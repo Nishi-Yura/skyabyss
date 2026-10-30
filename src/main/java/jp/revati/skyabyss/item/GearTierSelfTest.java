@@ -146,7 +146,8 @@ public final class GearTierSelfTest {
         }
         for (Item it : BuiltInRegistries.ITEM) {
             ResourceLocation key = BuiltInRegistries.ITEM.getKey(it);
-            if (it instanceof ModGear && key.getNamespace().equals(SkyAbyss.MODID)) {
+            // 野の装備 (docs/design/51) は自分の表 (item/wild/WildGearTable) と自己テスト wild gear が見る
+            if (it instanceof ModGear && !(it instanceof jp.revati.skyabyss.item.wild.WildGear) && key.getNamespace().equals(SkyAbyss.MODID)) {
                 check(f, byId.containsKey(key.getPath()), "gear " + key.getPath() + " is missing from the tier table (03 1.4)");
             }
         }

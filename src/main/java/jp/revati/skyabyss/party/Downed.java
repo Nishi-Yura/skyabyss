@@ -399,7 +399,8 @@ public final class Downed {
             s.progress = 0;
             return;
         }
-        s.progress++;
+        // 野の装備 (雲上の祝詞の鈴杖) で起こす速さ ×2 (docs/design/51)
+        s.progress += jp.revati.skyabyss.item.wild.WildGearEvents.reviveStep(holder);
         if (s.progress >= REVIVE_TICKS) {
             revive(victim, holder);
         }

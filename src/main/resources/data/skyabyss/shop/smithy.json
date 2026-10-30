@@ -720,6 +720,174 @@
       ],
       "chapter": 5,
       "made": true
+    },
+    {
+      "id": "wild_guard_sword",
+      "item": "skyabyss:wild_guard_sword",
+      "count": 1,
+      "coins": 12,
+      "chapter": 1
+    },
+    {
+      "id": "wild_quarry_hammer",
+      "item": "skyabyss:wild_quarry_hammer",
+      "count": 1,
+      "coins": 12,
+      "chapter": 1
+    },
+    {
+      "id": "wild_scribe_staff",
+      "item": "skyabyss:wild_scribe_staff",
+      "count": 1,
+      "coins": 12,
+      "chapter": 1
+    },
+    {
+      "id": "wild_crow_bow",
+      "item": "skyabyss:wild_crow_bow",
+      "count": 1,
+      "coins": 12,
+      "chapter": 1
+    },
+    {
+      "id": "wild_rat_knife",
+      "item": "skyabyss:wild_rat_knife",
+      "count": 1,
+      "coins": 12,
+      "chapter": 1
+    },
+    {
+      "id": "wild_scarecrow_bell_staff",
+      "item": "skyabyss:wild_scarecrow_bell_staff",
+      "count": 1,
+      "coins": 12,
+      "chapter": 1
+    },
+    {
+      "id": "wild_oar_blade",
+      "item": "skyabyss:wild_oar_blade",
+      "count": 1,
+      "coins": 20,
+      "chapter": 2
+    },
+    {
+      "id": "wild_shipwright_maul",
+      "item": "skyabyss:wild_shipwright_maul",
+      "count": 1,
+      "coins": 20,
+      "chapter": 2
+    },
+    {
+      "id": "wild_tidewatch_staff",
+      "item": "skyabyss:wild_tidewatch_staff",
+      "count": 1,
+      "coins": 20,
+      "chapter": 2
+    },
+    {
+      "id": "wild_gull_bow",
+      "item": "skyabyss:wild_gull_bow",
+      "count": 1,
+      "coins": 20,
+      "chapter": 2
+    },
+    {
+      "id": "wild_shore_dagger",
+      "item": "skyabyss:wild_shore_dagger",
+      "count": 1,
+      "coins": 20,
+      "chapter": 2
+    },
+    {
+      "id": "wild_shell_bell_staff",
+      "item": "skyabyss:wild_shell_bell_staff",
+      "count": 1,
+      "coins": 20,
+      "chapter": 2
+    },
+    {
+      "id": "wild_oilskin_helmet",
+      "item": "skyabyss:wild_oilskin_helmet",
+      "count": 1,
+      "coins": 3,
+      "chapter": 1
+    },
+    {
+      "id": "wild_oilskin_chestplate",
+      "item": "skyabyss:wild_oilskin_chestplate",
+      "count": 1,
+      "coins": 5,
+      "chapter": 1
+    },
+    {
+      "id": "wild_oilskin_leggings",
+      "item": "skyabyss:wild_oilskin_leggings",
+      "count": 1,
+      "coins": 4,
+      "chapter": 1
+    },
+    {
+      "id": "wild_oilskin_boots",
+      "item": "skyabyss:wild_oilskin_boots",
+      "count": 1,
+      "coins": 2,
+      "chapter": 1
+    },
+    {
+      "id": "wild_belfry_helmet",
+      "item": "skyabyss:wild_belfry_helmet",
+      "count": 1,
+      "coins": 4,
+      "chapter": 1
+    },
+    {
+      "id": "wild_belfry_chestplate",
+      "item": "skyabyss:wild_belfry_chestplate",
+      "count": 1,
+      "coins": 7,
+      "chapter": 1
+    },
+    {
+      "id": "wild_belfry_leggings",
+      "item": "skyabyss:wild_belfry_leggings",
+      "count": 1,
+      "coins": 5,
+      "chapter": 1
+    },
+    {
+      "id": "wild_belfry_boots",
+      "item": "skyabyss:wild_belfry_boots",
+      "count": 1,
+      "coins": 3,
+      "chapter": 1
+    },
+    {
+      "id": "wild_sailcloth_helmet",
+      "item": "skyabyss:wild_sailcloth_helmet",
+      "count": 1,
+      "coins": 6,
+      "chapter": 2
+    },
+    {
+      "id": "wild_sailcloth_chestplate",
+      "item": "skyabyss:wild_sailcloth_chestplate",
+      "count": 1,
+      "coins": 10,
+      "chapter": 2
+    },
+    {
+      "id": "wild_sailcloth_leggings",
+      "item": "skyabyss:wild_sailcloth_leggings",
+      "count": 1,
+      "coins": 8,
+      "chapter": 2
+    },
+    {
+      "id": "wild_sailcloth_boots",
+      "item": "skyabyss:wild_sailcloth_boots",
+      "count": 1,
+      "coins": 5,
+      "chapter": 2
     }
   ],
   "buys": []

@@ -63,6 +63,12 @@ public final class WeaponClient {
                 "abyss_depth_bow", "whale_rib_longbow", "tide_coral_bow", "storm_gale_bow", "ember_flare_bow", "moon_waning_bow", "moon_starfall_bow", "divine_plume_bow")) {
             event.registerItem(new BowExtension(id), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id)));
         }
+        // 野の装備の弓 (item/wild。docs/design/51)
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Weapon w : jp.revati.skyabyss.item.wild.WildGearTable.WEAPONS) {
+            if (w.isBow()) {
+                event.registerItem(new BowExtension(w.id()), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, w.id())));
+            }
+        }
         // 珊瑚の盾: バニラの構え (構えている間)。見た目 (低ポリのメッシュ) と、殴りつける動き・副の手での小さな押し出しだけ足す
         event.registerItem(new ShieldExtension(), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_shield")));
         // 市の旅の盾 (item/outfit) も同じ

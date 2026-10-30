@@ -30,13 +30,25 @@ public class ChapterWeaponItem extends SwordItem implements ModGear {
 
     // tier: 章の武器はエピック、巨神のヒロイック武器 (item/HeroicGear) はヒロイック
     public ChapterWeaponItem(Item.Properties properties, String dungeon, double attack, double speed, GearTier tier, String descKey) {
-        super(TIER, properties.attributes(ItemAttributeModifiers.builder()
+        this(properties, dungeon, attack, speed, tier, descKey, b -> {
+        });
+    }
+
+    // extra: 攻撃力と速さのほかに手に持つ間の修飾子を足す (野の装備の体力・間合いなど。item/wild/WildGear)
+    public ChapterWeaponItem(Item.Properties properties, String dungeon, double attack, double speed, GearTier tier, String descKey,
+            java.util.function.Consumer<ItemAttributeModifiers.Builder> extra) {
+        super(TIER, properties.attributes(withExtra(ItemAttributeModifiers.builder()
                 .add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, attack - 1, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, speed - 4, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
-                .build()));
+                .add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, speed - 4, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND),
+                extra).build()));
         this.dungeon = dungeon;
         this.descKey = descKey;
         this.tier = tier;
+    }
+
+    private static ItemAttributeModifiers.Builder withExtra(ItemAttributeModifiers.Builder b, java.util.function.Consumer<ItemAttributeModifiers.Builder> extra) {
+        extra.accept(b);
+        return b;
     }
 
     @Override

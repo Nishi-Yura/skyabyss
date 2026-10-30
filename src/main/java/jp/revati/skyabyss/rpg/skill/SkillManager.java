@@ -120,6 +120,8 @@ public final class SkillManager {
             if (reading > 0 && Job.held(player) == Job.MAGE) {
                 scale += SkillRules.starReadingRegen(reading);
             }
+            // 野の装備のマナの戻り (docs/design/51)
+            scale += jp.revati.skyabyss.item.wild.WildGearEvents.manaRegenBonus(player);
             d.mana = (float) Math.min(max, d.mana + SkillRules.regenPerSecond(max, calm) * scale / SkillRules.SECOND);
         }
     }
@@ -501,7 +503,7 @@ public final class SkillManager {
         SkillData d = get(player);
         int rank = d.rank(skill);
         int ticks = SkillRules.cooldownTicks(skill, rank, runeOf(player, skill));
-        ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill));
+        ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill) * jp.revati.skyabyss.item.wild.WildGearEvents.cooldownScale(player));
         return jp.revati.skyabyss.rebirth.Rebirth.scaleCooldown(player, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks));
     }
 

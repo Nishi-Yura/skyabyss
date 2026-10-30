@@ -61,6 +61,10 @@ public final class CreativeTabs {
     }
 
     static int dungeon(Item item) {
+        // 野の装備 (docs/design/51) は物語の品のあと、必要 Lv の順
+        if (item instanceof jp.revati.skyabyss.item.wild.WildGear w) {
+            return DUNGEONS.size() + 1 + w.wildLevel();
+        }
         int i = item instanceof ModGear g ? DUNGEONS.indexOf(g.dungeon()) : -1;
         return i < 0 ? DUNGEONS.size() : i;
     }

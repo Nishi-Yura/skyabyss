@@ -16,7 +16,7 @@ import jp.revati.skyabyss.SkyAbyss;
 // クライアントも専用サーバーも同じ内容を見る (サーバーは当たる tick、クライアントは絵)。tools/gen/items/gen_weapon_moves.py が JSON を作る
 public final class MoveSets {
     // 動きを持つ品 (剣型の武器 17 点 + 弓 2 点 + 盾 + 島の祠の始めの武器 3 点 + 章の杖と鈴杖 8 点)
-    public static final List<String> ITEMS = List.of("whalebone_greatsword", "captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive",
+    private static final List<String> BASE = List.of("whalebone_greatsword", "captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive",
             "waterway_fang", "raiju_claw", "tidecaller_claw", "ember_war_axe", "smith_hammer", "thrall_poker", "abyss_greatsword", "abyss_bell_staff",
             "abyss_ash_scythe", "abyss_lamp_sword", "abyss_sinking_anchor", "abyss_pulse_dagger", "thunder_wing_bow", "abyss_storm_bow", "coral_shield",
             "shrine_staff", "shrine_bell_staff", "shrine_dagger", "whale_staff", "whale_bell_staff", "tide_staff", "tide_bell_staff",
@@ -26,6 +26,18 @@ public final class MoveSets {
             "moon_scale_hammer", "moon_tide_staff", "moon_crescent_dagger", "moon_starlight_bell_staff", "moon_waning_blade",
             "moon_light_sword", "moon_full_hammer", "moon_new_staff", "moon_umbra_dagger", "moon_halo_bell_staff",
             "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_rewind_dagger", "divine_promise_bell_staff");
+    // 野の装備の近接・杖・鈴杖 (item/wild。弓は動きを持たない。docs/design/51)
+    public static final List<String> ITEMS = withWild();
+
+    private static List<String> withWild() {
+        java.util.List<String> all = new java.util.ArrayList<>(BASE);
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Weapon w : jp.revati.skyabyss.item.wild.WildGearTable.WEAPONS) {
+            if (!w.isBow()) {
+                all.add(w.id());
+            }
+        }
+        return List.copyOf(all);
+    }
 
     private static Map<String, MoveSet> all;
 

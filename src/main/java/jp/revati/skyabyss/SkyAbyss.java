@@ -125,6 +125,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.abyss.gear.AbyssGearSetup.register(modEventBus);
         jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.register(modEventBus);
         jp.revati.skyabyss.story.finale.gear.DivineGearSetup.register(modEventBus);
+        // 野の装備 (土地ごとの武器 102 本と防具 18 式。docs/design/51)
+        jp.revati.skyabyss.item.wild.WildGearSetup.register(modEventBus);
         jp.revati.skyabyss.rpg.skill.JobChoice.register(modEventBus);
         jp.revati.skyabyss.item.ChapterGear.register(modEventBus);
         jp.revati.skyabyss.abyss.LegendGear.register(modEventBus);

@@ -817,6 +817,18 @@ def main():
         W[_item] = _copy.deepcopy(W[_src])
         W[_item]["item"] = _item
         W[_item]["label"] = label
+    # 野の装備 (docs/design/51。item/wild)。動きは同じ型の武器を写す (弓は動きを持たない)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "wild_gear"))
+    import spec as _wild
+    moves = {"sword": "whalebone_greatsword", "greatsword": "whalebone_greatsword", "spear": "captain_pike", "glaive": "warden_glaive",
+             "hammer": "smith_hammer", "maul": "smith_hammer", "mace": "smith_hammer", "axe": "ember_war_axe", "staff": "abyss_bell_staff",
+             "bell": "abyss_bell_staff", "totem": "abyss_bell_staff", "censer": "abyss_bell_staff", "dagger": "waterway_fang", "fang": "waterway_fang",
+             "claw": "raiju_claw"}
+    for _w in _wild.WEAPONS:
+        if _w["kind"] in moves:
+            W[_w["id"]] = _copy.deepcopy(W[moves[_w["kind"]]])
+            W[_w["id"]]["item"] = _w["id"]
+            W[_w["id"]]["label"] = _w["ja"] + ": " + W[moves[_w["kind"]]]["label"].split(": ", 1)[-1]
     os.makedirs(OUT, exist_ok=True)
     for item, d in W.items():
         with open(os.path.join(OUT, item + ".json"), "w", encoding="utf-8", newline="\n") as f:

@@ -63,7 +63,7 @@ public final class TierFloor {
         if (m == null) {
             m = new HashMap<>();
             for (Item item : BuiltInRegistries.ITEM) {
-                if (item instanceof ModGear g && g.tier() == GearTier.EPIC) {
+                if (item instanceof ModGear g && g.tier() == GearTier.EPIC && !(item instanceof jp.revati.skyabyss.item.wild.WildGear)) {
                     double[] v = base(item);
                     if (v != null) {
                         m.merge(g.dungeon(), dps(v), Math::max);
@@ -82,7 +82,8 @@ public final class TierFloor {
     // 足す攻撃の上乗せ (0 なら足さない)
     public static double extra(Item item) {
         return EXTRA.computeIfAbsent(item, it -> {
-            if (!(it instanceof ModGear g)) {
+            // 野の装備は表 (docs/design/51 の 2 章) の値のまま
+            if (!(it instanceof ModGear g) || it instanceof jp.revati.skyabyss.item.wild.WildGear) {
                 return 0.0;
             }
             double[] v = base(it);

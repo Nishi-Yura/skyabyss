@@ -231,8 +231,6 @@ def main():
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    main()
 # 巨神のヒロイック武器 (2026-10-28。item/HeroicGear)。持ち方は同じ型の武器を借りる (tools/install/install_job_weapons.py の _HOLD と同じ)
 for _id, _like in (("whale_choir_hammer", "ember_war_axe"), ("tide_reef_hammer", "ember_war_axe"), ("storm_anvil_hammer", "ember_war_axe"),
                    ("whale_star_staff", "abyss_bell_staff"), ("tide_pearl_staff", "abyss_bell_staff"), ("storm_cloud_staff", "abyss_bell_staff"),
@@ -249,3 +247,24 @@ for _id, _like in (("whale_choir_hammer", "ember_war_axe"), ("tide_reef_hammer",
                    ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff")):
     if _like in HELD:
         HELD[_id] = HELD[_like]
+
+# 野の装備 (docs/design/51。item/wild)。持ち方は同じ型の武器を借りる (tools/install/install_wild_gear.py の HOLD と同じ)
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "gen/wild_gear"))
+import spec as _wild  # noqa: E402
+WILD_HOLD = {"sword": "whalebone_greatsword", "greatsword": "whalebone_greatsword", "spear": "captain_pike", "glaive": "warden_glaive",
+             "hammer": "ember_war_axe", "maul": "ember_war_axe", "mace": "ember_war_axe", "axe": "ember_war_axe", "staff": "abyss_bell_staff",
+             "bell": "abyss_bell_staff", "totem": "abyss_bell_staff", "censer": "abyss_bell_staff", "dagger": "waterway_fang", "fang": "waterway_fang",
+             "claw": "raiju_claw", "bow": "thunder_wing_bow", "longbow": "thunder_wing_bow"}
+for _w in _wild.WEAPONS:
+    _like = WILD_HOLD[_w["kind"]]
+    if _like in HELD:
+        HELD[_w["id"]] = HELD[_like]
+    if _w["kind"] in ("bow", "longbow"):
+        for _n in range(3):
+            if f"{_like}_pulling_{_n}" in HELD:
+                HELD[f"{_w['id']}_pulling_{_n}"] = HELD[f"{_like}_pulling_{_n}"]
+
+
+if __name__ == "__main__":
+    main()

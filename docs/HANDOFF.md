@@ -8,6 +8,16 @@
 - 試遊版: 0.9.18（`build/libs/skyabyss-0.9.18.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 野の装備（武器 102 本・防具 18 式。2026-10-31。設計 [51](design/51_world_gear.md)）
+
+- 声「ストーリーに沿っての物しか出ていなかったので、他にも出るように」。Lv 帯ごとに職ごとの武器（帯 I〜V で 2・3・3・4・5 本 × 6 職）と防具の一式（3・3・3・4・5 式）。階級はアンコモン〜ヒロイック（帯が進むほど上が混ざる）。どの品も一品一案の形と、自分の能力（約 110 種）。
+- 表は一つ: `tools/gen/wild_gear/spec.py` → `python -I tools/gen/wild_gear/gen_wild_gear.py` が `item/wild/WildGearTable`（生成）・言葉（`assets/skyabyss_wild/lang`）・鍛冶屋の品（アンコモン、一章・二章から）を作る。
+- Java: `item/wild/`（`WildGearSetup` 登録と引き、`WildGearItems`・`WildArmorItem`、`WildEffect` 能力の種類、`WildGearEvents` 武器の能力、`WildArmorEvents` 一式、`WildLoot` 落とし物、`WildGearSelfTest`）。つなぎ: 由来の行（`ModGear.originKey`）、階級の床から外す（`TierFloor`）、基礎の要求（`GearRequirement`）、マナの戻りと技の待ち（`SkillManager`）、起こす速さ（`Downed`）、持ち方と振り（`WeaponKind`・`MoveSets`・`WeaponClient`）、クリエの並び（`CreativeTabs`）、古い自己テストの除外（`GearTierSelfTest`・`JobSelfTest`）。
+- 落とし物: 土地の敵（大陸の土地）・深淵の層・月・雲海の敵から人ごとの抽選、主（名のある強敵と帯を持つ型）は初回必ず。武器は 2/3 で今の職。
+- 形: 武器 `tools/rough/lowpoly/weapons/wild/`（`o_wild1〜5.py`・塗り `paint_wild.py`・`build_wild.py`・見直し `look_wild.py`）、防具 `tools/rough/lowpoly/armor/wild/build_wild_armor.py`。入れる `python -I tools/install/install_wild_gear.py [weapons|armor]`。一覧の絵 `docs/review/roughs_wild/sheets/`。撮影 `tools/shots/wild_gear.txt`（`gen_wild_shots.py`）。
+- 確かめ: 自己テスト `wild gear`・`gear tiers`・`jobs`・`weapon moves`・`lang` が通った。quick_check の資源・言葉・メッシュも通った。
+- まだ: 能力の数値と落ちる確率は試遊で。ヒロイックの防具はもう一段豪華にしてよい。
+
 ## 0.9.18（全体監査の直し。2026-10-31）
 
 - 監査の書類 `docs/review/audit_2026-10-31.md`（通ったもの・おかしい所・書類の古さ・足したいもの・まだやること）。

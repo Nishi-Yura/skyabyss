@@ -1,0 +1,1361 @@
+# 野の装備 (docs/design/51): 武器 102 本の一人称と三人称、防具 18 式の前と後ろ。tools/gen/wild_gear/gen_wild_shots.py が作る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/wild_gear.txt -PshotsName=wild_gear
+world shots flat
+size 960 540
+timeout 6000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 400
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_guard_sword
+close
+wait 24
+chat clear
+shot fp_wild_guard_sword
+perspective front
+hud off
+wait 8
+shot tp_wild_guard_sword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_banner_spear
+close
+wait 24
+chat clear
+shot fp_wild_banner_spear
+perspective front
+hud off
+wait 8
+shot tp_wild_banner_spear
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_quarry_hammer
+close
+wait 24
+chat clear
+shot fp_wild_quarry_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_quarry_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_tusk_axe
+close
+wait 24
+chat clear
+shot fp_wild_tusk_axe
+perspective front
+hud off
+wait 8
+shot tp_wild_tusk_axe
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_scribe_staff
+close
+wait 24
+chat clear
+shot fp_wild_scribe_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_scribe_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_moss_staff
+close
+wait 24
+chat clear
+shot fp_wild_moss_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_moss_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_crow_bow
+close
+wait 24
+chat clear
+shot fp_wild_crow_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_crow_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bonespike_bow
+close
+wait 24
+chat clear
+shot fp_wild_bonespike_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_bonespike_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_rat_knife
+close
+wait 24
+chat clear
+shot fp_wild_rat_knife
+perspective front
+hud off
+wait 8
+shot tp_wild_rat_knife
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_shell_claw
+close
+wait 24
+chat clear
+shot fp_wild_shell_claw
+perspective front
+hud off
+wait 8
+shot tp_wild_shell_claw
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_scarecrow_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_scarecrow_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_scarecrow_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bonebird_totem
+close
+wait 24
+chat clear
+shot fp_wild_bonebird_totem
+perspective front
+hud off
+wait 8
+shot tp_wild_bonebird_totem
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_oar_blade
+close
+wait 24
+chat clear
+shot fp_wild_oar_blade
+perspective front
+hud off
+wait 8
+shot tp_wild_oar_blade
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_dune_sword
+close
+wait 24
+chat clear
+shot fp_wild_dune_sword
+perspective front
+hud off
+wait 8
+shot tp_wild_dune_sword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ramhorn_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_ramhorn_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_ramhorn_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_shipwright_maul
+close
+wait 24
+chat clear
+shot fp_wild_shipwright_maul
+perspective front
+hud off
+wait 8
+shot tp_wild_shipwright_maul
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_crab_hammer
+close
+wait 24
+chat clear
+shot fp_wild_crab_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_crab_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_conductor_axe
+close
+wait 24
+chat clear
+shot fp_wild_conductor_axe
+perspective front
+hud off
+wait 8
+shot tp_wild_conductor_axe
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_tidewatch_staff
+close
+wait 24
+chat clear
+shot fp_wild_tidewatch_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_tidewatch_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lure_staff
+close
+wait 24
+chat clear
+shot fp_wild_lure_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_lure_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fluff_staff
+close
+wait 24
+chat clear
+shot fp_wild_fluff_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_fluff_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_gull_bow
+close
+wait 24
+chat clear
+shot fp_wild_gull_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_gull_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_nacre_bow
+close
+wait 24
+chat clear
+shot fp_wild_nacre_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_nacre_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_eaglet_longbow
+close
+wait 24
+chat clear
+shot fp_wild_eaglet_longbow
+perspective front
+hud off
+wait 8
+shot tp_wild_eaglet_longbow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_shore_dagger
+close
+wait 24
+chat clear
+shot fp_wild_shore_dagger
+perspective front
+hud off
+wait 8
+shot tp_wild_shore_dagger
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_hermit_knife
+close
+wait 24
+chat clear
+shot fp_wild_hermit_knife
+perspective front
+hud off
+wait 8
+shot tp_wild_hermit_knife
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_stormwolf_fang
+close
+wait 24
+chat clear
+shot fp_wild_stormwolf_fang
+perspective front
+hud off
+wait 8
+shot tp_wild_stormwolf_fang
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_shell_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_shell_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_shell_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fogbell_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_fogbell_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_fogbell_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_loom_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_loom_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_loom_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_gale_glaive
+close
+wait 24
+chat clear
+shot fp_wild_gale_glaive
+perspective front
+hud off
+wait 8
+shot tp_wild_gale_glaive
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fortress_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_fortress_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_fortress_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lavajaw_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_lavajaw_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_lavajaw_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_snowsplitter_axe
+close
+wait 24
+chat clear
+shot fp_wild_snowsplitter_axe
+perspective front
+hud off
+wait 8
+shot tp_wild_snowsplitter_axe
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bellows_hammer
+close
+wait 24
+chat clear
+shot fp_wild_bellows_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_bellows_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ashrite_maul
+close
+wait 24
+chat clear
+shot fp_wild_ashrite_maul
+perspective front
+hud off
+wait 8
+shot tp_wild_ashrite_maul
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cloudreader_staff
+close
+wait 24
+chat clear
+shot fp_wild_cloudreader_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_cloudreader_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_emberbug_staff
+close
+wait 24
+chat clear
+shot fp_wild_emberbug_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_emberbug_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_warden_crown_staff
+close
+wait 24
+chat clear
+shot fp_wild_warden_crown_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_warden_crown_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_windcutter_bow
+close
+wait 24
+chat clear
+shot fp_wild_windcutter_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_windcutter_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ashhook_bow
+close
+wait 24
+chat clear
+shot fp_wild_ashhook_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_ashhook_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_crater_longbow
+close
+wait 24
+chat clear
+shot fp_wild_crater_longbow
+perspective front
+hud off
+wait 8
+shot tp_wild_crater_longbow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_frostfang_dagger
+close
+wait 24
+chat clear
+shot fp_wild_frostfang_dagger
+perspective front
+hud off
+wait 8
+shot tp_wild_frostfang_dagger
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cinder_claw
+close
+wait 24
+chat clear
+shot fp_wild_cinder_claw
+perspective front
+hud off
+wait 8
+shot tp_wild_cinder_claw
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_venom_fang
+close
+wait 24
+chat clear
+shot fp_wild_venom_fang
+perspective front
+hud off
+wait 8
+shot tp_wild_venom_fang
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_peak_totem
+close
+wait 24
+chat clear
+shot fp_wild_peak_totem
+perspective front
+hud off
+wait 8
+shot tp_wild_peak_totem
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ashsow_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_ashsow_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_ashsow_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_stormdrum_totem
+close
+wait 24
+chat clear
+shot fp_wild_stormdrum_totem
+perspective front
+hud off
+wait 8
+shot tp_wild_stormdrum_totem
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_delver_sword
+close
+wait 24
+chat clear
+shot fp_wild_delver_sword
+perspective front
+hud off
+wait 8
+shot tp_wild_delver_sword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_saltcrystal_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_saltcrystal_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_saltcrystal_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_rope_halberd
+close
+wait 24
+chat clear
+shot fp_wild_rope_halberd
+perspective front
+hud off
+wait 8
+shot tp_wild_rope_halberd
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_inverted_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_inverted_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_inverted_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_pick_hammer
+close
+wait 24
+chat clear
+shot fp_wild_pick_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_pick_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_saltmill_maul
+close
+wait 24
+chat clear
+shot fp_wild_saltmill_maul
+perspective front
+hud off
+wait 8
+shot tp_wild_saltmill_maul
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_blasting_axe
+close
+wait 24
+chat clear
+shot fp_wild_blasting_axe
+perspective front
+hud off
+wait 8
+shot tp_wild_blasting_axe
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lampeater_hammer
+close
+wait 24
+chat clear
+shot fp_wild_lampeater_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_lampeater_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bonepipe_staff
+close
+wait 24
+chat clear
+shot fp_wild_bonepipe_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_bonepipe_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_salttear_staff
+close
+wait 24
+chat clear
+shot fp_wild_salttear_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_salttear_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_compass_staff
+close
+wait 24
+chat clear
+shot fp_wild_compass_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_compass_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mimic_heart_staff
+close
+wait 24
+chat clear
+shot fp_wild_mimic_heart_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_mimic_heart_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_saltcrow_bow
+close
+wait 24
+chat clear
+shot fp_wild_saltcrow_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_saltcrow_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bonestring_bow
+close
+wait 24
+chat clear
+shot fp_wild_bonestring_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_bonestring_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lantern_bow
+close
+wait 24
+chat clear
+shot fp_wild_lantern_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_lantern_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_hanged_longbow
+close
+wait 24
+chat clear
+shot fp_wild_hanged_longbow
+perspective front
+hud off
+wait 8
+shot tp_wild_hanged_longbow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ropecut_knife
+close
+wait 24
+chat clear
+shot fp_wild_ropecut_knife
+perspective front
+hud off
+wait 8
+shot tp_wild_ropecut_knife
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bone_needle_dagger
+close
+wait 24
+chat clear
+shot fp_wild_bone_needle_dagger
+perspective front
+hud off
+wait 8
+shot tp_wild_bone_needle_dagger
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ceiling_claw
+close
+wait 24
+chat clear
+shot fp_wild_ceiling_claw
+perspective front
+hud off
+wait 8
+shot tp_wild_ceiling_claw
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_snuffer_dagger
+close
+wait 24
+chat clear
+shot fp_wild_snuffer_dagger
+perspective front
+hud off
+wait 8
+shot tp_wild_snuffer_dagger
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mourning_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_mourning_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_mourning_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_saltpillar_totem
+close
+wait 24
+chat clear
+shot fp_wild_saltpillar_totem
+perspective front
+hud off
+wait 8
+shot tp_wild_saltpillar_totem
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_knotted_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_knotted_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_knotted_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lullaby_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_lullaby_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_lullaby_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fulgurite_sword
+close
+wait 24
+chat clear
+shot fp_wild_fulgurite_sword
+perspective front
+hud off
+wait 8
+shot tp_wild_fulgurite_sword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_twin_spear
+close
+wait 24
+chat clear
+shot fp_wild_twin_spear
+perspective front
+hud off
+wait 8
+shot tp_wild_twin_spear
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_chain_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_chain_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_chain_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_meteor_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_meteor_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_meteor_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cloudcleaver_greatsword
+close
+wait 24
+chat clear
+shot fp_wild_cloudcleaver_greatsword
+perspective front
+hud off
+wait 8
+shot tp_wild_cloudcleaver_greatsword
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_molten_axe
+close
+wait 24
+chat clear
+shot fp_wild_molten_axe
+perspective front
+hud off
+wait 8
+shot tp_wild_molten_axe
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cog_hammer
+close
+wait 24
+chat clear
+shot fp_wild_cog_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_cog_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_abyss_mace
+close
+wait 24
+chat clear
+shot fp_wild_abyss_mace
+perspective front
+hud off
+wait 8
+shot tp_wild_abyss_mace
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_starforge_hammer
+close
+wait 24
+chat clear
+shot fp_wild_starforge_hammer
+perspective front
+hud off
+wait 8
+shot tp_wild_starforge_hammer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_skysplit_axe
+close
+wait 24
+chat clear
+shot fp_wild_skysplit_axe
+perspective front
+hud off
+wait 8
+shot tp_wild_skysplit_axe
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ballspark_staff
+close
+wait 24
+chat clear
+shot fp_wild_ballspark_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_ballspark_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_hourglass_staff
+close
+wait 24
+chat clear
+shot fp_wild_hourglass_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_hourglass_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_deep_eye_staff
+close
+wait 24
+chat clear
+shot fp_wild_deep_eye_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_deep_eye_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_starchart_staff
+close
+wait 24
+chat clear
+shot fp_wild_starchart_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_starchart_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_prism_staff
+close
+wait 24
+chat clear
+shot fp_wild_prism_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_prism_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_flash_bow
+close
+wait 24
+chat clear
+shot fp_wild_flash_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_flash_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_scope_longbow
+close
+wait 24
+chat clear
+shot fp_wild_scope_longbow
+perspective front
+hud off
+wait 8
+shot tp_wild_scope_longbow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_calling_bow
+close
+wait 24
+chat clear
+shot fp_wild_calling_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_calling_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lighthouse_longbow
+close
+wait 24
+chat clear
+shot fp_wild_lighthouse_longbow
+perspective front
+hud off
+wait 8
+shot tp_wild_lighthouse_longbow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_skylark_bow
+close
+wait 24
+chat clear
+shot fp_wild_skylark_bow
+perspective front
+hud off
+wait 8
+shot tp_wild_skylark_bow
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_spark_dagger
+close
+wait 24
+chat clear
+shot fp_wild_spark_dagger
+perspective front
+hud off
+wait 8
+shot tp_wild_spark_dagger
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ash_sickle_claw
+close
+wait 24
+chat clear
+shot fp_wild_ash_sickle_claw
+perspective front
+hud off
+wait 8
+shot tp_wild_ash_sickle_claw
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fishhook_knife
+close
+wait 24
+chat clear
+shot fp_wild_fishhook_knife
+perspective front
+hud off
+wait 8
+shot tp_wild_fishhook_knife
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mirror_dagger
+close
+wait 24
+chat clear
+shot fp_wild_mirror_dagger
+perspective front
+hud off
+wait 8
+shot tp_wild_mirror_dagger
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cloudveil_claw
+close
+wait 24
+chat clear
+shot fp_wild_cloudveil_claw
+perspective front
+hud off
+wait 8
+shot tp_wild_cloudveil_claw
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_raincall_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_raincall_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_raincall_bell_staff
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_calming_censer
+close
+wait 24
+chat clear
+shot fp_wild_calming_censer
+perspective front
+hud off
+wait 8
+shot tp_wild_calming_censer
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_effigy_totem
+close
+wait 24
+chat clear
+shot fp_wild_effigy_totem
+perspective front
+hud off
+wait 8
+shot tp_wild_effigy_totem
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_starbell_totem
+close
+wait 24
+chat clear
+shot fp_wild_starbell_totem
+perspective front
+hud off
+wait 8
+shot tp_wild_starbell_totem
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cloudhymn_bell_staff
+close
+wait 24
+chat clear
+shot fp_wild_cloudhymn_bell_staff
+perspective front
+hud off
+wait 8
+shot tp_wild_cloudhymn_bell_staff
+cmd clear @s
+hud off
+fov 30
+cmd item replace entity @s armor.feet with skyabyss:wild_oilskin_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_oilskin_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_oilskin_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_oilskin_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_oilskin
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_oilskin
+cmd item replace entity @s armor.feet with skyabyss:wild_belfry_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_belfry_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_belfry_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_belfry_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_belfry
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_belfry
+cmd item replace entity @s armor.feet with skyabyss:wild_oldsoldier_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_oldsoldier_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_oldsoldier_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_oldsoldier_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_oldsoldier
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_oldsoldier
+cmd item replace entity @s armor.feet with skyabyss:wild_sailcloth_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_sailcloth_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_sailcloth_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_sailcloth_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_sailcloth
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_sailcloth
+cmd item replace entity @s armor.feet with skyabyss:wild_lurelight_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_lurelight_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_lurelight_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_lurelight_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_lurelight
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_lurelight
+cmd item replace entity @s armor.feet with skyabyss:wild_ramfleece_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_ramfleece_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_ramfleece_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_ramfleece_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_ramfleece
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_ramfleece
+cmd item replace entity @s armor.feet with skyabyss:wild_windweave_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_windweave_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_windweave_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_windweave_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_windweave
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_windweave
+cmd item replace entity @s armor.feet with skyabyss:wild_ashleather_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_ashleather_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_ashleather_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_ashleather_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_ashleather
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_ashleather
+cmd item replace entity @s armor.feet with skyabyss:wild_fortress_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_fortress_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_fortress_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_fortress_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_fortress
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_fortress
+cmd item replace entity @s armor.feet with skyabyss:wild_delver_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_delver_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_delver_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_delver_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_delver
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_delver
+cmd item replace entity @s armor.feet with skyabyss:wild_saltplate_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_saltplate_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_saltplate_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_saltplate_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_saltplate
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_saltplate
+cmd item replace entity @s armor.feet with skyabyss:wild_lampkeeper_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_lampkeeper_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_lampkeeper_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_lampkeeper_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_lampkeeper
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_lampkeeper
+cmd item replace entity @s armor.feet with skyabyss:wild_hanged_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_hanged_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_hanged_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_hanged_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_hanged
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_hanged
+cmd item replace entity @s armor.feet with skyabyss:wild_copperwire_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_copperwire_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_copperwire_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_copperwire_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_copperwire
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_copperwire
+cmd item replace entity @s armor.feet with skyabyss:wild_soot_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_soot_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_soot_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_soot_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_soot
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_soot
+cmd item replace entity @s armor.feet with skyabyss:wild_deepwarden_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_deepwarden_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_deepwarden_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_deepwarden_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_deepwarden
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_deepwarden
+cmd item replace entity @s armor.feet with skyabyss:wild_stargazer_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_stargazer_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_stargazer_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_stargazer_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_stargazer
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_stargazer
+cmd item replace entity @s armor.feet with skyabyss:wild_cloudknight_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_cloudknight_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_cloudknight_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_cloudknight_helmet
+perspective front
+bodyyaw 25
+wait 16
+shot worn_wild_cloudknight
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_cloudknight
+fov 70

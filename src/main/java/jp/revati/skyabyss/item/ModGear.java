@@ -62,6 +62,10 @@ public interface ModGear {
 
     // 由来の一行のキー。武器は「〇〇の専用武器」(origin_weapon)、防具・装身具は「専用装備」。武器の版がない由来は装備のまま
     static String originKey(ItemStack stack) {
+        // 野の装備は土地の品 (docs/design/51)
+        if (stack.getItem() instanceof jp.revati.skyabyss.item.wild.WildGear) {
+            return jp.revati.skyabyss.item.wild.WildGearSetup.originKey(stack.getItem());
+        }
         String dungeon = stack.getItem() instanceof ModGear g ? g.dungeon() : "stone_whale";
         // 島の祠の始めの武器 (rpg/skill/JobChoice。強化の燃料は岩鯨のまま、由来の文だけ祠)
         if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().startsWith("shrine_")) {

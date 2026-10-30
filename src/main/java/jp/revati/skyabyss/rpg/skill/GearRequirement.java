@@ -57,7 +57,8 @@ public final class GearRequirement {
         if (job == null || gear.tier().ordinal() < GearTier.RARE.ordinal()) {
             return null;
         }
-        int amount = amountFor(gear.dungeon());
+        int amount = gear instanceof jp.revati.skyabyss.item.wild.WildGear w
+                ? jp.revati.skyabyss.item.wild.WildGearTypes.baseRequirement(gear.tier(), w.wildLevel()) : amountFor(gear.dungeon());
         return amount <= 0 ? null : new Req(statFor(job), amount);
     }
 

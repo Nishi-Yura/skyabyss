@@ -91,11 +91,42 @@ public enum WeaponKind {
             Map.entry("divine_rewind_dagger", FANG), Map.entry("divine_promise_bell_staff", POKER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
-        return BY_ITEM.entrySet();
+        java.util.List<Map.Entry<String, WeaponKind>> all = new java.util.ArrayList<>(BY_ITEM.entrySet());
+        all.addAll(WILD.entrySet());
+        return all;
     }
 
     public static WeaponKind of(String path) {
-        return BY_ITEM.get(path);
+        WeaponKind k = BY_ITEM.get(path);
+        return k != null || !path.startsWith("wild_") ? k : WILD.get(path);
+    }
+
+    // 野の装備 (item/wild/WildGearTable の種類から。弓は WeaponClient が BowExtension で登録する)
+    private static final Map<String, WeaponKind> WILD = wild();
+
+    private static Map<String, WeaponKind> wild() {
+        Map<String, WeaponKind> m = new java.util.HashMap<>();
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Weapon w : jp.revati.skyabyss.item.wild.WildGearTable.WEAPONS) {
+            WeaponKind k = wildKind(w.kind());
+            if (k != null) {
+                m.put(w.id(), k);
+            }
+        }
+        return m;
+    }
+
+    public static WeaponKind wildKind(String kind) {
+        return switch (kind) {
+            case "sword", "greatsword" -> GREATSWORD;
+            case "spear" -> PIKE;
+            case "glaive" -> GLAIVE;
+            case "hammer", "maul", "mace" -> HAMMER;
+            case "axe" -> AXE;
+            case "dagger", "fang" -> FANG;
+            case "claw" -> CLAW;
+            case "staff", "bell", "totem", "censer" -> POKER;
+            default -> null;
+        };
     }
 
     public static WeaponKind of(ItemStack stack) {
@@ -103,6 +134,6 @@ public enum WeaponKind {
             return null;
         }
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return "skyabyss".equals(id.getNamespace()) ? BY_ITEM.get(id.getPath()) : null;
+        return "skyabyss".equals(id.getNamespace()) ? of(id.getPath()) : null;
     }
 }

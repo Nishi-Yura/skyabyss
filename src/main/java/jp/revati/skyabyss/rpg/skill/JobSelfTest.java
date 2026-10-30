@@ -204,7 +204,8 @@ public final class JobSelfTest {
             Job job = Job.of(it);
             if (weapon) {
                 check(f, job != null, "weapon " + key + " belongs to no job");
-                if (job != null && it instanceof jp.revati.skyabyss.item.ModGear g) {
+                // 野の装備は章の武器の数に入れない (章ごとの 6 職の検査を隠さない)
+                if (job != null && it instanceof jp.revati.skyabyss.item.ModGear g && !(it instanceof jp.revati.skyabyss.item.wild.WildGear)) {
                     String origin = key.getPath().startsWith("shrine_") ? "island_shrine" : g.dungeon();
                     byOrigin.computeIfAbsent(origin, o -> java.util.EnumSet.noneOf(Job.class)).add(job);
                 }

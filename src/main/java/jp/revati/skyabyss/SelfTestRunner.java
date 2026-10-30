@@ -191,6 +191,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("abyss gear", jp.revati.skyabyss.abyss.gear.AbyssGearSelfTest::runSelfTest));
         steps.add(Step.once("moon gear", jp.revati.skyabyss.story.ch6.gear.MoonGearSelfTest::runSelfTest));
+        steps.add(Step.once("wild gear", jp.revati.skyabyss.item.wild.WildGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         // (大陸の世界は出現地点がはじまりの島へ動いたばかりで、そこのチャンクがまだ動いていないことがある。30 秒で諦めて進む)
         int[] recordWait = {0};
