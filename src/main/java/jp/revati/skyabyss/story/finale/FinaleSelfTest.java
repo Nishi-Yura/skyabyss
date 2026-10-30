@@ -490,6 +490,14 @@ public final class FinaleSelfTest {
         p.getPersistentData().remove(FinaleHints.KEY);
         check(f, FinaleHints.once(p, "hand_stuck") && !FinaleHints.once(p, "hand_stuck"), "a first-time hint showed twice or never");
         p.getPersistentData().remove(FinaleHints.KEY);
+        // 後ろの空白・全角の空白のあるコマンドも通る (CommandTidy)
+        var src = cloud.getServer().createCommandSourceStack().withPermission(4);
+        var disp = cloud.getServer().getCommands().getDispatcher();
+        for (String typed : List.of("skyabyss cloudsea enter ", "skyabyss　cloudsea  enter")) {
+            var parsed = disp.parse(jp.revati.skyabyss.CommandTidy.tidy(typed), src);
+            check(f, !parsed.getReader().canRead() && parsed.getExceptions().isEmpty() && parsed.getContext().getCommand() != null,
+                    "the cloudsea command with stray spaces does not parse: [" + typed + "]");
+        }
         Quests.forgetAll(p);
         ending(p, f);
     }

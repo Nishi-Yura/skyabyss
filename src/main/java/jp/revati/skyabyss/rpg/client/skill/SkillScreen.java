@@ -1478,6 +1478,26 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         return GRID_Y0 + n.y * GRID;
     }
 
+    // 節の大きさ (種類ごと。使う技がいちばん大きく、基礎はいちばん小さい。2026-10-30 の声「どれがスキルかわからない」)
+    static int v2Size(AbilityNode n) {
+        return switch (n.kind) {
+            case ACTIVE -> 30;
+            case KEYSTONE, TRAIT -> 28;
+            case PASSIVE, MUTATION -> 24;
+            case STAT -> 15;
+            default -> 18;
+        };
+    }
+
+    // 節の左上 (格子の升の真ん中に、大きさの分だけ寄せる)
+    private static int v2L(AbilityNode n) {
+        return v2X(n) + (NODE - v2Size(n)) / 2;
+    }
+
+    private static int v2T(AbilityNode n) {
+        return v2Y(n) + (NODE - v2Size(n)) / 2;
+    }
+
     private AbilityNode v2NodeAt(double mx, double my) {
         AbilityTree t = v2();
         if (t == null || !canvas.contains(mx, my)) {
@@ -1486,7 +1506,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         double bx = canvas.toContentX(mx);
         double by = canvas.toContentY(my);
         for (AbilityNode n : t.nodes()) {
-            if (in(bx, by, v2X(n), v2Y(n), NODE, NODE)) {
+            // 小さな節も押しやすいよう、当たりは 18 より小さくしない
+            int hs = Math.max(18, v2Size(n));
+            if (in(bx, by, v2X(n) + (NODE - hs) / 2, v2Y(n) + (NODE - hs) / 2, hs, hs)) {
                 return n;
             }
         }
@@ -1555,9 +1577,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 boolean b = d.hasNode(tree, n.id);
                 int color = a && b ? LORE : a ? SOFT : DIM;
                 int x0 = v2X(r) + NODE / 2;
-                int y0 = v2Y(r) + NODE;
+                int y0 = v2T(r) + v2Size(r);
                 int x1 = v2X(n) + NODE / 2;
-                int y1 = v2Y(n);
+                int y1 = v2T(n);
                 if (y1 <= y0) {
                     // 横に並ぶ節 (同じ行) は真ん中どうし
                     line(g, Math.min(x0, x1), v2Y(r) + NODE / 2, Math.max(x0, x1), v2Y(r) + NODE / 2, color);
@@ -1570,30 +1592,38 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
         }
         for (AbilityNode n : t.nodes()) {
-            int x = v2X(n);
-            int y = v2Y(n);
+            int x = v2L(n);
+            int y = v2T(n);
+            int sz = v2Size(n);
             boolean taken = d.hasNode(tree, n.id);
             SkillData.TakeResult tr = taken ? SkillData.TakeResult.TAKEN : d.canTake(tree, n, level);
             boolean reachable = tr == SkillData.TakeResult.OK || tr == SkillData.TakeResult.NO_POINTS;
             int state = taken ? 3 : reachable ? 1 : 0;
+            // 使う技の節は金の縁で囲む (ひと目で技と分かる)
+            if (n.kind == AbilityNode.Kind.ACTIVE) {
+                int rim = taken ? 0xFFF2D27A : state == 1 ? 0xFFB89650 : 0xFF6A5A3A;
+                g.fill(x - 2, y - 2, x + sz + 2, y + sz + 2, rim);
+                g.fill(x - 1, y - 1, x + sz + 1, y + sz + 1, 0xFF14121A);
+            }
             if (v2Big(n)) {
-                g.blit(PANEL, x, y, NODE, NODE, state * 48, 376, 44, 44, 1024, 512);
+                g.blit(PANEL, x, y, sz, sz, state * 48, 376, 44, 44, 1024, 512);
             } else {
-                g.blit(SkillHud.TEXTURE, x, y, NODE, NODE, state * 48, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
+                g.blit(SkillHud.TEXTURE, x, y, sz, sz, state * 48, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
             }
             if (state == 0) {
                 g.setColor(0.42f, 0.42f, 0.48f, 1f);
             } else if (state == 1) {
                 g.setColor(0.72f, 0.72f, 0.78f, 1f);
             }
-            SkillHud.drawIcon(g, v2Icon(n), x + 3, y + 3);
+            int pad = Math.max(2, sz * 3 / 22);
+            SkillHud.drawIcon(g, v2Icon(n), x + pad, y + pad, sz - 2 * pad);
             g.setColor(1f, 1f, 1f, 1f);
             if (n == selectedNode) {
-                g.blit(SkillHud.TEXTURE, x - 1, y - 1, NODE + 2, NODE + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
+                g.blit(SkillHud.TEXTURE, x - 1, y - 1, sz + 2, sz + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
             }
             // 技の稽古の覚える段: 取れる使う技を光らせる
             if (lessonLearn && n.kind == AbilityNode.Kind.ACTIVE && tr == SkillData.TakeResult.OK) {
-                jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, NODE, NODE);
+                jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, sz, sz);
             }
             // 下の小さな字: 基礎は +数、段は +1、まだ取っていない節は点
             String cap = n.kind == AbilityNode.Kind.STAT ? "+" + n.amount : n.kind == AbilityNode.Kind.RANK ? "+1" : taken ? "" : n.cost + "点";
@@ -1601,14 +1631,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 boolean prov = tryon != null && taken && !real().hasNode(tree, n.id);
                 int color = prov ? 0x7FFFA0 : taken ? GOLD : tr == SkillData.TakeResult.OK ? TEXT : DIM;
                 g.pose().pushPose();
-                g.pose().translate(x + NODE / 2f, y + NODE + 1, 0);
+                g.pose().translate(x + sz / 2f, y + sz + (n.kind == AbilityNode.Kind.ACTIVE ? 3 : 1), 0);
                 g.pose().scale(0.75f, 0.75f, 1f);
                 g.drawString(font, cap, -font.width(cap) / 2, 0, color, false);
                 g.pose().popPose();
             }
             // 使う技の節には小さな菱形の印 (枠に置ける)
             if (n.kind == AbilityNode.Kind.ACTIVE) {
-                g.fill(x + NODE - 4, y + 1, x + NODE - 1, y + 4, taken ? 0xFF9FE8FF : 0xFF4A5060);
+                g.fill(x + sz - 4, y + 1, x + sz - 1, y + 4, taken ? 0xFF9FE8FF : 0xFF4A5060);
             }
             // 排他の節には赤紫の点 (左上)
             if (!n.excludes.isEmpty()) {
@@ -1618,7 +1648,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             if (n.skill != null && n == t.skillNode(n.skill)) {
                 jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
                 if (gi != null) {
-                    SkillHud.drawGlyph(g, gi.glyph(), x - 2, y + NODE - 7, 9);
+                    SkillHud.drawGlyph(g, gi.glyph(), x - 2, y + sz - 7, 9);
                 }
             }
         }

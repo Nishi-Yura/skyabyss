@@ -1,0 +1,52 @@
+# 技の木の節の大きさ (使う技 > 型の要 > 常に効く > 段・刻印 > 基礎) の確認 (2026-10-30)
+# ./gradlew runShots -Pscript=tools/shots/skill_tree_v2.txt
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 20
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 20
+
+# 幹だけ取った状態
+open skills
+wait 10
+shot tree_root
+close
+
+# 盾の枝を進める
+cmd skyabyss skill node @p str_a
+cmd skyabyss skill node @p vit_a
+cmd skyabyss skill node @p stone_stance
+cmd skyabyss skill node @p riposte
+cmd skyabyss skill node @p shield_rush
+cmd skyabyss skill node @p vit_b
+cmd skyabyss skill node @p rock_call
+cmd skyabyss skill node @p heavy_voice
+cmd skyabyss skill node @p vit_c
+cmd skyabyss skill node @p rock_skin
+cmd skyabyss skill node @p dull_iron
+wait 10
+open skills
+wait 10
+shot tree_shield
+wait 2
+close
+cmd skyabyss job choose mage
+wait 10
+open skills
+wait 10
+shot tree_mage
+close

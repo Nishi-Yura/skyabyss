@@ -38,7 +38,7 @@ while [ $slot -lt 0 ]; do
     d=$(slot_dir $i)
     if [ -d "$d" ] && [ -n "$(find "$d" -maxdepth 0 -mmin +360 2>/dev/null)" ]; then
       echo "[mc_run] clearing stale slot $((i + 1)) (older than 6 h)"
-      rmdir "$d" 2>/dev/null
+      rm -rf "$d" 2>/dev/null
     fi
   done
   mem=99999
