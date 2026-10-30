@@ -691,5 +691,225 @@
         "volume": 1.4
       }
     ]
+  },
+  "seat_touch": {
+    "subtitle": "subtitles.skyabyss_finale.seat_touch",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.resonate",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.4
+      }
+    ]
+  },
+  "hand_rise": {
+    "subtitle": "subtitles.skyabyss_finale.hand_rise",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.emerge",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.4
+      }
+    ]
+  },
+  "hand_slam_tell": {
+    "subtitle": "subtitles.skyabyss_finale.hand_slam_tell",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.flap",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.4
+      }
+    ]
+  },
+  "hand_slam": {
+    "subtitle": "subtitles.skyabyss_finale.hand_slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.attack_impact",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.7
+      }
+    ]
+  },
+  "hand_scrape_tell": {
+    "subtitle": "subtitles.skyabyss_finale.hand_scrape_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.bell.resonate",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.5
+      }
+    ]
+  },
+  "hand_scrape": {
+    "subtitle": "subtitles.skyabyss_finale.hand_scrape",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.5
+      }
+    ]
+  },
+  "eye_open": {
+    "subtitle": "subtitles.skyabyss_finale.eye_open",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.activate",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.5
+      }
+    ]
+  },
+  "pilgrim_stare": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_stare",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.ambient",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.6
+      }
+    ]
+  },
+  "pilgrim_beam": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_beam",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.6
+      }
+    ]
+  },
+  "pilgrim_close": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_close",
+    "sounds": [
+      {
+        "name": "minecraft:block.wool.place",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.6
+      }
+    ]
+  },
+  "pilgrim_rain_tell": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_rain_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.resonate",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.8
+      }
+    ]
+  },
+  "pilgrim_rain": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_rain",
+    "sounds": [
+      {
+        "name": "minecraft:entity.arrow.hit",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.6
+      }
+    ]
+  },
+  "moon_pull_tell": {
+    "subtitle": "subtitles.skyabyss_finale.moon_pull_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.6
+      }
+    ]
+  },
+  "moon_pull": {
+    "subtitle": "subtitles.skyabyss_finale.moon_pull",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.7
+      }
+    ]
+  },
+  "moon_sweep": {
+    "subtitle": "subtitles.skyabyss_finale.moon_sweep",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.6
+      }
+    ]
+  },
+  "moon_rewind": {
+    "subtitle": "subtitles.skyabyss_finale.moon_rewind",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.ambient",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.4
+      }
+    ]
+  },
+  "moon_fall_tell": {
+    "subtitle": "subtitles.skyabyss_finale.moon_fall_tell",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.activate",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.4
+      }
+    ]
+  },
+  "moon_fall": {
+    "subtitle": "subtitles.skyabyss_finale.moon_fall",
+    "sounds": [
+      {
+        "name": "minecraft:item.totem.use",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.8
+      }
+    ]
+  },
+  "pilgrim_roar": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.growl",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "pilgrim_fade": {
+    "subtitle": "subtitles.skyabyss_finale.pilgrim_fade",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.deactivate",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 0.5
+      }
+    ]
   }
 }

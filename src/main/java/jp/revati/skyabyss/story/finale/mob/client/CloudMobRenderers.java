@@ -38,6 +38,9 @@ public final class CloudMobRenderers {
         event.registerEntityRenderer(CloudMobsSetup.FALLEN_PLUME.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.FallenPlume.ID, 0.0f, 1.0f));
         event.registerEntityRenderer(CloudMobsSetup.PLUME_WARDEN.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PlumeWarden.ID, 0.5f, 1.0f));
         event.registerEntityRenderer(CloudMobsSetup.PILGRIM_PLUME.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimPlume.ID, 0.0f, 1.0f));
+        event.registerEntityRenderer(CloudMobsSetup.PILGRIM_HAND.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimHand.ID, 0.0f, 1.6f));
+        event.registerEntityRenderer(CloudMobsSetup.PILGRIM_EYE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimEye.ID, 0.0f, 1.5f));
+        event.registerEntityRenderer(CloudMobsSetup.PILGRIM_MOON.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimMoon.ID, 0.0f, 1.4f));
     }
 
     static final class Model<T extends CloudMob> extends LowPolyGeoRenderer.Model<T> {

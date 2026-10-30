@@ -1,0 +1,16 @@
+{
+ "id": "moon_pilgrim_hand",
+ "short": "巡礼者の手",
+ "kind": "ラスボス 第 1 形態 一品一案 (50 の 4.3)",
+ "title": "巡礼者の手 (pilgrim_hand) — 雲の下から伸びる大きな手・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/pilgrim_hand.png"
+ ],
+ "extra": "雲海の言葉 (雲の白・淡い金・朝の光)。骨 8 本。 三角形 1211 (目安 主 1500〜3000)。埋まった部品: なし。生成: tools/rough/lowpoly/moon/pilgrim_hand.py。三段の姿: 二段目 = 金の線が手首から肘へ広がる。",
+ "options": {
+  "a": {
+   "name": "雲の白の大きな手 (1211 三角形)",
+   "desc": "長い指と金の爪、指の筋に金の光、金の腕輪、手首から下は雲。"
+  }
+ }
+}

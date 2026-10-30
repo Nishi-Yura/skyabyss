@@ -12,7 +12,7 @@
   animations/entity/<id>.animation.json, models/item/<id>_spawn_egg.json
   assets/skyabyss_finale/sounds.json            音の出来事 (既存の音の別名。字幕は lang)
 
-島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。島 3「炉の島」(2026-10-30): 灰の打ち手・戻り火・戻し手。島 4「約束の島」(2026-10-30): 落ち羽・羽の番人・巡礼者の羽。
+島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。島 3「炉の島」(2026-10-30): 灰の打ち手・戻り火・戻し手。島 4「約束の島」(2026-10-30): 落ち羽・羽の番人・巡礼者の羽。巡礼者の座 (2026-10-30): 巡礼者の手・目・月 (ラスボスの三形態)。
 回転の約束は gen_moon_mobs と同じ (kf の x が負 = 前へ傾く)。
 """
 import importlib.util
@@ -35,7 +35,8 @@ AF = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_finale")
 ROUGH = os.path.join(ROOT, "docs", "review", "cloud_roughs")
 
 CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a",
-          "ash_striker": "a", "backfire": "a", "rewinder": "a", "fallen_plume": "a", "plume_warden": "a", "pilgrim_plume": "a"}
+          "ash_striker": "a", "backfire": "a", "rewinder": "a", "fallen_plume": "a", "plume_warden": "a", "pilgrim_plume": "a",
+          "pilgrim_hand": "a", "pilgrim_eye": "a", "pilgrim_moon": "a"}
 
 
 # ---------------------------------------------------------------- 鐘の亡者 (よろよろ歩く・鐘を振り上げて鳴らす)
@@ -335,10 +336,88 @@ def pilgrim_plume():
             p + "death": once(2.6, death, True)}
 
 
+# ---------------------------------------------------------------- 巡礼者の手 (ラスボス 第 1 形態)
+def pilgrim_hand():
+    p = "animation.pilgrim_hand."
+    fing = ["f1", "f2", "f3", "f4"]
+    idle = {"wrist": bone([S(0, 4, 30), "0", S(90, 4, 25)]), "palm": bone([S(60, 3, 30), "0", "0"])}
+    for i, f in enumerate(fing):
+        idle[f] = bone([S(i * 40, 8, 40), "0", "0"])
+    walk = dict(idle)
+    # 叩く (1.6 保つ): 1.2 まで手を起こして指を開き (予告)、1.35 で掌を下へ叩きつけ、そのまま床に手を突く
+    slam = {"wrist": bone(kf({0: (0, 0, 0), 1.2: (-45, 0, 0), 1.35: (-95, 0, 0), 1.6: (-92, 0, 0)}))}
+    for f in fing:
+        slam[f] = bone(kf({0: (0, 0, 0), 1.2: (25, 0, 0), 1.35: (-8, 0, 0), 1.6: (-5, 0, 0)}))
+    slam["thumb"] = bone(kf({0: (0, 0, 0), 1.2: (0, 0, -25), 1.35: (0, 0, 5)}))
+    # 起き上がる (1.0)
+    rise = {"wrist": bone(kf({0: (-92, 0, 0), 1.0: (0, 0, 0)}))}
+    # 削る (2.0): 1.4 まで指を曲げて構え (予告)、1.5〜1.9 で横へ掻く
+    scrape = {"wrist": bone(kf({0: (0, 0, 0), 1.4: (-60, 0, -35), 1.9: (-60, 0, 35), 2.0: (0, 0, 0)}))}
+    for f in fing:
+        scrape[f] = bone(kf({0: (0, 0, 0), 1.4: (-55, 0, 0), 1.9: (-65, 0, 0), 2.0: (0, 0, 0)}))
+    death = {"wrist": bone(kf({0: (0, 0, 0), 0.8: (20, 0, 10), 2.5: (40, 0, 30)}), kf({0: (0, 0, 0), 0.8: (0, -6, 0), 2.5: (0, -60, 0)}, False))}
+    for f in fing:
+        death[f] = bone(kf({0: (0, 0, 0), 1.0: (-70, 0, 0)}))
+    return {p + "idle": loop(8.0, idle), p + "walk": loop(8.0, walk), p + "slam": once(1.6, slam, True), p + "rise": once(1.0, rise),
+            p + "scrape": once(2.0, scrape), p + "hurt": once(0.22, hurt_bones("wrist")), p + "death": once(2.5, death, True)}
+
+
+# ---------------------------------------------------------------- 巡礼者の目 (ラスボス 第 2 形態)
+def pilgrim_eye():
+    p = "animation.pilgrim_eye."
+    idle = {"eye": bone([S(90, 5, 20), S(0, 12, 14), "0"]), "halo": bone(["0", "0", "query.anim_time * 12"]),
+            "lid_top": bone(None, [0, S(0, 0.6, 40), 0]), "lid_bottom": bone(None, [0, S(180, 0.6, 40), 0])}
+    walk = dict(idle)
+    # 凝視 (1.5 保つ): 瞼が開き、目が膨らむ
+    stare = {"eye": dict(bone(None), scale=M.scale({0: (1, 1, 1), 0.4: (1.1, 1.1, 1.1), 1.5: (1.14, 1.14, 1.14)})),
+             "lid_top": bone(None, kf({0: (0, 0, 0), 0.4: (0, 2.5, 0)}, False)), "lid_bottom": bone(None, kf({0: (0, 0, 0), 0.4: (0, -2.5, 0)}, False))}
+    # 目を閉じる (3.0): 雲の瞼が合わさる
+    closed = {"lid_top": bone(kf({0: (0, 0, 0), 0.3: (-10, 0, 0), 2.7: (-10, 0, 0), 3.0: (0, 0, 0)}),
+                              kf({0: (0, 0, 0), 0.3: (0, -8, -2), 2.7: (0, -8, -2), 3.0: (0, 0, 0)}, False)),
+              "lid_bottom": bone(kf({0: (0, 0, 0), 0.3: (10, 0, 0), 2.7: (10, 0, 0), 3.0: (0, 0, 0)}),
+                                 kf({0: (0, 0, 0), 0.3: (0, 7, -2), 2.7: (0, 7, -2), 3.0: (0, 0, 0)}, False)),
+              "halo": bone(kf({0: (0, 0, 0), 3.0: (0, 0, 30)}))}
+    # 光の雨 (1.2): 目を上へ
+    rain = {"eye": bone(kf({0: (0, 0, 0), 0.4: (-35, 0, 0), 1.0: (-35, 0, 0), 1.2: (0, 0, 0)}))}
+    call = {"eye": bone(kf({0: (0, 0, 0), 0.5: (0, 50, 0), 1.0: (0, -50, 0), 1.5: (0, 0, 0)})), "halo": bone(kf({0: (0, 0, 0), 2.0: (0, 0, 360)}))}
+    death = {"lid_top": bone(None, kf({0: (0, 0, 0), 0.6: (0, -8, -2)}, False)), "lid_bottom": bone(None, kf({0: (0, 0, 0), 0.6: (0, 7, -2)}, False)),
+             "body": bone(kf({0: (0, 0, 0), 2.6: (30, 0, 20)}), kf({0: (0, 0, 0), 1.0: (0, 4, 0), 2.6: (0, 40, 0)}, False))}
+    return {p + "idle": loop(10.0, idle), p + "walk": loop(10.0, walk), p + "stare": once(1.5, stare, True), p + "closed": once(3.0, closed),
+            p + "rain": once(1.2, rain), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones("eye")), p + "death": once(2.6, death, True)}
+
+
+# ---------------------------------------------------------------- 巡礼者の月 (ラスボス 第 3 形態)
+def pilgrim_moon():
+    p = "animation.pilgrim_moon."
+    idle = {"moon": bone(["0", "query.anim_time * 6", "0"], [0, S(0, 1.0, 30), 0]), "clock": bone(["0", "0", "query.anim_time * -40"]),
+            "chains": bone([S(0, 2, 25), "0", S(90, 2, 20)])}
+    walk = dict(idle)
+    # 引き (2.0): 月が速く回り、時計が戻る
+    pull = {"moon": bone(kf({0: (0, 0, 0), 2.0: (0, 180, 0)})), "clock": bone(kf({0: (0, 0, 0), 2.0: (0, 0, 360)})),
+            "chains": bone(kf({0: (0, 0, 0), 1.0: (8, 0, 0), 2.0: (0, 0, 0)}))}
+    # 満ち欠けの刃 (1.4): 傾いて薙ぐ
+    sweep = {"moon": bone(kf({0: (0, 0, 0), 0.9: (0, -40, -15), 1.0: (0, 50, 10), 1.4: (0, 0, 0)}))}
+    # 巻き戻し (1.6): 時計が大きく逆に回る
+    rewind = {"clock": bone(kf({0: (0, 0, 0), 1.6: (0, 0, 720)})), "moon": bone(kf({0: (0, 0, 0), 1.6: (0, -90, 0)}))}
+    # 月落とし (5.0): 上へ昇り、最後に落ちる
+    fall = {"moon": bone(None, kf({0: (0, 0, 0), 1.0: (0, 14, 0), 4.7: (0, 16, 0), 4.85: (0, -4, 0), 5.0: (0, 0, 0)}, False)),
+            "chains": bone(None, kf({0: (0, 0, 0), 1.0: (0, 14, 0), 4.7: (0, 16, 0), 4.85: (0, -4, 0), 5.0: (0, 0, 0)}, False)),
+            "clock": bone(kf({0: (0, 0, 0), 5.0: (0, 0, -1440)}))}
+    call = {"clock": bone(kf({0: (0, 0, 0), 2.0: (0, 0, 540)})), "chains": bone(kf({0: (0, 0, 0), 1.0: (-10, 0, 0), 2.0: (0, 0, 0)}))}
+    death = {"moon": dict(bone(kf({0: (0, 0, 0), 3.0: (20, 200, 10)}), kf({0: (0, 0, 0), 3.0: (0, -30, 0)}, False)),
+                          scale=M.scale({0: (1, 1, 1), 2.4: (0.9, 0.9, 0.9), 3.0: (0.2, 0.2, 0.2)})),
+             "chains": bone(None, kf({0: (0, 0, 0), 1.0: (0, 20, 0), 3.0: (0, 80, 0)}, False)),
+             "clock": dict(bone(kf({0: (0, 0, 0), 3.0: (0, 0, 720)})), scale=M.scale({0: (1, 1, 1), 1.5: (1.3, 1.3, 1.3), 3.0: (0.1, 0.1, 0.1)}))}
+    return {p + "idle": loop(12.0, idle), p + "walk": loop(12.0, walk), p + "pull": once(2.0, pull), p + "sweep": once(1.4, sweep),
+            p + "rewind": once(1.6, rewind), p + "fall": once(5.0, fall), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones("moon")),
+            p + "death": once(3.0, death, True)}
+
+
 ANIMS = {"bell_mourner": bell_mourner, "mist_bird": mist_bird, "last_bellkeeper": last_bellkeeper,
          "net_caster": net_caster, "lamp_moth": lamp_moth, "lamp_eye": lamp_eye,
          "ash_striker": ash_striker, "backfire": backfire, "rewinder": rewinder,
-         "fallen_plume": fallen_plume, "plume_warden": plume_warden, "pilgrim_plume": pilgrim_plume}
+         "fallen_plume": fallen_plume, "plume_warden": plume_warden, "pilgrim_plume": pilgrim_plume,
+         "pilgrim_hand": pilgrim_hand, "pilgrim_eye": pilgrim_eye, "pilgrim_moon": pilgrim_moon}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -462,6 +541,27 @@ SOUNDS = {
     "wing_judge": [ev("item.totem.use", 0.6, 1.4)],
     "wing_call": [ev("entity.phantom.ambient", 1.0, 0.6)],
     "wing_roar": [ev("entity.ender_dragon.growl", 0.5, 1.4)],
+    # 巡礼者の座 (ラスボス)
+    "seat_touch": [ev("block.bell.resonate", 1.0, 0.4)],
+    "hand_rise": [ev("entity.warden.emerge", 0.6, 1.4)],
+    "hand_slam_tell": [ev("entity.phantom.flap", 1.2, 0.4)],
+    "hand_slam": [ev("entity.warden.attack_impact", 1.0, 0.7)],
+    "hand_scrape_tell": [ev("block.bell.resonate", 1.0, 0.5)],
+    "hand_scrape": [ev("entity.player.attack.sweep", 1.0, 0.5)],
+    "eye_open": [ev("block.beacon.activate", 1.0, 0.5)],
+    "pilgrim_stare": [ev("block.beacon.ambient", 1.0, 0.6)],
+    "pilgrim_beam": [ev("block.beacon.power_select", 1.0, 0.6)],
+    "pilgrim_close": [ev("block.wool.place", 1.0, 0.6)],
+    "pilgrim_rain_tell": [ev("block.amethyst_block.resonate", 1.0, 0.8)],
+    "pilgrim_rain": [ev("entity.arrow.hit", 1.0, 0.6)],
+    "moon_pull_tell": [ev("block.respawn_anchor.charge", 1.0, 0.6)],
+    "moon_pull": [ev("block.respawn_anchor.deplete", 1.0, 0.7)],
+    "moon_sweep": [ev("entity.player.attack.sweep", 1.0, 0.6)],
+    "moon_rewind": [ev("block.respawn_anchor.ambient", 1.0, 1.4)],
+    "moon_fall_tell": [ev("block.beacon.activate", 1.0, 0.4)],
+    "moon_fall": [ev("item.totem.use", 0.7, 0.8)],
+    "pilgrim_roar": [ev("entity.ender_dragon.growl", 0.6, 0.6)],
+    "pilgrim_fade": [ev("block.beacon.deactivate", 1.0, 0.5)],
 }
 
 

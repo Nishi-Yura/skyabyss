@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -65,6 +66,7 @@ public final class PromiseIsle {
     private static final Map<UUID, Long> RAISE_READY = new HashMap<>();
     private static final java.util.Set<String> SEEN = new java.util.HashSet<>();
     private static long tauntUntil;
+    private static UUID tauntLead;
     private static long nextTaunt;
 
     private PromiseIsle() {
@@ -85,7 +87,7 @@ public final class PromiseIsle {
 
     // 島と主の間 (前の自分たちが付いて歩く所)
     public static boolean inRegion(Vec3 p) {
-        return onIsland(p) || PromiseArena.box().contains(p);
+        return onIsland(p) || PromiseArena.box().contains(p) || SeatArena.box().contains(p);
     }
 
     static AABB area() {
@@ -247,8 +249,19 @@ public final class PromiseIsle {
 
     // 付いて歩いている (術を使う) 前の自分
     public static TownGuestEntity active(ServerLevel level, int k) {
+        // 巡礼者の座の第 3 形態で加勢している四人を先に (SeatArena)
+        TownGuestEntity seat = SeatArena.ally(level, k);
+        if (seat != null) {
+            return seat;
+        }
         TownGuestEntity g = self(level, k);
         return g != null && LEAD.containsKey(k) ? g : null;
+    }
+
+    // 術を使う前の自分の先頭 (座の加勢なら付いて歩いている人)
+    static UUID leadId(ServerLevel level, int k) {
+        TownGuestEntity seat = SeatArena.ally(level, k);
+        return seat != null ? SeatArena.leadOf(seat) : LEAD.get(k);
     }
 
     // ---------------------------------------------------------------- 術
@@ -314,26 +327,24 @@ public final class PromiseIsle {
                 }
                 level.sendParticles(ParticleTypes.ANGRY_VILLAGER, cliff.getX(), cliff.getY() + 2.2, cliff.getZ(), 1, 0.2, 0.1, 0.2, 0);
             }
-            if (now + 1 == tauntUntil) {
-                UUID lead = LEAD.get(2);
-                if (lead != null) {
-                    cliff.setFollow(lead);
-                }
+            if (now + 1 == tauntUntil && tauntLead != null) {
+                cliff.setFollow(tauntLead);
             }
             return;
         }
         if (now < nextTaunt) {
             return;
         }
-        UUID lead = LEAD.get(2);
+        UUID lead = leadId(level, 2);
         ServerPlayer p = lead == null ? null : (ServerPlayer) level.getPlayerByUUID(lead);
         if (p == null) {
             return;
         }
         List<CloudMob> foes = level.getEntitiesOfClass(CloudMob.class, p.getBoundingBox().inflate(TAUNT_R), m -> m.isAlive()
                 && !(m instanceof jp.revati.skyabyss.story.finale.mob.PilgrimPlume) && m.getTarget() instanceof Player);
-        boolean lord = !PromiseArena.lords(level).isEmpty() && PromiseArena.present(level).contains(p);
-        if (foes.isEmpty() && !lord) {
+        Entity lord = !PromiseArena.lords(level).isEmpty() && PromiseArena.present(level).contains(p) ? PromiseArena.lords(level).get(0)
+                : SeatArena.box().contains(p.position()) ? SeatArena.boss(level) : null;
+        if (foes.isEmpty() && lord == null) {
             return;
         }
         // 敵の真ん中の方へ 4 前に出る (主の間なら主の方へ)
@@ -341,7 +352,7 @@ public final class PromiseIsle {
         for (CloudMob m : foes) {
             c = c.add(m.position());
         }
-        c = foes.isEmpty() ? PromiseArena.lords(level).get(0).position() : c.scale(1.0 / foes.size());
+        c = foes.isEmpty() ? lord.position() : c.scale(1.0 / foes.size());
         Vec3 dir = new Vec3(c.x - p.getX(), 0, c.z - p.getZ());
         dir = dir.lengthSqr() < 0.01 ? new Vec3(0, 0, -1) : dir.normalize();
         Vec3 at = p.position().add(dir.scale(4));
@@ -353,6 +364,7 @@ public final class PromiseIsle {
                 break;
             }
         }
+        tauntLead = lead;
         cliff.setFollow(null);
         cliff.clearRestriction();
         cliff.getNavigation().stop();
@@ -398,11 +410,11 @@ public final class PromiseIsle {
                 field.teleportTo(p.getX() + 0.8, p.getY(), p.getZ() + 0.4);
                 field.getLookControl().setLookAt(p);
                 Notice.narrate(p, "message.skyabyss.isle4.raising");
-                UUID lead = LEAD.get(3);
+                UUID lead = leadId(level, 3);
                 if (lead != null) {
                     jp.revati.skyabyss.story.ch1.Tasks.later(RAISE_TICKS + 5, () -> {
-                        if (field.isAlive() && LEAD.get(3) != null) {
-                            field.setFollow(LEAD.get(3));
+                        if (field.isAlive()) {
+                            field.setFollow(lead);
                         }
                     });
                 }
@@ -473,7 +485,10 @@ public final class PromiseIsle {
             }
             PromiseArena.tick(level);
         }
-        arts(level);
+        // 座で四人が加勢している間は、術は座の見張り (SeatArena) が使う
+        if (SeatArena.form() != 3 && SeatArena.form() != 4) {
+            arts(level);
+        }
         if (now % 40 == 0) {
             for (ServerPlayer p : level.players()) {
                 if (!p.isSpectator() && !p.isCreative()) {

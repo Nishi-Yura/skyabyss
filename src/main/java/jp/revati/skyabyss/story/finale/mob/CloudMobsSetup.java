@@ -74,6 +74,17 @@ public final class CloudMobsSetup {
             () -> EntityType.Builder.of(PilgrimPlume::new, MobCategory.MONSTER).sized(3.0f, 4.5f).eyeHeight(1.9f).fireImmune()
                     .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + PilgrimPlume.ID));
 
+    // 巡礼者の座: ラスボス「雲上の巡礼者」の三形態 (docs/design/50 の 4.3)
+    public static final DeferredHolder<EntityType<?>, EntityType<PilgrimHand>> PILGRIM_HAND = ENTITIES.register(PilgrimHand.ID,
+            () -> EntityType.Builder.of(PilgrimHand::new, MobCategory.MONSTER).sized(3.6f, 7.4f).eyeHeight(4.8f).fireImmune()
+                    .clientTrackingRange(14).build(SkyAbyss.MODID + ":" + PilgrimHand.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<PilgrimEye>> PILGRIM_EYE = ENTITIES.register(PilgrimEye.ID,
+            () -> EntityType.Builder.of(PilgrimEye::new, MobCategory.MONSTER).sized(5.2f, 6.4f).eyeHeight(3.2f).fireImmune()
+                    .clientTrackingRange(14).build(SkyAbyss.MODID + ":" + PilgrimEye.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<PilgrimMoon>> PILGRIM_MOON = ENTITIES.register(PilgrimMoon.ID,
+            () -> EntityType.Builder.of(PilgrimMoon::new, MobCategory.MONSTER).sized(5.0f, 6.2f).eyeHeight(3.2f).fireImmune()
+                    .clientTrackingRange(14).build(SkyAbyss.MODID + ":" + PilgrimMoon.ID));
+
     public static final DeferredItem<Item> BELL_MOURNER_EGG = egg("bell_mourner_spawn_egg", BELL_MOURNER, 0xC4C0B6, 0x8C6A3E);
     public static final DeferredItem<Item> MIST_BIRD_EGG = egg("mist_bird_spawn_egg", MIST_BIRD, 0xF4F4F8, 0xDCB250);
     public static final DeferredItem<Item> LAST_BELLKEEPER_EGG = egg("last_bellkeeper_spawn_egg", LAST_BELLKEEPER, 0x343640, 0xDCB250);
@@ -86,6 +97,9 @@ public final class CloudMobsSetup {
     public static final DeferredItem<Item> FALLEN_PLUME_EGG = egg("fallen_plume_spawn_egg", FALLEN_PLUME, 0xF4F4F8, 0xDCB250);
     public static final DeferredItem<Item> PLUME_WARDEN_EGG = egg("plume_warden_spawn_egg", PLUME_WARDEN, 0xDCB250, 0xF4F4F8);
     public static final DeferredItem<Item> PILGRIM_PLUME_EGG = egg("pilgrim_plume_spawn_egg", PILGRIM_PLUME, 0xFFFFFF, 0xFFE8B4);
+    public static final DeferredItem<Item> PILGRIM_HAND_EGG = egg("pilgrim_hand_spawn_egg", PILGRIM_HAND, 0xF4F4F8, 0xFFD890);
+    public static final DeferredItem<Item> PILGRIM_EYE_EGG = egg("pilgrim_eye_spawn_egg", PILGRIM_EYE, 0xFCFAF4, 0xDCB250);
+    public static final DeferredItem<Item> PILGRIM_MOON_EGG = egg("pilgrim_moon_spawn_egg", PILGRIM_MOON, 0x9CA2AE, 0xDCB250);
 
     public static final DeferredHolder<SoundEvent, SoundEvent> MOURNER_IDLE = sound("mourner_idle");
     public static final DeferredHolder<SoundEvent, SoundEvent> MOURNER_TELL = sound("mourner_tell");
@@ -149,6 +163,26 @@ public final class CloudMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> WING_JUDGE = sound("wing_judge");
     public static final DeferredHolder<SoundEvent, SoundEvent> WING_CALL = sound("wing_call");
     public static final DeferredHolder<SoundEvent, SoundEvent> WING_ROAR = sound("wing_roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SEAT_TOUCH = sound("seat_touch");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HAND_RISE = sound("hand_rise");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HAND_SLAM_TELL = sound("hand_slam_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HAND_SLAM = sound("hand_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HAND_SCRAPE_TELL = sound("hand_scrape_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HAND_SCRAPE = sound("hand_scrape");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EYE_OPEN = sound("eye_open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_STARE = sound("pilgrim_stare");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_BEAM = sound("pilgrim_beam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_CLOSE = sound("pilgrim_close");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_RAIN_TELL = sound("pilgrim_rain_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_RAIN = sound("pilgrim_rain");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOON_PULL_TELL = sound("moon_pull_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOON_PULL = sound("moon_pull");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOON_SWEEP = sound("moon_sweep");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOON_REWIND = sound("moon_rewind");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOON_FALL_TELL = sound("moon_fall_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOON_FALL = sound("moon_fall");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_ROAR = sound("pilgrim_roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_FADE = sound("pilgrim_fade");
 
     private CloudMobsSetup() {
     }
@@ -183,12 +217,16 @@ public final class CloudMobsSetup {
         event.put(FALLEN_PLUME.get(), FallenPlume.createAttributes().build());
         event.put(PLUME_WARDEN.get(), PlumeWarden.createAttributes().build());
         event.put(PILGRIM_PLUME.get(), PilgrimPlume.createAttributes().build());
+        event.put(PILGRIM_HAND.get(), PilgrimHand.createAttributes().build());
+        event.put(PILGRIM_EYE.get(), PilgrimEye.createAttributes().build());
+        event.put(PILGRIM_MOON.get(), PilgrimMoon.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(BELL_MOURNER_EGG, MIST_BIRD_EGG, LAST_BELLKEEPER_EGG, NET_CASTER_EGG, LAMP_MOTH_EGG, LAMP_EYE_EGG, ASH_STRIKER_EGG,
-                    BACKFIRE_EGG, REWINDER_EGG, FALLEN_PLUME_EGG, PLUME_WARDEN_EGG, PILGRIM_PLUME_EGG)) {
+                    BACKFIRE_EGG, REWINDER_EGG, FALLEN_PLUME_EGG, PLUME_WARDEN_EGG, PILGRIM_PLUME_EGG,
+                    PILGRIM_HAND_EGG, PILGRIM_EYE_EGG, PILGRIM_MOON_EGG)) {
                 event.accept(i.get());
             }
         }
@@ -209,6 +247,9 @@ public final class CloudMobsSetup {
             put(FallenPlume.ID, 22);
             put(PlumeWarden.ID, 30);
             put(PilgrimPlume.ID, 840);
+            put(PilgrimHand.ID, 500);
+            put(PilgrimEye.ID, 900);
+            put(PilgrimMoon.ID, 1200);
         });
     }
 

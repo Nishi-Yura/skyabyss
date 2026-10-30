@@ -1,0 +1,398 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.pilgrim_eye.idle": {
+      "loop": true,
+      "animation_length": 10.0,
+      "bones": {
+        "eye": {
+          "rotation": [
+            "math.sin(query.anim_time * 20 + 90) * 5",
+            "math.sin(query.anim_time * 14 + 0) * 12",
+            "0"
+          ]
+        },
+        "halo": {
+          "rotation": [
+            "0",
+            "0",
+            "query.anim_time * 12"
+          ]
+        },
+        "lid_top": {
+          "position": [
+            0,
+            "math.sin(query.anim_time * 40 + 0) * 0.6",
+            0
+          ]
+        },
+        "lid_bottom": {
+          "position": [
+            0,
+            "math.sin(query.anim_time * 40 + 180) * 0.6",
+            0
+          ]
+        }
+      }
+    },
+    "animation.pilgrim_eye.walk": {
+      "loop": true,
+      "animation_length": 10.0,
+      "bones": {
+        "eye": {
+          "rotation": [
+            "math.sin(query.anim_time * 20 + 90) * 5",
+            "math.sin(query.anim_time * 14 + 0) * 12",
+            "0"
+          ]
+        },
+        "halo": {
+          "rotation": [
+            "0",
+            "0",
+            "query.anim_time * 12"
+          ]
+        },
+        "lid_top": {
+          "position": [
+            0,
+            "math.sin(query.anim_time * 40 + 0) * 0.6",
+            0
+          ]
+        },
+        "lid_bottom": {
+          "position": [
+            0,
+            "math.sin(query.anim_time * 40 + 180) * 0.6",
+            0
+          ]
+        }
+      }
+    },
+    "animation.pilgrim_eye.stare": {
+      "animation_length": 1.5,
+      "bones": {
+        "eye": {
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "0.40": [
+              1.1,
+              1.1,
+              1.1
+            ],
+            "1.50": [
+              1.14,
+              1.14,
+              1.14
+            ]
+          }
+        },
+        "lid_top": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              0,
+              2.5,
+              0
+            ]
+          }
+        },
+        "lid_bottom": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              0,
+              -2.5,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.pilgrim_eye.closed": {
+      "animation_length": 3.0,
+      "bones": {
+        "lid_top": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              10,
+              0,
+              0
+            ],
+            "2.70": [
+              10,
+              0,
+              0
+            ],
+            "3.00": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              -8,
+              -2
+            ],
+            "2.70": [
+              0,
+              -8,
+              -2
+            ],
+            "3.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "lid_bottom": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              -10,
+              0,
+              0
+            ],
+            "2.70": [
+              -10,
+              0,
+              0
+            ],
+            "3.00": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              7,
+              -2
+            ],
+            "2.70": [
+              0,
+              7,
+              -2
+            ],
+            "3.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "halo": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "3.00": [
+              0,
+              0,
+              30
+            ]
+          }
+        }
+      }
+    },
+    "animation.pilgrim_eye.rain": {
+      "animation_length": 1.2,
+      "bones": {
+        "eye": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              35,
+              0,
+              0
+            ],
+            "1.00": [
+              35,
+              0,
+              0
+            ],
+            "1.20": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.pilgrim_eye.call": {
+      "animation_length": 2.0,
+      "bones": {
+        "eye": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              -50,
+              0
+            ],
+            "1.00": [
+              0,
+              50,
+              0
+            ],
+            "1.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "halo": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "2.00": [
+              0,
+              0,
+              360
+            ]
+          }
+        }
+      }
+    },
+    "animation.pilgrim_eye.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "eye": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.pilgrim_eye.death": {
+      "animation_length": 2.6,
+      "bones": {
+        "lid_top": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -8,
+              -2
+            ]
+          }
+        },
+        "lid_bottom": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              7,
+              -2
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "2.60": [
+              -30,
+              0,
+              20
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              4,
+              0
+            ],
+            "2.60": [
+              0,
+              40,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

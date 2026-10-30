@@ -84,6 +84,7 @@ public final class FinaleSelfTest {
             isle2(cloud, p, f);
             isle3(cloud, p, f);
             isle4(cloud, p, f);
+            seat(cloud, p, f);
         } catch (RuntimeException ex) {
             SkyAbyss.LOGGER.error("SELFTEST cloudsea crashed", ex);
             f.add("crashed: " + ex);
@@ -406,9 +407,82 @@ public final class FinaleSelfTest {
         Quests.forgetAll(p);
     }
 
+    // 巡礼者の座 (50 の 4.3): 光の橋・関所 / 鐘雲の輪と鐘 / 三形態の部位 / 第 3 形態の四人 (盾の円) / 片付け
+    static void seat(ServerLevel cloud, FakePlayer p, List<String> f) {
+        check(f, FinaleWorld.version(cloud.getServer()) >= 6, "the seat was not poured (version " + FinaleWorld.version(cloud.getServer()) + ")");
+        FinaleTerrain t = PilgrimSeat.terrain();
+        BlockPos s = t.mark("bridge_gate");
+        BlockPos e = t.mark("arrive");
+        int gaps = 0;
+        for (int z = s.getZ(); z >= e.getZ(); z--) {
+            boolean floor = false;
+            for (int y = 166; y >= 130; y--) {
+                BlockPos q = new BlockPos(s.getX(), y, z);
+                cloud.getChunk(q);
+                if (!cloud.getBlockState(q).getCollisionShape(cloud, q).isEmpty()) {
+                    floor = cloud.getBlockState(q.above()).getCollisionShape(cloud, q.above()).isEmpty()
+                            && cloud.getBlockState(q.above(2)).getCollisionShape(cloud, q.above(2)).isEmpty();
+                    break;
+                }
+            }
+            gaps += floor ? 0 : 1;
+        }
+        check(f, gaps == 0, "the light bridge has " + gaps + " gaps between the moon-viewing rock and the seat");
+        for (String k : List.of("arrive", "arena_entry", "throne_front", "lord_spawn")) {
+            BlockPos q = t.mark(k);
+            check(f, cloud.getBlockState(q.below()).isFaceSturdy(cloud, q.below(), net.minecraft.core.Direction.UP) && cloud.getBlockState(q).isAir(), k + " is not standable");
+        }
+        check(f, PilgrimSeat.clouds().size() > 300, "the seat's cloud ring is too small: " + PilgrimSeat.clouds().size());
+        for (BlockPos b : PilgrimSeat.bells()) {
+            check(f, cloud.getBlockState(b).getBlock() instanceof net.minecraft.world.level.block.BellBlock, "a seat bell is missing at " + b);
+        }
+        // 鐘で輪が固まる
+        BellIsle.addExtra(PilgrimSeat.clouds());
+        BlockPos bell = PilgrimSeat.bells().get(0);
+        BlockPos near = null;
+        for (BlockPos c : PilgrimSeat.clouds()) {
+            if (c.distSqr(bell) < 64) {
+                near = c;
+                break;
+            }
+        }
+        BellIsle.ring(cloud, bell);
+        check(f, near != null && cloud.getBlockState(near).getValue(BellCloudBlock.SOLID), "ringing a seat bell did not harden the ring");
+        BellIsle.silence(cloud, bell, 2);
+        check(f, near != null && !cloud.getBlockState(near).getValue(BellCloudBlock.SOLID), "silencing the seat bell left the ring hard");
+        // 関所: 約束の島を終えていない人は月見の岩の上の入口へ戻る
+        Quests.forgetAll(p);
+        p.moveTo(s.getX() + 0.5, s.getY(), s.getZ() - 3 + 0.5, 0f, 0f);
+        PilgrimSeat.gate(p);
+        check(f, p.blockPosition().closerThan(PromiseIsle.mark("arena_entry"), 2), "the light bridge let someone through before the pilgrim's plume");
+        check(f, !PilgrimSeat.mayChallenge(p), "the seat could be touched without the quest");
+        // 三形態の部位
+        SeatArena.toForm(cloud, 1);
+        check(f, SeatArena.parts(cloud).stream().filter(x -> x instanceof jp.revati.skyabyss.story.finale.mob.PilgrimHand).count() == 2, "the pilgrim's two hands did not rise");
+        SeatArena.toForm(cloud, 2);
+        check(f, SeatArena.parts(cloud).size() == 1 && SeatArena.parts(cloud).get(0) instanceof jp.revati.skyabyss.story.finale.mob.PilgrimEye
+                && cloud.getBlockState(near).getValue(BellCloudBlock.SOLID), "the eye form did not open with the ring hardened");
+        SeatArena.toForm(cloud, 3);
+        check(f, SeatArena.parts(cloud).size() == 1 && SeatArena.parts(cloud).get(0) instanceof jp.revati.skyabyss.story.finale.mob.PilgrimMoon
+                && SeatArena.allies(cloud).size() == 4, "the moon form did not come with the four former selves");
+        jp.revati.skyabyss.town.TownGuestEntity valley = SeatArena.ally(cloud, 1);
+        check(f, valley != null && PromiseIsle.active(cloud, 1) == valley, "the seat's valley self does not use its arts");
+        if (valley != null) {
+            p.moveTo(valley.getX() + 1, valley.getY(), valley.getZ(), 0f, 0f);
+            check(f, PromiseIsle.shielded(p), "the seat's valley self does not shield someone beside them");
+        }
+        for (String id : List.of("pilgrim_hand", "pilgrim_eye", "pilgrim_moon")) {
+            check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/animations/entity/" + id + ".animation.json") != null
+                    && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/lowpoly/" + id + "_s2.png") != null, "assets of " + id + " are missing");
+        }
+        SeatArena.clear(cloud);
+        check(f, SeatArena.parts(cloud).isEmpty() && SeatArena.allies(cloud).isEmpty() && SeatArena.form() == 0, "clearing the seat left the pilgrim or the four");
+        Quests.forgetAll(p);
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }
