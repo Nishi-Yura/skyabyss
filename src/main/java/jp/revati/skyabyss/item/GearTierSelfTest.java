@@ -96,6 +96,8 @@ public final class GearTierSelfTest {
         row(6, R, "moon_walker_helmet", "moon_walker_chestplate", "moon_walker_leggings", "moon_walker_boots");
         row(6, R, "moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
         row(6, H, "moon_waning_blade", "moon_full_hammer", "moon_new_staff", "moon_starfall_bow", "moon_umbra_dagger", "moon_halo_bell_staff", "moon_full_ring");
+        // 終章 神器 (story/finale/gear。巡礼者の報酬。図鑑の品は無い)
+        row(7, A, "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_plume_bow", "divine_rewind_dagger", "divine_promise_bell_staff");
     }
 
     private GearTierSelfTest() {
@@ -356,7 +358,8 @@ public final class GearTierSelfTest {
             }
             check(f, maxExclusive < minPiece, set.titan + ": an exclusive drops as often as a codex piece");
             // 月は専用の逸品が 2 つ (太刀と環。03 の 12.2)
-            int want = set.titan.equals("moon") ? 2 : 3;
+            // 終章の神器は図鑑に品を持たない (燃料のための形だけ)
+            int want = set.titan.equals("moon") ? 2 : set.titan.equals("cloudsea") ? 0 : 3;
             check(f, set.exclusives().size() == want, set.titan + " should have " + want + " exclusives");
         }
         for (String id : AbyssSetup.legends()) {

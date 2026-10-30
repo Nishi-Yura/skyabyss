@@ -214,6 +214,8 @@ public final class JobChoice {
                 SkillManager.takeNode(p, base.id);
             }
         }
+        // 終章の神器は、替えた職の神器になる (story/finale/gear/DivineGear)
+        jp.revati.skyabyss.story.finale.gear.DivineGear.swap(p, job);
         SkillManager.refreshStats(p);
         SkillManager.sync(p);
         SkillManager.applyModifiers(p);

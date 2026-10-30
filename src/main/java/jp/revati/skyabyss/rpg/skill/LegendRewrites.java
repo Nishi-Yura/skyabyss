@@ -435,6 +435,99 @@ public final class LegendRewrites {
                     }
                 });
             }
+            // ---- 終章の神器 (story/finale/gear)
+            case DIVINE_SKY_HAND -> {
+                // 巡礼者の手: 斬った先へ、0.6 秒後に光の手が叩きつける (まわり 3)
+                Vec3 c = player.position().add(f.scale(3.0));
+                level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 6, c.z, 20, 0.6, 1.0, 0.6, 0.02);
+                SkillEffects.later(level, 12, () -> {
+                    level.sendParticles(ParticleTypes.FLASH, c.x, c.y + 0.5, c.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.2, c.z, 30, 1.6, 0.1, 1.6, 0.05);
+                    level.playSound(null, c.x, c.y, c.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0f, 1.2f);
+                    for (LivingEntity e : around(player, c, 3.0)) {
+                        SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.8), skill);
+                        e.setDeltaMovement(e.getDeltaMovement().add(0, 0.35, 0));
+                    }
+                });
+            }
+            case DIVINE_BELL_WAVE -> {
+                // 鐘: 打ったところから鐘の波が広がる (半径 6 まで。一度ずつ、鈍り 2 秒)
+                Vec3 c = player.position();
+                level.playSound(null, c.x, c.y, c.z, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.4f, 0.9f);
+                java.util.Set<Integer> hit = new java.util.HashSet<>();
+                for (int k = 1; k <= 3; k++) {
+                    double rad = 2.0 * k;
+                    SkillEffects.later(level, 4 * k, () -> {
+                        ring(level, c, rad, ParticleTypes.WAX_ON, (int) (rad * 8));
+                        for (LivingEntity e : around(player, c, rad)) {
+                            if (hit.add(e.getId())) {
+                                SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
+                                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1), player);
+                            }
+                        }
+                    });
+                }
+            }
+            case DIVINE_DAWN_GAZE -> {
+                // 灯の目: 落ちた所に光の筋が 2 秒回り、筋の中の敵を焼く
+                Vec3 c = aimPoint(player, 24.0);
+                for (int k = 0; k < 8; k++) {
+                    int step = k;
+                    SkillEffects.later(level, 5 * k + 4, () -> {
+                        double a = step * Math.PI / 4;
+                        Vec3 d = new Vec3(Math.cos(a), 0, Math.sin(a));
+                        for (double t = 0.5; t <= 6.0; t += 0.7) {
+                            level.sendParticles(ParticleTypes.END_ROD, c.x + d.x * t, c.y + 0.8, c.z + d.z * t, 1, 0, 0, 0, 0);
+                        }
+                        for (LivingEntity e : cone(player, c, d, 6.0, 22)) {
+                            SkillActions.hit(player, e, JobActions.spell(player, 0.18), skill);
+                        }
+                    });
+                }
+            }
+            case DIVINE_PLUME_RAIN -> {
+                // 落ち羽: 射った筋に沿って、0.5 秒後に羽根が降る (8 か所、まわり 1.5)
+                Vec3 c0 = player.position();
+                for (int k = 1; k <= 8; k++) {
+                    Vec3 p = c0.add(f.scale(2.0 * k));
+                    level.sendParticles(ParticleTypes.END_ROD, p.x, p.y + 5, p.z, 2, 0.2, 0.3, 0.2, 0.01);
+                    SkillEffects.later(level, 10 + k, () -> {
+                        level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 0.4, p.z, 6, 0.3, 0.2, 0.3, 0.05);
+                        for (LivingEntity e : around(player, p, 1.5)) {
+                            SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
+                        }
+                    });
+                }
+            }
+            case DIVINE_REWIND_LUNGE -> {
+                // 巻き戻り: 1 秒後に、同じ道筋をもう一度踏み込みの残像が走る (道のまわり 1.6 の敵に)
+                Vec3 a0 = from;
+                Vec3 a1 = player.position();
+                SkillEffects.later(level, 20, () -> {
+                    Vec3 d = a1.subtract(a0);
+                    double len = Math.max(1.0, d.length());
+                    level.playSound(null, a0.x, a0.y, a0.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 0.6f, 1.6f);
+                    java.util.Set<Integer> hit = new java.util.HashSet<>();
+                    for (double t = 0; t <= len; t += 0.8) {
+                        Vec3 p = a0.add(d.normalize().scale(t));
+                        level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 1, p.z, 2, 0.1, 0.3, 0.1, 0.01);
+                        for (LivingEntity e : around(player, p, 1.6)) {
+                            if (hit.add(e.getId())) {
+                                SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.6), skill);
+                            }
+                        }
+                    }
+                });
+            }
+            case DIVINE_PROMISE_CIRCLE -> {
+                // 盾の円: 唄った所に 6 秒、半径 4 の円。円の内の仲間は受ける傷 ×0.6 (story/finale/gear/DivineGearEvents)
+                Vec3 c = player.position();
+                jp.revati.skyabyss.story.finale.gear.DivineGearEvents.addCircle(level, c, 4.0, 120);
+                for (int k = 0; k < 6; k++) {
+                    SkillEffects.later(level, 20 * k, () -> ring(level, c, 4.0, ParticleTypes.END_ROD, 28));
+                }
+                level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0f, 1.4f);
+            }
             case MOON_FULL_BURST -> SkillEffects.later(level, 6, () -> {
                 Vec3 c = player.position();
                 ring(level, c, 5.0, ParticleTypes.END_ROD, 32);

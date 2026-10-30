@@ -107,7 +107,14 @@ public enum Rune {
     MOON_NEW_DUST("moon_new_dust", Skill.STARDUST, 4, "moon_new_staff"),
     MOON_STARFALL_SNARE("moon_starfall_snare", Skill.SNARE_SHOT, 4, "moon_starfall_bow"),
     MOON_UMBRA_TWIN("moon_umbra_twin", Skill.TWIN_FANG, 4, "moon_umbra_dagger"),
-    MOON_HALO_CURSE("moon_halo_curse", Skill.CURSE_MARK, 6, "moon_halo_bell_staff");
+    MOON_HALO_CURSE("moon_halo_curse", Skill.CURSE_MARK, 6, "moon_halo_bell_staff"),
+    // ---- 終章の神器 (story/finale/gear の 6 本。2026-10-30)。どれもその職の幹の技を、島と座で覚えた決まりの形に
+    DIVINE_SKY_HAND("divine_sky_hand", Skill.TITAN_CLEAVE, 4, "divine_sky_sword"),
+    DIVINE_BELL_WAVE("divine_bell_wave", Skill.EMBER_HAMMER, 4, "divine_bell_hammer"),
+    DIVINE_DAWN_GAZE("divine_dawn_gaze", Skill.THUNDER_BOLT, 4, "divine_dawn_staff"),
+    DIVINE_PLUME_RAIN("divine_plume_rain", Skill.CLOUD_PIERCE, 4, "divine_plume_bow"),
+    DIVINE_REWIND_LUNGE("divine_rewind_lunge", Skill.LUNGE, 4, "divine_rewind_dagger"),
+    DIVINE_PROMISE_CIRCLE("divine_promise_circle", Skill.WARD_SONG, 4, "divine_promise_bell_staff");
 
     // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は逸品の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;

@@ -243,6 +243,9 @@ for _id, _like in (("whale_choir_hammer", "ember_war_axe"), ("tide_reef_hammer",
                    ("moon_scale_hammer", "ember_war_axe"), ("moon_tide_staff", "abyss_bell_staff"), ("moon_crescent_dagger", "waterway_fang"),
                    ("moon_starlight_bell_staff", "abyss_bell_staff"), ("moon_waning_blade", "whalebone_greatsword"),
                    ("moon_light_sword", "whalebone_greatsword"), ("moon_full_hammer", "ember_war_axe"), ("moon_new_staff", "abyss_bell_staff"),
-                   ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff")):
+                   ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff"),
+                   # 終章の神器 (story/finale/gear)
+                   ("divine_sky_sword", "whalebone_greatsword"), ("divine_bell_hammer", "ember_war_axe"), ("divine_dawn_staff", "abyss_bell_staff"),
+                   ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff")):
     if _like in HELD:
         HELD[_id] = HELD[_like]

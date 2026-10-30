@@ -29,7 +29,9 @@ public final class LegendLootSelfTest {
         List<String> pool = LegendLoot.pool();
         for (Item it : BuiltInRegistries.ITEM) {
             String id = BuiltInRegistries.ITEM.getKey(it).toString();
-            if (it instanceof ModGear g && g.tier() == GearTier.ARTIFACT && id.startsWith(SkyAbyss.MODID + ":")) {
+            // 終章の神器は巡礼者の報酬 (story/finale/gear)。伝説の抽選には入れない
+            if (it instanceof ModGear g && g.tier() == GearTier.ARTIFACT && id.startsWith(SkyAbyss.MODID + ":")
+                    && !jp.revati.skyabyss.story.finale.gear.DivineGear.RELICS.contains(id)) {
                 check(f, pool.contains(id), "legendary " + id + " is not in the legend pool");
                 for (jp.revati.skyabyss.item.TitanGearSet set : jp.revati.skyabyss.item.TitanGearSets.all()) {
                     check(f, !set.contains(id), "legendary " + id + " is in the " + set.titan + " codex (titans must not drop legends)");

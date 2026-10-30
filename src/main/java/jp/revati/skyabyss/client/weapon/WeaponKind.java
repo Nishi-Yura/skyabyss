@@ -85,7 +85,10 @@ public enum WeaponKind {
             Map.entry("moon_scale_hammer", HAMMER), Map.entry("moon_tide_staff", POKER), Map.entry("moon_crescent_dagger", FANG),
             Map.entry("moon_starlight_bell_staff", POKER), Map.entry("moon_waning_blade", GREATSWORD),
             Map.entry("moon_light_sword", GREATSWORD), Map.entry("moon_full_hammer", HAMMER), Map.entry("moon_new_staff", POKER),
-            Map.entry("moon_umbra_dagger", FANG), Map.entry("moon_halo_bell_staff", POKER));
+            Map.entry("moon_umbra_dagger", FANG), Map.entry("moon_halo_bell_staff", POKER),
+            // 終章の神器 (story/finale/gear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("divine_sky_sword", GREATSWORD), Map.entry("divine_bell_hammer", HAMMER), Map.entry("divine_dawn_staff", POKER),
+            Map.entry("divine_rewind_dagger", FANG), Map.entry("divine_promise_bell_staff", POKER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

@@ -288,6 +288,8 @@ public final class SeatArena {
         Quests.signalWithParty(level, here, LORD);
         for (ServerPlayer p : here) {
             Notice.narrate(p, "message.skyabyss.seat.down");
+            // 神器 (初めては職の神器と雲上の心核、二度目からは心核の欠片と心核 25%。story/finale/gear/DivineGear)
+            jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
         }
         // 語りのあと、座のそばの人に結末の選び (FinaleEnding)
         jp.revati.skyabyss.story.ch1.Tasks.later(120, () -> {

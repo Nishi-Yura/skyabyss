@@ -5,15 +5,22 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の祠で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.13（`build/libs/skyabyss-0.9.13.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.13 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末）、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.14（`build/libs/skyabyss-0.9.14.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.14 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器）、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 終章「雲海」その 8: 神器（0.9.14。設計 [50](design/50_finale.md) の 4.5）
+
+- 6 職に一つずつの神器（アーティファクト、必要 Lv 50、一品一案。`o_divine.py`・雲海の塗り `paint_divine.py`）: 天穹の剣・七つ鐘の大鎚・暁の灯杖・巡礼の羽弓・巻き戻りの短剣・約束の鈴杖。固有の効果（`DivineGearEvents`）と、職の幹の技の書き換え（`Rune.DIVINE_*`・`LegendRewrites`）。
+- 巡礼者の月を初めて倒すと、いまの職の神器と雲上の心核（`DivineGear.reward`。`SeatArena.onDeath`）。職の間で職を替えると神器も替わる（`JobChoice.switchTo` → `DivineGear.swap`。強化そのまま）。燃料は心核の欠片で、七つの心核はしゃがんで使うと欠片 5 つに砕ける。
+- 確かめ: 自己テスト `cloudsea`（6 本と職・受け取り・持ち替え・心核・書き換え）と装備の検査。撮影 `tools/shots/divine_relics.txt`（見直し `docs/review/finale/divine_relics.jpg`）。数値と書き換えの手ざわりは試遊で。
+- 次: 作る順 6（クリア後: 巡礼の試し）。
 
 ## 終章「雲海」その 7: 結末と結末のあとの世界（0.9.13。設計 [50](design/50_finale.md) の 4.4）
 
 - 月を倒したあと、座のそばでチャットの選び（[鎮める]・[壊す]・条件を満たした人だけ [受け入れる]）。選ぶと結末の紙芝居（`finale_end_<結末>`、5 枚ずつ。`tools/story/pixel/finale_end.py`）→ 見終えると記録（人ごと。`FinaleEnding`）、終章の完の札・伝承の頁・結末の札。座に触れ直すと選び直す／挑み直す。
 - 結末のあとの世界（本人だけ）: 鎮める＝月が遠く空が晴れ、巨神の歌がときどき・都の鐘が明るく／壊す＝空の裂け目・鐘が低く／受け入れる＝翼が昼の空を巡り・鐘は鳴らない。どれも雲の中の目はもう出ない（`CloudEyeEvents`）。空は `ChapterSky.stage` が結末の段を先に返し、絵は `client/sky/EndingSkyClient`。
 - 確かめ: 自己テスト `cloudsea`（結末の条件・記録・空の段・素材）。撮影 `tools/shots/finale_endings.txt`（見直し `docs/review/finale/ending_sky.jpg`、語りは `docs/review/finale/ending_reels.jpg`）。紙芝居の読み心地と、空の見え方は試遊で。
-- 次: 作る順 5（神器）。
+- 次: 作る順 5（神器）。その 8 で済み。
 
 ## 終章「雲海」その 6: 巡礼者の座とラスボス（0.9.12。設計 [50](design/50_finale.md) の 4.3）
 

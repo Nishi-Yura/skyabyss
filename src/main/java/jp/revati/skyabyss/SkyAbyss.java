@@ -124,6 +124,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.abyss.AbyssSetup.register(modEventBus);
         jp.revati.skyabyss.abyss.gear.AbyssGearSetup.register(modEventBus);
         jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.register(modEventBus);
+        jp.revati.skyabyss.story.finale.gear.DivineGearSetup.register(modEventBus);
         jp.revati.skyabyss.rpg.skill.JobChoice.register(modEventBus);
         jp.revati.skyabyss.item.ChapterGear.register(modEventBus);
         jp.revati.skyabyss.abyss.LegendGear.register(modEventBus);

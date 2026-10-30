@@ -499,11 +499,72 @@ public final class FinaleSelfTest {
         check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/textures/environment/finale_crack.png") != null
                 && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/environment/finale_wing.png") != null, "the ending sky textures are missing");
         p.getPersistentData().remove(FinaleEnding.KEY);
+        divine(p, f);
+    }
+
+    // 神器 (50 の 4.5): 6 本と職・受け取り・職を替えたときの持ち替え・心核を砕く・書き換えの品
+    static void divine(FakePlayer p, List<String> f) {
+        jp.revati.skyabyss.rpg.skill.Job[] jobs = {jp.revati.skyabyss.rpg.skill.Job.WARRIOR, jp.revati.skyabyss.rpg.skill.Job.SMITH,
+                jp.revati.skyabyss.rpg.skill.Job.MAGE, jp.revati.skyabyss.rpg.skill.Job.ARCHER, jp.revati.skyabyss.rpg.skill.Job.ASSASSIN,
+                jp.revati.skyabyss.rpg.skill.Job.SHAMAN};
+        for (jp.revati.skyabyss.rpg.skill.Job j : jobs) {
+            net.minecraft.world.item.Item it = jp.revati.skyabyss.story.finale.gear.DivineGear.item(jp.revati.skyabyss.story.finale.gear.DivineGear.forJob(j));
+            check(f, it instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.ARTIFACT
+                    && jp.revati.skyabyss.rpg.skill.Job.of(it) == j, "the " + j.id + " relic is missing, not an artifact, or belongs to another job");
+        }
+        p.getInventory().clearContent();
+        p.getPersistentData().remove("skyabyss_divine_given");
+        jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
+        check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.given(p) && countRelics(p) == 1
+                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get()) == 1, "the first defeat did not give one relic and the cloud core");
+        int shardsBefore = p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
+        jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
+        check(f, countRelics(p) == 1 && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) > shardsBefore,
+                "a later defeat gave another relic or no shards");
+        // 職を替えると神器も替わる (強化はそのまま)
+        int slot = -1;
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+            if (jp.revati.skyabyss.story.finale.gear.DivineGear.isRelic(p.getInventory().getItem(i))) {
+                slot = i;
+            }
+        }
+        if (slot >= 0) {
+            p.getInventory().getItem(slot).set(jp.revati.skyabyss.registry.ModDataComponents.ENHANCE.get(), 3);
+        }
+        jp.revati.skyabyss.story.finale.gear.DivineGear.swap(p, jp.revati.skyabyss.rpg.skill.Job.MAGE);
+        net.minecraft.world.item.ItemStack swapped = slot >= 0 ? p.getInventory().getItem(slot) : net.minecraft.world.item.ItemStack.EMPTY;
+        check(f, swapped.getItem() == jp.revati.skyabyss.story.finale.gear.DivineGearSetup.STAFF.get() && jp.revati.skyabyss.item.ModGear.enhance(swapped) == 3,
+                "changing job did not turn the relic into the mage's, keeping its upgrade");
+        // 心核を砕く
+        net.minecraft.world.item.ItemStack core = new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get(), 2);
+        int sh = p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
+        check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.breakCore(p, core) && core.getCount() == 1
+                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) == sh + jp.revati.skyabyss.story.finale.gear.DivineGear.SHARDS_PER_CORE,
+                "breaking a heart core did not give shards");
+        for (String c : jp.revati.skyabyss.story.finale.gear.DivineGear.CORES) {
+            check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.item(c) != net.minecraft.world.item.Items.AIR, "the heart core " + c + " is not registered");
+        }
+        // 書き換えの品
+        for (jp.revati.skyabyss.rpg.skill.Rune r : jp.revati.skyabyss.rpg.skill.Rune.values()) {
+            if (r.id.startsWith("divine_")) {
+                check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.RELICS.contains(SkyAbyss.MODID + ":" + r.weapon), "the rewrite " + r.id + " points at no relic");
+            }
+        }
+        p.getInventory().clearContent();
+        p.getPersistentData().remove("skyabyss_divine_given");
+    }
+
+    static int countRelics(FakePlayer p) {
+        int n = 0;
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+            n += jp.revati.skyabyss.story.finale.gear.DivineGear.isRelic(p.getInventory().getItem(i)) ? 1 : 0;
+        }
+        return n;
     }
 
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies; endings)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies; endings; divine relics)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }
