@@ -19,15 +19,21 @@
   - 新しい検査 `tools/audit/check_resources.py`（JSON・モデルの参照・blockstate・ogg・バニラの音のファイル名・看板の幅・ja/en の鍵の対）。`quick_check.sh` に `check_resources`・`check_lang_keys`・`mesh_audit --check` を足した。
   - 自己テストを新しい大陸ワールドで流す `tools/dev/selftest_fresh.sh`（前は scratchpad にあって消えた）。
   - 書類を 0.9.17 の形に: README・`docs/beta_how_to_play.md`（終章まで、J は見るだけ、3b を 0.9 に、既知の問題）、サイト（`tools/site/pages_a.py`・`pages_c.py` → `python tools/site/build.py`。既知の制限と v0.9.17 の変更）、01（M5 済・M6 仕上げ）、14（0.9.17・終章）、03（神器は 50 の形）、46・`MoonEnd`（終章へのつなぎ）、37（五章〜終章の開発コマンド 2.7）、設計 README の 04 の行。
-- 確かめ: `quick_check.sh` 全部 OK。自己テスト全段（`selftest_fresh.sh`）の結果は監査の書類の 5 章。
-- 次: 終章の通しの試遊とその声での直し。監査の書類の 4 章（まだやること）。
+- 自己テスト全段を新しい大陸ワールドで流した（22 分。失敗は深淵の伝説の書き換えの数の期待値だけ → 61 に）。`RebirthFx` の文字の表示に `alignment`（バニラの「Display entity Not a string」のログ止め）。
+- 監査の「足したほうがいい・まだやること」（同日）:
+  - 設計書の古い案を今の形に: 03 の 13 章（神器は 50 の形。クロスダンジョン装備・天と淵のセットは作らない）と 14 章（今あるエンドコンテンツの表。ハード版・ボスラッシュ・8 人レイドなどは作らない）、2.1 の宝箱の行（`SiteTreasure`）、04・27（天職は 43・48 で削った）、07（修理そのものが無い）、10（ループごとの頼み 3 つは作らない）、11（備えの台詞の分岐は付けない）、12・`WeathercockItem`（回る動きは付けない）、03 の護符の枠（採らない）。
+  - 配布の手順 `docs/release.md`（版上げ・確かめ・作る・渡すもの・記録）。
+  - `docs/review` の掃除: モデルを入れるスクリプトが読まない出力（音楽と声の見本・武器と防具の比べ頁・日付の報告の絵・古い一覧 177 ファイル）を消した。残りは install/gen の入力か、未選定の案。
+  - 取り込み済みの `wip/*` 79 本の削除は auto mode に止められた（`git push origin --delete $(git branch -r --merged m1-sky-pass | grep origin/wip/ | sed 's|  origin/||')` と `git branch -d wip/continent-only wip/skill-tree-v2` をユーザーが流す）。
+- 確かめ: `quick_check.sh` 全部 OK。自己テストは全段 1 回と、直した `abyss`・`rebirth` の流し直しが通った。
+- 次: 終章の通しの試遊とその声での直し（ユーザーは「ある程度完成してから」）。35 の「前の私の頁（砦の本丸の奥。三章）」は中身がまだ無い（話だけ）。
 
 ## 0.9.17（終章の試遊の途中の声）
 
 - 技の木の節の大きさを種類で変えた（`SkillScreen.v2Size`）: 使う技 30（金の縁で囲む）・型の要 28・常に効く 24・段と刻印 18・基礎 15。当たりは 18 より小さくしない。声「どれがスキルかわからない」。
 - `/skyabyss cloudsea enter` が「コマンドの引数が正しくありません」で止まった: 後ろに空白が残っていた。この作品のコマンドは、全角の空白を半角に・続く空白を一つに・前後の空白を取って読み直す（`CommandTidy`）。
 - 撮影の道具 `tools/dev/mc_run.sh`: 古い枠に owner.txt が残っていると消せずに止まり続けた（rmdir → rm -rf）。
-- 確かめ: 撮影 `tools/shots/skill_tree_sizes.txt`（見直し `docs/review/skill_tree_sizes.jpg`。戦士の幹・盾の枝・魔法使い）。自己テスト `cloudsea`（空白入りのコマンド）・`skills`・`jobs`・`lang` は通った。
+- 確かめ: 撮影 `tools/shots/skill_tree_sizes.txt`（見直しの絵は 10-31 に消した。戦士の幹・盾の枝・魔法使い）。自己テスト `cloudsea`（空白入りのコマンド）・`skills`・`jobs`・`lang` は通った。
 
 ## 終章「雲海」その 10: 通しの点検（0.9.16）
 
@@ -275,7 +281,7 @@
 
 監査の「中」も直した（2026-10-29 深夜）:
 - 旧スキル制度のコードを消した（43 の 3 章どおり）: 天職（`SkillCalling`・`CallingScreen`・通信 2 本）、構え（`SkillStance`・キー `.`）、連鎖（枠の印）、刻み目（`Breakpoints`）、旅人の木（合図・備えの報い・野営の手・目利き・逃げ足・手帖）と橋の木（5 本）。技は 65 → 54 本、アイコンの番号は `Skill.iconIndex`（淵・前世は icons2 の 5 番から）。技の画面の「ビルド」のページは鍵石だけ。自己テスト `skills`・`jobs`・`soul`・`lang`・`skill lesson` を通した。
-- 絵: 穴の欠片 5 枚を土地ごとに別の形に（`docs/review/socket_shards_2026-10-29.png`。2026-10-30 にユーザーが確認して決まり）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
+- 絵: 穴の欠片 5 枚を土地ごとに別の形に（確認の絵は 10-31 に消した。2026-10-30 にユーザーが確認して決まり）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
 - 係の人の見た目は A だけ（B・C の 54 枚と 2 体の骨格を消した。`AttendantLook.LOOKS = {"a"}`）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
 - 片付け: `run/shots`・`run/mp_check`・`run/world_all4`・dump・`config/*.bak`・`build/portraits_v2`・`build/tmp_attendant`・0.8.0 の jar。`docs/review` の古い報告（assets/gear/mod_blocks/weapon_design_base と試遊表 0.7.1〜0.8.0）、決まったラフの案（legends・ch5・voice2・survivor・warden_paint・材料。比較の絵だけ残す）、`tools/once`・`tools/misc` の 4 本・`tools/rough` の v2〜v4 と gallery_v*。消した書類を指していたコメントと README は直した。
 - 残したもの（判断）: `textures/entity/` と `lowpoly/` の同じ絵 35 組は、立方体の geo（`LowPoly.enabled = false` の控え）が残っているのでそのまま。`elder_sentry`（一章の洞窟）と `elder_sentinel`（背の試練）は役が別なので二体のまま（突進・踏みの印は同じ動きなので同じ絵）。メッシュ監査（`tools/audit/mesh_audit.py`）: 開いた辺 0、非多様体の辺 2,028、つぶれた三角 104、関節の離れ 37（主に防具の脚）。直すなら `tools/lib/mesh_close.py` から。
@@ -390,5 +396,5 @@
 2. 試遊 0.8.0（`docs/review/playtest_0.8.0.md`）の声を待つ。BGM（49）の聞き心地も試遊の声で直す（`build_all.py <id>`）。
 3a. 六章の続き（46 の 5 章）: 六章の本筋はできた（月の核まで。4.7.1）。残りはクリア後の位相の挑戦（3.8）、月の装備（03 の 12.2）、記憶の断片と伝承、終章「雲海」。
 3. クエストの見直しは済んだ（初日のお使いと風の道の旗を消し、墓守を 2 段に、大干潮と峰の足もとを時刻で閉じない形に、折れた剣は自分の得物を研ぐ形に）。
-4. 都・見どころの仕上げの撮影は 2026-10-30 に撮って見た（`docs/review/capital_dress_2026-10-30.jpg`・`poi_dress_2026-10-30.jpg`）。崩れ・抜けなし。見どころは作りが小さめ（崩れた家・見張り台）なので、作り込むなら 45 の仕上げの段で。試遊 0.7.1 の声の直しの確かめは試遊の声待ち。
+4. 都・見どころの仕上げの撮影は 2026-10-30 に撮って見た（絵は 10-31 に消した）。崩れ・抜けなし。見どころは作りが小さめ（崩れた家・見張り台）なので、作り込むなら 45 の仕上げの段で。試遊 0.7.1 の声の直しの確かめは試遊の声待ち。
 5. 大きく変えたら jar を作り直す。

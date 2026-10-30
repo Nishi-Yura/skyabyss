@@ -29,7 +29,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 // 手に持つ: 画面の下に、次の夕立の刻までの時間と、雷翼までの距離 (遠い・近い・すぐそこ) を一行。
 // 掲げる (右クリック): 空が見え、まわり 16 ブロックでいちばん高い所 (または y 100 以上) で掲げると、風見鶏に雷が落ち (演出だけ)、
 // 雷翼がその人の近くの峰へ降りて 3 分止まる。ワールドで 10 分に一度まで。ほかの人には「○○が嵐を呼んだ」。
-// 鶏の向きが雷翼を指す手の中のモデル (回る) は、品の絵 (ラフ 3 案) と一緒に入れる。今は避雷針の形を借りている (00 に書いた)
+// 手の中のモデルは低ポリの真鍮の鶏 (2026-10-28 の選定 A。install_weathercock.py)。雷翼を指して回る動きは付けない (00 の 118 の答え。向きと距離は下の一行で足りる)
 public class WeathercockItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     static final int CALL_COOLDOWN = 12000;   // 10 分
     static final int CALL_REST = 3600;        // 3 分止まる

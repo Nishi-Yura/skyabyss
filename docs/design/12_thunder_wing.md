@@ -125,7 +125,7 @@
 | 低い所で掲げたとき | 「ここは低すぎる。もっと高い所で」と一行（高い所へ登る理由にする） |
 | マルチ | 誰かが呼べば「○○が呼んだ」と出る |
 
-- 形は低ポリの真鍮の鶏を柄の先に立てたもの（2026-10-28 の選定 A。`tools/rough/lowpoly/weapons/weathercock`、入れるのは `tools/install/install_weathercock.py`）。火かき棒と同じ持ち方。手の中で雷翼を指して回る動きはまだない（未決 118）。
+- 形は低ポリの真鍮の鶏を柄の先に立てたもの（2026-10-28 の選定 A。`tools/rough/lowpoly/weapons/weathercock`、入れるのは `tools/install/install_weathercock.py`）。火かき棒と同じ持ち方。手の中で回る動きは付けない（00 の 118 の答え。向きと距離は画面の下の一行で足りる）。
 
 ### 2.7 見守り（見失わない・一体だけ）
 
