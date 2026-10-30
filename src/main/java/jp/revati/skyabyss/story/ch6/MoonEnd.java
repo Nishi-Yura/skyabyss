@@ -14,7 +14,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 六章の終わり (docs/design/46 の 4.7)。
 //   メイン「月の核」(main_moon_core。核を止めて語りの紙芝居を見終える) を終えた人に、六章の余韻の札「六章　月　完」と、
-//   終章はまだ作っていないという一言を一度だけ出す (人ごとに一度。記録は ArcData の余韻の札)。
+//   終章へのつなぎの一言 (語り部が数え歌のななつめを口ずさむ。TODO) を一度だけ出す (人ごとに一度。記録は ArcData の余韻の札)。
+//   そのあと語り部に話すと終章「雲の上へ」が始まる (docs/design/50 の 4.1、story/finale)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MoonEnd {
     public static final String QUEST = "main_moon_core";

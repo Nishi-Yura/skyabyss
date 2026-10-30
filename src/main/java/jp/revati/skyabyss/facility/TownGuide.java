@@ -90,7 +90,7 @@ public final class TownGuide {
             new Place("tavern", Group.GREY, "label_tavern"),
             new Place("graveyard", Group.GREY, "sign_graveyard"));
 
-    private static final Map<java.util.UUID, Long> LAST_PICK = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<java.util.UUID, Long> LAST_PICK = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.concurrent.ConcurrentHashMap<>());
 
     public static final String GUIDE_MARK = AttendantRole.MARK_PREFIX + "guide_";
 

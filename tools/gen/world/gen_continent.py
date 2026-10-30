@@ -570,6 +570,20 @@ def trim_road_ends(out):
                     r[:] = pts[::-1]
 
 
+# 生成のあとで手で動かした点 (layout.json を直に直した分。生成し直しても戻らないように、ここで同じ値にする)。
+# (道の番号, 端 (0 か -1)) -> [x, z]
+HAND_ROAD_ENDS = {
+    # 汐守の東の脇道の端: 0.9.5 の点検で建物の手前へ 5 ブロック寄せた (trim_road_ends の計算より少し先)
+    (13, -1): [1483, 80],
+}
+
+
+def hand_fix_roads(out):
+    for (i, end), p in HAND_ROAD_ENDS.items():
+        if i < len(out['roads']):
+            out['roads'][i][end] = list(p)
+
+
 def write_layout(lay, height=None):
     def pt(p):
         return [int(p[0]), int(p[1])]
@@ -599,6 +613,7 @@ def write_layout(lay, height=None):
                          # 道の分かれ目の札 (首の道の側の端。[x, z, 行き先])。行き先は lang の sign.skyabyss.island.<行き先>
                          'signs': [pt(a) + [name] for (a, _, _), name in zip(plan['necks'], ['prints', 'bandits', 'fire', 'shrine', 'lookout', 'cave', 'huts', 'camp_west', 'tree'])]}
     trim_road_ends(out)
+    hand_fix_roads(out)
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')

@@ -2026,7 +2026,8 @@
         "volume": 1.0
       },
       {
-        "name": "minecraft:block/stone/break1",
+        "name": "minecraft:block.stone.break",
+        "type": "event",
         "pitch": 0.7,
         "volume": 0.8
       }
@@ -2036,12 +2037,14 @@
     "subtitle": "subtitles.skyabyss.rock_shell_beetle_step",
     "sounds": [
       {
-        "name": "minecraft:block/stone/step1",
+        "name": "minecraft:block.stone.step",
+        "type": "event",
         "pitch": 1.4,
         "volume": 0.35
       },
       {
-        "name": "minecraft:block/stone/step2",
+        "name": "minecraft:block.stone.step",
+        "type": "event",
         "pitch": 1.5,
         "volume": 0.35
       }
@@ -2096,12 +2099,14 @@
     "subtitle": "subtitles.skyabyss.spine_hare_step",
     "sounds": [
       {
-        "name": "minecraft:block/grass/step1",
+        "name": "minecraft:block.grass.step",
+        "type": "event",
         "pitch": 1.6,
         "volume": 0.4
       },
       {
-        "name": "minecraft:block/grass/step2",
+        "name": "minecraft:block.grass.step",
+        "type": "event",
         "pitch": 1.6,
         "volume": 0.4
       }
@@ -2161,12 +2166,14 @@
     "subtitle": "subtitles.skyabyss.bone_hauler_step",
     "sounds": [
       {
-        "name": "minecraft:block/gravel/step1",
+        "name": "minecraft:block.gravel.step",
+        "type": "event",
         "pitch": 1.0,
         "volume": 0.4
       },
       {
-        "name": "minecraft:block/gravel/step2",
+        "name": "minecraft:block.gravel.step",
+        "type": "event",
         "pitch": 1.0,
         "volume": 0.4
       }

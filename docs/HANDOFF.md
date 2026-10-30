@@ -1,12 +1,26 @@
-# 引き継ぎ（2026-10-29）
+# 引き継ぎ（2026-10-31）
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の祠で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.17（`build/libs/skyabyss-0.9.17.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.16 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
-- 自己テスト: `bash <scratchpad>/fresh_continent.sh "<名前,…>" <世界名>`（空なら全部。大陸の新しい世界で回す）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+- 試遊版: 0.9.18（`build/libs/skyabyss-0.9.18.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 0.9.18（全体監査の直し。2026-10-31）
+
+- 監査の書類 `docs/review/audit_2026-10-31.md`（通ったもの・おかしい所・書類の古さ・足したいもの・まだやること）。
+- 直し:
+  - `quick_check.sh` が落ちていた 2 つ: `layout.json` の道の端（汐守の東の脇道、0.9.5 の手直し）を `gen_continent.py` の `HAND_ROAD_ENDS` で再現。`check_stairs.py` の許す例に、土地の村と都の広場の縁（床の高さの階段の帯）、祠と環状列石の台座の面取り、汐守の宿の正面の飾りの階段を足した（どれも見た目の帯で、段ではない）。
+  - 看板のはみ出し（1 行 90 px）: ja 5 行・en 98 行を短く割り直した（`sign.skyabyss.*`。足した行の ja は空）。
+  - 一章の地上の敵 3 種の足音と死の音: `sounds.json` がバニラに無いファイル名（`block/stone/step1` など）を指していて鳴らなかった → 出来事参照（`type: event`）に。
+  - `RecordService`・`TownGuide` の人ごとの時刻の表を `PlayerMaps.track` で包んだ（ログアウトで消える）。`ChapterCards` は `ArcSetup.onLogout` が消していたのでそのまま。
+  - 新しい検査 `tools/audit/check_resources.py`（JSON・モデルの参照・blockstate・ogg・バニラの音のファイル名・看板の幅・ja/en の鍵の対）。`quick_check.sh` に `check_resources`・`check_lang_keys`・`mesh_audit --check` を足した。
+  - 自己テストを新しい大陸ワールドで流す `tools/dev/selftest_fresh.sh`（前は scratchpad にあって消えた）。
+  - 書類を 0.9.17 の形に: README・`docs/beta_how_to_play.md`（終章まで、J は見るだけ、3b を 0.9 に、既知の問題）、サイト（`tools/site/pages_a.py`・`pages_c.py` → `python tools/site/build.py`。既知の制限と v0.9.17 の変更）、01（M5 済・M6 仕上げ）、14（0.9.17・終章）、03（神器は 50 の形）、46・`MoonEnd`（終章へのつなぎ）、37（五章〜終章の開発コマンド 2.7）、設計 README の 04 の行。
+- 確かめ: `quick_check.sh` 全部 OK。自己テスト全段（`selftest_fresh.sh`）の結果は監査の書類の 5 章。
+- 次: 終章の通しの試遊とその声での直し。監査の書類の 4 章（まだやること）。
 
 ## 0.9.17（終章の試遊の途中の声）
 

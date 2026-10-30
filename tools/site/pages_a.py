@@ -161,7 +161,7 @@ def index():
 # ------------------------------------------------------------------ 遊び方
 def play():
     keys = [
-        ("J", "ステータス（レベル、力の振り分け、振り直し）", "Status (level, stat points, respec)"),
+        ("J", "ステータス（レベル、基礎の値と効き目、記憶の断片。見るだけ。基礎は K の木の基礎の節で上がる）", "Status (level, stats and their effects, memory fragments; read-only, stats come from the skill tree)"),
         ("K", "技の画面（職の木で技を覚える、四つの枠に置く、刻印・型の保存）", "Skills screen (learn skills in the job tree, slots, runes, loadouts)"),
         ("U", "クエストログ（メインとサブ、追跡の切り替え）", "Quest log (main and side quests, tracking)"),
         ("B", "控え帳（巨神の進み、墓の場所、大事な品、呼び戻し）。<code>/skyrecord</code> でも開く", "Record book (titan progress, grave locations, key items, recall); also <code>/skyrecord</code>"),

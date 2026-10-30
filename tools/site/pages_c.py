@@ -86,11 +86,10 @@ def faq():
     ]
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
-        ("遊べるのは序章から五章「深淵」と、六章「月」の最初の区画「新月の谷」までです。谷を終えると「この版はここまで」の札が出ます。", "You can play from the prologue through chapter 5, the abyss, and the first district of chapter 6, the New Moon Valley. After the valley a card says the version ends there."),
-        ("六章の区画 2〜4、月の核、星術と、終章（雲海）はまだありません。", "Districts 2 to 4 of chapter 6, the moon's core, star arts and the final chapter (the sea of clouds) do not exist yet."),
-        ("0.8.1 の直し（巨神の居場所、戦いの手ごたえ、ヒロイック武器、心臓の間の大広間、試練の時間切れ）は、まだ人の手で試遊していません。", "The 0.8.1 changes (titan lairs, combat feel, heroic weapons, heart halls, trial time limits) have not been playtested by people yet."),
+        ("序章から終章「雲海」の結末まで遊べます。終章は、人が通しで遊んでいる途中です（島の主・座の三形態・巡礼の試しの難しさ、予告の見やすさ、四人の術の分かりやすさを教えてください）。", "You can play from the prologue to the ending of the final chapter, the sea of clouds. The final chapter is still being playtested: tell us about the island lords, the three forms of the seat, the difficulty of the pilgrim's trial, how readable the telegraphs are and whether the four selves' arts are clear."),
+        ("章の小さな仕掛けと予兆、雷翼・余燼の背の通し、二人以上での潮殻の背は、人の手で通して確かめていません。", "Chapter side elements and omens, full runs of the Thunder Wing and Ember backs, and the Tide Shell back with two or more players have not been verified end to end by people."),
         ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("五章「深淵」は、まだ人の手で通しに遊ばれていません（特に番人の戦いと、クリア後の深みを）。", "Chapter 5, the abyss, has not yet been played through end to end by people (especially the warden's fight and the depths after the clear)."),
+        ("潮の真珠と潮鳴り石の絵は仮のものです。", "The tide pearl and tide stone icons are placeholders."),
     ]
     lim = "".join("<li>%s</li>" % T(a, b) for a, b in limits)
     body = page_head("導入・FAQ", "Install and FAQ", "必要なもの、入れ方、サーバーの管理、よくある質問、既知の制限。",
@@ -177,6 +176,14 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.9.18", "2026-10-31", [
+            ("全体監査の直し: 看板のはみ出し（日英）、一章の地上の敵の足音、転生の墓の札のログ、書類とサイトを今の版に。", "Audit fixes: sign lines that overflowed (ja/en), footstep sounds of the chapter 1 ground foes, the rebirth grave label log line, and docs and site brought up to date."),
+            ("終章「雲海」。月の核のあと語り部に話すと「雲の上へ」が始まり、四体の巨神に運ばれて雲の上の海へ。鐘の島・灯の島・炉の島・約束の島の四つを光の橋で渡り、巡礼者の座で雲上の巡礼者と戦います（手 → 目 → 月の三形態。第三形態では前の自分たちが加勢）。", "The final chapter, the sea of clouds: after the moon's core, speak to the storyteller to begin \"Above the Clouds\". The four titans carry you up; cross the Isle of Bells, the Isle of the Lamp, the Isle of the Forge and the Isle of the Promise over bridges of light, and face the Pilgrim above the Clouds at the Pilgrim's seat (hand, eye, moon; your former selves join in the third form)."),
+            ("結末は三つ（鎮める・壊す・受け入れる）。結末ごとに地上の空と都が変わり、座に触れると選び直せます。神器は職ごとに一つ（雲上の心核の欠片で強化）。クリア後は巡礼の試し（段 1〜5）。", "Three endings (calm, break, accept). Each changes the sky and the capital, and you can choose again at the seat. One divine relic per job, strengthened with shards of the cloud core. After the clear: the Pilgrim's Trial, tiers 1 to 5."),
+            ("六章「月」が全部入りました: 新月の谷・上弦の崖・満月の野・下弦の裂け目、月の核、月の装備（職ごとにレアとヒロイック）、位相の挑戦。", "Chapter 6, the Moon, is complete: the New Moon Valley, the Waxing Cliffs, the Full Moon Field, the Waning Rift, the moon's core, moon gear (a rare and a heroic per job) and the phase trials."),
+            ("技の木 v2: 職ごとの Wynncraft 型の木。使う技は 4 本まで、基礎は木の節で上がります。職は町の職の間で替えます。ステータス画面は見るだけになりました。", "Skill tree v2: a Wynncraft-style tree per job. Up to four active skills; stats come from tree nodes. Change jobs at the town's job hall. The status screen is now read-only."),
+            ("BGM 17 曲（場所と戦いごと）。技の木の節は種類ごとに大きさが違います（使う技は金の縁）。コマンドの空白は全角でも通ります。", "17 BGM tracks for places and fights. Skill tree nodes are sized by kind (active skills have a gold border). Commands accept full-width spaces."),
+        ]),
         ("v0.8.1", "2026-10-28", [
             ("巨神は四体とも決まった居場所で休み続けます（人のそばへは来ず、20 分で去りもしません）。体の下の地面は地形で下げてあり、巨神がブロックを壊すことはありません。", "All four titans now rest at fixed lairs: they no longer come to you or leave after 20 minutes, and the ground under them is lowered by terrain generation, so they never break blocks."),
             ("心臓を止めると、土地の町を出た道ばたに祠が建ちます。周回はそこから挑みます。", "Stopping a heart raises a shrine beside the road just outside the regional town; repeat runs start there."),

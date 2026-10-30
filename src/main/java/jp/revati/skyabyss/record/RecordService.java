@@ -22,8 +22,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class RecordService {
     // 画面からの「最新にして」は、この間隔 (tick) より詰めて受け付けない
     static final int REQUEST_INTERVAL = 10;
-    private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
-    private static final Map<UUID, Long> LAST_CLAIM = new HashMap<>();
+    private static final Map<UUID, Long> LAST_REQUEST = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
+    private static final Map<UUID, Long> LAST_CLAIM = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
 
     private RecordService() {
     }

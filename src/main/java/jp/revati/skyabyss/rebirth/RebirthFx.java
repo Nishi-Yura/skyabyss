@@ -84,6 +84,7 @@ public final class RebirthFx {
         Component text = RebirthText.symbols(count, 0L, true).append(Component.literal(" ")).append(RebirthText.level(50, count, 0L, true));
         CompoundTag tag = new CompoundTag();
         tag.putString("billboard", "center");
+        tag.putString("alignment", "center"); // 無いとバニラが "Display entity Not a string" を毎回ログに出す
         tag.putInt("background", 0);
         tag.putBoolean("shadow", true);
         tag.putString("text", Component.Serializer.toJson(text, level.registryAccess()));

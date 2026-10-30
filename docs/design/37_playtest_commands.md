@@ -190,6 +190,17 @@
 
 主線の五つ（`main_song` `main_tide` `main_thunder` `main_ember` `main_key` `main_abyss`）の段階（未着手・完了・段階名）と、四つの巨神の「止めた・まだ」を一行ずつ出す。
 
+### 2.7 五章・六章・終章の開発コマンド（権限 2。製品版では見えない）
+
+| コマンド | 中身 | 書類 |
+| --- | --- | --- |
+| `/skyabyss abyss …` | 深淵の層・番人・深みへ跳ぶ | [36](36_abyss.md)、`docs/review/playtest_0.8.1.md` |
+| `/skyabyss moonworld <valley|cliff|field|rift|core> …`、`core_lord`、`core_clear` | 月の区画へ跳ぶ、核の主、核を倒したことにする | [46](46_moon.md)、`docs/review/playtest_0.9.1.md` |
+| `/skyabyss cloudsea enter`、`ring <鐘>`、`lord`、`crumble`、`lamp <w\|e\|s>`、`eye`、`forge <w\|e\|n>`、`rewinder`、`selves`、`plume`、`seat <1\|2\|3>`、`ending <calm\|break\|accept\|none>`、`trial <1..5>` | 終章: 着く所へ跳ぶ、島ごとの仕掛けと主、座の形態、結末の空、巡礼の試しの段 | [50](50_finale.md)、`docs/review/playtest_finale.md` |
+| `/skyabyss quest next <頼み>`、`quest signal <合図>` | 頼みを一段進める、合図を立てる（終章は `main_finale_bell`・`lamp`・`forge`・`promise`・`seat`） | 07 |
+
+コマンドの引数は、全角の空白を半角に・続く空白を一つに・前後の空白を取って読み直す（`CommandTidy`）。
+
 ## 3. 試遊の進め方（コピーして使う）
 
 専用の世界（平ら、または普通の世界）で、OP の権限のある人が次の順に流す。どの章も、最後に `status` で段階を確かめる。

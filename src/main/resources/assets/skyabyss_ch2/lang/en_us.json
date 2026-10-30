@@ -169,13 +169,13 @@
   "sign.skyabyss.ch2_salt_vault.1": "The Salt Vault",
   "sign.skyabyss.ch2_salt_vault.2": "At low tide, walk",
   "sign.skyabyss.ch2_salt_vault.3": "At high tide, dive",
-  "sign.skyabyss.ch2_salt_vault.4": "The warden is awake",
-  "sign.skyabyss.ch2_salt_wall.1": "The tide can be read",
+  "sign.skyabyss.ch2_salt_vault.4": "Warden is awake",
+  "sign.skyabyss.ch2_salt_wall.1": "Read the tide",
   "sign.skyabyss.ch2_salt_wall.2": "Wait",
   "sign.skyabyss.ch2_salt_wall.3": "",
   "sign.skyabyss.ch2_salt_wall.4": "",
   "sign.skyabyss.ch2_ebb_stakes.1": "Tide stakes",
-  "sign.skyabyss.ch2_ebb_stakes.2": "Count the notches",
+  "sign.skyabyss.ch2_ebb_stakes.2": "Count notches",
   "sign.skyabyss.ch2_ebb_stakes.3": "The great ebb",
-  "sign.skyabyss.ch2_ebb_stakes.4": "comes early at night"
+  "sign.skyabyss.ch2_ebb_stakes.4": "is early at night"
 }
