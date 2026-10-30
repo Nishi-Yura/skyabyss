@@ -292,4 +292,11 @@ public final class ForgeIsle {
         }
         return false;
     }
+
+    // サーバーが止まったとき (FinaleReset)
+    static void resetAll() {
+        PHASE.clear();
+        FORGE_ON.clear();
+        arenaRewinds = false;
+    }
 }

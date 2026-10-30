@@ -48,8 +48,6 @@ public class PilgrimHand extends CloudMob {
     private Vec3 spot = Vec3.ZERO;
     private Vec3 from = Vec3.ZERO;
     private double angle;
-    private static boolean toldStuck;
-    private static boolean toldScrape;
 
     public PilgrimHand(EntityType<? extends Monster> type, Level level) {
         super(type, level, ID, "slam", "rise", "scrape", "hurt", "death");
@@ -230,9 +228,8 @@ public class PilgrimHand extends CloudMob {
                 }
             }
         }
-        if (!toldStuck) {
-            toldStuck = true;
-            for (ServerPlayer p : SeatArena.present(sl)) {
+        for (ServerPlayer p : SeatArena.present(sl)) {
+            if (jp.revati.skyabyss.story.finale.FinaleHints.once(p, "hand_stuck")) {
                 Notice.narrate(p, "message.skyabyss.seat.hand_stuck");
             }
         }
@@ -278,10 +275,11 @@ public class PilgrimHand extends CloudMob {
                     }
                 }
             }
-            if (n > 0 && !toldScrape) {
-                toldScrape = true;
+            if (n > 0) {
                 for (ServerPlayer p : SeatArena.present(sl)) {
-                    Notice.narrate(p, "message.skyabyss.seat.hand_scrape");
+                    if (jp.revati.skyabyss.story.finale.FinaleHints.once(p, "hand_scrape")) {
+                        Notice.narrate(p, "message.skyabyss.seat.hand_scrape");
+                    }
                 }
             }
         }

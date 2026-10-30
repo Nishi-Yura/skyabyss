@@ -261,4 +261,9 @@ public final class FinaleWorld {
             return tag;
         }
     }
+
+    // サーバーが止まったとき (FinaleReset)
+    static void resetAll() {
+        SAFE.clear();
+    }
 }

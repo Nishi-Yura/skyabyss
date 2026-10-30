@@ -89,8 +89,21 @@ public final class PilgrimSeat {
                 }
             }
             SeatArena.tick(level);
+            sendSelvesHome(level);
         }
         SeatArena.everyTick(level);
+    }
+
+    // 約束の島の四人が座まで付いてきていたら、天幕の前へ帰す (座の第 3 形態には座の四人が出る)
+    static void sendSelvesHome(ServerLevel level) {
+        for (jp.revati.skyabyss.town.TownGuestEntity g : level.getEntities(jp.revati.skyabyss.town.TownSetup.GUEST.get(), SeatArena.box(),
+                e -> e.isAlive() && e.getTags().contains(PromiseIsle.TAG))) {
+            String id = g.guestId();
+            int k = id.isEmpty() ? 1 : id.charAt(id.length() - 1) - '0';
+            BlockPos home = PromiseIsle.mark("self_" + Math.max(1, Math.min(4, k)));
+            g.setFollow(null);
+            g.teleportTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
+        }
     }
 
     // ---------------------------------------------------------------- 光の橋の関所 (月見の岩の上 → 座)

@@ -30,7 +30,6 @@ public class AshStriker extends CloudMob {
     static final double R = 2.0;
     static final int TELL = 16;
     public static final int ECHO = 50;
-    private static boolean told;
 
     public AshStriker(EntityType<? extends Monster> type, Level level) {
         super(type, level, ID, "slam", "hurt", "death");
@@ -116,8 +115,7 @@ public class AshStriker extends CloudMob {
                 }
                 Echoes.circle(sl, spot, R, ECHO, dmg(0.8), AshStriker.this);
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(10), e -> e.isAlive())) {
-                    if (!told) {
-                        told = true;
+                    if (jp.revati.skyabyss.story.finale.FinaleHints.once(p, "echo_first")) {
                         Notice.narrate(p, "message.skyabyss.isle3.echo_first");
                     }
                 }

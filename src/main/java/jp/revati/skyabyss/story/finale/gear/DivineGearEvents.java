@@ -216,4 +216,10 @@ public final class DivineGearEvents {
             }
         }
     }
+
+    // サーバーが止まったとき (story/finale/FinaleReset)
+    public static void resetAll() {
+        CIRCLES.clear();
+        inner = false;
+    }
 }

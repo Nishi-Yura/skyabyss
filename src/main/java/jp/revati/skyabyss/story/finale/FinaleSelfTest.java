@@ -478,6 +478,18 @@ public final class FinaleSelfTest {
         }
         SeatArena.clear(cloud);
         check(f, SeatArena.parts(cloud).isEmpty() && SeatArena.allies(cloud).isEmpty() && SeatArena.form() == 0, "clearing the seat left the pilgrim or the four");
+        // 約束の島の四人が座まで来ていたら天幕の前へ帰る / 初めての一言は人ごとに一度
+        PromiseIsle.standUp(cloud);
+        jp.revati.skyabyss.town.TownGuestEntity stray = PromiseIsle.self(cloud, 2);
+        if (stray != null) {
+            BlockPos at = PilgrimSeat.mark("lord_spawn");
+            stray.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+            PilgrimSeat.sendSelvesHome(cloud);
+            check(f, stray.blockPosition().closerThan(PromiseIsle.mark("self_2"), 2), "an island self that reached the seat was not sent home");
+        }
+        p.getPersistentData().remove(FinaleHints.KEY);
+        check(f, FinaleHints.once(p, "hand_stuck") && !FinaleHints.once(p, "hand_stuck"), "a first-time hint showed twice or never");
+        p.getPersistentData().remove(FinaleHints.KEY);
         Quests.forgetAll(p);
         ending(p, f);
     }

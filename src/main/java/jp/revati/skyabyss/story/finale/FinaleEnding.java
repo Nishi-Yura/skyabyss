@@ -50,6 +50,7 @@ public final class FinaleEnding {
     static final String COMMAND = "skyabyss_ending";
     static final int SONG_EVERY = 4800;
     static final double CAPITAL_NEAR = 220;
+    static final String TOLLED = "skyabyss_finale_tolled";
     private static final Map<UUID, String> SENT = new HashMap<>();
 
     private FinaleEnding() {
@@ -175,7 +176,11 @@ public final class FinaleEnding {
         long t = level.getDayTime() % 24000;
         if (!e.equals("accept") && (t >= 0 && t < 20 || t >= 12000 && t < 12020)) {
             BlockPos gate = MoonGate.gatePos(p.server);
-            if (gate != null && p.distanceToSqr(gate.getX(), gate.getY(), gate.getZ()) < CAPITAL_NEAR * CAPITAL_NEAR) {
+            // 昼夜が止まっていても鳴り続けないよう、1 分に一度まで
+            long last = p.getPersistentData().getLong(TOLLED);
+            if (gate != null && p.distanceToSqr(gate.getX(), gate.getY(), gate.getZ()) < CAPITAL_NEAR * CAPITAL_NEAR
+                    && (last > level.getGameTime() || level.getGameTime() - last > 1200)) {
+                p.getPersistentData().putLong(TOLLED, level.getGameTime());
                 toll(p, e.equals("calm") ? 1.0f : 0.6f, 3);
             }
         }
@@ -206,5 +211,10 @@ public final class FinaleEnding {
             return 0;
         }));
         event.getDispatcher().register(root);
+    }
+
+    // サーバーが止まったとき (FinaleReset)
+    static void resetAll() {
+        SENT.clear();
     }
 }

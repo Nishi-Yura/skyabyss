@@ -36,7 +36,6 @@ public class PlumeWarden extends CloudMob {
     static final int DASH = 9;
     static final double SPEED = 1.0;
     static final double PUSH = 1.5;
-    private static boolean told;
 
     public PlumeWarden(EntityType<? extends Monster> type, Level level) {
         super(type, level, ID, "charge", "hurt", "death");
@@ -156,8 +155,7 @@ public class PlumeWarden extends CloudMob {
                         p.push(dir.x * PUSH, 0.4, dir.z * PUSH);
                         p.hurtMarked = true;
                     }
-                    if (!told) {
-                        told = true;
+                    if (jp.revati.skyabyss.story.finale.FinaleHints.once(p, "warden_first")) {
                         Notice.narrate(p, "message.skyabyss.isle4.warden_first");
                     }
                 }

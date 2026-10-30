@@ -351,4 +351,14 @@ public final class SeatArena {
         start(level, f);
         summonForm(level);
     }
+
+    // サーバーが止まったとき (FinaleReset)
+    static void resetAll() {
+        form = 0;
+        tier = 0;
+        spawned = false;
+        nextAt = -1;
+        empty = 0;
+        ringAt = 0;
+    }
 }

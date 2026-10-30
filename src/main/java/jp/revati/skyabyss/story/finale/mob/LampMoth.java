@@ -29,7 +29,6 @@ public class LampMoth extends CloudMob {
     public static final double DMG = 6;
     static final int TELL = 20;
     public static final int LIT = 120;
-    private static boolean told;
     private int flaring;
 
     public LampMoth(EntityType<? extends Monster> type, Level level) {
@@ -63,8 +62,7 @@ public class LampMoth extends CloudMob {
     public static void mark(ServerPlayer p) {
         LampIsle.light(p, LIT);
         p.serverLevel().playSound(null, p.blockPosition(), CloudMobsSetup.MOTH_MARK.get(), net.minecraft.sounds.SoundSource.HOSTILE, 1.0f, 1.2f);
-        if (!told) {
-            told = true;
+        if (jp.revati.skyabyss.story.finale.FinaleHints.once(p, "lamp_marked")) {
             Notice.narrate(p, "message.skyabyss.isle2.marked");
         }
     }

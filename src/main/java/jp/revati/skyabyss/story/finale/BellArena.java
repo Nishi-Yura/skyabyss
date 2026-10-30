@@ -247,4 +247,10 @@ public final class BellArena {
         level.addFreshEntity(m);
         return m;
     }
+
+    // サーバーが止まったとき (FinaleReset)
+    static void resetAll() {
+        CRUMBLED.clear();
+        empty = 0;
+    }
 }

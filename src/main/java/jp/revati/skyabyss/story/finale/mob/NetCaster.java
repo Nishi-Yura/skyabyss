@@ -32,7 +32,6 @@ public class NetCaster extends CloudMob {
     static final double RANGE = 6.5;
     static final double CONE = 70;
     public static final int ROOT = 30;
-    private static boolean told;
 
     public NetCaster(EntityType<? extends Monster> type, Level level) {
         super(type, level, ID, "cast", "strike", "hurt", "death");
@@ -59,8 +58,7 @@ public class NetCaster extends CloudMob {
     // 網を投げられた (自己テストからも)
     public static void root(ServerPlayer p) {
         p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROOT, 7, false, true, true));
-        if (!told) {
-            told = true;
+        if (jp.revati.skyabyss.story.finale.FinaleHints.once(p, "netted")) {
             Notice.narrate(p, "message.skyabyss.isle2.netted");
         }
     }

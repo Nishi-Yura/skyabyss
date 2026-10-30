@@ -204,7 +204,8 @@ public final class LampIsle {
             }
             if (onIsland(p.position())) {
                 gaze(p, inBeam(level, source(a), a, HALF_WIDTH, RANGE, p), HOLD, p.getMaxHealth() * BURN, null);
-            } else if (!LampArena.box().contains(p.position())) {
+            } else if (!LampArena.box().contains(p.position()) && !SeatArena.box().contains(p.position())) {
+                // 灯の島の主の間と巡礼者の座 (第 2 形態の目) は、それぞれの目が見る
                 gaze(p, false, HOLD, 0, null);
             }
         }
@@ -372,5 +373,12 @@ public final class LampIsle {
         HELD.remove(p.getUUID());
         LIT.remove(p.getUUID());
         unheavy(p);
+    }
+
+    // サーバーが止まったとき (FinaleReset)
+    static void resetAll() {
+        HELD.clear();
+        LIT.clear();
+        LAMP_ON.clear();
     }
 }
