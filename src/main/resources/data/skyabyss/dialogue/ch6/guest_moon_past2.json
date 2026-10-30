@@ -2,6 +2,68 @@
   "npc": "skyabyss:guest_moon_past2",
   "entries": [
     {
+      "node": "fin_promise_done",
+      "if": {
+        "type": "quest",
+        "quest": "main_finale_promise",
+        "is": "done"
+      }
+    },
+    {
+      "node": "fin_promise_with",
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "quest",
+            "quest": "main_finale_promise",
+            "is": "active"
+          },
+          {
+            "type": "any",
+            "of": [
+              {
+                "type": "flag",
+                "flag": "finale_promise"
+              },
+              {
+                "type": "quest",
+                "quest": "main_finale_promise",
+                "is": "active",
+                "stage": "door"
+              },
+              {
+                "type": "quest",
+                "quest": "main_finale_promise",
+                "is": "active",
+                "stage": "lord"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "node": "fin_promise_join",
+      "if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "quest",
+            "quest": "main_finale_promise",
+            "is": "active",
+            "stage": "walk"
+          },
+          {
+            "type": "quest",
+            "quest": "main_finale_promise",
+            "is": "active",
+            "stage": "selves"
+          }
+        ]
+      }
+    },
+    {
       "node": "ch6_core_wait2",
       "if": {
         "type": "quest",
@@ -224,6 +286,58 @@
       ]
     },
     "ch6_core_wait2": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "fin_promise_join": {
+      "face": "smile",
+      "next": "fin_promise_join2"
+    },
+    "fin_promise_join2": {
+      "face": "grave",
+      "next": "fin_promise_join3"
+    },
+    "fin_promise_join3": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "signal",
+              "signal": "finale_isle4_arrive"
+            },
+            {
+              "type": "signal",
+              "signal": "finale_promise_2"
+            },
+            {
+              "type": "flag",
+              "flag": "finale_promise"
+            }
+          ]
+        }
+      ]
+    },
+    "fin_promise_with": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "fin_promise_done": {
       "face": "smile",
       "options": [
         {

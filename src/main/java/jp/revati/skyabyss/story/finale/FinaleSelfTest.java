@@ -13,6 +13,7 @@ import jp.revati.skyabyss.quest.Quests;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -82,6 +83,7 @@ public final class FinaleSelfTest {
             isle1(cloud, p, f);
             isle2(cloud, p, f);
             isle3(cloud, p, f);
+            isle4(cloud, p, f);
         } catch (RuntimeException ex) {
             SkyAbyss.LOGGER.error("SELFTEST cloudsea crashed", ex);
             f.add("crashed: " + ex);
@@ -324,9 +326,89 @@ public final class FinaleSelfTest {
         check(f, ForgeArena.lords(cloud).isEmpty() && !ForgeIsle.arenaRewinds, "clearing the forge arena left the rewinder");
     }
 
+    // 島 4「約束の島」(50 の 4.2.4): 光の橋・関所 / 四人の幻と並ぶ / 扉 / 盾の円・起こす術 / 羽根の矢の筋 / 主
+    static void isle4(ServerLevel cloud, FakePlayer p, List<String> f) {
+        check(f, FinaleWorld.version(cloud.getServer()) >= 5, "island 4 was not poured (version " + FinaleWorld.version(cloud.getServer()) + ")");
+        FinaleTerrain t = PromiseIsle.terrain();
+        BlockPos s = t.mark("bridge_gate");
+        BlockPos e = t.mark("arrive");
+        int gaps = 0;
+        for (int z = s.getZ(); z >= e.getZ(); z--) {
+            boolean floor = false;
+            for (int y = 132; y >= 108; y--) {
+                BlockPos q = new BlockPos(s.getX(), y, z);
+                cloud.getChunk(q);
+                if (!cloud.getBlockState(q).getCollisionShape(cloud, q).isEmpty()) {
+                    floor = cloud.getBlockState(q.above()).getCollisionShape(cloud, q.above()).isEmpty()
+                            && cloud.getBlockState(q.above(2)).getCollisionShape(cloud, q.above(2)).isEmpty();
+                    break;
+                }
+            }
+            gaps += floor ? 0 : 1;
+        }
+        check(f, gaps == 0, "the light bridge has " + gaps + " gaps between the great forge and island 4");
+        for (String k : List.of("arena_entry", "door_front", "arrive", "self_1", "self_2", "self_3", "self_4", "seat_bridge")) {
+            BlockPos q = t.mark(k);
+            check(f, cloud.getBlockState(q.below()).isFaceSturdy(cloud, q.below(), net.minecraft.core.Direction.UP) && cloud.getBlockState(q).isAir()
+                    && cloud.getBlockState(q.above()).isAir(), k + " is not standable");
+        }
+        check(f, cloud.getBlockState(t.mark("camp")).getBlock() instanceof net.minecraft.world.level.block.CampfireBlock, "the camp has no fire");
+        // 関所: 炉の島を終えていない人は大炉の上の入口へ戻る
+        Quests.forgetAll(p);
+        p.moveTo(s.getX() + 0.5, s.getY(), s.getZ() - 3 + 0.5, 0f, 0f);
+        PromiseIsle.gate(p);
+        check(f, p.blockPosition().closerThan(ForgeIsle.mark("arena_entry"), 2), "the light bridge let someone through before the rewinder");
+        // 四人の幻が天幕の前に立つ
+        PromiseIsle.reset();
+        PromiseIsle.standUp(cloud);
+        for (int k = 1; k <= 4; k++) {
+            jp.revati.skyabyss.town.TownGuestEntity g = PromiseIsle.self(cloud, k);
+            check(f, g != null && g.blockPosition().closerThan(t.mark("self_" + k), 2), "former self " + k + " is not standing at their tent");
+        }
+        // 並ぶ: 段 selves で目的 k が済んだ人だけ / 扉は段 door から
+        check(f, !PromiseIsle.doorOpen(p), "the rock door opened without the quest");
+        Quests.start(p, PromiseIsle.QUEST);
+        Quests.signal(p, "finale_isle4_arrive");
+        Quests.signal(p, "finale_promise_1");
+        check(f, PromiseIsle.joined(p, 1) && !PromiseIsle.joined(p, 2), "standing with the valley self did not count alone");
+        check(f, !PromiseIsle.doorOpen(p), "the rock door opened before all four stood with you");
+        for (int k = 2; k <= 4; k++) {
+            Quests.signal(p, "finale_promise_" + k);
+        }
+        check(f, PromiseIsle.doorOpen(p) && PromiseIsle.joined(p, 4), "the rock door did not open after all four stood with you");
+        // 盾の円・起こす術 (開発用の join で四人をそばへ)
+        BlockPos camp = t.mark("self_1");
+        p.moveTo(camp.getX() + 0.5, camp.getY(), camp.getZ() + 0.5, 0f, 0f);
+        PromiseIsle.join(p);
+        check(f, PromiseIsle.shielded(p), "the valley self's circle does not shield someone beside them");
+        check(f, PromiseIsle.canRaise(p) && jp.revati.skyabyss.party.Downed.mayDown(p), "the field self would not raise someone who falls alone");
+        p.moveTo(camp.getX() + 0.5 + 9, camp.getY(), camp.getZ() + 0.5, 0f, 0f);
+        check(f, !PromiseIsle.shielded(p), "the valley self's circle reaches too far");
+        // 落ち羽の筋
+        Vec3 from = new Vec3(0, 100, 0);
+        Vec3 dir = new Vec3(1, 0, 0);
+        check(f, jp.revati.skyabyss.story.finale.mob.FallenPlume.onLine(from, dir, new Vec3(6, 100, 0.5))
+                && !jp.revati.skyabyss.story.finale.mob.FallenPlume.onLine(from, dir, new Vec3(6, 100, 2.0))
+                && !jp.revati.skyabyss.story.finale.mob.FallenPlume.onLine(from, dir, new Vec3(-2, 100, 0)), "the fallen plume's line covers the wrong ground");
+        // 素材と主
+        for (String id : List.of("fallen_plume", "plume_warden", "pilgrim_plume")) {
+            check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/animations/entity/" + id + ".animation.json") != null
+                    && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/lowpoly/" + id + "_s2.png") != null, "assets of " + id + " are missing");
+        }
+        jp.revati.skyabyss.story.finale.mob.PilgrimPlume lord = PromiseArena.summon(cloud);
+        check(f, lord != null && lord.blockPosition().closerThan(t.mark("lord_spawn").above(3), 2) && lord.getMaxHealth() > 1000, "the pilgrim's plume did not appear at its spot");
+        PromiseArena.clear(cloud);
+        check(f, PromiseArena.lords(cloud).isEmpty(), "clearing the rock arena left the plume");
+        for (jp.revati.skyabyss.town.TownGuestEntity g : PromiseIsle.selves(cloud)) {
+            g.discard();
+        }
+        PromiseIsle.reset();
+        Quests.forgetAll(p);
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }

@@ -1,0 +1,94 @@
+{
+  "category": "main",
+  "chapter": "finale",
+  "order": 94,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_finale_forge",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "walk",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "arrive",
+          "type": "signal",
+          "targets": [
+            "finale_isle4_arrive"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "selves",
+      "xp": 300,
+      "objectives": [
+        {
+          "id": "s1",
+          "type": "signal",
+          "targets": [
+            "finale_promise_1"
+          ],
+          "count": 1
+        },
+        {
+          "id": "s2",
+          "type": "signal",
+          "targets": [
+            "finale_promise_2"
+          ],
+          "count": 1
+        },
+        {
+          "id": "s3",
+          "type": "signal",
+          "targets": [
+            "finale_promise_3"
+          ],
+          "count": 1
+        },
+        {
+          "id": "s4",
+          "type": "signal",
+          "targets": [
+            "finale_promise_4"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "door",
+      "objectives": [
+        {
+          "id": "door",
+          "type": "signal",
+          "targets": [
+            "finale_promise_door"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lord",
+      "objectives": [
+        {
+          "id": "lord",
+          "type": "signal",
+          "targets": [
+            "finale_lord_promise"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 850
+  }
+}

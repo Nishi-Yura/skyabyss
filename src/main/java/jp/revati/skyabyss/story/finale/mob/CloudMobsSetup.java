@@ -63,6 +63,17 @@ public final class CloudMobsSetup {
             () -> EntityType.Builder.of(Rewinder::new, MobCategory.MONSTER).sized(1.6f, 3.7f).eyeHeight(3.2f).fireImmune()
                     .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + Rewinder.ID));
 
+    // 島 4「約束の島」(docs/design/50 の 4.2.4)
+    public static final DeferredHolder<EntityType<?>, EntityType<FallenPlume>> FALLEN_PLUME = ENTITIES.register(FallenPlume.ID,
+            () -> EntityType.Builder.of(FallenPlume::new, MobCategory.MONSTER).sized(0.9f, 2.6f).eyeHeight(1.6f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + FallenPlume.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<PlumeWarden>> PLUME_WARDEN = ENTITIES.register(PlumeWarden.ID,
+            () -> EntityType.Builder.of(PlumeWarden::new, MobCategory.MONSTER).sized(0.9f, 2.3f).eyeHeight(2.0f)
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + PlumeWarden.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<PilgrimPlume>> PILGRIM_PLUME = ENTITIES.register(PilgrimPlume.ID,
+            () -> EntityType.Builder.of(PilgrimPlume::new, MobCategory.MONSTER).sized(3.0f, 4.5f).eyeHeight(1.9f).fireImmune()
+                    .clientTrackingRange(12).build(SkyAbyss.MODID + ":" + PilgrimPlume.ID));
+
     public static final DeferredItem<Item> BELL_MOURNER_EGG = egg("bell_mourner_spawn_egg", BELL_MOURNER, 0xC4C0B6, 0x8C6A3E);
     public static final DeferredItem<Item> MIST_BIRD_EGG = egg("mist_bird_spawn_egg", MIST_BIRD, 0xF4F4F8, 0xDCB250);
     public static final DeferredItem<Item> LAST_BELLKEEPER_EGG = egg("last_bellkeeper_spawn_egg", LAST_BELLKEEPER, 0x343640, 0xDCB250);
@@ -72,6 +83,9 @@ public final class CloudMobsSetup {
     public static final DeferredItem<Item> ASH_STRIKER_EGG = egg("ash_striker_spawn_egg", ASH_STRIKER, 0x605E5A, 0xF08C32);
     public static final DeferredItem<Item> BACKFIRE_EGG = egg("backfire_spawn_egg", BACKFIRE, 0x323238, 0xFFB45A);
     public static final DeferredItem<Item> REWINDER_EGG = egg("rewinder_spawn_egg", REWINDER, 0x54382A, 0xB08C54);
+    public static final DeferredItem<Item> FALLEN_PLUME_EGG = egg("fallen_plume_spawn_egg", FALLEN_PLUME, 0xF4F4F8, 0xDCB250);
+    public static final DeferredItem<Item> PLUME_WARDEN_EGG = egg("plume_warden_spawn_egg", PLUME_WARDEN, 0xDCB250, 0xF4F4F8);
+    public static final DeferredItem<Item> PILGRIM_PLUME_EGG = egg("pilgrim_plume_spawn_egg", PILGRIM_PLUME, 0xFFFFFF, 0xFFE8B4);
 
     public static final DeferredHolder<SoundEvent, SoundEvent> MOURNER_IDLE = sound("mourner_idle");
     public static final DeferredHolder<SoundEvent, SoundEvent> MOURNER_TELL = sound("mourner_tell");
@@ -116,6 +130,25 @@ public final class CloudMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_PRINTS = sound("rewinder_prints");
     public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_CALL = sound("rewinder_call");
     public static final DeferredHolder<SoundEvent, SoundEvent> REWINDER_ROAR = sound("rewinder_roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SELF_JOIN = sound("self_join");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SELF_SHIELD = sound("self_shield");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SELF_TAUNT = sound("self_taunt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SELF_RAISE = sound("self_raise");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PLUME_TELL = sound("plume_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PLUME_VOLLEY = sound("plume_volley");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WARDEN_TELL = sound("warden_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WARDEN_CHARGE = sound("warden_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WARDEN_HIT = sound("warden_hit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_BEAT_TELL = sound("wing_beat_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_BEAT = sound("wing_beat");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_RAIN_TELL = sound("wing_rain_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_RAIN = sound("wing_rain");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_MARK = sound("wing_mark");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_PLUNGE = sound("wing_plunge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_JUDGE_TELL = sound("wing_judge_tell");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_JUDGE = sound("wing_judge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_CALL = sound("wing_call");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WING_ROAR = sound("wing_roar");
 
     private CloudMobsSetup() {
     }
@@ -147,12 +180,15 @@ public final class CloudMobsSetup {
         event.put(ASH_STRIKER.get(), AshStriker.createAttributes().build());
         event.put(BACKFIRE.get(), Backfire.createAttributes().build());
         event.put(REWINDER.get(), Rewinder.createAttributes().build());
+        event.put(FALLEN_PLUME.get(), FallenPlume.createAttributes().build());
+        event.put(PLUME_WARDEN.get(), PlumeWarden.createAttributes().build());
+        event.put(PILGRIM_PLUME.get(), PilgrimPlume.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(BELL_MOURNER_EGG, MIST_BIRD_EGG, LAST_BELLKEEPER_EGG, NET_CASTER_EGG, LAMP_MOTH_EGG, LAMP_EYE_EGG, ASH_STRIKER_EGG,
-                    BACKFIRE_EGG, REWINDER_EGG)) {
+                    BACKFIRE_EGG, REWINDER_EGG, FALLEN_PLUME_EGG, PLUME_WARDEN_EGG, PILGRIM_PLUME_EGG)) {
                 event.accept(i.get());
             }
         }
@@ -170,6 +206,9 @@ public final class CloudMobsSetup {
             put(AshStriker.ID, 28);
             put(Backfire.ID, 22);
             put(Rewinder.ID, 800);
+            put(FallenPlume.ID, 22);
+            put(PlumeWarden.ID, 30);
+            put(PilgrimPlume.ID, 840);
         });
     }
 

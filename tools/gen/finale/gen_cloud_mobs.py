@@ -12,7 +12,7 @@
   animations/entity/<id>.animation.json, models/item/<id>_spawn_egg.json
   assets/skyabyss_finale/sounds.json            音の出来事 (既存の音の別名。字幕は lang)
 
-島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。島 3「炉の島」(2026-10-30): 灰の打ち手・戻り火・戻し手。
+島 1「鐘の島」(2026-10-30): 鐘の亡者・霞鳥・最後の鐘守。島 2「灯の島」(2026-10-30): 網打ち・灯蛾・灯守の目。島 3「炉の島」(2026-10-30): 灰の打ち手・戻り火・戻し手。島 4「約束の島」(2026-10-30): 落ち羽・羽の番人・巡礼者の羽。
 回転の約束は gen_moon_mobs と同じ (kf の x が負 = 前へ傾く)。
 """
 import importlib.util
@@ -35,7 +35,7 @@ AF = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss_finale")
 ROUGH = os.path.join(ROOT, "docs", "review", "cloud_roughs")
 
 CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a",
-          "ash_striker": "a", "backfire": "a", "rewinder": "a"}
+          "ash_striker": "a", "backfire": "a", "rewinder": "a", "fallen_plume": "a", "plume_warden": "a", "pilgrim_plume": "a"}
 
 
 # ---------------------------------------------------------------- 鐘の亡者 (よろよろ歩く・鐘を振り上げて鳴らす)
@@ -266,9 +266,79 @@ def rewinder():
             p + "prints": once(1.6, prints), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones()), p + "death": once(2.4, death, True)}
 
 
+# ---------------------------------------------------------------- 落ち羽 (漂う・羽根の矢を一列に撃つ)
+def fallen_plume():
+    p = "animation.fallen_plume."
+    spin = "query.anim_time * 60"
+    idle = {"body": bone([S(0, 4, 50), "0", S(90, 6, 40)], [0, S(0, 0.8, 60), 0]), "quills": bone(["0", spin, "0"])}
+    walk = {"body": bone([S(0, 8, 120), "0", S(90, 6, 90)], [0, S(0, 0.6, 120), 0]), "quills": bone(["0", "query.anim_time * 120", "0"])}
+    # 撃つ (1.4): 0.8 まで横に倒れて狙う (予告)、0.85 で矢を放って跳ね返る
+    volley = {"body": bone(kf({0: (0, 0, 0), 0.8: (-75, 0, 0), 0.85: (-62, 0, 0), 1.1: (-75, 0, 0), 1.4: (0, 0, 0)})),
+              "quills": bone(kf({0: (0, 0, 0), 0.8: (0, 360, 0), 0.85: (0, 380, 0), 1.4: (0, 540, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.5: (40, 0, 60), 1.0: (90, 0, 120)}), kf({0: (0, 0, 0), 1.0: (0, -10, 0)}, False)),
+             "quills": bone(kf({0: (0, 0, 0), 1.0: (0, 200, 0)}), kf({0: (0, 0, 0), 1.0: (0, -6, 0)}, False))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(3.0, walk), p + "volley": once(1.4, volley), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.0, death, True)}
+
+
+# ---------------------------------------------------------------- 羽の番人 (歩く・槍を下げて突っ込む)
+def plume_warden():
+    p = "animation.plume_warden."
+    idle = {"body": bone([S(0, 1.5, 40), "0", "0"]), "head": bone([S(90, 3, 30), S(0, 6, 20), "0"]),
+            "mantle": bone([S(0, 4, 50), "0", S(90, 2, 40)])}
+    walk = {"leg_l": bone([S(0, 22, 200), "0", "0"]), "leg_r": bone([S(180, 22, 200), "0", "0"]),
+            "body": bone(["0", "0", S(0, 3, 200)], [0, S(0, 0.4, 400), 0]), "arm_l": bone([S(180, 10, 200), "0", "0"]),
+            "mantle": bone([S(0, 8, 200), "0", "0"])}
+    # 突き (1.6): 1.0 まで槍を下げて低く構える (予告)、1.0〜1.5 は突っ込む姿、1.6 で戻る
+    charge = {"arm_r": bone(kf({0: (0, 0, 0), 1.0: (-80, 0, 0), 1.5: (-85, 0, 0), 1.6: (0, 0, 0)})),
+              "arm_l": bone(kf({0: (0, 0, 0), 1.0: (-40, 0, 10), 1.5: (-40, 0, 10), 1.6: (0, 0, 0)})),
+              "body": bone(kf({0: (0, 0, 0), 1.0: (-15, 0, 0), 1.1: (-22, 0, 0), 1.5: (-22, 0, 0), 1.6: (0, 0, 0)})),
+              "leg_l": bone(kf({0: (0, 0, 0), 1.0: (20, 0, 0), 1.2: (-30, 0, 0), 1.35: (30, 0, 0), 1.5: (-30, 0, 0), 1.6: (0, 0, 0)})),
+              "leg_r": bone(kf({0: (0, 0, 0), 1.0: (-20, 0, 0), 1.2: (30, 0, 0), 1.35: (-30, 0, 0), 1.5: (30, 0, 0), 1.6: (0, 0, 0)})),
+              "mantle": bone(kf({0: (0, 0, 0), 1.0: (10, 0, 0), 1.2: (35, 0, 0), 1.5: (35, 0, 0), 1.6: (0, 0, 0)}))}
+    death = {"body": bone(kf({0: (0, 0, 0), 0.6: (-20, 0, 0), 1.3: (-85, 0, 5)}), kf({0: (0, 0, 0), 1.3: (0, -8, 0)}, False)),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.6: (-60, 0, 20)}))}
+    return {p + "idle": loop(6.0, idle), p + "walk": loop(1.6, walk), p + "charge": once(1.6, charge), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.3, death, True)}
+
+
+# ---------------------------------------------------------------- 巡礼者の羽 (主。浮かんだ片翼)
+def pilgrim_plume():
+    p = "animation.pilgrim_plume."
+    spin = "query.anim_time * 20"
+    idle = {"arm": bone([S(0, 6, 45), "0", S(90, 3, 30)]), "hand": bone([S(60, 8, 45), "0", "0"]),
+            "halo": bone(["0", "0", spin]), "body": bone(["0", "0", "0"], [0, S(0, 1.2, 45), 0])}
+    walk = dict(idle)
+    # 羽ばたき (1.8): 1.2 まで後ろへ大きく引く (扇の予告)、1.3 で前へ打ち下ろす
+    beat = {"arm": bone(kf({0: (0, 0, 0), 1.2: (35, 0, -8), 1.3: (-55, 0, 6), 1.6: (-50, 0, 4), 1.8: (0, 0, 0)})),
+            "hand": bone(kf({0: (0, 0, 0), 1.2: (25, 0, 0), 1.3: (-35, 0, 0), 1.6: (-30, 0, 0), 1.8: (0, 0, 0)})),
+            "halo": bone(kf({0: (0, 0, 0), 1.8: (0, 0, 180)}))}
+    # 羽の雨 (1.4): 翼を上げて震わせる
+    rain = {"arm": bone(kf({0: (0, 0, 0), 0.4: (0, 0, -20), 0.6: (5, 0, -24), 0.8: (-5, 0, -18), 1.0: (5, 0, -22), 1.4: (0, 0, 0)})),
+            "hand": bone(kf({0: (0, 0, 0), 0.4: (0, 0, -15), 1.0: (0, 0, -15), 1.4: (0, 0, 0)}))}
+    # 先触れの印 (2.5): 翼の先で一人を指し、保つ
+    mark = {"arm": bone(kf({0: (0, 0, 0), 0.5: (-30, 0, 10), 2.3: (-30, 0, 10), 2.5: (0, 0, 0)})),
+            "hand": bone(kf({0: (0, 0, 0), 0.5: (-25, 0, 15), 2.3: (-25, 0, 15), 2.5: (0, 0, 0)})),
+            "halo": bone(kf({0: (0, 0, 0), 2.5: (0, 0, 360)}))}
+    # 審きの光 (5.0): 翼を高く掲げ、輪が速く回り、最後に打ち下ろす
+    judge = {"arm": bone(kf({0: (0, 0, 0), 1.0: (0, 0, -35), 4.7: (0, 0, -38), 4.85: (-40, 0, 8), 5.0: (0, 0, 0)})),
+             "hand": bone(kf({0: (0, 0, 0), 1.0: (0, 0, -25), 4.7: (0, 0, -28), 4.85: (-30, 0, 0), 5.0: (0, 0, 0)})),
+             "body": bone(kf({0: (0, 0, 0), 1.0: (-20, 0, 0), 4.7: (-20, 0, 0), 5.0: (0, 0, 0)})),
+             "halo": bone(kf({0: (0, 0, 0), 5.0: (0, 0, 1440)}))}
+    # 呼ぶ (2.0): 翼を一度大きく広げる
+    call = {"arm": bone(kf({0: (0, 0, 0), 0.6: (0, 0, -30), 1.4: (0, 0, -30), 2.0: (0, 0, 0)})),
+            "hand": bone(kf({0: (0, 0, 0), 0.6: (0, 0, -30), 1.4: (0, 0, -30), 2.0: (0, 0, 0)}))}
+    death = {"arm": bone(kf({0: (0, 0, 0), 1.0: (30, 0, 20), 2.6: (70, 0, 50)})), "hand": bone(kf({0: (0, 0, 0), 1.0: (40, 0, 30), 2.6: (80, 0, 40)})),
+             "body": bone(kf({0: (0, 0, 0), 1.0: (0, 0, 15), 2.6: (0, 0, 40)}), kf({0: (0, 0, 0), 1.0: (0, -8, 0), 2.6: (0, -30, 0)}, False))}
+    return {p + "idle": loop(8.0, idle), p + "walk": loop(8.0, walk), p + "beat": once(1.8, beat), p + "rain": once(1.4, rain),
+            p + "mark": once(2.5, mark), p + "judge": once(5.0, judge), p + "call": once(2.0, call), p + "hurt": once(0.22, hurt_bones("arm")),
+            p + "death": once(2.6, death, True)}
+
+
 ANIMS = {"bell_mourner": bell_mourner, "mist_bird": mist_bird, "last_bellkeeper": last_bellkeeper,
          "net_caster": net_caster, "lamp_moth": lamp_moth, "lamp_eye": lamp_eye,
-         "ash_striker": ash_striker, "backfire": backfire, "rewinder": rewinder}
+         "ash_striker": ash_striker, "backfire": backfire, "rewinder": rewinder,
+         "fallen_plume": fallen_plume, "plume_warden": plume_warden, "pilgrim_plume": pilgrim_plume}
 
 
 # ---------------------------------------------------------------- 素材を入れる
@@ -372,6 +442,26 @@ SOUNDS = {
     "rewinder_prints": [ev("block.respawn_anchor.charge", 0.5, 1.2)],
     "rewinder_call": [ev("block.anvil.land", 0.4, 1.4)],
     "rewinder_roar": [ev("entity.ravager.roar", 0.5, 1.6)],
+    # 島 4「約束の島」
+    "self_join": [ev("block.respawn_anchor.set_spawn", 0.6, 1.4)],
+    "self_shield": [ev("block.beacon.power_select", 0.5, 1.8)],
+    "self_taunt": [ev("item.goat_horn.sound.1", 0.5, 1.3)],
+    "self_raise": [ev("block.beacon.activate", 0.8, 1.5)],
+    "plume_tell": [ev("block.amethyst_block.chime", 1.2, 1.4)],
+    "plume_volley": [ev("entity.arrow.shoot", 0.8, 1.3)],
+    "warden_tell": [ev("item.armor.equip_gold", 1.0, 0.7)],
+    "warden_charge": [ev("entity.horse.gallop", 1.0, 0.8)],
+    "warden_hit": [ev("item.shield.block", 1.0, 0.8)],
+    "wing_beat_tell": [ev("entity.phantom.flap", 1.2, 0.5)],
+    "wing_beat": [ev("entity.ender_dragon.flap", 1.0, 1.0)],
+    "wing_rain_tell": [ev("block.amethyst_block.resonate", 1.0, 1.2)],
+    "wing_rain": [ev("entity.arrow.hit", 1.0, 0.8)],
+    "wing_mark": [ev("block.beacon.power_select", 1.0, 1.6)],
+    "wing_plunge": [ev("entity.warden.attack_impact", 0.8, 1.6)],
+    "wing_judge_tell": [ev("block.beacon.activate", 1.0, 0.6)],
+    "wing_judge": [ev("item.totem.use", 0.6, 1.4)],
+    "wing_call": [ev("entity.phantom.ambient", 1.0, 0.6)],
+    "wing_roar": [ev("entity.ender_dragon.growl", 0.5, 1.4)],
 }
 
 
