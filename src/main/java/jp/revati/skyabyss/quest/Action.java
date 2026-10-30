@@ -168,7 +168,12 @@ public final class Action {
             case "lore" -> Lore.unlock(player, str("entry"), true);
             case "give" -> {
                 Item item = Condition.item(str("item"));
-                if (item != null) {
+                if (item != null && optStr("page") != null) {
+                    // 破れた頁 (lore_page) は出どころ (page) を付けて渡す。読むとその出どころの伝承が書に移る (LorePageItem)
+                    ItemStack page = jp.revati.skyabyss.lore.LorePageItem.of(optStr("page"));
+                    page.setCount(Math.max(1, integer("count", 1)));
+                    Quests.give(player, page);
+                } else if (item != null) {
                     Quests.give(player, QuestItems.make(item, Math.max(1, integer("count", 1)), optStr("token"), optStr("name"), loreKeys()));
                 }
             }

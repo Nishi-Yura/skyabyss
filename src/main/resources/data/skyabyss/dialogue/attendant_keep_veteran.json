@@ -99,7 +99,59 @@
           "kind": "talk",
           "goto": "page",
           "if": {
-            "type": "in_capital"
+            "type": "all",
+            "of": [
+              {
+                "type": "in_capital"
+              },
+              {
+                "type": "stage",
+                "max": 1
+              }
+            ]
+          }
+        },
+        {
+          "id": "page_give",
+          "kind": "give",
+          "goto": "page_give",
+          "text": "dialogue.skyabyss.attendant_keep_veteran.menu.page",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "in_capital"
+              },
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "flag",
+                  "flag": "page_given"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "page_again",
+          "kind": "talk",
+          "goto": "page_again",
+          "text": "dialogue.skyabyss.attendant_keep_veteran.menu.page",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "in_capital"
+              },
+              {
+                "type": "flag",
+                "flag": "page_given"
+              }
+            ]
           }
         },
         {
@@ -149,6 +201,26 @@
       "face": "neutral",
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_keep_veteran.records_town"
+    },
+    "page_give": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give",
+          "item": "skyabyss:lore_page",
+          "page": "keep_page",
+          "count": 1
+        },
+        {
+          "type": "flag",
+          "flag": "page_given"
+        }
+      ],
+      "next": "menu"
+    },
+    "page_again": {
+      "face": "neutral",
+      "next": "menu"
     }
   }
 }

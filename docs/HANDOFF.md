@@ -26,7 +26,8 @@
   - `docs/review` の掃除: モデルを入れるスクリプトが読まない出力（音楽と声の見本・武器と防具の比べ頁・日付の報告の絵・古い一覧 177 ファイル）を消した。残りは install/gen の入力か、未選定の案。
   - 取り込み済みの `wip/*` 79 本の削除は auto mode に止められた（`git push origin --delete $(git branch -r --merged m1-sky-pass | grep origin/wip/ | sed 's|  origin/||')` と `git branch -d wip/continent-only wip/skill-tree-v2` をユーザーが流す）。
 - 確かめ: `quick_check.sh` 全部 OK。自己テストは全段 1 回と、直した `abyss`・`rebirth` の流し直しが通った。
-- 次: 終章の通しの試遊とその声での直し（ユーザーは「ある程度完成してから」）。35 の「前の私の頁（砦の本丸の奥。三章）」は中身がまだ無い（話だけ）。
+- 前の私の頁（35 の空見の砦。「今は話だけ」だった分）: 心臓を二つ止めた人（三章）に砦の老兵が一度だけ破れた頁 `keep_page` を渡し、読むと伝承「本丸の頁」（`chapter1/keep_prev_page`。文は `skyabyss_storm` の lang。前の空見が嵐と影を見誤るなと書いた一枚。筆の止め方が自分と同じ）が書に移る。会話の `give` に `page` を付けると破れた頁になる（`quest/Action`）。自己テスト `facility`。
+- 次: 終章の通しの試遊とその声での直し（ユーザーは「ある程度完成してから」）。
 
 ## 0.9.17（終章の試遊の途中の声）
 

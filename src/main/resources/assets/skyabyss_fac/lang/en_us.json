@@ -69,6 +69,8 @@
   "dialogue.skyabyss.attendant_keep_veteran.menu.page": "The page deep in the keep",
   "dialogue.skyabyss.attendant_keep_veteran.menu.records": "Reading the records",
   "dialogue.skyabyss.attendant_keep_veteran.page": "Deep in the keep there's a page the last skywatcher left. ...I can't show it yet. When the third chapter's tale moves on, then.",
+  "dialogue.skyabyss.attendant_keep_veteran.page_give": "The page from the back of the keep. A sky-watcher before you left it. ... If you are bound for the third titan, you have the right to read it. Take it.\nThe hand may look familiar. I say nothing.",
+  "dialogue.skyabyss.attendant_keep_veteran.page_again": "I gave you the page already. If you read it, it is in your book. ... If not, hurry. The storm does not wait.",
   "dialogue.skyabyss.attendant_keep_veteran.records": "Touch the stone for this week's ranking; the boards show each titan's fastest runs. I keep a copy of the trial codex. Not bad to have your name beside your friends'.",
   "dialogue.skyabyss.attendant_mapmaker.intro": "Mapmaker. I can add rumours of the old sites, and the marks you haven't reached yet.",
   "dialogue.skyabyss.attendant_mapmaker.menu": "What'll it be?",

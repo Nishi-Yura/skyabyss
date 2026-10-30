@@ -125,9 +125,18 @@ public final class FacilityExtrasSelfTest {
                 check(f, listed && desc != null && desc.textKey().equals(v.descKey()), "priest explains vow " + v.id());
             }
         }
-        // 前の私の頁は話だけ (まだ中身がない)
+        // 前の私の頁 (35 の 6.4): 心臓を二つ止めた人 (三章) に老兵が一度だけ渡す。読むと伝承 chapter1/keep_prev_page が書に移る
         Dialogue keep = DialogueManager.dialogue(AttendantRole.KEEP_VETERAN.dialogueRole());
-        check(f, keep != null && keep.nodes().containsKey("page"), "keep veteran has the page placeholder");
+        check(f, keep != null && keep.nodes().containsKey("page") && keep.nodes().containsKey("page_give") && keep.nodes().containsKey("page_again"),
+                "keep veteran has the page nodes (before, give, again)");
+        if (keep != null) {
+            Dialogue.Node give = keep.nodes().get("page_give");
+            boolean gives = give != null && give.actions().stream().anyMatch(a -> a.type().equals("give") && "keep_page".equals(a.optStr("page")));
+            check(f, gives, "page_give hands a lore page with source keep_page");
+            boolean gated = keep.nodes().get("menu").options().stream().anyMatch(o -> o.id().equals("page_give") && o.condition() != null);
+            check(f, gated, "the page option is gated (stage 2 and not yet given)");
+        }
+        check(f, jp.revati.skyabyss.lore.LoreManager.catalog().entry("chapter1/keep_prev_page") != null, "lore entry chapter1/keep_prev_page exists");
     }
 
     // ---------------------------------------------------------------- 振り直し
