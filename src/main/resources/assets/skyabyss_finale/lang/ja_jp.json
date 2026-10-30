@@ -400,5 +400,18 @@
   "legend.skyabyss.divine_promise_circle.skill": "守りの唄",
   "message.skyabyss.divine.given": "神器を受け取った: %s。職の間で職を替えると、替えた職の神器になる。",
   "message.skyabyss.divine.swapped": "神器が、新しい職の形に変わった: %s",
-  "message.skyabyss.divine.core_broken": "心核を砕いた。心核の欠片 ×%s"
+  "message.skyabyss.divine.core_broken": "心核を砕いた。心核の欠片 ×%s",
+  "message.skyabyss.trial.calendar": "雲の暦の日時計が、巡礼者の影を刻んでいる。越えた段: %s",
+  "message.skyabyss.trial.option": "[巡礼の試し 段 %s に挑む]",
+  "message.skyabyss.trial.option.hint.1": "体力 ×1.15・傷 ×1.08",
+  "message.skyabyss.trial.option.hint.2": "体力 ×1.3・傷 ×1.16",
+  "message.skyabyss.trial.option.hint.3": "体力 ×1.45・傷 ×1.24・技の間が三分の二",
+  "message.skyabyss.trial.option.hint.4": "体力 ×1.6・傷 ×1.32・技の間が三分の二",
+  "message.skyabyss.trial.option.hint.5": "体力 ×1.75・傷 ×1.4・技の間が三分の二・形態ごとの重ね (手の円が三つ・目の隙が半分・巻き戻しが三度)",
+  "message.skyabyss.trial.begin": "巡礼の試し、段 %s。巡礼者が、もう一度降りてくる。",
+  "message.skyabyss.trial.cleared": "巡礼の試し 段 %s を越えた。",
+  "message.skyabyss.trial.keepsake": "日時計の影が、一度だけ止まった。……伝承の頁に記された。",
+  "message.skyabyss.trial.shut": "日時計の影は動かない。……まだ、巡礼者を退けていない。",
+  "lore.skyabyss.finale.keepsake_pilgrim.title": "巡礼の試し",
+  "lore.skyabyss.finale.keepsake_pilgrim.body": "五度目の段を越えたとき、雲の暦の日時計の影が、一度だけ止まった。\n\n巡礼者は、何度でも降りてくる。退けられても、また引き合いの片方として。それは敵だからではない。試しているのだ。この世界の側に、まだ立っている者がいるかを。\n\n影が動き出す。次の巡礼が来る。"
 }

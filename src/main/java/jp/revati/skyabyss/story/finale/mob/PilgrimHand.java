@@ -190,7 +190,18 @@ public class PilgrimHand extends CloudMob {
         move = "";
         t = 0;
         boolean alone = SeatArena.parts((ServerLevel) level()).stream().filter(e -> e instanceof PilgrimHand).count() <= 1;
-        rest = alone ? 34 : 60;
+        rest = (int) ((alone ? 34 : 60) * SeatArena.pace());
+    }
+
+    // 叩きつけの円 (巡礼の試しの段 5 は、左右にもう二つ)
+    java.util.List<Vec3> slamSpots() {
+        if (SeatArena.tier() < 5) {
+            return java.util.List.of(spot);
+        }
+        BlockPos c = PilgrimSeat.mark("arena");
+        Vec3 out = new Vec3(spot.x - (c.getX() + 0.5), 0, spot.z - (c.getZ() + 0.5));
+        Vec3 side = out.lengthSqr() < 0.01 ? new Vec3(1, 0, 0) : new Vec3(-out.z, 0, out.x).normalize();
+        return java.util.List.of(spot, spot.add(side.scale(4.5)), spot.subtract(side.scale(4.5)));
     }
 
     // 叩きつけ: 頭上へ寄って (予告の円) → 叩きつけ → 床に手を突いたまま
@@ -200,19 +211,23 @@ public class PilgrimHand extends CloudMob {
             double k = Math.min(1.0, t / (double) (SLAM_TELL - 6));
             setPos(from.x + (above.x - from.x) * k, from.y + (above.y - from.y) * k, from.z + (above.z - from.z) * k);
             if (t % 3 == 0) {
-                for (int i = 0; i < 20; i++) {
-                    double a = i / 20.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.WAX_ON, spot.x + Math.cos(a) * SLAM_R, spot.y + 0.15, spot.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
+                for (Vec3 s : slamSpots()) {
+                    for (int i = 0; i < 20; i++) {
+                        double a = i / 20.0 * Math.PI * 2;
+                        sl.sendParticles(ParticleTypes.WAX_ON, s.x + Math.cos(a) * SLAM_R, s.y + 0.15, s.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
+                    }
                 }
             }
             return;
         }
         setPos(spot.x, spot.y, spot.z);
         playSound(CloudMobsSetup.HAND_SLAM.get(), 2.4f, 1.0f);
-        sl.sendParticles(ParticleTypes.CLOUD, spot.x, spot.y + 0.4, spot.z, 40, SLAM_R * 0.5, 0.3, SLAM_R * 0.5, 0.08);
-        for (ServerPlayer p : SeatArena.present(sl)) {
-            if (p.position().subtract(spot).horizontalDistance() <= SLAM_R + 0.3 && Math.abs(p.getY() - spot.y) < 2.5) {
-                strike(p, dmg(1.4));
+        for (Vec3 s : slamSpots()) {
+            sl.sendParticles(ParticleTypes.CLOUD, s.x, s.y + 0.4, s.z, 40, SLAM_R * 0.5, 0.3, SLAM_R * 0.5, 0.08);
+            for (ServerPlayer p : SeatArena.present(sl)) {
+                if (p.position().subtract(s).horizontalDistance() <= SLAM_R + 0.3 && Math.abs(p.getY() - s.y) < 2.5) {
+                    strike(p, dmg(1.4));
+                }
             }
         }
         if (!toldStuck) {

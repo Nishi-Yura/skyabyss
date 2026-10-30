@@ -267,7 +267,7 @@ public class PilgrimMoon extends CloudMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
-            rest = phase >= 2 ? restTicks / 2 : restTicks;
+            rest = (int) ((phase >= 2 ? restTicks / 2 : restTicks) * SeatArena.pace());
         }
 
         // 月の引き: 縮む輪の光と引き寄せ → 真ん中が弾ける
@@ -360,6 +360,10 @@ public class PilgrimMoon extends CloudMob {
                     }
                     Echoes.circle(sl, p.position(), 2.2, 40, dmg(), PilgrimMoon.this);
                     Echoes.circle(sl, p.position(), 2.2, 80, dmg(), PilgrimMoon.this);
+                    // 巡礼の試しの段 5 は三度
+                    if (SeatArena.tier() >= 5) {
+                        Echoes.circle(sl, p.position(), 2.2, 120, dmg(), PilgrimMoon.this);
+                    }
                 }
             }
             if (t >= 30) {

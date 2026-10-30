@@ -400,5 +400,18 @@
   "legend.skyabyss.divine_promise_circle.skill": "Ward Song",
   "message.skyabyss.divine.given": "Received a divine relic: %s. Change your job at the Hall of Callings and it becomes that job's relic.",
   "message.skyabyss.divine.swapped": "Your divine relic took the shape of your new job: %s",
-  "message.skyabyss.divine.core_broken": "You broke the heart core. Heart core shards ×%s"
+  "message.skyabyss.divine.core_broken": "You broke the heart core. Heart core shards ×%s",
+  "message.skyabyss.trial.calendar": "The sundial of the cloud calendar marks the Pilgrim's shadow. Tiers cleared: %s",
+  "message.skyabyss.trial.option": "[Take the Pilgrim's Trial, tier %s]",
+  "message.skyabyss.trial.option.hint.1": "Health ×1.15, damage ×1.08",
+  "message.skyabyss.trial.option.hint.2": "Health ×1.3, damage ×1.16",
+  "message.skyabyss.trial.option.hint.3": "Health ×1.45, damage ×1.24, moves come faster",
+  "message.skyabyss.trial.option.hint.4": "Health ×1.6, damage ×1.32, moves come faster",
+  "message.skyabyss.trial.option.hint.5": "Health ×1.75, damage ×1.4, faster moves, and each form is layered (three slam circles, half the eye's opening, rewinds thrice)",
+  "message.skyabyss.trial.begin": "The Pilgrim's Trial, tier %s. The Pilgrim descends once more.",
+  "message.skyabyss.trial.cleared": "Cleared the Pilgrim's Trial, tier %s.",
+  "message.skyabyss.trial.keepsake": "For a moment, the sundial's shadow stood still. ...It has been written in your lore.",
+  "message.skyabyss.trial.shut": "The sundial's shadow does not move. ...You have not yet driven back the Pilgrim.",
+  "lore.skyabyss.finale.keepsake_pilgrim.title": "The Pilgrim's Trial",
+  "lore.skyabyss.finale.keepsake_pilgrim.body": "When you cleared the fifth tier, the shadow on the cloud calendar's sundial stood still, just once.\n\nThe Pilgrim descends again and again. Driven back, it returns as the other half of the pull. Not because it is an enemy. It is testing whether anyone still stands on this side of the world.\n\nThe shadow moves again. The next pilgrimage is coming."
 }

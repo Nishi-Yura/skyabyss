@@ -85,6 +85,7 @@ public final class FinaleSelfTest {
             isle3(cloud, p, f);
             isle4(cloud, p, f);
             seat(cloud, p, f);
+            trial(cloud, p, f);
         } catch (RuntimeException ex) {
             SkyAbyss.LOGGER.error("SELFTEST cloudsea crashed", ex);
             f.add("crashed: " + ex);
@@ -554,6 +555,38 @@ public final class FinaleSelfTest {
         p.getPersistentData().remove("skyabyss_divine_given");
     }
 
+    // 巡礼の試し (50 の 4.6): 暦・閉じた人・段の倍率と体力の上限・技の間・報酬と記録・片付け
+    static void trial(ServerLevel cloud, FakePlayer p, List<String> f) {
+        check(f, FinaleWorld.version(cloud.getServer()) >= 7 && cloud.getBlockState(PilgrimSeat.mark("calendar")).getBlock()
+                instanceof net.minecraft.world.level.block.DaylightDetectorBlock, "the cloud calendar is missing");
+        Quests.forgetAll(p);
+        p.getPersistentData().remove(PilgrimTrial.KEY);
+        check(f, !PilgrimTrial.open(p) && PilgrimTrial.next(p) == 1, "the trial was open before the seat quest");
+        SeatArena.startTrial(cloud, 3);
+        java.util.List<jp.revati.skyabyss.story.finale.mob.CloudMob> hands = new java.util.ArrayList<>();
+        SeatArena.toForm(cloud, 1);
+        check(f, SeatArena.tier() == 0, "a plain fight kept the trial tier");
+        SeatArena.startTrial(cloud, 3);
+        SeatArena.summonForm(cloud);
+        hands.addAll(SeatArena.parts(cloud));
+        check(f, hands.size() == 2 && SeatArena.tier() == 3 && SeatArena.pace() < 1, "the tier 3 trial did not raise two hands with faster moves");
+        if (!hands.isEmpty()) {
+            jp.revati.skyabyss.story.finale.mob.CloudMob h = hands.get(0);
+            double want = jp.revati.skyabyss.story.finale.mob.PilgrimHand.HP * PilgrimTrial.hpScale(3);
+            check(f, h.getMaxHealth() <= jp.revati.skyabyss.story.finale.mob.CloudMob.MAX_HP
+                    && Math.abs(h.getMaxHealth() / h.toughness() - want) < 1, "the trial hand's health is not the tier's (" + h.getMaxHealth() + " / " + h.toughness() + ")");
+        }
+        SeatArena.clear(cloud);
+        check(f, SeatArena.tier() == 0 && SeatArena.form() == 0, "clearing the trial left its tier");
+        // 報酬と記録 (段 5 は記念の頁)
+        PilgrimTrial.won(java.util.List.of(p), 5);
+        check(f, PilgrimTrial.cleared(p) == 5 && PilgrimTrial.next(p) == 5
+                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) >= 8
+                && jp.revati.skyabyss.lore.Lore.state(p).has(PilgrimTrial.KEEPSAKE), "winning tier 5 did not record, reward, or write the keepsake");
+        p.getInventory().clearContent();
+        p.getPersistentData().remove(PilgrimTrial.KEY);
+    }
+
     static int countRelics(FakePlayer p) {
         int n = 0;
         for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
@@ -564,7 +597,7 @@ public final class FinaleSelfTest {
 
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies; endings; divine relics)");
+            SkyAbyss.LOGGER.info("SELFTEST cloudsea PASSED (dimension, arrival island and marks, cloud layer, fall rescue, gate condition, quest and reel; island 1 bridge, bells, bell clouds ring/silence, tower door, foes, lord and arena floor; island 2 light bridge and gate, lamps, door, beam and shade, moth light, eye; island 3 light bridge and gate, forges, door, rewind stones, echoes, rewinder; island 4 light bridge and gate, former selves, door, shield and raise, plume line, pilgrim's plume; seat bridge and gate, cloud ring and bells, three forms, the four allies; endings; divine relics; pilgrim's trial)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST cloudsea FAILED: {}", m));
         }

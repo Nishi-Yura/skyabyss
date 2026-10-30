@@ -5,6 +5,7 @@
   座の床 (真ん中 (3, -705)、床 y 156): 内の半径 7 は固い床 (白と金の敷石)、7〜16.5 は鐘雲の輪 (印 ring)。南北に幅 3 の固い道。
   内の床の縁の四隅に小さな鐘 (印 seat_bell_<ne|se|sw|nw>)。輪の上の四隅に陰の柱 (印 pillar_<k>)。
   北の台 (半径 17〜24) に巡礼者の座 (白い石と金の大きな椅子、背に金の輪)。座の前の段に触れる所 (印 throne)。台に帰りの台 (印 arena_back)。
+  台の西に雲の暦 (石英の台に日時計。印 calendar。クリア後の巡礼の試し。FinaleWorld の版 7)。
   下は白い岩の逆さの根。
 
   python -X utf8 tools/gen/world/build_cloud_seat.py
@@ -143,6 +144,13 @@ g.put(CX + 6, F + 1, TZ + 3, "minecraft:lodestone")
 for x in (CX - 6, CX + 6):
     g.put(x, F + 1, TZ, "minecraft:quartz_pillar[axis=y]")
     g.put(x, F + 2, TZ, "minecraft:end_rod[facing=up]")
+# 雲の暦 (巡礼の試し): 石英の台に日時計、まわりに金の四つの刻み
+CAL = (CX - 6, F + 2, TZ + 3)
+g.put(CAL[0], F + 1, CAL[2], "minecraft:chiseled_quartz_block")
+g.put(*CAL, "minecraft:daylight_detector[inverted=false,power=0]")
+for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+    g.put(CAL[0] + dx, F + 1, CAL[2] + dz, "minecraft:gold_block" if dx else "minecraft:quartz_slab[type=bottom,waterlogged=false]")
+g.marks["calendar"] = list(CAL)
 
 g.marks["arena"] = [CX, F, CZ]
 g.marks["lord_spawn"] = [CX, F + 1, CZ]

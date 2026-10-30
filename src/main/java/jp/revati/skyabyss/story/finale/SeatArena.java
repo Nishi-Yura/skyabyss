@@ -44,12 +44,32 @@ public final class SeatArena {
     private static boolean spawned;
     private static int empty;
     private static long ringAt;
+    // 巡礼の試しの段 (0 = ふだんの戦い。PilgrimTrial)
+    private static int tier;
 
     private SeatArena() {
     }
 
     public static int form() {
         return form;
+    }
+
+    public static int tier() {
+        return tier;
+    }
+
+    // 技の間の倍率 (試しの段 3 から三分の二)
+    public static double pace() {
+        return tier >= 3 ? 2.0 / 3 : 1.0;
+    }
+
+    // 巡礼の試しを始める (段 tier。体力と傷に段の倍率)
+    public static void startTrial(ServerLevel level, int t) {
+        start(level, 1);
+        tier = t;
+        for (ServerPlayer p : present(level)) {
+            Notice.narrate(p, "message.skyabyss.trial.begin", t);
+        }
     }
 
     public static AABB box() {
@@ -164,7 +184,7 @@ public final class SeatArena {
                     if (h != null) {
                         h.setHome(at, side.equals("e") ? 0 : 70);
                         h.moveTo(at.getX() + 0.5, at.getY() - 6, at.getZ() + 0.5, side.equals("e") ? 90f : 270f, 0f);
-                        h.tuneCloud(1, PilgrimHand.HP, PilgrimHand.DMG);
+                        h.tuneCloud(1, PilgrimHand.HP * PilgrimTrial.hpScale(tier), PilgrimHand.DMG * PilgrimTrial.dmgScale(tier));
                         h.addTag(TAG);
                         level.addFreshEntity(h);
                         level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 60, 2.0, 2.0, 2.0, 0.05);
@@ -178,7 +198,7 @@ public final class SeatArena {
                 PilgrimEye e = CloudMobsSetup.PILGRIM_EYE.get().create(level);
                 if (e != null) {
                     e.moveTo(c.getX() + 0.5, c.getY() + PilgrimEye.HOVER, c.getZ() + 0.5, 180f, 0f);
-                    e.tuneCloud(1, PilgrimEye.HP, PilgrimEye.DMG);
+                    e.tuneCloud(1, PilgrimEye.HP * PilgrimTrial.hpScale(tier), PilgrimEye.DMG * PilgrimTrial.dmgScale(tier));
                     e.addTag(TAG);
                     level.addFreshEntity(e);
                     e.playAction("call");
@@ -192,7 +212,7 @@ public final class SeatArena {
                 PilgrimMoon m = CloudMobsSetup.PILGRIM_MOON.get().create(level);
                 if (m != null) {
                     m.moveTo(c.getX() + 0.5, c.getY() + PilgrimMoon.HOVER, c.getZ() + 0.5, 180f, 0f);
-                    m.tuneCloud(1, PilgrimMoon.HP, PilgrimMoon.DMG);
+                    m.tuneCloud(1, PilgrimMoon.HP * PilgrimTrial.hpScale(tier), PilgrimMoon.DMG * PilgrimTrial.dmgScale(tier));
                     m.addTag(TAG);
                     level.addFreshEntity(m);
                     m.playAction("call");
@@ -273,6 +293,7 @@ public final class SeatArena {
             LampIsle.gaze(p, false, 0, 0f, null);
         }
         form = 0;
+        tier = 0;
         spawned = false;
         nextAt = -1;
         empty = 0;
@@ -285,14 +306,25 @@ public final class SeatArena {
             return;
         }
         List<ServerPlayer> here = present(level);
-        Quests.signalWithParty(level, here, LORD);
+        if (tier > 0) {
+            // 巡礼の試し: 記録と報酬だけ (PilgrimTrial)
+            PilgrimTrial.won(here, tier);
+        } else {
+            Quests.signalWithParty(level, here, LORD);
+        }
         for (ServerPlayer p : here) {
             Notice.narrate(p, "message.skyabyss.seat.down");
             // 神器 (初めては職の神器と雲上の心核、二度目からは心核の欠片と心核 25%。story/finale/gear/DivineGear)
-            jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
+            if (tier == 0) {
+                jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
+            }
         }
-        // 語りのあと、座のそばの人に結末の選び (FinaleEnding)
-        jp.revati.skyabyss.story.ch1.Tasks.later(120, () -> {
+        boolean trial = tier > 0;
+        // 語りのあと、座のそばの人に結末の選び (FinaleEnding。試しのときは出さない)
+        jp.revati.skyabyss.story.ch1.Tasks.later(trial ? 1 : 120, () -> {
+            if (trial) {
+                return;
+            }
             for (ServerPlayer p : here) {
                 if (!p.hasDisconnected() && FinaleEnding.mayChoose(p)) {
                     FinaleEnding.offer(p, false);

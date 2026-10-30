@@ -34,7 +34,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   島 2    灯の島と鐘の島の主の間からの光の橋 (data/skyabyss/finale/isle2.json。build_cloud_isle2.py。版 3。LampIsle)
 //   島 3    炉の島と灯の島の主の間からの光の橋 (data/skyabyss/finale/isle3.json。build_cloud_isle3.py。版 4。ForgeIsle)
 //   島 4    約束の島と炉の島の主の間からの光の橋 (data/skyabyss/finale/isle4.json。build_cloud_isle4.py。版 5。PromiseIsle)
-//   座      巡礼者の座と約束の島の主の間からの光の橋 (data/skyabyss/finale/seat.json。build_cloud_seat.py。版 6。PilgrimSeat・SeatArena)
+//   座      巡礼者の座と約束の島の主の間からの光の橋 (data/skyabyss/finale/seat.json。build_cloud_seat.py。版 6、雲の暦は版 7。PilgrimSeat・SeatArena・PilgrimTrial)
 //   行き来  都の大鐘楼の門 (story/ch6/MoonGate が行き先を選ばせる。FinaleGate)。着く所の帰りの台 (天然磁石) を右クリックで都へ
 //   門の鐘  巡礼の門の下の鐘を右クリック → 合図 finale_gate (作る順 2 で雲の島 1 への橋を架ける)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -46,7 +46,7 @@ public final class FinaleWorld {
     public static final String GATE_SIGNAL = "finale_gate";
     static final String ARRIVAL = "arrival";
     // 1 = 巡礼の門の島、2 = 島 1「鐘の島」と着く所からの白い橋 (BellIsle)
-    static final int VERSION = 6;
+    static final int VERSION = 7;
     // 人ごとの最後に立っていた島の所 (保存しない。なければ着く所)
     private static final Map<UUID, BlockPos> SAFE = new HashMap<>();
 
@@ -103,7 +103,8 @@ public final class FinaleWorld {
         if (d.version < 5) {
             PromiseIsle.terrain().pour(level);
         }
-        if (d.version < 6) {
+        // 版 7: 座の台に雲の暦 (巡礼の試し)。座をもう一度流し込む
+        if (d.version < 7) {
             PilgrimSeat.terrain().pour(level);
         }
         d.version = VERSION;
@@ -178,7 +179,7 @@ public final class FinaleWorld {
         Notice.narrate(p, "message.skyabyss.cloudsea.gate");
     }
 
-    // 開発用: /skyabyss cloudsea enter | leave | ring <鐘の印> | lord | crumble | lamp <w|e|s> | eye | forge <w|e|n> | rewinder | selves | plume | seat <1|2|3> | ending <calm|break|accept|none> (権限 2)
+    // 開発用: /skyabyss cloudsea enter | leave | ring <鐘の印> | lord | crumble | lamp <w|e|s> | eye | forge <w|e|n> | rewinder | selves | plume | seat <1|2|3> | ending <calm|break|accept|none> | trial <1..5> (権限 2)
     @SubscribeEvent
     static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
@@ -216,6 +217,11 @@ public final class FinaleWorld {
                         .then(net.minecraft.commands.Commands.literal("seat")
                                 .then(net.minecraft.commands.Commands.argument("form", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3)).executes(c -> {
                                     SeatArena.toForm(c.getSource().getServer().getLevel(LEVEL), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "form"));
+                                    return 1;
+                                })))
+                        .then(net.minecraft.commands.Commands.literal("trial")
+                                .then(net.minecraft.commands.Commands.argument("tier", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, PilgrimTrial.MAX_TIER)).executes(c -> {
+                                    SeatArena.startTrial(c.getSource().getServer().getLevel(LEVEL), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "tier"));
                                     return 1;
                                 })))
                         .then(net.minecraft.commands.Commands.literal("ending")

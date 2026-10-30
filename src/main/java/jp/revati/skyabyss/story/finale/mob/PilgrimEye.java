@@ -267,7 +267,7 @@ public class PilgrimEye extends CloudMob {
                         spots.add(p.position());
                     }
                     BlockPos c = PilgrimSeat.mark("lord_spawn");
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < (SeatArena.tier() >= 5 ? 10 : 5); i++) {
                         double ra = random.nextDouble() * Math.PI * 2;
                         double rd = 3 + random.nextDouble() * 11;
                         spots.add(new Vec3(c.getX() + 0.5 + Math.cos(ra) * rd, c.getY(), c.getZ() + 0.5 + Math.sin(ra) * rd));
@@ -295,7 +295,7 @@ public class PilgrimEye extends CloudMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
-            rest = phase >= 2 ? restTicks * 2 / 3 : restTicks;
+            rest = (int) ((phase >= 2 ? restTicks * 2 / 3 : restTicks) * SeatArena.pace());
         }
 
         // 凝視: 光の糸 (STARE_TELL) → 見えていれば光の柱 → 目を閉じる
@@ -338,7 +338,8 @@ public class PilgrimEye extends CloudMob {
                 }
             }
             if (t >= STARE_TELL + 6) {
-                closedFor = CLOSED;
+                // 巡礼の試しの段 5 は、閉じる隙が半分
+                closedFor = SeatArena.tier() >= 5 ? CLOSED / 2 : CLOSED;
                 playAction("closed");
                 playSound(CloudMobsSetup.PILGRIM_CLOSE.get(), 2.0f, 0.9f);
                 end(30);
