@@ -35,6 +35,11 @@ public final class PouchLayout {
     public record Result(List<Spot> spots, List<Label> labels, int bottom, List<int[]> spare, int[] spareLabel) {
     }
 
+    // 袋の枠に並べる区分か (封の箱は自分のつまみで見る)
+    public static boolean onGrid(Category category) {
+        return category != Category.BOX;
+    }
+
     // 登録の並び (PouchEntries.enabled()) を流し込む。入る品が増えて下端を越えたら bottom が SEPARATOR_Y を越える (自己テストが見る)
     public static Result compute(List<Entry> entries) {
         List<Spot> spots = new ArrayList<>();
@@ -43,6 +48,9 @@ public final class PouchLayout {
         int row = 0;
         int bottom = TOP;
         for (Category category : Category.values()) {
+            if (!onGrid(category)) {
+                continue;
+            }
             List<Entry> group = new ArrayList<>();
             for (Entry e : entries) {
                 if (e.category() == category) {

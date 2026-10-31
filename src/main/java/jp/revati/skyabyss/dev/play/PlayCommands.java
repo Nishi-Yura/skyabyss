@@ -40,7 +40,7 @@ public final class PlayCommands {
     private PlayCommands() {
     }
 
-    static final int HELP_LINES = 16;
+    static final int HELP_LINES = 17;
 
     private interface Fn {
         int run(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> targets) throws CommandSyntaxException;
@@ -153,6 +153,8 @@ public final class PlayCommands {
                 })));
         play.then(Commands.literal("skip").then(targeted(Commands.literal("opening"), (ctx, t) -> each(ctx, t, "skip_opening", Playtest::skipOpening))));
         play.then(targeted(Commands.literal("now"), (ctx, t) -> now(ctx, t, false)));
+        // 封の箱 (docs/design/52): box give <種類> [数] / box open
+        play.then(jp.revati.skyabyss.loot.box.BoxCommands.node());
         LiteralArgumentBuilder<CommandSourceStack> quest = Commands.literal("quest");
         quest.then(targeted(Commands.literal("list"), (ctx, t) -> {
             for (ServerPlayer p : t) {

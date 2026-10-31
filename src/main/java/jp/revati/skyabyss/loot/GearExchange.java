@@ -88,7 +88,7 @@ public final class GearExchange {
         r.lastExchangeClears = r.clears;
         r.exchanges++;
         ItemStack stack = AffixRules.withAffixes(new ItemStack(item.get()), player.getRandom());
-        int held = TitanLoot.handOver(player.server, player.getUUID(), player, List.of(stack), 0);
+        int held = jp.revati.skyabyss.loot.box.LootBoxes.direct(() -> TitanLoot.handOver(player.server, player.getUUID(), player, List.of(stack), 0));
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
         Notice.alert(player, "message.skyabyss.exchange.done", TitanLoot.itemLink(stack));
         TitanLoot.tellHeld(player, held);

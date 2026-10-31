@@ -36,7 +36,9 @@ public enum AttendantRole {
     // 市の三人 (2026-10-27 の声「道具屋がパンまで売るのはおかしい。専門の人に」): 食べ物・得物と防具・素材
     FOOD_VENDOR("food_vendor", "food_shop", 1),
     OUTFITTER("outfitter", "outfit_shop", 1),
-    MATERIAL_TRADER("material_trader", "material_shop", 1);
+    MATERIAL_TRADER("material_trader", "material_shop", 1),
+    // 封切り師 (封の箱を開ける。docs/design/52 の 5 章)。設計図の印は持たず、鍛冶屋の係の人のそばの空いた床に立つ (loot/box/BoxOpeners)
+    BOX_OPENER("box_opener", null, 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";

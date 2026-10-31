@@ -174,6 +174,7 @@ public final class FacilitySelfTest {
                 case SMITH -> "repair";
                 case TRADE_KEEPER -> "trade";
                 case STABLE_KEEPER -> "mount_shop";
+                case BOX_OPENER -> "boxes";
                 default -> null;
             };
             if (need != null && menu != null) {

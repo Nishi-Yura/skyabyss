@@ -158,6 +158,10 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.SMALL, jp.revati.skyabyss.facility.Coins.MAX, false, false);
         // 乗り笛 (Y の短押しで呼ぶ・帰す)。登録の末尾に足して既存の枠の位置を動かさない。区分は鍵の列 (使う道具の列に足すと袋の枠が一行あふれる)
         add(list, jp.revati.skyabyss.mount.MountSetup.WHISTLE.get(), Category.KEY, 1, true, false);
+        // 封の箱 (19 種。docs/design/52)。袋の枠の並び (PouchLayout) には出さない
+        for (var box : jp.revati.skyabyss.loot.box.LootBoxSetup.BOX_ITEMS.values()) {
+            add(list, box.get(), Category.BOX, 999, false, false);
+        }
         return list;
     }
 

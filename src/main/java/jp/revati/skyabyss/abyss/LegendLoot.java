@@ -72,8 +72,13 @@ public final class LegendLoot {
         ItemStack legend = AffixRules.withAffixes(new ItemStack(item(id)), random);
         List<ItemStack> items = new ArrayList<>();
         items.add(legend);
+        boolean boxed = jp.revati.skyabyss.loot.box.LootBoxes.wouldBox(legend);
         TitanLoot.handOver(p.getServer(), p.getUUID(), p, items, 0);
-        Notice.alert(p, "message.skyabyss.abyss.legend_new", TitanLoot.itemLink(legend));
+        if (boxed) {
+            Notice.gain(p, TitanLoot.rewardLine(items));
+        } else {
+            Notice.alert(p, "message.skyabyss.abyss.legend_new", TitanLoot.itemLink(legend));
+        }
     }
 
     // 果てない深みの王の褒美の箱 (tier 3)。深いほど出やすい。箱の中なので誰のものでもない (職の寄りは無し)

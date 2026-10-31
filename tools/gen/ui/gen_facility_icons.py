@@ -104,6 +104,11 @@ SIGNPOST = ["....##....", "########..", "#########.", "########..", "....##...."
             "....##....", "....##....", "....##....", "....##....", "...####..."]
 SIGNPOST_H = [(2, 2), (4, 2), (6, 2), (3, 6), (5, 6), (7, 6)]
 
+# 封切り師: 封をした箱 (ふたの継ぎ目・真ん中の封蝋)
+SEALBOX = [".##########.", "############", "############", "############", "############", "############",
+           "############", "############", "############", ".##########."]
+SEALBOX_H = [(x, 3) for x in range(12) if x not in (4, 5, 6, 7)] + [(4, 2), (7, 2), (4, 5), (7, 5), (5, 6), (6, 6)]
+
 
 ICONS = {
     "guild_clerk": (BANNER, BANNER_H), "smith": (HAMMER, HAMMER_H), "tool_merchant": (LANTERN, []),
@@ -115,6 +120,7 @@ ICONS = {
     "stable_keeper": (HORSESHOE, []),
     "guide": (SIGNPOST, SIGNPOST_H),
     "food_vendor": (SAUSAGE, SAUSAGE_H), "outfitter": (SWORD_SHIELD, SWORD_SHIELD_H), "material_trader": (ORE, ORE_H),
+    "box_opener": (SEALBOX, SEALBOX_H),
 }
 
 

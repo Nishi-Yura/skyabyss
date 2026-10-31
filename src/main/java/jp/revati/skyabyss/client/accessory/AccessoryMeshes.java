@@ -32,13 +32,26 @@ public final class AccessoryMeshes {
             "tide_chime_charm", "moontide_pearl", "tide_watching_shell",
             "abyss_pulse_listener", "abyss_lantern_charm", "abyss_surveyor_plumb"));
 
-    // 野の装備の装飾の枠の品 (item/wild/WildGearTable.ACCESSORIES。docs/design/51 の 6 章)
+    // 野の装備の装飾の枠の品 (item/wild/WildGearTable.ACCESSORIES。docs/design/51 の 6 章) と封の箱 (docs/design/52)
     private static Set<String> withWild(Set<String> base) {
         java.util.Set<String> all = new java.util.HashSet<>(base);
         for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : jp.revati.skyabyss.item.wild.WildGearTable.ACCESSORIES) {
             all.add(x.id());
         }
+        for (jp.revati.skyabyss.loot.box.BoxKind k : jp.revati.skyabyss.loot.box.BoxKind.ALL) {
+            all.add(k.id());
+        }
         return Set.copyOf(all);
+    }
+
+    // 平らなモデル・メッシュの名前 (封の箱は形の名前 BoxKind.look()。階級の箱は帯にかかわらず階級ごとに一つ)
+    public static Set<String> lookNames() {
+        java.util.Set<String> out = new java.util.HashSet<>();
+        for (String id : IDS) {
+            jp.revati.skyabyss.loot.box.BoxKind k = jp.revati.skyabyss.loot.box.BoxKind.byId(id);
+            out.add(k == null ? id : k.look());
+        }
+        return out;
     }
     public static final int WHITE = 0xFFFFFFFF;
     public static final int FULL_BRIGHT = 0xF000F0;
@@ -50,6 +63,9 @@ public final class AccessoryMeshes {
     }
 
     public static String idOf(ItemStack stack) {
+        if (stack.getItem() instanceof jp.revati.skyabyss.loot.box.SealedBoxItem box) {
+            return box.kind.look();
+        }
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
     }
 

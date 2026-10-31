@@ -59,5 +59,6 @@
   "commands.skyabyss_play.said.raid": "%s のレイド部屋 %s へ運びます (%s 人)",
   "commands.skyabyss_play.said.day": "%s 日目の朝に",
   "commands.skyabyss_play.said.fast_on": "時間を 2 倍速に",
-  "commands.skyabyss_play.said.fast_off": "時間を通常に"
+  "commands.skyabyss_play.said.fast_off": "時間を通常に",
+  "commands.skyabyss_play.help.16": "§e■ 封の箱 §fplay box give <種類> [数] §7— 箱を出す ・ §fplay box open §7— 封切り師の画面をその場で開く"
 }

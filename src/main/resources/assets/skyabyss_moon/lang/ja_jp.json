@@ -494,5 +494,6 @@
   "message.skyabyss.moon_trial.overlay.field": "位相が重なる: 満ち引きが二倍の速さで巡る",
   "message.skyabyss.moon_trial.overlay.rift": "位相が重なる: 残像の遅れが二秒に縮む",
   "message.skyabyss.moon_trial.overlay.core": "位相が重なる: 欠片が速く回る",
-  "block.skyabyss.moon_memory_stone": "記憶の石"
+  "block.skyabyss.moon_memory_stone": "記憶の石",
+  "gear.skyabyss.origin.moon": "月の専用装備"
 }

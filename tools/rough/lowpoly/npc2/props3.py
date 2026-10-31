@@ -148,3 +148,18 @@ PROP3_MATS = {
 from props import PROP_MATS  # noqa: E402
 
 PROP_MATS.update(PROP3_MATS)
+
+
+# ---------------------------------------------------------------- 封切り師 (docs/design/52 の 5 章)
+def sealed_box(c):
+    """左手で胸に抱えた封の箱 (樫の板・真鍮の帯・赤い封蝋の印と紐)"""
+    h = hand(c, 1)
+    cen = h + V(-1.0, 1.5, -0.7)
+    F = part("sb_body", box("prop_l", "wood", cen, (1.9, 1.25, 1.35)))
+    F += part("sb_lid", box("prop_l", "wood", cen + V(0, 1.5, 0), (2.05, 0.34, 1.48), taper=0.9))
+    for i, dx in enumerate((-1.25, 1.25)):
+        F += part(f"sb_band{i}", box("prop_l", "brass", cen + V(dx, 0.25, 0), (0.2, 1.72, 1.46)))
+    F += part("sb_cord", box("prop_l", "wax", cen + V(0, 0.35, -1.42), (0.12, 1.3, 0.06)))
+    F += part("sb_seal", disc("prop_l", "wax", cen + V(0, 0.55, -1.48), 0.56, 0.2, n=8, axis="z"))
+    F += part("sb_lock", box("prop_l", "brass", cen + V(0, 1.15, -1.42), (0.32, 0.3, 0.1)))
+    return F

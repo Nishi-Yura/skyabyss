@@ -176,8 +176,9 @@
 | `trade_keeper` | 取引所の番 | 取引所 | 取引所を開く（`trade`。6.11）、取引の決まり |
 | `stable_keeper` | 厩舎の番 | 厩舎 | 乗り物を見る・買う（`mount_shop`。38）、乗り笛の決まり |
 | `guide`（印は `npc_guide_<所>`） | 都の案内人（5 人） | 四つの門と広場 | 行き先を選ぶ（`guide`。6.12）、灯りの色のこと、都の門のこと |
+| `box_opener`（印なし） | 封切り師（都と四つの町に一人ずつ） | 鍛冶屋の係の人のそば（`npc_smith` から 2〜4 ブロックの空いた床。`loot/box/BoxOpeners`） | 封の箱を開ける（`boxes`。ルーレットの画面。[52](52_loot_boxes.md)）、箱のこと |
 
-- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|lore_book|map_copy|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
+- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|lore_book|map_copy|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
 ### 6.2 鐘銭と店（`facility/Coins`・`ShopDef`・`ShopService`、画面 `client/facility/ShopScreen`）
 

@@ -59,5 +59,6 @@
   "commands.skyabyss_play.said.raid": "Carrying to the %s raid room %s (%s players)",
   "commands.skyabyss_play.said.day": "Morning of day %s",
   "commands.skyabyss_play.said.fast_on": "Time at 2x",
-  "commands.skyabyss_play.said.fast_off": "Time at normal"
+  "commands.skyabyss_play.said.fast_off": "Time at normal",
+  "commands.skyabyss_play.help.16": "§e■ Sealed boxes §fplay box give <kind> [n] §7— get boxes · §fplay box open §7— open the box opener screen here"
 }

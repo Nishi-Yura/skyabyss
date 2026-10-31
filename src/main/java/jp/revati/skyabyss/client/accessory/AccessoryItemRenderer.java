@@ -76,7 +76,7 @@ public final class AccessoryItemRenderer extends BlockEntityWithoutLevelRenderer
 
     @SubscribeEvent
     static void registerFlatModels(ModelEvent.RegisterAdditional event) {
-        for (String name : AccessoryMeshes.IDS) {
+        for (String name : AccessoryMeshes.lookNames()) {
             event.register(flatId(name));
         }
     }

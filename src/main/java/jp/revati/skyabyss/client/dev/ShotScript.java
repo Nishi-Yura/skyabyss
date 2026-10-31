@@ -72,7 +72,7 @@ public final class ShotScript {
                     script.height = line.intArg(1);
                 }
                 case "stareffect", "marker", "waitfile", "signal", "wait", "cmd", "camera", "waitchunks", "hud", "fov", "guiscale", "open", "key", "close", "respawn", "shot", "record", "recwait",
-                        "echo", "prof", "watch", "band", "waitgame", "waitband", "waitnotice", "waitscreen", "quit", "waitdump", "chat", "look", "render", "clouds", "perf", "perspective", "swingpose", "swingstep", "inspectpose", "swingclock", "swing", "use", "stopuse", "mainhand", "bodyyaw", "lowpoly", "titanweight", "overheadshadow", "skypass", "skycircle", "weaponmesh", "weapontier", "acctier", "accmesh", "accworn", "accequip", "hover", "openacc", "trail", "watcher", "heartreward", "armortier", "armorlevel", "sneak", "walk", "huddemo", "mapstyle", "mapscale", "wheel", "drag", "music" -> script.steps.add(line);
+                        "echo", "prof", "watch", "band", "waitgame", "waitband", "waitnotice", "waitscreen", "quit", "waitdump", "chat", "look", "render", "clouds", "perf", "perspective", "swingpose", "swingstep", "inspectpose", "swingclock", "swing", "use", "stopuse", "mainhand", "bodyyaw", "lowpoly", "titanweight", "overheadshadow", "skypass", "skycircle", "weaponmesh", "weapontier", "acctier", "accmesh", "accworn", "accequip", "hover", "openacc", "trail", "watcher", "heartreward", "armortier", "armorlevel", "sneak", "walk", "huddemo", "mapstyle", "mapscale", "wheel", "drag", "click", "music" -> script.steps.add(line);
                 default -> throw new IllegalArgumentException("line " + (i + 1) + ": unknown step '" + op + "' (" + Arrays.toString(args) + ")");
             }
         }

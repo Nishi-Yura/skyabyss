@@ -489,6 +489,8 @@ public final class TitanLoot {
 
     // 渡せる分は手もとへ。受け取れない人の分と、あふれた分は預かる。預かった品の数を返す
     public static int handOver(MinecraftServer server, UUID uuid, @Nullable ServerPlayer player, List<ItemStack> items, int xp) {
+        // 装備は封の箱に替えて渡す (docs/design/52。交換・初回の選択などは LootBoxes.direct の中で呼ぶ)
+        items = jp.revati.skyabyss.loot.box.LootBoxes.wrapAll(server, uuid, items);
         if (!canReceive(player)) {
             TitanMemoryData.Pending pending = memory(server).pending(uuid);
             items.forEach(s -> pending.items.add(s.copy()));
@@ -601,6 +603,10 @@ public final class TitanLoot {
         for (Item piece : roll.pieces()) {
             // 特性の付いた実物を見せる (名前にカーソルで特性まで見える)
             ItemStack shown = roll.items().stream().filter(s -> s.is(piece)).findFirst().orElseGet(() -> new ItemStack(piece));
+            // 箱で渡した品は、開けるまで言わない
+            if (jp.revati.skyabyss.loot.box.LootBoxes.wouldBox(shown)) {
+                continue;
+            }
             boolean fresh = roll.fresh().contains(piece);
             if (isExclusive(piece)) {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
@@ -793,7 +799,7 @@ public final class TitanLoot {
         r.lastExchangeClears = r.clears;
         r.exchanges++;
         ItemStack stack = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
-        int held = handOver(player.server, player.getUUID(), player, List.of(stack), 0);
+        int held = jp.revati.skyabyss.loot.box.LootBoxes.direct(() -> handOver(player.server, player.getUUID(), player, List.of(stack), 0));
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
         Notice.alert(player, "message.skyabyss.exchange.done", itemLink(stack));
         tellHeld(player, held);

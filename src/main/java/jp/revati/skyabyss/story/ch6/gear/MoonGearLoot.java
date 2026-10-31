@@ -52,6 +52,7 @@ public final class MoonGearLoot {
         String piece = MoonGear.lordPiece(lord);
         if (!r.owned.contains(piece)) {
             addGear(out, piece, random);
+            out.forEach(jp.revati.skyabyss.loot.box.LootBoxes::keepDirect);
             MoonGear.SET.record(r, List.of(piece));
         } else {
             fragments += 4;

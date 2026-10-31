@@ -155,7 +155,7 @@ public final class HeartReward {
         // 初回の贈り物は記憶のカウンタを戻さない (天井の進みはそのまま)
         r.owned.add(itemId);
         ItemStack gift = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
-        int held = TitanLoot.handOver(player.server, player.getUUID(), player, List.of(gift), 0);
+        int held = jp.revati.skyabyss.loot.box.LootBoxes.direct(() -> TitanLoot.handOver(player.server, player.getUUID(), player, List.of(gift), 0));
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8f, 1f);
         Notice.alert(player, "message.skyabyss.legendary_new", TitanLoot.itemLink(gift));
         TitanLoot.tellHeld(player, held);

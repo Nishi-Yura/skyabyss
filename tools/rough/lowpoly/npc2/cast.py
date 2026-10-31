@@ -386,6 +386,19 @@ add("material_trader", ja="素材屋", anim="hold_l",
     lower="robe", sleeve="wide", arms=HOLD_L, props={"prop_l": P3.ore_lump})
 
 
+# 封切り師 (封の箱を開ける人。docs/design/52 の 5 章)。封蝋の匠: 煤けた赤茶の上着に生成りの前掛け、腰に小刀と封蝋の棒の袋、
+# 左手で封の箱を抱える。眼鏡越しに封を見る年配の職人
+add("box_opener", ja="封切り師", anim="hold_l",
+    pal=dict(skin=SKIN["ruddy"], hair=(150, 140, 132), coat=(112, 52, 42), apron=(214, 200, 168), shirt=(196, 184, 160), trim=(64, 36, 28),
+             metal=(206, 168, 86), trousers=(56, 46, 42), boot=(48, 34, 26), leather=(110, 74, 46), wax=(170, 34, 38)),
+    face=dict(eye="calm", iris=(110, 84, 60), brow="flat", mouth="smirk", marks=[(["w"], 4, 47)]),
+    hair=dict(style="short", front=27.2, side=24.6, back=23.4, fringe=[]),
+    specs=True, beard="moustache", hairline=27.0, build="avg",
+    upper=dict(apron=dict(bottom=6.4, top=17.6, w=3.1), collar=True, collar_mat="trim", buttons=[18.6],
+               pouches=[(-3.8, 10.4, "pouch"), (3.8, 10.6, "pouch")]),
+    lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P3.sealed_box})
+
+
 # ====================================================================== 旅の職人 (章ごとに絵だけ替える: variants)
 
 def goggles(c):

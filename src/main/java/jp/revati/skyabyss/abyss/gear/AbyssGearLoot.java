@@ -61,6 +61,7 @@ public final class AbyssGearLoot {
         String piece = AbyssGear.lordPiece(layer);
         if (!r.owned.contains(piece)) {
             addGear(out, piece, random);
+            out.forEach(jp.revati.skyabyss.loot.box.LootBoxes::keepDirect);
             AbyssGear.SET.record(r, List.of(piece));
         } else {
             iron += 4;

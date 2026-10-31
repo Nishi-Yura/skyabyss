@@ -494,5 +494,6 @@
   "message.skyabyss.moon_trial.overlay.field": "The phases overlap: the tide turns twice as fast",
   "message.skyabyss.moon_trial.overlay.rift": "The phases overlap: the afterimage lags only two seconds",
   "message.skyabyss.moon_trial.overlay.core": "The phases overlap: the shards spin faster",
-  "block.skyabyss.moon_memory_stone": "Memory Stone"
+  "block.skyabyss.moon_memory_stone": "Memory Stone",
+  "gear.skyabyss.origin.moon": "Moon gear"
 }

@@ -413,5 +413,6 @@
   "message.skyabyss.trial.keepsake": "For a moment, the sundial's shadow stood still. ...It has been written in your lore.",
   "message.skyabyss.trial.shut": "The sundial's shadow does not move. ...You have not yet driven back the Pilgrim.",
   "lore.skyabyss.finale.keepsake_pilgrim.title": "The Pilgrim's Trial",
-  "lore.skyabyss.finale.keepsake_pilgrim.body": "When you cleared the fifth tier, the shadow on the cloud calendar's sundial stood still, just once.\n\nThe Pilgrim descends again and again. Driven back, it returns as the other half of the pull. Not because it is an enemy. It is testing whether anyone still stands on this side of the world.\n\nThe shadow moves again. The next pilgrimage is coming."
+  "lore.skyabyss.finale.keepsake_pilgrim.body": "When you cleared the fifth tier, the shadow on the cloud calendar's sundial stood still, just once.\n\nThe Pilgrim descends again and again. Driven back, it returns as the other half of the pull. Not because it is an enemy. It is testing whether anyone still stands on this side of the world.\n\nThe shadow moves again. The next pilgrimage is coming.",
+  "gear.skyabyss.origin.cloudsea": "Cloudsea relic"
 }

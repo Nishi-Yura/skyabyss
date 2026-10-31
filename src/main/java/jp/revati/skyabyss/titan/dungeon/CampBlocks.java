@@ -351,7 +351,7 @@ public final class CampBlocks {
         if (items.isEmpty()) {
             return;
         }
-        int held = TitanLoot.handOver(server, receiverId, receiver, items, 0);
+        int held = jp.revati.skyabyss.loot.box.LootBoxes.direct(() -> TitanLoot.handOver(server, receiverId, receiver, items, 0));
         if (receiver != null && TitanLoot.canReceive(receiver)) {
             Notice.hint(receiver, "message.skyabyss.camp.returned", items.stream().mapToInt(ItemStack::getCount).sum());
             if (held > 0) {

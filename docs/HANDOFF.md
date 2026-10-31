@@ -19,6 +19,17 @@
 - 装飾の枠の品 26 品（同日の声「この流れで、装飾も色々追加してほしい。レベルごとに」。設計 51 の 6 章）: 帯ごとに装飾 2・3・3・4・5 と護符 1・1・2・2・3。`WildAccessoryItem`（護符の使い方）、装飾の効果は `WildArmorEvents.active` が一式と一緒に数える、体に付ける所は表の mount（`AccessoryWornLayer`）、手・地面・額縁の低ポリは `AccessoryMeshes.IDS` に足した。形 `tools/rough/lowpoly/weapons/wild/o_wild_acc.py`、入れる `install_wild_gear.py accessories`。撮影は `tools/shots/wild_gear.txt` の終わり（`accequip` で体に付けた姿）。
 - まだ: 能力の数値と落ちる確率は試遊で。ヒロイックの防具はもう一段豪華にしてよい。
 
+## 封の箱と封切り師（2026-10-31。設計 [52](design/52_loot_boxes.md)）
+
+- 声「敵が直接防具を落とすのをやめたい。Wynncraft のように低確率で箱を落とす形に。同じ種類ならスタック。町に開封してくれる NPC、ルーレット。巨神は専用の箱 4 種、その他はレア度で」。00 の 306〜311 は推奨どおり（金の箱あり・深淵と月も階級の箱・5 人・無料・旅嚢の欄・心臓の数は今の品の数）。
+- 仕組み: 抽選は今のまま。当たった装備は渡す直前に箱に替わり、品（特性つき）は人ごとの封の列（`LootBoxData`、保存 `skyabyss_loot_boxes`）へ。開けると古い順。列が空の箱は表から引く。包むのは `TitanLoot.handOver`・`WildLoot.give`・敵の落とし物（`LivingDropsEvent` の一番後）。包まないのは `LootBoxes.direct`（交換・初回の選択・野営の返却）と `keepDirect`（層・区画の主の初回の部位）。
+- Java: `loot/box/`（`BoxKind` 19 品、`SealedBoxItem`、`LootBoxSetup`、`LootBoxes` 包む・表・開ける、`BoxService`・`BoxNetwork` 画面、`BoxOpeners` 立つ所、`BoxCommands`、`LootBoxSelfTest`）、`client/box/`（`BoxScreen` ルーレット、`BoxPouchScreen` 旅嚢の四つ目のつまみ）。つなぎ: `AttendantRole.BOX_OPENER`・`FacilityActions` の `boxes`・`PouchConfig.Category.BOX`（袋の枠には並ばない `PouchLayout.onGrid`）・つまみ 4 つ（`AccessoryScreen.addTabs`）・`AccessoryMeshes`（箱の形は `BoxKind.look()`）・告知の口止め（`TitanLoot.announcePieces`・`LegendLoot`）。
+- 封切り師: 都と四つの町の鍛冶屋の係の人（`npc_smith`）から 2〜4 ブロックの空いた床に立つ（設計図は触らない）。体は `tools/rough/lowpoly/npc2/cast.py` の box_opener（`install_npc2.py box_opener`）、顔と印は `gen_attendant_portraits.py`・`gen_facility_icons.py`（どちらも全員を描き直すので、ほかの役の絵は git で戻すこと）。
+- 形と絵: `tools/rough/lowpoly/weapons/wild/o_boxes.py`（9 形）→ `build_wild.py o_boxes` → `python -I tools/install/install_boxes.py`（帯の数字入りの絵も作る）。言葉と会話 `python tools/gen/loot/gen_box_text.py`。
+- 試遊: `/skyabyss play box give <種類> [数]`・`/skyabyss play box open`。撮影 `tools/shots/box_ui.txt`（画面と形）・`tools/shots/box_openers.txt`（都と町の立つ所）。
+- 確かめ: 自己テスト `loot boxes`・`pouch`・`facility`・`lowpoly npc`・`wild gear`・`command gate`・`lang` ほかが通った。quick_check も通った。
+- まだ: 箱の落ちる確率の手ざわり、ルーレットの長さ、町ごとの封切り師の台詞（今は一人分）は試遊で。
+
 ## 0.9.18（全体監査の直し。2026-10-31）
 
 - 監査の書類 `docs/review/audit_2026-10-31.md`（通ったもの・おかしい所・書類の古さ・足したいもの・まだやること）。

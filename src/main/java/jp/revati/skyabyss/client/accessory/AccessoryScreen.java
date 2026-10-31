@@ -22,9 +22,9 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
     static final int TEX = 512;
     static final int W = 176;
     static final int H = 166;
-    static final int TAB_W = 48;
+    static final int TAB_W = 41;
     public static final int TAB_H = 16;
-    static final int TABS = 3;
+    static final int TABS = 4;
     private static final int DOLL_X0 = 58;
     private static final int DOLL_Y0 = 14;
     private static final int DOLL_X1 = 118;
@@ -71,9 +71,14 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
     }
 
     public static void addTabs(java.util.function.Consumer<AbstractButton> add, AbstractContainerScreen<?> screen, int selected) {
+        addTabs(add, screen::getGuiLeft, screen::getGuiTop, selected);
+    }
+
+    // 入れ物でない画面 (封の箱の欄 client/box/BoxPouchScreen) からも。left / top = 画面の左上
+    public static void addTabs(java.util.function.Consumer<AbstractButton> add, java.util.function.IntSupplier left, java.util.function.IntSupplier top, int selected) {
         restoreCursor();
         for (int i = 0; i < TABS; i++) {
-            add.accept(new Tab(screen, i, i == selected));
+            add.accept(new Tab(left, top, i, i == selected));
         }
     }
 
@@ -119,23 +124,25 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
         }
     }
 
-    // つまみ: 0 = 持ち物、1 = 装飾。選ばれたつまみは押せず、画面の縁とつながる
+    // つまみ: 0 = 持ち物、1 = 装飾、2 = 旅嚢、3 = 封の箱 (docs/design/52)。選ばれたつまみは押せず、画面の縁とつながる
     static final class Tab extends AbstractButton {
-        private final AbstractContainerScreen<?> screen;
+        private final java.util.function.IntSupplier left;
+        private final java.util.function.IntSupplier top;
         private final int which;
         private final boolean selected;
 
-        Tab(AbstractContainerScreen<?> screen, int which, boolean selected) {
+        Tab(java.util.function.IntSupplier left, java.util.function.IntSupplier top, int which, boolean selected) {
             super(0, 0, TAB_W, TAB_H, Component.translatable(which == 0 ? "skyabyss_gear.screen.tab_inventory"
-                    : which == 1 ? "skyabyss_gear.screen.tab_accessories" : "skyabyss_pouch.tab"));
-            this.screen = screen;
+                    : which == 1 ? "skyabyss_gear.screen.tab_accessories" : which == 2 ? "skyabyss_pouch.tab" : "skyabyss_box.tab"));
+            this.left = left;
+            this.top = top;
             this.which = which;
             this.selected = selected;
         }
 
         private void place() {
-            setX(screen.getGuiLeft() + W - (TABS - which) * (TAB_W + 2) - 2);
-            setY(screen.getGuiTop() - TAB_H + 2);
+            setX(left.getAsInt() + W - (TABS - which) * (TAB_W + 2) - 2);
+            setY(top.getAsInt() - TAB_H + 2);
         }
 
         @Override
@@ -149,6 +156,9 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
                 PacketDistributor.sendToServer(new jp.revati.skyabyss.item.accessory.AccessorySetup.OpenPayload());
             } else if (which == 2) {
                 PacketDistributor.sendToServer(new jp.revati.skyabyss.pouch.PouchNet.Open());
+            } else if (which == 3 && mc.player != null) {
+                mc.player.closeContainer();
+                mc.setScreen(new jp.revati.skyabyss.client.box.BoxPouchScreen());
             } else if (mc.player != null) {
                 mc.player.closeContainer();
                 mc.setScreen(new InventoryScreen(mc.player));
@@ -161,7 +171,8 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
             int state = selected ? 2 : isHoveredOrFocused() ? 1 : 0;
             g.pose().pushPose();
             g.pose().translate(0, 0, selected ? 50 : 0);
-            g.blit(TEXTURE, getX(), getY(), TAB_W, TAB_H, state * 100, 340, TAB_W * 2, TAB_H * 2, TEX, TEX);
+            // 絵のつまみは幅 48 (96 画素) で描いてあるので、四つ並ぶ幅へ縮める
+            g.blit(TEXTURE, getX(), getY(), TAB_W, TAB_H, state * 100, 340, 96, TAB_H * 2, TEX, TEX);
             var font = Minecraft.getInstance().font;
             int color = selected ? 0xF2C14E : isHoveredOrFocused() ? 0xE6E2D6 : 0xA9AEBC;
             g.drawString(font, getMessage(), getX() + (TAB_W - font.width(getMessage())) / 2, getY() + 5, color, false);

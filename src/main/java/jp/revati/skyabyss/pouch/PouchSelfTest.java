@@ -591,7 +591,7 @@ public final class PouchSelfTest {
         p.containerMenu = menu;
         // 枠の並び: 登録の品ごとに 1 枠、重ならず、画面の中、説明の線より上
         PouchLayout.Result layout = PouchLayout.compute(PouchEntries.enabled());
-        check(f, menu.pouchSlotCount() == PouchEntries.enabled().size() && menu.slots.size() == menu.pouchSlotCount(), "the menu does not have one slot per entry");
+        check(f, menu.pouchSlotCount() == PouchEntries.enabled().stream().filter(e -> PouchLayout.onGrid(e.category())).count() && menu.slots.size() == menu.pouchSlotCount(), "the menu does not have one slot per entry");
         check(f, layout.bottom() <= PouchLayout.SEPARATOR_Y - 2, "the pouch slots run into the info area: " + layout.bottom());
         boolean clean = true;
         for (int i = 0; i < layout.spots().size(); i++) {
@@ -604,7 +604,7 @@ public final class PouchSelfTest {
             }
         }
         check(f, clean, "the pouch slot positions overlap or leave the panel");
-        check(f, layout.labels().size() == Category.values().length, "a category has no label");
+        check(f, layout.labels().size() == java.util.Arrays.stream(Category.values()).filter(PouchLayout::onGrid).count(), "a category has no label");
         int sh = slotOf(menu, shard);
         int cr = slotOf(menu, crystal);
         int co = slotOf(menu, core);
