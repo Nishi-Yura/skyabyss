@@ -38,7 +38,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // あいだの塔の受付 (docs/design/54 の 2.2)。都の広場 (案内人の印 npc_guide_plaza から 2〜4 ブロックの空いた床。BoxOpeners.spotNear)。
-//   見え方  資格のある人 (終章の結末を選んだ人) にだけ、受付から光の柱 (その人にだけ送る粒)。触れる所は見えない Interaction (塔守の姿は形を見せてから)
+//   見え方  受付に塔守 (係の人の役 TOWER_KEEPER。話すと受付の一覧・塔の店・記録の板) が立つ。資格のある人 (終章の結末を選んだ人) にだけ、受付から光の柱 (その人にだけ送る粒)
 //   隊      レイド隊 1〜12 人。隊長が「隊を作る」(受付のそばの同じ組の人も入る)、ほかの人は「隊に入る」。隊長の「塔へ入る」で、
 //           受付のそば (RANGE) にいる、資格があり今日まだ入っていない人が全員入る (Towers.start)
 //   チャット 押せる文字の一覧 (/skyabyss_tower menu|create|join <隊長>|quit|start|leave)。どこでも開けるが、作る・入る・始めるは受付のそばだけ
@@ -90,7 +90,7 @@ public final class TowerDesk {
     }
 
     // 記録の板: 人数ごとの最速と、今週の組合の順位
-    static void records(ServerPlayer p) {
+    public static void records(ServerPlayer p) {
         TowerRecords r = TowerRecords.get(p.server);
         p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.head").withStyle(s -> s.withColor(0xF2D78A)));
         boolean any = false;
@@ -157,24 +157,22 @@ public final class TowerDesk {
     }
 
     static void ensureDesk(ServerLevel level, BlockPos s) {
-        AABB box = new AABB(s).inflate(2);
-        List<Entity> have = level.getEntitiesOfClass(Entity.class, box, e -> e.getTags().contains(TAG));
-        if (!have.isEmpty()) {
-            return;
+        // 前の版の見えない受付 (Interaction) は片付ける
+        for (Entity e : level.getEntitiesOfClass(Interaction.class, new AABB(s).inflate(4), e -> e.getTags().contains(TAG))) {
+            e.discard();
         }
-        Interaction it = EntityType.INTERACTION.create(level);
-        if (it == null) {
-            return;
+        if (jp.revati.skyabyss.facility.Attendants.find(level, jp.revati.skyabyss.facility.AttendantRole.TOWER_KEEPER, s) == null) {
+            jp.revati.skyabyss.facility.Attendants.ensureAll(level, Map.of(jp.revati.skyabyss.facility.AttendantRole.TOWER_KEEPER.mark(), s));
         }
-        it.moveTo(s.getX() + 0.5, s.getY(), s.getZ() + 0.5, 0f, 0f);
-        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-        it.saveWithoutId(tag);
-        tag.putFloat("width", 1.2f);
-        tag.putFloat("height", 2.4f);
-        tag.putBoolean("response", true);
-        it.load(tag);
-        it.addTag(TAG);
-        level.addFreshEntity(it);
+    }
+
+    // 塔の店を開く (受付のそばで、資格のある人だけ)
+    public static boolean openShop(ServerPlayer p) {
+        if (!Towers.eligible(p) || !near(p)) {
+            Notice.hint(p, Towers.eligible(p) ? "message.skyabyss.tower.desk.far" : "message.skyabyss.tower.not_yet");
+            return false;
+        }
+        return jp.revati.skyabyss.facility.ShopService.open(p, SHOP, null);
     }
 
     @SubscribeEvent
@@ -383,14 +381,7 @@ public final class TowerDesk {
                     return 1;
                 }))
                 // 塔の店 (塔の欠片で塔の装備・塔の箱。受付のそばで)
-                .then(Commands.literal("shop").executes(c -> {
-                    ServerPlayer p = c.getSource().getPlayerOrException();
-                    if (!Towers.eligible(p) || !near(p)) {
-                        Notice.hint(p, "message.skyabyss.tower.desk.far");
-                        return 0;
-                    }
-                    return jp.revati.skyabyss.facility.ShopService.open(p, SHOP, null) ? 1 : 0;
-                }))
+                .then(Commands.literal("shop").executes(c -> openShop(c.getSource().getPlayerOrException()) ? 1 : 0))
                 .then(Commands.literal("leave").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     if (Towers.runOf(p) != null) {

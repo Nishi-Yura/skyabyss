@@ -110,6 +110,11 @@ SEALBOX = [".##########.", "############", "############", "############", "####
 SEALBOX_H = [(x, 3) for x in range(12) if x not in (4, 5, 6, 7)] + [(4, 2), (7, 2), (4, 5), (7, 5), (5, 6), (6, 6)]
 
 
+# 塔守: 天秤 (柱と竿と二つの皿)
+BALANCE = ["....##....", "##########", "#...##...#", "#...##...#", "#...##...#", "###.##.###", "....##....", "....##....", "...####...", "..######.."]
+BALANCE_H = [(4, 0), (5, 0)]
+
+
 ICONS = {
     "guild_clerk": (BANNER, BANNER_H), "smith": (HAMMER, HAMMER_H), "tool_merchant": (LANTERN, []),
     "apothecary": (FLASK, FLASK_H), "storage_keeper": (CHEST, CHEST_H), "innkeeper": (BED, BED_H),
@@ -120,6 +125,7 @@ ICONS = {
     "guide": (SIGNPOST, SIGNPOST_H),
     "food_vendor": (SAUSAGE, SAUSAGE_H), "outfitter": (SWORD_SHIELD, SWORD_SHIELD_H), "material_trader": (ORE, ORE_H),
     "box_opener": (SEALBOX, SEALBOX_H),
+    "tower_keeper": (BALANCE, BALANCE_H),
 }
 
 

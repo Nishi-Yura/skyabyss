@@ -44,6 +44,7 @@ R = {
     "trade_keeper":    dict(skin=(196, 150, 112), hair=(70, 52, 40), coat=(44, 84, 82), role=(196, 160, 82), acc=(214, 184, 104), head="cap", headc=(44, 84, 82), specs=True, bg=(200, 170, 90)),
     "guide":           dict(skin=(196, 150, 112), hair=(70, 52, 40), coat=(232, 230, 222), role=(242, 240, 234), acc=(196, 162, 78), head="none", bg=(120, 170, 210)),
     "box_opener":      dict(skin=(222, 160, 128), hair=(150, 140, 132), coat=(112, 52, 42), role=(214, 200, 168), acc=(206, 168, 86), head="none", specs=True, old=True, bg=(170, 60, 50)),
+    "tower_keeper":    dict(skin=(214, 178, 150), hair=(222, 220, 214), coat=(226, 222, 210), role=(40, 36, 52), acc=(206, 168, 86), head="hood", headc=(226, 222, 210), beard=True, old=True, bg=(150, 110, 210)),
 }
 ROLES = list(R)
 

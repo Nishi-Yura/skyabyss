@@ -44,11 +44,12 @@ import net.minecraft.world.level.block.BedBlock;
 //   trade     : 取引所の番。取引所の画面 (trade/TradeService。番の前なので出す・申請ができる)
 //   boxes     : 封切り師。封の箱の画面 (loot/box/BoxService。docs/design/52)
 //   buyback   : 封切り師の買い取り。装備を鐘銭に (Buyback。店の画面を売るだけで開く)
+//   tower_desk / tower_shop / tower_records : 塔守。あいだの塔の受付の一覧・塔の店・記録の板 (tower/TowerDesk)
 //   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records");
 
     private FacilityActions() {
     }
@@ -85,6 +86,9 @@ public final class FacilityActions {
             case "guide" -> TownGuide.openMenu(player);
             case "boxes" -> jp.revati.skyabyss.loot.box.BoxService.open(player, npc);
             case "buyback" -> ShopService.open(player, Buyback.ID, npc);
+            case "tower_desk" -> jp.revati.skyabyss.tower.TowerDesk.menu(player);
+            case "tower_shop" -> jp.revati.skyabyss.tower.TowerDesk.openShop(player);
+            case "tower_records" -> jp.revati.skyabyss.tower.TowerDesk.records(player);
             default -> SkyAbyss.LOGGER.warn("[facility] unknown open {}", open);
         }
     }

@@ -1,0 +1,22 @@
+# あいだの塔の塔守 (係の人。形と持ち物と会話)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_keeper.txt -PshotsName=tower_keeper
+world keeper_flat flat
+size 1280 720
+timeout 1200
+render 8
+cmd gamemode creative
+camera 0 -60 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd time set noon
+cmd skyabyss facility spawn tower_keeper
+cmd execute at @e[type=skyabyss:attendant,limit=1,sort=nearest] run tp @s ~ ~ ~3.2 180 12
+wait 40
+shot keeper_front
+cmd execute at @e[type=skyabyss:attendant,limit=1,sort=nearest] run tp @s ~2.4 ~ ~1.8 127 12
+wait 20
+shot keeper_side

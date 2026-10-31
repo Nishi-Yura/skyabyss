@@ -21,7 +21,9 @@
 - 形（承認済み・入れた）: 武器 6 本 `tools/rough/lowpoly/weapons/one/o_tower.py` → `install_job_weapons.py`（持ち方・振り `gen_weapon_moves.py`・`WeaponKind`・`MoveSets`・弓は `WeaponClient`）、塔の箱 `o_boxes.py box_tower` → `install_boxes.py`、塔の欠片 `tools/gen/tower/gen_tower_assets.py --install`。ゲームの中の絵 `docs/review/tower_rewards/tower_weapons_ingame.jpg`、撮影 `tools/shots/tower_weapons.txt`。
 - 防具 3 式 12 部位と装飾 2（承認済み・入れた）: 品 `TowerArmorItem`・`TowerGearSetup.ARMOR/RING/CHAIN`、効き方 `TowerGearEvents`（光輪の衣は `WildGearEvents.manaRegenBonus・cooldownScale` から）。形 `tools/rough/lowpoly/armor/tower/build_tower_armor.py` → `tools/install/install_tower_armor.py`、装飾の絵 `gen_tower_assets.py --install`。塔の箱と塔の店（部位 50・装飾 60）にも入る。ゲームの中の絵 `docs/review/tower_rewards/tower_armor_ingame.jpg`、撮影 `tools/shots/tower_armor.txt`。
 - 週の賭け（`TowerWagers`。受付で隊長が三つまで選ぶ）・記録の板（`TowerRecords`。受付の [記録の板]）・称号 2 つはできた。
-- まだ: 塔守の姿（ラフ `npc2/cast.py` の `tower_keeper`、承認待ち。承認されたら NPC として入れ、受付の光の柱の所に立たせる）。数字（体力・傷・月の速さ）は遊んで詰める。
+- 塔守（係の人の役 `TOWER_KEEPER`）が受付に立つ（`TowerDesk.ensureDesk`。前の見えない Interaction は片付ける）。話すと受付の一覧・塔の店・記録の板。撮影 `tools/shots/tower_keeper.txt`。
+- まだ: 数字（体力・傷・月の速さ・箱の確率）は遊んで詰める。
+- 注意: `gen_attendant_portraits.py`・`install_attendants.py`・`gen_facility_icons.py` を流すと、ほかの役の今の絵まで書き換わる（今の絵は道具の出力とずれている）。新しい役を足すときは、その役の出力だけを残して、ほかは戻す。
 
 ## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
 

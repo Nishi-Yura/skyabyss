@@ -1,0 +1,101 @@
+{
+  "npc": "skyabyss:attendant_tower_keeper",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "text": "dialogue.skyabyss.attendant_tower_keeper.intro",
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_tower_keeper.intro"
+    },
+    "rules": {
+      "face": "grave",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_tower_keeper.rules"
+    },
+    "menu": {
+      "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_tower_keeper.menu",
+      "options": [
+        {
+          "id": "desk",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_tower_keeper.menu.desk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "tower_desk"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "shop",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_tower_keeper.menu.shop",
+          "do": [
+            {
+              "type": "facility",
+              "open": "tower_shop"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "records",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_tower_keeper.menu.records",
+          "do": [
+            {
+              "type": "facility",
+              "open": "tower_records"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rules",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_tower_keeper.menu.rules",
+          "goto": "rules"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_tower_keeper.menu.about",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_tower_keeper.menu.bye",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

@@ -112,7 +112,7 @@
 2. 橋の舞台（できた）
 3. 主「あいだに座すもの」の形と技・段・落ちる月・側の目・湧く敵（できた。越えた回数と最速は人のデータに書く。数字は遊んで詰める）
 3.5. 塔の欠片・塔の箱・越えた報酬・塔の店・塔の武器 6 本（できた。形も承認されて入れた）
-3.6. 週の賭け・記録の板・称号（できた）。塔守の姿はラフ（`tools/rough/lowpoly/npc2/cast.py` の `tower_keeper` → `docs/review/npc_models_v2/roughs/tower_keeper.png`）で承認待ち
+3.6. 週の賭け・記録の板・称号・塔守（できた）。塔守は係の人の役 `TOWER_KEEPER`（形 `npc2/cast.py` の `tower_keeper` → `install_npc2.py`）。受付の所に立ち、話すと受付の一覧・塔の店・記録の板・塔の決まり（会話 `attendant_tower_keeper.json`、働き `FacilityActions` の `tower_desk`・`tower_shop`・`tower_records`）
 4. 塔の装備（形は一品一案。見せてから入れる）・塔の箱・塔の店
 5. 週の賭け・記録・称号
 6. 自己テスト・撮影・確かめ表
