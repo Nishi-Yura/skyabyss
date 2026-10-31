@@ -47,6 +47,9 @@ final class ContinentScatter {
                 }
             }
             for (ContinentPois.Poi p : ContinentPois.all()) {
+                if (p.kind().equals(ContinentPois.GONE)) {
+                    continue;
+                }
                 out.add(new int[] {p.x(), p.z(), 36});
             }
             keepOut = out;

@@ -132,7 +132,7 @@ public final class MapMarks {
         java.util.Set<Integer> found = jp.revati.skyabyss.world.continent.ContinentPois.discovered(player);
         for (int i = 0; i < all.size(); i++) {
             jp.revati.skyabyss.world.continent.ContinentPois.Poi poi = all.get(i);
-            if (poi.kind().equals("signpost")) {
+            if (!poi.site()) {
                 continue;
             }
             BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));

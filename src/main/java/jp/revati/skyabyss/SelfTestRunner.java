@@ -107,6 +107,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("weapon strike end", s -> jp.revati.skyabyss.weapon.WeaponMoveSelfTest.finishFlow()));
         // 敵が壁・地面の中に湧かない (すべての湧き口と波に共通の決まり)。SKYABYSS_SELFTEST_ONLY="spawn safety"
         steps.add(Step.once("spawn safety", jp.revati.skyabyss.util.SpawnSafetySelfTest::runSelfTest));
+        steps.add(Step.once("quiet hives", jp.revati.skyabyss.rpg.rules.QuietHives::selfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
         steps.add(Step.once("players snapshot", jp.revati.skyabyss.util.PlayersSelfTest::runSelfTest));
         // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.3 節

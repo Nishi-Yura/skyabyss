@@ -51,7 +51,14 @@ public final class ContinentPois {
 
     // a・b = 道しるべの行き先 (signpost.skyabyss.<id>)、da・db = そこまでのおおよその道のり
     public record Poi(String kind, int x, int z, String a, int da, String b, int db) {
+        // 行ける見どころ (道しるべと、消した見どころの空き "gone" を除く)。
+        // 見どころは pois.json の並びの番号で覚える (建った印・発見) ので、消すときは並びから抜かずに "gone" にする
+        public boolean site() {
+            return !kind.equals("signpost") && !kind.equals(GONE);
+        }
     }
+
+    public static final String GONE = "gone";
 
     private static List<Poi> pois;
 
@@ -96,8 +103,8 @@ public final class ContinentPois {
             }
             for (int i = 0; i < list.size(); i++) {
                 Poi poi = list.get(i);
-                // 道しるべの看板は建てない (2026-10-28 の試遊「看板の向きや置いてる位置がおかしいときがある。消してもいい」)
-                if (poi.kind().equals("signpost")) {
+                // 道しるべの看板は建てない (2026-10-28 の試遊「看板の向きや置いてる位置がおかしいときがある。消してもいい」)。消した見どころも
+                if (!poi.site()) {
                     continue;
                 }
                 double d2 = p.distanceToSqr(poi.x() + 0.5, p.getY(), poi.z() + 0.5);
@@ -115,7 +122,7 @@ public final class ContinentPois {
                         SiteBuilds.enqueue(job(over, data, e));
                     }
                 } else {
-                    if (!poi.kind().equals("signpost") && d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
+                    if (d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
                         discover(p, i, poi);
                         // 見どころに着いた (土地の町の人の頼み「〜を見てこよう」。初めてでなくても毎回)
                         jp.revati.skyabyss.quest.Quests.signal(p, "poi:" + poi.kind());
@@ -174,7 +181,7 @@ public final class ContinentPois {
         }
         persisted(p).putIntArray(FOUND_TAG, found.stream().mapToInt(Integer::intValue).sorted().toArray());
         jp.revati.skyabyss.notice.Notice.place(p, net.minecraft.network.chat.Component.translatable("map.skyabyss.poi." + poi.kind()),
-                net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", found.size(), all().stream().filter(q -> !q.kind().equals("signpost")).count()));
+                net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", found.size(), all().stream().filter(Poi::site).count()));
         int region = ContinentMap.get().region(poi.x(), poi.z());
         jp.revati.skyabyss.rpg.Growth.addXp(p, DISCOVER_XP[Math.max(0, Math.min(DISCOVER_XP.length - 1, region))], "growth.skyabyss.reason.discovery");
         p.serverLevel().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1.6f);

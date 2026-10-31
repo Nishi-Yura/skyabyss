@@ -1,5 +1,7 @@
-# はじまりの島 v2 (2026-10-27): 広い谷・低い丘・寄り道 5 か所
-world island_v2 continent
+# はじまりの島 v3 (2026-10-31): 寄り道 5 か所 (見張り塔の跡・大樹・洞窟・漁師小屋・旅人の野営) と脇道の谷を消したあと。
+# 残る場所 (野営地・足跡の窪地・峠の野盗の野営・休み場・祠・船着き場) と、寄り道のあった所が谷の壁に戻ったかを見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_v3.txt -PshotsName=island_v3
+world island_v3 continent
 size 1600 900
 timeout 2400
 render 12
@@ -21,43 +23,63 @@ cmd tp @s -1770 230 1775 0 90
 waitchunks 900
 wait 200
 shot top
-cmd tp @s -1990 110 1960 -40 25
+cmd tp @s -1990 140 1960 -130 22
 waitchunks 900
 wait 200
 shot over_sw
-cmd tp @s -1560 112 1600 135 25
+cmd tp @s -1560 140 1600 51 22
 waitchunks 900
 wait 200
 shot over_ne
 cmd gamemode creative
 cmd effect give @s invisibility 9999 0 true
-cmd tp @s -1725 120 1680
+# 残る場所 (近くで建つのを待ってから、斜め上から)
+cmd tp @s -1922 120 1814
+waitchunks 600
+wait 600
+cmd execute positioned -1922 0 1814 positioned over motion_blocking_no_leaves run tp @s ~16 ~12 ~16 facing ~ ~1 ~
+wait 60
+shot site_camp
+cmd tp @s -1842 120 1690
+waitchunks 600
+wait 600
+cmd execute positioned -1842 0 1690 positioned over motion_blocking_no_leaves run tp @s ~0 ~30 ~45 facing ~ ~ ~
+wait 60
+shot site_prints
+cmd tp @s -1745 120 1803
 waitchunks 600
 wait 900
-cmd execute positioned -1745 0 1660 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+cmd execute positioned -1745 0 1803 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
 wait 60
-shot spot_lookout
-cmd tp @s -1612 120 1684
+shot site_bandits
+cmd tp @s -1668 120 1714
 waitchunks 600
-wait 900
-cmd execute positioned -1632 0 1664 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 600
+cmd execute positioned -1668 0 1714 positioned over motion_blocking_no_leaves run tp @s ~14 ~10 ~14 facing ~ ~1 ~
 wait 60
-shot spot_cave
-cmd tp @s -1795 120 1913
+shot site_rest
+cmd tp @s -1624 120 1752
 waitchunks 600
-wait 900
-cmd execute positioned -1815 0 1893 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 600
+cmd execute positioned -1624 0 1752 positioned over motion_blocking_no_leaves run tp @s ~12 ~8 ~12 facing ~ ~1 ~
 wait 60
-shot spot_huts
-cmd tp @s -1876 120 1884
+shot site_shrine
+cmd tp @s -1590 120 1718
 waitchunks 600
-wait 900
-cmd execute positioned -1896 0 1864 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 600
+cmd execute positioned -1590 0 1718 positioned over motion_blocking_no_leaves run tp @s ~-18 ~12 ~14 facing ~ ~1 ~
 wait 60
-shot spot_camp_west
-cmd tp @s -1640 120 1860
+shot site_dock
+# 消した寄り道のあった所 (建物も脇道もなく、谷の外の林になっている)
+cmd tp @s -1745 120 1660
 waitchunks 600
-wait 900
-cmd execute positioned -1660 0 1840 positioned over motion_blocking_no_leaves run tp @s ~18 ~13 ~18 facing ~ ~2 ~
+wait 600
+cmd tp @s -1745 135 1680 180 45
 wait 60
-shot spot_tree
+shot gone_lookout
+cmd tp @s -1660 120 1840
+waitchunks 600
+wait 600
+cmd tp @s -1680 125 1800 -25 35
+wait 60
+shot gone_tree

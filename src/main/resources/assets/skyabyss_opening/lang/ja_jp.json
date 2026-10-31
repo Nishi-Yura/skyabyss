@@ -183,19 +183,5 @@
   "sign.skyabyss.town_fac.market.1": "市",
   "sign.skyabyss.town_fac.market.2": "道具・食料",
   "sign.skyabyss.town_fac.market.3": "武具・素材",
-  "sign.skyabyss.town_fac.market.4": "それに薬",
-  "objective.skyabyss.island_camp_west": "西の浜の旅人の野営に寄ろう",
-  "objective.skyabyss.island_huts": "南の漁師小屋の様子を見に行こう",
-  "objective.skyabyss.island_lookout": "北の見張り塔の跡を確かめよう",
-  "objective.skyabyss.island_tree": "大樹の根もとから、島を見渡そう",
-  "objective.skyabyss.island_cave": "洞窟の奥の迷い火を払おう",
-  "message.skyabyss.island.camp_west_appear": "荒らされた野営に、野犬がうろついている。追い払おう。",
-  "message.skyabyss.island.camp_west_done": "野犬は逃げていった。焚き火の跡は冷たい。……ここにいた旅人は、どこへ行ったのだろう。",
-  "message.skyabyss.island.huts_appear": "漁師小屋の干し魚を、鼠が荒らしている。",
-  "message.skyabyss.island.huts_done": "鼠を追い払った。網の繕い方が、どこかで見た手つきに似ている。",
-  "message.skyabyss.island.lookout_appear": "崩れた塔のまわりで、針兎が毛を逆立てている。",
-  "message.skyabyss.island.lookout_done": "塔の跡から、峠の向こうまで見えた。海の先に、大きな影が浮かんでいる。",
-  "message.skyabyss.island.tree_done": "大樹の根もとから島を見渡した。焚き火の煙と、祠の灯りが見える。",
-  "message.skyabyss.island.cave_appear": "洞窟の奥に、迷い火が揺れている。",
-  "message.skyabyss.island.cave_done": "迷い火は消えた。洞窟の壁に、古い鐘の印が刻まれていた。"
+  "sign.skyabyss.town_fac.market.4": "それに薬"
 }

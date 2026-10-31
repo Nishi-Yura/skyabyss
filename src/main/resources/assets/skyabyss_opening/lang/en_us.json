@@ -183,19 +183,5 @@
   "sign.skyabyss.town_fac.market.1": "Market",
   "sign.skyabyss.town_fac.market.2": "Tools, food",
   "sign.skyabyss.town_fac.market.3": "Arms, materials",
-  "sign.skyabyss.town_fac.market.4": "and medicine",
-  "objective.skyabyss.island_camp_west": "Visit the camp on the west beach",
-  "objective.skyabyss.island_huts": "Check on the fishing huts to the south",
-  "objective.skyabyss.island_lookout": "Look over the ruined lookout to the north",
-  "objective.skyabyss.island_tree": "View the island from the great tree",
-  "objective.skyabyss.island_cave": "Drive out the wisps deep in the cave",
-  "message.skyabyss.island.camp_west_appear": "Wild dogs prowl the wrecked camp. Drive them off.",
-  "message.skyabyss.island.camp_west_done": "The dogs ran off. The fire pit is cold. ...Where did the traveller go?",
-  "message.skyabyss.island.huts_appear": "Rats are raiding the dried fish at the huts.",
-  "message.skyabyss.island.huts_done": "You drove off the rats. The way the nets were mended looks oddly familiar.",
-  "message.skyabyss.island.lookout_appear": "Spine hares bristle around the fallen tower.",
-  "message.skyabyss.island.lookout_done": "From the ruined tower you can see past the pass. Far out over the sea, a huge shadow floats.",
-  "message.skyabyss.island.tree_done": "From the roots of the great tree you take in the island: the campfire smoke, the shrine light.",
-  "message.skyabyss.island.cave_appear": "Wisps flicker deep in the cave.",
-  "message.skyabyss.island.cave_done": "The wisps are gone. An old bell mark is carved into the cave wall."
+  "sign.skyabyss.town_fac.market.4": "and medicine"
 }

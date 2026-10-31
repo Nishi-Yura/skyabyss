@@ -15,7 +15,8 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 
 // はじまりの島の道 (IslandTrail) と道の均し (ContinentRoads) の検査。SKYABYSS_SELFTEST_ONLY="island trail"。
 //   道: 陸の上の道は 2 ブロックごとの高さの差が 1 以内 (段々・崖にならない)。島の足跡は道から離れている
-//   島 (大陸の世界だけ): 目的の順 (足跡 → 野盗 → 休み場 → 祠 → 渡し守)、野盗を 3 人退けると峠の柵が開く、祠で渡し守の印、渡ると目的が消える
+//   島 (大陸の世界だけ): 目的の順 (職 → 足跡 → 野盗 → 休み場 → 祠 → 渡し守)、野盗を 3 人退けると峠の柵が開く、祠で渡し守の印、渡ると目的が消える、
+//   消した寄り道が島の図にも見どころにも残っていない
 public final class IslandTrailSelfTest {
     private IslandTrailSelfTest() {
     }
@@ -33,7 +34,7 @@ public final class IslandTrailSelfTest {
             trail(f, level);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST island trail PASSED (road grade{})", island ? ", island order, bandits open the barricade, job choice at the shrine readies the ferryman, crossing" : "; no island here");
+            SkyAbyss.LOGGER.info("SELFTEST island trail PASSED (road grade{})", island ? ", island order, job choice at the camp, bandits open the barricade, the shrine readies the ferryman, crossing, no removed side trips" : "; no island here");
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST island trail FAILED: {}", s));
         }
@@ -107,26 +108,6 @@ public final class IslandTrailSelfTest {
         if (first == null || !jp.revati.skyabyss.rpg.skill.SkillManager.get(p).knows(first)) {
             f.add("the first job skill was not learned: " + first);
         }
-        p.setPos(start.getX() + 0.5, p.getY(), start.getZ() + 0.5);
-        // 寄り道も順の目的 (2026-10-28): 西の野営 → 漁師小屋。着くと敵が出て、まわりの敵がいなくなれば済む
-        expect(f, p, "island_camp_west");
-        BlockPos cw = ContinentLayout.get().island("camp_west");
-        p.setPos(cw.getX() + 0.5, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cw.getX(), cw.getZ()), cw.getZ() + 0.5);
-        level.getChunk(cw);
-        IslandTrail.update(level, p);
-        java.util.List<net.minecraft.world.entity.Mob> dogs = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-                new net.minecraft.world.phys.AABB(cw).inflate(24, 40, 24), m -> m.getTags().contains(IslandTrail.SPOT_TAG + "_camp_west"));
-        if (IslandTrail.has(p, IslandTrail.CAMP_WEST) || (p.getPersistentData().getInt(IslandTrail.SPAWNED) & IslandTrail.CAMP_WEST) == 0) {
-            f.add("arriving at the west camp did not set out its dogs (done " + IslandTrail.done(p) + ", seen " + dogs.size() + ")");
-        }
-        dogs.forEach(net.minecraft.world.entity.Entity::discard);
-        IslandTrail.update(level, p);
-        if (!dogs.isEmpty() && !IslandTrail.has(p, IslandTrail.CAMP_WEST)) {
-            f.add("clearing the west camp did not finish it");
-        }
-        IslandTrail.mark(p, IslandTrail.CAMP_WEST);
-        expect(f, p, "island_huts");
-        IslandTrail.mark(p, IslandTrail.HUTS);
         expect(f, p, "island_prints");
         BlockPos pr = ContinentLayout.get().islandPrints().get(0);
         p.setPos(pr.getX() + 0.5, p.getY(), pr.getZ() + 0.5);
@@ -136,13 +117,6 @@ public final class IslandTrailSelfTest {
             f.add("bandits counted before any kill");
         }
         p.getPersistentData().putInt(IslandTrail.KILLS, IslandTrail.BANDITS_NEEDED);
-        IslandTrail.update(level, p);
-        expect(f, p, "island_lookout");
-        IslandTrail.mark(p, IslandTrail.LOOKOUT);
-        expect(f, p, "island_tree");
-        // 大樹は敵がなく、着けば済む
-        BlockPos tr = ContinentLayout.get().island("tree");
-        p.setPos(tr.getX() + 0.5, p.getY(), tr.getZ() + 0.5);
         IslandTrail.update(level, p);
         expect(f, p, "island_rest");
         if (!IslandTrail.gateOpen(level)) {
@@ -154,8 +128,6 @@ public final class IslandTrailSelfTest {
         BlockPos r = IslandTrail.restPos(level, 0);
         p.setPos(r.getX() + 0.5, r.getY(), r.getZ() + 0.5);
         IslandTrail.update(level, p);
-        expect(f, p, "island_cave");
-        IslandTrail.mark(p, IslandTrail.CAVE);
         expect(f, p, "island_shrine");
         if (jp.revati.skyabyss.npc.NpcBonds.of(p).hasFlag(IslandTrail.FERRYMAN_ROLE, IslandTrail.READY_FLAG)) {
             f.add("the ferryman is ready before the shrine");
@@ -174,6 +146,17 @@ public final class IslandTrailSelfTest {
         }
         if (jp.revati.skyabyss.town.RegionFolk.byId(IslandTrail.FERRYMAN) == null) {
             f.add("the island ferryman is not a region folk");
+        }
+        // 消した寄り道 (見張り塔の跡・大樹・洞窟・漁師小屋・旅人の野営) は、島の図にも見どころにも残っていない
+        for (String gone : List.of("lookout", "tree", "cave", "huts", "camp_west")) {
+            if (ContinentLayout.get().island(gone) != null) {
+                f.add("the removed island side trip " + gone + " is still in the island plan");
+            }
+        }
+        for (ContinentPois.Poi poi : ContinentPois.all()) {
+            if (poi.site() && !poi.kind().equals("bandit_camp") && ContinentOutskirts.onIsland(level, new BlockPos(poi.x(), 64, poi.z()))) {
+                f.add("a " + poi.kind() + " point of interest is still on the island at " + poi.x() + ", " + poi.z());
+            }
         }
         p.discard();
     }

@@ -607,11 +607,7 @@ def write_layout(lay, height=None):
     if plan:
         pk = {n: pt(c) for n, c, _, _ in plan['pockets']}
         out['island'] = {'gate': pt(plan['gate']), 'prints': [pt(p) for p in plan['prints']], 'fire': pk['fire'], 'shrine': pk['shrine'],
-                         'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0]),
-                         # 寄り道 (札の行き先)
-                         **{n: pk[n] for n in ('lookout', 'cave', 'huts', 'camp_west', 'tree') if n in pk},
-                         # 道の分かれ目の札 (首の道の側の端。[x, z, 行き先])。行き先は lang の sign.skyabyss.island.<行き先>
-                         'signs': [pt(a) + [name] for (a, _, _), name in zip(plan['necks'], ['prints', 'bandits', 'fire', 'shrine', 'lookout', 'cave', 'huts', 'camp_west', 'tree'])]}
+                         'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0])}
     trim_road_ends(out)
     hand_fix_roads(out)
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:

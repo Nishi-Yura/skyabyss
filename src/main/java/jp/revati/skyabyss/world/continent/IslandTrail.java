@@ -49,9 +49,10 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   5. 宿り木の祠に祈る (island_shrine。そばに立つと済む。ここで目覚めるようになり、技の画面 (K) の手がかり)
 //   6. 船着き場の渡し守と話す (take_ferry)。渡し守は 1〜5 を済ませた人だけを乗せる (会話の印 island_ready)。乗ると渡りの場面 (ferry_crossing) →
 //      鐘の都の南の門の外で、都を見上げる場面 (capital_arrival)
-// 2026-10-28 の試遊「島には最初しか行けないので、すべて回らせて。チュートリアルなのに差が出るのはおかしい」: 寄り道 5 つも順の目的にした。
-//   職 → 西の旅人の野営 (野犬) → 南の漁師小屋 (鼠) → 足跡 → 峠の野盗 → 見張り塔の跡 (針兎) → 大樹 (見渡す) → 焚き火 → 洞窟 (迷い火) → 祠 → 渡し守
-//   島の敵は時間では湧かない (spawns/island.json は空。見どころの敵も島では出ない)。その目的の場所に着いたときだけ、決まった数を出す (Spot)
+// 2026-10-31 の試遊「意味のないものは建造物、クエストごと消して。このゲームの要素紹介になってない」: 遊びの要素を教えない寄り道
+//   (見張り塔の跡・大樹・洞窟・漁師小屋・旅人の野営) を、目的・建物・脇道ごと消した。島の目的はどれもゲームの要素を一つ教える
+//   (職と技・巨神の跡と伝承の書・戦いと名のある敵・休み場・目覚める祠と技の画面・渡し守)
+//   島の敵は時間では湧かない (spawns/island.json は空。見どころの敵も島では出ない)。峠の野盗だけ
 // 印は人の永続データの KEY (倒れても残る。util/LifeKeep)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class IslandTrail {
@@ -61,25 +62,8 @@ public final class IslandTrail {
     public static final int BANDITS = 2;
     public static final int REST = 4;
     public static final int SHRINE = 8;
-    public static final int CAMP_WEST = 16;
-    public static final int HUTS = 32;
-    public static final int LOOKOUT = 64;
-    public static final int TREE = 128;
-    public static final int CAVE = 256;
-    public static final int ALL = PRINTS | BANDITS | REST | SHRINE | CAMP_WEST | HUTS | LOOKOUT | TREE | CAVE;
-    static final String SPAWNED = "skyabyss_island_spawned";
-    static final String SPOT_TAG = "skyabyss_island_spot";
-    static final double SPOT_NEAR = 12;
-
-    // 寄り道の場所 (島の図の名前・印・出す敵と数。敵がなければ着けば済む)
-    record Spot(String name, int bit, String entity, int count) {
-    }
-
-    static final Spot S_CAMP_WEST = new Spot("camp_west", CAMP_WEST, "skyabyss:feral_dog", 2);
-    static final Spot S_HUTS = new Spot("huts", HUTS, "skyabyss:grain_rat", 3);
-    static final Spot S_LOOKOUT = new Spot("lookout", LOOKOUT, "skyabyss:spine_hare", 2);
-    static final Spot S_TREE = new Spot("tree", TREE, null, 0);
-    static final Spot S_CAVE = new Spot("cave", CAVE, "skyabyss:stray_wisp", 2);
+    // 消した寄り道の印 (16〜256) は、前のセーブに残っていても見ない
+    public static final int ALL = PRINTS | BANDITS | REST | SHRINE;
     public static final int BANDITS_NEEDED = 3;
     public static final String FERRYMAN = "island_ferryman";
     public static final String FERRYMAN_ROLE = "skyabyss:guest_island_ferryman";
@@ -157,11 +141,6 @@ public final class IslandTrail {
         if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
             return new Object[] {"island_job", ground(p.serverLevel(), lay.start())};
         }
-        for (Spot s : new Spot[] {S_CAMP_WEST, S_HUTS}) {
-            if (!has(p, s.bit) && lay.island(s.name) != null) {
-                return new Object[] {"island_" + s.name, ground(p.serverLevel(), lay.island(s.name))};
-            }
-        }
         if (!has(p, PRINTS)) {
             BlockPos v = lay.islandPrints().isEmpty() ? lay.island("prints_view") : lay.islandPrints().get(0);
             return new Object[] {"island_prints", ground(p.serverLevel(), v)};
@@ -169,16 +148,8 @@ public final class IslandTrail {
         if (!has(p, BANDITS)) {
             return new Object[] {"island_bandits", ground(p.serverLevel(), lay.island("bandits"))};
         }
-        for (Spot s : new Spot[] {S_LOOKOUT, S_TREE}) {
-            if (!has(p, s.bit) && lay.island(s.name) != null) {
-                return new Object[] {"island_" + s.name, ground(p.serverLevel(), lay.island(s.name))};
-            }
-        }
         if (!has(p, REST)) {
             return new Object[] {"island_rest", ground(p.serverLevel(), restPos(p.serverLevel(), 0))};
-        }
-        if (!has(p, CAVE) && lay.island(S_CAVE.name) != null) {
-            return new Object[] {"island_cave", ground(p.serverLevel(), lay.island(S_CAVE.name))};
         }
         if (!has(p, SHRINE)) {
             return new Object[] {"island_shrine", ground(p.serverLevel(), restPos(p.serverLevel(), 1))};
@@ -226,15 +197,7 @@ public final class IslandTrail {
             }
             return;
         }
-        // 目的は左上の順にしか進まない。今の目的が寄り道の場所なら、そこで済ませる
-        Object[] now = objective(p);
-        String cur = now == null ? "" : (String) now[0];
-        for (Spot s : new Spot[] {S_CAMP_WEST, S_HUTS, S_LOOKOUT, S_TREE, S_CAVE}) {
-            if (cur.equals("island_" + s.name)) {
-                spot(level, p, s);
-            }
-        }
-        if (!has(p, PRINTS) && has(p, CAMP_WEST) && has(p, HUTS)) {
+        if (!has(p, PRINTS)) {
             boolean near = jp.revati.skyabyss.lore.Lore.state(p).has("prologue/footprints");
             for (BlockPos q : lay.islandPrints()) {
                 near |= Math.hypot(p.getX() - q.getX(), p.getZ() - q.getZ()) < PRINTS_NEAR;
@@ -253,13 +216,13 @@ public final class IslandTrail {
                 keepBandits(level, p);
             }
         }
-        if (has(p, BANDITS) && has(p, LOOKOUT) && has(p, TREE) && !has(p, REST) && restPos(level, 0).distToCenterSqr(p.position()) < REST_NEAR * REST_NEAR) {
+        if (has(p, BANDITS) && !has(p, REST) && restPos(level, 0).distToCenterSqr(p.position()) < REST_NEAR * REST_NEAR) {
             mark(p, REST);
             Notice.hint(p, "message.skyabyss.island.rested");
         }
         // 祠に祈る (職は野営地で選んである)
         double shrine = restPos(level, 1).distToCenterSqr(p.position());
-        if (has(p, REST) && has(p, CAVE) && shrine < SHRINE_NEAR * SHRINE_NEAR && !has(p, SHRINE)) {
+        if (has(p, REST) && shrine < SHRINE_NEAR * SHRINE_NEAR && !has(p, SHRINE)) {
             mark(p, SHRINE);
             Notice.objective(p, "message.skyabyss.island.prayed");
             Notice.hint(p, "message.skyabyss.island.skill_hint");
@@ -283,49 +246,6 @@ public final class IslandTrail {
         // 絵芝居のなかった版で目を覚ました人は、目覚めて 90 秒たてば
         return st.legacy() || jp.revati.skyabyss.story.reel.StoryReels.seen(p, jp.revati.skyabyss.story.reel.StoryReels.OPENING)
                 || st.awakeAt() >= 0 && p.serverLevel().getGameTime() - st.awakeAt() > 20 * 90;
-    }
-
-    // ---------------------------------------------------------------- 寄り道の場所
-    // 着くと (SPOT_NEAR の内)、その人のために敵を出す (場所に生きている見張りの敵がいなければ)。出したあと、場所のまわりに生きている敵がいなくなれば済む。
-    // 敵のない場所 (大樹) は着けば済む
-    static void spot(ServerLevel level, ServerPlayer p, Spot s) {
-        BlockPos at = ContinentLayout.get().island(s.name);
-        if (at == null || Math.hypot(p.getX() - at.getX(), p.getZ() - at.getZ()) > SPOT_NEAR) {
-            return;
-        }
-        if (s.entity == null) {
-            mark(p, s.bit);
-            Notice.objective(p, "message.skyabyss.island." + s.name + "_done");
-            return;
-        }
-        String tag = SPOT_TAG + "_" + s.name;
-        AABB box = new AABB(at).inflate(24, 40, 24);
-        int alive = level.getEntitiesOfClass(Mob.class, box, m -> m.isAlive() && m.getTags().contains(tag)).size();
-        int spawned = p.getPersistentData().getInt(SPAWNED);
-        if (alive == 0 && (spawned & s.bit) != 0) {
-            mark(p, s.bit);
-            Notice.objective(p, "message.skyabyss.island." + s.name + "_done");
-            return;
-        }
-        if (alive == 0) {
-            EntityType<?> type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.get(net.minecraft.resources.ResourceLocation.parse(s.entity));
-            for (int i = 0; i < s.count; i++) {
-                if (!(type.create(level) instanceof Mob m)) {
-                    continue;
-                }
-                double a = i / (double) s.count * Math.PI * 2 + level.random.nextDouble();
-                int x = at.getX() + (int) Math.round(Math.cos(a) * 4);
-                int z = at.getZ() + (int) Math.round(Math.sin(a) * 4);
-                int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-                m.moveTo(x + 0.5, y, z + 0.5, level.random.nextFloat() * 360f, 0f);
-                m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null);
-                m.setPersistenceRequired();
-                m.addTag(tag);
-                level.addFreshEntity(m);
-            }
-            p.getPersistentData().putInt(SPAWNED, spawned | s.bit);
-            Notice.objective(p, "message.skyabyss.island." + s.name + "_appear");
-        }
     }
 
     // ---------------------------------------------------------------- 峠の野盗
@@ -497,70 +417,6 @@ public final class IslandTrail {
                 Notice.hint(q, "message.skyabyss.island.gate_open");
             }
         }
-    }
-
-    // ---------------------------------------------------------------- 道の分かれ目の札 (Wynncraft の道しるべのように。首の入口から 5 入った所に、道の方を向けて)
-    static final String SIGNS_KIND = "island_signs";
-
-    static void buildSigns(ServerLevel level) {
-        SiteData data = SiteData.get(level);
-        SiteData.Entry e = data.first(SIGNS_KIND);
-        if (e == null) {
-            BlockPos g = ContinentLayout.get().island("gate");
-            if (g == null) {
-                return;
-            }
-            e = data.add(SIGNS_KIND, 0, g, 0);
-            e.built = true;
-            data.setDirty();
-        }
-        int i = 0;
-        for (Map.Entry<BlockPos, String> s : ContinentLayout.get().islandSigns().entrySet()) {
-            String done = "s" + i++;
-            if (e.extra(done) != null) {
-                continue;
-            }
-            BlockPos at = s.getKey();
-            BlockPos to = signTarget(s.getValue());
-            if (to == null || !level.isLoaded(at)) {
-                continue;
-            }
-            double dx = to.getX() - at.getX();
-            double dz = to.getZ() - at.getZ();
-            double len = Math.max(1, Math.hypot(dx, dz));
-            // 行き先へ 5、横へ 6 (脇道の上に立てない)
-            int x = (int) Math.round(at.getX() + dx / len * 5 - dz / len * 6);
-            int z = (int) Math.round(at.getZ() + dz / len * 5 + dx / len * 6);
-            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            BlockPos p = new BlockPos(x, y, z);
-            if (!level.getBlockState(p).canBeReplaced()) {
-                e.extra(done, p);
-                continue;
-            }
-            // 札の表は道の方 (行き先と逆の向き)。回転 0 = 南向き、16 段
-            double face = Math.toDegrees(Math.atan2(dx / len, -dz / len));
-            int rot = Math.floorMod((int) Math.round(face / 22.5), 16);
-            level.setBlock(p, Blocks.SPRUCE_SIGN.defaultBlockState().setValue(net.minecraft.world.level.block.StandingSignBlock.ROTATION, rot), 3);
-            if (level.getBlockEntity(p) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
-                be.setText(new net.minecraft.world.level.block.entity.SignText()
-                        .setMessage(1, Component.translatable("sign.skyabyss.island." + s.getValue()))
-                        .setMessage(2, Component.literal("→")), true);
-                be.setWaxed(true);
-                be.setChanged();
-                level.sendBlockUpdated(p, be.getBlockState(), be.getBlockState(), 3);
-            }
-            e.extra(done, p);
-            data.setDirty();
-        }
-    }
-
-    @Nullable
-    static BlockPos signTarget(String name) {
-        ContinentLayout lay = ContinentLayout.get();
-        return switch (name) {
-            case "prints" -> lay.islandPrints().isEmpty() ? null : lay.islandPrints().get(0);
-            default -> lay.island(name);
-        };
     }
 
     public static boolean gateOpen(ServerLevel level) {
