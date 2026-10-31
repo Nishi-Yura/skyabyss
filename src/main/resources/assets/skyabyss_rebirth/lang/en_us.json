@@ -127,5 +127,17 @@
   "title.skyabyss_rebirth.walker_storm": "Walked all of Kazamachi",
   "title.skyabyss_rebirth.walker_storm.how": "Find every sight of the Kazamachi lands",
   "title.skyabyss_rebirth.walker_ember": "Walked all of Hairo",
-  "title.skyabyss_rebirth.walker_ember.how": "Find every sight of the Hairo lands"
+  "title.skyabyss_rebirth.walker_ember.how": "Find every sight of the Hairo lands",
+  "title.skyabyss_rebirth.mastery_warrior": "Master Warrior",
+  "title.skyabyss_rebirth.mastery_warrior.how": "Raise Warrior mastery to 10",
+  "title.skyabyss_rebirth.mastery_smith": "Master Smith",
+  "title.skyabyss_rebirth.mastery_smith.how": "Raise Smith mastery to 10",
+  "title.skyabyss_rebirth.mastery_mage": "Master Mage",
+  "title.skyabyss_rebirth.mastery_mage.how": "Raise Mage mastery to 10",
+  "title.skyabyss_rebirth.mastery_archer": "Master Archer",
+  "title.skyabyss_rebirth.mastery_archer.how": "Raise Archer mastery to 10",
+  "title.skyabyss_rebirth.mastery_assassin": "Master Assassin",
+  "title.skyabyss_rebirth.mastery_assassin.how": "Raise Assassin mastery to 10",
+  "title.skyabyss_rebirth.mastery_shaman": "Master Shaman",
+  "title.skyabyss_rebirth.mastery_shaman.how": "Raise Shaman mastery to 10"
 }

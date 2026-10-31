@@ -66,5 +66,7 @@
   "dialogue.skyabyss.guest_town_guide_whale.ask.journal": "名声と旅帳を見る",
   "dialogue.skyabyss.guest_town_guide_tide.ask.journal": "名声と旅帳を見る",
   "dialogue.skyabyss.guest_town_guide_storm.ask.journal": "名声と旅帳を見る",
-  "dialogue.skyabyss.guest_town_guide_ember.ask.journal": "名声と旅帳を見る"
+  "dialogue.skyabyss.guest_town_guide_ember.ask.journal": "名声と旅帳を見る",
+  "gui.skyabyss.growth.hud_mastery": "Lv %s・熟練 %s",
+  "message.skyabyss.mastery.up": "%sの熟練が上がった: 段 %s"
 }

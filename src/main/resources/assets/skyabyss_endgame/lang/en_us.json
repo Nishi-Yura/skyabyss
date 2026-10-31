@@ -66,5 +66,7 @@
   "dialogue.skyabyss.guest_town_guide_whale.ask.journal": "See fame and the travel journal",
   "dialogue.skyabyss.guest_town_guide_tide.ask.journal": "See fame and the travel journal",
   "dialogue.skyabyss.guest_town_guide_storm.ask.journal": "See fame and the travel journal",
-  "dialogue.skyabyss.guest_town_guide_ember.ask.journal": "See fame and the travel journal"
+  "dialogue.skyabyss.guest_town_guide_ember.ask.journal": "See fame and the travel journal",
+  "gui.skyabyss.growth.hud_mastery": "Lv %s · mastery %s",
+  "message.skyabyss.mastery.up": "%s mastery rose to %s"
 }

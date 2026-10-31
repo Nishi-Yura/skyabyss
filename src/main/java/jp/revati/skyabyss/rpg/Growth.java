@@ -57,6 +57,10 @@ public final class Growth {
         amount = jp.revati.skyabyss.rebirth.Rebirth.scaleXp(player, amount);
         // 物語の進みで決まるレベルの上限 (10 の 5 章)
         int cap = jp.revati.skyabyss.progress.Progression.levelCap(player);
+        // Lv 50 (上限) のあとの経験値は、いまの職の熟練へ (rpg/JobMastery)
+        if (data.level >= GrowthRules.MAX_LEVEL) {
+            JobMastery.add(player, amount);
+        }
         int gained = addXpRaw(data, amount, cap);
         sync(player);
         if (gained > 0) {

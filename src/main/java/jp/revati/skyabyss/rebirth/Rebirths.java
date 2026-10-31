@@ -125,7 +125,8 @@ public final class Rebirths {
         int count = RebirthView.count(p);
         boolean founder = jp.revati.skyabyss.story.finale.founder.Founder.beaten(p);
         int tower = p.getPersistentData().getInt(jp.revati.skyabyss.tower.Towers.CLEARS);
-        java.util.Set<String> marks = jp.revati.skyabyss.endgame.RegionFame.marks(p);
+        java.util.Set<String> marks = new java.util.HashSet<>(jp.revati.skyabyss.endgame.RegionFame.marks(p));
+        marks.addAll(jp.revati.skyabyss.rpg.JobMastery.marks(p));
         if (e == null) {
             return new RebirthTitles.Facts(count, 0, Progression.stage(p), 0, -1, -1, 0, founder, tower, marks);
         }

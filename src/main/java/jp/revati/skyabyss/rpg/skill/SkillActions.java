@@ -113,6 +113,8 @@ public final class SkillActions {
             LegendRewrites.after(player, skill, rank, from);
             // 秘伝 (枠に付けた秘伝の上乗せ。rpg/skill/SecretArts。docs/design/54 の 3.2.1)
             SecretArts.after(player, skill, rank, from);
+            // 職の熟練の光 (rpg/JobMastery。見た目だけ)
+            jp.revati.skyabyss.rpg.JobMastery.aura(player);
         }
         return failure;
     }
