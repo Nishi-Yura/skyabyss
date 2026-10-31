@@ -64,7 +64,7 @@
 - 形: 武器 `tools/rough/lowpoly/weapons/wild/`（`o_wild1〜5.py`・塗り `paint_wild.py`・`build_wild.py`・見直し `look_wild.py`）、防具 `tools/rough/lowpoly/armor/wild/build_wild_armor.py`。入れる `python -I tools/install/install_wild_gear.py [weapons|armor]`。一覧の絵 `docs/review/roughs_wild/sheets/`。撮影 `tools/shots/wild_gear.txt`（`gen_wild_shots.py`）。
 - 確かめ: 自己テスト `wild gear`・`gear tiers`・`jobs`・`weapon moves`・`lang` が通った。quick_check の資源・言葉・メッシュも通った。
 - 装飾の枠の品 26 品（同日の声「この流れで、装飾も色々追加してほしい。レベルごとに」。設計 51 の 6 章）: 帯ごとに装飾 2・3・3・4・5 と護符 1・1・2・2・3。`WildAccessoryItem`（護符の使い方）、装飾の効果は `WildArmorEvents.active` が一式と一緒に数える、体に付ける所は表の mount（`AccessoryWornLayer`）、手・地面・額縁の低ポリは `AccessoryMeshes.IDS` に足した。形 `tools/rough/lowpoly/weapons/wild/o_wild_acc.py`、入れる `install_wild_gear.py accessories`。撮影は `tools/shots/wild_gear.txt` の終わり（`accequip` で体に付けた姿）。
-- まだ: 能力の数値と落ちる確率は試遊で。ヒロイックの防具はもう一段豪華にしてよい。
+- まだ: 能力の数値と落ちる確率は試遊で。ヒロイックの防具の一段上の飾り（地まで届く外套・光る継ぎ目・頭の飾り）は 2026-10-31 の磨きで済んだ（`build_wild_armor.py` の `HEROIC`）。
 
 ## 封の箱と封切り師（2026-10-31。設計 [52](design/52_loot_boxes.md)）
 
