@@ -37,8 +37,6 @@ import net.minecraft.world.level.block.BedBlock;
 //   guild_storage : ギルドの倉庫 (GuildStorage)
 //   respec_quote / respec_skills / respec_skills_coins : 訓練場の師範の振り直し (TrainingMaster)
 //   job_room : 職の間 (職を替える画面。JobChoice.openRoom。docs/design/48 の 3 章)
-//   lore_book : 書庫番の伝承の読み返し (伝承の書の画面を開く)
-//   map_copy  : 書庫番の地図の写し (M の地図に祠と跡地のありか。FacilityMarks.MAP_COPY → MapMarks)
 //   key_offer / key_return : 社の祭司。鍵の間に欠片を納める / 返してもらう (KeyRoom)
 //   records   : 砦の老兵の試練の記録 (KeepRecords → client RecordsScreen)
 //   brew_lesson : 薬師が醸造を教える (四章。手ほどきの品を一度だけ)
@@ -48,7 +46,7 @@ import net.minecraft.world.level.block.BedBlock;
 //   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
-            "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room", "lore_book", "map_copy",
+            "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
             "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes");
 
     private FacilityActions() {
@@ -77,8 +75,6 @@ public final class FacilityActions {
             case "job_room" -> jp.revati.skyabyss.rpg.skill.JobChoice.openRoom(player);
             case "respec_skills" -> TrainingMaster.respec(player, false, false);
             case "respec_skills_coins" -> TrainingMaster.respec(player, false, true);
-            case "lore_book" -> loreBook(player);
-            case "map_copy" -> mapCopy(player);
             case "key_offer" -> KeyRoom.offerAll(player);
             case "key_return" -> KeyRoom.giveBack(player);
             case "records" -> KeepRecords.open(player);
@@ -216,21 +212,6 @@ public final class FacilityActions {
             }
         }
         return false;
-    }
-
-    // ---------------------------------------------------------------- 書庫
-    // 伝承の書の画面を開く (書を持っていなくても読める。中身は人の記録)
-    public static void loreBook(ServerPlayer player) {
-        jp.revati.skyabyss.lore.Lore.sync(player);
-        ShopService.send(player, new jp.revati.skyabyss.pouch.PouchNet.OpenBook());
-    }
-
-    // 地図の写し: 祠と、開いた章の跡地のありかが M の地図に載る (一度で、あとはずっと)。地図を開いて見せる
-    public static boolean mapCopy(ServerPlayer player) {
-        boolean first = FacilityMarks.add(player, FacilityMarks.MAP_COPY);
-        Notice.hint(player, first ? "message.skyabyss.archive.map_copied" : "message.skyabyss.archive.map_again");
-        ShopService.send(player, new FacilityNetwork.OpenMap());
-        return first;
     }
 
     // ---------------------------------------------------------------- 醸造の手ほどき (四章)

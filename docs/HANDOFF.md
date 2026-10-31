@@ -15,6 +15,13 @@
 - 声「蜂の巣からめっちゃ音が聞こえる」: バニラの木の飾りが蜂入りの巣を付け、蜂はバニラの生き物なので世界に入れず（`RpgRules.onJoin`）、巣が昼のあいだ毎 tick 出る音を鳴らしていた。巣の付く木 15 種の `configured_feature` を飾りなしで上書き（`data/minecraft/worldgen/configured_feature`。作るのは `tools/gen/world/quiet_bee_trees.py`）。前の版でできたチャンクの巣は読んだときに空気にする（`rpg/rules/QuietHives`。取ると記録に `[hives] removed`）。
 - 撮影 `tools/shots/island_v3.txt`（`island_v2`・`island_camps` は消した）。自己テスト `island trail`（消した寄り道が残っていない検査を足した）・`quiet hives`（新しい段）。
 
+## 書庫番・地図屋を消した（2026-10-31）
+
+- 声「書庫番や地図屋って必要？」→ 両方消す。`AttendantRole` から外し、会話・言葉・体・顔・印を消した（設計図の印 `npc_archivist`・`npc_mapmaker` は残っても立たない。前の世界に立っている人は `AttendantRole.RETIRED` で消える）。生成の道具（肖像・印・npc2・attendants）からも外した。
+- 働きの引っ越し: 祠と開いた章の跡地は M の地図に最初から載る（前は書庫番の「地図の写し」）。跡地の噂と描き足し（鐘銭 5）は都の案内人が言う（`attendant_guide_town.json`、都の中だけ）。伝承の読み返しは伝承の書の画面のまま。
+- 同日: レベルアップの知らせから「振り分けられる力」を消して技の点に、記録（J）の振り分けの行を消した。町の案内の一覧に封切り師（鍛冶場の中）。
+- 確かめ: 自己テスト `facility`・`town`・`town guide`・`npc`・`lowpoly npc`・`continent`・`record`・`lang` と quick_check。
+
 ## 0.9.19（野の装備と封の箱の試遊版。2026-10-31）
 
 - jar `build/libs/skyabyss-0.9.19.jar`。確かめ表 `docs/review/playtest_0.9.19.md`（箱が落ちる・封切り師で開ける・旅嚢の欄・野の装備・箱にならないもの）。変更履歴はサイト（`tools/site/pages_c.py`）。

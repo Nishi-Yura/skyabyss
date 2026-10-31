@@ -19,7 +19,7 @@ public final class ShelterBuilder {
         return new SiteJob(level, data, entry, Blueprint.get(name), "shelter", ShelterBuilder::finish);
     }
 
-    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker");
+    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker");  // 地図屋の屋根裏は人がいないので名札も出さない
     public static final String LABEL_TAG = "skyabyss_facility_label";
 
     private static net.minecraft.nbt.ListTag floats(float... v) {

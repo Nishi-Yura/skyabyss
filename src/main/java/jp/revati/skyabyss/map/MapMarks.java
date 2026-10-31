@@ -89,9 +89,8 @@ public final class MapMarks {
         titanMarks(player, over, out);
         shrineMarks(player, out);
         foeMarks(out);
-        if (jp.revati.skyabyss.facility.FacilityMarks.has(player, jp.revati.skyabyss.facility.FacilityMarks.MAP_COPY)) {
-            archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
-        }
+        // 祠と開いた章の跡地のありか (前は書庫番の「地図の写し」で載った。書庫番を消したので最初から)
+        archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
         if (data.first("camp") == null) {
             BlockPos s = over.getSharedSpawnPos();
             out.add(new Mark(Kind.SPAWN, "spawn", "spawn", "", s.getX(), s.getZ(), false, 0));

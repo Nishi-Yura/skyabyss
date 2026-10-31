@@ -150,7 +150,6 @@ public final class FacilityCommands {
                         .then(Commands.literal("keyroom")
                                 .then(Commands.literal("offer").executes(c -> KeyRoom.offerAll(c.getSource().getPlayerOrException())))
                                 .then(Commands.literal("return").executes(c -> KeyRoom.giveBack(c.getSource().getPlayerOrException()))))
-                        .then(Commands.literal("mapcopy").executes(c -> FacilityActions.mapCopy(c.getSource().getPlayerOrException()) ? 1 : 0))
                         .then(Commands.literal("respec").then(Commands.argument("what", StringArgumentType.word())
                                 .suggests((ctx, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.List.of("skills", "stats"), b))
                                 .executes(c -> TrainingMaster.respec(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "what").equals("stats"), false)

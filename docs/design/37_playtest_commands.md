@@ -45,7 +45,7 @@
 | 悪夢 | `skyabyss_nightmare` | enter | 2 | 要確認 | 根が `skyabyss` の外（統一が要る） |
 | 村・人 | `npc` | spawn village affinity bonds reset loop set advance | 2 | 試遊 | |
 | 町 | `town` | list rumor start place bell well reset cellar open close mapmaker draw | 2 | 試遊 | |
-| 施設・ギルド・交易 | `facility`・`guild`・`trade` | spawn mark place shop stash coins look records dummy keyroom offer return mapcopy respec brew trade demo・create apply join accept deny leave kick open info list menu officer take storage deliver banner leader disband confirm pattern plate achievements | 一部 2 | プレイヤー | `coins` が `FacilityCommands` に二度ある（後述 3） |
+| 施設・ギルド・交易 | `facility`・`guild`・`trade` | spawn mark place shop stash coins look records dummy keyroom offer return respec brew trade demo・create apply join accept deny leave kick open info list menu officer take storage deliver banner leader disband confirm pattern plate achievements | 一部 2 | プレイヤー | `coins` が `FacilityCommands` に二度ある（後述 3） |
 | パーティ | `party` | invite accept decline leave kick leader | なし | プレイヤー | |
 | 拾得・報酬 | `titanmemory`・`heartreward` | claim choose memory set clear・reward reset dev | 2 | 試遊 | |
 | 旅嚢 | `pouch` | （品の袋の確認） | 2 | 試遊 | |

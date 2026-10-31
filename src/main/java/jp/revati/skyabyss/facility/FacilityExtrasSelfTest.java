@@ -101,7 +101,6 @@ public final class FacilityExtrasSelfTest {
                 AttendantRole.TRAINING_MASTER, List.of("respec_quote", "respec_skills", "respec_skills_coins", "job_room"),
                 AttendantRole.SHRINE_PRIEST, List.of("key_offer", "key_return"),
                 AttendantRole.KEEP_VETERAN, List.of("records"),
-                AttendantRole.ARCHIVIST, List.of("lore_book", "map_copy"),
                 AttendantRole.APOTHECARY, List.of("shop", "brew_lesson"),
                 AttendantRole.GUILD_CLERK, List.of("guild", "guild_storage"));
         need.forEach((role, list) -> {
@@ -268,8 +267,6 @@ public final class FacilityExtrasSelfTest {
     }
 
     private static void marks(List<String> f, FakePlayer p) {
-        FacilityMarks.remove(p, FacilityMarks.MAP_COPY);
-        check(f, FacilityActions.mapCopy(p) && !FacilityActions.mapCopy(p) && FacilityMarks.has(p, FacilityMarks.MAP_COPY), "map copy is marked once");
         List<MapMarks.Mark> out = new ArrayList<>();
         MapMarks.archiveMarks(p.server, List.of(), jp.revati.skyabyss.story.Chapters.of(p), out);
         for (String t : Titans.all()) {
@@ -288,6 +285,5 @@ public final class FacilityExtrasSelfTest {
         p.setGameMode(GameType.SURVIVAL);
         p.getInventory().clearContent();
         jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
-        FacilityActions.loreBook(p);
     }
 }

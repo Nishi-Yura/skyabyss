@@ -282,7 +282,7 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | `remake_ward` | `titan` | その巨神の鼓動守を編み直して渡す（持っていない人だけ、1 日 1 つまで。条件 `ward_ok` と組。素材は別に `take`） |
 
 - 結果 `facility` `{open, shop}`: 都の施設の働き（`shop` 店・`stash` 預かり所・`inn_rest` 寝台・`rumor` 噂・`perch` 巨神の子を呼ぶ・`map` 地図・`guild` ギルドの窓口・`repair` 修理。35 の 6 章）。
-- 結果 `town` `{act}`: 町のクエストと裏通りの働き（`open_cellar` 酒場の地下の奥の壁を開ける・`mapmaker` 地図屋の噂・`mapmaker_draw` 地図屋の描き足し）。町のクエストの限定の人（`skyabyss:guest_<人>`）の会話もこの仕組み。35 の 3.5・6.9。
+- 結果 `town` `{act}`: 町のクエストと裏通りの働き（`open_cellar` 酒場の地下の奥の壁を開ける・`mapmaker` 跡地の噂・`mapmaker_draw` 地図への描き足し。どちらも都の案内人が言う）。町のクエストの限定の人（`skyabyss:guest_<人>`）の会話もこの仕組み。35 の 3.5・6.9。
 - 結果 `open_board`: 板の画面を開く（NPC が受け口になる）。結果 `grave_choose`: 墓の一覧の画面を開く（11 の 6.4 節）。結果 `grave_rescue`: 画面なしで一番古い墓を救う。結果 `give` の `name` / `lore` と、品の `token`、`optional` の欄は 6.1 節。
 
 ### 4.5 ループをまたぐ会話（「覚えているような」NPC）

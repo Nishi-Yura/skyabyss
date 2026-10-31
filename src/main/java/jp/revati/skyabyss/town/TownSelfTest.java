@@ -141,8 +141,8 @@ public final class TownSelfTest {
                 check(f, resource(a + "textures/gui/npc/face/guest_" + g.id() + "_" + face + ".png"), "face guest_" + g.id() + " " + face);
             }
         }
-        // 足し書きが係の人の会話に混ざっている (墓守の頼み・酔いどれ・地図屋)
-        for (String role : List.of("gravekeeper", "drunkard", "mapmaker", "guild_clerk", "innkeeper")) {
+        // 足し書きが係の人の会話に混ざっている (墓守の頼み・酔いどれ・案内人の跡地の噂)
+        for (String role : List.of("gravekeeper", "drunkard", "guide", "guild_clerk", "innkeeper")) {
             Dialogue d = DialogueManager.dialogue("skyabyss:attendant_" + role);
             check(f, d != null && d.nodes().keySet().stream().anyMatch(n -> n.startsWith("town_")), "town nodes merged into attendant_" + role);
         }

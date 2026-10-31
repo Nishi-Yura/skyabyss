@@ -39,12 +39,12 @@ voxel = CK.voxel
 BONES = ART.BONES
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
-         "shrine_priest", "keep_veteran", "archivist", "training_master", "black_marketeer", "gravekeeper",
-         "mapmaker", "drunkard", "trade_keeper", "stable_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener"]
+         "shrine_priest", "keep_veteran", "training_master", "black_marketeer", "gravekeeper",
+         "drunkard", "trade_keeper", "stable_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener"]
 ROLE_JA = {"food_vendor": "食料屋", "outfitter": "武具屋", "material_trader": "素材屋", "guild_clerk": "組合の受付の書記", "smith": "鍛冶師", "tool_merchant": "道具屋", "apothecary": "薬師",
            "storage_keeper": "預かり番", "innkeeper": "宿の女将", "perch_keeper": "止まり木の番", "shrine_priest": "社の祭司",
-           "keep_veteran": "砦の老兵", "archivist": "書庫番", "training_master": "師範", "black_marketeer": "顔を隠した商人",
-           "gravekeeper": "墓守", "mapmaker": "地図屋", "drunkard": "酔いどれ",
+           "keep_veteran": "砦の老兵", "training_master": "師範", "black_marketeer": "顔を隠した商人",
+           "gravekeeper": "墓守", "drunkard": "酔いどれ",
            "trade_keeper": "取引所の番", "stable_keeper": "厩舎の番", "guide": "都の案内人", "box_opener": "封切り師"}
 
 
@@ -84,11 +84,9 @@ PAL = {
     "perch_keeper":    dict(coat=(98, 120, 140), role=(212, 218, 214), trim=(54, 118, 124), acc=(90, 160, 166), hair=(120, 92, 62), skin="tan", guard=(84, 98, 112), sash=(54, 118, 124)),
     "shrine_priest":   dict(coat=(222, 218, 206), role=(176, 56, 44), trim=(200, 160, 70), acc=(214, 176, 80), hair=(236, 232, 222), skin="old", guard=(204, 200, 188), sash=(176, 56, 44), legs=(150, 48, 40)),
     "keep_veteran":    dict(coat=(88, 92, 98), role=(124, 38, 38), trim=(150, 154, 160), acc=(170, 174, 180), hair=(196, 194, 188), skin="old", guard=(110, 112, 118), sash=(90, 30, 30)),
-    "archivist":       dict(coat=(52, 58, 96), role=(200, 184, 140), trim=(36, 40, 72), acc=(176, 148, 82), hair=(118, 112, 110), skin="pale", guard=(66, 70, 104), sash=(110, 90, 60)),
     "training_master": dict(coat=(214, 206, 184), role=(48, 60, 104), trim=(28, 30, 40), acc=(40, 44, 60), hair=(40, 34, 32), skin="tan", guard=(196, 188, 168), sash=(28, 30, 40), legs=(44, 54, 92)),
     "black_marketeer": dict(coat=(36, 34, 40), role=(68, 44, 68), trim=(22, 20, 26), acc=(120, 104, 70), hair=(28, 26, 32), skin="mid", guard=(42, 40, 46), sash=(58, 36, 58), mask=(70, 58, 78)),
     "gravekeeper":     dict(coat=(92, 92, 88), role=(74, 86, 70), trim=(50, 52, 50), acc=(150, 146, 132), hair=(176, 174, 168), skin="pale", guard=(72, 72, 70), sash=(56, 60, 54)),
-    "mapmaker":        dict(coat=(54, 104, 112), role=(196, 172, 122), trim=(40, 52, 76), acc=(186, 146, 70), hair=(150, 96, 56), skin="mid", guard=(70, 96, 100), sash=(150, 70, 50)),
     "drunkard":        dict(coat=(110, 92, 70), role=(122, 62, 78), trim=(76, 60, 46), acc=(140, 120, 80), hair=(96, 76, 58), skin="ruddy", guard=(100, 84, 66), sash=(98, 70, 50), drunk=True),
     "trade_keeper":    dict(coat=(44, 84, 82), role=(196, 160, 82), trim=(58, 40, 28), acc=(214, 184, 104), hair=(70, 52, 40), skin="mid", guard=(52, 72, 70), sash=(150, 110, 50)),
     "stable_keeper":   dict(coat=(116, 84, 56), role=(92, 120, 76), trim=(70, 48, 30), acc=(204, 172, 104), hair=(104, 76, 52), skin="tan", guard=(86, 70, 52), sash=(92, 120, 76)),

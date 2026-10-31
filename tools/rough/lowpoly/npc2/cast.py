@@ -116,15 +116,6 @@ add("keep_veteran", ja="砦の老兵", anim="hold_r",
     lower="trousers", sleeve="fitted", arms=STAFF_R, props={"prop_r": P2.spear},
     extra_body=[])
 
-add("archivist", ja="書庫番", anim="hold_l",
-    pal=dict(skin=SKIN["pale"], hair=(124, 118, 116), coat=(52, 58, 96), skirt=(52, 58, 96), sash=(200, 184, 140), trim=(176, 148, 82), hat=(40, 44, 78),
-             hat2=(176, 148, 82), metal=(176, 148, 82), trousers=(40, 44, 70), boot=(40, 36, 40)),
-    face=dict(eye="old", iris=(80, 90, 120), brow="worried", mouth="small", marks=[(["w"], 4, 47)]),
-    hair=dict(style="sidelocks", front=27.0, side=24.6, back=23.6, fringe=[]),
-    hat=dict(kind="cap"), specs=True, beard="goatee", hairline=26.8, build="old",
-    upper=dict(sash=True, collar=True, collar_mat="trim", mantle=dict(bottom=18.0, clasp=False)),
-    lower="robe", sleeve="wide", arms=HOLD_L, props={"prop_l": P2.book_stack})
-
 add("training_master", ja="師範", anim="hold_r",
     pal=dict(skin=SKIN["tan"], hair=(40, 34, 32), coat=(214, 206, 184), skirt=(48, 60, 104), sash=(40, 44, 60), trim=(170, 160, 136), hat=(214, 206, 184),
              trousers=(48, 60, 104), boot=(50, 40, 34), tie=(214, 206, 184)),
@@ -152,15 +143,6 @@ add("gravekeeper", ja="墓守", anim="hold_r",
     hat=dict(kind="brim"), hairline=27.0, build="old",
     upper=dict(scarf=True, lapels=True, buttons=[13.4, 15.6]),
     lower="coat_long", sleeve="fitted", arms=STAFF_R, props={"prop_r": P2.shovel})
-
-add("mapmaker", ja="地図屋", anim="hold_l",
-    pal=dict(skin=SKIN["mid"], hair=(150, 96, 56), coat=(54, 104, 112), vest=(196, 172, 122), shirt=(220, 210, 186), trim=(40, 52, 76), hat=(150, 70, 50),
-             hat2=(110, 50, 36), metal=(186, 146, 70), trousers=(60, 56, 70), boot=(60, 44, 34), leather=(120, 84, 50)),
-    face=dict(eye="round", iris=(70, 120, 110), brow="high", mouth="smile", marks=[([".f.f", "f.f."], 3, 49)]),
-    hair=dict(style="short", front=27.6, side=25.0, back=23.6, fringe=[(-2.0, 28.0, 1.6, 0.7, -0.5), (-0.4, 28.1, 1.4, 0.7, 0.0), (1.4, 28.0, 1.5, 0.7, 0.5)]),
-    hat=dict(kind="beret"), hairline=27.6, build="slim",
-    upper=dict(vest=True, collar=True, collar_mat="shirt", bandolier=True, pouches=[(3.6, 10.4, "pouch")]),
-    lower="trousers", sleeve="rolled", arms=HOLD_L_LOW, props={"prop_l": P2.map_rolls, "prop_back": P2.map_tube})
 
 add("drunkard", ja="酔いどれ", anim="hold_r",
     pal=dict(skin=SKIN["ruddy"], hair=(96, 76, 58), coat=(110, 92, 70), vest=(122, 62, 78), shirt=(170, 156, 126), trim=(76, 60, 46), metal=(140, 120, 80),

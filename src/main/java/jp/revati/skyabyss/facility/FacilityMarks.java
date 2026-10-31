@@ -12,10 +12,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
 // 施設で一度だけのことの印 (人ごと。死んでも残る)。
-//   map_copy    : 書庫番から地図の写しをもらった (M の地図に祠と跡地のありかが載る。MapMarks)
 //   brew_lesson : 薬師に醸造を教わった (四章。手ほどきの品は一度だけ)
 public final class FacilityMarks implements INBTSerializable<CompoundTag> {
-    public static final String MAP_COPY = "map_copy";
     public static final String BREW_LESSON = "brew_lesson";
 
     final Set<String> marks = new LinkedHashSet<>();

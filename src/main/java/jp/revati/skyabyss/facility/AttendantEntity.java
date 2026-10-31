@@ -47,6 +47,15 @@ public class AttendantEntity extends NpcEntity {
         return id.startsWith("survivor_") || id.startsWith("abyss_");
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+        // 消した役の人 (書庫番・地図屋) は、前の世界に残っていれば消える
+        if (!level().isClientSide && tickCount % 40 == 0 && AttendantRole.RETIRED.contains(roleId())) {
+            discard();
+        }
+    }
+
     public void setRole(AttendantRole role) {
         entityData.set(ROLE, role.id);
         nameByRole();

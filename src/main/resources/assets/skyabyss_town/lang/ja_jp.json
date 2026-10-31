@@ -239,12 +239,6 @@
   "dialogue.skyabyss.attendant_innkeeper.town_declined.ok": "わかった",
   "dialogue.skyabyss.attendant_innkeeper.town_sea": "続き？　うちの祖母が歌ってた。「鳴るたびに、一人戻らない」。……寝る前に歌う歌じゃないね。",
   "dialogue.skyabyss.attendant_innkeeper.town_sea.ok": "わかった",
-  "dialogue.skyabyss.attendant_mapmaker.menu.town_draw": "地図に描き足してもらう（鐘銭 5）",
-  "dialogue.skyabyss.attendant_mapmaker.menu.town_rumor": "まだ行っていない所",
-  "dialogue.skyabyss.attendant_mapmaker.town_draw": "どれ、描き足してやろう。跡地なら、方角と距離はわしの頭に入っとる。",
-  "dialogue.skyabyss.attendant_mapmaker.town_draw.ok": "わかった",
-  "dialogue.skyabyss.attendant_mapmaker.town_rumor": "噂ならいくらでも。まだあんたの地図にない所を、指でなぞってやろう。",
-  "dialogue.skyabyss.attendant_mapmaker.town_rumor.ok": "わかった",
   "dialogue.skyabyss.attendant_perch_keeper.menu.town_sea": "海の歌のこと",
   "dialogue.skyabyss.attendant_perch_keeper.town_sea": "海の歌？　子どもの頃、浜で聞いたよ。「道の先で、殻が鳴る」。それしか覚えてない。",
   "dialogue.skyabyss.attendant_perch_keeper.town_sea.ok": "わかった",
@@ -635,5 +629,11 @@
   "entity.skyabyss.guest_town_guide_ember": "灰炉の町の案内人",
   "dialogue.skyabyss.guest_town_guide_ember.ask": "灰炉へようこそ。灰が積もって、足もとが見えにくいでしょう。\n店を探しているなら、行きたい所を言って。灯りで連れていくよ。",
   "dialogue.skyabyss.guest_town_guide_ember.ask.way": "店へ案内してもらう (灯りで案内)",
-  "dialogue.skyabyss.guest_town_guide_ember.ask.bye": "またにする"
+  "dialogue.skyabyss.guest_town_guide_ember.ask.bye": "またにする",
+  "dialogue.skyabyss.attendant_guide.menu.town_rumor": "まだ行っていない所の噂",
+  "dialogue.skyabyss.attendant_guide.menu.town_draw": "地図に描き足してもらう（鐘銭 5）",
+  "dialogue.skyabyss.attendant_guide.town_rumor": "旅人の話なら、門でいくらでも聞く。まだあんたの地図にない所を教えよう。",
+  "dialogue.skyabyss.attendant_guide.town_rumor.ok": "わかった",
+  "dialogue.skyabyss.attendant_guide.town_draw": "跡地なら、都からの方角と道のりは覚えている。地図に描いておこう。",
+  "dialogue.skyabyss.attendant_guide.town_draw.ok": "わかった"
 }

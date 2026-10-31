@@ -22,8 +22,8 @@ TEX = os.path.join(ASSETS, "textures", "lowpoly")
 TMP = os.path.join(ROOT, "build", "tmp_attendant")
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
-         "shrine_priest", "keep_veteran", "archivist", "training_master", "black_marketeer", "gravekeeper",
-         "mapmaker", "drunkard", "trade_keeper", "stable_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener"]
+         "shrine_priest", "keep_veteran", "training_master", "black_marketeer", "gravekeeper",
+         "drunkard", "trade_keeper", "stable_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener"]
 DEFAULT = "guild_clerk"
 
 
