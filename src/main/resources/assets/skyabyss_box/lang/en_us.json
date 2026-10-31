@@ -39,14 +39,5 @@
   "skyabyss_box.pouch.rarity": "Rarity boxes",
   "skyabyss_box.pouch.artifact": "Gold box",
   "skyabyss_box.pouch.hint": "Bring them to a box opener (next to the smith in the capital and the four towns) to spin for the contents.",
-  "skyabyss_pouch.category.box": "Sealed boxes",
-  "entity.skyabyss.attendant.box_opener": "Box Opener",
-  "entity.skyabyss.attendant_box_opener": "Box Opener",
-  "dialogue.skyabyss.attendant_box_opener.intro": "Brought me a sealed box? What a foe drops stays asleep until the seal is cut. I'll cut it for you, no charge. I like the sound a seal makes.",
-  "dialogue.skyabyss.attendant_box_opener.menu": "...A box?",
-  "dialogue.skyabyss.attendant_box_opener.menu.open": "Open my boxes",
-  "dialogue.skyabyss.attendant_box_opener.menu.rules": "About the boxes",
-  "dialogue.skyabyss.attendant_box_opener.menu.about": "What is this place?",
-  "dialogue.skyabyss.attendant_box_opener.menu.bye": "I'll come back",
-  "dialogue.skyabyss.attendant_box_opener.rules": "Boxes from a titan's back bear that titan's mark, and hold only its gear. The others show their rank by colour: green, blue, purple, vermilion. The band number is the Lv range inside. The gold box comes from the bottom of the abyss. Boxes of the same kind stack."
+  "skyabyss_pouch.category.box": "Sealed boxes"
 }

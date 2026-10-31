@@ -91,9 +91,18 @@ E = {
 ja.update(J)
 en.update(E)
 assert set(ja) == set(en)
+# 封切り師の名と会話の文は、ほかの係の人と同じ skyabyss_fac へ (NpcQuestSelfTest が会話の文を読む所)
+FAC = ROOT + "assets/skyabyss_fac/lang/"
 for name, d in (("ja_jp", ja), ("en_us", en)):
+    fac_keys = {k: v for k, v in d.items() if k.startswith("dialogue.skyabyss.attendant_box_opener") or k.startswith("entity.skyabyss.attendant")}
+    box = {k: v for k, v in d.items() if k not in fac_keys}
     with open(LANG + name + ".json", "w", encoding="utf-8") as f:
-        json.dump(d, f, ensure_ascii=False, indent=2)
+        json.dump(box, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    fac = json.load(open(FAC + name + ".json", encoding="utf-8"))
+    fac.update(fac_keys)
+    with open(FAC + name + ".json", "w", encoding="utf-8") as f:
+        json.dump(fac, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
 dialogue = {

@@ -593,5 +593,14 @@
   "message.skyabyss.runs.week_none": "今週、心臓を止めたギルドはまだない",
   "message.skyabyss.runs.ranked": "踏破の記録に載った（%1$s 位　%2$s）。組合の書記に記録を見せてもらえる",
   "dialogue.skyabyss.attendant_training_master.job_room.go": "職の間へ",
-  "dialogue.skyabyss.attendant_training_master.job_room.back": "戻る"
+  "dialogue.skyabyss.attendant_training_master.job_room.back": "戻る",
+  "entity.skyabyss.attendant.box_opener": "封切り師",
+  "entity.skyabyss.attendant_box_opener": "封切り師",
+  "dialogue.skyabyss.attendant_box_opener.intro": "封の箱を持ってきたか。敵が落とす箱は、封を切るまで中身が眠っている。わしが切ってやろう。代はいらん。封の音を聞くのが好きでな。",
+  "dialogue.skyabyss.attendant_box_opener.menu": "……箱か。",
+  "dialogue.skyabyss.attendant_box_opener.menu.open": "箱を開けてもらう",
+  "dialogue.skyabyss.attendant_box_opener.menu.rules": "箱のこと",
+  "dialogue.skyabyss.attendant_box_opener.menu.about": "ここは何をする所？",
+  "dialogue.skyabyss.attendant_box_opener.menu.bye": "また来る",
+  "dialogue.skyabyss.attendant_box_opener.rules": "巨神の背で落ちる箱は、その巨神の印の箱だ。中にはその巨神の品しか入っておらん。ほかの箱は色で階級が分かる。緑・青・紫・朱。帯の数は、中の品の重さ (Lv) の幅だ。金の箱は淵の底のもの。同じ箱なら重ねて持てる。"
 }

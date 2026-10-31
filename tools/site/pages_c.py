@@ -176,6 +176,10 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.9.19", "2026-10-31", [
+            ("野の装備: 物語の報酬とは別に、土地の敵・名のある強敵・層の主から出る武器 102 本（職ごと・Lv 帯ごと）、防具 18 式、装飾と護符 26 品。どれも自分の形と能力を持ちます。アンコモンは鍛冶屋でも買えます。", "Wild gear: beyond story rewards, 102 job weapons by level band, 18 armor sets and 26 trinkets and charms drop from regional foes, named foes and layer lords, each with its own model and ability. Uncommon pieces are also sold by the smith."),
+            ("装備は封の箱で落ちます: 巨神の箱 4 種、階級の箱（Lv の帯ごと）、淵の金の箱。同じ箱は重なり、旅嚢の新しいつまみ「封の箱」に入ります。都と四つの町の封切り師がルーレットで開けてくれます（無料）。", "Gear now drops in sealed boxes: four titan boxes, rarity boxes per level band, and the abyssal gold box. Boxes of a kind stack and go to the new Sealed Boxes tab of the satchel. The box opener in the capital and the four towns opens them with a roulette (free)."),
+        ]),
         ("v0.9.18", "2026-10-31", [
             ("全体監査の直し: 看板のはみ出し（日英）、一章の地上の敵の足音、転生の墓の札のログ、書類とサイトを今の版に。", "Audit fixes: sign lines that overflowed (ja/en), footstep sounds of the chapter 1 ground foes, the rebirth grave label log line, and docs and site brought up to date."),
             ("終章「雲海」。月の核のあと語り部に話すと「雲の上へ」が始まり、四体の巨神に運ばれて雲の上の海へ。鐘の島・灯の島・炉の島・約束の島の四つを光の橋で渡り、巡礼者の座で雲上の巡礼者と戦います（手 → 目 → 月の三形態。第三形態では前の自分たちが加勢）。", "The final chapter, the sea of clouds: after the moon's core, speak to the storyteller to begin \"Above the Clouds\". The four titans carry you up; cross the Isle of Bells, the Isle of the Lamp, the Isle of the Forge and the Isle of the Promise over bridges of light, and face the Pilgrim above the Clouds at the Pilgrim's seat (hand, eye, moon; your former selves join in the third form)."),

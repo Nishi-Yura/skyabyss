@@ -39,14 +39,5 @@
   "skyabyss_box.pouch.rarity": "階級の箱",
   "skyabyss_box.pouch.artifact": "金の箱",
   "skyabyss_box.pouch.hint": "町の封切り師 (都と四つの町の鍛冶屋のそば) に渡すと、ルーレットで中身が決まる。",
-  "skyabyss_pouch.category.box": "封の箱",
-  "entity.skyabyss.attendant.box_opener": "封切り師",
-  "entity.skyabyss.attendant_box_opener": "封切り師",
-  "dialogue.skyabyss.attendant_box_opener.intro": "封の箱を持ってきたか。敵が落とす箱は、封を切るまで中身が眠っている。わしが切ってやろう。代はいらん。封の音を聞くのが好きでな。",
-  "dialogue.skyabyss.attendant_box_opener.menu": "……箱か。",
-  "dialogue.skyabyss.attendant_box_opener.menu.open": "箱を開けてもらう",
-  "dialogue.skyabyss.attendant_box_opener.menu.rules": "箱のこと",
-  "dialogue.skyabyss.attendant_box_opener.menu.about": "ここは何をする所？",
-  "dialogue.skyabyss.attendant_box_opener.menu.bye": "また来る",
-  "dialogue.skyabyss.attendant_box_opener.rules": "巨神の背で落ちる箱は、その巨神の印の箱だ。中にはその巨神の品しか入っておらん。ほかの箱は色で階級が分かる。緑・青・紫・朱。帯の数は、中の品の重さ (Lv) の幅だ。金の箱は淵の底のもの。同じ箱なら重ねて持てる。"
+  "skyabyss_pouch.category.box": "封の箱"
 }

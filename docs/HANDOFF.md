@@ -5,8 +5,14 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の祠で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.18（`build/libs/skyabyss-0.9.18.jar`。確認表 `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.19（`build/libs/skyabyss-0.9.19.jar`。確認表 `docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 0.9.19（野の装備と封の箱の試遊版。2026-10-31）
+
+- jar `build/libs/skyabyss-0.9.19.jar`。確かめ表 `docs/review/playtest_0.9.19.md`（箱が落ちる・封切り師で開ける・旅嚢の欄・野の装備・箱にならないもの）。変更履歴はサイト（`tools/site/pages_c.py`）。
+- 版の前の直し: 自己テスト全段で落ちた 2 つ。野の装備 200 品の物語の一行（`tools/gen/wild_gear/stories.py` → `gen_wild_gear.py` が `skyabyss_wild` へ。`GearCurveSelfTest` がそこも読む）と、封切り師の会話の文を `skyabyss_fac` へ（`gen_box_text.py`。`NpcQuestSelfTest` が読む所）。月の装備・神器の由来の行の鍵も足した。
+- 確かめ: 自己テスト全段（上の 2 つのほか失敗なし。直したあと該当の段を流し直して通った）、`quick_check.sh` 全部、jar の中身と版。
 
 ## 野の装備（武器 102 本・防具 18 式。2026-10-31。設計 [51](design/51_world_gear.md)）
 

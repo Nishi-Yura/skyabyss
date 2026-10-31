@@ -128,6 +128,15 @@ def lang():
         en[f"item.skyabyss.{x['id']}"] = x["en"]
         ja[f"item.skyabyss.{x['id']}.desc"] = ("護符（[H] で使う）。" if x["kind"] == "charm" else "装飾。") + x["abil_ja"]
         en[f"item.skyabyss.{x['id']}.desc"] = ("Charm ([H] to use). " if x["kind"] == "charm" else "Trinket. ") + x["abil_en"]
+    # 物語の一行 (stories.py。GearCurveSelfTest の story が見る)
+    import stories as T
+    for wid, (j, e) in list(T.WEAPONS.items()) + list(T.ACCESSORIES.items()):
+        ja[f"item.skyabyss.{wid}.story"] = j
+        en[f"item.skyabyss.{wid}.story"] = e
+    for aid, rows in T.ARMORS.items():
+        for p, (j, e) in zip(S.PIECES, rows):
+            ja[f"item.skyabyss.{aid}_{p}.story"] = j
+            en[f"item.skyabyss.{aid}_{p}.story"] = e
     ja["message.skyabyss.wild_charm.used"] = "%s を使った"
     en["message.skyabyss.wild_charm.used"] = "Used %s"
     ja["message.skyabyss.wild_drop"] = "%s を手に入れた"

@@ -64,10 +64,10 @@ public final class GearCurveSelfTest {
         // 二章の旅装 4 部位の一行は skyabyss_ch2gear の lang にある (guide/Ch2Gear)
         ja.putAll(lang("/assets/skyabyss_ch2gear/lang/ja_jp.json", f));
         en.putAll(lang("/assets/skyabyss_ch2gear/lang/en_us.json", f));
-        // 三章・四章の旅装の一行は、その章の lang にある (四章はまだ旅装がないとき、ファイルがなくてもよい)
+        // 三章・四章の旅装の一行は、その章の lang にある (四章はまだ旅装がないとき、ファイルがなくてもよい)。野の装備は skyabyss_wild (tools/gen/wild_gear/stories.py)
         ja.putAll(lang("/assets/skyabyss_ch3gear/lang/ja_jp.json", f));
         en.putAll(lang("/assets/skyabyss_ch3gear/lang/en_us.json", f));
-        for (String ns : List.of("skyabyss_ch4gear", "skyabyss_ch4", "skyabyss_abyss_gear")) {
+        for (String ns : List.of("skyabyss_ch4gear", "skyabyss_ch4", "skyabyss_abyss_gear", "skyabyss_wild")) {
             if (GearCurveSelfTest.class.getResource("/assets/" + ns + "/lang/ja_jp.json") != null) {
                 ja.putAll(lang("/assets/" + ns + "/lang/ja_jp.json", f));
                 en.putAll(lang("/assets/" + ns + "/lang/en_us.json", f));
