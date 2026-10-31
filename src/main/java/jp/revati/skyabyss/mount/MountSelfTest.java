@@ -98,8 +98,9 @@ public final class MountSelfTest {
             check(f, look.seat > 0.8 && look.seat < 2.6 && look.legPitch <= 0 && look.legSpread >= 0, "seat and rider legs " + look.id);
         }
         check(f, resource(a + "textures/item/mount_whistle.png") && resource(a + "models/item/mount_whistle.json"), "whistle item");
-        check(f, resource(a + "textures/gui/npc_marker/fac_stable_keeper.png"), "stable keeper icon");
-        check(f, resource("/data/skyabyss/dialogue/attendant_stable_keeper.json"), "stable keeper dialogue");
+        // 乗り物の店は旅の番 (止まり木の番。2026-11-01 に厩舎の番をまとめた)
+        check(f, resource(a + "textures/gui/npc_marker/fac_perch_keeper.png"), "travel keeper icon");
+        check(f, resource("/data/skyabyss/dialogue/attendant_perch_keeper.json"), "travel keeper dialogue");
         check(f, MountLook.values().length == 7 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
         for (int k = 0; k < 3; k++) {
             for (int t = 2; t <= MountStats.TIERS; t++) {

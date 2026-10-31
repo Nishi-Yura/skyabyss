@@ -23,7 +23,7 @@ TMP = os.path.join(ROOT, "build", "tmp_attendant")
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
          "shrine_priest", "training_master", "black_marketeer", "gravekeeper",
-         "drunkard", "trade_keeper", "stable_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener"]
+         "drunkard", "trade_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener"]
 DEFAULT = "guild_clerk"
 
 

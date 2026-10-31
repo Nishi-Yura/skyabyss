@@ -25,8 +25,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TownTour {
     static final String TAG = "skyabyss_town_tour";
-    // 厩舎では必ず乗り笛を受け取る (2026-10-27 の声「都をめぐる際、絶対に乗り笛は手に入れに行かせて」)
-    static final List<String> STOPS = List.of("smithy", "inn", "stable", "tool_shop", "guild");
+    // 旅の番 (子の止まり木) では必ず乗り笛を受け取る (2026-10-27 の声「都をめぐる際、絶対に乗り笛は手に入れに行かせて」)。
+    // 前は厩舎だった。2026-11-01 に厩舎の番を旅の番へまとめたので、乗り物を売る人のいる所へ
+    static final List<String> STOPS = List.of("smithy", "inn", "perch", "tool_shop", "guild");
     static final int[] COINS = {3, 3, 3, 5, 5};
     static final double ARRIVE = 5.0;
     static final int CHECK = 20;
@@ -84,7 +85,7 @@ public final class TownTour {
         if (id.equals("inn")) {
             jp.revati.skyabyss.quest.Quests.give(p, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 3));
         }
-        if (id.equals("stable")) {
+        if (id.equals("perch")) {
             jp.revati.skyabyss.mount.MountService.giveWhistle(p);
             Notice.hint(p, "message.skyabyss.tour.whistle");
         }

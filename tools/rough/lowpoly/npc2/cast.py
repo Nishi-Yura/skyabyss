@@ -152,16 +152,6 @@ add("trade_keeper", ja="取引所の番", anim="hold_l",
     upper=dict(vest=True, collar=True, collar_mat="shirt", buttons=[13.0, 15.0, 17.0], pouches=[(3.6, 10.4, "pouch")]),
     lower="tails", sleeve="fitted", arms=HOLD_L_LOW, props={"prop_l": P2.scales})
 
-add("stable_keeper", ja="厩舎の番", anim="hold_r",
-    pal=dict(skin=SKIN["tan"], hair=(104, 76, 52), coat=(116, 84, 56), vest=(92, 120, 76), shirt=(200, 186, 150), trim=(70, 48, 30), hat=(124, 92, 60),
-             hat2=(70, 48, 30), metal=(204, 172, 104), trousers=(80, 70, 56), boot=(70, 46, 30), glove=(130, 96, 60)),
-    face=dict(eye="kind", iris=(90, 70, 40), brow="soft", mouth="smile"),
-    hair=dict(style="short", front=27.4, side=24.8, back=23.4, fringe=[]),
-    hat=dict(kind="brim"), beard="full", hairline=27.4, build="avg",
-    upper=dict(vest=True, scarf=True, scarf_mat="scarf", pouches=[(3.8, 10.4, "pouch")]),
-    pal_extra=dict(scarf=(180, 70, 50)),
-    lower="trousers", sleeve="rolled", gloves=True, arms=STAFF_R, props={"prop_r": P2.pitchfork})
-
 # 都の案内人 (門と広場に立つ。話すと施設の一覧 → 選んだ施設の戸まで色つきの灯りの道。docs/design/35 の 6.12)。
 # 白い外套 (長い上着 + 肩掛け + 背へ下ろした頭巾)、金の縁、角灯を提げた杖に四色の房
 add("guide", ja="都の案内人", anim="hold_r",

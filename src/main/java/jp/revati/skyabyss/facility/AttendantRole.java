@@ -27,7 +27,6 @@ public enum AttendantRole {
     // 取引所 (プレイヤーどうしの売り買い。35 の 6.11)
     TRADE_KEEPER("trade_keeper", null, 1),
     // 厩舎 (乗り物の店。docs/design/38)
-    STABLE_KEEPER("stable_keeper", null, 1),
     // 都の案内人 (門と広場に何人も。印は npc_guide_<所>。話すと施設の一覧 → 選んだ戸まで灯りの道。facility/TownGuide、35 の 6.12)
     GUIDE("guide", null, 1),
     // 市の三人 (2026-10-27 の声「道具屋がパンまで売るのはおかしい。専門の人に」): 食べ物・得物と防具・素材
@@ -40,7 +39,8 @@ public enum AttendantRole {
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";
     // 消した役 (2026-10-31「書庫番や地図屋って必要？」→ 両方消す。砦の老兵も同日に消した: 試練の記録は J の記録、本丸の頁は社の祭司)。前の世界に立っている人は AttendantEntity が消す。設計図の印は残っていても立たない
-    public static final java.util.Set<String> RETIRED = java.util.Set.of("archivist", "mapmaker", "keep_veteran");
+    // 厩舎の番は 2026-11-01 に止まり木の番へまとめた (旅の番。乗り物の店と乗り笛の決まりも)
+    public static final java.util.Set<String> RETIRED = java.util.Set.of("archivist", "mapmaker", "keep_veteran", "stable_keeper");
     // 会話の役の ID の頭 (skyabyss:attendant_<役>)
     public static final String DIALOGUE_PREFIX = SkyAbyss.MODID + ":attendant_";
 

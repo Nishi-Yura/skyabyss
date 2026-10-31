@@ -173,13 +173,17 @@ public final class FacilitySelfTest {
                 case GUILD_CLERK -> "guild";
                 case SMITH -> "repair";
                 case TRADE_KEEPER -> "trade";
-                case STABLE_KEEPER -> "mount_shop";
                 case BOX_OPENER -> "boxes";
                 default -> null;
             };
             if (need != null && menu != null) {
                 boolean has = menu.options().stream().anyMatch(o -> o.actions().stream().anyMatch(a -> a.type().equals("facility") && a.str("open").equals(need)));
                 check(f, has, r.id + ": menu opens " + need);
+            }
+            // 旅の番 (止まり木の番) は乗り物の店も (2026-11-01 に厩舎の番をまとめた)
+            if (r == AttendantRole.PERCH_KEEPER && menu != null) {
+                check(f, menu.options().stream().anyMatch(o -> o.actions().stream().anyMatch(a -> a.type().equals("facility") && a.str("open").equals("mount_shop"))),
+                        r.id + ": menu opens mount_shop");
             }
             NpcBonds.of(p).bond(r.dialogueRole()).flags().remove("intro");
         }

@@ -117,7 +117,6 @@ ICONS = {
     "training_master": target(), "black_marketeer": (MASK, MASK_H),
     "gravekeeper": (GRAVE, GRAVE_H), "drunkard": (MUG, MUG_H),
     "trade_keeper": (SCALES, []),
-    "stable_keeper": (HORSESHOE, []),
     "guide": (SIGNPOST, SIGNPOST_H),
     "food_vendor": (SAUSAGE, SAUSAGE_H), "outfitter": (SWORD_SHIELD, SWORD_SHIELD_H), "material_trader": (ORE, ORE_H),
     "box_opener": (SEALBOX, SEALBOX_H),

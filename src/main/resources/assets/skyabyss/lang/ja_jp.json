@@ -1697,7 +1697,7 @@
   "item.skyabyss.storm_sword.desc": "樋に銅の稲妻が走る鋼の長剣。鍔は雷翼の風切羽。",
   "item.skyabyss.storm_dagger": "稲妻の短剣",
   "item.skyabyss.storm_dagger.desc": "刃そのものが折れた稲妻の形をした銅の短剣。",
-  "message.skyabyss.tour.whistle": "厩舎の番から乗り笛をもらった。Y で乗り物を呼べる",
+  "message.skyabyss.tour.whistle": "旅の番から乗り笛をもらった。Y で乗り物を呼べる",
   "map.skyabyss.foe.lair": "%s の棲み家",
   "map.skyabyss.foe.alive": "今、棲み家にいる",
   "map.skyabyss.foe.away": "近づくと現れる (倒すとしばらく出ない)",

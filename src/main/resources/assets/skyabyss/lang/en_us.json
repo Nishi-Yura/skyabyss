@@ -1697,7 +1697,7 @@
   "item.skyabyss.storm_sword.desc": "A steel longsword with copper lightning in its fuller and thunderwing feathers for a guard.",
   "item.skyabyss.storm_dagger": "Lightning Dagger",
   "item.skyabyss.storm_dagger.desc": "A copper dagger whose blade is a forked bolt of lightning.",
-  "message.skyabyss.tour.whistle": "The stable keeper gave you a mount whistle. Press Y to call your mount.",
+  "message.skyabyss.tour.whistle": "The travel keeper gave you a riding whistle. Press Y to call your mount",
   "map.skyabyss.foe.lair": "Lair of %s",
   "map.skyabyss.foe.alive": "In its lair now",
   "map.skyabyss.foe.away": "Appears when you come close (gone a while after it falls)",

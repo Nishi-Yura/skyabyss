@@ -79,7 +79,6 @@ public final class TownGuide {
             new Place("trade", Group.GOLD, "label_trade"),
             new Place("apothecary", Group.GOLD, "label_apothecary"),
             new Place("inn", Group.BLUE, "label_inn"),
-            new Place("stable", Group.BLUE, "label_stable"),
             new Place("perch", Group.BLUE, "label_perch"),
             new Place("guild", Group.RED, "open_guild"),
             new Place("smithy", Group.RED, "label_smithy"),
@@ -183,7 +182,7 @@ public final class TownGuide {
     static final int TOWN_RANGE = 70;
     static final Map<String, String> TOWN_DOORS = Map.ofEntries(Map.entry("tool_shop", "npc_tool_merchant"), Map.entry("storage", "npc_storage_keeper"),
             Map.entry("trade", "npc_trade_keeper"), Map.entry("apothecary", "npc_apothecary"), Map.entry("inn", "npc_innkeeper"),
-            Map.entry("stable", "npc_stable_keeper"), Map.entry("perch", "npc_perch_keeper"), Map.entry("guild", "npc_guild_clerk"),
+            Map.entry("perch", "npc_perch_keeper"), Map.entry("guild", "npc_guild_clerk"),
             Map.entry("smithy", "npc_smith"), Map.entry("box_opener", "npc_smith"), Map.entry("training", "npc_training_master"), Map.entry("shrine", "npc_shrine_priest"));
 
     @Nullable

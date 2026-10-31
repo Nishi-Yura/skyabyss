@@ -42,7 +42,6 @@ R = {
     "gravekeeper":     dict(skin=(206, 180, 160), hair=(176, 174, 168), coat=(92, 92, 88), role=(74, 86, 70), acc=(150, 146, 132), head="brim", headc=(62, 62, 60), old=True, bg=(120, 140, 130)),
     "drunkard":        dict(skin=(206, 146, 116), hair=(96, 76, 58), coat=(110, 92, 70), role=(122, 62, 78), acc=(140, 120, 80), head="none", beard=True, drunk=True, bg=(200, 110, 90)),
     "trade_keeper":    dict(skin=(196, 150, 112), hair=(70, 52, 40), coat=(44, 84, 82), role=(196, 160, 82), acc=(214, 184, 104), head="cap", headc=(44, 84, 82), specs=True, bg=(200, 170, 90)),
-    "stable_keeper":   dict(skin=(190, 140, 104), hair=(104, 76, 52), coat=(116, 84, 56), role=(92, 120, 76), acc=(204, 172, 104), head="brim", headc=(124, 92, 60), beard=True, bg=(170, 130, 80)),
     "guide":           dict(skin=(196, 150, 112), hair=(70, 52, 40), coat=(232, 230, 222), role=(242, 240, 234), acc=(196, 162, 78), head="none", bg=(120, 170, 210)),
     "box_opener":      dict(skin=(222, 160, 128), hair=(150, 140, 132), coat=(112, 52, 42), role=(214, 200, 168), acc=(206, 168, 86), head="none", specs=True, old=True, bg=(170, 60, 50)),
 }
