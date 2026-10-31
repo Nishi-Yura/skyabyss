@@ -751,7 +751,8 @@ public class TravelMapScreen extends Screen {
             List<Component> lines = new ArrayList<>();
             lines.add(MapText.name(m));
             if (m.kind() == MapMarks.Kind.FOE) {
-                lines.add(Component.translatable(m.extra().equals("alive") ? "map.skyabyss.foe.alive" : "map.skyabyss.foe.away"));
+                lines.add(Component.translatable(m.id().equals("world_event") ? "map.skyabyss.world_event.here"
+                        : m.extra().equals("alive") ? "map.skyabyss.foe.alive" : "map.skyabyss.foe.away"));
             }
             lines.add(m.rumor() ? MapText.rumor(me, m.x(), m.z()) : MapText.where(me, m.x(), m.z()));
             hits.add(hit(at, layer(m), lines, null));

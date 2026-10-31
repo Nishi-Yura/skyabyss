@@ -31,5 +31,12 @@
   "dialogue.skyabyss.guest_town_guide_whale.ask.circuit": "Walk a circuit (20-minute task run)",
   "dialogue.skyabyss.guest_town_guide_tide.ask.circuit": "Walk a circuit (20-minute task run)",
   "dialogue.skyabyss.guest_town_guide_storm.ask.circuit": "Walk a circuit (20-minute task run)",
-  "dialogue.skyabyss.guest_town_guide_ember.ask.circuit": "Walk a circuit (20-minute task run)"
+  "dialogue.skyabyss.guest_town_guide_ember.ask.circuit": "Walk a circuit (20-minute task run)",
+  "entity.skyabyss.world_event.name": "Great %s",
+  "map.skyabyss.world_event": "World event: Great %s",
+  "message.skyabyss.world_event.begin": "World event: %2$s has come to %1$s. Head for the red pillar (it leaves in 15 minutes)",
+  "message.skyabyss.world_event.appear": "%s appears! Take it on with everyone nearby",
+  "message.skyabyss.world_event.gone": "%s has left",
+  "message.skyabyss.world_event.down": "%s was calmed (your share %s%%). %s coins, %s sealed boxes",
+  "map.skyabyss.world_event.here": "A great foe for everyone nearby. Leaves after 15 minutes"
 }

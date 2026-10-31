@@ -31,5 +31,12 @@
   "dialogue.skyabyss.guest_town_guide_whale.ask.circuit": "巡り路を歩く（20 分の課題めぐり）",
   "dialogue.skyabyss.guest_town_guide_tide.ask.circuit": "巡り路を歩く（20 分の課題めぐり）",
   "dialogue.skyabyss.guest_town_guide_storm.ask.circuit": "巡り路を歩く（20 分の課題めぐり）",
-  "dialogue.skyabyss.guest_town_guide_ember.ask.circuit": "巡り路を歩く（20 分の課題めぐり）"
+  "dialogue.skyabyss.guest_town_guide_ember.ask.circuit": "巡り路を歩く（20 分の課題めぐり）",
+  "entity.skyabyss.world_event.name": "大いなる%s",
+  "map.skyabyss.world_event": "大陸の大事件: 大いなる%s",
+  "message.skyabyss.world_event.begin": "大陸の大事件: %sに%sが来た。赤い光の柱の所へ（15 分で去る）",
+  "message.skyabyss.world_event.appear": "%sが現れた！ 近くの人みなで挑もう",
+  "message.skyabyss.world_event.gone": "%sは去っていった",
+  "message.skyabyss.world_event.down": "%sを鎮めた（与えた分 %s％）。鐘銭 %s・封の箱 %s",
+  "map.skyabyss.world_event.here": "近くの人みなで挑む大きな相手。15 分で去る"
 }

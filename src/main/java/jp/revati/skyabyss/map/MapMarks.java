@@ -113,6 +113,12 @@ public final class MapMarks {
             boolean alive = jp.revati.skyabyss.world.continent.NamedFoes.alive(r);
             out.add(new Mark(Kind.FOE, "foe_" + r, d.name(), alive ? "alive" : "", lair.getX(), lair.getZ(), false, alive ? 0xE8443A : 0x9A7A70));
         }
+        // 大陸の大事件 (endgame/WorldEvents): 大いなるものが来ている所 (いつも赤く、大きく)
+        var ev = jp.revati.skyabyss.endgame.WorldEvents.current();
+        var evDef = ev == null ? null : jp.revati.skyabyss.world.continent.NamedFoes.def(ev.region());
+        if (evDef != null) {
+            out.add(0, new Mark(Kind.FOE, "world_event", evDef.name(), "alive", ev.spot().getX(), ev.spot().getZ(), false, 0xFF2A1A));
+        }
     }
 
     // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑などの印で、指すと名前。

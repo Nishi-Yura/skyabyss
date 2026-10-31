@@ -1,0 +1,35 @@
+# 大陸の大事件 (大いなるもの・赤い柱・体力の帯・地図)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/world_event.txt -PshotsName=world_event
+world circuit_check continent
+size 1280 720
+timeout 1500
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd skyabyss playtest chapter 2 @s
+cmd skyabyss level set @p 20
+cmd time set noon
+cmd weather clear
+cmd effect give @s resistance 900 4 true
+cmd tp @s -120 140 -700
+waitchunks 300
+wait 60
+chat clear
+cmd skyabyss event start 2
+wait 40
+shot event_1_announce
+cmd skyabyss event goto
+waitchunks 300
+wait 100
+shot event_2_boss
+wait 100
+shot event_3_boss_later
+open travel_map
+wait 60
+shot event_4_map
+close
+cmd skyabyss event end
+wait 40
+shot event_5_gone
