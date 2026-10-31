@@ -1,0 +1,91 @@
+{
+  "npc": "skyabyss:attendant_shrine_priest",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "about",
+      "options": [
+        {
+          "id": "page",
+          "goto": "page",
+          "kind": "talk",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "in_capital"
+              },
+              {
+                "type": "stage",
+                "max": 1
+              }
+            ]
+          }
+        },
+        {
+          "id": "page_give",
+          "goto": "page_give",
+          "kind": "talk",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "in_capital"
+              },
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "lore",
+                  "entry": "chapter1/keep_prev_page"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "page_again",
+          "goto": "page_again",
+          "kind": "talk",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "in_capital"
+              },
+              {
+                "type": "lore",
+                "entry": "chapter1/keep_prev_page"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "page": {
+      "face": "grave",
+      "next": "menu"
+    },
+    "page_give": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "give",
+          "item": "skyabyss:lore_page",
+          "page": "keep_page",
+          "count": 1
+        }
+      ],
+      "next": "menu"
+    },
+    "page_again": {
+      "face": "neutral",
+      "next": "menu"
+    }
+  }
+}

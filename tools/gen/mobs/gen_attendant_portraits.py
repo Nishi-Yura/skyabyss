@@ -37,7 +37,6 @@ R = {
     "innkeeper":       dict(skin=(210, 156, 124), hair=(150, 62, 46), coat=(122, 58, 56), role=(222, 210, 180), acc=(206, 170, 96), head="kerchief", headc=(176, 70, 56), lady=True, bg=(230, 150, 80)),
     "perch_keeper":    dict(skin=(176, 126, 90), hair=(120, 92, 62), coat=(98, 120, 140), role=(212, 218, 214), acc=(90, 160, 166), head="none", feather=True, bg=(120, 180, 200)),
     "shrine_priest":   dict(skin=(200, 164, 136), hair=(226, 222, 212), coat=(222, 218, 206), role=(176, 56, 44), acc=(214, 176, 80), head="tall", headc=(40, 36, 40), old=True, bg=(220, 90, 60)),
-    "keep_veteran":    dict(skin=(196, 156, 126), hair=(196, 194, 188), coat=(88, 92, 98), role=(124, 38, 38), acc=(170, 174, 180), head="none", beard=True, scar=True, old=True, bg=(170, 60, 50)),
     "training_master": dict(skin=(176, 124, 88), hair=(40, 34, 32), coat=(214, 206, 184), role=(48, 60, 104), acc=(40, 44, 60), head="band", headc=(214, 206, 184), topknot=True, bg=(90, 110, 180)),
     "black_marketeer": dict(skin=(190, 146, 112), hair=(28, 26, 32), coat=(36, 34, 40), role=(68, 44, 68), acc=(120, 104, 70), head="hood", headc=(44, 38, 50), mask=(70, 58, 78), bg=(110, 70, 130)),
     "gravekeeper":     dict(skin=(206, 180, 160), hair=(176, 174, 168), coat=(92, 92, 88), role=(74, 86, 70), acc=(150, 146, 132), head="brim", headc=(62, 62, 60), old=True, bg=(120, 140, 130)),

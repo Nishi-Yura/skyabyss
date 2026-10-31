@@ -20,7 +20,6 @@ public enum AttendantRole {
     INNKEEPER("innkeeper", null, 1),
     PERCH_KEEPER("perch_keeper", null, 1),
     SHRINE_PRIEST("shrine_priest", null, 2),
-    KEEP_VETERAN("keep_veteran", null, 2),
     TRAINING_MASTER("training_master", null, 2),
     BLACK_MARKETEER("black_marketeer", "black_market", 3),
     GRAVEKEEPER("gravekeeper", null, 3),
@@ -40,8 +39,8 @@ public enum AttendantRole {
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";
-    // 消した役 (2026-10-31「書庫番や地図屋って必要？」→ 両方消す)。前の世界に立っている人は AttendantEntity が消す。設計図の印は残っていても立たない
-    public static final java.util.Set<String> RETIRED = java.util.Set.of("archivist", "mapmaker");
+    // 消した役 (2026-10-31「書庫番や地図屋って必要？」→ 両方消す。砦の老兵も同日に消した: 試練の記録は J の記録、本丸の頁は社の祭司)。前の世界に立っている人は AttendantEntity が消す。設計図の印は残っていても立たない
+    public static final java.util.Set<String> RETIRED = java.util.Set.of("archivist", "mapmaker", "keep_veteran");
     // 会話の役の ID の頭 (skyabyss:attendant_<役>)
     public static final String DIALOGUE_PREFIX = SkyAbyss.MODID + ":attendant_";
 

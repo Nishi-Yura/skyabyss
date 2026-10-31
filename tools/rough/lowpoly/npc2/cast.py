@@ -106,16 +106,6 @@ add("shrine_priest", ja="社の祭司", anim="hold_r",
     upper=dict(mantle=dict(bottom=17.0, clasp=True), sash=True, collar=True, collar_mat="trim"),
     lower="robe", sleeve="wide", arms=STAFF_R, props={"prop_r": P2.bell_staff})
 
-add("keep_veteran", ja="砦の老兵", anim="hold_r",
-    pal=dict(skin=SKIN["old"], hair=(196, 194, 188), coat=(88, 92, 98), apron=(124, 38, 38), apron2=(90, 30, 30), trim=(60, 60, 66), metal=(170, 174, 180),
-             metal2=(140, 144, 152), trousers=(60, 60, 66), boot=(44, 38, 34), leather=(80, 56, 40)),
-    face=dict(eye="narrow", iris=(100, 110, 120), brow="stern", mouth="frown", marks=[(["S", "S", "S", "S"], 4, 53, -1), (["EEE", "EEE"], 1, 51, 1)]),
-    hair=dict(style="short", front=28.2, side=25.0, back=24.0, off=0.3, fringe=[]),
-    beard="full", brow3d=dict(mat="brow", r=0.45, inner=25.95, outer=26.4), hairline=28.0, build="broad",
-    upper=dict(apron=dict(bottom=6.0, top=19.6, w=3.0, bib=True), pauldron=True, collar=True, collar_mat="metal2"),
-    lower="trousers", sleeve="fitted", arms=STAFF_R, props={"prop_r": P2.spear},
-    extra_body=[])
-
 add("training_master", ja="師範", anim="hold_r",
     pal=dict(skin=SKIN["tan"], hair=(40, 34, 32), coat=(214, 206, 184), skirt=(48, 60, 104), sash=(40, 44, 60), trim=(170, 160, 136), hat=(214, 206, 184),
              trousers=(48, 60, 104), boot=(50, 40, 34), tie=(214, 206, 184)),

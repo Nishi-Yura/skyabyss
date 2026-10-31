@@ -113,7 +113,7 @@ SEALBOX_H = [(x, 3) for x in range(12) if x not in (4, 5, 6, 7)] + [(4, 2), (7, 
 ICONS = {
     "guild_clerk": (BANNER, BANNER_H), "smith": (HAMMER, HAMMER_H), "tool_merchant": (LANTERN, []),
     "apothecary": (FLASK, FLASK_H), "storage_keeper": (CHEST, CHEST_H), "innkeeper": (BED, BED_H),
-    "perch_keeper": (FEATHER, FEATHER_H), "shrine_priest": (TORII, []), "keep_veteran": (SHIELD, SHIELD_H),
+    "perch_keeper": (FEATHER, FEATHER_H), "shrine_priest": (TORII, []),
     "training_master": target(), "black_marketeer": (MASK, MASK_H),
     "gravekeeper": (GRAVE, GRAVE_H), "drunkard": (MUG, MUG_H),
     "trade_keeper": (SCALES, []),

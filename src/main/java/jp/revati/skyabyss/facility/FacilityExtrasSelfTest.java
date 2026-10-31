@@ -100,7 +100,6 @@ public final class FacilityExtrasSelfTest {
         Map<AttendantRole, List<String>> need = Map.of(
                 AttendantRole.TRAINING_MASTER, List.of("respec_quote", "respec_skills", "respec_skills_coins", "job_room"),
                 AttendantRole.SHRINE_PRIEST, List.of("key_offer", "key_return"),
-                AttendantRole.KEEP_VETERAN, List.of("records"),
                 AttendantRole.APOTHECARY, List.of("shop", "brew_lesson"),
                 AttendantRole.GUILD_CLERK, List.of("guild", "guild_storage"));
         need.forEach((role, list) -> {
@@ -124,16 +123,16 @@ public final class FacilityExtrasSelfTest {
                 check(f, listed && desc != null && desc.textKey().equals(v.descKey()), "priest explains vow " + v.id());
             }
         }
-        // 前の私の頁 (35 の 6.4): 心臓を二つ止めた人 (三章) に老兵が一度だけ渡す。読むと伝承 chapter1/keep_prev_page が書に移る
-        Dialogue keep = DialogueManager.dialogue(AttendantRole.KEEP_VETERAN.dialogueRole());
+        // 前の空見の頁 (35 の 6.4): 心臓を二つ止めた人 (三章) に社の祭司が渡す (前は砦の老兵)。読むと伝承 chapter1/keep_prev_page が書に移る
+        Dialogue keep = priest;
         check(f, keep != null && keep.nodes().containsKey("page") && keep.nodes().containsKey("page_give") && keep.nodes().containsKey("page_again"),
-                "keep veteran has the page nodes (before, give, again)");
+                "shrine priest has the page nodes (before, give, again)");
         if (keep != null) {
             Dialogue.Node give = keep.nodes().get("page_give");
             boolean gives = give != null && give.actions().stream().anyMatch(a -> a.type().equals("give") && "keep_page".equals(a.optStr("page")));
             check(f, gives, "page_give hands a lore page with source keep_page");
             boolean gated = keep.nodes().get("menu").options().stream().anyMatch(o -> o.id().equals("page_give") && o.condition() != null);
-            check(f, gated, "the page option is gated (stage 2 and not yet given)");
+            check(f, gated, "the page option is gated (stage 2 and not yet read)");
         }
         check(f, jp.revati.skyabyss.lore.LoreManager.catalog().entry("chapter1/keep_prev_page") != null, "lore entry chapter1/keep_prev_page exists");
     }

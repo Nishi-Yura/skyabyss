@@ -168,6 +168,7 @@ public final class AbyssEscortSelfTest {
             int steps = 0;
             for (; steps < MAX_STEPS && run.state() != AbyssEscort.State.DONE; steps++) {
                 now++;
+                keepAlive(a);
                 Vec3 at = AbyssEscort.npcPos(run);
                 boolean behind = run.state() == AbyssEscort.State.ESCAPE && !escapeFailed;
                 place(a, behind ? waitPos(run, 3) : at.add(0.6, 0, 0.6));
@@ -257,6 +258,9 @@ public final class AbyssEscortSelfTest {
             int steps = 0;
             for (; steps < MAX_STEPS && run.state() != AbyssEscort.State.DONE; steps++) {
                 now++;
+                // 全段で流すと、前の段が残した敵や灰の層の熱で試しの人が倒れ、付き添いが「そばにいない」で止まっていた。試しの人は倒れない
+                keepAlive(b);
+                keepAlive(c);
                 Vec3 at = AbyssEscort.npcPos(run);
                 place(b, at.add(0.6, 0, 0.6));
                 place(c, at.add(-0.6, 0, -0.6));
@@ -266,7 +270,7 @@ public final class AbyssEscortSelfTest {
                 AbyssEscort.tick(level, run, now, List.of(b, c));
             }
             check(f, run.state() == AbyssEscort.State.DONE, "the party ash escort did not finish (" + steps + " steps, state " + run.state() + ", cp "
-                    + run.secured() + ", at " + run.at() + ")");
+                    + run.secured() + ", at " + run.at() + ", alive " + b.isAlive() + "/" + c.isAlive() + ")");
             check(f, run.participants().contains(c.getUUID()), "the second player did not join the escort");
             for (FakePlayer q : List.of(b, c)) {
                 Quests.poll(q, true);
@@ -332,6 +336,15 @@ public final class AbyssEscortSelfTest {
     static void check(List<String> f, boolean ok, String what) {
         if (!ok) {
             f.add(what);
+        }
+    }
+
+    // 試しの人を倒れないままにする (前の段の敵・灰の熱・溶岩の縁で倒れると、付き添いが進まない)
+    static void keepAlive(ServerPlayer p) {
+        p.setInvulnerable(true);
+        p.clearFire();
+        if (p.getHealth() < p.getMaxHealth()) {
+            p.setHealth(p.getMaxHealth());
         }
     }
 }

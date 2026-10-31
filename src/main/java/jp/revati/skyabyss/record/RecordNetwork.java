@@ -48,6 +48,11 @@ public final class RecordNetwork {
                     if (context.player() instanceof ServerPlayer player) {
                         RecordService.replay(player, payload.reel());
                     }
+                })
+                .playToServer(OpenTrials.TYPE, OpenTrials.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        jp.revati.skyabyss.facility.KeepRecords.open(player);
+                    }
                 });
     }
 
@@ -92,6 +97,17 @@ public final class RecordNetwork {
 
     // 本人 → サーバー: なくした天の鍵の欠片 (key = false)・天の鍵 (key = true) を呼び戻す
     // 見る人 → サーバー: 見た語りをもう一度流す
+    // 見る人 → サーバー: 試練の記録 (図鑑) を開く (控え帳の巨神のつまみの行)
+    public record OpenTrials() implements CustomPacketPayload {
+        public static final Type<OpenTrials> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "record_open_trials"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenTrials> STREAM_CODEC = StreamCodec.unit(new OpenTrials());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     public record Replay(String reel) implements CustomPacketPayload {
         public static final Type<Replay> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "record_replay"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Replay> STREAM_CODEC = StreamCodec.composite(

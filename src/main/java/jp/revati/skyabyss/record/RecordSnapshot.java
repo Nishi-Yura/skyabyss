@@ -50,6 +50,8 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
     public static final int ACTION_RECALL_KEY = 4;
     // 見た語り (紙芝居) をもう一度流す (行の key = "reel.<語りの名前>"。本人だけ。story/reel/StoryReels)
     public static final int ACTION_REPLAY = 5;
+    // 試練の記録 (図鑑) を開く (facility/KeepRecords。前は砦の老兵が開いた。本人だけ)
+    public static final int ACTION_RECORDS = 6;
     public static final String REEL_ROW = "reel.";
 
     // 中のつまみ: 「巨神」のつまみの中に、一覧と巨神ごとの頁を並べる (id は「titans.巨神の名前」)。

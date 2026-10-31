@@ -310,5 +310,9 @@
   "skyabyss_record.r.reel.chapter_titan_storm": "Before chapter III",
   "skyabyss_record.d.reel.chapter_titan_storm": "\"The tide shell, too, sank into sleep beneath the sea.\"",
   "skyabyss_record.r.reel.chapter_titan_ember": "Before chapter IV",
-  "skyabyss_record.d.reel.chapter_titan_ember": "\"The thunder wing, too, folded its wings and slept.\""
+  "skyabyss_record.d.reel.chapter_titan_ember": "\"The thunder wing, too, folded its wings and slept.\"",
+  "skyabyss_record.r.trial_codex": "Trial records",
+  "skyabyss_record.v.trial_codex": "Codex",
+  "skyabyss_record.d.trial_codex": "Trial times on the titans' backs, titles and your copy of the codex. Press Open below.",
+  "skyabyss_record.gui.open": "Open"
 }

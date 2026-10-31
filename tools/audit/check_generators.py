@@ -20,6 +20,9 @@ ROOT = Path(__file__).resolve().parents[2]
 # 出力が src/main/resources のデータ・lang に及ぶ生成スクリプト (ROOT からの相対パス)。
 GENERATORS = """
 tools/gen/world/gen_continent.py
+tools/gen/shop/gen_made_to_order.py
+tools/gen/wild_gear/gen_wild_gear.py
+tools/gen/loot/gen_box_text.py
 """.split()
 
 COPY = ["tools", "src/main/resources", "docs/design"]

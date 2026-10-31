@@ -310,5 +310,9 @@
   "skyabyss_record.r.reel.chapter_titan_storm": "三章の前の語り",
   "skyabyss_record.d.reel.chapter_titan_storm": "「潮殻もまた、海の底へ眠りについた。」",
   "skyabyss_record.r.reel.chapter_titan_ember": "四章の前の語り",
-  "skyabyss_record.d.reel.chapter_titan_ember": "「雷翼も、羽をたたんで眠った。」"
+  "skyabyss_record.d.reel.chapter_titan_ember": "「雷翼も、羽をたたんで眠った。」",
+  "skyabyss_record.r.trial_codex": "試練の記録",
+  "skyabyss_record.v.trial_codex": "図鑑",
+  "skyabyss_record.d.trial_codex": "巨神の背の試練の速さ・称号・図鑑の写し。下の「開く」で見る。",
+  "skyabyss_record.gui.open": "開く"
 }

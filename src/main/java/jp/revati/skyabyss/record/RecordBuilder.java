@@ -464,6 +464,10 @@ public final class RecordBuilder {
                     t("r.titan_of", t("n." + order), titanName(p, titan)), value, mark, -1, detail, RecordSnapshot.ACTION_NONE));
         }
 
+        // 試練の記録 (図鑑): 背の試練の速さ・称号・図鑑の写し (前は砦の老兵が開いた)
+        rows.add(new Row("trial_codex", Kind.VALUE, ItemStack.EMPTY, t("r.trial_codex"), t("v.trial_codex"), RecordSnapshot.MARK_NONE, -1,
+                List.of(t("d.trial_codex")), RecordSnapshot.ACTION_RECORDS));
+
         rows.add(header("travel"));
         TravelState travel = Voyages.state(p);
         List<Component> titanNames = new ArrayList<>();

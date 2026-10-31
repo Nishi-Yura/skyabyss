@@ -642,6 +642,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
                 case RecordSnapshot.ACTION_CLAIM -> "skyabyss_record.gui.claim";
                 case RecordSnapshot.ACTION_RECALL_FRAGMENT, RecordSnapshot.ACTION_RECALL_KEY -> "skyabyss_record.gui.recall";
                 case RecordSnapshot.ACTION_REPLAY -> "skyabyss_record.gui.replay";
+                case RecordSnapshot.ACTION_RECORDS -> "skyabyss_record.gui.open";
                 default -> "skyabyss_record.gui.choose";
             });
             g.drawString(font, label, bx + (80 - font.width(label)) / 2, by + 3, TITLE, false);
@@ -732,6 +733,9 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             // 語りの画面はサーバーが開かせる (控え帳は閉じる)
             PacketDistributor.sendToServer(new RecordNetwork.Replay(row.key().substring(RecordSnapshot.REEL_ROW.length())));
             onClose();
+        } else if (row.action() == RecordSnapshot.ACTION_RECORDS) {
+            // 試練の記録の画面はサーバーが開かせる
+            PacketDistributor.sendToServer(new RecordNetwork.OpenTrials());
         } else if (row.action() == RecordSnapshot.ACTION_CHOOSE && minecraft.player != null) {
             // 遺物の選択画面 (サーバーが開かせる。docs/design/30)
             jp.revati.skyabyss.client.reward.HeartRewardClient.request();

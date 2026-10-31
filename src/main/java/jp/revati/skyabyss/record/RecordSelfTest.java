@@ -373,6 +373,9 @@ public final class RecordSelfTest {
             jp.revati.skyabyss.story.reel.StoryReels.markSeen(a, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
             RecordSnapshot.Row reelRow = RecordBuilder.build(a, true).tab(RecordSnapshot.TITANS).row(reelKey);
             check(f, reelRow != null && reelRow.action() == RecordSnapshot.ACTION_REPLAY, "a seen tale should offer a replay row");
+            // 試練の記録 (図鑑) は巨神のつまみの行から開く (前は砦の老兵)
+            RecordSnapshot.Row trials = RecordBuilder.build(a, true).tab(RecordSnapshot.TITANS).row("trial_codex");
+            check(f, trials != null && trials.action() == RecordSnapshot.ACTION_RECORDS, "the titans tab should open the trial records");
             RecordSnapshot.Row keyRow = RecordBuilder.build(a, true).tab(RecordSnapshot.KEEPSAKES).row("sky_key");
             check(f, keyRow != null && keyRow.action() == RecordSnapshot.ACTION_RECALL_KEY, "the key row should offer a recall");
             KeepsakeBonds.recall(a, KeepsakeBonds.Kind.KEY);

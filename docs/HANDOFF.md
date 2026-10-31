@@ -8,6 +8,13 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 0.9.20 のあと（遊ばずに決められる片づけ。2026-10-31）
+
+- 砦の老兵を消した（`AttendantRole.RETIRED` に足した。前の世界の人は消える）。試練の記録（図鑑）は J の記録の巨神のつまみの行「試練の記録」の「開く」から（`RecordSnapshot.ACTION_RECORDS` → `RecordNetwork.OpenTrials` → `KeepRecords.open`）。前の空見の頁は都の社の祭司が渡す（`attendant_shrine_priest_page.json`。伝承 `chapter1/keep_prev_page` が開いていれば「もう渡した」）。
+- 誂えの生成（`tools/gen/shop/gen_made_to_order.py`）: 表を今の店に合わせた（糧は食料屋、バニラの花火と光の矢は外した）。手で置いた品は消さず、誂えの品だけ入れ替える。`check_generators.py` の一覧に、これと `gen_wild_gear.py`・`gen_box_text.py` を足した（流して店がずれたら quick_check が落ちる）。
+- `abyss escort`: 全段で流すと、前の段の敵や灰の熱で試しの人が倒れ、付き添いが止まっていた。試しの人を倒れないように（`AbyssEscortSelfTest.keepAlive`）。直したあとの全段は失敗 0（206 段）。
+- ゲームの中の確かめ: `tools/shots/townsfolk_check.txt`・`townsfolk_check2.txt`（都の封切り師と案内人の噂・描き足し、社の祭司の頁、汐守・風待の封切り師の挨拶、道具屋・素材屋・武具屋・鍛冶場の品）。灰炉の封切り師は撮影の位置合わせで話しかけられなかった（立つことは前の撮影 `box_openers` で見た）。
+
 ## 0.9.20（島・町の人・店の直しの試遊版。2026-10-31）
 
 - jar `build/libs/skyabyss-0.9.20.jar`。確かめ表 `docs/review/playtest_0.9.20.md`（島・蜂の巣・町の人・店・成長の知らせ・ヒロイックの防具・封切り師の挨拶）。変更履歴はサイト（`tools/site/pages_c.py`）。新しい世界で始めること（島の地形を作り直した）。
