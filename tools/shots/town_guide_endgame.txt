@@ -1,0 +1,40 @@
+# 土地の町の案内人: 巡り路を歩く・名声と旅帳を見る (鯨見の町)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_guide_endgame.txt -PshotsName=town_guide_endgame
+world continent_areas continent
+size 1280 720
+timeout 1500
+render 8
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode adventure
+cmd effect give @s resistance 600 4 true
+cmd effect give @s slow_falling 600 0 true
+cmd tp @s -120 120 -600
+waitchunks 300
+cmd skyabyss dev grounds mark town 0 stand
+waitchunks 300
+wait 200
+chat clear
+cmd skyabyss dev talk "skyabyss:guest_town_guide_whale"
+wait 40
+shot guide_1_options
+cmd skyabyss dev talk say 1
+wait 160
+shot guide_2_circuit_offer
+cmd skyabyss dev talk say 0
+wait 60
+close
+wait 10
+shot guide_2b_circuit_started
+chat clear
+cmd skyabyss fame add whale 35
+wait 30
+cmd skyabyss_journal
+wait 10
+shot guide_3_journal

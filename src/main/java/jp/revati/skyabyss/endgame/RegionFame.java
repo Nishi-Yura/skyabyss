@@ -109,6 +109,18 @@ public final class RegionFame {
         return pct;
     }
 
+    // その土地の町の店での値引き (名声の段と、その土地の旗。町の中かどうかは見ない。旅の記録の画面に出す)
+    public static int discountFor(ServerPlayer p, int region) {
+        if (!townLand(region)) {
+            return 0;
+        }
+        int pct = DISCOUNT[tier(p, region)];
+        if (GuildWeek.holdsFlag(p, region)) {
+            pct = Math.min(GuildWeek.DISCOUNT_CAP, pct + GuildWeek.FLAG_DISCOUNT);
+        }
+        return pct;
+    }
+
     public static int price(ServerPlayer p, int coins) {
         int pct = discountHere(p);
         if (coins <= 0 || pct <= 0) {

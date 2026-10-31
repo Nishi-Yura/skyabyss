@@ -23,13 +23,7 @@
         {
           "id": "circuit",
           "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "circuit"
-            }
-          ],
-          "goto": "end"
+          "goto": "circuit"
         },
         {
           "id": "journal",
@@ -44,6 +38,27 @@
         },
         {
           "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    },
+    "circuit": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "go",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "circuit_start"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "no",
           "kind": "leave",
           "goto": "end"
         }

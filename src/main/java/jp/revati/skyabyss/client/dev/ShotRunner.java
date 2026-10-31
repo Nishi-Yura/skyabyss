@@ -1117,6 +1117,7 @@ public final class ShotRunner {
             case "lore", "lorebook" -> jp.revati.skyabyss.lore.client.LoreBookScreen::new;
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
+            case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;

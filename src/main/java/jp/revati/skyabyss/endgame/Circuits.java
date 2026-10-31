@@ -136,6 +136,14 @@ public final class Circuits {
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("message.skyabyss.circuit.offer.hover")))));
     }
 
+    // 案内人の会話の「歩き出す」から: 始めて、今日の報いの残りを知らせる
+    public static void startFromGuide(ServerPlayer p) {
+        if (startHere(p)) {
+            int left = Math.max(0, DAILY - runsToday(p));
+            Notice.hint(p, left > 0 ? "message.skyabyss.circuit.left_today" : "message.skyabyss.circuit.none_today", left, DAILY);
+        }
+    }
+
     static boolean startHere(ServerPlayer p) {
         SiteData.Entry town = townHere(p);
         if (town == null) {
