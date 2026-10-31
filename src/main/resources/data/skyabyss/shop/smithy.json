@@ -888,6 +888,27 @@
       "count": 1,
       "coins": 5,
       "chapter": 2
+    },
+    {
+      "id": "wild_guard_badge",
+      "item": "skyabyss:wild_guard_badge",
+      "count": 1,
+      "coins": 9,
+      "chapter": 1
+    },
+    {
+      "id": "wild_herb_vial",
+      "item": "skyabyss:wild_herb_vial",
+      "count": 1,
+      "coins": 11,
+      "chapter": 1
+    },
+    {
+      "id": "wild_float_netsuke",
+      "item": "skyabyss:wild_float_netsuke",
+      "count": 1,
+      "coins": 18,
+      "chapter": 2
     }
   ],
   "buys": []

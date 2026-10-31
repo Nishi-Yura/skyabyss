@@ -139,6 +139,40 @@ public final class WildGearTable {
             armor("wild_stargazer", "mystic", GearTier.HEROIC, 48, "moon", new int[]{4, 8, 6, 4}, 2.4, List.of(), List.of(fx(Kind.MANA_REGEN, 0.35), fx(Kind.NIGHT_DAMAGE, 0.08))),
             armor("wild_cloudknight", "heavy", GearTier.HEROIC, 50, "cloud", new int[]{5, 9, 7, 4}, 5, List.of(), List.of(fx(Kind.CLOUD_WARD, 400, 6, 0.1))));
 
+    // 装飾の枠の品 26 品: ID・護符か・階級・必要 Lv・土地・待ち (tick、護符だけ)・能力・体に描く場所 (装飾だけ)
+    public static final List<WildGearTypes.Accessory> ACCESSORIES = List.of(
+            accessory("wild_guard_badge", false, GearTier.UNCOMMON, 3, "meadow", 0, List.of(fx(Kind.MAX_HEALTH, 2)), new WildGearTypes.Mount("BODY", 0f, 1.4f, -2.7f, 0f, 0f, 0f, 0.45f, 0f, 5f, 0f)),
+            accessory("wild_mossball_netsuke", false, GearTier.RARE, 8, "hills", 0, List.of(fx(Kind.REGEN_TICK, 1, 100)), new WildGearTypes.Mount("BODY", -3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_herb_vial", true, GearTier.UNCOMMON, 5, "meadow", 900, List.of(fx(Kind.CHARM_HEAL, 6)), null),
+            accessory("wild_float_netsuke", false, GearTier.UNCOMMON, 12, "coast", 0, List.of(fx(Kind.SWIM, 0.4), fx(Kind.BREATH, 1), fx(Kind.MOVE_SPEED, 0.03)), new WildGearTypes.Mount("BODY", 3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_wolf_tooth_necklace", false, GearTier.RARE, 16, "heights", 0, List.of(fx(Kind.CRIT, 0.08, 0.5)), new WildGearTypes.Mount("BODY", 0f, 1.4f, -2.7f, 0f, 0f, 0f, 0.45f, 0f, 5f, 0f)),
+            accessory("wild_crab_backplate", false, GearTier.EPIC, 19, "coast", 0, List.of(fx(Kind.TOUGHNESS, 2), fx(Kind.THORNS, 0.15, 3)), new WildGearTypes.Mount("BODY", 0f, 4f, 3f, 0f, 180f, 0f, 0.55f, 0f, 3f, 0f)),
+            accessory("wild_fog_handbell", true, GearTier.RARE, 15, "coast", 800, List.of(fx(Kind.CHARM_FOG, 8, 60)), null),
+            accessory("wild_weave_bracelet", false, GearTier.RARE, 22, "heights", 0, List.of(fx(Kind.MOVE_SPEED, 0.05), fx(Kind.FALL_TAKEN, -0.3)), new WildGearTypes.Mount("RIGHT_LEG", 0f, 10.4f, 0f, 0f, 0f, 0f, 0.42f, 0f, 0f, 0f)),
+            accessory("wild_emberbug_amber", false, GearTier.EPIC, 26, "wastes", 0, List.of(fx(Kind.BURN_BONUS_SET, 0.1), fx(Kind.FIRE_TAKEN, -0.15)), new WildGearTypes.Mount("BODY", -3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_ramhorn_bugle", false, GearTier.HEROIC, 30, "heights", 0, List.of(fx(Kind.BERSERK, 0.5, 0.15), fx(Kind.TOUGHNESS, 2)), new WildGearTypes.Mount("BODY", 3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_ash_talisman", true, GearTier.EPIC, 25, "wastes", 1000, List.of(fx(Kind.CHARM_CLEANSE, 100)), null),
+            accessory("wild_signal_fire", true, GearTier.HEROIC, 29, "heights", 1200, List.of(fx(Kind.CHARM_RALLY, 8, 0.15, 160)), null),
+            accessory("wild_plumb_line_ring", false, GearTier.RARE, 32, "abyss_upper", 0, List.of(fx(Kind.FALL_TAKEN, -0.5), fx(Kind.NIGHT_VISION, 1)), new WildGearTypes.Mount("BODY", 3.6f, 10.6f, 3.1f, 0f, 0f, 0f, 0.4f, 0f, 6f, 0f)),
+            accessory("wild_salttear_earring", false, GearTier.EPIC, 35, "abyss_upper", 0, List.of(fx(Kind.MANA_REGEN, 0.15), fx(Kind.MAX_MANA, 6)), new WildGearTypes.Mount("HEAD", -4.3f, -5.2f, 1.2f, 25f, 0f, 22f, 0.6f, 0f, 0f, 0f)),
+            accessory("wild_bonepipe_necklace", false, GearTier.EPIC, 38, "abyss_upper", 0, List.of(fx(Kind.DARK_BONUS, 7, 0.1)), new WildGearTypes.Mount("BODY", 0f, 1.4f, -2.7f, 0f, 0f, 0f, 0.45f, 0f, 5f, 0f)),
+            accessory("wild_hangman_knot", false, GearTier.HEROIC, 40, "abyss_upper", 0, List.of(fx(Kind.NOOSE, 5, 4800), fx(Kind.MOVE_SPEED, 0.04)), new WildGearTypes.Mount("BODY", 3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_lamp_charm", true, GearTier.RARE, 33, "abyss_upper", 900, List.of(fx(Kind.CHARM_LIGHT, 10, 0.1, 200)), null),
+            accessory("wild_mimic_heart_charm", true, GearTier.HEROIC, 39, "abyss_upper", 2400, List.of(fx(Kind.CHARM_HEART, 0.5)), null),
+            accessory("wild_fulgurite_necklace", false, GearTier.RARE, 42, "abyss_lower", 0, List.of(fx(Kind.LIGHTNING_TAKEN, -0.3), fx(Kind.THORN_BOLT, 0.1, 5)), new WildGearTypes.Mount("BODY", 0f, 1.4f, -2.7f, 0f, 0f, 0f, 0.45f, 0f, 5f, 0f)),
+            accessory("wild_ash_hourglass_charm", false, GearTier.EPIC, 44, "abyss_lower", 0, List.of(fx(Kind.COOLDOWN, 0.08)), new WildGearTypes.Mount("BODY", -3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_deep_eye_charm", false, GearTier.EPIC, 46, "abyss_lower", 0, List.of(fx(Kind.CRIT, 0.12, 0.6)), new WildGearTypes.Mount("BODY", 0f, 1.4f, -2.7f, 0f, 0f, 0f, 0.45f, 0f, 5f, 0f)),
+            accessory("wild_meteor_ring", false, GearTier.HEROIC, 48, "moon", 0, List.of(fx(Kind.MAX_HEALTH, 6), fx(Kind.TOUGHNESS, 2), fx(Kind.GRIT, 0.05, 0.1)), new WildGearTypes.Mount("BODY", 3.4f, 10f, -2.9f, 0f, 0f, 0f, 0.45f, 0f, 5.4f, 0f)),
+            accessory("wild_skylark_plume", false, GearTier.HEROIC, 50, "cloud", 0, List.of(fx(Kind.FALL_TAKEN, -1), fx(Kind.MOVE_SPEED, 0.08)), new WildGearTypes.Mount("HEAD", -4.3f, -5.2f, 1.2f, 25f, 0f, 22f, 0.6f, 0f, 0f, 0f)),
+            accessory("wild_starchart_compass", true, GearTier.EPIC, 45, "abyss_lower", 400, List.of(fx(Kind.CHARM_BLINK, 8)), null),
+            accessory("wild_moon_hourglass", true, GearTier.HEROIC, 49, "moon", 1500, List.of(fx(Kind.CHARM_STOP, 10, 60, 20)), null),
+            accessory("wild_cloudhymn_slip", true, GearTier.HEROIC, 50, "cloud", 1800, List.of(fx(Kind.CHARM_HYMN, 10, 10, 0.2, 160)), null));
+
+    private static WildGearTypes.Accessory accessory(String id, boolean charm, GearTier tier, int level, String region, int cooldown, List<WildEffect.Fx> fx,
+            WildGearTypes.Mount mount) {
+        return new WildGearTypes.Accessory(id, charm, tier, level, region, cooldown, fx, mount);
+    }
+
     private static WildGearTypes.Weapon weapon(String id, Job job, String kind, GearTier tier, int level, String region, double attack, double speed,
             double bow, List<WildEffect.Fx> fx) {
         return new WildGearTypes.Weapon(id, job, kind, tier, level, region, attack, speed, bow, fx);

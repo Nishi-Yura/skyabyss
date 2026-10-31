@@ -35,6 +35,9 @@ KINDS = {
     "dagger": dict(pose="whale", grip=(0.0, 0.6, 0.0), cen=(0.0, 4.8, 0.0), scale=16.0),
     "fang": dict(pose="whale", grip=(0.0, 0.6, 0.0), cen=(0.0, 5.0, 0.0), scale=15.0),
     "claw": dict(pose="whale", grip=(0.0, 1.5, 0.0), cen=(0.0, 7.0, 0.0), scale=13.0),
+    # 装飾の枠の品 (手に持たない。絵の枠だけ)
+    "trinket": dict(pose="whale", grip=(0.0, 0.0, 0.0), cen=(0.0, 1.0, 0.0), scale=22.0),
+    "charm": dict(pose="whale", grip=(0.0, 0.0, 0.0), cen=(0.0, 1.0, 0.0), scale=22.0),
 }
 # 品の階級 → 絵を作るときの段 (縁と光る筋の型。ヒロイックだけ伝説の筋)
 BUILD_TIER = {"uncommon": "rare", "rare": "rare", "epic": "rare", "heroic": "legend"}

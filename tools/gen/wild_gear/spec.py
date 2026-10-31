@@ -394,3 +394,88 @@ if __name__ == "__main__":
         print(w["id"], w["tier"], w["lv"], weapon_stats(w), round(target(w["lv"], w["tier"]), 1))
     for a in ARMORS:
         print(a["id"], armor_stats(a))
+
+
+# ---------------------------------------------------------------- 装飾の枠の品 (docs/design/51 の 6 章)
+# kind: trinket = 装飾 (付けているだけで効く。枠 2 つ) / charm = 護符 (H キーで使う。枠 1 つ、待ちは cd 秒)
+# mount: 体に描く場所 (client/accessory/AccessoryWornLayer の Mount と同じ並び: 部位, x, y, z, rx, ry, rz, 倍率, 留め点 x, y, z)
+ACCESSORIES = []
+
+
+def X(id_, kind, tier, lv, region, fx, ja, en, abil_ja, abil_en, cd=0, mount=None):
+    ACCESSORIES.append(dict(id=id_, kind=kind, tier=tier, lv=lv, region=region, fx=fx, ja=ja, en=en, abil_ja=abil_ja, abil_en=abil_en,
+                            cd=cd, mount=mount))
+
+
+CHEST = ("BODY", 0, 1.4, -2.7, 0, 0, 0, 0.45, 0, 5.0, 0)
+HIP_R = ("BODY", -3.4, 10.0, -2.9, 0, 0, 0, 0.45, 0, 5.4, 0)
+HIP_L = ("BODY", 3.4, 10.0, -2.9, 0, 0, 0, 0.45, 0, 5.4, 0)
+BACK = ("BODY", 0, 4.0, 3.0, 0, 180, 0, 0.55, 0, 3.0, 0)
+WRIST = ("RIGHT_LEG", 0, 10.4, 0, 0, 0, 0, 0.42, 0, 0, 0)
+EAR = ("HEAD", -4.3, -5.2, 1.2, 25, 0, 22, 0.6, 0, 0, 0)
+BELT_BACK = ("BODY", 3.6, 10.6, 3.1, 0, 0, 0, 0.4, 0, 6.0, 0)
+
+# 帯 I
+X("wild_guard_badge", "trinket", "uncommon", 3, "meadow", [("MAX_HEALTH", 2)],
+  "衛士の鐘章", "Bell Guard's Badge", "体力 +2", "+2 max health", mount=CHEST)
+X("wild_mossball_netsuke", "trinket", "rare", 8, "hills", [("REGEN_TICK", 1, 100)],
+  "苔玉の根付", "Mossball Netsuke", "5 秒ごとに体力 +1", "Restores 1 health every 5s", mount=HIP_R)
+X("wild_herb_vial", "charm", "uncommon", 5, "meadow", [("CHARM_HEAL", 6)],
+  "草薬の小瓶", "Herbal Vial", "使うと体力 +6（待ち 45 秒）", "Use: heal 6 (45s cooldown)", cd=45)
+# 帯 II
+X("wild_float_netsuke", "trinket", "uncommon", 12, "coast", [("SWIM", 0.4), ("BREATH", 1), ("MOVE_SPEED", 0.03)],
+  "浮き玉の根付", "Glass Float Netsuke", "水の中の移動 +、息が長い、移動 +3%", "Faster swimming, longer breath, +3% speed", mount=HIP_L)
+X("wild_wolf_tooth_necklace", "trinket", "rare", 16, "heights", [("CRIT", 0.08, 0.5)],
+  "雷狼の牙の首飾り", "Stormwolf Tooth Necklace", "会心 8%（×1.5）", "8% critical chance (x1.5)", mount=CHEST)
+X("wild_crab_backplate", "trinket", "epic", 19, "coast", [("TOUGHNESS", 2), ("THORNS", 0.15, 3)],
+  "大蟹の甲羅の背当て", "Crab Shell Backplate", "強靭 +2、打たれると 15% で棘 3 を返す", "+2 toughness; 15% chance to return 3 damage when hit", mount=BACK)
+X("wild_fog_handbell", "charm", "rare", 15, "coast", [("CHARM_FOG", 8, 60)],
+  "霧鐘の小鈴", "Foghorn Handbell", "使うとまわり 8 の敵を 3 秒 霧で遅く II・目くらみ（待ち 40 秒）",
+  "Use: enemies within 8 are slowed and blinded by fog for 3s (40s cooldown)", cd=40)
+# 帯 III
+X("wild_weave_bracelet", "trinket", "rare", 22, "heights", [("MOVE_SPEED", 0.05), ("FALL_TAKEN", -0.3)],
+  "織り紐の腕輪", "Woven Cord Bracelet", "移動 +5%、落下 −30%", "+5% speed, -30% fall damage", mount=WRIST)
+X("wild_emberbug_amber", "trinket", "epic", 26, "wastes", [("BURN_BONUS_SET", 0.10), ("FIRE_TAKEN", -0.15)],
+  "熾り蟲の琥珀", "Emberbug Amber", "燃えている相手に +10%、火の傷 −15%", "+10% against burning targets, -15% fire damage taken", mount=HIP_R)
+X("wild_ramhorn_bugle", "trinket", "heroic", 30, "heights", [("BERSERK", 0.5, 0.15), ("TOUGHNESS", 2)],
+  "雷角の角笛", "Ramhorn Bugle", "体力が半分を切ると与える傷 +15%、強靭 +2", "+15% damage below half health, +2 toughness", mount=HIP_L)
+X("wild_ash_talisman", "charm", "epic", 25, "wastes", [("CHARM_CLEANSE", 100)],
+  "灰の民の祈り札", "Ashfolk Prayer Slip", "使うと悪い効果を消し、5 秒 耐性 I（待ち 50 秒）", "Use: clear harmful effects and gain Resistance I for 5s (50s cooldown)", cd=50)
+X("wild_signal_fire", "charm", "heroic", 29, "heights", [("CHARM_RALLY", 8, 0.15, 160)],
+  "峰の狼煙筒", "Summit Signal Fire", "使うと 8 秒 まわり 8 の仲間（自分も）の与える傷 +15%（待ち 60 秒）",
+  "Use: you and allies within 8 deal +15% damage for 8s (60s cooldown)", cd=60)
+# 帯 IV
+X("wild_plumb_line_ring", "trinket", "rare", 32, "abyss_upper", [("FALL_TAKEN", -0.5), ("NIGHT_VISION", 1)],
+  "測り縄の輪", "Plumb Line Coil", "落下 −50%、暗い所で暗視", "-50% fall damage; night vision in the dark", mount=BELT_BACK)
+X("wild_salttear_earring", "trinket", "epic", 35, "abyss_upper", [("MANA_REGEN", 0.15), ("MAX_MANA", 6)],
+  "塩の涙の耳飾り", "Salt Tear Earring", "マナの戻り +15%、マナの上限 +6", "+15% mana regeneration, +6 max mana", mount=EAR)
+X("wild_bonepipe_necklace", "trinket", "epic", 38, "abyss_upper", [("DARK_BONUS", 7, 0.10)],
+  "骨笛の首飾り", "Bonepipe Necklace", "暗い所で与える傷 +10%", "+10% damage in darkness", mount=CHEST)
+X("wild_hangman_knot", "trinket", "heroic", 40, "abyss_upper", [("NOOSE", 5, 4800), ("MOVE_SPEED", 0.04)],
+  "縄の人の結び目", "Hanged One's Knot", "倒れる傷を体力 1 で耐えて後ろへ跳ぶ（待ち 240 秒）、移動 +4%",
+  "Survive a lethal blow at 1 health and leap back (240s cooldown); +4% speed", mount=HIP_L)
+X("wild_lamp_charm", "charm", "rare", 33, "abyss_upper", [("CHARM_LIGHT", 10, 0.10, 200)],
+  "灯籠の小灯", "Little Lantern", "使うと 10 秒 まわりを照らし、まわり 10 の敵に印（仲間全員の傷 +10%）（待ち 45 秒）",
+  "Use: light your surroundings for 10s and mark enemies within 10 (+10% damage from everyone) (45s cooldown)", cd=45)
+X("wild_mimic_heart_charm", "charm", "heroic", 39, "abyss_upper", [("CHARM_HEART", 0.5)],
+  "脈打つ偽の心臓", "Throbbing Mimic Heart", "使うと体力を上限の 50% 戻す（待ち 120 秒）", "Use: restore 50% of max health (120s cooldown)", cd=120)
+# 帯 V
+X("wild_fulgurite_necklace", "trinket", "rare", 42, "abyss_lower", [("LIGHTNING_TAKEN", -0.3), ("THORN_BOLT", 0.10, 5)],
+  "雷管石の首飾り", "Fulgurite Necklace", "雷の傷 −30%、打たれると 10% で雷を返す", "-30% lightning damage taken; 10% chance to return lightning when hit", mount=CHEST)
+X("wild_ash_hourglass_charm", "trinket", "epic", 44, "abyss_lower", [("COOLDOWN", 0.08)],
+  "灰の砂時計の飾り", "Ash Hourglass Pendant", "技の待ち −8%", "-8% skill cooldowns", mount=HIP_R)
+X("wild_deep_eye_charm", "trinket", "epic", 46, "abyss_lower", [("CRIT", 0.12, 0.6)],
+  "深みの眼の護り", "Deep Eye Ward", "会心 12%（×1.6）", "12% critical chance (x1.6)", mount=CHEST)
+X("wild_meteor_ring", "trinket", "heroic", 48, "moon", [("MAX_HEALTH", 6), ("TOUGHNESS", 2), ("GRIT", 0.05, 0.10)],
+  "隕鉄の環", "Meteoric Iron Ring", "体力 +6、強靭 +2、受ける傷 −5%（体力半分未満で −10%）",
+  "+6 max health, +2 toughness, -5% damage taken (-10% below half health)", mount=HIP_L)
+X("wild_skylark_plume", "trinket", "heroic", 50, "cloud", [("FALL_TAKEN", -1.0), ("MOVE_SPEED", 0.08)],
+  "雲雀の羽根飾り", "Skylark Plume", "落下の傷なし、移動 +8%", "No fall damage, +8% speed", mount=EAR)
+X("wild_starchart_compass", "charm", "epic", 45, "abyss_lower", [("CHARM_BLINK", 8)],
+  "星図の羅針盤", "Starchart Compass", "使うと向いた方へ 8 ブロック跳ぶ（待ち 20 秒）", "Use: blink 8 blocks forward (20s cooldown)", cd=20)
+X("wild_moon_hourglass", "charm", "heroic", 49, "moon", [("CHARM_STOP", 10, 60, 20)],
+  "月の砂時計", "Lunar Hourglass", "使うとまわり 10 の敵の時を 3 秒止める（主は 1 秒）（待ち 75 秒）",
+  "Use: freeze enemies within 10 for 3s (bosses 1s) (75s cooldown)", cd=75)
+X("wild_cloudhymn_slip", "charm", "heroic", 50, "cloud", [("CHARM_HYMN", 10, 10, 0.20, 160)],
+  "雲上の祝詞の札", "Cloudhymn Slip", "使うとまわり 10 の仲間（自分も）の体力 +10、8 秒 受ける傷 −20%（待ち 90 秒）",
+  "Use: you and allies within 10 heal 10 and take -20% damage for 8s (90s cooldown)", cd=90)

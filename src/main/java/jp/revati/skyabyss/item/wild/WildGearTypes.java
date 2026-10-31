@@ -72,4 +72,16 @@ public final class WildGearTypes {
             return WildGearTypes.band(level);
         }
     }
+
+    // 体に描く場所 (client/accessory/AccessoryWornLayer の Mount と同じ並び。part = HEAD / BODY / RIGHT_LEG / LEFT_LEG)
+    public record Mount(String part, float x, float y, float z, float rx, float ry, float rz, float scale, float px, float py, float pz) {
+    }
+
+    // 装飾の枠の品 (charm = 護符、それ以外は装飾)。cooldown は護符の待ち (tick)
+    public record Accessory(String id, boolean charm, GearTier tier, int level, String region, int cooldown, List<WildEffect.Fx> fx, Mount mount)
+            implements Row {
+        public int band() {
+            return WildGearTypes.band(level);
+        }
+    }
 }

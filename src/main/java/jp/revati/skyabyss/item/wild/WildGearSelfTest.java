@@ -90,6 +90,22 @@ public final class WildGearSelfTest {
             check(f, !a.set2().isEmpty() || !a.set4().isEmpty(), a.id() + " has no set effect");
         }
         check(f, java.util.Arrays.equals(sets, new int[]{3, 3, 3, 4, 5}), "armor band counts " + java.util.Arrays.toString(sets));
+        // 装飾の枠の品: 帯ごとに装飾 2・3・3・4・5、護符 1・1・2・2・3。装飾は体に描く場所を持つ
+        int[] trinkets = new int[5];
+        int[] charms = new int[5];
+        for (WildGearTypes.Accessory x : WildGearTable.ACCESSORIES) {
+            Item item = WildGearSetup.item(x.id());
+            check(f, item instanceof WildAccessoryItem a && a.row() == x, "accessory not registered: " + x.id());
+            check(f, item instanceof jp.revati.skyabyss.item.accessory.Accessory a && a.accessoryKind()
+                    == (x.charm() ? jp.revati.skyabyss.item.accessory.AccessoryKind.CHARM : jp.revati.skyabyss.item.accessory.AccessoryKind.TRINKET),
+                    x.id() + " slot kind differs");
+            check(f, GearLevel.required(item) == x.level() && item instanceof ModGear g && g.tier() == x.tier() && !g.enhanceable(), x.id() + " tier/level/forge differ");
+            check(f, x.charm() ? x.cooldown() >= 20 : x.mount() != null, x.id() + (x.charm() ? " has no cooldown" : " has no body mount"));
+            check(f, Job.of(item) == null, x.id() + " was mapped to a job");
+            (x.charm() ? charms : trinkets)[x.band() - 1]++;
+        }
+        check(f, java.util.Arrays.equals(trinkets, new int[]{2, 3, 3, 4, 5}) && java.util.Arrays.equals(charms, new int[]{1, 1, 2, 2, 3}),
+                "accessory band counts " + java.util.Arrays.toString(trinkets) + " / " + java.util.Arrays.toString(charms));
     }
 
     // 目安 E(L) (spec.py の E_PTS と同じ)
@@ -197,6 +213,20 @@ public final class WildGearSelfTest {
         double share = all == 0 ? 0 : (double) mine / all;
         check(f, share > 0.6 && share < 0.8, "job bias " + share + " (want about 0.72)");
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        // 護符を使う: 草薬の小瓶で体力が戻り、待ちに入り、待ちの最中は使えない
+        Item vial = WildGearSetup.item("wild_herb_vial");
+        if (vial instanceof WildAccessoryItem charm) {
+            // 必要 Lv は問わない (創造)。体力を減らしてから使う
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            p.setHealth(5f);
+            ItemStack s = new ItemStack(vial);
+            boolean used = charm.activate(p, s);
+            check(f, used && p.getHealth() > 5f && p.getCooldowns().isOnCooldown(vial) && !charm.activate(p, s), "herb vial charm did not heal / cool down");
+            p.getCooldowns().removeCooldown(vial);
+            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        }
+        // 装飾の効き目は付けているあいだの一式の効果と一緒に数える
+        check(f, WildArmorEvents.active(p).isEmpty(), "a bare player should have no wild set or trinket effects");
     }
 
     static void assets(List<String> f, List<String> notes) {
@@ -231,6 +261,12 @@ public final class WildGearSelfTest {
                 check(f, ja.containsKey("item.skyabyss." + id) && en.containsKey("item.skyabyss." + id), "name missing (ja/en): " + id);
             }
             check(f, ja.containsKey("item.skyabyss." + s.id() + ".desc") && en.containsKey("item.skyabyss." + s.id() + ".desc"), "set desc missing: " + s.id());
+        }
+        for (WildGearTypes.Accessory x : WildGearTable.ACCESSORIES) {
+            check(f, exists(a + "models/item/" + x.id() + ".json") && exists(a + "models/item_flat/" + x.id() + ".json"), "accessory model missing: " + x.id());
+            check(f, java.util.Arrays.equals(pngSize(a + "textures/item/" + x.id() + ".png"), new int[]{32, 32}), "icon is not 32x32: " + x.id());
+            check(f, exists(a + "lowpoly/items/" + x.id() + "/" + x.tier().meshTier + ".json"), "accessory mesh missing: " + x.id());
+            check(f, ja.containsKey("item.skyabyss." + x.id()) && en.containsKey("item.skyabyss." + x.id() + ".desc"), "accessory text missing: " + x.id());
         }
         notes.add("weapons without a low-poly mesh: " + missingMesh);
         check(f, ja.containsKey("message.skyabyss.wild_drop") && en.containsKey("message.skyabyss.wild_drop"), "drop message missing");

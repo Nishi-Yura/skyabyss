@@ -40,6 +40,7 @@ public final class WildLoot {
     public static final double SHARE_RANGE = 32;
     public static final float JOB_BIAS = 2f / 3f;
     public static final float WEAPON_SHARE = 0.7f;
+    public static final float ACCESSORY_SHARE = 0.15f;
     public static final float UNCOMMON = 0.02f, RARE = 0.008f, EPIC = 0.003f, HEROIC = 0.0005f;
     public static final float BOSS_AGAIN = 0.12f, BOSS_HEROIC = 0.03f;
     static final String FIRST = SkyAbyss.MODID + ":wild_first_";
@@ -178,6 +179,16 @@ public final class WildLoot {
             if (want.test(a)) {
                 armors.add(a);
             }
+        }
+        List<WildGearTypes.Accessory> accs = new ArrayList<>();
+        for (WildGearTypes.Accessory x : WildGearTable.ACCESSORIES) {
+            if (want.test(x)) {
+                accs.add(x);
+            }
+        }
+        // 装飾の枠の品 (ACCESSORY_SHARE)
+        if (!accs.isEmpty() && (weapons.isEmpty() && armors.isEmpty() || rand.nextFloat() < ACCESSORY_SHARE)) {
+            return new ItemStack(WildGearSetup.item(accs.get(rand.nextInt(accs.size())).id()));
         }
         boolean weapon = !weapons.isEmpty() && (armors.isEmpty() || rand.nextFloat() < WEAPON_SHARE);
         if (weapon) {

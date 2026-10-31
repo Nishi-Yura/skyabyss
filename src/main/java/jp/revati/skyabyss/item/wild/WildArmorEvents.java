@@ -28,6 +28,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -61,6 +62,18 @@ public final class WildArmorEvents {
             }
             if (s.getValue() >= 4) {
                 out.addAll(s.getKey().set4());
+            }
+        }
+        // 装飾の枠に付けた野の装飾 (護符は使って効くので数えない)
+        if (e instanceof Player p) {
+            for (int i = 0; i < jp.revati.skyabyss.item.accessory.AccessoryData.SIZE; i++) {
+                if (i == jp.revati.skyabyss.item.accessory.AccessoryData.CHARM) {
+                    continue;
+                }
+                ItemStack s = jp.revati.skyabyss.item.accessory.Accessories.stack(p, i);
+                if (s.getItem() instanceof WildAccessoryItem a && !a.row().charm() && jp.revati.skyabyss.item.GearLevel.meets(p, s)) {
+                    out.addAll(a.row().fx());
+                }
             }
         }
         return out;
@@ -107,6 +120,23 @@ public final class WildArmorEvents {
         }
         if (target.isOnFire()) {
             m *= 1 + sum(fx, Kind.BURN_BONUS_SET, 0);
+        }
+        // 装飾の条件つきの上乗せ (会心・背水・暗がり)
+        for (Fx f : fx) {
+            switch (f.kind()) {
+                case CRIT -> {
+                    if (p.getRandom().nextDouble() < f.p(0)) {
+                        m *= 1 + f.p(1);
+                        if (p.level() instanceof ServerLevel sl) {
+                            sl.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.3, 0.3, 0.2);
+                        }
+                    }
+                }
+                case BERSERK -> m *= p.getHealth() < p.getMaxHealth() * f.p(0) ? 1 + f.p(1) : 1;
+                case DARK_BONUS -> m *= p.level().getMaxLocalRawBrightness(p.blockPosition()) <= f.p(0) ? 1 + f.p(1) : 1;
+                default -> {
+                }
+            }
         }
         return m;
     }
@@ -216,6 +246,11 @@ public final class WildArmorEvents {
         long now = p.level().getGameTime();
         if (p.tickCount % 20 == 9) {
             List<Fx> fx = active(p);
+            for (Fx f : fx) {
+                if (f.kind() == Kind.REGEN_TICK && (p.tickCount / 20) % Math.max(1, f.ticks(1) / 20) == 0 && p.getHealth() < p.getMaxHealth()) {
+                    p.heal((float) f.p(0));
+                }
+            }
             toggle(p, Attributes.MAX_HEALTH, "max_health", sum(fx, Kind.MAX_HEALTH, 0), AttributeModifier.Operation.ADD_VALUE);
             toggle(p, Attributes.ARMOR_TOUGHNESS, "toughness", sum(fx, Kind.TOUGHNESS, 0), AttributeModifier.Operation.ADD_VALUE);
             toggle(p, jp.revati.skyabyss.rpg.Rpg.MAX_MANA, "max_mana", sum(fx, Kind.MAX_MANA, 0), AttributeModifier.Operation.ADD_VALUE);

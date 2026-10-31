@@ -130,6 +130,18 @@ public final class WildEffect {
         SNEAK_STEALTH,     // しゃがむと気づかれる距離 ×(1−a)
         GRIT,              // 受ける傷 −a、体力が半分未満で −b
         CLOUD_WARD,        // a tick ごとに膜 b、膜があるあいだ移動 +c
+        // ---------------------------------------------------------------- 装飾 (付けているあいだ)
+        REGEN_TICK,        // b tick ごとに体力 +a
+        // ---------------------------------------------------------------- 護符 (H キーで使う。WildAccessoryItem.activate)
+        CHARM_HEAL,        // 体力 +a
+        CHARM_FOG,         // まわり a の敵を b tick 遅く II・目くらみ
+        CHARM_CLEANSE,     // 悪い効果を消し、a tick 耐性 I
+        CHARM_RALLY,       // まわり a の仲間 (自分も) の与える傷 +b (c tick)
+        CHARM_LIGHT,       // まわり a を照らし、敵に印 (+b、c tick)
+        CHARM_HEART,       // 体力を上限の a 戻す
+        CHARM_BLINK,       // 向いた方へ a ブロック跳ぶ
+        CHARM_STOP,        // まわり a の敵の時を b tick 止める (主は c tick)
+        CHARM_HYMN,        // まわり a の仲間 (自分も) の体力 +b、d tick 受ける傷 −c
     }
 
     public record Fx(Kind kind, double[] p) {

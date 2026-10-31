@@ -52,6 +52,12 @@ def java():
         pieces, tough = S.armor_stats(a)
         alines.append(f'            armor("{a["id"]}", "{a["role"]}", GearTier.{TIER[a["tier"]]}, {a["lv"]}, "{a["region"]}", '
                       f'new int[]{{{", ".join(str(p) for p in pieces)}}}, {num(tough)}, {fx_list(a["set2"])}, {fx_list(a["set4"])})')
+    xlines = []
+    for x in S.ACCESSORIES:
+        m = x["mount"]
+        mount = "null" if m is None else f'new WildGearTypes.Mount("{m[0]}", ' + ", ".join(num(v) + "f" for v in m[1:]) + ")"
+        xlines.append(f'            accessory("{x["id"]}", {"true" if x["kind"] == "charm" else "false"}, GearTier.{TIER[x["tier"]]}, {x["lv"]}, "{x["region"]}", '
+                      f'{x["cd"] * 20}, {fx_list(x["fx"])}, {mount})')
     src = f"""package jp.revati.skyabyss.item.wild;
 
 import java.util.List;
@@ -74,6 +80,15 @@ public final class WildGearTable {{
     // 防具 {len(S.ARMORS)} 式: ID・役・階級・必要 Lv・土地・部位ごとの防御 (兜・胴・脚・靴)・部位ごとの強靭・2 部位の効果・4 部位の効果
     public static final List<WildGearTypes.ArmorSet> ARMORS = List.of(
 {(","+chr(10)).join(alines)});
+
+    // 装飾の枠の品 {len(S.ACCESSORIES)} 品: ID・護符か・階級・必要 Lv・土地・待ち (tick、護符だけ)・能力・体に描く場所 (装飾だけ)
+    public static final List<WildGearTypes.Accessory> ACCESSORIES = List.of(
+{(","+chr(10)).join(xlines)});
+
+    private static WildGearTypes.Accessory accessory(String id, boolean charm, GearTier tier, int level, String region, int cooldown, List<WildEffect.Fx> fx,
+            WildGearTypes.Mount mount) {{
+        return new WildGearTypes.Accessory(id, charm, tier, level, region, cooldown, fx, mount);
+    }}
 
     private static WildGearTypes.Weapon weapon(String id, Job job, String kind, GearTier tier, int level, String region, double attack, double speed,
             double bow, List<WildEffect.Fx> fx) {{
@@ -108,6 +123,13 @@ def lang():
             en[f"item.skyabyss.{a['id']}_{p}"] = f"{a['en']} {S.PIECE_EN[p]}"
         ja[f"item.skyabyss.{a['id']}.desc"] = f"{ROLE_JA[a['role']]}の一式。{a['set_ja']}"
         en[f"item.skyabyss.{a['id']}.desc"] = f"{ROLE_EN[a['role']]} set. {a['set_en']}"
+    for x in S.ACCESSORIES:
+        ja[f"item.skyabyss.{x['id']}"] = x["ja"]
+        en[f"item.skyabyss.{x['id']}"] = x["en"]
+        ja[f"item.skyabyss.{x['id']}.desc"] = ("護符（[H] で使う）。" if x["kind"] == "charm" else "装飾。") + x["abil_ja"]
+        en[f"item.skyabyss.{x['id']}.desc"] = ("Charm ([H] to use). " if x["kind"] == "charm" else "Trinket. ") + x["abil_en"]
+    ja["message.skyabyss.wild_charm.used"] = "%s を使った"
+    en["message.skyabyss.wild_charm.used"] = "Used %s"
     ja["message.skyabyss.wild_drop"] = "%s を手に入れた"
     en["message.skyabyss.wild_drop"] = "Found %s"
     LANG.mkdir(parents=True, exist_ok=True)
@@ -130,6 +152,9 @@ def shop():
             for p, share in zip(S.PIECES, S.PIECE_SPLIT):
                 d["goods"].append({"id": f"{a['id']}_{p}", "item": f"skyabyss:{a['id']}_{p}", "count": 1,
                                    "coins": max(2, round((6 + a["lv"]) * share * 1.6)), "chapter": S.band(a["lv"])})
+    for x in S.ACCESSORIES:
+        if x["tier"] == "uncommon":
+            d["goods"].append({"id": x["id"], "item": "skyabyss:" + x["id"], "count": 1, "coins": 6 + x["lv"], "chapter": S.band(x["lv"])})
     SHOP.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -137,4 +162,4 @@ if __name__ == "__main__":
     java()
     lang()
     shop()
-    print("wild gear:", len(S.WEAPONS), "weapons,", len(S.ARMORS), "armor sets")
+    print("wild gear:", len(S.WEAPONS), "weapons,", len(S.ARMORS), "armor sets,", len(S.ACCESSORIES), "accessories")

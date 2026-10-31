@@ -121,10 +121,54 @@ def install_armor(a):
         flat_model(f"{sid}_{p}")
 
 
+# 装飾の枠の品 (手・地面・額縁・頭は client/accessory/AccessoryItemRenderer の低ポリ、GUI は 32x32 の平絵。
+# 持ち方は今の装飾品と同じ表 (tools/install/install_lowpoly_accessories.py の DISPLAY)。鍛えないので強化の絵は入れない
+ACC_DISPLAY = {
+    "thirdperson_righthand": {"rotation": [0, -45, 0], "translation": [0, 3, 1], "scale": [0.85, 0.85, 0.85]},
+    "thirdperson_lefthand": {"rotation": [0, 45, 0], "translation": [0, 3, 1], "scale": [0.85, 0.85, 0.85]},
+    "firstperson_righthand": {"rotation": [0, -60, 10], "translation": [0.8, 2.5, 1.5], "scale": [0.55, 0.55, 0.55]},
+    "firstperson_lefthand": {"rotation": [0, 60, -10], "translation": [0.8, 2.5, 1.5], "scale": [0.55, 0.55, 0.55]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.55, 0.55, 0.55]},
+    "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7], "scale": [0.9, 0.9, 0.9]},
+    "fixed": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [0.85, 0.85, 0.85]},
+}
+
+
+def install_accessory(x):
+    item = x["id"]
+    src = RAW / item / "a"
+    bt, dest = BUILD_TIER[x["tier"]], MESH_TIER[x["tier"]]
+    mesh_dir = ASSETS / "lowpoly/items" / item
+    tex_dir = ASSETS / "textures/lowpoly/items" / item
+    mesh_dir.mkdir(parents=True, exist_ok=True)
+    tex_dir.mkdir(parents=True, exist_ok=True)
+    for f in list(mesh_dir.glob("*.json")) + list(tex_dir.glob("*.png")):
+        f.unlink()
+    mesh = json.loads((src / f"{bt}_mesh.json").read_text(encoding="utf-8"))
+    mesh["texture"] = f"items/{item}/{dest}_atlas"
+    mesh.pop("glowmask", None)
+    mesh, _ = mesh_close.close_mesh(mesh)
+    (mesh_dir / f"{dest}.json").write_text(json.dumps(mesh, separators=(",", ":")), encoding="utf-8")
+    shutil.copyfile(src / f"{bt}_atlas.png", tex_dir / f"{dest}_atlas.png")
+    glow, lit = bake_glow(src / f"{bt}_atlas.png", src / f"{bt}_glowmask.png")
+    if lit > 0:
+        glow.save(tex_dir / f"{dest}_atlas_glow.png")
+    shutil.copyfile(src / "icon.png", ASSETS / "textures/item" / f"{item}.png")
+    tex = f"skyabyss:item/{item}"
+    flat = ASSETS / "models/item_flat"
+    flat.mkdir(parents=True, exist_ok=True)
+    (flat / f"{item}.json").write_text(json.dumps({"parent": "minecraft:item/generated", "textures": {"layer0": tex}}, separators=(",", ":")),
+                                       encoding="utf-8")
+    model = {"loader": "neoforge:separate_transforms",
+             "base": {"parent": "builtin/entity", "gui_light": "front", "display": ACC_DISPLAY, "textures": {"particle": tex}},
+             "perspectives": {"gui": {"parent": "minecraft:item/generated", "textures": {"layer0": tex}}}}
+    (ASSETS / "models/item" / f"{item}.json").write_text(json.dumps(model, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 def main():
     args = sys.argv[1:]
-    what = args[0] if args and args[0] in ("weapons", "armor") else "all"
-    only = [a for a in args if a not in ("weapons", "armor")]
+    what = args[0] if args and args[0] in ("weapons", "armor", "accessories") else "all"
+    only = [a for a in args if a not in ("weapons", "armor", "accessories")]
     if what in ("all", "weapons"):
         n = 0
         for w in S.WEAPONS:
@@ -140,6 +184,13 @@ def main():
                 install_armor(a)
                 n += 1
         print("armor sets installed:", n)
+    if what in ("all", "accessories"):
+        n = 0
+        for x in S.ACCESSORIES:
+            if (not only or x["id"] in only) and (RAW / x["id"] / "a").is_dir():
+                install_accessory(x)
+                n += 1
+        print("accessories installed:", n)
 
 
 if __name__ == "__main__":

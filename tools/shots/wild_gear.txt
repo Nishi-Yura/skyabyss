@@ -1358,4 +1358,312 @@ perspective back
 bodyyaw 0
 wait 4
 shot back_wild_cloudknight
+cmd clear @s
+accequip
+hud off
+fov 30
+accequip wild_guard_badge
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_guard_badge
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_guard_badge
+accequip
+accequip wild_mossball_netsuke
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_mossball_netsuke
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_mossball_netsuke
+accequip
+accequip wild_float_netsuke
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_float_netsuke
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_float_netsuke
+accequip
+accequip wild_wolf_tooth_necklace
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_wolf_tooth_necklace
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_wolf_tooth_necklace
+accequip
+accequip wild_crab_backplate
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_crab_backplate
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_crab_backplate
+accequip
+accequip wild_weave_bracelet
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_weave_bracelet
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_weave_bracelet
+accequip
+accequip wild_emberbug_amber
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_emberbug_amber
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_emberbug_amber
+accequip
+accequip wild_ramhorn_bugle
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_ramhorn_bugle
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_ramhorn_bugle
+accequip
+accequip wild_plumb_line_ring
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_plumb_line_ring
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_plumb_line_ring
+accequip
+accequip wild_salttear_earring
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_salttear_earring
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_salttear_earring
+accequip
+accequip wild_bonepipe_necklace
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_bonepipe_necklace
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_bonepipe_necklace
+accequip
+accequip wild_hangman_knot
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_hangman_knot
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_hangman_knot
+accequip
+accequip wild_fulgurite_necklace
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_fulgurite_necklace
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_fulgurite_necklace
+accequip
+accequip wild_ash_hourglass_charm
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_ash_hourglass_charm
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_ash_hourglass_charm
+accequip
+accequip wild_deep_eye_charm
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_deep_eye_charm
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_deep_eye_charm
+accequip
+accequip wild_meteor_ring
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_meteor_ring
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_meteor_ring
+accequip
+accequip wild_skylark_plume
+perspective front
+bodyyaw 30
+wait 10
+shot accworn_wild_skylark_plume
+perspective back
+bodyyaw -20
+wait 4
+shot accback_wild_skylark_plume
+accequip
 fov 70
+bodyyaw 0
+cmd clear @s
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_guard_badge
+close
+wait 16
+chat clear
+shot acc_wild_guard_badge
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mossball_netsuke
+close
+wait 16
+chat clear
+shot acc_wild_mossball_netsuke
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_herb_vial
+close
+wait 16
+chat clear
+shot acc_wild_herb_vial
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_float_netsuke
+close
+wait 16
+chat clear
+shot acc_wild_float_netsuke
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_wolf_tooth_necklace
+close
+wait 16
+chat clear
+shot acc_wild_wolf_tooth_necklace
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_crab_backplate
+close
+wait 16
+chat clear
+shot acc_wild_crab_backplate
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fog_handbell
+close
+wait 16
+chat clear
+shot acc_wild_fog_handbell
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_weave_bracelet
+close
+wait 16
+chat clear
+shot acc_wild_weave_bracelet
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_emberbug_amber
+close
+wait 16
+chat clear
+shot acc_wild_emberbug_amber
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ramhorn_bugle
+close
+wait 16
+chat clear
+shot acc_wild_ramhorn_bugle
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ash_talisman
+close
+wait 16
+chat clear
+shot acc_wild_ash_talisman
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_signal_fire
+close
+wait 16
+chat clear
+shot acc_wild_signal_fire
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_plumb_line_ring
+close
+wait 16
+chat clear
+shot acc_wild_plumb_line_ring
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_salttear_earring
+close
+wait 16
+chat clear
+shot acc_wild_salttear_earring
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bonepipe_necklace
+close
+wait 16
+chat clear
+shot acc_wild_bonepipe_necklace
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_hangman_knot
+close
+wait 16
+chat clear
+shot acc_wild_hangman_knot
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lamp_charm
+close
+wait 16
+chat clear
+shot acc_wild_lamp_charm
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mimic_heart_charm
+close
+wait 16
+chat clear
+shot acc_wild_mimic_heart_charm
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fulgurite_necklace
+close
+wait 16
+chat clear
+shot acc_wild_fulgurite_necklace
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ash_hourglass_charm
+close
+wait 16
+chat clear
+shot acc_wild_ash_hourglass_charm
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_deep_eye_charm
+close
+wait 16
+chat clear
+shot acc_wild_deep_eye_charm
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_meteor_ring
+close
+wait 16
+chat clear
+shot acc_wild_meteor_ring
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_skylark_plume
+close
+wait 16
+chat clear
+shot acc_wild_skylark_plume
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_starchart_compass
+close
+wait 16
+chat clear
+shot acc_wild_starchart_compass
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_moon_hourglass
+close
+wait 16
+chat clear
+shot acc_wild_moon_hourglass
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cloudhymn_slip
+close
+wait 16
+chat clear
+shot acc_wild_cloudhymn_slip

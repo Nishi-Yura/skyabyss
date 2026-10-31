@@ -39,6 +39,8 @@ public final class WildGearSetup {
     public static final Map<String, List<DeferredItem<Item>>> ARMOR_ITEMS = new LinkedHashMap<>();
     public static final Map<String, WildGearTypes.Weapon> WEAPON_ROWS = new HashMap<>();
     public static final Map<String, WildGearTypes.ArmorSet> ARMOR_ROWS = new HashMap<>();
+    public static final Map<String, DeferredItem<Item>> ACCESSORY_ITEMS = new LinkedHashMap<>();
+    public static final Map<String, WildGearTypes.Accessory> ACCESSORY_ROWS = new HashMap<>();
 
     public static void register(IEventBus bus) {
         for (WildGearTypes.Weapon w : WildGearTable.WEAPONS) {
@@ -67,6 +69,10 @@ public final class WildGearSetup {
                 pieces.add(ITEMS.register(a.id() + "_" + type.getName(), () -> new WildArmorItem(material, type, props(a.tier()), a)));
             }
             ARMOR_ITEMS.put(a.id(), pieces);
+        }
+        for (WildGearTypes.Accessory x : WildGearTable.ACCESSORIES) {
+            ACCESSORY_ROWS.put(x.id(), x);
+            ACCESSORY_ITEMS.put(x.id(), ITEMS.register(x.id(), () -> new WildAccessoryItem(props(x.tier()), x)));
         }
         ITEMS.register(bus);
         MATERIALS.register(bus);

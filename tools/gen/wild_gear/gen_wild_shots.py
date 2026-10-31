@@ -26,6 +26,13 @@ for a in S.ARMORS:
     for slot, p in (("feet", "boots"), ("legs", "leggings"), ("chest", "chestplate"), ("head", "helmet")):
         L.append(f"cmd item replace entity @s armor.{slot} with skyabyss:{a['id']}_{p}")
     L += ["perspective front", "bodyyaw 25", "wait 16", f"shot worn_{a['id']}", "perspective back", "bodyyaw 0", "wait 4", f"shot back_{a['id']}"]
-L += ["fov 70"]
+L += ["cmd clear @s", "accequip", "hud off", "fov 30"]
+for x in S.ACCESSORIES:
+    if x["kind"] == "trinket":
+        L += [f"accequip {x['id']}", "perspective front", "bodyyaw 30", "wait 10", f"shot accworn_{x['id']}", "perspective back", "bodyyaw -20", "wait 4",
+              f"shot accback_{x['id']}", "accequip"]
+L += ["fov 70", "bodyyaw 0", "cmd clear @s", "perspective first", "hud on"]
+for x in S.ACCESSORIES:
+    L += [f"cmd item replace entity @s weapon.mainhand with skyabyss:{x['id']}", "close", "wait 16", "chat clear", f"shot acc_{x['id']}"]
 OUT.write_text("\n".join(L) + "\n", encoding="utf-8")
 print("wrote", OUT, len(L), "lines")

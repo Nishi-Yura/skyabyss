@@ -54,6 +54,20 @@ public final class AccessoryWornLayer extends RenderLayer<AbstractClientPlayer, 
             "abyss_pulse_listener", new Mount(Part.BODY, -2.2f, 4.6f, -2.1f, 0, 0, 0, 0.36f, 0, 0.0f, 1.27f),
             "abyss_surveyor_plumb", new Mount(Part.BODY, 3.6f, 10.6f, 3.1f, 0, 0, 0, 0.4f, 0, 8.6f, 0));
 
+    // 野の装備の装飾 (表の mount。item/wild/WildGearTable)
+    private static final Map<String, Mount> WILD = wild();
+
+    private static Map<String, Mount> wild() {
+        Map<String, Mount> m = new java.util.HashMap<>();
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : jp.revati.skyabyss.item.wild.WildGearTable.ACCESSORIES) {
+            var w = x.mount();
+            if (w != null) {
+                m.put(x.id(), new Mount(Part.valueOf(w.part()), w.x(), w.y(), w.z(), w.rx(), w.ry(), w.rz(), w.scale(), w.px(), w.py(), w.pz()));
+            }
+        }
+        return m;
+    }
+
     public AccessoryWornLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
     }
@@ -73,7 +87,7 @@ public final class AccessoryWornLayer extends RenderLayer<AbstractClientPlayer, 
             if (stack.isEmpty()) {
                 continue;
             }
-            Mount m = MOUNTS.get(AccessoryMeshes.idOf(stack));
+            Mount m = MOUNTS.getOrDefault(AccessoryMeshes.idOf(stack), WILD.get(AccessoryMeshes.idOf(stack)));
             LowPolyMesh mesh = m == null ? null : AccessoryMeshes.mesh(stack);
             if (mesh == null) {
                 continue;

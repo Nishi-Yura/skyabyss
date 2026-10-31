@@ -147,7 +147,7 @@ public final class WildGearEvents {
 
     // 技の待ちの倍率 (rpg/skill/SkillManager.cooldownFor)
     public static double cooldownScale(Player p) {
-        return 1 - val(p, Kind.COOLDOWN, 0);
+        return 1 - val(p, Kind.COOLDOWN, 0) - WildArmorEvents.sum(WildArmorEvents.active(p), Kind.COOLDOWN, 0);
     }
 
     // 起こす 1 tick の進み (party/Downed)

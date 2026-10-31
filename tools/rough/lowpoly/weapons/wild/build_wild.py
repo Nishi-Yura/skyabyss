@@ -28,6 +28,37 @@ for k, rgb in PG.GLOW_RGB.items():
     B.scene.GLOW_RGB["gg_" + k] = rgb
 
 
+_icon = B.icon
+
+
+def icon(r, wid):
+    w = M.WEAPONS[wid]
+    if w.get("kind") not in ("trinket", "charm"):
+        return _icon(r, wid)
+    import numpy as np
+    from PIL import Image
+    pts = np.concatenate([f.verts for f in r["faces"]])
+    ext = max(np.ptp(pts[:, 0]), np.ptp(pts[:, 1]))
+    sc = 28.0 / ext * 4
+    mid = (pts.max(0) + pts.min(0)) / 2
+    im = B.view(r["faces"], r["atlas"], r["glow"], B.vk(w), 200, 8, (128, 128), (mid[0], mid[1], mid[2]), sc, ss=2, outline=False)
+    small = Image.fromarray(np.array(im)).resize((32, 32), Image.BOX)
+    arr = np.array(small).astype(float)
+    solid = arr[..., 3] >= 70
+    rgb = np.clip(arr[..., :3] * 1.45 + 10, 0, 255)
+    out = np.zeros((32, 32, 4), np.uint8)
+    out[solid, :3] = rgb[solid].astype(np.uint8)
+    out[solid, 3] = 255
+    near = np.zeros_like(solid)
+    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        near |= np.roll(np.roll(solid, dx, 1), dy, 0)
+    out[~solid & near] = (14, 10, 22, 255)
+    return Image.fromarray(out, "RGBA")
+
+
+B.icon = icon
+
+
 def main():
     args = [a for a in sys.argv[2:] if not a.startswith("--")]
     quick = "--quick" in sys.argv
