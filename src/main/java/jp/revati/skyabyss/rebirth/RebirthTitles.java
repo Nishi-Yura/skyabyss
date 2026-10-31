@@ -4,24 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
+// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
 // 並び順は固定 (解除の印は並び順の番号の bit で持つので、足すなら末尾へ。順番を替えない)。
 // 名前の文は lang の "title.skyabyss_rebirth.<id>" と、条件の説明 "title.skyabyss_rebirth.<id>.how"
 public final class RebirthTitles {
     // 1 人の事実。lifeBest = 一番速かった人生 (tick。なければ -1)、fewestDeaths = 一人生の最少の死 (なければ -1)、titanBests = 記録のある巨神の数、
-    // founder = 裏ボス「初代の空見」を退けた (docs/design/53 の 6 章)
-    public record Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests, boolean founder) {
+    // founder = 裏ボス「初代の空見」を退けた (docs/design/53 の 6 章)、towerClears = あいだの塔を越えた回数 (docs/design/54 の 2.6)
+    public record Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests, boolean founder,
+            int towerClears) {
         public static final Facts NONE = new Facts(0, 0, 0, 0, -1, -1, 0);
 
         public Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests) {
-            this(rebirths, flawless, titansStopped, deathsTotal, lifeBest, fewestDeaths, titanBests, false);
+            this(rebirths, flawless, titansStopped, deathsTotal, lifeBest, fewestDeaths, titanBests, false, 0);
+        }
+
+        public Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests, boolean founder) {
+            this(rebirths, flawless, titansStopped, deathsTotal, lifeBest, fewestDeaths, titanBests, founder, 0);
         }
     }
 
     public record Title(int index, String id, Predicate<Facts> rule) {
     }
 
-    public static final int MAX = 25;
+    public static final int MAX = 27;
     private static final long HOUR = 72_000L;
     private static final List<Title> ALL = new ArrayList<>();
 
@@ -51,6 +56,8 @@ public final class RebirthTitles {
         add("pulse_counted", f -> f.titanBests >= 1);
         add("pulse_all", f -> f.titanBests >= 4);
         add("yattsume", f -> f.founder);
+        add("tower_1", f -> f.towerClears >= 1);
+        add("tower_50", f -> f.towerClears >= 50);
     }
 
     private RebirthTitles() {

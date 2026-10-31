@@ -138,7 +138,8 @@ public final class TowerFight {
         }
         Vec3 at = rel(0, 1, -52);
         m.moveTo(at.x, 300, at.z, 0f, 0f);
-        m.tuneCloud(1, masterHp(n), TowerMaster.DMG);
+        m.tuneCloud(1, masterHp(n) * (TowerWagers.isOn(run, "thick_master") ? TowerWagers.THICK_MASTER : 1),
+                TowerMaster.DMG * (TowerWagers.isOn(run, "heavy_hits") ? TowerWagers.HEAVY_HITS : 1));
         m.moveTo(at.x, at.y, at.z, 0f, 0f);
         m.addTag(TowerWorld.TAG);
         m.addTag(TowerWorld.TAG + "_" + run.id);
@@ -155,6 +156,7 @@ public final class TowerFight {
                     big ? TowerEye.HP_BIG : TowerEye.HP_SMALL, TowerEye.DMG, n, run.id);
             if (e instanceof TowerEye te) {
                 te.setHome(p);
+                te.setInvulnerable(TowerWagers.isOn(run, "hard_eyes"));
                 eyes.add(new Eye(te, big, start + INTRO + 60 + i * 37L));
             }
             i++;
@@ -384,7 +386,7 @@ public final class TowerFight {
                 master.playAction("sigil");
                 sound(level, rel(0, 1, -40), CloudMobsSetup.KEEPER_CALL.get(), 5f, 0.7f);
                 for (int i = 0; i < 1 + n / 3; i++) {
-                    Mob a = TowerWorld.foe(level, CloudMobsSetup.ASH_STRIKER.get(), rel(-10 + rng.nextDouble() * 20, 1, -44 + rng.nextDouble() * 10), 160, 16, n, run.id);
+                    Mob a = add(level, CloudMobsSetup.ASH_STRIKER.get(), rel(-10 + rng.nextDouble() * 20, 1, -44 + rng.nextDouble() * 10), 160, 16);
                     if (a != null) {
                         a.addTag(PHLEGM_TAG);
                         adds.add(a);
@@ -430,7 +432,7 @@ public final class TowerFight {
         int count = Math.min(12, 3 + n);
         for (int i = 0; i < count; i++) {
             EntityType<? extends Mob> type = i % 2 == 0 ? CloudMobsSetup.FALLEN_PLUME.get() : CloudMobsSetup.BELL_MOURNER.get();
-            Mob a = TowerWorld.foe(level, type, rel(-5 + rng.nextDouble() * 10, 1, -20 + rng.nextDouble() * 50), i % 2 == 0 ? 120 : 160, i % 2 == 0 ? 14 : 16, n, run.id);
+            Mob a = add(level, type, rel(-5 + rng.nextDouble() * 10, 1, -20 + rng.nextDouble() * 50), i % 2 == 0 ? 120 : 160, i % 2 == 0 ? 14 : 16);
             if (a != null) {
                 adds.add(a);
                 level.sendParticles(i % 2 == 0 ? GOLD : VIOLET, a.getX(), a.getY() + 1, a.getZ(), 20, 0.4, 0.8, 0.4, 0);
@@ -505,9 +507,22 @@ public final class TowerFight {
         raiseBinders(level);
     }
 
-    // 月の進み (0 = 広場、1 = 南の端)
+    // 月の進み (0 = 広場、1 = 南の端)。賭け fast_moon で速い
     double moonProgress(long now) {
-        return Math.min(1.0, (now - moonBorn) / (double) MOON_TICKS);
+        double ticks = MOON_TICKS * (TowerWagers.isOn(run, "fast_moon") ? TowerWagers.FAST_MOON : 1);
+        return Math.min(1.0, (now - moonBorn) / ticks);
+    }
+
+    // 湧く敵 (賭け fast_adds で足が速い)
+    Mob add(ServerLevel level, EntityType<? extends Mob> type, Vec3 at, double hp, double dmg) {
+        Mob a = TowerWorld.foe(level, type, at, hp, dmg, n, run.id);
+        if (a != null && TowerWagers.isOn(run, "fast_adds")) {
+            var speed = a.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+            if (speed != null) {
+                speed.setBaseValue(speed.getBaseValue() * TowerWagers.FAST_ADDS);
+            }
+        }
+        return a;
     }
 
     void tickMoon(ServerLevel level, long now, List<ServerPlayer> here) {

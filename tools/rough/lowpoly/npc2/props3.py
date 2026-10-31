@@ -163,3 +163,16 @@ def sealed_box(c):
     F += part("sb_seal", disc("prop_l", "wax", cen + V(0, 0.55, -1.48), 0.56, 0.2, n=8, axis="z"))
     F += part("sb_lock", box("prop_l", "brass", cen + V(0, 1.15, -1.42), (0.32, 0.3, 0.1)))
     return F
+
+
+def tower_balance(c):
+    """左手に提げた小さな天秤 (あいだの塔の塔守)。金の竿と真ん中の柱、左に金の皿・右に黒い石の皿、柱の上に光る珠"""
+    h = hand(c, 1)
+    top = h + V(0, -0.6, 0)
+    F = part("tb_post", rod("prop_l", "metal", top, top + V(0, -3.2, 0), 0.16, 0.16))
+    F += part("tb_beam", rod("prop_l", "metal", top + V(-2.2, -0.9, 0), top + V(2.2, -0.9, 0), 0.13, 0.13))
+    F += part("tb_gem", ellipsoid("prop_l", "glow", top + V(0, -0.3, 0), (0.32, 0.32, 0.32)))
+    for i, (dx, m) in enumerate(((-2.0, "metal"), (2.0, "stone"))):
+        F += part(f"tb_cord{i}", rod("prop_l", "metal", top + V(dx, -0.9, 0), top + V(dx, -2.6, 0), 0.05, 0.05))
+        F += part(f"tb_pan{i}", disc("prop_l", m, top + V(dx, -2.7, 0), 0.9, 0.18, n=10, axis="y"))
+    return F

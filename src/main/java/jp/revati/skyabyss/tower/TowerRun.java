@@ -24,6 +24,8 @@ public final class TowerRun {
     public TowerArena arena;
     public final Set<UUID> fallen = new HashSet<>();
     public boolean cleared;
+    // 選んだ週の賭け (TowerWagers)
+    public final Set<String> wagers = new java.util.LinkedHashSet<>();
     final MinecraftServer server;
 
     TowerRun(MinecraftServer server, int id, int slot, List<UUID> members, long now) {
@@ -32,6 +34,11 @@ public final class TowerRun {
         this.slot = slot;
         this.members = new ArrayList<>(new LinkedHashSet<>(members));
         this.startedTick = now;
+    }
+
+    // 時間の限り (賭け short_time で 25 分)
+    public int limit() {
+        return wagers.contains("short_time") ? TowerWagers.SHORT_LIMIT : TowerArena.LIMIT;
     }
 
     public ServerLevel level() {

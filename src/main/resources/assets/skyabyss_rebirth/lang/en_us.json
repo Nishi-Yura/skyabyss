@@ -105,5 +105,9 @@
   "advancement.skyabyss.rebirth_flawless.title": "Flawless Rebirth",
   "advancement.skyabyss.rebirth_flawless.description": "Rebirth without having fallen even once.",
   "title.skyabyss_rebirth.yattsume": "Heard the Eighth Verse",
-  "title.skyabyss_rebirth.yattsume.how": "Overcome the First Skywatcher inside the bell"
+  "title.skyabyss_rebirth.yattsume.how": "Overcome the First Skywatcher inside the bell",
+  "title.skyabyss_rebirth.tower_1": "Crosser of the Tower",
+  "title.skyabyss_rebirth.tower_1.how": "Defeat the master of the Tower Between",
+  "title.skyabyss_rebirth.tower_50": "Fifty Times Across",
+  "title.skyabyss_rebirth.tower_50.how": "Cross the Tower Between 50 times"
 }

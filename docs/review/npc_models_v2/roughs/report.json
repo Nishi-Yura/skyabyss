@@ -1091,5 +1091,22 @@
     "atlas": 64
    }
   }
+ },
+ "tower_keeper": {
+  "tris": 1621,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 168,
+    "atlas": 64
+   }
+  }
  }
 }

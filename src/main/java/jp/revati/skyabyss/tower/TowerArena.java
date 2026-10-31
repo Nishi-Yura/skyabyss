@@ -40,8 +40,8 @@ public final class TowerArena {
         long elapsed = t - run.startedTick;
         // 残りの時間の帯
         if (t % 20 == 0) {
-            long left = Math.max(0, LIMIT - elapsed);
-            timer.setProgress(left / (float) LIMIT);
+            long left = Math.max(0, run.limit() - elapsed);
+            timer.setProgress(left / (float) run.limit());
             timer.setName(Component.translatable("message.skyabyss.tower.timer", (left / 20 + 59) / 60));
             for (ServerPlayer p : run.online()) {
                 if (p.level() == level) {
@@ -81,7 +81,7 @@ public final class TowerArena {
 
     // 時間切れ
     boolean timedOut(long t) {
-        return t - run.startedTick >= LIMIT;
+        return t - run.startedTick >= run.limit();
     }
 
     void close() {

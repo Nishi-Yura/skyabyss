@@ -105,5 +105,9 @@
   "advancement.skyabyss.rebirth_flawless.title": "無傷の転生",
   "advancement.skyabyss.rebirth_flawless.description": "一度も倒れずに転生する。",
   "title.skyabyss_rebirth.yattsume": "やっつめを聞いた者",
-  "title.skyabyss_rebirth.yattsume.how": "鐘の内で、初代の空見を退ける"
+  "title.skyabyss_rebirth.yattsume.how": "鐘の内で、初代の空見を退ける",
+  "title.skyabyss_rebirth.tower_1": "塔を越えた者",
+  "title.skyabyss_rebirth.tower_1.how": "あいだの塔の主を倒す",
+  "title.skyabyss_rebirth.tower_50": "塔を 50 回越えた者",
+  "title.skyabyss_rebirth.tower_50.how": "あいだの塔を 50 回越える"
 }

@@ -78,6 +78,11 @@ public final class Towers {
     // ---------------------------------------------------------------- 始める
     // squad = 入る人 (隊長が先頭)。dev = 一日一回を数えない (開発用)
     public static TowerRun start(MinecraftServer server, List<ServerPlayer> squad, boolean dev) {
+        return start(server, squad, dev, java.util.Set.of());
+    }
+
+    // wagers = 隊長が受付で選んだ週の賭け (TowerWagers)
+    public static TowerRun start(MinecraftServer server, List<ServerPlayer> squad, boolean dev, java.util.Set<String> wagers) {
         ServerLevel level = TowerWorld.level(server);
         if (level == null || squad.isEmpty()) {
             return null;
@@ -100,6 +105,7 @@ public final class Towers {
             ids.add(p.getUUID());
         }
         TowerRun run = new TowerRun(server, nextId++, slot, ids, level.getGameTime());
+        run.wagers.addAll(wagers);
         RUNS.put(run.id, run);
         for (ServerPlayer p : squad) {
             BY_PLAYER.put(p.getUUID(), run.id);
@@ -118,6 +124,9 @@ public final class Towers {
             p.resetFallDistance();
             p.setHealth(p.getMaxHealth());
             Notice.place(p, Component.translatable("message.skyabyss.tower.title"), Component.translatable("message.skyabyss.tower.sub", squad.size()));
+            if (!run.wagers.isEmpty()) {
+                Notice.hint(p, "message.skyabyss.tower.wager.on", wagerNames(run.wagers));
+            }
         }
         return run;
     }
@@ -159,9 +168,32 @@ public final class Towers {
         end(run);
     }
 
-    // 主が倒れた: 塔の中にいる隊の人に、越えた回数と最速を書く
+    public static Component wagerNames(java.util.Collection<String> wagers) {
+        net.minecraft.network.chat.MutableComponent c = Component.empty();
+        int i = 0;
+        for (String w : wagers) {
+            if (i++ > 0) {
+                c.append("・");
+            }
+            c.append(Component.translatable("message.skyabyss.tower.wager." + w));
+        }
+        return c;
+    }
+
+    // 主が倒れた: 塔の中にいる隊の人に、越えた回数と最速を書き、記録の板 (人数ごとの最速・今週の組合) と称号を更新する
     static void cleared(TowerRun run, long ticks) {
         run.cleared = true;
+        List<String> names = new ArrayList<>();
+        List<String[]> guilds = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (ServerPlayer p : run.online()) {
+            names.add(p.getGameProfile().getName());
+            var g = jp.revati.skyabyss.facility.guild.Guilds.of(p);
+            if (g != null && seen.add(g.id)) {
+                guilds.add(new String[]{g.id, g.name});
+            }
+        }
+        boolean fastest = run.server != null && TowerRecords.get(run.server).record(run.members.size(), ticks, names, guilds);
         for (ServerPlayer p : run.online()) {
             if (!TowerWorld.in(p)) {
                 continue;
@@ -172,19 +204,23 @@ public final class Towers {
                 d.putLong(BEST, ticks);
             }
             Notice.narrate(p, "message.skyabyss.tower.cleared", time(ticks));
-            reward(p);
+            if (fastest) {
+                Notice.gain(p, "message.skyabyss.tower.record", run.members.size());
+            }
+            reward(p, run);
+            jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
             Notice.hint(p, "message.skyabyss.tower.clear_back");
         }
         SkyAbyss.LOGGER.info("[tower] run #{} cleared in {} with {} player(s)", run.id, time(ticks), run.members.size());
     }
 
     // 越えた人への報酬: 塔の欠片・鐘銭と、塔の箱 (確率と天井。TowerGear.BOX_CHANCE・BOX_PITY。中は塔の装備がどれか一つ)
-    static void reward(ServerPlayer p) {
+    static void reward(ServerPlayer p, TowerRun run) {
         rollBox(p, false);
-        jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(),
-                jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR));
+        int shards = (int) Math.round(jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR * TowerWagers.shardScale(run == null ? java.util.Set.of() : run.wagers));
+        jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(), shards));
         jp.revati.skyabyss.facility.Coins.give(p, jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
-        Notice.gain(p, "message.skyabyss.tower.reward", jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR,
+        Notice.gain(p, "message.skyabyss.tower.reward", shards,
                 jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
     }
 
@@ -279,6 +315,19 @@ public final class Towers {
                 end(run);
             }
         }
+    }
+
+    // 賭け half_heal: 塔の中の隊の人の回復が半分
+    @SubscribeEvent
+    static void onHeal(net.neoforged.neoforge.event.entity.living.LivingHealEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p && TowerWorld.in(p) && TowerWagers.isOn(runOf(p), "half_heal")) {
+            event.setAmount(event.getAmount() * 0.5f);
+        }
+    }
+
+    // 賭け no_revive: 倒れた人を起こせない (WildGearEvents.reviveStep から)
+    public static boolean noRevive(net.minecraft.world.entity.player.Player p) {
+        return p instanceof ServerPlayer sp && TowerWorld.in(sp) && TowerWagers.isOn(runOf(sp), "no_revive");
     }
 
     // ---------------------------------------------------------------- 出来事

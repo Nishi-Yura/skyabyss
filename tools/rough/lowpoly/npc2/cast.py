@@ -361,6 +361,18 @@ add("box_opener", ja="封切り師", anim="hold_l",
     lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P3.sealed_box})
 
 
+# あいだの塔の塔守 (docs/design/54 の 2.2。都の広場の塔の受付)。天と淵のあいだの番人: 白い衣の裾は黒く、金の帯。頭巾と金縁の肩掛けの老人が、
+# 左手に小さな天秤 (金の皿と黒い石の皿) を提げる
+add("tower_keeper", ja="塔守", anim="hold_l",
+    pal=dict(skin=SKIN["old"], hair=(222, 220, 214), coat=(226, 222, 210), skirt=(40, 36, 52), sash=(206, 168, 86), trim=(206, 168, 86), hat=(226, 222, 210),
+             metal=(214, 176, 92), stone=(46, 42, 58), glow=(255, 230, 170), trousers=(40, 36, 52), boot=(34, 30, 42)),
+    face=dict(eye="old", iris=(150, 120, 200), brow="soft", mouth="small", marks=[(["w"], 4, 47)]),
+    hair=dict(style="short", front=27.2, side=24.6, back=23.6, fringe=[]),
+    hat=dict(kind="hood"), beard="full", hairline=27.0, build="slim",
+    upper=dict(sash=True, collar=True, collar_mat="trim", mantle=dict(bottom=17.2, clasp=True)),
+    lower="robe", sleeve="wide", arms=HOLD_L_LOW, props={"prop_l": P3.tower_balance})
+
+
 # ====================================================================== 旅の職人 (章ごとに絵だけ替える: variants)
 
 def goggles(c):

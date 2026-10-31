@@ -145,7 +145,7 @@ public final class TowerSelfTest {
         p.getPersistentData().putInt(jp.revati.skyabyss.tower.gear.TowerGear.BOX_DRY, jp.revati.skyabyss.tower.gear.TowerGear.BOX_PITY - 1);
         int boxes0 = box == null ? 0 : jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box));
         long coins0 = jp.revati.skyabyss.facility.Coins.count(p);
-        Towers.reward(p);
+        Towers.reward(p, null);
         check(f, jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get()) == shards0 + jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR
                 && box != null && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box)) == boxes0 + 1
                 && jp.revati.skyabyss.facility.Coins.count(p) == coins0 + jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR, "the clear reward was not given");
@@ -168,6 +168,7 @@ public final class TowerSelfTest {
         var shop = jp.revati.skyabyss.facility.ShopManager.shop(TowerDesk.SHOP);
         check(f, shop != null && shop.goods().size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size() + 1, "the tower shop is missing or incomplete");
         armor(f, p);
+        wagers(f, run);
         p.getPersistentData().remove(Towers.CLEARS);
         p.getPersistentData().remove(Towers.BEST);
     }
@@ -191,9 +192,26 @@ public final class TowerSelfTest {
         jp.revati.skyabyss.rpg.Growth.get(p).level = lv;
     }
 
+    // 週の賭け (今週の六つ・欠片の倍率・時間の限り) と記録の板 (人数の最速・組合の順位)
+    static void wagers(List<String> f, TowerRun run) {
+        List<String> week = TowerWagers.thisWeek();
+        check(f, week.size() == TowerWagers.PER_WEEK && TowerWagers.POOL.containsAll(week) && week.stream().distinct().count() == week.size()
+                && week.equals(TowerWagers.thisWeek()), "this week's wagers are not six fixed picks from the pool");
+        check(f, Math.abs(TowerWagers.shardScale(java.util.Set.of("a", "b")) - 1.6) < 1e-9, "the wager shard bonus is wrong");
+        run.wagers.add("short_time");
+        check(f, run.limit() == TowerWagers.SHORT_LIMIT && run.arena.timedOut(run.startedTick + TowerWagers.SHORT_LIMIT), "the short time wager does not shorten the limit");
+        run.wagers.clear();
+        TowerRecords r = new TowerRecords();
+        boolean first = r.record(3, 9000, List.of("a", "b", "c"), java.util.Collections.singletonList(new String[]{"g1", "Guild"}));
+        boolean slower = r.record(3, 9500, List.of("d", "e", "f"), java.util.Collections.singletonList(new String[]{"g1", "Guild"}));
+        r.record(2, 12000, List.of("x", "y"), java.util.Collections.singletonList(new String[]{"g2", "Other"}));
+        check(f, first && !slower && r.best(3).ticks() == 9000 && r.ranking(5).get(0).getKey().equals("g1") && r.ranking(5).get(0).getValue() == 2,
+                "the record board did not keep the fastest run or count guild clears");
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, end)");
+            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, wagers, record board, end)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tower FAILED: {}", m));
         }

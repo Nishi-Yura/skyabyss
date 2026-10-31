@@ -154,6 +154,9 @@ public final class WildGearEvents {
 
     // 起こす 1 tick の進み (party/Downed)
     public static int reviveStep(Player holder) {
+        if (jp.revati.skyabyss.tower.Towers.noRevive(holder)) {
+            return 0;
+        }
         double m = val(holder, Kind.REVIVE_SPEED, 0);
         int step = m > 1 ? (int) Math.round(m) : 1;
         // 約束の小鈴: 起こす速さ ×1.5 (一 tick おきに 2 進む)

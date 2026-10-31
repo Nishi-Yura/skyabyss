@@ -71,6 +71,49 @@ public final class TowerDesk {
         SQUADS.clear();
     }
 
+    // 隊長が選んだ週の賭け (隊長 → 賭けの id)
+    static final Map<UUID, LinkedHashSet<String>> WAGERS = new java.util.HashMap<>();
+
+    static void toggleWager(ServerPlayer p, String id) {
+        if (!SQUADS.containsKey(p.getUUID()) || !TowerWagers.thisWeek().contains(id)) {
+            return;
+        }
+        LinkedHashSet<String> s = WAGERS.computeIfAbsent(p.getUUID(), k -> new LinkedHashSet<>());
+        if (!s.remove(id)) {
+            if (s.size() >= TowerWagers.MAX_PICK) {
+                Notice.hint(p, "message.skyabyss.tower.wager.max", TowerWagers.MAX_PICK);
+                return;
+            }
+            s.add(id);
+        }
+        menu(p);
+    }
+
+    // 記録の板: 人数ごとの最速と、今週の組合の順位
+    static void records(ServerPlayer p) {
+        TowerRecords r = TowerRecords.get(p.server);
+        p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.head").withStyle(s -> s.withColor(0xF2D78A)));
+        boolean any = false;
+        for (int n = 1; n <= Towers.MAX_SQUAD; n++) {
+            TowerRecords.Best b = r.best(n);
+            if (b != null) {
+                any = true;
+                p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.best", n, Towers.time(b.ticks()), String.join("、", b.names()), b.day()));
+            }
+        }
+        if (!any) {
+            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.none"));
+        }
+        p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.guild_head").withStyle(s -> s.withColor(0xF2D78A)));
+        var top = r.ranking(5);
+        for (int i = 0; i < top.size(); i++) {
+            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.guild", i + 1, r.guildName(top.get(i).getKey()), top.get(i).getValue()));
+        }
+        if (top.isEmpty()) {
+            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.none"));
+        }
+    }
+
     // 塔の店 (data/skyabyss/shop/tower.json)
     public static final String SHOP = "tower";
 
@@ -184,6 +227,18 @@ public final class TowerDesk {
             p.sendSystemMessage(Component.translatable("message.skyabyss.tower.desk.squad", name(p.server, mine), s.size(), Towers.MAX_SQUAD, String.join("、", names)));
             if (mine.equals(p.getUUID())) {
                 line.append(button("message.skyabyss.tower.btn.start", "start", 0xF2D78A)).append("  ");
+                // 今週の賭け (押すと選ぶ / 外す。三つまで)
+                java.util.Set<String> chosen = WAGERS.getOrDefault(mine, new LinkedHashSet<>());
+                MutableComponent w = Component.translatable("message.skyabyss.tower.wager.head", Math.round(TowerWagers.SHARD_BONUS * 100));
+                for (String id : TowerWagers.thisWeek()) {
+                    boolean on = chosen.contains(id);
+                    w.append(" ").append(Component.literal(on ? "[✔ " : "[").append(Component.translatable("message.skyabyss.tower.wager." + id)).append("]")
+                            .withStyle(Style.EMPTY.withColor(on ? 0xFF9A6A : 0xB8A0D8).withUnderlined(true)
+                                    .withHoverEvent(new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT,
+                                            Component.translatable("message.skyabyss.tower.wager." + id + ".desc")))
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + COMMAND + " wager " + id))));
+                }
+                p.sendSystemMessage(w);
             }
             line.append(button("message.skyabyss.tower.btn.quit", "quit", 0xB0B0B8));
         } else if (!Towers.usedToday(p)) {
@@ -196,7 +251,8 @@ public final class TowerDesk {
             }
         }
         line.append(line.getSiblings().isEmpty() ? Component.empty() : Component.literal("  "))
-                .append(button("message.skyabyss.tower.btn.shop", "shop", 0xC8B4FF));
+                .append(button("message.skyabyss.tower.btn.shop", "shop", 0xC8B4FF)).append("  ")
+                .append(button("message.skyabyss.tower.btn.records", "records", 0x9CC8F0));
         p.sendSystemMessage(line);
     }
 
@@ -295,10 +351,12 @@ public final class TowerDesk {
             return false;
         }
         SQUADS.remove(p.getUUID());
+        java.util.Set<String> wagers = WAGERS.getOrDefault(p.getUUID(), new LinkedHashSet<>());
+        WAGERS.remove(p.getUUID());
         for (ServerPlayer m : go) {
             m.level().playSound(null, m.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.2f, 0.7f);
         }
-        return Towers.start(p.server, go, false) != null;
+        return Towers.start(p.server, go, false, wagers) != null;
     }
 
     @SubscribeEvent
@@ -316,6 +374,14 @@ public final class TowerDesk {
                     return 1;
                 }))
                 .then(Commands.literal("start").executes(c -> start(c.getSource().getPlayerOrException()) ? 1 : 0))
+                .then(Commands.literal("wager").then(Commands.argument("id", StringArgumentType.word()).executes(c -> {
+                    toggleWager(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "id"));
+                    return 1;
+                })))
+                .then(Commands.literal("records").executes(c -> {
+                    records(c.getSource().getPlayerOrException());
+                    return 1;
+                }))
                 // 塔の店 (塔の欠片で塔の装備・塔の箱。受付のそばで)
                 .then(Commands.literal("shop").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
