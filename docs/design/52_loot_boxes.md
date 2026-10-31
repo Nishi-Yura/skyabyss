@@ -67,7 +67,7 @@
 
 - いる所: 都と四つの土地の町に一人ずつ。設計図の印は足さず（町の建て直しになるため）、鍛冶屋の係の人の印（`npc_smith`）から 2〜4 ブロックの、まっすぐ歩いて行ける空いた床に立つ（`BoxOpeners`）。
 - 人物: 封蝋の匠。煤けた赤茶の上着に生成りの前掛け、眼鏡と口ひげ、左手に封の箱を抱える（`tools/rough/lowpoly/npc2/cast.py` の box_opener）。頭の上の印は封をした箱。
-- 会話: 「箱を開けてもらう」（画面を開く）・「箱のこと」・「ここは何をする所？」・「また来る」（`data/skyabyss/dialogue/attendant_box_opener.json`）。
+- 会話: 「箱を開けてもらう」（画面を開く）・「箱のこと」・「ここは何をする所？」・「また来る」（`data/skyabyss/dialogue/attendant_box_opener.json`）。挨拶の一行は町ごと（都 = 封蝋の匂い、鯨見 = 鯨骨の留め、汐守 = 潮で湿った封、風待 = 風で鳴る封、灰炉 = 燠で焼き切る。会話の条件 `in_town`）。文は `tools/gen/loot/gen_box_text.py`。
 - 画面を開いている間、封切り師から 8 ブロック以内でだけ開けられる。
 
 ## 6. ルーレットの画面（`client/box/BoxScreen`）

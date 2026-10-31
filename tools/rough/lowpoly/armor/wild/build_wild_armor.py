@@ -925,6 +925,138 @@ class Cloudknight:
                                + lume(BOOT[s], (s * 2.05, 4.4, -3.1), (0.3, 0.5, 0.15))))
 
 
+# ====================================================================== ヒロイックの一段上の飾り (2026-10-31「ヒロイックの防具はもう一段豪華に」)
+# 四式とも: 背に地まで届く外套か長い垂れ、光る継ぎ目、頭の上の飾り。部位ごとの足し分 (骨 → 面) を元の形に重ねる
+def _feather(bone, mat, c, ang, L=4.0, w=0.7, th=0.3):
+    return ext(bone, mat, [(0, 0), (w, L * 0.3), (0, L), (-w, L * 0.3)], th, c=c, rot=rot_z(ang))
+
+
+def _fortress(piece):
+    if piece == "helmet":
+        b = "armorHead"
+        f = crv(b, "cloth", [(0, 34.0, 0.0), (0, 37.0, 2.4), (0, 37.0, 5.4), (0, 34.4, 7.8), (0, 30.4, 8.8)], 1.3, 0.5, sides=6)
+        for s in (-1, 1):
+            f += lume(b, (s * 6.15, 30.0, -1.6), (0.2, 2.6, 0.35), rot=rot_z(s * 12))
+            f += spk(b, "bevel", (s * 5.6, 33.0, 0.0), (s * 0.6, 1.0, 0.0), 2.4, 0.55)
+        return {b: f}
+    if piece == "chestplate":
+        B = "armorBody"
+        f = drape(B, ["cape", "cape", "cape", "cape", "dark"], 0, 23.6, 1.0, 3.1, 4.2, 5.8, rows=6, cols=6, fold=0.5, flare_z=1.8, t=0.4,
+                  hem=[0.0, -1.6, 0.6, -2.2, -0.4, -1.2])
+        for s in (-1, 1):
+            f += lume(B, (s * 3.7, 18.6, -4.75), (0.25, 4.6, 0.2))
+        f += lume(B, (0, 14.4, -4.75), (4.0, 0.25, 0.2))
+        out = {B: f}
+        for s in (-1, 1):
+            g = spk(ARM[s], "bevel", (s * 7.4, 25.8, -1.0), (s * 0.45, 1.0, 0.0), 2.6, 0.55)
+            g += spk(ARM[s], "bevel", (s * 7.6, 25.6, 1.4), (s * 0.45, 1.0, 0.2), 2.0, 0.45)
+            g += lume(ARM[s], (s * 8.5, 23.6, 0.0), (0.2, 0.3, 4.0))
+            out[ARM[s]] = g
+        return out
+    if piece == "leggings":
+        return pair(lambda s: (LEG[s], lume(LEG[s], (s * 2.05, 10.0, -3.55), (1.4, 0.25, 0.15))
+                               + bx(LEG[s], "plate", (s * 2.05, 6.4, -2.8), (3.6, 2.8, 0.5), taper=(0.85, 1.0))))
+    return pair(lambda s: (BOOT[s], spk(BOOT[s], "bevel", (s * 2.05, 2.0, 3.0), (0, -0.2, 1.0), 1.6, 0.35)
+                           + lume(BOOT[s], (s * 2.05, 6.4, -3.1), (2.2, 0.25, 0.15))))
+
+
+def _hanged(piece):
+    if piece == "helmet":
+        b = "armorHead"
+        f = crv(b, "sash", [(0, 34.8, 0.4), (0.4, 37.6, 0.8), (-0.2, 39.6, 0.4), (0.3, 41.2, 0.0)], 0.55, 0.42, sides=6)
+        for k in range(3):
+            f += spk(b, "sash", (0.3, 41.0, 0.0), (0.5 * (k - 1), 1.0, 0.3 * (k - 1)), 1.2, 0.2)
+        f += lume(b, (0, 26.9, -6.35), (2.8, 0.22, 0.12))
+        f += drape(b, ["cape", "cape", "cape", "cloth"], 0, 31.0, 21.0, 6.0, 4.4, 5.6, rows=4, cols=5, fold=0.5, flare_z=1.2, t=0.35,
+                   hem=[0.0, -1.0, 0.4, -1.4, -0.2])
+        return {b: f}
+    if piece == "chestplate":
+        B = "armorBody"
+        f = drape(B, ["cloth", "cloth", "cape", "cape", "cape", "cape"], 0, 23.8, -3.0, 3.2, 4.4, 6.2, rows=7, cols=6, fold=0.7, flare_z=1.8, t=0.35,
+                  hem=[0.0, -2.0, 0.8, -2.6, -0.4, -1.8])
+        for k in range(4):
+            f += A.E(B, "gem", ((-1) ** k * 2.6, 14.3 + 2.6 * k, -3.25), (0.4, 0.4, 0.3))
+        for x, y1 in ((-1.6, 6.0), (1.2, 4.2), (3.0, 7.4)):
+            f += crv(B, "sash", [(x, 12.6, -3.2), (x + 0.3, (12.6 + y1) / 2, -3.6), (x - 0.2, y1, -3.4)], 0.2, 0.14, sides=4)
+        return {B: f}
+    if piece == "leggings":
+        return pair(lambda s: (LEG[s], crv(LEG[s], "sash", [(s * 2.05 + s * 1.4, 8.4, -1.0), (s * 2.05 + s * 2.2, 5.0, -1.4), (s * 2.05 + s * 1.8, 1.4, -1.0)],
+                                           0.18, 0.12, sides=4)))
+    return pair(lambda s: (BOOT[s], crv(BOOT[s], "sash", [(s * 2.05 + s * 2.6, 2.8, 0.0), (s * 2.05 + s * 3.4, 1.2, 0.6), (s * 2.05 + s * 3.0, 0.2, 1.4)],
+                                        0.16, 0.1, sides=4)))
+
+
+def _stargazer(piece):
+    if piece == "helmet":
+        b = "armorHead"
+        R = 4.6
+        pts = [(R * math.cos(math.radians(a)), 37.4, R * math.sin(math.radians(a))) for a in range(0, 361, 30)]
+        f = crv(b, "brass", pts, 0.16, 0.16, sides=4)
+        for a in range(15, 360, 60):
+            f += A.E(b, "gem", (R * math.cos(math.radians(a)), 37.4, R * math.sin(math.radians(a))), (0.4, 0.4, 0.4))
+        f += ext(b, "brass", [(-1.4, 0.6), (-0.6, -0.8), (0.6, -1.2), (1.4, -0.4), (0.6, -0.4), (-0.2, 0.0)], 0.3, c=(0, 33.0, -5.4))
+        return {b: f}
+    if piece == "chestplate":
+        B = "armorBody"
+        f = drape(B, ["cloth", "cloth", "cloth", "cloth", "cape"], 0, 23.8, -2.0, 3.2, 4.2, 6.4, rows=6, cols=6, fold=0.4, flare_z=2.0, t=0.4)
+        for p in ((-2.8, 18.0), (1.6, 16.2), (-0.6, 12.6), (3.2, 10.4), (-3.4, 8.2), (0.8, 6.0), (2.6, 2.6), (-2.0, 1.4)):
+            f += lume(B, (p[0], p[1], 4.4 + (23.8 - p[1]) * 0.075), (0.35, 0.35, 0.15))
+        f += crv(B, "brass", [(0, 23.6, -3.4), (0, 18.0, -3.35), (0, 13.0, -3.35)], 0.14, 0.14, sides=4)
+        out = {B: f}
+        for s in (-1, 1):
+            out[ARM[s]] = drape(ARM[s], ["cape", "cape", "brass"], s * 6.0, 24.6, 20.6, 0.0, 2.6, 3.2, rows=3, cols=4, fold=0.2, flare_z=0.4, t=0.3,
+                                ov=(s, 0, 0))
+        return out
+    if piece == "leggings":
+        return pair(lambda s: (LEG[s], lume(LEG[s], (s * 2.05 + s * 0.6, 6.0, -2.4), (0.3, 0.3, 0.15))
+                               + lume(LEG[s], (s * 2.05 - s * 0.8, 2.6, -2.4), (0.3, 0.3, 0.15))))
+    return pair(lambda s: (BOOT[s], ext(BOOT[s], "brass", [(-0.9, 0.3), (-0.3, -0.6), (0.5, -0.8), (0.9, -0.2), (0.4, -0.2), (-0.1, 0.1)], 0.25,
+                                        c=(s * 2.05, 2.2, -3.6))))
+
+
+def _cloudknight(piece):
+    if piece == "helmet":
+        b = "armorHead"
+        R = 5.6
+        pts = [(R * math.cos(math.radians(a)), 29.0 + R * math.sin(math.radians(a)), 6.6) for a in range(0, 361, 24)]
+        f = crv(b, "brass", pts, 0.2, 0.2, sides=4)
+        for a in range(0, 360, 45):
+            f += spk(b, "brass", (R * math.cos(math.radians(a)), 29.0 + R * math.sin(math.radians(a)), 6.6),
+                     (math.cos(math.radians(a)), math.sin(math.radians(a)), 0.0), 1.4, 0.22)
+        f += crv(b, "cape", [(0, 34.6, -1.0), (0, 37.0, 1.0), (0, 37.2, 3.6), (0, 35.0, 6.0)], 0.9, 0.4, sides=6)
+        return {b: f}
+    if piece == "chestplate":
+        B = "armorBody"
+        f = drape(B, ["cape", "cape", "cape", "cape", "cape", "brass"], 0, 23.8, -1.4, 3.3, 4.4, 6.4, rows=7, cols=6, fold=0.5, flare_z=2.4, t=0.4,
+                  hem=[0.0, -0.6, 0.2, -0.8, 0.0, -0.4])
+        for a in range(0, 360, 45):
+            r = math.radians(a)
+            f += spk(B, "brass", (0.9 * math.cos(r), 20.6 + 0.9 * math.sin(r), -4.85), (math.cos(r), math.sin(r), 0.0), 1.8 if a % 90 == 0 else 1.1, 0.2)
+        out = {B: f}
+        for s in (-1, 1):
+            g = []
+            for k in range(3):
+                g += _feather(ARM[s], "brass", (s * 8.4, 25.0, -0.8 + 1.2 * k), -s * (35 + 15 * k), L=3.6 - 0.5 * k, w=0.6)
+            out[ARM[s]] = g
+        return out
+    if piece == "leggings":
+        return pair(lambda s: (LEG[s], bx(LEG[s], "brass", (s * 2.05, 11.6, -2.8), (4.0, 0.4, 0.4))))
+    return pair(lambda s: (BOOT[s], _feather(BOOT[s], "brass", (s * 2.05 + s * 2.7, 4.6, 0.6), -s * 60, L=3.0, w=0.55)
+                           + _feather(BOOT[s], "brass", (s * 2.05 + s * 2.7, 4.2, 1.4), -s * 75, L=2.4, w=0.5)))
+
+
+HEROIC = {"wild_fortress": _fortress, "wild_hanged": _hanged, "wild_stargazer": _stargazer, "wild_cloudknight": _cloudknight}
+
+
+def _plus(fn, extra, piece):
+    def wrapped():
+        d = fn()
+        for bone, fs in extra(piece).items():
+            d[bone] = list(d.get(bone, [])) + [f for f in fs if f is not None]
+        return d
+    return wrapped
+
+
 # ====================================================================== 塗り (一式ごとの素材の表)
 S_EXTRA = {"oilskin": ("leather", np.array([(70, 54, 18), (110, 86, 28), (150, 120, 40), (186, 154, 60), (214, 186, 92)]))}
 CUR = {}
@@ -1056,7 +1188,10 @@ def build_set(sid):
     A.DESC["a"] = (cls.__doc__ or "").split(":", 1)[-1].strip()
     A.scene.GLOW_RGB["ad2_wild_" + sid] = tuple(int(c) for c in PW.GLOWS[cfg["glow"]][-2])
     A.PALS["G_wild_" + sid] = PW.GLOWS[cfg["glow"]]
-    A.BUILD["a"] = tuple(_lit(fn, piece) for fn, piece in ((cls.helmet, "helmet"), (cls.chestplate, "chestplate"), (cls.leggings, "leggings"), (cls.boots, "boots")))
+    pieces = ((cls.helmet, "helmet"), (cls.chestplate, "chestplate"), (cls.leggings, "leggings"), (cls.boots, "boots"))
+    if sid in HEROIC:
+        pieces = tuple((_plus(fn, HEROIC[sid], piece), piece) for fn, piece in pieces)
+    A.BUILD["a"] = tuple(_lit(fn, piece) for fn, piece in pieces)
     sys.argv = [sys.argv[0], "a"]
     A.main()
 

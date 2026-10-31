@@ -88,6 +88,17 @@ E = {
     "dialogue.skyabyss.attendant_box_opener.menu.bye": "I'll come back",
     "dialogue.skyabyss.attendant_box_opener.rules": "Boxes from a titan's back bear that titan's mark, and hold only its gear. The others show their rank by colour: green, blue, purple, vermilion. The band number is the Lv range inside. The gold box comes from the bottom of the abyss. Boxes of the same kind stack.",
 }
+TOWN_LINES = {
+    "whale": ("……箱か。鯨骨の留めは固い。小刀でこじるのが一番だ。", "...A box? Whalebone clasps are stubborn. A small knife pries them best."),
+    "tide": ("……箱か。潮で封が湿っとる。少し乾かしてから切ろう。", "...A box? The tide's dampened the seal. Let it dry a moment before I cut."),
+    "storm": ("……箱か。風の強い日は、封がひとりでに鳴るんだ。", "...A box? On windy days the seals hum all by themselves."),
+    "ember": ("……箱か。燠で焼き切れば、封は音もなく開く。", "...A box? Burn it with an ember and the seal opens without a sound."),
+}
+for town, (j, e) in TOWN_LINES.items():
+    J["dialogue.skyabyss.attendant_box_opener.menu_" + town] = j
+    E["dialogue.skyabyss.attendant_box_opener.menu_" + town] = e
+J["dialogue.skyabyss.attendant_box_opener.menu"] = "……箱か。封蝋の匂いは、都の鐘の音より好きでね。"
+E["dialogue.skyabyss.attendant_box_opener.menu"] = "...A box? I like the smell of sealing wax more than the capital's bells."
 ja.update(J)
 en.update(E)
 assert set(ja) == set(en)
@@ -105,21 +116,26 @@ for name, d in (("ja_jp", ja), ("en_us", en)):
         json.dump(fac, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
-dialogue = {
-    "npc": "skyabyss:attendant_box_opener",
-    "entries": [{"if": {"type": "not", "of": {"type": "flag", "flag": "intro"}}, "node": "intro"}, {"node": "menu"}],
-    "nodes": {
-        "intro": {"face": "smile", "do": [{"type": "flag", "flag": "intro"}], "next": "menu"},
-        "again": {"face": "neutral", "next": "menu", "text": "dialogue.skyabyss.attendant_box_opener.intro"},
-        "rules": {"face": "neutral", "next": "menu"},
-        "menu": {"face": "neutral", "options": [
-            {"id": "open", "kind": "talk", "do": [{"type": "facility", "open": "boxes"}], "goto": "end"},
-            {"id": "rules", "kind": "talk", "goto": "rules"},
-            {"id": "about", "kind": "talk", "goto": "again"},
-            {"id": "bye", "kind": "leave", "goto": "end"},
-        ]},
-    },
+# 町ごとの挨拶の一行 (メニューの文。docs/design/52 の 5 章)。都は "menu"、土地の町は "menu_<町>" (会話の条件 in_town)
+K = "dialogue.skyabyss.attendant_box_opener."
+OPTIONS = [
+    {"id": "open", "kind": "talk", "text": K + "menu.open", "do": [{"type": "facility", "open": "boxes"}], "goto": "end"},
+    {"id": "rules", "kind": "talk", "text": K + "menu.rules", "goto": "rules"},
+    {"id": "about", "kind": "talk", "text": K + "menu.about", "goto": "again"},
+    {"id": "bye", "kind": "leave", "text": K + "menu.bye", "goto": "end"},
+]
+nodes = {
+    "intro": {"face": "smile", "do": [{"type": "flag", "flag": "intro"}], "next": "menu"},
+    "again": {"face": "neutral", "next": "menu", "text": K + "intro"},
+    "rules": {"face": "neutral", "next": "menu"},
+    "menu": {"face": "neutral", "text": K + "menu", "options": OPTIONS},
 }
+entries = [{"if": {"type": "not", "of": {"type": "flag", "flag": "intro"}}, "node": "intro"}]
+for town in TOWN_LINES:
+    nodes["menu_" + town] = {"face": "neutral", "text": K + "menu_" + town, "options": OPTIONS}
+    entries.append({"if": {"type": "in_town", "town": town}, "node": "menu_" + town})
+entries.append({"node": "menu"})
+dialogue = {"npc": "skyabyss:attendant_box_opener", "entries": entries, "nodes": nodes}
 with open(ROOT + "data/skyabyss/dialogue/attendant_box_opener.json", "w", encoding="utf-8") as f:
     json.dump(dialogue, f, ensure_ascii=False, indent=2)
     f.write("\n")

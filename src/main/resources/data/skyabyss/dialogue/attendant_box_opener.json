@@ -12,6 +12,34 @@
       "node": "intro"
     },
     {
+      "if": {
+        "type": "in_town",
+        "town": "whale"
+      },
+      "node": "menu_whale"
+    },
+    {
+      "if": {
+        "type": "in_town",
+        "town": "tide"
+      },
+      "node": "menu_tide"
+    },
+    {
+      "if": {
+        "type": "in_town",
+        "town": "storm"
+      },
+      "node": "menu_storm"
+    },
+    {
+      "if": {
+        "type": "in_town",
+        "town": "ember"
+      },
+      "node": "menu_ember"
+    },
+    {
       "node": "menu"
     }
   ],
@@ -37,10 +65,12 @@
     },
     "menu": {
       "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_box_opener.menu",
       "options": [
         {
           "id": "open",
           "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.open",
           "do": [
             {
               "type": "facility",
@@ -52,16 +82,163 @@
         {
           "id": "rules",
           "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
           "goto": "rules"
         },
         {
           "id": "about",
           "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.about",
           "goto": "again"
         },
         {
           "id": "bye",
           "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.bye",
+          "goto": "end"
+        }
+      ]
+    },
+    "menu_whale": {
+      "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_box_opener.menu_whale",
+      "options": [
+        {
+          "id": "open",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.open",
+          "do": [
+            {
+              "type": "facility",
+              "open": "boxes"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rules",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
+          "goto": "rules"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.about",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.bye",
+          "goto": "end"
+        }
+      ]
+    },
+    "menu_tide": {
+      "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_box_opener.menu_tide",
+      "options": [
+        {
+          "id": "open",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.open",
+          "do": [
+            {
+              "type": "facility",
+              "open": "boxes"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rules",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
+          "goto": "rules"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.about",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.bye",
+          "goto": "end"
+        }
+      ]
+    },
+    "menu_storm": {
+      "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_box_opener.menu_storm",
+      "options": [
+        {
+          "id": "open",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.open",
+          "do": [
+            {
+              "type": "facility",
+              "open": "boxes"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rules",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
+          "goto": "rules"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.about",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.bye",
+          "goto": "end"
+        }
+      ]
+    },
+    "menu_ember": {
+      "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_box_opener.menu_ember",
+      "options": [
+        {
+          "id": "open",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.open",
+          "do": [
+            {
+              "type": "facility",
+              "open": "boxes"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "rules",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
+          "goto": "rules"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.about",
+          "goto": "again"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.bye",
           "goto": "end"
         }
       ]

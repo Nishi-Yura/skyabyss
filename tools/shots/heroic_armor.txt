@@ -1,0 +1,74 @@
+# ヒロイックの防具 4 式 (一段豪華にした形) の前と後ろ
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/heroic_armor.txt -PshotsName=heroic_armor
+world shots flat
+size 960 540
+timeout 6000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt replace
+camera 0 -60 8 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd item replace entity @s armor.feet with skyabyss:wild_fortress_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_fortress_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_fortress_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_fortress_helmet
+perspective front
+bodyyaw 25
+wait 20
+chat clear
+shot front_wild_fortress
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_fortress
+perspective first
+cmd item replace entity @s armor.feet with skyabyss:wild_hanged_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_hanged_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_hanged_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_hanged_helmet
+perspective front
+bodyyaw 25
+wait 20
+chat clear
+shot front_wild_hanged
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_hanged
+perspective first
+cmd item replace entity @s armor.feet with skyabyss:wild_stargazer_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_stargazer_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_stargazer_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_stargazer_helmet
+perspective front
+bodyyaw 25
+wait 20
+chat clear
+shot front_wild_stargazer
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_stargazer
+perspective first
+cmd item replace entity @s armor.feet with skyabyss:wild_cloudknight_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_cloudknight_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_cloudknight_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_cloudknight_helmet
+perspective front
+bodyyaw 25
+wait 20
+chat clear
+shot front_wild_cloudknight
+perspective back
+bodyyaw 0
+wait 4
+shot back_wild_cloudknight
+perspective first
+quit

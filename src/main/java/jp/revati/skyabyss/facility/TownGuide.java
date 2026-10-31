@@ -185,7 +185,7 @@ public final class TownGuide {
             Map.entry("smithy", "npc_smith"), Map.entry("training", "npc_training_master"), Map.entry("shrine", "npc_shrine_priest"));
 
     @Nullable
-    static SiteData.Entry townAt(MinecraftServer server, BlockPos at) {
+    public static SiteData.Entry townAt(MinecraftServer server, BlockPos at) {
         for (SiteData.Entry e : SiteData.get(server.overworld()).entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
             if (e.built && OpeningSites.horizontal(e.pos, at) <= TOWN_RANGE) {
                 return e;
