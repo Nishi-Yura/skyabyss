@@ -68,5 +68,9 @@
   "dialogue.skyabyss.guest_town_guide_storm.ask.journal": "See fame and the travel journal",
   "dialogue.skyabyss.guest_town_guide_ember.ask.journal": "See fame and the travel journal",
   "gui.skyabyss.growth.hud_mastery": "Lv %s · mastery %s",
-  "message.skyabyss.mastery.up": "%s mastery rose to %s"
+  "message.skyabyss.mastery.up": "%s mastery rose to %s",
+  "message.skyabyss.guild_week.flag": "Your guild holds the flag of %s this week. The weekly goods are in the storage",
+  "message.skyabyss.guild_week.honor": "Last week's tower rank %s: %s tower shards in the guild storage",
+  "message.skyabyss.guild_week.flag_line": "Flag of %s: %s",
+  "message.skyabyss.guild_week.honor_line": "Last week's tower honor #%s: %s"
 }

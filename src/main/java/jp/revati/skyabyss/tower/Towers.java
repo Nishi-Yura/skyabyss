@@ -194,6 +194,12 @@ public final class Towers {
             }
         }
         boolean fastest = run.server != null && TowerRecords.get(run.server).record(run.members.size(), ticks, names, guilds);
+        // 組合の塔の順位 (endgame/GuildWeek。週が替わると上位 3 組合が誉れ)
+        if (run.server != null) {
+            for (String[] g : guilds) {
+                jp.revati.skyabyss.endgame.GuildWeek.towerClear(run.server, g[0], g[1]);
+            }
+        }
         for (ServerPlayer p : run.online()) {
             if (!TowerWorld.in(p)) {
                 continue;

@@ -377,6 +377,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("fame", jp.revati.skyabyss.endgame.RegionFameSelfTest::run));
         // 職の熟練 (docs/design/54 の 6.2.1)。SKYABYSS_SELFTEST_ONLY="mastery"
         steps.add(Step.once("mastery", jp.revati.skyabyss.rpg.JobMasterySelfTest::run));
+        // 組合の週 (旗取り・塔の順位。docs/design/54 の 5.1・3.5)。SKYABYSS_SELFTEST_ONLY="guild week"
+        steps.add(Step.once("guild week", jp.revati.skyabyss.endgame.GuildWeekSelfTest::run));
         steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));

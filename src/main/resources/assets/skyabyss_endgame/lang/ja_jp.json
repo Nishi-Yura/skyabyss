@@ -68,5 +68,9 @@
   "dialogue.skyabyss.guest_town_guide_storm.ask.journal": "名声と旅帳を見る",
   "dialogue.skyabyss.guest_town_guide_ember.ask.journal": "名声と旅帳を見る",
   "gui.skyabyss.growth.hud_mastery": "Lv %s・熟練 %s",
-  "message.skyabyss.mastery.up": "%sの熟練が上がった: 段 %s"
+  "message.skyabyss.mastery.up": "%sの熟練が上がった: 段 %s",
+  "message.skyabyss.guild_week.flag": "組合が%sの旗を手にした（今週）。倉庫に週の品が届いた",
+  "message.skyabyss.guild_week.honor": "先週の塔の順位 %s 位: 組合の倉庫に塔の欠片 %s",
+  "message.skyabyss.guild_week.flag_line": "%sの旗: %s",
+  "message.skyabyss.guild_week.honor_line": "先週の塔の誉れ %s 位: %s"
 }

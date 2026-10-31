@@ -101,7 +101,12 @@ public final class RegionFame {
             return 0;
         }
         int region = Circuits.regionOfTown(town.index);
-        return DISCOUNT[tier(p, region)];
+        int pct = DISCOUNT[tier(p, region)];
+        // その土地の旗を持つ組合の人は、さらに引く (GuildWeek)
+        if (GuildWeek.holdsFlag(p, region)) {
+            pct = Math.min(GuildWeek.DISCOUNT_CAP, pct + GuildWeek.FLAG_DISCOUNT);
+        }
+        return pct;
     }
 
     public static int price(ServerPlayer p, int coins) {
@@ -190,6 +195,14 @@ public final class RegionFame {
             } else {
                 p.sendSystemMessage(Component.translatable("message.skyabyss.journal.line_plain", landName(r), sights)
                         .withStyle(j.done() ? ChatFormatting.AQUA : ChatFormatting.WHITE));
+            }
+        }
+        // 今週の土地の旗と塔の誉れ (GuildWeek)
+        GuildWeek w = GuildWeek.get(p.server);
+        for (int r : LANDS) {
+            String g = townLand(r) ? w.flag(r) : null;
+            if (g != null) {
+                p.sendSystemMessage(Component.translatable("message.skyabyss.guild_week.flag_line", landName(r), w.name(g)).withStyle(ChatFormatting.YELLOW));
             }
         }
         p.sendSystemMessage(Component.translatable("message.skyabyss.journal.foot").withStyle(ChatFormatting.GRAY));

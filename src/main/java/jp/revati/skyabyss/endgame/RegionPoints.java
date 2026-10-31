@@ -41,6 +41,8 @@ public final class RegionPoints {
         data.put(FAME, fame);
         if (p instanceof net.minecraft.server.level.ServerPlayer sp) {
             RegionFame.changed(sp, region, before, before + n);
+            // 組合の旗取り (GuildWeek): 組合ごとの土地の週の点
+            GuildWeek.regionPoints(sp, region, n);
         }
     }
 

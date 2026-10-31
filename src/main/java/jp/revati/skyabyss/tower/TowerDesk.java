@@ -112,6 +112,13 @@ public final class TowerDesk {
         if (top.isEmpty()) {
             p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.none"));
         }
+        // 先週の上位 3 組合 (塔の誉れ。endgame/GuildWeek)
+        var week = jp.revati.skyabyss.endgame.GuildWeek.get(p.server);
+        var honors = new java.util.ArrayList<>(week.honors().entrySet());
+        honors.sort(java.util.Map.Entry.comparingByValue());
+        for (var h : honors) {
+            p.sendSystemMessage(Component.translatable("message.skyabyss.guild_week.honor_line", h.getValue(), week.name(h.getKey())).withStyle(s -> s.withColor(0xF2D78A)));
+        }
     }
 
     // 塔の店 (data/skyabyss/shop/tower.json)
