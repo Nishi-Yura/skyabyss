@@ -5,8 +5,13 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.19（`build/libs/skyabyss-0.9.19.jar`。確認表 `docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+
+## 0.9.20（島・町の人・店の直しの試遊版。2026-10-31）
+
+- jar `build/libs/skyabyss-0.9.20.jar`。確かめ表 `docs/review/playtest_0.9.20.md`（島・蜂の巣・町の人・店・成長の知らせ・ヒロイックの防具・封切り師の挨拶）。変更履歴はサイト（`tools/site/pages_c.py`）。新しい世界で始めること（島の地形を作り直した）。
+- 確かめ: 自己テスト全段（失敗は `abyss escort` だけ。いつもの時間切れで、単独で流して通った）、`quick_check.sh` 全部、jar の中身と版。
 
 ## はじまりの島を要素の紹介だけに・蜂の巣の音（2026-10-31。設計 [40](design/40_rpg_world_and_start.md) の 7 章）
 

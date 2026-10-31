@@ -176,6 +176,11 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.9.20", "2026-10-31", [
+            ("はじまりの島は、遊び方を教える場所だけに（職・帳面・足跡・峠の野盗・休み場・祠・渡し守）。見張り塔の跡・大樹などの寄り道は消しました。木の蜂の巣が鳴りやまない音も止めました。", "The starting island now holds only the places that teach the game (job, journal, footprints, the pass bandits, rest spot, shrine, ferryman). Side trips such as the old watchtower and the great tree are gone, and beehives no longer buzz nonstop."),
+            ("町の人を見直しました: 書庫番と地図屋はいなくなり、祠と跡地は最初から地図に、跡地の噂は都の案内人に。店は冒険モードで置けないブロックを売らず、同じ品は一つの店に。封切り師は町の案内の一覧に載り、町ごとに挨拶が違います。", "Townsfolk review: the archivist and the mapmaker are gone; shrines and ruins are on the map from the start, and the capital guide tells ruin rumors. Shops no longer sell blocks you cannot place in adventure mode, and each good has one shop. The box opener is in the town guide list and greets you differently in each town."),
+            ("レベルが上がったときは技の点の数を知らせます（残っていた「振り分けられる力」の文を消しました）。ヒロイックの防具 4 式に外套・光る継ぎ目・頭の飾りを足しました。", "Level-ups now report skill points (the leftover stat-point text is gone). The four heroic armor sets gain capes, glowing seams and crown ornaments."),
+        ]),
         ("v0.9.19", "2026-10-31", [
             ("野の装備: 物語の報酬とは別に、土地の敵・名のある強敵・層の主から出る武器 102 本（職ごと・Lv 帯ごと）、防具 18 式、装飾と護符 26 品。どれも自分の形と能力を持ちます。アンコモンは鍛冶屋でも買えます。", "Wild gear: beyond story rewards, 102 job weapons by level band, 18 armor sets and 26 trinkets and charms drop from regional foes, named foes and layer lords, each with its own model and ability. Uncommon pieces are also sold by the smith."),
             ("装備は封の箱で落ちます: 巨神の箱 4 種、階級の箱（Lv の帯ごと）、淵の金の箱。同じ箱は重なり、旅嚢の新しいつまみ「封の箱」に入ります。都と四つの町の封切り師がルーレットで開けてくれます（無料）。", "Gear now drops in sealed boxes: four titan boxes, rarity boxes per level band, and the abyssal gold box. Boxes of a kind stack and go to the new Sealed Boxes tab of the satchel. The box opener in the capital and the four towns opens them with a roulette (free)."),
