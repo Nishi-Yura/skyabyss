@@ -8,6 +8,10 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 神器の二本目・防具・装飾（ラフ・承認待ち。2026-11-01。設計 [50](design/50_finale.md) の 4.5.1）
+
+- 武器 6 本は `o_divine.py` の後半、防具 3 式は `tools/rough/lowpoly/armor/divine/build_divine_armor.py`、装飾の絵は `tools/gen/finale/gen_divine_gear_icons.py`。見せた絵 `docs/review/divine_gear/divine_gear_roughs.png`。品の登録・効き方・手に入れ方（雲上の箱）・入れ方はまだ。
+
 ## 超大型レイド「あいだの塔」（作りかけ。2026-11-01。設計 [54](design/54_endgame_plan.md) の 2 章）
 
 - 声「Wynncraft のめっちゃでかい動かないボスのやつに似せて。途中のやつとかなくて、ボス戦だけ」「アナイアレーション参考にして」で、四つの階をやめ、橋の先に座る巨大な主との一戦だけにした（手本は Wynncraft の Prelude to Annihilation）。
