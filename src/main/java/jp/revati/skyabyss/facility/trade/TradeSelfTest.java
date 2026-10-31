@@ -20,7 +20,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 // 取引所 (docs/design/35 の 6.11) の自己テスト。段: "facility trade"。
 //   出す (預かる・10 品まで・空・大事な品)、申請 (品は動かない・二度目・自分の出品・持っていない)、断る (知らせ)、
 //   受ける (一度に入れ替え・ほかの申請へ知らせ)、品が足りない・持ち物が一杯 (何も動かず申請は残る)、いない人 (受けられない・知らせは次に入ったとき)、
-//   別の申し出 (自分で選んだ品と鐘銭)、取り下げ (品が戻る・一杯なら受け取り箱)、期限切れ (受け取り箱と知らせ)、受け取る、保存と読み直し
+//   値を出す (鐘銭の額だけ。品の申し出・品をほしいものにするのは断る。2026-11-01)、取り下げ (品が戻る・一杯なら受け取り箱)、期限切れ (受け取り箱と知らせ)、受け取る、保存と読み直し
 public final class TradeSelfTest {
     private TradeSelfTest() {
     }
@@ -51,7 +51,7 @@ public final class TradeSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST facility trade PASSED (list/escrow/limits, apply keeps items, reject, accept swap, lacking items, full inventory, "
-                    + "offline applicant and notes, counter offer, cancel returns, expiry to mail, claim, save)");
+                    + "offline applicant and notes, coin-only bids and prices, cancel returns, expiry to mail, claim, save)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility trade FAILED: {}", m));
         }
@@ -76,21 +76,21 @@ public final class TradeSelfTest {
         here.put(s.getUUID(), s);
         here.put(b.getUUID(), b);
         here.put(c.getUUID(), c);
-        // ---- 出す: 鉄 10 を出して、ダイヤ 2 と鐘銭 5 がほしい
+        // ---- 出す: 鉄 10 を鐘銭 5,000 で (持ち物の枠を越える額。鐘銭は旅嚢で受け渡す)
         s.getInventory().setItem(0, new ItemStack(Items.IRON_INGOT, 16));
-        check(f, Trades.list(s, List.of(), List.of(Items.DIAMOND), List.of(2), 5) == Trades.Result.EMPTY_GIVE, "nothing to give refused");
-        check(f, Trades.list(s, slot(0, 10), List.of(), List.of(), 0) == Trades.Result.EMPTY_WANT, "wanting nothing refused");
-        check(f, Trades.list(s, slot(0, 99), List.of(Items.DIAMOND), List.of(2), 0) == Trades.Result.LACK, "cannot give more than held");
-        check(f, Trades.list(s, slot(40, 1), List.of(Items.DIAMOND), List.of(2), 0) == Trades.Result.BAD_SLOT, "bad slot refused");
-        check(f, Trades.list(s, slot(0, 10), List.of(Items.DIAMOND), List.of(2), 5) == Trades.Result.LISTED, "list");
+        check(f, Trades.list(s, List.of(), List.of(), List.of(), 5) == Trades.Result.EMPTY_GIVE, "nothing to give refused");
+        check(f, Trades.list(s, slot(0, 10), List.of(), List.of(), 0) == Trades.Result.EMPTY_WANT, "a price of nothing refused");
+        check(f, Trades.list(s, slot(0, 10), List.of(Items.DIAMOND), List.of(2), 5) == Trades.Result.NOT_ALLOWED, "wanting items refused (coins only)");
+        check(f, Trades.list(s, slot(0, 99), List.of(), List.of(), 5) == Trades.Result.LACK, "cannot give more than held");
+        check(f, Trades.list(s, slot(40, 1), List.of(), List.of(), 5) == Trades.Result.BAD_SLOT, "bad slot refused");
+        check(f, Trades.list(s, slot(0, 10), List.of(), List.of(), 5000) == Trades.Result.LISTED, "list");
         TradeData.Listing l = data.of(s.getUUID()).isEmpty() ? null : data.of(s.getUUID()).get(0);
         if (l == null) {
             f.add("listing missing");
             return;
         }
         check(f, s.getInventory().getItem(0).getCount() == 6 && l.give.size() == 1 && l.give.get(0).getCount() == 10, "seller's items are held in escrow");
-        check(f, l.want.size() == 2 && Trades.count(l.want, new ItemStack(Items.DIAMOND)) == 2 && Trades.count(l.want, Trades.coins(1)) == 5,
-                "want = diamonds and coins");
+        check(f, l.want.size() == 1 && Trades.count(l.want, Trades.coins(1)) == 5000, "the price is coins only");
         check(f, l.expires - l.created == Trades.EXPIRE_MS, "listing expires in 7 days");
         // 大事な品 (クエストの印の品) は出せない
         ItemStack token = new ItemStack(Items.PAPER);
@@ -99,21 +99,19 @@ public final class TradeSelfTest {
         token.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tg));
         if (jp.revati.skyabyss.quest.QuestItems.token(token) != null) {
             s.getInventory().setItem(1, token);
-            check(f, Trades.list(s, slot(1, 1), List.of(Items.DIAMOND), List.of(1), 0) == Trades.Result.NOT_ALLOWED, "quest items cannot be listed");
+            check(f, Trades.list(s, slot(1, 1), List.of(), List.of(), 1) == Trades.Result.NOT_ALLOWED, "quest items cannot be listed");
             s.getInventory().setItem(1, ItemStack.EMPTY);
         }
-        // ---- 申請: 品は動かない
+        // ---- 申請: 鐘銭は動かない
         check(f, Trades.apply(s, l.id, null, 0) == Trades.Result.OWN_LISTING, "cannot apply to own listing");
-        check(f, Trades.apply(b, l.id, null, 0) == Trades.Result.LACK, "cannot apply without the wanted items");
-        b.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 3));
-        Coins.give(b, 7);
+        check(f, Trades.apply(b, l.id, null, 0) == Trades.Result.LACK, "cannot apply without the coins");
+        Coins.give(b, 6000);
         check(f, Trades.apply(b, l.id, null, 0) == Trades.Result.APPLIED, "apply");
-        check(f, b.getInventory().countItem(Items.DIAMOND) == 3 && Coins.count(b) == 7, "applying takes nothing");
+        check(f, Coins.count(b) == 6000, "applying takes nothing");
         check(f, told(s.getUUID(), "note_applied"), "seller told of the application");
         check(f, Trades.apply(b, l.id, null, 0) == Trades.Result.ALREADY_APPLIED, "one application per listing");
         // ---- 断る
-        c.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 2));
-        Coins.give(c, 5);
+        Coins.give(c, 5000);
         check(f, Trades.apply(c, l.id, null, 0) == Trades.Result.APPLIED, "second applicant");
         check(f, Trades.reject(b, l.id, c.getUUID()) == Trades.Result.NOT_SELLER, "only the seller rejects");
         here.remove(c.getUUID());
@@ -122,16 +120,16 @@ public final class TradeSelfTest {
         here.put(c.getUUID(), c);
         check(f, Trades.flush(c) >= 1 && data.notes(c.getUUID()).isEmpty(), "notes are shown on login");
         check(f, Trades.apply(c, l.id, null, 0) == Trades.Result.APPLIED, "apply again after rejection");
-        // ---- 足りない: b がダイヤを手放したあとに受けようとする
-        b.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 1));
+        // ---- 足りない: b が鐘銭を使ったあとに受けようとする
+        Coins.take(b, 5900);
         check(f, Trades.accept(s, l.id, b.getUUID()) == Trades.Result.APPLICANT_LACKS && l.apps.containsKey(b.getUUID())
-                && data.byId(l.id) != null && s.getInventory().countItem(Items.DIAMOND) == 0, "lacking applicant: nothing moves, application stays");
-        b.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 3));
+                && data.byId(l.id) != null && Coins.count(s) == 0, "lacking applicant: nothing moves, application stays");
+        Coins.give(b, 5900);
         // ---- いない人: 受けられない
         here.remove(b.getUUID());
         check(f, Trades.accept(s, l.id, b.getUUID()) == Trades.Result.APPLICANT_AWAY && data.byId(l.id) != null, "cannot accept an offline applicant");
         here.put(b.getUUID(), b);
-        // ---- 持ち物が一杯: 受ける人の側
+        // ---- 持ち物が一杯: 受ける人の側 (鉄 10 が入らない)
         List<ItemStack> keep = new ArrayList<>();
         for (int i = 0; i < 36; i++) {
             keep.add(b.getInventory().getItem(i).copy());
@@ -139,26 +137,24 @@ public final class TradeSelfTest {
                 b.getInventory().setItem(i, new ItemStack(Items.DIRT, 64));
             }
         }
-        // ダイヤ 2 は出るが一枠が空くとは限らない (3 → 1)。鐘銭 7 → 2。鉄 10 は入らない
-        check(f, Trades.accept(s, l.id, b.getUUID()) == Trades.Result.ROOM_APPLICANT && data.byId(l.id) != null
-                && b.getInventory().countItem(Items.DIAMOND) == 3, "full applicant: nothing moves");
+        check(f, Trades.accept(s, l.id, b.getUUID()) == Trades.Result.ROOM_APPLICANT && data.byId(l.id) != null && Coins.count(b) == 6000,
+                "full applicant: nothing moves");
         for (int i = 0; i < 36; i++) {
             b.getInventory().setItem(i, keep.get(i));
         }
-        // ---- 受ける: 一度に入れ替え
+        // ---- 受ける: 一度に入れ替え (鐘銭は旅嚢で)
         int sIron = s.getInventory().countItem(Items.IRON_INGOT);
         check(f, Trades.accept(s, l.id, b.getUUID()) == Trades.Result.ACCEPTED, "accept");
         check(f, data.byId(l.id) == null, "listing closes on accept");
-        check(f, b.getInventory().countItem(Items.IRON_INGOT) == 10 && b.getInventory().countItem(Items.DIAMOND) == 1 && Coins.count(b) == 2,
-                "applicant paid and received " + b.getInventory().countItem(Items.IRON_INGOT) + " " + b.getInventory().countItem(Items.DIAMOND) + " " + Coins.count(b));
-        check(f, s.getInventory().countItem(Items.DIAMOND) == 2 && Coins.count(s) == 5 && s.getInventory().countItem(Items.IRON_INGOT) == sIron,
-                "seller received the payment");
+        check(f, b.getInventory().countItem(Items.IRON_INGOT) == 10 && Coins.count(b) == 1000,
+                "applicant paid and received " + b.getInventory().countItem(Items.IRON_INGOT) + " " + Coins.count(b));
+        check(f, Coins.count(s) == 5000 && s.getInventory().countItem(Items.IRON_INGOT) == sIron, "seller received the payment: " + Coins.count(s));
         check(f, told(s.getUUID(), "note_sold") && told(b.getUUID(), "note_accepted") && told(c.getUUID(), "note_taken"),
                 "both told, other applicants told it went to someone else");
-        check(f, c.getInventory().countItem(Items.DIAMOND) == 2 && Coins.count(c) == 5, "other applicant keeps everything");
-        // ---- 別の申し出: 鉄 3 と鐘銭 1 で、s の新しい出品 (金 4 に ダイヤ 1)
+        check(f, Coins.count(c) == 5000, "other applicant keeps everything");
+        // ---- 値を出す: 金 4 (値 300) に b が鐘銭 250 で申し出る。品の申し出・0 枚は断る
         s.getInventory().setItem(5, new ItemStack(Items.GOLD_INGOT, 4));
-        check(f, Trades.list(s, slot(5, 4), List.of(Items.DIAMOND), List.of(1), 0) == Trades.Result.LISTED, "second listing");
+        check(f, Trades.list(s, slot(5, 4), List.of(), List.of(), 300) == Trades.Result.LISTED, "second listing");
         TradeData.Listing l2 = data.of(s.getUUID()).get(0);
         int ironSlot = -1;
         for (int i = 0; i < 36; i++) {
@@ -166,17 +162,18 @@ public final class TradeSelfTest {
                 ironSlot = i;
             }
         }
-        check(f, ironSlot >= 0 && Trades.apply(b, l2.id, slot(ironSlot, 3), 1) == Trades.Result.APPLIED, "counter offer");
+        check(f, ironSlot >= 0 && Trades.apply(b, l2.id, slot(ironSlot, 3), 1) == Trades.Result.NOT_ALLOWED, "offering items refused (coins only)");
+        check(f, Trades.apply(c, l2.id, List.of(), 0) == Trades.Result.EMPTY_OFFER, "a bid of nothing refused");
+        check(f, Trades.apply(b, l2.id, List.of(), 250) == Trades.Result.APPLIED, "bid");
         TradeData.Application ca = l2.apps.get(b.getUUID());
-        check(f, ca != null && Trades.count(ca.offer, new ItemStack(Items.IRON_INGOT)) == 3 && Trades.count(ca.offer, Trades.coins(1)) == 1,
-                "counter offer holds the chosen items");
+        check(f, ca != null && ca.offer.size() == 1 && Trades.count(ca.offer, Trades.coins(1)) == 250, "the bid holds the coins only");
         check(f, Trades.accept(s, l2.id, b.getUUID()) == Trades.Result.ACCEPTED && b.getInventory().countItem(Items.GOLD_INGOT) == 4
-                && b.getInventory().countItem(Items.IRON_INGOT) == 7 && Coins.count(b) == 1, "counter offer swap");
+                && Coins.count(b) == 750 && Coins.count(s) == 5250, "bid swap");
         // ---- 取り下げ: 品が戻る (一杯なら受け取り箱)
         s.getInventory().setItem(6, new ItemStack(Items.EMERALD, 5));
-        Trades.list(s, slot(6, 5), List.of(Items.APPLE), List.of(1), 0);
+        Trades.list(s, slot(6, 5), List.of(), List.of(), 10);
         TradeData.Listing l3 = data.of(s.getUUID()).get(0);
-        Trades.apply(c, l3.id, slot(0, 1), 0);
+        Trades.apply(c, l3.id, null, 0);
         check(f, Trades.withdraw(b, l3.id) == Trades.Result.NO_APPLICATION, "withdraw needs an application");
         check(f, Trades.cancel(b, l3.id) == Trades.Result.NOT_SELLER, "only the seller cancels");
         check(f, Trades.cancel(s, l3.id) == Trades.Result.CANCELLED && s.getInventory().countItem(Items.EMERALD) == 5 && data.byId(l3.id) == null,
@@ -188,7 +185,7 @@ public final class TradeSelfTest {
             }
         }
         s.getInventory().setItem(6, new ItemStack(Items.EMERALD, 5));
-        Trades.list(s, slot(6, 5), List.of(Items.APPLE), List.of(1), 0);
+        Trades.list(s, slot(6, 5), List.of(), List.of(), 10);
         TradeData.Listing l4 = data.of(s.getUUID()).get(0);
         List<ItemStack> sKeep = new ArrayList<>();
         for (int i = 0; i < 36; i++) {
@@ -209,9 +206,8 @@ public final class TradeSelfTest {
         check(f, Trades.claim(s) == Trades.Result.NOTHING_TO_CLAIM, "claim twice");
         // ---- 期限切れ: 受け取り箱へ、いない人には知らせを残す
         s.getInventory().setItem(7, new ItemStack(Items.COAL, 8));
-        Trades.list(s, slot(7, 8), List.of(Items.APPLE), List.of(1), 0);
+        Trades.list(s, slot(7, 8), List.of(), List.of(), 20);
         TradeData.Listing l5 = data.of(s.getUUID()).get(0);
-        b.getInventory().setItem(20, new ItemStack(Items.APPLE, 1));
         Trades.apply(b, l5.id, null, 0);
         here.remove(s.getUUID());
         here.remove(b.getUUID());
@@ -224,7 +220,7 @@ public final class TradeSelfTest {
         // ---- 10 品まで
         s.getInventory().setItem(8, new ItemStack(Items.STICK, 64));
         int made = 0;
-        while (Trades.list(s, slot(8, 1), List.of(Items.APPLE), List.of(1), 0) == Trades.Result.LISTED) {
+        while (Trades.list(s, slot(8, 1), List.of(), List.of(), 1) == Trades.Result.LISTED) {
             made++;
             if (made > 20) {
                 break;
@@ -236,17 +232,17 @@ public final class TradeSelfTest {
         Trades.apply(b, lx.id, null, 0);
         TradeData copy = data.roundTrip(server.registryAccess());
         TradeData.Listing cl = copy.byId(lx.id);
-        check(f, cl != null && cl.seller.equals(s.getUUID()) && cl.give.get(0).is(Items.STICK) && cl.want.get(0).is(Items.APPLE)
-                && cl.apps.containsKey(b.getUUID()) && cl.apps.get(b.getUUID()).offer.get(0).is(Items.APPLE) && cl.expires == lx.expires,
+        check(f, cl != null && cl.seller.equals(s.getUUID()) && cl.give.get(0).is(Items.STICK) && Trades.isCoin(cl.want.get(0))
+                && cl.apps.containsKey(b.getUUID()) && Trades.isCoin(cl.apps.get(b.getUUID()).offer.get(0)) && cl.expires == lx.expires,
                 "listings and applications survive save");
         check(f, Trades.count(copy.mail(s.getUUID()), new ItemStack(Items.COAL)) == 8 && !copy.notes(b.getUUID()).isEmpty(), "mail and notes survive save");
-        // 大きな数のほしいもの (鐘銭 300) も保存で欠けない
+        // 大きな値 (鐘銭 200 万。上限 Coins.MAX まで) も保存で欠けない
         Trades.cancel(s, lx.id);
-        Trades.list(s, slot(8, 1), List.of(), List.of(), 300);
+        Trades.list(s, slot(8, 1), List.of(), List.of(), 2_000_000);
         TradeData copy2 = data.roundTrip(server.registryAccess());
         List<TradeData.Listing> mine2 = copy2.of(s.getUUID());
         TradeData.Listing big = mine2.get(mine2.size() - 1);
-        check(f, Trades.count(big.want, Trades.coins(1)) == 300, "large wanted counts survive save");
+        check(f, Trades.count(big.want, Trades.coins(1)) == 2_000_000, "large prices survive save");
         s.getInventory().clearContent();
         jp.revati.skyabyss.facility.Coins.take(s, jp.revati.skyabyss.facility.Coins.count(s));
         b.getInventory().clearContent();

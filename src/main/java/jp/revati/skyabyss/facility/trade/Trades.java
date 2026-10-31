@@ -311,8 +311,12 @@ public final class Trades {
         if (p.error() != null) {
             return p.error();
         }
-        if (p.picks().size() > MAX_GIVE || wantItems.size() > MAX_WANT) {
+        if (p.picks().size() > MAX_GIVE) {
             return Result.TOO_MANY_ITEMS;
+        }
+        // ほしいものは鐘銭だけ (2026-11-01「トレードで使えるのはお金のみ。アイテムは無し」)
+        if (wantItems.stream().anyMatch(it -> it != null && it != Items.AIR)) {
+            return Result.NOT_ALLOWED;
         }
         List<ItemStack> want = wants(wantItems, wantCounts, coins);
         if (want == null) {
@@ -380,21 +384,14 @@ public final class Trades {
                 items.add(s.copy());
             }
         } else {
-            Picked p = pick(applicant, offer);
-            if (p.error() != null) {
-                return p.error();
+            // 別の申し出は鐘銭の額だけ (品は出せない。2026-11-01)
+            if (!offer.isEmpty()) {
+                return Result.NOT_ALLOWED;
             }
-            if (p.picks().size() > MAX_WANT) {
-                return Result.TOO_MANY_ITEMS;
-            }
-            items = new ArrayList<>(p.stacks());
-            if (coins > 0) {
-                items.add(coins(Math.min(MAX_COINS, coins)));
-            }
-            items = combine(items);
-            if (items.isEmpty()) {
+            if (coins <= 0) {
                 return Result.EMPTY_OFFER;
             }
+            items = new ArrayList<>(List.of(coins(Math.min(MAX_COINS, coins))));
         }
         // 申請のときは持っているかだけ見る (取らない)
         if (!holds(applicant, items)) {
@@ -463,19 +460,31 @@ public final class Trades {
             tell(server, applicantId, "message.skyabyss.trade.note_lacked", l.sellerName, "#" + l.id);
             return Result.APPLICANT_LACKS;
         }
-        stageCoins(buyer, a.offer);
-        if (!fits(main(buyer), a.offer, split(l.give))) {
+        // 鐘銭は旅嚢と持ち物の合計で払い、受け取る人の旅嚢へ (持ち物の空きを使わない。大きな額も 99 枚ずつにしない)。
+        // 前の版の品の申し出 (鐘銭のほかの品) だけ、持ち物で入れ替える
+        int coinsOwed = 0;
+        List<ItemStack> goods = new ArrayList<>();
+        for (ItemStack s : combine(a.offer)) {
+            if (isCoin(s)) {
+                coinsOwed += s.getCount();
+            } else {
+                goods.add(s);
+            }
+        }
+        if (!fits(main(buyer), goods, split(l.give))) {
             tell(server, applicantId, "message.skyabyss.trade.note_no_room", l.sellerName, "#" + l.id);
             return Result.ROOM_APPLICANT;
         }
-        if (!fits(main(seller), List.of(), split(a.offer))) {
+        if (!fits(main(seller), List.of(), split(goods))) {
             return Result.ROOM_SELLER;
         }
         // ここから先は失敗しない (同じ手の中で、調べたとおりに動かす)
         data.remove(l);
-        List<ItemStack> paid = take(buyer, a.offer);
+        List<ItemStack> paid = take(buyer, goods);
+        jp.revati.skyabyss.facility.Coins.take(buyer, coinsOwed);
         put(buyer, l.give);
         put(seller, combine(paid));
+        jp.revati.skyabyss.facility.Coins.give(seller, coinsOwed);
         data.dirty();
         jp.revati.skyabyss.advancement.Beats.fire(seller, "trade:done");
         jp.revati.skyabyss.advancement.Beats.fire(buyer, "trade:done");
@@ -607,29 +616,5 @@ public final class Trades {
             }
         }
         return true;
-    }
-
-    // 払う前に、持ち物で足りない鐘銭を旅嚢から持ち物へ出す (取るのは持ち物から)
-    static void stageCoins(ServerPlayer p, List<ItemStack> templates) {
-        int need = 0;
-        for (ItemStack t : combine(templates)) {
-            if (isCoin(t)) {
-                need += t.getCount();
-            }
-        }
-        int lack = need - count(main(p), coins(1));
-        if (lack <= 0) {
-            return;
-        }
-        int got = jp.revati.skyabyss.pouch.Pouch.take(p, FacilitySetup.BELL_COIN.get(), lack);
-        while (got > 0) {
-            int k = Math.min(got, coins(1).getMaxStackSize());
-            ItemStack c = coins(k);
-            p.getInventory().add(c);
-            if (!c.isEmpty()) {
-                jp.revati.skyabyss.pouch.Pouch.add(p, c);
-            }
-            got -= k;
-        }
     }
 }

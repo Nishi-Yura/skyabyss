@@ -50,6 +50,7 @@ J = {
     "dialogue.skyabyss.attendant_box_opener.intro": "封の箱を持ってきたか。敵が落とす箱は、封を切るまで中身が眠っている。わしが切ってやろう。代はいらん。封の音を聞くのが好きでな。",
     "dialogue.skyabyss.attendant_box_opener.menu": "……箱か。",
     "dialogue.skyabyss.attendant_box_opener.menu.open": "箱を開けてもらう",
+    "dialogue.skyabyss.attendant_box_opener.menu.sell": "品を買い取ってもらう",
     "dialogue.skyabyss.attendant_box_opener.menu.rules": "箱のこと",
     "dialogue.skyabyss.attendant_box_opener.menu.about": "ここは何をする所？",
     "dialogue.skyabyss.attendant_box_opener.menu.bye": "また来る",
@@ -83,6 +84,7 @@ E = {
     "dialogue.skyabyss.attendant_box_opener.intro": "Brought me a sealed box? What a foe drops stays asleep until the seal is cut. I'll cut it for you, no charge. I like the sound a seal makes.",
     "dialogue.skyabyss.attendant_box_opener.menu": "...A box?",
     "dialogue.skyabyss.attendant_box_opener.menu.open": "Open my boxes",
+    "dialogue.skyabyss.attendant_box_opener.menu.sell": "Sell my gear",
     "dialogue.skyabyss.attendant_box_opener.menu.rules": "About the boxes",
     "dialogue.skyabyss.attendant_box_opener.menu.about": "What is this place?",
     "dialogue.skyabyss.attendant_box_opener.menu.bye": "I'll come back",
@@ -120,6 +122,8 @@ for name, d in (("ja_jp", ja), ("en_us", en)):
 K = "dialogue.skyabyss.attendant_box_opener."
 OPTIONS = [
     {"id": "open", "kind": "talk", "text": K + "menu.open", "do": [{"type": "facility", "open": "boxes"}], "goto": "end"},
+    # 買い取り (2026-11-01「アイテム売ってお金にできる機能を箱空けるnpcに」。facility/Buyback)
+    {"id": "sell", "kind": "talk", "text": K + "menu.sell", "do": [{"type": "facility", "open": "buyback"}], "goto": "end"},
     {"id": "rules", "kind": "talk", "text": K + "menu.rules", "goto": "rules"},
     {"id": "about", "kind": "talk", "text": K + "menu.about", "goto": "again"},
     {"id": "bye", "kind": "leave", "text": K + "menu.bye", "goto": "end"},

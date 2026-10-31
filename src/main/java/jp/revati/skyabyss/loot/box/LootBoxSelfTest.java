@@ -53,13 +53,14 @@ public final class LootBoxSelfTest {
             kinds(f);
             pools(f, notes);
             queue(server, f);
+            buyback(server, f);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("loot boxes selftest crashed", e);
             f.add("crashed: " + e);
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST loot boxes: {}", n));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST loot boxes PASSED (items, kinds, pools, odds, queue, hand-over)");
+            SkyAbyss.LOGGER.info("SELFTEST loot boxes PASSED (items, kinds, pools, odds, queue, hand-over, buyback and the coin cap)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST loot boxes FAILED: {}", x));
         }
@@ -69,6 +70,36 @@ public final class LootBoxSelfTest {
         if (!ok) {
             f.add(what);
         }
+    }
+
+    // 封切り師の買い取り (facility/Buyback) と鐘銭の上限 (2026-11-01)
+    static void buyback(MinecraftServer server, List<String> f) {
+        FakePlayer p = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "[buyback]"));
+        net.minecraft.world.item.Item heroic = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "wild_lavajaw_greatsword"));
+        net.minecraft.world.item.Item divine = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "divine_sky_sword"));
+        ItemStack gear = new ItemStack(heroic);
+        int price = jp.revati.skyabyss.facility.Buyback.price(gear);
+        int lv = jp.revati.skyabyss.item.GearLevel.required(gear);
+        check(f, price == Math.round(60 * (1 + lv / 10.0)), "heroic gear price " + price + " at Lv " + lv);
+        check(f, jp.revati.skyabyss.facility.Buyback.price(new ItemStack(divine)) == 0, "a divine relic can be sold");
+        check(f, jp.revati.skyabyss.facility.Buyback.price(new ItemStack(net.minecraft.world.item.Items.DIAMOND)) == 0, "a vanilla item can be sold to the box opener");
+        p.getInventory().setItem(3, gear);
+        p.getInventory().setItem(4, new ItemStack(divine));
+        var view = jp.revati.skyabyss.facility.Buyback.view(p);
+        check(f, view.sells().size() == 1 && view.sells().get(0).index() == 3 && view.sells().get(0).coins() == price, "buyback lists only the sellable gear");
+        int before = jp.revati.skyabyss.facility.Coins.count(p);
+        check(f, jp.revati.skyabyss.facility.Buyback.sell(p, 3, 1) == 1 && p.getInventory().getItem(3).isEmpty()
+                && jp.revati.skyabyss.facility.Coins.count(p) == before + price, "selling paid the price and took the item");
+        check(f, jp.revati.skyabyss.facility.Buyback.sell(p, 4, 1) == 0 && !p.getInventory().getItem(4).isEmpty(), "the divine relic was sold");
+        // 大きな額: 旅嚢へまとめて入る (上限 999,999,999)
+        jp.revati.skyabyss.facility.Coins.give(p, 50_000_000);
+        check(f, jp.revati.skyabyss.facility.Coins.count(p) == before + price + 50_000_000, "a large coin gift did not land in the pouch: "
+                + jp.revati.skyabyss.facility.Coins.count(p));
+        check(f, jp.revati.skyabyss.facility.Coins.MAX == 999_999_999, "coin cap");
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
+        p.getInventory().clearContent();
     }
 
     static void items(List<String> f) {

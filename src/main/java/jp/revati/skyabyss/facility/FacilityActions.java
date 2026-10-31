@@ -43,11 +43,12 @@ import net.minecraft.world.level.block.BedBlock;
 //   mount_shop : 厩舎の番。乗り物の店の画面 (mount/MountService。docs/design/38)
 //   trade     : 取引所の番。取引所の画面 (trade/TradeService。番の前なので出す・申請ができる)
 //   boxes     : 封切り師。封の箱の画面 (loot/box/BoxService。docs/design/52)
+//   buyback   : 封切り師の買い取り。装備を鐘銭に (Buyback。店の画面を売るだけで開く)
 //   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback");
 
     private FacilityActions() {
     }
@@ -83,6 +84,7 @@ public final class FacilityActions {
             case "mount_shop" -> jp.revati.skyabyss.mount.MountService.open(player, npc);
             case "guide" -> TownGuide.openMenu(player);
             case "boxes" -> jp.revati.skyabyss.loot.box.BoxService.open(player, npc);
+            case "buyback" -> ShopService.open(player, Buyback.ID, npc);
             default -> SkyAbyss.LOGGER.warn("[facility] unknown open {}", open);
         }
     }

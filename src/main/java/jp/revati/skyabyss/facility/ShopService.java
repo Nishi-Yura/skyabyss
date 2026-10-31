@@ -53,6 +53,12 @@ public final class ShopService {
 
     // 開く (npc = 店の人。null = どこからでも)
     public static boolean open(ServerPlayer player, String shopId, @Nullable Entity npc) {
+        // 封切り師の買い取り (売るだけの店。Buyback)
+        if (Buyback.ID.equals(shopId)) {
+            SESSIONS.put(player.getUUID(), new Session(shopId, npc == null ? -1 : npc.getId()));
+            send(player, Buyback.view(player));
+            return true;
+        }
         ShopDef shop = ShopManager.shop(shopId);
         if (shop == null) {
             SkyAbyss.LOGGER.warn("[shop] no shop {}", shopId);
@@ -182,6 +188,18 @@ public final class ShopService {
     // ---------------------------------------------------------------- 売る
     public static Result sell(ServerPlayer player, String shopId, int index, int times) {
         Session s = SESSIONS.get(player.getUUID());
+        if (Buyback.ID.equals(shopId)) {
+            if (s == null || !s.shop().equals(shopId)) {
+                return Result.NO_SHOP;
+            }
+            if (!reach(player, s)) {
+                close(player);
+                return Result.FAR;
+            }
+            int n = Buyback.sell(player, index, times);
+            send(player, Buyback.view(player));
+            return n > 0 ? Result.OK : Result.NO_GOOD;
+        }
         ShopDef shop = ShopManager.shop(shopId);
         if (shop == null || s == null || !s.shop().equals(shopId)) {
             return Result.NO_SHOP;

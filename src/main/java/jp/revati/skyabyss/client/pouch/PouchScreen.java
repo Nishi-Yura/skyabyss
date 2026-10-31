@@ -130,6 +130,17 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         g.drawString(font, label, x + (w - font.width(label)) / 2, y + (h - 8) / 2, color, false);
     }
 
+    // 旅嚢の枠の鐘銭は、枠の上に数を出さない (2026-11-01「数字がすごいため見せなくていい」。数は下の説明の行と店の画面に出る)
+    @Override
+    protected void renderSlot(GuiGraphics g, net.minecraft.world.inventory.Slot slot) {
+        ItemStack s = slot.getItem();
+        if (!(slot.container instanceof net.minecraft.world.entity.player.Inventory) && s.is(jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get())) {
+            g.renderItem(s, slot.x, slot.y);
+            return;
+        }
+        super.renderSlot(g, slot);
+    }
+
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         int mx = mouseX - leftPos;

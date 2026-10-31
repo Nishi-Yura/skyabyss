@@ -8,6 +8,15 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
+
+- 声「アイテム売ってお金にできる機能を箱空ける NPC に」「お金の上限もっと増やしていい（旅のインベントリのコインの上の数は見せなくていい）」「トレードで使えるのはお金のみ。アイテムは無し」「統合できそうな NPC は統合してもいい」。
+- 買い取り: 封切り師の「品を買い取ってもらう」→ 店の画面を買い取りだけで開く（`facility/Buyback`、`ShopService` が id `buyback` を振り分け、`ShopScreen` は売るだけの形）。装備を階級と必要 Lv で値付け。会話の文は `tools/gen/loot/gen_box_text.py`。
+- 上限: `Coins.MAX` を 999,999,999 に。`Coins.give` は旅嚢へまとめて入れる（前は 99 枚ずつ回していた）。旅嚢の枠の上の鐘銭の数は出さない（`PouchScreen.renderSlot`）。
+- 取引所: 値と申し出は鐘銭だけ（`Trades.list`・`apply` が品を断る）。受けるときの鐘銭は旅嚢で受け渡す（前は持ち物へ 99 枚ずつ出していたので、約 3,500 枚を超える額は「空きがない」で止まるか払いきれなかった）。画面は値を鐘銭の絵と桁区切りの額で出し、つまみに重なっていた列の見出しを外した。
+- 統合: 候補（旅の館の厩舎の番と止まり木の番、組合会館の取引所の番と預かり番、鍛冶場の鍛冶師と封切り師）は都で建物が別だったり、町めぐりが寄ったりするので、ユーザーに選んでもらう。
+- 確かめ: 自己テスト `facility`（trade・extras・guild）・`loot boxes`（買い取りと上限）・`pouch`・`lang` が通った。撮影 `tools/shots/money.txt`（買い取り・市・出す・自分の品・旅嚢）。
+
 ## ヒロイック防具の二回目の磨き（2026-11-01。設計 [51](design/51_world_gear.md) の 5 章）
 
 - 縄の人の吊り衣の背: 外套の上に交差する縄と結び目、腰の縄、紫に光る背筋、垂れる三本の縄の先の光る重り（`build_wild_armor.py` の `_hanged_back`）。

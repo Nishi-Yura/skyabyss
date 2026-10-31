@@ -1,0 +1,52 @@
+# 鐘銭まわり (2026-11-01): 封切り師の買い取り、鐘銭だけの取引所 (市・出す・申し出)、旅嚢の鐘銭 (枠の上に数を出さない)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/money.txt -PshotsName=money
+world shots flat
+size 960 540
+timeout 900
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+hud on
+chat clear
+cmd skyabyss facility coins 123456789
+cmd give @s skyabyss:wild_lavajaw_greatsword
+cmd give @s skyabyss:wild_cloudknight_helmet
+cmd give @s skyabyss:wild_hanged_chestplate
+cmd give @s skyabyss:divine_sky_sword
+cmd give @s minecraft:iron_ingot 40
+wait 10
+cmd skyabyss facility shop buyback
+wait 30
+shot m01_buyback
+close
+cmd skyabyss facility trade demo
+cmd skyabyss facility trade
+wait 30
+shot m02_trade_market
+cmd trade 1
+wait 30
+shot m03_trade_sell
+cmd trade 2
+wait 30
+shot m04_trade_mine
+close
+cmd gamemode survival
+wait 5
+open inventory
+wait 10
+shot m05_inventory
+click 239 46
+wait 10
+shot m06_pouch_a
+click 271 46
+wait 10
+shot m07_pouch_b
+close

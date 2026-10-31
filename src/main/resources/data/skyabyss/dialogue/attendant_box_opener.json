@@ -80,6 +80,18 @@
           "goto": "end"
         },
         {
+          "id": "sell",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.sell",
+          "do": [
+            {
+              "type": "facility",
+              "open": "buyback"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "rules",
           "kind": "talk",
           "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
@@ -111,6 +123,18 @@
             {
               "type": "facility",
               "open": "boxes"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "sell",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.sell",
+          "do": [
+            {
+              "type": "facility",
+              "open": "buyback"
             }
           ],
           "goto": "end"
@@ -152,6 +176,18 @@
           "goto": "end"
         },
         {
+          "id": "sell",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.sell",
+          "do": [
+            {
+              "type": "facility",
+              "open": "buyback"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "rules",
           "kind": "talk",
           "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
@@ -188,6 +224,18 @@
           "goto": "end"
         },
         {
+          "id": "sell",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.sell",
+          "do": [
+            {
+              "type": "facility",
+              "open": "buyback"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "rules",
           "kind": "talk",
           "text": "dialogue.skyabyss.attendant_box_opener.menu.rules",
@@ -219,6 +267,18 @@
             {
               "type": "facility",
               "open": "boxes"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "sell",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_box_opener.menu.sell",
+          "do": [
+            {
+              "type": "facility",
+              "open": "buyback"
             }
           ],
           "goto": "end"

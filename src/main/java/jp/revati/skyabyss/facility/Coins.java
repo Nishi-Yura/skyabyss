@@ -24,8 +24,8 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 //   使う: 店 (ShopService)、鍛冶師の修理 (FacilityActions)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Coins {
-    // 持てる鐘銭の上限 (旅嚢の枠。2026-10-27 の声「お金の上限 999 万」)
-    public static final int MAX = 9_999_999;
+    // 持てる鐘銭の上限 (旅嚢の枠。2026-10-27 の声「お金の上限 999 万」→ 2026-11-01「もっと増やしていい」で 9 億 9999 万)
+    public static final int MAX = 999_999_999;
 
     private Coins() {
     }
@@ -55,9 +55,14 @@ public final class Coins {
         return true;
     }
 
-    // 渡す (入りきらなければ足もとに落とす)
+    // 渡す (旅嚢へまとめて。入りきらない分は 99 枚ずつ持ち物か足もとへ。大きな額を 99 枚ずつ回さない)
     public static void give(ServerPlayer player, int n) {
-        int left = n;
+        if (n <= 0) {
+            return;
+        }
+        ItemStack all = new ItemStack(FacilitySetup.BELL_COIN.get(), n);
+        jp.revati.skyabyss.pouch.Pouch.add(player, all);
+        int left = all.getCount();
         while (left > 0) {
             int k = Math.min(left, 99);
             Quests.give(player, new ItemStack(FacilitySetup.BELL_COIN.get(), k));

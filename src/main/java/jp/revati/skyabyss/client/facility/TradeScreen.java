@@ -2,7 +2,6 @@ package jp.revati.skyabyss.client.facility;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import jp.revati.skyabyss.facility.FacilitySetup;
 import jp.revati.skyabyss.facility.trade.TradeNetwork;
@@ -14,12 +13,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 取引所の画面 (docs/design/35 の 6.11)。店の画面と同じ絵柄 (暗い石板・骨の枠・角の青緑のひし形)。つまみ 5 つ:
@@ -46,14 +42,9 @@ public class TradeScreen extends Screen {
     private ItemStack hover = ItemStack.EMPTY;
     // 出す / 申し出の編集
     private final List<int[]> picked = new ArrayList<>();          // {枠, 数}
-    private final List<Item> wantItems = new ArrayList<>();
-    private final List<Integer> wantCounts = new ArrayList<>();
     private int offerFor = -1;
     private EditBox coinsBox;
-    private EditBox search;
-    private String searchText = "";
     private String coinsText = "";
-    private final List<Item> results = new ArrayList<>();
     // 自分の出品で選んだもの
     private int selected = -1;
     private String confirm = "";
@@ -77,8 +68,6 @@ public class TradeScreen extends Screen {
         if (listed || offered) {
             // 出せた・申し出た: 編集を空にして、その一覧へ
             picked.clear();
-            wantItems.clear();
-            wantCounts.clear();
             coinsText = "";
             if (tab == 1) {
                 tab = offered && offerFor >= 0 ? 3 : 2;
@@ -114,29 +103,16 @@ public class TradeScreen extends Screen {
         x0 = 8;
         y0 = 8;
         coinsBox = null;
-        search = null;
         int by = y0 + H - 26;
         switch (tab) {
             case 1 -> {
                 int rx = x0 + 186;
                 coinsBox = new EditBox(font, rx + 18, y0 + 54, 50, 14, Component.translatable("gui.skyabyss.trade.coins"));
-                coinsBox.setMaxLength(7);
+                coinsBox.setMaxLength(9);
                 coinsBox.setFilter(s -> s.chars().allMatch(Character::isDigit));
                 coinsBox.setValue(coinsText);
                 coinsBox.setResponder(s -> coinsText = s);
                 addRenderableWidget(coinsBox);
-                if (offerFor < 0) {
-                    search = new EditBox(font, rx, y0 + 112, W - 12 - 186, 14, Component.translatable("gui.skyabyss.trade.search"));
-                    search.setMaxLength(32);
-                    search.setValue(searchText);
-                    search.setHint(Component.translatable("gui.skyabyss.trade.search"));
-                    search.setResponder(s -> {
-                        searchText = s;
-                        refreshResults();
-                    });
-                    addRenderableWidget(search);
-                    refreshResults();
-                }
                 Button go = Button.builder(Component.translatable(offerFor >= 0 ? "gui.skyabyss.trade.do_offer" : "gui.skyabyss.trade.do_list"),
                         b -> submit()).bounds(x0 + W - 96, by, 84, 18).build();
                 go.active = view.atKeeper();
@@ -167,36 +143,6 @@ public class TradeScreen extends Screen {
                 addRenderableWidget(claim);
             }
             default -> {
-            }
-        }
-    }
-
-    private void refreshResults() {
-        results.clear();
-        String q = searchText.strip().toLowerCase(Locale.ROOT);
-        if (q.isEmpty()) {
-            return;
-        }
-        for (Item it : BuiltInRegistries.ITEM) {
-            if (it == Items.AIR) {
-                continue;
-            }
-            String name = new ItemStack(it).getHoverName().getString().toLowerCase(Locale.ROOT);
-            String id = BuiltInRegistries.ITEM.getKey(it).getPath();
-            if (!name.contains(q) && !id.contains(q)) {
-                continue;
-            }
-            boolean ok;
-            try {
-                ok = Trades.allowed(new ItemStack(it));
-            } catch (RuntimeException e) {
-                ok = true;
-            }
-            if (ok) {
-                results.add(it);
-                if (results.size() >= 24) {
-                    break;
-                }
             }
         }
     }
@@ -244,14 +190,11 @@ public class TradeScreen extends Screen {
             slots.add(p[0]);
             counts.add(p[1]);
         }
+        // 品で払う申し出・品をほしいものにする出品は無い (2026-11-01「トレードで使えるのはお金のみ」)。申し出は鐘銭の額だけ
         if (offerFor >= 0) {
-            send(new TradeNetwork.Action("offer", offerFor, "", coinsValue(), slots, counts, List.of(), List.of()));
+            send(new TradeNetwork.Action("offer", offerFor, "", coinsValue(), List.of(), List.of(), List.of(), List.of()));
         } else {
-            List<String> ids = new ArrayList<>();
-            for (Item it : wantItems) {
-                ids.add(BuiltInRegistries.ITEM.getKey(it).toString());
-            }
-            send(new TradeNetwork.Action("list", 0, "", coinsValue(), slots, counts, ids, new ArrayList<>(wantCounts)));
+            send(new TradeNetwork.Action("list", 0, "", coinsValue(), slots, counts, List.of(), List.of()));
         }
     }
 
@@ -369,11 +312,37 @@ public class TradeScreen extends Screen {
         }
     }
 
-    // 品を並べて描き、右端の x を返す (step = 間隔)
+    // 鐘銭の額 (桁区切り。大きな額も絵の上に数を重ねない。2026-11-01)
+    private static String coinText(int n) {
+        return String.format(java.util.Locale.ROOT, "%,d", n);
+    }
+
+    // 品を並べたときの幅 (鐘銭は絵と額の文字)
+    private int stacksWidth(List<ItemStack> list, int step, int max) {
+        int w = 0;
+        for (int i = 0; i < list.size() && i < max; i++) {
+            ItemStack s = list.get(i);
+            w += Trades.isCoin(s) ? 18 + font.width(coinText(s.getCount())) + 2 : step;
+        }
+        return w;
+    }
+
+    // 品を並べて描き、右端の x を返す (step = 間隔)。鐘銭は絵の横に額を書く
     private int stacks(GuiGraphics g, List<ItemStack> list, int x, int y, int step, int max, int mx, int my) {
         int px = x;
         for (int i = 0; i < list.size() && i < max; i++) {
-            stack(g, list.get(i), px, y, mx, my);
+            ItemStack s = list.get(i);
+            if (Trades.isCoin(s)) {
+                g.renderItem(s.copyWithCount(1), px, y);
+                if (mx >= px && mx < px + 16 && my >= y && my < y + 16) {
+                    hover = s.copyWithCount(1);
+                }
+                String t = coinText(s.getCount());
+                g.drawString(font, t, px + 18, y + 4, FacilityUi.GOLD, false);
+                px += 18 + font.width(t) + 2;
+                continue;
+            }
+            stack(g, s, px, y, mx, my);
             px += step;
         }
         if (list.size() > max) {
@@ -405,8 +374,7 @@ public class TradeScreen extends Screen {
         int ly = y0 + 40;
         int lw = W - 20;
         FacilityUi.well(g, lx, ly, lw, ROWS * ROW_H);
-        g.drawString(font, Component.translatable("gui.skyabyss.trade.col_pay"), lx + 4, ly - 10, FacilityUi.DIM, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.trade.col_get"), lx + 88, ly - 10, FacilityUi.DIM, false);
+        // 列の見出し (渡すもの・もらえる品) はつまみの列に重なっていたので出さない (2026-11-01)。並びは「値 → もらえる品」
         List<TradeNetwork.Row> rows = view.market();
         clamp(0, rows.size());
         if (rows.isEmpty()) {
@@ -419,7 +387,7 @@ public class TradeScreen extends Screen {
                 g.fill(lx, ry, lx + lw, ry + ROW_H, FacilityUi.ROW);
             }
             // 買う側から読む: 左 = 渡すもの (出品者のほしいもの)、右 = もらえる品 (出品の品)。2026-10-22 の試遊: 逆に読めた
-            FacilityUi.tag(g, lx + 2, ry + 2, Math.min(4, r.want().size()) * 18 + 4, ROW_H - 4);
+            FacilityUi.tag(g, lx + 2, ry + 2, stacksWidth(r.want(), 18, 4) + 4, ROW_H - 4);
             int ex = stacks(g, r.want(), lx + 4, ry + 4, 18, 4, mx, my);
             g.drawString(font, "→", Math.max(ex, lx + 78), ry + 8, FacilityUi.TEAL, false);
             int wx = Math.max(ex, lx + 78) + 10;
@@ -427,13 +395,13 @@ public class TradeScreen extends Screen {
             int nx = lx + 190;
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.seller()), nx, ry + 3, 64, FacilityUi.TEXT, false);
             g.drawString(font, left(r.left()), nx, ry + 13, FacilityUi.DIM, false);
-            int bx = lx + lw - 70;
+            int bx = lx + lw - 86;
             if (r.applied()) {
                 g.drawString(font, Component.translatable("gui.skyabyss.trade.applied"), bx + 4, ry + 8, FacilityUi.GOLD, false);
             } else {
                 button(g, bx, ry + 5, 34, Component.translatable("gui.skyabyss.trade.apply"), 0xFF1E3A40, r.canPay() ? FacilityUi.TEXT : FacilityUi.LACK, mx, my,
                         () -> send(TradeNetwork.Action.simple("apply", r.id(), "")));
-                button(g, bx + 36, ry + 5, 32, Component.translatable("gui.skyabyss.trade.counter"), 0xFF22262E, FacilityUi.DIM, mx, my, () -> {
+                button(g, bx + 36, ry + 5, 48, Component.translatable("gui.skyabyss.trade.counter"), 0xFF22262E, FacilityUi.DIM, mx, my, () -> {
                     offerFor = r.id();
                     picked.clear();
                     coinsText = "";
@@ -466,10 +434,14 @@ public class TradeScreen extends Screen {
         }
         g.drawString(font, Component.translatable(offerFor >= 0 ? "gui.skyabyss.trade.offer_head" : "gui.skyabyss.trade.give_head"), lx, y0 + 42,
                 FacilityUi.TEAL, false);
-        // 選んだ品 (4 枠)
+        if (target != null) {
+            // 申し出は鐘銭の額だけ (持ち物の品は出せない)
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.trade.coins_only"), lx, y0 + 58, 166, FacilityUi.DIM, false);
+        }
+        // 選んだ品 (4 枠。出品のときだけ)
         int py = y0 + 54;
         List<ItemStack> inv = Minecraft.getInstance().player == null ? List.of() : Minecraft.getInstance().player.getInventory().items;
-        for (int i = 0; i < Trades.MAX_GIVE; i++) {
+        for (int i = 0; i < (target == null ? Trades.MAX_GIVE : 0); i++) {
             int sx = lx + i * 20;
             g.fill(sx, py, sx + 18, py + 18, 0xFF0C0F14);
             g.renderOutline(sx, py, 18, 18, FacilityUi.LINE);
@@ -487,9 +459,11 @@ public class TradeScreen extends Screen {
             }
         }
         // 持ち物 (上 3 段 = 9..35、下の段 = ホットバー 0..8)
-        g.drawString(font, Component.translatable("gui.skyabyss.trade.inventory"), lx, y0 + 78, FacilityUi.DIM, false);
+        if (target == null) {
+            g.drawString(font, Component.translatable("gui.skyabyss.trade.inventory"), lx, y0 + 78, FacilityUi.DIM, false);
+        }
         int gy = y0 + 88;
-        for (int k = 0; k < 36; k++) {
+        for (int k = 0; k < (target == null ? 36 : 0); k++) {
             int slot = k < 27 ? k + 9 : k - 27;
             int sx = lx + (k % 9) * 18;
             int sy = gy + (k / 9) * 18 + (k >= 27 ? 4 : 0);
@@ -526,35 +500,10 @@ public class TradeScreen extends Screen {
             stacks(g, target.want(), rx + 60, y0 + 120, 18, 4, mx, my);
             return;
         }
-        // ほしいもの: 鐘銭と品 (4 つ)
+        // ほしいもの: 鐘銭だけ (値段)
         g.drawString(font, Component.translatable("gui.skyabyss.trade.want_head"), rx, y0 + 42, FacilityUi.TEAL, false);
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), rx, y0 + 53);
-        int wy = y0 + 76;
-        for (int i = 0; i < Trades.MAX_WANT; i++) {
-            int sx = rx + i * 20;
-            g.fill(sx, wy, sx + 18, wy + 18, 0xFF0C0F14);
-            g.renderOutline(sx, wy, 18, 18, FacilityUi.LINE);
-            if (i < wantItems.size()) {
-                int idx = i;
-                stack(g, new ItemStack(wantItems.get(i), wantCounts.get(i)), sx + 1, wy + 1, mx, my);
-                hit(sx, wy, 18, 18, () -> bumpWant(idx, hasShiftDown() ? 8 : 1), () -> bumpWant(idx, hasShiftDown() ? -8 : -1));
-            }
-        }
-        g.drawString(font, Component.translatable("gui.skyabyss.trade.search_head"), rx, y0 + 100, FacilityUi.DIM, false);
-        int ry = y0 + 130;
-        int cols = rw / 18;
-        FacilityUi.well(g, rx, ry, rw, 3 * 18);
-        if (results.isEmpty()) {
-            g.drawString(font, Component.translatable(searchText.isBlank() ? "gui.skyabyss.trade.search_tip" : "gui.skyabyss.trade.search_none"),
-                    rx + 3, ry + 4, FacilityUi.DIM, false);
-        }
-        for (int i = 0; i < results.size() && i < cols * 3; i++) {
-            Item it = results.get(i);
-            int sx = rx + 1 + (i % cols) * 18;
-            int sy = ry + 1 + (i / cols) * 18;
-            stack(g, new ItemStack(it), sx, sy, mx, my);
-            hit(sx, sy, 17, 17, () -> addWant(it, hasShiftDown() ? 8 : 1), null);
-        }
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.trade.coins_only_list"), rx, y0 + 76, rw, FacilityUi.DIM, false);
     }
 
     private static boolean allowed(ItemStack s) {
@@ -583,26 +532,6 @@ public class TradeScreen extends Screen {
         }
         if (picked.size() < Trades.MAX_GIVE && count > 0) {
             picked.add(new int[]{slot, count});
-        }
-    }
-
-    private void addWant(Item it, int n) {
-        int i = wantItems.indexOf(it);
-        if (i >= 0) {
-            bumpWant(i, n);
-        } else if (wantItems.size() < Trades.MAX_WANT) {
-            wantItems.add(it);
-            wantCounts.add(Math.min(Trades.MAX_WANT_COUNT, n));
-        }
-    }
-
-    private void bumpWant(int i, int d) {
-        int n = wantCounts.get(i) + d;
-        if (n <= 0) {
-            wantItems.remove(i);
-            wantCounts.remove(i);
-        } else {
-            wantCounts.set(i, Math.min(Trades.MAX_WANT_COUNT, n));
         }
     }
 
