@@ -1,30 +1,6 @@
 {
   "goods": [
     {
-      "id": "torch",
-      "item": "minecraft:torch",
-      "count": 8,
-      "coins": 2
-    },
-    {
-      "id": "lantern",
-      "item": "minecraft:lantern",
-      "count": 1,
-      "coins": 6
-    },
-    {
-      "id": "bedroll",
-      "item": "minecraft:white_bed",
-      "count": 1,
-      "coins": 12
-    },
-    {
-      "id": "candle",
-      "item": "minecraft:candle",
-      "count": 1,
-      "coins": 3
-    },
-    {
       "id": "boat",
       "item": "skyabyss:skiff",
       "count": 1,

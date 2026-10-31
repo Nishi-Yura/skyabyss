@@ -2,32 +2,6 @@
   "title": "gui.skyabyss.shop.smithy",
   "goods": [
     {
-      "id": "made_message_board",
-      "item": "skyabyss:message_board",
-      "count": 1,
-      "coins": 6,
-      "chapter": 1,
-      "made": true
-    },
-    {
-      "id": "made_resonance_forge",
-      "item": "skyabyss:resonance_forge",
-      "count": 1,
-      "coins": 11,
-      "materials": [
-        {
-          "item": "skyabyss:resonance_crystal",
-          "count": 1
-        },
-        {
-          "item": "skyabyss:stone_whale_shard",
-          "count": 1
-        }
-      ],
-      "chapter": 1,
-      "made": true
-    },
-    {
       "id": "made_rock_whetstone",
       "item": "skyabyss:rock_whetstone",
       "count": 2,
@@ -46,42 +20,6 @@
       "made": true
     },
     {
-      "id": "made_socket_shard_bone",
-      "item": "skyabyss:socket_shard_bone",
-      "count": 1,
-      "coins": 2,
-      "materials": [
-        {
-          "item": "skyabyss:bone_chip",
-          "count": 4
-        },
-        {
-          "item": "skyabyss:resonance_crystal",
-          "count": 1
-        }
-      ],
-      "chapter": 1,
-      "made": true
-    },
-    {
-      "id": "made_socket_shard_stone",
-      "item": "skyabyss:socket_shard_stone",
-      "count": 1,
-      "coins": 2,
-      "materials": [
-        {
-          "item": "skyabyss:stone_whale_shard",
-          "count": 4
-        },
-        {
-          "item": "skyabyss:resonance_crystal",
-          "count": 1
-        }
-      ],
-      "chapter": 1,
-      "made": true
-    },
-    {
       "id": "made_stone_whale_call",
       "item": "skyabyss:stone_whale_call",
       "count": 1,
@@ -91,20 +29,6 @@
           "item": "skyabyss:stone_whale_core",
           "count": 1
         },
-        {
-          "item": "skyabyss:stone_whale_shard",
-          "count": 1
-        }
-      ],
-      "chapter": 1,
-      "made": true
-    },
-    {
-      "id": "made_titan_waymark",
-      "item": "skyabyss:titan_waymark",
-      "count": 2,
-      "coins": 5,
-      "materials": [
         {
           "item": "skyabyss:stone_whale_shard",
           "count": 1
@@ -185,24 +109,6 @@
         },
         {
           "item": "skyabyss:shell_chip",
-          "count": 1
-        }
-      ],
-      "chapter": 2,
-      "made": true
-    },
-    {
-      "id": "made_socket_shard_tide",
-      "item": "skyabyss:socket_shard_tide",
-      "count": 1,
-      "coins": 3,
-      "materials": [
-        {
-          "item": "skyabyss:tide_shell_shard",
-          "count": 4
-        },
-        {
-          "item": "skyabyss:resonance_crystal",
           "count": 1
         }
       ],
@@ -452,24 +358,6 @@
       "made": true
     },
     {
-      "id": "made_socket_shard_wind",
-      "item": "skyabyss:socket_shard_wind",
-      "count": 1,
-      "coins": 4,
-      "materials": [
-        {
-          "item": "skyabyss:thunder_wing_shard",
-          "count": 4
-        },
-        {
-          "item": "skyabyss:resonance_crystal",
-          "count": 1
-        }
-      ],
-      "chapter": 3,
-      "made": true
-    },
-    {
       "id": "made_thunder_whetstone",
       "item": "skyabyss:thunder_whetstone",
       "count": 2,
@@ -633,24 +521,6 @@
       "materials": [
         {
           "item": "skyabyss:ember_shard",
-          "count": 1
-        }
-      ],
-      "chapter": 4,
-      "made": true
-    },
-    {
-      "id": "made_socket_shard_ash",
-      "item": "skyabyss:socket_shard_ash",
-      "count": 1,
-      "coins": 5,
-      "materials": [
-        {
-          "item": "skyabyss:ember_shard",
-          "count": 4
-        },
-        {
-          "item": "skyabyss:resonance_crystal",
           "count": 1
         }
       ],

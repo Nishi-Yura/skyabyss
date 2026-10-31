@@ -111,7 +111,20 @@
           "count": 6
         }
       ],
-      "chapter": 2
+      "chapter": 1
+    },
+    {
+      "id": "socket_bone",
+      "item": "skyabyss:socket_shard_bone",
+      "count": 1,
+      "coins": 10,
+      "materials": [
+        {
+          "item": "skyabyss:bone_chip",
+          "count": 6
+        }
+      ],
+      "chapter": 1
     },
     {
       "id": "socket_tide",
@@ -124,7 +137,7 @@
           "count": 6
         }
       ],
-      "chapter": 3
+      "chapter": 2
     },
     {
       "id": "socket_wind",
@@ -137,7 +150,7 @@
           "count": 6
         }
       ],
-      "chapter": 4
+      "chapter": 3
     },
     {
       "id": "socket_ash",
@@ -150,7 +163,7 @@
           "count": 6
         }
       ],
-      "chapter": 5
+      "chapter": 4
     }
   ],
   "buys": [

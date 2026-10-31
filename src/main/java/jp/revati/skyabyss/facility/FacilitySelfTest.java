@@ -279,12 +279,13 @@ public final class FacilitySelfTest {
                 check(f, item != Items.EMERALD, id + " uses emeralds");
             }
         }
-        // 市の四人 (2026-10-27): 道具屋 = 灯りと寝袋、食料屋 = パン、武具屋 = 矢、素材屋 = 素材の値段と買い取り
+        // 市の四人 (2026-10-27): 道具屋 = 旅と採集の道具、食料屋 = パン、武具屋 = 矢、素材屋 = 素材の値段と買い取り
         ShopDef toolShop = ShopManager.shop("tool_shop");
         ShopDef tools = ShopManager.shop("food_shop");
         ShopDef outfit = ShopManager.shop("outfit_shop");
         ShopDef mats = ShopManager.shop("material_shop");
-        check(f, toolShop.goods().stream().anyMatch(g -> g.item() == Items.TORCH) && toolShop.goods().stream().anyMatch(g -> g.item() == Items.WHITE_BED), "tool shop sells light and beds");
+        // 冒険モードでは置けないので、道具屋はブロック (灯り・寝台) を売らない (2026-10-31 の係の人の見直し)
+        check(f, !toolShop.goods().isEmpty() && toolShop.goods().stream().noneMatch(g -> g.item() instanceof net.minecraft.world.item.BlockItem), "tool shop sells blocks players cannot place");
         check(f, tools.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()), "food vendor sells bread");
         check(f, outfit.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get()), "outfitter sells arrows");
         check(f, toolShop.goods().stream().noneMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get() || g.item() == Items.IRON_SWORD), "tool shop no longer sells food or swords");
@@ -301,7 +302,7 @@ public final class FacilitySelfTest {
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
         check(f, Coins.count(p) == 27 && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) == 3, "bread paid and given");
-        check(f, ShopService.buy(p, toolShop, "bedroll", 3) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
+        check(f, ShopService.buy(p, toolShop, "gather_axe", 5) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
         check(f, ShopService.buy(p, tools, "nope", 1) == ShopService.Result.NO_GOOD, "unknown good");
         // 素材の値段
         check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
@@ -311,7 +312,7 @@ public final class FacilitySelfTest {
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null) == before + 1
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:stone_whale_shard", null) == 0, "pay with titan materials");
         // 章の届かない品
-        check(f, ShopService.buy(p, mats, "socket_stone", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
+        check(f, ShopService.buy(p, mats, "socket_ash", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
         // 売る
         p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), 9));
         int idx = -1;

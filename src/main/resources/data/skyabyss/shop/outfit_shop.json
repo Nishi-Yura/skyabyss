@@ -21,12 +21,6 @@
       "made": true
     },
     {
-      "id": "whetstone",
-      "item": "skyabyss:rock_whetstone",
-      "count": 1,
-      "coins": 6
-    },
-    {
       "id": "travel_shield",
       "item": "skyabyss:travel_shield",
       "count": 1,

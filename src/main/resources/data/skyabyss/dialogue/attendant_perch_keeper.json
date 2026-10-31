@@ -50,17 +50,6 @@
           "goto": "end"
         },
         {
-          "id": "map",
-          "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "map"
-            }
-          ],
-          "goto": "end"
-        },
-        {
           "id": "rule",
           "kind": "talk",
           "goto": "rule"

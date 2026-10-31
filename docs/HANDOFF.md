@@ -15,6 +15,13 @@
 - 声「蜂の巣からめっちゃ音が聞こえる」: バニラの木の飾りが蜂入りの巣を付け、蜂はバニラの生き物なので世界に入れず（`RpgRules.onJoin`）、巣が昼のあいだ毎 tick 出る音を鳴らしていた。巣の付く木 15 種の `configured_feature` を飾りなしで上書き（`data/minecraft/worldgen/configured_feature`。作るのは `tools/gen/world/quiet_bee_trees.py`）。前の版でできたチャンクの巣は読んだときに空気にする（`rpg/rules/QuietHives`。取ると記録に `[hives] removed`）。
 - 撮影 `tools/shots/island_v3.txt`（`island_v2`・`island_camps` は消した）。自己テスト `island trail`（消した寄り道が残っていない検査を足した）・`quiet hives`（新しい段）。
 
+## 係の人と店の見直し（2026-10-31）
+
+- 係の人を全員見た: 丸ごと消すのは書庫番・地図屋だけ（下の節）。墓守・酔いどれは都の町の頼みの起点、土地の町の人と客は全員クエストを出すので残す。砦の老兵は試練の記録を開くだけだが、本丸の頁の話があるので残した（記録を J に移せば消せる）。
+- 直し: 止まり木の番の「地図を見る」（M と同じ）を外した。冒険モードで置けないブロックを店から外した（道具屋の松明・ランタン・寝台・蝋燭、鍛冶場の言伝ての板・共鳴の炉・巨神の道標）。重なっていた品は一か所に: 砥石は鍛冶場の誂えだけ（一章の職人の頼みが鍛冶場で教える）、穴の粉 5 種は素材屋だけ（章は前の鍛冶場と同じ）。
+- 注意: `tools/gen/shop/gen_made_to_order.py` は apothecary.json と tool_shop.json の made の品も書き直し、手で外した品（固焼きなど）を戻してしまう。流したら smithy.json 以外は git で戻すこと。
+- 確かめ: 自己テスト `facility`・`npc`・`artisan`・`travel`・`gear freedom`・`town`・`lang`。
+
 ## 書庫番・地図屋を消した（2026-10-31）
 
 - 声「書庫番や地図屋って必要？」→ 両方消す。`AttendantRole` から外し、会話・言葉・体・顔・印を消した（設計図の印 `npc_archivist`・`npc_mapmaker` は残っても立たない。前の世界に立っている人は `AttendantRole.RETIRED` で消える）。生成の道具（肖像・印・npc2・attendants）からも外した。
