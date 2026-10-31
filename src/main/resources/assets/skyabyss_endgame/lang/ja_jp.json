@@ -85,5 +85,16 @@
   "message.skyabyss.codex.foot": "装備は手にしたとき、敵は倒したときに図鑑に載る。そろえると鐘銭と称号",
   "message.skyabyss.codex.set_done": "図鑑: %sの装備をすべて集めた（鐘銭 %s）",
   "message.skyabyss.codex.all_done": "図鑑: すべての巨神の装備を集めた",
-  "message.skyabyss.codex.foes_done": "図鑑: 大陸の敵をすべて倒した（鐘銭 %s）"
+  "message.skyabyss.codex.foes_done": "図鑑: 大陸の敵をすべて倒した（鐘銭 %s）",
+  "dialogue.skyabyss.attendant_smith.menu.look": "武器の見た目を替える（図鑑の武器の形に）",
+  "message.skyabyss.look.no_weapon": "見た目を替える武器を、利き手に持って話しかけて。",
+  "message.skyabyss.look.head": "── %sの見た目 ──",
+  "message.skyabyss.look.none": "同じ種類の武器が、まだ図鑑にない。巨神の背やレイドで手にした武器の形を着られる。",
+  "message.skyabyss.look.hover": "押すとこの形にする（鐘銭 %s）",
+  "message.skyabyss.look.clear": "[元の形に戻す]",
+  "message.skyabyss.look.foot": "形だけを替える（強さ・技・動きは元のまま）。一回 鐘銭 %s、戻すのはただ",
+  "message.skyabyss.look.cannot": "その形には替えられない。",
+  "message.skyabyss.look.done": "%sの見た目を%sの形にした",
+  "message.skyabyss.look.cleared": "%sを元の形に戻した",
+  "tooltip.skyabyss.look": "見た目: %s"
 }

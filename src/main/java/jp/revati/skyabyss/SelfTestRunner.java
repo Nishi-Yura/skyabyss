@@ -381,6 +381,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("guild week", jp.revati.skyabyss.endgame.GuildWeekSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
+        // 見た目替え (docs/design/54 の 5.4)。SKYABYSS_SELFTEST_ONLY="looks"
+        steps.add(Step.once("looks", jp.revati.skyabyss.endgame.LooksSelfTest::run));
         steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));

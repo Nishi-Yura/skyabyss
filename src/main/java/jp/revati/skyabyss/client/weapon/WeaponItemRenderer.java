@@ -65,16 +65,19 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        // 見た目替え (endgame/Looks): 形は見た目の武器、鍛えた光と輝きは元の品のまま
+        net.minecraft.world.item.Item lookItem = jp.revati.skyabyss.endgame.Looks.look(stack);
+        ItemStack shown = lookItem == null ? stack : new ItemStack(lookItem);
+        String id = BuiltInRegistries.ITEM.getKey(shown.getItem()).getPath();
         int stage = pullStage(stack, context);
         if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
-            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(stack) + (stage >= 0 ? "_pull" + stage : ""));
+            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(shown) + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
-                renderMesh(mesh, id, tierName(stack), level(stack), stack.hasFoil(), context, pose, buffers, light, overlay);
+                renderMesh(mesh, id, tierName(shown), level(stack), stack.hasFoil(), context, pose, buffers, light, overlay);
                 return;
             }
         }
-        renderVoxel(id, stage, stack, pose, buffers, light, overlay);
+        renderVoxel(id, stage, shown, pose, buffers, light, overlay);
     }
 
     // ---------------------------------------------------------------- メッシュ
