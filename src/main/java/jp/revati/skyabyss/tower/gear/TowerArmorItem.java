@@ -28,7 +28,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-// 塔の防具 (docs/design/54 の 2.6。ヒロイック・必要 Lv 50、一式 4 部位)。天秤の甲冑 (重)・渡りの装束 (軽)・光輪の衣 (術)。
+// 塔の防具 (docs/design/54 の 2.6。神器・必要 Lv 50、一式 4 部位)。天秤の甲冑 (重)・渡りの装束 (軽)・光輪の衣 (術)。
 // 着た姿は低ポリ (client/TowerArmorRenderer が lowpoly/armor/<一式>/<部位>_legend)。4 部位の効果は TowerGearEvents
 public class TowerArmorItem extends ArmorItem implements ModGear, GeoItem {
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -46,7 +46,7 @@ public class TowerArmorItem extends ArmorItem implements ModGear, GeoItem {
 
     @Override
     public GearTier tier() {
-        return GearTier.HEROIC;
+        return GearTier.MYTHIC;
     }
 
     @Override

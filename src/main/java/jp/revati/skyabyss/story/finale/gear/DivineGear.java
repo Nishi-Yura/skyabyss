@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-// 終章の神器 (docs/design/50 の 4.5)。6 職に一つずつ、階級はアーティファクト (★ 伝説)、必要 Lv 50。
+// 終章の神器 (docs/design/50 の 4.5)。6 職に一つずつ、階級は神器 (いちばん上。あいだの塔の装備と同じ)、必要 Lv 50。
 //   受け取り  雲上の巡礼者を初めて退けた人に、いまの職の神器と雲上の心核 (SeatArena.onDeath → reward)。二度目からは心核 25% と心核の欠片
 //   職を替える 職の間で職を替えると、持っている神器は替えた職の神器になる (強化と特性はそのまま。JobChoice.switchTo → swap)
 //   強化      燃料は心核の欠片 (共鳴の炉。由来 cloudsea の図鑑の燃料)。七つの心核 (五つの巨神・深淵・月・雲上) は、しゃがんで使うと欠片 5 つに砕ける

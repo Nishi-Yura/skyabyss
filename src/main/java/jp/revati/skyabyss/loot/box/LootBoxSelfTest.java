@@ -103,7 +103,7 @@ public final class LootBoxSelfTest {
     }
 
     static void items(List<String> f) {
-        check(f, BoxKind.ALL.size() == 19, "box kinds " + BoxKind.ALL.size() + " != 19");
+        check(f, BoxKind.ALL.size() == 20, "box kinds " + BoxKind.ALL.size() + " != 20");
         String a = "/assets/skyabyss/";
         for (BoxKind k : BoxKind.ALL) {
             Item item = LootBoxSetup.item(k);

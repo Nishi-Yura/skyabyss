@@ -57,7 +57,7 @@ public final class GearTierSelfTest {
     }
 
     static {
-        GearTier C = GearTier.COMMON, U = GearTier.UNCOMMON, R = GearTier.RARE, E = GearTier.EPIC, H = GearTier.HEROIC, A = GearTier.ARTIFACT;
+        GearTier C = GearTier.COMMON, U = GearTier.UNCOMMON, R = GearTier.RARE, E = GearTier.EPIC, H = GearTier.HEROIC, A = GearTier.ARTIFACT, M = GearTier.MYTHIC;
         // 一章 岩鯨
         row(1, C, "heartbeat_ward_stone_whale");
         // 島の祠の始めの武器 (rpg/skill/JobChoice。docs/design/43 の 4 節)
@@ -97,7 +97,12 @@ public final class GearTierSelfTest {
         row(6, R, "moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
         row(6, H, "moon_waning_blade", "moon_full_hammer", "moon_new_staff", "moon_starfall_bow", "moon_umbra_dagger", "moon_halo_bell_staff", "moon_full_ring");
         // 終章 神器 (story/finale/gear。巡礼者の報酬。図鑑の品は無い)
-        row(7, A, "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_plume_bow", "divine_rewind_dagger", "divine_promise_bell_staff");
+        // あいだの塔 (tower/gear。docs/design/54 の 2.6。どれも神器)
+        row(8, M, "tower_balance_sword", "tower_pull_hammer", "tower_moon_staff", "tower_eye_bow", "tower_sigil_dagger", "tower_clap_bell_staff",
+                "tower_scale_helmet", "tower_scale_chestplate", "tower_scale_leggings", "tower_scale_boots",
+                "tower_bridge_helmet", "tower_bridge_chestplate", "tower_bridge_leggings", "tower_bridge_boots",
+                "tower_halo_helmet", "tower_halo_chestplate", "tower_halo_leggings", "tower_halo_boots", "tower_heaven_ring", "tower_abyss_chain");
+        row(7, M, "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_plume_bow", "divine_rewind_dagger", "divine_promise_bell_staff");
     }
 
     private GearTierSelfTest() {
@@ -164,9 +169,9 @@ public final class GearTierSelfTest {
                 line.append(' ').append(t.key).append(' ').append(count.getOrDefault(t, 0));
             }
             notes.add(line.toString());
-            // 巨神の章 (1〜4) は六つの階級がすべてそろう
+            // 巨神の章 (1〜4) は神器より下の六つの階級がすべてそろう (神器は終章とあいだの塔だけ)
             if (ch <= 4) {
-                check(f, count.size() == GearTier.values().length, "chapter " + ch + " does not use every tier: " + count);
+                check(f, count.size() == GearTier.MYTHIC.ordinal() && !count.containsKey(GearTier.MYTHIC), "chapter " + ch + " does not use every tier: " + count);
             }
         }
     }
@@ -174,7 +179,7 @@ public final class GearTierSelfTest {
     // ---------------------------------------------------------------- 決まりが上へ単調
     private static void rules(List<String> f) {
         GearTier[] t = GearTier.values();
-        check(f, t.length == 6 && t[0] == GearTier.COMMON && t[5] == GearTier.ARTIFACT, "the ladder is not the six tiers");
+        check(f, t.length == 7 && t[0] == GearTier.COMMON && t[5] == GearTier.ARTIFACT && t[6] == GearTier.MYTHIC, "the ladder is not the seven tiers");
         double prevSockets = -1;
         for (int i = 0; i < t.length; i++) {
             int[] odds = t[i].socketOdds();
@@ -359,8 +364,8 @@ public final class GearTierSelfTest {
             }
             check(f, maxExclusive < minPiece, set.titan + ": an exclusive drops as often as a codex piece");
             // 月は専用の逸品が 2 つ (太刀と環。03 の 12.2)
-            // 終章の神器は図鑑に品を持たない (燃料のための形だけ)
-            int want = set.titan.equals("moon") ? 2 : set.titan.equals("cloudsea") ? 0 : 3;
+            // 終章の神器・あいだの塔は図鑑に品を持たない (燃料のための形だけ)
+            int want = set.titan.equals("moon") ? 2 : set.titan.equals("cloudsea") || set.titan.equals("tower") ? 0 : 3;
             check(f, set.exclusives().size() == want, set.titan + " should have " + want + " exclusives");
         }
         for (String id : AbyssSetup.legends()) {
@@ -375,8 +380,8 @@ public final class GearTierSelfTest {
     private static void display(List<String> f) {
         Map<String, String> ja = GearCurveSelfTest.lang("/assets/skyabyss/lang/ja_jp.json", f);
         Map<String, String> en = GearCurveSelfTest.lang("/assets/skyabyss/lang/en_us.json", f);
-        String[] jaNames = {"コモン", "アンコモン", "レア", "エピック", "ヒロイック", "★ 伝説"};
-        String[] enNames = {"Common", "Uncommon", "Rare", "Epic", "Heroic", "★ Legendary"};
+        String[] jaNames = {"コモン", "アンコモン", "レア", "エピック", "ヒロイック", "★ 伝説", "神器"};
+        String[] enNames = {"Common", "Uncommon", "Rare", "Epic", "Heroic", "★ Legendary", "Mythic"};
         for (GearTier t : GearTier.values()) {
             check(f, jaNames[t.ordinal()].equals(ja.get(t.translationKey())), "ja tier name of " + t + " is " + ja.get(t.translationKey()));
             check(f, enNames[t.ordinal()].equals(en.get(t.translationKey())), "en tier name of " + t + " is " + en.get(t.translationKey()));

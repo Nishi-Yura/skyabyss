@@ -32,7 +32,7 @@ public record BoxKind(String id, Type type, @Nullable String titan, GearTier tie
             }
         }
         out.add(new BoxKind("box_artifact", Type.ARTIFACT, null, GearTier.ARTIFACT, 0));
-        out.add(new BoxKind("box_tower", Type.TOWER, null, GearTier.HEROIC, 0));
+        out.add(new BoxKind("box_tower", Type.TOWER, null, GearTier.MYTHIC, 0));
         return List.copyOf(out);
     }
 

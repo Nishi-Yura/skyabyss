@@ -142,9 +142,20 @@ public final class TowerSelfTest {
                 && jp.revati.skyabyss.loot.box.LootBoxes.pool(box).size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size(), "tower gear does not go into the tower box");
         int shards0 = jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get());
         int boxes0 = box == null ? 0 : jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box));
+        long coins0 = jp.revati.skyabyss.facility.Coins.count(p);
         Towers.reward(p);
         check(f, jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get()) == shards0 + jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR
-                && box != null && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box)) == boxes0 + 1, "the clear reward was not given");
+                && box != null && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box)) == boxes0 + 1
+                && jp.revati.skyabyss.facility.Coins.count(p) == coins0 + jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR, "the clear reward was not given");
+        boolean mythic = true;
+        for (var d : jp.revati.skyabyss.tower.gear.TowerGearSetup.all()) {
+            mythic &= d.get() instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.MYTHIC;
+        }
+        check(f, mythic, "a tower gear item is not mythic");
+        if (box != null) {
+            var opened = jp.revati.skyabyss.loot.box.LootBoxes.roll(box, null, p.getRandom());
+            check(f, !opened.isEmpty() && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(opened) == box, "the tower box did not roll tower gear");
+        }
         var shop = jp.revati.skyabyss.facility.ShopManager.shop(TowerDesk.SHOP);
         check(f, shop != null && shop.goods().size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size() + 1, "the tower shop is missing or incomplete");
         armor(f, p);

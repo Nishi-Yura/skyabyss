@@ -46,9 +46,9 @@ import org.joml.Vector3f;
 //  - 側の目の弓: 同じ相手に続けて当てるたびに +6% (5 重ねまで)。別の相手で数え直し
 //  - 追う印の短剣: 打つと 3 秒足が速くなり、その間の次の一撃は +35% (3 秒に一度)
 //  - 合掌の鈴杖: 打つたびに祈り 1。5 つで合掌 (まわり 6 の仲間と自分の体力 4・マナ 6)
-//  - 天秤の甲冑 4 部位: 受ける傷 ×0.92、体力が半分以下で強靭 +10 / 渡りの装束 4 部位: 速さ +8%、走っているあいだ受ける傷 ×0.93 /
-//    光輪の衣 4 部位: マナの戻り +30%・技の待ち −6% (WildGearEvents の manaRegenBonus・cooldownScale から呼ぶ)
-//  - 天の環: 体力が満ちているあいだ与える傷 +6% / 淵の鎖: 体力が 3 割以下で受ける傷 ×0.85
+//  - 天秤の甲冑 4 部位: 受ける傷 ×0.90、体力が半分以下で強靭 +12 / 渡りの装束 4 部位: 速さ +10%、走っているあいだ受ける傷 ×0.90 /
+//    光輪の衣 4 部位: マナの戻り +40%・技の待ち −8% (WildGearEvents の manaRegenBonus・cooldownScale から呼ぶ)
+//  - 天の環: 体力が満ちているあいだ与える傷 +8% / 淵の鎖: 体力が 3 割以下で受ける傷 ×0.80
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TowerGearEvents {
     static final String HAMMER_COUNT = SkyAbyss.MODID + ":tower_pull_count";

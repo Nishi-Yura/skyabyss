@@ -532,8 +532,8 @@ public final class FinaleSelfTest {
                 jp.revati.skyabyss.rpg.skill.Job.SHAMAN};
         for (jp.revati.skyabyss.rpg.skill.Job j : jobs) {
             net.minecraft.world.item.Item it = jp.revati.skyabyss.story.finale.gear.DivineGear.item(jp.revati.skyabyss.story.finale.gear.DivineGear.forJob(j));
-            check(f, it instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.ARTIFACT
-                    && jp.revati.skyabyss.rpg.skill.Job.of(it) == j, "the " + j.id + " relic is missing, not an artifact, or belongs to another job");
+            check(f, it instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.MYTHIC
+                    && jp.revati.skyabyss.rpg.skill.Job.of(it) == j, "the " + j.id + " relic is missing, not mythic, or belongs to another job");
         }
         p.getInventory().clearContent();
         p.getPersistentData().remove("skyabyss_divine_given");

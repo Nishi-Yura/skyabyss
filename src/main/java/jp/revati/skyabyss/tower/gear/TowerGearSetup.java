@@ -29,7 +29,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// あいだの塔の報酬の品の登録 (docs/design/54 の 2.6)。塔の欠片・塔の武器 6 本・防具 3 式 12 部位・装飾 2 (ヒロイック・必要 Lv 50)。
+// あいだの塔の報酬の品の登録 (docs/design/54 の 2.6)。塔の欠片・塔の武器 6 本・防具 3 式 12 部位・装飾 2 (どれも神器・必要 Lv 50)。
 // 数値は TowerGear、効果は TowerGearEvents
 public final class TowerGearSetup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -85,7 +85,7 @@ public final class TowerGearSetup {
 
     public static class Weapon extends ChapterWeaponItem {
         public Weapon(Item.Properties properties, double attack, double speed, String descKey) {
-            super(properties, TowerGear.DUNGEON, attack, speed, GearTier.HEROIC, descKey);
+            super(properties, TowerGear.DUNGEON, attack, speed, GearTier.MYTHIC, descKey);
         }
 
         @Override
@@ -96,7 +96,7 @@ public final class TowerGearSetup {
 
     public static class Bow extends ChapterBowItem {
         public Bow(Item.Properties properties, double multiplier, String descKey) {
-            super(properties, TowerGear.DUNGEON, multiplier, GearTier.HEROIC, descKey);
+            super(properties, TowerGear.DUNGEON, multiplier, GearTier.MYTHIC, descKey);
         }
 
         @Override
@@ -107,7 +107,7 @@ public final class TowerGearSetup {
 
     public static class Trinket extends GearItem {
         public Trinket(Item.Properties properties, String descKey) {
-            super(properties, GearTier.HEROIC, descKey, true);
+            super(properties, GearTier.MYTHIC, descKey, true);
         }
 
         @Override

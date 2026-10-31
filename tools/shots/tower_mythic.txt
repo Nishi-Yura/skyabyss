@@ -1,0 +1,34 @@
+# 神器の階級の表示 (塔の大剣・天秤の甲冑の胴・天の環のツールチップ)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_mythic.txt -PshotsName=tower_mythic
+world tower_mythic flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+camera 0 -60 0 0 25
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+cmd clear @s
+cmd item replace entity @s hotbar.0 with skyabyss:tower_balance_sword
+cmd item replace entity @s hotbar.1 with skyabyss:tower_scale_chestplate
+cmd item replace entity @s hotbar.2 with skyabyss:tower_heaven_ring
+wait 20
+guiscale 2
+open inventory
+wait 10
+hover slot 36
+wait 4
+shot sword
+hover slot 37
+wait 4
+shot chest
+hover slot 38
+wait 4
+shot ring
+close

@@ -2,11 +2,12 @@ package jp.revati.skyabyss.item;
 
 import net.minecraft.network.chat.TextColor;
 
-// 装備の階級 (03 の 1.2節。2026-10-24 に 6 段へ): コモン(白) / アンコモン(緑) / レア(青) / エピック(紫) / ヒロイック(橙) / アーティファクト(金)。
+// 装備の階級 (03 の 1.2節。2026-10-24 に 6 段へ、2026-11-01 に 7 段へ): コモン(白) / アンコモン(緑) / レア(青) / エピック(紫) / ヒロイック(橙) /
+// アーティファクト(金。表示は「★ 伝説」) / 神器(紅紫。Wynncraft のミシックの立ち位置: いちばん上、終章の神器とあいだの塔の装備だけ)。
 // 階級は品で決まる (セーブには書かない)。品の ID が変わらないので、前のセーブの装備は新しい階級をそのまま読む。
 // 階級ごとの決まりはこの表だけに置く: 名前の色、特性の数と幅 (AffixRules)、穴の抽選 (GearFreedom)、分解 (ForgeRules)、
 // 必要 Lv の差 (GearLevel)、立体の形の段 (meshTier: 手・地面・額縁・装飾の立体。絵は変えない)、アスペクトの芯を刻めるか。
-// 旧「伝説」はアーティファクトに改名した (キーは artifact)。案だった「神器」(七つの心核から作る、強化 +15) も同じ階級にまとめる (7 段目は作らない)
+// 旧「伝説」はアーティファクトに改名した (キーは artifact)。神器 (mythic) は 2026-11-01 の声「レア度神器は Wynncraft のミシックのような立ち位置」で足した
 public enum GearTier {
     //        key          色        分解 特性   少ない側 幅広 穴 0/1/2        欠片 結晶 Lv差 形
     COMMON("common", 0xE4E4E4, 0, 0, 0, 0f, false, new int[]{100, 0, 0}, false, 0, 4, "common"),
@@ -14,7 +15,8 @@ public enum GearTier {
     RARE("rare", 0x5AA9FF, 3, 1, 2, 0.6f, false, new int[]{50, 38, 12}, false, 1, 4, "rare"),
     EPIC("epic", 0xB98CFF, 5, 1, 2, 0.35f, false, new int[]{40, 42, 18}, false, 1, 4, "rare"),
     HEROIC("heroic", 0xFF7A3D, 10, 2, 3, 0.6f, true, new int[]{30, 45, 25}, true, 2, 2, "legend"),
-    ARTIFACT("artifact", 0xF2C94C, 10, 2, 3, 0.35f, true, new int[]{20, 45, 35}, true, 3, 2, "legend");
+    ARTIFACT("artifact", 0xF2C94C, 10, 2, 3, 0.35f, true, new int[]{20, 45, 35}, true, 3, 2, "legend"),
+    MYTHIC("mythic", 0xE040FB, 12, 3, 3, 0f, true, new int[]{10, 40, 50}, true, 4, 2, "legend");
 
     public final String key;
     public final TextColor color;
@@ -68,7 +70,7 @@ public enum GearTier {
             case COMMON, UNCOMMON -> 0;
             case RARE -> 1;
             case EPIC -> 2;
-            case HEROIC, ARTIFACT -> 3;
+            case HEROIC, ARTIFACT, MYTHIC -> 3;
         };
     }
 

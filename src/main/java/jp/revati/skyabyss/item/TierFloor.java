@@ -92,7 +92,7 @@ public final class TierFloor {
             }
             double target = switch (g.tier()) {
                 case HEROIC -> epicBest().getOrDefault(g.dungeon(), 0.0) * HEROIC_OVER;
-                case ARTIFACT -> ARTIFACT_DPS;
+                case ARTIFACT, MYTHIC -> ARTIFACT_DPS;
                 default -> 0.0;
             };
             double now = dps(v);

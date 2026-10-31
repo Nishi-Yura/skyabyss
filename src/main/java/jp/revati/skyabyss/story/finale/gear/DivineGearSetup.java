@@ -17,7 +17,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 終章の神器の登録 (docs/design/50 の 4.5)。6 本 (アーティファクト・必要 Lv 50)・雲上の心核・心核の欠片。数値は DivineGear、効果は DivineGearEvents
+// 終章の神器の登録 (docs/design/50 の 4.5)。6 本 (神器・必要 Lv 50)・雲上の心核・心核の欠片。数値は DivineGear、効果は DivineGearEvents
 public final class DivineGearSetup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
@@ -43,7 +43,7 @@ public final class DivineGearSetup {
 
     public static class Weapon extends ChapterWeaponItem {
         public Weapon(Item.Properties properties, double attack, double speed, String descKey) {
-            super(properties, DivineGear.DUNGEON, attack, speed, GearTier.ARTIFACT, descKey);
+            super(properties, DivineGear.DUNGEON, attack, speed, GearTier.MYTHIC, descKey);
         }
 
         @Override
@@ -54,7 +54,7 @@ public final class DivineGearSetup {
 
     public static class Bow extends ChapterBowItem {
         public Bow(Item.Properties properties, double multiplier, String descKey) {
-            super(properties, DivineGear.DUNGEON, multiplier, GearTier.ARTIFACT, descKey);
+            super(properties, DivineGear.DUNGEON, multiplier, GearTier.MYTHIC, descKey);
         }
 
         @Override

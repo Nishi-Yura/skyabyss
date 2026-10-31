@@ -178,7 +178,7 @@ public final class Towers {
         SkyAbyss.LOGGER.info("[tower] run #{} cleared in {} with {} player(s)", run.id, time(ticks), run.members.size());
     }
 
-    // 越えた人への報酬: 塔の箱 1 (封切り師で開ける。中は塔の装備) と塔の欠片
+    // 越えた人への報酬: 塔の箱 1 (封切り師で開ける。中は塔の装備がどれか一つ)・塔の欠片・鐘銭
     static void reward(ServerPlayer p) {
         net.minecraft.world.item.Item box = jp.revati.skyabyss.loot.box.LootBoxSetup.item(jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower"));
         if (box != null) {
@@ -186,7 +186,9 @@ public final class Towers {
         }
         jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(),
                 jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR));
-        Notice.gain(p, "message.skyabyss.tower.reward", jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR);
+        jp.revati.skyabyss.facility.Coins.give(p, jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
+        Notice.gain(p, "message.skyabyss.tower.reward", jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR,
+                jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
     }
 
     public static String time(long ticks) {
