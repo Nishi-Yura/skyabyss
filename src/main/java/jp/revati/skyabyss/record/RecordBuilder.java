@@ -658,9 +658,6 @@ public final class RecordBuilder {
                 List.of(t("d.level", GrowthRules.MAX_LEVEL), t("d.lifetime", d.lifetimeXp(), GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL))),
                 RecordSnapshot.ACTION_NONE));
         rows.add(value("xp", t("r.xp"), max ? t("v.max") : t("v.of", d.xp, toNext), RecordSnapshot.MARK_NONE, List.of(t("d.xp"))));
-        int unspent = d.unspentPoints();
-        rows.add(value("points", t("r.points"), t("v.of", unspent, d.totalPoints()), unspent > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE,
-                List.of(t("d.points", GrowthRules.POINTS_PER_LEVEL, GrowthRules.STAT_CAP))));
         rows.addAll(jp.revati.skyabyss.rebirth.RebirthRecord.rows(p));
         rows.add(header("stats"));
         for (Stat stat : Stat.values()) {

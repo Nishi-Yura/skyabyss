@@ -606,5 +606,8 @@
   "dialogue.skyabyss.attendant_box_opener.menu_whale": "……箱か。鯨骨の留めは固い。小刀でこじるのが一番だ。",
   "dialogue.skyabyss.attendant_box_opener.menu_tide": "……箱か。潮で封が湿っとる。少し乾かしてから切ろう。",
   "dialogue.skyabyss.attendant_box_opener.menu_storm": "……箱か。風の強い日は、封がひとりでに鳴るんだ。",
-  "dialogue.skyabyss.attendant_box_opener.menu_ember": "……箱か。燠で焼き切れば、封は音もなく開く。"
+  "dialogue.skyabyss.attendant_box_opener.menu_ember": "……箱か。燠で焼き切れば、封は音もなく開く。",
+  "gui.skyabyss.town_guide.place.box_opener": "封切り師",
+  "gui.skyabyss.town_guide.place.box_opener.desc": "封の箱を開ける（鍛冶場の中）",
+  "gui.skyabyss.town_guide.place.box_opener.to": "封切り師"
 }

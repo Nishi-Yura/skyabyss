@@ -83,6 +83,8 @@ public final class TownGuide {
             new Place("perch", Group.BLUE, "label_perch"),
             new Place("guild", Group.RED, "open_guild"),
             new Place("smithy", Group.RED, "label_smithy"),
+            // 封切り師は鍛冶屋の中に立つ (印を持たない。loot/box/BoxOpeners)ので、鍛冶屋の戸へ案内する
+            new Place("box_opener", Group.RED, "label_smithy"),
             new Place("training", Group.RED, "open_training"),
             new Place("shrine", Group.VIOLET, "open_shrine"),
             new Place("keep", Group.VIOLET, "open_keep"),
@@ -182,7 +184,7 @@ public final class TownGuide {
     static final Map<String, String> TOWN_DOORS = Map.ofEntries(Map.entry("tool_shop", "npc_tool_merchant"), Map.entry("storage", "npc_storage_keeper"),
             Map.entry("trade", "npc_trade_keeper"), Map.entry("apothecary", "npc_apothecary"), Map.entry("inn", "npc_innkeeper"),
             Map.entry("stable", "npc_stable_keeper"), Map.entry("perch", "npc_perch_keeper"), Map.entry("guild", "npc_guild_clerk"),
-            Map.entry("smithy", "npc_smith"), Map.entry("training", "npc_training_master"), Map.entry("shrine", "npc_shrine_priest"));
+            Map.entry("smithy", "npc_smith"), Map.entry("box_opener", "npc_smith"), Map.entry("training", "npc_training_master"), Map.entry("shrine", "npc_shrine_priest"));
 
     @Nullable
     public static SiteData.Entry townAt(MinecraftServer server, BlockPos at) {

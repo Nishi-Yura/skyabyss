@@ -13,6 +13,6 @@
   "tutorial.skyabyss.record": "[%s] で控え帳を開く",
   "tutorial.skyabyss.ping": "[%s] で見ている先を仲間に知らせる",
   "tutorial.skyabyss.quest_log": "[%s] でクエストログを開く",
-  "tutorial.skyabyss.status": "[%s] で力を振り分ける画面を開く",
+  "tutorial.skyabyss.status": "[%s] で今の力（ステータス）を見る。力は技の木の節で上がる",
   "tutorial.skyabyss.skills": "[%s] で技の画面を開く"
 }

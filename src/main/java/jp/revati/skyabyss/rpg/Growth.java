@@ -126,13 +126,11 @@ public final class Growth {
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 1f);
         level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);
-        Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level,
-                GrowthRules.POINTS_PER_LEVEL * gained);
+        // 基礎の振り分けは無い (技の木の節で上がる。docs/design/48)。知らせは技の木の点が増えたこと
+        int skill = jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level) - jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level - gained);
+        Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level, skill);
         if (data.level >= GrowthRules.MAX_LEVEL) {
             Notice.narrate(player, "message.skyabyss.growth.max_level");
-        } else if (data.unspentPoints() > 0 && (data.level <= 5 || data.unspentPoints() >= 3 * GrowthRules.POINTS_PER_LEVEL)) {
-            // 振り方の手がかりは、はじめのうちと、力をためこんでいるときだけ (毎回は出さない)
-            jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.STATUS);
         }
     }
 

@@ -328,7 +328,7 @@
 | --- | --- |
 | 金 = 買う・預ける | 道具屋（`label_tool_shop`）・預かり所（`label_storage`）・取引所（`label_trade`）・薬師の店（`label_apothecary`） |
 | 青 = 休む・旅 | 宿「鐘の宿」（`label_inn`）・厩舎（`label_stable`）・子の止まり木（`label_perch`） |
-| 赤 = 鍛える・戦う | 鯨追いの組合（`open_guild`）・鍛冶場（`label_smithy`）・訓練場（`open_training`） |
+| 赤 = 鍛える・戦う | 鯨追いの組合（`open_guild`）・鍛冶場（`label_smithy`）・封切り師（鍛冶場の中。`label_smithy`）・訓練場（`open_training`） |
 | 紫 = 物語・祈り | 四巨神の社（`open_shrine`）・空見の砦（`open_keep`）・空見の館（`open_hall`） |
 | 灰 = 裏通り | 酒場「深い杯」（`label_tavern`）・墓所（`sign_graveyard`） |
 

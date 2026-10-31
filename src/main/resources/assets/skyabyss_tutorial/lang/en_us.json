@@ -13,6 +13,6 @@
   "tutorial.skyabyss.record": "Press [%s] to open the record book",
   "tutorial.skyabyss.ping": "Press [%s] to point out what you are looking at to your party",
   "tutorial.skyabyss.quest_log": "Press [%s] to open the quest log",
-  "tutorial.skyabyss.status": "Press [%s] to open the stat screen",
+  "tutorial.skyabyss.status": "Press [%s] to see your stats. They rise through skill tree nodes",
   "tutorial.skyabyss.skills": "Press [%s] to open the skill screen"
 }

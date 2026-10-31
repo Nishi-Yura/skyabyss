@@ -353,7 +353,7 @@
   "gui.skyabyss.town_guide.place.storage.to": "the Storehouse",
   "gui.skyabyss.town_guide.place.tavern": "The Deep Cup",
   "gui.skyabyss.town_guide.place.tavern.desc": "A back-street tavern",
-  "gui.skyabyss.town_guide.place.tavern.to": "the The Deep Cup",
+  "gui.skyabyss.town_guide.place.tavern.to": "The Deep Cup",
   "gui.skyabyss.town_guide.place.tool_shop": "Market",
   "gui.skyabyss.town_guide.place.tool_shop.desc": "Buy tools, food, arms and materials. They buy materials too",
   "gui.skyabyss.town_guide.place.tool_shop.to": "the market",
@@ -606,5 +606,8 @@
   "dialogue.skyabyss.attendant_box_opener.menu_whale": "...A box? Whalebone clasps are stubborn. A small knife pries them best.",
   "dialogue.skyabyss.attendant_box_opener.menu_tide": "...A box? The tide's dampened the seal. Let it dry a moment before I cut.",
   "dialogue.skyabyss.attendant_box_opener.menu_storm": "...A box? On windy days the seals hum all by themselves.",
-  "dialogue.skyabyss.attendant_box_opener.menu_ember": "...A box? Burn it with an ember and the seal opens without a sound."
+  "dialogue.skyabyss.attendant_box_opener.menu_ember": "...A box? Burn it with an ember and the seal opens without a sound.",
+  "gui.skyabyss.town_guide.place.box_opener": "Box Opener",
+  "gui.skyabyss.town_guide.place.box_opener.desc": "Opens sealed boxes (inside the smithy)",
+  "gui.skyabyss.town_guide.place.box_opener.to": "the Box Opener"
 }
