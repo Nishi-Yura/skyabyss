@@ -88,7 +88,10 @@ public enum WeaponKind {
             Map.entry("moon_umbra_dagger", FANG), Map.entry("moon_halo_bell_staff", POKER),
             // 終章の神器 (story/finale/gear。弓は WeaponClient が BowExtension で登録する)
             Map.entry("divine_sky_sword", GREATSWORD), Map.entry("divine_bell_hammer", HAMMER), Map.entry("divine_dawn_staff", POKER),
-            Map.entry("divine_rewind_dagger", FANG), Map.entry("divine_promise_bell_staff", POKER));
+            Map.entry("divine_rewind_dagger", FANG), Map.entry("divine_promise_bell_staff", POKER),
+            // あいだの塔の武器 (tower/gear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("tower_balance_sword", GREATSWORD), Map.entry("tower_pull_hammer", HAMMER), Map.entry("tower_moon_staff", POKER),
+            Map.entry("tower_sigil_dagger", FANG), Map.entry("tower_clap_bell_staff", POKER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         java.util.List<Map.Entry<String, WeaponKind>> all = new java.util.ArrayList<>(BY_ITEM.entrySet());

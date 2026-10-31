@@ -1,0 +1,85 @@
+# あいだの塔の武器 6 本 (docs/design/54 の 2.6): 一人称と三人称の正面。最後に塔の箱と塔の欠片を手に
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_weapons.txt -PshotsName=tower_weapons
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+perspective first
+hud on
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_balance_sword
+close
+wait 30
+chat clear
+shot fp_tower_balance_sword
+perspective front
+wait 8
+shot tp_tower_balance_sword
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_pull_hammer
+close
+wait 30
+chat clear
+shot fp_tower_pull_hammer
+perspective front
+wait 8
+shot tp_tower_pull_hammer
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_moon_staff
+close
+wait 30
+chat clear
+shot fp_tower_moon_staff
+perspective front
+wait 8
+shot tp_tower_moon_staff
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_eye_bow
+close
+wait 30
+chat clear
+shot fp_tower_eye_bow
+perspective front
+wait 8
+shot tp_tower_eye_bow
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_sigil_dagger
+close
+wait 30
+chat clear
+shot fp_tower_sigil_dagger
+perspective front
+wait 8
+shot tp_tower_sigil_dagger
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_clap_bell_staff
+close
+wait 30
+chat clear
+shot fp_tower_clap_bell_staff
+perspective front
+wait 8
+shot tp_tower_clap_bell_staff
+
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:box_tower
+cmd item replace entity @s hotbar.1 with skyabyss:tower_shard 10
+close
+wait 30
+chat clear
+shot fp_box_tower
+perspective front
+wait 8
+shot tp_box_tower

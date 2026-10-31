@@ -661,7 +661,12 @@ for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の�
                             ("divine_bell_hammer", "smith_hammer", "七つ鐘の大鎚: 振りかぶって打ち下ろす"),
                             ("divine_dawn_staff", "abyss_bell_staff", "暁の灯杖: 掲げて溜め、地を突く"),
                             ("divine_rewind_dagger", "waterway_fang", "巻き戻りの短剣: 右上から左下へ、返して X、突き抜ける"),
-                            ("divine_promise_bell_staff", "abyss_bell_staff", "約束の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす")):
+                            ("divine_promise_bell_staff", "abyss_bell_staff", "約束の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("tower_balance_sword", "whalebone_greatsword", "あいだの大剣: 大きく薙ぎ、振り下ろす"),
+                            ("tower_pull_hammer", "smith_hammer", "引き合いの鎚: 振りかぶって打ち下ろす"),
+                            ("tower_moon_staff", "abyss_bell_staff", "落ちる月の杖: 掲げて溜め、地を突く"),
+                            ("tower_sigil_dagger", "waterway_fang", "追う印の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("tower_clap_bell_staff", "abyss_bell_staff", "合掌の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす")):
     W[_item] = _copy.deepcopy(W[_src])
     W[_item]["item"] = _item
     W[_item]["label"] = _label
@@ -812,7 +817,9 @@ def main():
                         ("moon_light_sword", "whalebone_greatsword"), ("moon_full_hammer", "smith_hammer"), ("moon_new_staff", "abyss_bell_staff"),
                         ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff"),
                         ("divine_sky_sword", "whalebone_greatsword"), ("divine_bell_hammer", "smith_hammer"), ("divine_dawn_staff", "abyss_bell_staff"),
-                        ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff")):
+                        ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff"),
+                        ("tower_balance_sword", "whalebone_greatsword"), ("tower_pull_hammer", "smith_hammer"), ("tower_moon_staff", "abyss_bell_staff"),
+                        ("tower_sigil_dagger", "waterway_fang"), ("tower_clap_bell_staff", "abyss_bell_staff")):
         label = W[_item]["label"]
         W[_item] = _copy.deepcopy(W[_src])
         W[_item]["item"] = _item

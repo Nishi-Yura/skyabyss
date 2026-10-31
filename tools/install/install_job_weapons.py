@@ -76,6 +76,10 @@ for _id, _kind in (("moon_waning_blade", "sword"), ("moon_full_hammer", "hammer"
 for _id, _kind in (("divine_sky_sword", "sword"), ("divine_bell_hammer", "hammer"), ("divine_dawn_staff", "staff"), ("divine_plume_bow", "bow"),
                    ("divine_rewind_dagger", "dagger"), ("divine_promise_bell_staff", "bell")):
     ITEMS[_id] = ("roughs_one", "legend") + _HOLD[_kind]
+# あいだの塔の武器 6 本 (tools/rough/lowpoly/weapons/one/o_tower.py。形の段 legend。tower/gear。docs/design/54 の 2.6)
+for _id, _kind in (("tower_balance_sword", "sword"), ("tower_pull_hammer", "hammer"), ("tower_moon_staff", "staff"), ("tower_eye_bow", "bow"),
+                   ("tower_sigil_dagger", "dagger"), ("tower_clap_bell_staff", "bell")):
+    ITEMS[_id] = ("roughs_one", "legend") + _HOLD[_kind]
 # 巨神のヒロイック武器 17 本 (2026-10-28。tools/rough/lowpoly/weapons/heroic/build_heroic.py の docs/review/roughs_heroic/raw/<id>/<案>/。形の段 rare)
 HEROIC = {"whale_choir_hammer": ("hammer", "c"), "whale_star_staff": ("staff", "c"), "whale_rib_longbow": ("bow", "c"), "whale_deep_bell_staff": ("bell", "a"),
           "tide_reef_hammer": ("hammer", "c"), "tide_pearl_staff": ("staff", "b"), "tide_coral_bow": ("bow", "b"), "tide_surf_bell_staff": ("bell", "a"),

@@ -2,7 +2,7 @@
 """封の箱 (docs/design/52) の低ポリと絵を assets へ入れる。
 
 入力 (先に作る):
-  python -I tools/rough/lowpoly/weapons/wild/build_wild.py o_boxes   形 9 種 → docs/review/roughs_wild/raw/box_<形>/a/
+  python -I tools/rough/lowpoly/weapons/wild/build_wild.py o_boxes   形 10 種 → docs/review/roughs_wild/raw/box_<形>/a/
 出力:
   形 (9): lowpoly/items/<形>/common.json・textures/lowpoly/items/<形>/common_atlas.png (+ _glow)、models/item_flat/<形>.json
           (手・地面・額縁は client/accessory/AccessoryItemRenderer の低ポリ。形の名前は BoxKind.look(): 巨神の箱と金の箱は品ごと、階級の箱は階級ごと)
@@ -27,7 +27,7 @@ from PIL import Image  # noqa: E402
 ASSETS = ROOT / "src/main/resources/assets/skyabyss"
 RAW = ROOT / "docs/review/roughs_wild/raw"
 LOOKS = {"box_stone_whale": "rare", "box_tide_shell": "rare", "box_thunder_wing": "rare", "box_ember": "rare",
-         "box_uncommon": "rare", "box_rare": "rare", "box_epic": "rare", "box_heroic": "legend", "box_artifact": "legend"}
+         "box_uncommon": "rare", "box_rare": "rare", "box_epic": "rare", "box_heroic": "legend", "box_artifact": "legend", "box_tower": "legend"}
 # 品 → 形 (と帯)。loot/box/BoxKind.ALL と同じ並び
 ITEMS = [("box_stone_whale", "box_stone_whale", 0), ("box_tide_shell", "box_tide_shell", 0), ("box_thunder_wing", "box_thunder_wing", 0),
          ("box_ember", "box_ember", 0)]
@@ -35,6 +35,7 @@ for tier, bands in (("uncommon", (1, 2)), ("rare", (1, 2, 3, 4, 5)), ("epic", (2
     for b in bands:
         ITEMS.append((f"box_{tier}_{b}", f"box_{tier}", b))
 ITEMS.append(("box_artifact", "box_artifact", 0))
+ITEMS.append(("box_tower", "box_tower", 0))
 TIER_RGB = {"uncommon": (123, 214, 107), "rare": (90, 169, 255), "epic": (185, 140, 255), "heroic": (255, 122, 61)}
 # 3x5 の数字 (I・V だけで書く)
 GLYPH = {"I": ["#", "#", "#", "#", "#"], "V": ["#.#", "#.#", "#.#", "#.#", ".#."]}
