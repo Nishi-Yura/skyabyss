@@ -591,6 +591,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     // ---------------------------------------------------------------- 入力
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
+        if (button == 0 && artsHovered(screenX, screenY) && minecraft.player != null) {
+            // 秘伝の一覧 (チャットの押せる一覧) を出して画面を閉じる
+            minecraft.player.connection.sendCommand("skyabyss_arts");
+            onClose();
+            return true;
+        }
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
         if (super.mouseClicked(mx, my, button)) {
@@ -847,6 +853,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             ext.render(g, font, minecraft, d, left, top, mouseX, mouseY);
         }
         renderBottom(g, d, level);
+        renderArts(g);
         if (lessonLearn && page == 0) {
             if (learn.active && learn.visible) {
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, learn.getX(), learn.getY(), learn.getWidth(), learn.getHeight());
@@ -1132,6 +1139,13 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         // 刻印 (使う技のうち、刻印のあるもの) は本文の下に続く。言い伝えの一行は効果の前に
         // 刻印: 職の木 v2 では節で選ぶので、ここには出さない
         boolean hasRunes = s.active && v2() == null;
+        // いま技を変えているもの (刻印・書き換え・変異・秘伝) は一番上に (技が見た目のまま変わって分かりづらい、の声)
+        List<Component> changes = new ArrayList<>();
+        changeLines(changes, s);
+        if (!changes.isEmpty()) {
+            lines.addAll(wrapAll(changes, w));
+            lines.add(FormattedCharSequence.EMPTY);
+        }
         lines.addAll(TextWrap.split(font, Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w));
         lines.addAll(body);
         // 送れる面の中で描く (字が長ければ送る)。刻印の段は本文の続きに置き、枠の外の段は当たりを取らない
@@ -1346,6 +1360,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 g.setColor(1f, 1f, 1f, 1f);
             } else if (s != null) {
                 SkillHud.drawIcon(g, s.iconIndex(), x + 3, y + 3);
+                SkillHud.changeMark(g, minecraft.player, s, x + 2, y + 2);
             }
             String k = SkillClientSetup.SLOT_KEYS[i].getTranslatedKeyMessage().getString();
             if (k.length() > 3) {
@@ -1358,7 +1373,57 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
+    // 秘伝の枠 (技の枠の右、型の札の左)。中は付けた秘伝の技の絵と段の点 (I〜III)
+    static final int ARTS_X = 183;
+    static final int ARTS_Y = 157;
+    static final int ARTS_BOX = 14;
+
+    private void renderArts(GuiGraphics g) {
+        var held = jp.revati.skyabyss.rpg.skill.SecretArts.heldFor(minecraft.player);
+        for (int i = 0; i < jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS; i++) {
+            int x = left + ARTS_X + (i % 2) * (ARTS_BOX + 2);
+            int y = top + ARTS_Y + (i / 2) * (ARTS_BOX + 2);
+            boolean on = i < held.size();
+            int c = 0xFF000000 | jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.SECRET.rgb;
+            g.fill(x, y, x + ARTS_BOX, y + ARTS_BOX, on ? c : 0xFF2A2E3A);
+            g.fill(x + 1, y + 1, x + ARTS_BOX - 1, y + ARTS_BOX - 1, 0xFF14161E);
+            if (on) {
+                var h = held.get(i);
+                SkillHud.drawIcon(g, h.art().skill.iconIndex(), x + 1, y + 1, ARTS_BOX - 2);
+                // 段の点 (下の縁に 1〜3 つ)
+                for (int t = 0; t < h.tier(); t++) {
+                    int px = x + ARTS_BOX / 2 - h.tier() + t * 2;
+                    g.fill(px, y + ARTS_BOX - 2, px + 1, y + ARTS_BOX - 1, 0xFFFFFFFF);
+                }
+            }
+        }
+        Component label = Component.translatable("gui.skyabyss.skill.arts_label");
+        g.drawString(font, label, left + ARTS_X + ARTS_BOX + 1 - font.width(label) / 2, top + ARTS_Y + ARTS_BOX + 3, SOFT, false);
+    }
+
+    private boolean artsHovered(double mx, double my) {
+        return mx >= left + ARTS_X && mx < left + ARTS_X + 2 * ARTS_BOX + 2 && my >= top + ARTS_Y && my < top + ARTS_Y + ARTS_BOX + 12;
+    }
+
     private void renderHover(GuiGraphics g, SkillData d, int mx, int my) {
+        if (artsHovered(mx, my)) {
+            List<Component> lines = new ArrayList<>();
+            lines.add(Component.translatable("gui.skyabyss.skill.arts_title").withColor(GOLD));
+            var held = jp.revati.skyabyss.rpg.skill.SecretArts.heldFor(minecraft.player);
+            for (int i = 0; i < jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS; i++) {
+                if (i < held.size()) {
+                    var h = held.get(i);
+                    lines.add(Component.literal("・").append(jp.revati.skyabyss.rpg.skill.SecretArts.name(h.art(), h.tier())).append(" — ")
+                            .append(Component.translatable(h.art().skill.nameKey())).withColor(jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.SECRET.rgb));
+                    lines.add(Component.literal("  ").append(Component.translatable(h.art().nameKey() + ".desc")).withColor(TEXT));
+                } else {
+                    lines.add(Component.translatable("gui.skyabyss.skill.arts_empty").withColor(DIM));
+                }
+            }
+            lines.add(Component.translatable("gui.skyabyss.skill.arts_hint").withColor(DIM));
+            tip(wrapAll(lines, 220));
+            return;
+        }
         if (page == 0 && v2() != null) {
             AbilityNode n = v2NodeAt(mx, my);
             if (n != null) {
@@ -1399,6 +1464,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
             lines.add(s == null ? Component.translatable("gui.skyabyss.skill.slot_empty").withColor(SOFT)
                     : Component.translatable(s.nameKey()).withColor(GOLD));
+            if (s != null) {
+                changeLines(lines, s);
+            }
             lines.add(Component.translatable("gui.skyabyss.skill.slot_key", SkillClientSetup.SLOT_KEYS[slot].getTranslatedKeyMessage()).withColor(SOFT));
             lines.add(Component.translatable(selected != null && !selected.active && d.knows(selected) ? "gui.skyabyss.skill.passive_no_slot"
                     : selected != null && selected.active && d.knows(selected)
@@ -1716,6 +1784,18 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     // 節の説明の行 (名前・種類と点・中身・いま取れるか)。囲みと説明の欄の両方で使う
+    // 今その技を変えているもの (刻印・書き換え・変異・秘伝。SkillChanges)
+    private void changeLines(List<Component> lines, Skill s) {
+        var changes = jp.revati.skyabyss.rpg.skill.SkillChanges.of(minecraft.player, s);
+        if (changes.isEmpty()) {
+            return;
+        }
+        lines.add(Component.translatable("gui.skyabyss.skill.change.head").withColor(SOFT));
+        for (var c : changes) {
+            lines.add(Component.literal(" ").append(c.line()).withColor(c.active() ? c.kind().rgb : DIM));
+        }
+    }
+
     private List<Component> v2Lines(SkillData d, AbilityNode n, int level) {
         List<Component> lines = new ArrayList<>();
         lines.add(Component.translatable(n.nameKey(v2().key)).withColor(GOLD));
@@ -1778,6 +1858,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
             if (gi != null) {
                 lines.add(Component.translatable("gui.skyabyss.tree.glyph_line", Component.translatable(gi.glyph().nameKey()), gi.level()).withColor(PALE));
+            }
+            if (!skillInfoShown) {
+                changeLines(lines, n.skill);
             }
         }
         if (!n.requires.isEmpty()) {

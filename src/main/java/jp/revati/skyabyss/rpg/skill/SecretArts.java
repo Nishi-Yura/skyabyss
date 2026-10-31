@@ -107,7 +107,68 @@ public final class SecretArts {
         }
     }
 
+    // 手元 (クライアント) に届いた秘伝 (SecretArtsPayload)。サーバーでは使わない
+    public record Held(Art art, int tier) {
+    }
+
+    private static List<Held> clientHeld = List.of();
+
     private SecretArts() {
+    }
+
+    // 枠に付けた秘伝と段 (サーバーは人のデータ、クライアントは届いたもの)
+    public static List<Held> heldFor(net.minecraft.world.entity.player.Player p) {
+        if (p instanceof ServerPlayer sp) {
+            List<Held> out = new ArrayList<>();
+            for (Art a : equipped(sp)) {
+                out.add(new Held(a, tier(sp, a)));
+            }
+            return out;
+        }
+        return clientHeld;
+    }
+
+    public static void onClient(jp.revati.skyabyss.rpg.skill.net.SecretArtsPayload payload) {
+        java.util.Map<String, Integer> tiers = new java.util.HashMap<>();
+        for (int i = 0; i < payload.ids().size(); i++) {
+            tiers.put(payload.ids().get(i), payload.tiers().get(i));
+        }
+        List<Held> out = new ArrayList<>();
+        for (String id : payload.slots()) {
+            Art a = Art.byId(id);
+            if (a != null && tiers.getOrDefault(id, 0) > 0) {
+                out.add(new Held(a, tiers.get(id)));
+            }
+        }
+        clientHeld = List.copyOf(out);
+    }
+
+    // 持ち主へ送る (覚えた・付けた・外した・入った・起きたとき)
+    public static void sync(ServerPlayer p) {
+        if (p instanceof net.neoforged.neoforge.common.util.FakePlayer || p.connection == null) {
+            return;
+        }
+        CompoundTag arts = p.getPersistentData().getCompound(ARTS);
+        List<String> ids = new ArrayList<>(arts.getAllKeys());
+        List<Integer> tiers = new ArrayList<>();
+        ids.forEach(id -> tiers.add(arts.getInt(id)));
+        List<String> slots = new ArrayList<>();
+        equipped(p).forEach(a -> slots.add(a.id));
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new jp.revati.skyabyss.rpg.skill.net.SecretArtsPayload(ids, tiers, slots));
+    }
+
+    @SubscribeEvent
+    static void onLogin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p) {
+            sync(p);
+        }
+    }
+
+    @SubscribeEvent
+    static void onRespawn(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p) {
+            sync(p);
+        }
     }
 
     // ---------------------------------------------------------------- 覚える・段・枠
@@ -146,6 +207,7 @@ public final class SecretArts {
         }
         arts.putInt(a.id, t + 1);
         p.getPersistentData().put(ARTS, arts);
+        sync(p);
         // 枠に空きがあれば付ける
         List<Art> eq = equipped(p);
         if (!eq.contains(a) && eq.size() < SLOTS) {
@@ -159,6 +221,7 @@ public final class SecretArts {
         ListTag l = new ListTag();
         eq.forEach(a -> l.add(StringTag.valueOf(a.id)));
         p.getPersistentData().put(SLOTS_KEY, l);
+        sync(p);
     }
 
     public static boolean equip(ServerPlayer p, Art a) {
@@ -249,6 +312,7 @@ public final class SecretArts {
                         .then(Commands.literal("clear").executes(c -> {
                             c.getSource().getPlayerOrException().getPersistentData().remove(ARTS);
                             c.getSource().getPlayerOrException().getPersistentData().remove(SLOTS_KEY);
+                            sync(c.getSource().getPlayerOrException());
                             return 1;
                         }))));
     }

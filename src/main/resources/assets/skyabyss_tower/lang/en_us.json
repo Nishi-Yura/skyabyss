@@ -182,5 +182,16 @@
   "dialogue.skyabyss.attendant_tower_keeper.menu.rules": "Ask about the tower's rules",
   "dialogue.skyabyss.attendant_tower_keeper.menu.about": "Who are you?",
   "dialogue.skyabyss.attendant_tower_keeper.menu.bye": "Later",
-  "dialogue.skyabyss.attendant_tower_keeper.rules": "One entry a day; the tower rearranges at the fifth hour. Defeat the master past the bridge for shards and coins, and with luck a tower box. Take on the week's wagers for more shards. If the moon crosses the bridge, it is over."
+  "dialogue.skyabyss.attendant_tower_keeper.rules": "One entry a day; the tower rearranges at the fifth hour. Defeat the master past the bridge for shards and coins, and with luck a tower box. Take on the week's wagers for more shards. If the moon crosses the bridge, it is over.",
+  "gui.skyabyss.skill.change.head": "Current changes:",
+  "gui.skyabyss.skill.change.rune": "Rune: %s",
+  "gui.skyabyss.skill.change.rewrite": "Rewrite: %s",
+  "gui.skyabyss.skill.change.rewrite_any": "relic, legend or mythic",
+  "gui.skyabyss.skill.change.mutation": "Mutation: %s",
+  "gui.skyabyss.skill.change.secret": "Secret art: %s",
+  "gui.skyabyss.skill.change.inactive": "%s (works while holding that weapon)",
+  "gui.skyabyss.skill.arts_label": "Arts",
+  "gui.skyabyss.skill.arts_title": "Secret art slots (only slotted arts work)",
+  "gui.skyabyss.skill.arts_empty": "・(empty)",
+  "gui.skyabyss.skill.arts_hint": "Click to list secret arts (slot/remove) in chat"
 }

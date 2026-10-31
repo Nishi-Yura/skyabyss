@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[3]
 A = ROOT / "src/main/resources/assets/skyabyss"
 REVIEW = ROOT / "docs/review/tower_rewards"
 # assets へ入れる絵 (承認済み)
-INSTALLED = ("tower_shard", "tower_heaven_ring", "tower_abyss_chain")
+INSTALLED = ("tower_shard", "tower_heaven_ring", "tower_abyss_chain", "secret_scroll")
 OUTLINE = (30, 24, 36, 255)
 
 

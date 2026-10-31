@@ -98,6 +98,36 @@ public final class SkillHud {
         }
     }
 
+    // 左の縁に小さな菱形 (5 画素)。効いている変化の種類ごとに一つ、上から縦に並べる
+    // 色は変化の種類 (刻印 金・書き換え 橙・変異 紫・秘伝 水色。SkillChanges.Kind)
+    public static void changeMark(GuiGraphics g, net.minecraft.world.entity.player.Player p, Skill s, int x, int y) {
+        java.util.EnumSet<jp.revati.skyabyss.rpg.skill.SkillChanges.Kind> kinds = java.util.EnumSet.noneOf(jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.class);
+        for (var c : jp.revati.skyabyss.rpg.skill.SkillChanges.of(p, s)) {
+            if (c.active()) {
+                kinds.add(c.kind());
+            }
+        }
+        if (kinds.isEmpty()) {
+            return;
+        }
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 210);
+        int i = 0;
+        for (var k : kinds) {
+            diamond(g, x, y + i * 6, 0xFF000000 | k.rgb);
+            i++;
+        }
+        g.pose().popPose();
+    }
+
+    static void diamond(GuiGraphics g, int x, int y, int c) {
+        g.fill(x + 2, y, x + 3, y + 5, 0xFF101418);
+        g.fill(x, y + 2, x + 5, y + 3, 0xFF101418);
+        g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF101418);
+        g.fill(x + 2, y + 1, x + 3, y + 4, c);
+        g.fill(x + 1, y + 2, x + 4, y + 3, c);
+    }
+
     private static void renderMana(GuiGraphics g, Minecraft mc, SkillData d) {
         double max = SkillManager.maxMana(mc.player);
         int[] m = jp.revati.skyabyss.rpg.client.GrowthHud.manaOrigin();
@@ -142,6 +172,8 @@ public final class SkillHud {
             if (s != null) {
                 int rank = d.rank(s);
                 drawIcon(g, s.iconIndex(), x + 2, y + 2);
+                // 今その技を変えているもの (刻印・書き換え・変異・秘伝) があれば左上に色の印 (SkillChanges)
+                changeMark(g, mc.player, s, x + 1, y + 1);
                 // マナが足りない: 青黒く沈める
                 if (d.mana + 1e-4 < SkillManager.manaCostFor(mc.player, s)) {
                     g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A101A3A);

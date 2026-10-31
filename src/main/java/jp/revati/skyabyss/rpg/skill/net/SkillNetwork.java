@@ -26,7 +26,8 @@ public final class SkillNetwork {
     // 3: 島の祠の職選び (JobChoiceOpenPayload・JobChoosePayload)
     // 4: 技の木 v2 の節 (SkillNodePayload)
     // 5: 節に木の id (淵・前世の木)
-    private static final String PROTOCOL_VERSION = "5";
+    // 6: 秘伝 (SecretArtsPayload)
+    private static final String PROTOCOL_VERSION = "6";
 
     private SkillNetwork() {
     }
@@ -36,6 +37,8 @@ public final class SkillNetwork {
         event.registrar(PROTOCOL_VERSION)
                 // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
                 .playToClient(ManaPayload.TYPE, ManaPayload.STREAM_CODEC, (payload, context) -> SkillClient.onMana(payload))
+                .playToClient(SecretArtsPayload.TYPE, SecretArtsPayload.STREAM_CODEC,
+                        (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.rpg.skill.SecretArts.onClient(payload)))
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))
                 .playToClient(SkillFxPayload.TYPE, SkillFxPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillFx.onCast(payload)))
                 // 島の祠で職を選ぶ (docs/design/43 の 4 節)。選び直しはできない (サーバーが検める)

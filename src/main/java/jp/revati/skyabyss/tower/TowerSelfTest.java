@@ -222,6 +222,12 @@ public final class TowerSelfTest {
         jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, jp.revati.skyabyss.rpg.skill.SecretArts.Art.WHALE_WHIRL);
         check(f, jp.revati.skyabyss.rpg.skill.SecretArts.equipped(p).size() == jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS
                 && !jp.revati.skyabyss.rpg.skill.SecretArts.equip(p, jp.revati.skyabyss.rpg.skill.SecretArts.Art.WHALE_WHIRL), "the secret art slots are not two");
+        // 技の画面と帯が見る「いまの変化」(SkillChanges) に枠の秘伝が出る。枠に無い秘伝は出ない
+        var ch = jp.revati.skyabyss.rpg.skill.SkillChanges.of(p, cut.skill);
+        check(f, ch.stream().anyMatch(c -> c.kind() == jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.SECRET && c.active())
+                && jp.revati.skyabyss.rpg.skill.SkillChanges.markColor(p, cut.skill) != 0, "a slotted secret art is not shown as a skill change");
+        check(f, jp.revati.skyabyss.rpg.skill.SkillChanges.of(p, jp.revati.skyabyss.rpg.skill.SecretArts.Art.WHALE_WHIRL.skill).stream()
+                .noneMatch(c -> c.kind() == jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.SECRET), "an unslotted secret art is shown as a skill change");
         java.util.Map<jp.revati.skyabyss.rpg.skill.Job, Integer> per = new java.util.EnumMap<>(jp.revati.skyabyss.rpg.skill.Job.class);
         for (var a : jp.revati.skyabyss.rpg.skill.SecretArts.Art.values()) {
             per.merge(a.job, 1, Integer::sum);
@@ -238,7 +244,7 @@ public final class TowerSelfTest {
 
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, wagers, record board, secret arts, end)");
+            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, wagers, record board, secret arts, skill changes, end)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tower FAILED: {}", m));
         }
