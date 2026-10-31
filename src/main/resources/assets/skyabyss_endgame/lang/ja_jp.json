@@ -60,7 +60,7 @@
   "message.skyabyss.journal.line": "%s  名声 %s（%s）  %s",
   "message.skyabyss.journal.line_plain": "%s  %s",
   "message.skyabyss.journal.sights": "名所 %s/%s",
-  "message.skyabyss.journal.foot": "名声は巡り路・大事件・名のある強敵・言伝ての板の頼み・名所の発見で上がる。名所は近づくと旅帳に載る",
+  "message.skyabyss.journal.foot": "名声は巡り路・大事件・名のある強敵・言伝ての板の頼み・名所の発見で上がる。名所は近づくと旅帳に載る。図鑑は /skyabyss_codex",
   "message.skyabyss.journal.done": "旅帳: %sの名所をすべて見つけた",
   "message.skyabyss.journal.gift": "旅帳の褒美: 鐘銭 %s・名声 +%s",
   "dialogue.skyabyss.guest_town_guide_whale.ask.journal": "名声と旅帳を見る",
@@ -72,5 +72,18 @@
   "message.skyabyss.guild_week.flag": "組合が%sの旗を手にした（今週）。倉庫に週の品が届いた",
   "message.skyabyss.guild_week.honor": "先週の塔の順位 %s 位: 組合の倉庫に塔の欠片 %s",
   "message.skyabyss.guild_week.flag_line": "%sの旗: %s",
-  "message.skyabyss.guild_week.honor_line": "先週の塔の誉れ %s 位: %s"
+  "message.skyabyss.guild_week.honor_line": "先週の塔の誉れ %s 位: %s",
+  "endgame.skyabyss.codex.set.stone_whale": "岩鯨",
+  "endgame.skyabyss.codex.set.tide_shell": "潮殻",
+  "endgame.skyabyss.codex.set.thunder_wing": "雷翼",
+  "endgame.skyabyss.codex.set.ember": "余燼",
+  "endgame.skyabyss.codex.set.abyss": "深淵",
+  "endgame.skyabyss.codex.set.moon": "月",
+  "message.skyabyss.codex.head": "── 図鑑 ──",
+  "message.skyabyss.codex.set_line": "%sの装備  %s/%s",
+  "message.skyabyss.codex.foes_line": "敵の図鑑  %s/%s",
+  "message.skyabyss.codex.foot": "装備は手にしたとき、敵は倒したときに図鑑に載る。そろえると鐘銭と称号",
+  "message.skyabyss.codex.set_done": "図鑑: %sの装備をすべて集めた（鐘銭 %s）",
+  "message.skyabyss.codex.all_done": "図鑑: すべての巨神の装備を集めた",
+  "message.skyabyss.codex.foes_done": "図鑑: 大陸の敵をすべて倒した（鐘銭 %s）"
 }

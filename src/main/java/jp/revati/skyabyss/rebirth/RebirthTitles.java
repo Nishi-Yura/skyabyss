@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個、土地の名声の 5 つと旅帳の 4 つで 36 個、職の熟練の 6 つで 42 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
+// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個、土地の名声の 5 つと旅帳の 4 つで 36 個、職の熟練の 6 つで 42 個、図鑑の 6 つで 48 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
 // 並び順は固定 (解除の印は並び順の番号の bit で持つので、足すなら末尾へ。順番を替えない)。
 // 名前の文は lang の "title.skyabyss_rebirth.<id>" と、条件の説明 "title.skyabyss_rebirth.<id>.how"
 public final class RebirthTitles {
@@ -32,7 +32,7 @@ public final class RebirthTitles {
     public record Title(int index, String id, Predicate<Facts> rule) {
     }
 
-    public static final int MAX = 42;
+    public static final int MAX = 48;
     private static final long HOUR = 72_000L;
     private static final List<Title> ALL = new ArrayList<>();
 
@@ -77,6 +77,12 @@ public final class RebirthTitles {
         for (String job : new String[] {"warrior", "smith", "mage", "archer", "assassin", "shaman"}) {
             add("mastery_" + job, f -> f.marks.contains("mastery:" + job));
         }
+        // 図鑑の完成 (endgame/Codex): 巨神ごとの装備の表、すべての表、敵の図鑑
+        for (String titan : new String[] {"stone_whale", "tide_shell", "thunder_wing", "ember"}) {
+            add("codex_" + titan, f -> f.marks.contains("codex:" + titan));
+        }
+        add("codex_all", f -> f.marks.contains("codex:all"));
+        add("foes_all", f -> f.marks.contains("foes:all"));
     }
 
     private RebirthTitles() {

@@ -60,7 +60,7 @@
   "message.skyabyss.journal.line": "%s  fame %s (%s)  %s",
   "message.skyabyss.journal.line_plain": "%s  %s",
   "message.skyabyss.journal.sights": "sights %s/%s",
-  "message.skyabyss.journal.foot": "Fame rises with circuits, world events, named foes, board errands and new sights. Sights enter the journal when you come near",
+  "message.skyabyss.journal.foot": "Fame rises with circuits, world events, named foes, board errands and new sights. Sights enter the journal when you come near. Codex: /skyabyss_codex",
   "message.skyabyss.journal.done": "Travel journal: you found every sight of %s",
   "message.skyabyss.journal.gift": "Journal reward: %s coins, fame +%s",
   "dialogue.skyabyss.guest_town_guide_whale.ask.journal": "See fame and the travel journal",
@@ -72,5 +72,18 @@
   "message.skyabyss.guild_week.flag": "Your guild holds the flag of %s this week. The weekly goods are in the storage",
   "message.skyabyss.guild_week.honor": "Last week's tower rank %s: %s tower shards in the guild storage",
   "message.skyabyss.guild_week.flag_line": "Flag of %s: %s",
-  "message.skyabyss.guild_week.honor_line": "Last week's tower honor #%s: %s"
+  "message.skyabyss.guild_week.honor_line": "Last week's tower honor #%s: %s",
+  "endgame.skyabyss.codex.set.stone_whale": "Stone Whale",
+  "endgame.skyabyss.codex.set.tide_shell": "Tide Shell",
+  "endgame.skyabyss.codex.set.thunder_wing": "Thunder Wing",
+  "endgame.skyabyss.codex.set.ember": "Ember",
+  "endgame.skyabyss.codex.set.abyss": "Abyss",
+  "endgame.skyabyss.codex.set.moon": "Moon",
+  "message.skyabyss.codex.head": "── Codex ──",
+  "message.skyabyss.codex.set_line": "%s gear  %s/%s",
+  "message.skyabyss.codex.foes_line": "Foes  %s/%s",
+  "message.skyabyss.codex.foot": "Gear enters the codex when you get it, foes when you defeat them. Complete sets pay coins and titles",
+  "message.skyabyss.codex.set_done": "Codex: you collected all %s gear (%s coins)",
+  "message.skyabyss.codex.all_done": "Codex: you collected every titan's gear",
+  "message.skyabyss.codex.foes_done": "Codex: you defeated every foe of the continent (%s coins)"
 }

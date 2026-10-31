@@ -139,5 +139,17 @@
   "title.skyabyss_rebirth.mastery_assassin": "Master Assassin",
   "title.skyabyss_rebirth.mastery_assassin.how": "Raise Assassin mastery to 10",
   "title.skyabyss_rebirth.mastery_shaman": "Master Shaman",
-  "title.skyabyss_rebirth.mastery_shaman.how": "Raise Shaman mastery to 10"
+  "title.skyabyss_rebirth.mastery_shaman.how": "Raise Shaman mastery to 10",
+  "title.skyabyss_rebirth.codex_stone_whale": "Stone Whale Collector",
+  "title.skyabyss_rebirth.codex_stone_whale.how": "Complete the Stone Whale gear codex",
+  "title.skyabyss_rebirth.codex_tide_shell": "Tide Shell Collector",
+  "title.skyabyss_rebirth.codex_tide_shell.how": "Complete the Tide Shell gear codex",
+  "title.skyabyss_rebirth.codex_thunder_wing": "Thunder Wing Collector",
+  "title.skyabyss_rebirth.codex_thunder_wing.how": "Complete the Thunder Wing gear codex",
+  "title.skyabyss_rebirth.codex_ember": "Ember Collector",
+  "title.skyabyss_rebirth.codex_ember.how": "Complete the Ember gear codex",
+  "title.skyabyss_rebirth.codex_all": "Codex Keeper",
+  "title.skyabyss_rebirth.codex_all.how": "Complete every titan's gear codex (Abyss and Moon too)",
+  "title.skyabyss_rebirth.foes_all": "Knower of Foes",
+  "title.skyabyss_rebirth.foes_all.how": "Fill the foe codex"
 }
