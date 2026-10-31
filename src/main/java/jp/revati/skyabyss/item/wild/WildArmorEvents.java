@@ -41,6 +41,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 二つの一式を 2 部位ずつ着ると、どちらの 2 部位の効果も効く
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WildArmorEvents {
+    static final net.minecraft.core.particles.DustParticleOptions CLOUD_WHITE = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.96f, 0.97f, 1.0f), 1.3f);
+    static final net.minecraft.core.particles.DustParticleOptions CLOUD_GOLD = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1.0f, 0.86f, 0.5f), 1.3f);
     static final String P = SkyAbyss.MODID + ":wild_armor_";
     static final String STILL = P + "still", STILL_POS = P + "still_pos", LAST_STAND = P + "last_stand", NOOSE = P + "noose", CLOUD = P + "cloud";
 
@@ -278,7 +280,13 @@ public final class WildArmorEvents {
             if (cloud != null && now - pd.getLong(CLOUD) >= cloud.p(0)) {
                 pd.putLong(CLOUD, now);
                 p.setAbsorptionAmount((float) Math.max(p.getAbsorptionAmount(), cloud.p(1)));
-                level.sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ(), 14, 0.5, 0.6, 0.5, 0.02);
+                // 白と金の光の輪 (2026-11-01: バニラの雲の粒は消えぎわに暗くなり、地面の上で黒い欠けに見えた)
+                for (int i = 0; i < 16; i++) {
+                    double ang = i / 16.0 * Math.PI * 2;
+                    level.sendParticles(i % 4 == 0 ? CLOUD_GOLD : CLOUD_WHITE, p.getX() + Math.cos(ang) * 0.8, p.getY() + 0.9, p.getZ() + Math.sin(ang) * 0.8,
+                            1, 0, 0.15, 0, 0);
+                }
+                level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1.2, p.getZ(), 4, 0.3, 0.4, 0.3, 0.01);
             }
             // 砦: 止まっている秒
             Vec3 at = p.position();

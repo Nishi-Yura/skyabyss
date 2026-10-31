@@ -8,6 +8,13 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## ヒロイック防具の二回目の磨き（2026-11-01。設計 [51](design/51_world_gear.md) の 5 章）
+
+- 縄の人の吊り衣の背: 外套の上に交差する縄と結び目、腰の縄、紫に光る背筋、垂れる三本の縄の先の光る重り（`build_wild_armor.py` の `_hanged_back`）。
+- 星詠みの法衣の正面: 胸の真鍮の星盤、左右の星座、帯から下がる星の飾り（`_stargazer_front`）。
+- 雲上の騎士の足もとの黒と白の欠けは形ではなく、一式の効果「雲の守り」のバニラの雲の粒（消えぎわに暗くなる）だった。白と金の光の輪に替えた（`WildArmorEvents`）。
+- 入れ方は `python -I tools/rough/lowpoly/armor/wild/build_wild_armor.py wild_hanged wild_stargazer` → `python -I tools/install/install_wild_gear.py armor`。撮影 `tools/shots/heroic_armor.txt`（見分けの 2 枚 `zz_*` を足した）、一覧 `docs/review/roughs_wild/sheets/heroic_armor_worn.jpg`。
+
 ## 裏ボス「初代の空見」（2026-11-01。設計 [53](design/53_founder.md)）
 
 - 三つの結末を見終えた人に、語り部が数え歌の「やっつめ」を話す（頼み `side_founder`）。大鐘楼の門の選びの［鐘の内へ］から、雲海の次元の南の閉じた大鐘「鐘の内」へ。

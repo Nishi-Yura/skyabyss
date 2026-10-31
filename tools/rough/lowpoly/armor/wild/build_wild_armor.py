@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT / "tools/rough/lowpoly/weapons/wild"))
 sys.path.insert(0, str(ROOT / "tools/gen/wild_gear"))
 import armor_abyss_v2 as A  # noqa: E402
 from armor_abyss_v2 import (bx, crv, rot_x, rot_y, rot_z, ARM, LEG, BOOT, sring, dloft, bplate, ngon, drape, lume, M_SIDE, E, N)  # noqa: E402,F401
+from sk import ring_tube  # noqa: E402
 from akit import spk, ext, edge_fields, fill_outside, hash1, vnoise, BAYER  # noqa: E402
 from wkit import pick, ramp, LIGHT  # noqa: E402
 import paint_wild as PW  # noqa: E402
@@ -978,12 +979,64 @@ def _hanged(piece):
             f += A.E(B, "gem", ((-1) ** k * 2.6, 14.3 + 2.6 * k, -3.25), (0.4, 0.4, 0.3))
         for x, y1 in ((-1.6, 6.0), (1.2, 4.2), (3.0, 7.4)):
             f += crv(B, "sash", [(x, 12.6, -3.2), (x + 0.3, (12.6 + y1) / 2, -3.6), (x - 0.2, y1, -3.4)], 0.2, 0.14, sides=4)
+        f += _hanged_back(B)
         return {B: f}
     if piece == "leggings":
         return pair(lambda s: (LEG[s], crv(LEG[s], "sash", [(s * 2.05 + s * 1.4, 8.4, -1.0), (s * 2.05 + s * 2.2, 5.0, -1.4), (s * 2.05 + s * 1.8, 1.4, -1.0)],
                                            0.18, 0.12, sides=4)))
     return pair(lambda s: (BOOT[s], crv(BOOT[s], "sash", [(s * 2.05 + s * 2.6, 2.8, 0.0), (s * 2.05 + s * 3.4, 1.2, 0.6), (s * 2.05 + s * 3.0, 0.2, 1.4)],
                                         0.16, 0.1, sides=4)))
+
+
+def _hanged_back(B):
+    """二回目の磨き (2026-11-01「背中が灰色の布一枚で寂しい」): 外套の上に、肩から腰へ交差する縄と結び目、腰の縄、
+    背筋の光る継ぎ目、腰から垂れる三本の縄の先と光る重り。z は外套の面 (上 3.2、下へ二乗で反る) の少し外"""
+    def z(y):
+        v = max(0.0, (23.8 - y) / 26.8)
+        return 3.2 + 1.8 * v * v + 0.55
+
+    f = []
+    for s in (-1, 1):
+        pts = [(s * 3.6 - s * 7.0 * t, 23.0 - 14.0 * t, 0.0) for t in (0.0, 0.25, 0.5, 0.75, 1.0)]
+        f += crv(B, "sash", [(x, y, z(y) + 0.1 * math.sin(math.pi * k / 4)) for k, (x, y, _) in enumerate(pts)], 0.34, 0.3, sides=5)
+    f += crv(B, "sash", [(x, 12.4, z(12.4) - 0.05 * abs(x)) for x in (-4.4, -2.2, 0.0, 2.2, 4.4)], 0.34, 0.34, sides=5)
+    f += A.E(B, "sash", (0, 16.0, z(16.0) + 0.25), (0.8, 0.8, 0.5))
+    for s in (-1, 1):
+        f += A.E(B, "sash", (s * 3.5, 12.4, z(12.4) + 0.2), (0.6, 0.6, 0.45))
+    f += lume(B, (0, 20.3, z(20.3) + 0.05), (0.3, 3.4, 0.15))
+    f += lume(B, (0, 6.4, z(6.4) + 0.05), (0.3, 6.6, 0.15))
+    for x, y1, sway in ((-2.4, 4.0, -0.4), (0.9, 2.2, 0.3), (3.0, 5.4, 0.5)):
+        f += crv(B, "sash", [(x, 12.2, z(12.2) + 0.15), (x + sway * 0.5, (12.2 + y1) / 2, z((12.2 + y1) / 2) + 0.35), (x + sway, y1 + 0.6, z(y1) + 0.45)],
+                 0.24, 0.18, sides=4)
+        f += bx(B, "lume", (x + sway, y1, z(y1) + 0.45), (0.8, 0.9, 0.8), taper=(0.7, 0.7))
+    return f
+
+
+def _stargazer_front(B):
+    """二回目の磨き (2026-11-01「正面が背中より寂しい」): 胸の真鍮の星盤 (二重の輪・十字・宝石)、胸の左右の星座 (光る星と細い線)、
+    帯から下がる二つの星の飾り"""
+    f = []
+    c = (0.0, 19.0, -3.6)
+    f += ring_tube(B, "brass", c, 2.0, 0.2, n=18, plane="xy")
+    f += ring_tube(B, "brass", (c[0], c[1], c[2] - 0.05), 1.25, 0.13, n=14, plane="xy")
+    f += crv(B, "brass", [(-2.0, c[1], c[2] - 0.1), (2.0, c[1], c[2] - 0.1)], 0.12, 0.12, sides=4)
+    f += crv(B, "brass", [(0, c[1] - 2.0, c[2] - 0.1), (0, c[1] + 2.0, c[2] - 0.1)], 0.12, 0.12, sides=4)
+    f += A.E(B, "gem", (0, c[1], c[2] - 0.3), (0.5, 0.5, 0.3))
+    for a in (45, 135, 225, 315):
+        f += A.E(B, "gem", (2.0 * math.cos(math.radians(a)), c[1] + 2.0 * math.sin(math.radians(a)), c[2] - 0.15), (0.3, 0.3, 0.22))
+    for sx in (-1, 1):
+        stars = [(sx * 3.3, 22.8), (sx * 2.9, 16.0), (sx * 3.6, 13.6)]
+        for k, (x, y) in enumerate(stars):
+            f += lume(B, (x, y, -3.48), (0.4, 0.4, 0.15))
+            if k:
+                px, py = stars[k - 1]
+                f += crv(B, "brass", [(px, py, -3.42), (x, y, -3.42)], 0.09, 0.09, sides=4)
+    star = [(0, 1.0), (0.28, 0.28), (1.0, 0), (0.28, -0.28), (0, -1.0), (-0.28, -0.28), (-1.0, 0), (-0.28, 0.28)]
+    for sx in (-1, 1):
+        f += crv(B, "brass", [(sx * 1.7, 12.2, -3.5), (sx * 1.8, 10.4, -3.7), (sx * 1.7, 9.0, -3.6)], 0.09, 0.09, sides=4)
+        f += ext(B, "brass", [(x * 0.95, y * 0.95) for x, y in star], 0.25, c=(sx * 1.7, 8.2, -3.65))
+        f += lume(B, (sx * 1.7, 8.2, -3.85), (0.35, 0.35, 0.12))
+    return f
 
 
 def _stargazer(piece):
@@ -1001,7 +1054,8 @@ def _stargazer(piece):
         f = drape(B, ["cloth", "cloth", "cloth", "cloth", "cape"], 0, 23.8, -2.0, 3.2, 4.2, 6.4, rows=6, cols=6, fold=0.4, flare_z=2.0, t=0.4)
         for p in ((-2.8, 18.0), (1.6, 16.2), (-0.6, 12.6), (3.2, 10.4), (-3.4, 8.2), (0.8, 6.0), (2.6, 2.6), (-2.0, 1.4)):
             f += lume(B, (p[0], p[1], 4.4 + (23.8 - p[1]) * 0.075), (0.35, 0.35, 0.15))
-        f += crv(B, "brass", [(0, 23.6, -3.4), (0, 18.0, -3.35), (0, 13.0, -3.35)], 0.14, 0.14, sides=4)
+        f += crv(B, "brass", [(0, 23.6, -3.4), (0, 21.0, -3.35)], 0.14, 0.14, sides=4)
+        f += _stargazer_front(B)
         out = {B: f}
         for s in (-1, 1):
             out[ARM[s]] = drape(ARM[s], ["cape", "cape", "brass"], s * 6.0, 24.6, 20.6, 0.0, 2.6, 3.2, rows=3, cols=4, fold=0.2, flare_z=0.4, t=0.3,
