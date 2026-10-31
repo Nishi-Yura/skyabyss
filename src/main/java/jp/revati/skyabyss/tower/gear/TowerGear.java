@@ -12,7 +12,7 @@ import jp.revati.skyabyss.rpg.skill.Job;
 //             武器の強さは終章の神器と横並び (1 秒あたりの傷が同じ)、効き方が違う (TowerGearEvents)。防具と装飾も野のヒロイックより一段上
 //   鐘銭      主を倒した人に毎回 COINS_PER_CLEAR
 //   塔の欠片  主を倒した人に毎回 SHARDS_PER_CLEAR。塔の装備の強化の燃料 (共鳴の炉。由来 tower の図鑑の燃料) と、塔の店の値段
-//   塔の箱    主を倒した人に毎回一つ (封切り師で開ける。中は塔の装備。loot/box の box_tower)
+//   塔の箱    主を倒した人に 15% (出ないまま 10 回目で必ず。封切り師で開ける。中は塔の装備のどれか一つ。loot/box の box_tower)
 // | 品               | 職     | 攻撃 / 速さ | 効き方 |
 // | あいだの大剣     | 戦士   | 15.0 / 1.6  | 傾き: 自分の体力が半分より上なら傷 +15%、半分以下なら与えた傷の 10% を体力に |
 // | 引き合いの鎚     | 鍛冶師 | 15.2 / 1.6  | 4 度目ごとに引き合いの一撃 (傷 ×1.5、まわり 5 の敵を自分のほうへ引き寄せる) |
@@ -31,6 +31,10 @@ public final class TowerGear {
     public static final int REQUIRED_LEVEL = 50;
     public static final int SHARDS_PER_CLEAR = 10;
     public static final int COINS_PER_CLEAR = 300;
+    // 塔の箱は毎回ではない (神器はなかなか手に入らない): 越えるたびに BOX_CHANCE、出ないまま BOX_PITY 回目で必ず。数えは人のデータ BOX_DRY
+    public static final float BOX_CHANCE = 0.15f;
+    public static final int BOX_PITY = 10;
+    public static final String BOX_DRY = "skyabyss_tower_box_dry";
     public static final String SHARD = id("tower_shard");
     public static final String SWORD = id("tower_balance_sword");
     public static final String HAMMER = id("tower_pull_hammer");

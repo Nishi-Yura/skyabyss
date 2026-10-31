@@ -141,6 +141,8 @@ public final class TowerSelfTest {
                         jp.revati.skyabyss.tower.gear.TowerGearSetup.ARMOR.get(jp.revati.skyabyss.tower.gear.TowerGear.HALO).get(1).get())) == box
                 && jp.revati.skyabyss.loot.box.LootBoxes.pool(box).size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size(), "tower gear does not go into the tower box");
         int shards0 = jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get());
+        // 天井の一つ手前にしておくと、この回で必ず箱が出る
+        p.getPersistentData().putInt(jp.revati.skyabyss.tower.gear.TowerGear.BOX_DRY, jp.revati.skyabyss.tower.gear.TowerGear.BOX_PITY - 1);
         int boxes0 = box == null ? 0 : jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box));
         long coins0 = jp.revati.skyabyss.facility.Coins.count(p);
         Towers.reward(p);
@@ -152,6 +154,13 @@ public final class TowerSelfTest {
             mythic &= d.get() instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.MYTHIC;
         }
         check(f, mythic, "a tower gear item is not mythic");
+        check(f, p.getPersistentData().getInt(jp.revati.skyabyss.tower.gear.TowerGear.BOX_DRY) == 0, "the pity count did not reset after a box");
+        int dryBoxes = 0;
+        for (int i = 0; i < jp.revati.skyabyss.tower.gear.TowerGear.BOX_PITY; i++) {
+            dryBoxes += Towers.rollBox(p, false) ? 1 : 0;
+        }
+        check(f, dryBoxes >= 1, "ten clears in a row gave no tower box (the pity did not work)");
+        p.getPersistentData().remove(jp.revati.skyabyss.tower.gear.TowerGear.BOX_DRY);
         if (box != null) {
             var opened = jp.revati.skyabyss.loot.box.LootBoxes.roll(box, null, p.getRandom());
             check(f, !opened.isEmpty() && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(opened) == box, "the tower box did not roll tower gear");

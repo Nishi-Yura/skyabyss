@@ -18,7 +18,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 終章の神器 (docs/design/50 の 4.5)。6 職に一つずつ、階級は神器 (いちばん上。あいだの塔の装備と同じ)、必要 Lv 50。
-//   受け取り  雲上の巡礼者を初めて退けた人に、いまの職の神器と雲上の心核 (SeatArena.onDeath → reward)。二度目からは心核 25% と心核の欠片
+//   受け取り  雲上の巡礼者を初めて退けた人に、雲上の箱 (神器のどれか一つ) と雲上の心核 (SeatArena.onDeath → reward)。二度目からは心核 25% と心核の欠片、
+//             雲上の箱 3% (巡礼の試しは 3% + 段 × 1%)
 //   職を替える 職の間で職を替えると、持っている神器は替えた職の神器になる (強化と特性はそのまま。JobChoice.switchTo → swap)
 //   強化      燃料は心核の欠片 (共鳴の炉。由来 cloudsea の図鑑の燃料)。七つの心核 (五つの巨神・深淵・月・雲上) は、しゃがんで使うと欠片 5 つに砕ける
 //   書き換え  どれもその職の幹の技を、島と座で覚えた決まりの形に書き換える (rpg/skill/Rune の DIVINE_*・LegendRewrites)
@@ -50,10 +51,11 @@ public final class DivineGear {
     public static final List<String> ARMOR_SETS = List.of(BELLKEEPER, MISTWALKER, LAMPKEEPER);
     public static final String CHARM = id("divine_plume_charm");
     public static final String CHIME = id("divine_promise_chime");
-    // 雲上の箱 (中は神器の武器・防具・装飾のどれか一つ): 二度目からの巡礼者で BOX_CHANCE、巡礼の試しは段ごとに + BOX_TRIAL_STEP
+    // 雲上の箱 (中は神器の武器・防具・装飾のどれか一つ。神器はなかなか手に入らない: 2026-11-01 の声「神器はあんまり手に入らないようにしてほしい」):
+    // 巡礼者を初めて倒すと必ず一つ。二度目からの巡礼者で BOX_CHANCE、巡礼の試しは BOX_CHANCE + 段 × BOX_TRIAL_STEP
     public static final String BOX = "box_cloud";
-    public static final float BOX_CHANCE = 0.20f;
-    public static final float BOX_TRIAL_STEP = 0.05f;
+    public static final float BOX_CHANCE = 0.03f;
+    public static final float BOX_TRIAL_STEP = 0.01f;
     // 砕くと欠片になる七つの心核
     public static final List<String> CORES = List.of(id("stone_whale_core"), id("tide_shell_core"), id("thunder_wing_core"), id("ember_core"),
             id("abyss_core"), id("moon_heart"), CORE);
@@ -174,10 +176,9 @@ public final class DivineGear {
     public static void reward(ServerPlayer p) {
         if (!p.getPersistentData().getBoolean(GIVEN)) {
             p.getPersistentData().putBoolean(GIVEN, true);
-            ItemStack relic = new ItemStack(item(forJob(job(p))));
-            Quests.give(p, relic.copy());
+            rollBox(p, 1f);
             Quests.give(p, new ItemStack(item(CORE)));
-            Notice.objective(p, "message.skyabyss.divine.given", relic.getHoverName());
+            Notice.objective(p, "message.skyabyss.divine.given_box");
             return;
         }
         int n = SHARDS_MIN + p.getRandom().nextInt(SHARDS_MAX - SHARDS_MIN + 1);

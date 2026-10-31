@@ -398,7 +398,6 @@
   "legend.skyabyss.divine_promise_circle": "Circle of the Promise",
   "legend.skyabyss.divine_promise_circle.effect": "Leaves a shield circle of radius 4 for 6 s where you sang. Allies inside take ×0.6 damage.",
   "legend.skyabyss.divine_promise_circle.skill": "Ward Song",
-  "message.skyabyss.divine.given": "Received a divine relic: %s. Change your job at the Hall of Callings and it becomes that job's relic.",
   "message.skyabyss.divine.swapped": "Your divine relic took the shape of your new job: %s",
   "message.skyabyss.divine.core_broken": "You broke the heart core. Heart core shards ×%s",
   "message.skyabyss.trial.calendar": "The sundial of the cloud calendar marks the Pilgrim's shadow. Tiers cleared: %s",
@@ -522,5 +521,6 @@
   "item.skyabyss.divine_promise_chime.story": "\"Ring it, and your former selves lend a hand.\"",
   "item.skyabyss.box_cloud": "Cloud Box",
   "item.skyabyss.box.kind_cloud": "Cloud box · a divine relic, armor piece or accessory",
-  "message.skyabyss.divine.box": "Received a Cloud Box. Open it at a box opener."
+  "message.skyabyss.divine.box": "Received a Cloud Box. Open it at a box opener.",
+  "message.skyabyss.divine.given_box": "Received a Cloud Box and a Cloud Heart. Open the box at a box opener (it holds one divine piece)."
 }

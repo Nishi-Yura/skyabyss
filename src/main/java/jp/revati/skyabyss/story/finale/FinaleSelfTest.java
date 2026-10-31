@@ -551,8 +551,12 @@ public final class FinaleSelfTest {
         p.getInventory().clearContent();
         p.getPersistentData().remove("skyabyss_divine_given");
         jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
-        check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.given(p) && countRelics(p) == 1
-                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get()) == 1, "the first defeat did not give one relic and the cloud core");
+        net.minecraft.world.item.Item cloudBox = jp.revati.skyabyss.loot.box.LootBoxSetup.item(cloud);
+        check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.given(p) && countRelics(p) == 0
+                && jp.revati.skyabyss.pouch.Pouch.countAll(p, cloudBox) == 1
+                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get()) == 1, "the first defeat did not give one cloud box and the cloud core");
+        // 箱から出た一本目の代わりに、職の一本目を持たせて続きを確かめる
+        p.getInventory().add(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SWORD.get()));
         int shardsBefore = p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
         jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
         check(f, countRelics(p) == 1 && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) > shardsBefore,

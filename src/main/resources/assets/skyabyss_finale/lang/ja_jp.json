@@ -398,7 +398,6 @@
   "legend.skyabyss.divine_promise_circle": "約束の円",
   "legend.skyabyss.divine_promise_circle.effect": "唄った所に 6 秒、半径 4 の盾の円。円の内の仲間は受ける傷 ×0.6。",
   "legend.skyabyss.divine_promise_circle.skill": "守りの唄",
-  "message.skyabyss.divine.given": "神器を受け取った: %s。職の間で職を替えると、替えた職の神器になる。",
   "message.skyabyss.divine.swapped": "神器が、新しい職の形に変わった: %s",
   "message.skyabyss.divine.core_broken": "心核を砕いた。心核の欠片 ×%s",
   "message.skyabyss.trial.calendar": "雲の暦の日時計が、巡礼者の影を刻んでいる。越えた段: %s",
@@ -522,5 +521,6 @@
   "item.skyabyss.divine_promise_chime.story": "「鳴らせば、前の自分たちが手を貸す。」",
   "item.skyabyss.box_cloud": "雲上の箱",
   "item.skyabyss.box.kind_cloud": "雲上の箱 · 終章の神器 (武器・防具・装飾のどれか一つ)",
-  "message.skyabyss.divine.box": "雲上の箱を受け取った。封切り師で開ける。"
+  "message.skyabyss.divine.box": "雲上の箱を受け取った。封切り師で開ける。",
+  "message.skyabyss.divine.given_box": "雲上の箱と雲上の心核を受け取った。箱は封切り師で開ける (中は神器のどれか一つ)。"
 }

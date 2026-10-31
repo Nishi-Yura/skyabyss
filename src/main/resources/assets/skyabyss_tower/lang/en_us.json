@@ -63,7 +63,7 @@
   "item.skyabyss.tower_clap_bell_staff": "Bell Staff of Joined Hands",
   "item.skyabyss.tower_clap_bell_staff.desc": "Each hit adds a prayer. At 5: allies within 6 (and you) regain 4 health and 6 mana.",
   "item.skyabyss.tower_clap_bell_staff.story": "\"Join your hands, and a small sound rings between sky and abyss.\"",
-  "message.skyabyss.tower.reward": "Got a Tower Box, %s shards and %s coins. Open the box at a box opener.",
+  "message.skyabyss.tower.reward": "Got %s Tower Shards and %s coins.",
   "message.skyabyss.tower.btn.shop": "[Tower Shop]",
   "item.skyabyss.tower_scale_helmet": "Balance Plate Helm",
   "item.skyabyss.tower_scale_chestplate": "Balance Plate Body",
@@ -85,5 +85,6 @@
   "item.skyabyss.tower_heaven_ring.story": "\"Only the full may reach for the sky.\"",
   "item.skyabyss.tower_abyss_chain": "Chain of the Abyss",
   "item.skyabyss.tower_abyss_chain.desc": "A chain of black stone links. At 30% health or below: damage taken x0.80.",
-  "item.skyabyss.tower_abyss_chain.story": "\"The abyss holds on to those about to fall.\""
+  "item.skyabyss.tower_abyss_chain.story": "\"The abyss holds on to those about to fall.\"",
+  "message.skyabyss.tower.box": "A Tower Box dropped! Open it at a box opener (it holds one mythic piece)."
 }

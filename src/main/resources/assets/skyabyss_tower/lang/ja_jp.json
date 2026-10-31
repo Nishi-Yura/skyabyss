@@ -63,7 +63,7 @@
   "item.skyabyss.tower_clap_bell_staff": "合掌の鈴杖",
   "item.skyabyss.tower_clap_bell_staff.desc": "打つたびに祈りが一つ。5 つで合掌: まわり 6 の仲間と自分の体力 4・マナ 6 を戻す。",
   "item.skyabyss.tower_clap_bell_staff.story": "「両手を合わせると、天と淵のあいだに小さな音が鳴る。」",
-  "message.skyabyss.tower.reward": "塔の箱・塔の欠片 %s・鐘銭 %s 枚を受け取った。箱は封切り師で開ける。",
+  "message.skyabyss.tower.reward": "塔の欠片 %s・鐘銭 %s 枚を受け取った。",
   "message.skyabyss.tower.btn.shop": "[塔の店]",
   "item.skyabyss.tower_scale_helmet": "天秤の甲冑の兜",
   "item.skyabyss.tower_scale_chestplate": "天秤の甲冑の胴",
@@ -85,5 +85,6 @@
   "item.skyabyss.tower_heaven_ring.story": "「満ちた者だけが、天に手を伸ばせる。」",
   "item.skyabyss.tower_abyss_chain": "淵の鎖",
   "item.skyabyss.tower_abyss_chain.desc": "黒い石の輪をつないだ鎖。体力が 3 割以下のあいだ、受ける傷 ×0.80。",
-  "item.skyabyss.tower_abyss_chain.story": "「落ちかけた者を、淵がつなぎとめる。」"
+  "item.skyabyss.tower_abyss_chain.story": "「落ちかけた者を、淵がつなぎとめる。」",
+  "message.skyabyss.tower.box": "塔の箱が出た! 封切り師で開ける (中は神器のどれか一つ)。"
 }
