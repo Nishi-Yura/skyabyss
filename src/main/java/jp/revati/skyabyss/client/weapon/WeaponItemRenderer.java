@@ -106,8 +106,9 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         // item モデルの原点は block の角 (この時点で -0.5 ずみ)。メッシュは x = 0, z = 0 が中心で、LowPolyMesh は geo (GeckoLib) 向けに x を反転して焼くので、ここで戻す
         pose.translate(0.5f, 0f, 0.5f);
         pose.scale(-1f, 1f, 1f);
-        // 刃の向きが逆に作ってあるメッシュは、柄の軸で半回転 (2026-10-29 の試遊「短剣や斧、持ち方逆」: 一人称で刃が後ろを向いていた)
-        if (EDGE_FLIP.contains(id)) {
+        // 刃の向きが逆に作ってあるメッシュは、柄の軸で半回転 (2026-10-29 の試遊「短剣や斧、持ち方逆」: 一人称で刃が後ろを向いていた)。
+        // 鎚はどれも打つ面を +x に作ってあり、持ち方を借りた戦斧 (刃が -x) と逆なので、まとめて半回転 (2026-11-01「ハンマー、全体的に前後ろ逆かも」)
+        if (EDGE_FLIP.contains(id) || faceFlip(id)) {
             pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
         }
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
@@ -139,6 +140,11 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger", "gather_axe");
+
+    // 打つ面が +x の鎚 (武器の種類が鎚のもの。採集の道具は除く)
+    static boolean faceFlip(String id) {
+        return WeaponKind.of(id) == WeaponKind.HAMMER && !id.startsWith("gather_");
+    }
 
     private static float daggerGrow(String id, String tier) {
         boolean dagger = id.equals("waterway_fang") || id.equals("raiju_claw") || id.equals("tidecaller_claw");
