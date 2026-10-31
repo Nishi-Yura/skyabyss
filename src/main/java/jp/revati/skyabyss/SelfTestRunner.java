@@ -369,6 +369,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("founder", jp.revati.skyabyss.story.finale.founder.FounderSelfTest::run));
         // 超大型レイド「あいだの塔」(docs/design/54)。SKYABYSS_SELFTEST_ONLY="tower"
         steps.add(Step.once("tower", jp.revati.skyabyss.tower.TowerSelfTest::run));
+        // 巡り路 (docs/design/54 の 3.1)。SKYABYSS_SELFTEST_ONLY="circuit"
+        steps.add(Step.once("circuit", jp.revati.skyabyss.endgame.CircuitSelfTest::run));
         steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));
         steps.add(Step.once("abyss depths", 20, jp.revati.skyabyss.story.ch5.depths.DepthsV2SelfTest::run));
         steps.add(Step.once("abyss finds (load)", jp.revati.skyabyss.story.ch5.AbyssFindsSelfTest::load));

@@ -1,0 +1,43 @@
+# 巡り路 (目的の帯・光の柱・課題の湧き)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/circuit.txt -PshotsName=circuit
+world circuit_check continent
+size 1280 720
+timeout 1500
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd skyabyss level set @p 14
+cmd time set noon
+cmd weather clear
+cmd effect give @s resistance 600 4 true
+cmd tp @s -120 140 -700
+waitchunks 300
+wait 60
+cmd skyabyss circuit reset
+cmd skyabyss circuit start 2
+chat clear
+wait 60
+shot circuit_1_start
+cmd skyabyss circuit goto
+waitchunks 300
+wait 80
+shot circuit_2_task
+wait 120
+shot circuit_3_task_later
+cmd skyabyss circuit next
+wait 40
+cmd skyabyss circuit goto
+waitchunks 300
+wait 80
+shot circuit_4_next
+cmd skyabyss circuit next
+wait 40
+cmd skyabyss circuit goto
+waitchunks 300
+wait 80
+shot circuit_5_next
+cmd skyabyss circuit end
+wait 40
+shot circuit_6_end

@@ -141,6 +141,11 @@ public final class ObjectiveStrip {
         if (town != null) {
             return new Cur(town, new Resolved(jp.revati.skyabyss.client.guide.TownGuideClient.door(), false));
         }
+        // 巡り路 (endgame/Circuits) を歩いているあいだは、残り時間・印・いまの課題と行き先
+        String circuit = jp.revati.skyabyss.endgame.client.CircuitClient.objective();
+        if (circuit != null) {
+            return new Cur(circuit, new Resolved(jp.revati.skyabyss.endgame.client.CircuitClient.target(), false));
+        }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
             return new Cur(Component.translatable("objective.skyabyss." + opening.id()).getString(), new Resolved(opening.target(), false));

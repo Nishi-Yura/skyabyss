@@ -21,6 +21,17 @@
           "goto": "end"
         },
         {
+          "id": "circuit",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "circuit"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "bye",
           "kind": "leave",
           "goto": "end"

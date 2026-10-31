@@ -49,7 +49,9 @@ public final class LifeKeep {
             "skyabyss_tower_day",                     // あいだの塔に入った日 (一日一回。tower/Towers)
             "skyabyss_tower_clears", "skyabyss_tower_best",   // あいだの塔を越えた回数と最速
             "skyabyss_tower_box_dry",                 // 塔の箱が出ないまま越えた回数 (天井)
-            "skyabyss_secret_arts", "skyabyss_secret_slots"); // 秘伝 (覚えた段と枠。rpg/skill/SecretArts)
+            "skyabyss_secret_arts", "skyabyss_secret_slots", // 秘伝 (覚えた段と枠。rpg/skill/SecretArts)
+            "skyabyss_circuit_day", "skyabyss_circuit_runs",  // 巡り路の報いを受けた日と回数 (endgame/Circuits)
+            "skyabyss_region_week", "skyabyss_region_fame");  // 土地の点 (週の点と名声。endgame/RegionPoints)
     // 頭が同じ印 (巨神ごと・主ごとに分かれる記録)
     public static final List<String> PREFIXES = List.of(
             "skyabyss_moon_trial.");                  // 位相の挑戦の主ごとの最速 (story/ch6/MoonTrial)
