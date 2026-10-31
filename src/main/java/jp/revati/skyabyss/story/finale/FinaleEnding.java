@@ -45,6 +45,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FinaleEnding {
     public static final String KEY = "skyabyss_finale_ending";
+    // 見終えた結末 (並びは ENDINGS の順、"," でつなぐ)。三つそろうと裏ボス「初代の空見」の頼みが始まる (docs/design/53 の 3 章)
+    public static final String SEEN = "skyabyss_finale_seen";
     public static final List<String> ENDINGS = List.of("calm", "break", "accept");
     public static final String REEL = "finale_end_";
     static final String COMMAND = "skyabyss_ending";
@@ -66,6 +68,27 @@ public final class FinaleEnding {
     public static String chosen(ServerPlayer p) {
         String s = p.getPersistentData().getString(KEY);
         return ENDINGS.contains(s) ? s : null;
+    }
+
+    // 見終えた結末 (前の版から遊んでいる人は、今の結末を見たものとして数える)
+    public static java.util.Set<String> seen(ServerPlayer p) {
+        java.util.Set<String> out = new java.util.LinkedHashSet<>();
+        for (String e : p.getPersistentData().getString(SEEN).split(",")) {
+            if (ENDINGS.contains(e)) {
+                out.add(e);
+            }
+        }
+        String now = chosen(p);
+        if (now != null) {
+            out.add(now);
+        }
+        return out;
+    }
+
+    static void markSeen(ServerPlayer p, String e) {
+        java.util.Set<String> s = seen(p);
+        s.add(e);
+        p.getPersistentData().putString(SEEN, String.join(",", ENDINGS.stream().filter(s::contains).toList()));
     }
 
     // 受け入れるを選べるか: 月の記憶の断片 12 と、伝承「見る者」
@@ -113,6 +136,7 @@ public final class FinaleEnding {
     public static void apply(ServerPlayer p, String e) {
         boolean first = chosen(p) == null;
         p.getPersistentData().putString(KEY, e);
+        markSeen(p, e);
         Lore.unlock(p, "finale/ending_" + e, true);
         Notice.place(p, Component.translatable("message.skyabyss.ending." + e + ".title"), Component.translatable("message.skyabyss.ending." + e + ".sub"));
         Notice.narrate(p, "message.skyabyss.ending." + e + ".after");

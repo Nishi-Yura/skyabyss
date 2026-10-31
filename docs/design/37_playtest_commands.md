@@ -197,6 +197,7 @@
 | `/skyabyss abyss …` | 深淵の層・番人・深みへ跳ぶ | [36](36_abyss.md)、`docs/review/playtest_0.8.1.md` |
 | `/skyabyss moonworld <valley|cliff|field|rift|core> …`、`core_lord`、`core_clear` | 月の区画へ跳ぶ、核の主、核を倒したことにする | [46](46_moon.md)、`docs/review/playtest_0.9.1.md` |
 | `/skyabyss cloudsea enter`、`ring <鐘>`、`lord`、`crumble`、`lamp <w\|e\|s>`、`eye`、`forge <w\|e\|n>`、`rewinder`、`selves`、`plume`、`seat <1\|2\|3>`、`ending <calm\|break\|accept\|none>`、`trial <1..5>` | 終章: 着く所へ跳ぶ、島ごとの仕掛けと主、座の形態、結末の空、巡礼の試しの段 | [50](50_finale.md)、`docs/review/playtest_finale.md` |
+| `/skyabyss founder enter`、`summon`、`phase <1..3>`、`verse <1..7>`、`win`、`seen`、`wear`、`reset` | 裏ボス: 鐘の内へ跳ぶ、始祖を呼ぶ、段を進める、歌の一行をすぐ、退ける（やっつめの語りと報酬）、三つの結末を見たことにする、肩掛けを着る・脱ぐ、進みを消す | [53](53_founder.md)、`docs/review/playtest_founder.md` |
 | `/skyabyss quest next <頼み>`、`quest signal <合図>` | 頼みを一段進める、合図を立てる（終章は `main_finale_bell`・`lamp`・`forge`・`promise`・`seat`） | 07 |
 
 コマンドの引数は、全角の空白を半角に・続く空白を一つに・前後の空白を取って読み直す（`CommandTidy`）。

@@ -103,5 +103,7 @@
   "advancement.skyabyss.rebirth_20.title": "淵を巡る者",
   "advancement.skyabyss.rebirth_20.description": "転生を 20 回する。",
   "advancement.skyabyss.rebirth_flawless.title": "無傷の転生",
-  "advancement.skyabyss.rebirth_flawless.description": "一度も倒れずに転生する。"
+  "advancement.skyabyss.rebirth_flawless.description": "一度も倒れずに転生する。",
+  "title.skyabyss_rebirth.yattsume": "やっつめを聞いた者",
+  "title.skyabyss_rebirth.yattsume.how": "鐘の内で、初代の空見を退ける"
 }

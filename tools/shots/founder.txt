@@ -1,0 +1,72 @@
+# 裏ボス「初代の空見」(docs/design/53): 鐘の内の広い絵、始祖の正面と構え (突き・ふたつ・歌う・聞き耳・みっつ・膝をつく)、退けたあとの札、肩掛け
+# 撮る人はクリエイティブ (観戦だと「誰もいない」と数えて 10 秒で片付く)。始祖は AI を止めて構えだけ流す
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/founder.txt -PshotsName=founder
+world founder
+size 1280 720
+timeout 2400
+render 10
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd gamemode creative
+cmd skyabyss founder enter
+wait 70
+cmd data merge entity @e[type=skyabyss:founder,limit=1] {NoAI:1b}
+cmd tp @e[type=skyabyss:founder,limit=1] 0.5 151 1193.5 0 0
+wait 20
+camera skyabyss:cloudsea 0 160 1215 180 22
+waitchunks 200
+wait 40
+shot f01_arena
+camera skyabyss:cloudsea 13 152 1210 140 -12
+wait 20
+shot f02_arena_up
+camera skyabyss:cloudsea 2.5 152.6 1196.8 146 4
+wait 30
+shot f03_founder
+cmd skyabyss dev anim @e[type=skyabyss:founder,limit=1] thrust
+camera skyabyss:cloudsea 4.8 152.4 1193.5 90 4
+wait 11
+shot f04_thrust_side
+cmd skyabyss dev anim @e[type=skyabyss:founder,limit=1] spin
+camera skyabyss:cloudsea 0.5 152.6 1197.6 180 4
+wait 28
+shot f05_spin
+cmd skyabyss dev anim @e[type=skyabyss:founder,limit=1] sing
+wait 12
+shot f06_sing
+cmd skyabyss dev anim @e[type=skyabyss:founder,limit=1] listen
+wait 14
+shot f07_listen
+cmd skyabyss dev anim @e[type=skyabyss:founder,limit=1] leap
+wait 30
+shot f08_leap
+cmd skyabyss dev anim @e[type=skyabyss:founder,limit=1] kneel
+wait 40
+shot f09_kneel
+camera skyabyss:cloudsea -2.5 152.6 1190.5 326 4
+wait 10
+shot f10_back
+camera skyabyss:cloudsea 0.5 151 1199.5 180 0
+hud on
+cmd skyabyss founder win
+wait 124
+shot f11_won
+hud off
+cmd skyabyss founder wear
+camera skyabyss:cloudsea 0.5 151 1206.5 180 0
+perspective back
+wait 20
+shot f12_shawl_back
+perspective front
+wait 10
+shot f13_shawl_front
+bodyyaw 50
+wait 10
+shot f14_shawl_side
+perspective first

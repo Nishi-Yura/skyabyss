@@ -103,5 +103,7 @@
   "advancement.skyabyss.rebirth_20.title": "Wanderer of the Abyss",
   "advancement.skyabyss.rebirth_20.description": "Rebirth 20 times.",
   "advancement.skyabyss.rebirth_flawless.title": "Flawless Rebirth",
-  "advancement.skyabyss.rebirth_flawless.description": "Rebirth without having fallen even once."
+  "advancement.skyabyss.rebirth_flawless.description": "Rebirth without having fallen even once.",
+  "title.skyabyss_rebirth.yattsume": "Heard the Eighth Verse",
+  "title.skyabyss_rebirth.yattsume.how": "Overcome the First Skywatcher inside the bell"
 }

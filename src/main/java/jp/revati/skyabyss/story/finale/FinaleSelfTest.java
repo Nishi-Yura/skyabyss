@@ -512,6 +512,7 @@ public final class FinaleSelfTest {
         check(f, "calm".equals(FinaleEnding.chosen(p)) && jp.revati.skyabyss.sky.ChapterSky.stage(p).moonBias() < 0, "choosing calm did not change the sky");
         FinaleEnding.apply(p, "break");
         check(f, "break".equals(FinaleEnding.chosen(p)), "choosing again did not replace the ending");
+        check(f, FinaleEnding.seen(p).containsAll(List.of("calm", "break")), "the seen endings were not recorded: " + FinaleEnding.seen(p));
         for (String e : FinaleEnding.ENDINGS) {
             check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/story_reels/finale_end_" + e + ".json") != null
                     && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/gui/story/finale_end_" + e + "/p5.png") != null
@@ -520,6 +521,7 @@ public final class FinaleSelfTest {
         check(f, FinaleSelfTest.class.getResource("/assets/skyabyss/textures/environment/finale_crack.png") != null
                 && FinaleSelfTest.class.getResource("/assets/skyabyss/textures/environment/finale_wing.png") != null, "the ending sky textures are missing");
         p.getPersistentData().remove(FinaleEnding.KEY);
+        p.getPersistentData().remove(FinaleEnding.SEEN);
         divine(p, f);
     }
 

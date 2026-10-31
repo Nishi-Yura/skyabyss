@@ -1,0 +1,14 @@
+{
+  "chapter": "finale",
+  "order": 41,
+  "inscription": true,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/counting_song",
+    "finale/founder"
+  ]
+}

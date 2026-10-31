@@ -314,5 +314,8 @@
   "skyabyss_record.r.trial_codex": "試練の記録",
   "skyabyss_record.v.trial_codex": "図鑑",
   "skyabyss_record.d.trial_codex": "巨神の背の試練の速さ・称号・図鑑の写し。下の「開く」で見る。",
-  "skyabyss_record.gui.open": "開く"
+  "skyabyss_record.gui.open": "開く",
+  "skyabyss_record.r.founder": "初代の空見",
+  "skyabyss_record.v.founder_none": "退けた",
+  "skyabyss_record.d.founder": "鐘の内で初代の空見を退けた最速の時間。挑み直すたびに縮めて残る。"
 }

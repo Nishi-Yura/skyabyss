@@ -1,0 +1,16 @@
+{
+ "id": "moon_founder_shawl",
+ "short": "空見の肩掛け",
+ "kind": "裏ボスの報酬 一品一案 (53 の 6 章)",
+ "title": "空見の肩掛け (founder_shawl) — 見た目だけ。星図を刺した藍の布、後ろに長い二本の垂れ",
+ "sheets": [
+  "moon_roughs/founder_shawl.png"
+ ],
+ "extra": "骨 1 本 (root)。 三角形 548 (目安 300〜700)。埋まった部品: なし。生成: tools/rough/lowpoly/moon/founder_shawl.py。三段の姿: ",
+ "options": {
+  "a": {
+   "name": "星図の肩掛け (548 三角形)",
+   "desc": "藍の布に金の縁と刺した星 (光る)。"
+  }
+ }
+}

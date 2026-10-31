@@ -467,6 +467,13 @@ public final class RecordBuilder {
         // 試練の記録 (図鑑): 背の試練の速さ・称号・図鑑の写し (前は砦の老兵が開いた)
         rows.add(new Row("trial_codex", Kind.VALUE, ItemStack.EMPTY, t("r.trial_codex"), t("v.trial_codex"), RecordSnapshot.MARK_NONE, -1,
                 List.of(t("d.trial_codex")), RecordSnapshot.ACTION_RECORDS));
+        // 裏ボス「初代の空見」の最速 (退けた人だけ。docs/design/53 の 6 章)
+        if (jp.revati.skyabyss.story.finale.founder.Founder.beaten(p)) {
+            long best = jp.revati.skyabyss.story.finale.founder.Founder.best(p);
+            rows.add(new Row("founder", Kind.VALUE, ItemStack.EMPTY, t("r.founder"),
+                    best < 0 ? t("v.founder_none") : Component.literal(jp.revati.skyabyss.story.finale.founder.Founder.time(best)),
+                    RecordSnapshot.MARK_NONE, -1, List.of(t("d.founder")), RecordSnapshot.ACTION_NONE));
+        }
 
         rows.add(header("travel"));
         TravelState travel = Voyages.state(p);

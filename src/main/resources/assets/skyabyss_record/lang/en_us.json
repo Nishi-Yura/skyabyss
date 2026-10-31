@@ -314,5 +314,8 @@
   "skyabyss_record.r.trial_codex": "Trial records",
   "skyabyss_record.v.trial_codex": "Codex",
   "skyabyss_record.d.trial_codex": "Trial times on the titans' backs, titles and your copy of the codex. Press Open below.",
-  "skyabyss_record.gui.open": "Open"
+  "skyabyss_record.gui.open": "Open",
+  "skyabyss_record.r.founder": "First Skywatcher",
+  "skyabyss_record.v.founder_none": "Overcome",
+  "skyabyss_record.d.founder": "Your fastest time overcoming the First Skywatcher inside the bell. Each retry can lower it."
 }

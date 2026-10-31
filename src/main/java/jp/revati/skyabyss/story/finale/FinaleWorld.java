@@ -37,6 +37,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   座      巡礼者の座と約束の島の主の間からの光の橋 (data/skyabyss/finale/seat.json。build_cloud_seat.py。版 6、雲の暦は版 7。PilgrimSeat・SeatArena・PilgrimTrial)
 //   行き来  都の大鐘楼の門 (story/ch6/MoonGate が行き先を選ばせる。FinaleGate)。着く所の帰りの台 (天然磁石) を右クリックで都へ
 //   門の鐘  巡礼の門の下の鐘を右クリック → 合図 finale_gate (作る順 2 で雲の島 1 への橋を架ける)
+//   鐘の内  裏ボス「初代の空見」の舞台 (data/skyabyss/finale/founder.json。build_bell_inside.py。版 8。founder/FounderArena)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FinaleWorld {
     public static final ResourceKey<Level> LEVEL = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "cloudsea"));
@@ -46,7 +47,7 @@ public final class FinaleWorld {
     public static final String GATE_SIGNAL = "finale_gate";
     static final String ARRIVAL = "arrival";
     // 1 = 巡礼の門の島、2 = 島 1「鐘の島」と着く所からの白い橋 (BellIsle)
-    static final int VERSION = 7;
+    static final int VERSION = 8;
     // 人ごとの最後に立っていた島の所 (保存しない。なければ着く所)
     private static final Map<UUID, BlockPos> SAFE = new HashMap<>();
 
@@ -106,6 +107,10 @@ public final class FinaleWorld {
         // 版 7: 座の台に雲の暦 (巡礼の試し)。座をもう一度流し込む
         if (d.version < 7) {
             PilgrimSeat.terrain().pour(level);
+        }
+        // 版 8: 裏ボスの鐘の内 (docs/design/53。南の閉じた大鐘)
+        if (d.version < 8) {
+            jp.revati.skyabyss.story.finale.founder.FounderArena.terrain().pour(level);
         }
         d.version = VERSION;
         d.setDirty();

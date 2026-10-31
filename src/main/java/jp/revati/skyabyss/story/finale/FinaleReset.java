@@ -23,5 +23,6 @@ public final class FinaleReset {
         FinaleEnding.resetAll();
         FinaleWorld.resetAll();
         jp.revati.skyabyss.story.finale.gear.DivineGearEvents.resetAll();
+        jp.revati.skyabyss.story.finale.founder.FounderArena.resetAll();
     }
 }

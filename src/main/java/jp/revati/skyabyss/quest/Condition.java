@@ -47,7 +47,7 @@ import net.minecraft.world.item.Item;
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -232,6 +232,8 @@ public final class Condition {
                 jp.revati.skyabyss.opening.site.SiteData.Entry e = jp.revati.skyabyss.facility.TownGuide.townAt(server, ctx.player().blockPosition());
                 yield e != null && jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index).equals(str("town"));
             }
+            // 見終えた結末の数 (終章。docs/design/53 の 3 章)
+            case "endings_seen" -> jp.revati.skyabyss.story.finale.FinaleEnding.seen(ctx.player()).size() >= GsonHelper.getAsInt(json, "min", 1);
             case "night" -> {
                 long t = ctx.player().server.overworld().getDayTime() % 24000L;
                 yield t >= 13000 && t < 23000;

@@ -1,0 +1,62 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "node": "founder_verse",
+      "if": {
+        "type": "quest",
+        "quest": "side_founder",
+        "is": "active",
+        "stage": "verse"
+      }
+    },
+    {
+      "node": "founder_after",
+      "if": {
+        "type": "quest",
+        "quest": "side_founder",
+        "is": "active",
+        "stage": "tell"
+      }
+    }
+  ],
+  "nodes": {
+    "founder_verse": {
+      "face": "grave",
+      "next": "founder_verse2"
+    },
+    "founder_verse2": {
+      "face": "neutral",
+      "next": "founder_verse3"
+    },
+    "founder_verse3": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "founder_after": {
+      "face": "neutral",
+      "next": "founder_after2"
+    },
+    "founder_after2": {
+      "face": "grave",
+      "next": "founder_after3"
+    },
+    "founder_after3": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

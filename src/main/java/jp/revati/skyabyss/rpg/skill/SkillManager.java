@@ -640,6 +640,8 @@ public final class SkillManager {
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), skill.id, rank, false, SkillActions.fxTarget));
         }
         SkillActions.fxTarget = null;
+        // 鐘の内の初代の空見は、技の音を聞く (docs/design/53 の 5.1)
+        jp.revati.skyabyss.story.finale.mob.FounderBoss.heardSkill(player);
         return CastResult.OK;
     }
 

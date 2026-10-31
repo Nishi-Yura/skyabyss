@@ -87,7 +87,12 @@ public final class CloudMobsSetup {
 
     public static final DeferredItem<Item> BELL_MOURNER_EGG = egg("bell_mourner_spawn_egg", BELL_MOURNER, 0xC4C0B6, 0x8C6A3E);
     public static final DeferredItem<Item> MIST_BIRD_EGG = egg("mist_bird_spawn_egg", MIST_BIRD, 0xF4F4F8, 0xDCB250);
+    // 裏ボス「初代の空見」(docs/design/53。人の大きさ 2.4)
+    public static final DeferredHolder<EntityType<?>, EntityType<FounderBoss>> FOUNDER = ENTITIES.register(FounderBoss.ID,
+            () -> EntityType.Builder.of(FounderBoss::new, MobCategory.MONSTER).sized(0.8f, 2.4f).eyeHeight(2.15f).fireImmune()
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + FounderBoss.ID));
     public static final DeferredItem<Item> LAST_BELLKEEPER_EGG = egg("last_bellkeeper_spawn_egg", LAST_BELLKEEPER, 0x343640, 0xDCB250);
+    public static final DeferredItem<Item> FOUNDER_EGG = egg("founder_spawn_egg", FOUNDER, 0xD0CAB4, 0x26305A);
     public static final DeferredItem<Item> NET_CASTER_EGG = egg("net_caster_spawn_egg", NET_CASTER, 0x2E3C3A, 0xA08860);
     public static final DeferredItem<Item> LAMP_MOTH_EGG = egg("lamp_moth_spawn_egg", LAMP_MOTH, 0xF4F2EC, 0xFFD890);
     public static final DeferredItem<Item> LAMP_EYE_EGG = egg("lamp_eye_spawn_egg", LAMP_EYE, 0xB89646, 0x5A9C88);
@@ -220,13 +225,14 @@ public final class CloudMobsSetup {
         event.put(PILGRIM_HAND.get(), PilgrimHand.createAttributes().build());
         event.put(PILGRIM_EYE.get(), PilgrimEye.createAttributes().build());
         event.put(PILGRIM_MOON.get(), PilgrimMoon.createAttributes().build());
+        event.put(FOUNDER.get(), FounderBoss.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(BELL_MOURNER_EGG, MIST_BIRD_EGG, LAST_BELLKEEPER_EGG, NET_CASTER_EGG, LAMP_MOTH_EGG, LAMP_EYE_EGG, ASH_STRIKER_EGG,
                     BACKFIRE_EGG, REWINDER_EGG, FALLEN_PLUME_EGG, PLUME_WARDEN_EGG, PILGRIM_PLUME_EGG,
-                    PILGRIM_HAND_EGG, PILGRIM_EYE_EGG, PILGRIM_MOON_EGG)) {
+                    PILGRIM_HAND_EGG, PILGRIM_EYE_EGG, PILGRIM_MOON_EGG, FOUNDER_EGG)) {
                 event.accept(i.get());
             }
         }
@@ -250,6 +256,7 @@ public final class CloudMobsSetup {
             put(PilgrimHand.ID, 500);
             put(PilgrimEye.ID, 900);
             put(PilgrimMoon.ID, 1200);
+            put(FounderBoss.ID, 1500);
         });
     }
 

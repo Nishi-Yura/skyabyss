@@ -21,7 +21,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // 都の大鐘楼の門から雲海へ (docs/design/50 の 4.1)。MoonGate が門を触られたときに先に聞く (route)。
 //   メイン「雲の上へ」(main_finale_ascend) の段 ascend 以降の人だけ。
 //   初めて: 紙芝居「巨神の昇り」(finale_ascend) を見て雲海の着く所へ (合図 cloudsea_arrive)
-//   二度目から: 月にも行ける人にはチャットの二択 ([月へ] / [雲海へ]。/skyabyss_gate moon|cloud。門のそばでだけ)
+//   二度目から: 月にも行ける人にはチャットの二択 ([月へ] / [雲海へ]。/skyabyss_gate moon|cloud。門のそばでだけ)。
+//   裏ボスの頼み (founder/Founder) の段 enter 以降の人には [鐘の内へ] も (/skyabyss_gate bell)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FinaleGate {
     public static final String QUEST = "main_finale_ascend";
@@ -72,7 +73,11 @@ public final class FinaleGate {
                     .withStyle(Style.EMPTY.withColor(0x9CB4F0).withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + COMMAND + " moon")));
             Component cloud = Component.translatable("message.skyabyss.gate.choose.cloud")
                     .withStyle(Style.EMPTY.withColor(0xF2D78A).withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + COMMAND + " cloud")));
-            p.sendSystemMessage(Component.empty().append(moon).append("  ").append(cloud));
+            Component line = Component.empty().append(moon).append("  ").append(cloud);
+            if (jp.revati.skyabyss.story.finale.founder.Founder.available(p)) {
+                line = line.copy().append("  ").append(jp.revati.skyabyss.story.finale.founder.Founder.gateOption(COMMAND));
+            }
+            p.sendSystemMessage(line);
             return true;
         }
         go(p);
@@ -104,6 +109,13 @@ public final class FinaleGate {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     if (nearGate(p) && MoonGate.refusal(p) == null) {
                         MoonGate.open(p, MoonGate.gatePos(p.server));
+                    }
+                    return 1;
+                }))
+                .then(Commands.literal("bell").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    if (nearGate(p) && jp.revati.skyabyss.story.finale.founder.Founder.available(p)) {
+                        jp.revati.skyabyss.story.finale.founder.Founder.enterFromGate(p, MoonGate.gatePos(p.server));
                     }
                     return 1;
                 }))

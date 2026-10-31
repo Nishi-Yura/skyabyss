@@ -8,6 +8,14 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 裏ボス「初代の空見」（2026-11-01。設計 [53](design/53_founder.md)）
+
+- 三つの結末を見終えた人に、語り部が数え歌の「やっつめ」を話す（頼み `side_founder`）。大鐘楼の門の選びの［鐘の内へ］から、雲海の次元の南の閉じた大鐘「鐘の内」へ。
+- 始祖は人の大きさの一騎打ち。鐘の拍子、耳で狙う（うるさい人を）、聞き耳の返し、竿の三つの技、数え歌の七行を技にした歌（言葉どおりに動けば避けられる）、段 3 の二行重ねと写し。体力が尽きると膝をつき、やっつめ「やっつ　やすんで　いいのよ」を歌って消える。
+- 報酬は称号「やっつめを聞いた者」・見た目だけの空見の肩掛け（背中に描く。装飾の枠は使わない）・始祖の小鐘・伝承 2 項。挑み直すと J の記録に最速が残る。強さは増やさない。
+- 同じ作業で見つけた不具合: 倒れて新しい体になると、月と終章の記録（選んだ結末・巡礼の試しと位相の挑戦の段・神器を渡した印など）が消えていた。`util/LifeKeep` に足した（神器を二度もらえる穴もふさいだ）。
+- 確かめ: 自己テスト `founder`（と `cloudsea`・`rebirth`・`record`）が通った。撮影 `tools/shots/founder.txt`（鐘の内・始祖の構え・退けたあとの札・肩掛け）。手応え（数値・技の間）と歌の避けやすさは試遊で（`docs/review/playtest_founder.md`）。
+
 ## 0.9.20 のあと（遊ばずに決められる片づけ。2026-10-31）
 
 - 砦の老兵を消した（`AttendantRole.RETIRED` に足した。前の世界の人は消える）。試練の記録（図鑑）は J の記録の巨神のつまみの行「試練の記録」の「開く」から（`RecordSnapshot.ACTION_RECORDS` → `RecordNetwork.OpenTrials` → `KeepRecords.open`）。前の空見の頁は都の社の祭司が渡す（`attendant_shrine_priest_page.json`。伝承 `chapter1/keep_prev_page` が開いていれば「もう渡した」）。
