@@ -1,4 +1,4 @@
-# 引き継ぎ（2026-10-31）
+# 引き継ぎ（2026-11-02）
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
@@ -8,10 +8,20 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## エンドコンテンツの残り（2026-11-02 の夜。設計 [54](design/54_endgame_plan.md) の 3.1.1・3.3.1・3.4.1・5.1.1・5.4.1・6.2.7・6.2.8）
+
+- 新しい包み `endgame/`: 巡り路 `Circuits`（町の案内人から。20 分、倒す・守る・運ぶ、一日 3 回の報い）、大陸の大事件 `WorldEvents`（45 分ごと、二章から）、土地の点 `RegionPoints`（週の点と名声）、名声と旅帳 `RegionFame`（`/skyabyss_journal`）、組合の週 `GuildWeek`（旗取りと塔の誉れ）、図鑑の報い `Codex`（`/skyabyss_codex`）、武器の見た目替え `Looks`（鍛冶屋。データ部品 `look`）。職の熟練は `rpg/JobMastery`（`GrowthData.mastery`）。
+- 称号は 48 個（`RebirthTitles`。事実の印 `Facts.marks` で名声・旅帳・熟練・図鑑を数える）。
+- 自己テスト: `circuit`・`world event`・`fame`・`mastery`・`guild week`・`codex`・`looks`。撮影台本: `tools/shots/circuit.txt`・`world_event.txt`・`mastery.txt`・`looks.txt`・`skill_changes.txt`。
+- 開発用: `/skyabyss circuit start <土地>|next|goto|end|reset`、`/skyabyss event start [土地]|goto|end`、`/skyabyss fame add <土地> <点>`。
+- 形の承認待ち（朝の確認ページ https://claude.ai/artifact/8gGk5RcrHcLSJhUcYWetji 。選びは db の `choices`）: 飾り装備の範囲・防具の見た目替え・釣り・巡り路の「壊す」の杭・土地の旗の見た目。
+- 数値（巡り路の鐘銭・大事件の体力の倍率・名声の段の境・熟練の段の量）は試遊で直す。
+
 ## 秘伝（2026-11-01。設計 [54](design/54_endgame_plan.md) の 3.2.1）
 
-- 職ごとに 4 つ・24 の秘伝（`rpg/skill/SecretArts`。`SkillActions.perform` の後に上乗せ）。段 I〜III、枠 2（チャットの一覧 `/skyabyss_arts`・師範の「秘伝の枠を見る」）。秘伝の巻 `secret_scroll`（`rpg/skill/SecretScroll`。塔を越えると 25%、塔の店で欠片 100）。自己テストは `tower` の中。
-- まだ: 巻の絵（`gen_tower_assets.py` の `secret_scroll`、承認待ち。`INSTALLED` に足して `--install`）。技の画面に枠を出すこと。効き方の手ごたえは遊んで。
+- 職ごとに 4 つ・24 の秘伝（`rpg/skill/SecretArts`。`SkillActions.perform` の後に上乗せ）。段 I〜III、枠 2（チャットの一覧 `/skyabyss_arts`・師範の「秘伝の枠を見る」・技の画面の下の段の枠）。秘伝の巻 `secret_scroll`（絵は入れた）。秘伝は `SecretArtsPayload` で手元へ送る。自己テストは `tower` の中。
+- 技の変化の見え方（`rpg/skill/SkillChanges`）: 刻印・書き換え・変異・秘伝が技を変えているとき、技の帯と画面の枠に色の菱形、説明の一番上に「いまの変化:」。
+- まだ: 効き方の手ごたえは遊んで。
 
 ## 神器の二本目・防具・装飾（入れた。2026-11-01。設計 [50](design/50_finale.md) の 4.5.1）
 
