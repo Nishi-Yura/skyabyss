@@ -42,6 +42,11 @@ public final class CloudMobRenderers {
         event.registerEntityRenderer(CloudMobsSetup.PILGRIM_EYE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimEye.ID, 0.0f, 1.5f));
         event.registerEntityRenderer(CloudMobsSetup.PILGRIM_MOON.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimMoon.ID, 0.0f, 1.4f));
         event.registerEntityRenderer(CloudMobsSetup.FOUNDER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.FounderBoss.ID, 0.5f, 1.0f));
+        // あいだの塔: 主は 1/5 で作ってあるので 5 倍。側の目は灯守の目、落ちる月は巡礼者の月の形を借りる
+        event.registerEntityRenderer(CloudMobsSetup.TOWER_MASTER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.tower.mob.TowerMaster.ID, 0.0f, 5.0f));
+        event.registerEntityRenderer(CloudMobsSetup.TOWER_EYE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.LampEye.ID, 0.0f, 1.0f));
+        event.registerEntityRenderer(CloudMobsSetup.TOWER_EYE_BIG.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.LampEye.ID, 0.0f, 1.8f));
+        event.registerEntityRenderer(CloudMobsSetup.TOWER_MOON.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimMoon.ID, 0.0f, 1.4f));
     }
 
     static final class Model<T extends CloudMob> extends LowPolyGeoRenderer.Model<T> {

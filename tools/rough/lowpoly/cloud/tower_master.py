@@ -6,10 +6,12 @@
   右腕     金と白 (天)。左腕 黒い石と鎖 (淵)。両手は橋の北の広場に置かれる (主の前 24・左右 13・下 10 ブロック)
   頭       白い布で顔を覆う。右に金の角、左に黒い角、角のあいだに天秤の印 (光る)
 座標: 設計は 1 ブロック = 16 で書き、書き出す前に SCALE (1/5) で縮める (絵の画素が巨大にならないように)。ゲームでは描くときに 5 倍に広げる。
-原点 = 玉座に座る所 (印 boss)。正面は -Z (橋の方)。
+原点 = 広場の床 (主の当たりの箱の底の真ん中。印 boss の 9 下・12 前)。正面は -Z (橋の方)。形は LIFT だけ上と後ろへずらして玉座に座らせる。
 骨: root > body > head > halo / horn / sigil、body > arm_l > fore_l > hand_l、arm_r > fore_r > hand_r、core、legs。
 """
 import math
+
+import numpy as np
 import sys
 from pathlib import Path
 
@@ -21,12 +23,14 @@ VOIDG = [(120, 70, 210), (160, 110, 240), (200, 160, 255), (235, 215, 255)]
 ROBEW = [(176, 172, 160), (208, 204, 192), (230, 228, 218), (246, 244, 236)]
 
 SCALE = 0.2
+# 玉座に座る所 (設計で書いた原点) を、広場の床の原点から見た所 (上 9・後ろ 12 ブロック)
+LIFT = (0, 9 * 16, 12 * 16)
 _BONES = {"root": (None, (0, 0, 0)), "body": ("root", (0, 60, 0)), "head": ("body", (0, 360, -10)),
-         "halo": ("head", (0, 400, 90)), "core": ("body", (0, 250, -96)),
+         "halo": ("head", (0, 410, 110)), "core": ("body", (0, 250, -96)),
          "arm_l": ("body", (-150, 320, -10)), "fore_l": ("arm_l", (-205, 120, -120)), "hand_l": ("fore_l", (-210, -110, -330)),
          "arm_r": ("body", (150, 320, -10)), "fore_r": ("arm_r", (205, 120, -120)), "hand_r": ("fore_r", (210, -110, -330)),
          "legs": ("root", (0, 0, 0))}
-BONES = {k: (v[0], tuple(c * SCALE for c in v[1])) for k, v in _BONES.items()}
+BONES = {k: (v[0], tuple((c + LIFT[i]) * SCALE for i, c in enumerate(v[1]))) for k, v in _BONES.items()}
 PAL = make_pal({
     "stone": (STONE, 0.5, dict(crack=0.10, noise=0.22)),
     "robe": (ROBEW, 0.62, dict(crack=0.03, noise=0.14)),
@@ -137,10 +141,11 @@ def build(k):
         F += part(f"feather{i}", tube("halo", "robe" if i % 2 else "gold", [(cx, cy, 112), ((cx + ox) / 2, (cy + oy) / 2, 116), (ox, oy, 120)],
                                       ra=[16, 12, 2], sides=4, hint=(0, 0, 1)))
     # 書き出す大きさへ縮める (骨の支点も SCALE で縮めてある)
+    lift = np.array(LIFT, dtype=float)
     for f in F:
-        f.verts = f.verts * SCALE
+        f.verts = (f.verts + lift) * SCALE
         f.loc = f.verts
-        f.ref = f.ref * SCALE
+        f.ref = (f.ref + lift) * SCALE
     return F, []
 
 
@@ -157,10 +162,10 @@ SPEC = dict(
     sub=["上半身は天 (白と金の衣・羽の光輪・金の角)、下半身と左腕は淵 (黒い石・紫の割れ目・鎖)。白い布で顔を覆い、角のあいだに天秤の印。",
          "胸の核が打てる所。両手は橋の北の広場に置かれる。高さ約 40 ブロック、動かない (Wynncraft の Annihilation が手本)。"],
     labels=["あいだに座すもの"],
-    rows=[("前 3/4 (橋から見上げる)", "idle", 205, 4, 560, (0, 34, -24), 3.1),
-          ("右手の払い", "rake", 230, 4, 560, (0, 34, -24), 3.1),
-          ("合掌", "clap", 180, 8, 560, (0, 34, -30), 3.1),
-          ("落ちる月を呼ぶ / 後ろ 3/4", "moon", 30, 8, 560, (0, 44, -8), 2.75)],
+    rows=[("前 3/4 (橋から見上げる)", "idle", 205, 4, 560, (0, 63, 14), 3.1),
+          ("右手の払い", "rake", 230, 4, 560, (0, 63, 14), 3.1),
+          ("合掌", "clap", 180, 8, 560, (0, 63, 8), 3.1),
+          ("落ちる月を呼ぶ / 後ろ 3/4", "moon", 30, 8, 560, (0, 73, 30), 2.75)],
     options={"a": dict(name="天と淵の巨人", desc="上は白と金と羽の光輪、下と左腕は黒い石と鎖。顔は白い布、胸に光る核と天秤。")},
     extra="骨 12 本。光るのは胸の核・角のあいだの印・紫の割れ目。",
     budget="主 4000〜8000", pw=520,

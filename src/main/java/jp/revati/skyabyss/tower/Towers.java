@@ -37,6 +37,11 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Towers {
     public static final String DAY = "skyabyss_tower_day";
+    // 越えた回数と最速 (tick)。人のデータ (LifeKeep で倒れても残る)
+    public static final String CLEARS = "skyabyss_tower_clears";
+    public static final String BEST = "skyabyss_tower_best";
+    // 主が倒れてから都の受付へ戻すまで
+    static final int CLEAR_BACK = 300;
     public static final int MAX_SQUAD = 12;
     static final int EMPTY_END = 1200;
     static final Map<Integer, TowerRun> RUNS = new HashMap<>();
@@ -106,6 +111,7 @@ public final class Towers {
         TowerWorld.pour(level, slot);
         clearFoes(run);
         run.arena = new TowerArena(run);
+        run.arena.begin(level);
         Vec3 e = run.markCenter("entry");
         for (ServerPlayer p : run.online()) {
             p.teleportTo(level, e.x + (p.getRandom().nextDouble() - 0.5) * 4, e.y, e.z + (p.getRandom().nextDouble() - 0.5) * 2, 180f, 0f);
@@ -153,6 +159,29 @@ public final class Towers {
         end(run);
     }
 
+    // 主が倒れた: 塔の中にいる隊の人に、越えた回数と最速を書く
+    static void cleared(TowerRun run, long ticks) {
+        run.cleared = true;
+        for (ServerPlayer p : run.online()) {
+            if (!TowerWorld.in(p)) {
+                continue;
+            }
+            var d = p.getPersistentData();
+            d.putInt(CLEARS, d.getInt(CLEARS) + 1);
+            if (!d.contains(BEST) || ticks < d.getLong(BEST)) {
+                d.putLong(BEST, ticks);
+            }
+            Notice.narrate(p, "message.skyabyss.tower.cleared", time(ticks));
+            Notice.hint(p, "message.skyabyss.tower.clear_back");
+        }
+        SkyAbyss.LOGGER.info("[tower] run #{} cleared in {} with {} player(s)", run.id, time(ticks), run.members.size());
+    }
+
+    public static String time(long ticks) {
+        long s = ticks / 20;
+        return String.format("%d:%02d", s / 60, s % 60);
+    }
+
     // 抜ける: 都の受付へ。その日はもう入れない
     public static void leave(ServerPlayer p) {
         TowerRun run = runOf(p);
@@ -184,6 +213,25 @@ public final class Towers {
             return;
         }
         run.arena.tick(level, t);
+        TowerFight fight = run.arena.fight;
+        if (fight.won) {
+            if (!run.cleared) {
+                cleared(run, fight.wonAt - run.startedTick);
+            }
+            if (t >= fight.wonAt + CLEAR_BACK) {
+                for (ServerPlayer p : run.online()) {
+                    if (p.isAlive() && TowerWorld.in(p)) {
+                        TowerDesk.sendBack(p);
+                    }
+                }
+                end(run);
+            }
+            return;
+        }
+        if (fight.failed != null) {
+            fail(run, fight.failed);
+            return;
+        }
         if (run.arena.timedOut(t)) {
             fail(run, "timeout");
             return;
@@ -278,7 +326,7 @@ public final class Towers {
     }
 
     // ---------------------------------------------------------------- 開発用
-    // /skyabyss tower start (一人で、一日一回を数えずに) | day (今日の一回を戻す) | leave
+    // /skyabyss tower start (一人で、一日一回を数えずに) | day (今日の一回を戻す) | leave | act <技> (主の技をすぐ出す) | hp <割合 %> (主の体力)
     @SubscribeEvent
     static void onCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
@@ -291,6 +339,23 @@ public final class Towers {
                         .then(Commands.literal("leave").executes(c -> {
                             leave(c.getSource().getPlayerOrException());
                             return 1;
-                        }))));
+                        }))
+                        .then(Commands.literal("act").then(Commands.argument("move", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                            TowerRun run = runOf(c.getSource().getPlayerOrException());
+                            if (run == null || run.arena == null) {
+                                return 0;
+                            }
+                            run.arena.fight.devMove(run.level(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "move"));
+                            return 1;
+                        })))
+                        .then(Commands.literal("hp").then(Commands.argument("percent", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 100)).executes(c -> {
+                            TowerRun run = runOf(c.getSource().getPlayerOrException());
+                            if (run == null || run.arena == null || run.arena.fight.master() == null) {
+                                return 0;
+                            }
+                            var m = run.arena.fight.master();
+                            m.setHealth(m.getMaxHealth() * com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "percent") / 100f);
+                            return 1;
+                        })))));
     }
 }

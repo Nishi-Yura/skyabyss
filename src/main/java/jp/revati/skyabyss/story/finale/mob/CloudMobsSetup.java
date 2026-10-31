@@ -91,6 +91,19 @@ public final class CloudMobsSetup {
     public static final DeferredHolder<EntityType<?>, EntityType<FounderBoss>> FOUNDER = ENTITIES.register(FounderBoss.ID,
             () -> EntityType.Builder.of(FounderBoss::new, MobCategory.MONSTER).sized(0.8f, 2.4f).eyeHeight(2.15f).fireImmune()
                     .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + FounderBoss.ID));
+    // 超大型レイド「あいだの塔」(docs/design/54 の 2.5): 主・側の目 (小・大)・落ちる月。主は動かない巨人で、当たりは広場から玉座まで
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerMaster>> TOWER_MASTER = ENTITIES.register(
+            jp.revati.skyabyss.tower.mob.TowerMaster.ID, () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerMaster::new, MobCategory.MONSTER)
+                    .sized(28f, 32f).eyeHeight(28f).fireImmune().clientTrackingRange(16).build(SkyAbyss.MODID + ":" + jp.revati.skyabyss.tower.mob.TowerMaster.ID));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerEye>> TOWER_EYE = ENTITIES.register("tower_eye",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerEye::new, MobCategory.MONSTER).sized(2.4f, 2.8f).eyeHeight(1.4f).fireImmune()
+                    .clientTrackingRange(16).build(SkyAbyss.MODID + ":tower_eye"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerEye>> TOWER_EYE_BIG = ENTITIES.register("tower_eye_big",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerEye::new, MobCategory.MONSTER).sized(4.3f, 5.0f).eyeHeight(2.5f).fireImmune()
+                    .clientTrackingRange(16).build(SkyAbyss.MODID + ":tower_eye_big"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerMoon>> TOWER_MOON = ENTITIES.register("tower_moon",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerMoon::new, MobCategory.MONSTER).sized(5.0f, 6.2f).eyeHeight(3.2f).fireImmune()
+                    .clientTrackingRange(16).build(SkyAbyss.MODID + ":tower_moon"));
     public static final DeferredItem<Item> LAST_BELLKEEPER_EGG = egg("last_bellkeeper_spawn_egg", LAST_BELLKEEPER, 0x343640, 0xDCB250);
     public static final DeferredItem<Item> FOUNDER_EGG = egg("founder_spawn_egg", FOUNDER, 0xD0CAB4, 0x26305A);
     public static final DeferredItem<Item> NET_CASTER_EGG = egg("net_caster_spawn_egg", NET_CASTER, 0x2E3C3A, 0xA08860);
@@ -226,6 +239,10 @@ public final class CloudMobsSetup {
         event.put(PILGRIM_EYE.get(), PilgrimEye.createAttributes().build());
         event.put(PILGRIM_MOON.get(), PilgrimMoon.createAttributes().build());
         event.put(FOUNDER.get(), FounderBoss.createAttributes().build());
+        event.put(TOWER_MASTER.get(), jp.revati.skyabyss.tower.mob.TowerMaster.createAttributes().build());
+        event.put(TOWER_EYE.get(), jp.revati.skyabyss.tower.mob.TowerEye.createAttributes().build());
+        event.put(TOWER_EYE_BIG.get(), jp.revati.skyabyss.tower.mob.TowerEye.createAttributes().build());
+        event.put(TOWER_MOON.get(), jp.revati.skyabyss.tower.mob.TowerMoon.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {

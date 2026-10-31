@@ -8,6 +8,7 @@ import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.story.finale.FinaleEnding;
+import jp.revati.skyabyss.tower.mob.TowerMaster;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -16,6 +17,8 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // あいだの塔の自己テスト (docs/design/54 の 2 章。橋の上の一戦)。段: "tower"
 //   次元・橋の印 / 資格と一日一回 / 挑戦: 区画に流し込む (橋・帰りの天然磁石・印の石)・時間切れの判定・終わり / 区画は隊ごとに別
+//   主の一戦 (TowerFight): 主と側の目 6 つが湧く・人数の体力・目覚めは傷が通らない・体力が月の前で止まる・予告の印の内外 /
+//   落ちる月 (主が傷を受けない・渡りきると全滅・壊すと次の段へ) / 主が倒れると勝ちと記録
 public final class TowerSelfTest {
     private TowerSelfTest() {
     }
@@ -66,6 +69,7 @@ public final class TowerSelfTest {
                 check(f, level.getBlockState(a.mark("return")).is(Blocks.LODESTONE) && level.getBlockState(a.mark("sigil_2").below()).is(Blocks.CRYING_OBSIDIAN),
                         "the bridge was not poured in the slot");
                 check(f, !a.arena.timedOut(a.startedTick + TowerArena.LIMIT - 1) && a.arena.timedOut(a.startedTick + TowerArena.LIMIT), "the 30 minute limit is wrong");
+                fight(f, level, a, p);
                 Towers.end(a);
                 runs.remove(a);
                 check(f, Towers.runOf(p) == null && !Towers.RUNS.containsKey(a.id), "the run did not end");
@@ -82,9 +86,59 @@ public final class TowerSelfTest {
         report(f);
     }
 
+    // 主の一戦 (人のいない区画で、段を手で進める)
+    static void fight(List<String> f, ServerLevel level, TowerRun run, FakePlayer p) {
+        TowerFight fg = run.arena.fight;
+        TowerMaster m = fg.master();
+        check(f, m != null && m.isAlive() && fg.eyes.size() == 6 && fg.eyes.stream().allMatch(e -> e.mob.isAlive()), "the master and six side eyes did not spawn");
+        if (m == null) {
+            return;
+        }
+        check(f, Math.abs(TowerFight.masterHp(1) - TowerMaster.HP) < 1 && Math.abs(TowerFight.masterHp(12) - TowerMaster.HP * (1 + 0.85 * 11)) < 1
+                && Math.abs(TowerFight.masterHp(20) - TowerFight.masterHp(12)) < 1, "the master's HP does not follow the squad size");
+        check(f, Math.abs(m.getMaxHealth() * (1 / m.toughness()) - TowerFight.masterHp(1)) < 2, "the master was not tuned to its HP");
+        check(f, !m.hurt(level.damageSources().generic(), 50), "the master can be hurt while it wakes");
+        long now = level.getGameTime();
+        fg.start = now - TowerFight.INTRO - 1;
+        fg.tick(level, now);
+        check(f, !m.shielded(), "the master stays shielded after waking");
+        m.setHealth(1);
+        check(f, m.getHealth() >= m.getMaxHealth() * 0.5f - 1, "the master's health did not stop before the first moon");
+        // 予告の印
+        TowerFight.Zone c = TowerFight.Zone.circle(new net.minecraft.world.phys.Vec3(0, 100, 0), 4, 0, 1, TowerFight.GOLD);
+        TowerFight.Zone b = TowerFight.Zone.box(new net.minecraft.world.phys.Vec3(-2, 100, -5), new net.minecraft.world.phys.Vec3(2, 100, 5), 0, 1, TowerFight.GOLD);
+        check(f, c.contains(new net.minecraft.world.phys.Vec3(3, 100, 0)) && !c.contains(new net.minecraft.world.phys.Vec3(3, 100, 3))
+                && !c.contains(new net.minecraft.world.phys.Vec3(0, 106, 0)) && b.contains(new net.minecraft.world.phys.Vec3(1, 100, 4)) && !b.contains(new net.minecraft.world.phys.Vec3(3, 100, 0)),
+                "the warning zones are wrong");
+        // 落ちる月: 体力が止まった所で月が出る
+        fg.tick(level, now + 1);
+        check(f, fg.moon != null && fg.moon.isAlive() && m.shielded(), "the first moon did not rise at 50%");
+        if (fg.moon != null) {
+            fg.moonBorn = now - TowerFight.MOON_TICKS;
+            fg.tickMoon(level, now + 2, List.of());
+            check(f, "moon_lost".equals(fg.failed), "a moon that crossed the bridge did not wipe the squad");
+            fg.failed = null;
+            fg.moon.kill();
+            fg.tickMoon(level, now + 3, List.of());
+            check(f, fg.moon == null && fg.moonsDone == 1 && !m.shielded(), "breaking the moon did not lift the master's shield");
+            m.setHealth(1);
+            check(f, m.getHealth() >= m.getMaxHealth() * 0.2f - 1 && m.getHealth() < m.getMaxHealth() * 0.5f, "the master's health did not stop before the second moon");
+        }
+        // 勝ち
+        fg.moon = null;
+        fg.moonsDone = 2;
+        m.setFloor(0);
+        m.kill();
+        fg.tick(level, now + 4);
+        Towers.tick(level, run, now + 4);
+        check(f, fg.won && run.cleared, "the run was not cleared when the master fell");
+        p.getPersistentData().remove(Towers.CLEARS);
+        p.getPersistentData().remove(Towers.BEST);
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, end)");
+            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, end)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tower FAILED: {}", m));
         }

@@ -46,7 +46,8 @@ public final class LifeKeep {
             "skyabyss_founder",                       // 初代の空見の進み (story/finale/founder/Founder)
             "skyabyss_founder_best",                  // 初代の空見の最速 (tick)
             "skyabyss_founder_shawl",                 // 空見の肩掛けを着ている
-            "skyabyss_tower_day");                    // あいだの塔に入った日 (一日一回。tower/Towers)
+            "skyabyss_tower_day",                     // あいだの塔に入った日 (一日一回。tower/Towers)
+            "skyabyss_tower_clears", "skyabyss_tower_best"); // あいだの塔を越えた回数と最速
     // 頭が同じ印 (巨神ごと・主ごとに分かれる記録)
     public static final List<String> PREFIXES = List.of(
             "skyabyss_moon_trial.");                  // 位相の挑戦の主ごとの最速 (story/ch6/MoonTrial)

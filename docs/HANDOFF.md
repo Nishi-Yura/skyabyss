@@ -12,7 +12,8 @@
 
 - 声「Wynncraft のめっちゃでかい動かないボスのやつに似せて。途中のやつとかなくて、ボス戦だけ」「アナイアレーション参考にして」で、四つの階をやめ、橋の先に座る巨大な主との一戦だけにした（手本は Wynncraft の Prelude to Annihilation）。
 - できた: 塔の次元 `skyabyss:tower`（`data/skyabyss/dimension*/tower.json`）、区画 16（`tower/TowerWorld`）、橋の舞台（`tools/gen/world/build_tower.py` → `data/skyabyss/tower/bridge.json`、`TowerTerrain` が区画へずらして流し込む）、挑戦の進め方（`Towers`。一日一回・全滅と 30 分で終わり・倒れたら入口・抜ける）、橋の上の時間と休み場と落ちたとき（`TowerArena`）、都の広場の受付とレイド隊 1〜12（`TowerDesk`。資格のある人にだけ光の柱、チャットで隊を作る・入る・始める）、自己テスト `tower`、撮影 `tools/shots/tower_floors.txt`。
-- まだ: 主「あいだに座すもの」の形（ラフ `tools/rough/lowpoly/cloud/tower_master.py` → `docs/review/cloud_roughs/tower_master.png`。1/5 で作り、ゲームで 5 倍に描く。ユーザーの承認待ち）、技と段と落ちる月・側の目・湧く敵、塔の箱と装備・店・賭け・記録、塔守の姿。
+- 主「あいだに座すもの」（形はユーザー承認済み。ラフ `tools/rough/lowpoly/cloud/tower_master.py`、入れるのは `gen_cloud_mobs.py tower_master`。1/5 で作り、ゲームで 5 倍に描く。原点は北の広場の床で、形は LIFT で玉座へ上げてある）: 体 `tower/mob/TowerMaster`（当たり 28×32、体力の止まり所 floor、月のあいだの shielded）、側の目 `TowerEye`（灯守の目の形）、落ちる月 `TowerMoon`（巡礼者の月の形）、一戦の進め方 `tower/TowerFight`（技 11・群れ・高まり・月 2 回・側の目・繋ぎ手・鎖の子の回復落ち・勝ち）。越えた回数と最速は人のデータ `skyabyss_tower_clears` / `_best`。開発用 `/skyabyss tower act <技>`・`hp <%>`。撮影 `tools/shots/tower_boss.txt`。
+- まだ: 塔の箱と装備・塔の欠片・店・賭け・記録の板・称号、塔守の姿。数字（体力・傷・月の速さ）は遊んで詰める。
 
 ## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
 
