@@ -172,9 +172,21 @@ public final class Towers {
                 d.putLong(BEST, ticks);
             }
             Notice.narrate(p, "message.skyabyss.tower.cleared", time(ticks));
+            reward(p);
             Notice.hint(p, "message.skyabyss.tower.clear_back");
         }
         SkyAbyss.LOGGER.info("[tower] run #{} cleared in {} with {} player(s)", run.id, time(ticks), run.members.size());
+    }
+
+    // 越えた人への報酬: 塔の箱 1 (封切り師で開ける。中は塔の装備) と塔の欠片
+    static void reward(ServerPlayer p) {
+        net.minecraft.world.item.Item box = jp.revati.skyabyss.loot.box.LootBoxSetup.item(jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower"));
+        if (box != null) {
+            jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(box));
+        }
+        jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(),
+                jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR));
+        Notice.gain(p, "message.skyabyss.tower.reward", jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR);
     }
 
     public static String time(long ticks) {

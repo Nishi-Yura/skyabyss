@@ -1,0 +1,82 @@
+{
+  "title": "gui.skyabyss.shop.tower",
+  "goods": [
+    {
+      "id": "tower_balance_sword",
+      "item": "skyabyss:tower_balance_sword",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 80
+        }
+      ]
+    },
+    {
+      "id": "tower_pull_hammer",
+      "item": "skyabyss:tower_pull_hammer",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 80
+        }
+      ]
+    },
+    {
+      "id": "tower_moon_staff",
+      "item": "skyabyss:tower_moon_staff",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 80
+        }
+      ]
+    },
+    {
+      "id": "tower_eye_bow",
+      "item": "skyabyss:tower_eye_bow",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 80
+        }
+      ]
+    },
+    {
+      "id": "tower_sigil_dagger",
+      "item": "skyabyss:tower_sigil_dagger",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 80
+        }
+      ]
+    },
+    {
+      "id": "tower_clap_bell_staff",
+      "item": "skyabyss:tower_clap_bell_staff",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 80
+        }
+      ]
+    },
+    {
+      "id": "box",
+      "item": "skyabyss:box_tower",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 40
+        }
+      ]
+    }
+  ]
+}

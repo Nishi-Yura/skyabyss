@@ -19,6 +19,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //   次元・橋の印 / 資格と一日一回 / 挑戦: 区画に流し込む (橋・帰りの天然磁石・印の石)・時間切れの判定・終わり / 区画は隊ごとに別
 //   主の一戦 (TowerFight): 主と側の目 6 つが湧く・人数の体力・目覚めは傷が通らない・体力が月の前で止まる・予告の印の内外 /
 //   落ちる月 (主が傷を受けない・渡りきると全滅・壊すと次の段へ) / 主が倒れると勝ちと記録
+//   報酬 (docs/design/54 の 2.6): 塔の武器は塔の箱に入る・箱の表は 6 本・越えた人に箱 1 と欠片 10・塔の店の品
 public final class TowerSelfTest {
     private TowerSelfTest() {
     }
@@ -132,13 +133,24 @@ public final class TowerSelfTest {
         fg.tick(level, now + 4);
         Towers.tick(level, run, now + 4);
         check(f, fg.won && run.cleared, "the run was not cleared when the master fell");
+        // 報酬
+        jp.revati.skyabyss.loot.box.BoxKind box = jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower");
+        check(f, box != null && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SWORD.get())) == box
+                && jp.revati.skyabyss.loot.box.LootBoxes.pool(box).size() == jp.revati.skyabyss.tower.gear.TowerGear.WEAPONS.size(), "tower gear does not go into the tower box");
+        int shards0 = jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get());
+        int boxes0 = box == null ? 0 : jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box));
+        Towers.reward(p);
+        check(f, jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get()) == shards0 + jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR
+                && box != null && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box)) == boxes0 + 1, "the clear reward was not given");
+        var shop = jp.revati.skyabyss.facility.ShopManager.shop(TowerDesk.SHOP);
+        check(f, shop != null && shop.goods().size() == 7, "the tower shop is missing or incomplete");
         p.getPersistentData().remove(Towers.CLEARS);
         p.getPersistentData().remove(Towers.BEST);
     }
 
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, end)");
+            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, end)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tower FAILED: {}", m));
         }

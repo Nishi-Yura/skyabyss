@@ -7,11 +7,11 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.item.GearTier;
 
-// 封の箱の種類 (docs/design/52 の 2 章)。巨神の箱 4 種・階級の箱 (階級 × 帯)・淵の金の箱。
+// 封の箱の種類 (docs/design/52 の 2 章)。巨神の箱 4 種・階級の箱 (階級 × 帯)・淵の金の箱・塔の箱 (あいだの塔の報酬。docs/design/54 の 2.6)。
 // 同じ種類 (= 同じ品) の箱は重なる。階級の箱は帯ごとに別の品にする (旅嚢は品ごとの数で持つので、帯を品で分ける)
 public record BoxKind(String id, Type type, @Nullable String titan, GearTier tier, int band) {
     public enum Type {
-        TITAN, RARITY, ARTIFACT
+        TITAN, RARITY, ARTIFACT, TOWER
     }
 
     public static final List<String> TITANS = List.of("stone_whale", "tide_shell", "thunder_wing", "ember");
@@ -32,6 +32,7 @@ public record BoxKind(String id, Type type, @Nullable String titan, GearTier tie
             }
         }
         out.add(new BoxKind("box_artifact", Type.ARTIFACT, null, GearTier.ARTIFACT, 0));
+        out.add(new BoxKind("box_tower", Type.TOWER, null, GearTier.HEROIC, 0));
         return List.copyOf(out);
     }
 

@@ -1,4 +1,5 @@
-"""封の箱 9 種 (docs/design/52 の 2 章)。一品一案: 巨神の箱 4 (岩鯨・潮殻・雷翼・余燼)、階級の箱 4 (アンコモン・レア・エピック・ヒロイック)、淵の金の箱。
+"""封の箱 10 種 (docs/design/52 の 2 章)。一品一案: 巨神の箱 4 (岩鯨・潮殻・雷翼・余燼)、階級の箱 4 (アンコモン・レア・エピック・ヒロイック)、淵の金の箱、
+塔の箱 (あいだの塔の報酬。docs/design/54 の 2.6)。
 大きさは手に持てる小箱 (幅 ±4、高さ 0〜7 単位、奥行き ±3。1 単位 = 1/16 ブロック)。底が y = 0、正面 = -Z (封は正面)。
 縁 (trim) は階級の色 (paint_wild.TRIM)。光るのは封 (gem) だけ。
 
@@ -187,6 +188,35 @@ def box_artifact(stage=0):
     return f
 
 
+def box_tower(stage=0):
+    """塔の箱: 箱が縦に割れ、左は白い石 (天)、右は黒い石 (淵)。合わせ目と角は金、黒い側に紫に光る割れ目。ふたの上に天秤の印 (金の輪と竿と二つの皿)、
+    正面の封は金の輪の中の紫の石"""
+    f = []
+    for s, mat in ((-1, "main"), (1, "spine")):
+        f += block(mat, (s * WX / 2, 2.1, 0), (WX, 4.2, 2 * D))
+        f += block(mat, (s * WX / 2, 5.05, 0), (WX + 0.15, 1.9, 2 * D + 0.3), taper=(0.92, 0.8))
+    f += block("acc", (0, 0.25, 0), (2 * WX + 0.35, 0.5, 2 * D + 0.35))
+    f += block("acc", (0, 4.15, 0), (2 * WX + 0.4, 0.42, 2 * D + 0.4))
+    f += block("acc", (0, 2.9, 0), (0.5, 5.8, 2 * D + 0.45))
+    for x in (-WX, WX):
+        for z in (-D, D):
+            f += block("acc", (x, 2.1, z), (0.7, 4.2, 0.7))
+    # 黒い側の割れ目 (光る)
+    f += gbar([(1.2, 0.8, -D - 0.05), (2.0, 1.9, -D - 0.05), (1.6, 2.9, -D - 0.05), (2.6, 3.8, -D - 0.05)], r=0.11, mat="gem")
+    f += gbar([(WX + 0.05, 1.0, -1.4), (WX + 0.05, 2.2, -0.4), (WX + 0.05, 3.4, -1.0)], r=0.11, mat="gem")
+    # ふたの上の天秤の印
+    f += prism("acc", (0, 6.0, 0), (0, 7.6, 0), 0.18, 0.18, sides=4, caps=(True, True))
+    f += prism("acc", (-2.6, 7.6, 0), (2.6, 7.6, 0), 0.16, 0.16, sides=4, caps=(True, True), hint=(0, 1, 0))
+    for s, mat in ((-1, "acc"), (1, "spine")):
+        f += prism("acc", (s * 2.4, 7.5, 0), (s * 2.4, 6.7, 0), 0.05, 0.05, sides=3, caps=(False, False))
+        f += ell(mat, (s * 2.4, 6.55, 0), (0.75, 0.2, 0.75), segs=8, rings=2)
+    f += torus("acc", (0, 7.6, -0.05), 0.75, 0.14, 0.18, n=10, k=3, ax="z")
+    # 正面の封
+    f += torus("acc", (0, 2.6, -3.2), 0.95, 0.17, 0.17, n=10, k=3, ax="z")
+    f += gem((0, 2.6, -3.35), 0.55, 0.55, 0.3, segs=6, rings=2)
+    return f
+
+
 WEAPONS = dict([
     W(box_stone_whale, "岩鯨の封の箱", "rare", "trinket", "frost", dict(main="driftwood", spine="tusk", acc="moss", guard="stone")),
     W(box_tide_shell, "潮殻の封の箱", "rare", "trinket", "sea", dict(main="darkwood", spine="shell", acc="rockshell", cloth="nacre")),
@@ -197,6 +227,7 @@ WEAPONS = dict([
     W(box_epic, "エピックの封の箱", "epic", "trinket", "void", dict(main="purplecloth", acc="silver")),
     W(box_heroic, "ヒロイックの封の箱", "heroic", "trinket", "ember", dict(main="redcloth", acc="gold")),
     W(box_artifact, "淵の金の箱", "heroic", "trinket", "void", dict(main="gold", acc="gold")),
+    W(box_tower, "塔の箱", "heroic", "trinket", "void", dict(main="cloudwhite", spine="basalt", acc="gold")),
 ])
 for _k in WEAPONS:
     WEAPONS[_k]["scale"] = 15.0

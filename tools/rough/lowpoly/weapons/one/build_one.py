@@ -1,5 +1,5 @@
 """一品一案の武器の絵とメッシュ (2026-10-26)。作りは五章の武器 (../gear_gaps/build_gaps.py) と弓の段 (staged) を借り、案は一つ (a) だけ。
-塗り: 巨神の品 (o_whale / o_tide / o_storm / o_ember) は巨神の塗り (../paint.py。伝説は縁が金と淵の欠片)、五章 (o_abyss) は五章の塗り (../gear_gaps/paint_gaps.py)、六章 (o_moon) は月の塗り (paint_moon.py)、終章の神器 (o_divine) は雲海の塗り (paint_divine.py)。
+塗り: 巨神の品 (o_whale / o_tide / o_storm / o_ember) は巨神の塗り (../paint.py。伝説は縁が金と淵の欠片)、五章 (o_abyss) は五章の塗り (../gear_gaps/paint_gaps.py)、六章 (o_moon) は月の塗り (paint_moon.py)、終章の神器 (o_divine) は雲海の塗り (paint_divine.py)、塔の武器 (o_tower) は塔の塗り (paint_tower.py)。
 
 実行: python -I tools/rough/lowpoly/weapons/one/build_one.py <o_whale|o_tide|o_storm|o_ember|o_abyss|o_moon|o_divine> [武器 id ...] [--quick]
 出力: docs/review/roughs_one/<id>/views.png・actions.png と raw/<id>/a/ (install_job_weapons.py が読む)
@@ -29,6 +29,9 @@ elif mod_name == "o_moon":
     B.PG = PG
 elif mod_name == "o_divine":
     import paint_divine as PG  # noqa: E402
+    B.PG = PG
+elif mod_name == "o_tower":
+    import paint_tower as PG  # noqa: E402
     B.PG = PG
 else:
     B.PG = types.SimpleNamespace(

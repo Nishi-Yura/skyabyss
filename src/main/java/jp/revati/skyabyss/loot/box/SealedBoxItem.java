@@ -19,6 +19,9 @@ public class SealedBoxItem extends Item {
     }
 
     public static int color(BoxKind kind) {
+        if (kind.type() == BoxKind.Type.TOWER) {
+            return 0xC8B4FF;
+        }
         if (kind.type() != BoxKind.Type.TITAN) {
             return kind.tier().rgb();
         }
@@ -42,6 +45,7 @@ public class SealedBoxItem extends Item {
             case RARITY -> Component.translatable("item.skyabyss.box.kind_rarity", Component.translatable(kind.tier().translationKey()),
                     kind.minLevel(), kind.maxLevel());
             case ARTIFACT -> Component.translatable("item.skyabyss.box.kind_artifact");
+            case TOWER -> Component.translatable("item.skyabyss.box.kind_tower");
         };
         tooltip.add(head.copy().withStyle(s -> s.withColor(color(kind))));
         tooltip.add(Component.translatable("item.skyabyss.box.contents").withStyle(ChatFormatting.GRAY));

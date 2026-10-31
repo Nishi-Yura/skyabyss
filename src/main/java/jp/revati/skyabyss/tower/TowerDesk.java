@@ -71,6 +71,9 @@ public final class TowerDesk {
         SQUADS.clear();
     }
 
+    // 塔の店 (data/skyabyss/shop/tower.json)
+    public static final String SHOP = "tower";
+
     static boolean near(ServerPlayer p) {
         BlockPos s = spot(p.server);
         return s != null && p.level().dimension() == Level.OVERWORLD && p.distanceToSqr(Vec3.atBottomCenterOf(s)) <= RANGE * RANGE;
@@ -192,9 +195,9 @@ public final class TowerDesk {
                 }
             }
         }
-        if (!line.getSiblings().isEmpty()) {
-            p.sendSystemMessage(line);
-        }
+        line.append(line.getSiblings().isEmpty() ? Component.empty() : Component.literal("  "))
+                .append(button("message.skyabyss.tower.btn.shop", "shop", 0xC8B4FF));
+        p.sendSystemMessage(line);
     }
 
     static boolean create(ServerPlayer p) {
@@ -313,6 +316,15 @@ public final class TowerDesk {
                     return 1;
                 }))
                 .then(Commands.literal("start").executes(c -> start(c.getSource().getPlayerOrException()) ? 1 : 0))
+                // 塔の店 (塔の欠片で塔の装備・塔の箱。受付のそばで)
+                .then(Commands.literal("shop").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    if (!Towers.eligible(p) || !near(p)) {
+                        Notice.hint(p, "message.skyabyss.tower.desk.far");
+                        return 0;
+                    }
+                    return jp.revati.skyabyss.facility.ShopService.open(p, SHOP, null) ? 1 : 0;
+                }))
                 .then(Commands.literal("leave").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     if (Towers.runOf(p) != null) {
