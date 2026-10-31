@@ -1,0 +1,25 @@
+# 会話から開く押せる一覧 (チャットの窓が開いて全部見える)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/chat_menu.txt -PshotsName=chat_menu
+world chat_menu_flat flat
+size 1280 720
+timeout 600
+render 6
+guiscale 3
+cmd time set noon
+cmd gamemode survival
+cmd skyabyss cinematic stop
+camera 0 -60 0 0 0
+waitchunks
+wait 200
+chat clear
+cmd skyabyss job choose warrior
+cmd skyabyss arts learn second_cut
+cmd skyabyss arts learn quake_call
+cmd skyabyss_arts
+wait 20
+shot chat_1_closed
+open skills
+wait 20
+click 221 210
+wait 30
+shot chat_2_arts_open

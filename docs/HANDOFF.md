@@ -16,6 +16,8 @@
 - 開発用: `/skyabyss circuit start <土地>|next|goto|end|reset`、`/skyabyss event start [土地]|goto|end`、`/skyabyss fame add <土地> <点>`。
 - 形の承認待ち（朝の確認ページ https://claude.ai/artifact/8gGk5RcrHcLSJhUcYWetji 。選びは db の `choices`）: 飾り装備の範囲・防具の見た目替え・釣り・巡り路の「壊す」の杭・土地の旗の見た目。
 - 数値（巡り路の鐘銭・大事件の体力の倍率・名声の段の境・熟練の段の量）は試遊で直す。
+- 旅の記録の画面: 記録・技の上のつまみ「旅」（`endgame/client/JourneyScreen`、背景 `tools/gen/items/gen_journey_assets.py`）。
+- チャットの押せる一覧（秘伝・塔の受付と記録・見た目替え・旅帳）は、係の人の会話から開くとチャットの窓を開く（`endgame/ChatMenus`）。チャットの窓を開いているあいだは行を絞らない（`ChatLinesMixin`）。狭い画面では閉じたチャットは 1 行しか見えないため。
 
 ## 秘伝（2026-11-01。設計 [54](design/54_endgame_plan.md) の 3.2.1）
 

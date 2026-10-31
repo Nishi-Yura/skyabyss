@@ -591,10 +591,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     // ---------------------------------------------------------------- 入力
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
-        if (button == 0 && artsHovered(screenX, screenY) && minecraft.player != null) {
-            // 秘伝の一覧 (チャットの押せる一覧) を出して画面を閉じる
+        if (button == 0 && artsHovered(fit.x(screenX), fit.y(screenY)) && minecraft.player != null) {
+            // 秘伝の一覧 (チャットの押せる一覧) を出し、チャットの窓を開いて全部見せる
             minecraft.player.connection.sendCommand("skyabyss_arts");
-            onClose();
+            minecraft.setScreen(new net.minecraft.client.gui.screens.ChatScreen(""));
             return true;
         }
         double mx = fit.x(screenX);

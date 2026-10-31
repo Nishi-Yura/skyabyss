@@ -8,8 +8,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // エンドコンテンツ (巡り路など。docs/design/54) のパケット。共有の ModNetwork とは別の登録口にして、版を独立させる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EndgameNetwork {
-    // 2: 旅の記録 (Journey)
-    private static final String PROTOCOL_VERSION = "2";
+    // 2: 旅の記録 (Journey)。3: チャットの窓を開く (ChatMenus)
+    private static final String PROTOCOL_VERSION = "3";
 
     private EndgameNetwork() {
     }
@@ -22,6 +22,8 @@ public final class EndgameNetwork {
                         (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.endgame.client.CircuitClient.receive(payload)))
                 .playToClient(Journey.Snapshot.TYPE, Journey.Snapshot.STREAM_CODEC,
                         (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.endgame.client.JourneyScreen.receive(payload)))
+                .playToClient(ChatMenus.Open.TYPE, ChatMenus.Open.STREAM_CODEC,
+                        (payload, context) -> context.enqueueWork(jp.revati.skyabyss.endgame.client.ChatMenuClient::receive))
                 .playToServer(Journey.Request.TYPE, Journey.Request.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof net.minecraft.server.level.ServerPlayer sp) {
                         Journey.answer(sp);

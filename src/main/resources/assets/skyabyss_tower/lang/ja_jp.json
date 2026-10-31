@@ -193,7 +193,7 @@
   "gui.skyabyss.skill.arts_label": "秘伝",
   "gui.skyabyss.skill.arts_title": "秘伝の枠 (枠に付けた秘伝だけが効く)",
   "gui.skyabyss.skill.arts_empty": "・(空き)",
-  "gui.skyabyss.skill.arts_hint": "押すと秘伝の一覧 (付け外し) をチャットに出す",
+  "gui.skyabyss.skill.arts_hint": "押すと秘伝の一覧（付け外し）をチャットの窓に出す",
   "biome.skyabyss.tower": "あいだの塔",
   "item.skyabyss.tower_scale_helmet.story": "「天秤の兜は、どちらにも傾かない。」",
   "item.skyabyss.tower_scale_chestplate.story": "「胸の皿に、天と淵を一つずつ載せた。」",
