@@ -68,6 +68,160 @@
       ]
     },
     {
+      "id": "tower_scale_helmet",
+      "item": "skyabyss:tower_scale_helmet",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_scale_chestplate",
+      "item": "skyabyss:tower_scale_chestplate",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_scale_leggings",
+      "item": "skyabyss:tower_scale_leggings",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_scale_boots",
+      "item": "skyabyss:tower_scale_boots",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_bridge_helmet",
+      "item": "skyabyss:tower_bridge_helmet",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_bridge_chestplate",
+      "item": "skyabyss:tower_bridge_chestplate",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_bridge_leggings",
+      "item": "skyabyss:tower_bridge_leggings",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_bridge_boots",
+      "item": "skyabyss:tower_bridge_boots",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_halo_helmet",
+      "item": "skyabyss:tower_halo_helmet",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_halo_chestplate",
+      "item": "skyabyss:tower_halo_chestplate",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_halo_leggings",
+      "item": "skyabyss:tower_halo_leggings",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_halo_boots",
+      "item": "skyabyss:tower_halo_boots",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "id": "tower_heaven_ring",
+      "item": "skyabyss:tower_heaven_ring",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 60
+        }
+      ]
+    },
+    {
+      "id": "tower_abyss_chain",
+      "item": "skyabyss:tower_abyss_chain",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 60
+        }
+      ]
+    },
+    {
       "id": "box",
       "item": "skyabyss:box_tower",
       "count": 1,

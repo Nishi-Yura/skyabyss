@@ -142,12 +142,13 @@ public final class WildGearEvents {
         if (p.getPersistentData().getLong(MANA) > p.level().getGameTime()) {
             b += p.getPersistentData().getDouble(MANA_AMT);
         }
-        return b + WildArmorEvents.manaRegenBonus(p);
+        return b + WildArmorEvents.manaRegenBonus(p) + jp.revati.skyabyss.tower.gear.TowerGearEvents.manaRegenBonus(p);
     }
 
     // 技の待ちの倍率 (rpg/skill/SkillManager.cooldownFor)
     public static double cooldownScale(Player p) {
-        return 1 - val(p, Kind.COOLDOWN, 0) - WildArmorEvents.sum(WildArmorEvents.active(p), Kind.COOLDOWN, 0);
+        return 1 - val(p, Kind.COOLDOWN, 0) - WildArmorEvents.sum(WildArmorEvents.active(p), Kind.COOLDOWN, 0)
+                - jp.revati.skyabyss.tower.gear.TowerGearEvents.cooldownCut(p);
     }
 
     // 起こす 1 tick の進み (party/Downed)

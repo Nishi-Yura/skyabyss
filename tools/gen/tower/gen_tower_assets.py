@@ -18,8 +18,8 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[3]
 A = ROOT / "src/main/resources/assets/skyabyss"
 REVIEW = ROOT / "docs/review/tower_rewards"
-# assets へ入れる絵 (承認済み)。装飾の二つは承認待ち
-INSTALLED = ("tower_shard",)
+# assets へ入れる絵 (承認済み)
+INSTALLED = ("tower_shard", "tower_heaven_ring", "tower_abyss_chain")
 OUTLINE = (30, 24, 36, 255)
 
 

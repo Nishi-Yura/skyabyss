@@ -136,21 +136,44 @@ public final class TowerSelfTest {
         // 報酬
         jp.revati.skyabyss.loot.box.BoxKind box = jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower");
         check(f, box != null && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SWORD.get())) == box
-                && jp.revati.skyabyss.loot.box.LootBoxes.pool(box).size() == jp.revati.skyabyss.tower.gear.TowerGear.WEAPONS.size(), "tower gear does not go into the tower box");
+                && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.CHAIN.get())) == box
+                && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(new net.minecraft.world.item.ItemStack(
+                        jp.revati.skyabyss.tower.gear.TowerGearSetup.ARMOR.get(jp.revati.skyabyss.tower.gear.TowerGear.HALO).get(1).get())) == box
+                && jp.revati.skyabyss.loot.box.LootBoxes.pool(box).size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size(), "tower gear does not go into the tower box");
         int shards0 = jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get());
         int boxes0 = box == null ? 0 : jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box));
         Towers.reward(p);
         check(f, jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get()) == shards0 + jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR
                 && box != null && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.loot.box.LootBoxSetup.item(box)) == boxes0 + 1, "the clear reward was not given");
         var shop = jp.revati.skyabyss.facility.ShopManager.shop(TowerDesk.SHOP);
-        check(f, shop != null && shop.goods().size() == 7, "the tower shop is missing or incomplete");
+        check(f, shop != null && shop.goods().size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size() + 1, "the tower shop is missing or incomplete");
+        armor(f, p);
         p.getPersistentData().remove(Towers.CLEARS);
         p.getPersistentData().remove(Towers.BEST);
     }
 
+    // 塔の防具の 4 部位の効果 (光輪の衣のマナの戻りと待ち、渡りの装束の速さ)
+    static void armor(List<String> f, FakePlayer p) {
+        var halo = jp.revati.skyabyss.tower.gear.TowerGearSetup.ARMOR.get(jp.revati.skyabyss.tower.gear.TowerGear.HALO);
+        net.minecraft.world.entity.EquipmentSlot[] slots = {net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
+                net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET};
+        int lv = jp.revati.skyabyss.rpg.Growth.get(p).level;
+        jp.revati.skyabyss.rpg.Growth.get(p).level = 50;
+        for (int i = 0; i < 4; i++) {
+            p.setItemSlot(slots[i], new net.minecraft.world.item.ItemStack(halo.get(i).get()));
+        }
+        check(f, jp.revati.skyabyss.tower.gear.TowerArmorItem.piecesWorn(p, jp.revati.skyabyss.tower.gear.TowerGear.HALO) == 4
+                && jp.revati.skyabyss.tower.gear.TowerGearEvents.manaRegenBonus(p) > 0 && jp.revati.skyabyss.item.wild.WildGearEvents.cooldownScale(p) < 1,
+                "the halo vestment's four-piece effect does not apply");
+        for (net.minecraft.world.entity.EquipmentSlot s : slots) {
+            p.setItemSlot(s, net.minecraft.world.item.ItemStack.EMPTY);
+        }
+        jp.revati.skyabyss.rpg.Growth.get(p).level = lv;
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, end)");
+            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, end)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tower FAILED: {}", m));
         }
