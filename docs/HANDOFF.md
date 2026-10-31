@@ -8,6 +8,12 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 超大型レイド「あいだの塔」（作りかけ。2026-11-01。設計 [54](design/54_endgame_plan.md) の 2 章）
+
+- 声「Wynncraft のめっちゃでかい動かないボスのやつに似せて。途中のやつとかなくて、ボス戦だけ」「アナイアレーション参考にして」で、四つの階をやめ、橋の先に座る巨大な主との一戦だけにした（手本は Wynncraft の Prelude to Annihilation）。
+- できた: 塔の次元 `skyabyss:tower`（`data/skyabyss/dimension*/tower.json`）、区画 16（`tower/TowerWorld`）、橋の舞台（`tools/gen/world/build_tower.py` → `data/skyabyss/tower/bridge.json`、`TowerTerrain` が区画へずらして流し込む）、挑戦の進め方（`Towers`。一日一回・全滅と 30 分で終わり・倒れたら入口・抜ける）、橋の上の時間と休み場と落ちたとき（`TowerArena`）、都の広場の受付とレイド隊 1〜12（`TowerDesk`。資格のある人にだけ光の柱、チャットで隊を作る・入る・始める）、自己テスト `tower`、撮影 `tools/shots/tower_floors.txt`。
+- まだ: 主「あいだに座すもの」の形（ラフ `tools/rough/lowpoly/cloud/tower_master.py` → `docs/review/cloud_roughs/tower_master.png`。1/5 で作り、ゲームで 5 倍に描く。ユーザーの承認待ち）、技と段と落ちる月・側の目・湧く敵、塔の箱と装備・店・賭け・記録、塔守の姿。
+
 ## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
 
 - 声「アイテム売ってお金にできる機能を箱空ける NPC に」「お金の上限もっと増やしていい（旅のインベントリのコインの上の数は見せなくていい）」「トレードで使えるのはお金のみ。アイテムは無し」「統合できそうな NPC は統合してもいい」。

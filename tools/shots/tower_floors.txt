@@ -1,0 +1,32 @@
+# あいだの塔の舞台「橋」(docs/design/54 の 2.4)。一度入って橋を流し込み、出てから区画 0 をカメラで見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_floors.txt -PshotsName=tower_floors
+world shots flat
+size 1280 720
+timeout 1200
+render 12
+cmd gamemode creative
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss tower start
+wait 80
+cmd skyabyss tower leave
+wait 40
+cmd gamemode spectator
+camera skyabyss:tower 0 142 72 180 18
+waitchunks 300
+wait 60
+shot b01_bridge_from_entry
+camera skyabyss:tower 44 138 4 120 14
+wait 30
+shot b02_bridge_side
+camera skyabyss:tower 0 129 -18 180 6
+wait 30
+shot b03_throne
+camera skyabyss:tower -30 165 -10 150 40
+wait 30
+shot b04_overview

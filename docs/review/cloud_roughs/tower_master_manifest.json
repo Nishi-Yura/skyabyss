@@ -1,0 +1,16 @@
+{
+ "id": "moon_tower_master",
+ "short": "あいだに座すもの",
+ "kind": "超大型レイドの主 一品一案 (54 の 2.5)",
+ "title": "あいだに座すもの (tower_master) — 橋の先に座る、天と淵の引き合いの巨人・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/tower_master.png"
+ ],
+ "extra": "骨 12 本。光るのは胸の核・角のあいだの印・紫の割れ目。 三角形 9680 (目安 主 4000〜8000)。埋まった部品: crack-1-thigh-1:0.8, crack1-thigh1:0.8, stonepatch-torso:0.49, panline-1-stonepatch:0.7, pan-1-stonepatch:0.46, chfore_l-210-3000-fore-1:0.81, neck-veil:0.75, skull-veil:0.47。生成: tools/rough/lowpoly/moon/tower_master.py。三段の姿: 段が進むと石の割れ目が広がり、光輪が赤くなる (引き合いの高まり)。",
+ "options": {
+  "a": {
+   "name": "天と淵の巨人 (9680 三角形)",
+   "desc": "上は白と金と羽の光輪、下と左腕は黒い石と鎖。顔は白い布、胸に光る核と天秤。"
+  }
+ }
+}
