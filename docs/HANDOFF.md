@@ -15,7 +15,8 @@
 - 主「あいだに座すもの」（形はユーザー承認済み。ラフ `tools/rough/lowpoly/cloud/tower_master.py`、入れるのは `gen_cloud_mobs.py tower_master`。1/5 で作り、ゲームで 5 倍に描く。原点は北の広場の床で、形は LIFT で玉座へ上げてある）: 体 `tower/mob/TowerMaster`（当たり 28×32、体力の止まり所 floor、月のあいだの shielded）、側の目 `TowerEye`（灯守の目の形）、落ちる月 `TowerMoon`（巡礼者の月の形）、一戦の進め方 `tower/TowerFight`（技 11・群れ・高まり・月 2 回・側の目・繋ぎ手・鎖の子の回復落ち・勝ち）。越えた回数と最速は人のデータ `skyabyss_tower_clears` / `_best`。開発用 `/skyabyss tower act <技>`・`hp <%>`。撮影 `tools/shots/tower_boss.txt`。
 - 報酬（54 の 2.6）: 塔の欠片 `tower_shard`・塔の箱 `box_tower`（`BoxKind.Type.TOWER`、由来 `tower` の装備が入る）・越えた人に箱 1 と欠片 10（`Towers.reward`）・塔の店（受付の [塔の店]、`/skyabyss_tower shop`、`data/skyabyss/shop/tower.json`）・塔の武器 6 本（`tower/gear/TowerGear`・`TowerGearSetup`・`TowerGearEvents`）。
 - 形（承認済み・入れた）: 武器 6 本 `tools/rough/lowpoly/weapons/one/o_tower.py` → `install_job_weapons.py`（持ち方・振り `gen_weapon_moves.py`・`WeaponKind`・`MoveSets`・弓は `WeaponClient`）、塔の箱 `o_boxes.py box_tower` → `install_boxes.py`、塔の欠片 `tools/gen/tower/gen_tower_assets.py --install`。ゲームの中の絵 `docs/review/tower_rewards/tower_weapons_ingame.jpg`、撮影 `tools/shots/tower_weapons.txt`。
-- まだ: 塔の防具 3 式と装飾 2（案は 54 の 2.6。ラフから）、賭け・記録の板・称号、塔守の姿。数字（体力・傷・月の速さ）は遊んで詰める。
+- 防具 3 式と装飾 2 のラフ（承認待ち）: `tools/rough/lowpoly/armor/tower/build_tower_armor.py` → `docs/review/roughs_tower/`、装飾の絵は `gen_tower_assets.py`（INSTALLED に足すと入る）。見せた絵 `docs/review/tower_rewards/tower_armor_roughs.png`。品の登録・効き方・入れ方はまだ。
+- まだ:、賭け・記録の板・称号、塔守の姿。数字（体力・傷・月の速さ）は遊んで詰める。
 
 ## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
 
