@@ -52,7 +52,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 大陸の大事件 (docs/design/54 の 3.3。Wynncraft のワールドイベント)。
 //   EVERY (45 分) ごとに、岩鯨・潮殻・雷翼・余燼のどれかの土地の見どころに、その土地の名のある強敵の大型版「大いなる〜」が来る。
 //   来たことは二章からの人みなに知らせ、地図 (MapMarks.foeMarks) と赤い光の柱で場所を示す。誰かが SPAWN_NEAR まで来ると現れる。
-//   大型版: 体力は (12 + 近くの人 1 人につき 6) 倍、攻め 1.6 倍、大きさ 1.8 倍。30 秒ごとにその土地の敵が 2 体寄る。いる所から LEASH 離れると戻る。
+//   大型版: 体力は (12 + 近くの人 1 人につき 6) 倍、攻め 1.6 倍、大きさ 1.8 倍。近くのいちばん高い Lv が土地の目安 (TOP_LEVEL) より上なら、
+//   差 1 につき体力 +12%・攻め +0.08 倍 (levelHealth・levelDamage)。30 秒ごとにその土地の敵が 2 体寄る。いる所から LEASH 離れると戻る。
 //   LAST (15 分) で倒せなければ去る。倒すと、与えた分が SHARE 以上の人みなに報い: 名づきの鐘銭 × 4、封の箱 1
 //   (レア 65・エピック 28・ヒロイック 7。帯は土地の目安の Lv)、土地の点 +4。いちばん与えた人は箱をもう一つ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -264,17 +265,21 @@ public final class WorldEvents {
             return null;
         }
         int people = 0;
+        int top = 0;
         for (ServerPlayer p : level.players()) {
             if (!p.isSpectator() && p.distanceToSqr(at.getX(), at.getY(), at.getZ()) < BAR_RANGE * BAR_RANGE) {
                 people++;
+                top = Math.max(top, jp.revati.skyabyss.rpg.Growth.get(p).level);
             }
         }
-        double mult = health(Math.max(1, people));
+        // いちばん高い Lv の人が土地の目安より上なら、その差だけ固く強く (Wynncraft のワールドイベントと同じく、強い人が来ても手応えが残る)
+        int gap = Math.max(0, top - Circuits.TOP_LEVEL[Math.max(0, Math.min(Circuits.TOP_LEVEL.length - 1, e.region))]);
+        double mult = health(Math.max(1, people)) * levelHealth(gap);
         m.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null);
         double base = m.getMaxHealth();
         modifier(m.getAttribute(Attributes.MAX_HEALTH), HEALTH_ID, mult - 1);
-        modifier(m.getAttribute(Attributes.ATTACK_DAMAGE), DAMAGE_ID, 0.6);
+        modifier(m.getAttribute(Attributes.ATTACK_DAMAGE), DAMAGE_ID, levelDamage(gap) - 1);
         modifier(m.getAttribute(Attributes.SCALE), SCALE_ID, 0.8);
         m.setHealth(m.getMaxHealth());
         e.baseHealth = (float) base;
@@ -307,6 +312,15 @@ public final class WorldEvents {
     // 体力の倍率 (近くの人の数で伸びる)
     public static double health(int people) {
         return 12 + 6 * (people - 1);
+    }
+
+    // 近くのいちばん高い Lv と土地の目安の Lv の差 (gap) での、体力と攻めの倍率
+    public static double levelHealth(int gap) {
+        return 1 + 0.12 * Math.max(0, gap);
+    }
+
+    public static double levelDamage(int gap) {
+        return 1.6 + 0.08 * Math.max(0, gap);
     }
 
     static void modifier(@Nullable AttributeInstance a, ResourceLocation id, double amount) {

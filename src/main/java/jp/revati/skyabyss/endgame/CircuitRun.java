@@ -16,11 +16,26 @@ public final class CircuitRun {
         HUNT, GUARD, CARRY
     }
 
+    // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分
+    public enum Bonus {
+        NONE(0xE6E2D6), DOUBLE(0xF2C14E), TIME(0x7FB8FF);
+
+        public final int rgb;
+
+        Bonus(int rgb) {
+            this.rgb = rgb;
+        }
+    }
+
+    // 選べる次の課題 (柱一本)。poi = 使った見どころの番号 (選ばれなかった柱の見どころは使っていないことに戻す。-1 = 見どころでない)
+    record Offer(Kind kind, BlockPos spot, @Nullable String place, @Nullable BlockPos spot2, @Nullable String place2, Bonus bonus, int poi, int poi2) {
+    }
+
     final int region;
     final List<UUID> members = new ArrayList<>();
     final BlockPos origin;
     final long start;
-    final long end;
+    long end;
     int marks;
     int tasks;
 
@@ -50,6 +65,9 @@ public final class CircuitRun {
     // 自己テストの人 (FakePlayer は人の一覧にいないので、ここから引く)
     final java.util.Map<UUID, net.minecraft.server.level.ServerPlayer> fakes = new java.util.HashMap<>();
     final Set<Integer> usedPois = new HashSet<>();
+    // 次の課題の柱 (空でなければ選んでいるところ) と、いまの課題の柱の色
+    final List<Offer> offers = new ArrayList<>();
+    Bonus bonus = Bonus.NONE;
 
     CircuitRun(int region, BlockPos origin, long start, long end) {
         this.region = region;
@@ -72,6 +90,14 @@ public final class CircuitRun {
 
     public Kind kind() {
         return kind;
+    }
+
+    public boolean choosing() {
+        return !offers.isEmpty();
+    }
+
+    public Bonus bonus() {
+        return bonus;
     }
 
     public BlockPos spot() {

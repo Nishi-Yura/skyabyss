@@ -17,7 +17,7 @@
   "message.skyabyss.circuit.offer.start": "[歩き出す]",
   "message.skyabyss.circuit.offer.hover": "押すと巡り路が始まる（20 分）",
   "message.skyabyss.circuit.started": "光の柱の所へ向かおう",
-  "message.skyabyss.circuit.done": "課題を越えた。巡りの印 +1（いま %s）",
+  "message.skyabyss.circuit.done": "課題を越えた。巡りの印 +%s（いま %s）",
   "message.skyabyss.circuit.failed": "課題に間に合わなかった。次の課題へ",
   "message.skyabyss.circuit.carry_take": "%sが荷を背負った（足が少し重い）",
   "message.skyabyss.circuit.carry_drop": "荷が落ちた。拾い直そう",
@@ -131,5 +131,17 @@
   "gui.skyabyss.journey.tip.no_flag": "今週の旗: まだどの組合も持っていない",
   "gui.skyabyss.journey.tip.sights": "見つけた名所 %s/%s",
   "gui.skyabyss.journey.tip.how": "名声は巡り路・大事件・名のある強敵・板の頼み・名所の発見で上がる",
-  "gui.skyabyss.journey.tip.mastery": "Lv 50 のあとに得た経験値が、いまの職の熟練にたまる。段が上がると、技を使ったときの光が変わる（強さは変わらない）。"
+  "gui.skyabyss.journey.tip.mastery": "Lv 50 のあとに得た経験値が、いまの職の熟練にたまる。段が上がると、技を使ったときの光が変わる（強さは変わらない）。",
+  "circuit.skyabyss.kind.hunt": "倒す",
+  "circuit.skyabyss.kind.guard": "守る",
+  "circuit.skyabyss.kind.carry": "運ぶ",
+  "circuit.skyabyss.offer.none": "白 %s",
+  "circuit.skyabyss.offer.double": "金 %s 印×2",
+  "circuit.skyabyss.offer.time": "青 %s +2分",
+  "circuit.skyabyss.task.choose": "柱を選ぼう：%s／%s",
+  "circuit.skyabyss.task.with_bonus": "%s〔%s〕",
+  "circuit.skyabyss.bonus.double": "印×2",
+  "circuit.skyabyss.bonus.time": "+2分",
+  "message.skyabyss.circuit.choose": "次の課題: 光る柱のどちらかへ。金は印が二つ（手ごわい）、青は越えると残り時間 +2 分",
+  "message.skyabyss.circuit.time_bonus": "残り時間 +%s 分"
 }

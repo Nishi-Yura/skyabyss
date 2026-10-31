@@ -47,6 +47,8 @@ public final class WorldEventSelfTest {
             }
             WorldEvents.leave(level);
             check(f, WorldEvents.current() == null && WorldEvents.nextAt() > level.getGameTime(), "a world event did not leave and schedule the next");
+            check(f, WorldEvents.levelHealth(0) == 1.0 && WorldEvents.levelHealth(38) > 5 && WorldEvents.levelDamage(38) > WorldEvents.levelDamage(0),
+                    "the great foe does not grow with the visitors' level");
             // 取り残された大いなるもの (印付きで、いまの大事件のものでない) は世界に入れない
             var strayType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.get(
                     net.minecraft.resources.ResourceLocation.parse(NamedFoes.def(ContinentMap.WHALE).entity()));

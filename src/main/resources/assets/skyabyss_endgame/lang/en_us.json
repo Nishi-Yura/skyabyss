@@ -17,7 +17,7 @@
   "message.skyabyss.circuit.offer.start": "[Set out]",
   "message.skyabyss.circuit.offer.hover": "Click to start a circuit (20 minutes)",
   "message.skyabyss.circuit.started": "Head for the light pillar",
-  "message.skyabyss.circuit.done": "Task cleared. Circuit mark +1 (now %s)",
+  "message.skyabyss.circuit.done": "Task cleared. Circuit marks +%s (now %s)",
   "message.skyabyss.circuit.failed": "Too late for that task. On to the next",
   "message.skyabyss.circuit.carry_take": "%s shouldered the load (a little slower)",
   "message.skyabyss.circuit.carry_drop": "The load was dropped. Pick it up again",
@@ -131,5 +131,17 @@
   "gui.skyabyss.journey.tip.no_flag": "This week's flag: no guild holds it yet",
   "gui.skyabyss.journey.tip.sights": "Sights found %s/%s",
   "gui.skyabyss.journey.tip.how": "Fame rises with circuits, world events, named foes, board errands and new sights",
-  "gui.skyabyss.journey.tip.mastery": "Experience past Lv 50 builds mastery of your current job. Each step changes the light of your skills (no power change)."
+  "gui.skyabyss.journey.tip.mastery": "Experience past Lv 50 builds mastery of your current job. Each step changes the light of your skills (no power change).",
+  "circuit.skyabyss.kind.hunt": "defeat",
+  "circuit.skyabyss.kind.guard": "guard",
+  "circuit.skyabyss.kind.carry": "carry",
+  "circuit.skyabyss.offer.none": "white %s",
+  "circuit.skyabyss.offer.double": "gold %s x2",
+  "circuit.skyabyss.offer.time": "blue %s +2m",
+  "circuit.skyabyss.task.choose": "Pick a pillar: %s / %s",
+  "circuit.skyabyss.task.with_bonus": "%s [%s]",
+  "circuit.skyabyss.bonus.double": "marks x2",
+  "circuit.skyabyss.bonus.time": "+2 min",
+  "message.skyabyss.circuit.choose": "Next task: head for either pillar. Gold gives two marks (harder), blue adds 2 minutes when cleared",
+  "message.skyabyss.circuit.time_bonus": "Time left +%s min"
 }

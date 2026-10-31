@@ -20,6 +20,9 @@ cmd skyabyss circuit start 2
 chat clear
 wait 60
 shot circuit_1_start
+cmd tp @s ~ ~40 ~
+wait 40
+shot circuit_1b_two_pillars
 cmd skyabyss circuit goto
 waitchunks 300
 wait 80
