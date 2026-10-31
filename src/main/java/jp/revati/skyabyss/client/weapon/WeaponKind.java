@@ -89,6 +89,8 @@ public enum WeaponKind {
             // 終章の神器 (story/finale/gear。弓は WeaponClient が BowExtension で登録する)
             Map.entry("divine_sky_sword", GREATSWORD), Map.entry("divine_bell_hammer", HAMMER), Map.entry("divine_dawn_staff", POKER),
             Map.entry("divine_rewind_dagger", FANG), Map.entry("divine_promise_bell_staff", POKER),
+            // 神器の二本目 (story/finale/gear)
+            Map.entry("divine_warden_blade", GREATSWORD), Map.entry("divine_ash_hammer", HAMMER), Map.entry("divine_eyelid_staff", POKER), Map.entry("divine_moth_dagger", FANG), Map.entry("divine_keeper_bell_staff", POKER),
             // あいだの塔の武器 (tower/gear。弓は WeaponClient が BowExtension で登録する)
             Map.entry("tower_balance_sword", GREATSWORD), Map.entry("tower_pull_hammer", HAMMER), Map.entry("tower_moon_staff", POKER),
             Map.entry("tower_sigil_dagger", FANG), Map.entry("tower_clap_bell_staff", POKER));

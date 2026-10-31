@@ -76,6 +76,10 @@ for _id, _kind in (("moon_waning_blade", "sword"), ("moon_full_hammer", "hammer"
 for _id, _kind in (("divine_sky_sword", "sword"), ("divine_bell_hammer", "hammer"), ("divine_dawn_staff", "staff"), ("divine_plume_bow", "bow"),
                    ("divine_rewind_dagger", "dagger"), ("divine_promise_bell_staff", "bell")):
     ITEMS[_id] = ("roughs_one", "legend") + _HOLD[_kind]
+# 終章の神器の二本目 6 本 (o_divine.py の後半。docs/design/50 の 4.5.1)
+for _id, _kind in (("divine_warden_blade", "sword"), ("divine_ash_hammer", "hammer"), ("divine_eyelid_staff", "staff"), ("divine_mist_bow", "bow"),
+                   ("divine_moth_dagger", "dagger"), ("divine_keeper_bell_staff", "bell")):
+    ITEMS[_id] = ("roughs_one", "legend") + _HOLD[_kind]
 # あいだの塔の武器 6 本 (tools/rough/lowpoly/weapons/one/o_tower.py。形の段 legend。tower/gear。docs/design/54 の 2.6)
 for _id, _kind in (("tower_balance_sword", "sword"), ("tower_pull_hammer", "hammer"), ("tower_moon_staff", "staff"), ("tower_eye_bow", "bow"),
                    ("tower_sigil_dagger", "dagger"), ("tower_clap_bell_staff", "bell")):

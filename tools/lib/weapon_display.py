@@ -245,6 +245,11 @@ for _id, _like in (("whale_choir_hammer", "ember_war_axe"), ("tide_reef_hammer",
                    # 終章の神器 (story/finale/gear)
                    ("divine_sky_sword", "whalebone_greatsword"), ("divine_bell_hammer", "ember_war_axe"), ("divine_dawn_staff", "abyss_bell_staff"),
                    ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff"),
+                   ("divine_warden_blade", "whalebone_greatsword"),
+                   ("divine_ash_hammer", "ember_war_axe"),
+                   ("divine_eyelid_staff", "abyss_bell_staff"),
+                   ("divine_moth_dagger", "waterway_fang"),
+                   ("divine_keeper_bell_staff", "abyss_bell_staff"),
                    # あいだの塔の武器 (tower/gear)
                    ("tower_balance_sword", "whalebone_greatsword"), ("tower_pull_hammer", "ember_war_axe"), ("tower_moon_staff", "abyss_bell_staff"),
                    ("tower_sigil_dagger", "waterway_fang"), ("tower_clap_bell_staff", "abyss_bell_staff")):

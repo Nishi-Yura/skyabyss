@@ -94,6 +94,8 @@ public final class PilgrimTrial {
     static void won(List<ServerPlayer> here, int tier) {
         for (ServerPlayer p : here) {
             Quests.give(p, new ItemStack(DivineGearSetup.SHARD.get(), 3 + tier));
+            jp.revati.skyabyss.story.finale.gear.DivineGear.rollBox(p,
+                    jp.revati.skyabyss.story.finale.gear.DivineGear.BOX_CHANCE + jp.revati.skyabyss.story.finale.gear.DivineGear.BOX_TRIAL_STEP * tier);
             if (p.getRandom().nextFloat() < 0.1f * tier) {
                 Quests.give(p, new ItemStack(DivineGearSetup.CORE.get()));
             }

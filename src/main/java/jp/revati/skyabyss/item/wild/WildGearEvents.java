@@ -142,7 +142,8 @@ public final class WildGearEvents {
         if (p.getPersistentData().getLong(MANA) > p.level().getGameTime()) {
             b += p.getPersistentData().getDouble(MANA_AMT);
         }
-        return b + WildArmorEvents.manaRegenBonus(p) + jp.revati.skyabyss.tower.gear.TowerGearEvents.manaRegenBonus(p);
+        return b + WildArmorEvents.manaRegenBonus(p) + jp.revati.skyabyss.tower.gear.TowerGearEvents.manaRegenBonus(p)
+                + jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.manaRegenBonus(p);
     }
 
     // 技の待ちの倍率 (rpg/skill/SkillManager.cooldownFor)
@@ -154,7 +155,9 @@ public final class WildGearEvents {
     // 起こす 1 tick の進み (party/Downed)
     public static int reviveStep(Player holder) {
         double m = val(holder, Kind.REVIVE_SPEED, 0);
-        return m > 1 ? (int) Math.round(m) : 1;
+        int step = m > 1 ? (int) Math.round(m) : 1;
+        // 約束の小鈴: 起こす速さ ×1.5 (一 tick おきに 2 進む)
+        return step + jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.reviveExtra(holder);
     }
 
     // ---------------------------------------------------------------- 傷

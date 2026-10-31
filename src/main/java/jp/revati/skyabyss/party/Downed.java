@@ -253,6 +253,8 @@ public final class Downed {
 
     private static void revive(ServerPlayer victim, @Nullable ServerPlayer reviver) {
         clear(victim.getUUID(), victim);
+        // 約束の小鈴: 起こした仲間に守り
+        jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.onRevived(victim, reviver);
         victim.setHealth(Math.max(1f, victim.getMaxHealth() * REVIVE_HEALTH));
         victim.fallDistance = 0;
         ReentryRules.guard(victim, false);

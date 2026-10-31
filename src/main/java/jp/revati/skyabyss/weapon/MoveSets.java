@@ -26,6 +26,7 @@ public final class MoveSets {
             "moon_scale_hammer", "moon_tide_staff", "moon_crescent_dagger", "moon_starlight_bell_staff", "moon_waning_blade",
             "moon_light_sword", "moon_full_hammer", "moon_new_staff", "moon_umbra_dagger", "moon_halo_bell_staff",
             "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_rewind_dagger", "divine_promise_bell_staff",
+            "divine_warden_blade", "divine_ash_hammer", "divine_eyelid_staff", "divine_moth_dagger", "divine_keeper_bell_staff",
             "tower_balance_sword", "tower_pull_hammer", "tower_moon_staff", "tower_sigil_dagger", "tower_clap_bell_staff");
     // 野の装備の近接・杖・鈴杖 (item/wild。弓は動きを持たない。docs/design/51)
     public static final List<String> ITEMS = withWild();

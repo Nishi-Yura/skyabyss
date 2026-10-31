@@ -662,6 +662,11 @@ for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の�
                             ("divine_dawn_staff", "abyss_bell_staff", "暁の灯杖: 掲げて溜め、地を突く"),
                             ("divine_rewind_dagger", "waterway_fang", "巻き戻りの短剣: 右上から左下へ、返して X、突き抜ける"),
                             ("divine_promise_bell_staff", "abyss_bell_staff", "約束の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("divine_warden_blade", "whalebone_greatsword", "羽の番人の大剣: 大きく薙ぎ、振り下ろす"),
+                            ("divine_ash_hammer", "smith_hammer", "灰打ちの大鎚: 振りかぶって打ち下ろす"),
+                            ("divine_eyelid_staff", "abyss_bell_staff", "雲の瞼の杖: 掲げて溜め、地を突く"),
+                            ("divine_moth_dagger", "waterway_fang", "灯蛾の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("divine_keeper_bell_staff", "abyss_bell_staff", "鐘守の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
                             ("tower_balance_sword", "whalebone_greatsword", "あいだの大剣: 大きく薙ぎ、振り下ろす"),
                             ("tower_pull_hammer", "smith_hammer", "引き合いの鎚: 振りかぶって打ち下ろす"),
                             ("tower_moon_staff", "abyss_bell_staff", "落ちる月の杖: 掲げて溜め、地を突く"),
@@ -818,6 +823,11 @@ def main():
                         ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff"),
                         ("divine_sky_sword", "whalebone_greatsword"), ("divine_bell_hammer", "smith_hammer"), ("divine_dawn_staff", "abyss_bell_staff"),
                         ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff"),
+                        ("divine_warden_blade", "whalebone_greatsword"),
+                        ("divine_ash_hammer", "smith_hammer"),
+                        ("divine_eyelid_staff", "abyss_bell_staff"),
+                        ("divine_moth_dagger", "waterway_fang"),
+                        ("divine_keeper_bell_staff", "abyss_bell_staff"),
                         ("tower_balance_sword", "whalebone_greatsword"), ("tower_pull_hammer", "smith_hammer"), ("tower_moon_staff", "abyss_bell_staff"),
                         ("tower_sigil_dagger", "waterway_fang"), ("tower_clap_bell_staff", "abyss_bell_staff")):
         label = W[_item]["label"]

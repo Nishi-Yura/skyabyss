@@ -534,7 +534,20 @@ public final class FinaleSelfTest {
             net.minecraft.world.item.Item it = jp.revati.skyabyss.story.finale.gear.DivineGear.item(jp.revati.skyabyss.story.finale.gear.DivineGear.forJob(j));
             check(f, it instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.MYTHIC
                     && jp.revati.skyabyss.rpg.skill.Job.of(it) == j, "the " + j.id + " relic is missing, not mythic, or belongs to another job");
+            net.minecraft.world.item.Item two = jp.revati.skyabyss.story.finale.gear.DivineGear.item(jp.revati.skyabyss.story.finale.gear.DivineGear.secondForJob(j));
+            check(f, two instanceof jp.revati.skyabyss.item.ModGear g2 && g2.tier() == jp.revati.skyabyss.item.GearTier.MYTHIC
+                    && jp.revati.skyabyss.rpg.skill.Job.of(two) == j, "the " + j.id + " second relic is missing, not mythic, or belongs to another job");
         }
+        // 雲上の箱: 神器の武器・防具・装飾が入り、どれも神器
+        var cloud = jp.revati.skyabyss.loot.box.BoxKind.byId(jp.revati.skyabyss.story.finale.gear.DivineGear.BOX);
+        check(f, cloud != null && jp.revati.skyabyss.loot.box.LootBoxes.pool(cloud).size() == jp.revati.skyabyss.story.finale.gear.DivineGearSetup.all().size()
+                && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CHIME.get())) == cloud,
+                "the cloud box does not hold the divine gear");
+        // 職を替える: 二本目は二本目へ
+        p.getInventory().clearContent();
+        p.getInventory().add(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.WARDEN.get()));
+        jp.revati.skyabyss.story.finale.gear.DivineGear.swap(p, jp.revati.skyabyss.rpg.skill.Job.MAGE);
+        check(f, p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.EYELID.get()) == 1, "the second relic did not follow the job change");
         p.getInventory().clearContent();
         p.getPersistentData().remove("skyabyss_divine_given");
         jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);

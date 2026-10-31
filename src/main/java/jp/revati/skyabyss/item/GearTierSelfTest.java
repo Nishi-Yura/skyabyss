@@ -102,6 +102,11 @@ public final class GearTierSelfTest {
                 "tower_scale_helmet", "tower_scale_chestplate", "tower_scale_leggings", "tower_scale_boots",
                 "tower_bridge_helmet", "tower_bridge_chestplate", "tower_bridge_leggings", "tower_bridge_boots",
                 "tower_halo_helmet", "tower_halo_chestplate", "tower_halo_leggings", "tower_halo_boots", "tower_heaven_ring", "tower_abyss_chain");
+        row(7, M, "divine_warden_blade", "divine_ash_hammer", "divine_eyelid_staff", "divine_mist_bow", "divine_moth_dagger", "divine_keeper_bell_staff",
+                "divine_bellkeeper_helmet", "divine_bellkeeper_chestplate", "divine_bellkeeper_leggings", "divine_bellkeeper_boots",
+                "divine_mistwalker_helmet", "divine_mistwalker_chestplate", "divine_mistwalker_leggings", "divine_mistwalker_boots",
+                "divine_lampkeeper_helmet", "divine_lampkeeper_chestplate", "divine_lampkeeper_leggings", "divine_lampkeeper_boots",
+                "divine_plume_charm", "divine_promise_chime");
         row(7, M, "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_plume_bow", "divine_rewind_dagger", "divine_promise_bell_staff");
     }
 

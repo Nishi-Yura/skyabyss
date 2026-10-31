@@ -642,6 +642,8 @@ public final class SkillManager {
         SkillActions.fxTarget = null;
         // 鐘の内の初代の空見は、技の音を聞く (docs/design/53 の 5.1)
         jp.revati.skyabyss.story.finale.mob.FounderBoss.heardSkill(player);
+        // 灯守の法衣 (4 部位): 技を使うと、まわりの仲間に灯の守り
+        jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.onSkillCast(player);
         return CastResult.OK;
     }
 

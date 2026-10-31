@@ -60,7 +60,7 @@ public final class WeaponClient {
         event.registerItem(new BowExtension("abyss_storm_bow"), jp.revati.skyabyss.abyss.AbyssSetup.STORM_BOW_ITEM.get());
         // 職の章の弓と祠の弓 (item/ChapterGear・rpg/skill/JobChoice)
         for (String id : java.util.List.of("whale_bow", "tide_bow", "ember_bow", "shrine_bow", "abyss_whale_bow", "abyss_tide_bow", "abyss_ember_bow",
-                "abyss_depth_bow", "whale_rib_longbow", "tide_coral_bow", "storm_gale_bow", "ember_flare_bow", "moon_waning_bow", "moon_starfall_bow", "divine_plume_bow", "tower_eye_bow")) {
+                "abyss_depth_bow", "whale_rib_longbow", "tide_coral_bow", "storm_gale_bow", "ember_flare_bow", "moon_waning_bow", "moon_starfall_bow", "divine_plume_bow", "divine_mist_bow", "tower_eye_bow")) {
             event.registerItem(new BowExtension(id), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id)));
         }
         // 野の装備の弓 (item/wild。docs/design/51)

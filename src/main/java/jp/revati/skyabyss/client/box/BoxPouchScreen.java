@@ -44,6 +44,7 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
                 }
                 case ARTIFACT -> s.add(new Spot(k, BAND_X, 69 + 4 * 19 + 4));
                 case TOWER -> s.add(new Spot(k, BAND_X + PITCH + 4, 69 + 4 * 19 + 4));
+                case CLOUD -> s.add(new Spot(k, BAND_X + 2 * (PITCH + 4), 69 + 4 * 19 + 4));
             }
         }
         spots = List.copyOf(s);

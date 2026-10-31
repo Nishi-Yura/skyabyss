@@ -1,0 +1,75 @@
+# 神器の二本目 6 本 (docs/design/50 の 4.5.1): 一人称と三人称の正面
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/divine_second.txt -PshotsName=divine_second
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+perspective first
+hud on
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_warden_blade
+close
+wait 30
+chat clear
+shot fp_divine_warden_blade
+perspective front
+wait 8
+shot tp_divine_warden_blade
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_ash_hammer
+close
+wait 30
+chat clear
+shot fp_divine_ash_hammer
+perspective front
+wait 8
+shot tp_divine_ash_hammer
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_eyelid_staff
+close
+wait 30
+chat clear
+shot fp_divine_eyelid_staff
+perspective front
+wait 8
+shot tp_divine_eyelid_staff
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_mist_bow
+close
+wait 30
+chat clear
+shot fp_divine_mist_bow
+perspective front
+wait 8
+shot tp_divine_mist_bow
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_moth_dagger
+close
+wait 30
+chat clear
+shot fp_divine_moth_dagger
+perspective front
+wait 8
+shot tp_divine_moth_dagger
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_keeper_bell_staff
+close
+wait 30
+chat clear
+shot fp_divine_keeper_bell_staff
+perspective front
+wait 8
+shot tp_divine_keeper_bell_staff
+

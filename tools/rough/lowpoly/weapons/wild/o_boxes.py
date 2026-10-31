@@ -1,5 +1,5 @@
-"""封の箱 10 種 (docs/design/52 の 2 章)。一品一案: 巨神の箱 4 (岩鯨・潮殻・雷翼・余燼)、階級の箱 4 (アンコモン・レア・エピック・ヒロイック)、淵の金の箱、
-塔の箱 (あいだの塔の報酬。docs/design/54 の 2.6)。
+"""封の箱 11 種 (docs/design/52 の 2 章)。一品一案: 巨神の箱 4 (岩鯨・潮殻・雷翼・余燼)、階級の箱 4 (アンコモン・レア・エピック・ヒロイック)、淵の金の箱、
+塔の箱 (あいだの塔の報酬。docs/design/54 の 2.6)、雲上の箱 (終章の神器。docs/design/50 の 4.5.1)。
 大きさは手に持てる小箱 (幅 ±4、高さ 0〜7 単位、奥行き ±3。1 単位 = 1/16 ブロック)。底が y = 0、正面 = -Z (封は正面)。
 縁 (trim) は階級の色 (paint_wild.TRIM)。光るのは封 (gem) だけ。
 
@@ -217,6 +217,26 @@ def box_tower(stage=0):
     return f
 
 
+def box_cloud(stage=0):
+    """雲上の箱: 雲の白の石の箱に金の縁と角金具。ふたは雲の房が三つ盛り上がり、正面の封は金の輪の中の朝の光の珠。左右に小さな畳んだ金の翼、帯は空の藍"""
+    f = chest("main", "main", h=4.2, lid_h=1.4, rim=False, dome=(0.95, 0.85))
+    f += block("acc", (0, 0.25, 0), (2 * WX + 0.35, 0.5, 2 * D + 0.35))
+    f += block("acc", (0, 4.15, 0), (2 * WX + 0.4, 0.42, 2 * D + 0.4))
+    f += block("spine", (0, 2.2, 0), (2 * WX + 0.3, 0.9, 2 * D + 0.3))
+    f += corner_caps("acc")
+    # ふたの雲の房
+    for p, r in (((0, 6.0, 0), 1.9), ((-2.4, 5.6, 0.3), 1.5), ((2.4, 5.7, -0.2), 1.6), ((0.9, 6.6, 1.0), 1.1)):
+        f += ell("main", p, (r, r * 0.75, r * 0.9), segs=8, rings=4)
+    # 封
+    f += torus("acc", (0, 2.6, -3.2), 0.95, 0.17, 0.17, n=10, k=3, ax="z")
+    f += gem((0, 2.6, -3.35), 0.55, 0.55, 0.3, segs=6, rings=2)
+    # 左右の畳んだ翼
+    for sx in (-1, 1):
+        for i in range(3):
+            f += feather("acc", (sx * WX, 3.4 - 0.5 * i, -1.0 + 1.0 * i), (sx * (WX + 2.2 - 0.3 * i), 5.0 - 0.6 * i, -1.0 + 1.0 * i), 0.5, th=0.18)
+    return f
+
+
 WEAPONS = dict([
     W(box_stone_whale, "岩鯨の封の箱", "rare", "trinket", "frost", dict(main="driftwood", spine="tusk", acc="moss", guard="stone")),
     W(box_tide_shell, "潮殻の封の箱", "rare", "trinket", "sea", dict(main="darkwood", spine="shell", acc="rockshell", cloth="nacre")),
@@ -228,6 +248,7 @@ WEAPONS = dict([
     W(box_heroic, "ヒロイックの封の箱", "heroic", "trinket", "ember", dict(main="redcloth", acc="gold")),
     W(box_artifact, "淵の金の箱", "heroic", "trinket", "void", dict(main="gold", acc="gold")),
     W(box_tower, "塔の箱", "heroic", "trinket", "void", dict(main="cloudwhite", spine="basalt", acc="gold")),
+    W(box_cloud, "雲上の箱", "heroic", "trinket", "dawn", dict(main="cloudwhite", spine="bluecloth", acc="gold")),
 ])
 for _k in WEAPONS:
     WEAPONS[_k]["scale"] = 15.0

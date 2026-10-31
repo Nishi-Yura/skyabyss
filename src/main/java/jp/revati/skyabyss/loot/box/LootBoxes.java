@@ -114,6 +114,9 @@ public final class LootBoxes {
         if (jp.revati.skyabyss.tower.gear.TowerGear.DUNGEON.equals(d)) {
             return BoxKind.byId("box_tower");
         }
+        if (DivineGear.DUNGEON.equals(d) && t == GearTier.MYTHIC) {
+            return BoxKind.byId(DivineGear.BOX);
+        }
         if (t == GearTier.ARTIFACT) {
             return DivineGear.DUNGEON.equals(d) ? null : BoxKind.byId("box_artifact");
         }
