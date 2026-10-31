@@ -283,7 +283,7 @@
 - 書き換えは、その技を極めて書き換え (刻印の 4 番) を選び、神器を主の手に持っているときに効く (ほかの逸品の書き換えと同じ)。
 - 作りの場所: 品と数値 `story/finale/gear/DivineGear`・`DivineGearSetup`、効果 `DivineGearEvents`、書き換え `rpg/skill/Rune` の `DIVINE_*` と `LegendRewrites`、形 `tools/rough/lowpoly/weapons/one/o_divine.py` (塗り `paint_divine.py`) → `install_job_weapons.py`、素材の絵 `tools/gen/finale/gen_divine_assets.py`、撮影 `tools/shots/divine_relics.txt`、自己テスト `cloudsea`。
 
-### 4.5.1 神器の二本目・防具・装飾（2026-11-01 の声「通常神器、1 種類しかないけど 2 種類に増やせる？ 防具と装飾も追加してほしい」。できた。雲上の箱の形だけ承認待ち）
+### 4.5.1 神器の二本目・防具・装飾（2026-11-01 の声「通常神器、1 種類しかないけど 2 種類に増やせる？ 防具と装飾も追加してほしい」。できた）
 
 - 階級はどれも神器（七段目。[03](03_gear_and_endgame.md) の 1.2）。必要 Lv 50。二本目の強さは一本目と同じ 1 秒あたり、効き方が違う（技の書き換えは一本目だけ）。形は雲の島の敵と主から。
 - 形のラフ: 武器 `tools/rough/lowpoly/weapons/one/o_divine.py`（二本目の 6 本）、防具 `tools/rough/lowpoly/armor/divine/build_divine_armor.py`、装飾の絵 `tools/gen/finale/gen_divine_gear_icons.py`。見せた絵 `docs/review/divine_gear/divine_gear_roughs.png`。
@@ -305,7 +305,7 @@
 | 巡礼の羽飾り（装飾） | 白い風切羽に金の軸、藍の紐と光の珠 | 落ちる傷が無くなり、空中で打つ傷 +8% |
 | 約束の小鈴（装飾） | 金の鈴に藍の紐と四つの灯 | 倒れた仲間を起こす速さ ×1.5、起こした仲間に守り 3 秒（受ける傷 ×0.7） |
 
-- 手に入れ方: 一本目の受け取りは今のまま（巡礼者を初めて倒すと、いまの職の一本目）。二度目からの巡礼者と巡礼の試しで「雲上の箱」（`box_cloud`。封切り師で開ける。中は神器の武器 12・防具 12 部位・装飾 2 のどれか一つ）が 20%、試しは段ごとに +5%（`DivineGear.rollBox`）。箱の形のラフ `o_boxes.py box_cloud`（承認待ち。入れるのは `install_boxes.py` の LOOKS と ITEMS に足して流す）。
+- 手に入れ方: 一本目の受け取りは今のまま（巡礼者を初めて倒すと、いまの職の一本目）。二度目からの巡礼者と巡礼の試しで「雲上の箱」（`box_cloud`。封切り師で開ける。中は神器の武器 12・防具 12 部位・装飾 2 のどれか一つ）が 20%、試しは段ごとに +5%（`DivineGear.rollBox`）。箱の形は `o_boxes.py box_cloud` → `install_boxes.py`。
 - 作りの場所: 品 `DivineGearSetup`（二本目・`ARMOR`・`CHARM`/`CHIME`）、防具の品 `DivineArmorItem`（塔の防具の作りを借りる）、効き方 `DivineSecondEvents`（技を使ったとき `SkillManager.cast`、起こしたとき `Downed.revive`・`WildGearEvents.reviveStep`、マナの戻り `WildGearEvents.manaRegenBonus` から呼ぶ）、取り込み `install_job_weapons.py`・`install_tower_armor.py --divine`・`gen_divine_gear_icons.py --install`、撮影 `tools/shots/divine_second.txt`・`divine_armor.txt`、自己テスト `cloudsea`。
 - 職を替える: 二本目は替えた職の二本目になる（一本目は一本目へ）。
 

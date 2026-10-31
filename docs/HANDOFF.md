@@ -10,7 +10,7 @@
 
 ## 神器の二本目・防具・装飾（入れた。2026-11-01。設計 [50](design/50_finale.md) の 4.5.1）
 
-- 二本目 6 本・防具 3 式・装飾 2 は登録と効き方と形まで入れた（ゲームの中の絵 `docs/review/divine_gear/divine_gear_ingame.jpg`）。雲上の箱 `box_cloud` は品と抽選まで入れたが、形（ラフ `docs/review/roughs_wild/box_cloud/views.png`）は承認待ち。承認されたら `install_boxes.py` の LOOKS と ITEMS に足して流す。それまで自己テスト `loot boxes` は「box_cloud の形が無い」で落ちる。
+- 二本目 6 本・防具 3 式・装飾 2 は登録と効き方と形まで入れた（ゲームの中の絵 `docs/review/divine_gear/divine_gear_ingame.jpg`）。雲上の箱 `box_cloud` も形まで入れた（`o_boxes.py box_cloud` → `install_boxes.py`）。
 
 ## 超大型レイド「あいだの塔」（作りかけ。2026-11-01。設計 [54](design/54_endgame_plan.md) の 2 章）
 
