@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
+// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個、土地の名声の 5 つと旅帳の 4 つで 36 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
 // 並び順は固定 (解除の印は並び順の番号の bit で持つので、足すなら末尾へ。順番を替えない)。
 // 名前の文は lang の "title.skyabyss_rebirth.<id>" と、条件の説明 "title.skyabyss_rebirth.<id>.how"
 public final class RebirthTitles {
     // 1 人の事実。lifeBest = 一番速かった人生 (tick。なければ -1)、fewestDeaths = 一人生の最少の死 (なければ -1)、titanBests = 記録のある巨神の数、
     // founder = 裏ボス「初代の空見」を退けた (docs/design/53 の 6 章)、towerClears = あいだの塔を越えた回数 (docs/design/54 の 2.6)
+    // marks = ほかの決まりごとの印 (土地の名声・旅帳の "hero:<土地>"・"walker:<土地>"。endgame/RegionFame.marks)
     public record Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests, boolean founder,
-            int towerClears) {
+            int towerClears, java.util.Set<String> marks) {
         public static final Facts NONE = new Facts(0, 0, 0, 0, -1, -1, 0);
+
+        public Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests, boolean founder,
+                int towerClears) {
+            this(rebirths, flawless, titansStopped, deathsTotal, lifeBest, fewestDeaths, titanBests, founder, towerClears, java.util.Set.of());
+        }
 
         public Facts(int rebirths, int flawless, int titansStopped, int deathsTotal, long lifeBest, int fewestDeaths, int titanBests) {
             this(rebirths, flawless, titansStopped, deathsTotal, lifeBest, fewestDeaths, titanBests, false, 0);
@@ -26,7 +32,7 @@ public final class RebirthTitles {
     public record Title(int index, String id, Predicate<Facts> rule) {
     }
 
-    public static final int MAX = 27;
+    public static final int MAX = 36;
     private static final long HOUR = 72_000L;
     private static final List<Title> ALL = new ArrayList<>();
 
@@ -58,6 +64,15 @@ public final class RebirthTitles {
         add("yattsume", f -> f.founder);
         add("tower_1", f -> f.towerClears >= 1);
         add("tower_50", f -> f.towerClears >= 50);
+        // 土地の名声の 5 段 (endgame/RegionFame) と、四つの土地すべて
+        for (String land : new String[] {"whale", "tide", "storm", "ember"}) {
+            add("hero_" + land, f -> f.marks.contains("hero:" + land));
+        }
+        add("hero_all", f -> f.marks.contains("hero:all"));
+        // 旅帳: 土地の名所をすべて見つけた
+        for (String land : new String[] {"whale", "tide", "storm", "ember"}) {
+            add("walker_" + land, f -> f.marks.contains("walker:" + land));
+        }
     }
 
     private RebirthTitles() {

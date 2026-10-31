@@ -136,7 +136,8 @@ public final class RebirthSelfTest {
     // ---------------------------------------------------------------- 称号
     private static void titles(List<String> f) {
         List<RebirthTitles.Title> all = RebirthTitles.all();
-        check(f, all.size() == 27 && all.size() <= RebirthTitles.MAX, "27 titles (24 + the founder + the tower two): " + all.size());
+        check(f, all.size() == 36 && all.size() <= RebirthTitles.MAX && RebirthTitles.MAX <= 64,
+                "36 titles (24 + the founder + the tower two + fame five + journal four): " + all.size());
         Set<String> ids = new HashSet<>();
         for (int i = 0; i < all.size(); i++) {
             check(f, all.get(i).index() == i, "title index order at " + i);

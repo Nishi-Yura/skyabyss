@@ -125,10 +125,12 @@ public final class Rebirths {
         int count = RebirthView.count(p);
         boolean founder = jp.revati.skyabyss.story.finale.founder.Founder.beaten(p);
         int tower = p.getPersistentData().getInt(jp.revati.skyabyss.tower.Towers.CLEARS);
+        java.util.Set<String> marks = jp.revati.skyabyss.endgame.RegionFame.marks(p);
         if (e == null) {
-            return new RebirthTitles.Facts(count, 0, Progression.stage(p), 0, -1, -1, 0, founder, tower);
+            return new RebirthTitles.Facts(count, 0, Progression.stage(p), 0, -1, -1, 0, founder, tower, marks);
         }
-        return new RebirthTitles.Facts(count, e.flawless, Progression.stage(p), e.deathsTotal, e.fastestLife, e.fewestDeaths, e.titanBest.size(), founder, tower);
+        return new RebirthTitles.Facts(count, e.flawless, Progression.stage(p), e.deathsTotal, e.fastestLife, e.fewestDeaths, e.titanBest.size(), founder, tower,
+                marks);
     }
 
     // 称号の解除 (足すだけで消さない)。新しく解けたものがあれば知らせる

@@ -89,6 +89,11 @@ public final class Coins {
         if (n > 0) {
             give(player, n);
             Notice.gain(player, "message.skyabyss.facility.coins_gained", n);
+            // 言伝ての板の頼みは、その土地の名声にも (endgame/RegionFame。週の頼みは多め)
+            int region = jp.revati.skyabyss.world.continent.ContinentMap.get().region(player.getBlockX(), player.getBlockZ());
+            if (region != jp.revati.skyabyss.world.continent.ContinentMap.OUTSKIRTS) {
+                jp.revati.skyabyss.endgame.RegionPoints.add(player, region, def.repeat().equals("weekly") ? 5 : 2);
+            }
         }
     }
 

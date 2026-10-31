@@ -32,6 +32,17 @@
           "goto": "end"
         },
         {
+          "id": "journal",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "journal"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "bye",
           "kind": "leave",
           "goto": "end"

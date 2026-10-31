@@ -185,7 +185,18 @@ public final class ContinentPois {
         int region = ContinentMap.get().region(poi.x(), poi.z());
         jp.revati.skyabyss.rpg.Growth.addXp(p, DISCOVER_XP[Math.max(0, Math.min(DISCOVER_XP.length - 1, region))], "growth.skyabyss.reason.discovery");
         p.serverLevel().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1.6f);
+        // 旅帳と土地の名声 (endgame/RegionFame)
+        jp.revati.skyabyss.endgame.RegionFame.discovered(p, region);
         return true;
+    }
+
+    // 自己テスト用: 見どころを見つけたことにする / 見つけた記録を消す
+    public static boolean discoverForTest(ServerPlayer p, int index) {
+        return discover(p, index, all().get(index));
+    }
+
+    public static void forgetForTest(net.minecraft.world.entity.player.Player p) {
+        persisted(p).remove(FOUND_TAG);
     }
 
     static SiteData.Entry entry(SiteData data, int index) {

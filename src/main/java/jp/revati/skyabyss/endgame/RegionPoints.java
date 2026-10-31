@@ -36,8 +36,12 @@ public final class RegionPoints {
         week.putInt("r" + region, week.getInt("r" + region) + n);
         data.put(WEEK, week);
         CompoundTag fame = data.getCompound(FAME);
-        fame.putInt("r" + region, fame.getInt("r" + region) + n);
+        int before = fame.getInt("r" + region);
+        fame.putInt("r" + region, before + n);
         data.put(FAME, fame);
+        if (p instanceof net.minecraft.server.level.ServerPlayer sp) {
+            RegionFame.changed(sp, region, before, before + n);
+        }
     }
 
     // この週の点 (週が替わっていれば 0)

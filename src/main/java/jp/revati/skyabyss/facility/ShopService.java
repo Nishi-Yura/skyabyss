@@ -103,7 +103,8 @@ public final class ShopService {
             }
             int left = g.limit() <= 0 ? -1 : Math.max(0, g.limit() - ledger.bought(shop.id(), g.id(), day));
             boolean rotating = shop.pool().contains(g);
-            goods.add(new FacilityNetwork.GoodView(g.id(), g.stack(), g.coins(), mats, have, left, chapter < g.chapter(), g.chapter(), rotating));
+            goods.add(new FacilityNetwork.GoodView(g.id(), g.stack(), jp.revati.skyabyss.endgame.RegionFame.price(player, g.coins()), mats, have, left,
+                    chapter < g.chapter(), g.chapter(), rotating));
         }
         List<FacilityNetwork.SellView> sells = new ArrayList<>();
         for (int i = 0; i < shop.buys().size(); i++) {
@@ -154,7 +155,9 @@ public final class ShopService {
                 return Result.SOLD_OUT;
             }
         }
-        if (Coins.count(player) < g.coins() * n) {
+        // 土地の名声の値引き (土地の町の中だけ。endgame/RegionFame)
+        int each = jp.revati.skyabyss.endgame.RegionFame.price(player, g.coins());
+        if (Coins.count(player) < each * n) {
             Notice.hint(player, "message.skyabyss.shop.no_coins");
             return Result.NO_COINS;
         }
@@ -164,7 +167,7 @@ public final class ShopService {
                 return Result.NO_MATERIALS;
             }
         }
-        Coins.take(player, g.coins() * n);
+        Coins.take(player, each * n);
         for (ShopDef.Price p : g.materials()) {
             QuestItems.take(player, BuiltInRegistries.ITEM.getKey(p.item()).toString(), null, p.count() * n);
         }
