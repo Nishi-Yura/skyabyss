@@ -5,7 +5,7 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.21（`build/libs/skyabyss-0.9.21.jar`。確認表 `docs/review/playtest_0.9.21.md`（塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
 ## エンドコンテンツの残り（2026-11-02 の夜。設計 [54](design/54_endgame_plan.md) の 3.1.1・3.3.1・3.4.1・5.1.1・5.4.1・6.2.7・6.2.8）
@@ -65,6 +65,12 @@
 - 報酬は称号「やっつめを聞いた者」・見た目だけの空見の肩掛け（背中に描く。装飾の枠は使わない）・始祖の小鐘・伝承 2 項。挑み直すと J の記録に最速が残る。強さは増やさない。
 - 同じ作業で見つけた不具合: 倒れて新しい体になると、月と終章の記録（選んだ結末・巡礼の試しと位相の挑戦の段・神器を渡した印など）が消えていた。`util/LifeKeep` に足した（神器を二度もらえる穴もふさいだ）。
 - 確かめ: 自己テスト `founder`（と `cloudsea`・`rebirth`・`record`）が通った。撮影 `tools/shots/founder.txt`（鐘の内・始祖の構え・退けたあとの札・肩掛け）。手応え（数値・技の間）と歌の避けやすさは試遊で（`docs/review/playtest_founder.md`）。
+
+## 0.9.21（塔・神器・秘伝・エンドコンテンツの試遊版。2026-11-02）
+
+- jar `build/libs/skyabyss-0.9.21.jar`。確かめ表 `docs/review/playtest_0.9.21.md`。0.9.20 の世界のままでよい。
+- サイト（`site/`、`tools/site/pages_c.py` の更新履歴）はまだ 0.9.20 のまま。GitHub Pages に載るので、出してよいか確かめてから `python tools/site/build.py`。
+- 確かめ: 自己テスト全段（夜に流して、見つかった抜けを直した。直したあと関わる段を流し直して通った）。
 
 ## 0.9.20 のあと（遊ばずに決められる片づけ。2026-10-31）
 
