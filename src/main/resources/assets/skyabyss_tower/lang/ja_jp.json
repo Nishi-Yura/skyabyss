@@ -172,5 +172,15 @@
   "message.skyabyss.secret.btn.on": "[枠に付ける]",
   "message.skyabyss.secret.btn.off": "[外す]",
   "message.skyabyss.tower.scroll": "秘伝の巻を見つけた。使うと秘伝を覚える。",
-  "dialogue.skyabyss.attendant_training_master.menu.arts": "秘伝の枠を見る"
+  "dialogue.skyabyss.attendant_training_master.menu.arts": "秘伝の枠を見る",
+  "entity.skyabyss.attendant_tower_keeper": "塔守",
+  "dialogue.skyabyss.attendant_tower_keeper.intro": "……ようこそ。わしは塔守。天と淵のあいだに架かった橋の、こちらの端の番をしておる。結末を選んだ者だけが、あの塔に入れる。",
+  "dialogue.skyabyss.attendant_tower_keeper.menu": "隊を組むか、欠片を替えるか。どうする。",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.desk": "塔の受付 (隊・賭け・入る)",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.shop": "塔の店",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.records": "記録の板",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.rules": "塔の決まりを聞く",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.about": "あなたは誰？",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.bye": "またあとで",
+  "dialogue.skyabyss.attendant_tower_keeper.rules": "入れるのは一日一度。朝の五つで塔は組み替わる。橋の先の主を倒せば欠片と鐘銭、運がよければ塔の箱。週の賭けを背負えば欠片が増える。月が橋を渡りきれば、それまでじゃ。"
 }

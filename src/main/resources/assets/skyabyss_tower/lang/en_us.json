@@ -172,5 +172,15 @@
   "message.skyabyss.secret.btn.on": "[Slot]",
   "message.skyabyss.secret.btn.off": "[Remove]",
   "message.skyabyss.tower.scroll": "Found a Secret Art Scroll. Use it to learn a secret art.",
-  "dialogue.skyabyss.attendant_training_master.menu.arts": "See my secret arts"
+  "dialogue.skyabyss.attendant_training_master.menu.arts": "See my secret arts",
+  "entity.skyabyss.attendant_tower_keeper": "Tower Keeper",
+  "dialogue.skyabyss.attendant_tower_keeper.intro": "...Welcome. I am the Tower Keeper, warden of this end of the bridge between sky and abyss. Only those who chose an ending may enter.",
+  "dialogue.skyabyss.attendant_tower_keeper.menu": "Form a squad, or trade your shards?",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.desk": "Tower desk (squads, wagers, entry)",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.shop": "Tower shop",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.records": "Record board",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.rules": "Ask about the tower's rules",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.about": "Who are you?",
+  "dialogue.skyabyss.attendant_tower_keeper.menu.bye": "Later",
+  "dialogue.skyabyss.attendant_tower_keeper.rules": "One entry a day; the tower rearranges at the fifth hour. Defeat the master past the bridge for shards and coins, and with luck a tower box. Take on the week's wagers for more shards. If the moon crosses the bridge, it is over."
 }
