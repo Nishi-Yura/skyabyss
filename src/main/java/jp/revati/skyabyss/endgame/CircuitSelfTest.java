@@ -150,6 +150,33 @@ public final class CircuitSelfTest {
             Circuits.finish(server, again);
             check(f, Coins.count(p) == before, "a fourth circuit in a day still paid");
             check(f, RegionPoints.fame(p, ContinentMap.WHALE) == 5, "marks past the daily limit did not count as fame");
+
+            // 二人で歩く: 二人とも印の報いを受け、一人が抜けても残りの人で続く
+            FakePlayer q = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-0000000c1c02"), "circuit_test_b"));
+            p.getPersistentData().remove(Circuits.DAY);
+            p.getPersistentData().remove(Circuits.RUNS);
+            q.getPersistentData().remove(Circuits.DAY);
+            q.getPersistentData().remove(Circuits.RUNS);
+            CircuitRun duo = Circuits.start(server, List.of(p, q), ContinentMap.WHALE, town);
+            made.add(duo);
+            check(f, Circuits.runOf(p) == duo && Circuits.runOf(q) == duo && duo.members.size() == 2, "a party circuit did not hold both walkers");
+            Circuits.forceComplete(level, duo);
+            Circuits.forceComplete(level, duo);
+            discard(level, duo);
+            int qBefore = Coins.count(q);
+            Circuits.leave(q);
+            check(f, Circuits.runOf(q) == null && Circuits.runOf(p) == duo && Coins.count(q) - qBefore == 2 * Circuits.COINS[ContinentMap.WHALE],
+                    "leaving a party circuit did not pay the leaver or broke the run");
+            int pBefore = Coins.count(p);
+            Circuits.forceComplete(level, duo);
+            discard(level, duo);
+            Circuits.finish(server, duo);
+            check(f, Coins.count(p) - pBefore == 3 * Circuits.COINS[ContinentMap.WHALE] && Circuits.runsToday(q) == 1,
+                    "the walker who stayed was not paid for every mark");
+            q.getPersistentData().remove(Circuits.DAY);
+            q.getPersistentData().remove(Circuits.RUNS);
+            q.getPersistentData().remove(RegionPoints.WEEK);
+            q.getPersistentData().remove(RegionPoints.FAME);
         } catch (RuntimeException ex) {
             f.add("circuit test crashed: " + ex);
             SkyAbyss.LOGGER.error("circuit test", ex);
@@ -166,7 +193,7 @@ public final class CircuitSelfTest {
             p.getPersistentData().remove(RegionPoints.FAME);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST circuit PASSED (tasks stay in the region at fair distances, guard, hunt, carry with drop, timeout, coins, daily limit, region points)");
+            SkyAbyss.LOGGER.info("SELFTEST circuit PASSED (tasks stay in the region at fair distances, guard, hunt with respawn, carry with drop, timeout, coins, daily limit, region points, party walk and leave)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST circuit FAILED: {}", m));
         }
