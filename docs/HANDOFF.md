@@ -8,6 +8,11 @@
 - 試遊版: 0.9.20（`build/libs/skyabyss-0.9.20.jar`。確認表 `docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
 
+## 秘伝（2026-11-01。設計 [54](design/54_endgame_plan.md) の 3.2.1）
+
+- 職ごとに 4 つ・24 の秘伝（`rpg/skill/SecretArts`。`SkillActions.perform` の後に上乗せ）。段 I〜III、枠 2（チャットの一覧 `/skyabyss_arts`・師範の「秘伝の枠を見る」）。秘伝の巻 `secret_scroll`（`rpg/skill/SecretScroll`。塔を越えると 25%、塔の店で欠片 100）。自己テストは `tower` の中。
+- まだ: 巻の絵（`gen_tower_assets.py` の `secret_scroll`、承認待ち。`INSTALLED` に足して `--install`）。技の画面に枠を出すこと。効き方の手ごたえは遊んで。
+
 ## 神器の二本目・防具・装飾（入れた。2026-11-01。設計 [50](design/50_finale.md) の 4.5.1）
 
 - 二本目 6 本・防具 3 式・装飾 2 は登録と効き方と形まで入れた（ゲームの中の絵 `docs/review/divine_gear/divine_gear_ingame.jpg`）。雲上の箱 `box_cloud` も形まで入れた（`o_boxes.py box_cloud` → `install_boxes.py`）。

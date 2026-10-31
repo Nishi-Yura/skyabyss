@@ -217,6 +217,10 @@ public final class Towers {
     // 越えた人への報酬: 塔の欠片・鐘銭と、塔の箱 (確率と天井。TowerGear.BOX_CHANCE・BOX_PITY。中は塔の装備がどれか一つ)
     static void reward(ServerPlayer p, TowerRun run) {
         rollBox(p, false);
+        if (p.getRandom().nextFloat() < jp.revati.skyabyss.tower.gear.TowerGear.SCROLL_CHANCE) {
+            jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SECRET_SCROLL.get()));
+            Notice.gain(p, "message.skyabyss.tower.scroll");
+        }
         int shards = (int) Math.round(jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR * TowerWagers.shardScale(run == null ? java.util.Set.of() : run.wagers));
         jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(), shards));
         jp.revati.skyabyss.facility.Coins.give(p, jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);

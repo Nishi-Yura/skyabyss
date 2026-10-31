@@ -7,6 +7,7 @@
   tower_shard   塔の欠片: 縦に長い欠片が斜めのぎざぎざで割れ、左は白と金 (天)、右は黒い石 (淵) に紫の割れ目。割れ目のあいだに朝の光が一筋
   tower_heaven_ring  天の環 (装飾): 金の輪の上に白い羽が三枚開き、前に朝の光の珠
   tower_abyss_chain  淵の鎖 (装飾): 黒い石の輪を四つつないだ短い鎖。真ん中の輪だけ紫に光り、下に天秤の印の小さな飾り
+  secret_scroll      秘伝の巻: 斜めに置いた巻物。古い白の紙に金の軸、紫の紐で結び、結び目に金の天秤の封
 """
 import json
 import math
@@ -139,10 +140,55 @@ def abyss_chain():
     return im
 
 
+def secret_scroll():
+    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    px = im.load()
+    # 斜めの巻物の胴 (左下 → 右上)
+    ax, ay, bx, by = 7.0, 24.0, 24.0, 7.0
+    L = math.hypot(bx - ax, by - ay)
+    ux, uy = (bx - ax) / L, (by - ay) / L
+    nx, ny = -uy, ux
+    for y in range(32):
+        for x in range(32):
+            dx, dy = x + 0.5 - ax, y + 0.5 - ay
+            t = dx * ux + dy * uy
+            d = dx * nx + dy * ny
+            if 0 <= t <= L and abs(d) <= 4.2:
+                shade = (244, 236, 212) if d < -1.5 else (226, 214, 184) if d < 1.6 else (196, 180, 146)
+                if int(t) % 5 == 0 and abs(d) < 3.6:
+                    shade = tuple(c - 18 for c in shade)
+                put(px, x, y, shade + (255,))
+    # 両端の金の軸
+    for (cx, cy) in ((ax, ay), (bx, by)):
+        for y in range(32):
+            for x in range(32):
+                dx, dy = x + 0.5 - cx, y + 0.5 - cy
+                t = dx * ux + dy * uy
+                d = dx * nx + dy * ny
+                if abs(t) <= 1.3 and abs(d) <= 5.4:
+                    put(px, x, y, (255, 222, 140, 255) if d < 0 else (200, 152, 72, 255))
+    # 紫の紐と金の封
+    mx, my = (ax + bx) / 2, (ay + by) / 2
+    for k in range(-5, 6):
+        put(px, round(mx + nx * k * 0.85), round(my + ny * k * 0.85), (150, 100, 230, 255))
+        put(px, round(mx + nx * k * 0.85 + ux), round(my + ny * k * 0.85 + uy), (110, 70, 190, 255))
+    for y in range(32):
+        for x in range(32):
+            if math.hypot(x + 0.5 - mx - 0.5, y + 0.5 - my - 0.5) <= 2.4:
+                put(px, x, y, (240, 196, 96, 255))
+    put(px, round(mx) - 1, round(my), (120, 80, 30, 255))
+    put(px, round(mx), round(my), (120, 80, 30, 255))
+    put(px, round(mx) + 1, round(my), (120, 80, 30, 255))
+    for x, y in ((round(mx + nx * 6), round(my + ny * 6 + 2)), (round(mx + nx * 6) + 1, round(my + ny * 6 + 3))):
+        put(px, x, y, (150, 100, 230, 255))
+    outline(im)
+    return im
+
+
 def main():
     install = "--install" in sys.argv
     REVIEW.mkdir(parents=True, exist_ok=True)
-    for name, fn in (("tower_shard", shard), ("tower_heaven_ring", heaven_ring), ("tower_abyss_chain", abyss_chain)):
+    for name, fn in (("tower_shard", shard), ("tower_heaven_ring", heaven_ring), ("tower_abyss_chain", abyss_chain), ("secret_scroll", secret_scroll)):
         im = fn()
         im.save(REVIEW / f"{name}.png")
         im.resize((256, 256), Image.NEAREST).save(REVIEW / f"{name}_x8.png")

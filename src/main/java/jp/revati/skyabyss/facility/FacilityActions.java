@@ -49,7 +49,7 @@ import net.minecraft.world.level.block.BedBlock;
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts");
 
     private FacilityActions() {
     }
@@ -89,6 +89,7 @@ public final class FacilityActions {
             case "tower_desk" -> jp.revati.skyabyss.tower.TowerDesk.menu(player);
             case "tower_shop" -> jp.revati.skyabyss.tower.TowerDesk.openShop(player);
             case "tower_records" -> jp.revati.skyabyss.tower.TowerDesk.records(player);
+            case "secret_arts" -> jp.revati.skyabyss.rpg.skill.SecretArts.menu(player);
             default -> SkyAbyss.LOGGER.warn("[facility] unknown open {}", open);
         }
     }

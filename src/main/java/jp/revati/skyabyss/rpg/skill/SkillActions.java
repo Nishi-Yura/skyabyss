@@ -111,6 +111,8 @@ public final class SkillActions {
         if (failure == null) {
             // 伝説の書き換え (巨神の色の上乗せ。rpg/skill/LegendRewrites)
             LegendRewrites.after(player, skill, rank, from);
+            // 秘伝 (枠に付けた秘伝の上乗せ。rpg/skill/SecretArts。docs/design/54 の 3.2.1)
+            SecretArts.after(player, skill, rank, from);
         }
         return failure;
     }

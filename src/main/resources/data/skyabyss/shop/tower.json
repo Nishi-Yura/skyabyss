@@ -222,6 +222,17 @@
       ]
     },
     {
+      "id": "secret_scroll",
+      "item": "skyabyss:secret_scroll",
+      "count": 1,
+      "materials": [
+        {
+          "item": "skyabyss:tower_shard",
+          "count": 100
+        }
+      ]
+    },
+    {
       "id": "box",
       "item": "skyabyss:box_tower",
       "count": 1,

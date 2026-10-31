@@ -71,6 +71,10 @@ public final class TowerGearSetup {
         }
     }
 
+    // 秘伝の巻 (rpg/skill/SecretScroll。docs/design/54 の 3.2.1)
+    public static final DeferredItem<Item> SECRET_SCROLL = ITEMS.register("secret_scroll",
+            () -> new jp.revati.skyabyss.rpg.skill.SecretScroll(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC)));
+
     public static final DeferredItem<Item> RING = ITEMS.register("tower_heaven_ring",
             () -> new Trinket(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "item.skyabyss.tower_heaven_ring.desc"));
     public static final DeferredItem<Item> CHAIN = ITEMS.register("tower_abyss_chain",
@@ -147,6 +151,7 @@ public final class TowerGearSetup {
                 event.accept(item.get());
             }
             event.accept(SHARD.get());
+            event.accept(SECRET_SCROLL.get());
         }
     }
 }

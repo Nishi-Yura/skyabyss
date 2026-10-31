@@ -166,9 +166,10 @@ public final class TowerSelfTest {
             check(f, !opened.isEmpty() && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(opened) == box, "the tower box did not roll tower gear");
         }
         var shop = jp.revati.skyabyss.facility.ShopManager.shop(TowerDesk.SHOP);
-        check(f, shop != null && shop.goods().size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size() + 1, "the tower shop is missing or incomplete");
+        check(f, shop != null && shop.goods().size() == jp.revati.skyabyss.tower.gear.TowerGearSetup.all().size() + 2, "the tower shop is missing or incomplete");
         armor(f, p);
         wagers(f, run);
+        arts(f, p);
         p.getPersistentData().remove(Towers.CLEARS);
         p.getPersistentData().remove(Towers.BEST);
     }
@@ -209,9 +210,35 @@ public final class TowerSelfTest {
                 "the record board did not keep the fastest run or count guild clears");
     }
 
+    // 秘伝 (rpg/skill/SecretArts): 段は III まで、枠は二つ、職ごとに 4 つ、どの秘伝の上乗せも動く
+    static void arts(List<String> f, FakePlayer p) {
+        p.getPersistentData().remove(jp.revati.skyabyss.rpg.skill.SecretArts.ARTS);
+        p.getPersistentData().remove(jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS_KEY);
+        var cut = jp.revati.skyabyss.rpg.skill.SecretArts.Art.SECOND_CUT;
+        boolean ok = jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, cut) && jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, cut)
+                && jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, cut) && !jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, cut);
+        check(f, ok && jp.revati.skyabyss.rpg.skill.SecretArts.tier(p, cut) == 3, "a secret art did not stop at tier III");
+        jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, jp.revati.skyabyss.rpg.skill.SecretArts.Art.QUAKE_CALL);
+        jp.revati.skyabyss.rpg.skill.SecretArts.learn(p, jp.revati.skyabyss.rpg.skill.SecretArts.Art.WHALE_WHIRL);
+        check(f, jp.revati.skyabyss.rpg.skill.SecretArts.equipped(p).size() == jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS
+                && !jp.revati.skyabyss.rpg.skill.SecretArts.equip(p, jp.revati.skyabyss.rpg.skill.SecretArts.Art.WHALE_WHIRL), "the secret art slots are not two");
+        java.util.Map<jp.revati.skyabyss.rpg.skill.Job, Integer> per = new java.util.EnumMap<>(jp.revati.skyabyss.rpg.skill.Job.class);
+        for (var a : jp.revati.skyabyss.rpg.skill.SecretArts.Art.values()) {
+            per.merge(a.job, 1, Integer::sum);
+            try {
+                jp.revati.skyabyss.rpg.skill.SecretArts.applyForTest(p, a, 3);
+            } catch (RuntimeException ex) {
+                f.add("secret art " + a.id + " crashed: " + ex);
+            }
+        }
+        check(f, per.size() == 6 && per.values().stream().allMatch(n -> n == 4), "not four secret arts per job: " + per);
+        p.getPersistentData().remove(jp.revati.skyabyss.rpg.skill.SecretArts.ARTS);
+        p.getPersistentData().remove(jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS_KEY);
+    }
+
     static void report(List<String> f) {
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, wagers, record board, end)");
+            SkyAbyss.LOGGER.info("SELFTEST tower PASSED (dimension, bridge marks, eligibility and daily entry, slots per squad, bridge poured, time limit, master and eyes, party HP, wake shield, health floors, warning zones, falling moon, clear, rewards, shop, tower armor, wagers, record board, secret arts, end)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tower FAILED: {}", m));
         }

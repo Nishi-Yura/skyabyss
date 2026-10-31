@@ -31,6 +31,8 @@ public final class TowerGear {
     public static final int REQUIRED_LEVEL = 50;
     public static final int SHARDS_PER_CLEAR = 10;
     public static final int COINS_PER_CLEAR = 300;
+    // 秘伝の巻: 越えるたびに SCROLL_CHANCE (docs/design/54 の 3.2.1)
+    public static final float SCROLL_CHANCE = 0.25f;
     // 塔の箱は毎回ではない (神器はなかなか手に入らない): 越えるたびに BOX_CHANCE、出ないまま BOX_PITY 回目で必ず。数えは人のデータ BOX_DRY
     public static final float BOX_CHANCE = 0.15f;
     public static final int BOX_PITY = 10;

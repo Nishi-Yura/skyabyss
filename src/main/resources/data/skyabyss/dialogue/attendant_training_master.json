@@ -87,6 +87,18 @@
           "goto": "job_room"
         },
         {
+          "id": "arts",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_training_master.menu.arts",
+          "do": [
+            {
+              "type": "facility",
+              "open": "secret_arts"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "dummy",
           "kind": "talk",
           "goto": "dummy"
