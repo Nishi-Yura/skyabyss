@@ -193,5 +193,18 @@
   "gui.skyabyss.skill.arts_label": "Arts",
   "gui.skyabyss.skill.arts_title": "Secret art slots (only slotted arts work)",
   "gui.skyabyss.skill.arts_empty": "・(empty)",
-  "gui.skyabyss.skill.arts_hint": "Click to list secret arts (slot/remove) in chat"
+  "gui.skyabyss.skill.arts_hint": "Click to list secret arts (slot/remove) in chat",
+  "biome.skyabyss.tower": "The Tower Between",
+  "item.skyabyss.tower_scale_helmet.story": "The balance helm tilts toward neither side.",
+  "item.skyabyss.tower_scale_chestplate.story": "On the chest's two pans: one heaven, one abyss.",
+  "item.skyabyss.tower_scale_leggings.story": "The more the wounds, the deeper the legs take root.",
+  "item.skyabyss.tower_scale_boots.story": "When the tower floor tilts, these boots do not.",
+  "item.skyabyss.tower_bridge_helmet.story": "Whoever crosses the bridge looks only ahead.",
+  "item.skyabyss.tower_bridge_chestplate.story": "A light vest woven from the links of the bridge chain.",
+  "item.skyabyss.tower_bridge_leggings.story": "Stop and you fall. So the legs never stop.",
+  "item.skyabyss.tower_bridge_boots.story": "The soles still hold the chill of the bridge stones.",
+  "item.skyabyss.tower_halo_helmet.story": "The halo settles on the head of one who thinks.",
+  "item.skyabyss.tower_halo_chestplate.story": "The robe's feathers fell from the master's halo.",
+  "item.skyabyss.tower_halo_leggings.story": "The words of prayer are sewn into the hem.",
+  "item.skyabyss.tower_halo_boots.story": "Walk on light and your feet lift a little."
 }

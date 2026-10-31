@@ -284,11 +284,13 @@ public final class WorldEvents {
         m.setCustomNameVisible(true);
         m.setPersistenceRequired();
         m.addTag(TAG);
+        // 現れる前に記す (onJoin が知らない大いなるものを消すので)
+        e.boss = m.getUUID();
         if (!level.addFreshEntity(m)) {
+            e.boss = null;
             return null;
         }
         m.setTarget(near);
-        e.boss = m.getUUID();
         e.maxHealth = m.getMaxHealth();
         e.nextAdds = level.getGameTime() + ADDS_EVERY;
         clearBar(e);
@@ -372,6 +374,18 @@ public final class WorldEvents {
         Event e = current;
         if (e != null && amount > 0) {
             e.dealt.merge(who, amount, Float::sum);
+        }
+    }
+
+    // 取り残された大いなるもの (時間切れのとき区画が読まれていなかった・サーバーが立ち直した・二体目になった) は、読まれたときに消す
+    @SubscribeEvent
+    static void onJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide() || !event.getEntity().getTags().contains(TAG)) {
+            return;
+        }
+        Event e = current;
+        if (e == null || e.boss == null || !e.boss.equals(event.getEntity().getUUID())) {
+            event.setCanceled(true);
         }
     }
 

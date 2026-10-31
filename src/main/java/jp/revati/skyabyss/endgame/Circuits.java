@@ -410,19 +410,23 @@ public final class Circuits {
             if (near == null) {
                 return;
             }
-            run.need = Math.min(10, 4 + 2 * (ps.size() - 1));
-            spawnAround(level, run, run.spot, run.need, 2, 7, near);
-            run.need = run.mobs.size();
-            run.phase = 1;
+            // 初めて着いたときに数を決める。離れて敵が片づけられたあとに戻ったときは、残りの数だけ湧かせ直す
             if (run.need == 0) {
+                run.need = Math.min(10, 4 + 2 * (ps.size() - 1));
+            }
+            run.mobs.clear();
+            spawnAround(level, run, run.spot, run.need - run.progress, 2, 7, near);
+            run.phase = 1;
+            if (run.mobs.isEmpty()) {
                 complete(level, run);
             }
             return;
         }
-        int alive = alive(level, run);
-        run.progress = run.need - alive;
-        if (alive == 0) {
+        // 倒した数 (onDeath が数える) で越える。倒さずに消えた (離れて片づけられた) 敵は、戻ったときに湧かせ直す
+        if (run.progress >= run.need) {
             complete(level, run);
+        } else if (alive(level, run) == 0) {
+            run.phase = 0;
         }
     }
 
@@ -493,6 +497,21 @@ public final class Circuits {
         }
         if (left <= CARRY_R) {
             complete(level, run);
+        }
+    }
+
+    // 課題の敵が倒れたら数える (倒す課題の進み)
+    @SubscribeEvent
+    static void onMobDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (ACTIVE.isEmpty() || event.getEntity().level().isClientSide()) {
+            return;
+        }
+        UUID id = event.getEntity().getUUID();
+        for (CircuitRun run : ACTIVE) {
+            if (run.kind == CircuitRun.Kind.HUNT && run.mobs.remove(id)) {
+                run.progress++;
+                return;
+            }
         }
     }
 

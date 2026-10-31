@@ -522,5 +522,17 @@
   "item.skyabyss.box_cloud": "雲上の箱",
   "item.skyabyss.box.kind_cloud": "雲上の箱 · 終章の神器 (武器・防具・装飾のどれか一つ)",
   "message.skyabyss.divine.box": "雲上の箱を受け取った。封切り師で開ける。",
-  "message.skyabyss.divine.given_box": "雲上の箱と雲上の心核を受け取った。箱は封切り師で開ける (中は神器のどれか一つ)。"
+  "message.skyabyss.divine.given_box": "雲上の箱と雲上の心核を受け取った。箱は封切り師で開ける (中は神器のどれか一つ)。",
+  "item.skyabyss.divine_bellkeeper_helmet.story": "「兜の鐘は、鳴らす者がいなくても鳴った。」",
+  "item.skyabyss.divine_bellkeeper_chestplate.story": "「最後の鐘守は、胸の鐘で時を数えた。」",
+  "item.skyabyss.divine_bellkeeper_leggings.story": "「腰の小さな鐘は、退かぬ足の数だけ鳴る。」",
+  "item.skyabyss.divine_bellkeeper_boots.story": "「雲の上でも、鐘守の足音は重い。」",
+  "item.skyabyss.divine_mistwalker_helmet.story": "「霞鳥のくちばしは、見えない道を指す。」",
+  "item.skyabyss.divine_mistwalker_chestplate.story": "「羽の肩掛けに、霞がまとわりつく。」",
+  "item.skyabyss.divine_mistwalker_leggings.story": "「巻き脚の布は、風より軽い。」",
+  "item.skyabyss.divine_mistwalker_boots.story": "「霞を渡る者は、足跡を残さない。」",
+  "item.skyabyss.divine_lampkeeper_helmet.story": "「灯守は、目を閉じても灯を見ていた。」",
+  "item.skyabyss.divine_lampkeeper_chestplate.story": "「胸の灯の目は、仲間の背を照らす。」",
+  "item.skyabyss.divine_lampkeeper_leggings.story": "「腰の小さな灯は、帰り道のためにある。」",
+  "item.skyabyss.divine_lampkeeper_boots.story": "「灯を運ぶ足は、急がない。」"
 }

@@ -522,5 +522,17 @@
   "item.skyabyss.box_cloud": "Cloud Box",
   "item.skyabyss.box.kind_cloud": "Cloud box · a divine relic, armor piece or accessory",
   "message.skyabyss.divine.box": "Received a Cloud Box. Open it at a box opener.",
-  "message.skyabyss.divine.given_box": "Received a Cloud Box and a Cloud Heart. Open the box at a box opener (it holds one divine piece)."
+  "message.skyabyss.divine.given_box": "Received a Cloud Box and a Cloud Heart. Open the box at a box opener (it holds one divine piece).",
+  "item.skyabyss.divine_bellkeeper_helmet.story": "The helm's bell rang even with no one to ring it.",
+  "item.skyabyss.divine_bellkeeper_chestplate.story": "The last bellkeeper counted the hours on the bell at his chest.",
+  "item.skyabyss.divine_bellkeeper_leggings.story": "The small bells at the hip ring once for every step not taken back.",
+  "item.skyabyss.divine_bellkeeper_boots.story": "Even above the clouds, a bellkeeper walks heavy.",
+  "item.skyabyss.divine_mistwalker_helmet.story": "The mistbird's beak points down roads no one can see.",
+  "item.skyabyss.divine_mistwalker_chestplate.story": "Mist clings to the feathered shawl.",
+  "item.skyabyss.divine_mistwalker_leggings.story": "The leg wraps weigh less than the wind.",
+  "item.skyabyss.divine_mistwalker_boots.story": "Those who cross the mist leave no footprints.",
+  "item.skyabyss.divine_lampkeeper_helmet.story": "The lampkeeper watched the light even with eyes shut.",
+  "item.skyabyss.divine_lampkeeper_chestplate.story": "The lamp-eye at the chest lights the backs of friends.",
+  "item.skyabyss.divine_lampkeeper_leggings.story": "The small lamps at the hip are for the way home.",
+  "item.skyabyss.divine_lampkeeper_boots.story": "Feet that carry a lamp never hurry."
 }

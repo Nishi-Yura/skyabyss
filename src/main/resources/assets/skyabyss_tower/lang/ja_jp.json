@@ -193,5 +193,18 @@
   "gui.skyabyss.skill.arts_label": "秘伝",
   "gui.skyabyss.skill.arts_title": "秘伝の枠 (枠に付けた秘伝だけが効く)",
   "gui.skyabyss.skill.arts_empty": "・(空き)",
-  "gui.skyabyss.skill.arts_hint": "押すと秘伝の一覧 (付け外し) をチャットに出す"
+  "gui.skyabyss.skill.arts_hint": "押すと秘伝の一覧 (付け外し) をチャットに出す",
+  "biome.skyabyss.tower": "あいだの塔",
+  "item.skyabyss.tower_scale_helmet.story": "「天秤の兜は、どちらにも傾かない。」",
+  "item.skyabyss.tower_scale_chestplate.story": "「胸の皿に、天と淵を一つずつ載せた。」",
+  "item.skyabyss.tower_scale_leggings.story": "「傷が増えるほど、脚は地に根を張る。」",
+  "item.skyabyss.tower_scale_boots.story": "「塔の床が傾いても、この靴は傾かない。」",
+  "item.skyabyss.tower_bridge_helmet.story": "「橋を渡る者は、前だけを見る。」",
+  "item.skyabyss.tower_bridge_chestplate.story": "「鎖の継ぎ目で編んだ、軽い胴着。」",
+  "item.skyabyss.tower_bridge_leggings.story": "「止まれば落ちる。だから脚は止まらない。」",
+  "item.skyabyss.tower_bridge_boots.story": "「靴底に、橋の石の冷たさが残る。」",
+  "item.skyabyss.tower_halo_helmet.story": "「光輪は、考える者の頭に宿る。」",
+  "item.skyabyss.tower_halo_chestplate.story": "「衣の羽は、主の背の光輪から抜けた。」",
+  "item.skyabyss.tower_halo_leggings.story": "「祈りの言葉は、裾の縁に縫ってある。」",
+  "item.skyabyss.tower_halo_boots.story": "「光の上を歩くと、足が少し浮く。」"
 }

@@ -73,15 +73,31 @@ public final class CircuitSelfTest {
             check(f, run.marks == 1, "guarding next to the pillar did not clear the task");
             discard(level, run);
 
-            // 倒す: 着くと湧き、みな倒すと越える
+            // 倒す: 着くと湧き、倒した数で越える。倒さずに消えた敵は越えたことにならず、戻ると湧き直す
             run.kind = CircuitRun.Kind.HUNT;
             run.phase = 0;
+            run.need = 0;
+            run.progress = 0;
             run.spot = here;
             run.taskStart = level.getGameTime();
             Circuits.step(level, run, false);
-            discard(level, run);
             if (run.marks == 1) {
+                int spawned = run.mobs.size();
+                discard(level, run);
                 Circuits.step(level, run, false);
+                check(f, run.marks == 1 && run.phase == 0, "foes that vanished without dying cleared the hunt");
+                Circuits.step(level, run, false);
+                check(f, spawned == 0 || !run.mobs.isEmpty(), "the hunt did not respawn the missing foes");
+                // 倒しきるまで (湧きが足りなければ湧き直す)
+                for (int round = 0; round < 6 && run.marks == 1; round++) {
+                    for (UUID id : List.copyOf(run.mobs)) {
+                        if (level.getEntity(id) instanceof net.minecraft.world.entity.LivingEntity le) {
+                            le.kill();
+                        }
+                    }
+                    Circuits.step(level, run, false);
+                    Circuits.step(level, run, false);
+                }
             }
             check(f, run.marks == 2, "defeating the circuit foes did not clear the task");
 
