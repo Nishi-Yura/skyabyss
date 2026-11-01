@@ -33,7 +33,15 @@ public final class SkinSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "skin_test"));
         try {
-            Skins.Skin s = Skins.ALL.get(0);
+            // 仕立て屋の週替わり: 4 着、同じ週は同じ並び、週が替わると替わることがある
+            java.util.List<String> stock = Skins.weeklyStock();
+            check(f, stock.size() == Skins.WEEKLY && stock.equals(Skins.weeklyStock()), "the weekly stock is not four stable skins: " + stock);
+            java.util.Set<java.util.List<String>> weeks = new java.util.HashSet<>();
+            for (int w = 1; w <= 12; w++) {
+                weeks.add(Skins.weeklyStock("2026-W" + w));
+            }
+            check(f, weeks.size() > 1, "the weekly stock never changes");
+            Skins.Skin s = Skins.byId(stock.get(0));
             check(f, Skins.ALL.size() >= 4 && Skins.ALL.stream().map(Skins.Skin::id).distinct().count() == Skins.ALL.size(), "skins are missing or repeat");
             check(f, Skins.buy(p, s.id()) == Skins.Buy.FAR, "a skin was bought without the tailor");
             Skins.openTailor(p);
@@ -42,7 +50,13 @@ public final class SkinSelfTest {
             Coins.give(p, s.price() + 7);
             check(f, Skins.buy(p, s.id()) == Skins.Buy.OK && Skins.data(p).has(s.id()) && Coins.count(p) == 7, "buying a skin did not take the price: " + Coins.count(p));
             check(f, Skins.buy(p, s.id()) == Skins.Buy.OWNED, "an owned skin was sold again");
-            Skins.Skin other = Skins.ALL.get(1);
+            Skins.Skin other = Skins.ALL.stream().filter(k -> !k.id().equals(s.id())).findFirst().orElseThrow();
+            Skins.Skin offWeek = Skins.ALL.stream().filter(k -> k.shop() == Skins.Shop.TAILOR && !stock.contains(k.id())).findFirst().orElse(null);
+            if (offWeek != null) {
+                Coins.give(p, offWeek.price());
+                check(f, Skins.buy(p, offWeek.id()) == Skins.Buy.NOT_THIS_WEEK, "a skin not in this week's stock was sold");
+                Coins.take(p, offWeek.price());
+            }
             check(f, !Skins.wear(p, other.id()) && Skins.worn(p) == null, "a skin not owned was worn");
             check(f, Skins.wear(p, s.id()) && s.id().equals(Skins.worn(p)), "wearing an owned skin failed");
             check(f, Skins.wear(p, "") && Skins.worn(p) == null, "taking the skin off failed");
@@ -101,7 +115,7 @@ public final class SkinSelfTest {
             SkyAbyss.LOGGER.error("skins test", e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST skins PASSED (tailor only, coins, buy once, tower shards, rewards not sold, fame and codex rewards, rare drop once, kept through rebirth, wear owned only, take off, save and sync round trips, meshes and pictures)");
+            SkyAbyss.LOGGER.info("SELFTEST skins PASSED (tailor only, weekly stock, coins, buy once, tower shards, rewards not sold, fame and codex rewards, rare drop once, kept through rebirth, wear owned only, take off, save and sync round trips, meshes and pictures)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST skins FAILED: {}", m));
         }

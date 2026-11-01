@@ -176,3 +176,27 @@ def tower_balance(c):
         F += part(f"tb_cord{i}", rod("prop_l", "metal", top + V(dx, -0.9, 0), top + V(dx, -2.6, 0), 0.05, 0.05))
         F += part(f"tb_pan{i}", disc("prop_l", m, top + V(dx, -2.7, 0), 0.9, 0.18, n=10, axis="y"))
     return F
+
+
+# ---------------------------------------------------------------- 仕立て屋 (docs/design/54 の 6.1。スキンの店)
+PROP_MATS["bolt"] = dict(ramp=[(60, 30, 80), (100, 52, 130), (146, 86, 176), (190, 130, 214), (226, 186, 240)], base=0.58, lit=0.32, noise=0.04,
+                         crack=0, min=0, stripe=2, axis="u", streak=0.08)
+PROP_MATS["bolt2"] = dict(ramp=[(150, 110, 30), (200, 156, 50), (236, 200, 96), (252, 232, 160)], base=0.6, lit=0.3, noise=0.04, crack=0, min=0)
+
+
+def cloth_bolt(c):
+    """左手で胸に斜めに立てて抱えた反物 (紫の布を巻いた長い筒、両端に金の縁、芯の木が両端からのぞき、上から垂れる布の端)"""
+    h = hand(c, 1)
+    lo = h + V(-0.4, -0.8, -0.9)
+    hi = h + V(-2.6, 5.2, -0.4)
+    d = hi - lo
+    F = part("cb_roll", rod("prop_l", "bolt", lo, hi, 0.95, 0.95))
+    for i, t in enumerate((0.04, 0.96)):
+        p0 = lo + d * (t - 0.03)
+        p1 = lo + d * (t + 0.03)
+        F += part(f"cb_edge{i}", rod("prop_l", "bolt2", p0, p1, 1.0, 1.0))
+    F += part("cb_core0", rod("prop_l", "wood", lo - d * 0.06, lo, 0.35, 0.35))
+    F += part("cb_core1", rod("prop_l", "wood", hi, hi + d * 0.06, 0.35, 0.35))
+    top = lo + d * 0.85
+    F += part("cb_flap", tube("prop_l", "bolt", [top + V(0.0, 0, -0.9), top + V(0.6, -2.0, -1.2), top + V(1.0, -4.2, -1.1)], 0.7, 0.55, sides=4))
+    return F

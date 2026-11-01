@@ -200,7 +200,7 @@
   "gui.skyabyss.profile.wardrobe.buy": "Click to buy (%s bell coins)",
   "gui.skyabyss.profile.wardrobe.where": "Sold by the outfitter (%s bell coins)",
   "gui.skyabyss.profile.wardrobe.note": "Skins only change looks; your armor's strength stays",
-  "gui.skyabyss.profile.wardrobe.tailor": "Tailoring: click a skin you don't own to buy it",
+  "gui.skyabyss.profile.wardrobe.tailor": "Tailor (4 this week): click a gold-cornered skin to buy",
   "gui.skyabyss.profile.wardrobe.coins": "Bell coins %s",
   "skin.skyabyss.ninja": "Ninja",
   "skin.skyabyss.witch": "Witch",
@@ -226,5 +226,7 @@
   "skin.skyabyss.cowboy.desc": "Wide-brim hat, leather vest and spurred boots",
   "skin.skyabyss.robot.desc": "Boxy head with glowing blue eyes and an antenna",
   "skin.skyabyss.maid.desc": "Frilled headdress and a black dress with a white apron",
-  "skin.skyabyss.student.desc": "School cap and a black stand-collar jacket with gold buttons"
+  "skin.skyabyss.student.desc": "School cap and a black stand-collar jacket with gold buttons",
+  "gui.skyabyss.profile.wardrobe.not_this_week": "Not in the tailor's stock this week (weekly)",
+  "message.skyabyss.skin.not_this_week": "That skin isn't in the tailor's stock this week (changes Monday morning)"
 }

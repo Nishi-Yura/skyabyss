@@ -118,8 +118,11 @@ public class ProfileScreen extends Screen {
     // 武具屋の「スキンを見る」・塔守の「塔のスキン」(Skins.OpenTailor) から: 衣装のつまみを買える形で。会話の画面が閉じるのを待って開く (1 秒まで)
     private static int tailorWait = -1;
     private static jp.revati.skyabyss.skin.Skins.Shop waitingShop;
+    // 仕立て屋の今週の品 (Skins.OpenTailor で届く)
+    private static List<String> stock = List.of();
 
-    public static void openTailor(int shopIndex) {
+    public static void openTailor(int shopIndex, List<String> weekly) {
+        stock = List.copyOf(weekly);
         var shops = jp.revati.skyabyss.skin.Skins.Shop.values();
         waitingShop = shops[Math.max(0, Math.min(shops.length - 1, shopIndex))];
         tailorWait = 20;
@@ -446,7 +449,9 @@ public class ProfileScreen extends Screen {
             case REWARD -> Component.translatable(skin.howKey()).withStyle(st -> st.withColor(SOFT));
             case TOWER -> shop == skin.shop() ? Component.translatable("gui.skyabyss.profile.wardrobe.buy_shards", price).withStyle(st -> st.withColor(TitleTagClient.COLOR))
                     : Component.translatable("gui.skyabyss.profile.wardrobe.where_tower", price).withStyle(st -> st.withColor(DIM));
-            default -> shop == skin.shop() ? Component.translatable("gui.skyabyss.profile.wardrobe.buy", price).withStyle(st -> st.withColor(TitleTagClient.COLOR))
+            default -> shop == skin.shop() ? (stock.contains(skin.id())
+                    ? Component.translatable("gui.skyabyss.profile.wardrobe.buy", price).withStyle(st -> st.withColor(TitleTagClient.COLOR))
+                    : Component.translatable("gui.skyabyss.profile.wardrobe.not_this_week").withStyle(st -> st.withColor(DIM)))
                     : Component.translatable("gui.skyabyss.profile.wardrobe.where", price).withStyle(st -> st.withColor(DIM));
         };
     }
@@ -470,9 +475,15 @@ public class ProfileScreen extends Screen {
             if (!has) {
                 com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.35f, 0.35f, 0.4f, 1f);
             }
+            boolean onSale = !has && shop != null && shop == skin.shop() && (shop != jp.revati.skyabyss.skin.Skins.Shop.TAILOR || stock.contains(skin.id()));
             g.blit(pic, x + 6, y + 1, 28, 42, 0, 0, 128, 192, 128, 192);
             com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            FitText.drawCentered(g, font, Component.translatable(skin.nameKey()), x + CARD_W / 2, y + 44, CARD_W - 2, on ? GOLD : has ? TEXT : DIM, false);
+            FitText.drawCentered(g, font, Component.translatable(skin.nameKey()), x + CARD_W / 2, y + 44, CARD_W - 2, on ? GOLD : has ? TEXT : onSale ? TitleTagClient.COLOR : DIM, false);
+            if (onSale) {
+                // 並んでいる品には値札の印 (右上の金の角)
+                g.fill(x + CARD_W - 6, y + 1, x + CARD_W - 1, y + 3, 0xFF000000 | GOLD);
+                g.fill(x + CARD_W - 3, y + 1, x + CARD_W - 1, y + 6, 0xFF000000 | GOLD);
+            }
             if (hover) {
                 List<Component> tip = new ArrayList<>();
                 tip.add(Component.translatable(skin.nameKey()).withStyle(st -> st.withColor(on ? GOLD : TEXT)));

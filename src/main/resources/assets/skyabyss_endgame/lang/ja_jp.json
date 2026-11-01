@@ -200,7 +200,7 @@
   "gui.skyabyss.profile.wardrobe.buy": "押すと買う（%s 鐘銭）",
   "gui.skyabyss.profile.wardrobe.where": "武具屋の「スキンを見る」で買える（%s 鐘銭）",
   "gui.skyabyss.profile.wardrobe.note": "スキンは見た目だけ。強さは今の防具のまま",
-  "gui.skyabyss.profile.wardrobe.tailor": "仕立て: 持っていないスキンを押すと買える",
+  "gui.skyabyss.profile.wardrobe.tailor": "仕立て（今週の 4 着）: 金の角の品を押すと買える",
   "gui.skyabyss.profile.wardrobe.coins": "鐘銭 %s",
   "skin.skyabyss.ninja": "忍び",
   "skin.skyabyss.witch": "魔女",
@@ -226,5 +226,7 @@
   "skin.skyabyss.cowboy.desc": "つば広の帽子と革のベスト、拍車の長靴",
   "skin.skyabyss.robot.desc": "青く光る目とアンテナの四角い頭",
   "skin.skyabyss.maid.desc": "フリルの髪飾りと白い前掛けの黒い服",
-  "skin.skyabyss.student.desc": "学帽と黒の詰め襟、金のボタン"
+  "skin.skyabyss.student.desc": "学帽と黒の詰め襟、金のボタン",
+  "gui.skyabyss.profile.wardrobe.not_this_week": "今週は仕立て屋に並んでいない（週替わり）",
+  "message.skyabyss.skin.not_this_week": "そのスキンは今週は仕立て屋に並んでいない（月曜の朝に替わる）"
 }

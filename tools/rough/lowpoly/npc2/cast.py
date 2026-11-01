@@ -373,6 +373,19 @@ add("tower_keeper", ja="塔守", anim="hold_l",
     lower="robe", sleeve="wide", arms=HOLD_L_LOW, props={"prop_l": P3.tower_balance})
 
 
+# 仕立て屋 (スキンの店。docs/design/54 の 6.1)。都の武具屋のそばに立つ、身なりのよい女の仕立て屋: 縞の深緑のベストに白いシャツ、
+# 首に黄色い巻尺を掛け、丸眼鏡、髪はまとめ髪に針を挿す。腰に鋏の袋。左手に紫の反物を抱える
+add("tailor", ja="仕立て屋", anim="hold_l",
+    pal=dict(skin=SKIN["pale"], hair=(58, 40, 34), coat=(40, 78, 72), vest=(40, 78, 72), vest_stripe=2, shirt=(232, 226, 210), trim=(206, 168, 86),
+             metal=(210, 214, 220), scarf=(232, 200, 70), scarf_stripe=2, trousers=(46, 44, 56), boot=(40, 30, 28), leather=(110, 70, 44), tie=(170, 40, 60)),
+    face=dict(eye="calm", iris=(70, 120, 110), brow="soft", mouth="smile"),
+    hair=dict(style="bun", front=27.4, side=24.8, back=24.0, fringe=[]),
+    specs=True, hairline=27.2, build="slim",
+    upper=dict(vest=True, collar=True, collar_mat="shirt", scarf=True, scarf_mat="scarf", buttons=[19.6, 18.2, 16.8],
+               pouches=[(3.8, 10.8, "pouch")]),
+    lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P3.cloth_bolt})
+
+
 # ====================================================================== 旅の職人 (章ごとに絵だけ替える: variants)
 
 def goggles(c):

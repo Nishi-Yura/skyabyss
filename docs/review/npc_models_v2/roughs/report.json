@@ -1108,5 +1108,16 @@
     "atlas": 64
    }
   }
+ },
+ "tailor": {
+  "tris": 1588,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 96,
+    "atlas": 64
+   }
+  }
  }
 }

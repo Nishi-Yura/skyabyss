@@ -40,7 +40,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 // スキン (docs/design/54 の 6.1。物語と関係のない見た目だけの一式)。着ると今の防具の見た目がスキンに替わる (強さは防具のまま)。
 //   持っているスキンと着ているスキンは人ごとの Data Attachment (周りの人にも同期。描き替えは client/SkinLayer と LowPolyArmorRenderer)
-//   手に入れ方 (Shop): TAILOR = 武具屋の「スキンを見る」で鐘銭、TOWER = 塔守の「塔のスキン」で塔の欠片 (開いた人だけが TAILOR_TICKS のあいだ買える。
+//   手に入れ方 (Shop): TAILOR = 武具屋の「スキンを見る」で鐘銭 (週替わりで WEEKLY 着)、TOWER = 塔守の「塔のスキン」で塔の欠片 (開いた人だけが TAILOR_TICKS のあいだ買える。
 //   プロフィールの「衣装」つまみ)、REWARD = 買えない (ほうび: 図鑑・名声の印 Rebirths.updateTitles → checkRewards、まれな箱 rareDrop)
 //   形は tools/rough/lowpoly/armor/skin_one.py (一着一案)、入れるのは tools/install/install_skins.py。メッシュは lowpoly/armor/skin_<id>/<部位>
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -75,6 +75,23 @@ public final class Skins {
             new Skin("student", Shop.TAILOR, 2000, ""));
     // まれな箱 (巡り路の報い・大陸の大事件の報い) から REWARD "rare" のスキンが出る割合 (百分率)
     public static final int RARE_PCT = 5;
+    // 仕立て屋の週替わり: TAILOR のスキンのうち、週ごとに WEEKLY 着だけ並ぶ (週 = RegionPoints.weekId。週の名前から決まる並び)
+    public static final int WEEKLY = 4;
+
+    public static List<String> weeklyStock() {
+        return weeklyStock(jp.revati.skyabyss.endgame.RegionPoints.weekId());
+    }
+
+    public static List<String> weeklyStock(String week) {
+        List<String> pool = new ArrayList<>();
+        for (Skin s : ALL) {
+            if (s.shop == Shop.TAILOR) {
+                pool.add(s.id);
+            }
+        }
+        java.util.Collections.shuffle(pool, new java.util.Random(week.hashCode() * 31L + 7));
+        return List.copyOf(pool.subList(0, Math.min(WEEKLY, pool.size())));
+    }
 
     public record Data(List<String> owned, String worn) {
         public static final Data EMPTY = new Data(List.of(), "");
@@ -168,7 +185,7 @@ public final class Skins {
     public static void openShop(ServerPlayer p, Shop shop) {
         TAILOR.put(p.getUUID(), new Open(shop, p.serverLevel().getGameTime() + TAILOR_TICKS));
         if (!(p instanceof FakePlayer) && p.connection != null) {
-            PacketDistributor.sendToPlayer(p, new OpenTailor(shop.ordinal()));
+            PacketDistributor.sendToPlayer(p, new OpenTailor(shop.ordinal(), shop == Shop.TAILOR ? weeklyStock() : List.of()));
         }
     }
 
@@ -181,7 +198,7 @@ public final class Skins {
         return o != null && o.shop == shop && p.serverLevel().getGameTime() <= o.until;
     }
 
-    public enum Buy { OK, OWNED, FAR, COINS, NOT_SOLD, UNKNOWN }
+    public enum Buy { OK, OWNED, FAR, COINS, NOT_SOLD, NOT_THIS_WEEK, UNKNOWN }
 
     public static Buy buy(ServerPlayer p, String id) {
         Skin s = byId(id);
@@ -196,6 +213,9 @@ public final class Skins {
         }
         if (!atShop(p, s.shop)) {
             return Buy.FAR;
+        }
+        if (s.shop == Shop.TAILOR && !weeklyStock().contains(id)) {
+            return Buy.NOT_THIS_WEEK;
         }
         if (s.shop == Shop.TOWER) {
             net.minecraft.world.item.Item shard = jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get();
@@ -250,6 +270,7 @@ public final class Skins {
                     }
                     case COINS -> Notice.warn(p, s.shop == Shop.TOWER ? "message.skyabyss.skin.shards" : "message.skyabyss.skin.coins", s.price);
                     case FAR -> Notice.warn(p, "message.skyabyss.skin.far");
+                    case NOT_THIS_WEEK -> Notice.warn(p, "message.skyabyss.skin.not_this_week");
                     default -> {
                     }
                 }
@@ -276,10 +297,11 @@ public final class Skins {
         }
     }
 
-    // shop = Shop の番号
-    public record OpenTailor(int shop) implements CustomPacketPayload {
+    // shop = Shop の番号、stock = 仕立て屋の今週の品 (TAILOR のときだけ)
+    public record OpenTailor(int shop, List<String> stock) implements CustomPacketPayload {
         public static final Type<OpenTailor> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "skin_tailor"));
-        public static final StreamCodec<FriendlyByteBuf, OpenTailor> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, OpenTailor::shop, OpenTailor::new);
+        public static final StreamCodec<FriendlyByteBuf, OpenTailor> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, OpenTailor::shop,
+                ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), OpenTailor::stock, OpenTailor::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
@@ -289,14 +311,14 @@ public final class Skins {
 
     @SubscribeEvent
     static void onPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("2")
+        event.registrar("3")
                 .playToServer(Action.TYPE, Action.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer sp) {
                         act(sp, payload.action(), payload.id());
                     }
                 }))
                 .playToClient(OpenTailor.TYPE, OpenTailor.STREAM_CODEC,
-                        (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.endgame.client.ProfileScreen.openTailor(payload.shop())));
+                        (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.endgame.client.ProfileScreen.openTailor(payload.shop(), payload.stock())));
     }
 
     // 開発用: /skyabyss skin give <id>|all・wear <id>・clear・reset (持ち物を空に)・tailor・tower
