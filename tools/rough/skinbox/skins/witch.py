@@ -12,14 +12,14 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from kit import Model  # noqa: E402
-from paint import metal, C, mix, blank, out, cloth, skin, hair, lace, clear, sprite, stamp, circle_alpha, edge, shade_rows, rnd  # noqa: E402
+from paint import band, metal, C, mix, blank, out, cloth, skin, hair, lace, clear, sprite, stamp, circle_alpha, edge, shade_rows, rnd  # noqa: E402
 
 ID = "witch"
 
 # ---------------------------------------------------------------- 色
-BLACK = dict(base="#2b2534", light="#463d54", dark="#16121c", line="#0e0b12")
-PURPLE = dict(base="#6c2f90", light="#9a5cc4", dark="#43195f")
-CRIMSON = dict(base="#a3143c", light="#d93a62", dark="#650a24")
+BLACK = dict(base="#3b2a52", light="#5e4682", dark="#21162f", line="#160e20")
+PURPLE = dict(base="#8a46b8", light="#bb84e6", dark="#5a2a80")
+CRIMSON = dict(base="#c41c48", light="#f05478", dark="#7a0c2c")
 SILVER = dict(base="#c9cdd9", light="#f4f6fb", dark="#7e8497")
 BONE = dict(base="#ece2cc", light="#fff8ea", dark="#b5a78c")
 GLOW = "#c45cff"
@@ -462,7 +462,7 @@ def teeth(face, W, H, box):
 
 
 # ---------------------------------------------------------------- 組み立て (素体の上に重ねる。docs/design/55)
-def witch_hat(m, y0=32.75, base_w=8.8, brim_w=16.6, side_x=-4.95):
+def witch_hat(m, y0=33.6, base_w=9.2, brim_w=17.2, side_x=-5.15):
     """帽子: 二枚重ねの広いつば、16 段の円すいが後ろへ折れて垂れる (上の段は揺れる)、紅の帯と立体の銀の留め金、横のリボンと三日月。"""
     TILT = 6
     rt = (TILT, 0, 0)
@@ -552,16 +552,25 @@ def skull3(m, bone, c):
     m.box(bone, (cx - 0.75, cy - 1.3, cz - 1.5), (1.5, 0.3, 0.2), teeth)
 
 
+def half_cape(face, W, H, box):
+    """半マント: 表は濃い紫に紅の縁、裏は明るい紫。"""
+    if face in "nsew" and W >= 4 and H >= 4:
+        img = cloth(BLACK["base"], BLACK["light"], BLACK["dark"], BLACK["line"])(face, W, H, box).astype(float)
+        band(img, H - 3, H, CRIMSON["base"], hi=CRIMSON["light"])
+        return out(img)
+    return cloth(PURPLE["base"], PURPLE["light"], PURPLE["dark"], edges=False)(face, W, H, box)
+
+
 def build():
-    from body import base, HairPaint, hair_cap, bangs, side_locks, back_hair
+    from body import base, HairPaint2, hair_mass, bangs2, side_hair2, back_hair2
     m = Model("skin_full/" + ID)
     base(m, own=True, under=BLACK["base"])
-    # ---- 髪 (黒紫の長い髪。前髪 3 層、横髪 2 段、背中まで 3 層)
-    hp = HairPaint("#30274a", "#140f22", "#54457a", "#b9a6ee", seed=7)
-    hair_cap(m, hp, back_bottom=24.5)
-    bangs(m, hp, length=4.4)
-    side_locks(m, hp, length=9.5)
-    back_hair(m, hp, bottom=12.5)
+    # ---- 髪 (紫の長い髪。大きな板を傾けて重ねる: かさ・前髪 5 房・横髪 2 枚・後ろ髪は扇に開く 3 枚)
+    hp = HairPaint2("#6d4a92", "#3a2556", "#9c7cc6", "#e2d2fa")
+    hair_mass(m, hp, back_bottom=24.0)
+    bangs2(m, hp)
+    side_hair2(m, hp, length=13.5)
+    back_hair2(m, hp, bottom=11.5)
     # ---- 胴: 胴着、コルセット (立体の編み上げと銀の鳩目)、細い帯と留め金
     m.box("body", (-3.6, 18.2, -2.1), (7.2, 5.3, 4.2), bodice)
     m.box("body", (-3.2, 14.4, -1.95), (6.4, 4.0, 3.9), corset_plain)
@@ -616,8 +625,23 @@ def build():
     m.pair("legR", (-3.65, 0.55, -3.0), (3.5, 1.4, 4.8), boot)
     m.pair("legR", (-3.4, 0.55, -3.35), (3.0, 1.05, 0.4), boot)
     m.pair("legR", (-3.8, 0.0, -3.45), (3.8, 0.6, 5.4), sole)
-    # ---- 帽子
+    # ---- 帽子 (横のリボンから長い垂れが 2 本、揺れる)
     witch_hat(m)
+    m.bone("ribbon_hat", "head", (-5.2, 33.9, 0.6))
+    m.box("ribbon_hat", (-5.45, 25.8, 0.4), (0.5, 8.2, 0.16), ribbon_tail, rot=(14, 0, -6), pivot=(-5.2, 33.9, 0.6))
+    m.box("ribbon_hat", (-5.4, 27.4, 1.2), (0.42, 6.6, 0.16), ribbon_tail, rot=(24, 0, -10), pivot=(-5.2, 33.9, 0.6))
+    # ---- 左肩の半マント (肩に留め、斜めに背へ垂れる。揺れる)
+    m.bone("cape_half", "body", (2.6, 23.8, 0.6))
+    m.box("cape_half", (0.2, 23.2, -2.6), (4.6, 0.7, 5.2), half_cape, rot=(0, 0, -16), pivot=(2.6, 23.8, 0.6))
+    m.box("cape_half", (3.2, 15.6, -2.4), (0.35, 7.8, 4.9), half_cape, rot=(0, 0, -16), pivot=(2.6, 23.8, 0.6))
+    m.box("cape_half", (-0.8, 12.2, 2.35), (5.4, 11.3, 0.35), half_cape, rot=(8, 0, -9), pivot=(2.6, 23.8, 0.6))
+    m.box("body", (2.3, 22.6, -2.55), (1.0, 1.0, 0.35), gem("#c0306a", "#ff9ec0", "#6a0a30"))
+    # ---- 左の腰の紅の飾り帯 (斜めに巻き、結び目から長い垂れ)
+    m.box("body", (-3.35, 13.4, -2.2), (6.9, 0.7, 0.3), ribbon, rot=(0, 0, 10), pivot=(0, 13.8, -2.2))
+    bow(m, "body", 3.0, 14.2, -2.35, size=0.7)
+    m.bone("ribbon_sash", "body", (3.0, 14.0, -2.4))
+    m.box("ribbon_sash", (2.6, 6.0, -2.55), (0.8, 8.0, 0.18), ribbon_tail, rot=(-8, 0, 6), pivot=(3.0, 14.0, -2.4))
+    m.box("ribbon_sash", (3.3, 7.4, -2.5), (0.65, 6.6, 0.18), ribbon_tail, rot=(-8, 0, 16), pivot=(3.0, 14.0, -2.4))
     # ---- 浮かぶもの: 髑髏 3 つ (回り、ひとつずつ上下)、魔導書 (横で浮いて揺れる)
     m.bone("orbit_skulls", None, (0, 21.0, 0))
     for i, c in enumerate(((-9.4, 25.0, -1.5), (9.0, 19.5, 2.0), (1.5, 28.5, 9.0))):
