@@ -192,13 +192,16 @@ public final class RebirthSelfTest {
     }
 
     private static void sync(MinecraftServer server, List<String> f) {
-        RebirthData d = new RebirthData(13, "flawless_1", 0b1011L, 2, true);
+        RebirthData d = new RebirthData(13, "flawless_1", 0b1011L, 2, true, RebirthData.TITLE_BELOW);
         RegistryFriendlyByteBuf b = buf(server);
         RebirthData.STREAM_CODEC.encode(b, d);
         check(f, RebirthData.STREAM_CODEC.decode(b).equals(d), "RebirthData stream codec round trip");
         check(f, RebirthData.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, d).result().flatMap(t -> RebirthData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, t).result())
                 .map(d::equals).orElse(false), "RebirthData save round trip");
         check(f, new RebirthData(99, null, 0, 0, false).count() == 20, "count is clamped on load");
+        // 名札の称号の位置: 古い保存 (位置なし) は名前の上、おかしな値も名前の上
+        check(f, new RebirthData(1, "", 0, 0, false).titlePos() == RebirthData.TITLE_ABOVE && new RebirthData(1, "", 0, 0, false, 9).titlePos() == RebirthData.TITLE_ABOVE
+                && d.withTitle("reborn_1").titlePos() == RebirthData.TITLE_BELOW, "the title position is lost or not clamped");
         // 順位の石・飾り板のパケット
         var board = new RebirthNet.BoardPayload(0, true, List.of(List.of(new RebirthNet.Line("abe", 5, 5), new RebirthNet.Line("bob", 3, 3)), List.of(), List.of(new RebirthNet.Line("cara", 1, 2))),
                 List.of());

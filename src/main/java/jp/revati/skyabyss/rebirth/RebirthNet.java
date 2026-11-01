@@ -105,6 +105,18 @@ public final class RebirthNet {
         }
     }
 
+    // 名札の称号の位置 (RebirthData.TITLE_*)
+    public record TitlePosPayload(int pos) implements CustomPacketPayload {
+        public static final Type<TitlePosPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "rebirth_title_pos"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, TitlePosPayload> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, TitlePosPayload::pos, TitlePosPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     public record HiddenPayload(boolean hidden) implements CustomPacketPayload {
         public static final Type<HiddenPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "rebirth_hidden"));
         public static final StreamCodec<RegistryFriendlyByteBuf, HiddenPayload> STREAM_CODEC = StreamCodec.composite(
@@ -118,12 +130,17 @@ public final class RebirthNet {
 
     @SubscribeEvent
     static void onPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("1")
+        event.registrar("2")
                 .playToClient(BoardPayload.TYPE, BoardPayload.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.rebirth.RebirthClient.openBoard(p))
                 .playToClient(BurstPayload.TYPE, BurstPayload.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.rebirth.RebirthClient.burst(p))
                 .playToServer(SelectTitlePayload.TYPE, SelectTitlePayload.STREAM_CODEC, (p, ctx) -> {
                     if (ctx.player() instanceof ServerPlayer sp) {
                         Rebirths.selectTitle(sp, p.id());
+                    }
+                })
+                .playToServer(TitlePosPayload.TYPE, TitlePosPayload.STREAM_CODEC, (p, ctx) -> {
+                    if (ctx.player() instanceof ServerPlayer sp) {
+                        Rebirths.setTitlePos(sp, p.pos());
                     }
                 })
                 .playToServer(HiddenPayload.TYPE, HiddenPayload.STREAM_CODEC, (p, ctx) -> {

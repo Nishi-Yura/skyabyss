@@ -624,6 +624,20 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedTier = t.equals("auto") ? null : t;
                 return true;
             }
+            case "otherplayer" -> {
+                // otherplayer <dx> <dz> <名前> : 手元だけの別の人 (自分と同じ見た目・転生の写し) を前に置く (名札の称号の確認用。サーバーには居ない)
+                if (mc.level != null && mc.player != null) {
+                    var rp = new net.minecraft.client.player.RemotePlayer(mc.level,
+                            new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes(("shot:" + line.arg(2)).getBytes()), line.arg(2)));
+                    rp.moveTo(mc.player.getX() + Double.parseDouble(line.arg(0)), mc.player.getY(), mc.player.getZ() + Double.parseDouble(line.arg(1)),
+                            mc.player.getYRot() + 180f, 0f);
+                    rp.setYHeadRot(mc.player.getYRot() + 180f);
+                    rp.yBodyRot = mc.player.getYRot() + 180f;
+                    rp.setData(jp.revati.skyabyss.rebirth.RebirthSetup.DATA.get(), jp.revati.skyabyss.rebirth.RebirthView.data(mc.player));
+                    mc.level.addEntity(rp);
+                }
+                return true;
+            }
             case "sneak" -> {
                 // sneak on|off : しゃがむキーを押し続ける / 放す (防具の姿勢の確認用。KeyMapping だけ。OS の入力ではない)
                 mc.options.keyShift.setDown(line.arg(0).equalsIgnoreCase("on"));
@@ -1118,6 +1132,7 @@ public final class ShotRunner {
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
+            case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;

@@ -78,6 +78,31 @@ public final class GuildEmblems {
             e("paly", null, a(BannerPatterns.STRIPE_SMALL)),
             e("bricks", null, a(BannerPatterns.BRICKS)),
             e("gradient", null, a(BannerPatterns.GRADIENT)),
+            // 2026-11-01 に足した組み合わせ (はじめから)
+            e("star", null, a(BannerPatterns.STRAIGHT_CROSS), a(BannerPatterns.CROSS)),
+            e("hourglass", null, a(BannerPatterns.TRIANGLE_TOP), a(BannerPatterns.TRIANGLE_BOTTOM)),
+            e("chevron_up", null, a(BannerPatterns.TRIANGLE_TOP)),
+            e("rising_sun", null, a(BannerPatterns.HALF_HORIZONTAL_MIRROR), a(BannerPatterns.CIRCLE_MIDDLE)),
+            e("dusk_sun", null, a(BannerPatterns.GRADIENT), a(BannerPatterns.CIRCLE_MIDDLE)),
+            e("half_moon", null, a(BannerPatterns.HALF_VERTICAL), b(BannerPatterns.CIRCLE_MIDDLE)),
+            e("gate", null, a(BannerPatterns.STRIPE_LEFT), a(BannerPatterns.STRIPE_RIGHT), a(BannerPatterns.STRIPE_TOP)),
+            e("pillar_frame", null, a(BannerPatterns.STRIPE_CENTER), a(BannerPatterns.BORDER)),
+            e("cross_frame", null, a(BannerPatterns.STRAIGHT_CROSS), a(BannerPatterns.BORDER)),
+            e("saltire_frame", null, a(BannerPatterns.CROSS), a(BannerPatterns.BORDER)),
+            e("framed_roundel", null, a(BannerPatterns.BORDER), a(BannerPatterns.CIRCLE_MIDDLE)),
+            e("lozenge_frame", null, a(BannerPatterns.RHOMBUS_MIDDLE), a(BannerPatterns.CURLY_BORDER)),
+            e("lozenge_cross", null, a(BannerPatterns.STRAIGHT_CROSS), a(BannerPatterns.RHOMBUS_MIDDLE)),
+            e("roundel_saltire", null, a(BannerPatterns.CROSS), a(BannerPatterns.CIRCLE_MIDDLE)),
+            e("bars", null, a(BannerPatterns.STRIPE_TOP), a(BannerPatterns.STRIPE_MIDDLE), a(BannerPatterns.STRIPE_BOTTOM)),
+            e("pales", null, a(BannerPatterns.STRIPE_LEFT), a(BannerPatterns.STRIPE_CENTER), a(BannerPatterns.STRIPE_RIGHT)),
+            e("comb", null, a(BannerPatterns.STRIPE_SMALL), a(BannerPatterns.STRIPE_TOP)),
+            e("hem_stripes", null, a(BannerPatterns.STRIPE_SMALL), b(BannerPatterns.HALF_HORIZONTAL)),
+            e("teeth", null, a(BannerPatterns.TRIANGLES_TOP)),
+            e("hem", null, a(BannerPatterns.TRIANGLES_BOTTOM), a(BannerPatterns.STRIPE_BOTTOM)),
+            e("bend_sinister", null, a(BannerPatterns.STRIPE_DOWNLEFT)),
+            e("per_bend_sinister", null, a(BannerPatterns.DIAGONAL_RIGHT)),
+            e("four_corners", null, a(BannerPatterns.SQUARE_TOP_LEFT), a(BannerPatterns.SQUARE_TOP_RIGHT), a(BannerPatterns.SQUARE_BOTTOM_LEFT), a(BannerPatterns.SQUARE_BOTTOM_RIGHT)),
+            e("flame", null, a(BannerPatterns.GRADIENT_UP), a(BannerPatterns.TRIANGLES_BOTTOM)),
             // 功績で開く
             e("flower", "requests_1", a(BannerPatterns.FLOWER)),
             e("flow", "requests_5", a(BannerPatterns.FLOW)),
@@ -85,7 +110,10 @@ public final class GuildEmblems {
             e("globe", "contrib_1500", a(BannerPatterns.GLOBE)),
             e("guster", "members_10", a(BannerPatterns.GUSTER)),
             e("tide", "requests_15", a(BannerPatterns.GRADIENT_UP), a(BannerPatterns.FLOW), a(BannerPatterns.BORDER)),
-            e("abyss_eye", "requests_30", a(BannerPatterns.GRADIENT_UP), a(BannerPatterns.RHOMBUS_MIDDLE), b(BannerPatterns.CIRCLE_MIDDLE)));
+            e("abyss_eye", "requests_30", a(BannerPatterns.GRADIENT_UP), a(BannerPatterns.RHOMBUS_MIDDLE), b(BannerPatterns.CIRCLE_MIDDLE)),
+            e("flower_cross", "requests_10", a(BannerPatterns.STRAIGHT_CROSS), a(BannerPatterns.FLOWER)),
+            e("star_globe", "contrib_4000", a(BannerPatterns.GLOBE), a(BannerPatterns.BORDER)),
+            e("gale", "members_25", a(BannerPatterns.GUSTER), a(BannerPatterns.BORDER)));
 
     // 名札の特別な色 (どれも功績で開く。"" = 旗の地の色のまま)
     public static final List<Plate> PLATES = List.of(

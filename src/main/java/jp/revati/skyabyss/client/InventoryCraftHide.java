@@ -43,7 +43,8 @@ public final class InventoryCraftHide {
         if (event.getScreen() instanceof InventoryScreen s) {
             double x = event.getMouseX() - s.getGuiLeft();
             double y = event.getMouseY() - s.getGuiTop();
-            if (x >= X0 && x < X1 && y >= Y0 && y < Y1) {
+            // プロフィールの札 (endgame/client/ProfileCard) の上だけは通す
+            if (x >= X0 && x < X1 && y >= Y0 && y < Y1 && !jp.revati.skyabyss.endgame.client.ProfileCard.over(x, y)) {
                 event.setCanceled(true);
             }
         }
