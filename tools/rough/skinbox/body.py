@@ -352,7 +352,7 @@ def bangs2(m: Model, paint, spec=None):
     for (x, w, L, rz, layer) in spec:
         z = -5.0 - 0.35 * layer
         # 額の上で少し前へふくらみ、先は顔へ戻る。横へは rz の向きへ流れる
-        lock(m, "head", x, 33.1, z, w, L + 1.7, 0.6, paint, out=(0, 0, -1), flare=10, flow=rz * 1.6, lean=(-7, 0), n=5)
+        lock(m, "head", x, 33.1, z, w, L + 1.7, 0.85, paint, out=(0, 0, -1), flare=10, flow=rz * 1.6, lean=(-7, 0), n=5)
 
 
 def side_hair2(m: Model, paint, length=13.0, bone="hair_side_R"):
@@ -387,3 +387,47 @@ def ahoge2(m: Model, paint, x=0.5, z=-0.8):
     m.box("hair_ahoge", (x - 0.3, 34.2, z - 0.3), (0.6, 1.8, 0.6), paint, rot=(-18, 0, 12), pivot=(x, 34.3, z))
     m.box("hair_ahoge", (x - 0.25, 35.6, z - 0.9), (0.5, 1.2, 0.5), paint, rot=(-60, 0, 20), pivot=(x, 34.3, z))
     m.box("hair_ahoge", (x - 0.2, 35.4, z - 2.0), (0.4, 0.9, 0.4), paint, rot=(-120, 0, 25), pivot=(x, 34.3, z))
+
+
+# ================================================================ 髪の 4 段塗り (見本のような手描きの画素)
+class HairCel:
+    """髪を明・中・影・濃い影の 4 段で塗る。2x2 画素が一画素。上ほど明るく (頭の高さで決まる)、束の左右の端ほど暗い、
+    天使の輪は明るい画素のぎざぎざの帯、毛先は濃い影。"""
+
+    def __init__(self, base, light, shadow, deep, hi, y_hi=34.5, y_lo=12.0, ring_y=32.2, block=2):
+        self.pal = [C(deep), C(shadow), C(base), C(light)]
+        self.h = C(hi)
+        self.y_hi, self.y_lo, self.ring_y, self.block = y_hi, y_lo, ring_y, block
+
+    def __call__(self, face, W, H, box):
+        x0, y0, z0 = box.frm
+        w, h, d = box.size
+        bl = self.block
+        w2, h2 = max(1, -(-W // bl)), max(1, -(-H // bl))
+        if face in "nsew":
+            ys = y0 + h - (np.arange(h2) + 0.5) * bl / T
+            u = (np.arange(w2) + 0.5) / w2
+            t = np.clip((self.y_hi - ys) / (self.y_hi - self.y_lo), 0, 1)
+            bias = {"n": 0.06, "w": 0.1, "e": -0.1, "s": -0.12}[face]
+            v = 0.78 - 0.55 * t[:, None] + bias - 0.36 * (np.abs(u[None, :] - 0.45) * 2) ** 1.5
+        elif face == "u":
+            v = np.full((h2, w2), 0.8)
+        else:
+            v = np.full((h2, w2), 0.05)
+        tone = np.where(v > 0.66, 3, np.where(v > 0.38, 2, np.where(v > 0.14, 1, 0)))
+        img = np.zeros((h2, w2, 4))
+        img[..., 3] = 255
+        for k in range(4):
+            img[tone == k, :3] = self.pal[k]
+        if face in "nsew" and face != "s":
+            # 天使の輪: ring_y のあたりに明るい画素のぎざぎざ
+            for i in range(w2):
+                yy = self.ring_y + (0.12 if i % 3 == 1 else 0.0) - (0.1 if i % 4 == 0 else 0.0)
+                rows = np.where(np.abs(ys - yy) < 0.16)[0] if face in "nsew" else []
+                if 0.15 < u[i] < 0.85:
+                    img[rows, i, :3] = self.h
+        img = np.repeat(np.repeat(img, bl, 0), bl, 1)[:H, :W]
+        if face in "nsew" and W >= 3:
+            img[:, :1, :3] = mix(img[:, :1, :3], self.pal[0], 0.55)
+            img[:, -1:, :3] = mix(img[:, -1:, :3], self.pal[0], 0.55)
+        return out(img)

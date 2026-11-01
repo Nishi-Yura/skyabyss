@@ -316,3 +316,58 @@ def metal(base, light=None, dark=None, line=None, streak=True, over=None, faces=
                 img = r
         return img
     return cloth(base, light, dark, line, edges=False, over=o, faces=faces)
+
+
+# ================================================================ 4 段のアニメ塗り (見本のような手描きの画素)
+def _hue(c, toward, k):
+    return mix(np.asarray(c, float), C(toward), k)
+
+
+def cel(base, light=None, shadow=None, deep=None, block=2, light_dir="ul", outline=True, rim=True, ao=True, noise=0.03,
+        round_k=0.32, faces=None, over=None, seed=0):
+    """明・中・影・濃い影の 4 段で塗る。2x2 画素を一つの画素として塗り (手描きの画素に見せる)、
+    光は左上の前から。面の左右の端ほど暗く (丸く見せる)、上の縁に細い光、下に影、境は少し散らす。
+    影は青紫へ、明るいところは暖かい色へ少し寄せる。"""
+    b = C(base)
+    l = C(light) if light else np.clip(_hue(b * 1.0, "#fff4dc", 0.35), 0, 255)
+    s = C(shadow) if shadow else np.clip(_hue(b * 0.72, "#3a2a6a", 0.18), 0, 255)
+    dp = C(deep) if deep else np.clip(_hue(b * 0.48, "#1a1030", 0.25), 0, 255)
+    face_bias = {"n": 0.08, "w": 0.12, "e": -0.12, "s": -0.18}
+
+    def p(face, W, H, box):
+        if faces and face in faces:
+            return faces[face](face, W, H, box)
+        w2, h2 = max(1, -(-W // block)), max(1, -(-H // block))
+        r = rnd(box, seed + ord(face))
+        if face in "nsew":
+            t = (np.arange(h2) + 0.5) / h2
+            u = (np.arange(w2) + 0.5) / w2
+            cu = 0.42 if face in "nw" else 0.5  # 光は左上から: 明るいところを少し左へ
+            v = 0.8 - 0.5 * t[:, None] + face_bias[face] - round_k * (np.abs(u[None, :] - cu) * 2) ** 1.6
+        elif face == "u":
+            v = np.full((h2, w2), 0.85)
+        else:
+            v = np.full((h2, w2), 0.08)
+        # 段の境のまわりだけ少し散らす (手描きの境)
+        v = v + r.normal(0, noise, size=v.shape)
+        img = np.zeros((h2, w2, 4))
+        img[..., 3] = 255
+        tone = np.where(v > 0.7, 3, np.where(v > 0.38, 2, np.where(v > 0.14, 1, 0)))
+        pal = [dp, s, b, l]
+        for k in range(4):
+            img[tone == k, :3] = pal[k]
+        img = np.repeat(np.repeat(img, block, 0), block, 1)[:H, :W]
+        if face in "nsew":
+            if rim and H >= 4 * block:
+                img[0:block, :, :3] = mix(img[0:block, :, :3], l * 1.05, 0.55)
+            if ao and H >= 4 * block:
+                img[H - block:, :, :3] = mix(img[H - block:, :, :3], dp, 0.6)
+            if outline and W >= 3:
+                img[:, :1, :3] = mix(img[:, :1, :3], dp, 0.6)
+                img[:, -1:, :3] = mix(img[:, -1:, :3], dp, 0.6)
+        if over:
+            rr = over(img, face, W, H, box)
+            if rr is not None:
+                img = rr
+        return out(img)
+    return p

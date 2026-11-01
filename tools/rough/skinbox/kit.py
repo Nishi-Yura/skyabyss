@@ -281,6 +281,18 @@ def pack(faces, pad=1):
     return size, atlas, glow
 
 
+def _retry(fn, tries=8):
+    """書き込みがまれに一瞬拒まれる (Errno 22) ので、少し待ってやり直す。"""
+    import time
+    for k in range(tries):
+        try:
+            return fn()
+        except OSError:
+            if k == tries - 1:
+                raise
+            time.sleep(0.4)
+
+
 def export(model: Model, out_dir: Path, texture: str):
     faces = model.faces()
     size, atlas, glow = pack(faces)
@@ -332,8 +344,8 @@ def export(model: Model, out_dir: Path, texture: str):
     data = {"format_version": 1, "name": model.name, "units": "1/16 block, y up, front = -Z (geo absolute)", "uv": "normalized, origin top-left",
             "texture": texture, "outfit": model.outfit, "texture_size": [size, size], "texels_per_unit": T, "triangle_count": total, "bones": bones}
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "mesh.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-    Image.fromarray(atlas, "RGBA").save(out_dir / "atlas.png")
+    _retry(lambda: (out_dir / "mesh.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8"))
+    _retry(lambda: Image.fromarray(atlas, "RGBA").save(out_dir / "atlas.png"))
     if glow.any():
         g = np.zeros_like(atlas)
         g[glow] = atlas[glow]
