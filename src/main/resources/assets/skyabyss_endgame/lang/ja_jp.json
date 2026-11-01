@@ -209,5 +209,14 @@
   "skin.skyabyss.ninja.desc": "藍の頭巾に鉢金、背に刀と紅の襟巻き",
   "skin.skyabyss.witch.desc": "とんがり帽子と紫の長衣、光る薬瓶",
   "skin.skyabyss.chef.desc": "背の高いコック帽と白い上着、前掛けにお玉",
-  "skin.skyabyss.vampire.desc": "山高帽と高い襟の外套、紅玉の留め"
+  "skin.skyabyss.vampire.desc": "山高帽と高い襟の外套、紅玉の留め",
+  "gui.skyabyss.profile.wardrobe.buy_shards": "押すと買う（塔の欠片 %s）",
+  "gui.skyabyss.profile.wardrobe.where_tower": "塔守の「塔のスキン」で買える（塔の欠片 %s）",
+  "gui.skyabyss.profile.wardrobe.tower": "塔のスキン: 押すと塔の欠片で買える",
+  "skin.skyabyss.astronaut.how": "ほうび: どこかの土地の名声を 5 段（土地の英雄）にする",
+  "skin.skyabyss.ninja.how": "まれに: 巡り路と大陸の大事件の報いから",
+  "skin.skyabyss.vampire.how": "ほうび: 敵の図鑑をすべてそろえる",
+  "message.skyabyss.skin.reward": "ほうびのスキン「%s」を手に入れた（プロフィールの「衣装」で着られる）",
+  "message.skyabyss.skin.rare": "まれなスキン「%s」が出た！（プロフィールの「衣装」で着られる）",
+  "message.skyabyss.skin.shards": "塔の欠片が足りない（%s）"
 }

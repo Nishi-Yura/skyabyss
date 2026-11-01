@@ -46,6 +46,39 @@ public final class SkinSelfTest {
             check(f, !Skins.wear(p, other.id()) && Skins.worn(p) == null, "a skin not owned was worn");
             check(f, Skins.wear(p, s.id()) && s.id().equals(Skins.worn(p)), "wearing an owned skin failed");
             check(f, Skins.wear(p, "") && Skins.worn(p) == null, "taking the skin off failed");
+            // 店ごと: 塔のスキンは仕立て屋では買えず、塔守で塔の欠片。ほうびのスキンは買えない
+            Skins.Skin tower = Skins.ALL.stream().filter(k -> k.shop() == Skins.Shop.TOWER).findFirst().orElseThrow();
+            check(f, Skins.buy(p, tower.id()) == Skins.Buy.FAR, "a tower skin was sold at the tailor");
+            Skins.openShop(p, Skins.Shop.TOWER);
+            net.minecraft.world.item.Item shard = jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get();
+            p.getInventory().add(new net.minecraft.world.item.ItemStack(shard, tower.price()));
+            check(f, Skins.buy(p, tower.id()) == Skins.Buy.OK && Skins.data(p).has(tower.id())
+                    && jp.revati.skyabyss.pouch.Pouch.countAll(p, shard) == 0, "a tower skin was not bought with shards");
+            for (Skins.Skin k : Skins.ALL) {
+                if (k.shop() == Skins.Shop.REWARD) {
+                    check(f, Skins.buy(p, k.id()) == Skins.Buy.NOT_SOLD, "a reward skin was sold: " + k.id());
+                }
+            }
+            // ほうび: 名声 5 段の印と図鑑の印
+            Skins.checkRewards(p, java.util.Set.of("hero:tide"));
+            check(f, Skins.data(p).has("astronaut") && !Skins.data(p).has("vampire"), "the fame reward skin was not given (or too many)");
+            Skins.checkRewards(p, java.util.Set.of("foes:all"));
+            check(f, Skins.data(p).has("vampire"), "the codex reward skin was not given");
+            // まれな箱: 何度か引くと出る、出たあとは二度と出ない
+            boolean dropped = false;
+            for (int i = 0; i < 2000 && !dropped; i++) {
+                dropped = Skins.rareDrop(p);
+            }
+            check(f, dropped && Skins.data(p).has("ninja"), "the rare skin never dropped");
+            boolean again = false;
+            for (int i = 0; i < 500 && !again; i++) {
+                again = Skins.rareDrop(p);
+            }
+            check(f, !again, "an owned rare skin dropped again");
+            // 転生 (レベル・技を戻す) でスキンは消えない
+            Skins.wear(p, s.id());
+            jp.revati.skyabyss.rebirth.Rebirth.reset(p);
+            check(f, s.id().equals(Skins.worn(p)) && Skins.data(p).has("ninja"), "a rebirth took the skins away");
             Skins.wear(p, s.id());
             Skins.Data d = Skins.data(p);
             RegistryFriendlyByteBuf b = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess(), ConnectionType.NEOFORGE);
@@ -68,7 +101,7 @@ public final class SkinSelfTest {
             SkyAbyss.LOGGER.error("skins test", e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST skins PASSED (tailor only, coins, buy once, wear owned only, take off, save and sync round trips, meshes and pictures)");
+            SkyAbyss.LOGGER.info("SELFTEST skins PASSED (tailor only, coins, buy once, tower shards, rewards not sold, fame and codex rewards, rare drop once, kept through rebirth, wear owned only, take off, save and sync round trips, meshes and pictures)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST skins FAILED: {}", m));
         }

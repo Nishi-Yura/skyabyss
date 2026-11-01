@@ -38,7 +38,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // プロフィール (持ち物の画面の右上の札から開く。自分のことを見る・決める画面)。
 //   左      人形・名前と名札の称号 (選んだ位置で上か下)・組合の旗と名前
 //   右の上  つまみ四つ: わたし (職・転生・鐘銭・遊んだ時間・倒した数・称号・名声・図鑑・塔) / 称号 (一覧から選ぶ・名札の位置) / 見え方 (名札と背の飾りの設定・順位表) /
-//           衣装 (スキンを着る・外す。武具屋の「スキンを見る」から開くと、持っていないスキンを押して買える。skin/Skins)
+//           衣装 (スキンを着る・外す。8 着ずつのページ。武具屋の「スキンを見る」・塔守の「塔のスキン」から開くと、その店のスキンを押して買える。skin/Skins)
 //   中身はサーバーへ頼む (Profile.Request → Snapshot)。称号と転生は同期してある RebirthData を読む。背景は tools/gen/items/gen_profile_assets.py
 //   E で持ち物へ戻る。J/K は記録と技へ
 @net.neoforged.fml.common.EventBusSubscriber(modid = SkyAbyss.MODID, value = net.neoforged.api.distmarker.Dist.CLIENT)
@@ -101,8 +101,10 @@ public class ProfileScreen extends Screen {
     private int scroll;
     private List<FormattedCharSequence> pendingTip;
     private ItemStack banner = ItemStack.EMPTY;
-    // 仕立て屋から開いた (持っていないスキンを買える)
-    private static boolean tailor;
+    // 店から開いた (その店のスキンを買える。null = 見るだけ) と、衣装棚のページ (8 着ずつ)
+    private static jp.revati.skyabyss.skin.Skins.Shop shop;
+    private static int page;
+    static final int PER_PAGE = 8;
     private String bannerKey = "";
 
     public ProfileScreen() {
@@ -113,10 +115,13 @@ public class ProfileScreen extends Screen {
         data = snap.data();
     }
 
-    // 武具屋の「スキンを見る」(Skins.OpenTailor) から: 衣装のつまみを買える形で。会話の画面が閉じるのを待って開く (1 秒まで)
+    // 武具屋の「スキンを見る」・塔守の「塔のスキン」(Skins.OpenTailor) から: 衣装のつまみを買える形で。会話の画面が閉じるのを待って開く (1 秒まで)
     private static int tailorWait = -1;
+    private static jp.revati.skyabyss.skin.Skins.Shop waitingShop;
 
-    public static void openTailor() {
+    public static void openTailor(int shopIndex) {
+        var shops = jp.revati.skyabyss.skin.Skins.Shop.values();
+        waitingShop = shops[Math.max(0, Math.min(shops.length - 1, shopIndex))];
         tailorWait = 20;
     }
 
@@ -131,8 +136,9 @@ public class ProfileScreen extends Screen {
         } else if (mc.screen == null || --tailorWait < 0) {
             tailorWait = -1;
             sub = WARDROBE;
+            page = 0;
             open();
-            tailor = true;
+            shop = waitingShop;
         }
     }
 
@@ -154,6 +160,12 @@ public class ProfileScreen extends Screen {
             addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.profile.wardrobe.none"), b -> {
                 PacketDistributor.sendToServer(new jp.revati.skyabyss.skin.Skins.Action("wear", ""));
             }).bounds(left + BODY_X, top + 170, 170, 16).build());
+            if (pages() > 1) {
+                addRenderableWidget(Button.builder(Component.literal("◀"), b -> page = Math.floorMod(page - 1, pages()))
+                        .bounds(left + BODY_R - 40, top + 155, 12, 12).build());
+                addRenderableWidget(Button.builder(Component.literal("▶"), b -> page = Math.floorMod(page + 1, pages()))
+                        .bounds(left + BODY_R - 12, top + 155, 12, 12).build());
+            }
         }
         if (sub == TITLES) {
             String[] keys = {"above", "below", "off"};
@@ -423,13 +435,30 @@ public class ProfileScreen extends Screen {
         return top + CARD_Y + (i / 4) * (CARD_H + 2);
     }
 
+    static int pages() {
+        return Math.max(1, (jp.revati.skyabyss.skin.Skins.ALL.size() + PER_PAGE - 1) / PER_PAGE);
+    }
+
+    // 持っていないスキンの手に入れ方の一行 (いま開いている店で買えるなら「押すと買う」)
+    private static Component howToGet(jp.revati.skyabyss.skin.Skins.Skin skin) {
+        String price = String.format("%,d", skin.price());
+        return switch (skin.shop()) {
+            case REWARD -> Component.translatable(skin.howKey()).withStyle(st -> st.withColor(SOFT));
+            case TOWER -> shop == skin.shop() ? Component.translatable("gui.skyabyss.profile.wardrobe.buy_shards", price).withStyle(st -> st.withColor(TitleTagClient.COLOR))
+                    : Component.translatable("gui.skyabyss.profile.wardrobe.where_tower", price).withStyle(st -> st.withColor(DIM));
+            default -> shop == skin.shop() ? Component.translatable("gui.skyabyss.profile.wardrobe.buy", price).withStyle(st -> st.withColor(TitleTagClient.COLOR))
+                    : Component.translatable("gui.skyabyss.profile.wardrobe.where", price).withStyle(st -> st.withColor(DIM));
+        };
+    }
+
     private void renderWardrobe(GuiGraphics g, int mx, int my) {
         Minecraft mc = Minecraft.getInstance();
         var data = jp.revati.skyabyss.skin.Skins.data(mc.player);
         String worn = jp.revati.skyabyss.skin.Skins.worn(mc.player);
         var all = jp.revati.skyabyss.skin.Skins.ALL;
-        for (int i = 0; i < all.size() && i < 8; i++) {
-            var skin = all.get(i);
+        page = Math.floorMod(page, pages());
+        for (int i = 0; i < PER_PAGE && page * PER_PAGE + i < all.size(); i++) {
+            var skin = all.get(page * PER_PAGE + i);
             int x = cardX(i);
             int y = cardY(i);
             boolean has = data.has(skin.id());
@@ -450,13 +479,17 @@ public class ProfileScreen extends Screen {
                 tip.add(Component.translatable(skin.nameKey() + ".desc").withStyle(st -> st.withColor(SOFT)));
                 tip.add(on ? Component.translatable("gui.skyabyss.profile.wardrobe.wearing").withStyle(st -> st.withColor(GOLD))
                         : has ? Component.translatable("gui.skyabyss.profile.wardrobe.owned").withStyle(st -> st.withColor(TitleTagClient.COLOR))
-                        : tailor ? Component.translatable("gui.skyabyss.profile.wardrobe.buy", String.format("%,d", skin.price())).withStyle(st -> st.withColor(TitleTagClient.COLOR))
-                        : Component.translatable("gui.skyabyss.profile.wardrobe.where", String.format("%,d", skin.price())).withStyle(st -> st.withColor(DIM)));
+                        : howToGet(skin));
                 tip(tip);
             }
         }
-        Component foot = tailor ? Component.translatable("gui.skyabyss.profile.wardrobe.tailor") : Component.translatable("gui.skyabyss.profile.wardrobe.note");
-        FitText.draw(g, font, foot, left + BODY_X, top + 158, BODY_R - BODY_X, tailor ? TitleTagClient.COLOR : DIM, false);
+        Component foot = shop == jp.revati.skyabyss.skin.Skins.Shop.TOWER ? Component.translatable("gui.skyabyss.profile.wardrobe.tower")
+                : shop != null ? Component.translatable("gui.skyabyss.profile.wardrobe.tailor") : Component.translatable("gui.skyabyss.profile.wardrobe.note");
+        int footW = pages() > 1 ? BODY_R - BODY_X - 44 : BODY_R - BODY_X;
+        FitText.draw(g, font, foot, left + BODY_X, top + 158, footW, shop != null ? TitleTagClient.COLOR : DIM, false);
+        if (pages() > 1) {
+            g.drawCenteredString(font, (page + 1) + "/" + pages(), left + BODY_R - 20, top + 157, SOFT);
+        }
     }
 
     // ---------------------------------------------------------------- 見え方
@@ -487,11 +520,11 @@ public class ProfileScreen extends Screen {
         if (sub == WARDROBE && button == 0) {
             Minecraft mc = Minecraft.getInstance();
             var all = jp.revati.skyabyss.skin.Skins.ALL;
-            for (int i = 0; i < all.size() && i < 8; i++) {
+            for (int i = 0; i < PER_PAGE && page * PER_PAGE + i < all.size(); i++) {
                 if (in((int) mx, (int) my, cardX(i), cardY(i), CARD_W, CARD_H)) {
-                    var skin = all.get(i);
+                    var skin = all.get(page * PER_PAGE + i);
                     boolean has = jp.revati.skyabyss.skin.Skins.data(mc.player).has(skin.id());
-                    if (has || tailor) {
+                    if (has || shop == skin.shop()) {
                         PacketDistributor.sendToServer(new jp.revati.skyabyss.skin.Skins.Action(has ? "wear" : "buy", skin.id()));
                     }
                     return true;
@@ -504,7 +537,7 @@ public class ProfileScreen extends Screen {
     @Override
     public void removed() {
         super.removed();
-        tailor = false;
+        shop = null;
     }
 
     @Override

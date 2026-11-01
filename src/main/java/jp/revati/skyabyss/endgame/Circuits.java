@@ -242,6 +242,7 @@ public final class Circuits {
             giveBox(p, BoxKind.rarity(tier, band));
         }
         Notice.gain(p, "message.skyabyss.circuit.reward", coins, boxes);
+        jp.revati.skyabyss.skin.Skins.rareDrop(p);
         String titan = run.region >= 0 && run.region < TITAN.length ? TITAN[run.region] : null;
         if (run.marks >= 6 && titan != null) {
             giveBox(p, BoxKind.titan(titan));

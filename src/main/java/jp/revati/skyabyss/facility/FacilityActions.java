@@ -49,7 +49,7 @@ import net.minecraft.world.level.block.BedBlock;
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "skins");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "skins", "tower_skins");
 
     private FacilityActions() {
     }
@@ -106,6 +106,7 @@ public final class FacilityActions {
                 jp.revati.skyabyss.endgame.ChatMenus.open(player);
             }
             case "skins" -> jp.revati.skyabyss.skin.Skins.openTailor(player);
+            case "tower_skins" -> jp.revati.skyabyss.skin.Skins.openShop(player, jp.revati.skyabyss.skin.Skins.Shop.TOWER);
             case "look" -> {
                 jp.revati.skyabyss.endgame.Looks.menu(player);
                 jp.revati.skyabyss.endgame.ChatMenus.open(player);

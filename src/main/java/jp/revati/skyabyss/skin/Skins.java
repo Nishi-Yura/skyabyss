@@ -40,26 +40,37 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 // スキン (docs/design/54 の 6.1。物語と関係のない見た目だけの一式)。着ると今の防具の見た目がスキンに替わる (強さは防具のまま)。
 //   持っているスキンと着ているスキンは人ごとの Data Attachment (周りの人にも同期。描き替えは client/SkinLayer と LowPolyArmorRenderer)
-//   手に入れ方: 武具屋の会話の「スキンを見る」(仕立て屋) で鐘銭。開いた人だけが TAILOR_TICKS のあいだ買える (プロフィールの「衣装」つまみ)
+//   手に入れ方 (Shop): TAILOR = 武具屋の「スキンを見る」で鐘銭、TOWER = 塔守の「塔のスキン」で塔の欠片 (開いた人だけが TAILOR_TICKS のあいだ買える。
+//   プロフィールの「衣装」つまみ)、REWARD = 買えない (ほうび: 図鑑・名声の印 Rebirths.updateTitles → checkRewards、まれな箱 rareDrop)
 //   形は tools/rough/lowpoly/armor/skin_one.py (一着一案)、入れるのは tools/install/install_skins.py。メッシュは lowpoly/armor/skin_<id>/<部位>
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Skins {
-    public record Skin(String id, int price) {
+    public enum Shop { TAILOR, TOWER, REWARD }
+
+    // price = 鐘銭 (TAILOR) か塔の欠片 (TOWER)。REWARD は 0。reward = REWARD の解ける印 (称号の事実の印。"rare" = まれな箱)
+    public record Skin(String id, Shop shop, int price, String reward) {
         public String nameKey() {
             return "skin.skyabyss." + id;
+        }
+
+        // 手に入れ方の一言 (衣装棚の説明)
+        public String howKey() {
+            return "skin.skyabyss." + id + ".how";
         }
     }
 
     // 並びは衣装棚の順 (足すなら末尾へ)
     public static final List<Skin> ALL = List.of(
-            new Skin("samurai", 3000),
-            new Skin("pirate", 2500),
-            new Skin("knight", 2500),
-            new Skin("astronaut", 4000),
-            new Skin("ninja", 3000),
-            new Skin("witch", 3000),
-            new Skin("chef", 2500),
-            new Skin("vampire", 3500));
+            new Skin("samurai", Shop.TAILOR, 3000, ""),
+            new Skin("pirate", Shop.TAILOR, 2500, ""),
+            new Skin("knight", Shop.TOWER, 40, ""),
+            new Skin("astronaut", Shop.REWARD, 0, "hero:any"),
+            new Skin("ninja", Shop.REWARD, 0, "rare"),
+            new Skin("witch", Shop.TAILOR, 3000, ""),
+            new Skin("chef", Shop.TAILOR, 2500, ""),
+            new Skin("vampire", Shop.REWARD, 0, "foes:all"));
+    // まれな箱 (巡り路の報い・大陸の大事件の報い) から REWARD "rare" のスキンが出る割合 (百分率)
+    public static final int RARE_PCT = 5;
 
     public record Data(List<String> owned, String worn) {
         public static final Data EMPTY = new Data(List.of(), "");
@@ -93,9 +104,12 @@ public final class Skins {
     public static final Supplier<AttachmentType<Data>> DATA = ATTACHMENTS.register("skins",
             () -> AttachmentType.builder(() -> Data.EMPTY).serialize(Data.CODEC).copyOnDeath().sync((holder, to) -> true, Data.STREAM_CODEC).build());
 
-    // 仕立て屋を開いた人 → 買える期限 (ゲームの tick)
+    // 店を開いた人 → (店, 買える期限 (ゲームの tick))
     static final long TAILOR_TICKS = 20 * 60 * 3;
-    private static final Map<UUID, Long> TAILOR = new HashMap<>();
+    private record Open(Shop shop, long until) {
+    }
+
+    private static final Map<UUID, Open> TAILOR = new HashMap<>();
 
     private Skins() {
     }
@@ -142,20 +156,28 @@ public final class Skins {
         return true;
     }
 
-    // 仕立て屋 (武具屋の会話から)。衣装のつまみを買える形で開く
+    // 店 (武具屋 = 仕立て屋・塔守 = 塔のスキン)。衣装のつまみを買える形で開く
     public static void openTailor(ServerPlayer p) {
-        TAILOR.put(p.getUUID(), p.serverLevel().getGameTime() + TAILOR_TICKS);
+        openShop(p, Shop.TAILOR);
+    }
+
+    public static void openShop(ServerPlayer p, Shop shop) {
+        TAILOR.put(p.getUUID(), new Open(shop, p.serverLevel().getGameTime() + TAILOR_TICKS));
         if (!(p instanceof FakePlayer) && p.connection != null) {
-            PacketDistributor.sendToPlayer(p, new OpenTailor());
+            PacketDistributor.sendToPlayer(p, new OpenTailor(shop.ordinal()));
         }
     }
 
     public static boolean atTailor(ServerPlayer p) {
-        Long until = TAILOR.get(p.getUUID());
-        return until != null && p.serverLevel().getGameTime() <= until;
+        return atShop(p, Shop.TAILOR);
     }
 
-    public enum Buy { OK, OWNED, FAR, COINS, UNKNOWN }
+    public static boolean atShop(ServerPlayer p, Shop shop) {
+        Open o = TAILOR.get(p.getUUID());
+        return o != null && o.shop == shop && p.serverLevel().getGameTime() <= o.until;
+    }
+
+    public enum Buy { OK, OWNED, FAR, COINS, NOT_SOLD, UNKNOWN }
 
     public static Buy buy(ServerPlayer p, String id) {
         Skin s = byId(id);
@@ -165,14 +187,51 @@ public final class Skins {
         if (data(p).has(id)) {
             return Buy.OWNED;
         }
-        if (!atTailor(p)) {
+        if (s.shop == Shop.REWARD) {
+            return Buy.NOT_SOLD;
+        }
+        if (!atShop(p, s.shop)) {
             return Buy.FAR;
         }
-        if (!Coins.take(p, s.price)) {
+        if (s.shop == Shop.TOWER) {
+            net.minecraft.world.item.Item shard = jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get();
+            if (jp.revati.skyabyss.pouch.Pouch.countAll(p, shard) < s.price) {
+                return Buy.COINS;
+            }
+            jp.revati.skyabyss.pouch.Pouch.takeAny(p, shard, s.price);
+        } else if (!Coins.take(p, s.price)) {
             return Buy.COINS;
         }
         grant(p, id);
         return Buy.OK;
+    }
+
+    // ---------------------------------------------------------------- ほうび
+    // 称号の事実の印が新しくそろったら、REWARD のスキンを渡す (Rebirths.updateTitles から)。"hero:any" = どこかの土地の名声 5 段
+    public static void checkRewards(ServerPlayer p, java.util.Set<String> marks) {
+        for (Skin s : ALL) {
+            if (s.shop != Shop.REWARD || s.reward.isEmpty() || "rare".equals(s.reward) || data(p).has(s.id)) {
+                continue;
+            }
+            boolean ok = "hero:any".equals(s.reward) ? marks.stream().anyMatch(m -> m.startsWith("hero:")) : marks.contains(s.reward);
+            if (ok && grant(p, s.id)) {
+                Notice.unlock(p, "message.skyabyss.skin.reward", Component.translatable(s.nameKey()));
+            }
+        }
+    }
+
+    // まれな箱 (巡り路・大陸の大事件の報い)。RARE_PCT で、まだ持っていない "rare" のスキンを一つ。出たら true
+    public static boolean rareDrop(ServerPlayer p) {
+        if (p.getRandom().nextInt(100) >= RARE_PCT) {
+            return false;
+        }
+        for (Skin s : ALL) {
+            if (s.shop == Shop.REWARD && "rare".equals(s.reward) && grant(p, s.id)) {
+                Notice.unlock(p, "message.skyabyss.skin.rare", Component.translatable(s.nameKey()));
+                return true;
+            }
+        }
+        return false;
     }
 
     static void act(ServerPlayer p, String action, String id) {
@@ -185,7 +244,7 @@ public final class Skins {
                         Notice.unlock(p, "message.skyabyss.skin.bought", Component.translatable(s.nameKey()));
                         p.playNotifySound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 1f, 1.1f);
                     }
-                    case COINS -> Notice.warn(p, "message.skyabyss.skin.coins", s.price);
+                    case COINS -> Notice.warn(p, s.shop == Shop.TOWER ? "message.skyabyss.skin.shards" : "message.skyabyss.skin.coins", s.price);
                     case FAR -> Notice.warn(p, "message.skyabyss.skin.far");
                     default -> {
                     }
@@ -213,9 +272,10 @@ public final class Skins {
         }
     }
 
-    public record OpenTailor() implements CustomPacketPayload {
+    // shop = Shop の番号
+    public record OpenTailor(int shop) implements CustomPacketPayload {
         public static final Type<OpenTailor> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "skin_tailor"));
-        public static final StreamCodec<FriendlyByteBuf, OpenTailor> STREAM_CODEC = StreamCodec.unit(new OpenTailor());
+        public static final StreamCodec<FriendlyByteBuf, OpenTailor> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, OpenTailor::shop, OpenTailor::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
@@ -225,17 +285,17 @@ public final class Skins {
 
     @SubscribeEvent
     static void onPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("1")
+        event.registrar("2")
                 .playToServer(Action.TYPE, Action.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer sp) {
                         act(sp, payload.action(), payload.id());
                     }
                 }))
                 .playToClient(OpenTailor.TYPE, OpenTailor.STREAM_CODEC,
-                        (payload, context) -> context.enqueueWork(jp.revati.skyabyss.endgame.client.ProfileScreen::openTailor));
+                        (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.endgame.client.ProfileScreen.openTailor(payload.shop())));
     }
 
-    // 開発用: /skyabyss skin give <id>|all・wear <id>・clear・tailor
+    // 開発用: /skyabyss skin give <id>|all・wear <id>・clear・reset (持ち物を空に)・tailor・tower
     @SubscribeEvent
     static void onCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
@@ -252,8 +312,16 @@ public final class Skins {
                         .then(Commands.literal("wear").then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c ->
                                 wear(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id")) ? 1 : 0)))
                         .then(Commands.literal("clear").executes(c -> wear(c.getSource().getPlayerOrException(), "") ? 1 : 0))
+                        .then(Commands.literal("reset").executes(c -> {
+                            c.getSource().getPlayerOrException().setData(DATA.get(), Data.EMPTY);
+                            return 1;
+                        }))
                         .then(Commands.literal("tailor").executes(c -> {
                             openTailor(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                        .then(Commands.literal("tower").executes(c -> {
+                            openShop(c.getSource().getPlayerOrException(), Shop.TOWER);
                             return 1;
                         }))));
     }

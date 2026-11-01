@@ -138,7 +138,9 @@ public final class Rebirths {
     // 称号の解除 (足すだけで消さない)。新しく解けたものがあれば知らせる
     public static void updateTitles(ServerPlayer p) {
         RebirthData d = data(p);
-        long mask = d.unlocked() | RebirthTitles.unlockedMask(facts(p));
+        RebirthTitles.Facts facts = facts(p);
+        jp.revati.skyabyss.skin.Skins.checkRewards(p, facts.marks());
+        long mask = d.unlocked() | RebirthTitles.unlockedMask(facts);
         long added = mask & ~d.unlocked();
         if (added != 0) {
             put(p, d.withUnlocked(mask));

@@ -209,5 +209,14 @@
   "skin.skyabyss.ninja.desc": "Indigo hood and headband, a blade and red scarf on the back",
   "skin.skyabyss.witch.desc": "Pointed hat, purple robe and glowing potions",
   "skin.skyabyss.chef.desc": "Tall toque, white jacket and a ladle in the apron",
-  "skin.skyabyss.vampire.desc": "Top hat, high-collared cloak and a ruby pin"
+  "skin.skyabyss.vampire.desc": "Top hat, high-collared cloak and a ruby pin",
+  "gui.skyabyss.profile.wardrobe.buy_shards": "Click to buy (%s tower shards)",
+  "gui.skyabyss.profile.wardrobe.where_tower": "Sold by the tower keeper (Tower skins, %s shards)",
+  "gui.skyabyss.profile.wardrobe.tower": "Tower skins: click to buy with shards",
+  "skin.skyabyss.astronaut.how": "Reward: raise any land's fame to tier 5 (land hero)",
+  "skin.skyabyss.ninja.how": "Rare: from circuit and world event rewards",
+  "skin.skyabyss.vampire.how": "Reward: complete the foe codex",
+  "message.skyabyss.skin.reward": "Got the reward skin \"%s\" (wear it from Wardrobe in your profile)",
+  "message.skyabyss.skin.rare": "A rare skin \"%s\" dropped! (wear it from Wardrobe)",
+  "message.skyabyss.skin.shards": "Not enough tower shards (%s)"
 }
