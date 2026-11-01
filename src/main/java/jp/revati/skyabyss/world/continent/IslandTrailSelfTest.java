@@ -119,11 +119,9 @@ public final class IslandTrailSelfTest {
         p.getPersistentData().putInt(IslandTrail.KILLS, IslandTrail.BANDITS_NEEDED);
         IslandTrail.update(level, p);
         expect(f, p, "island_rest");
+        // 峠の柵は立てない (2026-11-02。島を出る決まりは渡し守だけ)
         if (!IslandTrail.gateOpen(level)) {
-            f.add("the barricade did not open after the bandits");
-        }
-        if (IslandTrail.gateColumns().length < 20) {
-            f.add("the barricade is too short (" + IslandTrail.gateColumns().length + " columns)");
+            f.add("a pass barricade is standing");
         }
         BlockPos r = IslandTrail.restPos(level, 0);
         p.setPos(r.getX() + 0.5, r.getY(), r.getZ() + 0.5);

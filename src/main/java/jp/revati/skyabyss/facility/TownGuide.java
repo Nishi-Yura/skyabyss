@@ -72,7 +72,8 @@ public final class TownGuide {
         }
     }
 
-    // 並び = 一覧の並び (種類ごと)。裏通りの闇市・地図屋は自分で見つける所なので載せない (戸の上の名も出していない。ShelterBuilder.LABEL_HIDDEN)
+    // 並び = 一覧の並び (種類ごと)。裏通りの闇市・地図屋は自分で見つける所なので載せない (戸の上の名も出していない。ShelterBuilder.LABEL_HIDDEN)。
+    // 係の人のいない空見の館・厩舎 (2026-10-31〜11-01 に書庫番と厩舎の番を消した) も載せない (2026-11-02 の声「空見の館とか、いらない」)
     public static final List<Place> PLACES = List.of(
             new Place("tool_shop", Group.GOLD, "label_tool_shop"),
             new Place("storage", Group.GOLD, "label_storage"),
@@ -87,7 +88,6 @@ public final class TownGuide {
             new Place("training", Group.RED, "open_training"),
             new Place("shrine", Group.VIOLET, "open_shrine"),
             new Place("keep", Group.VIOLET, "open_keep"),
-            new Place("hall", Group.VIOLET, "open_hall"),
             new Place("tavern", Group.GREY, "label_tavern"),
             new Place("graveyard", Group.GREY, "sign_graveyard"));
 

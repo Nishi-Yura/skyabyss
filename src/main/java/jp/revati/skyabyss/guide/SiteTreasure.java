@@ -74,7 +74,9 @@ public final class SiteTreasure {
 
     // 受け取り記録を見ずに渡す (周回の素材)
     public static List<ItemStack> give(ServerPlayer player, Table table) {
-        List<ItemStack> stacks = roll(table, player.getRandom());
+        List<ItemStack> stacks = new ArrayList<>(roll(table, player.getRandom()));
+        // 置く品は渡さない (渡した品の一覧にも入れない。rpg/rules/NoPlaceables)
+        stacks.removeIf(s -> jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(player, s));
         for (ItemStack s : stacks) {
             Quests.give(player, s.copy());
         }

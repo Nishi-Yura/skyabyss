@@ -88,8 +88,8 @@
 
 ## 8. 試遊コマンド
 
-- `/skyabyss play box give <種類> [数]`: 箱を出す（列は空なので、開けると表から引く）。
-- `/skyabyss play box open`: 封切り師なしで、その場で封切り師の画面を開く。
+- `/skyabyss admin box give <種類> [数]`: 箱を出す（列は空なので、開けると表から引く）。
+- `/skyabyss admin box open`: 封切り師なしで、その場で封切り師の画面を開く。
 
 ## 9. 自己テスト（段 "loot boxes"）
 

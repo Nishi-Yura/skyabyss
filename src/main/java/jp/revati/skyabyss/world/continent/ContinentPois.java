@@ -113,10 +113,14 @@ public final class ContinentPois {
                 }
                 SiteData.Entry e = entry(data, i);
                 if (e == null) {
-                    int y = ContinentMap.get().surface(poi.x(), poi.z()) + 1;
+                    // 道にかかる見どころは、道から離れる向きにずらす (2026-11-02 の声「道の上に構造物できないようにして」。かかった所だけ欠けて建っていた)
+                    BlockPos at = RoadClearance.pushAway(new BlockPos(poi.x(), 0, poi.z()), radius(poi), 2, 40);
+                    int y = ContinentMap.get().surface(at.getX(), at.getZ()) + 1;
                     // 正面 (部品は南が入口) を一番近い道へ向ける (2026-10-28 の試遊「建物の向きがおかしい」。前は番号で回していた)
-                    e = data.add(KIND, i, new BlockPos(poi.x(), y, poi.z()), faceRoad(poi.x(), poi.z()));
+                    e = data.add(KIND, i, new BlockPos(at.getX(), y, at.getZ()), faceRoad(at.getX(), at.getZ()));
                 }
+                // 見つけた・敵の近さは、建った所から測る (道からずらした見どころ)
+                d2 = p.distanceToSqr(e.pos.getX() + 0.5, p.getY(), e.pos.getZ() + 0.5);
                 if (!e.built) {
                     if (!SiteBuilds.queued(e)) {
                         SiteBuilds.enqueue(job(over, data, e));
@@ -206,6 +210,16 @@ public final class ContinentPois {
             }
         }
         return null;
+    }
+
+    // 見どころの部品の半径 (向きによらず収まる半分の大きさ + 地均しの輪)。部品が読めなければ 8
+    static int radius(Poi poi) {
+        try {
+            Blueprint bp = Blueprint.get("poi_" + poi.kind());
+            return Math.max(bp.rx1 - bp.rx0, bp.rz1 - bp.rz0) / 2 + 1 + bp.ring;
+        } catch (RuntimeException ex) {
+            return 8;
+        }
     }
 
     // 一番近い道の点へ正面 (南) を向ける回し (道がなければ南のまま)

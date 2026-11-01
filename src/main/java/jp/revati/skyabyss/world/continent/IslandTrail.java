@@ -14,7 +14,6 @@ import jp.revati.skyabyss.cinematic.Cinematics;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.opening.site.SiteData;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -44,7 +43,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //      2026-10-26 の声「職業選んでから戦いでしょ」: 選ぶまでは島の目的が進まず、峠の野盗も立たない
 //   1. 野営地の帳面 (今までどおり examine_camp)
 //   2. 足跡の窪地を見る (island_prints。窪地の足跡の 40 以内か、足跡の伝承)
-//   3. 峠の野盗を退ける (island_bandits。島で野盗を 3 人。足りなければ野営に出る)。峠の柵は、誰かが退けると開く (世界に一つ)
+//   3. 峠の野盗を退ける (island_bandits。島で野盗を 3 人。足りなければ野営に出る)。
+//      峠の柵は 2026-11-02 に外した (声「クエストしてなかったら柵が立ってるやつ、意味ない。よこからでれちゃう」。島を出る決まりは渡し守だけ)
 //   4. 旅の休み場の焚き火で休む (island_rest。そばに 3 秒)
 //   5. 宿り木の祠に祈る (island_shrine。そばに立つと済む。ここで目覚めるようになり、技の画面 (K) の手がかり)
 //   6. 船着き場の渡し守と話す (take_ferry)。渡し守は 1〜5 を済ませた人だけを乗せる (会話の印 island_ready)。乗ると渡りの場面 (ferry_crossing) →
@@ -172,6 +172,14 @@ public final class IslandTrail {
         return ContinentLayout.get().island(index == 0 ? "fire" : "shrine");
     }
 
+    // 着いたか: 水平の近さで見て、高さは上下 6 まで。島の図の点 (場所がまだ建っていない。高さ 0) は高さを見ない
+    // (2026-11-02 の声「〜に行こうの判定もおかしいときある」: 前は高さ込みの近さで、建つ前の休み場・祠では高さ 0 と比べて済まなかった)
+    static boolean near(BlockPos at, ServerPlayer p, double r) {
+        double dx = p.getX() - (at.getX() + 0.5);
+        double dz = p.getZ() - (at.getZ() + 0.5);
+        return dx * dx + dz * dz < r * r && (at.getY() == 0 || Math.abs(p.getY() - at.getY()) < 6);
+    }
+
     // ---------------------------------------------------------------- 見回り (1 秒ごと)
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -185,7 +193,7 @@ public final class IslandTrail {
     // 一人の進みを見る (自己テストからも)
     static void update(ServerLevel level, ServerPlayer p) {
         ContinentLayout lay = ContinentLayout.get();
-        buildGate(level);
+        clearOldGate(level);
         // 道の札は立てない (2026-10-28 の試遊「看板の向きや置いてる位置がおかしい。消してもいい」。目的の帯と目印が道を示す)
         // 職を選ぶまでは、ほかの目的は進まない (野営地のそばで選ぶ画面が開く)
         if (jp.revati.skyabyss.rpg.skill.JobChoice.chosen(p) == null) {
@@ -210,19 +218,17 @@ public final class IslandTrail {
         if (has(p, PRINTS) && !has(p, BANDITS)) {
             if (p.getPersistentData().getInt(KILLS) >= BANDITS_NEEDED) {
                 mark(p, BANDITS);
-                openGate(level);
                 Notice.objective(p, "message.skyabyss.island.bandits_done");
             } else {
                 keepBandits(level, p);
             }
         }
-        if (has(p, BANDITS) && !has(p, REST) && restPos(level, 0).distToCenterSqr(p.position()) < REST_NEAR * REST_NEAR) {
+        if (has(p, BANDITS) && !has(p, REST) && near(restPos(level, 0), p, REST_NEAR)) {
             mark(p, REST);
             Notice.hint(p, "message.skyabyss.island.rested");
         }
         // 祠に祈る (職は野営地で選んである)
-        double shrine = restPos(level, 1).distToCenterSqr(p.position());
-        if (has(p, REST) && shrine < SHRINE_NEAR * SHRINE_NEAR && !has(p, SHRINE)) {
+        if (has(p, REST) && near(restPos(level, 1), p, SHRINE_NEAR) && !has(p, SHRINE)) {
             mark(p, SHRINE);
             Notice.objective(p, "message.skyabyss.island.prayed");
             Notice.hint(p, "message.skyabyss.island.skill_hint");
@@ -312,25 +318,36 @@ public final class IslandTrail {
         Notice.bar(p, Component.translatable("message.skyabyss.island.bandit_count", Math.min(n, BANDITS_NEEDED), BANDITS_NEEDED));
     }
 
-    // ---------------------------------------------------------------- 峠の柵 (世界に一つ。誰かが野盗を退けると開く)
-    @Nullable
-    static SiteData.Entry gateEntry(ServerLevel level) {
+    // ---------------------------------------------------------------- 峠の柵 (2026-11-02 に外した)
+    // 前の版で建った柵 (世界に一つ。道を横切る丸太と柵) は、人が近くに来たとき黙って片付ける。新しく建てることはない
+    static void clearOldGate(ServerLevel level) {
         SiteData data = SiteData.get(level);
         SiteData.Entry e = data.first(GATE_KIND);
-        if (e == null) {
-            BlockPos g = ContinentLayout.get().island("gate");
-            if (g == null) {
-                return null;
-            }
-            e = data.add(GATE_KIND, 0, g, 0);
-            // 建てるのは IslandTrail (SiteBuilds の部品ではない)。柵のブロックは buildGate が、人が近くに来たときに置く
-            e.built = true;
-            data.setDirty();
+        if (e == null || e.extra("built") == null || e.extra("open") != null || !level.isLoaded(e.pos)) {
+            return;
         }
-        return e;
+        int[][] cols = gateColumns();
+        for (int[] c : cols) {
+            if (!level.isLoaded(new BlockPos(c[0], 0, c[1]))) {
+                return;
+            }
+        }
+        for (int[] c : cols) {
+            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c[0], c[1]);
+            for (int y = top - 4; y <= top + 1; y++) {
+                BlockPos at = new BlockPos(c[0], y, c[1]);
+                BlockState st = level.getBlockState(at);
+                if (st.is(Blocks.SPRUCE_LOG) || st.is(Blocks.SPRUCE_FENCE)) {
+                    level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
+                }
+            }
+        }
+        e.extra("open", e.pos);
+        data.setDirty();
+        SkyAbyss.LOGGER.info("Island trail: the old pass barricade was removed");
     }
 
-    // 柵の列 (道を横切る。道の向きに直角)。{x, z} の並び
+    // 柵の列 (道を横切る。道の向きに直角)。{x, z} の並び。前の版の柵を片付けるのに使う
     static int[][] gateColumns() {
         BlockPos g = ContinentLayout.get().island("gate");
         List<BlockPos> road = ContinentLayout.get().roads().get(0);
@@ -362,66 +379,10 @@ public final class IslandTrail {
         return out;
     }
 
-    static void buildGate(ServerLevel level) {
-        SiteData.Entry e = gateEntry(level);
-        if (e == null || e.extra("built") != null || e.extra("open") != null || !level.isLoaded(e.pos)) {
-            return;
-        }
-        int[][] cols = gateColumns();
-        for (int[] c : cols) {
-            if (!level.isLoaded(new BlockPos(c[0], 0, c[1]))) {
-                return;
-            }
-        }
-        BlockState log = Blocks.SPRUCE_LOG.defaultBlockState();
-        BlockState fence = Blocks.SPRUCE_FENCE.defaultBlockState();
-        for (int i = 0; i < cols.length; i++) {
-            int x = cols[i][0];
-            int z = cols[i][1];
-            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            boolean post = i % 4 == 0;
-            for (int k = 0; k < (post ? 3 : 2); k++) {
-                BlockPos at = new BlockPos(x, y + k, z);
-                if (level.getBlockState(at).canBeReplaced()) {
-                    level.setBlock(at, post ? log : fence, 3);
-                }
-            }
-        }
-        e.extra("built", e.pos);
-        SiteData.get(level).setDirty();
-    }
-
-    static void openGate(ServerLevel level) {
-        SiteData.Entry e = gateEntry(level);
-        if (e == null || e.extra("open") != null) {
-            return;
-        }
-        for (int[] c : gateColumns()) {
-            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c[0], c[1]);
-            for (int y = top - 4; y <= top + 1; y++) {
-                BlockPos at = new BlockPos(c[0], y, c[1]);
-                BlockState s = level.getBlockState(at);
-                if (s.is(Blocks.SPRUCE_LOG) || s.is(Blocks.SPRUCE_FENCE)) {
-                    level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
-                    if (y % 2 == 0) {
-                        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, s), c[0] + 0.5, y + 0.5, c[1] + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
-                    }
-                }
-            }
-        }
-        level.playSound(null, e.pos, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.2f, 0.8f);
-        e.extra("open", e.pos);
-        SiteData.get(level).setDirty();
-        for (ServerPlayer q : level.players()) {
-            if (q.distanceToSqr(e.pos.getX(), q.getY(), e.pos.getZ()) < 96 * 96) {
-                Notice.hint(q, "message.skyabyss.island.gate_open");
-            }
-        }
-    }
-
+    // 峠に柵が立っていないか (前の版の柵が残っていれば false)
     public static boolean gateOpen(ServerLevel level) {
-        SiteData.Entry e = gateEntry(level);
-        return e != null && e.extra("open") != null;
+        SiteData.Entry e = SiteData.get(level).first(GATE_KIND);
+        return e == null || e.extra("built") == null || e.extra("open") != null;
     }
 
     // ---------------------------------------------------------------- 渡り (渡し守の会話の「渡してもらう」。town の act island_cross)
@@ -541,7 +502,6 @@ public final class IslandTrail {
                             p.getPersistentData().putInt(KILLS, BANDITS_NEEDED);
                             p.getPersistentData().putInt(KEY, ALL);
                             setReady(p, true);
-                            openGate(p.serverLevel());
                             return 1;
                         }))
                         .then(net.minecraft.commands.Commands.literal("cross").executes(c -> {

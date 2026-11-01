@@ -342,10 +342,10 @@ public final class CinematicClient {
         }
     }
 
-    // Space か Esc を押し続けるとスキップ。離すと戻る
+    // Enter を押し続けるとスキップ。離すと戻る (2026-11-02 の声「ムービースキップ系、全部 Enter にして」。前は Space か Esc)
     private static void tickSkip(Run r, Minecraft mc) {
         long window = mc.getWindow().getWindow();
-        boolean down = InputConstants.isKeyDown(window, 32) || InputConstants.isKeyDown(window, 256);
+        boolean down = InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER) || InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER);
         if (down && r.ticks >= 10) {
             r.skipHeld++;
             if (r.skipHeld >= SKIP_HOLD) {

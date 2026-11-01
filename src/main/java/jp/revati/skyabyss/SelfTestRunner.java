@@ -460,6 +460,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
         // 完全な RPG の決まり (採集・水汲み・倒れたときの既定)。docs/design/40。SKYABYSS_SELFTEST_ONLY="rpg rules"
         steps.addAll(jp.revati.skyabyss.rpg.rules.RpgRulesSelfTest.steps());
+        // 正式版の前の直し: データの版の移し替え・置く品を持たせない・頁が寄る (upgrade/)。SKYABYSS_SELFTEST_ONLY="upgrade"
+        steps.addAll(jp.revati.skyabyss.upgrade.UpgradeSelfTest.steps());
         // 天と淵の大陸の地形 (図と、大陸の世界なら本物のチャンク)。docs/design/40 の 3 章。SKYABYSS_SELFTEST_ONLY="continent"
         steps.addAll(jp.revati.skyabyss.world.continent.ContinentSelfTest.steps());
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"

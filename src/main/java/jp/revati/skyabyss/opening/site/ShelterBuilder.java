@@ -19,7 +19,8 @@ public final class ShelterBuilder {
         return new SiteJob(level, data, entry, Blueprint.get(name), "shelter", ShelterBuilder::finish);
     }
 
-    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker");  // 地図屋の屋根裏は人がいないので名札も出さない
+    // 名札を出さない施設: 闇市 (自分で見つける)・地図屋の屋根裏と厩舎 (係の人を消して人がいない。乗り物は止まり木の旅の番)。前に置いた名札は keepLabels が外す
+    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker", "stable");
     public static final String LABEL_TAG = "skyabyss_facility_label";
 
     private static net.minecraft.nbt.ListTag floats(float... v) {
@@ -66,7 +67,7 @@ public final class ShelterBuilder {
     public static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
         for (int i = 0; i < e.extraNames.size(); i++) {
             String key = e.extraNames.get(i);
-            if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {
+            if (!key.startsWith("label_")) {
                 continue;
             }
             BlockPos at = e.extraPos.get(i);
@@ -74,6 +75,13 @@ public final class ShelterBuilder {
                 continue;
             }
             net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
+            if (LABEL_HIDDEN.contains(key.substring(6))) {
+                // 前の版で置いた名札 (厩舎など) を外す
+                for (net.minecraft.world.entity.Entity old : level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, d -> d.getTags().contains(LABEL_TAG))) {
+                    old.discard();
+                }
+                continue;
+            }
             if (level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, d -> d.getTags().contains(LABEL_TAG)).isEmpty()) {
                 placeLabel(level, at, key.substring(6));
             }

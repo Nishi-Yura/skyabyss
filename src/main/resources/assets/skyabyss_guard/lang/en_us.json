@@ -11,9 +11,9 @@
   "label.skyabyss.facility.smithy": "Smithy",
   "label.skyabyss.facility.guild": "Whale Chasers' Guild",
   "label.skyabyss.facility.guild_hall": "Guild Hall (guild, exchange, storage)",
-  "label.skyabyss.facility.travel": "Travel House (stables, perch, maps)",
+  "label.skyabyss.facility.travel": "Travel House (perch, mounts)",
   "label.skyabyss.facility.training": "Training Hall",
-  "label.skyabyss.facility.shrine": "Shrine (key room, archive)",
+  "label.skyabyss.facility.shrine": "Shrine (key room)",
   "label.skyabyss.facility.market": "Market (tools, food, arms, materials, medicine)",
   "message.skyabyss.chest.took": "Got %s",
   "message.skyabyss.chest.wait": "You already opened this. Something will be inside again in about %s min"

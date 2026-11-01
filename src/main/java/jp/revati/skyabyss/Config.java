@@ -35,7 +35,21 @@ public final class Config {
             .comment("技の予告の粒 (旧来の点線) を、床の印とは別にサーバーからも送るか。false = 送らない (床の印と、クライアントの telegraphStyle の粒だけ)")
             .define("telegraphServerParticles", false);
 
+    // 管理者のコマンド (/skyabyss admin …。dev/play/PlayCommands) を使える権限の段 (2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」)
+    public static final ModConfigSpec.IntValue ADMIN_PERMISSION = SERVER_BUILDER
+            .comment("管理者のコマンド (/skyabyss admin …) を使える権限の段 (1〜4。2 = OP。シングルプレイでは「チートの許可」をオンにした世界)")
+            .defineInRange("adminPermissionLevel", 2, 1, 4);
+
     static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
+
+    // 管理者の権限の段 (設定を読む前は 2)
+    public static int adminLevel() {
+        try {
+            return ADMIN_PERMISSION.get();
+        } catch (IllegalStateException e) {
+            return 2;
+        }
+    }
 
     // --- クライアント設定: プレイヤーごとの見え方の好み ---
     private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();

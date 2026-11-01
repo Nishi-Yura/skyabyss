@@ -180,9 +180,9 @@ def play():
         ("/skyrecord", "控え帳を開く", "Open the record book"),
         ("/titanmemory", "巨神ごとの記録と、装備の図鑑", "Per-titan records and gear codex"),
         ("/party invite|accept|leave …", "パーティの招待・参加・脱退", "Party: invite, accept, leave"),
-        ("/skyabyss play help", "試遊用の移動の一覧（OP）", "Tester travel commands (op)"),
-        ("/skyabyss play raid 巨神 部屋", "背の部屋へ運ぶ（OP）", "Jump to a back room (op)"),
-        ("/skyabyss play chapter 5", "深淵の章の始めへ（OP）", "Start of chapter 5, the abyss (op)"),
+        ("/skyabyss admin help", "試遊用の移動の一覧（OP）", "Tester travel commands (op)"),
+        ("/skyabyss admin raid 巨神 部屋", "背の部屋へ運ぶ（OP）", "Jump to a back room (op)"),
+        ("/skyabyss admin chapter 5", "深淵の章の始めへ（OP）", "Start of chapter 5, the abyss (op)"),
     ]
     crows = [["<code>%s</code>" % c, T(j, e)] for c, j, e in cmds]
     notices = [

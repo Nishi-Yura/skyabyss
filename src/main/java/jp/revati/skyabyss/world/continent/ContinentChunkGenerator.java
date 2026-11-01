@@ -248,6 +248,11 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     static final double ROAD_EDGE = 4.9;
     static final double WIDE = 0.0;
 
+    // 道の芯から縁までの幅 (置き場所を道から離す仕組みが使う。RoadClearance・opening/site/ChapterSites)
+    public static double roadEdge() {
+        return ROAD_EDGE;
+    }
+
     // このチャンク (と縁 4) にかかる道の線分 {x0, z0, x1, z1}
     static List<int[]> roadSegments(int x0, int z0) {
         List<int[]> out = new java.util.ArrayList<>();

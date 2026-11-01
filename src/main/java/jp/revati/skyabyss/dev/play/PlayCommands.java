@@ -33,14 +33,18 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-// /skyabyss play ... : 試遊用の近道 (OP、権限 2)。章・場所・道具・ボス・クエスト・状態を名前で切り替える。
-// 既存の /skyabyss playtest はそのまま残す。docs/design/37 の 2〜4 節
+// /skyabyss admin ... : 管理者のコマンド (権限は設定 adminPermissionLevel、既定 2 = OP)。章・場所・道具・ボス・クエスト・状態を名前で切り替える。
+// 2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」で、試遊の /skyabyss play を admin に改め、他人の記録 (inspect)・レベル・鐘銭・版を足した。
+// /skyabyss play は開発の別名 (撮影の台本が使う。製品版では隠れる。dev/CommandGate)。docs/design/37 の 2〜4 節
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PlayCommands {
     private PlayCommands() {
     }
 
-    static final int HELP_LINES = 17;
+    static final int HELP_LINES = 18;
+    // 正式の名前と、開発の別名
+    public static final String ADMIN = "admin";
+    public static final String DEV_ALIAS = "play";
 
     private interface Fn {
         int run(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> targets) throws CommandSyntaxException;
@@ -52,11 +56,12 @@ public final class PlayCommands {
 
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2)).then(tree()));
+        // 権限は CommandGate が節ごとに付け直す (admin = 設定の段、play = 2)
+        event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2)).then(tree(ADMIN)).then(tree(DEV_ALIAS)));
     }
 
-    static LiteralArgumentBuilder<CommandSourceStack> tree() {
-        LiteralArgumentBuilder<CommandSourceStack> play = Commands.literal("play");
+    static LiteralArgumentBuilder<CommandSourceStack> tree(String label) {
+        LiteralArgumentBuilder<CommandSourceStack> play = Commands.literal(label);
         play.then(Commands.literal("help").executes(PlayCommands::help));
         play.then(targeted(Commands.literal("status"), (ctx, t) -> {
             for (ServerPlayer p : t) {
@@ -206,7 +211,32 @@ public final class PlayCommands {
         // reset: 対象を省略 = 自分。旧い形 (reset me [対象]) も残す
         play.then(targeted(Commands.literal("reset"), (ctx, t) -> reset(ctx, t))
                 .then(Commands.literal("me").executes(ctx -> reset(ctx, List.of(ctx.getSource().getPlayerOrException())))));
+        // ほかの人の記録 (J の画面) を見る
+        play.then(Commands.literal("inspect").then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
+            ServerPlayer viewer = ctx.getSource().getPlayerOrException();
+            return jp.revati.skyabyss.record.RecordService.open(viewer, EntityArgument.getPlayer(ctx, "player"), "") ? 1 : 0;
+        })));
+        // レベルを決める・鐘銭を渡す
+        play.then(Commands.literal("level").then(targeted(Commands.argument("level", IntegerArgumentType.integer(1, jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL)),
+                (ctx, t) -> each(ctx, t, "level", p -> jp.revati.skyabyss.rpg.Growth.setLevel(p, IntegerArgumentType.getInteger(ctx, "level"))))));
+        play.then(Commands.literal("coins").then(targeted(Commands.argument("amount", IntegerArgumentType.integer(1, 9_999_999)),
+                (ctx, t) -> each(ctx, t, "coins", p -> jp.revati.skyabyss.facility.Coins.give(p, IntegerArgumentType.getInteger(ctx, "amount"))))));
+        // Mod の版と、世界・人のデータの版 (upgrade/WorldUpgrade)
+        play.then(Commands.literal("version").executes(PlayCommands::version));
         return play;
+    }
+
+    private static int version(CommandContext<CommandSourceStack> ctx) {
+        net.minecraft.server.MinecraftServer server = ctx.getSource().getServer();
+        String mod = net.neoforged.fml.ModList.get().getModContainerById(SkyAbyss.MODID).map(c -> c.getModInfo().getVersion().toString()).orElse("?");
+        ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.version", mod,
+                jp.revati.skyabyss.upgrade.WorldUpgrade.version(server), jp.revati.skyabyss.upgrade.WorldUpgrade.CURRENT,
+                jp.revati.skyabyss.upgrade.WorldUpgrade.savedWith(server)).withStyle(ChatFormatting.AQUA), false);
+        if (ctx.getSource().getEntity() instanceof ServerPlayer p) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.version_player",
+                    jp.revati.skyabyss.upgrade.PlayerUpgrade.version(p), jp.revati.skyabyss.upgrade.PlayerUpgrade.CURRENT).withStyle(ChatFormatting.GRAY), false);
+        }
+        return 1;
     }
 
     private static final com.mojang.brigadier.suggestion.SuggestionProvider<CommandSourceStack> QUEST_IDS =

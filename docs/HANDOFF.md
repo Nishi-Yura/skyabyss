@@ -1,6 +1,22 @@
-# 引き継ぎ（2026-11-01 の夕方）
+# 引き継ぎ（2026-11-02 の夜）
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
+
+## 2026-11-02 の夜: 正式版の前の直し（版の引き継ぎ・コマンド・場面の飛ばし・置く品・道・島・都の係の人）
+
+声（2026-11-02）: 「アップデートで mod の ver が上がって変更しても対応できるように」「正式版なので、コマンド整理して管理者用も設定して」「ムービースキップ系、全部 Enter に」「置く系のアイテムは手に入らないように（松明とか）」「道の上に構造物できないように」「始まりの島の柵、意味ない。よこからでれちゃう」「アイテム壊れたときのドロップなくしていい」「NPC の位置とかおかしいかも。NPC 統一したときに建物とか位置直してないかも」「空見の館とか、いらない」「手に持った品を直すもいらない」「前なおした NPC 系が治ってなくない？」「破れたページも、動き回ってたら手に入らない」「〜に行こうの判定もおかしいときある」。
+
+- **版の引き継ぎ**（新 `upgrade/`）: `WorldUpgrade`（世界ごとのデータの版 `skyabyss_world_version`、サーバーの始まりで新しい段を古い順に流す。新しい版で保存した世界を古い版で開くと記録と管理者に知らせ）・`PlayerUpgrade`（人の永続データ `skyabyss_data_version`、`LifeKeep` で倒れても残す、入ったときに流す）。段 1 は世界 = 記録を始めるだけ、人 = 置く品を外す。足し方と、建物・ID の変え方は `docs/release.md` の 5 節。`/skyabyss admin version` で版を見る。
+- **コマンド**: `/skyabyss play` を管理者の `/skyabyss admin`（`inspect`・`level`・`coins`・`version` を足した。権限は設定 `adminPermissionLevel`、既定 2）に。遊ぶ人の一覧 `/skyabyss help`（新 `dev/play/HelpCommands`）。`dev/CommandGate` は `/skyabyss` の根を誰でも通し、権限 2 を子へ移す（help = 誰でも、admin = 設定の段、ほか = 製品版で隠す・開発で 2）。`play` は開発の別名（撮影の台本用）。文書は 37・遊び方・release・サイトの元原稿（`site/*.html` は作り直していない）。
+- **場面の飛ばしは Enter**: 場面（`CinematicClient` の長押し。Space/Esc から Enter に）・絵芝居（Enter = 飛ばす、クリック/Space/Z = 進む）・天の鍵の場面・封の箱のルーレット。文言と設計 20。
+- **置く品を持たせない**（新 `rpg/rules/NoPlaceables`）: ブロックの品（作物の種などを除く）と舟・額縁・火打ち石・スポーンエッグなど。例外は頼みで集める・渡す品と店の品（売り買い）と月の錘。`Quests.give`・人ごとの宝箱・跡地の宝で渡さない、拾えない、世界に出たら消す、2 秒ごとに持ち物とエンダーチェストから外す。ブロックが壊れても何も落とさない（`BlockDropsEvent`）。採集は渡せる品が無いブロックでは何もしない（花・きのこなど）。野営地・一章・雷翼・潮殻の箱と骨の坑・死んだ炉の宝から松明を外した。自己テストの間は止める（`testing`）。
+- **頁が寄る**（新 `lore/PageHoming`）: 地面の破れた頁と伝承の書は、落ちて 15 tick たつと拾える人へ飛び、5 秒拾われない・24 より遠いと足もとへ移る。野営地の帳面（拾えない置き物）は動かさない。
+- **道**（新 `world/continent/RoadClearance`）: 章の跡地の置き場所探しに道の点を障害物として足し（`ChapterSites.schedule`）、道しるべの点（`ChapterGrounds.roadOnce`・`roadFallback`）と見どころ（`ContinentPois`。道から遠ざかる向きに最大 40 ずらす。見つけた・敵の近さは建った所から測る）を道から離した。前の世界ですでに建った物はそのまま。
+- **島**: 峠の柵を外した（`IslandTrail.clearOldGate` が前の版の柵を黙って片付ける）。休み場と祠に着いたかは水平の近さ＋上下 6（前は高さ込みで、建つ前の点は高さ 0 と比べて済まなかった）。
+- **都**: 空見の館は開かず案内にも載せない（`CapitalDoors`・`TownGuide`。碑は閉じた館の文、前に開いた世界は「書庫は空になった」）。厩舎の名札を出さない（`LABEL_HIDDEN`。前に置いた名札は `keepLabels` が外す。碑は「乗り物は止まり木の旅の番」）。地図屋の碑も空き家の文。土地の町の旅の館と社の名札・碑から厩舎・地図屋・書庫番を外した。鍛冶師の「手に持った品を直す」（修理）を消した。
+- **都の係の人の立ち位置**: `Attendants.capitalSpots` が、建てたときに写した印に今の設計図の印を重ねる（設計図の印が立てる床ならそちら）。前の版で建てた都でも、直した立ち位置とあとから足した係の人（市の三人など）が届く。封切り師の元・訓練場の師範・施設の命令も同じ所を見る。
+- **「〜へ行こう」**: 町のクエストの印 `TownGuests.marks` は、写した印に設計図にしかない印（町のクエストの家 10・11 など。前の版の都では無く、いつまでも済まなかった）と係の人の今の立ち位置を足す（tick ごとに作り直さない）。着いたかは水平 4・上下 3。
+- 確かめ: compileJava、`quick_check.sh --no-java` 全部 OK（生成物のずれ 0）。自己テストを新しい大陸の世界で `upgrade,command gate,play,playtest,facility*,town*,~capital doors,island trail,continent,rpg rules,quiet hives,lang*,lore,npc,chapter sites,site*` を流して全段 PASSED（直した `playtest` の権限の検査を含む）。全段の通し（378 段）はまだ。ゲームの中での見え方（場面の Enter・頁の寄り方・都の係の人の立ち位置・前の版の世界の引き継ぎ）は未確認。版は 0.9.22 に決まり（ユーザー）、`build/libs/skyabyss-0.9.22.jar` を作った（jar の中の版・新しいクラス・文言を確かめた）。確かめ表は `docs/review/playtest_0.9.21.md` の 14 節。サイトの元原稿 `tools/site/pages_c.py` に v0.9.21・v0.9.22 の履歴を足したが、`site/*.html` は作り直していない（GitHub Pages に載るので、ユーザーが試遊してから）。
 
 ## 2026-11-02 の夕方: 終盤の主の硬さ・wip の削除・形のラフ
 
@@ -74,7 +90,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.21（`build/libs/skyabyss-0.9.21.jar`。確認表 `docs/review/playtest_0.9.21.md`（塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.22（`build/libs/skyabyss-0.9.22.jar`。確認表 `docs/review/playtest_0.9.21.md`（14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すとまれに落ちる（単独でも淵の順でも通る。灰の封のチャンクを読み込むよう直し、落ちたら失敗の文に状態が出る）。`titan ground` も全部を流したときにまれに落ちる（2026-11-01 の夜: サーバーが 14 秒遅れていた所で、潮の殻が一 tick で 2 ブロック上下した。単独では 2 回とも通る）。
 
 ## 2026-11-01 の昼から夕方に入れたもの

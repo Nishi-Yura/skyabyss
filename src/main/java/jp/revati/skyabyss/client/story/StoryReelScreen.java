@@ -149,7 +149,12 @@ public class StoryReelScreen extends Screen {
 
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_SPACE || key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_Z) {
+        // 飛ばすのは Enter (場面の飛ばし方をそろえる。2026-11-02)。進めるのはクリック・Space・Z
+        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+            onClose();
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_SPACE || key == GLFW.GLFW_KEY_Z) {
             advance();
             return true;
         }

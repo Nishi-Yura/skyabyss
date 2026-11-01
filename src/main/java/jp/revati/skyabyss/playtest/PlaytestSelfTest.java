@@ -49,10 +49,11 @@ public final class PlaytestSelfTest {
                 f.add("not registered: " + path);
             }
         }
-        CommandNode<CommandSourceStack> sky = root.getChild("skyabyss");
-        if (sky.getRequirement().test(server.createCommandSourceStack().withPermission(1))
-                || !sky.getRequirement().test(server.createCommandSourceStack().withPermission(2))) {
-            f.add("skyabyss commands are not exactly permission 2");
+        // 根は誰でも通し (/skyabyss help)、開発の節が権限 2 (dev/CommandGate。2026-11-02)
+        CommandNode<CommandSourceStack> playtest = root.getChild("skyabyss").getChild("playtest");
+        if (playtest == null || playtest.getRequirement().test(server.createCommandSourceStack().withPermission(1))
+                || !playtest.getRequirement().test(server.createCommandSourceStack().withPermission(2))) {
+            f.add("skyabyss playtest is not exactly permission 2");
         }
         var disp = server.getCommands().getDispatcher();
         CommandSourceStack op = server.createCommandSourceStack().withPermission(4).withSuppressedOutput();

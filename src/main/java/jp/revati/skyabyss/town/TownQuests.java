@@ -73,7 +73,7 @@ public final class TownQuests {
     static final int TOWER_RISE = 25;
     static final double TOWER_REACH = 8;
     // 印の近く (town_at)
-    static final double SPOT_RADIUS = 3.5;
+    static final double SPOT_RADIUS = 4.0;
     // 古井戸の宝の印
     public static final String WELL_CHEST = "well_chest";
     public static final int WELL_COINS = 15;
@@ -177,7 +177,13 @@ public final class TownQuests {
         for (ServerPlayer p : players) {
             for (String signal : wantedSpots(p)) {
                 BlockPos at = marks.get(signal.substring(SIGNAL_AT.length()));
-                if (at != null && p.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5) <= SPOT_RADIUS * SPOT_RADIUS) {
+                if (at == null) {
+                    continue;
+                }
+                // 水平に SPOT_RADIUS、上下は 3 まで (戸口の印の前で一段上・下に立っていても済む。2026-11-02「〜に行こうの判定」)
+                double dx = p.getX() - (at.getX() + 0.5);
+                double dz = p.getZ() - (at.getZ() + 0.5);
+                if (dx * dx + dz * dz <= SPOT_RADIUS * SPOT_RADIUS && Math.abs(p.getY() - at.getY()) < 3) {
                     Quests.signal(p, signal);
                 }
             }

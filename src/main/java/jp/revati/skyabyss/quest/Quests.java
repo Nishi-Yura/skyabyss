@@ -513,6 +513,10 @@ public final class Quests {
     }
 
     public static void give(ServerPlayer player, ItemStack stack) {
+        // 置く品 (松明・丸太など。冒険の決まりでは使えない) は渡さない (rpg/rules/NoPlaceables)
+        if (jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(player, stack)) {
+            return;
+        }
         // 留め袋に入る品は袋へ (docs/design/22 の 4.1)
         jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
         if (!stack.isEmpty()) {

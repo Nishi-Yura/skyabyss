@@ -65,11 +65,11 @@ def faq():
         ["<code>skyabyssHeartReentryLimit</code>", T("戦いで倒れた人が 20 秒後に戻れる回数（既定 3。0 で数えない）", "Re-entries allowed per fight after 20 s (default 3; 0 = uncounted)")],
     ])
     cmds = table([T("コマンド（OP・権限 2）", "Command (op level 2)"), T("働き", "What it does")], [
-        ["<code>/skyabyss play help</code>", T("試遊用の一覧（章・場所・道具・ボス・部屋・頼み・状態）", "Tester commands: chapter, place, kit, boss, room, quest, state")],
-        ["<code>/skyabyss play chapter &lt;番号&gt;</code>", T("その章の始めへ（例: <code>5</code> で深淵）", "Jump to the start of a chapter (e.g. <code>5</code> for the abyss)")],
-        ["<code>/skyabyss play raid &lt;巨神&gt; &lt;部屋&gt;</code>", T("背の順路の部屋へ運ぶ", "Jump to a back room")],
-        ["<code>/skyabyss play now</code> / <code>next</code>", T("今の目的の出来事を起こす／今の目的を済ませて次へ", "Trigger the current objective's event / complete it and move on")],
-        ["<code>/skyabyss inspect …</code>", T("今の状態を読む（進み・頼み・持ち物）", "Read the current state (progress, quests, items)")],
+        ["<code>/skyabyss admin help</code>", T("試遊用の一覧（章・場所・道具・ボス・部屋・頼み・状態）", "Tester commands: chapter, place, kit, boss, room, quest, state")],
+        ["<code>/skyabyss admin chapter &lt;番号&gt;</code>", T("その章の始めへ（例: <code>5</code> で深淵）", "Jump to the start of a chapter (e.g. <code>5</code> for the abyss)")],
+        ["<code>/skyabyss admin raid &lt;巨神&gt; &lt;部屋&gt;</code>", T("背の順路の部屋へ運ぶ", "Jump to a back room")],
+        ["<code>/skyabyss admin now</code> / <code>next</code>", T("今の目的の出来事を起こす／今の目的を済ませて次へ", "Trigger the current objective's event / complete it and move on")],
+        ["<code>/skyabyss admin inspect …</code>", T("今の状態を読む（進み・頼み・持ち物）", "Read the current state (progress, quests, items)")],
     ])
     qa = [
         ("どの Minecraft で遊べますか。", "Which Minecraft versions work?", "Java 版 %s と NeoForge %s の組み合わせだけです。Forge や Fabric、統合版では動きません。" % (MC, MC),
@@ -162,8 +162,8 @@ def faq():
         h_gr=T("ゲームルール", "Game rules"), gr=gr, h_cmd=T("OP 用のコマンド（抜粋）", "Operator commands (excerpt)"), cmds=cmds,
         cfg=T("設定ファイルで、不穏な出来事の頻度（<code>horrorEventFrequency</code> など）や知らせの見せ方を変えられます。試遊用コマンドの全部は", "The config file adjusts omen frequency (<code>horrorEventFrequency</code> and others) and notice display. All playtest commands are in"),
         h_tst=T("試遊する人へ", "For testers"),
-        tst=T("試遊の人は、OP で <code>/skyabyss play help</code> と打つと、章・場所・道具・ボスを移す一覧が出ます（例: <code>/skyabyss play chapter 5</code> で深淵の章の始めへ）。",
-              "Testers with op can type <code>/skyabyss play help</code> for the list of chapter, place, kit and boss commands (e.g. <code>/skyabyss play chapter 5</code> starts the abyss chapter)."),
+        tst=T("試遊の人は、OP で <code>/skyabyss admin help</code> と打つと、章・場所・道具・ボスを移す一覧が出ます（例: <code>/skyabyss admin chapter 5</code> で深淵の章の始めへ）。",
+              "Testers with op can type <code>/skyabyss admin help</code> for the list of chapter, place, kit and boss commands (e.g. <code>/skyabyss admin chapter 5</code> starts the abyss chapter)."),
         h_faq=T("よくある質問", "FAQ"), qa=qa_html,
         h_lim=T("既知の制限", "Known limits"),
         lim_lead=T("これはベータ版です。作ったばかりで、人が通しで遊んでいない所があります。", "This is a beta. Some parts are brand new and have not been played through by people."),
@@ -180,6 +180,17 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.9.22", "2026-11-02", [
+            ("Mod の版を上げても、前の版の世界をそのまま続けられます（世界と人のデータの版を持ち、版が上がると直しを自動で流します）。管理者は <code>/skyabyss admin version</code> で版を見られます。", "Worlds from earlier versions carry over when the mod updates: each world and player keeps a data version, and upgrades run automatically. Admins can check it with <code>/skyabyss admin version</code>."),
+            ("コマンドを整理: 遊ぶ人は <code>/skyabyss help</code> で一覧、管理者は <code>/skyabyss admin …</code>（権限の段はサーバーの設定 <code>adminPermissionLevel</code>、既定 2）。", "Commands tidied: players get a list with <code>/skyabyss help</code>, admins use <code>/skyabyss admin …</code> (permission level from the server config <code>adminPermissionLevel</code>, default 2)."),
+            ("場面・絵芝居・封の箱のルーレットは、どれも Enter で飛ばせます。", "Cutscenes, picture stories and the loot-box roulette are all skipped with Enter."),
+            ("松明などの置く品は手に入らなくなり、ブロックが壊れても品が落ちません。破れた頁と伝承の書は、拾う人のほうへ寄ってきます。", "Placeable items such as torches are no longer handed out, and broken blocks drop nothing. Torn pages and the lore book drift toward the player who can pick them up."),
+            ("新しく建つ跡地・見どころ・道しるべは道の上に乗りません。はじまりの島の峠の柵をなくしました。空見の館は開かず、人のいない厩舎の名札も消しました。鍛冶師の修理はなくなりました。", "New ruins, points of interest and signposts stay off the roads. The barricade at the island pass is gone. Skywatch Hall stays shut, the empty stable no longer shows a name tag, and the smith no longer repairs."),
+            ("前の版で建った都でも、係の人が直した立ち位置に立ち、町のクエストの「〜へ行こう」が着いたときに済みます。", "In capitals built by earlier versions, attendants now stand at their corrected spots and town quest \"go to\" steps complete on arrival."),
+        ]),
+        ("v0.9.21", "2026-11-02", [
+            ("終章のあとに、あいだの塔（大きなレイド）、神器と雲の箱、秘伝、裏ボス「初代の空見」、巡り路・大陸の大事件・名声と旅帳・職の熟練・組合の旗取り・図鑑の報い・見た目替え・釣りを足しました。", "After the finale: the Tower Between (a large raid), divine gear and cloud boxes, secret arts, the hidden boss The First Skywatcher, circuits, continent events, fame and journals, job mastery, guild flags, codex rewards, appearance overrides and fishing."),
+        ]),
         ("v0.9.20", "2026-10-31", [
             ("はじまりの島は、遊び方を教える場所だけに（職・帳面・足跡・峠の野盗・休み場・祠・渡し守）。見張り塔の跡・大樹などの寄り道は消しました。木の蜂の巣が鳴りやまない音も止めました。", "The starting island now holds only the places that teach the game (job, journal, footprints, the pass bandits, rest spot, shrine, ferryman). Side trips such as the old watchtower and the great tree are gone, and beehives no longer buzz nonstop."),
             ("町の人を見直しました: 書庫番と地図屋はいなくなり、祠と跡地は最初から地図に、跡地の噂は都の案内人に。店は冒険モードで置けないブロックを売らず、同じ品は一つの店に。封切り師は町の案内の一覧に載り、町ごとに挨拶が違います。", "Townsfolk review: the archivist and the mapmaker are gone; shrines and ruins are on the map from the start, and the capital guide tells ruin rumors. Shops no longer sell blocks you cannot place in adventure mode, and each good has one shop. The box opener is in the town guide list and greets you differently in each town."),

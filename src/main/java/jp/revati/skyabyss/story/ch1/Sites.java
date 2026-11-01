@@ -17,7 +17,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 // 序章・一章の小要素の登録 (ChapterSites)。部品は data/skyabyss/opening/ch1_*.json (データを直接直す（生成スクリプトはない）)。
 // 章が開いたとき、その人の拠点のまわりに扇形の 3 方向へ置かれる。拠点から 150 ブロック以内に 2 つ以上 (序章は 3 つ)。
@@ -158,7 +157,6 @@ public final class Sites {
         }
         int slot = 0;
         box.setItem(slot++, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 1 + level.random.nextInt(2)));
-        box.setItem(slot++, new ItemStack(Items.TORCH, 2 + level.random.nextInt(3)));
         if (gear) {
             ItemStack low = switch (level.random.nextInt(4)) {
                 case 0 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_LEGGINGS.get());

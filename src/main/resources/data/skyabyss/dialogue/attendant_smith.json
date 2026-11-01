@@ -39,17 +39,6 @@
       "face": "neutral",
       "options": [
         {
-          "id": "repair",
-          "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "repair"
-            }
-          ],
-          "goto": "end"
-        },
-        {
           "id": "made",
           "kind": "talk",
           "do": [

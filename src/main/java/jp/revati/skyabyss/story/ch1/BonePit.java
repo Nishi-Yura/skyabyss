@@ -78,7 +78,7 @@ public final class BonePit {
                         Tasks.later(80, () -> Notice.narrate(p, "message.skyabyss.ch1.pit.trail"));
                     }
                 }).register();
-        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 2), new SiteTreasure.Entry("minecraft:torch", 8))));
+        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 2))));
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 4), new SiteTreasure.Entry("skyabyss:bone_chip", 2))));
         SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 1, 3, 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 1, 2, 2), new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 1, 2, 2))));

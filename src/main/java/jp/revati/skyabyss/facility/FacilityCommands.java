@@ -113,7 +113,7 @@ public final class FacilityCommands {
                                         })))
                         .then(Commands.literal("place").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
-                            int n = Attendants.ensureAll(p.serverLevel(), OpeningSites.shelterExtras(p.server, AttendantRole.MARK_PREFIX));
+                            int n = Attendants.ensureAll(p.serverLevel(), Attendants.capitalSpots(p.serverLevel()));
                             c.getSource().sendSuccess(() -> Component.literal("attendants: " + n), false);
                             return n;
                         }))

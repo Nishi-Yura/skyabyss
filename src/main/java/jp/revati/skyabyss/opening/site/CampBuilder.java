@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.phys.AABB;
 
@@ -29,8 +28,7 @@ public final class CampBuilder {
         BlockPos barrel = job.mark("barrel");
         if (barrel != null && level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
             be.setItem(0, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 4));
-            be.setItem(1, new ItemStack(Items.TORCH, 8));
-            be.setItem(2, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_AXE.get()));
+            be.setItem(1, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_AXE.get()));
         } else {
             SkyAbyss.LOGGER.error("Opening camp: no barrel at {}", barrel);
         }

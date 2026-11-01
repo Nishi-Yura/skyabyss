@@ -167,8 +167,7 @@
   "entity.skyabyss.island_bandit_leader": "峠の頭目",
   "message.skyabyss.island.leader_down": "峠の頭目を退けた。鐘銭 %s",
   "message.skyabyss.island.bandit_count": "野盗を退けた %s / %s",
-  "message.skyabyss.island.bandits_done": "峠の野盗を退けた。柵が開いた",
-  "message.skyabyss.island.gate_open": "峠の柵が開いた",
+  "message.skyabyss.island.bandits_done": "峠の野盗を退けた。道の先の休み場へ",
   "message.skyabyss.island.rested": "焚き火で休んだ。樽の糧は、いつでも食べてよい",
   "message.skyabyss.island.prayed": "宿り木の祠に祈った。倒れたら、ここで目覚める",
   "message.skyabyss.island.skill_hint": "技を一つ覚えよう（K で技の画面）",
@@ -2331,5 +2330,6 @@
   "subtitles.skyabyss.ember_moth_hurt": "火の粉蛾がひるむ",
   "subtitles.skyabyss.ember_heart_voice_death": "心臓が止まり、殻がくずれる声",
   "subtitles.skyabyss.storm_heart_voice_death": "心臓が止まり、風がやむ声",
-  "subtitles.skyabyss.tide_heart_voice_death": "心臓が止まり、潮が引く声"
+  "subtitles.skyabyss.tide_heart_voice_death": "心臓が止まり、潮が引く声",
+  "message.skyabyss.upgrade.newer_world": "この世界は新しい版の Mod (%s) で保存されています。今の版 (%s) のまま遊ぶと、新しい版のデータが失われることがあります。Mod を新しい版にしてから開いてください。"
 }

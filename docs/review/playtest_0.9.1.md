@@ -7,9 +7,9 @@
 
 - jar は `build/libs/skyabyss-0.9.1.jar`（サーバーと全員のクライアントに同じもの）。新しい世界で始めるのがいちばん確か。前の世界でも、月へ入ると谷・崖・野・淵が新しい形に流し直される。
 - 月へすぐ行く（権限 2）:
-  - `/skyabyss play chapter 5` で五章の用意 → `/skyabyss play quest done main_moon_near`（近づく月）→ `/skyabyss moonworld enter`
+  - `/skyabyss admin chapter 5` で五章の用意 → `/skyabyss admin quest done main_moon_near`（近づく月）→ `/skyabyss moonworld enter`
   - 帰りは着く所の帰りの台（天然磁石）か `/skyabyss moonworld leave`
-- 区画を飛ばすとき: `/skyabyss play quest done main_moon_valley` など（`main_moon_valley`・`main_moon_cliff`・`main_moon_field`・`main_moon_rift`・`main_moon_core`）。
+- 区画を飛ばすとき: `/skyabyss admin quest done main_moon_valley` など（`main_moon_valley`・`main_moon_cliff`・`main_moon_field`・`main_moon_rift`・`main_moon_core`）。
 - 月の位相を進める: `/skyabyss moonworld phase <0〜3>`（0 新月・1 上弦・2 満月・3 下弦）。
 
 ## 1. 四つの区画と核（物語の順）

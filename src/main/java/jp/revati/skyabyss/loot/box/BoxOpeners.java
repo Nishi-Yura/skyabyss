@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.facility.AttendantRole;
 import jp.revati.skyabyss.facility.Attendants;
-import jp.revati.skyabyss.opening.OpeningSites;
 import jp.revati.skyabyss.opening.site.SiteData;
 import jp.revati.skyabyss.world.continent.ContinentTowns;
 import net.minecraft.core.BlockPos;
@@ -35,7 +34,7 @@ public final class BoxOpeners {
     // 立たせる所の元 (都と、建った土地の町の鍛冶屋の印)
     public static List<BlockPos> anchors(net.minecraft.server.MinecraftServer server) {
         List<BlockPos> out = new ArrayList<>();
-        BlockPos capital = OpeningSites.shelterExtras(server, ANCHOR).get(ANCHOR);
+        BlockPos capital = Attendants.capitalSpots(server.overworld()).get(ANCHOR);
         if (capital != null) {
             out.add(capital);
         }
@@ -96,7 +95,7 @@ public final class BoxOpeners {
         return null;
     }
 
-    static boolean standable(ServerLevel level, BlockPos p) {
+    public static boolean standable(ServerLevel level, BlockPos p) {
         BlockState below = level.getBlockState(p.below());
         return open(level, p) && open(level, p.above()) && below.isFaceSturdy(level, p.below(), Direction.UP);
     }

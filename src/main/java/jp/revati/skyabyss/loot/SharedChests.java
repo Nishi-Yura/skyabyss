@@ -153,6 +153,10 @@ public final class SharedChests extends SavedData {
         boolean first = true;
         for (ItemStack s : template) {
             ItemStack give = s.copy();
+            // 置く品 (前の版で箱に入れた松明など) は渡さず、名前にも出さない (rpg/rules/NoPlaceables)
+            if (jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(p, give)) {
+                continue;
+            }
             if (!first) {
                 names.append(Component.literal("・"));
             }

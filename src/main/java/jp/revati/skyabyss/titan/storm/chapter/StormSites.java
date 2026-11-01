@@ -91,8 +91,7 @@ public final class StormSites {
         BlockPos barrel = job.mark("barrel");
         if (barrel != null && job.level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
             be.setItem(0, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 2));
-            be.setItem(1, new ItemStack(Items.TORCH, 4));
-            be.setItem(2, new ItemStack(Items.LIGHTNING_ROD, 1));
+            be.setItem(1, new ItemStack(Items.LIGHTNING_ROD, 1));
         }
     }
 

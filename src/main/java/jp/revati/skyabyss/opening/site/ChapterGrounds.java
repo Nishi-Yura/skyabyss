@@ -444,8 +444,8 @@ public final class ChapterGrounds {
                     int x = capital.getX() + (int) Math.round(ux * (along + shift) - uz * side);
                     int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
                     Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
-                    // 海面の高さの平地 (沼・浜・川べり) は水たまりが多いので避ける
-                    if (ar.ok() && ar.min() >= g.sea() + 1) {
+                    // 海面の高さの平地 (沼・浜・川べり) は水たまりが多いので避ける。大陸の道の上も避ける (2026-11-02。道の上に道しるべが欠けて建っていた)
+                    if (ar.ok() && ar.min() >= g.sea() + 1 && !jp.revati.skyabyss.world.continent.RoadClearance.blocks(x, z, 3, 2)) {
                         at = new BlockPos(x, ar.median() + 1, z);
                         break search;
                     }
@@ -472,7 +472,7 @@ public final class ChapterGrounds {
                 int x = capital.getX() + (int) Math.round(ux * (along + shift) - uz * side);
                 int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
                 Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
-                if (ar.ok()) {
+                if (ar.ok() && !jp.revati.skyabyss.world.continent.RoadClearance.blocks(x, z, 3, 2)) {
                     return new BlockPos(x, ar.median() + 1, z);
                 }
             }

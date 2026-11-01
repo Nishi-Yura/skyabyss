@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.opening.OpeningSites;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
@@ -127,7 +126,7 @@ public final class TrainingYard {
         if (level.dimension() != Level.OVERWORLD || (level.getGameTime() + (player.getId() & 0x3F) + 37) % 100 != 0) {
             return;
         }
-        BlockPos master = OpeningSites.shelterExtras(player.server, MASTER_MARK).get(MASTER_MARK);
+        BlockPos master = Attendants.capitalSpots(player.serverLevel()).get(MASTER_MARK);
         if (master == null || master.distSqr(player.blockPosition()) > (double) (SEARCH + 24) * (SEARCH + 24)
                 || !Attendants.loaded(level, master)) {
             return;

@@ -31,7 +31,8 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 // 壊さずに、壊したときと同じ品 (手の道具で掘った分) が手に入る。同じ所は人ごとにしばらく採れない (戻りの時間)。
 //   木 (丸太)・石と土・砂・砂利・粘土・鉱石・実った作物・花・きのこ・溶岩の塊・黒曜石・紫水晶。
 //   道具ごと (2026-10-27 の声「関連したツールでとれるように」): 丸太は斧、石・鉱石・黒曜石・溶岩の塊・紫水晶はつるはし、
-//   土・砂・砂利・粘土はシャベル。作物・花・きのこは素手でよい。採った物は市の素材屋が買い取る (使い道 = 鐘銭)
+//   土・砂・砂利・粘土はシャベル。作物・花・きのこは素手でよい。採った物は市の素材屋が買い取る (使い道 = 鐘銭)。
+//   置く品で、売れず頼みにも使わないもの (花・きのこ・丸石以外の石など) は採れない (rpg/rules/NoPlaceables。2026-11-02「置く系のアイテムは手に入らないように」)
 //   都の中・巨神の背・深淵では採れない (作った物は採らせない)。サバイバルの人は今までどおり壊す
 //   水は、空のバケツで水源を見て右クリックすると汲める (水は減らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -157,16 +158,20 @@ public final class Gathering {
         if (mine.size() > MAX_ENTRIES) {
             mine.values().removeIf(t -> t <= now);
         }
-        List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, tool);
-        if (drops.isEmpty()) {
+        List<ItemStack> outs = new java.util.ArrayList<>();
+        for (ItemStack d : Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, tool)) {
+            ItemStack out = modDrop(d);
+            // 置く品で使い道のないもの (花・きのこ・売れない石など。NoPlaceables) は採れない
+            if (!out.isEmpty() && !NoPlaceables.blockGive(player, out)) {
+                outs.add(out);
+            }
+        }
+        if (outs.isEmpty()) {
             return;
         }
         mine.put(pos.asLong(), now + regrow);
-        for (ItemStack d : drops) {
-            ItemStack out = modDrop(d);
-            if (!out.isEmpty()) {
-                jp.revati.skyabyss.quest.Quests.give(player, out);
-            }
+        for (ItemStack out : outs) {
+            jp.revati.skyabyss.quest.Quests.give(player, out);
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         var sound = state.getSoundType(level, pos, player);

@@ -106,9 +106,29 @@ public final class Attendants {
         if (capital == null || capital.distSqr(player.blockPosition()) > (double) KEEP_RADIUS * KEEP_RADIUS) {
             return;
         }
-        Map<String, BlockPos> marks = new java.util.LinkedHashMap<>(OpeningSites.shelterExtras(player.server, AttendantRole.MARK_PREFIX));
-        // 案内人は設計図の印から (前の版で建てた都には、写した印が無いので)
-        TownGuide.guideSpots(player.server).forEach(marks::putIfAbsent);
-        ensureAll(level, marks);
+        ensureAll(level, capitalSpots(level));
+    }
+
+    // 都の係の人の立つ所 (印の名前 → 位置)。建てたときに写した印に、今の設計図の印を重ねる: 設計図の印が立てる床 (足と頭が空き、足もとが固い) なら
+    // そちらを使う。前の版で建てた都でも、あとから直した立ち位置と、あとから足した係の人 (市の三人など) が届くように
+    // (2026-11-02 の声「NPC 統一したときに建物とか位置直してないかも」「前なおした NPC 系が治ってなくない？」)。
+    // 立てない所 (建物の作りが前の版のまま) は写した印のまま。消した役の印は使わない
+    public static Map<String, BlockPos> capitalSpots(ServerLevel level) {
+        Map<String, BlockPos> out = new java.util.LinkedHashMap<>();
+        OpeningSites.shelterExtras(level.getServer(), AttendantRole.MARK_PREFIX).forEach((k, v) -> {
+            if (AttendantRole.byMark(k) != null) {
+                out.put(k, v);
+            }
+        });
+        for (Map.Entry<String, BlockPos> e : TownGuide.worldMarks(level.getServer(), AttendantRole.MARK_PREFIX).entrySet()) {
+            BlockPos now = e.getValue();
+            if (AttendantRole.byMark(e.getKey()) == null || now.equals(out.get(e.getKey())) || !level.isLoaded(now)) {
+                continue;
+            }
+            if (jp.revati.skyabyss.loot.box.BoxOpeners.standable(level, now)) {
+                out.put(e.getKey(), now);
+            }
+        }
+        return out;
     }
 }

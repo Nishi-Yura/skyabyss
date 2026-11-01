@@ -629,6 +629,11 @@ public final class ChapterSites {
         for (ChapterPlanner.Placed p : fixed) {
             obstacles.add(new ChapterPlanner.Obstacle(p.pos(), p.radius()));
         }
+        // 大陸の道も避ける (2026-11-02 の声「道の上に構造物できないようにして」。道にかかった跡地は、かかった所だけ欠けて建っていた)
+        int roadHalf = (int) Math.ceil(jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadEdge());
+        for (BlockPos q : jp.revati.skyabyss.world.continent.RoadClearance.points(base, ChapterPlanner.MAX_DIST + 120)) {
+            obstacles.add(new ChapterPlanner.Obstacle(q, roadHalf));
+        }
         SiteFinder.Probe probe = new SiteFinder.Probe(level);
         // 整える形のある跡地は、整えたあとの地形で探す
         SiteFinder.Ground terrain = ChapterGrounds.overlayData(probe, data.grounds());

@@ -172,7 +172,7 @@ public final class FacilitySelfTest {
                 case INNKEEPER -> "inn_rest";
                 case PERCH_KEEPER -> "perch";
                 case GUILD_CLERK -> "guild";
-                case SMITH -> "repair";
+                case SMITH -> "look";
                 case TRADE_KEEPER -> "trade";
                 case BOX_OPENER -> "boxes";
                 case TOWER_KEEPER -> "tower_desk";
@@ -397,18 +397,6 @@ public final class FacilitySelfTest {
             }
         }
         check(f, FacilityActions.rumorFor(p) != null, "rumor text");
-        // 修理
-        ItemStack sword = new ItemStack(Items.IRON_SWORD);
-        sword.setDamageValue(sword.getMaxDamage() / 2);
-        int cost = FacilityActions.repairCost(sword);
-        check(f, cost == 10, "repair cost half-worn = 10 (" + cost + ")");
-        check(f, FacilityActions.repairCost(new ItemStack(Items.IRON_SWORD)) == 0, "unworn costs nothing");
-        p.getInventory().clearContent();
-        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
-        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, sword);
-        check(f, !FacilityActions.repair(p) && sword.isDamaged(), "repair needs coins");
-        Coins.give(p, 10);
-        check(f, FacilityActions.repair(p) && !sword.isDamaged() && Coins.count(p) == 0, "repair takes coins and mends");
     }
 
     // 頭の上の名札 (entity.skyabyss.attendant.<役>) が日本語と英語にあるか (2026-11-01: 塔守と仕立て屋で抜けていた)。lang は名前空間ごとに分かれている

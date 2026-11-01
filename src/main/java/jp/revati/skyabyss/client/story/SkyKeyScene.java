@@ -117,7 +117,7 @@ public final class SkyKeyScene extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) { // Esc
+        if (keyCode == 256 || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER) { // Esc か Enter (場面の飛ばしは Enter にそろえる)
             if (time() < CARD) {
                 skip();
             } else {

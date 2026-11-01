@@ -462,7 +462,8 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && mode == Mode.SPIN) {
+        boolean enter = keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER;
+        if ((keyCode == GLFW.GLFW_KEY_ESCAPE || enter) && mode == Mode.SPIN) {
             skip();
             return true;
         }

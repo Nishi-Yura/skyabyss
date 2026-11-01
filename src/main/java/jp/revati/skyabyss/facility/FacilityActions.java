@@ -20,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -33,7 +32,6 @@ import net.minecraft.world.level.block.BedBlock;
 //   perch    : 止まり木の番が巨神の子を呼ぶ (笛と同じ決まり。出会った巨神の子から)
 //   map      : 旅の地図 (M) を開く
 //   guild    : ギルドの画面
-//   repair   : 鍛冶師の修理 (手に持った品。傷みに応じた鐘銭)
 //   guild_storage : ギルドの倉庫 (GuildStorage)
 //   respec_quote / respec_skills / respec_skills_coins : 訓練場の師範の振り直し (TrainingMaster)
 //   job_room : 職の間 (職を替える画面。JobChoice.openRoom。docs/design/48 の 3 章)
@@ -47,7 +45,7 @@ import net.minecraft.world.level.block.BedBlock;
 //   tower_desk / tower_shop / tower_records : 塔守。あいだの塔の受付の一覧・塔の店・記録の板 (tower/TowerDesk)
 //   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
 public final class FacilityActions {
-    public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild", "repair",
+    public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
             "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board");
 
@@ -71,7 +69,6 @@ public final class FacilityActions {
             case "perch" -> perchCall(player);
             case "map" -> ShopService.send(player, new FacilityNetwork.OpenMap());
             case "guild" -> GuildService.open(player, npc);
-            case "repair" -> repair(player);
             case "guild_storage" -> jp.revati.skyabyss.facility.guild.GuildStorage.open(player, npc);
             case "respec_quote" -> TrainingMaster.quote(player);
             case "job_room" -> jp.revati.skyabyss.rpg.skill.JobChoice.openRoom(player);
@@ -267,31 +264,5 @@ public final class FacilityActions {
     // 火の地への差し入れ (2026-10-25: 醸造台は冒険の決まりで置けないので、手ほどきの品の代わりに薬を一本ずつ。00 の 278)
     public static List<ItemStack> brewKit() {
         return List.of(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get()), new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()));
-    }
-
-    // ---------------------------------------------------------------- 修理
-    // 修理の値段 (傷みの割合 x 20、1 以上)
-    public static int repairCost(ItemStack stack) {
-        if (!stack.isDamageableItem() || !stack.isDamaged()) {
-            return 0;
-        }
-        return Math.max(1, (int) Math.ceil(20.0 * stack.getDamageValue() / Math.max(1, stack.getMaxDamage())));
-    }
-
-    public static boolean repair(ServerPlayer player) {
-        ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
-        int cost = repairCost(held);
-        if (cost <= 0) {
-            Notice.hint(player, "message.skyabyss.smith.nothing_to_repair");
-            return false;
-        }
-        if (!Coins.take(player, cost)) {
-            Notice.hint(player, "message.skyabyss.smith.repair_cost", cost);
-            return false;
-        }
-        held.setDamageValue(0);
-        Notice.hint(player, "message.skyabyss.smith.repaired", held.getHoverName(), cost);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.5f, 1.2f);
-        return true;
     }
 }

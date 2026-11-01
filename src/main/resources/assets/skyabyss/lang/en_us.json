@@ -167,8 +167,7 @@
   "entity.skyabyss.island_bandit_leader": "Pass Bandit Chief",
   "message.skyabyss.island.leader_down": "The pass bandit chief is down. %s bell coins",
   "message.skyabyss.island.bandit_count": "Bandits driven off %s / %s",
-  "message.skyabyss.island.bandits_done": "The bandits at the pass are gone. The barricade is open",
-  "message.skyabyss.island.gate_open": "The barricade at the pass is open",
+  "message.skyabyss.island.bandits_done": "The bandits at the pass are gone. On to the rest stop ahead",
   "message.skyabyss.island.rested": "You rested by the fire. The food in the barrel is yours whenever you need it",
   "message.skyabyss.island.prayed": "You prayed at the mistletoe shrine. If you fall, you'll wake here",
   "message.skyabyss.island.skill_hint": "Learn a skill (K opens the skill screen)",
@@ -2331,5 +2330,6 @@
   "subtitles.skyabyss.ember_moth_hurt": "Ember Moth recoils",
   "subtitles.skyabyss.ember_heart_voice_death": "The heart stops and the shell gives way",
   "subtitles.skyabyss.storm_heart_voice_death": "The heart stops and the wind falls still",
-  "subtitles.skyabyss.tide_heart_voice_death": "The heart stops and the tide goes out"
+  "subtitles.skyabyss.tide_heart_voice_death": "The heart stops and the tide goes out",
+  "message.skyabyss.upgrade.newer_world": "This world was saved by a newer version of the mod (%s). Playing it with this version (%s) may lose data from the newer one. Update the mod before playing."
 }
