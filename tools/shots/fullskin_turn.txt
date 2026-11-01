@@ -13,6 +13,9 @@ cmd weather clear
 cmd effect give @s resistance 99999 4 true
 cmd tp @s -120 120 -600 0 0
 waitchunks 300
+wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
 wait 100
 cmd skyabyss level set @p 50
 cmd item replace entity @s armor.head with minecraft:air
@@ -30,17 +33,26 @@ shot turn_0
 cmd tp @s -120 120 -560 0 0
 waitchunks 100
 wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
+wait 20
 otherplayer 0 3 T90 90
 wait 30
 shot turn_90
 cmd tp @s -120 120 -520 0 0
 waitchunks 100
 wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
+wait 20
 otherplayer 0 3 T180 180
 wait 30
 shot turn_180
 cmd tp @s -120 120 -480 0 0
 waitchunks 100
+wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
 wait 20
 otherplayer 0 3 T270 270
 wait 30

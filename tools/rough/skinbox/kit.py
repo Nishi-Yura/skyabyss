@@ -67,8 +67,10 @@ class Box:
 
 
 class Model:
-    def __init__(self, name):
+    def __init__(self, name, outfit=False):
         self.name = name
+        # True = 服だけ (着ている人のバニラの体とスキンを残して重ねる)。バニラの体の大きさに合わせて作る
+        self.outfit = outfit
         self.boxes: list[Box] = []
         self.bones: dict[str, dict] = {}
         for b, p in PIVOTS.items():
@@ -225,7 +227,7 @@ def export(model: Model, out_dir: Path, texture: str):
     for v in bones.values():
         v["triangle_count"] = len(v["triangles"])
     data = {"format_version": 1, "name": model.name, "units": "1/16 block, y up, front = -Z (geo absolute)", "uv": "normalized, origin top-left",
-            "texture": texture, "texture_size": [size, size], "texels_per_unit": T, "triangle_count": total, "bones": bones}
+            "texture": texture, "outfit": model.outfit, "texture_size": [size, size], "texels_per_unit": T, "triangle_count": total, "bones": bones}
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "mesh.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     Image.fromarray(atlas, "RGBA").save(out_dir / "atlas.png")
@@ -343,8 +345,32 @@ def render(faces, yaw=30, pitch=10, scale=14, size=(640, 760), center=(0, 19, 0)
     return Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB")
 
 
+def mannequin_boxes(model: Model):
+    """服だけのスキンの見本用: バニラの体 (Steve の大きさ) を無地の箱で。頭は顔の目印つき。"""
+    import paint as P
+    body = P.cloth("#c9a58c", "#e0c2ab", "#a88468", edges=False)
+    shirt = P.cloth("#4f8fa8", "#6faac0", "#3a6f84", edges=False)
+    pants = P.cloth("#3d4a8a", "#55629f", "#2c3668", edges=False)
+
+    def head(face, W, H, box):
+        img = body(face, W, H, box)
+        if face == "n":
+            img[H // 2:H // 2 + 3, W // 4:W // 4 + 3] = (60, 50, 90, 255)
+            img[H // 2:H // 2 + 3, W - W // 4 - 3:W - W // 4] = (60, 50, 90, 255)
+        if face in "nsewu":
+            img[: H // 4 if face != "u" else H] = (70, 50, 35, 255)
+        return img
+    bx = [Box("head", (-4, 24, -4), (8, 8, 8), head), Box("body", (-4, 12, -2), (8, 12, 4), shirt),
+          Box("armR", (-8, 12, -2), (4, 12, 4), shirt), Box("armL", (4, 12, -2), (4, 12, 4), shirt),
+          Box("legR", (-4, 0, -2), (4, 12, 4), pants), Box("legL", (0, 0, -2), (4, 12, 4), pants)]
+    out = []
+    for b in bx:
+        out.extend(box_faces(b))
+    return out
+
+
 def sheet(model: Model, path: Path, poses=None, views=((20, 8), (160, 8), (-60, 6)), scale=13, size=(560, 720), title=None):
-    faces = model.faces()
+    faces = model.faces() + (mannequin_boxes(model) if model.outfit else [])
     poses = poses or [{}]
     ims = []
     for pose in poses:
@@ -363,8 +389,8 @@ def sheet(model: Model, path: Path, poses=None, views=((20, 8), (160, 8), (-60, 
 
 
 def wardrobe(model: Model, path: Path, yaw=22, pitch=8):
-    """衣装棚の絵 (前の 3/4 の全身、128x192、背景は透明)。体の高さに合わせて縮める。"""
-    faces = model.faces()
+    """衣装棚の絵 (前の 3/4 の全身、128x192、背景は透明)。体の高さに合わせて縮める。服だけのものは人形に着せて描く。"""
+    faces = model.faces() + (mannequin_boxes(model) if model.outfit else [])
     ys = np.concatenate([f.verts[:, 1] for f in faces])
     top, bot = float(ys.max()), float(min(0.0, ys.min()))
     scale = 360 / (top - bot + 2)

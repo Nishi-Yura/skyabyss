@@ -37,6 +37,7 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 
 // 体ごとのスキン (Yes Steve Model のような作り。skin/Skins の、形 lowpoly/skin_full/<id>.json があるもの)。
 //   着ている人はバニラの体の箱を隠し、スキンの形をプレイヤーの姿勢どおりに描く (手に持つ品・矢などのほかの層はそのまま)。防具は描かない
+//   形の JSON が "outfit": true のものは服だけ: バニラの体 (その人のスキンの顔と体) を残し、上に服を重ねる
 //   骨: head / body / armR / armL / legR / legL はバニラの体の部分と同じに動く (回転の中心もバニラのまま)。それ以外の骨は親に付いて動き、名前の頭で揺れる:
 //     hair・cloth・cape・skirt・ribbon・tail = 歩く速さと向きの変わりで後ろへなびき、遅れて戻る (ばね)。skirt は脚の振りでも広がる
 //     float = 浮かぶ飾り。ゆっくり上下して揺れる。orbit = 付け根のまわりを回る (子に float を付けて回しながら上下)。wing = ゆっくり羽ばたく (歩くと強く)
@@ -118,7 +119,8 @@ public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, Playe
     // ---------------------------------------------------------------- バニラの体を隠す (描くあいだだけ)
     @SubscribeEvent
     static void onRenderPre(RenderPlayerEvent.Pre event) {
-        if (event.getEntity() instanceof AbstractClientPlayer p && mesh(p) != null) {
+        LowPolyMesh mesh = event.getEntity() instanceof AbstractClientPlayer p ? mesh(p) : null;
+        if (mesh != null && !mesh.outfit) {
             setBody(event.getRenderer().getModel(), false);
         }
     }
@@ -156,8 +158,11 @@ public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, Playe
         if (bone == null) {
             return;
         }
-        event.setCanceled(true);
         PlayerModel<AbstractClientPlayer> m = r.getModel();
+        // 服だけのスキンはバニラの腕 (自分のスキン) をこのあと描かせ、袖だけ重ねる
+        if (!mesh.outfit) {
+            event.setCanceled(true);
+        }
         m.attackTime = 0f;
         m.crouching = false;
         m.swimAmount = 0f;

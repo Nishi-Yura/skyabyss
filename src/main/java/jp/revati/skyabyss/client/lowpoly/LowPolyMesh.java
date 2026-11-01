@@ -18,6 +18,8 @@ public final class LowPolyMesh {
     public final ResourceLocation glowMask; // 光る画素だけに元の色を置いた画像 (<name>_glow.png、tools/install/install_lowpoly.py が --gear のときに焼く)。無ければ null
     // true: 頂点は受け口の骨の原点が基準 (武器・盾)。false: モデル全体の絶対座標 (GeckoLib の geo の cube と同じ)
     public final boolean socket;
+    // 体ごとのスキン (client/FullSkinLayer) のうち、着ている人の体 (バニラの体と自分のスキン) を残して服だけ重ねるもの。JSON の "outfit"
+    public boolean outfit;
     public final Map<String, Bone> bones = new LinkedHashMap<>();
     public final int triangles;
     public final int quads;
@@ -192,6 +194,7 @@ public final class LowPolyMesh {
         }
         LowPolyMesh mesh = new LowPolyMesh(name, tex, glow, socket, tris, quads);
         mesh.bones.putAll(baked);
+        mesh.outfit = json.has("outfit") && json.get("outfit").getAsBoolean();
         return mesh;
     }
 

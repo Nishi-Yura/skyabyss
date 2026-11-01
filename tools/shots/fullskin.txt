@@ -14,6 +14,9 @@ cmd weather clear
 cmd effect give @s resistance 99999 4 true
 cmd tp @s -120 120 -600 0 0
 waitchunks 300
+wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
 wait 100
 cmd skyabyss level set @p 50
 cmd item replace entity @s armor.head with minecraft:air
@@ -32,12 +35,18 @@ wait 40
 shot fullskin_1_three_views
 cmd tp @s -120 120 -560 0 0
 waitchunks 100
+wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
 wait 30
 otherplayer 0 1.7 Face
 wait 30
 shot fullskin_2_face
 cmd tp @s -120 120 -530 0 0
 waitchunks 100
+wait 20
+cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
+cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
 cmd item replace entity @s armor.head with skyabyss:whale_road_helmet
 cmd item replace entity @s armor.chest with skyabyss:whale_road_chestplate
 cmd item replace entity @s armor.legs with skyabyss:whale_road_leggings

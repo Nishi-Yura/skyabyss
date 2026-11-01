@@ -1,6 +1,7 @@
 """体ごとのスキン「魔女」(ゴシックの魔女。浮かぶ髑髏が三つ回る)。
 
-python tools/rough/skinbox/skins/witch.py          → docs/review/skins/full/witch/ に見本の絵と mesh.json・atlas.png
+python tools/rough/skinbox/skins/witch.py [outfit|full] [install]
+  outfit = 服だけ (自分のスキンの上に重ねる)、full = 見た目ごと替える。docs/review/skins/full/witch_<種類>/ に見本の絵と mesh.json・atlas.png
 """
 from __future__ import annotations
 
@@ -375,6 +376,9 @@ def moon(face, W, H, box):
         m = a & ~b
         img[..., :3] = mix(C("#ffffff"), C("#a99ee0"), np.clip((v + 1) / 2, 0, 1)[..., None])
         img[~m, 3] = 0
+        if face == "e":
+            # 向こう側の面は裏から見ると左右が逆になるので、映して手前の面と重ねる
+            return out(img[:, ::-1]), m[:, ::-1]
         return out(img), m
     if face in "nsud":
         return out(blank(W, H)), None
@@ -447,103 +451,20 @@ def skull_top(face, W, H, box):
 
 
 # ---------------------------------------------------------------- 組み立て
-def build():
-    m = Model("skin_full/" + ID)
-    hp = hair(**HAIR)
-    hp_band = hair(**HAIR, band=0.32)
-    black = cloth(**BLACK)
-    sk = skin()
-
-    # ---- 脚 (細め 2.9 幅。ニーハイの靴下、厚底の編み上げブーツ)
-    m.pair("legR", (-3.4, 10.4, -1.4), (2.8, 1.8, 2.8), sk, hide=("u",))
-    m.pair("legR", (-3.45, 4.6, -1.45), (2.9, 5.9, 2.9), stocking)
-    m.pair("legR", (-3.6, 9.9, -1.6), (3.2, 1.0, 3.2), lace("#efe9f3", "#c3b8d0"), hide=("u", "d"))
-    m.pair("legR", (-3.62, 1.2, -1.62), (3.24, 3.8, 3.24), boot)
-    m.pair("legR", (-3.7, 0.55, -2.7), (3.4, 1.6, 4.5), boot)
-    m.pair("legR", (-3.78, 0.0, -2.78), (3.56, 0.6, 4.66), sole)
-    m.pair("legR", (-3.0, 0.0, 1.4), (2.0, 1.2, 1.3), sole)
-
-    # ---- 体
-    m.box("body", (-3.0, 12.4, -1.7), (6.0, 5.8, 3.4), corset)
-    m.box("body", (-3.3, 18.0, -1.9), (6.6, 5.5, 3.8), bodice)
-    m.box("body", (-0.9, 23.3, -0.9), (1.8, 1.3, 1.8), sk)
-    m.box("body", (-1.05, 23.6, -1.05), (2.1, 0.55, 2.1), ribbon)
-    m.box("body", (-0.35, 23.45, -1.3), (0.7, 0.7, 0.3), gem("#c0306a", "#ff9ec0", "#6a0a30"))
-    m.box("body", (-1.3, 18.4, -2.3), (2.6, 4.6, 0.45), jabot)
-    # 胸のリボン (結び目・輪・垂れ)
-    m.box("body", (-0.6, 22.2, -2.6), (1.2, 1.1, 0.5), ribbon)
-    m.pair("body", (-2.6, 21.8, -2.45), (2.0, 1.6, 0.4), ribbon, rot=(0, 0, -12), pivot=(-0.6, 22.6, -2.4))
-    m.pair("body", (-1.1, 19.6, -2.5), (0.7, 2.6, 0.25), ribbon_tail, rot=(0, 0, -10), pivot=(-0.6, 22.2, -2.4))
-    # 襟 (高い立ち襟。前は開く)
-    m.box("body", (-2.2, 23.2, 1.4), (4.4, 2.2, 0.4), collar)
-    m.pair("body", (-2.6, 23.2, -1.6), (0.4, 2.2, 3.2), collar, rot=(0, 0, -8), pivot=(-2.4, 23.2, 0))
-    m.pair("body", (-2.5, 23.2, -2.0), (1.4, 1.9, 0.4), collar, rot=(0, -25, 0), pivot=(-2.4, 23.2, -1.8))
-    # 腰の後ろの大きなリボン
-    m.box("body", (-0.8, 15.0, 1.7), (1.6, 1.6, 0.8), ribbon)
-    m.pair("body", (-4.0, 14.5, 1.8), (3.4, 2.6, 0.7), ribbon, rot=(0, 0, 12), pivot=(-0.8, 15.8, 2.1))
-    m.pair_bone("ribbon_R", "body", (-0.6, 15.4, 2.3))
-    m.pair("ribbon_R", (-1.8, 7.4, 2.0), (1.3, 8.0, 0.3), ribbon_tail, rot=(0, 0, -8), pivot=(-0.6, 15.4, 2.3))
-
-    # ---- スカート (外の黒い布 8 枚と、下の白いレース 8 枚)。付け根は腰
-    Y0, L = 13.6, 8.0
-    panels = [
-        # 骨, 外の面, 箱の始め, 大きさ, 付け根, rot, yaw
-        ("skirt_f", "n", (-3.0, Y0 - L, -2.05), (6.0, L, 0.35), (0, Y0, -1.9), (17, 0, 0), 0),
-        ("skirt_b", "s", (-3.0, Y0 - L, 1.7), (6.0, L, 0.35), (0, Y0, 1.9), (-17, 0, 0), 0),
-    ]
-    for bn, outer, frm, size, piv, rot, yw in panels:
-        m.bone(bn, "body", piv)
-        m.box(bn, frm, size, skirt_panel(outer), rot=rot, pivot=piv)
-        # 下のレース: 少し内側・少し長く
-        f2 = (frm[0] + 0.2, frm[1] - 0.9, frm[2] + (0.25 if outer == "n" else -0.25))
-        m.box(bn, f2, (size[0] - 0.4, L + 0.6, size[2]), petticoat_panel(outer), rot=(rot[0] * 0.8, 0, 0), pivot=piv)
-    m.pair_bone("skirt_R", "body", (-3.2, Y0, 0))
-    m.pair("skirt_R", (-3.55, Y0 - L, -1.9), (0.35, L, 3.8), skirt_panel("w"), rot=(0, 0, -17), pivot=(-3.2, Y0, 0))
-    m.pair("skirt_R", (-3.3, Y0 - L - 0.9, -1.7), (0.35, L + 0.6, 3.4), petticoat_panel("w"), rot=(0, 0, -13), pivot=(-3.2, Y0, 0))
-    for nm, (px, pz), yw in (("skirt_fR", (-2.75, -1.55), 45), ("skirt_bR", (-2.75, 1.55), 135)):
-        m.pair_bone(nm, "body", (px, Y0, pz))
-        m.pair(nm, (px - 1.7, Y0 - L, pz - 0.17), (3.4, L, 0.35), skirt_panel("n"), rot=(17, 0, 0), pivot=(px, Y0, pz), yaw=yw)
-        m.pair(nm, (px - 1.4, Y0 - L - 0.9, pz + 0.1), (2.8, L + 0.6, 0.35), petticoat_panel("n"), rot=(13, 0, 0), pivot=(px, Y0, pz), yaw=yw)
-
-    # ---- 腕 (細い腕、ふくらんだ肩、広がる袖口とレース)
-    m.pair("armR", (-6.45, 15.6, -1.05), (2.1, 4.6, 2.1), black)
-    m.pair("armR", (-6.95, 19.8, -1.5), (3.0, 3.8, 3.0), puff)
-    m.pair("armR", (-7.0, 19.4, -1.55), (3.1, 0.55, 3.1), ribbon)
-    m.pair("armR", (-7.1, 13.0, -1.7), (3.4, 2.9, 3.4), cuff)
-    m.pair("armR", (-7.25, 12.3, -1.85), (3.7, 0.85, 3.7), lace("#efe9f3", "#c3b8d0"), hide=("u", "d"))
-    m.pair("armR", (-6.2, 10.9, -0.8), (1.6, 2.4, 1.6), sk)
-
-    # ---- 頭 (9 幅の大きめの頭、顔はドット絵)
-    m.box("head", (-4.5, 24.0, -4.5), (9.0, 9.0, 9.0), face_paint)
-    m.box("head", (-5.0, 32.0, -5.0), (10.0, 1.2, 10.2), hp)
-    m.box("head", (-5.0, 24.6, 4.35), (10.0, 8.6, 0.9), hair(**HAIR, jag=0.12))
-    m.pair("head", (-5.15, 25.4, -4.7), (0.8, 7.8, 9.3), hair(**HAIR, jag=0.22, jag_w=(4, 7)))
-    m.box("head", (-4.95, 28.2, -5.2), (9.9, 4.6, 0.65), hair(**HAIR, jag=0.6, jag_w=(6, 9), seed=11), hide=("s", "u"))
-    # 顔の横の長い房 (胸まで。揺れる)
-    m.pair_bone("hair_lock_R", "head", (-4.4, 30.5, -3.4))
-    m.pair("hair_lock_R", (-5.3, 19.2, -4.3), (1.7, 11.3, 1.7), hair(**HAIR, jag=0.08), rot=(0, 0, -3), pivot=(-4.4, 30.5, -3.4))
-    m.pair("hair_lock_R", (-5.6, 18.2, -4.1), (1.2, 2.2, 1.3), hair(**HAIR, jag=0.3), rot=(0, 0, 14), pivot=(-4.4, 30.5, -3.4))
-    # 背中の長い髪 (腰まで。体に付いて揺れる)
-    m.bone("hair_back", "body", (0, 27.0, 5.1))
-    m.box("hair_back", (-4.8, 12.8, 4.6), (9.6, 14.6, 1.0), back_hair, pivot=(0, 27.0, 5.1))
-    m.box("hair_back", (-4.2, 15.5, 5.45), (8.4, 11.5, 0.6), hair(**HAIR, jag=0.3, jag_w=(4, 7), seed=3), pivot=(0, 27.0, 5.1), hide=("n",))
-    m.pair_bone("hair_backside_R", "body", (-4.4, 27.0, 3.9))
-    m.pair("hair_backside_R", (-5.5, 15.0, 3.2), (1.7, 11.5, 1.7), hair(**HAIR, jag=0.12), rot=(0, 0, -5), pivot=(-4.4, 27.0, 3.9))
-
-    # ---- 帽子 (広いつば、9 段の円すいが後ろへ折れて垂れる。上の段は揺れる)
-    TILT = 6
-    m.box("head", (-8.6, 32.6, -8.6), (17.2, 0.4, 17.2), brim, rot=(TILT, 0, 0), pivot=(0, 32.8, 0))
-    m.box("head", (-4.55, 32.8, -4.55), (9.1, 1.25, 9.1), buckle, rot=(TILT, 0, 0), pivot=(0, 32.8, 0))
+def witch_hat(m, y0, base, brim_w, side_x):
+    """帽子 (広いつば、16 段の円すいが後ろへ折れて垂れる。上の段は揺れる) と、横の紅のリボン・三日月。"""
     import math
-    pos = np.array([0.0, 32.8, 0.0])
+    TILT = 6
+    m.box("head", (-brim_w / 2, y0 - 0.2, -brim_w / 2), (brim_w, 0.4, brim_w), brim, rot=(TILT, 0, 0), pivot=(0, y0, 0))
+    m.box("head", (-(base + 0.25) / 2, y0, -(base + 0.25) / 2), (base + 0.25, 1.25, base + 0.25), buckle, rot=(TILT, 0, 0), pivot=(0, y0, 0))
+    pos = np.array([0.0, y0, 0.0])
     n = 16
     ds = 10.5 / n
     parent = "head"
     for i in range(n):
         s = i / (n - 1)
         ang = TILT + 125 * s ** 2.2
-        w = 7.9 * (1 - s) ** 1.1 + 0.9
-        hgt = ds * 1.35
+        w = (base - 0.9) * (1 - s) ** 1.1 + 0.9
         bn = parent
         if i == 8:
             bn = m.bone("cloth_hat1", "head", tuple(pos))
@@ -551,43 +472,179 @@ def build():
         elif i == 13:
             bn = m.bone("cloth_hat2", "cloth_hat1", tuple(pos))
             parent = bn
-        m.box(bn, (pos[0] - w / 2, pos[1], pos[2] - w / 2), (w, hgt, w), hat, rot=(ang, 0, 0), pivot=tuple(pos))
+        m.box(bn, (pos[0] - w / 2, pos[1], pos[2] - w / 2), (w, ds * 1.35, w), hat, rot=(ang, 0, 0), pivot=tuple(pos))
         a = math.radians(ang)
         pos = pos + np.array([0, math.cos(a), math.sin(a)]) * ds
-    # 帽子の横の紅のリボンと、垂れた三日月
-    m.box("head", (-5.0, 33.0, -1.0), (0.7, 1.4, 1.4), ribbon)
-    m.box("head", (-5.25, 32.9, -3.6), (0.6, 2.0, 2.6), ribbon, rot=(22, 0, 0), pivot=(-5.0, 33.7, -1.0))
-    m.box("head", (-5.25, 32.9, 0.4), (0.6, 2.0, 2.6), ribbon, rot=(-22, 0, 0), pivot=(-5.0, 33.7, 0.4))
-    m.bone("cloth_charm", "head", (-5.1, 33.0, -0.3))
-    m.box("cloth_charm", (-5.15, 30.6, -0.35), (0.12, 2.4, 0.12), cloth(SILVER["dark"], edges=False), pivot=(-5.1, 33.0, -0.3))
-    m.box("cloth_charm", (-5.25, 28.4, -1.3), (0.3, 2.4, 2.2), moon, pivot=(-5.1, 33.0, -0.3))
+    x = side_x
+    m.box("head", (x, y0 + 0.2, -1.0), (0.7, 1.4, 1.4), ribbon)
+    m.box("head", (x - 0.25, y0 + 0.1, -3.6), (0.6, 2.0, 2.6), ribbon, rot=(22, 0, 0), pivot=(x, y0 + 0.9, -1.0))
+    m.box("head", (x - 0.25, y0 + 0.1, 0.4), (0.6, 2.0, 2.6), ribbon, rot=(-22, 0, 0), pivot=(x, y0 + 0.9, 0.4))
+    m.bone("cloth_charm", "head", (x - 0.1, y0 + 0.2, -0.3))
+    m.box("cloth_charm", (x - 0.15, y0 - 2.2, -0.35), (0.12, 2.4, 0.12), cloth(SILVER["dark"], edges=False), pivot=(x - 0.1, y0 + 0.2, -0.3))
+    m.box("cloth_charm", (x - 0.25, y0 - 4.4, -1.3), (0.3, 2.4, 2.2), moon, pivot=(x - 0.1, y0 + 0.2, -0.3))
 
-    # ---- 白いレースの丸襟 (肩の上に寝た花びら。顔を明るく縁取る)
-    m.pair("body", (-3.35, 21.0, -2.2), (3.05, 2.7, 0.28), collar_flap("n"), rot=(0, 0, -6), pivot=(-0.3, 23.5, -2.1))
-    m.pair("body", (-3.55, 21.5, -2.0), (0.28, 2.2, 4.0), collar_flap("w"))
-    m.box("body", (-3.4, 21.3, 1.95), (6.8, 2.4, 0.28), collar_flap("s"))
 
-    # ---- 浮かぶ髑髏 (三つ。肩のまわりを回り、ひとつずつ上下する)
+def skulls(m):
+    """浮かぶ髑髏 (三つ。肩のまわりを回り、ひとつずつ上下する)。"""
     m.bone("orbit_skulls", None, (0, 21.0, 0))
-    for i, (cx, cy, cz) in enumerate(((-9.2, 25.0, -1.5), (8.8, 19.5, 2.0), (1.5, 28.5, 8.6))):
+    for i, (cx, cy, cz) in enumerate(((-9.6, 25.0, -1.5), (9.2, 19.5, 2.0), (1.5, 28.5, 9.0))):
         bn = m.bone(f"float_skull{i + 1}", "orbit_skulls", (cx, cy, cz))
         m.box(bn, (cx - 1.35, cy - 0.5, cz - 1.3), (2.7, 2.0, 2.7), skull_top)
         m.box(bn, (cx - 1.05, cy - 1.25, cz - 1.45), (2.1, 1.1, 2.2), skull)
         m.box(bn, (cx - 0.8, cy - 1.85, cz - 1.3), (1.6, 0.65, 1.6), jaw)
+
+
+def skirt(m, Y0, L, hw, hd, tilt=17):
+    """スカート (外の黒い布 8 枚と、下の白いレース 8 枚)。付け根は腰。hw / hd = 腰の幅・奥行きの半分。"""
+    for bn, outer, z, sign in (("skirt_f", "n", -hd, 1), ("skirt_b", "s", hd, -1)):
+        piv = (0, Y0, z)
+        m.bone(bn, "body", piv)
+        m.box(bn, (-hw, Y0 - L, z - 0.175), (hw * 2, L, 0.35), skirt_panel(outer), rot=(tilt * sign, 0, 0), pivot=piv)
+        m.box(bn, (-hw + 0.2, Y0 - L - 0.9, z - 0.175 + 0.25 * sign), (hw * 2 - 0.4, L + 0.6, 0.35), petticoat_panel(outer),
+              rot=(tilt * 0.8 * sign, 0, 0), pivot=piv)
+    sx = hw + 0.2
+    m.pair_bone("skirt_R", "body", (-sx, Y0, 0))
+    m.pair("skirt_R", (-sx - 0.35, Y0 - L, -hd), (0.35, L, hd * 2), skirt_panel("w"), rot=(0, 0, -tilt), pivot=(-sx, Y0, 0))
+    m.pair("skirt_R", (-sx - 0.1, Y0 - L - 0.9, -hd + 0.2), (0.35, L + 0.6, hd * 2 - 0.4), petticoat_panel("w"), rot=(0, 0, -tilt * 0.77), pivot=(-sx, Y0, 0))
+    cw = min(hw, hd) * 1.6
+    for nm, (px, pz), yw in (("skirt_fR", (-hw + 0.25, -hd + 0.35), 45), ("skirt_bR", (-hw + 0.25, hd - 0.35), 135)):
+        m.pair_bone(nm, "body", (px, Y0, pz))
+        m.pair(nm, (px - cw / 2, Y0 - L, pz - 0.17), (cw, L, 0.35), skirt_panel("n"), rot=(tilt, 0, 0), pivot=(px, Y0, pz), yaw=yw)
+        m.pair(nm, (px - cw / 2 + 0.3, Y0 - L - 0.9, pz + 0.1), (cw - 0.6, L + 0.6, 0.35), petticoat_panel("n"), rot=(tilt * 0.77, 0, 0),
+               pivot=(px, Y0, pz), yaw=yw)
+
+
+def build_outfit():
+    """服だけ: 着ている人のバニラの体 (自分のスキンの顔・髪・手) の上に重ねる。大きさは Steve の体 (重ね着の層 +0.25 より外)。"""
+    m = Model("skin_full/" + ID, outfit=True)
+    black = cloth(**BLACK)
+    # ---- 脚 (ニーハイの靴下とレース、厚底の編み上げブーツ)。脚 = x -3.9..0.1, z ±2
+    m.pair("legR", (-4.3, 4.8, -2.35), (4.6, 5.9, 4.7), stocking)
+    m.pair("legR", (-4.45, 10.3, -2.5), (4.9, 1.0, 5.0), lace("#efe9f3", "#c3b8d0"), hide=("u", "d"))
+    m.pair("legR", (-4.4, 1.2, -2.45), (4.8, 4.0, 4.9), boot)
+    m.pair("legR", (-4.5, 0.45, -3.3), (5.0, 1.6, 5.75), boot)
+    m.pair("legR", (-4.6, 0.0, -3.4), (5.2, 0.5, 5.95), sole)
+    # ---- 体 (x ±4, z ±2)
+    m.box("body", (-4.3, 12.3, -2.35), (8.6, 5.6, 4.7), corset)
+    m.box("body", (-4.4, 17.7, -2.45), (8.8, 6.45, 4.9), bodice)
+    m.box("body", (-1.5, 18.2, -2.85), (3.0, 4.9, 0.45), jabot)
+    m.box("body", (-0.65, 22.4, -3.1), (1.3, 1.2, 0.55), ribbon)
+    m.pair("body", (-2.8, 22.0, -2.95), (2.15, 1.7, 0.4), ribbon, rot=(0, 0, -12), pivot=(-0.65, 22.8, -2.9))
+    m.pair("body", (-1.2, 19.6, -3.0), (0.75, 2.8, 0.25), ribbon_tail, rot=(0, 0, -10), pivot=(-0.65, 22.4, -2.9))
+    m.pair("body", (-4.4, 20.9, -2.75), (3.6, 3.0, 0.28), collar_flap("n"), rot=(0, 0, -6), pivot=(-0.6, 23.9, -2.7))
+    m.pair("body", (-4.65, 21.4, -2.5), (0.28, 2.6, 5.0), collar_flap("w"))
+    m.box("body", (-4.5, 21.2, 2.5), (9.0, 2.8, 0.28), collar_flap("s"))
+    m.box("body", (-0.9, 14.8, 2.4), (1.8, 1.8, 0.8), ribbon)
+    m.pair("body", (-4.6, 14.3, 2.5), (3.8, 2.8, 0.7), ribbon, rot=(0, 0, 12), pivot=(-0.9, 15.7, 2.85))
+    m.pair_bone("ribbon_R", "body", (-0.7, 15.3, 3.0))
+    m.pair("ribbon_R", (-2.0, 6.8, 2.7), (1.4, 8.5, 0.3), ribbon_tail, rot=(0, 0, -8), pivot=(-0.7, 15.3, 3.0))
+    skirt(m, 12.9, 8.0, 4.35, 2.4)
+    # ---- 腕 (腕 = x -8..-4, y 12..24, z ±2)。ふくらんだ肩・袖・広がる袖口。手 (下の 1.5) は自分のスキンが見える
+    m.pair("armR", (-8.55, 19.4, -2.55), (5.1, 5.0, 5.1), puff)
+    m.pair("armR", (-8.6, 19.0, -2.6), (5.2, 0.55, 5.2), ribbon)
+    m.pair("armR", (-8.35, 16.4, -2.35), (4.7, 2.7, 4.7), black)
+    m.pair("armR", (-8.7, 14.2, -2.7), (5.4, 2.6, 5.4), cuff)
+    m.pair("armR", (-8.85, 13.45, -2.85), (5.7, 0.85, 5.7), lace("#efe9f3", "#c3b8d0"), hide=("u", "d"))
+    # ---- 帽子 (頭 = 8、重ね着の層で 9)
+    witch_hat(m, 32.75, 9.1, 17.6, -5.0)
+    skulls(m)
+    return m
+
+
+# 小さな目 (画面の左の目。外の端 = 左)。7x6。上のまぶたの線、瞳は上が暗く下が明るい、ハイライト 1 画素
+EYE_S = [
+    ".KKKKKK",
+    "KKDDDDK",
+    "KDPPHDK",
+    "KMPPMMK",
+    ".LMMLL.",
+    "..kkk..",
+]
+
+
+def small_face(face, W, H, box):
+    if face != "n":
+        return skin()(face, W, H, box)
+    img = skin()(face, W, H, box).astype(float)
+    eye = sprite(EYE_S, EYE_PAL)
+    ey = 18
+    stamp(img, eye, 5, ey)
+    e2 = eye[:, ::-1].copy()
+    hl = np.array([[c in "Hh" for c in r] for r in EYE_S])
+    e2[hl[:, ::-1], :3] = C(EYE_PAL["P"])
+    e2[hl, :3] = eye[hl, :3]
+    stamp(img, e2, 20, ey)
+    # 薄い頬と小さな口 (片方に白い牙)
+    for x in (5, 6, 25, 26):
+        img[ey + 7, x, :3] = mix(img[ey + 7, x, :3], C("#f2a0ad"), 0.5)
+    img[ey + 9, 15, :3] = C("#8c3448")
+    img[ey + 9, 16, :3] = C("#8c3448")
+    img[ey + 10, 16, :3] = C("#ffffff")
+    return out(img)
+
+
+def build_full():
+    """見た目ごと替える: 頭はバニラと同じ 8、顔は小さな目を低く。体は細身。"""
+    m = Model("skin_full/" + ID)
+    black = cloth(**BLACK)
+    sk = skin()
+    m.pair("legR", (-3.4, 10.4, -1.4), (2.8, 1.8, 2.8), sk, hide=("u",))
+    m.pair("legR", (-3.45, 4.6, -1.45), (2.9, 5.9, 2.9), stocking)
+    m.pair("legR", (-3.6, 9.9, -1.6), (3.2, 1.0, 3.2), lace("#efe9f3", "#c3b8d0"), hide=("u", "d"))
+    m.pair("legR", (-3.62, 1.2, -1.62), (3.24, 3.8, 3.24), boot)
+    m.pair("legR", (-3.7, 0.55, -2.7), (3.4, 1.6, 4.5), boot)
+    m.pair("legR", (-3.78, 0.0, -2.78), (3.56, 0.6, 4.66), sole)
+    m.box("body", (-3.0, 12.4, -1.7), (6.0, 5.8, 3.4), corset)
+    m.box("body", (-3.3, 18.0, -1.9), (6.6, 5.5, 3.8), bodice)
+    m.box("body", (-0.9, 23.3, -0.9), (1.8, 1.3, 1.8), sk)
+    m.box("body", (-1.05, 23.6, -1.05), (2.1, 0.55, 2.1), ribbon)
+    m.box("body", (-1.3, 18.4, -2.3), (2.6, 4.6, 0.45), jabot)
+    m.box("body", (-0.6, 22.2, -2.6), (1.2, 1.1, 0.5), ribbon)
+    m.pair("body", (-2.6, 21.8, -2.45), (2.0, 1.6, 0.4), ribbon, rot=(0, 0, -12), pivot=(-0.6, 22.6, -2.4))
+    m.pair("body", (-1.1, 19.6, -2.5), (0.7, 2.6, 0.25), ribbon_tail, rot=(0, 0, -10), pivot=(-0.6, 22.2, -2.4))
+    m.pair("body", (-3.35, 21.0, -2.2), (3.05, 2.7, 0.28), collar_flap("n"), rot=(0, 0, -6), pivot=(-0.3, 23.5, -2.1))
+    m.pair("body", (-3.55, 21.5, -2.0), (0.28, 2.2, 4.0), collar_flap("w"))
+    m.box("body", (-3.4, 21.3, 1.95), (6.8, 2.4, 0.28), collar_flap("s"))
+    m.box("body", (-0.8, 15.0, 1.7), (1.6, 1.6, 0.8), ribbon)
+    m.pair("body", (-4.0, 14.5, 1.8), (3.4, 2.6, 0.7), ribbon, rot=(0, 0, 12), pivot=(-0.8, 15.8, 2.1))
+    m.pair_bone("ribbon_R", "body", (-0.6, 15.4, 2.3))
+    m.pair("ribbon_R", (-1.8, 7.4, 2.0), (1.3, 8.0, 0.3), ribbon_tail, rot=(0, 0, -8), pivot=(-0.6, 15.4, 2.3))
+    skirt(m, 13.6, 8.0, 3.0, 1.9)
+    m.pair("armR", (-6.45, 15.6, -1.05), (2.1, 4.6, 2.1), black)
+    m.pair("armR", (-6.95, 19.8, -1.5), (3.0, 3.8, 3.0), puff)
+    m.pair("armR", (-7.0, 19.4, -1.55), (3.1, 0.55, 3.1), ribbon)
+    m.pair("armR", (-7.1, 13.0, -1.7), (3.4, 2.9, 3.4), cuff)
+    m.pair("armR", (-7.25, 12.3, -1.85), (3.7, 0.85, 3.7), lace("#efe9f3", "#c3b8d0"), hide=("u", "d"))
+    m.pair("armR", (-6.2, 10.9, -0.8), (1.6, 2.4, 1.6), sk)
+    # ---- 頭 (バニラと同じ 8。顔は小さな目を低く、前髪が額を深く覆う)
+    m.box("head", (-4.0, 24.0, -4.0), (8.0, 8.0, 8.0), small_face)
+    m.box("head", (-4.5, 31.2, -4.5), (9.0, 1.1, 9.1), hair(**HAIR))
+    m.box("head", (-4.5, 24.4, 3.85), (9.0, 7.9, 0.9), hair(**HAIR, jag=0.12))
+    m.pair("head", (-4.65, 24.8, -4.2), (0.75, 7.2, 8.4), hair(**HAIR, jag=0.22, jag_w=(4, 7)))
+    m.box("head", (-4.45, 27.5, -4.7), (8.9, 4.2, 0.65), hair(**HAIR, jag=0.55, jag_w=(5, 8), seed=11), hide=("s", "u"))
+    m.pair_bone("hair_lock_R", "head", (-3.9, 29.5, -3.0))
+    m.pair("hair_lock_R", (-4.8, 18.8, -3.9), (1.6, 10.7, 1.6), hair(**HAIR, jag=0.08), rot=(0, 0, -3), pivot=(-3.9, 29.5, -3.0))
+    m.bone("hair_back", "body", (0, 26.5, 4.7))
+    m.box("hair_back", (-4.4, 12.8, 4.3), (8.8, 14.0, 1.0), back_hair, pivot=(0, 26.5, 4.7))
+    m.box("hair_back", (-3.8, 15.5, 5.15), (7.6, 10.8, 0.6), hair(**HAIR, jag=0.3, jag_w=(4, 7), seed=3), pivot=(0, 26.5, 4.7), hide=("n",))
+    m.pair_bone("hair_backside_R", "body", (-4.0, 26.5, 3.6))
+    m.pair("hair_backside_R", (-5.0, 15.0, 2.9), (1.6, 11.0, 1.6), hair(**HAIR, jag=0.12), rot=(0, 0, -5), pivot=(-4.0, 26.5, 3.6))
+    witch_hat(m, 31.8, 8.4, 16.4, -4.6)
+    skulls(m)
     return m
 
 
 if __name__ == "__main__":
-    model = build()
-    dst = ROOT / "docs/review/skins/full" / ID
-    data, atlas, glow, faces = export(model, dst, "skin_full/" + ID)
-    walk = {"armR": (-25, 0, 0), "armL": (25, 0, 0), "legR": (22, 0, 0), "legL": (-22, 0, 0)}
-    sheet(model, dst / "preview.png", views=((15, 10), (150, 10), (-70, 8)), scale=20, size=(620, 960))
-    sheet(model, dst / "preview_walk.png", poses=[walk], views=((35, 12),), scale=20, size=(620, 960))
-    face = [f for f in faces if f.bone == "head"]
     from kit import render
-    render(face, 0, 0, 60, (700, 700), center=(0, 29.5, 0)).save(dst / "preview_face.png")
-    print(ID, data["triangle_count"], "triangles", data["texture_size"], "atlas")
-    if "install" in sys.argv:
-        install(model, ID, dst)
-        print("installed")
+    kinds = [a for a in sys.argv[1:] if a in ("outfit", "full")] or ["outfit", "full"]
+    for kind in kinds:
+        model = build_outfit() if kind == "outfit" else build_full()
+        dst = ROOT / "docs/review/skins/full" / f"{ID}_{kind}"
+        data, atlas, glow, faces = export(model, dst, "skin_full/" + ID)
+        sheet(model, dst / "preview.png", views=((15, 10), (150, 10), (-70, 8)), scale=20, size=(620, 960))
+        if kind == "full":
+            render([f for f in faces if f.bone == "head"], 0, 0, 60, (700, 700), center=(0, 28.5, 0)).save(dst / "preview_face.png")
+        print(ID, kind, data["triangle_count"], "triangles", data["texture_size"], "atlas")
+        if "install" in sys.argv:
+            install(model, ID, dst)
+            print("installed", kind)
