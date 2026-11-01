@@ -323,8 +323,8 @@ def _hue(c, toward, k):
     return mix(np.asarray(c, float), C(toward), k)
 
 
-def cel(base, light=None, shadow=None, deep=None, block=1, light_dir="ul", outline=True, rim=True, ao=True, noise=0.012,
-        round_k=0.32, faces=None, over=None, seed=0):
+def cel(base, light=None, shadow=None, deep=None, block=1, light_dir="ul", outline=False, rim=False, ao=False, noise=0.012,
+        round_k=0.14, faces=None, over=None, seed=0, grad=0.5):
     """明・中・影・濃い影の 4 段で塗る。2x2 画素を一つの画素として塗り (手描きの画素に見せる)、
     光は左上の前から。面の左右の端ほど暗く (丸く見せる)、上の縁に細い光、下に影、境は少し散らす。
     影は青紫へ、明るいところは暖かい色へ少し寄せる。"""
@@ -343,7 +343,7 @@ def cel(base, light=None, shadow=None, deep=None, block=1, light_dir="ul", outli
             t = (np.arange(h2) + 0.5) / h2
             u = (np.arange(w2) + 0.5) / w2
             cu = 0.42 if face in "nw" else 0.5  # 光は左上から: 明るいところを少し左へ
-            v = 0.8 - 0.5 * t[:, None] + face_bias[face] - round_k * (np.abs(u[None, :] - cu) * 2) ** 1.6
+            v = 0.55 + grad * 0.5 - grad * t[:, None] + face_bias[face] - round_k * (np.abs(u[None, :] - cu) * 2) ** 1.6
         elif face == "u":
             v = np.full((h2, w2), 0.85)
         else:

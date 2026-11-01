@@ -348,19 +348,19 @@ def hair_mass(m: Model, paint, back_bottom=23.5, shingles=True):
 
 def bangs2(m: Model, paint, spec=None):
     """前髪: 大きな房 (lock) を斜めに垂らして重ねる。spec = [(真ん中の x, 幅, 長さ, 傾き rz, 層)]。"""
-    spec = spec or [(-3.2, 3.2, 3.5, 8, 0), (3.2, 3.2, 3.3, -8, 0), (0.0, 3.4, 3.9, -4, 1), (-1.75, 2.0, 2.9, -12, 2), (1.75, 2.0, 2.7, 12, 2)]
+    spec = spec or [(-3.0, 3.6, 3.5, 8, 0), (3.0, 3.6, 3.3, -8, 0), (0.0, 3.8, 3.9, -4, 1), (-1.7, 2.6, 2.9, -12, 2), (1.7, 2.6, 2.7, 12, 2)]
     for (x, w, L, rz, layer) in spec:
         z = -5.0 - 0.35 * layer
         # 額の上で少し前へふくらみ、先は顔へ戻る。横へは rz の向きへ流れる
-        lock(m, "head", x, 33.1, z, w, L + 1.7, 0.85, paint, out=(0, 0, -1), flare=10, flow=rz * 1.6, lean=(-7, 0), n=5)
+        lock(m, "head", x, 33.1, z, w, L + 1.7, 1.0, paint, out=(0, 0, -1), flare=10, flow=rz * 1.6, lean=(-7, 0), n=5)
 
 
 def side_hair2(m: Model, paint, length=13.0, bone="hair_side_R"):
     """横髪: 頬の前の長い束と、耳の後ろの束 (lock)。外へ少し開いて垂れる。左は映す。"""
     piv = (-4.9, 31.0, -2.2)
     m.pair_bone(bone, "head", piv)
-    lock(m, bone, -5.35, 31.0, -4.55, 1.3, length, 2.8, paint, out=(-1, 0, 0), flare=12, flow=6, lean=(-2, 0), pivot=piv)
-    lock(m, bone, -5.6, 30.6, -2.1, 1.35, length * 0.82, 4.4, paint, out=(-1, 0, 0), flare=15, flow=-4, lean=(3, 0), pivot=piv)
+    lock(m, bone, -5.5, 31.0, -4.6, 1.7, length, 3.4, paint, out=(-1, 0, 0), flare=12, flow=6, lean=(-2, 0), pivot=piv)
+    lock(m, bone, -5.75, 30.6, -2.0, 1.7, length * 0.82, 4.6, paint, out=(-1, 0, 0), flare=15, flow=-4, lean=(3, 0), pivot=piv)
     for b in [b for b in m.boxes if b.bone == bone and not b.mirror]:
         x0 = -(b.frm[0] + b.size[0])
         p = None if b.pivot is None else (-b.pivot[0], b.pivot[1], b.pivot[2])
@@ -409,7 +409,7 @@ class HairCel:
             u = (np.arange(w2) + 0.5) / w2
             t = np.clip((self.y_hi - ys) / (self.y_hi - self.y_lo), 0, 1)
             bias = {"n": 0.06, "w": 0.1, "e": -0.1, "s": -0.12}[face]
-            v = 0.78 - 0.55 * t[:, None] + bias - 0.36 * (np.abs(u[None, :] - 0.45) * 2) ** 1.5
+            v = 0.78 - 0.55 * t[:, None] + bias - 0.2 * (np.abs(u[None, :] - 0.45) * 2) ** 1.5
         elif face == "u":
             v = np.full((h2, w2), 0.8)
         else:
@@ -428,6 +428,6 @@ class HairCel:
                     img[rows, i, :3] = self.h
         img = np.repeat(np.repeat(img, bl, 0), bl, 1)[:H, :W]
         if face in "nsew" and W >= 3:
-            img[:, :1, :3] = mix(img[:, :1, :3], self.pal[0], 0.55)
-            img[:, -1:, :3] = mix(img[:, -1:, :3], self.pal[0], 0.55)
+            img[:, :1, :3] = mix(img[:, :1, :3], self.pal[0], 0.35)
+            img[:, -1:, :3] = mix(img[:, -1:, :3], self.pal[0], 0.35)
         return out(img)

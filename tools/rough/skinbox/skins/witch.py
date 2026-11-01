@@ -23,7 +23,7 @@ BLACK = cel("#2c2438", "#5a4a70", "#1c1626", "#0e0a14")
 CRIMSON = cel("#c01e4a", "#ff6a88", "#801030", "#4a0818")
 WHITE = cel("#f4eef6", "#ffffff", "#c8bed8", "#8e82a6")
 GOLD = cel("#dcaa3c", "#fff0a0", "#9a6a1a", "#5a3a0a")
-HAT = cel("#2e2440", "#5c4a7a", "#1c1528", "#0c0812", rim=False, ao=False, outline=False, noise=0.015)
+HAT = cel("#2e2440", "#5c4a7a", "#1c1528", "#0c0812", noise=0.015, grad=0.12)
 BONE = cel("#ece2cc", "#fffaf0", "#b8a888", "#7a6a50")
 GLOW = "#c45cff"
 GLOW2 = "#f2d2ff"
@@ -191,8 +191,8 @@ def bow(m, bone, cx, cy, z, size=1.0, back=False):
 
 
 def witch_hat(m, y0=33.6, base_w=9.4, brim_w=17.0, side_x=-5.2):
-    """帽子: 厚みのある二枚のつば、9 段の円すい (角は八角) が後ろへ折れて垂れる (上の段は揺れる)、紅の帯と金の留め金、横のリボンと三日月。"""
-    TILT = 6
+    """帽子: 厚みのある二枚のつば、斜めの板 8 枚の円すい、先は細るキューブの鎖で後ろへ折れて垂れる (揺れる)、紅の帯と金の留め金、横のリボンと三日月。"""
+    TILT = 4
     rt = (TILT, 0, 0)
     pv = (0, y0, 0)
     m.box("head", (-brim_w / 2, y0 - 0.2, -brim_w / 2), (brim_w, 0.45, brim_w), brim, rot=rt, pivot=pv, rounded=False)
@@ -201,24 +201,35 @@ def witch_hat(m, y0=33.6, base_w=9.4, brim_w=17.0, side_x=-5.2):
     bz = -(base_w + 0.3) / 2 - 0.25
     for (x, y, w, h) in ((-1.0, y0 + 0.05, 2.0, 0.3), (-1.0, y0 + 1.0, 2.0, 0.3), (-1.0, y0 + 0.05, 0.3, 1.25), (0.7, y0 + 0.05, 0.3, 1.25)):
         m.box("head", (x, y, bz), (w, h, 0.3), GOLD, rot=rt, pivot=pv, rounded=False)
-    pos = np.array([0.0, y0, 0.0])
-    n = 9
-    ds = 10.5 / n
+    # 円すい: 斜めの板 12 枚の輪を 3 段 (下ほど広い)。板の幅はその高さのまわりの長さに合わせ、隣と少し重ねる (段の棚が出ない)
+    yb = y0 + 0.4
+    rings = ((base_w / 2 - 0.05, 3.4, 3.0), (3.4, 2.1, 3.0), (2.1, 0.75, 3.0))
+    y = yb
+    for (rb, rt, h) in rings:
+        tilt = math.degrees(math.atan((rb - rt) / h))
+        wp = 2 * math.pi * rb / 12 * 1.12
+        for k in range(12):
+            a = 360.0 * k / 12 + 15
+            px, pz = -math.sin(math.radians(a)) * rt, -math.cos(math.radians(a)) * rt
+            m.box("head", (px - wp / 2, y - 0.15, pz - 0.3), (wp, h / math.cos(math.radians(tilt)) + 0.3, 0.6), HAT, rot=(tilt, 0, 0),
+                  pivot=(px, y + h, pz), yaw=a, rounded=False)
+        y += h
+    m.box("head", (-0.9, y - 0.4, -0.9), (1.8, 0.6, 1.8), HAT)
+    Hc = y - yb
+    # 先: 細るキューブ 4 個を、前のキューブの上の端を付け根に少しずつ後ろへ曲げる
+    top = np.array([0.0, yb + Hc - 0.2, 0.0])
     parent = "head"
-    for i in range(n):
-        s = i / (n - 1)
-        ang = TILT + 120 * s ** 2.0
-        w = (base_w - 1.2) * (1 - s) ** 1.05 + 1.2
+    for i, (w, ln, ang) in enumerate(((1.9, 1.8, 18), (1.5, 1.6, 45), (1.1, 1.4, 78), (0.7, 1.2, 110))):
         bn = parent
-        if i == 4:
-            bn = m.bone("cloth_hat1", "head", tuple(pos))
+        if i == 1:
+            bn = m.bone("cloth_hat1", "head", tuple(top))
             parent = bn
-        elif i == 7:
-            bn = m.bone("cloth_hat2", "cloth_hat1", tuple(pos))
+        elif i == 3:
+            bn = m.bone("cloth_hat2", "cloth_hat1", tuple(top))
             parent = bn
-        m.box(bn, (pos[0] - w / 2, pos[1], pos[2] - w / 2), (w, ds * 1.45, w), HAT, rot=(ang, 0, 0), pivot=tuple(pos))
+        m.box(bn, (top[0] - w / 2, top[1] - 0.3, top[2] - w / 2), (w, ln + 0.3, w), HAT, rot=(ang, 0, 0), pivot=tuple(top))
         a = math.radians(ang)
-        pos = pos + np.array([0, math.cos(a), math.sin(a)]) * ds
+        top = top + np.array([0, math.cos(a), math.sin(a)]) * ln
     x = side_x
     bow(m, "head", x, y0 + 0.75, -0.3, size=0.8)
     m.bone("cloth_charm", "head", (x - 0.1, y0 + 0.2, 0.6))
@@ -290,10 +301,9 @@ def build():
     # ---- 腕: 白いふくらんだ肩 (斜めの板の輪)、黒い腕、広がる黒い袖口と白いレース
     m.pair("armR", (-6.8, 14.4, -1.3), (2.6, 4.6, 2.6), BLACK)
     for bone, cx in (("armR", -5.5), ("armL", 5.5)):
-        m.box(bone, (cx - 1.85, 19.1, -1.85), (3.7, 3.1, 3.7), WHITE)
-        m.ring(bone, (cx, 0), 20.6, 3.0, 1.6, 8, 0.5, WHITE, tilt=24, overlap=1.45, phase=22.5)
-        m.ring(bone, (cx, 0), 19.0, 1.9, 2.8, 8, 0.5, WHITE, tilt=-34, overlap=1.4, phase=22.5)
-        m.ring(bone, (cx, 0), 18.7, 0.5, 1.8, 8, 0.45, CRIMSON, tilt=0, overlap=1.3, phase=22.5)
+        m.box(bone, (cx - 2.1, 18.9, -2.1), (4.2, 3.4, 4.2), WHITE)
+        m.box(bone, (cx - 1.7, 22.2, -1.7), (3.4, 1.2, 3.4), WHITE)
+        m.box(bone, (cx - 1.75, 18.5, -1.75), (3.5, 0.5, 3.5), CRIMSON)
         m.ring(bone, (cx, 0), 12.9, 2.6, 1.5, 10, 0.45, BLACK, tilt=20, overlap=1.4)
         m.ring(bone, (cx, 0), 12.0, 1.0, 2.4, 10, 0.35, lace, tilt=34, overlap=1.35, phase=18)
     # ---- 脚: 白い長い靴下と紅のガーター、黒い厚底の長靴 (紅の帯 2 本と金の留め金)
