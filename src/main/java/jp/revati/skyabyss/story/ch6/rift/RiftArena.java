@@ -79,6 +79,8 @@ public final class RiftArena {
         e.tuneMoon(3, matched, false, WaningBlade.HP / MoonMob.SECTION_HP[3], WaningBlade.DMG / MoonMob.SECTION_DMG[3]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 人数で強く (受ける傷を割る。47 の 2.6)
+        jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
         e.playAction("roar");
         WaningBlade.spawnEcho(level, e, WaningBlade.DELAY);
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 80, 1.0, 2.0, 1.0, 0.05);

@@ -86,10 +86,14 @@ def faq():
     ]
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
-        ("序章から終章「雲海」の結末まで遊べます。終章は、人が通しで遊んでいる途中です（島の主・座の三形態・巡礼の試しの難しさ、予告の見やすさ、四人の術の分かりやすさを教えてください）。", "You can play from the prologue to the ending of the final chapter, the sea of clouds. The final chapter is still being playtested: tell us about the island lords, the three forms of the seat, the difficulty of the pilgrim's trial, how readable the telegraphs are and whether the four selves' arts are clear."),
-        ("章の小さな仕掛けと予兆、雷翼・余燼の背の通し、二人以上での潮殻の背は、人の手で通して確かめていません。", "Chapter side elements and omens, full runs of the Thunder Wing and Ember backs, and the Tide Shell back with two or more players have not been verified end to end by people."),
-        ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("潮の真珠と潮鳴り石の絵は仮のものです。", "The tide pearl and tide stone icons are placeholders."),
+        ("序章から終章「雲海」の結末、そのあとのあいだの塔・巡り路・大陸の大事件まで遊べます。終章と終盤の遊びは、人が通しで遊んでいる途中です（島の主・座の三形態・巡礼の試し・塔の主の長さと難しさ、予告の見やすさを教えてください）。",
+         "You can play from the prologue to the ending of the sea of clouds, then the Tower Between, circuits and world events. The final chapter and the endgame are still being playtested: tell us about the island lords, the three forms of the seat, the pilgrim's trial, the tower master, and how readable the telegraphs are."),
+        ("月・雲海・塔・深みの主にも、心臓と同じ「構えと隙」と人数で強くなる決まりを入れたばかりです。体力の数字はまだ合わせていません。",
+         "The moon, cloud-sea, tower and depth bosses only just received the same guard-and-opening rule and party scaling as the hearts; their health numbers are not tuned yet."),
+        ("章の小さな仕掛けと予兆、雷翼・余燼の背の通し、二人以上での潮殻の背、マルチ全般（特に 2 つのパーティが同じ背中にいるとき）は、人の手で通して確かめていません。",
+         "Chapter side elements and omens, full runs of the Thunder Wing and Ember backs, the Tide Shell back with two or more players, and multiplayer in general (especially two parties on one back) have not been verified end to end by people."),
+        ("日替わり・週替わりの遊び（言伝ての板・店の品揃え・組合の頼み・巡り路・塔・旗取り・釣り大会）は、どれも実時間の朝 5 時・月曜で替わります。ゲームの中で寝ても替わりません。",
+         "Daily and weekly content (the notice board, shop stock, guild requests, circuits, the tower, flag contests and the fishing contest) all turn over at 5:00 server time and on Monday; sleeping in game does not advance them."),
     ]
     lim = "".join("<li>%s</li>" % T(a, b) for a, b in limits)
     body = page_head("導入・FAQ", "Install and FAQ", "必要なもの、入れ方、サーバーの管理、よくある質問、既知の制限。",
@@ -227,7 +231,7 @@ def changelog():
         ("v0.6.0", "2026-10-26", [
             ("完全な RPG へ。世界は手で描いた一枚の大陸（はじまりの島 → 渡し船 → 鐘の都 → 四つの土地の町）。世界の種類は「天と淵の大陸」だけです。", "A full RPG: the world is one hand-drawn continent (starting island, ferry, the bell capital, four regional towns). The only world type is the continent."),
             ("アドベンチャーモードで、掘らない・建てない・作らない。倒れても落とさず、装備はすり減りません。", "Adventure mode: no mining, building or crafting. Nothing drops on death and gear never wears down."),
-            ("6 職（戦士・鍛冶師・魔法使い・弓使い・暗殺者・呪術師）。持った武器で職が決まり、島の祠で最初の職を選びます。旅人の木・天職・構え・連鎖・刻み目・橋の木はなくなりました。", "Six jobs (Warrior, Smith, Mage, Archer, Assassin, Shaman). The weapon in hand sets the job; the first job is chosen at the island shrine. The Wayfarer tree, callings, stances, chains, breakpoints and bridge trees are gone."),
+            ("6 職（戦士・鍛冶師・魔法使い・弓使い・暗殺者・呪術師）。島の祠で最初の職を選びます（職の替え方は 0.9.18 から町の職の間）。旅人の木・天職・構え・連鎖・刻み目・橋の木はなくなりました。", "Six jobs (Warrior, Smith, Mage, Archer, Assassin, Shaman). The first job is chosen at the island shrine (since 0.9.18 you switch jobs in a town job room). The Wayfarer tree, callings, stances, chains, breakpoints and bridge trees are gone."),
             ("敵はこの mod の敵だけ。土地・昼夜・地形ごとの湧き。バニラの敵・動物・進捗・レシピは使いません。", "Only the mod's own enemies spawn, by region, time and terrain. Vanilla mobs, animals, advancements and recipes are not used."),
         ]),
         ("v0.5.6", "2026-10-24", [

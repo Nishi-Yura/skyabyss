@@ -18,8 +18,7 @@ public final class RegionPoints {
     }
 
     public static String weekId() {
-        var d = Towers.today();
-        return d.get(IsoFields.WEEK_BASED_YEAR) + "-W" + d.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        return jp.revati.skyabyss.util.DayClock.weekId();
     }
 
     public static void add(Player p, int region, int n) {

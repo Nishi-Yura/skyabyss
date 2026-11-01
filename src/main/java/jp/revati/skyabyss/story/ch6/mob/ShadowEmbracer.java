@@ -134,6 +134,7 @@ public class ShadowEmbracer extends MoonMob {
         // 星灯りの中に出たら固まる
         if (!sunk() && !frozen() && freezeCooldown == 0 && roarFor == 0 && StarLamps.inLight(level(), position().add(0, 1, 0))) {
             frozenFor = FREEZE_TICKS;
+            jp.revati.skyabyss.combat.BossOpenings.open(this, FREEZE_TICKS);
             entityData.set(FROZEN, true);
             playAction("frozen");
             playSound(MoonMobsSetup.EMBRACER_FROZEN.get(), 1.5f, 0.9f);
@@ -173,7 +174,8 @@ public class ShadowEmbracer extends MoonMob {
         if (sunk() || roarFor > 0) {
             return false;
         }
-        return super.hurt(source, frozen() ? amount * 1.6f : amount * 0.2f);
+        // 固まった隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)。影の中は硬い
+        return super.hurt(source, frozen() ? amount : amount * 0.2f);
     }
 
     @Override
@@ -329,6 +331,7 @@ public class ShadowEmbracer extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(ShadowEmbracer.this);
             rest = paced(phase >= 2 ? restTicks / 2 : restTicks);
         }
 

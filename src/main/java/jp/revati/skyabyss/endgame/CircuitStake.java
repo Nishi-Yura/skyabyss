@@ -102,6 +102,8 @@ public class CircuitStake extends CloudMob {
         } else if (pulseAt <= 0) {
             pulseAt = PULSE;
             pulse(sl);
+            // 脈のあとが隙 (47 の 2.1。構えは ×0.3、隙は ×1.6)
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(this);
         }
     }
 

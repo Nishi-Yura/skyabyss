@@ -210,6 +210,7 @@ public class WaningBlade extends MoonMob {
             return;
         }
         staggerFor = STAGGER_TICKS;
+        jp.revati.skyabyss.combat.BossOpenings.open(this, STAGGER_TICKS);
         playAction("kneel");
         playSound(MoonMobsSetup.BLADE_STAGGER.get(), 2.0f, 0.8f);
         sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2, getZ(), 40, 0.8, 1.2, 0.8, 0.12);
@@ -330,7 +331,8 @@ public class WaningBlade extends MoonMob {
         if (roarFor > 0) {
             return false;
         }
-        return super.hurt(source, amount * (staggerFor > 0 ? 1.6f : 1.0f));
+        // 膝をついた隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)
+        return super.hurt(source, amount);
     }
 
     @Override
@@ -547,6 +549,7 @@ public class WaningBlade extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(WaningBlade.this);
             rest = paced(phase >= 2 ? restTicks * 2 / 3 : restTicks);
         }
 

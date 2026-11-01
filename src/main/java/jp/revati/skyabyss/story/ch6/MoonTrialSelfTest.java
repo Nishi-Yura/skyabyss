@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import net.minecraft.core.BlockPos;
+
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -48,10 +50,32 @@ public final class MoonTrialSelfTest {
             check(f, !MoonTrial.open(p), "the trials are open before the core");
             check(f, MoonTrial.next(p, "valley") == 1, "the first tier should be 1");
             check(f, Math.abs(MoonTrial.hpScale(3) - 1.45) < 1e-6 && Math.abs(MoonTrial.dmgScale(5) - 1.40) < 1e-6, "tier scales are off");
+            // 主の間のチャンクを読み込んでおく (入れた主が見えるように。前の段が外したあとは読み込まれていないことがある)
+            BlockPos ac = jp.revati.skyabyss.story.ch6.valley.MoonValley.mark("arena_center");
+            for (String k : new String[] {"arena_center", "lord_spawn"}) {
+                BlockPos m = jp.revati.skyabyss.story.ch6.valley.MoonValley.mark(k);
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        moon.setChunkForced((m.getX() >> 4) + dx, (m.getZ() >> 4) + dz, true);
+                        // その場で読み込む (印だけでは同じ tick の中で見えるようにならない)
+                        moon.getChunk((m.getX() >> 4) + dx, (m.getZ() >> 4) + dz);
+                    }
+                }
+            }
+            // チャンクの印が効いて、入れた敵が見える (entity section が accessible になる) のは、溜まった主スレッドの仕事が流れたあと
+            for (int i = 0; i < 10000 && moon.getChunkSource().pollTask(); i++) {
+                // pollTask は距離の更新と主スレッドの仕事を一つずつ流す (バニラの managedBlock と同じ)
+            }
             // ふだんの主がいるあいだは挑めない
             ValleyArena.lords(moon).forEach(Entity::discard);
             MoonMob plain = ValleyArena.summon(moon);
+            SkyAbyss.LOGGER.info("SELFTEST moon trial: plain lord {} visible={} chunk={} alive={} removed={} hp={} byUuid={} near={} box={}", plain == null ? "missing" : plain.blockPosition(),
+                    ValleyArena.lords(moon).size(), moon.getChunk(ac.getX() >> 4, ac.getZ() >> 4).getFullStatus(), plain != null && plain.isAlive(), plain != null && plain.isRemoved(),
+                    plain == null ? -1 : plain.getHealth(), plain != null && moon.getEntity(plain.getUUID()) != null,
+                    plain == null ? -1 : moon.getEntitiesOfClass(ShadowEmbracer.class, plain.getBoundingBox().inflate(2)).size(), ValleyArena.box());
             if (plain != null) {
+                // 影から立ち上がる前は主の間の箱の外 (下) にいるので、立ち上がったあとの位置に置いて「いる」ことにする
+                plain.setPos(ac.getX() + 0.5, ac.getY(), ac.getZ() + 0.5);
                 spawned.add(plain);
                 check(f, MoonTrial.start(p, "valley", 1) == null, "a trial started while the normal lord was up");
                 plain.discard();
@@ -96,6 +120,14 @@ public final class MoonTrialSelfTest {
             if (moon != null) {
                 CoreArena.clear(moon);
                 ValleyArena.lords(moon).forEach(Entity::discard);
+                for (String k : new String[] {"arena_center", "lord_spawn"}) {
+                    BlockPos m = jp.revati.skyabyss.story.ch6.valley.MoonValley.mark(k);
+                    for (int dx = -1; dx <= 1; dx++) {
+                        for (int dz = -1; dz <= 1; dz++) {
+                            moon.setChunkForced((m.getX() >> 4) + dx, (m.getZ() >> 4) + dz, false);
+                        }
+                    }
+                }
             }
         }
         report(f);

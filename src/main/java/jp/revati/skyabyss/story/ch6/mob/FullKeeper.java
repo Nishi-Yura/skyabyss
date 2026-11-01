@@ -137,6 +137,7 @@ public class FullKeeper extends MoonMob {
         release = -1;
         charge = 0;
         kneelFor = KNEEL_TICKS;
+        jp.revati.skyabyss.combat.BossOpenings.open(this, KNEEL_TICKS);
         playAction("kneel");
         playSound(MoonMobsSetup.KEEPER_KNEEL.get(), 2.0f, 0.8f);
         sl.sendParticles(ParticleTypes.END_ROD, orb().x, orb().y, orb().z, 50, 1.0, 1.0, 1.0, 0.15);
@@ -269,6 +270,7 @@ public class FullKeeper extends MoonMob {
             release = -1;
             charge = 0;
             spentFor = SPENT_TICKS;
+            jp.revati.skyabyss.combat.BossOpenings.open(this, SPENT_TICKS);
         }
     }
 
@@ -286,7 +288,8 @@ public class FullKeeper extends MoonMob {
         if (roarFor > 0) {
             return false;
         }
-        float k = kneelFor > 0 ? 1.6f : spentFor > 0 ? 1.3f : charge > 0 && release < 0 ? 0.35f : 1.0f;
+        // 膝をつく・空っぽの隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)。溜めのあいだだけ硬い
+        float k = kneelFor == 0 && spentFor == 0 && charge > 0 && release < 0 ? 0.35f : 1.0f;
         return super.hurt(source, amount * k);
     }
 
@@ -379,6 +382,7 @@ public class FullKeeper extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(FullKeeper.this);
             rest = paced(phase >= 2 ? restTicks * 2 / 3 : restTicks);
         }
 

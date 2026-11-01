@@ -197,7 +197,8 @@ public class PilgrimEye extends CloudMob {
         if (roarFor > 0) {
             return false;
         }
-        return super.hurt(source, closedFor > 0 ? amount * 1.5f : amount);
+        // 目を閉じた隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)
+        return super.hurt(source, amount);
     }
 
     @Override
@@ -295,6 +296,7 @@ public class PilgrimEye extends CloudMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(PilgrimEye.this);
             rest = (int) ((phase >= 2 ? restTicks * 2 / 3 : restTicks) * SeatArena.pace());
         }
 
@@ -340,6 +342,7 @@ public class PilgrimEye extends CloudMob {
             if (t >= STARE_TELL + 6) {
                 // 巡礼の試しの段 5 は、閉じる隙が半分
                 closedFor = SeatArena.tier() >= 5 ? CLOSED / 2 : CLOSED;
+                jp.revati.skyabyss.combat.BossOpenings.open(PilgrimEye.this, closedFor);
                 playAction("closed");
                 playSound(CloudMobsSetup.PILGRIM_CLOSE.get(), 2.0f, 0.9f);
                 end(30);

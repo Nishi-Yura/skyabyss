@@ -187,6 +187,7 @@ public final class SeatArena {
                         h.tuneCloud(1, PilgrimHand.HP * PilgrimTrial.hpScale(tier), PilgrimHand.DMG * PilgrimTrial.dmgScale(tier));
                         h.addTag(TAG);
                         level.addFreshEntity(h);
+                        jp.revati.skyabyss.combat.PartyScale.apply(h, present(level).size());
                         level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 60, 2.0, 2.0, 2.0, 0.05);
                     }
                 }
@@ -201,6 +202,7 @@ public final class SeatArena {
                     e.tuneCloud(1, PilgrimEye.HP * PilgrimTrial.hpScale(tier), PilgrimEye.DMG * PilgrimTrial.dmgScale(tier));
                     e.addTag(TAG);
                     level.addFreshEntity(e);
+                    jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
                     e.playAction("call");
                 }
                 level.sendParticles(ParticleTypes.CLOUD, c.getX() + 0.5, c.getY() + 6, c.getZ() + 0.5, 120, 4.0, 2.0, 4.0, 0.08);
@@ -215,6 +217,7 @@ public final class SeatArena {
                     m.tuneCloud(1, PilgrimMoon.HP * PilgrimTrial.hpScale(tier), PilgrimMoon.DMG * PilgrimTrial.dmgScale(tier));
                     m.addTag(TAG);
                     level.addFreshEntity(m);
+                    jp.revati.skyabyss.combat.PartyScale.apply(m, present(level).size());
                     m.playAction("call");
                 }
                 callAllies(level);

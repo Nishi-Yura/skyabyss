@@ -269,9 +269,12 @@ public final class RiftSelfTest {
                     ghost.setYRot(0f);
                     ghost.strikeAs(moon, "slash", lord);
                     check(f, lord.staggered(), "the afterimage's slash did not stagger the blade");
+                    // 崩れた隙は BossOpenings (人が打った傷だけ) で出す。人数の割りは外して素の値を見る
+                    net.neoforged.neoforge.common.util.FakePlayer hitter = new net.neoforged.neoforge.common.util.FakePlayer(moon, new GameProfile(UUID.randomUUID(), "moon_rift_hitter"));
+                    lord.getPersistentData().remove(jp.revati.skyabyss.combat.PartyScale.KEY);
                     float h1 = lord.getHealth();
                     lord.invulnerableTime = 0;
-                    lord.hurt(moon.damageSources().generic(), 50f);
+                    lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                     check(f, h1 - lord.getHealth() >= 70f, "the staggered blade did not take extra damage: " + (h1 - lord.getHealth()));
                 }
                 RiftArena.waning(moon, lord);

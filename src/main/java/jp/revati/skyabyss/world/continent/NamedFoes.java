@@ -190,6 +190,8 @@ public final class NamedFoes {
             }
         }
         m.setHealth(m.getMaxHealth());
+        // 棲み家のまわりの人数で強く (受ける傷を割る。47 の 2.6)
+        jp.revati.skyabyss.combat.PartyScale.applyNearby(m, LAIR_NEAR);
         ALIVE.put(region, m.getUUID());
         REGION_OF.put(m.getUUID(), region);
         BARS.put(m.getUUID(), new ServerBossEvent(name, BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10));

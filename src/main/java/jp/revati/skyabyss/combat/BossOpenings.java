@@ -28,6 +28,8 @@ public final class BossOpenings {
     private BossOpenings() {
     }
 
+    // この印を持つ敵は構えを掛けない (壊すのが目的の的・動かない繋ぎ手など。技を出さないので隙も来ないため)
+    public static final String NO_GUARD_TAG = "skyabyss_no_guard";
     public static final float GUARD = 0.3f;
     public static final float OPEN = 1.6f;
     public static final int OPEN_TICKS = 60;
@@ -51,7 +53,7 @@ public final class BossOpenings {
         if (plantedForTest != null) {
             return plantedForTest.test(e);
         }
-        return !(e instanceof net.minecraft.world.entity.Mob m && m.isNoAi()) && BossFooting.planted(e);
+        return !(e instanceof net.minecraft.world.entity.Mob m && m.isNoAi()) && !e.getTags().contains(NO_GUARD_TAG) && BossFooting.planted(e);
     }
 
     // Telegraph から: 持ち主の技が当たり終わった

@@ -305,6 +305,7 @@ public class MoonCoreBoss extends MoonMob {
                 }
                 if (t >= 20) {
                     sweep = -1;
+                    jp.revati.skyabyss.combat.BossOpenings.moveEnded(this);
                     r = SHARD_R;
                 }
             }
@@ -357,6 +358,7 @@ public class MoonCoreBoss extends MoonMob {
             // 崩れる
             rewind = -1;
             staggerFor = STAGGER_TICKS;
+            jp.revati.skyabyss.combat.BossOpenings.open(this, STAGGER_TICKS);
             playAction("stagger");
             playSound(MoonMobsSetup.CORE_BREAK.get(), 2.5f, 0.8f);
             sl.sendParticles(ParticleTypes.FLASH, orb().x, orb().y, orb().z, 2, 0, 0, 0, 0);
@@ -433,6 +435,7 @@ public class MoonCoreBoss extends MoonMob {
             return;
         }
         drop = -1;
+        jp.revati.skyabyss.combat.BossOpenings.moveEnded(this);
         stopTriggeredAnim("action", "drop");
         playSound(MoonMobsSetup.CORE_DROP.get(), 4.0f, 0.6f);
         sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 2, c.z, 3, 6, 1, 6, 0);
@@ -480,7 +483,8 @@ public class MoonCoreBoss extends MoonMob {
             }
             return false;
         }
-        return super.hurt(source, amount * (staggerFor > 0 ? 1.6f : 1.0f));
+        // 崩れた隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)
+        return super.hurt(source, amount);
     }
 
     @Override

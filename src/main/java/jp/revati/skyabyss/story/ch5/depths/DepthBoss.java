@@ -361,6 +361,8 @@ public final class DepthBoss {
 
     static void endMove(LivingEntity king, Fight f) {
         freeze(king, false);
+        // 技が終わった: 隙 (47 の 2.1)
+        jp.revati.skyabyss.combat.BossOpenings.moveEnded(king);
         f.active = null;
         f.points.clear();
         f.cooldown = cooldown(f.bossNo, f.phase);

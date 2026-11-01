@@ -72,8 +72,9 @@ public final class GuildRequests {
     public static final int REWARD_COINS = 20;
     public static final int REWARD_SHARDS = 1;
 
+    // 週 (実時間の ISO 週。旗取り・釣り大会と同じ時計。util/DayClock)
     public static long week(MinecraftServer server) {
-        return Math.floorDiv(server.overworld().getDayTime() / 24000L, Repeats.WEEK_DAYS);
+        return jp.revati.skyabyss.util.DayClock.weekNumber();
     }
 
     // その週の頼み (純粋。ギルドの ID と週で決まる)

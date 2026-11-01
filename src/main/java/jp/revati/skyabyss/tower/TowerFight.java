@@ -238,6 +238,8 @@ public final class TowerFight {
         // 技
         if (!move.isEmpty() && now >= moveEnd) {
             move = "";
+            // 技が終わった: 隙 (47 の 2.1。構えは ×0.3、隙は ×1.6)
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(master);
             restUntil = now + (long) (REST * pace() * (moon != null ? 1.6 : 1.0));
         }
         if (move.isEmpty() && now >= restUntil && !targets(here).isEmpty()) {
@@ -455,6 +457,8 @@ public final class TowerFight {
             Mob b = TowerWorld.foe(level, CloudMobsSetup.NET_CASTER.get(), run.markCenter(mk), 300, 10, n, run.id);
             if (b != null) {
                 b.setNoAi(true);
+                // 動かず技も出さないので、構え (×0.3) は掛けない
+                b.addTag(jp.revati.skyabyss.combat.BossOpenings.NO_GUARD_TAG);
                 binders.add(b);
                 level.sendParticles(BIND, b.getX(), b.getY() + 1, b.getZ(), 30, 0.5, 1.0, 0.5, 0);
             }
@@ -500,6 +504,8 @@ public final class TowerFight {
                 TowerMoon.DMG, n, run.id);
         if (m instanceof TowerMoon tm) {
             moon = tm;
+            // 壊すのが目的の的。構え (×0.3) は掛けない
+            tm.addTag(jp.revati.skyabyss.combat.BossOpenings.NO_GUARD_TAG);
             moonBorn = now;
             tm.setSize(1.0);
             tm.playAction("call");
@@ -707,6 +713,7 @@ public final class TowerFight {
                 p.hurt(e.mob.attackSource(), e.mob.hit((e.big ? 1.2 : 0.7) * stokeMult()));
             }
             e.target = null;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(e.mob);
             e.next = now + 140 + rng.nextInt(100) + (e.big ? 40 : 0);
         }
     }

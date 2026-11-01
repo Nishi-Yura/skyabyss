@@ -3,9 +3,10 @@ package jp.revati.skyabyss.quest;
 import net.minecraft.server.MinecraftServer;
 
 // 繰り返すクエストの周期。
-//   daily  : オーバーワールドのゲーム内の日 (夜明けで替わる。寝て夜を飛ばしても次の日になる。
-//            doDaylightCycle を切っていても、経ったゲーム時間 (24000 tick) ごとに次の日になる)
-//   weekly : 7 日ごと (週替わり)
+//   daily  : 実時間の一日 (朝 5 時で替わる。util/DayClock。塔・巡り路・旗取り・店の品揃えと同じ時計。2026-11-02 に一本にした)
+//   weekly : 実時間の一週 (ISO 週。月曜の朝 5 時で替わる)
+//   day()  : ゲーム内の日 (夜明けで替わる。寝て夜を飛ばしても次の日。doDaylightCycle を切っていても 24000 tick ごとに次の日)。
+//            物語の「毎日の小さな異変」(story/ch1/Oddities) など、遊びの中の日数を数える所だけが使う
 // 受けたときの周期を記録に残し、周期が替わるまで同じクエストは受け直せない。報酬は周期ごとに一度 (QuestLog.claimed)
 public final class Repeats {
     public static final long DAY = 24000L;
@@ -24,19 +25,19 @@ public final class Repeats {
     }
 
     public static long cycle(MinecraftServer server, String repeat) {
-        long day = day(server);
         return switch (repeat) {
-            case "weekly" -> Math.floorDiv(day, WEEK_DAYS);
-            case "daily" -> day;
+            case "weekly" -> jp.revati.skyabyss.util.DayClock.weekNumber();
+            case "daily" -> jp.revati.skyabyss.util.DayClock.epochDay();
             default -> -1;
         };
     }
 
-    // 次の周期までのゲーム内の時間 (tick)。板に「次の入れ替えまで」を出すのに使う
+    // 次の周期までの時間 (tick。実時間を 20 tick = 1 秒で)。板に「次の入れ替えまで」を出すのに使う
     public static long untilNext(MinecraftServer server, String repeat) {
-        return untilNext(server.overworld().getDayTime(), server.overworld().getGameTime(), repeat);
+        return repeat.equals("weekly") ? jp.revati.skyabyss.util.DayClock.ticksUntilNextWeek() : jp.revati.skyabyss.util.DayClock.ticksUntilNextDay();
     }
 
+    // ゲーム内の日で数えたときの残り (純粋な計算。自己テストが見る)
     public static long untilNext(long dayTime, long gameTime, String repeat) {
         long span = repeat.equals("weekly") ? DAY * WEEK_DAYS : DAY;
         // 今の日を決めているほうの時計で測る (昼夜が止まっていればゲーム時間)

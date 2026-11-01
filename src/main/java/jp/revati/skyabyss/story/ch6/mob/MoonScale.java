@@ -194,7 +194,8 @@ public class MoonScale extends MoonMob {
         if (roarFor > 0) {
             return false;
         }
-        return super.hurt(source, toppled() ? amount * 1.6f : amount * 0.35f);
+        // 倒れた隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)。立っているあいだは錘で硬い
+        return super.hurt(source, toppled() ? amount : amount * 0.35f);
     }
 
     @Override
@@ -297,6 +298,7 @@ public class MoonScale extends MoonMob {
     public void topple(ServerLevel sl) {
         toppleFor = TOPPLE_TICKS;
         tiltFor = 0;
+        jp.revati.skyabyss.combat.BossOpenings.open(this, TOPPLE_TICKS);
         playAction("topple");
         playSound(MoonMobsSetup.SCALE_TOPPLE.get(), 2.0f, 0.8f);
         for (long[] w : landed) {
@@ -437,6 +439,7 @@ public class MoonScale extends MoonMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(MoonScale.this);
             rest = paced(phase >= 2 ? restTicks * 2 / 3 : restTicks);
         }
 

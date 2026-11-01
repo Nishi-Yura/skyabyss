@@ -187,6 +187,7 @@ public class PilgrimHand extends CloudMob {
     void end() {
         move = "";
         t = 0;
+        jp.revati.skyabyss.combat.BossOpenings.moveEnded(this);
         boolean alone = SeatArena.parts((ServerLevel) level()).stream().filter(e -> e instanceof PilgrimHand).count() <= 1;
         rest = (int) ((alone ? 34 : 60) * SeatArena.pace());
     }
@@ -235,6 +236,7 @@ public class PilgrimHand extends CloudMob {
         }
         move = "stuck";
         t = 0;
+        jp.revati.skyabyss.combat.BossOpenings.open(this, STUCK);
     }
 
     // 削る: 輪の一方へ構えて (掻く跡の光) → 掻く
@@ -295,7 +297,8 @@ public class PilgrimHand extends CloudMob {
         if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return super.hurt(source, amount);
         }
-        return super.hurt(source, stuck() ? amount * 1.5f : amount);
+        // 床に手を突いた隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)
+        return super.hurt(source, amount);
     }
 
     @Override

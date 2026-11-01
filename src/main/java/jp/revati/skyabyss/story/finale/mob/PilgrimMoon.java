@@ -267,6 +267,7 @@ public class PilgrimMoon extends CloudMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(PilgrimMoon.this);
             rest = (int) ((phase >= 2 ? restTicks / 2 : restTicks) * SeatArena.pace());
         }
 

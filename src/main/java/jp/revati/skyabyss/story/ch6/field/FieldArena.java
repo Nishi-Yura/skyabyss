@@ -67,6 +67,8 @@ public final class FieldArena {
         e.tuneMoon(2, full, false, FullKeeper.HP / MoonMob.SECTION_HP[2], FullKeeper.DMG / MoonMob.SECTION_DMG[2]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 人数で強く (受ける傷を割る。47 の 2.6)
+        jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
         e.playAction("roar");
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 80, 1.2, 3.0, 1.2, 0.05);
         level.playSound(null, at, MoonMobsSetup.KEEPER_ROAR.get(), net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 0.8f);

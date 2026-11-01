@@ -619,6 +619,7 @@ public class FounderBoss extends CloudMob {
         void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(FounderBoss.this);
             rest = phase >= 2 ? restTicks * 2 / 3 : restTicks;
         }
 

@@ -211,34 +211,29 @@
 ### 試練で詰まった
 
 - 休み場の焚き火に**しゃがんで右クリック**すると、試練をあきらめて背中の入口へ戻れます。
-- 地上へ戻りたいとき: 岩鯨は錨石を右クリック、潮殻は潮門、雷翼は羽根の門、余燼は口の前の「見送りの石」に立ちます。うまく出られないときは、管理者に `/skyabyss titan leave` を頼めます。
+- 地上へ戻りたいとき: 岩鯨は錨石を右クリック、潮殻は潮門、雷翼は羽根の門、余燼は口の前の「見送りの石」に立ちます。うまく出られないときは、管理者に `/skyabyss play goto overworld <人>` を頼めます。
 - 次の巨神が見つからないとき: U のクエストログに手がかりがあります。語り部とイサナは、話を聞くたびに少しずつ教えてくれます。
 
 ### 管理者（OP）のコマンド
 
-テストに役立つものだけを載せます。サーバーの管理者か、チートを許可したワールドで使えます。`<人>` はプレイヤー名です。
+試遊の jar で使えるのは `/skyabyss play …` と `/skyabyss inspect …` の二つだけです（ほかの開発用のコマンドは隠れています）。サーバーの管理者か、チートを許可したワールドで使えます。`[人]` はプレイヤー名か `@a`（省くと自分）。全部の一覧は `/skyabyss play help`。
 
 | コマンド | 使いどころ |
 | --- | --- |
-| `/skyabyss progress show <人>` | 物語の進みを見る |
-| `/skyabyss progress grant <人> <巨神>` | その巨神の心臓を止めたことにして、次の巨神に乗れるようにする。巨神は `stone_whale`・`tide_shell`・`thunder_wing`・`ember` |
-| `/skyabyss progress world grant <巨神>` | ワールドの進みだけ進めて、次の巨神を出す |
-| `/skyabyss level set <人> <1-50>`、`level addxp <人> <量>` | レベルを決める、経験値を足す |
-| `/skyabyss quest list <人>`、`quest next <人> <クエスト>` | クエストの進みを見る、一段進める |
-| `/skyabyss cinematic play <場面> [人]`、`cinematic stop [人]`、`cinematic reset [人]` | 場面（`opening`・`whale_first_sight`・`heart_<巨神>`・`titan_end_<巨神>`）を流す・止める・「見た記録」を消す。`[人]` は `@a` や名前（省くと自分）。マルチで他の人に見せたいときに |
-| `/skyabyss titan summon <名前>` | 巨神を近くに呼ぶ。名前は `tide`・`storm`・`ember`（省略すると岩鯨） |
-| `/skyabyss titan rest <名前>`（`here` を足すとその場で） | 巨神をすぐ休ませる（乗るため） |
-| `/skyabyss titan board <名前>`、`titan leave` | 背中へ直接渡る、背中から地上へ戻る |
-| `/skyabyss titan reset <名前>` | 背中の試練を最初に戻す |
-| `/skyabyss titan storm calm`・`storm`・`cycle` | 雷翼の背の風を凪・嵐に止める、元に戻す（雷翼の背の中で） |
-| `/skyabyss tideheart start`・`win`・`reset`（`stormheart`・`emberheart` も同じ） | 心臓の戦いをすぐ始める、倒したことにする、最初に戻す |
-| `/skyabyss story ready <人>` | 四体を止めたことにして欠片を四つにし、天の鍵の場面を見る |
-| `/skyabyss lore book`、`lore unlock <人> all` | 伝承の書を渡す、項目をすべて記す |
-| `/skyabyss pass` | 空の影をすぐ通す |
-| `/skyabyss opening status [人]`、`opening <拍子> [人]`、`opening reset [人]` | 序盤の進みを見る、その拍子へ進める、最初に戻す。拍子は `awake`・`camp`・`trail`・`footprints`・`shadow`・`storyteller`・`footsteps`・`isana`・`bones`・`song`・`whale` |
-| `/skyabyss npc village` | 近くの村に語り部を立たせる。`npc spawn <storyteller|whale_chaser>` で足もとにも立てられる |
+| `/skyabyss play status [人]` | 章・メインクエストの段階・止めた巨神を見る |
+| `/skyabyss play chapter <0-5> [人]` | その章の始めの状態にする（0 序章、1 岩鯨、2 潮殻、3 雷翼、4 余燼、5 深淵）。前の章の心臓は止めたことになる |
+| `/skyabyss play goto <場所> [人]` | 場所へ運ぶ（`overworld`・`whale` などの巨神・`<巨神>-<地点>`・`abyss`・`abyss-depth-<階>`） |
+| `/skyabyss play skip opening [人]`、`play now [人]` | 序章を飛ばす、今の目的の次の出来事をその場で起こす（序盤の拍子・予兆が起きないとき） |
+| `/skyabyss play boss <whale|tide|storm|ember|raiju|smith|warden|nightmare> [人] [段階]` | その主の所へ運ぶ（心臓・中ボス・番人） |
+| `/skyabyss play raid <巨神> <部屋> [人]` | 背の順路の部屋へ運ぶ（部屋は `1`〜`3`、`walk`・`wit`・`fight`） |
+| `/skyabyss play trials <巨神> [人]` | その背の試練を全部済ませたことにする |
+| `/skyabyss play quest list|next|set|done|reset …` | 頼みの進みを見る、一段進める、段を決める、済ませる、戻す |
+| `/skyabyss play lore unlock-all|reset [人]` | 伝承を全部記す、白紙に戻す |
+| `/skyabyss play kit <iron|whale|tide|storm|ember> [人]` | その章の装備一式を渡す |
+| `/skyabyss play heal|feed [人]`、`play god on|off [人]`、`play reset [人]` | 回復、満腹、無敵、その人を初めての状態に戻す |
+| `/skyabyss play time day|noon|night|midnight`、`play day <n>`、`play fast on|off`、`play weather clear|rain|thunder`、`play peaceful on|off` | 時刻・日数・早送り・天気・難易度 |
+| `/skyabyss play box give <種類> [数]`、`play box open` | 封の箱を出す、封切り師の画面をその場で開く |
 | `/skyabyss inspect <人>` | ほかの人の控え帳を見る |
-| `/skyabyss affix show`、`affix reroll` | 手の装備の特性を見る、抽選し直す |
 
 - ゲームルール（`/gamerule`）で、決まりを切れます:
   - `skyabyssStoryGate false` … 巨神の順番と乗る資格の決まりを切る（好きな順に乗れる）
@@ -255,12 +250,12 @@
 
 ベータ版で、すでに分かっていることです。
 
-- **余燼の背中**は、部屋のつなぎ目と、歩いて行ける道を作る側で監査して直しました。まだ人が最後まで通しで遊んだことはありません。部屋と部屋のあいだで噛み合わない所、行けない所があれば教えてください。そのときは、管理者に `/skyabyss titan reset ember` か、`/skyabyss emberheart start` を頼んでください。
-- 章の小さな仕掛けや、巨神が現れる前の予兆は、人が通しで遊んで確かめていません。濃さ（出すぎる・気づかない）の感想をください。見る者が巨神の方を向く場面や、章ごとの村の小さな変化は、まだ作っていません。
-- 潮の真珠と潮鳴り石の絵は、仮のものです。
-- 終章「雲海」は、人が通しで遊んでいる途中です。島の主・座の三形態・巡礼の試しの長さと難しさ、予告の見やすさ、四人の術の分かりやすさを教えてください（[終章の確かめ表](review/playtest_finale.md)）。
+- 人が通しで遊んでいない所があります: 章の小さな仕掛けと予兆（見る者の向き・縁の音・暮らしの変化）、雷翼・余燼の背の通し、二人以上での潮殻の背、終章「雲海」（島の主・座の三形態・巡礼の試し）、あいだの塔、巡り路、大陸の大事件、マルチ全般（特に 2 つのパーティが同じ背にいるとき）。濃さ・長さ・難しさの感想をください（[終章の確かめ表](review/playtest_finale.md)、[0.9.21 の確かめ順](review/playtest_0.9.21.md)）。
+- 月・雲海・塔・深みの主にも、心臓と同じ「構えと隙」（技のあとの 3 秒は大きく削れる。白い火花が合図）と、人数で強くなる決まりを入れたばかりです。体力の数字はまだ合わせていないので、長すぎる・短すぎるを教えてください。
+- 日替わり・週替わり（言伝ての板・店の品揃え・組合の頼み・巡り路・塔・旗取り・釣り大会）は、どれも実時間の朝 5 時・月曜で替わります。ゲームの中で寝ても替わりません。
+- 余燼の背は、部屋のつなぎ目と歩ける道を作る側で監査して直しました。噛み合わない所があれば、管理者に `/skyabyss play raid ember <部屋>` か `/skyabyss play boss ember` を頼んでください。
 - 世界を開いた直後の数分は、裏で背中の島を建てているので、動きが少し重いことがあります。そのあいだに岩鯨の背中へ乗ろうとすると、一瞬止まることがあります。
-- 序盤の演出（暗転・足音・歌と星の欠け・骨の丘など）は、通しで人が遊んで確かめていません。鳴るはずの所で音が鳴らない、目的の帯の方角が合わない、拍子が起きない、などがあれば教えてください。起きないときは、管理者に `/skyabyss opening <拍子>` を頼めます。
+- 序盤の演出（暗転・足音・歌と星の欠け・骨の丘など）で、鳴るはずの所で音が鳴らない、目的の帯の方角が合わない、拍子が起きない、などがあれば教えてください。起きないときは、管理者に `/skyabyss play now <人>` を頼めます。
 - 知らせの記録（N）は、その遊びのあいだだけの記録です。ゲームを閉じると消えます。
 - 天の鍵の場面は、そろえた本人の画面にだけ出ます。
 - 倒した巨神の心臓の欠片が 4 つそろわないときは、控え帳（B）の「呼び戻す」を使ってください。

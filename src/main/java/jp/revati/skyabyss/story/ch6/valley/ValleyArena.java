@@ -32,7 +32,7 @@ public final class ValleyArena {
     private ValleyArena() {
     }
 
-    static AABB box() {
+    public static AABB box() {
         return new AABB(MoonValley.mark("arena_center")).inflate(RADIUS, 12, RADIUS);
     }
 
@@ -65,6 +65,8 @@ public final class ValleyArena {
         e.tuneMoon(0, nm, false, ShadowEmbracer.HP / MoonMob.SECTION_HP[0], ShadowEmbracer.DMG / MoonMob.SECTION_DMG[0]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 人数で強く (受ける傷を割る。47 の 2.6)
+        jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
         e.playAction("rise");
         level.sendParticles(ParticleTypes.SQUID_INK, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 80, 1.2, 1.5, 1.2, 0.05);
         level.playSound(null, at, MoonMobsSetup.EMBRACER_ROAR.get(), net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 0.7f);

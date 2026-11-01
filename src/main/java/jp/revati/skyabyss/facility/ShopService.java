@@ -47,8 +47,9 @@ public final class ShopService {
     private ShopService() {
     }
 
+    // 品揃えの日 (実時間。朝 5 時で替わる。板・組合の頼みと同じ時計。util/DayClock)
     public static long day(ServerPlayer player) {
-        return player.server.overworld().getDayTime() / 24000L;
+        return jp.revati.skyabyss.util.DayClock.epochDay();
     }
 
     // 開く (npc = 店の人。null = どこからでも)

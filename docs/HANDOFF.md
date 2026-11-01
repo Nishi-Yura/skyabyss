@@ -2,6 +2,17 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
+## 2026-11-02 の未明: 全体監査の「高」5 件を直した
+
+全体監査は `docs/review/audit_2026-11-01.md`（五つの観点・優先度順。中 13 件・低 4 件はまだ）。直したのは高の 5 件:
+
+1. **終盤の主の隙**（`combat/BossOpenings`）: 月の主 5 体・雲海の島の主 4 体と巡礼者の三形態・始祖・塔の主と側の目・深みの王・淵の杭は Telegraph を使わず、隙が一度も来ないまま ×0.3 で削り切る形だった。技の終わりで `BossOpenings.moveEnded(主)`、主の弱い時間（膝・閉じた目・固まる・床に手を突く）は `BossOpenings.open(主, 長さ)` に寄せ、自前の ×1.5〜1.6 は外した。塔の落ちる月と繋ぎ手は印 `skyabyss_no_guard` で構えを掛けない。設計 47 の 2.6。
+2. **人数で強く**（新 `combat/PartyScale`）: 人から受ける傷を `HeartBalance.partyScale(人数)` で割る（体力の上限 1024 を越えないため。心臓・始祖と同じ形）。月の舞台 5・雲海の舞台 4 と座・名のある敵の棲み家で湧かせるときに書く。体力の数字はまだ試遊で詰めていない。
+3. **職の替え方の公開文**: README・サイト（`pages_a`・`pages_c`）・設計 43 の「持った武器で職が決まる」を「島の祠で選び、町の職の間で替える」に。
+4. **時計を一つに**（新 `util/DayClock`。朝 5 時・ISO 週）: 言伝ての板（`quest/Repeats.cycle`）・店の品揃え（`ShopService.day`）・組合の週の頼み（`GuildRequests.week`）を実時間に。塔・巡り路・旗取り・釣り大会も `DayClock` を見る。物語の日（`Repeats.day`・`Oddities`・会話の日）はゲーム内の日のまま。自己テスト `freequest` は `DayClock.testOffsetDays` で日を進める。前の世界の板・店は一度だけ顔ぶれが替わる。設計 07・35・54。
+5. **配布物**: 遊び方の管理者コマンドを製品 jar で見える `/skyabyss play …` に書き直し、既知の問題を今の形に。サイトの既知の制限も直し、`python tools/site/build.py` で 0.9.21 に作り直した。**版の名前（ベータ → v1）と `mod_version` はユーザーの判断で**（`docs/release.md`）。
+- 確かめ: compileJava。自己テスト `freequest,combat rules,guild,facility,tower,founder,cloudsea,moon *,circuit,world event,abyss depths,new foes,titan lairs,play,command gate,lang,progress,heart balance` を新しい世界で流して通った。直したテスト: `freequest` の保存の検めは `Repeats.cycle`、月の主 3 体（崖・野・淵）の「弱い時間の傷」は人の傷（`playerAttack`）で見て `PartyScale.KEY` を外す。`moon trial` は前の段が主の間のチャンクを外したあとだと、同じ tick に湧かせた主が entity section にまだ見えず（チャンクの印は効いていても、見える化は主スレッドの仕事待ち）落ちていた（順番しだい。今回の変更とは別）。`arena_center`・`lord_spawn` のチャンクを読み込み、`ServerChunkCache.pollTask()` を回して溜まった仕事を流してから湧かせるようにした（`ValleyArena.box()` を public に）。全段の通しはこの直しのあとまだ流していない。
+
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。

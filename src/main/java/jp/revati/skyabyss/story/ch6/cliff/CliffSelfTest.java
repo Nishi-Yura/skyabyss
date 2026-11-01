@@ -200,16 +200,19 @@ public final class CliffSelfTest {
             spawned.add(lord);
             check(f, lord != null && lord.getMaxHealth() >= MoonScale.HP - 0.01, "the moon scale did not appear with its hp: " + (lord == null ? -1 : lord.getMaxHealth()));
             if (lord != null) {
+                // 構えと隙は人が打った傷にだけ掛かる (BossOpenings)。人数の割り (PartyScale) は外して素の値を見る
+                net.neoforged.neoforge.common.util.FakePlayer hitter = new net.neoforged.neoforge.common.util.FakePlayer(moon, new GameProfile(UUID.randomUUID(), "moon_hitter"));
+                lord.getPersistentData().remove(jp.revati.skyabyss.combat.PartyScale.KEY);
                 float h0 = lord.getHealth();
                 lord.invulnerableTime = 0;
-                lord.hurt(moon.damageSources().generic(), 50f);
+                lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                 float d1 = h0 - lord.getHealth();
                 check(f, d1 <= 18f, "the balanced scale took full damage: " + d1);
                 lord.topple(moon);
                 check(f, lord.toppled(), "the scale did not topple");
                 float h1 = lord.getHealth();
                 lord.invulnerableTime = 0;
-                lord.hurt(moon.damageSources().generic(), 50f);
+                lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                 float d2 = h1 - lord.getHealth();
                 check(f, d2 >= 70f, "the toppled scale did not take extra damage: " + d2);
                 CliffArena.summon(moon);

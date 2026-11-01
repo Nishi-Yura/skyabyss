@@ -220,10 +220,13 @@ public final class FieldSelfTest {
                     "the keeper did not appear with its hp: " + (lord == null ? -1 : lord.getMaxHealth()));
             if (lord != null) {
                 FieldTide.setTo(moon, FieldTide.Tide.BRIGHT, 10);
+                // 構えと隙は人が打った傷にだけ掛かる (BossOpenings)。人数の割り (PartyScale) は外して素の値を見る
+                net.neoforged.neoforge.common.util.FakePlayer hitter = new net.neoforged.neoforge.common.util.FakePlayer(moon, new GameProfile(UUID.randomUUID(), "moon_hitter"));
+                lord.getPersistentData().remove(jp.revati.skyabyss.combat.PartyScale.KEY);
                 lord.chargeForTest(40);
                 float h0 = lord.getHealth();
                 lord.invulnerableTime = 0;
-                lord.hurt(moon.damageSources().generic(), 50f);
+                lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                 float d1 = h0 - lord.getHealth();
                 check(f, d1 <= 18f, "the charging keeper took full damage: " + d1);
                 lord.chargeForTest(FullKeeper.HP > 0 ? 160 : 0);
@@ -234,7 +237,7 @@ public final class FieldSelfTest {
                 check(f, lord.kneeling() && !lord.releasing(), "moment stop during the release did not make the keeper kneel");
                 float h1 = lord.getHealth();
                 lord.invulnerableTime = 0;
-                lord.hurt(moon.damageSources().generic(), 50f);
+                lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                 float d2 = h1 - lord.getHealth();
                 check(f, d2 >= 70f, "the kneeling keeper did not take extra damage: " + d2);
                 FieldArena.summon(moon);

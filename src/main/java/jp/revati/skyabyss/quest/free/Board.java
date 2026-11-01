@@ -71,7 +71,7 @@ public final class Board {
 
     // ---------------------------------------------------------------- 今日の顔ぶれ (ワールドで一つ)
     public static List<QuestDef> todays(MinecraftServer server) {
-        long day = Repeats.day(server);
+        long day = Repeats.cycle(server, "daily");
         int world = Progression.worldStage(server);
         List<QuestDef> daily = new ArrayList<>();
         List<QuestDef> weekly = new ArrayList<>();
@@ -97,7 +97,7 @@ public final class Board {
 
     // 今日受けた日替わりの数 (終えたものも数える)
     public static int usedToday(ServerPlayer player) {
-        long today = Repeats.day(player.server);
+        long today = Repeats.cycle(player.server, "daily");
         int n = 0;
         for (Map.Entry<String, QuestLog.Entry> e : QuestLog.of(player).quests().entrySet()) {
             QuestDef def = QuestManager.quest(e.getKey());

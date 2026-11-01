@@ -67,6 +67,8 @@ public final class CliffArena {
                 MoonScale.DMG / jp.revati.skyabyss.story.ch6.mob.MoonMob.SECTION_DMG[1]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 人数で強く (受ける傷を割る。47 の 2.6)
+        jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
         e.playAction("roar");
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 60, 1.2, 2.0, 1.2, 0.05);
         level.playSound(null, at, MoonMobsSetup.SCALE_ROAR.get(), net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 0.7f);

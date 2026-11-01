@@ -196,7 +196,8 @@ public class LampEye extends CloudMob {
         if (roarFor > 0) {
             return false;
         }
-        return super.hurt(source, closedFor > 0 ? amount * 1.5f : amount);
+        // 目を閉じた隙は BossOpenings の隙 (×1.6。構えは ×0.3) で出す (47 の 2.1)
+        return super.hurt(source, amount);
     }
 
     @Override
@@ -288,6 +289,7 @@ public class LampEye extends CloudMob {
         private void end(int restTicks) {
             move = "";
             t = 0;
+            jp.revati.skyabyss.combat.BossOpenings.moveEnded(LampEye.this);
             rest = phase >= 2 ? restTicks * 2 / 3 : restTicks;
         }
 
@@ -332,6 +334,7 @@ public class LampEye extends CloudMob {
             }
             if (t >= STARE_TELL + 6) {
                 closedFor = CLOSED;
+                jp.revati.skyabyss.combat.BossOpenings.open(LampEye.this, closedFor);
                 playAction("closed");
                 playSound(CloudMobsSetup.EYE_CLOSE.get(), 1.6f, 0.9f);
                 end(30);

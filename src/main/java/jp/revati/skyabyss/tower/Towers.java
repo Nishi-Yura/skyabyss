@@ -59,7 +59,7 @@ public final class Towers {
 
     // 今日 (朝 5 時で切り替わる)
     public static LocalDate today() {
-        return LocalDateTime.now().minusHours(5).toLocalDate();
+        return jp.revati.skyabyss.util.DayClock.today();
     }
 
     public static boolean usedToday(ServerPlayer p) {

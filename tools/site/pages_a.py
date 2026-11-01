@@ -37,7 +37,7 @@ def index():
         feat("item/stone_whale_call.png", "四体の巨神", "Four titans",
              "空・海・嵐・地の中を行く巨神に、一体ずつ挑みます。", "Take on titans that move through sky, sea, storm and earth, one by one.", "titans.html"),
         feat("skill/05.png", "6 つの職", "Six jobs",
-             "戦士・鍛冶師・魔法使い・弓使い・暗殺者・呪術師。持った武器で職が決まり、持ち替えればその場で替わります。", "Warrior, Smith, Mage, Archer, Assassin and Shaman. The weapon in your hand decides the job; swap it and the job swaps.", "skills.html"),
+             "戦士・鍛冶師・魔法使い・弓使い・暗殺者・呪術師。島の祠で選び、町の「職の間」でいつでも替えられます。技の木の点は職ごとに残ります。", "Warrior, Smith, Mage, Archer, Assassin and Shaman. Choose at the island shrine and switch any time in a town's job room; skill points stay with each job.", "skills.html"),
         feat("item/resonance_shard_ember.png", "転生と深淵", "Rebirth and the Abyss",
              "Lv 50 で転生し、魂盤と恩恵でビルドを作り直します。深淵の難度も。", "Rebirth at Lv 50, rebuild with the soul board and boons, then try Abyss difficulty.", "rebirth.html"),
         feat("item/waterway_fang.png", "章ごと、職ごとの武器", "Weapons per chapter and job",

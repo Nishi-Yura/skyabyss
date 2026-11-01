@@ -83,6 +83,7 @@ public final class FreeQuestSelfTest {
             progress.restore(progressSaved, server.registryAccess());
             parties.restore(partiesSaved, server.registryAccess());
             level.setDayTime(dayBefore);
+            jp.revati.skyabyss.util.DayClock.testOffsetDays = 0;
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST freequest: {}", n));
         if (failures.isEmpty()) {
@@ -588,15 +589,15 @@ public final class FreeQuestSelfTest {
         }
         check(totalXp(p) == before, "a daily paid twice in one day", failures);
 
-        // 受けたまま日が替わっても残る。日が替わると、また受けられる (見張りの巡りが板に出る日まで進める)
-        level.setDayTime(level.getDayTime() + Repeats.DAY);
+        // 受けたまま日が替わっても残る。日が替わると、また受けられる (見張りの巡りが板に出る日まで進める)。日は実時間 (DayClock) なので時計をずらす
+        jp.revati.skyabyss.util.DayClock.testOffsetDays++;
         for (int i = 0; i < 40 && !onBoard(server, "daily_bone_sentry"); i++) {
-            level.setDayTime(level.getDayTime() + Repeats.DAY);
+            jp.revati.skyabyss.util.DayClock.testOffsetDays++;
         }
         if (!sentryThird) {
             check(acceptOrStart(server, p, "daily_bone_sentry"), "could not take the sentry rounds on a new day at stage 1", failures);
         }
-        level.setDayTime(level.getDayTime() + Repeats.DAY);
+        jp.revati.skyabyss.util.DayClock.testOffsetDays++;
         check(stage(p, "daily_bone_sentry").equals("rounds"), "an unfinished daily vanished at dawn", failures);
         check(state(Board.lines(p), "daily_bone_sentry") == Board.ACTIVE, "an unfinished daily is not shown as in progress", failures);
         before = totalXp(p);
@@ -623,7 +624,7 @@ public final class FreeQuestSelfTest {
         check(stage(p, "weekly_back_trials").equals("done") && stage(p, "weekly_heart_again").equals("done"), "weeklies did not finish", failures);
         check(QuestItems.count(p, "skyabyss:resonance_crystal", null) >= 1, "heart again did not give a crystal", failures);
         check(!Board.accept(p, "weekly_heart_again"), "a weekly was taken twice in a week", failures);
-        level.setDayTime(level.getDayTime() + Repeats.DAY * Repeats.WEEK_DAYS);
+        jp.revati.skyabyss.util.DayClock.testOffsetDays += Repeats.WEEK_DAYS;
         check(acceptOrStart(server, p, "weekly_heart_again"), "a weekly could not be taken in the next week", failures);
         // NPC が板の代わりに見せる (語り部の「村の頼みごと」) と、同じ決まりで受けられる
         FakePlayer q = player(level, 6, at);
@@ -719,7 +720,7 @@ public final class FreeQuestSelfTest {
         Tag tag = QuestLog.CODEC.encodeStart(NbtOps.INSTANCE, log).getOrThrow();
         QuestLog back = QuestLog.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
         check(back.equals(log), "quest log with cycles and origins did not round-trip", failures);
-        check(back.entry("daily_night_watch").origin == at.asLong() && back.entry("daily_night_watch").cycle == Repeats.day(server),
+        check(back.entry("daily_night_watch").origin == at.asLong() && back.entry("daily_night_watch").cycle == Repeats.cycle(server, "daily"),
                 "origin or cycle lost on save", failures);
         // ワールドの記録 (板を立てた村、数えた影と潮)
         FreeQuestData d = FreeQuestData.get(level);
