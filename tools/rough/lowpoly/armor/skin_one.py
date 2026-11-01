@@ -1,7 +1,7 @@
-"""スキン (docs/design/54 の 6.1。物語と関係のない見た目だけの一式) の一着一案。最初の組 = 侍・海賊の船長・白銀の騎士・宇宙飛行士。
+"""スキン (docs/design/54 の 6.1。物語と関係のない見た目だけの一式) の一着一案。最初の組 = 侍・海賊の船長・白銀の騎士・宇宙飛行士。二組目 = 忍び・魔女・料理人・吸血鬼の貴族。
 作りは旅装 (travel_one) と同じ: 部位 helmet / chestplate / leggings / boots、骨は armor*、塗りは tpaint (材質 → 色と質感の表をこのファイルで足す)。
 色違いにしない: 一着ずつ形が違う。顔を出すもの (侍・海賊) は頭の前を開け、騎士の兜と宇宙の兜は顔を覆う。
-実行: python skin_one.py [名前 ...]          -> docs/review/skins/<名前>.png (前・横・後ろ・3/4) と docs/review/skins/skins_1.png (並べたもの)
+実行: python skin_one.py [組|名前 ...]     -> docs/review/skins/<名前>.png (前・横・後ろ・3/4) と docs/review/skins/skins_<組>.png (並べたもの。名前を並べたときは skins_pick.png)
       python skin_one.py install [名前 ...]  -> docs/review/skins/raw/<名前>/ (tools/install/install_skins.py の入力) と衣装棚の絵
 """
 from __future__ import annotations
@@ -44,6 +44,19 @@ tpaint.C.update(
     VISOR=A_([(120, 74, 16), (176, 116, 30), (222, 166, 58), (246, 212, 120), (255, 240, 196)]),
     HOSE=A_([(110, 114, 120), (140, 144, 150), (170, 174, 178)]),
     FLAG=A_([(30, 60, 140), (44, 84, 178), (200, 40, 40), (236, 236, 236)]),
+    NINJA=A_([(14, 16, 26), (22, 26, 40), (32, 38, 56), (46, 54, 74), (62, 72, 94)]),
+    NINJA_L=A_([(40, 46, 64), (56, 64, 86), (74, 84, 108), (96, 106, 130)]),
+    STEEL=A_([(56, 60, 68), (84, 90, 100), (118, 124, 134), (156, 162, 170), (196, 200, 206)]),
+    WRAP=A_([(150, 150, 146), (182, 182, 176), (210, 210, 204), (232, 232, 226)]),
+    WITCH=A_([(36, 16, 52), (54, 26, 76), (74, 38, 102), (98, 54, 130), (126, 76, 158)]),
+    NIGHT=A_([(10, 10, 14), (18, 18, 24), (28, 28, 36), (40, 40, 50), (56, 56, 68)]),
+    CHEF=A_([(186, 188, 190), (212, 214, 216), (232, 234, 234), (246, 246, 246), (255, 255, 255)]),
+    CHECK=A_([(26, 26, 30), (60, 60, 64), (170, 170, 172), (220, 220, 222)]),
+    APRON=A_([(26, 40, 66), (36, 54, 88), (50, 72, 112), (68, 94, 138)]),
+    BLOOD=A_([(70, 6, 14), (104, 12, 22), (138, 20, 30), (170, 34, 42), (200, 56, 60)]),
+    VELVET=A_([(12, 8, 14), (20, 14, 24), (32, 24, 36), (46, 36, 52), (64, 52, 70)]),
+    G_GREEN=A_([(60, 170, 70), (100, 220, 110), (170, 250, 160), (230, 255, 220)]),
+    G_RED=A_([(170, 20, 30), (220, 40, 50), (255, 100, 100), (255, 190, 190)]),
 )
 tpaint.SETS.update({
     "samurai": dict(main=("LACQUER", 0.48, "metal"), cloth=("RED_SILK", 0.50, "rope"), cord=("RED_SILK", 0.55, "rope"), metal=("GOLD", 0.60, "metal"),
@@ -55,6 +68,14 @@ tpaint.SETS.update({
     "knight": dict(main=("SILVER", 0.56, "metal"), sec=("MAIL", 0.52, "rope"), cloth=("ROYAL", 0.50, "wool"), acc=("GOLD", 0.60, "metal"),
                    edge=("SILVER", 0.70, "metal"), metal=("GOLD", 0.62, "metal"), cord=("LEATHER", 0.50, "leather"), fur=("PLUME_RED", 0.55, "feather"),
                    glow="G_CYAN"),
+    "ninja": dict(main=("NINJA", 0.50, "wool"), sec=("NINJA_L", 0.50, "wool"), cloth=("RED_SILK", 0.50, "wool"), metal=("STEEL", 0.60, "metal"),
+                  cord=("WRAP", 0.55, "rope"), acc=("LACQUER", 0.45, "leather"), edge=("STEEL", 0.70, "metal"), glow="G_CYAN"),
+    "witch": dict(main=("WITCH", 0.50, "wool"), sec=("NIGHT", 0.50, "wool"), metal=("GOLD", 0.62, "metal"), cloth=("NIGHT", 0.45, "leather"),
+                  cord=("ROPE", 0.52, "rope"), edge=("WITCH", 0.65, "wool"), acc=("LEATHER", 0.50, "leather"), glow="G_GREEN"),
+    "chef": dict(main=("CHEF", 0.62, "wool"), sec=("CHECK", 0.50, "straw"), cloth=("APRON", 0.50, "wool"), edge=("RED_SILK", 0.55, "wool"),
+                 cord=("APRON", 0.60, "rope"), acc=("STEEL", 0.62, "metal"), metal=("NIGHT", 0.50, "metal"), fur=("BLACK_LEATHER", 0.50, "leather"), glow="G_CYAN"),
+    "vampire": dict(main=("VELVET", 0.50, "wool"), sec=("BLOOD", 0.50, "wool"), edge=("LINEN", 0.66, "wool"), metal=("SILVER", 0.62, "metal"),
+                    cloth=("BLACK_LEATHER", 0.52, "leather"), acc=("BLOOD", 0.40, "leather"), cord=("VELVET", 0.60, "rope"), glow="G_RED"),
     "astronaut": dict(main=("SUIT_WHITE", 0.58, "wool"), acc=("SUIT_GREY", 0.52, "metal"), glass=("VISOR", 0.58, "glass"), cord=("HOSE", 0.55, "rope"),
                       edge=("FLAG", 0.50, "leather"), metal=("SUIT_GREY", 0.62, "metal"), sec=("SUIT_GREY", 0.45, "leather"), glow="G_CYAN"),
 })
@@ -318,7 +339,214 @@ def astronaut():
     return p
 
 
-SKINS = [("samurai", "侍（紅糸威の大鎧）", samurai), ("pirate", "海賊の船長", pirate), ("knight", "白銀の騎士", knight), ("astronaut", "宇宙飛行士", astronaut)]
+# ================================================================== 忍び
+def ninja():
+    p = empty()
+    h = p["helmet"]
+    # 頭巾: 頭を包む藍の布。目のまわり (y 26.6〜29.4 の前) だけ開け、下は口元を覆う。額に鉄の鉢金、首の後ろに結び目
+    rings = [rr(24.0, 4.6, -4.6, 4.6, cut=1.4), rr(28.0, 4.7, -4.7, 4.7, cut=1.6), rr(32.2, 4.6, -4.6, 4.6, cut=1.8), rr(33.2, 3.2, -3.2, 3.2, cut=1.2)]
+    h += hide_front(shell(H_, "main", rings, caps=(False, "main")), 29.4, zcos=0.55)
+    h += bx(H_, "main", (0, 25.4, -4.75), (9.0, 2.8, 0.5))
+    h += bx(H_, "metal", (0, 30.2, -4.85), (7.6, 1.4, 0.4))
+    h += bx(H_, "edge", (0, 30.2, -5.1), (1.4, 0.9, 0.2))
+    h += spk(H_, "main", (0, 29.0, 4.9), (0, 0, 1), 0.8, 0.9, sides=6, rings=1)
+    for s_ in (-1, 1):
+        h += crv(H_, "main", [(s_ * 0.5, 29.0, 5.4), (s_ * 1.4, 27.4, 6.6), (s_ * 1.0, 25.6, 7.2)], 0.45, 0.3, sides=4)
+    c = p["chestplate"]
+    # 胴着 (藍) と打ち合わせの襟 (明るい藍)、紅の帯と結び、背に斜めの刀、腰に手裏剣、前腕の手甲
+    c += bx(B_, "main", (0, 18.0, 0), (9.2, 12.0, 5.0), skip=("u", "b"))
+    for s_ in (-1, 1):
+        c += bx(B_, "sec", (s_ * 1.4, 21.0, -2.75), (1.4, 6.0, 0.4), rot=rot_z(s_ * -28))
+    c += band(B_, "cloth", 0, 13.8, 9.8, 1.6, 5.6)
+    c += bx(B_, "cloth", (2.6, 13.8, -3.0), (1.6, 1.4, 0.6))
+    c += crv(B_, "cloth", [(2.6, 13.4, -3.2), (3.2, 11.2, -3.4), (3.0, 9.8, -3.2)], 0.4, 0.3, sides=4)
+    c += crv(B_, "acc", [(-4.4, 23.6, 3.4), (4.6, 11.6, 3.4)], 0.55, 0.55, sides=4)
+    c += crv(B_, "metal", [(-4.4, 23.6, 3.4), (-5.8, 25.6, 3.4)], 0.4, 0.4, sides=4)
+    c += crv(B_, "cord", [(-3.8, 24.0, 2.8), (4.2, 23.6, -2.8)], 0.22, 0.22, sides=3)
+    for i in range(4):
+        a = math.radians(i * 90 + 45)
+        c += spk(B_, "metal", (-3.0, 14.0, -3.3), (math.cos(a), math.sin(a), 0), 1.0, 0.25, sides=3, rings=1)
+    # 紅の襟巻きの長い尾 (首の後ろから背へ流れる)
+    c += crv(B_, "cloth", [(0.8, 24.2, 3.0), (1.8, 21.0, 4.4), (3.0, 17.0, 5.4), (4.4, 13.6, 6.2)], 0.7, 0.45, sides=4, hint=(0, 0, 1))
+    c += crv(B_, "cloth", [(-0.4, 24.2, 3.0), (0.2, 20.4, 4.6), (1.2, 16.0, 5.8)], 0.6, 0.4, sides=4, hint=(0, 0, 1))
+    for s_ in (-1, 1):
+        ab = ARM[s_]
+        c += sleeve(ab, s_, "main", w=4.7, d=4.7)
+        c += bx(ab, "metal", (s_ * 6.0, 15.0, 0), (5.0, 3.0, 5.0), taper=(1.04, 1.04))
+        c += bx(ab, "cord", (s_ * 6.0, 17.0, 0), (4.9, 0.5, 4.9))
+    lg = p["leggings"]
+    # 細い袴
+    for s_ in (-1, 1):
+        L = LEG[s_]
+        cx = s_ * 2.15
+        lg += bx(L, "main", (cx, 8.6, 0), (4.7, 6.6, 4.9), taper=(1.03, 1.0), skip=("u",))
+        lg += bx(L, "sec", (cx, 6.0, 0), (4.8, 1.0, 5.0))
+    bt = p["boots"]
+    # 脚絆 (白い布を巻く) と足袋 (つま先が割れる)
+    for s_ in (-1, 1):
+        cx = s_ * 2.15
+        bt += bx(BOOT[s_], "cord", (cx, 3.6, 0), (4.8, 3.4, 4.9))
+        for k in range(3):
+            bt += bx(BOOT[s_], "sec", (cx, 2.4 + k * 1.1, 0), (4.9, 0.3, 5.0), rot=rot_z(8 if k % 2 else -8))
+        bt += bx(BOOT[s_], "main", (cx, 1.0, -0.2), (4.8, 2.0, 5.2))
+        bt += bx(BOOT[s_], "dark", (cx, 1.0, -2.85), (0.3, 1.8, 0.4))
+        bt += bx(BOOT[s_], "dark", (cx, 0.15, -0.2), (5.0, 0.3, 5.6), skip=("u",))
+    return p
+
+
+# ================================================================== 魔女
+def witch():
+    p = empty()
+    h = p["helmet"]
+    # 大きなとんがり帽子: 広い鍔、背の高い円錐が先で後ろへ折れる。金の留め金の帯と、先に小さな金の星
+    h += shell(H_, "main", [rr(29.6, 8.0, -8.0, 8.0, cut=3.2), rr(30.2, 8.0, -8.0, 8.0, cut=3.2)], caps=("main", "main"))
+    h += shell(H_, "main", [rr(30.1, 4.8, -4.8, 4.8, cut=1.8), rr(33.6, 3.6, -3.6, 3.6, cut=1.4), rr(36.4, 2.4, -2.2, 2.6, cut=1.0),
+                            rr(38.6, 1.4, -0.8, 2.2, cut=0.6)], caps=(False, False))
+    h += crv(H_, "main", [(0, 38.6, 0.7), (0, 40.0, 2.4), (0, 39.6, 4.6), (0, 38.2, 5.6)], 1.1, 0.25, sides=5)
+    h += shell(H_, "sec", [rr(30.3, 4.9, -4.9, 4.9, cut=1.8), rr(31.5, 4.6, -4.6, 4.6, cut=1.7)], caps=(False, False))
+    h += bx(H_, "metal", (0, 30.9, -4.95), (1.8, 1.4, 0.4))
+    h += bx(H_, "sec", (0, 30.9, -5.15), (0.8, 0.6, 0.1))
+    h += spk(H_, "metal", (0, 38.0, 5.8), (0, -1, 0.2), 1.2, 0.5, sides=5, rings=1)
+    c = p["chestplate"]
+    # 紫の長衣と黒い高い襟の外套、帯に光る薬瓶三本、首に金の星の飾り
+    c += bx(B_, "main", (0, 18.0, 0), (9.4, 12.0, 5.2), skip=("u", "b"))
+    c += bx(B_, "sec", (0, 23.0, 0.8), (10.4, 2.6, 6.0), taper=(0.9, 0.95))
+    c += bx(B_, "sec", (0, 25.6, 2.6), (8.8, 3.0, 0.8), rot=rot_x(-14))
+    for s_ in (-1, 1):
+        c += bx(B_, "sec", (s_ * 4.4, 25.2, 0.6), (0.8, 2.6, 4.0), rot=rot_z(s_ * 16))
+    c += bx(B_, "sec", (0, 16.8, 3.1), (9.8, 13.4, 0.8), taper=(1.0, 1.08))
+    c += band(B_, "acc", 0, 14.0, 9.8, 1.2, 5.6)
+    c += bx(B_, "metal", (0, 14.0, -2.95), (1.4, 1.4, 0.4))
+    for x in (-3.4, -2.0, 2.6):
+        c += bx(B_, "gem", (x, 12.6, -3.0), (1.0, 1.6, 1.0))
+        c += bx(B_, "acc", (x, 13.6, -3.0), (0.6, 0.5, 0.6))
+    c += crv(B_, "metal", [(-2.0, 24.2, -2.8), (0, 22.6, -3.1), (2.0, 24.2, -2.8)], 0.15, 0.15, sides=3)
+    c += spk(B_, "metal", (0, 22.2, -3.3), (0, -1, -0.2), 1.0, 0.45, sides=5, rings=1)
+    for s_ in (-1, 1):
+        ab = ARM[s_]
+        c += sleeve(ab, s_, "main", w=4.8, d=4.9)
+        # 広がる袖口 (手首で大きく開く)
+        c += bx(ab, "main", (s_ * 6.0, 13.0, 0), (6.2, 2.6, 6.4), taper=(0.8, 0.8))
+        c += bx(ab, "edge", (s_ * 6.0, 11.7, 0), (6.4, 0.4, 6.6))
+    lg = p["leggings"]
+    # 長い裾 (前と後ろと横。くるぶしまで)
+    for s_ in (-1, 1):
+        L = LEG[s_]
+        cx = s_ * 2.15
+        lg += bx(L, "main", (cx, 7.6, 0), (4.9, 9.0, 5.2), taper=(1.0, 1.08), skip=("u",))
+        lg += bx(L, "sec", (cx, 7.0, 3.0), (5.0, 9.6, 0.6))
+        lg += bx(L, "edge", (cx, 3.2, 0), (5.4, 0.5, 5.8))
+    bt = p["boots"]
+    # とがって反り返るつま先の靴
+    for s_ in (-1, 1):
+        cx = s_ * 2.15
+        bt += bx(BOOT[s_], "cloth", (cx, 1.6, 0), (4.8, 3.2, 5.0))
+        bt += crv(BOOT[s_], "cloth", [(cx, 0.8, -2.4), (cx, 0.8, -4.2), (cx, 1.8, -5.0)], 0.9, 0.2, sides=4)
+        bt += bx(BOOT[s_], "metal", (cx, 2.0, -2.6), (1.0, 0.8, 0.3))
+    return p
+
+
+# ================================================================== 料理人
+def chef():
+    p = empty()
+    h = p["helmet"]
+    # 背の高い白いコック帽 (上がふくらみ、縦のひだ) と帯
+    h += shell(H_, "main", [rr(29.8, 4.7, -4.7, 4.7, cut=1.6), rr(32.0, 4.6, -4.6, 4.6, cut=1.6)], caps=(False, False))
+    h += shell(H_, "main", [rr(32.0, 4.4, -4.4, 4.4, cut=1.6), rr(34.0, 5.4, -5.4, 5.4, cut=2.2), rr(36.6, 5.8, -5.8, 5.8, cut=2.6),
+                            rr(38.4, 5.0, -5.0, 5.0, cut=2.2), rr(39.2, 3.0, -3.0, 3.0, cut=1.4)], caps=(False, "main"))
+    for i in range(6):
+        a = math.radians(i * 60)
+        h += bx(H_, "main", (math.cos(a) * 5.4, 36.0, math.sin(a) * 5.4), (0.6, 4.0, 0.6), rot=rot_y(-i * 60))
+    c = p["chestplate"]
+    # 白い両前の上着 (黒いボタン二列)、赤い首巻き、紺の前掛け (腰で紐を結び、ポケットにお玉)
+    c += bx(B_, "main", (0, 18.0, 0), (9.6, 12.0, 5.4), skip=("u", "b"))
+    c += bx(B_, "main", (1.0, 18.6, -2.85), (6.2, 10.4, 0.4))
+    for k in range(4):
+        for x in (-1.2, 3.0):
+            c += bx(B_, "metal", (x, 22.0 - k * 2.0, -3.15), (0.6, 0.6, 0.3))
+    c += bx(B_, "edge", (0, 23.6, -0.4), (9.4, 1.0, 5.4))
+    c += spk(B_, "edge", (-1.0, 23.2, -3.0), (0.2, -1, -0.1), 1.6, 0.6, sides=4, rings=1)
+    c += bx(B_, "cloth", (0, 14.6, -2.95), (8.4, 4.4, 0.4))
+    c += band(B_, "cord", 0, 15.4, 9.8, 0.5, 5.6)
+    c += crv(B_, "cord", [(0, 15.4, 3.0), (1.0, 14.2, 3.4), (0.6, 12.8, 3.4)], 0.25, 0.2, sides=3)
+    c += crv(B_, "cord", [(0, 15.4, 3.0), (-1.0, 14.2, 3.4), (-0.6, 12.8, 3.4)], 0.25, 0.2, sides=3)
+    c += bx(B_, "cloth", (2.4, 13.6, -3.3), (2.6, 2.0, 0.4))
+    c += crv(B_, "acc", [(2.8, 13.8, -3.6), (3.0, 17.0, -3.7)], 0.2, 0.2, sides=3)
+    c += spk(B_, "acc", (3.0, 17.4, -3.7), (0, 0, -1), 0.6, 0.7, sides=6, rings=1)
+    for s_ in (-1, 1):
+        ab = ARM[s_]
+        c += sleeve(ab, s_, "main", w=4.9, d=4.9)
+        c += bx(ab, "main", (s_ * 6.0, 16.6, 0), (5.3, 1.6, 5.3))
+    lg = p["leggings"]
+    # 千鳥格子のズボンと、前掛けの裾 (ひざ上まで)
+    for s_ in (-1, 1):
+        L = LEG[s_]
+        cx = s_ * 2.15
+        lg += bx(L, "sec", (cx, 8.6, 0), (4.6, 6.6, 4.8), skip=("u",))
+        lg += bx(L, "cloth", (cx, 9.6, -2.75), (4.6, 4.8, 0.4))
+    bt = p["boots"]
+    # 黒い木靴 (丸いつま先)
+    for s_ in (-1, 1):
+        cx = s_ * 2.15
+        bt += bx(BOOT[s_], "sec", (cx, 3.4, 0), (4.6, 2.8, 4.8), skip=("u",))
+        bt += bx(BOOT[s_], "fur", (cx, 1.0, -0.4), (5.0, 2.0, 5.8), taper=(0.92, 0.92))
+        bt += bx(BOOT[s_], "fur", (cx, 0.9, -3.0), (4.4, 1.6, 1.4), taper=(0.7, 0.7))
+    return p
+
+
+# ================================================================== 吸血鬼の貴族
+def vampire():
+    import cosmetic_one as CO
+    p = empty()
+    h = p["helmet"]
+    # 細い黒の山高帽 (血の色の帯)
+    h += shell(H_, "main", [rr(31.4, 6.4, -6.4, 6.4, cut=2.6), rr(31.9, 6.4, -6.4, 6.4, cut=2.6)], caps=("main", "main"))
+    h += shell(H_, "main", [rr(31.8, 3.8, -3.8, 3.8, cut=1.4), rr(37.0, 4.1, -4.1, 4.1, cut=1.5)], caps=(False, "main"))
+    h += shell(H_, "sec", [rr(32.0, 3.9, -3.9, 3.9, cut=1.4), rr(33.0, 3.95, -3.95, 3.95, cut=1.45)], caps=(False, False))
+    c = p["chestplate"]
+    # 黒の燕尾の上着、血の色の胴着と銀のボタン、白い襟飾りに紅玉の留め
+    c += bx(B_, "sec", (0, 18.0, 0), (8.8, 12.0, 4.8), skip=("u", "b"))
+    c += bx(B_, "main", (0, 18.0, 0.6), (9.8, 12.2, 4.6), skip=("-z",))
+    for s_ in (-1, 1):
+        c += bx(B_, "main", (s_ * 3.7, 18.0, -2.45), (2.4, 12.2, 1.0), skip=("+z",))
+        c += bx(B_, "main", (s_ * 2.6, 21.6, -3.0), (1.2, 5.4, 0.4), rot=rot_z(s_ * -16))
+    for k in range(3):
+        c += bx(B_, "metal", (0, 19.6 - k * 1.8, -2.65), (0.6, 0.6, 0.3))
+    for k in range(3):
+        c += bx(B_, "edge", (0, 23.4 - k * 0.8, -2.6 - k * 0.15), (2.0 - k * 0.3, 0.8, 0.8))
+    c += spk(B_, "gem", (0, 22.6, -3.4), (0, 0, -1), 0.6, 0.55, sides=6, rings=1)
+    # 外套: 肩から足首まで (外は黒・内は血の色)、背の高い襟が頭の後ろで扇に開く
+    rows = [(24.4, 2.9, 5.0, 0.4, None), (18.0, 3.4, 5.6, 0.9, None), (10.0, 4.0, 6.2, 1.3, None), (3.0, 4.6, 6.6, 1.6, [1.2, 0, -0.6, 0, 0.6, 0, -0.6, 0, 1.2])]
+    c += CO.cloak("main", rows, th=0.45)
+    c += CO.cloak("sec", [(y, z - 0.25, hw - 0.2, b, dy) for (y, z, hw, b, dy) in rows], th=0.2)
+    c += shell(B_, "main", [CO.slab_ring(24.6, 2.6, 5.4, 1.0, 0.4, 9), CO.slab_ring(29.0, 3.6, 6.6, 2.2, 0.4, 9), CO.slab_ring(31.2, 4.4, 7.0, 2.6, 0.4, 9)],
+               caps=(True, True))
+    c += shell(B_, "sec", [CO.slab_ring(24.6, 2.35, 5.2, 1.0, 0.2, 9), CO.slab_ring(29.0, 3.35, 6.4, 2.2, 0.2, 9), CO.slab_ring(31.0, 4.15, 6.8, 2.6, 0.2, 9)],
+               caps=(True, True))
+    for s_ in (-1, 1):
+        ab = ARM[s_]
+        c += sleeve(ab, s_, "main")
+        c += bx(ab, "edge", (s_ * 6.0, 13.2, 0), (5.0, 1.0, 5.0))
+    lg = p["leggings"]
+    # 黒のズボンと燕尾の尾 (後ろでひざの下まで)
+    for s_ in (-1, 1):
+        L = LEG[s_]
+        cx = s_ * 2.15
+        lg += bx(L, "main", (cx, 8.6, 0), (4.6, 6.6, 4.8), skip=("u",))
+        lg += bx(L, "main", (cx, 8.0, 2.7), (4.4, 8.0, 0.5), taper=(1.0, 0.8))
+    bt = p["boots"]
+    # 磨いた黒の長靴 (銀のかかと)
+    for s_ in (-1, 1):
+        cx = s_ * 2.15
+        bt += bx(BOOT[s_], "cloth", (cx, 3.0, 0), (4.8, 6.0, 5.0), skip=("u",))
+        bt += bx(BOOT[s_], "cloth", (cx, 0.8, -2.8), (4.2, 1.6, 1.4), taper=(0.75, 0.75))
+        bt += bx(BOOT[s_], "metal", (cx, 0.4, 2.3), (4.0, 0.8, 0.8))
+    return p
+
+
+SKINS = [("samurai", "侍（紅糸威の大鎧）", samurai), ("pirate", "海賊の船長", pirate), ("knight", "白銀の騎士", knight), ("astronaut", "宇宙飛行士", astronaut),
+         ("ninja", "忍び", ninja), ("witch", "魔女", witch), ("chef", "料理人", chef), ("vampire", "吸血鬼の貴族", vampire)]
+GROUPS = {"1": ["samurai", "pirate", "knight", "astronaut"], "2": ["ninja", "witch", "chef", "vampire"]}
 
 
 def built(key, fn):
@@ -357,7 +585,9 @@ def main():
         return
     aview.SS = 2
     OUT.mkdir(parents=True, exist_ok=True)
-    names = sys.argv[1:] or [k for k, _, _ in SKINS]
+    args = sys.argv[1:]
+    group = args[0] if len(args) == 1 and args[0] in GROUPS else None
+    names = GROUPS[group] if group else args or [k for k, _, _ in SKINS]
     rows = []
     for key, label, fn in SKINS:
         if key not in names:
@@ -372,8 +602,9 @@ def main():
     for r in rows:
         S.paste(r, (0, y))
         y += r.height
-    S.save(OUT / "skins_1.png")
-    print("wrote", OUT / "skins_1.png")
+    out = OUT / (f"skins_{group}.png" if group else "skins_pick.png")
+    S.save(out)
+    print("wrote", out)
 
 
 if __name__ == "__main__":
