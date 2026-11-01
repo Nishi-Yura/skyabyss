@@ -250,6 +250,11 @@ public final class AbyssEscortSelfTest {
             place(b, Vec3.atBottomCenterOf(s));
             place(c, Vec3.atBottomCenterOf(s).add(1, 0, 0));
             long now = level.getGameTime() + 200000;
+            // 全段で流すと、前の段が外した強制読み込みのあとで封のチャンクが読み込まれておらず、封が開かずに同じ区間をやり直し続けたことがある
+            BlockPos sealAt = AbyssBuild.mark("seal_ash");
+            if (sealAt != null) {
+                level.getChunkAt(sealAt);
+            }
             check(f, AbyssEscort.tryStart(level, "ash", now, List.of(b, c)), "standing at the ash mouth did not start the escort");
             AbyssEscort.Run run = AbyssEscort.run("ash");
             if (run == null) {
@@ -270,7 +275,8 @@ public final class AbyssEscortSelfTest {
                 AbyssEscort.tick(level, run, now, List.of(b, c));
             }
             check(f, run.state() == AbyssEscort.State.DONE, "the party ash escort did not finish (" + steps + " steps, state " + run.state() + ", cp "
-                    + run.secured() + ", at " + run.at() + ", alive " + b.isAlive() + "/" + c.isAlive() + ")");
+                    + run.secured() + ", at " + run.at() + ", fails " + run.fails() + ", seal loaded " + (sealAt != null && level.isLoaded(sealAt))
+                    + ", alive " + b.isAlive() + "/" + c.isAlive() + ", spectator " + b.isSpectator() + "/" + c.isSpectator() + ")");
             check(f, run.participants().contains(c.getUUID()), "the second player did not join the escort");
             for (FakePlayer q : List.of(b, c)) {
                 Quests.poll(q, true);
