@@ -142,7 +142,9 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         pose.popPose();
     }
 
-    static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger", "gather_axe");
+    // 刃を +x に作ってある品 (宿り木の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
+    static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger", "gather_axe",
+            "wild_tusk_axe", "wild_conductor_axe", "wild_snowsplitter_axe", "wild_blasting_axe", "wild_molten_axe");
 
     // 打つ面が +x の鎚 (武器の種類が鎚のもの。採集の道具は除く)
     static boolean faceFlip(String id) {
