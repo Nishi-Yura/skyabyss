@@ -38,6 +38,7 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 // 体ごとのスキン (Yes Steve Model のような作り。skin/Skins の、形 lowpoly/skin_full/<id>.json があるもの)。
 //   着ている人はバニラの体の箱を隠し、スキンの形をプレイヤーの姿勢どおりに描く (手に持つ品・矢などのほかの層はそのまま)。防具は描かない
 //   形の JSON が "outfit": true のものは服だけ: バニラの体 (その人のスキンの顔と体) を残し、上に服を重ねる
+//   own_ で始まる骨は、着ている人のマイクラのスキンの絵で描く (自分の顔を貼るスキン。docs/design/55)
 //   骨: head / body / armR / armL / legR / legL はバニラの体の部分と同じに動く (回転の中心もバニラのまま)。それ以外の骨は親に付いて動き、名前の頭で揺れる:
 //     hair・cloth・cape・ribbon・tail = 歩く速さと向きの変わりで後ろへなびき、遅れて戻る (ばね)。plate = 同じだが少しだけ (鎧の板)。skirt は脚の振りでも広がる
 //     float = 浮かぶ飾り。ゆっくり上下して揺れる。orbit = 付け根のまわりを回る (子に float を付けて回しながら上下)。wing = ゆっくり羽ばたく (歩くと強く)
@@ -46,6 +47,12 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private static final int FULL_BRIGHT = 0xF000F0;
     private static final Map<Integer, Sway> SWAY = new HashMap<>();
+    // 描く順: 形の絵 → 着ている人のスキンの絵 (own_ の骨) → 光る画素
+    private static final int PASS_MESH = 0;
+    private static final int PASS_OWN = 1;
+    private static final int PASS_GLOW = 2;
+    // この頭の骨は、着ている人のマイクラのスキンの絵で描く (顔を貼るスキンの頭・首・手。uv はスキンの 64x64 の中)
+    public static final String OWN_PREFIX = "own_";
 
     public FullSkinLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
@@ -176,8 +183,10 @@ public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, Playe
         pose.translate(0f, 1.5f, 0f);
         pose.scale(-1f, -1f, 1f);
         Sway sway = SWAY.computeIfAbsent(player.getId(), k -> new Sway());
-        drawTree(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), false, mesh, m, bone, sway, player.tickCount,
+        drawTree(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), PASS_MESH, mesh, m, bone, sway, player.tickCount,
                 event.getPackedLight(), OverlayTexture.NO_OVERLAY, 0f, 0f, false);
+        drawTree(pose, event.getMultiBufferSource().getBuffer(RenderType.entityCutoutNoCull(player.getSkin().texture())), PASS_OWN, mesh, m, bone, sway,
+                player.tickCount, event.getPackedLight(), OverlayTexture.NO_OVERLAY, 0f, 0f, false);
         pose.popPose();
     }
 
@@ -193,14 +202,18 @@ public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, Playe
         PlayerModel<AbstractClientPlayer> m = getParentModel();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
         // 二度に分けて描く (体の絵 → 光る画素)。描き先を一度に二つ取ると、先の方が閉じられる
-        drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), false, mesh, m, sway, ageInTicks + partialTick, light, overlay, limbSwing, limbSwingAmount);
+        drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), PASS_MESH, mesh, m, sway, ageInTicks + partialTick, light, overlay, limbSwing,
+                limbSwingAmount);
+        // own_ の骨: 着ている人のマイクラのスキンの絵 (顔・首・手)
+        drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(player.getSkin().texture())), PASS_OWN, mesh, m, sway, ageInTicks + partialTick, light, overlay,
+                limbSwing, limbSwingAmount);
         if (mesh.glowMask != null) {
-            drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(mesh.glowMask)), true, mesh, m, sway, ageInTicks + partialTick, FULL_BRIGHT, overlay, limbSwing,
+            drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(mesh.glowMask)), PASS_GLOW, mesh, m, sway, ageInTicks + partialTick, FULL_BRIGHT, overlay, limbSwing,
                     limbSwingAmount);
         }
     }
 
-    private static void drawAll(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer buf, boolean glow, LowPolyMesh mesh, PlayerModel<AbstractClientPlayer> m, Sway sway,
+    private static void drawAll(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer buf, int pass, LowPolyMesh mesh, PlayerModel<AbstractClientPlayer> m, Sway sway,
             float t, int light, int overlay, float limbSwing, float limbSwingAmount) {
         for (LowPolyMesh.Bone b : mesh.bones.values()) {
             boolean root = b.parent == null || !mesh.bones.containsKey(b.parent);
@@ -214,26 +227,27 @@ public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, Playe
                 // geo (足もと y = 0、上へ +y。メッシュは x を反転して焼いてある) → 体の空間 (首の上が原点、下へ +y)
                 pose.translate(0f, 1.5f, 0f);
                 pose.scale(-1f, -1f, 1f);
-                drawTree(pose, buf, glow, mesh, m, b, sway, t, light, overlay, limbSwing, limbSwingAmount, part == null);
+                drawTree(pose, buf, pass, mesh, m, b, sway, t, light, overlay, limbSwing, limbSwingAmount, part == null);
                 pose.popPose();
             }
         }
     }
 
-    private static void drawTree(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer buf, boolean glow, LowPolyMesh mesh,
+    private static void drawTree(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer buf, int pass, LowPolyMesh mesh,
             PlayerModel<AbstractClientPlayer> m, LowPolyMesh.Bone b, Sway sway, float t, int light, int overlay, float limbSwing, float limbAmount, boolean animate) {
         pose.pushPose();
         if (animate) {
             motion(pose, b, sway, t, limbSwing, limbAmount);
         }
-        if (glow) {
+        boolean own = b.name.startsWith(OWN_PREFIX);
+        if (pass == PASS_GLOW && !own) {
             LowPoly.drawBone(pose, buf, b, light, overlay, 0xFFFFFFFF, 0f, false);
-        } else {
+        } else if ((pass == PASS_OWN) == own && pass != PASS_GLOW) {
             LowPoly.drawBone(pose, buf, b, light, overlay, 0xFFFFFFFF, 0.25f);
         }
         for (LowPolyMesh.Bone c : mesh.bones.values()) {
             if (b.name.equals(c.parent) && part(m, c.name) == null) {
-                drawTree(pose, buf, glow, mesh, m, c, sway, t, light, overlay, limbSwing, limbAmount, true);
+                drawTree(pose, buf, pass, mesh, m, c, sway, t, light, overlay, limbSwing, limbAmount, true);
             }
         }
         pose.popPose();

@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-T = 4
+T = 8
 ROOT = Path(__file__).resolve().parents[3]
 
 # バニラの体の部分の付け根 (geo)
@@ -52,6 +52,7 @@ class Face:
     img: np.ndarray  # (H, W, 4)
     glow: np.ndarray | None = None  # (H, W) bool
     uv: tuple = None  # アトラスの (x, y) 置き場
+    skin: tuple = None  # 着ている人のスキンの絵の (u0, v0, u1, v1) (64x64 の画素。own_ の骨)。アトラスには入れない
 
 
 @dataclass
@@ -66,10 +67,11 @@ class Box:
     hide: tuple = ()
     tag: str = ""
     yaw: float = 0.0  # rot の後に、付け根のまわりで Y へ回す (斜めの布)
+    skinmap: dict = None  # {面: (u0, v0, u1, v1)} 着ている人のスキンの絵の場所 (64x64 の画素)。own_ の骨の箱だけ
 
 
 class Model:
-    def __init__(self, name, outfit=True):
+    def __init__(self, name, outfit=False):
         self.name = name
         # True = 服だけ (着ている人のバニラの体とスキンを残して重ねる)。バニラの体の大きさに合わせて作る
         self.outfit = outfit
@@ -82,8 +84,8 @@ class Model:
         self.bones[name] = dict(parent=parent, pivot=tuple(pivot))
         return name
 
-    def box(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", mirror=False, yaw=0.0):
-        b = Box(bone, tuple(frm), tuple(size), paint, tuple(rot), tuple(pivot) if pivot else None, mirror, tuple(hide), tag, yaw)
+    def box(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", mirror=False, yaw=0.0, skinmap=None):
+        b = Box(bone, tuple(frm), tuple(size), paint, tuple(rot), tuple(pivot) if pivot else None, mirror, tuple(hide), tag, yaw, skinmap)
         self.boxes.append(b)
         return b
 
@@ -132,6 +134,10 @@ def box_faces(bx: Box):
         verts = (verts - piv) @ R.T + piv
         W = max(1, int(round(fw * T)))
         H = max(1, int(round(fh * T)))
+        if bx.skinmap and fn in bx.skinmap:
+            r = bx.skinmap[fn]
+            out.append(Face(bx.bone, verts, placeholder_crop(r, W, H), None, None, tuple(r)))
+            continue
         pf = fn
         if bx.mirror and fn in "ew":
             pf = "w" if fn == "e" else "e"
@@ -149,9 +155,47 @@ def box_faces(bx: Box):
     return out
 
 
+# ------------------------------------------------------------------ 着ている人のスキンの代わり (見本の絵だけ)
+_PLACE = None
+
+
+def placeholder_skin():
+    """見本の絵で own_ の面に貼る、Steve に似た 64x64 のスキン。"""
+    global _PLACE
+    if _PLACE is not None:
+        return _PLACE
+    a = np.zeros((64, 64, 4), np.uint8)
+    skin, hair, eye_w, eye_b = (196, 150, 118, 255), (66, 44, 30, 255), (236, 236, 236, 255), (60, 70, 140, 255)
+    a[0:16, 0:32] = skin
+    a[0:8, 8:16] = hair
+    for (x0, x1) in ((0, 8), (16, 32)):
+        a[8:11, x0:x1] = hair
+    a[8:10, 8:16] = hair
+    a[12, 9], a[12, 10], a[12, 13], a[12, 14] = eye_w, eye_b, eye_b, eye_w
+    a[14, 11:13] = (150, 100, 80, 255)
+    a[16:32, 40:56] = skin
+    a[48:64, 32:48] = skin
+    _PLACE = a
+    return a
+
+
+def placeholder_crop(r, W, H):
+    u0, v0, u1, v1 = r
+    a = placeholder_skin()
+    x0, x1 = sorted((u0, u1))
+    y0, y1 = sorted((v0, v1))
+    c = a[int(y0):max(int(y0) + 1, int(np.ceil(y1))), int(x0):max(int(x0) + 1, int(np.ceil(x1)))]
+    if u1 < u0:
+        c = c[:, ::-1]
+    if v1 < v0:
+        c = c[::-1]
+    return np.array(Image.fromarray(c).resize((max(1, W), max(1, H)), Image.NEAREST))
+
+
 # ------------------------------------------------------------------ アトラス
 def pack(faces, pad=1):
     """高さの順に棚へ詰める。正方形の 2 の累乗。"""
+    faces = [f for f in faces if f.skin is None]
     order = sorted(range(len(faces)), key=lambda i: (-faces[i].img.shape[0], -faces[i].img.shape[1]))
     area = sum((f.img.shape[0] + pad * 2) * (f.img.shape[1] + pad * 2) for f in faces)
     size = 64
@@ -199,12 +243,20 @@ def export(model: Model, out_dir: Path, texture: str):
     for f in faces:
         b = bones[f.bone]
         base = len(b["vertices"])
-        hh, ww = f.img.shape[:2]
-        x, y = f.uv
-        corners = [(x + inset, y + inset), (x + ww - inset, y + inset), (x + ww - inset, y + hh - inset), (x + inset, y + hh - inset)]
+        if f.skin is not None:
+            # 着ている人のスキンの絵 (64x64)
+            u0, v0, u1, v1 = f.skin
+            k = 0.01
+            corners = [(u0 + k, v0 + k), (u1 - k, v0 + k), (u1 - k, v1 - k), (u0 + k, v1 - k)]
+            sz = 64.0
+        else:
+            hh, ww = f.img.shape[:2]
+            x, y = f.uv
+            corners = [(x + inset, y + inset), (x + ww - inset, y + inset), (x + ww - inset, y + hh - inset), (x + inset, y + hh - inset)]
+            sz = size
         for p, (cu, cv) in zip(f.verts, corners):
             b["vertices"].append([round(float(q), 4) for q in p])
-            b["uvs"].append([round(cu / size, 6), round(cv / size, 6)])
+            b["uvs"].append([round(cu / sz, 6), round(cv / sz, 6)])
         # 外向き (geo で反時計回り) にそろえる
         a, bb, c = f.verts[0], f.verts[1], f.verts[2]
         nrm = np.cross(bb - a, c - a)
@@ -276,7 +328,7 @@ def pose_faces(model: Model, faces, pose):
     for f in faces:
         M = world(f.bone)
         v = f.verts @ M[:3, :3].T + M[:3, 3]
-        out.append(Face(f.bone, v, f.img, f.glow, f.uv))
+        out.append(Face(f.bone, v, f.img, f.glow, f.uv, f.skin))
     return out
 
 
