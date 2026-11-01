@@ -1,0 +1,13 @@
+{
+ "id": "ceiling_walker",
+ "letter": "a",
+ "installed": 412,
+ "before": 372,
+ "before_closed": 412,
+ "after": 968,
+ "after_closed": 1022,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

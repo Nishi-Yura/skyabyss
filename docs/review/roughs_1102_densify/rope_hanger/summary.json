@@ -1,0 +1,13 @@
+{
+ "id": "rope_hanger",
+ "letter": "b",
+ "installed": 652,
+ "before": 624,
+ "before_closed": 652,
+ "after": 980,
+ "after_closed": 1032,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

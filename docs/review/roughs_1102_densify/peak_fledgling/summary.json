@@ -1,0 +1,13 @@
+{
+ "id": "peak_fledgling",
+ "letter": "b",
+ "installed": 228,
+ "before": 195,
+ "before_closed": 228,
+ "after": 428,
+ "after_closed": 548,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

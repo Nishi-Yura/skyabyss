@@ -1,0 +1,13 @@
+{
+ "id": "rift_wing",
+ "letter": "a",
+ "installed": 820,
+ "before": 732,
+ "before_closed": 820,
+ "after": 1220,
+ "after_closed": 1420,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_after": [],
+ "group_best": null
+}

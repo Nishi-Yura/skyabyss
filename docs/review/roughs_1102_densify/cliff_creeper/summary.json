@@ -1,0 +1,13 @@
+{
+ "id": "cliff_creeper",
+ "letter": "b",
+ "installed": 780,
+ "before": 584,
+ "before_closed": 780,
+ "after": 1216,
+ "after_closed": 1436,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_after": [],
+ "group_best": null
+}

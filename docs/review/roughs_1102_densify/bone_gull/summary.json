@@ -1,0 +1,13 @@
+{
+ "id": "bone_gull",
+ "letter": "a",
+ "installed": 450,
+ "before": 314,
+ "before_closed": 450,
+ "after": 522,
+ "after_closed": 736,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}
