@@ -243,3 +243,62 @@ def circle_alpha(W, H, inner=0.0):
     dy = (yy + 0.5) / H * 2 - 1
     r = np.sqrt(dx * dx + dy * dy)
     return (r <= 1.0) & (r >= inner)
+
+
+def band(img, y0, y1, col, hi=None, lo=None):
+    """横の帯 (行 y0..y1)。hi = 上の 1 行、lo = 下の 1 行の色。"""
+    H = img.shape[0]
+    y0, y1 = max(0, y0), min(H, y1)
+    if y1 <= y0:
+        return img
+    img[y0:y1, :, :3] = C(col) if isinstance(col, str) else col
+    if hi:
+        img[y0, :, :3] = C(hi)
+    if lo and y1 - 1 > y0:
+        img[y1 - 1, :, :3] = C(lo)
+    return img
+
+
+def vband(img, x0, x1, col, hi=None):
+    W = img.shape[1]
+    x0, x1 = max(0, x0), min(W, x1)
+    if x1 <= x0:
+        return img
+    img[:, x0:x1, :3] = C(col) if isinstance(col, str) else col
+    if hi:
+        img[:, x0, :3] = C(hi)
+    return img
+
+
+def dot(img, x, y, col, size=1):
+    H, W = img.shape[:2]
+    for yy in range(y, y + size):
+        for xx in range(x, x + size):
+            if 0 <= yy < H and 0 <= xx < W:
+                img[yy, xx, :3] = C(col) if isinstance(col, str) else col
+                img[yy, xx, 3] = 255
+    return img
+
+
+def metal(base, light=None, dark=None, line=None, streak=True, over=None, faces=None):
+    """磨いた金属: 上が明るく下へ暗く、斜めの光の筋、縁は暗い線。"""
+    b = C(base)
+    l = C(light) if light else mix(b, np.array([255, 255, 255.]), 0.45)
+    d = C(dark) if dark else b * 0.55
+
+    def o(img, face, W, H, box):
+        if face in "nsew":
+            img[..., :3] = shade_rows(H, l, b, d, top=0.35, bottom=0.6)[:, None, :]
+            if streak and W >= 4 and H >= 4:
+                for y in range(H):
+                    x = int(W * 0.3) - y // 2
+                    for k in (0, 1):
+                        if 0 <= x + k < W:
+                            img[y, x + k, :3] = mix(img[y, x + k, :3], l * 1.08, 0.45)
+            edge(img, C(line) if line else d * 0.7, l)
+        if over:
+            r = over(img, face, W, H, box)
+            if r is not None:
+                img = r
+        return img
+    return cloth(base, light, dark, line, edges=False, over=o, faces=faces)

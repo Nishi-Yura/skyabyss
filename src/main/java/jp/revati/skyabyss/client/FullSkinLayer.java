@@ -39,7 +39,7 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 //   着ている人はバニラの体の箱を隠し、スキンの形をプレイヤーの姿勢どおりに描く (手に持つ品・矢などのほかの層はそのまま)。防具は描かない
 //   形の JSON が "outfit": true のものは服だけ: バニラの体 (その人のスキンの顔と体) を残し、上に服を重ねる
 //   骨: head / body / armR / armL / legR / legL はバニラの体の部分と同じに動く (回転の中心もバニラのまま)。それ以外の骨は親に付いて動き、名前の頭で揺れる:
-//     hair・cloth・cape・skirt・ribbon・tail = 歩く速さと向きの変わりで後ろへなびき、遅れて戻る (ばね)。skirt は脚の振りでも広がる
+//     hair・cloth・cape・ribbon・tail = 歩く速さと向きの変わりで後ろへなびき、遅れて戻る (ばね)。plate = 同じだが少しだけ (鎧の板)。skirt は脚の振りでも広がる
 //     float = 浮かぶ飾り。ゆっくり上下して揺れる。orbit = 付け根のまわりを回る (子に float を付けて回しながら上下)。wing = ゆっくり羽ばたく (歩くと強く)
 //   形は箱で組んでドット絵を描く (tools/rough/skinbox)。座標は geo (1/16 ブロック、足もと y = 0、前 = -Z)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
@@ -268,8 +268,8 @@ public final class FullSkinLayer extends RenderLayer<AbstractClientPlayer, Playe
         if (n.startsWith("wing")) {
             ry = Mth.sin(t * 0.12f + phase) * (6f + s.speed * 10f) * (b.pivot[0] < 0 ? -1f : 1f);
             rz = Mth.sin(t * 0.12f + phase + 0.6f) * 3f;
-        } else if (n.startsWith("hair") || n.startsWith("cloth") || n.startsWith("cape") || n.startsWith("ribbon") || n.startsWith("tail")) {
-            float k = n.startsWith("hair") ? 0.55f : n.startsWith("cape") ? 1.0f : 0.8f;
+        } else if (n.startsWith("hair") || n.startsWith("cloth") || n.startsWith("cape") || n.startsWith("ribbon") || n.startsWith("tail") || n.startsWith("plate")) {
+            float k = n.startsWith("plate") ? 0.2f : n.startsWith("hair") ? 0.55f : n.startsWith("cape") ? 1.0f : 0.8f;
             // 前へ進むと下の端が後ろ (+z) へ、右へ進む・右を向くと左 (描く空間の -x) へ
             rx = -s.back * k + Mth.sin(t * 0.08f + phase) * 2.5f;
             rz = -s.side * k * 0.6f + Mth.sin(t * 0.06f + phase * 1.7f) * 1.5f;

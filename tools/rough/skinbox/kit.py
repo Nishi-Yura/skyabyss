@@ -417,3 +417,15 @@ def install(model: Model, sid: str, dst: Path):
     elif g.exists():
         g.unlink()
     wardrobe(model, assets / "textures/gui/skins" / f"{sid}.png")
+
+
+def main(sid: str, build, argv):
+    """スキンの台本の入り口: 見本の絵と mesh.json・atlas.png を docs/review/skins/full/<id>/ へ。install で mod の中へ。"""
+    model = build()
+    dst = ROOT / "docs/review/skins/full" / sid
+    data, atlas, glow, faces = export(model, dst, "skin_full/" + sid)
+    sheet(model, dst / "preview.png", views=((15, 10), (150, 10), (-70, 8)), scale=20, size=(620, 960))
+    print(sid, data["triangle_count"], "triangles", data["texture_size"], "atlas")
+    if "install" in argv:
+        install(model, sid, dst)
+        print("installed")
