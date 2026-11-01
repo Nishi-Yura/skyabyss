@@ -36,8 +36,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // プロフィール (持ち物の画面の右上の札から開く。自分のことを見る・決める画面)。
-//   左      人形・名前と名札の称号 (選んだ位置で上か下)・組合の旗と名前
-//   右の上  つまみ三つ: わたし (職・転生・鐘銭・遊んだ時間・倒した数・称号・名声・図鑑・塔) / 称号 (一覧から選ぶ・名札の位置) / 見え方 (名札と背の飾りの設定・順位表)
+//   左      人形・名前と名札の称号 (名前の上)・組合の旗と名前
+//   右の上  つまみ三つ: わたし (職・転生・鐘銭・遊んだ時間・倒した数・称号・名声・図鑑・塔) / 称号 (一覧から選ぶ) / 見え方 (名札と背の飾りの設定・順位表)
 //   中身はサーバーへ頼む (Profile.Request → Snapshot)。称号と転生は同期してある RebirthData を読む。背景は tools/gen/items/gen_profile_assets.py
 //   E で持ち物へ戻る。J/K は記録と技へ
 public class ProfileScreen extends Screen {
@@ -62,7 +62,6 @@ public class ProfileScreen extends Screen {
     static final int ME_ROW = 11;
     static final int LIST_Y = 45;
     static final int LIST_ROWS = 9;
-    static final int POS_X = 154;
 
     static final int TITLE = 0x9FE8FF;
     static final int TEXT = 0xE6E2D6;
@@ -123,15 +122,7 @@ public class ProfileScreen extends Screen {
         for (int i = 0; i <= LOOKS; i++) {
             addRenderableWidget(new SubTab(left + SUB_X + i * (SUB_W + SUB_GAP), top + SUB_Y, i));
         }
-        if (sub == TITLES) {
-            String[] keys = {"above", "below", "off"};
-            for (int i = 0; i < 3; i++) {
-                int pos = i;
-                addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.profile.pos." + keys[i]), b -> {
-                    PacketDistributor.sendToServer(new RebirthNet.TitlePosPayload(pos));
-                }).bounds(left + POS_X + i * 44, top + 166, 42, 16).build());
-            }
-        } else if (sub == LOOKS) {
+        if (sub == LOOKS) {
             int y = top + 46;
             for (Toggle t : TOGGLES) {
                 addRenderableWidget(Button.builder(label(t), btn -> {
@@ -236,13 +227,9 @@ public class ProfileScreen extends Screen {
         int cx = left + 56;
         Component name = mc.player.getName();
         Component title = TitleTagClient.text(mc.player);
-        int pos = RebirthView.data(mc.player).titlePos();
-        if (title != null && pos == RebirthData.TITLE_ABOVE) {
+        if (title != null) {
             FitText.drawCentered(g, font, title, cx, top + 131, 88, TitleTagClient.COLOR, false);
             FitText.drawCentered(g, font, name, cx, top + 141, 88, TEXT, false);
-        } else if (title != null) {
-            FitText.drawCentered(g, font, name, cx, top + 132, 88, TEXT, false);
-            FitText.drawCentered(g, font, title, cx, top + 142, 88, TitleTagClient.COLOR, false);
         } else {
             FitText.drawCentered(g, font, name, cx, top + 137, 88, TEXT, false);
         }
@@ -361,10 +348,6 @@ public class ProfileScreen extends Screen {
         }
         g.drawString(font, Component.translatable("gui.skyabyss.profile.count", Long.bitCount(d.unlocked()), RebirthTitles.MAX), left + BODY_X,
                 top + LIST_Y + LIST_ROWS * ROW + 3, DIM, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.profile.pos"), left + BODY_X, top + 170, SOFT, false);
-        // いまの位置のボタンに金の下線
-        int x = left + POS_X + d.titlePos() * 44;
-        g.fill(x + 3, top + 182, x + 39, top + 183, 0xFF000000 | GOLD);
     }
 
     // 一覧の並び: 解けた称号を先に (どちらも元の並び順のまま)

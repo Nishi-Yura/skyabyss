@@ -10,7 +10,7 @@
 
 ## 2026-11-01 の昼から夕方に入れたもの
 
-- プロフィール（`endgame/Profile`・`endgame/client/ProfileScreen`。持ち物の画面の右上の札 `ProfileCard` から）: わたし・称号・見え方の三つのつまみ。名札の称号は名前の上か下の一行（`client/rebirth/TitleTagClient`、位置は `RebirthData.titlePos`）。称号は 50 個。
+- プロフィール（`endgame/Profile`・`endgame/client/ProfileScreen`。持ち物の画面の右上の札 `ProfileCard` から）: わたし・称号・見え方の三つのつまみ。名札の称号は名前の上の一行（`client/rebirth/TitleTagClient`。位置は選べない）。称号は 50 個。
 - ギルドの旗の模様 67 種（`GuildEmblems`。バニラの重ね 55 とこの世界の紋 12 = `data/skyabyss/banner_pattern/guild_*.json`、絵は `tools/gen/items/gen_guild_banners.py`）。土地の旗を取った組合の旗を町の門と広場に掛ける（`endgame/TownFlags`、開発用 `/skyabyss townflag set|clear|goto|respot`）。
 - 巡り路の「壊す」: 淵の杭 `endgame/CircuitStake`（形は `cloud/circuit_stake.py`、`gen_cloud_mobs.py circuit_stake`）。
 - 釣り（`fishing/`）: 釣り竿（道具屋）、魚 31 種（絵 `tools/gen/items/gen_fish.py [install]`）、土地ごとの釣れ方、図鑑、週の釣り大会、食べ物屋の買い取りと番付。開発用 `/skyabyss fishing catch [id]|roll|reset`。

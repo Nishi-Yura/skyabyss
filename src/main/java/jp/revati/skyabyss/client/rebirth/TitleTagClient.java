@@ -24,7 +24,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 
-// 名札の称号 (その人が選んだ称号を、名前の上か下に一行で。位置はその人がプロフィールの画面で選ぶ: RebirthData.titlePos)。
+// 名札の称号 (その人が選んだ称号を、名前の上に一行で)。
 //   転生していない人にも出す (称号は名声・熟練・図鑑などでも解ける)。名前より少し小さく、淡い金の字
 //   出すのは名札が出るときだけ、24 マスまで。しゃがんでいる人は壁越しに透かさない (バニラの名札と同じ)。見る側の設定 (RebirthConfig.NAMETAG_TITLE) で切れる
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
@@ -38,11 +38,11 @@ public final class TitleTagClient {
     private TitleTagClient() {
     }
 
-    // その人の名札の称号 (無い・出さない・解けていない なら null)
+    // その人の名札の称号 (無い・解けていない なら null)
     @Nullable
     public static Component text(Player p) {
         RebirthData d = RebirthView.data(p);
-        if (d.title().isEmpty() || d.titlePos() == RebirthData.TITLE_OFF) {
+        if (d.title().isEmpty()) {
             return null;
         }
         RebirthTitles.Title t = RebirthTitles.byId(d.title());
@@ -69,10 +69,9 @@ public final class TitleTagClient {
         if (at == null) {
             return;
         }
-        boolean above = RebirthView.data(p).titlePos() == RebirthData.TITLE_ABOVE;
         PoseStack ps = event.getPoseStack();
         ps.pushPose();
-        ps.translate(at.x, at.y + 0.5 + (above ? LINE : -LINE), at.z);
+        ps.translate(at.x, at.y + 0.5 + LINE, at.z);
         ps.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
         float s = 0.025f * SCALE;
         ps.scale(s, -s, s);

@@ -36,11 +36,20 @@ close
 wait 10
 chat clear
 shot fishing_3_rod_held
+# 前に小さな池を掘る (浮きが水に落ちるように)
+cmd fill ~-3 ~-4 ~2 ~3 ~-1 ~9 minecraft:water
+cmd fill ~-3 ~ ~2 ~3 ~3 ~9 minecraft:air
+wait 10
+# 押してすぐ放す (押したままだと使い直しの間 4 tick のあとにもう一度使われ、投げた浮きをすぐ巻き戻してしまう)
 use
-wait 4
+wait 1
 stopuse
-wait 30
+wait 40
 shot fishing_4_rod_cast
+perspective back
+wait 10
+shot fishing_4b_cast_behind
+perspective first
 cmd skyabyss_fishing
 wait 10
 open chat

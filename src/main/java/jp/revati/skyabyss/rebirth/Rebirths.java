@@ -167,11 +167,6 @@ public final class Rebirths {
         return true;
     }
 
-    // 名札の称号の位置 (RebirthData.TITLE_*)
-    public static void setTitlePos(ServerPlayer p, int pos) {
-        put(p, data(p).withTitlePos(pos));
-    }
-
     // 順位表に載せるか (断る = false)
     public static void setHidden(ServerPlayer p, boolean hidden) {
         put(p, data(p).withHidden(hidden));

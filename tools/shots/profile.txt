@@ -1,4 +1,4 @@
-# プロフィール (持ち物の画面の札・三つのつまみ) と、名札の称号 (名前の上・下)
+# プロフィール (持ち物の画面の札・三つのつまみ) と、名札の称号 (いつも名前の上)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/profile.txt -PshotsName=profile
 world continent_areas continent
 size 1280 720
@@ -37,14 +37,3 @@ wait 10
 otherplayer 0 3 Tabibito
 wait 40
 shot profile_5_tag_above
-open profile
-wait 20
-click 270 44
-wait 10
-click 290 207
-wait 20
-close
-wait 10
-otherplayer 2.5 4 Tabibito2
-wait 40
-shot profile_6_tag_below
