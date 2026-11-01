@@ -2,7 +2,7 @@
 """ギルドの旗の模様の見本と、この世界の紋 (旗の模様の絵) のラフ。
   1. 見本 docs/review/guild_banners/emblems.png : GuildEmblems.java の模様 (バニラの模様の重ね) をすべて、旗の形で並べる (2026-11-01 に足したものに「新」)
   2. 紋のラフ docs/review/guild_banners/motifs.png : この世界の紋 12 (鯨・鐘・巨神の目・月…) を三つの色の組で
-     紋の絵そのもの (64x64 の旗の模様。表の面は (1,1) から 20x40) は docs/review/guild_banners/motifs/<id>.png。決まったら assets へ移す
+     紋の絵そのもの (64x64 の旗と盾の模様) は assets/skyabyss/textures/entity/{banner,shield}/guild_<id>.png (00 の 339 で決まり)
 バニラの旗の模様の絵は Minecraft の資源の jar から読む (引数で展開した場所を渡す):
     python tools/gen/items/gen_guild_banners.py <展開した場所>/assets/minecraft/textures/entity/banner
 """
@@ -59,7 +59,12 @@ def tint(mask, color):
 def banner(tex, layers, base, accent):
     cloth = tint(face(Image.open(tex / "base.png")), base)
     for pat, is_accent in layers:
-        src = pat if isinstance(pat, Image.Image) else Image.open(tex / (TEX.get(pat, pat.lower()) + ".png"))
+        if isinstance(pat, Image.Image):
+            src = pat
+        elif pat.startswith("guild_"):
+            src = Image.open(ROOT / "src/main/resources/assets/skyabyss/textures/entity/banner" / (pat + ".png"))
+        else:
+            src = Image.open(tex / (TEX.get(pat, pat.lower()) + ".png"))
         cloth = Image.alpha_composite(cloth, tint(face(src), accent if is_accent else base))
     return cloth.resize((cloth.width * SCALE, cloth.height * SCALE), Image.NEAREST)
 
@@ -76,7 +81,7 @@ def emblems():
         m = re.match(r'\s*e\("(\w+)", (null|"(\w+)"), (.*)\)[,;)]*\s*$', line)
         if not m:
             continue
-        layers = [(p, k == "a") for k, p in re.findall(r"(a|b)\(BannerPatterns\.(\w+)\)", m.group(4))]
+        layers = [(p or "guild_" + q, k == "a") for k, p, q in re.findall(r'(a|b)\((?:BannerPatterns\.(\w+)|motif\("(\w+)"\))\)', m.group(4))]
         out.append((m.group(1), m.group(3), layers, new or m.group(1) in ("flower_cross", "star_globe", "gale")))
     return out
 
@@ -117,12 +122,23 @@ def canvas():
     return Image.new("L", (20 * SS, 40 * SS), 0)
 
 
-def finish(big):
-    small = big.resize((20, 40), Image.BOX).point(lambda v: 255 if v >= 128 else 0)
-    tex = Image.new("RGBA", (64, 64), (255, 255, 255, 0))
-    face_img = Image.merge("RGBA", (Image.new("L", (20, 40), 255),) * 3 + (small,))
-    tex.paste(face_img, (1, 1))
+def mask_tex(big, size, faces):
+    small = big.resize(size, Image.BOX).point(lambda v: 255 if v >= 128 else 0)
+    face_img = Image.merge("LA", (Image.new("L", size, 255), small))
+    tex = Image.new("LA", (64, 64), (255, 0))
+    for x, mirror in faces:
+        tex.paste(face_img.transpose(Image.FLIP_LEFT_RIGHT) if mirror else face_img, (x, 1))
     return tex
+
+
+def finish(big):
+    # 旗の模様の絵: 表 (1,1) と裏 (22,1。左右を返す) に 20x40
+    return mask_tex(big, (20, 40), ((1, False), (22, True)))
+
+
+def shield(big):
+    # 盾の模様の絵: 表 (1,1) に 12x22
+    return mask_tex(big, (12, 22), ((1, False),))
 
 
 def m_whale():
@@ -304,6 +320,18 @@ MOTIF_PAIRS = [("blue", "yellow"), ("black", "light_blue"), ("red", "white")]
 def main():
     tex = Path(sys.argv[1])
     OUT.mkdir(parents=True, exist_ok=True)
+    assets = ROOT / "src/main/resources/assets/skyabyss/textures/entity"
+    (assets / "banner").mkdir(parents=True, exist_ok=True)
+    (assets / "shield").mkdir(parents=True, exist_ok=True)
+    tiles = []
+    for mid, label, fn in MOTIFS:
+        big = fn()
+        mask = finish(big)
+        mask.save(assets / "banner" / ("guild_" + mid + ".png"))
+        shield(big).save(assets / "shield" / ("guild_" + mid + ".png"))
+        for k, (base, accent) in enumerate(MOTIF_PAIRS):
+            tiles.append((banner(tex, [(mask, True)], base, accent), label if k == 0 else "", "", False))
+    sheet(tiles, 12, "この世界の紋の 12 種 (それぞれ三つの色の組。旗の模様の絵として足し、ほかの模様と重ねられる)", OUT / "motifs.png")
     nm = names()
     tiles = []
     for i, (eid, unlock, layers, new) in enumerate(emblems()):
@@ -311,14 +339,6 @@ def main():
         sub = ("新" if new else "") + ("・功績" if unlock and new else "功績" if unlock else "")
         tiles.append((banner(tex, layers, base, accent), nm.get(eid, eid), sub, new))
     sheet(tiles, 12, f"ギルドの旗の模様 {len(tiles)} 種 (青緑の「新」= 2026-11-01 に足したもの。色は見本)", OUT / "emblems.png")
-    (OUT / "motifs").mkdir(exist_ok=True)
-    tiles = []
-    for mid, label, fn in MOTIFS:
-        mask = finish(fn())
-        mask.save(OUT / "motifs" / (mid + ".png"))
-        for k, (base, accent) in enumerate(MOTIF_PAIRS):
-            tiles.append((banner(tex, [(mask, True)], base, accent), label if k == 0 else "", "", False))
-    sheet(tiles, 12, "この世界の紋のラフ 12 種 (それぞれ三つの色の組。旗の模様の絵として足し、ほかの模様と重ねられる)", OUT / "motifs.png")
 
 
 if __name__ == "__main__":

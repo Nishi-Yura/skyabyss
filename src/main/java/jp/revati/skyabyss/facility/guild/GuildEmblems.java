@@ -7,8 +7,10 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BannerBlock;
@@ -17,7 +19,7 @@ import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BannerPatterns;
 
 // ギルドの旗の模様と、名札の特別な色 (docs/design/35 の 6.5)。サーバーとクライアントの両方で使う (画面の見本も同じ旗の品を描く)。
-//   模様 = バニラの旗の模様を 1〜3 枚重ねたもの。各層は模様の色 (accent) か地の色 (base) で塗る
+//   模様 = バニラの旗の模様を 1〜4 枚重ねたものと、この世界の紋 (このModの旗の模様 guild_<id>)。各層は模様の色 (accent) か地の色 (base) で塗る
 //   unlock が null の模様ははじめから使える。そうでなければギルドの功績 (GuildAchievements) で開く
 //   名札の色 (Plate) は名札の「[印]」の字の色。旗の品は染料の 16 色のままなので、名札だけに出る
 public final class GuildEmblems {
@@ -45,6 +47,11 @@ public final class GuildEmblems {
 
     private static Layer b(ResourceKey<BannerPattern> p) {
         return new Layer(p, false);
+    }
+
+    // この世界の紋 (このModの旗の模様。data/skyabyss/banner_pattern/guild_<id>.json、絵は tools/gen/items/gen_guild_banners.py)
+    private static ResourceKey<BannerPattern> motif(String id) {
+        return ResourceKey.create(Registries.BANNER_PATTERN, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "guild_" + id));
     }
 
     private static Emblem e(String id, String unlock, Layer... layers) {
@@ -103,6 +110,19 @@ public final class GuildEmblems {
             e("per_bend_sinister", null, a(BannerPatterns.DIAGONAL_RIGHT)),
             e("four_corners", null, a(BannerPatterns.SQUARE_TOP_LEFT), a(BannerPatterns.SQUARE_TOP_RIGHT), a(BannerPatterns.SQUARE_BOTTOM_LEFT), a(BannerPatterns.SQUARE_BOTTOM_RIGHT)),
             e("flame", null, a(BannerPatterns.GRADIENT_UP), a(BannerPatterns.TRIANGLES_BOTTOM)),
+            // この世界の紋 (00 の 339。はじめから)
+            e("whale", null, a(motif("whale"))),
+            e("bell", null, a(motif("bell"))),
+            e("titan_eye", null, a(motif("titan_eye"))),
+            e("moon", null, a(motif("moon"))),
+            e("wing", null, a(motif("wing"))),
+            e("shell", null, a(motif("shell"))),
+            e("ember", null, a(motif("ember"))),
+            e("bolt", null, a(motif("bolt"))),
+            e("tower", null, a(motif("tower"))),
+            e("compass", null, a(motif("compass"))),
+            e("cloud_sea", null, a(motif("cloud_sea"))),
+            e("heart", null, a(motif("heart"))),
             // 功績で開く
             e("flower", "requests_1", a(BannerPatterns.FLOWER)),
             e("flow", "requests_5", a(BannerPatterns.FLOW)),
