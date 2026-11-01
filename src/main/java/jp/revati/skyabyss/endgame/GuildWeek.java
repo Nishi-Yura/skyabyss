@@ -33,7 +33,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //           旗を持つ組合の人は、その土地の町の店で FLAG_DISCOUNT 引き (名声の値引きに足す。合わせて 25％ まで)。組合の倉庫に週の品 (封の箱 1・塔の欠片 10)
 //   塔の順位: 組合ごとの週の塔を越えた回数 (Towers.cleared から)。週が替わると前の週の上位 3 組合を「塔の誉れ」(1〜3 位) にし、
 //           組合の倉庫に塔の欠片 (30・20・10)。記録の板 (TowerDesk.records) と旅帳 (/skyabyss_journal) に出す
-//   旗の見た目 (町の碑と門の旗・名札の土地の印) は、形を一品一案で見せてから足す
+//   旗の見た目: 旗を持つ組合の旗を、その土地の町の門と広場に掛ける (TownFlags)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GuildWeek extends SavedData {
     private static final String NAME = "skyabyss_guild_week";

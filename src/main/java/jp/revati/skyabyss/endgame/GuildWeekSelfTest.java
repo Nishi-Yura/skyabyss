@@ -87,8 +87,16 @@ public final class GuildWeekSelfTest {
                 p.getPersistentData().remove(RegionPoints.WEEK);
             }
         }
+        // 町の旗 (TownFlags): 広場の旗は町の中心を向く、色ごとの壁掛けの旗
+        net.minecraft.core.BlockPos c = net.minecraft.core.BlockPos.ZERO;
+        check(f, TownFlags.facingCenter(new net.minecraft.core.BlockPos(0, 0, 5), c) == 8 && TownFlags.facingCenter(new net.minecraft.core.BlockPos(0, 0, -5), c) == 0
+                && TownFlags.facingCenter(new net.minecraft.core.BlockPos(5, 0, 0), c) == 4 && TownFlags.facingCenter(new net.minecraft.core.BlockPos(-5, 0, 0), c) == 12,
+                "plaza flags do not face the town center");
+        for (net.minecraft.world.item.DyeColor d : net.minecraft.world.item.DyeColor.values()) {
+            check(f, TownFlags.wallBanner(d) instanceof net.minecraft.world.level.block.WallBannerBlock wb && wb.getColor() == d, "no wall banner for " + d);
+        }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST guild week PASSED (points per guild, flags, tower honors, storage goods, save)");
+            SkyAbyss.LOGGER.info("SELFTEST guild week PASSED (points per guild, flags, tower honors, storage goods, save, town flag facing and colors)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST guild week FAILED: {}", m));
         }
