@@ -782,6 +782,10 @@ def install(names):
     for key, label, fn in SKINS:
         if names and key not in names:
             continue
+        if (ROOT / "tools/rough/skinbox/skins" / f"{key}.py").exists():
+            # 服だけのスキンに作り直したもの (tools/rough/skinbox) は、ここの部位ごとの形を入れない
+            print(key, "is an outfit now (tools/rough/skinbox/skins), skipped")
+            continue
         res = built(key, fn)
         aview.save_set(res, OUT / "raw" / key, "skin_" + key)
         im = aview.render(res, "whale", 200, 8, (256, 384), 9.6, center=(0, 17.0, 0), mann=True, bg=(0, 0, 0))

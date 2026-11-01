@@ -1,4 +1,6 @@
-"""体ごとのスキン (client/FullSkinLayer) の形を箱で組み、面ごとにドット絵を描く道具。
+"""スキン (client/FullSkinLayer) の形を箱で組み、面ごとにドット絵を描く道具。
+スキンは服だけ (2026-11-01 の声「顔かえるのはいらない」): 着ている人のバニラの体と自分のスキンを残し、Steve の体の大きさ
+(頭 8・体 8x12x4・腕と脚 4x12x4、重ね着の層 +0.25〜0.5) より外に服を重ねる。顔は描かない。
 
 座標は geo (1/16 ブロック、足もと y = 0、上へ +y、前 = -Z、体の右 = -X)。T 画素 / 1 単位で描く (既定 4 = バニラの 4 倍の細かさ)。
 骨: head / body / armR / armL / legR / legL はバニラの体の部分と同じに動く。ほかの骨は parent に付き、名前の頭で揺れる
@@ -67,7 +69,7 @@ class Box:
 
 
 class Model:
-    def __init__(self, name, outfit=False):
+    def __init__(self, name, outfit=True):
         self.name = name
         # True = 服だけ (着ている人のバニラの体とスキンを残して重ねる)。バニラの体の大きさに合わせて作る
         self.outfit = outfit

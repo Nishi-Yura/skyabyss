@@ -100,8 +100,15 @@ public final class SkinSelfTest {
             check(f, Skins.Data.STREAM_CODEC.decode(b).equals(d), "skin data stream codec round trip");
             check(f, Skins.Data.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, d).result()
                     .flatMap(t -> Skins.Data.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, t).result()).map(d::equals).orElse(false), "skin data save round trip");
-            // 素材: 部位ごとの形と絵、衣装棚の絵、名前
+            // 素材: 服の形 (lowpoly/skin_full/<id>。作り直す前のものは部位ごとの形) と絵、衣装棚の絵、名前
             for (Skins.Skin k : Skins.ALL) {
+                if (SkinSelfTest.class.getResource("/assets/skyabyss/lowpoly/skin_full/" + k.id() + ".json") != null) {
+                    check(f, SkinSelfTest.class.getResource("/assets/skyabyss/textures/lowpoly/skin_full/" + k.id() + ".png") != null, "missing outfit texture " + k.id());
+                    check(f, SkinSelfTest.class.getResource("/assets/skyabyss/lowpoly/armor/skin_" + k.id() + "/chestplate.json") == null,
+                            "old per-piece skin left beside the outfit " + k.id());
+                    check(f, SkinSelfTest.class.getResource("/assets/skyabyss/textures/gui/skins/" + k.id() + ".png") != null, "missing wardrobe picture " + k.id());
+                    continue;
+                }
                 for (String piece : new String[] {"helmet", "chestplate", "leggings", "boots"}) {
                     String mesh = "lowpoly/armor/skin_" + k.id() + "/" + piece + ".json";
                     check(f, SkinSelfTest.class.getResource("/assets/skyabyss/" + mesh) != null, "missing skin mesh " + mesh);
