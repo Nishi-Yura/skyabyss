@@ -1,4 +1,4 @@
-# 引き継ぎ（2026-11-02）
+# 引き継ぎ（2026-11-01 の夕方）
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
@@ -6,15 +6,26 @@
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
 - 試遊版: 0.9.21（`build/libs/skyabyss-0.9.21.jar`。確認表 `docs/review/playtest_0.9.21.md`（塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
-- 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すと時間切れで落ちることがある（単独では通る）。
+- 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すとまれに落ちる（単独でも淵の順でも通る。灰の封のチャンクを読み込むよう直し、落ちたら失敗の文に状態が出る）。
+
+## 2026-11-01 の昼から夕方に入れたもの
+
+- プロフィール（`endgame/Profile`・`endgame/client/ProfileScreen`。持ち物の画面の右上の札 `ProfileCard` から）: わたし・称号・見え方・衣装の四つのつまみ。名札の称号は名前の上か下の一行（`client/rebirth/TitleTagClient`、位置は `RebirthData.titlePos`）。称号は 50 個。
+- ギルドの旗の模様 67 種（`GuildEmblems`。バニラの重ね 55 とこの世界の紋 12 = `data/skyabyss/banner_pattern/guild_*.json`、絵は `tools/gen/items/gen_guild_banners.py`）。土地の旗を取った組合の旗を町の門と広場に掛ける（`endgame/TownFlags`、開発用 `/skyabyss townflag set|clear|goto|respot`）。
+- 巡り路の「壊す」: 淵の杭 `endgame/CircuitStake`（形は `cloud/circuit_stake.py`、`gen_cloud_mobs.py circuit_stake`）。
+- スキン 12 着（`skin/Skins`・`client/SkinLayer`。形 `tools/rough/lowpoly/armor/skin_one.py [組|install]` → `tools/install/install_skins.py`）。着ると防具の見た目が替わる。手に入れ方は仕立て屋（週替わり 4 着、鐘銭）・塔守（欠片）・ほうび（名声 5 段・敵の図鑑）・まれな箱（巡り路と大事件）。仕立て屋の係の人 `TAILOR`（`skin/TailorStand`、武具屋のそば。形 `npc2/cast.py` の tailor）。開発用 `/skyabyss skin give|wear|clear|reset|tailor|tower`。
+- 釣り（`fishing/`）: 釣り竿（道具屋）、魚 31 種（絵 `tools/gen/items/gen_fish.py [install]`）、土地ごとの釣れ方、図鑑、週の釣り大会、食べ物屋の買い取りと番付。開発用 `/skyabyss fishing catch [id]|roll|reset`。
+- 野の斧 5 本の刃の向き（`WeaponItemRenderer.EDGE_FLIP`）。係の人の頭の名札の訳（塔守と仕立て屋が抜けていた。施設の自己テストで全部の役を見る）。
+- 自己テストを足した: `skins`・`fishing`（本物の浮きを引き上げる流れも）・`guild week`（町の旗）・`circuit`（壊す）・`facility`（名札）。撮影: `profile.txt`・`guild_motifs.txt`・`town_flags.txt`・`circuit_stake.txt`・`skins.txt`・`skins_shops.txt`・`tailor.txt`・`fishing.txt`・`axe_facing.txt`。
+- まだ: 公開サイトは 0.9.20 のまま（ユーザーが 0.9.21 を遊んでから更新する）。釣りの投げる・引く手ごたえと数値（釣れる割合・大会の賞・スキンの値段）は試遊で直す。
 
 ## エンドコンテンツの残り（2026-11-02 の夜。設計 [54](design/54_endgame_plan.md) の 3.1.1・3.3.1・3.4.1・5.1.1・5.4.1・6.2.7・6.2.8）
 
 - 新しい包み `endgame/`: 巡り路 `Circuits`（町の案内人から。20 分、倒す・守る・運ぶ、一日 3 回の報い）、大陸の大事件 `WorldEvents`（45 分ごと、二章から）、土地の点 `RegionPoints`（週の点と名声）、名声と旅帳 `RegionFame`（`/skyabyss_journal`）、組合の週 `GuildWeek`（旗取りと塔の誉れ）、図鑑の報い `Codex`（`/skyabyss_codex`）、武器の見た目替え `Looks`（鍛冶屋。データ部品 `look`）。職の熟練は `rpg/JobMastery`（`GrowthData.mastery`）。
-- 称号は 48 個（`RebirthTitles`。事実の印 `Facts.marks` で名声・旅帳・熟練・図鑑を数える）。
+- 称号は 50 個（`RebirthTitles`。事実の印 `Facts.marks` で名声・旅帳・熟練・図鑑・釣りを数える）。
 - 自己テスト: `circuit`・`world event`・`fame`・`mastery`・`guild week`・`codex`・`looks`。撮影台本: `tools/shots/circuit.txt`・`world_event.txt`・`mastery.txt`・`looks.txt`・`skill_changes.txt`。
 - 開発用: `/skyabyss circuit start <土地>|next|goto|end|reset`、`/skyabyss event start [土地]|goto|end`、`/skyabyss fame add <土地> <点>`。
-- 形の承認待ち（朝の確認ページ https://claude.ai/artifact/8gGk5RcrHcLSJhUcYWetji 。選びは db の `choices`）: 飾り装備の範囲・防具の見た目替え・釣り・巡り路の「壊す」の杭・土地の旗の見た目。
+- 朝の確認ページ（https://claude.ai/artifact/8gGk5RcrHcLSJhUcYWetji）の選びは全部おすすめで、上の昼の分で作り終えた（飾り装備はユーザーの声でスキンに改めた）。
 - 数値（巡り路の鐘銭・大事件の体力の倍率・名声の段の境・熟練の段の量）は試遊で直す。
 - 旅の記録の画面: 記録・技の上のつまみ「旅」（`endgame/client/JourneyScreen`、背景 `tools/gen/items/gen_journey_assets.py`）。
 - チャットの押せる一覧（秘伝・塔の受付と記録・見た目替え・旅帳）は、係の人の会話から開くとチャットの窓を開く（`endgame/ChatMenus`）。チャットの窓を開いているあいだは行を絞らない（`ChatLinesMixin`）。狭い画面では閉じたチャットは 1 行しか見えないため。
