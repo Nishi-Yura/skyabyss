@@ -201,5 +201,13 @@
   "gui.skyabyss.profile.wardrobe.where": "Sold by the outfitter (%s bell coins)",
   "gui.skyabyss.profile.wardrobe.note": "Skins only change looks; your armor's strength stays",
   "gui.skyabyss.profile.wardrobe.tailor": "Tailoring: click a skin you don't own to buy it",
-  "gui.skyabyss.profile.wardrobe.coins": "Bell coins %s"
+  "gui.skyabyss.profile.wardrobe.coins": "Bell coins %s",
+  "skin.skyabyss.ninja": "Ninja",
+  "skin.skyabyss.witch": "Witch",
+  "skin.skyabyss.chef": "Chef",
+  "skin.skyabyss.vampire": "Vampire Noble",
+  "skin.skyabyss.ninja.desc": "Indigo hood and headband, a blade and red scarf on the back",
+  "skin.skyabyss.witch.desc": "Pointed hat, purple robe and glowing potions",
+  "skin.skyabyss.chef.desc": "Tall toque, white jacket and a ladle in the apron",
+  "skin.skyabyss.vampire.desc": "Top hat, high-collared cloak and a ruby pin"
 }

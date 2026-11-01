@@ -55,7 +55,11 @@ public final class Skins {
             new Skin("samurai", 3000),
             new Skin("pirate", 2500),
             new Skin("knight", 2500),
-            new Skin("astronaut", 4000));
+            new Skin("astronaut", 4000),
+            new Skin("ninja", 3000),
+            new Skin("witch", 3000),
+            new Skin("chef", 2500),
+            new Skin("vampire", 3500));
 
     public record Data(List<String> owned, String worn) {
         public static final Data EMPTY = new Data(List.of(), "");

@@ -74,10 +74,10 @@ public class ProfileScreen extends Screen {
     static final int TITLES = 1;
     static final int LOOKS = 2;
     static final int WARDROBE = 3;
-    // 衣装の札 (絵 32x48 と名前)
+    // 衣装の札 (絵 28x42 と名前。二段で 8 着、下の説明とボタンに掛からない高さ)
     static final int CARD_W = 40;
-    static final int CARD_H = 62;
-    static final int CARD_Y = 46;
+    static final int CARD_H = 54;
+    static final int CARD_Y = 44;
     // 最後に開いていたつまみ (開き直しても同じつまみ)
     private static int sub = ME;
 
@@ -441,9 +441,9 @@ public class ProfileScreen extends Screen {
             if (!has) {
                 com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.35f, 0.35f, 0.4f, 1f);
             }
-            g.blit(pic, x + 4, y + 2, 32, 48, 0, 0, 128, 192, 128, 192);
+            g.blit(pic, x + 6, y + 1, 28, 42, 0, 0, 128, 192, 128, 192);
             com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            FitText.drawCentered(g, font, Component.translatable(skin.nameKey()), x + CARD_W / 2, y + 52, CARD_W - 2, on ? GOLD : has ? TEXT : DIM, false);
+            FitText.drawCentered(g, font, Component.translatable(skin.nameKey()), x + CARD_W / 2, y + 44, CARD_W - 2, on ? GOLD : has ? TEXT : DIM, false);
             if (hover) {
                 List<Component> tip = new ArrayList<>();
                 tip.add(Component.translatable(skin.nameKey()).withStyle(st -> st.withColor(on ? GOLD : TEXT)));

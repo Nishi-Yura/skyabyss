@@ -201,5 +201,13 @@
   "gui.skyabyss.profile.wardrobe.where": "武具屋の「スキンを見る」で買える（%s 鐘銭）",
   "gui.skyabyss.profile.wardrobe.note": "スキンは見た目だけ。強さは今の防具のまま",
   "gui.skyabyss.profile.wardrobe.tailor": "仕立て: 持っていないスキンを押すと買える",
-  "gui.skyabyss.profile.wardrobe.coins": "鐘銭 %s"
+  "gui.skyabyss.profile.wardrobe.coins": "鐘銭 %s",
+  "skin.skyabyss.ninja": "忍び",
+  "skin.skyabyss.witch": "魔女",
+  "skin.skyabyss.chef": "料理人",
+  "skin.skyabyss.vampire": "吸血鬼の貴族",
+  "skin.skyabyss.ninja.desc": "藍の頭巾に鉢金、背に刀と紅の襟巻き",
+  "skin.skyabyss.witch.desc": "とんがり帽子と紫の長衣、光る薬瓶",
+  "skin.skyabyss.chef.desc": "背の高いコック帽と白い上着、前掛けにお玉",
+  "skin.skyabyss.vampire.desc": "山高帽と高い襟の外套、紅玉の留め"
 }

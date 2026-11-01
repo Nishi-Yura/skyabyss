@@ -47,9 +47,18 @@ cmd tp @s -120 120 -560 0 0
 waitchunks 100
 wait 40
 otherplayer 0 4 Astro
-cmd skyabyss skin wear samurai
+cmd skyabyss skin wear ninja
 wait 10
-otherplayer 2.5 4 SamuraiBare
+otherplayer 2.5 4 Ninja
+cmd skyabyss skin wear witch
+wait 10
+otherplayer -2.5 4 Witch
+cmd skyabyss skin wear chef
+wait 10
+otherplayer 5 4.5 Chef
+cmd skyabyss skin wear vampire
+wait 10
+otherplayer -5 4.5 Vampire
 wait 40
 shot skins_2_no_armor
 hud on
