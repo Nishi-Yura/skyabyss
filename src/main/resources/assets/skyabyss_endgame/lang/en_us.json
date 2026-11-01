@@ -218,5 +218,13 @@
   "skin.skyabyss.vampire.how": "Reward: complete the foe codex",
   "message.skyabyss.skin.reward": "Got the reward skin \"%s\" (wear it from Wardrobe in your profile)",
   "message.skyabyss.skin.rare": "A rare skin \"%s\" dropped! (wear it from Wardrobe)",
-  "message.skyabyss.skin.shards": "Not enough tower shards (%s)"
+  "message.skyabyss.skin.shards": "Not enough tower shards (%s)",
+  "skin.skyabyss.cowboy": "Cowboy",
+  "skin.skyabyss.robot": "Robot",
+  "skin.skyabyss.maid": "Maid",
+  "skin.skyabyss.student": "School Uniform",
+  "skin.skyabyss.cowboy.desc": "Wide-brim hat, leather vest and spurred boots",
+  "skin.skyabyss.robot.desc": "Boxy head with glowing blue eyes and an antenna",
+  "skin.skyabyss.maid.desc": "Frilled headdress and a black dress with a white apron",
+  "skin.skyabyss.student.desc": "School cap and a black stand-collar jacket with gold buttons"
 }

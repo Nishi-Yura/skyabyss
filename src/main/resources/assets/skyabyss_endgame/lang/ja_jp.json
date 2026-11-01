@@ -218,5 +218,13 @@
   "skin.skyabyss.vampire.how": "ほうび: 敵の図鑑をすべてそろえる",
   "message.skyabyss.skin.reward": "ほうびのスキン「%s」を手に入れた（プロフィールの「衣装」で着られる）",
   "message.skyabyss.skin.rare": "まれなスキン「%s」が出た！（プロフィールの「衣装」で着られる）",
-  "message.skyabyss.skin.shards": "塔の欠片が足りない（%s）"
+  "message.skyabyss.skin.shards": "塔の欠片が足りない（%s）",
+  "skin.skyabyss.cowboy": "カウボーイ",
+  "skin.skyabyss.robot": "ロボット",
+  "skin.skyabyss.maid": "メイド",
+  "skin.skyabyss.student": "学生服",
+  "skin.skyabyss.cowboy.desc": "つば広の帽子と革のベスト、拍車の長靴",
+  "skin.skyabyss.robot.desc": "青く光る目とアンテナの四角い頭",
+  "skin.skyabyss.maid.desc": "フリルの髪飾りと白い前掛けの黒い服",
+  "skin.skyabyss.student.desc": "学帽と黒の詰め襟、金のボタン"
 }

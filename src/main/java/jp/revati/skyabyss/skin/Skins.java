@@ -68,7 +68,11 @@ public final class Skins {
             new Skin("ninja", Shop.REWARD, 0, "rare"),
             new Skin("witch", Shop.TAILOR, 3000, ""),
             new Skin("chef", Shop.TAILOR, 2500, ""),
-            new Skin("vampire", Shop.REWARD, 0, "foes:all"));
+            new Skin("vampire", Shop.REWARD, 0, "foes:all"),
+            new Skin("cowboy", Shop.TAILOR, 2500, ""),
+            new Skin("robot", Shop.TOWER, 60, ""),
+            new Skin("maid", Shop.TAILOR, 3000, ""),
+            new Skin("student", Shop.TAILOR, 2000, ""));
     // まれな箱 (巡り路の報い・大陸の大事件の報い) から REWARD "rare" のスキンが出る割合 (百分率)
     public static final int RARE_PCT = 5;
 

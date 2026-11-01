@@ -61,12 +61,32 @@ wait 10
 otherplayer -5 4.5 Vampire
 wait 40
 shot skins_2_no_armor
+cmd tp @s -120 120 -530 0 0
+waitchunks 100
+wait 40
+cmd skyabyss skin wear cowboy
+wait 10
+otherplayer -3.75 4 Cowboy
+cmd skyabyss skin wear robot
+wait 10
+otherplayer -1.25 4.5 Robot
+cmd skyabyss skin wear maid
+wait 10
+otherplayer 1.25 4.5 Maid
+cmd skyabyss skin wear student
+wait 10
+otherplayer 3.75 4 Student
+wait 40
+shot skins_2b_group3
 hud on
 open profile
 wait 30
 click 340 44
 wait 20
 shot skins_3_wardrobe
+click 361 192
+wait 10
+shot skins_3b_wardrobe_page2
 close
 cmd skyabyss skin tailor
 wait 40

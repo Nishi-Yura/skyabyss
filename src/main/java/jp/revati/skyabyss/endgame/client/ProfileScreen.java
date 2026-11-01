@@ -162,7 +162,7 @@ public class ProfileScreen extends Screen {
             }).bounds(left + BODY_X, top + 170, 170, 16).build());
             if (pages() > 1) {
                 addRenderableWidget(Button.builder(Component.literal("◀"), b -> page = Math.floorMod(page - 1, pages()))
-                        .bounds(left + BODY_R - 40, top + 155, 12, 12).build());
+                        .bounds(left + BODY_R - 48, top + 155, 12, 12).build());
                 addRenderableWidget(Button.builder(Component.literal("▶"), b -> page = Math.floorMod(page + 1, pages()))
                         .bounds(left + BODY_R - 12, top + 155, 12, 12).build());
             }
@@ -485,10 +485,10 @@ public class ProfileScreen extends Screen {
         }
         Component foot = shop == jp.revati.skyabyss.skin.Skins.Shop.TOWER ? Component.translatable("gui.skyabyss.profile.wardrobe.tower")
                 : shop != null ? Component.translatable("gui.skyabyss.profile.wardrobe.tailor") : Component.translatable("gui.skyabyss.profile.wardrobe.note");
-        int footW = pages() > 1 ? BODY_R - BODY_X - 44 : BODY_R - BODY_X;
+        int footW = pages() > 1 ? BODY_R - BODY_X - 52 : BODY_R - BODY_X;
         FitText.draw(g, font, foot, left + BODY_X, top + 158, footW, shop != null ? TitleTagClient.COLOR : DIM, false);
         if (pages() > 1) {
-            g.drawCenteredString(font, (page + 1) + "/" + pages(), left + BODY_R - 20, top + 157, SOFT);
+            g.drawCenteredString(font, (page + 1) + "/" + pages(), left + BODY_R - 24, top + 157, SOFT);
         }
     }
 
