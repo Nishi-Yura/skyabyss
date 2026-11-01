@@ -820,5 +820,6 @@
   "dialogue.skyabyss.attendant_tailor.menu.about": "スキンって？",
   "dialogue.skyabyss.attendant_tailor.menu.bye": "また来る",
   "dialogue.skyabyss.attendant_tailor.about_skins": "鎧の上に着る見た目よ。着ると鎧の形が隠れて、仕立てた服に見えるの。強さは鎧のまま。店に並ぶのは週に四着、月曜の朝に替わるわ。塔の欠片の品は塔守、ほかにもほうびで手に入るものがあるそうよ。着替えはプロフィールの「衣装」で。",
-  "entity.skyabyss.attendant.tailor": "仕立て屋"
+  "entity.skyabyss.attendant.tailor": "仕立て屋",
+  "dialogue.skyabyss.attendant_food_vendor.menu.fishing": "釣り大会の番付を見る"
 }

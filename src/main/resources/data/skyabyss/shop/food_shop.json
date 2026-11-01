@@ -75,5 +75,161 @@
       "made": true
     }
   ],
-  "buys": []
+  "buys": [
+    {
+      "item": "skyabyss:fish_crucian",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_sweetfish",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_bell_carp",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_mud_catfish",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_striped_dace",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_mill_trout",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_moss_sculpin",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_songstone_flounder",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_bone_cod",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_barnacle_bream",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_ash_herring",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_whalebone_eel",
+      "per": 1,
+      "coins": 40
+    },
+    {
+      "item": "skyabyss:fish_pearl_bream",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_tideshell_puffer",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_kelp_seahorse",
+      "per": 1,
+      "coins": 40
+    },
+    {
+      "item": "skyabyss:fish_coral_parrotfish",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_moon_mackerel",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_swirl_shark",
+      "per": 1,
+      "coins": 40
+    },
+    {
+      "item": "skyabyss:fish_thunder_char",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_cloud_trout",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_pass_yamame",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_lightning_eel",
+      "per": 1,
+      "coins": 40
+    },
+    {
+      "item": "skyabyss:fish_featherfin_flyingfish",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_glacier_icefish",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_ember_snapper",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_ash_catfish",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_hotspring_goldfish",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_obsidian_spinefish",
+      "per": 1,
+      "coins": 15
+    },
+    {
+      "item": "skyabyss:fish_firetail",
+      "per": 1,
+      "coins": 6
+    },
+    {
+      "item": "skyabyss:fish_flame_dragonfish",
+      "per": 1,
+      "coins": 40
+    },
+    {
+      "item": "skyabyss:fish_dream_fish",
+      "per": 1,
+      "coins": 300
+    }
+  ]
 }

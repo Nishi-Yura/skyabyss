@@ -705,10 +705,23 @@ def fishing_rod():
         put(px, 28, y, c)
         put(px, 29, y, c)
         put(px, 30, y, c)
-    return finish(im)
+    return im  # 竿は縁取りしない (手に持つと細い線が太い黒になる。バニラの竿と同じく線だけ)
+
+
+def fishing_rod_cast():
+    """投げたあとの釣り竿 (糸と浮きは水へ出ているので、竿だけ)"""
+    im = fishing_rod()
+    px = im.load()
+    for y in range(4, 22):
+        for x in range(27, 32):
+            px[x, y] = (0, 0, 0, 0)
+    for x, y in ((24, 6), (25, 5), (26, 5), (27, 4), (28, 4), (29, 3)):
+        px[x, y] = (190, 160, 90, 255)
+    return im
 
 
 TOOLS = [("fishing_rod", "釣り竿", "道具屋", "C", fishing_rod)]
+TOOLS_INSTALL_ONLY = [("fishing_rod_cast", fishing_rod_cast)]
 
 # (id, 名前, 土地, まれさ C/U/R/L, 絵)
 FISH = [
@@ -742,6 +755,8 @@ def main():
             im.save(ITEM / f"fish_{fid}.png")
         for fid, _, _, _, im in tools:
             im.save(ITEM / f"{fid}.png")
+        for fid, fn in TOOLS_INSTALL_ONLY:
+            fn().save(ITEM / f"{fid}.png")
         print("installed", len(ims), "fish icons and", len(tools), "tools")
         return
     ims = ims + tools

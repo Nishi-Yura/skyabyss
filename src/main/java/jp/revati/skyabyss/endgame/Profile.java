@@ -79,6 +79,8 @@ public final class Profile {
         t.putInt("fame_max", RegionFame.LANDS.length * RegionFame.STEPS.length);
         t.putInt("foes", Codex.foesDefeated(p));
         t.putInt("foes_total", Codex.foes().size());
+        t.putInt("fish", jp.revati.skyabyss.fishing.Fishing.codexCount(p));
+        t.putInt("fish_total", jp.revati.skyabyss.fishing.Fish.ALL.size());
         return t;
     }
 

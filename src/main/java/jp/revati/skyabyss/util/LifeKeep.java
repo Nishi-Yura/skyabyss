@@ -52,7 +52,8 @@ public final class LifeKeep {
             "skyabyss_secret_arts", "skyabyss_secret_slots", // 秘伝 (覚えた段と枠。rpg/skill/SecretArts)
             "skyabyss_circuit_day", "skyabyss_circuit_runs",  // 巡り路の報いを受けた日と回数 (endgame/Circuits)
             "skyabyss_region_week", "skyabyss_region_fame",   // 土地の点 (週の点と名声。endgame/RegionPoints)
-            "skyabyss_journal_done");                 // 旅帳をそろえた土地 (endgame/RegionFame)
+            "skyabyss_journal_done",                  // 旅帳をそろえた土地 (endgame/RegionFame)
+            "skyabyss_fish", "skyabyss_fish_done", "skyabyss_fish_champion");  // 魚の図鑑・図鑑の報いを受けた・釣り大会で一番になった (fishing/Fishing)
     // 頭が同じ印 (巨神ごと・主ごとに分かれる記録)
     public static final List<String> PREFIXES = List.of(
             "skyabyss_moon_trial.");                  // 位相の挑戦の主ごとの最速 (story/ch6/MoonTrial)

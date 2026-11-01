@@ -46,6 +46,17 @@
           "goto": "end"
         },
         {
+          "id": "fishing",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "fishing_board"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "about",
           "kind": "talk",
           "goto": "again"

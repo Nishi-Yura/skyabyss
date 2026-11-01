@@ -60,6 +60,8 @@ public class ProfileScreen extends Screen {
     static final int SUB_GAP = 2;
     static final int SUB_H = 14;
     static final int ROW = 12;
+    // わたしのつまみの行の間 (12 行が箱に収まるように)
+    static final int ME_ROW = 11;
     static final int LIST_Y = 45;
     static final int LIST_ROWS = 9;
     static final int POS_X = 154;
@@ -331,30 +333,32 @@ public class ProfileScreen extends Screen {
         int y = top + 47;
         row(g, y, "job", job == null ? Component.translatable("gui.skyabyss.profile.none")
                 : Component.translatable("gui.skyabyss.profile.job_value", Component.translatable(job.nameKey()), level));
-        y += ROW;
+        y += ME_ROW;
         int mastery = data.getInt("mastery");
         row(g, y, "mastery", level >= jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL
                 ? Component.translatable("gui.skyabyss.profile.tier_value", mastery) : Component.translatable("gui.skyabyss.profile.from_50"));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "rebirths", Component.translatable("gui.skyabyss.profile.times", rd.count()));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "coins", Component.literal(String.format("%,d", data.getInt("coins"))));
-        y += ROW;
+        y += ME_ROW;
         long minutes = data.getLong("play") / 20 / 60;
         row(g, y, "play", Component.translatable("gui.skyabyss.profile.hours", minutes / 60, minutes % 60));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "kills", Component.literal(String.format("%,d", data.getInt("kills"))));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "deaths", Component.literal(String.format("%,d", data.getInt("deaths"))));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "titles", Component.literal(Long.bitCount(rd.unlocked()) + " / " + RebirthTitles.MAX));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "fame", Component.translatable("gui.skyabyss.profile.of_tiers", data.getInt("fame"), data.getInt("fame_max")));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "foes", Component.literal(data.getInt("foes") + " / " + data.getInt("foes_total")));
-        y += ROW;
+        y += ME_ROW;
         row(g, y, "tower", Component.translatable("gui.skyabyss.profile.times", data.getInt("tower")));
-        if (in(mx, my, left + BODY_X, top + 47 + 8 * ROW, BODY_R - BODY_X, 2 * ROW)) {
+        y += ME_ROW;
+        row(g, y, "fish", Component.literal(data.getInt("fish") + " / " + data.getInt("fish_total")));
+        if (in(mx, my, left + BODY_X, top + 47 + 8 * ME_ROW, BODY_R - BODY_X, 2 * ME_ROW)) {
             tip(List.of(Component.translatable("gui.skyabyss.profile.see_journey").withStyle(s -> s.withColor(SOFT))));
         }
     }
@@ -363,7 +367,7 @@ public class ProfileScreen extends Screen {
         g.drawString(font, Component.translatable("gui.skyabyss.profile.row." + key), left + BODY_X, y, SOFT, false);
         int w = Math.min(font.width(value), 100);
         FitText.draw(g, font, value, left + BODY_R - w, y, 100, TEXT, false);
-        g.fill(left + BODY_X, y + 10, left + BODY_R, y + 11, 0x18FFFFFF);
+        g.fill(left + BODY_X, y + 9, left + BODY_R, y + 10, 0x18FFFFFF);
     }
 
     // ---------------------------------------------------------------- 称号

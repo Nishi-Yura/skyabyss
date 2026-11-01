@@ -1,0 +1,48 @@
+# 釣り: 魚の品の説明・竿を投げた形・番付
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/fishing.txt -PshotsName=fishing
+world continent_areas continent
+size 1280 720
+timeout 1200
+render 6
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd time set 6000
+cmd weather clear
+cmd effect give @s resistance 99999 4 true
+cmd tp @s -120 120 -600 0 30
+waitchunks 300
+wait 60
+cmd skyabyss fishing reset
+cmd clear @s
+cmd skyabyss fishing catch bell_carp
+cmd skyabyss fishing catch dream_fish
+cmd skyabyss fishing catch kelp_seahorse
+cmd skyabyss fishing catch ember_snapper
+cmd item replace entity @s weapon.mainhand with skyabyss:fishing_rod
+wait 20
+chat clear
+open inventory
+wait 20
+hover slot 37
+wait 10
+shot fishing_1_tooltip_dream
+hover slot 36
+wait 10
+shot fishing_2_tooltip_carp
+close
+wait 10
+chat clear
+shot fishing_3_rod_held
+use
+wait 4
+stopuse
+wait 30
+shot fishing_4_rod_cast
+cmd skyabyss_fishing
+wait 10
+open chat
+wait 10
+shot fishing_5_board

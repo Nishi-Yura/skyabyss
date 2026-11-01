@@ -151,5 +151,9 @@
   "title.skyabyss_rebirth.codex_all": "Codex Keeper",
   "title.skyabyss_rebirth.codex_all.how": "Complete every titan's gear codex (Abyss and Moon too)",
   "title.skyabyss_rebirth.foes_all": "Knower of Foes",
-  "title.skyabyss_rebirth.foes_all.how": "Fill the foe codex"
+  "title.skyabyss_rebirth.foes_all.how": "Fill the foe codex",
+  "title.skyabyss_rebirth.angler_all": "Keeper of the Fish Codex",
+  "title.skyabyss_rebirth.angler_all.how": "Fill the fish codex",
+  "title.skyabyss_rebirth.angler_champion": "Fishing Champion",
+  "title.skyabyss_rebirth.angler_champion.how": "Win a weekly fishing contest"
 }

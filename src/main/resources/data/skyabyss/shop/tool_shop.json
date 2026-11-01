@@ -38,6 +38,12 @@
       "item": "skyabyss:gather_shovel",
       "count": 1,
       "coins": 4
+    },
+    {
+      "id": "fishing_rod",
+      "item": "skyabyss:fishing_rod",
+      "count": 1,
+      "coins": 120
     }
   ],
   "buys": []

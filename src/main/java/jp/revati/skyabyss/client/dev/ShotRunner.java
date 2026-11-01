@@ -1138,6 +1138,7 @@ public final class ShotRunner {
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
             case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
+            case "chat" -> () -> new net.minecraft.client.gui.screens.ChatScreen("");
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;

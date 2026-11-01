@@ -820,5 +820,6 @@
   "dialogue.skyabyss.attendant_tailor.menu.about": "What are skins?",
   "dialogue.skyabyss.attendant_tailor.menu.bye": "See you",
   "dialogue.skyabyss.attendant_tailor.about_skins": "A look worn over your armor. It hides the armor's shape and shows the outfit, but your strength stays the armor's. Four pieces a week, changing Monday morning. Tower pieces are with the tower keeper, and some come as rewards. Change outfits from Wardrobe in your profile.",
-  "entity.skyabyss.attendant.tailor": "Tailor"
+  "entity.skyabyss.attendant.tailor": "Tailor",
+  "dialogue.skyabyss.attendant_food_vendor.menu.fishing": "See the fishing contest board"
 }

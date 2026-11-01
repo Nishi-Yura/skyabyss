@@ -172,6 +172,9 @@ public class SkyAbyss {
         // スキン (見た目だけの一式。持っているものと着ているもの)。docs/design/54 の 6.1
         jp.revati.skyabyss.skin.Skins.register(modEventBus);
 
+        // 釣り (魚 31 種と釣り竿)。docs/design/54 の 6.2.4.1
+        jp.revati.skyabyss.fishing.FishingSetup.register(modEventBus);
+
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
