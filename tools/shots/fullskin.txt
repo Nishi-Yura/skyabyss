@@ -1,0 +1,63 @@
+# 体ごとのスキン (client/FullSkinLayer): 前・横・後ろ、顔の寄り、防具を着ていても隠れるか、歩いて揺れる姿
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/fullskin.txt -PshotsName=fullskin
+world continent_areas continent
+size 1280 720
+timeout 1200
+render 6
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd time set 6000
+cmd weather clear
+cmd effect give @s resistance 99999 4 true
+cmd tp @s -120 120 -600 0 0
+waitchunks 300
+wait 100
+cmd skyabyss level set @p 50
+cmd item replace entity @s armor.head with minecraft:air
+cmd item replace entity @s armor.chest with minecraft:air
+cmd item replace entity @s armor.legs with minecraft:air
+cmd item replace entity @s armor.feet with minecraft:air
+cmd skyabyss skin give all
+cmd skyabyss skin wear witch
+hud off
+chat clear
+wait 20
+otherplayer -2.4 4.2 Front
+otherplayer 0 4.4 Side 90
+otherplayer 2.4 4.2 Back 180
+wait 40
+shot fullskin_1_three_views
+cmd tp @s -120 120 -560 0 0
+waitchunks 100
+wait 30
+otherplayer 0 1.7 Face
+wait 30
+shot fullskin_2_face
+cmd tp @s -120 120 -530 0 0
+waitchunks 100
+cmd item replace entity @s armor.head with skyabyss:whale_road_helmet
+cmd item replace entity @s armor.chest with skyabyss:whale_road_chestplate
+cmd item replace entity @s armor.legs with skyabyss:whale_road_leggings
+cmd item replace entity @s armor.feet with skyabyss:whale_road_boots
+wait 20
+otherplayer -1.2 3.4 Armored -30
+cmd skyabyss skin clear
+wait 10
+otherplayer 1.2 3.4 Plain 30
+wait 40
+shot fullskin_3_armor_hidden
+cmd skyabyss skin wear witch
+perspective front
+wait 20
+shot fullskin_4_still
+walk on
+wait 14
+shot fullskin_5_walking
+wait 30
+shot fullskin_6_walking_more
+walk off
+wait 6
+shot fullskin_7_stopping

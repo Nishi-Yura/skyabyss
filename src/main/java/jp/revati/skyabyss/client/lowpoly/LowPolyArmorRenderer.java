@@ -29,6 +29,8 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
     private final String set;
     // いま描く人が着ているスキン (prepForRender で決める。null = 防具のまま)
     private String skin;
+    // いま描く人が体ごとのスキン (client/FullSkinLayer) を着ているか。着ていれば防具は描かない
+    private boolean fullSkin;
 
     protected LowPolyArmorRenderer(String set) {
         super(new Model<T>(set));
@@ -56,6 +58,7 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
     }
 
     private void pickSkin(net.minecraft.world.entity.Entity entity, EquipmentSlot slot) {
+        fullSkin = entity instanceof net.minecraft.world.entity.player.Player fp && jp.revati.skyabyss.client.FullSkinLayer.mesh(fp) != null;
         String s = entity instanceof net.minecraft.world.entity.player.Player p && slot != null ? jp.revati.skyabyss.skin.Skins.worn(p) : null;
         skin = s != null && LowPoly.enabled && LowPolyMeshes.get(skinMesh(s, slot)) != null ? s : null;
         ((Model<T>) getGeoModel()).skin = skin;
@@ -81,6 +84,9 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
 
     @Override
     public void renderCubesOfBone(PoseStack poseStack, GeoBone bone, VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
+        if (fullSkin) {
+            return;
+        }
         if (skin != null) {
             if (!bone.isHidden()) {
                 LowPolyMesh mesh = LowPolyMeshes.get(skinMesh(skin, currentSlot));

@@ -625,14 +625,18 @@ public final class ShotRunner {
                 return true;
             }
             case "otherplayer" -> {
-                // otherplayer <dx> <dz> <名前> : 手元だけの別の人 (自分と同じ見た目・転生とスキンと防具の写し) を前に置く (名札の称号の確認用。サーバーには居ない)
+                // otherplayer <dx> <dz> <名前> [<向きのずれ 度>] : 手元だけの別の人 (自分と同じ見た目・転生とスキンと防具の写し) を前に置く (名札の称号・スキンの確認用。サーバーには居ない)。
+                //   既定はこちらを向く。90 = 体の右をこちらへ、180 = 背中
                 if (mc.level != null && mc.player != null) {
                     var rp = new net.minecraft.client.player.RemotePlayer(mc.level,
                             new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes(("shot:" + line.arg(2)).getBytes()), line.arg(2)));
+                    float face = mc.player.getYRot() + 180f + (line.args().length > 3 ? (float) line.doubleArg(3) : 0f);
                     rp.moveTo(mc.player.getX() + Double.parseDouble(line.arg(0)), mc.player.getY(), mc.player.getZ() + Double.parseDouble(line.arg(1)),
-                            mc.player.getYRot() + 180f, 0f);
-                    rp.setYHeadRot(mc.player.getYRot() + 180f);
-                    rp.yBodyRot = mc.player.getYRot() + 180f;
+                            face, 0f);
+                    rp.setYHeadRot(face);
+                    rp.yHeadRotO = face;
+                    rp.yBodyRot = face;
+                    rp.yBodyRotO = face;
                     rp.setData(jp.revati.skyabyss.rebirth.RebirthSetup.DATA.get(), jp.revati.skyabyss.rebirth.RebirthView.data(mc.player));
                     rp.setData(jp.revati.skyabyss.skin.Skins.DATA.get(), jp.revati.skyabyss.skin.Skins.data(mc.player));
                     for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.HEAD,

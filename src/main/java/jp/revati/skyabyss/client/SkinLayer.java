@@ -51,7 +51,7 @@ public final class SkinLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
     public void render(PoseStack poseStack, MultiBufferSource buffers, int packedLight, AbstractClientPlayer player, float limbSwing, float limbSwingAmount,
             float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         String skin = Skins.worn(player);
-        if (skin == null || player.isInvisible()) {
+        if (skin == null || player.isInvisible() || FullSkinLayer.mesh(player) != null) {
             return;
         }
         for (EquipmentSlot slot : SLOTS) {

@@ -36,6 +36,8 @@ public final class LowPolyMesh {
     public static final class Bone {
         public final String name;
         public final String parent;
+        // 骨の付け根 (geo の座標、1/16 ブロック。JSON の pivot。無ければ原点)。体ごとのスキン (client/FullSkinLayer) が揺れの回転の中心に使う
+        public final float[] pivot;
         public final float[] pos;
         public final float[] uv;
         public final float[] nrm;
@@ -51,9 +53,10 @@ public final class LowPolyMesh {
         boolean[] glowQuads;
         ResourceLocation glowQuadsFor;
 
-        Bone(String name, String parent, float[] pos, float[] uv, float[] nrm, float[] vshade, int capStart) {
+        Bone(String name, String parent, float[] pivot, float[] pos, float[] uv, float[] nrm, float[] vshade, int capStart) {
             this.name = name;
             this.parent = parent;
+            this.pivot = pivot;
             this.pos = pos;
             this.uv = uv;
             this.nrm = nrm;
@@ -176,7 +179,14 @@ public final class LowPolyMesh {
                 }
             }
             String parent = b.has("parent") && !b.get("parent").isJsonNull() ? b.get("parent").getAsString() : null;
-            baked.put(e.getKey(), new Bone(e.getKey(), parent, pos, uvOut, nrm, vshade, capStart));
+            float[] pivot = new float[3];
+            if (b.has("pivot")) {
+                JsonArray pv = b.getAsJsonArray("pivot");
+                for (int k = 0; k < 3 && k < pv.size(); k++) {
+                    pivot[k] = pv.get(k).getAsFloat();
+                }
+            }
+            baked.put(e.getKey(), new Bone(e.getKey(), parent, pivot, pos, uvOut, nrm, vshade, capStart));
             tris += n;
             quads += q;
         }
