@@ -293,31 +293,39 @@ class HairPaint2:
         return out(img)
 
 
-def sheet(m: Model, bone, x, ytop, z, w, L, d, paint, rz=0.0, rx=0.0, bend=1.6, tip=0.38, pivot=None):
-    """垂れる髪の板一枚を 3 節の鎖で: 根元の板 → 中 → 先。節は前の節の下の端を付け根に曲がるので、つながったまま細って曲がる。
+def sheet(m: Model, bone, x, ytop, z, w, L, d, paint, rz=0.0, rx=0.0, bend=1.6, tip=0.38, pivot=None, out=(0, 0, -1), twist=9.0):
+    """垂れる髪の板一枚を 3 節の鎖で: 根元の板 → 中 → 先。節は前の節の下の端を付け根に曲がる (つながったまま細って曲がる)。
+    次の節は前の節の中から生えるのではなく、前の節の外の面に乗って上の端が重なる (鱗のように重ねて立体に見せる)。
+    out = 外の向き (前髪 (0,0,-1)・後ろ髪 (0,0,1)・右の横髪 (-1,0,0))、twist = 節ごとに互い違いに少し回して角をのぞかせる。
     z = 前の面。rz・rx = 根元の傾き、bend = 先へ行くほど傾きを何倍にするか。"""
     from kit import rot_matrix
-    lens = [L * (1 - tip), L * tip * 0.6, L * tip * 0.45]
-    widths = [w, w * 0.68, w * 0.36]
+    lens = [L * (1 - tip), L * tip * 0.62, L * tip * 0.5]
+    widths = [w, w * 0.8, w * 0.5]
     depths = [d, d * 0.9, d * 0.8]
     rots = [(rx, 0, rz), (rx * 1.2, 0, rz * bend), (rx * 1.4, 0, rz * bend * 1.35)]
+    o = np.array(out, float)
     piv = np.array(pivot or (x, ytop, z + d / 2), float)
     top = np.array([x, ytop, z + d / 2], float)
     for k in range(3):
         wl, ln, dp, rt = widths[k], lens[k], depths[k], rots[k]
-        over = 0.0 if k == 0 else 0.45  # 前の節に食い込ませる
+        over = 0.0 if k == 0 else 0.7  # 前の節の外の面に重ねる長さ
         frm = (top[0] - wl / 2, top[1] - ln, top[2] - dp / 2)
-        m.box(bone, frm, (wl, ln + over, dp), paint, rot=rt, pivot=tuple(piv))
-        # この節の下の端 (回した後) が次の節の付け根
+        m.box(bone, frm, (wl, ln + over, dp), paint, rot=rt, pivot=tuple(piv), spin=0.0 if k == 0 else twist * (1 if k % 2 else -1))
+        # この節の下の端 (回した後) が次の節の付け根。次の節は外へ厚みの半分ずらし、前の節の面に乗せる
         R = rot_matrix(rt)
         bottom = np.array([top[0], top[1] - ln, top[2]])
         top = piv + R @ (bottom - piv)
-        # 次の節は回す前の形を top から下へ置き、付け根 top のまわりで回す
+        thick = (w if abs(o[0]) > 0.5 else d)
+        top = top + o * thick * 0.42
         piv = top.copy()
 
 
-def hair_mass(m: Model, paint, back_bottom=23.5):
-    """かさ: 頭より 1px 外の大きな箱、上は 3 段で丸く、後ろの厚み、耳の上の横。"""
+def hair_mass(m: Model, paint, back_bottom=23.5, shingles=True):
+    """かさ: 頭より 1px 外の大きな箱 (角は八角に落ちる)、上は 3 段で丸く、後ろの厚み、耳の上の横。
+    shingles: そのまわりに、外へ傾けた板を角が重なるように並べる (顔の前は空ける)。"""
+    if shingles:
+        m.ring("head", (0, 0), 27.6, 6.0, 5.1, 12, 0.7, paint, tilt=13, overlap=1.3, skip=(-50, 50), squarish=0.18, phase=15)
+        m.ring("head", (0, 0), 30.6, 3.4, 4.6, 10, 0.7, paint, tilt=24, overlap=1.3, skip=(-25, 25), squarish=0.15)
     m.box("head", (-5.0, 30.3, -4.95), (10.0, 2.8, 10.1), paint)
     m.box("head", (-4.7, 33.0, -4.6), (9.4, 0.75, 9.4), paint)
     m.box("head", (-4.2, 33.7, -4.0), (8.4, 0.6, 8.3), paint)
@@ -338,8 +346,8 @@ def side_hair2(m: Model, paint, length=13.0, bone="hair_side_R"):
     """横髪: 頬の前の長い板と、耳の後ろの板。外へ少し開いて垂れる。左は映す。"""
     piv = (-4.9, 31.0, -2.2)
     m.pair_bone(bone, "head", piv)
-    sheet(m, bone, -5.35, 31.0, -4.55, 1.2, length, 2.6, paint, rz=-4, rx=-3, bend=1.15, pivot=piv)
-    sheet(m, bone, -5.6, 30.6, -2.1, 1.25, length * 0.8, 4.3, paint, rz=-7, rx=3, bend=1.15, pivot=piv)
+    sheet(m, bone, -5.35, 31.0, -4.55, 1.2, length, 2.6, paint, rz=-4, rx=-3, bend=1.15, pivot=piv, out=(-1, 0, 0))
+    sheet(m, bone, -5.6, 30.6, -2.1, 1.25, length * 0.8, 4.3, paint, rz=-7, rx=3, bend=1.15, pivot=piv, out=(-1, 0, 0))
     for b in [b for b in m.boxes if b.bone == bone and not b.mirror]:
         x0 = -(b.frm[0] + b.size[0])
         p = None if b.pivot is None else (-b.pivot[0], b.pivot[1], b.pivot[2])
@@ -356,7 +364,7 @@ def back_hair2(m: Model, paint, bottom=12.0, bone="hair_back"):
     # 外の房 5 つ: 少しずつ重ね、外ほど開いて短く、前後を互い違いに
     for (x, w, rz, k, z) in ((-3.7, 2.9, -12, 0.86, 4.55), (3.7, 2.9, 12, 0.84, 4.55), (-1.9, 3.1, -5, 0.97, 5.0),
                              (1.9, 3.1, 5, 0.95, 5.0), (0.0, 3.3, 0, 1.0, 5.45)):
-        sheet(m, bone, x, top, z, w, L * k, 1.15, paint, rz=rz, rx=7, bend=1.45, tip=0.32, pivot=(x, top, z + 0.55))
+        sheet(m, bone, x, top, z, w, L * k, 1.15, paint, rz=rz, rx=7, bend=1.45, tip=0.32, pivot=(x, top, z + 0.55), out=(0, 0, 1))
 
 
 def ahoge2(m: Model, paint, x=0.5, z=-0.8):

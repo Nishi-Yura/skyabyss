@@ -28,7 +28,7 @@ cmd fill -126 160 -606 -114 166 -592 minecraft:air
 cmd tp @s -120 160 -600 0 0
 waitchunks 100
 wait 30
-otherplayer 0 3.2 T0 0
+otherplayer 0 2.4 T0 0
 wait 30
 shot turn_0
 cmd fill -96 159 -606 -84 159 -592 minecraft:smooth_stone
@@ -36,7 +36,7 @@ cmd fill -96 160 -606 -84 166 -592 minecraft:air
 cmd tp @s -90 160 -600 0 0
 waitchunks 100
 wait 30
-otherplayer 0 3.2 T90 90
+otherplayer 0 2.4 T90 90
 wait 30
 shot turn_90
 cmd fill -66 159 -606 -54 159 -592 minecraft:smooth_stone
@@ -44,7 +44,7 @@ cmd fill -66 160 -606 -54 166 -592 minecraft:air
 cmd tp @s -60 160 -600 0 0
 waitchunks 100
 wait 30
-otherplayer 0 3.2 T180 180
+otherplayer 0 2.4 T180 180
 wait 30
 shot turn_180
 cmd fill -36 159 -606 -24 159 -592 minecraft:smooth_stone
@@ -52,6 +52,6 @@ cmd fill -36 160 -606 -24 166 -592 minecraft:air
 cmd tp @s -30 160 -600 0 0
 waitchunks 100
 wait 30
-otherplayer 0 3.2 T270 270
+otherplayer 0 2.4 T270 270
 wait 30
 shot turn_270

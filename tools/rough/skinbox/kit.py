@@ -68,6 +68,7 @@ class Box:
     tag: str = ""
     yaw: float = 0.0  # rot の後に、付け根のまわりで Y へ回す (斜めの布)
     skinmap: dict = None  # {面: (u0, v0, u1, v1)} 着ている人のスキンの絵の場所 (64x64 の画素)。own_ の骨の箱だけ
+    spin: float = 0.0  # まず箱の真ん中のまわりで Y へ回す (角を落とす斜めのキューブ)。そのあと rot・yaw
 
 
 class Model:
@@ -86,21 +87,44 @@ class Model:
         self.bones[name] = dict(parent=parent, pivot=tuple(pivot))
         return name
 
-    def box(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", mirror=False, yaw=0.0, skinmap=None, rounded=None):
+    def box(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", mirror=False, yaw=0.0, skinmap=None, rounded=None, spin=0.0):
         x, y, z = frm
         w, h, d = size
         rnd_ok = self.auto_round if rounded is None else rounded
         if rnd_ok and skinmap is None and h >= 0.5 and min(w, d) >= 1.8:
-            # 角を落とす: 横に広い箱と奥に広い箱を重ねて、断面の四隅を段で欠く (角ばって見えないように)
-            r = min(0.7, min(w, d) * 0.2)
+            # 角を落として断面を八角にする: 横に広い箱と奥に広い箱 (十字) に、四隅へ 45 度回した細いキューブを置いて斜めの面にする
+            r = min(0.9, min(w, d) * 0.24)
             piv = tuple(pivot) if pivot else (x + w / 2, y + h / 2, z + d / 2)
             self.boxes.append(Box(bone, (x, y, z + r), (w, h, d - 2 * r), paint, tuple(rot), piv, mirror, tuple(hide), tag, yaw, None))
             b = Box(bone, (x + r, y, z), (w - 2 * r, h, d), paint, tuple(rot), piv, mirror, tuple(hide), tag, yaw, None)
             self.boxes.append(b)
+            side = r * math.sqrt(2)
+            plain = _side_paint(paint)
+            for (cx, cz) in ((x + r, z + r), (x + w - r, z + r), (x + r, z + d - r), (x + w - r, z + d - r)):
+                self.boxes.append(Box(bone, (cx - side / 2, y, cz - side / 2), (side, h, side), plain, tuple(rot), piv, mirror,
+                                      tuple(hide), tag, yaw, None, 45.0))
             return b
-        b = Box(bone, tuple(frm), tuple(size), paint, tuple(rot), tuple(pivot) if pivot else None, mirror, tuple(hide), tag, yaw, skinmap)
+        b = Box(bone, tuple(frm), tuple(size), paint, tuple(rot), tuple(pivot) if pivot else None, mirror, tuple(hide), tag, yaw, skinmap, spin)
         self.boxes.append(b)
         return b
+
+    def ring(self, bone, center, y, height, radius, n, thick, paint, tilt=0.0, overlap=1.15, rot_pivot=None, phase=0.0, skip=None, squarish=0.0):
+        """輪 (円すい) を斜めの板で: 中心のまわりに n 枚、それぞれ外を向けて tilt だけ外へ傾ける。隣と角が重なる幅にする。
+        角度 0 = 前 (-Z)、90 = 体の右 (-X)。skip = (始め, 終わり) の角度は置かない (顔の前など)。squarish = 斜めの向きほど外へ (四角い頭を包む)。"""
+        cx, cz = center
+        w = 2 * math.pi * radius / n * overlap
+        out = []
+        for k in range(n):
+            a = 360.0 * k / n + phase
+            aa = (a + 180) % 360 - 180
+            if skip and skip[0] <= aa <= skip[1]:
+                continue
+            rr = radius * (1 + squarish * abs(math.sin(math.radians(2 * a))))
+            px = cx + math.sin(math.radians(a)) * -rr
+            pz = cz - math.cos(math.radians(a)) * rr
+            piv = (px, y + height, pz)
+            out.append(self.box(bone, (px - w / 2, y, pz - thick / 2), (w, height, thick), paint, rot=(tilt, 0, 0), pivot=piv, yaw=a, rounded=False))
+        return out
 
     def pair(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", yaw=0.0):
         """体の右 (-X) に置いた箱と、左右を映した箱を作る。骨の名前の R/L も入れ替える。"""
@@ -131,6 +155,8 @@ def box_faces(bx: Box):
     c = np.array([[x0, y0, z0], [x0 + w, y0 + h, z0 + d]], float)
     piv = np.array(bx.pivot if bx.pivot else ((x0 + w / 2), (y0 + h / 2), (z0 + d / 2)), float)
     R = rot_matrix((0, bx.yaw, 0)) @ rot_matrix(bx.rot)
+    cen = np.array([x0 + w / 2, y0 + h / 2, z0 + d / 2])
+    S = rot_matrix((0, bx.spin, 0)) if bx.spin else None
     out = []
     for fn, (nrm, uax, vax) in FACES.items():
         if fn in bx.hide:
@@ -144,6 +170,8 @@ def box_faces(bx: Box):
         center = (c[0] + c[1]) / 2 + n * dims / 2
         tl = center - u * fw / 2 - v * fh / 2
         verts = np.array([tl, tl + u * fw, tl + u * fw + v * fh, tl + v * fh])
+        if S is not None:
+            verts = (verts - cen) @ S.T + cen
         verts = (verts - piv) @ R.T + piv
         W = max(1, int(round(fw * T)))
         H = max(1, int(round(fh * T)))
@@ -166,6 +194,14 @@ def box_faces(bx: Box):
             glow = None if glow is None else glow[:, ::-1]
         out.append(Face(bx.bone, verts, img.copy(), None if glow is None else glow.copy()))
     return out
+
+
+def _side_paint(paint):
+    """角を落とすキューブの絵: 前後の面の飾り (編み上げなど) を写さないよう、横の面 (e) の絵で塗る。"""
+    def p(face, W, H, box):
+        f = "e" if face in "nsew" else face
+        return paint(f, W, H, box) if callable(paint) else paint[f](W, H, box)
+    return p
 
 
 # ------------------------------------------------------------------ 着ている人のスキンの代わり (見本の絵だけ)
