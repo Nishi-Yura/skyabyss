@@ -79,6 +79,39 @@ public final class FishingSelfTest {
                 }
             }
             check(f, small > 2400, "big fish are not rarer: " + small + "/4000 under the middle");
+            // 本物の流れ: 竿を持って浮きを出し、食いついたところで引く → バニラの品は出ず、その土地の魚が一匹だけ飛んでくる
+            p.getPersistentData().remove(Fishing.BEST);
+            net.minecraft.core.BlockPos at = level.getSharedSpawnPos();
+            p.setPos(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(FishingSetup.ROD.get()));
+            for (int round = 0; round < 3; round++) {
+                net.minecraft.world.entity.projectile.FishingHook hook = new net.minecraft.world.entity.projectile.FishingHook(p, level, 0, 0);
+                hook.setPos(p.getX() + 3, p.getY(), p.getZ());
+                level.addFreshEntity(hook);
+                try {
+                    java.lang.reflect.Field nib = net.minecraft.world.entity.projectile.FishingHook.class.getDeclaredField("nibble");
+                    nib.setAccessible(true);
+                    nib.setInt(hook, 20);
+                } catch (ReflectiveOperationException e) {
+                    f.add("cannot make the hook bite: " + e);
+                    break;
+                }
+                net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(hook.blockPosition()).inflate(4);
+                level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box).forEach(net.minecraft.world.entity.Entity::discard);
+                int damage = hook.retrieve(p.getMainHandItem());
+                List<net.minecraft.world.entity.item.ItemEntity> drops = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box);
+                int land = ContinentMap.get().inside(hook.getBlockX(), hook.getBlockZ())
+                        ? Fish.fishingRegion(ContinentMap.get().region(hook.getBlockX(), hook.getBlockZ())) : ContinentMap.MEADOW;
+                check(f, damage == 0 && drops.size() == 1 && drops.get(0).getItem().getItem() instanceof FishingSetup.FishItem fi
+                        && (fi.species.region() == land || fi.species.region() == Fish.ANY) && drops.get(0).getItem().get(FishingSetup.FISH_SIZE.get()) != null,
+                        "reeling in did not give one fish of the land: " + drops.stream().map(e -> e.getItem().toString()).toList() + " damage " + damage);
+                check(f, level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box).isEmpty(), "reeling in dropped experience");
+                drops.forEach(net.minecraft.world.entity.Entity::discard);
+                hook.discard();
+            }
+            check(f, Fishing.codexCount(p) >= 1, "a real catch was not written in the codex");
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+
             // 図鑑: 初めて・大きい一匹だけ覚える・そろうと一度だけ報い
             p.getPersistentData().remove(Fishing.BEST);
             p.getPersistentData().remove(Fishing.DONE);
@@ -136,7 +169,7 @@ public final class FishingSelfTest {
             }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST fishing PASSED (31 fish, six per land, icons and models, catch rates per land, sizes, codex and reward once, weekly contest, rod for sale and fish bought)");
+            SkyAbyss.LOGGER.info("SELFTEST fishing PASSED (31 fish, six per land, a real hook reeled in gives one land fish and no vanilla loot, icons and models, catch rates per land, sizes, codex and reward once, weekly contest, rod for sale and fish bought)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST fishing FAILED: {}", m));
         }
