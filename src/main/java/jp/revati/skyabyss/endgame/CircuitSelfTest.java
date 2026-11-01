@@ -145,6 +145,37 @@ public final class CircuitSelfTest {
             check(f, run.marks == 3, "delivering the load did not clear the task");
             discard(level, run);
 
+            // 壊す: 着くと杭が立つ。打つと割れ目が広がり、消えただけでは越えず (戻ると立て直す)、壊すと越える
+            run.offers.clear();
+            run.bonus = CircuitRun.Bonus.NONE;
+            run.kind = CircuitRun.Kind.BREAK;
+            run.phase = 0;
+            run.progress = 0;
+            run.stake = null;
+            run.spot = here;
+            run.taskStart = level.getGameTime();
+            Circuits.step(level, run, false);
+            net.minecraft.world.entity.Entity st = run.stake == null ? null : level.getEntity(run.stake);
+            check(f, run.phase == 1 && st instanceof CircuitStake, "arriving did not raise the abyss stake");
+            if (st instanceof CircuitStake cs) {
+                check(f, Math.abs(cs.getMaxHealth() - Math.min(CircuitStake.MAX_HP, Circuits.stakeHealth(run, 1))) < 1, "the stake health is wrong: " + cs.getMaxHealth());
+                cs.hurt(level.damageSources().generic(), cs.getMaxHealth() * 0.5f);
+                check(f, cs.stage() == 2, "a half-broken stake did not crack: stage " + cs.stage());
+                cs.discard();
+                Circuits.step(level, run, false);
+                check(f, run.marks == 3 && run.phase == 0, "a stake that vanished cleared the task");
+                Circuits.step(level, run, false);
+                net.minecraft.world.entity.Entity st2 = run.stake == null ? null : level.getEntity(run.stake);
+                check(f, st2 instanceof CircuitStake && st2 != cs, "the stake was not raised again");
+                if (st2 instanceof CircuitStake cs2) {
+                    cs2.kill();
+                    Circuits.step(level, run, false);
+                }
+            }
+            check(f, run.marks == 4, "breaking the stake did not clear the task");
+            run.marks = 3;
+            discard(level, run);
+
             // 時間切れ: 印なしで次へ
             Circuits.adopt(level, run, 0);
             run.bonus = CircuitRun.Bonus.NONE;
@@ -230,7 +261,7 @@ public final class CircuitSelfTest {
             p.getPersistentData().remove(RegionPoints.FAME);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST circuit PASSED (two pillars to choose, tasks stay in the region at fair distances, gold and blue pillars, guard, hunt with respawn, carry with drop, timeout, coins, daily limit, region points, party walk and leave)");
+            SkyAbyss.LOGGER.info("SELFTEST circuit PASSED (two pillars to choose, tasks stay in the region at fair distances, gold and blue pillars, guard, hunt with respawn, carry with drop, break the stake, timeout, coins, daily limit, region points, party walk and leave)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST circuit FAILED: {}", m));
         }
@@ -244,5 +275,6 @@ public final class CircuitSelfTest {
             }
         }
         run.mobs.clear();
+        Circuits.removeStake(level, run);
     }
 }

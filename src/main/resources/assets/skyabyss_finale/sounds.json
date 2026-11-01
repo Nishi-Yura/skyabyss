@@ -1,4 +1,37 @@
 {
+  "stake_pulse": {
+    "subtitle": "subtitles.skyabyss_finale.stake_pulse",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.6
+      }
+    ]
+  },
+  "stake_hit": {
+    "subtitle": "subtitles.skyabyss_finale.stake_hit",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.hit",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.7
+      }
+    ]
+  },
+  "stake_break": {
+    "subtitle": "subtitles.skyabyss_finale.stake_break",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_cluster.break",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.5
+      }
+    ]
+  },
   "mourner_idle": {
     "subtitle": "subtitles.skyabyss_finale.mourner_idle",
     "sounds": [

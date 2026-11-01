@@ -177,5 +177,8 @@
   "gui.skyabyss.profile.pos.above": "名前の上",
   "gui.skyabyss.profile.pos.below": "名前の下",
   "gui.skyabyss.profile.pos.off": "出さない",
-  "gui.skyabyss.profile.looks_note": "名札の色と記号は転生の段で決まる（替えられない）"
+  "gui.skyabyss.profile.looks_note": "名札の色と記号は転生の段で決まる（替えられない）",
+  "circuit.skyabyss.kind.break": "壊す",
+  "circuit.skyabyss.task.break_go": "%sへ行き、敵の杭を壊そう",
+  "circuit.skyabyss.task.break": "淵の杭を壊そう（脈の輪から離れて）"
 }

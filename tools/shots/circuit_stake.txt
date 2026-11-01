@@ -1,0 +1,30 @@
+# 巡り路の「壊す」の淵の杭 (endgame/CircuitStake): 立った姿・割れ目の段 2・3
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/circuit_stake.txt -PshotsName=circuit_stake
+world continent_areas continent
+size 1280 720
+timeout 1200
+render 6
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd time set 6000
+cmd weather clear
+cmd tp @s -120 120 -600 0 10
+waitchunks 300
+wait 100
+hud off
+cmd execute at @s positioned ^ ^ ^6 positioned over motion_blocking_no_leaves run summon skyabyss:circuit_stake ~ ~ ~ {NoAI:0b}
+wait 40
+cmd execute as @e[type=skyabyss:circuit_stake,limit=1] at @s run tp @a ^ ^1.5 ^6 facing entity @s eyes
+wait 30
+shot circuit_stake_1
+cmd damage @e[type=skyabyss:circuit_stake,limit=1] 80 minecraft:generic
+wait 30
+shot circuit_stake_2_cracked
+cmd damage @e[type=skyabyss:circuit_stake,limit=1] 70 minecraft:generic
+wait 30
+shot circuit_stake_3_broken_more
+wait 60
+shot circuit_stake_4_pulse

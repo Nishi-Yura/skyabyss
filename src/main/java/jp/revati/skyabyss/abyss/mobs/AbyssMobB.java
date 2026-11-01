@@ -39,6 +39,11 @@ public abstract class AbyssMobB extends GuardMob {
         return entityData.get(STAGE);
     }
 
+    // 形を替える (打たれて崩れていく物。巡り路の淵の杭 endgame/CircuitStake)
+    protected void setStage(int form) {
+        entityData.set(STAGE, Math.max(1, Math.min(AbyssScaling.FORM_MAX, form)));
+    }
+
     // 湧いたときに一度だけ。形と HP・傷の基の値 (湧いた高さの倍率はここで決める)
     public void tune(int form, double hp, double dmg) {
         tunedY = blockPosition().getY();

@@ -534,5 +534,10 @@
   "item.skyabyss.divine_lampkeeper_helmet.story": "「灯守は、目を閉じても灯を見ていた。」",
   "item.skyabyss.divine_lampkeeper_chestplate.story": "「胸の灯の目は、仲間の背を照らす。」",
   "item.skyabyss.divine_lampkeeper_leggings.story": "「腰の小さな灯は、帰り道のためにある。」",
-  "item.skyabyss.divine_lampkeeper_boots.story": "「灯を運ぶ足は、急がない。」"
+  "item.skyabyss.divine_lampkeeper_boots.story": "「灯を運ぶ足は、急がない。」",
+  "entity.skyabyss.circuit_stake": "淵の杭",
+  "item.skyabyss.circuit_stake_spawn_egg": "淵の杭のスポーンエッグ",
+  "subtitles.skyabyss_finale.stake_pulse": "淵の杭が脈を打つ",
+  "subtitles.skyabyss_finale.stake_hit": "淵の杭がきしむ",
+  "subtitles.skyabyss_finale.stake_break": "淵の杭が砕ける"
 }

@@ -37,7 +37,7 @@ ROUGH = os.path.join(ROOT, "docs", "review", "cloud_roughs")
 
 CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a",
           "ash_striker": "a", "backfire": "a", "rewinder": "a", "fallen_plume": "a", "plume_warden": "a", "pilgrim_plume": "a",
-          "pilgrim_hand": "a", "pilgrim_eye": "a", "pilgrim_moon": "a", "founder": "a", "tower_master": "a"}
+          "pilgrim_hand": "a", "pilgrim_eye": "a", "pilgrim_moon": "a", "founder": "a", "tower_master": "a", "circuit_stake": "a"}
 
 
 # ---------------------------------------------------------------- 鐘の亡者 (よろよろ歩く・鐘を振り上げて鳴らす)
@@ -584,6 +584,33 @@ ANIMS = {"bell_mourner": bell_mourner, "mist_bird": mist_bird, "last_bellkeeper"
          "tower_master": tower_master}
 
 
+# ---------------------------------------------------------------- 淵の杭 (巡り路の「壊す」。docs/design/54 の 3.1.1。動かない)
+def circuit_stake():
+    p = "animation.circuit_stake."
+    idle = {"crown": bone(["0", S(0, 6, 90), "0"], [0, S(0, 0.3, 60), 0]), "body": bone([S(0, 0.6, 50), "0", S(90, 0.6, 40)])}
+    # 脈を打つ (1.0): 結晶の房が持ち上がって震え (予告)、0.8 で叩きつけて足もとへ脈
+    pulse_crown = {0: (0, 0, 0), 0.8: (0, 40, 0), 0.85: (0, 0, 0), 1.0: (0, 0, 0)}
+    shake = {0: (0, 0, 0)}
+    for i in range(7):
+        shake[0.1 + i * 0.1] = (2 if i % 2 == 0 else -2, 0, 2 if i % 2 else -2)
+    shake[0.8] = (0, 0, 0)
+    shake[0.85] = (-4, 0, 0)
+    shake[1.0] = (0, 0, 0)
+    pulse = {"crown": bone(kf(pulse_crown), kf({0: (0, 0, 0), 0.8: (0, 2.5, 0), 0.85: (0, -0.5, 0), 1.0: (0, 0, 0)}, False)),
+             "body": bone(kf(dict(sorted(shake.items()))))}
+    # 壊れる (1.4): 胴が横へ倒れながら沈み、房が先に落ちる
+    death = {"body": bone(kf({0: (0, 0, 0), 0.5: (0, 0, 14), 1.4: (0, 0, 70)}), kf({0: (0, 0, 0), 1.4: (0, -9, 0)}, False)),
+             "crown": bone(kf({0: (0, 0, 0), 0.4: (30, 0, 0), 1.0: (80, 0, 20)}), kf({0: (0, 0, 0), 0.4: (0, 2, 0), 1.0: (0, -6, 2)}, False))}
+    return {p + "idle": loop(2.0, idle), p + "walk": loop(2.0, idle), p + "pulse": once(1.0, pulse), p + "hurt": once(0.22, hurt_bones()),
+            p + "death": once(1.4, death, True)}
+
+
+ANIMS["circuit_stake"] = circuit_stake
+
+# 段の割れ目の色 (無ければ朝の光)
+CRACK = {"circuit_stake": (198, 160, 255, 255)}
+
+
 # ---------------------------------------------------------------- 素材を入れる
 def stage_atlases(mob, atlas, glow, tex):
     """二段目・三段目の絵: 体 (光らない画素) に朝の光の割れ目を足していく。割れ目の画素は光る"""
@@ -603,7 +630,7 @@ def stage_atlases(mob, atlas, glow, tex):
                 continue
             for _ in range(rng.randint(3, 7)):
                 if 0 <= x < W and 0 <= y < H and px[x, y][3] >= 200:
-                    ip[x, y] = (255, 228, 170, 255)
+                    ip[x, y] = CRACK.get(mob, (255, 228, 170, 255))
                     gp[x, y] = 255
                 x += rng.choice((-1, 0, 1))
                 y += rng.choice((-1, 0, 1))
@@ -638,6 +665,10 @@ def install(only=()):
 
 # ---------------------------------------------------------------- 音 (既存の音の別名。namespace skyabyss_finale)
 SOUNDS = {
+    # 巡り路の淵の杭
+    "stake_pulse": [ev("block.respawn_anchor.charge", 1.2, 0.6)],
+    "stake_hit": [ev("block.amethyst_block.hit", 1.2, 0.7)],
+    "stake_break": [ev("block.amethyst_cluster.break", 1.6, 0.5)],
     # 島 1「鐘の島」
     "mourner_idle": [ev("entity.allay.ambient_without_item", 0.4, 0.4)],
     "mourner_tell": [ev("block.bell.resonate", 1.4, 0.7)],

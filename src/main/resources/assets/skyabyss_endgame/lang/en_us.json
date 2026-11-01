@@ -177,5 +177,8 @@
   "gui.skyabyss.profile.pos.above": "Above",
   "gui.skyabyss.profile.pos.below": "Below",
   "gui.skyabyss.profile.pos.off": "Hidden",
-  "gui.skyabyss.profile.looks_note": "Name tag colors and marks follow your rebirth tier (fixed)"
+  "gui.skyabyss.profile.looks_note": "Name tag colors and marks follow your rebirth tier (fixed)",
+  "circuit.skyabyss.kind.break": "Break",
+  "circuit.skyabyss.task.break_go": "Go to %s and break the foes' stake",
+  "circuit.skyabyss.task.break": "Break the abyss stake (step out of its pulse ring)"
 }

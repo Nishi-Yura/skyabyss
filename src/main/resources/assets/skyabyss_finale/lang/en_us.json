@@ -534,5 +534,10 @@
   "item.skyabyss.divine_lampkeeper_helmet.story": "The lampkeeper watched the light even with eyes shut.",
   "item.skyabyss.divine_lampkeeper_chestplate.story": "The lamp-eye at the chest lights the backs of friends.",
   "item.skyabyss.divine_lampkeeper_leggings.story": "The small lamps at the hip are for the way home.",
-  "item.skyabyss.divine_lampkeeper_boots.story": "Feet that carry a lamp never hurry."
+  "item.skyabyss.divine_lampkeeper_boots.story": "Feet that carry a lamp never hurry.",
+  "entity.skyabyss.circuit_stake": "Abyss Stake",
+  "item.skyabyss.circuit_stake_spawn_egg": "Abyss Stake Spawn Egg",
+  "subtitles.skyabyss_finale.stake_pulse": "Abyss stake pulses",
+  "subtitles.skyabyss_finale.stake_hit": "Abyss stake creaks",
+  "subtitles.skyabyss_finale.stake_break": "Abyss stake shatters"
 }

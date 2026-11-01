@@ -104,6 +104,12 @@ public final class CloudMobsSetup {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerMoon>> TOWER_MOON = ENTITIES.register("tower_moon",
             () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerMoon::new, MobCategory.MONSTER).sized(5.0f, 6.2f).eyeHeight(3.2f).fireImmune()
                     .clientTrackingRange(16).build(SkyAbyss.MODID + ":tower_moon"));
+    // 巡り路の「壊す」の淵の杭 (endgame/CircuitStake。docs/design/54 の 3.1.1)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.endgame.CircuitStake>> CIRCUIT_STAKE = ENTITIES.register(
+            jp.revati.skyabyss.endgame.CircuitStake.ID,
+            () -> EntityType.Builder.of(jp.revati.skyabyss.endgame.CircuitStake::new, MobCategory.MONSTER).sized(1.2f, 2.8f).eyeHeight(2.0f).fireImmune()
+                    .clientTrackingRange(10).build(SkyAbyss.MODID + ":" + jp.revati.skyabyss.endgame.CircuitStake.ID));
+    public static final DeferredItem<Item> CIRCUIT_STAKE_EGG = egg("circuit_stake_spawn_egg", CIRCUIT_STAKE, 0x201E28, 0xB48CFF);
     public static final DeferredItem<Item> LAST_BELLKEEPER_EGG = egg("last_bellkeeper_spawn_egg", LAST_BELLKEEPER, 0x343640, 0xDCB250);
     public static final DeferredItem<Item> FOUNDER_EGG = egg("founder_spawn_egg", FOUNDER, 0xD0CAB4, 0x26305A);
     public static final DeferredItem<Item> NET_CASTER_EGG = egg("net_caster_spawn_egg", NET_CASTER, 0x2E3C3A, 0xA08860);
@@ -201,6 +207,9 @@ public final class CloudMobsSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> MOON_FALL = sound("moon_fall");
     public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_ROAR = sound("pilgrim_roar");
     public static final DeferredHolder<SoundEvent, SoundEvent> PILGRIM_FADE = sound("pilgrim_fade");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAKE_PULSE = sound("stake_pulse");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAKE_HIT = sound("stake_hit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAKE_BREAK = sound("stake_break");
 
     private CloudMobsSetup() {
     }
@@ -243,13 +252,14 @@ public final class CloudMobsSetup {
         event.put(TOWER_EYE.get(), jp.revati.skyabyss.tower.mob.TowerEye.createAttributes().build());
         event.put(TOWER_EYE_BIG.get(), jp.revati.skyabyss.tower.mob.TowerEye.createAttributes().build());
         event.put(TOWER_MOON.get(), jp.revati.skyabyss.tower.mob.TowerMoon.createAttributes().build());
+        event.put(CIRCUIT_STAKE.get(), jp.revati.skyabyss.endgame.CircuitStake.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(BELL_MOURNER_EGG, MIST_BIRD_EGG, LAST_BELLKEEPER_EGG, NET_CASTER_EGG, LAMP_MOTH_EGG, LAMP_EYE_EGG, ASH_STRIKER_EGG,
                     BACKFIRE_EGG, REWINDER_EGG, FALLEN_PLUME_EGG, PLUME_WARDEN_EGG, PILGRIM_PLUME_EGG,
-                    PILGRIM_HAND_EGG, PILGRIM_EYE_EGG, PILGRIM_MOON_EGG, FOUNDER_EGG)) {
+                    PILGRIM_HAND_EGG, PILGRIM_EYE_EGG, PILGRIM_MOON_EGG, FOUNDER_EGG, CIRCUIT_STAKE_EGG)) {
                 event.accept(i.get());
             }
         }

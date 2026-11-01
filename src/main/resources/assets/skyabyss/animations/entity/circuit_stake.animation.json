@@ -1,0 +1,262 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.circuit_stake.idle": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "crown": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 6",
+            "0"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 60 + 0) * 0.3",
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            "math.sin(query.anim_time * 50 + 0) * 0.6",
+            "0",
+            "math.sin(query.anim_time * 40 + 90) * 0.6"
+          ]
+        }
+      }
+    },
+    "animation.circuit_stake.walk": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "crown": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 6",
+            "0"
+          ],
+          "position": [
+            0,
+            "math.sin(query.anim_time * 60 + 0) * 0.3",
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            "math.sin(query.anim_time * 50 + 0) * 0.6",
+            "0",
+            "math.sin(query.anim_time * 40 + 90) * 0.6"
+          ]
+        }
+      }
+    },
+    "animation.circuit_stake.pulse": {
+      "animation_length": 1.0,
+      "bones": {
+        "crown": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              -40,
+              0
+            ],
+            "0.85": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              2.5,
+              0
+            ],
+            "0.85": [
+              0,
+              -0.5,
+              0
+            ],
+            "1.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.10": [
+              -2,
+              0,
+              -2
+            ],
+            "0.20": [
+              2,
+              0,
+              2
+            ],
+            "0.30": [
+              -2,
+              0,
+              -2
+            ],
+            "0.40": [
+              2,
+              0,
+              2
+            ],
+            "0.50": [
+              -2,
+              0,
+              -2
+            ],
+            "0.60": [
+              2,
+              0,
+              2
+            ],
+            "0.70": [
+              -2,
+              0,
+              -2
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ],
+            "0.85": [
+              4,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.circuit_stake.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.circuit_stake.death": {
+      "animation_length": 1.4,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              14
+            ],
+            "1.40": [
+              0,
+              0,
+              70
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.40": [
+              0,
+              -9,
+              0
+            ]
+          }
+        },
+        "crown": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              -30,
+              0,
+              0
+            ],
+            "1.00": [
+              -80,
+              0,
+              20
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.40": [
+              0,
+              2,
+              0
+            ],
+            "1.00": [
+              0,
+              -6,
+              2
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

@@ -13,7 +13,7 @@ import net.minecraft.core.BlockPos;
 // 一回の巡り路 (Circuits)。歩く人たち・土地・残り時間・印と、いまの課題
 public final class CircuitRun {
     public enum Kind {
-        HUNT, GUARD, CARRY
+        HUNT, GUARD, CARRY, BREAK
     }
 
     // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分
@@ -62,6 +62,9 @@ public final class CircuitRun {
     boolean ambushed;
     // 運ぶ: 荷が落ちている (背負った人が倒れた・離れた)
     boolean dropped;
+    // 壊す: 淵の杭 (CircuitStake)
+    @Nullable
+    UUID stake;
     // 自己テストの人 (FakePlayer は人の一覧にいないので、ここから引く)
     final java.util.Map<UUID, net.minecraft.server.level.ServerPlayer> fakes = new java.util.HashMap<>();
     final Set<Integer> usedPois = new HashSet<>();

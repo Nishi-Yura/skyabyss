@@ -56,12 +56,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //     倒す  HUNT  : 着くとその土地の敵が湧く (4 + 仲間 1 人につき 2。10 まで)。みな倒すと越える
 //     守る  GUARD : 柱のそば (GUARD_R) に誰かがいるあいだだけ進む (40 秒)。10 秒ごとに敵が寄せてくる
 //     運ぶ  CARRY : 柱の所で荷を背負い (足が少し重い)、もう一つの柱の所へ届ける。半ばで待ち伏せ。背負った人が倒れる・離れると荷が落ちる
+//     壊す  BREAK : 着くと淵の杭 (CircuitStake) と守りの敵 (2 + 人数) が湧く。杭が立っているあいだ BREAK_WAVE ごとに寄せ手。杭を壊すと越える
 //   課題を越えるたびに、次の課題の柱が二本立つ (Wynncraft のルートランのビーコン)。先に近づいた方が次の課題になる。柱の色は
 //     白 = ふつう、金 = 印が二つ (倒す数・守る時間・待ち伏せが 1.5 倍)、青 = 越えると残り時間 +2 分。二本は課題の種類が違う
 //   越えるたびに「巡りの印」+1 (金は +2)。課題ごとに 5 分で間に合わなければ次へ (印なし。柱を選んでいるあいだは数えない)。近くの組の仲間 (START_NEAR) も一緒に歩く
 //   終わると一人ずつ報い: 印 × 土地の鐘銭、印 2 つにつき封の箱 1 (アンコモン 60・レア 32・エピック 8)、印 6 以上で土地の巨神の封の箱 1。
 //   報いは一日 DAILY 回まで (朝 5 時に戻る。Towers.today)。印はいつでも土地の点 (RegionPoints。旗取りと名声) に数える
-//   「壊す」課題は敵の杭の形が決まってから足す (00 の未決ではなく、形の承認待ち)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Circuits {
     public static final int DURATION = 20 * 60 * 20;
@@ -77,6 +77,8 @@ public final class Circuits {
     public static final int GUARD_NEED = 800;
     public static final int TIME_BONUS = 20 * 60 * 2;
     static final int WAVE_EVERY = 200;
+    static final int BREAK_WAVE = 300;
+    static final int BREAK_CAP = 8;
     static final int SPOT_MIN = 70;
     static final int SPOT_MAX = 240;
     // 土地ごとの印一つの鐘銭 (野・島・岩鯨・潮殻・雷翼・余燼。ContinentMap の番号の順)
@@ -256,6 +258,7 @@ public final class Circuits {
 
     // ---------------------------------------------------------------- 課題
     static void nextTask(ServerLevel level, CircuitRun run) {
+        removeStake(level, run);
         run.mobs.clear();
         run.progress = 0;
         run.need = 0;
@@ -477,6 +480,7 @@ public final class Circuits {
             case HUNT -> stepHunt(level, run, ps);
             case GUARD -> stepGuard(level, run, ps, now);
             case CARRY -> stepCarry(level, run, ps);
+            case BREAK -> stepBreak(level, run, ps, now);
         }
         if (show && ACTIVE.contains(run)) {
             for (ServerPlayer p : ps) {
@@ -508,6 +512,84 @@ public final class Circuits {
             complete(level, run);
         } else if (alive(level, run) == 0) {
             run.phase = 0;
+        }
+    }
+
+    // 壊す: 着くと杭と守りが湧く。杭が死ねば (onMobDeath) 越える。倒さずに消えた (離れて片づけられた) 杭は、戻ったときに立て直す
+    static void stepBreak(ServerLevel level, CircuitRun run, List<ServerPlayer> ps, long now) {
+        if (run.progress > 0) {
+            complete(level, run);
+            return;
+        }
+        if (run.phase == 0) {
+            ServerPlayer near = nearest(ps, run.spot, ARRIVE);
+            if (near == null) {
+                return;
+            }
+            removeStake(level, run);
+            if (spawnStake(level, run, ps.size()) == null) {
+                // 立てる地面がない (崖・水の上): 越えたことにする (詰まらせない)
+                complete(level, run);
+                return;
+            }
+            run.mobs.clear();
+            spawnAround(level, run, run.spot, (int) Math.round((2 + ps.size()) * harder(run)), 3, 8, near);
+            run.phase = 1;
+            run.nextWave = now + BREAK_WAVE;
+            return;
+        }
+        Entity stake = run.stake == null ? null : level.getEntity(run.stake);
+        if (stake == null || !stake.isAlive()) {
+            run.phase = 0;
+            return;
+        }
+        if (now >= run.nextWave) {
+            run.nextWave = now + BREAK_WAVE;
+            ServerPlayer near = nearest(ps, run.spot, 24);
+            if (near != null && alive(level, run) < BREAK_CAP) {
+                spawnAround(level, run, run.spot, 1 + ps.size() / 2, 4, 9, near);
+            }
+        }
+    }
+
+    // 杭の強さ: 土地の目安の Lv × 10 の体力 (人数で 1 + 0.5 × (人 - 1)、金の柱で 1.5 倍)、傷は 2 + Lv / 4
+    static double stakeHealth(CircuitRun run, int people) {
+        return 10.0 * TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] * (1 + 0.5 * Math.max(0, people - 1)) * harder(run);
+    }
+
+    static double stakeDamage(CircuitRun run) {
+        return 2 + TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] / 4.0;
+    }
+
+    @Nullable
+    static CircuitStake spawnStake(ServerLevel level, CircuitRun run, int people) {
+        BlockPos g = ground(level, run.spot.getX(), run.spot.getZ());
+        for (int i = 0; g == null && i < 16; i++) {
+            g = ground(level, run.spot.getX() + level.random.nextInt(9) - 4, run.spot.getZ() + level.random.nextInt(9) - 4);
+        }
+        if (g == null) {
+            return null;
+        }
+        CircuitStake stake = jp.revati.skyabyss.story.finale.mob.CloudMobsSetup.CIRCUIT_STAKE.get().create(level);
+        if (stake == null) {
+            return null;
+        }
+        stake.moveTo(g.getX() + 0.5, g.getY(), g.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
+        stake.tuneCloud(1, stakeHealth(run, people), stakeDamage(run));
+        if (!level.addFreshEntity(stake)) {
+            return null;
+        }
+        run.stake = stake.getUUID();
+        return stake;
+    }
+
+    static void removeStake(ServerLevel level, CircuitRun run) {
+        if (run.stake != null) {
+            Entity e = level.getEntity(run.stake);
+            if (e != null && e.isAlive()) {
+                e.discard();
+            }
+            run.stake = null;
         }
     }
 
@@ -593,6 +675,10 @@ public final class Circuits {
                 run.progress++;
                 return;
             }
+            if (run.kind == CircuitRun.Kind.BREAK && id.equals(run.stake)) {
+                run.progress = 1;
+                return;
+            }
         }
     }
 
@@ -675,6 +761,8 @@ public final class Circuits {
                     ? (run.dropped ? Component.translatable("circuit.skyabyss.task.carry_pick")
                             : Component.translatable("circuit.skyabyss.task.carry_go", place(run.place)))
                     : Component.translatable("circuit.skyabyss.task.carry", place(run.place2));
+            case BREAK -> run.phase == 0 ? Component.translatable("circuit.skyabyss.task.break_go", place(run.place))
+                    : Component.translatable("circuit.skyabyss.task.break");
         };
     }
 

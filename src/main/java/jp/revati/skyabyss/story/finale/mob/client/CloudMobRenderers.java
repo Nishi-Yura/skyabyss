@@ -46,6 +46,7 @@ public final class CloudMobRenderers {
         event.registerEntityRenderer(CloudMobsSetup.TOWER_MASTER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.tower.mob.TowerMaster.ID, 0.0f, 5.0f));
         event.registerEntityRenderer(CloudMobsSetup.TOWER_EYE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.LampEye.ID, 0.0f, 1.0f));
         event.registerEntityRenderer(CloudMobsSetup.TOWER_EYE_BIG.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.LampEye.ID, 0.0f, 1.8f));
+        event.registerEntityRenderer(CloudMobsSetup.CIRCUIT_STAKE.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.endgame.CircuitStake.ID, 0.7f, 1.0f));
         event.registerEntityRenderer(CloudMobsSetup.TOWER_MOON.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.finale.mob.PilgrimMoon.ID, 0.0f, 1.4f));
     }
 
