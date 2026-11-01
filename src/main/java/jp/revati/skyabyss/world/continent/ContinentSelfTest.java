@@ -63,7 +63,7 @@ public final class ContinentSelfTest {
                 for (jp.revati.skyabyss.facility.AttendantRole role : jp.revati.skyabyss.facility.AttendantRole.values()) {
                     if (role == jp.revati.skyabyss.facility.AttendantRole.GUIDE || role == jp.revati.skyabyss.facility.AttendantRole.GRAVEKEEPER
                             || role == jp.revati.skyabyss.facility.AttendantRole.DRUNKARD || role == jp.revati.skyabyss.facility.AttendantRole.BOX_OPENER
-                            || role == jp.revati.skyabyss.facility.AttendantRole.TOWER_KEEPER) {
+                            || role == jp.revati.skyabyss.facility.AttendantRole.TOWER_KEEPER || role == jp.revati.skyabyss.facility.AttendantRole.TAILOR) {
                         continue;
                     }
                     if (!bp.marks.containsKey(role.mark())) {

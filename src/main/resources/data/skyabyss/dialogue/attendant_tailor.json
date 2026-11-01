@@ -26,11 +26,6 @@
       ],
       "next": "menu"
     },
-    "again": {
-      "face": "neutral",
-      "next": "menu",
-      "text": "dialogue.skyabyss.attendant_tailor.intro"
-    },
     "about_skins": {
       "face": "smile",
       "next": "menu"
