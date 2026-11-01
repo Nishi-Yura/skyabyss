@@ -96,3 +96,9 @@
 | 灰被りの大蜥蜴（灰） | 160 / 10 | 吐く（1.2 秒・前の扇 8、燃える）・尾の薙ぎ（0.8 秒・輪 1.8〜6.5）・噛みつき（0.5 秒・扇）。火に強い | 220 / 260 |
 
 大物 4 体は表では湧かず、名づきとしてだけ現れる（`entity/foe/RegionBoss` が突進の手当て）。頭を人へ向けない（野犬・雷狼と同じ理由）。撮影は tools/shots/foes_named.txt。
+
+## 6. 音
+
+敵はみな、環境音・被弾・倒れる音を持つ（月・雲海・深淵の A/B 組・章四の地上の敵・余燼の背・三つの心臓の倒れる音）。音は材質と声から作り、名前は `<種>_ambient` / `_hurt` / `_death`。
+素材は `tools/gen/sound/gen_mob_voices.py`（`python tools/gen/sound/gen_mob_voices.py`。乱数の種は固定）が `assets/skyabyss/sounds/voices/*.ogg` に書く。登録は各 Setup（月 `skyabyss_moon`・雲海 `skyabyss_finale`・深淵 B `skyabyss_abyss_b`・深淵 A `skyabyss_abyss_a`・章四 `skyabyss_ch4`・余燼・心臓は `skyabyss`）。
+月・雲海・深淵の種は `entity/MobVoices` の表で引く（`AbyssMobB` と `AbyssMob` が `getAmbientSound` / `getHurtSound` / `getDeathSound` を返す）。表にない種はバニラの音。

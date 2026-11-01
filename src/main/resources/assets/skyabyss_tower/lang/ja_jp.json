@@ -207,5 +207,17 @@
   "item.skyabyss.tower_halo_chestplate.story": "「衣の羽は、主の背の光輪から抜けた。」",
   "item.skyabyss.tower_halo_leggings.story": "「祈りの言葉は、裾の縁に縫ってある。」",
   "item.skyabyss.tower_halo_boots.story": "「光の上を歩くと、足が少し浮く。」",
-  "entity.skyabyss.attendant.tower_keeper": "塔守"
+  "entity.skyabyss.attendant.tower_keeper": "塔守",
+  "gui.skyabyss.attack.tower_master.rake": "右手の払い",
+  "gui.skyabyss.attack.tower_master.flense": "左手の払い",
+  "gui.skyabyss.attack.tower_master.clap": "合掌",
+  "gui.skyabyss.attack.tower_master.breath": "淵の吐息",
+  "gui.skyabyss.attack.tower_master.beams": "三つの印の光",
+  "gui.skyabyss.attack.tower_master.sigil": "追う印",
+  "gui.skyabyss.attack.tower_master.exhort": "退けの声",
+  "gui.skyabyss.attack.tower_master.stars": "星屑の雨",
+  "gui.skyabyss.attack.tower_master.arrows": "天の三矢",
+  "gui.skyabyss.attack.tower_master.kids": "鎖の子",
+  "gui.skyabyss.attack.tower_master.moon": "落ちる月",
+  "gui.skyabyss.attack.tower_master.swarm": "天と淵の群れ"
 }

@@ -119,11 +119,13 @@ public final class EmberIds {
     public static final String SOUND_THRALL_IGNITE = "ash_thrall_ignite";
     public static final String SOUND_MOTH_FLUTTER = "ember_moth_flutter";
     public static final String SOUND_MOTH_DEATH = "ember_moth_death";
+    public static final String SOUND_MOTH_HURT = "ember_moth_hurt";
     public static final String SOUND_ROLLER_CURL = "cinder_roller_curl";
     public static final String SOUND_ROLLER_ROLL = "cinder_roller_roll";
     public static final String SOUND_ROLLER_BONK = "cinder_roller_bonk";
     public static final String SOUND_ROLLER_HURT = "cinder_roller_hurt";
     public static final String SOUND_ROLLER_DEATH = "cinder_roller_death";
+    public static final String SOUND_ROLLER_AMBIENT = "cinder_roller_ambient";
     // E 灰の鍛え手
     public static final String SOUND_SMITH_SLAM = "ash_smith_slam";
     public static final String SOUND_SMITH_INHALE = "ash_smith_inhale";
@@ -132,6 +134,7 @@ public final class EmberIds {
     public static final String SOUND_SMITH_RAGE = "ash_smith_rage";
     public static final String SOUND_SMITH_HURT = "ash_smith_hurt";
     public static final String SOUND_SMITH_DEATH = "ash_smith_death";
+    public static final String SOUND_SMITH_AMBIENT = "ash_smith_ambient";
     // F 余燼の心臓
     public static final String SOUND_HEART_BEAT = "ember_heart_beat";
     public static final String SOUND_HEART_ROAR = "ember_heart_roar";

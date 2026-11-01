@@ -39,9 +39,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     // ここから下はサーバーだけが使う (クライアントへは送らない)
     // 一度だけの経験値 (新しい場所、初めての撃破) の記録
     public final Set<String> discoveries = new LinkedHashSet<>();
-    // バニラの敵から今日もらった量 (日が変わると 0)
-    public long vanillaDay = -1;
-    public int vanillaToday;
 
     public int stat(Stat s) {
         return stats[s.ordinal()];
@@ -130,8 +127,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
             d.add(StringTag.valueOf(id));
         }
         tag.put("discoveries", d);
-        tag.putLong("vanillaDay", vanillaDay);
-        tag.putInt("vanillaToday", vanillaToday);
         return tag;
     }
 
@@ -161,8 +156,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         for (Tag t : tag.getList("discoveries", Tag.TAG_STRING)) {
             discoveries.add(t.getAsString());
         }
-        vanillaDay = tag.contains("vanillaDay") ? tag.getLong("vanillaDay") : -1;
-        vanillaToday = tag.getInt("vanillaToday");
         sanitize();
     }
 

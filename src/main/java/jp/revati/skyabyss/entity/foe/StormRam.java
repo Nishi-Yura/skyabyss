@@ -47,6 +47,7 @@ public class StormRam extends RegionBoss {
     @Override
     protected void choose(LivingEntity target, double distance) {
         if (distance >= 6 && distance <= 15) {
+            cue("storm_ram", "charge", CHARGE_WARN);
             charge(target, CHARGE, "charge", CHARGE_WARN, CHARGE_LENGTH, 1.2, 0.9, MobSounds.STORM_RAM_CHARGE);
             return;
         }
@@ -54,6 +55,7 @@ public class StormRam extends RegionBoss {
             move = REAR;
             lastRear = tickCount;
             begin(target, "rear");
+            cue("storm_ram", "rear", REAR_WARN);
             double cx = getX();
             double cz = getZ();
             double y = getY();
@@ -81,6 +83,7 @@ public class StormRam extends RegionBoss {
         if (distance <= 3.4) {
             move = BUTT;
             begin(target, "butt");
+            cue("storm_ram", "butt", BUTT_WARN);
             Vec3 f = forward();
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), 3.6, Math.toRadians(50)))
                     .floor(getY()).warn(BUTT_WARN).danger().owner(this).target(target)

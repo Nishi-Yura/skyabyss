@@ -73,7 +73,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
             LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(shown) + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
-                renderMesh(mesh, id, tierName(shown), level(stack), stack.hasFoil(), context, pose, buffers, light, overlay);
+                renderMesh(mesh, id, tierName(shown), level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
                 return;
             }
         }
@@ -97,7 +97,17 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         return new float[] {0f, 0f};
     }
 
-    private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    // 神器 (七段目) か。形の段は伝説と同じなので、光の脈で見分ける (03 の 1.2。2026-11-02 の監査)
+    static boolean mythic(ItemStack stack) {
+        return stack.getItem() instanceof ModGear g && g.tier() == GearTier.MYTHIC;
+    }
+
+    // 神器の光の脈 (0〜1。約 2.6 秒で一巡)
+    public static float mythicPulse() {
+        return 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() / 420.0);
+    }
+
+    private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, boolean mythic, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         ResourceLocation[] tex = variant(mesh.texture, level);
         pose.pushPose();
         // 元のボクセルは盾以外、全部の要素を z 軸まわりに -45 度 (中心 8,8,8) 傾けていて、display (持ち方) はその傾きを前提にしている。メッシュは刃を立てて作ってあるので、同じだけ傾ける
@@ -131,6 +141,11 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         LowPoly.drawAll(pose, body, mesh, light, overlay, WHITE);
         if (tex[1] != null) {
             LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
+            if (mythic) {
+                // 神器: 光る画素をもう一度、脈打つ濃さで重ねる
+                int a = (int) (40 + 150 * mythicPulse());
+                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
+            }
         }
         // 動きの間だけ: 光る画素をもう一度重ねて強め (GLOW)、刃の軌跡の帯を引く (TRAIL)
         float[] fx = effects(context);

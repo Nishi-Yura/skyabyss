@@ -38,15 +38,21 @@ public final class ContinentMap {
         this.region = region;
     }
 
-    public static synchronized ContinentMap get() {
-        if (instance == null) {
-            int[] head = new int[4];
-            byte[] h = read("height.bin", head);
-            byte[] b = read("biome.bin", head);
-            byte[] r = read("region.bin", head);
-            instance = new ContinentMap(head[0], head[1], head[2], head[3], h, b, r);
-        }
-        return instance;
+    // 読み込みは一度だけ (holder。ワールド生成のスレッドとサーバースレッドがクラスのロックを取り合わないように。2026-11-02 の監査)
+    private static final class Holder {
+        static final ContinentMap I = load();
+    }
+
+    private static ContinentMap load() {
+        int[] head = new int[4];
+        byte[] h = read("height.bin", head);
+        byte[] b = read("biome.bin", head);
+        byte[] r = read("region.bin", head);
+        return new ContinentMap(head[0], head[1], head[2], head[3], h, b, r);
+    }
+
+    public static ContinentMap get() {
+        return Holder.I;
     }
 
     private static byte[] read(String name, int[] head) {

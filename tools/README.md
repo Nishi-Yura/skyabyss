@@ -20,7 +20,6 @@
 | `sheets/` | `docs/review` の比べシート・レビューページを作るスクリプト (テンプレート html を含む) |
 | `audit/` | 検査 (`check_*.py`、`mesh_audit.py`、`check_text_fit.py` など) |
 | `lib/` | ほかのスクリプトが `import` する共有の部品 (`mesh_close`、`whale_bin`、`weapon_display` など) |
-| `once/` | 一度だけ走らせた移行スクリプト (`add_*_lang`・`fix_*`)。履歴として残す。もう走らせない |
 | `misc/` | 単発の調査・プローブ |
 | `dev/` | 開発用 (`rcon.py`、`mc_run.sh`、`quick_check.sh`、`world_template.sh`)。使い方は下の「開発の速い回し方」 |
 | `shots/` | 撮影の台本 (`*.txt`) だけ。台本を書くスクリプトは `gen/shots/`、撮った絵を並べる台紙のスクリプトは `sheets/` に置く |
@@ -278,17 +277,17 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 天の鍵 `textures/item/sky_key.png`、場面の音 `assets/skyabyss_story/sounds/*.ogg` と `sounds.json` (14 の 4 章) | `tools/gen/story/gen_story_assets.py` (`--option A\|B\|C`、既定 C。比較は `docs/review/sky_key_roughs/compare.png`) | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 潮殻の背の敵の音 `sounds/tide_mobs/*.ogg`、泡 `textures/entity/bubble_shot.png`、素材の絵 `textures/item/{tide_shell_shard,tide_dried_shell,bubble_sac}.png` (仮) | `tools/gen/mobs/gen_tide_mob_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 心臓: `geo/entity/stone_whale_heart_p1..p3.geo.json`、`textures/entity/stone_whale_heart_p*`、`animations/entity/stone_whale_heart.animation.json` | `tools/install/install_heart_v4.py` (形の元は `tools/sources/heart/`。`rough/boss_v4.py` の A 案) | |
-| 射手: `geo/entity/rib_archer.geo.json`、弓の `geo/gear/rib_archer_bow.geo.json` など | `rough/rib_archer_v4.py` | 同じ物ができる |
-| 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | `rough/captain_v4.py --install` | 同じ物ができる |
+| 射手: `geo/entity/rib_archer.geo.json`、弓の `geo/gear/rib_archer_bow.geo.json` など | 生成の道具 `rough/rib_archer_v4.py` は消した (依存の `mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (履歴は git に残る) |
+| 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | 生成の道具 `rough/captain_v4.py` は消した (`captain_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (履歴は git に残る) |
 | 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `tools/install/install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる。`tools/gen/mobs/gen_mobs.py` の苔這いは古い版なので走らせない |
 | `textures/gui/sky_vignette.png` | `tools/gen/ui/gen_vignette.py` | 同じ物ができる |
 | 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `tools/gen/items/gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
-| 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | `rough/watcher.py --install` | ラフ 3 案は `docs/review/watcher_roughs/`。`--install` なしなら docs にだけ書く |
+| 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | 生成の道具 `rough/watcher.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (`rough/watcher_v2.py` も同じ理由で走らない) |
 | `sounds/prologue/*.ogg` (見る者の音) | `tools/gen/sound/gen_watcher_sounds.py` | 同じ物ができる |
 | 技: `textures/gui/skill/{icons,skills}.png`、`textures/particle/{rune_spark,sky_mote}_*.png`、`particles/*.json`、`sounds/rpg/skill/*.ogg` | `tools/gen/ui/gen_skill_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。アイコンのラフ 3 案と比較画像は `docs/review/skill_icons_roughs/`、採用は `ADOPTED`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `SkillScreen.java` と値をそろえる |
 | 共鳴の炉の画面: `textures/gui/forge/forge.png` (左右の板・つまみ・印・候補の札、2 倍密度) | `tools/gen/items/gen_forge_assets.py` | 同じ物ができる。画面の配置を変えたら `ResonanceForgeScreen.java` と値をそろえる |
 | 旅嚢の画面: `textures/gui/pouch/pouch.png` (画面・枠 3 種・「？」・ボタン 3 状態・輪の札と中心、2 倍密度。装飾の画面と同じ作り。`--preview` で `docs/review/_gallery_pouch/pouch_screen_preview.png`) | `tools/gen/items/gen_pouch_assets.py` | 同じ物ができる。画面の配置を変えたら `PouchLayout.java`・`PouchScreen.java` と値をそろえる。つまみは装飾の画面の素材を使う (`tools/gen/items/gen_accessory_assets.py`) |
-| 語り部・鯨追い: `geo/entity/{storyteller,whale_chaser}.geo.json`、`textures/entity/{storyteller,whale_chaser}.png`、`animations/entity/{storyteller,whale_chaser}.animation.json`、顔 `textures/gui/npc/face/*.png` | `rough/npc.py --install` (画面の見本は `rough/npc_ui_mock.py`) | ラフは `docs/review/npc_roughs/`。`--install` なしなら docs にだけ書く |
+| 語り部・鯨追い: `geo/entity/{storyteller,whale_chaser}.geo.json`、`textures/entity/{storyteller,whale_chaser}.png`、`animations/entity/{storyteller,whale_chaser}.animation.json`、顔 `textures/gui/npc/face/*.png` | 生成の道具 `rough/npc.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 (画面の見本の `rough/npc_ui_mock.py` は残す) | ラフと採用の記録は `docs/review/npc_roughs/` (README の表) |
 | 1章の空 雲の目: `textures/environment/sky_eye/{sclera,iris,lid,lid_glow,patch}.png` | `rough/sky_eye.py --install` | ラフ 3 案と夜空の比較は `docs/review/sky_eye_roughs/`、採用は `CHOSEN` (今は b 月蝕の瞳)。`--install` なしなら docs にだけ書く。描画の割合を変えたら `CloudEyeRenderer.java` と値をそろえる |
 | `sounds/sky_ch1/*.ogg` (削られた山頂・雲の目の音) | `tools/gen/sound/gen_chapter_sky_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 巨神での移動: `textures/item/stone_whale_call.png`、`textures/block/titan_waymark_{front,side,base,cap}.png`、`textures/gui/travel/chart.png`、`sounds/titan/travel/*.ogg` | `tools/gen/world/gen_titan_travel_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。ラフ 3 案と比較画像は `docs/review/titan_travel_roughs/`、採用は `ADOPTED_CALL` / `ADOPTED_MARK`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `TravelChartScreen.java` と値をそろえる |

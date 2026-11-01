@@ -139,39 +139,6 @@ public final class Growth {
     }
 
     // ---------------------------------------------------------------- ステータス
-    // 力を振り分ける。add は 4 つのステータスへの追加量。正しくなければ何もせず false
-    public static boolean allocate(ServerPlayer player, int[] add) {
-        // 基礎は技の木の節で上がる (docs/design/48)。振り分けは受け付けない
-        if (true) {
-            return false;
-        }
-        GrowthData data = get(player);
-        if (!canAllocate(data, add)) {
-            return false;
-        }
-        for (int i = 0; i < add.length; i++) {
-            data.stats[i] += add[i];
-        }
-        sync(player);
-        applyModifiers(player);
-        return true;
-    }
-
-    public static boolean canAllocate(GrowthData data, int[] add) {
-        if (add == null || add.length != data.stats.length) {
-            return false;
-        }
-        int sum = 0;
-        for (int i = 0; i < add.length; i++) {
-            // 引き算で比べる (足し算だと、改造したクライアントの巨大な値で int があふれて通ってしまう)
-            if (add[i] < 0 || add[i] > GrowthRules.STAT_CAP - data.stats[i]) {
-                return false;
-            }
-            sum += add[i];
-        }
-        return sum > 0 && sum <= data.unspentPoints();
-    }
-
     // 振り分けを全部戻す (管理者・テスト用。回数も費用も数えない)
     public static void resetStats(ServerPlayer player) {
         GrowthData data = get(player);

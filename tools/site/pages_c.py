@@ -81,7 +81,7 @@ def faq():
         ("キーがほかの mod とぶつかります。", "Keys clash with another mod.", "設定の「操作」にある「天と淵のあいだ」の項目で変えられます。", "Rebind them under Controls in the \"Between the Sky and the Abyss\" category."),
         ("大事な品をなくしました。", "I lost a key item.", "<kbd>B</kbd> の控え帳を開き、品の在りかと「呼び戻す」ボタンを使ってください。", "Open the record book (<kbd>B</kbd>) to see where it is and use the Recall button."),
         ("好きな順に巨神に挑めますか。", "Can I fight the titans in any order?", "既定では順番があります。管理者がゲームルール <code>skyabyssStoryGate</code> を <code>false</code> にすると好きな順に乗れます。", "By default there is an order. An admin can set the game rule <code>skyabyssStoryGate</code> to <code>false</code> to board in any order."),
-        ("他の mod と一緒に使えますか。", "Does it work with other mods?", "ほかの mod との組み合わせは確かめていません。ブロックを壊す・置く・作る mod は、アドベンチャーの決まりで効きません。", "Combinations with other mods are untested. Mods that break, place or craft blocks are blocked by the adventure rules."),
+        ("他の mod と一緒に使えますか。", "Does it work with other mods?", "ほかの mod との組み合わせは確かめていません。この mod はレシピを全部（ほかの mod の分も）読まず、バニラの進捗も消すので、作業台や進捗に頼る mod は動きません。ブロックを壊す・置く・作る mod も、アドベンチャーの決まりで効きません。", "Combinations with other mods are untested. This mod drops every recipe (other mods' too) and removes vanilla advancements, so mods that rely on crafting or advancements will not work; mods that break, place or craft blocks are blocked by the adventure rules."),
         ("建築や採掘はできますか。", "Can I build or mine?", "できません。この mod は、Minecraft の見た目をした RPG です。アドベンチャーモードで、採集は道具ごとの決まった場所だけです。", "No. This mod is an RPG with Minecraft's look: adventure mode, with gathering only at set spots per tool."),
     ]
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)

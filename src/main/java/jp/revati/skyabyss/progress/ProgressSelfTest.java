@@ -72,7 +72,6 @@ public final class ProgressSelfTest {
         check(f, ProgressRules.levelCap(4, true) == 50 && ProgressRules.levelCap(4, false) == 40 && ProgressRules.levelCap(3, true) == 33,
                 "the warden does not raise the cap to 50");
         check(f, ProgressRules.levelCap(4, true) >= jp.revati.skyabyss.rebirth.RebirthRules.MIN_LEVEL, "rebirth level is out of reach after the warden");
-        check(f, GrowthRules.VANILLA_DAILY == 100, "vanilla daily limit is " + GrowthRules.VANILLA_DAILY);
 
         // ---------------------------------------------------------------- 上限で止まる経験値
         GrowthData d = new GrowthData();

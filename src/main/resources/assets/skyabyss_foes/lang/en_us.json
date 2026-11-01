@@ -34,5 +34,18 @@
   "entity.skyabyss.named.island": "Redsash, Chief of the Pass",
   "entity.skyabyss.named.meadow": "The Last Standard-Bearer",
   "message.skyabyss.named.appear": "Something named stirs nearby: %s",
-  "message.skyabyss.named.down": "%s has fallen. %s bell coins"
+  "message.skyabyss.named.down": "%s has fallen. %s bell coins",
+  "gui.skyabyss.attack.meadow.plant": "Plant the Banner",
+  "gui.skyabyss.attack.meadow.sweep": "Bone Sweep",
+  "gui.skyabyss.attack.rock_boar.charge": "Charge",
+  "gui.skyabyss.attack.rock_boar.quake": "Back Quake",
+  "gui.skyabyss.attack.rock_boar.gore": "Tusk Sweep",
+  "gui.skyabyss.attack.tide_crab.spray": "Bubble Spray",
+  "gui.skyabyss.attack.tide_crab.slam": "Great Claw Slam",
+  "gui.skyabyss.attack.storm_ram.charge": "Horn Charge",
+  "gui.skyabyss.attack.storm_ram.rear": "Thunder Hoof",
+  "gui.skyabyss.attack.storm_ram.butt": "Headbutt",
+  "gui.skyabyss.attack.ash_lizard.sweep": "Tail Sweep",
+  "gui.skyabyss.attack.ash_lizard.bite": "Bite",
+  "gui.skyabyss.attack.ash_lizard.breath": "Spit Fire"
 }

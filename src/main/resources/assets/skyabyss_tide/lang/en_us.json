@@ -283,5 +283,7 @@
   "gui.skyabyss.tide_goal.title.crown": "Crown gallery",
   "gui.skyabyss.tide_goal.fin.hall": "Strike the shells in the rule's order (%1$s / %2$s). No penalty for a miss. The far gate opens",
   "gui.skyabyss.tide_goal.fin.tip": "The gate is open. On to the tablet and cache at the tip. Return the same way",
-  "gui.skyabyss.tide_goal.crown.ring": "Crown gallery. Find the tablets and caches. To climb, use the glowing bubble on the rim"
+  "gui.skyabyss.tide_goal.crown.ring": "Crown gallery. Find the tablets and caches. To climb, use the glowing bubble on the rim",
+  "gui.skyabyss.attack.shore_warden.thrust": "Harpoon Thrust",
+  "gui.skyabyss.attack.shore_warden.ring": "Tide Ring"
 }

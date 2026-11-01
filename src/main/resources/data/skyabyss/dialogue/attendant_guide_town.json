@@ -30,7 +30,7 @@
       "do": [
         {
           "type": "town",
-          "act": "mapmaker"
+          "act": "guide_rumor"
         }
       ],
       "options": [
@@ -46,7 +46,7 @@
       "do": [
         {
           "type": "town",
-          "act": "mapmaker_draw"
+          "act": "guide_draw"
         }
       ],
       "options": [

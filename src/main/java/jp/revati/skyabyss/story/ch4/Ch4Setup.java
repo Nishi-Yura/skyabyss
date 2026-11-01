@@ -72,9 +72,13 @@ public final class Ch4Setup {
     public static final DeferredItem<Item> SOOT_WHETSTONE = ITEMS.register("soot_whetstone", () -> new SootWhetstoneItem(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<Item> ASH_COOLER = ITEMS.register("ash_cooler", () -> new AshCoolerItem(new Item.Properties().stacksTo(16)));
 
-    // ---------------------------------------------------------------- 音 (既存の音の別名。assets/skyabyss_ch4/sounds.json)
+    // ---------------------------------------------------------------- 音 (assets/skyabyss_ch4/sounds.json。声の三つは tools/gen/sound/gen_mob_voices.py)
     public static final DeferredHolder<SoundEvent, SoundEvent> MITE_AMBIENT = sound("cinder_mite_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MITE_HURT = sound("cinder_mite_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> MITE_DEATH = sound("cinder_mite_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_AMBIENT = sound("ash_dragger_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_HURT = sound("ash_dragger_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_DEATH = sound("ash_dragger_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_CURL = sound("ash_dragger_curl");
     public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_ROLL = sound("ash_dragger_roll");
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_CRACK = sound("elder_thrall_crack");

@@ -2,6 +2,7 @@ package jp.revati.skyabyss.story.finale.mob;
 
 import java.util.EnumSet;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.finale.Echoes;
@@ -269,6 +270,7 @@ public class Rewinder extends CloudMob {
             move = m;
             t = 0;
             getNavigation().stop();
+            BossCue.send(Rewinder.this, "rewinder", m, m.equals("slam") ? SLAM_TELL : m.equals("sweep") ? SWEEP_TELL : 40);
             playAction(m);
             switch (m) {
                 case "slam" -> playSound(CloudMobsSetup.REWINDER_SLAM_TELL.get(), 1.6f, 0.9f);

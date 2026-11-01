@@ -208,5 +208,12 @@
   "sign.skyabyss.ch4_ash_3.1": "山は眠らぬ",
   "sign.skyabyss.ch4_ash_3.2": "息をひそめ",
   "sign.skyabyss.ch4_ash_3.3": "鍛え手の",
-  "sign.skyabyss.ch4_ash_3.4": "名を数える"
+  "sign.skyabyss.ch4_ash_3.4": "名を数える",
+  "subtitles.skyabyss_ch4.ash_dragger_ambient": "灰ひきずりの気配",
+  "subtitles.skyabyss_ch4.ash_dragger_hurt": "灰ひきずりがひるむ",
+  "subtitles.skyabyss_ch4.ash_dragger_death": "灰ひきずりが崩れる",
+  "subtitles.skyabyss_ch4.cinder_mite_hurt": "熾り蟲がひるむ",
+  "gui.skyabyss.attack.elder_thrall.rake": "火掻き",
+  "gui.skyabyss.attack.elder_thrall.crack": "亀裂",
+  "gui.skyabyss.attack.elder_thrall.wave": "熱の波"
 }

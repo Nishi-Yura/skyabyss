@@ -1034,7 +1034,7 @@ public class AshSmith extends EmberMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return null;
+        return EmberSmithSetup.AMBIENT.get();
     }
 
     @Override

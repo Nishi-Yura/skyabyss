@@ -285,10 +285,12 @@ public final class ChapterMobSpawner {
             if (mob == null) {
                 // 倒れた・チャンクごと読み込みから外れた。記録を落とす (ディスクから戻ってきても、LIVE にないので入れない: SiteSpawner.onJoin)
                 it.remove();
+                MOBS.remove(e.getKey());
                 continue;
             }
             if (!mob.isAlive()) {
                 it.remove();
+                MOBS.remove(e.getKey());
                 continue;
             }
             boolean kept = false;

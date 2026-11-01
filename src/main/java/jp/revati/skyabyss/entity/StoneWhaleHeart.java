@@ -1249,10 +1249,10 @@ public class StoneWhaleHeart extends HeartBoss {
         return MobSounds.STONE_WHALE_HEART_HURT.get();
     }
 
-    // 最後の一撃の音 (被弾と同じ)。倒れる演出は deathEffects が音も流すので、ここで別の音を重ねない
+    // 倒れるときの音 (tools/gen/sound/gen_mob_sounds.py の死の音)
     @Override
     protected SoundEvent getDeathSound() {
-        return MobSounds.STONE_WHALE_HEART_HURT.get();
+        return MobSounds.STONE_WHALE_HEART_DEATH.get();
     }
 
     @Override

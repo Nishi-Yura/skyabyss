@@ -48,6 +48,7 @@ public class RockBoar extends RegionBoss {
     @Override
     protected void choose(LivingEntity target, double distance) {
         if (distance >= 5 && distance <= 14) {
+            cue("rock_boar", "charge", CHARGE_WARN);
             charge(target, CHARGE, "charge", CHARGE_WARN, CHARGE_LENGTH, 1.3, 0.8, MobSounds.ROCK_BOAR_CHARGE);
             return;
         }
@@ -55,6 +56,7 @@ public class RockBoar extends RegionBoss {
             move = QUAKE;
             lastQuake = tickCount;
             begin(target, "quake");
+            cue("rock_boar", "quake", QUAKE_WARN);
             Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), QUAKE_RADIUS))
                     .floor(getY()).warn(QUAKE_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
@@ -70,6 +72,7 @@ public class RockBoar extends RegionBoss {
         if (distance <= GORE_RANGE) {
             move = GORE;
             begin(target, "gore");
+            cue("rock_boar", "gore", GORE_WARN);
             Vec3 f = forward();
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), GORE_RANGE, Math.toRadians(60)))
                     .floor(getY()).warn(GORE_WARN).danger().owner(this).target(target)

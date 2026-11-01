@@ -3,9 +3,12 @@ package jp.revati.skyabyss.abyss.mobs;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.entity.MobVoices;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -86,6 +89,25 @@ public abstract class AbyssMobB extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 声 (環境音・被弾・倒れる)。種の表 (MobVoices) にあればその音、なければバニラの音
+    @Override
+    protected SoundEvent getAmbientSound() {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getAmbientSound() : v.ambient().get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getHurtSound(source) : v.hurt().get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getDeathSound() : v.death().get();
     }
 
     protected void strike(LivingEntity target, float amount) {

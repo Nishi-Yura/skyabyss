@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jp.revati.skyabyss.combat.BossCue;
 import org.joml.Vector3f;
 
 import jp.revati.skyabyss.notice.Notice;
@@ -57,7 +58,7 @@ public class MoonCoreBoss extends MoonMob {
     static final int DROP_TELL = 100;
     static final int ECHO_EVERY = 400;
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.moon_core"),
-            BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private final List<Integer> shards = new ArrayList<>();
     private int phase;
     private int roarFor;
@@ -209,6 +210,7 @@ public class MoonCoreBoss extends MoonMob {
             sweep = 0;
             sweptHit.clear();
             playAction("sweep");
+            BossCue.send(this, "moon_core", "sweep", SWEEP_TELL);
             playSound(MoonMobsSetup.CORE_TELL.get(), 2.0f, 0.9f);
         }
         if (phase == 1) {
@@ -216,6 +218,7 @@ public class MoonCoreBoss extends MoonMob {
                 rewind = 0;
                 rewindHp = getHealth();
                 playAction("rewind");
+                BossCue.send(this, "moon_core", "rewind", REWIND_RING);
                 playSound(MoonMobsSetup.CORE_CLOCK.get(), 2.0f, 1.0f);
             }
             if (rewind >= 0) {
@@ -229,6 +232,7 @@ public class MoonCoreBoss extends MoonMob {
             if (drop < 0 && clock % DROP_EVERY == DROP_EVERY / 4) {
                 drop = 0;
                 playAction("drop");
+                BossCue.send(this, "moon_core", "drop", DROP_TELL);
                 playSound(MoonMobsSetup.CORE_DROP_TELL.get(), 3.0f, 0.7f);
                 for (ServerPlayer p : CoreArena.players(sl)) {
                     Notice.narrate(p, "message.skyabyss.moon.core_drop");
@@ -334,6 +338,7 @@ public class MoonCoreBoss extends MoonMob {
 
     // 欠片の雨: 主の間の人の足もとと少し先へ光を降らす
     private void rain(ServerLevel sl) {
+        BossCue.send(this, "moon_core", "rain", 20);
         for (ServerPlayer p : CoreArena.players(sl)) {
             for (int i = 0; i < (phase >= 1 ? 3 : 2); i++) {
                 Vec3 at = i == 0 ? p.position() : p.position().add((random.nextDouble() - 0.5) * 8, 0, (random.nextDouble() - 0.5) * 8);
@@ -394,6 +399,7 @@ public class MoonCoreBoss extends MoonMob {
 
     // 時の残像: 床の縁に残り鎧の残像を二体 (淵の残り影と同じ形で立つ)
     private void echoes(ServerLevel sl) {
+        BossCue.send(this, "moon_core", "echo", 40);
         for (int i = 0; i < 2; i++) {
             double a = random.nextDouble() * Math.PI * 2;
             Vec3 at = MoonCore.mark("arena_center").getBottomCenter().add(Math.cos(a) * 11, 0, Math.sin(a) * 11);

@@ -381,5 +381,7 @@
   "message.skyabyss.raid.SR5.round": "Round %s / %s",
   "message.skyabyss.raid.SR5.go": "Now step the order",
   "message.skyabyss.raid.SR5.miss": "Wrong, or too late. Watch again",
-  "message.skyabyss.raid.SR6.gust": "A gust is coming! Get behind a pillar"
+  "message.skyabyss.raid.SR6.gust": "A gust is coming! Get behind a pillar",
+  "gui.skyabyss.attack.scorched_warden.ring": "Lightning Ring",
+  "gui.skyabyss.attack.scorched_warden.leap": "Mantle Leap"
 }

@@ -47,6 +47,7 @@ public class TideCrab extends RegionBoss {
             move = SPRAY;
             lastSpray = tickCount;
             begin(target, "spray");
+            cue("tide_crab", "spray", SPRAY_WARN);
             Vec3 f = forward();
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SPRAY_RANGE, Math.toRadians(35)))
                     .floor(getY()).warn(SPRAY_WARN).danger().owner(this).target(target)
@@ -70,6 +71,7 @@ public class TideCrab extends RegionBoss {
         }
         move = SLAM;
         begin(target, "slam");
+        cue("tide_crab", "slam", SLAM_WARN);
         Vec3 f = forward();
         Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), SLAM_LENGTH, 1.2))
                 .floor(getY()).warn(SLAM_WARN).danger().owner(this).target(target)

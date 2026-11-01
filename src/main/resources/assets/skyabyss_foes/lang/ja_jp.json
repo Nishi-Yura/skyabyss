@@ -34,5 +34,18 @@
   "entity.skyabyss.named.island": "峠の頭目 赤帯",
   "entity.skyabyss.named.meadow": "最後の旗手",
   "message.skyabyss.named.appear": "近くに名のある強敵が現れた: %s",
-  "message.skyabyss.named.down": "%s を倒した。鐘銭 %s 枚"
+  "message.skyabyss.named.down": "%s を倒した。鐘銭 %s 枚",
+  "gui.skyabyss.attack.meadow.plant": "旗を立てる",
+  "gui.skyabyss.attack.meadow.sweep": "骨の薙ぎ",
+  "gui.skyabyss.attack.rock_boar.charge": "突進",
+  "gui.skyabyss.attack.rock_boar.quake": "背の震え",
+  "gui.skyabyss.attack.rock_boar.gore": "牙の薙ぎ",
+  "gui.skyabyss.attack.tide_crab.spray": "泡",
+  "gui.skyabyss.attack.tide_crab.slam": "大ばさみの叩きつけ",
+  "gui.skyabyss.attack.storm_ram.charge": "角の突進",
+  "gui.skyabyss.attack.storm_ram.rear": "雷の蹄",
+  "gui.skyabyss.attack.storm_ram.butt": "頭突き",
+  "gui.skyabyss.attack.ash_lizard.sweep": "尾の薙ぎ",
+  "gui.skyabyss.attack.ash_lizard.bite": "噛みつき",
+  "gui.skyabyss.attack.ash_lizard.breath": "吐く"
 }

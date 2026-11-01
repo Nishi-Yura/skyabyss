@@ -1960,10 +1960,10 @@ public class EmberHeart extends HeartBoss {
         return MobSounds.EMBER_HEART_HURT.get();
     }
 
-    // 最後の一撃の音 (被弾と同じ)。倒れる演出は deathEffects が音も流すので、ここで別の音を重ねない
+    // 倒れるときの声 (tools/gen/sound/gen_mob_voices.py)。die() が鳴らす死の音とは別に重なる
     @Override
     protected SoundEvent getDeathSound() {
-        return MobSounds.EMBER_HEART_HURT.get();
+        return MobSounds.EMBER_HEART_VOICE_DEATH.get();
     }
 
     @Override

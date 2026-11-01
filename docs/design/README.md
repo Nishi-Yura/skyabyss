@@ -66,6 +66,18 @@ Minecraft Java 1.21.1（NeoForge）の RPG mod「天と淵のあいだ」の設�
 
 ほかの資料: [テスター向けの遊び方](../beta_how_to_play.md)、ラフの比較は `docs/review/`、生成スクリプトと確かめ方は `tools/README.md`。
 
+## 消した書類の番号
+
+06・17・21・33・34 は消した（今の仕様だけを書く方針）。本文やコードの注釈に残る「06 の 4 章」のような参照は、次の行き先を読む。参照は一つずつ直していない。
+
+| 消した番号 | 今の行き先 |
+| --- | --- |
+| 06 | [01](01_overview.md) §7 ホラーの原則 |
+| 17 | [40](40_rpg_world_and_start.md)・[42](42_story_on_the_continent.md) のはじまりの流れ |
+| 21 | [03](03_gear_and_endgame.md) §5.8 旅装 |
+| 33 | [35](35_capital_facilities.md) |
+| 34 | [42](42_story_on_the_continent.md) |
+
 ## 用語
 
 | 言葉 | 意味 |

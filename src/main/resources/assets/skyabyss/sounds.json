@@ -3789,5 +3789,53 @@
         "stream": true
       }
     ]
+  },
+  "cinder_roller_ambient": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/cinder_roller_ambient"
+      }
+    ]
+  },
+  "ash_smith_ambient": {
+    "subtitle": "subtitles.skyabyss.ash_smith_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_smith_ambient"
+      }
+    ]
+  },
+  "ember_moth_hurt": {
+    "subtitle": "subtitles.skyabyss.ember_moth_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ember_moth_hurt"
+      }
+    ]
+  },
+  "ember_heart_voice_death": {
+    "subtitle": "subtitles.skyabyss.ember_heart_voice_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ember_heart_death"
+      }
+    ]
+  },
+  "storm_heart_voice_death": {
+    "subtitle": "subtitles.skyabyss.storm_heart_voice_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/storm_heart_death"
+      }
+    ]
+  },
+  "tide_heart_voice_death": {
+    "subtitle": "subtitles.skyabyss.tide_heart_voice_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/tide_heart_death"
+      }
+    ]
   }
 }

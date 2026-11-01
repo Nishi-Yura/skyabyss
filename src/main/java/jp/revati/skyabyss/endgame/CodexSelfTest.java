@@ -54,14 +54,15 @@ public final class CodexSelfTest {
             long mask = RebirthTitles.unlockedMask(Rebirths.facts(p));
             check(f, RebirthTitles.has(mask, "codex_stone_whale") && !RebirthTitles.has(mask, "codex_all"), "the codex titles are wrong");
 
-            var foes = Codex.foes();
+            var foes = Codex.continentFoes();
             check(f, foes.size() >= 12 && foes.stream().allMatch(s -> s.startsWith(SkyAbyss.MODID + ":")), "the foe codex is too small: " + foes.size());
+            check(f, Codex.foes().size() > foes.size() + 40 && Codex.foes().containsAll(foes), "the full foe codex should hold every MONSTER type: " + Codex.foes().size());
             check(f, Codex.defeat(p, foes.iterator().next()) && !Codex.defeat(p, foes.iterator().next()), "defeating a foe twice counted twice");
             before = Coins.count(p);
             for (String e : foes) {
                 Codex.defeat(p, e);
             }
-            check(f, Codex.foesDefeated(p) == foes.size() && Coins.count(p) - before == Codex.FOES_COINS, "the full foe codex did not pay");
+            check(f, Codex.continentDefeated(p) == foes.size() && Coins.count(p) - before == Codex.FOES_COINS, "the full foe codex did not pay");
             check(f, RebirthTitles.has(RebirthTitles.unlockedMask(Rebirths.facts(p)), "foes_all"), "the foe codex title is missing");
         } catch (RuntimeException ex) {
             f.add("codex test crashed: " + ex);

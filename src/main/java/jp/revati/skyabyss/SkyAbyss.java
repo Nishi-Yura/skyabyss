@@ -42,6 +42,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.registry.ModBlockEntities.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
+        jp.revati.skyabyss.registry.BossEggs.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMenus.register(modEventBus);
         // 装備の技の修飾 (ルーン・属性タグ) を SkillModifier へつなぐ

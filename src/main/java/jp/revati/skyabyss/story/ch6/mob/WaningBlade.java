@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.EnumSet;
 import java.util.Iterator;
 
+import jp.revati.skyabyss.combat.BossCue;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.notice.Notice;
@@ -53,7 +54,7 @@ public class WaningBlade extends MoonMob {
     private static final EntityDataAccessor<Boolean> ECHO = SynchedEntityData.defineId(WaningBlade.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HIDDEN = SynchedEntityData.defineId(WaningBlade.class, EntityDataSerializers.BOOLEAN);
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.waning_blade"),
-            BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
 
     // 主が書く一 tick の記録。anim = その tick に始めた技の動き、hit = その tick に当てた技
     public record Frame(long time, Vec3 pos, float yaw, @Nullable String anim, @Nullable String hit) {
@@ -539,6 +540,9 @@ public class WaningBlade extends MoonMob {
                 if (new Vec3(lungeTo.x - c.x, 0, lungeTo.z - c.z).length() > 12.5) {
                     lungeTo = position();
                 }
+            }
+            if (!WaningBlade.this.echo()) {
+                BossCue.send(WaningBlade.this, "waning_blade", m, m.equals("slash") ? SLASH_TELL : m.equals("thrust") ? THRUST_TELL : WAVE_TELL);
             }
             began(m);
             if (level() instanceof ServerLevel sl) {

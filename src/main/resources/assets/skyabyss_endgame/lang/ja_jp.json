@@ -81,6 +81,7 @@
   "endgame.skyabyss.codex.set.moon": "月",
   "message.skyabyss.codex.head": "── 図鑑 ──",
   "message.skyabyss.codex.set_line": "%sの装備  %s/%s",
+  "message.skyabyss.codex.continent_line": "大陸の敵  %s/%s",
   "message.skyabyss.codex.foes_line": "敵の図鑑  %s/%s",
   "message.skyabyss.codex.foot": "装備は手にしたとき、敵は倒したときに図鑑に載る。そろえると鐘銭と称号",
   "message.skyabyss.codex.set_done": "図鑑: %sの装備をすべて集めた（鐘銭 %s）",
@@ -264,5 +265,6 @@
   "message.skyabyss.fishing.board_mine": "あなたの一番: %s %s cm（%s 点）",
   "message.skyabyss.fishing.board_last": "先週の一番: %s　%s %s cm",
   "message.skyabyss.fishing.board_foot": "点 = その種の一番大きい大きさに対する割合。週が替わると上位に鐘銭 %s・%s・%s",
-  "gui.skyabyss.profile.row.fish": "釣った魚"
+  "gui.skyabyss.profile.row.fish": "釣った魚",
+  "gui.skyabyss.attack.circuit_stake.pulse": "淵の脈"
 }

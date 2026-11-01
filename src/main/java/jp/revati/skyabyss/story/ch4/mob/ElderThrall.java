@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.StoneWhaleHeart;
@@ -191,6 +192,7 @@ public class ElderThrall extends AshThrall {
         }
         int n = 0;
         playAction("crack");
+        BossCue.send(this, "elder_thrall", "crack", CRACK_WARN);
         server.playSound(null, getX(), getY(), getZ(), Ch4Setup.ELDER_CRACK.get(), SoundSource.HOSTILE, 1.4f, 0.8f);
         for (ServerPlayer p : roomPlayers()) {
             if (Growth.discover(p, "ch4_elder_crack")) {
@@ -227,6 +229,7 @@ public class ElderThrall extends AshThrall {
         }
         waves++;
         playAction("wave");
+        BossCue.send(this, "elder_thrall", "wave", WAVE_WARN);
         double cx = getX();
         double cz = getZ();
         double y = getY();
@@ -310,6 +313,7 @@ public class ElderThrall extends AshThrall {
                 act = 1;
                 mob.rakes++;
                 mob.playAction("attack");
+                BossCue.send(mob, "elder_thrall", "rake", RAKE_WARN);
                 double angle = Telegraph.angleOf(t.getX() - mob.getX(), t.getZ() - mob.getZ());
                 float yaw = (float) Math.toDegrees(angle) - 90f;
                 mob.setYRot(yaw);

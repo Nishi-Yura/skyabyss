@@ -24,13 +24,6 @@ public final class RpgNetwork {
         event.registrar(PROTOCOL_VERSION)
                 // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
                 .playToClient(GrowthGainPayload.TYPE, GrowthGainPayload.STREAM_CODEC, (payload, context) -> GrowthClient.onGain(payload))
-                .playToServer(GrowthAllocatePayload.TYPE, GrowthAllocatePayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player && !Growth.allocate(player, payload.add())) {
-                        // 画面が古いとき (ほかの所で振った・レベルを下げられた) など。同期し直して知らせる
-                        Growth.sync(player);
-                        Notice.bar(player, ModText.deny("message.skyabyss.growth.allocate_failed"));
-                    }
-                })
                 .playToServer(GrowthRespecPayload.TYPE, GrowthRespecPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         int cost = jp.revati.skyabyss.rpg.GrowthRules.statRespecCost(Growth.get(player).statRespecs);

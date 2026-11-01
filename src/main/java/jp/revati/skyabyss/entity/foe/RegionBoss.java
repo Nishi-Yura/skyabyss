@@ -2,7 +2,9 @@ package jp.revati.skyabyss.entity.foe;
 
 import java.util.function.Supplier;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.world.continent.NamedFoes;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvent;
@@ -28,6 +30,13 @@ public abstract class RegionBoss extends ContinentFoe {
     @Override
     protected void registerGoals() {
         baseGoals(new ApproachGoal(this, 1.0, 3.0));
+    }
+
+    // 名のある強敵 (NamedFoes の名づき) の技の名前を送る。ふつうの同じ種は送らない
+    protected void cue(String boss, String attack, int ticks) {
+        if (NamedFoes.named(this)) {
+            BossCue.send(this, boss, attack, ticks);
+        }
     }
 
     // 前の長い帯の突進。length = 帯の長さ (走る距離)

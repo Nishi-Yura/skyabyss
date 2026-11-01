@@ -3,6 +3,7 @@ package jp.revati.skyabyss.story.ch6.mob;
 import java.util.EnumSet;
 import java.util.List;
 
+import jp.revati.skyabyss.combat.BossCue;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
@@ -323,6 +324,7 @@ public class ShadowEmbracer extends MoonMob {
             t = 0;
             spot = null;
             getNavigation().stop();
+            BossCue.send(ShadowEmbracer.this, "shadow_embracer", m, m.equals("grab") ? 14 : m.equals("sink") ? 20 : m.equals("wave") ? 20 : 16);
             if (!m.equals("sink")) {
                 playAction(m);
             }

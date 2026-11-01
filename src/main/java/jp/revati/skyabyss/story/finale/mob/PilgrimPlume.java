@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.finale.PromiseArena;
@@ -55,7 +56,7 @@ public class PilgrimPlume extends CloudMob {
     static final int JUDGE_EVERY = 500;
     public static final int JUDGE_TELL = 100;
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.pilgrim_plume"),
-            BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private long judgeAt = Long.MAX_VALUE;
@@ -273,6 +274,7 @@ public class PilgrimPlume extends CloudMob {
         private void begin(String m) {
             move = m;
             t = 0;
+            BossCue.send(PilgrimPlume.this, "pilgrim_plume", m, m.equals("beat") ? BEAT_TELL : m.equals("rain") ? RAIN_TELL : m.equals("mark") ? MARK_TELL : JUDGE_TELL);
             playAction(m);
             playSound(switch (m) {
                 case "beat" -> CloudMobsSetup.WING_BEAT_TELL.get();

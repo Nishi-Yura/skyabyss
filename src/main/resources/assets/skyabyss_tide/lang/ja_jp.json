@@ -283,5 +283,7 @@
   "gui.skyabyss.tide_goal.title.crown": "冠の回廊",
   "gui.skyabyss.tide_goal.fin.hall": "貝を決まりの順に叩く (%1$s / %2$s)。間違えても罰はない。奥の戸が開く",
   "gui.skyabyss.tide_goal.fin.tip": "戸は開いた。先端の碑と宝へ。戻りは同じ道",
-  "gui.skyabyss.tide_goal.crown.ring": "冠の回廊。壁の碑と宝を探そう。昇るなら縁の光る泡"
+  "gui.skyabyss.tide_goal.crown.ring": "冠の回廊。壁の碑と宝を探そう。昇るなら縁の光る泡",
+  "gui.skyabyss.attack.shore_warden.thrust": "銛の突き",
+  "gui.skyabyss.attack.shore_warden.ring": "満ち潮の輪"
 }

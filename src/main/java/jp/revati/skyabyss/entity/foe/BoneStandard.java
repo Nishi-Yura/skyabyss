@@ -1,8 +1,10 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
+import jp.revati.skyabyss.world.continent.NamedFoes;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
@@ -59,6 +61,9 @@ public class BoneStandard extends BoneSoldier {
             planting = true;
             lastPlant = tickCount;
             begin(target, "plant");
+            if (NamedFoes.named(this)) {
+                BossCue.send(this, "meadow", "plant", PLANT_WARN);
+            }
             server().playSound(null, getX(), getY(), getZ(), MobSounds.BONE_STANDARD_HORN.get(), SoundSource.HOSTILE, 1.4f, 1f);
             Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), WARD_RADIUS))
                     .floor(getY()).warn(PLANT_WARN).harmless().owner(this).start();
@@ -86,6 +91,9 @@ public class BoneStandard extends BoneSoldier {
         }
         planting = false;
         begin(target, "sweep");
+        if (NamedFoes.named(this)) {
+            BossCue.send(this, "meadow", "sweep", SWEEP_WARN);
+        }
         Vec3 f = forward();
         Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, SWEEP_HALF))
                 .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)

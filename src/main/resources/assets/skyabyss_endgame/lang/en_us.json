@@ -81,6 +81,7 @@
   "endgame.skyabyss.codex.set.moon": "Moon",
   "message.skyabyss.codex.head": "── Codex ──",
   "message.skyabyss.codex.set_line": "%s gear  %s/%s",
+  "message.skyabyss.codex.continent_line": "Continent foes  %s/%s",
   "message.skyabyss.codex.foes_line": "Foes  %s/%s",
   "message.skyabyss.codex.foot": "Gear enters the codex when you get it, foes when you defeat them. Complete sets pay coins and titles",
   "message.skyabyss.codex.set_done": "Codex: you collected all %s gear (%s coins)",
@@ -264,5 +265,6 @@
   "message.skyabyss.fishing.board_mine": "Your best: %s %s cm (%s pts)",
   "message.skyabyss.fishing.board_last": "Last week's best: %s  %s %s cm",
   "message.skyabyss.fishing.board_foot": "Points = size against the species' largest. At week's end the top three get %s, %s, %s bell coins",
-  "gui.skyabyss.profile.row.fish": "Fish caught"
+  "gui.skyabyss.profile.row.fish": "Fish caught",
+  "gui.skyabyss.attack.circuit_stake.pulse": "Abyss Pulse"
 }

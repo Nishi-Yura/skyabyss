@@ -2,6 +2,55 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
+## 2026-11-02 の昼: 全体監査の「中」13 件と「低」4 件（`docs/review/audit_2026-11-01.md` の 6〜22）
+
+一つのコミットにまとめる前の作業ツリー（約 630 ファイル。削除 249・変更 207・新規 174）。確かめ: compileJava、`quick_check.sh --no-java` 全部 OK、自己テストは各担当の段と、まとめの段 `lang,keys,vow,codex,combat rules,new foes,town guide,item audit,gear tiers,wild gear,accessory,moon world,moon valley,cloudsea,tower,circuit,facility,growth,titan ground,titan lairs`（結果はこの節の末尾）。
+
+- **6 レア度の見た目**: 神器 18 本と神器の装飾は、光る画素が約 2.6 秒で脈打つ（`WeaponItemRenderer.mythicPulse`、`AccessoryMeshes.draw(…, mythic)`）。形の作り直しは選んでもらう: `docs/review/roughs_1102/index.md`（エピックの箱・淵の金の箱・雲雀の羽根飾り、3 案ずつ。関数は `tools/rough/lowpoly/weapons/wild/o_roughs_1102.py`）。
+- **7 ボスの基本設定**: (a) 主 23 体に様式ある帯（新 `client/titan/BossBarLooks`、`PhasedBossBar.Style` に枠名。絵は `tools/gen/ui/gen_boss_bars_more.py`。月・雲海の 12 体は帯の初期色が二段目を指していたのも直した。淵の杭に帯を付けた）。(b) 技名 `BossCue` 約 60 か所、lang 83 個・印 83 枚（`gen_attack_icons.py`）。残り: 咆哮と召喚の知らせ、FeatherWarden 基底の技、塔の側の目の光線。(c) 音: 60 種に環境音・被弾・倒れる声 163 音（`tools/gen/sound/gen_mob_voices.py` → `sounds/voices/`、表は新 `entity/MobVoices`、AbyssMobB/AbyssMob が引く。月 17・雲海 16・深淵 B 9・深淵 A 9（新名前空間 `skyabyss_abyss_a`）・四章・余燼の抜け・心臓 3 の倒れる声）。耳での確認はまだ。心臓 3 体は die() の既存の音と重なるので、重ければ片方を外す。
+- **8 モデル**: 灰の屑と古い灰の番人は自前のメッシュを使っていた（監査の読み違い。骨だけ共通）。塔の側の目と落ちる月の自前の形、雑魚 37 体の作り直しは手つかず（ラフから）。
+- **9 図鑑**: `Codex.foes()` はこの MOD の MONSTER 全型（約 110）。報いと称号は `continentFoes()`（大陸 32 種）のまま。チャットに「大陸の敵 n/m」と「敵の図鑑 n/m」の二行。
+- **10・11**: 下の「午後」の節（別の担当）。
+- **12〜18 性能とエラーの芽**: 敵の体力の帯は tick に一度だけ探す。誓いの体力は人のまわり 96 だけ見る。採集の待ちは `PlayerMaps.track`。場所の敵の表は LIVE と一緒に落とす。文字の切り抜きは範囲からはみ出す字だけ。`ContinentMap`/`ContinentLayout` は holder（ロックなし）。潮殻は地形の下限へ一 tick に最大 0.5 ずつ。サイトの FAQ に「ほかの mod のレシピと進捗も消える」。
+- **19**: 自己テストを別のソースセットへ分けるのは見送り（`SelfTestRunner.enabled()` を製品のコードが参照していて、分けるには口を切り直す必要がある）。
+- **20**: 建築の検めの一件ずつの WARN は debug に。**21**: 7(c) の中で埋めた。**22**: 舞台の主 11 体の卵（新 `registry/BossEggs`、残りの 99 型には前からあった）。
+- 判断待ち: ラフ 3 品の選び、心臓の倒れる声の重なり、`origin/wip/*` 79 本の削除（下の節のコマンド）。
+
+## 2026-11-02 の午後: 不要なデータを消し、古い名前と注釈を直した（監査の 10・11 と「不要なデータの一覧」）
+
+- 消した（追跡ファイル 249 本・3.4 MB。`git diff --diff-filter=D`）:
+  - 巨神の装飾など 18 品の使わない階級の段（`lowpoly/items/<品>/` の json 36 本と絵 146 枚。品の階級は固定なので、残るのは一段ずつ。撮影の `weapontier` は消した段を選べない）。
+  - `models/item_voxel/coral_shield_blocking.json`、`textures/lowpoly/items/{gale_feather,tide_pearl}/`、`textures/lowpoly/npc_tailor_prop_l.png`、lang の `gui.skyabyss.skill.bar_nojob`・`bar_bow`・`sign.skyabyss.town_shop`（ja/en と `tools/gen/story/gen_jobs_lang.py`）。
+  - 消した仕組みの道具と絵: `tools/install/install_skins.py`、`tools/rough/lowpoly/armor/{cosmetic_one,skin_one}.py`、`tools/shots/{skins,skins_shops,fullskin,fullskin_turn,tailor,great_tree_1029}.txt`、`docs/review/cosmetic_one/`、`tailor_towns.jpg`、`npc_models_v2/roughs/{archivist,mapmaker,stable_keeper,tailor}`、`npc_roughs/{a,b,c}/attendant_*`（13 枚）。
+  - 走らない道具（依存の `mobs_small_v2.py` と `captain_v2.py` が無い）: `tools/rough/{captain_v4,npc,rib_archer_v4,watcher}.py`。`npc.py` は語り部と鯨追いの geo、`captain_v4`・`rib_archer_v4` は番兵長と射手の geo、`watcher.py` は見る者の geo の生成元だった。今の geo が正本。履歴は git に残る。`tools/rough/smooth_mob.py`（`smooth_mob2.py` へ）。
+  - 前の版の確かめ表 `playtest_0.8.1.md`・`0.9.19.md`・`0.9.20.md`: 確かめの項目は `playtest_0.9.21.md` の「13. 前の版から持ち越す確かめ」へ移し、リンクを張り替えた（遊び方・設計 14・37・HANDOFF）。
+- 名前を直した: `town/TownActions` の `mapmaker`・`mapmaker_draw` → `guide_rumor`・`guide_draw`（ACTS・switch・メソッド名・`attendant_guide_town.json`）。`/skyabyss town mapmaker [draw]` → `/skyabyss town guide [draw]`。lang `message.skyabyss.town.mapmaker.*` → `message.skyabyss.town.guide.*`（ja/en）、話し手の「地図屋:」→「案内人:」（"Guide:"）。建物と看板の `sign.skyabyss.capital.mapmaker.*` は残した（建物は町を建て直さない）。
+- 成長: `/growth add` と `Growth.allocate`・`canAllocate`、振り分けの通信 `GrowthAllocatePayload`（送り手が無かった）を消した。`/growth` は表示のみ。`/growth` の「振り分けられる力」の行と `message.skyabyss.growth.{allocate_failed,allocated,unknown_stat,points}`、`gui.skyabyss.growth.points` を消した。
+- バニラの日ごとの上限を消した: `GrowthRules.VANILLA_DAILY`・`VANILLA_TIRED`、`GrowthRewards.vanillaBudget`、`GrowthData.vanillaDay/vanillaToday`（NBT の読み書きも）。撃破の経験値は `vanillaXp(mob) * part`。
+- 注釈: `story/Chapters.java` の頭（終章・六章は未着手という古い記述と、五章の推奨 Lv 40 → 32）、`SelfTestRunner` の skins 注釈、`FacilityCommands` の mapcopy 行（そのコマンドは無い）、`MoonEnd.TODO` → `SEVENTH_LINE`（訳のキーは同じ）。
+- 設計書: 54 の塔の武器の職名（魔法使い・呪術師）、35・38・40 の厩舎と地図屋（空き部屋・旅の番へまとめた。町めぐりは 鍛冶場 → 宿 → 止まり木 → 道具屋 → 組合）、04 のステータスの振り分けとバニラの上限（基礎は技の木の節。48 が正）、10 の行 7 と §5 のバニラの上限、00 の行 26・226・233（答えの出た行と消した店の決まり）、07 の act 名。`docs/design/README.md` に「消した書類の番号」の表（06・17・21・33・34 の行き先）。
+- `tools/gen/loot/gen_box_text.py` は lang と dialogue を `newline="
+"` で書く（作業ツリーが CRLF にならない）。
+- 手元のブランチ `wip/continent-only` を消した（`git branch -d` は upstream と比べて拒んだ。HEAD に入っていることを確かめてから `-D`）。
+
+確かめ: `compileJava` 通過、`quick_check.sh --no-java` 全部 OK（check_generators はドリフト 0、gen_box_text は LF のまま）、自己テスト `gear tiers,wild gear,accessory,town,facility,growth,progress,lang,npc` を新しい大陸の世界で流して全段 PASSED（`run/logs/latest.log`、FAILED 0）。
+
+残したもの（判断）:
+- `tools/rough/lowpoly/whalebone_captain/sheet.py` は `captain_v4` を import している（もともと `captain_v2` が無く動かない）。`tools/rough/watcher_v2.py` は `watcher` を import する（同じく動かない）。直すか消すかは次の人。
+- `tools/gen/shots/gen_gear_{tide,whale}_shots.py`・`gen_weapon_*` は消した段（`weapontier` の common/rare/legend）を指すものがあり、その撮影は今は出ない。
+- `tools/install/install_lowpoly_accessories.py` は三段とも書くので、走らせると消した段が戻る。
+- `docs/review/mesh_audit_report.md` の `npc_archivist.json` の行は古い生成結果（自動の報告）のまま。
+- 監査の「一覧」にあった `data/quest/weekly_route.json`・伝承の未使用項目・UI の皮 3 組は確かめていない（別の作業）。
+- 監査 11 の「設計 01 の 4.1」と遊び方の既知の問題の食い違いは直していない。
+
+### 持ち主が実行する: リモートの wip ブランチ 79 本の削除（まだ実行していない）
+
+`git branch -r --merged HEAD` で `origin/wip/*` の 79 本が m1-sky-pass に取り込み済みと確かめた（`wip/continent-only` を含む）。消すのは持ち主:
+
+```
+git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths wip/abyss-gear-models wip/abyss-icons wip/abyss-layers wip/abyss-organic wip/abyss-polish wip/abyss-two-types wip/abyss-v3 wip/audit-ui-perf wip/boss-leftovers wip/boss-quality wip/builds-polish wip/builds-polish-interiors wip/builds-polish-shrine wip/builds-polish-townfind wip/call-perf wip/continent-only wip/cube-geo wip/decisions-1023 wip/dev-speed wip/final-tidy wip/fix-progression wip/fix-raid-tests wip/fix-story-npc wip/fix-suite wip/font-italic wip/fun-review wip/gear-gaps wip/gen-sync wip/ground-perf wip/heart-fx wip/lore-foreshadow wip/mob-quality wip/mob-quality2 wip/mount-models wip/mount-shop wip/npc-models wip/playtest-cmd wip/portraits wip/quest-fixes wip/quest-map wip/raid-build-ember wip/raid-build-guide wip/raid-build-storm wip/raid-build-tide wip/raid-build-whale wip/raid-ember wip/raid-lore-text wip/raid-rewards wip/raid-route-v2 wip/raid-storm wip/raid-tide wip/raid-whale wip/raid2-ember wip/raid2-storm wip/raid2-tide wip/raid2-whale wip/rarity-tiers wip/regress-fix wip/remove-cairns wip/roughs-abyss wip/roughs-mounts wip/site-refresh wip/skill-fx wip/skill-fx3 wip/skill-fx4 wip/skill-tree-v2 wip/skill-tutorial wip/text-pass wip/tidy-1023 wip/town-fix wip/town-guide-map wip/ui-controls wip/verify-ch5 wip/weak-spots wip/weapon-models wip/world-fixes
+```
+
 ## 2026-11-02 の未明: 全体監査の「高」5 件を直した
 
 全体監査は `docs/review/audit_2026-11-01.md`（五つの観点・優先度順。中 13 件・低 4 件はまだ）。直したのは高の 5 件:
@@ -16,7 +65,7 @@
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.21（`build/libs/skyabyss-0.9.21.jar`。確認表 `docs/review/playtest_0.9.21.md`（塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.20.md`（島・町の人・店）・`docs/review/playtest_0.9.19.md`（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.21（`build/libs/skyabyss-0.9.21.jar`。確認表 `docs/review/playtest_0.9.21.md`（塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すとまれに落ちる（単独でも淵の順でも通る。灰の封のチャンクを読み込むよう直し、落ちたら失敗の文に状態が出る）。`titan ground` も全部を流したときにまれに落ちる（2026-11-01 の夜: サーバーが 14 秒遅れていた所で、潮の殻が一 tick で 2 ブロック上下した。単独では 2 回とも通る）。
 
 ## 2026-11-01 の昼から夕方に入れたもの
@@ -104,7 +153,7 @@
 
 ## 0.9.20（島・町の人・店の直しの試遊版。2026-10-31）
 
-- jar `build/libs/skyabyss-0.9.20.jar`。確かめ表 `docs/review/playtest_0.9.20.md`（島・蜂の巣・町の人・店・成長の知らせ・ヒロイックの防具・封切り師の挨拶）。変更履歴はサイト（`tools/site/pages_c.py`）。新しい世界で始めること（島の地形を作り直した）。
+- jar `build/libs/skyabyss-0.9.20.jar`。確かめ表 `docs/review/playtest_0.9.21.md` の 13.1 節（島・蜂の巣・町の人・店・成長の知らせ・ヒロイックの防具・封切り師の挨拶）。変更履歴はサイト（`tools/site/pages_c.py`）。新しい世界で始めること（島の地形を作り直した）。
 - 確かめ: 自己テスト全段（失敗は `abyss escort` だけ。いつもの時間切れで、単独で流して通った）、`quick_check.sh` 全部、jar の中身と版。
 
 ## はじまりの島を要素の紹介だけに・蜂の巣の音（2026-10-31。設計 [40](design/40_rpg_world_and_start.md) の 7 章）
@@ -130,7 +179,7 @@
 
 ## 0.9.19（野の装備と封の箱の試遊版。2026-10-31）
 
-- jar `build/libs/skyabyss-0.9.19.jar`。確かめ表 `docs/review/playtest_0.9.19.md`（箱が落ちる・封切り師で開ける・旅嚢の欄・野の装備・箱にならないもの）。変更履歴はサイト（`tools/site/pages_c.py`）。
+- jar `build/libs/skyabyss-0.9.19.jar`。確かめ表 `docs/review/playtest_0.9.21.md` の 13.2 節（箱が落ちる・封切り師で開ける・旅嚢の欄・野の装備・箱にならないもの）。変更履歴はサイト（`tools/site/pages_c.py`）。
 - 版の前の直し: 自己テスト全段で落ちた 2 つ。野の装備 200 品の物語の一行（`tools/gen/wild_gear/stories.py` → `gen_wild_gear.py` が `skyabyss_wild` へ。`GearCurveSelfTest` がそこも読む）と、封切り師の会話の文を `skyabyss_fac` へ（`gen_box_text.py`。`NpcQuestSelfTest` が読む所）。月の装備・神器の由来の行の鍵も足した。
 - 確かめ: 自己テスト全段（上の 2 つのほか失敗なし。直したあと該当の段を流し直して通った）、`quick_check.sh` 全部、jar の中身と版。
 
@@ -456,7 +505,7 @@
 2. （済み）心臓の間の大広間（`trial/raid/HeartHall`、32 の 10 章、撮影 `tools/shots/heart_rooms.txt`）。
 3. （済み）試練をそろえる共通の決まり（`trial/raid/RaidPace`、32 の 9.6）。試遊で部屋ごとの声を聞いて、部屋の数値を詰める。
 4. （済み）祠を撮って確かめた（`tools/shots/shrines.txt`。四つとも町を出た道ばたの平らな広場に建つ）。
-5. （済み）0.8.1 の試遊用の jar（`build/libs/skyabyss-0.8.1.jar`、確かめ表 `docs/review/playtest_0.8.1.md`）。全体の自己テストは 189 通過、残りは直して単独で通した（`ch4 ground (sites)` は全部を続けて流すとときどき落ちる。単独では通る）。
+5. （済み）0.8.1 の試遊用の jar（`build/libs/skyabyss-0.8.1.jar`、確かめ表 `docs/review/playtest_0.9.21.md` の 13.3 節）。全体の自己テストは 189 通過、残りは直して単独で通した（`ch4 ground (sites)` は全部を続けて流すとときどき落ちる。単独では通る）。
 
 ## 2026-10-27 にやったこと（0.7.0 の試遊の声）
 

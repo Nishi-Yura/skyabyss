@@ -100,7 +100,7 @@
 
 ### 3.4 見た目
 
-素材: `docs/review/npc_roughs/`（比較シートと選定の表 `README.md`）。今のモデルは低ポリのメッシュ（15 の 9.6。語り部 A・イサナ A。`tools/install/install_lowpoly_ember_npc.py` が入れ、`LowPoly.enabled = false` で滑らかなボクセル版（15 の 4.5。語り部 B 頭巾・イサナ A つば広帽）に戻る）。語り部は頭巾の縁と白い髪の房、結んだ前掛け、イサナは広いつばの帽子とボタンの外套、背負い袋が、近くで見ても面の張りで読める。下の表は役の見た目の方針。生成: `tools/rough/npc.py`（画面の見本は `tools/rough/npc_ui_mock.py`）。
+素材: `docs/review/npc_roughs/`（比較シートと選定の表 `README.md`）。今のモデルは低ポリのメッシュ（15 の 9.6。語り部 A・イサナ A。`tools/install/install_lowpoly_ember_npc.py` が入れ、`LowPoly.enabled = false` で滑らかなボクセル版（15 の 4.5。語り部 B 頭巾・イサナ A つば広帽）に戻る）。語り部は頭巾の縁と白い髪の房、結んだ前掛け、イサナは広いつばの帽子とボタンの外套、背負い袋が、近くで見ても面の張りで読める。下の表は役の見た目の方針。生成の道具 `tools/rough/npc.py` は消した（依存の `mobs_small_v2` が無く、走らなかった）。今の geo が正本で、画面の見本は `tools/rough/npc_ui_mock.py`。
 
 | | 選んだ案 | 特徴 |
 | --- | --- | --- |
@@ -282,7 +282,7 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | `remake_ward` | `titan` | その巨神の鼓動守を編み直して渡す（持っていない人だけ、1 日 1 つまで。条件 `ward_ok` と組。素材は別に `take`） |
 
 - 結果 `facility` `{open, shop}`: 都の施設の働き（`shop` 店・`stash` 預かり所・`inn_rest` 寝台・`rumor` 噂・`perch` 巨神の子を呼ぶ・`map` 地図・`guild` ギルドの窓口・`repair` 修理。35 の 6 章）。
-- 結果 `town` `{act}`: 町のクエストと裏通りの働き（`open_cellar` 酒場の地下の奥の壁を開ける・`mapmaker` 跡地の噂・`mapmaker_draw` 地図への描き足し。どちらも都の案内人が言う）。町のクエストの限定の人（`skyabyss:guest_<人>`）の会話もこの仕組み。35 の 3.5・6.9。
+- 結果 `town` `{act}`: 町のクエストと裏通りの働き（`open_cellar` 酒場の地下の奥の壁を開ける・`guide_rumor` 跡地の噂・`guide_draw` 地図への描き足し。どちらも都の案内人が言う）。町のクエストの限定の人（`skyabyss:guest_<人>`）の会話もこの仕組み。35 の 3.5・6.9。
 - 結果 `open_board`: 板の画面を開く（NPC が受け口になる）。結果 `grave_choose`: 墓の一覧の画面を開く（11 の 6.4 節）。結果 `grave_rescue`: 画面なしで一番古い墓を救う。結果 `give` の `name` / `lore` と、品の `token`、`optional` の欄は 6.1 節。
 
 ### 4.5 ループをまたぐ会話（「覚えているような」NPC）
@@ -611,7 +611,7 @@ data/<名前空間>/quest/<名前>.json
 | `client/npc/DialogueScreen`、`NpcClient`、`NpcRenderer` | 会話の画面、受け口、描画 |
 | `client/quest/QuestLogScreen`、`QuestHud`、`QuestToast`、`QuestClient` | ログ、追跡表示、札、キー（U） |
 | データを直接直す（生成スクリプトはない） | 会話・クエスト・文・この書類の表 |
-| `tools/rough/npc.py`、`npc_ui_mock.py` | モデルのラフと書き出し、画面の見本 |
+| `tools/rough/npc_ui_mock.py` | 画面の見本（`npc.py` は消した） |
 
 - 共有ファイルへの変更は最小: `SkyAbyss.java` のコンストラクタに登録 2 行（`NpcSetup`、`QuestSetup`）。本体の lang、`sounds.json`、`ModEntities`、`Config`、伝承の JSON には触れていない。
 - 自由なモード: `quest/free/`（7.2 節）、データを直接直す（生成スクリプトはない）、`tools/gen/story/gen_message_board.py`。1 章の続き: `story/`（`StoryData`、`StorySelfTest` ほか）。序盤: `opening/`、`story/OpeningStorySelfTest`。
@@ -664,7 +664,7 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 
 - 段階 0 の人のログの「？？？」（板の伏せ方は自己テストで確かめた）。
 - サブ「鯨のかけら」「数え歌のつづき」の報告、イサナの頼み・二人でのマルチ（自己テストだけ）。
-- 話すときの右手は控えめで、正面からはほとんど見えない。もっと上げるなら `tools/rough/npc.py` の `raise_r` を上げて `--install`。
+- 話すときの右手は控えめで、正面からはほとんど見えない。もっと上げるなら geo の右腕の骨を直接直す（道具 `npc.py` は消した）。
 
 ---
 

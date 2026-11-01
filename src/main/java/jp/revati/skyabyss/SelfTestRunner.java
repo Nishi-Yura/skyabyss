@@ -383,7 +383,6 @@ public final class SelfTestRunner {
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
         // 見た目替え (docs/design/54 の 5.4)。SKYABYSS_SELFTEST_ONLY="looks"
         steps.add(Step.once("looks", jp.revati.skyabyss.endgame.LooksSelfTest::run));
-        // スキン (見た目だけの一式。仕立て屋・鐘銭・着る/外す・同期)。SKYABYSS_SELFTEST_ONLY="skins"
         // 釣り (魚の表・釣れ方・大きさ・図鑑・週の大会・店)。SKYABYSS_SELFTEST_ONLY="fishing"
         steps.add(Step.once("fishing", jp.revati.skyabyss.fishing.FishingSelfTest::run));
         steps.add(Step.once("moon (unload)", jp.revati.skyabyss.story.ch6.MoonTestLoad::unload));

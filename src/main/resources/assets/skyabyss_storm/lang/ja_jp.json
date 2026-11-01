@@ -381,5 +381,7 @@
   "message.skyabyss.raid.SR5.round": "第 %s 回 / %s",
   "message.skyabyss.raid.SR5.go": "さあ、順に踏め",
   "message.skyabyss.raid.SR5.miss": "違う。もう一度見せよう",
-  "message.skyabyss.raid.SR6.gust": "突風が来る！ 柱の陰へ"
+  "message.skyabyss.raid.SR6.gust": "突風が来る！ 柱の陰へ",
+  "gui.skyabyss.attack.scorched_warden.ring": "雷の輪",
+  "gui.skyabyss.attack.scorched_warden.leap": "外套の跳躍"
 }

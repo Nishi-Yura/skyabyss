@@ -1,11 +1,16 @@
 package jp.revati.skyabyss.endgame;
 
+import jp.revati.skyabyss.combat.BossCue;
+import jp.revati.skyabyss.music.MusicArea;
 import jp.revati.skyabyss.story.finale.mob.CloudMob;
 import jp.revati.skyabyss.story.finale.mob.CloudMobsSetup;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -26,6 +31,9 @@ public class CircuitStake extends CloudMob {
     static final double PULSE_R = 3.5;
     private static final DustParticleOptions VOID = new DustParticleOptions(new Vector3f(0.75f, 0.6f, 1.0f), 1.4f);
     private int pulseAt = PULSE / 2;
+    // 体力の帯 (近くの人に見せる。ほかのボスと同じ型)
+    private final ServerBossEvent bar = MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.circuit_stake"),
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
 
     public CircuitStake(EntityType<? extends Monster> type, Level level) {
         super(type, level, ID, "pulse", "hurt", "death");
@@ -73,9 +81,23 @@ public class CircuitStake extends CloudMob {
     @Override
     public void die(DamageSource source) {
         super.die(source);
+        bar.removeAllPlayers();
         if (level() instanceof ServerLevel sl) {
             playSound(CloudMobsSetup.STAKE_BREAK.get(), 1.4f, 0.7f);
             sl.sendParticles(VOID, getX(), getY() + 1.4, getZ(), 40, 0.5, 1.0, 0.5, 0.05);
+        }
+    }
+
+    // 帯: 体力の割合と、近く (40 ブロック) の人への出し入れ
+    private void updateBar(ServerLevel sl) {
+        bar.setProgress(Math.max(0f, getHealth() / getMaxHealth()));
+        for (ServerPlayer p : sl.players()) {
+            boolean near = p.distanceToSqr(this) < 40 * 40;
+            if (near && !bar.getPlayers().contains(p)) {
+                bar.addPlayer(p);
+            } else if (!near && bar.getPlayers().contains(p)) {
+                bar.removePlayer(p);
+            }
         }
     }
 
@@ -86,6 +108,7 @@ public class CircuitStake extends CloudMob {
         if (!(level() instanceof ServerLevel sl) || !isAlive()) {
             return;
         }
+        updateBar(sl);
         // 割れ目から漏れる淵の粒 (崩れるほど多く)
         if (tickCount % 6 == 0) {
             sl.sendParticles(VOID, getX(), getY() + 1.0 + random.nextDouble() * 1.4, getZ(), stage(), 0.35, 0.4, 0.35, 0.01);
@@ -93,6 +116,7 @@ public class CircuitStake extends CloudMob {
         pulseAt--;
         if (pulseAt == TELL) {
             playAction("pulse");
+            BossCue.send(this, "circuit_stake", "pulse", TELL);
             playSound(CloudMobsSetup.STAKE_PULSE.get(), 1.2f, 0.8f);
             // 予告: 当たる輪を地面に見せる
             for (int i = 0; i < 24; i++) {

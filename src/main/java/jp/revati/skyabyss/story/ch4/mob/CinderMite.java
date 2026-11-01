@@ -178,6 +178,11 @@ public class CinderMite extends EmberMob {
     }
 
     @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return Ch4Setup.MITE_HURT.get();
+    }
+
+    @Override
     protected SoundEvent getDeathSound() {
         return Ch4Setup.MITE_DEATH.get();
     }

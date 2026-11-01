@@ -55,7 +55,7 @@ public final class AccessoryItemRenderer extends BlockEntityWithoutLevelRenderer
                 pose.translate(0.5f, 0.5f, 0.5f);
                 pose.mulPose(Axis.YP.rotationDegrees(180f));
                 pose.scale(-1f, 1f, 1f);
-                AccessoryMeshes.draw(mesh, pose, buffers, light, overlay);
+                AccessoryMeshes.draw(mesh, pose, buffers, light, overlay, stack.getItem() instanceof jp.revati.skyabyss.item.ModGear g && g.tier() == jp.revati.skyabyss.item.GearTier.MYTHIC);
                 pose.popPose();
                 return;
             }

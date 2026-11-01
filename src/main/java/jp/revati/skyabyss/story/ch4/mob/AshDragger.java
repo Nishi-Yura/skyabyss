@@ -16,6 +16,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -66,6 +67,22 @@ public class AshDragger extends EmberMob {
 
     public boolean isBall() {
         return entityData.get(BALL);
+    }
+
+    // 声 (環境音・被弾・倒れる)。丸まる・転がる音は別 (DRAGGER_CURL / DRAGGER_ROLL)
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return Ch4Setup.DRAGGER_AMBIENT.get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return Ch4Setup.DRAGGER_HURT.get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return Ch4Setup.DRAGGER_DEATH.get();
     }
 
     @Override

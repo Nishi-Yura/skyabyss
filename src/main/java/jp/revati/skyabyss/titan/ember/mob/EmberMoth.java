@@ -337,7 +337,7 @@ public class EmberMoth extends EmberMob {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return EmberMobSetup.MOTH_DEATH.get();
+        return EmberMobSetup.MOTH_HURT.get();
     }
 
     @Override

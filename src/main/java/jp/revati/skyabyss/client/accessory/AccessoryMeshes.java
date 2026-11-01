@@ -84,10 +84,19 @@ public final class AccessoryMeshes {
 
     // 今の座標系 (描く点が原点、ブロック単位) のまま、メッシュを流す。メッシュは x 反転で焼いてある (GeckoLib 向け) ので、向きの決め方は呼ぶ側で
     public static void draw(LowPolyMesh mesh, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        draw(mesh, pose, buffers, light, overlay, false);
+    }
+
+    // mythic: 神器の装飾は光る画素が脈打つ (WeaponItemRenderer.mythicPulse と同じ拍)
+    public static void draw(LowPolyMesh mesh, PoseStack pose, MultiBufferSource buffers, int light, int overlay, boolean mythic) {
         ResourceLocation[] tex = variant(mesh.texture);
         LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0])), mesh, light, overlay, WHITE);
         if (tex[1] != null) {
             LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
+            if (mythic) {
+                int a = (int) (40 + 150 * jp.revati.skyabyss.client.weapon.WeaponItemRenderer.mythicPulse());
+                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
+            }
         }
     }
 

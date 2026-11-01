@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.finale.LampArena;
@@ -50,7 +51,7 @@ public class LampEye extends CloudMob {
     static final int ARENA_HOLD = 20;
     private static final DustParticleOptions BEAM = new DustParticleOptions(new Vector3f(1.0f, 0.9f, 0.6f), 1.4f);
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.lamp_eye"),
-            BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private int closedFor;
@@ -282,6 +283,7 @@ public class LampEye extends CloudMob {
             move = m;
             t = 0;
             lastStare = m.equals("stare");
+            BossCue.send(LampEye.this, "lamp_eye", m, m.equals("stare") ? STARE_TELL : RAIN_TELL);
             playAction(m);
             playSound(m.equals("stare") ? CloudMobsSetup.EYE_STARE.get() : CloudMobsSetup.EYE_RAIN_TELL.get(), 1.6f, 1.0f);
         }

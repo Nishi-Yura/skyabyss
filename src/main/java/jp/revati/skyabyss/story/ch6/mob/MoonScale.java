@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import jp.revati.skyabyss.combat.BossCue;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.notice.Notice;
@@ -57,7 +58,7 @@ public class MoonScale extends MoonMob {
     static final double SLAM_RADIUS = 2.8;
     static final double TILT_PUSH = 0.1;
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.moon_scale"),
-            BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private int toppleFor;
@@ -433,6 +434,7 @@ public class MoonScale extends MoonMob {
             spots.clear();
             slamAt = null;
             getNavigation().stop();
+            BossCue.send(MoonScale.this, "moon_scale", m, m.equals("sweep") ? 18 : m.equals("throw") ? 26 : 30);
             playAction(m);
         }
 

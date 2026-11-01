@@ -44,7 +44,8 @@ public final class Gathering {
     static final int RARE = 20 * 180;
     static final int MAX_ENTRIES = 4096;
 
-    private static final Map<UUID, Map<Long, Long>> READY = new HashMap<>();
+    // 人ごと。ログアウトで消える (PlayerMaps。2026-11-02 の監査: 消えずに溜まっていた)
+    private static final Map<UUID, Map<Long, Long>> READY = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
 
     private Gathering() {
     }

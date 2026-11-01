@@ -2,7 +2,6 @@ package jp.revati.skyabyss.rpg;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -24,7 +23,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // /growth                         : 自分のレベル・経験値・ステータス・記憶の断片を見る (誰でも)
-// /growth add <ステータス> [数]     : 力を振り分ける (画面を開けないときのため。誰でも)
 // /skyabyss level show <人>        : 人の成長を見る (管理者)
 // /skyabyss level set <人> <1-50>  : レベルを決める (経験値は 0 から。使いすぎた力は戻る)
 // /skyabyss level addxp <人> <量>  : 経験値を足す (レベルアップの演出も出る)
@@ -39,13 +37,7 @@ public final class GrowthCommands {
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("growth")
-                .executes(ctx -> show(ctx.getSource(), ctx.getSource().getPlayerOrException()))
-                .then(Commands.literal("add").then(Commands.argument("stat", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(Stat.values()).map(s -> s.id), b))
-                        .executes(ctx -> add(ctx, 1))
-                        .then(Commands.argument("amount", IntegerArgumentType.integer(1, GrowthRules.STAT_CAP))
-                                .executes(ctx -> add(ctx, IntegerArgumentType.getInteger(ctx, "amount")))))));
+        d.register(Commands.literal("growth").executes(ctx -> show(ctx.getSource(), ctx.getSource().getPlayerOrException())));
         d.register(Commands.literal(SkyAbyss.MODID)
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("level")
@@ -95,24 +87,6 @@ public final class GrowthCommands {
         return 1;
     }
 
-    private static int add(CommandContext<CommandSourceStack> ctx, int amount) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Stat stat = Stat.byId(StringArgumentType.getString(ctx, "stat"));
-        if (stat == null) {
-            player.sendSystemMessage(ModText.deny("message.skyabyss.growth.unknown_stat"));
-            return 0;
-        }
-        int[] add = new int[Stat.values().length];
-        add[stat.ordinal()] = amount;
-        if (!Growth.allocate(player, add)) {
-            player.sendSystemMessage(ModText.deny("message.skyabyss.growth.allocate_failed"));
-            return 0;
-        }
-        player.sendSystemMessage(ModText.progress("message.skyabyss.growth.allocated",
-                Component.translatable(stat.nameKey()), Growth.get(player).stat(stat)));
-        return 1;
-    }
-
     private static int giveFragment(CommandContext<CommandSourceStack> ctx, int count) throws CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "id");
@@ -144,7 +118,6 @@ public final class GrowthCommands {
                     .append(Component.literal(" " + d.stat(s) + "   ").withStyle(ChatFormatting.WHITE));
         }
         source.sendSystemMessage(stats);
-        source.sendSystemMessage(ModText.hint("message.skyabyss.growth.points", d.unspentPoints()));
         source.sendSystemMessage(ModText.hint("message.skyabyss.growth.effects",
                 pct(GrowthRules.meleeMultiplier(d.stat(Stat.STRENGTH))),
                 pct(GrowthRules.moveMultiplier(d.stat(Stat.AGILITY))),

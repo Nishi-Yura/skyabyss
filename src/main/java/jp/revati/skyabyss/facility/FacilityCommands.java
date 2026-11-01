@@ -28,7 +28,6 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss facility records                    砦の老兵の試練の記録を開く
 //   /skyabyss facility dummy                      足もとのまわり 8 の木偶の柱に的をかぶせる (撮影・試し用)
 //   /skyabyss facility keyroom offer|return       鍵の間に欠片を納める / 返してもらう (祭司と同じ)
-//   /skyabyss facility mapcopy                    書庫番の地図の写し (祭司・書庫番の働きと同じ)
 //   /skyabyss facility respec <skills|stats> [coins]   師範の振り直し
 //   /skyabyss facility brew                       薬師の醸造の手ほどき (四章の決まりのまま)
 //   /skyabyss facility trade [demo]               取引所の画面を番の前と同じに開く (出す・申請ができる。だれでもの /trade は番の前でない)。

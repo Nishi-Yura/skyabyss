@@ -86,5 +86,37 @@
         "volume": 1.0
       }
     ]
+  },
+  "ash_dragger_ambient": {
+    "subtitle": "subtitles.skyabyss_ch4.ash_dragger_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_dragger_ambient"
+      }
+    ]
+  },
+  "ash_dragger_hurt": {
+    "subtitle": "subtitles.skyabyss_ch4.ash_dragger_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_dragger_hurt"
+      }
+    ]
+  },
+  "ash_dragger_death": {
+    "subtitle": "subtitles.skyabyss_ch4.ash_dragger_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_dragger_death"
+      }
+    ]
+  },
+  "cinder_mite_hurt": {
+    "subtitle": "subtitles.skyabyss_ch4.cinder_mite_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/cinder_mite_hurt"
+      }
+    ]
   }
 }

@@ -35,8 +35,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 図鑑の完成の報い (docs/design/54 の 3.4)。
 //   装備の図鑑: 巨神ごとの装備の表 (TitanGearSets の図鑑の品。手にした記録は TitanMemoryData.owned)。一つの巨神の表をすべて手にすると
 //               鐘銭 SET_COINS と称号「〜の装備をそろえた」(岩鯨・潮殻・雷翼・余燼)。表のあるすべての巨神 (深淵・月を含む) で「図鑑を満たした者」
-//   敵の図鑑: この MOD の敵を倒すと記す (人ごと。死んでも消えない)。数えるのは土地の湧きの表 (RegionSpawner) と名のある強敵の敵。
-//             すべて倒すと鐘銭 FOES_COINS と称号「大陸の敵を知る者」
+//   敵の図鑑: この MOD の敵を倒すと記す (人ごと。死んでも消えない)。数えるのはこの MOD の MONSTER の型すべて (大陸・背・深淵・月・雲海・塔。foes)。
+//             報いは「大陸の敵」(土地の湧きの表と名のある強敵。continentFoes) をすべて倒したとき: 鐘銭 FOES_COINS と称号「大陸の敵を知る者」
+//             (2026-11-02 の監査: 前は大陸の 32 種しか数えておらず、終盤の敵が図鑑に載らなかった)
 //   見る: /skyabyss_codex (チャットに巨神ごとの数と敵の数)。旅帳の案内にも書く。見た目 (旗・名札の色) は形を見せてから足す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Codex {
@@ -70,8 +71,20 @@ public final class Codex {
     }
 
     // ---------------------------------------------------------------- 敵の図鑑
-    // 数える敵 (土地の湧きの表と名のある強敵。この MOD の敵だけ)
+    // 数える敵: この MOD の MONSTER の型すべて (大陸の敵を先に、ほかは登録の順)
     public static Set<String> foes() {
+        Set<String> out = new LinkedHashSet<>(continentFoes());
+        for (net.minecraft.world.entity.EntityType<?> t : BuiltInRegistries.ENTITY_TYPE) {
+            ResourceLocation k = BuiltInRegistries.ENTITY_TYPE.getKey(t);
+            if (k.getNamespace().equals(SkyAbyss.MODID) && t.getCategory() == net.minecraft.world.entity.MobCategory.MONSTER) {
+                out.add(k.toString());
+            }
+        }
+        return out;
+    }
+
+    // 大陸の敵 (土地の湧きの表と名のある強敵。報いの範囲)
+    public static Set<String> continentFoes() {
         Set<String> out = new LinkedHashSet<>();
         for (var region : RegionSpawner.table()) {
             for (var e : region) {
@@ -121,6 +134,11 @@ public final class Codex {
     public static int foesDefeated(ServerPlayer p) {
         Set<String> seen = defeated(p);
         return (int) foes().stream().filter(seen::contains).count();
+    }
+
+    public static int continentDefeated(ServerPlayer p) {
+        Set<String> seen = defeated(p);
+        return (int) continentFoes().stream().filter(seen::contains).count();
     }
 
     @SubscribeEvent
@@ -173,7 +191,7 @@ public final class Codex {
             changed = true;
             Notice.unlock(p, "message.skyabyss.codex.all_done");
         }
-        Set<String> all = foes();
+        Set<String> all = continentFoes();
         if (!all.isEmpty() && defeated(p).containsAll(all) && d.add("foes:all")) {
             changed = true;
             Coins.give(p, FOES_COINS);
@@ -217,6 +235,9 @@ public final class Codex {
             p.sendSystemMessage(Component.translatable("message.skyabyss.codex.set_line", Component.translatable("endgame.skyabyss.codex.set." + set.titan), n, all.size())
                     .withStyle(n >= all.size() ? ChatFormatting.AQUA : ChatFormatting.WHITE));
         }
+        int cont = continentFoes().size();
+        int contSeen = continentDefeated(p);
+        p.sendSystemMessage(Component.translatable("message.skyabyss.codex.continent_line", contSeen, cont).withStyle(contSeen >= cont ? ChatFormatting.AQUA : ChatFormatting.WHITE));
         int foes = foes().size();
         int seen = foesDefeated(p);
         p.sendSystemMessage(Component.translatable("message.skyabyss.codex.foes_line", seen, foes).withStyle(seen >= foes ? ChatFormatting.AQUA : ChatFormatting.WHITE));

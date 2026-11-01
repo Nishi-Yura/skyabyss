@@ -208,5 +208,12 @@
   "sign.skyabyss.ch4_ash_3.1": "The peak",
   "sign.skyabyss.ch4_ash_3.2": "never sleeps.",
   "sign.skyabyss.ch4_ash_3.3": "It counts",
-  "sign.skyabyss.ch4_ash_3.4": "the smiths"
+  "sign.skyabyss.ch4_ash_3.4": "the smiths",
+  "subtitles.skyabyss_ch4.ash_dragger_ambient": "Ash Dragger stirs",
+  "subtitles.skyabyss_ch4.ash_dragger_hurt": "Ash Dragger recoils",
+  "subtitles.skyabyss_ch4.ash_dragger_death": "Ash Dragger collapses",
+  "subtitles.skyabyss_ch4.cinder_mite_hurt": "Cinder Mite recoils",
+  "gui.skyabyss.attack.elder_thrall.rake": "Ember Rake",
+  "gui.skyabyss.attack.elder_thrall.crack": "Crack",
+  "gui.skyabyss.attack.elder_thrall.wave": "Heat Wave"
 }

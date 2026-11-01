@@ -109,12 +109,12 @@ FAC = ROOT + "assets/skyabyss_fac/lang/"
 for name, d in (("ja_jp", ja), ("en_us", en)):
     fac_keys = {k: v for k, v in d.items() if k.startswith("dialogue.skyabyss.attendant_box_opener") or k.startswith("entity.skyabyss.attendant")}
     box = {k: v for k, v in d.items() if k not in fac_keys}
-    with open(LANG + name + ".json", "w", encoding="utf-8") as f:
+    with open(LANG + name + ".json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(box, f, ensure_ascii=False, indent=2)
         f.write("\n")
     fac = json.load(open(FAC + name + ".json", encoding="utf-8"))
     fac.update(fac_keys)
-    with open(FAC + name + ".json", "w", encoding="utf-8") as f:
+    with open(FAC + name + ".json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(fac, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
@@ -140,7 +140,7 @@ for town in TOWN_LINES:
     entries.append({"if": {"type": "in_town", "town": town}, "node": "menu_" + town})
 entries.append({"node": "menu"})
 dialogue = {"npc": "skyabyss:attendant_box_opener", "entries": entries, "nodes": nodes}
-with open(ROOT + "data/skyabyss/dialogue/attendant_box_opener.json", "w", encoding="utf-8") as f:
+with open(ROOT + "data/skyabyss/dialogue/attendant_box_opener.json", "w", encoding="utf-8", newline="\n") as f:
     json.dump(dialogue, f, ensure_ascii=False, indent=2)
     f.write("\n")
 print(len(ja), "keys")

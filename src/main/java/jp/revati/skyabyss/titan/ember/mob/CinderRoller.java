@@ -399,6 +399,11 @@ public class CinderRoller extends EmberMob {
     // ---------------------------------------------------------------- 音
 
     @Override
+    protected SoundEvent getAmbientSound() {
+        return EmberMobSetup.ROLLER_AMBIENT.get();
+    }
+
+    @Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return EmberMobSetup.ROLLER_HURT.get();
     }

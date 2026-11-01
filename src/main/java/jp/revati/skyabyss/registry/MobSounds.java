@@ -35,6 +35,10 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_WHALE_HEART_AMBIENT = register("stone_whale_heart_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_WHALE_HEART_HURT = register("stone_whale_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_WHALE_HEART_DEATH = register("stone_whale_heart_death");
+    // 三つの心臓の倒れる声 (tools/gen/sound/gen_mob_voices.py。素材は voices/<心臓>_death.ogg)
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_HEART_VOICE_DEATH = register("ember_heart_voice_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_HEART_VOICE_DEATH = register("storm_heart_voice_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_HEART_VOICE_DEATH = register("tide_heart_voice_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_HEART_HURT = register("ember_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> STORM_HEART_HURT = register("storm_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_HEART_HURT = register("tide_heart_hurt");

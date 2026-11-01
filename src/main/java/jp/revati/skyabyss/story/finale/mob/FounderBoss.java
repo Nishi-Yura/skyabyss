@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.finale.founder.FounderArena;
@@ -18,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -65,7 +65,7 @@ public class FounderBoss extends CloudMob {
     static final DustParticleOptions MOONLIGHT = new DustParticleOptions(new Vector3f(0.72f, 0.82f, 1.0f), 1.6f);
 
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.founder"),
-            BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private int finalFor = -1;
@@ -603,6 +603,16 @@ public class FounderBoss extends CloudMob {
             setYBodyRot(getYRot());
             setYHeadRot(getYRot());
             getNavigation().stop();
+            BossCue.send(FounderBoss.this, "founder", m, switch (m) {
+                case "thrust" -> 20;
+                case "sweep" -> 16;
+                case "dash" -> 14;
+                case "listen" -> 24;
+                case "spin" -> 24;
+                case "beat" -> 20;
+                case "moon", "lid" -> 40;
+                default -> 30;
+            });
             playAction(m);
             if (m.equals("thrust")) {
                 lastPole = 1;
@@ -976,16 +986,6 @@ public class FounderBoss extends CloudMob {
         public void stop() {
             move = "";
         }
-    }
-
-    @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.AMETHYST_BLOCK_HIT;
-    }
-
-    @Override
-    protected SoundEvent getDeathSound() {
-        return SoundEvents.BELL_RESONATE;
     }
 
     // 開発用 (FounderArena のコマンド): 段を進める・歌の一行をすぐ始める

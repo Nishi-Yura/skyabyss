@@ -7,6 +7,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.rpg.GrowthRewards;
 import jp.revati.skyabyss.story.ch4.Ch4Setup;
+import jp.revati.skyabyss.entity.MobVoices;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -191,6 +192,19 @@ public final class MoonMobsSetup {
 
     private static <T extends Mob> DeferredItem<Item> egg(String name, Supplier<? extends EntityType<T>> type, int bg, int fg) {
         return ITEMS.register(name, () -> new DeferredSpawnEggItem(type, bg, fg, new Item.Properties()));
+    }
+
+    // 声 (環境音・被弾・倒れる)。素材は tools/gen/sound/gen_mob_voices.py。名前は <種>_ambient / _hurt / _death。AbyssMobB が MobVoices で引く
+    static {
+        for (String id : List.of("dust_crawler", "shell_hare", "shadow_stitcher", "shadow_embracer", "moon_leaper", "push_stone",
+                "cliff_creeper", "moon_scale", "light_swarm", "shade_strider", "mirror_bearer", "full_keeper", "rift_wing",
+                "rift_armor", "rift_serpent", "waning_blade", "moon_core")) {
+            MobVoices.put(id, voice(id));
+        }
+    }
+
+    private static MobVoices.Voice voice(String id) {
+        return new MobVoices.Voice(sound(id + "_ambient"), sound(id + "_hurt"), sound(id + "_death"));
     }
 
     private static DeferredHolder<SoundEvent, SoundEvent> sound(String name) {

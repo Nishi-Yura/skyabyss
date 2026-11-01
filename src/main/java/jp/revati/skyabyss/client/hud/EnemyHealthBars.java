@@ -36,6 +36,10 @@ public final class EnemyHealthBars {
     static final float HEIGHT = 0.1f;
     // 遅れの帯 (体の id → 表示中の割合)
     private static final java.util.Map<Integer, Float> LAG = new java.util.HashMap<>();
+    // 近くの敵の一覧は tick に一度だけ探す (毎フレーム探すと敵の多い所で描画が重い。2026-11-02 の監査)
+    private static java.util.List<LivingEntity> near = java.util.List.of();
+    private static long nearTick = Long.MIN_VALUE;
+    private static ClientLevel nearLevel;
     private static long lagTick;
 
     private EnemyHealthBars() {
@@ -52,8 +56,13 @@ public final class EnemyHealthBars {
         if (level == null || mc.player == null || mc.options.hideGui || !Config.ENEMY_HEALTH_BARS.get()) {
             return;
         }
-        var list = level.getEntitiesOfClass(LivingEntity.class, new AABB(mc.player.blockPosition()).inflate(RANGE),
-                e -> e instanceof Enemy);
+        long tick = level.getGameTime();
+        if (tick != nearTick || nearLevel != level) {
+            nearTick = tick;
+            nearLevel = level;
+            near = level.getEntitiesOfClass(LivingEntity.class, new AABB(mc.player.blockPosition()).inflate(RANGE), e -> e instanceof Enemy);
+        }
+        var list = near;
         if (list.isEmpty()) {
             return;
         }

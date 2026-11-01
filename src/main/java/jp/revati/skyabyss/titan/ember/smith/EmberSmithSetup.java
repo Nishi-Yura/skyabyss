@@ -42,6 +42,7 @@ public final class EmberSmithSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> RAGE = sound(EmberIds.SOUND_SMITH_RAGE);
     public static final DeferredHolder<SoundEvent, SoundEvent> HURT = sound(EmberIds.SOUND_SMITH_HURT);
     public static final DeferredHolder<SoundEvent, SoundEvent> DEATH = sound(EmberIds.SOUND_SMITH_DEATH);
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT = sound(EmberIds.SOUND_SMITH_AMBIENT);
 
     public static final String[] SOUND_NAMES = {EmberIds.SOUND_SMITH_SLAM, EmberIds.SOUND_SMITH_INHALE, EmberIds.SOUND_SMITH_BLAST,
             EmberIds.SOUND_SMITH_SPARKS, EmberIds.SOUND_SMITH_RAGE, EmberIds.SOUND_SMITH_HURT, EmberIds.SOUND_SMITH_DEATH};

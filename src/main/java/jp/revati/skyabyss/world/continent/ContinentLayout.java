@@ -169,19 +169,25 @@ public final class ContinentLayout {
         }
     }
 
-    public static synchronized ContinentLayout get() {
-        if (instance == null) {
-            String path = "/data/skyabyss/continent/layout.json";
-            try (InputStream in = ContinentLayout.class.getResourceAsStream(path)) {
-                if (in == null) {
-                    throw new IllegalStateException("missing " + path);
-                }
-                instance = new ContinentLayout(JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject());
-            } catch (java.io.IOException e) {
-                throw new IllegalStateException("cannot read " + path, e);
+    // 読み込みは一度だけ (holder。ロックの取り合いをなくす。2026-11-02 の監査)
+    private static final class Holder {
+        static final ContinentLayout I = load();
+    }
+
+    private static ContinentLayout load() {
+        String path = "/data/skyabyss/continent/layout.json";
+        try (InputStream in = ContinentLayout.class.getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalStateException("missing " + path);
             }
+            return new ContinentLayout(JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject());
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("cannot read " + path, e);
         }
-        return instance;
+    }
+
+    public static ContinentLayout get() {
+        return Holder.I;
     }
 
     public BlockPos capital() {

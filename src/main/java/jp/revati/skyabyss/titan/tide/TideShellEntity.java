@@ -785,7 +785,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         double dy = Mth.clamp(want - getY(), -rate, r);
         double ny = getY() + dy;
         if (ny < groundNow) {
-            ny = groundNow;
+            // 地形の下限へは一 tick に最大 0.5 (秒 10 ブロック) ずつ寄せる (読み込みの遅れで下限が急に上がったとき、一 tick で跳ねないように。2026-11-02)
+            ny = Math.min(groundNow, getY() + Math.max(0.5, r));
         }
         ny = Math.min(ny, cap);
         if (Math.abs(ny - getY()) > 1e-4) {

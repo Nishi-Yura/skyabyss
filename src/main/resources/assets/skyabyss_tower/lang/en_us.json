@@ -207,5 +207,17 @@
   "item.skyabyss.tower_halo_chestplate.story": "The robe's feathers fell from the master's halo.",
   "item.skyabyss.tower_halo_leggings.story": "The words of prayer are sewn into the hem.",
   "item.skyabyss.tower_halo_boots.story": "Walk on light and your feet lift a little.",
-  "entity.skyabyss.attendant.tower_keeper": "Tower Keeper"
+  "entity.skyabyss.attendant.tower_keeper": "Tower Keeper",
+  "gui.skyabyss.attack.tower_master.rake": "Right Hand Rake",
+  "gui.skyabyss.attack.tower_master.flense": "Left Hand Flense",
+  "gui.skyabyss.attack.tower_master.clap": "Clap",
+  "gui.skyabyss.attack.tower_master.breath": "Abyss Breath",
+  "gui.skyabyss.attack.tower_master.beams": "Three Sigil Beams",
+  "gui.skyabyss.attack.tower_master.sigil": "Pursuing Sigil",
+  "gui.skyabyss.attack.tower_master.exhort": "Exhorting Cry",
+  "gui.skyabyss.attack.tower_master.stars": "Starfall",
+  "gui.skyabyss.attack.tower_master.arrows": "Three Heaven Arrows",
+  "gui.skyabyss.attack.tower_master.kids": "Chain Spawn",
+  "gui.skyabyss.attack.tower_master.moon": "Falling Moon",
+  "gui.skyabyss.attack.tower_master.swarm": "Heaven and Abyss Swarm"
 }

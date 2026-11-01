@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.party.Downed;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
@@ -289,6 +290,12 @@ public final class TowerFight {
         last = m;
         int len = 40;
         double k = stokeMult();
+        BossCue.send(master, "tower_master", m, switch (m) {
+            case "beams" -> 40;
+            case "exhort" -> 20;
+            case "clap" -> 30;
+            default -> 30;
+        });
         switch (m) {
             case "rake" -> {
                 master.playAction("rake");
@@ -431,6 +438,7 @@ public final class TowerFight {
     // ---------------------------------------------------------------- 70%: 天と淵の群れと、主を癒す繋ぎ手
     void swarm(ServerLevel level, List<ServerPlayer> here) {
         swarmDone = true;
+        BossCue.send(master, "tower_master", "swarm", 40);
         int count = Math.min(12, 3 + n);
         for (int i = 0; i < count; i++) {
             EntityType<? extends Mob> type = i % 2 == 0 ? CloudMobsSetup.FALLEN_PLUME.get() : CloudMobsSetup.BELL_MOURNER.get();
@@ -492,6 +500,7 @@ public final class TowerFight {
     void startMoon(ServerLevel level, long now, List<ServerPlayer> here) {
         master.setShielded(true);
         master.playAction("moon");
+        BossCue.send(master, "tower_master", "moon", 80);
         move = "moon";
         moveEnd = now + 80;
         zones.clear();

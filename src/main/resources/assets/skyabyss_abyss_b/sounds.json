@@ -218,5 +218,221 @@
         "volume": 1.0
       }
     ]
+  },
+  "ash_trail_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ash_trail_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_trail_ambient"
+      }
+    ]
+  },
+  "ash_trail_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ash_trail_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_trail_hurt"
+      }
+    ]
+  },
+  "ash_trail_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ash_trail_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ash_trail_death"
+      }
+    ]
+  },
+  "ceiling_walker_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ceiling_walker_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ceiling_walker_ambient"
+      }
+    ]
+  },
+  "ceiling_walker_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ceiling_walker_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ceiling_walker_hurt"
+      }
+    ]
+  },
+  "ceiling_walker_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ceiling_walker_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ceiling_walker_death"
+      }
+    ]
+  },
+  "ember_keeper_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ember_keeper_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ember_keeper_ambient"
+      }
+    ]
+  },
+  "ember_keeper_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ember_keeper_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ember_keeper_hurt"
+      }
+    ]
+  },
+  "ember_keeper_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.ember_keeper_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/ember_keeper_death"
+      }
+    ]
+  },
+  "heartbeat_mimic_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.heartbeat_mimic_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/heartbeat_mimic_ambient"
+      }
+    ]
+  },
+  "heartbeat_mimic_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.heartbeat_mimic_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/heartbeat_mimic_hurt"
+      }
+    ]
+  },
+  "heartbeat_mimic_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.heartbeat_mimic_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/heartbeat_mimic_death"
+      }
+    ]
+  },
+  "lamp_eater_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.lamp_eater_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/lamp_eater_ambient"
+      }
+    ]
+  },
+  "lamp_eater_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.lamp_eater_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/lamp_eater_hurt"
+      }
+    ]
+  },
+  "lamp_eater_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.lamp_eater_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/lamp_eater_death"
+      }
+    ]
+  },
+  "nameless_shape_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.nameless_shape_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/nameless_shape_ambient"
+      }
+    ]
+  },
+  "nameless_shape_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.nameless_shape_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/nameless_shape_hurt"
+      }
+    ]
+  },
+  "nameless_shape_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.nameless_shape_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/nameless_shape_death"
+      }
+    ]
+  },
+  "past_shadow_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.past_shadow_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/past_shadow_ambient"
+      }
+    ]
+  },
+  "past_shadow_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.past_shadow_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/past_shadow_hurt"
+      }
+    ]
+  },
+  "past_shadow_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.past_shadow_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/past_shadow_death"
+      }
+    ]
+  },
+  "rope_hanger_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.rope_hanger_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/rope_hanger_ambient"
+      }
+    ]
+  },
+  "rope_hanger_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.rope_hanger_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/rope_hanger_hurt"
+      }
+    ]
+  },
+  "rope_hanger_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.rope_hanger_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/rope_hanger_death"
+      }
+    ]
+  },
+  "soot_child_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_b.soot_child_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/soot_child_ambient"
+      }
+    ]
+  },
+  "soot_child_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_b.soot_child_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/soot_child_hurt"
+      }
+    ]
+  },
+  "soot_child_death": {
+    "subtitle": "subtitles.skyabyss_abyss_b.soot_child_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/soot_child_death"
+      }
+    ]
   }
 }

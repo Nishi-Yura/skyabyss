@@ -136,22 +136,10 @@ public final class GrowthSelfTest {
         check(f, d.level == GrowthRules.MAX_LEVEL && d.xp == 0, "overflow should stop at the cap with an empty bar");
         check(f, Growth.addXpRaw(d, 500) == 0 && d.xp == 0, "xp at the cap should be discarded");
 
-        // ---------------------------------------------------------------- 振り分けの検め
+        // ---------------------------------------------------------------- 基礎の検め
         d = new GrowthData();
-        d.level = 6; // 15 点
-        check(f, !Growth.canAllocate(d, new int[] {0, 0, 0, 0}), "an empty allocation was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {-1, 2, 0, 0}), "a negative allocation was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {16, 0, 0, 0}), "an allocation over the points was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {1, 0}), "a short allocation was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {5, 5, 3, 2}), "an allocation was accepted (stats come from the tree)");
-        // 巨大な値で int があふれても通らない (受け取るのは改造されうるクライアントの値)
-        int keep = d.stats[0];
-        d.stats[0] = 1;
-        check(f, !Growth.canAllocate(d, new int[] {Integer.MAX_VALUE, Integer.MAX_VALUE, 0, 3}), "an overflowing allocation was accepted");
-        d.stats[0] = keep;
         d.level = 50;
         d.stats[0] = GrowthRules.STAT_CAP;
-        check(f, !Growth.canAllocate(d, new int[] {1, 0, 0, 0}), "an allocation over the stat cap was accepted");
         // 基礎は木から写す値なので、レベルを下げられても検めでは消さない
         d.level = 3;
         d.sanitize();
@@ -177,15 +165,6 @@ public final class GrowthSelfTest {
                 "random rounding is wrong");
         checkOpeningPace(f);
         ServerLevel overworld = server.overworld();
-        GrowthData budget = new GrowthData();
-        // 日ごとの上限は 100 (00 の 26)
-        check(f, GrowthRules.VANILLA_DAILY == 100, "vanilla daily cap is " + GrowthRules.VANILLA_DAILY + ", expected 100");
-        // 上限 (VANILLA_DAILY) の 10 手前まで使い、次の 20 は 10 が満額・10 が疲れ
-        double first = GrowthRewards.vanillaBudget(overworld, budget, GrowthRules.VANILLA_DAILY - 10);
-        double second = GrowthRewards.vanillaBudget(overworld, budget, 20);
-        check(f, first == GrowthRules.VANILLA_DAILY - 10 && Math.abs(second - (10 + 10 * GrowthRules.VANILLA_TIRED)) < 1e-9,
-                "vanilla daily budget is wrong: " + first + ", " + second);
-
         // ---------------------------------------------------------------- 保存 (NBT) と同期のコーデック
         GrowthData a = sample();
         GrowthData b = new GrowthData();
@@ -319,8 +298,6 @@ public final class GrowthSelfTest {
         a.fragmentCapacity = 14;
         a.discoveries.add("biome:minecraft:plains");
         a.discoveries.add("first:skyabyss:heart");
-        a.vanillaDay = 4;
-        a.vanillaToday = 77;
         a.statRespecs = 3;
         return a;
     }

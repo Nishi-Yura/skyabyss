@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.finale.BellArena;
@@ -47,7 +48,7 @@ public class LastBellkeeper extends CloudMob {
     static final int SILENCE_TELL = 24;
     static final int SILENCE_EVERY = 300;
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.last_bellkeeper"),
-            BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private int sinceSilence;
@@ -236,6 +237,7 @@ public class LastBellkeeper extends CloudMob {
             t = 0;
             hit.clear();
             lastWave = m.equals("wave");
+            BossCue.send(LastBellkeeper.this, "last_bellkeeper", m, m.equals("slam") ? SLAM_TELL : m.equals("wave") ? WAVE_TELL : SILENCE_TELL);
             playAction(m);
             switch (m) {
                 case "slam" -> playSound(CloudMobsSetup.KEEPER_SLAM_TELL.get(), 1.6f, 0.9f);

@@ -3,6 +3,7 @@ package jp.revati.skyabyss.story.finale.mob;
 import java.util.EnumSet;
 import java.util.List;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.party.Downed;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
@@ -53,7 +54,7 @@ public class PilgrimMoon extends CloudMob {
     static final int FALL_EVERY = 500;
     public static final int FALL_TELL = 100;
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.pilgrim_moon"),
-            BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private long fallAt = Long.MAX_VALUE;
@@ -255,6 +256,7 @@ public class PilgrimMoon extends CloudMob {
         private void begin(String m) {
             move = m;
             t = 0;
+            BossCue.send(PilgrimMoon.this, "pilgrim_moon", m, m.equals("pull") ? PULL_TELL : m.equals("sweep") ? SWEEP_TELL : m.equals("fall") ? FALL_TELL : 40);
             playAction(m);
             playSound(switch (m) {
                 case "pull" -> CloudMobsSetup.MOON_PULL_TELL.get();

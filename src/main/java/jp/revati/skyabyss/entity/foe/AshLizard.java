@@ -53,6 +53,7 @@ public class AshLizard extends RegionBoss {
             move = SWEEP;
             lastSweep = tickCount;
             begin(target, "sweep");
+            cue("ash_lizard", "sweep", SWEEP_WARN);
             Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), SWEEP_IN, SWEEP_OUT))
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.ASH_LIZARD_SWEEP.get(), 1.4f, 1.0f)
@@ -69,6 +70,7 @@ public class AshLizard extends RegionBoss {
         if (distance <= 3.2) {
             move = BITE;
             begin(target, "bite");
+            cue("ash_lizard", "bite", BITE_WARN);
             Vec3 f = forward();
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), 4.2, Math.toRadians(40)))
                     .floor(getY()).warn(BITE_WARN).danger().owner(this).target(target)
@@ -82,6 +84,7 @@ public class AshLizard extends RegionBoss {
         }
         move = BREATH;
         begin(target, "breath");
+        cue("ash_lizard", "breath", BREATH_WARN);
         Vec3 f = forward();
         Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(30)))
                 .floor(getY()).warn(BREATH_WARN).danger().owner(this).target(target)

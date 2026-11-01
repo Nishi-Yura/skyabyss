@@ -31,6 +31,29 @@ BOSS = {
     "tide_beckoner": ((63, 180, 174, 255), (134, 228, 218, 255)),
     "raiju": ((236, 200, 70, 255), (130, 190, 255, 255)),
     "ash_smith": ((190, 96, 56, 255), (255, 150, 60, 255)),
+    "full_keeper": ((176, 196, 222, 255), (150, 186, 236, 255)),
+    "moon_core": ((176, 196, 222, 255), (150, 186, 236, 255)),
+    "moon_scale": ((176, 196, 222, 255), (150, 186, 236, 255)),
+    "shadow_embracer": ((176, 196, 222, 255), (150, 186, 236, 255)),
+    "waning_blade": ((176, 196, 222, 255), (150, 186, 236, 255)),
+    "lamp_eye": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "last_bellkeeper": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "pilgrim_eye": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "pilgrim_moon": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "pilgrim_plume": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "rewinder": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "founder": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "pilgrim_hand": ((236, 224, 190, 255), (232, 196, 96, 255)),
+    "tower_master": ((240, 220, 150, 255), (58, 40, 82, 255)),
+    "circuit_stake": ((150, 170, 196, 255), (208, 220, 240, 255)),
+    "scorched_warden": ((214, 140, 72, 255), (250, 196, 84, 255)),
+    "elder_thrall": ((206, 88, 44, 255), (255, 140, 70, 255)),
+    "shore_warden": ((196, 236, 230, 255), (110, 216, 204, 255)),
+    "meadow": ((150, 166, 96, 255), (196, 214, 120, 255)),
+    "rock_boar": ((160, 150, 136, 255), (206, 198, 180, 255)),
+    "tide_crab": ((92, 160, 150, 255), (150, 220, 206, 255)),
+    "storm_ram": ((176, 134, 60, 255), (232, 190, 100, 255)),
+    "ash_lizard": ((140, 70, 44, 255), (250, 190, 140, 255)),
 }
 
 
@@ -542,6 +565,49 @@ def g_spines(c):  # 深淵の棘 (輪の内側へ向く長い棘)
     c.p(8, 8, WHITE)
 
 
+def g_crescent(c):  # 三日月 (弧の刃)
+    c.arc(8, 8, 5.5, 90, 270)
+    c.arc(9, 8, 4, 110, 250, c.acc)
+
+
+def g_eye(c):  # 目 (凝視)
+    c.line((2, 8), (8, 4))
+    c.line((8, 4), (13, 8), c.acc)
+    c.line((13, 8), (8, 12), c.acc)
+    c.line((8, 12), (2, 8))
+    c.disc(8, 8, 2, c.acc)
+    c.p(8, 8, WHITE)
+
+
+def g_ringeye(c):  # 輪の中の目
+    c.arc(8, 8, 5.5, 0, 360, c.acc)
+    c.line((4, 8), (8, 6))
+    c.line((8, 6), (12, 8))
+    c.line((12, 8), (8, 10))
+    c.line((8, 10), (4, 8))
+    c.p(8, 8, WHITE)
+
+
+def g_bell(c):  # 鐘
+    c.poly([(5, 5), (11, 5), (12, 11), (4, 11)], CREAM)
+    c.line((4, 12), (12, 12), c.acc)
+    c.p(8, 3, c.acc)
+
+
+def g_hand(c):  # 手のひら
+    c.disc(8, 10, 3, CREAM)
+    c.line((5, 9), (4, 4), c.acc)
+    c.line((7, 8), (7, 3), c.acc)
+    c.line((9, 8), (9, 3), c.acc)
+    c.line((11, 9), (12, 4), c.acc)
+    c.line((4, 11), (2, 9), c.acc)
+
+
+def g_flag(c):  # 旗
+    c.line((5, 3), (5, 13), CREAM)
+    c.poly([(6, 3), (12, 5), (6, 8)], c.acc)
+
+
 GLYPHS = {
     "wave": g_wave, "ring": g_ring, "spike": g_spike, "spike_ring": g_spike_ring, "beam": g_beam, "claw": g_claw, "roar": g_roar,
     "breath": g_breath, "slam": g_slam, "rush": g_rush, "leap": g_leap, "rain": g_rain, "chain": g_chain, "shell": g_shell,
@@ -553,6 +619,7 @@ GLYPHS = {
     "gale": g_gale, "pellet": g_pellet, "veil": g_veil, "burrow": g_burrow, "beckon": g_beckon, "moon": g_moon, "spring": g_spring,
     "descend": g_descend, "return": g_return, "pounce": g_pounce,
     "fans": g_fans, "undertow": g_undertow, "flood_ebb": g_flood_ebb, "spines": g_spines,
+    "crescent": g_crescent, "eye": g_eye, "ringeye": g_ringeye, "bell": g_bell, "hand": g_hand, "flag": g_flag,
 }
 
 # (ボス, 技) -> 形。技の一覧 (lang) と食い違えば止まる
@@ -584,6 +651,34 @@ ASSIGN = {
     ("raiju", "roar"): "roar", ("raiju", "return"): "return",
     ("ash_smith", "slam"): "slam", ("ash_smith", "breath"): "breath", ("ash_smith", "quench"): "quench",
     ("ash_smith", "sparks"): "sparks", ("ash_smith", "rage"): "rage",
+    ("full_keeper", "release"): "ring", ("full_keeper", "sweep"): "swing", ("full_keeper", "orbs"): "orb",
+    ("moon_core", "sweep"): "wave", ("moon_core", "rain"): "rain", ("moon_core", "rewind"): "whirl",
+    ("moon_core", "echo"): "veil", ("moon_core", "drop"): "moon", ("moon_scale", "sweep"): "swing",
+    ("moon_scale", "slam"): "stomp", ("moon_scale", "tilt"): "down", ("moon_scale", "throw"): "descend",
+    ("shadow_embracer", "sink"): "burrow", ("shadow_embracer", "grab"): "claw", ("shadow_embracer", "throw"): "volley",
+    ("shadow_embracer", "wave"): "wave", ("waning_blade", "slash"): "crescent", ("waning_blade", "thrust"): "thrust",
+    ("waning_blade", "wave"): "chase", ("lamp_eye", "stare"): "eye", ("lamp_eye", "rain"): "rain",
+    ("pilgrim_eye", "stare"): "ringeye", ("pilgrim_eye", "rain"): "sparks", ("last_bellkeeper", "slam"): "slam",
+    ("last_bellkeeper", "wave"): "ring", ("last_bellkeeper", "silence"): "bell", ("pilgrim_hand", "slam"): "hand",
+    ("pilgrim_hand", "scrape"): "claw", ("pilgrim_moon", "pull"): "chain", ("pilgrim_moon", "sweep"): "crescent",
+    ("pilgrim_moon", "rewind"): "return", ("pilgrim_moon", "fall"): "moon", ("pilgrim_plume", "beat"): "fans",
+    ("pilgrim_plume", "rain"): "pellet", ("pilgrim_plume", "mark"): "lead", ("pilgrim_plume", "judge"): "pillar",
+    ("rewinder", "slam"): "slam", ("rewinder", "sweep"): "wave", ("rewinder", "prints"): "embers",
+    ("founder", "thrust"): "thrust", ("founder", "sweep"): "swing", ("founder", "dash"): "rush",
+    ("founder", "listen"): "bell", ("founder", "sing"): "veil", ("founder", "spin"): "whirl",
+    ("founder", "leap"): "beam", ("founder", "moon"): "moon", ("founder", "beat"): "pulse",
+    ("founder", "lid"): "wall", ("founder", "split"): "spines", ("tower_master", "rake"): "claw",
+    ("tower_master", "flense"): "swing", ("tower_master", "clap"): "crack", ("tower_master", "breath"): "breath",
+    ("tower_master", "beams"): "beam", ("tower_master", "sigil"): "lead", ("tower_master", "exhort"): "roar",
+    ("tower_master", "stars"): "spike_ring", ("tower_master", "arrows"): "volley", ("tower_master", "kids"): "chain",
+    ("tower_master", "moon"): "moon", ("tower_master", "swarm"): "fans", ("circuit_stake", "pulse"): "pulse",
+    ("scorched_warden", "ring"): "ring", ("scorched_warden", "leap"): "leap", ("elder_thrall", "rake"): "swing",
+    ("elder_thrall", "crack"): "crack", ("elder_thrall", "wave"): "wave", ("shore_warden", "thrust"): "thrust",
+    ("shore_warden", "ring"): "ring", ("meadow", "plant"): "flag", ("meadow", "sweep"): "swing",
+    ("rock_boar", "charge"): "rush", ("rock_boar", "quake"): "floor", ("rock_boar", "gore"): "swing",
+    ("tide_crab", "spray"): "bubble", ("tide_crab", "slam"): "stomp", ("storm_ram", "charge"): "rush",
+    ("storm_ram", "rear"): "bolt", ("storm_ram", "butt"): "spike", ("ash_lizard", "sweep"): "gale",
+    ("ash_lizard", "bite"): "spike", ("ash_lizard", "breath"): "erupt",
 }
 
 

@@ -65,12 +65,25 @@ public final class VowEvents {
         }
     }
 
+    // 人のまわりで誓いの体力を上乗せする範囲
+    static final double FOE_SCAN = 96;
+
     // 背中の敵に、そのグループの誓いの体力を一度だけ上乗せする。上乗せした数 (自己テスト用)
     public static int applyFoeHealth(ServerLevel level) {
         Map<UUID, Float> cache = new HashMap<>();
         int n = 0;
-        for (Entity e : level.getAllEntities()) {
-            if (!(e instanceof LivingEntity living) || !(e instanceof GroupOwned owned) || owned.groupId() == null || living.isDeadOrDying()) {
+        // 人のまわり (FOE_SCAN) の敵だけ見る (背の全エンティティを毎秒なめない。離れた敵は人が近づいたときに上乗せされる。2026-11-02 の監査)
+        java.util.Set<UUID> seen = new java.util.HashSet<>();
+        java.util.List<LivingEntity> foes = new java.util.ArrayList<>();
+        for (ServerPlayer p : Players.snapshot(level.players())) {
+            for (LivingEntity le : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(FOE_SCAN), le -> le instanceof GroupOwned)) {
+                if (seen.add(le.getUUID())) {
+                    foes.add(le);
+                }
+            }
+        }
+        for (LivingEntity living : foes) {
+            if (!(living instanceof GroupOwned owned) || owned.groupId() == null || living.isDeadOrDying()) {
                 continue;
             }
             float extra = cache.computeIfAbsent(owned.groupId(), g -> foeHealth(Vows.active(level, g)));

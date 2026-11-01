@@ -2,6 +2,7 @@ package jp.revati.skyabyss.story.ch6.mob;
 
 import java.util.EnumSet;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.ch6.field.FallingLight;
@@ -50,7 +51,7 @@ public class FullKeeper extends MoonMob {
     static final int KNEEL_TICKS = 120;
     static final int SPENT_TICKS = 80;
     private final ServerBossEvent bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("entity.skyabyss.full_keeper"),
-            BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10));
+            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private int phase;
     private int roarFor;
     private int charge;
@@ -196,6 +197,7 @@ public class FullKeeper extends MoonMob {
                 }
             } else if (tide == FieldTide.Tide.TO_DIM && charge >= CHARGE_FULL / 2) {
                 release = 0;
+                BossCue.send(this, "full_keeper", "release", RELEASE_TELL);
                 playAction("release");
                 playSound(MoonMobsSetup.KEEPER_CHARGE.get(), 2.0f, 0.9f);
             } else if (tide != FieldTide.Tide.BRIGHT) {
@@ -376,6 +378,9 @@ public class FullKeeper extends MoonMob {
             t = 0;
             shots = 0;
             getNavigation().stop();
+            if (m.equals("sweep") || m.equals("orbs")) {
+                BossCue.send(FullKeeper.this, "full_keeper", m, m.equals("sweep") ? 18 : 12);
+            }
             playAction(m);
         }
 

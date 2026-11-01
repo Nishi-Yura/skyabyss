@@ -70,7 +70,8 @@ public final class BuildAudit {
                 }
             }
             findings.add(f);
-            jp.revati.skyabyss.SkyAbyss.LOGGER.warn("BUILD AUDIT FINDING {}", f);
+            // 一件ずつは debug に (許可は addAll で外れるので、ここで WARN に出すと許可済みの分まで数千行になる。まとめは自己テストが出す)
+            jp.revati.skyabyss.SkyAbyss.LOGGER.debug("BUILD AUDIT FINDING {}", f);
         }
 
         public void addAll(Report other) {

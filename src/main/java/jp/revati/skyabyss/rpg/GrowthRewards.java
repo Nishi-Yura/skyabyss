@@ -256,7 +256,7 @@ public final class GrowthRewards {
         } else if (boss != null) {
             amount = boss * part;
         } else {
-            amount = vanillaBudget(level, Growth.get(player), vanillaXp(mob) * part);
+            amount = vanillaXp(mob) * part;
         }
         int xp = GrowthRules.roundRandom(amount, level.random.nextDouble());
         if (xp > 0) {
@@ -284,19 +284,6 @@ public final class GrowthRewards {
             list.add(killer);
         }
         return list;
-    }
-
-    // バニラの敵は日ごとに VANILLA_DAILY (100) までは満額、そのあとは 20%
-    static double vanillaBudget(ServerLevel level, GrowthData data, double amount) {
-        long day = level.getGameTime() / 24000L;
-        if (data.vanillaDay != day) {
-            data.vanillaDay = day;
-            data.vanillaToday = 0;
-        }
-        double full = Math.max(0, Math.min(amount, GrowthRules.VANILLA_DAILY - data.vanillaToday));
-        double tired = (amount - full) * GrowthRules.VANILLA_TIRED;
-        data.vanillaToday += (int) Math.ceil(full);
-        return full + tired;
     }
 
     // ---------------------------------------------------------------- 新しい場所

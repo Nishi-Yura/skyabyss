@@ -11,7 +11,8 @@ import net.minecraft.world.BossEvent;
 // テクスチャの名前の頭と段階の色で使い回せる形にした。
 //  一段目: 顔の印 (16x16)、名前、段階の名前 (咆哮中は咆哮)、右に割合
 //  二段目: 枠 (182x16。溝は x 3〜177、y 3〜8)、そのなかの帯
-// テクスチャ: textures/gui/boss/<prefix>_icon_pN.png と <prefix>_frame_pN.png (N は 1 から)
+// テクスチャ: textures/gui/boss/<prefix>_icon_pN.png と <frame>_frame_pN.png (N は 1 から。枠は同じ族のボスで共有できる)
+// 段のないボス (phaseKey が null) は段の名を出さない (名前と割合だけ)。
 public final class PhasedBossBar {
     public static final int WIDTH = 182;
     public static final int FRAME_HEIGHT = 16;
@@ -23,8 +24,12 @@ public final class PhasedBossBar {
     // バニラの横棒より高い段の分
     public static final int EXTRA_HEIGHT = 12;
 
-    // 見た目: テクスチャの頭、段階ごとの帯の色・帯の上の線・段階の名前の色、段階の名前の翻訳キーの頭
-    public record Style(String prefix, int[] fill, int[] fillTop, int[] label, String phaseKey, String roaringKey, int roaringColor) {
+    // 見た目: 印の頭 (icon)、枠の頭 (frame。普通は印と同じ)、段階ごとの帯の色・帯の上の線・段階の名前の色、段階の名前の翻訳キーの頭 (段なしは null)
+    public record Style(String prefix, String frame, int[] fill, int[] fillTop, int[] label, String phaseKey, String roaringKey, int roaringColor) {
+        public Style(String prefix, int[] fill, int[] fillTop, int[] label, String phaseKey, String roaringKey, int roaringColor) {
+            this(prefix, prefix, fill, fillTop, label, phaseKey, roaringKey, roaringColor);
+        }
+
         public int phases() {
             return fill.length;
         }
@@ -39,14 +44,16 @@ public final class PhasedBossBar {
         g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + style.prefix() + "_icon_p" + n + ".png"),
                 x, y, 0, 0, ICON, ICON, ICON, ICON);
         g.drawString(mc.font, name, x + ICON + 4, y + 4, 0xFFFFFF, true);
-        int labelX = x + ICON + 4 + mc.font.width(name) + 6;
-        Component label = roaring ? Component.translatable(style.roaringKey()) : Component.translatable(style.phaseKey() + n);
-        g.drawString(mc.font, label, labelX, y + 4, roaring ? style.roaringColor() : style.label()[p], true);
+        if (style.phaseKey() != null) {
+            int labelX = x + ICON + 4 + mc.font.width(name) + 6;
+            Component label = roaring ? Component.translatable(style.roaringKey()) : Component.translatable(style.phaseKey() + n);
+            g.drawString(mc.font, label, labelX, y + 4, roaring ? style.roaringColor() : style.label()[p], true);
+        }
         String percent = Math.round(boss.getProgress() * 100) + "%";
         g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
 
         int barY = y + ICON + 2;
-        g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + style.prefix() + "_frame_p" + n + ".png"),
+        g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + style.frame() + "_frame_p" + n + ".png"),
                 x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);
         float progress = Math.max(0f, Math.min(1f, boss.getProgress()));
         int fill = Math.round(TRACK_W * progress);

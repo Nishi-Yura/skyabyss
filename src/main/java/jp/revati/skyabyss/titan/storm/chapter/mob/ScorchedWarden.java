@@ -2,6 +2,7 @@ package jp.revati.skyabyss.titan.storm.chapter.mob;
 
 import javax.annotation.Nullable;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.StoneWhaleHeart;
@@ -195,6 +196,7 @@ public class ScorchedWarden extends FeatherWarden {
     // 雷の輪 (足もと。予告 1.2 秒)
     public void startRing() {
         setSkill(RING);
+        BossCue.send(this, "scorched_warden", "ring", RING_WARN);
         ringCd = RING_COOLDOWN;
         getNavigation().stop();
         double cx = getX();
@@ -217,6 +219,7 @@ public class ScorchedWarden extends FeatherWarden {
     // 外套の跳躍 (落ちる先に輪。予告 1.2 秒)
     public void startLeap(LivingEntity t) {
         setSkill(LEAP);
+        BossCue.send(this, "scorched_warden", "leap", LEAP_TICKS);
         leapCd = LEAP_COOLDOWN;
         getNavigation().stop();
         leapFrom = position();

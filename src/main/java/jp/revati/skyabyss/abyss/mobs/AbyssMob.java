@@ -5,6 +5,7 @@ import java.util.List;
 import org.joml.Vector3f;
 
 import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.entity.MobVoices;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -99,6 +101,25 @@ public class AbyssMob extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 声 (環境音・被弾・倒れる)。種の表 (MobVoices) にあればその音、なければバニラの音
+    @Override
+    protected SoundEvent getAmbientSound() {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getAmbientSound() : v.ambient().get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getHurtSound(source) : v.hurt().get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getDeathSound() : v.death().get();
     }
 
     public AbyssMobKind kind() {

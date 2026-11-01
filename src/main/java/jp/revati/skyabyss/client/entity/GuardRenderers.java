@@ -156,7 +156,7 @@ public final class GuardRenderers {
     // 番兵長の鉾 (アイテムの3Dモデル) を socket_main に合わせる。
     // アイテムの座標 (画素) で、柄の軸は x=5.875 z=8、握りは y=4 (石突きから7画素)。刃は +x、穂先は +y で、-45°傾けて置いてある。
     // 受け口の向き: 穂先が -Z、刃が -Y (腕を前へ水平に出すと、柄が立ち、刃が前を向く)。大きさは 1.8 倍 (番兵長の背丈に合わせる)。
-    // tools/rough/captain_v4.py の PIKE_* と同じ値にしておく
+    // 鉾の値は前の道具 (captain_v4.py の PIKE_*) から写した。道具は消した。今の値が正本
     private static <T> Function<T, ItemStack> captainPikeStack() {
         ItemStack stack = new ItemStack(ModItems.CAPTAIN_PIKE.get());
         return mob -> stack;

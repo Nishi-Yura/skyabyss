@@ -2,6 +2,7 @@ package jp.revati.skyabyss.story.finale.mob;
 
 import java.util.List;
 
+import jp.revati.skyabyss.combat.BossCue;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.party.Downed;
 import jp.revati.skyabyss.story.finale.BellIsle;
@@ -147,11 +148,13 @@ public class PilgrimHand extends CloudMob {
                 move = "scrape";
                 BlockPos c = PilgrimSeat.mark("arena");
                 angle = Math.atan2(tg.getZ() - (c.getZ() + 0.5), tg.getX() - (c.getX() + 0.5));
+                BossCue.send(this, "pilgrim_hand", "scrape", SCRAPE_TELL);
                 playAction("scrape");
                 playSound(CloudMobsSetup.HAND_SCRAPE_TELL.get(), 2.0f, 1.0f);
             } else {
                 move = "slam";
                 spot = tg.position();
+                BossCue.send(this, "pilgrim_hand", "slam", SLAM_TELL);
                 playAction("slam");
                 playSound(CloudMobsSetup.HAND_SLAM_TELL.get(), 2.0f, 1.0f);
             }
