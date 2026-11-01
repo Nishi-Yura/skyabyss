@@ -1,6 +1,6 @@
 # 2026-11-02 の形のラフ（階級の見た目をそろえる）
 全体監査（`docs/review/audit_2026-11-01.md` の 6）で、階級の割に部品が少なかった三品のラフ 3 案。どれか一つを選べば、`tools/rough/lowpoly/weapons/wild/o_roughs_1102.py` の関数を本体（`o_boxes.py`・`o_wild_acc.py`）へ写し、`install_boxes.py` / `install_wild_gear.py` で入れる。三角形数はどれも同じ種類の上の段（ヒロイックの箱 664・野のヒロイックの装飾 200〜300）に寄せた。塗りは今の素材のまま（紫の漆と銀／金と淵の石／雲の白と金）。
-答え方: 「箱エピック B、淵の箱 C、羽根 A」のように。どれも違うなら「作り直し」と要望を一行。
+**決まり（2026-11-02）: 三品とも A。** 本体の関数へ写し、`install_boxes.py box_epic box_artifact` と `install_wild_gear.py accessories wild_skylark_plume` で入れた。B・C は `o_roughs_1102.py` に残してある。
 
 ## エピックの封の箱
 

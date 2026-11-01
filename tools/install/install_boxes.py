@@ -7,7 +7,7 @@
   形 (9): lowpoly/items/<形>/common.json・textures/lowpoly/items/<形>/common_atlas.png (+ _glow)、models/item_flat/<形>.json
           (手・地面・額縁は client/accessory/AccessoryItemRenderer の低ポリ。形の名前は BoxKind.look(): 巨神の箱と金の箱は品ごと、階級の箱は階級ごと)
   品 (19): textures/item/<品>.png (32x32。階級の箱は左下に帯の数字 I〜V を足す)・models/item/<品>.json (GUI は平絵、ほかは低ポリ)
-使い方: python -I tools/install/install_boxes.py
+使い方: python -I tools/install/install_boxes.py [形の名前 ...]
 """
 from __future__ import annotations
 
@@ -108,10 +108,14 @@ def install_item(item, look, band):
 
 
 def main():
+    # 形の名前を引数に書けば、その形 (と、その形を使う品) だけ入れ直す (2026-11-02: A 案を選んだ二つの箱だけ入れるため)
+    only = set(sys.argv[1:])
     for look, bt in LOOKS.items():
-        install_look(look, bt)
+        if not only or look in only:
+            install_look(look, bt)
     for item, look, band in ITEMS:
-        install_item(item, look, band)
+        if not only or look in only:
+            install_item(item, look, band)
     # 形だけの絵 (階級の箱の形の名前) は品の絵ではないので、平らなモデルの絵としてだけ残す
     print("looks", len(LOOKS), "items", len(ITEMS))
 

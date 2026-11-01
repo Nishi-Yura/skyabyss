@@ -1,5 +1,5 @@
 """2026-11-02 の全体監査で「階級が上がるほど豪華」から外れていた三品のラフ 3 案 (docs/review/roughs_1102)。
-一品一案の決まりどおり、選んだ一つだけを o_boxes.py / o_wild_acc.py の本体に写して入れる (ここは選ぶまでの置き場)。
+2026-11-02 に三品とも A を選び、本体 (o_boxes.py / o_wild_acc.py) へ写した。ここに残るのは選ばなかった B・C (ラフの掃除の決まり: 選ばなかった案は残す)。
 
   エピックの封の箱   今 192 三角形 (アンコモン 220・レア 262 より少ない)。目標 380〜450、レア (鉄の帯) より部品が一段多い
   淵の金の箱         今 248 (ヒロイック 664 より少ない)。目標 700〜900、ヒロイックの上
@@ -18,27 +18,6 @@ from o_wild_acc import plume  # noqa: F401
 
 
 # ====================================================================== エピックの封の箱 (紫の漆・銀)
-def box_epic_a(stage=0):
-    """案 A 銀の葉冠: 紫の漆の箱に銀の金具。角の銀の葉を大きくし、ふたの上に銀の三日月の冠、正面に紫の印の封と銀の鎖の垂れ"""
-    f = chest("main", "main", h=4.2, lid_h=2.0, dome=(0.86, 0.66))
-    f += block("acc", (0, 4.35, 0), (2 * WX + 0.7, 0.3, 2 * D + 0.7))
-    f += corner_caps("acc", h=4.2, s=0.7)
-    for x in (-WX, WX):
-        for z in (-D, D):
-            f += extrude("acc", [(-1.0, 0), (0, -0.5), (1.0, 0), (0.7, 1.6), (0, 2.4), (-0.7, 1.6)], 0.3, c=(x * 0.8, 1.0, z * 1.05))
-    f += torus("acc", (0, 6.5, 0), 1.6, 0.18, 0.18, n=12, k=3, ax="y")
-    for k in range(5):
-        a = math.radians(-60 + 30 * k)
-        f += gem((1.6 * math.sin(a), 6.55, -1.6 * math.cos(a)), 0.22, 0.3, 0.22, segs=4, rings=1)
-    for y in (1.0, 3.3):
-        f += gbar([(-3.2, y, -3.08), (-1.4, y, -3.08)], r=0.12, mat="acc")
-        f += gbar([(1.4, y, -3.08), (3.2, y, -3.08)], r=0.12, mat="acc")
-    f += block("acc", (0, 3.0, -3.1), (2.0, 2.2, 0.4), taper=(0.8, 1.0))
-    f += gem((0, 3.0, -3.35), 0.55, 0.62, 0.22, segs=4, rings=1)
-    for s in (-1, 1):
-        f += curve("acc", [(s * 0.9, 2.0, -3.3), (s * 1.3, 1.2, -3.4), (s * 1.1, 0.5, -3.3)], 0.1, 0.08, sides=4)
-        f += gem((s * 1.1, 0.4, -3.4), 0.16, 0.22, 0.12, segs=4, rings=1)
-    return f
 
 
 def box_epic_b(stage=0):
@@ -80,28 +59,6 @@ def box_epic_c(stage=0):
 
 
 # ====================================================================== 淵の金の箱 (金・淵の欠片)
-def box_artifact_a(stage=0):
-    """案 A 欠片の冠: 金の箱の角に金の柱、ふたの上の金の輪から九つの淵の欠片が浮く。正面は金の輪と深い紫の石、左右に小さな石"""
-    f = chest("main", "main", h=4.2, lid_h=1.9, rim=False, dome=(0.9, 0.74))
-    f += block("acc", (0, 0.25, 0), (2 * WX + 0.35, 0.5, 2 * D + 0.35))
-    f += block("acc", (0, 4.15, 0), (2 * WX + 0.4, 0.42, 2 * D + 0.4))
-    f += corner_caps("acc", h=4.2, s=0.9)
-    for x in (-WX, WX):
-        for z in (-D, D):
-            f += gem((x, 4.7, z), 0.3, 0.45, 0.3, segs=4, rings=1)
-    f += torus("acc", (0, 6.15, 0), 1.5, 0.16, 0.16, n=12, k=3, ax="y")
-    f += torus("acc", (0, 6.9, 0), 0.9, 0.12, 0.12, n=10, k=3, ax="y")
-    for k in range(9):
-        a = math.radians(40 * k)
-        r = 2.6 + 0.9 * (k % 3)
-        y = 6.3 + 0.9 * ((k * 2) % 3) + 0.4 * (k % 2)
-        s = 0.5 + 0.2 * (k % 3)
-        f += gem((r * math.cos(a), y, r * math.sin(a) * 0.7), s * 0.55, s * 1.25, s * 0.55, segs=4, rings=1)
-    f += torus("acc", (0, 3.0, -3.2), 0.95, 0.17, 0.17, n=10, k=3, ax="z")
-    f += gem((0, 3.0, -3.35), 0.55, 0.55, 0.3, segs=6, rings=2)
-    for s in (-1, 1):
-        f += gem((s * 2.4, 2.2, -3.3), 0.2, 0.3, 0.14, segs=4, rings=1)
-    return f
 
 
 def box_artifact_b(stage=0):
@@ -148,17 +105,6 @@ def box_artifact_c(stage=0):
 
 
 # ====================================================================== 雲雀の羽根飾り (ヒロイックの装飾)
-def wild_skylark_plume_a(stage=0):
-    """案 A 五枚の扇: 雲雀の白い羽根を五枚扇に束ね、金の留め具の輪に空の光の石。羽根の先は空の光、留め具から金の小鎖"""
-    f = prism("trim", (0, 0, 0), (0, 1.4, 0), 0.6, 0.55, sides=8, caps=(True, True))
-    f += torus("trim", (0, 0.7, -0.55), 0.5, 0.1, 0.1, n=10, k=3, ax="z")
-    f += gem((0, 0.7, -0.6), 0.28, 0.28, 0.16, segs=6, rings=2)
-    for k, (dx, L, lean) in enumerate(((-1.6, 5.2, -1.0), (-0.8, 6.4, -0.5), (0.0, 7.6, 0.0), (0.8, 6.4, 0.5), (1.6, 5.2, 1.0))):
-        f += plume((dx * 0.25, 1.2, 0.1 * (k % 3)), (dx * 1.6, 1.2 + L, 0.6 + 0.15 * k), 0.8, th=0.2, big=True, mat="cloth", tipmat="gem", scorch=1)
-    for s in (-1, 1):
-        f += curve("trim", [(s * 0.3, 0.1, -0.3), (s * 0.5, -0.9, -0.5), (s * 0.4, -1.7, -0.3)], 0.07, 0.06, sides=4)
-        f += gem((s * 0.4, -1.95, -0.3), 0.14, 0.2, 0.12, segs=4, rings=1)
-    return f
 
 
 def wild_skylark_plume_b(stage=0):
@@ -195,13 +141,10 @@ def wild_skylark_plume_c(stage=0):
 
 
 WEAPONS = dict([
-    W(box_epic_a, "エピックの封の箱 A", "epic", "trinket", "void", dict(main="purplecloth", acc="silver")),
     W(box_epic_b, "エピックの封の箱 B", "epic", "trinket", "void", dict(main="purplecloth", acc="silver")),
     W(box_epic_c, "エピックの封の箱 C", "epic", "trinket", "void", dict(main="purplecloth", acc="silver")),
-    W(box_artifact_a, "淵の金の箱 A", "heroic", "trinket", "void", dict(main="gold", acc="gold")),
     W(box_artifact_b, "淵の金の箱 B", "heroic", "trinket", "void", dict(main="gold", acc="gold")),
     W(box_artifact_c, "淵の金の箱 C", "heroic", "trinket", "void", dict(main="gold", acc="gold")),
-    W(wild_skylark_plume_a, "雲雀の羽根飾り A", "heroic", "trinket", "dawn", dict(cloth="cloudwhite")),
     W(wild_skylark_plume_b, "雲雀の羽根飾り B", "heroic", "trinket", "dawn", dict(cloth="cloudwhite")),
     W(wild_skylark_plume_c, "雲雀の羽根飾り C", "heroic", "trinket", "dawn", dict(cloth="cloudwhite")),
 ])

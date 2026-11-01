@@ -319,12 +319,18 @@ def wild_meteor_ring(stage=0):
 
 
 def wild_skylark_plume(stage=0):
-    """雲雀の羽根飾り: 雲雀の白い羽根を三枚束ね、金の留め具で耳の後ろに挿す飾り。羽根の先は空の光"""
-    f = prism("trim", (0, 0, 0), (0, 1.2, 0), 0.45, 0.4, sides=6, caps=(True, True))
-    f += gem((0, 0.6, -0.45), 0.25, 0.25, 0.15, segs=5, rings=1)
-    for k, (dx, L) in enumerate(((-0.8, 6.0), (0.0, 7.6), (0.8, 6.4))):
-        f += plume((dx * 0.3, 1.0, 0.1 * k), (dx * 2.4, 1.0 + L, 0.6 + 0.2 * k), 0.85, th=0.2, big=True, mat="cloth", tipmat="gem", scorch=1)
+    """五枚の扇: 雲雀の白い羽根を五枚扇に束ね、金の留め具の輪に空の光の石。羽根の先は空の光、留め具から金の小鎖"""
+    f = prism("trim", (0, 0, 0), (0, 1.4, 0), 0.6, 0.55, sides=8, caps=(True, True))
+    f += torus("trim", (0, 0.7, -0.55), 0.5, 0.1, 0.1, n=10, k=3, ax="z")
+    f += gem((0, 0.7, -0.6), 0.28, 0.28, 0.16, segs=6, rings=2)
+    for k, (dx, L, lean) in enumerate(((-1.6, 5.2, -1.0), (-0.8, 6.4, -0.5), (0.0, 7.6, 0.0), (0.8, 6.4, 0.5), (1.6, 5.2, 1.0))):
+        f += plume((dx * 0.25, 1.2, 0.1 * (k % 3)), (dx * 1.6, 1.2 + L, 0.6 + 0.15 * k), 0.8, th=0.2, big=True, mat="cloth", tipmat="gem", scorch=1)
+    for s in (-1, 1):
+        f += curve("trim", [(s * 0.3, 0.1, -0.3), (s * 0.5, -0.9, -0.5), (s * 0.4, -1.7, -0.3)], 0.07, 0.06, sides=4)
+        f += gem((s * 0.4, -1.95, -0.3), 0.14, 0.2, 0.12, segs=4, rings=1)
     return f
+
+
 
 
 def wild_starchart_compass(stage=0):
