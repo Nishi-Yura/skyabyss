@@ -444,21 +444,19 @@ class HairCel:
 def hair4(m: Model, paint, back_bottom=12.0, side_len=12.5, bangs_len=3.1, part=0.6):
     """かさ・前髪 4 房・横髪 (前と耳の後ろ)・後ろ髪 (下地の一枚と幅の広い束 4 本)。part = 分け目の x (前髪の流れの中心)。"""
     # ---- かさ: 頭より外の大きな箱 (角は八角)、上の丸み、横のふくらみ (下ほど外へ)、後ろの厚み
-    m.box("head", (-5.2, 29.6, -5.0), (10.4, 3.7, 10.3), paint)
-    m.box("head", (-4.5, 33.2, -4.4), (9.0, 0.9, 8.9), paint)
-    m.box("head", (-3.3, 34.0, -3.2), (6.6, 0.5, 6.6), paint)
-    m.pair("head", (-5.7, 24.6, -3.6), (1.5, 6.0, 7.6), paint, rot=(0, 0, -6), pivot=(-5.0, 30.6, 0))
-    m.box("head", (-5.3, 23.4, 3.3), (10.6, 7.2, 2.0), paint)
-    # ---- 前髪: 4 房。分け目から左右へ流れ、隣と重なる幅。奥の房と手前の房で 0.3 ずらす
-    for (x, w, L, flow, z) in ((-3.2, 3.2, bangs_len * 0.92, -10, -5.05), (-0.9, 3.4, bangs_len, -5, -5.35),
-                               (1.5, 3.3, bangs_len * 0.96, 7, -5.35), (3.5, 2.8, bangs_len * 0.85, 12, -5.05)):
-        lock(m, "head", x, 33.4, z, w, L + 1.6, 1.15, paint, out=(0, 0, -1), flare=9, flow=flow, lean=(-8, 0), wide=True)
+    m.box("head", (-5.0, 31.5, -4.9), (10.0, 2.1, 10.1), paint)
+    m.box("head", (-4.5, 33.5, -4.3), (9.0, 0.7, 8.8), paint)
+    m.box("head", (-3.3, 34.1, -3.1), (6.6, 0.45, 6.4), paint)
+    m.pair("head", (-5.0, 25.8, -3.6), (0.9, 6.0, 8.1), paint)
+    m.box("head", (-5.0, 23.6, 3.3), (10.0, 8.2, 1.9), paint)
+    # ---- 前髪: 太い束 4 本 (左から長・短・長・短)。根元 2.4〜2.8px から毛先 1px へ、毛先は顔の真ん中へ回す (BANGS4 の表)
+    bangs4(m, paint)
     # ---- 横髪: 頬の前の幅の広い束 (胸まで) と、耳の後ろの束。揺れる。左は映す
     bone = "hair_side_R"
     piv = (-5.0, 31.0, -2.0)
     m.pair_bone(bone, "head", piv)
-    lock(m, bone, -5.55, 31.0, -4.8, 1.7, side_len, 3.6, paint, out=(-1, 0, 0), flare=9, flow=5, lean=(-2, 0), pivot=piv, wide=True)
-    lock(m, bone, -5.85, 30.4, -1.6, 1.7, side_len * 0.8, 4.4, paint, out=(-1, 0, 0), flare=12, flow=-6, lean=(4, 0), pivot=piv, wide=True)
+    lock(m, bone, -5.0, 31.0, -4.7, 1.2, side_len, 3.2, paint, out=(-1, 0, 0), flare=6, flow=5, lean=(-2, 0), pivot=piv, wide=True)
+    lock(m, bone, -5.15, 30.6, -1.7, 1.2, side_len * 0.8, 4.4, paint, out=(-1, 0, 0), flare=8, flow=-6, lean=(3, 0), pivot=piv, wide=True)
     for b in [b for b in m.boxes if b.bone == bone and not b.mirror]:
         x0 = -(b.frm[0] + b.size[0])
         pv = None if b.pivot is None else (-b.pivot[0], b.pivot[1], b.pivot[2])
@@ -473,4 +471,34 @@ def hair4(m: Model, paint, back_bottom=12.0, side_len=12.5, bangs_len=3.1, part=
     for (x, w, flow, k, z) in ((-3.6, 3.6, -11, 0.92, 4.6), (3.6, 3.6, 11, 0.9, 4.6), (-1.25, 3.9, -4, 1.0, 5.1), (1.25, 3.9, 4, 0.98, 5.1)):
         lock(m, "hair_back", x, top, z, w, L * k, 1.6, paint, out=(0, 0, 1), flare=10, flow=flow, lean=(5, flow * 0.25),
              pivot=(x, top, z + 0.8), wide=True)
+
+
+# 前髪 4 束の表 (docs/design/55)。束ごとに 4 個のキューブ: (長さ, 幅, 厚み, X 回転, Z 回転)。回転は各キューブそのものの角度。
+#   根元の上の端 y = 32.6 (額の上)。長い束の毛先は顔の上から 3 段目の下 (y 29.0)、短い束は 2 段目の下 (y 30.1)。
+#   Z 回転: 毛先を顔の真ん中 (x = 0) へ。X 回転: マイナスで毛先が顔へ寄る。長い束を手前 (z -5.05)、短い束を少し奥 (z -4.85) に置いて重ねる
+BANGS4 = (
+    # (根元の真ん中の x, 前の面の z, キューブ 4 個)
+    (-3.0, -5.05, ((1.2, 2.8, 0.8, 0, 0), (1.0, 2.2, 0.75, -4, 5), (0.8, 1.6, 0.7, -8, 11), (0.6, 1.0, 0.6, -12, 18))),
+    (-1.0, -4.85, ((0.85, 2.4, 0.75, 0, 0), (0.7, 1.9, 0.7, -3, 4), (0.55, 1.4, 0.65, -6, 8), (0.45, 1.0, 0.55, -9, 13))),
+    (1.0, -5.05, ((1.2, 2.8, 0.8, 0, 0), (1.0, 2.2, 0.75, -4, -5), (0.8, 1.6, 0.7, -8, -11), (0.6, 1.0, 0.6, -12, -18))),
+    (3.0, -4.85, ((0.85, 2.4, 0.75, 0, 0), (0.7, 1.9, 0.7, -3, -4), (0.55, 1.4, 0.65, -6, -8), (0.45, 1.0, 0.55, -9, -13))),
+)
+
+
+def chain(m: Model, bone, top, segs, paint, overlap=0.3):
+    """キューブの鎖: segs = [(長さ, 幅, 厚み, X 回転, Z 回転)]。各キューブは前のキューブを回した後の下の端を付け根に回し、上の端を overlap だけ食い込ませる。"""
+    from kit import rot_matrix
+    top = np.array(top, float)
+    piv = top.copy()
+    for k, (ln, w, d, rx, rz) in enumerate(segs):
+        ov = 0.0 if k == 0 else overlap
+        m.box(bone, (top[0] - w / 2, top[1] - ln, top[2] - d / 2), (w, ln + ov, d), paint, rot=(rx, 0, rz), pivot=tuple(piv), rounded=False)
+        top = piv + rot_matrix((rx, 0, rz)) @ (np.array([top[0], top[1] - ln, top[2]]) - piv)
+        piv = top.copy()
+    return top
+
+
+def bangs4(m: Model, paint, y_root=32.6, table=BANGS4):
+    for (x, zf, segs) in table:
+        chain(m, "head", (x, y_root, zf + segs[0][2] / 2), segs, paint)
 
