@@ -323,7 +323,7 @@ def _hue(c, toward, k):
     return mix(np.asarray(c, float), C(toward), k)
 
 
-def cel(base, light=None, shadow=None, deep=None, block=2, light_dir="ul", outline=True, rim=True, ao=True, noise=0.03,
+def cel(base, light=None, shadow=None, deep=None, block=1, light_dir="ul", outline=True, rim=True, ao=True, noise=0.012,
         round_k=0.32, faces=None, over=None, seed=0):
     """明・中・影・濃い影の 4 段で塗る。2x2 画素を一つの画素として塗り (手描きの画素に見せる)、
     光は左上の前から。面の左右の端ほど暗く (丸く見せる)、上の縁に細い光、下に影、境は少し散らす。

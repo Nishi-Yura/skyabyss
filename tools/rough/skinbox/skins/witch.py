@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from kit import Model  # noqa: E402
+from kit import Model, T  # noqa: E402
 from paint import C, mix, blank, out, cel, band  # noqa: E402
 
 ID = "witch"
@@ -35,12 +35,15 @@ def skirt_panel(face, W, H, box):
     def over(img, face, W, H, box):
         if face not in "nsew":
             return img
-        for x in range(0, W, 6):
-            img[:, x:x + 2, :3] = mix(img[:, x:x + 2, :3], C("#1e1034"), 0.45)
-            if x + 2 < W:
-                img[:, x + 2:x + 4, :3] = mix(img[:, x + 2:x + 4, :3], C("#9a72c8"), 0.25)
-        band(img, H - 6, H - 2, "#c01e4a", hi="#ff6a88")
-        band(img, H - 2, H, "#4a0818")
+        # ひだ: 1.5px ごとに影の線と光の線を半画素ずつ
+        step = max(3, int(1.5 * T))
+        for x in range(0, W, step):
+            img[:, x, :3] = mix(img[:, x, :3], C("#1e1034"), 0.5)
+            if x + 1 < W:
+                img[:, x + 1, :3] = mix(img[:, x + 1, :3], C("#9a72c8"), 0.3)
+        hb = max(1, T // 2)
+        band(img, H - 3 * hb, H - hb, "#c01e4a", hi="#ff6a88")
+        band(img, H - hb, H, "#4a0818")
         return img
     return cel("#4c2e72", "#7a52a8", "#331e52", "#1e1034", over=over)(face, W, H, box)
 
@@ -51,14 +54,10 @@ def lace(face, W, H, box):
         return out(blank(W, H))
 
     def over(img, face, W, H, box):
-        for y in range(4, H - 6, 6):
-            for x in range((y // 6) % 2 * 4, W, 8):
-                img[y:y + 2, x:x + 2, :3] = C("#c8bed8")
+        # 下の縁の波 (半画素ごとに抜く)
         for x in range(W):
-            if x % 8 in (0, 1, 6, 7):
-                img[H - 2:H, x, 3] = 0
-            if x % 8 == 0:
-                img[H - 4:H, x, 3] = 0
+            if x % 3 == 0:
+                img[H - 1, x, 3] = 0
         return img
     return cel("#f4eef6", "#ffffff", "#c8bed8", "#8e82a6", over=over, outline=False, ao=False)(face, W, H, box)
 
@@ -67,8 +66,8 @@ def collar(face, W, H, box):
     """白い丸襟: 縁に紅の線、角は丸く抜く。"""
     def over(img, face, W, H, box):
         if face in "nsew":
-            band(img, H - 3, H - 1, "#c01e4a")
-            for (cy, cx) in ((H - 1, 0), (H - 1, 1), (H - 2, 0), (H - 1, W - 1), (H - 1, W - 2), (H - 2, W - 1)):
+            band(img, H - 1, H, "#c01e4a")
+            for (cy, cx) in ((H - 1, 0), (H - 1, W - 1)):
                 img[cy, cx, 3] = 0
         return img
     return cel("#f4eef6", "#ffffff", "#c8bed8", "#8e82a6", over=over)(face, W, H, box)
@@ -78,9 +77,9 @@ def ribbon_tail(face, W, H, box):
     """リボンの垂れ: 先は燕尾に抜く。"""
     def over(img, face, W, H, box):
         if face in "nsew" and W >= 3:
-            for k in range(min(4, H)):
+            for k in range(min(T, H)):
                 for x in range(W):
-                    if abs(x - (W - 1) / 2) < (4 - k) * W / 8:
+                    if abs(x - (W - 1) / 2) < (T - k) * W / (2 * T):
                         img[H - 1 - k, x, 3] = 0
         return img
     return cel("#c01e4a", "#ff6a88", "#801030", "#4a0818", over=over)(face, W, H, box)
@@ -132,19 +131,18 @@ def skull_face(face, W, H, box):
     img = BONE(face, W, H, box).astype(float)
     glow = np.zeros((H, W), bool)
     if face == "n":
-        ew = max(4, W // 3)
-        for x0 in (2, W - 2 - ew):
-            img[1:H - 1, x0:x0 + ew, :3] = C(GLOW)
-            img[H // 2:H - 2, x0 + 2:x0 + ew - 2, :3] = C(GLOW2)
-            glow[1:H - 1, x0:x0 + ew] = True
-        img[H // 2:, W // 2 - 1:W // 2 + 1, :3] = C("#3a2a44")
+        ew = max(1, W // 3)
+        for x0 in (max(0, W // 2 - ew - 1), W // 2 + 1):
+            img[:H - 1 if H > 1 else H, x0:x0 + ew, :3] = C(GLOW)
+            glow[:H - 1 if H > 1 else H, x0:x0 + ew] = True
+        img[H - 1:, W // 2:W // 2 + 1, :3] = C("#3a2a44")
     return out(img), glow
 
 
 def teeth(face, W, H, box):
     img = BONE(face, W, H, box).astype(float)
     if face == "n":
-        for x in range(0, W, 4):
+        for x in range(0, W, 2):
             img[:, x, :3] = C("#5a4c3a")
     return out(img)
 
@@ -153,19 +151,17 @@ def book_cover(face, W, H, box):
     """魔導書の表紙: 紫の革、金の角、光る紋。"""
     img = cel("#3a1650", "#6a3290", "#24103a", "#12061a")(face, W, H, box).astype(float)
     glow = np.zeros((H, W), bool)
-    if face in "ew" and W >= 8 and H >= 8:
-        for (y, x) in ((0, 0), (0, W - 4), (H - 4, 0), (H - 4, W - 4)):
-            img[y:y + 4, x:x + 4, :3] = C("#dcaa3c")
+    if face in "ew" and W >= 4 and H >= 4:
+        for (y, x) in ((0, 0), (0, W - 1), (H - 1, 0), (H - 1, W - 1)):
+            img[y:y + 1, x:x + 1, :3] = C("#dcaa3c")
         yy, xx = np.mgrid[0:H, 0:W]
         r = np.hypot(xx + 0.5 - W / 2, yy + 0.5 - H / 2)
-        ring = (r < min(W, H) * 0.3) & (r > min(W, H) * 0.3 - 2)
+        ring = (r < min(W, H) * 0.34) & (r > min(W, H) * 0.34 - 1)
         img[ring, :3] = C(GLOW)
         glow |= ring
         cx, cy = W // 2, H // 2
-        for k in range(-3, 4):
-            img[cy + k, cx - 1:cx + 1, :3] = C(GLOW2)
-            img[cy - 1:cy + 1, cx + k, :3] = C(GLOW2)
-            glow[cy + k, cx - 1:cx + 1] = glow[cy - 1:cy + 1, cx + k] = True
+        img[cy, cx, :3] = C(GLOW2)
+        glow[cy, cx] = True
     return out(img), glow
 
 
@@ -173,7 +169,7 @@ def pages(face, W, H, box):
     img = cel("#efe4c8", "#fff8e6", "#c9b88f", "#8a7a58")(face, W, H, box).astype(float)
     if face in "nsud":
         for y in range(0, H, 2):
-            img[y, :, :3] = mix(img[y, :, :3], C("#bfae86"), 0.4)
+            img[y, :, :3] = mix(img[y, :, :3], C("#bfae86"), 0.25)
     return out(img)
 
 

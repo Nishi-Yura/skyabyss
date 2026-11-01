@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-T = 8
+T = 2  # 1px (バニラの 1 画素) を 2 画素で塗る = 半画素の粗さ (2026-11-01「解像度もっと粗くしても」。見本のモデルと同じくらい)
 ROOT = Path(__file__).resolve().parents[3]
 
 # バニラの体の部分の付け根 (geo)

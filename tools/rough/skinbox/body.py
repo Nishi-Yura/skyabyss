@@ -394,7 +394,7 @@ class HairCel:
     """髪を明・中・影・濃い影の 4 段で塗る。2x2 画素が一画素。上ほど明るく (頭の高さで決まる)、束の左右の端ほど暗い、
     天使の輪は明るい画素のぎざぎざの帯、毛先は濃い影。"""
 
-    def __init__(self, base, light, shadow, deep, hi, y_hi=34.5, y_lo=12.0, ring_y=32.2, block=2):
+    def __init__(self, base, light, shadow, deep, hi, y_hi=34.5, y_lo=12.0, ring_y=32.2, block=1):
         self.pal = [C(deep), C(shadow), C(base), C(light)]
         self.h = C(hi)
         self.y_hi, self.y_lo, self.ring_y, self.block = y_hi, y_lo, ring_y, block
