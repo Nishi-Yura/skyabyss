@@ -169,6 +169,9 @@ public class SkyAbyss {
         // 転生の見せ方 (色の段・記号・名札・称号・背中の飾り・順位の石・飾り板)。docs/design/31
         jp.revati.skyabyss.rebirth.RebirthSetup.register(modEventBus, modContainer);
 
+        // スキン (見た目だけの一式。持っているものと着ているもの)。docs/design/54 の 6.1
+        jp.revati.skyabyss.skin.Skins.register(modEventBus);
+
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);

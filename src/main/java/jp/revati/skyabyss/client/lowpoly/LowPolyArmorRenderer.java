@@ -18,6 +18,8 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 //  - 低ポリ: geo/armor/lowpoly_armor.geo.json (骨だけ) + lowpoly/armor/<組>/<部位>[_階級].json + 強化段階の絵 (LowPolyArmor)。光る画素は <絵>_glowmask.png を AutoGlowingGeoLayer が重ねる
 //  - LowPolyArmor.enabled = false: 元の geo/armor/<組>_armor.geo.json と textures/armor/<組>_armor.png (cube)
 // 防具の層はバニラの防具モデルを GeckoLib のこの描画に置き換えるので、バニラの層は描かれない
+// スキン (skin/Skins): 着ている人の防具は、形と絵をスキンのもの (lowpoly/armor/skin_<id>/<部位>) に替えて描く。防具のない部位は client/SkinLayer が描く
+@SuppressWarnings("unchecked")
 public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends GeoArmorRenderer<T> {
     private static final ResourceLocation LOW_GEO = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/armor/lowpoly_armor.geo.json");
 
@@ -25,6 +27,8 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
     static final float SHADE_FLATTEN = 0.4f;
 
     private final String set;
+    // いま描く人が着ているスキン (prepForRender で決める。null = 防具のまま)
+    private String skin;
 
     protected LowPolyArmorRenderer(String set) {
         super(new Model<T>(set));
@@ -37,7 +41,35 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
     }
 
     @Override
+    public void prepForRender(net.minecraft.world.entity.Entity entity, net.minecraft.world.item.ItemStack stack, EquipmentSlot slot,
+            net.minecraft.client.model.HumanoidModel<?> baseModel) {
+        super.prepForRender(entity, stack, slot, baseModel);
+        pickSkin(entity, slot);
+    }
+
+    @Override
+    public void prepForRender(net.minecraft.world.entity.Entity entity, net.minecraft.world.item.ItemStack stack, EquipmentSlot slot,
+            net.minecraft.client.model.HumanoidModel<?> baseModel, net.minecraft.client.renderer.MultiBufferSource bufferSource, float partialTick, float limbSwing,
+            float limbSwingAmount, float netHeadYaw, float headPitch) {
+        super.prepForRender(entity, stack, slot, baseModel, bufferSource, partialTick, limbSwing, limbSwingAmount, netHeadYaw, headPitch);
+        pickSkin(entity, slot);
+    }
+
+    private void pickSkin(net.minecraft.world.entity.Entity entity, EquipmentSlot slot) {
+        String s = entity instanceof net.minecraft.world.entity.player.Player p && slot != null ? jp.revati.skyabyss.skin.Skins.worn(p) : null;
+        skin = s != null && LowPoly.enabled && LowPolyMeshes.get(skinMesh(s, slot)) != null ? s : null;
+        ((Model<T>) getGeoModel()).skin = skin;
+    }
+
+    public static String skinMesh(String skin, EquipmentSlot slot) {
+        return "armor/skin_" + skin + "/" + LowPolyArmor.pieceName(slot);
+    }
+
+    @Override
     public ResourceLocation getTextureLocation(T animatable) {
+        if (skin != null && currentSlot != null) {
+            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + skinMesh(skin, currentSlot) + ".png");
+        }
         if (currentSlot != null && currentStack != null && LowPolyArmor.usable(set, currentSlot)) {
             ResourceLocation atlas = LowPolyArmor.atlas(set, currentSlot, currentStack);
             if (atlas != null) {
@@ -49,6 +81,16 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
 
     @Override
     public void renderCubesOfBone(PoseStack poseStack, GeoBone bone, VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
+        if (skin != null) {
+            if (!bone.isHidden()) {
+                LowPolyMesh mesh = LowPolyMeshes.get(skinMesh(skin, currentSlot));
+                LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
+                if (meshBone != null) {
+                    LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, SHADE_FLATTEN);
+                }
+            }
+            return;
+        }
         if (!lowPoly()) {
             super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour);
             return;
@@ -66,6 +108,7 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
     // 低ポリのときは骨だけの geo、そうでなければ元の cube の geo / 絵
     private static final class Model<T extends Item & GeoItem> extends DefaultedGeoModel<T> {
         private final String set;
+        String skin;
 
         private Model(String set) {
             super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, set + "_armor"));
@@ -81,7 +124,7 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
         public ResourceLocation getModelResource(T animatable) {
             if (animatable instanceof ArmorItem armor) {
                 EquipmentSlot slot = armor.getType().getSlot();
-                if (LowPolyArmor.usable(set, slot)) {
+                if (skin != null || LowPolyArmor.usable(set, slot)) {
                     return LOW_GEO;
                 }
             }

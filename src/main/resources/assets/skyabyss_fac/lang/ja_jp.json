@@ -812,5 +812,6 @@
   "gui.skyabyss.buyback.hint": "押すと 1 つ売る (シフトでその枠を全部)。身につけている品と大事な品は出ない",
   "dialogue.skyabyss.attendant_perch_keeper.mount_rules": "笛を吹けば目の前に来る。もう一度吹けば帰る。巨神の背と淵の底、心臓の間には連れていけない。主が遠くへ行ったり、眠りについたりしても帰っちまう。見た目は章を越えるごとに増える。性能は鐘銭で磨くんだ。",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount": "乗り物を見る・買う (見た目と性能)",
-  "dialogue.skyabyss.attendant_perch_keeper.menu.mount_rules": "乗り笛の決まり"
+  "dialogue.skyabyss.attendant_perch_keeper.menu.mount_rules": "乗り笛の決まり",
+  "dialogue.skyabyss.attendant_outfitter.menu.skins": "スキンを見る（仕立て）"
 }

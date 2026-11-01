@@ -1,7 +1,8 @@
 """スキン (docs/design/54 の 6.1。物語と関係のない見た目だけの一式) の一着一案。最初の組 = 侍・海賊の船長・白銀の騎士・宇宙飛行士。
 作りは旅装 (travel_one) と同じ: 部位 helmet / chestplate / leggings / boots、骨は armor*、塗りは tpaint (材質 → 色と質感の表をこのファイルで足す)。
 色違いにしない: 一着ずつ形が違う。顔を出すもの (侍・海賊) は頭の前を開け、騎士の兜と宇宙の兜は顔を覆う。
-実行: python skin_one.py [名前 ...]  -> docs/review/skins/<名前>.png (前・横・後ろ・3/4) と docs/review/skins/skins_1.png (並べたもの)
+実行: python skin_one.py [名前 ...]          -> docs/review/skins/<名前>.png (前・横・後ろ・3/4) と docs/review/skins/skins_1.png (並べたもの)
+      python skin_one.py install [名前 ...]  -> docs/review/skins/raw/<名前>/ (tools/install/install_skins.py の入力) と衣装棚の絵
 """
 from __future__ import annotations
 
@@ -333,7 +334,27 @@ def built(key, fn):
     return out
 
 
+def install(names):
+    """メッシュとアトラス (raw) と、衣装棚の絵 (前の 3/4 の全身、128x192。背景は透明)"""
+    aview.SS = 2
+    gui = ROOT / "src/main/resources/assets/skyabyss/textures/gui/skins"
+    gui.mkdir(parents=True, exist_ok=True)
+    for key, label, fn in SKINS:
+        if names and key not in names:
+            continue
+        res = built(key, fn)
+        aview.save_set(res, OUT / "raw" / key, "skin_" + key)
+        im = aview.render(res, "whale", 200, 8, (256, 384), 9.6, center=(0, 17.0, 0), mann=True, bg=(0, 0, 0))
+        a = np.array(im.convert("RGBA"))
+        a[..., 3] = np.where((a[..., :3] == 0).all(-1), 0, 255)
+        Image.fromarray(a, "RGBA").resize((128, 192), Image.LANCZOS).save(gui / f"{key}.png")
+        print(key, "raw + wardrobe picture", flush=True)
+
+
 def main():
+    if sys.argv[1:2] == ["install"]:
+        install(set(sys.argv[2:]))
+        return
     aview.SS = 2
     OUT.mkdir(parents=True, exist_ok=True)
     names = sys.argv[1:] or [k for k, _, _ in SKINS]

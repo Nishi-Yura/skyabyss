@@ -625,7 +625,7 @@ public final class ShotRunner {
                 return true;
             }
             case "otherplayer" -> {
-                // otherplayer <dx> <dz> <名前> : 手元だけの別の人 (自分と同じ見た目・転生の写し) を前に置く (名札の称号の確認用。サーバーには居ない)
+                // otherplayer <dx> <dz> <名前> : 手元だけの別の人 (自分と同じ見た目・転生とスキンと防具の写し) を前に置く (名札の称号の確認用。サーバーには居ない)
                 if (mc.level != null && mc.player != null) {
                     var rp = new net.minecraft.client.player.RemotePlayer(mc.level,
                             new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes(("shot:" + line.arg(2)).getBytes()), line.arg(2)));
@@ -634,6 +634,11 @@ public final class ShotRunner {
                     rp.setYHeadRot(mc.player.getYRot() + 180f);
                     rp.yBodyRot = mc.player.getYRot() + 180f;
                     rp.setData(jp.revati.skyabyss.rebirth.RebirthSetup.DATA.get(), jp.revati.skyabyss.rebirth.RebirthView.data(mc.player));
+                    rp.setData(jp.revati.skyabyss.skin.Skins.DATA.get(), jp.revati.skyabyss.skin.Skins.data(mc.player));
+                    for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.HEAD,
+                            net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
+                        rp.setItemSlot(slot, mc.player.getItemBySlot(slot).copy());
+                    }
                     mc.level.addEntity(rp);
                 }
                 return true;
