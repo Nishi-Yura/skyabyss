@@ -61,8 +61,20 @@ def edge(img, dark, top_light=None, sides=True, bottom=True, top=False, k=0.55):
     return img
 
 
-def cloth(base, light=None, dark=None, line=None, edges=True, faces=None, over=None, flat=False, hi_top=True):
-    """布・革・金属などのふつうの面。faces = {面: painter} で面ごとに差し替え、over(img, face, W, H, box) で上描き。"""
+def round_shade(img, d, curve):
+    """面の左右の端ほど暗く (丸い面に見せる)。"""
+    W = img.shape[1]
+    if W < 3 or curve <= 0:
+        return img
+    u = (np.arange(W) + 0.5) / W * 2 - 1
+    k = (np.abs(u) ** 2.2 * curve)[None, :, None]
+    img[..., :3] = img[..., :3] * (1 - k) + d * k
+    return img
+
+
+def cloth(base, light=None, dark=None, line=None, edges=True, faces=None, over=None, flat=False, hi_top=True, curve=0.32):
+    """布・革・金属などのふつうの面。faces = {面: painter} で面ごとに差し替え、over(img, face, W, H, box) で上描き。
+    curve = 横の面の左右の端を暗くする強さ (丸く見せる)。"""
     b, l, d = C(base), C(light) if light else mix(C(base), np.array([255, 255, 255.]), 0.22), C(dark) if dark else C(base) * 0.62
     ln = C(line) if line else d * 0.7
 
@@ -73,6 +85,7 @@ def cloth(base, light=None, dark=None, line=None, edges=True, faces=None, over=N
         if not flat:
             if face in "nsew":
                 img[..., :3] = shade_rows(H, l, b, d)[:, None, :]
+                round_shade(img, d, curve)
             elif face == "u":
                 img[..., :3] = mix(b, l, 0.6)
             else:
@@ -289,6 +302,7 @@ def metal(base, light=None, dark=None, line=None, streak=True, over=None, faces=
     def o(img, face, W, H, box):
         if face in "nsew":
             img[..., :3] = shade_rows(H, l, b, d, top=0.35, bottom=0.6)[:, None, :]
+            round_shade(img, d, 0.3)
             if streak and W >= 4 and H >= 4:
                 for y in range(H):
                     x = int(W * 0.3) - y // 2

@@ -75,6 +75,8 @@ class Model:
         self.name = name
         # True = 服だけ (着ている人のバニラの体とスキンを残して重ねる)。バニラの体の大きさに合わせて作る
         self.outfit = outfit
+        # 太い箱 (幅と奥行きが 1.8 以上、高さ 0.5 以上) は角を落として重ねる (box の rounded=False で止める)
+        self.auto_round = True
         self.boxes: list[Box] = []
         self.bones: dict[str, dict] = {}
         for b, p in PIVOTS.items():
@@ -84,7 +86,18 @@ class Model:
         self.bones[name] = dict(parent=parent, pivot=tuple(pivot))
         return name
 
-    def box(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", mirror=False, yaw=0.0, skinmap=None):
+    def box(self, bone, frm, size, paint, rot=(0, 0, 0), pivot=None, hide=(), tag="", mirror=False, yaw=0.0, skinmap=None, rounded=None):
+        x, y, z = frm
+        w, h, d = size
+        rnd_ok = self.auto_round if rounded is None else rounded
+        if rnd_ok and skinmap is None and h >= 0.5 and min(w, d) >= 1.8:
+            # 角を落とす: 横に広い箱と奥に広い箱を重ねて、断面の四隅を段で欠く (角ばって見えないように)
+            r = min(0.7, min(w, d) * 0.2)
+            piv = tuple(pivot) if pivot else (x + w / 2, y + h / 2, z + d / 2)
+            self.boxes.append(Box(bone, (x, y, z + r), (w, h, d - 2 * r), paint, tuple(rot), piv, mirror, tuple(hide), tag, yaw, None))
+            b = Box(bone, (x + r, y, z), (w - 2 * r, h, d), paint, tuple(rot), piv, mirror, tuple(hide), tag, yaw, None)
+            self.boxes.append(b)
+            return b
         b = Box(bone, tuple(frm), tuple(size), paint, tuple(rot), tuple(pivot) if pivot else None, mirror, tuple(hide), tag, yaw, skinmap)
         self.boxes.append(b)
         return b

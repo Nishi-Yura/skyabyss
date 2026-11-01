@@ -272,6 +272,9 @@ class HairPaint2:
                     seg = max(0.0, np.sin(xs[i] * math.pi * 3.2 + 0.4))
                     k = np.exp(-((ys - (self.ring_y + wave[i])) / 0.2) ** 2) * seg * 0.9
                     img[:, i, :3] = mix(img[:, i, :3], self.h, np.clip(k, 0, 0.9)[:, None])
+            # 房の左右の端ほど暗く (板ではなく丸い房に見せる)
+            from paint import round_shade
+            round_shade(img, self.d, 0.5)
             # 2 本だけの薄い筋 (房の形が分かる程度)
             if W >= 8:
                 for xf in (0.33, 0.7):
@@ -291,14 +294,26 @@ class HairPaint2:
 
 
 def sheet(m: Model, bone, x, ytop, z, w, L, d, paint, rz=0.0, rx=0.0, bend=1.6, tip=0.38, pivot=None):
-    """垂れる髪の板一枚: 根元の板 + 先へ 2 枚 (同じ付け根のまわりでさらに傾け、細く)。z = 前の面。"""
-    piv = pivot or (x, ytop, z + d / 2)
-    Lb = L * (1 - tip)
-    m.box(bone, (x - w / 2, ytop - Lb, z), (w, Lb + 0.3, d), paint, rot=(rx, 0, rz), pivot=piv)
-    m.box(bone, (x - w * 0.32, ytop - L * (1 - tip * 0.35), z + d * 0.06), (w * 0.64, L * tip * 0.75, d * 0.88), paint,
-          rot=(rx * 1.2, 0, rz * bend), pivot=piv)
-    m.box(bone, (x - w * 0.14, ytop - L - 0.2, z + d * 0.12), (w * 0.28, L * tip * 0.55, d * 0.76), paint,
-          rot=(rx * 1.4, 0, rz * bend * 1.35), pivot=piv)
+    """垂れる髪の板一枚を 3 節の鎖で: 根元の板 → 中 → 先。節は前の節の下の端を付け根に曲がるので、つながったまま細って曲がる。
+    z = 前の面。rz・rx = 根元の傾き、bend = 先へ行くほど傾きを何倍にするか。"""
+    from kit import rot_matrix
+    lens = [L * (1 - tip), L * tip * 0.6, L * tip * 0.45]
+    widths = [w, w * 0.68, w * 0.36]
+    depths = [d, d * 0.9, d * 0.8]
+    rots = [(rx, 0, rz), (rx * 1.2, 0, rz * bend), (rx * 1.4, 0, rz * bend * 1.35)]
+    piv = np.array(pivot or (x, ytop, z + d / 2), float)
+    top = np.array([x, ytop, z + d / 2], float)
+    for k in range(3):
+        wl, ln, dp, rt = widths[k], lens[k], depths[k], rots[k]
+        over = 0.0 if k == 0 else 0.45  # 前の節に食い込ませる
+        frm = (top[0] - wl / 2, top[1] - ln, top[2] - dp / 2)
+        m.box(bone, frm, (wl, ln + over, dp), paint, rot=rt, pivot=tuple(piv))
+        # この節の下の端 (回した後) が次の節の付け根
+        R = rot_matrix(rt)
+        bottom = np.array([top[0], top[1] - ln, top[2]])
+        top = piv + R @ (bottom - piv)
+        # 次の節は回す前の形を top から下へ置き、付け根 top のまわりで回す
+        piv = top.copy()
 
 
 def hair_mass(m: Model, paint, back_bottom=23.5):
@@ -337,9 +352,11 @@ def back_hair2(m: Model, paint, bottom=12.0, bone="hair_back"):
     piv = (0, 29.5, 4.8)
     m.bone(bone, "body", piv)
     L = top - bottom
-    m.box(bone, (-4.7, top - L * 0.82, 4.0), (9.4, L * 0.82, 0.8), paint, rot=(4, 0, 0), pivot=piv)
-    for (x, w, rz, k, z) in ((-3.1, 4.2, -9, 0.95, 4.6), (3.1, 4.2, 9, 0.95, 4.6), (0.0, 4.8, 0, 1.0, 5.15)):
-        sheet(m, bone, x, top, z, w, L * k, 1.0, paint, rz=rz, rx=7, bend=1.4, tip=0.3, pivot=(x, top, z + 0.5))
+    m.box(bone, (-4.7, top - L * 0.8, 4.0), (9.4, L * 0.8, 0.8), paint, rot=(4, 0, 0), pivot=piv, rounded=False)
+    # 外の房 5 つ: 少しずつ重ね、外ほど開いて短く、前後を互い違いに
+    for (x, w, rz, k, z) in ((-3.7, 2.9, -12, 0.86, 4.55), (3.7, 2.9, 12, 0.84, 4.55), (-1.9, 3.1, -5, 0.97, 5.0),
+                             (1.9, 3.1, 5, 0.95, 5.0), (0.0, 3.3, 0, 1.0, 5.45)):
+        sheet(m, bone, x, top, z, w, L * k, 1.15, paint, rz=rz, rx=7, bend=1.45, tip=0.32, pivot=(x, top, z + 0.55))
 
 
 def ahoge2(m: Model, paint, x=0.5, z=-0.8):

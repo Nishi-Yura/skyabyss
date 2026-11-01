@@ -1,4 +1,4 @@
-# 体ごとのスキンを一人ずつ四つの向きで (二重に描かれていないかの確認)
+# 体ごとのスキンを一人ずつ四つの向きで。空に足場を置いて撮る (地面の高さで位置がずれないように)
 world continent_areas continent
 size 1280 720
 timeout 1200
@@ -11,12 +11,9 @@ cmd gamemode adventure
 cmd time set 6000
 cmd weather clear
 cmd effect give @s resistance 99999 4 true
-cmd tp @s -120 120 -600 0 0
+cmd tp @s -120 160 -600 0 0
 waitchunks 300
-wait 20
-cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
-cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
-wait 100
+wait 60
 cmd skyabyss level set @p 50
 cmd item replace entity @s armor.head with minecraft:air
 cmd item replace entity @s armor.chest with minecraft:air
@@ -26,34 +23,35 @@ cmd skyabyss skin give all
 cmd skyabyss skin wear witch
 hud off
 chat clear
-wait 20
-otherplayer 0 3 T0 0
+cmd fill -126 159 -606 -114 159 -592 minecraft:smooth_stone
+cmd fill -126 160 -606 -114 166 -592 minecraft:air
+cmd tp @s -120 160 -600 0 0
+waitchunks 100
+wait 30
+otherplayer 0 3.2 T0 0
 wait 30
 shot turn_0
-cmd tp @s -120 120 -560 0 0
+cmd fill -96 159 -606 -84 159 -592 minecraft:smooth_stone
+cmd fill -96 160 -606 -84 166 -592 minecraft:air
+cmd tp @s -90 160 -600 0 0
 waitchunks 100
-wait 20
-cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
-cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
-wait 20
-otherplayer 0 3 T90 90
+wait 30
+otherplayer 0 3.2 T90 90
 wait 30
 shot turn_90
-cmd tp @s -120 120 -520 0 0
+cmd fill -66 159 -606 -54 159 -592 minecraft:smooth_stone
+cmd fill -66 160 -606 -54 166 -592 minecraft:air
+cmd tp @s -60 160 -600 0 0
 waitchunks 100
-wait 20
-cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
-cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
-wait 20
-otherplayer 0 3 T180 180
+wait 30
+otherplayer 0 3.2 T180 180
 wait 30
 shot turn_180
-cmd tp @s -120 120 -480 0 0
+cmd fill -36 159 -606 -24 159 -592 minecraft:smooth_stone
+cmd fill -36 160 -606 -24 166 -592 minecraft:air
+cmd tp @s -30 160 -600 0 0
 waitchunks 100
-wait 20
-cmd fill ~-5 ~ ~-2 ~5 ~6 ~8 minecraft:air
-cmd fill ~-5 ~-1 ~-2 ~5 ~-1 ~8 minecraft:grass_block
-wait 20
-otherplayer 0 3 T270 270
+wait 30
+otherplayer 0 3.2 T270 270
 wait 30
 shot turn_270
