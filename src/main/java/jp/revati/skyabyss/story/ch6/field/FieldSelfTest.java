@@ -222,7 +222,7 @@ public final class FieldSelfTest {
                 FieldTide.setTo(moon, FieldTide.Tide.BRIGHT, 10);
                 // 構えと隙は人が打った傷にだけ掛かる (BossOpenings)。人数の割り (PartyScale) は外して素の値を見る
                 net.neoforged.neoforge.common.util.FakePlayer hitter = new net.neoforged.neoforge.common.util.FakePlayer(moon, new GameProfile(UUID.randomUUID(), "moon_hitter"));
-                lord.getPersistentData().remove(jp.revati.skyabyss.combat.PartyScale.KEY);
+                jp.revati.skyabyss.combat.PartyScale.clearForTest(lord);
                 lord.chargeForTest(40);
                 float h0 = lord.getHealth();
                 lord.invulnerableTime = 0;

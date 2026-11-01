@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.tower.mob;
 
 import jp.revati.skyabyss.story.finale.mob.CloudMob;
-import jp.revati.skyabyss.story.finale.mob.PilgrimMoon;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -13,11 +12,12 @@ import net.minecraft.world.phys.Vec3;
 // 落ちる月 (あいだの塔。docs/design/54 の 2.5 の New Sun)。主が体力 50% と 20% で呼ぶ。橋の北から南へ進みながら大きくなる
 // (進みと大きさは TowerFight が決める)。南の端に着く前に壊さないと全滅。形は巡礼者の月 (pilgrim_moon) を借りる
 public class TowerMoon extends CloudMob {
+    public static final String ID = "tower_moon";
     public static final double HP = 1200;
     public static final double DMG = 22;
 
     public TowerMoon(EntityType<? extends Monster> type, Level level) {
-        super(type, level, PilgrimMoon.ID, "pull", "sweep", "rewind", "fall", "call", "hurt", "death");
+        super(type, level, ID, "pull", "sweep", "rewind", "fall", "call", "hurt", "death");
         this.xpReward = 0;
         setNoGravity(true);
         setPersistenceRequired();

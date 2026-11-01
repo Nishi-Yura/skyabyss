@@ -20,6 +20,9 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PartyScale {
     public static final String KEY = "skyabyss_party_scale";
+    // 主の硬さ (心臓の BASE_RESIST と同じ役)。体力の上限 1024 を越えられない主が、心臓と同じ長さ (一人で 200 秒前後) の戦いになるよう、
+    // 人から受ける傷をこの値でも割る。値は 47 の 2.6 の表 (dps(Lv) × 0.55 × 200 ÷ 主の HP ÷ 平均の倍率)。2026-11-02
+    public static final String RESIST = "skyabyss_resist";
 
     private PartyScale() {
     }
@@ -45,10 +48,26 @@ public final class PartyScale {
         return Math.max(1, n);
     }
 
-    // 書いてある倍率 (なければ 1)
+    // 硬さを書く (1 なら消す)
+    public static void resist(LivingEntity boss, double k) {
+        if (k > 1) {
+            boss.getPersistentData().putDouble(RESIST, k);
+        } else {
+            boss.getPersistentData().remove(RESIST);
+        }
+    }
+
+    // 書いてある倍率 (人数 × 硬さ。なければ 1)
     public static double of(LivingEntity e) {
         double k = e.getPersistentData().getDouble(KEY);
-        return k > 1 ? k : 1;
+        double r = e.getPersistentData().getDouble(RESIST);
+        return (k > 1 ? k : 1) * (r > 1 ? r : 1);
+    }
+
+    // 自己テスト用: 人数と硬さを外して素の傷を見る
+    public static void clearForTest(LivingEntity e) {
+        e.getPersistentData().remove(KEY);
+        e.getPersistentData().remove(RESIST);
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)

@@ -147,6 +147,8 @@ public final class TowerFight {
         m.setShielded(true);
         m.setFloor(m.getMaxHealth() * floorFrac(0));
         level.addFreshEntity(m);
+        // 硬さ 2.0: 四人で 15〜20 分 (54 の 2.3)。隙の決まりが入って 0.3 倍で削り切る形でなくなったぶん (47 の 2.6)
+        jp.revati.skyabyss.combat.PartyScale.resist(m, 2.0);
         master = m;
         String[][] marks = {{"eye_l_1", "s"}, {"eye_r_1", "s"}, {"eye_l_2", "s"}, {"eye_r_2", "s"}, {"eye_big_l", "b"}, {"eye_big_r", "b"}};
         int i = 0;

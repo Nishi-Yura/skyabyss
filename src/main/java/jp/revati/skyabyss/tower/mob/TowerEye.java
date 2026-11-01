@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.tower.mob;
 
 import jp.revati.skyabyss.story.finale.mob.CloudMob;
-import jp.revati.skyabyss.story.finale.mob.LampEye;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -13,6 +12,7 @@ import net.minecraft.world.phys.Vec3;
 // 側の目 (あいだの塔。docs/design/54 の 2.5 の Eyes of War)。橋の左右の台に据わり、光線を撃つ (撃つ順と狙いは TowerFight)。壊せる。
 //   形は灯守の目 (lamp_eye) を借りる。小さい目 4 つ (1 倍) と大きい目 2 つ (1.8 倍。TOWER_EYE_BIG)
 public class TowerEye extends CloudMob {
+    public static final String ID = "tower_eye";
     public static final double HP_SMALL = 260;
     public static final double HP_BIG = 600;
     public static final double DMG = 20;
@@ -20,7 +20,7 @@ public class TowerEye extends CloudMob {
     private Vec3 home;
 
     public TowerEye(EntityType<? extends Monster> type, Level level) {
-        super(type, level, LampEye.ID, "stare", "closed", "rain", "call", "hurt", "death");
+        super(type, level, ID, "stare", "closed", "rain", "call", "hurt", "death");
         this.xpReward = 0;
         setNoGravity(true);
         setPersistenceRequired();

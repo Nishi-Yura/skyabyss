@@ -37,7 +37,8 @@ ROUGH = os.path.join(ROOT, "docs", "review", "cloud_roughs")
 
 CHOICE = {"bell_mourner": "a", "mist_bird": "a", "last_bellkeeper": "a", "net_caster": "a", "lamp_moth": "a", "lamp_eye": "a",
           "ash_striker": "a", "backfire": "a", "rewinder": "a", "fallen_plume": "a", "plume_warden": "a", "pilgrim_plume": "a",
-          "pilgrim_hand": "a", "pilgrim_eye": "a", "pilgrim_moon": "a", "founder": "a", "tower_master": "a", "circuit_stake": "a"}
+          "pilgrim_hand": "a", "pilgrim_eye": "a", "pilgrim_moon": "a", "founder": "a", "tower_master": "a", "circuit_stake": "a",
+          "tower_eye": "a", "tower_moon": "a"}
 
 
 # ---------------------------------------------------------------- 鐘の亡者 (よろよろ歩く・鐘を振り上げて鳴らす)
@@ -606,6 +607,9 @@ def circuit_stake():
 
 
 ANIMS["circuit_stake"] = circuit_stake
+# 塔の側の目と落ちる月 (2026-11-02 に自前の形。骨は灯守の目・巡礼者の月と同じ名前なので、動きはそのまま借りる)
+ANIMS["tower_eye"] = lamp_eye
+ANIMS["tower_moon"] = pilgrim_moon
 
 # 段の割れ目の色 (無ければ朝の光)
 CRACK = {"circuit_stake": (198, 160, 255, 255)}

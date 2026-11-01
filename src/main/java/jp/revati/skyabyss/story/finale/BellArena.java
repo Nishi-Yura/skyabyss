@@ -88,6 +88,7 @@ public final class BellArena {
         level.addFreshEntity(e);
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
+        jp.revati.skyabyss.combat.PartyScale.resist(e, 2.5);
         e.playAction("call");
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 80, 1.2, 3.0, 1.2, 0.05);
         level.playSound(null, at, CloudMobsSetup.KEEPER_ROAR.get(), SoundSource.HOSTILE, 2.0f, 0.8f);

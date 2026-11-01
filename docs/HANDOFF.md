@@ -2,6 +2,14 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
+## 2026-11-02 の夕方: 終盤の主の硬さ・wip の削除・形のラフ
+
+- **終盤の主の体力**（設計 [47](design/47_combat_difficulty.md) の 2.6 の表）: 月・雲海・塔の主の体力は、隙の決まりが入る前（×0.3 で削り切る形）に一人 3〜5 分になるよう置かれていた数字で、隙が来るようになって 80〜100 秒に縮んでいた。体力の上限 1024 を越えられないので、心臓の `BASE_RESIST` と同じ役の硬さ `PartyScale.resist`（人から受ける傷を割る。人数の割りと同じ所で掛かる）を舞台で湧かせるときに書き、一人 200 秒前後に戻した。値: 望の灯守 1.9・月秤 1.9・影抱き 1.5・欠けの刃 2.6・月の核 2.6・灯守の目 2.4・最後の鐘守 2.5・巻き戻し手 2.4・巡礼者の羽 2.3・巡礼者の手/目/月 1.3・あいだに座すもの 2.0。始祖は変えない（53）。式と平均の倍率の見積もりは 47 の表。試遊で長ければ下げる。
+- **origin/wip/\* 79 本を消した**（全部 m1-sky-pass に取り込み済みだった）。リモートの枝は `main` と `m1-sky-pass` だけ。
+- **塔の側の目と落ちる月の自前の形**: 3 案ずつのラフ（`docs/review/roughs_1102_tower/`）から、側の目 C「二つ割りの眼」(1708 三角形)・落ちる月 A「半分の月」(2006) を選んで入れた（`gen_cloud_mobs.py tower_eye tower_moon`。`TowerEye.ID`/`TowerMoon.ID` を自前の形に。骨は灯守の目・巡礼者の月と同じなので動きはそのまま）。
+- **形のラフ**: 三角形数が同種の 40% 未満だった雑魚 37 体の密度上げ（`docs/review/roughs_1102_densify/`、`tools/rough/lowpoly/densify_1102/`）。どちらも入れていない（選んでから）。
+- 確かめ: 全段の自己テスト 216 段すべて通過（硬さと塔の形を入れる前の状態。1329 秒）。硬さと塔の形を入れたあとに月・雲海・始祖・塔・戦いの決まりの段を流し直した（結果はこの節の末尾）。
+
 ## 2026-11-02 の昼: 全体監査の「中」13 件と「低」4 件（`docs/review/audit_2026-11-01.md` の 6〜22）
 
 一つのコミットにまとめる前の作業ツリー（約 630 ファイル。削除 249・変更 207・新規 174）。確かめ: compileJava、`quick_check.sh --no-java` 全部 OK、自己テストは各担当の段と、まとめの段 `lang,keys,vow,codex,combat rules,new foes,town guide,item audit,gear tiers,wild gear,accessory,moon world,moon valley,cloudsea,tower,circuit,facility,growth,titan ground,titan lairs`（結果はこの節の末尾）。
