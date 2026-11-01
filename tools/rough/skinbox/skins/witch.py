@@ -249,15 +249,12 @@ def skull(m, bone, c):
 
 # ---------------------------------------------------------------- 組み立て
 def build():
-    from body import base, HairCel, hair_mass, bangs2, side_hair2, back_hair2
+    from body import base, HairCel, hair4
     m = Model("skin_full/" + ID)
     base(m, own=True, under="#2c2438")
-    # ---- 髪 (紫。かさ・前髪 5 束・横髪 2 束ずつ・後ろ髪 5 束。束は先細りのキューブの鎖)
+    # ---- 髪 (紫。頭より外までふくらむかさ・前髪 4 房・横髪 2 束ずつ・後ろ髪は下地と幅の広い束 4 本)
     hp = HairCel("#7a4fb4", "#b48ee0", "#4f2f80", "#2c1a4c", "#ece0ff")
-    hair_mass(m, hp, back_bottom=24.0, shingles=False)
-    bangs2(m, hp)
-    side_hair2(m, hp, length=13.5)
-    back_hair2(m, hp, bottom=11.5)
+    hair4(m, hp, back_bottom=11.5, side_len=13.0)
     # ---- 胴: 黒い胴着、紅の胸当て (コルセットの前) と黒い紐・金の鳩目、帯と金の留め金
     m.box("body", (-3.6, 18.4, -2.1), (7.2, 5.1, 4.2), BLACK)
     m.box("body", (-3.25, 14.3, -1.95), (6.5, 4.2, 3.9), BLACK)

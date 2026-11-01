@@ -302,14 +302,19 @@ LOCK5 = dict(len=[3.4, 3.2, 3.0, 2.6, 3.8], w=[1.0, 0.867, 0.733, 0.6, 0.333], d
              flare=[0.333, 0.667, 0.889, 1.0, 0.667], flow=[0.0, 0.118, 0.294, 0.471, 0.824])
 
 
-def lock(m: Model, bone, x, ytop, z, w, L, d, paint, out=(0, 0, 1), flare=18.0, flow=0.0, lean=(0.0, 0.0), pivot=None, n=None, overlap=0.5):
+LOCKW = dict(len=[3.4, 3.2, 3.0, 2.6, 2.2, 1.6], w=[1.0, 0.95, 0.88, 0.78, 0.66, 0.5], d=[1.0, 0.95, 0.9, 0.82, 0.72, 0.6],
+             flare=[0.333, 0.667, 0.889, 1.0, 0.833, 0.5], flow=[0.0, 0.118, 0.294, 0.471, 0.706, 1.0])
+
+
+def lock(m: Model, bone, x, ytop, z, w, L, d, paint, out=(0, 0, 1), flare=18.0, flow=0.0, lean=(0.0, 0.0), pivot=None, n=None, overlap=0.5,
+         wide=False):
     """髪の一束をキューブの鎖で: 先へ行くほど小さく、節ごとに少しずつ回して流れるカーブにする。
     各キューブは前のキューブを回した後の下の端 (の真ん中) を付け根に回すので、曲がってもつながったまま。上の端は overlap だけ前に食い込ませる。
     x・ytop = 根元の上の端の真ん中、z = 前の面、w = 幅 (x)、d = 厚み (z)、L = 長さ。
     out = 外の向き: (0,0,1) 後ろ髪 / (0,0,-1) 前髪 / (-1,0,0) 右の横髪 / (1,0,0) 左。flare = 外へ開く最大の角度 (S 字の山)。
     flow = 横へ流れる毛先の角度 (後ろ・前髪は +X へ、横髪は前 (-Z) へ)。lean = 全体の傾き (X, Z)。n = 6 か 5 (既定は長さで決める)。"""
     from kit import rot_matrix
-    t = LOCK6 if (n or (6 if L >= 9 else 5)) == 6 else LOCK5
+    t = LOCKW if wide else (LOCK6 if (n or (6 if L >= 9 else 5)) == 6 else LOCK5)
     total = sum(t["len"])
     ox, _, oz = out
     piv = np.array(pivot or (x, ytop, z + d / 2), float)
@@ -409,7 +414,7 @@ class HairCel:
             u = (np.arange(w2) + 0.5) / w2
             t = np.clip((self.y_hi - ys) / (self.y_hi - self.y_lo), 0, 1)
             bias = {"n": 0.06, "w": 0.1, "e": -0.1, "s": -0.12}[face]
-            v = 0.78 - 0.55 * t[:, None] + bias - 0.2 * (np.abs(u[None, :] - 0.45) * 2) ** 1.5
+            v = 0.78 - 0.55 * t[:, None] + bias - 0.1 * (np.abs(u[None, :] - 0.45) * 2) ** 1.5
         elif face == "u":
             v = np.full((h2, w2), 0.8)
         else:
@@ -428,6 +433,44 @@ class HairCel:
                     img[rows, i, :3] = self.h
         img = np.repeat(np.repeat(img, bl, 0), bl, 1)[:H, :W]
         if face in "nsew" and W >= 3:
-            img[:, :1, :3] = mix(img[:, :1, :3], self.pal[0], 0.35)
-            img[:, -1:, :3] = mix(img[:, -1:, :3], self.pal[0], 0.35)
+            img[:, :1, :3] = mix(img[:, :1, :3], self.pal[1], 0.4)
+            img[:, -1:, :3] = mix(img[:, -1:, :3], self.pal[1], 0.4)
         return out(img)
+
+
+# ================================================================ 髪の組み方 4 (見本に寄せて: 少ない幅の広い束で一つのかたまり。2026-11-01)
+#   束は 3〜5 本ずつ、幅 3〜4.5px・厚み 1.1〜1.6px、先は根元の半分まで (LOCKW)。束どうしは重ねてすき間を出さない。
+#   頭のまわりは頭より 1〜1.5px 外までふくらませ、横は下ほど広がる。
+def hair4(m: Model, paint, back_bottom=12.0, side_len=12.5, bangs_len=3.1, part=0.6):
+    """かさ・前髪 4 房・横髪 (前と耳の後ろ)・後ろ髪 (下地の一枚と幅の広い束 4 本)。part = 分け目の x (前髪の流れの中心)。"""
+    # ---- かさ: 頭より外の大きな箱 (角は八角)、上の丸み、横のふくらみ (下ほど外へ)、後ろの厚み
+    m.box("head", (-5.2, 29.6, -5.0), (10.4, 3.7, 10.3), paint)
+    m.box("head", (-4.5, 33.2, -4.4), (9.0, 0.9, 8.9), paint)
+    m.box("head", (-3.3, 34.0, -3.2), (6.6, 0.5, 6.6), paint)
+    m.pair("head", (-5.7, 24.6, -3.6), (1.5, 6.0, 7.6), paint, rot=(0, 0, -6), pivot=(-5.0, 30.6, 0))
+    m.box("head", (-5.3, 23.4, 3.3), (10.6, 7.2, 2.0), paint)
+    # ---- 前髪: 4 房。分け目から左右へ流れ、隣と重なる幅。奥の房と手前の房で 0.3 ずらす
+    for (x, w, L, flow, z) in ((-3.2, 3.2, bangs_len * 0.92, -10, -5.05), (-0.9, 3.4, bangs_len, -5, -5.35),
+                               (1.5, 3.3, bangs_len * 0.96, 7, -5.35), (3.5, 2.8, bangs_len * 0.85, 12, -5.05)):
+        lock(m, "head", x, 33.4, z, w, L + 1.6, 1.15, paint, out=(0, 0, -1), flare=9, flow=flow, lean=(-8, 0), wide=True)
+    # ---- 横髪: 頬の前の幅の広い束 (胸まで) と、耳の後ろの束。揺れる。左は映す
+    bone = "hair_side_R"
+    piv = (-5.0, 31.0, -2.0)
+    m.pair_bone(bone, "head", piv)
+    lock(m, bone, -5.55, 31.0, -4.8, 1.7, side_len, 3.6, paint, out=(-1, 0, 0), flare=9, flow=5, lean=(-2, 0), pivot=piv, wide=True)
+    lock(m, bone, -5.85, 30.4, -1.6, 1.7, side_len * 0.8, 4.4, paint, out=(-1, 0, 0), flare=12, flow=-6, lean=(4, 0), pivot=piv, wide=True)
+    for b in [b for b in m.boxes if b.bone == bone and not b.mirror]:
+        x0 = -(b.frm[0] + b.size[0])
+        pv = None if b.pivot is None else (-b.pivot[0], b.pivot[1], b.pivot[2])
+        m.box(bone.replace("_R", "_L"), (x0, b.frm[1], b.frm[2]), b.size, b.paint, (b.rot[0], -b.rot[1], -b.rot[2]), pv, mirror=True,
+              rounded=False)
+    # ---- 後ろ髪: 下地の一枚 (すき間を塞ぐ) と、幅の広い束 4 本 (少しずつ重ね、外の束ほど開いて短い)。体に付けて揺らす
+    top = 30.2
+    pv = (0, 29.6, 4.9)
+    m.bone("hair_back", "body", pv)
+    L = top - back_bottom
+    m.box("hair_back", (-5.0, top - L * 0.86, 4.25), (10.0, L * 0.86, 1.3), paint, rot=(5, 0, 0), pivot=pv, rounded=False)
+    for (x, w, flow, k, z) in ((-3.6, 3.6, -11, 0.92, 4.6), (3.6, 3.6, 11, 0.9, 4.6), (-1.25, 3.9, -4, 1.0, 5.1), (1.25, 3.9, 4, 0.98, 5.1)):
+        lock(m, "hair_back", x, top, z, w, L * k, 1.6, paint, out=(0, 0, 1), flare=10, flow=flow, lean=(5, flow * 0.25),
+             pivot=(x, top, z + 0.8), wide=True)
+
