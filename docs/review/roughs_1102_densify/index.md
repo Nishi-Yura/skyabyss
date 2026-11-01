@@ -94,5 +94,41 @@ python -I tools/install/install_lowpoly.py <名前> --mesh docs/review/roughs_11
 - 索引の再作成: `python -I tools/rough/lowpoly/densify_1102/index_build.py`。
 - 採用案: 取り込みの三角形数に一番近い案（`dens.choose`）。深淵 B・三章・四章・大陸などは生成スクリプトの CHOICE の案を直接指定し、再現の数が取り込みと一致することを確かめた（`shell_hare` 等の差は注に書いた）。
 
+## 入れた（2026-11-02）
+
+33 体すべてを `src/main/resources` に入れた（取り込み済み。生成スクリプトの入力も新しい形に置き換えた）。
+
+- 結果: 33 体、41 ファイル（深淵 A は s1〜s3 の三段）。`lowpoly/<名前>.json` の `triangle_count` は、上の表の「密度上げ後」と全件一致。
+- 検査: `python -I tools/audit/mesh_audit.py --check` は 0 失敗。`python -I tools/audit/check_resources.py` は 0 件。
+- 名前: 参照されるファイル名（`lowpoly/<名前>.json`・`textures/lowpoly/<名前>.png`・`_glowmask.png`・`geo/entity/<名前>_lowpoly.geo.json`）と骨の名前は変えていない。
+- 対象外: `tower_eye`・`tower_moon` は触っていない（変更 0）。
+
+実行したコマンド（リポジトリ直下）:
+
+```
+python -I tools/rough/lowpoly/densify_1102/install_1102.py place     # 元のラフを before/rough_original/ に控え、after を生成元の入力名に置く
+python -I tools/rough/lowpoly/densify_1102/install_1102.py install   # 群ごとに生成スクリプトの install を 33 体に絞って流す
+```
+
+`install` が流すもの:
+
+- 月 8 体・雲海 5 体: `tools/gen/ch6/gen_moon_mobs.py` の `install(only=...)`、`tools/gen/finale/gen_cloud_mobs.py` の `install(only=...)`
+- 深淵 B 7 体: `python -I tools/abyss/paint_abyss_b.py <7 体>`（絵を描き直す。元の絵は before/painted_original/ に控えた）→ `tools/gen/abyss/gen_abyss_mobs_b.py` の `install(only=...)`
+- 深淵 A 4 体: `PYTHONIOENCODING=utf-8 python -I tools/gen/abyss/gen_abyss_mobs_a.py --only <種>`（種ごと。段 s1〜s3 を作る）
+- 三章 3 体: `tools/gen/ch3/gen_ch3_ground_mobs.py` の CHOICE を 3 体に絞って `install()`
+- 四章 `cinder_mite`: `tools/gen/ch4/gen_ch4_ground_mobs.py` の CHOICE を絞って `install()`
+- 大陸 2 体: `tools/gen/foes/gen_foes_one.py` の MOBS を絞って `install()`
+- 一章 `bone_gull`: `tools/install/install_ch1_back_mobs.py` の JOBS を絞って `main()`
+- 二章 2 体: `tools/gen/ch2/gen_ch2_ground_mobs.py` の CHOICE を絞って `install()`
+
+検査: `python -I tools/rough/lowpoly/densify_1102/install_1102.py verify`（三角形数の照合）、`python -I tools/audit/mesh_audit.py --check`、`python -I tools/audit/check_resources.py`。
+
+注意:
+
+- 深淵 A は生成スクリプトが入力のメッシュを島ごとに複製して使うため、閉じたメッシュ（`after/<id>_after_mesh_closed.json`）を入力にした。最初に開いた raw を入れたところ s1〜s3 が 520 三角形の開いた状態になったので、閉じた版に直して四種を流し直した。
+- 深淵 B の絵は `paint_abyss_b.py` で描き直した。ゲームで色と見え方を撮って確かめる必要がある（未確認）。
+- `check_generators.py`（全体の再現確認）は走らせていない。
+- 変更されたファイル: 元のラフ・絵は `before/` の下に控えた。取り込み前の `src/main/resources` は git の HEAD に残っている。デバッグ用の geo（箱の範囲）は新しい形に合わせて変わる。アニメ・スポーンエッグは内容が同じ（改行の違いだけ）。
+
 ---
 作成: 2026-11-02。
