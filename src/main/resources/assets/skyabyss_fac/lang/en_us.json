@@ -813,5 +813,12 @@
   "dialogue.skyabyss.attendant_perch_keeper.mount_rules": "Blow once and it comes; blow again and it goes home. It can't follow you onto a titan's back, down into the abyss, or into a heart chamber. It also leaves if you wander far or log off. New looks arrive as you clear chapters; stats you polish with bell coins.",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount": "See or buy mounts (looks and stats)",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount_rules": "How the whistle works",
-  "dialogue.skyabyss.attendant_outfitter.menu.skins": "Look at skins (tailoring)"
+  "entity.skyabyss.attendant_tailor": "Tailor",
+  "dialogue.skyabyss.attendant_tailor.intro": "Welcome, I'm the tailor. I won't make you any stronger, but I'll make you look like anything you like. Samurai, pirate, just say the word.",
+  "dialogue.skyabyss.attendant_tailor.menu": "Care to see this week's pieces?",
+  "dialogue.skyabyss.attendant_tailor.menu.skins": "See this week's tailoring",
+  "dialogue.skyabyss.attendant_tailor.menu.about": "What are skins?",
+  "dialogue.skyabyss.attendant_tailor.menu.bye": "See you",
+  "dialogue.skyabyss.attendant_tailor.about_skins": "A look worn over your armor. It hides the armor's shape and shows the outfit, but your strength stays the armor's. Four pieces a week, changing Monday morning. Tower pieces are with the tower keeper, and some come as rewards. Change outfits from Wardrobe in your profile.",
+  "entity.skyabyss.attendant.tailor": "Tailor"
 }

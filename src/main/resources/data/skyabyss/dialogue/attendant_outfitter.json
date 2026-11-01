@@ -46,17 +46,6 @@
           "goto": "end"
         },
         {
-          "id": "skins",
-          "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "skins"
-            }
-          ],
-          "goto": "end"
-        },
-        {
           "id": "about",
           "kind": "talk",
           "goto": "again"

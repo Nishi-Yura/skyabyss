@@ -36,7 +36,9 @@ public enum AttendantRole {
     // 封切り師 (封の箱を開ける。docs/design/52 の 5 章)。設計図の印は持たず、鍛冶屋の係の人のそばの空いた床に立つ (loot/box/BoxOpeners)
     BOX_OPENER("box_opener", null, 1),
     // 塔守 (あいだの塔の受付。docs/design/54 の 2.2)。設計図の印は持たず、都の広場の案内人のそばの空いた床に立つ (tower/TowerDesk)
-    TOWER_KEEPER("tower_keeper", null, 1);
+    TOWER_KEEPER("tower_keeper", null, 1),
+    // 仕立て屋 (スキンの店。docs/design/54 の 6.1.1)。設計図の印は持たず、武具屋の係の人のそばの空いた床に立つ (skin/TailorStand)
+    TAILOR("tailor", null, 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";

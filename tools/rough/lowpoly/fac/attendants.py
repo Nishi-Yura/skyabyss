@@ -40,12 +40,12 @@ BONES = ART.BONES
 
 ROLES = ["guild_clerk", "smith", "tool_merchant", "apothecary", "storage_keeper", "innkeeper", "perch_keeper",
          "shrine_priest", "training_master", "black_marketeer", "gravekeeper",
-         "drunkard", "trade_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener", "tower_keeper"]
+         "drunkard", "trade_keeper", "guide", "food_vendor", "outfitter", "material_trader", "box_opener", "tower_keeper", "tailor"]
 ROLE_JA = {"food_vendor": "食料屋", "outfitter": "武具屋", "material_trader": "素材屋", "guild_clerk": "組合の受付の書記", "smith": "鍛冶師", "tool_merchant": "道具屋", "apothecary": "薬師",
            "storage_keeper": "預かり番", "innkeeper": "宿の女将", "perch_keeper": "止まり木の番", "shrine_priest": "社の祭司",
            "training_master": "師範", "black_marketeer": "顔を隠した商人",
            "gravekeeper": "墓守", "drunkard": "酔いどれ",
-           "trade_keeper": "取引所の番", "guide": "都の案内人", "box_opener": "封切り師", "tower_keeper": "塔守"}
+           "trade_keeper": "取引所の番", "guide": "都の案内人", "box_opener": "封切り師", "tower_keeper": "塔守", "tailor": "仕立て屋"}
 
 
 # ====================================================================== 色
@@ -91,6 +91,7 @@ PAL = {
     "guide":           dict(coat=(232, 230, 222), role=(242, 240, 234), trim=(196, 162, 78), acc=(206, 170, 90), hair=(70, 52, 40), skin="mid", guard=(214, 210, 200), sash=(70, 108, 150)),
     "box_opener":      dict(coat=(112, 52, 42), role=(214, 200, 168), trim=(64, 36, 28), acc=(206, 168, 86), hair=(150, 140, 132), skin="ruddy", guard=(96, 50, 40), sash=(170, 34, 38)),
     "tower_keeper":    dict(coat=(226, 222, 210), role=(40, 36, 52), trim=(206, 168, 86), acc=(214, 176, 92), hair=(222, 220, 214), skin="old", guard=(40, 36, 52), sash=(206, 168, 86)),
+    "tailor":          dict(coat=(40, 78, 72), role=(232, 226, 210), trim=(206, 168, 86), acc=(232, 200, 70), hair=(58, 40, 34), skin="pale", guard=(46, 44, 56), sash=(232, 200, 70)),
 }
 
 LEATHER = CK.BROWN

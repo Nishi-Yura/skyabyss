@@ -1,0 +1,65 @@
+{
+  "npc": "skyabyss:attendant_tailor",
+  "entries": [
+    {
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "intro"
+        }
+      },
+      "node": "intro"
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "intro"
+        }
+      ],
+      "next": "menu"
+    },
+    "again": {
+      "face": "neutral",
+      "next": "menu",
+      "text": "dialogue.skyabyss.attendant_tailor.intro"
+    },
+    "about_skins": {
+      "face": "smile",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "skins",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "skins"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "about",
+          "kind": "talk",
+          "goto": "about_skins"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

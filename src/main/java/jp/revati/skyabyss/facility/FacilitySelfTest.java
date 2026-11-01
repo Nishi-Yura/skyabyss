@@ -91,6 +91,7 @@ public final class FacilitySelfTest {
             shops(f, p);
             stash(f, server, p);
             inn(f, level, p);
+            names(f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST facility crashed", e);
             f.add("crashed: " + e);
@@ -99,7 +100,7 @@ public final class FacilitySelfTest {
             jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST facility PASSED (assets 3 looks x 16 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
+            SkyAbyss.LOGGER.info("SELFTEST facility PASSED (role names on the head in ja/en, assets 3 looks x 16 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility FAILED: {}", m));
         }
@@ -408,5 +409,19 @@ public final class FacilitySelfTest {
         check(f, !FacilityActions.repair(p) && sword.isDamaged(), "repair needs coins");
         Coins.give(p, 10);
         check(f, FacilityActions.repair(p) && !sword.isDamaged() && Coins.count(p) == 0, "repair takes coins and mends");
+    }
+
+    // 頭の上の名札 (entity.skyabyss.attendant.<役>) が日本語と英語にあるか (2026-11-01: 塔守と仕立て屋で抜けていた)。lang は名前空間ごとに分かれている
+    static void names(List<String> f) {
+        java.util.Map<String, String> ja = new java.util.HashMap<>();
+        java.util.Map<String, String> en = new java.util.HashMap<>();
+        for (String ns : new String[] {"skyabyss", "skyabyss_fac", "skyabyss_tower", "skyabyss_endgame"}) {
+            List<String> ignore = new java.util.ArrayList<>();
+            ja.putAll(jp.revati.skyabyss.item.GearCurveSelfTest.lang("/assets/" + ns + "/lang/ja_jp.json", ignore));
+            en.putAll(jp.revati.skyabyss.item.GearCurveSelfTest.lang("/assets/" + ns + "/lang/en_us.json", ignore));
+        }
+        for (AttendantRole r : AttendantRole.values()) {
+            check(f, ja.containsKey(r.nameKey()) && en.containsKey(r.nameKey()), "no head name for " + r.id + " (" + r.nameKey() + ")");
+        }
     }
 }
