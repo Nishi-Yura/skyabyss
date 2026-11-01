@@ -10,14 +10,15 @@
 
 ## 2026-11-01 の昼から夕方に入れたもの
 
-- プロフィール（`endgame/Profile`・`endgame/client/ProfileScreen`。持ち物の画面の右上の札 `ProfileCard` から）: わたし・称号・見え方・衣装の四つのつまみ。名札の称号は名前の上か下の一行（`client/rebirth/TitleTagClient`、位置は `RebirthData.titlePos`）。称号は 50 個。
+- プロフィール（`endgame/Profile`・`endgame/client/ProfileScreen`。持ち物の画面の右上の札 `ProfileCard` から）: わたし・称号・見え方の三つのつまみ。名札の称号は名前の上か下の一行（`client/rebirth/TitleTagClient`、位置は `RebirthData.titlePos`）。称号は 50 個。
 - ギルドの旗の模様 67 種（`GuildEmblems`。バニラの重ね 55 とこの世界の紋 12 = `data/skyabyss/banner_pattern/guild_*.json`、絵は `tools/gen/items/gen_guild_banners.py`）。土地の旗を取った組合の旗を町の門と広場に掛ける（`endgame/TownFlags`、開発用 `/skyabyss townflag set|clear|goto|respot`）。
 - 巡り路の「壊す」: 淵の杭 `endgame/CircuitStake`（形は `cloud/circuit_stake.py`、`gen_cloud_mobs.py circuit_stake`）。
-- スキン 12 着（`skin/Skins`・`client/SkinLayer`。形 `tools/rough/lowpoly/armor/skin_one.py [組|install]` → `tools/install/install_skins.py`）。着ると防具の見た目が替わる。手に入れ方は仕立て屋（週替わり 4 着、鐘銭）・塔守（欠片）・ほうび（名声 5 段・敵の図鑑）・まれな箱（巡り路と大事件）。仕立て屋の係の人 `TAILOR`（`skin/TailorStand`、武具屋のそば。形 `npc2/cast.py` の tailor）。開発用 `/skyabyss skin give|wear|clear|reset|tailor|tower`。
 - 釣り（`fishing/`）: 釣り竿（道具屋）、魚 31 種（絵 `tools/gen/items/gen_fish.py [install]`）、土地ごとの釣れ方、図鑑、週の釣り大会、食べ物屋の買い取りと番付。開発用 `/skyabyss fishing catch [id]|roll|reset`。
-- 野の斧 5 本の刃の向き（`WeaponItemRenderer.EDGE_FLIP`）。係の人の頭の名札の訳（塔守と仕立て屋が抜けていた。施設の自己テストで全部の役を見る）。
-- 自己テストを足した: `skins`・`fishing`（本物の浮きを引き上げる流れも）・`guild week`（町の旗）・`circuit`（壊す）・`facility`（名札）。撮影: `profile.txt`・`guild_motifs.txt`・`town_flags.txt`・`circuit_stake.txt`・`skins.txt`・`skins_shops.txt`・`tailor.txt`・`fishing.txt`・`axe_facing.txt`。
-- まだ: 公開サイトは 0.9.20 のまま（ユーザーが 0.9.21 を遊んでから更新する）。釣りの投げる・引く手ごたえと数値（釣れる割合・大会の賞・スキンの値段）は試遊で直す。
+- 野の斧 5 本の刃の向き（`WeaponItemRenderer.EDGE_FLIP`）。係の人の頭の名札の訳（塔守が抜けていた。施設の自己テストで全部の役を見る）。
+- 自己テストを足した: `fishing`（本物の浮きを引き上げる流れも）・`guild week`（町の旗）・`circuit`（壊す）・`facility`（名札）。撮影: `profile.txt`・`guild_motifs.txt`・`town_flags.txt`・`circuit_stake.txt`・`fishing.txt`・`axe_facing.txt`。
+- まだ: 公開サイトは 0.9.20 のまま（ユーザーが 0.9.21 を遊んでから更新する）。釣りの投げる・引く手ごたえと数値（釣れる割合・大会の賞）は試遊で直す。
+
+- スキン（見た目だけの一式・仕立て屋・衣装棚）は 2026-11-01 の夜に仕組みごと消した（アニメ調のモデルに作り直していたが、ユーザーが「全部消していい」）。消した: `skin/`・`client/SkinLayer`・`client/FullSkinLayer`・プロフィールの「衣装」・仕立て屋の役（`AttendantRole.RETIRED` に入れたので前の世界の仕立て屋は消える）・塔守の「塔のスキン」・ほうびとまれな箱のスキン・形と絵と道具（`tools/rough/skinbox` など）。設計 54 の 6.1。
 
 ## エンドコンテンツの残り（2026-11-02 の夜。設計 [54](design/54_endgame_plan.md) の 3.1.1・3.3.1・3.4.1・5.1.1・5.4.1・6.2.7・6.2.8）
 
@@ -25,7 +26,7 @@
 - 称号は 50 個（`RebirthTitles`。事実の印 `Facts.marks` で名声・旅帳・熟練・図鑑・釣りを数える）。
 - 自己テスト: `circuit`・`world event`・`fame`・`mastery`・`guild week`・`codex`・`looks`。撮影台本: `tools/shots/circuit.txt`・`world_event.txt`・`mastery.txt`・`looks.txt`・`skill_changes.txt`。
 - 開発用: `/skyabyss circuit start <土地>|next|goto|end|reset`、`/skyabyss event start [土地]|goto|end`、`/skyabyss fame add <土地> <点>`。
-- 朝の確認ページ（https://claude.ai/artifact/8gGk5RcrHcLSJhUcYWetji）の選びは全部おすすめで、上の昼の分で作り終えた（飾り装備はユーザーの声でスキンに改めた）。
+- 朝の確認ページ（https://claude.ai/artifact/8gGk5RcrHcLSJhUcYWetji）の選びは全部おすすめで、上の昼の分で作り終えた（飾り装備はスキンに改めたあと、2026-11-01 の夜に仕組みごとやめた）。
 - 数値（巡り路の鐘銭・大事件の体力の倍率・名声の段の境・熟練の段の量）は試遊で直す。
 - 旅の記録の画面: 記録・技の上のつまみ「旅」（`endgame/client/JourneyScreen`、背景 `tools/gen/items/gen_journey_assets.py`）。
 - チャットの押せる一覧（秘伝・塔の受付と記録・見た目替え・旅帳）は、係の人の会話から開くとチャットの窓を開く（`endgame/ChatMenus`）。チャットの窓を開いているあいだは行を絞らない（`ChatLinesMixin`）。狭い画面では閉じたチャットは 1 行しか見えないため。

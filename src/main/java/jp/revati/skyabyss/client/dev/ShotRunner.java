@@ -638,7 +638,6 @@ public final class ShotRunner {
                     rp.yBodyRot = face;
                     rp.yBodyRotO = face;
                     rp.setData(jp.revati.skyabyss.rebirth.RebirthSetup.DATA.get(), jp.revati.skyabyss.rebirth.RebirthView.data(mc.player));
-                    rp.setData(jp.revati.skyabyss.skin.Skins.DATA.get(), jp.revati.skyabyss.skin.Skins.data(mc.player));
                     for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.HEAD,
                             net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
                         rp.setItemSlot(slot, mc.player.getItemBySlot(slot).copy());

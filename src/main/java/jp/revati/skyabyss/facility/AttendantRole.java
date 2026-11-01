@@ -36,15 +36,14 @@ public enum AttendantRole {
     // 封切り師 (封の箱を開ける。docs/design/52 の 5 章)。設計図の印は持たず、鍛冶屋の係の人のそばの空いた床に立つ (loot/box/BoxOpeners)
     BOX_OPENER("box_opener", null, 1),
     // 塔守 (あいだの塔の受付。docs/design/54 の 2.2)。設計図の印は持たず、都の広場の案内人のそばの空いた床に立つ (tower/TowerDesk)
-    TOWER_KEEPER("tower_keeper", null, 1),
-    // 仕立て屋 (スキンの店。docs/design/54 の 6.1.1)。設計図の印は持たず、武具屋の係の人のそばの空いた床に立つ (skin/TailorStand)
-    TAILOR("tailor", null, 1);
+    TOWER_KEEPER("tower_keeper", null, 1);
 
     // 設計図の印の頭 (npc_<役>)
     public static final String MARK_PREFIX = "npc_";
     // 消した役 (2026-10-31「書庫番や地図屋って必要？」→ 両方消す。砦の老兵も同日に消した: 試練の記録は J の記録、本丸の頁は社の祭司)。前の世界に立っている人は AttendantEntity が消す。設計図の印は残っていても立たない
     // 厩舎の番は 2026-11-01 に止まり木の番へまとめた (旅の番。乗り物の店と乗り笛の決まりも)
-    public static final java.util.Set<String> RETIRED = java.util.Set.of("archivist", "mapmaker", "keep_veteran", "stable_keeper");
+    // 仕立て屋も 2026-11-01 に消した (スキンの仕組みごとやめた)
+    public static final java.util.Set<String> RETIRED = java.util.Set.of("archivist", "mapmaker", "keep_veteran", "stable_keeper", "tailor");
     // 会話の役の ID の頭 (skyabyss:attendant_<役>)
     public static final String DIALOGUE_PREFIX = SkyAbyss.MODID + ":attendant_";
 

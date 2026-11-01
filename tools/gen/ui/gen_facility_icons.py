@@ -116,8 +116,6 @@ BALANCE_H = [(4, 0), (5, 0)]
 
 
 # 仕立て屋: 開いた鋏 (刃が X に交わり、下に二つの指の輪)
-SCISSORS = ["##......##", ".##....##.", "..##..##..", "...####...", "....##....", "...####...", ".##....##.", "#..#..#..#", "#..#..#..#", ".##....##."]
-SCISSORS_H = [(4, 4), (5, 4)]
 
 ICONS = {
     "guild_clerk": (BANNER, BANNER_H), "smith": (HAMMER, HAMMER_H), "tool_merchant": (LANTERN, []),
@@ -130,7 +128,6 @@ ICONS = {
     "food_vendor": (SAUSAGE, SAUSAGE_H), "outfitter": (SWORD_SHIELD, SWORD_SHIELD_H), "material_trader": (ORE, ORE_H),
     "box_opener": (SEALBOX, SEALBOX_H),
     "tower_keeper": (BALANCE, BALANCE_H),
-    "tailor": (SCISSORS, SCISSORS_H),
 }
 
 

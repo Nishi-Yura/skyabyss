@@ -170,7 +170,6 @@ public class SkyAbyss {
         jp.revati.skyabyss.rebirth.RebirthSetup.register(modEventBus, modContainer);
 
         // スキン (見た目だけの一式。持っているものと着ているもの)。docs/design/54 の 6.1
-        jp.revati.skyabyss.skin.Skins.register(modEventBus);
 
         // 釣り (魚 31 種と釣り竿)。docs/design/54 の 6.2.4.1
         jp.revati.skyabyss.fishing.FishingSetup.register(modEventBus);

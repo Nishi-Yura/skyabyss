@@ -66,17 +66,6 @@
           "goto": "end"
         },
         {
-          "id": "skins",
-          "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "tower_skins"
-            }
-          ],
-          "goto": "end"
-        },
-        {
           "id": "records",
           "kind": "talk",
           "text": "dialogue.skyabyss.attendant_tower_keeper.menu.records",

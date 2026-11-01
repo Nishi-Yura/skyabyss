@@ -813,13 +813,5 @@
   "dialogue.skyabyss.attendant_perch_keeper.mount_rules": "笛を吹けば目の前に来る。もう一度吹けば帰る。巨神の背と淵の底、心臓の間には連れていけない。主が遠くへ行ったり、眠りについたりしても帰っちまう。見た目は章を越えるごとに増える。性能は鐘銭で磨くんだ。",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount": "乗り物を見る・買う (見た目と性能)",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount_rules": "乗り笛の決まり",
-  "entity.skyabyss.attendant_tailor": "仕立て屋",
-  "dialogue.skyabyss.attendant_tailor.intro": "いらっしゃい。仕立て屋よ。強さは変えないけれど、見た目は一から仕立てるわ。侍でも海賊でも、着たいものを言ってちょうだい。",
-  "dialogue.skyabyss.attendant_tailor.menu": "今週の品を見ていく？",
-  "dialogue.skyabyss.attendant_tailor.menu.skins": "今週の仕立てを見る",
-  "dialogue.skyabyss.attendant_tailor.menu.about": "スキンって？",
-  "dialogue.skyabyss.attendant_tailor.menu.bye": "また来る",
-  "dialogue.skyabyss.attendant_tailor.about_skins": "鎧の上に着る見た目よ。着ると鎧の形が隠れて、仕立てた服に見えるの。強さは鎧のまま。店に並ぶのは週に四着、月曜の朝に替わるわ。塔の欠片の品は塔守、ほかにもほうびで手に入るものがあるそうよ。着替えはプロフィールの「衣装」で。",
-  "entity.skyabyss.attendant.tailor": "仕立て屋",
   "dialogue.skyabyss.attendant_food_vendor.menu.fishing": "釣り大会の番付を見る"
 }

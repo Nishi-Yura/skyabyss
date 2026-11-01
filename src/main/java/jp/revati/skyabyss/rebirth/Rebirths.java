@@ -140,7 +140,6 @@ public final class Rebirths {
     public static void updateTitles(ServerPlayer p) {
         RebirthData d = data(p);
         RebirthTitles.Facts facts = facts(p);
-        jp.revati.skyabyss.skin.Skins.checkRewards(p, facts.marks());
         long mask = d.unlocked() | RebirthTitles.unlockedMask(facts);
         long added = mask & ~d.unlocked();
         if (added != 0) {

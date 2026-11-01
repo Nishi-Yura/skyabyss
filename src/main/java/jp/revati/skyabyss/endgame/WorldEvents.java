@@ -482,7 +482,6 @@ public final class WorldEvents {
             }
             RegionPoints.add(p, e.region, 4);
             Notice.gain(p, "message.skyabyss.world_event.down", name, pct, coins, boxes);
-            jp.revati.skyabyss.skin.Skins.rareDrop(p);
             paid.add(p);
         }
         return paid;

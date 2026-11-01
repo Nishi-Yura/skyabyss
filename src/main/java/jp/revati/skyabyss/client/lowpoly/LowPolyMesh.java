@@ -18,8 +18,6 @@ public final class LowPolyMesh {
     public final ResourceLocation glowMask; // 光る画素だけに元の色を置いた画像 (<name>_glow.png、tools/install/install_lowpoly.py が --gear のときに焼く)。無ければ null
     // true: 頂点は受け口の骨の原点が基準 (武器・盾)。false: モデル全体の絶対座標 (GeckoLib の geo の cube と同じ)
     public final boolean socket;
-    // 体ごとのスキン (client/FullSkinLayer) のうち、着ている人の体 (バニラの体と自分のスキン) を残して服だけ重ねるもの。JSON の "outfit"
-    public boolean outfit;
     public final Map<String, Bone> bones = new LinkedHashMap<>();
     public final int triangles;
     public final int quads;
@@ -38,8 +36,6 @@ public final class LowPolyMesh {
     public static final class Bone {
         public final String name;
         public final String parent;
-        // 骨の付け根 (geo の座標、1/16 ブロック。JSON の pivot。無ければ原点)。体ごとのスキン (client/FullSkinLayer) が揺れの回転の中心に使う
-        public final float[] pivot;
         public final float[] pos;
         public final float[] uv;
         public final float[] nrm;
@@ -55,10 +51,9 @@ public final class LowPolyMesh {
         boolean[] glowQuads;
         ResourceLocation glowQuadsFor;
 
-        Bone(String name, String parent, float[] pivot, float[] pos, float[] uv, float[] nrm, float[] vshade, int capStart) {
+        Bone(String name, String parent, float[] pos, float[] uv, float[] nrm, float[] vshade, int capStart) {
             this.name = name;
             this.parent = parent;
-            this.pivot = pivot;
             this.pos = pos;
             this.uv = uv;
             this.nrm = nrm;
@@ -181,20 +176,12 @@ public final class LowPolyMesh {
                 }
             }
             String parent = b.has("parent") && !b.get("parent").isJsonNull() ? b.get("parent").getAsString() : null;
-            float[] pivot = new float[3];
-            if (b.has("pivot")) {
-                JsonArray pv = b.getAsJsonArray("pivot");
-                for (int k = 0; k < 3 && k < pv.size(); k++) {
-                    pivot[k] = pv.get(k).getAsFloat();
-                }
-            }
-            baked.put(e.getKey(), new Bone(e.getKey(), parent, pivot, pos, uvOut, nrm, vshade, capStart));
+            baked.put(e.getKey(), new Bone(e.getKey(), parent, pos, uvOut, nrm, vshade, capStart));
             tris += n;
             quads += q;
         }
         LowPolyMesh mesh = new LowPolyMesh(name, tex, glow, socket, tris, quads);
         mesh.bones.putAll(baked);
-        mesh.outfit = json.has("outfit") && json.get("outfit").getAsBoolean();
         return mesh;
     }
 

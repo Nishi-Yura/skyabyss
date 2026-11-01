@@ -174,7 +174,6 @@
 | `guide`（印は `npc_guide_<所>`） | 都の案内人（5 人） | 四つの門と広場 | 行き先を選ぶ（`guide`。6.12）、灯りの色のこと、都の門のこと |
 | （消した役）書庫番・地図屋・砦の老兵 | — | — | 2026-10-31 に消した（伝承の書の画面・M の地図・J の記録と同じことをするだけだった。老兵の試練の記録は J、本丸の頁は社の祭司へ）。祠と跡地は地図に最初から、跡地の噂と描き足しは都の案内人が言う。前の世界に立っている人は消える（`AttendantRole.RETIRED`） |
 | `box_opener`（印なし） | 封切り師（都と四つの町に一人ずつ） | 鍛冶屋の係の人のそば（`npc_smith` から 2〜4 ブロックの空いた床。`loot/box/BoxOpeners`） | 封の箱を開ける（`boxes`。ルーレットの画面。[52](52_loot_boxes.md)）、箱のこと |
-| `tailor`（印なし） | 仕立て屋（都と四つの町に一人ずつ） | 武具屋の係の人のそば（`npc_outfitter` から 2〜4 ブロックの空いた床。`skin/TailorStand`） | 今週の仕立て（`skins`。スキンの週替わりの 4 着を衣装のつまみで買う。[54](54_endgame_plan.md) の 6.1.1）、スキンのこと |
 
 - 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
