@@ -81,5 +81,13 @@
   "commands.skyabyss.help.arts": "秘伝の枠",
   "commands.skyabyss.help.tower": "あいだの塔の受付 (menu・create・join)",
   "commands.skyabyss.help.circuit": "巡り路 (start・leave)",
-  "commands.skyabyss.help.admin": "管理者のコマンドは %s"
+  "commands.skyabyss.help.admin": "管理者のコマンドは %s",
+  "commands.skyabyss_play.help.18": "§e■ あいだの塔 §fadmin tower ending <calm|break|accept> [対象] §7— 結末を選んだことにする (受付が見える) ・ §fadmin tower start [対象] §7— 対象を一つの隊にして一日一回を数えずに入る ・ §fadmin tower day [対象] §7— 今日の一回を戻す ・ §fadmin tower hp <1-100> [対象] §7— 主の体力を割合に (落ちる月の確かめ) ・ §fadmin tower leave [対象]",
+  "commands.skyabyss_play.act.tower_ending": "結末を選んだことにした",
+  "commands.skyabyss_play.act.tower_day": "塔の今日の一回を戻した",
+  "commands.skyabyss_play.act.tower_leave": "塔を抜けた",
+  "commands.skyabyss_play.said.tower_start": "あいだの塔へ入った (%s 人。一日一回は数えない)",
+  "commands.skyabyss_play.tower_bad_ending": "結末は calm・break・accept のどれか: %s",
+  "commands.skyabyss_play.tower_no_start": "塔へ入れなかった (塔の世界がない・空きの舞台がない・全員がもう塔の中)",
+  "commands.skyabyss_play.tower_no_run": "塔の中で主と戦っている人がいない"
 }

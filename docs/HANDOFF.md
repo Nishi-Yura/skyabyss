@@ -15,6 +15,7 @@
 - **島**: 峠の柵を外した（`IslandTrail.clearOldGate` が前の版の柵を黙って片付ける）。休み場と祠に着いたかは水平の近さ＋上下 6（前は高さ込みで、建つ前の点は高さ 0 と比べて済まなかった）。
 - **都**: 空見の館は開かず案内にも載せない（`CapitalDoors`・`TownGuide`。碑は閉じた館の文、前に開いた世界は「書庫は空になった」）。厩舎の名札を出さない（`LABEL_HIDDEN`。前に置いた名札は `keepLabels` が外す。碑は「乗り物は止まり木の旅の番」）。地図屋の碑も空き家の文。土地の町の旅の館と社の名札・碑から厩舎・地図屋・書庫番を外した。鍛冶師の「手に持った品を直す」（修理）を消した。
 - **都の係の人の立ち位置**: `Attendants.capitalSpots` が、建てたときに写した印に今の設計図の印を重ねる（設計図の印が立てる床ならそちら）。前の版で建てた都でも、直した立ち位置とあとから足した係の人（市の三人など）が届く。封切り師の元・訓練場の師範・施設の命令も同じ所を見る。
+- **塔の管理者の近道**（同じ夜の声「超大型 raid やりたいんだけど、どうやるっけ」）: `/skyabyss admin tower ending <calm|break|accept> [人]`（結末を選んだことにする = 塔の資格。`FinaleEnding.apply`）・`start [人]`（一日一回を数えずに隊で入る）・`day [人]`・`hp <1-100> [人]`（`Towers.masterHealth`）・`leave [人]`。自己テスト `play` に働きの検査を足した。jar は同じ 0.9.22 で作り直した。
 - **「〜へ行こう」**: 町のクエストの印 `TownGuests.marks` は、写した印に設計図にしかない印（町のクエストの家 10・11 など。前の版の都では無く、いつまでも済まなかった）と係の人の今の立ち位置を足す（tick ごとに作り直さない）。着いたかは水平 4・上下 3。
 - 確かめ: compileJava、`quick_check.sh --no-java` 全部 OK（生成物のずれ 0）。自己テストを新しい大陸の世界で `upgrade,command gate,play,playtest,facility*,town*,~capital doors,island trail,continent,rpg rules,quiet hives,lang*,lore,npc,chapter sites,site*` を流して全段 PASSED（直した `playtest` の権限の検査を含む）。全段の通し（378 段）はまだ。ゲームの中での見え方（場面の Enter・頁の寄り方・都の係の人の立ち位置・前の版の世界の引き継ぎ）は未確認。版は 0.9.22 に決まり（ユーザー）、`build/libs/skyabyss-0.9.22.jar` を作った（jar の中の版・新しいクラス・文言を確かめた）。確かめ表は `docs/review/playtest_0.9.21.md` の 14 節。サイトの元原稿 `tools/site/pages_c.py` に v0.9.21・v0.9.22 の履歴を足したが、`site/*.html` は作り直していない（GitHub Pages に載るので、ユーザーが試遊してから）。
 

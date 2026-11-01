@@ -41,7 +41,7 @@ public final class PlayCommands {
     private PlayCommands() {
     }
 
-    static final int HELP_LINES = 18;
+    static final int HELP_LINES = 19;
     // 正式の名前と、開発の別名
     public static final String ADMIN = "admin";
     public static final String DEV_ALIAS = "play";
@@ -221,9 +221,53 @@ public final class PlayCommands {
                 (ctx, t) -> each(ctx, t, "level", p -> jp.revati.skyabyss.rpg.Growth.setLevel(p, IntegerArgumentType.getInteger(ctx, "level"))))));
         play.then(Commands.literal("coins").then(targeted(Commands.argument("amount", IntegerArgumentType.integer(1, 9_999_999)),
                 (ctx, t) -> each(ctx, t, "coins", p -> jp.revati.skyabyss.facility.Coins.give(p, IntegerArgumentType.getInteger(ctx, "amount"))))));
+        // あいだの塔 (超大型レイド。docs/design/54 の 2 章) をすぐ試す (2026-11-02 の声「超大型 raid やりたいんだけど」)
+        play.then(tower());
         // Mod の版と、世界・人のデータの版 (upgrade/WorldUpgrade)
         play.then(Commands.literal("version").executes(PlayCommands::version));
         return play;
+    }
+
+    // admin tower ending <結末> [対象] : 終章の結末を選んだことにする (塔の受付が見え、入れる)
+    // admin tower start [対象]         : 対象を一つの隊にして、一日一回を数えずに塔へ入る (先頭が隊長)
+    // admin tower day [対象]           : 今日の一回を戻す
+    // admin tower hp <1-100> [対象]    : その人のいる塔の主の体力を割合に (50% と 20% の落ちる月の確かめ)
+    // admin tower leave [対象]         : 塔を抜けて都の受付へ
+    private static LiteralArgumentBuilder<CommandSourceStack> tower() {
+        LiteralArgumentBuilder<CommandSourceStack> t = Commands.literal("tower");
+        t.then(Commands.literal("ending").then(targeted(Commands.argument("ending", StringArgumentType.word())
+                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(jp.revati.skyabyss.story.finale.FinaleEnding.ENDINGS, b)),
+                (ctx, ps) -> {
+                    String e = StringArgumentType.getString(ctx, "ending");
+                    if (!jp.revati.skyabyss.story.finale.FinaleEnding.ENDINGS.contains(e)) {
+                        ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.tower_bad_ending", e));
+                        return 0;
+                    }
+                    return each(ctx, ps, "tower_ending", p -> jp.revati.skyabyss.story.finale.FinaleEnding.apply(p, e));
+                })));
+        t.then(targeted(Commands.literal("start"), (ctx, ps) -> {
+            List<ServerPlayer> squad = ps.stream().filter(p -> jp.revati.skyabyss.tower.Towers.runOf(p) == null).toList();
+            if (squad.isEmpty() || jp.revati.skyabyss.tower.Towers.start(ctx.getSource().getServer(), squad, true) == null) {
+                ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.tower_no_start"));
+                return 0;
+            }
+            say(ctx, "tower_start", squad.size());
+            return squad.size();
+        }));
+        t.then(targeted(Commands.literal("day"), (ctx, ps) -> each(ctx, ps, "tower_day", jp.revati.skyabyss.tower.Towers::resetDay)));
+        t.then(Commands.literal("hp").then(targeted(Commands.argument("percent", IntegerArgumentType.integer(1, 100)), (ctx, ps) -> {
+            int pct = IntegerArgumentType.getInteger(ctx, "percent");
+            int n = 0;
+            for (ServerPlayer p : ps) {
+                n += jp.revati.skyabyss.tower.Towers.masterHealth(p, pct) ? 1 : 0;
+            }
+            if (n == 0) {
+                ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.tower_no_run"));
+            }
+            return n;
+        })));
+        t.then(targeted(Commands.literal("leave"), (ctx, ps) -> each(ctx, ps, "tower_leave", jp.revati.skyabyss.tower.Towers::leave)));
+        return t;
     }
 
     private static int version(CommandContext<CommandSourceStack> ctx) {

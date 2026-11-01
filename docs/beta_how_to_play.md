@@ -236,6 +236,9 @@
 | `/skyabyss admin inspect <人>` | ほかの人の控え帳を見る |
 | `/skyabyss admin level <1-50> [人]`、`admin coins <数> [人]` | レベルを決める、鐘銭を渡す |
 | `/skyabyss admin version` | Mod の版と、世界・自分のデータの版（版を上げたあとの確かめ） |
+| `/skyabyss admin tower ending <calm|break|accept> [人]` | 終章の結末を選んだことにする（あいだの塔の受付が見え、入れる） |
+| `/skyabyss admin tower start [人]`、`admin tower day [人]` | 対象を一つの隊にして、一日一回を数えずに塔へ入る（先頭が隊長）／今日の一回を戻す |
+| `/skyabyss admin tower hp <1-100> [人]`、`admin tower leave [人]` | 塔の主の体力を割合にする（50%・20% の落ちる月の確かめ）／塔を抜けて受付へ |
 
 - ゲームルール（`/gamerule`）で、決まりを切れます:
   - `skyabyssStoryGate false` … 巨神の順番と乗る資格の決まりを切る（好きな順に乗れる）

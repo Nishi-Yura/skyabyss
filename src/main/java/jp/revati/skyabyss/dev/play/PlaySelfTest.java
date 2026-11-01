@@ -40,7 +40,8 @@ public final class PlaySelfTest {
             "play goto abyss-depth-5", "play kit tide", "play boss tide @a 2", "play boss warden", "play quest main_song done", "play quest main_song reset",
             "play quest main_song see_whale", "play lore unlock-all", "play lore reset", "play time day", "play weather clear", "play peaceful on",
             "play heal", "play feed", "play god on", "play god off", "play reset me",
-            "admin help", "admin status", "admin level 10", "admin coins 5 @a", "admin version", "help");
+            "admin help", "admin status", "admin level 10", "admin coins 5 @a", "admin version", "help",
+            "admin tower ending calm", "admin tower start", "admin tower start @a", "admin tower day", "admin tower hp 50", "admin tower leave");
 
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();
@@ -84,6 +85,24 @@ public final class PlaySelfTest {
                 f.add("does not parse: " + c);
             }
         }
+
+        // 1a. 塔の管理者の命令 (結末を選んだことにする・今日の一回を戻す)。偽の人で流す
+        FakePlayer tp = net.neoforged.neoforge.common.util.FakePlayerFactory.get(server.overworld(),
+                new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-0000000070e1"), "admin_tower"));
+        CommandSourceStack ts = tp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+        disp.execute("skyabyss admin tower ending calm", ts);
+        if (!"calm".equals(jp.revati.skyabyss.story.finale.FinaleEnding.chosen(tp)) || !jp.revati.skyabyss.tower.Towers.eligible(tp)) {
+            f.add("admin tower ending did not make the player eligible");
+        }
+        tp.getPersistentData().putString(jp.revati.skyabyss.tower.Towers.DAY, "2026-01-01");
+        disp.execute("skyabyss admin tower day", ts);
+        if (tp.getPersistentData().contains(jp.revati.skyabyss.tower.Towers.DAY)) {
+            f.add("admin tower day did not give back the entry");
+        }
+        if (disp.execute("skyabyss admin tower hp 50", ts) != 0) {
+            f.add("admin tower hp outside a run should do nothing");
+        }
+        tp.getPersistentData().remove(jp.revati.skyabyss.story.finale.FinaleEnding.KEY);
 
         // 1b. 既存の開始コマンドの形 (boss が流す文字列。木になければ構文の段階で落ちる)
         for (String c : List.of("tideheart start", "emberheart start", "stormheart start",

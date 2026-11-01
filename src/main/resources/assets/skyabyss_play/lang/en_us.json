@@ -81,5 +81,13 @@
   "commands.skyabyss.help.arts": "Secret arts slots",
   "commands.skyabyss.help.tower": "Desk of the Tower Between (menu, create, join)",
   "commands.skyabyss.help.circuit": "Circuit runs (start, leave)",
-  "commands.skyabyss.help.admin": "Admin commands: %s"
+  "commands.skyabyss.help.admin": "Admin commands: %s",
+  "commands.skyabyss_play.help.18": "§e# Tower Between §fadmin tower ending <calm|break|accept> [targets] §7- count the ending as chosen (the desk shows) · §fadmin tower start [targets] §7- enter as one squad without using the daily entry · §fadmin tower day [targets] §7- give back today's entry · §fadmin tower hp <1-100> [targets] §7- set the master's health (to check the falling moons) · §fadmin tower leave [targets]",
+  "commands.skyabyss_play.act.tower_ending": "ending set",
+  "commands.skyabyss_play.act.tower_day": "tower entry for today given back",
+  "commands.skyabyss_play.act.tower_leave": "left the tower",
+  "commands.skyabyss_play.said.tower_start": "Entered the Tower Between (%s player(s); the daily entry is not used)",
+  "commands.skyabyss_play.tower_bad_ending": "The ending must be calm, break or accept: %s",
+  "commands.skyabyss_play.tower_no_start": "Could not enter the tower (no tower world, no free stage, or everyone is already inside)",
+  "commands.skyabyss_play.tower_no_run": "Nobody is fighting the master inside the tower"
 }

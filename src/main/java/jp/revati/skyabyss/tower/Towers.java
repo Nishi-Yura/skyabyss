@@ -420,7 +420,7 @@ public final class Towers {
                 .then(Commands.literal("tower")
                         .then(Commands.literal("start").executes(c -> start(c.getSource().getServer(), List.of(c.getSource().getPlayerOrException()), true) != null ? 1 : 0))
                         .then(Commands.literal("day").executes(c -> {
-                            c.getSource().getPlayerOrException().getPersistentData().remove(DAY);
+                            resetDay(c.getSource().getPlayerOrException());
                             return 1;
                         }))
                         .then(Commands.literal("leave").executes(c -> {
@@ -435,14 +435,23 @@ public final class Towers {
                             run.arena.fight.devMove(run.level(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "move"));
                             return 1;
                         })))
-                        .then(Commands.literal("hp").then(Commands.argument("percent", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 100)).executes(c -> {
-                            TowerRun run = runOf(c.getSource().getPlayerOrException());
-                            if (run == null || run.arena == null || run.arena.fight.master() == null) {
-                                return 0;
-                            }
-                            var m = run.arena.fight.master();
-                            m.setHealth(m.getMaxHealth() * com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "percent") / 100f);
-                            return 1;
-                        })))));
+                        .then(Commands.literal("hp").then(Commands.argument("percent", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 100)).executes(c ->
+                                masterHealth(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "percent")) ? 1 : 0)))));
+    }
+
+    // 今日の一回を戻す (開発用と管理者の /skyabyss admin tower day)
+    public static void resetDay(ServerPlayer p) {
+        p.getPersistentData().remove(DAY);
+    }
+
+    // その人のいる塔の主の体力を、最大の percent % にする (月の段の確かめ。開発用と管理者の /skyabyss admin tower hp)。塔の中で主がいなければ false
+    public static boolean masterHealth(ServerPlayer p, int percent) {
+        TowerRun run = runOf(p);
+        if (run == null || run.arena == null || run.arena.fight.master() == null) {
+            return false;
+        }
+        var m = run.arena.fight.master();
+        m.setHealth(m.getMaxHealth() * Math.max(1, Math.min(100, percent)) / 100f);
+        return true;
     }
 }
