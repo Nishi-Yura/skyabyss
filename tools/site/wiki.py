@@ -166,10 +166,16 @@ except ImportError:
     _KKS = None
 
 
+# 辞書の読みが、この mod で使う読みと違う言葉 (長いものを先に)
+READING_FIX = [("大百足", "おおむかで"), ("百足", "むかで"), ("旅嚢", "たびのう")]
+
+
 def reading(name):
     """名前のひらがなの読み (pykakasi があるときだけ。漢字の名前を読みでも探せるように)"""
     if not _KKS:
         return ""
+    for word, kana in READING_FIX:
+        name = name.replace(word, kana)
     return "".join(x["hira"] for x in _KKS.convert(name))
 
 
