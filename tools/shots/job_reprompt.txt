@@ -1,0 +1,26 @@
+# 島の野営地の職選び: 「あとで」がなく、Esc で閉じても野営地にいればまた開く (2026-11-03)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/job_reprompt.txt -PshotsName=job_reprompt
+world job_reprompt continent
+size 1280 720
+timeout 1500
+render 8
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd tp @s -1922 120 1814
+waitchunks 300
+cmd execute positioned -1930 0 1820 positioned over motion_blocking_no_leaves run tp @s ~ ~ ~
+wait 100
+shot jr_01_open
+close
+wait 30
+shot jr_02_closed_1s
+wait 50
+shot jr_03_closed_4s
+wait 70
+shot jr_04_back_7s
+quit

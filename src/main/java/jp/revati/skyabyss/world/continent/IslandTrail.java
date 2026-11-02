@@ -200,8 +200,6 @@ public final class IslandTrail {
             double camp = Math.hypot(p.getX() - lay.start().getX(), p.getZ() - lay.start().getZ());
             if (camp < CAMP_NEAR && openingOver(p)) {
                 jp.revati.skyabyss.rpg.skill.JobChoice.prompt(p);
-            } else if (camp > CAMP_NEAR + 4) {
-                jp.revati.skyabyss.rpg.skill.JobChoice.away(p);
             }
             return;
         }

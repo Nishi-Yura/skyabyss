@@ -132,7 +132,6 @@
   "gui.skyabyss.job_choice.lead": "宿り木の祠が、六つの得物を差し出している",
   "gui.skyabyss.job_choice.start": "この職で始める",
   "gui.skyabyss.job_choice.confirm": "もう一度押して決める",
-  "gui.skyabyss.job_choice.later": "あとで",
   "gui.skyabyss.job_choice.pick": "左から職を一つ選ぼう。その職の始めの武器を受け取り、最初の技を一つ覚える。",
   "gui.skyabyss.job_choice.weapon": "受け取る武器: %s",
   "gui.skyabyss.job_choice.skills": "発動スキル: %s",

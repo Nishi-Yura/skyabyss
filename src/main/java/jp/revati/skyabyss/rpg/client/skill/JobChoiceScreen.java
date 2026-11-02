@@ -20,10 +20,15 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 島の宿り木の祠で職を選ぶ画面 (docs/design/43 の 4 節) と、街の職の間で職を替える画面 (switching。docs/design/48 の 3 章)。
+// 島の野営地で職を選ぶ画面 (docs/design/43 の 4 節) と、街の職の間で職を替える画面 (switching。docs/design/48 の 3 章)。
 // 左に六つの職 (始めの武器の絵・名前・副題)、右に役目・受け取る武器・使う技・最初に覚える技。「この職で始める」「この職に替える」は二度押し。
-// 職の間では、いまの職に（いま）を添え、その職の木に使った点を見せる (替えても残る)
+// 職の間では、いまの職に（いま）を添え、その職の木に使った点を見せる (替えても残る)。
+// 島の画面には「あとで」を置かない: 職を選ぶまで島は進まず、街の職の間は渡し船の先なので、ほかに選ぶ所がない
+// (2026-11-03 の声「最初に選ばなかったら、どこで選ぶの？ 後での項目いらなくない？」)。Esc では閉じられ、野営地にいれば REOPEN_MS のあとでまた開く (JobChoice.prompt)
 public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
+    // 島の画面を閉じてから、また開くまで (この間に Esc をもう一度押せばゲームのメニューが開く)
+    static final long REOPEN_MS = 5000;
+    private static long closedAt;
     private static final int MAX_W = 340;
     private static final int MAX_H = 200;
     private static final int ROW_Y = 30;
@@ -39,7 +44,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     private boolean armed;
     private int armedTicks;
     private Button start;
-    private Button later;
     private final ScrollPanel right = new ScrollPanel(LINE_H * 2);
     private final boolean switching;
 
@@ -77,10 +81,14 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     @Override
     protected void init() {
         layout();
+        int rx = left + LIST_W + 16;
+        int rw = w - LIST_W - 24;
         start = addRenderableWidget(Button.builder(Component.translatable(switching ? "gui.skyabyss.job_room.switch_btn" : "gui.skyabyss.job_choice.start"), b -> press())
-                .bounds(left + LIST_W + 16, top + h - 22, 96, 14).build());
-        later = addRenderableWidget(Button.builder(Component.translatable(switching ? "gui.skyabyss.job_room.later" : "gui.skyabyss.job_choice.later"), b -> onClose())
-                .bounds(left + LIST_W + 116, top + h - 22, w - LIST_W - 124, 14).build());
+                .bounds(rx, top + h - 22, switching ? 96 : rw, 14).build());
+        if (switching) {
+            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.job_room.later"), b -> onClose())
+                    .bounds(rx + 100, top + h - 22, rw - 100, 14).build());
+        }
         update();
     }
 
@@ -155,6 +163,19 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        if (!switching) {
+            closedAt = net.minecraft.Util.getMillis();
+        }
+    }
+
+    // 島の画面をまた開いてよいか (閉じてから REOPEN_MS たった)
+    static boolean mayReopen() {
+        return net.minecraft.Util.getMillis() - closedAt >= REOPEN_MS;
     }
 
     @Override

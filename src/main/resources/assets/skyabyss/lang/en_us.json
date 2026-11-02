@@ -132,7 +132,6 @@
   "gui.skyabyss.job_choice.lead": "The mistletoe shrine offers six weapons",
   "gui.skyabyss.job_choice.start": "Begin as this",
   "gui.skyabyss.job_choice.confirm": "Press again",
-  "gui.skyabyss.job_choice.later": "Later",
   "gui.skyabyss.job_choice.pick": "Pick a job on the left. You receive its first weapon and learn one skill.",
   "gui.skyabyss.job_choice.weapon": "Weapon: %s",
   "gui.skyabyss.job_choice.skills": "Skills: %s",
