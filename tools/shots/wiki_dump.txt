@@ -1,0 +1,13 @@
+# 公式サイトの wiki の元 (品と生き物を、ゲームの中の説明の行ごと) を書き出す。出力 run/shots/wiki_dump/shots/wiki_dump/wiki.json
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/wiki_dump.txt -PshotsName=wiki_dump → python -I tools/site/build.py (wiki も作る)
+world wiki_dump flat
+size 960 540
+timeout 900
+render 4
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+wait 20
+wikidump
+quit

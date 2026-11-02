@@ -379,6 +379,15 @@ public final class ShotRunner {
             case "echo" -> {
                 return true;
             }
+            case "wikidump" -> {
+                // wikidump : この mod の品と生き物を、説明の行ごと wiki.json (出力先) に書く (公式サイトの wiki の元。WikiDump)
+                try {
+                    say("  " + WikiDump.write(out.resolve("wiki.json")));
+                } catch (IOException e) {
+                    say("  wikidump failed: " + e);
+                }
+                return true;
+            }
             case "music" -> {
                 // music : 流れている BGM を記録に出す。music master <音量> : 全体の音量。music set <id> : 曲を決め打ち (空の名前 "-" で無音)。music auto : 決め打ちをやめる
                 if (first) {
@@ -719,7 +728,8 @@ public final class ShotRunner {
                 return true;
             }
             case "perspective" -> {
-                // perspective first|back|front : 視点 (一人称 / 三人称の背中側 / 三人称の正面)
+                // perspective first|back|front : 視点 (一人称 / 三人称の背中側 / 三人称の正面)。正面は肩越しの F5 の飛ばしに戻されない
+                jp.revati.skyabyss.client.camera.ShoulderCam.keepFront = "front".equalsIgnoreCase(line.arg(0));
                 mc.options.setCameraType(switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
                     case "first" -> net.minecraft.client.CameraType.FIRST_PERSON;
                     case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;

@@ -61,6 +61,8 @@ public final class ShoulderCam {
     private static float setPitch;
     // 照準の先の敵 (赤い角を出す)
     private static Entity aimed;
+    // 撮影の台本 (ShotRunner の perspective front) が前から映す視点を選んだときは、F5 の飛ばしで一人称へ戻さない
+    public static boolean keepFront;
 
     private ShoulderCam() {
     }
@@ -112,7 +114,7 @@ public final class ShoulderCam {
             return;
         }
         // F5: 前から映す視点を飛ばす (一人称 → 肩越し → 一人称)
-        if (Config.SHOULDER_CAMERA.get() && !OTHER_CAMERA && mc.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) {
+        if (Config.SHOULDER_CAMERA.get() && !OTHER_CAMERA && !keepFront && mc.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
         while (SWAP_KEY.consumeClick()) {

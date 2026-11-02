@@ -1,0 +1,135 @@
+# 公式サイトの職の立ち姿 (6 職)。緑の幕 (ライムのコンクリート) の前で正面から撮り、tools/site/cut_job_renders.py で幕を抜く
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/site_jobs.txt -PshotsName=site_jobs
+world site_jobs flat
+size 1280 1280
+timeout 1800
+render 6
+fov 50
+clouds off
+wait 80
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd fill -16 -61 -16 16 -61 16 minecraft:lime_concrete
+cmd fill -18 -60 -5 18 -40 -5 minecraft:lime_concrete
+cmd fill -18 -60 -5 -18 -40 16 minecraft:lime_concrete
+cmd fill 18 -60 -5 18 -40 16 minecraft:lime_concrete
+camera 0 -60 0 0 0
+waitchunks
+hud off
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 10
+
+# ---- warrior
+cmd item replace entity @s armor.feet with skyabyss:wild_fortress_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_fortress_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_fortress_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_fortress_helmet
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_sky_sword
+camera 0 -60 0 0 0
+perspective front
+bodyyaw 28
+wait 24
+chat clear
+shot warrior_idle
+swingpose 0.3
+wait 6
+shot warrior_swing
+swingpose off
+perspective first
+
+# ---- smith
+cmd item replace entity @s armor.feet with skyabyss:ember_boots
+cmd item replace entity @s armor.legs with skyabyss:ember_leggings
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s armor.head with skyabyss:ember_helmet
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_bell_hammer
+camera 0 -60 0 0 0
+perspective front
+bodyyaw 28
+wait 24
+chat clear
+shot smith_idle
+swingpose 0.3
+wait 6
+shot smith_swing
+swingpose off
+perspective first
+
+# ---- mage
+cmd item replace entity @s armor.feet with skyabyss:wild_stargazer_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_stargazer_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_stargazer_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_stargazer_helmet
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_dawn_staff
+camera 0 -60 0 0 0
+perspective front
+bodyyaw 28
+wait 24
+chat clear
+shot mage_idle
+swingpose 0.3
+wait 6
+shot mage_swing
+swingpose off
+perspective first
+
+# ---- archer
+cmd item replace entity @s armor.feet with skyabyss:wild_hanged_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_hanged_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_hanged_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_hanged_helmet
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_plume_bow
+camera 0 -60 0 0 0
+perspective front
+bodyyaw 28
+wait 24
+chat clear
+shot archer_idle
+swingpose 0.3
+wait 6
+shot archer_swing
+swingpose off
+perspective first
+
+# ---- assassin
+cmd item replace entity @s armor.feet with skyabyss:divine_mistwalker_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_mistwalker_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_mistwalker_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_mistwalker_helmet
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_rewind_dagger
+camera 0 -60 0 0 0
+perspective front
+bodyyaw 28
+wait 24
+chat clear
+shot assassin_idle
+swingpose 0.3
+wait 6
+shot assassin_swing
+swingpose off
+perspective first
+
+# ---- shaman
+cmd item replace entity @s armor.feet with skyabyss:wild_lurelight_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_lurelight_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_lurelight_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_lurelight_helmet
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_promise_bell_staff
+camera 0 -60 0 0 0
+perspective front
+bodyyaw 28
+wait 24
+chat clear
+shot shaman_idle
+swingpose 0.3
+wait 6
+shot shaman_swing
+swingpose off
+perspective first
+quit

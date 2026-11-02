@@ -1,0 +1,105 @@
+# 公式サイトの足りない絵 (site_showcase.txt・site_titans.txt の続き): 土地の町、都の三人称、巨神の背の順路の部屋、五章の深淵
+# 町は data/skyabyss/continent/layout.json の towns (鯨見 -120,-760 / 汐守 1330,160 / 風待 -1180,-100 / 灰炉 -300,1100)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/site_extra.txt -PshotsName=site_showcase
+world site_showcase continent
+size 1920 1080
+timeout 3600
+render 16
+clouds off
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd skyabyss cinematic stop
+cmd time set 3000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd gamemode spectator
+hud off
+chat clear
+lowpoly on
+
+# ---- 土地の町 (鯨見・汐守)
+cmd tp @s -30 135 -680 0 0
+cmd execute as @s run tp @s -30 135 -680 facing -120 72 -760
+waitchunks 600
+wait 60
+shot x01_town_whale
+cmd tp @s 1240 130 240 0 0
+cmd execute as @s run tp @s 1240 130 240 facing 1330 70 160
+waitchunks 600
+wait 60
+shot x02_town_tide
+cmd tp @s -1090 150 -20 0 0
+cmd execute as @s run tp @s -1090 150 -20 facing -1180 90 -100
+waitchunks 600
+wait 60
+shot x03_town_storm
+
+# ---- 都の三人称 (目的の帯・体力・技の枠が見える)
+cmd gamemode adventure
+cmd skyabyss dev opening at shelter 0 0 1 30 180 2
+waitchunks 400
+wait 40
+cmd skyabyss play kit tide
+wait 20
+hud on
+perspective back
+look 180 6
+wait 60
+chat clear
+shot x04_capital_third
+perspective first
+hud off
+
+# ---- 巨神の背の順路の部屋 (岩鯨の歩、潮殻の闘)
+cmd gamemode adventure
+cmd skyabyss play raid whale walk
+wait 200
+waitchunks 300
+wait 60
+hud on
+perspective back
+wait 40
+chat clear
+shot x05_raid_whale_walk
+look 90 8
+wait 20
+shot x06_raid_whale_walk_side
+cmd skyabyss play raid tide fight
+wait 200
+waitchunks 300
+wait 60
+chat clear
+shot x07_raid_tide_fight
+look 90 8
+wait 20
+shot x08_raid_tide_fight_side
+perspective first
+hud off
+
+# ---- 五章 深淵
+cmd gamemode spectator
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd skyabyss play goto abyss-arrival
+waitchunks 400
+wait 60
+shot x09_abyss_arrival
+look 90 20
+wait 20
+shot x10_abyss_arrival_b
+look 0 50
+wait 20
+shot x11_abyss_down
+cmd skyabyss play goto abyss-rest_2
+waitchunks 400
+wait 60
+shot x12_abyss_rest2
+look 180 20
+wait 20
+shot x13_abyss_rest2_b
+quit
