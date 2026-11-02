@@ -1,0 +1,118 @@
+# 公式サイトの巨神の絵 (site_showcase.txt の続き)。大陸の世界で、四体をそれぞれの居場所 (data/skyabyss/continent/lairs.json) の前で呼び、
+# 居場所に落ち着かせてから、体に対する位置で撮る。生の summon は番人 (Keeper) に消されるので使わない
+# 居場所: 岩鯨 230,-1000 / 潮殻 1730,-250 / 雷翼 -1180,-500 (峰) / 余燼 492,1108。呼ぶ所は居場所の 120 南から北 (yaw 180) を向いて
+# 相対の ^ は 左 ^ 上 ^ 前 (体の向き)。tp のたびに地形を読み込ませてから撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/site_titans.txt -PshotsName=site_showcase
+world site_showcase continent
+size 1920 1080
+timeout 3600
+render 16
+clouds off
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd skyabyss cinematic stop
+cmd time set 1500
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd gamemode spectator
+cmd skyabyss progress grant @p stone_whale
+cmd skyabyss progress grant @p tide_shell
+cmd skyabyss progress grant @p thunder_wing
+hud off
+chat clear
+lowpoly on
+
+# ---- 岩鯨
+cmd tp @s 230 200 -880 180 0
+waitchunks 600
+cmd skyabyss titan summon
+wait 200
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^85 ^-10 ^25 facing entity @e[type=skyabyss:stone_whale,limit=1] feet
+waitchunks 500
+wait 60
+shot t01_whale_side
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^-50 ^-30 ^95 facing entity @e[type=skyabyss:stone_whale,limit=1] feet
+waitchunks 500
+wait 60
+shot t02_whale_front_low
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^-120 ^35 ^-40 facing entity @e[type=skyabyss:stone_whale,limit=1] feet
+waitchunks 500
+wait 60
+shot t03_whale_above
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^170 ^-50 ^90 facing entity @e[type=skyabyss:stone_whale,limit=1] feet
+waitchunks 500
+wait 60
+shot t04_whale_far
+cmd time set 12400
+wait 20
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^85 ^-10 ^25 facing entity @e[type=skyabyss:stone_whale,limit=1] feet
+waitchunks 300
+wait 40
+shot t05_whale_dusk
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^170 ^-50 ^90 facing entity @e[type=skyabyss:stone_whale,limit=1] feet
+waitchunks 300
+wait 40
+shot t06_whale_dusk_far
+cmd time set 1500
+
+# ---- 潮殻 (東の海)
+cmd tp @s 1730 90 -130 180 0
+waitchunks 600
+cmd skyabyss titan summon tide
+wait 200
+cmd execute as @e[type=skyabyss:tide_shell,limit=1] at @s run tp @p ^100 ^35 ^50 facing entity @e[type=skyabyss:tide_shell,limit=1] feet
+waitchunks 500
+wait 60
+shot t07_tide_side
+cmd execute as @e[type=skyabyss:tide_shell,limit=1] at @s run tp @p ^-45 ^25 ^115 facing entity @e[type=skyabyss:tide_shell,limit=1] feet
+waitchunks 500
+wait 60
+shot t08_tide_front
+cmd execute as @e[type=skyabyss:tide_shell,limit=1] at @s run tp @p ^-140 ^70 ^-60 facing entity @e[type=skyabyss:tide_shell,limit=1] feet
+waitchunks 500
+wait 60
+shot t09_tide_above
+
+# ---- 雷翼 (北西の峰)
+cmd tp @s -1180 240 -380 180 0
+waitchunks 600
+cmd skyabyss titan summon storm
+wait 60
+cmd skyabyss titan rest storm here
+wait 200
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^0 ^25 ^150 facing entity @e[type=skyabyss:thunder_wing,limit=1] feet
+waitchunks 500
+wait 60
+shot t10_storm_front
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^120 ^5 ^100 facing entity @e[type=skyabyss:thunder_wing,limit=1] feet
+waitchunks 500
+wait 60
+shot t11_storm_three_quarter
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^-150 ^60 ^-40 facing entity @e[type=skyabyss:thunder_wing,limit=1] feet
+waitchunks 500
+wait 60
+shot t12_storm_above
+
+# ---- 余燼 (南の荒れ地)
+cmd tp @s 492 170 988 180 0
+waitchunks 600
+cmd skyabyss titan summon ember
+wait 60
+cmd skyabyss titan rest ember here
+wait 200
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^-40 ^50 ^170 facing entity @e[type=skyabyss:ember_titan,limit=1] feet
+waitchunks 500
+wait 60
+shot t13_ember_front
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^-220 ^110 ^-60 facing entity @e[type=skyabyss:ember_titan,limit=1] feet
+waitchunks 500
+wait 60
+shot t14_ember_above
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^170 ^70 ^90 facing entity @e[type=skyabyss:ember_titan,limit=1] feet
+waitchunks 500
+wait 60
+shot t15_ember_side
+quit

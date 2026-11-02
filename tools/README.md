@@ -373,13 +373,19 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 ## 公式サイト (`site/`)
 
-`python tools/site/gen_art.py`（ドット絵と素材の写し）→ `python tools/site/encode_skill_fx_clips.py`（技の動く絵を `site/img/skill_fx/` へ）→ `python tools/site/build.py`（HTML を書き出す）。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`）。技の木は `Skill.java` と lang から読むので、技を足したら build し直す。
+日本語だけの静的なサイト。見た目は「夜の空」（紺と金。2026-11-03 にユーザーが選んだ）。トップと 7 頁（世界と物語・戦いと職・冒険の場所・装備と成長・仲間と暮らし・はじめる・更新履歴）。前の版の頁の名前（play・titans・skills など）は、今の頁へ移す小さな頁にしてある。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`。main へ入ったときだけ。動かなければ `gh workflow run pages.yml --ref main`）。
 
-### 技の見た目（技の一覧の開閉パネル・動く絵）
+- 頁を書き出す: `python -I tools/site/build.py`（`pages.py` がトップと 6 頁、`jobs.py` が職の切り替え、`changelog.py` が更新履歴、部品は `sitelib.py`）。新しい版を出したら `changelog.py` の `ver` の頭に足す。
+- ゲームの中の絵: 元は `tools/sources/site/shots/<名>.webp`（幅 1600）→ `python -I tools/site/gen_site_shots.py` が `site/img/shot/<名>.webp`（1600 と 640 の `_s`）と共有用の `site/img/og.jpg`（`hero` から）を作る。撮り方は `tools/shots/site_showcase.txt`（都・大陸・月・雲海・塔）・`site_titans.txt`（四体の巨神をそれぞれの居場所 `data/skyabyss/continent/lairs.json` で）・`site_extra.txt`（土地の町・都の三人称・順路の部屋・深淵）。ほかの絵は各機能の確かめの撮影から選んだ。
+- 職の立ち姿: `tools/shots/site_jobs.txt`（ライムの幕の前で、職ごとの防具と神器を持って正面から）→ `python -I tools/site/cut_job_renders.py`（幕を抜いて `tools/sources/site/jobs/<職>.png` と顔の `<職>_face.png`）→ `gen_site_shots.py` が `site/img/job/` へ。台本の `perspective front` は肩越しの視点の F5 の飛ばしに戻されない（`ShoulderCam.keepFront`）。
+- 技の動く絵: `site/img/skill_fx/<技>.webp`（職の欄に各職一本）。
+- 頁の印 `site/img/favicon.png` は天の鍵の絵（`textures/item/sky_key.png`）の写し。前のサイトの手描きの帯・場面・板の絵と、それを作る `gen_art.py` は 2026-11-03 に外した（git の履歴にある）。
+- 見る: `.claude/launch.json` の `site`（`python -m http.server 8765 --directory site`）。
+
+### 技の見た目（動く絵）
 
 - 撮り方: `python tools/gen/shots/gen_skill_fx_shots.py`（台本 `tools/shots/skill_fx.txt` と `tools/shots/skill_fx_clips.json` を書く）→ `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx`。一技を一本の録画（`record <技> <tick> <fps>`）で撮り、`run/shots/skill_fx/<技>/0000.png …` に書く。録画の間は `/tick rate 5` で、論理時刻で 30 枚/秒ずつ撮る（台本の手順は止めない。終わるのを待つのは `recwait`）。撮りは 25 本で十数分。
 - 絵にする: `python tools/site/encode_skill_fx_clips.py`（幅 640・ループの動く webp を `site/img/skill_fx/<技>.webp`、当たりの瞬間の止めた絵を `<技>_poster.webp` に書く。目安 500 KB 以下、超えたら画質を下げる。ffmpeg は使わない）。録画の場所を変えるときは引数に渡す。
-- 見る側 (`pages_b.skill_card`・`js/main.js`): パネルを開いたとき初めて動く絵を読み、閉じたら外す。動きを減らす設定の人は止めた絵と再生ボタン。
 
 ## 文字のはみ出しの検査 (`python tools/audit/check_text_fit.py`)
 

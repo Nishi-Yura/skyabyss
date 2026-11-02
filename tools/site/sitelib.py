@@ -1,20 +1,16 @@
-"""サイトの部品 (日英の対、ページの枠、表、技の木の図)。build.py から使う。"""
+"""サイトの部品 (頁の枠・節・絵・表)。build.py から使う。サイトは日本語だけ。
+
+絵は site/img/shot/<名>.webp (幅 1600) と <名>_s.webp (幅 640)。元は tools/sources/site/shots/ (gen_site_shots.py)。
+"""
+import glob
 import html
+import json
 import os
-import re
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SITE = os.path.join(ROOT, "site")
 REPO = "https://github.com/Nishi-Yura/skyabyss"
 SITE_URL = "https://nishi-yura.github.io/skyabyss/"
-
-
-def version():
-    with open(os.path.join(ROOT, "gradle.properties"), encoding="utf8") as f:
-        for line in f:
-            if line.startswith("mod_version="):
-                return line.split("=", 1)[1].strip()
-    return "?"
 
 
 def gp(key):
@@ -25,379 +21,182 @@ def gp(key):
     return "?"
 
 
-VERSION = version()
+VERSION = gp("mod_version")
 MC = gp("minecraft_version")
 NEO = gp("neo_version")
 GECKO = gp("geckolib_version")
 
-
 _LANG = {}
 
 
-def _load_lang():
-    import glob
-    import json
-    for lg in ("ja_jp", "en_us"):
-        d = {}
-        for f in sorted(glob.glob(os.path.join(ROOT, "src", "main", "resources", "assets", "*", "lang", lg + ".json"))):
-            d.update(json.load(open(f, encoding="utf8")))
-        _LANG[lg] = d
-
-
-def lang_dicts():
-    """lang の全部 (ja, en)。サイトの技の木が節の文を引く"""
+def lang(key):
+    """ja_jp の文 (全部の名前空間)。無ければ鍵のまま"""
     if not _LANG:
-        _load_lang()
-    return _LANG["ja_jp"], _LANG["en_us"]
-
-
-def item_name(iid):
-    """品の名前 (日, 英) を lang から引く。"""
-    if not _LANG:
-        _load_lang()
-    k = "item.skyabyss." + iid
-    return _LANG["ja_jp"].get(k, iid), _LANG["en_us"].get(k, iid)
-
-
-def item_li(iid, extra_ja="", extra_en=""):
-    ja, en = item_name(iid)
-    return '<li>%s%s</li>' % (icon("img/item/%s.png" % iid, ja, en), T(ja + extra_ja, en + extra_en))
-
-
-def T(ja, en):
-    return '<span class="ja" lang="ja">%s</span><span class="en" lang="en">%s</span>' % (ja, en)
+        for f in sorted(glob.glob(os.path.join(ROOT, "src", "main", "resources", "assets", "*", "lang", "ja_jp.json"))):
+            _LANG.update(json.load(open(f, encoding="utf8")))
+    return _LANG.get(key, key)
 
 
 def esc(s):
     return html.escape(s, quote=True)
 
 
-def icon(path, ja, en=None, cls="ic"):
-    en = en if en is not None else ja
-    return '<img class="%s px" src="%s" width="32" height="32" alt="%s" data-alt-ja="%s" data-alt-en="%s" loading="lazy">' % (
-        cls, path, esc(ja), esc(ja), esc(en))
+def T(ja, en=None):
+    """日英の対の名残。サイトは日本語だけなので ja を返す (更新履歴の元の表が対で持つ)"""
+    return ja
 
 
-def pimg(path, ja, en, w=None, h=None, cls="px", eager=False):
-    size = (' width="%d"' % w if w else "") + (' height="%d"' % h if h else "")
-    return '<img class="%s" src="%s"%s alt="%s" data-alt-ja="%s" data-alt-en="%s"%s>' % (
-        cls, path, size, esc(ja), esc(ja), esc(en), "" if eager else ' loading="lazy"')
-
-
-def table(heads, rows, cls=""):
-    out = ['<div class="tablewrap"><table%s><thead><tr>' % (' class="%s"' % cls if cls else "")]
-    for h in heads:
-        out.append("<th scope=\"col\">%s</th>" % h)
-    out.append("</tr></thead><tbody>")
-    for r in rows:
-        out.append("<tr>" + "".join("<td>%s</td>" % c for c in r) + "</tr>")
-    out.append("</tbody></table></div>")
-    return "".join(out)
-
-
-def panel(inner, cls=""):
-    return '<div class="panel %s">%s</div>' % (cls, inner)
-
-
+# 頁の並び (ファイル, 名前)。トップは題の字から戻る
 NAV = [
-    ("index.html", "ホーム", "Home"),
-    ("play.html", "遊び方", "How to play"),
-    ("titans.html", "巨神と背中", "Titans"),
-    ("skills.html", "職と技", "Jobs"),
-    ("rebirth.html", "転生と深淵", "Rebirth"),
-    ("gear.html", "装備", "Gear"),
-    ("pouch.html", "旅嚢と道具", "Pouch"),
-    ("party.html", "パーティとマルチ", "Multiplayer"),
-    ("story.html", "物語", "Story"),
-    ("faq.html", "導入・FAQ", "Install / FAQ"),
-    ("changelog.html", "更新履歴", "Changelog"),
+    ("world.html", "世界と物語"),
+    ("combat.html", "戦いと職"),
+    ("adventure.html", "冒険の場所"),
+    ("gear.html", "装備と成長"),
+    ("together.html", "仲間と暮らし"),
+    ("start.html", "はじめる"),
+    ("changelog.html", "更新履歴"),
 ]
+FONTS = "https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
 
 
-def head(title_ja, title_en, desc_ja, desc_en, depth_class="", ogimg="img/plate_title.png"):
+def head(title, desc, canonical):
     return """<!doctype html>
-<html lang="ja" data-lang="ja">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-ja="%(tj)s" data-en="%(te)s">%(tj)s</title>
-<meta name="description" content="%(dj)s">
-<meta property="og:title" content="%(tj)s">
-<meta property="og:description" content="%(dj)s">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>%(t)s</title>
+<meta name="description" content="%(d)s">
+<link rel="canonical" href="%(site)s%(c)s">
+<meta property="og:title" content="%(t)s">
+<meta property="og:description" content="%(d)s">
 <meta property="og:type" content="website">
-<meta property="og:image" content="%(site)s%(og)s">
-<meta name="theme-color" content="#080e20" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#eaf4ff" media="(prefers-color-scheme: light)">
+<meta property="og:url" content="%(site)s%(c)s">
+<meta property="og:image" content="%(site)simg/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a1226">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@400;700&family=Zen+Antique&display=swap">
+<link rel="stylesheet" href="%(fonts)s">
 <link rel="stylesheet" href="css/style.css">
-<script>try{var t=localStorage.getItem("skyabyss-site-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<script>document.documentElement.classList.add("js")</script>
 <script src="js/main.js" defer></script>
 </head>
-<body class="%(cls)s">
-""" % dict(tj=esc(title_ja), te=esc(title_en), dj=esc(desc_ja), site=SITE_URL, og=ogimg, cls=depth_class)
+<body>
+""" % dict(t=esc(title), d=esc(desc), site=SITE_URL, c="" if canonical == "index.html" else canonical, fonts=FONTS)
 
 
 def header(current):
-    links = []
-    cur_ja = cur_en = ""
-    for href, ja, en in NAV:
-        cur = ' aria-current="page"' if href == current else ""
-        if href == current:
-            cur_ja, cur_en = ja, en
-        links.append('<a href="%s"%s>%s</a>' % (href, cur, T(ja, en)))
-    menu_label = T("メニュー", "Menu")
-    here = T("（今: %s）" % cur_ja, "(now: %s)" % cur_en) if cur_ja else ""
-    return """<a class="skip" href="#main">%s</a>
+    links = "".join('<a href="%s"%s>%s</a>' % (h, ' aria-current="page"' if h == current else "", n) for h, n in NAV)
+    return """<a class="skip" href="#main">本文へ</a>
 <header class="site-header">
 <div class="wrap bar">
-<a class="brand" href="index.html"><img class="px" src="img/favicon.png" width="32" height="32" alt=""><span>天と淵のあいだ</span></a>
-<div class="bar-tools">
-<span class="lang" role="group" aria-label="Language / 言語"><button type="button" data-set="ja" aria-pressed="true" lang="ja">日本語</button><button type="button" data-set="en" aria-pressed="false" lang="en">English</button></span>
-<button class="theme-toggle" type="button" data-theme-toggle aria-label="%s" title="%s"><span class="ja" lang="ja">表示: 自動</span><span class="en" lang="en">Theme: auto</span></button>
-<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">%s<span class="here">%s</span></button>
-</div>
-<nav class="nav" id="site-nav" aria-label="%s">%s</nav>
+<a class="brand" href="index.html"><img src="img/favicon.png" width="28" height="28" alt="">天と淵のあいだ</a>
+<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">メニュー</button>
+<nav class="nav" id="site-nav" aria-label="サイトの頁">%s</nav>
 </div>
 </header>
-""" % (T("本文へ", "Skip to content"), "表示の切り替え（自動・明るい・暗い） / Theme (auto, light, dark)",
-       "表示の切り替え（自動・明るい・暗い） / Theme (auto, light, dark)", menu_label, here,
-       "メニュー / Menu", "".join(links))
-
-
-def toc(items, title_ja="この頁の目次", title_en="On this page"):
-    """長い頁の目次。items は (アンカー, 日本語, 英語)。"""
-    li = "".join('<li><a href="#%s">%s</a></li>' % (a, T(j, e)) for a, j, e in items)
-    return ('<div class="wrap"><nav class="toc" aria-labelledby="toc-h"><details open><summary id="toc-h">%s</summary>'
-            '<ol>%s</ol></details></nav></div>') % (T(title_ja, title_en), li)
+""" % links
 
 
 def footer():
-    foot = "".join('<li><a href="%s">%s</a></li>' % (h, T(j, e)) for h, j, e in NAV)
+    links = "".join('<li><a href="%s">%s</a></li>' % (h, n) for h, n in [("index.html", "トップ")] + NAV)
     return """<footer class="site-footer">
 <div class="wrap">
 <ul class="foot-links">%s</ul>
-<p>%s</p>
-<p>%s <a href="%s">GitHub: Nishi-Yura/skyabyss</a></p>
-<p><small>%s</small></p>
+<p>天と淵のあいだ v%s（Minecraft Java %s・NeoForge）。作 Nishi-Yura。All Rights Reserved。巨神の動きに GeckoLib を使っています。</p>
+<p>ソースと更新: <a href="%s">GitHub: Nishi-Yura/skyabyss</a></p>
+<p><small>Minecraft は Mojang Studios の商標です。このサイトと mod は Mojang・Microsoft とは関係ありません。</small></p>
 </div>
 </footer>
 </body>
 </html>
-""" % (
-        foot,
-        T("天と淵のあいだ v%s。作 Nishi-Yura。All Rights Reserved。巨神の動きに GeckoLib を使っています。" % VERSION,
-          "Between the Sky and the Abyss v%s by Nishi-Yura. All Rights Reserved. Titan animation uses GeckoLib." % VERSION),
-        T("ソースと更新:", "Source and updates:"), REPO,
-        T("Minecraft はMojang Studios の商標です。このサイトと mod は Mojang・Microsoft とは関係ありません。",
-          "Minecraft is a trademark of Mojang Studios. This site and mod are not affiliated with Mojang or Microsoft."),
-    )
+""" % (links, VERSION, MC, REPO)
 
 
-def page_head(h1_ja, h1_en, sub_ja, sub_en):
-    return '<div class="page-head"><div class="wrap"><h1>%s</h1><p>%s</p></div></div>' % (T(h1_ja, h1_en), T(sub_ja, sub_en))
-
-
-# 頁の頭に置く、ゲームの中で撮った全幅の絵 (site/img/shot/<名>.webp・元は tools/sources/site/shots/)。
-# (絵の名, 日本語の説明, 英語の説明)。説明は絵に写っているものだけ書く。
-SHOTS = {
-    "index.html": ("titans", "空を渡る巨神。夕暮れ、雲の上を泳いでいく。", "A titan crossing the sky at dusk, above the clouds."),
-    "titans.html": ("index", "潮殻の背。島のような、段になった岩の背中。", "The back of the Tide Shell, a stepped island of stone."),
-    "play.html": ("play", "はじまりの都。門の上から見た、夕暮れの町。", "The first town at dusk, seen from above the gate."),
-    "skills.html": ("skills", "余燼の鎚。燃える一撃と、広がる金の輪。", "Ember Hammer: a burning blow and spreading rings of gold."),
-    "rebirth.html": ("rebirth", "四巨神の社。真ん中の祭壇が、転生の台座。", "The Shrine of the Four. The altar at its heart is where you are reborn."),
-    "gear.html": ("gear", "四つの巨神の防具が並ぶ。巨神の背の広場で。", "Armour of the four titans side by side, on a titan's back."),
-    "pouch.html": ("pouch", "市の広場。布の屋根の屋台と、並んだ品物。", "The market square, with striped stalls and goods laid out."),
-    "story.html": ("story", "語り部。夕暮れの大通りで、話を聞かせてくれる。", "The storyteller, waiting on the main street at dusk to tell you the tale."),
-    "faq.html": ("faq", "夕暮れの大通り。灯りが並ぶ。", "Dusk on the main street, with lanterns lining the way."),
-    "changelog.html": ("changelog", "夕暮れの都を上から。", "The town at dusk, seen from above."),
-}
-# 仲間の頁は、よい絵が撮れるまで絵を置かない (弱い絵は出さない)
-
-
-def shot_figure(name, ja, en):
-    return ('<figure class="shot"><img src="img/shot/%s.webp" width="1600" height="900" loading="eager" alt="%s" '
-            'data-alt-ja="%s" data-alt-en="%s"><figcaption>%s</figcaption></figure>') % (
-        name, esc(ja), esc(ja), esc(en), T(ja, en))
-
-
-def page(fname, title_ja, title_en, desc_ja, desc_en, body, cls=""):
-    s = SHOTS.get(fname)
-    lead_shot = shot_figure(*s) if s else ""
-    out = head(title_ja, title_en, desc_ja, desc_en, cls) + header(fname) + lead_shot + '<main id="main">' + body + "</main>\n" + footer()
+def page(fname, title, desc, body):
+    out = head(title, desc, fname) + header(fname) + '<main id="main">' + body + "</main>\n" + footer()
     with open(os.path.join(SITE, fname), "w", encoding="utf8", newline="\n") as f:
         f.write(out)
 
 
-def divider():
-    return '<div class="divider" aria-hidden="true"></div>'
+def redirect(old, new):
+    """前の頁の名前から、今の頁へ移す小さな頁 (外から張られた道を切らない)"""
+    out = """<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>移動しました — 天と淵のあいだ</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="%(site)s%(new)s">
+<meta http-equiv="refresh" content="0; url=%(new)s">
+</head>
+<body style="background:#0a1226;color:#eaeef7;font-family:sans-serif">
+<p>この頁は <a href="%(new)s" style="color:#f3d690">%(new)s</a> へ移りました。</p>
+</body>
+</html>
+""" % dict(site=SITE_URL, new=new)
+    with open(os.path.join(SITE, old), "w", encoding="utf8", newline="\n") as f:
+        f.write(out)
 
 
-# ------------------------------------------------------------- 技の木の図
-# (id, 技 ID の並び順, 名前 ja, 名前 en, 種類, 行, 列, 前提, 一言 ja, 一言 en)
-TREE_KIND_RING = {"active": "ring-a", "keystone": "ring-k", "trait": "ring-k", "mutation": "ring-k"}
-TREE_KIND_BADGE = {"active": ("使", "A"), "rank": ("段", "R"), "passive": ("常", "P"), "keystone": ("要", "K"), "rune": ("変", "M"),
-                   "stat": ("基", "S"), "threshold": ("閾", "T"), "effect": ("常", "P"), "trait": ("要", "K"), "mutation": ("変異", "Mu")}
-STAT_ORDER = ["strength", "agility", "spirit", "vitality"]
+# ------------------------------------------------------------------ 絵
+def img(name, alt, sizes="100vw", eager=False, cls="", style=""):
+    """ゲームの中の絵。幅 640 と 1600 の二つから、表示の幅に合うほうを読む"""
+    return ('<img%s%s src="img/shot/%s.webp" srcset="img/shot/%s_s.webp 640w, img/shot/%s.webp 1600w" sizes="%s" '
+            'width="1600" height="900" alt="%s"%s>') % (
+        ' class="%s"' % cls if cls else "", ' style="%s"' % style if style else "", name, name, name, sizes, esc(alt),
+        ' fetchpriority="high"' if eager else ' loading="lazy" decoding="async"')
 
 
-def tree_v2_svg(job, tree, skill_icons, lang_ja, lang_en, desc):
-    """技の木 v2 (assets/skyabyss/skill_tree/<職>.json) を格子の SVG に。skill_icons: 技の id → 絵の番号 (site/img/skill/NN.png)。
-    desc: 技の id → (短い説明 ja, en)。節の文は lang から (node.skyabyss.<職>.<id> など)。"""
-    import json
-    cell = 80
-    nodew = 56
-    nodes = tree["nodes"]
-    by = {n["id"]: n for n in nodes}
-    width = max(n["x"] for n in nodes) + 1
-    height = max(n["y"] for n in nodes) + 1
-    vw = width * cell + 16
-    vh = height * cell + 48
-
-    def pos(n):
-        return 8 + n["x"] * cell + (cell - nodew) // 2, 8 + n["y"] * cell
-
-    def name(n):
-        k = n["kind"]
-        sid = n.get("skill", "")
-        if k in ("active", "passive", "keystone"):
-            return lang_ja.get("skill.skyabyss." + sid, sid), lang_en.get("skill.skyabyss." + sid, sid)
-        if k == "rank":
-            return lang_ja.get("skill.skyabyss." + sid, sid) + " +1", lang_en.get("skill.skyabyss." + sid, sid) + " +1"
-        if k == "rune":
-            return lang_ja.get("rune.skyabyss." + n["id"], n["id"]), lang_en.get("rune.skyabyss." + n["id"], n["id"])
-        if k == "stat":
-            return lang_ja.get("stat.skyabyss." + n["stat"], n["stat"]) + " +%d" % n["amount"], lang_en.get("stat.skyabyss." + n["stat"], n["stat"]) + " +%d" % n["amount"]
-        if k == "trait":
-            return lang_ja.get("keystone.skyabyss." + n["keystone"], n["id"]), lang_en.get("keystone.skyabyss." + n["keystone"], n["id"])
-        if k == "mutation":
-            return lang_ja.get("mutation.skyabyss." + n["mutation"], n["id"]), lang_en.get("mutation.skyabyss." + n["mutation"], n["id"])
-        key = "node.skyabyss.%s.%s" % (job, n["id"])
-        return lang_ja.get(key, n["id"]), lang_en.get(key, n["id"])
-
-    def effect(n):
-        k = n["kind"]
-        sid = n.get("skill", "")
-        if k in ("active", "passive", "keystone", "rank"):
-            d = desc.get(sid)
-            return d if d else ("", "")
-        if k == "rune":
-            key = "rune.skyabyss.%s.effect" % n["id"]
-        elif k == "trait":
-            key = "keystone.skyabyss.%s.effect" % n["keystone"]
-        elif k == "mutation":
-            key = "mutation.skyabyss.%s.effect" % n["mutation"]
-        elif k == "stat":
-            return ("", "")
-        else:
-            key = "node.skyabyss.%s.%s.effect" % (job, n["id"])
-        return lang_ja.get(key, "").replace("%%", "%"), lang_en.get(key, "").replace("%%", "%")
-
-    def icon(n):
-        k = n["kind"]
-        if k == "stat":
-            return 100 + STAT_ORDER.index(n["stat"])
-        if k == "rune":
-            return 104
-        if k == "effect":
-            return 145
-        if k == "threshold":
-            return 146
-        if k == "trait":
-            return 147
-        return skill_icons.get(n.get("skill", ""), None)
-
-    parts = ['<svg class="tree-svg tree-v2" viewBox="0 0 %d %d" role="img" aria-label="%s" data-label-ja="%s" data-label-en="%s">' % (
-        vw, vh, esc(lang_ja.get("job.skyabyss." + job, job) + " の技の木"), esc(lang_ja.get("job.skyabyss." + job, job) + " の技の木"),
-        esc(lang_en.get("job.skyabyss." + job, job) + " ability tree"))]
-    for n in nodes:
-        x, y = pos(n)
-        for r in n.get("requires", []):
-            p = by.get(r)
-            if p is None:
-                continue
-            px, py = pos(p)
-            x1, y1 = px + nodew // 2, py + nodew
-            x2, y2 = x + nodew // 2, y
-            if py == y:
-                parts.append('<path class="ln" d="M%d %d H%d"/>' % (min(px, x) + nodew // 2, py + nodew // 2, max(px, x) + nodew // 2))
-            elif x1 == x2:
-                parts.append('<path class="ln" d="M%d %d V%d"/>' % (x1, y1, y2))
-            else:
-                ym = (y1 + y2) // 2
-                parts.append('<path class="ln" d="M%d %d V%d H%d V%d"/>' % (x1, y1, ym, x2, y2))
-    for n in nodes:
-        x, y = pos(n)
-        cx, cy = x + nodew // 2, y + nodew // 2
-        ja, en = name(n)
-        eja, een = effect(n)
-        ic = icon(n)
-        kind_ja = lang_ja.get("gui.skyabyss.tree.kind." + n["kind"], n["kind"])
-        kind_en = lang_en.get("gui.skyabyss.tree.kind." + n["kind"], n["kind"])
-        req = [name(by[r])[0] for r in n.get("requires", []) if r in by]
-        req_en = [name(by[r])[1] for r in n.get("requires", []) if r in by]
-        tip_ja = "%s（%s・点 %d）%s%s%s" % (ja, kind_ja, n["cost"], "\n" + eja if eja else "", "\n前提: " + " / ".join(req) if req else "",
-                                         "\n型の点 %d" % n["arch_points"] if n.get("arch_points") else "")
-        tip_en = "%s (%s, %d pt)%s%s%s" % (en, kind_en, n["cost"], "\n" + een if een else "", "\nNeeds: " + " / ".join(req_en) if req_en else "",
-                                          "\nArchetype points %d" % n["arch_points"] if n.get("arch_points") else "")
-        parts.append('<g class="node"><title class="ja">%s</title>' % esc(tip_ja))
-        if ic is not None and os.path.exists(os.path.join(ROOT, "site", "img", "skill", "%02d.png" % ic)):
-            parts.append('<image href="img/skill/%02d.png" x="%d" y="%d" width="%d" height="%d"/>' % (ic, x, y, nodew, nodew))
-        parts.append('<circle class="%s" cx="%d" cy="%d" r="%d"/>' % (TREE_KIND_RING.get(n["kind"], "ring-p"), cx, cy, nodew // 2 + 1))
-        b = TREE_KIND_BADGE.get(n["kind"], ("", ""))
-        parts.append('<rect class="badge" x="%d" y="%d" width="%d" height="16"/>' % (x - 4, y - 4, 18 if len(b[0]) <= 1 else 30))
-        parts.append('<text class="badge-t ja" x="%d" y="%d">%s</text><text class="badge-t en" x="%d" y="%d">%s</text>' % (x + 5, y + 8, b[0], x + 5, y + 8, b[1]))
-        parts.append('<text class="cost" x="%d" y="%d" text-anchor="end">%d</text>' % (x + nodew + 4, y + nodew + 2, n["cost"]))
-        parts.append('<text class="tx ja" x="%d" y="%d" text-anchor="middle">%s</text><text class="tx en" x="%d" y="%d" text-anchor="middle">%s</text>' % (
-            cx, y + nodew + 14, esc(ja), cx, y + nodew + 14, esc(en)))
-        parts.append('<desc class="en">%s</desc></g>' % esc(tip_en))
-    for arch in tree.get("archetypes", []):
-        xs = [pos(n)[0] for n in nodes if n.get("arch") == arch]
-        if not xs:
-            continue
-        mid = (min(xs) + max(xs) + nodew) // 2
-        aja = lang_ja.get("arch.skyabyss.%s.%s" % (job, arch), arch)
-        aen = lang_en.get("arch.skyabyss.%s.%s" % (job, arch), arch)
-        parts.append('<text class="lv ja" x="%d" y="%d" text-anchor="middle">%s</text><text class="lv en" x="%d" y="%d" text-anchor="middle">%s</text>' % (
-            mid, vh - 12, esc(aja), mid, vh - 12, esc(aen)))
-    parts.append("</svg>")
-    return "".join(parts)
+def shot(name, cap, sizes="(max-width: 900px) 100vw, 600px"):
+    """説明つきの絵。説明は絵に写っているものだけ書く"""
+    return '<figure class="shot">%s<figcaption>%s</figcaption></figure>' % (img(name, cap, sizes), cap)
 
 
-def tree_svg(nodes, name_ja, name_en, icons=None):
-    """nodes: [(idx, ja, en, kind, row, col, [prereq idx])] 。kind は A(使う)・P(常に)・K(要)。icons: idx → 絵の番号 (site/img/skill/NN.png。無ければ輪だけ)。"""
-    pos = {}
-    nodew = 64
-    xs = {0: 8, 1: 176, 2: 92}
-    ys = {0: 22, 1: 128, 2: 234, 3: 340}
-    parts = ['<svg class="tree-svg" viewBox="0 0 260 450" role="img" aria-label="%s" data-label-ja="%s" data-label-en="%s">' % (
-        esc(name_ja + " の技の木"), esc(name_ja + " の技の木"), esc(name_en + " skill tree"))]
-    for (i, ja, en, kind, row, col, pre) in nodes:
-        pos[i] = (xs[col] + nodew // 2, ys[row] + nodew // 2, xs[col], ys[row])
-    for (i, ja, en, kind, row, col, pre) in nodes:
-        for p in pre:
-            x1, y1 = pos[p][0], pos[p][1] + nodew // 2
-            x2, y2 = pos[i][0], pos[i][1] - nodew // 2
-            if x1 == x2:
-                parts.append('<path class="ln" d="M%d %d V%d"/>' % (x1, y1, y2))
-            else:
-                ym = (y1 + y2) // 2
-                parts.append('<path class="ln" d="M%d %d V%d H%d V%d"/>' % (x1, y1, ym, x2, y2))
-    for lvl, (row, txt) in enumerate(((0, "Lv1"), (1, "Lv5"), (2, "Lv12"), (3, "Lv20"))):
-        parts.append('<text class="lv" x="256" y="%d" text-anchor="end">%s</text>' % (ys[row] + 14, txt))
-    for (i, ja, en, kind, row, col, pre) in nodes:
-        cx, cy, x, y = pos[i]
-        cls = {"A": "ring-a", "P": "ring-p", "K": "ring-k"}[kind]
-        icon = icons.get(i, i) if icons else i
-        if os.path.exists(os.path.join(ROOT, "site", "img", "skill", "%02d.png" % icon)):
-            parts.append('<image href="img/skill/%02d.png" x="%d" y="%d" width="64" height="64"/>' % (icon, x, y))
-        parts.append('<circle class="%s" cx="%d" cy="%d" r="33"/>' % (cls, cx, cy))
-        b = {"A": ("使", "A"), "P": ("常", "P"), "K": ("要", "K")}[kind]
-        parts.append('<rect class="badge" x="%d" y="%d" width="18" height="16"/>' % (x - 4, y - 4))
-        parts.append('<text class="badge-t ja" x="%d" y="%d">%s</text><text class="badge-t en" x="%d" y="%d">%s</text>' % (x + 5, y + 8, b[0], x + 5, y + 8, b[1]))
-        parts.append('<text class="tx ja" x="%d" y="%d" text-anchor="middle">%s</text><text class="tx en" x="%d" y="%d" text-anchor="middle">%s</text>' % (
-            cx, y + 80, esc(ja), cx, y + 80, esc(en)))
-    parts.append("</svg>")
-    return "".join(parts)
+# ------------------------------------------------------------------ 頁の部品
+def page_hero(name, alt, h1, lead, toc=None, pos=None):
+    nav = ""
+    if toc:
+        nav = '<div class="wrap"><nav class="toc" aria-label="この頁の中">%s</nav></div>' % "".join(
+            '<a href="#%s">%s</a>' % (a, n) for a, n in toc)
+    return ('<div class="page-hero">%s<div class="wrap"><div><p class="eyebrow">天と淵のあいだ</p><h1>%s</h1>'
+            '<p class="lead">%s</p></div></div></div>%s') % (img(name, alt, eager=True, style="object-position:%s" % pos if pos else ""), h1, lead, nav)
+
+
+def sec(id_, kicker, h2, lead, inner, alt=False):
+    head_ = '<div class="sec-head"><p class="kicker">%s</p><h2 id="%s-h">%s</h2>%s</div>' % (
+        kicker, id_, h2, "<p>%s</p>" % lead if lead else "")
+    return '<section class="sec%s" id="%s" aria-labelledby="%s-h"><div class="wrap">%s%s</div></section>\n' % (
+        " alt" if alt else "", id_, id_, head_, inner)
+
+
+def split(name, cap, text, rev=False):
+    return '<div class="split%s">%s<div>%s</div></div>' % (" rev" if rev else "", shot(name, cap), text)
+
+
+def ul(items, cls="list"):
+    return '<ul class="%s">%s</ul>' % (cls, "".join("<li>%s</li>" % i for i in items))
+
+
+def table(heads, rows):
+    out = ['<div class="tablewrap"><table><thead><tr>']
+    out += ['<th scope="col">%s</th>' % h for h in heads]
+    out.append("</tr></thead><tbody>")
+    for r in rows:
+        out.append("<tr>" + "".join(("<th scope=\"row\">%s</th>" if i == 0 else "<td>%s</td>") % c for i, c in enumerate(r)) + "</tr>")
+    out.append("</tbody></table></div>")
+    return "".join(out)
+
+
+def gallery(*items):
+    return '<div class="gallery">%s</div>' % "".join(shot(n, c, "(max-width: 900px) 100vw, 380px") for n, c in items)
+
+
+def note(text, warn=False):
+    return '<div class="note%s">%s</div>' % (" warn" if warn else "", text)
+
+
+def details(summary, inner):
+    return "<details><summary>%s</summary><div>%s</div></details>" % (summary, inner)
