@@ -277,7 +277,54 @@ public final class ContinentPois {
             if (loot != null) {
                 fillLoot(level, loot, poi);
             }
+            // 地下のダンジョンの入口の間 (docs/design/55): 層の門・帰り着く所・噂の主の立つ所
+            for (String k : new String[]{"gate", "back", "rumor"}) {
+                BlockPos at = job.mark(k);
+                if (at != null) {
+                    job.entry.extra(k, at);
+                }
+            }
         });
+    }
+
+    // 建った見どころ kind の印 extra の世界の座標 (まだ建っていなければ null)。地下のダンジョンの層の門・帰り着く所
+    @org.jetbrains.annotations.Nullable
+    public static BlockPos extraOf(ServerLevel level, String kind, String extra) {
+        ServerLevel over = level.getServer().overworld();
+        SiteData data = SiteData.get(over);
+        List<Poi> list = all();
+        for (SiteData.Entry e : data.entries(KIND)) {
+            if (e.built && e.index >= 0 && e.index < list.size() && list.get(e.index).kind().equals(kind)) {
+                return e.extra(extra);
+            }
+        }
+        return null;
+    }
+
+    // 建った見どころ kind の、正面 (部品の南) へ dist 出た所と、部品の原点 (撮影・開発用)。まだ建っていなければ null
+    @org.jetbrains.annotations.Nullable
+    public static BlockPos[] frontOf(ServerLevel level, String kind, int dist) {
+        ServerLevel over = level.getServer().overworld();
+        List<Poi> list = all();
+        for (SiteData.Entry e : SiteData.get(over).entries(KIND)) {
+            if (e.built && e.index >= 0 && e.index < list.size() && list.get(e.index).kind().equals(kind)) {
+                BlockPos front = Blueprint.transform(0, 0, dist, jp.revati.skyabyss.opening.site.SiteFinder.rot(e.yaw),
+                        jp.revati.skyabyss.opening.site.SiteFinder.mirror(e.yaw), e.pos);
+                return new BlockPos[]{front, e.pos};
+            }
+        }
+        return null;
+    }
+
+    // 見どころ kind の置き場 (pois.json の x・z。y は 0)
+    @org.jetbrains.annotations.Nullable
+    public static BlockPos placeOf(String kind) {
+        for (Poi p : all()) {
+            if (p.kind().equals(kind)) {
+                return new BlockPos(p.x(), 0, p.z());
+            }
+        }
+        return null;
     }
 
     // 宝箱: 鐘銭 3〜8・糧・その土地の巨神の粉 (I) 一つ

@@ -2272,7 +2272,7 @@
   "item.skyabyss.moon_tear.desc": "A teardrop vial of glowing moonlight.",
   "item.skyabyss.moon_tear.use": "Drink: for 30 seconds, the next hit you take deals 0 (cooldown 60 seconds)",
   "item.skyabyss.moon_fragment": "Moon Fragment",
-  "item.skyabyss.moon_fragment.desc": "A chip of moon stone. Fuel for upgrading and repairing moon gear.",
+  "item.skyabyss.moon_fragment.desc": "A chip of moon stone. Fuel for upgrading moon gear.",
   "item.skyabyss.moon_heart": "Moon Heart",
   "item.skyabyss.moon_heart.desc": "The core of the stilled moon. An artifact material.",
   "item.skyabyss.resonance_shard_moon": "Resonance Shard (Moon)",

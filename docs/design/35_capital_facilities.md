@@ -61,6 +61,7 @@
 
 - 北の段（大鐘楼・語り部の家・砦・館）・壁と門・広場・十字の大通りは今のまま。
 - どの施設も、戸の上に吊り看板、戸の脇に碑（`sign_<施設>`。文は `assets/skyabyss_opening/lang` の `sign.skyabyss.capital.<施設>.1..4`）、両わきに旗。入ってすぐ受付の机があり、係の人は机の向こうの囲いの中に立つ（係の人が客の側へ出てこない）。
+- **浮く名札**（`opening/site/FacilityLabels`。都と土地の町の両方）: 設計図の印 `label_<施設>`（戸の前の一つ外・床から 4 上）から、通りの側へ 0〜6・上下 −1〜6・横へ −6〜6 の中で、名札がどの向きを向いてもブロックに触れず（半径 = 日本語と英語の広い方の行の幅の半分 + 0.3 の円柱が空気）、下に 2 マスの空きがある、いちばん戸に近く低い所に置く（2026-11-02 の声「ブロックにめり込んで全部上手く見えない」）。題（`label.skyabyss.facility.<施設>`、2 倍・金・太字）と、あれば中身の行（`.sub`、1 倍）の text_display 二つ。縦の軸だけで回り、明るさ固定、見える距離 64。土地の町の宿は `town_inn`（旅の宿）。前の版の名札（印の上に 1 枚）は見回りが外して置き直す。都の訓練場の名札（`label_training`、西の門の上）は 2026-11-02 に足した（前の版の都にも設計図の印から出る）。自己テスト `facility labels`（38 枚すべてで空いた所がある）、撮影 `tools/shots/facility_labels.txt`。
 - 戸の前は空ける（大通りの灯りは戸と碑の前に立てない）。建物どうしは軒を含めて間を空ける。
 - 訓練場は**はじめから使える**（章で閉じない。門の扱いは都の設計図の側）。師範の振り直しと木偶も、心臓の数や章に関わらず使える。 門に格子はなく、印 `open_training` は門の真ん中に残す（`CapitalDoors` は読まない）。
 - 図は `docs/review/town_roughs/capital_plan.png`（上から見た色）、決める前の案は `fac_a.png`。ゲーム内の絵は `docs/review/town_roughs/rebuild_a/`（撮影 `tools/shots/capital_rebuild.txt`）。
@@ -328,8 +329,8 @@
 
 | 種類（色） | 施設（戸の印） |
 | --- | --- |
-| 金 = 買う・預ける | 道具屋（`label_tool_shop`）・預かり所（`label_storage`）・取引所（`label_trade`）・薬師の店（`label_apothecary`） |
-| 青 = 休む・旅 | 宿「鐘の宿」（`label_inn`）・子の止まり木（`label_perch`）。厩舎の建物は人がいないので名札も案内も出さない（`ShelterBuilder.LABEL_HIDDEN`。碑は「乗り物は止まり木の旅の番」） |
+| 金 = 買う・預ける | 市（`label_tool_shop`）・預かり所（`label_storage`）・取引所（`label_trade`）・薬師の店（`label_apothecary`） |
+| 青 = 休む・旅 | 宿「鐘の宿」（`label_inn`）・止まり木（`label_perch`。中身の行は「巨神の子を呼ぶ・乗り物」）。厩舎の建物は人がいないので名札も案内も出さない（`FacilityLabels.HIDDEN`。碑は「乗り物は止まり木の旅の番」） |
 | 赤 = 鍛える・戦う | 鯨追いの組合（`open_guild`）・鍛冶場（`label_smithy`）・封切り師（鍛冶場の中。`label_smithy`）・訓練場（`open_training`） |
 | 紫 = 物語・祈り | 四巨神の社（`open_shrine`）・空見の砦（`open_keep`） |
 | 灰 = 裏通り | 酒場「深い杯」（`label_tavern`）・墓所（`sign_graveyard`） |

@@ -135,6 +135,19 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.ThunderWolf>> THUNDER_WOLF = ENTITIES.register("thunder_wolf",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.ThunderWolf::new, MobCategory.MONSTER)
                     .sized(0.9f, 1.1f).eyeHeight(0.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":thunder_wolf"));
+    // 地下のダンジョンの主 (docs/design/55。dungeon/DungeonFloor が主の間に湧かせる)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BoneCentipede>> BONE_CENTIPEDE = ENTITIES.register("bone_centipede",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BoneCentipede::new, MobCategory.MONSTER)
+                    .sized(3.6f, 3.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":bone_centipede"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ShellOctopus>> SHELL_OCTOPUS = ENTITIES.register("shell_octopus",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ShellOctopus::new, MobCategory.MONSTER)
+                    .sized(3.2f, 2.8f).clientTrackingRange(12).build(SkyAbyss.MODID + ":shell_octopus"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.CrystalLizard>> CRYSTAL_LIZARD = ENTITIES.register("crystal_lizard",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.CrystalLizard::new, MobCategory.MONSTER)
+                    .sized(3.0f, 2.4f).clientTrackingRange(12).build(SkyAbyss.MODID + ":crystal_lizard"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ForgeGiant>> FORGE_GIANT = ENTITIES.register("forge_giant",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ForgeGiant::new, MobCategory.MONSTER)
+                    .sized(2.4f, 5.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":forge_giant"));
     // 名のある強敵の大物 (docs/design/44 の 5。world/continent/NamedFoes が湧かせる)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.RockBoar>> ROCK_BOAR = ENTITIES.register("rock_boar",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.RockBoar::new, MobCategory.MONSTER)
@@ -186,6 +199,10 @@ public final class ModEntities {
         event.put(TIDE_CRAB.get(), jp.revati.skyabyss.entity.foe.TideCrab.createAttributes().build());
         event.put(STORM_RAM.get(), jp.revati.skyabyss.entity.foe.StormRam.createAttributes().build());
         event.put(ASH_LIZARD.get(), jp.revati.skyabyss.entity.foe.AshLizard.createAttributes().build());
+        event.put(BONE_CENTIPEDE.get(), jp.revati.skyabyss.dungeon.mob.BoneCentipede.createAttributes().build());
+        event.put(SHELL_OCTOPUS.get(), jp.revati.skyabyss.dungeon.mob.ShellOctopus.createAttributes().build());
+        event.put(CRYSTAL_LIZARD.get(), jp.revati.skyabyss.dungeon.mob.CrystalLizard.createAttributes().build());
+        event.put(FORGE_GIANT.get(), jp.revati.skyabyss.dungeon.mob.ForgeGiant.createAttributes().build());
     }
 
     private ModEntities() {

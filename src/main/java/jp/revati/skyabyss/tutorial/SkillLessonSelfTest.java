@@ -162,22 +162,27 @@ public final class SkillLessonSelfTest {
             SkillLesson.act(p, "skip", null);
             check(f, QuestLog.of(p).entry(SkillLesson.QUEST) == null, "skip should clear the lesson");
 
-            // 後の章: 星術師の木が開く → 一段の稽古 → その木の技を当てる
+            // 後の章: 星読み・深淵術師の木は技の木 v2 の K に無いので、木が開いても稽古は始めない。淵の木 (転生 1 回から) の稽古は始まり、淵の技で終わる
             SkillData d = SkillManager.get(p);
-            SkillLesson.poll(p);
-            check(f, QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest()) == null, "the star lesson started before the tree opened");
             d.unlockedTrees.add(SkillTree.STAR.id);
+            d.unlockedTrees.add(SkillTree.ABYSS.id);
             SkillLesson.poll(p);
-            var star = QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest());
-            check(f, star != null && !star.done, "the star lesson did not start when the tree opened");
+            check(f, QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest()) == null && QuestLog.of(p).entry(SkillLesson.Unlock.ABYSS.quest()) == null,
+                    "the star / abyss lessons started although v2 has no such tab");
+            int rebirth = d.rebirth;
+            d.rebirth = Math.max(1, rebirth);
+            SkillLesson.poll(p);
+            var deep = QuestLog.of(p).entry(SkillLesson.Unlock.DEEP.quest());
+            check(f, deep != null && !deep.done, "the deep lesson did not start after a rebirth");
             SkillLesson.onHit(p, dummy, Skill.TITAN_CLEAVE);
-            check(f, star != null && !star.done, "a rock skill finished the star lesson");
-            Skill starSkill = Skill.inTree(SkillTree.STAR).isEmpty() ? null : Skill.inTree(SkillTree.STAR).get(0);
-            if (starSkill != null) {
-                SkillLesson.onHit(p, dummy, starSkill);
-                star = QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest());
-                check(f, star != null && star.done, "a star skill did not finish the star lesson");
+            check(f, deep != null && !deep.done, "a rock skill finished the deep lesson");
+            Skill deepSkill = Skill.inTree(SkillTree.DEEP).isEmpty() ? null : Skill.inTree(SkillTree.DEEP).get(0);
+            if (deepSkill != null) {
+                SkillLesson.onHit(p, dummy, deepSkill);
+                deep = QuestLog.of(p).entry(SkillLesson.Unlock.DEEP.quest());
+                check(f, deep != null && deep.done, "a deep skill did not finish the deep lesson");
             }
+            d.rebirth = rebirth;
         } finally {
             dummy.discard();
             Quests.forgetAll(p);

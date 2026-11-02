@@ -93,7 +93,9 @@ public final class SkillLesson {
         public boolean open(SkillData d, int level) {
             return switch (this) {
                 case KEYSTONE -> level >= Skill.STONE_OATH.minLevel;
-                case STAR, ABYSS -> d.unlockedTrees.contains(tree.id);
+                // 技の木 v2 の K の画面には星読み・深淵術師の木のつまみが無い (docs/design/48 の 7 章。木は職ごとと淵・前世だけ)。
+                // 「技の画面に新しい札がある」と案内すると行き先が無いので、この二つの稽古は始めない (星術・深淵術は自分のキーで使う)
+                case STAR, ABYSS -> false;
                 case DEEP, PAST -> d.rebirth >= 1;
             };
         }

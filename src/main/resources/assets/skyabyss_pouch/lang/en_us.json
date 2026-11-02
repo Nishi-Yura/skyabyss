@@ -2,7 +2,7 @@
   "skyabyss_pouch.name": "Travel Satchel",
   "skyabyss_pouch.first": "Put [%2$s] into the %1$s",
   "skyabyss_pouch.full": "The %1$s is full of [%2$s]. It went to your inventory",
-  "skyabyss_pouch.migrated": "Moved your mod items into the %1$s (%2$s)",
+  "skyabyss_pouch.migrated": "Moved the items that belong in the %1$s out of your inventory (%2$s)",
   "skyabyss_pouch.category.tool": "Tools",
   "skyabyss_pouch.category.key": "Keys",
   "skyabyss_pouch.category.resonance": "Resonance",

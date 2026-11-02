@@ -635,7 +635,8 @@ public final class StormChapterSelfTest {
                 }
                 if (e.siteId.equals(StormSites.PACK)) {
                     for (BlockPos q : BlockPos.betweenClosed(at.offset(-3, -2, -3), at.offset(3, 4, 3))) {
-                        if (level.getBlockEntity(q) instanceof BarrelBlockEntity b && b.getItem(2).is(net.minecraft.world.item.Items.LIGHTNING_ROD)) {
+                        // 荷の樽: 糧と避雷針 (松明は 0.9.22 から入れないので、避雷針の枠の位置は決めない)
+                        if (level.getBlockEntity(q) instanceof BarrelBlockEntity b && b.hasAnyOf(java.util.Set.of(net.minecraft.world.item.Items.LIGHTNING_ROD))) {
                             packs++;
                         }
                     }

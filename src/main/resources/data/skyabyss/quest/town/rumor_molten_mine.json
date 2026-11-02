@@ -1,0 +1,51 @@
+{
+  "category": "sub",
+  "order": 384,
+  "giver": "skyabyss:guest_town_guide_ember",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:dungeon_molten_mine",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "clear",
+      "objectives": [
+        {
+          "id": "clear",
+          "type": "signal",
+          "target": "dungeon:molten_mine",
+          "party": true
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_town_guide_ember",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 50
+      }
+    ]
+  }
+}

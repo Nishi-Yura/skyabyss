@@ -71,7 +71,13 @@ public final class BossBarLooks {
             Map.entry("entity.skyabyss.rock_boar", solo("named_stone", "named_stone", 0x9A9080, 0xD8D0C0, 0xC0B8A8)),
             Map.entry("entity.skyabyss.tide_crab", solo("named_tide", "named_tide", 0x4E9A94, 0x9CE0D4, 0x84CCC2)),
             Map.entry("entity.skyabyss.storm_ram", solo("named_ochre", "named_ochre", 0xB08A3C, 0xE8C472, 0xD8AC5C)),
-            Map.entry("entity.skyabyss.ash_lizard", solo("named_ash", "named_ash", 0x8E4E34, 0xCC8054, 0xC0744C)));
+            Map.entry("entity.skyabyss.ash_lizard", solo("named_ash", "named_ash", 0x8E4E34, 0xCC8054, 0xC0744C)),
+            // 地下のダンジョンの主と中ボス (docs/design/55)
+            Map.entry("entity.skyabyss.bone_centipede", solo("named_stone", "named_stone", 0xCFC6AE, 0xF4EEDC, 0xE0D8C2)),
+            Map.entry("entity.skyabyss.shell_octopus", solo("named_tide", "named_tide", 0xC88C78, 0xF4D2C0, 0xE0B4A0)),
+            Map.entry("entity.skyabyss.crystal_lizard", solo("named_ochre", "named_ochre", 0x7CB8F0, 0xD8F0FF, 0xA8D4FA)),
+            Map.entry("entity.skyabyss.forge_giant", solo("named_ash", "named_ash", 0xE07830, 0xFFC080, 0xF09850)),
+            Map.entry("entity.skyabyss.dungeon_mid", solo("named_stone", "named_stone", 0x9A9080, 0xD8D0C0, 0xC0B8A8)));
 
     private BossBarLooks() {
     }

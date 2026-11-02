@@ -650,7 +650,8 @@ public final class Ch1SelfTest {
                     diaries += pagesNear(level, s.get(0).pos(), Ch1.PAGE_DIARY);
                 }
                 if (id.equals(Sites.LOST_CART)) {
-                    check(containerItemsNear(level, s.get(0).pos()) >= 2, "the lost cart's pack should hold food and torches");
+                    // 松明は 0.9.22 から入れない (置く品は持たせない)。糧だけ
+                    check(containerItemsNear(level, s.get(0).pos()) >= 1, "the lost cart's pack should hold food");
                 }
                 if (id.equals(Sites.LOOKOUT)) {
                     BlockPos rod = find(level, s.get(0).pos(), 5, Blocks.LIGHTNING_ROD);

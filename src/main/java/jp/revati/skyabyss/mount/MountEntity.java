@@ -24,7 +24,10 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -45,6 +48,11 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     // 歩き・駆けの境 (ブロック/tick)。乗って前へ進むと 0.3〜0.55 になる
     private static final double WALK_FROM = 0.012;
     private static final double RUN_FROM = 0.2;
+    // 飛ぶ乗り物 (38 の 6 章): 速さの段の値 × FLY_SCALE ブロック/tick (段 8 の 0.44 で 1 秒に 21 ブロックほど。地上の 1.2 倍)、
+    // 地面 (動きを止める面) から FLY_CEILING ブロックより上へは上がらない。羽ばたき (跳びのキー) は上へ FLAP + 跳びの段の分
+    static final double FLY_SCALE = 2.4;
+    static final int FLY_CEILING = 40;
+    static final double FLAP = 0.32;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Nullable
@@ -107,7 +115,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         double oldMax = getMaxHealth();
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(MountStats.speed(data.tier(MountStats.SPEED)));
         getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(MountStats.jump(data.tier(MountStats.JUMP)));
-        getAttribute(Attributes.MAX_HEALTH).setBaseValue(MountStats.health(data.tier(MountStats.HEALTH)));
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(MountStats.FIXED_HEALTH);
         if (healFull) {
             setHealth(getMaxHealth());
         } else if (getMaxHealth() > oldMax) {
@@ -138,6 +146,61 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
             gaitSpeed = gaitSpeed * 0.6 + v * 0.4;
             airTicks = onGround() || isInWater() || isInLava() ? 0 : airTicks + 1;
         }
+        // 飛ぶ乗り物は、人が乗っているあいだ落ちない (降りると地面へ下りる。落下では傷つかない)
+        boolean fly = flying();
+        if (isNoGravity() != fly) {
+            setNoGravity(fly);
+        }
+    }
+
+    // 飛んでいるか (飛ぶ見た目で、持ち主が乗っている)
+    public boolean flying() {
+        return look().flies() && getControllingPassenger() instanceof Player;
+    }
+
+    // 飛ぶ乗り物: 見ている向きへ飛ぶ (上を向けば上がる・下を向けば下がる)。前へ押さなければ宙に止まる。少しずつ速さを合わせる (惰性)
+    @Override
+    public void travel(Vec3 input) {
+        if (!flying() || !(getControllingPassenger() instanceof Player p)) {
+            super.travel(input);
+            return;
+        }
+        double speed = getAttributeValue(Attributes.MOVEMENT_SPEED) * FLY_SCALE;
+        Vec3 look = Vec3.directionFromRotation(p.getXRot(), p.getYRot());
+        float yaw = p.getYRot() * Mth.DEG_TO_RAD;
+        Vec3 left = new Vec3(Mth.cos(yaw), 0, Mth.sin(yaw));
+        Vec3 want = look.scale(input.z).add(left.scale(input.x));
+        if (want.lengthSqr() > 1) {
+            want = want.normalize();
+        }
+        Vec3 v = getDeltaMovement().scale(0.88).add(want.scale(speed * 0.12));
+        // 高さの上限: 地面から FLY_CEILING より上へは上がらない (越えたら少しずつ下げる)
+        int ground = level().getHeight(Heightmap.Types.MOTION_BLOCKING, getBlockX(), getBlockZ());
+        double over = getY() - (ground + FLY_CEILING);
+        if (over > 0 && v.y > 0) {
+            v = new Vec3(v.x, 0, v.z);
+        }
+        if (over > 1) {
+            v = new Vec3(v.x, -0.08, v.z);
+        }
+        setDeltaMovement(v);
+        move(MoverType.SELF, v);
+    }
+
+    // 跳びのキー: 飛ぶ乗り物は宙でも羽ばたいて上がる (溜めの強さと跳びの段で大きく)
+    @Override
+    public void onPlayerJump(int power) {
+        if (!look().flies() || !isVehicle()) {
+            super.onPlayerJump(power);
+            return;
+        }
+        double k = Mth.clamp(power, 0, 100) / 100.0;
+        int ground = level().getHeight(Heightmap.Types.MOTION_BLOCKING, getBlockX(), getBlockZ());
+        if (getY() < ground + FLY_CEILING) {
+            Vec3 v = getDeltaMovement();
+            setDeltaMovement(v.x, Math.max(v.y, 0) + FLAP * (0.5 + 0.5 * k) * (0.6 + getAttributeValue(Attributes.JUMP_STRENGTH)), v.z);
+        }
+        playSound(SoundEvents.PHANTOM_FLAP, 0.5f, 1.2f);
     }
 
     // 描画用: 歩いた距離 (部分 tick で補間)
@@ -247,7 +310,8 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         // 宙 (跳び・落ち) → 跳び、速い → 駆け、動いている → 歩き、止まる → 待機。脚の運びは歩いた距離で進む (アニメの式の variable.mount_dist)
         controllers.add(new AnimationController<>(this, "move", 4, state -> {
-            if (airTicks > 2) {
+            // 飛ぶ乗り物は宙にいるのがふつうなので、跳びの姿にはしない (待機・歩き・駆け = ゆっくり・ふつう・強い羽ばたき)
+            if (airTicks > 2 && !look().flies()) {
                 return state.setAndContinue(JUMP);
             }
             if (gaitSpeed > RUN_FROM) {

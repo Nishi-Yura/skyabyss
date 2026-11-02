@@ -17,7 +17,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 // 段は何度流しても同じ結果になるように書く。新しい段を足すとき: CURRENT を一つ上げ、STEPS の終わりに足す (docs/release.md)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PlayerUpgrade {
-    public static final int CURRENT = 1;
+    public static final int CURRENT = 2;
     public static final String KEY = "skyabyss_data_version";
 
     public record Step(int version, String name, Consumer<ServerPlayer> run) {
@@ -32,6 +32,17 @@ public final class PlayerUpgrade {
                 int n = jp.revati.skyabyss.rpg.rules.NoPlaceables.sweep(p);
                 if (n > 0) {
                     SkyAbyss.LOGGER.info("Player upgrade: removed {} placeable item(s) from {}", n, p.getGameProfile().getName());
+                }
+            }),
+            // 1.0.0: 乗り物の体力の段をやめた (mount/MountStats)。前に買った段の鐘銭を返して、段を 0 にする
+            new Step(2, "refund mount health tiers", p -> {
+                jp.revati.skyabyss.mount.MountData d = jp.revati.skyabyss.mount.MountService.data(p);
+                int refund = jp.revati.skyabyss.mount.MountStats.healthRefund(d.tier(jp.revati.skyabyss.mount.MountStats.HEALTH));
+                if (refund > 0) {
+                    d.setTier(jp.revati.skyabyss.mount.MountStats.HEALTH, 0);
+                    jp.revati.skyabyss.facility.Coins.give(p, refund);
+                    jp.revati.skyabyss.notice.Notice.hint(p, "message.skyabyss.mount.health_refund", refund);
+                    SkyAbyss.LOGGER.info("Player upgrade: refunded {} bell coin(s) of mount health tiers to {}", refund, p.getGameProfile().getName());
                 }
             }));
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個、土地の名声の 5 つと旅帳の 4 つで 36 個、職の熟練の 6 つで 42 個、図鑑の 6 つで 48 個、釣りの 2 つで 50 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
+// 称号 (C04)。最初は 24 個、裏ボスの「やっつめを聞いた者」で 25 個、あいだの塔の二つで 27 個、土地の名声の 5 つと旅帳の 4 つで 36 個、職の熟練の 6 つで 42 個、図鑑の 6 つで 48 個、釣りの 2 つで 50 個、地下のダンジョンの 4 つで 54 個。解ける条件は Facts (その人の事実) だけで決まる計算で、解けたものは消えない (解除は足すだけ)。
 // 並び順は固定 (解除の印は並び順の番号の bit で持つので、足すなら末尾へ。順番を替えない)。
 // 名前の文は lang の "title.skyabyss_rebirth.<id>" と、条件の説明 "title.skyabyss_rebirth.<id>.how"
 public final class RebirthTitles {
@@ -32,7 +32,7 @@ public final class RebirthTitles {
     public record Title(int index, String id, Predicate<Facts> rule) {
     }
 
-    public static final int MAX = 50;
+    public static final int MAX = 54;
     private static final long HOUR = 72_000L;
     private static final List<Title> ALL = new ArrayList<>();
 
@@ -86,6 +86,10 @@ public final class RebirthTitles {
         // 釣り (fishing/Fishing): 魚の図鑑をそろえた・週の釣り大会で一番
         add("angler_all", f -> f.marks.contains("fish:all"));
         add("angler_champion", f -> f.marks.contains("fish:champion"));
+        // 地下のダンジョン (dungeon/Dungeons.marks): 主を初めて倒した (docs/design/55 の 2 章)
+        for (String d : new String[] {"bone_pit", "tide_cave", "storm_hollow", "molten_mine"}) {
+            add("dungeon_" + d, f -> f.marks.contains("dungeon:" + d));
+        }
     }
 
     private RebirthTitles() {

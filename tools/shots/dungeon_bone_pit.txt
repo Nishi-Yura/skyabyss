@@ -1,0 +1,70 @@
+# 地下のダンジョン「鯨骨の坑」(docs/design/55): 大陸の入口 (岩の口と入口の間)・一層目・二層目・主の間と骨掘りの大百足
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/dungeon_bone_pit.txt -PshotsName=dungeon_bone_pit
+world dungeon_bone_pit continent
+size 1600 900
+timeout 3600
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+# 見どころは場所の支度 (opening build) のあと、人が 240 まで近づくと建つ
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+chat clear
+cmd tp @s 60 170 -770 180 30
+waitchunks 600
+wait 900
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon mouth bone_pit
+waitchunks 300
+wait 80
+shot bp_mouth
+cmd skyabyss dungeon hall bone_pit
+waitchunks 200
+wait 60
+shot bp_hall_gate
+cmd execute as @s at @s run tp @s ~ ~ ~ ~180 5
+wait 20
+shot bp_hall_back
+# 写しへ (一層目の入口から)
+cmd skyabyss dungeon enter bone_pit
+wait 80
+shot bp_f1_entry
+cmd skyabyss dungeon goto view_dig view_dig_to
+wait 60
+shot bp_f1_dig
+cmd skyabyss dungeon goto view_hall view_hall_to
+wait 60
+shot bp_f1_scaffold
+cmd skyabyss dungeon goto view_cart view_cart_to
+wait 40
+shot bp_f1_cart
+cmd skyabyss dungeon floor 1
+wait 80
+cmd skyabyss dungeon goto view_rim view_rim_to
+wait 40
+shot bp_f2_shaft_down
+cmd skyabyss dungeon goto view_bottom view_bottom_to
+wait 60
+shot bp_f2_bottom_up
+cmd skyabyss dungeon floor 2
+wait 80
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+shot bp_boss_lair
+cmd execute as @s at @s facing entity @e[type=skyabyss:bone_centipede,limit=1,sort=nearest] eyes run tp @s ^ ^ ^6 ~ ~
+wait 40
+shot bp_boss_close
+cmd skyabyss dungeon boss
+wait 120
+cmd skyabyss dungeon goto view_lair exit
+wait 40
+shot bp_exit_light

@@ -1,0 +1,229 @@
+# 地下のダンジョン四つ (docs/design/55): 大陸の入口 (岩の口と入口の間)・各層の見どころ・主
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/dungeons_all.txt -PshotsName=dungeons_all
+world dungeons_all continent
+size 1600 900
+timeout 7200
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+chat clear
+# ---- bone_pit
+cmd gamemode creative
+cmd tp @s 60 190 -768 180 30
+waitchunks 600
+wait 900
+cmd time set 6000
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon mouth bone_pit
+waitchunks 300
+wait 80
+shot bone_pit_mouth
+cmd skyabyss dungeon hall bone_pit
+waitchunks 200
+wait 60
+shot bone_pit_hall_gate
+cmd execute as @s at @s run tp @s ~ ~ ~ ~180 5
+wait 20
+shot bone_pit_hall_back
+cmd skyabyss dungeon enter bone_pit
+wait 80
+cmd gamemode spectator
+shot bone_pit_f1_entry
+cmd skyabyss dungeon goto view_dig view_dig_to
+wait 50
+shot bone_pit_dig
+cmd skyabyss dungeon goto view_hall view_hall_to
+wait 50
+shot bone_pit_hall
+cmd skyabyss dungeon goto view_cart view_cart_to
+wait 50
+shot bone_pit_cart
+cmd skyabyss dungeon floor 1
+wait 80
+cmd skyabyss dungeon goto view_rim view_rim_to
+wait 50
+shot bone_pit_rim
+cmd skyabyss dungeon goto view_bottom view_bottom_to
+wait 50
+shot bone_pit_bottom
+cmd gamemode creative
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+wait 20
+shot bone_pit_lair
+cmd skyabyss dungeon boss
+wait 120
+cmd skyabyss dungeon goto view_lair exit
+wait 40
+shot bone_pit_exit
+cmd skyabyss dungeon leave
+wait 40
+# ---- tide_cave
+cmd gamemode creative
+cmd tp @s 1426 190 -82 180 30
+waitchunks 600
+wait 900
+cmd time set 6000
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon mouth tide_cave
+waitchunks 300
+wait 80
+shot tide_cave_mouth
+cmd skyabyss dungeon hall tide_cave
+waitchunks 200
+wait 60
+shot tide_cave_hall_gate
+cmd execute as @s at @s run tp @s ~ ~ ~ ~180 5
+wait 20
+shot tide_cave_hall_back
+cmd skyabyss dungeon enter tide_cave
+wait 80
+cmd gamemode spectator
+shot tide_cave_f1_entry
+cmd skyabyss dungeon goto view_pool view_pool_to
+wait 50
+shot tide_cave_pool
+cmd skyabyss dungeon goto view_shelf view_shelf_to
+wait 50
+shot tide_cave_shelf
+cmd skyabyss dungeon floor 1
+wait 80
+cmd skyabyss dungeon goto view_wreck view_wreck_to
+wait 50
+shot tide_cave_wreck
+cmd skyabyss dungeon goto view_mid view_mid_to
+wait 50
+shot tide_cave_mid
+cmd gamemode creative
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+wait 20
+shot tide_cave_lair
+cmd skyabyss dungeon boss
+wait 120
+cmd skyabyss dungeon goto view_lair exit
+wait 40
+shot tide_cave_exit
+cmd skyabyss dungeon leave
+wait 40
+# ---- storm_hollow
+cmd gamemode creative
+cmd tp @s -1244 190 -252 180 30
+waitchunks 600
+wait 900
+cmd time set 6000
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon mouth storm_hollow
+waitchunks 300
+wait 80
+shot storm_hollow_mouth
+cmd skyabyss dungeon hall storm_hollow
+waitchunks 200
+wait 60
+shot storm_hollow_hall_gate
+cmd execute as @s at @s run tp @s ~ ~ ~ ~180 5
+wait 20
+shot storm_hollow_hall_back
+cmd skyabyss dungeon enter storm_hollow
+wait 80
+cmd gamemode spectator
+shot storm_hollow_f1_entry
+cmd skyabyss dungeon goto view_gallery view_gallery_to
+wait 50
+shot storm_hollow_gallery
+cmd skyabyss dungeon goto view_works view_works_to
+wait 50
+shot storm_hollow_works
+cmd skyabyss dungeon floor 1
+wait 80
+cmd skyabyss dungeon goto view_geode view_geode_to
+wait 50
+shot storm_hollow_geode
+cmd skyabyss dungeon goto view_mid view_mid_to
+wait 50
+shot storm_hollow_mid
+cmd gamemode creative
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+wait 20
+shot storm_hollow_lair
+cmd skyabyss dungeon boss
+wait 120
+cmd skyabyss dungeon goto view_lair exit
+wait 40
+shot storm_hollow_exit
+cmd skyabyss dungeon leave
+wait 40
+# ---- molten_mine
+cmd gamemode creative
+cmd tp @s 240 190 1250 180 30
+waitchunks 600
+wait 900
+cmd time set 6000
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon mouth molten_mine
+waitchunks 300
+wait 80
+shot molten_mine_mouth
+cmd skyabyss dungeon hall molten_mine
+waitchunks 200
+wait 60
+shot molten_mine_hall_gate
+cmd execute as @s at @s run tp @s ~ ~ ~ ~180 5
+wait 20
+shot molten_mine_hall_back
+cmd skyabyss dungeon enter molten_mine
+wait 80
+cmd gamemode spectator
+shot molten_mine_f1_entry
+cmd skyabyss dungeon goto view_forge view_forge_to
+wait 50
+shot molten_mine_forge
+cmd skyabyss dungeon goto view_cross view_cross_to
+wait 50
+shot molten_mine_cross
+cmd skyabyss dungeon floor 1
+wait 80
+cmd skyabyss dungeon goto view_river view_river_to
+wait 50
+shot molten_mine_river
+cmd skyabyss dungeon goto view_mid view_mid_to
+wait 50
+shot molten_mine_mid
+cmd gamemode creative
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+wait 20
+shot molten_mine_lair
+cmd skyabyss dungeon boss
+wait 120
+cmd skyabyss dungeon goto view_lair exit
+wait 40
+shot molten_mine_exit
+cmd skyabyss dungeon leave
+wait 40

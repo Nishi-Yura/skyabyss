@@ -492,6 +492,8 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
         v.set(x0 - 1, 5, mid, '%s_wall_banner[facing=west]' % st.banner_color)
         # 門ははじめから開いている (鉄格子なし)。印 open_training は門の真ん中 (今は読む仕組みはない)
         self.mark('open_training', x0, 0, mid)
+        # 門の外の上に浮く名札 (職の間はここ。ShelterBuilder → FacilityLabels が通りの上の空いた所に置く)
+        self.mark('label_training', x0 - 2, 5, mid)
         self.tablet(x0 - 1, 0, gz0 - 3, 'west', 'training')
         v.set(x0 - 1, -1, gz0 - 3, st.trim.full)
         self.openings.append((x0, mid, 'west'))

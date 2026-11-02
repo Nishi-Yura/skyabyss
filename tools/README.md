@@ -179,6 +179,8 @@ SKYABYSS_LANG=en_us ./gradlew runShots -Pscript=tools/shots/first_hour.txt   # �
 新しいプレイヤーが、序章 → 帳面 → 煙 → 語り部 → 最初の影 → 破れた頁 → イサナ → 足音の夜 → 歌の夜 → 岩鯨の初見 → 鎖、を進む間の「帯の文・画面・知らせ」を、ゲーム内の時刻つきで `run/shots/first_hour/shots/first_hour/shots.log` の `[watch]` に残す (開発用。本番の計測ではない)。拍子の強制 (`opening <拍子>`) は使わず、影・足音・歌・岩鯨は本物の判断に任せて総 tick を 60 分ぶん流す (`cmd tick rate 100` でサーバーだけ 5 倍)。歩きは `dev opening view|goto` で運び、会話は `dev talk "<役>"` / `dev talk say <continue|leave|番号>` で本物の会話 (DialogueService) を進める (節と選択肢が `[dialogue]` に出る)。結果の読み方と見つけた穴は `docs/review/first_hour_log.md`。
 
 - 巨神が地形にめり込まない・潮殻の乗り場の輪 (`TitanGround`、08 の 2.2〜2.4): `python tools/gen/shots/gen_titan_ground_shots.py` → `SKYABYSS_SHOTS_SEED=4242 ./gradlew runShots -Pscript=tools/shots/titan_ground.txt` → `python tools/sheets/titan_ground_sheet.py` で `docs/review/previews/titan_ground_sheet.png` (前後。開発コマンド `/skyabyss dev titanground <true|false>`・`place tide <x> <z> <yaw>`・`scout`)。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan ground" ./gradlew runServer` (体積の柱ごとにブロックを数える)。台本の世界の種は環境変数 `SKYABYSS_SHOTS_SEED` で変えられる
+- 施設の浮く名札 (`opening/site/FacilityLabels`、35 の 2.1): `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/facility_labels.txt -PshotsName=facility_labels` (都の 10 枚と鯨見の町・風待の里の市を、係の人から名札の向きの正面と、壁に沿った横から。係の人は観戦の人のそばには立たないので、はじめは創造で待つ)。置き場の検めは自己テスト `facility labels` (設計図だけで 38 枚)。
+- 乗り物の新しい見た目のラフ (00 の 346〜348): `python -I tools/rough/lowpoly/mounts2/roughs.py [abyss|moon|sky]` → `docs/review/roughs_mounts2/<題>.png` と案ごとの `<題>_<a|b|c>.png`。部品は `tools/gen/mobs/mounts_lp/mlp.py`。選んだ案は `mounts_lp/<id>.py` へ移して作り込み、`build_all.py` で入れる。
 
 ## 生成スクリプトとコミット済みデータの同期 (`tools/audit/check_generators.py`)
 

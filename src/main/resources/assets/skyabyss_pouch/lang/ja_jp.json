@@ -2,7 +2,7 @@
   "skyabyss_pouch.name": "旅嚢",
   "skyabyss_pouch.first": "【%2$s】を、%1$sへ入れた",
   "skyabyss_pouch.full": "%1$sの【%2$s】がいっぱいだ。持ち物へ入れた",
-  "skyabyss_pouch.migrated": "持ち物の mod の品を、%1$sへ移した（%2$s 個）",
+  "skyabyss_pouch.migrated": "持ち物の中の旅嚢に入る品を、%1$sへ移した（%2$s 個）",
   "skyabyss_pouch.category.tool": "使う道具",
   "skyabyss_pouch.category.key": "鍵と心核",
   "skyabyss_pouch.category.resonance": "共鳴",

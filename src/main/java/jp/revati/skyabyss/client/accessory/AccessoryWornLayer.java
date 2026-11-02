@@ -59,7 +59,10 @@ public final class AccessoryWornLayer extends RenderLayer<AbstractClientPlayer, 
 
     private static Map<String, Mount> wild() {
         Map<String, Mount> m = new java.util.HashMap<>();
-        for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : jp.revati.skyabyss.item.wild.WildGearTable.ACCESSORIES) {
+        java.util.List<jp.revati.skyabyss.item.wild.WildGearTypes.Accessory> rows = new java.util.ArrayList<>(jp.revati.skyabyss.item.wild.WildGearTable.ACCESSORIES);
+        // 地下のダンジョンの装飾品 (dungeon/DungeonGear) も同じ形の表
+        rows.addAll(jp.revati.skyabyss.dungeon.DungeonGear.ROWS);
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : rows) {
             var w = x.mount();
             if (w != null) {
                 m.put(x.id(), new Mount(Part.valueOf(w.part()), w.x(), w.y(), w.z(), w.rx(), w.ry(), w.rz(), w.scale(), w.px(), w.py(), w.pz()));

@@ -523,13 +523,13 @@ public final class Ch1SitesSelfTest {
                     "the blade and shield trails should wait for the iron trail");
             check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
 
-            // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・松明 8・頁) → 鉄の防具 4 部位を着る
+            // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・頁。松明は 0.9.22 から入れない: 置く品は持たせない) → 鉄の防具 4 部位を着る
             check(BonePit.openPack(p, level, null), "the pack did not open the first time");
             check(!BonePit.openPack(p, level, null), "the pack gave its contents twice");
             Tasks.flush();
             check(Lore.state(p).has(Ch1Prep.PAGE_IRON), "the pack did not record the page");
-            check(jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:iron_lump", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 8,
-                    "the pack should hold two iron ingots and eight torches");
+            check(jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:iron_lump", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 0,
+                    "the pack should hold two iron ingots and no torches");
             Quests.poll(p, true);
             QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);
             check(iron.stage == 1 && !iron.done, "the page did not move the iron trail to the armor stage");

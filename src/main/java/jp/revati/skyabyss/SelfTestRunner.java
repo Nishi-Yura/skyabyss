@@ -228,6 +228,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.facility.FacilitySelfTest.steps());
         // 都の案内人と灯りの道 (印・どの施設にも道・選んだときの知らせ)。docs/design/35 の 6.12。SKYABYSS_SELFTEST_ONLY="town guide"
         steps.addAll(jp.revati.skyabyss.facility.TownGuideSelfTest.steps());
+        // 施設の浮く名札 (文・どの向きでもブロックに触れない置き場)。SKYABYSS_SELFTEST_ONLY="facility labels"
+        steps.addAll(jp.revati.skyabyss.opening.site.FacilityLabelsSelfTest.steps());
         // 都の町めぐり (docs/design/40 の 4 章)。SKYABYSS_SELFTEST_ONLY="town tour"
         steps.addAll(jp.revati.skyabyss.facility.TownTourSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.world.continent.RegionSpawnerSelfTest.steps());
@@ -382,6 +384,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("founder", jp.revati.skyabyss.story.finale.founder.FounderSelfTest::run));
         // 超大型レイド「あいだの塔」(docs/design/54)。SKYABYSS_SELFTEST_ONLY="tower"
         steps.add(Step.once("tower", jp.revati.skyabyss.tower.TowerSelfTest::run));
+        steps.add(Step.once("dungeons", jp.revati.skyabyss.dungeon.DungeonSelfTest::run));
         // 巡り路 (docs/design/54 の 3.1)。SKYABYSS_SELFTEST_ONLY="circuit"
         steps.add(Step.once("circuit", jp.revati.skyabyss.endgame.CircuitSelfTest::run));
         // 大陸の大事件 (docs/design/54 の 3.3)。SKYABYSS_SELFTEST_ONLY="world event"

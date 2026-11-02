@@ -1,0 +1,51 @@
+{
+  "category": "sub",
+  "order": 381,
+  "giver": "skyabyss:guest_town_guide_whale",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:dungeon_bone_pit",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "clear",
+      "objectives": [
+        {
+          "id": "clear",
+          "type": "signal",
+          "target": "dungeon:bone_pit",
+          "party": true
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_town_guide_whale",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 20
+      }
+    ]
+  }
+}

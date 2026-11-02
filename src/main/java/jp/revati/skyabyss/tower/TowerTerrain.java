@@ -21,7 +21,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
 // あいだの塔の階の地形 (docs/design/54 の 2.4)。tools/gen/world/build_tower.py が彫って data/skyabyss/tower/<階>.json に書く。
-// 書式は雲海の島と同じ (palette・runs・marks・rect) で、座標は階の手元 (原点 = 階の床の真ん中、床の上面 y 0)。区画の原点へずらして流し込む
+// 書式は雲海の島と同じ (palette・runs・marks・rect) で、座標は階の手元 (原点 = 階の床の真ん中、床の上面 y 0)。区画の原点へずらして流し込む。
+// 地下のダンジョンの層 (data/skyabyss/dungeon/<名前>.json。tools/gen/world/build_dungeons.py) も同じ書式なので of("dungeon", 名前) で読む
 public final class TowerTerrain {
     private static final Map<String, TowerTerrain> CACHE = new HashMap<>();
 
@@ -46,11 +47,16 @@ public final class TowerTerrain {
     }
 
     public static synchronized TowerTerrain of(String name) {
-        return CACHE.computeIfAbsent(name, TowerTerrain::load);
+        return of("tower", name);
     }
 
-    private static TowerTerrain load(String name) {
-        String path = "/data/" + SkyAbyss.MODID + "/tower/" + name + ".json";
+    // folder = data/skyabyss/ の下の置き場 (tower・dungeon)
+    public static synchronized TowerTerrain of(String folder, String name) {
+        return CACHE.computeIfAbsent(folder + "/" + name, k -> load(folder, name));
+    }
+
+    private static TowerTerrain load(String folder, String name) {
+        String path = "/data/" + SkyAbyss.MODID + "/" + folder + "/" + name + ".json";
         JsonObject json;
         try (InputStream in = TowerTerrain.class.getResourceAsStream(path)) {
             if (in == null) {
@@ -112,6 +118,16 @@ public final class TowerTerrain {
         return out;
     }
 
+    // 手元の範囲 (x0, z0, x1, z1)
+    public int[] rect() {
+        return new int[]{x0, z0, x1, z1};
+    }
+
+    // 流し込むブロックの列の数 (少しずつ流す pour(level, origin, from, to) の範囲)
+    public int runCount() {
+        return runs.size();
+    }
+
     // origin へずらして流し込む (違うブロックだけ置く)。置いた数
     public int pour(ServerLevel level, BlockPos origin) {
         long t0 = System.currentTimeMillis();
@@ -120,9 +136,17 @@ public final class TowerTerrain {
                 level.getChunk(cx, cz);
             }
         }
+        int placed = pour(level, origin, 0, runs.size());
+        SkyAbyss.LOGGER.info("[terrain] {} poured at {}: {} blocks in {} ms", name, origin.toShortString(), placed, System.currentTimeMillis() - t0);
+        return placed;
+    }
+
+    // 列 from..to-1 だけ流し込む (毎 tick 少しずつ。チャンクは触れたものを読む)
+    public int pour(ServerLevel level, BlockPos origin, int from, int to) {
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
         int placed = 0;
-        for (int[] r : runs) {
+        for (int ri = Math.max(0, from); ri < Math.min(runs.size(), to); ri++) {
+            int[] r = runs.get(ri);
             int y = r[0] + origin.getY();
             int z = r[1] + origin.getZ();
             int x = r[2] + origin.getX();
@@ -142,7 +166,6 @@ public final class TowerTerrain {
                 x += len;
             }
         }
-        SkyAbyss.LOGGER.info("[tower] {} poured at {}: {} blocks in {} ms", name, origin.toShortString(), placed, System.currentTimeMillis() - t0);
         return placed;
     }
 }

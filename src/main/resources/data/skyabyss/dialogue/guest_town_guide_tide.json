@@ -10,6 +10,48 @@
       "face": "smile",
       "options": [
         {
+          "id": "rumor",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 1
+              },
+              {
+                "type": "quest",
+                "quest": "town/rumor_tide_cave",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/rumor_tide_cave"
+            }
+          ]
+        },
+        {
+          "id": "rumor_back",
+          "goto": "q_done",
+          "kind": "give",
+          "if": {
+            "type": "quest",
+            "quest": "town/rumor_tide_cave",
+            "is": "active",
+            "stage": "back"
+          },
+          "do": [
+            {
+              "type": "signal",
+              "signal": "town_hand:guest_town_guide_tide"
+            }
+          ]
+        },
+        {
           "id": "way",
           "kind": "talk",
           "do": [
@@ -61,6 +103,26 @@
           "id": "no",
           "kind": "leave",
           "goto": "end"
+        }
+      ]
+    },
+    "q_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "q_done": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "leave"
         }
       ]
     }

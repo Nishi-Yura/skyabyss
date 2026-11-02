@@ -2,6 +2,35 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空（340〜345 は 2026-11-02 の午後に答えが出て作った）。
 
+## 2026-11-02 の夜: 地下のダンジョン四つを作った（コミットしていない）
+
+主の形は 00 の 364〜367 で選ばれた（364 A・365 B・366 A・367 A。どれも推奨）。設計書 55 の 5 章が作りの表。
+
+- **仕組み**（`dungeon/`）: `Dungeon`（四つの表）・`DungeonWorld`（次元 `skyabyss:dungeon`、ダンジョンごとに区画 12、層 k は z = 320k）・`DungeonRun`・`DungeonFloor`（部屋の敵・扉・罠・宝箱・主と帯）・`Mechanics`（満ち引き・溶岩・結晶）・`DungeonLoot`・`Dungeons`（入る・層・帰る・報酬・出来事・命令 `/skyabyss dungeon …`）。地形の読み込みは `TowerTerrain.of("dungeon", 名前)`（塔と同じ書式。少しずつ流す `pour(level, origin, from, to)` を足した）。宝箱の受け取りの鍵は写しの区画によらない（`SharedChests.key` → `DungeonWorld.chestKey`）。
+- **入口**: 大陸の見どころ `dungeon_<id>`（`continent/pois.json` の末尾に 4 つ。置き場は町と跡地のあいだ、道から 20〜50）。部品 `opening/poi_dungeon_<id>.json`（`tools/gen/world/dungeon_entrances.py`）。`ContinentPois` が gate・back・rumor を見どころの extra に覚える（`extraOf`・`placeOf`・`frontOf` を足した）。
+- **層**: `tools/gen/world/build_dungeons.py`（鯨骨の坑）と `dungeons_more.py`（ほか三つ）。部品 `dungeon_kit.py`（numpy で彫る・殻を塗る・灯り・鍾乳石）。書き出し `data/skyabyss/dungeon/<id>_<1|2|boss>.json`。撮影の視点の印 `view_<名前>` / `view_<名前>_to`（`/skyabyss dungeon goto <印> <向く印>`）。
+- **主**: `dungeon/mob/`（`DungeonBoss` の下に大百足・大蛸・大蜥蜴・巨人）。モデル `tools/gen/mobs/dungeon_bosses_lp/`（乗り物の部品 `mlp` を使う。`build_all.py` で入れ、`docs/review/dungeon_bosses/<id>_sheet.png` に確かめの絵）。大蛸は切れた腕を `client/entity/ShellOctopusRenderer` が隠す。帯の見た目 `BossBarLooks`、技の名前 `skyabyss_dungeon` の lang。
+- **報酬**: 経験値・鐘銭・粉・一日一度の封の箱・初めての称号（`RebirthTitles` に 4 つ。54 個）。主は敵の図鑑に自動で載る。
+- **自己テスト** `dungeons`（入口の部品・四つの写し・扉・結晶の扉・満ち引き・溶岩・罠・中ボス・主・続きから・噂の頼み）と `rebirth`（称号 54）が通る。撮影 `tools/shots/dungeon_bone_pit.txt`（`run/shots/dungeon_bone_pit2/`）・`tools/shots/dungeons_all.txt`（`run/shots/dungeons_all/`。入口の口・入口の間・各層の視点）・`tools/shots/dungeon_bosses.txt`（`run/shots/dungeon_bosses/`。主 4 体）。撮影のあとで直したもの（潮の洞の床の材料・沈んだ船の形・熔けた坑道の溶岩の区間の縁）は撮り直していない。
+- **監査**: `mesh_audit` で新しい主 4 体の開いた辺は 0。関節の浅い所が大百足・大蜥蜴・巨人に一つずつ（`docs/review/mesh_audit_report.md`）。文と資源の検査は 0 件。
+- **噂の頼み**: 土地の町の案内人の会話（`dialogue/guest_town_guide_<町>.json`）に「噂を聞く」と報告を足し、`quest/town/rumor_<id>.json`（入口 → 主 → 報告）。文は `skyabyss_town` の lang。自己テスト `dungeons` が四つとも最後まで進める。
+- **装飾品**（00 の 368〜371 = A・A・C・A）: `dungeon/DungeonGear`（`WildAccessoryItem` を使い、野の装備の表には入れない）。初めて主を倒すと一つ渡す。メッシュ・持ち物欄の絵は `tools/rough/lowpoly/accessories/dungeon_final.py`（`install_lowpoly_accessories.py` の手順を使う）。体の描き場所は `AccessoryWornLayer`、立体は `AccessoryMeshes` が `DungeonGear.ROWS` も読む。`SignFit.lang` が `skyabyss_dungeon` も読む。自己テスト `dungeons` と `wild gear`・`loot boxes` が通る。撮影 `tools/shots/dungeon_trinkets.txt`（`run/shots/dungeon_trinkets2/`）。
+- **まだ**: 手ざわり（主の強さ・罠の傷）は試遊で。
+
+## 2026-11-02 の夕方 2: 店の名札・乗り物・地下のダンジョンの案・文・正式版の点検（コミットしていない）
+
+声（夕方）: 店の浮く名札の名前と位置（「ブロックにめり込んで全部上手く見えない」）、ペットの種類・飛べるペット・体力はいらない・速さ、地下に大きめのダンジョン（主を倒すと入口へ戻る、サブクエストのような遊び）、わかりにくい文、正式版に向けた調整。選ぶページ https://claude.ai/artifact/Lpzq85EKGcRG8c2VSPSBqq （db の `choices`、`q346`〜`q363`。00 の 346〜363 と `docs/review/pets_dungeons_1102/index.md` が同じ中身、生成 `tools/gen/review/pets_dungeons_page.py`）。
+
+- **名札**（35 の 2.1）: 新しい `opening/site/FacilityLabels`（置き場を探す・題と中身の行・縦の軸で回る・明るさ固定・前の版の名札を置き直す）。`ShelterBuilder.keepLabels` と `ContinentTowns` の見回りはこれを呼ぶ。名前は `skyabyss_guard` の lang（`label.skyabyss.facility.*` と `.sub`、`town_inn`）。都の `capital.json` と `tools/capital/facilities.py` に `label_training`（前の版の都には `TownGuide.worldMarks` で届く）。`SignFit.lang` が `skyabyss_guard` も読む。自己テスト `facility labels`（38 枚すべてで空いた所。置き場の写しは設計図だけで見る）。撮影 `tools/shots/facility_labels.txt`（`run/shots/facility_labels/`）。
+- **乗り物**（38 の 3）: 体力の段をやめた（いつも 60。前に買った段は `PlayerUpgrade` の段 2 で鐘銭を返す。`CURRENT` = 2）。速さは 8 段（0.44 まで）。店の行は二つ。自己テスト `mount` に返金と二度払わないこと。新しい見た目のラフ 3 題 × 3 案（`tools/rough/lowpoly/mounts2/roughs.py` → `docs/review/roughs_mounts2/`）。ラフの道具が雷獣の箱の geo（`tools/sources/geo_cube/` へ移した）を読んで止まっていたのを直した（`tools/rough/lowpoly/raiju/common.py`）。
+- **文**: 約 70 キー（目的の行の形・店の案内の誤り・なくなった仕組みの言葉・技の木 v2 の言葉・記号）。en も合わせた。`check_lang_keys`・`check_text_fit` 0 件。直したキーは `pets_dungeons_1102/index.md` の「文」。
+- **正式版の点検**: 舞台の主の卵 8 つの持ち物の形（`models/item/*_spawn_egg.json`）を足した。技の木 v2 に無い星読み・深淵術師の木の稽古は始めない（`SkillLesson.Unlock.open`、自己テスト `skill lesson` は淵の木で確かめる）。残りの一覧はページの最後の節。
+- **選んだあと（同じ日の夕方）**: 声「選定した」（22 問のうち 18。347 = B 星読みの大猫・353 = B 2 層・357 = B 1〜6 人のほかは推奨）。答えは 38 の 2・3・6、新しい 55（地下のダンジョン）、`docs/release.md` の 7 に書き、00 から外した。
+  - 乗り物 3 つを入れた: `tools/gen/mobs/mounts_lp/abyss_gecko.py`・`star_lynx.py`・`sky_ray.py`（共通 `mlp_extra.py`。`build_all.py` の `ORDER` に足した）、`MountLook` の `ABYSS_GECKO`（章 6・220）・`STAR_LYNX`（7・260）・`SKY_RAY`（8・400、`flies()`）、`MountService.chapter` は四つの心臓のあと物語の章を見る（五章 = 6・六章 = 7・`FinaleEnding.chosen` = 8）、並ぶ前の札 `lockedKey`。店の一覧はホイールで送る（`MountShopScreen.scroll`）。
+  - 空鱏の飛び方: `MountEntity.travel`（見ている向き・惰性・地面から `FLY_CEILING` 40）、`onPlayerJump`（羽ばたき）、乗っている間は重力なし、動きは跳びの姿にしない。撮影 `tools/shots/mounts_1102.txt`。
+  - ダンジョンの主 4 体のラフ（3 案ずつ、`tools/rough/lowpoly/dungeon_bosses/roughs.py` → `docs/review/roughs_dungeon_bosses/`）を選ぶページに足した（00 の 364〜367）。
+- 確かめ: compileJava、自己テスト `facility labels,mount` PASSED、全段の通し（新しい大陸の世界 `run/st_full_1102`）は名前の出る段 216 PASSED・11 FAILED（目的の帯の幅を越えた 8 行 → 文を短くした。`tools/audit/check_band_width.py` も流すこと。0.9.22 で荷から松明を外したのに数えていた `ch1 p6`・`ch1`・`storm chapter (sites)` → 自己テストを今の荷に合わせた）。直したあと `objective band,ch1,storm chapter,mount,skill lesson,facility labels,lang` を新しい世界で流し直して全部 PASSED。名札は撮影で見た（都の 10 枚と鯨見の町・風待の里の市）。乗り物の速さの手ざわりはゲームの中で見ていない。
+
 ## 2026-11-02 の夕方: 神器の大きな能力・武器の数値の行・型の溜まるもの・待ちとマナ（340〜345 をみな推奨で）
 
 声「選び終えた」（選ぶページの 40 問すべておすすめ）。

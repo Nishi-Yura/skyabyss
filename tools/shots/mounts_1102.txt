@@ -1,0 +1,100 @@
+# 2026-11-02 に入れた乗り物 3 つ (灯り守の大守宮・星読みの大猫・空鱏。docs/design/38 の 2・6)。並び・正面・乗った姿・駆け・空鱏の飛ぶ姿
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/mounts_1102.txt -PshotsName=mounts_1102
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+wait 200
+cmd skyabyss cinematic stop
+cmd kill @e[type=skyabyss:mount]
+chat clear
+hud off
+cmd tp @s 0 -60 -2 0 0
+cmd skyabyss facility mount demo
+wait 40
+shot m_row
+camera minecraft:overworld -6.3 -59 2.5 25 14
+wait 20
+shot m_abyss_gecko_front
+camera minecraft:overworld -3.5 -59 7.0 90 10
+wait 15
+shot m_abyss_gecko_side
+camera minecraft:overworld -9.7 -59 2.5 25 14
+wait 20
+shot m_star_lynx_front
+camera minecraft:overworld -6.9 -59 7.0 90 10
+wait 15
+shot m_star_lynx_side
+camera minecraft:overworld -13.1 -59 2.5 25 14
+wait 20
+shot m_sky_ray_front
+camera minecraft:overworld -10.3 -59 7.0 90 10
+wait 15
+shot m_sky_ray_side
+cmd tp @s -8.5 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot m_abyss_gecko_ride
+walk on
+wait 24
+shot m_abyss_gecko_run_a
+wait 4
+shot m_abyss_gecko_run_b
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s -11.9 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective front
+wait 15
+shot m_star_lynx_ride
+walk on
+wait 24
+shot m_star_lynx_run_a
+wait 4
+shot m_star_lynx_run_b
+walk off
+wait 10
+cmd ride @s dismount
+perspective first
+wait 5
+cmd tp @s -15.3 -60 7 180 0
+wait 5
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+perspective back
+wait 15
+shot m_sky_ray_ride
+look 180 -25
+walk on
+wait 40
+shot m_sky_ray_climb
+look 180 0
+wait 30
+shot m_sky_ray_fly
+perspective front
+wait 10
+shot m_sky_ray_fly_front
+walk off
+wait 20
+shot m_sky_ray_hover
+cmd ride @s dismount
+perspective first
+wait 40
+quit

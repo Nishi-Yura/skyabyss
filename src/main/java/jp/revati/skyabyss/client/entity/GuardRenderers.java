@@ -88,6 +88,11 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.MIST_ANGLER.get(), ctx -> noTilt(ctx, "mist_angler"));
         event.registerEntityRenderer(ModEntities.THUNDER_WOLF.get(), ctx -> noTiltStillHead(ctx, "thunder_wolf"));
         event.registerEntityRenderer(ModEntities.ROCK_BOAR.get(), ctx -> noTiltStillHead(ctx, "rock_boar"));
+        // 地下のダンジョンの主 (docs/design/55)
+        event.registerEntityRenderer(ModEntities.BONE_CENTIPEDE.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "bone_centipede", 1.8f));
+        event.registerEntityRenderer(ModEntities.SHELL_OCTOPUS.get(), ShellOctopusRenderer::new);
+        event.registerEntityRenderer(ModEntities.CRYSTAL_LIZARD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "crystal_lizard", 1.7f));
+        event.registerEntityRenderer(ModEntities.FORGE_GIANT.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "forge_giant", 1.6f));
         event.registerEntityRenderer(ModEntities.TIDE_CRAB.get(), ctx -> noTiltStillHead(ctx, "tide_crab"));
         event.registerEntityRenderer(ModEntities.STORM_RAM.get(), ctx -> noTiltStillHead(ctx, "storm_ram"));
         event.registerEntityRenderer(ModEntities.ASH_LIZARD.get(), ctx -> noTiltStillHead(ctx, "ash_lizard"));

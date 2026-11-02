@@ -7,7 +7,7 @@
   "gui.skyabyss.mount.looks": "Looks",
   "gui.skyabyss.mount.max": "MAX",
   "gui.skyabyss.mount.owned": "Owned (click to use)",
-  "gui.skyabyss.mount.title": "Stable",
+  "gui.skyabyss.mount.title": "Mounts",
   "gui.skyabyss.mount.whistle_get": "Take a whistle",
   "gui.skyabyss.mount.whistle_have": "You carry a whistle",
   "item.skyabyss.mount_whistle": "Mount Whistle",
@@ -42,5 +42,18 @@
   "mount.skyabyss.look.whale_calf.desc": "A calf of the stone whale. Mossy slabs on its back, fins that tread the ground.",
   "mount.skyabyss.stat.health": "Health",
   "mount.skyabyss.stat.jump": "Jump",
-  "mount.skyabyss.stat.speed": "Speed"
+  "mount.skyabyss.stat.speed": "Speed",
+  "message.skyabyss.mount.health_refund": "Mount health tiers are gone (health is always at the old maximum). Refunded %s bell coins for the tiers you bought",
+  "mount.skyabyss.look.abyss_gecko": "Lamp-Keeper Gecko",
+  "mount.skyabyss.look.abyss_gecko.desc": "A great gecko kept by the abyss lamp keepers. Lantern sacs glow on its shoulders and tail.",
+  "mount.skyabyss.look.star_lynx": "Star-Reader Lynx",
+  "mount.skyabyss.look.star_lynx.desc": "A great lynx of the moon fields. Stars glint in its night-blue fur; a crescent glows at its tail.",
+  "mount.skyabyss.look.sky_ray": "Sky Ray",
+  "mount.skyabyss.look.sky_ray.desc": "A great ray that swims the cloud sea. It flies where you look (jump to flap).",
+  "gui.skyabyss.mount.locked.ch6": "Unlocks in ch. 5",
+  "gui.skyabyss.mount.locked.ch7": "Unlocks on the moon",
+  "gui.skyabyss.mount.locked.ch8": "After the finale",
+  "message.skyabyss.mount.locked.ch6": "Not in stock yet (unlocks in chapter 5, past the abyss gate)",
+  "message.skyabyss.mount.locked.ch7": "Not in stock yet (unlocks once you reach the moon)",
+  "message.skyabyss.mount.locked.ch8": "Not in stock yet (unlocks after the finale)"
 }

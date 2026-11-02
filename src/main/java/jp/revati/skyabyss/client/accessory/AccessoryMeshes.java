@@ -41,6 +41,10 @@ public final class AccessoryMeshes {
         for (jp.revati.skyabyss.loot.box.BoxKind k : jp.revati.skyabyss.loot.box.BoxKind.ALL) {
             all.add(k.id());
         }
+        // 地下のダンジョンの装飾品 (dungeon/DungeonGear。野の装備の表の外)
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : jp.revati.skyabyss.dungeon.DungeonGear.ROWS) {
+            all.add(x.id());
+        }
         return Set.copyOf(all);
     }
 

@@ -26,7 +26,7 @@ sys.path.insert(0, str(HERE))
 import mlp  # noqa: E402
 from mlp import *  # noqa: E402,F401,F403
 
-ORDER = ["horn_beast", "ash_deer", "great_lizard", "whale_calf", "shell_tortoise", "storm_chick", "ember_fox"]
+ORDER = ["horn_beast", "ash_deer", "great_lizard", "whale_calf", "shell_tortoise", "storm_chick", "ember_fox", "abyss_gecko", "star_lynx", "sky_ray"]
 LOOK_JAVA = ROOT / "src/main/java/jp/revati/skyabyss/mount/MountLook.java"
 PARAMS = WORK / "look_params.json"
 

@@ -19,73 +19,12 @@ public final class ShelterBuilder {
         return new SiteJob(level, data, entry, Blueprint.get(name), "shelter", ShelterBuilder::finish);
     }
 
-    // 名札を出さない施設: 闇市 (自分で見つける)・地図屋の屋根裏と厩舎 (係の人を消して人がいない。乗り物は止まり木の旅の番)。前に置いた名札は keepLabels が外す
-    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker", "stable");
-    public static final String LABEL_TAG = "skyabyss_facility_label";
+    // 施設の浮く名札は FacilityLabels (置き場の探し方・題と中身の行・見回り)
+    public static final String LABEL_TAG = FacilityLabels.TAG;
 
-    private static net.minecraft.nbt.ListTag floats(float... v) {
-        net.minecraft.nbt.ListTag l = new net.minecraft.nbt.ListTag();
-        for (float f : v) {
-            l.add(net.minecraft.nbt.FloatTag.valueOf(f));
-        }
-        return l;
-    }
-
-    // 文字の表示 (バニラの text_display) を一つ置く。前に置いた同じ所の表示は消してから
-    static boolean placeLabel(net.minecraft.server.level.ServerLevel level, BlockPos at, String name) {
-        net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
-        for (net.minecraft.world.entity.Entity old : level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, e -> e.getTags().contains(LABEL_TAG))) {
-            old.discard();
-        }
-        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-        tag.putString("id", "minecraft:text_display");
-        tag.putString("text", "{\"translate\":\"label.skyabyss.facility." + name + "\",\"color\":\"#F2C14E\",\"bold\":true}");
-        tag.putString("billboard", "center");
-        // 揃えを書かないと、バニラが読むたびに「Display entityNot a string」をログに出す
-        tag.putString("alignment", "center");
-        tag.putInt("background", 0x6A0A0C10);
-        tag.putInt("line_width", 200);
-        tag.putFloat("view_range", 0.8f);
-        // 2 倍の大きさ (通りの向こうからでも読める)
-        net.minecraft.nbt.CompoundTag tf = new net.minecraft.nbt.CompoundTag();
-        tf.put("left_rotation", floats(0f, 0f, 0f, 1f));
-        tf.put("right_rotation", floats(0f, 0f, 0f, 1f));
-        tf.put("translation", floats(0f, 0f, 0f));
-        tf.put("scale", floats(2f, 2f, 2f));
-        tag.put("transformation", tf);
-        net.minecraft.nbt.ListTag tags = new net.minecraft.nbt.ListTag();
-        tags.add(net.minecraft.nbt.StringTag.valueOf(LABEL_TAG));
-        tag.put("Tags", tags);
-        net.minecraft.world.entity.Entity e = net.minecraft.world.entity.EntityType.loadEntityRecursive(tag, level, en -> {
-            en.moveTo(at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, 0f, 0f);
-            return en;
-        });
-        return e != null && level.addFreshEntity(e);
-    }
-
-    // 5 秒ごと (SiteGuard の見回りから): 都の施設の名の表示が無ければ置き直す (生き物の動いているチャンクだけ)
+    // 5 秒ごと (SiteGuard の見回りから): 都の施設の名札が無ければ置き直す
     public static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
-        for (int i = 0; i < e.extraNames.size(); i++) {
-            String key = e.extraNames.get(i);
-            if (!key.startsWith("label_")) {
-                continue;
-            }
-            BlockPos at = e.extraPos.get(i);
-            if (!level.isPositionEntityTicking(at)) {
-                continue;
-            }
-            net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
-            if (LABEL_HIDDEN.contains(key.substring(6))) {
-                // 前の版で置いた名札 (厩舎など) を外す
-                for (net.minecraft.world.entity.Entity old : level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, d -> d.getTags().contains(LABEL_TAG))) {
-                    old.discard();
-                }
-                continue;
-            }
-            if (level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, d -> d.getTags().contains(LABEL_TAG)).isEmpty()) {
-                placeLabel(level, at, key.substring(6));
-            }
-        }
+        FacilityLabels.keep(level, e, false);
     }
 
     static void finish(SiteJob job) {
@@ -170,17 +109,17 @@ public final class ShelterBuilder {
             int placed = jp.revati.skyabyss.facility.Attendants.ensureAll(job.level, facility);
             SkyAbyss.LOGGER.info("Opening capital: {} facility mark(s), {} attendant(s) placed", facility.size(), placed);
         }
-        // 入れる施設の戸の上に浮く名 (label_<施設>。建物のほかに、遠くからでも店と分かるように。2026-10-21 の試遊)。裏通りの闇市・地図屋は出さない
+        // 入れる施設の戸の前に浮く名 (label_<施設>。建物のほかに、遠くからでも店と分かるように。2026-10-21 の試遊)。裏通りの闇市・地図屋は出さない
         int labels = 0;
         for (String key : job.bp.marks.keySet()) {
-            if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {
+            if (!key.startsWith("label_") || FacilityLabels.HIDDEN.contains(key.substring(6))) {
                 continue;
             }
             BlockPos at = job.mark(key);
             if (at != null) {
                 // 位置を記録して、建てたときに生き物の読み込まれていないチャンクでも、見回り (keepLabels) が置き直す
                 job.entry.extra(key, at);
-                if (job.level.isPositionEntityTicking(at) && placeLabel(job.level, at, key.substring(6))) {
+                if (job.level.isPositionEntityTicking(at) && FacilityLabels.place(job.level, at, key.substring(6), false)) {
                     labels++;
                 }
             }

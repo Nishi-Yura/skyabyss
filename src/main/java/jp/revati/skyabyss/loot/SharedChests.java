@@ -69,7 +69,13 @@ public final class SharedChests extends SavedData {
     }
 
     static String key(ServerLevel level, BlockPos pos) {
-        return level.dimension().location() + "@" + pos.asLong();
+        String dungeon = jp.revati.skyabyss.dungeon.DungeonWorld.chestKey(level, pos);
+        return dungeon != null ? dungeon : level.dimension().location() + "@" + pos.asLong();
+    }
+
+    // この箱に見本 (人ごとに渡す中身) があるか (地下のダンジョンの層を流し直したとき、まだ見本のない箱だけ中身を入れる)
+    public static boolean known(ServerLevel level, BlockPos pos) {
+        return get(level.getServer()).templates.containsKey(key(level, pos));
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)

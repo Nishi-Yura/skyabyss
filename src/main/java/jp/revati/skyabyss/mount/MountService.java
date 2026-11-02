@@ -47,8 +47,20 @@ public final class MountService {
         return player.getData(MountSetup.DATA);
     }
 
+    // 店の章: 四つの心臓までは止めた数 + 1 (Coins.chapter)。そのあとは物語の章 (五章 = 6・六章 = 7・終章を越えた = 8。MountLook.chapter)
     public static int chapter(ServerPlayer player) {
-        return chapterOverride > 0 ? chapterOverride : Coins.chapter(player);
+        if (chapterOverride > 0) {
+            return chapterOverride;
+        }
+        int c = Coins.chapter(player);
+        if (c < 5 || player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            return c;
+        }
+        if (jp.revati.skyabyss.story.finale.FinaleEnding.chosen(player) != null) {
+            return 8;
+        }
+        jp.revati.skyabyss.story.Chapters ch = jp.revati.skyabyss.story.Chapters.of(player);
+        return ch.ordinal() >= jp.revati.skyabyss.story.Chapters.MOON.ordinal() ? 7 : ch == jp.revati.skyabyss.story.Chapters.ABYSS ? 6 : 5;
     }
 
     static void setChapterOverride(int c) {
@@ -158,7 +170,7 @@ public final class MountService {
             return Result.OWNED;
         }
         if (chapter(player) < look.chapter) {
-            Notice.hint(player, "message.skyabyss.mount.locked", look.chapter - 1);
+            Notice.hint(player, look.lockedKey("message.skyabyss.mount.locked"), look.chapter - 1);
             return Result.LOCKED;
         }
         if (!Coins.take(player, look.price)) {
@@ -188,7 +200,7 @@ public final class MountService {
         }
         MountData d = data(player);
         int next = d.tier(kind) + 1;
-        if (next > MountStats.TIERS) {
+        if (next > MountStats.tiers(kind)) {
             Notice.hint(player, "message.skyabyss.mount.maxed");
             return Result.MAXED;
         }

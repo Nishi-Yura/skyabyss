@@ -56,7 +56,7 @@ public final class ContinentTowns {
                     job.entry.extra(m, at);
                 }
             }
-            // 施設の浮く名札 (都と同じ。opening/site/ShelterBuilder.keepLabels が近くの人のために置き直す)。
+            // 施設の浮く名札 (都と同じ。opening/site/FacilityLabels.keep が近くの人のために置き直す)。
             // 係の人の印 npc_<役> と宿の寝台 inn_bed_<n> は、設計図にあるものを全部 (土地の町にも都と同じ施設。2026-10-27)。
             // 施設の碑 sign_<建物> には、その町の施設の札を書く (sign.skyabyss.town_fac.<建物>)
             if (bp != null) {
@@ -160,7 +160,7 @@ public final class ContinentTowns {
                 }
             }
             Attendants.ensureAll(level, marks);
-            jp.revati.skyabyss.opening.site.ShelterBuilder.keepLabels(level, e);
+            jp.revati.skyabyss.opening.site.FacilityLabels.keep(level, e, true);
             // 土地の町の人 (town/RegionFolk。二〜四章の町に二人ずつ)
             for (String fm : new String[] {"folk_a", "folk_b"}) {
                 BlockPos at = e.extra(fm);
