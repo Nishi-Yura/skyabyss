@@ -118,7 +118,8 @@ public final class ShotRunner {
         if (file == null || file.isBlank()) {
             return false;
         }
-        if (FMLEnvironment.production) {
+        // 本番の jar では動かない。配る前の起動確認 (tools/dev/prod_client.py) だけは、起動の印 -Dskyabyss.prodcheck=true を付けて動かす
+        if (FMLEnvironment.production && !Boolean.getBoolean("skyabyss.prodcheck")) {
             SkyAbyss.LOGGER.warn("[shots] {} is ignored outside the development environment", ENV);
             finished = true;
             return false;

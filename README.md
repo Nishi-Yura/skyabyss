@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://nishi-yura.github.io/skyabyss/">
-    <img src="docs/readme/plate_title.png" width="840" alt="天と淵のあいだ　BETWEEN THE SKY AND THE ABYSS　空を追う人の旅の手帳　ベータ版">
+    <img src="docs/readme/plate_title.png" width="840" alt="天と淵のあいだ　BETWEEN THE SKY AND THE ABYSS　空を追う人の旅の手帳　v1.0.0">
   </a>
 </p>
 
@@ -30,10 +30,10 @@
 ## かんたんな導入
 
 1. NeoForge 1.21.1 を入れて、一度起動する。
-2. `skyabyss-0.9.23.jar` と GeckoLib の jar を、どちらも `mods` フォルダへ入れる（サーバーなら、サーバーの `mods` にも）。
+2. `skyabyss-1.0.0.jar` と GeckoLib の jar を、どちらも `mods` フォルダへ入れる（サーバーなら、サーバーの `mods` にも）。
 3. **新しいワールド**を作る。世界の種類は「天と淵の大陸」だけです（専用サーバーは `server.properties` に `level-type=skyabyss\:continent`）。難易度はピースフル以外。一人でも、仲間と 6 人までで遊べます（みんなで同じ jar を）。
 
-jar は開発者から受け取るか、ソースから `./gradlew build` で作ると `build/libs/` に出ます。テスター向けの案内は [docs/beta_how_to_play.md](docs/beta_how_to_play.md)。
+jar は開発者から受け取るか、ソースから `./gradlew build` で作ると `build/libs/` に出ます。遊び方の案内は [docs/beta_how_to_play.md](docs/beta_how_to_play.md)。
 
 ## 必要なもの
 
@@ -49,6 +49,6 @@ jar は開発者から受け取るか、ソースから `./gradlew build` で作
 All Rights Reserved。作 Nishi-Yura。巨神の動きに GeckoLib を使っています。
 
 <p align="center">
-  <sub>これはベータ版（0.9.23）です。序章から終章「雲海」まで遊べます（既知の制限は<a href="https://nishi-yura.github.io/skyabyss/faq.html#limits">サイトの導入・FAQ</a>）。<br>
+  <sub>これは正式版（1.0.0）です。序章から終章「雲海」まで遊べます（既知の制限は<a href="https://nishi-yura.github.io/skyabyss/faq.html#limits">サイトの導入・FAQ</a>）。<br>
   <code>docs/design/</code> の設計書には物語の核心が書かれています。まっさらな気持ちで遊びたい人は開かないでください。</sub>
 </p>

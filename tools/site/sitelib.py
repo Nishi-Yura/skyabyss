@@ -188,8 +188,8 @@ def footer():
 </html>
 """ % (
         foot,
-        T("天と淵のあいだ v%s（ベータ版）。作 Nishi-Yura。All Rights Reserved。巨神の動きに GeckoLib を使っています。" % VERSION,
-          "Between the Sky and the Abyss v%s (beta) by Nishi-Yura. All Rights Reserved. Titan animation uses GeckoLib." % VERSION),
+        T("天と淵のあいだ v%s。作 Nishi-Yura。All Rights Reserved。巨神の動きに GeckoLib を使っています。" % VERSION,
+          "Between the Sky and the Abyss v%s by Nishi-Yura. All Rights Reserved. Titan animation uses GeckoLib." % VERSION),
         T("ソースと更新:", "Source and updates:"), REPO,
         T("Minecraft はMojang Studios の商標です。このサイトと mod は Mojang・Microsoft とは関係ありません。",
           "Minecraft is a trademark of Mojang Studios. This site and mod are not affiliated with Mojang or Microsoft."),

@@ -121,7 +121,7 @@ def index():
 """ % dict(
         pitch=T("一枚の大陸を歩き、空を泳ぐ巨神の背に乗り、世界の底の謎へ。Minecraft の見た目をした、掘らない・建てない RPG。",
                 "Walk one hand-drawn continent, climb onto titans that swim through sky, sea, storm and earth, and descend to the world's deep. An RPG with Minecraft's look, no mining and no building."),
-        mc=MC, ver=T("v%s ベータ版" % VERSION, "v%s beta" % VERSION), pl=T("1〜6 人", "1 to 6 players"),
+        mc=MC, ver=T("v%s" % VERSION, "v%s" % VERSION), pl=T("1〜6 人", "1 to 6 players"),
         cta1=T("導入する", "Install"), cta2=T("遊び方を見る", "How to play"), cta3=T("巨神を知る", "Meet the titans"),
         h_diff=T("ほかと違うところ", "What makes it different"),
         d1h=T("巨神の背が、そのままダンジョン", "A titan's back is the dungeon"),

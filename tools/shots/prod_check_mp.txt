@@ -1,0 +1,23 @@
+# 本番の jar の確かめ (docs/release.md の 2): 本番のクライアント (tools/dev/prod_client.py) で、本番のオフラインの専用サーバー (localhost:25599) へ入る
+server localhost:25599
+size 1600 900
+timeout 1200
+guiscale 2
+render 8
+wait 400
+shot m01_join
+wait 400
+shot m02_later
+close
+wait 20
+open travel_map
+wait 40
+shot m03_map
+close
+wait 10
+open skills
+wait 30
+shot m04_skills
+close
+wait 10
+quit

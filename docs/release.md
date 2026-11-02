@@ -22,6 +22,14 @@ bash tools/dev/selftest_fresh.sh
 
 自己テスト全段を新しい大陸ワールドで流す（約 25 分）。`run/logs/latest.log` の `SELFTEST … FAILED` が 0 で、`all steps done` が出ること。急ぐときは変えた所の段だけ（`bash tools/dev/selftest_fresh.sh "cloudsea,skills"`）。
 
+**本番の形での起動確認**（配る jar を、開発用でない NeoForge で動かす。2026-11-02 に始めた）:
+
+1. リポジトリの外のフォルダ（例 `C:\Users\<名前>\skyabyss_prod`）に、NeoForge のインストーラー（maven.neoforged.net の `neoforge-<neo_version>-installer.jar`）で `--installServer server` と `--installClient client`（先に `client/launcher_profiles.json` に `{"profiles":{}}`）。
+2. 両方の `mods/` に `build/libs/skyabyss-<版>.jar` と GeckoLib の jar（gradle の置き場の `geckolib-neoforge-1.21.1-<版>.jar`）。サーバーは `eula=true`、`server.properties` に `online-mode=false`・`level-type=skyabyss\:continent`・`server-port=25599`。
+3. サーバーを起動して `Done` と、記録の `command gate: … developer commands hidden` を見る。
+4. クライアントは `python -X utf8 tools/dev/prod_client.py <client> --script tools/shots/prod_check.txt`（一人遊びで大陸の世界）と `--script tools/shots/prod_check_mp.txt`（サーバーへ入る）。撮影の台本は本番の jar では `-Dskyabyss.prodcheck=true` のときだけ動く（`prod_client.py` が付ける）。絵は `<client>/shots/<台本>/`。
+5. 相性: よく使われる mod（JEI・Sodium・Jade・Shoulder Surfing Reloaded など。Modrinth の NeoForge 1.21.1 版）を足して `tools/shots/prod_check_compat.txt`。Shoulder Surfing が入っているときは、この mod の肩越しは使わない。
+
 人の試遊で見る所は `docs/review/playtest_0.9.4.md`（六章 `playtest_0.9.1.md`、終章 `playtest_finale.md`）。
 
 ## 3. 作る
@@ -77,4 +85,5 @@ bash tools/dev/selftest_fresh.sh
 
 - 次の版は 0.9.23 を**候補版**として出す。通しの試遊（終章と、あいだの塔を 1 人と 4 人で）と全段の自己テストのあとで 1.0.0 にする。
 - 公開サイト・README・遊び方の「ベータ版」の表記、遊び方に残る古いコマンドの案内（`/skyabyss titan` ほか）、サイトの更新履歴は、1.0.0 を出すときにまとめて直す（サイトは今 0.9.20）。
+- 2026-11-02 の夜に 1.0.0 にした（声「その後に 1.0.0 いこう」）。候補の 0.9.23 のあと、本番の形での起動確認・相性・英語の見直しをして、通しの試遊の前に上げた。遊んで出たものは 1.0.x で直す。表記・コマンドの案内・更新履歴は上のとおり直し、サイトを作り直した。
 

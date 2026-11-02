@@ -166,7 +166,7 @@ def faq():
               "Testers with op can type <code>/skyabyss admin help</code> for the list of chapter, place, kit and boss commands (e.g. <code>/skyabyss admin chapter 5</code> starts the abyss chapter)."),
         h_faq=T("よくある質問", "FAQ"), qa=qa_html,
         h_lim=T("既知の制限", "Known limits"),
-        lim_lead=T("これはベータ版です。作ったばかりで、人が通しで遊んでいない所があります。", "This is a beta. Some parts are brand new and have not been played through by people."),
+        lim_lead=T("正式版 1.0.0 で分かっている制限です。強さの釣り合いは、遊んだ声で合わせていきます。", "Known limits in version 1.0.0. Balance will keep being tuned from player feedback."),
         lim=lim,
         lim_end=T("噛み合わない所や、おかしな動きを見つけたら、ぜひ教えてください。開いた直後の数分は、巨神の背の島を建てるので少し重くなります。", "If you find something that does not fit or behaves oddly, please tell us. The first few minutes after opening a world are a little heavy while the back islands are built."),
     )
@@ -180,6 +180,10 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v1.0.0", "2026-11-02", [
+            ("正式版です。0.9.23 の候補版のあと、まっさらな NeoForge のサーバーとクライアントで起動・世界の作成・入る所までを確かめ、英語の文を見直しました。", "The release. After the 0.9.23 candidate, startup, world creation and joining were checked on a clean NeoForge server and client, and the English text was reviewed."),
+            ("旅の地図を見やすく（土地の名前・方位盤・札）、この mod の三人称（F5 で肩越し、F6 で肩を替える、照準の所へ当たる）を入れました。", "A more readable travel map (region names, compass rose, labels) and the mod's own third-person view (F5 for over-the-shoulder, F6 to swap shoulders, hits land under the crosshair)."),
+        ]),
         ("v0.9.23", "2026-11-02", [
             ("正式版の候補です。地下のダンジョンを四つ足しました（鯨骨の坑・潮の洞・雷晶の空洞・熔けた坑道）。町の案内人の「噂を聞く」から始まり、二つの層と主の間を抜けて主を倒すと入口へ戻ります。ダンジョンだけの敵と中ボス、主 4 体、初めて倒したときの装飾品と称号があります。", "Release candidate. Four underground dungeons (the Bone Pit, the Tide Cave, the Storm Hollow and the Molten Mine), started from the town guide's rumors: two floors and a boss room, then back to the entrance. Dungeon-only foes and mid-bosses, four bosses, and a trinket and title for the first clear."),
             ("乗り物を三つ足しました（灯り守の大守宮・星読みの大猫・空を飛べる空鱏）。乗り物の体力の段はなくなり（前に買った分は鐘銭で返します）、速さは 8 段まで上がります。", "Three new mounts (the Lamp-Keeper Gecko, the Star-Reader Lynx and the flying Sky Ray). Mount health tiers are gone (earlier purchases are refunded in coins) and speed now goes up to tier 8."),
@@ -336,8 +340,8 @@ def changelog():
         items.append('<li%s><h3>%s</h3>%s<ul>%s</ul></li>' % (
             cls, T(v, TITLE_EN.get(v, v)), date,
             "".join("<li>%s</li>" % T(a, b) for a, b in notes)))
-    body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。新しい版が上。0.5.6 までは試遊の確かめ順と記録から書きました。",
-                     "Main changes in the beta, newest first. Versions up to 0.5.6 are written from the playtest checklists and notes.") + """
+    body = page_head("更新履歴", "Changelog", "版ごとの主な変更です。新しい版が上。0.5.6 までは試遊の確かめ順と記録から書きました。",
+                     "Main changes by version, newest first. Versions up to 0.5.6 are written from the playtest checklists and notes.") + """
 <section aria-labelledby="log">
 <div class="wrap">
 <h2 id="log" style="position:absolute;left:-999px">%s</h2>
@@ -346,4 +350,4 @@ def changelog():
 </div>
 </section>
 """ % (T("更新履歴", "Changelog"), "".join(items), T("細かい変更の一覧は", "The full list of changes is on"), REPO)
-    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "ベータ版の主な変更。最新は %s。" % VERSION, "Main changes in the beta. Latest: %s." % VERSION, body)
+    page("changelog.html", "更新履歴 — 天と淵のあいだ", "Changelog — Between the Sky and the Abyss", "版ごとの主な変更。最新は %s。" % VERSION, "Main changes by version. Latest: %s." % VERSION, body)

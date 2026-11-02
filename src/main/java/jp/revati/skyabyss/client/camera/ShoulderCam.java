@@ -76,10 +76,13 @@ public final class ShoulderCam {
         }
     }
 
+    // ほかのカメラの mod (Shoulder Surfing Reloaded) が入っていれば、この mod の肩越しは使わない (二つのカメラがぶつかる)
+    private static final boolean OTHER_CAMERA = net.neoforged.fml.ModList.get().isLoaded("shouldersurfing");
+
     // 肩越しが効いているか (三人称の背中側・自分を映している・場面の最中でない)
     public static boolean active() {
         Minecraft mc = Minecraft.getInstance();
-        return Config.SHOULDER_CAMERA.get() && mc.player != null && mc.level != null && mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK
+        return Config.SHOULDER_CAMERA.get() && !OTHER_CAMERA && mc.player != null && mc.level != null && mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK
                 && mc.getCameraEntity() == mc.player && !mc.player.isSleeping();
     }
 
@@ -109,7 +112,7 @@ public final class ShoulderCam {
             return;
         }
         // F5: 前から映す視点を飛ばす (一人称 → 肩越し → 一人称)
-        if (Config.SHOULDER_CAMERA.get() && mc.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) {
+        if (Config.SHOULDER_CAMERA.get() && !OTHER_CAMERA && mc.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
         while (SWAP_KEY.consumeClick()) {

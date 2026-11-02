@@ -1,0 +1,29 @@
+# 本番の jar の確かめ (docs/release.md の 2): 本番のクライアント (tools/dev/prod_client.py) で一人遊びの大陸の世界を作り、
+# はじまりの流れ・HUD・地図・肩越しを撮る。開発用のコマンドは使わない (本番では隠れる)
+world prodcheck continent
+size 1600 900
+timeout 1200
+guiscale 2
+render 8
+wait 300
+shot p01_start
+wait 300
+shot p02_later
+close
+wait 20
+open travel_map
+wait 40
+shot p03_map
+close
+wait 10
+perspective back
+wait 30
+shot p04_shoulder
+perspective first
+wait 10
+open skills
+wait 30
+shot p05_skills
+close
+wait 10
+quit

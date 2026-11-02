@@ -9,7 +9,7 @@ import icons, icons2  # noqa: F401
 import scenes
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", "docs", "readme", "options"))
-VERSION = "v0.2.2"
+VERSION = "v1.0.0"
 
 
 def outdir(name):

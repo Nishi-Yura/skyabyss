@@ -2,6 +2,16 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空（340〜345 は 2026-11-02 の午後に答えが出て作った）。
 
+## 2026-11-02 の夜 5: 本番の形での確かめ・相性・英語・1.0.0
+
+声「2. 遊んでもらう間に私が進められること をお願い。その後に 1.0.0 いこう」。
+
+- **本番の形での起動確認**（`docs/release.md` の 2 に手順）: リポジトリの外 `C:\Users\nisimoto\skyabyss_prod` に NeoForge 21.1.259 のインストーラー（maven.neoforged.net）でサーバーとクライアントを入れ、jar と GeckoLib 4.9.3 を `mods/` に。サーバーは起動 25 秒・エラーなし・`command gate: 60 developer commands hidden`。クライアントは小さな起動器 `tools/dev/prod_client.py`（ランチャーなし。素材は gradle の置き場を使う）で、一人遊びの大陸の世界（`tools/shots/prod_check.txt`。開幕の場面・天の声・技の画面）と、オフラインの専用サーバーへ入る（`prod_check_mp.txt`。最初の絵芝居・地図・技）を撮った。撮影の台本は本番の jar では止まる作りなので、起動の印 `-Dskyabyss.prodcheck=true` のときだけ動くようにした（`ShotRunner`）。
+- **相性**: Modrinth の NeoForge 1.21.1 版の JEI 19.70.0.469・Sodium 0.8.13・Jade 15.10.6・Shoulder Surfing Reloaded 5.3.0 を入れて本番のサーバーへ（`prod_check_compat.txt`）。落ちない・描画も正しい。JEI は「使えるレシピが無い」と記録する（この mod はクラフトをなくしているため。品の一覧は出る）。Shoulder Surfing が入っているときは、この mod の肩越しを使わない（`ShoulderCam.OTHER_CAMERA`）。
+- **英語の文**: 13,023 の鍵で日本語と英語がそろい、置き換え記号のずれも無い。英語の中の「・」3 か所を • に、道中の敵「骨の坑夫」の英語名を Bone Miner に（主の Bone-Digger Centipede と紛れたため）。
+- **1.0.0**: `mod_version=1.0.0`。README（題の絵 `docs/readme/plate_title.png` を v1.0.0 に作り直し。前は v0.2.2 BETA のままだった。生成 `tools/readme/final/make_readme.py`）・遊び方（「ベータ版」と試遊の案内を外し、本番で隠れる `/story`・`/titanmemory` を今のコマンドに、既知の問題を今の形に）・01・14・サイト（`tools/site/pages_a.py`・`pages_c.py`・`sitelib.py` の「ベータ版」を外し、v1.0.0 の更新履歴。`python tools/site/build.py` で `site/*.html` を作り直した。サイトは 0.9.20 のあと作り直していなかったので差分が大きい）。サイトは push すると公開される（GitHub Pages）。
+- 確かめ: 全段の自己テスト（`run/st_full_100`）222 段 PASSED・FAILED 0。`build/libs/skyabyss-1.0.0.jar`（78.9 MB、中の版 1.0.0）を本番のサーバーで起動（0.9.23 の世界を開いて `World upgrade: opened with 1.0.0 (last 0.9.23)`）、本番のクライアントで入れた。
+
 ## 2026-11-02 の夜 4: 旅の地図を見やすく・この mod の三人称（肩越し）・0.9.23 の jar
 
 声「マップが見にくいから直してほしいのと、3人称視点をオリジナルの物にして、3人称視点でも戦いやすくして」。
@@ -202,7 +212,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.23（正式版の候補。`build/libs/skyabyss-0.9.23.jar` は 2026-11-02 の夜に作った。確認表 `docs/review/playtest_0.9.21.md`（17 節が名札・乗り物・地下のダンジョン・都の空き家、16 節が神器・武器・技の回し、15 節が 0.9.22 のあとの声、14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 正式版: 1.0.0（`build/libs/skyabyss-1.0.0.jar`。確認表 `docs/review/playtest_0.9.21.md`（17 節が名札・乗り物・地下のダンジョン・都の空き家、16 節が神器・武器・技の回し、15 節が 0.9.22 のあとの声、14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すとまれに落ちる（単独でも淵の順でも通る。灰の封のチャンクを読み込むよう直し、落ちたら失敗の文に状態が出る）。`titan ground` も全部を流したときにまれに落ちる（2026-11-01 の夜: サーバーが 14 秒遅れていた所で、潮の殻が一 tick で 2 ブロック上下した。単独では 2 回とも通る）。
 
 ## 2026-11-01 の昼から夕方に入れたもの
