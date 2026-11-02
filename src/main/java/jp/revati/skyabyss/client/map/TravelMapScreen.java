@@ -32,8 +32,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 旅の地図 (M キー)。北が上、町を中心にした印だけの地図 (地形は描かない。座標の数字も出さない)。
-// 縮尺はホイール (と ＋／− のキー・右上のつまみ) でなめらかに替える: 半径 96 (都の中) 〜 4,800 (世界の果てまで)。指した所を中心に寄る。
+// 旅の地図 (M キー)。北が上。大陸の絵 (continent.png) の上に印を置く (座標の数字は出さない)。土地の名前は縁取りの大きな字、左上の隅に方位盤。
+// 縮尺はホイール (と ＋／− のキー・右上のつまみ) でなめらかに替える: 半径 96 (都の中) 〜 2,200 (大陸とはじまりの島が収まる)。指した所を中心に寄る。
 // 印を指すと名前と「北東 420」(自分からの方角と距離)。大事な印 (都・巨神・章の場所・祠・仲間・目的・墓) は、名前の札を常に出す (重なる札は出さない)。
 // 輪には距離の数字。自分の矢印は 2 倍で、暗い丸の上に。寄せると都の壁の四角 (2026-10-23: 地図を読みやすく・もっと寄せて・もっと引いて)。
 // 巨神の子に乗っているとき (chart != null) は、子の海図 (旧 TravelChartScreen) をこの画面に重ねる: 行ける行き先の印が光り、
@@ -56,9 +56,10 @@ public class TravelMapScreen extends Screen {
 
     // 縮尺 (中心から縁までのブロック): いちばん寄せた / いちばん引いた / 開いたとき (町のまわり・世界)。ホイール一目盛りで 1.25 倍
     static final double MIN_RANGE = 96;
-    static final double MAX_RANGE = 4800;
+    // いちばん引いた所は大陸がちょうど盤に収まる半径 (前は 4,800 で、大陸が小さくなり名前が重なった。2026-11-02 の声「マップが見にくい」)
+    static final double MAX_RANGE = 2200;
     static final double NEAR = 600;
-    static final double FAR = 2400;
+    static final double FAR = 1600;
     static final double ZOOM_STEP = 1.25;
     // 輪の間の候補 (半径の中に輪が 2〜4 本になるものを選ぶ)
     // 都の壁 (真ん中から壁の外の面まで。tools/capital/town.py の W)
@@ -488,9 +489,9 @@ public class TravelMapScreen extends Screen {
     static final int CONTINENT_HALF = 2000;
     // 外の海の色 (continent.png の海と同じ。gen_continent.py の deep_ocean と紙の色を混ぜたもの)
     static final int SEA_COLOR = 0xFFA4B7B6;
-    // 土地の名前を出す縮尺 (この間。引きすぎると重なる)
-    static final double NAMES_FROM = 700;
-    static final double NAMES_TO = 3200;
+    // 土地の名前を出す縮尺 (この間)。2026-11-02 の声「マップが見にくい」: 寄せても引いても土地の名が読めるように広げた
+    static final double NAMES_FROM = 450;
+    static final double NAMES_TO = MAX_RANGE;
 
     // ---------------------------------------------------------------- 月 (docs/design/46 の 3.6。2026-10-28 の試遊「月行ったらマップ変わる様にしてほしい」)
     // 月にいる間は、月の絵 (moon.png。tools/gen/ch6/gen_moon_map.py。512 x 512 で x -256..256、z -128..384) を敷く
@@ -541,7 +542,11 @@ public class TravelMapScreen extends Screen {
         }
     }
 
+    // 土地の名前を書いた所 (印の札はなるべくここを避ける)
+    private final List<int[]> regionRects = new ArrayList<>();
+
     private void drawContinent(GuiGraphics g) {
+        regionRects.clear();
         if (radius <= 0) {
             return;
         }
@@ -565,14 +570,19 @@ public class TravelMapScreen extends Screen {
             return;
         }
         jp.revati.skyabyss.world.continent.ContinentLayout lay = jp.revati.skyabyss.world.continent.ContinentLayout.get();
+        // 土地の名前: 引くほど大きく (1.25〜1.75 倍)、紙の色の縁取りの上に濃い茶の字
+        float big = (float) Mth.clamp(1.25 + (view - NAMES_FROM) / (NAMES_TO - NAMES_FROM) * 0.5, 1.25, 1.75);
         for (var e : lay.names().entrySet()) {
             int[] at = project(e.getValue().getX(), e.getValue().getZ());
             if (at[2] == 0) {
                 Component name = Component.translatable("map.skyabyss.continent." + e.getKey());
-                g.drawCenteredString(font, name, at[0], at[1] - 4, 0xFF4A3A2A);
+                haloText(g, name, at[0], at[1] - 10, big, 0xFF33241A, 0xE8F4EAD2);
+                int w = (int) Math.ceil(font.width(name) * big) + 4;
+                regionRects.add(new int[] {at[0] - w / 2, at[1] - 11, w, (int) Math.ceil(9 * big) + 2});
             }
         }
-        for (var e : lay.levels().entrySet()) {
+        // 目安のレベルは 700〜3,200 の間だけ (寄せると入口の印、引きすぎると土地の名前と重なる)
+        for (var e : view < 700 || view > 3200 ? java.util.Map.<String, jp.revati.skyabyss.world.continent.ContinentLayout.Level>of().entrySet() : lay.levels().entrySet()) {
             int[] at = project(e.getValue().pos().getX(), e.getValue().pos().getZ());
             if (at[2] == 0) {
                 String s = "Lv " + e.getValue().text();
@@ -584,19 +594,36 @@ public class TravelMapScreen extends Screen {
         }
     }
 
-    // 方位の刻みと N E S W (印の上に描く)
+    // 方位: 地図の左上の隅に小さな方位盤 (北が上)。前は四辺の真ん中に東西南北を書いていたが、縁の印と重なった (2026-11-02 の声「マップが見にくい」)
     private void drawCompass(GuiGraphics g, Palette p) {
-        int lc = p.accent();
-        int mx = (rx0 + rx1) / 2;
-        int my = (ry0 + ry1) / 2;
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), mx, ry0 - 11, lc);
-        // 南は地図の下の縁の内側に、暗い札を敷いて (外に置くと下の操作の説明の行に重なった。2026-11-02 の重なりの検査)
-        Component s = Component.translatable("gui.skyabyss.travel.dir.s");
-        int sw = font.width(s);
-        g.fill(mx - sw / 2 - 2, ry1 - 12, mx + sw - sw / 2 + 2, ry1 - 1, 0xB0101418);
-        drawCentered(g, s, mx, ry1 - 10, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), rx0 - 7, my - 4, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), rx1 + 7, my - 4, lc);
+        int x = rx0 + 17;
+        int y = ry0 + 17;
+        disc(g, x, y, 13, 0xD00A0D12);
+        circle(g, x, y, 13, p.accent(), 1, 0);
+        // 北の針 (上の三角) と南の針 (下の細い線)
+        for (int i = 0; i < 7; i++) {
+            g.fill(x - (6 - i) / 2, y - 2 - i, x + (6 - i) / 2 + 1, y - 1 - i, 0xFFE24A3A);
+        }
+        g.fill(x, y, x + 1, y + 8, p.dim());
+        Component n = Component.translatable("gui.skyabyss.travel.dir.n");
+        haloText(g, n, x, y - 22, 1f, p.accent(), 0xE00A0D12);
+    }
+
+    // 縁取りの字 (地図の上の名前。どの地の色の上でも読める)。x は真ん中、y は上
+    private void haloText(GuiGraphics g, Component text, int x, int y, float scale, int color, int halo) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(scale, scale, 1f);
+        int w = font.width(text);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx != 0 || dy != 0) {
+                    g.drawString(font, text, -w / 2 + dx, dy, halo, false);
+                }
+            }
+        }
+        g.drawString(font, text, -w / 2, 0, color, false);
+        g.pose().popPose();
     }
 
     // 寄せたとき (半径 400 まで): 都の壁の四角 (点線) と大通りの十字
@@ -680,7 +707,7 @@ public class TravelMapScreen extends Screen {
         g.drawString(font, sc, minusX() - 6 - font.width(sc), fy + 10, p.text(), shadow);
         Component foot = sheet == null ? Component.translatable("gui.skyabyss.map.waiting")
                 : !onGround() ? Component.translatable("gui.skyabyss.map.elsewhere") : Component.translatable("gui.skyabyss.map.hint");
-        g.drawString(font, foot, fx + 14, fy + fh - 14, p.dim(), shadow);
+        g.drawString(font, foot, fx + 14, fy + fh - 14, style() == Config.MapStyle.PARCHMENT ? p.dim() : p.text(), shadow);
     }
 
     private void zoomButton(GuiGraphics g, Palette p, int x, int y, boolean plus, int mouseX, int mouseY) {
@@ -876,19 +903,24 @@ public class TravelMapScreen extends Screen {
             int w = font.width(text) + 6;
             int h = 11;
             int[][] spots = {{l.x() + 10, l.y() - 5}, {l.x() - 10 - w, l.y() - 5}, {l.x() - w / 2, l.y() + 10}, {l.x() - w / 2, l.y() - 10 - h}};
-            for (int[] sp : spots) {
-                int[] r = {sp[0], sp[1], w, h};
-                if (Math.hypot(sp[0] + w / 2.0 - cx, sp[1] + h / 2.0 - cy) > radius - 6 && Math.hypot(sp[0] - cx, sp[1] - cy) > radius - 4) {
-                    continue;
+            // 一度目は土地の名前も避ける。どこにも入らなければ、二度目は土地の名前の上でもよい
+            boolean done = false;
+            for (int pass = 0; pass < 2 && !done; pass++) {
+                for (int[] sp : spots) {
+                    int[] r = {sp[0], sp[1], w, h};
+                    if (Math.hypot(sp[0] + w / 2.0 - cx, sp[1] + h / 2.0 - cy) > radius - 6 && Math.hypot(sp[0] - cx, sp[1] - cy) > radius - 4) {
+                        continue;
+                    }
+                    if (overlaps(r, placed) || overlapsIcons(r, icons, l) || pass == 0 && overlaps(r, regionRects)) {
+                        continue;
+                    }
+                    placed.add(r);
+                    g.fill(r[0], r[1], r[0] + w, r[1] + h, parch ? 0xE6F2E6C8 : 0xE60A0D12);
+                    g.fill(r[0], r[1], r[0] + 1, r[1] + h, l.color());
+                    g.drawString(font, text, r[0] + 4, r[1] + 2, parch ? 0xFF3B2A1A : l.color(), !parch);
+                    done = true;
+                    break;
                 }
-                if (overlaps(r, placed) || overlapsIcons(r, icons, l)) {
-                    continue;
-                }
-                placed.add(r);
-                g.fill(r[0], r[1], r[0] + w, r[1] + h, parch ? 0xC8F2E6C8 : 0xC80A0D12);
-                g.fill(r[0], r[1], r[0] + 1, r[1] + h, l.color());
-                g.drawString(font, text, r[0] + 4, r[1] + 2, parch ? 0xFF3B2A1A : l.color(), !parch);
-                break;
             }
         }
     }

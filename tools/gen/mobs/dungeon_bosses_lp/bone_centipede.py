@@ -80,6 +80,11 @@ def build():
                 m.add(f"thigh{i}{s}", tub(b, "chitin", [hip, knee], [1.25, 0.95], None, sides=6))
                 m.add(f"shin{i}{s}", tub(b, "bone", [knee, (knee + foot) / 2 + np.array([0, 0.6, 0]), foot], [0.95, 0.65, 0.22], None, sides=5))
                 m.add(f"knee{i}{s}", ell(b, "bone", knee, (1.15, 1.05, 1.15), segs=6, rings=2))
+    # 頭の節の付け根: 次の節 (f1) の肉の中まで伸ばす。頭を振っても節の間が開かない
+    r1 = 7.0 - 2.4 * (1 / N) ** 1.3
+    d1 = nrm(P[0] - P[2])
+    m.add("neck0", ell("f0", "flesh", P[0] * 0.35 + P[1] * 0.65, (r1 * 0.92, r1 * 0.66, r1 * 0.80), segs=12, rings=3,
+                       rx=-math.degrees(math.atan2(-d1[1], abs(d1[2]) + 1e-6))))
     # 頭: 骨の兜と鶴嘴の大顎
     m.add("skull", ell("f0", "bone", head, (6.8, 4.8, 6.4), segs=12, rings=4), core=True)
     m.add("brow", ell("f0", "bone", head + np.array([0, 3.0, -1.0]), (5.2, 1.8, 4.6), segs=10, rings=2))

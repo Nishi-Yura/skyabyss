@@ -403,6 +403,7 @@ public final class SiteGuard {
             SiteData.Entry shelter = SiteData.get(server.overworld()).first("shelter");
             if (shelter != null && shelter.built) {
                 ShelterBuilder.keepLabels(server.overworld(), shelter);
+                CapitalSeal.keep(server.overworld(), shelter);
             }
         }
         if (server.getTickCount() % 5 != 2 || safetyOff()) {

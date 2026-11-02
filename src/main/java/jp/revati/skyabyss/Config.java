@@ -203,6 +203,14 @@ public final class Config {
             .comment("声が文字に合わせて鳴らない様式 (動機・環境音・息だけ) のときの、字幕が出る速さ (1 秒に出す文字数)。長い台詞は表示時間のうちに全文が出る速さまで上がる")
             .defineInRange("steadyRevealCps", 8.0, 2.0, 40.0);
 
+    public static final ModConfigSpec.BooleanValue SHOULDER_CAMERA = CLIENT_BUILDER
+            .comment("三人称をこの mod の肩越しにするか (F5 は 一人称 → 肩越し。カメラは片側の肩の後ろ、画面の真ん中に照準、体は照準の先を向く。F6 で左右を替える)。false = バニラの三人称")
+            .define("shoulderCamera", true);
+
+    public static final ModConfigSpec.DoubleValue SHOULDER_DISTANCE = CLIENT_BUILDER
+            .comment("肩越しのカメラの体からの遠さ (ブロック)。壁に当たると寄る。乗り物の上では少し足す")
+            .defineInRange("shoulderDistance", 4.0, 1.5, 6.0);
+
     public static final ModConfigSpec.BooleanValue CINEMATIC_SCENES = CLIENT_BUILDER
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);

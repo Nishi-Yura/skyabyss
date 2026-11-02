@@ -93,6 +93,19 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.SHELL_OCTOPUS.get(), ShellOctopusRenderer::new);
         event.registerEntityRenderer(ModEntities.CRYSTAL_LIZARD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "crystal_lizard", 1.7f));
         event.registerEntityRenderer(ModEntities.FORGE_GIANT.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "forge_giant", 1.6f));
+        // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7)
+        event.registerEntityRenderer(ModEntities.PIT_DIGGER.get(), ctx -> noTilt(ctx, "pit_digger"));
+        event.registerEntityRenderer(ModEntities.BONE_ROLLER.get(), ctx -> noTilt(ctx, "bone_roller"));
+        event.registerEntityRenderer(ModEntities.PIT_FOREMAN.get(), ctx -> noTilt(ctx, "pit_foreman"));
+        event.registerEntityRenderer(ModEntities.DROWNED_SAILOR.get(), ctx -> noTilt(ctx, "drowned_sailor"));
+        event.registerEntityRenderer(ModEntities.CAVE_JELLY.get(), ctx -> noTilt(ctx, "cave_jelly"));
+        event.registerEntityRenderer(ModEntities.BELL_HERMIT.get(), ctx -> noTilt(ctx, "bell_hermit"));
+        event.registerEntityRenderer(ModEntities.HORN_BEETLE.get(), ctx -> noTilt(ctx, "horn_beetle"));
+        event.registerEntityRenderer(ModEntities.CRYSTAL_EYE.get(), ctx -> noTilt(ctx, "crystal_eye"));
+        event.registerEntityRenderer(ModEntities.GEODE_GOLEM.get(), ctx -> noTilt(ctx, "geode_golem"));
+        event.registerEntityRenderer(ModEntities.BELLOWS_IMP.get(), ctx -> noTilt(ctx, "bellows_imp"));
+        event.registerEntityRenderer(ModEntities.LAVA_SLUG.get(), ctx -> noTilt(ctx, "lava_slug"));
+        event.registerEntityRenderer(ModEntities.OX_SMITH.get(), ctx -> noTilt(ctx, "ox_smith"));
         event.registerEntityRenderer(ModEntities.TIDE_CRAB.get(), ctx -> noTiltStillHead(ctx, "tide_crab"));
         event.registerEntityRenderer(ModEntities.STORM_RAM.get(), ctx -> noTiltStillHead(ctx, "storm_ram"));
         event.registerEntityRenderer(ModEntities.ASH_LIZARD.get(), ctx -> noTiltStillHead(ctx, "ash_lizard"));

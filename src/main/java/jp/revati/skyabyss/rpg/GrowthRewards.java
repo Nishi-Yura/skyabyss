@@ -85,6 +85,19 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_crab", new Source(160, 18));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":storm_ram", new Source(200, 24));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_lizard", new Source(260, 30));
+        // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7。中ボスは名のある大物と同じ)
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":pit_digger", new Source(10, 10));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_roller", new Source(6, 10));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":pit_foreman", new Source(120, 12));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":drowned_sailor", new Source(14, 16));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":cave_jelly", new Source(10, 16));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bell_hermit", new Source(160, 18));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":horn_beetle", new Source(16, 22));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":crystal_eye", new Source(14, 22));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":geode_golem", new Source(200, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bellows_imp", new Source(18, 28));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":lava_slug", new Source(16, 28));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ox_smith", new Source(260, 30));
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(300, STONE_WHALE_LEVEL));

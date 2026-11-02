@@ -180,6 +180,12 @@ def faq():
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v0.9.23", "2026-11-02", [
+            ("正式版の候補です。地下のダンジョンを四つ足しました（鯨骨の坑・潮の洞・雷晶の空洞・熔けた坑道）。町の案内人の「噂を聞く」から始まり、二つの層と主の間を抜けて主を倒すと入口へ戻ります。ダンジョンだけの敵と中ボス、主 4 体、初めて倒したときの装飾品と称号があります。", "Release candidate. Four underground dungeons (the Bone Pit, the Tide Cave, the Storm Hollow and the Molten Mine), started from the town guide's rumors: two floors and a boss room, then back to the entrance. Dungeon-only foes and mid-bosses, four bosses, and a trinket and title for the first clear."),
+            ("乗り物を三つ足しました（灯り守の大守宮・星読みの大猫・空を飛べる空鱏）。乗り物の体力の段はなくなり（前に買った分は鐘銭で返します）、速さは 8 段まで上がります。", "Three new mounts (the Lamp-Keeper Gecko, the Star-Reader Lynx and the flying Sky Ray). Mount health tiers are gone (earlier purchases are refunded in coins) and speed now goes up to tier 8."),
+            ("神器はそれぞれ大きな能力と欠点を一つずつ持ち、武器には決まった数値の行が付きます。型に 8 点使うと、その型の溜まるもの（マナの帯の上）が目覚めます。技の待ちは短く、マナは少し重くなりました。", "Each divine weapon now has one major ability with a drawback, and weapons carry fixed stat lines. Spending 8 points in an archetype awakens its gauge (above the mana bar). Skill cooldowns are shorter and mana costs slightly higher."),
+            ("店の浮く名札がブロックにめり込まなくなりました。都の空き家（旧厩舎・地図屋・空見の館）は戸を塞ぎ、碑もなくしました。わかりにくい文を直しました。", "Shop name tags no longer clip into blocks. The capital's empty houses (the old stable, the mapmaker's and Skywatch Hall) are sealed and their stone tablets removed. Unclear lines were rewritten."),
+        ]),
         ("v0.9.22", "2026-11-02", [
             ("Mod の版を上げても、前の版の世界をそのまま続けられます（世界と人のデータの版を持ち、版が上がると直しを自動で流します）。管理者は <code>/skyabyss admin version</code> で版を見られます。", "Worlds from earlier versions carry over when the mod updates: each world and player keeps a data version, and upgrades run automatically. Admins can check it with <code>/skyabyss admin version</code>."),
             ("コマンドを整理: 遊ぶ人は <code>/skyabyss help</code> で一覧、管理者は <code>/skyabyss admin …</code>（権限の段はサーバーの設定 <code>adminPermissionLevel</code>、既定 2）。", "Commands tidied: players get a list with <code>/skyabyss help</code>, admins use <code>/skyabyss admin …</code> (permission level from the server config <code>adminPermissionLevel</code>, default 2)."),

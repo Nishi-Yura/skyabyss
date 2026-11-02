@@ -148,6 +148,43 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ForgeGiant>> FORGE_GIANT = ENTITIES.register("forge_giant",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ForgeGiant::new, MobCategory.MONSTER)
                     .sized(2.4f, 5.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":forge_giant"));
+    // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7。dungeon/DungeonFloor が部屋に湧かせる)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.PitDigger>> PIT_DIGGER = ENTITIES.register("pit_digger",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.PitDigger::new, MobCategory.MONSTER)
+                    .sized(0.8f, 1.9f).clientTrackingRange(10).build(SkyAbyss.MODID + ":pit_digger"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BoneRoller>> BONE_ROLLER = ENTITIES.register("bone_roller",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BoneRoller::new, MobCategory.MONSTER)
+                    .sized(0.9f, 0.7f).clientTrackingRange(10).build(SkyAbyss.MODID + ":bone_roller"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.PitForeman>> PIT_FOREMAN = ENTITIES.register("pit_foreman",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.PitForeman::new, MobCategory.MONSTER)
+                    .sized(2.0f, 3.4f).clientTrackingRange(10).build(SkyAbyss.MODID + ":pit_foreman"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.DrownedSailor>> DROWNED_SAILOR = ENTITIES.register("drowned_sailor",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.DrownedSailor::new, MobCategory.MONSTER)
+                    .sized(0.8f, 2.0f).clientTrackingRange(10).build(SkyAbyss.MODID + ":drowned_sailor"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.CaveJelly>> CAVE_JELLY = ENTITIES.register("cave_jelly",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.CaveJelly::new, MobCategory.MONSTER)
+                    .sized(1.2f, 1.7f).clientTrackingRange(10).build(SkyAbyss.MODID + ":cave_jelly"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BellHermit>> BELL_HERMIT = ENTITIES.register("bell_hermit",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BellHermit::new, MobCategory.MONSTER)
+                    .sized(2.6f, 2.4f).clientTrackingRange(10).build(SkyAbyss.MODID + ":bell_hermit"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.HornBeetle>> HORN_BEETLE = ENTITIES.register("horn_beetle",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.HornBeetle::new, MobCategory.MONSTER)
+                    .sized(1.3f, 1.0f).clientTrackingRange(10).build(SkyAbyss.MODID + ":horn_beetle"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.CrystalEye>> CRYSTAL_EYE = ENTITIES.register("crystal_eye",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.CrystalEye::new, MobCategory.MONSTER)
+                    .sized(0.8f, 0.8f).clientTrackingRange(10).build(SkyAbyss.MODID + ":crystal_eye"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.GeodeGolem>> GEODE_GOLEM = ENTITIES.register("geode_golem",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.GeodeGolem::new, MobCategory.MONSTER)
+                    .sized(2.4f, 3.2f).clientTrackingRange(10).build(SkyAbyss.MODID + ":geode_golem"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BellowsImp>> BELLOWS_IMP = ENTITIES.register("bellows_imp",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BellowsImp::new, MobCategory.MONSTER)
+                    .sized(0.8f, 1.4f).clientTrackingRange(10).build(SkyAbyss.MODID + ":bellows_imp"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.LavaSlug>> LAVA_SLUG = ENTITIES.register("lava_slug",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.LavaSlug::new, MobCategory.MONSTER)
+                    .sized(1.0f, 0.7f).clientTrackingRange(10).build(SkyAbyss.MODID + ":lava_slug"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.OxSmith>> OX_SMITH = ENTITIES.register("ox_smith",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.OxSmith::new, MobCategory.MONSTER)
+                    .sized(2.0f, 3.4f).clientTrackingRange(10).build(SkyAbyss.MODID + ":ox_smith"));
     // 名のある強敵の大物 (docs/design/44 の 5。world/continent/NamedFoes が湧かせる)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.RockBoar>> ROCK_BOAR = ENTITIES.register("rock_boar",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.RockBoar::new, MobCategory.MONSTER)
@@ -203,6 +240,18 @@ public final class ModEntities {
         event.put(SHELL_OCTOPUS.get(), jp.revati.skyabyss.dungeon.mob.ShellOctopus.createAttributes().build());
         event.put(CRYSTAL_LIZARD.get(), jp.revati.skyabyss.dungeon.mob.CrystalLizard.createAttributes().build());
         event.put(FORGE_GIANT.get(), jp.revati.skyabyss.dungeon.mob.ForgeGiant.createAttributes().build());
+        event.put(PIT_DIGGER.get(), jp.revati.skyabyss.dungeon.mob.PitDigger.createAttributes().build());
+        event.put(BONE_ROLLER.get(), jp.revati.skyabyss.dungeon.mob.BoneRoller.createAttributes().build());
+        event.put(PIT_FOREMAN.get(), jp.revati.skyabyss.dungeon.mob.PitForeman.createAttributes().build());
+        event.put(DROWNED_SAILOR.get(), jp.revati.skyabyss.dungeon.mob.DrownedSailor.createAttributes().build());
+        event.put(CAVE_JELLY.get(), jp.revati.skyabyss.dungeon.mob.CaveJelly.createAttributes().build());
+        event.put(BELL_HERMIT.get(), jp.revati.skyabyss.dungeon.mob.BellHermit.createAttributes().build());
+        event.put(HORN_BEETLE.get(), jp.revati.skyabyss.dungeon.mob.HornBeetle.createAttributes().build());
+        event.put(CRYSTAL_EYE.get(), jp.revati.skyabyss.dungeon.mob.CrystalEye.createAttributes().build());
+        event.put(GEODE_GOLEM.get(), jp.revati.skyabyss.dungeon.mob.GeodeGolem.createAttributes().build());
+        event.put(BELLOWS_IMP.get(), jp.revati.skyabyss.dungeon.mob.BellowsImp.createAttributes().build());
+        event.put(LAVA_SLUG.get(), jp.revati.skyabyss.dungeon.mob.LavaSlug.createAttributes().build());
+        event.put(OX_SMITH.get(), jp.revati.skyabyss.dungeon.mob.OxSmith.createAttributes().build());
     }
 
     private ModEntities() {

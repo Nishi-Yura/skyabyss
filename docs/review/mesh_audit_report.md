@@ -4,9 +4,9 @@
 
 ## 要約
 
-- 調べたメッシュ: 961 個 / 開いた辺の合計: **0** / 裏面透けの画素数の合計: **9524**
+- 調べたメッシュ: 965 個 / 開いた辺の合計: **0** / 裏面透けの画素数の合計: **9524**
 - 逆法線の塊: 0 / 向きの食い違い: 0 / 多様体でない辺: 3201 / つぶれた三角形: 204
-- 関節: detach 92 / shallow 77 / ok 1555 (うち pivot が親の外: 831)
+- 関節: detach 91 / shallow 77 / ok 1556 (うち pivot が親の外: 831)
 - ブロックモデル: 87 個中、面の欠け・宙に浮く部品のあるもの 0
 
 ## ランキング (悪い順)
@@ -207,75 +207,74 @@
 | 192 | tide_heart_p3.json | 6 | 0 | 0 | 0 | 0 | 0 | 122 | 0 |
 | 193 | watcher.json | 6 | 0 | 0 | 0 | 0 | 0 | 137 | 0 |
 | 194 | cliff_creeper.json | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 195 | forge_giant.json | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 196 | moon_core.json | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 197 | rift_armor.json | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 198 | scorched_warden.json | 5 | 0 | 0 | 0 | 0 | 0 | 9 | 1 |
-| 199 | tide_heart_p1.json | 5 | 0 | 0 | 0 | 0 | 0 | 115 | 0 |
-| 200 | armor/wild_oilskin/chestplate.json | 4 | 0 | 0 | 0 | 0 | 0 | 97 | 0 |
-| 201 | king_bone_c0.json | 4 | 0 | 0 | 0 | 0 | 0 | 5 | 4 |
-| 202 | king_bone_c2.json | 4 | 0 | 0 | 0 | 0 | 0 | 11 | 4 |
-| 203 | king_shadow_c1.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| 204 | king_shadow_c2.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| 205 | moss_crawler.json | 4 | 0 | 0 | 0 | 0 | 0 | 97 | 0 |
-| 206 | pilgrim_eye.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| 207 | shade_strider.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| 208 | young_thunder_wing.json | 4 | 0 | 0 | 0 | 0 | 0 | 81 | 0 |
-| 209 | abyss_lightning_idol_s2.json | 3 | 0 | 0 | 0 | 0 | 0 | 73 | 0 |
-| 210 | abyss_lightning_idol_s3.json | 3 | 0 | 0 | 0 | 0 | 0 | 79 | 0 |
-| 211 | abyss_rib_guard_s2.json | 3 | 0 | 0 | 0 | 0 | 0 | 67 | 0 |
-| 212 | abyss_rib_guard_s3.json | 3 | 0 | 0 | 0 | 0 | 0 | 74 | 0 |
-| 213 | abyss_salt_husk_s2.json | 3 | 0 | 0 | 0 | 0 | 0 | 72 | 0 |
-| 214 | abyss_salt_husk_s3.json | 3 | 0 | 0 | 0 | 0 | 0 | 77 | 0 |
-| 215 | armor/stone_whale/chestplate.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 216 | armor/tide_shell/helmet.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 217 | armor/tide_shell/helmet_rare.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 218 | bell_mourner.json | 3 | 0 | 0 | 0 | 0 | 0 | 63 | 0 |
-| 219 | bone_sentinel.json | 3 | 0 | 1 | 0 | 0 | 0 | 12 | 0 |
-| 220 | bone_sentinel_shield.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 221 | items/tide_shell_trident/rare.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 222 | items/wild_chain_greatsword/rare.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 223 | king_bone_c1.json | 3 | 0 | 0 | 0 | 0 | 0 | 6 | 3 |
-| 224 | king_shadow_c0.json | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| 225 | plume_warden.json | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| 226 | thunder_wing_mid.json | 3 | 0 | 0 | 0 | 0 | 0 | 65 | 0 |
-| 227 | armor/wild_hanged/chestplate.json | 2 | 0 | 0 | 0 | 0 | 0 | 55 | 0 |
-| 228 | armor/wild_hanged/chestplate_legend.json | 2 | 0 | 0 | 0 | 0 | 0 | 55 | 0 |
-| 229 | armor/wild_windweave/boots.json | 2 | 0 | 0 | 0 | 0 | 0 | 52 | 0 |
-| 230 | armor/wild_windweave/boots_rare.json | 2 | 0 | 0 | 0 | 0 | 0 | 52 | 0 |
-| 231 | full_keeper.json | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| 232 | king_storm_c0.json | 2 | 0 | 0 | 0 | 0 | 0 | 4 | 2 |
-| 233 | king_storm_c1.json | 2 | 0 | 0 | 0 | 0 | 0 | 4 | 2 |
-| 234 | king_storm_c2.json | 2 | 0 | 0 | 0 | 0 | 0 | 4 | 2 |
-| 235 | moss_dead.json | 2 | 0 | 0 | 0 | 0 | 0 | 54 | 0 |
-| 236 | pilgrim_plume.json | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| 237 | stone_whale_heart_p3.json | 2 | 0 | 0 | 0 | 0 | 0 | 55 | 0 |
-| 238 | thunder_wing_far.json | 2 | 0 | 0 | 0 | 0 | 0 | 58 | 0 |
-| 239 | tide_beckoner.json | 2 | 0 | 0 | 0 | 12 | 0 | 56 | 0 |
-| 240 | abyss_charged_moth_s2.json | 1 | 0 | 0 | 0 | 0 | 0 | 5 | 1 |
-| 241 | abyss_charged_moth_s3.json | 1 | 0 | 0 | 0 | 0 | 0 | 8 | 1 |
-| 242 | armor/wild_soot/chestplate.json | 1 | 0 | 0 | 0 | 0 | 0 | 22 | 0 |
-| 243 | armor/wild_soot/chestplate_rare.json | 1 | 0 | 0 | 0 | 0 | 0 | 22 | 0 |
-| 244 | armor/wild_stargazer/helmet.json | 1 | 0 | 0 | 0 | 0 | 0 | 23 | 0 |
-| 245 | armor/wild_stargazer/helmet_legend.json | 1 | 0 | 0 | 0 | 0 | 0 | 23 | 0 |
-| 246 | ash_thrall.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 247 | bone_centipede.json | 1 | 0 | 0 | 0 | 0 | 0 | 3 | 1 |
-| 248 | crystal_lizard.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 249 | dust_crawler.json | 1 | 0 | 0 | 0 | 0 | 0 | 29 | 0 |
-| 250 | elder_thrall.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 251 | king_ash_c1.json | 1 | 0 | 0 | 0 | 0 | 0 | 7 | 1 |
-| 252 | king_ash_c2.json | 1 | 0 | 0 | 0 | 0 | 0 | 7 | 1 |
-| 253 | king_salt_c1.json | 1 | 0 | 0 | 0 | 0 | 0 | 28 | 0 |
-| 254 | king_salt_c2.json | 1 | 0 | 0 | 0 | 0 | 0 | 29 | 0 |
-| 255 | lord_ash.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 256 | mount_horn_beast.json | 1 | 0 | 0 | 0 | 0 | 0 | 10 | 1 |
-| 257 | npc_abyss_porter_prop_back.json | 1 | 0 | 0 | 0 | 0 | 0 | 23 | 0 |
-| 258 | past_shadow.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| 259 | stone_whale.json | 1 | 0 | 0 | 0 | 0 | 0 | 37 | 0 |
-| 260 | stone_whale_heart_p2.json | 1 | 0 | 0 | 0 | 0 | 0 | 34 | 0 |
-| 261 | storm_heart_p2.json | 1 | 0 | 0 | 0 | 0 | 0 | 27 | 0 |
-| 262 | storm_heart_p3.json | 1 | 0 | 0 | 0 | 0 | 0 | 34 | 0 |
-| 263 | storm_ram.json | 1 | 0 | 0 | 0 | 0 | 0 | 2 | 1 |
+| 195 | moon_core.json | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 196 | rift_armor.json | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 197 | scorched_warden.json | 5 | 0 | 0 | 0 | 0 | 0 | 9 | 1 |
+| 198 | tide_heart_p1.json | 5 | 0 | 0 | 0 | 0 | 0 | 115 | 0 |
+| 199 | armor/wild_oilskin/chestplate.json | 4 | 0 | 0 | 0 | 0 | 0 | 97 | 0 |
+| 200 | king_bone_c0.json | 4 | 0 | 0 | 0 | 0 | 0 | 5 | 4 |
+| 201 | king_bone_c2.json | 4 | 0 | 0 | 0 | 0 | 0 | 11 | 4 |
+| 202 | king_shadow_c1.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
+| 203 | king_shadow_c2.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
+| 204 | moss_crawler.json | 4 | 0 | 0 | 0 | 0 | 0 | 97 | 0 |
+| 205 | pilgrim_eye.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
+| 206 | shade_strider.json | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
+| 207 | young_thunder_wing.json | 4 | 0 | 0 | 0 | 0 | 0 | 81 | 0 |
+| 208 | abyss_lightning_idol_s2.json | 3 | 0 | 0 | 0 | 0 | 0 | 73 | 0 |
+| 209 | abyss_lightning_idol_s3.json | 3 | 0 | 0 | 0 | 0 | 0 | 79 | 0 |
+| 210 | abyss_rib_guard_s2.json | 3 | 0 | 0 | 0 | 0 | 0 | 67 | 0 |
+| 211 | abyss_rib_guard_s3.json | 3 | 0 | 0 | 0 | 0 | 0 | 74 | 0 |
+| 212 | abyss_salt_husk_s2.json | 3 | 0 | 0 | 0 | 0 | 0 | 72 | 0 |
+| 213 | abyss_salt_husk_s3.json | 3 | 0 | 0 | 0 | 0 | 0 | 77 | 0 |
+| 214 | armor/stone_whale/chestplate.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 215 | armor/tide_shell/helmet.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 216 | armor/tide_shell/helmet_rare.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 217 | bell_mourner.json | 3 | 0 | 0 | 0 | 0 | 0 | 63 | 0 |
+| 218 | bone_sentinel.json | 3 | 0 | 1 | 0 | 0 | 0 | 12 | 0 |
+| 219 | bone_sentinel_shield.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 220 | items/tide_shell_trident/rare.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 221 | items/wild_chain_greatsword/rare.json | 3 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 222 | king_bone_c1.json | 3 | 0 | 0 | 0 | 0 | 0 | 6 | 3 |
+| 223 | king_shadow_c0.json | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
+| 224 | plume_warden.json | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
+| 225 | thunder_wing_mid.json | 3 | 0 | 0 | 0 | 0 | 0 | 65 | 0 |
+| 226 | armor/wild_hanged/chestplate.json | 2 | 0 | 0 | 0 | 0 | 0 | 55 | 0 |
+| 227 | armor/wild_hanged/chestplate_legend.json | 2 | 0 | 0 | 0 | 0 | 0 | 55 | 0 |
+| 228 | armor/wild_windweave/boots.json | 2 | 0 | 0 | 0 | 0 | 0 | 52 | 0 |
+| 229 | armor/wild_windweave/boots_rare.json | 2 | 0 | 0 | 0 | 0 | 0 | 52 | 0 |
+| 230 | full_keeper.json | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
+| 231 | king_storm_c0.json | 2 | 0 | 0 | 0 | 0 | 0 | 4 | 2 |
+| 232 | king_storm_c1.json | 2 | 0 | 0 | 0 | 0 | 0 | 4 | 2 |
+| 233 | king_storm_c2.json | 2 | 0 | 0 | 0 | 0 | 0 | 4 | 2 |
+| 234 | moss_dead.json | 2 | 0 | 0 | 0 | 0 | 0 | 54 | 0 |
+| 235 | pilgrim_plume.json | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
+| 236 | stone_whale_heart_p3.json | 2 | 0 | 0 | 0 | 0 | 0 | 55 | 0 |
+| 237 | thunder_wing_far.json | 2 | 0 | 0 | 0 | 0 | 0 | 58 | 0 |
+| 238 | tide_beckoner.json | 2 | 0 | 0 | 0 | 12 | 0 | 56 | 0 |
+| 239 | abyss_charged_moth_s2.json | 1 | 0 | 0 | 0 | 0 | 0 | 5 | 1 |
+| 240 | abyss_charged_moth_s3.json | 1 | 0 | 0 | 0 | 0 | 0 | 8 | 1 |
+| 241 | armor/wild_soot/chestplate.json | 1 | 0 | 0 | 0 | 0 | 0 | 22 | 0 |
+| 242 | armor/wild_soot/chestplate_rare.json | 1 | 0 | 0 | 0 | 0 | 0 | 22 | 0 |
+| 243 | armor/wild_stargazer/helmet.json | 1 | 0 | 0 | 0 | 0 | 0 | 23 | 0 |
+| 244 | armor/wild_stargazer/helmet_legend.json | 1 | 0 | 0 | 0 | 0 | 0 | 23 | 0 |
+| 245 | ash_thrall.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 246 | bone_centipede.json | 1 | 0 | 0 | 0 | 0 | 0 | 3 | 1 |
+| 247 | crystal_lizard.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 248 | dust_crawler.json | 1 | 0 | 0 | 0 | 0 | 0 | 29 | 0 |
+| 249 | elder_thrall.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 250 | king_ash_c1.json | 1 | 0 | 0 | 0 | 0 | 0 | 7 | 1 |
+| 251 | king_ash_c2.json | 1 | 0 | 0 | 0 | 0 | 0 | 7 | 1 |
+| 252 | king_salt_c1.json | 1 | 0 | 0 | 0 | 0 | 0 | 28 | 0 |
+| 253 | king_salt_c2.json | 1 | 0 | 0 | 0 | 0 | 0 | 29 | 0 |
+| 254 | lord_ash.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 255 | mount_horn_beast.json | 1 | 0 | 0 | 0 | 0 | 0 | 10 | 1 |
+| 256 | npc_abyss_porter_prop_back.json | 1 | 0 | 0 | 0 | 0 | 0 | 23 | 0 |
+| 257 | past_shadow.json | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 258 | stone_whale.json | 1 | 0 | 0 | 0 | 0 | 0 | 37 | 0 |
+| 259 | stone_whale_heart_p2.json | 1 | 0 | 0 | 0 | 0 | 0 | 34 | 0 |
+| 260 | storm_heart_p2.json | 1 | 0 | 0 | 0 | 0 | 0 | 27 | 0 |
+| 261 | storm_heart_p3.json | 1 | 0 | 0 | 0 | 0 | 0 | 34 | 0 |
+| 262 | storm_ram.json | 1 | 0 | 0 | 0 | 0 | 0 | 2 | 1 |
 
 ## 骨ごとの詳細 (上位 25 個)
 

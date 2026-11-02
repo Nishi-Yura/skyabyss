@@ -52,9 +52,9 @@ public final class ShelterBuilder {
             job.entry.extra("door", door);
         }
         // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人
-        // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・地図屋・酒場・古井戸
-        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
-                "tool_shop", "apothecary", "stable", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well", "well_song")) {
+        // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・酒場・古井戸 (空き家 3 軒の碑は外した。CapitalSeal)
+        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
+                "tool_shop", "apothecary", "storage", "inn", "perch", "training", "black_market", "tavern", "well", "well_song")) {
             BlockPos at = job.mark("sign_" + key);
             if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
@@ -68,8 +68,8 @@ public final class ShelterBuilder {
             }
         }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
-        for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall", "open_training",
-                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "sign_training", "chaser", "altar",
+        for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_training",
+                "sign_guild", "sign_shrine", "sign_keep", "sign_training", "chaser", "altar",
                 "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember",
                 // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.9): 止まり木の台、古井戸の格子と下の迷路、
                 // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)

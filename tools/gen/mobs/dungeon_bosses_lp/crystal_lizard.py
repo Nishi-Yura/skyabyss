@@ -72,10 +72,10 @@ def build():
     # 背の結晶の房 (crystals): 三本ずつ 8 房。真ん中が高い
     for k, z in enumerate(np.linspace(ZS[0] + 2, ZS[-1] + 2, 8)):
         h = 10 - abs(k - 3.5) * 1.3
-        y = 26 * BULK - abs(z) * 0.2 - 1.5
+        y = 26 * BULK - abs(z) * 0.2 - 2.6  # 根を背の肉に深く埋める (傾けても浮かない)
         for j in (-1, 0, 1):
             a = j * 0.38 + (0.12 if k % 2 else -0.12)
-            m.add(f"cry{k}{j}", cone("crystals", "cry", (j * 2.4, y, z + j * 0.8), (a, 1, 0.12), h * (0.62 if j else 1.0), 1.9 if j else 2.6, sides=6, rings=2))
+            m.add(f"cry{k}{j}", cone("crystals", "cry", (j * 2.4, y, z + j * 0.8), (a, 1, 0.12), h * (0.62 if j else 1.0) + 1.1, 1.9 if j else 2.6, sides=6, rings=2))
     m.pal = dict(mats={"eye": M_(EYE, base=0.5, lit=0.2, noise=0.0, min=0), "scale": M_(SCL, lit=0.34, streak=0.04), "belly": M_(BELLY, lit=0.34),
                        "cry": M_(CRY, base=0.64, lit=0.22), "horn": M_(HORN), "claw": M_(CLAW)}, glow_mats=["cry"])
 

@@ -21,7 +21,7 @@ public final class DungeonGear {
     static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
     // 体に描く場所 (spec.py の CHEST・HIP_R・HIP_L・BELT_BACK と同じ。留め点は吊る輪の高さ)
-    static final WildGearTypes.Mount CHEST = new WildGearTypes.Mount("BODY", 0, 1.4f, -2.7f, 0, 0, 0, 0.45f, 0, 4.8f, 0);
+    static final WildGearTypes.Mount CHEST = new WildGearTypes.Mount("BODY", 0, 2.2f, -3.4f, 0, 0, 0, 0.45f, 0, 4.8f, 0);
     static final WildGearTypes.Mount HIP_R = new WildGearTypes.Mount("BODY", -3.4f, 10.0f, -2.9f, 0, 0, 0, 0.42f, 0, 9.4f, 0);
     static final WildGearTypes.Mount HIP_L = new WildGearTypes.Mount("BODY", 3.4f, 10.0f, -2.9f, 0, 0, 0, 0.42f, 0, 7.0f, 0);
     static final WildGearTypes.Mount BELT_BACK = new WildGearTypes.Mount("BODY", 3.6f, 10.6f, 3.1f, 0, 0, 0, 0.4f, 0, 6.4f, 0);

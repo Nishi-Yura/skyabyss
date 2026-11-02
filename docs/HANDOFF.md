@@ -2,6 +2,39 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空（340〜345 は 2026-11-02 の午後に答えが出て作った）。
 
+## 2026-11-02 の夜 4: 旅の地図を見やすく・この mod の三人称（肩越し）・0.9.23 の jar
+
+声「マップが見にくいから直してほしいのと、3人称視点をオリジナルの物にして、3人称視点でも戦いやすくして」。
+
+- **地図**（`client/map/TravelMapScreen`、40 の 3 章の 5）: 土地の名前は半径 450〜2,200 で、引くほど大きく（1.25〜1.75 倍）紙の色の縁取り（`haloText`）。目安のレベルは 700〜3,200 だけ。方位は四辺の東西南北をやめ、左上の隅の方位盤。印の札の地を濃く、札は土地の名前をなるべく避ける（`regionRects`、入らなければ重ねる）。下の操作の説明を明るい字に。いちばん引いた所を 4,800 → 2,200（大陸とはじまりの島が収まる。開いたときの「世界」は 1,600）。「〜 の棲み家」の余計な空きを直した。撮影 `tools/shots/map_shoulder.txt`（`run/shots/load_probe/shots/map_shoulder/`）。
+- **三人称**（`client/camera/ShoulderCam`、47 の 5 章）: F5 は 一人称 → 肩越し（前から映す視点は飛ばす）。カメラは目から 0.5 上・0.75 横（F6 で左右、`KeyDefaults.SWAP_SHOULDER`）・後ろへ `shoulderDistance`（既定 4.0）、壁で寄る（八隅の clip）。マウスはカメラの向き（`mixin/MouseHandlerShoulderMixin`）、体は毎フレーム照準の先を向く（`RenderFrameEvent.Pre`）、カメラの置き場は `mixin/CameraShoulderMixin`（`Camera.setup` の後）。三人称でも照準を描き、照準の先が敵なら赤い角。外から体が回されたらカメラも回る。設定 `shoulderCamera` で切れる。キーの数の決まりを 23 に（`KeyDefaultsSelfTest`）。
+- **確かめ**: 全段の自己テスト（`run/st_full_1102c`）は 221 段 PASSED、`ash smith` だけ FAILED（撮影を同時に始めかけて資源のファイルが書き直された取り違え。流し直して PASSED）。あとから `keys,travel map,lang` PASSED。撮影で地図（300〜2,600）と肩越し（右・左・見下ろし・照準・坑道）を見た。手での操作の手ざわり（マウスの感じ・照準の正しさ・乗り物の上・空鱏で飛ぶとき）は見ていない。
+- **0.9.23 の jar**: `build/libs/skyabyss-0.9.23.jar`（78.9 MB。中の版 0.9.23、新しいクラス・メッシュ・mixin・文を確かめた）。版の数字は README・遊び方・01・14・HANDOFF・サイトの元原稿 `tools/site/pages_c.py`（v0.9.23 の履歴を足した。`site/*.html` は作り直していない）。前の版の世界の引き継ぎは `tools/shots/upgrade_check.txt`（夕方に建てた都の世界を開いて、空き家 3 軒が塞がるのを見た）。
+
+## 2026-11-02 の夜 3: ダンジョン専用の敵 12 体を入れた（00 の 372〜383 = みな推奨）
+
+声「おすすめで進めて」。
+
+- **形**: `tools/gen/mobs/dungeon_foes_lp/foes.py`（12 体。ラフの選んだ案を骨に分け、待機・歩き・技・被弾・倒れの動き）。`build_all.py` で入れる（主の部品 `dungeon_bosses_lp/blp.py` を使う）。確かめの絵 `docs/review/dungeon_foes/<id>_sheet.png`。`mesh_audit --joints` は 12 体とも 0 件（牛頭の鍛冶番は肩の玉を足した）。技の当たりの瞬間は予告の最短 16 tick（0.8 秒）にそろえた。
+- **Java**（`dungeon/mob/`）: 道中 `PitDigger`・`BoneRoller`（`RegionBoss.charge`）・`DrownedSailor`・`CaveJelly`・`HornBeetle`・`CrystalEye`・`BellowsImp`・`LavaSlug`（火の跡は `Telegraph.active/repeatEvery`）、浮く二体の共通 `DungeonFloater`（迷い火と同じ漂い方）、中ボス `PitForeman`・`BellHermit`・`GeodeGolem`・`OxSmith`（`DungeonBoss` の下。技の名前はいつも出る）。登録 `ModEntities`・卵 `ModItems`（持ち物の形 `models/item/<id>_spawn_egg.json`）・描画 `GuardRenderers.noTilt`・経験値 `GrowthRewards`・名前と技の名前 `skyabyss_dungeon` の lang。
+- **表**（`Dungeon`）: 鯨骨の坑 footman → 骨の坑夫・miner → 骨甲の団子虫・mid → 骨鯨の兜の坑頭。潮の洞 hermit → 沈み船の水夫・scuttler → 洞の水母・mid → 鐘負いの大寄居蟹。雷晶の空洞 wolf → 雷角の兜虫・puff → 晶の目玉・mid → 晶洞の傀儡。熔けた坑道 husk → 鞴の小鬼・mite → 熔岩の蛞蝓・mid → 牛頭の鍛冶番。層の印はそのまま。
+- **自己テスト** "dungeon foes"（登録・卵・経験値・メッシュ・動き・表・12 体の技の予告と当たり・盾と胸の倍率）。撮影 `tools/shots/dungeon_foes.txt`。
+- 全段の自己テスト（新しい世界 `run/st_full_1102b`）で落ちた 2 段を直した: `lang`（ダンジョンの次元の名 `biome.skyabyss.dungeon`）、`gear curve`（ダンジョンの装飾品 4 つの一行を「」の一行に、`GearCurveSelfTest` が `skyabyss_dungeon` も読む）。
+- 試遊の表 `docs/review/playtest_0.9.21.md` の 17。
+
+## 2026-11-02 の夜 2: 正式版前の続き（主の関節・顎飾り・都の空き家・重さ・ダンジョン専用の敵の案）
+
+声: 「それで進めて」（小さな直し → 0.9.23 の候補版）、「少し大きめの作業もお願い。都の空き家 3 軒は完全に入れなくしてもいい。碑もなくしていい」。
+
+- **主の関節**: 炉負いの巨人の頭が胴から離れていた（`mesh_audit` の detach）→ 首（`forge_giant.py` の `neck`）。大百足の頭の節に `neck0`、大蜥蜴の背の結晶を 1.1 深く。巨人は 0 件、残る 2 件（大百足 f0・大蜥蜴 crystals）は子の部品が多くて「付け根に近い 200 点」が薄い帯になる検査の見かけ（絵では隙間なし）。
+- **胸の首飾りの位置**: 胸の防具の内側に描いていた → `CHEST` を (0, 2.2, -3.4) に（`tools/gen/wild_gear/spec.py` と `DungeonGear.CHEST`。野の装備の首飾り 4 品も）。撮影 `run/shots/dungeon_trinkets3/`。
+- **撮り直し**: `dungeons_all3`・`dungeon_bosses3`（潮の洞の床・沈んだ船・溶岩の縁・主 4 体を見た）。
+- **都の空き家 3 軒**（35 の 1 章）: `tools/capital/seal_vacant.py` が `capital.json` の戸 6 マスを壁に・碑 3 つを空気に、印 `sign_stable|mapmaker|hall`・`label_stable|mapmaker`・`open_hall` を外し、`seal_<名>_<番号>` を置く（`capital.json` は生成のあと手で加工されているので `town.py` から作り直さない）。前の版の都は `opening/site/CapitalSeal`（SiteGuard の見回り。記録 `sealed_vacant`）が印の所を今の設計図のブロックで置き直す。碑の文（`sign.skyabyss.capital.hall|hall_open|stable|mapmaker.*`）を外した。自己テスト `capital doors` に足した。撮影 `run/shots/load_probe/`（sealed_*）。
+- **自己テストのコードを jar から外す**: 見送り（圧縮で約 2.2 MB / 74 MB。200 ファイル余りの作り替え）。
+- **重さ**: 開発用 `/skyabyss dev load <名前> [秒]`（`dev/LoadProbeDev`）。台本 `tools/shots/load_probe.txt`（都・野・ダンジョンの主・塔）。結果は `docs/review/dungeon_foes_1102/index.md`。
+- **ダンジョン専用の敵**（55 の 4 の 7）: 12 体 × 3 案のラフ（`tools/rough/lowpoly/dungeon_foes/roughs.py` → `docs/review/roughs_dungeon_foes/`）。選ぶページ（`tools/gen/review/dungeon_foes_page.py` → `docs/review/dungeon_foes_1102/`、db の `choices`、00 の 372〜383）。**選んでもらうのを待っている**。選んだら作り込み（`tools/gen/mobs/` に乗り物の部品で）、技と予告をつけて `Dungeon` の foes と midBoss を差し替える。
+- 0.9.23 の候補版（版を上げる・全段の自己テスト・前の版の世界の引き継ぎ・jar）は、専用の敵を入れたあと。
+
 ## 2026-11-02 の夜: 地下のダンジョン四つを作った（コミットしていない）
 
 主の形は 00 の 364〜367 で選ばれた（364 A・365 B・366 A・367 A。どれも推奨）。設計書 55 の 5 章が作りの表。
@@ -169,7 +202,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 試遊版: 0.9.22（`build/libs/skyabyss-0.9.22.jar`。確認表 `docs/review/playtest_0.9.21.md`（14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 試遊版: 0.9.23（正式版の候補。`build/libs/skyabyss-0.9.23.jar` は 2026-11-02 の夜に作った。確認表 `docs/review/playtest_0.9.21.md`（17 節が名札・乗り物・地下のダンジョン・都の空き家、16 節が神器・武器・技の回し、15 節が 0.9.22 のあとの声、14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すとまれに落ちる（単独でも淵の順でも通る。灰の封のチャンクを読み込むよう直し、落ちたら失敗の文に状態が出る）。`titan ground` も全部を流したときにまれに落ちる（2026-11-01 の夜: サーバーが 14 秒遅れていた所で、潮の殻が一 tick で 2 ブロック上下した。単独では 2 回とも通る）。
 
 ## 2026-11-01 の昼から夕方に入れたもの

@@ -23,7 +23,9 @@
     "MountRiderLegsMixin",
     "StringSplitterMixin",
     "BossHealthOverlayAccessor",
-    "AbstractWidgetAuditMixin"
+    "AbstractWidgetAuditMixin",
+    "CameraShoulderMixin",
+    "MouseHandlerShoulderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

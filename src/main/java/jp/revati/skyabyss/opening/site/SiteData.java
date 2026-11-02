@@ -67,6 +67,15 @@ public final class SiteData extends SavedData {
             int i = extraNames.indexOf(name);
             return i < 0 ? null : extraPos.get(i);
         }
+
+        // 印を外す (自己テストで「前の版の世界」に戻すときなど)
+        public void extraRemove(String name) {
+            int i = extraNames.indexOf(name);
+            if (i >= 0) {
+                extraNames.remove(i);
+                extraPos.remove(i);
+            }
+        }
     }
 
     // 章の小要素の置き場 (章が開いた人の拠点ごとに一つ)。序盤の 4 種の entries とは別に持つ (OpeningSites が数えない)

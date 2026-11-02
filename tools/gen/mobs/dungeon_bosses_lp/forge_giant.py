@@ -37,6 +37,8 @@ def build():
     # 頭: 低く前に突き出た岩の頭、光る目、あごの岩
     head = np.array([0, 60 - 6 * HUNCH, -10 - 4 * HUNCH])
     m.add("skull", ell("head", "basalt", head, (5.4, 5.0, 5.4), segs=10, rings=3), core=True)
+    # 首: 胸の前の面の奥から頭の後ろへ。うなずいても頭が胸から離れない
+    m.add("neck", ell("head", "basalt", (0, 54, -8.5), (4.6, 4.4, 5.6), segs=10, rings=3))
     m.add("brow", ell("head", "basalt", head + np.array([0, 2.2, -2.6]), (5.8, 1.8, 3.0), segs=10, rings=2))
     m.add("chin", ell("head", "basalt", head + np.array([0, -3.4, -2.2]), (4.2, 2.4, 3.4), segs=9, rings=2))
     for s in (1, -1):

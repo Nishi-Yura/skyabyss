@@ -234,6 +234,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.facility.TownTourSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.world.continent.RegionSpawnerSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.entity.foe.FoesOneSelfTest.steps());
+        // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7)。SKYABYSS_SELFTEST_ONLY="dungeon foes"
+        steps.addAll(jp.revati.skyabyss.dungeon.mob.DungeonFoesSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.record.DeedsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.dev.ItemAuditSelfTest.steps());
         // 乗り物 (見た目と性能の買い物・呼ぶ/帰す・背中と深淵の禁止)。docs/design/38。SKYABYSS_SELFTEST_ONLY=mount

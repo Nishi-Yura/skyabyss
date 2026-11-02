@@ -109,16 +109,16 @@ public final class TownGuide {
     }
 
     // ---------------------------------------------------------------- 印 (設計図 → 世界)
-    static Blueprint blueprint() {
+    public static Blueprint blueprint() {
         return Blueprint.get(System.getenv("SKYABYSS_SMALL_SHELTER") != null ? "shelter" : "capital");
     }
 
     // 建てた都の向きと原点 (設計図の (0, 0, 0) の世界の座標)。建てていなければ null
-    private record Frame(int rot, boolean mirror, BlockPos origin) {
+    public record Frame(int rot, boolean mirror, BlockPos origin) {
     }
 
     @Nullable
-    private static Frame frame(MinecraftServer server, Blueprint bp) {
+    public static Frame frame(MinecraftServer server, Blueprint bp) {
         SiteData.Entry e = SiteData.get(server.overworld()).first(OpeningSites.Kind.SHELTER.id);
         if (e == null || !e.built) {
             return null;
