@@ -55,6 +55,7 @@ NAV = [
     ("together.html", "仲間と暮らし"),
     ("start.html", "はじめる"),
     ("changelog.html", "更新履歴"),
+    ("wiki.html", "wiki"),
 ]
 FONTS = "https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
 
@@ -88,7 +89,8 @@ def head(title, desc, canonical):
 
 
 def header(current):
-    links = "".join('<a href="%s"%s>%s</a>' % (h, ' aria-current="page"' if h == current else "", n) for h, n in NAV)
+    here = "wiki.html" if current.startswith("wiki") else current
+    links = "".join('<a href="%s"%s>%s</a>' % (h, ' aria-current="page"' if h == here else "", n) for h, n in NAV)
     return """<a class="skip" href="#main">本文へ</a>
 <header class="site-header">
 <div class="wrap bar">

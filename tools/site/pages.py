@@ -98,6 +98,9 @@ def index():
     body += '<div class="wrap" style="margin-top:56px"><div class="numbers">%s</div></div>' % numbers
     body += sec("rules", "HOW IT PLAYS", "このゲームの決まり", "Minecraft の見た目をした RPG です。ふだんの Minecraft とは遊び方が違います。",
                 '<div class="split">%s<div>%s</div></div>' % (shot("capital_third", "鐘の都の大通り。左上に目的の帯、下に体力・マナ・技の枠"), rules))
+    body += sec("wiki", "WIKI", "全部の情報は wiki に",
+                "武器・防具・装飾品・敵と主・技の木の全部の節・クエスト・店・見どころの座標・伝承まで。ゲームの中身から作っているので、版が上がるたびに同じになります。",
+                '<p class="btns"><a class="btn primary" href="wiki.html">wiki を開く</a><a class="btn" href="wiki-weapons.html">武器</a><a class="btn" href="wiki-enemies.html">敵と主</a><a class="btn" href="wiki-quests.html">クエスト</a></p>')
     body += sec("start", "START", "はじめ方",
                 "くわしい手順・キー・困ったときは <a href=\"start.html\">はじめる</a> の頁にあります。",
                 '<ol class="start">%s</ol>' % start, alt=True)
@@ -277,7 +280,7 @@ def adventure():
                 + gallery(("cloudsea", "雲海"), ("cloud_arena", "雲の島の戦いの場")))
     body += sec("after", "ENDGAME", "物語のあと", "結末のあとも、挑む相手は残っています。",
                 split("tower", "雲の上にそびえるあいだの塔",
-                      "<p><b>あいだの塔</b>は、結末を見たあとに開く超大型のレイドです。橋の上で「あいだに座するもの」と戦います。払い・星の雨・光の柱・落ちる月など、技ごとの予告を読んで避けます。</p>"
+                      "<p><b>あいだの塔</b>は、結末を見たあとに開く超大型のレイドです。橋の上で「あいだに座すもの」と戦います。払い・星の雨・光の柱・落ちる月など、技ごとの予告を読んで避けます。</p>"
                       + "<p>三つの結末をすべて見た人だけが会える裏ボスもいます。</p>")
                 + '<div style="margin-top:28px">%s</div>' % after, alt=True)
     page("adventure.html", "冒険の場所 — 天と淵のあいだ", "巨神の背、地下のダンジョン、五章の深淵、六章の月、終章の雲海、あいだの塔。", body)

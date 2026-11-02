@@ -379,6 +379,15 @@ public final class ShotRunner {
             case "echo" -> {
                 return true;
             }
+            case "wikidump" -> {
+                // wikidump : この mod の品と生き物を、説明の行ごと wiki.json (出力先) に書く (公式サイトの wiki の元。WikiDump)
+                try {
+                    say("  " + WikiDump.write(out.resolve("wiki.json")));
+                } catch (IOException e) {
+                    say("  wikidump failed: " + e);
+                }
+                return true;
+            }
             case "music" -> {
                 // music : 流れている BGM を記録に出す。music master <音量> : 全体の音量。music set <id> : 曲を決め打ち (空の名前 "-" で無音)。music auto : 決め打ちをやめる
                 if (first) {

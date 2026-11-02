@@ -128,5 +128,6 @@
   "gui.skyabyss.attack.geode_golem.shards": "Crystal Rain",
   "gui.skyabyss.attack.ox_smith.grab": "Tong Throw",
   "gui.skyabyss.attack.ox_smith.bash": "Red-Hot Shield Bash",
-  "gui.skyabyss.attack.ox_smith.slam": "Forge Slam"
+  "gui.skyabyss.attack.ox_smith.slam": "Forge Slam",
+  "gear.skyabyss.origin.wild_dungeon": "Item of the Underground Dungeons"
 }

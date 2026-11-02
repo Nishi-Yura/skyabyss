@@ -128,5 +128,6 @@
   "gui.skyabyss.attack.geode_golem.shards": "晶の雨",
   "gui.skyabyss.attack.ox_smith.grab": "火ばさみの投げ",
   "gui.skyabyss.attack.ox_smith.bash": "焼け盾打ち",
-  "gui.skyabyss.attack.ox_smith.slam": "叩き伏せ"
+  "gui.skyabyss.attack.ox_smith.slam": "叩き伏せ",
+  "gear.skyabyss.origin.wild_dungeon": "地下のダンジョンの品"
 }
