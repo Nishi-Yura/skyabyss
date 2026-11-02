@@ -13,6 +13,10 @@ public enum AffixType {
     THIRST("thirst", Slot.WEAPON, 15, 0.02, 0.04, 0.005, true),
     RESONANT("resonant", Slot.WEAPON, 20, 4, 10, 1, false),
     KEEN("keen", Slot.WEAPON, 15, 0.04, 0.10, 0.005, true),
+    // 2026-11-02 の声「武器や防具によっては殴ったらマナ回復したり。Wynncraft にも。そういう武器を何個も持つ工夫も」:
+    // マナ吸収 (近接で当てるたびにマナ +値。0.6 秒に一度)・技の威力 (+割合)
+    MANA_STEAL("mana_steal", Slot.WEAPON, 15, 1, 3, 1, false),
+    SPELL("spell", Slot.WEAPON, 15, 0.04, 0.10, 0.005, true),
     // 木の印 (docs/design/27 の 4.1): その木の技の力 +5〜10%。5 種合わせて重み 10 (一つずつ 2)。1 装備に 1 つまで
     MARK_STONE("mark_stone", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
     MARK_WIND("mark_wind", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
@@ -25,7 +29,9 @@ public enum AffixType {
     STRIDE("stride", Slot.ARMOR, 20, 0.015, 0.03, 0.005, true),
     WARD("ward", Slot.ARMOR, 15, 0.015, 0.03, 0.005, true),
     CALM("calm", Slot.ARMOR, 15, 3, 6, 1, false),
-    STEADY("steady", Slot.ARMOR, 15, 0.05, 0.10, 0.01, true);
+    STEADY("steady", Slot.ARMOR, 15, 0.05, 0.10, 0.01, true),
+    // マナの戻り +割合 (着ている部位を足す)
+    MANA_REGEN("mana_regen", Slot.ARMOR, 15, 0.05, 0.12, 0.01, true);
 
     // ヒロイック以上は値の幅を広げる (下も上も 1.25 倍)
     public static final double LEGENDARY_SCALE = 1.25;

@@ -281,6 +281,8 @@ public final class ModItems {
             case "thunder_wing" -> RESONANCE_SHARD_THUNDER_WING.get();
             case "ember" -> RESONANCE_SHARD_EMBER.get();
             case "abyss" -> jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get();
+            // 月の専用の逸品は月の共鳴の欠片で (2026-11-02: 前は岩鯨の欠片に落ちていた)
+            case "moon" -> jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.RESONANCE_SHARD.get();
             default -> RESONANCE_SHARD_STONE_WHALE.get();
         };
     }
@@ -289,7 +291,8 @@ public final class ModItems {
     public static boolean isResonanceShard(Item item) {
         return item == RESONANCE_SHARD.get() || item == RESONANCE_SHARD_STONE_WHALE.get() || item == RESONANCE_SHARD_TIDE_SHELL.get()
                 || item == RESONANCE_SHARD_THUNDER_WING.get() || item == RESONANCE_SHARD_EMBER.get()
-                || item == jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get();
+                || item == jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get()
+                || item == jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.RESONANCE_SHARD.get();
     }
 
     public static void register(IEventBus modEventBus) {

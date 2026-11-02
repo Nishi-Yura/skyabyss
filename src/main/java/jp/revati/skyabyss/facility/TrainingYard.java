@@ -172,8 +172,9 @@ public final class TrainingYard {
         return new double[] {total, total / (span / 20.0)};
     }
 
+    // 傷の数は画面の倍率 (Hp.SHOWN) で
     public static String fmt(double v) {
-        return String.format(java.util.Locale.ROOT, "%.1f", v);
+        return jp.revati.skyabyss.Hp.number(v);
     }
 
     static void number(ServerLevel level, TrainingDummy dummy, float dealt, long now) {

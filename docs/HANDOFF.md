@@ -2,6 +2,41 @@
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
 
+## 2026-11-02 の昼: 塔の主を案 C「門を背負う者」に
+
+声「C 門を背負う者」。
+
+- **形**: `cloud_roughs/tower_master_c/a/` を `cloud_roughs/tower_master/a/` へ写して `gen_cloud_mobs.py tower_master`（骨 17・三角形 21,366。光輪の骨は C に無いので動きから外した）。手首の玉を足した（`tower_master_kit.hand_parts` の `wrist`。掲げた手が前腕から浮いて見えた）。
+- **動き**: 合図つきの動きを `gen_cloud_mobs.py` の `tower_master()` に（前の動きは消した）。`TowerFight` で使う: 高まり `stoke`（角の上の印。光は `TowerMaster.crown`）、三つの印の光 `beams`（左手を空へ・掌の印）、群れ `palm`（左腕を肩の高さで突き出し掌を橋へ）、目覚めの知らせ 3 で `bow`（伏して腕を広げる）。吐息の筋は `TowerMaster.mouth` から。倒れると腕を伸ばしたまま門の真ん中へ引き戻される（位置は (門 − 支点) × SCALE）。
+- **直したもの（撮影で見つけた）**: 倒れている 8 秒、主と門が真っ赤だった → `CloudMobRenderers.Foe.getPackedOverlay` で赤くしない。吐息の筋・門の輪・閃光・橋の灯が遠くの人に届いていなかった（`sendParticles` は 32 ブロックの内だけ。越えた場面では人の体は元の所）→ `TowerFight.far`。高まりの文「光輪が赤く」を「角の上に天秤の印が開き」に、防具の話「主の背の光輪」を「背負う門の縁」に。
+- **開発用**: `/skyabyss tower act pose_<動き>`（技は出さず動きだけ）・`act hold`（主が自分から技を出さない）・`act win`（倒す）。撮影 `tools/shots/tower_master_cues.txt`（形・合図 12・倒れる・越えた場面のカメラ）、`tower_master_hand.txt`（右手の近く）。
+- 確かめ: 撮影で合図の向き（右手 = 東、腕の上げ下げ、掌の印・角の上の印の出入り）、倒れて門へ吸われる流れ、越えた場面のカメラと題・知らせ。
+
+## 2026-11-02 の深夜 2: 残りの声（塔の主の形・技の木を Wynncraft に・傷の数字・塔の演出・UI の重なり）
+
+声「まだのものお願い」（前の節の「まだ」の五つ）。
+
+- **塔の主の形**: 3 案のラフ（`docs/review/roughs_1102_tower_master/index.md`、生成 `tools/rough/lowpoly/cloud/tower_master_{a,b,c}.py` と共通の `tower_master_kit.py`）。A 天秤の巨人 18105・B 割れた神像 13752・C 門を背負う者 18924 三角形。三案とも Annihilation の合図の骨（`index_r`・`fingers_r`・`palm_l`・`sigil`・`jaw`・`rift`）。**選んでもらうのを待っている**。選んだら `cloud_roughs/tower_master/a/` へ写して `gen_cloud_mobs.py tower_master`、動きを合図つきで作り直す（`gen_cloud_mobs.py` の `tower_master()`）。
+- **技の木を Wynncraft に**: 技ごとの節（`gen_trees.py` の `wynn_nodes`。幹に根の技と二つ目の技の軽減 −25%・早さ −20%、型の一番下に型の技の軽減・マナの節・型の技の早さ。戦士の手書きの木にも一度だけ足す）。鍵 `cooldown@<技>`・`mana_cost@<技>`・`power@<技>`（`SkillBuild`）、`mana_hit`（近接で当てるたび。`AffixEvents`）、`mana_kill`（倒したとき。`SkillEvents.onDeath`）。設計 48 の 2.4。
+- **傷の数字は 10 倍で見せる**（ユーザーは問いに答えず「まだのものお願い」。勧めた 10 倍で進めた）: `Hp.SHOWN`。帯・浮く数字（大きい傷ほど大きく、白く光って弾み、少し震える）・装備の攻撃力と最大体力（`AttributeShownMixin`）・技の説明の体力と傷・報いの比べ・訓練場・説明文の数（手書き 16 本と野の装備 17 本。野は `tools/gen/wild_gear/spec.py` から生成）。中の値は変えない。設計 04 の 4.2。
+- **塔の演出**: 越えた場面 `tower_clear`（13.5 秒。`Cinematics.startAt` を足した = 原点を決めて始める）。崩れる → 門が開く → 光が吸われる → 閃光 → 橋の灯と鐘と花火 → 題と報い（報いは場面のあと）。入ったとき・越えたときのサーバーへの知らせ。落ちる月が半分を過ぎると光の玉。星屑・三矢・光の玉の落ちる尾、吐息の筋。設計 54 の 2.2。
+- **UI の重なり**（見つけて直したもの）: 画面を開いている間も HUD（持ち物の帯・体力とマナの帯）を描いていて、半透明の窓の後ろに透けて字に重なっていた → 会話の欄・円の選び・場面・死んだ画面のほかは HUD を描かない（`HudManager.hidesHud`。設計 18）。旅の地図の「南」が下の操作の説明に重なっていた → 地図の下の縁の内側へ（`TravelMapScreen.drawCompass`）。最後の検査では、持ち物の画面のつまみ（位置が 0,0 の部品を姿勢でずらして描く）の 6 件だけが残り、これは検査の取り違え。
+- **UI の重なりの検査**: 開発用の検査 `client/dev/OverlapAudit`（台本の `overlap <名前>`。描いた文字と部品の四角の重なり・部品の外へはみ出す字・範囲で切れた字を `overlap.txt` に書く。部品の持ち主は `AbstractWidgetAuditMixin`）。台本 `tools/shots/overlap_audit.txt`（`tools/gen/shots/gen_overlap_audit.py`。窓と GUI の倍率 3 通り × 画面 38）。係の人の働きを話さずに起こす `/skyabyss facility act <働き>`、台本の `window <幅> <高さ>` を足した。
+
+- 確かめ: compileJava、`check_lang_keys`・`check_text_fit`・`check_resources`・`check_generators`（ドリフト 0）。自己テストを新しい大陸の世界で `tree,growth,affix,skills,tower,cinematic,lang,facility*,play*,command gate,party*,travel*,gear freedom,builds,deep skills` → `cinematic` だけ落ちた（新しい場面のカメラの切れ目と声）ので直し、`cinematic,tower,lang` を流し直して全部 PASSED。声は `gen_cinematic_voice.py --install --style l2` で塔の 3 本を足した（ほかの 68 本は音が同じで包みだけ変わったので戻した）。重なりの検査の撮影 138 枚（`run/shots/overlap_audit/`）。ゲームの中で見ていないもの: 塔の越えた場面・光の玉・落ちる尾・吐息の筋・浮く数字の弾み、塔への知らせ。
+- 塔の主の形は C に決まり、上の節で入れた。コミットはしていない。
+
+## 2026-11-02 の深夜: 0.9.22 のあとの声（技の木・炉の交換・粉・塔・体力・特性）
+
+- **共鳴の炉の交換**: 交換の表は専用の逸品がある表だけ（`TitanGearSets.exchangeable()`。雲海の神器とあいだの塔は出さない）。月の専用の逸品は月の共鳴の欠片で（`ModItems.resonanceShard("moon")`。前は岩鯨の欠片に落ちていた）。神器と塔の装備の分解は、その表の欠片（心核の欠片・塔の欠片）を返す。
+- **技の木**: 取れなかった型の要 5 つ（弓・暗殺者 2・呪術師・鍛冶師）の門を、取れる点に合わせた（`gen_trees.py` の `reachable`。全節が 30 点以下で届くのを全探索で確かめた）。線はまっすぐ・選んだ節へ水色・閉じた変化に赤い ×・閉じた理由を説明に。言葉を SP・発動スキル・常時スキル・スキル変化・奥義・発動キー・再使用までに。撮影 `tools/shots/skill_tree_lines.txt`。
+- **粉**: 段を VI まで。心臓と試練はその巨神の章の段（岩鯨 I〜余燼 IV）。
+- **体力**: 2 レベルごとに +0.5（Lv 50 で +12。`GrowthRules.levelHealth`）。
+- **特性**: マナ吸収（武器）・技の威力（武器）・マナの戻り（防具）。
+- **塔**: 受付をチャットから画面に（`TowerDeskScreen`。撮影 `tools/shots/tower_desk_ui.txt`）。目覚めまで 20 秒と仕掛けの知らせ 4 つと 3,2,1。範囲の予告を赤い床の印に。当たりの箱 28 → 44。
+- 確かめ: compileJava、自己テスト `tree,growth,affix,gear freedom,tower,facility*,lang*,skills,abyss gear,moon gear,party*,players,rebirth,soul,heart balance` 全部 PASSED。技の木と受付の画面は撮影で見た。塔の戦いの中（予告・始まりの間・当たり）はゲームの中で見ていない。
+- まだ（声のうち、次にやる）: 塔の主の形・動き・技の見た目・クリアの演出（ラフから）、塔をもっとアンニアレーションの形に、技の木をもっと Wynncraft に（技の待ちの短縮などの節）、傷の数字の迫力（数字の見せ方の倍率は判断待ち）、UI の重なり（どの画面か聞く）。
+
 ## 2026-11-02 の夜: 正式版の前の直し（版の引き継ぎ・コマンド・場面の飛ばし・置く品・道・島・都の係の人）
 
 声（2026-11-02）: 「アップデートで mod の ver が上がって変更しても対応できるように」「正式版なので、コマンド整理して管理者用も設定して」「ムービースキップ系、全部 Enter に」「置く系のアイテムは手に入らないように（松明とか）」「道の上に構造物できないように」「始まりの島の柵、意味ない。よこからでれちゃう」「アイテム壊れたときのドロップなくしていい」「NPC の位置とかおかしいかも。NPC 統一したときに建物とか位置直してないかも」「空見の館とか、いらない」「手に持った品を直すもいらない」「前なおした NPC 系が治ってなくない？」「破れたページも、動き回ってたら手に入らない」「〜に行こうの判定もおかしいときある」。

@@ -83,10 +83,7 @@ public final class FacilityActions {
             case "guide" -> TownGuide.openMenu(player);
             case "boxes" -> jp.revati.skyabyss.loot.box.BoxService.open(player, npc);
             case "buyback" -> ShopService.open(player, Buyback.ID, npc);
-            case "tower_desk" -> {
-                jp.revati.skyabyss.tower.TowerDesk.menu(player);
-                jp.revati.skyabyss.endgame.ChatMenus.open(player);
-            }
+            case "tower_desk" -> jp.revati.skyabyss.tower.TowerDesk.menu(player);
             case "tower_shop" -> jp.revati.skyabyss.tower.TowerDesk.openShop(player);
             case "tower_records" -> {
                 jp.revati.skyabyss.tower.TowerDesk.records(player);

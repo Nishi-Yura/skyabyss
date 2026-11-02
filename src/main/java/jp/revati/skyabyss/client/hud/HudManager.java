@@ -118,9 +118,22 @@ public final class HudManager {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onLayer(RenderGuiLayerEvent.Pre event) {
         ResourceLocation name = event.getName();
-        if (Minecraft.getInstance().options.hideGui && SkyAbyss.MODID.equals(name.getNamespace()) && !KEEP_WHEN_HIDDEN.contains(name.getPath())) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.hideGui && SkyAbyss.MODID.equals(name.getNamespace()) && !KEEP_WHEN_HIDDEN.contains(name.getPath())) {
             event.setCanceled(true);
         }
+        // 画面を開いている間は HUD (持ち物の帯・体力とマナの帯・目的の帯など、バニラも mod も) を描かない。
+        // 2026-11-02 の声「UI がたまにおかしいものある。文字や要素が重なったり」: 半透明の窓の後ろに持ち物の帯と体力の帯が透けて、字に重なっていた。
+        // 会話の欄・円の選び (技の輪・旅嚢の輪)・場面 (自分で HUD を消す) は HUD の上に出すものなので残す
+        if (mc.screen != null && hidesHud(mc.screen) && !KEEP_WHEN_HIDDEN.contains(name.getPath())) {
+            event.setCanceled(true);
+        }
+    }
+
+    static boolean hidesHud(net.minecraft.client.gui.screens.Screen screen) {
+        return !(screen instanceof net.minecraft.client.gui.screens.ChatScreen) && !(screen instanceof jp.revati.skyabyss.client.wheel.WheelScreen)
+                && !(screen instanceof jp.revati.skyabyss.client.pouch.PouchWheelScreen) && !screen.getClass().getName().equals("jp.revati.skyabyss.client.cinematic.CinematicScreen")
+                && !(screen instanceof net.minecraft.client.gui.screens.DeathScreen);
     }
 
     // ------------------------------------------------------------ 計算

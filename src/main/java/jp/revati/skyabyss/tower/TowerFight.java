@@ -56,7 +56,9 @@ import org.joml.Vector3f;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TowerFight {
     public static final double PARTY_STEP = 0.85;
-    public static final int INTRO = 100;
+    // 目覚めまでの間 (20 秒)。2026-11-02 の声「急に始まりすぎ」「ギミックがよくわからない」: 主の名を出し、予告・落ちる月・側の目・癒しの輪を
+    // 一つずつ知らせ、3・2・1 を数えてから動く (前は 5 秒で動き出した)
+    public static final int INTRO = 400;
     static final int REST = 50;
     // 落ちる月が北の広場から南の端まで渡りきる tick
     public static final int MOON_TICKS = 1800;
@@ -96,6 +98,8 @@ public final class TowerFight {
     String last = "";
     long start = -1;
     boolean woke;
+    // 開発用: 主が自分から技を出さない (act hold で切り替え。撮影で動きだけを見るとき)
+    boolean devHold;
     // 全滅の理由 (落ちる月が渡りきった)。null なら続く
     String failed;
     boolean won;
@@ -189,6 +193,7 @@ public final class TowerFight {
             }
         }
         if (won) {
+            tickWin(level, now);
             return;
         }
         if (!master.isAlive()) {
@@ -200,12 +205,33 @@ public final class TowerFight {
         if (since < INTRO) {
             if (since == 20) {
                 for (ServerPlayer p : here) {
+                    Notice.place(p, Component.translatable("entity.skyabyss.tower_master"), Component.translatable("message.skyabyss.tower.intro_sub"));
                     Notice.narrate(p, "message.skyabyss.tower.intro");
                 }
             }
             if (since == 40) {
                 master.playAction("roar");
                 sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 0.6f);
+            }
+            // 側の目の知らせ (tip3) に合わせて、身を伏せて両腕を橋の左右の台へ広げる
+            if (since == 220) {
+                master.playAction("bow");
+            }
+            // 仕掛けの知らせ (一つずつ)
+            int tip = since == 100 ? 1 : since == 160 ? 2 : since == 220 ? 3 : since == 280 ? 4 : 0;
+            if (tip > 0) {
+                for (ServerPlayer p : here) {
+                    Notice.hint(p, "message.skyabyss.tower.tip" + tip);
+                }
+            }
+            // 3・2・1
+            if (since == INTRO - 60 || since == INTRO - 40 || since == INTRO - 20) {
+                int n = (int) ((INTRO - since) / 20);
+                for (ServerPlayer p : here) {
+                    p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(0, 16, 4));
+                    p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(Component.literal(String.valueOf(n)).withStyle(s -> s.withColor(0xF2D78A))));
+                    p.playNotifySound(net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BELL.value(), net.minecraft.sounds.SoundSource.HOSTILE, 1f, 0.6f + 0.1f * (3 - n));
+                }
             }
             return;
         }
@@ -228,9 +254,11 @@ public final class TowerFight {
         }
         if (stoke < 1 && f <= 0.6f || stoke < 2 && f <= 0.3f) {
             stoke++;
-            master.playAction("roar");
+            // 角の上に天秤の印が開く (Annihilation の Stoke the Blaze)
+            master.playAction("stoke");
             sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 0.8f);
-            level.sendParticles(RED, master.head().x, master.head().y, master.head().z + 3, 80, 9, 9, 1, 0);
+            Vec3 cr = master.crown();
+            far(level, RED, cr.x, cr.y, cr.z + 1, 80, 7, 4, 1, 0);
             for (ServerPlayer p : here) {
                 Notice.narrate(p, "message.skyabyss.tower.stoke");
             }
@@ -245,7 +273,7 @@ public final class TowerFight {
             jp.revati.skyabyss.combat.BossOpenings.moveEnded(master);
             restUntil = now + (long) (REST * pace() * (moon != null ? 1.6 : 1.0));
         }
-        if (move.isEmpty() && now >= restUntil && !targets(here).isEmpty()) {
+        if (move.isEmpty() && now >= restUntil && !devHold && !targets(here).isEmpty()) {
             begin(level, now, pick(f), here);
         }
     }
@@ -322,9 +350,9 @@ public final class TowerFight {
                 sound(level, master.head(), CloudMobsSetup.EYE_RAIN_TELL.get(), 5f, 0.5f);
                 int kind = rng.nextInt(3);
                 if (kind == 0) {
-                    zones.add(Zone.box(rel(-12, 1, -50), rel(12, 1, -24), now + 30, 1.3 * k, VIOLET));
+                    zones.add(Zone.box(rel(-12, 1, -50), rel(12, 1, -24), now + 30, 1.3 * k, VIOLET).breath());
                 } else if (kind == 1) {
-                    zones.add(Zone.box(rel(-2.5, 1, -30), rel(2.5, 1, 50), now + 30, 1.6 * k, VIOLET));
+                    zones.add(Zone.box(rel(-2.5, 1, -30), rel(2.5, 1, 50), now + 30, 1.6 * k, VIOLET).breath());
                 } else {
                     ServerPlayer far = tg.get(0);
                     for (ServerPlayer p : tg) {
@@ -332,12 +360,12 @@ public final class TowerFight {
                             far = p;
                         }
                     }
-                    zones.add(Zone.circle(far.position(), 4, now + 35, 1.4 * k, VIOLET).follow(far, now + 20));
+                    zones.add(Zone.circle(far.position(), 4, now + 35, 1.4 * k, VIOLET).follow(far, now + 20).breath());
                 }
                 len = 60;
             }
             case "beams" -> {
-                master.playAction("sigil");
+                master.playAction("beams");
                 for (int i = 0; i < 3; i++) {
                     Vec3 s = run.markCenter("sigil_" + (i + 1));
                     zones.add(Zone.circle(s, 3.5, now + 40 + i * 15L, 1.8 * k, GOLD).pillar());
@@ -372,10 +400,10 @@ public final class TowerFight {
                 for (int w = 0; w < 3; w++) {
                     long at = now + 25 + w * 30L;
                     for (ServerPlayer p : tg) {
-                        zones.add(Zone.circle(p.position(), 2.5, at, 0.9 * k, GOLD).follow(p, at - 18));
+                        zones.add(Zone.circle(p.position(), 2.5, at, 0.9 * k, GOLD).follow(p, at - 18).fall());
                     }
                     for (int i = 0; i < extra; i++) {
-                        zones.add(Zone.circle(rel(-6 + rng.nextDouble() * 12, 1, -42 + rng.nextDouble() * 78), 2.5, at, 0.9 * k, GOLD));
+                        zones.add(Zone.circle(rel(-6 + rng.nextDouble() * 12, 1, -42 + rng.nextDouble() * 78), 2.5, at, 0.9 * k, GOLD).fall());
                     }
                 }
                 len = 100;
@@ -387,9 +415,9 @@ public final class TowerFight {
                     Notice.narrate(q, "message.skyabyss.tower.arrows", p.getDisplayName());
                 }
                 double share = 1.2 * Math.min(tg.size(), 3) * k;
-                zones.add(Zone.circle(p.position(), 5, now + 40, 1.6 * k, WHITE).follow(p, now + 25));
-                zones.add(Zone.circle(p.position(), 4, now + 80, share, GOLD).follow(p, now + 65).share());
-                zones.add(Zone.circle(p.position(), 4, now + 110, share, GOLD).follow(p, now + 95).share());
+                zones.add(Zone.circle(p.position(), 5, now + 40, 1.6 * k, WHITE).follow(p, now + 25).fall());
+                zones.add(Zone.circle(p.position(), 4, now + 80, share, GOLD).follow(p, now + 65).share().fall());
+                zones.add(Zone.circle(p.position(), 4, now + 110, share, GOLD).follow(p, now + 95).share().fall());
                 sound(level, master.head(), CloudMobsSetup.PILGRIM_BEAM.get(), 5f, 0.6f);
                 len = 120;
             }
@@ -434,7 +462,7 @@ public final class TowerFight {
                 tell(p, "exhort");
             }
         }
-        level.sendParticles(ParticleTypes.SONIC_BOOM, master.getX(), master.getY() + 2, master.getZ() + 16, 6, 8, 0.5, 2, 0);
+        far(level, ParticleTypes.SONIC_BOOM, master.getX(), master.getY() + 2, master.getZ() + 16, 6, 8, 0.5, 2, 0);
     }
 
     // ---------------------------------------------------------------- 70%: 天と淵の群れと、主を癒す繋ぎ手
@@ -451,7 +479,8 @@ public final class TowerFight {
             }
         }
         raiseBinders(level);
-        master.playAction("roar");
+        // 左の掌を橋へ向け、掌の印が開く (Annihilation の Blossoming Chaos)
+        master.playAction("palm");
         sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 1.0f);
         for (ServerPlayer p : here) {
             Notice.narrate(p, "message.skyabyss.tower.swarm");
@@ -576,6 +605,23 @@ public final class TowerFight {
                 }
             }
         }
+        // 大きくなった月は光の玉を撃つ (Annihilation の New Sun。半分を過ぎてから。進むほど間が詰まる)。狙った人の足もとに赤い予告、1 秒後に落ちる
+        long volley = prog < 0.5 ? 0 : prog < 0.8 ? 40 : 26;
+        if (volley > 0 && now % volley == 0) {
+            List<ServerPlayer> tg = targets(here);
+            if (!tg.isEmpty()) {
+                ServerPlayer p = tg.get(rng.nextInt(tg.size()));
+                Vec3 to = p.position();
+                zones.add(Zone.circle(to, 2.2, now + 20, 0.6 * stokeMult(), GOLD).fall());
+                Vec3 from = moon.position().add(0, 2 * (1 + prog), 0);
+                Vec3 d = to.subtract(from);
+                for (int i = 0; i < 12; i++) {
+                    Vec3 q = from.add(d.scale(i / 12.0));
+                    level.sendParticles(ParticleTypes.END_ROD, q.x, q.y, q.z, 1, 0.1, 0.1, 0.1, 0.01);
+                }
+                sound(level, from, SoundEvents.BLAZE_SHOOT, 3f, 0.6f);
+            }
+        }
         if (prog >= 1.0) {
             failed = "moon_lost";
         }
@@ -597,8 +643,22 @@ public final class TowerFight {
                 }
             }
             if (now < z.at) {
+                // 床の予告 (ほかの主と同じ赤い印。範囲が満ちていく)。人を追う印は、追うのをやめた (止まった) ときに置く。
+                // 2026-11-02 の声「大規模レイドも攻撃予告の赤色出してほしい」。傷はこの仕組み (z.contains) が出すので、印は当たらない
+                if (!z.decal && (z.follow == null || now >= z.lockAt) && z.at - now >= 4) {
+                    z.decal = true;
+                    jp.revati.skyabyss.combat.TelegraphShape shape = z.kind == Zone.CIRCLE ? jp.revati.skyabyss.combat.TelegraphShape.circle(z.cx, z.cz, z.r)
+                            : jp.revati.skyabyss.combat.TelegraphShape.line(z.x0, z.cz, 0, z.x1 - z.x0, (z.z1 - z.z0) / 2);
+                    var b = jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(z.y).warn((int) (z.at - now)).owner(master).victims(pl -> false);
+                    (z.share ? b.safe() : b.danger()).start();
+                }
                 if ((z.at - now) % (z.at - now <= 10 ? 2 : 4) == 0) {
                     z.draw(level, rng);
+                }
+                if (z.fall && z.at - now <= 8) {
+                    double h = (z.at - now) / 8.0 * 24;
+                    level.sendParticles(ParticleTypes.END_ROD, z.cx, z.y + h, z.cz, 3, 0.15, 0.6, 0.15, 0.01);
+                    level.sendParticles(z.color, z.cx, z.y + h + 1.5, z.cz, 6, 0.3, 1.2, 0.3, 0);
                 }
                 continue;
             }
@@ -623,6 +683,17 @@ public final class TowerFight {
                     }
                     p.push(away.x * z.push, 0.35, away.z * z.push);
                     p.hurtMarked = true;
+                }
+            }
+            if (z.breath) {
+                // 吐く間は顔を下ろしているので、口は休めの姿勢より 4 下・3 前
+                Vec3 from = master.mouth().add(0, -4, 3);
+                Vec3 to = z.center();
+                for (int i = 0; i <= 18; i++) {
+                    Vec3 q = from.add(to.subtract(from).scale(i / 18.0));
+                    double spread = 0.4 + 2.0 * i / 18.0;
+                    far(level, ParticleTypes.SOUL_FIRE_FLAME, q.x, q.y, q.z, 4, spread, spread * 0.4, spread, 0.02);
+                    far(level, VIOLET, q.x, q.y, q.z, 3, spread, spread * 0.4, spread, 0);
                 }
             }
             z.burst(level);
@@ -660,7 +731,7 @@ public final class TowerFight {
                 double dist = h.distanceTo(to);
                 for (double s = 0; s < dist; s += 1.0) {
                     Vec3 q = h.lerp(to, s / dist);
-                    level.sendParticles(RED, q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                    far(level, RED, q.x, q.y, q.z, 1, 0, 0, 0, 0);
                 }
             }
         }
@@ -730,15 +801,65 @@ public final class TowerFight {
     }
 
     // ---------------------------------------------------------------- 勝ち
+    // 越えた場面 (2026-11-02 の声「クリア演出ももっと豪華にして」。手本は Annihilation の終わり: 崩れ、腕を伸ばしたまま門へ引き戻される)。
+    //   0〜3 秒 主が崩れ、割れ目から光が漏れる / 2.5 秒 背の門が開く / 3.5〜7.5 秒 光が門へ吸われる (主は門へ引き戻される)
+    //   8 秒 門が閉じて閃光 (主が消える) / 9.5〜12.5 秒 橋の灯が北から南へ並び、鐘と花火 / 13.5 秒 報いと記録 (Towers.cleared)
+    //   カメラは場面 tower_clear (Scenes.towerClear。原点は橋の北寄りの真ん中、前 = 主)。Enter で飛ばせる。場面の間は傷を受けない
+    public static final int CLEAR_SCENE = 270;
+    Vec3 fallAt;
+
     void win(ServerLevel level, long now) {
         won = true;
         wonAt = now;
+        fallAt = master.position();
         bar.removeAllPlayers();
         zones.clear();
         chasers.clear();
         if (moon != null) {
             moon.discard();
             moon = null;
+        }
+        Vec3 frame = rel(0, 1, -20);
+        for (ServerPlayer p : run.online()) {
+            if (p.level() == level && p.isAlive()) {
+                if (Downed.isDowned(p)) {
+                    Downed.reviveFull(p);
+                }
+                jp.revati.skyabyss.cinematic.Cinematics.startAt(p, jp.revati.skyabyss.cinematic.Scenes.TOWER_CLEAR, master, master.position(), frame);
+            }
+        }
+        sound(level, master.chest(), SoundEvents.ENDER_DRAGON_GROWL, 8f, 0.5f);
+        sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 8f, 0.45f);
+        laters.add(new Later(now + 50, () -> sound(level, rift(), SoundEvents.END_PORTAL_SPAWN, 8f, 0.6f)));
+        laters.add(new Later(now + 80, () -> sound(level, rift(), SoundEvents.PORTAL_TRIGGER, 8f, 0.5f)));
+        laters.add(new Later(now + 160, () -> {
+            Vec3 r = rift();
+            far(level, ParticleTypes.FLASH, r.x, r.y, r.z, 3, 2, 2, 2, 0);
+            far(level, ParticleTypes.END_ROD, r.x, r.y, r.z, 240, 4, 4, 4, 0.6);
+            far(level, WHITE, r.x, r.y, r.z, 120, 10, 10, 3, 0);
+            sound(level, r, SoundEvents.BEACON_DEACTIVATE, 8f, 0.5f);
+            sound(level, r, SoundEvents.TOTEM_USE, 6f, 0.7f);
+        }));
+        // 橋の灯 (北から南へ十対) と鐘
+        for (int i = 0; i < 10; i++) {
+            final int k = i;
+            laters.add(new Later(now + 190 + i * 6L, () -> {
+                double z = -40 + k * 9;
+                for (int s = -1; s <= 1; s += 2) {
+                    Vec3 b = rel(s * 7.5, 1, z);
+                    for (int y = 0; y < 10; y++) {
+                        far(level, ParticleTypes.END_ROD, b.x, b.y + y, b.z, 2, 0.08, 0.3, 0.08, 0.01);
+                    }
+                    far(level, GOLD, b.x, b.y + 5, b.z, 30, 0.4, 4, 0.4, 0);
+                }
+                sound(level, rel(0, 2, z), SoundEvents.BELL_BLOCK, 3f, 0.7f + 0.06f * k);
+            }));
+        }
+        // 花火 (三つ。金・白・紫)
+        int[][] colors = {{0xF2D78A, 0xFFF4D6}, {0xFFFFFF, 0xCFE8FF}, {0xA070F0, 0xF2D78A}};
+        for (int i = 0; i < 3; i++) {
+            final int k = i;
+            laters.add(new Later(now + 215 + i * 18L, () -> firework(level, rel(k == 1 ? 0 : (k == 0 ? -9 : 9), 2, -12 + k * 18), colors[k])));
         }
         laters.add(new Later(now + 40, () -> {
             for (Eye e : eyes) {
@@ -751,6 +872,68 @@ public final class TowerFight {
                 m.discard();
             }
         }));
+    }
+
+    // 越えた場面の毎 tick の光 (崩れる体の割れ目・開いて閉じる門・門へ吸われる光)
+    void tickWin(ServerLevel level, long now) {
+        long t = now - wonAt;
+        if (fallAt == null || t > CLEAR_SCENE) {
+            return;
+        }
+        Vec3 body = fallAt.add(0, 20, -8);
+        if (t < 80 && t % 4 == 0) {
+            for (int i = 0; i < 6; i++) {
+                double x = body.x + (rng.nextDouble() - 0.5) * 26;
+                double y = body.y + (rng.nextDouble() - 0.5) * 30;
+                double z = body.z + (rng.nextDouble() - 0.5) * 14;
+                far(level, i % 2 == 0 ? GOLD : VIOLET, x, y, z, 4, 0.4, 0.4, 0.4, 0);
+                far(level, ParticleTypes.END_ROD, x, y, z, 1, 0.2, 0.2, 0.2, 0.05);
+            }
+        }
+        // 門: 2.5 秒で開き始め、5.5 秒で最大 (半径 23。形の門の縁は 1.3 倍で 24)、8 秒で閉じる
+        if (t >= 50 && t <= 160 && t % 2 == 0) {
+            double r = t < 110 ? 4 + 19 * (t - 50) / 60.0 : 23 * (160 - t) / 50.0;
+            Vec3 c = rift();
+            int n = 36;
+            for (int i = 0; i < n; i++) {
+                double a = 2 * Math.PI * i / n + t * 0.05;
+                far(level, VIOLET, c.x + Math.sin(a) * r, c.y + Math.cos(a) * r, c.z, 1, 0.1, 0.1, 0.1, 0);
+            }
+            far(level, ParticleTypes.PORTAL, c.x, c.y, c.z, 30, r * 0.4, r * 0.4, 0.5, 0.3);
+        }
+        // 光が門へ吸われる (体の点から門の真ん中へ向かう速さを持たせる)
+        if (t >= 70 && t <= 155 && t % 3 == 0) {
+            Vec3 c = rift();
+            for (int i = 0; i < 8; i++) {
+                Vec3 from = body.add((rng.nextDouble() - 0.5) * 24, (rng.nextDouble() - 0.5) * 26, (rng.nextDouble() - 0.5) * 10);
+                Vec3 d = c.subtract(from).normalize();
+                far(level, ParticleTypes.END_ROD, from.x, from.y, from.z, 0, d.x, d.y, d.z, 1.2);
+                far(level, ParticleTypes.REVERSE_PORTAL, from.x, from.y, from.z, 0, d.x, d.y, d.z, 0.9);
+            }
+        }
+    }
+
+    // 背の「あいだの門」の真ん中 (主の原点から上 35.9・後ろ 30.1。形の rift の骨の支点、ラフの (0, 420, 300))
+    Vec3 rift() {
+        Vec3 o = fallAt != null ? fallAt : master.position();
+        return o.add(0, 35.9, -30.1);
+    }
+
+    // 遠くの人にも見せる光。ふつうの sendParticles は 32 ブロックの内の人にしか届かないが、主の顔・門・吐息の筋は橋の上から 30〜130 ブロック先にある。
+    // 越えた場面のあいだ、人の体は元の所にいてカメラだけが動くので、場面の光もこれで送る
+    static void far(ServerLevel level, ParticleOptions type, double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
+        for (ServerPlayer p : level.players()) {
+            level.sendParticles(p, type, true, x, y, z, count, dx, dy, dz, speed);
+        }
+    }
+
+    static void firework(ServerLevel level, Vec3 at, int[] colors) {
+        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.FIREWORK_ROCKET);
+        stack.set(net.minecraft.core.component.DataComponents.FIREWORKS, new net.minecraft.world.item.component.Fireworks(1,
+                List.of(new net.minecraft.world.item.component.FireworkExplosion(net.minecraft.world.item.component.FireworkExplosion.Shape.LARGE_BALL,
+                        it.unimi.dsi.fastutil.ints.IntList.of(colors), it.unimi.dsi.fastutil.ints.IntList.of(colors[1]), true, true))));
+        net.minecraft.world.entity.projectile.FireworkRocketEntity f = new net.minecraft.world.entity.projectile.FireworkRocketEntity(level, at.x, at.y, at.z, stack);
+        level.addFreshEntity(f);
     }
 
     void close() {
@@ -841,8 +1024,13 @@ public final class TowerFight {
         double push;
         boolean share;
         boolean pillar;
+        // 落ちる尾 (星屑・光の玉・三矢。当たる 8 tick 前から空から落ちてくる) / 吐息 (当たる瞬間、主の顔から筋が吹き出す)
+        boolean fall;
+        boolean breath;
         UUID follow;
         long lockAt;
+        // 床の予告 (Telegraph) を置いたか
+        boolean decal;
 
         private Zone(int kind, double cx, double y, double cz, double r, double x0, double x1, double z0, double z1, long at, double factor, DustParticleOptions color) {
             this.kind = kind;
@@ -857,6 +1045,16 @@ public final class TowerFight {
             this.at = at;
             this.factor = factor;
             this.color = color;
+        }
+
+        Zone fall() {
+            fall = true;
+            return this;
+        }
+
+        Zone breath() {
+            breath = true;
+            return this;
         }
 
         static Zone circle(Vec3 c, double r, long at, double factor, DustParticleOptions color) {
@@ -973,7 +1171,21 @@ public final class TowerFight {
                 }
             }
             case "swarm" -> swarm(level, all);
-            default -> begin(level, now, m, all);
+            case "hold" -> devHold = !devHold;
+            // 倒す (越えた場面の確かめ)
+            case "win" -> {
+                master.setShielded(false);
+                master.setFloor(0);
+                master.kill();
+            }
+            default -> {
+                // pose_<動き>: 技は出さず、主の動きだけを見せる (pose_bow・pose_stoke など)
+                if (m.startsWith("pose_")) {
+                    master.playAction(m.substring(5));
+                } else {
+                    begin(level, now, m, all);
+                }
+            }
         }
     }
 }

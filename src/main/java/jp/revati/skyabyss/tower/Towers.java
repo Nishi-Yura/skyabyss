@@ -41,7 +41,8 @@ public final class Towers {
     public static final String CLEARS = "skyabyss_tower_clears";
     public static final String BEST = "skyabyss_tower_best";
     // 主が倒れてから都の受付へ戻すまで
-    static final int CLEAR_BACK = 300;
+    // 越えてから都へ戻るまで (越えた場面 TowerFight.CLEAR_SCENE のあと 15 秒)
+    static final int CLEAR_BACK = TowerFight.CLEAR_SCENE + 300;
     public static final int MAX_SQUAD = 12;
     static final int EMPTY_END = 1200;
     static final Map<Integer, TowerRun> RUNS = new HashMap<>();
@@ -114,6 +115,7 @@ public final class Towers {
             }
         }
         SkyAbyss.LOGGER.info("[tower] run #{} slot {} with {} player(s)", run.id, slot, squad.size());
+        announce(server, "message.skyabyss.tower.announce_enter", squad, squad.get(0).getGameProfile().getName(), squad.size());
         TowerWorld.pour(level, slot);
         clearFoes(run);
         run.arena = new TowerArena(run);
@@ -209,6 +211,8 @@ public final class Towers {
             if (!d.contains(BEST) || ticks < d.getLong(BEST)) {
                 d.putLong(BEST, ticks);
             }
+            Notice.place(p, Component.translatable("message.skyabyss.tower.clear_title"), Component.translatable("message.skyabyss.tower.clear_sub", time(ticks)));
+            p.playNotifySound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.MASTER, 1f, 1f);
             Notice.narrate(p, "message.skyabyss.tower.cleared", time(ticks));
             if (fastest) {
                 Notice.gain(p, "message.skyabyss.tower.record", run.members.size());
@@ -218,6 +222,18 @@ public final class Towers {
             Notice.hint(p, "message.skyabyss.tower.clear_back");
         }
         SkyAbyss.LOGGER.info("[tower] run #{} cleared in {} with {} player(s)", run.id, time(ticks), run.members.size());
+        if (run.server != null) {
+            List<ServerPlayer> on = run.online();
+            announce(run.server, "message.skyabyss.tower.announce_clear", on, on.isEmpty() ? "?" : on.get(0).getGameProfile().getName(), time(ticks));
+        }
+    }
+
+    // 塔へ挑んだ・越えたことを、ほかの人にも一行で知らせる (手本 Annihilation の「Wynn faces Annihilation」の知らせ)。自己テストの偽の人だけの隊は知らせない
+    static void announce(MinecraftServer server, String key, List<ServerPlayer> squad, Object... args) {
+        if (squad.stream().allMatch(p -> p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            return;
+        }
+        server.getPlayerList().broadcastSystemMessage(Component.translatable(key, args).withStyle(s -> s.withColor(0xF2D78A)), false);
     }
 
     // 越えた人への報酬: 塔の欠片・鐘銭と、塔の箱 (確率と天井。TowerGear.BOX_CHANCE・BOX_PITY。中は塔の装備がどれか一つ)
@@ -289,7 +305,8 @@ public final class Towers {
         run.arena.tick(level, t);
         TowerFight fight = run.arena.fight;
         if (fight.won) {
-            if (!run.cleared) {
+            // 報いと記録は越えた場面のあと (時間は主が倒れた tick で数える)
+            if (!run.cleared && t >= fight.wonAt + TowerFight.CLEAR_SCENE) {
                 cleared(run, fight.wonAt - run.startedTick);
             }
             if (t >= fight.wonAt + CLEAR_BACK) {
@@ -413,7 +430,7 @@ public final class Towers {
     }
 
     // ---------------------------------------------------------------- 開発用
-    // /skyabyss tower start (一人で、一日一回を数えずに) | day (今日の一回を戻す) | leave | act <技> (主の技をすぐ出す) | hp <割合 %> (主の体力)
+    // /skyabyss tower start (一人で、一日一回を数えずに) | day (今日の一回を戻す) | leave | act <技> (主の技をすぐ出す。pose_<動き> は動きだけ、hold は自分から技を出さない、win は倒す) | hp <割合 %> (主の体力)
     @SubscribeEvent
     static void onCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))

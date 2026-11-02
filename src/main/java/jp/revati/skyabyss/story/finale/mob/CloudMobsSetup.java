@@ -95,7 +95,7 @@ public final class CloudMobsSetup {
     // 超大型レイド「あいだの塔」(docs/design/54 の 2.5): 主・側の目 (小・大)・落ちる月。主は動かない巨人で、当たりは広場から玉座まで
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerMaster>> TOWER_MASTER = ENTITIES.register(
             jp.revati.skyabyss.tower.mob.TowerMaster.ID, () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerMaster::new, MobCategory.MONSTER)
-                    .sized(28f, 32f).eyeHeight(28f).fireImmune().clientTrackingRange(16).build(SkyAbyss.MODID + ":" + jp.revati.skyabyss.tower.mob.TowerMaster.ID));
+                    .sized(44f, 32f).eyeHeight(28f).fireImmune().clientTrackingRange(16).build(SkyAbyss.MODID + ":" + jp.revati.skyabyss.tower.mob.TowerMaster.ID));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.tower.mob.TowerEye>> TOWER_EYE = ENTITIES.register("tower_eye",
             () -> EntityType.Builder.of(jp.revati.skyabyss.tower.mob.TowerEye::new, MobCategory.MONSTER).sized(2.4f, 2.8f).eyeHeight(1.4f).fireImmune()
                     .clientTrackingRange(16).build(SkyAbyss.MODID + ":tower_eye"));

@@ -12,12 +12,14 @@ import net.minecraft.world.item.component.CustomData;
 
 // 巨神の粉 (docs/design/41。2026-10-25 に A に決まった)。前の「属性の欠片」(Element・ElementShard) を、段 (I〜III) のある粉にしたもの。
 //   - 段は品の CUSTOM_DATA の "powder_tier" (無ければ I)。穴に差すと Gem の milli に段を写す (0 は I)
-//   - 同じ段の粉三つで、一つ上の段の粉一つ (手に持って使う)。効き目の数字は段の数だけ掛ける (I ×1・II ×2・III ×3)
+//   - 同じ段の粉三つで、一つ上の段の粉一つ (手に持って使う)。効き目の数字は段の数だけ掛ける (I ×1 … VI ×6)
+//   - 段は VI まで (2026-11-02 の声「穴にいれる粉系、1 しかなくない？もっといいやつは？」。Wynncraft の粉と同じ六段)。
+//     心臓と試練では、その巨神の章の段の粉が落ちる (岩鯨 I・潮殻 II・雷翼 III・余燼 IV。GearFreedomLoot)
 //   - 粉の技: 一つの装備に差した粉の段を属性ごとに足し、WEIGHT_FOR_ART 以上なら、その属性の粉の技が働く (PowderArts)。
 //     穴は二つまでなので、III と I、II と II などで届く
 public final class Powder {
     public static final String TIER_KEY = "powder_tier";
-    public static final int MAX_TIER = 3;
+    public static final int MAX_TIER = 6;
     public static final int COMBINE = 3;
     public static final int WEIGHT_FOR_ART = 4;
 
@@ -51,6 +53,9 @@ public final class Powder {
         return switch (tier) {
             case 2 -> "II";
             case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            case 6 -> "VI";
             default -> "I";
         };
     }

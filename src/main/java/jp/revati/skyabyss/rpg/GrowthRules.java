@@ -27,6 +27,9 @@ public final class GrowthRules {
     public static final double SPIRIT_SPELL = 0.006;
     // 耐久: 2 ごとに最大体力 +0.5 点 (ハート 0.25 個。表示は Hearts)
     public static final double VITALITY_HEALTH_PER_TWO = 0.5;
+    // レベル: 2 ごとに最大体力 +0.5 点 (Lv 50 で +12。2026-11-02 の声「HP はレベルに応じて少しずつ上がるように。最低の基礎値が上がると、ビルドも組みやすい」。
+    // Wynncraft も素の体力はレベルで伸び、残りを防具で伸ばす)
+    public static final double LEVEL_HEALTH_PER_TWO = 0.5;
 
     // ---------------------------------------------------------------- 経験値の補正
     // 内容の推奨レベル + この差までは満額。超えた 1 レベルごとに 10% 減り、最低 20%
@@ -115,6 +118,11 @@ public final class GrowthRules {
 
     public static double bonusHealth(int vitality) {
         return VITALITY_HEALTH_PER_TWO * (vitality / 2);
+    }
+
+    // レベルで増える最大体力 (Lv 1 は 0)
+    public static double levelHealth(int level) {
+        return LEVEL_HEALTH_PER_TWO * (Math.max(0, level - 1) / 2);
     }
 
     // 内容の推奨レベルより上がりすぎた人への補正

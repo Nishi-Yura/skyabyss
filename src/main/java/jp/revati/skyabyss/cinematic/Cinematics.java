@@ -75,16 +75,22 @@ public final class Cinematics {
     // 場面を始める。すでに別の場面の最中・存在しない場面・観戦者・死んでいる人には始めない (false)。
     // target: 狙う物 (岩鯨・心臓など。見つからなくても faceToward の位置を見る)、faceToward: 場面の「前」の向きにする点 (null なら本人の向き)
     public static boolean start(ServerPlayer player, String sceneId, @Nullable Entity target, @Nullable Vec3 faceToward) {
+        return startAt(player, sceneId, target, faceToward, null);
+    }
+
+    // 場面の原点 (カメラの座標の足もと) を決めて始める。皆が散らばっていても同じ絵になる (あいだの塔の越えた場面)。
+    // 本人はその場に留まる (留める所は本人の足もと)。frame が null なら本人の足もと
+    public static boolean startAt(ServerPlayer player, String sceneId, @Nullable Entity target, @Nullable Vec3 faceToward, @Nullable Vec3 frame) {
         Scene scene = Scenes.get(sceneId);
         if (scene == null || ACTIVE.containsKey(player.getUUID()) || !player.isAlive() || player.isSpectator()) {
             return false;
         }
-        Vec3 origin = player.position();
+        Vec3 origin = frame != null ? frame : player.position();
         Vec3 aim = target != null ? target.position() : faceToward;
         float yaw = aim != null && aim.subtract(origin).horizontalDistanceSqr() > 1.0 ? CameraMath.yawOf(aim.subtract(origin)) : player.getYRot();
         Vec3 fallback = aim != null ? aim : origin.add(0, 0, 1);
         long now = player.serverLevel().getGameTime();
-        ACTIVE.put(player.getUUID(), new Active(scene, now, origin, yaw));
+        ACTIVE.put(player.getUUID(), new Active(scene, now, player.position(), yaw));
         state(player).markSeen(sceneId);
         player.setDeltaMovement(Vec3.ZERO);
         player.hurtMarked = true;

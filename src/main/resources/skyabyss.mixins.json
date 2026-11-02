@@ -9,7 +9,8 @@
     "FallingBlockMixin",
     "RecipeManagerMixin",
     "AdvancementManagerMixin",
-    "ItemNameMixin"
+    "ItemNameMixin",
+    "AttributeShownMixin"
   ],
   "client": [
     "GuiGraphicsMixin",
@@ -21,7 +22,8 @@
     "ContainerLabelMixin",
     "MountRiderLegsMixin",
     "StringSplitterMixin",
-    "BossHealthOverlayAccessor"
+    "BossHealthOverlayAccessor",
+    "AbstractWidgetAuditMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -102,6 +102,7 @@ public final class SkillBuild {
             v += SkillRules.MASTERY_RUNE_POWER;
         }
         v += NodeEffects.sum(player, "skill_power");
+        v += NodeEffects.sum(player, "power@" + skill.id);
         for (SkillModifier m : MODIFIERS) {
             v += m.power(player, skill);
         }
@@ -135,6 +136,7 @@ public final class SkillBuild {
             v += m.cooldown(player, skill);
         }
         v += NodeEffects.sum(player, "cooldown");
+        v += NodeEffects.sum(player, "cooldown@" + skill.id);
         return 1 + Math.max(SkillRules.COOLDOWN_MIN, Math.min(SkillRules.COOLDOWN_MAX, v));
     }
 
@@ -145,6 +147,7 @@ public final class SkillBuild {
             v += m.manaCost(player, skill);
         }
         v += NodeEffects.sum(player, "mana_cost");
+        v += NodeEffects.sum(player, "mana_cost@" + skill.id);
         return 1 + Math.max(-SkillRules.MANA_COST_CAP, Math.min(SkillRules.MANA_COST_CAP, v));
     }
 

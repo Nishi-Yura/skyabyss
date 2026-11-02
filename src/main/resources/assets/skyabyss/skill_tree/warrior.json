@@ -81,6 +81,19 @@
     {"id": "wind_dance", "kind": "trait", "keystone": "wind_dance", "cost": 3, "x": 7, "y": 10, "arch": "tail", "arch_points": 20, "requires": ["agi_e", "double_sweep", "circle_guard"]},
     {"id": "tail_return", "kind": "effect", "cost": 2, "x": 6, "y": 11, "arch": "tail", "arch_points": 22, "requires": ["wind_dance"], "effect": {"attack": 0.05, "cooldown": -0.05}},
     {"id": "str_n", "kind": "stat", "stat": "strength", "amount": 4, "cost": 1, "x": 7, "y": 11, "arch": "tail", "requires": ["tail_return"]},
-    {"id": "blade_storm", "kind": "threshold", "stat": "agility", "at": 20, "cost": 1, "x": 8, "y": 11, "arch": "tail", "requires": ["wind_dance"], "effect": {"attack_speed": 0.1}}
+    {"id": "blade_storm", "kind": "threshold", "stat": "agility", "at": 20, "cost": 1, "x": 8, "y": 11, "arch": "tail", "requires": ["wind_dance"], "effect": {"attack_speed": 0.1}},
+    {"id": "cheap_titan_cleave", "kind": "effect", "cost": 1, "x": 2, "y": 1, "requires": ["str_a"], "effect": {"mana_cost@titan_cleave": -0.25}},
+    {"id": "quick_titan_cleave", "kind": "effect", "cost": 1, "x": 6, "y": 1, "requires": ["vit_a"], "effect": {"cooldown@titan_cleave": -0.2}},
+    {"id": "cheap_shield_rush", "kind": "effect", "cost": 1, "x": 3, "y": 3, "requires": ["shield_rush"], "effect": {"mana_cost@shield_rush": -0.25}},
+    {"id": "quick_shield_rush", "kind": "effect", "cost": 1, "x": 5, "y": 3, "requires": ["shield_rush"], "effect": {"cooldown@shield_rush": -0.2}},
+    {"id": "cheap_whale_sweep", "kind": "effect", "cost": 1, "x": 6, "y": 12, "arch": "tail", "requires": ["tail_return", "str_n", "blade_storm"], "effect": {"mana_cost@whale_sweep": -0.25}},
+    {"id": "tail_mana_hit", "kind": "effect", "cost": 2, "x": 7, "y": 12, "arch": "tail", "requires": ["tail_return", "str_n", "blade_storm"], "effect": {"mana_hit": 1.0}},
+    {"id": "quick_spin_cut", "kind": "effect", "cost": 1, "x": 8, "y": 12, "arch": "tail", "requires": ["tail_return", "str_n", "blade_storm"], "effect": {"cooldown@spin_cut": -0.2}},
+    {"id": "cheap_rock_call", "kind": "effect", "cost": 1, "x": 0, "y": 12, "arch": "shield", "requires": ["fortress", "heavy_shield", "str_j", "str_i"], "effect": {"mana_cost@rock_call": -0.25}},
+    {"id": "shield_mana_hit", "kind": "effect", "cost": 2, "x": 1, "y": 12, "arch": "shield", "requires": ["fortress", "heavy_shield", "str_j", "str_i"], "effect": {"mana_hit": 1.0}},
+    {"id": "quick_shield_bash", "kind": "effect", "cost": 1, "x": 2, "y": 12, "arch": "shield", "requires": ["fortress", "heavy_shield", "str_j", "str_i"], "effect": {"cooldown@shield_bash": -0.2}},
+    {"id": "cheap_bone_swing", "kind": "effect", "cost": 1, "x": 3, "y": 12, "arch": "cleaver", "requires": ["str_l"], "effect": {"mana_cost@bone_swing": -0.25}},
+    {"id": "cleaver_mana_hit", "kind": "effect", "cost": 2, "x": 4, "y": 12, "arch": "cleaver", "requires": ["str_l"], "effect": {"mana_hit": 1.0}},
+    {"id": "quick_bone_swing", "kind": "effect", "cost": 1, "x": 5, "y": 12, "arch": "cleaver", "requires": ["str_l"], "effect": {"cooldown@bone_swing": -0.2}}
   ]
 }

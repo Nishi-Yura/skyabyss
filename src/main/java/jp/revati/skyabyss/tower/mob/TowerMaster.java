@@ -12,22 +12,23 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// あいだに座すもの (超大型レイド「あいだの塔」の主。docs/design/54 の 2.5。一品一案 tools/rough/lowpoly/cloud/tower_master.py)。
+// あいだに座すもの (超大型レイド「あいだの塔」の主。docs/design/54 の 2.5。形は 2026-11-02 の案 C「門を背負う者」tools/rough/lowpoly/cloud/tower_master_c.py)。
 //   動かない。原点は北の広場の床の、玉座寄り (主の当たりの箱の底の真ん中)。正面は南 (橋の方)
 //   当たり   幅 28・高さ 32 の箱。北の広場の手の置き場から玉座までを覆い、広場からどの職でも打てる
 //   技と段   tower/TowerFight が動かす (この体は動作を見せ、傷を受けるだけ)
 //   floor    体力がこの値より下がらない (落ちる月の段の手前で止める)。shielded のあいだは傷が通らない (月が生きているあいだ・目覚め)
-//   形は 5 倍で描く (CloudMobRenderers)。天の手 (金・右手) は東 (x が正。橋から見て右)、淵の手 (黒い石・左手) は西
+//   形は 5 倍で描く (CloudMobRenderers)。天の手 (金・右手) は東 (x が正。橋から見て右)、淵の手 (黒い石・左手) は西。背に「あいだの門」(上 36・後ろ 30 ブロック、半径 28)
 public class TowerMaster extends CloudMob {
     public static final String ID = "tower_master";
     public static final double HP = 6000;
     public static final double DMG = 26;
-    public static final int DEATH_TICKS = 120;
+    // 倒れてから消えるまで (越えた場面で門が閉じる 8 秒。TowerFight.win)
+    public static final int DEATH_TICKS = 160;
     private float floor;
     private boolean shielded;
 
     public TowerMaster(EntityType<? extends Monster> type, Level level) {
-        super(type, level, ID, "rake", "flense", "clap", "breath", "sigil", "stars", "arrows", "roar", "moon", "hurt", "death");
+        super(type, level, ID, "rake", "flense", "clap", "breath", "sigil", "beams", "stars", "arrows", "roar", "stoke", "palm", "moon", "bow", "hurt", "death");
         this.xpReward = 0;
         setNoGravity(true);
         setPersistenceRequired();
@@ -59,13 +60,23 @@ public class TowerMaster extends CloudMob {
         shielded = on;
     }
 
-    // 顔 (角のあいだの印) と胸の核の所 (光の出る所)
+    // 光の出る所 (ラフの座標 (x, y, z) は 位置 + ((y + 144) / 16, -(z + 192) / 16) ブロック)
+    //   head  角のあいだの印 (追う印の光・高まりの光)   mouth  縦に裂ける口 (淵の吐息)
+    //   chest 金の肋の奥の核                             crown  角の上に開く印 (引き合いの高まり)
     public Vec3 head() {
-        return position().add(0, 34.6, -10.8);
+        return position().add(0, 42.75, -7.6);
+    }
+
+    public Vec3 mouth() {
+        return position().add(0, 33.1, -4.5);
     }
 
     public Vec3 chest() {
-        return position().add(0, 28.4, -5.1);
+        return position().add(0, 24.6, -2.6);
+    }
+
+    public Vec3 crown() {
+        return position().add(0, 49.0, -9.5);
     }
 
     @Override
@@ -108,10 +119,10 @@ public class TowerMaster extends CloudMob {
         }
     }
 
-    // 体が大きいので、箱が画面の外でも形が見えていれば描く
+    // 体が大きいので、箱が画面の外でも形が見えていれば描く (背の門の上の端は床から 64、後ろの端は 32)
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(14, 24, 14);
+        return getBoundingBox().inflate(16, 34, 22);
     }
 
     @Override

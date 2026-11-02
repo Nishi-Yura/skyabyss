@@ -204,7 +204,7 @@ public final class Downed {
         Notice.bar(player, ModText.deny("message.skyabyss.revive.down_self", DOWN_TICKS / 20));
         Component name = player.getName();
         for (ServerPlayer mate : rescuers(player)) {
-            Notice.alert(mate, "message.skyabyss.revive.down_mate", name);
+            Notice.alert(mate, "message.skyabyss.revive.down_mate", name, Component.keybind("key.use"));
         }
     }
 

@@ -26,7 +26,7 @@
     {"id": "big_hammer", "kind": "effect", "cost": 2, "x": 1, "y": 8, "arch": "ember", "requires": ["str_f"], "effect": {"big_target": 0.1}},
     {"id": "cinder", "kind": "effect", "cost": 2, "x": 2, "y": 8, "arch": "ember", "requires": ["spi_c"], "effect": {"skill_power": 0.05}},
     {"id": "hammer_meteor", "kind": "mutation", "cost": 2, "x": 0, "y": 9, "arch": "ember", "requires": ["str_g"], "mutation": "hammer_meteor"},
-    {"id": "ash_pact", "kind": "trait", "cost": 3, "x": 1, "y": 9, "arch": "ember", "requires": ["str_g", "big_hammer", "cinder"], "keystone": "ash_pact", "arch_points": 20},
+    {"id": "ash_pact", "kind": "trait", "cost": 3, "x": 1, "y": 9, "arch": "ember", "requires": ["str_g", "big_hammer", "cinder"], "keystone": "ash_pact", "arch_points": 10},
     {"id": "mountain_arm", "kind": "threshold", "cost": 1, "x": 0, "y": 10, "arch": "ember", "requires": ["ash_pact"], "stat": "strength", "at": 40, "effect": {"attack": 0.06, "big_target": 0.06}},
     {"id": "slow_burn", "kind": "effect", "cost": 2, "x": 2, "y": 10, "arch": "ember", "requires": ["ash_pact"], "effect": {"regen": 0.08}},
     {"id": "temper_2", "kind": "rank", "cost": 1, "x": 3, "y": 4, "arch": "temper", "requires": ["str_c"], "skill": "temper"},
@@ -68,6 +68,19 @@
     {"id": "spark_burst_2", "kind": "rank", "cost": 1, "x": 8, "y": 9, "arch": "ash", "requires": ["spi_j"], "skill": "spark_burst"},
     {"id": "ember_lung", "kind": "effect", "cost": 2, "x": 7, "y": 9, "arch": "ash", "requires": ["spi_h", "spi_i", "spi_j"], "effect": {"regen": 0.1, "skill_power": 0.04}, "arch_points": 20},
     {"id": "white_ash", "kind": "threshold", "cost": 1, "x": 6, "y": 10, "arch": "ash", "requires": ["ember_lung"], "stat": "spirit", "at": 36, "effect": {"skill_power": 0.06, "cooldown": -0.04}},
-    {"id": "ash_heart", "kind": "effect", "cost": 2, "x": 8, "y": 10, "arch": "ash", "requires": ["ember_lung"], "effect": {"low_hp_armor": 4, "fire_resist": 0.1}}
+    {"id": "ash_heart", "kind": "effect", "cost": 2, "x": 8, "y": 10, "arch": "ash", "requires": ["ember_lung"], "effect": {"low_hp_armor": 4, "fire_resist": 0.1}},
+    {"id": "cheap_temper", "kind": "effect", "cost": 1, "x": 2, "y": 1, "requires": ["str_a"], "effect": {"mana_cost@temper": -0.25}},
+    {"id": "quick_temper", "kind": "effect", "cost": 1, "x": 6, "y": 1, "requires": ["spi_a"], "effect": {"cooldown@temper": -0.2}},
+    {"id": "cheap_ember_hammer", "kind": "effect", "cost": 1, "x": 3, "y": 3, "requires": ["ember_hammer"], "effect": {"mana_cost@ember_hammer": -0.25}},
+    {"id": "quick_ember_hammer", "kind": "effect", "cost": 1, "x": 5, "y": 3, "requires": ["ember_hammer"], "effect": {"cooldown@ember_hammer": -0.2}},
+    {"id": "ember_ember_hammer_keen", "kind": "effect", "cost": 1, "x": 0, "y": 11, "arch": "ember", "requires": ["mountain_arm", "slow_burn"], "effect": {"power@ember_hammer": 0.12}},
+    {"id": "ember_mana_hit", "kind": "effect", "cost": 2, "x": 1, "y": 11, "arch": "ember", "requires": ["mountain_arm", "slow_burn"], "effect": {"mana_hit": 1.0}},
+    {"id": "ember_temper_keen", "kind": "effect", "cost": 1, "x": 2, "y": 11, "arch": "ember", "requires": ["mountain_arm", "slow_burn"], "effect": {"power@temper": 0.12}},
+    {"id": "cheap_forge_stomp", "kind": "effect", "cost": 1, "x": 3, "y": 11, "arch": "temper", "requires": ["master_eye", "steel_body"], "effect": {"mana_cost@forge_stomp": -0.25}},
+    {"id": "temper_mana_hit", "kind": "effect", "cost": 2, "x": 4, "y": 11, "arch": "temper", "requires": ["master_eye", "steel_body"], "effect": {"mana_hit": 1.0}},
+    {"id": "quick_forge_stomp", "kind": "effect", "cost": 1, "x": 5, "y": 11, "arch": "temper", "requires": ["master_eye", "steel_body"], "effect": {"cooldown@forge_stomp": -0.2}},
+    {"id": "cheap_ash_scatter", "kind": "effect", "cost": 1, "x": 6, "y": 11, "arch": "ash", "requires": ["white_ash", "ash_heart"], "effect": {"mana_cost@ash_scatter": -0.25}},
+    {"id": "ash_mana_hit", "kind": "effect", "cost": 2, "x": 7, "y": 11, "arch": "ash", "requires": ["white_ash", "ash_heart"], "effect": {"mana_hit": 1.0}},
+    {"id": "quick_spark_burst", "kind": "effect", "cost": 1, "x": 8, "y": 11, "arch": "ash", "requires": ["white_ash", "ash_heart"], "effect": {"cooldown@spark_burst": -0.2}}
   ]
 }

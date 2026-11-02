@@ -82,6 +82,13 @@ public final class SkillManager {
         }
     }
 
+    // マナを足す (武器のマナ吸収など。上限まで)
+    public static void gainMana(ServerPlayer player, double amount) {
+        if (amount > 0) {
+            setMana(player, get(player).mana + amount);
+        }
+    }
+
     public static void setMana(ServerPlayer player, double value) {
         SkillData d = get(player);
         d.mana = (float) Math.max(0, Math.min(value, maxMana(player)));
@@ -121,7 +128,7 @@ public final class SkillManager {
                 scale += SkillRules.starReadingRegen(reading);
             }
             // 野の装備のマナの戻り (docs/design/51)
-            scale += jp.revati.skyabyss.item.wild.WildGearEvents.manaRegenBonus(player);
+            scale += jp.revati.skyabyss.item.wild.WildGearEvents.manaRegenBonus(player) + jp.revati.skyabyss.item.affix.AffixEvents.manaRegen(player);
             d.mana = (float) Math.min(max, d.mana + SkillRules.regenPerSecond(max, calm) * scale / SkillRules.SECOND);
         }
     }

@@ -1,0 +1,44 @@
+# あいだに座すものの右手の合図 (星屑の雨: ほかの指を握って人さし指を立てる) を近くで見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_master_hand.txt -PshotsName=tower_master_hand
+world shots flat
+size 1280 720
+timeout 900
+render 12
+cmd gamemode creative
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss tower start
+wait 60
+cmd gamemode spectator
+camera skyabyss:tower 13 186 -36 180 -8
+waitchunks 300
+cmd skyabyss tower act hold
+wait 460
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss tower act pose_stars
+wait 26
+shot h01_south
+wait 40
+camera skyabyss:tower 32 188 -58 90 2
+wait 10
+cmd skyabyss tower act pose_stars
+wait 26
+shot h02_east
+wait 40
+camera skyabyss:tower 13 205 -44 180 40
+wait 10
+cmd skyabyss tower act pose_stars
+wait 26
+shot h03_west
+wait 40
+camera skyabyss:tower 24 170 -34 150 -40
+wait 10
+cmd skyabyss tower act pose_stars
+wait 26
+shot h04_below

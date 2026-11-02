@@ -131,20 +131,34 @@ public final class DamageNumbersClient {
                 continue;
             }
             float t = (n.age + partial) / LIFE;
-            // 出た瞬間に少し大きく、すぐ落ち着く。遠くても読めるよう、距離で少し大きく
-            float pop = n.age < 3 ? 1.35f - 0.12f * (n.age + partial) : 1f;
-            float size = (n.kind == DamageNumbers.KILL ? 1.35f : n.kind == DamageNumbers.SKILL ? 1.15f : 1f) * pop
+            // 中の傷の 10 倍 (Hp.SHOWN) を整数で。1 に満たない傷も「1」と出す
+            int shown = Math.max(1, jp.revati.skyabyss.Hp.whole(n.amount));
+            // 出た瞬間に大きく弾んで、すぐ落ち着く (2026-11-02 の声「攻撃力の迫力がない」)。大きい傷ほど大きく (35 で 1 倍、300 で 1.25 倍、1000 で 1.4 倍)。
+            // 遠くても読めるよう、距離で少し大きく
+            float age = n.age + partial;
+            float pop = age < 4 ? 1.7f - 0.175f * age : 1f;
+            float big = Mth.clamp(0.66f + 0.215f * (float) Math.log10(shown), 0.85f, 1.6f);
+            float size = (n.kind == DamageNumbers.KILL ? 1.35f : n.kind == DamageNumbers.SKILL ? 1.15f : 1f) * pop * big
                     * (float) Mth.clamp(0.8 + dist * 0.035, 0.8, 2.2) * 0.05f;
             int alpha = (int) (255 * Mth.clamp(t < 0.75f ? 1f : (1f - t) / 0.25f, 0f, 1f));
             if (alpha < 8) {
                 continue;
             }
+            // 出た瞬間は白く光り、2 tick で種類の色 (ふつう 白、技 金、とどめ 赤みの金) へ
             int rgb = n.kind == DamageNumbers.KILL ? 0xFFB347 : n.kind == DamageNumbers.SKILL ? 0xFFD966 : 0xFFFFFF;
-            String text = n.amount >= 10 ? Integer.toString(Math.round(n.amount)) : jp.revati.skyabyss.Hp.number(Math.round(n.amount * 10) / 10.0);
+            if (age < 2) {
+                rgb = mix(0xFFFFFF, rgb, age / 2f);
+            }
+            String text = Integer.toString(shown);
             FormattedCharSequence seq = Component.literal(text).withStyle(net.minecraft.ChatFormatting.BOLD).getVisualOrderText();
             ps.pushPose();
             ps.translate(at.x - cam.x, at.y - cam.y, at.z - cam.z);
             ps.mulPose(camera.rotation());
+            // 出た 3 tick は小さく震える (とどめは強く)
+            if (age < 3) {
+                float shake = (n.kind == DamageNumbers.KILL ? 0.05f : 0.025f) * (3 - age);
+                ps.translate((float) Math.sin(age * 9.1f + n.entity) * shake, (float) Math.cos(age * 7.3f + n.entity) * shake, 0);
+            }
             ps.scale(size, -size, size);
             Matrix4f m = ps.last().pose();
             float x = -font.width(seq) / 2f;
@@ -152,5 +166,13 @@ public final class DamageNumbersClient {
             ps.popPose();
         }
         buffers.endBatch();
+    }
+
+    private static int mix(int a, int b, float k) {
+        k = Mth.clamp(k, 0f, 1f);
+        int r = (int) Mth.lerp(k, a >> 16 & 255, b >> 16 & 255);
+        int g = (int) Mth.lerp(k, a >> 8 & 255, b >> 8 & 255);
+        int bl = (int) Mth.lerp(k, a & 255, b & 255);
+        return r << 16 | g << 8 | bl;
     }
 }

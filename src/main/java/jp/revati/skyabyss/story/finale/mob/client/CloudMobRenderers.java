@@ -74,5 +74,15 @@ public final class CloudMobRenderers {
             super(ctx, new CloudMobRenderers.Model<>(name), e -> name, scale);
             this.shadowRadius = shadow;
         }
+
+        // あいだに座すものは倒れてから 8 秒かけて背の門へ引き戻される (越えた場面)。そのあいだ体と門を赤く染めない
+        @Override
+        public int getPackedOverlay(T mob, float u, float partialTick) {
+            if (mob instanceof jp.revati.skyabyss.tower.mob.TowerMaster) {
+                return net.minecraft.client.renderer.texture.OverlayTexture.pack(net.minecraft.client.renderer.texture.OverlayTexture.u(u),
+                        net.minecraft.client.renderer.texture.OverlayTexture.v(mob.hurtTime > 0 && mob.deathTime == 0));
+            }
+            return super.getPackedOverlay(mob, u, partialTick);
+        }
     }
 }

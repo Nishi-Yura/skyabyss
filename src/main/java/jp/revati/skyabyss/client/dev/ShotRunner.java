@@ -912,6 +912,18 @@ public final class ShotRunner {
                 mc.setScreen(null);
                 return true;
             }
+            case "overlap" -> {
+                // overlap <名前> : 今の画面の文字と部品の重なりを調べ、撮影のフォルダの overlap.txt に書く (client/dev/OverlapAudit)
+                if (first) {
+                    OverlapAudit.arm(line.arg(0), out.resolve("overlap.txt"));
+                }
+                return OverlapAudit.done() || mc.screen == null;
+            }
+            case "window" -> {
+                // window <幅> <高さ> : 窓の大きさを変える (GUI の倍率ごとの重なりの検査)
+                GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), line.intArg(0), line.intArg(1));
+                return true;
+            }
             case "respawn" -> {
                 // respawn : 死んだ画面なら起き上がる (前の回で倒れたまま入った人)。生きていれば何もしない
                 if (mc.player != null && !mc.player.isAlive()) {
@@ -1143,6 +1155,7 @@ public final class ShotRunner {
             case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
             case "chat" -> () -> new net.minecraft.client.gui.screens.ChatScreen("");
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
+            case "tower_desk" -> jp.revati.skyabyss.tower.client.TowerDeskScreen::sample;
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
             case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);

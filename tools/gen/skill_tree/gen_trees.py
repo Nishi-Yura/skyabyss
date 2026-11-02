@@ -121,16 +121,164 @@ class Tree:
                 # 上げる節が足りない型 (常に効く数の少ない枝) は、門のほうを下げる (16 まで)
                 g["arch_points"] = max(16, pre - 2)
                 print("  gate lowered:", self.job, g["id"], "->", g["arch_points"])
+            # 本当に取れる点で見直す (2026-11-02 の声「点 20 いるやつとか、選べない」): 同じ技の刻印は一つだけ・排他・使う技 3 本 (幹の根で 1 本) の
+            # 決まりの中で、門の手前で取れる型の点の最大。枝の根が同じ技の刻印三つの型は、枝を一本しか進めないので 20 に届かなかった
+            best = self.reachable(g["arch"], {g["id"]} | desc)
+            if best < g["arch_points"] + 2:
+                g["arch_points"] = max(10, best - 2)
+                print("  gate fitted:", self.job, g["id"], "->", g["arch_points"], "(reachable", best, ")")
+
+    def reachable(self, arch, skip):
+        """型 arch の節 (skip と変異を除く) で取れる点の最大。前提 (どれか一つ。幹の節は取れるものとする)・排他・同じ技の刻印は一つ・使う技 3 本まで"""
+        by = {n["id"]: n for n in self.nodes}
+        pool = [n for n in self.nodes if n.get("arch") == arch and n["id"] not in skip and n["kind"] != "mutation"]
+        order = []
+        seen = set()
+
+        def visit(nd):
+            if nd["id"] in seen:
+                return
+            seen.add(nd["id"])
+            for r in nd.get("requires", []):
+                if r in by and by[r] in pool:
+                    visit(by[r])
+            order.append(nd)
+
+        for nd in sorted(pool, key=lambda n: (n["y"], n["x"])):
+            visit(nd)
+        ids = {n["id"] for n in pool}
+        best = [0]
+
+        def rec(i, sel, pts, acts, runes):
+            rest = sum(n["cost"] for n in order[i:])
+            if pts + rest <= best[0]:
+                return
+            if i == len(order):
+                best[0] = max(best[0], pts)
+                return
+            nd = order[i]
+            reqs = nd.get("requires", [])
+            ok = not reqs or any(r in sel or (r not in ids and by[r].get("arch") is None) for r in reqs)
+            ok = ok and not any(e in sel for e in nd.get("excludes", [])) and not any(nd["id"] in by[x].get("excludes", []) for x in sel)
+            ok = ok and not (nd["kind"] == "rune" and nd.get("skill") in runes) and not (nd["kind"] == "active" and acts >= 3)
+            if ok:
+                sel.add(nd["id"])
+                rec(i + 1, sel, pts + nd["cost"], acts + (nd["kind"] == "active"),
+                    runes | ({nd.get("skill")} if nd["kind"] == "rune" else set()))
+                sel.discard(nd["id"])
+            rec(i + 1, sel, pts, acts, runes)
+
+        rec(0, set(), 0, 0, frozenset())
+        return best[0]
 
     def write(self):
         self.check()
         self.balance()
+        wynn_nodes(self.job, self.nodes, self.names, max(n["y"] for n in self.nodes) + 1)
+        self.check()
         OUT.mkdir(parents=True, exist_ok=True)
         lines = ['{', '  "archetypes": %s,' % json.dumps(self.archetypes), '  "nodes": [']
         for i, nd in enumerate(self.nodes):
             lines.append("    " + json.dumps(nd, ensure_ascii=False) + ("," if i < len(self.nodes) - 1 else ""))
         lines += ["  ]", "}", ""]
         io.open(OUT / (self.job + ".json"), "w", encoding="utf-8", newline="\n").write("\n".join(lines))
+
+
+# ---------------------------------------------------------------- 技ごとの節 (2026-11-02 の声「スキルツリーとかももっと Wynncraft に寄せたい。クールダウン減少等々」)
+# Wynncraft の木の「Cheaper Bash」(その技のマナ −)・技の待ちの短縮・倒して/殴ってマナのような節を、どの職の木にも同じ決まりで足す。
+#   幹: 根の技の軽減 (2,1)・早さ (6,1)、幹の二つ目の技の軽減 (3,3)・早さ (5,3)
+#   型: 型の一番下の行の下 (row) に、型の技の軽減・マナの節・型の技の早さ (型の三列)
+CHEAP = -0.25     # その技のマナ −25%
+QUICK = -0.20     # その技の待ち −20%
+MELEE = {"warrior", "assassin", "smith"}
+MANA_HIT = 1.0    # 近接で当てるたび (0.6 秒に一度) マナ +1
+MANA_KILL = 2.0   # 敵を倒すとマナ +2
+
+
+def skill_names():
+    txt = {}
+    for lang in ("ja_jp", "en_us"):
+        d = json.loads(io.open(LANG / (lang + ".json"), encoding="utf-8").read())
+        txt[lang] = {k[len("skill.skyabyss."):]: v for k, v in d.items() if k.startswith("skill.skyabyss.") and k.count(".") == 2}
+    return txt
+
+
+def wynn_nodes(job, nodes, names, row):
+    """技ごとの軽減・早さとマナの節を nodes に足し、names (id -> (ja, en, ja_e, en_e)) に文を足す。足した節の一覧を返す"""
+    sn = skill_names()
+    ja, en = sn["ja_jp"], sn["en_us"]
+    by = {n["id"]: n for n in nodes}
+    cells = {(n["x"], n["y"]) for n in nodes}
+    actives = [n["skill"] for n in nodes if n["kind"] == "active"]
+    root = next(n for n in nodes if (n["x"], n["y"]) == (4, 0))["skill"]
+    trunk2 = next((n["skill"] for n in nodes if (n["x"], n["y"]) == (4, 2) and n["kind"] == "active"), None)
+    added = []
+
+    def put(id, x, y, effect, nja, nen, eja, een, req, arch=None, cost=1):
+        assert (x, y) not in cells, (job, id, x, y)
+        assert id not in by, (job, id)
+        node = {"id": id, "kind": "effect", "cost": cost, "x": x, "y": y}
+        if arch:
+            node["arch"] = arch
+        node["requires"] = req
+        node["effect"] = effect
+        nodes.append(node)
+        by[id] = node
+        cells.add((x, y))
+        names[id] = (nja, nen, eja, een)
+        added.append(node)
+
+    def cheap(skill, x, y, req, arch=None):
+        put("cheap_" + skill, x, y, {"mana_cost@" + skill: CHEAP}, "%sの軽減" % ja[skill], "Cheaper %s" % en[skill],
+            "%s のマナ −%d%%" % (ja[skill], -CHEAP * 100), "%s mana cost −%d%%" % (en[skill], -CHEAP * 100), req, arch)
+
+    def quick(skill, x, y, req, arch=None):
+        put("quick_" + skill, x, y, {"cooldown@" + skill: QUICK}, "%sの早さ" % ja[skill], "Faster %s" % en[skill],
+            "%s の再使用までの時間 −%d%%" % (ja[skill], -QUICK * 100), "%s cooldown −%d%%" % (en[skill], -QUICK * 100), req, arch)
+
+    def keen(id, skill, x, y, req, arch):
+        put(id, x, y, {"power@" + skill: 0.12}, "%sの冴え" % ja[skill], "Keener %s" % en[skill],
+            "%s の力 +12%%" % ja[skill], "%s power +12%%" % en[skill], req, arch)
+
+    at = {(n["x"], n["y"]): n["id"] for n in nodes}
+    cheap(root, 2, 1, [at[(3, 1)]])
+    quick(root, 6, 1, [at[(5, 1)]])
+    if trunk2:
+        cheap(trunk2, 3, 3, [at[(4, 2)]])
+        quick(trunk2, 5, 3, [at[(4, 2)]])
+    archs = []
+    for n in nodes:
+        if n.get("arch") and n["arch"] not in archs:
+            archs.append(n["arch"])
+    for a in archs:
+        own = [n for n in nodes if n.get("arch") == a and n not in added]
+        g0 = 3 * (round(sum(n["x"] for n in own) / len(own)) // 3)
+        # 型の技: 型だけの使う技 → 型が段や刻印で伸ばす幹の技 → 幹の技
+        ref = [n.get("skill") for n in own if n.get("skill") in actives]
+        sk = []
+        for s_ in [s_ for s_ in ref if s_ not in (root, trunk2)] + [s_ for s_ in ref if s_ in (root, trunk2)] + [trunk2, root]:
+            if s_ and s_ not in sk:
+                sk.append(s_)
+        last = max(n["y"] for n in own)
+        req = [n["id"] for n in own if n["y"] == last and n["kind"] != "mutation"] or [n["id"] for n in own if n["y"] == last]
+        s1, s2 = sk[0], sk[1]
+        if ("cheap_" + s1) in by:
+            keen("%s_%s_keen" % (a, s1), s1, g0, row, req, a)
+        else:
+            cheap(s1, g0, row, req, a)
+        if job in MELEE:
+            put("%s_mana_hit" % a, g0 + 1, row, {"mana_hit": MANA_HIT}, "打ち手の泉", "Striker's Well",
+                "近接で当てるたびにマナ +%g（0.6 秒に一度）" % MANA_HIT, "Melee hits restore %g mana (once per 0.6 s)" % MANA_HIT, req, a, cost=2)
+        else:
+            put("%s_mana_kill" % a, g0 + 1, row, {"mana_kill": MANA_KILL}, "仕留めの泉", "Hunter's Well",
+                "敵を倒すとマナ +%g" % MANA_KILL, "Defeating an enemy restores %g mana" % MANA_KILL, req, a, cost=2)
+        if ("quick_" + s2) not in by:
+            quick(s2, g0 + 2, row, req, a)
+        elif ("quick_" + s1) not in by:
+            quick(s1, g0 + 2, row, req, a)
+        else:
+            keen("%s_%s_keen" % (a, s2), s2, g0 + 2, row, req, a)
+    return added
 
 
 ARCH_NAMES = {
@@ -495,6 +643,24 @@ def main():
             en["node.skyabyss.%s.%s.effect" % (t.job, id)] = e_en
         total = sum(n["cost"] for n in t.nodes)
         print(t.job, len(t.nodes), "nodes", total, "points")
+    # 戦士の木 (手で書いた warrior.json) にも同じ技ごとの節を足す (二度足さない)
+    wpath = OUT / "warrior.json"
+    wd = json.loads(io.open(wpath, encoding="utf-8").read())
+    if not any(n["id"].startswith("cheap_") for n in wd["nodes"]):
+        assert set(wd) == {"archetypes", "nodes"}, list(wd)
+        wnames = {}
+        wynn_nodes("warrior", wd["nodes"], wnames, max(n["y"] for n in wd["nodes"]) + 1)
+        lines = ['{', '  "archetypes": %s,' % json.dumps(wd["archetypes"]), '  "nodes": [']
+        for i, nd in enumerate(wd["nodes"]):
+            lines.append("    " + json.dumps(nd, ensure_ascii=False) + ("," if i < len(wd["nodes"]) - 1 else ""))
+        lines += ["  ]", "}", ""]
+        io.open(wpath, "w", encoding="utf-8", newline="\n").write("\n".join(lines))
+        for id, (n_ja, n_en, e_ja, e_en) in wnames.items():
+            ja["node.skyabyss.warrior.%s" % id] = n_ja
+            ja["node.skyabyss.warrior.%s.effect" % id] = e_ja
+            en["node.skyabyss.warrior.%s" % id] = n_en
+            en["node.skyabyss.warrior.%s.effect" % id] = e_en
+        print("warrior", len(wnames), "wynn nodes added")
     put_lang(LANG / "ja_jp.json", ja)
     put_lang(LANG / "en_us.json", en)
 

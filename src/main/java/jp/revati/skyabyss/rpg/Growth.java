@@ -28,6 +28,7 @@ public final class Growth {
     public static final ResourceLocation MOD_AGILITY_ATTACK = id("growth/agility_attack_speed");
     public static final ResourceLocation MOD_SPIRIT = id("growth/spirit_mana");
     public static final ResourceLocation MOD_VITALITY = id("growth/vitality_health");
+    public static final ResourceLocation MOD_LEVEL = id("growth/level_health");
 
     private Growth() {
     }
@@ -191,6 +192,7 @@ public final class Growth {
         set(player, Attributes.ATTACK_SPEED, MOD_AGILITY_ATTACK, GrowthRules.attackSpeedMultiplier(data.stat(Stat.AGILITY)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         set(player, Rpg.MAX_MANA, MOD_SPIRIT, GrowthRules.bonusMana(data.stat(Stat.SPIRIT)), AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.MAX_HEALTH, MOD_VITALITY, GrowthRules.bonusHealth(data.stat(Stat.VITALITY)), AttributeModifier.Operation.ADD_VALUE);
+        set(player, Attributes.MAX_HEALTH, MOD_LEVEL, GrowthRules.levelHealth(data.level), AttributeModifier.Operation.ADD_VALUE);
         // 転生の魂盤・恩恵の修飾子 (docs/design/31)
         jp.revati.skyabyss.rebirth.Rebirth.applyModifiers(player);
         // 最大体力が増えた分は、そのぶん満たしておく (振った直後にハートが空のままにならないように)

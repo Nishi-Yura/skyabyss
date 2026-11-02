@@ -590,7 +590,11 @@ public class TravelMapScreen extends Screen {
         int mx = (rx0 + rx1) / 2;
         int my = (ry0 + ry1) / 2;
         g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), mx, ry0 - 11, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), mx, ry1 + 3, lc);
+        // 南は地図の下の縁の内側に、暗い札を敷いて (外に置くと下の操作の説明の行に重なった。2026-11-02 の重なりの検査)
+        Component s = Component.translatable("gui.skyabyss.travel.dir.s");
+        int sw = font.width(s);
+        g.fill(mx - sw / 2 - 2, ry1 - 12, mx + sw - sw / 2 + 2, ry1 - 1, 0xB0101418);
+        drawCentered(g, s, mx, ry1 - 10, lc);
         drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), rx0 - 7, my - 4, lc);
         drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), rx1 + 7, my - 4, lc);
     }

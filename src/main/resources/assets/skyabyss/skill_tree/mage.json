@@ -63,6 +63,19 @@
     {"id": "agi_f", "kind": "stat", "cost": 1, "x": 8, "y": 8, "arch": "tide", "requires": ["far_step"], "stat": "agility", "amount": 4},
     {"id": "tide_walker", "kind": "effect", "cost": 2, "x": 7, "y": 9, "arch": "tide", "requires": ["light_robe", "agi_e", "agi_f"], "effect": {"move": 0.05, "mana": 0.08}, "arch_points": 19},
     {"id": "deep_frost", "kind": "threshold", "cost": 1, "x": 6, "y": 10, "arch": "tide", "requires": ["tide_walker"], "stat": "spirit", "at": 36, "effect": {"skill_power": 0.06}},
-    {"id": "mirror_step", "kind": "effect", "cost": 2, "x": 8, "y": 10, "arch": "tide", "requires": ["tide_walker"], "effect": {"damage_taken": -0.04, "cooldown": -0.04}}
+    {"id": "mirror_step", "kind": "effect", "cost": 2, "x": 8, "y": 10, "arch": "tide", "requires": ["tide_walker"], "effect": {"damage_taken": -0.04, "cooldown": -0.04}},
+    {"id": "cheap_thunder_bolt", "kind": "effect", "cost": 1, "x": 2, "y": 1, "requires": ["spi_a"], "effect": {"mana_cost@thunder_bolt": -0.25}},
+    {"id": "quick_thunder_bolt", "kind": "effect", "cost": 1, "x": 6, "y": 1, "requires": ["agi_a"], "effect": {"cooldown@thunder_bolt": -0.2}},
+    {"id": "cheap_ember_orb", "kind": "effect", "cost": 1, "x": 3, "y": 3, "requires": ["ember_orb"], "effect": {"mana_cost@ember_orb": -0.25}},
+    {"id": "quick_ember_orb", "kind": "effect", "cost": 1, "x": 5, "y": 3, "requires": ["ember_orb"], "effect": {"cooldown@ember_orb": -0.2}},
+    {"id": "thunder_thunder_bolt_keen", "kind": "effect", "cost": 1, "x": 0, "y": 11, "arch": "thunder", "requires": ["starfall", "high_voice"], "effect": {"power@thunder_bolt": 0.12}},
+    {"id": "thunder_mana_kill", "kind": "effect", "cost": 2, "x": 1, "y": 11, "arch": "thunder", "requires": ["starfall", "high_voice"], "effect": {"mana_kill": 2.0}},
+    {"id": "thunder_ember_orb_keen", "kind": "effect", "cost": 1, "x": 2, "y": 11, "arch": "thunder", "requires": ["starfall", "high_voice"], "effect": {"power@ember_orb": 0.12}},
+    {"id": "cheap_stardust", "kind": "effect", "cost": 1, "x": 3, "y": 11, "arch": "fire", "requires": ["white_fire", "ember_skin"], "effect": {"mana_cost@stardust": -0.25}},
+    {"id": "fire_mana_kill", "kind": "effect", "cost": 2, "x": 4, "y": 11, "arch": "fire", "requires": ["white_fire", "ember_skin"], "effect": {"mana_kill": 2.0}},
+    {"id": "quick_stardust", "kind": "effect", "cost": 1, "x": 5, "y": 11, "arch": "fire", "requires": ["white_fire", "ember_skin"], "effect": {"cooldown@stardust": -0.2}},
+    {"id": "cheap_frost_tide", "kind": "effect", "cost": 1, "x": 6, "y": 11, "arch": "tide", "requires": ["deep_frost", "mirror_step"], "effect": {"mana_cost@frost_tide": -0.25}},
+    {"id": "tide_mana_kill", "kind": "effect", "cost": 2, "x": 7, "y": 11, "arch": "tide", "requires": ["deep_frost", "mirror_step"], "effect": {"mana_kill": 2.0}},
+    {"id": "quick_blink", "kind": "effect", "cost": 1, "x": 8, "y": 11, "arch": "tide", "requires": ["deep_frost", "mirror_step"], "effect": {"cooldown@blink": -0.2}}
   ]
 }

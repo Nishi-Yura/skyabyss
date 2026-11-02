@@ -72,7 +72,8 @@ public final class SkillEffects {
 
     // 技の傷に掛ける倍率: 共鳴の声・鍛え人の目・巨神斬りの型のおまけ・木の印
     public static double damagePower(ServerPlayer player, Skill skill) {
-        double v = 1 + chorus(player) + smith(player) + SkillMarks.power(player, skill.tree) + SkillBuild.skillPower(player, skill);
+        double v = 1 + chorus(player) + smith(player) + SkillMarks.power(player, skill.tree) + SkillBuild.skillPower(player, skill)
+                + jp.revati.skyabyss.item.affix.AffixEvents.spellPower(player);
         if (skill == Skill.TITAN_CLEAVE && WeaponType.has(player, WeaponType.HEAVY)) {
             v += SkillRules.CLEAVE_HEAVY_BONUS;
         }

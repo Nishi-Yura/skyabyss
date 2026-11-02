@@ -105,6 +105,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     private Skill selected;
     // 木 v2 (docs/design/48): 職の木では節を選ぶ。selected はその節の技 (枠に置くため)
     private AbilityNode selectedNode;
+    // 木 v2: いまマウスの下にある節 (その節へつながる線を光らせる)
+    private AbilityNode hoverNode;
     // 木 v2 の格子の間隔 (盤の単位。節は NODE = 22)
     static final int GRID = 34;
     static final int GRID_X0 = 8;
@@ -845,6 +847,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         g.drawCenteredString(font, title, left + W / 2, top + 8, TITLE);
         if (page == 0) {
             renderTreeTabs(g, d);
+            hoverNode = v2() != null ? v2NodeAt(mouseX, mouseY) : null;
             renderTree(g, d, level);
             hoverRune = 0;
             renderInfo(g, d, level, mouseX, mouseY);
@@ -1011,6 +1014,17 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
         }
         canvas.end(g);
+    }
+
+    // 太さ w のまっすぐな線 (斜めも)
+    private static void thick(GuiGraphics g, int x0, int y0, int x1, int y1, int color, int w) {
+        int steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+        int h = w / 2;
+        for (int i = 0; i <= steps; i++) {
+            int x = x0 + Math.round((x1 - x0) * i / (float) Math.max(1, steps));
+            int y = y0 + Math.round((y1 - y0) * i / (float) Math.max(1, steps));
+            g.fill(x - h, y - h, x - h + w, y - h + w, 0xFF000000 | color);
+        }
     }
 
     private static void diag(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
@@ -1634,29 +1648,30 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             g.drawCenteredString(font, label, 0, 0, pts > 0 ? PALE : SOFT);
             g.pose().popPose();
         }
-        // つなぐ線 (先に描く)。両方取っていれば明るく、手前だけなら薄く、どちらも無ければ暗く
-        for (AbilityNode n : t.nodes()) {
-            for (String rid : n.requires) {
-                AbilityNode r = t.node(rid);
-                if (r == null) {
-                    continue;
+        // つなぐ線 (先に描く)。2026-11-02 の声「線が機能してない」: 前は折れ線で、同じ行どうしの横の線が重なって、どの節がどれにつながるか
+        // 読めなかった。いまは節の真ん中どうしをまっすぐ結ぶ。両方取っていれば金、手前を取っていれば (次に取れる) 明るく、ほかは暗く。
+        // マウスの下か選んだ節へつながる線は太い水色 (前提はどれか一つ取っていればよい)
+        AbilityNode focus = hoverNode != null ? hoverNode : selectedNode;
+        for (int pass = 0; pass < 2; pass++) {
+            for (AbilityNode n : t.nodes()) {
+                for (String rid : n.requires) {
+                    AbilityNode r = t.node(rid);
+                    if (r == null) {
+                        continue;
+                    }
+                    boolean lit = n == focus || r == focus;
+                    if ((pass == 1) != lit) {
+                        continue;
+                    }
+                    boolean a = d.hasNode(tree, r.id);
+                    boolean b = d.hasNode(tree, n.id);
+                    int color = lit ? 0x5FD8FF : a && b ? GOLD : a ? 0xC8D2DC : 0x3A4050;
+                    int x0 = v2L(r) + v2Size(r) / 2;
+                    int y0 = v2T(r) + v2Size(r) / 2;
+                    int x1 = v2L(n) + v2Size(n) / 2;
+                    int y1 = v2T(n) + v2Size(n) / 2;
+                    thick(g, x0, y0, x1, y1, color, lit || a ? 2 : 1);
                 }
-                boolean a = d.hasNode(tree, r.id);
-                boolean b = d.hasNode(tree, n.id);
-                int color = a && b ? LORE : a ? SOFT : DIM;
-                int x0 = v2X(r) + NODE / 2;
-                int y0 = v2T(r) + v2Size(r);
-                int x1 = v2X(n) + NODE / 2;
-                int y1 = v2T(n);
-                if (y1 <= y0) {
-                    // 横に並ぶ節 (同じ行) は真ん中どうし
-                    line(g, Math.min(x0, x1), v2Y(r) + NODE / 2, Math.max(x0, x1), v2Y(r) + NODE / 2, color);
-                    continue;
-                }
-                int mid = (y0 + y1) / 2;
-                line(g, x0, y0, x0, mid, color);
-                line(g, Math.min(x0, x1), mid, Math.max(x0, x1), mid, color);
-                line(g, x1, mid, x1, y1, color);
             }
         }
         for (AbilityNode n : t.nodes()) {
@@ -1694,7 +1709,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, sz, sz);
             }
             // 下の小さな字: 基礎は +数、段は +1、まだ取っていない節は点
-            String cap = n.kind == AbilityNode.Kind.STAT ? "+" + n.amount : n.kind == AbilityNode.Kind.RANK ? "+1" : taken ? "" : n.cost + "点";
+            String cap = n.kind == AbilityNode.Kind.STAT ? "+" + n.amount : n.kind == AbilityNode.Kind.RANK ? "+1" : taken ? "" : n.cost + "SP";
             if (!cap.isEmpty()) {
                 boolean prov = tryon != null && taken && !real().hasNode(tree, n.id);
                 int color = prov ? 0x7FFFA0 : taken ? GOLD : tr == SkillData.TakeResult.OK ? TEXT : DIM;
@@ -1711,6 +1726,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             // 排他の節には赤紫の点 (左上)
             if (!n.excludes.isEmpty()) {
                 g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF000000 | DENY);
+            }
+            // 同じスキルの変化を先に取っていて取れない節は、赤い × (2026-11-02「思ったような選択ルートにならない」: 黙って閉じていた)
+            if (!taken && tr == SkillData.TakeResult.EXCLUDED) {
+                int c = 0xFF000000 | DENY;
+                for (int i = 0; i < sz - 4; i++) {
+                    g.fill(x + 2 + i, y + 2 + i, x + 4 + i, y + 4 + i, c);
+                    g.fill(x + sz - 4 - i, y + 2 + i, x + sz - 2 - i, y + 4 + i, c);
+                }
             }
             // 紋を差している技の節には、その紋の絵 (左下)
             if (n.skill != null && n == t.skillNode(n.skill)) {
@@ -1902,6 +1925,20 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             case RANK_MAX -> lines.add(Component.translatable("message.skyabyss.skill.learn_failed.max_rank").withColor(DENY));
             case NOT_MASTERED -> lines.add(Component.translatable("message.skyabyss.skill.node_failed.not_mastered").withColor(DENY));
             case REBIRTH -> lines.add(Component.translatable("gui.skyabyss.ext.need_rebirth", n.rebirthAt).withColor(DENY));
+            // 前提が足りないときは、上の「線でつながった上の節」の行が赤くなる (同じことを二度書かない)
+            case EXCLUDED -> {
+                AbilityNode other = null;
+                if (n.kind == AbilityNode.Kind.RUNE) {
+                    for (AbilityNode o : t.runesOf(n.skill)) {
+                        if (o != n && d.hasNode(tree, o.id)) {
+                            other = o;
+                        }
+                    }
+                }
+                lines.add(other != null ? Component.translatable("gui.skyabyss.tree.rune_taken", Component.translatable(other.nameKey(key))).withColor(DENY)
+                        : Component.translatable("message.skyabyss.skill.node_failed.excluded").withColor(DENY));
+            }
+            case ARCH_POINTS -> lines.add(Component.translatable("gui.skyabyss.tree.need_arch", Component.translatable(t.archKey(n.arch)), n.archPoints - d.archPoints(tree, n.arch)).withColor(DENY));
             default -> {
             }
         }

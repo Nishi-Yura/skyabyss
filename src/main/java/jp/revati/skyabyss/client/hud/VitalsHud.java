@@ -111,8 +111,9 @@ public final class VitalsHud {
             float k = 0.65f + 0.35f * (float) Math.sin(p.tickCount * 0.45f);
             color = scale(color, k);
         }
-        int absorb = (int) Math.ceil(p.getAbsorptionAmount());
-        String text = (int) Math.ceil(hp) + "/" + (int) Math.ceil(max);
+        // 数は中の値の 10 倍で見せる (jp.revati.skyabyss.Hp。中の 20 = 帯の「200/200」)
+        int absorb = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(p.getAbsorptionAmount()));
+        String text = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(hp) - 1e-4) + "/" + (int) Math.ceil(jp.revati.skyabyss.Hp.shown(max) - 1e-4);
         bar(g, mc.font, r, HEART, 0xFFE0606C, hp / max, color, text, 0xFFF4EEE6, p.hurtTime > 0 || p.invulnerableTime > 10);
         if (absorb > 0) {
             // 吸収: 帯の上辺に金の線 (最大の体力に対する割合)。数字は体力の数字の左

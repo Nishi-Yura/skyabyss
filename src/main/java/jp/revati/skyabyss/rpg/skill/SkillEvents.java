@@ -164,6 +164,19 @@ public final class SkillEvents {
         }
     }
 
+    // ---------------------------------------------------------------- 倒したときのマナ (技の木の節 mana_kill。Wynncraft の「倒してマナ」)
+    @SubscribeEvent
+    static void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (event.getEntity().level().isClientSide || event.getEntity() instanceof Player
+                || !(event.getSource().getEntity() instanceof ServerPlayer player) || player instanceof FakePlayer || !player.isAlive()) {
+            return;
+        }
+        double mana = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_kill");
+        if (mana > 0) {
+            SkillManager.gainMana(player, mana);
+        }
+    }
+
     // ---------------------------------------------------------------- 押し出される強さ
     // 岩呼び: 狙いを引いた敵の攻撃を受けても、押されにくい (ノックバック 0.5 倍)
     @SubscribeEvent

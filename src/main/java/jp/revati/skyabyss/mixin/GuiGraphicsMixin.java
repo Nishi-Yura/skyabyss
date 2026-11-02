@@ -84,6 +84,9 @@ public abstract class GuiGraphicsMixin {
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("HEAD"))
     private void skyabyss$in1(Font font, String text, int x, int y, int color, boolean shadow, CallbackInfoReturnable<Integer> cir) {
         skyabyss$begin(font, text == null ? 0 : font.width(text), x, y);
+        if (jp.revati.skyabyss.client.dev.OverlapAudit.capturing() && text != null) {
+            jp.revati.skyabyss.client.dev.OverlapAudit.text((GuiGraphics) (Object) this, font, text, x, y, font.width(text), skyabyss$on);
+        }
     }
 
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("RETURN"))
@@ -94,6 +97,9 @@ public abstract class GuiGraphicsMixin {
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)I", at = @At("HEAD"))
     private void skyabyss$in2(Font font, FormattedCharSequence text, int x, int y, int color, boolean shadow, CallbackInfoReturnable<Integer> cir) {
         skyabyss$begin(font, text == null ? 0 : font.width(text), x, y);
+        if (jp.revati.skyabyss.client.dev.OverlapAudit.capturing() && text != null) {
+            jp.revati.skyabyss.client.dev.OverlapAudit.text((GuiGraphics) (Object) this, font, text, x, y, font.width(text), skyabyss$on);
+        }
     }
 
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)I", at = @At("RETURN"))

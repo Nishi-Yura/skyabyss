@@ -119,6 +119,12 @@ public final class FacilityCommands {
                         }))
                         .then(Commands.literal("shop").then(Commands.argument("shop", StringArgumentType.word()).suggests(SHOPS)
                                 .executes(c -> ShopService.open(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "shop"), null) ? 1 : 0)))
+                        // act <働き> : 係の人の働き (FacilityActions の open) を、話さずに起こす (撮影・画面の重なりの検査用)
+                        .then(Commands.literal("act").then(Commands.argument("open", StringArgumentType.word())
+                                .executes(c -> {
+                                    FacilityActions.run(c.getSource().getPlayerOrException(), null, StringArgumentType.getString(c, "open"), null);
+                                    return 1;
+                                })))
                         .then(Commands.literal("stash").executes(c -> {
                             StashMenu.open(c.getSource().getPlayerOrException(), null);
                             return 1;

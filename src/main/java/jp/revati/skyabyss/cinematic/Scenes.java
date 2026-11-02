@@ -22,6 +22,8 @@ public final class Scenes {
     // 土地の町に初めて着いたとき (9 秒)。ContinentAreas が起こす
     public static final String TOWN_PREFIX = "town_first_";
     public static final String[] TOWNS = {"whale", "tide", "storm", "ember"};
+    // あいだの塔を越えたとき (13.5 秒。tower/TowerFight.win が皆に startAt で始める。原点は橋の北寄りの真ん中、前 = 主)
+    public static final String TOWER_CLEAR = "tower_clear";
     // 試練を越えて真ん中へ戻ったとき、光った碑を見せる (約 3.4 秒。docs/design/29 の 4.6)。前 = 碑の方。台詞なし
     // 設定の視野 (度)。撮影の fov はこの値との比で効かせる
     public static final float BASE_FOV = 70f;
@@ -46,6 +48,7 @@ public final class Scenes {
             add(heartAppears(titan));
             add(titanEnd(titan));
         }
+        add(towerClear());
         // 深淵の区切り (五章の一〜四・終わり)。story/ch5/layers/AbyssSections
         for (Scene s : jp.revati.skyabyss.story.ch5.layers.SectionScenes.all()) {
             add(s);
@@ -216,6 +219,24 @@ public final class Scenes {
                         .look(Look.target(0, 4, 0)).lookTo(Look.target(0, 4, 0)).fov(64f, 58f).sway(0.2f).build())
                 .line(0.2f, 1.8f, Speaker.HEAVEN, "cinematic.skyabyss.heart." + titan + ".heaven")
                 .line(2.1f, 1.9f, Speaker.HERO, "cinematic.skyabyss.heart." + titan + ".hero")
+                .build();
+    }
+
+    // あいだの塔を越えた (2026-11-02 の声「クリア演出ももっと豪華にして」)。主は原点の前 32、高さ約 40、正面は橋 (南)。背の門は主の後ろ 31・上 35。
+    // カメラは一続き (場面の決まり): ① 崩れる主を橋から見上げる ② 横へ回りながら上がり、門が開き主が引き戻される ③ 真ん中へ寄って門が閉じる閃光 ④ 高く引いて橋を見下ろし、灯が北から南へ並ぶ
+    private static Scene towerClear() {
+        return Scene.of(TOWER_CLEAR).handBack()
+                .shot(Shot.of(3.0f).pos(2, 1.5, 0).posTo(-2, 2.5, 6)
+                        .look(Look.target(0, 30, -6)).lookTo(Look.target(0, 22, -4)).fov(62f, 54f).ease(Ease.SMOOTH).sway(0.3f).build())
+                .shot(Shot.of(3.5f).pos(-2, 2.5, 6).posTo(20, 14, 10)
+                        .look(Look.target(0, 22, -4)).lookTo(Look.target(0, 30, -24)).fov(54f, 60f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(3.0f).pos(20, 14, 10).posTo(4, 14, 2)
+                        .look(Look.target(0, 30, -24)).lookTo(Look.target(0, 35, -31)).fov(60f, 48f).ease(Ease.SMOOTHER).sway(0.15f).build())
+                .shot(Shot.of(4.0f).pos(4, 14, 2).posTo(0, 34, -8)
+                        .look(Look.target(0, 35, -31)).lookTo(Look.target(0, 0, 50)).fov(48f, 66f).ease(Ease.SMOOTH).sway(0.15f).build())
+                .line(0.6f, 2.6f, Speaker.HEAVEN, "cinematic.skyabyss.tower.clear.1")
+                .line(6.8f, 3.0f, Speaker.HERO, "cinematic.skyabyss.tower.clear.2")
+                .line(10.2f, 3.0f, Speaker.HEAVEN, "cinematic.skyabyss.tower.clear.3")
                 .build();
     }
 

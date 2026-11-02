@@ -751,7 +751,7 @@ public final class SkillRules {
             case FORESIGHT -> new Object[] {fmt(foresightBonus(r) * 100), FORESIGHT_TICKS / SECOND};
             case WIND_REND -> new Object[] {pct(rendBack(r)), pct(rendFront(r))};
             case LONE_WIND -> new Object[] {pct(LONE_ATTACK), pct(LONE_MOVE), fmt(LONE_RANGE)};
-            case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), fmt(wardAbsorb(r)), fmt(wardAbsorb(r)), WARD_SONG_TICKS / SECOND};
+            case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), hp(wardAbsorb(r)), hp(wardAbsorb(r)), WARD_SONG_TICKS / SECOND};
             case CALM_HEART -> new Object[] {fmt(calmHeartBonus(r) * 100)};
             case EBB_TIDE -> new Object[] {fmt(ebbRange(r)), ebbSlowTicks(r) / SECOND};
             case RIPPLE -> new Object[] {fmt(rippleSlow(r) * 100), RIPPLE_TICKS / SECOND};
@@ -763,11 +763,11 @@ public final class SkillRules {
             case FORGE_MEMORY -> new Object[] {r, pct(FORGE_MEMORY_BONUS)};
             case ASH_SCATTER -> new Object[] {fmt(ASH_SCATTER_RADIUS), ashScatterTicks(r) / SECOND, pct(ASH_ATTACK), pct(ASH_PROJECTILE)};
             case SMITH_EYE -> new Object[] {fmt(SMITH_PER_LEVEL * 100), fmt(SMITH_PER_LEVEL * 100 * 10)};
-            case CLOUD_PIERCE -> new Object[] {pierceDamage(r), piercePierce(r)};
+            case CLOUD_PIERCE -> new Object[] {hp(pierceDamage(r)), piercePierce(r)};
             case FAR_SHOT -> new Object[] {fmt(0.06 * r * 100), fmt(FAR_FULL)};
             case BONE_TRAP -> new Object[] {TRAP_MAX, trapBindTicks(r) / SECOND, pct(trapMultiplier(r)), pct(TRAP_LARGE_MULTIPLIER)};
             case HAWK_EYE -> new Object[] {fmt(markBonus(r) * 100), MARK_TICKS / SECOND};
-            case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, fmt(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
+            case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, hp(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STILL_STRING -> new Object[] {pct(STILL_BONUS), STILL_TICKS / SECOND};
             case DEEP_PULL -> new Object[] {fmt(PULL_RADIUS), pct(pullMultiplier(r)), fmt(PULL_SLOW * 100), PULL_SLOW_TICKS / SECOND};
             case DEEP_MIRROR -> new Object[] {fmt(mirrorPower(r) * 100), MIRROR_TAGS};
@@ -793,17 +793,22 @@ public final class SkillRules {
             case SPIN_CUT -> new Object[] {fmt(SPIN_RADIUS), pct(spinMultiplier(r)), SPIN_DASH_BLOCKS};
             case TWIN_FANG -> new Object[] {pct(FANG_MULTIPLIER), fmt(FANG_BACK)};
             case SPARK_BURST -> new Object[] {fmt(SPARK_RADIUS), pct(sparkMultiplier(r)), SPARK_BURN / SECOND};
-            case SNARE_SHOT -> new Object[] {fmt(SNARE_RANGE), fmt(pierceDamage(r) * SNARE_MULTIPLIER), fmt(SNARE_SLOW * 100), snareTicks(r) / SECOND};
+            case SNARE_SHOT -> new Object[] {fmt(SNARE_RANGE), hp(pierceDamage(r) * SNARE_MULTIPLIER), fmt(SNARE_SLOW * 100), snareTicks(r) / SECOND};
             case STARDUST -> new Object[] {fmt(DUST_RADIUS), pct(dustMultiplier(r))};
             case MIST_VEIL -> new Object[] {veilTicks(r) / SECOND, fmt(VEIL_SPEED * 100), pct(VEIL_STRIKE)};
             case CURSE_MARK -> new Object[] {fmt(CURSE_RANGE), fmt(curseBonus(r) * 100), curseTicks(r) / SECOND};
-            case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, fmt(lampAbsorb(r)), LAMP_PULSE / SECOND};
+            case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, hp(lampAbsorb(r)), LAMP_PULSE / SECOND};
         };
     }
 
     // tick を「8」「5.5」のような秒の文字に
     public static String fmtSeconds(int ticks) {
         return fmt(ticks / (double) SECOND);
+    }
+
+    // 体力・傷の数 (画面の倍率 Hp.SHOWN で)
+    static String hp(double v) {
+        return jp.revati.skyabyss.Hp.number(v);
     }
 
     static String pct(double v) {

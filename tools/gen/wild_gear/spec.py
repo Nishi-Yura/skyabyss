@@ -55,7 +55,7 @@ def W(id_, job, kind, tier, lv, region, speed, gain, fx, ja, en, abil_ja, abil_e
 
 # ======================================================== 帯 I (Lv 1〜10)
 W("wild_guard_sword", "warrior", "sword", "uncommon", 4, "meadow", 1.5, 0.0, [("MAX_HEALTH", 2)],
-  "衛士の払い剣", "Guard's Surplus Sword", "体力 +2", "+2 max health")
+  "衛士の払い剣", "Guard's Surplus Sword", "体力 +20", "+20 max health")
 W("wild_banner_spear", "warrior", "spear", "rare", 9, "meadow", 1.3, 0.06, [("REACH", 1.0), ("AURA_DAMAGE", 0.06, 6)],
   "古戦の旗槍", "Old War Banner Spear", "間合い +1。旗の下で: まわり 6 の仲間（自分も）の与える傷 +6%",
   "+1 reach. Under the banner: you and allies within 6 deal +6% damage")
@@ -78,7 +78,7 @@ W("wild_shell_claw", "assassin", "claw", "rare", 9, "hills", 2.0, 0.10, [("BACKS
 W("wild_scarecrow_bell_staff", "shaman", "bell", "uncommon", 4, "meadow", 1.4, 0.0, [("SLOW", 20, 0)],
   "案山子の鳴子杖", "Scarecrow Clapper Staff", "打った相手を 1 秒遅く I", "Hits slow the target (Slowness I, 1s)")
 W("wild_bonebird_totem", "shaman", "totem", "rare", 9, "hills", 1.4, 0.0, [("TEAM_HEAL_ON_HIT", 0.5, 5)],
-  "骨鳥の祈り柱", "Bonebird Prayer Totem", "打つたびに まわり 5 の仲間（自分も）の体力 +0.5", "Each hit heals you and allies within 5 by 0.5")
+  "骨鳥の祈り柱", "Bonebird Prayer Totem", "打つたびに まわり 5 の仲間（自分も）の体力 +5", "Each hit heals you and allies within 5 by 5")
 
 # ======================================================== 帯 II (Lv 11〜20)
 W("wild_oar_blade", "warrior", "greatsword", "uncommon", 12, "coast", 1.0, 0.0, [("REACH", 0.5)],
@@ -112,7 +112,7 @@ W("wild_hermit_knife", "assassin", "dagger", "rare", 16, "coast", 2.0, 0.06, [("
 W("wild_stormwolf_fang", "assassin", "fang", "epic", 19, "heights", 2.0, 0.11, [("EXECUTE", 0.30, 0.35)],
   "雷狼の牙", "Stormwolf Fang", "体力 30% を切った相手に +35%", "+35% against targets under 30% health")
 W("wild_shell_bell_staff", "shaman", "bell", "uncommon", 12, "coast", 1.4, 0.0, [("MAX_HEALTH", 2)],
-  "浜の貝鈴杖", "Seashell Bell Staff", "体力の上限 +2", "+2 max health")
+  "浜の貝鈴杖", "Seashell Bell Staff", "体力の上限 +20", "+20 max health")
 W("wild_fogbell_bell_staff", "shaman", "bell", "rare", 16, "coast", 1.4, 0.08, [("MARK", 0.08, 80)],
   "霧鐘の鈴杖", "Foghorn Bell Staff", "打った相手に霧の印 4 秒（仲間全員の傷 +8%）", "Hits mark the target for 4s (+8% damage from everyone)")
 W("wild_loom_bell_staff", "shaman", "bell", "epic", 19, "heights", 1.4, 0.08, [("TEAM_HASTE", 0.10, 0.08, 80, 6)],
@@ -161,8 +161,8 @@ W("wild_peak_totem", "shaman", "totem", "rare", 22, "heights", 1.4, 0.0, [("TEAM
 W("wild_ashsow_bell_staff", "shaman", "bell", "epic", 26, "wastes", 1.4, 0.0, [("LEECH_LOWEST", 0.08, 6)],
   "灰撒きの鈴杖", "Ashsower Bell Staff", "与えた傷の 8% を、まわり 6 でいちばん体力の低い仲間へ", "8% of damage dealt heals the most wounded ally within 6")
 W("wild_stormdrum_totem", "shaman", "totem", "heroic", 30, "heights", 1.4, 0.10, [("AURA_DAMAGE", 0.05, 6), ("DRUM", 5, 6, 20, 2)],
-  "嵐呼びの太鼓柱", "Stormcaller Drum Totem", "常に まわり 6 の仲間の傷 +5%。5 度目ごとに太鼓（まわり 6 の敵を 1 秒すくませ、仲間の体力 +2）",
-  "Always: allies within 6 deal +5% damage. Every 5th hit beats the drum (enemies within 6 are stunned 1s, allies heal 2)")
+  "嵐呼びの太鼓柱", "Stormcaller Drum Totem", "常に まわり 6 の仲間の傷 +5%。5 度目ごとに太鼓（まわり 6 の敵を 1 秒すくませ、仲間の体力 +20）",
+  "Always: allies within 6 deal +5% damage. Every 5th hit beats the drum (enemies within 6 are stunned 1s, allies heal 20)")
 
 # ======================================================== 帯 IV (Lv 31〜40)
 W("wild_delver_sword", "warrior", "sword", "rare", 32, "abyss_upper", 1.5, 0.10, [("DARK_BONUS", 7, 0.12)],
@@ -190,8 +190,8 @@ W("wild_salttear_staff", "mage", "staff", "epic", 35, "abyss_upper", 1.2, 0.10, 
 W("wild_compass_staff", "mage", "staff", "epic", 38, "abyss_upper", 1.2, 0.12, [("FAR_BONUS", 8, 0.20)],
   "探掘隊の羅針杖", "Delver's Compass Staff", "8 ブロックより遠い相手に +20%", "+20% damage beyond 8 blocks")
 W("wild_mimic_heart_staff", "mage", "staff", "heroic", 40, "abyss_upper", 1.2, 0.18, [("MAX_HEALTH", 6), ("HEARTBEAT", 0.06, 10)],
-  "鼓動もどきの心杖", "Mimic Heart Staff", "常に 体力 +6。傷の 6% を体力に、満ちているときは鼓動を溜め（最大 10）、10 で次の一撃 ×2",
-  "Always: +6 max health. Heals 6% of damage; at full health stores heartbeats instead (max 10), and at 10 the next hit deals x2")
+  "鼓動もどきの心杖", "Mimic Heart Staff", "常に 体力 +60。傷の 6% を体力に、満ちているときは鼓動を溜め（最大 10）、10 で次の一撃 ×2",
+  "Always: +60 max health. Heals 6% of damage; at full health stores heartbeats instead (max 10), and at 10 the next hit deals x2")
 W("wild_saltcrow_bow", "archer", "bow", "rare", 32, "abyss_upper", 0, 0.10, [("SPLIT_EVERY", 3, 3, 0.60)],
   "塩鴉の弓", "Saltcrow Bow", "3 本目ごとに矢が 3 本に分かれる（各 60%）", "Every 3rd arrow splits into 3 (60% each)")
 W("wild_bonestring_bow", "archer", "bow", "epic", 35, "abyss_upper", 0, 0.10, [("PIERCE", 2, 0.15)],
@@ -218,8 +218,8 @@ W("wild_knotted_bell_staff", "shaman", "bell", "epic", 38, "abyss_upper", 1.4, 0
   "縄結びの鈴杖", "Knotted Rope Bell Staff", "打った相手と近くの敵一体を 5 秒結ぶ（片方の傷の 30% をもう一方も）",
   "Hits bind the target to a nearby enemy for 5s (each shares 30% of the other's damage)")
 W("wild_lullaby_bell_staff", "shaman", "bell", "heroic", 40, "abyss_upper", 1.4, 0.10, [("TEAM_GUARD_AURA", 0.06, 8), ("LULLABY", 8, 6, 40, 10, 3)],
-  "深淵の子守鐘", "Abyssal Lullaby Bell Staff", "常に まわり 8 の仲間の受ける傷 −6%。8 度目ごとに子守唄（まわり 6 の敵を 2 秒眠らせる。主は 0.5 秒）、仲間の体力 +3",
-  "Always: allies within 8 take -6% damage. Every 8th hit sings a lullaby (enemies within 6 sleep 2s, bosses 0.5s; allies heal 3)")
+  "深淵の子守鐘", "Abyssal Lullaby Bell Staff", "常に まわり 8 の仲間の受ける傷 −6%。8 度目ごとに子守唄（まわり 6 の敵を 2 秒眠らせる。主は 0.5 秒）、仲間の体力 +30",
+  "Always: allies within 8 take -6% damage. Every 8th hit sings a lullaby (enemies within 6 sleep 2s, bosses 0.5s; allies heal 30)")
 
 # ======================================================== 帯 V (Lv 41〜50)
 W("wild_fulgurite_sword", "warrior", "sword", "rare", 42, "abyss_lower", 1.5, 0.12, [("PROC_BOLT", 0.12, 1.0)],
@@ -229,8 +229,8 @@ W("wild_twin_spear", "warrior", "spear", "epic", 44, "abyss_lower", 1.4, 0.10, [
 W("wild_chain_greatsword", "warrior", "greatsword", "epic", 46, "abyss_lower", 1.0, 0.12, [("REACH", 2.0), ("FAR_BONUS", 3, 0.15)],
   "淵の鎖剣", "Abyss Chain Greatsword", "間合い +2。3 ブロックより遠い相手に +15%", "+2 reach. +15% against targets beyond 3 blocks")
 W("wild_meteor_greatsword", "warrior", "greatsword", "heroic", 48, "moon", 0.95, 0.10, [("MAX_HEALTH", 6), ("WARD_STACK", 6, 200, 0.10)],
-  "隕鉄の大剣", "Meteoric Iron Greatsword", "常に 体力 +6。打つたびに膜 1（最大 6、10 秒）、膜があると +10%",
-  "Always: +6 max health. Each hit grants 1 absorption (max 6, 10s); +10% damage while it holds")
+  "隕鉄の大剣", "Meteoric Iron Greatsword", "常に 体力 +60。打つたびに膜 10（最大 60、10 秒）、膜があると +10%",
+  "Always: +60 max health. Each hit grants 10 absorption (max 60, 10s); +10% damage while it holds")
 W("wild_cloudcleaver_greatsword", "warrior", "greatsword", "heroic", 50, "cloud", 1.0, 0.20, [("MOVE_SPEED", 0.06), ("WIND_SLASH", 8, 0.50)],
   "雲断ちの大剣", "Cloudcleaver Greatsword", "常に 移動の速さ +6%。振るたびに前へ風の刃（8 ブロック・通った敵に 50%）",
   "Always: +6% movement speed. Each swing sends a wind blade forward (8 blocks, 50% to enemies it passes)")
@@ -290,11 +290,11 @@ W("wild_effigy_totem", "shaman", "totem", "epic", 46, "abyss_lower", 1.4, 0.0, [
   "身代わりの人形柱", "Effigy Totem", "まわり 6 の仲間の受ける傷の 15% を肩代わりし、自分の受ける傷 −20%",
   "Takes 15% of the damage dealt to allies within 6; you take -20% damage")
 W("wild_starbell_totem", "shaman", "totem", "heroic", 48, "moon", 1.4, 0.10, [("TEAM_HEALTH_AURA", 4, 8), ("STAR_FRUIT", 6, 4, 0.10, 120, 6)],
-  "星鈴の木", "Starbell Tree", "常に まわり 8 の仲間の体力の上限 +4。6 度目ごとに星の実が弾ける（まわり 6 の仲間の体力 +4・6 秒 傷 +10%）",
-  "Always: allies within 8 gain +4 max health. Every 6th hit bursts a star fruit (allies within 6 heal 4 and deal +10% for 6s)")
+  "星鈴の木", "Starbell Tree", "常に まわり 8 の仲間の体力の上限 +40。6 度目ごとに星の実が弾ける（まわり 6 の仲間の体力 +40・6 秒 傷 +10%）",
+  "Always: allies within 8 gain +40 max health. Every 6th hit bursts a star fruit (allies within 6 heal 40 and deal +10% for 6s)")
 W("wild_cloudhymn_bell_staff", "shaman", "bell", "heroic", 50, "cloud", 1.4, 0.05, [("REVIVE_SPEED", 2.0), ("HYMN", 0.10, 0.25, 80, 8)],
-  "雲上の祝詞の鈴杖", "Cloudhymn Bell Staff", "常に 倒れた仲間を起こす速さ ×2。打つと 10% で祝詞（まわり 8 の仲間に 4 秒 受ける傷 −25%・体力の戻り 2/秒）",
-  "Always: revive fallen allies twice as fast. Hits have a 10% chance to chant (allies within 8 take -25% damage and heal 2/s for 4s)")
+  "雲上の祝詞の鈴杖", "Cloudhymn Bell Staff", "常に 倒れた仲間を起こす速さ ×2。打つと 10% で祝詞（まわり 8 の仲間に 4 秒 受ける傷 −25%・体力の戻り 20/秒）",
+  "Always: revive fallen allies twice as fast. Hits have a 10% chance to chant (allies within 8 take -25% damage and heal 20/s for 4s)")
 
 # ---------------------------------------------------------------- 防具 (一式)
 ARMORS = []
@@ -313,8 +313,8 @@ A("wild_oilskin", "light", "uncommon", 3, "island", [], [("MOVE_SPEED", 0.05), (
 A("wild_belfry", "mystic", "uncommon", 6, "meadow", [], [("MANA_REGEN", 0.15)],
   "鐘撞きの法衣", "Bellringer's Vestment", "4 部位: マナの戻り +15%", "4 pieces: +15% mana regeneration")
 A("wild_oldsoldier", "heavy", "rare", 9, "meadow", [("MAX_HEALTH", 4)], [("LAST_STAND", 0.3, 60, 1200)],
-  "骸兵の古鎧", "Old Soldier's Armor", "2 部位: 体力 +4。4 部位: 体力 30% を切ると 3 秒 耐性 II（待ち 60 秒）",
-  "2 pieces: +4 max health. 4 pieces: below 30% health gain Resistance II for 3s (60s cooldown)")
+  "骸兵の古鎧", "Old Soldier's Armor", "2 部位: 体力 +40。4 部位: 体力 30% を切ると 3 秒 耐性 II（待ち 60 秒）",
+  "2 pieces: +40 max health. 4 pieces: below 30% health gain Resistance II for 3s (60s cooldown)")
 A("wild_sailcloth", "light", "uncommon", 12, "coast", [], [("MOVE_SPEED", 0.05), ("BREATH", 1)],
   "汐守の帆布装", "Shiomori Sailcloth", "4 部位: 移動 +5%、水の中の息が長い", "4 pieces: +5% speed, longer breath underwater")
 A("wild_lurelight", "mystic", "rare", 16, "coast", [("MAX_MANA", 5)], [("NIGHT_MANA", 0.25, 0.05)],
@@ -338,8 +338,8 @@ A("wild_saltplate", "heavy", "epic", 35, "abyss_upper", [], [("TOUGHNESS", 2), (
 A("wild_lampkeeper", "mystic", "epic", 38, "abyss_upper", [], [("MANA_REGEN", 0.25), ("LIGHT", 1)],
   "灯守の法衣", "Lampkeeper's Vestment", "4 部位: マナの戻り +25%、まわりが明るい", "4 pieces: +25% mana regeneration; you light up your surroundings")
 A("wild_hanged", "light", "heroic", 40, "abyss_upper", [("MOVE_SPEED", 0.05)], [("NOOSE", 6, 3600)],
-  "縄の人の吊り衣", "Hanged One's Shroud", "2 部位: 移動 +5%。4 部位「吊り」: 倒れる傷を体力 1 で耐え、後ろへ跳ぶ（待ち 180 秒）",
-  "2 pieces: +5% speed. 4 pieces, Noose: survive a lethal blow at 1 health and leap back (180s cooldown)")
+  "縄の人の吊り衣", "Hanged One's Shroud", "2 部位: 移動 +5%。4 部位「吊り」: 倒れる傷を体力 10 で耐え、後ろへ跳ぶ（待ち 180 秒）",
+  "2 pieces: +5% speed. 4 pieces, Noose: survive a lethal blow at 10 health and leap back (180s cooldown)")
 A("wild_copperwire", "mid", "rare", 42, "abyss_lower", [], [("LIGHTNING_TAKEN", -0.4), ("THORN_BOLT", 0.15, 5)],
   "銅線の避雷鎧", "Copperwire Armor", "4 部位: 雷の傷 −40%、打たれると 15% で雷を返す", "4 pieces: -40% lightning damage taken; when hit, 15% chance to return lightning")
 A("wild_soot", "light", "epic", 44, "abyss_lower", [], [("MOVE_SPEED", 0.08), ("SNEAK_STEALTH", 0.5)],
@@ -417,11 +417,11 @@ BELT_BACK = ("BODY", 3.6, 10.6, 3.1, 0, 0, 0, 0.4, 0, 6.0, 0)
 
 # 帯 I
 X("wild_guard_badge", "trinket", "uncommon", 3, "meadow", [("MAX_HEALTH", 2)],
-  "衛士の鐘章", "Bell Guard's Badge", "体力 +2", "+2 max health", mount=CHEST)
+  "衛士の鐘章", "Bell Guard's Badge", "体力 +20", "+20 max health", mount=CHEST)
 X("wild_mossball_netsuke", "trinket", "rare", 8, "hills", [("REGEN_TICK", 1, 100)],
-  "苔玉の根付", "Mossball Netsuke", "5 秒ごとに体力 +1", "Restores 1 health every 5s", mount=HIP_R)
+  "苔玉の根付", "Mossball Netsuke", "5 秒ごとに体力 +10", "Restores 10 health every 5s", mount=HIP_R)
 X("wild_herb_vial", "charm", "uncommon", 5, "meadow", [("CHARM_HEAL", 6)],
-  "草薬の小瓶", "Herbal Vial", "使うと体力 +6（待ち 45 秒）", "Use: heal 6 (45s cooldown)", cd=45)
+  "草薬の小瓶", "Herbal Vial", "使うと体力 +60（待ち 45 秒）", "Use: heal 60 (45s cooldown)", cd=45)
 # 帯 II
 X("wild_float_netsuke", "trinket", "uncommon", 12, "coast", [("SWIM", 0.4), ("BREATH", 1), ("MOVE_SPEED", 0.03)],
   "浮き玉の根付", "Glass Float Netsuke", "水の中の移動 +、息が長い、移動 +3%", "Faster swimming, longer breath, +3% speed", mount=HIP_L)
@@ -452,8 +452,8 @@ X("wild_salttear_earring", "trinket", "epic", 35, "abyss_upper", [("MANA_REGEN",
 X("wild_bonepipe_necklace", "trinket", "epic", 38, "abyss_upper", [("DARK_BONUS", 7, 0.10)],
   "骨笛の首飾り", "Bonepipe Necklace", "暗い所で与える傷 +10%", "+10% damage in darkness", mount=CHEST)
 X("wild_hangman_knot", "trinket", "heroic", 40, "abyss_upper", [("NOOSE", 5, 4800), ("MOVE_SPEED", 0.04)],
-  "縄の人の結び目", "Hanged One's Knot", "倒れる傷を体力 1 で耐えて後ろへ跳ぶ（待ち 240 秒）、移動 +4%",
-  "Survive a lethal blow at 1 health and leap back (240s cooldown); +4% speed", mount=HIP_L)
+  "縄の人の結び目", "Hanged One's Knot", "倒れる傷を体力 10 で耐えて後ろへ跳ぶ（待ち 240 秒）、移動 +4%",
+  "Survive a lethal blow at 10 health and leap back (240s cooldown); +4% speed", mount=HIP_L)
 X("wild_lamp_charm", "charm", "rare", 33, "abyss_upper", [("CHARM_LIGHT", 10, 0.10, 200)],
   "灯籠の小灯", "Little Lantern", "使うと 10 秒 まわりを照らし、まわり 10 の敵に印（仲間全員の傷 +10%）（待ち 45 秒）",
   "Use: light your surroundings for 10s and mark enemies within 10 (+10% damage from everyone) (45s cooldown)", cd=45)
@@ -467,8 +467,8 @@ X("wild_ash_hourglass_charm", "trinket", "epic", 44, "abyss_lower", [("COOLDOWN"
 X("wild_deep_eye_charm", "trinket", "epic", 46, "abyss_lower", [("CRIT", 0.12, 0.6)],
   "深みの眼の護り", "Deep Eye Ward", "会心 12%（×1.6）", "12% critical chance (x1.6)", mount=CHEST)
 X("wild_meteor_ring", "trinket", "heroic", 48, "moon", [("MAX_HEALTH", 6), ("TOUGHNESS", 2), ("GRIT", 0.05, 0.10)],
-  "隕鉄の環", "Meteoric Iron Ring", "体力 +6、強靭 +2、受ける傷 −5%（体力半分未満で −10%）",
-  "+6 max health, +2 toughness, -5% damage taken (-10% below half health)", mount=HIP_L)
+  "隕鉄の環", "Meteoric Iron Ring", "体力 +60、強靭 +2、受ける傷 −5%（体力半分未満で −10%）",
+  "+60 max health, +2 toughness, -5% damage taken (-10% below half health)", mount=HIP_L)
 X("wild_skylark_plume", "trinket", "heroic", 50, "cloud", [("FALL_TAKEN", -1.0), ("MOVE_SPEED", 0.08)],
   "雲雀の羽根飾り", "Skylark Plume", "落下の傷なし、移動 +8%", "No fall damage, +8% speed", mount=EAR)
 X("wild_starchart_compass", "charm", "epic", 45, "abyss_lower", [("CHARM_BLINK", 8)],
@@ -477,5 +477,5 @@ X("wild_moon_hourglass", "charm", "heroic", 49, "moon", [("CHARM_STOP", 10, 60, 
   "月の砂時計", "Lunar Hourglass", "使うとまわり 10 の敵の時を 3 秒止める（主は 1 秒）（待ち 75 秒）",
   "Use: freeze enemies within 10 for 3s (bosses 1s) (75s cooldown)", cd=75)
 X("wild_cloudhymn_slip", "charm", "heroic", 50, "cloud", [("CHARM_HYMN", 10, 10, 0.20, 160)],
-  "雲上の祝詞の札", "Cloudhymn Slip", "使うとまわり 10 の仲間（自分も）の体力 +10、8 秒 受ける傷 −20%（待ち 90 秒）",
-  "Use: you and allies within 10 heal 10 and take -20% damage for 8s (90s cooldown)", cd=90)
+  "雲上の祝詞の札", "Cloudhymn Slip", "使うとまわり 10 の仲間（自分も）の体力 +100、8 秒 受ける傷 −20%（待ち 90 秒）",
+  "Use: you and allies within 10 heal 100 and take -20% damage for 8s (90s cooldown)", cd=90)

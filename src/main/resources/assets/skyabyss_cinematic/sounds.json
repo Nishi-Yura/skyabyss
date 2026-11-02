@@ -503,6 +503,33 @@
       }
     ]
   },
+  "voice.tower_clear.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/tower_clear/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.tower_clear.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/tower_clear/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.tower_clear.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/tower_clear/l2",
+        "stream": false
+      }
+    ]
+  },
   "voice.abyss_section_bone.l0": {
     "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
     "sounds": [

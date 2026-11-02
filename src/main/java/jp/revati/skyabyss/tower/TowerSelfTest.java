@@ -132,7 +132,10 @@ public final class TowerSelfTest {
         m.kill();
         fg.tick(level, now + 4);
         Towers.tick(level, run, now + 4);
-        check(f, fg.won && run.cleared, "the run was not cleared when the master fell");
+        // 報いと記録は越えた場面 (CLEAR_SCENE) のあと
+        check(f, fg.won && !run.cleared, "the run was cleared before the clear scene ended");
+        Towers.tick(level, run, fg.wonAt + TowerFight.CLEAR_SCENE);
+        check(f, fg.won && run.cleared, "the run was not cleared after the clear scene");
         // 報酬
         jp.revati.skyabyss.loot.box.BoxKind box = jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower");
         check(f, box != null && jp.revati.skyabyss.loot.box.LootBoxes.kindFor(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SWORD.get())) == box

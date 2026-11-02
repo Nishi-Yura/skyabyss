@@ -511,7 +511,7 @@
   "item.skyabyss.divine_moth_dagger.desc": "A dagger of twin moth wings. Hits dust foes with light (5s, they glow); a backstab on a dusted foe deals x1.5.",
   "item.skyabyss.divine_moth_dagger.story": "\"Those drawn to the lamp are judged by it.\"",
   "item.skyabyss.divine_keeper_bell_staff": "Bellkeeper's Staff",
-  "item.skyabyss.divine_keeper_bell_staff.desc": "A staff crowned with a tiny belfry. Every 4th hit rings a bell: foes within 5 slowed for 2s, allies within 5 (and you) heal 2.",
+  "item.skyabyss.divine_keeper_bell_staff.desc": "A staff crowned with a tiny belfry. Every 4th hit rings a bell: foes within 5 slowed for 2s, allies within 5 (and you) heal 20.",
   "item.skyabyss.divine_keeper_bell_staff.story": "\"The last bellkeeper kept ringing to the very end.\"",
   "item.skyabyss.divine_plume_charm": "Pilgrim's Plume Charm",
   "item.skyabyss.divine_plume_charm.desc": "A white flight feather on a gold quill. No fall damage. +8% damage while airborne.",

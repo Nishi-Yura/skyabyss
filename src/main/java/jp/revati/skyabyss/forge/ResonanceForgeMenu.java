@@ -80,12 +80,12 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public ResonanceForgeMenu(int id, Inventory inventory, ContainerLevelAccess access) {
         super(ModMenus.RESONANCE_FORGE.get(), id);
         this.access = access;
-        int sets = TitanGearSets.all().size();
+        int sets = TitanGearSets.exchangeable().size();
         if (inventory.player instanceof ServerPlayer server) {
             exchange = new ContainerData() {
                 @Override
                 public int get(int index) {
-                    TitanGearSet set = TitanGearSets.all().get(index / 2);
+                    TitanGearSet set = TitanGearSets.exchangeable().get(index / 2);
                     TitanMemoryData.Record r = TitanMemoryData.get(server.server).peek(server.getUUID(), set.titan);
                     return index % 2 == 0 ? GearExchange.ownedMask(set, r) : GearExchange.state(set, r).ordinal();
                 }
@@ -160,7 +160,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         if (id >= BUTTON_EXCHANGE && id < BUTTON_EXTRACT_DESTROY) {
             int t = (id - BUTTON_EXCHANGE) / EXCHANGE_STRIDE;
             int i = (id - BUTTON_EXCHANGE) % EXCHANGE_STRIDE;
-            List<TitanGearSet> sets = TitanGearSets.all();
+            List<TitanGearSet> sets = TitanGearSets.exchangeable();
             if (t >= sets.size() || i >= sets.get(t).exclusives().size() || !(player instanceof ServerPlayer server)
                     || !GearExchange.exchange(server, sets.get(t), sets.get(t).exclusives().get(i))) {
                 return false;

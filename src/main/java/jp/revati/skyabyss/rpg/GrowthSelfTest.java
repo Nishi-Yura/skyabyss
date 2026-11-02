@@ -197,16 +197,21 @@ public final class GrowthSelfTest {
         check(f, modifier(p, Attributes.ATTACK_SPEED, Growth.MOD_AGILITY_ATTACK, 0.04, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
                 "agility attack speed modifier missing or wrong");
         check(f, Math.abs(p.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed * 1.04) < 1e-6, "agility did not add on top of the base speed");
-        check(f, Math.abs(p.getMaxHealth() - 22f) < 1e-4, "vitality 9 should give 22 max health, got " + p.getMaxHealth());
-        check(f, Math.abs(p.getHealth() - 22f) < 1e-4, "a full-health player was not topped up to the new max");
-        // 表示は体力の点: 耐久 9 は +2、点は 0.5 の倍数で 2 桁まで
-        check(f, "2".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(9))) && "0.5".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(2)))
-                && "1".equals(jp.revati.skyabyss.Hp.number(1.0)) && "0".equals(jp.revati.skyabyss.Hp.number(0)) && !jp.revati.skyabyss.Hp.of(4).contains("❤"),
-                "vitality is not shown as HP numbers");
+        // 体力 = 20 + 耐久 9 の +2 + レベルの分 (2 レベルごとに +0.5。2026-11-02)
+        float want = 22f + (float) GrowthRules.levelHealth(pd.level);
+        float base = 20f + (float) GrowthRules.levelHealth(pd.level);
+        check(f, Math.abs(GrowthRules.levelHealth(1)) < 1e-9 && Math.abs(GrowthRules.levelHealth(50) - 12) < 1e-9, "level health should be 0 at Lv 1 and 12 at Lv 50");
+        check(f, Math.abs(p.getMaxHealth() - want) < 1e-4, "vitality 9 should give " + want + " max health, got " + p.getMaxHealth());
+        check(f, Math.abs(p.getHealth() - want) < 1e-4, "a full-health player was not topped up to the new max");
+        // 表示は画面の倍率 (Hp.SHOWN = 10): 耐久 9 は中の +2 = 「20」、2 は 0.5 = 「5」
+        check(f, "20".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(9))) && "5".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(2)))
+                && "10".equals(jp.revati.skyabyss.Hp.number(1.0)) && "0".equals(jp.revati.skyabyss.Hp.number(0)) && "2.5".equals(jp.revati.skyabyss.Hp.number(0.25))
+                && !jp.revati.skyabyss.Hp.of(4).contains("❤"),
+                "vitality is not shown as HP numbers x10");
         check(f, p.getAttributeValue(Rpg.MAX_MANA) == 30, "spirit 5 should give 30 mana, got " + p.getAttributeValue(Rpg.MAX_MANA));
         // 付け直しても重ならない
         Growth.applyModifiers(p);
-        check(f, Math.abs(p.getMaxHealth() - 22f) < 1e-4, "applying twice stacked the modifiers");
+        check(f, Math.abs(p.getMaxHealth() - want) < 1e-4, "applying twice stacked the modifiers");
 
         // 死亡時の引き継ぎ (PlayerEvent.Clone と同じ呼び方)
         FakePlayer reborn = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "growth_test_b"));
@@ -219,8 +224,8 @@ public final class GrowthSelfTest {
         FakePlayer loaded = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "growth_test_c"));
         loaded.load(saved);
         check(f, same(pd, Growth.get(loaded), true), "growth data was not saved with the player");
-        check(f, Math.abs(loaded.getMaxHealth() - 22f) < 1e-4 && Math.abs(loaded.getHealth() - 22f) < 1e-4,
-                "after loading, health was " + loaded.getHealth() + "/" + loaded.getMaxHealth() + " (expected 22/22)");
+        check(f, Math.abs(loaded.getMaxHealth() - want) < 1e-4 && Math.abs(loaded.getHealth() - want) < 1e-4,
+                "after loading, health was " + loaded.getHealth() + "/" + loaded.getMaxHealth() + " (expected " + want + ")");
 
         // 振り分けを戻すと修飾子が外れ、体力は新しい上限に収まる
         java.util.Arrays.fill(pd.stats, 0);
@@ -228,7 +233,7 @@ public final class GrowthSelfTest {
         check(f, p.getAttribute(Attributes.ATTACK_DAMAGE).getModifier(Growth.MOD_STRENGTH) == null
                 && p.getAttribute(Attributes.MAX_HEALTH).getModifier(Growth.MOD_VITALITY) == null
                 && p.getAttribute(Rpg.MAX_MANA).getModifier(Growth.MOD_SPIRIT) == null, "modifiers were not removed after a reset");
-        check(f, p.getMaxHealth() == 20f && p.getHealth() <= 20f, "health was not clamped after a reset");
+        check(f, Math.abs(p.getMaxHealth() - base) < 1e-4 && p.getHealth() <= base + 1e-4, "health was not clamped after a reset");
 
         // ステータスの振り直し (00 の 3 = A): 炉のそばで、技と同じ費用 (初回無料、以後結晶)。回数は技と別
         checkStatRespec(f, overworld, p);

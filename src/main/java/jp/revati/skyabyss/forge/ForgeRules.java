@@ -232,6 +232,10 @@ public final class ForgeRules {
     // 分解で戻る共鳴の欠片 (ヒロイック以上。由来の巨神の欠片)
     public static Item resonanceItem(ItemStack stack) {
         jp.revati.skyabyss.item.TitanGearSet set = TitanGearSets.of(stack.getItem());
+        // 雲海の神器とあいだの塔は共鳴の欠片を持たないので、その表の欠片 (心核の欠片・塔の欠片) を返す (前は岩鯨の欠片に落ちていた)
+        if (set != null && set.exclusives().isEmpty()) {
+            return jp.revati.skyabyss.item.TitanGearSet.item(set.shard).orElse(ModItems.resonanceShard("stone_whale"));
+        }
         return ModItems.resonanceShard(set == null ? "stone_whale" : set.titan);
     }
 

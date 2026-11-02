@@ -86,7 +86,7 @@ public final class TowerDesk {
             }
             s.add(id);
         }
-        menu(p);
+        refreshAround(p);
     }
 
     // 記録の板: 人数ごとの最速と、今週の組合の順位
@@ -221,44 +221,51 @@ public final class TowerDesk {
             return;
         }
         Notice.narrate(p, Towers.usedToday(p) ? "message.skyabyss.tower.desk.used" : "message.skyabyss.tower.desk.hello");
+        sendState(p, true);
+    }
+
+    // 受付の画面の状態を送る (open = 画面を開く。false は開いている画面だけ新しくする)
+    static void sendState(ServerPlayer p, boolean open) {
+        if (p instanceof net.neoforged.neoforge.common.util.FakePlayer || p.connection == null) {
+            return;
+        }
         UUID mine = squadOf(p.getUUID());
-        MutableComponent line = Component.empty();
+        List<String> members = new ArrayList<>();
         if (mine != null) {
-            LinkedHashSet<UUID> s = SQUADS.get(mine);
-            List<String> names = new ArrayList<>();
-            for (UUID u : s) {
-                names.add(name(p.server, u));
+            for (UUID u : SQUADS.get(mine)) {
+                members.add(name(p.server, u));
             }
-            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.desk.squad", name(p.server, mine), s.size(), Towers.MAX_SQUAD, String.join("、", names)));
-            if (mine.equals(p.getUUID())) {
-                line.append(button("message.skyabyss.tower.btn.start", "start", 0xF2D78A)).append("  ");
-                // 今週の賭け (押すと選ぶ / 外す。三つまで)
-                java.util.Set<String> chosen = WAGERS.getOrDefault(mine, new LinkedHashSet<>());
-                MutableComponent w = Component.translatable("message.skyabyss.tower.wager.head", Math.round(TowerWagers.SHARD_BONUS * 100));
-                for (String id : TowerWagers.thisWeek()) {
-                    boolean on = chosen.contains(id);
-                    w.append(" ").append(Component.literal(on ? "[✔ " : "[").append(Component.translatable("message.skyabyss.tower.wager." + id)).append("]")
-                            .withStyle(Style.EMPTY.withColor(on ? 0xFF9A6A : 0xB8A0D8).withUnderlined(true)
-                                    .withHoverEvent(new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT,
-                                            Component.translatable("message.skyabyss.tower.wager." + id + ".desc")))
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + COMMAND + " wager " + id))));
-                }
-                p.sendSystemMessage(w);
-            }
-            line.append(button("message.skyabyss.tower.btn.quit", "quit", 0xB0B0B8));
-        } else if (!Towers.usedToday(p)) {
-            line.append(button("message.skyabyss.tower.btn.create", "create", 0xF2D78A));
+        }
+        List<String> joinLeaders = new ArrayList<>();
+        List<Integer> joinCounts = new ArrayList<>();
+        if (mine == null) {
             for (Map.Entry<UUID, LinkedHashSet<UUID>> e : SQUADS.entrySet()) {
                 if (e.getValue().size() < Towers.MAX_SQUAD) {
-                    String leader = name(p.server, e.getKey());
-                    line.append("  ").append(button("message.skyabyss.tower.btn.join", "join " + leader, 0x9CC8F0, leader, e.getValue().size(), Towers.MAX_SQUAD));
+                    joinLeaders.add(name(p.server, e.getKey()));
+                    joinCounts.add(e.getValue().size());
                 }
             }
         }
-        line.append(line.getSiblings().isEmpty() ? Component.empty() : Component.literal("  "))
-                .append(button("message.skyabyss.tower.btn.shop", "shop", 0xC8B4FF)).append("  ")
-                .append(button("message.skyabyss.tower.btn.records", "records", 0x9CC8F0));
-        p.sendSystemMessage(line);
+        List<String> chosen = mine == null ? List.of() : new ArrayList<>(WAGERS.getOrDefault(mine, new LinkedHashSet<>()));
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new TowerDeskState(open, Towers.usedToday(p), mine == null ? "" : name(p.server, mine), members,
+                mine != null && mine.equals(p.getUUID()), Towers.MAX_SQUAD, joinLeaders, joinCounts, TowerWagers.thisWeek(), chosen, TowerWagers.MAX_PICK,
+                (int) Math.round(TowerWagers.SHARD_BONUS * 100)));
+    }
+
+    // その隊の人 (と受付のそばの人) の開いている画面を新しくする
+    static void refreshAround(ServerPlayer p) {
+        BlockPos s = spot(p.server);
+        for (ServerPlayer q : p.server.getPlayerList().getPlayers()) {
+            if (s != null && q.level().dimension() == Level.OVERWORLD && q.distanceToSqr(Vec3.atBottomCenterOf(s)) <= 32 * 32) {
+                sendState(q, false);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    static void registerPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
+        event.registrar("tower-desk-1").playToClient(TowerDeskState.TYPE, TowerDeskState.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.tower.client.TowerDeskScreen.receive(payload)));
     }
 
     static boolean create(ServerPlayer p) {
@@ -280,7 +287,7 @@ public final class TowerDesk {
             }
         }
         SQUADS.put(p.getUUID(), s);
-        menu(p);
+        refreshAround(p);
         return true;
     }
 
@@ -312,6 +319,7 @@ public final class TowerDesk {
                 Notice.hint(m, "message.skyabyss.tower.desk.joined", p.getGameProfile().getName());
             }
         }
+        refreshAround(p);
         return true;
     }
 
@@ -331,6 +339,7 @@ public final class TowerDesk {
             SQUADS.get(leader).remove(p.getUUID());
             Notice.hint(p, "message.skyabyss.tower.desk.left");
         }
+        refreshAround(p);
     }
 
     // 隊長が始める: 受付のそばにいて、資格があり、今日まだ入っていない人だけが入る

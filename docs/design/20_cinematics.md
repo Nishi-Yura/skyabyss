@@ -152,6 +152,10 @@
 - 遺物の選択画面: 場面が終わる（最後まで・スキップ・打ち切り）と、`HeartReward` の聞き手が 50 tick あとに、心臓を初めて止めた人へ専用の画面を開かせる（[30](30_heart_reward_ui.md)）。場面のない降ろしは 110 tick あと。
 - コマンド: `/skyabyss cinematic play titan_end_<巨神>`（巨神の本体を狙う）。眠りの動きは `/skyabyss titan end <巨神> sleep` を一緒に流すと見られる。
 
+### 3.6 あいだの塔を越えた `tower_clear`（13.5 秒、スキップ可。越えるたび）
+
+あいだの塔の主が倒れた瞬間、塔にいる隊の人みなに始める（`TowerFight.win`。設計 [54](54_endgame_plan.md) の 2.2）。人が橋に散らばっていても同じ絵になるよう、場面の原点を橋の北寄りの真ん中に決めて始める（`Cinematics.startAt(人, 場面, 狙う物, 前, 原点)`。本人はその場に留まる）。カメラは一続き: ① 崩れる主を橋から見上げる ② 横へ回りながら上がり、背の門が開いて主が引き戻される ③ 真ん中へ寄って門が閉じる閃光 ④ 高く引いて橋を見下ろし、灯が北から南へ並ぶ。台詞は天・主人公・天の三つ（`cinematic.skyabyss.tower.clear.1〜3`）。崩れる光・門・灯・鐘・花火はサーバーが出す（`TowerFight.tickWin`）。報いと「塔を越えた」の題は場面のあと。
+
 ## 4. 開発・確認
 
 - OP コマンド（確かめ・台本用）: `/skyabyss cinematic play <場面> [targets]`（岩鯨の場面は今いる岩鯨、いなければ前方を狙う）、`/skyabyss cinematic stop [targets]`、`/skyabyss cinematic reset [targets]`（見た記録を消す）。`targets` はセレクタ（`@a`・名前など）。省くと自分。場面は人ごとに独立。

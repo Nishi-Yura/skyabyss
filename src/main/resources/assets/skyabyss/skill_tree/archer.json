@@ -25,7 +25,7 @@
     {"id": "agi_g", "kind": "stat", "cost": 1, "x": 0, "y": 8, "arch": "pierce", "requires": ["agi_f"], "stat": "agility", "amount": 4},
     {"id": "agi_h", "kind": "stat", "cost": 1, "x": 1, "y": 8, "arch": "pierce", "requires": ["sharp_tip"], "stat": "agility", "amount": 4},
     {"id": "agi_i", "kind": "stat", "cost": 1, "x": 2, "y": 8, "arch": "pierce", "requires": ["quick_nock"], "stat": "agility", "amount": 4},
-    {"id": "lone_string", "kind": "trait", "cost": 3, "x": 1, "y": 9, "arch": "pierce", "requires": ["agi_g", "agi_h", "agi_i"], "keystone": "lone_string", "arch_points": 20},
+    {"id": "lone_string", "kind": "trait", "cost": 3, "x": 1, "y": 9, "arch": "pierce", "requires": ["agi_g", "agi_h", "agi_i"], "keystone": "lone_string", "arch_points": 12},
     {"id": "eagle_eye", "kind": "threshold", "cost": 1, "x": 0, "y": 10, "arch": "pierce", "requires": ["lone_string"], "stat": "agility", "at": 40, "effect": {"projectile": 0.08}},
     {"id": "last_arrow", "kind": "effect", "cost": 2, "x": 2, "y": 10, "arch": "pierce", "requires": ["lone_string"], "effect": {"skill_power": 0.05, "cooldown": -0.04}},
     {"id": "snare_shot", "kind": "active", "cost": 2, "x": 3, "y": 4, "arch": "trap", "requires": ["agi_c"], "skill": "snare_shot"},
@@ -67,6 +67,19 @@
     {"id": "hawk_eye_3", "kind": "rank", "cost": 1, "x": 8, "y": 9, "arch": "rain", "requires": ["str_j"], "skill": "hawk_eye"},
     {"id": "rain_comet", "kind": "mutation", "cost": 2, "x": 7, "y": 10, "arch": "rain", "requires": ["storm_caller"], "mutation": "rain_comet"},
     {"id": "thunder_arm", "kind": "threshold", "cost": 1, "x": 6, "y": 10, "arch": "rain", "requires": ["storm_caller"], "stat": "strength", "at": 36, "effect": {"projectile": 0.06, "attack": 0.04}},
-    {"id": "endless_rain", "kind": "effect", "cost": 2, "x": 8, "y": 10, "arch": "rain", "requires": ["storm_caller"], "effect": {"mana": 0.1, "regen": 0.06}}
+    {"id": "endless_rain", "kind": "effect", "cost": 2, "x": 8, "y": 10, "arch": "rain", "requires": ["storm_caller"], "effect": {"mana": 0.1, "regen": 0.06}},
+    {"id": "cheap_cloud_pierce", "kind": "effect", "cost": 1, "x": 2, "y": 1, "requires": ["agi_a"], "effect": {"mana_cost@cloud_pierce": -0.25}},
+    {"id": "quick_cloud_pierce", "kind": "effect", "cost": 1, "x": 6, "y": 1, "requires": ["str_a"], "effect": {"cooldown@cloud_pierce": -0.2}},
+    {"id": "cheap_archer_leap", "kind": "effect", "cost": 1, "x": 3, "y": 3, "requires": ["archer_leap"], "effect": {"mana_cost@archer_leap": -0.25}},
+    {"id": "quick_archer_leap", "kind": "effect", "cost": 1, "x": 5, "y": 3, "requires": ["archer_leap"], "effect": {"cooldown@archer_leap": -0.2}},
+    {"id": "pierce_cloud_pierce_keen", "kind": "effect", "cost": 1, "x": 0, "y": 11, "arch": "pierce", "requires": ["eagle_eye", "last_arrow"], "effect": {"power@cloud_pierce": 0.12}},
+    {"id": "pierce_mana_kill", "kind": "effect", "cost": 2, "x": 1, "y": 11, "arch": "pierce", "requires": ["eagle_eye", "last_arrow"], "effect": {"mana_kill": 2.0}},
+    {"id": "pierce_archer_leap_keen", "kind": "effect", "cost": 1, "x": 2, "y": 11, "arch": "pierce", "requires": ["eagle_eye", "last_arrow"], "effect": {"power@archer_leap": 0.12}},
+    {"id": "cheap_snare_shot", "kind": "effect", "cost": 1, "x": 3, "y": 11, "arch": "trap", "requires": ["bone_cage", "still_air"], "effect": {"mana_cost@snare_shot": -0.25}},
+    {"id": "trap_mana_kill", "kind": "effect", "cost": 2, "x": 4, "y": 11, "arch": "trap", "requires": ["bone_cage", "still_air"], "effect": {"mana_kill": 2.0}},
+    {"id": "quick_bone_trap", "kind": "effect", "cost": 1, "x": 5, "y": 11, "arch": "trap", "requires": ["bone_cage", "still_air"], "effect": {"cooldown@bone_trap": -0.2}},
+    {"id": "cheap_sky_rain", "kind": "effect", "cost": 1, "x": 6, "y": 11, "arch": "rain", "requires": ["thunder_arm", "endless_rain"], "effect": {"mana_cost@sky_rain": -0.25}},
+    {"id": "rain_mana_kill", "kind": "effect", "cost": 2, "x": 7, "y": 11, "arch": "rain", "requires": ["thunder_arm", "endless_rain"], "effect": {"mana_kill": 2.0}},
+    {"id": "quick_sky_rain", "kind": "effect", "cost": 1, "x": 8, "y": 11, "arch": "rain", "requires": ["thunder_arm", "endless_rain"], "effect": {"cooldown@sky_rain": -0.2}}
   ]
 }

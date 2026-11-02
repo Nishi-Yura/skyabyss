@@ -1,0 +1,20 @@
+# 塔の受付の画面 (2026-11-02 の声「なぜ大規模レイドの入り方がチャット？」)。
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_desk_ui.txt -PshotsName=tower_desk_ui
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 20
+open tower_desk
+wait 10
+shot desk_leader
+close

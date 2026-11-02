@@ -53,6 +53,12 @@ public final class TitanGearSets {
         return Collections.unmodifiableList(SETS);
     }
 
+    // 共鳴の炉で交換できる表 (専用の逸品があるもの)。雲海の神器とあいだの塔は交換の品を持たない (神器は物語と塔で手に入る。
+    // 2026-11-02 の声「雲海の神器、あいだの塔は交換で手に入らなくない？いらない要素では」)。サーバーと手元で同じ並び
+    public static synchronized List<TitanGearSet> exchangeable() {
+        return SETS.stream().filter(s -> !s.exclusives().isEmpty()).toList();
+    }
+
     @Nullable
     public static TitanGearSet get(String titan) {
         for (TitanGearSet s : SETS) {

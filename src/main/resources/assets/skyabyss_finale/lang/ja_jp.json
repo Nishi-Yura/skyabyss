@@ -511,7 +511,7 @@
   "item.skyabyss.divine_moth_dagger.desc": "二枚の翅の刃の短剣。打つと灯の粉 (5 秒、相手が光る)。粉のある相手を背から刺すと ×1.5。",
   "item.skyabyss.divine_moth_dagger.story": "「灯に寄る者は、灯に裁かれる。」",
   "item.skyabyss.divine_keeper_bell_staff": "鐘守の鈴杖",
-  "item.skyabyss.divine_keeper_bell_staff.desc": "小さな鐘楼を頂く鈴杖。4 度目ごとに沈黙の鐘: まわり 5 の敵を 2 秒遅く、まわり 5 の仲間 (自分も) の体力 2。",
+  "item.skyabyss.divine_keeper_bell_staff.desc": "小さな鐘楼を頂く鈴杖。4 度目ごとに沈黙の鐘: まわり 5 の敵を 2 秒遅く、まわり 5 の仲間 (自分も) の体力 20。",
   "item.skyabyss.divine_keeper_bell_staff.story": "「最後の鐘守は、最後まで鳴らし続けた。」",
   "item.skyabyss.divine_plume_charm": "巡礼の羽飾り",
   "item.skyabyss.divine_plume_charm.desc": "金の軸の白い風切羽。落ちる傷が無くなる。空中で打つ傷 +8%。",

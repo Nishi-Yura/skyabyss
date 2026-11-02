@@ -36,6 +36,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AffixEvents {
     private static final int THIRST_INTERVAL = 5;
+    private static final int STEAL_INTERVAL = 12;
+    private static final java.util.Map<Player, Long> lastSteal = new java.util.WeakHashMap<>();
     private static final float THIRST_MAX_HEAL = 2f;
     // 冴えの上限 (ヒロイック以上の最大 12.5% より少し上。今は一つの武器にしか付かないので届かない)
     private static final double KEEN_CAP = 0.15;
@@ -113,6 +115,28 @@ public final class AffixEvents {
         return Math.min(AffixRules.WARD_CAP, sum);
     }
 
+    // 着ている防具のマナの戻りの割合の合計 (0.1 = +10%)
+    public static double manaRegen(LivingEntity entity) {
+        double sum = 0;
+        for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+            ItemStack stack = entity.getItemBySlot(slot);
+            if (AffixRules.slotOf(stack.getItem()) == AffixType.Slot.ARMOR) {
+                sum += AffixRules.value(stack, AffixType.MANA_REGEN);
+            }
+        }
+        return sum;
+    }
+
+    // 手の武器の技の威力 (0.06 = +6%)。要るレベル・要る基礎に届いていなければ効かない
+    public static double spellPower(Player player) {
+        ItemStack hand = player.getMainHandItem();
+        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)
+                || !jp.revati.skyabyss.rpg.skill.GearRequirement.met(player, hand)) {
+            return 0;
+        }
+        return AffixRules.value(hand, AffixType.SPELL);
+    }
+
     // 技の待ちに掛ける倍率 (手の武器の冴え)
     public static double cooldownScale(Player player) {
         ItemStack hand = player.getMainHandItem();
@@ -144,10 +168,18 @@ public final class AffixEvents {
             return;
         }
         ItemStack hand = player.getMainHandItem();
-        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)) {
-            return;
+        boolean weapon = AffixRules.slotOf(hand.getItem()) == AffixType.Slot.WEAPON && GearLevel.meets(player, hand);
+        long tick = player.level().getGameTime();
+        // マナ吸収: 当てるたびにマナ +値 (0.6 秒に一度)。武器の特性と技の木の節 (mana_hit) を足す
+        double steal = (weapon ? AffixRules.value(hand, AffixType.MANA_STEAL) : 0) + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_hit");
+        if (steal > 0) {
+            Long lastS = lastSteal.get(player);
+            if (lastS == null || tick - lastS >= STEAL_INTERVAL) {
+                lastSteal.put(player, tick);
+                jp.revati.skyabyss.rpg.skill.SkillManager.gainMana(player, steal);
+            }
         }
-        double thirst = AffixRules.value(hand, AffixType.THIRST);
+        double thirst = weapon ? AffixRules.value(hand, AffixType.THIRST) : 0;
         if (thirst <= 0 || player.getHealth() >= player.getMaxHealth()) {
             return;
         }
