@@ -130,6 +130,19 @@ public final class SelfTestRunner {
         // 職の前の技ごとの検査 (木をまたいだ枠で技を試す) は、職 (持った武器) を見ずに。職の検査は "jobs"
         steps.addAll(jp.revati.skyabyss.rpg.skill.JobSelfTest.steps());
         // 木 v2 (48) は外して、前の覚え方 (技の段を直接) で技の仕組みだけを検める。木の決まりは "tree"
+        // 神器の大きな能力 (03 の 13.4)
+        steps.add(Step.once("mythic", jp.revati.skyabyss.item.mythic.MythicSelfTest::runSelfTest));
+        // 型の溜まるもの (48 の 2.6)。技の段を直接決めるので、木と職は外す
+        steps.add(Step.once("gauges", server -> {
+            jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
+            jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(false);
+            try {
+                jp.revati.skyabyss.rpg.skill.GaugeSelfTest.runSelfTest(server);
+            } finally {
+                jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = false;
+                jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(true);
+            }
+        }));
         steps.add(Step.once("skills", server -> {
             jp.revati.skyabyss.rpg.skill.SkillManager.IGNORE_JOBS = true;
             jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.setEnabled(false);

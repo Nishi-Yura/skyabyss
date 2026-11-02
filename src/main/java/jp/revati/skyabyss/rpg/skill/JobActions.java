@@ -51,6 +51,8 @@ public final class JobActions {
         final ServerPlayer owner;
         final float damage;
         final Vec3 dir;
+        // 熾火 (火の型の溜まるもの) で広がった弾ける広さ
+        double radiusBonus;
         Vec3 pos;
         int age;
 
@@ -171,7 +173,11 @@ public final class JobActions {
     static String emberOrb(ServerPlayer player, int rank) {
         Vec3 dir = player.getLookAngle().normalize();
         Vec3 from = player.getEyePosition().add(dir.scale(0.8)).subtract(0, 0.2, 0);
-        ORBS.add(new Orb(player.serverLevel(), player, spell(player, SkillRules.orbMultiplier(rank)), from, dir));
+        // 熾火 (火の型): 熾火一つにつき、大きく (+1 ブロック) 強く (+20%)。玉は飛んでから弾けるので、撃つときに決める
+        int stacks = Gauges.orbStacks(player);
+        Orb orb = new Orb(player.serverLevel(), player, spell(player, SkillRules.orbMultiplier(rank)) * (float) Gauges.orbPower(stacks), from, dir);
+        orb.radiusBonus = stacks;
+        ORBS.add(orb);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8f, 1.1f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
@@ -207,7 +213,7 @@ public final class JobActions {
         level.sendParticles(ParticleTypes.EXPLOSION, c.x, c.y, c.z, 1, 0, 0, 0, 0);
         level.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 30, 0.8, 0.5, 0.8, 0.06);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6f, 1.4f);
-        double r = SkillRules.ORB_RADIUS;
+        double r = SkillRules.ORB_RADIUS + o.radiusBonus;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r), e -> SkillActions.isFoe(owner, e))) {
             if (e.distanceToSqr(c) - e.getBbWidth() <= r * r) {
                 SkillActions.hit(owner, e, o.damage, Skill.EMBER_ORB);
@@ -224,6 +230,7 @@ public final class JobActions {
         for (LivingEntity e : SkillActions.foesAround(player, r, 1.0, 2.0)) {
             SkillActions.hit(player, e, dmg, Skill.FROST_TIDE);
             SkillEffects.slow(e, SkillRules.FROST_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.frostTicks(rank));
+            Gauges.chill(e, SkillRules.frostTicks(rank));
             level.sendParticles(ParticleTypes.SNOWFLAKE, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
         }
         for (double rr = 1.5; rr <= r; rr += 1.5) {
@@ -335,6 +342,8 @@ public final class JobActions {
         int ticks = SkillRules.curseTicks(rank);
         SkillEvents.mark(target, SkillRules.curseBonus(rank), level.getGameTime(), ticks, player);
         SkillEffects.timedMod(target, Attributes.ATTACK_DAMAGE, "curse_mark", -SkillRules.CURSE_WEAKEN, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, ticks);
+        // 呪いの重ね (呪いの型の溜まるもの)
+        Gauges.onCurse(player, target, rank, ticks);
         line(level, player.getEyePosition().subtract(0, 0.3, 0), stop[0], ParticleTypes.WITCH, 0.6);
         level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 8, 0.3, 0.2, 0.3, 0.01);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 1.3f);
@@ -347,18 +356,20 @@ public final class JobActions {
     static String lampCharm(ServerPlayer player, int rank) {
         ServerLevel level = player.serverLevel();
         Vec3 at = player.position();
-        SkillEffects.zone(SkillEffects.ZoneKind.LAMP, player, at, SkillRules.LAMP_RADIUS, SkillRules.lampTicks(rank), rank);
-        lampPulse(player, at, rank);
+        // 調べ (守りの唄の型の溜まるもの): 調べ一つにつき広く (+1 ブロック) 長く (+3 秒)
+        double radius = SkillRules.LAMP_RADIUS + Gauges.lampRadius(player);
+        SkillEffects.zone(SkillEffects.ZoneKind.LAMP, player, at, radius, SkillRules.lampTicks(rank) + Gauges.lampTicks(player), rank);
+        lampPulse(player, at, rank, radius);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 0.8f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
     }
 
     // 灯のそばの自分と仲間の吸収を、段の量まで満たす (SkillEffects の LAMP の場が 2 秒ごとに呼ぶ)
-    static void lampPulse(ServerPlayer owner, Vec3 center, int rank) {
+    static void lampPulse(ServerPlayer owner, Vec3 center, int rank, double radius) {
         float amount = (float) (SkillRules.lampAbsorb(rank) * SkillEffects.supportPower(owner, Skill.LAMP_CHARM));
         List<ServerPlayer> near = new ArrayList<>();
-        double r2 = SkillRules.LAMP_RADIUS * SkillRules.LAMP_RADIUS;
+        double r2 = radius * radius;
         if (owner.isAlive() && owner.position().distanceToSqr(center) <= r2) {
             near.add(owner);
         }
@@ -372,7 +383,7 @@ public final class JobActions {
         }
         ServerLevel level = owner.serverLevel();
         level.sendParticles(ParticleTypes.GLOW, center.x, center.y + 0.8, center.z, 6, 0.2, 0.3, 0.2, 0.01);
-        ring(level, center, SkillRules.LAMP_RADIUS, ParticleTypes.END_ROD, 20);
+        ring(level, center, radius, ParticleTypes.END_ROD, (int) (radius * 7));
     }
 
     // ---------------------------------------------------------------- 毎 tick (SkillActions.tick から)

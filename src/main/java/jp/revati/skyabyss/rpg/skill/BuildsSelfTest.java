@@ -534,7 +534,8 @@ final class BuildsSelfTest {
         for (Skill s : new Skill[] {Skill.TITAN_CLEAVE, Skill.WHALE_SWEEP, Skill.WIND_REND, Skill.EMBER_HAMMER, Skill.LUNGE, Skill.BONE_TRAP}) {
             double mana = perMana(s, s.maxRank);
             double cooldownLimit = mana * SkillRules.manaCost(s, s.maxRank) / (SkillRules.cooldownTicks(s, s.maxRank) / 20.0);
-            check(f, cooldownLimit / basic <= 0.45, s.id + " alone is too strong (" + cooldownLimit + " per second vs " + basic + ")");
+            // 待ちを 0.65 倍にした (00 の 343 A。主の隙に技を重ねる) ぶん、一本だけの瞬間の上限も 1 / 0.65 倍まで許す。長い戦いはマナで縛る (下の bonus)
+            check(f, cooldownLimit / basic <= 0.45 / SkillRules.COOLDOWN_SCALE, s.id + " alone is too strong (" + cooldownLimit + " per second vs " + basic + ")");
             best = Math.max(best, mana);
         }
         double skillDps = regen * best;

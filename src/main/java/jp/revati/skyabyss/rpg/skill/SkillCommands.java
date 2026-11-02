@@ -83,6 +83,12 @@ public final class SkillCommands {
                                     SkillManager.setMana(target(ctx), DoubleArgumentType.getDouble(ctx, "amount"));
                                     return done(ctx);
                                 }))))
+                        // 型の溜まるもの (Gauges) を決める: gauge <人> <型 (cleaver など) | off> <値>。撮影・確かめ用 (off で点の決まりに戻す)
+                        .then(Commands.literal("gauge").then(player().then(Commands.argument("kind", StringArgumentType.word())
+                                .then(Commands.argument("value", IntegerArgumentType.integer(0, 200)).executes(ctx -> {
+                                    boolean ok = Gauges.devSet(target(ctx), StringArgumentType.getString(ctx, "kind"), IntegerArgumentType.getInteger(ctx, "value"));
+                                    return ok ? done(ctx) : 0;
+                                })))))
                         .then(Commands.literal("cooldowns").then(player().executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).cooldowns.clear();

@@ -171,7 +171,8 @@ public final class AffixEvents {
         boolean weapon = AffixRules.slotOf(hand.getItem()) == AffixType.Slot.WEAPON && GearLevel.meets(player, hand);
         long tick = player.level().getGameTime();
         // マナ吸収: 当てるたびにマナ +値 (0.6 秒に一度)。武器の特性と技の木の節 (mana_hit) を足す
-        double steal = (weapon ? AffixRules.value(hand, AffixType.MANA_STEAL) : 0) + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_hit");
+        double steal = (weapon ? AffixRules.value(hand, AffixType.MANA_STEAL) : 0) + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_hit")
+                + jp.revati.skyabyss.item.WeaponLines.manaSteal(player);
         if (steal > 0) {
             Long lastS = lastSteal.get(player);
             if (lastS == null || tick - lastS >= STEAL_INTERVAL) {

@@ -128,7 +128,8 @@ public final class SkillManager {
                 scale += SkillRules.starReadingRegen(reading);
             }
             // 野の装備のマナの戻り (docs/design/51)
-            scale += jp.revati.skyabyss.item.wild.WildGearEvents.manaRegenBonus(player) + jp.revati.skyabyss.item.affix.AffixEvents.manaRegen(player);
+            scale += jp.revati.skyabyss.item.wild.WildGearEvents.manaRegenBonus(player) + jp.revati.skyabyss.item.affix.AffixEvents.manaRegen(player)
+                    + jp.revati.skyabyss.item.WeaponLines.sum(player, jp.revati.skyabyss.item.WeaponLines.Stat.MANA_REGEN);
             d.mana = (float) Math.min(max, d.mana + SkillRules.regenPerSecond(max, calm) * scale / SkillRules.SECOND);
         }
     }
@@ -509,8 +510,9 @@ public final class SkillManager {
     public static int cooldownFor(Player player, Skill skill) {
         SkillData d = get(player);
         int rank = d.rank(skill);
-        int ticks = SkillRules.cooldownTicks(skill, rank, runeOf(player, skill));
-        ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill) * jp.revati.skyabyss.item.wild.WildGearEvents.cooldownScale(player));
+        int ticks = SkillRules.cooldownTicks(skill, rank, runeOf(player, skill)) + jp.revati.skyabyss.item.mythic.MythicAbilities.cooldownExtra(player, skill);
+        ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill) * jp.revati.skyabyss.item.wild.WildGearEvents.cooldownScale(player)
+                * Math.max(0.5, 1 + jp.revati.skyabyss.item.WeaponLines.sum(player, jp.revati.skyabyss.item.WeaponLines.Stat.COOLDOWN)));
         return jp.revati.skyabyss.rebirth.Rebirth.scaleCooldown(player, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks));
     }
 
@@ -519,7 +521,7 @@ public final class SkillManager {
         int base = SkillRules.manaCost(skill, get(player).rank(skill));
         // 星の誓い (要): 星読みの技のマナ +25%
         double oath = skill.tree == SkillTree.STAR && get(player).knows(Skill.STAR_OATH) ? 1 + SkillRules.STAR_OATH_MANA : 1;
-        return base == 0 ? 0 : Math.max(1, (int) Math.round(base * oath * SkillBuild.manaScale(player, skill)));
+        return base == 0 ? 0 : Math.max(1, (int) Math.round(base * oath * SkillBuild.manaScale(player, skill) * jp.revati.skyabyss.item.mythic.MythicAbilities.manaScale(player, skill)));
     }
 
     public static boolean nearForge(Player player) {
@@ -607,6 +609,10 @@ public final class SkillManager {
         }
         settleMana(player);
         int cost = manaCostFor(player, skill);
+        // 暁の灯杖「命の灯」: 足りないマナを体力で払う
+        if (d.mana + 1e-4 < cost && jp.revati.skyabyss.item.mythic.MythicAbilities.payWithLife(player, cost - d.mana)) {
+            d.mana = cost;
+        }
         if (d.mana + 1e-4 < cost) {
             Notice.bar(player, ModText.deny("message.skyabyss.skill.no_mana"));
             player.playNotifySound(Skills.SOUND_FAIL.get(), SoundSource.PLAYERS, 0.6f, 1f);
@@ -616,6 +622,8 @@ public final class SkillManager {
         SkillActions.cooldownScale = 1;
         long now = player.level().getGameTime();
         SkillActions.fxTarget = null;
+        // 舞 (風の舞い手の溜まるもの): 今の段の分だけ、この技の待ちが短い
+        double gaugeCooldown = Gauges.cooldownScale(player, skill);
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
             Notice.bar(player, ModText.deny(failure));
@@ -625,8 +633,10 @@ public final class SkillManager {
         }
         d.mana = Math.max(0, d.mana - cost);
         // 刻印・敏捷の刻み目・手の武器の特性「冴え」で待ちが変わる (03 の 8章)。連ねは当たると半分
-        d.cooldowns.put(skill.id, Math.max(1, (int) Math.round(cooldownFor(player, skill) * SkillActions.cooldownScale)));
+        d.cooldowns.put(skill.id, Math.max(1, (int) Math.round(cooldownFor(player, skill) * SkillActions.cooldownScale * gaugeCooldown)));
         SkillActions.cooldownScale = 1;
+        // 型の溜まるもの: 溜める技・放つ技 (rpg/skill/Gauges)
+        Gauges.afterCast(player, skill);
         // 炉の記憶: 技を使うたびに熾が 1 つ溜まる (次の近接で使い切る)
         int memory = d.rank(Skill.FORGE_MEMORY);
         if (memory > 0) {
@@ -651,6 +661,8 @@ public final class SkillManager {
         jp.revati.skyabyss.story.finale.mob.FounderBoss.heardSkill(player);
         // 灯守の法衣 (4 部位): 技を使うと、まわりの仲間に灯の守り
         jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.onSkillCast(player);
+        // 神器の大きな能力 (巻き戻し・羽の嵐)
+        jp.revati.skyabyss.item.mythic.MythicAbilities.onSkillCast(player, skill, rank);
         return CastResult.OK;
     }
 

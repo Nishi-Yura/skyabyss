@@ -204,12 +204,13 @@ public final class SkillActions {
 
     // 技の傷を入れる。共鳴の声・鍛え人の目・木の印の倍率を掛け、当たった敵には波紋の鈍足が付く
     public static boolean hit(ServerPlayer player, LivingEntity target, float amount, Skill skill) {
-        float scaled = amount * (float) SkillEffects.damagePower(player, skill);
+        float scaled = amount * (float) (SkillEffects.damagePower(player, skill) * Gauges.versus(player, target, skill));
         if (isLarge(target)) {
             scaled *= (float) (1 + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "big_target"));
         }
         boolean hurt = deal(player, target, scaled, skill, false);
         if (hurt) {
+            Gauges.onSkillHit(player, target, skill);
             int ripple = SkillManager.get(player).rank(Skill.RIPPLE);
             if (ripple > 0) {
                 SkillEffects.slow(target, SkillRules.rippleSlow(ripple) * (isLarge(target) ? 0.5 : 1.0), SkillRules.RIPPLE_TICKS);
@@ -849,6 +850,8 @@ public final class SkillActions {
         if (rune == 2) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin.add(dir.scale(1.5)), SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
         }
+        // 潮位 (引き潮の型の溜まるもの): 引いた敵の数だけ
+        Gauges.onEbb(player, foes.size());
         if (rune == 4) {
             // 結ばれた敵 (最も近い 1 体) が動くと、近くの敵が引かれる
             LivingEntity tied = foes.get(0);
@@ -1081,7 +1084,11 @@ public final class SkillActions {
         }
         ServerLevel level = player.serverLevel();
         int rune = rune(player, Skill.CLOUD_PIERCE);
-        int pierce = SkillRules.piercePierce(rank) + (WeaponType.has(player, WeaponType.RANGED) ? 1 : 0);
+        int pierce = SkillRules.piercePierce(rank) + (WeaponType.has(player, WeaponType.RANGED) ? 1 : 0) + Gauges.pierceBonus(player);
+        // 側の目の弓の欠点: 雲穿ちが貫かない
+        if (jp.revati.skyabyss.item.mythic.MythicAbilities.noPierce(player)) {
+            pierce = 0;
+        }
         double damageScale = SkillEffects.damagePower(player, Skill.CLOUD_PIERCE);
         float speed = SkillRules.PIERCE_SPEED;
         if (rune == 1) {

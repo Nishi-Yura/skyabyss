@@ -83,6 +83,7 @@ public final class SkillEvents {
         d.tickCooldowns();
         long now = player.level().getGameTime();
         SkillPassives.tick(player, d, now);
+        Gauges.tick(player);
         SkillManager.regenTick(player, d, now);
         SkillManager.sendMana(player, false);
         if (player.tickCount % 20 == 7) {
@@ -140,6 +141,7 @@ public final class SkillEvents {
     static void onServerStopped(ServerStoppedEvent event) {
         SkillActions.clear();
         MARKS.clear();
+        Gauges.clear();
     }
 
     // ---------------------------------------------------------------- 矢が放たれた
@@ -280,6 +282,10 @@ public final class SkillEvents {
                     player.heal((float) Math.min(2.0, amount * steal));
                 }
             }
+            // 孤り (孤風の型の溜まるもの): 満ちていれば、この一撃 ×2.5
+            if (melee) {
+                amount *= (float) Gauges.meleeMultiplier(player);
+            }
             // 炉の記憶: 溜まった熾を使い切る
             if (melee && d.embers > 0) {
                 amount *= (float) (1 + SkillRules.FORGE_MEMORY_BONUS * d.embers);
@@ -337,6 +343,7 @@ public final class SkillEvents {
                 if (d.knows(Skill.RIPOSTE)) {
                     d.riposteUntil = now + SkillRules.RIPOSTE_WINDOW;
                 }
+                Gauges.onHurt(player);
                 // 岩の返り: 狙いを引いた敵の攻撃を受けた
                 if (d.tauntRune == 3 && d.tauntUntil >= now && SkillEffects.tauntedBy(from, player)) {
                     d.rockReturn = SkillRules.ROCK_RETURN_BONUS;
@@ -345,10 +352,19 @@ public final class SkillEvents {
         }
         if (source.getEntity() instanceof ServerPlayer attackerPlayer && !SkillActions.riderless()) {
             SkillData ad = SkillManager.get(attackerPlayer);
+            // 型の溜まるもの: ふつうの近接 (技でない) が当たった・ふつうの矢 (技の矢でない) が当たった
+            if (victim != attackerPlayer && SkillActions.dealing() == null && SkillActions.isFoe(attackerPlayer, victim)) {
+                if (source.getDirectEntity() == attackerPlayer) {
+                    Gauges.onMelee(attackerPlayer, victim);
+                } else if (source.getDirectEntity() instanceof AbstractArrow arrow && !arrow.getTags().contains(SkillActions.PIERCE_TAG)) {
+                    Gauges.onArrow(attackerPlayer);
+                }
+            }
             // 焼き入れ: 熾の武器の近接に、炎の傷が乗る
             if (ad.temperUntil >= now && source.getDirectEntity() == attackerPlayer && SkillActions.dealing() != Skill.SKY_RAIN
                     && !(victim instanceof Player) && victim != attackerPlayer) {
-                double mult = ad.temperMult + (WeaponType.has(attackerPlayer, WeaponType.HEAVY) ? SkillRules.TEMPER_HEAVY_BONUS : 0);
+                double mult = (ad.temperMult + (WeaponType.has(attackerPlayer, WeaponType.HEAVY) ? SkillRules.TEMPER_HEAVY_BONUS : 0))
+                        * (Gauges.temperBoost(attackerPlayer) ? 2 : 1);
                 float extra = (float) (attackerPlayer.getAttributeValue(Attributes.ATTACK_DAMAGE) * mult * SkillEffects.damagePower(attackerPlayer, Skill.TEMPER));
                 if (extra > 0) {
                     SkillActions.hitPlain(attackerPlayer, victim, extra, Skill.TEMPER);
@@ -449,6 +465,7 @@ public final class SkillEvents {
             }
             d.riposteUntil = 0;
             d.embers = 0;
+            Gauges.reset(player);
             d.temperUntil = 0;
             d.rockReturn = 0;
             SkillManager.sync(player);

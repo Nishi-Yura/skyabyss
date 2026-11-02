@@ -114,7 +114,17 @@ public final class SkillRules {
     }
 
     // ---------------------------------------------------------------- 消費マナとクールダウン
+    // 技の待ちとマナ (docs/design/48 の 2.5。2026-11-02 の 00 の 343 A): 待ちを今の 6〜7 割に縮め、そのぶんマナを少し重くする。
+    // 主の大技のあとの隙 (3 秒) に技を重ねられ、打ち手の泉・マナ吸収で回す遊びにする
+    public static final double COOLDOWN_SCALE = 0.65;
+    public static final double MANA_SCALE = 1.15;
+
     public static int manaCost(Skill skill, int rank) {
+        int base = baseManaCost(skill, rank);
+        return base <= 0 ? base : Math.max(1, (int) Math.round(base * MANA_SCALE));
+    }
+
+    static int baseManaCost(Skill skill, int rank) {
         return switch (skill) {
             case TITAN_CLEAVE -> 10;
             case ROCK_CALL -> 12;
@@ -162,6 +172,11 @@ public final class SkillRules {
 
     // tick。段が上がると短くなる技もある (刻印の分は別。cooldownTicks(skill, rank, rune))
     public static int cooldownTicks(Skill skill, int rank) {
+        int base = baseCooldownTicks(skill, rank);
+        return base <= 0 ? base : Math.max(SkillRules.GLOBAL_COOLDOWN, (int) Math.round(base * COOLDOWN_SCALE));
+    }
+
+    static int baseCooldownTicks(Skill skill, int rank) {
         int r = Math.max(1, rank);
         return switch (skill) {
             case TITAN_CLEAVE -> 8 * SECOND;

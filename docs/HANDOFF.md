@@ -1,6 +1,20 @@
 # 引き継ぎ（2026-11-02 の夜）
 
-ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空。
+ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空（340〜345 は 2026-11-02 の午後に答えが出て作った）。
+
+## 2026-11-02 の夕方: 神器の大きな能力・武器の数値の行・型の溜まるもの・待ちとマナ（340〜345 をみな推奨で）
+
+声「選び終えた」（選ぶページの 40 問すべておすすめ）。
+
+- **待ちとマナ**（48 の 2.5）: どの技も待ち ×0.65（`SkillRules.COOLDOWN_SCALE`）、マナ ×1.15（`MANA_SCALE`）。`BuildsSelfTest` の一本だけの上限を 0.45 / 0.65 に。
+- **型の溜まるもの**（48 の 2.6）: `rpg/skill/Gauges`（18 種。型に 8 点で出る）。つなぎ: `SkillActions.hit`（onSkillHit・versus）、`SkillEffects.damagePower`（power）、`SkillManager.cast`（cooldownScale・afterCast）、`SkillEvents`（近接・傷・矢・tick）、`JobActions`（熾火の玉の大きさ・凍て潮の冷え・呪いの重ね・灯の守り札の広さ）、`ebbTide`・`pierce`。帯はマナの帯の上（`VitalsHud.drawGauge`、`GaugePayload`。通信の版 7）。技の木の説明に型の力の行。開発用 `/skyabyss skill gauge <人> <型> <値|off>`。自己テスト `gauges`。
+- **神器の大きな能力**（03 の 13.4）: `item/mythic/MythicAbilities`（18 本、欠点つき）。前の小さな効き方は `DivineGearEvents`・`DivineSecondEvents`・`TowerGearEvents` から外した（防具・装飾・心核・約束の円はそのまま）。説明文 18 本（ja/en）。終章（50）と塔（54）の表も新しい能力に。自己テスト `mythic`。
+- **武器の数値の行**（03 の 1.6）: `item/WeaponLines`（職ごとの候補から品の id で決まる行。階級で本数と大きさ。エピック以上は赤い欠点の行。神器は欠点なし）。説明の最後に緑と赤の行。自己テスト `mythic` に階級ごとの本数。
+- 確かめ: compileJava、`check_lang_keys`・`check_text_fit`、自己テスト `mythic,gauges,skills,affix,gear,item audit,growth,tower,cloudsea,jobs,tree` みな PASSED。撮影 `tools/shots/gauges_mythic.txt`（帯 3・技の木の説明・武器の説明 6）。ゲームの中で戦っての手触り（溜まるものの回し・神器の能力の強さ・数値の行のつり合い）は見ていない。
+
+## 2026-11-02 の午後: 神器・武器・技の回しの見直しの案
+
+声「Wynncraft のミシックみたいに神器にはそれぞれ一つ特出した特殊能力ある？」「武器の良さでてる？」「楽しいスキル回しできる？」→ 調べた見立て: 神器の固有効果はヒロイックと同じくらいの小さな追撃、武器は 1 秒あたりをそろえているので差が薄い、技は待ちが長くつながりが少ない。「案をまとめて」で選ぶページ https://claude.ai/artifact/NbFMC5stEczhu1gEMJB9Zn （db の `choices`、40 問。生成 `tools/gen/review/mythic_rotation_page.py`、中身の全文 `docs/review/mythic_rotation_1102/index.md`、00 の 340〜345）。答えが来たら `ArtifactData list choices` で読み、03・48 の本文に書いて作る。
 
 ## 2026-11-02 の昼: 塔の主を案 C「門を背負う者」に
 

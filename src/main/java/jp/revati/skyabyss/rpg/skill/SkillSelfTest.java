@@ -300,7 +300,7 @@ public final class SkillSelfTest {
         SkillManager.CastResult r = SkillManager.cast(p, 0);
         check(f, r == SkillManager.CastResult.OK, "casting titan cleave returned " + r);
         check(f, zombie.getHealth() < before - 4, "titan cleave did not hurt the zombie (" + before + " -> " + zombie.getHealth() + ")");
-        check(f, Math.abs(pd.mana - 10) < 1e-4, "titan cleave did not cost 10 mana: " + pd.mana);
+        check(f, Math.abs(pd.mana - (20 - SkillRules.manaCost(Skill.TITAN_CLEAVE, 2))) < 1e-4, "titan cleave did not cost its mana: " + pd.mana);
         check(f, pd.cooldown(Skill.TITAN_CLEAVE) == SkillRules.cooldownTicks(Skill.TITAN_CLEAVE, 2) && pd.globalCooldown == SkillRules.GLOBAL_COOLDOWN,
                 "titan cleave cooldown did not start");
         check(f, zombie.invulnerableTime == 0, "a skill hit left the zombie invulnerable (it would eat the next normal attack)");
@@ -353,7 +353,7 @@ public final class SkillSelfTest {
         pd.globalCooldown = 0;
         int rains = SkillActions.pendingRains();
         r = SkillManager.cast(p, 2);
-        check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - 4) < 1e-4,
+        check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - (20 - SkillRules.manaCost(Skill.SKY_RAIN, 1))) < 1e-4,
                 "sky rain was not scheduled (" + r + ", mana " + pd.mana + ")");
         SkillActions.clear();
 

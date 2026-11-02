@@ -1775,6 +1775,15 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             for (String arch : t.archetypes) {
                 lines.add(Component.translatable("gui.skyabyss.tree.arch_line", Component.translatable(t.archKey(arch)), d.archPoints(tree, arch)).withColor(SOFT).getVisualOrderText());
             }
+            // 型の力 (溜まるもの。rpg/skill/Gauges): その型に 8 点使うと出る
+            for (String arch : t.archetypes) {
+                var gk = t.job == null ? null : jp.revati.skyabyss.rpg.skill.Gauges.Kind.of(t.job, arch);
+                if (gk != null) {
+                    boolean on = d.archPoints(tree, arch) >= jp.revati.skyabyss.rpg.skill.Gauges.ARCH_POINTS;
+                    lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.tree.gauge_line", Component.translatable(gk.nameKey()),
+                            jp.revati.skyabyss.rpg.skill.Gauges.ARCH_POINTS, Component.translatable(gk.nameKey() + ".desc")).withColor(on ? PALE : SOFT), w));
+                }
+            }
             if (tree == SkillTree.PAST) {
                 lines.add(Component.translatable("gui.skyabyss.ext.past_points", d.pastLeft(), d.pastPool()).withColor(PALE).getVisualOrderText());
             }

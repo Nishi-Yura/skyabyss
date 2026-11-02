@@ -73,11 +73,13 @@ public final class SkillEffects {
     // 技の傷に掛ける倍率: 共鳴の声・鍛え人の目・巨神斬りの型のおまけ・木の印
     public static double damagePower(ServerPlayer player, Skill skill) {
         double v = 1 + chorus(player) + smith(player) + SkillMarks.power(player, skill.tree) + SkillBuild.skillPower(player, skill)
-                + jp.revati.skyabyss.item.affix.AffixEvents.spellPower(player);
+                + jp.revati.skyabyss.item.affix.AffixEvents.spellPower(player) + Gauges.power(player, skill)
+                + jp.revati.skyabyss.item.WeaponLines.sum(player, jp.revati.skyabyss.item.WeaponLines.Stat.SKILL);
         if (skill == Skill.TITAN_CLEAVE && WeaponType.has(player, WeaponType.HEAVY)) {
             v += SkillRules.CLEAVE_HEAVY_BONUS;
         }
-        return v;
+        // 巻き戻りの短剣のもう一度は半分の力
+        return v * jp.revati.skyabyss.item.mythic.MythicAbilities.powerScale();
     }
 
     // 支えの量 (吸収・マナの回復) に掛ける倍率: 共鳴の声・木の印
@@ -395,6 +397,17 @@ public final class SkillEffects {
         return z;
     }
 
+    // その人の、まだ消えていない領域 (古い順)
+    public static List<Zone> zonesListOf(ZoneKind kind, UUID owner) {
+        List<Zone> out = new ArrayList<>();
+        for (Zone z : ZONES) {
+            if (z.kind == kind && z.owner.equals(owner) && !z.spent) {
+                out.add(z);
+            }
+        }
+        return out;
+    }
+
     public static int zonesOf(ZoneKind kind, UUID owner) {
         int n = 0;
         for (Zone z : ZONES) {
@@ -472,7 +485,7 @@ public final class SkillEffects {
                 case LAMP -> {
                     // 灯の守り札 (呪術師): 2 秒ごとに、そばの自分と仲間の吸収を満たす。灯の光は毎秒
                     if ((z.until - now) % SkillRules.LAMP_PULSE == 0) {
-                        JobActions.lampPulse(owner, z.center, z.rank);
+                        JobActions.lampPulse(owner, z.center, z.rank, z.radius);
                     } else if (now % 20 == 0) {
                         z.level.sendParticles(net.minecraft.core.particles.ParticleTypes.GLOW, z.center.x, z.center.y + 0.8, z.center.z, 2, 0.15, 0.2, 0.15, 0.0);
                     }

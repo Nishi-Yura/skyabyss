@@ -30,6 +30,21 @@ public final class SkillClient {
     private SkillClient() {
     }
 
+    // 型の溜まるもの (Gauges.Kind の序数。-1 = 無し) と値。VitalsHud がマナの帯の上に描く
+    public static int gaugeKind = -1;
+    public static int gaugeValue;
+    // 満ちた瞬間に光らせる残り
+    public static int gaugeFlash;
+
+    public static void onGauge(jp.revati.skyabyss.rpg.skill.net.GaugePayload payload) {
+        var k = jp.revati.skyabyss.rpg.skill.Gauges.Kind.byOrdinal(payload.kind());
+        if (k != null && payload.value() >= k.max && (payload.kind() != gaugeKind || gaugeValue < k.max)) {
+            gaugeFlash = 12;
+        }
+        gaugeKind = payload.kind();
+        gaugeValue = payload.value();
+    }
+
     public static void onMana(ManaPayload payload) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
@@ -132,6 +147,9 @@ public final class SkillClient {
         }
         if (manaFlash > 0) {
             manaFlash--;
+        }
+        if (gaugeFlash > 0) {
+            gaugeFlash--;
         }
     }
 }

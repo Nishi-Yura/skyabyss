@@ -27,7 +27,8 @@ public final class SkillNetwork {
     // 4: 技の木 v2 の節 (SkillNodePayload)
     // 5: 節に木の id (淵・前世の木)
     // 6: 秘伝 (SecretArtsPayload)
-    private static final String PROTOCOL_VERSION = "6";
+    // 7: 型の溜まるもの (GaugePayload)
+    private static final String PROTOCOL_VERSION = "7";
 
     private SkillNetwork() {
     }
@@ -37,6 +38,7 @@ public final class SkillNetwork {
         event.registrar(PROTOCOL_VERSION)
                 // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
                 .playToClient(ManaPayload.TYPE, ManaPayload.STREAM_CODEC, (payload, context) -> SkillClient.onMana(payload))
+                .playToClient(GaugePayload.TYPE, GaugePayload.STREAM_CODEC, (payload, context) -> SkillClient.onGauge(payload))
                 .playToClient(SecretArtsPayload.TYPE, SecretArtsPayload.STREAM_CODEC,
                         (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.rpg.skill.SecretArts.onClient(payload)))
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))

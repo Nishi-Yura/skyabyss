@@ -41,13 +41,8 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Vector3f;
 
-// 神器の二本目・防具・装飾の効き方 (docs/design/50 の 4.5.1。必要 Lv に届いているときだけ。数値は DivineGear):
-//   羽の番人の大剣  傷を受けると番の構え 3 秒: 次の一撃 +40%
-//   灰打ちの大鎚    打った相手を 3 秒溶かす (その相手が受ける傷はだれのものでも +10%)
-//   雲の瞼の杖      打った相手に凝視の糸 3 秒。糸のある相手が 6 より離れると光の柱 (攻撃力の 80%)
-//   霞鳥の弓        当たった所に 3 秒の霞 (中の敵は遅く、受ける傷 +10%)
-//   灯蛾の短剣      打つと灯の粉 (5 秒、相手が光る)。粉のある相手を背から刺すと ×1.5、粉が消える
-//   鐘守の鈴杖      4 度目ごとに沈黙の鐘: まわり 5 の敵を 2 秒遅く、まわり 5 の仲間 (自分も) の体力 2
+// 神器の防具・装飾の効き方 (docs/design/50 の 4.5.1。必要 Lv に届いているときだけ。数値は DivineGear)。
+// 二本目の武器の大きな能力は item/mythic/MythicAbilities (2026-11-02 に作り替えた):
 //   鐘守の重鎧 4    受ける傷 ×0.92。傷を受けると鐘が鳴り、まわり 4 の敵を押し返す (8 秒に一度)
 //   霞渡りの装束 4  速さ +10%。傷を受けると 1 秒霞に隠れる (姿が消え、狙っていた敵が見失う。10 秒に一度)
 //   灯守の法衣 4    マナの戻り +35% (WildGearEvents.manaRegenBonus から)。技を使うと 4 秒、まわり 6 の仲間の受ける傷 ×0.92
@@ -55,11 +50,6 @@ import org.joml.Vector3f;
 //   約束の小鈴      倒れた仲間を起こす速さ ×1.5 (Downed から)。起こした仲間に守り 3 秒 (受ける傷 ×0.7)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class DivineSecondEvents {
-    static final String GUARD = SkyAbyss.MODID + ":divine_warden_guard";
-    static final String MELT = SkyAbyss.MODID + ":divine_ash_melt";
-    static final String MOTH = SkyAbyss.MODID + ":divine_moth_dust";
-    static final String MIST_MARK = SkyAbyss.MODID + ":divine_mist_mark";
-    static final String KEEPER_COUNT = SkyAbyss.MODID + ":divine_keeper_count";
     static final String BELL_CD = SkyAbyss.MODID + ":divine_bellkeeper_cd";
     static final String MIST_CD = SkyAbyss.MODID + ":divine_mistwalker_cd";
     static final String LAMP_WARD = SkyAbyss.MODID + ":divine_lamp_ward";
@@ -68,15 +58,6 @@ public final class DivineSecondEvents {
     static final DustParticleOptions DAWN = new DustParticleOptions(new Vector3f(1.0f, 0.9f, 0.65f), 1.0f);
     static final DustParticleOptions SKY = new DustParticleOptions(new Vector3f(0.75f, 0.85f, 1.0f), 1.2f);
 
-    // 凝視の糸 (相手・打った人・切れる tick) と霞 (所・切れる tick)
-    record Gaze(int target, int attacker, long until) {
-    }
-
-    record Mist(ServerLevel level, Vec3 pos, long until) {
-    }
-
-    private static final List<Gaze> GAZES = new ArrayList<>();
-    private static final List<Mist> MISTS = new ArrayList<>();
     // 効き方が足した傷を入れているあいだ (その傷からまた効き方を起こさない)
     private static boolean inner;
 
@@ -130,12 +111,6 @@ public final class DivineSecondEvents {
         var source = event.getSource();
         double m = 1;
         var td = target.getPersistentData();
-        if (td.getLong(MELT) > now) {
-            m *= 1 + DivineGear.ASH_MELT;
-        }
-        if (td.getLong(MIST_MARK) > now) {
-            m *= 1 + DivineGear.MIST_TAKEN;
-        }
         if (target instanceof Player p && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             if (source.is(DamageTypeTags.IS_FALL) && wears(p, DivineGearSetup.CHARM.get())) {
                 event.setCanceled(true);
@@ -155,77 +130,13 @@ public final class DivineSecondEvents {
             if (!player.onGround() && wears(player, DivineGearSetup.CHARM.get())) {
                 m *= 1 + DivineGear.CHARM_AIR;
             }
-            if (source.getDirectEntity() == player) {
-                m *= melee(level, player, target, now);
-            } else if (source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getWeaponItem() != null
-                    && arrow.getWeaponItem().getItem() == DivineGearSetup.MIST.get() && GearLevel.meets(player, arrow.getWeaponItem())) {
-                MISTS.add(new Mist(level, target.position(), now + DivineGear.MIST_TICKS));
-                level.sendParticles(SKY, target.getX(), target.getY() + 0.5, target.getZ(), 30, 1.2, 0.4, 1.2, 0);
-            }
         }
         if (m != 1) {
             event.setAmount((float) (event.getAmount() * m));
         }
     }
 
-    static double melee(ServerLevel level, Player player, LivingEntity target, long now) {
-        ItemStack hand = player.getMainHandItem();
-        if (hand.isEmpty() || !GearLevel.meets(player, hand)) {
-            return 1;
-        }
-        var pd = player.getPersistentData();
-        var td = target.getPersistentData();
-        Item it = hand.getItem();
-        if (it == DivineGearSetup.WARDEN.get()) {
-            if (pd.getLong(GUARD) > now) {
-                pd.remove(GUARD);
-                level.sendParticles(DAWN, target.getX(), target.getY(0.6), target.getZ(), 14, 0.3, 0.4, 0.3, 0);
-                return 1 + DivineGear.WARDEN_GUARD;
-            }
-            return 1;
-        }
-        if (it == DivineGearSetup.ASH.get()) {
-            td.putLong(MELT, now + DivineGear.ASH_MELT_TICKS);
-            level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 3, 0.3, 0.3, 0.3, 0);
-            return 1;
-        }
-        if (it == DivineGearSetup.EYELID.get()) {
-            GAZES.removeIf(g -> g.target() == target.getId() && g.attacker() == player.getId());
-            GAZES.add(new Gaze(target.getId(), player.getId(), now + DivineGear.EYELID_TICKS));
-            return 1;
-        }
-        if (it == DivineGearSetup.MOTH.get()) {
-            if (td.getLong(MOTH) > now && MoonGearEvents.fromBehind(target, player.position())) {
-                td.remove(MOTH);
-                target.removeEffect(MobEffects.GLOWING);
-                level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
-                return DivineGear.MOTH_BACK;
-            }
-            td.putLong(MOTH, now + DivineGear.MOTH_TICKS);
-            target.addEffect(new MobEffectInstance(MobEffects.GLOWING, DivineGear.MOTH_TICKS, 0, true, false));
-            level.sendParticles(DAWN, target.getX(), target.getY(0.8), target.getZ(), 8, 0.3, 0.3, 0.3, 0);
-            return 1;
-        }
-        if (it == DivineGearSetup.KEEPER.get()) {
-            int n = pd.getInt(KEEPER_COUNT) + 1;
-            if (n >= DivineGear.KEEPER_EVERY) {
-                n = 0;
-                AABB box = player.getBoundingBox().inflate(DivineGear.KEEPER_RADIUS);
-                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, q -> q.isAlive() && !(q instanceof Player))) {
-                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, true, false));
-                }
-                for (Player ally : level.getEntitiesOfClass(Player.class, box, q -> q.isAlive() && !q.isSpectator())) {
-                    ally.heal(DivineGear.KEEPER_HEAL);
-                }
-                level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.9f, 1.4f);
-                level.sendParticles(DAWN, player.getX(), player.getY() + 0.3, player.getZ(), 30, 2.5, 0.1, 2.5, 0);
-            }
-            pd.putInt(KEEPER_COUNT, n);
-        }
-        return 1;
-    }
-
-    // 傷を受けたあと: 番の構え・鐘守の鐘・霞に隠れる
+    // 傷を受けたあと: 鐘守の鐘・霞に隠れる
     @SubscribeEvent
     static void onDamaged(LivingDamageEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || event.getNewDamage() <= 0 || !(p.level() instanceof ServerLevel level)) {
@@ -233,9 +144,6 @@ public final class DivineSecondEvents {
         }
         long now = level.getGameTime();
         var pd = p.getPersistentData();
-        if (p.getMainHandItem().getItem() == DivineGearSetup.WARDEN.get() && GearLevel.meets(p, p.getMainHandItem())) {
-            pd.putLong(GUARD, now + DivineGear.WARDEN_GUARD_TICKS);
-        }
         if (full(p, DivineGear.BELLKEEPER) && pd.getLong(BELL_CD) <= now) {
             pd.putLong(BELL_CD, now + DivineGear.BELLKEEPER_COOLDOWN);
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(DivineGear.BELLKEEPER_PUSH_RADIUS),
@@ -278,63 +186,6 @@ public final class DivineSecondEvents {
             inst.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
         } else if (!on && has) {
             inst.removeModifier(id);
-        }
-    }
-
-    // 凝視の糸と霞 (毎 tick)
-    @SubscribeEvent
-    static void onLevelTick(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || GAZES.isEmpty() && MISTS.isEmpty()) {
-            return;
-        }
-        long now = level.getGameTime();
-        for (Gaze g : List.copyOf(GAZES)) {
-            Entity t = level.getEntity(g.target());
-            Entity a = level.getEntity(g.attacker());
-            if (g.until() < now || !(t instanceof LivingEntity target) || !target.isAlive() || !(a instanceof Player p)) {
-                if (t != null || a != null || g.until() < now) {
-                    GAZES.remove(g);
-                }
-                continue;
-            }
-            if (now % 4 == 0) {
-                Vec3 from = p.getEyePosition();
-                Vec3 to = target.position().add(0, target.getBbHeight() * 0.6, 0);
-                for (int i = 1; i < 6; i++) {
-                    Vec3 q = from.lerp(to, i / 6.0);
-                    level.sendParticles(ParticleTypes.WAX_ON, q.x, q.y, q.z, 1, 0, 0, 0, 0);
-                }
-            }
-            if (target.distanceTo(p) > DivineGear.EYELID_RANGE) {
-                GAZES.remove(g);
-                for (double h = 0; h < 6; h += 0.5) {
-                    level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + h, target.getZ(), 1, 0.15, 0.1, 0.15, 0.01);
-                }
-                inner = true;
-                try {
-                    target.invulnerableTime = 0;
-                    target.hurt(level.damageSources().indirectMagic(p, p), (float) (p.getAttributeValue(Attributes.ATTACK_DAMAGE) * DivineGear.EYELID_PILLAR));
-                } finally {
-                    inner = false;
-                }
-            }
-        }
-        if (now % 10 == 0) {
-            for (Mist m : List.copyOf(MISTS)) {
-                if (m.until() < now) {
-                    MISTS.remove(m);
-                    continue;
-                }
-                if (m.level() != level) {
-                    continue;
-                }
-                level.sendParticles(SKY, m.pos().x, m.pos().y + 0.4, m.pos().z, 10, DivineGear.MIST_RADIUS * 0.5, 0.3, DivineGear.MIST_RADIUS * 0.5, 0);
-                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(m.pos(), m.pos()).inflate(DivineGear.MIST_RADIUS, 2, DivineGear.MIST_RADIUS),
-                        q -> q.isAlive() && !(q instanceof Player))) {
-                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1, true, false));
-                    e.getPersistentData().putLong(MIST_MARK, now + 20);
-                }
-            }
         }
     }
 }
