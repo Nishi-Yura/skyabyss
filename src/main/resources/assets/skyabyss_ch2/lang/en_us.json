@@ -1,5 +1,6 @@
 {
   "item.skyabyss.tide_watching_shell": "Tide-watching Shell",
+  "item.skyabyss.tide_watching_shell.desc": "Hold it to see the Tide Shell's direction and distance, and the time to the next low tide, at the bottom of the screen",
   "subtitles.skyabyss_ch2.conch_far": "A conch sounds far away",
   "subtitles.skyabyss_ch2.ebb_recede": "The sea draws back",
   "subtitles.skyabyss_ch2.ebb_return": "The tide returns",

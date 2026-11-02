@@ -40,8 +40,10 @@
       var word = q.value.trim();
       load().then(function (d) {
         var w = norm(word);
-        var hits = word ? d.filter(function (e) { return norm(e.n).indexOf(w) >= 0; }) : [];
-        hits.sort(function (a, b) { return norm(a.n).indexOf(w) - norm(b.n).indexOf(w) || a.n.length - b.n.length; });
+        // 名前か読み (e.r。ひらがな) に含まれれば当たり。名前で当たったものを先に
+        function at(e) { var i = norm(e.n).indexOf(w); return i >= 0 ? i : (e.r && norm(e.r).indexOf(w) >= 0 ? 100 + norm(e.r).indexOf(w) : -1); }
+        var hits = word ? d.filter(function (e) { return at(e) >= 0; }) : [];
+        hits.sort(function (a, b) { return at(a) - at(b) || a.n.length - b.n.length; });
         render(hits, word);
       });
     });

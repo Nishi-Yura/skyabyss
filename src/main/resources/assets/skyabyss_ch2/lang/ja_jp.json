@@ -1,5 +1,6 @@
 {
   "item.skyabyss.tide_watching_shell": "潮見の貝",
+  "item.skyabyss.tide_watching_shell.desc": "手に持つと、潮殻の巨神のいる向きと遠さ、次の干潮までの時間が画面の下に出る",
   "subtitles.skyabyss_ch2.conch_far": "遠くで貝が鳴る",
   "subtitles.skyabyss_ch2.ebb_recede": "海が引いていく",
   "subtitles.skyabyss_ch2.ebb_return": "潮が戻る",

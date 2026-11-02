@@ -1,0 +1,1181 @@
+# wiki の敵の姿 (tools/site/gen_mob_shots.py が書く。手で直さない)。ライムの幕の部屋で一体ずつ、南東から斜めに
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/wiki_mobs.txt -PshotsName=wiki_mobs → python -I tools/site/cut_mob_shots.py
+world wiki_mobs flat
+size 720 720
+timeout 3600
+render 8
+clouds off
+fov 50
+wait 80
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+cmd fill -60 -61 -60 60 -61 60 minecraft:lime_concrete
+cmd fill -60 -60 -60 60 19 -60 minecraft:lime_concrete
+cmd fill -60 -60 -60 -60 19 60 minecraft:lime_concrete
+cmd fill -60 -60 60 60 19 60 minecraft:lime_concrete
+cmd fill 60 -60 -60 60 19 60 minecraft:lime_concrete
+camera 0 -50 30 180 10
+waitchunks
+hud off
+wait 40
+cmd skyabyss cinematic stop
+close
+
+# 骨の番兵
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_sentinel 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.34 -59.86 3.68 150.0 8.7
+wait 30
+chat clear
+shot bone_sentinel
+
+# 骨棘の射手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rib_archer 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.18 -60.01 3.42 150.0 8.7
+wait 30
+chat clear
+shot rib_archer
+
+# 苔這い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:moss_crawler 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.81 2.75 150.0 7.8
+wait 30
+chat clear
+shot moss_crawler
+
+# 鯨骨の番兵長
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:whalebone_captain 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.83 -59.23 6.27 150.0 8.1
+wait 30
+chat clear
+shot whalebone_captain
+
+# 岩鯨の心臓
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:stone_whale_heart 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 7.96 -56.37 13.42 150.0 8.0
+wait 30
+chat clear
+shot stone_whale_heart
+
+# 岩殻虫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rock_shell_beetle 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.40 -60.13 7.25 150.0 7.2
+wait 30
+chat clear
+shot rock_shell_beetle
+
+# 棘うさぎ
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:spine_hare 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.90 2.75 150.0 7.7
+wait 30
+chat clear
+shot spine_hare
+
+# 骨負い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_hauler 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.70 2.75 150.0 8.0
+wait 30
+chat clear
+shot bone_hauler
+
+# 老いた歩哨
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:elder_sentry 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.38 -59.82 3.75 150.0 8.7
+wait 30
+chat clear
+shot elder_sentry
+
+# 潮だまり貝
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tidepool_clam 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.01 2.75 150.0 7.4
+wait 30
+chat clear
+shot tidepool_clam
+
+# 砂潜り
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:sand_burrower 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.06 2.75 150.0 7.3
+wait 30
+chat clear
+shot sand_burrower
+
+# 宿借り
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:drift_hermit 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot drift_hermit
+
+# 潮の番人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:shore_warden 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.60 -59.39 5.87 150.0 8.1
+wait 30
+chat clear
+shot shore_warden
+
+# 野盗
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bandit 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.92 -60.26 2.95 150.0 8.7
+wait 30
+chat clear
+shot bandit
+
+# 野盗の弓手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bandit_archer 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.92 -60.26 2.95 150.0 8.7
+wait 30
+chat clear
+shot bandit_archer
+
+# 野盗の頭目
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bandit_chief 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.18 -60.01 3.42 150.0 8.7
+wait 30
+chat clear
+shot bandit_chief
+
+# 骸の歩兵
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_footman 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.92 -60.26 2.95 150.0 8.7
+wait 30
+chat clear
+shot bone_footman
+
+# 骸の弓兵
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_bowman 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.92 -60.26 2.95 150.0 8.7
+wait 30
+chat clear
+shot bone_bowman
+
+# 骸の旗手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_standard 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.15 -60.04 3.35 150.0 8.7
+wait 30
+chat clear
+shot bone_standard
+
+# 穂かじり鼠
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:grain_rat 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.06 2.75 150.0 7.3
+wait 30
+chat clear
+shot grain_rat
+
+# 迷い灯
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:stray_wisp 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.48 2.75 150.0 8.5
+wait 30
+chat clear
+shot stray_wisp
+
+# 野犬
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:feral_dog 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.81 2.75 150.0 7.8
+wait 30
+chat clear
+shot feral_dog
+
+# 苔の亡者
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:moss_dead 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.03 -60.15 3.15 150.0 8.7
+wait 30
+chat clear
+shot moss_dead
+
+# 霧の漁り火
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:mist_angler 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.03 -60.15 3.15 150.0 8.7
+wait 30
+chat clear
+shot mist_angler
+
+# 雷狼
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:thunder_wolf 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.70 2.75 150.0 8.0
+wait 30
+chat clear
+shot thunder_wolf
+
+# 骨掘りの大百足
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_centipede 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.76 -58.71 9.62 150.0 7.6
+wait 30
+chat clear
+shot bone_centipede
+
+# 殻負いの大蛸
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:shell_octopus 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.18 -58.96 8.60 150.0 7.7
+wait 30
+chat clear
+shot shell_octopus
+
+# 背晶の大蜥蜴
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:crystal_lizard 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.89 -59.25 8.10 150.0 7.6
+wait 30
+chat clear
+shot crystal_lizard
+
+# 炉負いの巨人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:forge_giant 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 6.24 -57.49 10.45 150.0 8.1
+wait 30
+chat clear
+shot forge_giant
+
+# 骨の坑夫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:pit_digger 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.96 -60.23 3.02 150.0 8.7
+wait 30
+chat clear
+shot pit_digger
+
+# 骨甲の団子虫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_roller 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.92 2.75 150.0 7.6
+wait 30
+chat clear
+shot bone_roller
+
+# 骨鯨の兜の坑頭
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:pit_foreman 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.41 -58.81 7.27 150.0 8.1
+wait 30
+chat clear
+shot pit_foreman
+
+# 沈み船の水夫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:drowned_sailor 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.03 -60.15 3.15 150.0 8.7
+wait 30
+chat clear
+shot drowned_sailor
+
+# 洞の水母
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:cave_jelly 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.37 2.76 150.0 8.7
+wait 30
+chat clear
+shot cave_jelly
+
+# 鐘負いの大寄居蟹
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bell_hermit 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.30 -59.39 7.08 150.0 7.7
+wait 30
+chat clear
+shot bell_hermit
+
+# 雷角の兜虫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:horn_beetle 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.76 2.75 150.0 7.9
+wait 30
+chat clear
+shot horn_beetle
+
+# 晶の目玉
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:crystal_eye 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.87 2.75 150.0 7.7
+wait 30
+chat clear
+shot crystal_eye
+
+# 晶洞の傀儡
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:geode_golem 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.18 -58.98 6.87 150.0 8.1
+wait 30
+chat clear
+shot geode_golem
+
+# 鞴の小鬼
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bellows_imp 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.54 2.75 150.0 8.4
+wait 30
+chat clear
+shot bellows_imp
+
+# 熔岩の蛞蝓
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:lava_slug 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.92 2.75 150.0 7.6
+wait 30
+chat clear
+shot lava_slug
+
+# 牛頭の鍛冶番
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ox_smith 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.41 -58.81 7.27 150.0 8.1
+wait 30
+chat clear
+shot ox_smith
+
+# 岩背の大猪
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rock_boar 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.13 -59.89 5.06 150.0 7.9
+wait 30
+chat clear
+shot rock_boar
+
+# 潮招きの大蟹
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tide_crab 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.01 -60.01 6.58 150.0 7.4
+wait 30
+chat clear
+shot tide_crab
+
+# 雷角の大羊
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:storm_ram 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.14 -59.72 5.08 150.0 8.1
+wait 30
+chat clear
+shot storm_ram
+
+# 灰被りの大蜥蜴
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_lizard 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.42 -60.04 5.57 150.0 7.6
+wait 30
+chat clear
+shot ash_lizard
+
+# 骨の砲手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_mortar 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.06 -60.20 3.20 150.0 8.6
+wait 30
+chat clear
+shot bone_mortar
+
+# 骨鳥
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_gull 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.92 2.75 150.0 7.6
+wait 30
+chat clear
+shot bone_gull
+
+# 老番兵
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:elder_sentinel 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.83 -59.23 6.27 150.0 8.1
+wait 30
+chat clear
+shot elder_sentinel
+
+# 心臓の番人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:heart_warden 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.44 -58.07 9.06 150.0 8.1
+wait 30
+chat clear
+shot heart_warden
+
+# 珊瑚憑き
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:coral_thrall 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.26 -59.93 3.55 150.0 8.7
+wait 30
+chat clear
+shot coral_thrall
+
+# 磯走り
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:reef_scuttler 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.01 2.75 150.0 7.4
+wait 30
+chat clear
+shot reef_scuttler
+
+# 泡吹き
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bubble_puffer 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.87 2.75 150.0 7.7
+wait 30
+chat clear
+shot bubble_puffer
+
+# 羽守
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:feather_warden 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.34 -59.86 3.68 150.0 8.7
+wait 30
+chat clear
+shot feather_warden
+
+# 雷蛾
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:static_moth 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot static_moth
+
+# 雷乞い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:thunder_supplicant 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.26 -59.93 3.55 150.0 8.7
+wait 30
+chat clear
+shot thunder_supplicant
+
+# 帯電毛玉
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:static_puff 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.92 2.75 150.0 7.6
+wait 30
+chat clear
+shot static_puff
+
+# 峰の雛
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:peak_fledgling 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.92 2.75 150.0 7.6
+wait 30
+chat clear
+shot peak_fledgling
+
+# 雷拾い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:lightning_gleaner 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.48 2.75 150.0 8.5
+wait 30
+chat clear
+shot lightning_gleaner
+
+# 焼けた羽守
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:scorched_warden 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.26 -59.64 5.28 150.0 8.1
+wait 30
+chat clear
+shot scorched_warden
+
+# 潮殻の心臓
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tide_heart 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 7.74 -56.42 13.04 150.0 8.1
+wait 30
+chat clear
+shot tide_heart
+
+# 雷翼の心臓
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:thunder_wing_heart 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 7.39 -56.67 12.44 150.0 8.1
+wait 30
+chat clear
+shot thunder_wing_heart
+
+# 潮招き
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tide_beckoner 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 6.35 -58.57 10.63 150.0 7.6
+wait 30
+chat clear
+shot tide_beckoner
+
+# 雷獣
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:raiju 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.26 -59.64 5.28 150.0 8.1
+wait 30
+chat clear
+shot raiju
+
+# 灰の番人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_thrall 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.26 -59.93 3.55 150.0 8.7
+wait 30
+chat clear
+shot ash_thrall
+
+# 火の粉蛾
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ember_moth 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot ember_moth
+
+# 燠虫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:cinder_roller 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.90 2.75 150.0 7.7
+wait 30
+chat clear
+shot cinder_roller
+
+# 熾り蟲
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:cinder_mite 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.06 2.75 150.0 7.3
+wait 30
+chat clear
+shot cinder_mite
+
+# 灰の屑
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_husk 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.99 -60.19 3.09 150.0 8.7
+wait 30
+chat clear
+shot ash_husk
+
+# 灰ひきずり
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_dragger 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.01 2.75 150.0 7.4
+wait 30
+chat clear
+shot ash_dragger
+
+# 古い灰の番人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:elder_thrall 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.54 -59.43 5.77 150.0 8.1
+wait 30
+chat clear
+shot elder_thrall
+
+# 骨拾い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_picker 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.06 2.75 150.0 7.3
+wait 30
+chat clear
+shot bone_picker
+
+# 肋の番
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rib_guard 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.99 -60.19 3.09 150.0 8.7
+wait 30
+chat clear
+shot rib_guard
+
+# 骨笛
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bone_flute 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot bone_flute
+
+# 塩の抜け殻
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:salt_husk 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.96 -60.23 3.02 150.0 8.7
+wait 30
+chat clear
+shot salt_husk
+
+# 潮だまりの手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tide_hands 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.03 2.75 150.0 7.4
+wait 30
+chat clear
+shot tide_hands
+
+# 白い貝守
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:white_shell_keeper 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.81 2.75 150.0 7.8
+wait 30
+chat clear
+shot white_shell_keeper
+
+# 帯電の羽虫
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:charged_moth 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.09 2.75 150.0 7.3
+wait 30
+chat clear
+shot charged_moth
+
+# 避雷の像
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:lightning_idol 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.18 -60.01 3.42 150.0 8.7
+wait 30
+chat clear
+shot lightning_idol
+
+# 焦げた鳥の影
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:scorched_bird 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot scorched_bird
+
+# 灰の鍛え手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_smith 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.67 -57.90 9.45 150.0 8.1
+wait 30
+chat clear
+shot ash_smith
+
+# 灰の這い跡
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_trail 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.09 2.75 150.0 7.3
+wait 30
+chat clear
+shot ash_trail
+
+# 燠の番人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ember_keeper 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.99 -60.19 3.09 150.0 8.7
+wait 30
+chat clear
+shot ember_keeper
+
+# 煤の子
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:soot_child 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -61.06 2.75 150.0 7.3
+wait 30
+chat clear
+shot soot_child
+
+# 前の私の影
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:past_shadow 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.99 -60.19 3.09 150.0 8.7
+wait 30
+chat clear
+shot past_shadow
+
+# 名のない形
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:nameless_shape 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.43 2.75 150.0 8.6
+wait 30
+chat clear
+shot nameless_shape
+
+# 灯喰い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:lamp_eater 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.87 2.75 150.0 7.7
+wait 30
+chat clear
+shot lamp_eater
+
+# 逆さ歩き
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ceiling_walker 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.96 -60.23 3.02 150.0 8.7
+wait 30
+chat clear
+shot ceiling_walker
+
+# 鼓動もどき
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:heartbeat_mimic 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.65 2.75 150.0 8.1
+wait 30
+chat clear
+shot heartbeat_mimic
+
+# 縄の人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rope_hanger 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.34 -59.86 3.68 150.0 8.7
+wait 30
+chat clear
+shot rope_hanger
+
+# 砂這い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:dust_crawler 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot dust_crawler
+
+# 殻背の兎
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:shell_hare 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.90 2.75 150.0 7.7
+wait 30
+chat clear
+shot shell_hare
+
+# 影の綴じ手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:shadow_stitcher 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.34 -59.86 3.68 150.0 8.7
+wait 30
+chat clear
+shot shadow_stitcher
+
+# 影抱き
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:shadow_embracer 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.44 -58.07 9.06 150.0 8.1
+wait 30
+chat clear
+shot shadow_embracer
+
+# 月跳ね
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:moon_leaper 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.79 2.75 150.0 7.9
+wait 30
+chat clear
+shot moon_leaper
+
+# 押し石
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:push_stone 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.48 2.75 150.0 8.5
+wait 30
+chat clear
+shot push_stone
+
+# 崖這い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:cliff_creeper 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.92 2.75 150.0 7.6
+wait 30
+chat clear
+shot cliff_creeper
+
+# 月秤
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:moon_scale 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.55 -57.99 9.26 150.0 8.1
+wait 30
+chat clear
+shot moon_scale
+
+# 光の群れ
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:light_swarm 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.76 2.75 150.0 7.9
+wait 30
+chat clear
+shot light_swarm
+
+# 影の竹馬
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:shade_strider 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.80 -59.42 4.48 150.0 8.7
+wait 30
+chat clear
+shot shade_strider
+
+# 鏡背負い
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:mirror_bearer 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.86 -60.41 2.86 150.0 8.5
+wait 30
+chat clear
+shot mirror_bearer
+
+# 望の灯守
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:full_keeper 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 6.24 -57.49 10.45 150.0 8.1
+wait 30
+chat clear
+shot full_keeper
+
+# 淵の羽影
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rift_wing 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.06 -60.81 3.20 150.0 7.6
+wait 30
+chat clear
+shot rift_wing
+
+# 残り鎧
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rift_armor 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.26 -59.93 3.55 150.0 8.7
+wait 30
+chat clear
+shot rift_armor
+
+# 逆さ砂の蛇
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rift_serpent 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.03 -60.15 3.15 150.0 8.7
+wait 30
+chat clear
+shot rift_serpent
+
+# 残月の剣守
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:waning_blade 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.52 -58.73 7.46 150.0 8.1
+wait 30
+chat clear
+shot waning_blade
+
+# 月の核
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:moon_core 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.64 -58.65 7.66 150.0 8.1
+wait 30
+chat clear
+shot moon_core
+
+# 鐘の亡者
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:bell_mourner 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.03 -60.15 3.15 150.0 8.7
+wait 30
+chat clear
+shot bell_mourner
+
+# 霞鳥
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:mist_bird 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.86 -60.85 2.86 150.0 7.7
+wait 30
+chat clear
+shot mist_bird
+
+# 最後の鐘守
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:last_bellkeeper 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.44 -58.07 9.06 150.0 8.1
+wait 30
+chat clear
+shot last_bellkeeper
+
+# 網打ち
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:net_caster 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.03 -60.15 3.15 150.0 8.7
+wait 30
+chat clear
+shot net_caster
+
+# 灯蛾
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:lamp_moth 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.98 2.75 150.0 7.5
+wait 30
+chat clear
+shot lamp_moth
+
+# 灯守の目
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:lamp_eye 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.01 -59.24 6.58 150.0 8.0
+wait 30
+chat clear
+shot lamp_eye
+
+# 灰の打ち手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ash_striker 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.11 -60.08 3.29 150.0 8.7
+wait 30
+chat clear
+shot ash_striker
+
+# 戻り火
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:backfire 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 1.80 -60.65 2.75 150.0 8.1
+wait 30
+chat clear
+shot backfire
+
+# 戻し手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:rewinder 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.75 -58.56 7.86 150.0 8.1
+wait 30
+chat clear
+shot rewinder
+
+# 落ち羽
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:fallen_plume 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.49 -59.71 3.95 150.0 8.7
+wait 30
+chat clear
+shot fallen_plume
+
+# 羽の番人
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:plume_warden 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 2.26 -59.93 3.55 150.0 8.7
+wait 30
+chat clear
+shot plume_warden
+
+# 巡礼者の羽
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:pilgrim_plume 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 5.67 -57.90 9.45 150.0 8.1
+wait 30
+chat clear
+shot pilgrim_plume
+
+# 巡礼者の手
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:pilgrim_hand 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 9.00 -55.51 15.22 150.0 8.1
+wait 30
+chat clear
+shot pilgrim_hand
+
+# 巡礼者の目
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:pilgrim_eye 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 8.10 -56.28 13.67 150.0 8.0
+wait 30
+chat clear
+shot pilgrim_eye
+
+# 巡礼者の月
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:pilgrim_moon 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 7.81 -56.46 13.16 150.0 8.0
+wait 30
+chat clear
+shot pilgrim_moon
+
+# 初代の空見
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:founder 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.26 -59.64 5.28 150.0 8.1
+wait 30
+chat clear
+shot founder
+
+# あいだに座すもの
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tower_master 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 64.84 -28.58 111.93 150.0 7.5
+wait 30
+chat clear
+shot tower_master
+
+# 側の目
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tower_eye 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 4.01 -59.24 6.58 150.0 8.0
+wait 30
+chat clear
+shot tower_eye
+
+# 側の大きな目
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tower_eye_big 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 6.79 -57.36 11.39 150.0 8.0
+wait 30
+chat clear
+shot tower_eye_big
+
+# 落ちる月
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:tower_moon 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 7.81 -56.46 13.16 150.0 8.0
+wait 30
+chat clear
+shot tower_moon
+
+# 淵の杭
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:circuit_stake 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 3.72 -59.31 6.07 150.0 8.1
+wait 30
+chat clear
+shot circuit_stake
+
+# 余燼の心臓
+cmd tp @e[type=!player] 0 -250 0
+cmd kill @e[type=!player]
+cmd summon skyabyss:ember_heart 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Silent:1b,NoGravity:1b,Rotation:[0f,0f]}
+camera 7.74 -56.42 13.04 150.0 8.1
+wait 30
+chat clear
+shot ember_heart
+cmd kill @e[type=!player]
+quit

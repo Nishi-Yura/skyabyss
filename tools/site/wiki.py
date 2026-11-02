@@ -159,14 +159,33 @@ def section(id_, h, inner, note=""):
         id_, h, '<p class="small">%s</p>' % note if note else "", inner)
 
 
+try:
+    import pykakasi
+    _KKS = pykakasi.kakasi()
+except ImportError:
+    _KKS = None
+
+
+def reading(name):
+    """名前のひらがなの読み (pykakasi があるときだけ。漢字の名前を読みでも探せるように)"""
+    if not _KKS:
+        return ""
+    return "".join(x["hira"] for x in _KKS.convert(name))
+
+
 def add_search(name, kind, url):
-    _search.append({"n": name, "k": kind, "u": url})
+    e = {"n": name, "k": kind, "u": url}
+    r = reading(name)
+    if r and r != name:
+        e["r"] = r
+    _search.append(e)
 
 
 # ================================================================== 品
 def classify(item):
     cls = item["class"].rsplit(".", 1)[-1]
-    if cls == "DeferredSpawnEggItem" or item["id"].endswith("_spawn_egg"):
+    if cls == "DeferredSpawnEggItem" or item["id"].endswith("_spawn_egg") or cls == "BlockItem":
+        # 生き物の卵と、置き物のブロック (封の門・共鳴の炉など。遊ぶ人には渡さない) は載せない
         return None
     if item.get("armor_slot"):
         return "armor"
@@ -259,6 +278,59 @@ def dungeon_table():
     return out
 
 
+# 主の技の表 (設計書。どの書類も今の仕様を書く決まり)。(生き物の id, 書類, 見出し, 表の何番目か)。
+# 表は見出しの下の n 番目。「前」の列 (作り直す前の形) は載せない
+BOSS_MOVES = [
+    ("skyabyss:whalebone_captain", "02_stone_whale.md", "### 5.2 中ボス「鯨骨の番兵長」", 0),
+    ("skyabyss:tide_beckoner", "08_tide_shell.md", "### 5.2 中ボス「潮招き」", 0),
+    ("skyabyss:tide_heart", "08_tide_shell.md", "### 5.5 予告つきの技（before → after）", 0),
+    ("skyabyss:raiju", "12_thunder_wing.md", "### 5.2 中ボス「雷獣」", 0),
+    ("skyabyss:thunder_wing_heart", "12_thunder_wing.md", "### 5.5 予告化（Telegraph）の前と後", 0),
+    ("skyabyss:ash_smith", "13_ember.md", "### 7.2 技（時間は tick）", 0),
+    ("skyabyss:ember_heart", "13_ember.md", "### 18.1 技ごとの予告と数", 0),
+    ("skyabyss:founder", "53_founder.md", "### 5.2 竿の技（いつでも）", 0),
+    ("skyabyss:founder", "53_founder.md", "### 5.3 歌の技（数え歌の七行）", 0),
+    ("skyabyss:tower_master", "54_endgame_plan.md", "### 2.5 主「あいだに座すもの」（動かない）", 0),
+]
+DOCS = os.path.join(ROOT, "docs", "design")
+MOB_IMG = os.path.join(SITE, "img", "mob")
+
+
+def md_inline(t):
+    t = esc(t)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
+    return re.sub(r"`([^`]+)`", r"\1", t)
+
+
+def doc_table(doc, heading, nth):
+    """書類の見出しの下の nth 番目の表を (見出しの列, 行) で返す。「前」の列は落とす"""
+    lines = open(os.path.join(DOCS, doc), encoding="utf8").read().split("\n")
+    i = lines.index(heading)
+    tables, cur = [], None
+    for ln in lines[i + 1:]:
+        if ln.startswith("#"):
+            break
+        if ln.startswith("|"):
+            cur = cur if cur is not None else []
+            cur.append([c.strip() for c in ln.strip().strip("|").split("|")])
+        elif cur is not None:
+            tables.append(cur)
+            cur = None
+    if cur:
+        tables.append(cur)
+    t = tables[nth]
+    head, rows = t[0], [r for r in t[2:] if len(r) == len(t[0])]
+    keep = [k for k, h in enumerate(head) if h != "前"]
+    return [head[k] for k in keep], [[r[k] for k in keep] for r in rows]
+
+
+def mob_img(mid, size):
+    name = mid.split(":", 1)[1]
+    if not os.path.exists(os.path.join(MOB_IMG, name + ".webp")):
+        return ""
+    return '<img class="mob-img" src="img/mob/%s.webp" width="%d" height="%d" alt="" loading="lazy">' % (name, size, size)
+
+
 AREA_BY_PKG = [  # (パッケージの頭, 場所)
     ("dungeon.mob", "地下のダンジョン"), ("abyss.mobs", "五章 深淵"), ("story.ch5", "五章 深淵"),
     ("story.ch6", "六章 月"), ("story.finale", "終章 雲海"), ("tower.mob", "あいだの塔"),
@@ -285,6 +357,9 @@ def enemies_page(mobs):
         in_dungeon.setdefault(d["mid"], []).append(nm + "（中ボス）")
         in_dungeon.setdefault(d["boss"], []).append(nm + "（主）")
 
+    moves_of = {}
+    for mid, doc, heading, nth in BOSS_MOVES:
+        moves_of.setdefault(mid, []).append((doc, heading, nth))
     groups = {}
     for m in mobs:
         pkg = ".".join(m.get("class", "").split(".")[3:-1])
@@ -312,8 +387,9 @@ def enemies_page(mobs):
             where = spawns.get(m["id"], []) + in_dungeon.get(m["id"], [])
             aid = "m-" + m["id"].split(":", 1)[1]
             boss = hp >= 150
-            rows.append('<tr id="%s" data-name="%s" data-text="%s"><th scope="row">%s%s</th><td class="num">%s</td><td class="num">%s</td><td class="num">%s</td><td>%s</td></tr>' % (
-                aid, esc(m["name"]), esc(m["name"] + " " + " ".join(where)), esc(m["name"]), ' <span class="boss">主</span>' if boss else "",
+            moves = ' <a class="moves-link" href="#mv-%s">技</a>' % m["id"].split(":", 1)[1] if m["id"] in moves_of else ""
+            rows.append('<tr id="%s" data-name="%s" data-text="%s"><th scope="row"><span class="mob-cell">%s<span>%s%s%s</span></span></th><td class="num">%s</td><td class="num">%s</td><td class="num">%s</td><td>%s</td></tr>' % (
+                aid, esc(m["name"]), esc(m["name"] + " " + " ".join(where)), mob_img(m["id"], 56), esc(m["name"]), ' <span class="boss">主</span>' if boss else "", moves,
                 "{:,}".format(int(round(hp * SHOWN))), "{:,}".format(int(round(st.get("generic.attack_damage", 0) * SHOWN))) if st.get("generic.attack_damage") else "—",
                 ("%g" % st.get("generic.armor", 0)) if st.get("generic.armor") else "—", "、".join(dict.fromkeys(where)) or "—"))
             add_search(m["name"], "敵", "wiki-enemies.html#" + aid)
@@ -323,6 +399,19 @@ def enemies_page(mobs):
     dun = "".join('<tr><th scope="row">%s</th><td class="num">%d</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
         lang("dungeon.skyabyss." + d["id"]), d["level"], "、".join(dict.fromkeys(lang("entity." + f.replace(":", ".")) for f in d["foes"])),
         lang("entity." + d["mid"].replace(":", ".")), lang("entity." + d["boss"].replace(":", "."))) for d in dungeons)
+    names_by_id = {m["id"]: m["name"] for m in mobs}
+    mv = ""
+    for mid, specs in moves_of.items():
+        tabs = ""
+        for doc, heading, nth in specs:
+            head, rows_ = doc_table(doc, heading, nth)
+            tabs += '<p class="small">%s（設計書 %s）</p><div class="tablewrap"><table class="moves"><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>' % (
+                esc(heading.lstrip("# ")), doc[:2], "".join('<th scope="col">%s</th>' % esc(h) for h in head),
+                "".join("<tr>%s</tr>" % "".join(("<th scope=\"row\">%s</th>" if k == 0 else "<td>%s</td>") % md_inline(c) for k, c in enumerate(r)) for r in rows_))
+        nm = names_by_id.get(mid, mid)
+        mv += '<details class="boss-moves" id="mv-%s"><summary>%s%s</summary><div>%s</div></details>' % (mid.split(":", 1)[1], mob_img(mid, 40), esc(nm), tabs)
+        add_search(nm + " の技", "主の技", "wiki-enemies.html#mv-" + mid.split(":", 1)[1])
+    body += section("moves", "主の技", mv, "心臓・中ボス・裏ボス・あいだの塔の主の技と予告。設計書（今の仕様）の表をそのまま載せています。数字の tick は 1/20 秒、n は人数です。")
     body += section("dungeons", "地下のダンジョンの顔ぶれ",
                     '<div class="tablewrap"><table><thead><tr><th scope="col">ダンジョン</th><th scope="col">目安 Lv</th><th scope="col">道中の敵</th><th scope="col">中ボス</th><th scope="col">主</th></tr></thead><tbody>%s</tbody></table></div>' % dun)
     wiki_page("wiki-enemies.html", "敵と主", "この mod の敵 %d 種を、出る場所ごとに。敵はこの mod の敵だけです。" % total, body, count="%d 種" % total)
@@ -477,11 +566,21 @@ def shops_page(names):
         for key in ("goods", "daily", "pool", "stock"):
             for g in s.get(key, []) if isinstance(s.get(key), list) else []:
                 nm = names.get(g.get("item"), g.get("item"))
-                rows.append('<tr><th scope="row"><a href="%s">%s</a></th><td class="num">%s</td><td class="num">%s</td><td>%s</td></tr>' % (
-                    item_link(g.get("item")), esc(nm), g.get("count", 1), g.get("coins", "—"), "日替わり" if key == "daily" else ""))
+                mats = "、".join("%s ×%d" % (names.get(m.get("item"), m.get("item")), m.get("count", 1)) for m in g.get("materials", []))
+                notes = [x for x in ("日替わり" if key == "daily" else "", ("%s章から" % "一二三四五六"[g["chapter"] - 1]) if isinstance(g.get("chapter"), int) and 1 <= g["chapter"] <= 6 else "") if x]
+                rows.append('<tr><th scope="row"><a href="%s">%s</a></th><td class="num">%s</td><td class="num">%s</td><td>%s</td><td>%s</td></tr>' % (
+                    item_link(g.get("item")), esc(nm), g.get("count", 1), g.get("coins", "—"), esc(mats) or "—", "・".join(notes)))
+        buys = []
+        for b in s.get("buys", []) if isinstance(s.get("buys"), list) else []:
+            nm = names.get(b.get("item"), b.get("item"))
+            buys.append('<tr><th scope="row"><a href="%s">%s</a></th><td class="num">%s</td><td class="num">%s</td></tr>' % (
+                item_link(b.get("item")), esc(nm), b.get("per", 1), b.get("coins", "—")))
         name = lang("gui.skyabyss.shop." + sid)
         add_search(name, "店", "wiki-shops.html#s-" + sid)
-        body += section("s-" + sid, name, '<div class="tablewrap"><table><thead><tr><th scope="col">品</th><th scope="col">数</th><th scope="col">鐘銭</th><th scope="col"></th></tr></thead><tbody>%s</tbody></table></div>' % "".join(rows))
+        inner = '<div class="tablewrap"><table><thead><tr><th scope="col">品</th><th scope="col">数</th><th scope="col">鐘銭</th><th scope="col">材料</th><th scope="col"></th></tr></thead><tbody>%s</tbody></table></div>' % "".join(rows)
+        if buys:
+            inner += '<h3>買い取り</h3><div class="tablewrap"><table><thead><tr><th scope="col">品</th><th scope="col">いくつで</th><th scope="col">鐘銭</th></tr></thead><tbody>%s</tbody></table></div>' % "".join(buys)
+        body += section("s-" + sid, name, inner)
     wiki_page("wiki-shops.html", "店", "店ごとの品と値段（鐘銭）。", body, count="%d 軒" % len(glob.glob(os.path.join(DATA, "shop", "*.json"))))
 
 

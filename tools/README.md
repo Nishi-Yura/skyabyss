@@ -383,7 +383,11 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
   1. 品・生き物・技を書き出す: `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/wiki_dump.txt -PshotsName=wiki_dump`（台本の `wikidump`。`client/dev/WikiDump` が、品の説明の行を色つきで・生き物の基の属性・技の段ごとの効果の文を `run/shots/wiki_dump/shots/wiki_dump/wiki.json` に書く）
   2. `cp run/shots/wiki_dump/shots/wiki_dump/wiki.json tools/sources/site/wiki.json`（コミットする元）→ `python -I tools/site/build.py`
   - ほかの元は mod の JSON と lang（技の木・クエスト・店・湧き・伝承・進捗・大陸の見どころ）と、コードの表（`dungeon/Dungeon.java`・`mount/MountLook.java` を正規表現で読む）。品・敵・技・品を足したり数値を変えたりしたら 1 から流し直す。
-  - 品の絵は `textures/item`（モデルの layer0）を `site/img/wiki/` へ写す。探す箱の索引は `site/js/wiki-search.json`、動きは `site/js/wiki.js`。体力と攻撃は画面と同じ 10 倍。
+  - 品の絵は `textures/item`（モデルの layer0）を `site/img/wiki/` へ写す。探す箱の索引は `site/js/wiki-search.json`、動きは `site/js/wiki.js`。体力と攻撃は画面と同じ 10 倍。置き物のブロック（`BlockItem`）と生き物の卵は載せない。
+  - 敵の姿: `python -I tools/site/gen_mob_shots.py`（台本 `tools/shots/wiki_mobs.txt`。wiki の敵を一体ずつライムの幕の部屋に呼び、体の大きさでカメラの遠さを決めて斜めから）→ runShots → `python -I tools/site/cut_mob_shots.py`（縁からつながる幕だけ抜く。`tools/sources/site/mobs/`）→ `gen_site_shots.py`。
+  - 主の技は設計書の表（`wiki.BOSS_MOVES` に書類と見出し）。見出しを変えたら、そこも直す。
+  - 探す箱の読み（ひらがな）は、`pykakasi` が入っていれば build のときに付く（無ければ名前だけで探す）。
+- 品の説明の行: lang に `<品の鍵>.desc`（灰色）・`.lore`（斜体）があれば、品のクラスが出していなくても名前の下に出る（`client/ItemDescTooltip`）。ただの Item で登録した素材や食べ物も、lang に書けば説明が出る。
 - 技の動く絵: `site/img/skill_fx/<技>.webp`（職の欄に各職一本）。
 - 頁の印 `site/img/favicon.png` は天の鍵の絵（`textures/item/sky_key.png`）の写し。前のサイトの手描きの帯・場面・板の絵と、それを作る `gen_art.py` は 2026-11-03 に外した（git の履歴にある）。
 - 見る: `.claude/launch.json` の `site`（`python -m http.server 8765 --directory site`）。
