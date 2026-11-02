@@ -61,19 +61,20 @@ public final class GuildRequests {
 
     // 頼みの表 (並びは変えない。週と ギルドの ID で選ぶ)
     public static final List<Req> POOL = List.of(
-            new Req("bones", 96, false, Items.BONE, any("bone_chip")),
+            new Req("bones", 96, false, Items.BONE_BLOCK, any("bone_chip")),
             new Req("iron", 48, false, Items.IRON_INGOT, s -> s.is(Items.IRON_INGOT)),
             new Req("titan", 24, false, Items.PRISMARINE_SHARD, any("stone_whale_shard", "tide_shell_shard", "thunder_wing_shard", "ember_shard")),
-            new Req("bread", 64, false, Items.BREAD, s -> s.is(Items.BREAD)),
+            new Req("bread", 64, false, Items.HAY_BLOCK, s -> s.is(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get())),
             new Req("resonance", 12, false, Items.AMETHYST_SHARD, any("resonance_shard")),
-            new Req("hunt", 150, true, Items.IRON_SWORD, s -> false));
+            new Req("hunt", 150, true, Items.SKELETON_SKULL, s -> false));
 
     // 報い (一人ぶん)
     public static final int REWARD_COINS = 20;
     public static final int REWARD_SHARDS = 1;
 
+    // 週 (実時間の ISO 週。旗取り・釣り大会と同じ時計。util/DayClock)
     public static long week(MinecraftServer server) {
-        return Math.floorDiv(server.overworld().getDayTime() / 24000L, Repeats.WEEK_DAYS);
+        return jp.revati.skyabyss.util.DayClock.weekNumber();
     }
 
     // その週の頼み (純粋。ギルドの ID と週で決まる)

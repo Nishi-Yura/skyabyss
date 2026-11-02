@@ -69,6 +69,9 @@ public final class RouteRoomsSelfTest {
                         f.add(titan + ": no raid room for step " + step);
                         break;
                     }
+                    if (step == 3 && !(run.room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom)) {
+                        f.add(titan + ": the fight room (step 3) does not hold the mid-boss");
+                    }
                     if (!run.ctx.cell().bounds().contains(p.position())) {
                         f.add(titan + ": step " + step + " did not carry the player into room " + run.ctx.roomId() + ": " + p.position());
                     }
@@ -78,19 +81,10 @@ public final class RouteRoomsSelfTest {
                     TrialRoute.flushPending();
                     TrialRoute.tick(back, titan, players, now + 1000L * step);
                 }
-                RaidRun.Run mid = RaidRun.of(group);
-                if (!TrialRoute.mid(back, group) || mid == null || !mid.mid) {
-                    f.add(titan + ": after the third room the route is not at the mid-boss");
-                } else {
-                    if (!mid.ctx.cell().bounds().contains(p.position())) {
-                        f.add(titan + ": the player was not carried into the mid-boss arena: " + p.position());
-                    }
-                    sealed(f, back, titan + " " + mid.ctx.roomId(), mid.ctx.cell().rest(), mid.ctx.cell().bounds());
-                    rooms++;
+                // 中ボスは三つ目の闘の部屋の中で出る (00 の 277)。中ボスだけの段は無く、闘の部屋を越えると心臓へ
+                if (TrialRoute.mid(back, group)) {
+                    f.add(titan + ": a separate mid-boss step appeared after the third room");
                 }
-                TrialRoute.devPass(back, group, titan, p);
-                TrialRoute.flushPending();
-                TrialRoute.tick(back, titan, players, now + 5000);
                 AABB heart = InstanceArenas.heartArena(titan);
                 if (TrialRoute.step(back, group) != TrialRoute.LAST_STEP || heart == null || !heart.contains(p.position())) {
                     f.add(titan + ": after the mid-boss the player is not inside the heart arena (step " + TrialRoute.step(back, group) + ", at " + p.position() + ")");

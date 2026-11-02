@@ -1,0 +1,128 @@
+# 防具を全部、着た姿で撮る (三人称の正面と背中)。見直し用 (2026-10-26)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/armor_review.txt -PshotsName=armor_review
+world shots flat
+size 960 540
+timeout 3000
+render 6
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud off
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd item replace entity @s armor.head with skyabyss:whale_road_helmet
+cmd item replace entity @s armor.chest with skyabyss:whale_road_chestplate
+cmd item replace entity @s armor.legs with skyabyss:whale_road_leggings
+cmd item replace entity @s armor.feet with skyabyss:whale_road_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_whale_road
+perspective back
+wait 6
+shot back_whale_road
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_stone_whale
+perspective back
+wait 6
+shot back_stone_whale
+cmd item replace entity @s armor.head with skyabyss:tide_wader_helmet
+cmd item replace entity @s armor.chest with skyabyss:tide_wader_chestplate
+cmd item replace entity @s armor.legs with skyabyss:tide_wader_leggings
+cmd item replace entity @s armor.feet with skyabyss:tide_wader_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_tide_wader
+perspective back
+wait 6
+shot back_tide_wader
+cmd item replace entity @s armor.head with skyabyss:tide_shell_helmet
+cmd item replace entity @s armor.chest with skyabyss:tide_shell_chestplate
+cmd item replace entity @s armor.legs with skyabyss:tide_shell_leggings
+cmd item replace entity @s armor.feet with skyabyss:tide_shell_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_tide_shell
+perspective back
+wait 6
+shot back_tide_shell
+cmd item replace entity @s armor.head with skyabyss:peak_crossing_helmet
+cmd item replace entity @s armor.chest with skyabyss:peak_crossing_chestplate
+cmd item replace entity @s armor.legs with skyabyss:peak_crossing_leggings
+cmd item replace entity @s armor.feet with skyabyss:peak_crossing_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_peak_crossing
+perspective back
+wait 6
+shot back_peak_crossing
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_thunder_wing
+perspective back
+wait 6
+shot back_thunder_wing
+cmd item replace entity @s armor.head with skyabyss:ash_walking_helmet
+cmd item replace entity @s armor.chest with skyabyss:ash_walking_chestplate
+cmd item replace entity @s armor.legs with skyabyss:ash_walking_leggings
+cmd item replace entity @s armor.feet with skyabyss:ash_walking_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_ash_walking
+perspective back
+wait 6
+shot back_ash_walking
+cmd item replace entity @s armor.head with skyabyss:ember_helmet
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s armor.legs with skyabyss:ember_leggings
+cmd item replace entity @s armor.feet with skyabyss:ember_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_ember
+perspective back
+wait 6
+shot back_ember
+cmd item replace entity @s armor.head with skyabyss:abyss_diver_helmet
+cmd item replace entity @s armor.chest with skyabyss:abyss_diver_chestplate
+cmd item replace entity @s armor.legs with skyabyss:abyss_diver_leggings
+cmd item replace entity @s armor.feet with skyabyss:abyss_diver_boots
+wait 20
+perspective front
+wait 6
+chat clear
+shot front_abyss_diver
+perspective back
+wait 6
+shot back_abyss_diver
+perspective first

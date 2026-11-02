@@ -13,7 +13,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 乗り込みの一言と二度押しの確認 (docs/design/21 の 1.2 の 2、docs/design/11 の 9 章)。ふさがない確認で、赤の灯が一つでもあるときだけ一度止める。
+// 乗り込みの一言と二度押しの確認 (docs/design/11 の 9 章)。ふさがない確認で、赤の灯が一つでもあるときだけ一度止める。
 //   乗り込み口 (鎖・潮門・昇り風・口) に触れると、乗る資格のある人の画面に三灯の一行が出る
 //   赤が一つもなければそのまま乗る
 //   赤があれば、一度は乗らずに「このまま乗る？」を出し、5 秒 (100 tick) 以内の二度目で乗る

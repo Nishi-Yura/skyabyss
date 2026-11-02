@@ -26,7 +26,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 五章の入口「足もとの鼓動」(docs/design/34 の 4.7)。メイン main_abyss の段 door・shaft を進める。
+// 五章の入口「足もとの鼓動」。メイン main_abyss の段 door・shaft を進める。
 //   封じた戸   都の設計図の印 abyss_door (戸の下の段) とその上の 1 段。メインが段 door 以降の人が、天の鍵 (持ち物か旅嚢) を持って
 //              戸 (またはそのまわり 1) を右クリックすると開く。一度開けたらワールドで開いたまま (TownData.abyssOpen)。都を建て直して
 //              戸が戻っていたら、人が近くに来たとき開け直す。開いた戸の前 3 に段 door の人が来ても合図 ch5_abyss_door

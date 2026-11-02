@@ -1,0 +1,59 @@
+# 六章 区画 3「満月の野」の模型の見直し: 望の灯守 (前 3/4・溜め・放ち)、影の竹馬 (立ち・像)、鏡背負い、光の群れを近くで
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_field_models.txt -PshotsName=moon_field_models
+# 主の間の外 (野営の東の平ら) に AI なしで置いて撮る。観戦モード + 暗視
+world moon_field_models1 continent
+size 1600 900
+timeout 1800
+render 10
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+hud off
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd tp @s -96 30 4 90 20
+waitchunks 200
+wait 60
+cmd skyabyss moonworld tide dim
+cmd summon skyabyss:full_keeper -96 12 4 {NoAI:1b,Rotation:[30f,0f],PersistenceRequired:1b}
+cmd tp @s -100.5 17 13 -150 12
+wait 40
+shot m01_keeper_front
+cmd skyabyss moonworld pose charge
+wait 30
+shot m02_keeper_charge
+cmd skyabyss moonworld pose release
+wait 36
+shot m03_keeper_release
+cmd tp @s -90 17 -4 40 12
+wait 20
+shot m04_keeper_back
+cmd kill @e[type=skyabyss:full_keeper]
+cmd summon skyabyss:shade_strider -96 12 4 {NoAI:1b,Rotation:[30f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:mirror_bearer -102 12 6 {NoAI:1b,Rotation:[30f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:light_swarm -90 13.3 6 {NoAI:1b,Rotation:[30f,0f],PersistenceRequired:1b}
+cmd tp @s -99 15 16 -165 12
+wait 40
+shot m05_mobs
+cmd skyabyss moonworld pose fold
+cmd skyabyss moonworld pose aim
+wait 60
+shot m06_mobs_fold_aim
+wait 60
+shot m06b_mobs_fold_hold
+cmd tp @s -92 14 4 90 8
+wait 30
+shot m06c_strider_side
+cmd skyabyss moonworld pose unfold
+cmd skyabyss moonworld pose hide
+cmd tp @s -99 15 16 -165 12
+wait 60
+shot m07_mobs_unfold_hide
+close

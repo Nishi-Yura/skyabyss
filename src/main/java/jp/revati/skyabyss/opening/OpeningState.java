@@ -8,7 +8,7 @@ import java.util.Set;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-// プレイヤーごとの序盤の拍子の状態 (Data Attachment skyabyss:opening)。プレイヤーのデータに保存され、死んでも引き継ぐ (17 の 6 章 A)。
+// プレイヤーごとの序盤の拍子の状態 (Data Attachment skyabyss:opening)。プレイヤーのデータに保存され、死んでも引き継ぐ。
 // マルチでは人ごとに持つので、あとから入った人にも B0〜B4 が起きる。時刻はどれもゲーム時間 (getGameTime)。ない値は -1。
 //   done        : 済んだ拍子
 //   awakeAt     : 目覚め (B0) の時刻。-1 ならまだ初参加の判定をしていない

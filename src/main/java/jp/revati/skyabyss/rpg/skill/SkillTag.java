@@ -32,24 +32,12 @@ public enum SkillTag {
         return null;
     }
 
-    // 旅人の木の技は、持ち味に合わせてタグを付ける (共通の木でも、混ぜる理由ができる)
+    // 淵・前世の技は持ち味に合わせてタグを付ける
     public static SkillTag of(Skill skill) {
         if (skill.tree.callable()) {
             return of(skill.tree);
         }
-        return switch (skill) {
-            case SIGNAL, JOURNAL -> TIDE;
-            case READINESS_REWARD -> ROCK;
-            case CAMP_HAND -> ASH;
-            case APPRAISER -> BONE;
-            // 橋は先の木のタグ (もう一方は second)。淵・前世の技は持ち味で
-            case DUST_CHARGE -> ROCK;
-            case SEA_BREEZE -> WIND;
-            case STEAM_BELL -> TIDE;
-            case CINDER_VOLLEY -> ASH;
-            case STONE_AIM -> BONE;
-            default -> skill.tree == SkillTree.TRAVELER ? WIND : ext(skill);
-        };
+        return ext(skill);
     }
 
     private static SkillTag ext(Skill skill) {
@@ -61,11 +49,5 @@ public enum SkillTag {
             case DEEP_MAW, ECHO_STRIKE, SOUL_THREAD -> BONE;
             default -> WIND;
         };
-    }
-
-    // 橋は 2 本の木のタグを両方数える (先のタグは of、もう一方はこれ)
-    public static SkillTag second(Skill skill) {
-        SkillTree[] t = skill.bridgeTrees();
-        return t.length == 2 ? of(t[1]) : null;
     }
 }

@@ -290,7 +290,7 @@ public final class TideHeartSelfTest {
         TideLoot.Roll first = TideLoot.rollHeart(r, random, id -> true);
         check(first.draws().stream().anyMatch(d -> d.id().equals(TideLoot.CORE)), "first clear has no core", failures);
         check(first.draws().stream().anyMatch(d -> d.id().equals(TideLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", failures);
-        check(TideLoot.collection().size() == 10, "collection should have 10 items", failures);
+        check(TideLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.TIDE.size(), "collection should have 10 items + the job weapons", failures);
         // ハード天井: 記憶 4 から撃破で 5 になり、未所持を一つ保証
         TitanMemoryData.Record p = new TitanMemoryData.Record();
         p.memory = TitanLoot.HARD_PITY - 1;
@@ -318,7 +318,7 @@ public final class TideHeartSelfTest {
         boolean worldBefore = ProgressData.get(server).worldStopped(TideLoot.TITAN);
         TideLoot.onHeartDefeat(back, List.of(), List.of(fake));
         TitanMemoryData.Record rec = memory.peek(fake, TideLoot.TITAN);
-        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending, "defeat record is wrong", failures);
+        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending == jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR, "defeat record is wrong", failures);
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null, "tide defeat wrote to the stone whale record", failures);
         check(memory.hasPending(fake), "rewards for an absent player were not held", failures);
         TitanMemoryData.Pending held = memory.takePending(fake);

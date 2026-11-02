@@ -51,6 +51,8 @@ public final class SiteJob {
     public final Blueprint bp;
     private final Post post;
     private final String label;
+    // 道の上に物を置かない部品か (見どころ・章の小要素・足跡・骨)
+    private final boolean keepRoadsClear;
 
     public Phase phase = Phase.LOAD;
     public int rot;
@@ -97,6 +99,8 @@ public final class SiteJob {
         this.entry = entry;
         this.bp = bp;
         this.label = label;
+        this.keepRoadsClear = !(label.equals("shelter") || label.equals("camp") || label.startsWith("town ") || label.startsWith("ferry ")
+                || label.startsWith("audit") || label.startsWith("conflict"));
         this.post = post;
         this.rot = SiteFinder.rot(entry.yaw);
         this.mirror = SiteFinder.mirror(entry.yaw);
@@ -260,7 +264,9 @@ public final class SiteJob {
                 || s.is(Blocks.TUFF) || s.is(Blocks.DRIPSTONE_BLOCK) || s.is(Blocks.ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.GRANITE)
                 || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH)
                 // 章の跡地の灰の盆地の上面 (ShapeJob。灰のまだら)
-                || s.is(Blocks.GRAY_CONCRETE_POWDER) || s.is(Blocks.LIGHT_GRAY_CONCRETE_POWDER) || s.is(Blocks.BASALT);
+                || s.is(Blocks.GRAY_CONCRETE_POWDER) || s.is(Blocks.LIGHT_GRAY_CONCRETE_POWDER) || s.is(Blocks.BASALT)
+                // 天と淵の大陸の地面 (峰に出る鉱石・火山の黒い石と溶岩の塊)
+                || s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES) || s.is(Blocks.BLACKSTONE) || s.is(Blocks.MAGMA_BLOCK);
     }
 
     // 地面の上に自然にある物か (空気・草花・雪・葉・木・つる・実)
@@ -379,16 +385,32 @@ public final class SiteJob {
             conflictFound();
             return;
         }
-        // ならしたあとの上面のブロック: 範囲の中央の地面 (草なら草、砂なら砂、雪や石ならそれ)
-        BlockPos cp = new BlockPos(origin.getX(), 0, origin.getZ());
-        int cg = ground(cp.getX(), cp.getZ());
-        if (cg != WET) {
-            BlockState top = level.getBlockState(new BlockPos(cp.getX(), cg, cp.getZ()));
-            if (top.is(BlockTags.SAND) || top.is(BlockTags.DIRT) || top.is(Blocks.GRAVEL) || top.is(BlockTags.TERRACOTTA)) {
-                topState = top.is(Blocks.DIRT_PATH) ? Blocks.GRASS_BLOCK.defaultBlockState() : top;
-                fillState = top.is(BlockTags.SAND) ? top : top.is(BlockTags.TERRACOTTA) ? top : Blocks.DIRT.defaultBlockState();
+        // ならしたあとの上面のブロック: 範囲の中央と、まわり 8 点の地面でいちばん多いもの (草なら草、砂なら砂、雪や石ならそれ)。
+        // 道 (土の道) は数えない (大陸の町は道の交わる所に建つ)
+        java.util.Map<BlockState, Integer> votes = new java.util.HashMap<>();
+        int sx = Math.max(2, (rect[2] - rect[0]) / 4);
+        int sz = Math.max(2, (rect[3] - rect[1]) / 4);
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                int x = origin.getX() + i * sx;
+                int z = origin.getZ() + j * sz;
+                int cg = ground(x, z);
+                if (cg == WET) {
+                    continue;
+                }
+                BlockState top = level.getBlockState(new BlockPos(x, cg, z));
+                if (!top.is(Blocks.DIRT_PATH) && (top.is(BlockTags.SAND) || top.is(BlockTags.DIRT) || top.is(Blocks.GRAVEL) || top.is(BlockTags.TERRACOTTA)
+                        || top.is(Blocks.STONE) || top.is(Blocks.ANDESITE) || top.is(Blocks.SNOW_BLOCK) || top.is(Blocks.BASALT) || top.is(Blocks.BLACKSTONE))) {
+                    votes.merge(top, 1, Integer::sum);
+                }
             }
         }
+        votes.entrySet().stream().max(java.util.Map.Entry.comparingByValue()).ifPresent(v -> {
+            BlockState top = v.getKey();
+            topState = top;
+            fillState = top.is(BlockTags.SAND) || top.is(BlockTags.TERRACOTTA) || top.is(Blocks.STONE) || top.is(Blocks.ANDESITE) || top.is(Blocks.BASALT)
+                    || top.is(Blocks.BLACKSTONE) ? top : top.is(Blocks.SNOW_BLOCK) ? Blocks.STONE.defaultBlockState() : Blocks.DIRT.defaultBlockState();
+        });
         buildColumns(inner);
         buildSelective();
         entry.started = true;
@@ -465,11 +487,21 @@ public final class SiteJob {
                 int g = groundCache[(x - x0) + (z - z0) * w];
                 boolean in = x >= inner[0] && x <= inner[2] && z >= inner[1] && z <= inner[3];
                 int dist = Math.max(Math.max(inner[0] - x, x - inner[2]), Math.max(inner[1] - z, z - inner[3]));
+                if (bp.round) {
+                    double cx = (inner[0] + inner[2]) / 2.0;
+                    double cz = (inner[1] + inner[3]) / 2.0;
+                    double rad = (inner[2] - inner[0]) / 2.0 + 0.5;
+                    double d = Math.hypot(x - cx, z - cz) - rad;
+                    in = d <= 0;
+                    dist = (int) Math.ceil(d);
+                }
                 int target;
                 if (in) {
                     target = bp.level ? groundH : g;
                 } else if (bp.level && bp.ring > 0 && dist <= bp.ring) {
+                    // なめらかにつなぐ (台の縁で折れず、まわりの地面へ寝かせて入る。2026-10-28)
                     double t = dist / (double) (bp.ring + 1);
+                    t = t * t * (3 - 2 * t);
                     target = (int) Math.round(groundH + (g - groundH) * t);
                 } else {
                     target = g;
@@ -481,6 +513,12 @@ public final class SiteJob {
         for (int i = 0; i < list.size(); i++) {
             System.arraycopy(list.get(i), 0, cols, i * 5, 5);
         }
+    }
+
+    // 列の上面: 大陸の道の上なら道の石、それ以外は topState
+    private BlockState roadTop(int x, int z) {
+        BlockState r = jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(x, z);
+        return r == null ? topState : r;
     }
 
     // ---------------------------------------------------------------- TERRAIN
@@ -520,18 +558,20 @@ public final class SiteJob {
                 // 変えない列 (輪の外、または変えない部品)。木だけ片付ける
                 clearAbove(p, x, z, g + 1, clear, false);
             } else {
+                // 大陸の道が通る列は、上面を道のままにする (町の台・見どころの輪で道が草に塗られて途切れない。2026-10-27)
+                BlockState top = roadTop(x, z);
                 if (target > g) {
                     for (int y = g + 1; y <= target; y++) {
-                        set(p.set(x, y, z), y == target ? topState : fillState);
+                        set(p.set(x, y, z), y == target ? top : fillState);
                     }
                 } else if (target < g) {
                     for (int y = g; y > target; y--) {
                         set(p.set(x, y, z), Blocks.AIR.defaultBlockState());
                     }
-                    set(p.set(x, target, z), topState);
-                } else if (in && !level.getBlockState(p.set(x, g, z)).equals(topState) && bp.level) {
+                    set(p.set(x, target, z), top);
+                } else if ((in || top != topState) && !level.getBlockState(p.set(x, g, z)).equals(top) && bp.level) {
                     // 同じ高さでも上面を揃える (部品の下は同じ地面に)
-                    set(p.set(x, g, z), topState);
+                    set(p.set(x, g, z), top);
                 }
                 clearAbove(p, x, z, Math.max(target, g) + 1, clear, true);
             }
@@ -673,6 +713,11 @@ public final class SiteJob {
             Blueprint.Cell c = cells.get(cellIndex++);
             BlockPos at = Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin);
             BlockState state = Blueprint.transform(c.state(), rot, mirror);
+            // 道の上には物を置かない (2026-10-28 の声「道の上にはなにも乗らないように」)。町・都・船着き場・野営地は道とつながるように作ってあるので除く。
+            // 仕掛けの付いた物 (樽・箱・旗など、クエストが場所を覚える物) は道にかかっても置く
+            if (keepRoadsClear && !state.isAir() && !state.hasBlockEntity() && c.y() >= 0 && jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(at.getX(), at.getZ()) != null) {
+                continue;
+            }
             if (!state.isAir() || !level.getBlockState(at).isAir()) {
                 set(at, state);
                 if (!state.isAir()) {
@@ -863,7 +908,7 @@ public final class SiteJob {
         return switch (kind) {
             case "camp" -> 12;
             case "shelter" -> 110;
-            case "footprint" -> SiteFinder.FOOT_HALF_Z;
+            case "footprint" -> 33;
             case "ribs" -> SiteFinder.RIB_HALF_LONG;
             default -> 3;
         };
@@ -946,28 +991,18 @@ public final class SiteJob {
         int coreX = bp.wetOk ? hx / 2 : hx;
         int coreZ = bp.wetOk ? hz / 2 : hz;
         int k = relocations;
-        SiteData.Entry campE = data.first("camp");
         SiteData.Entry shelterE = data.first("shelter");
         String kind = entry.kind;
-        // 一章の骨は一章の跡地 (docs/design/33 の 3 章) の中に置くので、野営地からの距離ではなく、跡地の中心から 150 以内で動かす
+        // 一章の骨は一章の跡地の中に置くので、跡地の中心から 150 以内で動かす
         SiteData.Ground whaleGround = kind.equals("ribs") ? data.ground(jp.revati.skyabyss.story.Chapters.WHALE.id()) : null;
         // 一章の骨は、跡地が取っておいた岩鯨の祠の台座 (ChapterGrounds.shrineSpot) の上へ動かさない (祠は骨の脇。台座 9×9)
         if (whaleGround != null && whaleGround.shrine != null) {
             others.add(whaleGround.shrine);
             radii.add(5);
         }
-        BlockPos campPos = campE == null || whaleGround != null ? null : campE.pos;
         BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
         BlockPos anchor = whaleGround != null ? whaleGround.center : entry.anchor;
         int maxDist = whaleGround != null ? ChapterPlanner.MAX_DIST : entry.maxDist;
-        List<BlockPos> otherPrints = new ArrayList<>();
-        if (kind.equals("footprint")) {
-            for (SiteData.Entry o : data.entries("footprint")) {
-                if (o != entry && Math.abs(o.index - entry.index) == 1) {
-                    otherPrints.add(o.pos);
-                }
-            }
-        }
         SiteFinder.Probe probe = new SiteFinder.Probe(level);
         java.util.function.Supplier<BlockPos> search = () -> {
             for (int attempt = 0; attempt < 12; attempt++) {
@@ -981,7 +1016,7 @@ public final class SiteJob {
                         break;
                     }
                 }
-                if (!clear || !withinLimits(kind, x, z, campPos, shelterPos, otherPrints) || (anchor != null && Math.hypot(x - anchor.getX(), z - anchor.getZ()) > maxDist)) {
+                if (!clear || !withinLimits(kind, x, z, shelterPos) || (anchor != null && Math.hypot(x - anchor.getX(), z - anchor.getZ()) > maxDist)) {
                     continue;
                 }
                 SiteFinder.Area ar = SiteFinder.area(probe, x, z, coreX, coreZ, range);
@@ -998,48 +1033,9 @@ public final class SiteJob {
         }
     }
 
-    // 動かしても守る距離 (骨は野営地から、足跡は道から)
-    private static boolean withinLimits(String kind, int x, int z, @Nullable BlockPos camp, @Nullable BlockPos shelter, List<BlockPos> footprints) {
-        if (camp == null) {
-            return true;
-        }
-        if (kind.equals("ribs")) {
-            double d = Math.hypot(x - camp.getX(), z - camp.getZ());
-            if (d < 205 || d > 375) {
-                return false;
-            }
-            // 宿りとは違う方角 (82 度以上離す)
-            if (shelter != null) {
-                double a1 = Math.atan2(z - camp.getZ(), x - camp.getX());
-                double a2 = Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX());
-                double diff = Math.abs(Math.toDegrees(a1 - a2));
-                diff = diff > 180 ? 360 - diff : diff;
-                return diff >= 82;
-            }
-            return true;
-        }
-        if (shelter != null && !kind.equals("shelter") && SiteFinder.capital()
-                && Math.hypot(x - shelter.getX(), z - shelter.getZ()) < (kind.equals("footprint") ? SiteFinder.CAPITAL_FOOT_MIN : SiteFinder.CAPITAL_SITE_MIN)) {
-            return false;
-        }
-        if (kind.equals("footprint") && shelter != null) {
-            double dx = shelter.getX() - camp.getX();
-            double dz = shelter.getZ() - camp.getZ();
-            double len = Math.sqrt(dx * dx + dz * dz);
-            double dp = SiteFinder.distToPath(x, z, camp, dx / len, dz / len, len);
-            if (dp < 30 || dp > 155) {
-                return false;
-            }
-            // 隣の足跡との一歩の間隔 (66〜135)
-            for (BlockPos o : footprints) {
-                double dd = Math.hypot(x - o.getX(), z - o.getZ());
-                if (dd < 66 || dd > 135) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return true;
+    // 動かしても都の中へは入れない (都は中心から壁まで約 100、墓地まで 140。都のほかの物は中心から 150 より外)
+    private static boolean withinLimits(String kind, int x, int z, @Nullable BlockPos shelter) {
+        return shelter == null || kind.equals("shelter") || !SiteFinder.capital() || Math.hypot(x - shelter.getX(), z - shelter.getZ()) >= 150;
     }
 
     private void applyRelocation(@Nullable BlockPos found) {
@@ -1340,6 +1336,12 @@ public final class SiteJob {
                         p.set(x, y, z);
                         BlockState s = level.getBlockState(p);
                         if (s.isAir() || !s.getFluidState().isEmpty() || ours.contains(p.asLong()) || s.canSurvive(level, p)) {
+                            continue;
+                        }
+                        // 土の道・耕地は上に物が載ると残れない。消すと穴になる (部品の床が道に掛かったとき浮いた) ので、ただの土に戻す
+                        if (s.is(Blocks.DIRT_PATH) || s.is(Blocks.FARMLAND)) {
+                            level.setBlock(p, Blocks.DIRT.defaultBlockState(), FLAGS);
+                            n++;
                             continue;
                         }
                         level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS);

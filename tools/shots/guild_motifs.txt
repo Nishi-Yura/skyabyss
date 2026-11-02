@@ -1,0 +1,38 @@
+# ギルドの旗のこの世界の紋 (旗のつまみの見本・プロフィールの旗)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/guild_motifs.txt -PshotsName=guild_motifs
+world continent_areas continent
+size 1280 720
+timeout 1200
+render 6
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd effect give @s resistance 99999 4 true
+cmd tp @s -120 120 -600 0 0
+waitchunks 300
+wait 100
+cmd guild create "Kujira" KJR blue yellow
+wait 10
+cmd guild pattern whale
+wait 10
+chat clear
+cmd guild menu 2
+wait 40
+shot guild_motifs_1_whale
+close
+cmd guild pattern titan_eye
+cmd guild plate none
+wait 10
+chat clear
+open profile
+wait 40
+shot guild_motifs_2_profile
+close
+cmd guild pattern tower
+wait 10
+chat clear
+cmd guild menu 2
+wait 40
+shot guild_motifs_3_tower

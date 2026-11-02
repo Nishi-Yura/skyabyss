@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-// 骨負い (docs/design/21 の 3.1): 追いかけっこ (敵意なし)。骨の籠を背負った四足の苔の獣。夕方〜夜に骨の集め場のまわりを歩き、人を見ると逃げる。
+// 骨負い: 追いかけっこ (敵意なし)。骨の籠を背負った四足の苔の獣。夕方〜夜に骨の集め場のまわりを歩き、人を見ると逃げる。
 // 逃げるとき、集め場が人の背ごしでなければ、集め場へ向かって走る (追えば導かれる)。攻撃はしない。倒すと籠 (骨片 1〜3) を落とす
 public class BoneHauler extends GuardMob {
     // 逃げ始める人との近さ、逃げ続ける近さ

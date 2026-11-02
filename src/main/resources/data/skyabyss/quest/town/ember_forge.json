@@ -1,0 +1,44 @@
+{
+  "category": "sub",
+  "order": 304,
+  "giver": "skyabyss:guest_ember_survivor",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:forge_ruin",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_ember_survivor",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 100,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 25
+      },
+      {
+        "item": "skyabyss:socket_shard_ash",
+        "count": 1
+      }
+    ]
+  }
+}

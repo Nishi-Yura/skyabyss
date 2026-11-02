@@ -79,9 +79,13 @@ public final class GearFreedomSelfTest {
             artifact[GearFreedom.rollSockets(GearTier.ARTIFACT, random)]++;
         }
         // 階級が上がるほど穴が多い (0 個の割合が減り、2 個の割合が増える)
-        check(f, rare[0] > epic[0] && epic[0] > legend[0] && legend[0] > artifact[0] && rare[2] < epic[2] && epic[2] < legend[2] && legend[2] < artifact[2],
+        // レアは穴 1 つまで (階級の上限 GearTier.maxSockets。2 の目は 1 になる)
+        check(f, rare[0] > epic[0] && epic[0] > legend[0] && legend[0] > artifact[0] && rare[2] == 0 && epic[2] < legend[2] && legend[2] < artifact[2],
                 "socket odds do not rise with the tier " + java.util.Arrays.toString(rare) + java.util.Arrays.toString(epic) + java.util.Arrays.toString(legend) + java.util.Arrays.toString(artifact));
-        check(f, Math.abs(rare[0] / 6000.0 - 0.50) < 0.03 && Math.abs(rare[2] / 6000.0 - 0.12) < 0.02, "rare socket odds off " + java.util.Arrays.toString(rare));
+        check(f, Math.abs(rare[0] / 6000.0 - 0.50) < 0.03 && rare[2] == 0, "rare socket odds off " + java.util.Arrays.toString(rare));
+        // 上限: コモン・アンコモン 0 / レア 1 / エピック 2 / ヒロイック・アーティファクト 3
+        check(f, GearTier.COMMON.maxSockets() == 0 && GearTier.UNCOMMON.maxSockets() == 0 && GearTier.RARE.maxSockets() == 1 && GearTier.EPIC.maxSockets() == 2
+                && GearTier.HEROIC.maxSockets() == 3 && GearTier.ARTIFACT.maxSockets() == 3, "socket caps per tier are wrong");
         check(f, Math.abs(legend[0] / 6000.0 - 0.30) < 0.03 && Math.abs(legend[2] / 6000.0 - 0.25) < 0.03, "heroic socket odds off " + java.util.Arrays.toString(legend));
         ItemStack old = new ItemStack(ModItems.WHALEBONE_GREATSWORD.get());
         old.set(ModDataComponents.AFFIXES.get(), List.of(new Affix(AffixType.SHARP, 0.05)));
@@ -139,11 +143,37 @@ public final class GearFreedomSelfTest {
         ItemStack back = ForgeRules.removeGem(p, s2, 0);
         check(f, back.is(ModItems.SOCKET_SHARD_STONE.get()) && GearFreedom.freeSockets(s2) == 1, "unsocket failed");
         check(f, ForgeRules.count(p, ModItems.RESONANCE_CRYSTAL.get()) == before - 1, "unsocket did not cost a crystal");
-        // 打ち直しで穴を足す: 必ず付き、2 で止まる
+        // ---- 巨神の粉 (docs/design/41): 段は数字に掛かる・外すと段のまま戻る・段の和 4 で粉の技・三つで一つ上の段
+        ItemStack ps = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 2);
+        double sharpBase = AffixRules.value(ps, AffixType.SHARP);
+        ForgeRules.insertGem(ps, Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_STONE.get()), 2));
+        check(f, Math.abs(AffixRules.value(ps, AffixType.SHARP) - (sharpBase + 0.04)) < 1e-9, "a tier II powder should add twice the attack");
+        check(f, Powder.art(ps) == null, "one tier II powder should not wake the powder art");
+        ForgeRules.insertGem(ps, Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_STONE.get()), 2));
+        check(f, Powder.art(ps) == Element.STONE, "two tier II stone powders should wake the stone art");
+        p.getInventory().setItem(20, new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), 60));
+        ItemStack out = ForgeRules.removeGem(p, ps, 0);
+        check(f, out.is(ModItems.SOCKET_SHARD_STONE.get()) && Powder.tier(out) == 2, "unsocketed powder lost its tier: " + Powder.tier(out));
+        ItemStack three = new ItemStack(ModItems.SOCKET_SHARD_WIND.get(), 3);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, three);
+        three.getItem().use(level, p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        boolean gotII = false;
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+            ItemStack it = p.getInventory().getItem(i);
+            gotII |= it.is(ModItems.SOCKET_SHARD_WIND.get()) && Powder.tier(it) == 2;
+        }
+        check(f, three.isEmpty() && gotII, "three tier I wind powders did not make one tier II");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        // 打ち直しで穴を足す: 必ず付き、エピックは 2 で止まる
         ItemStack none = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 0);
         p.getInventory().setItem(21, new ItemStack(ForgeRules.shardItem(none), 40));
         check(f, ForgeRules.addSocket(p, none) && GearFreedom.sockets(none) == 1 && ForgeRules.addSocket(p, none) && GearFreedom.sockets(none) == 2
                 && !ForgeRules.addSocket(p, none), "guaranteed socket add failed");
+        // ヒロイックは 3 つまで (エピックの大剣は上の 2 で止まる)
+        ItemStack heroic = rolled(ModItems.CAPTAIN_PIKE.get(), 0);
+        p.getInventory().setItem(22, new ItemStack(ForgeRules.shardItem(heroic), 64));
+        boolean opened3 = ForgeRules.addSocket(p, heroic) && ForgeRules.addSocket(p, heroic) && ForgeRules.addSocket(p, heroic);
+        check(f, opened3 && GearFreedom.sockets(heroic) == 3 && !ForgeRules.addSocket(p, heroic), "a heroic weapon should open up to 3 sockets: " + GearFreedom.sockets(heroic));
 
         // ---- ルーン: 1 つの技に 1 枚・倍率の上限
         ItemStack runeA = GearFreedomItems.rune(new RuneData("lunge", false, 1200));

@@ -20,11 +20,7 @@
     "xp": 30,
     "items": [
       {
-        "item": "minecraft:emerald",
-        "count": 1
-      },
-      {
-        "item": "minecraft:bread",
+        "item": "skyabyss:road_hardtack",
         "count": 2
       }
     ]

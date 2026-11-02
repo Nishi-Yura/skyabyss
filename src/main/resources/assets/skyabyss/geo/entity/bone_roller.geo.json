@@ -1,0 +1,137 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.bone_roller",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 3,
+    "visible_bounds_height": 3,
+    "visible_bounds_offset": [
+     0,
+     1.0,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      4.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -4.85,
+        0.8,
+        -7.518
+       ],
+       "size": [
+        9.699,
+        7.2,
+        15.035
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      3.4,
+      -6.2
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -4.708,
+        1.2,
+        -12.723
+       ],
+       "size": [
+        9.416,
+        5.444,
+        7.483
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_l",
+     "pivot": [
+      3.6,
+      2.6,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -5.603,
+        0.193,
+        -5.52
+       ],
+       "size": [
+        2.81,
+        2.928,
+        10.565
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_r",
+     "pivot": [
+      -3.6,
+      2.6,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        2.793,
+        0.193,
+        -5.52
+       ],
+       "size": [
+        2.81,
+        2.928,
+        10.565
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

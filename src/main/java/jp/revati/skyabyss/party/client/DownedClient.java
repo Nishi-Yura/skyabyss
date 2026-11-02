@@ -154,7 +154,7 @@ public final class DownedClient {
         DownedPackets.Entry aim = aimed();
         if (aim != null) {
             boolean active = aim.progressPercent() > 0 || mc.options.keyUse.isDown();
-            Component text = Component.translatable(active ? "hud.skyabyss.downed.reviving" : "hud.skyabyss.downed.hold", aim.name());
+            Component text = (active ? Component.translatable("hud.skyabyss.downed.reviving", aim.name()) : Component.translatable("hud.skyabyss.downed.hold", aim.name(), Component.keybind("key.use")));
             int tw = Math.max(28, mc.font.width(text));
             out.add(jp.revati.skyabyss.hud.HudLayout.Request.center(jp.revati.skyabyss.hud.HudLayout.Id.AIM_RING, -tw / 2, -14, tw, 45));
         }
@@ -205,7 +205,7 @@ public final class DownedClient {
             int cy = h / 2;
             boolean active = aim.progressPercent() > 0 || mc.options.keyUse.isDown();
             drawRing(g, cx, cy, 14, Math.max(0, Math.min(100, aim.progressPercent())), 0xFF9FE8B0);
-            Component text = Component.translatable(active ? "hud.skyabyss.downed.reviving" : "hud.skyabyss.downed.hold", aim.name());
+            Component text = (active ? Component.translatable("hud.skyabyss.downed.reviving", aim.name()) : Component.translatable("hud.skyabyss.downed.hold", aim.name(), Component.keybind("key.use")));
             g.drawCenteredString(font, text, cx, cy + 22, 0xFFFFFFFF);
         }
     }

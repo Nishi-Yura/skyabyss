@@ -56,7 +56,7 @@ public final class NightmareSelfTest {
             // 普通の戦いは段を持たない (数字は今まで通り)
             HeartWarden plain = WardenArena.wake(level);
             check(f, plain != null && plain.tier() == NightmareTier.NORMAL, "the normal fight has a nightmare tier");
-            check(f, plain != null && Math.abs(plain.getMaxHealth() - HeartWarden.BASE_HP) < 1, "the normal fight's health changed: " + (plain == null ? null : plain.getMaxHealth()));
+            check(f, plain != null && Math.abs(plain.bulk() - 1) < 1e-6, "the normal fight's health changed: " + (plain == null ? null : plain.getMaxHealth()));
             check(f, AbyssBeacons.usable(7) && Nightmare.tier().lanternLife() == 1.0, "the normal fight should use all lanterns at full time");
             WardenArena.clearRoom(level);
 
@@ -88,7 +88,7 @@ public final class NightmareSelfTest {
             HeartWarden w1 = WardenArena.current(level);
             check(f, Nightmare.active() && Nightmare.session().tier().n() == 1, "the session should be tier 1");
             check(f, w1 != null && w1.tier().n() == 1, "the warden did not take tier 1");
-            check(f, w1 != null && Math.abs(w1.getMaxHealth() - HeartWarden.BASE_HP * 1.1) < 1, "tier 1 health: " + (w1 == null ? null : w1.getMaxHealth()));
+            check(f, w1 != null && Math.abs(w1.bulk() - 1.1) < 1e-6, "tier 1 health: " + (w1 == null ? null : w1.bulk()));
             check(f, Nightmare.tier().lanternLife() == 0.75, "tier 1 should shorten the lanterns");
             long now = level.getGameTime();
             AbyssBeacons.light(level, 0, now);
@@ -147,7 +147,7 @@ public final class NightmareSelfTest {
             WardenArena.wake(level, t3);
             Nightmare.begin(g4, t3);
             HeartWarden w3 = WardenArena.current(level);
-            check(f, w3 != null && w3.tier() == t3 && Math.abs(w3.getMaxHealth() - HeartWarden.BASE_HP * 1.3) < 1, "tier 3 health is wrong");
+            check(f, w3 != null && w3.tier() == t3 && Math.abs(w3.bulk() - 1.3) < 1e-6, "tier 3 health is wrong");
             w3.setHealth(w3.getMaxHealth() * 0.5f);
             w3.updatePhase(level);
             check(f, shades(level, w3) == 1, "tier 3 should bring one shade at phase 2");
@@ -212,7 +212,7 @@ public final class NightmareSelfTest {
         check(f, n0.hp() == 1.0 && n0.dmg() == 1.0 && n0.lanternLife() == 1.0 && n0.lanterns() == 8 && n0.waves() == 1 && n0.snuffTicks() == HeartWarden.SNUFF_TICKS
                 && Math.abs(n0.darkShare() - HeartWarden.DARK_SHARE) < 1e-6 && !n0.nightmare(), "the normal numbers changed");
         check(f, NightmareTier.of(0) == n0 && NightmareTier.of(-1) == n0 && NightmareTier.of(11) == t.get(9) && NightmareTier.of(1) == t.get(0), "the tier lookup is wrong");
-        check(f, HeartWarden.BASE_HP == 600, "the normal health changed");
+        check(f, HeartWarden.BASE_HP == 1000 && HeartWarden.TOUGH == 0.3f, "the normal health changed");
     }
 
     // 後の段は前の段の決まりを落とさない (オン のまま)

@@ -59,13 +59,13 @@
           "kind": "give",
           "if": {
             "type": "item",
-            "item": "minecraft:potion",
+            "item": "skyabyss:healing_draught",
             "count": 2
           },
           "do": [
             {
               "type": "take",
-              "item": "minecraft:potion",
+              "item": "skyabyss:healing_draught",
               "count": 2
             },
             {

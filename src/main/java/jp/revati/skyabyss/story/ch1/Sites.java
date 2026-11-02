@@ -17,9 +17,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
-// 序章・一章の小要素の登録 (ChapterSites。docs/design/17 の 3.8)。部品は data/skyabyss/opening/ch1_*.json (tools/gen/ch1/gen_ch1_blueprints.py)。
+// 序章・一章の小要素の登録 (ChapterSites)。部品は data/skyabyss/opening/ch1_*.json (データを直接直す（生成スクリプトはない）)。
 // 章が開いたとき、その人の拠点のまわりに扇形の 3 方向へ置かれる。拠点から 150 ブロック以内に 2 つ以上 (序章は 3 つ)。
 //   序章 (日 1)  旅の跡 3 つ (石の輪・倒れた荷車・小さな祭壇)。どれも箱 (食料・松明・低い装備) と頁 1 枚
 //   一章         旅の跡 2 つ (井戸・置き去りの荷)、見張りの丘、歌石 5 つ、失せ物の荷車、日記の場所
@@ -37,7 +36,7 @@ public final class Sites {
     public static final String DIARY_SPOT = "ch1_diary_spot";
     public static final List<String> WHALE = List.of(TRACE_WELL, TRACE_PACK, LOOKOUT, LOST_CART, DIARY_SPOT,
             songStoneId(1), songStoneId(2), songStoneId(3), songStoneId(4), songStoneId(5));
-    // 一章の地上の新しい場所 (21 の 3.1、P6。34 の 4.2.1): 鯨道の祠・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
+    // 一章の地上の新しい場所 (P6): 鯨道の祠・骨の集め場・割れ殻の洞・骨の坑。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
     // 歌の間は宿りの鐘の下 (SongChamber)
     public static final List<String> WHALE_P6 = buildP6();
 
@@ -93,7 +92,7 @@ public final class Sites {
         registerP6();
     }
 
-    // ---------------------------------------------------------------- 21 の 3.1 の新しい場所 (P6)
+    // ---------------------------------------------------------------- 一章の地上の新しい場所 (P6)
     static void registerP6() {
         // 鯨道の祠: 都から一章の跡地 (北の丘) への道の終わり。道しるべの点のうち跡地にいちばん近い点に置く (atRoad)。着くと頁 ch1/road_shrine
         ChapterSites.element(Ch1Prep.ROAD_SHRINE_ID, Chapters.WHALE, Ch1Prep.ROAD_SHRINE_ID).atRoad().dist(132, 148)
@@ -116,6 +115,8 @@ public final class Sites {
         Ch1Trails.register();
         Ch1Prep.register();
         Ch1Mobs.registerWanderers();
+        // 鯨の碑 3 枚 (背の外の探索の碑。story/ChapterTablets)
+        jp.revati.skyabyss.story.ChapterTablets.register(jp.revati.skyabyss.story.ChapterTablets.WHALE);
     }
 
     // 荷車の傍らの道: 失せ物の荷車の隣 (東へ 10) に轍と荷を置く。印 "artisan" (職人が立つ所) を記録に残す
@@ -155,14 +156,13 @@ public final class Sites {
             return;
         }
         int slot = 0;
-        box.setItem(slot++, new ItemStack(Items.BREAD, 1 + level.random.nextInt(2)));
-        box.setItem(slot++, new ItemStack(Items.TORCH, 2 + level.random.nextInt(3)));
+        box.setItem(slot++, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 1 + level.random.nextInt(2)));
         if (gear) {
             ItemStack low = switch (level.random.nextInt(4)) {
-                case 0 -> new ItemStack(Items.WOODEN_SWORD);
-                case 1 -> new ItemStack(Items.LEATHER_HELMET);
-                case 2 -> new ItemStack(Items.STONE_PICKAXE);
-                default -> new ItemStack(Items.LEATHER_BOOTS);
+                case 0 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_LEGGINGS.get());
+                case 1 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_HELMET.get());
+                case 2 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_PICKAXE.get());
+                default -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_BOOTS.get());
             };
             box.setItem(slot++, low);
         }

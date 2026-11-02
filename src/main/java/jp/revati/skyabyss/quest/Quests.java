@@ -60,7 +60,7 @@ public final class Quests {
             log.tracked = questId;
         }
         if (log.quests.size() == 1) {
-            Notice.hint(player, "message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log"));
+            jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.QUEST_LOG);
         }
         notice(player, QuestNetwork.Notice.STARTED, questId);
         jp.revati.skyabyss.guide.PrepQuests.onStarted(player, def);
@@ -83,9 +83,17 @@ public final class Quests {
         bump(player, (def, stage, ob) -> ob.type().equals("signal") && ob.targets().contains(signal));
     }
 
+    // 巨神の背の順路を越えた (心臓が止まった)。ticks は順路を始めてから止めるまで
+    public static void onRun(ServerPlayer player, String titan, long ticks) {
+        bump(player, (def, stage, ob) -> ob.type().equals("run") && (ob.targets().contains(titan) || ob.targets().contains("any"))
+                && (ob.radius() <= 0 || ticks <= ob.radius() * 20));
+    }
+
     // 会話でその節 (node) に入った。topic のない talk は、その NPC と話せば何でもよい
     public static void onTalk(ServerPlayer player, String role, String node) {
         jp.revati.skyabyss.advancement.Beats.fire(player, "talk:" + role);
+        // 六章: 前の自分と話し終えると記憶の断片 (story/ch6/MoonMemories)
+        jp.revati.skyabyss.story.ch6.MoonMemories.onTalk(player, node);
         // 聞いた話題を覚える。今の段階でなくても (先に聞いても、途中で閉じても)、その段に着いたとき・ログイン時の measure が済ませる
         // (始めたあとの、そのクエストのどこかの段の話題だけ。始める前に聞いた話では済まない)
         QuestLog hlog = QuestLog.of(player);
@@ -505,6 +513,10 @@ public final class Quests {
     }
 
     public static void give(ServerPlayer player, ItemStack stack) {
+        // 置く品 (松明・丸太など。冒険の決まりでは使えない) は渡さない (rpg/rules/NoPlaceables)
+        if (jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(player, stack)) {
+            return;
+        }
         // 留め袋に入る品は袋へ (docs/design/22 の 4.1)
         jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
         if (!stack.isEmpty()) {

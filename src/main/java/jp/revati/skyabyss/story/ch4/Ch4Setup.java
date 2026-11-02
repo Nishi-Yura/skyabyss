@@ -29,16 +29,16 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 四章の地上 (docs/design/34 の C4、21 の 6.1) の登録: 敵 4 種 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り)・スポーンエッグ・品 5 つ・音。
+// 四章の地上の登録: 敵 4 種 (熾り蟲・灰被りの屑・灰ひきずり・古い灰被り)・スポーンエッグ・品 5 つ・音。
 // 敵と品の ID は skyabyss の名前空間。音の出来事だけは skyabyss_ch4 の名前空間 (assets/skyabyss_ch4/sounds.json。ほかの作業の sounds.json と分ける)。
-// 素材と見た目は tools/gen/ch4/gen_ch4_ground_mobs.py、文は tools/gen/ch4/gen_ch4_ground.py。SkyAbyss のコンストラクタから register を呼ぶ
+// 素材と見た目は tools/gen/ch4/gen_ch4_ground_mobs.py。SkyAbyss のコンストラクタから register を呼ぶ
 public final class Ch4Setup {
     public static final String SOUND_NS = "skyabyss_ch4";
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SOUND_NS);
 
-    // 四章の推奨レベル (34 の 4.5。Lv 24 → 30。成長の経験値の減り方に使う)
+    // 四章の推奨レベル (Lv 24 → 30。成長の経験値の減り方に使う)
     public static final int CONTENT_LEVEL = 27;
 
     // ---------------------------------------------------------------- 敵
@@ -64,7 +64,7 @@ public final class Ch4Setup {
     public static final DeferredItem<Item> ELDER_THRALL_EGG = ITEMS.register("elder_thrall_spawn_egg",
             () -> new DeferredSpawnEggItem(ELDER_THRALL, 0x5A5654, 0xD2551A, new Item.Properties()));
 
-    // ---------------------------------------------------------------- 品 (21 の 6.1。煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水)
+    // ---------------------------------------------------------------- 品 (煤鉄・灰麻・灰の護り糸・煤の砥石・灰の冷やし水)
     public static final DeferredItem<Item> SOOT_IRON = ITEMS.register("soot_iron", () -> new Described(new Item.Properties()));
     public static final DeferredItem<Item> ASH_HEMP = ITEMS.register("ash_hemp", () -> new Described(new Item.Properties()));
     public static final DeferredItem<Item> ASH_WARD_THREAD = ITEMS.register("ash_ward_thread",
@@ -72,9 +72,13 @@ public final class Ch4Setup {
     public static final DeferredItem<Item> SOOT_WHETSTONE = ITEMS.register("soot_whetstone", () -> new SootWhetstoneItem(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<Item> ASH_COOLER = ITEMS.register("ash_cooler", () -> new AshCoolerItem(new Item.Properties().stacksTo(16)));
 
-    // ---------------------------------------------------------------- 音 (既存の音の別名。assets/skyabyss_ch4/sounds.json)
+    // ---------------------------------------------------------------- 音 (assets/skyabyss_ch4/sounds.json。声の三つは tools/gen/sound/gen_mob_voices.py)
     public static final DeferredHolder<SoundEvent, SoundEvent> MITE_AMBIENT = sound("cinder_mite_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MITE_HURT = sound("cinder_mite_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> MITE_DEATH = sound("cinder_mite_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_AMBIENT = sound("ash_dragger_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_HURT = sound("ash_dragger_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_DEATH = sound("ash_dragger_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_CURL = sound("ash_dragger_curl");
     public static final DeferredHolder<SoundEvent, SoundEvent> DRAGGER_ROLL = sound("ash_dragger_roll");
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_CRACK = sound("elder_thrall_crack");
@@ -88,8 +92,8 @@ public final class Ch4Setup {
     public static final int XP_DRAGGER = 3;
     public static final int XP_ELDER = 80;
 
-    // 旅の覚書 (四章) が解くレシピ
-    public static final List<String> RECIPES = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",
+    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    public static final List<String> MADE = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",
             "soot_whetstone", "ash_cooler", "ash_baked_bread");
 
     private Ch4Setup() {
@@ -117,7 +121,7 @@ public final class Ch4Setup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(CINDER_MITE_EGG, ASH_HUSK_EGG, ASH_DRAGGER_EGG, ELDER_THRALL_EGG, SOOT_IRON, ASH_HEMP, ASH_WARD_THREAD,
                     SOOT_WHETSTONE, ASH_COOLER)) {
                 event.accept(i.get());
@@ -131,8 +135,6 @@ public final class Ch4Setup {
             GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_husk", new GrowthRewards.Source(XP_HUSK, CONTENT_LEVEL));
             GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_dragger", new GrowthRewards.Source(XP_DRAGGER, CONTENT_LEVEL));
             GrowthRewards.MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_thrall", new GrowthRewards.Source(XP_ELDER, CONTENT_LEVEL));
-            jp.revati.skyabyss.guide.WayfarerNotes.registerRecipes(4, RECIPES.stream().map(r -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r))
-                    .toArray(ResourceLocation[]::new));
         });
     }
 

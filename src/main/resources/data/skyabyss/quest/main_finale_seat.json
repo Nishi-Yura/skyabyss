@@ -1,0 +1,56 @@
+{
+  "category": "main",
+  "chapter": "finale",
+  "order": 95,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_finale_promise",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "walk",
+      "xp": 150,
+      "objectives": [
+        {
+          "id": "arrive",
+          "type": "signal",
+          "targets": [
+            "finale_seat_arrive"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "throne",
+      "objectives": [
+        {
+          "id": "throne",
+          "type": "signal",
+          "targets": [
+            "finale_seat_throne"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lord",
+      "objectives": [
+        {
+          "id": "lord",
+          "type": "signal",
+          "targets": [
+            "finale_lord_pilgrim"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 2000
+  }
+}

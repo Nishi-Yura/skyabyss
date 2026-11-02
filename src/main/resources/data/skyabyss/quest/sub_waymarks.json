@@ -36,12 +36,16 @@
     "xp": 120,
     "items": [
       {
-        "item": "minecraft:flint",
+        "item": "skyabyss:flint_stone",
         "count": 1,
         "name": "item.skyabyss.keepsake.notched_stone",
         "lore": [
           "item.skyabyss.keepsake.notched_stone.lore"
         ]
+      },
+      {
+        "item": "skyabyss:rock_whetstone",
+        "count": 1
       }
     ],
     "affinity": {

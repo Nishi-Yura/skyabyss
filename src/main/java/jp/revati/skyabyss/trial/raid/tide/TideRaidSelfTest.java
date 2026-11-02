@@ -151,16 +151,17 @@ public final class TideRaidSelfTest {
     // いまの部屋 (その型で、動いている間だけ)
     private static <T> T room(Class<T> type) {
         RaidRun.Run run = group == null ? null : RaidRun.of(group);
-        if (run == null || !type.isInstance(run.room) || run.phase != RaidRun.Phase.ACTIVE) {
+        RaidRoom inner = run == null ? null : jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run.room);
+        if (run == null || !type.isInstance(inner) || run.phase != RaidRun.Phase.ACTIVE) {
             return null;
         }
-        return type.cast(run.room);
+        return type.cast(inner);
     }
 
     // その部屋が越えられて、枠組みが「越えた」にしたあとか
     private static boolean cleared(Class<?> type) {
         RaidRun.Run run = group == null ? null : RaidRun.of(group);
-        return run != null && type.isInstance(run.room) && run.phase == RaidRun.Phase.COMPLETE;
+        return run != null && type.isInstance(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run.room)) && run.phase == RaidRun.Phase.COMPLETE;
     }
 
     // 人は偽物なので、部屋の塊は「人の近く」にならず敵が動かない。試験のあいだだけ塊を強制で読み込む (本物の人がいれば要らない)

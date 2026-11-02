@@ -1,0 +1,74 @@
+# 職 (docs/design/43) の画面: K 画面 (剣を持った戦士の木)・変異・島の祠の職選び・始めの武器を持った姿
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/jobs_ui.txt -PshotsName=jobs_ui
+world shots flat
+size 1280 720
+timeout 300
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 20
+cmd skyabyss skill forget @p
+cmd item replace entity @p weapon.mainhand with minecraft:iron_sword
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p riposte 2
+cmd skyabyss skill learn @p far_shot 2
+wait 20
+open skills
+wait 20
+shot jobs_1_warrior
+close
+wait 10
+open job_choice
+wait 20
+shot jobs_2_choice
+close
+wait 10
+open job_choice_shaman
+wait 20
+shot jobs_3_choice_shaman
+close
+wait 10
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_bell_staff
+wait 20
+shot jobs_4_bell_hand
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_staff
+wait 20
+shot jobs_5_staff_hand
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_dagger
+wait 20
+shot jobs_6_dagger_hand
+# 魔法使いの木 (杖を持つと星読みの木から開く) と、潮歌いの木 (3 行目に 3 つ)
+cmd skyabyss skill forget @p
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill learn @p thunder_bolt 3
+cmd skyabyss skill learn @p star_reading 2
+cmd skyabyss skill learn @p ember_orb 1
+cmd skyabyss skill learn @p frost_tide 1
+cmd skyabyss skill learn @p blink 1
+wait 20
+open skills
+wait 20
+shot jobs_7_mage_tree
+close
+wait 10
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_bell_staff
+cmd skyabyss skill learn @p ward_song 1
+cmd skyabyss skill learn @p ebb_tide 1
+cmd skyabyss skill learn @p curse_mark 1
+cmd skyabyss skill learn @p calm_heart 1
+cmd skyabyss skill learn @p ripple 1
+cmd skyabyss skill learn @p lamp_charm 1
+wait 20
+open skills
+wait 20
+shot jobs_8_shaman_tree
+close

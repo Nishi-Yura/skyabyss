@@ -1,0 +1,59 @@
+# 終章の雲海 島 4「約束の島」(docs/design/50 の 4.2.4): 光の橋・島と野営・四人の天幕と幻・月見の岩と扉・敵 2 種・主の間と巡礼者の羽
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_isle4.txt -PshotsName=cloudsea_isle4
+world cloudsea_isle4
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 3 140 -520
+waitchunks 200
+wait 100
+camera 3 131 -472 180 6
+wait 60
+shot m01_light_bridge
+camera 70 172 -545 116 30
+wait 60
+shot m02_overview
+# 天幕の前に四人の幻を立たせる (観戦モードでは立たないので、少しだけクリエイティブで野営に立つ)
+cmd gamemode creative
+cmd tp @s 3 117 -570
+wait 80
+cmd gamemode spectator
+camera 3 121 -551 180 8
+wait 60
+shot m03_arrive_camp
+camera 3 128 -556 180 32
+wait 40
+shot m04_camp_tents
+camera 3 118.5 -569 0 8
+wait 40
+shot m05_valley_self
+camera -2 118.5 -574 270 8
+wait 30
+shot m06_cliff_self
+camera 3 123 -575 180 -4
+wait 40
+shot m07_rock_door
+cmd summon skyabyss:plume_warden 0 117 -560 {NoAI:1b,Rotation:[160f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:fallen_plume 6 119 -560 {NoAI:1b,Rotation:[200f,0f],PersistenceRequired:1b}
+wait 40
+camera 3 119 -553 180 8
+wait 30
+shot m08_foes
+cmd skyabyss cloudsea plume
+wait 80
+camera 3 160 -584 180 35
+wait 40
+shot m09_arena
+camera 3 144 -592 180 -8
+wait 40
+shot m10_plume

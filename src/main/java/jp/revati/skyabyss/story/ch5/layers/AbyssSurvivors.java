@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //     骨 = 灯り番のミオ、塩 = 測量士のハヤセ (と荷運びのロク abyss_porter。品の取り替え)、雷 = 薬師のシズ、灰 = 隊長のトウヤ。
 //     いなくなったら (コマンドで消した等)、人が近くに来たときに立て直す。塩のロクと灰のトウヤは、護りの下り道のあいだ野営にいない (AbyssEscort)
 //   手記: 野営の帳面 (journal_<層>_0) と、道ごとの書見台 (journal_<層>_1..3)。右クリックで読む (人ごとに記録 "read:journal_<層>_<i>"、合図 abyss_journal_<層>_<i>)
-//     文は message.skyabyss.abyss_v2.journal.<層>_<i>_1 / _2 (tools/gen/ch5/gen_ch5_layers.py)
+//     文は message.skyabyss.abyss_v2.journal.<層>_<i>_1 / _2 (データを直接直す（生成スクリプトはない）)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssSurvivors {
     public static final String TAG = "skyabyss_abyss_survivor";

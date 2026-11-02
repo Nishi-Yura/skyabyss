@@ -4,7 +4,7 @@
   src/main/resources/assets/skyabyss_abyss_gear/lang/{ja_jp,en_us}.json   名前・説明・物語の一行・由来・炉・記録・知らせ
   src/main/resources/data/skyabyss/recipe/abyss_lantern_charm.json         遺品「空の手燭」をなぞる (遺品は残る: AbyssRelicItem)
   src/main/resources/data/skyabyss/recipe/abyss_pulse_listener.json        遺品「心臓の形の石」をなぞる
-荷運びのロクの取り替えは tools/gen/ch5/gen_ch5_layers.py の TRADES。
+荷運びのロクの取り替えは データを直接直す（生成スクリプトはない） の TRADES。
 使い方: python -I tools/gen/abyss_gear/gen_abyss_gear.py   (何度流してもよい)
 """
 from __future__ import annotations
@@ -56,8 +56,8 @@ T = [
      "Worn as a trinket, you deal more damage the deeper you are (abyss: +1% per 40 depth, up to +12%; surface: +1% per 16 blocks below y 64, up to +8%). -30% fall damage"),
     ("item.skyabyss.abyss_anchor_iron.desc", "深淵の底から上がってきた、重く冷たい鉄。深淵の装備を鍛え、直す",
      "Heavy, cold iron brought up from the abyss floor. Enhances and repairs abyss gear"),
-    ("item.skyabyss.abyss_core.desc", "心臓の番人の胸に残っていた、まだ脈を打つ核。アーティファクトの材料",
-     "A core still beating, left in the warden's chest. A material for artifacts"),
+    ("item.skyabyss.abyss_core.desc", "心臓の番人の胸に残っていた、まだ脈を打つ核。伝説の装備の材料",
+     "A core still beating, left in the warden's chest. A material for legendary gear"),
     ("item.skyabyss.resonance_shard_abyss.desc",
      "深淵の共鳴の欠片。深淵の専用の逸品との交換に 30 個。心臓の番人・層の主が落とし、深淵のヒロイックの品を分解しても得られる",
      "The abyss's Resonance Fragment. 30 trade for an abyss exclusive. Dropped by the heart's warden and the layer lords, and returned when you dismantle abyss heroic gear"),

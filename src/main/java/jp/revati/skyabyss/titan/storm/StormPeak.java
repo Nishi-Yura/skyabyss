@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-// 雷翼が止まる峰 (docs/design/33 の 3.1)。夕立の刻の止まり木 (choosePerch) と風見鶏で呼ぶ止まり (WeathercockItem) は、三章の跡地 (都の西の峰) だけ。
+// 雷翼が止まる峰。夕立の刻の止まり木 (choosePerch) と風見鶏で呼ぶ止まり (WeathercockItem) は、三章の跡地 (都の西の峰) だけ。
 // 跡地がまだ決まっていない世界 (序盤の場所を作らない設定など) では、今までどおり人の近くの峰 (12 の 2.3)。
 // 呼び羽 (09 の 4.4。心臓のあと)・開発コマンド・空の影でうずくまる・眠りの峰は峰に限らない。
 public final class StormPeak {

@@ -19,6 +19,11 @@ public final class Scenes {
     public static final String FIRST_PREFIX = "titan_first_";
     public static final String HEART_PREFIX = "heart_";
     public static final String END_PREFIX = "titan_end_";
+    // 土地の町に初めて着いたとき (9 秒)。ContinentAreas が起こす
+    public static final String TOWN_PREFIX = "town_first_";
+    public static final String[] TOWNS = {"whale", "tide", "storm", "ember"};
+    // あいだの塔を越えたとき (13.5 秒。tower/TowerFight.win が皆に startAt で始める。原点は橋の北寄りの真ん中、前 = 主)
+    public static final String TOWER_CLEAR = "tower_clear";
     // 試練を越えて真ん中へ戻ったとき、光った碑を見せる (約 3.4 秒。docs/design/29 の 4.6)。前 = 碑の方。台詞なし
     // 設定の視野 (度)。撮影の fov はこの値との比で効かせる
     public static final float BASE_FOV = 70f;
@@ -30,6 +35,11 @@ public final class Scenes {
 
     static {
         add(opening());
+        add(ferryCrossing());
+        add(capitalArrival());
+        for (String t : TOWNS) {
+            add(townFirst(t));
+        }
         add(whaleFirstSight());
         for (String titan : FIRST_SIGHT_TITANS) {
             add(titanFirstSight(titan));
@@ -38,6 +48,7 @@ public final class Scenes {
             add(heartAppears(titan));
             add(titanEnd(titan));
         }
+        add(towerClear());
         // 深淵の区切り (五章の一〜四・終わり)。story/ch5/layers/AbyssSections
         for (Scene s : jp.revati.skyabyss.story.ch5.layers.SectionScenes.all()) {
             add(s);
@@ -83,22 +94,64 @@ public final class Scenes {
     }
 
     // 開幕 (36 秒)。0〜10 秒: 暗闇からまぶたが開き、地面に寝た目線で空を見上げる。10〜20 秒: 起き上がるように空へ昇って主人公を見下ろす
-    // (題字)。20〜29 秒: 地平と空の高さを見渡す。29〜36 秒: 主人公の目に戻り、最初の目的 (煙の立つ方) を向いて操作へ
+    // (題字)。20〜29 秒: 高く引いて、はじまりの島の谷と道の先を見渡す (2026-10-26)。29〜36 秒: 主人公の目に戻り、最初の目的を向いて操作へ
     private static Scene opening() {
         return Scene.of(OPENING).intro().handBack().seamless()
                 .shot(Shot.of(10f).pos(1.1, 0.3, 0.8).posTo(1.4, 0.5, 1.0)
                         .look(Look.frame(0, 45, 10)).lookTo(Look.frame(0, 40, 24)).fov(62f, 66f).sway(0.5f).build())
                 .shot(Shot.of(10f).pos(1.4, 0.5, 1.0).posTo(4.0, 6.0, -8.0)
                         .look(Look.frame(0, 40, 24)).lookTo(Look.frame(0, 1.3, 0)).fov(66f, 70f).ease(Ease.SMOOTHER).sway(0.2f).build())
-                .shot(Shot.of(9f).pos(4.0, 6.0, -8.0).posTo(-5.0, 11.0, -14.0)
-                        .look(Look.frame(0, 1.3, 0)).lookTo(Look.frame(0, 26, 180)).fov(70f, 78f).sway(0.2f).build())
-                .shot(Shot.of(7f).pos(-5.0, 11.0, -14.0).posTo(0.0, CameraMath.EYE, 0.0)
-                        .look(Look.frame(0, 26, 180)).lookTo(Look.frame(0, 8, 100)).fov(78f, 70f).ease(Ease.SMOOTH).build())
+                .shot(Shot.of(9f).pos(4.0, 6.0, -8.0).posTo(-16.0, 30.0, -24.0)
+                        .look(Look.frame(0, 1.3, 0)).lookTo(Look.frame(0, 6, 160)).fov(70f, 80f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(7f).pos(-16.0, 30.0, -24.0).posTo(0.0, CameraMath.EYE, 0.0)
+                        .look(Look.frame(0, 6, 160)).lookTo(Look.frame(0, 8, 100)).fov(80f, 70f).ease(Ease.SMOOTH).build())
                 .line(10.5f, 4.2f, Speaker.HERO, "opening.skyabyss.line")
                 .line(15.2f, 4.6f, Speaker.HERO, "cinematic.skyabyss.opening.hero2")
                 .line(21.0f, 4.6f, Speaker.HEAVEN, "cinematic.skyabyss.opening.heaven1")
                 .line(26.2f, 2.8f, Speaker.HERO, "cinematic.skyabyss.opening.hero3")
                 .line(30.0f, 5.0f, Speaker.HEAVEN, "cinematic.skyabyss.opening.heaven2")
+                .build();
+    }
+
+    // はじまりの島から鐘の都への渡り (22 秒。world/continent/IslandTrail)。人は海の上の舟の上 (渡し守と二人)、前 = 鐘の都の向き。
+    // 舟と渡し守を後ろから → 横から水平線 (大陸の岸) → 高く上がって行く手。台詞は渡し守・主人公・天の声。終わると都の南の門の外へ
+    private static Scene ferryCrossing() {
+        return Scene.of(jp.revati.skyabyss.world.continent.IslandTrail.CROSSING)
+                .shot(Shot.of(7f).pos(3.2, 3.2, -5.5).posTo(2.2, 3.8, -3.5)
+                        .look(Look.frame(0, 1.6, 0)).lookTo(Look.frame(0, 3.5, 30)).fov(62f, 66f).sway(0.5f).build())
+                .shot(Shot.of(8f).pos(2.2, 3.8, -3.5).posTo(-7.0, 6.0, 10.0)
+                        .look(Look.frame(0, 3.5, 30)).lookTo(Look.frame(0, 6, 140)).fov(66f, 58f).ease(Ease.SMOOTHER).sway(0.3f).build())
+                .shot(Shot.of(7f).pos(-7.0, 6.0, 10.0).posTo(0.0, 14.0, 22.0)
+                        .look(Look.frame(0, 6, 140)).lookTo(Look.frame(0, 10, 220)).fov(58f, 70f).ease(Ease.SMOOTH).sway(0.2f).build())
+                .npcLine(0.8f, 4.4f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f1")
+                .line(5.6f, 3.6f, Speaker.HERO, "cinematic.skyabyss.ferry.hero1")
+                .npcLine(9.8f, 4.6f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f2")
+                .line(14.8f, 3.8f, Speaker.HEAVEN, "cinematic.skyabyss.ferry.heaven1")
+                .npcLine(18.8f, 3.2f, "cinematic.skyabyss.speaker.ferryman", "cinematic.skyabyss.ferry.f3")
+                .build();
+    }
+
+    // 土地の町に初めて着く (9 秒)。前 = 町の真ん中 (広場)。高く上がって広場と町の名物を見渡し、本人の目に戻る。台詞は主人公と天の声
+    private static Scene townFirst(String town) {
+        return Scene.of(TOWN_PREFIX + town).handBack().seamless()
+                .shot(Shot.of(4.5f).pos(0, CameraMath.EYE, 0).posTo(2.0, 14.0, -6.0)
+                        .look(Look.frame(0, 2, 20)).lookTo(Look.frame(0, 4, 45)).fov(70f, 74f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(4.5f).pos(2.0, 14.0, -6.0).posTo(0, CameraMath.EYE, 0)
+                        .look(Look.frame(0, 4, 45)).lookTo(Look.frame(0, 2, 30)).fov(74f, 70f).ease(Ease.SMOOTH).build())
+                .line(0.4f, 3.8f, Speaker.HERO, "cinematic.skyabyss.town." + town + ".hero")
+                .line(4.6f, 3.8f, Speaker.HEAVEN, "cinematic.skyabyss.town." + town + ".heaven")
+                .build();
+    }
+
+    // 鐘の都に着いて、南の門の外から都を見上げる (8 秒)。前 = 都の真ん中 (大鐘楼)。見上げて大鐘楼 → 本人の目に戻って操作へ
+    private static Scene capitalArrival() {
+        return Scene.of(jp.revati.skyabyss.world.continent.IslandTrail.ARRIVAL).handBack().seamless()
+                .shot(Shot.of(4f).pos(0, CameraMath.EYE, 0).posTo(0.0, 18.0, -6.0)
+                        .look(Look.frame(0, 3, 20)).lookTo(Look.frame(0, 26, 110)).fov(70f, 66f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(4f).pos(0.0, 18.0, -6.0).posTo(0, CameraMath.EYE, 0)
+                        .look(Look.frame(0, 26, 110)).lookTo(Look.frame(0, 2, 20)).fov(66f, 70f).ease(Ease.SMOOTH).build())
+                .line(0.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.arrival.hero1")
+                .line(4.0f, 3.6f, Speaker.HEAVEN, "cinematic.skyabyss.arrival.heaven1")
                 .build();
     }
 
@@ -166,6 +219,24 @@ public final class Scenes {
                         .look(Look.target(0, 4, 0)).lookTo(Look.target(0, 4, 0)).fov(64f, 58f).sway(0.2f).build())
                 .line(0.2f, 1.8f, Speaker.HEAVEN, "cinematic.skyabyss.heart." + titan + ".heaven")
                 .line(2.1f, 1.9f, Speaker.HERO, "cinematic.skyabyss.heart." + titan + ".hero")
+                .build();
+    }
+
+    // あいだの塔を越えた (2026-11-02 の声「クリア演出ももっと豪華にして」)。主は原点の前 32、高さ約 40、正面は橋 (南)。背の門は主の後ろ 31・上 35。
+    // カメラは一続き (場面の決まり): ① 崩れる主を橋から見上げる ② 横へ回りながら上がり、門が開き主が引き戻される ③ 真ん中へ寄って門が閉じる閃光 ④ 高く引いて橋を見下ろし、灯が北から南へ並ぶ
+    private static Scene towerClear() {
+        return Scene.of(TOWER_CLEAR).handBack()
+                .shot(Shot.of(3.0f).pos(2, 1.5, 0).posTo(-2, 2.5, 6)
+                        .look(Look.target(0, 30, -6)).lookTo(Look.target(0, 22, -4)).fov(62f, 54f).ease(Ease.SMOOTH).sway(0.3f).build())
+                .shot(Shot.of(3.5f).pos(-2, 2.5, 6).posTo(20, 14, 10)
+                        .look(Look.target(0, 22, -4)).lookTo(Look.target(0, 30, -24)).fov(54f, 60f).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(3.0f).pos(20, 14, 10).posTo(4, 14, 2)
+                        .look(Look.target(0, 30, -24)).lookTo(Look.target(0, 35, -31)).fov(60f, 48f).ease(Ease.SMOOTHER).sway(0.15f).build())
+                .shot(Shot.of(4.0f).pos(4, 14, 2).posTo(0, 34, -8)
+                        .look(Look.target(0, 35, -31)).lookTo(Look.target(0, 0, 50)).fov(48f, 66f).ease(Ease.SMOOTH).sway(0.15f).build())
+                .line(0.6f, 2.6f, Speaker.HEAVEN, "cinematic.skyabyss.tower.clear.1")
+                .line(6.8f, 3.0f, Speaker.HERO, "cinematic.skyabyss.tower.clear.2")
+                .line(10.2f, 3.0f, Speaker.HEAVEN, "cinematic.skyabyss.tower.clear.3")
                 .build();
     }
 

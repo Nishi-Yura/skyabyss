@@ -74,6 +74,41 @@ public final class GuardRenderers {
             r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "shore_harpoon"));
             return r;
         });
+        // 大陸の新しい敵 (docs/design/44)
+        event.registerEntityRenderer(ModEntities.BANDIT.get(), ctx -> noTilt(ctx, "bandit"));
+        event.registerEntityRenderer(ModEntities.BANDIT_ARCHER.get(), ctx -> noTilt(ctx, "bandit_archer"));
+        event.registerEntityRenderer(ModEntities.BANDIT_CHIEF.get(), ctx -> noTilt(ctx, "bandit_chief"));
+        event.registerEntityRenderer(ModEntities.BONE_FOOTMAN.get(), ctx -> noTilt(ctx, "bone_footman"));
+        event.registerEntityRenderer(ModEntities.BONE_BOWMAN.get(), ctx -> noTilt(ctx, "bone_bowman"));
+        event.registerEntityRenderer(ModEntities.BONE_STANDARD.get(), ctx -> noTilt(ctx, "bone_standard"));
+        event.registerEntityRenderer(ModEntities.GRAIN_RAT.get(), ctx -> noTilt(ctx, "grain_rat"));
+        event.registerEntityRenderer(ModEntities.STRAY_WISP.get(), ctx -> noTilt(ctx, "stray_wisp"));
+        event.registerEntityRenderer(ModEntities.FERAL_DOG.get(), ctx -> noTiltStillHead(ctx, "feral_dog"));
+        event.registerEntityRenderer(ModEntities.MOSS_DEAD.get(), ctx -> noTilt(ctx, "moss_dead"));
+        event.registerEntityRenderer(ModEntities.MIST_ANGLER.get(), ctx -> noTilt(ctx, "mist_angler"));
+        event.registerEntityRenderer(ModEntities.THUNDER_WOLF.get(), ctx -> noTiltStillHead(ctx, "thunder_wolf"));
+        event.registerEntityRenderer(ModEntities.ROCK_BOAR.get(), ctx -> noTiltStillHead(ctx, "rock_boar"));
+        // 地下のダンジョンの主 (docs/design/55)
+        event.registerEntityRenderer(ModEntities.BONE_CENTIPEDE.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "bone_centipede", 1.8f));
+        event.registerEntityRenderer(ModEntities.SHELL_OCTOPUS.get(), ShellOctopusRenderer::new);
+        event.registerEntityRenderer(ModEntities.CRYSTAL_LIZARD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "crystal_lizard", 1.7f));
+        event.registerEntityRenderer(ModEntities.FORGE_GIANT.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "forge_giant", 1.6f));
+        // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7)
+        event.registerEntityRenderer(ModEntities.PIT_DIGGER.get(), ctx -> noTilt(ctx, "pit_digger"));
+        event.registerEntityRenderer(ModEntities.BONE_ROLLER.get(), ctx -> noTilt(ctx, "bone_roller"));
+        event.registerEntityRenderer(ModEntities.PIT_FOREMAN.get(), ctx -> noTilt(ctx, "pit_foreman"));
+        event.registerEntityRenderer(ModEntities.DROWNED_SAILOR.get(), ctx -> noTilt(ctx, "drowned_sailor"));
+        event.registerEntityRenderer(ModEntities.CAVE_JELLY.get(), ctx -> noTilt(ctx, "cave_jelly"));
+        event.registerEntityRenderer(ModEntities.BELL_HERMIT.get(), ctx -> noTilt(ctx, "bell_hermit"));
+        event.registerEntityRenderer(ModEntities.HORN_BEETLE.get(), ctx -> noTilt(ctx, "horn_beetle"));
+        event.registerEntityRenderer(ModEntities.CRYSTAL_EYE.get(), ctx -> noTilt(ctx, "crystal_eye"));
+        event.registerEntityRenderer(ModEntities.GEODE_GOLEM.get(), ctx -> noTilt(ctx, "geode_golem"));
+        event.registerEntityRenderer(ModEntities.BELLOWS_IMP.get(), ctx -> noTilt(ctx, "bellows_imp"));
+        event.registerEntityRenderer(ModEntities.LAVA_SLUG.get(), ctx -> noTilt(ctx, "lava_slug"));
+        event.registerEntityRenderer(ModEntities.OX_SMITH.get(), ctx -> noTilt(ctx, "ox_smith"));
+        event.registerEntityRenderer(ModEntities.TIDE_CRAB.get(), ctx -> noTiltStillHead(ctx, "tide_crab"));
+        event.registerEntityRenderer(ModEntities.STORM_RAM.get(), ctx -> noTiltStillHead(ctx, "storm_ram"));
+        event.registerEntityRenderer(ModEntities.ASH_LIZARD.get(), ctx -> noTiltStillHead(ctx, "ash_lizard"));
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override
@@ -85,6 +120,16 @@ public final class GuardRenderers {
 
     private static <T extends net.minecraft.world.entity.Entity & GeoAnimatable> GeoEntityRenderer<T> noTilt(EntityRendererProvider.Context ctx, String name) {
         return new LowPolyGeoRenderer<T>(ctx, name, 1.0f) {
+            @Override
+            protected float getDeathMaxRotation(T animatable) {
+                return 0f;
+            }
+        };
+    }
+
+    // 頭の骨を人の方へ向けない (GeckoLib の首振りは head の回転を上書きするので、吠えて天を仰ぐ動きが消える。野犬・雷狼)
+    private static <T extends net.minecraft.world.entity.Entity & GeoAnimatable> GeoEntityRenderer<T> noTiltStillHead(EntityRendererProvider.Context ctx, String name) {
+        return new LowPolyGeoRenderer<T>(ctx, new LowPolyGeoRenderer.Model<T>(name, false), e -> name, 1.0f) {
             @Override
             protected float getDeathMaxRotation(T animatable) {
                 return 0f;
@@ -129,7 +174,7 @@ public final class GuardRenderers {
     // 番兵長の鉾 (アイテムの3Dモデル) を socket_main に合わせる。
     // アイテムの座標 (画素) で、柄の軸は x=5.875 z=8、握りは y=4 (石突きから7画素)。刃は +x、穂先は +y で、-45°傾けて置いてある。
     // 受け口の向き: 穂先が -Z、刃が -Y (腕を前へ水平に出すと、柄が立ち、刃が前を向く)。大きさは 1.8 倍 (番兵長の背丈に合わせる)。
-    // tools/rough/captain_v4.py の PIKE_* と同じ値にしておく
+    // 鉾の値は前の道具 (captain_v4.py の PIKE_*) から写した。道具は消した。今の値が正本
     private static <T> Function<T, ItemStack> captainPikeStack() {
         ItemStack stack = new ItemStack(ModItems.CAPTAIN_PIKE.get());
         return mob -> stack;

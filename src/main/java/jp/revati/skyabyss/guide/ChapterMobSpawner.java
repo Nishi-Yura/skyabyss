@@ -34,7 +34,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 地上のひとり歩きの小物 (docs/design/21 の 1.5、P3)。自然の湧きは増やさず、その章の人の近くだけに薄く湧かせる。
+// 地上のひとり歩きの小物 (P3)。自然の湧きは増やさず、その章の人の近くだけに薄く湧かせる。
 //   登録   ChapterMobSpawner.register(new Wanderer(id, chapter, entity, weight, Time))
 //   決まり
 //     湧く     その章 (Chapters.of(人)) の人が、その章の拠点 (ChapterSites の計画) から 300 ブロック以内にいるとき、その人の 24〜64 ブロック先の地面に、
@@ -66,6 +66,8 @@ public final class ChapterMobSpawner {
 
     private static final List<Wanderer> WANDERERS = new CopyOnWriteArrayList<>();
     private static final Map<UUID, UUID> LIVE = new ConcurrentHashMap<>();
+    // 湧かせた個体そのもの (チャンクの数え。湧かせた直後はまだ区画の見える一覧に入っていないことがあるので、一覧に頼らない)
+    private static final Map<UUID, Mob> MOBS = new ConcurrentHashMap<>();
 
     // 自己テストが差し替える口 (本番は null = 今の章と SiteData の拠点)
     @Nullable
@@ -241,6 +243,7 @@ public final class ChapterMobSpawner {
             LIVE.remove(mob.getUUID());
             return false;
         }
+        MOBS.put(mob.getUUID(), mob);
         return true;
     }
 
@@ -258,7 +261,14 @@ public final class ChapterMobSpawner {
     static int countInChunk(ServerLevel level, ChunkPos chunk) {
         AABB box = new AABB(chunk.getMinBlockX(), level.getMinBuildHeight(), chunk.getMinBlockZ(), chunk.getMaxBlockX() + 1, level.getMaxBuildHeight(),
                 chunk.getMaxBlockZ() + 1);
-        return level.getEntitiesOfClass(Mob.class, box, m -> LIVE.containsKey(m.getUUID())).size();
+        MOBS.entrySet().removeIf(e -> !LIVE.containsKey(e.getKey()) || e.getValue().isRemoved());
+        int known = 0;
+        for (Mob m : MOBS.values()) {
+            if (m.level() == level && m.chunkPosition().equals(chunk)) {
+                known++;
+            }
+        }
+        return Math.max(known, level.getEntitiesOfClass(Mob.class, box, m -> LIVE.containsKey(m.getUUID())).size());
     }
 
     // 死んだ個体の記録を落とし、グループの人が 128 ブロック以内にいなくなった個体を消す
@@ -275,10 +285,12 @@ public final class ChapterMobSpawner {
             if (mob == null) {
                 // 倒れた・チャンクごと読み込みから外れた。記録を落とす (ディスクから戻ってきても、LIVE にないので入れない: SiteSpawner.onJoin)
                 it.remove();
+                MOBS.remove(e.getKey());
                 continue;
             }
             if (!mob.isAlive()) {
                 it.remove();
+                MOBS.remove(e.getKey());
                 continue;
             }
             boolean kept = false;
@@ -303,12 +315,15 @@ public final class ChapterMobSpawner {
                 e.discard();
             }
         }
+        MOBS.values().forEach(Entity::discard);
+        MOBS.clear();
         LIVE.clear();
     }
 
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {
         LIVE.clear();
+        MOBS.clear();
         chapterOverride = null;
         anchorOverride = null;
     }

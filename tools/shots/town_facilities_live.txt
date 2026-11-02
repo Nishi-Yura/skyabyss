@@ -1,0 +1,51 @@
+# 大陸の世界で、土地の町が建ち、係の人が全員立つかを確かめる (45 の 5 章)。2026-10-27
+world openingtownfac continent
+size 1280 720
+timeout 6000
+render 10
+guiscale 2
+clouds off
+wait 2400
+cmd skyabyss cinematic stop
+wait 20
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+hud off
+cmd spreadplayers -120 -760 0 1 false @s
+waitchunks
+wait 2400
+cmd execute as @s at @s run tp @s ~ ~40 ~
+wait 400
+cmd execute at @s if entity @e[type=skyabyss:attendant,distance=..160]
+cmd say whale attendants:
+cmd execute at @s run say @e[type=skyabyss:attendant,distance=..160]
+shot whale_town
+cmd spreadplayers 1330 160 0 1 false @s
+waitchunks
+wait 2400
+cmd execute as @s at @s run tp @s ~ ~40 ~
+wait 400
+cmd execute at @s if entity @e[type=skyabyss:attendant,distance=..160]
+cmd say tide attendants:
+cmd execute at @s run say @e[type=skyabyss:attendant,distance=..160]
+shot tide_town
+cmd spreadplayers -1180 -100 0 1 false @s
+waitchunks
+wait 2400
+cmd execute as @s at @s run tp @s ~ ~40 ~
+wait 400
+cmd execute at @s if entity @e[type=skyabyss:attendant,distance=..160]
+cmd say storm attendants:
+cmd execute at @s run say @e[type=skyabyss:attendant,distance=..160]
+shot storm_town
+cmd spreadplayers -300 1100 0 1 false @s
+waitchunks
+wait 2400
+cmd execute as @s at @s run tp @s ~ ~40 ~
+wait 400
+cmd execute at @s if entity @e[type=skyabyss:attendant,distance=..160]
+cmd say ember attendants:
+cmd execute at @s run say @e[type=skyabyss:attendant,distance=..160]
+shot ember_town

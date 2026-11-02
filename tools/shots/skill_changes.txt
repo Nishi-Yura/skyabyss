@@ -1,0 +1,51 @@
+# 技の変化の見え方 (刻印・書き換え・秘伝の印と説明の行、秘伝の枠)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_changes.txt -PshotsName=skill_changes
+world changes_flat flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 40
+cmd skyabyss skill calling @p rock
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p rock_call 2
+cmd skyabyss skill learn @p whale_sweep 1
+cmd skyabyss skill rune @p titan_cleave 2
+cmd skyabyss skill rune @p rock_call 4
+cmd skyabyss skill slot @p 1 titan_cleave
+cmd skyabyss skill slot @p 2 rock_call
+cmd skyabyss skill slot @p 3 whale_sweep
+cmd skyabyss arts clear
+cmd skyabyss arts learn second_cut
+cmd skyabyss arts learn whale_whirl
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 300
+cmd skyabyss cinematic stop
+close
+chat clear
+wait 40
+shot changes_1_hud
+open skills_node:titan_cleave
+wait 20
+shot changes_2_cleave
+hover 221 210
+wait 10
+shot changes_3_arts_tip
+hover 112 212
+wait 10
+shot changes_4_slot_tip
+close
+wait 10
+open skills_node:rock_call
+wait 20
+shot changes_5_rockcall
+close

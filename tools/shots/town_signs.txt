@@ -1,0 +1,25 @@
+# 土地の町の宿と道具屋の看板
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_signs.txt -PshotsName=town_signs
+world continent_signs continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+cmd skyabyss dev grounds mark town 0 inn
+waitchunks 300
+wait 200
+cmd execute at @s run tp @s ~4 ~1 ~ 90 5
+wait 40
+shot inn_sign
+cmd skyabyss dev grounds mark town 0 shop
+wait 40
+cmd execute at @s run tp @s ~-4 ~1 ~ -90 5
+wait 40
+shot shop_sign

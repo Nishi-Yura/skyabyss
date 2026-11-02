@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -41,7 +42,7 @@ public final class WeaponStrikes {
     // 預けたクリックを呼び直している間は、AttackEntityEvent を素通しにする
     private static boolean replaying;
     // 連撃の数え: 持ち主 → [前の振りの始まりの tick, 前の段]
-    private static final Map<UUID, long[]> COMBO = new HashMap<>();
+    private static final Map<UUID, long[]> COMBO = PlayerMaps.track(new HashMap<>());
 
     private WeaponStrikes() {
     }

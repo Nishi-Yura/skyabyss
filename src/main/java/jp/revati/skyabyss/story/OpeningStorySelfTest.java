@@ -35,7 +35,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 序盤の語り (17 の 3〜6 章、担当 4) の自己テスト (SELFTEST opening story)。
+// 序盤の語り (担当 4) の自己テスト (SELFTEST opening story)。
 //  - 新しい伝承の項目 6 つ (野営地・帳面の余白・足跡・足音・骨の丘・空の歌): 読み込み・日英の文・折り返し・記される・核心に触れない言葉
 //  - 石板の看板の幅、開幕の一行、目的の帯の文 (7 つ。日本語 20 字、英語 52 字まで。「〜しよう」と次の行動を言い、操作のキーは書かない。骨の丘の前触れの字幕 4 つ)
 //  - メイン「雲の下の歌」の始まり: 帳面を拾う → 煙の下の宿り (語り部の shadow0) → 空を見る → 語り部に尋ねる → イサナ、の通し。
@@ -130,7 +130,7 @@ public final class OpeningStorySelfTest {
                     check(i == 0 || line.isEmpty() || "、。」』）".indexOf(line.charAt(0)) < 0, lang + ": " + id + " starts a line with punctuation: " + line, failures);
                 }
                 check(lines.size() <= 30, lang + ": " + id + " is too long (" + lines.size() + " lines)", failures);
-                // 問いか物で終える (17 の 5.4節)
+                // 問いか物で終える
                 String last = body.substring(body.lastIndexOf('\n') + 1);
                 check(last.endsWith("？") || last.endsWith("?") || last.endsWith("。") || last.endsWith("."), lang + ": " + id + " does not end cleanly", failures);
                 if (e.inscription()) {
@@ -347,7 +347,7 @@ public final class OpeningStorySelfTest {
         check(QuestLog.of(a).tracked().equals("main_song"), "the main quest should be tracked", failures);
         // 序盤のサブクエストは、イサナと会うまで出ない (17-10)
         for (QuestDef def : QuestManager.all()) {
-            // 初日のお使い (story/ch1。17 の 1.5) は、日 1 から開く例外
+            // 初日のお使い (story/ch1) は、日 1 から開く例外
             if (def.board() && !def.id().startsWith("ch1/")) {
                 check(!def.unlock().test(StoryContext.of(a)), "board quest " + def.id() + " is open before meeting Isana", failures);
             }
@@ -398,7 +398,7 @@ public final class OpeningStorySelfTest {
         }
         pick(a, WC, "whale_q", failures);
         next(a);
-        // イサナの話のあとは一章の支度 (34 の 4.2。三本そろうまで岩鯨は来ない)
+        // イサナの話のあとは一章の支度 (三本そろうまで岩鯨は来ない)
         check(stage(a, "main_song").equals("prepare"), "talking to Isana did not advance to prepare: " + stage(a, "main_song"), failures);
         DialogueService.close(a);
         DialogueService.open(a, st);

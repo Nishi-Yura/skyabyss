@@ -1,0 +1,9 @@
+{
+  "_comment": "titan lairs on the continent (docs/design/40 section 3.6). x z = body center, yaw = facing (0 = south, 90 = west), base = body origin Y; the ground under a grounded body is lowered below it in generation",
+  "stone_whale": {"x": 230, "z": -1000, "yaw": 200},
+  "tide_shell": {"x": 1730, "z": -250, "yaw": 180, "base": 52, "volume": "tide_shell"},
+  "thunder_wing": {"x": -1180, "z": -500, "yaw": 51.3, "base": 200, "volume": "thunder_wing"},
+  "ember": {"x": 492, "z": 1108, "yaw": 36.9, "base": 118, "volume": "ember_titan"},
+  "_comment_shrines": "shrines = the replay shrine of each titan (titan/shrine/TitanShrine): beside the road from the regional town toward the site, about 90 blocks out of town. The ground is levelled in generation (radius 7, blended over 16)",
+  "shrines": {"stone_whale": [-10, -815], "tide_shell": [1353, 50], "thunder_wing": [-1184, -239], "ember": [-203, 1143]}
+}

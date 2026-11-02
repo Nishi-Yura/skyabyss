@@ -34,21 +34,22 @@
           "id": "beasts",
           "type": "kill",
           "targets": [
-            "minecraft:zombie",
-            "minecraft:husk",
-            "minecraft:skeleton",
-            "minecraft:stray",
-            "minecraft:spider",
-            "minecraft:cave_spider",
-            "minecraft:creeper",
-            "minecraft:drowned"
+            "skyabyss:bone_footman",
+            "skyabyss:bone_bowman",
+            "skyabyss:bone_standard",
+            "skyabyss:stray_wisp",
+            "skyabyss:feral_dog",
+            "skyabyss:moss_dead",
+            "skyabyss:bandit",
+            "skyabyss:bandit_archer",
+            "skyabyss:grain_rat"
           ],
           "count": 4
         },
         {
           "id": "bones",
           "type": "collect",
-          "target": "minecraft:bone",
+          "target": "skyabyss:bone_chip",
           "count": 3
         }
       ]
@@ -73,8 +74,8 @@
         "count": 12
       },
       {
-        "item": "minecraft:iron_ingot",
-        "count": 2
+        "item": "skyabyss:rock_whetstone",
+        "count": 1
       }
     ]
   }

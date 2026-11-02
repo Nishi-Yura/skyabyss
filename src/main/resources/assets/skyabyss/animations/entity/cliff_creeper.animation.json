@@ -1,0 +1,331 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.cliff_creeper.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "arm_l": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 60 + 0) * 6",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 60 + 180) * 6",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 50 + 0) * 3",
+            "0",
+            "0"
+          ]
+        },
+        "body": {
+          "position": [
+            0,
+            "math.abs(math.sin(query.anim_time * 60 + 0) * 1)*0.3",
+            0
+          ]
+        }
+      }
+    },
+    "animation.cliff_creeper.walk": {
+      "loop": true,
+      "animation_length": 0.6,
+      "bones": {
+        "leg_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 600 + 0) * 25",
+            "0",
+            "math.sin(query.anim_time * 600 + 90) * 8"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 600 + 180) * 25",
+            "0",
+            "math.sin(query.anim_time * 600 + 270) * 8"
+          ]
+        },
+        "arm_l": {
+          "rotation": [
+            "math.sin(query.anim_time * 600 + 180) * 10",
+            "0",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "math.sin(query.anim_time * 600 + 0) * 10",
+            "0",
+            "0"
+          ]
+        },
+        "body": {
+          "rotation": [
+            "0",
+            "0",
+            "math.sin(query.anim_time * 600 + 0) * 4"
+          ]
+        }
+      }
+    },
+    "animation.cliff_creeper.throw": {
+      "animation_length": 0.8,
+      "bones": {
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              150,
+              0,
+              20
+            ],
+            "0.45": [
+              40,
+              0,
+              10
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              150,
+              0,
+              -20
+            ],
+            "0.45": [
+              40,
+              0,
+              -10
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "rock": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              20,
+              0,
+              0
+            ],
+            "0.45": [
+              60,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              3.5,
+              1.0
+            ],
+            "0.45": [
+              0,
+              5.0,
+              -6.0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.30": [
+              -15,
+              0,
+              0
+            ],
+            "0.45": [
+              10,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.cliff_creeper.attack": {
+      "animation_length": 0.45,
+      "bones": {
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              35,
+              -25,
+              0
+            ],
+            "0.28": [
+              20,
+              10,
+              0
+            ],
+            "0.45": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              35,
+              25,
+              0
+            ],
+            "0.28": [
+              20,
+              -10,
+              0
+            ],
+            "0.45": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              8,
+              0,
+              0
+            ],
+            "0.45": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.cliff_creeper.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.cliff_creeper.death": {
+      "animation_length": 0.9,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              170
+            ],
+            "0.90": [
+              0,
+              0,
+              180
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              3,
+              0
+            ],
+            "0.90": [
+              0,
+              2,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

@@ -71,6 +71,7 @@ public final class FacilityExtrasSelfTest {
             f.add("crashed: " + e);
         } finally {
             p.getInventory().clearContent();
+            jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
             KeyRoom.Data.get(server).offered.remove(p.getUUID());
         }
         if (f.isEmpty()) {
@@ -97,10 +98,8 @@ public final class FacilityExtrasSelfTest {
 
     private static void dialogues(List<String> f) {
         Map<AttendantRole, List<String>> need = Map.of(
-                AttendantRole.TRAINING_MASTER, List.of("respec_quote", "respec_skills", "respec_skills_coins", "respec_stats", "respec_stats_coins"),
+                AttendantRole.TRAINING_MASTER, List.of("respec_quote", "respec_skills", "respec_skills_coins", "job_room"),
                 AttendantRole.SHRINE_PRIEST, List.of("key_offer", "key_return"),
-                AttendantRole.KEEP_VETERAN, List.of("records"),
-                AttendantRole.ARCHIVIST, List.of("lore_book", "map_copy"),
                 AttendantRole.APOTHECARY, List.of("shop", "brew_lesson"),
                 AttendantRole.GUILD_CLERK, List.of("guild", "guild_storage"));
         need.forEach((role, list) -> {
@@ -124,9 +123,18 @@ public final class FacilityExtrasSelfTest {
                 check(f, listed && desc != null && desc.textKey().equals(v.descKey()), "priest explains vow " + v.id());
             }
         }
-        // 前の私の頁は話だけ (まだ中身がない)
-        Dialogue keep = DialogueManager.dialogue(AttendantRole.KEEP_VETERAN.dialogueRole());
-        check(f, keep != null && keep.nodes().containsKey("page"), "keep veteran has the page placeholder");
+        // 前の空見の頁 (35 の 6.4): 心臓を二つ止めた人 (三章) に社の祭司が渡す (前は砦の老兵)。読むと伝承 chapter1/keep_prev_page が書に移る
+        Dialogue keep = priest;
+        check(f, keep != null && keep.nodes().containsKey("page") && keep.nodes().containsKey("page_give") && keep.nodes().containsKey("page_again"),
+                "shrine priest has the page nodes (before, give, again)");
+        if (keep != null) {
+            Dialogue.Node give = keep.nodes().get("page_give");
+            boolean gives = give != null && give.actions().stream().anyMatch(a -> a.type().equals("give") && "keep_page".equals(a.optStr("page")));
+            check(f, gives, "page_give hands a lore page with source keep_page");
+            boolean gated = keep.nodes().get("menu").options().stream().anyMatch(o -> o.id().equals("page_give") && o.condition() != null);
+            check(f, gated, "the page option is gated (stage 2 and not yet read)");
+        }
+        check(f, jp.revati.skyabyss.lore.LoreManager.catalog().entry("chapter1/keep_prev_page") != null, "lore entry chapter1/keep_prev_page exists");
     }
 
     // ---------------------------------------------------------------- 振り直し
@@ -134,6 +142,7 @@ public final class FacilityExtrasSelfTest {
         BlockPos at = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 6);
         p.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         GrowthData gd = Growth.get(p);
         SkillData sd = SkillManager.get(p);
         gd.level = 16;
@@ -217,11 +226,13 @@ public final class FacilityExtrasSelfTest {
     // ---------------------------------------------------------------- 鍵の間
     private static void keyRoom(List<String> f, MinecraftServer server, FakePlayer p) {
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         KeyRoom.Data data = KeyRoom.Data.get(server);
         String titan = Titans.all().get(0);
         p.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
         check(f, !KeyRoom.offer(p, titan, false), "no offering for a titan whose heart is still beating");
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         data.offered.put(p.getUUID(), new java.util.LinkedHashSet<>(Set.of(titan)));
         Keepsakes.Where w = Keepsakes.locate(p, ModItems.SKY_KEY_FRAGMENT.get());
         check(f, w.holders().getOrDefault(KeyRoom.HOLDER, 0) == 1 && w.safe() >= 1, "laid fragment counts as at hand " + w.holders());
@@ -237,6 +248,7 @@ public final class FacilityExtrasSelfTest {
         check(f, copy.offered.getOrDefault(p.getUUID(), Set.of()).contains(titan), "key room survives save");
         data.offered.remove(p.getUUID());
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 
     // ---------------------------------------------------------------- 記録・印
@@ -254,8 +266,6 @@ public final class FacilityExtrasSelfTest {
     }
 
     private static void marks(List<String> f, FakePlayer p) {
-        FacilityMarks.remove(p, FacilityMarks.MAP_COPY);
-        check(f, FacilityActions.mapCopy(p) && !FacilityActions.mapCopy(p) && FacilityMarks.has(p, FacilityMarks.MAP_COPY), "map copy is marked once");
         List<MapMarks.Mark> out = new ArrayList<>();
         MapMarks.archiveMarks(p.server, List.of(), jp.revati.skyabyss.story.Chapters.of(p), out);
         for (String t : Titans.all()) {
@@ -266,12 +276,13 @@ public final class FacilityExtrasSelfTest {
         // 醸造: 四章より前は教えない、四章 (ここではクリエイティブで代える) で一度だけ
         FacilityMarks.remove(p, FacilityMarks.BREW_LESSON);
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         check(f, !FacilityActions.brewLesson(p) && !FacilityMarks.has(p, FacilityMarks.BREW_LESSON), "no brewing lesson before chapter 4");
         p.setGameMode(GameType.CREATIVE);
-        check(f, FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.BREWING_STAND) == 1, "brewing lesson gives the kit");
-        check(f, !FacilityActions.brewLesson(p) && p.getInventory().countItem(Items.BREWING_STAND) == 1, "brewing kit only once");
+        check(f, FacilityActions.brewLesson(p) && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get()) == 1 && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()) == 1, "the fire-chapter gift gives a fire ward and a healing potion");
+        check(f, !FacilityActions.brewLesson(p) && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get()) == 1, "the fire-chapter gift only once");
         p.setGameMode(GameType.SURVIVAL);
         p.getInventory().clearContent();
-        FacilityActions.loreBook(p);
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 }

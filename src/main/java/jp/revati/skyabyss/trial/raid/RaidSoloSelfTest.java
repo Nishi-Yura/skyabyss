@@ -205,7 +205,16 @@ public final class RaidSoloSelfTest {
         p.setHealth(p.getMaxHealth());
         p.getFoodData().setFoodLevel(20);
         p.removeAllEffects();
-        c.script.act(ctx, c.room, p, c.t);
+        // 闘の部屋 (中ボスが部屋に現れる。FightBossRoom): 波の段は部屋の台本、中ボスの段は近い敵から叩く
+        if (c.room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom fb) {
+            if (fb.bossStage()) {
+                RaidSolo.FIGHT.act(ctx, fb, p, c.t);
+            } else {
+                c.script.act(ctx, fb.inner(), p, c.t);
+            }
+        } else {
+            c.script.act(ctx, c.room, p, c.t);
+        }
         c.room.tick(ctx);
         if (!c.guided && c.room.guideTarget(ctx) != null) {
             c.guided = true;

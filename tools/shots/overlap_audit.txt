@@ -1,0 +1,938 @@
+# 画面の文字と部品の重なりの検査 (2026-11-02 の声「UI がたまにおかしいものある。文字や要素が重なったり」)。client/dev/OverlapAudit が overlap.txt に書く。
+# 窓 1920x1080 の GUI 4 (480x270)・GUI 2 (960x540)、窓 1280x720 の GUI 3 (427x240) で、開ける画面を全部開く
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/overlap_audit.txt -PshotsName=overlap_audit
+# 台本は tools/gen/shots/gen_overlap_audit.py が書く
+world overlap_audit flat
+size 1920 1080
+timeout 1500
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd skyabyss job choose mage
+cmd skyabyss facility coins 5000
+cmd skyabyss quest start @s main_song
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+# ---- 1920 1080 GUI 4
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open inventory
+wait 8
+overlap inventory_1920_g4
+shot inventory_1920_g4
+close
+wait 2
+open travel_map
+wait 8
+overlap travel_map_1920_g4
+shot travel_map_1920_g4
+close
+wait 2
+open lore
+wait 8
+overlap lore_1920_g4
+shot lore_1920_g4
+close
+wait 2
+open quests
+wait 8
+overlap quests_1920_g4
+shot quests_1920_g4
+close
+wait 2
+open growth
+wait 8
+overlap growth_1920_g4
+shot growth_1920_g4
+close
+wait 2
+open journey
+wait 8
+overlap journey_1920_g4
+shot journey_1920_g4
+close
+wait 2
+open profile
+wait 8
+overlap profile_1920_g4
+shot profile_1920_g4
+close
+wait 2
+open skills
+wait 8
+overlap skills_1920_g4
+shot skills_1920_g4
+close
+wait 2
+open skills_node:cheap_thunder_bolt
+wait 8
+overlap skills_node_cheap_thunder_bolt_1920_g4
+shot skills_node_cheap_thunder_bolt_1920_g4
+close
+wait 2
+open skills_build
+wait 8
+overlap skills_build_1920_g4
+shot skills_build_1920_g4
+close
+wait 2
+open skills_tryon
+wait 8
+overlap skills_tryon_1920_g4
+shot skills_tryon_1920_g4
+close
+wait 2
+open skills_deep
+wait 8
+overlap skills_deep_1920_g4
+shot skills_deep_1920_g4
+close
+wait 2
+open skills_past
+wait 8
+overlap skills_past_1920_g4
+shot skills_past_1920_g4
+close
+wait 2
+open skills_ext
+wait 8
+overlap skills_ext_1920_g4
+shot skills_ext_1920_g4
+close
+wait 2
+open job_choice
+wait 8
+overlap job_choice_1920_g4
+shot job_choice_1920_g4
+close
+wait 2
+open party
+wait 8
+overlap party_1920_g4
+shot party_1920_g4
+close
+wait 2
+open rebirth
+wait 8
+overlap rebirth_1920_g4
+shot rebirth_1920_g4
+close
+wait 2
+open wheel
+wait 8
+overlap wheel_1920_g4
+shot wheel_1920_g4
+close
+wait 2
+open notices
+wait 8
+overlap notices_1920_g4
+shot notices_1920_g4
+close
+wait 2
+open grave
+wait 8
+overlap grave_1920_g4
+shot grave_1920_g4
+close
+wait 2
+open pouchwheel_9
+wait 8
+overlap pouchwheel_9_1920_g4
+shot pouchwheel_9_1920_g4
+close
+wait 2
+open tower_desk
+wait 8
+overlap tower_desk_1920_g4
+shot tower_desk_1920_g4
+close
+wait 2
+open chat
+wait 8
+overlap chat_1920_g4
+shot chat_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop apothecary
+wait 12
+overlap shop_apothecary_1920_g4
+shot shop_apothecary_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop food_shop
+wait 12
+overlap shop_food_shop_1920_g4
+shot shop_food_shop_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop material_shop
+wait 12
+overlap shop_material_shop_1920_g4
+shot shop_material_shop_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop outfit_shop
+wait 12
+overlap shop_outfit_shop_1920_g4
+shot shop_outfit_shop_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+wait 12
+overlap shop_smithy_1920_g4
+shot shop_smithy_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop tool_shop
+wait 12
+overlap shop_tool_shop_1920_g4
+shot shop_tool_shop_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop tower
+wait 12
+overlap shop_tower_1920_g4
+shot shop_tower_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop black_market
+wait 12
+overlap shop_black_market_1920_g4
+shot shop_black_market_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act stash
+wait 12
+overlap stash_1920_g4
+shot stash_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act guild
+wait 12
+overlap guild_1920_g4
+shot guild_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act records
+wait 12
+overlap records_1920_g4
+shot records_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act boxes
+wait 12
+overlap boxes_1920_g4
+shot boxes_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act trade
+wait 12
+overlap trade_1920_g4
+shot trade_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act mount_shop
+wait 12
+overlap mount_shop_1920_g4
+shot mount_shop_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act tower_shop
+wait 12
+overlap tower_shop_1920_g4
+shot tower_shop_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act secret_arts
+wait 12
+overlap secret_arts_1920_g4
+shot secret_arts_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act journal
+wait 12
+overlap journal_1920_g4
+shot journal_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act fishing_board
+wait 12
+overlap fishing_board_1920_g4
+shot fishing_board_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act job_room
+wait 12
+overlap job_room_1920_g4
+shot job_room_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act map
+wait 12
+overlap map_1920_g4
+shot map_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act buyback
+wait 12
+overlap buyback_1920_g4
+shot buyback_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act circuit
+wait 12
+overlap circuit_1920_g4
+shot circuit_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act guide
+wait 12
+overlap guide_1920_g4
+shot guide_1920_g4
+close
+wait 2
+
+# ---- 1920 1080 GUI 2
+window 1920 1080
+wait 10
+guiscale 2
+wait 10
+open inventory
+wait 8
+overlap inventory_1920_g2
+shot inventory_1920_g2
+close
+wait 2
+open travel_map
+wait 8
+overlap travel_map_1920_g2
+shot travel_map_1920_g2
+close
+wait 2
+open lore
+wait 8
+overlap lore_1920_g2
+shot lore_1920_g2
+close
+wait 2
+open quests
+wait 8
+overlap quests_1920_g2
+shot quests_1920_g2
+close
+wait 2
+open growth
+wait 8
+overlap growth_1920_g2
+shot growth_1920_g2
+close
+wait 2
+open journey
+wait 8
+overlap journey_1920_g2
+shot journey_1920_g2
+close
+wait 2
+open profile
+wait 8
+overlap profile_1920_g2
+shot profile_1920_g2
+close
+wait 2
+open skills
+wait 8
+overlap skills_1920_g2
+shot skills_1920_g2
+close
+wait 2
+open skills_node:cheap_thunder_bolt
+wait 8
+overlap skills_node_cheap_thunder_bolt_1920_g2
+shot skills_node_cheap_thunder_bolt_1920_g2
+close
+wait 2
+open skills_build
+wait 8
+overlap skills_build_1920_g2
+shot skills_build_1920_g2
+close
+wait 2
+open skills_tryon
+wait 8
+overlap skills_tryon_1920_g2
+shot skills_tryon_1920_g2
+close
+wait 2
+open skills_deep
+wait 8
+overlap skills_deep_1920_g2
+shot skills_deep_1920_g2
+close
+wait 2
+open skills_past
+wait 8
+overlap skills_past_1920_g2
+shot skills_past_1920_g2
+close
+wait 2
+open skills_ext
+wait 8
+overlap skills_ext_1920_g2
+shot skills_ext_1920_g2
+close
+wait 2
+open job_choice
+wait 8
+overlap job_choice_1920_g2
+shot job_choice_1920_g2
+close
+wait 2
+open party
+wait 8
+overlap party_1920_g2
+shot party_1920_g2
+close
+wait 2
+open rebirth
+wait 8
+overlap rebirth_1920_g2
+shot rebirth_1920_g2
+close
+wait 2
+open wheel
+wait 8
+overlap wheel_1920_g2
+shot wheel_1920_g2
+close
+wait 2
+open notices
+wait 8
+overlap notices_1920_g2
+shot notices_1920_g2
+close
+wait 2
+open grave
+wait 8
+overlap grave_1920_g2
+shot grave_1920_g2
+close
+wait 2
+open pouchwheel_9
+wait 8
+overlap pouchwheel_9_1920_g2
+shot pouchwheel_9_1920_g2
+close
+wait 2
+open tower_desk
+wait 8
+overlap tower_desk_1920_g2
+shot tower_desk_1920_g2
+close
+wait 2
+open chat
+wait 8
+overlap chat_1920_g2
+shot chat_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop apothecary
+wait 12
+overlap shop_apothecary_1920_g2
+shot shop_apothecary_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop food_shop
+wait 12
+overlap shop_food_shop_1920_g2
+shot shop_food_shop_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop material_shop
+wait 12
+overlap shop_material_shop_1920_g2
+shot shop_material_shop_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop outfit_shop
+wait 12
+overlap shop_outfit_shop_1920_g2
+shot shop_outfit_shop_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+wait 12
+overlap shop_smithy_1920_g2
+shot shop_smithy_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop tool_shop
+wait 12
+overlap shop_tool_shop_1920_g2
+shot shop_tool_shop_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop tower
+wait 12
+overlap shop_tower_1920_g2
+shot shop_tower_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop black_market
+wait 12
+overlap shop_black_market_1920_g2
+shot shop_black_market_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act stash
+wait 12
+overlap stash_1920_g2
+shot stash_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act guild
+wait 12
+overlap guild_1920_g2
+shot guild_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act records
+wait 12
+overlap records_1920_g2
+shot records_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act boxes
+wait 12
+overlap boxes_1920_g2
+shot boxes_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act trade
+wait 12
+overlap trade_1920_g2
+shot trade_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act mount_shop
+wait 12
+overlap mount_shop_1920_g2
+shot mount_shop_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act tower_shop
+wait 12
+overlap tower_shop_1920_g2
+shot tower_shop_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act secret_arts
+wait 12
+overlap secret_arts_1920_g2
+shot secret_arts_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act journal
+wait 12
+overlap journal_1920_g2
+shot journal_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act fishing_board
+wait 12
+overlap fishing_board_1920_g2
+shot fishing_board_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act job_room
+wait 12
+overlap job_room_1920_g2
+shot job_room_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act map
+wait 12
+overlap map_1920_g2
+shot map_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act buyback
+wait 12
+overlap buyback_1920_g2
+shot buyback_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act circuit
+wait 12
+overlap circuit_1920_g2
+shot circuit_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act guide
+wait 12
+overlap guide_1920_g2
+shot guide_1920_g2
+close
+wait 2
+
+# ---- 1280 720 GUI 3
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open inventory
+wait 8
+overlap inventory_1280_g3
+shot inventory_1280_g3
+close
+wait 2
+open travel_map
+wait 8
+overlap travel_map_1280_g3
+shot travel_map_1280_g3
+close
+wait 2
+open lore
+wait 8
+overlap lore_1280_g3
+shot lore_1280_g3
+close
+wait 2
+open quests
+wait 8
+overlap quests_1280_g3
+shot quests_1280_g3
+close
+wait 2
+open growth
+wait 8
+overlap growth_1280_g3
+shot growth_1280_g3
+close
+wait 2
+open journey
+wait 8
+overlap journey_1280_g3
+shot journey_1280_g3
+close
+wait 2
+open profile
+wait 8
+overlap profile_1280_g3
+shot profile_1280_g3
+close
+wait 2
+open skills
+wait 8
+overlap skills_1280_g3
+shot skills_1280_g3
+close
+wait 2
+open skills_node:cheap_thunder_bolt
+wait 8
+overlap skills_node_cheap_thunder_bolt_1280_g3
+shot skills_node_cheap_thunder_bolt_1280_g3
+close
+wait 2
+open skills_build
+wait 8
+overlap skills_build_1280_g3
+shot skills_build_1280_g3
+close
+wait 2
+open skills_tryon
+wait 8
+overlap skills_tryon_1280_g3
+shot skills_tryon_1280_g3
+close
+wait 2
+open skills_deep
+wait 8
+overlap skills_deep_1280_g3
+shot skills_deep_1280_g3
+close
+wait 2
+open skills_past
+wait 8
+overlap skills_past_1280_g3
+shot skills_past_1280_g3
+close
+wait 2
+open skills_ext
+wait 8
+overlap skills_ext_1280_g3
+shot skills_ext_1280_g3
+close
+wait 2
+open job_choice
+wait 8
+overlap job_choice_1280_g3
+shot job_choice_1280_g3
+close
+wait 2
+open party
+wait 8
+overlap party_1280_g3
+shot party_1280_g3
+close
+wait 2
+open rebirth
+wait 8
+overlap rebirth_1280_g3
+shot rebirth_1280_g3
+close
+wait 2
+open wheel
+wait 8
+overlap wheel_1280_g3
+shot wheel_1280_g3
+close
+wait 2
+open notices
+wait 8
+overlap notices_1280_g3
+shot notices_1280_g3
+close
+wait 2
+open grave
+wait 8
+overlap grave_1280_g3
+shot grave_1280_g3
+close
+wait 2
+open pouchwheel_9
+wait 8
+overlap pouchwheel_9_1280_g3
+shot pouchwheel_9_1280_g3
+close
+wait 2
+open tower_desk
+wait 8
+overlap tower_desk_1280_g3
+shot tower_desk_1280_g3
+close
+wait 2
+open chat
+wait 8
+overlap chat_1280_g3
+shot chat_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop apothecary
+wait 12
+overlap shop_apothecary_1280_g3
+shot shop_apothecary_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop food_shop
+wait 12
+overlap shop_food_shop_1280_g3
+shot shop_food_shop_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop material_shop
+wait 12
+overlap shop_material_shop_1280_g3
+shot shop_material_shop_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop outfit_shop
+wait 12
+overlap shop_outfit_shop_1280_g3
+shot shop_outfit_shop_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+wait 12
+overlap shop_smithy_1280_g3
+shot shop_smithy_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop tool_shop
+wait 12
+overlap shop_tool_shop_1280_g3
+shot shop_tool_shop_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop tower
+wait 12
+overlap shop_tower_1280_g3
+shot shop_tower_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop black_market
+wait 12
+overlap shop_black_market_1280_g3
+shot shop_black_market_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act stash
+wait 12
+overlap stash_1280_g3
+shot stash_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act guild
+wait 12
+overlap guild_1280_g3
+shot guild_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act records
+wait 12
+overlap records_1280_g3
+shot records_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act boxes
+wait 12
+overlap boxes_1280_g3
+shot boxes_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act trade
+wait 12
+overlap trade_1280_g3
+shot trade_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act mount_shop
+wait 12
+overlap mount_shop_1280_g3
+shot mount_shop_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act tower_shop
+wait 12
+overlap tower_shop_1280_g3
+shot tower_shop_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act secret_arts
+wait 12
+overlap secret_arts_1280_g3
+shot secret_arts_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act journal
+wait 12
+overlap journal_1280_g3
+shot journal_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act fishing_board
+wait 12
+overlap fishing_board_1280_g3
+shot fishing_board_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act job_room
+wait 12
+overlap job_room_1280_g3
+shot job_room_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act map
+wait 12
+overlap map_1280_g3
+shot map_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act buyback
+wait 12
+overlap buyback_1280_g3
+shot buyback_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act circuit
+wait 12
+overlap circuit_1280_g3
+shot circuit_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss facility act guide
+wait 12
+overlap guide_1280_g3
+shot guide_1280_g3
+close
+wait 2

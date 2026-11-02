@@ -214,10 +214,10 @@ public final class EmberHeartSelfTest {
     private static void checkNumbers(List<String> f, List<String> notes) {
         check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 1.84f,
                 "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 1.84)", f);
-        check(EmberHeart.BREATH_DAMAGE == 32f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 24f && EmberHeart.PULSE_HEAT == 10f
-                && EmberHeart.ORB_DAMAGE == 28f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
-                && EmberHeart.GALE_DAMAGE == 30f && EmberHeart.PELLET_DAMAGE == 18f && EmberHeart.FADING_DAMAGE == 37f
-                && EmberHeart.FORGE_DAMAGE == 34f && EmberHeart.FORGE_CORE_DAMAGE == 30f
+        check(EmberHeart.BREATH_DAMAGE == 43f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 32.5f && EmberHeart.PULSE_HEAT == 10f
+                && EmberHeart.ORB_DAMAGE == 38f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
+                && EmberHeart.GALE_DAMAGE == 40.5f && EmberHeart.PELLET_DAMAGE == 24.5f && EmberHeart.FADING_DAMAGE == 50f
+                && EmberHeart.FORGE_DAMAGE == 46f && EmberHeart.FORGE_CORE_DAMAGE == 40.5f
                 && EmberHeart.EMBER_BURN_DAMAGE == 8f && EmberHeart.EMBER_HEAT_PER_SECOND == 12f && EmberHeart.CHILL_PER_SECOND == 8f
                 && EmberHeartArena.ENGULF_DAMAGE == 18f && EmberHeartArena.ENGULF_HEAT == 40f, "damage or heat numbers differ from 13 の 8.3節", f);
         check(EmberHeart.GALE_PULL == 0.12 && EmberAshPellet.SPEED == 0.18 && EmberHeart.EMBER_RADIUS == 2.5 && EmberHeart.EMBER_TICKS == 160
@@ -226,10 +226,11 @@ public final class EmberHeartSelfTest {
         // 技は 10 (冷えは段階 3 に入る瞬間から効く常時の技)。三段階に三つずつ
         check(EmberHeart.bagFor(0).length == 3 && EmberHeart.bagFor(1).length == 3 && EmberHeart.bagFor(2).length == 3, "each phase should have 3 moves", f);
         check(EmberHeart.bagFor(0).length + EmberHeart.bagFor(1).length + EmberHeart.bagFor(2).length + 1 == 10, "should be 10 moves in all", f);
-        // 技の間: 段階 1 は 1.4〜1.9 秒、段階 2 は 1.1〜1.5 秒、段階 3 は 1.0〜1.4 秒、憤怒は 0.4〜0.7 秒。段階が進むほど短い
-        check(EmberHeart.GAP_MIN[0] == 28 && EmberHeart.GAP_MIN[0] + EmberHeart.GAP_SPAN[0] - 1 <= 37
-                && EmberHeart.GAP_MIN[1] == 22 && EmberHeart.GAP_MIN[1] + EmberHeart.GAP_SPAN[1] - 1 <= 29
-                && EmberHeart.GAP_MIN[2] == 20 && EmberHeart.GAP_MIN[2] + EmberHeart.GAP_SPAN[2] - 1 <= 27
+        // 技の間: 段階 1 は 3.2〜3.85 秒、段階 2 は 2.1〜2.55 秒、段階 3 は 1.4〜1.75 秒、憤怒は 0.4〜0.7 秒。段階が進むほど短い
+        // (2026-10-25: はじめをゆっくりに。前は 1.4〜1.9 / 1.1〜1.5 / 1.0〜1.4 秒)
+        check(EmberHeart.GAP_MIN[0] == 64 && EmberHeart.GAP_MIN[0] + EmberHeart.GAP_SPAN[0] - 1 <= 77
+                && EmberHeart.GAP_MIN[1] == 42 && EmberHeart.GAP_MIN[1] + EmberHeart.GAP_SPAN[1] - 1 <= 51
+                && EmberHeart.GAP_MIN[2] == 28 && EmberHeart.GAP_MIN[2] + EmberHeart.GAP_SPAN[2] - 1 <= 35
                 && EmberHeart.GAP_FURY + EmberHeart.GAP_FURY_SPAN - 1 < EmberHeart.GAP_MIN[2], "move gaps differ from 13", f);
         // 技の組: 二つ目は 16 tick 以上遅れ、組の長さは二つの技が終わるまで。段階 3 と憤怒の組に灰の帳・鞴の嵐・崩れる床は入らない。炉打ちは憤怒の組だけ
         for (EmberHeart.Pair[] set : List.of(EmberHeart.PAIRS_TWO, EmberHeart.PAIRS_THREE, EmberHeart.PAIRS_FURY)) {
@@ -306,7 +307,7 @@ public final class EmberHeartSelfTest {
                 "the lava pool under a section is not 3 deep", f);
         check(back.getBlockState(new BlockPos(cx + 15, fl, cz)).is(Blocks.LAVA), "moat has no lava", f);
         check(back.getBlockState(new BlockPos(cx + 16, fl + 3, cz)).getBlock() != Blocks.AIR && !back.getBlockState(new BlockPos(cx + 16, fl + 3, cz)).is(Blocks.LAVA), "wall is open", f);
-        check(back.getBlockState(new BlockPos(cx, EmberHeartArena.CEILING, cz + 3)).getBlock() != Blocks.AIR, "chamber has no ceiling", f);
+        check(jp.revati.skyabyss.trial.raid.HeartHall.roofed(back, cx, cz + 3, EmberHeartArena.CEILING, EmberHeartArena.SURFACE), "chamber has no ceiling", f);
         check(back.getBlockState(new BlockPos(cx, fl + 1, cz + 6)).isAir() && back.getBlockState(new BlockPos(cx + 7, EmberHeartArena.CEILING - 1, cz - 7)).isAir(), "interior is not open", f);
         // 入口: 橋 (幅 3、溝の上) と通り道、封印する壁の 1 枚は空いている
         for (int x = -1; x <= 1; x++) {
@@ -791,7 +792,7 @@ public final class EmberHeartSelfTest {
             List<EmberAshPellet> pellets = back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena());
             check(early == 0, "pellets appeared before the 1.0 s charge (" + early + ")", f);
             check(pellets.size() == EmberHeart.pelletCount(1), "pellet count " + pellets.size() + " (want " + EmberHeart.pelletCount(1) + ")", f);
-            check(EmberHeart.PELLET_DAMAGE == 18f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
+            check(EmberHeart.PELLET_DAMAGE == 24.5f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
             check(1000 - target.getHealth() == 0, "a pellet hurt before landing", f);
             tickHeart(heart, EmberHeart.PELLET_WARN + 3);
             float lost = 1000 - target.getHealth();
@@ -1146,8 +1147,8 @@ public final class EmberHeartSelfTest {
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.CORE)), "first clear has no core", f);
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", f);
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.RESONANCE_SHARD) && d.count() >= 1 && d.count() <= 3), "resonance shards not 1-3", f);
-        check(EmberLoot.collection().size() == 10 && EmberLoot.collection().equals(EmberIds.CODEX.stream().map(EmberIds::id).map(Object::toString).toList()),
-                "collection should be the 10 pieces of EmberIds.CODEX", f);
+        check(EmberLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.EMBER.size() && EmberLoot.collection().equals(EmberIds.CODEX.stream().map(EmberIds::id).map(Object::toString).toList()),
+                "collection should be the pieces of EmberIds.CODEX", f);
         check(EmberLoot.EXCLUSIVES.size() == 3 && EmberLoot.chance(EmberGear.HAMMER) == 0.04f && EmberLoot.chance(EmberGear.LANTERN) == 0.02f
                 && EmberLoot.chance(EmberGear.HELMET) == 0.25f && EmberLoot.chance(EmberGear.WAR_AXE) == 0.20f, "chances differ from 6.3節", f);
         // 天の鍵の欠片以外の確率: 心核 初回必ず・以後 25%、共鳴の結晶 40%、角杯 50%
@@ -1192,7 +1193,7 @@ public final class EmberHeartSelfTest {
         boolean worldBefore = ProgressData.get(server).worldStopped(EmberLoot.TITAN);
         EmberLoot.onHeartDefeat(back, List.of(), List.of(fake));
         TitanMemoryData.Record rec = memory.peek(fake, EmberLoot.TITAN);
-        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending, "defeat record is wrong", f);
+        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending == jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR, "defeat record is wrong", f);
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null && memory.peek(fake, "tide_shell") == null, "ember defeat wrote to another titan's record", f);
         check(memory.hasPending(fake), "rewards for an absent player were not held", f);
         TitanMemoryData.Pending held = memory.takePending(fake);

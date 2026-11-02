@@ -1,0 +1,16 @@
+{
+ "id": "moon_pilgrim_moon",
+ "short": "巡礼者の月",
+ "kind": "ラスボス 第 3 形態 一品一案 (50 の 4.3)",
+ "title": "巡礼者の月 (pilgrim_moon) — 金の鎖に縛られて引き寄せられた月・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/pilgrim_moon.png"
+ ],
+ "extra": "月 (46) と雲海 (金) の言葉を合わせる。骨 4 本。光るのはひび・鎖の先・時計の刻み。 三角形 2036 (目安 主 1500〜3000)。埋まった部品: crack1-moon:0.57。生成: tools/rough/lowpoly/moon/pilgrim_moon.py。三段の姿: 二段目 = ひびが広がる。",
+ "options": {
+  "a": {
+   "name": "鎖の月 (2036 三角形)",
+   "desc": "くぼみとひびの光の月、四方の金の鎖、前に逆に回る時計の輪。"
+  }
+ }
+}

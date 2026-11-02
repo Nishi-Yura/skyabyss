@@ -74,7 +74,7 @@ public final class StormMobSetup {
         ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
         SOUNDS.register(modEventBus);
-        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守。21 の 5.1、P16)
+        // 三章の地上の敵 (帯電毛玉・峰の雛・雷拾い・焼けた羽守P16)
         jp.revati.skyabyss.titan.storm.chapter.Ch3Mobs.register(modEventBus);
         modEventBus.addListener(StormMobSetup::onAttributes);
         modEventBus.addListener(StormMobSetup::onCreativeTab);
@@ -88,7 +88,7 @@ public final class StormMobSetup {
 
     // Mod のタブの末尾に並べる (ModItems の一覧には手を入れない)
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(FEATHER_WARDEN_EGG.get());
             event.accept(STATIC_MOTH_EGG.get());
             event.accept(THUNDER_SUPPLICANT_EGG.get());

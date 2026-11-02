@@ -217,10 +217,10 @@ public class DialogueScreen extends Screen {
         g.pose().popPose();
         // 名前と親しさ
         Component name = Component.translatable("entity." + show.role().replace(':', '.'));
-        g.drawCenteredString(font, name, fx + face / 2, fy + face + 7, NAME);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, fx + face / 2, fy + face + 7, face + 18, NAME, true);
         int affinity = Minecraft.getInstance().player == null ? 0 : NpcBonds.of(Minecraft.getInstance().player).affinity(show.role());
         int tier = Affinity.tier(affinity);
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2, fy + face + 18, SOFT);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2, fy + face + 18, face + 18, SOFT, true);
         drawMarks(g, fx + face / 2, fy + face + 29, tier);
         // 本文 (一字ずつ)
         int tx = x + textX;
@@ -287,6 +287,11 @@ public class DialogueScreen extends Screen {
 
     private ResourceLocation faceTexture() {
         String path = show.role().substring(show.role().indexOf(':') + 1);
+        // 土地の町の人 (はじまりの島の渡し守も) は自分の肖像。なければ体と同じく都の町の人の肖像を借りる (town/RegionFolk)
+        if (path.startsWith("guest_") && Minecraft.getInstance().getResourceManager()
+                .getResource(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png")).isEmpty()) {
+            path = "guest_" + jp.revati.skyabyss.town.RegionFolk.lookOf(path.substring(6));
+        }
         return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png");
     }
 

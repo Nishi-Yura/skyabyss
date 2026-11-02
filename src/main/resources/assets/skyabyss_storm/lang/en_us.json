@@ -48,7 +48,6 @@
   "item.skyabyss.lore_page.desc.storm_back": "Found on the thunder wing's back. Tally strokes fill it to the edges",
   "item.skyabyss.static_moth_spawn_egg": "Static Moth Spawn Egg",
   "item.skyabyss.thunder_supplicant_spawn_egg": "Thunder Supplicant Spawn Egg",
-  "item.skyabyss.warden_hook_spear": "Warden's Hook Spear",
   "item.skyabyss.weathercock": "Weathercock",
   "item.skyabyss.weathercock.desc": "The cock points not at the wind, but at the storm",
   "item.skyabyss.weathercock.desc2": "Raise it somewhere high under open sky to call the storm",
@@ -61,6 +60,8 @@
   "lore.skyabyss.chapter1.raiju.body": "When the beast fell, the lightning gathered in the knuckle had nowhere to go, and ran from rod to rod, again and again. At last the rods fell quiet.",
   "lore.skyabyss.chapter1.raiju.title": "The Raiju",
   "lore.skyabyss.chapter1.storm_cower.body": "While the sky shadow passed, the thunder wing clung to the peak with its head hidden under its wings. A bird the size of a mountain was afraid.",
+  "lore.skyabyss.chapter1.keep_prev_page.title": "The Keep's Page",
+  "lore.skyabyss.chapter1.keep_prev_page.body": "A loose leaf from a ledger at the back of the Skywatch keep, stamped with the sky-watchers' seal. The hand looks familiar.\n\n\"Afternoon. A storm came down on the north peak. I put my hand to the bell rope, and let go. Not the shadow. The shadow makes no sound.\n\nI counted the wing flash three times in the storm. I did not count the fourth. Counting it, I feel it would look back.\n\nTo whoever stands watch next: do not mistake the storm for the shadow. The storm, for now, is still on our side.\"\n\n... The way the strokes end is the same as your own.",
   "lore.skyabyss.chapter1.storm_cower.title": "The Cowering Titan",
   "lore.skyabyss.chapter1.storm_ruins.body": "Two stone towers stood on the bird's back. Their walls are cut with short strokes, more than anyone could count.\n\nNo one was there. Wardens in copper helms walked the hollow bones. Behind the helms there was nothing.",
   "lore.skyabyss.chapter1.storm_ruins.title": "Ruins of the Wind Folk",
@@ -378,7 +379,9 @@
   "raid.skyabyss.SR6.keeper": "Keeper",
   "message.skyabyss.raid.SR4.key": "Key %s / %s",
   "message.skyabyss.raid.SR5.round": "Round %s / %s",
-  "message.skyabyss.raid.SR5.go": "Your turn",
+  "message.skyabyss.raid.SR5.go": "Now step the order",
   "message.skyabyss.raid.SR5.miss": "Wrong, or too late. Watch again",
-  "message.skyabyss.raid.SR6.gust": "A gust is coming! Get behind a pillar"
+  "message.skyabyss.raid.SR6.gust": "A gust is coming! Get behind a pillar",
+  "gui.skyabyss.attack.scorched_warden.ring": "Lightning Ring",
+  "gui.skyabyss.attack.scorched_warden.leap": "Mantle Leap"
 }

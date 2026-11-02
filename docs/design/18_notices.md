@@ -2,7 +2,7 @@
 
 - 文書番号: 18
 - 範囲: チャットに流していた世界の声・獲得・警告を、画面の決まった場所に種類ごとの見せ方で出す仕組み（通知の仕分け、レベルアップ、目的の帯、知らせの記録）。
-- 関連: [17](17_opening_and_rpg_feel.md)（5.1〜5.3 の元の設計。実装は 18 が正）、[04](04_growth_and_skills.md)（レベル）、[07](07_npc_quest.md)（クエストの札・ログ）、[11](11_record_screen.md)
+- 関連: 17（5.1〜5.3 の元の設計。実装は 18 が正）、[04](04_growth_and_skills.md)（レベル）、[07](07_npc_quest.md)（クエストの札・ログ）、[11](11_record_screen.md)
 
 ---
 
@@ -12,7 +12,7 @@
 - 同じ場所には一度に一つだけ映る（順番待ち）。混んだら一つあたりを縮め、あふれたら手がかりから捨てる。
 - 見逃しても、N の「知らせの記録」で読み返せる。
 - 文言（翻訳キー）は変えない。送り方だけを変えた。
-- 見た目は案 A（暗い石板。クエスト・伝承の札と同じ作り）。ラフは `docs/review/notice_roughs/index.html`。参考: ゼルダ（下中央の語りの字幕、右上の獲得）、ドラクエ（獲得の窓）、FF（場所名のタイトル）、Elden Ring（場所名・撃破の大きな帯、獲得の札）。
+- 見た目は案 A（暗い石板。クエスト・伝承の札と同じ作り）。参考: ゼルダ（下中央の語りの字幕、右上の獲得）、ドラクエ（獲得の窓）、FF（場所名のタイトル）、Elden Ring（場所名・撃破の大きな帯、獲得の札）。
 
 ## 2. 何をどこに出すか
 
@@ -153,6 +153,7 @@
 - 順路の目的（32 の 6 章）: 背の中で順路が動いているあいだは、「第一の試練 〇〇（歩）」「第二の試練 〇〇（智）」「第三の試練 〇〇（闘）」「〇〇を倒そう」（中ボス）「心臓へ」。原型の試練の中の次の目的があれば「：」のあとに続ける。
 - 距離（10 ブロック単位）と八方位は、目的ごとの位置につく。位置は序盤の構造物（野営地・宿り・骨の丘・岩鯨）をサーバーが人ごとに送る（`OpeningDirector.target`。17）。
 - 場面（シネマティック）の間は HUD ごと隠れる（`hideGui`）ので、知らせは出ない。台詞は場面の画面が自分で描く（[20](20_cinematics.md)）。
+- **画面を開いている間は HUD を描かない**（2026-11-02 の声「UI がたまにおかしいものある。文字や要素が重なったり」: 半透明の窓の後ろに持ち物の帯と体力・マナの帯が透けて字に重なっていた）。バニラの層も mod の層も止める（`HudManager.onLayer` の `hidesHud`）。残すのは会話の欄・技の輪・旅嚢の輪・場面・死んだ画面と、暗転の層（`carry_fade`・`abyss_flash`）。
 - 開幕の暗転と題字（`OpeningOverlay`）は 17 の 4.4。表示の部品は `Notice.place`（題字）と `NoticeClient` の帯を使う。
 - `sky/`・`lore/`・titan の出現条件は、文を出す呼び出しの置き換えだけにした（条件は触っていない）。
 
@@ -322,7 +323,6 @@
 - 開発用の見本: `/skyabyss_hud demo [all|opening|back|boss|off]`（表示だけにデータを入れる。サーバーには触れない）、`/skyabyss_hud layout`（いまの長方形と出さなかった部品をチャットへ）。台本では `huddemo <all|opening|back|boss|off>`。
 - 台本 `tools/shots/hud_layout.txt`（一番混む三つの場面 × GUI 倍率 2・3・4）。バニラの部品を重ねた版は `tools/shots/hud_vanilla2.txt`（1920x1080 の GUI 2・3・4。`python tools/sheets/hud_vanilla2_sheet.py` で `docs/review/previews/hud_vanilla2_sheet.png`）。整理の前後の比べは `docs/review/previews/hud_layout_sheet.png`。
 - 自己テスト `SELFTEST hud layout`（`hud/HudLayoutSelfTest`。「混んだ場面」`crowded`: `tools/shots/hud_vanilla2.txt` の boss・opening・back と同じ組み合わせ × GUI 倍率 2〜4（1920x1080・1280x720・1600x900・2560x1440）× ボスバー・効き目・札・チャット・アクションバー・横板・字幕を振って、バニラが mod の部品のどれにも重ならないこと（動かせないまま残るのも不可）。倍率 1〜4 × 16 種の窓で、置いた長方形が画面に収まる・mod の部品どうし、バニラの部品と重ならない・普通の大きさでは字幕と手がかりと目的が出る、をランダムな部品の組み合わせでも確かめる）。ゲームを開かずに main でも回せる。
-- 絵柄（板・文字・キーの表示）の 3 案は `docs/review/hud/index.html`（選びは db の `choices/hud_style`）。置き場の整理は絵柄に依らない。
 
 ### 14.6 体力・防具・空気の帯（`client/hud/VitalsHud`）
 
@@ -334,6 +334,8 @@
 
 - 技の名前（`BossAttackCue`）は画面の中心（ボスバーの真ん中）の真下に置く（左右の帯に押されて右へずれていた）。
 - ボスバーの名前の左に 16px のドット絵の印: 四つの心臓・雷獣・灰の鍛冶は専用のバー（`textures/gui/boss/*_icon*.png`）、鯨骨の隊長・古い見張り・真珠の番人・潮呼びは `client/titan/MidBossBar`（`captain / elder_sentry / pearl_keeper / tide_beckoner _icon.png`。`tools/gen/ui/gen_boss_icons.py`）。名前と同じ体が近くにいるときだけ描き換える。
+
+- 残りのボスも同じ型の帯にした（2026-11-02）。月の族（月の核・月秤・影抱き・残月の剣守・望の灯守）と雲海の族（灯守の目・最後の鐘守・巡礼者の目・手・月・羽・戻し手・初代の空見）は段つき（体力 66%・33%。`AbyssBossBars` の色と咆哮を読む）、塔の主・雷の章の焼けた羽守・熾の章の古い灰被り・潮の番人・淵の杭・名のある強敵（草原の旗手と四つの土地の大物。「大いなる〜」も同じ型）は段なし。型は名前の翻訳キーで決める（`client/titan/BossBarLooks`、`PhasedBossBar` は枠を印と別に持てる）。絵は `tools/gen/ui/gen_boss_bars_more.py`。淵の杭は帯がなかったので新しく付けた。技の名前は 83 個の印つき（`gui.skyabyss.attack.*`、`gen_attack_icons.py`）を、各ボスの技の始まりに送る。
 
 ## 15. 会話の画面の肖像
 

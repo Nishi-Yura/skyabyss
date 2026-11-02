@@ -6,8 +6,6 @@ import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
-import jp.revati.skyabyss.rpg.skill.net.SkillStancePayload;
 import net.minecraft.network.chat.Component;
 import jp.revati.skyabyss.rpg.skill.net.ManaPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillCastPayload;
@@ -32,6 +30,21 @@ public final class SkillClient {
     private SkillClient() {
     }
 
+    // 型の溜まるもの (Gauges.Kind の序数。-1 = 無し) と値。VitalsHud がマナの帯の上に描く
+    public static int gaugeKind = -1;
+    public static int gaugeValue;
+    // 満ちた瞬間に光らせる残り
+    public static int gaugeFlash;
+
+    public static void onGauge(jp.revati.skyabyss.rpg.skill.net.GaugePayload payload) {
+        var k = jp.revati.skyabyss.rpg.skill.Gauges.Kind.byOrdinal(payload.kind());
+        if (k != null && payload.value() >= k.max && (payload.kind() != gaugeKind || gaugeValue < k.max)) {
+            gaugeFlash = 12;
+        }
+        gaugeKind = payload.kind();
+        gaugeValue = payload.value();
+    }
+
     public static void onMana(ManaPayload payload) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
@@ -53,14 +66,10 @@ public final class SkillClient {
         }
     }
 
-    // 天職を選べる (サーバーが知らせた) 段。0 = まだ。K の画面のボタンを出す
-    public static int callingReady;
-
-    public static void onCallingOpen(jp.revati.skyabyss.rpg.skill.net.CallingOpenPayload payload) {
-        callingReady = payload.which();
+    public static void onJobChoiceOpen(boolean switching) {
         Minecraft mc = Minecraft.getInstance();
-        if (payload.open() && mc.player != null && !(mc.screen instanceof CallingScreen)) {
-            mc.setScreen(new CallingScreen(payload.which()));
+        if (mc.player != null && !(mc.screen instanceof JobChoiceScreen)) {
+            mc.setScreen(new JobChoiceScreen(switching));
         }
     }
 
@@ -115,18 +124,6 @@ public final class SkillClient {
                 mc.setScreen(new SkillScreen());
             }
         }
-        while (SkillClientSetup.STANCE_KEY.consumeClick()) {
-            if (mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()) {
-                SkillData sd = SkillManager.get(mc.player);
-                if (sd.stanceCd > 0 && !mc.player.isCreative()) {
-                    mc.player.displayClientMessage(ModText.deny("message.skyabyss.skill.stance_cooldown"), true);
-                } else {
-                    int next = (sd.stance + 1) % SkillStance.values().length;
-                    PacketDistributor.sendToServer(new SkillStancePayload(next));
-                    mc.player.displayClientMessage(ModText.hint("message.skyabyss.skill.stance_set", Component.translatable(SkillStance.of(next).nameKey())), true);
-                }
-            }
-        }
         for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
             while (SkillClientSetup.SLOT_KEYS[i].consumeClick()) {
                 if (mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()) {
@@ -150,6 +147,9 @@ public final class SkillClient {
         }
         if (manaFlash > 0) {
             manaFlash--;
+        }
+        if (gaugeFlash > 0) {
+            gaugeFlash--;
         }
     }
 }

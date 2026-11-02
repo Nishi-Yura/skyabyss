@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 一章の予兆 3 拍 (docs/design/01 の 4.1「予兆 3 拍」、17 の 1.5。予兆の枠は story/arc/Foreshadow): 岩鯨が現れる前に、痕跡 → 間接 → 一部。
+// 一章の予兆 3 拍 (docs/design/01 の 4.1「予兆 3 拍」。予兆の枠は story/arc/Foreshadow): 岩鯨が現れる前に、痕跡 → 間接 → 一部。
 //   ① 痕跡 (昼・空の見える所): 晴れているのに、乾いた石の粉が空からうっすら降る
 //   ② 間接 (昼・空の見える所): 雲ひとつないのに、地面の上だけを大きな影が渡る (霧の色が暗くなって戻る。動物は空を見上げて固まる)
 //   ③ 一部 (夕方〜夜): 空の高みで鎖が鳴り、石の環が一つ足もとに落ちてくる (拾える。本人だけ)
@@ -150,9 +150,8 @@ public final class Beats {
             if (player.isRemoved() || player.serverLevel() != level) {
                 return;
             }
-            Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-            look = look.lengthSqr() < 1.0e-4 ? new Vec3(0, 0, 1) : look.normalize();
-            Vec3 at = player.position().add(look.scale(3.0)).add(0, 8.0, 0);
+            // その人の頭の上から落とす (目線の先だとブロックの奥に落ちることがあった。2026-10-27 の声)
+            Vec3 at = player.position().add(0, 6.0, 0);
             ItemStack link = new ItemStack(Items.CHAIN);
             link.set(DataComponents.CUSTOM_NAME, Component.translatable("item.skyabyss.ch1.whale_link").withStyle(s -> s.withItalic(false)));
             link.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.skyabyss.ch1.whale_link.lore"))));

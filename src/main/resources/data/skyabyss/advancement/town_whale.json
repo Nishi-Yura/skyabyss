@@ -1,0 +1,34 @@
+{
+  "parent": "skyabyss:capital_tour",
+  "display": {
+    "icon": {
+      "id": "skyabyss:stone_whale_plating"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.town_whale.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.town_whale.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "town:visit:whale"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_3"
+  }
+}

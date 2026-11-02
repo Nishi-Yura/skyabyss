@@ -60,7 +60,7 @@ public final class UxDev {
                                     ServerLevel level = p.serverLevel();
                                     BlockPos at = p.blockPosition().offset(com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "dx"), 0,
                                             com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "dz"));
-                                    Graves.create(p, level, at, null, List.of(new ItemStack(Items.BREAD, 5)), 30);
+                                    Graves.create(p, level, at, null, List.of(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 5)), 30);
                                     return 1;
                                 }))))
                         .then(Commands.literal("party").executes(ctx -> {

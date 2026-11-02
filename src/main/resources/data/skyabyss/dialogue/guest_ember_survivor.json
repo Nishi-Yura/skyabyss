@@ -1,0 +1,191 @@
+{
+  "npc": "skyabyss:guest_ember_survivor",
+  "entries": [
+    {
+      "node": "q_back",
+      "if": {
+        "type": "quest",
+        "quest": "town/ember_forge",
+        "is": "active",
+        "stage": "back"
+      }
+    },
+    {
+      "node": "q_wait",
+      "if": {
+        "type": "quest",
+        "quest": "town/ember_forge",
+        "is": "active"
+      }
+    },
+    {
+      "node": "after",
+      "if": {
+        "type": "stilled",
+        "titan": "ember"
+      }
+    },
+    {
+      "node": "hint",
+      "if": {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "active"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "idle": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "quest",
+                "quest": "town/ember_forge",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/ember_forge"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "hint": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "quest",
+                "quest": "town/ember_forge",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/ember_forge"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "after": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "quest",
+                "quest": "town/ember_forge",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/ember_forge"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "q_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "q_wait": {
+      "face": "neutral"
+    },
+    "q_back": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "give",
+          "goto": "q_done",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "signal",
+              "signal": "town_hand:guest_ember_survivor"
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "q_done": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

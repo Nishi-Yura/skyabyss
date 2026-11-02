@@ -1,0 +1,43 @@
+# 技の木の線と文言の確認 (2026-11-02 の声「線が機能してない」「点 20 いるやつ選べない」「わかりにくい書き方」)。
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_tree_lines.txt -PshotsName=skill_tree_lines
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose archer
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 20
+
+# 貫きの型: 刻印を一つ取ると、ほかの二つに × が付き、型の要 (門 12) まで届く
+cmd skyabyss skill node @p agi_a
+cmd skyabyss skill node @p far_shot
+cmd skyabyss skill node @p agi_b
+cmd skyabyss skill node @p heavy_arrow
+cmd skyabyss skill node @p cloud_pierce_2
+open skills_node:thin_arrow
+wait 10
+shot archer_rune_locked
+close
+open skills_node:lone_string
+wait 10
+shot archer_keystone
+close
+
+# 戦士: 選んだ節へつながる線が水色に光る
+cmd skyabyss job choose warrior
+open skills_node:shield_bash
+wait 10
+shot warrior_lines
+close

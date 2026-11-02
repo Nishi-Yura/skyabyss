@@ -17,7 +17,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 岩鯨の背の新しい敵 (docs/design/21 の 3.3): 骨の砲手・骨鳥・老番兵。型・属性・スポーンエッグ。
+// 岩鯨の背の新しい敵: 骨の砲手・骨鳥・老番兵。型・属性・スポーンエッグ。
 // 登録は ModEntities.register から呼ぶ (SkyAbyss のコンストラクタは触らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch1BackEntities {

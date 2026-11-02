@@ -13,7 +13,8 @@ public final class TrialMidBoss {
 
     // その周に中ボスの段が要るか (中ボスの間のある巨神)
     public static boolean needed(String titan, TrialDraw.Draw draw) {
-        return jp.revati.skyabyss.trial.raid.mid.MidRooms.idOf(titan) != null;
+        // 2026-10-25 (00 の 277): 中ボスは闘の部屋の中で出る (trial/raid/mid/FightBossRoom)。中ボスだけの段はない
+        return false;
     }
 
     public static Component name(String titan) {

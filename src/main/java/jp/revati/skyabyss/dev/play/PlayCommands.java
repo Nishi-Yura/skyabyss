@@ -33,14 +33,18 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-// /skyabyss play ... : 試遊用の近道 (OP、権限 2)。章・場所・道具・ボス・クエスト・状態を名前で切り替える。
-// 既存の /skyabyss playtest はそのまま残す。docs/design/37 の 2〜4 節
+// /skyabyss admin ... : 管理者のコマンド (権限は設定 adminPermissionLevel、既定 2 = OP)。章・場所・道具・ボス・クエスト・状態を名前で切り替える。
+// 2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」で、試遊の /skyabyss play を admin に改め、他人の記録 (inspect)・レベル・鐘銭・版を足した。
+// /skyabyss play は開発の別名 (撮影の台本が使う。製品版では隠れる。dev/CommandGate)。docs/design/37 の 2〜4 節
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PlayCommands {
     private PlayCommands() {
     }
 
-    static final int HELP_LINES = 16;
+    static final int HELP_LINES = 19;
+    // 正式の名前と、開発の別名
+    public static final String ADMIN = "admin";
+    public static final String DEV_ALIAS = "play";
 
     private interface Fn {
         int run(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> targets) throws CommandSyntaxException;
@@ -52,11 +56,12 @@ public final class PlayCommands {
 
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2)).then(tree()));
+        // 権限は CommandGate が節ごとに付け直す (admin = 設定の段、play = 2)
+        event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2)).then(tree(ADMIN)).then(tree(DEV_ALIAS)));
     }
 
-    static LiteralArgumentBuilder<CommandSourceStack> tree() {
-        LiteralArgumentBuilder<CommandSourceStack> play = Commands.literal("play");
+    static LiteralArgumentBuilder<CommandSourceStack> tree(String label) {
+        LiteralArgumentBuilder<CommandSourceStack> play = Commands.literal(label);
         play.then(Commands.literal("help").executes(PlayCommands::help));
         play.then(targeted(Commands.literal("status"), (ctx, t) -> {
             for (ServerPlayer p : t) {
@@ -153,6 +158,8 @@ public final class PlayCommands {
                 })));
         play.then(Commands.literal("skip").then(targeted(Commands.literal("opening"), (ctx, t) -> each(ctx, t, "skip_opening", Playtest::skipOpening))));
         play.then(targeted(Commands.literal("now"), (ctx, t) -> now(ctx, t, false)));
+        // 封の箱 (docs/design/52): box give <種類> [数] / box open
+        play.then(jp.revati.skyabyss.loot.box.BoxCommands.node());
         LiteralArgumentBuilder<CommandSourceStack> quest = Commands.literal("quest");
         quest.then(targeted(Commands.literal("list"), (ctx, t) -> {
             for (ServerPlayer p : t) {
@@ -204,7 +211,76 @@ public final class PlayCommands {
         // reset: 対象を省略 = 自分。旧い形 (reset me [対象]) も残す
         play.then(targeted(Commands.literal("reset"), (ctx, t) -> reset(ctx, t))
                 .then(Commands.literal("me").executes(ctx -> reset(ctx, List.of(ctx.getSource().getPlayerOrException())))));
+        // ほかの人の記録 (J の画面) を見る
+        play.then(Commands.literal("inspect").then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
+            ServerPlayer viewer = ctx.getSource().getPlayerOrException();
+            return jp.revati.skyabyss.record.RecordService.open(viewer, EntityArgument.getPlayer(ctx, "player"), "") ? 1 : 0;
+        })));
+        // レベルを決める・鐘銭を渡す
+        play.then(Commands.literal("level").then(targeted(Commands.argument("level", IntegerArgumentType.integer(1, jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL)),
+                (ctx, t) -> each(ctx, t, "level", p -> jp.revati.skyabyss.rpg.Growth.setLevel(p, IntegerArgumentType.getInteger(ctx, "level"))))));
+        play.then(Commands.literal("coins").then(targeted(Commands.argument("amount", IntegerArgumentType.integer(1, 9_999_999)),
+                (ctx, t) -> each(ctx, t, "coins", p -> jp.revati.skyabyss.facility.Coins.give(p, IntegerArgumentType.getInteger(ctx, "amount"))))));
+        // あいだの塔 (超大型レイド。docs/design/54 の 2 章) をすぐ試す (2026-11-02 の声「超大型 raid やりたいんだけど」)
+        play.then(tower());
+        // Mod の版と、世界・人のデータの版 (upgrade/WorldUpgrade)
+        play.then(Commands.literal("version").executes(PlayCommands::version));
         return play;
+    }
+
+    // admin tower ending <結末> [対象] : 終章の結末を選んだことにする (塔の受付が見え、入れる)
+    // admin tower start [対象]         : 対象を一つの隊にして、一日一回を数えずに塔へ入る (先頭が隊長)
+    // admin tower day [対象]           : 今日の一回を戻す
+    // admin tower hp <1-100> [対象]    : その人のいる塔の主の体力を割合に (50% と 20% の落ちる月の確かめ)
+    // admin tower leave [対象]         : 塔を抜けて都の受付へ
+    private static LiteralArgumentBuilder<CommandSourceStack> tower() {
+        LiteralArgumentBuilder<CommandSourceStack> t = Commands.literal("tower");
+        t.then(Commands.literal("ending").then(targeted(Commands.argument("ending", StringArgumentType.word())
+                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(jp.revati.skyabyss.story.finale.FinaleEnding.ENDINGS, b)),
+                (ctx, ps) -> {
+                    String e = StringArgumentType.getString(ctx, "ending");
+                    if (!jp.revati.skyabyss.story.finale.FinaleEnding.ENDINGS.contains(e)) {
+                        ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.tower_bad_ending", e));
+                        return 0;
+                    }
+                    return each(ctx, ps, "tower_ending", p -> jp.revati.skyabyss.story.finale.FinaleEnding.apply(p, e));
+                })));
+        t.then(targeted(Commands.literal("start"), (ctx, ps) -> {
+            List<ServerPlayer> squad = ps.stream().filter(p -> jp.revati.skyabyss.tower.Towers.runOf(p) == null).toList();
+            if (squad.isEmpty() || jp.revati.skyabyss.tower.Towers.start(ctx.getSource().getServer(), squad, true) == null) {
+                ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.tower_no_start"));
+                return 0;
+            }
+            say(ctx, "tower_start", squad.size());
+            return squad.size();
+        }));
+        t.then(targeted(Commands.literal("day"), (ctx, ps) -> each(ctx, ps, "tower_day", jp.revati.skyabyss.tower.Towers::resetDay)));
+        t.then(Commands.literal("hp").then(targeted(Commands.argument("percent", IntegerArgumentType.integer(1, 100)), (ctx, ps) -> {
+            int pct = IntegerArgumentType.getInteger(ctx, "percent");
+            int n = 0;
+            for (ServerPlayer p : ps) {
+                n += jp.revati.skyabyss.tower.Towers.masterHealth(p, pct) ? 1 : 0;
+            }
+            if (n == 0) {
+                ctx.getSource().sendFailure(Component.translatable("commands.skyabyss_play.tower_no_run"));
+            }
+            return n;
+        })));
+        t.then(targeted(Commands.literal("leave"), (ctx, ps) -> each(ctx, ps, "tower_leave", jp.revati.skyabyss.tower.Towers::leave)));
+        return t;
+    }
+
+    private static int version(CommandContext<CommandSourceStack> ctx) {
+        net.minecraft.server.MinecraftServer server = ctx.getSource().getServer();
+        String mod = net.neoforged.fml.ModList.get().getModContainerById(SkyAbyss.MODID).map(c -> c.getModInfo().getVersion().toString()).orElse("?");
+        ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.version", mod,
+                jp.revati.skyabyss.upgrade.WorldUpgrade.version(server), jp.revati.skyabyss.upgrade.WorldUpgrade.CURRENT,
+                jp.revati.skyabyss.upgrade.WorldUpgrade.savedWith(server)).withStyle(ChatFormatting.AQUA), false);
+        if (ctx.getSource().getEntity() instanceof ServerPlayer p) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss_play.version_player",
+                    jp.revati.skyabyss.upgrade.PlayerUpgrade.version(p), jp.revati.skyabyss.upgrade.PlayerUpgrade.CURRENT).withStyle(ChatFormatting.GRAY), false);
+        }
+        return 1;
     }
 
     private static final com.mojang.brigadier.suggestion.SuggestionProvider<CommandSourceStack> QUEST_IDS =

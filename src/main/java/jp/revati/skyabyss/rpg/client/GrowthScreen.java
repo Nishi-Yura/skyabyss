@@ -8,21 +8,16 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
-import jp.revati.skyabyss.rpg.Rpg;
 import jp.revati.skyabyss.client.ui.UiFit;
-import jp.revati.skyabyss.rpg.net.GrowthAllocatePayload;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.network.PacketDistributor;
 
-// ステータス画面 (J キー)。力を仮に振ってから「決定」でサーバーへ送る (押しまちがえを戻せるように)。
+// ステータス画面 (J キー)。見るだけの記録: レベルと経験値、基礎 (筋力・敏捷・精神・耐久) とその効き目、記憶の断片。
+// 基礎は技の木の節で上がる (docs/design/48。振り分けの釦はない。基礎は SkillManager.refreshStats が木から写す)。
 // 背景は tools/gen/items/gen_growth_assets.py で作る 2 倍密度のテクスチャ (480x368 を 240x184 で描く)
 public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/growth/status.png");
@@ -40,23 +35,12 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final int TEXT = 0xE6E2D6;
     static final int SOFT = 0xA9AEBC;
     static final int GOLD = 0xF2C14E;
-    static final int PENDING = 0x9FE8FF;
     static final int LORE = 0x7FD6D0;
 
-    private final int[] pending = new int[Stat.values().length];
     // 画面は窓に合わせて一様に大きくする (描くのも、当たりも、この一つの変換を通す)。論理の原点は (left, top)
     private final UiFit fit = new UiFit();
     private int left;
     private int top;
-    private final List<SmallButton> plus = new ArrayList<>();
-    private final List<SmallButton> minus = new ArrayList<>();
-    private Button confirm;
-    private Button undo;
-    // 振り直し (00 の 3 = A)。二度押しで送る (押しまちがえで振り分けを失わないように)
-    private Button respec;
-    private int respecArmed;
-    private Component noticeText;
-    private int noticeTicks;
 
     public GrowthScreen() {
         super(Component.translatable("gui.skyabyss.growth.title"));
@@ -67,121 +51,13 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         fit.fit(width, height, W + 4, H + 24, 2.5f);
         left = 2;
         top = 20;
-        plus.clear();
-        minus.clear();
-        for (Stat stat : Stat.values()) {
-            int ry = top + ROW_Y + stat.ordinal() * ROW_H;
-            minus.add(addRenderableWidget(new SmallButton(left + 200, ry + 6, false, () -> change(stat, -1))));
-            plus.add(addRenderableWidget(new SmallButton(left + 214, ry + 6, true, () -> change(stat, +1))));
-        }
-        undo = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.undo"), b -> java.util.Arrays.fill(pending, 0))
-                .bounds(left + 136, top + 161, 44, 16).build());
-        confirm = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.confirm"), b -> send())
-                .bounds(left + 184, top + 161, 46, 16).build());
-        // 振り分けられる力の行の右。技の画面の「振り直す」と同じ費用と場所 (共鳴の炉のそば)
-        respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.respec"), b -> pressRespec())
-                .bounds(left + 170, top + 45, 60, 12).build());
         // 技の画面へのつまみ (上の縁)
         jp.revati.skyabyss.rpg.client.skill.RpgTabs.addAt(this::addRenderableWidget, left + W / 2, top,
                 jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
-        refresh();
     }
 
     private GrowthData data() {
         return Growth.get(minecraft.player);
-    }
-
-    private int pendingSum() {
-        int sum = 0;
-        for (int v : pending) {
-            sum += v;
-        }
-        return sum;
-    }
-
-    // シフトを押しながらなら 5 ずつ
-    private void change(Stat stat, int sign) {
-        GrowthData d = data();
-        int step = hasShiftDown() ? 5 : 1;
-        int i = stat.ordinal();
-        if (sign > 0) {
-            int room = Math.min(d.unspentPoints() - pendingSum(), GrowthRules.STAT_CAP - d.stat(stat) - pending[i]);
-            pending[i] += Math.max(0, Math.min(step, room));
-        } else {
-            pending[i] = Math.max(0, pending[i] - step);
-        }
-        refresh();
-    }
-
-    private void send() {
-        if (pendingSum() > 0) {
-            PacketDistributor.sendToServer(new GrowthAllocatePayload(pending.clone()));
-            minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(Rpg.LEVEL_UP.get(), 1.6f, 0.35f));
-        }
-        java.util.Arrays.fill(pending, 0);
-        refresh();
-    }
-
-    private void refresh() {
-        GrowthData d = data();
-        // 記録が変わって (同期・レベルを下げられた)、仮の振り分けが収まらなくなったら取り消す
-        if (pendingSum() > d.unspentPoints()) {
-            java.util.Arrays.fill(pending, 0);
-        }
-        int available = d.unspentPoints() - pendingSum();
-        for (Stat stat : Stat.values()) {
-            int i = stat.ordinal();
-            plus.get(i).active = available > 0 && d.stat(stat) + pending[i] < GrowthRules.STAT_CAP;
-            minus.get(i).active = pending[i] > 0;
-        }
-        confirm.active = pendingSum() > 0;
-        undo.active = pendingSum() > 0;
-        respec.active = d.spentPoints() > 0;
-        respec.setMessage(Component.translatable(respecArmed > 0 ? "gui.skyabyss.growth.respec_confirm" : "gui.skyabyss.growth.respec"));
-    }
-
-    // 振り直しは二度押し。断られる理由は先に画面の中で出す (画面を開いている間はアクションバーが見えない。最後はサーバーが検める)
-    private void pressRespec() {
-        int cost = GrowthRules.statRespecCost(data().statRespecs);
-        if (!minecraft.player.isCreative()) {
-            if (!jp.revati.skyabyss.rpg.skill.SkillManager.nearForge(minecraft.player)) {
-                notice(Component.translatable("message.skyabyss.growth.respec_failed.no_forge"));
-                return;
-            }
-            if (jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(minecraft.player) < cost) {
-                notice(Component.translatable("message.skyabyss.growth.respec_failed.no_crystals", cost));
-                return;
-            }
-        }
-        if (respecArmed <= 0) {
-            respecArmed = 60;
-            refresh();
-            return;
-        }
-        respecArmed = 0;
-        java.util.Arrays.fill(pending, 0);
-        PacketDistributor.sendToServer(new jp.revati.skyabyss.rpg.net.GrowthRespecPayload(cost));
-        refresh();
-    }
-
-    private void notice(Component text) {
-        noticeText = text;
-        noticeTicks = 60;
-        respecArmed = 0;
-        minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
-                jp.revati.skyabyss.rpg.skill.Skills.SOUND_FAIL.get(), 1.0f, 0.5f));
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (respecArmed > 0) {
-            respecArmed--;
-        }
-        if (noticeTicks > 0) {
-            noticeTicks--;
-        }
-        refresh();
     }
 
     @Override
@@ -243,7 +119,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         return super.mouseScrolled(fit.x(screenX), fit.y(screenY), dx, dy);
     }
 
-    // 板の中身 (釦は render の中で先に描いた)
     // 囲み (ツールチップ) は変換の外で描く (変換の中では窓の端で切れる)。描く場所は画面の座標
     private List<FormattedCharSequence> pendingTip;
 
@@ -271,10 +146,13 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                 : Component.translatable("gui.skyabyss.growth.xp", d.xp, d.xpNeed());
         g.drawString(font, xpText, left + BAR_X + BAR_W - font.width(xpText), top + BAR_Y + 9, SOFT, false);
 
-        // 振り分けられる力
-        int available = d.unspentPoints() - pendingSum();
-        g.drawString(font, Component.translatable("gui.skyabyss.growth.points", available), left + 12, top + 46,
-                available > 0 ? GOLD : SOFT, false);
+        // 職と、基礎の上がり方 (木の節)
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(jp.revati.skyabyss.rpg.skill.SkillManager.get(minecraft.player).curJob);
+        Component jobLine = Component.translatable("gui.skyabyss.growth.job_line",
+                job == null ? Component.translatable("gui.skyabyss.growth.job_none") : Component.translatable(job.nameKey()));
+        g.drawString(font, jobLine, left + 12, top + 46, job == null ? SOFT : GOLD, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.growth.from_tree"), left + 12 + font.width(jobLine) + 8, top + 46,
+                W - 24 - font.width(jobLine) - 8, SOFT, false);
 
         // ステータスの行
         for (Stat stat : Stat.values()) {
@@ -282,29 +160,19 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             int ry = top + ROW_Y + i * ROW_H;
             g.blit(TEXTURE, left + 10, ry + 4, 16, 16, i * 32, 384, 32, 32, TEX, TEX);
             g.drawString(font, Component.translatable(stat.nameKey()), left + 32, ry + 3, TEXT, false);
-            int value = d.stat(stat) + pending[i];
-            String v = String.valueOf(value);
-            int vx = left + 104;
-            g.drawString(font, v, vx, ry + 3, pending[i] > 0 ? PENDING : TEXT, false);
-            if (pending[i] > 0) {
-                g.drawString(font, "(+" + pending[i] + ")", vx + font.width(v) + 3, ry + 3, PENDING, false);
-            }
-            g.drawString(font, effect(stat, value), left + 32, ry + 13, pending[i] > 0 ? PENDING : SOFT, false);
+            int value = d.stat(stat);
+            g.drawString(font, String.valueOf(value), left + 104, ry + 3, value > 0 ? GOLD : TEXT, false);
+            g.drawString(font, effect(stat, value), left + 32, ry + 13, SOFT, false);
         }
 
         // 記憶の断片 (器だけ。効果は後で)
         g.drawString(font, Component.translatable("gui.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity),
                 left + 12, top + 166, LORE, false);
 
-        // 断られた理由 (振り直し)。下の縁の上に 3 秒
-        if (noticeTicks > 0 && noticeText != null) {
-            g.drawCenteredString(font, noticeText, left + W / 2, top + H + 4, 0xD9779A);
-        }
-
         renderHover(g, d, mouseX, mouseY);
     }
 
-    // ステータスの効果の一行 (振ったあとの値で)
+    // ステータスの効果の一行
     static Component effect(Stat stat, int value) {
         return switch (stat) {
             case STRENGTH -> Component.translatable("gui.skyabyss.growth.effect.strength", pct(GrowthRules.meleeMultiplier(value)));
@@ -323,17 +191,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     // 名前に重ねると説明、断片の行に重ねると中身、バーに重ねると合計の経験値
     private void renderHover(GuiGraphics g, GrowthData d, int mouseX, int mouseY) {
-        if (respec.isHovered()) {
-            int cost = GrowthRules.statRespecCost(d.statRespecs);
-            List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable(cost == 0
-                    ? "gui.skyabyss.growth.respec_free" : "gui.skyabyss.growth.respec_cost", cost,
-                    jp.revati.skyabyss.rpg.skill.SkillRules.RESPEC_FORGE_RANGE).withColor(TEXT), 200));
-            if (respecArmed > 0) {
-                lines.addAll(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable("gui.skyabyss.growth.respec_again").withColor(0xD9779A), 200));
-            }
-            tip(lines);
-            return;
-        }
         for (Stat stat : Stat.values()) {
             int ry = top + ROW_Y + stat.ordinal() * ROW_H;
             if (mouseX >= left + 8 && mouseX < left + 196 && mouseY >= ry && mouseY < ry + ROW_H - 2) {
@@ -355,35 +212,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         if (mouseX >= left + BAR_X && mouseX < left + BAR_X + BAR_W && mouseY >= top + BAR_Y - 2 && mouseY < top + BAR_Y + 18) {
             tip(List.of(Component.translatable("gui.skyabyss.growth.lifetime", d.lifetimeXp(),
                     GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL)).getVisualOrderText()));
-        }
-    }
-
-    // ＋ と − の小さなボタン (11x11、テクスチャは 22x22 の 2 倍密度)
-    static final class SmallButton extends AbstractButton {
-        private final boolean plusSign;
-        private final Runnable action;
-
-        SmallButton(int x, int y, boolean plusSign, Runnable action) {
-            super(x, y, 11, 11, Component.literal(plusSign ? "+" : "-"));
-            this.plusSign = plusSign;
-            this.action = action;
-        }
-
-        @Override
-        public void onPress() {
-            action.run();
-        }
-
-        @Override
-        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            int state = !active ? 2 : isHoveredOrFocused() ? 1 : 0;
-            int u = (plusSign ? 0 : 72) + state * 24;
-            g.blit(TEXTURE, getX(), getY(), 11, 11, u, 416, 22, 22, TEX, TEX);
-        }
-
-        @Override
-        protected void updateWidgetNarration(NarrationElementOutput output) {
-            defaultButtonNarrationText(output);
         }
     }
 

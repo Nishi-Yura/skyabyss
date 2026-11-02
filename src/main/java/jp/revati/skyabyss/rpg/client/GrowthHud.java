@@ -105,6 +105,13 @@ public final class GrowthHud {
         renderLevelUp(g, mc, delta);
     }
 
+    // いまの職 (職の間で選んだ職。SkillData は持ち主へ送られている)
+    @org.jetbrains.annotations.Nullable
+    static jp.revati.skyabyss.rpg.skill.Job masteryJob(Minecraft mc) {
+        String cur = jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player).curJob;
+        return cur == null || cur.isEmpty() ? null : jp.revati.skyabyss.rpg.skill.Job.byId(cur);
+    }
+
     private static void renderStatus(GuiGraphics g, Minecraft mc, int[] o, boolean bottom) {
         GrowthData data = Growth.get(mc.player);
         Font font = mc.font;
@@ -112,6 +119,12 @@ public final class GrowthHud {
         int x = o[0];
         // 一行目: Lv と、振り分けていない力があれば金の印
         Component lv = Component.translatable("gui.skyabyss.growth.hud_level", data.level);
+        // Lv 50 では、いまの職の熟練の段と進みを出す (rpg/JobMastery)
+        jp.revati.skyabyss.rpg.skill.Job job = max ? masteryJob(mc) : null;
+        long mxp = jp.revati.skyabyss.rpg.JobMastery.xp(data, job);
+        if (job != null) {
+            lv = Component.translatable("gui.skyabyss.growth.hud_mastery", data.level, jp.revati.skyabyss.rpg.JobMastery.tier(mxp));
+        }
         g.drawString(font, lv, x, o[1], TEXT, true);
         int unspent = data.unspentPoints();
         if (unspent > 0) {
@@ -120,10 +133,10 @@ public final class GrowthHud {
         // 二行目: 細いバー
         int by = o[1] + 11;
         g.blit(TEXTURE, x, by, BAR_W, BAR_H, 0, 0, 128, 10, 128, 32);
-        float fraction = max ? 1f : (float) data.xp / Math.max(1, data.xpNeed());
+        float fraction = job != null ? jp.revati.skyabyss.rpg.JobMastery.progress(mxp) : max ? 1f : (float) data.xp / Math.max(1, data.xpNeed());
         int fill = Mth.clamp(Math.round(62 * fraction), 0, 62);
         if (fill > 0) {
-            g.blit(TEXTURE, x + 1, by + 1, fill, 3, 2, max ? 16 : 10, fill * 2, 6, 128, 32);
+            g.blit(TEXTURE, x + 1, by + 1, fill, 3, 2, max && job == null ? 16 : 10, fill * 2, 6, 128, 32);
         }
         if (GrowthClient.barFlash > 0 && !max) {
             int a = (int) (GrowthClient.barFlash / 12f * 0x70);

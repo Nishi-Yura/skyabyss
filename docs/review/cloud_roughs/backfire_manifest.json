@@ -1,0 +1,16 @@
+{
+ "id": "moon_backfire",
+ "short": "戻り火",
+ "kind": "炉の島の敵 一品一案 (50 の 4.2.3)",
+ "title": "戻り火 (backfire) — 炉から漏れた火の霊・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/backfire.png"
+ ],
+ "extra": "炉の島の言葉 (鉄・残り火)。骨 4 本。光るのは芯と炎。 三角形 628 (目安 小さな敵 400〜900)。埋まった部品: なし。生成: tools/rough/lowpoly/moon/backfire.py。三段の姿: 二段目 = 尾が二本増える。",
+ "options": {
+  "a": {
+   "name": "火の籠の霊 (628 三角形)",
+   "desc": "鉄の格子の籠、残り火の芯と目、炎の冠と尾。"
+  }
+ }
+}

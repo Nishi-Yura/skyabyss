@@ -1,0 +1,26 @@
+# 本番の jar の相性 (docs/release.md の 2): クライアントに JEI・Sodium・Jade・Shoulder Surfing Reloaded、サーバーに JEI・Jade を入れて、本番のサーバーへ入る
+server localhost:25599
+size 1600 900
+timeout 1200
+guiscale 2
+render 8
+wait 300
+close
+wait 40
+shot c01_world
+perspective back
+wait 40
+shot c02_third_ssr
+perspective first
+wait 10
+open inventory
+wait 40
+shot c03_inventory_jei
+close
+wait 10
+open travel_map
+wait 40
+shot c04_map
+close
+wait 10
+quit

@@ -1,0 +1,53 @@
+# 六章 区画 4「下弦の淵」(docs/design/46 の 4.6): 淵の見下ろし、野営と前の自分 (四人目)、二つの板の門、残像の渡り、灯りの回廊、主の間 (剣守と残像)、敵
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_rift.txt -PshotsName=moon_rift
+# 観戦モードで撮る (月は軽いので、ふつうのモードだと宙で落ちていく)。見やすさのため暗視
+world moon_rift1 continent
+size 1600 900
+timeout 2400
+render 14
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+hud off
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd tp @s 150 75 128 0 52
+waitchunks 300
+wait 100
+shot r01_overview
+cmd tp @s 98 16 206 -55 12
+waitchunks 100
+wait 60
+shot r02_camp
+cmd tp @s 161 18 166 90 22
+wait 40
+shot r03_door
+cmd tp @s 166 17 247 -37 6
+wait 40
+shot r04_leap
+cmd tp @s 139 -8 269 127 8
+wait 40
+shot r05_hall
+cmd tp @s 200 9 216 -90 14
+wait 30
+cmd skyabyss moonworld rift_lord
+wait 70
+shot r06_arena
+cmd tp @s 210 6 205 -40 10
+wait 20
+shot r07_blade_close
+cmd skyabyss moonworld rift_clear
+cmd summon skyabyss:rift_wing 128 16 214 {NoAI:1b,Rotation:[90f,0f]}
+cmd summon skyabyss:rift_armor 128 12 218 {NoAI:1b,Rotation:[90f,0f]}
+cmd summon skyabyss:rift_serpent 128 12 223 {NoAI:1b,Rotation:[90f,0f]}
+cmd tp @s 121 15 219 -90 12
+wait 40
+shot r08_mobs
+close

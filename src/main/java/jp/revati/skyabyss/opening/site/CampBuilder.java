@@ -8,11 +8,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.phys.AABB;
 
-// 旅の野営地 (docs/design/17 の 4.1)。消えた焚き火、倒れた荷車、開いた寝袋、木箱 (パン 4・松明 8・木の斧 1)、切り株の上の古い帳面。
+// 旅の野営地。消えた焚き火、倒れた荷車、開いた寝袋、木箱 (パン 4・松明 8・木の斧 1)、切り株の上の古い帳面。
 // 帳面は伝承の書を ItemEntity にして置く (消えない。タグ NOTEBOOK_TAG)。拾ったときの扱いは拍子 (opening/) の側で決める
 public final class CampBuilder {
     public static final String NOTEBOOK_TAG = "skyabyss_opening_notebook";
@@ -28,9 +27,8 @@ public final class CampBuilder {
         ServerLevel level = job.level;
         BlockPos barrel = job.mark("barrel");
         if (barrel != null && level.getBlockEntity(barrel) instanceof BarrelBlockEntity be) {
-            be.setItem(0, new ItemStack(Items.BREAD, 4));
-            be.setItem(1, new ItemStack(Items.TORCH, 8));
-            be.setItem(2, new ItemStack(Items.WOODEN_AXE));
+            be.setItem(0, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 4));
+            be.setItem(1, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_AXE.get()));
         } else {
             SkyAbyss.LOGGER.error("Opening camp: no barrel at {}", barrel);
         }

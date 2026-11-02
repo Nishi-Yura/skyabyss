@@ -1,0 +1,50 @@
+{
+  "_comment": "docs/design/44 の湧きの表。entity / weight / time (day|night|any) / biomes (ContinentBiomes の名前、省くとどこでも) / group [少, 多]",
+  "entries": [
+    {
+      "entity": "skyabyss:cinder_mite",
+      "weight": 5,
+      "time": "day",
+      "group": [
+        2,
+        3
+      ]
+    },
+    {
+      "entity": "skyabyss:ash_dragger",
+      "weight": 3,
+      "time": "day",
+      "group": [
+        1,
+        1
+      ]
+    },
+    {
+      "entity": "skyabyss:elder_thrall",
+      "weight": 1,
+      "time": "day",
+      "group": [
+        1,
+        1
+      ]
+    },
+    {
+      "entity": "skyabyss:ash_husk",
+      "weight": 4,
+      "time": "night",
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:cinder_mite",
+      "weight": 3,
+      "time": "night",
+      "group": [
+        2,
+        3
+      ]
+    }
+  ]
+}

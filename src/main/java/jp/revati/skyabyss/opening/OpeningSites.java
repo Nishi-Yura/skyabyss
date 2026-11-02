@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
-// 序盤の構造物 4 つ (docs/design/17 の 4 章) の場所を返す窓口。拍子 (opening/) と語りが、これだけを見ればよい。
+// 序盤の構造物 4 つの場所を返す窓口。拍子 (opening/) と語りが、これだけを見ればよい。
 //   野営地 CAMP        : 目覚めの場所。スポーン地点 (近い陸へ動かすこともある)。9x9 ほど
 //   鐘の宿り SHELTER   : 語り部の家。野営地から 140〜220 ブロック。バニラの鐘がある (NpcSpawner が語り部を立たせる)
 //   巨大な足跡 FOOTPRINT: 野営地〜宿りの道から 30〜60 ブロック外れた所に 3 つ (index 0 が野営地に一番近い)

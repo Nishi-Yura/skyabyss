@@ -71,6 +71,46 @@ class Town(Facilities):
     def mark(self, name, x, y, z):
         self.v.mark(name, x, y, z)
 
+    def massing_house(self, x0, z0, x1, z1, y0, floors, front, sides, extras, roof=None):
+        """入れない町家を家の型 (massing.build_house。docs/design/45) で: 平入り・妻入り・張り出し・段の妻の商家と、
+        屋根の形 (急・反り・半切妻・寄棟・段の妻) を混ぜる。高さ y0 の段の上の家は、仮の箱 (y = 0) で建てて持ち上げる"""
+        import massing as M
+        rng = self.rng
+        st = self.st
+        frontw = (x1 - x0 + 1) if front in ('north', 'south') else (z1 - z0 + 1)
+        if floors >= 3 and frontw >= 8:
+            kind = rng.choice(['gable', 'merchant', 'jetty', 'row', 'gable'])
+        elif floors >= 2:
+            kind = rng.choice(['gable', 'row', 'jetty', 'gable'])
+        else:
+            kind = rng.choice(['cottage', 'row'])
+        roof_kind = 'stepped' if kind == 'merchant' else rng.choice(['steep', 'steep', 'bell', 'half_hip', 'kick', 'hip'])
+        mat = roof or (rng.choice(list(st.roof_alts)) if st.roof_alts and rng.random() < 0.3 else st.roof)
+        rect = (x0, z0, x1, z1)
+        if kind == 'jetty':
+            rect = M.shrink(rect, front, 1)
+            if (rect[2] - rect[0]) < 4 or (rect[3] - rect[1]) < 4:
+                kind, rect = 'gable', (x0, z0, x1, z1)
+        ex = tuple(e for e in extras if e in ('dormer', 'chimney'))
+        real = self.v
+        tmp = vox.Vox(seed=1)
+        tmp.rng = rng
+        self.v = tmp
+        try:
+            M.build_house(self, kind, rect, front, floors, roof_kind, mat=mat, sides=sides, quest=False, extras=ex)
+        finally:
+            self.v = real
+        for (x, y, z), s_ in tmp.b.items():
+            real.set(x, y + y0, z, s_)
+        for m, (x, y, z) in tmp.marks.items():
+            real.marks[m] = [x, y + y0, z]
+        real.fake_doors.extend((x, y + y0, z, f) for (x, y, z, f) in tmp.fake_doors)
+        if hasattr(tmp, 'chimneys'):
+            if not hasattr(real, 'chimneys'):
+                real.chimneys = []
+            real.chimneys.extend((x, y + y0, z) for (x, y, z) in tmp.chimneys)
+        return None
+
     def tablet(self, x, y, z, facing, name):
         self.v.set(x, y, z, 'skyabyss:tablet[facing=%s,standing=true]' % facing)
         self.v.mark('sign_' + name, x, y, z)
@@ -85,6 +125,12 @@ class Town(Facilities):
         sealed = 入れない家 (物語に関係のない家。中は埋め、窓は暗く、戸は壁に貼った跳ね上げ戸)
         quest = 大通りの 1 列目の入れる家 (二階建て。中を作り、印 quest_house_<n>。facilities.furnish_home)"""
         st, v = self.st, self.v
+        # 入れる家は住み手の型 (interiors.HOME_THEMES) の数まで。それより多い並びは入れない家にする
+        from interiors import HOME_THEMES
+        if quest and self.quest_n >= max(HOME_THEMES):
+            quest = False
+        if sealed and not quest and getattr(self, 'use_massing', True):
+            return self.massing_house(x0, z0, x1, z1, y0, floors, front, sides, extras, roof)
         if quest:
             sealed = False
             floors, fh = 2, 5
@@ -1812,10 +1858,14 @@ class Town(Facilities):
         self.drop_floaters()
         self.polish_final()
         self.fix_stairs()
-        self.street_light()
+        # 明るさで足す灯りの柱 (street_light) はやめた (2026-10-25「フェンスとランタンが適当に置かれている」)。都は敵が湧かないので、
+        # 灯りは大通りの決まった並び (street_lamps) と戸の上 (house_lights) だけ
         self.house_lights()
         self.fix_gates()
         self.drop_unsupported()
+        if getattr(self, 'dress_capital', True):
+            import dress
+            dress.dress_capital(self, (-TERX, -IN, TERX, TERZ), TER + 1)
         self.v.connect()
         return self.v
 
@@ -1881,7 +1931,7 @@ class Town(Facilities):
 
     def street_light(self):
         """夜の街路を、暖かい灯りの柱で照らす (tools/audit/check_light.py)。魂の松明は使わない。
-        中心 (|x|,|z| <= 60) は歩く所の明るさ 7 未満を、外の輪は 4 未満を、柱の列 (8〜10 ほど離す) で埋める。
+        中心 (|x|,|z| <= 60) は歩く所の明るさ 3 未満を、外の輪は 1 未満を、柱の列 (16〜20 ほど離す) で埋める (道の目印ていど)。
         柱は道の端に立つ (四方の三つは空き)。灯りの高さは柱の上 (吊り灯り)"""
         sys.path.insert(0, os.path.join(ROOT, 'tools', 'audit'))
         import check_light  # noqa: E402
@@ -1890,10 +1940,11 @@ class Town(Facilities):
 
         def veto(cells, changes):
             return passage.placement_ok(cells, changes, **rules)
-        core = check_light.plan_wall_torches(self.v.b, target=7, region=check_light.in_core, min_gap=8, max_add=400,
+        # 2026-10-25 の試遊で「灯りが多すぎる」。町は安全 (敵が湧かない) なので、道の目印になる程度に間引く
+        core = check_light.plan_wall_torches(self.v.b, target=3, region=check_light.in_core, min_gap=16, max_add=120,
                                              veto=veto)
-        ring = check_light.plan_wall_torches(self.v.b, target=4, region=lambda p: not check_light.in_core(p),
-                                             min_gap=10, max_add=300, veto=veto)
+        ring = check_light.plan_wall_torches(self.v.b, target=1, region=lambda p: not check_light.in_core(p),
+                                             min_gap=20, max_add=60, veto=veto)
         self.torches = core + ring
 
     def house_lights(self):
@@ -2055,7 +2106,6 @@ class Town(Facilities):
         self.block(-67, 6, -53, 27, ('north', 'east', 'south'), depth=10, usable=('north',))
         self.block(40, 6, 45, 27, ('east',), depth=6, courtyard=False)
         self.block(70, 6, IN2, 16, ('north',), depth=11, courtyard=False, usable=('north',), reserve=[(81, 5, 94, 18)])
-        self.block(53, 21, IN2, 27, ('south',), depth=7, courtyard=False)
         # 帯 1 (z 35..61): 古井戸の小広場、酒場、訓練場、闇市
         self.block(-IN2, 35, -53, 61, ('north', 'east', 'west', 'south'), depth=11, reserve=[(-64, 43, -53, 53)])
         self.block(-45, 35, -7, 61, ('north', 'west', 'east', 'south'), depth=11, usable=('east',), prio='ew', reserve=[(-40, 36, -28, 46)])
@@ -2065,6 +2115,8 @@ class Town(Facilities):
         self.block(-45, 69, -7, IN2, ('north', 'west', 'east', 'south'), depth=11, usable=('east',), prio='ew')
         self.block(7, 69, 45, IN2, ('north', 'west', 'east', 'south'), depth=11, usable=('west',), prio='ew', lot=(22, 75, 36, 89, 'lot_4'))
         self.block(53, 69, IN2, IN2, ('north', 'west', 'east', 'south'), depth=11, lot=(64, 76, 80, 92, 'lot_5'), reserve=[(83, 69, 94, 79)])
+        # 東の通りの南の並び (z 21..27)。入れる家 10・11 (吟遊詩人・雷を怖がる子。番号を前の 1〜9 から変えないよう最後に建てる)
+        self.block(53, 21, IN2, 27, ('south',), depth=7, courtyard=False, usable=('south',))
 
     def facilities(self):
         """施設 (facilities.py)。街区のあとに建てる (街区は reserve で場所を空けている)"""

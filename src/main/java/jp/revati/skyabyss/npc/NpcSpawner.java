@@ -31,9 +31,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // NPC をどこに立たせるか。
-//  - 語り部: 村 (集会所の鐘) にプレイヤーが近づいたとき、その村にまだいなければ、鐘のそばに一人立たせる。村ごとに一人
-//  - 鯨追い: 村の近くにいる人のクエストが鯨追いを必要としている (話す目的・依頼主) とき、村の外れ (鐘から 18〜34 ブロック) に
-//           火を焚いて立たせる。焚き火の煙が、遠くからの目印になる
+//  - 語り部: 都の大鐘楼にプレイヤーが近づいたとき、まだいなければ、鐘のそばに一人立たせる
+//  - 鯨追い: 鯨見の町の見張り台のそば (ContinentTowns が keepTownChaser を呼ぶ)
 // どちらもいなくなったら (コマンドで消した等)、立たせてから 1 日たてば立て直す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class NpcSpawner {
@@ -54,16 +53,25 @@ public final class NpcSpawner {
         if (level.dimension() != Level.OVERWORLD || (level.getGameTime() + (player.getId() & 0xFF)) % CHECK_INTERVAL != 0) {
             return;
         }
+        // 語り部と鯨追いは都の大鐘楼にだけ立つ (2026-10-25 の試遊: 野の村・野営に立つ語り部はいらない)。
+        // 前の版で野に立った二人は、近くを通ったときに消す
+        removeWild(level, player);
+        // 天と淵の大陸: 鯨追いは鯨見の町に立つ (ContinentTowns が keepTownChaser を呼ぶ)。都の鐘では語り部だけ
         Optional<BlockPos> bell = level.getPoiManager().findClosest(h -> h.is(PoiTypes.MEETING), player.blockPosition(), VILLAGE_RADIUS,
                 PoiManager.Occupancy.ANY);
-        if (bell.isPresent()) {
+        if (bell.isPresent() && jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, bell.get())) {
             visitVillage(level, capitalBell(level, bell.get()), player);
-            return;
         }
-        // 鐘のある村が近くに無い人のための野営 (StoryGuide が焚き火を置く)。村と同じように語り部が立ち、必要なら鯨追いも立つ
-        BlockPos camp = nearestCamp(NpcWorldData.get(level.getServer().overworld()), player.blockPosition(), VILLAGE_RADIUS);
-        if (camp != null) {
-            visitVillage(level, camp, player);
+    }
+
+    private static void removeWild(ServerLevel level, ServerPlayer player) {
+        net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(SEARCH);
+        for (NpcEntity npc : level.getEntitiesOfClass(NpcEntity.class, box,
+                n -> (n.getType() == NpcSetup.STORYTELLER.get() || n.getType() == NpcSetup.WHALE_CHASER.get())
+                        && !jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, n.blockPosition())
+                        && !townChaser(level, n))) {
+            SkyAbyss.LOGGER.info("[npc] removed a wild {} at {} (only the capital's bell tower keeps them)", npc.getType().toShortString(), npc.blockPosition());
+            npc.discard();
         }
     }
 
@@ -75,53 +83,6 @@ public final class NpcSpawner {
             return bell;
         }
         return jp.revati.skyabyss.opening.site.SiteGuard.inCapital(level, bell) ? main : bell;
-    }
-
-    // 位置 near から水平 radius 以内の、いちばん近い野営の焚き火 (なければ null)
-    @Nullable
-    public static BlockPos nearestCamp(NpcWorldData data, BlockPos near, double radius) {
-        BlockPos best = null;
-        double bestD = radius * radius;
-        for (long packed : data.camps) {
-            BlockPos camp = BlockPos.of(packed);
-            double dx = camp.getX() - near.getX();
-            double dz = camp.getZ() - near.getZ();
-            double d = dx * dx + dz * dz;
-            if (d <= bestD) {
-                best = camp;
-                bestD = d;
-            }
-        }
-        return best;
-    }
-
-    // 語り部の野営を、位置 around の 18〜34 ブロック先の自然の地面に作る (焚き火を置き、野営として記録する)。置けなければ null。
-    // 語り部本人は、このあと visitVillage が (焚き火を鐘の代わりにして) 立たせる
-    @Nullable
-    public static BlockPos buildCamp(ServerLevel level, BlockPos around, RandomSource random) {
-        for (int i = 0; i < 80; i++) {
-            double angle = random.nextDouble() * Math.PI * 2;
-            int r = 18 + random.nextInt(17);
-            BlockPos column = around.offset((int) Math.round(Math.cos(angle) * r), 0, (int) Math.round(Math.sin(angle) * r));
-            if (!level.isLoaded(column)) {
-                continue;
-            }
-            BlockPos at = ground(level, column, 12, 16);
-            if (at == null || !openSky(level, at) || !natural(level.getBlockState(at.below()))) {
-                continue;
-            }
-            BlockPos fire = campfireSpot(level, at, random);
-            if (fire == null) {
-                continue;
-            }
-            level.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState(), 3);
-            NpcWorldData data = NpcWorldData.get(level.getServer().overworld());
-            data.camps.add(fire.asLong());
-            data.setDirty();
-            SkyAbyss.LOGGER.info("[npc] a storyteller's camp was made at {}", fire);
-            return fire;
-        }
-        return null;
     }
 
     public static void visitVillage(ServerLevel level, BlockPos bell, ServerPlayer player) {
@@ -136,25 +97,38 @@ public final class NpcSpawner {
                 data.markSpawned(bell.asLong(), NpcSetup.STORYTELLER_ID, now);
             }
         }
-        if (needsChaser(player) && find(level, bell, NpcSetup.WHALE_CHASER.get()) == null
-                && canRespawn(data, bell, NpcSetup.WHALE_CHASER_ID, now)) {
-            NpcEntity npc = spawnChaser(level, bell, level.random);
-            if (npc != null) {
-                data.markSpawned(bell.asLong(), NpcSetup.WHALE_CHASER_ID, now);
-                data.markChaserFire(bell.asLong(), npc.home().asLong());
-            }
-        }
     }
 
-    // 鐘 bell の村の鯨追いの焚き火の位置。立っていればその今の足もと、いなければ立たせたときの記録 (なければ null)。
-    // 目的の帯の「宿りの外れの焚き火」の目印 (語り部の鐘の位置ではない)
-    @Nullable
-    public static BlockPos chaserSpot(ServerLevel level, BlockPos bell) {
-        NpcEntity live = find(level, bell, NpcSetup.WHALE_CHASER.get());
-        if (live != null) {
-            return live.home() != null ? live.home() : live.blockPosition();
+    // 天と淵の大陸の鯨見の町の鯨追い (立つ所 spot の近く)。野に立つ二人を消すときに残す
+    static boolean townChaser(ServerLevel level, NpcEntity n) {
+        if (n.getType() != NpcSetup.WHALE_CHASER.get() || !jp.revati.skyabyss.world.continent.ContinentPois.in(level)) {
+            return false;
         }
-        return NpcWorldData.get(level.getServer().overworld()).chaserFire(bell);
+        BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
+        return spot != null && n.blockPosition().distSqr(spot) <= SEARCH * SEARCH;
+    }
+
+    // 鯨見の町の鯨追い: 要る人が近くにいて、立っていなければ立たせる (一日おき)。離れていたら戻す
+    public static void keepTownChaser(ServerLevel level, BlockPos spot, ServerPlayer player) {
+        if (!entitiesLoaded(level, spot)) {
+            return;
+        }
+        NpcEntity live = find(level, spot, NpcSetup.WHALE_CHASER.get());
+        if (live != null) {
+            if (live.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) > 64) {
+                live.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+            }
+            return;
+        }
+        NpcWorldData data = NpcWorldData.get(level.getServer().overworld());
+        long now = level.getGameTime();
+        if (!needsChaser(player) || !canRespawn(data, spot, NpcSetup.WHALE_CHASER_ID, now)) {
+            return;
+        }
+        NpcEntity npc = place(level, NpcSetup.WHALE_CHASER.get(), spot, spot);
+        if (npc != null) {
+            data.markSpawned(spot.asLong(), NpcSetup.WHALE_CHASER_ID, now);
+        }
     }
 
     // 都 (鐘の宿り) の鐘なら、語り部の立つ所 = 鐘の 2 下 (一階の床) の、鐘から南へ 2。都でなければ null

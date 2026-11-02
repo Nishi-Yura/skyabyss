@@ -47,7 +47,8 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_INSERT = 103;
     // 外す: 穴 0・1 (104・105)
     public static final int BUTTON_REMOVE = 104;
-    public static final int BUTTON_ADD_SOCKET = 106;
+    // 外す (BUTTON_REMOVE + 穴の番号 0〜2) と重ならないように
+    public static final int BUTTON_ADD_SOCKET = 108;
     public static final int GEAR_X = 44;
     public static final int GEAR_Y = 35;
     // 材料の枠 (欠片・ルーン・アスペクトの芯)
@@ -79,12 +80,12 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public ResonanceForgeMenu(int id, Inventory inventory, ContainerLevelAccess access) {
         super(ModMenus.RESONANCE_FORGE.get(), id);
         this.access = access;
-        int sets = TitanGearSets.all().size();
+        int sets = TitanGearSets.exchangeable().size();
         if (inventory.player instanceof ServerPlayer server) {
             exchange = new ContainerData() {
                 @Override
                 public int get(int index) {
-                    TitanGearSet set = TitanGearSets.all().get(index / 2);
+                    TitanGearSet set = TitanGearSets.exchangeable().get(index / 2);
                     TitanMemoryData.Record r = TitanMemoryData.get(server.server).peek(server.getUUID(), set.titan);
                     return index % 2 == 0 ? GearExchange.ownedMask(set, r) : GearExchange.state(set, r).ordinal();
                 }
@@ -159,7 +160,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         if (id >= BUTTON_EXCHANGE && id < BUTTON_EXTRACT_DESTROY) {
             int t = (id - BUTTON_EXCHANGE) / EXCHANGE_STRIDE;
             int i = (id - BUTTON_EXCHANGE) % EXCHANGE_STRIDE;
-            List<TitanGearSet> sets = TitanGearSets.all();
+            List<TitanGearSet> sets = TitanGearSets.exchangeable();
             if (t >= sets.size() || i >= sets.get(t).exclusives().size() || !(player instanceof ServerPlayer server)
                     || !GearExchange.exchange(server, sets.get(t), sets.get(t).exclusives().get(i))) {
                 return false;

@@ -1,0 +1,32 @@
+{
+  "_comment": "語りの紙芝居 (tools/story/pixel/install_reels.py)",
+  "panels": [
+    {
+      "id": "p1",
+      "motion": "up",
+      "hold": 2.4
+    },
+    {
+      "id": "p2",
+      "motion": "down",
+      "hold": 2.4,
+      "sound": "minecraft:block.amethyst_block.chime"
+    },
+    {
+      "id": "p3",
+      "motion": "right",
+      "hold": 2.4
+    },
+    {
+      "id": "p4",
+      "motion": "still",
+      "hold": 2.4
+    },
+    {
+      "id": "p5",
+      "motion": "down",
+      "hold": 2.4,
+      "sound": "minecraft:entity.warden.heartbeat"
+    }
+  ]
+}

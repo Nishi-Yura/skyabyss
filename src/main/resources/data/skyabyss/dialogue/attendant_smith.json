@@ -39,12 +39,24 @@
       "face": "neutral",
       "options": [
         {
-          "id": "repair",
+          "id": "made",
           "kind": "talk",
           "do": [
             {
               "type": "facility",
-              "open": "repair"
+              "open": "shop",
+              "shop": "smithy"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "look",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "look"
             }
           ],
           "goto": "end"

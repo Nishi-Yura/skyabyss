@@ -17,9 +17,14 @@ public final class MapText {
     public static Component name(MapMarks.Mark m) {
         return switch (m.kind()) {
             case TITAN -> Component.translatable("progress.skyabyss.titan." + m.name());
-            case WAYMARK -> m.name().isEmpty() ? TravelDest.waymarkName(m.extra()) : Component.literal(m.name());
+            case WAYMARK -> m.extra().startsWith("poi~:") ? Component.translatable("map.skyabyss.poi.undiscovered", Component.translatable("map.skyabyss.poi." + m.extra().substring(5)))
+                    : m.extra().startsWith("poi:") ? Component.translatable("map.skyabyss.poi." + m.extra().substring(4))
+                    : m.name().isEmpty() ? TravelDest.waymarkName(m.extra()) : Component.literal(m.name());
             case SITE -> siteName(m.name(), m.extra());
             case SPAWN -> Component.translatable("gui.skyabyss.travel.spawn");
+            case FOE -> m.id().equals("world_event") ? Component.translatable("map.skyabyss.world_event", Component.translatable(m.name()))
+                    : Component.translatable("map.skyabyss.foe.lair", Component.translatable(m.name()));
+            case TOWN -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.town") : Component.translatable("map.skyabyss.town." + m.extra());
             case SHRINE -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.shrine")
                     : Component.translatable("map.skyabyss.shrine_of", Component.translatable("progress.skyabyss.titan." + m.extra()));
             default -> Component.translatable("map.skyabyss.mark." + m.kind().name().toLowerCase(java.util.Locale.ROOT));

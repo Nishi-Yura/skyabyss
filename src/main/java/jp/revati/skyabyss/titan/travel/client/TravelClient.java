@@ -35,7 +35,7 @@ public final class TravelClient {
     private TravelClient() {
     }
 
-    // 子の海図は旅の地図 (client/map/TravelMapScreen) に重ねて開く (docs/design/33 の 4.1)
+    // 子の海図は旅の地図 (client/map/TravelMapScreen) に重ねて開く
     public static void openChart(TravelNetwork.Chart chart) {
         jp.revati.skyabyss.client.map.MapClient.openVoyage(chart);
     }

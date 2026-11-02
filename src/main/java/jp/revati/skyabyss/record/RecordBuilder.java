@@ -69,6 +69,7 @@ public final class RecordBuilder {
         tabs.addAll(titanTabs(target));
         tabs.add(new Tab(RecordSnapshot.GROWTH, growth(target)));
         tabs.add(new Tab(RecordSnapshot.BONDS, bonds(target)));
+        tabs.addAll(DeedPages.tabs(target));
         return new RecordSnapshot(target.getUUID(), target.getDisplayName().copy(), self, tabs);
     }
 
@@ -415,6 +416,15 @@ public final class RecordBuilder {
         return tabs;
     }
 
+    // 見た語りを見直す行 (見ていなければ出さない)。detail は語りの最初の一文
+    static Row reelRow(ServerPlayer p, String reel) {
+        if (!jp.revati.skyabyss.story.reel.StoryReels.seen(p, reel)) {
+            return null;
+        }
+        return new Row(RecordSnapshot.REEL_ROW + reel, Kind.VALUE, ItemStack.EMPTY, t("r.reel." + reel), t("v.reel"), RecordSnapshot.MARK_NONE, -1,
+                List.of(t("d.reel." + reel), t("d.reel")), RecordSnapshot.ACTION_REPLAY);
+    }
+
     private static List<Row> titanOverview(ServerPlayer p) {
         List<Row> rows = new ArrayList<>();
         rows.add(header("progress"));
@@ -454,6 +464,17 @@ public final class RecordBuilder {
                     t("r.titan_of", t("n." + order), titanName(p, titan)), value, mark, -1, detail, RecordSnapshot.ACTION_NONE));
         }
 
+        // 試練の記録 (図鑑): 背の試練の速さ・称号・図鑑の写し (前は砦の老兵が開いた)
+        rows.add(new Row("trial_codex", Kind.VALUE, ItemStack.EMPTY, t("r.trial_codex"), t("v.trial_codex"), RecordSnapshot.MARK_NONE, -1,
+                List.of(t("d.trial_codex")), RecordSnapshot.ACTION_RECORDS));
+        // 裏ボス「初代の空見」の最速 (退けた人だけ。docs/design/53 の 6 章)
+        if (jp.revati.skyabyss.story.finale.founder.Founder.beaten(p)) {
+            long best = jp.revati.skyabyss.story.finale.founder.Founder.best(p);
+            rows.add(new Row("founder", Kind.VALUE, ItemStack.EMPTY, t("r.founder"),
+                    best < 0 ? t("v.founder_none") : Component.literal(jp.revati.skyabyss.story.finale.founder.Founder.time(best)),
+                    RecordSnapshot.MARK_NONE, -1, List.of(t("d.founder")), RecordSnapshot.ACTION_NONE));
+        }
+
         rows.add(header("travel"));
         TravelState travel = Voyages.state(p);
         List<Component> titanNames = new ArrayList<>();
@@ -475,9 +496,20 @@ public final class RecordBuilder {
         }
         rows.add(value("waymarks", t("r.waymarks"), t("v.of", travel.waymarks.size(), TravelState.MAX_WAYMARKS), RecordSnapshot.MARK_NONE, marks));
         rows.add(value("voyages", t("r.voyages"), t("v.times", travel.voyages), RecordSnapshot.MARK_NONE, List.of(t("d.voyages"))));
+        // 天と淵の大陸の見どころの発見 (ContinentPois.discover)
+        if (jp.revati.skyabyss.world.continent.ContinentPois.in(p.level())) {
+            long total = jp.revati.skyabyss.world.continent.ContinentPois.all().stream().filter(jp.revati.skyabyss.world.continent.ContinentPois.Poi::site).count();
+            rows.add(value("discoveries", t("r.discoveries"), t("v.of", jp.revati.skyabyss.world.continent.ContinentPois.discovered(p).size(), total),
+                    RecordSnapshot.MARK_NONE, List.of(t("d.discoveries"))));
+        }
         long left = Voyages.cooldownLeft(p);
         rows.add(value("cooldown", t("r.cooldown"), left <= 0 ? t("v.ready") : t("v.seconds", (left + 19) / 20), RecordSnapshot.MARK_NONE,
                 List.of(t("d.cooldown"))));
+        Row opening = reelRow(p, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
+        if (opening != null) {
+            rows.add(header("reels"));
+            rows.add(opening);
+        }
         return rows;
     }
 
@@ -513,7 +545,7 @@ public final class RecordBuilder {
         rows.addAll(fightBadgeRows(p, titan));
         rows.add(stelesRow(p, titan));
         rows.add(routeRow(p, titan));
-        // 誓い (周回の縛り) の最高の段。称号は飾りだけ (docs/design/21 の 1.8)
+        // 誓い (周回の縛り) の最高の段。称号は飾りだけ
         int vowBest = jp.revati.skyabyss.titan.group.FirstRunData.get(p.server).vowBest(p.getUUID(), titan);
         int vowTier = jp.revati.skyabyss.titan.vow.Vows.titleTier(vowBest);
         rows.add(value("vow_best", t("r.vow_best"), vowBest > 0 ? t("v.vow_best", vowBest, Component.translatable(jp.revati.skyabyss.titan.vow.Vows.titleKey(vowTier))) : t("v.vow_none"),
@@ -553,10 +585,19 @@ public final class RecordBuilder {
         if (collection.isEmpty()) {
             rows.add(value("collection_none", t("r.collection_none"), Component.empty(), RecordSnapshot.MARK_LOCKED, List.of(t("d.collection_none"))));
         }
+        for (jp.revati.skyabyss.story.Chapters c : jp.revati.skyabyss.story.Chapters.values()) {
+            if (titan.equals(c.titan())) {
+                Row reel = reelRow(p, jp.revati.skyabyss.story.arc.ChapterCards.reel(c));
+                if (reel != null) {
+                    rows.add(header("reels"));
+                    rows.add(reel);
+                }
+            }
+        }
         return rows;
     }
 
-    // 備えの三灯 (21 の 1.2、11 の 9 章): 身・刃・糧の色と、足りない灯の一言。サーバーの式 (Readiness) を target の持ち物から
+    // 備えの三灯 (11 の 9 章): 身・刃・糧の色と、足りない灯の一言。サーバーの式 (Readiness) を target の持ち物から
     // 倒れた回数の札 (docs/design/10 の 10.14): 心臓・中ボスそれぞれの、倒れた回数の最良と札の名前。文の中に文を入れない (パケットで壊れないように)
     static List<Row> fightBadgeRows(ServerPlayer p, String titan) {
         FightBadgeData d = FightBadgeData.get(p.server);
@@ -628,9 +669,6 @@ public final class RecordBuilder {
                 List.of(t("d.level", GrowthRules.MAX_LEVEL), t("d.lifetime", d.lifetimeXp(), GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL))),
                 RecordSnapshot.ACTION_NONE));
         rows.add(value("xp", t("r.xp"), max ? t("v.max") : t("v.of", d.xp, toNext), RecordSnapshot.MARK_NONE, List.of(t("d.xp"))));
-        int unspent = d.unspentPoints();
-        rows.add(value("points", t("r.points"), t("v.of", unspent, d.totalPoints()), unspent > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE,
-                List.of(t("d.points", GrowthRules.POINTS_PER_LEVEL, GrowthRules.STAT_CAP))));
         rows.addAll(jp.revati.skyabyss.rebirth.RebirthRecord.rows(p));
         rows.add(header("stats"));
         for (Stat stat : Stat.values()) {

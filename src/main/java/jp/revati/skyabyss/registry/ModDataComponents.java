@@ -33,6 +33,10 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<jp.revati.skyabyss.item.extra.GearExtras>> GEAR_EXTRAS = COMPONENTS.registerComponentType("gear_extras",
             builder -> builder.persistent(jp.revati.skyabyss.item.extra.GearExtras.CODEC).networkSynchronized(jp.revati.skyabyss.item.extra.GearExtras.STREAM_CODEC).cacheEncoding());
 
+    // 見た目替え (endgame/Looks): 見た目に使う武器の ID。描く側 (WeaponItemRenderer) がその形を使う。強さは替えない
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> LOOK = COMPONENTS.registerComponentType("look",
+            builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
+
     // アスペクトの芯 (品) が持つ、逸品の書き換え (Rune の id)
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> ASPECT = COMPONENTS.registerComponentType("aspect",
             builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));

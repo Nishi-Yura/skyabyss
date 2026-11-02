@@ -85,8 +85,9 @@ public final class RaidLightSelfTest {
         }
     }
 
-    // 階段の向き (docs/design/39 の段の決まり): 下付きの段は、向き (低い側) の前が壁でなく、後ろ (高い側) が支えられている。
-    // 後ろが塞がり・段の続きのどれでもない = 空中へ上がる段。前が壁 = 向きが逆。上付きの段は天井の飾りとして見ない
+    // 階段の向き: マインクラフトの段の向き (FACING) は高い側 (背) の向き (北を見て置くと FACING=north で、北へ上る)。
+    // 下付きの段は、低い側 (向きの反対) の前が壁でなく、高い側 (向きの側) が支えられている。上付きの段は天井の飾りとして見ない
+    // (2026-10-25 まで、この確かめは向きを低い側と取り違えていて、正しい段を逆に直させていた)
     private static void checkStairs(ServerLevel level, RaidCtx ctx) {
         AABB b = ctx.cell().bounds();
         BlockPos o = ctx.origin();
@@ -96,8 +97,8 @@ public final class RaidLightSelfTest {
                 continue;
             }
             Direction f = st.getValue(StairBlock.FACING);
-            BlockPos back = p.relative(f.getOpposite());
-            BlockPos front = p.relative(f);
+            BlockPos back = p.relative(f);
+            BlockPos front = p.relative(f.getOpposite());
             BlockState bs = level.getBlockState(back);
             boolean backSupported = bs.getBlock() instanceof StairBlock || bs.isSolidRender(level, back);
             boolean frontWall = level.getBlockState(front).isSolidRender(level, front);
@@ -109,7 +110,7 @@ public final class RaidLightSelfTest {
                 FAILS.add(where + ": the low side is a wall (the stair faces the wrong way)");
             }
             // 段の続き: 上る先の段が直角に向きを変えるのは角 (正しい形もある)。目で見る一覧として出す (失敗にはしない)
-            BlockPos ahead = p.relative(f.getOpposite());
+            BlockPos ahead = p.relative(f).above();
             BlockState ab = level.getBlockState(ahead);
             if (ab.getBlock() instanceof StairBlock && ab.getValue(StairBlock.HALF) == Half.BOTTOM
                     && ab.getValue(StairBlock.FACING) != f && ab.getValue(StairBlock.FACING) != f.getOpposite()) {

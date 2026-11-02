@@ -4,7 +4,6 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.client.hud.HudManager;
 import jp.revati.skyabyss.hud.HudLayout.Id;
@@ -85,8 +84,48 @@ public final class SkillHud {
             renderMana(g, mc, d);
         }
         if (anySlot(d)) {
+            // 今の職の武器を持っていない間は、枠を薄く出す (使えないことが分かるように。消さない。docs/design/48 の 3 章)
+            jp.revati.skyabyss.rpg.skill.Job cur = jp.revati.skyabyss.rpg.skill.Job.byId(d.curJob);
+            boolean idle = cur == null || jp.revati.skyabyss.rpg.skill.Job.held(mc.player) != cur;
+            if (idle) {
+                g.setColor(1f, 1f, 1f, 0.45f);
+                com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+            }
             renderSlots(g, mc, d);
+            if (idle) {
+                g.setColor(1f, 1f, 1f, 1f);
+            }
         }
+    }
+
+    // 左の縁に小さな菱形 (5 画素)。効いている変化の種類ごとに一つ、上から縦に並べる
+    // 色は変化の種類 (刻印 金・書き換え 橙・変異 紫・秘伝 水色。SkillChanges.Kind)
+    public static void changeMark(GuiGraphics g, net.minecraft.world.entity.player.Player p, Skill s, int x, int y) {
+        java.util.EnumSet<jp.revati.skyabyss.rpg.skill.SkillChanges.Kind> kinds = java.util.EnumSet.noneOf(jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.class);
+        for (var c : jp.revati.skyabyss.rpg.skill.SkillChanges.of(p, s)) {
+            if (c.active()) {
+                kinds.add(c.kind());
+            }
+        }
+        if (kinds.isEmpty()) {
+            return;
+        }
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 210);
+        int i = 0;
+        for (var k : kinds) {
+            diamond(g, x, y + i * 6, 0xFF000000 | k.rgb);
+            i++;
+        }
+        g.pose().popPose();
+    }
+
+    static void diamond(GuiGraphics g, int x, int y, int c) {
+        g.fill(x + 2, y, x + 3, y + 5, 0xFF101418);
+        g.fill(x, y + 2, x + 5, y + 3, 0xFF101418);
+        g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF101418);
+        g.fill(x + 2, y + 1, x + 3, y + 4, c);
+        g.fill(x + 1, y + 2, x + 4, y + 3, c);
     }
 
     private static void renderMana(GuiGraphics g, Minecraft mc, SkillData d) {
@@ -125,7 +164,6 @@ public final class SkillHud {
             return;
         }
         Font font = mc.font;
-        renderStance(g, font, d, o[0] + d.slotCount() * (SLOT + SLOT_GAP) + 1, o[1]);
         for (int i = 0; i < d.slotCount(); i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);
             int y = o[1];
@@ -134,6 +172,8 @@ public final class SkillHud {
             if (s != null) {
                 int rank = d.rank(s);
                 drawIcon(g, s.iconIndex(), x + 2, y + 2);
+                // 今その技を変えているもの (刻印・書き換え・変異・秘伝) があれば左上に色の印 (SkillChanges)
+                changeMark(g, mc.player, s, x + 1, y + 1);
                 // マナが足りない: 青黒く沈める
                 if (d.mana + 1e-4 < SkillManager.manaCostFor(mc.player, s)) {
                     g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A101A3A);
@@ -151,10 +191,6 @@ public final class SkillHud {
                 } else if (d.globalCooldown > 0) {
                     g.fill(x + 2, y + 2, x + 18, y + 18, 0x50101418);
                 }
-            }
-            // 連鎖の印: 次の枠とのあいだに金の小さな帯
-            if (i + 1 < d.slotCount() && (d.chainMask & (1 << i)) != 0) {
-                g.fill(x + SLOT, y + 5, x + SLOT + SLOT_GAP, y + SLOT - 5, 0xFFF2C14E);
             }
             // 光る: 使えた (白く)・使えなかった (赤紫の縁)
             int f = SkillClient.slotFlash[i];
@@ -184,22 +220,10 @@ public final class SkillHud {
         }
     }
 
-    // 構えの字 (枠の右端。切り替えの待ちのあいだは暗く)
-    private static void renderStance(GuiGraphics g, Font font, SkillData d, int x, int y) {
-        if (d.stance == 0) {
-            return;
-        }
-        SkillStance st = SkillStance.of(d.stance);
-        String letter = Component.translatable(st.nameKey() + ".short").getString();
-        int color = st == SkillStance.GUARD ? 0xC9A66B : st == SkillStance.SWIFT ? 0x8FE3C2 : 0x6FB8FF;
-        g.fill(x, y + 3, x + 9, y + SLOT - 3, 0xA0101418);
-        g.drawString(font, letter, x + 5 - font.width(letter) / 2, y + 6, d.stanceCd > 0 ? 0x6A707C : color, true);
-    }
-
     // 32px の絵を 16 で描く
     static final ResourceLocation ICONS2 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons2.png");
 
-    // 100 以上は icons2.png (橋・淵・前世の技・木の印・紋。256x128)
+    // 100 以上は icons2.png (淵・前世の技・木の印・紋・職の新しい技。256x192)
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
         drawIcon(g, index, x, y, 16);
     }
@@ -207,7 +231,7 @@ public final class SkillHud {
     static void drawIcon(GuiGraphics g, int index, int x, int y, int size) {
         if (index >= 100) {
             int n = index - 100;
-            g.blit(ICONS2, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 128);
+            g.blit(ICONS2, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 192);
         } else {
             g.blit(ICONS, x, y, size, size, (index % 8) * 32, (index / 8) * 32, 32, 32, 256, 192);
         }

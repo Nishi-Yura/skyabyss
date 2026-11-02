@@ -50,12 +50,12 @@
           "goto": "end"
         },
         {
-          "id": "map",
+          "id": "mount",
           "kind": "talk",
           "do": [
             {
               "type": "facility",
-              "open": "map"
+              "open": "mount_shop"
             }
           ],
           "goto": "end"
@@ -64,6 +64,11 @@
           "id": "rule",
           "kind": "talk",
           "goto": "rule"
+        },
+        {
+          "id": "mount_rules",
+          "kind": "talk",
+          "goto": "mount_rules"
         },
         {
           "id": "about",
@@ -76,6 +81,10 @@
           "goto": "end"
         }
       ]
+    },
+    "mount_rules": {
+      "face": "neutral",
+      "next": "menu"
     }
   }
 }

@@ -31,11 +31,21 @@ public final class GearFreedomLoot {
         };
     }
 
+    // その巨神の章で落ちる粉の段 (岩鯨 I・潮殻 II・雷翼 III・余燼 IV。V・VI は合わせて作る)
+    public static int tierOf(String titan) {
+        return switch (titan) {
+            case "tide_shell" -> 2;
+            case "thunder_wing" -> 3;
+            case "ember" -> 4;
+            default -> 1;
+        };
+    }
+
     // 心臓を倒した一人ぶん
     public static List<ItemStack> heartDrops(String titan, RandomSource random) {
         List<ItemStack> out = new ArrayList<>();
         if (random.nextFloat() < HEART_SHARD_CHANCE) {
-            out.add(new ItemStack(ModItems.socketShard(elementOf(titan)).get(), 1 + random.nextInt(2)));
+            out.add(Powder.withTier(new ItemStack(ModItems.socketShard(elementOf(titan)).get(), 1 + random.nextInt(2)), tierOf(titan)));
         }
         if ("stone_whale".equals(titan) && random.nextFloat() < HEART_BONE_CHANCE) {
             out.add(new ItemStack(ModItems.SOCKET_SHARD_BONE.get()));
@@ -57,7 +67,7 @@ public final class GearFreedomLoot {
             out.add(GearFreedomItems.rune(RuneData.roll(random)));
         }
         if (first && random.nextFloat() < TRIAL_SHARD_FIRST) {
-            out.add(new ItemStack(ModItems.socketShard(elementOf(titan)).get()));
+            out.add(Powder.withTier(new ItemStack(ModItems.socketShard(elementOf(titan)).get()), tierOf(titan)));
         }
         return out;
     }

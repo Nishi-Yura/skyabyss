@@ -1,0 +1,74 @@
+# 終章の神器 6 本 (docs/design/50 の 4.5): 一人称と三人称の正面
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/divine_relics.txt -PshotsName=divine_relics
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+perspective first
+hud on
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_sky_sword
+close
+wait 30
+chat clear
+shot fp_divine_sky_sword
+perspective front
+wait 8
+shot tp_divine_sky_sword
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_bell_hammer
+close
+wait 30
+chat clear
+shot fp_divine_bell_hammer
+perspective front
+wait 8
+shot tp_divine_bell_hammer
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_dawn_staff
+close
+wait 30
+chat clear
+shot fp_divine_dawn_staff
+perspective front
+wait 8
+shot tp_divine_dawn_staff
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_plume_bow
+close
+wait 30
+chat clear
+shot fp_divine_plume_bow
+perspective front
+wait 8
+shot tp_divine_plume_bow
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_rewind_dagger
+close
+wait 30
+chat clear
+shot fp_divine_rewind_dagger
+perspective front
+wait 8
+shot tp_divine_rewind_dagger
+perspective first
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_promise_bell_staff
+close
+wait 30
+chat clear
+shot fp_divine_promise_bell_staff
+perspective front
+wait 8
+shot tp_divine_promise_bell_staff

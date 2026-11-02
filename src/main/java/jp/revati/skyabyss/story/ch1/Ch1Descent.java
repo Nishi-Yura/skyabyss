@@ -9,8 +9,8 @@ import jp.revati.skyabyss.story.Chapters;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-// 岩鯨の降下の条件 (docs/design/21 の 3.2、17 の 2.8): 鎖が降りるのは「その人が岩鯨をもう見た (初見の伝承 chapter1/stone_whale が記された) とき」。
-// 日数・時刻・天気では止めない (状態で入口を閉じない決まり)。岩鯨が初めて現れるのは一章の支度を済ませたあと (34 の 4.2。titan.TitanEvents)
+// 岩鯨の降下の条件: 鎖が降りるのは「その人が岩鯨をもう見た (初見の伝承 chapter1/stone_whale が記された) とき」。
+// 日数・時刻・天気では止めない (状態で入口を閉じない決まり)。岩鯨が初めて現れるのは一章の支度を済ませたあと (titan.TitanEvents)
 // なので、見た人はふつう支度を済ませている。仲間と一緒に見た人は、支度がまだでも乗れる (降りた鎖には誰でも乗れる)。
 // 見つけてから背に乗るまでを短くする: 初見の場面が終われば、岩鯨はすぐその人のもとへ降りてくる。
 //   人ごと      その人が一章 (Chapters.of = WHALE) にいるときだけ「見たか」を見る。一章を過ぎた人 (岩鯨の心臓を止めた人) は見たものとする

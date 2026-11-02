@@ -1,0 +1,18 @@
+{
+  "archetypes": ["deep"],
+  "nodes": [
+    {"id": "deep_pull", "kind": "active", "skill": "deep_pull", "cost": 1, "x": 0, "y": 0, "arch": "deep"},
+    {"id": "deep_mirror", "kind": "passive", "skill": "deep_mirror", "cost": 1, "x": 2, "y": 0, "arch": "deep"},
+    {"id": "deep_pull_2", "kind": "rank", "skill": "deep_pull", "cost": 1, "x": 0, "y": 1, "requires": ["deep_pull"], "arch": "deep"},
+    {"id": "deep_mirror_2", "kind": "rank", "skill": "deep_mirror", "cost": 1, "x": 2, "y": 1, "requires": ["deep_mirror"], "arch": "deep"},
+    {"id": "deep_mirror_3", "kind": "rank", "skill": "deep_mirror", "cost": 1, "x": 3, "y": 1, "requires": ["deep_mirror_2"], "arch": "deep"},
+    {"id": "deep_echo", "kind": "active", "skill": "deep_echo", "cost": 1, "x": 0, "y": 2, "requires": ["deep_pull"], "arch": "deep"},
+    {"id": "deep_tithe", "kind": "passive", "skill": "deep_tithe", "cost": 1, "x": 2, "y": 2, "requires": ["deep_mirror"], "arch": "deep"},
+    {"id": "deep_echo_2", "kind": "rank", "skill": "deep_echo", "cost": 1, "x": 0, "y": 3, "requires": ["deep_echo"], "arch": "deep"},
+    {"id": "deep_tithe_2", "kind": "rank", "skill": "deep_tithe", "cost": 1, "x": 2, "y": 3, "requires": ["deep_tithe"], "arch": "deep"},
+    {"id": "deep_tithe_3", "kind": "rank", "skill": "deep_tithe", "cost": 1, "x": 3, "y": 3, "requires": ["deep_tithe_2"], "arch": "deep"},
+    {"id": "deep_maw", "kind": "active", "skill": "deep_maw", "cost": 1, "x": 1, "y": 4, "requires": ["deep_echo", "deep_tithe"], "arch": "deep"},
+    {"id": "deep_maw_2", "kind": "rank", "skill": "deep_maw", "cost": 1, "x": 1, "y": 5, "requires": ["deep_maw"], "arch": "deep"},
+    {"id": "deep_oath", "kind": "keystone", "skill": "deep_oath", "cost": 1, "x": 1, "y": 6, "requires": ["deep_maw"], "arch": "deep"}
+  ]
+}

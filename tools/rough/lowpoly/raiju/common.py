@@ -29,7 +29,11 @@ INSET = 0.02
 
 # ---- geo と同じ骨 (geo 空間 = root 回転の前の座標。前は +Z)
 def _load_bones():
-    g = json.loads((ASSETS / "geo/entity/raiju.geo.json").read_text(encoding="utf-8"))
+    # 箱の geo は jar の外 (tools/sources/geo_cube/) へ移した (2026-10-24)
+    path = ASSETS / "geo/entity/raiju.geo.json"
+    if not path.exists():
+        path = ROOT / "tools/sources/geo_cube/geo/entity/raiju.geo.json"
+    g = json.loads(path.read_text(encoding="utf-8"))
     out = {}
     for b in g["minecraft:geometry"][0]["bones"]:
         out[b["name"]] = (b.get("parent"), [float(x) for x in b["pivot"]])

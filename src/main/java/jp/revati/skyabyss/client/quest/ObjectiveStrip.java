@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-// メインの目的の帯 (docs/design/17 の 5.3)。左上 (クエストの小さな表示の位置) に、今のメインの目的を細い一行で常に出す。
+// メインの目的の帯。左上 (クエストの小さな表示の位置) に、今のメインの目的を細い一行で常に出す。
 // 目的が変わると一度だけ光る。目印の場所が分かる目的は、右に距離 (10 ブロック単位) と方角 (八方位) を添える。
 // 戦いで傷を受けた直後と、画面を開いているあいだは薄くする。設定 objectiveStrip で消せる (全文は U のクエストログ)。
 // 追跡中のクエストがメインのときは、この帯が代わりに出す (QuestHud は出さない)
@@ -140,6 +140,11 @@ public final class ObjectiveStrip {
         String town = jp.revati.skyabyss.client.guide.TownGuideClient.objective();
         if (town != null) {
             return new Cur(town, new Resolved(jp.revati.skyabyss.client.guide.TownGuideClient.door(), false));
+        }
+        // 巡り路 (endgame/Circuits) を歩いているあいだは、残り時間・印・いまの課題と行き先
+        String circuit = jp.revati.skyabyss.endgame.client.CircuitClient.objective();
+        if (circuit != null) {
+            return new Cur(circuit, new Resolved(jp.revati.skyabyss.endgame.client.CircuitClient.target(), false));
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {

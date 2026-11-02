@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import jp.revati.skyabyss.rpg.skill.Glyph;
-import jp.revati.skyabyss.rpg.skill.Mutation;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillExtOps;
@@ -17,10 +16,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// K 画面の 3 ページ目「変異・紋」。左: 技の変異 (A08。8 本、素材と一度きりの選び)。右: 紋の盤 (A14。穴は最大 6、中心の技と紋を選んで差す)。
+// K 画面の 3 ページ目「紋の盤」(A14。穴は最大 6、中心の技と紋を選んで差す)。変異は 48 で技の木の節になった (左の列はその案内)。
 // 押す順は 穴 → 中心の技 → 持っている紋。見えるのは 1 画面に穴 6 つまで (docs/design/31)
 final class ExtPage {
-    static final int HIT_MUTATION = 1;
     static final int HIT_SOCKET = 2;
     static final int HIT_PICK = 3;
     static final int HIT_BAG = 4;
@@ -38,13 +36,7 @@ final class ExtPage {
     private Skill pick;
     private int pickScroll;
     private int bagScroll;
-    private int armed = -1;
-    private int armedTicks;
-
     void tick() {
-        if (armedTicks > 0 && --armedTicks == 0) {
-            armed = -1;
-        }
     }
 
     // 撮影用: 穴と中心の技を選んだ状態にする
@@ -79,37 +71,13 @@ final class ExtPage {
     void render(GuiGraphics g, Font font, Minecraft mc, SkillData d, int left, int top, int mx, int my) {
         hits.clear();
         List<Component> tip = null;
-        // ---- 左: 変異
+        // ---- 左: 変異は木の節へ (案内)
         int x0 = left + 10;
         g.drawString(font, Component.translatable("gui.skyabyss.ext.mutation_head"), x0, top + 23, GOLD, false);
-        Mutation[] all = Mutation.values();
-        for (int i = 0; i < all.length; i++) {
-            Mutation m = all[i];
-            int y = top + 34 + i * ROW_H;
-            boolean done = d.mutations.containsKey(m.skill.id);
-            boolean mastered = d.rank(m.skill) >= m.skill.maxRank;
-            boolean mats = SkillExtOps.hasMaterial(mc.player, m);
-            boolean hover = in(mx, my, x0, y, 164, ROW_H - 1);
-            boolean arm = armed == i;
-            g.fill(x0, y, x0 + 164, y + ROW_H - 1, arm ? 0xFF000000 | GOLD : done ? 0xFF8A7A3A : hover ? 0xFF6A7A8A : 0xFF3A4452);
-            g.fill(x0 + 1, y + 1, x0 + 163, y + ROW_H - 2, done ? 0xFF2A2A1E : hover ? 0xFF222B36 : 0xFF161A22);
-            if (!mastered && !done) {
-                g.setColor(0.5f, 0.5f, 0.55f, 1f);
-            }
-            SkillHud.drawIcon(g, m.skill.iconIndex(), x0 + 1, y - 1, 15);
-            g.setColor(1f, 1f, 1f, 1f);
-            Component name = Component.translatable(m.skill.nameKey());
-            g.drawString(font, name, x0 + 19, y + 3, done ? SOFT : mastered ? TEXT : DIM, false);
-            Component status = done ? Component.translatable(m.nameKey())
-                    : !mastered ? Component.translatable("gui.skyabyss.ext.need_master")
-                            : mats ? Component.translatable(arm ? "gui.skyabyss.ext.confirm" : "gui.skyabyss.ext.ready")
-                                    : Component.translatable("gui.skyabyss.ext.need_material");
-            int color = done ? GOLD : arm ? GOLD : !mastered ? DIM : mats ? PALE : DENY;
-            g.drawString(font, status, x0 + 162 - font.width(status), y + 3, color, false);
-            hits.add(new int[] {x0, y, 164, ROW_H - 1, HIT_MUTATION, i});
-            if (hover) {
-                tip = mutationTip(mc, d, m, done, mastered);
-            }
+        int ly = top + 36;
+        for (net.minecraft.util.FormattedCharSequence line : TextWrap.split(font, Component.translatable("gui.skyabyss.ext.mutation_moved"), 160)) {
+            g.drawString(font, line, x0, ly, SOFT, false);
+            ly += 10;
         }
         // ---- 右: 紋の盤
         int rx = left + 186;
@@ -197,20 +165,6 @@ final class ExtPage {
         }
     }
 
-    private List<Component> mutationTip(Minecraft mc, SkillData d, Mutation m, boolean done, boolean mastered) {
-        List<Component> tip = new ArrayList<>();
-        tip.add(Component.translatable(m.nameKey()).withColor(GOLD));
-        tip.add(Component.translatable("gui.skyabyss.ext.mutation_of", Component.translatable(m.skill.nameKey())).withColor(SOFT));
-        tip.add(Component.translatable(m.effectKey()).withColor(TEXT));
-        int core = SkillExtOps.count(mc.player, m.coreItem());
-        int shard = SkillExtOps.count(mc.player, m.shardItem());
-        tip.add(Component.translatable("gui.skyabyss.ext.material", m.coreItem().getDescription(), Math.min(core, 99), Mutation.CORES,
-                m.shardItem().getDescription(), Math.min(shard, 99), Mutation.SHARDS).withColor(core >= Mutation.CORES && shard >= Mutation.SHARDS ? PALE : DENY));
-        tip.add(Component.translatable(done ? "gui.skyabyss.ext.mutation_done" : mastered ? "gui.skyabyss.ext.mutation_once" : "gui.skyabyss.ext.mutation_master")
-                .withColor(DIM));
-        return tip;
-    }
-
     private List<Component> glyphTip(SkillData d, Glyph.Item item, Skill center) {
         List<Component> tip = new ArrayList<>();
         Glyph gl = item.glyph();
@@ -230,7 +184,6 @@ final class ExtPage {
                 continue;
             }
             switch (h[4]) {
-                case HIT_MUTATION -> pressMutation(h[5], d, mc, notice, click);
                 case HIT_SOCKET -> pressSocket(h[5], d, notice, click);
                 case HIT_PICK -> {
                     List<Skill> ks = known(d);
@@ -244,32 +197,6 @@ final class ExtPage {
             return true;
         }
         return false;
-    }
-
-    private void pressMutation(int index, SkillData d, Minecraft mc, Consumer<Component> notice, Runnable click) {
-        Mutation m = Mutation.values()[index];
-        if (d.mutations.containsKey(m.skill.id)) {
-            notice.accept(Component.translatable("message.skyabyss.skill.ext_failed.already"));
-            return;
-        }
-        if (d.rank(m.skill) < m.skill.maxRank) {
-            notice.accept(Component.translatable("message.skyabyss.skill.ext_failed.not_mastered"));
-            return;
-        }
-        if (!SkillExtOps.hasMaterial(mc.player, m)) {
-            notice.accept(Component.translatable("message.skyabyss.skill.ext_failed.no_material"));
-            return;
-        }
-        if (armed != index) {
-            // 戻せないので二度押し
-            armed = index;
-            armedTicks = 60;
-            click.run();
-            return;
-        }
-        armed = -1;
-        PacketDistributor.sendToServer(new SkillExtPayload(SkillExtPayload.MUTATE, m.skill.id, 0, 0));
-        click.run();
     }
 
     private void pressSocket(int index, SkillData d, Consumer<Component> notice, Runnable click) {

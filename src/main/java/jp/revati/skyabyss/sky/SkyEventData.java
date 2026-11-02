@@ -13,7 +13,7 @@ public class SkyEventData extends SavedData {
     private long nextPassTick = -1;
     // これまでに起きた通過の数 (潮殻の巨神の出現の条件。08 の 2.1節)
     private int passCount;
-    // 最初の通過が始まった時刻 (まだなら -1)。岩鯨は、これより後でないと現れない (06 の 2.7節)
+    // 最初の通過が始まった時刻 (まだなら -1)。岩鯨は、これより後でないと現れない
     private long firstPassTick = -1;
 
     public static SkyEventData get(ServerLevel level) {

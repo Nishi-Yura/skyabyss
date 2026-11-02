@@ -1,0 +1,77 @@
+# 野の斧の向きの確かめ (一人称の振りの途中と、三人称の横)。灰炉の戦斧が正しい向きの見本
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/axe_facing.txt -PshotsName=axe_facing
+world shots flat
+size 960 540
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+perspective first
+swingpose 0.4
+wait 6
+shot ember_war_axe_fp_0.4
+swingpose off
+wait 4
+shot ember_war_axe_fp_idle
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot ember_war_axe_tp_04
+swingpose off
+bodyyaw 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_tusk_axe
+perspective first
+swingpose 0.4
+wait 6
+shot wild_tusk_axe_fp_0.4
+swingpose off
+wait 4
+shot wild_tusk_axe_fp_idle
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot wild_tusk_axe_tp_04
+swingpose off
+bodyyaw 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_snowsplitter_axe
+perspective first
+swingpose 0.4
+wait 6
+shot wild_snowsplitter_axe_fp_0.4
+swingpose off
+wait 4
+shot wild_snowsplitter_axe_fp_idle
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot wild_snowsplitter_axe_tp_04
+swingpose off
+bodyyaw 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_molten_axe
+perspective first
+swingpose 0.4
+wait 6
+shot wild_molten_axe_fp_0.4
+swingpose off
+wait 4
+shot wild_molten_axe_fp_idle
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot wild_molten_axe_tp_04
+swingpose off
+bodyyaw 0

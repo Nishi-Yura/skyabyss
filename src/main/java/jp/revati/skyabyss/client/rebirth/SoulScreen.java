@@ -494,8 +494,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             boolean sel = selBoon == index;
             g.fill(getX(), getY(), getX() + width, getY() + height, sel ? 0xFF2A3342 : isHoveredOrFocused() ? 0xFF222A37 : 0xFF161B24);
             g.renderOutline(getX(), getY(), width, height, sel ? 0xFFF2C14E : 0xFF303846);
-            g.drawString(font, font.plainSubstrByWidth(Component.translatable(boon.nameKey()).getString(), width - 6), getX() + 4, getY() + 3, sel ? GOLD : TEXT, false);
-            g.drawString(font, font.plainSubstrByWidth(Component.translatable(boon.descKey()).getString(), width - 6), getX() + 4, getY() + 12, SOFT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.nameKey()).getString()), getX() + 4, getY() + 3, width - 6, sel ? GOLD : TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.descKey()).getString()), getX() + 4, getY() + 12, width - 6, SOFT, false);
         }
 
         @Override

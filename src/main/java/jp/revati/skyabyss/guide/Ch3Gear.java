@@ -69,15 +69,15 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.joml.Vector3f;
 
-// 三章「風に逆らう嵐」の備えの品 (docs/design/21 の 1.2・5.1)。一章の TravelGear・二章の Ch2Gear と同じ型。
+// 三章「風に逆らう嵐」の備えの品。一章の TravelGear・二章の Ch2Gear と同じ型。
 //  - 素材: 焦げ羽・帯電綿・銅線・雷の護り糸 (鼓動守 雷翼の材料)。落とすのは三章の地上の敵 (titan/storm/chapter/Ch3Mobs が ID で引く)
 //  - 峰越えの旅装 (4 部位): 防御 3/7/6/3 = 19、強靭 2.75 × 4 = 11、感電の傷 −6.25% × 着ている部位 (一式 −25%)、
 //    アンコモン、炉で鍛えない、必要 Lv 19 (GearCurve.TRAVEL[2])。修理は銅線。一式で合図 SIGNAL_GEAR_MADE
 //  - 雷の砥石: 「雷の刃」(攻撃 +2.2、20 分)。近接で当てると小さな火花が散る (見た目と音だけ)。岩・塩の砥石とは重ねない (替わる)
 //  - 風干しの団子 (吸収 II 60 秒 + 落下速度低下 20 秒)・避雷の油 (飲むと 90 秒「避雷」= 感電と雷の傷 −50%)
 //  - 風読みの小旗 (消耗しない): 使うと、そこに 30 秒、風下へ細い光の筋を立て、次の嵐までの目安を画面の帯に出す。クールダウン 30 秒
-// 感電の傷 (isShock): 雷 (lightning_bolt の傷) と、雷を使う敵 (SHOCK_MOBS) の傷。レシピは旅の覚書 (三章) か職人 (unlock_recipes chapter 3) に教わるまで作れない。
-// 生成は tools/gen/ch3/gen_ch3_gear.py (レシピと文)、絵は tools/install/install_ch3_gear_assets.py
+// 感電の傷 (isShock): 雷 (lightning_bolt の傷) と、雷を使う敵 (SHOCK_MOBS) の傷。品は鍛冶場・薬師の誂え (MADE)。
+// データを直接直す（生成スクリプトはない）、絵は tools/install/install_ch3_gear_assets.py
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch3Gear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -98,7 +98,8 @@ public final class Ch3Gear {
     public static final String SIGNAL_OIL_USED = "ch3_oil_used";
     public static final String SIGNAL_WIND_READ = "ch3_wind_read";
 
-    public static final List<String> RECIPES = List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots",
+    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    public static final List<String> MADE = List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots",
             "thunder_whetstone", "wind_dumpling", "lightning_oil", "wind_streamer", "copper_wire");
 
     // ---------------------------------------------------------------- 数値
@@ -180,7 +181,6 @@ public final class Ch3Gear {
         Readiness.registerRemedy(Readiness.Lamp.BLADE, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.thunder_whetstone"));
         Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.wind_dumpling"));
         Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.lightning_oil"));
-        WayfarerNotes.registerRecipes(CHAPTER, RECIPES.stream().map(n -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, n)).toArray(ResourceLocation[]::new));
     }
 
     private Ch3Gear() {
@@ -207,7 +207,7 @@ public final class Ch3Gear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> item : List.of(SCORCHED_FEATHER, STATIC_COTTON, COPPER_WIRE, THUNDER_WARD_THREAD, HELMET, CHESTPLATE, LEGGINGS, BOOTS,
                     THUNDER_WHETSTONE, WIND_DUMPLING, LIGHTNING_OIL, WIND_STREAMER)) {
                 event.accept(item.get());

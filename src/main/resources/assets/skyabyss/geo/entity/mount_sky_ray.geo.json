@@ -1,0 +1,191 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.mount_sky_ray",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 6,
+    "visible_bounds_height": 5,
+    "visible_bounds_offset": [
+     0,
+     1.5,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      22.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -16.945,
+        16.772,
+        -22.314
+       ],
+       "size": [
+        33.889,
+        16.41,
+        41.314
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "wing_l",
+     "pivot": [
+      13.0,
+      22.4,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -27.0,
+        20.022,
+        -12.0
+       ],
+       "size": [
+        16.0,
+        5.919,
+        23.0
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "wing_l2",
+     "pivot": [
+      27.0,
+      24.6,
+      3.0
+     ],
+     "parent": "wing_l",
+     "cubes": [
+      {
+       "origin": [
+        -44.0,
+        22.962,
+        -2.6
+       ],
+       "size": [
+        18.0,
+        2.999,
+        13.2
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "wing_r",
+     "pivot": [
+      -13.0,
+      22.4,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        11.0,
+        20.022,
+        -12.0
+       ],
+       "size": [
+        16.0,
+        5.919,
+        23.0
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "wing_r2",
+     "pivot": [
+      -27.0,
+      24.6,
+      3.0
+     ],
+     "parent": "wing_r",
+     "cubes": [
+      {
+       "origin": [
+        26.0,
+        22.962,
+        -2.6
+       ],
+       "size": [
+        18.0,
+        2.999,
+        13.2
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "tail",
+     "pivot": [
+      0.0,
+      22.0,
+      17.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -1.522,
+        20.544,
+        15.97
+       ],
+       "size": [
+        3.122,
+        3.658,
+        41.673
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

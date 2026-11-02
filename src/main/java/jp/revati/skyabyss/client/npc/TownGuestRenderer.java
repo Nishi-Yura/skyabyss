@@ -48,12 +48,16 @@ public final class TownGuestRenderer {
         });
     }
 
+    // 絵の名前 (土地の町の人は都の町の人の絵を借りる。town/RegionFolk)
     static String guest(NpcEntity e) {
-        return e instanceof TownGuestEntity g ? g.guestId() : "apprentice";
+        return e instanceof TownGuestEntity g ? jp.revati.skyabyss.town.RegionFolk.lookOf(g.guestId()) : "apprentice";
     }
 
-    // v2 (NpcModels) の名前: guest_<人>
+    // v2 (NpcModels) の名前: guest_<人>。土地の町の人は自分の体があればそれ (2026-10-28 から 8 人とも)、なければ借りた都の人
     static String v2(NpcEntity e) {
+        if (e instanceof TownGuestEntity g && NpcModels.has("guest_" + jp.revati.skyabyss.town.RegionFolk.body(g.guestId()))) {
+            return "guest_" + jp.revati.skyabyss.town.RegionFolk.body(g.guestId());
+        }
         return "guest_" + guest(e);
     }
 
@@ -63,7 +67,7 @@ public final class TownGuestRenderer {
 
     static float scale(NpcEntity entity) {
         if (entity instanceof TownGuestEntity g) {
-            TownGuests.Guest def = TownGuests.byId(g.guestId());
+            TownGuests.Guest def = TownGuests.byId(guest(g));
             return def == null ? 1f : def.scale();
         }
         return 1f;

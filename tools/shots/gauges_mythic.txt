@@ -1,0 +1,76 @@
+# 型の溜まるもの (マナの帯の上の帯・技の木の説明) と、武器の数値の行・神器の大きな能力の説明 (docs/design/48 の 2.6・03 の 1.6・13.4)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/gauges_mythic.txt -PshotsName=gauges_mythic
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd skyabyss job choose warrior
+cmd clear @s
+cmd give @s skyabyss:divine_sky_sword
+cmd give @s skyabyss:wild_lavajaw_greatsword
+cmd give @s skyabyss:wild_ramhorn_greatsword
+cmd give @s skyabyss:shrine_sword
+cmd give @s skyabyss:tower_pull_hammer
+cmd give @s skyabyss:divine_dawn_staff
+hud on
+camera 0 -60 8 0 0
+waitchunks
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 40
+chat clear
+
+# 1. 帯 (研ぎ 3/5・点)
+cmd skyabyss skill gauge @p cleaver 3
+wait 10
+chat clear
+shot g01_hud_cleaver
+# 2. 満ちた帯 (岩の重み 100・帯)
+cmd skyabyss skill gauge @p shield 100
+wait 10
+chat clear
+shot g02_hud_shield_full
+# 3. 空の矢筒 20 の点
+cmd skyabyss skill gauge @p rain 12
+wait 10
+chat clear
+shot g03_hud_rain
+cmd skyabyss skill gauge @p off 0
+
+# 4. 技の木の説明 (型の力の行)
+open skills
+wait 20
+shot g04_tree_info
+close
+wait 10
+
+# 5〜10. 武器の説明: 神器・ヒロイック・エピック・コモン・塔・暁の灯杖
+open inventory
+wait 20
+hover slot 36
+wait 10
+shot g05_tip_sky_sword
+hover slot 37
+wait 10
+shot g06_tip_heroic
+hover slot 38
+wait 10
+shot g07_tip_epic
+hover slot 39
+wait 10
+shot g08_tip_common
+hover slot 40
+wait 10
+shot g09_tip_pull_hammer
+hover slot 41
+wait 10
+shot g10_tip_dawn_staff
+close

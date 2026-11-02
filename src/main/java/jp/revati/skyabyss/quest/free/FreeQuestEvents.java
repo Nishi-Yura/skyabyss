@@ -97,7 +97,8 @@ public final class FreeQuestEvents {
         if (tide == null || !tide.isResting() || tide.distanceToSqr(player) > TIDE_WATCH * TIDE_WATCH) {
             return;
         }
-        if (FreeQuestData.get(level).firstTide(player.getUUID(), tideIndex(level.getDayTime()))) {
+        // 休みごとに一度 (2026-10-27: 干潮の刻の番号で数えていたので、三度見るのに半日ずつ待たされた。巨神は浜で待てば寄ってくる)
+        if (FreeQuestData.get(level).firstTide(player.getUUID(), tide.restStart())) {
             Quests.signal(player, TIDE_WATCHED);
         }
     }

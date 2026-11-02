@@ -621,8 +621,8 @@ public final class TideBuild {
             Direction d = Direction.from2DDataValue(rnd.nextInt(4));
             deco(cx + d.getStepX(), 1, cz + d.getStepZ(), Blocks.SMOOTH_QUARTZ_SLAB.defaultBlockState());
             Direction e = d.getClockWise();
-            // 段は山の外へ低く下る: 低い側は外 (e)、背は山の中心へ
-            deco(cx + e.getStepX(), 1, cz + e.getStepZ(), Blocks.QUARTZ_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, e));
+            // 段は山の外へ低く下る: 低い側は外 (e)、高い側 (段の向き FACING) は山の中心へ
+            deco(cx + e.getStepX(), 1, cz + e.getStepZ(), Blocks.QUARTZ_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, e.getOpposite()));
             placed++;
         }
         return this;

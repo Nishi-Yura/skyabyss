@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 // 層の主の技 (2026-10-23 の試遊「5章の中ボス系全然作りこめてない攻撃やボスバーも」)。主ごとに、教える仕掛け (AbyssLords の骨・塩・雷・灰) のほかに
-// 段で増える 4〜5 の技を持つ。どれも床の赤い予告 (Telegraph の DANGER) と溜め (主が止まり、層の色の粒と音) のあとに当たる。
+// 段で増える 4〜5 の技を持つ。一撃は 2026-10-25 に 3.2 倍 (試遊で「深淵のボスが弱すぎる」。五章の装備で傷にならなかった)。どれも床の赤い予告 (Telegraph の DANGER) と溜め (主が止まり、層の色の粒と音) のあとに当たる。
 //   段     体力 66% 超 = 一段目 (技 2〜3)、33% 超 = 二段目 (+1、間隔が詰まる)、33% 以下 = 三段目 (+1、もっと詰まる)。段の変わり目は咆哮 (AbyssLords.phaseShift)
 //   間隔   技と技のあいだ 70 / 55 / 42 tick (+ 溜め)。教える仕掛けが出た直後は 50 tick 待つ
 //   予告   20〜38 tick。三段目でも 18 を切らない。当たりは予告の最後の一瞬
@@ -44,27 +44,27 @@ public final class LordMoves {
     // 層ごとの技 (並び = 使い始める段の順)
     static final Attack[][] MOVES = {
             // 骨: 肋の主 (骨と魂の火)
-            {new Attack("rib_sweep", Kind.CONE, 22, 7f, 6.5, Math.toRadians(55), 0),
-                    new Attack("bone_spikes", Kind.LINE, 26, 8f, 15, 1.3, 0),
-                    new Attack("marrow_quake", Kind.SLAM, 30, 9f, 5.5, 0, 1),
-                    new Attack("bone_rain", Kind.RAIN, 30, 6f, 2.2, 7, 2)},
+            {new Attack("rib_sweep", Kind.CONE, 22, 22.5f, 6.5, Math.toRadians(55), 0),
+                    new Attack("bone_spikes", Kind.LINE, 26, 25.5f, 15, 1.3, 0),
+                    new Attack("marrow_quake", Kind.SLAM, 30, 29f, 5.5, 0, 1),
+                    new Attack("bone_rain", Kind.RAIN, 30, 19f, 2.2, 7, 2)},
             // 塩: 白殻の主 (塩と潮)
-            {new Attack("shell_slam", Kind.SLAM, 28, 9f, 4.5, 0, 0),
-                    new Attack("brine_spray", Kind.CONE, 24, 6f, 9, Math.toRadians(35), 0),
-                    new Attack("salt_pillars", Kind.PILLARS, 22, 7f, 2.2, 4, 0),
-                    new Attack("tide_ring", Kind.RING, 36, 8f, 5, 12, 1),
-                    new Attack("shell_roll", Kind.CHARGE, 26, 10f, 16, 1.8, 2)},
+            {new Attack("shell_slam", Kind.SLAM, 28, 29f, 4.5, 0, 0),
+                    new Attack("brine_spray", Kind.CONE, 24, 19f, 9, Math.toRadians(35), 0),
+                    new Attack("salt_pillars", Kind.PILLARS, 22, 22.5f, 2.2, 4, 0),
+                    new Attack("tide_ring", Kind.RING, 36, 25.5f, 5, 12, 1),
+                    new Attack("shell_roll", Kind.CHARGE, 26, 32f, 16, 1.8, 2)},
             // 雷: 鼓動まねの主 (雷)
-            {new Attack("jolt_line", Kind.LINE, 22, 7f, 15, 1.2, 0),
-                    new Attack("static_field", Kind.UNDER, 30, 6f, 2.4, 0, 0),
-                    new Attack("thunder_cross", Kind.CROSS, 30, 8f, 13, 1.3, 1),
-                    new Attack("chain_burst", Kind.SLAM, 26, 9f, 6, 0, 2)},
+            {new Attack("jolt_line", Kind.LINE, 22, 22.5f, 15, 1.2, 0),
+                    new Attack("static_field", Kind.UNDER, 30, 19f, 2.4, 0, 0),
+                    new Attack("thunder_cross", Kind.CROSS, 30, 25.5f, 13, 1.3, 1),
+                    new Attack("chain_burst", Kind.SLAM, 26, 29f, 6, 0, 2)},
             // 灰: 灯り喰いの主 (灰と熾火)
-            {new Attack("ember_claw", Kind.CONE, 20, 8f, 6, Math.toRadians(48), 0),
-                    new Attack("ash_breath", Kind.CONE, 30, 7f, 12, Math.toRadians(20), 0),
-                    new Attack("cinder_rain", Kind.RAIN, 30, 6f, 2.2, 6, 1),
-                    new Attack("magma_burst", Kind.RING, 32, 9f, 3, 8, 1),
-                    new Attack("lunge", Kind.CHARGE, 24, 10f, 14, 2, 2)},
+            {new Attack("ember_claw", Kind.CONE, 20, 25.5f, 6, Math.toRadians(48), 0),
+                    new Attack("ash_breath", Kind.CONE, 30, 22.5f, 12, Math.toRadians(20), 0),
+                    new Attack("cinder_rain", Kind.RAIN, 30, 19f, 2.2, 6, 1),
+                    new Attack("magma_burst", Kind.RING, 32, 29f, 3, 8, 1),
+                    new Attack("lunge", Kind.CHARGE, 24, 32f, 14, 2, 2)},
     };
     static final int[] GAP = {70, 55, 42};
     static final int MIN_WARN = 18;

@@ -1,0 +1,147 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "face": "skyabyss:block/echo_mirror_face_recording",
+    "side": "skyabyss:block/echo_mirror_side",
+    "base": "skyabyss:block/echo_mirror_base",
+    "particle": "skyabyss:block/echo_mirror_base"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        3,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#base",
+          "uv": [
+            3,
+            13,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#base",
+          "uv": [
+            3,
+            13,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#base",
+          "uv": [
+            3,
+            13,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#base",
+          "uv": [
+            3,
+            13,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#base",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#base",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        3,
+        7
+      ],
+      "to": [
+        16,
+        19,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#face",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#face",
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#side",
+          "uv": [
+            0,
+            7,
+            16,
+            9
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            0,
+            7,
+            16,
+            9
+          ]
+        }
+      }
+    }
+  ]
+}

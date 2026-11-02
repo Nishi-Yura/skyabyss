@@ -28,7 +28,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 序盤の拍子 B0〜B10 (17 の 3 章・8.3 の表) の自己テスト (SKYABYSS_SELFTEST=1)。
+// 序盤の拍子 B0〜B10 (8.3 の表) の自己テスト (SKYABYSS_SELFTEST=1)。
 //  1. 判断 (OpeningLogic) を、時刻と状況の列で流す: 新しいワールド / 雨の日 / 洞窟にこもった人 / 寝た人 / 戦闘中 / 村と宿りのない世界 /
 //     ホラーの強さ 0 / マルチ (二人目) / すでに遊んでいた人。起きた順・回数・後ろへのずらし方・ホラーの決まりを数える
 //  2. 目的の帯の表、岩鯨の門、状態の保存
@@ -366,7 +366,7 @@ public final class OpeningSelfTest {
         Sim sim = run(new Route(), 5);
         String all = listEvents(sim);
         check(!sim.violation, "new world: " + sim.violationText, failures);
-        // 起きた順 (17 の 3.1節): 目覚め → 帳面 → 野営地の頁 → 鐘 → 足跡 → 影のあとの頁 → 足音 → 骨 → 歌
+        // 起きた順: 目覚め → 帳面 → 野営地の頁 → 鐘 → 足跡 → 影のあとの頁 → 足音 → 骨 → 歌
         String[] order = {"awake", "notebook", "campLore", "page", "footsteps", "footstepsLore", "bones", "song", "songLore"};
         long previous = -1;
         for (String name : order) {
@@ -407,8 +407,8 @@ public final class OpeningSelfTest {
         for (OpeningBeat beat : OpeningBeat.values()) {
             check(sim.st.done(beat), "new world: beat " + beat.id + " is not done at the end: " + all, failures);
         }
-        // 目的の帯の移り変わり: 野営地 → 煙 → 空 → 宿り → イサナ → 骨の丘 (寄り道) → 岩鯨
-        List<String> want = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "bone_hill", "see_whale", "wait_whale");
+        // 目的の帯の移り変わり: 野営地 → 煙 → 空 → 宿り → イサナ → 岩鯨 (骨の丘への寄り道は 2026-10-27 に外した)
+        List<String> want = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "see_whale", "wait_whale");
         int at = 0;
         for (String id : sim.objectives) {
             if (at < want.size() && id.equals(want.get(at))) {
@@ -692,7 +692,7 @@ public final class OpeningSelfTest {
                 new Env(0, 0, true, true, true, false, false, false, true, false)).isEmpty(), "legacy: the opening objective was shown", failures);
     }
 
-    // ---- 目的の帯の表 (17 の 11.2節)
+    // ---- 目的の帯の表
     private static void objectives(List<String> failures) {
         OpeningState st = new OpeningState();
         st.awakeAt = 0;
@@ -712,7 +712,8 @@ public final class OpeningSelfTest {
         st.markDone(OpeningBeat.FOOTSTEPS);
         Env day2noon = new Env(30000, 24000 + 6000, true, true, true, false, false, false, true, false);
         Facts seeWhale = new Facts(false, true, true, 5, 5, 100, false, false, true, true, false, false, true, false, false, false, false, 1, 100, "see_whale");
-        check(OpeningLogic.objective(st, seeWhale, day2noon).equals("bone_hill"), "objective: the bone hill was not offered on day 2 noon", failures);
+        // 白く霞む丘の寄り道は出さない (2026-10-27)
+        check(!OpeningLogic.objective(st, seeWhale, day2noon).equals("bone_hill"), "objective: the bone hill detour is offered again", failures);
         check(OpeningLogic.objective(st, seeWhale, day).equals("see_whale"), "objective: the bone hill was offered on day 1", failures);
         Env day2night = new Env(40000, 24000 + 15000, true, true, true, false, false, false, true, false);
         check(OpeningLogic.objective(st, seeWhale, day2night).equals("see_whale"), "objective: the bone hill was offered at night", failures);
@@ -766,7 +767,7 @@ public final class OpeningSelfTest {
         }
     }
 
-    // ---- 岩鯨の門 (17 の 3.9節): 日 3 でも、影・歌・イサナの前には出ない。日 5 には出る
+    // ---- 岩鯨の門: 日 3 でも、影・歌・イサナの前には出ない。日 5 には出る
     private static void whaleGate(List<String> failures) {
         long day3eve = 2 * 24000L + 11500;
         long day5 = 4 * 24000L + 11500;

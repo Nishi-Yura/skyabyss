@@ -1,0 +1,218 @@
+{
+  "bone_picker_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.bone_picker_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/bone_picker_ambient"
+      }
+    ]
+  },
+  "bone_picker_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.bone_picker_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/bone_picker_hurt"
+      }
+    ]
+  },
+  "bone_picker_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.bone_picker_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/bone_picker_death"
+      }
+    ]
+  },
+  "rib_guard_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.rib_guard_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/rib_guard_ambient"
+      }
+    ]
+  },
+  "rib_guard_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.rib_guard_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/rib_guard_hurt"
+      }
+    ]
+  },
+  "rib_guard_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.rib_guard_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/rib_guard_death"
+      }
+    ]
+  },
+  "bone_flute_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.bone_flute_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/bone_flute_ambient"
+      }
+    ]
+  },
+  "bone_flute_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.bone_flute_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/bone_flute_hurt"
+      }
+    ]
+  },
+  "bone_flute_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.bone_flute_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/bone_flute_death"
+      }
+    ]
+  },
+  "salt_husk_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.salt_husk_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/salt_husk_ambient"
+      }
+    ]
+  },
+  "salt_husk_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.salt_husk_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/salt_husk_hurt"
+      }
+    ]
+  },
+  "salt_husk_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.salt_husk_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/salt_husk_death"
+      }
+    ]
+  },
+  "tide_hands_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.tide_hands_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/tide_hands_ambient"
+      }
+    ]
+  },
+  "tide_hands_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.tide_hands_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/tide_hands_hurt"
+      }
+    ]
+  },
+  "tide_hands_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.tide_hands_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/tide_hands_death"
+      }
+    ]
+  },
+  "white_shell_keeper_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.white_shell_keeper_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/white_shell_keeper_ambient"
+      }
+    ]
+  },
+  "white_shell_keeper_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.white_shell_keeper_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/white_shell_keeper_hurt"
+      }
+    ]
+  },
+  "white_shell_keeper_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.white_shell_keeper_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/white_shell_keeper_death"
+      }
+    ]
+  },
+  "charged_moth_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.charged_moth_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/charged_moth_ambient"
+      }
+    ]
+  },
+  "charged_moth_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.charged_moth_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/charged_moth_hurt"
+      }
+    ]
+  },
+  "charged_moth_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.charged_moth_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/charged_moth_death"
+      }
+    ]
+  },
+  "lightning_idol_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.lightning_idol_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/lightning_idol_ambient"
+      }
+    ]
+  },
+  "lightning_idol_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.lightning_idol_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/lightning_idol_hurt"
+      }
+    ]
+  },
+  "lightning_idol_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.lightning_idol_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/lightning_idol_death"
+      }
+    ]
+  },
+  "scorched_bird_ambient": {
+    "subtitle": "subtitles.skyabyss_abyss_a.scorched_bird_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/scorched_bird_ambient"
+      }
+    ]
+  },
+  "scorched_bird_hurt": {
+    "subtitle": "subtitles.skyabyss_abyss_a.scorched_bird_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/scorched_bird_hurt"
+      }
+    ]
+  },
+  "scorched_bird_death": {
+    "subtitle": "subtitles.skyabyss_abyss_a.scorched_bird_death",
+    "sounds": [
+      {
+        "name": "skyabyss:voices/scorched_bird_death"
+      }
+    ]
+  }
+}

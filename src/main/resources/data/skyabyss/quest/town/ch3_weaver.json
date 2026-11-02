@@ -22,7 +22,7 @@
         {
           "id": "copper",
           "type": "collect",
-          "target": "minecraft:copper_ingot",
+          "target": "skyabyss:copper_lump",
           "count": 6
         },
         {
@@ -53,7 +53,7 @@
         "count": 25
       },
       {
-        "item": "minecraft:spyglass",
+        "item": "skyabyss:thunder_ward_thread",
         "count": 1
       }
     ]

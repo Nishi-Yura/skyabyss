@@ -1,0 +1,21 @@
+# 旅の地図の見どころの印 (寄せ・引き)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_mapcheck.txt -PshotsName=continent_wild
+world continent_wild continent
+size 1600 900
+timeout 900
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd gamemode adventure
+cmd tp @s -450 80 40
+waitchunks 300
+wait 100
+open travel_map
+wait 60
+shot map_full
+wheel 400 225 -3
+wait 60
+shot map_mid
+wheel 400 225 -5
+wait 60
+shot map_far

@@ -1,0 +1,42 @@
+# 土地の町の 8 人の自分の体 (2026-10-28 の選定) を近くで撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_folk.txt -PshotsName=continent_towns
+world folk_look continent
+size 1600 900
+timeout 1500
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 200
+hud off
+cmd gamemode creative
+cmd skyabyss dev grounds mark town 1 stand
+waitchunks 300
+wait 240
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"tide_ferryman"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 40
+shot folk_tide_ferryman
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"tide_lightkeeper"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 40
+shot folk_tide_lightkeeper
+cmd skyabyss dev grounds mark town 2 stand
+waitchunks 300
+wait 240
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"storm_elder"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 40
+shot folk_storm_elder
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"storm_hutkeeper"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 40
+shot folk_storm_hutkeeper
+cmd skyabyss dev grounds mark town 3 stand
+waitchunks 300
+wait 240
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"ember_survivor"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 40
+shot folk_ember_survivor
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"ember_watch"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 40
+shot folk_ember_watch

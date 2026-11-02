@@ -55,7 +55,7 @@ public final class AbyssSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> item : List.of(GREATSWORD_ITEM, BELL_STAFF_ITEM, STORM_BOW_ITEM, ASH_SCYTHE_ITEM)) {
                 event.accept(item.get());
             }

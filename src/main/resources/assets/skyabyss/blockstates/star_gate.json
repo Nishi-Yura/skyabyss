@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "core=false": {
+      "model": "skyabyss:block/star_gate"
+    },
+    "core=true": {
+      "model": "skyabyss:block/star_gate_core"
+    }
+  }
+}

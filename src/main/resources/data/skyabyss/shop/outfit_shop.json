@@ -1,0 +1,67 @@
+{
+  "goods": [
+    {
+      "id": "arrow",
+      "item": "skyabyss:travel_arrow",
+      "count": 8,
+      "coins": 3
+    },
+    {
+      "id": "made_spectral_arrow",
+      "item": "skyabyss:glow_arrow",
+      "count": 2,
+      "coins": 6,
+      "materials": [
+        {
+          "item": "skyabyss:moth_dust",
+          "count": 1
+        }
+      ],
+      "chapter": 4,
+      "made": true
+    },
+    {
+      "id": "travel_shield",
+      "item": "skyabyss:travel_shield",
+      "count": 1,
+      "coins": 12
+    },
+    {
+      "id": "ironclad_helmet",
+      "item": "skyabyss:ironclad_helmet",
+      "count": 1,
+      "coins": 10
+    },
+    {
+      "id": "ironclad_chestplate",
+      "item": "skyabyss:ironclad_chestplate",
+      "count": 1,
+      "coins": 16
+    },
+    {
+      "id": "ironclad_leggings",
+      "item": "skyabyss:ironclad_leggings",
+      "count": 1,
+      "coins": 14
+    },
+    {
+      "id": "ironclad_boots",
+      "item": "skyabyss:ironclad_boots",
+      "count": 1,
+      "coins": 8
+    },
+    {
+      "id": "wayfarer_chestplate",
+      "item": "skyabyss:wayfarer_chestplate",
+      "count": 1,
+      "coins": 4
+    },
+    {
+      "id": "sky_stone_chestplate",
+      "item": "skyabyss:sky_stone_chestplate",
+      "count": 1,
+      "coins": 70
+    }
+  ],
+  "buys": []
+}

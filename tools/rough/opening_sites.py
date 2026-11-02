@@ -696,6 +696,28 @@ def footprint_c(g: Grid, rng):
     _footprint(g, rng, "c")
 
 
+def footprint_island(g: Grid, rng=None):
+    """はじまりの島の足跡 (2026-10-26)。道の脇の窪地に二つ。古く草に覆われた浅い足形: 縁の盛り土は低く、岩と倒木は少なく、
+    底は苔と草と泥、深い所に雨水。道から見下ろして足の形と分かること (土の壁で囲わない)"""
+    import random
+    rng = rng or random.Random(11)
+    xs, zs, d = foot_depth("a", rng)
+    d = np.round(d * 0.6)
+    build_relief(g, xs, zs, d, rng, rim_max=1, rim_reach=3, boulders=3, logs=2, cracks=4, pools=False)
+    for (x, z), r in g.relief.items():
+        if r[0] == 0:
+            r[2] = M + rng.choice(["moss_block", "grass_block", "moss_block", "mud", "grass_block", "coarse_dirt"])
+            r[3] = 1 if r[1] >= 3 and math.sin(x * 0.55 + 1.3) * math.sin(z * 0.5 + 0.4) > 0.2 else 0
+        elif r[0] == 1:
+            if "cobblestone" in r[3]:
+                r[2] = M + rng.choice(["mossy_cobblestone", "mossy_stone_bricks", "stone"])
+                r[3] = M + "mossy_cobblestone"
+            else:
+                r[2] = M + rng.choice(["grass_block", "grass_block", "moss_block", "coarse_dirt"])
+    g.meta = {"rect": _recenter_rect(g), "level": False, "relief": True, "height": 5, "ring": 2, "wetOk": True}
+    _foot_marks(g, d)
+
+
 def footprint_end(g: Grid, rng=None):
     """道のいちばん先の足跡 (足跡 a の前半) と、その先の、地の中へ潜った穴 (土が投げ出された火口) と、地中を進んだ土のうねり (余燼の通り道、17-3)"""
     import random
@@ -1413,7 +1435,7 @@ def main():
             bp = blueprint(s, ADOPTED[s])
             (DATA / f"{s}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
             print("installed", s, ADOPTED[s], len(bp["blocks"]), "blocks")
-        for name, fn in (("slab", slab), ("footprint_end", footprint_end)):
+        for name, fn in (("slab", slab), ("footprint_end", footprint_end), ("footprint_island", footprint_island)):
             bp = blueprint_small(name, fn)
             (DATA / f"{name}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
         return

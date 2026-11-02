@@ -67,28 +67,6 @@
           ]
         },
         {
-          "id": "stats",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "respec_stats"
-            }
-          ]
-        },
-        {
-          "id": "stats_coins",
-          "kind": "talk",
-          "goto": "end",
-          "do": [
-            {
-              "type": "facility",
-              "open": "respec_stats_coins"
-            }
-          ]
-        },
-        {
           "id": "back",
           "kind": "talk",
           "goto": "menu"
@@ -104,6 +82,23 @@
           "goto": "respec"
         },
         {
+          "id": "job_room",
+          "kind": "talk",
+          "goto": "job_room"
+        },
+        {
+          "id": "arts",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_training_master.menu.arts",
+          "do": [
+            {
+              "type": "facility",
+              "open": "secret_arts"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "dummy",
           "kind": "talk",
           "goto": "dummy"
@@ -117,6 +112,27 @@
           "id": "bye",
           "kind": "leave",
           "goto": "end"
+        }
+      ]
+    },
+    "job_room": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "kind": "talk",
+          "goto": "end",
+          "do": [
+            {
+              "type": "facility",
+              "open": "job_room"
+            }
+          ]
+        },
+        {
+          "id": "back",
+          "kind": "talk",
+          "goto": "menu"
         }
       ]
     }

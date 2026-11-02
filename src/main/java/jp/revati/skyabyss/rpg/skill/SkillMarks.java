@@ -22,14 +22,14 @@ public final class SkillMarks {
         };
     }
 
-    // 手の武器の、その木の印の割合 (0.06 = +6%)。要るレベルに届いていない武器は効かない。木のない旅人などは 0
+    // 手の武器の、その木の印の割合 (0.06 = +6%)。要るレベル・要る基礎 (48) に届いていない武器は効かない
     public static double power(ServerPlayer player, SkillTree tree) {
         AffixType type = typeOf(tree);
         if (type == null) {
             return 0;
         }
         ItemStack hand = player.getMainHandItem();
-        if (hand.isEmpty() || AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)) {
+        if (hand.isEmpty() || AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand) || !GearRequirement.met(player, hand)) {
             return 0;
         }
         return AffixRules.value(hand, type);

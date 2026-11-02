@@ -35,7 +35,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
-// 砂潜り (docs/design/21 の 4.1。二章の地上): 地面の下の敵。
+// 砂潜り (二章の地上): 地面の下の敵。
 //   潜っている間は見えず (描かない)、傷も受けない。人が真上 (TRIGGER の近さ) に来ると、砂が盛り上がる (予告 0.8 秒。足もとの円と砂の粒)、
 //   満ちた瞬間に飛び出して噛む (4)。出たあとは近づいて飛びかかり (予告 0.8 秒の床の帯)。狙いを失って BURROW_AFTER たつと、また潜る。
 //   潮: 浜のひとり歩き (ChapterMobSpawner) の個体は、満潮の間は出てこない (潜ったまま。出ていれば潜る)。

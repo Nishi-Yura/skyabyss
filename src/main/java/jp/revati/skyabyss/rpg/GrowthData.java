@@ -33,13 +33,12 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     public int statRespecs;
     // 転生した回数 (0〜20。docs/design/31)。表示は「Lv 50+n」、必要経験値が減る。持ち主のクライアントへも送る
     public int rebirths;
+    // 職の熟練 (職の ID → Lv 50 のあとに得た経験値。rpg/JobMastery)。転生でも消さない。持ち主のクライアントへも送る
+    public final Map<String, Long> mastery = new LinkedHashMap<>();
 
     // ここから下はサーバーだけが使う (クライアントへは送らない)
     // 一度だけの経験値 (新しい場所、初めての撃破) の記録
     public final Set<String> discoveries = new LinkedHashSet<>();
-    // バニラの敵から今日もらった量 (日が変わると 0)
-    public long vanillaDay = -1;
-    public int vanillaToday;
 
     public int stat(Stat s) {
         return stats[s.ordinal()];
@@ -97,10 +96,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < stats.length; i++) {
             stats[i] = Mth.clamp(stats[i], 0, GrowthRules.STAT_CAP);
         }
-        // 力を使いすぎている (レベルを下げられたなど) ときは、すべて戻して振り直してもらう
-        if (spentPoints() > totalPoints()) {
-            java.util.Arrays.fill(stats, 0);
-        }
+        // 基礎は技の木から導く (SkillManager.refreshStats が上書きする) ので、ここでは使いすぎを見ない
         fragmentCapacity = Math.max(0, fragmentCapacity);
         statRespecs = Math.max(0, statRespecs);
         fragments.values().removeIf(v -> v == null || v <= 0);
@@ -123,13 +119,14 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         tag.putInt("fragmentCapacity", fragmentCapacity);
         tag.putInt("statRespecs", statRespecs);
         tag.putInt("rebirths", rebirths);
+        CompoundTag m = new CompoundTag();
+        mastery.forEach(m::putLong);
+        tag.put("mastery", m);
         ListTag d = new ListTag();
         for (String id : discoveries) {
             d.add(StringTag.valueOf(id));
         }
         tag.put("discoveries", d);
-        tag.putLong("vanillaDay", vanillaDay);
-        tag.putInt("vanillaToday", vanillaToday);
         return tag;
     }
 
@@ -150,12 +147,15 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         fragmentCapacity = tag.contains("fragmentCapacity") ? tag.getInt("fragmentCapacity") : GrowthRules.FRAGMENT_CAPACITY;
         statRespecs = tag.getInt("statRespecs");
         rebirths = tag.getInt("rebirths");
+        mastery.clear();
+        CompoundTag m = tag.getCompound("mastery");
+        for (String key : m.getAllKeys()) {
+            mastery.put(key, Math.max(0L, m.getLong(key)));
+        }
         discoveries.clear();
         for (Tag t : tag.getList("discoveries", Tag.TAG_STRING)) {
             discoveries.add(t.getAsString());
         }
-        vanillaDay = tag.contains("vanillaDay") ? tag.getLong("vanillaDay") : -1;
-        vanillaToday = tag.getInt("vanillaToday");
         sanitize();
     }
 
@@ -176,6 +176,11 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                 });
                 buf.writeVarInt(data.statRespecs);
                 buf.writeVarInt(data.rebirths);
+                buf.writeVarInt(data.mastery.size());
+                data.mastery.forEach((id, v) -> {
+                    buf.writeUtf(id);
+                    buf.writeVarLong(v);
+                });
             },
             buf -> {
                 GrowthData data = new GrowthData();
@@ -192,6 +197,10 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                 }
                 data.statRespecs = buf.readVarInt();
                 data.rebirths = buf.readVarInt();
+                int k = buf.readVarInt();
+                for (int i = 0; i < k; i++) {
+                    data.mastery.put(buf.readUtf(), buf.readVarLong());
+                }
                 return data;
             });
 }

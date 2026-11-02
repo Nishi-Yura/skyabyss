@@ -12,10 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 // まだその巨神の心臓を止めておらず、乗る資格のある人が、決まった場所 (峰・灰の地の口) の近くに WAIT tick 居続けたら、
 // 巨神が気づいて来る。時刻はふだんの来方 (味つけ) として残る。決まり: 試練・背は時刻や天気で閉じない (状態は遊び方だけを変える)
 public final class FirstBoardWait {
-    // 気づくまでの待ち (30 秒)
-    public static final int WAIT = 600;
+    // 気づくまでの待ち (10 秒。2026-10-27: 以前は 30 秒で、休むまでが長かった)
+    public static final int WAIT = 200;
     // 決まった場所のまわりで「待っている」とみなす距離
-    public static final double RANGE = 48;
+    public static final double RANGE = 64;
 
     private int waited;
 

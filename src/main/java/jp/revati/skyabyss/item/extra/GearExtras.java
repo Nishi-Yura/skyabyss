@@ -19,7 +19,8 @@ import net.minecraft.network.codec.StreamCodec;
 //  genStamp  最後に世代を上げたときの転生回数 (同じ転生で二度上げないため)
 //  traits    世代 3 ごとに開く形見の特性 (小さな特性)
 public record GearExtras(int sockets, List<Gem> gems, String aspect, boolean hollow, int generation, int genStamp, List<Affix> traits) {
-    public static final int MAX_SOCKETS = 2;
+    // どの階級でもこれより多くは開かない (階級ごとの上限は GearTier.maxSockets)
+    public static final int MAX_SOCKETS = 3;
     public static final int MAX_GENERATION = 12;
     public static final int GENERATIONS_PER_TRAIT = 3;
 

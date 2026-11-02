@@ -860,6 +860,17 @@ def face_paint(c, ctx, col, glow):
         col = np.where(cover[..., None], cc, col)
         topm = cover & (P[..., 1] > 24.05)
         col = np.where(topm[..., None], col * 0.72, col)
+    # 目隠しの布 (目の高さの帯が頭を一周する。前の真ん中に星の刺繍)
+    if f.get("blindfold") is not None:
+        m = np.array(f["blindfold"], float)
+        cover = skin & (P[..., 1] > 24.95) & (P[..., 1] < 26.45)
+        shade = np.clip(0.78 + 0.3 * (-N[..., 2]) + 0.12 * N[..., 1], 0.55, 1.15)
+        cc = np.clip(m[None, None, :] * shade[..., None], 0, 255) * (1 + 0.06 * bay[..., None])
+        col = np.where(cover[..., None], cc, col)
+        edge = cover & ((P[..., 1] < 25.2) | (P[..., 1] > 26.2))
+        col = np.where(edge[..., None], col * 0.8, col)
+        star = cover & (ax < 0.55) & (np.abs(P[..., 1] - 25.7) < 0.3) & (N[..., 2] < -0.5)
+        col = np.where(star[..., None], np.array([214, 228, 250], float), col)
     # 髪の生え際の影 (前髪の下の額を一段暗く) と、顎の下の首の影
     hl = c.get("hairline")
     if hl:
@@ -889,6 +900,8 @@ def face_paint(c, ctx, col, glow):
                     continue
                 m = sd & (tx == ax0 + k) & (ty == ty0 - r_)
                 if f.get("mask") is not None and ty0 - r_ < 49:
+                    continue
+                if f.get("blindfold") is not None and 49 <= ty0 - r_ <= 52:
                     continue
                 cc = pal.get(ch)
                 if cc is None:

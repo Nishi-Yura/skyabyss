@@ -179,10 +179,6 @@
       "face": "grave",
       "do": [
         {
-          "type": "unlock_recipes",
-          "chapter": 1
-        },
-        {
           "type": "flag",
           "flag": "ch1p_taught"
         },
@@ -254,10 +250,6 @@
     "ch1p_teach": {
       "face": "neutral",
       "do": [
-        {
-          "type": "unlock_recipes",
-          "chapter": 1
-        },
         {
           "type": "flag",
           "flag": "ch1p_taught"

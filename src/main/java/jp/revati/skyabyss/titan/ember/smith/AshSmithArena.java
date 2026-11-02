@@ -269,6 +269,26 @@ public final class AshSmithArena {
         }
     }
 
+    // ずらした所に、戦いに要る物だけを建てる (床・壁・空気には触らない。闘の部屋の中ボス。trial/raid/mid/EmberMidRoom.fitInto)
+    public static void buildFixtures(ServerLevel level, BlockPos s) {
+        SHIFT = s;
+        try {
+            for (BlockPos t : TROUGHS) {
+                buildTrough(level, t);
+            }
+            for (BlockPos p : PUDDLES) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        set(level, p.getX() + dx, FLOOR, p.getZ() + dz, Blocks.GRAY_WOOL.defaultBlockState());
+                    }
+                }
+            }
+            buildFurnace(level, false);
+        } finally {
+            SHIFT = BlockPos.ZERO;
+        }
+    }
+
     public static void buildFurnace(ServerLevel level, boolean open, BlockPos s) {
         SHIFT = s;
         try {

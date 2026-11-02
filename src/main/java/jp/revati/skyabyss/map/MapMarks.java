@@ -26,14 +26,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
-// 旅の地図 (M キー。docs/design/33 の 4 章) に載せる印を、サーバーで一人ぶん集める。**印の出どころはここ一か所**。
+// 旅の地図 (M キー) に載せる印を、サーバーで一人ぶん集める。**印の出どころはここ一か所**。
 // 地図の画面 (client/map/TravelMapScreen) はこの一覧と、クライアントがもともと持っている自分・仲間・墓・目的の標だけを描く。
 //
 //   町 (鐘の宿り)   序盤の場所 shelter。語り部に会った (STORYTELLER) か近くに来たら「見た」、それまでは野営地からの方角だけの「噂」
 //   野営地          camp。いつも見た (目覚めの場所)
 //   巨大な足跡      footprint。足跡の拍子 (FOOTPRINTS) のあと
 //   巨神の骨        ribs。骨の拍子 (BONES) のあと見た。イサナ (ISANA) のあとは町からの方角の噂
-//   章の跡地        ChapterGrounds の四つの跡地 (33 の 3 章)。その章が開いた人に、都からの方角だけの「噂」。跡地の近く (96) に来たら「見た」
+//   章の跡地        ChapterGrounds の四つの跡地。その章が開いた人に、都からの方角だけの「噂」。跡地の近く (96) に来たら「見た」
 //                   (SiteData.Ground.seen に残る)。その章を終えた人にはいつも「見た」
 //   章の場所        ChapterSites の小要素。その人が使う拠点 (跡地を含む) の分で、近くに着いた (arrived) ものだけ。
 //   碑              覚えた碑 (TravelState.waymarks)。壊された碑は出さない
@@ -41,11 +41,12 @@ import net.minecraft.world.phys.Vec3;
 // すでに遊んでいた人 (OpeningState.legacy) には序盤の場所を全部「見た」で出す。新しい保存は足さない (記録はどれも既存のものを読む)。
 //
 // 32 の祠は kind = SHRINE (建っている祠を、その巨神の心臓を止めた人にだけ。extra = 巨神の名前)。
-// 言伝ての板の依頼の目印も同じ。画面の側は kind を知っていれば描ける (MapSprites)
+// 言伝ての板の依頼の目印も同じ。画面の側は kind を知っていれば描ける (MapSprites)。
+// 名のある強敵の棲み家は kind = FOE (いつも出す。name = 名札の鍵、extra = 今いれば "alive"。world.continent.NamedFoes)
 public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
     public enum Kind {
-        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN
+        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN, FOE
     }
 
     // 一つの印。name は文の鍵の材料 (種類ごと。画面の MapText が文にする)、extra は付け足し (碑の土地の名・章の ID)。
@@ -58,7 +59,8 @@ public final class MapMarks {
     }
 
     // 送る印の上限 (仲間・墓・目的はクライアントの分で、ここには入らない)
-    public static final int MAX = 96;
+    // 印の数の上限 (見どころ 100 と町・跡地・巨神などが入る数)
+    public static final int MAX = 256;
     // 「近くに来た」とみなす距離 (町を見た)
     static final int SEEN_NEAR = 64;
 
@@ -81,20 +83,66 @@ public final class MapMarks {
         }
         BlockPos town = openingMarks(spots, k, out);
         groundMarks(data.grounds(), player.getUUID(), Chapters.of(player), here, town, out);
+        townRumors(player, data.grounds(), out);
         chapterMarks(data, player.getUUID(), out);
         waymarkMarks(Voyages.state(player), TravelWorldData.get(player.server), out);
         titanMarks(player, over, out);
         shrineMarks(player, out);
-        if (jp.revati.skyabyss.facility.FacilityMarks.has(player, jp.revati.skyabyss.facility.FacilityMarks.MAP_COPY)) {
-            archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
-        }
+        foeMarks(out);
+        // 祠と開いた章の跡地のありか (前は書庫番の「地図の写し」で載った。書庫番を消したので最初から)
+        archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
         if (data.first("camp") == null) {
             BlockPos s = over.getSharedSpawnPos();
             out.add(new Mark(Kind.SPAWN, "spawn", "spawn", "", s.getX(), s.getZ(), false, 0));
         }
+        // 天と淵の大陸の見どころは最後に (多いので、上限で切れるならここから切れる)
+        poiMarks(player, spots, out);
         BlockPos center = town != null ? town : over.getSharedSpawnPos();
         boolean townKnown = out.stream().anyMatch(m -> m.kind() == Kind.TOWN && !m.rumor());
         return new Sheet(center.getX(), center.getZ(), townKnown, out.size() > MAX ? List.copyOf(out.subList(0, MAX)) : List.copyOf(out));
+    }
+
+    // 名のある強敵の棲み家 (土地ごとに一つ。生きていれば赤く縁取る)
+    static void foeMarks(List<Mark> out) {
+        for (int r = 0; r < jp.revati.skyabyss.world.continent.RegionSpawner.REGIONS.length; r++) {
+            var d = jp.revati.skyabyss.world.continent.NamedFoes.def(r);
+            BlockPos lair = jp.revati.skyabyss.world.continent.NamedFoes.lair(r);
+            if (d == null || lair == null) {
+                continue;
+            }
+            boolean alive = jp.revati.skyabyss.world.continent.NamedFoes.alive(r);
+            out.add(new Mark(Kind.FOE, "foe_" + r, d.name(), alive ? "alive" : "", lair.getX(), lair.getZ(), false, alive ? 0xE8443A : 0x9A7A70));
+        }
+        // 大陸の大事件 (endgame/WorldEvents): 大いなるものが来ている所 (いつも赤く、大きく)
+        var ev = jp.revati.skyabyss.endgame.WorldEvents.current();
+        var evDef = ev == null ? null : jp.revati.skyabyss.world.continent.NamedFoes.def(ev.region());
+        if (evDef != null) {
+            out.add(0, new Mark(Kind.FOE, "world_event", evDef.name(), "alive", ev.spot().getX(), ev.spot().getZ(), false, 0xFF2A1A));
+        }
+    }
+
+    // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑などの印で、指すと名前。
+    // まだ見つけていない見どころは extra を "poi~:<種類>" にして、画面で薄く描く (ContinentPois.discovered)
+    static void poiMarks(ServerPlayer player, List<Spot> entries, List<Mark> out) {
+        if (entries.stream().noneMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
+            return;
+        }
+        List<jp.revati.skyabyss.world.continent.ContinentPois.Poi> all = jp.revati.skyabyss.world.continent.ContinentPois.all();
+        java.util.Map<Integer, BlockPos> built = new java.util.HashMap<>();
+        for (Spot e : entries) {
+            if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentPois.KIND)) {
+                built.put(e.index(), e.pos());
+            }
+        }
+        java.util.Set<Integer> found = jp.revati.skyabyss.world.continent.ContinentPois.discovered(player);
+        for (int i = 0; i < all.size(); i++) {
+            jp.revati.skyabyss.world.continent.ContinentPois.Poi poi = all.get(i);
+            if (!poi.site()) {
+                continue;
+            }
+            BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
+            out.add(new Mark(Kind.WAYMARK, "poi" + i, "", (found.contains(i) ? "poi:" : "poi~:") + poi.kind(), at.getX(), at.getZ(), false, 0));
+        }
     }
 
     // 序盤の拍子から読む「知っていること」(純粋。自己テスト向けに分けてある)
@@ -144,6 +192,13 @@ public final class MapMarks {
                 }
             }
         }
+        // 天と淵の大陸の土地の町 (いつも出す。名前は map.skyabyss.town.<土地>)
+        for (Spot e : entries) {
+            if (e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
+                String region = jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index());
+                out.add(new Mark(Kind.TOWN, "town_" + region, "town", region, e.pos().getX(), e.pos().getZ(), false, 0));
+            }
+        }
         Spot ribsSpot = first(entries, "ribs");
         BlockPos ribs = ribsSpot == null ? null : ribsSpot.pos();
         if (ribs != null) {
@@ -174,6 +229,33 @@ public final class MapMarks {
             } else if (town != null) {
                 BlockPos r = rumor(town, g.center, name.hashCode());
                 out.add(new Mark(Kind.SITE, "ground:" + ch.id(), name, ch.id(), r.getX(), r.getZ(), true, color));
+            }
+        }
+    }
+
+    // 天と淵の大陸: 章の土地の町に着いたら、その章の跡地の噂を本当の位置に (00 の 278 = A: 町が章の入口。42 の 1.4)
+    static void townRumors(ServerPlayer player, List<SiteData.Ground> grounds, List<Mark> out) {
+        if (!jp.revati.skyabyss.world.continent.ContinentPois.in(player.serverLevel())) {
+            return;
+        }
+        for (SiteData.Ground g : grounds) {
+            Chapters ch = Chapters.byId(g.chapter);
+            String town = ch == null || ch.titan() == null ? null : switch (ch.titan()) {
+                case Titans.STONE_WHALE -> "whale";
+                case Titans.TIDE_SHELL -> "tide";
+                case Titans.THUNDER_WING -> "storm";
+                case Titans.EMBER -> "ember";
+                default -> null;
+            };
+            if (town == null || !jp.revati.skyabyss.world.continent.ContinentAreas.visited(player, town)) {
+                continue;
+            }
+            String id = "ground:" + ch.id();
+            for (int i = 0; i < out.size(); i++) {
+                Mark m = out.get(i);
+                if (m.id().equals(id) && m.rumor()) {
+                    out.set(i, new Mark(m.kind(), m.id(), m.name(), m.extra(), g.center.getX(), g.center.getZ(), false, m.color()));
+                }
             }
         }
     }

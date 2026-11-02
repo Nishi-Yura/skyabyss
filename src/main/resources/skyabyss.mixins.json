@@ -5,9 +5,12 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "EnemyPickMixin",
-    "InventoryMixin",
     "ItemStackDurabilityMixin",
-    "ServerPlaceRecipeMixin"
+    "FallingBlockMixin",
+    "RecipeManagerMixin",
+    "AdvancementManagerMixin",
+    "ItemNameMixin",
+    "AttributeShownMixin"
   ],
   "client": [
     "GuiGraphicsMixin",
@@ -18,8 +21,11 @@
     "AdvancementToastAccessor",
     "ContainerLabelMixin",
     "MountRiderLegsMixin",
-    "TrueTypeProviderAccessor",
-    "TrueTypeGlyphShadowMixin"
+    "StringSplitterMixin",
+    "BossHealthOverlayAccessor",
+    "AbstractWidgetAuditMixin",
+    "CameraShoulderMixin",
+    "MouseHandlerShoulderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -179,7 +179,7 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
 
     # ---------------------------------------------------------------- 東の大通り: 道具屋
     def tool_shop(self):
-        """道具屋 (広場の東の角、x 33..45 z -38..-28)。戸は西 (広場へ)。売り台の向こうに道具屋、奥の壁に樽・箱・棚"""
+        """市 (広場の東の角、x 33..45 z -38..-28。前は道具屋)。戸は西 (広場へ)。売り台の向こうに道具屋・食料屋・武具屋・素材屋、奥の壁に樽・箱・棚"""
         st, v = self.st, self.v
         x0, z0, x1, z1 = 33, -38, 45, -28
         b, ridge = self.fac_body('tool_shop', x0, z0, x1, z1, 'west', floors=2, fh=6, ground='shop', axis='x')
@@ -204,7 +204,19 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
             v.set(43, 1, z, 'decorated_pot[cracked=false,facing=west,waterlogged=false]' if 'chest' in back[i % len(back)]
                   else 'barrel[facing=west,open=false]' if i % 2 else 'bookshelf')
             v.set(43, 2, z, ['lantern[hanging=false,waterlogged=false]', 'decorated_pot[cracked=false,facing=west,waterlogged=false]', 'potted_red_tulip', 'air'][i % 4])
-        self.attendant('tool_merchant', 42, 0, dz + 1 if dz + 1 <= az1 else dz - 1)
+        # 市の四人 (2026-10-27): 売り台の向こうに 2 おき。北から 道具屋・食料屋・武具屋・素材屋。持ち場の後ろの壁にそれぞれの品
+        stalls = [('tool_merchant', az0), ('food_vendor', az0 + 2), ('outfitter', az0 + 4), ('material_trader', az0 + 6)]
+        wares = {'food_vendor': ['hay_block[axis=y]', 'smoker[facing=west,lit=false]'], 'outfitter': ['smithing_table', 'grindstone[face=floor,facing=west]'],
+                 'material_trader': ['chiseled_bookshelf[facing=west,slot_0_occupied=true,slot_1_occupied=false,slot_2_occupied=true,slot_3_occupied=true,slot_4_occupied=false,slot_5_occupied=true]',
+                                     'iron_block'],
+                 'tool_merchant': ['barrel[facing=west,open=false]', 'fletching_table']}
+        for role, z in stalls:
+            if z > az1:
+                continue
+            self.attendant(role, 42, 0, z)
+            for k, it in enumerate(wares[role]):
+                zz = z + (k if z + k <= az1 else -k)
+                v.set(43, 0, zz, it)
         # 客の側: 北と南の壁の品 (干し糧・松明・矢・寝袋・縄)
         north = ['hay_block[axis=y]', 'barrel[facing=up,open=false]', 'crafting_table', 'chest[facing=south,type=single,waterlogged=false]', 'fletching_table']
         south = ['smoker[facing=north,lit=false]', 'barrel[facing=up,open=false]', 'white_wool', 'hay_block[axis=y]', 'barrel[facing=up,open=false]']
@@ -405,27 +417,12 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
 
     # ---------------------------------------------------------------- 鍛冶場: 西の口と鍛冶師の机
     def smithy_front(self):
-        """鍛冶場の西の面 (南の大通りに面する) に口を開ける。入ってすぐ北に鍛冶師の机"""
+        """鍛冶場の口は南の正面 (大きく開いた庇の下)。名札と吊り看板も正面に (2026-10-25: 横の口は、正面が開いているのにおかしい)。入って北に鍛冶師の机"""
         st, v = self.st, self.v
-        for z in range(16, 19):
-            for yy in range(0, 4):
-                v.set(8, yy, z, 'air')
-                v.set(9, yy, z, 'air')
-            v.set(8, -1, z, st.trim.full)
-            v.set(9, -1, z, st.trim.full)
-            v.set(7, 0, z, 'air')
-            v.set(7, -1, z, st.trim.full)
-        for x in (8, 9):
-            v.set(x, 3, 16, st.trim.stairs('north', 'top'))
-            v.set(x, 3, 18, st.trim.stairs('south', 'top'))
-            v.set(x, 4, 17, st.trim2)
-        for z in (15, 19):
-            v.fill(7, 0, z, 7, 3, z, st.pilaster)
-            v.set(7, 4, z, st.trim.stairs('east', 'top'))
-        hanging_sign(v, st, 8, 4, 17, 'west')
-        self.mark('label_smithy', 6, 6, 17)
-        v.set(7, 2, 14, 'lantern[hanging=false,waterlogged=false]') if False else None
-        self.openings.append((8, 17, 'west'))
+        cx = (8 + 26) // 2
+        hanging_sign(v, st, cx, 4, 21, 'south')
+        self.mark('label_smithy', cx, 6, 24)
+        self.openings.append((cx, 21, 'south'))
         # 鍛冶師の机 (z 14、x 10..15) と横 (x 15)
         self.counter([(x, 14) for x in range(10, 16)] + [(15, z) for z in (13, 12, 10)],
                      tops=((11, 14, 'lantern[hanging=false,waterlogged=false]'), (14, 14, 'anvil[facing=west]') if False else (14, 14, 'candle[candles=2,lit=true,waterlogged=false]')))
@@ -495,6 +492,8 @@ class Facilities(FurnishBig, FurnishShops2, FurnishShops, Furnish, Interiors, Ba
         v.set(x0 - 1, 5, mid, '%s_wall_banner[facing=west]' % st.banner_color)
         # 門ははじめから開いている (鉄格子なし)。印 open_training は門の真ん中 (今は読む仕組みはない)
         self.mark('open_training', x0, 0, mid)
+        # 門の外の上に浮く名札 (職の間はここ。ShelterBuilder → FacilityLabels が通りの上の空いた所に置く)
+        self.mark('label_training', x0 - 2, 5, mid)
         self.tablet(x0 - 1, 0, gz0 - 3, 'west', 'training')
         v.set(x0 - 1, -1, gz0 - 3, st.trim.full)
         self.openings.append((x0, mid, 'west'))

@@ -106,12 +106,26 @@ public final class SkillActions {
         if (mutation != null) {
             return ExtActions.mutated(player, mutation, rank);
         }
+        Vec3 from = player.position();
+        String failure = base(player, skill, rank);
+        if (failure == null) {
+            // 伝説の書き換え (巨神の色の上乗せ。rpg/skill/LegendRewrites)
+            LegendRewrites.after(player, skill, rank, from);
+            // 秘伝 (枠に付けた秘伝の上乗せ。rpg/skill/SecretArts。docs/design/54 の 3.2.1)
+            SecretArts.after(player, skill, rank, from);
+            // 職の熟練の光 (rpg/JobMastery。見た目だけ)
+            jp.revati.skyabyss.rpg.JobMastery.aura(player);
+        }
+        return failure;
+    }
+
+    private static String base(ServerPlayer player, Skill skill, int rank) {
         return switch (skill) {
             case TITAN_CLEAVE -> cleave(player, rank);
             case ROCK_CALL -> rockCall(player, rank);
             case WHALE_SWEEP -> sweep(player, rank);
-            case LUNGE -> lunge(player, rank);
-            case BACKSTEP -> backstep(player, rank);
+            case LUNGE, SHIELD_RUSH -> lunge(player, rank);
+            case BACKSTEP, ARCHER_LEAP -> backstep(player, rank);
             case WIND_REND -> rend(player, rank);
             case WARD_SONG -> wardSong(player, rank);
             case EBB_TIDE -> ebbTide(player, rank);
@@ -122,7 +136,10 @@ public final class SkillActions {
             case CLOUD_PIERCE -> pierce(player, rank);
             case BONE_TRAP -> boneTrap(player, rank);
             case SKY_RAIN -> rain(player, rank);
-            case SIGNAL -> signal(player, rank);
+            // 職の新しい技 (docs/design/43)
+            case THUNDER_BOLT, EMBER_ORB, FROST_TIDE, BLINK, FORGE_STOMP, MIST_VEIL, CURSE_MARK, LAMP_CHARM -> JobActions.perform(player, skill, rank);
+            // 木 v2 で足した技 (docs/design/48)
+            case SHIELD_BASH, BONE_SWING, SPIN_CUT, TWIN_FANG, SPARK_BURST, SNARE_SHOT, STARDUST -> TreeActions.perform(player, skill, rank);
             default -> ExtActions.perform(player, skill, rank);
         };
     }
@@ -187,9 +204,13 @@ public final class SkillActions {
 
     // 技の傷を入れる。共鳴の声・鍛え人の目・木の印の倍率を掛け、当たった敵には波紋の鈍足が付く
     public static boolean hit(ServerPlayer player, LivingEntity target, float amount, Skill skill) {
-        float scaled = amount * (float) SkillEffects.damagePower(player, skill);
+        float scaled = amount * (float) (SkillEffects.damagePower(player, skill) * Gauges.versus(player, target, skill));
+        if (isLarge(target)) {
+            scaled *= (float) (1 + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "big_target"));
+        }
         boolean hurt = deal(player, target, scaled, skill, false);
         if (hurt) {
+            Gauges.onSkillHit(player, target, skill);
             int ripple = SkillManager.get(player).rank(Skill.RIPPLE);
             if (ripple > 0) {
                 SkillEffects.slow(target, SkillRules.rippleSlow(ripple) * (isLarge(target) ? 0.5 : 1.0), SkillRules.RIPPLE_TICKS);
@@ -234,7 +255,28 @@ public final class SkillActions {
     }
 
     static float attackDamage(Player player) {
-        return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float melee = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        // 弓を持つ人は、弓の満月の一矢の傷を技の基準にする (近接の攻撃力は弓では 1 のままで、天落とし・罠などがほとんど効いていなかった。2026-10-29 の点検)
+        net.minecraft.world.item.ItemStack held = player.getMainHandItem();
+        if (held.getItem() instanceof net.minecraft.world.item.BowItem) {
+            return Math.max(melee, (float) (6.0 * bowMultiplier(held)) + (melee - 1f));
+        }
+        return melee;
+    }
+
+    // 弓の矢の傷の倍率 (強化込み。この作品の弓でなければ 1)
+    static double bowMultiplier(net.minecraft.world.item.ItemStack held) {
+        int enhance = jp.revati.skyabyss.item.ModGear.enhance(held);
+        if (held.getItem() instanceof jp.revati.skyabyss.item.ChapterBowItem b) {
+            return b.multiplier(enhance);
+        }
+        if (held.getItem() instanceof jp.revati.skyabyss.abyss.AbyssBowItem) {
+            return jp.revati.skyabyss.abyss.AbyssBowItem.DAMAGE * (1 + jp.revati.skyabyss.item.GearEvents.ATTACK_RATE_PER_LEVEL * enhance);
+        }
+        if (held.getItem() instanceof jp.revati.skyabyss.item.storm.ThunderWingBowItem) {
+            return jp.revati.skyabyss.item.storm.ThunderWingBowItem.damageMultiplier(enhance);
+        }
+        return 1.0;
     }
 
     static void sound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
@@ -252,9 +294,9 @@ public final class SkillActions {
         }
     }
 
-    // 範囲の技の押し出し: 筋力 30 の刻み目で 1.25 倍
+    // 範囲の技の押し出し (筋力の刻み目は 43 で削った。今はそのまま)
     static double push(ServerPlayer player, double base) {
-        return Breakpoints.reached(player, GrowthRules.Stat.STRENGTH, Breakpoints.SECOND) ? base * Breakpoints.STRENGTH_30_PUSH : base;
+        return base;
     }
 
     // ---------------------------------------------------------------- 岩守り
@@ -808,6 +850,8 @@ public final class SkillActions {
         if (rune == 2) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin.add(dir.scale(1.5)), SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
         }
+        // 潮位 (引き潮の型の溜まるもの): 引いた敵の数だけ
+        Gauges.onEbb(player, foes.size());
         if (rune == 4) {
             // 結ばれた敵 (最も近い 1 体) が動くと、近くの敵が引かれる
             LivingEntity tied = foes.get(0);
@@ -1040,7 +1084,11 @@ public final class SkillActions {
         }
         ServerLevel level = player.serverLevel();
         int rune = rune(player, Skill.CLOUD_PIERCE);
-        int pierce = SkillRules.piercePierce(rank) + (WeaponType.has(player, WeaponType.RANGED) ? 1 : 0);
+        int pierce = SkillRules.piercePierce(rank) + (WeaponType.has(player, WeaponType.RANGED) ? 1 : 0) + Gauges.pierceBonus(player);
+        // 側の目の弓の欠点: 雲穿ちが貫かない
+        if (jp.revati.skyabyss.item.mythic.MythicAbilities.noPierce(player)) {
+            pierce = 0;
+        }
         double damageScale = SkillEffects.damagePower(player, Skill.CLOUD_PIERCE);
         float speed = SkillRules.PIERCE_SPEED;
         if (rune == 1) {
@@ -1136,63 +1184,10 @@ public final class SkillActions {
         return null;
     }
 
-    // ---------------------------------------------------------------- 旅人
-    // 合図: 見ている先に 20 秒の光の標 (仲間全員に見える)。敵に当てると 5 秒の印 (鷹の目と同じ。高いほう)
-    static String signal(ServerPlayer player, int rank) {
-        ServerLevel level = player.serverLevel();
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(SkillRules.SIGNAL_RANGE));
-        BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-        Vec3 stop = block.getType() == HitResult.Type.MISS ? end : block.getLocation();
-        var entityHit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, stop,
-                new AABB(eye, stop).inflate(1.0), e -> e instanceof LivingEntity le && le.isAlive() && e != player && !(e instanceof ArmorStand),
-                eye.distanceToSqr(stop));
-        Vec3 at = stop;
-        if (entityHit != null && entityHit.getEntity() instanceof LivingEntity target) {
-            at = target.position();
-            if (isFoe(player, target)) {
-                SkillEvents.mark(target, SkillRules.signalMark(rank), level.getGameTime(), SkillRules.SIGNAL_MARK_TICKS, player);
-                signalTell(player, "message.skyabyss.signal.foe", target.getDisplayName(), (int) Math.round(SkillRules.signalMark(rank) * 100), SkillRules.SIGNAL_MARK_TICKS / 20);
-            } else {
-                SkillEffects.glow(target, SkillRules.MARK_TICKS, player);
-            }
-        } else if (block.getType() == HitResult.Type.MISS) {
-            // 宙を指していたら、真下の地面まで下ろす (16 ブロックまで)
-            BlockHitResult ground = level.clip(new ClipContext(at, at.add(0, -16, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-            if (ground.getType() != HitResult.Type.MISS) {
-                at = ground.getLocation();
-            }
-        }
-        if (!(entityHit != null && entityHit.getEntity() instanceof LivingEntity t2 && isFoe(player, t2))) {
-            signalTell(player, "message.skyabyss.signal.place", SkillRules.SIGNAL_TICKS / 20);
-        }
-        SkillEffects.zone(SkillEffects.ZoneKind.SIGNAL, player, at, 0.5, SkillRules.SIGNAL_TICKS, rank);
-        fxTarget = at;
-        player.swing(InteractionHand.MAIN_HAND, true);
-        level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 1.0f, 1.3f);
-        return null;
-    }
-
-    // 標を打ったことを、本人とパーティの仲間 (同じ次元) に知らせる
-    private static void signalTell(ServerPlayer player, String key, Object... args) {
-        Object[] a = new Object[args.length + 1];
-        a[0] = player.getDisplayName();
-        System.arraycopy(args, 0, a, 1, args.length);
-        jp.revati.skyabyss.notice.Notice.hint(player, key, a);
-        var party = jp.revati.skyabyss.party.PartyData.get(player.server).of(player.getUUID());
-        if (party != null) {
-            for (java.util.UUID id : party.members) {
-                ServerPlayer m = id.equals(player.getUUID()) ? null : player.server.getPlayerList().getPlayer(id);
-                if (m != null && m.level() == player.level()) {
-                    jp.revati.skyabyss.notice.Notice.hint(m, key, a);
-                }
-            }
-        }
-    }
-
     // ---------------------------------------------------------------- 毎 tick (SkillEvents から)
     public static void tick(MinecraftServer server) {
         SkillEffects.tick(server);
+        JobActions.tick(server);
         for (Iterator<TrackedArrow> it = ARROWS.iterator(); it.hasNext();) {
             TrackedArrow t = it.next();
             AbstractArrow a = t.arrow();
@@ -1274,6 +1269,7 @@ public final class SkillActions {
         ARROWS.clear();
         RAINS.clear();
         SkillEffects.clear();
+        JobActions.clear();
     }
 
     // 自己テスト用: 降っている途中の驟雨の数

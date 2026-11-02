@@ -1,0 +1,91 @@
+# 封の箱 (docs/design/52): 地面の 9 種・一人称で持つ・封切り師の画面 (一覧・回る途中・当たり・まとめて)・旅嚢の「封の箱」の欄・封切り師の姿
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/box_ui.txt -PshotsName=box_ui
+world box_ui flat
+size 960 540
+timeout 4000
+render 6
+clouds off
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt replace
+cmd kill @e[type=minecraft:item]
+cmd summon minecraft:item_display -4.8 -59.9 3 {item:{id:"skyabyss:box_stone_whale",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display -3.6 -59.9 3 {item:{id:"skyabyss:box_tide_shell",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display -2.4 -59.9 3 {item:{id:"skyabyss:box_thunder_wing",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display -1.2 -59.9 3 {item:{id:"skyabyss:box_ember",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display 0.0 -59.9 3 {item:{id:"skyabyss:box_uncommon_1",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display 1.2 -59.9 3 {item:{id:"skyabyss:box_rare_3",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display 2.4 -59.9 3 {item:{id:"skyabyss:box_epic_4",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display 3.6 -59.9 3 {item:{id:"skyabyss:box_heroic_5",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+cmd summon minecraft:item_display 4.8 -59.9 3 {item:{id:"skyabyss:box_artifact",count:1},item_display:"fixed",transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[0.9f,0.9f,0.9f]}}
+camera 0 -59.3 -1.2 0 18
+waitchunks
+hud off
+wait 60
+chat clear
+shot ground_boxes
+camera 0 -59.8 1.4 0 30
+wait 20
+shot ground_boxes_near
+cmd summon skyabyss:attendant 0 -60 7 {NoAI:1b,Role:"box_opener",Rotation:[180f,0f],PersistenceRequired:1b}
+hud off
+camera 0 -58.6 4.2 0 8
+wait 40
+shot opener_front
+camera 2.2 -58.6 5.2 40 8
+wait 10
+shot opener_side
+camera 0 -59.5 -3 0 0
+wait 10
+hud on
+cmd skyabyss play box give box_stone_whale 2
+cmd skyabyss play box give box_rare_3 8
+cmd skyabyss play box give box_heroic_5 1
+cmd skyabyss play box give box_artifact 1
+wait 10
+chat clear
+cmd skyabyss play box open
+waitscreen 100 BoxScreen
+wait 10
+shot screen_list
+click 320 191
+wait 30
+shot screen_spin
+wait 70
+shot screen_card
+click 300 217
+wait 10
+click 144 77
+wait 5
+shot screen_list_rare
+click 320 215
+wait 24
+shot screen_batch_spin
+wait 260
+shot screen_summary
+click 240 217
+wait 10
+click 144 77
+wait 5
+click 320 191
+wait 100
+shot screen_card_heroic
+close
+wait 10
+cmd gamemode survival
+wait 5
+open inventory
+wait 10
+click 303 46
+wait 10
+shot pouch_box_tab
+close
+quit

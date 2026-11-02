@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skyabyss:block/mirror_stone"
+    },
+    "facing=east": {
+      "model": "skyabyss:block/mirror_stone",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skyabyss:block/mirror_stone",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skyabyss:block/mirror_stone",
+      "y": 270
+    }
+  }
+}

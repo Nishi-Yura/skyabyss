@@ -37,7 +37,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //  - 語りの文 (ほかの担当が使う鍵): 日英にある、%s の数がそろう
 //  - 品の名前と説明: 日英にある
 //  - 天の鍵との継ぎ目: 余燼の燠石が四つ目として story の SkyKey につながる (四体を止めて四つで鍵、三つでは組まない、止めていなければ組まない)。
-//    「第一章 了」は SkyKey の終わりの札 (一章　天の鍵 / ベータ版はここまでです) で出す
+//    「第一章 了」は SkyKey の終わりの札 (巨神編　天の鍵 / 巨神編　了。続きは五章の深淵) で出す
 //  - 夜明けの地鳴り (EmberFinale): 余燼を止めた人だけ、地上の夜明けに一度
 // 記録は写して試し、最後に戻す
 public final class EmberLoreSelfTest {

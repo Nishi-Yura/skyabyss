@@ -1,0 +1,52 @@
+# 終章の結末のあとの空 (docs/design/50 の 4.4): 鎮める (晴れた空)・壊す (裂け目。昼と夜)・受け入れる (巡る翼。四方を広角で)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/finale_endings.txt -PshotsName=finale_endings
+world finale_endings
+size 1280 720
+timeout 2400
+render 10
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd time set 6000
+cmd weather clear
+cmd skyabyss cloudsea ending calm
+wait 60
+camera 0 150 0 200 -30
+wait 60
+shot e01_calm_noon
+cmd time set 18000
+wait 40
+camera 0 150 0 200 -40
+wait 40
+shot e02_calm_night
+cmd skyabyss cloudsea ending break
+cmd time set 6000
+wait 60
+camera 0 150 0 220 -40
+wait 60
+shot e03_break_noon
+cmd time set 18000
+wait 40
+shot e04_break_night
+cmd skyabyss cloudsea ending accept
+cmd time set 6000
+fov 110
+wait 60
+camera 0 150 0 0 -50
+wait 30
+shot e05_accept_s
+camera 0 150 0 90 -50
+wait 10
+shot e06_accept_w
+camera 0 150 0 180 -50
+wait 10
+shot e07_accept_n
+camera 0 150 0 270 -50
+wait 10
+shot e08_accept_e
+cmd skyabyss cloudsea ending none

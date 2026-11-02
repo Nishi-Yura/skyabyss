@@ -88,12 +88,53 @@ public final class CombatRulesSelfTest {
                     f.add("durability dropped on a titan back: sword " + sword.getDamageValue() + ", chestplate " + chest.getDamageValue());
                 }
             }
+            // 構えと隙・身構え (docs/design/47 の 2.1 と 3)
+            Zombie boss = EntityType.ZOMBIE.create(over);
+            Zombie foe = EntityType.ZOMBIE.create(over);
+            if (boss != null && foe != null) {
+                boss.setPos(at.getX() + 6.5, at.getY(), at.getZ() + 0.5);
+                foe.setPos(at.getX() + 9.5, at.getY(), at.getZ() + 0.5);
+                boss.setNoAi(true);
+                foe.setNoAi(true);
+                over.addFreshEntity(boss);
+                over.addFreshEntity(foe);
+                BossOpenings.plantedForTest = e -> e == boss;
+                try {
+                    if (BossOpenings.multiplier(boss, false) != BossOpenings.GUARD) {
+                        f.add("a guarded boss should take x" + BossOpenings.GUARD);
+                    }
+                    BossOpenings.moveEnded(boss);
+                    if (BossOpenings.multiplier(boss, false) != BossOpenings.OPEN) {
+                        f.add("a boss should be open (x" + BossOpenings.OPEN + ") right after its move lands");
+                    }
+                    float hp = boss.getHealth();
+                    boss.invulnerableTime = 0;
+                    boss.hurt(over.damageSources().playerAttack(a), 4f);
+                    float open = hp - boss.getHealth();
+                    if (open < 4f * BossOpenings.OPEN * 0.85f) {
+                        f.add("an open boss lost only " + open + " from a 4 hit");
+                    }
+                    for (int i = 0; i < BossOpenings.BRACE_HITS; i++) {
+                        BossOpenings.multiplier(foe, true);
+                    }
+                    if (!BossOpenings.isBraced(foe) || BossOpenings.multiplier(foe, false) != BossOpenings.BRACE) {
+                        f.add("a foe hit " + BossOpenings.BRACE_HITS + " times quickly should brace");
+                    }
+                } finally {
+                    BossOpenings.plantedForTest = null;
+                    boss.discard();
+                    foe.discard();
+                }
+            }
+            if (!FightRations.ration(new ItemStack(Items.BREAD)) || FightRations.ration(new ItemStack(Items.IRON_SWORD))) {
+                f.add("bread should count as a ration and a sword should not");
+            }
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST combat rules crashed", e);
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs)");
+            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; guarded/open bosses, bracing foes, rations)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST combat rules FAILED: {}", s);

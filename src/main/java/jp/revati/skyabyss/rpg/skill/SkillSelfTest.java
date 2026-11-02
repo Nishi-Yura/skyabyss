@@ -36,15 +36,11 @@ public final class SkillSelfTest {
     // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
     public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
-        // 技の規則の検めは、五つの木が全部開いた状態で流す。天職の層は BuildsSelfTest.callings が自分で入れる
-        SkillRules.CALLINGS = false;
         try {
             run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("skill selftest crashed", e);
             failures.add("crashed: " + e);
-        } finally {
-            SkillRules.CALLINGS = true;
         }
         if (failures.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST skills PASSED (points, learn rules, sanitize, nbt, sync codec, death copy, player save/load, cooldowns, mana, casting, passives)");
@@ -68,20 +64,12 @@ public final class SkillSelfTest {
             for (Skill r : s.requires()) {
                 check(f, r.tree == s.tree && r.tier < s.tier, s.id + " requires a skill that is not in the same tree or an earlier tier: " + r.id);
             }
-            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる (橋と前世の技は前提の線なし)
-            boolean linked = s.tree != SkillTree.HYBRID && s.tree != SkillTree.PAST;
+            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる (前世の技は前提の線なし)
+            boolean linked = s.tree != SkillTree.PAST;
             check(f, !linked || (s.tier == 0) == s.requires().isEmpty(), s.id + " tier and requirements disagree");
             SkillData d = new SkillData();
-            // 淵・前世の技は転生の回数、橋は両隣の木の技 3 つずつ
+            // 淵・前世の技は転生の回数
             d.rebirth = SkillRules.GLYPH_SOCKETS * 3;
-            for (SkillTree parent : s.bridgeTrees()) {
-                int n = 0;
-                for (Skill q : Skill.inTree(parent)) {
-                    if (n++ < SkillData.BRIDGE_SKILLS_PER_TREE) {
-                        d.ranks.put(q.id, 1);
-                    }
-                }
-            }
             for (Skill r : s.requires()) {
                 // 前提の前提も覚えておく (そうでないと検めで全部戻る)
                 for (Skill q : Skill.inTree(s.tree)) {
@@ -101,20 +89,23 @@ public final class SkillSelfTest {
             check(f, java.util.Arrays.asList(d.slots).contains(s.id) == s.active, s.id + " slot changed by sanitize");
         }
         // ---------------------------------------------------------------- 技の点・木の形
-        check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(2) == 1 && SkillRules.pointsForLevel(3) == 2
-                && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
-                && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
-                && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
-        check(f, Skill.values().length == 53 && Rune.values().length == 42, "skill / rune counts are wrong");
+        // 1 レベル 1 点 (docs/design/48)
+        check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(2) == 2 && SkillRules.pointsForLevel(3) == 3
+                && SkillRules.pointsForLevel(9) == 9 && SkillRules.pointsForLevel(10) == 10 && SkillRules.pointsForLevel(12) == 12
+                && SkillRules.pointsForLevel(15) == 15 && SkillRules.pointsForLevel(21) == 21 && SkillRules.pointsForLevel(33) == 33
+                && SkillRules.pointsForLevel(50) == 50, "skill points per level are wrong");
+        // 6 職の木 42 本 + 木 v2 で足した 7 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)。刻印は月のヒロイックの書き換え 6 を足して 85
+        check(f, Skill.values().length == 61 && Rune.values().length == 91, "skill / rune counts are wrong (" + Skill.values().length + " / " + Rune.values().length + ")");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
-            boolean linked = s.tree != SkillTree.HYBRID && s.tree != SkillTree.PAST;
+            boolean linked = s.tree != SkillTree.PAST;
             check(f, !linked || (s.tier == 0 ? s.requires().isEmpty() : !s.requires().isEmpty()), s.id + " requirement shape is wrong");
             check(f, s.active == (SkillRules.cooldownTicks(s, 1) > 0), s.id + " cooldown does not match its kind");
             check(f, s.keystone() == (s.tier == 3) && (!s.keystone() || s.maxRank == 1), s.id + " keystone shape is wrong");
-            check(f, s.ordinal() < 36 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 100 && s.iconIndex() < 132, s.id + " icon index");
-            if (s.active && s != Skill.SIGNAL) {
+            check(f, s.ordinal() < 30 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 105 && s.iconIndex() < 148 && (s.iconIndex() < 117 || s.iconIndex() >= 125),
+                    s.id + " icon index");
+            if (s.active) {
                 check(f, SkillRules.manaCost(s, 1) > 0, s.id + " has no mana cost");
             }
             for (int r = 1; r <= s.maxRank; r++) {
@@ -122,7 +113,10 @@ public final class SkillSelfTest {
             }
         }
         for (SkillTree t : SkillTree.values()) {
-            check(f, t.sealed || perTree[t.ordinal()] == (t == SkillTree.HYBRID ? 5 : 6), t.id + " does not have the right number of skills");
+            // 3 行目の左右に職の 4 つ目の技: 岩守り・風読み・灰の鍛え人・骨の射手 +1、潮歌い +2。木 v2 (48) で戦士 +3、風・灰・骨・星 +1
+            int want = t == SkillTree.ROCK ? 10 : t == SkillTree.WIND || t == SkillTree.ASH || t == SkillTree.BONE || t == SkillTree.TIDE ? 8
+                    : t == SkillTree.STAR ? 7 : 6;
+            check(f, t.sealed || perTree[t.ordinal()] == want, t.id + " does not have the right number of skills: " + perTree[t.ordinal()]);
         }
         // 1 本の木の総点 (段 + 刻印 1 点ずつ)。Lv 50 の 45 点では 3 本は極められない
         int[] treePoints = new int[SkillTree.values().length];
@@ -130,7 +124,7 @@ public final class SkillSelfTest {
             treePoints[s.tree.ordinal()] += s.maxRank + (s.runes().isEmpty() ? 0 : 1);
         }
         int rockPts = treePoints[SkillTree.ROCK.ordinal()];
-        check(f, rockPts >= 12 && rockPts <= 20 && rockPts * 3 > SkillRules.pointsForLevel(50), "tree points out of range: " + rockPts);
+        check(f, rockPts >= 12 && rockPts <= 30 && rockPts * 3 > SkillRules.pointsForLevel(50), "tree points out of range: " + rockPts);
         SkyAbyss.LOGGER.info("[selftest] skills: points per tree {}, points at 50: {}", java.util.Arrays.toString(treePoints), SkillRules.pointsForLevel(50));
 
         // ---------------------------------------------------------------- 習得の条件
@@ -152,9 +146,11 @@ public final class SkillSelfTest {
         d.ranks.put(Skill.WHALE_SWEEP.id, 1);
         check(f, d.canLearn(Skill.STONE_OATH, 19) == SkillData.LearnResult.LEVEL && d.canLearn(Skill.STONE_OATH, 20) == SkillData.LearnResult.NO_POINTS
                 || d.canLearn(Skill.STONE_OATH, 20) == SkillData.LearnResult.OK, "the keystone level gate is wrong");
-        check(f, !d.treeOpen(SkillTree.STAR) && !d.treeOpen(SkillTree.ABYSS) && d.treeOpen(SkillTree.ROCK), "sealed trees are open");
-        d.unlockedTrees.add(SkillTree.STAR.id);
-        check(f, d.treeOpen(SkillTree.STAR), "an unlocked tree stayed sealed");
+        // 星読みは魔法使いの木 (docs/design/43) になり、はじめから開いている
+        check(f, d.treeOpen(SkillTree.STAR) && !d.treeOpen(SkillTree.ABYSS) && d.treeOpen(SkillTree.ROCK), "sealed trees are open (or the mage tree is closed)");
+        d.unlockedTrees.add(SkillTree.ABYSS.id);
+        check(f, d.treeOpen(SkillTree.ABYSS), "an unlocked tree stayed sealed");
+        d.unlockedTrees.remove(SkillTree.ABYSS.id);
 
         // ---------------------------------------------------------------- 記録の検め
         d = new SkillData();
@@ -169,7 +165,7 @@ public final class SkillSelfTest {
         check(f, d.ranks.size() == 2 && !d.ranks.containsKey("skyabyss:gone"), "unknown skills were not dropped");
         check(f, d.slots[0].equals(Skill.LUNGE.id) && d.slots[1].isEmpty() && d.slots[2].isEmpty() && d.slots[3].isEmpty(),
                 "bad slots were not cleared: " + String.join(",", d.slots));
-        d.sanitize(3); // 2 点しかない → 全部戻る
+        d.sanitize(1); // 1 点しかない → 全部戻る
         check(f, d.ranks.isEmpty() && d.slots[0].isEmpty(), "overspent skills were not refunded");
         d = new SkillData();
         d.ranks.put(Skill.BACKSTEP.id, 1); // 前提なし
@@ -250,11 +246,11 @@ public final class SkillSelfTest {
         check(f, SkillManager.learn(p, Skill.SKY_RAIN) != SkillData.LearnResult.OK, "sky rain was learned without its requirements");
         check(f, !SkillManager.setSlot(p, 1, Skill.RIPOSTE) && !SkillManager.setSlot(p, 1, Skill.LUNGE), "an unknown or passive skill was slotted");
 
-        // 常時の技の修飾子 (岩の構え 2 段 = 防具 +2・押し返し耐性 +20%) と、岩の木の点 5 のセット (防具 +1・押し返し耐性 +10%)
+        // 常時の技の修飾子 (岩の構え 2 段 = 防具 +2・押し返し耐性 +20%)。木のセットは 48 で消した
         SkillManager.forceRank(p, Skill.STONE_STANCE, 2);
         check(f, pd.knows(Skill.RIPOSTE), "forcing stone stance did not fill its requirement");
-        check(f, Math.abs(p.getAttributeValue(Attributes.ARMOR) - 3) < 1e-6
-                && Math.abs(p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) - 0.3) < 1e-6, "stone stance modifiers are wrong: armor "
+        check(f, Math.abs(p.getAttributeValue(Attributes.ARMOR) - 2) < 1e-6
+                && Math.abs(p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) - 0.2) < 1e-6, "stone stance modifiers are wrong: armor "
                         + p.getAttributeValue(Attributes.ARMOR) + ", kb " + p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         check(f, pd.unspentPoints(12) >= 0, "forcing a rank left negative points");
 
@@ -304,7 +300,7 @@ public final class SkillSelfTest {
         SkillManager.CastResult r = SkillManager.cast(p, 0);
         check(f, r == SkillManager.CastResult.OK, "casting titan cleave returned " + r);
         check(f, zombie.getHealth() < before - 4, "titan cleave did not hurt the zombie (" + before + " -> " + zombie.getHealth() + ")");
-        check(f, Math.abs(pd.mana - 10) < 1e-4, "titan cleave did not cost 10 mana: " + pd.mana);
+        check(f, Math.abs(pd.mana - (20 - SkillRules.manaCost(Skill.TITAN_CLEAVE, 2))) < 1e-4, "titan cleave did not cost its mana: " + pd.mana);
         check(f, pd.cooldown(Skill.TITAN_CLEAVE) == SkillRules.cooldownTicks(Skill.TITAN_CLEAVE, 2) && pd.globalCooldown == SkillRules.GLOBAL_COOLDOWN,
                 "titan cleave cooldown did not start");
         check(f, zombie.invulnerableTime == 0, "a skill hit left the zombie invulnerable (it would eat the next normal attack)");
@@ -342,7 +338,8 @@ public final class SkillSelfTest {
         p.getInventory().setItem(9, new ItemStack(Items.ARROW, 5));
         r = SkillManager.cast(p, 1);
         check(f, r == SkillManager.CastResult.OK, "casting cloud pierce returned " + r);
-        check(f, p.getInventory().getItem(9).getCount() == 4, "cloud pierce did not use one arrow");
+        // 弓は矢がなくても撃てる (2026-10-28。item/FreeArrows): ふつうの矢は減らない
+        check(f, p.getInventory().getItem(9).getCount() == 5, "cloud pierce used up a plain arrow (bows need no arrows)");
         List<AbstractArrow> arrows = level.getEntitiesOfClass(AbstractArrow.class, new AABB(px - 8, py - 8, pz - 8, px + 8, py + 8, pz + 8),
                 e -> e.getTags().contains(SkillActions.PIERCE_TAG));
         check(f, arrows.size() == 1 && arrows.get(0).getPierceLevel() == SkillRules.piercePierce(2) + 1 && arrows.get(0).isNoGravity()
@@ -356,7 +353,7 @@ public final class SkillSelfTest {
         pd.globalCooldown = 0;
         int rains = SkillActions.pendingRains();
         r = SkillManager.cast(p, 2);
-        check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - 4) < 1e-4,
+        check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - (20 - SkillRules.manaCost(Skill.SKY_RAIN, 1))) < 1e-4,
                 "sky rain was not scheduled (" + r + ", mana " + pd.mana + ")");
         SkillActions.clear();
 
@@ -374,7 +371,7 @@ public final class SkillSelfTest {
         loaded.load(saved);
         check(f, same(pd, SkillManager.get(loaded)), "skill data was not saved with the player");
         check(f, SkillManager.get(loaded).cooldown(Skill.TITAN_CLEAVE) == 77, "cooldowns were not saved");
-        check(f, Math.abs(loaded.getAttributeValue(Attributes.ARMOR) - 3) < 1e-6, "stone stance armor was not saved with the player");
+        check(f, Math.abs(loaded.getAttributeValue(Attributes.ARMOR) - 2) < 1e-6, "stone stance armor was not saved with the player");
 
         // 忘れると修飾子が外れる
         SkillManager.forgetAll(p);

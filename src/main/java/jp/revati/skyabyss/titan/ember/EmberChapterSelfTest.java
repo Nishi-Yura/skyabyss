@@ -163,7 +163,8 @@ public final class EmberChapterSelfTest {
                 "the ember sky stage is not registered", f);
         for (String name : List.of("ember_hearth_ruin", "ember_ash_post", "ember_warm_ledge")) {
             Blueprint bp = Blueprint.get(name);
-            expect(!bp.cells.isEmpty() && bp.rx1 - bp.rx0 <= 6 && bp.rz1 - bp.rz0 <= 6, "blueprint " + name + " is empty or too big", f);
+            // 2026-10-28 に建築の水準へ建て直し、足もとを 3 広げた (tools/gen/world/build_chsites.py)。大陸の上なので一辺 12 まで
+            expect(!bp.cells.isEmpty() && bp.rx1 - bp.rx0 <= 12 && bp.rz1 - bp.rz0 <= 12, "blueprint " + name + " is empty or too big", f);
             if (!name.equals("ember_ash_post")) {
                 expect(bp.marks.containsKey("barrel"), "blueprint " + name + " has no barrel mark", f);
             }
@@ -293,7 +294,7 @@ public final class EmberChapterSelfTest {
         }
         expect(titan.mode() == EmberTitanEntity.Mode.SLEEP, "the titan did not finish rising: " + titan.mode(), f);
         List<BlockState> after = snapshot(level);
-        // 伏せる体に食い込む地形 (台の石) は取り除いてよい (titan/TitanClearing。docs/design/33)。人の建物 (板・ガラス・丸石・松明・箱) と空気は変わらない
+        // 伏せる体に食い込む地形 (台の石) は取り除いてよい (titan/TitanClearing)。人の建物 (板・ガラス・丸石・松明・箱) と空気は変わらない
         int changed = 0;
         int carved = 0;
         for (int i = 0; i < Math.min(before.size(), after.size()); i++) {

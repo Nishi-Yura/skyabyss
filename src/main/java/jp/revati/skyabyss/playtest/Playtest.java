@@ -28,6 +28,7 @@ import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.readiness.Readiness;
 import jp.revati.skyabyss.rpg.Growth;
+import jp.revati.skyabyss.titan.TitanKeeper;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.WhaleKeeper;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
@@ -100,9 +101,16 @@ public final class Playtest {
 
     public static int run(ServerPlayer p, String cmd) {
         try {
-            return p.server.getCommands().getDispatcher().execute(cmd, p.createCommandSourceStack().withPermission(4).withSuppressedOutput());
-        } catch (CommandSyntaxException e) {
-            SkyAbyss.LOGGER.warn("playtest: '{}' failed: {}", cmd, e.getMessage());
+            // 製品版で隠した入口 (dev/CommandGate) も、中から流す分は通す
+            return jp.revati.skyabyss.dev.CommandGate.inside(() -> {
+                try {
+                    return p.server.getCommands().getDispatcher().execute(cmd, p.createCommandSourceStack().withPermission(4).withSuppressedOutput());
+                } catch (CommandSyntaxException e) {
+                    throw new IllegalStateException(e);
+                }
+            });
+        } catch (IllegalStateException e) {
+            SkyAbyss.LOGGER.warn("playtest: '{}' failed: {}", cmd, e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             return 0;
         }
     }
@@ -131,6 +139,17 @@ public final class Playtest {
 
     // ---------------------------------------------------------------- 巨神
     @Nullable
+    @org.jetbrains.annotations.Nullable
+    static TitanKeeper<?> keeper(int idx) {
+        return switch (idx) {
+            case 0 -> WhaleKeeper.keeper();
+            case 1 -> TideKeeper.KEEPER;
+            case 2 -> StormKeeper.KEEPER;
+            case 3 -> EmberKeeper.KEEPER;
+            default -> null;
+        };
+    }
+
     public static Entity titanEntity(ServerLevel overworld, int idx) {
         return switch (idx) {
             case 0 -> WhaleKeeper.current(overworld);
@@ -167,7 +186,9 @@ public final class Playtest {
         if (titanEntity(p.server.overworld(), idx) != null) {
             task.accept(p);
         } else {
-            WAITS.add(new Wait(p.getUUID(), idx, task, new int[] {400}));
+            // 大陸の居場所は遠く、初めてなら地形を作るところから読み込むので長めに待つ (2 分)
+            TitanKeeper<?> keeper = keeper(idx);
+            WAITS.add(new Wait(p.getUUID(), idx, task, new int[] {keeper != null && keeper.lair(p.serverLevel()) != null ? 2400 : 400}));
         }
     }
 
@@ -178,6 +199,7 @@ public final class Playtest {
         for (Wait w : List.copyOf(WAITS)) {
             ServerPlayer p = server.getPlayerList().getPlayer(w.player());
             if (p == null || --w.left()[0] < 0) {
+                SkyAbyss.LOGGER.warn("playtest: gave up waiting for the titan {}", w.idx());
                 WAITS.remove(w);
             } else if (titanEntity(server.overworld(), w.idx()) != null) {
                 WAITS.remove(w);
@@ -189,6 +211,26 @@ public final class Playtest {
     // その巨神が地上にいなければ呼び、近くへ降ろして道 (鎖など) を下ろさせ、そのあと then
     public static void summonRest(ServerPlayer p, int idx, java.util.function.Consumer<ServerPlayer> then) {
         toOverworld(p);
+        // 大陸: 巨神は決まった居場所で休む。いなければ居場所に出す (呼ぶ・降ろすのコマンドは要らない)
+        TitanKeeper<?> keeper = keeper(idx);
+        if (keeper != null && keeper.lair(p.serverLevel()) != null) {
+            var lair = keeper.lair(p.serverLevel());
+            ServerLevel over = p.serverLevel();
+            keeper.appearAtLair(over, true);
+            // 見守りは人のそばの巨神しか読み込まないので、居場所のそば (体の外の地面か水の上) へ先に運ぶ
+            int x = net.minecraft.util.Mth.floor(lair.x()) + 120;
+            int z = net.minecraft.util.Mth.floor(lair.z());
+            over.getChunk(x >> 4, z >> 4);
+            int y = over.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
+            if (p instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+                // 自己テストの偽の人は接続がないので、位置だけ動かす
+                p.moveTo(x + 0.5, y + 1, z + 0.5, 90f, 0f);
+            } else {
+                p.teleportTo(over, x + 0.5, y + 1, z + 0.5, 90f, 0f);
+            }
+            whenTitan(p, idx, then);
+            return;
+        }
         if (titanEntity(p.server.overworld(), idx) == null) {
             run(p, "skyabyss titan summon" + suffix(idx));
         }
@@ -246,6 +288,7 @@ public final class Playtest {
             if (insideBack(pp, idx)) {
                 then.accept(pp);
             } else {
+                SkyAbyss.LOGGER.warn("playtest: boarding the titan {} failed for {} (in {})", idx, pp.getGameProfile().getName(), pp.level().dimension().location());
                 pp.sendSystemMessage(net.minecraft.network.chat.Component.translatable("commands.skyabyss.playtest.board_failed")
                         .withStyle(net.minecraft.ChatFormatting.RED));
             }
@@ -370,10 +413,10 @@ public final class Playtest {
         Growth.setLevel(p, tier >= 4 ? 40 : ProgressRules.TITAN_LEVEL[tier]);
         List<ItemStack> give = new ArrayList<>();
         if (tier == 0) {
-            equip(p, new ItemStack(Items.IRON_HELMET), new ItemStack(Items.IRON_CHESTPLATE), new ItemStack(Items.IRON_LEGGINGS),
-                    new ItemStack(Items.IRON_BOOTS));
-            give.add(new ItemStack(Items.IRON_SWORD));
-            give.add(new ItemStack(Items.BOW));
+            equip(p, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get()), new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get()), new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get()),
+                    new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get()));
+            give.add(new ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.SWORD.get()));
+            give.add(new ItemStack(jp.revati.skyabyss.rpg.skill.JobChoice.BOW.get()));
         } else {
             TitanGearSet set = TitanGearSets.get(ProgressRules.TITAN_ORDER.get(tier - 1));
             if (set != null) {
@@ -391,11 +434,11 @@ public final class Playtest {
                 equip(p, armor.toArray(new ItemStack[0]));
             }
         }
-        give.add(new ItemStack(Items.ARROW, 64));
-        give.add(new ItemStack(Items.SHIELD));
-        give.add(new ItemStack(Items.COOKED_BEEF, 48));
-        give.add(new ItemStack(Items.GOLDEN_APPLE, 8));
-        give.add(PotionContents.createItemStack(Items.POTION, Potions.STRONG_HEALING).copyWithCount(4));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get(), 64));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.TRAVEL_SHIELD.get()));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.SMOKED_MEAT.get(), 48));
+        give.add(new ItemStack(jp.revati.skyabyss.guide.Ch2Gear.PEARL_POWDER.get(), 8));
+        give.add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.STRONG_HEALING.get(), 4));
         for (ItemStack s : give) {
             Quests.give(p, s);
         }

@@ -83,7 +83,10 @@ public abstract class GuiGraphicsMixin {
 
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("HEAD"))
     private void skyabyss$in1(Font font, String text, int x, int y, int color, boolean shadow, CallbackInfoReturnable<Integer> cir) {
-        skyabyss$begin();
+        skyabyss$begin(font, text == null ? 0 : font.width(text), x, y);
+        if (jp.revati.skyabyss.client.dev.OverlapAudit.capturing() && text != null) {
+            jp.revati.skyabyss.client.dev.OverlapAudit.text((GuiGraphics) (Object) this, font, text, x, y, font.width(text), skyabyss$on);
+        }
     }
 
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("RETURN"))
@@ -93,7 +96,10 @@ public abstract class GuiGraphicsMixin {
 
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)I", at = @At("HEAD"))
     private void skyabyss$in2(Font font, FormattedCharSequence text, int x, int y, int color, boolean shadow, CallbackInfoReturnable<Integer> cir) {
-        skyabyss$begin();
+        skyabyss$begin(font, text == null ? 0 : font.width(text), x, y);
+        if (jp.revati.skyabyss.client.dev.OverlapAudit.capturing() && text != null) {
+            jp.revati.skyabyss.client.dev.OverlapAudit.text((GuiGraphics) (Object) this, font, text, x, y, font.width(text), skyabyss$on);
+        }
     }
 
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)I", at = @At("RETURN"))
@@ -103,9 +109,10 @@ public abstract class GuiGraphicsMixin {
 
     private boolean skyabyss$on;
 
-    private void skyabyss$begin() {
+    private void skyabyss$begin(Font font, int width, int x, int y) {
         int[] b = TextBounds.current();
-        skyabyss$on = b != null;
+        // 範囲の中に収まる字は切らない (enableScissor は描きためた分をいったん流すので、字ごとに切ると文字の多い画面が重い。2026-11-02 の監査)
+        skyabyss$on = b != null && !(x >= b[0] && y >= b[1] && x + width + 1 <= b[0] + b[2] && y + font.lineHeight + 1 <= b[1] + b[3]);
         if (skyabyss$on) {
             ((GuiGraphics) (Object) this).enableScissor(b[0], b[1], b[0] + b[2], b[1] + b[3]);
         }

@@ -27,7 +27,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
 
-// 焼けた見張り塔 (docs/design/21 の 5.1。三章の小さなダンジョン、支度の段 ch3/scorched_watch の舞台)。部品は ch3_scorched_watch (tools/gen/ch3/gen_ch3_ground.py)。
+// 焼けた見張り塔 (三章の小さなダンジョン、支度の段 ch3/scorched_watch の舞台)。部品は ch3_scorched_watch (データを直接直す（生成スクリプトはない）)。
 //
 //   場所   跡地 (西の峰) の中心から 60〜150、高台。外 9x9 の三階: 入口の間 (立つ高さ 0)・中の間 (6)・頂の間 (12。まんなかに柱)。北東の隅の梯子で上る。
 //          入口の脇に碑 (sign.skyabyss.ch3_watch)、南西の外に旅の職人の野営 (印 artisan。ArtisanSpawner の三章の立つ所)
@@ -69,11 +69,11 @@ public final class ScorchedWatch {
         ChapterSites.element(SITE, Chapters.STORM, SITE).atGround().dist(60, 150).prefer(Prefer.HIGH).arriveRadius(14)
                 .post(ScorchedWatch::finish)
                 .onArrive((p, s) -> Notice.narrate(p, "message.skyabyss.ch3g.arrive." + SITE)).register();
-        SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:copper_ingot", 6),
+        SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:copper_lump", 6),
                 new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 4), new SiteTreasure.Entry(Ch3Mobs.STATIC_COTTON, 4), new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 4),
                 new SiteTreasure.Entry(Ch3Mobs.THUNDER_WARD_THREAD, 1))));
-        SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("minecraft:copper_ingot", 2, 4, 3),
-                new SiteTreasure.Entry("minecraft:raw_copper", 2, 5, 3),
+        SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:copper_lump", 2, 4, 3),
+                new SiteTreasure.Entry("skyabyss:copper_lump", 2, 5, 3),
                 new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 2, 4, 3), new SiteTreasure.Entry(Ch3Mobs.STATIC_COTTON, 2, 4, 3), new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 1, 3, 2))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.STORM, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, ScorchedWatch::origins, ScorchedWatch::yawAt));
         SiteSpawner.onCleared(SITE, (p, first) -> {

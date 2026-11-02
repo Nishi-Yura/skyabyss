@@ -106,25 +106,46 @@ public enum Glyph {
         return item == null || center == null ? null : new Placed(item, center);
     }
 
-    // 隣の技: 木の前提の線でつながる技 (上下)、橋とその親の木の頂点 (段 2 の技)
+    // 隣の技: 木の前提の線でつながる技 (上下)
     public static List<Skill> neighbors(Skill center) {
+        // 木 v2 (48): 隣は木の線でつながる技の節 (間の基礎・常に効く数の節は一つ飛ばして数えない)
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(center.tree);
+        if (tree != null) {
+            List<Skill> out = new ArrayList<>();
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode mine = tree.skillNode(center);
+            if (mine == null) {
+                return out;
+            }
+            for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode n : tree.nodes()) {
+                if (n.skill == null || n.skill == center || n == tree.skillNode(n.skill) == false) {
+                    continue;
+                }
+                if (n.requires.contains(mine.id) || mine.requires.contains(n.id)) {
+                    out.add(n.skill);
+                }
+            }
+            return out;
+        }
         List<Skill> list = new ArrayList<>(center.requires());
         for (Skill s : Skill.values()) {
             if (s.requires().contains(center)) {
                 list.add(s);
             }
         }
-        SkillTree[] parents = center.bridgeTrees();
-        for (Skill s : Skill.values()) {
-            if (parents.length == 2 && s.tier == 2 && s.tree.callable() && (s.tree == parents[0] || s.tree == parents[1])) {
-                list.add(s);
-            }
-            if (center.tier == 2 && center.tree.callable() && s.bridgeTrees().length == 2
-                    && (s.bridgeTrees()[0] == center.tree || s.bridgeTrees()[1] == center.tree)) {
-                list.add(s);
+        return list;
+    }
+
+    // その技を中心に差している紋 (開いている穴の中。無ければ null)。木の画面の印
+    @javax.annotation.Nullable
+    public static Item centerGlyph(SkillData d, int rebirth, Skill skill) {
+        int open = SkillRules.glyphSockets(rebirth);
+        for (int i = 0; i < Math.min(open, d.glyphSockets.length); i++) {
+            Placed p = parsePlaced(d.glyphSockets[i]);
+            if (p != null && p.center == skill) {
+                return p.item;
             }
         }
-        return list;
+        return null;
     }
 
     // 開いている穴の数だけ見て、その技が受ける合計 (上限つき。力は +、待ち・マナは − の割合)

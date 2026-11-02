@@ -30,7 +30,7 @@
     "xp": 120,
     "items": [
       {
-        "item": "minecraft:spyglass",
+        "item": "skyabyss:socket_shard_stone",
         "count": 1
       }
     ],

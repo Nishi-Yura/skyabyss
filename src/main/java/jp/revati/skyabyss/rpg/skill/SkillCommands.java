@@ -56,6 +56,16 @@ public final class SkillCommands {
                             SkillManager.forgetAll(target(ctx));
                             return done(ctx);
                         })))
+                        // 木 v2 の節を取る (今の職の木。docs/design/48)
+                        .then(Commands.literal("node").then(player().then(Commands.argument("node", StringArgumentType.word()).executes(ctx -> {
+                            ServerPlayer p = target(ctx);
+                            SkillData.TakeResult r = SkillManager.takeNode(p, StringArgumentType.getString(ctx, "node"));
+                            if (r != SkillData.TakeResult.OK) {
+                                ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("node: " + r));
+                                return 0;
+                            }
+                            return done(ctx);
+                        }))))
                         .then(Commands.literal("points").then(player().then(Commands.argument("bonus", IntegerArgumentType.integer(0, 100)).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).bonusPoints = IntegerArgumentType.getInteger(ctx, "bonus");
@@ -73,6 +83,12 @@ public final class SkillCommands {
                                     SkillManager.setMana(target(ctx), DoubleArgumentType.getDouble(ctx, "amount"));
                                     return done(ctx);
                                 }))))
+                        // 型の溜まるもの (Gauges) を決める: gauge <人> <型 (cleaver など) | off> <値>。撮影・確かめ用 (off で点の決まりに戻す)
+                        .then(Commands.literal("gauge").then(player().then(Commands.argument("kind", StringArgumentType.word())
+                                .then(Commands.argument("value", IntegerArgumentType.integer(0, 200)).executes(ctx -> {
+                                    boolean ok = Gauges.devSet(target(ctx), StringArgumentType.getString(ctx, "kind"), IntegerArgumentType.getInteger(ctx, "value"));
+                                    return ok ? done(ctx) : 0;
+                                })))))
                         .then(Commands.literal("cooldowns").then(player().executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).cooldowns.clear();
@@ -97,12 +113,16 @@ public final class SkillCommands {
                         .then(Commands.literal("cast").then(player().then(Commands.argument("slot", IntegerArgumentType.integer(1, SkillRules.SLOTS))
                                 .executes(ctx -> {
                                     ServerPlayer p = target(ctx);
-                                    SkillManager.CastResult r = SkillManager.cast(p, IntegerArgumentType.getInteger(ctx, "slot") - 1);
-                                    ctx.getSource().sendSuccess(() -> Component.literal("cast: " + r.name()), false);
+                                    int slot = IntegerArgumentType.getInteger(ctx, "slot") - 1;
+                                    SkillManager.CastResult r = SkillManager.cast(p, slot);
+                                    // 断られた理由が分かるように、今の職・手の武器の職・枠の技を添える
+                                    SkillData sd = SkillManager.get(p);
+                                    Skill in = sd.slot(slot);
+                                    ctx.getSource().sendSuccess(() -> Component.literal("cast: " + r.name() + " (job " + sd.curJob + ", held " + Job.held(p)
+                                            + ", slot " + (in == null ? "-" : in.id) + ", slots " + String.join(",", sd.slots) + ", bars " + sd.jobBars.keySet()
+                                            + ", data#" + System.identityHashCode(sd) + ")"), false);
                                     return r == SkillManager.CastResult.OK ? 1 : 0;
                                 }))))
-                        .then(Commands.literal("calling").then(player().then(Commands.argument("tree", StringArgumentType.word())
-                                .executes(ctx -> callingCommand(ctx, "")))))
                         .then(Commands.literal("rune").then(player().then(Commands.argument("skill", StringArgumentType.word())
                                 .then(Commands.argument("index", IntegerArgumentType.integer(0, 5)).executes(ctx -> {
                                     // 開発用: 刻印を選んだことにする (極めている・天職の木のときだけ。点も武器も問わない)
@@ -121,15 +141,7 @@ public final class SkillCommands {
                                     SkillManager.sync(p);
                                     return done(ctx);
                                 })))))
-                        // 開発用 (自由度。docs/design/31): 構え・鍵石・熟練・連鎖・転生の初期化を、条件を問わずに入れる
-                        .then(Commands.literal("stance").then(player().then(Commands.argument("name", StringArgumentType.word()).executes(ctx -> {
-                            ServerPlayer p = target(ctx);
-                            String name = StringArgumentType.getString(ctx, "name");
-                            SkillStance st = java.util.Arrays.stream(SkillStance.values()).filter(x -> x.id.equals(name)).findFirst().orElse(SkillStance.NONE);
-                            SkillManager.get(p).stanceCd = 0;
-                            SkillManager.setStance(p, st);
-                            return done(ctx);
-                        }))))
+                        // 開発用 (自由度。docs/design/31): 鍵石・熟練・転生の初期化を、条件を問わずに入れる
                         .then(Commands.literal("keystone").then(player().then(Commands.argument("id", StringArgumentType.word()).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillKeystone k = SkillKeystone.byId(StringArgumentType.getString(ctx, "id"));
@@ -153,13 +165,6 @@ public final class SkillCommands {
                                     SkillManager.sync(p);
                                     return done(ctx);
                                 })))))
-                        .then(Commands.literal("chain").then(player().then(Commands.argument("mask", IntegerArgumentType.integer(0, 15)).executes(ctx -> {
-                            ServerPlayer p = target(ctx);
-                            SkillManager.get(p).chainMask = IntegerArgumentType.getInteger(ctx, "mask");
-                            SkillManager.get(p).sanitize(SkillManager.level(p));
-                            SkillManager.sync(p);
-                            return done(ctx);
-                        }))))
                         .then(Commands.literal("rebirth").then(player().executes(ctx -> {
                             SkillReset.forRebirth(target(ctx));
                             return done(ctx);
@@ -203,14 +208,6 @@ public final class SkillCommands {
                         }))))));
     }
 
-    // 開発用: 進みに関わらず天職を決める (一つ目が空なら一つ目、そうでなければ二つ目)
-    private static int callingCommand(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String unused) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        ServerPlayer p = target(ctx);
-        SkillCalling.Result r = SkillCalling.choose(p, StringArgumentType.getString(ctx, "tree"), true);
-        ctx.getSource().sendSuccess(() -> Component.literal("calling: " + r.name()), false);
-        return r == SkillCalling.Result.OK ? 1 : 0;
-    }
-
     private static com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, ?> player() {
         return Commands.argument("player", EntityArgument.player());
     }
@@ -239,8 +236,10 @@ public final class SkillCommands {
     private static MutableComponent summary(ServerPlayer p) {
         SkillData d = SkillManager.get(p);
         int level = SkillManager.level(p);
+        // 開発用なので、職と枠も添える (撮影の台本の記録で読める)
         return Component.translatable("message.skyabyss.skill.summary", p.getDisplayName(), d.spentPoints(), d.totalPoints(level),
-                Math.round(d.mana), Math.round(SkillManager.maxMana(p)), d.ranks.size(), d.respecs);
+                Math.round(d.mana), Math.round(SkillManager.maxMana(p)), d.ranks.size(), d.respecs)
+                .append(Component.literal(" [" + d.curJob + ": " + String.join(",", d.slots) + " data#" + System.identityHashCode(d) + "]"));
     }
 
     private static int show(CommandSourceStack source, ServerPlayer p) {

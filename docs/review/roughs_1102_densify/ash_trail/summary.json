@@ -1,0 +1,13 @@
+{
+ "id": "ash_trail",
+ "letter": "c",
+ "installed": 380,
+ "before": 332,
+ "before_closed": 380,
+ "after": 962,
+ "after_closed": 992,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

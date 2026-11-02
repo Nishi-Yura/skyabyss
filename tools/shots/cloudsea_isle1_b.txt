@@ -1,0 +1,35 @@
+# 島 1 の見直しの追い撮り: 敵 2 種を近くで、主の間の床の崩れ (主がいるうちに)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_isle1_b.txt -PshotsName=cloudsea_isle1_b
+world cloudsea_isle1_b
+size 1280 720
+timeout 3000
+render 10
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 0 90 -130
+waitchunks 200
+wait 60
+cmd summon skyabyss:bell_mourner 1 77 -137 {NoAI:1b,Rotation:[150f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:mist_bird -2 79 -137 {NoAI:1b,Rotation:[210f,0f],PersistenceRequired:1b}
+wait 20
+camera 0 78.6 -133.5 180 6
+wait 30
+shot j01_foes_close
+cmd skyabyss cloudsea lord
+cmd skyabyss cloudsea ring arena_bell_1
+cmd skyabyss cloudsea crumble
+wait 30
+camera 0 116 -168 180 34
+wait 30
+shot j02_arena_crumbled
+camera 9 108 -186 270 14
+wait 20
+shot j03_lord_side

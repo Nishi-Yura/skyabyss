@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 
-// 灰被りの屑 (docs/design/21 の 6.1): 灰被りの未完成。殻の予習。HP 28、殴り 8、殻 15。
+// 灰被りの屑: 灰被りの未完成。殻の予習。HP 28、殴り 8、殻 15。
 // 殻があるあいだは傷が半分 (灰被りと同じ AshThrall の決まり)。殻が割れると燃えて速くなり (殴り 10)、10 秒で燃え尽きる。
 // 骨とアニメは灰被りのもの (animation.ash_thrall.*)。描画は灰被りの 0.85 倍 (Ch4Renderers)
 public class AshHusk extends AshThrall {

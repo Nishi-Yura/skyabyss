@@ -158,7 +158,7 @@ public final class DepthBoss {
             this.floor = floor;
             this.bossNo = DepthPlan.bossNo(floor);
             this.def = def;
-            this.bar = new ServerBossEvent(name, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_6);
+            this.bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(name, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_6));
             this.rng = new Random(seed);
         }
     }
@@ -361,6 +361,8 @@ public final class DepthBoss {
 
     static void endMove(LivingEntity king, Fight f) {
         freeze(king, false);
+        // 技が終わった: 隙 (47 の 2.1)
+        jp.revati.skyabyss.combat.BossOpenings.moveEnded(king);
         f.active = null;
         f.points.clear();
         f.cooldown = cooldown(f.bossNo, f.phase);

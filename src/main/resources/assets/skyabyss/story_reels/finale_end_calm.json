@@ -1,0 +1,35 @@
+{
+  "_comment": "語りの紙芝居 (tools/story/pixel/install_reels.py)",
+  "panels": [
+    {
+      "id": "p1",
+      "motion": "still",
+      "hold": 3.0,
+      "sound": "minecraft:block.beacon.activate"
+    },
+    {
+      "id": "p2",
+      "motion": "still",
+      "hold": 3.0,
+      "sound": "minecraft:entity.warden.heartbeat"
+    },
+    {
+      "id": "p3",
+      "motion": "left",
+      "hold": 3.0,
+      "sound": "skyabyss:titan_song"
+    },
+    {
+      "id": "p4",
+      "motion": "up",
+      "hold": 3.0,
+      "sound": "minecraft:block.bell.use"
+    },
+    {
+      "id": "p5",
+      "motion": "still",
+      "hold": 3.0,
+      "sound": "minecraft:block.amethyst_block.resonate"
+    }
+  ]
+}

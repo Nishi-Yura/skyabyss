@@ -78,6 +78,42 @@ public abstract class TitanKeeper<T extends Entity> {
     protected abstract void announce(ServerLevel level, T titan);
 
     // 巨神での移動の最中か (この間は、動きと読み込みは旅の操縦が受け持つ)
+    // 大陸の居場所 (ContinentLairs)。大陸の世界でなければ null
+    @Nullable
+    public jp.revati.skyabyss.world.continent.ContinentLairs.Lair lair(ServerLevel level) {
+        return jp.revati.skyabyss.world.continent.ContinentLairs.of(level, slotId);
+    }
+
+    // 居場所で休ませる (各巨神の settleAt)。休んでいれば何もしない
+    protected void settle(ServerLevel level, T titan, jp.revati.skyabyss.world.continent.ContinentLairs.Lair lair) {
+    }
+
+    // 大陸: まだ出ていなくて、前の巨神が止まっている (Progression.worldAllows。force なら問わない) なら、居場所に出して休ませる。
+    // 出ていれば (または出した) その巨神、出せなければ null
+    @Nullable
+    public T appearAtLair(ServerLevel level, boolean force) {
+        jp.revati.skyabyss.world.continent.ContinentLairs.Lair l = lair(level);
+        if (l == null) {
+            return null;
+        }
+        T titan = current(level);
+        if (titan != null) {
+            return titan;
+        }
+        if (slot(level).spawned && !force) {
+            // 出たことがある: 読み込みと呼び直しは tick が受け持つ
+            return null;
+        }
+        if (!force && (resting(level) || !jp.revati.skyabyss.progress.Progression.worldAllows(level.getServer(), slotId))) {
+            return null;
+        }
+        level.getChunk(net.minecraft.util.Mth.floor(l.x()) >> 4, net.minecraft.util.Mth.floor(l.z()) >> 4);
+        titan = spawn(level, l.x(), l.z(), slot(level).state.isEmpty() ? null : slot(level).state);
+        titan.setYRot(l.yaw());
+        settle(level, titan, l);
+        return titan;
+    }
+
     // 呼び直しの宛先で優先する人 (まだこの巨神を見ていない人)。既定は誰も優先しない
     protected boolean preferred(ServerPlayer player) {
         return false;
@@ -189,6 +225,18 @@ public abstract class TitanKeeper<T extends Entity> {
             } else {
                 frozenSince = -1;
             }
+            jp.revati.skyabyss.world.continent.ContinentLairs.Lair home = lair(level);
+            if (home != null && !resting(level)) {
+                // 大陸: 居場所で休ませ続ける。旅などで離れていて、まわりに人がいなければ居場所へ戻す
+                if (Math.hypot(titan.getX() - home.x(), titan.getZ() - home.z()) > 48) {
+                    if (!near && !someoneAboard && unreachableSince >= 0 && now - unreachableSince > RELOCATE_AFTER) {
+                        relocate(level, slot, titan, null, now);
+                    }
+                } else if (now % 20 == 0) {
+                    settle(level, titan, home);
+                }
+                return;
+            }
             if (unreachableSince >= 0 && !someoneAboard && !resting(level) && now - unreachableSince > RELOCATE_AFTER) {
                 ServerPlayer target = pickTarget(level);
                 if (target != null) {
@@ -225,7 +273,8 @@ public abstract class TitanKeeper<T extends Entity> {
         missingSince = -1;
         if (unreachableSince < 0) {
             unreachableSince = now;
-        } else if (!someoneAboard && !resting(level) && now - unreachableSince > RELOCATE_AFTER) {
+        } else if (lair(level) == null && !someoneAboard && !resting(level) && now - unreachableSince > RELOCATE_AFTER) {
+            // (大陸: 居場所で読み込まれずに休んでいるだけなので、呼び直さない)
             ServerPlayer target = pickTarget(level);
             if (target != null) {
                 relocate(level, slot, null, target, now);
@@ -241,10 +290,11 @@ public abstract class TitanKeeper<T extends Entity> {
     // 古い個体 (読み込まれていれば) を消し、プレイヤーの遠くへ新しい個体を出して、前の状態を引き継がせる。
     // 呼び直せる位置がなければ (潮殻で海が見つからないなど) 何もしない。そのときは 2 分待ってやり直す
     private boolean relocate(ServerLevel level, TitanWorldData.Slot slot, @Nullable T old, @Nullable ServerPlayer target, long now) {
-        if (target == null) {
+        jp.revati.skyabyss.world.continent.ContinentLairs.Lair home = lair(level);
+        if (target == null && home == null) {
             return false;
         }
-        Vec3 at = relocationPoint(level, target);
+        Vec3 at = home != null ? new Vec3(home.x(), 0, home.z()) : relocationPoint(level, target);
         if (at == null) {
             unreachableSince = now;
             frozenSince = -1;
@@ -254,7 +304,11 @@ public abstract class TitanKeeper<T extends Entity> {
         if (old != null) {
             old.discard();
         }
-        spawn(level, at.x, at.z, state);
+        T fresh = spawn(level, at.x, at.z, state);
+        if (home != null) {
+            fresh.setYRot(home.yaw());
+            settle(level, fresh, home);
+        }
         return true;
     }
 

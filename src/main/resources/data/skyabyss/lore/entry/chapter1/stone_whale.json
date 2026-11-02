@@ -5,7 +5,7 @@
     {
       "type": "near_entity",
       "target": "skyabyss:stone_whale",
-      "radius": 160
+      "radius": 400
     },
     {
       "type": "dimension",

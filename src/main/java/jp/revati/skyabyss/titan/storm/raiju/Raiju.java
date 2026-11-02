@@ -119,7 +119,7 @@ public class Raiju extends GuardMob {
         NONE, RAIL, DESCEND, POUNCE, CLAW, ROAR, RETURN
     }
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
     @Nullable
     private RaijuNest.Site site;
     // 倒れたときに知らせる先 (順路の中ボスの部屋。trial/raid/mid)

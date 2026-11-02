@@ -255,6 +255,11 @@ public final class SkyPassClient {
         weatherOverridden = true;
     }
 
+    // BGM を止めるか (client/music/MusicDirector。近くを通過している間)
+    public static boolean hushesMusic() {
+        return current != null && proximity >= 0.05f;
+    }
+
     // 近くを通過している間は、音楽と動物の鳴き声が止む
     @SubscribeEvent
     static void onPlaySound(PlaySoundEvent event) {

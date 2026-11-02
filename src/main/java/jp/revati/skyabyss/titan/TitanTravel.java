@@ -87,7 +87,7 @@ public final class TitanTravel {
         if (LIFTS.containsKey(player.getUUID())) {
             return;
         }
-        // 備えの三灯 (21 の 1.2): 赤があれば一度は引き上げず、二度目 (右クリックなら 5 秒以内) で上る
+        // 備えの三灯: 赤があれば一度は引き上げず、二度目 (右クリックなら 5 秒以内) で上る
         if (!jp.revati.skyabyss.readiness.BoardReadiness.attempt(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE, mode)) {
             return;
         }

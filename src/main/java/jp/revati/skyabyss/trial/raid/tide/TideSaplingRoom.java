@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Blocks;
 //  - 苗は体力を持つ (HUD の二つ目の数)。かじられると赤い粒が出て、苗が縮む。人が近くにいる敵は人を相手にする
 //  - 全部の波を退けて、苗が一本でも残れば越える。三本とも失えば、部屋は最初からやり直し
 //  - 敵は磯走り (苗をかじる) と泡吹き (人を撃つ)。水の仕掛けはない
+//  - 闘の試練では (32 の 9.5) 波のあと床が砂になり、潮招きが砂から現れる。招き潮のあいだの逃げ場は苗の台 (一段上げる。苗はそのまま)
 public final class TideSaplingRoom extends RaidRoom {
     static final int HX = 14;
     static final int HZ = 14;
@@ -302,6 +303,18 @@ public final class TideSaplingRoom extends RaidRoom {
     @Override
     public boolean isComplete() {
         return wave >= WAVES && alive() > 0;
+    }
+
+    @Override
+    public void bossFit(RaidCtx ctx, jp.revati.skyabyss.trial.raid.mid.MidRoom mid) {
+        if (mid instanceof jp.revati.skyabyss.trial.raid.mid.TideMidRoom t) {
+            t.useBeds(AT);
+        }
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        ctx.say(Component.translatable("message.skyabyss.raid.TR3.beckoner"));
     }
 
     @Override

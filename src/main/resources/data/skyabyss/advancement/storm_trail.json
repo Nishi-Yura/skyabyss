@@ -2,7 +2,7 @@
   "parent": "skyabyss:scorched_watch",
   "display": {
     "icon": {
-      "id": "minecraft:diamond"
+      "id": "skyabyss:sky_stone"
     },
     "title": {
       "translate": "advancement.skyabyss.storm_trail.title"

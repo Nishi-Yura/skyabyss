@@ -1,0 +1,73 @@
+# 神器の防具 3 式 (docs/design/50 の 4.5.1): 着た姿の前・後ろ・3/4
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/divine_armor.txt -PshotsName=divine_armor
+world shots flat
+size 960 720
+timeout 1800
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+wait 400
+cmd gamemode creative
+fov 50
+camera minecraft:overworld 0 -60 0 180 0
+waitchunks
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:divine_bellkeeper_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_bellkeeper_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_bellkeeper_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_bellkeeper_helmet
+perspective front
+bodyyaw 0
+wait 25
+shot divine_bellkeeper_front
+perspective back
+wait 4
+shot divine_bellkeeper_back
+perspective front
+bodyyaw 40
+wait 4
+shot divine_bellkeeper_side
+bodyyaw 0
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:divine_mistwalker_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_mistwalker_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_mistwalker_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_mistwalker_helmet
+perspective front
+bodyyaw 0
+wait 25
+shot divine_mistwalker_front
+perspective back
+wait 4
+shot divine_mistwalker_back
+perspective front
+bodyyaw 40
+wait 4
+shot divine_mistwalker_side
+bodyyaw 0
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:divine_lampkeeper_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_lampkeeper_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_lampkeeper_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_lampkeeper_helmet
+perspective front
+bodyyaw 0
+wait 25
+shot divine_lampkeeper_front
+perspective back
+wait 4
+shot divine_lampkeeper_back
+perspective front
+bodyyaw 40
+wait 4
+shot divine_lampkeeper_side
+bodyyaw 0

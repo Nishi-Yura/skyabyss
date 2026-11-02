@@ -40,7 +40,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 巨神との「出会い」 (docs/design/09 の 4.4節、28): 乗れる姿を見た・背へ入った・心臓を倒した巨神に出会ったと記し、その呼び笛を一度だけ渡す。
 // 笛は巨神を呼ばない (成体の巨神は一つのパーティの用事では動かない)。笛が呼ぶのは巨神の「子」(titan.young)。
-// 最初の出会いの場面・時刻は変えない。笛は出会った時に一度だけ渡る (なくしたら作業台で作り直せる)
+// 最初の出会いの場面・時刻は変えない。笛は出会った時に一度だけ渡る (旅嚢の品なので、なくならない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TitanCalls {
     // 出会いとみなす距離 (巨神が乗れる姿で止まっているとき)

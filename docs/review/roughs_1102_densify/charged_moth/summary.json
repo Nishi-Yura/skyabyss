@@ -1,0 +1,13 @@
+{
+ "id": "charged_moth",
+ "letter": "a",
+ "installed": 442,
+ "before": 318,
+ "before_closed": 442,
+ "after": 676,
+ "after_closed": 888,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

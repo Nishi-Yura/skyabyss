@@ -1,0 +1,50 @@
+# 新月の谷の敵と主の動きの向きを確かめる (横から。docs/design/46 の 4.3)。敵は東を向けて止める (NoAI)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_mob_poses.txt -PshotsName=moon_mob_poses
+world moon_poses1 continent
+size 1600 900
+timeout 1800
+render 8
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 60
+cmd gamemode spectator
+cmd effect give @s minecraft:night_vision 99999 0 true
+hud off
+cmd summon skyabyss:shadow_stitcher 0 -6 76 {NoAI:1b,Rotation:[-90f,0f]}
+cmd summon skyabyss:dust_crawler 4 -6 80 {NoAI:1b,Rotation:[-90f,0f]}
+cmd summon skyabyss:shell_hare 4 -6 72 {NoAI:1b,Rotation:[-90f,0f]}
+cmd tp @s 2 -3 66 0 10
+wait 40
+cmd skyabyss moonworld lamp
+cmd tp @s 2 -4.5 70 0 0
+wait 20
+cmd skyabyss moonworld pose reach
+wait 12
+shot p1_stitcher_reach
+cmd skyabyss moonworld pose exposed
+wait 10
+shot p2_stitcher_exposed
+cmd skyabyss moonworld pose attack
+wait 4
+shot p3_attack
+cmd skyabyss moonworld pose leap
+wait 3
+shot p4_crawler_leap
+cmd skyabyss moonworld lord
+wait 60
+cmd tp @s -10 24 115 -90 0
+cmd skyabyss moonworld pose grab
+wait 16
+shot p5_lord_grab
+cmd skyabyss moonworld pose wave
+wait 21
+shot p6_lord_wave
+cmd skyabyss moonworld pose frozen
+wait 6
+shot p7_lord_frozen

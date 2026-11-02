@@ -2,7 +2,7 @@
   "parent": "skyabyss:level_50",
   "display": {
     "icon": {
-      "id": "minecraft:totem_of_undying"
+      "id": "skyabyss:resonance_charm"
     },
     "title": {
       "translate": "advancement.skyabyss.rebirth_1.title"

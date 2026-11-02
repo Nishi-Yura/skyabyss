@@ -141,7 +141,7 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_SHELL_SHARD.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.item.storm.StormGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
-        // 序盤の背中の素材 (岩殻片・護り糸)。作業台も旅嚢の中から使える (22 の 17 章)。登録の末尾に足して既存の枠の位置を動かさない
+        // 序盤の背中の素材 (岩殻片・護り糸)。誂えの材料も旅嚢の中から払える。登録の末尾に足して既存の枠の位置を動かさない
         add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_SCRAP.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_THREAD.get(), Category.MATERIAL, 999, false, false);
         // 小さな素材
@@ -153,8 +153,15 @@ public final class PouchEntries {
         // 序盤の小さな素材 (骨片・棘針)
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
+        // 鐘銭も袋へ (2026-10-25 の試遊。支払いは袋と持ち物の両方から: Coins)。共鳴の列に足すと袋の枠が一行あふれるので、小さな素材の列の端に
+        // 上限は Coins.MAX (999,999,999。2026-11-01)。旅嚢の枠の上には数を出さない (PouchScreen.renderSlot)
+        add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.SMALL, jp.revati.skyabyss.facility.Coins.MAX, false, false);
         // 乗り笛 (Y の短押しで呼ぶ・帰す)。登録の末尾に足して既存の枠の位置を動かさない。区分は鍵の列 (使う道具の列に足すと袋の枠が一行あふれる)
         add(list, jp.revati.skyabyss.mount.MountSetup.WHISTLE.get(), Category.KEY, 1, true, false);
+        // 封の箱 (19 種。docs/design/52)。袋の枠の並び (PouchLayout) には出さない
+        for (var box : jp.revati.skyabyss.loot.box.LootBoxSetup.BOX_ITEMS.values()) {
+            add(list, box.get(), Category.BOX, 999, false, false);
+        }
         return list;
     }
 

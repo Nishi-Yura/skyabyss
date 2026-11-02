@@ -107,7 +107,7 @@ public final class StormGearSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, BOW, ANKLET, CHARM, CLAW, GLAIVE, EYE_FEATHER,
                     SHARD, CORE, FRUIT, DUST)) {
                 event.accept(item.get());

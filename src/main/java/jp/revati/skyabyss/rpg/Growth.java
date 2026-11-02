@@ -28,6 +28,7 @@ public final class Growth {
     public static final ResourceLocation MOD_AGILITY_ATTACK = id("growth/agility_attack_speed");
     public static final ResourceLocation MOD_SPIRIT = id("growth/spirit_mana");
     public static final ResourceLocation MOD_VITALITY = id("growth/vitality_health");
+    public static final ResourceLocation MOD_LEVEL = id("growth/level_health");
 
     private Growth() {
     }
@@ -57,6 +58,10 @@ public final class Growth {
         amount = jp.revati.skyabyss.rebirth.Rebirth.scaleXp(player, amount);
         // 物語の進みで決まるレベルの上限 (10 の 5 章)
         int cap = jp.revati.skyabyss.progress.Progression.levelCap(player);
+        // Lv 50 (上限) のあとの経験値は、いまの職の熟練へ (rpg/JobMastery)
+        if (data.level >= GrowthRules.MAX_LEVEL) {
+            JobMastery.add(player, amount);
+        }
         int gained = addXpRaw(data, amount, cap);
         sync(player);
         if (gained > 0) {
@@ -126,46 +131,15 @@ public final class Growth {
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 1f);
         level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);
-        Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level,
-                GrowthRules.POINTS_PER_LEVEL * gained);
+        // 基礎の振り分けは無い (技の木の節で上がる。docs/design/48)。知らせは技の木の点が増えたこと
+        int skill = jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level) - jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level - gained);
+        Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level, skill);
         if (data.level >= GrowthRules.MAX_LEVEL) {
             Notice.narrate(player, "message.skyabyss.growth.max_level");
-        } else if (data.unspentPoints() > 0 && (data.level <= 5 || data.unspentPoints() >= 3 * GrowthRules.POINTS_PER_LEVEL)) {
-            // 振り方の手がかりは、はじめのうちと、力をためこんでいるときだけ (毎回は出さない)
-            Notice.hint(player, "message.skyabyss.growth.open_hint", Component.keybind("key.skyabyss.status"));
         }
     }
 
     // ---------------------------------------------------------------- ステータス
-    // 力を振り分ける。add は 4 つのステータスへの追加量。正しくなければ何もせず false
-    public static boolean allocate(ServerPlayer player, int[] add) {
-        GrowthData data = get(player);
-        if (!canAllocate(data, add)) {
-            return false;
-        }
-        for (int i = 0; i < add.length; i++) {
-            data.stats[i] += add[i];
-        }
-        sync(player);
-        applyModifiers(player);
-        return true;
-    }
-
-    public static boolean canAllocate(GrowthData data, int[] add) {
-        if (add == null || add.length != data.stats.length) {
-            return false;
-        }
-        int sum = 0;
-        for (int i = 0; i < add.length; i++) {
-            // 引き算で比べる (足し算だと、改造したクライアントの巨大な値で int があふれて通ってしまう)
-            if (add[i] < 0 || add[i] > GrowthRules.STAT_CAP - data.stats[i]) {
-                return false;
-            }
-            sum += add[i];
-        }
-        return sum > 0 && sum <= data.unspentPoints();
-    }
-
     // 振り分けを全部戻す (管理者・テスト用。回数も費用も数えない)
     public static void resetStats(ServerPlayer player) {
         GrowthData data = get(player);
@@ -218,6 +192,7 @@ public final class Growth {
         set(player, Attributes.ATTACK_SPEED, MOD_AGILITY_ATTACK, GrowthRules.attackSpeedMultiplier(data.stat(Stat.AGILITY)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         set(player, Rpg.MAX_MANA, MOD_SPIRIT, GrowthRules.bonusMana(data.stat(Stat.SPIRIT)), AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.MAX_HEALTH, MOD_VITALITY, GrowthRules.bonusHealth(data.stat(Stat.VITALITY)), AttributeModifier.Operation.ADD_VALUE);
+        set(player, Attributes.MAX_HEALTH, MOD_LEVEL, GrowthRules.levelHealth(data.level), AttributeModifier.Operation.ADD_VALUE);
         // 転生の魂盤・恩恵の修飾子 (docs/design/31)
         jp.revati.skyabyss.rebirth.Rebirth.applyModifiers(player);
         // 最大体力が増えた分は、そのぶん満たしておく (振った直後にハートが空のままにならないように)

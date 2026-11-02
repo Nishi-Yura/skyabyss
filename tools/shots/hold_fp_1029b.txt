@@ -1,0 +1,169 @@
+world hold_1029
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier off
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot shrine_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot whale_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot tide_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot storm_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot ember_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_crescent_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot moon_crescent_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot waterway_fang_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_fang
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot abyss_whale_fang_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot abyss_tide_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot abyss_storm_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot abyss_ember_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_pulse_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot abyss_pulse_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_ash_knife
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot ember_ash_knife_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_umbra_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot moon_umbra_dagger_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot gather_axe_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_pickaxe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot gather_pickaxe_fp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_shovel
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot gather_shovel_fp

@@ -1,0 +1,218 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.pit_foreman",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 6,
+    "visible_bounds_height": 5,
+    "visible_bounds_offset": [
+     0,
+     1.6666666666666667,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      20.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -9.273,
+        16.6,
+        -6.182
+       ],
+       "size": [
+        18.546,
+        8.8,
+        12.364
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "torso",
+     "pivot": [
+      0.0,
+      21.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -11.6,
+        18.0,
+        -7.824
+       ],
+       "size": [
+        23.2,
+        23.6,
+        14.686
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      40.0,
+      -1.0
+     ],
+     "parent": "torso",
+     "cubes": [
+      {
+       "origin": [
+        -8.0,
+        36.8,
+        -14.0
+       ],
+       "size": [
+        16.0,
+        16.6,
+        18.6
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_l",
+     "pivot": [
+      11.0,
+      38.0,
+      0.0
+     ],
+     "parent": "torso",
+     "cubes": [
+      {
+       "origin": [
+        -17.196,
+        15.6,
+        -10.497
+       ],
+       "size": [
+        10.392,
+        31.872,
+        15.439
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_r",
+     "pivot": [
+      -11.0,
+      38.0,
+      0.0
+     ],
+     "parent": "torso",
+     "cubes": [
+      {
+       "origin": [
+        -0.701,
+        33.0,
+        -4.942
+       ],
+       "size": [
+        17.897,
+        19.0,
+        38.942
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_l",
+     "pivot": [
+      6.0,
+      19.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -10.08,
+        0.0,
+        -6.001
+       ],
+       "size": [
+        7.361,
+        19.938,
+        9.601
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_r",
+     "pivot": [
+      -6.0,
+      19.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        2.72,
+        0.0,
+        -6.001
+       ],
+       "size": [
+        7.361,
+        19.938,
+        9.601
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

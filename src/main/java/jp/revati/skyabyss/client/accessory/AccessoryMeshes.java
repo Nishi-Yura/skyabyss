@@ -26,11 +26,37 @@ import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 // 装飾品は鍛えないので、絵は階級ごとに 1 枚 (+ 光る画素の画像)。
 public final class AccessoryMeshes {
     // 低ポリにした品 (models/item/<id>.json が builtin/entity)。tools/install/install_lowpoly_accessories.py の ITEMS と同じ
-    public static final Set<String> IDS = Set.of("storm_charm", "storm_anklet", "storm_eye_feather",
+    public static final Set<String> IDS = withWild(Set.of("storm_charm", "storm_anklet", "storm_eye_feather",
             "kindling_charm", "ember_mantle", "ember_lantern", "ember_horn", "cinder_lamp",
             "resonance_charm", "moss_talisman", "stone_whale_plating",
             "tide_chime_charm", "moontide_pearl", "tide_watching_shell",
-            "abyss_pulse_listener", "abyss_lantern_charm", "abyss_surveyor_plumb");
+            "abyss_pulse_listener", "abyss_lantern_charm", "abyss_surveyor_plumb"));
+
+    // 野の装備の装飾の枠の品 (item/wild/WildGearTable.ACCESSORIES。docs/design/51 の 6 章) と封の箱 (docs/design/52)
+    private static Set<String> withWild(Set<String> base) {
+        java.util.Set<String> all = new java.util.HashSet<>(base);
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : jp.revati.skyabyss.item.wild.WildGearTable.ACCESSORIES) {
+            all.add(x.id());
+        }
+        for (jp.revati.skyabyss.loot.box.BoxKind k : jp.revati.skyabyss.loot.box.BoxKind.ALL) {
+            all.add(k.id());
+        }
+        // 地下のダンジョンの装飾品 (dungeon/DungeonGear。野の装備の表の外)
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Accessory x : jp.revati.skyabyss.dungeon.DungeonGear.ROWS) {
+            all.add(x.id());
+        }
+        return Set.copyOf(all);
+    }
+
+    // 平らなモデル・メッシュの名前 (封の箱は形の名前 BoxKind.look()。階級の箱は帯にかかわらず階級ごとに一つ)
+    public static Set<String> lookNames() {
+        java.util.Set<String> out = new java.util.HashSet<>();
+        for (String id : IDS) {
+            jp.revati.skyabyss.loot.box.BoxKind k = jp.revati.skyabyss.loot.box.BoxKind.byId(id);
+            out.add(k == null ? id : k.look());
+        }
+        return out;
+    }
     public static final int WHITE = 0xFFFFFFFF;
     public static final int FULL_BRIGHT = 0xF000F0;
 
@@ -41,6 +67,9 @@ public final class AccessoryMeshes {
     }
 
     public static String idOf(ItemStack stack) {
+        if (stack.getItem() instanceof jp.revati.skyabyss.loot.box.SealedBoxItem box) {
+            return box.kind.look();
+        }
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
     }
 
@@ -59,10 +88,19 @@ public final class AccessoryMeshes {
 
     // 今の座標系 (描く点が原点、ブロック単位) のまま、メッシュを流す。メッシュは x 反転で焼いてある (GeckoLib 向け) ので、向きの決め方は呼ぶ側で
     public static void draw(LowPolyMesh mesh, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        draw(mesh, pose, buffers, light, overlay, false);
+    }
+
+    // mythic: 神器の装飾は光る画素が脈打つ (WeaponItemRenderer.mythicPulse と同じ拍)
+    public static void draw(LowPolyMesh mesh, PoseStack pose, MultiBufferSource buffers, int light, int overlay, boolean mythic) {
         ResourceLocation[] tex = variant(mesh.texture);
         LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0])), mesh, light, overlay, WHITE);
         if (tex[1] != null) {
             LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
+            if (mythic) {
+                int a = (int) (40 + 150 * jp.revati.skyabyss.client.weapon.WeaponItemRenderer.mythicPulse());
+                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
+            }
         }
     }
 

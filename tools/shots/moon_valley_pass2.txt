@@ -1,0 +1,47 @@
+# 六章 区画 1「新月の谷」の作り込みの二回目 (docs/design/46 の 4.3.3): 入口の下り・崖の張り出し・主の間のまわり。暗視をかけて形を見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_valley_pass2.txt -PshotsName=moon_valley_pass2
+world moon_valley_p3 continent
+size 1600 900
+timeout 2400
+render 12
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+cmd effect give @s minecraft:night_vision 99999 0 true
+hud off
+cmd tp @s 0 40 10 0 40
+waitchunks 200
+wait 60
+shot p01_overview
+cmd tp @s 0 14 24 0 22
+wait 40
+shot p02_entrance_top
+cmd tp @s 8 4 44 150 8
+wait 40
+shot p03_entrance_up
+cmd tp @s -4 0 62 -70 6
+wait 40
+shot p04_west_wall
+cmd tp @s 6 -2 96 -90 4
+wait 40
+shot p05_ring_east
+cmd tp @s -4 -3 150 90 4
+wait 40
+shot p06_ring_south
+cmd tp @s 0 -2 78 0 -14
+wait 40
+shot p07_mesa_below
+cmd tp @s 0 34 92 0 30
+wait 30
+shot p08_arena
+cmd tp @s 16 28 112 90 22
+wait 30
+shot p09_arena_side

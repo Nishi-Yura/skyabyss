@@ -107,6 +107,11 @@ public final class TitanGearSet {
     }
 
     public Pieces rollPieces(TitanMemoryData.Record r, int memory, RandomSource random, Predicate<String> available) {
+        return rollPieces(r, memory, random, available, 1.0);
+    }
+
+    // bonus: 図鑑の品の確率に掛ける倍率 (月の位相の挑戦の段など)
+    public Pieces rollPieces(TitanMemoryData.Record r, int memory, RandomSource random, Predicate<String> available, double bonus) {
         List<String> out = new ArrayList<>();
         String guaranteed = null;
         boolean pityShards = false;
@@ -120,7 +125,7 @@ public final class TitanGearSet {
                 out.add(guaranteed);
             }
         }
-        float mult = TitanLoot.pityMultiplier(memory);
+        float mult = (float) (TitanLoot.pityMultiplier(memory) * bonus);
         for (Piece p : pieces) {
             if (!p.id().equals(guaranteed) && available.test(p.id()) && random.nextFloat() < p.heartChance() * mult) {
                 out.add(p.id());

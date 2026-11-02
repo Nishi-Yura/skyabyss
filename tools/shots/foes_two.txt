@@ -1,0 +1,79 @@
+# 大陸の新しい敵 二組目 4 体 (docs/design/44) のゲーム内の確認: 待機・予告の姿。平らな世界、モブは原点で南 (+z) を向く
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foes_two.txt -PshotsName=foes_two
+world foes_two flat
+size 1280 720
+timeout 1200
+render 8
+cmd gamemode spectator
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+waitchunks 300
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 20
+hud off
+clouds off
+chat clear
+# --- 野犬 (待機 / 吠える / 跳びかかりの溜め)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:feral_dog 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 1.8 -59.6 2.0 137 12
+wait 40
+chat clear
+shot dog_rest
+cmd skyabyss dev anim @e[tag=m] howl
+wait 14
+shot dog_howl
+cmd skyabyss dev anim @e[tag=m] bite
+wait 7
+shot dog_crouch
+# --- 苔の亡者 (夜。待機 / 振りかぶり / 胞子)
+cmd time set 18000
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:moss_dead 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.4 -59.0 2.6 137 10
+wait 30
+chat clear
+shot moss_rest
+cmd skyabyss dev anim @e[tag=m] slam
+wait 19
+shot moss_windup
+cmd skyabyss dev anim @e[tag=m] spores
+wait 22
+shot moss_spores
+# --- 霧の漁り火 (夜。待機 / 網 / 灯を揺らす)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:mist_angler 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.6 -58.9 2.8 137 10
+wait 30
+chat clear
+shot angler_rest
+cmd skyabyss dev anim @e[tag=m] net
+wait 19
+shot angler_net
+cmd skyabyss dev anim @e[tag=m] sway
+wait 14
+shot angler_sway
+# --- 雷狼 (夜。待機 / 吠える)
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:thunder_wolf 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.2 -59.4 2.4 137 10
+wait 30
+chat clear
+shot wolf_rest
+cmd skyabyss dev anim @e[tag=m] howl
+wait 14
+shot wolf_howl
+# --- 並び (昼)
+cmd time set 6000
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:feral_dog -3.4 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:moss_dead -1.2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:mist_angler 1.2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:thunder_wolf 3.6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0.0 -58.8 5.6 180 8
+wait 40
+chat clear
+shot lineup

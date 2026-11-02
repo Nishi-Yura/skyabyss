@@ -22,8 +22,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class RecordService {
     // 画面からの「最新にして」は、この間隔 (tick) より詰めて受け付けない
     static final int REQUEST_INTERVAL = 10;
-    private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
-    private static final Map<UUID, Long> LAST_CLAIM = new HashMap<>();
+    private static final Map<UUID, Long> LAST_REQUEST = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
+    private static final Map<UUID, Long> LAST_CLAIM = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
 
     private RecordService() {
     }
@@ -90,6 +90,14 @@ public final class RecordService {
         }
         KeepsakeBonds.recall(player, key ? KeepsakeBonds.Kind.KEY : KeepsakeBonds.Kind.FRAGMENT);
         send(player, player, false, "");
+    }
+
+    // 控え帳から、見た語りをもう一度流す (見ていない語りは流さない。見直しなので、あとの出来事 (題字など) は起こさない)
+    static void replay(ServerPlayer player, String reel) {
+        if (throttled(LAST_CLAIM, player) || !jp.revati.skyabyss.story.reel.StoryReels.seen(player, reel)) {
+            return;
+        }
+        jp.revati.skyabyss.story.reel.StoryReels.replay(player, reel);
     }
 
     @SubscribeEvent

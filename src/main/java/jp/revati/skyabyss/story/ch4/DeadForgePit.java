@@ -29,7 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
-// 消えた炉の坑 (docs/design/21 の 6.1。四章の小さなダンジョン、支度の段 ch4/forge_ruins の舞台)。部品は ch4_dead_forge_pit (tools/gen/ch4/gen_ch4_ground.py)。
+// 消えた炉の坑 (四章の小さなダンジョン、支度の段 ch4/forge_ruins の舞台)。部品は ch4_dead_forge_pit (データを直接直す（生成スクリプトはない）)。
 //
 //   場所   四章の跡地 (都の南の灰の地) の中心から 60〜150、高台 (丘の斜面のつもり)。地表に黒石の枠の坑口と崩れた煙突、坑口の碑 (sign.skyabyss.ch4_forge_pit)、
 //          南西の外に旅の職人の野営 (印 artisan。ArtisanSpawner の四章の立つ所)。階段で地下 13 へ。部屋は荒い黒石で包む
@@ -70,9 +70,9 @@ public final class DeadForgePit {
                         Tasks.later(80, () -> Notice.narrate(p, "message.skyabyss.ch4g.pit.trail"));
                     }
                 }).register();
-        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:blaze_powder", 1), new SiteTreasure.Entry("minecraft:torch", 8))));
+        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:ember_drop", 1))));
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:soot_iron", 4), new SiteTreasure.Entry("skyabyss:ash_hemp", 4),
-                new SiteTreasure.Entry("minecraft:coal", 4))));
+                new SiteTreasure.Entry("skyabyss:charcoal_lump", 4))));
         SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:soot_iron", 1, 3, 3),
                 new SiteTreasure.Entry("skyabyss:ash_hemp", 1, 3, 3))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.EMBER, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, DeadForgePit::origins,

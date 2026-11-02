@@ -31,6 +31,21 @@ public final class EmberMidRoom extends MidRoom {
         return ctx.origin().subtract(EmberBackLayout.SMITH_CENTER);
     }
 
+    // 闘の部屋に入ったときのずれ (炉の扉が奥の壁の前に来るように、部屋が小さいぶん手前へ)。null なら間のまま
+    @Nullable
+    private BlockPos fitted;
+
+    private BlockPos shift(RaidCtx ctx) {
+        return fitted != null ? fitted : shiftOf(ctx);
+    }
+
+    // 闘の部屋に: 焼き入れの槽 2・灰溜まり 4・柱 4・炉の扉 (床と壁はそのまま)
+    @Override
+    protected void fitInto(RaidCtx ctx) {
+        fitted = shiftOf(ctx).offset(0, 0, Math.min(0, ctx.cell().hz() - R));
+        AshSmithArena.buildFixtures(ctx.level(), fitted);
+    }
+
     @Override
     public void build(RaidCtx ctx) {
         RaidKit.buildCell(ctx, new RaidKit.Spec(R, R, HEIGHT, RaidKit.EMBER));
@@ -59,7 +74,7 @@ public final class EmberMidRoom extends MidRoom {
         if (smith == null) {
             return null;
         }
-        BlockPos shift = shiftOf(ctx);
+        BlockPos shift = shift(ctx);
         Vec3 at = AshSmithArena.home(shift).add(0, 0, 4);
         smith.moveTo(at.x, at.y, at.z, 180f, 0f);
         smith.bind(Math.max(1, ctx.scale()));
@@ -75,12 +90,12 @@ public final class EmberMidRoom extends MidRoom {
 
     @Override
     protected Vec3 home(RaidCtx ctx) {
-        return AshSmithArena.home(shiftOf(ctx));
+        return AshSmithArena.home(shift(ctx));
     }
 
     @Override
     protected void resetFixtures(RaidCtx ctx) {
-        AshSmithArena.buildFurnace(ctx.level(), false, shiftOf(ctx));
+        AshSmithArena.buildFurnace(ctx.level(), false, shift(ctx));
         jp.revati.skyabyss.trial.raid.ember.EmberRaidDecor.exitLampsPublic(ctx, exitLamps, false);
     }
 

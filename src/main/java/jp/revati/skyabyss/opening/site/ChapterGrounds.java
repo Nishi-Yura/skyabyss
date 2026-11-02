@@ -21,7 +21,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 章の跡地 (docs/design/33 の 3 章。W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
+// 章の跡地 (W2)。はじまりの都から決まった方位と距離の帯に、章ごとに世界で一つ。
 //   一章 岩鯨 = 北 240〜360 の丘、二章 潮殻 = 東 520〜900 の海辺、三章 雷翼 = 西 650〜1,170 の峰 (y 150 以上)、四章 余燼 = 南 780〜1,300 の乾いた低地 (2026-10-23 の試遊でさらに近づけた。約 65%)。
 //   探し方: 方位の扇 (±25 度) の中で、帯の内側から外側へ 32 ブロック刻み (扇は 5 度刻み、まんなかから)。合う地形があればそこ。
 //     バニラの村・構造物の出るチャンクが 192 以内なら、その候補を飛ばす (= 少しずらす。小要素の広がりのぶん 128 より広め。道しるべの点は 48)。一章は野営地・足跡からも離す。
@@ -40,7 +40,7 @@ public final class ChapterGrounds {
         NONE, HILL, COVE, PEAK, BASIN
     }
 
-    // 章ごとの決まり (33 の 3 章の表)。dir = 都から見た向き (x, z。北 = -z)、min〜max = 距離の帯、side = 整える形の一辺
+    // 章ごとの決まり。dir = 都から見た向き (x, z。北 = -z)、min〜max = 距離の帯、side = 整える形の一辺
     public record Spec(Chapters chapter, int dirX, int dirZ, int min, int max, Shape shape, int side) {
         double angle() {
             return Math.atan2(dirZ, dirX);
@@ -53,13 +53,6 @@ public final class ChapterGrounds {
             new Spec(Chapters.STORM, -1, 0, 650, 1170, Shape.PEAK, 128),
             new Spec(Chapters.EMBER, 0, 1, 780, 1300, Shape.BASIN, 160));
 
-    // 扇の片側の開き (度) と刻み、距離の刻み
-    public static final int SECTOR = 25;
-    static final int ANGLE_STEP = 5;
-    static final int DIST_STEP = 32;
-    // バニラの構造物を避ける距離 (跡地の中心から。小要素は中心から 150 まで広がるので、33 の「128 以内」より広めに)、道しるべの点から
-    static final int STRUCTURE_GAP = 128;   // 跡地を 65% の距離にしたので 192 → 128
-    static final int ROAD_STRUCTURE_GAP = 48;
     // 一章の跡地と野営地・足跡の間 (一章の小要素は中心から 110 まで広がる)
     static final int CAMP_GAP = 140;
     static final int PRINT_GAP = 120;
@@ -202,33 +195,38 @@ public final class ChapterGrounds {
         return out;
     }
 
+    // 跡地は図に描いた場所 (docs/design/40 の 3 章)。そのまわり 160 の中で合う地形を探し、なければその場所に形を作る
     static Found find(Ground g, BlockPos capital, Spec s, List<Obstacle> obs) {
-        for (int d = s.min(); d <= s.max(); d += DIST_STEP) {
-            for (int off : offsets()) {
-                double a = s.angle() + Math.toRadians(off);
-                int x = capital.getX() + (int) Math.round(Math.cos(a) * d);
-                int z = capital.getZ() + (int) Math.round(Math.sin(a) * d);
-                if (blocked(x, z, obs)) {
-                    continue;
-                }
-                Found f = fit(g, capital, s, x, z, d, off);
-                if (f != null && !g.structureNear(x, z, STRUCTURE_GAP)) {
-                    return finish(g, capital, f);
+        return findAt(g, capital, s, jp.revati.skyabyss.world.continent.ContinentLayout.get().site(s.chapter().id()));
+    }
+
+    static Found findAt(Ground g, BlockPos capital, Spec s, BlockPos site) {
+        return finish(g, capital, findNear(g, capital, s, site));
+    }
+
+    static Found findNear(Ground g, BlockPos capital, Spec s, BlockPos site) {
+        int d = (int) Math.round(Math.hypot(site.getX() - capital.getX(), site.getZ() - capital.getZ()));
+        for (int r = 0; r <= 160; r += 32) {
+            int n = r == 0 ? 1 : 12;
+            for (int i = 0; i < n; i++) {
+                double a = Math.PI * 2 * i / n;
+                int x = site.getX() + (int) Math.round(Math.cos(a) * r);
+                int z = site.getZ() + (int) Math.round(Math.sin(a) * r);
+                Found f = fit(g, capital, s, x, z, d, 0);
+                if (f != null) {
+                    return f;
                 }
             }
         }
-        return finish(g, capital, shapeAt(g, capital, s, obs));
-    }
-
-    // 0, +5, -5, +10, -10, ... ±25
-    static int[] offsets() {
-        int n = SECTOR / ANGLE_STEP;
-        int[] out = new int[n * 2 + 1];
-        for (int i = 1; i <= n; i++) {
-            out[i * 2 - 1] = i * ANGLE_STEP;
-            out[i * 2] = -i * ANGLE_STEP;
+        int half = s.side() / 2;
+        List<Integer> hs = new ArrayList<>();
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                hs.add(g.topCoarse(site.getX() + i * half / 2, site.getZ() + j * half / 2));
+            }
         }
-        return out;
+        hs.sort(Integer::compare);
+        return shaped(g, capital, s, site.getX(), site.getZ(), Math.max(g.sea(), hs.get(hs.size() / 2)), d, 0);
     }
 
     private static boolean blocked(int x, int z, List<Obstacle> obs) {
@@ -336,71 +334,7 @@ public final class ChapterGrounds {
         }
     }
 
-    // 合う地形がない: 帯の中の候補のうち、いちばん乾いて平らな所 (まんなかに近いほど少しよい) に形を作る
-    static Found shapeAt(Ground g, BlockPos capital, Spec s, List<Obstacle> obs) {
-        int mid = (s.min() + s.max()) / 2;
-        int half = s.side() / 2;
-        double bestScore = -1e18;
-        int bx = 0;
-        int bz = 0;
-        int bd = mid;
-        int boff = 0;
-        int bBase = g.sea();
-        // 帯の全体を 64 刻みで (まんなかに近いほど少しよい)。形の中 (5×5) が乾いていて平らで、まわり 128 の輪 (小要素の広がる所) も乾いた陸の所
-        for (int d = s.min(); d <= s.max(); d += 2 * DIST_STEP) {
-            for (int off : offsets()) {
-                double a = s.angle() + Math.toRadians(off);
-                int x = capital.getX() + (int) Math.round(Math.cos(a) * d);
-                int z = capital.getZ() + (int) Math.round(Math.sin(a) * d);
-                if (blocked(x, z, obs)) {
-                    continue;
-                }
-                int wet = 0;
-                List<Integer> hs = new ArrayList<>();
-                for (int i = -2; i <= 2; i++) {
-                    for (int j = -2; j <= 2; j++) {
-                        int h = g.topCoarse(x + i * half / 2, z + j * half / 2);
-                        if (h < g.sea()) {
-                            wet++;
-                        }
-                        hs.add(h);
-                    }
-                }
-                int outerWet = 0;
-                int low = 0;
-                for (int i = 0; i < 12; i++) {
-                    double b = Math.PI * 2 * i / 12;
-                    int h = g.topCoarse(x + (int) Math.round(Math.cos(b) * 128), z + (int) Math.round(Math.sin(b) * 128));
-                    if (h < g.sea()) {
-                        outerWet++;
-                    } else if (h <= g.sea() + 1) {
-                        low++;
-                    }
-                }
-                hs.sort(Integer::compare);
-                int range = hs.get(hs.size() - 1) - hs.get(0);
-                for (int h : hs) {
-                    if (h >= g.sea() && h <= g.sea() + 1) {
-                        low++;
-                    }
-                }
-                double score = -wet * 100.0 - outerWet * 40.0 - low * 10.0 - range - Math.abs(d - mid) * 0.05 - Math.abs(off) * 0.3;
-                if (score > bestScore && !g.structureNear(x, z, STRUCTURE_GAP)) {
-                    bestScore = score;
-                    bx = x;
-                    bz = z;
-                    bd = d;
-                    boff = off;
-                    bBase = Math.max(g.sea(), hs.get(hs.size() / 2));
-                }
-            }
-        }
-        if (bestScore <= -1e18) {
-            // 全部ふさがっている (ありえないが): 帯のまんなかの正面
-            bx = capital.getX() + s.dirX() * mid;
-            bz = capital.getZ() + s.dirZ() * mid;
-            bBase = Math.max(g.sea(), g.topCoarse(bx, bz));
-        }
+    static Found shaped(Ground g, BlockPos capital, Spec s, int bx, int bz, int bBase, int bd, int boff) {
         BlockPos sc = new BlockPos(bx, bBase, bz);
         return switch (s.shape()) {
             case HILL -> new Found(s.chapter(), new BlockPos(bx, bBase + HILL_RISE + 1, bz), Shape.HILL, sc, bBase, null, 0, false, null, List.of(), bd, boff);
@@ -510,8 +444,8 @@ public final class ChapterGrounds {
                     int x = capital.getX() + (int) Math.round(ux * (along + shift) - uz * side);
                     int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
                     Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
-                    // 海面の高さの平地 (沼・浜・川べり) は水たまりが多いので避ける
-                    if (ar.ok() && ar.min() >= g.sea() + 1 && !g.structureNear(x, z, ROAD_STRUCTURE_GAP)) {
+                    // 海面の高さの平地 (沼・浜・川べり) は水たまりが多いので避ける。大陸の道の上も避ける (2026-11-02。道の上に道しるべが欠けて建っていた)
+                    if (ar.ok() && ar.min() >= g.sea() + 1 && !jp.revati.skyabyss.world.continent.RoadClearance.blocks(x, z, 3, 2)) {
                         at = new BlockPos(x, ar.median() + 1, z);
                         break search;
                     }
@@ -538,7 +472,7 @@ public final class ChapterGrounds {
                 int x = capital.getX() + (int) Math.round(ux * (along + shift) - uz * side);
                 int z = capital.getZ() + (int) Math.round(uz * (along + shift) + ux * side);
                 Area ar = SiteFinder.area(g, x, z, 1, 1, 4, false, false);
-                if (ar.ok() && !g.structureNear(x, z, ROAD_STRUCTURE_GAP)) {
+                if (ar.ok() && !jp.revati.skyabyss.world.continent.RoadClearance.blocks(x, z, 3, 2)) {
                     return new BlockPos(x, ar.median() + 1, z);
                 }
             }
@@ -547,7 +481,7 @@ public final class ChapterGrounds {
             int x = capital.getX() + (int) Math.round(ux * (along + shift));
             int z = capital.getZ() + (int) Math.round(uz * (along + shift));
             int top = g.top(x, z);
-            if (g.wet(x, z) && g.sea() - top <= BRIDGE_DEPTH && !g.structureNear(x, z, ROAD_STRUCTURE_GAP)) {
+            if (g.wet(x, z) && g.sea() - top <= BRIDGE_DEPTH) {
                 return new BlockPos(x, g.sea() + 1, z);
             }
         }
@@ -628,11 +562,6 @@ public final class ChapterGrounds {
             @Override
             public boolean dryBiome(int x, int z) {
                 return raw.dryBiome(x, z);
-            }
-
-            @Override
-            public boolean structureNear(int x, int z, int r) {
-                return raw.structureNear(x, z, r);
             }
         };
     }

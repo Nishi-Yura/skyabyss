@@ -24,7 +24,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
 
-// 序盤の拍子の、画面と音のクライアント側 (docs/design/17 の 3 章)。サーバーは「いつ始まるか」だけを知らせ、演出はここで自分の時計 (tick) で進める。
+// 序盤の拍子の、画面と音のクライアント側。サーバーは「いつ始まるか」だけを知らせ、演出はここで自分の時計 (tick) で進める。
 //   B0 目覚め      : 暗転・まぶたの開き・題字・一行 (OpeningOverlay が描く)。鼓動と遠い鐘
 //   B6 夜の足音    : 5 秒かけて環境音と動物の声が消え、3 秒おきに 3 度、遠くの巨大な足音と小さな揺れ。5 秒の無音のあと、虫の音がゆっくり戻る
 //   B9 夜の歌      : 40 秒の歌。星の欠けは StarBandRenderer が描く

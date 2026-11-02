@@ -1,0 +1,49 @@
+# 終章の雲海 巡礼者の座 (docs/design/50 の 4.3): 光の橋・座の床と鐘雲の輪・座・三形態 (手・目・月と前の自分たち)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_seat.txt -PshotsName=cloudsea_seat
+world cloudsea_seat
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 3 165 -660
+waitchunks 200
+wait 100
+camera 3 146 -626 180 4
+wait 60
+shot s01_light_bridge
+camera 50 186 -660 134 30
+wait 60
+shot s02_overview
+camera 3 160 -684 180 10
+wait 40
+shot s03_arrive
+camera 3 161 -712 180 2
+wait 40
+shot s04_throne
+cmd skyabyss cloudsea seat 1
+wait 120
+camera 3 168 -688 180 25
+wait 40
+shot s05_hands
+cmd skyabyss cloudsea seat 2
+wait 60
+camera 3 160 -690 180 4
+wait 40
+shot s06_eye
+cmd skyabyss cloudsea seat 3
+wait 80
+camera 3 163 -688 180 14
+wait 40
+shot s07_moon_and_selves
+camera 3 160 -697 180 -2
+wait 30
+shot s08_moon

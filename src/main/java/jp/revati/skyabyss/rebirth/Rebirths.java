@@ -123,16 +123,25 @@ public final class Rebirths {
     public static RebirthTitles.Facts facts(ServerPlayer p) {
         RebirthStats.Entry e = RebirthStats.get(p.server).peek(p.getUUID());
         int count = RebirthView.count(p);
+        boolean founder = jp.revati.skyabyss.story.finale.founder.Founder.beaten(p);
+        int tower = p.getPersistentData().getInt(jp.revati.skyabyss.tower.Towers.CLEARS);
+        java.util.Set<String> marks = new java.util.HashSet<>(jp.revati.skyabyss.endgame.RegionFame.marks(p));
+        marks.addAll(jp.revati.skyabyss.rpg.JobMastery.marks(p));
+        marks.addAll(jp.revati.skyabyss.endgame.Codex.marks(p));
+        marks.addAll(jp.revati.skyabyss.fishing.Fishing.marks(p));
+        marks.addAll(jp.revati.skyabyss.dungeon.Dungeons.marks(p));
         if (e == null) {
-            return new RebirthTitles.Facts(count, 0, Progression.stage(p), 0, -1, -1, 0);
+            return new RebirthTitles.Facts(count, 0, Progression.stage(p), 0, -1, -1, 0, founder, tower, marks);
         }
-        return new RebirthTitles.Facts(count, e.flawless, Progression.stage(p), e.deathsTotal, e.fastestLife, e.fewestDeaths, e.titanBest.size());
+        return new RebirthTitles.Facts(count, e.flawless, Progression.stage(p), e.deathsTotal, e.fastestLife, e.fewestDeaths, e.titanBest.size(), founder, tower,
+                marks);
     }
 
     // 称号の解除 (足すだけで消さない)。新しく解けたものがあれば知らせる
     public static void updateTitles(ServerPlayer p) {
         RebirthData d = data(p);
-        long mask = d.unlocked() | RebirthTitles.unlockedMask(facts(p));
+        RebirthTitles.Facts facts = facts(p);
+        long mask = d.unlocked() | RebirthTitles.unlockedMask(facts);
         long added = mask & ~d.unlocked();
         if (added != 0) {
             put(p, d.withUnlocked(mask));

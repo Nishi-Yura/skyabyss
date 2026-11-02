@@ -1,0 +1,9 @@
+{
+  "chapter": "finale",
+  "order": 30,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ]
+}

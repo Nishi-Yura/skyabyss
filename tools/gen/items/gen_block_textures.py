@@ -5,7 +5,7 @@
 """
 
 # ---------------------------------------------------------------------------
-# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+# 上書き防止: 実行すると採用済みの素材を古い版で上書きする。
 #   上書きするもの: textures/block/*.png 12 枚と textures/item/sky_key_fragment.png (採用の 32x32 案 B)
 #   採用版の生成元: tools/rough/items_blocks_32.py
 # どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。

@@ -135,13 +135,14 @@ public final class TownSelfTest {
         for (TownGuests.Guest g : TownGuests.ALL) {
             check(f, DialogueManager.dialogue(g.role()) != null, "dialogue missing " + g.role());
             check(f, TownQuests.byId(g.quest()) != null && QuestManager.quest(g.quest()) != null, "guest quest " + g.quest());
-            check(f, resource(a + "textures/lowpoly/guest_" + g.id() + ".png"), "texture guest_" + g.id());
+            // 体の絵は v2 (npc_guest_<人>)。古い立方体の絵 guest_<人> は 2026-10-29 に消した
+            check(f, resource(a + "textures/lowpoly/npc_guest_" + g.id() + ".png"), "texture npc_guest_" + g.id());
             for (String face : Dialogue.FACES) {
                 check(f, resource(a + "textures/gui/npc/face/guest_" + g.id() + "_" + face + ".png"), "face guest_" + g.id() + " " + face);
             }
         }
-        // 足し書きが係の人の会話に混ざっている (墓守の頼み・酔いどれ・地図屋)
-        for (String role : List.of("gravekeeper", "drunkard", "mapmaker", "guild_clerk", "innkeeper")) {
+        // 足し書きが係の人の会話に混ざっている (墓守の頼み・酔いどれ・案内人の跡地の噂)
+        for (String role : List.of("gravekeeper", "drunkard", "guide", "guild_clerk", "innkeeper")) {
             Dialogue d = DialogueManager.dialogue("skyabyss:attendant_" + role);
             check(f, d != null && d.nodes().keySet().stream().anyMatch(n -> n.startsWith("town_")), "town nodes merged into attendant_" + role);
         }
@@ -158,9 +159,9 @@ public final class TownSelfTest {
         QuestLog log = QuestLog.of(p);
         TownQuests.TownQuest ch1 = TownQuests.byId("town/ch1_apprentice");
         TownQuests.TownQuest ch2 = TownQuests.byId("town/ch2_net");
-        TownQuests.TownQuest g2 = TownQuests.byId("town/grave_2");
+        TownQuests.TownQuest g3 = TownQuests.byId("town/grave_3");
         check(f, TownQuests.available(ch1, 1, log) && !TownQuests.available(ch2, 1, log) && TownQuests.available(ch2, 2, log), "chapter gate");
-        check(f, !TownQuests.available(g2, 4, log), "grave_2 needs grave_1 done");
+        check(f, !TownQuests.available(g3, 4, log), "grave_3 needs grave_1 done");
         TownQuests.TownQuest first = TownQuests.nextRumor(1, log);
         check(f, first != null && first.kind() == TownQuests.Kind.GUEST && first.chapter() == 1, "first rumor is a chapter-1 guest quest");
         // 宿の噂で始まる (FakePlayer の章は 1)
@@ -195,9 +196,9 @@ public final class TownSelfTest {
         Quests.onTalk(p, "skyabyss:attendant_guild_clerk", "town_test");
         check(f, "hunt".equals(TownGuests.stageOf(p, qid)), "clerk -> hunt");
         for (int i = 0; i < 4; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 0);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 0);
         }
-        p.getInventory().add(new ItemStack(Items.BONE, 3));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), 3));
         Quests.poll(p, true);
         check(f, "hand".equals(TownGuests.stageOf(p, qid)), "hunt -> hand (" + TownGuests.stageOf(p, qid) + ")");
         int coins = Coins.count(p);
@@ -205,7 +206,7 @@ public final class TownSelfTest {
         QuestLog.Entry e = QuestLog.of(p).entry(qid);
         check(f, e != null && e.done, "apprentice quest done");
         check(f, Coins.count(p) == coins + 12, "reward 12 bell coins (" + (Coins.count(p) - coins) + ")");
-        check(f, p.getInventory().countItem(Items.IRON_INGOT) >= 2, "reward iron");
+        check(f, p.getInventory().countItem(jp.revati.skyabyss.guide.TravelGear.ROCK_WHETSTONE.get()) >= 1, "reward whetstone");
         TownGuests.keep(level, capital, List.of(p));
         check(f, TownGuests.find(level, capital, "apprentice").isEmpty(), "apprentice leaves after the quest");
     }
@@ -303,7 +304,7 @@ public final class TownSelfTest {
         boolean second = TownQuests.claimWell(p);
         check(f, first && !second, "well treasure once per player");
         check(f, Coins.count(p) == coins + TownQuests.WELL_COINS, "well coins");
-        check(f, p.getInventory().countItem(Items.ECHO_SHARD) >= 1, "well shard");
+        check(f, p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get()) >= 1, "well shard");
     }
 
     private static void cellar(List<String> f, ServerLevel level, BlockPos gap) {

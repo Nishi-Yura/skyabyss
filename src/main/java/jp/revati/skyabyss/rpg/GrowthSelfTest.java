@@ -40,7 +40,7 @@ public final class GrowthSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 序盤の進み (17 の 5.2、04 の 3.6)
+    // ---------------------------------------------------------------- 序盤の進み (04 の 3.6)
     // 拍子どおりに進めたときの経験値を、実際のデータ (クエストの段・伝承の表・定数) から積み上げ、レベルの節目を確かめる。
     // 敵と買い物の量は控えめに見積もる (最初の夜に 5 体、日 2 に 5 体、バイオームは 1 つ 10)。
     static void checkOpeningPace(List<String> f) {
@@ -81,8 +81,8 @@ public final class GrowthSelfTest {
         int withSubs = levelAt(clear + subs);
         check(f, withSubs >= 11 && withSubs <= 13, "first clear with the early side quests should be level 11-13, got " + withSubs);
         // 技: Lv1 の 1 点で最初の一つ。Lv3 で 2 つ目、Lv5 で 3 つ目 (二段目の技の必要 Lv も 5)
-        check(f, jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(1) == 1 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(3) == 2
-                && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(5) == 3, "skill points at level 1, 3, 5 are wrong");
+        check(f, jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(1) == 1 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(3) == 3
+                && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(5) == 5, "skill points at level 1, 3, 5 are wrong");
         SkyAbyss.LOGGER.info("[selftest] growth opening pace: lodge Lv{} / storyteller Lv{} / bone hill (about 1 h) Lv{} ({} xp) / whale seen Lv{} / first clear Lv{} ({} xp), with side quests Lv{}",
                 lodge, storyteller, hour, hourXp, whaleSeen, mainOnly, clear, withSubs);
     }
@@ -117,7 +117,8 @@ public final class GrowthSelfTest {
         check(f, GrowthRules.xpToNext(1) == 50, "level 1 needs " + GrowthRules.xpToNext(1));
         check(f, GrowthRules.totalXpFor(10) == 1758, "total to 10 is " + GrowthRules.totalXpFor(10));
         check(f, GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL) == 107898, "total to 50 is " + GrowthRules.totalXpFor(50));
-        check(f, GrowthRules.pointsForLevel(1) == 0 && GrowthRules.pointsForLevel(50) == 147, "points per level are wrong");
+        // 基礎はレベルでは上がらない (技の木の節。docs/design/48)
+        check(f, GrowthRules.pointsForLevel(1) == 0 && GrowthRules.pointsForLevel(50) == 0, "points per level are wrong");
         StringBuilder table = new StringBuilder();
         for (int l : new int[] {1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 49}) {
             table.append(" L").append(l).append('=').append(GrowthRules.xpToNext(l)).append('/').append(GrowthRules.totalXpFor(l + 1));
@@ -130,31 +131,19 @@ public final class GrowthSelfTest {
         check(f, Growth.addXpRaw(d, 1) == 1 && d.level == 2 && d.xp == 0, "50 xp should reach level 2 exactly");
         d = new GrowthData();
         check(f, Growth.addXpRaw(d, GrowthRules.totalXpFor(5) + 7) == 4 && d.level == 5 && d.xp == 7, "multi-level gain is wrong: " + d.level + "/" + d.xp);
-        check(f, d.unspentPoints() == 12, "level 5 should have 12 points, has " + d.unspentPoints());
+        check(f, d.unspentPoints() == 0, "level 5 should have no stat points (stats come from the tree), has " + d.unspentPoints());
         Growth.addXpRaw(d, 10_000_000L);
         check(f, d.level == GrowthRules.MAX_LEVEL && d.xp == 0, "overflow should stop at the cap with an empty bar");
         check(f, Growth.addXpRaw(d, 500) == 0 && d.xp == 0, "xp at the cap should be discarded");
 
-        // ---------------------------------------------------------------- 振り分けの検め
+        // ---------------------------------------------------------------- 基礎の検め
         d = new GrowthData();
-        d.level = 6; // 15 点
-        check(f, !Growth.canAllocate(d, new int[] {0, 0, 0, 0}), "an empty allocation was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {-1, 2, 0, 0}), "a negative allocation was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {16, 0, 0, 0}), "an allocation over the points was accepted");
-        check(f, !Growth.canAllocate(d, new int[] {1, 0}), "a short allocation was accepted");
-        check(f, Growth.canAllocate(d, new int[] {5, 5, 3, 2}), "a valid allocation was refused");
-        // 巨大な値で int があふれても通らない (受け取るのは改造されうるクライアントの値)
-        int keep = d.stats[0];
-        d.stats[0] = 1;
-        check(f, !Growth.canAllocate(d, new int[] {Integer.MAX_VALUE, Integer.MAX_VALUE, 0, 3}), "an overflowing allocation was accepted");
-        d.stats[0] = keep;
         d.level = 50;
         d.stats[0] = GrowthRules.STAT_CAP;
-        check(f, !Growth.canAllocate(d, new int[] {1, 0, 0, 0}), "an allocation over the stat cap was accepted");
-        // レベルを下げられて、使った力が持っている力より多い → 全部戻る
+        // 基礎は木から写す値なので、レベルを下げられても検めでは消さない
         d.level = 3;
         d.sanitize();
-        check(f, d.spentPoints() == 0 && d.unspentPoints() == 6, "overspent stats were not refunded");
+        check(f, d.stats[0] == GrowthRules.STAT_CAP, "sanitize wiped stats that come from the tree");
         d.level = 99;
         d.xp = -5;
         d.sanitize();
@@ -176,15 +165,6 @@ public final class GrowthSelfTest {
                 "random rounding is wrong");
         checkOpeningPace(f);
         ServerLevel overworld = server.overworld();
-        GrowthData budget = new GrowthData();
-        // 日ごとの上限は 100 (00 の 26)
-        check(f, GrowthRules.VANILLA_DAILY == 100, "vanilla daily cap is " + GrowthRules.VANILLA_DAILY + ", expected 100");
-        // 上限 (VANILLA_DAILY) の 10 手前まで使い、次の 20 は 10 が満額・10 が疲れ
-        double first = GrowthRewards.vanillaBudget(overworld, budget, GrowthRules.VANILLA_DAILY - 10);
-        double second = GrowthRewards.vanillaBudget(overworld, budget, 20);
-        check(f, first == GrowthRules.VANILLA_DAILY - 10 && Math.abs(second - (10 + 10 * GrowthRules.VANILLA_TIRED)) < 1e-9,
-                "vanilla daily budget is wrong: " + first + ", " + second);
-
         // ---------------------------------------------------------------- 保存 (NBT) と同期のコーデック
         GrowthData a = sample();
         GrowthData b = new GrowthData();
@@ -217,16 +197,21 @@ public final class GrowthSelfTest {
         check(f, modifier(p, Attributes.ATTACK_SPEED, Growth.MOD_AGILITY_ATTACK, 0.04, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
                 "agility attack speed modifier missing or wrong");
         check(f, Math.abs(p.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed * 1.04) < 1e-6, "agility did not add on top of the base speed");
-        check(f, Math.abs(p.getMaxHealth() - 22f) < 1e-4, "vitality 9 should give 22 max health, got " + p.getMaxHealth());
-        check(f, Math.abs(p.getHealth() - 22f) < 1e-4, "a full-health player was not topped up to the new max");
-        // 表示は体力の点: 耐久 9 は +2、点は 0.5 の倍数で 2 桁まで
-        check(f, "2".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(9))) && "0.5".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(2)))
-                && "1".equals(jp.revati.skyabyss.Hp.number(1.0)) && "0".equals(jp.revati.skyabyss.Hp.number(0)) && !jp.revati.skyabyss.Hp.of(4).contains("❤"),
-                "vitality is not shown as HP numbers");
+        // 体力 = 20 + 耐久 9 の +2 + レベルの分 (2 レベルごとに +0.5。2026-11-02)
+        float want = 22f + (float) GrowthRules.levelHealth(pd.level);
+        float base = 20f + (float) GrowthRules.levelHealth(pd.level);
+        check(f, Math.abs(GrowthRules.levelHealth(1)) < 1e-9 && Math.abs(GrowthRules.levelHealth(50) - 12) < 1e-9, "level health should be 0 at Lv 1 and 12 at Lv 50");
+        check(f, Math.abs(p.getMaxHealth() - want) < 1e-4, "vitality 9 should give " + want + " max health, got " + p.getMaxHealth());
+        check(f, Math.abs(p.getHealth() - want) < 1e-4, "a full-health player was not topped up to the new max");
+        // 表示は画面の倍率 (Hp.SHOWN = 10): 耐久 9 は中の +2 = 「20」、2 は 0.5 = 「5」
+        check(f, "20".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(9))) && "5".equals(jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(2)))
+                && "10".equals(jp.revati.skyabyss.Hp.number(1.0)) && "0".equals(jp.revati.skyabyss.Hp.number(0)) && "2.5".equals(jp.revati.skyabyss.Hp.number(0.25))
+                && !jp.revati.skyabyss.Hp.of(4).contains("❤"),
+                "vitality is not shown as HP numbers x10");
         check(f, p.getAttributeValue(Rpg.MAX_MANA) == 30, "spirit 5 should give 30 mana, got " + p.getAttributeValue(Rpg.MAX_MANA));
         // 付け直しても重ならない
         Growth.applyModifiers(p);
-        check(f, Math.abs(p.getMaxHealth() - 22f) < 1e-4, "applying twice stacked the modifiers");
+        check(f, Math.abs(p.getMaxHealth() - want) < 1e-4, "applying twice stacked the modifiers");
 
         // 死亡時の引き継ぎ (PlayerEvent.Clone と同じ呼び方)
         FakePlayer reborn = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "growth_test_b"));
@@ -239,8 +224,8 @@ public final class GrowthSelfTest {
         FakePlayer loaded = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "growth_test_c"));
         loaded.load(saved);
         check(f, same(pd, Growth.get(loaded), true), "growth data was not saved with the player");
-        check(f, Math.abs(loaded.getMaxHealth() - 22f) < 1e-4 && Math.abs(loaded.getHealth() - 22f) < 1e-4,
-                "after loading, health was " + loaded.getHealth() + "/" + loaded.getMaxHealth() + " (expected 22/22)");
+        check(f, Math.abs(loaded.getMaxHealth() - want) < 1e-4 && Math.abs(loaded.getHealth() - want) < 1e-4,
+                "after loading, health was " + loaded.getHealth() + "/" + loaded.getMaxHealth() + " (expected " + want + ")");
 
         // 振り分けを戻すと修飾子が外れ、体力は新しい上限に収まる
         java.util.Arrays.fill(pd.stats, 0);
@@ -248,7 +233,7 @@ public final class GrowthSelfTest {
         check(f, p.getAttribute(Attributes.ATTACK_DAMAGE).getModifier(Growth.MOD_STRENGTH) == null
                 && p.getAttribute(Attributes.MAX_HEALTH).getModifier(Growth.MOD_VITALITY) == null
                 && p.getAttribute(Rpg.MAX_MANA).getModifier(Growth.MOD_SPIRIT) == null, "modifiers were not removed after a reset");
-        check(f, p.getMaxHealth() == 20f && p.getHealth() <= 20f, "health was not clamped after a reset");
+        check(f, Math.abs(p.getMaxHealth() - base) < 1e-4 && p.getHealth() <= base + 1e-4, "health was not clamped after a reset");
 
         // ステータスの振り直し (00 の 3 = A): 炉のそばで、技と同じ費用 (初回無料、以後結晶)。回数は技と別
         checkStatRespec(f, overworld, p);
@@ -318,8 +303,6 @@ public final class GrowthSelfTest {
         a.fragmentCapacity = 14;
         a.discoveries.add("biome:minecraft:plains");
         a.discoveries.add("first:skyabyss:heart");
-        a.vanillaDay = 4;
-        a.vanillaToday = 77;
         a.statRespecs = 3;
         return a;
     }

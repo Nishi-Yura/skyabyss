@@ -54,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 三章の地上 (docs/design/34 の C3) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch3 ground"
+// 三章の地上の自己テスト。SKYABYSS_SELFTEST_ONLY="ch3 ground"
 //   ch3 ground            データ (支度の段 3 本とサブ・会話・伝承・文・経験値の枠・湧き台・職人の立つ所)、三本の流れ (空の石・焼けた見張り塔・避雷の柱の合図)、
 //                         合図 ch3_ready、イサナの決意で温石、旗の向き、眼の間の鏡の面 (折り返し・距離・眼の間の外は映さない・偽の人には出さない)
 //   ch3 ground (sites)    本物の世界で西の峰の跡地に建ったもの: 塔の跡の台 4・戸 9・石の箱と碑・見本の柱、針を立てると数えて戸が開き書と銅、
@@ -127,7 +127,7 @@ public final class Ch3GroundSelfTest {
         } finally {
             clean(p);
         }
-        report("ch3 ground", f, "3 trail steps + wind flags quest, dialogue, lore, ja/en text, xp budget, trail flow and ch3_ready, warm stone, mirror plane, flag bearings");
+        report("ch3 ground", f, "3 trail steps, dialogue, lore, ja/en text, xp budget, trail flow and ch3_ready, warm stone, mirror plane, flag bearings");
     }
 
     private static void data(List<String> f) {
@@ -138,8 +138,6 @@ public final class Ch3GroundSelfTest {
             check(f, def != null && def.main() && def.startWhen() != null && !def.repeats() && !def.board() && def.chapter().equals(Chapters.STORM.id()),
                     id + ": needs to be a main quest with start_when, chapter titan_storm, no repeat or board");
         }
-        QuestDef flags = QuestManager.quest(Ch3Ground.Q_FLAGS);
-        check(f, flags != null && !flags.main() && flags.chapter().equals(Chapters.STORM.id()), "ch3/wind_flags should be a chapter-3 side quest");
         check(f, QuestManager.loadErrors().stream().noneMatch(s -> s.contains("ch3/")), "chapter-3 quests were flagged: " + QuestManager.loadErrors());
         check(f, DialogueManager.loadErrors().stream().noneMatch(s -> s.contains("ch3g")), "chapter-3 ground dialogue was flagged: " + DialogueManager.loadErrors());
         for (String[] n : new String[][] {{"skyabyss:storyteller", "ch3g_pillars_tale"}, {"skyabyss:storyteller", "ch3g_s_verse"},
@@ -151,7 +149,7 @@ public final class Ch3GroundSelfTest {
         // 文 (日英)
         List<String> keys = new ArrayList<>(List.of("quest.skyabyss.ch3.lightning_pillars.raise.rods", "quest.skyabyss.ch3.lightning_pillars.vault.page",
                 "quest.skyabyss.ch3.scorched_watch.clear.page", "quest.skyabyss.ch3.scorched_watch.show.talk", "quest.skyabyss.ch3.sky_stone.dig.diamonds",
-                "quest.skyabyss.ch3.wind_flags.trace.flags", "message.skyabyss.ch3g.ruin.open", "message.skyabyss.ch3g.mirror.2",
+                "message.skyabyss.ch3g.ruin.open", "message.skyabyss.ch3g.mirror.2",
                 "message.skyabyss.ch3g.flags.turn", "message.skyabyss.ch3g.arrive.ch3_scorched_watch", "entity.skyabyss.scorched_warden",
                 "dialogue.skyabyss.whale_chaser.ch3g_c_stay", "dialogue.skyabyss.storyteller.ch3g_s_verse", "dialogue.skyabyss.artisan.ch3g_watch_show",
                 "advancement.skyabyss.storm_trail.title", "advancement.skyabyss.scorched_watch.description"));
@@ -169,7 +167,7 @@ public final class Ch3GroundSelfTest {
         }
         // 経験値の枠 (三章の新しい分 900・合計 1,700)
         int fresh = ChapterXpBudget.newXp(QuestManager.all(), 3);
-        check(f, fresh >= 570 && fresh <= ChapterXpBudget.NEW_CAP[3], "chapter 3 new xp " + fresh + " should count the trail steps, the flags and the watch, within " + ChapterXpBudget.NEW_CAP[3]);
+        check(f, fresh >= 400 && fresh <= ChapterXpBudget.NEW_CAP[3], "chapter 3 new xp " + fresh + " should count the trail steps and the watch, within " + ChapterXpBudget.NEW_CAP[3]);
         check(f, ChapterXpBudget.overruns(QuestManager.all(), 3).isEmpty(), "chapter 3 is over its xp budget: " + ChapterXpBudget.overruns(QuestManager.all(), 3));
         // 湧き台・職人の立つ所・部品の印
         SiteSpawner.Def def = SiteSpawner.def(ScorchedWatch.SITE);
@@ -198,16 +196,16 @@ public final class Ch3GroundSelfTest {
             check(f, QuestLog.of(p).entry(id) != null, id + " did not start");
         }
         // 空の石: ダイヤ 4 では済まない、5 で済む (胸当てか剣でも)
-        p.getInventory().add(new ItemStack(Items.DIAMOND, 4));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 4));
         Quests.poll(p, true);
         check(f, !QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "four diamonds finished the sky stone");
-        p.getInventory().add(new ItemStack(Items.DIAMOND, 1));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get(), 1));
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "five diamonds did not finish the sky stone");
         Quests.forget(p, Ch3Ground.Q_STONE);
         p.getInventory().clearContent();
         Quests.start(p, Ch3Ground.Q_STONE);
-        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.SKY_STONE_CHESTPLATE.get()));
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "a worn diamond chestplate did not finish the sky stone");
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
@@ -233,7 +231,7 @@ public final class Ch3GroundSelfTest {
         Quests.signal(p, Ch3Ground.SIGNAL_PILLAR);
         check(f, "vault".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)), "four rods did not open the vault stage");
         check(f, LightningPillars.openVault(p, level, null) && !LightningPillars.openVault(p, level, null), "the vault gave its copper twice or never");
-        check(f, QuestItems.count(p, "minecraft:copper_ingot", null) == 4 && Lore.state(p).has(Ch3Ground.PAGE_STAYER), "the vault should hand over four copper and the page");
+        check(f, QuestItems.count(p, "skyabyss:copper_lump", null) == 4 && Lore.state(p).has(Ch3Ground.PAGE_STAYER), "the vault should hand over four copper and the page");
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).done, "the page did not finish the pillars quest");
         check(f, PrepQuests.ready(p, 3) && Growth.get(p).discoveries.contains("prep_ready:3"), "the three chapter-3 steps did not raise ch3_ready");
@@ -521,7 +519,7 @@ public final class Ch3GroundSelfTest {
         }
         SiteSpawner.tick(level, List.of(a), now + 40);
         check(f, progress.cleared(a.getUUID(), ScorchedWatch.SITE), "clearing the watch was not recorded");
-        check(f, QuestItems.count(a, "minecraft:copper_ingot", null) >= 6, "the first watch clear should hand over copper");
+        check(f, QuestItems.count(a, "skyabyss:copper_lump", null) >= 6, "the first watch clear should hand over copper");
         laterWait = 0;
     }
 
@@ -551,7 +549,9 @@ public final class Ch3GroundSelfTest {
             if (e.siteId.equals(Ch3Ground.FIELD) && e.built) {
                 BlockPos cache = e.extra("cache");
                 check(f, cache != null && level.getBlockState(cache).is(Blocks.BARREL), "the gleaner field has no cache barrel");
-                check(f, Ch3Ground.openCache(p, level, cache) && !Ch3Ground.openCache(p, level, cache) && QuestItems.count(p, "minecraft:raw_copper", null) == 8,
+                // 生の銅と銅の延べ棒は、どちらも銅の塊になった (置き換えの第 3 段) ので、前からの分を引いて数える
+                int copperBefore = QuestItems.count(p, "skyabyss:copper_lump", null);
+                check(f, Ch3Ground.openCache(p, level, cache) && !Ch3Ground.openCache(p, level, cache) && QuestItems.count(p, "skyabyss:copper_lump", null) - copperBefore == 8,
                         "the cache should give eight raw copper once");
             }
             if (e.siteId.equals(Ch3Ground.CLIFF) && e.built) {

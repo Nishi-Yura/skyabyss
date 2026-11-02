@@ -1,0 +1,82 @@
+# 地下のダンジョンの主 4 体をゲームの中で (docs/design/55)。入口の見どころは待たない (写しへ直に入る)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/dungeon_bosses.txt -PshotsName=dungeon_bosses
+world dungeon_bosses continent
+size 1600 900
+timeout 2400
+render 8
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+hud off
+chat clear
+cmd gamemode creative
+cmd skyabyss dungeon enter bone_pit
+wait 60
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto boss
+cmd execute as @s at @s run tp @s ~ ~ ~8 180 10
+wait 80
+cmd gamemode spectator
+cmd execute as @s at @s facing entity @e[type=!minecraft:player,distance=..30,limit=1,sort=nearest] eyes run tp @s ^ ^1 ^-4 ~ ~
+wait 40
+shot bone_pit_boss_front
+cmd execute as @s at @s run tp @s ^5 ^1 ^ ~-35 ~
+wait 30
+shot bone_pit_boss_side
+cmd skyabyss dungeon leave
+wait 40
+cmd gamemode creative
+cmd skyabyss dungeon enter tide_cave
+wait 60
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto boss
+cmd execute as @s at @s run tp @s ~ ~ ~8 180 10
+wait 80
+cmd gamemode spectator
+cmd execute as @s at @s facing entity @e[type=!minecraft:player,distance=..30,limit=1,sort=nearest] eyes run tp @s ^ ^1 ^-4 ~ ~
+wait 40
+shot tide_cave_boss_front
+cmd execute as @s at @s run tp @s ^5 ^1 ^ ~-35 ~
+wait 30
+shot tide_cave_boss_side
+cmd skyabyss dungeon leave
+wait 40
+cmd gamemode creative
+cmd skyabyss dungeon enter storm_hollow
+wait 60
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto boss
+cmd execute as @s at @s run tp @s ~ ~ ~8 180 10
+wait 80
+cmd gamemode spectator
+cmd execute as @s at @s facing entity @e[type=!minecraft:player,distance=..30,limit=1,sort=nearest] eyes run tp @s ^ ^1 ^-4 ~ ~
+wait 40
+shot storm_hollow_boss_front
+cmd execute as @s at @s run tp @s ^5 ^1 ^ ~-35 ~
+wait 30
+shot storm_hollow_boss_side
+cmd skyabyss dungeon leave
+wait 40
+cmd gamemode creative
+cmd skyabyss dungeon enter molten_mine
+wait 60
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto boss
+cmd execute as @s at @s run tp @s ~ ~ ~8 180 10
+wait 80
+cmd gamemode spectator
+cmd execute as @s at @s facing entity @e[type=!minecraft:player,distance=..30,limit=1,sort=nearest] eyes run tp @s ^ ^1 ^-4 ~ ~
+wait 40
+shot molten_mine_boss_front
+cmd execute as @s at @s run tp @s ^5 ^1 ^ ~-35 ~
+wait 30
+shot molten_mine_boss_side
+cmd skyabyss dungeon leave
+wait 40

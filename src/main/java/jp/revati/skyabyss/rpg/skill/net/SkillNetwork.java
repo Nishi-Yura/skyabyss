@@ -6,10 +6,8 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.client.skill.SkillClient;
 import jp.revati.skyabyss.rpg.client.skill.SkillFx;
 import jp.revati.skyabyss.rpg.skill.Skill;
-import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillKeystone;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillExtOps;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
@@ -25,7 +23,12 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SkillNetwork {
     // 2: 技の見た目の合図に当たりの点 (SkillFxPayload.target)
-    private static final String PROTOCOL_VERSION = "2";
+    // 3: 島の祠の職選び (JobChoiceOpenPayload・JobChoosePayload)
+    // 4: 技の木 v2 の節 (SkillNodePayload)
+    // 5: 節に木の id (淵・前世の木)
+    // 6: 秘伝 (SecretArtsPayload)
+    // 7: 型の溜まるもの (GaugePayload)
+    private static final String PROTOCOL_VERSION = "7";
 
     private SkillNetwork() {
     }
@@ -35,21 +38,30 @@ public final class SkillNetwork {
         event.registrar(PROTOCOL_VERSION)
                 // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
                 .playToClient(ManaPayload.TYPE, ManaPayload.STREAM_CODEC, (payload, context) -> SkillClient.onMana(payload))
+                .playToClient(GaugePayload.TYPE, GaugePayload.STREAM_CODEC, (payload, context) -> SkillClient.onGauge(payload))
+                .playToClient(SecretArtsPayload.TYPE, SecretArtsPayload.STREAM_CODEC,
+                        (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.rpg.skill.SecretArts.onClient(payload)))
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))
                 .playToClient(SkillFxPayload.TYPE, SkillFxPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillFx.onCast(payload)))
-                .playToClient(CallingOpenPayload.TYPE, CallingOpenPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCallingOpen(payload))
-                .playToServer(CallingChoosePayload.TYPE, CallingChoosePayload.STREAM_CODEC, (payload, context) -> {
+                // 島の祠で職を選ぶ (docs/design/43 の 4 節)。選び直しはできない (サーバーが検める)
+                .playToClient(JobChoiceOpenPayload.TYPE, JobChoiceOpenPayload.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> SkillClient.onJobChoiceOpen(payload.switching())))
+                .playToServer(JobChoosePayload.TYPE, JobChoosePayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        SkillCalling.Result r = SkillCalling.choose(player, payload.tree());
-                        if (r != SkillCalling.Result.OK) {
-                            SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.calling.failed"));
-                        }
+                        jp.revati.skyabyss.rpg.skill.JobChoice.pick(player, jp.revati.skyabyss.rpg.skill.Job.byId(payload.job()));
                     }
                 })
                 .playToServer(SkillCastPayload.TYPE, SkillCastPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         SkillManager.cast(player, payload.slot());
+                    }
+                })
+                .playToServer(SkillNodePayload.TYPE, SkillNodePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillData.TakeResult r = SkillManager.takeNode(player, payload.tree(), payload.node());
+                        if (r != SkillData.TakeResult.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.node_failed." + r.name().toLowerCase()));
+                        }
                     }
                 })
                 .playToServer(SkillLearnPayload.TYPE, SkillLearnPayload.STREAM_CODEC, (payload, context) -> {
@@ -92,24 +104,6 @@ public final class SkillNetwork {
                         }
                     }
                 })
-                .playToServer(SkillStancePayload.TYPE, SkillStancePayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        SkillManager.StanceResult r = SkillManager.setStance(player, SkillStance.of(payload.stance()));
-                        if (r == SkillManager.StanceResult.COOLDOWN) {
-                            SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.skill.stance_cooldown"));
-                        }
-                    }
-                })
-                .playToServer(SkillChainPayload.TYPE, SkillChainPayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        SkillManager.ChainResult r = SkillManager.toggleChain(player, payload.slot());
-                        if (r != SkillManager.ChainResult.OK) {
-                            SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.skill.chain_failed." + r.name().toLowerCase()));
-                        }
-                    }
-                })
                 .playToServer(SkillKeystonePayload.TYPE, SkillKeystonePayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         SkillManager.KeystoneResult r = SkillManager.toggleKeystone(player, SkillKeystone.byId(payload.id()));
@@ -122,7 +116,6 @@ public final class SkillNetwork {
                 .playToServer(SkillExtPayload.TYPE, SkillExtPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         String result = switch (payload.action()) {
-                            case SkillExtPayload.MUTATE -> SkillExtOps.mutate(player, Skill.byId(payload.skill())).name();
                             case SkillExtPayload.PLACE -> SkillExtOps.place(player, payload.a(), payload.b(), Skill.byId(payload.skill())).name();
                             case SkillExtPayload.REMOVE -> SkillExtOps.remove(player, payload.a()).name();
                             default -> "BAD";

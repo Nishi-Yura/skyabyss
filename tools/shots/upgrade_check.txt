@@ -1,0 +1,34 @@
+# 前の版で遊んだ世界を今の版で開く (docs/release.md の 5)。記録の World upgrade・Player upgrade と、都の空き家 3 軒が塞がること・係の人と名札が残ること
+# 前に run/shots/upgrade_check/saves/<世界> へ古い世界を写しておく (この台本は既にある世界を開く)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/upgrade_check.txt -PshotsName=upgrade_check
+world facility_labels continent
+size 1280 720
+timeout 1800
+render 10
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+hud off
+chat clear
+cmd skyabyss dev opening at shelter 0 0 0 4 180 5
+waitchunks 600
+wait 200
+shot plaza
+cmd skyabyss dev opening at shelter 0 87 1 0 0 8
+waitchunks 300
+wait 120
+shot stable
+cmd skyabyss dev opening at shelter 0 88 1 63 0 8
+waitchunks 300
+wait 120
+shot mapmaker
+cmd skyabyss dev opening at shelter 0 -48 6 -77 180 8
+waitchunks 300
+wait 120
+shot hall
+cmd skyabyss admin version
+wait 20

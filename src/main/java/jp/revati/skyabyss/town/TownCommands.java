@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss town bell                 大鐘楼の頂の鐘を鳴らしたことにする (塔に登れないうちの試し)
 //   /skyabyss town well [reset]         古井戸の下の宝を受け取る (reset で受け取っていないことに)
 //   /skyabyss town cellar open|close    酒場の地下の奥の壁を開ける / 閉じたことにする
-//   /skyabyss town mapmaker [draw]      地図屋の噂 (draw で描き足し)
+//   /skyabyss town guide [draw]         案内人の噂 (draw で描き足し)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TownCommands {
     private TownCommands() {
@@ -71,10 +71,10 @@ public final class TownCommands {
                                     TownCellar.close(c.getSource().getServer());
                                     return 1;
                                 })))
-                        .then(Commands.literal("mapmaker").executes(c -> {
-                            TownActions.mapmakerRumor(c.getSource().getPlayerOrException());
+                        .then(Commands.literal("guide").executes(c -> {
+                            TownActions.guideRumor(c.getSource().getPlayerOrException());
                             return 1;
-                        }).then(Commands.literal("draw").executes(c -> TownActions.mapmakerDraw(c.getSource().getPlayerOrException()) ? 1 : 0)))));
+                        }).then(Commands.literal("draw").executes(c -> TownActions.guideDraw(c.getSource().getPlayerOrException()) ? 1 : 0)))));
     }
 
     static int list(CommandSourceStack source, ServerPlayer p) {

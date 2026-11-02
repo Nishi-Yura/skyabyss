@@ -1,0 +1,93 @@
+# 鎚の向きの確かめ (三人称の横・前と、振りの途中)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/hammer_facing.txt -PshotsName=hammer_facing
+world shots flat
+size 960 540
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+perspective first
+swingpose 0.2
+wait 6
+shot smith_hammer_fp_0.2
+swingpose 0.4
+wait 6
+shot smith_hammer_fp_0.4
+swingpose 0.6
+wait 6
+shot smith_hammer_fp_0.6
+swingpose off
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot smith_hammer_tp_04
+swingpose off
+bodyyaw 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+perspective first
+swingpose 0.2
+wait 6
+shot ember_war_axe_fp_0.2
+swingpose 0.4
+wait 6
+shot ember_war_axe_fp_0.4
+swingpose 0.6
+wait 6
+shot ember_war_axe_fp_0.6
+swingpose off
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot ember_war_axe_tp_04
+swingpose off
+bodyyaw 0
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_bell_hammer
+perspective first
+swingpose 0.2
+wait 6
+shot divine_bell_hammer_fp_0.2
+swingpose 0.4
+wait 6
+shot divine_bell_hammer_fp_0.4
+swingpose 0.6
+wait 6
+shot divine_bell_hammer_fp_0.6
+swingpose off
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot divine_bell_hammer_tp_04
+swingpose off
+bodyyaw 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_pull_hammer
+perspective first
+swingpose 0.2
+wait 6
+shot tower_pull_hammer_fp_0.2
+swingpose 0.4
+wait 6
+shot tower_pull_hammer_fp_0.4
+swingpose 0.6
+wait 6
+shot tower_pull_hammer_fp_0.6
+swingpose off
+perspective front
+bodyyaw 50
+swingpose 0.4
+wait 8
+shot tower_pull_hammer_tp_04
+swingpose off
+bodyyaw 0

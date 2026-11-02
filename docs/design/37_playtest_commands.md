@@ -3,7 +3,8 @@
 - 範囲: `/skyabyss ...` 以下に登録されている開発・試遊のコマンドの一覧（棚卸し）と、試遊のための新しい木 `/skyabyss play ...` の仕様と使い方。
 - 状態: **棚卸しは静的（ソースの登録とその参照先を読んだもの）。実行して確かめたのは `play` の自己テストだけ。** 古いコマンドの実行確認は未了。
 - 関係: 試遊のコマンドは `/skyabyss play ...` の一本に集めた。旧 `/skyabyss playtest ...` は当面そのまま動く（働きの同じ語は `play` に統合済み。1 節の表の「試遊（旧）」）。`play` は `Playtest` の補助と公開の API（`Quests`・`Progression`・`Growth`・`Lore`・`TrialRoute`）だけを使う薄い層。
-- 実装: `jp.revati.skyabyss.dev.play`（`PlayCommands`・`PlayChapters`・`PlayPlaces`・`PlayQuests`・`PlayRaid`・`PlaySelfTest`・`PlayMultiSelfTest`）。文言は `assets/skyabyss_play/lang`。
+- 実装: `jp.revati.skyabyss.dev.play`（`PlayCommands`・`HelpCommands`・`PlayChapters`・`PlayPlaces`・`PlayQuests`・`PlayRaid`・`PlaySelfTest`・`PlayMultiSelfTest`）。文言は `assets/skyabyss_play/lang`。
+- **正式版の形（2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」）**: 試遊の木は管理者のコマンド `/skyabyss admin …` に改めた（中身は play と同じ木に `inspect <人>`・`level <1-50> [人]`・`coins <数> [人]`・`version`、あいだの塔をすぐ試す `tower ending|start|day|hp|leave` を足した）。使える権限の段はサーバーの設定 `adminPermissionLevel`（既定 2）。遊ぶ人の一覧 `/skyabyss help`（誰でも。押すと入力欄に入る）。`/skyabyss play` は開発の別名として残し（撮影の台本が使う）、製品版では隠す。振り分けは `dev/CommandGate`: `/skyabyss` の根は誰でも通し、根の権限 2 を子の節へ移す（help = 誰でも、admin = 設定の段、そのほか = 製品版では隠す・開発では 2）。下の 2 節以降の `play` は `admin` と読み替える。
 
 ## 1. 棚卸し
 
@@ -45,7 +46,7 @@
 | 悪夢 | `skyabyss_nightmare` | enter | 2 | 要確認 | 根が `skyabyss` の外（統一が要る） |
 | 村・人 | `npc` | spawn village affinity bonds reset loop set advance | 2 | 試遊 | |
 | 町 | `town` | list rumor start place bell well reset cellar open close mapmaker draw | 2 | 試遊 | |
-| 施設・ギルド・交易 | `facility`・`guild`・`trade` | spawn mark place shop stash coins look records dummy keyroom offer return mapcopy respec brew trade demo・create apply join accept deny leave kick open info list menu officer take storage deliver banner leader disband confirm pattern plate achievements | 一部 2 | プレイヤー | `coins` が `FacilityCommands` に二度ある（後述 3） |
+| 施設・ギルド・交易 | `facility`・`guild`・`trade` | spawn mark place shop stash coins look records dummy keyroom offer return respec brew trade demo・create apply join accept deny leave kick open info list menu officer take storage deliver banner leader disband confirm pattern plate achievements | 一部 2 | プレイヤー | `coins` が `FacilityCommands` に二度ある（後述 3） |
 | パーティ | `party` | invite accept decline leave kick leader | なし | プレイヤー | |
 | 拾得・報酬 | `titanmemory`・`heartreward` | claim choose memory set clear・reward reset dev | 2 | 試遊 | |
 | 旅嚢 | `pouch` | （品の袋の確認） | 2 | 試遊 | |
@@ -189,6 +190,18 @@
 ### 2.6 状態（status）
 
 主線の五つ（`main_song` `main_tide` `main_thunder` `main_ember` `main_key` `main_abyss`）の段階（未着手・完了・段階名）と、四つの巨神の「止めた・まだ」を一行ずつ出す。
+
+### 2.7 五章・六章・終章の開発コマンド（権限 2。製品版では見えない）
+
+| コマンド | 中身 | 書類 |
+| --- | --- | --- |
+| `/skyabyss abyss …` | 深淵の層・番人・深みへ跳ぶ | [36](36_abyss.md)、`docs/review/playtest_0.9.21.md` の 13.3 節 |
+| `/skyabyss moonworld <valley|cliff|field|rift|core> …`、`core_lord`、`core_clear` | 月の区画へ跳ぶ、核の主、核を倒したことにする | [46](46_moon.md)、`docs/review/playtest_0.9.1.md` |
+| `/skyabyss cloudsea enter`、`ring <鐘>`、`lord`、`crumble`、`lamp <w\|e\|s>`、`eye`、`forge <w\|e\|n>`、`rewinder`、`selves`、`plume`、`seat <1\|2\|3>`、`ending <calm\|break\|accept\|none>`、`trial <1..5>` | 終章: 着く所へ跳ぶ、島ごとの仕掛けと主、座の形態、結末の空、巡礼の試しの段 | [50](50_finale.md)、`docs/review/playtest_finale.md` |
+| `/skyabyss founder enter`、`summon`、`phase <1..3>`、`verse <1..7>`、`win`、`seen`、`wear`、`reset` | 裏ボス: 鐘の内へ跳ぶ、始祖を呼ぶ、段を進める、歌の一行をすぐ、退ける（やっつめの語りと報酬）、三つの結末を見たことにする、肩掛けを着る・脱ぐ、進みを消す | [53](53_founder.md)、`docs/review/playtest_founder.md` |
+| `/skyabyss quest next <頼み>`、`quest signal <合図>` | 頼みを一段進める、合図を立てる（終章は `main_finale_bell`・`lamp`・`forge`・`promise`・`seat`） | 07 |
+
+コマンドの引数は、全角の空白を半角に・続く空白を一つに・前後の空白を取って読み直す（`CommandTidy`）。
 
 ## 3. 試遊の進め方（コピーして使う）
 

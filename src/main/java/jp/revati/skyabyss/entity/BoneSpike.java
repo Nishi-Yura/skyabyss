@@ -37,7 +37,7 @@ public class BoneSpike extends AbstractArrow {
 
     @Override
     protected ItemStack getDefaultPickupItem() {
-        return new ItemStack(Items.BONE);
+        return new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get());
     }
 
     @Override

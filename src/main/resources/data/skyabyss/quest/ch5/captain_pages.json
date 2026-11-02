@@ -50,12 +50,18 @@
     "xp": 300,
     "items": [
       {
-        "item": "minecraft:golden_carrot",
-        "count": 8
+        "item": "skyabyss:cloud_jerky",
+        "count": 4
       }
     ],
     "affinity": {
       "skyabyss:attendant_survivor_ash": 3
-    }
+    },
+    "do": [
+      {
+        "type": "lore",
+        "entry": "ch5/captain_notes"
+      }
+    ]
   }
 }

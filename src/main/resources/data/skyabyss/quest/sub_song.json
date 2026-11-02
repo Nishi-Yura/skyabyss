@@ -10,10 +10,9 @@
         {
           "id": "words",
           "type": "lore",
-          "count": 4,
+          "count": 3,
           "targets": [
             "prologue/counting_song",
-            "prologue/seventh_night",
             "prologue/shaved_peak",
             "prologue/watcher"
           ]
@@ -36,8 +35,8 @@
     "xp": 40,
     "items": [
       {
-        "item": "minecraft:clock",
-        "count": 1
+        "item": "skyabyss:resonance_shard",
+        "count": 2
       }
     ],
     "affinity": {

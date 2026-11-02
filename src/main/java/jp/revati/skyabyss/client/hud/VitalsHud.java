@@ -50,6 +50,11 @@ public final class VitalsHud {
 
     static void onLayer0(RenderGuiLayerEvent.Pre event) {
         var name = event.getName();
+        // バニラの緑の経験値のバーと数字は出さない (左上の Lv と成長の帯がある。2026-10-28 の試遊「経験値バーいらない」)
+        if (VanillaGuiLayers.EXPERIENCE_BAR.equals(name) || VanillaGuiLayers.EXPERIENCE_LEVEL.equals(name)) {
+            event.setCanceled(true);
+            return;
+        }
         boolean health = VanillaGuiLayers.PLAYER_HEALTH.equals(name);
         boolean armor = VanillaGuiLayers.ARMOR_LEVEL.equals(name);
         boolean food = VanillaGuiLayers.FOOD_LEVEL.equals(name);
@@ -106,8 +111,9 @@ public final class VitalsHud {
             float k = 0.65f + 0.35f * (float) Math.sin(p.tickCount * 0.45f);
             color = scale(color, k);
         }
-        int absorb = (int) Math.ceil(p.getAbsorptionAmount());
-        String text = (int) Math.ceil(hp) + "/" + (int) Math.ceil(max);
+        // 数は中の値の 10 倍で見せる (jp.revati.skyabyss.Hp。中の 20 = 帯の「200/200」)
+        int absorb = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(p.getAbsorptionAmount()));
+        String text = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(hp) - 1e-4) + "/" + (int) Math.ceil(jp.revati.skyabyss.Hp.shown(max) - 1e-4);
         bar(g, mc.font, r, HEART, 0xFFE0606C, hp / max, color, text, 0xFFF4EEE6, p.hurtTime > 0 || p.invulnerableTime > 10);
         if (absorb > 0) {
             // 吸収: 帯の上辺に金の線 (最大の体力に対する割合)。数字は体力の数字の左
@@ -140,6 +146,51 @@ public final class VitalsHud {
         // 足りずに撃てなかった直後は帯が光る (SkillClient.manaFlash)
         boolean flash = jp.revati.skyabyss.rpg.client.skill.SkillClient.manaFlash > 0;
         bar(g, mc.font, r, DROP, 0xFF7FC8F0, (float) (mana / max), 0xFF3C82D2, (int) Math.floor(mana) + "/" + (int) Math.ceil(max), 0xFFEAF4FC, flash);
+        drawGauge(g, mc, p, r);
+    }
+
+    // 型の溜まるもの (rpg/skill/Gauges): マナの帯のすぐ上の細い帯。小さい数は点、大きい数は帯。満ちると明るく脈打つ。
+    // 水の中で空気の帯が出ている間は重なるので描かない
+    private static void drawGauge(GuiGraphics g, Minecraft mc, Player p, Rect r) {
+        var k = jp.revati.skyabyss.rpg.skill.Gauges.Kind.byOrdinal(jp.revati.skyabyss.rpg.client.skill.SkillClient.gaugeKind);
+        if (k == null || p.isEyeInFluid(FluidTags.WATER) || p.getAirSupply() < p.getMaxAirSupply()) {
+            return;
+        }
+        int value = Mth.clamp(jp.revati.skyabyss.rpg.client.skill.SkillClient.gaugeValue, 0, k.max);
+        boolean full = value >= k.max;
+        int y0 = r.y() - 5;
+        int x0 = r.x() + 12;
+        int w = r.w() - 12 - 1;
+        int color = k.color;
+        if (full) {
+            color = scale(color, 0.85f + 0.3f * (float) Math.sin(p.tickCount * 0.5f));
+        }
+        if (jp.revati.skyabyss.rpg.client.skill.SkillClient.gaugeFlash > 0) {
+            color = 0xFFFFFFFF;
+        }
+        int fc = color;
+        g.drawManaged(() -> {
+            g.fill(x0 - 1, y0 - 1, x0 + w + 1, y0 + 4, EDGE);
+            g.fill(x0, y0, x0 + w, y0 + 3, TROUGH);
+            if (k.pips()) {
+                // 点: 数だけ等しく分けた升
+                int gap = 1;
+                int cell = Math.max(1, (w - gap * (k.max - 1)) / k.max);
+                for (int i = 0; i < k.max; i++) {
+                    int cx = x0 + i * (cell + gap);
+                    g.fill(cx, y0, Math.min(x0 + w, cx + cell), y0 + 3, i < value ? fc : 0xFF22282F);
+                }
+            } else {
+                int fill = Math.round(w * value / (float) k.max);
+                if (fill > 0) {
+                    g.fill(x0, y0, x0 + fill, y0 + 3, fc);
+                }
+            }
+        });
+        // 型の名 (左の小さな絵の所)。帯の高さに収まらないので、満ちたときだけ印を描く
+        if (full) {
+            g.fill(r.x() + 3, y0, r.x() + 9, y0 + 3, fc);
+        }
     }
 
     private static void drawArmor(GuiGraphics g, Minecraft mc, Player p) {

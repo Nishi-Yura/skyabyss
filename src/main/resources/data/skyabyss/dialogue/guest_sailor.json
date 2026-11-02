@@ -62,12 +62,12 @@
             "of": [
               {
                 "type": "item",
-                "item": "minecraft:compass",
+                "item": "skyabyss:wayfinder",
                 "count": 1
               },
               {
                 "type": "item",
-                "item": "minecraft:map",
+                "item": "skyabyss:blank_chart",
                 "count": 1
               }
             ]
@@ -75,12 +75,12 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:compass",
+              "item": "skyabyss:wayfinder",
               "count": 1
             },
             {
               "type": "take",
-              "item": "minecraft:map",
+              "item": "skyabyss:blank_chart",
               "count": 1
             },
             {

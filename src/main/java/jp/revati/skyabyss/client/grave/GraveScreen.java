@@ -157,10 +157,10 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
         g.fill(left + 8, y, left + 10, y + ROW_H - 3, TEAL);
         // 一行目: 場所。二行目: 品の数・経験値・経った時間
         String place = Component.translatable("gui.skyabyss.grave.place", dimensionName(e.dimension()), e.x(), e.y(), e.z()).getString();
-        g.drawString(font, font.plainSubstrByWidth(place, w - 96), left + 14, y + 4, TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(place), left + 14, y + 4, w - 96, TEXT, false);
         String contents = Component.translatable("gui.skyabyss.grave.contents", e.items(), e.xp()).getString();
-        g.drawString(font, contents, left + 14, y + 15, SOFT, false);
         String age = age(e.age());
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(contents), left + 14, y + 15, w - 74 - font.width(age) - 14 - 6, SOFT, false);
         g.drawString(font, age, left + w - 74 - font.width(age), y + 15, SOFT, false);
     }
 

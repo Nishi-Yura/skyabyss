@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector3f;
 
 // 地上へ帰る磁石石の祠 (骨の野営の南西。印 exit。2026-10-23 の試遊「深淵から帰れるロードストーン。派手にしてもいいかもな。これで帰れたんだってなる」)。
-//   祠: 白い石の壇・柱の先の灯り・奥の壁の空色の光 (tools/abyss/gen_abyss_layers.py の build_return_shrine)
+//   祠: 白い石の壇・柱の先の灯り・奥の壁の空色の光 (データを直接直す（生成スクリプトはない） の build_return_shrine)
 //   見回り (0.5 秒ごと、20 以内に人がいるとき): 鎖にそって上る白い光・壇のまわりの空色の粒、4 秒ごとに鐘のような低い音
 //   帰る: 磁石石か鎖を右クリック → 体がふわりと浮き、光が集まり、画面が白く明るくなる (AbyssNetwork.Flash) → 白の中で都の下の門の前へ
 //         → 着いた所に光と鐘の音と「地上へ戻った」の一言。2 秒のあいだに二度押しても一度だけ

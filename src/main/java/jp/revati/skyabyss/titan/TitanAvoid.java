@@ -13,7 +13,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import jp.revati.skyabyss.SkyAbyss;
 
-// 巨神は都 (鐘の宿り) の中に来ない (docs/design/33 の 2)。都の中心から RADIUS の内には、
+// 巨神は都 (鐘の宿り) の中に来ない。都の中心から RADIUS の内には、
 //  - 泳ぐ・歩く先 (steer の目標) を置かない (境目へ押し出す)
 //  - 雷翼のうずくまる峰を選ばない
 //  - それでも低く (地面から LOW 以内) 入ったら、境目へ押し戻す (高い空を渡るだけなら、そのまま)

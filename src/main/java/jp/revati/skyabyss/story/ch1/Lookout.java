@@ -19,7 +19,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 見張りの丘 (E9。docs/design/17 の 1.5): 高台の石の台に、真鍮の筒 (避雷針を寝かせたもの) が据えてある。右クリックで覗く。
+// 見張りの丘 (E9): 高台の石の台に、真鍮の筒 (避雷針を寝かせたもの) が据えてある。右クリックで覗く。
 // 夕方 (一日の時刻 10500〜13000)・空が荒れていないとき、遠い雲に「雲より暗い縁」が見える。岩鯨の方角と、「大きさ」を比べるものなしで先に見せる。
 // 岩鯨が出ていればその方角、まだなら世界ごとに決まった方角 (岩鯨の出現は 3 日目の夕方より前)。頁 ch1/lookout が記される
 @EventBusSubscriber(modid = SkyAbyss.MODID)

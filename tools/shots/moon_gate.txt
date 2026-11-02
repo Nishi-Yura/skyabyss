@@ -1,0 +1,36 @@
+# 六章の月の入口 (docs/design/46 の 5 章の 1): 鐘楼の門、月の面・空・地上の大陸・クレーター
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_gate.txt -PshotsName=moon_gate
+world moon_gate4 continent
+size 1600 900
+timeout 1800
+render 12
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss dev opening build
+wait 400
+cmd skyabyss moonworld gate
+waitchunks 200
+wait 60
+hud off
+cmd tp @s ~ ~ ~ 0 25
+wait 20
+shot g1_gate
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd tp @s 0 12 2 180 -8
+wait 30
+shot m1_landing
+cmd tp @s 0 12 4 165 -30
+wait 30
+shot m2_earth
+cmd tp @s 30 30 30 135 30
+wait 40
+shot m3_craters
+cmd tp @s 0 12 2 0 -5
+wait 20
+shot m4_south

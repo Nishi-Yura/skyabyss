@@ -1,0 +1,13 @@
+{
+ "id": "lightning_gleaner",
+ "letter": "c",
+ "installed": 404,
+ "before": 313,
+ "before_closed": 404,
+ "after": 416,
+ "after_closed": 568,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

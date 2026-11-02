@@ -106,7 +106,7 @@ def p_title():
     text(a, W // 2 - text_width(s, 12) // 2, 76, s, TEAL_L, 12, shadow=ABYSS0)
     s = "空を追う人の　旅の手帳"
     text(a, W // 2 - text_width(s, 12) // 2, 96, s, PARCH_D, 12, shadow=ABYSS0)
-    s = VERSION + "  BETA"
+    s = VERSION
     text(a, W // 2 - text_width(s, 12) // 2, Hh - 28, s, GOLD_L, 12, shadow=ABYSS0)
     bind(a, lea, "night")
     return save(a, "plate_title.png", 3)

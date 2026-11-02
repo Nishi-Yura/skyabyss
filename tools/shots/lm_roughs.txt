@@ -1,0 +1,41 @@
+# 町の目印のラフ 3 案 (tools/capital/landmarks.py rough)。2026-10-27
+world lmroughs flat
+size 1600 900
+timeout 900
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+hud off
+cmd forceload add -40 -40 200 40
+wait 60
+cmd skyabyss dev ch1 place lm_rough_a 0 -61 0 0
+cmd skyabyss dev ch1 place lm_rough_b 80 -61 0 0
+cmd skyabyss dev ch1 place lm_rough_c 160 -61 0 0
+wait 200
+chat clear
+cmd tp @s 30 -46 30 135 2
+waitchunks
+wait 60
+shot a_far
+cmd tp @s 0 -59 20 180 -30
+wait 40
+shot a_walk
+cmd tp @s 110 -46 30 135 2
+wait 40
+shot b_far
+cmd tp @s 86 -59 14 160 -25
+wait 40
+shot b_walk
+cmd tp @s 190 -46 30 135 2
+wait 40
+shot c_far
+cmd tp @s 165 -59 10 165 -30
+wait 40
+shot c_walk

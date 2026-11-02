@@ -31,7 +31,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 序盤の構造物の建設の起点 (docs/design/17 の 4 章、8.2 の担当 2)。
+// 序盤の構造物の建設の起点 (8.2 の担当 2)。
 //  - サーバーが始まったとき、まだ場所を決めていなければ決める (SiteFinder)。新しいワールドの最初の日なら、スポーン地点を野営地へ動かす (17-11)
 //  - 建て終わっていない物は、BackBuildJobs と同じように、1 tick の予算 (ms) だけ進める (SiteJob)。野営地はプレイヤーが入る前に建て終える
 //  - 環境変数 SKYABYSS_SHOTS (台本の撮影) のときは、ワールド名が "opening" で始まらなければ建てない (ほかの台本の邪魔をしない)。
@@ -71,6 +71,26 @@ public final class SiteBuilds {
 
     public static synchronized int pending() {
         return QUEUE.size();
+    }
+
+    // ほかの仕組み (大陸の見どころ) が建てる物を足す。同じ場所をもう待っていれば足さない
+    public static synchronized boolean enqueue(SiteJob job) {
+        for (SiteJob j : QUEUE) {
+            if (j.entry == job.entry) {
+                return false;
+            }
+        }
+        QUEUE.add(job);
+        return true;
+    }
+
+    public static synchronized boolean queued(SiteData.Entry e) {
+        for (SiteJob j : QUEUE) {
+            if (j.entry == e) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 起動
@@ -171,13 +191,14 @@ public final class SiteBuilds {
         SiteNetwork.broadcast(server);
     }
 
-    // 建て終わっていない物を、野営地 → 宿り → 足跡 → 骨の順で予約する
+    // 建て終わっていない物を、野営地 → 宿り → 足跡 → 骨 → 土地の町 (大陸のときだけ) の順で予約する
     public static synchronized void enqueueMissing(MinecraftServer server) {
         ServerLevel level = server.overworld();
         SiteData data = SiteData.get(level);
         java.util.Set<SiteData.Entry> queued = new java.util.HashSet<>();
         QUEUE.forEach(j -> queued.add(j.entry));
-        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id}) {
+        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, Kind.FOOTPRINT.id, Kind.RIBS.id, jp.revati.skyabyss.world.continent.ContinentTowns.KIND,
+                jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, jp.revati.skyabyss.world.continent.ContinentFerries.KIND}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 // 跡地の中の物 (一章の骨) は、跡地を整え終わってから
                 if (!e.built && !queued.contains(e) && !waitsForGround(data, e.pos)) {
@@ -226,6 +247,9 @@ public final class SiteBuilds {
             case "shelter" -> ShelterBuilder.create(level, data, e);
             case "footprint" -> FootprintBuilder.create(level, data, e);
             case "ribs" -> RibBuilder.create(level, data, e);
+            case jp.revati.skyabyss.world.continent.ContinentTowns.KIND -> jp.revati.skyabyss.world.continent.ContinentTowns.create(level, data, e);
+            case jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND -> jp.revati.skyabyss.world.continent.ContinentOutskirts.create(level, data, e);
+            case jp.revati.skyabyss.world.continent.ContinentFerries.KIND -> jp.revati.skyabyss.world.continent.ContinentFerries.create(level, data, e);
             default -> throw new IllegalArgumentException("unknown opening site kind " + e.kind);
         };
     }
@@ -415,8 +439,7 @@ public final class SiteBuilds {
             case "bell" -> jp.revati.skyabyss.opening.OpeningSites.bell(server).orElse(null);
             case "smoke" -> jp.revati.skyabyss.opening.OpeningSites.smoke(server).orElse(null);
             case "slab" -> jp.revati.skyabyss.opening.OpeningSites.slab(server).orElse(null);
-            case "chaser" -> jp.revati.skyabyss.opening.OpeningSites.bell(server)
-                    .map(b -> jp.revati.skyabyss.npc.NpcSpawner.chaserSpot(level, b)).orElse(null);
+            case "chaser" -> jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(server);
             default -> null;
         };
         if (at == null) {

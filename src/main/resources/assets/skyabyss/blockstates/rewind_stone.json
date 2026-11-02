@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "phase=0": {
+      "model": "skyabyss:block/rewind_stone_0"
+    },
+    "phase=1": {
+      "model": "skyabyss:block/rewind_stone_1"
+    },
+    "phase=2": {
+      "model": "skyabyss:block/rewind_stone_2"
+    },
+    "phase=3": {
+      "model": "skyabyss:block/rewind_stone_3"
+    }
+  }
+}

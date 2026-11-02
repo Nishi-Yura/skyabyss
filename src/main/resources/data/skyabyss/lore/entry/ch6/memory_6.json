@@ -1,0 +1,12 @@
+{
+  "chapter": "chapter3",
+  "order": 705,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "ch6/watcher_truth"
+  ]
+}

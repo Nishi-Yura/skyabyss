@@ -70,8 +70,8 @@ public final class RecordSelfTest {
 
         // ---------------------------------------------------------------- 中身と符号化
         RecordSnapshot snap = RecordBuilder.build(a, true);
-        int pages = RecordSnapshot.TAB_IDS.size() + jp.revati.skyabyss.progress.Titans.all().size();
-        check(f, snap.tabs().size() == pages, "snapshot should have " + pages + " tabs (4 and a page per titan), got " + snap.tabs().size());
+        int pages = RecordSnapshot.TAB_IDS.size() + jp.revati.skyabyss.progress.Titans.all().size() + DeedPages.GROUPS.size();
+        check(f, snap.tabs().size() == pages, "snapshot should have " + pages + " tabs (5, a page per titan and a page per deed group), got " + snap.tabs().size());
         for (String id : RecordSnapshot.TAB_IDS) {
             RecordSnapshot.Tab t = snap.tab(id);
             check(f, t != null && !t.rows().isEmpty(), "tab " + id + " is empty");
@@ -368,6 +368,14 @@ public final class RecordSelfTest {
             jp.revati.skyabyss.story.StoryData.get(server).mark(a.getUUID(), "[record_test_a]", 0);
             check(f, KeepsakeBonds.expected(a, KeepsakeBonds.Kind.FRAGMENT) == 0, "fragments are not expected after the key is made");
             check(f, KeepsakeBonds.missing(a, KeepsakeBonds.Kind.KEY) == 1, "a missing key should be noticed");
+            // 語りの見直し: 見た語りだけ、巨神の一覧の頁に「見直す」の行が出る
+            String reelKey = RecordSnapshot.REEL_ROW + jp.revati.skyabyss.story.reel.StoryReels.OPENING;
+            jp.revati.skyabyss.story.reel.StoryReels.markSeen(a, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
+            RecordSnapshot.Row reelRow = RecordBuilder.build(a, true).tab(RecordSnapshot.TITANS).row(reelKey);
+            check(f, reelRow != null && reelRow.action() == RecordSnapshot.ACTION_REPLAY, "a seen tale should offer a replay row");
+            // 試練の記録 (図鑑) は巨神のつまみの行から開く (前は砦の老兵)
+            RecordSnapshot.Row trials = RecordBuilder.build(a, true).tab(RecordSnapshot.TITANS).row("trial_codex");
+            check(f, trials != null && trials.action() == RecordSnapshot.ACTION_RECORDS, "the titans tab should open the trial records");
             RecordSnapshot.Row keyRow = RecordBuilder.build(a, true).tab(RecordSnapshot.KEEPSAKES).row("sky_key");
             check(f, keyRow != null && keyRow.action() == RecordSnapshot.ACTION_RECALL_KEY, "the key row should offer a recall");
             KeepsakeBonds.recall(a, KeepsakeBonds.Kind.KEY);

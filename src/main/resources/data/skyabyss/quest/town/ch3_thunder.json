@@ -47,7 +47,7 @@
         "count": 20
       },
       {
-        "item": "minecraft:paper",
+        "item": "skyabyss:thunder_whetstone",
         "count": 1,
         "token": "child_drawing",
         "name": "item.skyabyss.town.child_drawing",

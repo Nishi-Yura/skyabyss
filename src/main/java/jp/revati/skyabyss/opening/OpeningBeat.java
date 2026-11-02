@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import org.jetbrains.annotations.Nullable;
 
-// 序盤の拍子 (docs/design/17 の 3 章、B0〜B10)。名前は 17 の 11.3節 (語りの担当が決めた ID) と、伝承の項目の名前にそろえてある
+// 序盤の拍子 (B0〜B10)。名前は伝承の項目の名前にそろえてある
 public enum OpeningBeat {
     AWAKE("awake"),
     CAMP("camp"),

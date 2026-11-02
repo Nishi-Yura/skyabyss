@@ -1,0 +1,39 @@
+# 控え帳の「記し」(バニラの進捗の画面の代わり。record/DeedPages) の確認: 一覧・旅・名のある強敵の頁。いくつか済ませた状態で撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/deeds.txt -PshotsName=deeds
+world deeds flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+cmd time set noon
+cmd gamemode creative
+waitchunks 300
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd advancement grant @s only skyabyss:island_job
+cmd advancement grant @s only skyabyss:island_prints
+cmd advancement grant @s only skyabyss:island_bandits
+cmd advancement grant @s only skyabyss:island_ferry
+cmd advancement grant @s only skyabyss:named_any
+cmd advancement grant @s only skyabyss:named_island
+cmd advancement grant @s only skyabyss:level_5
+cmd advancement grant @s only skyabyss:skill
+wait 40
+chat clear
+cmd skyrecord deeds
+wait 40
+shot deeds_overview
+close
+wait 10
+cmd skyrecord deeds.journey
+wait 40
+shot deeds_journey
+close
+wait 10
+cmd skyrecord deeds.foes
+wait 40
+shot deeds_foes
+close
+echo done

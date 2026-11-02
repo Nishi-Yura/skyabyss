@@ -50,3 +50,6 @@ venv/
 # 生成スクリプトの確認用の絵
 docs/review/previews/
 /.claude/
+
+# BGM の楽器の音源 (第三者のデータ。tools/sources/soundfont/README.md の場所から落とす)
+tools/sources/soundfont/*.sf2

@@ -38,7 +38,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
-// 雷拾い (docs/design/21 の 5.1。三章の地上): 追いかけっこ (敵意なし)。銅の脚の長い鳥。HP 12。攻撃はしない。
+// 雷拾い (三章の地上): 追いかけっこ (敵意なし)。銅の脚の長い鳥。HP 12。攻撃はしない。
 //   ついばむ  ふだんは歩いて、ときどき焼けた荷の跡をついばむ (アニメ peck)
 //   逃げる    人が SCARE の近さに来ると羽ばたいて跳び、走って逃げる。逃げる先はいちばん近い雷拾いの原 (LEAD_RANGE 以内。なければ人から離れる向き)。
 //             追う人を原へ導く。人が CALM より離れると歩きに戻る

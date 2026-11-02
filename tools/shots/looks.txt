@@ -1,0 +1,35 @@
+# 見た目替え (鯨の杖に潮の杖の形)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/looks.txt -PshotsName=looks
+world looks_flat flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss cinematic stop
+camera 0 -60 0 0 0
+waitchunks
+wait 200
+chat clear
+cmd item replace entity @s hotbar.0 with skyabyss:whale_staff
+cmd item replace entity @s hotbar.1 with skyabyss:whale_staff[skyabyss:look="skyabyss:tide_staff"]
+cmd item replace entity @s hotbar.2 with skyabyss:tide_staff
+cmd item replace entity @s hotbar.3 with skyabyss:whalebone_greatsword[skyabyss:look="skyabyss:abyss_lamp_sword"]
+wait 20
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff
+wait 10
+shot looks_1_plain
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff[skyabyss:look="skyabyss:tide_staff"]
+wait 10
+shot looks_2_looked
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword[skyabyss:look="skyabyss:abyss_lamp_sword"]
+wait 10
+shot looks_3_greatsword
+open inventory
+wait 20
+hover slot 37
+wait 10
+shot looks_4_tooltip

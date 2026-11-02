@@ -1,0 +1,80 @@
+# あいだの塔の防具 3 式 (docs/design/54 の 2.6): 着た姿の前・後ろ・3/4 と、天の環・淵の鎖を手に
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_armor.txt -PshotsName=tower_armor
+world shots flat
+size 960 720
+timeout 1800
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+wait 400
+cmd gamemode creative
+fov 30
+camera minecraft:overworld 0 -60 0 180 0
+waitchunks
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:tower_scale_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_scale_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_scale_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_scale_helmet
+perspective front
+bodyyaw 0
+wait 25
+shot tower_scale_front
+perspective back
+wait 4
+shot tower_scale_back
+perspective front
+bodyyaw 40
+wait 4
+shot tower_scale_side
+bodyyaw 0
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:tower_bridge_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_bridge_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_bridge_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_bridge_helmet
+perspective front
+bodyyaw 0
+wait 25
+shot tower_bridge_front
+perspective back
+wait 4
+shot tower_bridge_back
+perspective front
+bodyyaw 40
+wait 4
+shot tower_bridge_side
+bodyyaw 0
+cmd clear @s
+cmd item replace entity @s armor.feet with skyabyss:tower_halo_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_halo_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_halo_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_halo_helmet
+perspective front
+bodyyaw 0
+wait 25
+shot tower_halo_front
+perspective back
+wait 4
+shot tower_halo_back
+perspective front
+bodyyaw 40
+wait 4
+shot tower_halo_side
+bodyyaw 0
+cmd clear @s
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_heaven_ring
+cmd item replace entity @s weapon.offhand with skyabyss:tower_abyss_chain
+perspective first
+hud on
+wait 20
+shot accessories

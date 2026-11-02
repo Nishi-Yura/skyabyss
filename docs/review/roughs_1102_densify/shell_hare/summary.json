@@ -1,0 +1,13 @@
+{
+ "id": "shell_hare",
+ "letter": "b",
+ "installed": 932,
+ "before": 822,
+ "before_closed": 924,
+ "after": 1126,
+ "after_closed": 1386,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_after": [],
+ "group_best": null
+}

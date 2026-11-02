@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 色の段と記号は固定で切れない。記録画面の「称号」から、または /rebirthfx で開く
 public final class RebirthScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 320;
-    private static final int H = 196;
+    private static final int H = 226;   // 切り替え 6 つ・順位表・固定の一行の下に「完了」が重ならない高さ (2026-10-28)
     private static final int ROW = 14;
     private static final int ROWS = 9;
     private static final int TEXT = 0xFFE9EDF0;
@@ -167,7 +167,7 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
                 tip = has ? Component.translatable("title.skyabyss_rebirth." + ti.id() + ".how") : Component.translatable("skyabyss_rebirth.gui.locked_how", Component.translatable("title.skyabyss_rebirth." + ti.id() + ".how"));
             }
             String shown = has ? name.getString() : "？ " + "・".repeat(Math.min(6, name.getString().length()));
-            g.drawString(font, font.plainSubstrByWidth((sel ? "▶ " : "  ") + shown, 156), left, y + 3, sel ? GOLD : has ? TEXT : LOCKED, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal((sel ? "▶ " : "  ") + shown), left, y + 3, 156, sel ? GOLD : has ? TEXT : LOCKED, false);
         }
         if (total > ROWS) {
             int barH = ROWS * ROW;

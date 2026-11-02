@@ -3,7 +3,6 @@
 - 文書番号: 28
 - 範囲: 巨神の子（歌のかけら）の仕様。呼び方、乗り方（パーティ全員）、運ぶ先と得意、降りたときの溶け方、眠りとの関係、マルチ、数値、自己テスト
 - 関連: [09 巨神での移動](09_titan_travel.md)（解放・笛・碑・出会い）、[01 全体設計](01_overview.md)（巨神共通の決まり・眠り）、[10 進行とマルチ](10_progression_multiplayer.md)、[26 背を大きく](26_backs_scale_up.md)
-- 選定ページ: 案は `docs/review/titan_young/index.html`、見た目の 3 案は `docs/review/young_roughs/index.html`（db `choices`、文書 id `young_look_<巨神>`。選ぶまで A 案を仮に入れてある）
 
 実装: `jp.revati.skyabyss.titan.young`（`YoungCarriers` 笛・乗り降り・入れ替わり、`YoungEntity` 実体・座席、`YoungTrip` 一回の旅の流れ、`YoungMotion` 動き、`YoungReach` 行き先と得意、`YoungOffers` 着いたあとの輪、`YoungKind`、`YoungSetup`）、`client/young/YoungClient`、海図は旅の地図 `client/map/TravelMapScreen` に重ねる（33 の 4.1）。
 

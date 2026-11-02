@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 潮殻の心臓の領域「合わせ貝」(docs/design/08 の 5.5)。床に貝の板が 12 枚ならび、それぞれ四つの印 (巻貝 ▲・二枚貝 ◆・ヒトデ ★・真珠 ●) のどれか。
 // 心臓の上に印がひとつ浮かぶ。その印の板を、全部叩く (叩くと板が光って止まる)。違う印を叩くと、光っていた板が全部消える (傷はない)。
-// 印の板を叩きおえると、板の印は配りなおされて、次の印が出る。印を (3 + 巡) 回合わせると一巡。水は使わない。
+// 印の板を叩きおえると、板の印は配りなおされて、次の印が出る。印を (2 + 巡、最大 3) 回合わせると一巡。水は使わない。
 // 決まりの傷: 貝の打ち下ろし (人のそばの板を丸く叩く) と、貝の薙ぎ (部屋を横切る帯)。どちらも赤い予告つき。傷 8
 public final class ShellMatchDomain extends HeartDomain {
     public static final String ID = "shell_match";
@@ -40,10 +40,11 @@ public final class ShellMatchDomain extends HeartDomain {
     public static final float RING_DAMAGE = 8f;
     public static final double FLOOR_REACH = 1.9;
     public static final int FIRST = 60;
-    public static final int SLAM_WARN = 30;
+    // 2026-10-25 の試遊: 長い・避けられない。予告を長く、輪を小さく、薙ぎを狭く、間を長く、合わせる回数を減らした
+    public static final int SLAM_WARN = 42;
     public static final int SLAM_ACTIVE = 8;
-    public static final double SLAM_RADIUS = 2.4;
-    public static final int SWEEP_WARN = 36;
+    public static final double SLAM_RADIUS = 2.0;
+    public static final int SWEEP_WARN = 50;
     public static final int SWEEP_ACTIVE = 24;
     public static final int SHUFFLE_DELAY = 26;
 
@@ -56,7 +57,7 @@ public final class ShellMatchDomain extends HeartDomain {
     private int current = -1;
     private int lastCurrent = -1;
     private int marksDone;
-    private int marksNeeded = 3;
+    private int marksNeeded = 2;
     private int shuffle;
     private int cycle;
     private final jp.revati.skyabyss.combat.AntiStrafe strafe = new jp.revati.skyabyss.combat.AntiStrafe();
@@ -146,7 +147,7 @@ public final class ShellMatchDomain extends HeartDomain {
     }
 
     private int period() {
-        return fast(Math.max(54, 84 - 14 * round()));
+        return fast(Math.max(70, 100 - 14 * round()));
     }
 
     @Override
@@ -195,12 +196,13 @@ public final class ShellMatchDomain extends HeartDomain {
             if (!strafers.isEmpty()) {
                 ServerPlayer p = strafers.get(0);
                 int dir = strafe.direction(p);
+                // 回り続けるだけの人には前の広さのまま (避ける動きをせずに回るだけで済まないように)
                 sweep(level, strafe.angleAt(p, SWEEP_WARN) - dir * 0.8, dir * 2.0);
             } else {
                 ServerPlayer target = who.get(0);
                 double a = Math.atan2(target.getZ() - cz, target.getX() - cx);
                 int dir = heart.getRandom().nextBoolean() ? 1 : -1;
-                sweep(level, a - dir * 0.6, dir * 1.9);
+                sweep(level, a - dir * 0.45, dir * 1.3);
             }
         }
     }
@@ -287,7 +289,7 @@ public final class ShellMatchDomain extends HeartDomain {
 
     @Override
     protected void puzzleBegin(ServerLevel level) {
-        marksNeeded = 3 + Math.min(round(), 2);
+        marksNeeded = 2 + Math.min(round(), 1);
         marksDone = 0;
         shuffle = 0;
         cycle = 0;

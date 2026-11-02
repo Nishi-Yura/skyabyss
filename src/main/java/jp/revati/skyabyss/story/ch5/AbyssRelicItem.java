@@ -17,7 +17,7 @@ public final class AbyssRelicItem extends Item {
         this.descKey = descKey;
     }
 
-    // 作業台で遺品をなぞって深淵の装備を作るとき (灯籠の護符・鼓動の聴き筒。data/skyabyss/recipe/abyss_*)、遺品は減らずに残る
+    // 鍛冶場で遺品をなぞって深淵の装備を誂えるとき (灯籠の護符・鼓動の聴き筒。data/skyabyss/shop/smithy)、遺品は減らずに残る
     @Override
     public boolean hasCraftingRemainingItem(ItemStack stack) {
         return true;

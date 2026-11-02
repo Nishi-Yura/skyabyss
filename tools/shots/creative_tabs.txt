@@ -1,0 +1,27 @@
+# クリエイティブの Mod の欄 (registry/CreativeTabs): 素材と品・武器・防具と飾り・敵の卵
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/creative_tabs.txt -PshotsName=creative_tabs
+world creative_tabs flat
+size 1280 720
+timeout 600
+guiscale 2
+waitchunks 200
+wait 40
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+wait 20
+open creative_weapons
+wait 30
+shot weapons
+close
+open creative_gear
+wait 30
+shot gear
+close
+open creative_main
+wait 30
+shot main
+close
+open creative_eggs
+wait 30
+shot eggs

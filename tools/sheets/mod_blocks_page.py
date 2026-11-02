@@ -29,7 +29,7 @@ body = ('<body>\n<div class="wrap">\n<h1>modの専用ブロックの見た目</h
         '<p class="intro">modに関わるブロック (宝の箱・休み場所の火・レバー・ボタン・感圧板・碑・封印・鐘) を、バニラとは別の専用ブロックにして、'
         '「これはmodの要素だ」と気づけるようにする案です。どれも「巨像の遺物」の共通の様式 (彫った石の枠・素材の象嵌・光る一本の筋) で、'
         '素材と光の色だけが 3 案で違います。各ブロック 32×32 のドット絵で、1 枚の中の左右が 2 つの状態です。ブロックごとに好きな案を選べます (混ぜてもよい)。'
-        'どこで使っているかの一覧は docs/review/mod_blocks_audit.md。ゲームのブロックはまだ差し替えていません。</p>\n'
+        'ゲームのブロックはまだ差し替えていません。</p>\n'
         '<img class="sheet" src="sheet.png" alt="8 種 x 3 案の全体 (各 2 状態)">\n')
 for bid, ja, en, desc, st in BL:
     body += (f'<h2>{ja} <span class="bid">{en}</span></h2>\n<p class="intro">{desc}</p>\n<fieldset class="opts" id="{bid}_opts"></fieldset>\n'

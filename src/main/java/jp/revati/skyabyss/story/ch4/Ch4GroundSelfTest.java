@@ -57,7 +57,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 四章の地上 (docs/design/34 の C4) の自己テスト。SKYABYSS_SELFTEST_ONLY="ch4"
+// 四章の地上の自己テスト。SKYABYSS_SELFTEST_ONLY="ch4"
 //   ch4 ground          データ (支度の段 2 本とサブ 2・日替わり・会話・伝承・文・経験値の枠・湧き台・職人の立つ所・部品の印・場所の置き方・メインの「乗る」の段と天の鍵の二人の答え・
 //                       鼓動守の編み方)、二本の流れ (耐火の薬 2 = 延長版も数える・頁)、合図 ch4_ready、サブの合図、前の私の荷・窯の箱 (人ごとに一度)、温石の台、砥石と冷やし水
 //   ch4 mobs            敵 4 種: 登録・体力・殻 (屑 15・古い灰被り 40、殻のあいだは傷が半分、煤の砥石は殻へ 1.5 倍)・燃え上がりと燃え尽き (屑は燃え尽き、古い灰被りは燃え尽きない)・
@@ -128,7 +128,7 @@ public final class Ch4GroundSelfTest {
     }
 
     static ItemStack firePotion(boolean strong) {
-        return PotionContents.createItemStack(Items.POTION, strong ? Potions.LONG_FIRE_RESISTANCE : Potions.FIRE_RESISTANCE);
+        return new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get());
     }
 
     // ---------------------------------------------------------------- データと流れ
@@ -230,7 +230,7 @@ public final class Ch4GroundSelfTest {
         check(f, QuestItems.known(Ch4GroundSelfTest.FIRE) && !QuestItems.known("minecraft:potion@minecraft:nope"), "the potion@effect target is not understood");
     }
 
-    static final String FIRE = "minecraft:potion@minecraft:fire_resistance";
+    static final String FIRE = "skyabyss:fire_ward_draught";
 
     private static void trails(MinecraftServer server, FakePlayer p, List<String> f) {
         clean(p);
@@ -238,10 +238,10 @@ public final class Ch4GroundSelfTest {
             Quests.start(p, id);
             check(f, QuestLog.of(p).entry(id) != null, id + " did not start");
         }
-        // 火除けの薬: 耐火 1 では済まない、2 (延長版も数える) で済む。ただの水の瓶・別の薬は数えない
+        // 火除けの薬: 1 では済まない、2 で済む。バニラの耐火のポーション・別の薬は数えない
         p.getInventory().add(firePotion(false));
-        p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.WATER));
-        p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.SWIFTNESS));
+        p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.FIRE_RESISTANCE));
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()));
         Quests.poll(p, true);
         check(f, "brew".equals(DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT)) && QuestItems.count(p, FIRE, null) == 1, "one fire potion should read 1/2 ("
                 + QuestItems.count(p, FIRE, null) + ")");
@@ -281,7 +281,7 @@ public final class Ch4GroundSelfTest {
         ServerLevel level = server.overworld();
         // 前の私の荷 (人ごとに一度、ブレイズパウダー 1)・窯の箱 (煤鉄 4・灰麻 3)
         p.getInventory().clearContent();
-        check(f, DeadForgePit.openPack(p, level, null) && !DeadForgePit.openPack(p, level, null) && QuestItems.count(p, "minecraft:blaze_powder", null) == 1,
+        check(f, DeadForgePit.openPack(p, level, null) && !DeadForgePit.openPack(p, level, null) && QuestItems.count(p, "skyabyss:ember_drop", null) == 1,
                 "the pack should hand over one blaze powder, once");
         check(f, Ch4Ground.openCache(p, level, null) && !Ch4Ground.openCache(p, level, null) && QuestItems.count(p, "skyabyss:soot_iron", null) == 4
                 && QuestItems.count(p, "skyabyss:ash_hemp", null) == 3, "the kiln cache should hand over four soot iron and three ash hemp, once");
@@ -314,11 +314,11 @@ public final class Ch4GroundSelfTest {
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, ItemStack.EMPTY);
         check(f, Ch4Gear.ASH_BAKED_BREAD.get().components().get(net.minecraft.core.component.DataComponents.FOOD) != null, "the ash-baked bread is not food");
-        // レシピ (旅の覚書の四章)
-        check(f, jp.revati.skyabyss.guide.WayfarerNotes.recipes(4).size() == Ch4Setup.RECIPES.size()
-                && server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "soot_whetstone")).isPresent()
-                && Ch4Setup.RECIPES.stream().allMatch(r -> server.getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r)).isPresent()),
-                "the chapter-4 recipes are missing or not on the notes");
+        // 誂え (旅の覚書の四章の品は、四章から鍛冶場・薬師で)
+        check(f, Ch4Setup.MADE.stream().allMatch(r -> {
+                    jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
+                    return e != null && e.good().chapter() == 4;
+                }), "the chapter-4 items are not made to order from chapter 4");
     }
 
     // ---------------------------------------------------------------- 敵

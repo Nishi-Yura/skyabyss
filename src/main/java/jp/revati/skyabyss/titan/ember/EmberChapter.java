@@ -119,6 +119,8 @@ public final class EmberChapter {
                 .onArrive((p, s) -> arrive(p, "post", POST_XP, LINE_POST, false)).register();
         ChapterSites.element(SITE_LEDGE, Chapters.EMBER, "ember_warm_ledge").atGround().dist(60, 140).arriveRadius(12)
                 .post(EmberChapter::finishLedge).onArrive((p, s) -> arrive(p, "ledge", LEDGE_XP, LINE_LEDGE, false)).register();
+        // 灰の碑 3 枚 (背の外の探索の碑。story/ChapterTablets)
+        jp.revati.skyabyss.story.ChapterTablets.register(jp.revati.skyabyss.story.ChapterTablets.EMBER);
     }
 
     // ---------------------------------------------------------------- 予兆

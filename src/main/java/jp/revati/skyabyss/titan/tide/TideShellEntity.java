@@ -145,6 +145,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private int forcedTicks;
     // 最後に寄る場所を決めた刻 (同じ刻で二度寄らない)
     private long lastWindow = Long.MIN_VALUE;
+    private final jp.revati.skyabyss.titan.FirstBoardWait shoreWait = new jp.revati.skyabyss.titan.FirstBoardWait();
     // 最後に休んだ場所 (背中から戻るとき、休んでいなければこの岸へ戻す)
     private boolean hasLastRest;
     private double lastRestX;
@@ -462,6 +463,23 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         if (tickCount % 200 == 0) {
             tryGather(level);
         }
+        if (tickCount % 20 == 0 && mode == Mode.CRUISE) {
+            answerShoreWait(level);
+        }
+    }
+
+    // 乗りたい人が浜 (跡地のない世界では潮殻の近く) で FirstBoardWait.WAIT 待ったら、干潮の刻を待たずに寄る (雷翼・余燼と同じ)
+    private void answerShoreWait(ServerLevel level) {
+        boolean beachOnly = TideBeach.restricted(level.getServer());
+        net.minecraft.core.BlockPos centre = beachOnly ? TideBeach.beach(level.getServer()) : net.minecraft.core.BlockPos.containing(getX(), getY(), getZ());
+        ServerPlayer p = shoreWait.tick(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, centre, 20);
+        if (p == null) {
+            return;
+        }
+        Vec3 spot = beachOnly ? TideBeach.restSpot(level) : TideOcean.findCallSpot(level, p.getX(), p.getZ());
+        if (spot != null) {
+            beginApproach(level, spot, FORCED_REST);
+        }
     }
 
     // 干潮の刻の 1 分前から刻の終わりまでのあいだに、寄る相手と休む場所を決める (決まらなければ、10 秒ごとにやり直す)
@@ -477,7 +495,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             }
         }
         java.util.Collections.shuffle(players, new java.util.Random(random.nextLong()));
-        // 二章の跡地があれば、寄るのはその浜だけ (浜の近くに人がいるとき。docs/design/33 の 3.1)
+        // 二章の跡地があれば、寄るのはその浜だけ (浜の近くに人がいるとき)
         boolean beachOnly = TideBeach.restricted(level.getServer());
         for (ServerPlayer player : players) {
             if (beachOnly && !TideBeach.near(player)) {
@@ -536,7 +554,15 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
     }
 
+    // いまの休みが始まったゲーム時刻 (保存しない。読み込み直したら 0。干潮を見る頼みが「休みごとに一度」数える。quest/free/FreeQuestEvents)
+    private long restStart;
+
+    public long restStart() {
+        return restStart;
+    }
+
     private void startRest(ServerLevel level) {
+        restStart = level.getGameTime();
         setMode(Mode.REST);
         // 座る体のなかに食い込む浜・岩・木を取り除く (めり込まない)
         jp.revati.skyabyss.titan.TitanClearing.carve(level, volumeName(), getX(), level.getSeaLevel() - REST_DRAFT, getZ(), getYRot());
@@ -555,9 +581,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private void tickRest(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
         rise(level.getSeaLevel() - REST_DRAFT, REST_RISE);
+        if (anchored) {
+            forcedTicks = TitanStay.TICKS;
+        }
         stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.tide");
         // 居座りの早じまい (20 分の滞在のあいだだけ): 誰もいないのが 3 分続いたら去る
-        if (forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
+        if (!anchored && forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
             forcedTicks = 1;
         }
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !TideOcean.isLowTide(level.getDayTime());
@@ -756,7 +785,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         double dy = Mth.clamp(want - getY(), -rate, r);
         double ny = getY() + dy;
         if (ny < groundNow) {
-            ny = groundNow;
+            // 地形の下限へは一 tick に最大 0.5 (秒 10 ブロック) ずつ寄せる (読み込みの遅れで下限が急に上がったとき、一 tick で跳ねないように。2026-11-02)
+            ny = Math.min(groundNow, getY() + Math.max(0.5, r));
         }
         ny = Math.min(ny, cap);
         if (Math.abs(ny - getY()) > 1e-4) {
@@ -943,6 +973,29 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         targetX = x;
         targetZ = z;
         hasTarget = true;
+    }
+
+    // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
+    private boolean anchored;
+
+    public boolean anchored() {
+        return anchored;
+    }
+
+    // 居場所で休む (休んでいれば何もしない)。位置と向きを合わせてから休む
+    public void settleAt(double x, double z, float yaw) {
+        anchored = true;
+        if (mode == Mode.REST) {
+            return;
+        }
+        setYRot(yaw);
+        yRotO = yaw;
+        setPos(x, level().getSeaLevel() - REST_DRAFT, z);
+        restHere();
+    }
+
+    public boolean settled() {
+        return anchored && mode == Mode.REST;
     }
 
     // テスト用: その場ですぐに休む

@@ -93,7 +93,7 @@ public final class EmberIds {
     public static final String EMBER_LANTERN = "ember_lantern";     // → G 余燼の灯 (専用の逸品、装飾の枠)
     // 図鑑の並び (EmberLoot・記録の画面・自己テストが使う。順は 6.3節の表)
     public static final List<String> CODEX = List.of(EMBER_HELMET, EMBER_CHESTPLATE, EMBER_LEGGINGS, EMBER_BOOTS, EMBER_WAR_AXE, EMBER_MANTLE,
-            KINDLING_CHARM, SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
+            KINDLING_CHARM, "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger", SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
     // 初回の選択の専用の逸品三つ
     public static final List<String> FIRST_CLEAR_CHOICES = List.of(SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
     // 天の鍵の欠片は共通の ModItems.SKY_KEY_FRAGMENT (四つ目)。天の鍵は story.SkyKey がそろえる (14 の 4章)
@@ -119,11 +119,13 @@ public final class EmberIds {
     public static final String SOUND_THRALL_IGNITE = "ash_thrall_ignite";
     public static final String SOUND_MOTH_FLUTTER = "ember_moth_flutter";
     public static final String SOUND_MOTH_DEATH = "ember_moth_death";
+    public static final String SOUND_MOTH_HURT = "ember_moth_hurt";
     public static final String SOUND_ROLLER_CURL = "cinder_roller_curl";
     public static final String SOUND_ROLLER_ROLL = "cinder_roller_roll";
     public static final String SOUND_ROLLER_BONK = "cinder_roller_bonk";
     public static final String SOUND_ROLLER_HURT = "cinder_roller_hurt";
     public static final String SOUND_ROLLER_DEATH = "cinder_roller_death";
+    public static final String SOUND_ROLLER_AMBIENT = "cinder_roller_ambient";
     // E 灰の鍛え手
     public static final String SOUND_SMITH_SLAM = "ash_smith_slam";
     public static final String SOUND_SMITH_INHALE = "ash_smith_inhale";
@@ -132,6 +134,7 @@ public final class EmberIds {
     public static final String SOUND_SMITH_RAGE = "ash_smith_rage";
     public static final String SOUND_SMITH_HURT = "ash_smith_hurt";
     public static final String SOUND_SMITH_DEATH = "ash_smith_death";
+    public static final String SOUND_SMITH_AMBIENT = "ash_smith_ambient";
     // F 余燼の心臓
     public static final String SOUND_HEART_BEAT = "ember_heart_beat";
     public static final String SOUND_HEART_ROAR = "ember_heart_roar";

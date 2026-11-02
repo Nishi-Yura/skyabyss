@@ -27,7 +27,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 歩哨の巡回 (E10。docs/design/17 の 1.5): 骨の丘 (巨神の骨) のそばを、夜だけ、既存の骨の番兵が一体歩く。昼は眠る (消える)。
+// 歩哨の巡回 (E10): 骨の丘 (巨神の骨) のそばを、夜だけ、既存の骨の番兵が一体歩く。昼は眠る (消える)。
 // 新しい敵は足さない (番兵は岩鯨の背の既存の敵)。追う範囲を狭めてあり (巡回の範囲 60 ブロック)、近づかなければ襲ってこない。
 // 倒すと頁 (ch1/sentry) と経験値。ピースフルでは出ない。丘から 150 ブロック以内に人がいる夜だけ
 @EventBusSubscriber(modid = SkyAbyss.MODID)

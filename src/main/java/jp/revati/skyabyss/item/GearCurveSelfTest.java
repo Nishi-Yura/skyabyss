@@ -54,7 +54,7 @@ public final class GearCurveSelfTest {
         return String.format(Locale.ROOT, "%.2f", v);
     }
 
-    // 装備のツールチップの物語の一行 (assets/skyabyss_gear_story/lang。生成元 tools/gen/story/gen_gear_story.py): 登録された装備のすべてに日英であり、短く、重複がない
+    // 装備のツールチップの物語の一行 (assets/skyabyss_gear_story/lang。データを直接直す（生成スクリプトはない）): 登録された装備のすべてに日英であり、短く、重複がない
     static void story(List<String> f) {
         java.util.Map<String, String> ja = lang("/assets/skyabyss_gear_story/lang/ja_jp.json", f);
         java.util.Map<String, String> en = lang("/assets/skyabyss_gear_story/lang/en_us.json", f);
@@ -64,10 +64,11 @@ public final class GearCurveSelfTest {
         // 二章の旅装 4 部位の一行は skyabyss_ch2gear の lang にある (guide/Ch2Gear)
         ja.putAll(lang("/assets/skyabyss_ch2gear/lang/ja_jp.json", f));
         en.putAll(lang("/assets/skyabyss_ch2gear/lang/en_us.json", f));
-        // 三章・四章の旅装の一行は、その章の lang にある (四章はまだ旅装がないとき、ファイルがなくてもよい)
+        // 三章・四章の旅装の一行は、その章の lang にある (四章はまだ旅装がないとき、ファイルがなくてもよい)。野の装備は skyabyss_wild (tools/gen/wild_gear/stories.py)
         ja.putAll(lang("/assets/skyabyss_ch3gear/lang/ja_jp.json", f));
         en.putAll(lang("/assets/skyabyss_ch3gear/lang/en_us.json", f));
-        for (String ns : List.of("skyabyss_ch4gear", "skyabyss_ch4", "skyabyss_abyss_gear")) {
+        // 神器 (終章) と塔の装備の一行は skyabyss_finale・skyabyss_tower、地下のダンジョンの装飾品は skyabyss_dungeon
+        for (String ns : List.of("skyabyss_ch4gear", "skyabyss_ch4", "skyabyss_abyss_gear", "skyabyss_wild", "skyabyss_finale", "skyabyss_tower", "skyabyss_dungeon")) {
             if (GearCurveSelfTest.class.getResource("/assets/" + ns + "/lang/ja_jp.json") != null) {
                 ja.putAll(lang("/assets/" + ns + "/lang/ja_jp.json", f));
                 en.putAll(lang("/assets/" + ns + "/lang/en_us.json", f));
@@ -99,7 +100,7 @@ public final class GearCurveSelfTest {
         check(f, jaStories >= gear && enStories >= gear, "story line tables should hold a line for each of the " + gear + " gear items: " + jaStories + "/" + enStories);
     }
 
-    static java.util.Map<String, String> lang(String path, List<String> f) {
+    public static java.util.Map<String, String> lang(String path, List<String> f) {
         java.util.Map<String, String> map = new java.util.HashMap<>();
         try (java.io.InputStream in = GearCurveSelfTest.class.getResourceAsStream(path)) {
             if (in == null) {

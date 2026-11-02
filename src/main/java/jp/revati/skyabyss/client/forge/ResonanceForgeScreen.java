@@ -148,7 +148,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             }).bounds(sx + 98, topPos + EXCHANGE_Y + i * EXCHANGE_STEP, 44, 16).build());
         }
         titanButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
-            titan = (titan + 1) % Math.max(1, TitanGearSets.all().size());
+            titan = (titan + 1) % Math.max(1, TitanGearSets.exchangeable().size());
             lastTitan = titan;
             exchangeArmed = -1;
             updateButtons();
@@ -262,13 +262,13 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         keepButton.setMessage(Component.translatable(keepArmed ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.keep"));
         keepButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.keep_hint")));
 
-        if (titan >= TitanGearSets.all().size()) {
+        if (titan >= TitanGearSets.exchangeable().size()) {
             titan = 0;
         }
         List<Item> exclusives = exclusives();
         boolean ready = menu.exchangeState(titan) == ForgeRules.ExchangeState.READY;
         boolean affordable = ForgeRules.exchangeAffordable(minecraft.player, set().titan);
-        titanButton.visible = exchangeTab && TitanGearSets.all().size() > 1;
+        titanButton.visible = exchangeTab && TitanGearSets.exchangeable().size() > 1;
         titanButton.setMessage(Component.translatable("gui.skyabyss.forge.exchange_titan", Component.translatable(set().originKey())));
         titanButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.exchange_titan_hint")));
         for (int i = 0; i < exchangeButtons.length; i++) {
@@ -481,7 +481,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                         minecraft.player.isCreative() || crystals >= jp.revati.skyabyss.item.extra.GearFreedom.IMPRINT_CRYSTALS ? OK : LACK, false);
             }
             case SOCKET -> {
-                g.drawString(font, Component.translatable("gui.skyabyss.forge.sockets", ex.gems().size(), ex.sockets()), x, 40, TEXT, false);
+                g.drawString(font, Component.translatable("gui.skyabyss.forge.sockets_of", ex.gems().size(), ex.sockets(),
+                        jp.revati.skyabyss.item.extra.GearFreedom.maxSockets(gear)), x, 40, TEXT, false);
                 for (int i = 0; i < ex.sockets(); i++) {
                     int y = SOCKET_ROW_Y + i * SOCKET_ROW_STEP;
                     if (i < ex.gems().size()) {
@@ -506,7 +507,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                     hint = Component.translatable(ex.gems().size() >= ex.sockets() ? "gui.skyabyss.forge.insert_full" : "gui.skyabyss.forge.insert_dup");
                     color = LACK;
                 }
-                drawWrapped(g, hint, x, 80, 132, 2, color);
+                // 穴が三つのときは三つ目の行の下へ
+                drawWrapped(g, hint, x, Math.max(80, SOCKET_ROW_Y + ex.sockets() * SOCKET_ROW_STEP + 2), 132, 2, color);
                 if (jp.revati.skyabyss.item.extra.GearFreedom.canAddSocket(gear)) {
                     int need = ForgeRules.addSocketMaterial(gear);
                     Item shard = ForgeRules.shardItem(gear);
@@ -544,7 +546,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             return;
         }
         for (Affix a : AffixRules.affixes(gear)) {
-            drawWrapped(g, AffixRules.line(a), INFO_X - 4, y, 98, 1, TEXT);
+            drawWrapped(g, AffixRules.line(a, AffixRules.wide(gear)), INFO_X - 4, y, 98, 1, TEXT);
             y += 10;
         }
     }
@@ -647,7 +649,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
     // 交換の巨神の表と、その専用の逸品 (まだ登録されていない品は null。番号は set.exclusives() の並び)
     private TitanGearSet set() {
-        List<TitanGearSet> all = TitanGearSets.all();
+        List<TitanGearSet> all = TitanGearSets.exchangeable();
         return all.get(Math.min(titan, all.size() - 1));
     }
 

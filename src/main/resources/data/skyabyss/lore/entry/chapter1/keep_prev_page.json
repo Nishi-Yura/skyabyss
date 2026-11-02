@@ -1,0 +1,17 @@
+{
+  "chapter": "titan_storm",
+  "order": 167,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "keep_page"
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/capital_skywatch",
+    "chapter1/storm_cower"
+  ]
+}

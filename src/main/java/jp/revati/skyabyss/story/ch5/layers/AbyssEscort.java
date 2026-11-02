@@ -21,6 +21,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -51,7 +52,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 形 B の層 (塩・灰) の護りの下り道 (docs/design/36 の 8.1・8.4。設計図は tools/abyss/gen_abyss_layers.py の build_expedition と layer_<層>.py)。
+// 形 B の層 (塩・灰) の護りの下り道 (docs/design/36 の 8.1・8.4。設計図は データを直接直す（生成スクリプトはない） の build_expedition と layer_<層>.py)。
 //   連れて下りる人: 塩 = 荷運びのロク (abyss_porter)、灰 = 隊長のトウヤ (survivor_ash)。野営の人は道のあいだ野営から消え、終わると戻る
 //   始まり: 段が <層>_marks で、まだ送っていない人が、野営の北の下り口 (escstart_<層>) に立つ。その人の仲間・近くに来た人も加わる (participants)
 //   歩く: 設計図の道すじ (esc_<層>_<n>) を一マスずつ。だれかが 10 以内にいる間だけ進む (置いていかない)
@@ -182,7 +183,7 @@ public final class AbyssEscort {
     }
 
     private static final Map<String, Run> RUNS = new HashMap<>();
-    private static final Map<UUID, Long> HINTED = new HashMap<>();
+    private static final Map<UUID, Long> HINTED = PlayerMaps.track(new HashMap<>());
     private static boolean listening;
 
     private AbyssEscort() {

@@ -1,0 +1,278 @@
+# 都と土地の町の施設の浮く名札 (FacilityLabels。2026-11-02: ブロックに埋まらず、通りから読める)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/facility_labels.txt -PshotsName=facility_labels
+world facility_labels continent
+size 1600 900
+timeout 3000
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+chat clear
+cmd skyabyss dev opening at shelter 0 0 2 20 180 6
+waitchunks 600
+# 係の人は観戦の人のそばには立たない (Attendants)。少しのあいだ創造で立ち、立ったら観戦へ
+wait 300
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"tool_merchant"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"tool_merchant"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tool_shop,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tool_shop,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_tool_shop_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.tool_shop,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"tool_merchant"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tool_shop,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_tool_shop_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"storage_keeper"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"storage_keeper"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.storage,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.storage,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_storage_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.storage,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"storage_keeper"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.storage,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_storage_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"trade_keeper"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"trade_keeper"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.trade,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.trade,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_trade_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.trade,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"trade_keeper"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.trade,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_trade_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"apothecary"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"apothecary"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.apothecary,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.apothecary,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_apothecary_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.apothecary,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"apothecary"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.apothecary,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_apothecary_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"innkeeper"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"innkeeper"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_inn_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"innkeeper"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_inn_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"perch_keeper"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"perch_keeper"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.perch,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.perch,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_perch_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.perch,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"perch_keeper"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.perch,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_perch_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_smithy_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_smithy_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"guild_clerk"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"guild_clerk"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.guild,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.guild,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_guild_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.guild,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"guild_clerk"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.guild,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_guild_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"drunkard"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"drunkard"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tavern,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tavern,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_tavern_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.tavern,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"drunkard"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tavern,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_tavern_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"training_master"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"training_master"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_training_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"training_master"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot cap_training_side
+cmd time set 18000
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"tool_merchant"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 60
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"tool_merchant"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tool_shop,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.tool_shop,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+shot cap_tool_shop_night
+cmd time set 6000
+cmd gamemode creative
+cmd skyabyss dev grounds mark town 0 stand
+waitchunks 600
+wait 300
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"outfitter"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"outfitter"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_market_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"outfitter"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_market_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"guild_clerk"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"guild_clerk"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.guild_hall,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.guild_hall,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_guild_hall_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.guild_hall,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"guild_clerk"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.guild_hall,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_guild_hall_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"innkeeper"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"innkeeper"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_inn_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"innkeeper"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.inn,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_inn_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"shrine_priest"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"shrine_priest"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.shrine,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.shrine,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_shrine_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.shrine,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"shrine_priest"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.shrine,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_shrine_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_smithy_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.smithy,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_smithy_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"training_master"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"training_master"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_training_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"training_master"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.training,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_training_side
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"perch_keeper"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"perch_keeper"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.travel,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.travel,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_travel_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.travel,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"perch_keeper"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.travel,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot whale_travel_side
+cmd gamemode creative
+cmd skyabyss dev grounds mark town 2 stand
+waitchunks 600
+wait 300
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"outfitter"},limit=1,sort=nearest] run tp @s ~ ~6 ~
+waitchunks 200
+wait 130
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"outfitter"},limit=1,sort=nearest] facing entity @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] feet rotated ~ 0 run tp @s ^ ^1.6 ^14
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot storm_market_front
+cmd execute at @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] facing entity @e[type=skyabyss:attendant,nbt={Role:"outfitter"},limit=1,sort=nearest] feet rotated ~90 0 run tp @s ^ ^-3 ^9
+cmd execute as @s at @s facing entity @e[type=minecraft:text_display,tag=skyabyss_label.market,limit=1,sort=nearest] feet run tp @s ~ ~ ~ ~ ~
+wait 30
+chat clear
+shot storm_market_side
+quit

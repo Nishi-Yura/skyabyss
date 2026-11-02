@@ -32,14 +32,42 @@
           "entry": "town/grave_1"
         }
       ]
+    },
+    {
+      "id": "water",
+      "objectives": [
+        {
+          "id": "water",
+          "type": "collect",
+          "target": "skyabyss:water_skin_full",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "wash",
+      "objectives": [
+        {
+          "id": "wash",
+          "type": "signal",
+          "target": "town_hand:attendant_gravekeeper",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/grave_2"
+        }
+      ]
     }
   ],
   "reward": {
-    "xp": 20,
+    "xp": 50,
     "items": [
       {
         "item": "skyabyss:bell_coin",
-        "count": 6
+        "count": 16
       }
     ]
   }

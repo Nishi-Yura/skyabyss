@@ -30,7 +30,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 一章の地上の敵の差し込み口と湧かせ方 (docs/design/21 の 3.1、P7)。
+// 一章の地上の敵の差し込み口と湧かせ方 (P7)。
 //   岩殻虫 (rock_shell_beetle)  ひとり歩きの湧き。丘・山・荒れ地、昼夜。割れ殻の洞の入口の間
 //   棘うさぎ (spine_hare)       ひとり歩きの湧き。草原・平野の夜。割れ殻の洞の棘の間
 //   老いた歩哨 (elder_sentry)   割れ殻の洞の奥の間 (CleftCave)

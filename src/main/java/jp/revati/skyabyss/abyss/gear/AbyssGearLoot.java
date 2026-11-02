@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
 //  - 層の主 (AbyssLords.defeat): 錨鉄 3〜5 と、その層の鎧の一部位 (まだ持っていなければ必ず。持っていれば錨鉄 +4)
 //  - 心臓の番人 (WardenArena.fallen) と番人の悪夢 (Nightmare.won): 巨神の心臓と同じ形 (図鑑 10 品の確率・天井・心核・共鳴の欠片)
 //  - 果てない深みの箱 (DepthLoot.roll): 錨鉄と、宝の間・敵の巣・王の褒美に図鑑の品の機会
-//  - 荷運びのロク (会話の取り替え) と作業台 (遺品をなぞる): 品の側は何もしない (data/skyabyss/dialogue/ch5・recipe)
+//  - 荷運びのロク (会話の取り替え) と鍛冶場の誂え (遺品をなぞる): 品の側は何もしない (data/skyabyss/dialogue/ch5・shop/smithy)
 public final class AbyssGearLoot {
     public static final float CRYSTAL_CHANCE = 0.40f;
     // 箱の図鑑の品 (tier: 0 ふつう・1 宝の間・2 敵の巣・3 王の褒美)
@@ -61,6 +61,7 @@ public final class AbyssGearLoot {
         String piece = AbyssGear.lordPiece(layer);
         if (!r.owned.contains(piece)) {
             addGear(out, piece, random);
+            out.forEach(jp.revati.skyabyss.loot.box.LootBoxes::keepDirect);
             AbyssGear.SET.record(r, List.of(piece));
         } else {
             iron += 4;
@@ -125,6 +126,8 @@ public final class AbyssGearLoot {
             int held = TitanLoot.handOver(server, p.getUUID(), p, items, 0);
             tell(p, items, "message.skyabyss.abyss_gear.warden_reward");
             TitanLoot.tellHeld(p, held);
+            // 伝説の装備の機会 (abyss/LegendLoot。巨神の心臓からは出ない)
+            jp.revati.skyabyss.abyss.LegendLoot.award(p, memory, tier, level.random);
         }
         memory.setDirty();
         SkyAbyss.LOGGER.debug("abyss gear: warden rewards for {} players (tier {})", players.size(), tier);
@@ -133,6 +136,7 @@ public final class AbyssGearLoot {
     // ---------------------------------------------------------------- 果てない深みの箱
     // DepthLoot.roll から。錨鉄 (ふつうの箱は 60%、ほかは必ず) と図鑑の品の機会。王の褒美だけ専用の逸品も出る (5 回に 1 回)
     public static void chest(List<ItemStack> out, int floor, int tier, Random r) {
+        jp.revati.skyabyss.abyss.LegendLoot.chest(out, floor, tier, r);
         if (tier > 0 || r.nextDouble() < 0.6) {
             add(out, AbyssGear.SHARD, 1 + r.nextInt(2) + floor / 6 + tier);
         }

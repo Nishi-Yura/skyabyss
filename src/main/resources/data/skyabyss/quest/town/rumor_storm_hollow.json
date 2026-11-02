@@ -1,0 +1,51 @@
+{
+  "category": "sub",
+  "order": 383,
+  "giver": "skyabyss:guest_town_guide_storm",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:dungeon_storm_hollow",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "clear",
+      "objectives": [
+        {
+          "id": "clear",
+          "type": "signal",
+          "target": "dungeon:storm_hollow",
+          "party": true
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_town_guide_storm",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 240,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 40
+      }
+    ]
+  }
+}

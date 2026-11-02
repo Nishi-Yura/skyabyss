@@ -35,12 +35,16 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_WHALE_HEART_AMBIENT = register("stone_whale_heart_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_WHALE_HEART_HURT = register("stone_whale_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_WHALE_HEART_DEATH = register("stone_whale_heart_death");
+    // 三つの心臓の倒れる声 (tools/gen/sound/gen_mob_voices.py。素材は voices/<心臓>_death.ogg)
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_HEART_VOICE_DEATH = register("ember_heart_voice_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_HEART_VOICE_DEATH = register("storm_heart_voice_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_HEART_VOICE_DEATH = register("tide_heart_voice_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_HEART_HURT = register("ember_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> STORM_HEART_HURT = register("storm_heart_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_HEART_HURT = register("tide_heart_hurt");
-    // 技の音 (tools/gen/sound/gen_boss_skill_sounds.py)。岩鯨の心臓と鯨骨の番兵長
+    // 技の音 (データを直接直す（生成スクリプトはない）)。岩鯨の心臓と鯨骨の番兵長
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_HEART_ROAR = register("stone_heart_roar");
-    // 心臓の領域の宣言の合図 (tools/gen/sound/gen_heart_domain_stings.py)
+    // 心臓の領域の宣言の合図 (データを直接直す（生成スクリプトはない）)
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_STONE_SEA = register("domain_stone_sea");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_RISING_TIDE = register("domain_rising_tide");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_THUNDER_CAGE = register("domain_thunder_cage");
@@ -128,6 +132,76 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_THRUST = register("shore_warden_thrust");
     public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_RING = register("shore_warden_ring");
     public static final DeferredHolder<SoundEvent, SoundEvent> SHORE_WARDEN_FLOOD = register("shore_warden_flood");
+
+    // 大陸の新しい敵 (docs/design/44。tools/gen/foes/gen_foes_one.py)
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_AMBIENT = register("bandit_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_HURT = register("bandit_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_DEATH = register("bandit_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_SWING = register("bandit_swing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_ARCHER_DRAW = register("bandit_archer_draw");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_ARCHER_SHOOT = register("bandit_archer_shoot");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_AMBIENT = register("bandit_chief_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_HURT = register("bandit_chief_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_DEATH = register("bandit_chief_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BANDIT_CHIEF_SHOUT = register("bandit_chief_shout");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_AMBIENT = register("bone_soldier_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_HURT = register("bone_soldier_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_DEATH = register("bone_soldier_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_STEP = register("bone_soldier_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_BLOCK = register("bone_soldier_block");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_SOLDIER_RISE = register("bone_soldier_rise");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_BOWMAN_SHOOT = register("bone_bowman_shoot");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_STANDARD_PLANT = register("bone_standard_plant");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_STANDARD_HORN = register("bone_standard_horn");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_AMBIENT = register("grain_rat_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_HURT = register("grain_rat_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_DEATH = register("grain_rat_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRAIN_RAT_BITE = register("grain_rat_bite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_AMBIENT = register("stray_wisp_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_HURT = register("stray_wisp_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_DEATH = register("stray_wisp_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STRAY_WISP_PULSE = register("stray_wisp_pulse");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_AMBIENT = register("feral_dog_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_HURT = register("feral_dog_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_DEATH = register("feral_dog_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_HOWL = register("feral_dog_howl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FERAL_DOG_BITE = register("feral_dog_bite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_AMBIENT = register("moss_dead_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_HURT = register("moss_dead_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_DEATH = register("moss_dead_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_STEP = register("moss_dead_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_SLAM = register("moss_dead_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOSS_DEAD_SPORES = register("moss_dead_spores");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_AMBIENT = register("mist_angler_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_HURT = register("mist_angler_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_DEATH = register("mist_angler_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_NET = register("mist_angler_net");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIST_ANGLER_SWAY = register("mist_angler_sway");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_AMBIENT = register("thunder_wolf_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HURT = register("thunder_wolf_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_DEATH = register("thunder_wolf_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HOWL = register("thunder_wolf_howl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_AMBIENT = register("rock_boar_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_HURT = register("rock_boar_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_DEATH = register("rock_boar_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_STEP = register("rock_boar_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_CHARGE = register("rock_boar_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_QUAKE = register("rock_boar_quake");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_AMBIENT = register("tide_crab_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_HURT = register("tide_crab_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_DEATH = register("tide_crab_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_SLAM = register("tide_crab_slam");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_CRAB_SPRAY = register("tide_crab_spray");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_AMBIENT = register("storm_ram_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_HURT = register("storm_ram_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_DEATH = register("storm_ram_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_CHARGE = register("storm_ram_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STORM_RAM_STOMP = register("storm_ram_stomp");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_AMBIENT = register("ash_lizard_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_HURT = register("ash_lizard_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_DEATH = register("ash_lizard_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_BREATH = register("ash_lizard_breath");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ASH_LIZARD_SWEEP = register("ash_lizard_sweep");
 
     private MobSounds() {
     }

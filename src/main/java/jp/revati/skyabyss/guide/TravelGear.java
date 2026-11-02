@@ -43,11 +43,11 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 旅装・砥石・糧と薬 (docs/design/21 の 1.2、P5。一章の分)。各章の地上で、前の巨神の装備がなくても備えを緑まで持っていける品。
+// 旅装・砥石・糧と薬 (P5。一章の分)。各章の地上で、前の巨神の装備がなくても備えを緑まで持っていける品。
 // 登録 (品・防具の素材・砥石の効き目) と、備えの三灯への足し込み (Readiness.registerWhetstone / registerRemedy)、旅装を一式作ったときの合図。
-// 作れるのは、旅の覚書か職人に教わってから (recipe/ と RecipeLock。ID は story/ch1/Ch1Prep.RECIPES で WayfarerNotes に登録済み)。
+// 手に入るのは鍛冶場・薬師の誂え (story/ch1/Ch1Prep.MADE)。
 //
-// 二〜四章の旅装は同じ型 (GearCurve.TRAVEL の表)。素材 (MATERIAL) と品の登録を足し、WayfarerNotes.registerRecipes(章, ...) で鍵をかける。
+// 二〜四章の旅装は同じ型 (GearCurve.TRAVEL の表)。素材 (MATERIAL) と品の登録を足し、誂えの品 (MADE) に並べる。
 // 一章の数値 (GearCurve.TRAVEL[0]): 防御 2/7/5/3 = 17、強靭 1.25 × 4 = 5、ノックバック耐性 0.025 × 4 = 0.1、必要 Lv 7、アンコモン
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TravelGear {
@@ -110,7 +110,7 @@ public final class TravelGear {
     private static final List<java.util.function.ToDoubleFunction<Player>> WHETSTONE_KINDS = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     static {
-        // 備えの三灯へ (21 の 1.2): 砥石 = 効いているか、持ち歩いている (使えばすぐ効く) とき攻撃 +1.5。登録があると刃の手段が「砥石で鍛える」に替わる。
+        // 備えの三灯へ: 砥石 = 効いているか、持ち歩いている (使えばすぐ効く) とき攻撃 +1.5。登録があると刃の手段が「砥石で鍛える」に替わる。
         // 旅装は防具の属性で自然に身の灯に入る。糧と薬は FoodProperties で自然に糧の灯に入る (固焼き = 吸収 II の 8 点、軟膏 = 再生 I の 3.2 点)
         // 砥石の種類 (章ごと) は重ねない: 登録は一つだけで、種類ごとの上乗せの一番大きい値を数える (二章の塩の砥石は addWhetstoneKind で足す)
         addWhetstoneKind(player -> player.hasEffect(WHETTED) || carries(player, ROCK_WHETSTONE.get()) ? WHETSTONE_ATTACK : 0);
@@ -137,7 +137,7 @@ public final class TravelGear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(HELMET.get());
             event.accept(CHESTPLATE.get());
             event.accept(LEGGINGS.get());

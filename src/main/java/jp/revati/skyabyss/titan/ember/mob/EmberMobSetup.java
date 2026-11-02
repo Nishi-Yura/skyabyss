@@ -54,11 +54,13 @@ public final class EmberMobSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> THRALL_IGNITE = sound(EmberIds.SOUND_THRALL_IGNITE);
     public static final DeferredHolder<SoundEvent, SoundEvent> MOTH_FLUTTER = sound(EmberIds.SOUND_MOTH_FLUTTER);
     public static final DeferredHolder<SoundEvent, SoundEvent> MOTH_DEATH = sound(EmberIds.SOUND_MOTH_DEATH);
+    public static final DeferredHolder<SoundEvent, SoundEvent> MOTH_HURT = sound(EmberIds.SOUND_MOTH_HURT);
     public static final DeferredHolder<SoundEvent, SoundEvent> ROLLER_CURL = sound(EmberIds.SOUND_ROLLER_CURL);
     public static final DeferredHolder<SoundEvent, SoundEvent> ROLLER_ROLL = sound(EmberIds.SOUND_ROLLER_ROLL);
     public static final DeferredHolder<SoundEvent, SoundEvent> ROLLER_BONK = sound(EmberIds.SOUND_ROLLER_BONK);
     public static final DeferredHolder<SoundEvent, SoundEvent> ROLLER_HURT = sound(EmberIds.SOUND_ROLLER_HURT);
     public static final DeferredHolder<SoundEvent, SoundEvent> ROLLER_DEATH = sound(EmberIds.SOUND_ROLLER_DEATH);
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROLLER_AMBIENT = sound(EmberIds.SOUND_ROLLER_AMBIENT);
 
     // 成長の経験値 (13 の 6.6節)。GrowthRewards.MOD_ENEMIES に足す (rpg の表には一行だけ書く)。
     // 入れ子のクラスにしたのは、GrowthRewards の初期化で EmberMobSetup (登録) を読み込まないため
@@ -99,7 +101,7 @@ public final class EmberMobSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(ASH_THRALL_EGG.get());
             event.accept(EMBER_MOTH_EGG.get());
             event.accept(CINDER_ROLLER_EGG.get());

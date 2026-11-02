@@ -1,0 +1,102 @@
+# 一人称の武器の見え方 (待機)。手元の見せ方の確認用
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+mainhand right
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+close
+wait 30
+chat clear
+shot fp_whalebone_greatsword
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_dagger
+close
+wait 30
+chat clear
+shot fp_ember_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff
+close
+wait 30
+chat clear
+shot fp_whale_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+close
+wait 30
+chat clear
+shot fp_smith_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+close
+wait 30
+chat clear
+shot fp_storm_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+close
+wait 30
+chat clear
+shot fp_whale_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_dagger
+close
+wait 30
+chat clear
+shot fp_tide_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_dagger
+close
+wait 30
+chat clear
+shot fp_storm_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer
+close
+wait 30
+chat clear
+shot fp_ember_censer
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bow
+close
+wait 30
+chat clear
+shot fp_tide_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_sword
+close
+wait 30
+chat clear
+shot fp_abyss_ember_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+close
+wait 30
+chat clear
+shot fp_shrine_sword
+perspective front
+bodyyaw 40
+hud off
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+close
+wait 10
+chat clear
+shot tp_whale_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_dagger
+close
+wait 10
+chat clear
+shot tp_tide_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+close
+wait 10
+chat clear
+shot tp_storm_sword
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_dagger
+close
+wait 10
+chat clear
+shot tp_storm_dagger

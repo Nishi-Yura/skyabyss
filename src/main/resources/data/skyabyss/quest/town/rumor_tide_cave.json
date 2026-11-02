@@ -1,0 +1,51 @@
+{
+  "category": "sub",
+  "order": 382,
+  "giver": "skyabyss:guest_town_guide_tide",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:dungeon_tide_cave",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "clear",
+      "objectives": [
+        {
+          "id": "clear",
+          "type": "signal",
+          "target": "dungeon:tide_cave",
+          "party": true
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_town_guide_tide",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 180,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 30
+      }
+    ]
+  }
+}

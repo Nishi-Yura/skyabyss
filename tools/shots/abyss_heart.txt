@@ -1,0 +1,129 @@
+# 深淵の心臓の間と控えの間を広く撮る (2026-10-28 夜の見直し)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_heart flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd effect give @s night_vision 99999 0 true
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd skyabyss abyss layer go heart_in 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 180 10
+wait 30
+shot 001_heart_in_180_0
+cmd skyabyss abyss layer go heart_in 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 0 10
+wait 30
+shot 002_heart_in_0_0
+cmd skyabyss abyss layer go heart 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~6 ~ 180 35
+wait 30
+shot 003_heart_180_6
+cmd skyabyss abyss layer go heart 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~6 ~ 0 35
+wait 30
+shot 004_heart_0_6
+cmd skyabyss abyss layer go heart 90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~6 ~ 90 35
+wait 30
+shot 005_heart_90_6
+cmd skyabyss abyss layer go heart -90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~6 ~ -90 35
+wait 30
+shot 006_heart_-90_6
+cmd skyabyss abyss layer go heart 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~1 ~ 180 5
+wait 30
+shot 007_heart_180_1
+cmd skyabyss abyss layer go heart 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~1 ~ 0 5
+wait 30
+shot 008_heart_0_1
+cmd skyabyss abyss layer go ascend_heart 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 180 5
+wait 30
+shot 009_ascend_heart_180_0
+cmd skyabyss abyss layer go ascend_heart 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 0 5
+wait 30
+shot 010_ascend_heart_0_0
+cmd skyabyss abyss layer go ascend_heart 90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 90 5
+wait 30
+shot 011_ascend_heart_90_0
+cmd skyabyss abyss layer go ascend_heart -90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ -90 5
+wait 30
+shot 012_ascend_heart_-90_0
+cmd skyabyss abyss layer go exit 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 180 5
+wait 30
+shot 013_exit_180_0
+cmd skyabyss abyss layer go exit 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0 ~ 0 5
+wait 30
+shot 014_exit_0_0

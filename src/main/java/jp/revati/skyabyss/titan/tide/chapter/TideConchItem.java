@@ -30,7 +30,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // - 手に持つ: 一秒ごとに画面下の帯 (Notice.bar) へ、巨神の向き (八方位)、距離の三段 (遠い・近い・すぐそこ)、次の干潮の刻まで (分)
 // - 吹く (右クリック): 海から 32 ブロック以内で、刻の 1 分前から刻の途中までに吹くと、その刻は自分のそばへ寄るよう頼める (一つの刻に一人)。
 //   巨神が頼みを受けると TideShellEntity.request が休む場所を決めて向かう。ほかに貝を持つ人には「○○が呼んだ」と知らせる
-// - 入手: 二章の小要素「漂着の荷」で一人に一つ。作業台では作らない
+// - 入手: 二章の小要素「漂着の荷」で一人に一つ。店・誂えには並ばない
 public class TideConchItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     // 距離の三段の境 (ブロック)
     public static final double NEAR = 320;

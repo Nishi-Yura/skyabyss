@@ -1,0 +1,249 @@
+package jp.revati.skyabyss.world.continent;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import net.minecraft.core.BlockPos;
+
+// 大陸の見取り図の座標 (data/skyabyss/continent/layout.json。tools/gen/world/gen_continent.py が書く)。
+// 都・はじまりの場所・土地ごとの町・章の跡地・道・渡し船・土地の名前と目安のレベル。高さは持たない (Y は 0。使う側で地面の高さを足す)
+public final class ContinentLayout {
+    private static ContinentLayout instance;
+
+    private final BlockPos capital;
+    private final BlockPos start;
+    private final BlockPos dock;
+    private final Map<String, BlockPos> towns = new HashMap<>();
+    private final Map<String, BlockPos> sites = new HashMap<>();
+    private final List<List<BlockPos>> roads = new ArrayList<>();
+    private final List<List<BlockPos>> ferries = new ArrayList<>();
+    // 渡し船の両端の船着き場 ([都の側, 向こう岸])
+    private final List<List<BlockPos>> ferryDocks = new ArrayList<>();
+    private final Map<String, BlockPos> names = new java.util.LinkedHashMap<>();
+    private final Map<String, Level> levels = new java.util.LinkedHashMap<>();
+    // はじまりの島の谷の場所 (gate・fire・shrine・bandits・prints_view と、足跡 prints)。古い図には無い (空)
+    private final Map<String, BlockPos> island = new HashMap<>();
+    private final List<BlockPos> islandPrints = new ArrayList<>();
+
+    // 地図に書く目安のレベル ("4-12") とその場所
+    public record Level(String text, BlockPos pos) {
+    }
+
+    private ContinentLayout(JsonObject o) {
+        capital = pos(o.getAsJsonArray("capital"));
+        start = pos(o.getAsJsonArray("start"));
+        dock = o.has("dock") ? pos(o.getAsJsonArray("dock")) : start;
+        for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("towns").entrySet()) {
+            towns.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
+        }
+        for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("sites").entrySet()) {
+            sites.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
+        }
+        List<List<BlockPos>> raw = new ArrayList<>();
+        lines(o.getAsJsonArray("roads"), raw);
+        roads.addAll(toGates(raw));
+        lines(o.getAsJsonArray("ferries"), ferries);
+        if (o.has("ferry_docks")) {
+            lines(o.getAsJsonArray("ferry_docks"), ferryDocks);
+        }
+        if (o.has("names")) {
+            for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("names").entrySet()) {
+                names.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
+            }
+        }
+        if (o.has("island")) {
+            for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("island").entrySet()) {
+                if (e.getKey().equals("prints")) {
+                    for (JsonElement p : e.getValue().getAsJsonArray()) {
+                        islandPrints.add(pos(p.getAsJsonArray()));
+                    }
+                } else {
+                    island.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
+                }
+            }
+        }
+        if (o.has("levels")) {
+            for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("levels").entrySet()) {
+                JsonArray a = e.getValue().getAsJsonArray();
+                levels.put(e.getKey(), new Level(a.get(0).getAsString(), pos(a.get(1).getAsJsonArray())));
+            }
+        }
+    }
+
+    // 町と都の門 (2026-10-27 の声「道が町とつながってない」): 図の道は町の真ん中を通るが、町は均した台に建ち、門は十字の四方 (町は芯から 55、都は 100)。
+    // 道を町の手前 (APPROACH。均す輪の外) で切り、いちばん近い門の向きへ: 輪の外の点 → 門の前 の二点を足す。町を抜けて続く道は二本に分かれる
+    static final int TOWN_GATE = 56;
+    static final int TOWN_APPROACH = 92;
+    static final int CAPITAL_GATE = 101;
+    static final int CAPITAL_APPROACH = 156;
+
+    private record Zone(BlockPos c, int gate, int approach) {
+        boolean inside(BlockPos p) {
+            return Math.max(Math.abs(p.getX() - c.getX()), Math.abs(p.getZ() - c.getZ())) < approach;
+        }
+
+        // p の向きにいちばん近い門の、輪の外の点と門の前の点
+        BlockPos[] gateFor(BlockPos p) {
+            int dx = p.getX() - c.getX();
+            int dz = p.getZ() - c.getZ();
+            int sx = 0;
+            int sz = 0;
+            if (Math.abs(dx) >= Math.abs(dz)) {
+                sx = dx >= 0 ? 1 : -1;
+            } else {
+                sz = dz >= 0 ? 1 : -1;
+            }
+            return new BlockPos[] {c.offset(sx * approach, 0, sz * approach), c.offset(sx * gate, 0, sz * gate)};
+        }
+    }
+
+    private List<List<BlockPos>> toGates(List<List<BlockPos>> raw) {
+        List<Zone> zones = new ArrayList<>();
+        zones.add(new Zone(capital, CAPITAL_GATE, CAPITAL_APPROACH));
+        for (BlockPos t : towns.values()) {
+            zones.add(new Zone(t, TOWN_GATE, TOWN_APPROACH));
+        }
+        List<List<BlockPos>> out = new ArrayList<>();
+        for (List<BlockPos> line : raw) {
+            List<BlockPos> cur = new ArrayList<>();
+            Zone lastZone = null;
+            for (BlockPos p : line) {
+                Zone z = null;
+                for (Zone zz : zones) {
+                    if (zz.inside(p)) {
+                        z = zz;
+                        break;
+                    }
+                }
+                if (z != null) {
+                    lastZone = z;
+                    if (!cur.isEmpty()) {
+                        // 町へ入る: 門へ向けて閉じる
+                        BlockPos[] g = z.gateFor(cur.get(cur.size() - 1));
+                        cur.add(g[0]);
+                        cur.add(g[1]);
+                        out.add(List.copyOf(cur));
+                        cur = new ArrayList<>();
+                    }
+                    continue;
+                }
+                if (cur.isEmpty() && lastZone != null) {
+                    // 町から出る: 門から始める
+                    BlockPos[] g = lastZone.gateFor(p);
+                    cur.add(g[1]);
+                    cur.add(g[0]);
+                }
+                cur.add(p);
+                lastZone = null;
+            }
+            if (cur.size() >= 2) {
+                out.add(List.copyOf(cur));
+            }
+        }
+        return out;
+    }
+
+    private static BlockPos pos(JsonArray a) {
+        return new BlockPos(a.get(0).getAsInt(), 0, a.get(1).getAsInt());
+    }
+
+    private static void lines(JsonArray a, List<List<BlockPos>> out) {
+        for (JsonElement line : a) {
+            List<BlockPos> pts = new ArrayList<>();
+            for (JsonElement p : line.getAsJsonArray()) {
+                pts.add(pos(p.getAsJsonArray()));
+            }
+            out.add(List.copyOf(pts));
+        }
+    }
+
+    // 読み込みは一度だけ (holder。ロックの取り合いをなくす。2026-11-02 の監査)
+    private static final class Holder {
+        static final ContinentLayout I = load();
+    }
+
+    private static ContinentLayout load() {
+        String path = "/data/skyabyss/continent/layout.json";
+        try (InputStream in = ContinentLayout.class.getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalStateException("missing " + path);
+            }
+            return new ContinentLayout(JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject());
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("cannot read " + path, e);
+        }
+    }
+
+    public static ContinentLayout get() {
+        return Holder.I;
+    }
+
+    public BlockPos capital() {
+        return capital;
+    }
+
+    public BlockPos start() {
+        return start;
+    }
+
+    // はじまりの島の船着き場 (ここから鐘の都へ渡る)
+    public BlockPos dock() {
+        return dock;
+    }
+
+    // 章の id ("titan_whale" など。Chapters.id()) か、"whale" などの短い名前
+    @Nullable
+    public BlockPos site(String titan) {
+        return sites.get(titan.startsWith("titan_") ? titan.substring(6) : titan);
+    }
+
+    @Nullable
+    public BlockPos town(String titan) {
+        return towns.get(titan.startsWith("titan_") ? titan.substring(6) : titan);
+    }
+
+    public List<List<BlockPos>> roads() {
+        return roads;
+    }
+
+    public List<List<BlockPos>> ferries() {
+        return ferries;
+    }
+
+    public List<List<BlockPos>> ferryDocks() {
+        return ferryDocks;
+    }
+
+    // はじまりの島の谷の場所 (gate・fire・shrine・bandits・prints_view)。無ければ null
+    @Nullable
+    public BlockPos island(String name) {
+        return island.get(name);
+    }
+
+    // はじまりの島の足跡の置き場 (空なら探す)
+    public List<BlockPos> islandPrints() {
+        return islandPrints;
+    }
+
+    // 土地の名前 (lang の map.skyabyss.continent.<id>) の場所
+    public Map<String, BlockPos> names() {
+        return names;
+    }
+
+    // 土地ごとの目安のレベル (capital・whale・tide・storm・ember)
+    public Map<String, Level> levels() {
+        return levels;
+    }
+}

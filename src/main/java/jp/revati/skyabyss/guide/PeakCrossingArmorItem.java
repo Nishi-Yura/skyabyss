@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 
-// 峰越えの旅装 (三章の旅装。21 の 1.2)。防御 19 / 強靭 11 (4 部位の合計)、アンコモン、炉で鍛えない、必要 Lv 19 (GearCurve.TRAVEL[2])。
+// 峰越えの旅装 (三章の旅装)。防御 19 / 強靭 11 (4 部位の合計)、アンコモン、炉で鍛えない、必要 Lv 19 (GearCurve.TRAVEL[2])。
 // 一章の鯨道の旅装 (WhaleRoadArmorItem) と同じ型を継ぐ。一式の効果「感電の傷 −25%」は部位ごとに −6.25% (Ch3Gear.shockFactor。着ている部位を数える)。
 // 着たときの見た目は低ポリ (client/armor/PeakCrossingArmorRenderer)
 public class PeakCrossingArmorItem extends WhaleRoadArmorItem {

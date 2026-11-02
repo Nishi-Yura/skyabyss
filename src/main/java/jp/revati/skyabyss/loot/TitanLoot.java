@@ -113,11 +113,17 @@ public final class TitanLoot {
                 ModItems.STONE_WHALE_LEGGINGS.get(), ModItems.STONE_WHALE_BOOTS.get());
     }
 
-    // 図鑑: 天井が数える装備 (甲殻4部位・大剣・護符・専用の逸品3つ)
+    // 図鑑: 天井が数える装備 (甲殻4部位・大剣・護符・職の章の武器 5 つ・専用の逸品3つ)
     public static List<Item> collection() {
         List<Item> all = new ArrayList<>(armorSet());
         all.add(ModItems.WHALEBONE_GREATSWORD.get());
         all.add(ModItems.RESONANCE_CHARM.get());
+        // 章の杖と鈴杖 (docs/design/43 の 5 段目)
+        all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_STAFF_ITEM.get());
+        all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_BELL_ITEM.get());
+        all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_HAMMER_ITEM.get());
+        all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_BOW_ITEM.get());
+        all.add(jp.revati.skyabyss.item.ChapterGear.WHALE_DAGGER_ITEM.get());
         all.addAll(exclusives());
         return all;
     }
@@ -132,6 +138,9 @@ public final class TitanLoot {
         }
         if (item == ModItems.RESONANCE_CHARM.get()) {
             return CHARM_CHANCE;
+        }
+        if (jp.revati.skyabyss.item.ChapterGear.WHALE.contains(id(item))) {
+            return jp.revati.skyabyss.item.ChapterGear.CHANCE;
         }
         if (item == ModItems.CAPTAIN_PIKE.get()) {
             return PIKE_CHANCE;
@@ -287,7 +296,7 @@ public final class TitanLoot {
         return items;
     }
 
-    // 背の新しい敵 (21 の 3.3): 骨の砲手・骨鳥は欠片と骨片、老番兵 (名づき) は欠片・岩殻片・骨片が必ずいくらか、防具の欠片が低い確率で
+    // 背の新しい敵: 骨の砲手・骨鳥は欠片と骨片、老番兵 (名づき) は欠片・岩殻片・骨片が必ずいくらか、防具の欠片が低い確率で
     public static List<ItemStack> rollNewGuard(LivingEntity mob, @Nullable TitanMemoryData.Record r, RandomSource random) {
         List<ItemStack> items = new ArrayList<>();
         if (mob instanceof ElderSentinel) {
@@ -362,11 +371,13 @@ public final class TitanLoot {
             items.addAll(roll.items());
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(STONE_WHALE, level.random));
+            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
+            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(STONE_WHALE, level.random));
             int held = handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = true;
+                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (player == null) {
                 continue;
@@ -478,6 +489,8 @@ public final class TitanLoot {
 
     // 渡せる分は手もとへ。受け取れない人の分と、あふれた分は預かる。預かった品の数を返す
     public static int handOver(MinecraftServer server, UUID uuid, @Nullable ServerPlayer player, List<ItemStack> items, int xp) {
+        // 装備は封の箱に替えて渡す (docs/design/52。交換・初回の選択などは LootBoxes.direct の中で呼ぶ)
+        items = jp.revati.skyabyss.loot.box.LootBoxes.wrapAll(server, uuid, items);
         if (!canReceive(player)) {
             TitanMemoryData.Pending pending = memory(server).pending(uuid);
             items.forEach(s -> pending.items.add(s.copy()));
@@ -590,6 +603,10 @@ public final class TitanLoot {
         for (Item piece : roll.pieces()) {
             // 特性の付いた実物を見せる (名前にカーソルで特性まで見える)
             ItemStack shown = roll.items().stream().filter(s -> s.is(piece)).findFirst().orElseGet(() -> new ItemStack(piece));
+            // 箱で渡した品は、開けるまで言わない
+            if (jp.revati.skyabyss.loot.box.LootBoxes.wouldBox(shown)) {
+                continue;
+            }
             boolean fresh = roll.fresh().contains(piece);
             if (isExclusive(piece)) {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
@@ -782,7 +799,7 @@ public final class TitanLoot {
         r.lastExchangeClears = r.clears;
         r.exchanges++;
         ItemStack stack = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
-        int held = handOver(player.server, player.getUUID(), player, List.of(stack), 0);
+        int held = jp.revati.skyabyss.loot.box.LootBoxes.direct(() -> handOver(player.server, player.getUUID(), player, List.of(stack), 0));
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
         Notice.alert(player, "message.skyabyss.exchange.done", itemLink(stack));
         tellHeld(player, held);

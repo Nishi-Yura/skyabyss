@@ -1,0 +1,59 @@
+# 小さな集落 (木組みの家)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/poi_hamlets.txt -PshotsName=poi_hamlets
+world continent_hamlets continent
+size 1600 900
+timeout 1800
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+hud off
+cmd gamemode creative
+cmd tp @s -496 120 968
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 86 pos
+cmd execute at @s run tp @s ~18 ~14 ~18 135 30
+wait 60
+shot hamlet_ember
+cmd gamemode creative
+cmd tp @s -536 120 -832
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 10 pos
+cmd execute at @s run tp @s ~18 ~14 ~18 135 30
+wait 60
+shot hamlet_meadow
+cmd gamemode creative
+cmd tp @s -1220 120 -764
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 79 pos
+cmd execute at @s run tp @s ~18 ~14 ~18 135 30
+wait 60
+shot hamlet_storm
+cmd gamemode creative
+cmd tp @s 1272 120 -12
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 58 pos
+cmd execute at @s run tp @s ~18 ~14 ~18 135 30
+wait 60
+shot hamlet_tide
+cmd gamemode creative
+cmd tp @s 436 120 -1044
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd skyabyss dev grounds mark poi 39 pos
+cmd execute at @s run tp @s ~18 ~14 ~18 135 30
+wait 60
+shot hamlet_whale

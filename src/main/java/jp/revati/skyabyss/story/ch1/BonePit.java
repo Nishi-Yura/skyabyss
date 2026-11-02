@@ -36,7 +36,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 骨の坑 (docs/design/34 の 4.2.1。一章の支度「鉄の跡」の舞台。8〜12 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_bone_pit.json (tools/gen/ch1/gen_ch1_sites.py)。
+// 骨の坑 (一章の支度「鉄の跡」の舞台。8〜12 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_bone_pit.json (データを直接直す（生成スクリプトはない）)。
 //
 //   場所   ChapterSites の要素 (拠点から 70〜150、高台を選ぶ = 北の丘のつもり。33 の跡地 W2 ができたら一章の跡地の中へ)。地表に骨の肋骨の弧と坑口の碑
 //          (sign.skyabyss.ch1_bone_pit)、木の枠の坑口から階段で地下 13 ブロックへ。部屋は石レンガの殻で包む (自然の洞や水とつながらない)
@@ -78,9 +78,9 @@ public final class BonePit {
                         Tasks.later(80, () -> Notice.narrate(p, "message.skyabyss.ch1.pit.trail"));
                     }
                 }).register();
-        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:iron_ingot", 2), new SiteTreasure.Entry("minecraft:torch", 8))));
-        SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("minecraft:raw_iron", 4), new SiteTreasure.Entry("skyabyss:bone_chip", 2))));
-        SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("minecraft:raw_iron", 1, 3, 3),
+        SiteTreasure.register(PACK, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 2))));
+        SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 4), new SiteTreasure.Entry("skyabyss:bone_chip", 2))));
+        SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:iron_lump", 1, 3, 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 1, 2, 2), new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 1, 2, 2))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.WHALE, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, BonePit::origins, BonePit::yawAt));
     }
@@ -248,11 +248,11 @@ public final class BonePit {
         return first;
     }
 
-    // 着ている鉄の防具の部位の数
+    // 着ている鉄張りの旅装 (市の武具屋。バニラの鉄の防具の代わり) の部位の数
     public static int ironWorn(Player player) {
         int n = 0;
         for (ItemStack s : player.getInventory().armor) {
-            if (s.is(Items.IRON_HELMET) || s.is(Items.IRON_CHESTPLATE) || s.is(Items.IRON_LEGGINGS) || s.is(Items.IRON_BOOTS)) {
+            if (s.getItem() instanceof jp.revati.skyabyss.item.outfit.OutfitArmorItem a && a.set().equals("ironclad")) {
                 n++;
             }
         }

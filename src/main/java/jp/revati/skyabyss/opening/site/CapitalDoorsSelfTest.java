@@ -2,6 +2,7 @@ package jp.revati.skyabyss.opening.site;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -12,9 +13,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
 
-// 都の閉じた施設が章で開く仕組み (CapitalDoors。docs/design/33 の 2.2) の自己テスト。段の名前は "capital doors"。
+// 都の閉じた施設が章で開く仕組み (CapitalDoors) の自己テスト。段の名前は "capital doors"。
 //  - 都が建っていれば、四つの施設の戸の印と碑の印が記録にある
 //  - 建てた直後は鉄の戸・鉄格子が閉じている。force で開けると消え、記録に「開いた」が残り、二度目は何もしない
+//  - 空き家 3 軒 (CapitalSeal) の戸は壁、碑は無い。戸と碑を置き直しても見回りで塞がる
 public final class CapitalDoorsSelfTest {
     private CapitalDoorsSelfTest() {
     }
@@ -121,8 +123,28 @@ public final class CapitalDoorsSelfTest {
             check(f, CapitalDoors.opened(server, "guild"), "the guild is not recorded as opened");
             check(f, !CapitalDoors.opened(server, "hall"), "the hall opened with the guild");
         }
+        // 空き家 3 軒 (CapitalSeal): 戸の所は壁、碑の所は空気。前の版の都のように戸と碑を置き直し、見回りで塞がること
+        Map<BlockPos, BlockState> seal = CapitalSeal.cells(level);
+        check(f, seal.size() == 9, "vacant houses: expected 9 seal cells, found " + seal.size());
+        for (Map.Entry<BlockPos, BlockState> c : seal.entrySet()) {
+            level.getChunk(c.getKey());
+            BlockState want = c.getValue();
+            check(f, want.isAir() || want.isCollisionShapeFullBlock(level, c.getKey()), "vacant houses: the seal cell " + c.getKey() + " is not a full wall: " + want);
+            check(f, !(want.getBlock() instanceof net.minecraft.world.level.block.DoorBlock), "vacant houses: a door is left in the blueprint at " + c.getKey());
+        }
+        if (!seal.isEmpty()) {
+            for (Map.Entry<BlockPos, BlockState> c : seal.entrySet()) {
+                level.setBlock(c.getKey(), c.getValue().isAir() ? jp.revati.skyabyss.registry.ModBlocks.TABLET.get().defaultBlockState() : Blocks.OAK_DOOR.defaultBlockState(), 2 | 16);
+            }
+            e.extraRemove(CapitalSeal.DONE);
+            CapitalSeal.keep(level, e);
+            check(f, e.extra(CapitalSeal.DONE) != null, "vacant houses: the seal is not recorded");
+            for (Map.Entry<BlockPos, BlockState> c : seal.entrySet()) {
+                check(f, level.getBlockState(c.getKey()).equals(c.getValue()), "vacant houses: " + c.getKey() + " was not restored: " + level.getBlockState(c.getKey()));
+            }
+        }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST capital doors PASSED (gated facilities have door and tablet marks; the training yard is open; back-alley marks; the guild opens on force and stays recorded)");
+            SkyAbyss.LOGGER.info("SELFTEST capital doors PASSED (gated facilities have door and tablet marks; the training yard is open; back-alley marks; the guild opens on force and stays recorded; the 3 vacant houses are sealed and an old capital gets sealed)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST capital doors FAILED: {}", s);

@@ -32,7 +32,7 @@ public final class SiteAudit {
     private static final String[] KNOWN = {"camp", "ch1_bone_cache", "ch1_bone_pit", "ch1_cart_track", "ch1_cleft_shell_cave", "ch1_diary_spot", "ch1_lookout",
             "ch1_lost_cart", "ch1_road_cairn", "ch1_road_shrine", "ch1_song_chamber", "ch1_song_stone_1", "ch1_song_stone_2", "ch1_song_stone_3",
             "ch1_song_stone_4", "ch1_song_stone_5", "ch1_trace_altar", "ch1_trace_camp", "ch1_trace_cart", "ch1_trace_pack", "ch1_trace_well", "ch3_pack",
-            "ch3_ruin", "ch3_tablet", "ch3_vane", "ember_ash_post", "ember_hearth_ruin", "ember_warm_ledge", "footprint", "footprint_end", "ribs", "shelter",
+            "ch3_ruin", "ch3_tablet", "ch3_vane", "ember_ash_post", "ember_hearth_ruin", "ember_warm_ledge", "footprint", "footprint_end", "footprint_island", "ribs", "shelter",
             "slab", "tide_cairn_a", "tide_cairn_b", "tide_cargo", "tide_stele"};
 
     public static List<String> blueprintNames() {
@@ -114,12 +114,13 @@ public final class SiteAudit {
         return rep;
     }
 
-    // 中心の 25x25 に、水・木が建物の邪魔をする所が無いか (水面と海底の高さが同じ = 水が無い)
+    // 中心の 25x25 に、水・木が建物の邪魔をする所が無いか (水面と海底の高さが同じ = 水が無い)。
+    // 読み込み済みのチャンクには地形生成用 (_WG) の高さ図が残っていない ("Unprimed heightmap" の ERROR になる) ので、ふつうの高さ図で見る
     private static boolean dry(ServerLevel level, int x, int z) {
         for (int dx = -12; dx <= 12; dx += 6) {
             for (int dz = -12; dz <= 12; dz += 6) {
-                int a = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, x + dx, z + dz);
-                int b = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x + dx, z + dz);
+                int a = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x + dx, z + dz);
+                int b = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, x + dx, z + dz);
                 if (a != b || a <= level.getSeaLevel()) {
                     return false;
                 }

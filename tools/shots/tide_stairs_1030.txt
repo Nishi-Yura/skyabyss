@@ -1,0 +1,29 @@
+# 汐守の町の階段の継ぎ目 (check_stairs の STAIR_RUN)
+world tide_stairs_a
+size 1280 720
+timeout 3000
+render 10
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+camera 0 -50 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss dev ch1 place town_tide 0 -60 200
+wait 200
+camera -23 -54 192 200 35
+wait 40
+shot west_corner
+camera -18 -55 186 140 30
+wait 30
+shot west_corner2
+camera 2 -54 193 160 35
+wait 30
+shot mid_run
+camera -10 -48 200 180 40
+wait 30
+shot overview

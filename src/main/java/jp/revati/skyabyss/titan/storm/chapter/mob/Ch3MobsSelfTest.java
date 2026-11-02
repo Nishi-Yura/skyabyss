@@ -36,7 +36,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 三章の地上の敵 4 種 (P16。docs/design/21 の 5.1) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ch3 mobs" ./gradlew runServer。
+// 三章の地上の敵 4 種 (P16) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ch3 mobs" ./gradlew runServer。
 // 結果は SELFTEST ch3 mobs PASSED / FAILED。
 //   登録     エンティティ・体力・スポーンエッグ・音・経験値の表・ひとり歩き (雷翼の章・時刻・地形)・群れの形 (GroupOwned)・焼けた見張り塔の湧き台
 //   帯電毛玉 帯電 4 秒 (予告) のあとに放電・固まった二人に渡り、離れた人には渡らない・放電 4 と 0.8 倍

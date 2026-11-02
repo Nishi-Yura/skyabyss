@@ -1,0 +1,93 @@
+# townsfolk_check の続き: 社の祭司と、土地の町の封切り師 (鍛冶師のそばへ寄ってから話す)
+world townsfolk_check continent
+size 1280 720
+timeout 9000
+render 8
+guiscale 2
+clouds off
+waitchunks 300
+wait 40
+cmd time set 3000
+cmd weather clear
+cmd skyabyss cinematic stop
+close
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud on
+cmd skyabyss dev opening at shelter 0 0 2 20 180 6
+waitchunks 600
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"shrine_priest"},limit=1,sort=nearest] run tp @s ~ ~ ~2
+waitchunks
+wait 40
+cmd skyabyss cinematic stop
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_shrine_priest"
+wait 60
+cmd skyabyss dev talk say continue
+wait 40
+shot capital_priest_menu
+close
+wait 10
+cmd skyabyss dev opening at town 0 0 2 20 180 -6
+waitchunks 600
+wait 100
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~ ~
+waitchunks
+wait 260
+cmd skyabyss cinematic stop
+close
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_box_opener"
+wait 60
+shot town_whale_opener
+close
+wait 10
+cmd skyabyss dev opening at town 1 0 2 20 180 -6
+waitchunks 600
+wait 100
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~ ~
+waitchunks
+wait 260
+cmd skyabyss cinematic stop
+close
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_box_opener"
+wait 60
+shot town_tide_opener
+close
+wait 10
+cmd skyabyss dev opening at town 2 0 2 20 180 -6
+waitchunks 600
+wait 100
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~ ~
+waitchunks
+wait 260
+cmd skyabyss cinematic stop
+close
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_box_opener"
+wait 60
+shot town_storm_opener
+close
+wait 10
+cmd skyabyss dev opening at town 3 0 2 20 180 -6
+waitchunks 600
+wait 100
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~ ~
+waitchunks
+wait 260
+cmd skyabyss cinematic stop
+close
+wait 10
+chat clear
+cmd skyabyss dev talk "skyabyss:attendant_box_opener"
+wait 60
+shot town_ember_opener
+close
+wait 10
+quit

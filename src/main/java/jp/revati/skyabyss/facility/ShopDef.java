@@ -21,7 +21,7 @@ import net.minecraft.world.item.alchemy.PotionContents;
 //   title    : 店の名前の翻訳キー (省くと gui.skyabyss.shop.<店>)
 //   goods    : いつも並ぶ品 [{id, item, count, potion?, coins, materials: [{item, count}], limit?, chapter?}]
 //              coins = 鐘銭の値段、materials = 巨神の素材などの値段 (両方書けば両方払う)。limit = 一日に一人が買える数 (0 = 限りなし)、
-//              chapter = この章から並ぶ (それより前は伏せて見せる)
+//              chapter = この章から並ぶ (それより前は伏せて見せる)、made = 誂えの品 (買うと「作った」合図)
 //   rotation : 日替わり {count, pool: [goods と同じ書式]}。ワールドの日と店の名前で決まる抽選 (その日は全員が同じ顔ぶれ)
 //   buys     : 店が買い取る品 [{item, per, coins}] = per 個で coins 枚
 // エメラルドは値段にも品にも使わない (00 の 224)。読み込みで弾く
@@ -29,7 +29,8 @@ public record ShopDef(String id, String titleKey, List<Good> goods, int rotation
     public record Price(Item item, int count) {
     }
 
-    public record Good(String id, Item item, int count, @Nullable ResourceLocation potion, int coins, List<Price> materials, int limit, int chapter) {
+    // made = 誂えの品 (作業台をなくした代わりに職人が作る。買うと「作った」合図 ItemCraftedEvent を流す。tools/gen/shop/gen_made_to_order.py)
+    public record Good(String id, Item item, int count, @Nullable ResourceLocation potion, int coins, List<Price> materials, int limit, int chapter, boolean made) {
         public ItemStack stack() {
             ItemStack s = new ItemStack(item, count);
             if (potion != null) {
@@ -142,7 +143,7 @@ public record ShopDef(String id, String titleKey, List<Good> goods, int rotation
                 }
             }
             out.add(new Good(gid, item, Math.max(1, GsonHelper.getAsInt(o, "count", 1)), potion, Math.max(0, coins), List.copyOf(materials),
-                    Math.max(0, GsonHelper.getAsInt(o, "limit", 0)), Math.max(1, GsonHelper.getAsInt(o, "chapter", 1))));
+                    Math.max(0, GsonHelper.getAsInt(o, "limit", 0)), Math.max(1, GsonHelper.getAsInt(o, "chapter", 1)), GsonHelper.getAsBoolean(o, "made", false)));
         }
         return out;
     }

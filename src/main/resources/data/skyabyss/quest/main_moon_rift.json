@@ -1,0 +1,112 @@
+{
+  "category": "main",
+  "chapter": "chapter3",
+  "order": 74,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon_field",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "meet",
+      "xp": 160,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:guest_moon_past4",
+          "topic": "ch6_rift_meet3"
+        }
+      ]
+    },
+    {
+      "id": "pool",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "pool",
+          "type": "signal",
+          "targets": [
+            "moon_rift_pool"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "shards",
+      "xp": 520,
+      "objectives": [
+        {
+          "id": "door",
+          "type": "signal",
+          "targets": [
+            "moon_rift_shard_door"
+          ],
+          "count": 1
+        },
+        {
+          "id": "leap",
+          "type": "signal",
+          "targets": [
+            "moon_rift_shard_leap"
+          ],
+          "count": 1
+        },
+        {
+          "id": "hall",
+          "type": "signal",
+          "targets": [
+            "moon_rift_shard_hall"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "cross",
+          "type": "signal",
+          "targets": [
+            "moon_rift_gate"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lord",
+      "xp": 840,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "moon_lord_waning"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "promise",
+      "xp": 160,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:guest_moon_past4",
+          "topic": "ch6_rift_promise3"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 1080
+  }
+}

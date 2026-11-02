@@ -107,7 +107,7 @@ public class RecordsScreen extends Screen {
                 KeepRecords.Row r = p.rows().get(i);
                 Trial.Def def = TrialCatalog.get(r.cellId());
                 Component name = r.seen() && def != null ? Component.translatable(def.nameKey()) : Component.translatable("trial.skyabyss.unknown");
-                g.drawString(font, font.plainSubstrByWidth(name.getString(), 130), x + 6, ry + 2, r.seen() ? FacilityUi.TEXT : FacilityUi.DIM, false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), x + 6, ry + 2, 130, r.seen() ? FacilityUi.TEXT : FacilityUi.DIM, false);
                 if (!r.seen()) {
                     continue;
                 }

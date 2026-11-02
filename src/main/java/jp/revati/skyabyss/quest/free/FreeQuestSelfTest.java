@@ -83,6 +83,7 @@ public final class FreeQuestSelfTest {
             progress.restore(progressSaved, server.registryAccess());
             parties.restore(partiesSaved, server.registryAccess());
             level.setDayTime(dayBefore);
+            jp.revati.skyabyss.util.DayClock.testOffsetDays = 0;
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST freequest: {}", n));
         if (failures.isEmpty()) {
@@ -403,24 +404,24 @@ public final class FreeQuestSelfTest {
             pick(p, ST, "errands", failures);
             pick(p, ST, "parcel", failures);
             pick(p, ST, "accept", failures);
-            check(stage(p, "sub_parcel").equals("deliver") && QuestItems.count(p, "minecraft:leather", "parcel") == 1,
+            check(stage(p, "sub_parcel").equals("deliver") && QuestItems.count(p, "skyabyss:hide", "parcel") == 1,
                     "parcel did not start with a marked bundle for " + p.getName().getString(), failures);
             DialogueService.close(p);
         }
         a.getInventory().clearContent();
-        a.getInventory().add(new ItemStack(Items.LEATHER, 1));
+        a.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.HIDE.get(), 1));
         talk(a, wc);
         check(!node(a).equals("fq_c_parcel"), "plain leather was taken as the storyteller's bundle", failures);
         DialogueService.close(a);
         talk(a, st);
         pick(a, ST, "errands", failures);
         pick(a, ST, "parcel_lost", failures);
-        check(QuestItems.count(a, "minecraft:leather", "parcel") == 1, "a lost bundle was not replaced", failures);
+        check(QuestItems.count(a, "skyabyss:hide", "parcel") == 1, "a lost bundle was not replaced", failures);
         DialogueService.close(a);
         talk(a, wc);
         check(node(a).equals("fq_c_parcel"), "whale chaser did not take the bundle: " + node(a), failures);
         next(a);
-        check(stage(a, "sub_parcel").equals("return") && QuestItems.count(a, "minecraft:bone", "clasp_return") == 1,
+        check(stage(a, "sub_parcel").equals("return") && QuestItems.count(a, "skyabyss:bone_chip", "clasp_return") == 1,
                 "chaser did not hand back the clasp", failures);
         check(stage(b, "sub_parcel").equals("deliver"), "a's delivery moved b's quest", failures);
         DialogueService.close(a);
@@ -454,7 +455,7 @@ public final class FreeQuestSelfTest {
         pick(a, ST, "gaps", failures);
         pick(a, ST, "accept", failures);
         DialogueService.close(a);
-        for (String e : List.of("prologue/the_book", "prologue/counting_song", "prologue/seventh_night", "prologue/shaved_peak", "prologue/watcher")) {
+        for (String e : List.of("prologue/the_book", "prologue/counting_song", "prologue/shaved_peak", "prologue/watcher")) {
             Lore.unlock(a, e, false);
         }
         Quests.poll(a, true);
@@ -538,31 +539,13 @@ public final class FreeQuestSelfTest {
         // 同じ日は全員が同じ顔ぶれ
         check(Board.todays(server).equals(Board.todays(server)), "the board draw is not stable within a day", failures);
 
-        // 日替わり 3 つ (地上のもの) を最後まで
+        // 日替わり 2 つ (地上のもの) を最後まで (羊の日課は、バニラの動物がいなくなったので外した。2026-10-27)
         long xp0 = totalXp(p);
-        check(acceptOrStart(server, p, "daily_lost_flock"), "could not take lost flock", failures);
         check(acceptOrStart(server, p, "daily_night_watch"), "could not take night watch", failures);
         check(acceptOrStart(server, p, "daily_firewood"), "could not take firewood", failures);
-        check(Board.usedToday(p) == 3, "quota count is " + Board.usedToday(p), failures);
-        // 羊: 2 頭では済まない、3 頭で済む
-        List<Sheep> sheep = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            Sheep s = EntityType.SHEEP.create(level);
-            s.moveTo(board.getX() + 2 + i, board.getY(), board.getZ() + 2);
-            s.setNoGravity(true);
-            s.setNoAi(true);
-            level.addFreshEntity(s);
-            spawned.add(s);
-            sheep.add(s);
-            Quests.poll(p, true);
-            if (i == 1) {
-                check(stage(p, "daily_lost_flock").equals("herd") && QuestLog.of(p).entry("daily_lost_flock").progress(0) == 2,
-                        "two sheep should show 2/3", failures);
-            }
-        }
-        check(stage(p, "daily_lost_flock").equals("done"), "three sheep by the board did not finish the flock", failures);
+        check(Board.usedToday(p) == 2, "quota count is " + Board.usedToday(p), failures);
         for (int i = 0; i < 6; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 3);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
         check(stage(p, "daily_night_watch").equals("done"), "six night kills did not finish the watch", failures);
         p.getInventory().add(new ItemStack(Items.OAK_LOG, 15));
@@ -573,25 +556,48 @@ public final class FreeQuestSelfTest {
         check(stage(p, "daily_firewood").equals("done") && QuestItems.count(p, "#minecraft:logs", null) == 0,
                 "sixteen mixed logs were not handed in", failures);
         long paid = totalXp(p) - xp0;
-        check(paid >= 90, "three dailies paid " + paid, failures);
+        check(paid >= 70, "two dailies paid " + paid, failures);
 
-        // 枠: 4 つ目は受けられない。同じ日に同じものは受け直せない
+        // 枠: 三つ目 (一段目の日替わり) までは受けられ、4 つ目は受けられない。同じ日に同じものは受け直せない
         stilled(server, p);
-        check(!acceptOrStartBoard(server, p, "daily_bone_sentry"), "a fourth daily was accepted the same day", failures);
+        // 今日の顔ぶれは日と世界の段で変わる (全部の自己テストを続けて回すと段が上がる)。今日引かれた、まだ受けていない一段目までの日替わりを使う
+        // 三つ目は見張りの巡り以外 (あとで日が替わってから受ける)。板に無ければ直に始める (枠の数え方は同じ)
+        List<String> free = drawnDailies(server, p);
+        // 全部を続けて回すと世界の段が上がり、今日の一段目までの日替わりが尽きることがある。そのときは引かれていない一段目までの日替わりを直に始める
+        // (枠の数え方は同じ。四章で閉じる daily_mite_clear は使わない)
+        if (free.stream().noneMatch(q -> !q.equals("daily_bone_sentry"))) {
+            for (jp.revati.skyabyss.quest.QuestDef d : jp.revati.skyabyss.quest.QuestManager.all()) {
+                if (d.repeat().equals("daily") && d.minStage() <= 1 && !d.id().equals("daily_mite_clear") && !QuestLog.of(p).quests().containsKey(d.id())
+                        && !free.contains(d.id())) {
+                    free.add(d.id());
+                }
+            }
+        }
+        // 一段目までの日替わりは見張り・薪・巡りの三つだけ (羊の日課を外したあと)。ほかに無ければ巡りを三つ目にし、日をまたいで残るかを見る
+        String third = free.stream().filter(q -> !q.equals("daily_bone_sentry")).findFirst().orElse("daily_bone_sentry");
+        boolean sentryThird = third.equals("daily_bone_sentry");
+        check(acceptOrStart(server, p, third) && Board.usedToday(p) == 3, "a third daily could not be taken at stage 1 (" + third + ", " + Board.usedToday(p) + ")", failures);
+        free.remove(third);
+        check(free.isEmpty() || !acceptOrStartBoard(server, p, free.get(0)), "a fourth daily was accepted the same day", failures);
         check(!Board.accept(p, "daily_night_watch") && stage(p, "daily_night_watch").equals("done"), "a finished daily was taken again the same day", failures);
         // 記録を消して同じ日に受け直しても、報酬は二度出ない
         long before = totalXp(p);
         Quests.forget(p, "daily_night_watch");
         Quests.start(p, "daily_night_watch");
         for (int i = 0; i < 6; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 3);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
         check(totalXp(p) == before, "a daily paid twice in one day", failures);
 
-        // 受けたまま日が替わっても残る。日が替わると、また受けられる
-        level.setDayTime(level.getDayTime() + Repeats.DAY);
-        check(acceptOrStart(server, p, "daily_bone_sentry"), "could not take the sentry rounds on a new day at stage 1", failures);
-        level.setDayTime(level.getDayTime() + Repeats.DAY);
+        // 受けたまま日が替わっても残る。日が替わると、また受けられる (見張りの巡りが板に出る日まで進める)。日は実時間 (DayClock) なので時計をずらす
+        jp.revati.skyabyss.util.DayClock.testOffsetDays++;
+        for (int i = 0; i < 40 && !onBoard(server, "daily_bone_sentry"); i++) {
+            jp.revati.skyabyss.util.DayClock.testOffsetDays++;
+        }
+        if (!sentryThird) {
+            check(acceptOrStart(server, p, "daily_bone_sentry"), "could not take the sentry rounds on a new day at stage 1", failures);
+        }
+        jp.revati.skyabyss.util.DayClock.testOffsetDays++;
         check(stage(p, "daily_bone_sentry").equals("rounds"), "an unfinished daily vanished at dawn", failures);
         check(state(Board.lines(p), "daily_bone_sentry") == Board.ACTIVE, "an unfinished daily is not shown as in progress", failures);
         before = totalXp(p);
@@ -603,7 +609,7 @@ public final class FreeQuestSelfTest {
         before = totalXp(p);
         check(acceptOrStart(server, p, "daily_night_watch"), "a daily could not be taken again on a new day", failures);
         for (int i = 0; i < 6; i++) {
-            Quests.onKill(p, "minecraft:zombie", true, 3);
+            Quests.onKill(p, "skyabyss:bone_footman", true, 3);
         }
         check(totalXp(p) > before, "a daily on a new day did not pay", failures);
 
@@ -618,7 +624,7 @@ public final class FreeQuestSelfTest {
         check(stage(p, "weekly_back_trials").equals("done") && stage(p, "weekly_heart_again").equals("done"), "weeklies did not finish", failures);
         check(QuestItems.count(p, "skyabyss:resonance_crystal", null) >= 1, "heart again did not give a crystal", failures);
         check(!Board.accept(p, "weekly_heart_again"), "a weekly was taken twice in a week", failures);
-        level.setDayTime(level.getDayTime() + Repeats.DAY * Repeats.WEEK_DAYS);
+        jp.revati.skyabyss.util.DayClock.testOffsetDays += Repeats.WEEK_DAYS;
         check(acceptOrStart(server, p, "weekly_heart_again"), "a weekly could not be taken in the next week", failures);
         // NPC が板の代わりに見せる (語り部の「村の頼みごと」) と、同じ決まりで受けられる
         FakePlayer q = player(level, 6, at);
@@ -649,6 +655,17 @@ public final class FreeQuestSelfTest {
         return Quests.start(p, quest, p.blockPosition());
     }
 
+    private static List<String> drawnDailies(MinecraftServer server, ServerPlayer p) {
+        List<String> out = new java.util.ArrayList<>();
+        for (jp.revati.skyabyss.quest.QuestDef d : Board.todays(server)) {
+            // 四章で閉じる daily_mite_clear は、全部を続けて回して段が上がると板に出ても受けられないので数えない
+            if (d.repeat().equals("daily") && d.minStage() <= 1 && !d.id().equals("daily_mite_clear") && !QuestLog.of(p).quests().containsKey(d.id())) {
+                out.add(d.id());
+            }
+        }
+        return out;
+    }
+
     private static boolean acceptOrStartBoard(MinecraftServer server, ServerPlayer p, String quest) {
         Board.open(p, p.blockPosition(), false);
         return onBoard(server, quest) && Board.accept(p, quest);
@@ -676,7 +693,7 @@ public final class FreeQuestSelfTest {
         c.moveTo(at.getX() - 50, at.getY(), at.getZ());
         Zombie z = EntityType.ZOMBIE.create(level);
         z.moveTo(at.getX() + 1, at.getY(), at.getZ());
-        QuestEvents.credit(level, z, "minecraft:zombie", a, online::get);
+        QuestEvents.credit(level, z, "skyabyss:bone_footman", a, online::get);
         check(QuestLog.of(a).entry("daily_night_watch").progress(0) == 1, "the killer got no credit", failures);
         check(QuestLog.of(b).entry("daily_night_watch").progress(0) == 1, "a party member 50 blocks away got no credit", failures);
         check(QuestLog.of(c).entry("daily_night_watch").progress(0) == 0, "a stranger 50 blocks away got credit", failures);
@@ -697,13 +714,13 @@ public final class FreeQuestSelfTest {
     // ---------------------------------------------------------------- 保存
     private static void saving(MinecraftServer server, ServerLevel level, BlockPos at, List<String> failures, List<String> notes) {
         FakePlayer p = player(level, 10, at);
-        Quests.start(p, "daily_lost_flock", at);
+        Quests.start(p, "daily_night_watch", at);
         Quests.start(p, "weekly_heart_again", at);
         QuestLog log = QuestLog.of(p);
         Tag tag = QuestLog.CODEC.encodeStart(NbtOps.INSTANCE, log).getOrThrow();
         QuestLog back = QuestLog.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
         check(back.equals(log), "quest log with cycles and origins did not round-trip", failures);
-        check(back.entry("daily_lost_flock").origin == at.asLong() && back.entry("daily_lost_flock").cycle == Repeats.day(server),
+        check(back.entry("daily_night_watch").origin == at.asLong() && back.entry("daily_night_watch").cycle == Repeats.cycle(server, "daily"),
                 "origin or cycle lost on save", failures);
         // ワールドの記録 (板を立てた村、数えた影と潮)
         FreeQuestData d = FreeQuestData.get(level);

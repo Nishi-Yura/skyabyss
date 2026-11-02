@@ -1,0 +1,241 @@
+# 深淵の護りの下り道 (塩・灰) を、進む向きで 30 点ごとに撮る (2026-10-28 夜)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_escort_walk2 flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd effect give @s night_vision 99999 0 true
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd skyabyss abyss layer go esc_salt_0 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 001_salt_0
+cmd skyabyss abyss layer go esc_salt_24 180
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 180 8
+wait 25
+shot 002_salt_24
+cmd skyabyss abyss layer go esc_salt_48 -108
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ -108 8
+wait 25
+shot 003_salt_48
+cmd skyabyss abyss layer go esc_salt_72 -90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ -90 8
+wait 25
+shot 004_salt_72
+cmd skyabyss abyss layer go esc_salt_96 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 005_salt_96
+cmd skyabyss abyss layer go esc_salt_120 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 006_salt_120
+cmd skyabyss abyss layer go esc_salt_144 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 007_salt_144
+cmd skyabyss abyss layer go esc_salt_168 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 008_salt_168
+cmd skyabyss abyss layer go esc_salt_192 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 009_salt_192
+cmd skyabyss abyss layer go esc_salt_216 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 010_salt_216
+cmd skyabyss abyss layer go esc_salt_240 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 011_salt_240
+cmd skyabyss abyss layer go esc_salt_264 180
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 180 8
+wait 25
+shot 012_salt_264
+cmd skyabyss abyss layer go esc_salt_288 180
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 180 8
+wait 25
+shot 013_salt_288
+cmd skyabyss abyss layer go esc_ash_0 180
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 180 8
+wait 25
+shot 014_ash_0
+cmd skyabyss abyss layer go esc_ash_24 180
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 180 8
+wait 25
+shot 015_ash_24
+cmd skyabyss abyss layer go esc_ash_48 -162
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ -162 8
+wait 25
+shot 016_ash_48
+cmd skyabyss abyss layer go esc_ash_72 -135
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ -135 8
+wait 25
+shot 017_ash_72
+cmd skyabyss abyss layer go esc_ash_96 -90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ -90 8
+wait 25
+shot 018_ash_96
+cmd skyabyss abyss layer go esc_ash_120 -72
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ -72 8
+wait 25
+shot 019_ash_120
+cmd skyabyss abyss layer go esc_ash_144 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 020_ash_144
+cmd skyabyss abyss layer go esc_ash_168 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 021_ash_168
+cmd skyabyss abyss layer go esc_ash_192 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 022_ash_192
+cmd skyabyss abyss layer go esc_ash_216 0
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 0 8
+wait 25
+shot 023_ash_216
+cmd skyabyss abyss layer go esc_ash_240 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 024_ash_240
+cmd skyabyss abyss layer go esc_ash_264 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 025_ash_264
+cmd skyabyss abyss layer go esc_ash_288 90
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 90 8
+wait 25
+shot 026_ash_288
+cmd skyabyss abyss layer go esc_ash_312 135
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 135 8
+wait 25
+shot 027_ash_312
+cmd skyabyss abyss layer go esc_ash_336 180
+wait 5
+cmd skyabyss cinematic stop
+wait 3
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ 180 8
+wait 25
+shot 028_ash_336

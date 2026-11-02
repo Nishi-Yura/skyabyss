@@ -1,0 +1,44 @@
+{
+  "category": "main",
+  "chapter": "chapter2",
+  "order": 61,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_abyss",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "look",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "moon",
+          "type": "signal",
+          "targets": [
+            "moon_seen"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch6_moon"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 200,
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

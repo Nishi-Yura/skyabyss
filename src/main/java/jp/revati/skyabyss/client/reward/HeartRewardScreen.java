@@ -251,6 +251,11 @@ public class HeartRewardScreen extends Screen {
             if (Math.abs(a) < 1e-6 && Math.abs(b) < 1e-6) {
                 continue;
             }
+            // 攻撃力と最大体力は画面の倍率 (Hp.SHOWN) で比べる (説明の行と同じ数)
+            if (e.getKey().is(Attributes.ATTACK_DAMAGE) || e.getKey().is(Attributes.MAX_HEALTH)) {
+                a = jp.revati.skyabyss.Hp.shown(a);
+                b = jp.revati.skyabyss.Hp.shown(b);
+            }
             rows.add(new StatRow(statLabel(e.getKey()), a, b, false));
         }
         return rows;

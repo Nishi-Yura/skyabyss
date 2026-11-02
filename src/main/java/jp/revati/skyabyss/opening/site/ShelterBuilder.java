@@ -7,77 +7,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 
-// 鐘の宿り (17 の 4.2、語り部の家)。小屋 1 つ、柵の庭、バニラの鐘 (POI "meeting" になるので、NpcSpawner が語り部を立たせる)、
+// 鐘の宿り (語り部の家)。小屋 1 つ、柵の庭、バニラの鐘 (POI "meeting" になるので、NpcSpawner が語り部を立たせる)、
 // わら束の上の煙の出る焚き火 (遠くからの目印)。庭の入口 (南向きの部品) は野営地の方へ向く
 public final class ShelterBuilder {
     private ShelterBuilder() {
     }
 
     public static SiteJob create(ServerLevel level, SiteData data, SiteData.Entry entry) {
-        // 鐘の宿りは「絶えかけの国の都」(docs/design/33 の 2)。小屋の設計図 (shelter) は SKYABYSS_SMALL_SHELTER=1 のときだけ (古い台本の撮影向け)
+        // 鐘の宿りは「絶えかけの国の都」。小屋の設計図 (shelter) は SKYABYSS_SMALL_SHELTER=1 のときだけ (古い台本の撮影向け)
         String name = System.getenv("SKYABYSS_SMALL_SHELTER") != null ? "shelter" : "capital";
         return new SiteJob(level, data, entry, Blueprint.get(name), "shelter", ShelterBuilder::finish);
     }
 
-    static final java.util.Set<String> LABEL_HIDDEN = java.util.Set.of("black_market", "mapmaker");
-    public static final String LABEL_TAG = "skyabyss_facility_label";
+    // 施設の浮く名札は FacilityLabels (置き場の探し方・題と中身の行・見回り)
+    public static final String LABEL_TAG = FacilityLabels.TAG;
 
-    private static net.minecraft.nbt.ListTag floats(float... v) {
-        net.minecraft.nbt.ListTag l = new net.minecraft.nbt.ListTag();
-        for (float f : v) {
-            l.add(net.minecraft.nbt.FloatTag.valueOf(f));
-        }
-        return l;
-    }
-
-    // 文字の表示 (バニラの text_display) を一つ置く。前に置いた同じ所の表示は消してから
-    static boolean placeLabel(net.minecraft.server.level.ServerLevel level, BlockPos at, String name) {
-        net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
-        for (net.minecraft.world.entity.Entity old : level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, e -> e.getTags().contains(LABEL_TAG))) {
-            old.discard();
-        }
-        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-        tag.putString("id", "minecraft:text_display");
-        tag.putString("text", "{\"translate\":\"label.skyabyss.facility." + name + "\",\"color\":\"#F2C14E\",\"bold\":true}");
-        tag.putString("billboard", "center");
-        // 揃えを書かないと、バニラが読むたびに「Display entityNot a string」をログに出す
-        tag.putString("alignment", "center");
-        tag.putInt("background", 0x6A0A0C10);
-        tag.putInt("line_width", 200);
-        tag.putFloat("view_range", 0.8f);
-        // 2 倍の大きさ (通りの向こうからでも読める)
-        net.minecraft.nbt.CompoundTag tf = new net.minecraft.nbt.CompoundTag();
-        tf.put("left_rotation", floats(0f, 0f, 0f, 1f));
-        tf.put("right_rotation", floats(0f, 0f, 0f, 1f));
-        tf.put("translation", floats(0f, 0f, 0f));
-        tf.put("scale", floats(2f, 2f, 2f));
-        tag.put("transformation", tf);
-        net.minecraft.nbt.ListTag tags = new net.minecraft.nbt.ListTag();
-        tags.add(net.minecraft.nbt.StringTag.valueOf(LABEL_TAG));
-        tag.put("Tags", tags);
-        net.minecraft.world.entity.Entity e = net.minecraft.world.entity.EntityType.loadEntityRecursive(tag, level, en -> {
-            en.moveTo(at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, 0f, 0f);
-            return en;
-        });
-        return e != null && level.addFreshEntity(e);
-    }
-
-    // 5 秒ごと (SiteGuard の見回りから): 都の施設の名の表示が無ければ置き直す (生き物の動いているチャンクだけ)
-    static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
-        for (int i = 0; i < e.extraNames.size(); i++) {
-            String key = e.extraNames.get(i);
-            if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {
-                continue;
-            }
-            BlockPos at = e.extraPos.get(i);
-            if (!level.isPositionEntityTicking(at)) {
-                continue;
-            }
-            net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(at).inflate(1.5);
-            if (level.getEntitiesOfClass(net.minecraft.world.entity.Display.TextDisplay.class, near, d -> d.getTags().contains(LABEL_TAG)).isEmpty()) {
-                placeLabel(level, at, key.substring(6));
-            }
-        }
+    // 5 秒ごと (SiteGuard の見回りから): 都の施設の名札が無ければ置き直す
+    public static void keepLabels(net.minecraft.server.level.ServerLevel level, SiteData.Entry e) {
+        FacilityLabels.keep(level, e, false);
     }
 
     static void finish(SiteJob job) {
@@ -86,6 +33,11 @@ public final class ShelterBuilder {
             SkyAbyss.LOGGER.error("Opening shelter: no bell at {}", bell);
         } else {
             job.entry.extra("bell", bell);
+        }
+        // 月への門 (大鐘楼の鐘の間の天然磁石。story/ch6/MoonGate)
+        BlockPos moonGate = job.mark(jp.revati.skyabyss.story.ch6.MoonGate.MARK);
+        if (moonGate != null) {
+            job.entry.extra(jp.revati.skyabyss.story.ch6.MoonGate.MARK, moonGate);
         }
         BlockPos smoke = job.mark("smoke");
         if (smoke != null) {
@@ -99,10 +51,10 @@ public final class ShelterBuilder {
         if (door != null) {
             job.entry.extra("door", door);
         }
-        // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人 (docs/design/33 の 2.2)
-        // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・地図屋・酒場・古井戸
-        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "hall", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
-                "tool_shop", "apothecary", "stable", "storage", "inn", "perch", "training", "black_market", "mapmaker", "tavern", "well", "well_song")) {
+        // 都: 門・閉じた施設・空き区画の碑と、市と住まいの村人
+        // 施設の碑 (docs/design/35 の 2.1): 道具屋・薬師・預かり所・宿・止まり木・訓練場・闇市・酒場・古井戸 (空き家 3 軒の碑は外した。CapitalSeal)
+        for (String key : List.of("gate_n", "gate_e", "gate_s", "gate_w", "keep", "guild", "shrine", "smithy", "lot_1", "lot_2", "lot_3", "lot_4", "lot_5", "graveyard", "guild_roll",
+                "tool_shop", "apothecary", "storage", "inn", "perch", "training", "black_market", "tavern", "well", "well_song")) {
             BlockPos at = job.mark("sign_" + key);
             if (at != null && job.level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
                 SiteKit.writeSign(job.level, at, "sign.skyabyss.capital." + (key.startsWith("lot_") ? "lot" : key));
@@ -116,13 +68,13 @@ public final class ShelterBuilder {
             }
         }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
-        for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall", "open_training",
-                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "sign_training", "chaser", "altar",
+        for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_training",
+                "sign_guild", "sign_shrine", "sign_keep", "sign_training", "chaser", "altar",
                 "stone_stone_whale", "stone_tide_shell", "stone_thunder_wing", "stone_ember",
                 // あとで町のクエスト・裏通りの仕組みが読む置き場 (35 の 3.3・3.5・6.9): 止まり木の台、古井戸の格子と下の迷路、
                 // 酒場の地下の奥の壁と隠し通路 (cellar_gap の 2 マスを空気にすると開く)
                 "perch", "old_well", "well_down", "well_chest", "cellar_wall", "cellar_gap", "cellar_passage", "abyss_hint", "abyss_door",
-                // 五章の大坑道 (34 の 4.7。story/ch5/AbyssEntrance)
+                // 五章の大坑道 (story/ch5/AbyssEntrance)
                 "abyss_landing_1", "abyss_landing_2", "abyss_gate", "abyss_gate_bars")) {
             BlockPos at = job.mark(key);
             if (at != null) {
@@ -157,17 +109,17 @@ public final class ShelterBuilder {
             int placed = jp.revati.skyabyss.facility.Attendants.ensureAll(job.level, facility);
             SkyAbyss.LOGGER.info("Opening capital: {} facility mark(s), {} attendant(s) placed", facility.size(), placed);
         }
-        // 入れる施設の戸の上に浮く名 (label_<施設>。建物のほかに、遠くからでも店と分かるように。2026-10-21 の試遊)。裏通りの闇市・地図屋は出さない
+        // 入れる施設の戸の前に浮く名 (label_<施設>。建物のほかに、遠くからでも店と分かるように。2026-10-21 の試遊)。裏通りの闇市・地図屋は出さない
         int labels = 0;
         for (String key : job.bp.marks.keySet()) {
-            if (!key.startsWith("label_") || LABEL_HIDDEN.contains(key.substring(6))) {
+            if (!key.startsWith("label_") || FacilityLabels.HIDDEN.contains(key.substring(6))) {
                 continue;
             }
             BlockPos at = job.mark(key);
             if (at != null) {
                 // 位置を記録して、建てたときに生き物の読み込まれていないチャンクでも、見回り (keepLabels) が置き直す
                 job.entry.extra(key, at);
-                if (job.level.isPositionEntityTicking(at) && placeLabel(job.level, at, key.substring(6))) {
+                if (job.level.isPositionEntityTicking(at) && FacilityLabels.place(job.level, at, key.substring(6), false)) {
                     labels++;
                 }
             }

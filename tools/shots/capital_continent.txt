@@ -1,0 +1,102 @@
+# 都「鐘の宿り」を大陸の世界で撮る (2026-10-28 の見直し。capital.txt と同じ位置)
+# ワールド名が opening で始まるので構造物が建つ。設計図を変えたら run/shots/capital/saves を消す。絵は run/shots/capital/shots/capital/*.png
+# at shelter 0 <x> <y> <z> <yaw> <pitch>: 設計図の座標と向き (yaw 0 = 南、180 = 北、90 = 西、-90 = 東) で置く
+world capital_continent4 continent
+size 1280 720
+timeout 1800
+render 16
+clouds off
+
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+cmd skyabyss dev opening info
+wait 200
+hud off
+cmd skyabyss dev opening at shelter 0 0 70 175 180 24
+waitchunks
+wait 20
+shot capital_aerial_south
+cmd skyabyss dev opening at shelter 0 140 75 140 135 26
+waitchunks
+wait 20
+shot capital_aerial_se
+cmd skyabyss dev opening at shelter 0 -140 75 -140 -45 26
+waitchunks
+wait 20
+shot capital_aerial_nw
+cmd skyabyss dev opening at shelter 0 0 140 0 0 90
+waitchunks
+wait 20
+shot capital_top
+cmd skyabyss dev opening at shelter 0 0 2 116 180 -8
+waitchunks
+wait 20
+shot capital_gate_south
+cmd skyabyss dev opening at shelter 0 0 2 60 180 -4
+waitchunks
+wait 20
+shot capital_avenue
+cmd skyabyss dev opening at shelter 0 0 2 -2 180 -12
+waitchunks
+wait 20
+shot capital_plaza_north
+cmd skyabyss dev opening at shelter 0 0 7 -48 180 -10
+waitchunks
+wait 20
+shot capital_terrace
+cmd skyabyss dev opening at shelter 0 -20 7 -58 151 -25
+waitchunks
+wait 20
+shot capital_bell_tower
+cmd skyabyss dev opening at shelter 0 32 7 -44 180 -12
+waitchunks
+wait 20
+shot capital_keep_gate
+cmd skyabyss dev opening at shelter 0 34 2 -18 -90 -6
+waitchunks
+wait 20
+shot capital_guild
+cmd skyabyss dev opening at shelter 0 -40 2 -21 90 -6
+waitchunks
+wait 20
+shot capital_shrine
+cmd skyabyss dev opening at shelter 0 -20 2 32 -90 -4
+waitchunks
+wait 20
+shot capital_street_south
+cmd skyabyss dev opening at shelter 0 -48 2 52 180 -5
+waitchunks
+wait 20
+shot capital_row_street
+cmd skyabyss dev opening at shelter 0 22 2 33 180 -8
+waitchunks
+wait 20
+shot capital_smithy
+cmd skyabyss dev opening at shelter 0 -26 14 49 180 45
+waitchunks
+wait 20
+shot capital_courtyard
+cmd skyabyss dev opening at shelter 0 60 32 60 135 20
+waitchunks
+wait 20
+shot capital_roofs
+cmd skyabyss dev opening at shelter 0 -112 4 26 160 -15
+waitchunks
+wait 20
+shot capital_graveyard
+cmd skyabyss dev opening at shelter 0 -116 5 -102 135 22
+waitchunks
+wait 30
+shot capital_out_field
+cmd skyabyss dev opening at shelter 0 -120 5 74 45 18
+waitchunks
+wait 30
+shot capital_out_grove

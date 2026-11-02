@@ -32,8 +32,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 旅の地図 (M キー。docs/design/33 の 4 章)。北が上、町を中心にした印だけの地図 (地形は描かない。座標の数字も出さない)。
-// 縮尺はホイール (と ＋／− のキー・右上のつまみ) でなめらかに替える: 半径 96 (都の中) 〜 4,800 (世界の果てまで)。指した所を中心に寄る。
+// 旅の地図 (M キー)。北が上。大陸の絵 (continent.png) の上に印を置く (座標の数字は出さない)。土地の名前は縁取りの大きな字、左上の隅に方位盤。
+// 縮尺はホイール (と ＋／− のキー・右上のつまみ) でなめらかに替える: 半径 96 (都の中) 〜 2,200 (大陸とはじまりの島が収まる)。指した所を中心に寄る。
 // 印を指すと名前と「北東 420」(自分からの方角と距離)。大事な印 (都・巨神・章の場所・祠・仲間・目的・墓) は、名前の札を常に出す (重なる札は出さない)。
 // 輪には距離の数字。自分の矢印は 2 倍で、暗い丸の上に。寄せると都の壁の四角 (2026-10-23: 地図を読みやすく・もっと寄せて・もっと引いて)。
 // 巨神の子に乗っているとき (chart != null) は、子の海図 (旧 TravelChartScreen) をこの画面に重ねる: 行ける行き先の印が光り、
@@ -48,16 +48,20 @@ public class TravelMapScreen extends Screen {
 
     // 印の絵の番号 (marks.png の並び。tools/gen/world/gen_travel_map_assets.py の SPRITES と同じ)
     static final int S_TOWN = 0, S_CAMP = 1, S_FOOTPRINT = 2, S_RIBS = 3, S_WAYMARK = 4, S_SITE = 5, S_TITAN = 6, S_GRAVE = 7,
-            S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14;
+            S_PARTY = 8, S_OBJECTIVE = 9, S_RUMOR = 10, S_SELF = 11, S_SPAWN = 12, S_SHRINE = 13, S_GLOW = 14,
+            S_POI_FIGHT = 15, S_POI_HAMLET = 16, S_POI_TOWER = 17, S_FOE = 18;
+    // 見どころの種類ごとの印 (それ以外の見どころは碑)
+    static final java.util.Set<String> POI_FIGHT = java.util.Set.of("bandit_camp", "barrow", "mine", "graveyard", "cave", "burnt_fort");
+    static final java.util.Set<String> POI_TOWER = java.util.Set.of("watchtower", "lighthouse", "rod_tower", "ruined_tower", "windmill");
 
     // 縮尺 (中心から縁までのブロック): いちばん寄せた / いちばん引いた / 開いたとき (町のまわり・世界)。ホイール一目盛りで 1.25 倍
     static final double MIN_RANGE = 96;
-    static final double MAX_RANGE = 4800;
+    // いちばん引いた所は大陸がちょうど盤に収まる半径 (前は 4,800 で、大陸が小さくなり名前が重なった。2026-11-02 の声「マップが見にくい」)
+    static final double MAX_RANGE = 2200;
     static final double NEAR = 600;
-    static final double FAR = 2400;
+    static final double FAR = 1600;
     static final double ZOOM_STEP = 1.25;
     // 輪の間の候補 (半径の中に輪が 2〜4 本になるものを選ぶ)
-    static final int[] RING_STEPS = {25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000};
     // 都の壁 (真ん中から壁の外の面まで。tools/capital/town.py の W)
     static final int TOWN_HALF = 100;
 
@@ -95,6 +99,8 @@ public class TravelMapScreen extends Screen {
 
     // 配置 (init で決める)
     private int fx, fy, fw, fh;
+    // 天と淵の大陸: 丸く切らず、地図の枠いっぱいの四角に描く (2026-10-25「円の範囲にのみうつさなくていい」)
+    private int rx0, ry0, rx1, ry1;
     private int cx, cy, radius;
     private int listX, listY, listRows, btnY;
 
@@ -103,7 +109,7 @@ public class TravelMapScreen extends Screen {
         this.chart = chart;
         this.sheet = sheet;
         // 海図は遠くまで行くので世界の縮尺から
-        this.view = chart != null ? FAR : NEAR;
+        this.view = chart != null ? FAR : onMoon() ? MOON_NEAR : NEAR;
         this.target = view;
         pickDefault();
     }
@@ -244,6 +250,10 @@ public class TravelMapScreen extends Screen {
         cx = inX + inW / 2;
         cy = inY + inH / 2;
         radius = Math.max(40, Math.min(inW, inH) / 2 - 10);
+        rx0 = inX;
+        ry0 = inY;
+        rx1 = inX + inW;
+        ry1 = inY + inH;
     }
 
     @Override
@@ -291,6 +301,9 @@ public class TravelMapScreen extends Screen {
 
     // 動かせる範囲 (世界の座標の {x0, z0, x1, z1}): 自分・町・載っている印を囲む長方形
     private int[] knownBounds() {
+        if (onMoon()) {
+            return new int[] {MOON_X0 + 64, MOON_Z0 + 64, MOON_X0 + MOON_SIZE - 64, MOON_Z0 + MOON_SIZE - 64};
+        }
         int x0 = baseX();
         int x1 = x0;
         int z0 = baseZ();
@@ -322,7 +335,7 @@ public class TravelMapScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (button == 0 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
+        if (button == 0 && radius > 0 && inMap(mx, my)) {
             double k = view / radius;
             panX -= dx * k;
             panZ -= dy * k;
@@ -337,24 +350,40 @@ public class TravelMapScreen extends Screen {
         double k = radius / view;
         double dx = (x - centerX()) * k;
         double dz = (z - centerZ()) * k;
-        double d = Math.hypot(dx, dz);
-        double max = radius - 5;
         int beyond = 0;
-        if (d > max) {
-            dx *= max / d;
-            dz *= max / d;
+        double hx = (rx1 - rx0) / 2.0 - 5;
+        double hy = (ry1 - ry0) / 2.0 - 5;
+        double ox = (rx0 + rx1) / 2.0 - cx;
+        double oy = (ry0 + ry1) / 2.0 - cy;
+        double ux = dx - ox;
+        double uy = dz - oy;
+        double f = Math.max(Math.abs(ux) / hx, Math.abs(uy) / hy);
+        if (f > 1) {
+            ux /= f;
+            uy /= f;
             beyond = 1;
         }
-        return new int[]{cx + (int) Math.round(dx), cy + (int) Math.round(dz), beyond};
+        return new int[]{cx + (int) Math.round(ux + ox), cy + (int) Math.round(uy + oy), beyond};
     }
 
     @Nullable
     private double[] self() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.level.dimension() != Level.OVERWORLD) {
+        if (mc.player == null || mc.level == null || (mc.level.dimension() != Level.OVERWORLD && !onMoon())) {
             return null;
         }
         return new double[]{mc.player.getX(), mc.player.getZ(), mc.player.getYRot()};
+    }
+
+    // 地図に描く世界 (月にいれば月、ほかは地上) の名前。墓・仲間の印はこの世界のものだけ
+    static String here() {
+        return (onMoon() ? jp.revati.skyabyss.story.ch6.MoonWorld.LEVEL : Level.OVERWORLD).location().toString();
+    }
+
+    // 月にいる (旅の地図は月の絵に替わる。地上の印は出さない)
+    static boolean onMoon() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.level != null && mc.level.dimension() == jp.revati.skyabyss.story.ch6.MoonWorld.LEVEL;
     }
 
     private boolean onGround() {
@@ -378,7 +407,7 @@ public class TravelMapScreen extends Screen {
         animateZoom();
         Palette p = palette();
         drawSheet(g, p);
-        drawRings(g, p);
+        drawContinent(g);
         drawTown(g, p);
         List<Hit> hits = new ArrayList<>();
         drawMarks(g, p, hits, mouseX, mouseY);
@@ -394,8 +423,20 @@ public class TravelMapScreen extends Screen {
         }
     }
 
+    private boolean inMap(double mx, double my) {
+        return mx >= rx0 && mx < rx1 && my >= ry0 && my < ry1;
+    }
+
     private void drawSheet(GuiGraphics g, Palette p) {
         Config.MapStyle st = style();
+        if (st == Config.MapStyle.SLATE) {
+            tile(g, 0, fx, fy, fw, fh);
+            frame(g, fx, fy, fw, fh, false);
+            if (chart != null) {
+                recess(g, listX - 4, fy + 14, LIST_W, fh - 28);
+            }
+            return;
+        }
         switch (st) {
             case SLATE -> {
                 tile(g, 0, fx, fy, fw, fh);
@@ -442,62 +483,152 @@ public class TravelMapScreen extends Screen {
         }
     }
 
-    static int ringStep(double range) {
-        for (int st : RING_STEPS) {
-            if (range / st <= 4.2) {
-                return st;
-            }
+    // ---------------------------------------------------------------- 天と淵の大陸 (docs/design/40 の 3 章)
+    // 大陸の世界では、丸い盤の中に描いた大陸の絵 (continent.png。tools/gen/world/gen_continent.py) を敷き、引いたときは土地の名前と目安のレベルを書く
+    static final ResourceLocation CONTINENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/continent.png");
+    static final int CONTINENT_HALF = 2000;
+    // 外の海の色 (continent.png の海と同じ。gen_continent.py の deep_ocean と紙の色を混ぜたもの)
+    static final int SEA_COLOR = 0xFFA4B7B6;
+    // 土地の名前を出す縮尺 (この間)。2026-11-02 の声「マップが見にくい」: 寄せても引いても土地の名が読めるように広げた
+    static final double NAMES_FROM = 450;
+    static final double NAMES_TO = MAX_RANGE;
+
+    // ---------------------------------------------------------------- 月 (docs/design/46 の 3.6。2026-10-28 の試遊「月行ったらマップ変わる様にしてほしい」)
+    // 月にいる間は、月の絵 (moon.png。tools/gen/ch6/gen_moon_map.py。512 x 512 で x -256..256、z -128..384) を敷く
+    static final ResourceLocation MOON = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/moon.png");
+    static final int MOON_X0 = -256;
+    static final int MOON_Z0 = -128;
+    static final int MOON_SIZE = 512;
+    // 月で開いたときの縮尺 (着く所と谷が盤に収まる)
+    static final double MOON_NEAR = 150;
+    // 月の地の色 (絵の外の透けた所)
+    static final int MOON_GROUND = 0xFF2A2C38;
+
+    private void drawMoon(GuiGraphics g) {
+        double k = radius / view;
+        int x0 = cx + (int) Math.round((MOON_X0 - centerX()) * k);
+        int y0 = cy + (int) Math.round((MOON_Z0 - centerZ()) * k);
+        int size = (int) Math.round(MOON_SIZE * k);
+        g.fill(rx0 - 1, ry0 - 1, rx1 + 1, ry1 + 1, 0xFF1A1C24);
+        g.fill(rx0, ry0, rx1, ry1, MOON_GROUND);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.enableScissor(rx0, ry0, rx1, ry1);
+        g.blit(MOON, x0, y0, size, size, 0, 0, MOON_SIZE, MOON_SIZE, MOON_SIZE, MOON_SIZE);
+        g.disableScissor();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        if (view > 600) {
+            return;
         }
-        return RING_STEPS[RING_STEPS.length - 1];
+        // 名前: 着く所・新月の谷・上弦の崖・満月の野・下弦の淵
+        int[] land = project(0, -12);
+        if (land[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.landing"), land[0], land[1] - 4, 0xFFE6E8F0);
+        }
+        int[] valley = project(-60, 120);
+        if (valley[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.valley"), valley[0], valley[1] - 4, 0xFFE6E8F0);
+        }
+        int[] cliff = project(150, -78);
+        if (cliff[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.cliff"), cliff[0], cliff[1] - 4, 0xFFE6E8F0);
+        }
+        int[] field = project(-170, 30);
+        if (field[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.field"), field[0], field[1] - 4, 0xFFE6E8F0);
+        }
+        int[] rift = project(150, 300);
+        if (rift[2] == 0) {
+            g.drawCenteredString(font, Component.translatable("map.skyabyss.moon.rift"), rift[0], rift[1] - 4, 0xFFE6E8F0);
+        }
     }
 
-    // 距離の輪 (2〜4 本。縮尺に合わせた切りのよい数) と、その距離の数字 (輪の南の内側)
-    private void drawRings(GuiGraphics g, Palette p) {
-        int step = ringStep(view);
-        boolean shadow = style() != Config.MapStyle.PARCHMENT;
-        for (int d = step; d < view * 0.97; d += step) {
-            int r = (int) Math.round(radius * d / view);
-            if (r < 14) {
-                continue;
-            }
-            circle(g, cx, cy, r, p.ring(), 1, 3);
-            // 数字は南の十字の線の右、輪のすぐ内 (印の多い東西を避ける)
-            String label = String.format("%,d", d);
-            if (r > 20) {
-                g.drawString(font, label, cx + 3, cy + r - 10, (p.dim() & 0x00FFFFFF) | 0xC0000000, shadow);
+    // 土地の名前を書いた所 (印の札はなるべくここを避ける)
+    private final List<int[]> regionRects = new ArrayList<>();
+
+    private void drawContinent(GuiGraphics g) {
+        regionRects.clear();
+        if (radius <= 0) {
+            return;
+        }
+        if (onMoon()) {
+            drawMoon(g);
+            return;
+        }
+        double k = radius / view;
+        int x0 = cx + (int) Math.round((-CONTINENT_HALF - centerX()) * k);
+        int y0 = cy + (int) Math.round((-CONTINENT_HALF - centerZ()) * k);
+        int size = (int) Math.round(CONTINENT_HALF * 2 * k);
+        // 枠いっぱいの四角に描く。外の海は透けて、下に敷いた海の色になじむ
+        g.fill(rx0 - 1, ry0 - 1, rx1 + 1, ry1 + 1, 0xFF4A3E2E);
+        g.fill(rx0, ry0, rx1, ry1, SEA_COLOR);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.enableScissor(rx0, ry0, rx1, ry1);
+        g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
+        g.disableScissor();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        if (view < NAMES_FROM || view > NAMES_TO) {
+            return;
+        }
+        jp.revati.skyabyss.world.continent.ContinentLayout lay = jp.revati.skyabyss.world.continent.ContinentLayout.get();
+        // 土地の名前: 引くほど大きく (1.25〜1.75 倍)、紙の色の縁取りの上に濃い茶の字
+        float big = (float) Mth.clamp(1.25 + (view - NAMES_FROM) / (NAMES_TO - NAMES_FROM) * 0.5, 1.25, 1.75);
+        for (var e : lay.names().entrySet()) {
+            int[] at = project(e.getValue().getX(), e.getValue().getZ());
+            if (at[2] == 0) {
+                Component name = Component.translatable("map.skyabyss.continent." + e.getKey());
+                haloText(g, name, at[0], at[1] - 10, big, 0xFF33241A, 0xE8F4EAD2);
+                int w = (int) Math.ceil(font.width(name) * big) + 4;
+                regionRects.add(new int[] {at[0] - w / 2, at[1] - 11, w, (int) Math.ceil(9 * big) + 2});
             }
         }
-        if (style() != Config.MapStyle.SLATE) {
-            circle(g, cx, cy, radius, p.ringStrong(), 1, 0);
+        // 目安のレベルは 700〜3,200 の間だけ (寄せると入口の印、引きすぎると土地の名前と重なる)
+        for (var e : view < 700 || view > 3200 ? java.util.Map.<String, jp.revati.skyabyss.world.continent.ContinentLayout.Level>of().entrySet() : lay.levels().entrySet()) {
+            int[] at = project(e.getValue().pos().getX(), e.getValue().pos().getZ());
+            if (at[2] == 0) {
+                String s = "Lv " + e.getValue().text();
+                int w = font.width(s);
+                g.fill(at[0] - w / 2 - 3, at[1] - 6, at[0] + w / 2 + 3, at[1] + 6, 0xE0F4EAD2);
+                outlineRect(g, at[0] - w / 2 - 3, at[1] - 6, w + 6, 12, 0xFF7A5A3A);
+                g.drawString(font, s, at[0] - w / 2, at[1] - 4, 0xFF7A3C1E, false);
+            }
         }
-        // 十字の細い線 (方位の輪)
-        dashed(g, cx - radius + 8, cy, cx + radius - 8, cy, p.ring(), 2, 4);
-        dashed(g, cx, cy - radius + 8, cx, cy + radius - 8, p.ring(), 2, 4);
     }
 
-    // 方位の刻みと N E S W (印の上に描く)
+    // 方位: 地図の左上の隅に小さな方位盤 (北が上)。前は四辺の真ん中に東西南北を書いていたが、縁の印と重なった (2026-11-02 の声「マップが見にくい」)
     private void drawCompass(GuiGraphics g, Palette p) {
-        for (int k = 0; k < 32; k++) {
-            double a = k / 32.0 * Math.PI * 2;
-            int len = k % 8 == 0 ? 6 : k % 4 == 0 ? 4 : 2;
-            int c = k % 8 == 0 ? p.accent() : p.ring();
-            for (int s = 0; s < len; s++) {
-                double rr = radius - 1 - s;
-                int x = cx + (int) Math.round(Math.cos(a) * rr);
-                int y = cy + (int) Math.round(Math.sin(a) * rr);
-                g.fill(x, y, x + 1, y + 1, c);
+        int x = rx0 + 17;
+        int y = ry0 + 17;
+        disc(g, x, y, 13, 0xD00A0D12);
+        circle(g, x, y, 13, p.accent(), 1, 0);
+        // 北の針 (上の三角) と南の針 (下の細い線)
+        for (int i = 0; i < 7; i++) {
+            g.fill(x - (6 - i) / 2, y - 2 - i, x + (6 - i) / 2 + 1, y - 1 - i, 0xFFE24A3A);
+        }
+        g.fill(x, y, x + 1, y + 8, p.dim());
+        Component n = Component.translatable("gui.skyabyss.travel.dir.n");
+        haloText(g, n, x, y - 22, 1f, p.accent(), 0xE00A0D12);
+    }
+
+    // 縁取りの字 (地図の上の名前。どの地の色の上でも読める)。x は真ん中、y は上
+    private void haloText(GuiGraphics g, Component text, int x, int y, float scale, int color, int halo) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(scale, scale, 1f);
+        int w = font.width(text);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx != 0 || dy != 0) {
+                    g.drawString(font, text, -w / 2 + dx, dy, halo, false);
+                }
             }
         }
-        int lc = p.accent();
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.travel.dir.n"), cx, cy - radius - 13, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.s"), cx, cy + radius + 6, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.w"), cx - radius - 10, cy - 4, lc);
-        drawCentered(g, Component.translatable("gui.skyabyss.travel.dir.e"), cx + radius + 10, cy - 4, lc);
+        g.drawString(font, text, -w / 2, 0, color, false);
+        g.pose().popPose();
     }
 
     // 寄せたとき (半径 400 まで): 都の壁の四角 (点線) と大通りの十字
     private void drawTown(GuiGraphics g, Palette p) {
-        if (view > 400 || sheet == null || !sheet.townKnown()) {
+        if (view > 400 || sheet == null || !sheet.townKnown() || onMoon()) {
             return;
         }
         MapMarks.Mark town = null;
@@ -576,7 +707,7 @@ public class TravelMapScreen extends Screen {
         g.drawString(font, sc, minusX() - 6 - font.width(sc), fy + 10, p.text(), shadow);
         Component foot = sheet == null ? Component.translatable("gui.skyabyss.map.waiting")
                 : !onGround() ? Component.translatable("gui.skyabyss.map.elsewhere") : Component.translatable("gui.skyabyss.map.hint");
-        g.drawString(font, foot, fx + 14, fy + fh - 14, p.dim(), shadow);
+        g.drawString(font, foot, fx + 14, fy + fh - 14, style() == Config.MapStyle.PARCHMENT ? p.dim() : p.text(), shadow);
     }
 
     private void zoomButton(GuiGraphics g, Palette p, int x, int y, boolean plus, int mouseX, int mouseY) {
@@ -608,7 +739,8 @@ public class TravelMapScreen extends Screen {
     private void drawMarks(GuiGraphics g, Palette p, List<Hit> hits, int mouseX, int mouseY) {
         double[] me = self();
         long time = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
-        List<MapMarks.Mark> marks = sheet == null ? List.of() : sheet.marks();
+        // 月にいる間は地上の印を出さない (自分の矢印だけ)
+        List<MapMarks.Mark> marks = sheet == null || onMoon() ? List.of() : sheet.marks();
         List<Label> labels = new ArrayList<>();
         List<int[]> icons = new ArrayList<>();
         // 道 (町から道しるべをつなぐ線) は描かない (2026-10-21 の試遊: ごちゃつく)
@@ -622,19 +754,37 @@ public class TravelMapScreen extends Screen {
             }
             int[] at = project(m.x(), m.z());
             int rim = m.color() == 0 ? p.rim() : 0xFF000000 | m.color();
+            boolean unfound = m.kind() == MapMarks.Kind.WAYMARK && m.extra().startsWith("poi~:");
+            boolean poi = unfound || m.kind() == MapMarks.Kind.WAYMARK && m.extra().startsWith("poi:");
+            if (poi && at[2] == 1) {
+                continue; // 見どころは数が多いので、枠の外のものは縁に寄せない
+            }
+            if (poi && view > 650) {
+                // 大きく引いたときは小さな点だけ (指すと名前)
+                g.fill(at[0] - 2, at[1] - 2, at[0] + 2, at[1] + 2, 0xFF3A3328);
+                g.fill(at[0] - 1, at[1] - 1, at[0] + 1, at[1] + 1, 0xFFE8DCC0);
+                hits.add(hit(at, layer(m), List.of(MapText.name(m), MapText.where(me, m.x(), m.z())), null));
+                continue;
+            }
             if (m.rumor()) {
                 sprite(g, S_RUMOR, at[0], at[1], 0, 0.85f);
             } else {
                 backing(g, at[0], at[1], at[2] == 1 ? 0.45f : 0.75f);
-                sprite(g, sprite(m.kind()), at[0], at[1], rim, at[2] == 1 ? 0.6f : 1f);
+                sprite(g, poi ? poiSprite(m.extra().substring(m.extra().indexOf(':') + 1)) : sprite(m.kind()), at[0], at[1], rim, at[2] == 1 || unfound ? 0.5f : 1f);
                 icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
                 int pr = labelPriority(m);
                 if (pr > 0 && at[2] == 0) {
-                    labels.add(new Label(at[0], at[1], MapText.name(m), m.kind() == MapMarks.Kind.TITAN || m.color() != 0 ? rim : p.text(), pr));
+                    // 見つけていない見どころの札は名前だけ (「未発見」は薄い印と指したときの説明でわかる)
+                    Component name = unfound ? Component.translatable("map.skyabyss.poi." + m.extra().substring(5)) : MapText.name(m);
+                    labels.add(new Label(at[0], at[1], name, m.kind() == MapMarks.Kind.TITAN || m.color() != 0 ? rim : p.text(), pr));
                 }
             }
             List<Component> lines = new ArrayList<>();
             lines.add(MapText.name(m));
+            if (m.kind() == MapMarks.Kind.FOE) {
+                lines.add(Component.translatable(m.id().equals("world_event") ? "map.skyabyss.world_event.here"
+                        : m.extra().equals("alive") ? "map.skyabyss.foe.alive" : "map.skyabyss.foe.away"));
+            }
             lines.add(m.rumor() ? MapText.rumor(me, m.x(), m.z()) : MapText.where(me, m.x(), m.z()));
             hits.add(hit(at, layer(m), lines, null));
         }
@@ -671,7 +821,7 @@ public class TravelMapScreen extends Screen {
         }
         // 墓・仲間・目的・自分 (クライアントが持っているもの)
         for (GraveMarkers.Mark gm : graves()) {
-            if (!gm.dimension().equals(Level.OVERWORLD.location().toString())) {
+            if (!gm.dimension().equals(here())) {
                 continue;
             }
             int[] at = project(gm.x() + 0.5, gm.z() + 0.5);
@@ -684,7 +834,7 @@ public class TravelMapScreen extends Screen {
             hits.add(hit(at, 60, List.of(Component.translatable("map.skyabyss.mark.grave"), MapText.where(me, gm.x() + 0.5, gm.z() + 0.5)), null));
         }
         for (PartyLocator.Entry e : party()) {
-            if (!e.dimension().equals(Level.OVERWORLD.location().toString())) {
+            if (!e.dimension().equals(here())) {
                 continue;
             }
             int[] at = project(e.x() + 0.5, e.z() + 0.5);
@@ -734,8 +884,11 @@ public class TravelMapScreen extends Screen {
             case TITAN -> 75;
             case SHRINE -> 70;
             case SITE -> 65;
+            case FOE -> m.extra().equals("alive") ? 72 : view <= 1600 ? 50 : 0;
             case CAMP -> view <= 1200 ? 40 : 0;
             case SPAWN -> view <= 1200 ? 35 : 0;
+            // 見どころは寄せたときだけ名前 (見つけたものを先に。重なる所には置かない)
+            case WAYMARK -> !m.extra().startsWith("poi") || view > 320 ? 0 : m.extra().startsWith("poi:") ? 20 : 12;
             default -> 0;
         };
     }
@@ -750,19 +903,24 @@ public class TravelMapScreen extends Screen {
             int w = font.width(text) + 6;
             int h = 11;
             int[][] spots = {{l.x() + 10, l.y() - 5}, {l.x() - 10 - w, l.y() - 5}, {l.x() - w / 2, l.y() + 10}, {l.x() - w / 2, l.y() - 10 - h}};
-            for (int[] sp : spots) {
-                int[] r = {sp[0], sp[1], w, h};
-                if (Math.hypot(sp[0] + w / 2.0 - cx, sp[1] + h / 2.0 - cy) > radius - 6 && Math.hypot(sp[0] - cx, sp[1] - cy) > radius - 4) {
-                    continue;
+            // 一度目は土地の名前も避ける。どこにも入らなければ、二度目は土地の名前の上でもよい
+            boolean done = false;
+            for (int pass = 0; pass < 2 && !done; pass++) {
+                for (int[] sp : spots) {
+                    int[] r = {sp[0], sp[1], w, h};
+                    if (Math.hypot(sp[0] + w / 2.0 - cx, sp[1] + h / 2.0 - cy) > radius - 6 && Math.hypot(sp[0] - cx, sp[1] - cy) > radius - 4) {
+                        continue;
+                    }
+                    if (overlaps(r, placed) || overlapsIcons(r, icons, l) || pass == 0 && overlaps(r, regionRects)) {
+                        continue;
+                    }
+                    placed.add(r);
+                    g.fill(r[0], r[1], r[0] + w, r[1] + h, parch ? 0xE6F2E6C8 : 0xE60A0D12);
+                    g.fill(r[0], r[1], r[0] + 1, r[1] + h, l.color());
+                    g.drawString(font, text, r[0] + 4, r[1] + 2, parch ? 0xFF3B2A1A : l.color(), !parch);
+                    done = true;
+                    break;
                 }
-                if (overlaps(r, placed) || overlapsIcons(r, icons, l)) {
-                    continue;
-                }
-                placed.add(r);
-                g.fill(r[0], r[1], r[0] + w, r[1] + h, parch ? 0xC8F2E6C8 : 0xC80A0D12);
-                g.fill(r[0], r[1], r[0] + 1, r[1] + h, l.color());
-                g.drawString(font, text, r[0] + 4, r[1] + 2, parch ? 0xFF3B2A1A : l.color(), !parch);
-                break;
             }
         }
     }
@@ -814,10 +972,21 @@ public class TravelMapScreen extends Screen {
         return switch (m.kind()) {
             case SITE, WAYMARK, SHRINE -> 10;
             case FOOTPRINT, RIBS, SPAWN -> 20;
+            case FOE -> 38;
             case CAMP -> 30;
             case TOWN -> 35;
             case TITAN -> 40;
         };
+    }
+
+    static int poiSprite(String kind) {
+        if (POI_FIGHT.contains(kind)) {
+            return S_POI_FIGHT;
+        }
+        if (POI_TOWER.contains(kind)) {
+            return S_POI_TOWER;
+        }
+        return kind.startsWith("hamlet_") ? S_POI_HAMLET : S_WAYMARK;
     }
 
     static int sprite(MapMarks.Kind kind) {
@@ -831,6 +1000,7 @@ public class TravelMapScreen extends Screen {
             case TITAN -> S_TITAN;
             case SHRINE -> S_SHRINE;
             case SPAWN -> S_SPAWN;
+            case FOE -> S_FOE;
         };
     }
 
@@ -933,7 +1103,7 @@ public class TravelMapScreen extends Screen {
             if (d.kind() == 2 && d.valid() && reachable(d)) {
                 color = 0xFF000000 | TravelDest.titanColor(d.name());
             }
-            g.drawString(font, font.plainSubstrByWidth(TravelDest.destName(d).getString(), ROW_W - 18), x + 5, y + 3, color, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(TravelDest.destName(d).getString()), x + 5, y + 3, ROW_W - 18, color, false);
             g.drawString(font, destDetail(d), x + 5, y + 12, d.valid() ? SLATE.dim() : SLATE.lost(), false);
             if (d.kind() == 1 && d.valid() && chart.leader() && hover) {
                 chartBlit(g, x + ROW_W - 11, y + 3, 464, 432, 16, 16);
@@ -1032,7 +1202,7 @@ public class TravelMapScreen extends Screen {
             zoomBy(1, cx, cy);
             return true;
         }
-        if (button == 1 && radius > 0 && Math.hypot(mx - cx, my - cy) <= radius + 8) {
+        if (button == 1 && radius > 0 && inMap(mx, my)) {
             panX = 0;
             panZ = 0;
             return true;
@@ -1119,16 +1289,16 @@ public class TravelMapScreen extends Screen {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         if (tint != 0) {
             g.setColor(((tint >> 16) & 0xFF) / 255f, ((tint >> 8) & 0xFF) / 255f, (tint & 0xFF) / 255f, tintAlpha);
-            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 512, 64);
+            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 1024, 64);
             g.setColor(1f, 1f, 1f, 1f);
             return;
         }
         if (rim != 0) {
             g.setColor(((rim >> 16) & 0xFF) / 255f, ((rim >> 8) & 0xFF) / 255f, (rim & 0xFF) / 255f, alpha);
-            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 32, 32, 32, 512, 64);
+            g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 32, 32, 32, 1024, 64);
         }
         g.setColor(1f, 1f, 1f, alpha);
-        g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 512, 64);
+        g.blit(MARKS, x - 8, y - 8, 16, 16, index * 32, 0, 32, 32, 1024, 64);
         g.setColor(1f, 1f, 1f, 1f);
     }
 

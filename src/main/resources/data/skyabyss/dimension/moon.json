@@ -1,0 +1,19 @@
+{
+  "type": "skyabyss:moon",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "skyabyss:moon",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:deepslate", "height": 40},
+        {"block": "minecraft:smooth_basalt", "height": 20},
+        {"block": "minecraft:tuff", "height": 12},
+        {"block": "minecraft:light_gray_concrete_powder", "height": 3}
+      ],
+      "structure_overrides": []
+    }
+  }
+}

@@ -47,12 +47,19 @@ public final class ShopService {
     private ShopService() {
     }
 
+    // 品揃えの日 (実時間。朝 5 時で替わる。板・組合の頼みと同じ時計。util/DayClock)
     public static long day(ServerPlayer player) {
-        return player.server.overworld().getDayTime() / 24000L;
+        return jp.revati.skyabyss.util.DayClock.epochDay();
     }
 
     // 開く (npc = 店の人。null = どこからでも)
     public static boolean open(ServerPlayer player, String shopId, @Nullable Entity npc) {
+        // 封切り師の買い取り (売るだけの店。Buyback)
+        if (Buyback.ID.equals(shopId)) {
+            SESSIONS.put(player.getUUID(), new Session(shopId, npc == null ? -1 : npc.getId()));
+            send(player, Buyback.view(player));
+            return true;
+        }
         ShopDef shop = ShopManager.shop(shopId);
         if (shop == null) {
             SkyAbyss.LOGGER.warn("[shop] no shop {}", shopId);
@@ -97,7 +104,8 @@ public final class ShopService {
             }
             int left = g.limit() <= 0 ? -1 : Math.max(0, g.limit() - ledger.bought(shop.id(), g.id(), day));
             boolean rotating = shop.pool().contains(g);
-            goods.add(new FacilityNetwork.GoodView(g.id(), g.stack(), g.coins(), mats, have, left, chapter < g.chapter(), g.chapter(), rotating));
+            goods.add(new FacilityNetwork.GoodView(g.id(), g.stack(), jp.revati.skyabyss.endgame.RegionFame.price(player, g.coins()), mats, have, left,
+                    chapter < g.chapter(), g.chapter(), rotating));
         }
         List<FacilityNetwork.SellView> sells = new ArrayList<>();
         for (int i = 0; i < shop.buys().size(); i++) {
@@ -148,7 +156,9 @@ public final class ShopService {
                 return Result.SOLD_OUT;
             }
         }
-        if (Coins.count(player) < g.coins() * n) {
+        // 土地の名声の値引き (土地の町の中だけ。endgame/RegionFame)
+        int each = jp.revati.skyabyss.endgame.RegionFame.price(player, g.coins());
+        if (Coins.count(player) < each * n) {
             Notice.hint(player, "message.skyabyss.shop.no_coins");
             return Result.NO_COINS;
         }
@@ -158,12 +168,18 @@ public final class ShopService {
                 return Result.NO_MATERIALS;
             }
         }
-        Coins.take(player, g.coins() * n);
+        Coins.take(player, each * n);
         for (ShopDef.Price p : g.materials()) {
             QuestItems.take(player, BuiltInRegistries.ITEM.getKey(p.item()).toString(), null, p.count() * n);
         }
         for (int i = 0; i < n; i++) {
-            Quests.give(player, g.stack());
+            ItemStack made = g.stack();
+            // 誂えの品は「作った」合図を流す (旅装を一式そろえた・砥石を作ったなどの章の合図が、作業台のときと同じに動く)
+            if (g.made()) {
+                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent(player, made.copy(),
+                        new net.minecraft.world.SimpleContainer(1)));
+            }
+            Quests.give(player, made);
         }
         if (g.limit() > 0) {
             ledger.add(shop.id(), g.id(), day, n);
@@ -176,6 +192,18 @@ public final class ShopService {
     // ---------------------------------------------------------------- 売る
     public static Result sell(ServerPlayer player, String shopId, int index, int times) {
         Session s = SESSIONS.get(player.getUUID());
+        if (Buyback.ID.equals(shopId)) {
+            if (s == null || !s.shop().equals(shopId)) {
+                return Result.NO_SHOP;
+            }
+            if (!reach(player, s)) {
+                close(player);
+                return Result.FAR;
+            }
+            int n = Buyback.sell(player, index, times);
+            send(player, Buyback.view(player));
+            return n > 0 ? Result.OK : Result.NO_GOOD;
+        }
         ShopDef shop = ShopManager.shop(shopId);
         if (shop == null || s == null || !s.shop().equals(shopId)) {
             return Result.NO_SHOP;

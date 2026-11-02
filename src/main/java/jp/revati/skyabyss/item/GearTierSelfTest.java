@@ -47,7 +47,7 @@ public final class GearTierSelfTest {
     public record Row(String id, GearTier tier, int chapter) {
     }
 
-    // 全装備の表 (03 の 1.4節と同じ。章 = 由来の巨神の章。深淵は 5)
+    // 全装備の表 (03 の 1.4節と同じ。章 = 由来の巨神の章。深淵は 5、月は 6)
     public static final List<Row> TABLE = new ArrayList<>();
 
     private static void row(int chapter, GearTier tier, String... ids) {
@@ -57,39 +57,57 @@ public final class GearTierSelfTest {
     }
 
     static {
-        GearTier C = GearTier.COMMON, U = GearTier.UNCOMMON, R = GearTier.RARE, E = GearTier.EPIC, H = GearTier.HEROIC, A = GearTier.ARTIFACT;
+        GearTier C = GearTier.COMMON, U = GearTier.UNCOMMON, R = GearTier.RARE, E = GearTier.EPIC, H = GearTier.HEROIC, A = GearTier.ARTIFACT, M = GearTier.MYTHIC;
         // 一章 岩鯨
         row(1, C, "heartbeat_ward_stone_whale");
+        // 島の祠の始めの武器 (rpg/skill/JobChoice。docs/design/43 の 4 節)
+        row(1, C, "shrine_staff", "shrine_bell_staff", "shrine_dagger", "shrine_sword", "shrine_hammer", "shrine_bow");
         row(1, U, "whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots");
         row(1, R, "stone_whale_helmet", "stone_whale_chestplate", "stone_whale_leggings", "stone_whale_boots", "moss_talisman");
-        row(1, E, "whalebone_greatsword", "resonance_charm");
-        row(1, H, "captain_pike", "waterway_fang", "stone_whale_plating");
-        row(1, A, "abyss_greatsword");
+        row(1, E, "whalebone_greatsword", "resonance_charm", "whale_staff", "whale_bell_staff", "whale_hammer", "whale_bow", "whale_dagger");
+        row(1, H, "captain_pike", "waterway_fang", "stone_whale_plating", "whale_choir_hammer", "whale_star_staff", "whale_rib_longbow", "whale_deep_bell_staff");
+        row(1, A, "abyss_greatsword", "abyss_whale_hammer", "abyss_whale_staff", "abyss_whale_bow", "abyss_whale_fang", "abyss_whale_bell_staff");
         // 二章 潮殻
         row(2, C, "heartbeat_ward_tide_shell");
         row(2, U, "tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots");
         row(2, R, "tide_shell_helmet", "tide_shell_chestplate", "tide_shell_leggings", "tide_shell_boots");
-        row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm");
-        row(2, H, "tidecaller_claw", "coral_harpoon", "moontide_pearl");
-        row(2, A, "abyss_bell_staff");
+        row(2, E, "tide_shell_trident", "coral_shield", "tide_chime_charm", "tide_staff", "tide_bell_staff", "tide_hammer", "tide_bow", "tide_dagger");
+        row(2, H, "tidecaller_claw", "coral_harpoon", "moontide_pearl", "tide_reef_hammer", "tide_pearl_staff", "tide_coral_bow", "tide_surf_bell_staff");
+        row(2, A, "abyss_bell_staff", "abyss_tide_sword", "abyss_tide_hammer", "abyss_tide_staff", "abyss_tide_bow", "abyss_tide_dagger");
         // 三章 雷翼
         row(3, C, "heartbeat_ward_thunder_wing");
         row(3, U, "peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots");
         row(3, R, "thunder_wing_helmet", "thunder_wing_chestplate", "thunder_wing_leggings", "thunder_wing_boots");
-        row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm");
-        row(3, H, "raiju_claw", "warden_glaive", "storm_eye_feather");
-        row(3, A, "abyss_storm_bow");
+        row(3, E, "thunder_wing_bow", "storm_anklet", "storm_charm", "storm_staff", "storm_bell_staff", "storm_hammer", "storm_sword", "storm_dagger");
+        row(3, H, "raiju_claw", "warden_glaive", "storm_eye_feather", "storm_anvil_hammer", "storm_cloud_staff", "storm_gale_bow", "storm_thunder_bell_staff");
+        row(3, A, "abyss_storm_bow", "abyss_storm_sword", "abyss_storm_hammer", "abyss_storm_staff", "abyss_storm_dagger", "abyss_storm_bell_staff");
         // 四章 余燼
         row(4, C, "heartbeat_ward_ember");
         row(4, U, "ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots");
         row(4, R, "ember_helmet", "ember_chestplate", "ember_leggings", "ember_boots");
-        row(4, E, "ember_war_axe", "ember_mantle", "kindling_charm");
-        row(4, H, "smith_hammer", "thrall_poker", "ember_lantern");
-        row(4, A, "abyss_ash_scythe");
+        row(4, E, "ember_war_axe", "ember_mantle", "kindling_charm", "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger");
+        row(4, H, "smith_hammer", "thrall_poker", "ember_lantern", "ember_cinder_blade", "ember_ash_knife", "ember_kiln_staff", "ember_flare_bow", "ember_censer_bell_staff");
+        row(4, A, "abyss_ash_scythe", "abyss_ember_sword", "abyss_ember_staff", "abyss_ember_bow", "abyss_ember_dagger", "abyss_ember_bell_staff");
         // 五章 深淵
         row(5, R, "abyss_diver_helmet", "abyss_diver_chestplate", "abyss_diver_leggings", "abyss_diver_boots");
-        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm");
+        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff");
         row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb");
+        // 六章 月 (story/ch6/gear)
+        row(6, R, "moon_walker_helmet", "moon_walker_chestplate", "moon_walker_leggings", "moon_walker_boots");
+        row(6, R, "moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
+        row(6, H, "moon_waning_blade", "moon_full_hammer", "moon_new_staff", "moon_starfall_bow", "moon_umbra_dagger", "moon_halo_bell_staff", "moon_full_ring");
+        // 終章 神器 (story/finale/gear。巡礼者の報酬。図鑑の品は無い)
+        // あいだの塔 (tower/gear。docs/design/54 の 2.6。どれも神器)
+        row(8, M, "tower_balance_sword", "tower_pull_hammer", "tower_moon_staff", "tower_eye_bow", "tower_sigil_dagger", "tower_clap_bell_staff",
+                "tower_scale_helmet", "tower_scale_chestplate", "tower_scale_leggings", "tower_scale_boots",
+                "tower_bridge_helmet", "tower_bridge_chestplate", "tower_bridge_leggings", "tower_bridge_boots",
+                "tower_halo_helmet", "tower_halo_chestplate", "tower_halo_leggings", "tower_halo_boots", "tower_heaven_ring", "tower_abyss_chain");
+        row(7, M, "divine_warden_blade", "divine_ash_hammer", "divine_eyelid_staff", "divine_mist_bow", "divine_moth_dagger", "divine_keeper_bell_staff",
+                "divine_bellkeeper_helmet", "divine_bellkeeper_chestplate", "divine_bellkeeper_leggings", "divine_bellkeeper_boots",
+                "divine_mistwalker_helmet", "divine_mistwalker_chestplate", "divine_mistwalker_leggings", "divine_mistwalker_boots",
+                "divine_lampkeeper_helmet", "divine_lampkeeper_chestplate", "divine_lampkeeper_leggings", "divine_lampkeeper_boots",
+                "divine_plume_charm", "divine_promise_chime");
+        row(7, M, "divine_sky_sword", "divine_bell_hammer", "divine_dawn_staff", "divine_plume_bow", "divine_rewind_dagger", "divine_promise_bell_staff");
     }
 
     private GearTierSelfTest() {
@@ -138,12 +156,13 @@ public final class GearTierSelfTest {
         }
         for (Item it : BuiltInRegistries.ITEM) {
             ResourceLocation key = BuiltInRegistries.ITEM.getKey(it);
-            if (it instanceof ModGear && key.getNamespace().equals(SkyAbyss.MODID)) {
+            // 野の装備 (docs/design/51) は自分の表 (item/wild/WildGearTable) と自己テスト wild gear が見る
+            if (it instanceof ModGear && !(it instanceof jp.revati.skyabyss.item.wild.WildGear) && key.getNamespace().equals(SkyAbyss.MODID)) {
                 check(f, byId.containsKey(key.getPath()), "gear " + key.getPath() + " is missing from the tier table (03 1.4)");
             }
         }
         // 章ごとの数 (03 の 1.4節の表の数)
-        for (int ch = 1; ch <= 5; ch++) {
+        for (int ch = 1; ch <= 6; ch++) {
             Map<GearTier, Integer> count = new EnumMap<>(GearTier.class);
             for (Row r : TABLE) {
                 if (r.chapter() == ch) {
@@ -155,9 +174,9 @@ public final class GearTierSelfTest {
                 line.append(' ').append(t.key).append(' ').append(count.getOrDefault(t, 0));
             }
             notes.add(line.toString());
-            // 巨神の章 (1〜4) は六つの階級がすべてそろう
+            // 巨神の章 (1〜4) は神器より下の六つの階級がすべてそろう (神器は終章とあいだの塔だけ)
             if (ch <= 4) {
-                check(f, count.size() == GearTier.values().length, "chapter " + ch + " does not use every tier: " + count);
+                check(f, count.size() == GearTier.MYTHIC.ordinal() && !count.containsKey(GearTier.MYTHIC), "chapter " + ch + " does not use every tier: " + count);
             }
         }
     }
@@ -165,7 +184,7 @@ public final class GearTierSelfTest {
     // ---------------------------------------------------------------- 決まりが上へ単調
     private static void rules(List<String> f) {
         GearTier[] t = GearTier.values();
-        check(f, t.length == 6 && t[0] == GearTier.COMMON && t[5] == GearTier.ARTIFACT, "the ladder is not the six tiers");
+        check(f, t.length == 7 && t[0] == GearTier.COMMON && t[5] == GearTier.ARTIFACT && t[6] == GearTier.MYTHIC, "the ladder is not the seven tiers");
         double prevSockets = -1;
         for (int i = 0; i < t.length; i++) {
             int[] odds = t[i].socketOdds();
@@ -234,7 +253,21 @@ public final class GearTierSelfTest {
             case "abyss_lamp_sword" -> AbyssGear.swordDps(e);
             case "abyss_sinking_anchor" -> AbyssGear.anchorDps(e);
             case "abyss_pulse_dagger" -> AbyssGear.daggerDps(e);
-            default -> plain(path, e);
+            case "moon_light_sword" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.swordDps(e);
+            case "moon_full_hammer" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.fullHammerDps(e);
+            case "moon_new_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.newStaffDps(e);
+            case "moon_umbra_dagger" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.umbraDps(e);
+            case "moon_halo_bell_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.haloDps(e);
+            // 月の弓は残像の矢・落ちる星を込める (近接と比べるので割り戻す)
+            case "moon_waning_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) * (1 + jp.revati.skyabyss.story.ch6.gear.MoonGear.BOW_ECHO) / RANGED;
+            case "moon_starfall_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) * (1 + jp.revati.skyabyss.story.ch6.gear.MoonGear.STARFALL_SHARE) / RANGED;
+            case "moon_scale_hammer" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.hammerDps(e);
+            case "moon_tide_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.staffDps(e);
+            case "moon_crescent_dagger" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.daggerDps(e);
+            case "moon_starlight_bell_staff" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.bellDps(e);
+            case "moon_waning_blade" -> jp.revati.skyabyss.story.ch6.gear.MoonGear.bladeDps(e);
+            case "whale_bow", "tide_bow", "ember_bow", "shrine_bow" -> ((jp.revati.skyabyss.item.ChapterBowItem) item(path)).dps(e) / RANGED;
+            default -> item(path) instanceof jp.revati.skyabyss.item.ChapterBowItem b ? b.dps(e) / RANGED : plain(path, e);
         };
     }
 
@@ -244,7 +277,7 @@ public final class GearTierSelfTest {
 
     private static void weapons(List<String> f, List<String> notes) {
         check(f, TideGear.TRIDENT.endsWith("tide_shell_trident") && EmberGear.HAMMER.endsWith("smith_hammer"), "weapon ids moved");
-        for (int ch = 1; ch <= 5; ch++) {
+        for (int ch = 1; ch <= 6; ch++) {
             Map<GearTier, double[]> lo = new EnumMap<>(GearTier.class);
             Map<GearTier, double[]> hi = new EnumMap<>(GearTier.class);
             StringBuilder line = new StringBuilder("chapter " + ch + " weapons (+0 / +10):");
@@ -299,6 +332,22 @@ public final class GearTierSelfTest {
             check(f, travel > 0 && titan > travel, "chapter " + ch + ": travel armor " + travel + " is not below the titan armor " + titan);
         }
         check(f, armorSum(5, GearTier.RARE) > armorSum(4, GearTier.RARE), "abyss armor is not above the ember armor");
+        check(f, armorSum(6, GearTier.RARE) > armorSum(5, GearTier.RARE), "moon armor is not above the abyss armor");
+        // 巨神の鎧は章ごとに上がる (旅装も)
+        StringBuilder line = new StringBuilder("armor sums by chapter (travel / titan):");
+        for (int ch = 1; ch <= 6; ch++) {
+            line.append(String.format(Locale.ROOT, " ch%d %.1f/%.1f", ch, armorSum(ch, GearTier.UNCOMMON), armorSum(ch, GearTier.RARE)));
+            if (ch >= 2 && ch <= 4) {
+                check(f, armorSum(ch, GearTier.UNCOMMON) > armorSum(ch - 1, GearTier.UNCOMMON), "chapter " + ch + " travel armor is not above chapter " + (ch - 1));
+            }
+        }
+        // 巨神の鎧は 2 部位のセットの強靭 (+3) を入れた曲線 (GearCurve.STAGES) で上がる: 防御 + 強靭が章ごとに上がる
+        for (int i = 1; i < GearCurve.STAGES.size(); i++) {
+            GearCurve.Stage a0 = GearCurve.STAGES.get(i - 1);
+            GearCurve.Stage a1 = GearCurve.STAGES.get(i);
+            check(f, a1.armor() + a1.toughness() > a0.armor() + a0.toughness(), a1.id() + " armor curve is not above " + a0.id());
+        }
+        SkyAbyss.LOGGER.info("[selftest] gear tiers {}", line);
     }
 
     // ---------------------------------------------------------------- 落とし表
@@ -319,7 +368,10 @@ public final class GearTierSelfTest {
                 }
             }
             check(f, maxExclusive < minPiece, set.titan + ": an exclusive drops as often as a codex piece");
-            check(f, set.exclusives().size() == 3, set.titan + " should have three exclusives");
+            // 月は専用の逸品が 2 つ (太刀と環。03 の 12.2)
+            // 終章の神器・あいだの塔は図鑑に品を持たない (燃料のための形だけ)
+            int want = set.titan.equals("moon") ? 2 : set.titan.equals("cloudsea") || set.titan.equals("tower") ? 0 : 3;
+            check(f, set.exclusives().size() == want, set.titan + " should have " + want + " exclusives");
         }
         for (String id : AbyssSetup.legends()) {
             check(f, item(id) instanceof ModGear g && g.tier() == GearTier.ARTIFACT, "abyss heart item " + id + " is not an artifact");
@@ -333,8 +385,8 @@ public final class GearTierSelfTest {
     private static void display(List<String> f) {
         Map<String, String> ja = GearCurveSelfTest.lang("/assets/skyabyss/lang/ja_jp.json", f);
         Map<String, String> en = GearCurveSelfTest.lang("/assets/skyabyss/lang/en_us.json", f);
-        String[] jaNames = {"コモン", "アンコモン", "レア", "エピック", "ヒロイック", "★ アーティファクト"};
-        String[] enNames = {"Common", "Uncommon", "Rare", "Epic", "Heroic", "★ Artifact"};
+        String[] jaNames = {"コモン", "アンコモン", "レア", "エピック", "ヒロイック", "★ 伝説", "神器"};
+        String[] enNames = {"Common", "Uncommon", "Rare", "Epic", "Heroic", "★ Legendary", "Mythic"};
         for (GearTier t : GearTier.values()) {
             check(f, jaNames[t.ordinal()].equals(ja.get(t.translationKey())), "ja tier name of " + t + " is " + ja.get(t.translationKey()));
             check(f, enNames[t.ordinal()].equals(en.get(t.translationKey())), "en tier name of " + t + " is " + en.get(t.translationKey()));

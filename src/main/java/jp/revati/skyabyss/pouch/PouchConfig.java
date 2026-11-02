@@ -28,7 +28,9 @@ public final class PouchConfig {
         // 巨神の素材 (鱗片・殻片・羽軸・燠石)
         MATERIAL("material"),
         // 小さな素材 (鱗粉・泡袋・火の粉の粉・燠の殻・潮干しの貝)
-        SMALL("small");
+        SMALL("small"),
+        // 封の箱 (docs/design/52。袋の枠には並べず、四つ目のつまみ「封の箱」で見る。client/box/BoxPouchScreen)
+        BOX("box");
 
         public final String id;
 

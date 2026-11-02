@@ -547,7 +547,7 @@ public final class LayerPuzzles {
         }
         Quests.signalWithParty(p.serverLevel(), List.of(p), f[2]);
         Notice.narrate(p, "message.skyabyss.abyss_v2.find." + f[0]);
-        ItemStack gift = f[0].startsWith("frag") ? new ItemStack(Items.PAPER) : new ItemStack(Items.SOUL_LANTERN);
+        ItemStack gift = f[0].startsWith("frag") ? new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.BLANK_CHART.get()) : new ItemStack(Items.SOUL_LANTERN);
         gift.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skyabyss.abyss_v2." + (f[0].startsWith("frag") ? "fragment" : "party_lantern")));
         Quests.give(p, gift);
         return true;

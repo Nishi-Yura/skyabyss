@@ -1,0 +1,140 @@
+# あいだに座すもの (案 C「門を背負う者」) の形と合図の姿、倒したあとの場面 (docs/design/54 の 2.5)。
+# 技は出さず動きだけ (act pose_<動き>) を、合図がいちばん大きい所で撮る。最後に act win で倒し、越えた場面を撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_master_cues.txt -PshotsName=tower_master_cues
+world shots flat
+size 1280 720
+timeout 2400
+render 14
+cmd gamemode creative
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss tower start
+wait 60
+cmd gamemode spectator
+camera skyabyss:tower 0 127 36 180 -14
+waitchunks 300
+cmd skyabyss tower act hold
+wait 460
+cmd skyabyss cinematic stop
+wait 10
+shot c01_from_bridge
+camera skyabyss:tower 0 134 14 180 -22
+wait 20
+shot c02_front
+camera skyabyss:tower -75 150 -46 -105 4
+wait 20
+shot c03_side
+camera skyabyss:tower 40 170 -96 35 18
+wait 20
+shot c04_back
+camera skyabyss:tower 0 134 14 180 -22
+wait 20
+cmd skyabyss tower act pose_stars
+wait 26
+shot p01_stars_finger
+wait 40
+camera skyabyss:tower 34 180 -52 90 4
+wait 10
+cmd skyabyss tower act pose_stars
+wait 26
+shot p01b_stars_finger_east
+wait 40
+camera skyabyss:tower 0 134 14 180 -22
+wait 10
+cmd skyabyss tower act pose_arrows
+wait 31
+shot p02_arrows_swing
+wait 30
+cmd skyabyss tower act pose_beams
+wait 26
+shot p03_beams_palm
+wait 40
+cmd skyabyss tower act pose_palm
+wait 28
+shot p04_palm_swarm
+wait 40
+cmd skyabyss tower act pose_stoke
+wait 28
+shot p05_stoke_crown
+wait 40
+cmd skyabyss tower act pose_breath
+wait 34
+shot p06_breath_mouth
+wait 40
+cmd skyabyss tower act pose_moon
+wait 40
+shot p07_moon_raise
+wait 60
+cmd skyabyss tower act pose_clap
+wait 44
+shot p08_clap_tell
+wait 40
+cmd skyabyss tower act pose_rake
+wait 24
+shot p09_rake_tell
+wait 40
+cmd skyabyss tower act pose_roar
+wait 24
+shot p10_roar
+wait 40
+camera skyabyss:tower -75 150 -46 -105 4
+wait 10
+cmd skyabyss tower act pose_bow
+wait 30
+shot p11_bow_side
+wait 50
+camera skyabyss:tower 0 134 14 180 -22
+wait 10
+cmd skyabyss tower act breath
+wait 32
+shot p12_breath_stream
+wait 60
+camera skyabyss:tower -75 150 -46 -105 0
+wait 20
+cmd skyabyss tower act win
+wait 30
+shot d01_fall_1s
+wait 50
+shot d02_arms_3s
+wait 40
+shot d03_pull_5s
+wait 30
+shot d04_pull_6s
+wait 30
+shot d05_gate_8s
+wait 40
+shot d06_close_10s
+wait 50
+shot d07_bridge_12s
+wait 40
+shot d08_title_14s
+# 越えた場面のカメラ (観戦の姿では場面が始まらないので、二回目の挑戦を創造の姿で倒す)
+wait 340
+cmd skyabyss tower start
+wait 60
+cmd gamemode creative
+waitchunks 300
+cmd skyabyss tower act hold
+wait 440
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss tower act win
+wait 30
+shot e01_scene_1s
+wait 50
+shot e02_scene_4s
+wait 50
+shot e03_scene_6s
+wait 40
+shot e04_scene_8s
+wait 30
+shot e05_scene_9s
+wait 40
+shot e06_scene_11s
+wait 40
+shot e07_scene_13s

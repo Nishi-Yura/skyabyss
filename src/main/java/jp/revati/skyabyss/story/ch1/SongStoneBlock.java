@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 // 歌石: 苔むした古い石。右クリックで叩くと鳴る (SongStones)。鳴ったあと 1 秒ほど、刻まれた輪がほのかに光る (LIT)。
-// 傍らの積み石の高さが、その石の番号 (1〜5)。順番は積み石の低いほうから。docs/design/17 の 1.5
+// 傍らの積み石の高さが、その石の番号 (1〜5)。順番は積み石の低いほうから
 public class SongStoneBlock extends Block {
     public static final MapCodec<SongStoneBlock> CODEC = simpleCodec(SongStoneBlock::new);
     public static final BooleanProperty LIT = BooleanProperty.create("lit");

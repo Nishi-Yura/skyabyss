@@ -2,7 +2,7 @@
   "parent": "skyabyss:rebirth_1",
   "display": {
     "icon": {
-      "id": "minecraft:gold_ingot"
+      "id": "skyabyss:gold_grain"
     },
     "title": {
       "translate": "advancement.skyabyss.rebirth_5.title"

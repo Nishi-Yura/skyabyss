@@ -14,6 +14,7 @@ import jp.revati.skyabyss.party.Parties;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -306,7 +307,7 @@ public final class AbyssMarks {
     static final double GATE_NEAR = 5.0;
     static final int GATE_LINGER = 60;
     private static final Map<String, Long> GATE_UNTIL = new java.util.HashMap<>();
-    private static final Map<UUID, Long> GATE_HINTED = new java.util.HashMap<>();
+    private static final Map<UUID, Long> GATE_HINTED = PlayerMaps.track(new java.util.HashMap<>());
 
     // 門の格子のマス (幅 3・高さ 3)
     static List<BlockPos> gateBars(BlockPos g) {

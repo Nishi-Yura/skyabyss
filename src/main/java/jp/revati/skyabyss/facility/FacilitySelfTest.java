@@ -46,7 +46,9 @@ public final class FacilitySelfTest {
     }
 
     static BlockPos testBase(ServerLevel level) {
-        return level.getSharedSpawnPos().offset(512, 0, 512);
+        // 世界の真ん中の側へ 512 (大陸の世界は出現地点が南西の島なので、外へ向けると世界の縁の外に出る)
+        BlockPos spawn = level.getSharedSpawnPos();
+        return spawn.offset(spawn.getX() > 0 ? -512 : 512, 0, spawn.getZ() > 0 ? -512 : 512);
     }
 
     static void load(net.minecraft.server.MinecraftServer server) {
@@ -61,8 +63,11 @@ public final class FacilitySelfTest {
 
     public static List<SelfTestRunner.Step> steps() {
         // 先に試しの場所 (出現地点から 512 離れた所。都の本物の係の人と混ざらない) のチャンクを読み込み、生き物が動くまで待つ
+        // (大陸の世界は試しの場所が海の上の新しいチャンクで、作るのに時間がかかる。生き物が動くまで待つ。30 秒で諦めて進む)
+        int[] waited = {0};
         return List.of(SelfTestRunner.Step.once("facility (load)", FacilitySelfTest::load),
-                SelfTestRunner.Step.once("facility", 60, FacilitySelfTest::run),
+                SelfTestRunner.Step.until("facility (wait)", server -> server.overworld().isPositionEntityTicking(testBase(server.overworld())) || ++waited[0] > 600),
+                SelfTestRunner.Step.once("facility", 20, FacilitySelfTest::run),
                 SelfTestRunner.Step.once("facility guild", GuildSelfTest::run),
                 SelfTestRunner.Step.once("facility extras", FacilityExtrasSelfTest::run),
                 SelfTestRunner.Step.once("facility trade", jp.revati.skyabyss.facility.trade.TradeSelfTest::run));
@@ -86,14 +91,16 @@ public final class FacilitySelfTest {
             shops(f, p);
             stash(f, server, p);
             inn(f, level, p);
+            names(f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST facility crashed", e);
             f.add("crashed: " + e);
         } finally {
             p.getInventory().clearContent();
+            jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST facility PASSED (assets 3 looks x 16 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
+            SkyAbyss.LOGGER.info("SELFTEST facility PASSED (role names on the head in ja/en, assets 3 looks x 16 roles, dialogues, attendant spawn/keep/save, coins, shops buy/sell/rotation, stash, inn, repair)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility FAILED: {}", m));
         }
@@ -134,7 +141,7 @@ public final class FacilitySelfTest {
         }
         check(f, resource(a + "textures/item/bell_coin.png"), "bell coin texture");
         check(f, resource(a + "models/item/bell_coin.json"), "bell coin model");
-        check(f, AttendantLook.look(0).equals(AttendantLook.DEFAULT) && AttendantLook.look(2).equals("b"), "look by variant");
+        check(f, AttendantLook.look(0).equals(AttendantLook.DEFAULT) && AttendantLook.look(2).equals(AttendantLook.DEFAULT), "look by variant");
     }
 
     // ---------------------------------------------------------------- 会話
@@ -154,7 +161,8 @@ public final class FacilitySelfTest {
             NpcBonds.of(p).bond(r.dialogueRole()).flags().remove("intro");
             StoryContext ctx = new StoryContext(p, r.dialogueRole(), null);
             Dialogue.Node first = d.entryNode(ctx);
-            check(f, first != null && first.id().equals("intro"), r.id + ": first talk opens intro");
+            // 都の外 (土地の町) では intro_town (都にしかない物の名を出さない。45 の 5 章)
+            check(f, first != null && (first.id().equals("intro") || first.id().equals("intro_town")), r.id + ": first talk opens intro");
             NpcBonds.of(p).bond(r.dialogueRole()).flags().add("intro");
             Dialogue.Node menu = d.entryNode(ctx);
             check(f, menu != null && menu.id().equals("menu") && menu.options().size() >= 3, r.id + ": then the menu");
@@ -164,14 +172,20 @@ public final class FacilitySelfTest {
                 case INNKEEPER -> "inn_rest";
                 case PERCH_KEEPER -> "perch";
                 case GUILD_CLERK -> "guild";
-                case SMITH -> "repair";
+                case SMITH -> "look";
                 case TRADE_KEEPER -> "trade";
-                case STABLE_KEEPER -> "mount_shop";
+                case BOX_OPENER -> "boxes";
+                case TOWER_KEEPER -> "tower_desk";
                 default -> null;
             };
             if (need != null && menu != null) {
                 boolean has = menu.options().stream().anyMatch(o -> o.actions().stream().anyMatch(a -> a.type().equals("facility") && a.str("open").equals(need)));
                 check(f, has, r.id + ": menu opens " + need);
+            }
+            // 旅の番 (止まり木の番) は乗り物の店も (2026-11-01 に厩舎の番をまとめた)
+            if (r == AttendantRole.PERCH_KEEPER && menu != null) {
+                check(f, menu.options().stream().anyMatch(o -> o.actions().stream().anyMatch(a -> a.type().equals("facility") && a.str("open").equals("mount_shop"))),
+                        r.id + ": menu opens mount_shop");
             }
             NpcBonds.of(p).bond(r.dialogueRole()).flags().remove("intro");
         }
@@ -229,6 +243,7 @@ public final class FacilitySelfTest {
     // ---------------------------------------------------------------- 鐘銭
     private static void coins(List<String> f, FakePlayer p) {
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         Coins.give(p, 150);
         check(f, Coins.count(p) == 150, "give/count coins " + Coins.count(p));
         check(f, Coins.take(p, 40) && Coins.count(p) == 110, "take coins");
@@ -252,6 +267,7 @@ public final class FacilitySelfTest {
         check(f, board == null || Coins.errandReward(board, 4) > Coins.errandReward(board, 1), "errand coins grow by chapter");
         check(f, notBoard == null || Coins.errandReward(notBoard, 1) == 0, "story quests do not pay coins automatically");
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 
     // ---------------------------------------------------------------- 店
@@ -259,7 +275,7 @@ public final class FacilitySelfTest {
         for (String e : ShopManager.loadErrors()) {
             f.add("shop load error: " + e);
         }
-        for (String id : List.of("tool_shop", "apothecary", "black_market")) {
+        for (String id : List.of("tool_shop", "food_shop", "outfit_shop", "material_shop", "apothecary", "black_market")) {
             ShopDef s = ShopManager.shop(id);
             if (s == null) {
                 f.add("no shop " + id);
@@ -269,45 +285,53 @@ public final class FacilitySelfTest {
                 check(f, item != Items.EMERALD, id + " uses emeralds");
             }
         }
-        ShopDef tools = ShopManager.shop("tool_shop");
-        for (Item need : List.of(Items.BREAD, Items.TORCH, Items.ARROW, Items.WHITE_BED)) {
-            check(f, tools.goods().stream().anyMatch(g -> g.item() == need), "tool shop sells " + BuiltInRegistries.ITEM.getKey(need));
-        }
+        // 市の四人 (2026-10-27): 道具屋 = 旅と採集の道具、食料屋 = パン、武具屋 = 矢、素材屋 = 素材の値段と買い取り
+        ShopDef toolShop = ShopManager.shop("tool_shop");
+        ShopDef tools = ShopManager.shop("food_shop");
+        ShopDef outfit = ShopManager.shop("outfit_shop");
+        ShopDef mats = ShopManager.shop("material_shop");
+        // 冒険モードでは置けないので、道具屋はブロック (灯り・寝台) を売らない (2026-10-31 の係の人の見直し)
+        check(f, !toolShop.goods().isEmpty() && toolShop.goods().stream().noneMatch(g -> g.item() instanceof net.minecraft.world.item.BlockItem), "tool shop sells blocks players cannot place");
+        check(f, tools.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()), "food vendor sells bread");
+        check(f, outfit.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get()), "outfitter sells arrows");
+        check(f, toolShop.goods().stream().noneMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get() || g.item() == Items.IRON_SWORD), "tool shop no longer sells food or swords");
         ShopDef apo = ShopManager.shop("apothecary");
-        check(f, apo.goods().stream().anyMatch(g -> g.potion() != null && g.potion().getPath().equals("healing")), "apothecary sells healing");
-        check(f, apo.goods().stream().anyMatch(g -> g.potion() != null && g.potion().getPath().equals("night_vision")), "apothecary sells night vision");
-        check(f, apo.goods().stream().anyMatch(g -> g.item() == Items.MILK_BUCKET), "apothecary sells an antidote");
-        ShopDef.Good healing = apo.goods().stream().filter(g -> g.id().equals("healing")).findFirst().orElse(null);
-        check(f, healing != null && healing.stack().has(net.minecraft.core.component.DataComponents.POTION_CONTENTS), "potion goods carry their potion");
+        // 薬は mod の飲み薬 (2026-10-27。バニラのポーションは売らない)
+        check(f, apo.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()), "apothecary sells healing");
+        check(f, apo.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.NIGHT_EYE.get()), "apothecary sells night vision");
+        check(f, apo.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.ANTIDOTE.get()), "apothecary sells an antidote");
+        check(f, apo.goods().stream().noneMatch(g -> g.item() == Items.POTION || g.item() == Items.MILK_BUCKET), "apothecary still sells vanilla potions");
 
         p.getInventory().clearContent();
+
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
-        check(f, Coins.count(p) == 27 && p.getInventory().countItem(Items.BREAD) == 3, "bread paid and given");
-        check(f, ShopService.buy(p, tools, "bedroll", 3) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
+        check(f, Coins.count(p) == 27 && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) == 3, "bread paid and given");
+        check(f, ShopService.buy(p, toolShop, "gather_axe", 5) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
         check(f, ShopService.buy(p, tools, "nope", 1) == ShopService.Result.NO_GOOD, "unknown good");
         // 素材の値段
-        check(f, ShopService.buy(p, tools, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
+        check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
         p.getInventory().add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 3));
         int before = jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null);
-        check(f, ShopService.buy(p, tools, "resonance", 1) == ShopService.Result.OK
+        check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.OK
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:resonance_shard", null) == before + 1
                 && jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:stone_whale_shard", null) == 0, "pay with titan materials");
         // 章の届かない品
-        check(f, ShopService.buy(p, tools, "socket_stone", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
+        check(f, ShopService.buy(p, mats, "socket_ash", 1) == ShopService.Result.LOCKED, "chapter-locked goods");
         // 売る
         p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), 9));
         int idx = -1;
-        for (int i = 0; i < tools.buys().size(); i++) {
-            if (tools.buys().get(i).item() == jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) {
+        for (int i = 0; i < mats.buys().size(); i++) {
+            if (mats.buys().get(i).item() == jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) {
                 idx = i;
             }
         }
         int coins = Coins.count(p);
-        check(f, idx >= 0 && ShopService.sell(p, tools, idx, 99) == ShopService.Result.OK, "sell bone chips");
+        check(f, idx >= 0 && ShopService.sell(p, mats, idx, 99) == ShopService.Result.OK, "sell bone chips");
         check(f, Coins.count(p) == coins + 2 && p.getInventory().countItem(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) == 1,
                 "sold two lots, one chip left");
-        check(f, ShopService.sell(p, tools, idx, 1) == ShopService.Result.NO_MATERIALS, "cannot sell a partial lot");
+        check(f, ShopService.sell(p, mats, idx, 1) == ShopService.Result.NO_MATERIALS, "cannot sell a partial lot");
         ItemStack named = new ItemStack(Items.BONE, 8);
         named.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("keep"));
         check(f, !ShopService.plain(named), "named items are not sold");
@@ -330,6 +354,7 @@ public final class FacilitySelfTest {
             check(f, ledger.bought(black.id(), limited.id(), 10) == 0, "old days are forgotten");
         }
         p.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(p, jp.revati.skyabyss.facility.Coins.count(p));
     }
 
     // ---------------------------------------------------------------- 預かり所
@@ -372,16 +397,19 @@ public final class FacilitySelfTest {
             }
         }
         check(f, FacilityActions.rumorFor(p) != null, "rumor text");
-        // 修理
-        ItemStack sword = new ItemStack(Items.IRON_SWORD);
-        sword.setDamageValue(sword.getMaxDamage() / 2);
-        int cost = FacilityActions.repairCost(sword);
-        check(f, cost == 10, "repair cost half-worn = 10 (" + cost + ")");
-        check(f, FacilityActions.repairCost(new ItemStack(Items.IRON_SWORD)) == 0, "unworn costs nothing");
-        p.getInventory().clearContent();
-        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, sword);
-        check(f, !FacilityActions.repair(p) && sword.isDamaged(), "repair needs coins");
-        Coins.give(p, 10);
-        check(f, FacilityActions.repair(p) && !sword.isDamaged() && Coins.count(p) == 0, "repair takes coins and mends");
+    }
+
+    // 頭の上の名札 (entity.skyabyss.attendant.<役>) が日本語と英語にあるか (2026-11-01: 塔守と仕立て屋で抜けていた)。lang は名前空間ごとに分かれている
+    static void names(List<String> f) {
+        java.util.Map<String, String> ja = new java.util.HashMap<>();
+        java.util.Map<String, String> en = new java.util.HashMap<>();
+        for (String ns : new String[] {"skyabyss", "skyabyss_fac", "skyabyss_tower", "skyabyss_endgame"}) {
+            List<String> ignore = new java.util.ArrayList<>();
+            ja.putAll(jp.revati.skyabyss.item.GearCurveSelfTest.lang("/assets/" + ns + "/lang/ja_jp.json", ignore));
+            en.putAll(jp.revati.skyabyss.item.GearCurveSelfTest.lang("/assets/" + ns + "/lang/en_us.json", ignore));
+        }
+        for (AttendantRole r : AttendantRole.values()) {
+            check(f, ja.containsKey(r.nameKey()) && en.containsKey(r.nameKey()), "no head name for " + r.id + " (" + r.nameKey() + ")");
+        }
     }
 }

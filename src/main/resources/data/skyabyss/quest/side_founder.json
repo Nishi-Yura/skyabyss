@@ -1,0 +1,69 @@
+{
+  "category": "sub",
+  "chapter": "finale",
+  "order": 95,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "endings_seen",
+    "min": 3
+  },
+  "stages": [
+    {
+      "id": "verse",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "founder_verse"
+        }
+      ]
+    },
+    {
+      "id": "enter",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "enter",
+          "type": "signal",
+          "targets": [
+            "founder_enter"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "founder",
+      "xp": 200,
+      "objectives": [
+        {
+          "id": "founder",
+          "type": "signal",
+          "targets": [
+            "founder_down"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "founder_after"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 500,
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

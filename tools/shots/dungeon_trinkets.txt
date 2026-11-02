@@ -1,0 +1,84 @@
+# 地下のダンジョンの装飾品 4 品 (00 の 368〜371): 手に持った姿・体に付けた姿・持ち物欄の絵
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/dungeon_trinkets.txt -PshotsName=dungeon_trinkets
+world shots flat
+size 1280 720
+timeout 1800
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 40
+cmd skyabyss cinematic stop
+wait 20
+accequip
+cmd item replace entity @s weapon.mainhand with skyabyss:pit_jaw_pendant
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot pit_jaw_pendant_hand
+accequip
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_spiral_shell
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_spiral_shell_hand
+accequip
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_crystal_shard
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot storm_crystal_shard_hand
+accequip
+cmd item replace entity @s weapon.mainhand with skyabyss:mine_forge_ember
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot mine_forge_ember_hand
+cmd item replace entity @s weapon.mainhand with minecraft:air
+accequip pit_jaw_pendant tide_spiral_shell
+perspective front
+hud off
+bodyyaw 20
+wait 10
+chat clear
+shot worn_pit_jaw_pendant_tide_spiral_shell
+bodyyaw 200
+wait 10
+shot worn_pit_jaw_pendant_tide_spiral_shell_back
+cmd item replace entity @s weapon.mainhand with minecraft:air
+accequip storm_crystal_shard mine_forge_ember
+perspective front
+hud off
+bodyyaw 20
+wait 10
+chat clear
+shot worn_storm_crystal_shard_mine_forge_ember
+bodyyaw 200
+wait 10
+shot worn_storm_crystal_shard_mine_forge_ember_back
+accequip
+perspective first
+hud on
+cmd clear @s
+cmd give @s skyabyss:pit_jaw_pendant
+cmd give @s skyabyss:tide_spiral_shell
+cmd give @s skyabyss:storm_crystal_shard
+cmd give @s skyabyss:mine_forge_ember
+wait 10
+open inventory
+wait 20
+shot inventory

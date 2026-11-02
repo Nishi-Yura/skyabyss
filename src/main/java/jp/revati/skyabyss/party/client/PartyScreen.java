@@ -116,7 +116,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         PartyNetwork.Sync s = PartyClient.state();
-        g.drawCenteredString(font, title, width / 2, top - 2, GOLD);
+        g.drawString(font, title, left, top - 2, GOLD, false);
         // 物語
         Component next = s.nextTitan().isEmpty() ? Component.translatable("gui.skyabyss.party.story_done")
                 : s.nextTitan().equals("?shadow") ? Component.translatable("gui.skyabyss.party.story_next_shadow")
@@ -141,7 +141,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             if (frame > 0) {
                 jp.revati.skyabyss.client.rebirth.RebirthClient.drawFrame(g, left - 3, y - 3, 66, 13, m.rebirths());
             }
-            g.drawString(font, font.plainSubstrByWidth(line, 60), left, y, m.online() ? TEXT : 0x707070, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(line), left, y, 60, m.online() ? TEXT : 0x707070, false);
             if (m.online()) {
                 if (m.rebirths() > 0) {
                     long t = jp.revati.skyabyss.client.rebirth.RebirthClient.timeMs();
@@ -172,7 +172,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             if (oy + 16 < candPanel.y() || oy > candPanel.y() + CAND_H) {
                 continue;
             }
-            g.drawString(font, font.plainSubstrByWidth(others.get(i), 82), left + 180, oy, TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(others.get(i)), left + 180, oy, 82, TEXT, false);
         }
         candPanel.end(g);
         candPanel.drawBar(g, 0x30FFFFFF, 0x90F2C14E);
@@ -208,7 +208,11 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.fill(left - 8, top - 8, left + 328, top + 200, 0x90000000);
+        // ほかの画面 (順位の石・墓・記録) と同じ枠: 濃い板に、上と下の細い明るい線。仲間と招きの間に区切りの線 (2026-10-28 の点検)
+        g.fill(left - 8, top - 8, left + 328, top + 200, 0xC0101418);
+        g.fill(left - 7, top - 7, left + 327, top - 6, 0x60FFFFFF);
+        g.fill(left - 7, top + 198, left + 327, top + 199, 0x60FFFFFF);
+        g.fill(left, top + 84, left + 320, top + 85, 0x30E6B84A);
     }
 
     @Override

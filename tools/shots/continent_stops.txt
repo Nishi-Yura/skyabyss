@@ -1,0 +1,21 @@
+# 外れの一本道の休み場と祠 (continent_start の世界を使う)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_stops.txt -PshotsName=continent_start
+world continent_start continent
+size 1600 900
+timeout 600
+render 8
+guiscale 2
+wait 80
+cmd gamemode spectator
+hud off
+cmd time set 3000
+cmd weather clear
+cmd execute positioned -604 0 353 run tp @s ~-8 ~ ~-8 -45 40
+cmd tp @s -612 110 345 -45 40
+waitchunks 300
+wait 60
+shot stop_fire
+cmd tp @s -516 110 175 -45 40
+waitchunks 300
+wait 60
+shot stop_shrine

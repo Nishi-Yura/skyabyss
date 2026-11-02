@@ -136,7 +136,8 @@ public final class RebirthSelfTest {
     // ---------------------------------------------------------------- 称号
     private static void titles(List<String> f) {
         List<RebirthTitles.Title> all = RebirthTitles.all();
-        check(f, all.size() == 24 && all.size() <= RebirthTitles.MAX, "24 titles at first: " + all.size());
+        check(f, all.size() == 54 && all.size() <= RebirthTitles.MAX && RebirthTitles.MAX <= 64,
+                "54 titles (24 + the founder + the tower two + fame five + journal four + mastery six + codex six + fishing two + dungeons four): " + all.size());
         Set<String> ids = new HashSet<>();
         for (int i = 0; i < all.size(); i++) {
             check(f, all.get(i).index() == i, "title index order at " + i);
@@ -149,8 +150,8 @@ public final class RebirthSelfTest {
         long flawless = RebirthTitles.unlockedMask(new RebirthTitles.Facts(5, 3, 0, 0, 50_000, 0, 0));
         check(f, RebirthTitles.has(flawless, "flawless_1") && RebirthTitles.has(flawless, "flawless_3") && !RebirthTitles.has(flawless, "flawless_5")
                 && RebirthTitles.has(flawless, "almost_flawless") && RebirthTitles.has(flawless, "swift_1h") && !RebirthTitles.has(flawless, "swift_30m"), "feat titles");
-        long full = RebirthTitles.unlockedMask(new RebirthTitles.Facts(20, 9, 4, 60, 10_000, 0, 4));
-        check(f, Long.bitCount(full) == 24, "every title can be unlocked: " + Long.bitCount(full));
+        long full = RebirthTitles.unlockedMask(new RebirthTitles.Facts(20, 9, 4, 60, 10_000, 0, 4, true, 50));
+        check(f, Long.bitCount(full) == 27, "every title can be unlocked: " + Long.bitCount(full));
         long some = RebirthTitles.unlockedMask(new RebirthTitles.Facts(2, 0, 4, 12, -1, -1, 1));
         check(f, RebirthTitles.has(some, "titan_4") && RebirthTitles.has(some, "all_backs") && !RebirthTitles.has(some, "gold_backs") && RebirthTitles.has(some, "fallen_10")
                 && !RebirthTitles.has(some, "fallen_50") && RebirthTitles.has(some, "pulse_counted") && !RebirthTitles.has(some, "pulse_all"), "progress titles");

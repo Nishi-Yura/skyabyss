@@ -72,6 +72,11 @@ public final class StormKeeper {
         }
 
         @Override
+        protected void settle(ServerLevel level, StormWingEntity titan, jp.revati.skyabyss.world.continent.ContinentLairs.Lair lair) {
+            titan.settleAt(lair.x(), lair.base(), lair.z(), lair.yaw());
+        }
+
+        @Override
         protected void announce(ServerLevel level, StormWingEntity titan) {
             // 知らせない。最初の出会いは「遠くの嵐が、風に逆らって動いていた」と自分で気づく形にする
         }
@@ -104,6 +109,13 @@ public final class StormKeeper {
         KEEPER.tick(level);
         if (level.getGameTime() % 20 == 0) {
             tellLore(level);
+        }
+        // 大陸: 決まった居場所に出す (夜明けは待たない。前の巨神が止まっていれば)
+        if (KEEPER.lair(level) != null) {
+            if (level.getGameTime() % 200 == 0) {
+                KEEPER.appearAtLair(level, false);
+            }
+            return;
         }
         if (level.getGameTime() % 200 != 0 || level.getGameTime() < nextTry || KEEPER.slot(level).spawned) {
             return;

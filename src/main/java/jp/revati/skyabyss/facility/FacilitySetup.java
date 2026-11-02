@@ -83,7 +83,7 @@ public final class FacilitySetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(BELL_COIN.get());
         }
     }

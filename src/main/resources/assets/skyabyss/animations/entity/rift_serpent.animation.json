@@ -1,0 +1,349 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.rift_serpent.idle": {
+      "loop": true,
+      "animation_length": 5.0,
+      "bones": {
+        "seg1": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 0) * 3",
+            "math.sin(query.anim_time * 45 + 90) * 5",
+            "0"
+          ]
+        },
+        "seg2": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 60) * 5",
+            "math.sin(query.anim_time * 45 + 150) * 6",
+            "0"
+          ]
+        },
+        "seg3": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 120) * 6",
+            "math.sin(query.anim_time * 45 + 210) * 8",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 180) * 5",
+            "0",
+            "0"
+          ]
+        },
+        "jaw": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 0) * 3",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.rift_serpent.walk": {
+      "loop": true,
+      "animation_length": 5.0,
+      "bones": {
+        "seg1": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 0) * 3",
+            "math.sin(query.anim_time * 45 + 90) * 5",
+            "0"
+          ]
+        },
+        "seg2": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 60) * 5",
+            "math.sin(query.anim_time * 45 + 150) * 6",
+            "0"
+          ]
+        },
+        "seg3": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 120) * 6",
+            "math.sin(query.anim_time * 45 + 210) * 8",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "math.sin(query.anim_time * 60 + 180) * 5",
+            "0",
+            "0"
+          ]
+        },
+        "jaw": {
+          "rotation": [
+            "math.sin(query.anim_time * 90 + 0) * 3",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.rift_serpent.spit": {
+      "animation_length": 1.8,
+      "bones": {
+        "seg2": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -12,
+              0,
+              0
+            ],
+            "0.70": [
+              12,
+              0,
+              0
+            ],
+            "1.00": [
+              8,
+              0,
+              0
+            ],
+            "1.30": [
+              12,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "seg3": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -15,
+              0,
+              0
+            ],
+            "0.70": [
+              15,
+              0,
+              0
+            ],
+            "1.00": [
+              10,
+              0,
+              0
+            ],
+            "1.30": [
+              15,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "jaw": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              -25,
+              0,
+              0
+            ],
+            "0.70": [
+              -35,
+              0,
+              0
+            ],
+            "1.00": [
+              -20,
+              0,
+              0
+            ],
+            "1.30": [
+              -35,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.rift_serpent.sink": {
+      "animation_length": 0.8,
+      "bones": {
+        "seg1": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              -40,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              0,
+              -10,
+              0
+            ]
+          },
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "0.80": [
+              0.6,
+              0.3,
+              0.6
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.rift_serpent.rise": {
+      "animation_length": 0.4,
+      "bones": {
+        "seg1": {
+          "rotation": {
+            "0.00": [
+              -40,
+              0,
+              0
+            ],
+            "0.40": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              -10,
+              0
+            ],
+            "0.40": [
+              0,
+              0,
+              0
+            ]
+          },
+          "scale": {
+            "0.00": [
+              0.6,
+              0.3,
+              0.6
+            ],
+            "0.40": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      }
+    },
+    "animation.rift_serpent.hurt": {
+      "animation_length": 0.22,
+      "bones": {
+        "seg2": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.06": [
+              0,
+              0,
+              10
+            ],
+            "0.22": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.rift_serpent.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "seg1": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              -60,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              -12,
+              0
+            ]
+          },
+          "scale": {
+            "0.00": [
+              1,
+              1,
+              1
+            ],
+            "1.00": [
+              0.5,
+              0.2,
+              0.5
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

@@ -40,10 +40,98 @@ public enum WeaponKind {
             Map.entry("abyss_lamp_sword", GREATSWORD),
             Map.entry("abyss_sinking_anchor", HAMMER),
             Map.entry("abyss_pulse_dagger", FANG),
-            Map.entry("abyss_ash_scythe", AXE));
+            Map.entry("abyss_ash_scythe", AXE),
+            // 島の祠の始めの武器 (rpg/skill/JobChoice)
+            Map.entry("shrine_staff", POKER),
+            Map.entry("shrine_bell_staff", POKER),
+            Map.entry("shrine_dagger", FANG),
+            // 章の杖と鈴杖 (item/ChapterGear)
+            Map.entry("whale_staff", POKER), Map.entry("whale_bell_staff", POKER), Map.entry("tide_staff", POKER), Map.entry("tide_bell_staff", POKER),
+            Map.entry("storm_staff", POKER), Map.entry("storm_bell_staff", POKER), Map.entry("ember_staff", POKER), Map.entry("ember_censer", POKER),
+            // 職の章の武器と祠の始めの武器 (弓は WeaponClient が BowExtension で登録する)
+            Map.entry("whale_hammer", HAMMER), Map.entry("tide_hammer", HAMMER), Map.entry("storm_hammer", HAMMER), Map.entry("ember_greatsword", GREATSWORD),
+            Map.entry("ember_dagger", FANG), Map.entry("whale_dagger", FANG), Map.entry("tide_dagger", FANG), Map.entry("storm_sword", GREATSWORD), Map.entry("storm_dagger", FANG), Map.entry("shrine_sword", GREATSWORD), Map.entry("shrine_hammer", HAMMER),
+            // 伝説の武器と五章の武器 (abyss/LegendGear)
+            Map.entry("abyss_whale_hammer", HAMMER),
+            Map.entry("abyss_whale_staff", POKER),
+            Map.entry("abyss_whale_fang", FANG),
+            Map.entry("abyss_whale_bell_staff", POKER),
+            Map.entry("abyss_tide_sword", GREATSWORD),
+            Map.entry("abyss_tide_hammer", HAMMER),
+            Map.entry("abyss_tide_staff", POKER),
+            Map.entry("abyss_tide_dagger", FANG),
+            Map.entry("abyss_storm_sword", GREATSWORD),
+            Map.entry("abyss_storm_hammer", HAMMER),
+            Map.entry("abyss_storm_staff", POKER),
+            Map.entry("abyss_storm_dagger", FANG),
+            Map.entry("abyss_storm_bell_staff", POKER),
+            Map.entry("abyss_ember_sword", GREATSWORD),
+            Map.entry("abyss_ember_staff", POKER),
+            Map.entry("abyss_ember_dagger", FANG),
+            Map.entry("abyss_ember_bell_staff", POKER),
+            Map.entry("abyss_lamp_staff", POKER),
+            Map.entry("abyss_toll_bell_staff", POKER),
+            // 巨神のヒロイック武器 (item/HeroicGear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("whale_choir_hammer", HAMMER), Map.entry("whale_star_staff", POKER), Map.entry("whale_deep_bell_staff", POKER),
+            Map.entry("tide_reef_hammer", HAMMER), Map.entry("tide_pearl_staff", POKER), Map.entry("tide_surf_bell_staff", POKER),
+            Map.entry("storm_anvil_hammer", HAMMER), Map.entry("storm_cloud_staff", POKER), Map.entry("storm_thunder_bell_staff", POKER),
+            Map.entry("ember_cinder_blade", GREATSWORD), Map.entry("ember_ash_knife", FANG), Map.entry("ember_kiln_staff", POKER),
+            Map.entry("ember_censer_bell_staff", POKER),
+            // 市の採集の道具 (item/outfit。振りの動きは持たない。持ち方と描き方だけ)
+            Map.entry("gather_axe", AXE), Map.entry("gather_pickaxe", HAMMER), Map.entry("gather_shovel", HAMMER),
+            // イサナの祖父の風見鶏 (雷翼を指す道具。杖のように持つ)
+            Map.entry("weathercock", POKER),
+            // 六章「月」の武器 (story/ch6/gear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("moon_scale_hammer", HAMMER), Map.entry("moon_tide_staff", POKER), Map.entry("moon_crescent_dagger", FANG),
+            Map.entry("moon_starlight_bell_staff", POKER), Map.entry("moon_waning_blade", GREATSWORD),
+            Map.entry("moon_light_sword", GREATSWORD), Map.entry("moon_full_hammer", HAMMER), Map.entry("moon_new_staff", POKER),
+            Map.entry("moon_umbra_dagger", FANG), Map.entry("moon_halo_bell_staff", POKER),
+            // 終章の神器 (story/finale/gear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("divine_sky_sword", GREATSWORD), Map.entry("divine_bell_hammer", HAMMER), Map.entry("divine_dawn_staff", POKER),
+            Map.entry("divine_rewind_dagger", FANG), Map.entry("divine_promise_bell_staff", POKER),
+            // 神器の二本目 (story/finale/gear)
+            Map.entry("divine_warden_blade", GREATSWORD), Map.entry("divine_ash_hammer", HAMMER), Map.entry("divine_eyelid_staff", POKER), Map.entry("divine_moth_dagger", FANG), Map.entry("divine_keeper_bell_staff", POKER),
+            // あいだの塔の武器 (tower/gear。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("tower_balance_sword", GREATSWORD), Map.entry("tower_pull_hammer", HAMMER), Map.entry("tower_moon_staff", POKER),
+            Map.entry("tower_sigil_dagger", FANG), Map.entry("tower_clap_bell_staff", POKER));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
-        return BY_ITEM.entrySet();
+        java.util.List<Map.Entry<String, WeaponKind>> all = new java.util.ArrayList<>(BY_ITEM.entrySet());
+        all.addAll(WILD.entrySet());
+        return all;
+    }
+
+    public static WeaponKind of(String path) {
+        WeaponKind k = BY_ITEM.get(path);
+        return k != null || !path.startsWith("wild_") ? k : WILD.get(path);
+    }
+
+    // 野の装備 (item/wild/WildGearTable の種類から。弓は WeaponClient が BowExtension で登録する)
+    private static final Map<String, WeaponKind> WILD = wild();
+
+    private static Map<String, WeaponKind> wild() {
+        Map<String, WeaponKind> m = new java.util.HashMap<>();
+        for (jp.revati.skyabyss.item.wild.WildGearTypes.Weapon w : jp.revati.skyabyss.item.wild.WildGearTable.WEAPONS) {
+            WeaponKind k = wildKind(w.kind());
+            if (k != null) {
+                m.put(w.id(), k);
+            }
+        }
+        return m;
+    }
+
+    public static WeaponKind wildKind(String kind) {
+        return switch (kind) {
+            case "sword", "greatsword" -> GREATSWORD;
+            case "spear" -> PIKE;
+            case "glaive" -> GLAIVE;
+            case "hammer", "maul", "mace" -> HAMMER;
+            case "axe" -> AXE;
+            case "dagger", "fang" -> FANG;
+            case "claw" -> CLAW;
+            case "staff", "bell", "totem", "censer" -> POKER;
+            default -> null;
+        };
     }
 
     public static WeaponKind of(ItemStack stack) {
@@ -51,6 +139,6 @@ public enum WeaponKind {
             return null;
         }
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return "skyabyss".equals(id.getNamespace()) ? BY_ITEM.get(id.getPath()) : null;
+        return "skyabyss".equals(id.getNamespace()) ? of(id.getPath()) : null;
     }
 }

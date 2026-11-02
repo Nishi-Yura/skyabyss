@@ -36,6 +36,7 @@ import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.raid.RaidRewards;
+import jp.revati.skyabyss.util.PlayerMaps;
 import jp.revati.skyabyss.util.Players;
 
 // 巨神の順路 (docs/design/32 の 2 章): 歩 → 智 → 闘 → 中ボス → 心臓。どれも体の外の閉じた部屋 (巨神の中は建てない。32 の 2.5)
@@ -563,7 +564,7 @@ public final class TrialRoute {
 
     // 開発用: 環境変数 SKYABYSS_ROUTE_TRACE があると、入口の箱の判断 (待つ・断る・始める) が変わるたびに記録へ書く (R6 の撮影で、始まらない理由を見る)
     private static final boolean TRACE = System.getenv("SKYABYSS_ROUTE_TRACE") != null;
-    private static final Map<UUID, String> TRACE_LAST = new HashMap<>();
+    private static final Map<UUID, String> TRACE_LAST = PlayerMaps.track(new HashMap<>());
 
     private static void trace(UUID group, String titan, String what) {
         if (TRACE && !what.equals(TRACE_LAST.put(group, what))) {
@@ -864,6 +865,24 @@ public final class TrialRoute {
             if (p != null && best) {
                 Notice.hint(p, "message.skyabyss.route.best", String.format("%d:%02d", t / 20 / 60, t / 20 % 60));
             }
+        }
+        // ワールドの踏破の記録 (巨神ごと・人数の部ごとの最速 10 件とギルドの週の数。docs/design/10 の 7.2)
+        List<ServerPlayer> online = new ArrayList<>();
+        for (UUID id : party(r)) {
+            ServerPlayer p = back.getServer().getPlayerList().getPlayer(id);
+            if (p != null) {
+                online.add(p);
+            }
+        }
+        int rank = jp.revati.skyabyss.facility.guild.TitanRunData.get(back.getServer()).record(back.getServer(), titan, t, online, back.getGameTime());
+        if (rank > 0) {
+            for (ServerPlayer p : online) {
+                Notice.gain(p, "message.skyabyss.runs.ranked", rank, jp.revati.skyabyss.facility.guild.TitanRunData.clock(t));
+            }
+        }
+        // 頼みの目的「踏破の時間」(run)。仲間は全員が同じ回の時間で数える
+        for (ServerPlayer p : online) {
+            jp.revati.skyabyss.quest.Quests.onRun(p, titan, t);
         }
         TrialSlot.release(back, r);
     }

@@ -29,6 +29,8 @@ public final class RaidRooms {
 
     private static final Map<String, Map<Slot, List<Entry>>> BY_TITAN = new LinkedHashMap<>();
     private static final Map<String, Entry> BY_ID = new HashMap<>();
+    // 自己テスト用: 枠の引きを決める (巨神 + ":" + 枠 → 部屋の id)。空なら引く
+    public static final Map<String, String> DEV_DRAW = new HashMap<>();
     private static boolean booted;
 
     private static void ensure() {
@@ -39,7 +41,10 @@ public final class RaidRooms {
     }
 
     // 登録する。同じ巨神・枠に複数登録すると、周ごとに一つ引く (drawOf。枠ごと 2 案)。同じ id は上書き。試練の定義 (TrialCatalog) にも原型として入る
-    public static void register(String titan, Slot slot, String id, Supplier<RaidRoom> factory) {
+    public static void register(String titan, Slot slot, String id, Supplier<RaidRoom> raw) {
+        // 闘の部屋は、波のあと中ボスが部屋に現れる (docs/design/32 の 9.5、00 の 277)
+        Supplier<RaidRoom> factory = slot == Slot.FIGHT && jp.revati.skyabyss.trial.raid.mid.MidRooms.idOf(titan) != null
+                ? () -> new jp.revati.skyabyss.trial.raid.mid.FightBossRoom(titan, raw.get()) : raw;
         Entry e = new Entry(id, factory);
         List<Entry> list = BY_TITAN.computeIfAbsent(titan, k -> new EnumMap<>(Slot.class)).computeIfAbsent(slot, k -> new ArrayList<>());
         list.removeIf(x -> x.id().equals(id));
@@ -102,6 +107,10 @@ public final class RaidRooms {
         List<String> ids = idsOf(titan, slot);
         if (ids.isEmpty()) {
             return null;
+        }
+        String forced = DEV_DRAW.get(titan + ":" + slot.name());
+        if (forced != null && ids.contains(forced)) {
+            return forced;
         }
         long z = seed ^ (slot.ordinal() * 0x9E3779B97F4A7C15L);
         z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;

@@ -27,6 +27,8 @@ public class MountShopScreen extends Screen {
 
     private MountNetwork.View view;
     private int x0, y0, w, h;
+    // 見た目の一覧の先頭の行 (見た目が 10 になり、枠に入りきらないのでホイールで送る)
+    private int scroll;
     private MountEntity preview;
 
     public MountShopScreen(MountNetwork.View view) {
@@ -44,6 +46,16 @@ public class MountShopScreen extends Screen {
         h = Math.min(236, height - 8);
         x0 = (width - w) / 2;
         y0 = (height - h) / 2;
+        // 今の見た目が見える所から
+        scroll = Math.max(0, Math.min(maxScroll(), view.chosen() - visibleRows() + 1));
+    }
+
+    private int visibleRows() {
+        return Math.max(3, Math.min(MountLook.values().length, (y0 + h - 18 - lookY()) / LOOK_H));
+    }
+
+    private int maxScroll() {
+        return Math.max(0, MountLook.values().length - visibleRows());
     }
 
     @Override
@@ -88,7 +100,7 @@ public class MountShopScreen extends Screen {
     }
 
     private int whistleY() {
-        return statY() + 3 * STAT_H + 4;
+        return statY() + MountStats.KEYS.length * STAT_H + 4;
     }
 
     @Override
@@ -107,10 +119,19 @@ public class MountShopScreen extends Screen {
         int lx = x0 + 10;
         int lw = leftW();
         g.drawString(font, Component.translatable("gui.skyabyss.mount.looks"), lx, y0 + 28, FacilityUi.TEAL, false);
-        FacilityUi.well(g, lx, lookY(), lw, MountLook.values().length * LOOK_H);
+        int rows = visibleRows();
+        FacilityUi.well(g, lx, lookY(), lw, rows * LOOK_H);
+        // 上と下にまだあるときの印
+        if (scroll > 0) {
+            g.drawString(font, "▲", lx + lw - 10, y0 + 28, FacilityUi.TEAL, false);
+        }
+        if (scroll < maxScroll()) {
+            g.drawString(font, "▼", lx + lw - 10, lookY() + rows * LOOK_H + 2, FacilityUi.TEAL, false);
+        }
         MountLook hoverLook = null;
-        for (MountLook look : MountLook.values()) {
-            int ry = lookY() + look.ordinal() * LOOK_H;
+        for (int i = 0; i < rows && scroll + i < MountLook.values().length; i++) {
+            MountLook look = MountLook.values()[scroll + i];
+            int ry = lookY() + i * LOOK_H;
             boolean hover = mouseX >= lx && mouseX < lx + lw && mouseY >= ry && mouseY < ry + LOOK_H;
             boolean chosen = view.owns(look) && view.chosen() == look.ordinal();
             if (chosen) {
@@ -135,8 +156,8 @@ public class MountShopScreen extends Screen {
         TextClip.line(g, font, Component.translatable(shown.nameKey()), rx + 4, y0 + 38, rw - 8, FacilityUi.TEXT, false);
         TextClip.line(g, font, Component.translatable(shown.nameKey() + ".desc"), rx + 4, y0 + 34 + previewH() - 11, rw - 8, FacilityUi.DIM, false);
 
-        // 性能の段
-        for (int k = 0; k < 3; k++) {
+        // 性能の段 (速さ・跳び。体力は段がない)
+        for (int k = 0; k < MountStats.KEYS.length; k++) {
             statRow(g, font, k, rx, statY() + k * STAT_H, rw, mouseX, mouseY);
         }
         // 笛
@@ -163,7 +184,7 @@ public class MountShopScreen extends Screen {
             sub = Component.translatable("gui.skyabyss.mount.owned");
             subColor = FacilityUi.TEAL;
         } else if (locked) {
-            sub = Component.translatable("gui.skyabyss.mount.locked", look.chapter - 1);
+            sub = Component.translatable(look.lockedKey("gui.skyabyss.mount.locked"), look.chapter - 1);
             subColor = FacilityUi.DIM;
         } else {
             sub = Component.translatable("gui.skyabyss.mount.for_sale");
@@ -182,15 +203,15 @@ public class MountShopScreen extends Screen {
 
     private void statRow(GuiGraphics g, Font font, int kind, int x, int y, int rw, int mx, int my) {
         int tier = view.tier(kind);
-        boolean maxed = tier >= MountStats.TIERS;
+        boolean maxed = tier >= MountStats.tiers(kind);
         g.drawString(font, Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]), x, y + 5, FacilityUi.TEXT, false);
         int px = x + 36;
-        for (int i = 0; i < MountStats.TIERS; i++) {
+        for (int i = 0; i < MountStats.tiers(kind); i++) {
             int bx = px + i * 9;
             g.fill(bx, y + 5, bx + 7, y + 12, i < tier ? FacilityUi.GOLD : 0xFF2A2F38);
             g.renderOutline(bx, y + 5, 7, 7, FacilityUi.LINE);
         }
-        int bw = rw - 36 - MountStats.TIERS * 9 - 4;
+        int bw = rw - 36 - MountStats.MAX_TIERS * 9 - 4;
         int bx = x + rw - bw;
         if (maxed) {
             TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.max"), bx + 2, y + 5, bw - 2, FacilityUi.TEAL, false);
@@ -224,12 +245,23 @@ public class MountShopScreen extends Screen {
     }
 
     @Override
+    public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        int lx = x0 + 10;
+        if (mx >= lx && mx < lx + leftW() && my >= lookY() && my < lookY() + visibleRows() * LOOK_H && sy != 0) {
+            scroll = Math.max(0, Math.min(maxScroll(), scroll - (int) Math.signum(sy)));
+            return true;
+        }
+        return super.mouseScrolled(mx, my, sx, sy);
+    }
+
+    @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
             int lx = x0 + 10;
             int lw = leftW();
-            if (mx >= lx && mx < lx + lw && my >= lookY() && my < lookY() + MountLook.values().length * LOOK_H) {
-                MountLook look = MountLook.values()[(int) ((my - lookY()) / LOOK_H)];
+            int index = scroll + (int) ((my - lookY()) / LOOK_H);
+            if (mx >= lx && mx < lx + lw && my >= lookY() && my < lookY() + visibleRows() * LOOK_H && index < MountLook.values().length) {
+                MountLook look = MountLook.values()[index];
                 if (view.owns(look)) {
                     if (view.chosen() != look.ordinal()) {
                         send(MountNetwork.CHOOSE_LOOK, look.ordinal());
@@ -241,9 +273,9 @@ public class MountShopScreen extends Screen {
             }
             int rx = rightX();
             int rw = rightW();
-            for (int k = 0; k < 3; k++) {
+            for (int k = 0; k < MountStats.KEYS.length; k++) {
                 int sy = statY() + k * STAT_H;
-                if (mx >= rx && mx < rx + rw && my >= sy && my < sy + STAT_H - 2 && view.tier(k) < MountStats.TIERS) {
+                if (mx >= rx && mx < rx + rw && my >= sy && my < sy + STAT_H - 2 && view.tier(k) < MountStats.tiers(k)) {
                     send(MountNetwork.BUY_TIER, k);
                     return true;
                 }

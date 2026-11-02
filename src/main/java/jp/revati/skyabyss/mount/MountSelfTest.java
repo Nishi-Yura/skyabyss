@@ -32,7 +32,9 @@ public final class MountSelfTest {
     }
 
     private static BlockPos base(ServerLevel level) {
-        return level.getSharedSpawnPos().offset(512, 0, 512);
+        // 世界の真ん中の側へ 512 (大陸の世界は出現地点が南西の島なので、外へ向けると世界の縁の外に出る)
+        BlockPos spawn = level.getSharedSpawnPos();
+        return spawn.offset(spawn.getX() > 0 ? -512 : 512, 0, spawn.getZ() > 0 ? -512 : 512);
     }
 
     private static void load(MinecraftServer server) {
@@ -96,15 +98,28 @@ public final class MountSelfTest {
             check(f, look.seat > 0.8 && look.seat < 2.6 && look.legPitch <= 0 && look.legSpread >= 0, "seat and rider legs " + look.id);
         }
         check(f, resource(a + "textures/item/mount_whistle.png") && resource(a + "models/item/mount_whistle.json"), "whistle item");
-        check(f, resource(a + "textures/gui/npc_marker/fac_stable_keeper.png"), "stable keeper icon");
-        check(f, resource("/data/skyabyss/dialogue/attendant_stable_keeper.json"), "stable keeper dialogue");
-        check(f, MountLook.values().length == 7 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
-        for (int k = 0; k < 3; k++) {
-            for (int t = 2; t <= MountStats.TIERS; t++) {
+        // 乗り物の店は旅の番 (止まり木の番。2026-11-01 に厩舎の番をまとめた)
+        check(f, resource(a + "textures/gui/npc_marker/fac_perch_keeper.png"), "travel keeper icon");
+        check(f, resource("/data/skyabyss/dialogue/attendant_perch_keeper.json"), "travel keeper dialogue");
+        check(f, MountLook.values().length == 10 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
+        // 2026-11-02 の三つ: 五章・六章・終章のあと。飛ぶのは空鱏だけ
+        check(f, MountLook.ABYSS_GECKO.chapter == 6 && MountLook.STAR_LYNX.chapter == 7 && MountLook.SKY_RAY.chapter == 8, "new looks unlock in chapters 5, 6 and after the finale");
+        int flyers = 0;
+        for (MountLook l : MountLook.values()) {
+            flyers += l.flies() ? 1 : 0;
+            check(f, resource(a + "geo/entity/mount_" + l.id + "_lowpoly.geo.json") && resource(a + "animations/entity/mount_" + l.id + ".animation.json"), "model and animations of " + l.id);
+        }
+        check(f, flyers == 1 && MountLook.SKY_RAY.flies(), "only the sky ray flies");
+        check(f, MountLook.SKY_RAY.lockedKey("gui.skyabyss.mount.locked").equals("gui.skyabyss.mount.locked.ch8") && MountLook.EMBER_FOX.lockedKey("x").equals("x"), "locked labels per chapter");
+        for (int k = 0; k < MountStats.KEYS.length; k++) {
+            for (int t = 2; t <= MountStats.tiers(k); t++) {
                 check(f, MountStats.price(k, t) > MountStats.price(k, t - 1), "price rises per tier " + k + "/" + t);
             }
         }
-        check(f, MountStats.speed(5) > MountStats.speed(0) && MountStats.jump(5) > MountStats.jump(0) && MountStats.health(5) > MountStats.health(0), "stats rise");
+        check(f, MountStats.speed(MountStats.tiers(MountStats.SPEED)) > MountStats.speed(5) && MountStats.speed(5) > MountStats.speed(0)
+                && MountStats.jump(5) > MountStats.jump(0), "stats rise (speed beyond the old tier 5)");
+        // 体力は段がない (店に並ばない)。前の段の返す額は値段の合計
+        check(f, MountStats.KEYS.length == 2 && MountStats.healthRefund(5) == 18 + 36 + 60 + 95 + 150 && MountStats.healthRefund(0) == 0, "no health tiers; refund of old ones");
     }
 
     private static void shop(List<String> f, FakePlayer p) {
@@ -121,6 +136,8 @@ public final class MountSelfTest {
         // 章の壁
         MountService.setChapterOverride(1);
         check(f, MountService.buyLook(p, MountLook.WHALE_CALF) == MountService.Result.LOCKED && !d.owns(MountLook.WHALE_CALF), "look locked before its chapter");
+        MountService.setChapterOverride(7);
+        check(f, MountService.buyLook(p, MountLook.SKY_RAY) == MountService.Result.LOCKED && !d.owns(MountLook.SKY_RAY), "the sky ray waits for the finale");
         MountService.setChapterOverride(2);
         int before = Coins.count(p);
         check(f, MountService.buyLook(p, MountLook.WHALE_CALF) == MountService.Result.OK, "buy look after its chapter");
@@ -129,9 +146,9 @@ public final class MountSelfTest {
         check(f, MountService.chooseLook(p, MountLook.SHELL_TORTOISE) == MountService.Result.NOT_OWNED, "cannot choose an unowned look");
         check(f, MountService.chooseLook(p, MountLook.HORN_BEAST) == MountService.Result.OK && d.chosen() == MountLook.HORN_BEAST, "choose owned look");
         // 段を最大まで。どの見た目でも同じ段
-        for (int k = 0; k < 3; k++) {
-            while (d.tier(k) < MountStats.TIERS) {
-                Coins.give(p, 400);
+        for (int k = 0; k < MountStats.KEYS.length; k++) {
+            while (d.tier(k) < MountStats.tiers(k)) {
+                Coins.give(p, 700);
                 check(f, MountService.buyTier(p, k) == MountService.Result.OK, "buy tier " + k + "/" + (d.tier(k) + 1));
             }
             check(f, MountService.buyTier(p, k) == MountService.Result.MAXED, "tier " + k + " maxed");
@@ -147,7 +164,16 @@ public final class MountSelfTest {
         check(f, !MountService.isOpen(p), "shop closes");
         // 笛
         check(f, MountService.giveWhistle(p) && MountService.hasWhistle(p) && !MountService.giveWhistle(p), "whistle given once");
-        d.setTier(MountStats.SPEED, MountStats.TIERS);
+        d.setTier(MountStats.SPEED, MountStats.tiers(MountStats.SPEED));
+        // 前の版で買った体力の段は、入ったときに鐘銭で返す (upgrade/PlayerUpgrade の段 2)
+        d.setTier(MountStats.HEALTH, 3);
+        p.getPersistentData().putInt(jp.revati.skyabyss.upgrade.PlayerUpgrade.KEY, 1);
+        int coins = Coins.count(p);
+        jp.revati.skyabyss.upgrade.PlayerUpgrade.run(p);
+        check(f, d.tier(MountStats.HEALTH) == 0 && Coins.count(p) == coins + MountStats.healthRefund(3), "old health tiers refunded once");
+        jp.revati.skyabyss.upgrade.PlayerUpgrade.run(p);
+        check(f, Coins.count(p) == coins + MountStats.healthRefund(3), "refund not paid twice");
+        Coins.take(p, Coins.count(p));
     }
 
     // FakePlayer.startRiding は常に false。乗り物の欄を直接書いて本物の人と同じに乗れるようにする
@@ -195,9 +221,9 @@ public final class MountSelfTest {
         }
         check(f, m.isAlive() && MountService.active(p) == m && p.getUUID().equals(m.owner()), "summoned and tracked");
         check(f, m.look() == MountLook.WHALE_CALF, "look applied");
-        check(f, Math.abs(m.getAttributeValue(Attributes.MOVEMENT_SPEED) - MountStats.speed(MountStats.TIERS)) < 1e-6, "speed applied");
-        check(f, Math.abs(m.getAttributeValue(Attributes.JUMP_STRENGTH) - MountStats.jump(MountStats.TIERS)) < 1e-6, "jump applied");
-        check(f, Math.abs(m.getMaxHealth() - MountStats.health(MountStats.TIERS)) < 1e-6 && m.getHealth() >= m.getMaxHealth() - 0.01, "health applied and full");
+        check(f, Math.abs(m.getAttributeValue(Attributes.MOVEMENT_SPEED) - MountStats.speed(MountStats.tiers(MountStats.SPEED))) < 1e-6, "speed applied");
+        check(f, Math.abs(m.getAttributeValue(Attributes.JUMP_STRENGTH) - MountStats.jump(MountStats.tiers(MountStats.JUMP))) < 1e-6, "jump applied");
+        check(f, Math.abs(m.getMaxHealth() - MountStats.FIXED_HEALTH) < 1e-6 && m.getHealth() >= m.getMaxHealth() - 0.01, "fixed health and full");
         check(f, m.distanceToSqr(p) < 36, "called in front of the owner");
         check(f, !m.shouldBeSaved(), "mount is not saved in the world");
         check(f, m.isSaddled() && m.isTamed() && !m.causeFallDamage(30f, 1f, level.damageSources().fall()), "saddled, and no fall damage");
@@ -206,7 +232,7 @@ public final class MountSelfTest {
         d.setTier(MountStats.JUMP, 0);
         MountService.chooseLook(p, MountLook.HORN_BEAST);
         check(f, m.look() == MountLook.HORN_BEAST && Math.abs(m.getAttributeValue(Attributes.JUMP_STRENGTH) - MountStats.jump(0)) < 1e-6, "look and stats follow a change at once");
-        d.setTier(MountStats.JUMP, MountStats.TIERS);
+        d.setTier(MountStats.JUMP, MountStats.tiers(MountStats.JUMP));
         // 乗る (持ち主だけ)
         net.minecraft.world.InteractionResult ir = m.mobInteract(p, InteractionHand.MAIN_HAND);
         check(f, p.getVehicle() == m && m.getControllingPassenger() == p, "owner rides and steers");

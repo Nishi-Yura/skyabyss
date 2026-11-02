@@ -48,6 +48,9 @@ GLOWK = {"a": "lamp", "b": "lamp", "c": "void"}
 N = 12
 
 
+# 見せる絵の見出しの頭 (借りる側が替える。野の防具・塔の防具)
+HEAD = "淵潜りの鎧 v2"
+
 def E(bone, mat, c, r, segs=8, rings=2, rot=None):
     return tag(ellipsoid(bone, mat, c, r, segs=segs, rings=rings, rot=rot), bone)
 
@@ -734,7 +737,7 @@ def option_sheet(o, res, icons):
     S = Image.new("RGB", (W, H), BG)
     dr = ImageDraw.Draw(S)
     total = sum(r["tris"] for r in res.values())
-    dr.text((10, 8), f"淵潜りの鎧 v2  {NAMES[o]}   一式 {total} 面 (兜 {res['helmet']['tris']} / 胸と腕 {res['chestplate']['tris']} / 脚 {res['leggings']['tris']} / 靴 {res['boots']['tris']})",
+    dr.text((10, 8), f"{HEAD}  {NAMES[o]}   一式 {total} 面 (兜 {res['helmet']['tris']} / 胸と腕 {res['chestplate']['tris']} / 脚 {res['leggings']['tris']} / 靴 {res['boots']['tris']})",
             font=font(20), fill=(255, 232, 160))
     dr.text((10, 36), DESC[o], font=font(13), fill=(210, 206, 226))
     y = 60

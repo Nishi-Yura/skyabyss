@@ -48,7 +48,8 @@ public final class TitanClearing {
     // base = 体の底 (巨神の位置 y)。壊したブロック数を返す
     public static int carve(ServerLevel level, String volumeName, double x, double base, double z, float yaw) {
         TitanVolume volume = TitanVolume.get(volumeName);
-        if (volume == null || !TitanGround.enabled) {
+        // 大陸では体の下の地面を地形の生成で下げてあるので、ブロックを壊さない (world.continent.ContinentLairs)
+        if (volume == null || !TitanGround.enabled || jp.revati.skyabyss.world.continent.ContinentLairs.active(level)) {
             return 0;
         }
         double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD);

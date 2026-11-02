@@ -16,6 +16,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -32,7 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
-// 灰ひきずり (docs/design/21 の 6.1): 追いかけっこの相手 (敵意なし)。HP 20。灰を引きずって歩き、跡に灰の粒を残す。
+// 灰ひきずり: 追いかけっこの相手 (敵意なし)。HP 20。灰を引きずって歩き、跡に灰の粒を残す。
 //   人が 6 ブロックまで来ると丸まり (0.3 秒)、煤の窯の跡 (Ch4Ground.kilnNear。なければ人から離れる向き) へ転がって逃げる (速さ 1.6 倍)。
 //   人が 14 より離れて 3 秒で、丸まりをほどいて歩く。窯の跡の 4 ブロックまで転がり着くと、窯の口へ潜って消える (近くの人に一行。巣)。
 //   燠虫 (背中) の転がりの小さな予習。叩くと灰麻 50%・煤鉄 30%
@@ -66,6 +67,22 @@ public class AshDragger extends EmberMob {
 
     public boolean isBall() {
         return entityData.get(BALL);
+    }
+
+    // 声 (環境音・被弾・倒れる)。丸まる・転がる音は別 (DRAGGER_CURL / DRAGGER_ROLL)
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return Ch4Setup.DRAGGER_AMBIENT.get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return Ch4Setup.DRAGGER_HURT.get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return Ch4Setup.DRAGGER_DEATH.get();
     }
 
     @Override

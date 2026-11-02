@@ -23,7 +23,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 旅の地図 (docs/design/33 の 4 章) のクライアント側: キー (既定 M、設定で変えられる) で開き、サーバーに印を頼む。
+// 旅の地図のクライアント側: キー (既定 M、設定で変えられる) で開き、サーバーに印を頼む。
 // 開くのはすぐ (前に届いた印で描き、返事が来たら差し替える)。開いている間は 5 秒ごとに頼み直す (巨神は動くので)。
 // 巨神の子の海図 (TravelNetwork.Chart) も同じ画面で開く (TravelClient.openChart → openVoyage)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)

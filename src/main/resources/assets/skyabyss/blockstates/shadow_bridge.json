@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "solid=true,wide=false": {
+      "model": "skyabyss:block/shadow_bridge"
+    },
+    "solid=true,wide=true": {
+      "model": "skyabyss:block/shadow_bridge"
+    },
+    "solid=false,wide=false": {
+      "model": "skyabyss:block/shadow_bridge_faded"
+    },
+    "solid=false,wide=true": {
+      "model": "skyabyss:block/shadow_bridge_faded"
+    }
+  }
+}

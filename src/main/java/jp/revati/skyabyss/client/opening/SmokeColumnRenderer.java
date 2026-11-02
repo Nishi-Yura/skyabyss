@@ -27,7 +27,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-// 宿りの煙の柱 (docs/design/17 の 3.2節)。地形や木に隠れて「煙の立つ方」が見えない問題への答え。
+// 宿りの煙の柱。地形や木に隠れて「煙の立つ方」が見えない問題への答え。
 // サーバーが SiteNetwork で送る煙の位置 ("smoke") へ、クライアントだけで高さ約 100 ブロックの柱を描く (その場所のチャンクが読まれていなくてもよい)。
 //   根もとは濃く細く、昇るほど太く薄くなって、風に流れてたなびく。木のてっぺんや丘より高いので、葉の上に出る。
 //   深度は見る (手前の山や地面には隠れる) が、書き込まない。山に完全に隠れても、上の部分は稜線の上に出る。

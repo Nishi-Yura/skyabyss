@@ -58,13 +58,6 @@
       "mode": "all",
       "objectives": [
         {
-          "id": "sword",
-          "type": "collect",
-          "target": "minecraft:iron_sword",
-          "count": 1,
-          "party": false
-        },
-        {
           "id": "whet",
           "type": "signal",
           "target": "ch1_whetstone_used",

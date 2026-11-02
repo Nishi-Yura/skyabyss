@@ -9,14 +9,9 @@
       "id": "fetch",
       "objectives": [
         {
-          "id": "go",
-          "type": "visit",
-          "target": "minecraft:the_nether"
-        },
-        {
           "id": "cream",
           "type": "collect",
-          "target": "minecraft:magma_cream",
+          "target": "skyabyss:ember_drop",
           "count": 4
         }
       ]
@@ -37,7 +32,7 @@
     "xp": 350,
     "items": [
       {
-        "item": "minecraft:charcoal",
+        "item": "skyabyss:charcoal_lump",
         "count": 1,
         "name": "item.skyabyss.keepsake.warm_coal",
         "lore": [
@@ -45,8 +40,8 @@
         ]
       },
       {
-        "item": "minecraft:bread",
-        "count": 3
+        "item": "skyabyss:ash_baked_bread",
+        "count": 2
       }
     ],
     "affinity": {

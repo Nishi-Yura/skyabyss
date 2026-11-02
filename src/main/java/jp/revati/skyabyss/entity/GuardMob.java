@@ -93,6 +93,16 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
         }
     }
 
+    // 終わった姿で止める動作か (像になる・殻にこもるのような、戻す動作を別に流す構え。既定は倒れる動きだけ)
+    protected boolean holdsAction(String action) {
+        return false;
+    }
+
+    // 今は被弾の動きを流さないか (止めた構えの最中。被弾で構えが解けて見えないように)
+    protected boolean hurtAnimBlocked() {
+        return false;
+    }
+
     // その動作の間は被弾の動きで上書きしないか (既定は全部。鼓動もどきの「呼ぶ」のような、繰り返す飾りの動作は false にする)
     protected boolean guardsAgainstHurt(String action) {
         return true;
@@ -120,7 +130,7 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
         boolean hit = super.hurt(source, amount);
         // 構え・攻撃・盾の受けの途中 (動作を流してから 1.5 秒の内) は被弾の動きを流さない。予告の形を崩さない
-        if (hit && autoHurtDeath() && !level().isClientSide && isAlive() && hasAction("hurt") && tickCount - lastActionTick > 30) {
+        if (hit && autoHurtDeath() && !level().isClientSide && isAlive() && hasAction("hurt") && tickCount - lastActionTick > 30 && !hurtAnimBlocked()) {
             playAction("hurt");
         }
         return hit;
@@ -273,9 +283,9 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
         }));
         AnimationController<GuardMob> action = new AnimationController<>(this, "action", 0, state -> PlayState.STOP);
         for (String name : actions) {
-            // 倒れる動きは、終わった姿で止める (消えるまで元の姿に戻らない)
+            // 倒れる動き (と holdsAction の動き) は、終わった姿で止める (次の動作を流すまで元の姿に戻らない)
             String id = "animation." + animPrefix + "." + name;
-            action.triggerableAnim(name, name.equals("death") ? RawAnimation.begin().thenPlayAndHold(id) : RawAnimation.begin().thenPlay(id));
+            action.triggerableAnim(name, name.equals("death") || holdsAction(name) ? RawAnimation.begin().thenPlayAndHold(id) : RawAnimation.begin().thenPlay(id));
         }
         controllers.add(action);
         controllers.add(new AnimationController<>(this, "boss", 3, this::bossState).setAnimationSpeedHandler(m -> m.bossSpeed()));

@@ -1,0 +1,191 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.bell_hermit",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 6,
+    "visible_bounds_height": 5,
+    "visible_bounds_offset": [
+     0,
+     1.6666666666666667,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      12.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -8.693,
+        7.0,
+        -12.761
+       ],
+       "size": [
+        17.387,
+        14.0,
+        13.523
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "shell",
+     "pivot": [
+      0.0,
+      18.0,
+      4.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -14.672,
+        6.0,
+        -4.0
+       ],
+       "size": [
+        29.345,
+        31.2,
+        20.0
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "claw_r",
+     "pivot": [
+      -7.0,
+      12.0,
+      -10.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        4.4,
+        6.0,
+        -32.264
+       ],
+       "size": [
+        11.2,
+        11.0,
+        24.234
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "claw_l",
+     "pivot": [
+      7.0,
+      12.0,
+      -10.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -11.08,
+        7.8,
+        -22.72
+       ],
+       "size": [
+        5.893,
+        5.11,
+        14.262
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_l",
+     "pivot": [
+      8.0,
+      12.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -18.475,
+        0.478,
+        -8.572
+       ],
+       "size": [
+        12.137,
+        15.433,
+        14.032
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_r",
+     "pivot": [
+      -8.0,
+      12.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        6.465,
+        0.477,
+        -8.567
+       ],
+       "size": [
+        12.123,
+        15.473,
+        14.354
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

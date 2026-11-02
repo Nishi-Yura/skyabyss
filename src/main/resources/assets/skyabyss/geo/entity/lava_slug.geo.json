@@ -1,0 +1,110 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.lava_slug",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 3,
+    "visible_bounds_height": 3,
+    "visible_bounds_offset": [
+     0,
+     1.0,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      4.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -6.0,
+        0.0,
+        -9.0
+       ],
+       "size": [
+        12.0,
+        9.2,
+        13.0
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      5.0,
+      -9.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -5.2,
+        0.4,
+        -14.68
+       ],
+       "size": [
+        10.4,
+        11.6,
+        6.68
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "tail",
+     "pivot": [
+      0.0,
+      4.0,
+      6.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -5.6,
+        0.0,
+        3.0
+       ],
+       "size": [
+        11.2,
+        8.8,
+        10.0
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

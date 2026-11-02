@@ -21,6 +21,9 @@ import net.minecraft.server.level.ServerPlayer;
 //   巨神ごと: 出会ったか・心臓を止めたか、順路を越えた回数と最速、試練ごと (見たか・済んだ回数・任意の目標・出会った修飾の数)
 //   称号の数。画面は client/facility/RecordsScreen。読むだけ (見ても「見た」の印は付けない)
 public final class KeepRecords {
+    // 本丸の奥の頁 (35 の 6.4): 心臓を二つ止めた人に老兵が一度だけ渡す破れた頁の出どころ。読むと chapter1/keep_prev_page が書に移る
+    public static final String PAGE_SOURCE = "keep_page";
+
     private KeepRecords() {
     }
 

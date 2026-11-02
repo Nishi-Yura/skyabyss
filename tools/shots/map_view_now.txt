@@ -1,0 +1,43 @@
+# 旅の地図と三人称の今の見え方 (2026-11-02 の声「マップが見にくい」「3人称視点をオリジナルに、戦いやすく」の前)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/map_view_now.txt -PshotsName=load_probe
+world load_probe continent
+size 1600 900
+timeout 900
+guiscale 2
+render 10
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode survival
+cmd skyabyss dev opening at shelter 0 0 0 4 180 5
+waitchunks 600
+wait 60
+open travel_map
+wait 40
+mapscale 300
+wait 20
+shot map_300
+mapscale 1200
+wait 20
+shot map_1200
+mapscale 2400
+wait 20
+shot map_2400
+mapscale 4800
+wait 20
+shot map_4800
+close
+wait 10
+hud on
+cmd effect give @s minecraft:resistance infinite 4 true
+cmd skyabyss dungeon mouth bone_pit
+waitchunks 300
+wait 40
+perspective back
+cmd summon skyabyss:pit_digger ~ ~ ~6
+wait 40
+shot third_vanilla
+perspective first
+wait 10
+shot first_vanilla

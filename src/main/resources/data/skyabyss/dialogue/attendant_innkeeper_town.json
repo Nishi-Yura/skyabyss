@@ -10,10 +10,18 @@
           "goto": "town_sea",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/ch2_bard",
-            "is": "active",
-            "stage": "listen"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/ch2_bard",
+                "is": "active",
+                "stage": "listen"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         },
         {
@@ -21,10 +29,18 @@
           "goto": "town_child",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/ch3_thunder",
-            "is": "active",
-            "stage": "inn"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/ch3_thunder",
+                "is": "active",
+                "stage": "inn"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         },
         {
@@ -32,8 +48,16 @@
           "goto": "town_accepted",
           "kind": "quest",
           "if": {
-            "type": "flag",
-            "flag": "town_offer"
+            "type": "all",
+            "of": [
+              {
+                "type": "flag",
+                "flag": "town_offer"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           },
           "do": [
             {
@@ -47,8 +71,16 @@
           "goto": "town_declined",
           "kind": "talk",
           "if": {
-            "type": "flag",
-            "flag": "town_offer"
+            "type": "all",
+            "of": [
+              {
+                "type": "flag",
+                "flag": "town_offer"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           },
           "do": [
             {

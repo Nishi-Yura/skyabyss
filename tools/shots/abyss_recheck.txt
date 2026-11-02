@@ -1,0 +1,145 @@
+# 深淵の見直しの確かめ (空が見えた 2 か所と灰の迷路。場面を止めてから撮る)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_recheck flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd effect give @s night_vision 99999 0 true
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd skyabyss abyss layer go escwait_salt_1 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 001_escwait_salt_1_180
+cmd skyabyss abyss layer go escwait_salt_1 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 002_escwait_salt_1_0
+cmd skyabyss abyss layer go escwait_salt_1 90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 003_escwait_salt_1_90
+cmd skyabyss abyss layer go escwait_salt_1 -90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 004_escwait_salt_1_-90
+cmd skyabyss abyss layer go escwait_ash_1 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 005_escwait_ash_1_180
+cmd skyabyss abyss layer go escwait_ash_1 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 006_escwait_ash_1_0
+cmd skyabyss abyss layer go escwait_ash_1 90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 007_escwait_ash_1_90
+cmd skyabyss abyss layer go escwait_ash_1 -90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 008_escwait_ash_1_-90
+cmd skyabyss abyss layer go maze_ash_a 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 009_maze_ash_a_180
+cmd skyabyss abyss layer go maze_ash_a 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 010_maze_ash_a_0
+cmd skyabyss abyss layer go maze_ash_a 90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 011_maze_ash_a_90
+cmd skyabyss abyss layer go maze_ash_a -90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 012_maze_ash_a_-90
+cmd skyabyss abyss layer go maze_ash_b 180
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 013_maze_ash_b_180
+cmd skyabyss abyss layer go maze_ash_b 0
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 014_maze_ash_b_0
+cmd skyabyss abyss layer go maze_ash_b 90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 015_maze_ash_b_90
+cmd skyabyss abyss layer go maze_ash_b -90
+wait 5
+cmd skyabyss cinematic stop
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s ~ ~0.2 ~ ~ 12
+wait 30
+shot 016_maze_ash_b_-90

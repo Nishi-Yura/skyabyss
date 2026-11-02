@@ -8,7 +8,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.story.Chapters;
 
-// 章ごとの経験値の予算 (docs/design/21 の 1.5 の表)。章の小要素は 1 章あたり「そのときの 1 レベル分の 1〜1.5 倍」までに抑え、上限を超えさせない。
+// 章ごとの経験値の予算。章の小要素は 1 章あたり「そのときの 1 レベル分の 1〜1.5 倍」までに抑え、上限を超えさせない。
 //   章 n (一〜四章)   1 レベル分 / 既存の小要素 / 新しい分の上限 / 合計の上限
 //   一章               480 / 350 / +400 / 750
 //   二章               850 / 500 / +600 / 1,100
@@ -26,7 +26,7 @@ public final class ChapterXpBudget {
     public static final double MAX_RATIO = 1.6;
 
     // 「既存の小要素」に数え済みのクエスト (新しい分に数えない)
-    public static final Set<String> LEGACY = Set.of("ch1/day1_traces", "ch1/day1_firewood", "ch1/lost_traveller", "ch2/ebb_road", "ch2/shore_signs",
+    public static final Set<String> LEGACY = Set.of("ch1/lost_traveller", "ch2/ebb_road", "ch2/shore_signs",
             "ch3/sub_isana_wait", "ch3/sub_wind_marks", "ch4/fragments");
 
     private ChapterXpBudget() {

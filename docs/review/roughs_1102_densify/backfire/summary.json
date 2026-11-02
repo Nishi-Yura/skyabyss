@@ -1,0 +1,13 @@
+{
+ "id": "backfire",
+ "letter": "a",
+ "installed": 760,
+ "before": 628,
+ "before_closed": 760,
+ "after": 1312,
+ "after_closed": 1508,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

@@ -47,10 +47,10 @@
           "id": "wear",
           "type": "wear",
           "targets": [
-            "minecraft:iron_helmet",
-            "minecraft:iron_chestplate",
-            "minecraft:iron_leggings",
-            "minecraft:iron_boots"
+            "skyabyss:ironclad_helmet",
+            "skyabyss:ironclad_chestplate",
+            "skyabyss:ironclad_leggings",
+            "skyabyss:ironclad_boots"
           ]
         }
       ]

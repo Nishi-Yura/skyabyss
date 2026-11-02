@@ -58,10 +58,10 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 序盤の拍子 B0〜B10 (docs/design/17 の 3 章) を、人ごとに必ず起こす。判断は OpeningLogic、ここは世界と人への働きかけ。
+// 序盤の拍子 B0〜B10 を、人ごとに必ず起こす。判断は OpeningLogic、ここは世界と人への働きかけ。
 // 場所は OpeningSites から (まだ建っていない世界でも詰まらない)。最初の影・書・岩鯨の門・語り部の案内は OpeningBeats / SkyEvents /
 // TitanEvents の保証のまま、その上に積む。
-// ホラーの決まり (01、06、17 の 6 章): ジャンプスケアなし (音は 5 秒かけて消す・戻す)、ダメージ・拘束なし、戦闘中・体力が半分以下・
+// ホラーの決まり (01、06): ジャンプスケアなし (音は 5 秒かけて消す・戻す)、ダメージ・拘束なし、戦闘中・体力が半分以下・
 // 敵が 8 ブロック以内・水中・睡眠中は後ろへずらす、足音と歌は一度だけ、horrorEventFrequency 0 では起こさない、本人にだけ。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class OpeningDirector {
@@ -223,7 +223,7 @@ public final class OpeningDirector {
                 Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePassFor(player) != null);
     }
 
-    // 戦っている・傷が深い・敵が近い (17 の 6 章: 殺さない。拍子は後ろへずらす)
+    // 戦っている・傷が深い・敵が近い 殺さない。拍子は後ろへずらす)
     static boolean danger(ServerLevel level, ServerPlayer player) {
         int hurt = player.getLastHurtByMobTimestamp();
         int hit = player.getLastHurtMobTimestamp();
@@ -272,7 +272,10 @@ public final class OpeningDirector {
         long passEnd = Math.max(lastPassEnd, SkyEvents.personalEnd(player));
         boolean passEnded = passEnd >= 0 && st.awakeAt >= 0 && passEnd >= st.awakeAt && now >= passEnd
                 && now - passEnd <= OpeningLogic.PASS_END_WINDOW;
-        boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || NpcBonds.of(player).hasSubstance()
+        // はじまりの島でまだ渡っていない新しい人は、遊んでいた人と取り違えない (2026-10-29 の試遊。あとから入った人の開幕が飛んだ)
+        boolean islandNew = jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(player)
+                && jp.revati.skyabyss.progress.Progression.stage(player) == 0 && jp.revati.skyabyss.rpg.skill.JobChoice.chosen(player) == null;
+        boolean legacy = !st.fresh && !islandNew && (!lore.unlocked().isEmpty() || lore.bookGiven() || NpcBonds.of(player).hasSubstance()
                 || !QuestLog.of(player).quests().isEmpty()
                 // 巨神をすでに止めた人 (記録が消えていても、序盤は終えている。章の移行: chapter_per_titan_plan 2.3)
                 || jp.revati.skyabyss.progress.Progression.stage(player) > 0);
@@ -305,6 +308,25 @@ public final class OpeningDirector {
         String id = OpeningLogic.objective(st, facts, env);
         // 目印は人ごと・今の目的ごとに決める (宿りの鐘と鯨追いの焚き火を取り違えない)。目印が変わったら送り直す
         BlockPos target = target(level, id);
+        // 天と淵の大陸: はじまりの島にいるあいだ (渡し船に乗る前)、都の側を指す目的は船着き場を指す (帳面を拾う前の目的はそのまま)
+        if (!id.isEmpty() && !id.equals("examine_camp") && !jp.revati.skyabyss.world.continent.ContinentOutskirts.ferried(player)) {
+            // はじまりの島の谷の道 (足跡 → 峠の野盗 → 休み場 → 祠 → 渡し守。world/continent/IslandTrail)
+            Object[] island = jp.revati.skyabyss.world.continent.IslandTrail.objective(player);
+            BlockPos ferry = jp.revati.skyabyss.world.continent.ContinentOutskirts.ferryPos(level);
+            if (island != null) {
+                id = (String) island[0];
+                target = (BlockPos) island[1];
+            } else if (ferry != null) {
+                id = "take_ferry";
+                target = ferry;
+            }
+        }
+        // 天と淵の大陸: 鯨追いは鯨見の町の見張り台のそば (00 の 278)
+        if (id.equals("find_isana")) {
+            id = "find_isana_town";
+            BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
+            target = spot != null ? spot : jp.revati.skyabyss.world.continent.ContinentLayout.get().town("whale");
+        }
         long tl = target == null ? Long.MIN_VALUE : target.asLong();
         if (id.equals(st.sentObjective) && tl == st.sentTarget && now - st.sentAt < RESEND) {
             return;
@@ -326,15 +348,12 @@ public final class OpeningDirector {
             case "examine_camp" -> OpeningSites.notebook(server).or(() -> OpeningSites.camp(server)).orElse(null);
             case "follow_smoke" -> OpeningSites.smoke(server).or(() -> OpeningSites.shelter(server)).orElse(null);
             case "ask_storyteller" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).orElse(null);
-            // 鯨追いは宿りの鐘から 18〜34 ブロック離れた焚き火のそばにいる。鐘の位置ではなく、その焚き火 (まだ立っていなければ目印なし)
-            case "find_isana" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server))
-                    .map(bell -> NpcSpawner.chaserSpot(server.overworld(), bell)).orElse(null);
             case "bone_hill" -> OpeningSites.ribs(server).orElse(null);
             default -> null;
         };
     }
 
-    // ---------------------------------------------------------------- 骨の丘の前触れ (17 の 3.5節)
+    // ---------------------------------------------------------------- 骨の丘の前触れ
     // 丘が急に目の前に現れないように、イサナのあとで骨の丘へ近づくにつれて字幕を一度ずつ: 風のにおい (方角) → 遠い稜線の白 → 足もとの欠片 (低い地鳴り) → 風が止む
     static final double BONE_FAR = 220;
     static final double BONE_MID = 130;
@@ -376,13 +395,13 @@ public final class OpeningDirector {
         }
     }
 
-    // ---------------------------------------------------------------- 岩鯨 (17 の 3.9節)
+    // ---------------------------------------------------------------- 岩鯨
     // 岩鯨を迎えられる人 (影・歌・イサナを済ませた人) がオーバーワールドにいるか
     public static boolean anyoneReady(ServerLevel level) {
         return readyPlayer(level) != null;
     }
 
-    // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (34 の 4.2。仲間が済ませていてもよい)
+    // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (仲間が済ませていてもよい)
     @Nullable
     public static ServerPlayer readyPlayer(ServerLevel level) {
         return pick(level, true);
@@ -411,7 +430,7 @@ public final class OpeningDirector {
         return any;
     }
 
-    // 見る者を、最初の二晩は出さない (足音と歌を邪魔しないため。17 の 3.8節)
+    // 見る者を、最初の二晩は出さない (足音と歌を邪魔しないため)
     public static boolean quietNight(ServerLevel level, ServerPlayer player) {
         OpeningState st = state(player);
         if (st.legacy() || st.awakeAt() < 0) {
@@ -434,7 +453,7 @@ public final class OpeningDirector {
     }
 
     // ---------------------------------------------------------------- 章の小要素 (story/ch1) 向けの窓口 (追加のみ)
-    // 目覚め・足音・歌の画面の演出の最中か。小さな異変などを重ねないために (「一度に一つ」。17 の 1.2)
+    // 目覚め・足音・歌の画面の演出の最中か。小さな異変などを重ねないために (「一度に一つ」)
     public static boolean cueBusy(ServerPlayer player) {
         OpeningState st = state(player);
         return st.cueUntil > player.level().getGameTime() || FREEZE.getOrDefault(player.getUUID(), -1L) > player.level().getGameTime();
@@ -453,6 +472,21 @@ public final class OpeningDirector {
         }
     }
 
+    // 目を覚ます: まぶたの開く合図と、開幕のカメラの場面 (36 秒。スキップできる)。最初の目的 (煙の立つ方) へ向きを合わせて、その向きで操作へ戻す。
+    // docs/design/20_cinematics.md。開幕の語りのあと (StoryReels.onDone)
+    static void wakeUp(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        state(player).cueUntil = level.getGameTime() + 300;
+        PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_AWAKE, level.getGameTime(), 0f));
+        BlockPos goal = target(level, "follow_smoke");
+        jp.revati.skyabyss.cinematic.Cinematics.start(player, jp.revati.skyabyss.cinematic.Scenes.OPENING, null,
+                goal == null ? null : Vec3.atBottomCenterOf(goal));
+    }
+
+    static {
+        jp.revati.skyabyss.story.reel.StoryReels.onDone(jp.revati.skyabyss.story.reel.StoryReels.OPENING, OpeningDirector::wakeUp);
+    }
+
     // ---------------------------------------------------------------- 本物の働きかけ
     static final class Live implements Fx {
         private final ServerLevel level;
@@ -467,12 +501,8 @@ public final class OpeningDirector {
 
         @Override
         public void awake() {
-            st.cueUntil = level.getGameTime() + 300;
-            PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_AWAKE, level.getGameTime(), 0f));
-            // 開幕はカメラの場面 (36 秒。スキップできる)。最初の目的 (煙の立つ方) へ向きを合わせて、その向きで操作へ戻す。docs/design/20_cinematics.md
-            BlockPos goal = target(level, "follow_smoke");
-            jp.revati.skyabyss.cinematic.Cinematics.start(player, jp.revati.skyabyss.cinematic.Scenes.OPENING, null,
-                    goal == null ? null : Vec3.atBottomCenterOf(goal));
+            // 目を覚ます前に、開幕の語り (ドット絵の紙芝居) を流す。見終わる (飛ばす) と wakeUp が走る。流さない場合はすぐ wakeUp
+            jp.revati.skyabyss.story.reel.StoryReels.play(player, jp.revati.skyabyss.story.reel.StoryReels.OPENING);
         }
 
         @Override
@@ -540,11 +570,8 @@ public final class OpeningDirector {
                 giveShadowPage();
                 return;
             }
-            Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-            if (look.lengthSqr() < 1.0e-4) {
-                look = new Vec3(0, 0, 1);
-            }
-            Vec3 at = player.position().add(look.normalize().scale(2.0)).add(0, 4.0, 0);
+            // その人の頭の上から落とす (目線の先だとブロックの奥に落ちて拾えないことがあった。2026-10-27 の声)
+            Vec3 at = player.position().add(0, 3.0, 0);
             BlockPos head = BlockPos.containing(at);
             while (head.getY() > player.getBlockY() + 1 && !level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {
                 head = head.below();

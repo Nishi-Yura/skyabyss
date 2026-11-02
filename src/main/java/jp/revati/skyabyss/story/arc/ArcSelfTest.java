@@ -370,7 +370,8 @@ public final class ArcSelfTest {
         // 中身のない章 (序章・五章以降) に空の段はない。一〜四章は、各章の担当が本物の段を登録している (本物の登録はこのテストのあとで元に戻す)
         for (Chapters c : Chapters.values()) {
             // 巨神編の各章の担当 (二章 = TideChapter、三章 = StormForeshadow、四章 = EmberChapter など) が自分の段を登録している。そこは別に確かめる
-            if (!c.titanChapter()) {
+            // 五章 (深淵) の空は「近づく月」が月を寄せる (story/ch5/MoonNear)。中身のある章になった
+            if (!c.titanChapter() && c != Chapters.ABYSS) {
                 check(f, ChapterSky.stage(c).equals(ChapterSky.Stage.NONE), "no sky stage should be registered for a chapter without content: " + c);
             }
         }

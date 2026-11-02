@@ -1,9 +1,9 @@
 # 村の NPC ラフ (語り部・鯨追い)
 
-生成: `python tools/rough/npc.py` (採用書き出しは `--install`)。各案は `<id>/<a|b|c>/` に geo.json と texture.png。
+生成の道具 `tools/rough/npc.py` は消した (依存の `mobs_small_v2` が無く、走らなかった)。今の geo が正本。残っている各案は `<id>/<a|b|c>/` に geo.json と texture.png。
 
 片付け (2026-10-17): 採用が決まったので、比較シート 2 枚 (`storyteller_roughs.png`・`whale_chaser_roughs.png`) とこの表だけ残し、各案の素材・`faces.png`・`ui_mock.png`・`report.txt` は消した。スクリプトを動かせば作り直せる。
-画面の見本: `python tools/rough/npc_ui_mock.py` → `ui_mock.png`。
+画面の見本: `python tools/rough/npc_ui_mock.py` → `ui_mock.png` (道具は残す)。
 
 ## 経緯
 

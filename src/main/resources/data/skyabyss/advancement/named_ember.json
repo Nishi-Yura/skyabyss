@@ -1,0 +1,34 @@
+{
+  "parent": "skyabyss:named_any",
+  "display": {
+    "icon": {
+      "id": "skyabyss:ash_lizard_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.named_ember.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.named_ember.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "named:ember"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_25"
+  }
+}

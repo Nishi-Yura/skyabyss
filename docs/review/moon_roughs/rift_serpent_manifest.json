@@ -1,0 +1,16 @@
+{
+ "id": "moon_rift_serpent",
+ "short": "逆さ砂の蛇",
+ "kind": "下弦の淵の敵 一品一案 (46 の 4.6)",
+ "title": "逆さ砂の蛇 (rift_serpent) — 割れた砂時計からこぼれた月の砂の蛇・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/rift_serpent.png"
+ ],
+ "extra": "月の言葉 (月の砂・銀・硝子・星の光)。骨 7 本。 三角形 1138 (目安 中の敵 800〜1300)。埋まった部品: shard1-bodyseg1:0.5, shard5-pile:0.75, shard5-spill:0.56, bandseg1-bodyseg1:0.52, bandseg2-bodyseg2:0.45。生成: tools/rough/lowpoly/moon/rift_serpent.py。三段の姿: 二段目 = 上の玉も割れて砂が両方から立つ。三段目 = 胴が二本になる。",
+ "options": {
+  "a": {
+   "name": "砂時計の蛇 (1138 三角形)",
+   "desc": "横に倒れて埋もれた銀の砂時計の割れた玉から、光る月の砂の胴が立ち上がる。三日月の顎と銀の角、星の目、浮く硝子の欠片。"
+  }
+ }
+}

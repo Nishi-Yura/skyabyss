@@ -1,0 +1,27 @@
+# 見どころの発見の札
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/poi_discovery.txt -PshotsName=poi_discovery
+world continent_discovery3 continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 5000
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+cmd tp @s -560 120 -244
+waitchunks 300
+wait 300
+cmd gamemode adventure
+cmd skyabyss dev grounds mark poi 30 pos
+wait 50
+shot discovery
+wait 30
+shot discovery2
+wait 40
+open travel_map
+wait 60
+shot map_after

@@ -33,6 +33,8 @@ final class DepthData extends SavedData {
     final Map<UUID, Integer> playerBest = new HashMap<>();
     final Map<UUID, Integer> groupMile = new HashMap<>();
     final Map<UUID, Integer> playerMile = new HashMap<>();
+    // 記録したときの名前 (組は顔ぶれ「A・B」、人は名前)。組が解けても順位の石に名前を出すため
+    final Map<UUID, String> names = new HashMap<>();
 
     static DepthData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -60,6 +62,14 @@ final class DepthData extends SavedData {
         read(tag.getCompound("PlayerBest"), d.playerBest);
         read(tag.getCompound("GroupMile"), d.groupMile);
         read(tag.getCompound("PlayerMile"), d.playerMile);
+        CompoundTag ns = tag.getCompound("Names");
+        for (String k : ns.getAllKeys()) {
+            try {
+                d.names.put(UUID.fromString(k), ns.getString(k));
+            } catch (IllegalArgumentException ignored) {
+                // 壊れた鍵は捨てる
+            }
+        }
         return d;
     }
 
@@ -81,6 +91,9 @@ final class DepthData extends SavedData {
         tag.put("PlayerBest", write(playerBest));
         tag.put("GroupMile", write(groupMile));
         tag.put("PlayerMile", write(playerMile));
+        CompoundTag ns = new CompoundTag();
+        names.forEach((k, v) -> ns.putString(k.toString(), v));
+        tag.put("Names", ns);
         return tag;
     }
 

@@ -118,7 +118,7 @@ public final class CampSelfTest {
     }
 
     private static void run(MinecraftServer server, ServerLevel back, FakePlayer owner, FakePlayer stranger, List<String> f) {
-        List<BlockPos> spots = goodSpots(back, owner, 12, Blocks.CRAFTING_TABLE.defaultBlockState());
+        List<BlockPos> spots = goodSpots(back, owner, 12, Blocks.BARREL.defaultBlockState());
         if (spots.size() < 12) {
             f.add("could not find 12 free floor spots on the arrival pad (" + spots.size() + ")");
             return;
@@ -154,11 +154,11 @@ public final class CampSelfTest {
         owner.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
 
         // 2. 野営の道具は、ふつうの床に置ける
-        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CRAFTING_TABLE, 1));
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BARREL, 1));
         place(back, owner, InteractionHand.MAIN_HAND, s0);
-        if (!back.getBlockState(s0).is(Blocks.CRAFTING_TABLE) || CampBlocks.at(server, back.dimension(), s0) == null
+        if (!back.getBlockState(s0).is(Blocks.BARREL) || CampBlocks.at(server, back.dimension(), s0) == null
                 || !owner.getMainHandItem().isEmpty()) {
-            f.add("a crafting table could not be placed on a normal floor (block " + back.getBlockState(s0) + ")");
+            f.add("a barrel could not be placed on a normal floor (block " + back.getBlockState(s0) + ")");
         }
         // 道具の上には積めない (足場にしない)
         BlockPos stacked = s0.above();
@@ -179,10 +179,10 @@ public final class CampSelfTest {
         } else {
             back.setBlock(lever, Blocks.LEVER.defaultBlockState().setValue(net.minecraft.world.level.block.LeverBlock.FACE,
                     net.minecraft.world.level.block.state.properties.AttachFace.FLOOR), 2);
-            owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FURNACE, 1));
+            owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CAMPFIRE, 1));
             place(back, owner, InteractionHand.MAIN_HAND, nearGate);
             if (!back.getBlockState(nearGate).isAir() || owner.getMainHandItem().getCount() != 1) {
-                f.add("a furnace was placed within 2 blocks of a lever or vanished (" + back.getBlockState(nearGate) + ")");
+                f.add("a campfire was placed within 2 blocks of a lever or vanished (" + back.getBlockState(nearGate) + ")");
             }
             back.setBlock(lever, Blocks.AIR.defaultBlockState(), 2);
             back.setBlock(nearGate, Blocks.AIR.defaultBlockState(), 2);
@@ -190,11 +190,11 @@ public final class CampSelfTest {
         // 戦いの部屋の中 (心臓の間・区画のレイドの部屋と中ボスの間) では置けない
         net.minecraft.world.phys.Vec3 hc = jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(jp.revati.skyabyss.progress.Titans.STONE_WHALE).getCenter();
         BlockPos arena = BlockPos.containing(hc.x, FLOOR + 1, hc.z);
-        if (CampBlocks.evaluate(owner, back, arena, Blocks.CRAFTING_TABLE.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
+        if (CampBlocks.evaluate(owner, back, arena, Blocks.BARREL.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
             f.add("the heart arena did not refuse a camp block");
         }
         BlockPos room = jp.revati.skyabyss.trial.TrialSlot.frame(1).at(new BlockPos(0, FLOOR + 1, 0));
-        if (CampBlocks.evaluate(owner, back, room, Blocks.CRAFTING_TABLE.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
+        if (CampBlocks.evaluate(owner, back, room, Blocks.BARREL.defaultBlockState()) != CampBlocks.Refusal.ARENA) {
             f.add("a raid room cell did not refuse a camp block");
         }
 
@@ -255,15 +255,15 @@ public final class CampSelfTest {
         if (back.getBlockEntity(chest2) instanceof ChestBlockEntity c2) {
             c2.setItem(2, new ItemStack(Items.GOLD_INGOT, 9));
         }
-        int tableBefore = total(owner, Items.CRAFTING_TABLE);
+        int barrelBefore = total(owner, Items.BARREL);
         int placed = CampBlocks.count(server, owner.getUUID(), back.dimension());
         int returned = CampBlocks.returnAll(server, owner.getUUID(), owner, back.dimension());
         if (returned != placed || CampBlocks.count(server, owner.getUUID(), back.dimension()) != 0) {
             f.add("leaving returned " + returned + " of " + placed + " camp blocks");
         }
-        if (total(owner, Items.CRAFTING_TABLE) != tableBefore + 1 || total(owner, Items.GOLD_INGOT) != 9
+        if (total(owner, Items.BARREL) != barrelBefore + 1 || total(owner, Items.GOLD_INGOT) != 9
                 || total(owner, Items.CHEST) != chests + 2) {
-            f.add("leaving did not return items and chest contents (table " + total(owner, Items.CRAFTING_TABLE) + ", gold "
+            f.add("leaving did not return items and chest contents (barrel " + total(owner, Items.BARREL) + ", gold "
                     + total(owner, Items.GOLD_INGOT) + ")");
         }
         for (BlockPos p : spots.subList(0, 10)) {

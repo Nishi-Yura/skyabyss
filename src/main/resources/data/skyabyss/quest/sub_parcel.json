@@ -30,7 +30,7 @@
     "xp": 50,
     "items": [
       {
-        "item": "minecraft:bone",
+        "item": "skyabyss:bone_chip",
         "count": 1,
         "name": "item.skyabyss.keepsake.whalebone_clasp",
         "lore": [

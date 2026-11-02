@@ -1,0 +1,137 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.horn_beetle",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 3,
+    "visible_bounds_height": 3,
+    "visible_bounds_offset": [
+     0,
+     1.0,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      7.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -8.0,
+        4.0,
+        -9.804
+       ],
+       "size": [
+        16.0,
+        11.4,
+        19.804
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      9.0,
+      -7.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -2.72,
+        5.0,
+        -20.425
+       ],
+       "size": [
+        5.441,
+        18.574,
+        14.242
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_l",
+     "pivot": [
+      5.0,
+      5.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -11.206,
+        0.319,
+        -6.217
+       ],
+       "size": [
+        6.878,
+        7.246,
+        11.924
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "legs_r",
+     "pivot": [
+      -5.0,
+      5.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        4.328,
+        0.319,
+        -6.217
+       ],
+       "size": [
+        6.878,
+        7.246,
+        11.924
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

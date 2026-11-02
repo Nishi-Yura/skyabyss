@@ -3,7 +3,7 @@
 - 文書番号: 29
 - 範囲: 巨神の背の試練を、周回ごとにどう引くか。段・修飾・稀さ・種・読める札・深淵・図鑑・報い。
 - 状態: 引き方と修飾は実装済み（`trial/TrialDraw`・`trial/TrialData`・`abyss/Abyss`）。順路の中身（部屋・中ボス・心臓）は [32 巨神の順路](32_titan_raid_route.md)。
-- 関連: [32](32_titan_raid_route.md)（順路・部屋・区画）、[26](26_backs_scale_up.md)（背の作り）、[21](21_content_expansion.md)（初回の延長・誓い）、[27](27_builds_and_classes.md)、[31](31_freedom_and_rebirth.md)（深淵の入口）
+- 関連: [32](32_titan_raid_route.md)（順路・部屋・区画）、[26](26_backs_scale_up.md)（背の作り）、21（初回の延長・誓い）、[27](27_builds_and_classes.md)、[31](31_freedom_and_rebirth.md)（深淵の入口）
 
 ---
 

@@ -69,10 +69,6 @@
       "face": "neutral",
       "do": [
         {
-          "type": "unlock_recipes",
-          "chapter": 2
-        },
-        {
           "type": "flag",
           "flag": "ch2p_taught"
         }

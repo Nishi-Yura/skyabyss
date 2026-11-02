@@ -15,8 +15,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 // 看板の各行が、実際に描かれる幅に収まるかを測る。バニラの看板は 1 行 90 px (SignBlockEntity の最大幅) を超えると、はみ出た分が描かれない。
-// サーバーには Font がないので、字の幅の表で測る (自己テスト用)。バニラの字と mod の字 (DotGothic16) の広いほうで見る。
-// クライアントでは本物の Font.width でも確かめる (SignFitClient)。
+// サーバーには Font がないので、バニラの字の幅の表で測る (自己テスト用)。クライアントでは本物の Font.width でも確かめる (SignFitClient)。
 //  - ASCII: バニラの ascii.png の字の幅 + 1 (字の間)。空白は 4
 //  - かな・漢字・全角記号: unifont の幅の上書き (left 0, right 15) で、どれも 9
 //  - そのほかの字: 9 とみなす (unifont の半角は 9 より狭いので、多めに見積もる)
@@ -32,23 +31,12 @@ public final class SignFit {
     private SignFit() {
     }
 
-    // 字の幅の表で見積もった、描かれる幅 (px)。バニラの字と mod の字 (DotGothic16。半角 4・全角 8) の広いほう
+    // 字の幅の表で見積もった、描かれる幅 (px)
     public static int approxWidth(String text) {
-        return Math.max(vanillaWidth(text), pixelFontWidth(text));
+        return vanillaWidth(text);
     }
 
-    // mod の字のパック (DotGothic16 を 16 px で点にした字。tools/gen/ui/gen_fonts.py) の幅: 半角はどれも 4、それ以外は 8
-    static int pixelFontWidth(String text) {
-        int w = 0;
-        for (int i = 0; i < text.length(); ) {
-            int cp = text.codePointAt(i);
-            i += Character.charCount(cp);
-            w += cp < 0x2000 || (cp >= 0xFF61 && cp <= 0xFF9F) ? 4 : 8;
-        }
-        return w;
-    }
-
-    // バニラの字 (字のパックを外した人) の幅
+    // バニラの字の幅
     static int vanillaWidth(String text) {
         int w = 0;
         for (int i = 0; i < text.length(); ) {
@@ -106,8 +94,8 @@ public final class SignFit {
     public static synchronized Map<String, String> lang(String language) {
         return CACHE.computeIfAbsent(language, l -> {
             Map<String, String> map = new HashMap<>();
-            // 潮殻の背の文は skyabyss_tide、雷翼の背の文は skyabyss_storm、余燼の背の文は skyabyss_ember、一章の地上 (骨の坑の碑) は skyabyss_ch1、深みの王の階の手記は skyabyss_abyss_dp の lang にある (同じ "sign.skyabyss." のキー)
-            for (String ns : List.of(SkyAbyss.MODID, SkyAbyss.MODID + "_tide", SkyAbyss.MODID + "_storm", SkyAbyss.MODID + "_ember", SkyAbyss.MODID + "_opening", SkyAbyss.MODID + "_trial", SkyAbyss.MODID + "_ch1", SkyAbyss.MODID + "_ch2", SkyAbyss.MODID + "_ch3", SkyAbyss.MODID + "_ch4", SkyAbyss.MODID + "_abyss_dp")) {
+            // 潮殻の背の文は skyabyss_tide、雷翼の背の文は skyabyss_storm、余燼の背の文は skyabyss_ember、一章の地上 (骨の坑の碑) は skyabyss_ch1、深みの王の階の手記は skyabyss_abyss_dp の lang にある (同じ "sign.skyabyss." のキー)。施設の浮く名札 (label.skyabyss.facility.*) は skyabyss_guard、地下のダンジョンの碑と品の文は skyabyss_dungeon
+            for (String ns : List.of(SkyAbyss.MODID, SkyAbyss.MODID + "_tide", SkyAbyss.MODID + "_storm", SkyAbyss.MODID + "_ember", SkyAbyss.MODID + "_opening", SkyAbyss.MODID + "_trial", SkyAbyss.MODID + "_ch1", SkyAbyss.MODID + "_ch2", SkyAbyss.MODID + "_ch3", SkyAbyss.MODID + "_ch4", SkyAbyss.MODID + "_abyss_dp", SkyAbyss.MODID + "_ch3mob", SkyAbyss.MODID + "_guard", SkyAbyss.MODID + "_dungeon")) {
                 String path = "/assets/" + ns + "/lang/" + l + ".json";
                 try (InputStream in = SignFit.class.getResourceAsStream(path)) {
                     if (in == null) {

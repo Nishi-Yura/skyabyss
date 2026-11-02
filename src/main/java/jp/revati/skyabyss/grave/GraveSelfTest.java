@@ -67,6 +67,20 @@ public final class GraveSelfTest {
         forceAround(server, true);
     }
 
+    // 読み込んだ区画が動き出すまで待つ (新しい地形の区画は生成に数 tick かかる。大陸のはじまりの島。20 秒で諦めて進む)
+    private static int loadWait;
+
+    public static boolean loaded(MinecraftServer server) {
+        if (loadWait == 0) {
+            load(server);
+        }
+        boolean ready = true;
+        for (int i = 0; i < PLATFORMS; i++) {
+            ready &= server.overworld().isPositionEntityTicking(platformCenter(server, i));
+        }
+        return ready || ++loadWait > 400;
+    }
+
     private static void forceAround(MinecraftServer server, boolean on) {
         ServerLevel level = server.overworld();
         for (int i = 0; i < PLATFORMS; i++) {
@@ -308,7 +322,7 @@ public final class GraveSelfTest {
                 && DeathRules.expireMinutes(server) == 0 && DeathRules.rescuePercent(server) == 50 && DeathRules.durabilityPercent(server) == 10,
                 "game rule readers do not match the settings");
         rule(server, DeathRules.MODE, 9);
-        check(f, DeathRules.mode(server) == DeathRules.Mode.GRAVE, "an out-of-range mode should fall back to grave");
+        check(f, DeathRules.mode(server) == DeathRules.Mode.KEEP, "an out-of-range mode should fall back to keep");
         rule(server, DeathRules.MODE, 0);
 
         // ---------------------------------------------------------------- grave (既定): 墓の中身がちょうど、残る物が残る

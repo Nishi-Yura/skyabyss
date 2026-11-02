@@ -69,11 +69,12 @@ def main():
             # 撮影のあいだは歩かせない (AI を止める。種ごとの動きの tick は残る)
             lines.append("cmd data merge entity @e[type=skyabyss:%s,limit=1,sort=nearest] {NoAI:1b}" % kind)
             lines.append("wait 30")
-            # 近寄る: 正面は湧いた所 (cx+0.5) の 1.6 ブロック手前、横は cz+1.8 から北を向く
-            lines.append("cmd tp @s %d %d %d 270 4" % (cx - 1, y, cz))
+            # 近寄る: 敵の今いる所から測る (湧いた所から動いていても、大きさが違っても同じ写り。2026-10-28)。正面は前 2.6、横は右 2.6
+            sel = "@e[type=skyabyss:%s,limit=1,sort=nearest]" % kind
+            lines.append("cmd execute at %s run tp @s ^ ^0.6 ^2.6 facing entity %s eyes" % (sel, sel))
             lines.append("wait 10")
             lines.append("shot %s_s%d_front" % (kind, stage))
-            lines.append("cmd tp @s %d %d %d 180 4" % (cx, y, cz + 2))
+            lines.append("cmd execute at %s run tp @s ^2.6 ^0.6 ^ facing entity %s eyes" % (sel, sel))
             lines.append("wait 10")
             lines.append("shot %s_s%d_side" % (kind, stage))
             lines.append("cmd kill @e[type=skyabyss:%s,distance=..30]" % kind)

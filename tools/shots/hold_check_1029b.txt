@@ -1,0 +1,160 @@
+world hold_1029
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier common
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 2
+shot gather_axe_fpSwing2
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 2
+shot gather_axe_tpSwing2
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 4
+shot gather_axe_fpSwing4
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 4
+shot gather_axe_tpSwing4
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 7
+shot gather_axe_fpSwing7
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 7
+shot gather_axe_tpSwing7
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 2
+shot shrine_dagger_fpSwing2
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 2
+shot shrine_dagger_tpSwing2
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 4
+shot shrine_dagger_fpSwing4
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 4
+shot shrine_dagger_tpSwing4
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 7
+shot shrine_dagger_fpSwing7
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 7
+shot shrine_dagger_tpSwing7
+cmd item replace entity @s weapon.mainhand with minecraft:iron_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 2
+shot iron_axe_fpSwing2
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 2
+shot iron_axe_tpSwing2
+cmd item replace entity @s weapon.mainhand with minecraft:iron_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 4
+shot iron_axe_fpSwing4
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 4
+shot iron_axe_tpSwing4
+cmd item replace entity @s weapon.mainhand with minecraft:iron_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+wait 30
+swing
+wait 7
+shot iron_axe_fpSwing7
+perspective front
+bodyyaw 90
+hud off
+wait 30
+swing
+wait 7
+shot iron_axe_tpSwing7

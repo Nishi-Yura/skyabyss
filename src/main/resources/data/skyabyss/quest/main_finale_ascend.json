@@ -1,0 +1,58 @@
+{
+  "category": "main",
+  "chapter": "finale",
+  "order": 90,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon_core",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "verse",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "fin_verse"
+        }
+      ]
+    },
+    {
+      "id": "ascend",
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "gate",
+          "type": "signal",
+          "targets": [
+            "cloudsea_arrive"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "bell",
+      "objectives": [
+        {
+          "id": "bell",
+          "type": "signal",
+          "targets": [
+            "finale_gate"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "affinity": {
+      "skyabyss:storyteller": 3
+    }
+  }
+}

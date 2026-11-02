@@ -1,0 +1,90 @@
+# 2026-10-28 のクオリティ点検: 開ける画面を全部 (GUI 3)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/audit_screens.txt -PshotsName=audit_screens
+world audit_screens_all3 flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+camera 0 -60 0 0 10
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 80
+cmd skyabyss quest start @s main_song
+cmd skyabyss quest start @s "ch1/trail_iron"
+wait 40
+open inventory
+wait 25
+shot ui_inventory
+close
+wait 5
+open travel_map
+wait 25
+shot ui_travel_map
+close
+wait 5
+open lore
+wait 25
+shot ui_lore
+close
+wait 5
+open quests
+wait 25
+shot ui_quests
+close
+wait 5
+open growth
+wait 25
+shot ui_growth
+close
+wait 5
+open skills
+wait 25
+shot ui_skills
+close
+wait 5
+open calling
+wait 25
+shot ui_calling
+close
+wait 5
+open job_choice
+wait 25
+shot ui_job_choice
+close
+wait 5
+open party
+wait 25
+shot ui_party
+close
+wait 5
+open rebirth
+wait 25
+shot ui_rebirth
+close
+wait 5
+open notices
+wait 25
+shot ui_notices
+close
+wait 5
+open grave
+wait 25
+shot ui_grave
+close
+wait 5
+open pouchwheel_9
+wait 25
+shot ui_pouchwheel_9
+close
+wait 5
+open wheel
+wait 25
+shot ui_wheel
+close
+wait 5

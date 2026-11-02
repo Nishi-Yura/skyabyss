@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "pressed=false": {
+      "model": "skyabyss:block/echo_plate"
+    },
+    "pressed=true": {
+      "model": "skyabyss:block/echo_plate_pressed"
+    }
+  }
+}

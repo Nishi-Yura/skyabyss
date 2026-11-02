@@ -1,0 +1,52 @@
+# はじまりの島の物語の流れ (2026-10-26): 開幕の場面 → 峠の柵 (閉じて・開いて) → 渡し守 → 渡りの場面 → 都を見上げる場面
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_story.txt -PshotsName=island_story
+world opening_island_story continent
+size 1600 900
+timeout 3000
+render 12
+guiscale 2
+waitchunks 600
+wait 60
+shot op_00
+wait 100
+shot op_05
+wait 200
+shot op_15
+wait 200
+shot op_25
+wait 160
+shot op_33
+wait 120
+shot op_after
+cmd time set 3000
+cmd weather clear
+cmd tp @s -1712 90 1781 -60 10
+waitchunks 300
+wait 100
+cmd execute at @s run tp @s ~ ~ ~ ~ 10
+wait 40
+shot gate_closed
+cmd skyabyss island ready
+wait 40
+shot gate_open
+cmd tp @s -1600 80 1722 -80 10
+waitchunks 300
+wait 100
+shot ferryman
+cmd skyabyss island cross
+wait 40
+shot cross_02
+wait 120
+shot cross_08
+wait 120
+shot cross_14
+wait 120
+shot cross_20
+wait 80
+waitchunks 300
+wait 60
+shot arrive_02
+wait 80
+shot arrive_06
+wait 120
+shot arrive_after

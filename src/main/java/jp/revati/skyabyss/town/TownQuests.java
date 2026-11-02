@@ -28,7 +28,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 // 町のクエスト (docs/design/35 の 3.5) と裏通りの頼み (3.3) の入口と、クエストの外から来る合図。
-//   一覧   : ALL (章・種類・前のクエスト)。中身 (段・目的・報酬) はデータ data/skyabyss/quest/town/*.json (tools/gen/story/gen_town_quests.py)
+//   一覧   : ALL (章・種類・前のクエスト)。中身 (段・目的・報酬) はデータ data/skyabyss/quest/town/*.json (データを直接直す（生成スクリプトはない）)
 //   入口   : 限定の人のクエスト (kind GUEST) は宿の女将の噂 (rumor) で始まる。墓守・酔いどれの頼みは、その人の会話で始まる
 //            (会話の足し書き attendant_<役>_town.json)。噂は、まだ始めていない頼みのことも話す (始めはしない)
 //   合図   : town_tower_bell (大鐘楼の頂の鐘を鳴らした)、town_at:<印> (印の近くに立った)、
@@ -59,11 +59,9 @@ public final class TownQuests {
             new TownQuest("town/ch2_sailor", 2, Kind.GUEST, null),
             new TownQuest("town/ch3_lanterns", 3, Kind.GUEST, null),
             new TownQuest("town/ch4_baker", 4, Kind.GUEST, null),
-            // 墓守の名のない墓 (六章まで続く。ここは一〜四章の 4 段)
+            // 墓守の名のない墓 (六章まで続く。ここは一章 (花と水) と三章 (足跡と蝋燭) の 2 段。2026-10-27 に 4 段から縮めた)
             new TownQuest("town/grave_1", 1, Kind.GRAVE, null),
-            new TownQuest("town/grave_2", 2, Kind.GRAVE, "town/grave_1"),
-            new TownQuest("town/grave_3", 3, Kind.GRAVE, "town/grave_2"),
-            new TownQuest("town/grave_4", 4, Kind.GRAVE, "town/grave_3"),
+            new TownQuest("town/grave_3", 3, Kind.GRAVE, "town/grave_1"),
             // 酒場の地下の酔いどれ (深淵の手がかり。三つ目で地下の奥の壁が開く)
             new TownQuest("town/cellar_1", 1, Kind.CELLAR, null),
             new TownQuest("town/cellar_2", 3, Kind.CELLAR, "town/cellar_1"),
@@ -75,7 +73,7 @@ public final class TownQuests {
     static final int TOWER_RISE = 25;
     static final double TOWER_REACH = 8;
     // 印の近く (town_at)
-    static final double SPOT_RADIUS = 3.5;
+    static final double SPOT_RADIUS = 4.0;
     // 古井戸の宝の印
     public static final String WELL_CHEST = "well_chest";
     public static final int WELL_COINS = 15;
@@ -179,7 +177,13 @@ public final class TownQuests {
         for (ServerPlayer p : players) {
             for (String signal : wantedSpots(p)) {
                 BlockPos at = marks.get(signal.substring(SIGNAL_AT.length()));
-                if (at != null && p.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5) <= SPOT_RADIUS * SPOT_RADIUS) {
+                if (at == null) {
+                    continue;
+                }
+                // 水平に SPOT_RADIUS、上下は 3 まで (戸口の印の前で一段上・下に立っていても済む。2026-11-02「〜に行こうの判定」)
+                double dx = p.getX() - (at.getX() + 0.5);
+                double dz = p.getZ() - (at.getZ() + 0.5);
+                if (dx * dx + dz * dz <= SPOT_RADIUS * SPOT_RADIUS && Math.abs(p.getY() - at.getY()) < 3) {
                     Quests.signal(p, signal);
                 }
             }
@@ -247,7 +251,7 @@ public final class TownQuests {
         }
         data.setDirty();
         Coins.give(player, WELL_COINS);
-        Quests.give(player, new ItemStack(Items.ECHO_SHARD));
+        Quests.give(player, new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get()));
         Lore.unlock(player, WELL_LORE, true);
         Notice.narrate(player, "message.skyabyss.town.well.found");
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.8f, 0.7f);

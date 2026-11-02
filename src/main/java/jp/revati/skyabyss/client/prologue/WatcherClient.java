@@ -78,6 +78,8 @@ public final class WatcherClient {
     private static double startDistance;
     private static int age;
     private static boolean noticed;
+    // 章の見る者: 巨神の方角を向いたまま、こちらへ振り向かない (サーバーの WatcherEvents.TITAN_FACING)
+    private static boolean titanFacing;
     private static int seenTicks;
     private static int awayTicks;
     private static int stareTicks;
@@ -128,7 +130,8 @@ public final class WatcherClient {
         entity.moveTo(payload.x(), payload.y(), payload.z(), payload.bodyYaw(), 0f);
         entity.setYHeadRot(payload.bodyYaw());
         id = payload.id();
-        stage = WatcherStage.byIndex(payload.stage());
+        stage = WatcherStage.byIndex(payload.stage() & 0xFF);
+        titanFacing = (payload.stage() & jp.revati.skyabyss.prologue.WatcherEvents.TITAN_FACING) != 0;
         age = 0;
         noticed = false;
         seenTicks = awayTicks = stareTicks = 0;
@@ -223,7 +226,9 @@ public final class WatcherClient {
             startFade(w, WatcherOutcome.STARED, FADE_STARED);
         }
 
-        aim(w, eye, staring);
+        if (!titanFacing) {
+            aim(w, eye, staring);
+        }
     }
 
     // 頭をゆっくりこちらへ向け、見つめられるほど首をかしげ、目の光を少し強める
@@ -315,6 +320,11 @@ public final class WatcherClient {
 
     static boolean presenceActive() {
         return watcher != null || presence > 0.01f;
+    }
+
+    // BGM を止めるか (client/music/MusicDirector。人影が立っている間)
+    public static boolean hushesMusic() {
+        return watcher != null;
     }
 
     // 人影が立っている間は、音楽・動物の鳴き声・洞窟の環境音が止む (引き算の兆し)。

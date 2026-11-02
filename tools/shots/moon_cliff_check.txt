@@ -1,0 +1,28 @@
+# 上弦の崖の確かめ (岩山の形・崩れる棚)。bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_cliff_check.txt -PshotsName=moon_cliff_check
+world moon_cliff2 continent
+size 1600 900
+timeout 1200
+render 14
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd gamemode spectator
+cmd effect give @s minecraft:night_vision 99999 0 true
+hud off
+cmd tp @s 46 112 70 225 32
+waitchunks 300
+wait 80
+shot k1_overview
+cmd tp @s 262 96 30 150 22
+waitchunks 200
+wait 60
+shot k2_mountain
+cmd tp @s 140 42 -24 80 18
+wait 40
+shot k3_ledge

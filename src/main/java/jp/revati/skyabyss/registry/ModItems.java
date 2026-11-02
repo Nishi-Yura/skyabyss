@@ -164,6 +164,70 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.DRIFT_HERMIT, 0x6C5C4C, 0xE48070, new Item.Properties()));
     public static final DeferredItem<Item> SHORE_WARDEN_EGG = ITEMS.register("shore_warden_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.SHORE_WARDEN, 0x3A6470, 0xF0F0EC, new Item.Properties()));
+    public static final DeferredItem<Item> BANDIT_EGG = ITEMS.register("bandit_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BANDIT, 0x5A4632, 0x8C2E22, new Item.Properties()));
+    public static final DeferredItem<Item> BANDIT_ARCHER_EGG = ITEMS.register("bandit_archer_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BANDIT_ARCHER, 0x6B7040, 0x5A4632, new Item.Properties()));
+    public static final DeferredItem<Item> BANDIT_CHIEF_EGG = ITEMS.register("bandit_chief_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BANDIT_CHIEF, 0x4A3A2C, 0xB0302A, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_FOOTMAN_EGG = ITEMS.register("bone_footman_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_FOOTMAN, 0xD8CDB2, 0x7A5A3A, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_BOWMAN_EGG = ITEMS.register("bone_bowman_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_BOWMAN, 0xD8CDB2, 0x4A5A3A, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_STANDARD_EGG = ITEMS.register("bone_standard_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_STANDARD, 0xD8CDB2, 0x2E3E6A, new Item.Properties()));
+    public static final DeferredItem<Item> GRAIN_RAT_EGG = ITEMS.register("grain_rat_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.GRAIN_RAT, 0x8A6A40, 0xD8B470, new Item.Properties()));
+    public static final DeferredItem<Item> STRAY_WISP_EGG = ITEMS.register("stray_wisp_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.STRAY_WISP, 0x9ACAEE, 0x2A2E3A, new Item.Properties()));
+    public static final DeferredItem<Item> FERAL_DOG_EGG = ITEMS.register("feral_dog_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.FERAL_DOG, 0x6E6050, 0x8A6A40, new Item.Properties()));
+    public static final DeferredItem<Item> MOSS_DEAD_EGG = ITEMS.register("moss_dead_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.MOSS_DEAD, 0x3E5A2A, 0xA8F082, new Item.Properties()));
+    public static final DeferredItem<Item> MIST_ANGLER_EGG = ITEMS.register("mist_angler_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.MIST_ANGLER, 0x54523A, 0x78F0D2, new Item.Properties()));
+    public static final DeferredItem<Item> THUNDER_WOLF_EGG = ITEMS.register("thunder_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.THUNDER_WOLF, 0x3E4862, 0x8CD2FF, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_CENTIPEDE_EGG = ITEMS.register("bone_centipede_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_CENTIPEDE, 0xDCD4BE, 0x5A2A26, new Item.Properties()));
+    public static final DeferredItem<Item> SHELL_OCTOPUS_EGG = ITEMS.register("shell_octopus_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.SHELL_OCTOPUS, 0xC8A070, 0x8C3A48, new Item.Properties()));
+    public static final DeferredItem<Item> CRYSTAL_LIZARD_EGG = ITEMS.register("crystal_lizard_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CRYSTAL_LIZARD, 0x2E3448, 0x8CC8FF, new Item.Properties()));
+    public static final DeferredItem<Item> FORGE_GIANT_EGG = ITEMS.register("forge_giant_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.FORGE_GIANT, 0x262224, 0xF08C30, new Item.Properties()));
+    public static final DeferredItem<Item> PIT_DIGGER_EGG = ITEMS.register("pit_digger_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.PIT_DIGGER, 0xD8D0BA, 0xF0B050, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_ROLLER_EGG = ITEMS.register("bone_roller_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_ROLLER, 0xD4CCB6, 0x2A3044, new Item.Properties()));
+    public static final DeferredItem<Item> PIT_FOREMAN_EGG = ITEMS.register("pit_foreman_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.PIT_FOREMAN, 0x6E5446, 0xE6DCC4, new Item.Properties()));
+    public static final DeferredItem<Item> DROWNED_SAILOR_EGG = ITEMS.register("drowned_sailor_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.DROWNED_SAILOR, 0x2E5C62, 0x8888A4, new Item.Properties()));
+    public static final DeferredItem<Item> CAVE_JELLY_EGG = ITEMS.register("cave_jelly_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CAVE_JELLY, 0x8CB4D8, 0x7AE8E0, new Item.Properties()));
+    public static final DeferredItem<Item> BELL_HERMIT_EGG = ITEMS.register("bell_hermit_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BELL_HERMIT, 0x6E8458, 0xC85A58, new Item.Properties()));
+    public static final DeferredItem<Item> HORN_BEETLE_EGG = ITEMS.register("horn_beetle_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.HORN_BEETLE, 0x2E2E3E, 0x8CC8FF, new Item.Properties()));
+    public static final DeferredItem<Item> CRYSTAL_EYE_EGG = ITEMS.register("crystal_eye_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CRYSTAL_EYE, 0x4A4E62, 0x9ED8FF, new Item.Properties()));
+    public static final DeferredItem<Item> GEODE_GOLEM_EGG = ITEMS.register("geode_golem_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.GEODE_GOLEM, 0x4A4E62, 0xAADCFF, new Item.Properties()));
+    public static final DeferredItem<Item> BELLOWS_IMP_EGG = ITEMS.register("bellows_imp_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BELLOWS_IMP, 0x6A4C42, 0xF09040, new Item.Properties()));
+    public static final DeferredItem<Item> LAVA_SLUG_EGG = ITEMS.register("lava_slug_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.LAVA_SLUG, 0x221E1E, 0xF08C30, new Item.Properties()));
+    public static final DeferredItem<Item> OX_SMITH_EGG = ITEMS.register("ox_smith_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.OX_SMITH, 0x6A4A40, 0xF0A040, new Item.Properties()));
+    public static final DeferredItem<Item> ROCK_BOAR_EGG = ITEMS.register("rock_boar_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ROCK_BOAR, 0x4A3C2E, 0x7A8696, new Item.Properties()));
+    public static final DeferredItem<Item> TIDE_CRAB_EGG = ITEMS.register("tide_crab_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.TIDE_CRAB, 0x22424A, 0xBA4A26, new Item.Properties()));
+    public static final DeferredItem<Item> STORM_RAM_EGG = ITEMS.register("storm_ram_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.STORM_RAM, 0xC4C8D0, 0x2A2C34, new Item.Properties()));
+    public static final DeferredItem<Item> ASH_LIZARD_EGG = ITEMS.register("ash_lizard_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ASH_LIZARD, 0x1E1A18, 0xE05A30, new Item.Properties()));
     public static final DeferredItem<Item> WHALEBONE_CAPTAIN_EGG = ITEMS.register("whalebone_captain_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.WHALEBONE_CAPTAIN, 0xE2D8C0, 0x3C8CAA, new Item.Properties()));
     public static final DeferredItem<Item> STONE_WHALE_HEART_EGG = ITEMS.register("stone_whale_heart_spawn_egg",
@@ -185,67 +249,37 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> RELIC_PLATE = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_PLATE);
     public static final DeferredItem<BlockItem> RELIC_BELL = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_BELL);
 
+    // クリエイティブの欄 (registry/CreativeTabs が全部の品を分けて並べる。2026-10-27)。ほかの担当が「main」へ入れていた分は LEGACY_TAB へ向けて止めた
+    public static final net.minecraft.resources.ResourceKey<CreativeModeTab> LEGACY_TAB = net.minecraft.resources.ResourceKey.create(Registries.CREATIVE_MODE_TAB,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "legacy_unused"));
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.skyabyss"))
             .icon(() -> SKY_KEY_FRAGMENT.get().getDefaultInstance())
-            .displayItems((params, output) -> {
-                output.accept(SKY_KEY_FRAGMENT.get());
-                output.accept(WHALEBONE_GREATSWORD.get());
-                output.accept(STONE_WHALE_HELMET.get());
-                output.accept(STONE_WHALE_CHESTPLATE.get());
-                output.accept(STONE_WHALE_LEGGINGS.get());
-                output.accept(STONE_WHALE_BOOTS.get());
-                output.accept(RESONANCE_CHARM.get());
-                output.accept(CLOUD_JERKY.get());
-                output.accept(CAPTAIN_PIKE.get());
-                output.accept(WATERWAY_FANG.get());
-                output.accept(STONE_WHALE_PLATING.get());
-                output.accept(MOSS_TALISMAN.get());
-                output.accept(BONE_SPIKE_ARROW.get());
-                output.accept(STONE_WHALE_SHARD.get());
-                output.accept(RESONANCE_CRYSTAL.get());
-                output.accept(RESONANCE_SHARD_STONE_WHALE.get());
-                output.accept(RESONANCE_SHARD_TIDE_SHELL.get());
-                output.accept(RESONANCE_SHARD_THUNDER_WING.get());
-                output.accept(RESONANCE_SHARD_EMBER.get());
-                output.accept(SONG_SHARD_STONE_WHALE.get());
-                output.accept(SONG_SHARD_TIDE_SHELL.get());
-                output.accept(SONG_SHARD_THUNDER_WING.get());
-                output.accept(SONG_SHARD_EMBER.get());
-                for (jp.revati.skyabyss.item.extra.Element e : jp.revati.skyabyss.item.extra.Element.values()) {
-                    output.accept(socketShard(e).get());
-                }
-                for (jp.revati.skyabyss.rpg.skill.Rune r : jp.revati.skyabyss.rpg.skill.Rune.values()) {
-                    if (r.legendary()) {
-                        output.accept(jp.revati.skyabyss.item.extra.GearFreedom.core(r));
-                    }
-                }
-                for (jp.revati.skyabyss.rpg.skill.Skill s : jp.revati.skyabyss.item.extra.RuneData.skills()) {
-                    output.accept(jp.revati.skyabyss.item.extra.GearFreedomItems.rune(new jp.revati.skyabyss.item.extra.RuneData(s.id, false, 1200)));
-                }
-                output.accept(RESONANCE_SHARD.get());
-                output.accept(STONE_WHALE_CORE.get());
-                output.accept(RESONANCE_FORGE.get());
-                output.accept(BONE_SENTINEL_EGG.get());
-                output.accept(RIB_ARCHER_EGG.get());
-                output.accept(Ch1BackEntities.BONE_MORTAR_EGG.get());
-                output.accept(Ch1BackEntities.BONE_GULL_EGG.get());
-                output.accept(Ch1BackEntities.ELDER_SENTINEL_EGG.get());
-                output.accept(MOSS_CRAWLER_EGG.get());
-                output.accept(ROCK_SHELL_BEETLE_EGG.get());
-                output.accept(SPINE_HARE_EGG.get());
-                output.accept(BONE_HAULER_EGG.get());
-                output.accept(ELDER_SENTRY_EGG.get());
-                output.accept(TIDEPOOL_CLAM_EGG.get());
-                output.accept(SAND_BURROWER_EGG.get());
-                output.accept(DRIFT_HERMIT_EGG.get());
-                output.accept(SHORE_WARDEN_EGG.get());
-                output.accept(WHALEBONE_CAPTAIN_EGG.get());
-                output.accept(STONE_WHALE_HEART_EGG.get());
-                output.accept(SEALED_GATE.get());
-                output.accept(CRUMBLING_BONE.get());
-                output.accept(GLOW_ANEMONE.get());
-            })
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.MISC, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_WEAPONS = TABS.register("weapons", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.weapons"))
+            .icon(() -> WHALEBONE_GREATSWORD.get().getDefaultInstance())
+            .withTabsBefore(TAB.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.WEAPON, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_GEAR = TABS.register("gear", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.gear"))
+            .icon(() -> STONE_WHALE_HELMET.get().getDefaultInstance())
+            .withTabsBefore(TAB_WEAPONS.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.GEAR, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_EGGS = TABS.register("eggs", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.eggs"))
+            .icon(() -> ROCK_SHELL_BEETLE_EGG.get().getDefaultInstance())
+            .withTabsBefore(TAB_GEAR.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.EGG, output))
+            .build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB_BLOCKS = TABS.register("blocks", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.skyabyss.blocks"))
+            .icon(() -> RESONANCE_FORGE.get().getDefaultInstance())
+            .withTabsBefore(TAB_EGGS.getKey())
+            .displayItems((params, output) -> CreativeTabs.fill(CreativeTabs.Kind.BLOCK, output))
             .build());
 
     private ModItems() {
@@ -279,6 +313,8 @@ public final class ModItems {
             case "thunder_wing" -> RESONANCE_SHARD_THUNDER_WING.get();
             case "ember" -> RESONANCE_SHARD_EMBER.get();
             case "abyss" -> jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get();
+            // 月の専用の逸品は月の共鳴の欠片で (2026-11-02: 前は岩鯨の欠片に落ちていた)
+            case "moon" -> jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.RESONANCE_SHARD.get();
             default -> RESONANCE_SHARD_STONE_WHALE.get();
         };
     }
@@ -287,7 +323,8 @@ public final class ModItems {
     public static boolean isResonanceShard(Item item) {
         return item == RESONANCE_SHARD.get() || item == RESONANCE_SHARD_STONE_WHALE.get() || item == RESONANCE_SHARD_TIDE_SHELL.get()
                 || item == RESONANCE_SHARD_THUNDER_WING.get() || item == RESONANCE_SHARD_EMBER.get()
-                || item == jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get();
+                || item == jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get()
+                || item == jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.RESONANCE_SHARD.get();
     }
 
     public static void register(IEventBus modEventBus) {

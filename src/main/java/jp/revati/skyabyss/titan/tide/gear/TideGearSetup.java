@@ -93,7 +93,7 @@ public final class TideGearSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, TRIDENT, SHIELD, CHARM, CLAW, HARPOON, PEARL, CORE)) {
                 event.accept(item.get());
             }

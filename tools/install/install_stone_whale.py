@@ -851,7 +851,7 @@ def main():
         pos = pack(items, S)
         if pos:
             break
-    # 詰めたあと、使っている高さ (16 画素単位に切り上げ) まで画像を切り詰める (assets_audit.md の S5)。
+    # 詰めたあと、使っている高さ (16 画素単位に切り上げ) まで画像を切り詰める。
     # uv は画素単位で、geo の texture_height を同じ値にするので、どの面も同じ画素を指す
     H = -(-max(pos[k][1] + h for k, w, h in items) // 16) * 16
     print("atlas", S, "x", H, "pixels used", sum(w * h for _, w, h in items))

@@ -7,7 +7,7 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 // 人ごとの乗り物の持ち物 (保存する。死んでも残る。同期はしない = 店の画面を開くときに送る)。
 //   owned  : 買った見た目 (MountLook の順の bit)。角の荷獣は最初から持つ
 //   chosen : 今の見た目 (MountLook の ordinal)
-//   tiers  : 速さ・跳び・体力の段 (MountStats)
+//   tiers  : 速さ・跳び・体力の段 (MountStats。体力の段は 2026-11-02 から使わない。前に買った分は PlayerUpgrade が返して 0 にする)
 public final class MountData implements INBTSerializable<CompoundTag> {
     int owned = 1 << MountLook.HORN_BEAST.ordinal();
     int chosen = MountLook.HORN_BEAST.ordinal();
@@ -35,7 +35,7 @@ public final class MountData implements INBTSerializable<CompoundTag> {
     }
 
     public void setTier(int kind, int tier) {
-        tiers[kind] = Math.max(0, Math.min(MountStats.TIERS, tier));
+        tiers[kind] = MountStats.clamp(kind, tier);
     }
 
     public int ownedBits() {
@@ -57,7 +57,7 @@ public final class MountData implements INBTSerializable<CompoundTag> {
         chosen = t.getInt("chosen");
         int[] a = t.getIntArray("tiers");
         for (int i = 0; i < tiers.length; i++) {
-            tiers[i] = i < a.length ? Math.max(0, Math.min(MountStats.TIERS, a[i])) : 0;
+            tiers[i] = i < a.length ? MountStats.clamp(i, a[i]) : 0;
         }
     }
 }

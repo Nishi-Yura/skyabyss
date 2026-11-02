@@ -39,7 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-// 潮の番人 (docs/design/21 の 4.1。名づき): 沈んだ塩の蔵の主。珊瑚憑きの変種 (背が高く、珊瑚の銛に塩の白い筋)。
+// 潮の番人 (名づき): 沈んだ塩の蔵の主。珊瑚憑きの変種 (背が高く、珊瑚の銛に塩の白い筋)。
 // 技はすべて Telegraph で予告する (名づきの技の予告は 1 秒以上)。人数で体力が増える (番兵長・心臓・老いた歩哨と同じ式)。
 //   銛の突き     構え 1.1 秒 (THRUST_WARN。床の前の帯 長さ 5・幅 1.8) → 前へ踏み込んで突く (9)。帯の外へ出ればよける
 //   満ち潮の輪   銛を頭上へ掲げ、狙った人の足もとに青い輪 (半径 2.6) が 1.2 秒 (RING_WARN) 満ちる → 石突を床へ。
@@ -63,7 +63,7 @@ public class ShoreWarden extends GroundFoe {
 
     private enum Kind { NONE, THRUST, RING }
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_6);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_6));
     private Kind kind = Kind.NONE;
     private int ringCd = 80;
     private boolean scaled;

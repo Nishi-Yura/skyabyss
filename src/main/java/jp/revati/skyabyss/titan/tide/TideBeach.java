@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
-// 潮殻が寄る浜 (docs/design/33 の 3.1)。干潮の刻 (tryGather) と潮見の貝 (request) で寄るのは、二章の跡地 (東の海辺) の浜だけ。
+// 潮殻が寄る浜。干潮の刻 (tryGather) と潮見の貝 (request) で寄るのは、二章の跡地 (東の海辺) の浜だけ。
 // 跡地がまだ決まっていない世界 (序盤の場所を作らない設定など) では、今までどおり人の近くの海 (08 の 2.3)。
 // 呼び貝 (09 の 4.4。心臓のあと) と開発コマンドは浜に限らない。
 public final class TideBeach {

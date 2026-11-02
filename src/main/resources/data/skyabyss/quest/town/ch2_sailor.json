@@ -22,13 +22,13 @@
         {
           "id": "compass",
           "type": "collect",
-          "target": "minecraft:compass",
+          "target": "skyabyss:wayfinder",
           "count": 1
         },
         {
           "id": "map",
           "type": "collect",
-          "target": "minecraft:map",
+          "target": "skyabyss:blank_chart",
           "count": 1
         }
       ]
@@ -53,7 +53,7 @@
         "count": 20
       },
       {
-        "item": "minecraft:spyglass",
+        "item": "skyabyss:socket_shard_tide",
         "count": 1
       }
     ]

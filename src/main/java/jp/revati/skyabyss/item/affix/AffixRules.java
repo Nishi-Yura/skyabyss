@@ -80,10 +80,20 @@ public final class AffixRules {
     }
 
     // ---------------------------------------------------------------- 抽選
+    // 品を問わない抽選 (どの木の印も出る。分布の検査用)
     public static List<Affix> roll(AffixType.Slot slot, GearTier tier, RandomSource random) {
+        return roll(slot, tier, random, true, null);
+    }
+
+    // anyMark = どの木の印も出してよい。false なら own (その武器の職の木の印) だけ。null なら木の印は出ない
+    // (docs/design/43 の 3 節: 木の印は職の武器の特性へ。魔法使いの杖に「風読みの技の力」が付かない)
+    public static List<Affix> roll(AffixType.Slot slot, GearTier tier, RandomSource random, boolean anyMark, AffixType own) {
         int count = random.nextFloat() < tier.fewerChance ? minCount(tier) : maxCount(tier);
         boolean legendary = tier.wideAffixes;
         List<AffixType> pool = pool(slot);
+        if (!anyMark) {
+            pool.removeIf(t -> t.isMark() && t != own);
+        }
         List<Affix> out = new ArrayList<>();
         for (int i = 0; i < count && !pool.isEmpty(); i++) {
             AffixType pick = weighted(pool, random);
@@ -102,7 +112,9 @@ public final class AffixRules {
         if (slot == null) {
             return List.of();
         }
-        return roll(slot, ((ModGear) stack.getItem()).tier(), random);
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.of(stack);
+        AffixType own = job == null ? null : jp.revati.skyabyss.rpg.skill.SkillMarks.typeOf(job.tree);
+        return roll(slot, ((ModGear) stack.getItem()).tier(), random, job == null, own);
     }
 
     private static AffixType weighted(List<AffixType> pool, RandomSource random) {
@@ -269,5 +281,39 @@ public final class AffixRules {
     public static MutableComponent line(Affix affix) {
         return Component.literal(" ◇ ").withStyle(s -> s.withColor(MARK_COLOR))
                 .append(describe(affix).withStyle(s -> s.withColor(LINE_COLOR)));
+    }
+
+    // 画面で Shift を押しているか (手元が入れる。サーバーでは false のまま)。押していれば特性の出来を添える
+    public static java.util.function.BooleanSupplier showRoll = () -> false;
+
+    // 特性の出来: その階級の幅 (最小〜最大) の中のどこか。0 = 最小、100 = 最大 (2026-10-26 の声「トレードで役に立つ」)
+    public static int rollPercent(Affix affix, boolean wide) {
+        AffixType t = affix.kind();
+        if (t == null) {
+            return 0;
+        }
+        double min = t.min(wide);
+        double max = t.max(wide);
+        if (max - min < 1e-9) {
+            return 100;
+        }
+        return (int) Math.round(Math.max(0, Math.min(1, (affix.value() - min) / (max - min))) * 100);
+    }
+
+    public static int rollColor(int pct) {
+        return pct >= 100 ? 0x7FE8FF : pct >= 67 ? 0x8FE08F : pct >= 34 ? 0xE8D27A : 0xD08A7A;
+    }
+
+    // 階級の幅つきの一行。Shift を押しているあいだは「 ◇ 攻撃速度 +7%  75%（5〜9）」
+    public static MutableComponent line(Affix affix, boolean wide) {
+        MutableComponent out = line(affix);
+        AffixType t = affix.kind();
+        if (t != null && showRoll.getAsBoolean()) {
+            int pct = rollPercent(affix, wide);
+            out.append(Component.literal("  " + pct + "%").withStyle(s -> s.withColor(rollColor(pct))))
+                    .append(Component.translatable("gear.skyabyss.affix_range", number(t, t.min(wide)), number(t, t.max(wide)))
+                            .withStyle(s -> s.withColor(0x7C8794)));
+        }
+        return out;
     }
 }

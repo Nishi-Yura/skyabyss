@@ -24,6 +24,9 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 //   使う: 店 (ShopService)、鍛冶師の修理 (FacilityActions)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Coins {
+    // 持てる鐘銭の上限 (旅嚢の枠。2026-10-27 の声「お金の上限 999 万」→ 2026-11-01「もっと増やしていい」で 9 億 9999 万)
+    public static final int MAX = 999_999_999;
+
     private Coins() {
     }
 
@@ -35,19 +38,12 @@ public final class Coins {
         return Mth.clamp(Progression.stage(player) + 1, 1, 5);
     }
 
+    // 袋 (旅嚢) と持ち物の合計
     public static int count(ServerPlayer player) {
-        Inventory inv = player.getInventory();
-        int n = 0;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(FacilitySetup.BELL_COIN.get())) {
-                n += s.getCount();
-            }
-        }
-        return n;
+        return jp.revati.skyabyss.pouch.Pouch.countAll(player, FacilitySetup.BELL_COIN.get());
     }
 
-    // 足りなければ何も取らずに false
+    // 足りなければ何も取らずに false。袋から先に、足りない分を持ち物から
     public static boolean take(ServerPlayer player, int n) {
         if (n <= 0) {
             return true;
@@ -55,23 +51,18 @@ public final class Coins {
         if (count(player) < n) {
             return false;
         }
-        Inventory inv = player.getInventory();
-        int left = n;
-        for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(FacilitySetup.BELL_COIN.get())) {
-                int k = Math.min(left, s.getCount());
-                s.shrink(k);
-                left -= k;
-            }
-        }
-        inv.setChanged();
+        jp.revati.skyabyss.pouch.Pouch.takeAny(player, FacilitySetup.BELL_COIN.get(), n);
         return true;
     }
 
-    // 渡す (入りきらなければ足もとに落とす)
+    // 渡す (旅嚢へまとめて。入りきらない分は 99 枚ずつ持ち物か足もとへ。大きな額を 99 枚ずつ回さない)
     public static void give(ServerPlayer player, int n) {
-        int left = n;
+        if (n <= 0) {
+            return;
+        }
+        ItemStack all = new ItemStack(FacilitySetup.BELL_COIN.get(), n);
+        jp.revati.skyabyss.pouch.Pouch.add(player, all);
+        int left = all.getCount();
         while (left > 0) {
             int k = Math.min(left, 99);
             Quests.give(player, new ItemStack(FacilitySetup.BELL_COIN.get(), k));
@@ -98,6 +89,11 @@ public final class Coins {
         if (n > 0) {
             give(player, n);
             Notice.gain(player, "message.skyabyss.facility.coins_gained", n);
+            // 言伝ての板の頼みは、その土地の名声にも (endgame/RegionFame。週の頼みは多め)
+            int region = jp.revati.skyabyss.world.continent.ContinentMap.get().region(player.getBlockX(), player.getBlockZ());
+            if (region != jp.revati.skyabyss.world.continent.ContinentMap.OUTSKIRTS) {
+                jp.revati.skyabyss.endgame.RegionPoints.add(player, region, def.repeat().equals("weekly") ? 5 : 2);
+            }
         }
     }
 

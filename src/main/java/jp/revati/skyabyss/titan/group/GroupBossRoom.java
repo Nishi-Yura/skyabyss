@@ -165,7 +165,7 @@ public final class GroupBossRoom {
     private final Set<UUID> died = new LinkedHashSet<>();
     // 倒れた参加者の再入場 (待ち時間・回数)。戦いが終わる・やり直しで消える
     private final Reentry reentry = new Reentry();
-    // この戦いで鼓動守 (guide.HeartbeatWard) が働いた人 (戦いが終わる・やり直しで消える。21 の 1.4: 戦いに一度)
+    // この戦いで鼓動守 (guide.HeartbeatWard) が働いた人 (戦いが終わる・やり直しで消える。戦いに一度)
     private final Set<UUID> wardUsed = new LinkedHashSet<>();
     // この戦いでパーティが倒れた回数 (倒れた状態 + 倒れずに死んだ回数)。勝ったときの札 (FightBadges) に使う
     private int falls;
@@ -292,6 +292,14 @@ public final class GroupBossRoom {
             lastInside.add(player.getUUID());
         }
         if (inside.isEmpty()) {
+            // 心臓の戦いで参加者が全員倒れた: 待たずに戦いを戻し、倒れた人は地上 (物語は巨神の前、周回は祠の前) で目覚める (WipeReturn)
+            if (!participants.isEmpty() && died.containsAll(participants) && boss instanceof jp.revati.skyabyss.entity.HeartBoss) {
+                Set<UUID> fallen = Set.copyOf(died);
+                reset(level, host, false);
+                WipeReturn.wiped(level, group, fallen);
+                cooldown = RETRY_COOLDOWN;
+                return;
+            }
             empty += STEP;
             if (empty >= ABANDON_DELAY) {
                 reset(level, host, true);

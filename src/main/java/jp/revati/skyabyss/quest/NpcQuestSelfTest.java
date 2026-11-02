@@ -137,7 +137,14 @@ public final class NpcQuestSelfTest {
                     || (d.role().startsWith(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX)
                     && jp.revati.skyabyss.facility.AttendantEntity.extraRole(d.role().substring(jp.revati.skyabyss.facility.AttendantRole.DIALOGUE_PREFIX.length())))
                     || (d.role().startsWith(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX)
-                    && jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null);
+                    && (jp.revati.skyabyss.town.TownGuests.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
+                    // 土地の町の人 (town/RegionFolk。都の町の人の絵を借りる)
+                    || jp.revati.skyabyss.town.RegionFolk.byId(d.role().substring(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX.length())) != null
+                    // 六章の前のループの自分 (月の谷・崖・野・淵の野営。story/ch6/valley/ValleyTicker・cliff/CliffTicker・field/FieldTicker)
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.valley.ValleyTicker.PAST_SELF)
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.cliff.CliffTicker.PAST_SELF)
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.field.FieldTicker.PAST_SELF)
+                    || d.role().equals(jp.revati.skyabyss.town.TownGuests.ROLE_PREFIX + jp.revati.skyabyss.story.ch6.rift.RiftTicker.PAST_SELF)));
             check(known, "dialogue for unknown entity " + d.role(), failures);
             d.entries().forEach(e -> conditions.add(e.condition()));
             for (Dialogue.Node n : d.nodes().values()) {
@@ -353,9 +360,9 @@ public final class NpcQuestSelfTest {
             // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
-            // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (tools/gen/ch5/gen_ch5_layers.py)
+            // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (データを直接直す（生成スクリプトはない）)
             // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の覚書・鼓動守の会話は skyabyss_ch3gear)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town", "skyabyss_lesson")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town", "skyabyss_lesson", "skyabyss_moon", "skyabyss_finale", "skyabyss_tower", "skyabyss_endgame")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {
@@ -637,10 +644,10 @@ public final class NpcQuestSelfTest {
         check(shown(a, WC, "whale_q") && !shown(a, WC, "whale"), "chaser menu should offer the quest topic", failures);
         pick(a, WC, "whale_q", failures);
         next(a);
-        // 鯨の話のあとは一章の支度 (34 の 4.2。三本そろうまで岩鯨は来ない)
+        // 鯨の話のあとは一章の支度 (三本そろうまで岩鯨は来ない)
         check(stage(a, "main_song").equals("prepare"), "talking to the chaser did not advance to prepare: " + stage(a, "main_song"), failures);
         next(a);
-        // 鉄を着ていた旅人の一言 (一章の支度の段の理由。34 の 4.2)
+        // 鉄を着ていた旅人の一言 (一章の支度の段の理由)
         check(node(a).equals("c_whale_iron"), "the chaser should mention the traveller who wore iron, got " + node(a), failures);
         next(a);
         pick(a, WC, "grab", failures);
@@ -736,7 +743,7 @@ public final class NpcQuestSelfTest {
         check(shown(a, WC, "shards"), "the give option should appear with 3+ shards", failures);
         pick(a, WC, "shards", failures);
         check(a.getInventory().countItem(ModItems.STONE_WHALE_SHARD.get()) == 1, "three shards were not taken", failures);
-        check(stage(a, "sub_shards").equals("done") && a.getInventory().countItem(Items.SPYGLASS) == 1, "sub_shards did not finish with a spyglass", failures);
+        check(stage(a, "sub_shards").equals("done") && a.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.SOCKET_SHARD_STONE.get()) >= 1, "sub_shards did not finish with a socket shard", failures);
         DialogueService.close(a);
 
         // サブ「数え歌のつづき」: 語り部から始め、村の言い伝え 4 つで報告へ
@@ -752,11 +759,6 @@ public final class NpcQuestSelfTest {
         pick(a, ST, "watcher_ask", failures);
         check(Lore.state(a).has("prologue/watcher"), "the watcher topic did not record lore", failures);
         DialogueService.close(a);
-        Affinity.set(a, ST, 22);
-        DialogueService.open(a, st);
-        check(shown(a, ST, "custom"), "the custom (seventh night) topic should appear at affinity 20+", failures);
-        pick(a, ST, "custom", failures);
-        DialogueService.close(a);
         DialogueService.open(a, wc);
         pick(a, WC, "peak", failures);
         DialogueService.close(a);
@@ -765,7 +767,7 @@ public final class NpcQuestSelfTest {
         DialogueService.open(a, st);
         check(node(a).equals("song_done"), "the storyteller should open song_done, got " + node(a), failures);
         next(a);
-        check(stage(a, "sub_song").equals("done") && a.getInventory().countItem(Items.CLOCK) == 1, "sub_song did not finish with a clock", failures);
+        check(stage(a, "sub_song").equals("done") && QuestItems.count(a, "skyabyss:resonance_shard", null) >= 2, "sub_song did not finish with resonance shards", failures);
         DialogueService.close(a);
         notes.add("side quests: shards (collect → give → spyglass) and song (4 sayings → report → clock)");
 

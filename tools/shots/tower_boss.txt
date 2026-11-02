@@ -1,0 +1,43 @@
+# あいだの塔の主「あいだに座すもの」(docs/design/54 の 2.5)。挑戦を始め、観戦で橋の上から主と技の予告を見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_boss.txt -PshotsName=tower_boss
+world shots flat
+size 1280 720
+timeout 1500
+render 12
+cmd gamemode creative
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss tower start
+wait 60
+cmd gamemode spectator
+camera skyabyss:tower 0 127 36 180 -14
+waitchunks 300
+wait 120
+shot m01_from_bridge
+camera skyabyss:tower 4 122 -30 190 -38
+wait 30
+shot m02_from_plaza
+camera skyabyss:tower -46 150 -6 125 18
+wait 30
+shot m03_side
+camera skyabyss:tower 2 132 -6 180 10
+wait 20
+cmd skyabyss tower act rake
+wait 24
+shot m04_rake_tell
+wait 40
+cmd skyabyss tower act beams
+wait 30
+shot m05_beams_tell
+wait 60
+cmd skyabyss tower act moon
+wait 50
+shot m06_moon_call
+camera skyabyss:tower 14 128 -2 200 12
+wait 80
+shot m07_moon_crossing

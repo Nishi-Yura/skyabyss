@@ -11,7 +11,7 @@
         {
           "id": "honey",
           "type": "collect",
-          "target": "minecraft:honey_bottle",
+          "target": "skyabyss:honey_jar",
           "count": 1
         }
       ]

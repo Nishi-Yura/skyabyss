@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 苔の軟膏 (一章の薬。21 の 1.2): 鈍足を治し、再生 I を 8 秒。再生は FoodProperties の効果 (備えの糧の灯がそのまま数える)、鈍足を治すのはここ
+// 苔の軟膏 (一章の薬): 鈍足を治し、再生 I を 8 秒。再生は FoodProperties の効果 (備えの糧の灯がそのまま数える)、鈍足を治すのはここ
 public class MossSalveItem extends Item {
     public MossSalveItem(Properties properties) {
         super(properties);

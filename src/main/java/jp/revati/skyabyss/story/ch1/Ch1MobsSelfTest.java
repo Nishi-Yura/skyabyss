@@ -45,7 +45,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 一章の地上の敵 4 種 (P7。docs/design/21 の 3.1) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ch1 mobs" ./gradlew runServer。
+// 一章の地上の敵 4 種 (P7) の自己テスト。SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ch1 mobs" ./gradlew runServer。
 // 結果は SELFTEST ch1 mobs PASSED / FAILED。
 //   登録     エンティティ・強さ・スポーンエッグ・音・割符・経験値の表・洞の湧き台が新しい敵・ひとり歩き (夜・地形)・骨負いの時刻
 //   岩殻虫   前からの傷は半分・立ち上がりの帯と当たりが同じ形で 0.8 秒以上・傷 4・落とし物 (岩殻片 60%・骨片 10%。倒した人がいるときだけ)

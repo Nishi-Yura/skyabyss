@@ -18,7 +18,12 @@ public final class TideGearClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> ItemProperties.register(TideGearSetup.SHIELD.get(), ResourceLocation.withDefaultNamespace("blocking"),
-                (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f));
+        event.enqueueWork(() -> {
+            ItemProperties.register(TideGearSetup.SHIELD.get(), ResourceLocation.withDefaultNamespace("blocking"),
+                    (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+            // 市の旅の盾 (item/outfit) も同じ印で travel_shield_blocking へ
+            ItemProperties.register(jp.revati.skyabyss.item.outfit.OutfitGear.TRAVEL_SHIELD.get(), ResourceLocation.withDefaultNamespace("blocking"),
+                    (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);
+        });
     }
 }

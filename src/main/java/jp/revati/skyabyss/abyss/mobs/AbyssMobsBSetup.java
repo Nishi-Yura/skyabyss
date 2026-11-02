@@ -7,6 +7,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.rpg.GrowthRewards;
 import jp.revati.skyabyss.story.ch4.Ch4Setup;
+import jp.revati.skyabyss.entity.MobVoices;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -101,6 +102,18 @@ public final class AbyssMobsBSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> ROPE_CREAK = sound("rope_creak");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROPE_PULL = sound("rope_pull");
 
+    // 声 (環境音・被弾・倒れる)。素材は tools/gen/sound/gen_mob_voices.py。名前は <種>_ambient / _hurt / _death。AbyssMobB が MobVoices で引く
+    static {
+        for (String id : List.of("ash_trail", "ceiling_walker", "ember_keeper", "heartbeat_mimic", "lamp_eater", "nameless_shape",
+                "past_shadow", "rope_hanger", "soot_child")) {
+            MobVoices.put(id, voice(id));
+        }
+    }
+
+    private static MobVoices.Voice voice(String id) {
+        return new MobVoices.Voice(sound(id + "_ambient"), sound(id + "_hurt"), sound(id + "_death"));
+    }
+
     private AbyssMobsBSetup() {
     }
 
@@ -134,7 +147,7 @@ public final class AbyssMobsBSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(ASH_TRAIL_EGG, EMBER_KEEPER_EGG, SOOT_CHILD_EGG, PAST_SHADOW_EGG, NAMELESS_SHAPE_EGG,
                     LAMP_EATER_EGG, CEILING_WALKER_EGG, HEARTBEAT_MIMIC_EGG, ROPE_HANGER_EGG, LAMP_ASH, SOOT_CLUMP, ROPE_KNOT, ECHO_SHARD,
                     PULSE_MEMBRANE)) {

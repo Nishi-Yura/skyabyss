@@ -1,0 +1,4 @@
+{
+  "_comment": "docs/design/44 の湧きの表。はじまりの島は空 (2026-10-28: 島の敵は時間で湧かない。目的の場所に着いたときだけ world/continent/IslandTrail が決まった数を出す)",
+  "entries": []
+}

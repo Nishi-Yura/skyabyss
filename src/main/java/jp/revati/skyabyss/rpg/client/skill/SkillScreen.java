@@ -8,28 +8,30 @@ import jp.revati.skyabyss.client.ui.PanZoomCanvas;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.rpg.Growth;
+import jp.revati.skyabyss.rpg.skill.Job;
 import jp.revati.skyabyss.rpg.skill.Mutation;
 import jp.revati.skyabyss.rpg.skill.Rune;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillBuild;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillKeystone;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillTag;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 import jp.revati.skyabyss.rpg.skill.Skills;
 import jp.revati.skyabyss.rpg.skill.WeaponType;
-import jp.revati.skyabyss.rpg.skill.net.SkillChainPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillKeystonePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillLearnPayload;
-import jp.revati.skyabyss.rpg.skill.net.SkillStancePayload;
+import jp.revati.skyabyss.rpg.skill.net.SkillNodePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillTryonPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillLoadoutPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillRespecPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillRunePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillSlotPayload;
+import jp.revati.skyabyss.rpg.skill.tree.AbilityNode;
+import jp.revati.skyabyss.rpg.skill.tree.AbilityTree;
+import jp.revati.skyabyss.rpg.skill.tree.AbilityTrees;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
@@ -101,6 +103,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     // 3 ページ目 (変異・紋の盤)
     private final ExtPage ext = new ExtPage();
     private Skill selected;
+    // 木 v2 (docs/design/48): 職の木では節を選ぶ。selected はその節の技 (枠に置くため)
+    private AbilityNode selectedNode;
+    // 木 v2: いまマウスの下にある節 (その節へつながる線を光らせる)
+    private AbilityNode hoverNode;
+    // 木 v2 の格子の間隔 (盤の単位。節は NODE = 22)
+    static final int GRID = 34;
+    static final int GRID_X0 = 8;
+    static final int GRID_Y0 = 14;
     private int left;
     private int top;
     // 木の盤 (動かせて拡大できる。画面の中の窓は BOARD_V*)
@@ -111,7 +121,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     private final UiFit fit = new UiFit();
     private Button learn;
     private Button respec;
-    private Button calling;
     private final Button[] loadLoadout = new Button[SkillRules.LOADOUTS];
     private Button saveToggle;
     private boolean saveMode;
@@ -126,8 +135,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     // 試着 (仮振り): 画面だけの写しと、仮に振った順。null = 試着していない
     private SkillData tryon;
     private final List<String> tryonOrder = new ArrayList<>();
-    // ビルドのページで押せる所: {x, y, w, h, 種類 (1 = 構え、2 = 連鎖、3 = 鍵石、4 = タグ), 引数}
-    private final List<int[]> hits = new ArrayList<>();
     private int respecArmed;
     // 刻印の付け替えの確かめ (押した刻印の番号。0 でなし)
     private int runeArmed;
@@ -140,6 +147,16 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     public SkillScreen() {
         super(Component.translatable("gui.skyabyss.skill.title"));
+        // 職の武器を持っていれば、その職の木から開く (docs/design/43)
+        net.minecraft.client.player.LocalPlayer me = net.minecraft.client.Minecraft.getInstance().player;
+        jp.revati.skyabyss.rpg.skill.Job held = me == null ? null : jp.revati.skyabyss.rpg.skill.Job.held(me);
+        // 木 v2: 今の職 (職の間で替える) の木から開く
+        Job cur = me == null ? null : Job.byId(SkillManager.get(me).curJob);
+        if (cur != null) {
+            tree = cur.tree;
+        } else if (held != null) {
+            tree = held.tree;
+        }
     }
 
     @Override
@@ -149,13 +166,13 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         top = 18;
         fit.fit(width, height, W, H + 18, 3f);
         canvas.setViewport(left + BOARD_VX, top + BOARD_VY, BOARD_VW, BOARD_VH);
-        canvas.setContent(BOARD_W, BOARD_H);
         // 盤は大きいので、最初は字と節が小さくなりすぎない大きさで上から見せる (残りは送る・拡げる)
         canvas.setStartMin(0.75f);
-        canvas.reset();
+        fitCanvas();
         learn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.learn"), b -> learnSelected())
                 .bounds(left + INFO_X + INFO_W - 4 - LEARN_W, top + INFO_Y + 3, LEARN_W, 14).build());
-        for (int i = 0; i < SkillRules.LOADOUTS; i++) {
+        // 型の保存は、いま持っている職の 2 つ (docs/design/43)
+        for (int i = 0; i < SkillRules.LOADOUTS_PER_JOB; i++) {
             int index = i;
             loadLoadout[i] = addRenderableWidget(Button.builder(Component.literal(String.valueOf(i + 1)), b -> pressLoadout(index))
                     .bounds(left + BTN_X + i * 18, top + BTN_ROW1, 17, 12).build());
@@ -163,16 +180,17 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         saveToggle = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.loadout_save_mode"), b -> {
             saveMode = !saveMode;
             click();
-        }).bounds(left + BTN_X + 74, top + BTN_ROW1, 32, 12).build());
-        calling = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.calling_choose_short"), b -> openCalling())
-                .bounds(left + BTN_X + 108, top + BTN_ROW1, 50, 12).build());
+        }).bounds(left + BTN_X + 38, top + BTN_ROW1, 32, 12).build());
         respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.respec"), b -> pressRespec())
                 .bounds(left + BTN_X, top + BTN_ROW2, 50, 12).build());
         tryonBtn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon"), b -> toggleTryon())
                 .bounds(left + BTN_X + 52, top + BTN_ROW2, 36, 12).build());
         String[] subKeys = {"gui.skyabyss.skill.sub_tree", "gui.skyabyss.skill.sub_build", "gui.skyabyss.skill.sub_ext"};
-        for (int i = 0; i < 3; i++) {
-            subTabs[i] = addRenderableWidget(new SubTab(left + SUB_X + i * (SUB_W + 1), top + SUB_Y, i, Component.translatable(subKeys[i])));
+        // ビルドのページ (構え・連鎖・タグ・鍵石) は 43 (6 職) で削った。つまみは「木」と「変異・紋」の二つ
+        int[] pages = {0, 2};
+        for (int k = 0; k < pages.length; k++) {
+            int i = pages[k];
+            subTabs[i] = addRenderableWidget(new SubTab(left + SUB_X + k * (SUB_W + 1), top + SUB_Y, i, Component.translatable(subKeys[i])));
         }
         tryonOk = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_ok"), b -> tryonConfirm())
                 .bounds(left + BTN_X, top + BTN_ROW2, 50, 12).build());
@@ -194,7 +212,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 撮影用: ビルドのページで開く
     public SkillScreen buildPage() {
-        page = 1;
+        page = 0;
         return this;
     }
 
@@ -203,6 +221,16 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     public SkillScreen tryOn(Skill... skills) {
         demoTry = new ArrayList<>(List.of(skills));
+        return this;
+    }
+
+    // 撮影用: 木 v2 の節を選んだ状態で開く (今の職の木)
+    public SkillScreen selectNode(String id) {
+        AbilityNode n = AbilityTrees.node(Job.ofTree(tree), id);
+        if (n != null) {
+            selectedNode = n;
+            selected = n.skill;
+        }
         return this;
     }
 
@@ -228,18 +256,28 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     private void refresh() {
         SkillData d = data();
-        learn.active = selected != null && d.canLearn(selected, level()) == SkillData.LearnResult.OK;
-        learn.visible = page == 0 && selected != null && d.treeOpen(selected.tree);
-        if (selected != null) {
-            learn.setMessage(d.rank(selected) >= d.rankLimit(selected) ? Component.translatable("gui.skyabyss.skill.learn_max")
-                    : d.knows(selected) ? Component.translatable("gui.skyabyss.skill.learn_up") : Component.translatable("gui.skyabyss.skill.learn"));
+        if (v2() != null) {
+            // 木 v2: 「取る」は選んだ節に対して
+            SkillData.TakeResult tr = selectedNode == null ? null : d.canTake(tree, selectedNode, level());
+            learn.visible = page == 0 && selectedNode != null;
+            learn.active = tr == SkillData.TakeResult.OK;
+            learn.setMessage(Component.translatable(tr == SkillData.TakeResult.TAKEN ? "gui.skyabyss.tree.taken" : "gui.skyabyss.tree.take"));
+        } else {
+            learn.active = selected != null && d.canLearn(selected, level()) == SkillData.LearnResult.OK;
+            learn.visible = page == 0 && selected != null && d.treeOpen(selected.tree);
+            if (selected != null) {
+                learn.setMessage(d.rank(selected) >= d.rankLimit(selected) ? Component.translatable("gui.skyabyss.skill.learn_max")
+                        : d.knows(selected) ? Component.translatable("gui.skyabyss.skill.learn_up") : Component.translatable("gui.skyabyss.skill.learn"));
+            }
         }
         SkillData r = real();
         boolean on = tryon != null;
         respec.visible = !on;
         tryonBtn.visible = !on;
         for (SubTab t : subTabs) {
-            t.visible = !on;
+            if (t != null) {
+                t.visible = !on;
+            }
         }
         tryonOk.visible = on;
         tryonUndo.visible = on;
@@ -248,17 +286,21 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         tryonUndo.active = !tryonOrder.isEmpty();
         tryonBtn.active = page == 0;
         if (!shownTrees().contains(tree)) {
-            tree = SkillTree.ROCK;
+            List<SkillTree> shown = shownTrees();
+            tree = shown.isEmpty() ? SkillTree.ROCK : shown.get(0);
             lastTree = tree;
             selected = null;
+            selectedNode = null;
+            fitCanvas();
         }
-        respec.active = r.spentPoints() > 0;
+        Job rj = Job.byId(r.curJob);
+        respec.active = rj != null && AbilityTrees.of(rj) != null ? !r.nodesOf(rj).isEmpty() : r.spentPoints() > 0;
         respec.setMessage(Component.translatable(respecArmed > 0 ? "gui.skyabyss.skill.respec_confirm" : "gui.skyabyss.skill.respec"));
-        for (int i = 0; i < SkillRules.LOADOUTS; i++) {
-            loadLoadout[i].active = saveMode || r.loadouts[i].saved;
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(r.curJob);
+        for (int i = 0; i < SkillRules.LOADOUTS_PER_JOB; i++) {
+            loadLoadout[i].active = job != null && (saveMode || r.loadouts[SkillData.loadoutIndex(job, i)].saved);
         }
         saveToggle.setMessage(Component.translatable(saveMode ? "gui.skyabyss.skill.loadout_save_on" : "gui.skyabyss.skill.loadout_save_mode"));
-        calling.visible = pendingCalling() > 0;
     }
 
     @Override
@@ -278,6 +320,26 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     private void learnSelected() {
+        if (v2() != null) {
+            if (selectedNode == null) {
+                return;
+            }
+            if (tryon != null) {
+                // 試着: 写しの木だけを進める (サーバーへは確定のときにまとめて送る)
+                SkillData.TakeResult r = tryon.canTake(tree, selectedNode, level());
+                if (r == SkillData.TakeResult.OK) {
+                    tryon.nodesOf(tree).add(selectedNode.id);
+                    tryon.applyNodes();
+                    tryonOrder.add(selectedNode.id);
+                    minecraft.getSoundManager().play(SimpleSoundInstance.forUI(Skills.SOUND_LEARN.get(), 1.8f, 0.3f));
+                } else {
+                    notice(Component.translatable("message.skyabyss.skill.node_failed." + r.name().toLowerCase()));
+                }
+                return;
+            }
+            PacketDistributor.sendToServer(new SkillNodePayload(tree.id, selectedNode.id));
+            return;
+        }
         if (selected == null) {
             return;
         }
@@ -326,6 +388,11 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             return;
         }
         String id = tryonOrder.remove(tryonOrder.size() - 1);
+        if (v2() != null && tryon.nodesOf(tree).remove(id)) {
+            tryon.applyNodes();
+            click();
+            return;
+        }
         int left = tryon.ranks.merge(id, -1, Integer::sum);
         if (left <= 0) {
             tryon.ranks.remove(id);
@@ -334,6 +401,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     private void setPage(int p) {
+        if (p == 1) {
+            p = 0;
+        }
         if (p != page) {
             page = p;
             click();
@@ -388,31 +458,18 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         return real().rebirth;
     }
 
-    private void openCalling() {
-        int which = pendingCalling();
-        if (which > 0) {
-            minecraft.setScreen(new CallingScreen(which));
-        }
-    }
-
-    // 選べる天職 (0 = なし)。進みはサーバーだけが知るので、サーバーが知らせた段 (SkillClient.callingReady) を見る
-    private int pendingCalling() {
-        SkillData d = data();
-        if (!SkillRules.CALLINGS) {
-            return 0;
-        }
-        int ready = SkillClient.callingReady;
-        return !d.hasCalling() ? (ready >= 1 ? 1 : 0) : d.calling2.isEmpty() ? (ready >= 2 ? 2 : 0) : 0;
-    }
-
-    private void pressLoadout(int index) {
+    private void pressLoadout(int i) {
         if (tryon != null) {
             notice(Component.translatable("gui.skyabyss.skill.tryon_locked"));
             return;
         }
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(real().curJob);
+        if (job == null) {
+            return;
+        }
         boolean save = saveMode;
         saveMode = false;
-        PacketDistributor.sendToServer(new SkillLoadoutPayload(index, save));
+        PacketDistributor.sendToServer(new SkillLoadoutPayload(SkillData.loadoutIndex(job, i), save));
         click();
     }
 
@@ -454,28 +511,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     // ---------------------------------------------------------------- 位置
-    // 橋の輪: 5 本の木 (角) の間に橋 (辺の真ん中)。輪の中心と半径
-    static final int RING_CX = 98;
-    static final int RING_CY = 80;
-    static final int RING_NODE_R = 48;
-    static final int RING_TREE_R = 64;
-
-    private static double ringAngle(int i, boolean node) {
-        return Math.toRadians(-90 + 72 * i + (node ? 36 : 0));
-    }
-
     // 盤の単位の位置 (盤の左上が原点。描くときは canvas の中で描く)
     private int nodeX(Skill s) {
-        if (s.tree == SkillTree.HYBRID) {
-            return RING_CX + (int) Math.round(Math.cos(ringAngle(s.column, true)) * RING_NODE_R) - NODE / 2;
-        }
         return COL_X[s.column];
     }
 
     private int nodeY(Skill s) {
-        if (s.tree == SkillTree.HYBRID) {
-            return RING_CY + (int) Math.round(Math.sin(ringAngle(s.column, true)) * RING_NODE_R) - NODE / 2;
-        }
         return TIER_Y[s.tier];
     }
 
@@ -487,8 +528,19 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     private List<SkillTree> shownTrees() {
         List<SkillTree> list = new ArrayList<>();
         int reborn = minecraft == null || minecraft.player == null ? 0 : rebirth();
-        for (SkillTree t : SkillTree.values()) {
-            if (!t.sealed && (!t.rebornOnly() || reborn > 0)) {
+        // 木 v2: 職の木は今の職のものだけ (ほかの職は職の間で替えてから)
+        Job cur = minecraft == null || minecraft.player == null ? null : Job.byId(real().curJob);
+        if (cur != null && AbilityTrees.of(cur) != null) {
+            list.add(cur.tree);
+        } else {
+            for (jp.revati.skyabyss.rpg.skill.Job j : jp.revati.skyabyss.rpg.skill.Job.values()) {
+                if (!Skill.inTree(j.tree).isEmpty() && (!j.tree.sealed || real().treeOpen(j.tree))) {
+                    list.add(j.tree);
+                }
+            }
+        }
+        for (SkillTree t : new SkillTree[] {SkillTree.DEEP, SkillTree.PAST}) {
+            if (reborn > 0) {
                 list.add(t);
             }
         }
@@ -506,7 +558,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     private Skill nodeAt(double mx, double my) {
-        if (!canvas.contains(mx, my)) {
+        if (!canvas.contains(mx, my) || v2() != null) {
             return null;
         }
         double bx = canvas.toContentX(mx);
@@ -541,6 +593,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     // ---------------------------------------------------------------- 入力
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
+        if (button == 0 && artsHovered(fit.x(screenX), fit.y(screenY)) && minecraft.player != null) {
+            // 秘伝の一覧 (チャットの押せる一覧) を出し、チャットの窓を開いて全部見せる
+            minecraft.player.connection.sendCommand("skyabyss_arts");
+            minecraft.setScreen(new net.minecraft.client.gui.screens.ChatScreen(""));
+            return true;
+        }
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
         if (super.mouseClicked(mx, my, button)) {
@@ -553,25 +611,29 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         if (page == 2) {
             return ext.click(mx, my, real(), minecraft, this::notice, this::click);
         }
-        if (page == 1) {
-            for (int[] h : hits) {
-                if (in(mx, my, h[0], h[1], h[2], h[3]) && h[4] != 4) {
-                    pressHit(h[4], h[5]);
-                    return true;
-                }
-            }
-        }
         SkillTree t = page == 0 ? treeTabAt(mx, my) : null;
         if (t != null) {
             if (t != tree) {
                 tree = t;
                 lastTree = t;
                 selected = null;
-                canvas.reset();
+                selectedNode = null;
+                fitCanvas();
                 click();
                 refresh();
             }
             return true;
+        }
+        if (page == 0 && v2() != null) {
+            AbilityNode n = v2NodeAt(mx, my);
+            if (n != null) {
+                selectedNode = n;
+                selected = n.skill;
+                runeArmed = 0;
+                click();
+                refresh();
+                return true;
+            }
         }
         Skill s = page == 0 ? nodeAt(mx, my) : null;
         if (s != null) {
@@ -617,8 +679,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             } else if (d.slot(slot) != null) {
                 // 置いてある技を選ぶ (木も合わせる)
                 selected = d.slot(slot);
-                tree = selected.tree;
-                lastTree = tree;
+                if (tree != selected.tree) {
+                    tree = selected.tree;
+                    lastTree = tree;
+                    fitCanvas();
+                }
+                selectedNode = v2() == null ? null : v2().skillNode(selected);
                 click();
                 refresh();
             }
@@ -650,7 +716,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             return;
         }
         if (current == 0) {
-            if (d.unspentPoints(level()) < 1) {
+            if (d.unspentFor(selected.tree, level()) < 1) {
                 notice(Component.translatable("gui.skyabyss.skill.need_points"));
                 return;
             }
@@ -781,17 +847,16 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         g.drawCenteredString(font, title, left + W / 2, top + 8, TITLE);
         if (page == 0) {
             renderTreeTabs(g, d);
+            hoverNode = v2() != null ? v2NodeAt(mouseX, mouseY) : null;
             renderTree(g, d, level);
             hoverRune = 0;
             renderInfo(g, d, level, mouseX, mouseY);
-        } else if (page == 1) {
-            runeRows.clear();
-            renderBuild(g, d, level, mouseX, mouseY);
         } else {
             runeRows.clear();
             ext.render(g, font, minecraft, d, left, top, mouseX, mouseY);
         }
         renderBottom(g, d, level);
+        renderArts(g);
         if (lessonLearn && page == 0) {
             if (learn.active && learn.visible) {
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, learn.getX(), learn.getY(), learn.getWidth(), learn.getHeight());
@@ -846,12 +911,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             int state = t == tree ? 1 : 0;
             g.blit(SkillHud.TEXTURE, x, y, size, size, 240 + state * 56, 384, 52, 52, SkillHud.TEX_W, SkillHud.TEX_H);
             SkillHud.drawIcon(g, t.iconIndex(), x + 2, y + 2, size - 4);
-            // 天職の印: 1 つ目は金、2 つ目は青緑の小さな点
-            if (t.id.equals(d.calling)) {
-                g.fill(x + size - 5, y + 1, x + size - 1, y + 5, 0xFF000000 | GOLD);
-            } else if (t.id.equals(d.calling2)) {
-                g.fill(x + size - 5, y + 1, x + size - 1, y + 5, 0xFF000000 | LORE);
-            }
         }
     }
 
@@ -859,30 +918,22 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     private void renderTree(GuiGraphics g, SkillData d, int level) {
         lessonLearn = tryon == null && jp.revati.skyabyss.client.tutorial.SkillLessonClient.learning(minecraft);
-        // 見出し: 木の名前 (天職なら印を添える)
-        MutableComponent head = Component.translatable(tree.nameKey());
+        if (v2() != null) {
+            renderTreeV2(g, d, level);
+            return;
+        }
+        // 見出し: 職と木の名前
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.ofTree(tree);
+        MutableComponent head = job == null ? Component.translatable(tree.nameKey())
+                : Component.translatable("job.skyabyss.subtitle", Component.translatable(job.nameKey()), Component.translatable(tree.nameKey()));
         int headColor = GOLD;
-        if (SkillRules.CALLINGS) {
-            if (tree.id.equals(d.calling)) {
-                head.append(Component.literal("  ")).append(Component.translatable("gui.skyabyss.skill.calling_mark"));
-            } else if (tree.id.equals(d.calling2)) {
-                head.append(Component.literal("  ")).append(Component.translatable("gui.skyabyss.skill.calling2_mark"));
-                headColor = LORE;
-            } else if (!d.hasCalling() && tree.callable()) {
-                headColor = SOFT;
-            }
+        if (job != null && minecraft != null && minecraft.player != null && jp.revati.skyabyss.rpg.skill.Job.held(minecraft.player) == job) {
+            head.append(Component.literal("  ")).append(Component.translatable("gui.skyabyss.skill.job_held"));
         }
         if (tryon != null) {
             head = Component.empty();
         }
-        g.drawString(font, head, left + 38, top + 25, headColor, false);
-        if (tryon == null && SkillTag.of(tree) != null && tree != SkillTree.TRAVELER) {
-            int tier = SkillBuild.setTier(d, tree);
-            int hx = left + 38 + font.width(head) + 8;
-            for (int i = 0; i < 3; i++) {
-                g.fill(hx + i * 6, top + 27, hx + i * 6 + 4, top + 31, i < tier ? 0xFF000000 | GOLD : 0xFF3A404C);
-            }
-        }
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, head, left + 38, top + 25, BOARD_VX + BOARD_VW - 38 - 2, headColor, false);
         if (tree == SkillTree.PAST) {
             // 前世の点 (通常の点とは別枠)
             Component pool = Component.translatable("gui.skyabyss.ext.past_points", d.pastLeft(), d.pastPool());
@@ -890,11 +941,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
         // 盤の中 (節と線と印は盤の単位で描く。窓の外は切れる)
         canvas.begin(g);
-        if (tree == SkillTree.HYBRID) {
-            renderRing(g, d);
-        }
-        // 行の目印 (要るレベル。淵は要る転生の回数。橋と前世の技は行の目印なし)
-        for (int tier = 0; tier < 4 && tree != SkillTree.HYBRID && tree != SkillTree.PAST; tier++) {
+        // 行の目印 (要るレベル。淵は要る転生の回数。前世の技は行の目印なし)
+        for (int tier = 0; tier < 4 && tree != SkillTree.PAST; tier++) {
             boolean deep = tree == SkillTree.DEEP;
             int need = deep ? new int[] {1, 3, 4, 5}[tier] : new int[] {1, 5, 12, 20}[tier];
             String lv = deep ? "転" + need : "Lv" + need;
@@ -922,8 +970,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             int x = nodeX(s);
             int y = nodeY(s);
             int rank = d.rank(s);
-            boolean allowed = d.callingAllows(s);
-            boolean reachable = d.requirementsMet(s) && level >= s.minLevel && allowed && s.rebirthAt() <= d.rebirth && d.bridgeOpen(s);
+            boolean reachable = d.requirementsMet(s) && level >= s.minLevel && s.rebirthAt() <= d.rebirth;
             int state = rank >= d.rankLimit(s) ? 3 : rank > 0 ? 2 : reachable ? 1 : 0;
             if (s.keystone()) {
                 g.blit(PANEL, x, y, NODE, NODE, state * 48, 376, 44, 44, 1024, 512);
@@ -937,9 +984,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
             SkillHud.drawIcon(g, s.iconIndex(), x + 3, y + 3);
             g.setColor(1f, 1f, 1f, 1f);
-            if (!allowed) {
-                SkillHud.drawIcon(g, 44, x + 9, y + 9);
-            }
             if (s == selected) {
                 g.blit(SkillHud.TEXTURE, x - 1, y - 1, NODE + 2, NODE + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
             }
@@ -972,40 +1016,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         canvas.end(g);
     }
 
-    // 橋の輪: 角に 5 本の木の印 (覚えた技の数 n/3)、辺に橋。橋から両隣の木へ線を引く
-    private static final SkillTree[] RING_TREES = {SkillTree.ROCK, SkillTree.WIND, SkillTree.TIDE, SkillTree.ASH, SkillTree.BONE};
-
-    private void renderRing(GuiGraphics g, SkillData d) {
-        int cx = RING_CX;
-        int cy = RING_CY;
-        for (Skill s : Skill.inTree(SkillTree.HYBRID)) {
-            SkillTree[] parents = s.bridgeTrees();
-            int nx = nodeX(s) + NODE / 2;
-            int ny = nodeY(s) + NODE / 2;
-            for (int k = 0; k < 2; k++) {
-                int vi = (s.column + k) % 5;
-                double a = ringAngle(vi, false);
-                int vx = cx + (int) Math.round(Math.cos(a) * RING_TREE_R);
-                int vy = cy + (int) Math.round(Math.sin(a) * RING_TREE_R);
-                boolean ok = d.knownIn(parents[k]) >= SkillData.BRIDGE_SKILLS_PER_TREE;
-                diag(g, nx, ny, vx, vy, ok ? LORE : DIM);
-            }
-        }
-        for (int i = 0; i < 5; i++) {
-            double a = ringAngle(i, false);
-            int vx = cx + (int) Math.round(Math.cos(a) * RING_TREE_R);
-            int vy = cy + (int) Math.round(Math.sin(a) * RING_TREE_R);
-            int n = d.knownIn(RING_TREES[i]);
-            boolean ok = n >= SkillData.BRIDGE_SKILLS_PER_TREE;
-            g.fill(vx - 8, vy - 8, vx + 8, vy + 8, 0xFF161A22);
-            g.fill(vx - 8, vy - 8, vx + 8, vy - 7, ok ? 0xFF000000 | GOLD : 0xFF3A4452);
-            SkillHud.drawIcon(g, RING_TREES[i].iconIndex(), vx - 7, vy - 7, 14);
-            String t = Math.min(n, 9) + "/" + SkillData.BRIDGE_SKILLS_PER_TREE;
-            g.pose().pushPose();
-            g.pose().translate(vx, vy + 9, 0);
-            g.pose().scale(0.75f, 0.75f, 1f);
-            g.drawString(font, t, -font.width(t) / 2, 0, ok ? GOLD : SOFT, false);
-            g.pose().popPose();
+    // 太さ w のまっすぐな線 (斜めも)
+    private static void thick(GuiGraphics g, int x0, int y0, int x1, int y1, int color, int w) {
+        int steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+        int h = w / 2;
+        for (int i = 0; i <= steps; i++) {
+            int x = x0 + Math.round((x1 - x0) * i / (float) Math.max(1, steps));
+            int y = y0 + Math.round((y1 - y0) * i / (float) Math.max(1, steps));
+            g.fill(x - h, y - h, x - h + w, y - h + w, 0xFF000000 | color);
         }
     }
 
@@ -1023,6 +1041,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     private void renderInfo(GuiGraphics g, SkillData d, int level, int mx, int my) {
+        if (v2() != null) {
+            renderInfoV2(g, d, level, mx, my);
+            return;
+        }
+        renderInfoSkill(g, d, level, mx, my);
+    }
+
+    private void renderInfoSkill(GuiGraphics g, SkillData d, int level, int mx, int my) {
         runeRows.clear();
         int x = left + INFO_X + 5;
         int y = top + INFO_Y + 5;
@@ -1043,20 +1069,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             lines.addAll(TextWrap.split(font, Component.translatable(tree.descKey()).withColor(SOFT), w));
             lines.add(statLine.copy().withColor(SOFT).getVisualOrderText());
             lines.add(FormattedCharSequence.EMPTY);
-            SkillTag treeTag = SkillTag.of(tree);
-            if (treeTag != null && tree != SkillTree.TRAVELER) {
-                int tier = SkillBuild.setTier(d, tree);
-                lines.add(Component.translatable("gui.skyabyss.skill.set_head", d.treePoints(tree), tier).withColor(PALE).getVisualOrderText());
-                for (int i = 0; i < 3; i++) {
-                    lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.set_line", SkillRules.SET_AT[i],
-                            Component.translatable("skillset.skyabyss." + treeTag.id + "." + (i + 1))).withColor(i < tier ? GOLD : DIM), w));
-                }
-                lines.add(FormattedCharSequence.EMPTY);
-            }
-            if (SkillRules.CALLINGS && !d.hasCalling()) {
-                lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.before_calling").withColor(LORE), w));
-                lines.add(FormattedCharSequence.EMPTY);
-            }
             lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.pick_hint").withColor(DIM), w));
             drawInfo(g, lines, x);
             return;
@@ -1071,9 +1083,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
         if (s.active) {
             kind.append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.mastery_short", d.masteryLevel(s)));
-        }
-        if (d.granted(s)) {
-            kind.append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.granted"));
         }
         lines.add(kind.withColor(SOFT).getVisualOrderText());
         if (s.active) {
@@ -1109,16 +1118,11 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
         // 足りない条件 (赤紫)
         if (rank < limit) {
-            if (level < s.minLevel) {
+            if (level < s.minLevel && Job.ofTree(s.tree) == null) {
                 body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_level", s.minLevel).withColor(DENY), w));
             }
             if (s.rebirthAt() > d.rebirth) {
                 body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.ext.need_rebirth", s.rebirthAt()).withColor(DENY), w));
-            }
-            if (!d.bridgeOpen(s)) {
-                SkillTree[] bt = s.bridgeTrees();
-                body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.ext.need_bridge", Component.translatable(bt[0].nameKey()),
-                        d.knownIn(bt[0]), Component.translatable(bt[1].nameKey()), d.knownIn(bt[1]), SkillData.BRIDGE_SKILLS_PER_TREE).withColor(DENY), w));
             }
             if (s.tree == SkillTree.PAST && d.pastLeft() < 1 && s.rebirthAt() <= d.rebirth) {
                 body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.ext.need_past_points").withColor(DENY), w));
@@ -1134,20 +1138,28 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 }
                 body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_skill", names).withColor(DENY), w));
             }
-            if (!d.callingAllows(s)) {
-                body.addAll(TextWrap.split(font, Component.translatable(d.hasCalling() ? "gui.skyabyss.skill.need_calling_deep" : "gui.skyabyss.skill.need_calling")
-                        .withColor(DENY), w));
-            }
-            if (s.tree != SkillTree.PAST && d.unspentPoints(level) < 1 && level >= s.minLevel && d.requirementsMet(s) && d.callingAllows(s)
-                    && s.rebirthAt() <= d.rebirth && d.bridgeOpen(s)) {
+            if (s.tree != SkillTree.PAST && d.unspentFor(s.tree, level) < 1 && level >= s.minLevel && d.requirementsMet(s)
+                    && s.rebirthAt() <= d.rebirth) {
                 body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_points").withColor(DENY), w));
             }
         } else if (limit < s.maxRank) {
             body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.rank_capped", limit).withColor(SOFT), w));
         }
+        // 木 v2: この節の点・前提・型の点・いま取れるか
+        if (v2() != null && selectedNode != null && selectedNode.skill == s) {
+            body.add(FormattedCharSequence.EMPTY);
+            body.addAll(wrapAll(v2Status(d, selectedNode, level, true), w));
+        }
         // 刻印 (使う技のうち、刻印のあるもの) は本文の下に続く。言い伝えの一行は効果の前に
-        List<Rune> runes = s.runes();
-        boolean hasRunes = s.active;
+        // 刻印: 職の木 v2 では節で選ぶので、ここには出さない
+        boolean hasRunes = s.active && v2() == null;
+        // いま技を変えているもの (刻印・書き換え・変異・秘伝) は一番上に (技が見た目のまま変わって分かりづらい、の声)
+        List<Component> changes = new ArrayList<>();
+        changeLines(changes, s);
+        if (!changes.isEmpty()) {
+            lines.addAll(wrapAll(changes, w));
+            lines.add(FormattedCharSequence.EMPTY);
+        }
         lines.addAll(TextWrap.split(font, Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w));
         lines.addAll(body);
         // 送れる面の中で描く (字が長ければ送る)。刻印の段は本文の続きに置き、枠の外の段は当たりを取らない
@@ -1184,8 +1196,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 逸品の書き換えの行を出すか (その武器を主の手に持っているか、もう選んでいるとき)
     private boolean legendShown(SkillData d, Skill s) {
-        Rune legend = Rune.legendaryOf(s);
-        return legend != null && (legend.held(minecraft.player) || d.rune(s) == legend.index);
+        Rune legend = Rune.legendFor(s, minecraft.player);
+        return legend != null && (legend.held(minecraft.player) || d.rune(s) == 4);
     }
 
     // 狭い箱に名前を収める: 幅が足りなければ 0.7 倍まで縮め、それでも足りなければ「…」で切る (中心 cx、上端 y)
@@ -1257,23 +1269,23 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         // 逸品の書き換え: 全幅の行 (その武器を持つあいだ)
         boolean legendRow = legendShown(d, s);
         if (legendRow) {
-            Rune r = Rune.legendaryOf(s);
+            Rune r = Rune.legendFor(s, minecraft.player);
             int ly = ry + 14;
-            boolean mine = current == r.index;
+            boolean mine = current == 4;
             boolean usable = available && r.held(minecraft.player);
             boolean hover = in(mx, my, x, ly, w - 4, 12) && usable;
-            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == r.index ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
+            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == 4 ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
             g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? 0xFF2A3A40 : hover ? 0xFF2E2A20 : 0xFF1C1A16);
             Component name = Component.translatable("gui.skyabyss.skill.rune_legend", Component.translatable(r.nameKey()));
             g.drawString(font, name, x + (w - 4 - font.width(name)) / 2, ly + 2, mine ? GOLD : usable ? 0xF2D78A : DIM, false);
-            runeRows.add(new int[] {x, ly, w - 4, 12, r.index});
+            runeRows.add(new int[] {x, ly, w - 4, 12, 4});
             if (hover) {
-                hoverRune = r.index;
+                hoverRune = 4;
             }
         }
         // 見ている (選んでいる) 刻印の効果
         int shown = hoverRune != 0 ? hoverRune : current;
-        Rune shownRune = shown == 0 ? null : Rune.of(s, shown);
+        Rune shownRune = shown == 0 ? null : shown == 4 ? Rune.legendFor(s, minecraft.player) : Rune.of(s, shown);
         int ty = ry + (legendRow ? 28 : 14);
         if (shown == Rune.MASTERY) {
             for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("rune.skyabyss.mastery.effect", SkillRules.MASTERY_RUNE_LEVEL,
@@ -1308,6 +1320,12 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 習得のボタンに重ねたとき: 次の段の効果
     private void renderLearnTooltip(GuiGraphics g, SkillData d, int mx, int my) {
+        if (v2() != null) {
+            if (selectedNode != null && learn.visible && learn.isHovered()) {
+                tip(wrapAll(v2Lines(d, selectedNode, level()), 200));
+            }
+            return;
+        }
         if (selected == null || !learn.visible || !learn.isHovered()) {
             return;
         }
@@ -1330,7 +1348,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     private boolean subTabHovered() {
         for (SubTab t : subTabs) {
-            if (t.isHovered()) {
+            if (t != null && t.isHovered()) {
                 return true;
             }
         }
@@ -1338,19 +1356,16 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     private void renderBottom(GuiGraphics g, SkillData d, int level) {
-        int points = d.unspentPoints(level);
+        int points = tree == SkillTree.PAST ? d.pastLeft() : d.unspentFor(tree, level);
         g.drawString(font, Component.translatable(tryon != null ? "gui.skyabyss.skill.points_tryon" : "gui.skyabyss.skill.points", points), left + 10, top + 158,
                 tryon != null ? 0x7FFFA0 : points > 0 ? GOLD : SOFT, false);
-        // 枠の組 (近接など / 弓): 武器を持ち替えると入れ替わる
-        Component barLabel = Component.translatable(real().bar == 1 ? "gui.skyabyss.skill.bar_bow" : "gui.skyabyss.skill.bar_melee");
-        g.drawString(font, barLabel, left + SLOT_X - 3 - font.width(barLabel), top + SLOT_Y + 7, SOFT, false);
         double max = SkillManager.maxMana(minecraft.player);
         g.drawString(font, Component.translatable("gui.skyabyss.skill.mana", Math.round(Math.max(0, d.mana)), Math.round(max)),
                 left + 10, top + 169, 0x9FB8FF, false);
-        for (int i = 0; i < SkillRules.SLOTS; i++) {
+        for (int i = 0; i < d.slotCount(); i++) {
             int x = left + SLOT_X + i * SLOT_STEP;
             int y = top + SLOT_Y;
-            boolean locked = i >= d.slotCount();
+            boolean locked = false;
             g.blit(SkillHud.TEXTURE, x, y, NODE, NODE, 420, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
             Skill s = d.slot(i);
             if (locked) {
@@ -1359,6 +1374,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 g.setColor(1f, 1f, 1f, 1f);
             } else if (s != null) {
                 SkillHud.drawIcon(g, s.iconIndex(), x + 3, y + 3);
+                SkillHud.changeMark(g, minecraft.player, s, x + 2, y + 2);
             }
             String k = SkillClientSetup.SLOT_KEYS[i].getTranslatedKeyMessage().getString();
             if (k.length() > 3) {
@@ -1371,9 +1387,63 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
+    // 秘伝の枠 (技の枠の右、型の札の左)。中は付けた秘伝の技の絵と段の点 (I〜III)
+    static final int ARTS_X = 183;
+    static final int ARTS_Y = 157;
+    static final int ARTS_BOX = 14;
+
+    private void renderArts(GuiGraphics g) {
+        var held = jp.revati.skyabyss.rpg.skill.SecretArts.heldFor(minecraft.player);
+        for (int i = 0; i < jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS; i++) {
+            int x = left + ARTS_X + (i % 2) * (ARTS_BOX + 2);
+            int y = top + ARTS_Y + (i / 2) * (ARTS_BOX + 2);
+            boolean on = i < held.size();
+            int c = 0xFF000000 | jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.SECRET.rgb;
+            g.fill(x, y, x + ARTS_BOX, y + ARTS_BOX, on ? c : 0xFF2A2E3A);
+            g.fill(x + 1, y + 1, x + ARTS_BOX - 1, y + ARTS_BOX - 1, 0xFF14161E);
+            if (on) {
+                var h = held.get(i);
+                SkillHud.drawIcon(g, h.art().skill.iconIndex(), x + 1, y + 1, ARTS_BOX - 2);
+                // 段の点 (下の縁に 1〜3 つ)
+                for (int t = 0; t < h.tier(); t++) {
+                    int px = x + ARTS_BOX / 2 - h.tier() + t * 2;
+                    g.fill(px, y + ARTS_BOX - 2, px + 1, y + ARTS_BOX - 1, 0xFFFFFFFF);
+                }
+            }
+        }
+        Component label = Component.translatable("gui.skyabyss.skill.arts_label");
+        g.drawString(font, label, left + ARTS_X + ARTS_BOX + 1 - font.width(label) / 2, top + ARTS_Y + ARTS_BOX + 3, SOFT, false);
+    }
+
+    private boolean artsHovered(double mx, double my) {
+        return mx >= left + ARTS_X && mx < left + ARTS_X + 2 * ARTS_BOX + 2 && my >= top + ARTS_Y && my < top + ARTS_Y + ARTS_BOX + 12;
+    }
+
     private void renderHover(GuiGraphics g, SkillData d, int mx, int my) {
-        if (page == 1 && buildTooltip(g, real(), mx, my)) {
+        if (artsHovered(mx, my)) {
+            List<Component> lines = new ArrayList<>();
+            lines.add(Component.translatable("gui.skyabyss.skill.arts_title").withColor(GOLD));
+            var held = jp.revati.skyabyss.rpg.skill.SecretArts.heldFor(minecraft.player);
+            for (int i = 0; i < jp.revati.skyabyss.rpg.skill.SecretArts.SLOTS; i++) {
+                if (i < held.size()) {
+                    var h = held.get(i);
+                    lines.add(Component.literal("・").append(jp.revati.skyabyss.rpg.skill.SecretArts.name(h.art(), h.tier())).append(" — ")
+                            .append(Component.translatable(h.art().skill.nameKey())).withColor(jp.revati.skyabyss.rpg.skill.SkillChanges.Kind.SECRET.rgb));
+                    lines.add(Component.literal("  ").append(Component.translatable(h.art().nameKey() + ".desc")).withColor(TEXT));
+                } else {
+                    lines.add(Component.translatable("gui.skyabyss.skill.arts_empty").withColor(DIM));
+                }
+            }
+            lines.add(Component.translatable("gui.skyabyss.skill.arts_hint").withColor(DIM));
+            tip(wrapAll(lines, 220));
             return;
+        }
+        if (page == 0 && v2() != null) {
+            AbilityNode n = v2NodeAt(mx, my);
+            if (n != null) {
+                tip(wrapAll(v2Lines(d, n, level()), 200));
+                return;
+            }
         }
         Skill node = page == 0 ? nodeAt(mx, my) : null;
         if (node != null) {
@@ -1404,12 +1474,13 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             Skill s = d.slot(slot);
             List<Component> lines = new ArrayList<>();
             if (slot >= d.slotCount()) {
-                lines.add(Component.translatable("gui.skyabyss.skill.slot_locked").withColor(SOFT));
-                tipC(lines);
                 return;
             }
             lines.add(s == null ? Component.translatable("gui.skyabyss.skill.slot_empty").withColor(SOFT)
                     : Component.translatable(s.nameKey()).withColor(GOLD));
+            if (s != null) {
+                changeLines(lines, s);
+            }
             lines.add(Component.translatable("gui.skyabyss.skill.slot_key", SkillClientSetup.SLOT_KEYS[slot].getTranslatedKeyMessage()).withColor(SOFT));
             lines.add(Component.translatable(selected != null && !selected.active && d.knows(selected) ? "gui.skyabyss.skill.passive_no_slot"
                     : selected != null && selected.active && d.knows(selected)
@@ -1423,23 +1494,19 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable(t.nameKey()).withColor(GOLD));
             lines.add(Component.translatable(t.descKey()).withColor(SOFT));
-            SkillTag tabTag = SkillTag.of(t);
-            if (tabTag != null && t != SkillTree.TRAVELER) {
-                int tier = SkillBuild.setTier(d, t);
-                lines.add(Component.translatable("gui.skyabyss.skill.set_head", d.treePoints(t), tier).withColor(PALE));
-                for (int i = 0; i < 3; i++) {
-                    lines.add(Component.translatable("gui.skyabyss.skill.set_line", SkillRules.SET_AT[i],
-                            Component.translatable("skillset.skyabyss." + tabTag.id + "." + (i + 1))).withColor(i < tier ? GOLD : DIM));
-                }
-            }
             tipC(lines);
             return;
         }
-        for (int i = 0; i < SkillRules.LOADOUTS; i++) {
+        for (int i = 0; i < SkillRules.LOADOUTS_PER_JOB; i++) {
             if (loadLoadout[i].isHovered()) {
                 SkillData rd = real();
+                jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(rd.curJob);
+                if (job == null) {
+                    tip(new ArrayList<>(TextWrap.split(font, Component.translatable("message.skyabyss.skill.no_job_weapon").withColor(TEXT), 190)));
+                    return;
+                }
                 List<FormattedCharSequence> lines = new ArrayList<>(TextWrap.split(font, Component.translatable(saveMode ? "gui.skyabyss.skill.loadout_save_tip" : "gui.skyabyss.skill.loadout_load_tip",
-                        i + 1, rd.loadouts[i].saved ? Component.translatable("gui.skyabyss.skill.loadout_saved") : Component.translatable("gui.skyabyss.skill.loadout_empty")).withColor(TEXT), 190));
+                        i + 1, rd.loadouts[SkillData.loadoutIndex(job, i)].saved ? Component.translatable("gui.skyabyss.skill.loadout_saved") : Component.translatable("gui.skyabyss.skill.loadout_empty")).withColor(TEXT), 190));
                 tip(lines);
                 return;
             }
@@ -1448,7 +1515,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             String key = saveToggle.isHovered() ? "gui.skyabyss.skill.loadout_mode_tip" : tryonBtn.isHovered() ? "gui.skyabyss.skill.tryon_tip"
                     : subTabHovered() ? "gui.skyabyss.skill.page_tip" : tryonOk.isHovered() ? "gui.skyabyss.skill.tryon_ok_tip"
                     : tryonUndo.isHovered() ? "gui.skyabyss.skill.tryon_undo_tip" : "gui.skyabyss.skill.tryon_cancel_tip";
-            tip(new ArrayList<>(TextWrap.split(font, Component.translatable(key, SkillRules.LOADOUTS).withColor(TEXT), 190)));
+            tip(new ArrayList<>(TextWrap.split(font, Component.translatable(key, SkillRules.LOADOUTS_PER_JOB).withColor(TEXT), 190)));
             return;
         }
         if (respec.isHovered()) {
@@ -1464,222 +1531,427 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
-    // ---------------------------------------------------------------- ビルドのページ (構え・連鎖・タグ・鍵石)
-    private void pressHit(int type, int arg) {
-        switch (type) {
-            case 1 -> {
-                SkillData r = real();
-                if (r.stance == arg) {
-                    return;
-                }
-                if (r.stanceCd > 0 && !minecraft.player.isCreative()) {
-                    notice(Component.translatable("message.skyabyss.skill.stance_cooldown"));
-                    return;
-                }
-                PacketDistributor.sendToServer(new SkillStancePayload(arg));
-                click();
+    // ---------------------------------------------------------------- 技の木 v2 (docs/design/48)。職の木は格子の盤
+    // いま見ている木が職の木 v2 なら、その木 (淵・前世・木のない職は null)
+    private AbilityTree v2() {
+        return AbilityTrees.of(tree);
+    }
+
+    private Job v2Job() {
+        return Job.ofTree(tree);
+    }
+
+    // 盤の大きさを木に合わせ、見え方を戻す
+    private void fitCanvas() {
+        AbilityTree t = v2();
+        if (t != null) {
+            canvas.setContent(GRID_X0 * 2 + t.width * GRID + NODE, GRID_Y0 + t.height * GRID + NODE + 24);
+        } else {
+            canvas.setContent(BOARD_W, BOARD_H);
+        }
+        canvas.reset();
+    }
+
+    private static int v2X(AbilityNode n) {
+        return GRID_X0 + n.x * GRID;
+    }
+
+    private static int v2Y(AbilityNode n) {
+        return GRID_Y0 + n.y * GRID;
+    }
+
+    // 節の大きさ (種類ごと。使う技がいちばん大きく、基礎はいちばん小さい。2026-10-30 の声「どれがスキルかわからない」)
+    static int v2Size(AbilityNode n) {
+        return switch (n.kind) {
+            case ACTIVE -> 30;
+            case KEYSTONE, TRAIT -> 28;
+            case PASSIVE, MUTATION -> 24;
+            case STAT -> 15;
+            default -> 18;
+        };
+    }
+
+    // 節の左上 (格子の升の真ん中に、大きさの分だけ寄せる)
+    private static int v2L(AbilityNode n) {
+        return v2X(n) + (NODE - v2Size(n)) / 2;
+    }
+
+    private static int v2T(AbilityNode n) {
+        return v2Y(n) + (NODE - v2Size(n)) / 2;
+    }
+
+    private AbilityNode v2NodeAt(double mx, double my) {
+        AbilityTree t = v2();
+        if (t == null || !canvas.contains(mx, my)) {
+            return null;
+        }
+        double bx = canvas.toContentX(mx);
+        double by = canvas.toContentY(my);
+        for (AbilityNode n : t.nodes()) {
+            // 小さな節も押しやすいよう、当たりは 18 より小さくしない
+            int hs = Math.max(18, v2Size(n));
+            if (in(bx, by, v2X(n) + (NODE - hs) / 2, v2Y(n) + (NODE - hs) / 2, hs, hs)) {
+                return n;
             }
-            case 2 -> {
-                SkillData r = real();
-                if ((r.chainMask & (1 << arg)) == 0 && Integer.bitCount(r.chainMask) >= SkillRules.CHAIN_MAX) {
-                    notice(Component.translatable("message.skyabyss.skill.chain_failed.too_many"));
-                    return;
+        }
+        return null;
+    }
+
+    // 節の絵: 技の節はその技の絵、基礎は icons2 の 0〜3 (筋力・敏捷・精神・耐久)、刻印 4、常に 45、閾値 46、型の要 47 (tools/gen/ui/gen_deep_skill_assets.py)
+    private static int v2Icon(AbilityNode n) {
+        return switch (n.kind) {
+            case STAT -> 100 + n.stat.ordinal();
+            case RUNE -> 104;
+            case EFFECT -> 145;
+            case THRESHOLD -> 146;
+            case TRAIT -> 147;
+            default -> n.skill.iconIndex();
+        };
+    }
+
+    private static boolean v2Big(AbilityNode n) {
+        return n.kind == AbilityNode.Kind.KEYSTONE || n.kind == AbilityNode.Kind.TRAIT;
+    }
+
+    private void renderTreeV2(GuiGraphics g, SkillData d, int level) {
+        AbilityTree t = v2();
+        Job job = v2Job();
+        MutableComponent head = job == null ? Component.translatable(tree.nameKey())
+                : Component.translatable("job.skyabyss.subtitle", Component.translatable(job.nameKey()), Component.translatable(tree.nameKey()));
+        if (job != null && minecraft != null && minecraft.player != null && Job.held(minecraft.player) == job) {
+            head.append(Component.literal("  ")).append(Component.translatable("gui.skyabyss.skill.job_held"));
+        }
+        if (tryon != null) {
+            head = Component.empty();
+        }
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, head, left + 38, top + 25, BOARD_VX + BOARD_VW - 38 - 2, GOLD, false);
+        canvas.begin(g);
+        // 型の名前と点: その型の節が並ぶ列の下 (盤の末尾。節の字と重ならない) に 0.75 倍で
+        int bottomY = GRID_Y0 + t.height * GRID + NODE + 4;
+        for (String arch : t.archetypes) {
+            int minX = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE;
+            for (AbilityNode n : t.nodes()) {
+                if (arch.equals(n.arch)) {
+                    minX = Math.min(minX, v2X(n));
+                    maxX = Math.max(maxX, v2X(n));
                 }
-                PacketDistributor.sendToServer(new SkillChainPayload(arg));
-                click();
             }
-            case 3 -> {
-                SkillData r = real();
-                SkillKeystone k = SkillKeystone.values()[arg];
-                if (!r.keystones.contains(k.id)) {
-                    if (r.keystones.size() >= SkillRules.KEYSTONE_MAX) {
-                        notice(Component.translatable("message.skyabyss.skill.keystone_failed.full"));
-                        return;
+            if (minX == Integer.MAX_VALUE) {
+                continue;
+            }
+            int pts = d.archPoints(tree, arch);
+            Component label = Component.translatable(t.archKey(arch)).append(" " + pts);
+            g.pose().pushPose();
+            g.pose().translate((minX + maxX + NODE) / 2f, bottomY, 0);
+            g.pose().scale(0.75f, 0.75f, 1f);
+            g.drawCenteredString(font, label, 0, 0, pts > 0 ? PALE : SOFT);
+            g.pose().popPose();
+        }
+        // つなぐ線 (先に描く)。2026-11-02 の声「線が機能してない」: 前は折れ線で、同じ行どうしの横の線が重なって、どの節がどれにつながるか
+        // 読めなかった。いまは節の真ん中どうしをまっすぐ結ぶ。両方取っていれば金、手前を取っていれば (次に取れる) 明るく、ほかは暗く。
+        // マウスの下か選んだ節へつながる線は太い水色 (前提はどれか一つ取っていればよい)
+        AbilityNode focus = hoverNode != null ? hoverNode : selectedNode;
+        for (int pass = 0; pass < 2; pass++) {
+            for (AbilityNode n : t.nodes()) {
+                for (String rid : n.requires) {
+                    AbilityNode r = t.node(rid);
+                    if (r == null) {
+                        continue;
                     }
-                    if (!r.keystoneReachable(k)) {
-                        notice(Component.translatable("message.skyabyss.skill.keystone_failed.not_reached", SkillRules.KEYSTONE_TREE_POINTS,
-                                Component.translatable(k.tag.tree.nameKey())));
-                        return;
+                    boolean lit = n == focus || r == focus;
+                    if ((pass == 1) != lit) {
+                        continue;
                     }
-                    if (r.unspentPoints(level()) < 1) {
-                        notice(Component.translatable("gui.skyabyss.skill.need_points"));
-                        return;
+                    boolean a = d.hasNode(tree, r.id);
+                    boolean b = d.hasNode(tree, n.id);
+                    int color = lit ? 0x5FD8FF : a && b ? GOLD : a ? 0xC8D2DC : 0x3A4050;
+                    int x0 = v2L(r) + v2Size(r) / 2;
+                    int y0 = v2T(r) + v2Size(r) / 2;
+                    int x1 = v2L(n) + v2Size(n) / 2;
+                    int y1 = v2T(n) + v2Size(n) / 2;
+                    thick(g, x0, y0, x1, y1, color, lit || a ? 2 : 1);
+                }
+            }
+        }
+        for (AbilityNode n : t.nodes()) {
+            int x = v2L(n);
+            int y = v2T(n);
+            int sz = v2Size(n);
+            boolean taken = d.hasNode(tree, n.id);
+            SkillData.TakeResult tr = taken ? SkillData.TakeResult.TAKEN : d.canTake(tree, n, level);
+            boolean reachable = tr == SkillData.TakeResult.OK || tr == SkillData.TakeResult.NO_POINTS;
+            int state = taken ? 3 : reachable ? 1 : 0;
+            // 使う技の節は金の縁で囲む (ひと目で技と分かる)
+            if (n.kind == AbilityNode.Kind.ACTIVE) {
+                int rim = taken ? 0xFFF2D27A : state == 1 ? 0xFFB89650 : 0xFF6A5A3A;
+                g.fill(x - 2, y - 2, x + sz + 2, y + sz + 2, rim);
+                g.fill(x - 1, y - 1, x + sz + 1, y + sz + 1, 0xFF14121A);
+            }
+            if (v2Big(n)) {
+                g.blit(PANEL, x, y, sz, sz, state * 48, 376, 44, 44, 1024, 512);
+            } else {
+                g.blit(SkillHud.TEXTURE, x, y, sz, sz, state * 48, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
+            }
+            if (state == 0) {
+                g.setColor(0.42f, 0.42f, 0.48f, 1f);
+            } else if (state == 1) {
+                g.setColor(0.72f, 0.72f, 0.78f, 1f);
+            }
+            int pad = Math.max(2, sz * 3 / 22);
+            SkillHud.drawIcon(g, v2Icon(n), x + pad, y + pad, sz - 2 * pad);
+            g.setColor(1f, 1f, 1f, 1f);
+            if (n == selectedNode) {
+                g.blit(SkillHud.TEXTURE, x - 1, y - 1, sz + 2, sz + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
+            }
+            // 技の稽古の覚える段: 取れる使う技を光らせる
+            if (lessonLearn && n.kind == AbilityNode.Kind.ACTIVE && tr == SkillData.TakeResult.OK) {
+                jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, sz, sz);
+            }
+            // 下の小さな字: 基礎は +数、段は +1、まだ取っていない節は点
+            String cap = n.kind == AbilityNode.Kind.STAT ? "+" + n.amount : n.kind == AbilityNode.Kind.RANK ? "+1" : taken ? "" : n.cost + "SP";
+            if (!cap.isEmpty()) {
+                boolean prov = tryon != null && taken && !real().hasNode(tree, n.id);
+                int color = prov ? 0x7FFFA0 : taken ? GOLD : tr == SkillData.TakeResult.OK ? TEXT : DIM;
+                g.pose().pushPose();
+                g.pose().translate(x + sz / 2f, y + sz + (n.kind == AbilityNode.Kind.ACTIVE ? 3 : 1), 0);
+                g.pose().scale(0.75f, 0.75f, 1f);
+                g.drawString(font, cap, -font.width(cap) / 2, 0, color, false);
+                g.pose().popPose();
+            }
+            // 使う技の節には小さな菱形の印 (枠に置ける)
+            if (n.kind == AbilityNode.Kind.ACTIVE) {
+                g.fill(x + sz - 4, y + 1, x + sz - 1, y + 4, taken ? 0xFF9FE8FF : 0xFF4A5060);
+            }
+            // 排他の節には赤紫の点 (左上)
+            if (!n.excludes.isEmpty()) {
+                g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF000000 | DENY);
+            }
+            // 同じスキルの変化を先に取っていて取れない節は、赤い × (2026-11-02「思ったような選択ルートにならない」: 黙って閉じていた)
+            if (!taken && tr == SkillData.TakeResult.EXCLUDED) {
+                int c = 0xFF000000 | DENY;
+                for (int i = 0; i < sz - 4; i++) {
+                    g.fill(x + 2 + i, y + 2 + i, x + 4 + i, y + 4 + i, c);
+                    g.fill(x + sz - 4 - i, y + 2 + i, x + sz - 2 - i, y + 4 + i, c);
+                }
+            }
+            // 紋を差している技の節には、その紋の絵 (左下)
+            if (n.skill != null && n == t.skillNode(n.skill)) {
+                jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
+                if (gi != null) {
+                    SkillHud.drawGlyph(g, gi.glyph(), x - 2, y + sz - 7, 9);
+                }
+            }
+        }
+        canvas.end(g);
+    }
+
+    private void renderInfoV2(GuiGraphics g, SkillData d, int level, int mx, int my) {
+        AbilityTree t = v2();
+        AbilityNode n = selectedNode;
+        if (n != null && n.skill != null && n.kind != AbilityNode.Kind.RUNE && n.kind != AbilityNode.Kind.MUTATION) {
+            // 技の節: いつもの技の説明 (段・待ち・マナ・効果)。節の点は「取る」の釦に重ねると出る
+            selected = n.skill;
+            renderInfoSkill(g, d, level, mx, my);
+            return;
+        }
+        runeRows.clear();
+        int x = left + INFO_X + 5;
+        int y = top + INFO_Y + 5;
+        int w = INFO_W - 14;
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        Component name = n == null ? Component.translatable(tree.nameKey()) : Component.translatable(n.nameKey(t.key));
+        List<FormattedCharSequence> nameLines = TextWrap.split(font, name.copy().withColor(GOLD), w - LEARN_W - 4);
+        for (int i = 0; i < nameLines.size(); i++) {
+            g.drawString(font, nameLines.get(i), x, y + i * 10, GOLD, false);
+        }
+        int bodyY = y + Math.max(12, nameLines.size() * 10) + 3;
+        info.setViewport(left + INFO_X + 2, bodyY, INFO_W - 4, top + INFO_Y + INFO_H - 2 - bodyY);
+        if (n == null) {
+            lines.addAll(TextWrap.split(font, Component.translatable(tree.descKey()).withColor(SOFT), w));
+            lines.add(FormattedCharSequence.EMPTY);
+            int actives = d.activeCount();
+            lines.add(Component.translatable("gui.skyabyss.tree.actives", actives, SkillRules.BASE_SLOTS).withColor(actives >= SkillRules.BASE_SLOTS ? GOLD : PALE).getVisualOrderText());
+            for (String arch : t.archetypes) {
+                lines.add(Component.translatable("gui.skyabyss.tree.arch_line", Component.translatable(t.archKey(arch)), d.archPoints(tree, arch)).withColor(SOFT).getVisualOrderText());
+            }
+            // 型の力 (溜まるもの。rpg/skill/Gauges): その型に 8 点使うと出る
+            for (String arch : t.archetypes) {
+                var gk = t.job == null ? null : jp.revati.skyabyss.rpg.skill.Gauges.Kind.of(t.job, arch);
+                if (gk != null) {
+                    boolean on = d.archPoints(tree, arch) >= jp.revati.skyabyss.rpg.skill.Gauges.ARCH_POINTS;
+                    lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.tree.gauge_line", Component.translatable(gk.nameKey()),
+                            jp.revati.skyabyss.rpg.skill.Gauges.ARCH_POINTS, Component.translatable(gk.nameKey() + ".desc")).withColor(on ? PALE : SOFT), w));
+                }
+            }
+            if (tree == SkillTree.PAST) {
+                lines.add(Component.translatable("gui.skyabyss.ext.past_points", d.pastLeft(), d.pastPool()).withColor(PALE).getVisualOrderText());
+            }
+            int[] st = d.statsFromNodes(tree);
+            MutableComponent stats = Component.empty();
+            for (jp.revati.skyabyss.rpg.GrowthRules.Stat stat : jp.revati.skyabyss.rpg.GrowthRules.Stat.values()) {
+                if (stat.ordinal() > 0) {
+                    stats.append("  ");
+                }
+                stats.append(Component.translatable(stat.nameKey())).append(" " + st[stat.ordinal()]);
+            }
+            lines.addAll(TextWrap.split(font, stats.withColor(SOFT), w));
+            lines.add(FormattedCharSequence.EMPTY);
+            lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.tree.pick_hint").withColor(DIM), w));
+            drawInfo(g, lines, x);
+            return;
+        }
+        List<Component> body = v2Lines(d, n, level);
+        body.remove(0);
+        lines.addAll(wrapAll(body, w));
+        drawInfo(g, lines, x);
+    }
+
+    private List<FormattedCharSequence> wrapAll(List<Component> parts, int w) {
+        List<FormattedCharSequence> out = new ArrayList<>();
+        for (Component c : parts) {
+            out.addAll(TextWrap.split(font, c, w));
+        }
+        return out;
+    }
+
+    // 節の説明の行 (名前・種類と点・中身・いま取れるか)。囲みと説明の欄の両方で使う
+    // 今その技を変えているもの (刻印・書き換え・変異・秘伝。SkillChanges)
+    private void changeLines(List<Component> lines, Skill s) {
+        var changes = jp.revati.skyabyss.rpg.skill.SkillChanges.of(minecraft.player, s);
+        if (changes.isEmpty()) {
+            return;
+        }
+        lines.add(Component.translatable("gui.skyabyss.skill.change.head").withColor(SOFT));
+        for (var c : changes) {
+            lines.add(Component.literal(" ").append(c.line()).withColor(c.active() ? c.kind().rgb : DIM));
+        }
+    }
+
+    private List<Component> v2Lines(SkillData d, AbilityNode n, int level) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.translatable(n.nameKey(v2().key)).withColor(GOLD));
+        lines.addAll(v2Status(d, n, level, false));
+        return lines;
+    }
+
+    // 種類と点 (withKind)・中身 (技の節では省く: 技の説明がある)・前提・排他・型の点・いま取れるか
+    private List<Component> v2Status(SkillData d, AbilityNode n, int level, boolean skillInfoShown) {
+        AbilityTree t = v2();
+        String key = t.key;
+        List<Component> lines = new ArrayList<>();
+        MutableComponent kind = Component.translatable(n.kind.key()).append(Component.literal("・")).append(Component.translatable("gui.skyabyss.tree.cost", n.cost));
+        if (n.arch != null) {
+            kind.append(Component.literal("・")).append(Component.translatable(t.archKey(n.arch)));
+        }
+        lines.add(kind.withColor(SOFT));
+        switch (skillInfoShown ? AbilityNode.Kind.STAT : n.kind) {
+            case STAT -> {
+                if (!skillInfoShown) {
+                    lines.add(Component.translatable("gui.skyabyss.tree.stat_effect", Component.translatable(n.stat.nameKey()), n.amount).withColor(TEXT));
+                }
+            }
+            case THRESHOLD -> {
+                int now = jp.revati.skyabyss.rpg.Growth.get(minecraft.player).stat(n.stat);
+                boolean on = d.hasNode(tree, n.id) && now >= n.at;
+                lines.add(Component.translatable("gui.skyabyss.tree.threshold_line", Component.translatable(n.stat.nameKey()), n.at, now).withColor(on ? PALE : SOFT));
+                lines.add(Component.translatable(n.effectKey(key)).withColor(TEXT));
+                if (on) {
+                    lines.add(Component.translatable("gui.skyabyss.tree.threshold_on").withColor(PALE));
+                }
+            }
+            case RUNE -> {
+                lines.add(Component.translatable("gui.skyabyss.tree.rune_line", Component.translatable(n.skill.nameKey())).withColor(SOFT));
+                lines.add(Component.translatable(n.effectKey(key)).withColor(TEXT));
+            }
+            case MUTATION -> {
+                lines.add(Component.translatable("gui.skyabyss.tree.mutation_line", Component.translatable(n.skill.nameKey())).withColor(SOFT));
+                lines.add(Component.translatable(n.effectKey(key)).withColor(TEXT));
+                Mutation m = n.mutation;
+                if (d.mutations.containsKey(n.skill.id)) {
+                    lines.add(Component.translatable("gui.skyabyss.tree.mutation_paid").withColor(PALE));
+                } else {
+                    int core = jp.revati.skyabyss.rpg.skill.SkillExtOps.count(minecraft.player, m.coreItem());
+                    int shard = jp.revati.skyabyss.rpg.skill.SkillExtOps.count(minecraft.player, m.shardItem());
+                    boolean enough = core >= Mutation.CORES && shard >= Mutation.SHARDS;
+                    lines.add(Component.translatable("gui.skyabyss.tree.material", m.coreItem().getDescription(), Math.min(core, 99), Mutation.CORES,
+                            m.shardItem().getDescription(), Math.min(shard, 99), Mutation.SHARDS).withColor(enough ? PALE : DENY));
+                }
+            }
+            case RANK -> {
+                lines.add(Component.translatable("gui.skyabyss.tree.rank_line", Component.translatable(n.skill.nameKey())).withColor(SOFT));
+                int next = Math.min(n.skill.maxRank, Math.max(1, d.rank(n.skill)) + (d.hasNode(tree, n.id) ? 0 : 1));
+                lines.add(Component.translatable(n.skill.effectKey(), SkillRules.describeArgs(n.skill, next)).withColor(TEXT));
+            }
+            case ACTIVE, PASSIVE, KEYSTONE -> lines.add(Component.translatable(n.skill.effectKey(), SkillRules.describeArgs(n.skill, Math.max(1, d.rank(n.skill)))).withColor(TEXT));
+            default -> lines.add(Component.translatable(n.effectKey(key)).withColor(TEXT));
+        }
+        if (n.skill != null && n == t.skillNode(n.skill)) {
+            jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
+            if (gi != null) {
+                lines.add(Component.translatable("gui.skyabyss.tree.glyph_line", Component.translatable(gi.glyph().nameKey()), gi.level()).withColor(PALE));
+            }
+            if (!skillInfoShown) {
+                changeLines(lines, n.skill);
+            }
+        }
+        if (!n.requires.isEmpty()) {
+            MutableComponent names = Component.empty();
+            for (int i = 0; i < n.requires.size(); i++) {
+                AbilityNode r = t.node(n.requires.get(i));
+                if (i > 0) {
+                    names.append(Component.translatable("gui.skyabyss.skill.or"));
+                }
+                names.append(r == null ? Component.literal(n.requires.get(i)) : Component.translatable(r.nameKey(key)));
+            }
+            boolean met = false;
+            for (String r : n.requires) {
+                met |= d.hasNode(tree, r);
+            }
+            lines.add(Component.translatable("gui.skyabyss.tree.requires", names).withColor(met ? SOFT : DENY));
+        }
+        if (!n.excludes.isEmpty()) {
+            MutableComponent names = Component.empty();
+            for (int i = 0; i < n.excludes.size(); i++) {
+                AbilityNode e = t.node(n.excludes.get(i));
+                if (i > 0) {
+                    names.append(Component.literal("・"));
+                }
+                names.append(e == null ? Component.literal(n.excludes.get(i)) : Component.translatable(e.nameKey(key)));
+            }
+            lines.add(Component.translatable("gui.skyabyss.tree.excludes", names).withColor(DENY));
+        }
+        if (n.archPoints > 0) {
+            int have = d.archPoints(tree, n.arch);
+            lines.add(Component.translatable("gui.skyabyss.tree.arch_points", n.archPoints, have).withColor(have >= n.archPoints ? SOFT : DENY));
+        }
+        SkillData.TakeResult tr = d.hasNode(tree, n.id) ? SkillData.TakeResult.TAKEN : d.canTake(tree, n, level);
+        switch (tr) {
+            case TAKEN -> lines.add(Component.translatable("gui.skyabyss.tree.taken_line").withColor(PALE));
+            case OK -> lines.add(Component.translatable("gui.skyabyss.tree.can_take").withColor(PALE));
+            case ACTIVES_FULL -> lines.add(Component.translatable("gui.skyabyss.tree.actives_full", SkillRules.BASE_SLOTS).withColor(DENY));
+            case NO_POINTS -> lines.add(Component.translatable("gui.skyabyss.skill.need_points").withColor(DENY));
+            case RANK_MAX -> lines.add(Component.translatable("message.skyabyss.skill.learn_failed.max_rank").withColor(DENY));
+            case NOT_MASTERED -> lines.add(Component.translatable("message.skyabyss.skill.node_failed.not_mastered").withColor(DENY));
+            case REBIRTH -> lines.add(Component.translatable("gui.skyabyss.ext.need_rebirth", n.rebirthAt).withColor(DENY));
+            // 前提が足りないときは、上の「線でつながった上の節」の行が赤くなる (同じことを二度書かない)
+            case EXCLUDED -> {
+                AbilityNode other = null;
+                if (n.kind == AbilityNode.Kind.RUNE) {
+                    for (AbilityNode o : t.runesOf(n.skill)) {
+                        if (o != n && d.hasNode(tree, o.id)) {
+                            other = o;
+                        }
                     }
                 }
-                PacketDistributor.sendToServer(new SkillKeystonePayload(k.id));
-                click();
+                lines.add(other != null ? Component.translatable("gui.skyabyss.tree.rune_taken", Component.translatable(other.nameKey(key))).withColor(DENY)
+                        : Component.translatable("message.skyabyss.skill.node_failed.excluded").withColor(DENY));
             }
+            case ARCH_POINTS -> lines.add(Component.translatable("gui.skyabyss.tree.need_arch", Component.translatable(t.archKey(n.arch)), n.archPoints - d.archPoints(tree, n.arch)).withColor(DENY));
             default -> {
             }
         }
-    }
-
-    private void renderBuild(GuiGraphics g, SkillData d, int level, int mx, int my) {
-        hits.clear();
-        int x0 = left + 12;
-        int colW = 170;
-        int y = top + 24;
-        // 構え
-        g.drawString(font, Component.translatable("gui.skyabyss.skill.stance_head"), x0, y, GOLD, false);
-        g.fill(x0, y + 9, x0 + colW, y + 10, 0x553A4452);
-        Component cd = d.stanceCd > 0 ? Component.translatable("gui.skyabyss.skill.stance_cd", SkillRules.fmtSeconds(d.stanceCd))
-                : Component.translatable("gui.skyabyss.skill.stance_ready");
-        g.drawString(font, cd, x0 + colW - font.width(cd), y, d.stanceCd > 0 ? DENY : SOFT, false);
-        y += 11;
-        SkillStance shown = SkillStance.of(d.stance);
-        for (int i = 0; i < 4; i++) {
-            SkillStance st = SkillStance.of(i);
-            int cx = x0 + i * 43;
-            boolean mine = d.stance == i;
-            boolean hover = in(mx, my, cx, y, 41, 13);
-            g.fill(cx, y, cx + 41, y + 13, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : 0xFF3A4452);
-            g.fill(cx + 1, y + 1, cx + 40, y + 12, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
-            Component name = Component.translatable(st.nameKey());
-            drawFit(g, name, cx + 20, y + 3, 37, mine ? GOLD : TEXT);
-            hits.add(new int[] {cx, y, 41, 13, 1, i});
-            if (hover) {
-                shown = st;
-            }
-        }
-        y += 15;
-        int dy = y;
-        for (FormattedCharSequence line : TextWrap.split(font, Component.translatable(shown.descKey()).withColor(SOFT), colW)) {
-            if (dy + 9 > top + 84) {
-                break;
-            }
-            g.drawString(font, line, x0, dy, SOFT, false);
-            dy += 10;
-        }
-        // 連鎖
-        y = top + 86;
-        g.drawString(font, Component.translatable("gui.skyabyss.skill.chain_head", Integer.bitCount(d.chainMask), SkillRules.CHAIN_MAX), x0, y, GOLD, false);
-        g.fill(x0, y + 9, x0 + colW, y + 10, 0x553A4452);
-        y += 11;
-        for (int i = 0; i < d.slotCount(); i++) {
-            int cx = x0 + i * 32;
-            g.blit(SkillHud.TEXTURE, cx, y, 18, 18, 420, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
-            Skill s = d.slot(i);
-            if (s != null) {
-                SkillHud.drawIcon(g, s.iconIndex(), cx + 1, y + 1);
-            }
-            if (i + 1 < d.slotCount()) {
-                boolean on = (d.chainMask & (1 << i)) != 0;
-                int bx = cx + 20;
-                boolean hover = in(mx, my, bx, y, 10, 18);
-                g.fill(bx, y + 4, bx + 10, y + 14, on ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : 0xFF3A4452);
-                g.fill(bx + 1, y + 5, bx + 9, y + 13, on ? 0xFF3A3220 : 0xFF161A22);
-                g.drawString(font, "\u203a", bx + 3, y + 5, on ? GOLD : SOFT, false);
-                hits.add(new int[] {bx, y + 4, 10, 10, 2, i});
-            }
-        }
-        // タグ
-        y = top + 118;
-        g.drawString(font, Component.translatable("gui.skyabyss.skill.tag_head"), x0, y, GOLD, false);
-        g.fill(x0, y + 9, x0 + colW, y + 10, 0x553A4452);
-        y += 11;
-        for (int i = 0; i < SkillTag.values().length; i++) {
-            SkillTag t = SkillTag.values()[i];
-            int cx = x0 + i * 34;
-            int n = SkillBuild.tagCount(minecraft.player, t);
-            boolean hover = in(mx, my, cx, y, 32, 13);
-            g.fill(cx, y, cx + 32, y + 13, hover ? 0xFF6A7A8A : 0xFF3A4452);
-            g.fill(cx + 1, y + 1, cx + 31, y + 12, 0xFF161A22);
-            g.fill(cx + 3, y + 4, cx + 8, y + 9, 0xFF000000 | t.rgb);
-            String num = String.valueOf(n);
-            g.drawString(font, num, cx + 12, y + 3, n >= SkillRules.TAG_STEP2 ? GOLD : n >= SkillRules.TAG_STEP1 ? PALE : n > 0 ? TEXT : DIM, false);
-            if (SkillBuild.condActive(minecraft.player, t) && n >= SkillRules.COND_MIN_TAGS) {
-                g.fill(cx + 25, y + 4, cx + 29, y + 8, 0xFF000000 | GOLD);
-            }
-            hits.add(new int[] {cx, y, 32, 13, 4, i});
-            // 凡例: 色の点の意味 (タグの名前) を札の下に小さく
-            g.pose().pushPose();
-            Component tagName = Component.translatable(t.nameKey());
-            float k = Math.min(0.75f, 31f / Math.max(1, font.width(tagName)));
-            g.pose().translate(cx + 16 - font.width(tagName) * k / 2f, y + 15, 0);
-            g.pose().scale(k, k, 1f);
-            g.drawString(font, tagName, 0, 0, 0xFF000000 | t.rgb, false);
-            g.pose().popPose();
-        }
-        // 二つの列の境の線
-        g.fill(left + 188, top + 24, left + 189, top + 148, 0x553A4452);
-        // 鍵石 (右の列)
-        int x1 = left + 194;
-        int w1 = 176;
-        y = top + 24;
-        g.drawString(font, Component.translatable("gui.skyabyss.skill.keystone_head", d.keystones.size(), SkillRules.KEYSTONE_MAX), x1, y, GOLD, false);
-        g.fill(x1, y + 9, x1 + w1, y + 10, 0x553A4452);
-        y += 11;
-        for (int i = 0; i < SkillKeystone.values().length; i++) {
-            SkillKeystone k = SkillKeystone.values()[i];
-            boolean mine = d.keystones.contains(k.id);
-            boolean reach = d.keystoneReachable(k);
-            boolean hover = in(mx, my, x1, y, w1, 17);
-            g.fill(x1, y, x1 + w1, y + 17, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : reach ? 0xFF4A5A6A : 0xFF2A2E38);
-            g.fill(x1 + 1, y + 1, x1 + w1 - 1, y + 16, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
-            g.fill(x1 + 3, y + 3, x1 + 7, y + 7, 0xFF000000 | k.tag.rgb);
-            g.drawString(font, Component.translatable(k.nameKey()), x1 + 10, y + 1, mine ? GOLD : reach ? TEXT : DIM, false);
-            g.pose().pushPose();
-            g.pose().translate(x1 + 10, y + 10.5f, 0);
-            g.pose().scale(0.7f, 0.7f, 1f);
-            g.drawString(font, Component.translatable(k.effectKey()), 0, 0, mine ? PALE : reach ? SOFT : DIM, false);
-            g.pose().popPose();
-            hits.add(new int[] {x1, y, w1, 17, 3, i});
-            y += 18;
-        }
-        if (noticeTicks > 0 && noticeText != null) {
-            int alpha = Math.min(255, noticeTicks * 12);
-            List<FormattedCharSequence> lines = TextWrap.split(font, noticeText, 330);
-            int ny = top + 146 - lines.size() * 10;
-            g.fill(left + 10, ny - 2, left + W - 10, top + 149, (Math.min(200, alpha) << 24) | 0x1A1020);
-            for (FormattedCharSequence line : lines) {
-                g.drawString(font, line, left + 14, ny, (alpha << 24) | DENY, false);
-                ny += 10;
-            }
-        }
-    }
-
-    private boolean buildTooltip(GuiGraphics g, SkillData d, int mx, int my) {
-        for (int[] h : hits) {
-            if (!in(mx, my, h[0], h[1], h[2], h[3])) {
-                continue;
-            }
-            List<Component> lines = new ArrayList<>();
-            switch (h[4]) {
-                case 1 -> {
-                    SkillStance st = SkillStance.of(h[5]);
-                    lines.add(Component.translatable(st.nameKey()).withColor(GOLD));
-                    lines.add(Component.translatable(st.descKey()).withColor(SOFT));
-                    lines.add(Component.translatable("gui.skyabyss.skill.stance_tip", SkillClientSetup.STANCE_KEY.getTranslatedKeyMessage(),
-                            SkillRules.fmtSeconds(SkillRules.STANCE_SWAP_TICKS)).withColor(DIM));
-                }
-                case 2 -> {
-                    lines.add(Component.translatable("gui.skyabyss.skill.chain_tip", SkillRules.CHAIN_MAX, SkillRules.fmtSeconds(SkillRules.CHAIN_WINDOW),
-                            Math.round(SkillRules.CHAIN_POWER * 100)).withColor(TEXT));
-                }
-                case 3 -> {
-                    SkillKeystone k = SkillKeystone.values()[h[5]];
-                    lines.add(Component.translatable(k.nameKey()).withColor(k.tag.rgb));
-                    lines.add(Component.translatable(k.effectKey()).withColor(TEXT));
-                    lines.add(Component.translatable("gui.skyabyss.skill.keystone_need", SkillRules.KEYSTONE_TREE_POINTS, Component.translatable(k.tag.tree.nameKey()),
-                            d.treePoints(k.tag.tree)).withColor(d.keystoneReachable(k) ? SOFT : DENY));
-                }
-                default -> {
-                    SkillTag t = SkillTag.values()[h[5]];
-                    int n = SkillBuild.tagCount(minecraft.player, t);
-                    int extra = SkillBuild.extraTagCount(minecraft.player, t);
-                    lines.add(Component.translatable(t.nameKey()).withColor(t.rgb));
-                    lines.add(Component.translatable("gui.skyabyss.skill.tag_count", n, n - extra, extra,
-                            Math.round(SkillRules.TAG_POWER_PER * Math.min(SkillRules.TAG_COUNT_CAP, n) * 100)).withColor(TEXT));
-                    lines.add(Component.translatable("gui.skyabyss.skill.tag_step", SkillRules.TAG_STEP1, SkillRules.TAG_STEP2,
-                            Component.translatable("tag.skyabyss." + t.id + ".step")).withColor(n >= SkillRules.TAG_STEP1 ? PALE : DIM));
-                    lines.add(Component.translatable("gui.skyabyss.skill.tag_cond", SkillRules.COND_MIN_TAGS, SkillRules.COND_BIG_TAGS,
-                            Component.translatable("tag.skyabyss." + t.id + ".cond")).withColor(n >= SkillRules.COND_MIN_TAGS ? PALE : DIM));
-                }
-            }
-            tipC(lines);
-            return true;
-        }
-        return false;
+        return lines;
     }
 
     @Override

@@ -20,6 +20,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -62,7 +63,7 @@ public final class AbyssLords {
     public static final String TAG = "skyabyss_lord";
     public static final String COPY_TAG = "skyabyss_lord_copy";
     static final String[] MOB = {"rib_guard", "white_shell_keeper", "heartbeat_mimic", "lamp_eater"};
-    static final double[] HP = {260, 320, 300, 380};          // 一人のときの体力
+    static final double[] HP = {780, 960, 900, 1140};         // 一人のときの体力 (2026-10-25 に 3 倍。弱すぎた)
     static final double[] SCALE = {1.9, 2.0, 1.7, 1.8};
     static final double PER_MATE = 0.6;                       // 一人ふえるごとに体力 +60%
     // 初めて倒したときの経験値 (骨・塩・雷・灰。人ごとに一度。間にいた人は満額、オンラインの仲間は分け前)。docs/design/36 の 8 章
@@ -97,13 +98,13 @@ public final class AbyssLords {
         Fight(String layer) {
             this.layer = layer;
             this.li = Layers.index(layer);
-            this.bar = new ServerBossEvent(Component.translatable("abyss_v2.skyabyss.lord." + layer), BossEvent.BossBarColor.RED,
-                    BossEvent.BossBarOverlay.NOTCHED_10);
+            this.bar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(Component.translatable("abyss_v2.skyabyss.lord." + layer), BossEvent.BossBarColor.RED,
+                    BossEvent.BossBarOverlay.NOTCHED_10));
         }
     }
 
     private static final Map<String, Fight> FIGHTS = new HashMap<>();
-    private static final Map<UUID, Long> HEARD = new HashMap<>();
+    private static final Map<UUID, Long> HEARD = PlayerMaps.track(new HashMap<>());
     private static boolean listening;
 
     private AbyssLords() {

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "skyabyss:block/lamp_post"
+    },
+    "lit=true": {
+      "model": "skyabyss:block/lamp_post_lit"
+    }
+  }
+}

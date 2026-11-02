@@ -565,7 +565,8 @@ public final class HeartBotSelfTest {
                 step(rig, bot, driver, level, t);
             }
             double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
-            check(f, taken >= 0.35, name + ": a constant circler took only " + fmt(taken) + " in 20 s of the domain (needs >= 0.35)");
+            // 領域の技は 2026-10-25 にゆっくりにした (予告が長く、間も長い)。回るだけの人が 20 秒で体力の 4 分の 1 は受ける
+            check(f, taken >= 0.25, name + ": a constant circler took only " + fmt(taken) + " in 20 s of the domain (needs >= 0.25)");
             notes.add(String.format(Locale.ROOT, "%s domain: circler %.2f in 20 s", name, taken));
         } finally {
             despawn(rig, bot);

@@ -1,0 +1,29 @@
+# 旅の番 (止まり木の番に厩舎の番をまとめた。2026-11-01): 立ち姿と頭の上の名、会話の選び
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/travel_keeper.txt -PshotsName=travel_keeper
+world shots flat
+size 960 540
+timeout 600
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+hud on
+chat clear
+cmd tp @s 0 -60 -2
+cmd skyabyss facility spawn perch_keeper
+cmd tp @s 0 -60 2
+wait 20
+shot t01_keeper
+cmd skyabyss dev talk "skyabyss:attendant_perch_keeper"
+wait 30
+shot t02_intro
+cmd skyabyss dev talk say continue
+wait 20
+shot t03_menu

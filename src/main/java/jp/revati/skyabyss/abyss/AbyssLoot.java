@@ -74,17 +74,16 @@ public final class AbyssLoot {
         for (ServerPlayer p : players) {
             List<ItemStack> items = new ArrayList<>();
             items.add(new ItemStack(Vows.resonanceShardOf(titan), HEART_SHARDS));
-            Roll roll = roll(memory.record(p.getUUID(), KEY + titan), titan, level.random);
-            ItemStack legend = ItemStack.EMPTY;
-            if (roll.dropped()) {
-                if (roll.dupe()) {
-                    items.add(new ItemStack(Vows.resonanceShardOf(titan), DUPE_SHARDS));
-                } else {
-                    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(roll.legend()));
-                    legend = new ItemStack(item);
-                    items.add(legend);
-                }
+            // 伝説の装備は巨神の心臓 (深淵の心臓も) からは出ない (2026-10-26。五章の番人・悪夢・深みへ。abyss/LegendLoot)。
+            // 代わりに、前の天井の回 (LEGEND_PITY 回に一度) は共鳴の欠片を多めに
+            TitanMemoryData.Record rec = memory.record(p.getUUID(), KEY + titan);
+            rec.clears++;
+            if (++rec.memory >= Abyss.LEGEND_PITY) {
+                rec.memory = 0;
+                items.add(new ItemStack(Vows.resonanceShardOf(titan), DUPE_SHARDS));
             }
+            ItemStack legend = ItemStack.EMPTY;
+            Roll roll = new Roll(null, false, false);
             TitanLoot.handOver(server, p.getUUID(), p, items, 0);
             Notice.gain(p, TitanLoot.rewardLine(items));
             if (!legend.isEmpty()) {

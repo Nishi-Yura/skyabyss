@@ -1,0 +1,278 @@
+"""六章 (月) の人の体 3 案ずつ。いまは区画 1 の「前のループの自分 (一人目)」(docs/design/46 の 4.3)。
+名は moon_<人>_<a|b|c>。選んだ案は cast の moon_<人> として足してから build / install する。
+
+前のループの自分: 今の主人公と同じ「初めの旅装」(生成りの麻の上着・帯・布の頭巾・脛の巻き布) が月の砂で色あせた姿。
+顔は見せきらない (プレイヤーの肌と似せない)。谷で何度も止まり、ここで待っていた。手には星の光の灯り。
+
+  python -I tools/rough/lowpoly/npc2/cast_moon.py [人 ...]   -> docs/review/npc_models_v2/roughs/moon_<人>_<案>.png と moon_<人>.png (3 案を並べた絵)
+"""
+from __future__ import annotations
+
+import math
+import sys
+from pathlib import Path
+
+from PIL import Image, ImageDraw
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cast as C  # noqa: E402
+from cast import HOLD_L, HOLD_L_LOW, STAFF_R, add  # noqa: E402
+import kit as K  # noqa: E402
+import props as PR  # noqa: E402
+from kit import V, part, rod, box, disc  # noqa: E402
+
+SHORT = dict(style="short", front=27.4, side=24.8, back=23.6, fringe=[(-1.2, 27.8, 1.4, 0.7, -0.3), (1.0, 27.8, 1.4, 0.7, 0.3)])
+
+# 月の砂で色あせた初めの旅装 (生成りの麻 → 青みの灰)。三案で同じ色、形で分ける
+FADED = dict(coat=(158, 156, 150), shirt=(186, 184, 176), mantle=(118, 122, 134), trim=(78, 80, 90), hat=(132, 134, 144), hat2=(92, 96, 110),
+             trousers=(112, 112, 116), boot=(84, 80, 76), sash=(96, 102, 124), cord=(150, 146, 132), leather=(96, 88, 80), metal=(170, 178, 192),
+             metal2=(120, 126, 140))
+STAR_LAMP = {
+    "lglass": dict(ramp=[(60, 90, 140), (110, 150, 210), (170, 206, 250), (230, 244, 255)], base=0.62, lit=0.3, noise=0.04, crack=0, min=1),
+    "flame": dict(ramp=[(120, 170, 240), (180, 214, 255), (226, 240, 255), (255, 255, 255)], base=0.7, lit=0.2, noise=0.05, crack=0, min=1),
+    "star": dict(ramp=[(120, 170, 240), (180, 214, 255), (226, 240, 255), (255, 255, 255)], base=0.7, lit=0.2, noise=0.04, crack=0, min=1),
+    "dust": dict(ramp=[(112, 118, 130), (152, 158, 168), (192, 196, 204), (226, 228, 232)], base=0.62, lit=0.3, noise=0.14, crack=0, min=0),
+}
+MOON = {}
+
+
+def star_lantern_l(c):
+    """左手に提げる角灯。火の代わりに星の光"""
+    h = PR.hand(c, 1)
+    return PR.lantern(c, PR.V(0.0, h[1] - 3.2, h[2] - 0.4), s=1.3, bone="prop_l", hook=PR.V(0, h[1] + 0.2, h[2] - 0.4))
+
+
+def star_staff(c):
+    """右手の旅の杖: 素木の杖の先に、布で巻いて結んだ星の欠片"""
+    h = PR.hand(c, -1)
+    F = part("ss_pole", rod("prop_r", "wood", h + V(0, -11.4, -0.1), h + V(0, 10.6, 0.1), 0.4, 0.34, sides=6))
+    top = h + V(0, 10.6, 0.1)
+    F += part("ss_wrap", disc("prop_r", "cord", top + V(0, -0.6, 0), 0.6, 1.2, n=6))
+    F += part("ss_star", K.ellipsoid("prop_r", "star", (top[0], top[1] + 1.4, top[2]), (0.9, 1.3, 0.9), segs=6, rings=3))
+    for i, (dx, dz) in enumerate(((0.7, 0.0), (-0.7, 0.0), (0.0, 0.7))):
+        F += part(f"ss_tie{i}", rod("prop_r", "cord", top + V(dx * 0.6, 0.0, dz * 0.6), top + V(dx * 1.1, -2.4, dz * 1.1), 0.12, sides=3))
+    F += part("ss_foot", disc("prop_r", "metal2", h + V(0, -11.0, -0.1), 0.5, 0.4, n=6))
+    return F
+
+
+def pack_dusty(c):
+    """背の荷: 丸めた寝具と小さな背負い袋。上に月の砂が積もる"""
+    F = part("pk_bag", box("body", "leather", V(0, 15.4, 3.6), (3.4, 4.0, 1.6)))
+    F += part("pk_flap", box("body", "leather2", V(0, 18.6, 3.9), (3.5, 1.0, 1.5)))
+    F += part("pk_roll", K.tube("body", "mantle", [V(-4.0, 20.2, 3.8), V(4.0, 20.2, 3.8)], ra=1.3, sides=8, caps=(True, True)))
+    for x in (-2.6, 2.6):
+        F += part(f"pk_band{x}", K.tube("body", "cord", [V(x, 20.2, 2.4), V(x, 21.6, 3.8), V(x, 20.2, 5.2)], ra=0.2, sides=4, caps=(True, True)))
+    F += part("pk_dust", K.ellipsoid("body", "dust", (0, 21.4, 3.8), (3.6, 0.45, 1.0), segs=8, rings=2))
+    for s in (-1, 1):
+        F += part(f"pk_strap{s}", K.tube("body", "cord", [V(s * 2.0, 21.8, 2.2), V(s * 2.4, 21.6, -1.4), V(s * 2.6, 16.0, -2.4)], ra=0.22, sides=4,
+                                         caps=(True, True), hint=(1, 0, 0)))
+    return F
+
+
+def moon(pid, ja, opts):
+    MOON[pid] = ja
+    for k, kw in zip("abc", opts):
+        kw = dict(kw)
+        kw["ja"] = f"{ja} 案 {k.upper()}"
+        add(f"moon_{pid}_{k}", **kw)
+
+
+def pal(**kw):
+    p = dict(FADED)
+    p.update(kw)
+    # 色あせた布は斑を抑える (灰の布に斑が強いと迷彩に見える)
+    soft = {m: K.cloth(p[k], noise=0.04, streak=0.03, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("hat", "hat"),
+                                                                                  ("trousers", "trousers"), ("shirt", "shirt"))}
+    p["extra_mats"] = {**STAR_LAMP, **soft}
+    p["glow_mats"] = ["star"]
+    return p
+
+
+# ---------------------------------------------------------------- 前のループの自分 (一人目)
+moon("past1", "前のループの自分 (一人目)", [
+    # A 頭巾と口布: 初めの旅装に布の頭巾、口から下を布で覆う。疲れた細い目だけが見える。左手に星の角灯
+    dict(anim="hold_l", pal=pal(skin=(196, 170, 150), hair=(70, 70, 78)),
+         face=dict(eye="sleepy", iris=(150, 170, 200), brow="worried", mouth="none", mask=(126, 130, 142)), hair=SHORT, hat=dict(kind="hood"),
+         hairline=27.4, build="avg", upper=dict(mantle=dict(bottom=15.0, clasp=True), sash=True), lower="trousers", sleeve="rolled",
+         arms=HOLD_L_LOW, props={"prop_l": star_lantern_l}),
+    # B 影の顔: 頭巾の中が影で、顔の代わりに星の光の目が二つだけ。旅の杖の先に布で結んだ星の欠片
+    dict(anim="hold_r", pal=pal(skin=(30, 32, 46), hair=(20, 22, 32)),
+         face=dict(eye="patch", brow="none", mouth="none", marks=[(["HH"], 1, 50)]), hair=SHORT, hat=dict(kind="hood"),
+         hairline=27.4, build="avg", upper=dict(mantle=dict(bottom=13.0, clasp=True), sash=True), lower="trousers", sleeve="wide",
+         arms=STAFF_R, props={"prop_r": star_staff}),
+    # C 長く留まった旅人: 裾の長い外套に頭巾と口布、背に寝具と荷 (上に月の砂)。年を経た目。左手に星の角灯
+    dict(anim="hold_l", pal=pal(skin=(190, 166, 148), hair=(150, 150, 156), coat=(132, 134, 140)),
+         face=dict(eye="old", iris=(150, 170, 200), brow="flat", mouth="none", mask=(110, 114, 128)), hair=SHORT, hat=dict(kind="hood"),
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=12.0, clasp=True), sash=True), lower="coat_long", sleeve="wide",
+         arms=HOLD_L_LOW, props={"prop_l": star_lantern_l}, extra_body=[pack_dusty]),
+])
+
+
+# 選定 (2026-10-28): 前のループの自分 (一人目) は C。cast の guest_moon_past1 として登録する (TownGuestEntity の guestId = moon_past1)
+PICK = {"past1": "c"}
+for _p, _k in PICK.items():
+    C.CAST[f"guest_moon_{_p}"] = C.CAST[f"moon_{_p}_{_k}"]
+
+
+# ---------------------------------------------------------------- 前のループの自分 (二人目。上弦の崖。docs/design/46 の 4.4)
+# 一人目より前の巻き戻りの自分。「鉄張りの旅装」(鎖帷子・鉄の鉢の兜・革の帯) が月の砂で色あせた姿。頭巾はなく、面頬で顔を隠す
+IRON = dict(coat=(128, 132, 140), shirt=(160, 160, 158), mantle=(104, 100, 96), trim=(84, 72, 62), hat=(140, 146, 156), hat2=(96, 100, 110),
+            trousers=(96, 94, 96), boot=(78, 70, 64), sash=(110, 92, 72), cord=(140, 128, 108), leather=(108, 90, 72), metal=(150, 156, 168),
+            metal2=(110, 116, 128), glove=(96, 84, 72))
+
+
+def ipal(**kw):
+    p = dict(IRON)
+    p.update(kw)
+    soft = {m: K.cloth(p[k], noise=0.04, streak=0.03, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("trousers", "trousers"),
+                                                                                  ("shirt", "shirt"))}
+    # 持ち物の木と布も月の砂で色あせる
+    soft["wood"] = K.cloth((104, 94, 84), base=0.52, lit=0.3, stripe=3, axis="v", streak=0.1)
+    soft["shield"] = K.cloth((112, 100, 88), base=0.52, lit=0.3, stripe=3, axis="v", streak=0.08)
+    soft["shield2"] = K.cloth((88, 80, 72), base=0.52, lit=0.3, stripe=3, axis="v", streak=0.08)
+    soft["brass"] = dict(ramp=[(80, 78, 74), (120, 116, 106), (160, 154, 140), (196, 190, 176)], base=0.6, lit=0.4, noise=0.02, crack=0, min=0)
+    soft["pennant"] = dict(ramp=[(60, 64, 76), (90, 96, 110), (120, 126, 140), (150, 156, 168)], base=0.6, lit=0.3, noise=0.04, crack=0, min=0)
+    p["extra_mats"] = {**STAR_LAMP, **soft}
+    p["glow_mats"] = ["star"]
+    return p
+
+
+import props2 as P2  # noqa: E402
+import props3 as P3  # noqa: E402
+
+moon("past2", "前のループの自分 (二人目)", [
+    # A 面頬の鎖帷子: 膝までの鎖帷子に鉄の兜と面頬、肩当て、左腕に欠けた丸盾。いちばん「戦って残った」姿
+    dict(anim="hold_l", pal=ipal(skin=(196, 170, 150), hair=(80, 74, 70)),
+         face=dict(eye="narrow", iris=(150, 170, 200), brow="stern", mouth="none", mask=(132, 138, 150)), hair=SHORT, hat=dict(kind="helmet"),
+         hairline=27.4, build="broad", upper=dict(pauldron=True, sash=True), lower="coat_long", sleeve="fitted", gloves=True,
+         arms=HOLD_L_LOW, props={"prop_l": P3.round_shield}),
+    # B 古い槍の見張り: 鉄の兜と面頬、肩に色あせた外套、右手に古い槍を杖のように立てる。崖の頂を見張っていた
+    dict(anim="hold_r", pal=ipal(skin=(190, 166, 148), hair=(120, 116, 112)),
+         face=dict(eye="old", iris=(150, 170, 200), brow="flat", mouth="none", mask=(120, 126, 138)), hair=SHORT, hat=dict(kind="helmet"),
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=14.0, clasp=True), sash=True), lower="trousers", sleeve="wide", gloves=True,
+         arms=STAFF_R, props={"prop_r": P2.spear}),
+    # C 綱を担ぐ登り手: 鉄の兜と面頬、鎖帷子は短く、腰に登りの綱の束、背に荷と寝具 (月の砂)。崖で何度も落ちて登り直した
+    dict(anim="hold_l", pal=ipal(skin=(196, 170, 150), hair=(70, 66, 64)),
+         face=dict(eye="calm", iris=(150, 170, 200), brow="worried", mouth="none", mask=(126, 132, 144)), hair=SHORT, hat=dict(kind="helmet"),
+         hairline=27.4, build="avg", upper=dict(pauldron=True, sash=True), lower="trousers", sleeve="rolled", gloves=True,
+         arms=HOLD_L_LOW, props={"prop_l": P2.rope_coil}, extra_body=[pack_dusty]),
+])
+
+
+# ---------------------------------------------------------------- 前のループの自分 (三人目。満月の野。docs/design/46 の 4.5。一品一案)
+# 二人目より前の巻き戻りの自分。「灰歩きの旅装」が月の光で白く褪せた姿。目を布で覆い (満ち引きを光ではなく数で数える)、左手に月の砂時計
+ASHW = dict(coat=(198, 196, 190), shirt=(220, 218, 212), mantle=(172, 176, 188), trim=(120, 118, 118), hat=(190, 190, 196), hat2=(150, 152, 160),
+            trousers=(150, 150, 156), boot=(98, 94, 92), sash=(132, 144, 176), cord=(176, 170, 158), leather=(126, 118, 110), metal=(176, 184, 198),
+            metal2=(130, 138, 152), glove=(150, 144, 136))
+
+
+def apal(**kw):
+    p = dict(ASHW)
+    p.update(kw)
+    soft = {m: K.cloth(p[k], noise=0.04, streak=0.03, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("trousers", "trousers"),
+                                                                                  ("shirt", "shirt"))}
+    sandglass = dict(ramp=[(90, 130, 190), (150, 190, 240), (206, 228, 255), (246, 250, 255)], base=0.6, lit=0.3, noise=0.03, crack=0, min=1)
+    p["extra_mats"] = {**STAR_LAMP, **soft, "sandglass": sandglass}
+    p["glow_mats"] = ["star", "sandglass"]
+    return p
+
+
+def hourglass_l(c):
+    """左手に提げる月の砂時計: 銀の上下の板と三本の柱、上の玉は空の光る硝子、下の玉に月の砂が溜まる"""
+    h = PR.hand(c, 1)
+    cx, cy, cz = h[0], h[1] - 3.4, h[2] - 0.4
+    F = part("hg_top", disc("prop_l", "metal", V(cx, cy + 2.5, cz), 1.25, 0.35, n=8))
+    F += part("hg_bot", disc("prop_l", "metal", V(cx, cy - 2.5, cz), 1.25, 0.35, n=8))
+    for i in range(3):
+        a = math.radians(90 + i * 120)
+        F += part(f"hg_post{i}", rod("prop_l", "metal2", V(cx + math.cos(a) * 1.0, cy - 2.3, cz + math.sin(a) * 1.0),
+                                     V(cx + math.cos(a) * 1.0, cy + 2.3, cz + math.sin(a) * 1.0), 0.14, sides=4))
+    F += part("hg_up", K.ellipsoid("prop_l", "sandglass", (cx, cy + 1.15, cz), (0.75, 1.05, 0.75), segs=7, rings=3))
+    F += part("hg_low", K.ellipsoid("prop_l", "dust", (cx, cy - 1.15, cz), (0.8, 1.05, 0.8), segs=7, rings=3))
+    F += part("hg_hook", rod("prop_l", "cord", V(cx, cy + 2.6, cz), V(h[0], h[1] - 0.2, h[2] - 0.4), 0.12, sides=3))
+    return F
+
+
+moon("past3", "前のループの自分 (三人目)", [
+    # 砂時計の数え手: 白く褪せた灰歩きの旅装に裾の長い外套、目を布で覆う (星の刺繍)、白くなった髪。腰に小瓶と袋、左手に月の砂時計
+    dict(anim="hold_l", pal=apal(skin=(192, 168, 152), hair=(170, 172, 182)),
+         face=dict(eye="closed", brow="flat", mouth="none", blindfold=(126, 138, 170)), hair=SHORT, hat=None,
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=11.0, clasp=True), sash=True, pouches=[(2.4, 14.6, "vial"), (-2.4, 14.6, "pouch")]),
+         lower="coat_long", sleeve="wide", arms=HOLD_L_LOW, props={"prop_l": hourglass_l}),
+])
+
+
+# ---------------------------------------------------------------- 前のループの自分 (四人目。下弦の淵。docs/design/46 の 4.6。一品一案)
+# いちばん古い巻き戻りの自分。色あせた初めの旅装が青白く薄れ、残像のように透けかけた姿。左手で胸の前に割れた手鏡を持つ
+GHOST = dict(coat=(176, 186, 206), shirt=(206, 214, 230), mantle=(150, 162, 188), trim=(120, 130, 156), hat=(170, 180, 200), hat2=(140, 150, 172),
+             trousers=(136, 146, 170), boot=(96, 102, 124), sash=(120, 140, 190), cord=(170, 178, 196), leather=(116, 122, 142), metal=(186, 194, 210),
+             metal2=(140, 148, 166), glove=(150, 158, 178))
+
+
+def gpal(**kw):
+    p = dict(GHOST)
+    p.update(kw)
+    soft = {m: K.cloth(p[k], noise=0.03, streak=0.05, facevar=0.03) for m, k in (("coat", "coat"), ("mantle", "mantle"), ("trousers", "trousers"),
+                                                                                  ("shirt", "shirt"))}
+    mirror = dict(ramp=[(110, 150, 210), (170, 206, 246), (220, 236, 255), (250, 252, 255)], base=0.62, lit=0.3, noise=0.03, crack=0, min=1)
+    p["extra_mats"] = {**STAR_LAMP, **soft, "mirror": mirror}
+    p["glow_mats"] = ["star", "mirror"]
+    return p
+
+
+def hand_mirror_l(c):
+    """左手で胸の前に持つ割れた手鏡: 銀の丸い枠に光る鏡の面、斜めの割れ目、下に短い柄"""
+    h = PR.hand(c, 1)
+    cx, cy, cz = h[0] - 0.6, h[1] + 3.0, h[2] - 0.9
+    F = part("mr_frame", disc("prop_l", "metal", V(cx, cy, cz), 2.1, 0.45, n=12, axis="z"))
+    F += part("mr_glass", disc("prop_l", "mirror", V(cx, cy, cz - 0.3), 1.75, 0.2, n=12, axis="z"))
+    F += part("mr_crack", rod("prop_l", "trim", V(cx - 1.2, cy + 1.0, cz - 0.45), V(cx + 0.9, cy - 1.1, cz - 0.45), 0.12, sides=3))
+    F += part("mr_handle", rod("prop_l", "metal2", V(cx, cy - 2.0, cz), V(h[0], h[1] - 0.6, h[2] - 0.4), 0.3, sides=5))
+    return F
+
+
+moon("past4", "前のループの自分 (四人目)", [
+    # 鏡の写し手: 青白く薄れた初めの旅装に短い外套と頭巾 (下ろしている)、白い髪、星の色の目。左手で胸の前に割れた手鏡
+    dict(anim="hold_l", pal=gpal(skin=(196, 200, 214), hair=(214, 220, 234)),
+         face=dict(eye="calm", iris=(170, 200, 250), brow="worried", mouth="none"), hair=SHORT, hat=None,
+         hairline=27.4, build="slim", upper=dict(mantle=dict(bottom=14.0, clasp=True), sash=True), lower="trousers", sleeve="rolled",
+         arms=HOLD_L, props={"prop_l": hand_mirror_l}),
+])
+
+
+def sheet(pid):
+    out = Path(__file__).resolve().parents[4] / "docs/review/npc_models_v2/roughs"
+    keys = [k for k in "abc" if f"moon_{pid}_{k}" in C.CAST]
+    if len(keys) == 1:
+        import shutil
+        shutil.copy(out / f"moon_{pid}_{keys[0]}.png", out / f"moon_{pid}.png")
+        return
+    ims = [Image.open(out / f"moon_{pid}_{k}.png").convert("RGB") for k in "abc"]
+    W = max(i.width for i in ims)
+    H = sum(i.height for i in ims) + 36
+    cv = Image.new("RGB", (W, H), (16, 16, 22))
+    d = ImageDraw.Draw(cv)
+    import voxel
+    d.text((10, 6), f"{MOON[pid]} 3 案", font=voxel.font(22), fill=(236, 232, 218))
+    y = 36
+    for im in ims:
+        cv.paste(im, (0, y))
+        y += im.height
+    cv.save(out / f"moon_{pid}.png")
+
+
+if __name__ == "__main__":
+    import build as B
+    ids = sys.argv[1:] or list(MOON)
+    B.main([f"moon_{p}_{k}" for p in ids for k in "abc" if f"moon_{p}_{k}" in C.CAST])
+    for p in ids:
+        sheet(p)
+    print("ok", len(ids))
+
+
+# 選定 (2026-10-28): 前のループの自分 (二人目) は C (綱を担ぐ登り手)。cast の guest_moon_past2 として登録する (guestId = moon_past2)
+C.CAST["guest_moon_past2"] = C.CAST["moon_past2_c"]
+# 三人目は一品一案 (2026-10-30)。guestId = moon_past3
+C.CAST["guest_moon_past3"] = C.CAST["moon_past3_a"]
+# 四人目も一品一案 (2026-10-30)。guestId = moon_past4
+C.CAST["guest_moon_past4"] = C.CAST["moon_past4_a"]

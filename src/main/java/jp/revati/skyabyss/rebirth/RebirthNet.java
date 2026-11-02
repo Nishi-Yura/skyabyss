@@ -118,7 +118,7 @@ public final class RebirthNet {
 
     @SubscribeEvent
     static void onPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("1")
+        event.registrar("2")
                 .playToClient(BoardPayload.TYPE, BoardPayload.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.rebirth.RebirthClient.openBoard(p))
                 .playToClient(BurstPayload.TYPE, BurstPayload.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.rebirth.RebirthClient.burst(p))
                 .playToServer(SelectTitlePayload.TYPE, SelectTitlePayload.STREAM_CODEC, (p, ctx) -> {

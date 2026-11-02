@@ -22,7 +22,6 @@ import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillActions;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
-import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -48,7 +47,7 @@ public final class SkillLessonSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST skill lesson PASSED (meet, learn+slot, two casts on a dummy, behind, stance, respec talk, reward once, replay, skip, tree lesson, data, ja/en)");
+            SkyAbyss.LOGGER.info("SELFTEST skill lesson PASSED (meet, learn+slot, two casts on a dummy, behind, respec talk, reward once, replay, skip, tree lesson, data, ja/en)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST skill lesson FAILED: {}", m));
         }
@@ -65,15 +64,10 @@ public final class SkillLessonSelfTest {
         return s == null ? (QuestLog.of(p).entry(SkillLesson.QUEST) != null && QuestLog.of(p).entry(SkillLesson.QUEST).done ? "done" : "none") : s;
     }
 
+    // 鐘銭は旅嚢にも入る (2026-10-25) ので、袋と持ち物の両方を数える
     private static int coins(FakePlayer p) {
         Item coin = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "bell_coin"));
-        int n = 0;
-        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-            if (p.getInventory().getItem(i).is(coin)) {
-                n += p.getInventory().getItem(i).getCount();
-            }
-        }
-        return n;
+        return jp.revati.skyabyss.pouch.Pouch.countAll(p, coin);
     }
 
     private static void hit(FakePlayer p, TrainingDummy dummy, Skill skill, long castTick) {
@@ -98,7 +92,7 @@ public final class SkillLessonSelfTest {
             JsonObject lang = lang(code);
             check(f, lang != null, code + ": no lesson lang");
             if (lang != null) {
-                for (String k : List.of("lesson.skyabyss.hint.learn", "lesson.skyabyss.hint.cast", "lesson.skyabyss.hint.behind", "lesson.skyabyss.hint.stance",
+                for (String k : List.of("lesson.skyabyss.hint.learn", "lesson.skyabyss.hint.cast", "lesson.skyabyss.hint.behind", 
                         "lesson.skyabyss.hint.reset", "lesson.skyabyss.screen.learn", "message.skyabyss.lesson.reward", "message.skyabyss.lesson.behind",
                         "message.skyabyss.lesson.say.finish", "message.skyabyss.lesson.skipped")) {
                     check(f, lang.has(k), code + ": missing " + k);
@@ -151,13 +145,8 @@ public final class SkillLessonSelfTest {
             check(f, SkillLesson.behind(dummy, p), "behind the dummy was not behind");
             dummy.invulnerableTime = 0;
             dummy.hurt(p.damageSources().playerAttack(p), 1f);
-            check(f, stage(p).equals("stance"), "a plain hit from behind should move to stance: " + stage(p));
-            // 構えを変える
-            SkillLesson.poll(p);
-            check(f, stage(p).equals("stance"), "stance passed without a change");
-            check(f, SkillManager.setStance(p, SkillStance.GUARD) == SkillManager.StanceResult.OK, "could not take the guard stance");
-            SkillLesson.poll(p);
-            check(f, stage(p).equals("reset"), "a stance change should move to reset: " + stage(p));
+            // 構えの段は 43 (6 職) で削った: 背後のあとは振り直し
+            check(f, stage(p).equals("reset"), "a plain hit from behind should move to reset: " + stage(p));
             // 振り直しを聞く → 済む・鐘銭
             int before = coins(p);
             Quests.onTalk(p, SkillLesson.MASTER, "lesson_respec");
@@ -173,22 +162,27 @@ public final class SkillLessonSelfTest {
             SkillLesson.act(p, "skip", null);
             check(f, QuestLog.of(p).entry(SkillLesson.QUEST) == null, "skip should clear the lesson");
 
-            // 後の章: 星術師の木が開く → 一段の稽古 → その木の技を当てる
+            // 後の章: 星読み・深淵術師の木は技の木 v2 の K に無いので、木が開いても稽古は始めない。淵の木 (転生 1 回から) の稽古は始まり、淵の技で終わる
             SkillData d = SkillManager.get(p);
-            SkillLesson.poll(p);
-            check(f, QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest()) == null, "the star lesson started before the tree opened");
             d.unlockedTrees.add(SkillTree.STAR.id);
+            d.unlockedTrees.add(SkillTree.ABYSS.id);
             SkillLesson.poll(p);
-            var star = QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest());
-            check(f, star != null && !star.done, "the star lesson did not start when the tree opened");
+            check(f, QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest()) == null && QuestLog.of(p).entry(SkillLesson.Unlock.ABYSS.quest()) == null,
+                    "the star / abyss lessons started although v2 has no such tab");
+            int rebirth = d.rebirth;
+            d.rebirth = Math.max(1, rebirth);
+            SkillLesson.poll(p);
+            var deep = QuestLog.of(p).entry(SkillLesson.Unlock.DEEP.quest());
+            check(f, deep != null && !deep.done, "the deep lesson did not start after a rebirth");
             SkillLesson.onHit(p, dummy, Skill.TITAN_CLEAVE);
-            check(f, star != null && !star.done, "a rock skill finished the star lesson");
-            Skill starSkill = Skill.inTree(SkillTree.STAR).isEmpty() ? null : Skill.inTree(SkillTree.STAR).get(0);
-            if (starSkill != null) {
-                SkillLesson.onHit(p, dummy, starSkill);
-                star = QuestLog.of(p).entry(SkillLesson.Unlock.STAR.quest());
-                check(f, star != null && star.done, "a star skill did not finish the star lesson");
+            check(f, deep != null && !deep.done, "a rock skill finished the deep lesson");
+            Skill deepSkill = Skill.inTree(SkillTree.DEEP).isEmpty() ? null : Skill.inTree(SkillTree.DEEP).get(0);
+            if (deepSkill != null) {
+                SkillLesson.onHit(p, dummy, deepSkill);
+                deep = QuestLog.of(p).entry(SkillLesson.Unlock.DEEP.quest());
+                check(f, deep != null && deep.done, "a deep skill did not finish the deep lesson");
             }
+            d.rebirth = rebirth;
         } finally {
             dummy.discard();
             Quests.forgetAll(p);

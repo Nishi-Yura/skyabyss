@@ -37,6 +37,16 @@ CW = {v: k for k, v in CCW.items()}
 
 # 許す例: (設計図の名前の一部, 種類, 座標の箱 (x0,y0,z0,x1,y1,z1) か None, 理由)
 ALLOW = [
+    # 土地の村の広場の縁 (ring 6): 磨いた閃緑岩と苔むした石レンガの階段を床の高さに並べた縁取り。段ではなく見た目の帯 (両側が全ブロックで埋まる)
+    ('poi_hamlet_', 'STAIR_BURIED', None, 'plaza rim at floor level (decorative band)'),
+    # 都の同じ縁取り (85, 0, -101)
+    ('capital', 'STAIR_BURIED', (85, 0, -101, 85, 0, -101), 'plaza rim at floor level (decorative band)'),
+    # 道ばたの祠と環状列石: 中央の台のまわりに外向きの階段を並べた裾 (段ではなく台座の面取り)
+    ('poi_roadside_shrine', 'STAIR_REVERSED', (-2, 0, -1, 2, 0, 0), 'plinth bevel around the altar'),
+    ('poi_stone_circle', 'STAIR_REVERSED', (-1, 0, -1, 1, 0, 1), 'plinth bevel around the centre stone'),
+    # 汐守の町の宿の正面: 戸口の柱のまわりの飾りの階段 (y 0〜1)。入口の段そのもの (y 0 の南向きの列) は正しい
+    ('town_tide', 'STAIR_RUN', (-25, 0, -24, -21, 1, -22), 'facade trim stairs around the door pillars'),
+    ('town_tide', 'STAIR_RUN', (-1, 0, -24, 8, 2, -22), 'facade trim stairs around the door pillars'),
 ]
 
 # 当たりの無いもの

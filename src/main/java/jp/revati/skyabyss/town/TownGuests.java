@@ -107,10 +107,30 @@ public final class TownGuests {
         testMarks = marks;
     }
 
+    // 都の印: 建てたときに写した印に、今の設計図にしかない印 (あとから足した町のクエストの家 10・11 など) を足す。
+    // 前の版で建てた都では写した印に無く、「〜へ行こう」(town_at) がいつまでも済まなかった (2026-11-02 の声「〜に行こうの判定もおかしいときある」)。
+    // 係の人の印 (npc_) は、いま立っている所 (facility/Attendants.capitalSpots)
     public static Map<String, BlockPos> marks(MinecraftServer server) {
         Map<String, BlockPos> t = testMarks;
-        return t != null ? t : OpeningSites.shelterExtras(server, "");
+        if (t != null) {
+            return t;
+        }
+        Map<String, BlockPos> c = cached;
+        if (c != null && cachedAt == server.getTickCount()) {
+            return c;
+        }
+        Map<String, BlockPos> out = new java.util.LinkedHashMap<>(jp.revati.skyabyss.facility.TownGuide.worldMarks(server, ""));
+        out.putAll(OpeningSites.shelterExtras(server, ""));
+        out.putAll(jp.revati.skyabyss.facility.Attendants.capitalSpots(server.overworld()));
+        c = java.util.Collections.unmodifiableMap(out);
+        cached = c;
+        cachedAt = server.getTickCount();
+        return c;
     }
+
+    // 同じ tick の中では作り直さない (見回りが人ごとに呼ぶ)
+    private static volatile Map<String, BlockPos> cached;
+    private static volatile int cachedAt = -1;
 
     @Nullable
     public static BlockPos mark(MinecraftServer server, String name) {

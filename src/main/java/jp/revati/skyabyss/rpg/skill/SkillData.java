@@ -28,9 +28,9 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public static final class Loadout {
         public final String[] slots = new String[SkillRules.SLOTS];
         public final Map<String, Integer> runes = new LinkedHashMap<>();
+        // 木 v2: 取っていた節 (docs/design/48。読み込むと木がこの形に戻る)
+        public final LinkedHashSet<String> nodes = new LinkedHashSet<>();
         public boolean saved;
-        // 連鎖の印 (枠 i → i+1 の連鎖を 1 << i で持つ)
-        public int chainMask;
 
         public Loadout() {
             Arrays.fill(slots, "");
@@ -40,12 +40,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             System.arraycopy(o.slots, 0, slots, 0, slots.length);
             runes.clear();
             runes.putAll(o.runes);
+            nodes.clear();
+            nodes.addAll(o.nodes);
             saved = o.saved;
-            chainMask = o.chainMask;
         }
 
         public boolean sameAs(Loadout o) {
-            return saved == o.saved && chainMask == o.chainMask && Arrays.equals(slots, o.slots) && runes.equals(o.runes);
+            return saved == o.saved && Arrays.equals(slots, o.slots) && runes.equals(o.runes) && nodes.equals(o.nodes);
         }
     }
 
@@ -61,15 +62,12 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public final Set<String> keystones = new LinkedHashSet<>();
     // 熟練の経験 (技の id → 点。転生しても残る)
     public final Map<String, Integer> mastery = new LinkedHashMap<>();
-    // 構え (SkillStance の番号) と、次に切り替えられるまでの tick
-    public int stance;
-    public int stanceCd;
-    // 連鎖の印 (枠 i → i+1 を 1 << i で持つ。立っているのは 3 つまで)
-    public int chainMask;
     // 武器の持ち替えで入れ替わる枠の組 (0 = 近接など、1 = 弓)。いま使っている枠は slots、使っていないほうがここ
-    public final String[][] bars = new String[2][SkillRules.SLOTS];
-    public final boolean[] barUsed = new boolean[2];
-    public int bar;
+    // 職ごとの枠 (docs/design/43)。slots はいま持っている職 (curJob) の枠。持ち替えると useJob が入れ替える
+    public final Map<String, String[]> jobBars = new java.util.HashMap<>();
+    public String curJob = "";
+    // 技の木 v2 (docs/design/48): 職ごとに取った節の id。技の段・刻印・古い鍵石・基礎はここから導く (applyNodes)
+    public final Map<String, LinkedHashSet<String>> nodes = new java.util.HashMap<>();
     // 技の変異 (A08。技の id → 変異の id)。一度選んだら外せない。転生しても残る
     public final Map<String, String> mutations = new LinkedHashMap<>();
     // 紋 (A14)。持っている紋 (「id/段」の文字。25 まで) と、盤の穴 (最大 6。「id/段@技の id」か空)。転生しても残る
@@ -91,9 +89,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public int respecs;
     // これまでに刻印を付け替えた回数 (初回は無料)
     public int runeSwaps;
-    // 天職 (木の id。選ぶまで空)。2 つ目は第三章のあと
-    public String calling = "";
-    public String calling2 = "";
     // 今のマナ。負なら「まだ決めていない」(初めてのログインで満タンにする)
     public float mana = -1;
     // 技ごとの残りのクールダウン (tick)。保存する (ログアウトで消えない)
@@ -117,10 +112,8 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     // 連鎖: 直前に使った枠と時刻、連鎖が付いた技と期限
     public int lastCastSlot = -1;
     public long lastCastTick = Long.MIN_VALUE / 2;
-    public String chainSkill = "";
     // 熟練の「当てた」を数えた時刻 (技ごと。広い技が一度に何体に当たっても、10 tick に 1 度だけ数える)
     public final Map<String, Long> masteryHitAt = new LinkedHashMap<>();
-    public long chainUntil;
     // 最後に持ち主へ送ったマナ (送りすぎないため)
     public float sentMana = -999;
     // マナの回復の倍率 (毎秒、SkillEffects が計算する): 凪の心得・野営の手、巡りの唄の期限つきの上乗せ
@@ -155,19 +148,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < loadouts.length; i++) {
             loadouts[i] = new Loadout();
         }
-        Arrays.fill(bars[0], "");
-        Arrays.fill(bars[1], "");
         Arrays.fill(glyphSockets, "");
     }
 
     public int rank(Skill skill) {
-        int r = ranks.getOrDefault(skill.id, 0);
-        return r == 0 && granted(skill) ? 1 : r;
-    }
-
-    // 天職の木の要は、点を使わずに授かる (天職の特典。docs/design/31 の A01)
-    public boolean granted(Skill skill) {
-        return SkillRules.CALLINGS && skill.keystone() && (skill.tree.id.equals(calling) || skill.tree.id.equals(calling2));
+        return ranks.getOrDefault(skill.id, 0);
     }
 
     // 熟練 (0〜5)
@@ -179,8 +164,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return SkillRules.masteryLevel(masteryXp(skill));
     }
 
-    // その木に使った点 (技の段と刻印。授かった要は数えない)
+    // その木に使った点 (職の木は節の点の合計。淵・前世は技の段と刻印)
     public int treePoints(SkillTree tree) {
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(tree) != null) {
+            return nodeSpent(tree);
+        }
         int sum = 0;
         for (Map.Entry<String, Integer> e : ranks.entrySet()) {
             Skill s = Skill.byId(e.getKey());
@@ -199,26 +187,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     // ---------------------------------------------------------------- 橋・淵・前世の技 (31 の A09・B08・B09)
     // 橋が開くか: 親の 2 本の木のそれぞれで、技を 3 つ以上覚えている (木の「段 3」)
-    public static final int BRIDGE_SKILLS_PER_TREE = 3;
-
-    public int knownIn(SkillTree tree) {
-        int n = 0;
-        for (Skill s : Skill.inTree(tree)) {
-            if (knows(s)) {
-                n++;
-            }
-        }
-        return n;
-    }
-
-    public boolean bridgeOpen(Skill skill) {
-        SkillTree[] parents = skill.bridgeTrees();
-        if (parents.length != 2) {
-            return true;
-        }
-        return knownIn(parents[0]) >= BRIDGE_SKILLS_PER_TREE && knownIn(parents[1]) >= BRIDGE_SKILLS_PER_TREE;
-    }
-
     // 前世の点の持ち分: 転生 1 回につき 2 点 (6 回ぶんの 12 点まで)。通常の点とは別枠
     public static final int PAST_POINTS_PER_REBIRTH = 2;
     public static final int PAST_POINTS_MAX = 12;
@@ -228,6 +196,9 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     }
 
     public int pastSpent() {
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(SkillTree.PAST) != null) {
+            return nodeSpent(SkillTree.PAST);
+        }
         int sum = 0;
         for (Map.Entry<String, Integer> e : ranks.entrySet()) {
             Skill s = Skill.byId(e.getKey());
@@ -245,6 +216,19 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     // 転生の回数が足りない淵・前世の技を戻す (回数が下がった・開発コマンド)。前世の点が持ち分を超えたら前世の技を全部戻す。戻したら true
     public boolean enforceRebirth() {
         boolean changed = false;
+        // 木 v2: 転生の足りない節 (淵・前世) と、前世の点の使いすぎを戻す
+        boolean nodesChanged = false;
+        for (jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree : jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.all()) {
+            nodesChanged |= pruneTree(tree, nodesOf(tree.tree));
+        }
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(SkillTree.PAST) != null && nodeSpent(SkillTree.PAST) > pastPool()) {
+            nodesOf(SkillTree.PAST).clear();
+            nodesChanged = true;
+        }
+        if (nodesChanged) {
+            applyNodes();
+            changed = true;
+        }
         for (Skill s : Skill.values()) {
             if (s.rebirthAt() > rebirth && ranks.containsKey(s.id)) {
                 ranks.remove(s.id);
@@ -269,21 +253,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return changed;
     }
 
-    // 天職の割引: 天職の木の技の段を 3 つぶんまで 1 点ずつ安くする (戻る点)。要と刻印は数えない
-    public int callingDiscount() {
-        if (!SkillRules.CALLINGS || !hasCalling()) {
-            return 0;
-        }
-        int n = 0;
-        for (Map.Entry<String, Integer> e : ranks.entrySet()) {
-            Skill s = Skill.byId(e.getKey());
-            if (s != null && s.tree.id.equals(calling) && !s.keystone()) {
-                n += e.getValue();
-            }
-        }
-        return Math.min(SkillRules.CALLING_DISCOUNT_MAX, n);
-    }
-
     public boolean knows(Skill skill) {
         return rank(skill) > 0;
     }
@@ -293,7 +262,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return runes.getOrDefault(skill.id, 0);
     }
 
+    // 使った点 (職ごとの点になったので「共有の分 + いちばん使っている職の分」。docs/design/43)。PAST は別枠
     public int spentPoints() {
+        return sharedSpent() + maxJobSpent();
+    }
+
+    // 前の版の数え方 (全部の木の合計。記録の移し替えの検査用)
+    public int spentPointsAllTrees() {
         int sum = 0;
         for (Map.Entry<String, Integer> e : ranks.entrySet()) {
             Skill sk = Skill.byId(e.getKey());
@@ -308,20 +283,407 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             }
         }
         sum += keystones.size();
-        return Math.max(0, sum - callingDiscount());
+        return Math.max(0, sum);
     }
 
     public int totalPoints(int level) {
         return SkillRules.pointsForLevel(level) + bonusPoints;
     }
 
+    // ---------------------------------------------------------------- 職ごとの点 (docs/design/43)
+    // 職の木の点はその職だけのもの。深淵の術 (artPoints) と淵の木は職をまたいで使う (どの職の残りからも引く)
+    public int jobSpent(SkillTree tree) {
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(tree) != null) {
+            return nodeSpent(tree);
+        }
+        int sum = 0;
+        for (Map.Entry<String, Integer> e : ranks.entrySet()) {
+            Skill sk = Skill.byId(e.getKey());
+            if (sk != null && sk.tree == tree) {
+                sum += e.getValue();
+            }
+        }
+        for (String id : runes.keySet()) {
+            Skill sk = Skill.byId(id);
+            if (sk != null && sk.tree == tree) {
+                sum += 1;
+            }
+        }
+        return sum;
+    }
+
+    public int sharedSpent() {
+        return artPoints + jobSpent(SkillTree.DEEP);
+    }
+
+    // いちばん点を使っている職の分
+    public int maxJobSpent() {
+        int max = 0;
+        for (Job j : Job.values()) {
+            max = Math.max(max, jobSpent(j.tree));
+        }
+        return max;
+    }
+
+    // その木の技を覚えるのに使える残り (職の木 = その職の残り、淵 = どの職でも足りる残り)
+    public int unspentFor(SkillTree tree, int level) {
+        Job job = Job.ofTree(tree);
+        int own = job != null ? jobSpent(tree) : maxJobSpent();
+        return totalPoints(level) - sharedSpent() - own;
+    }
+
+    // 持った武器の職へ枠を入れ替える。替わったら true。初めての職は、覚えている使う技を行の順に並べる
+    public boolean useJob(Job job) {
+        String key = job == null ? "" : job.id;
+        if (key.equals(curJob)) {
+            return false;
+        }
+        jobBars.put(curJob, slots.clone());
+        String[] next = jobBars.get(key);
+        Arrays.fill(slots, "");
+        if (next != null) {
+            System.arraycopy(next, 0, slots, 0, Math.min(next.length, slots.length));
+        } else if (job != null) {
+            int i = 0;
+            for (Skill s : jobActives(job)) {
+                if (knows(s) && i < slotCount()) {
+                    slots[i++] = s.id;
+                }
+            }
+        }
+        curJob = key;
+        return true;
+    }
+
+    // ---------------------------------------------------------------- 技の木 v2 (docs/design/48)
+    // 木の鍵: 職の木はその職の id、職をまたぐ木 (淵・前世) は木の id
+    public static String treeKey(SkillTree t) {
+        Job j = t == null ? null : Job.ofTree(t);
+        return j != null ? j.id : t == null ? "" : t.id;
+    }
+
+    public java.util.Set<String> nodesOf(Job job) {
+        return job == null ? java.util.Set.of() : nodesOf(job.tree);
+    }
+
+    public java.util.Set<String> nodesOf(SkillTree t) {
+        if (t == null) {
+            return java.util.Set.of();
+        }
+        return nodes.computeIfAbsent(treeKey(t), k -> new LinkedHashSet<>());
+    }
+
+    public boolean hasNode(Job job, String id) {
+        return job != null && hasNode(job.tree, id);
+    }
+
+    public boolean hasNode(SkillTree t, String id) {
+        return t != null && nodesOf(t).contains(id);
+    }
+
+    // その木で使った点
+    public int nodeSpent(Job job) {
+        return job == null ? 0 : nodeSpent(job.tree);
+    }
+
+    public int nodeSpent(SkillTree t) {
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(t);
+        if (tree == null) {
+            return 0;
+        }
+        int sum = 0;
+        for (String id : nodesOf(t)) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+            if (n != null) {
+                sum += n.cost;
+            }
+        }
+        return sum;
+    }
+
+    // その型 (枝) に使った点
+    public int archPoints(Job job, String arch) {
+        return job == null ? 0 : archPoints(job.tree, arch);
+    }
+
+    public int archPoints(SkillTree t, String arch) {
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(t);
+        if (tree == null || arch == null) {
+            return 0;
+        }
+        int sum = 0;
+        for (String id : nodesOf(t)) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+            if (n != null && arch.equals(n.arch)) {
+                sum += n.cost;
+            }
+        }
+        return sum;
+    }
+
+    // 取っている使う技の数 (今の職の木 + 淵 + 前世。4 本まで)
+    public int activeCount() {
+        int n = 0;
+        for (SkillTree t : activeTrees()) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(t);
+            if (tree == null) {
+                continue;
+            }
+            for (String id : nodesOf(t)) {
+                jp.revati.skyabyss.rpg.skill.tree.AbilityNode node = tree.node(id);
+                if (node != null && node.countsAsActive()) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
+    // 使う技を数える木: 今の職の木と、職をまたぐ木
+    private java.util.List<SkillTree> activeTrees() {
+        java.util.List<SkillTree> list = new java.util.ArrayList<>();
+        Job cur = Job.byId(curJob);
+        if (cur != null) {
+            list.add(cur.tree);
+        }
+        list.addAll(jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.SHARED);
+        return list;
+    }
+
+    public enum TakeResult {
+        OK, UNKNOWN, TAKEN, NO_POINTS, REQUIRES, EXCLUDED, ARCH_POINTS, ACTIVES_FULL, RANK_MAX, SEALED, NOT_MASTERED, NO_MATERIAL, REBIRTH
+    }
+
+    public TakeResult canTake(Job job, jp.revati.skyabyss.rpg.skill.tree.AbilityNode n, int level) {
+        return job == null ? TakeResult.UNKNOWN : canTake(job.tree, n, level);
+    }
+
+    // その節を今取れるか (職の木は今の職のもの、淵・前世はどの職でも)
+    public TakeResult canTake(SkillTree t, jp.revati.skyabyss.rpg.skill.tree.AbilityNode n, int level) {
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(t);
+        if (t == null || tree == null || n == null || tree.node(n.id) != n) {
+            return TakeResult.UNKNOWN;
+        }
+        java.util.Set<String> mine = nodesOf(t);
+        if (mine.contains(n.id)) {
+            return TakeResult.TAKEN;
+        }
+        if (!n.requires.isEmpty()) {
+            boolean any = false;
+            for (String r : n.requires) {
+                if (mine.contains(r)) {
+                    any = true;
+                    break;
+                }
+            }
+            if (!any) {
+                return TakeResult.REQUIRES;
+            }
+        }
+        for (String e : n.excludes) {
+            if (mine.contains(e)) {
+                return TakeResult.EXCLUDED;
+            }
+        }
+        if (n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.RUNE) {
+            // 同じ技の刻印は一つだけ
+            for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode other : tree.runesOf(n.skill)) {
+                if (other != n && mine.contains(other.id)) {
+                    return TakeResult.EXCLUDED;
+                }
+            }
+        }
+        if (n.arch != null && n.archPoints > 0 && archPoints(t, n.arch) < n.archPoints) {
+            return TakeResult.ARCH_POINTS;
+        }
+        if (n.rebirthAt > rebirth) {
+            return TakeResult.REBIRTH;
+        }
+        if (n.countsAsActive() && activeCount() >= SkillRules.BASE_SLOTS) {
+            return TakeResult.ACTIVES_FULL;
+        }
+        if (n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.RANK && rank(n.skill) >= n.skill.maxRank) {
+            return TakeResult.RANK_MAX;
+        }
+        // 変異は技を極めてから (素材はサーバーが取るときに見る)
+        if (n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.MUTATION && rank(n.skill) < n.skill.maxRank) {
+            return TakeResult.NOT_MASTERED;
+        }
+        int left = t == SkillTree.PAST ? pastLeft() : unspentFor(t, level);
+        if (left < n.cost) {
+            return TakeResult.NO_POINTS;
+        }
+        return TakeResult.OK;
+    }
+
+    // 節から技の段・刻印・鍵石を導く (節を変えたあと・読み込んだあとに呼ぶ)。木のある技だけを書き換える
+    public void applyNodes() {
+        for (jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree : jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.all()) {
+            for (Skill s : Skill.inTree(tree.tree)) {
+                ranks.remove(s.id);
+                runes.remove(s.id);
+            }
+            for (String id : nodesOf(tree.tree)) {
+                jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+                if (n == null) {
+                    continue;
+                }
+                switch (n.kind) {
+                    case ACTIVE, PASSIVE, KEYSTONE, RANK -> ranks.merge(n.skill.id, 1, Integer::sum);
+                    case RUNE -> runes.put(n.skill.id, n.rune);
+                    default -> {
+                    }
+                }
+            }
+            for (Skill s : Skill.inTree(tree.tree)) {
+                Integer r = ranks.get(s.id);
+                if (r != null && r > s.maxRank) {
+                    ranks.put(s.id, s.maxRank);
+                }
+            }
+        }
+        // 鍵石 (型の要) は今の職の木の節から。木がなければ (職がまだ無い・検査で木を外したとき) 前のまま
+        Job cur = Job.byId(curJob);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(cur);
+        if (tree != null) {
+            keystones.clear();
+            for (String id : nodesOf(cur)) {
+                jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+                if (n != null && n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.TRAIT) {
+                    keystones.add(n.keystone.id);
+                }
+            }
+        }
+    }
+
+    // 今の職の木から導いた基礎 (筋力・敏捷・精神・耐久の順)
+    public int[] statsFromNodes(Job job) {
+        return job == null ? new int[jp.revati.skyabyss.rpg.GrowthRules.Stat.values().length] : statsFromNodes(job.tree);
+    }
+
+    public int[] statsFromNodes(SkillTree t) {
+        int[] out = new int[jp.revati.skyabyss.rpg.GrowthRules.Stat.values().length];
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(t);
+        if (tree == null) {
+            return out;
+        }
+        for (String id : nodesOf(t)) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+            if (n != null && n.kind == jp.revati.skyabyss.rpg.skill.tree.AbilityNode.Kind.STAT) {
+                out[n.stat.ordinal()] += n.amount;
+            }
+        }
+        return out;
+    }
+
+    // その木を空にする (点は戻る)
+    public void clearJob(Job job) {
+        if (job != null) {
+            clearTree(job.tree);
+        }
+    }
+
+    public void clearTree(SkillTree t) {
+        if (t == null) {
+            return;
+        }
+        nodesOf(t).clear();
+        applyNodes();
+    }
+
+    // 一本の木の検め: 知らない節・転生の足りない節・前提の崩れた節・排他の重なりを外す。外したら true
+    private boolean pruneTree(jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree, java.util.Set<String> mine) {
+        boolean changed = mine.removeIf(id -> tree.node(id) == null || tree.node(id).rebirthAt > rebirth);
+        boolean again = true;
+        while (again) {
+            again = false;
+            for (String id : new java.util.ArrayList<>(mine)) {
+                jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+                boolean ok = n.requires.isEmpty();
+                for (String r : n.requires) {
+                    if (mine.contains(r)) {
+                        ok = true;
+                    }
+                }
+                for (String e : n.excludes) {
+                    if (mine.contains(e) && mine.contains(id)) {
+                        // 排他の重なりは、あとの方 (この節) を外す
+                        ok = false;
+                    }
+                }
+                if (!ok) {
+                    mine.remove(id);
+                    again = true;
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
+    // 節の検め: 木のない鍵・知らない節・前提の崩れた節・排他の重なり・点の使いすぎを戻す
+    void sanitizeNodes(int level) {
+        java.util.Set<String> valid = new java.util.HashSet<>();
+        for (jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree : jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.all()) {
+            valid.add(tree.key);
+        }
+        nodes.keySet().removeIf(k -> !valid.contains(k));
+        for (jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree : jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.all()) {
+            java.util.Set<String> mine = nodesOf(tree.tree);
+            pruneTree(tree, mine);
+            if (tree.job != null && nodeSpent(tree.tree) > SkillRules.pointsForLevel(jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL) + bonusPoints) {
+                mine.clear();
+            }
+            if (tree.tree == SkillTree.PAST && nodeSpent(SkillTree.PAST) > pastPool()) {
+                mine.clear();
+            }
+        }
+        applyNodes();
+    }
+
+    // その職で枠に置ける技か (その職の木か、職をまたぐ木 = 淵・前世・深淵の術)
+    public static boolean usableBy(Job job, Skill skill) {
+        Job own = Job.ofTree(skill.tree);
+        return job == null || own == null || own == job;
+    }
+
+    // 職の枠: その職の木の使う技を、行の順 (同じ行は列の順) に。覚えていなければ空 (null)
+    public Skill jobSlot(Job job, int i) {
+        if (job == null || i < 0) {
+            return null;
+        }
+        java.util.List<Skill> list = jobActives(job);
+        if (i >= list.size()) {
+            return null;
+        }
+        Skill s = list.get(i);
+        return knows(s) ? s : null;
+    }
+
+    // 職の木で、枠に入る使う技の並び
+    public static java.util.List<Skill> jobActives(Job job) {
+        java.util.List<Skill> out = new java.util.ArrayList<>();
+        for (Skill s : Skill.values()) {
+            if (job != null && s.tree == job.tree && s.active) {
+                out.add(s);
+            }
+        }
+        out.sort(java.util.Comparator.comparingInt((Skill s) -> s.tier).thenComparingInt(s -> s.column));
+        return out;
+    }
+
     public int unspentPoints(int level) {
         return totalPoints(level) - spentPoints();
     }
 
-    // いま使える枠の数 (2 つ目の天職を迎えると 5)
+    // 職 job の i 番目の型の箱
+    public static int loadoutIndex(Job job, int i) {
+        return job.ordinal() * SkillRules.LOADOUTS_PER_JOB + i;
+    }
+
+    // いま使える枠の数 (4。5 つ目の枠は天職とともに 43 で削った)
     public int slotCount() {
-        return calling2.isEmpty() ? SkillRules.BASE_SLOTS : SkillRules.SLOTS;
+        return SkillRules.BASE_SLOTS;
     }
 
     public Skill slot(int i) {
@@ -338,29 +700,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     // 1 tick 進める (サーバーとクライアントの両方で数える)
     public boolean tickCooldowns() {
-        boolean any = globalCooldown > 0 || !cooldowns.isEmpty() || stanceCd > 0;
-        if (stanceCd > 0) {
-            stanceCd--;
-        }
+        boolean any = globalCooldown > 0 || !cooldowns.isEmpty();
         if (globalCooldown > 0) {
             globalCooldown--;
         }
         cooldowns.replaceAll((k, v) -> v - 1);
         cooldowns.values().removeIf(v -> v <= 0);
         return any;
-    }
-
-    // ---------------------------------------------------------------- 天職
-    public boolean hasCalling() {
-        return !calling.isEmpty();
-    }
-
-    public SkillTree callingTree() {
-        return SkillTree.byId(calling);
-    }
-
-    public SkillTree calling2Tree() {
-        return SkillTree.byId(calling2);
     }
 
     // ---------------------------------------------------------------- 習得の条件
@@ -372,14 +718,15 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         if (skill == null) {
             return LearnResult.UNKNOWN;
         }
+        // 木のある技 (職の木・淵・前世) は節で取る (docs/design/48。SkillManager.takeNode)
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree) != null) {
+            return LearnResult.SEALED;
+        }
         if (!treeOpen(skill.tree)) {
             return LearnResult.SEALED;
         }
         if (skill.rebirthAt() > rebirth) {
             return LearnResult.REBIRTH;
-        }
-        if (!bridgeOpen(skill)) {
-            return LearnResult.REQUIRES;
         }
         if (rank(skill) >= rankLimit(skill)) {
             return rank(skill) >= skill.maxRank ? LearnResult.MAX_RANK : LearnResult.CALLING;
@@ -390,17 +737,15 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         if (!requirementsMet(skill)) {
             return LearnResult.REQUIRES;
         }
-        if (!callingAllows(skill)) {
-            return LearnResult.CALLING;
-        }
-        if (skill.tree == SkillTree.PAST ? pastLeft() < 1 : unspentPoints(level) < 1) {
+        if (skill.tree == SkillTree.PAST ? pastLeft() < 1 : unspentFor(skill.tree, level) < 1) {
             return LearnResult.NO_POINTS;
         }
         return LearnResult.OK;
     }
 
     public boolean requirementsMet(Skill skill) {
-        if (granted(skill)) {
+        // 木のある技の前提は木の線 (節の requires) で見る
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree) != null) {
             return true;
         }
         var req = skill.requires();
@@ -415,13 +760,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return false;
     }
 
-    // ---------------------------------------------------------------- 天職の決まり (docs/design/31 の A01)
-    // 木はすべて最初から開いていて、どの行も段の上限まで取れる (行ごとの要るレベルと前提だけは残る)。
-    // 天職は「専門」: その木の要を授かる・天性・技の段 3 つぶんの割引。2 つ目の天職は 5 つ目の枠と、その木の要
-    public boolean callingAllows(Skill skill) {
-        return true;
-    }
-
+    // ---------------------------------------------------------------- 段の上限と刻印
     public int rankLimit(Skill skill) {
         return skill.maxRank;
     }
@@ -445,13 +784,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     // 画面の試着 (仮振り) 用の写し。技の段・刻印・キーストーン・天職・熟練・追加の点・開いた木だけ
     public SkillData copyOf() {
         SkillData c = new SkillData();
+        nodes.forEach((k, v) -> c.nodes.put(k, new LinkedHashSet<>(v)));
+        c.curJob = curJob;
         c.ranks.putAll(ranks);
         c.runes.putAll(runes);
         c.keystones.addAll(keystones);
         c.mastery.putAll(mastery);
         c.unlockedTrees.addAll(unlockedTrees);
-        c.calling = calling;
-        c.calling2 = calling2;
         c.bonusPoints = bonusPoints;
         c.artPoints = artPoints;
         c.rebirth = rebirth;
@@ -476,29 +815,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         bonusPoints = Math.max(0, bonusPoints);
         respecs = Math.max(0, respecs);
         runeSwaps = Math.max(0, runeSwaps);
-        if (calling == null || SkillTree.byId(calling) == null || !SkillTree.byId(calling).callable()) {
-            calling = "";
-        }
-        if (calling2 == null || SkillTree.byId(calling2) == null || !SkillTree.byId(calling2).callable() || calling.isEmpty()
-                || calling2.equals(calling)) {
-            calling2 = "";
-        }
-        // 天職の木の要は授かるので、自分で取っていた分は外す (点が戻る)
-        ranks.keySet().removeIf(id -> granted(Skill.byId(id)));
-        // キーストーン: 知らないものは外し、2 つまで
-        keystones.removeIf(id -> SkillKeystone.byId(id) == null);
-        while (keystones.size() > SkillRules.KEYSTONE_MAX) {
-            keystones.remove(keystones.iterator().next());
+        // 木 v2: 節を検め、職の木の技の段・刻印・鍵石 (型の要) は節から導き直す
+        sanitizeNodes(level);
+        if (jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(Job.byId(curJob)) == null) {
+            // 木がないとき (職がまだ無い・検査で木を外したとき) は鍵石を持たない (43 で削った仕組み。型の要は木の節だけ)
+            keystones.clear();
         }
         mastery.entrySet().removeIf(e -> Skill.byId(e.getKey()) == null || e.getValue() == null || e.getValue() <= 0);
-        stance = SkillStance.of(stance).ordinal();
-        stanceCd = Math.max(0, stanceCd);
-        bar = bar == 1 ? 1 : 0;
-        // 連鎖: 立っているのは 3 つまで (低い枠から残す)
-        chainMask &= (1 << (SkillRules.SLOTS - 1)) - 1;
-        while (Integer.bitCount(chainMask) > SkillRules.CHAIN_MAX) {
-            chainMask &= ~Integer.highestOneBit(chainMask);
-        }
         // 前の版の記録: 木が組み替わったので、前提が崩れた技 (と、その先) だけ戻す。ほかは残す
         if (version < VERSION) {
             pruneBroken();
@@ -511,11 +834,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         });
         // 点を使いすぎている (レベルを下げられた) か、前提が崩れていたら、すべて戻して振り直してもらう。
         // 要るレベル (minLevel) は覚えるときだけの条件で、あとから下がっても消さない
-        boolean broken = spentPoints() > totalPoints(level);
-        // キーストーンは、点が足りなくなったか木の点が足りなくなったら全部外す (技はそのまま)
-        if (!broken) {
-            keystones.removeIf(id -> !keystoneReachable(SkillKeystone.byId(id)));
-        }
+        boolean broken = sharedSpent() + maxJobSpent() > totalPoints(level);
         for (String id : ranks.keySet()) {
             Skill s = Skill.byId(id);
             if (!requirementsMet(s) || !treeOpen(s.tree)) {
@@ -526,10 +845,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             ranks.clear();
             runes.clear();
             keystones.clear();
+            nodes.clear();
+            artPoints = 0;
         }
+        Job cur = Job.byId(curJob);
         for (int i = 0; i < slots.length; i++) {
             Skill s = Skill.byId(slots[i]);
-            if (s == null || !s.active || !knows(s) || i >= slotCount()) {
+            if (s == null || !s.active || !knows(s) || i >= slotCount() || !usableBy(cur, s)) {
                 slots[i] = "";
             }
             // 同じ技が二つの枠にあれば、後のほうを空ける
@@ -539,21 +861,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
             }
         }
-        for (String[] b : bars) {
-            for (int i = 0; i < b.length; i++) {
-                Skill s = Skill.byId(b[i]);
-                if (s == null || !s.active || !knows(s) || i >= slotCount()) {
-                    b[i] = "";
-                }
-                for (int j = 0; j < i; j++) {
-                    if (!b[i].isEmpty() && b[i].equals(b[j])) {
-                        b[i] = "";
-                    }
-                }
-            }
-        }
         for (Loadout l : loadouts) {
-            l.chainMask &= (1 << (SkillRules.SLOTS - 1)) - 1;
             for (int i = 0; i < l.slots.length; i++) {
                 Skill s = Skill.byId(l.slots[i]);
                 if (s == null || !s.active || i >= SkillRules.SLOTS) {
@@ -613,17 +921,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     // 振り直し: 覚えた技と刻印と置き場を空にする (点は戻る)。マナとクールダウンと型の保存の枠の置き方はそのまま
     public void clearSkills() {
+        nodes.clear();
         ranks.clear();
         // 深淵術のランクに使った点も戻す (術のランクは abyss/arts/AbyssArts.reconcile が 1 へ戻す)
         artPoints = 0;
         runes.clear();
         keystones.clear();
-        chainMask = 0;
         Arrays.fill(slots, "");
-        Arrays.fill(bars[0], "");
-        Arrays.fill(bars[1], "");
-        barUsed[0] = false;
-        barUsed[1] = false;
     }
 
     @Override
@@ -653,10 +957,14 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             l.runes.forEach(lr::putInt);
             lt.put("runes", lr);
             lt.putBoolean("saved", l.saved);
-            lt.putInt("chain", l.chainMask);
+            ListTag ln = new ListTag();
+            for (String id : l.nodes) {
+                ln.add(StringTag.valueOf(id));
+            }
+            lt.put("nodes", ln);
             ld.add(lt);
         }
-        tag.put("loadouts", ld);
+        tag.put("jobLoadouts", ld);
         ListTag ks = new ListTag();
         for (String id : keystones) {
             ks.add(StringTag.valueOf(id));
@@ -665,23 +973,29 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         CompoundTag ms = new CompoundTag();
         mastery.forEach(ms::putInt);
         tag.put("mastery", ms);
-        tag.putInt("stance", stance);
-        tag.putInt("chain", chainMask);
-        tag.putInt("bar", bar);
-        for (int b = 0; b < 2; b++) {
-            ListTag bl = new ListTag();
-            for (String id : bars[b]) {
-                bl.add(StringTag.valueOf(id));
+        CompoundTag jb = new CompoundTag();
+        jobBars.forEach((k, v) -> {
+            ListTag l = new ListTag();
+            for (String id : v) {
+                l.add(StringTag.valueOf(id == null ? "" : id));
             }
-            tag.put("bar" + b, bl);
-            tag.putBoolean("barUsed" + b, barUsed[b]);
-        }
+            jb.put(k.isEmpty() ? "_" : k, l);
+        });
+        tag.put("jobBars", jb);
+        tag.putString("curJob", curJob);
+        CompoundTag nd = new CompoundTag();
+        nodes.forEach((k, v) -> {
+            ListTag l = new ListTag();
+            for (String id : v) {
+                l.add(StringTag.valueOf(id));
+            }
+            nd.put(k, l);
+        });
+        tag.put("nodes", nd);
         tag.putInt("bonusPoints", bonusPoints);
         tag.putInt("artPoints", artPoints);
         tag.putInt("respecs", respecs);
         tag.putInt("runeSwaps", runeSwaps);
-        tag.putString("calling", calling);
-        tag.putString("calling2", calling2);
         tag.putFloat("mana", mana);
         CompoundTag c = new CompoundTag();
         cooldowns.forEach(c::putInt);
@@ -732,10 +1046,31 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < Math.min(s.size(), slots.length); i++) {
             slots[i] = s.getString(i);
         }
+        jobBars.clear();
+        CompoundTag jb = tag.getCompound("jobBars");
+        for (String k : jb.getAllKeys()) {
+            ListTag l = jb.getList(k, Tag.TAG_STRING);
+            String[] v = new String[SkillRules.SLOTS];
+            Arrays.fill(v, "");
+            for (int i = 0; i < Math.min(l.size(), v.length); i++) {
+                v[i] = l.getString(i);
+            }
+            jobBars.put(k.equals("_") ? "" : k, v);
+        }
+        curJob = tag.getString("curJob");
+        nodes.clear();
+        CompoundTag nd = tag.getCompound("nodes");
+        for (String k : nd.getAllKeys()) {
+            LinkedHashSet<String> set = new LinkedHashSet<>();
+            for (Tag t : nd.getList(k, Tag.TAG_STRING)) {
+                set.add(t.getAsString());
+            }
+            nodes.put(k, set);
+        }
         for (Loadout l : loadouts) {
             l.copyFrom(new Loadout());
         }
-        ListTag ld = tag.getList("loadouts", Tag.TAG_COMPOUND);
+        ListTag ld = tag.getList("jobLoadouts", Tag.TAG_COMPOUND);
         for (int i = 0; i < Math.min(ld.size(), loadouts.length); i++) {
             CompoundTag lt = ld.getCompound(i);
             Loadout l = loadouts[i];
@@ -748,7 +1083,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 l.runes.put(key, lr.getInt(key));
             }
             l.saved = lt.getBoolean("saved");
-            l.chainMask = lt.getInt("chain");
+            l.nodes.clear();
+            for (Tag t : lt.getList("nodes", Tag.TAG_STRING)) {
+                l.nodes.add(t.getAsString());
+            }
         }
         keystones.clear();
         for (Tag t : tag.getList("keystones", Tag.TAG_STRING)) {
@@ -759,23 +1097,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (String key : ms.getAllKeys()) {
             mastery.put(key, ms.getInt(key));
         }
-        stance = tag.getInt("stance");
-        chainMask = tag.getInt("chain");
-        bar = tag.getInt("bar");
-        for (int b = 0; b < 2; b++) {
-            Arrays.fill(bars[b], "");
-            ListTag bl = tag.getList("bar" + b, Tag.TAG_STRING);
-            for (int i = 0; i < Math.min(bl.size(), bars[b].length); i++) {
-                bars[b][i] = bl.getString(i);
-            }
-            barUsed[b] = tag.getBoolean("barUsed" + b);
-        }
         bonusPoints = tag.getInt("bonusPoints");
         artPoints = tag.getInt("artPoints");
         respecs = tag.getInt("respecs");
         runeSwaps = tag.getInt("runeSwaps");
-        calling = tag.getString("calling");
-        calling2 = tag.getString("calling2");
         mana = tag.contains("mana") ? tag.getFloat("mana") : -1;
         cooldowns.clear();
         CompoundTag c = tag.getCompound("cooldowns");
@@ -827,7 +1152,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
                 for (Loadout l : d.loadouts) {
                     buf.writeBoolean(l.saved);
-                    buf.writeVarInt(l.chainMask);
                     for (String id : l.slots) {
                         buf.writeUtf(id, 64);
                     }
@@ -836,7 +1160,19 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                         buf.writeUtf(id, 64);
                         buf.writeVarInt(n);
                     });
+                    buf.writeVarInt(l.nodes.size());
+                    for (String id : l.nodes) {
+                        buf.writeUtf(id, 64);
+                    }
                 }
+                buf.writeVarInt(d.nodes.size());
+                d.nodes.forEach((job, set) -> {
+                    buf.writeUtf(job, 32);
+                    buf.writeVarInt(set.size());
+                    for (String id : set) {
+                        buf.writeUtf(id, 64);
+                    }
+                });
                 buf.writeVarInt(d.keystones.size());
                 for (String id : d.keystones) {
                     buf.writeUtf(id, 32);
@@ -846,22 +1182,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                     buf.writeUtf(id, 64);
                     buf.writeVarInt(n);
                 });
-                buf.writeVarInt(d.stance);
-                buf.writeVarInt(d.stanceCd);
-                buf.writeVarInt(d.chainMask);
-                buf.writeVarInt(d.bar);
-                for (int b = 0; b < 2; b++) {
-                    buf.writeBoolean(d.barUsed[b]);
-                    for (String id : d.bars[b]) {
-                        buf.writeUtf(id, 64);
-                    }
-                }
                 buf.writeVarInt(d.bonusPoints);
                 buf.writeVarInt(d.artPoints);
                 buf.writeVarInt(d.respecs);
                 buf.writeVarInt(d.runeSwaps);
-                buf.writeUtf(d.calling, 32);
-                buf.writeUtf(d.calling2, 32);
                 buf.writeFloat(d.mana);
                 buf.writeVarInt(d.cooldowns.size());
                 d.cooldowns.forEach((id, n) -> {
@@ -886,6 +1210,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 for (String g : d.glyphSockets) {
                     buf.writeUtf(g, 96);
                 }
+                buf.writeUtf(d.curJob, 32);
             },
             buf -> {
                 SkillData d = new SkillData();
@@ -902,7 +1227,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
                 for (Loadout l : d.loadouts) {
                     l.saved = buf.readBoolean();
-                    l.chainMask = buf.readVarInt();
                     for (int i = 0; i < l.slots.length; i++) {
                         l.slots[i] = buf.readUtf(64);
                     }
@@ -910,6 +1234,20 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                     for (int i = 0; i < lr; i++) {
                         l.runes.put(buf.readUtf(64), buf.readVarInt());
                     }
+                    int lnn = buf.readVarInt();
+                    for (int i = 0; i < lnn; i++) {
+                        l.nodes.add(buf.readUtf(64));
+                    }
+                }
+                int jn = buf.readVarInt();
+                for (int j = 0; j < jn; j++) {
+                    String job = buf.readUtf(32);
+                    int cnt = buf.readVarInt();
+                    LinkedHashSet<String> set = new LinkedHashSet<>();
+                    for (int i = 0; i < cnt; i++) {
+                        set.add(buf.readUtf(64));
+                    }
+                    d.nodes.put(job, set);
                 }
                 int kn = buf.readVarInt();
                 for (int i = 0; i < kn; i++) {
@@ -919,22 +1257,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 for (int i = 0; i < mn; i++) {
                     d.mastery.put(buf.readUtf(64), buf.readVarInt());
                 }
-                d.stance = buf.readVarInt();
-                d.stanceCd = buf.readVarInt();
-                d.chainMask = buf.readVarInt();
-                d.bar = buf.readVarInt();
-                for (int b = 0; b < 2; b++) {
-                    d.barUsed[b] = buf.readBoolean();
-                    for (int i = 0; i < d.bars[b].length; i++) {
-                        d.bars[b][i] = buf.readUtf(64);
-                    }
-                }
                 d.bonusPoints = buf.readVarInt();
                 d.artPoints = buf.readVarInt();
                 d.respecs = buf.readVarInt();
                 d.runeSwaps = buf.readVarInt();
-                d.calling = buf.readUtf(32);
-                d.calling2 = buf.readUtf(32);
                 d.mana = buf.readFloat();
                 int c = buf.readVarInt();
                 for (int i = 0; i < c; i++) {
@@ -957,6 +1283,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 for (int i = 0; i < d.glyphSockets.length; i++) {
                     d.glyphSockets[i] = buf.readUtf(96);
                 }
+                d.curJob = buf.readUtf(32);
                 return d;
             });
 }

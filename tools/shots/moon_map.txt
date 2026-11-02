@@ -1,0 +1,25 @@
+# 月の旅の地図 (2026-10-28 の試遊「月行ったらマップ変わる様にしてほしい」)。月に立って M の地図を開く
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_map.txt -PshotsName=moon_map
+world moon_map2 continent
+size 1600 900
+timeout 1500
+render 8
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+wait 200
+cmd tp @s 0 13 60
+wait 60
+open travel_map
+wait 40
+shot m1_moon_map
+close
+cmd tp @s 0 13 2
+wait 20
+open travel_map
+wait 40
+shot m2_moon_map_landing

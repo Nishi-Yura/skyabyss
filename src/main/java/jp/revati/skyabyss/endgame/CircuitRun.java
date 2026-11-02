@@ -1,0 +1,118 @@
+package jp.revati.skyabyss.endgame;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.jetbrains.annotations.Nullable;
+
+import net.minecraft.core.BlockPos;
+
+// 一回の巡り路 (Circuits)。歩く人たち・土地・残り時間・印と、いまの課題
+public final class CircuitRun {
+    public enum Kind {
+        HUNT, GUARD, CARRY, BREAK
+    }
+
+    // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分
+    public enum Bonus {
+        NONE(0xE6E2D6), DOUBLE(0xF2C14E), TIME(0x7FB8FF);
+
+        public final int rgb;
+
+        Bonus(int rgb) {
+            this.rgb = rgb;
+        }
+    }
+
+    // 選べる次の課題 (柱一本)。poi = 使った見どころの番号 (選ばれなかった柱の見どころは使っていないことに戻す。-1 = 見どころでない)
+    record Offer(Kind kind, BlockPos spot, @Nullable String place, @Nullable BlockPos spot2, @Nullable String place2, Bonus bonus, int poi, int poi2) {
+    }
+
+    final int region;
+    final List<UUID> members = new ArrayList<>();
+    final BlockPos origin;
+    final long start;
+    long end;
+    int marks;
+    int tasks;
+
+    // いまの課題
+    Kind kind;
+    BlockPos spot;
+    // 運ぶ: 届け先
+    @Nullable
+    BlockPos spot2;
+    // 見どころの名前 (map.skyabyss.poi.<種類>。見どころでない所は null)
+    @Nullable
+    String place;
+    @Nullable
+    String place2;
+    long taskStart;
+    // 0 = 行く (運ぶ: 荷を受け取る)、1 = している (倒す・守る・運ぶ)
+    int phase;
+    final List<UUID> mobs = new ArrayList<>();
+    int need;
+    int progress;
+    long nextWave;
+    @Nullable
+    UUID carrier;
+    boolean ambushed;
+    // 運ぶ: 荷が落ちている (背負った人が倒れた・離れた)
+    boolean dropped;
+    // 壊す: 淵の杭 (CircuitStake)
+    @Nullable
+    UUID stake;
+    // 自己テストの人 (FakePlayer は人の一覧にいないので、ここから引く)
+    final java.util.Map<UUID, net.minecraft.server.level.ServerPlayer> fakes = new java.util.HashMap<>();
+    final Set<Integer> usedPois = new HashSet<>();
+    // 次の課題の柱 (空でなければ選んでいるところ) と、いまの課題の柱の色
+    final List<Offer> offers = new ArrayList<>();
+    Bonus bonus = Bonus.NONE;
+
+    CircuitRun(int region, BlockPos origin, long start, long end) {
+        this.region = region;
+        this.origin = origin;
+        this.start = start;
+        this.end = end;
+    }
+
+    public int region() {
+        return region;
+    }
+
+    public int marks() {
+        return marks;
+    }
+
+    public int tasks() {
+        return tasks;
+    }
+
+    public Kind kind() {
+        return kind;
+    }
+
+    public boolean choosing() {
+        return !offers.isEmpty();
+    }
+
+    public Bonus bonus() {
+        return bonus;
+    }
+
+    public BlockPos spot() {
+        return spot;
+    }
+
+    @Nullable
+    public BlockPos spot2() {
+        return spot2;
+    }
+
+    public List<UUID> members() {
+        return members;
+    }
+}

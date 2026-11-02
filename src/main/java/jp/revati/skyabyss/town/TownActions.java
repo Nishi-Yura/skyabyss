@@ -20,10 +20,10 @@ import net.minecraft.server.level.ServerPlayer;
 
 // 町のクエストと裏通りの、会話の結果 {"type": "town", "act": ...} (quest/Action が呼ぶ)。
 //   open_cellar   : 酒場の地下の奥の壁を開ける (TownCellar)
-//   mapmaker      : 地図屋の噂。まだ見ていない跡地 (ChapterGrounds) と、まだ着いていない章の場所の、都からの方角とおおよその距離
-//   mapmaker_draw : 地図屋に描き足してもらう (鐘銭 DRAW_COST)。まだ見ていない跡地のうち都にいちばん近いものを、M の地図に「見た」で載せる
+//   guide_rumor   : 案内人の噂。まだ見ていない跡地 (ChapterGrounds) と、まだ着いていない章の場所の、都からの方角とおおよその距離
+//   guide_draw    : 案内人に描き足してもらう (鐘銭 DRAW_COST)。まだ見ていない跡地のうち都にいちばん近いものを、M の地図に「見た」で載せる
 public final class TownActions {
-    public static final Set<String> ACTS = Set.of("open_cellar", "mapmaker", "mapmaker_draw", "accept_offer", "decline_offer");
+    public static final Set<String> ACTS = Set.of("open_cellar", "guide_rumor", "guide_draw", "accept_offer", "decline_offer", "island_cross", "inner_cross");
     public static final int DRAW_COST = 5;
     // 噂に並べる数の上限
     static final int RUMOR_MAX = 3;
@@ -34,10 +34,12 @@ public final class TownActions {
     public static void run(ServerPlayer player, @Nullable NpcEntity npc, String act) {
         switch (act) {
             case "open_cellar" -> TownCellar.open(player.server);
-            case "mapmaker" -> mapmakerRumor(player);
-            case "mapmaker_draw" -> mapmakerDraw(player);
+            case "guide_rumor" -> guideRumor(player);
+            case "guide_draw" -> guideDraw(player);
             case "accept_offer" -> TownQuests.acceptOffer(player);
             case "decline_offer" -> TownQuests.declineOffer(player);
+            case "island_cross" -> jp.revati.skyabyss.world.continent.IslandTrail.cross(player);
+            case "inner_cross" -> jp.revati.skyabyss.world.continent.ContinentFerries.cross(player);
             default -> SkyAbyss.LOGGER.warn("[town] unknown act {}", act);
         }
     }
@@ -92,22 +94,22 @@ public final class TownActions {
         return (int) Math.max(50, Math.round(d / 50.0) * 50);
     }
 
-    static void mapmakerRumor(ServerPlayer player) {
+    static void guideRumor(ServerPlayer player) {
         BlockPos town = OpeningSites.shelter(player.server).orElse(player.blockPosition());
         List<Unseen> list = unseen(player);
         if (list.isEmpty()) {
-            Notice.narrate(player, "message.skyabyss.town.mapmaker.none");
+            Notice.narrate(player, "message.skyabyss.town.guide.none");
             return;
         }
         for (int i = 0; i < Math.min(RUMOR_MAX, list.size()); i++) {
             Unseen u = list.get(i);
-            Notice.narrate(player, "message.skyabyss.town.mapmaker.rumor", Component.translatable(u.nameKey),
+            Notice.narrate(player, "message.skyabyss.town.guide.rumor", Component.translatable(u.nameKey),
                     Component.translatable(dirKey(town, u.pos)), roughDistance(town, u.pos));
         }
     }
 
     // 描き足したら true
-    static boolean mapmakerDraw(ServerPlayer player) {
+    static boolean guideDraw(ServerPlayer player) {
         SiteData.Ground g = null;
         String key = null;
         for (Unseen u : unseen(player)) {
@@ -118,16 +120,16 @@ public final class TownActions {
             }
         }
         if (g == null) {
-            Notice.hint(player, "message.skyabyss.town.mapmaker.nothing_to_draw");
+            Notice.hint(player, "message.skyabyss.town.guide.nothing_to_draw");
             return false;
         }
         if (!Coins.take(player, DRAW_COST)) {
-            Notice.hint(player, "message.skyabyss.town.mapmaker.cost", DRAW_COST);
+            Notice.hint(player, "message.skyabyss.town.guide.cost", DRAW_COST);
             return false;
         }
         g.seen.add(player.getUUID());
         SiteData.get(player.server.overworld()).setDirty();
-        Notice.hint(player, "message.skyabyss.town.mapmaker.drawn", Component.translatable(key));
+        Notice.hint(player, "message.skyabyss.town.guide.drawn", Component.translatable(key));
         return true;
     }
 }

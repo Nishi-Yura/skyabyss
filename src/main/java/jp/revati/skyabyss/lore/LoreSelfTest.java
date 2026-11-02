@@ -62,35 +62,43 @@ public final class LoreSelfTest {
         }
     }
 
+    // 章 → その章の「前の私の足取り」の頁 (筆跡が自分に似る頁)
+    static final String[][] FOOTSTEPS = {{"titan_whale", "ch1/trail_blade"}, {"titan_tide", "chapter1/ch2_drift_log"},
+            {"titan_storm", "chapter1/storm_burnt_pack"}, {"titan_ember", "chapter1/ember_prev_page"}};
+
     private static void run(MinecraftServer server, List<String> failures) {
         LoreCatalog catalog = LoreManager.catalog();
         // ---- 読み込み
         LoreManager.loadErrors().forEach(e -> failures.add("load: " + e));
+        // 前の私の足取り (01 の 4.2): 巨神編の章ごとに、筆跡が自分に似る頁が一枚ずつある
+        for (String[] fs : FOOTSTEPS) {
+            LoreEntry e = catalog.entry(fs[1]);
+            if (e == null || !e.chapter().equals(fs[0]) || !e.unlockable()) {
+                failures.add("footstep page for " + fs[0] + " missing or not unlockable: " + fs[1]);
+            }
+        }
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         // 五章 (chapter2「深淵」) は 2026-10-22 に中身が入った (刻み・墓・遺品の項目)
-        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_") || e.chapter().equals("chapter2"))).count();
+        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_") || e.chapter().equals("chapter2")
+                || e.chapter().equals("chapter3") || e.chapter().equals("finale"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
         // 都の町のクエストと裏通りの頼み (35 の 3.3・3.5) の 9 項目も足した
         // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
-        if (early < 12 || early > 160) {
-            failures.add("prologue + chapters 1-5 should have 12-160 entries, found " + early);
+        // 六章 (chapter3「月」) は 2026-10-31 に中身が入った (記憶の断片 12・見る者・月の核・記念の札 5)
+        if (early < 12 || early > 180) {
+            failures.add("prologue + chapters 1-6 should have 12-180 entries, found " + early);
         }
         if (unlockable != early) {
-            failures.add("only the prologue and chapters 1-5 may be written yet (" + unlockable + " unlockable)");
+            failures.add("only the prologue, chapters 1-6 and the finale may be written (" + unlockable + " unlockable)");
         }
-        for (String later : List.of("chapter3", "finale")) {
-            List<LoreEntry> list = catalog.inChapter(later);
-            if (list.isEmpty() || list.stream().anyMatch(e -> !e.placeholder())) {
-                failures.add("chapter " + later + " should hold placeholders only (" + list.size() + ")");
-            }
-        }
+        // 終章 (finale「雲海」) は 2026-10-30 に中身が入りはじめた (鐘の島の最後の言葉 3)。仮の項目 (unknown_*) は書いた分だけ減らす
         if (catalog.entry(Lore.BOOK_ENTRY) == null) {
             failures.add("the book's own entry " + Lore.BOOK_ENTRY + " is missing");
         }
         // ---- 条件の先が実在するか
         Set<String> signKeys = new HashSet<>();
         // 体の中の碑文はない。碑はレイドの部屋の入口の間 (RaidLore) と一章・二章の地上の碑だけ
-        // 一章の地上: 骨の坑の冷えの戸の奥の碑 (34 の 4.2.1。BonePit.finish が刻む)
+        // 一章の地上: 骨の坑の冷えの戸の奥の碑 (BonePit.finish が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch1.BonePit.COLD_SIGN);
         // 二章の地上: 沈んだ塩の蔵の奥の刻み (SaltVault.decorate が刻む)
         signKeys.add(jp.revati.skyabyss.story.ch2.SaltVault.WALL_SIGN);
@@ -136,7 +144,8 @@ public final class LoreSelfTest {
                         if (!t.target().equals("village") && !t.target().equals("titan_back") && !t.target().equals("shadow")
                                 && !t.target().equals(jp.revati.skyabyss.story.ch1.Ch1.PAGE_TRACE) && !t.target().equals(jp.revati.skyabyss.story.ch1.Ch1.PAGE_DIARY)
                                 && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE) && !t.target().equals(jp.revati.skyabyss.titan.ember.lore.EmberLore.PAGE_SOURCE)
-                                && !t.target().equals(jp.revati.skyabyss.titan.ember.EmberChapter.PAGE_SOURCE)) {
+                                && !t.target().equals(jp.revati.skyabyss.titan.ember.EmberChapter.PAGE_SOURCE)
+                                && !t.target().equals(jp.revati.skyabyss.facility.KeepRecords.PAGE_SOURCE)) {
                             failures.add(entry.id() + ": unknown page source " + t.target());
                         }
                     }
@@ -399,7 +408,7 @@ public final class LoreSelfTest {
         JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
         // 余燼の項目 (地を泳ぐもの・灰の民の炉・碑文・鍛え手・消えた火・鍛えの帳) の文は skyabyss_ember にある (13 の 9 章、担当 G)
         JsonObject ember = json("/assets/skyabyss_ember/lang/" + code + ".json", failures);
-        // 序章・一章の旅の跡・歌石などの項目 (17 の 1.5) の文は skyabyss_ch1 にある
+        // 序章・一章の旅の跡・歌石などの項目の文は skyabyss_ch1 にある
         JsonObject ch1 = json("/assets/skyabyss_ch1/lang/" + code + ".json", failures);
         // 二章「引く海」の項目 (漂着の荷の頁・浜の碑・潮の民の頁) の文は skyabyss_ch2 にある (08 の 2.8節)
         JsonObject ch2 = json("/assets/skyabyss_ch2/lang/" + code + ".json", failures);
@@ -407,14 +416,18 @@ public final class LoreSelfTest {
         JsonObject ch3 = json("/assets/skyabyss_ch3/lang/" + code + ".json", failures);
         // 都の町のクエストと裏通りの項目 (35 の 3.3・3.5) の文は skyabyss_town にある
         JsonObject town = json("/assets/skyabyss_town/lang/" + code + ".json", failures);
-        // 四章の地上の項目 (灰の民の薬・炉跡の頁・返しに来たか・煤の窯の跡) の文は skyabyss_ch4 にある (34 の 4.5.1)
+        // 四章の地上の項目 (灰の民の薬・炉跡の頁・返しに来たか・煤の窯の跡) の文は skyabyss_ch4 にある
         JsonObject ch4 = json("/assets/skyabyss_ch4/lang/" + code + ".json", failures);
         // 五章「深淵」の刻み・墓 (skyabyss_ch5) と遺品の項目 (skyabyss_abyss_rl)
         JsonObject ch5 = json("/assets/skyabyss_ch5/lang/" + code + ".json", failures);
         JsonObject relics = json("/assets/skyabyss_abyss_rl/lang/" + code + ".json", failures);
         // レイドの部屋の入口の碑 (RaidLore.SIGNS) のうち、余燼の二つ目の部屋 (ER4〜6) の項目の文は skyabyss_trial にある
         JsonObject trial = json("/assets/skyabyss_trial/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics, trial)) {
+        // 六章「月」の記憶の断片・見る者・月の核・記念の札 (46 の 4.9) の文は skyabyss_moon にある
+        JsonObject moon = json("/assets/skyabyss_moon/lang/" + code + ".json", failures);
+        // 終章「雲海」の文は skyabyss_finale にある
+        JsonObject finale = json("/assets/skyabyss_finale/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3, ch4, town, ch5, relics, trial, moon, finale)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

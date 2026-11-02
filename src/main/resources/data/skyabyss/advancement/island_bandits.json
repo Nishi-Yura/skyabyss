@@ -1,0 +1,34 @@
+{
+  "parent": "skyabyss:island_job",
+  "display": {
+    "icon": {
+      "id": "skyabyss:gather_axe"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.island_bandits.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.island_bandits.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "island:bandits"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "function": "skyabyss:reward/coins_3"
+  }
+}

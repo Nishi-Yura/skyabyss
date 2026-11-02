@@ -1,0 +1,32 @@
+# 土地の町の夜
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/town_night.txt -PshotsName=town_night
+world continent_night continent
+size 1600 900
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+hud off
+cmd time set 18000
+cmd gamemode spectator
+cmd skyabyss dev grounds mark town 0 pos
+waitchunks 400
+wait 200
+cmd execute at @s positioned ~40 ~ ~40 positioned over motion_blocking_no_leaves run tp @s ~ ~25 ~ 135 30
+wait 60
+shot whale_night
+cmd skyabyss dev grounds mark town 0 stand
+cmd execute at @s run tp @s ~ ~2 ~ 180 5
+wait 40
+shot whale_plaza_night
+cmd skyabyss dev grounds mark town 1 stand
+waitchunks 400
+wait 100
+cmd execute at @s run tp @s ~ ~2 ~ 180 5
+wait 40
+shot tide_plaza_night

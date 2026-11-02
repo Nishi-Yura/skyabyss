@@ -1,0 +1,38 @@
+# 職の熟練 (Lv 50 の表示と、技を使ったときの熟練の光)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/mastery.txt -PshotsName=mastery
+world mastery_flat flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss cinematic stop
+camera 0 -60 0 0 0
+waitchunks
+wait 200
+chat clear
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss level set @s 50
+cmd skyabyss skill learn @s titan_cleave 3
+cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss level addxp @s 40000
+wait 40
+shot mastery_1_hud
+perspective back
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill cast @s 1
+wait 4
+shot mastery_2_cast_t4
+cmd skyabyss level addxp @s 120000
+wait 40
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill cast @s 1
+wait 4
+shot mastery_3_cast_t10
+perspective first
+wait 10
+shot mastery_4_hud_t10

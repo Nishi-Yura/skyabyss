@@ -139,14 +139,17 @@ HELD = {
     "abyss_pulse_dagger": (t((0, -90, 55), (0, 4.0, 0.5), 1.1), t((0, -90, 25), (1.13, 3.2, 1.13), 0.5)),
 }
 # 弓 (引き絵 3 枚も同じ持ち方。引くときは腕を前へまっすぐ上げる)。弦が射手の側、腹が前、縦に立てる
-for _bow in ("thunder_wing_bow", "abyss_storm_bow"):
-    HELD[_bow] = (bow_hold("tp", 18, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (0.2, -0.2, 0.0), 30))
+# 一人称は 2026-10-28 の試遊「もう少し上でいい」で y を 1.6 上げた。弓は全部同じ持ち方 (メッシュの作りが同じ)
+BOWS = ("thunder_wing_bow", "abyss_storm_bow", "whale_bow", "tide_bow", "ember_bow", "shrine_bow", "abyss_whale_bow", "abyss_tide_bow",
+        "abyss_ember_bow", "abyss_depth_bow", "whale_rib_longbow", "tide_coral_bow", "storm_gale_bow", "ember_flare_bow", "moon_waning_bow", "moon_starfall_bow")
+for _bow in BOWS:
+    HELD[_bow] = (bow_hold("tp", 18, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (0.2, 1.4, 0.0), 30))
     for _n in range(3):
-        HELD[f"{_bow}_pulling_{_n}"] = (bow_hold("tp", 90, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (-0.4, -0.2, 0.0), 20))
+        HELD[f"{_bow}_pulling_{_n}"] = (bow_hold("tp", 90, 1.2, BOW_GRIP, (0, 0, 1.0)), bow_hold("fp", 0, 0.7, BOW_GRIP, (-0.4, 1.4, 0.0), 20))
 
 
-SOLVED = {"captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive", "thrall_poker", "abyss_bell_staff", "thunder_wing_bow", "abyss_storm_bow",
-          *(f"{b}_pulling_{n}" for b in ("thunder_wing_bow", "abyss_storm_bow") for n in range(3))}
+SOLVED = {"captain_pike", "tide_shell_trident", "coral_harpoon", "warden_glaive", "thrall_poker", "abyss_bell_staff", *BOWS,
+          *(f"{b}_pulling_{n}" for b in BOWS for n in range(3))}
 
 
 def left_of(d, item=None):
@@ -226,6 +229,49 @@ def main():
     print(("differs: " if check else "updated: ") + ", ".join(bad) if bad else "ok (nothing to change)")
     if check and bad:
         sys.exit(1)
+
+
+# 巨神のヒロイック武器 (2026-10-28。item/HeroicGear)。持ち方は同じ型の武器を借りる (tools/install/install_job_weapons.py の _HOLD と同じ)
+for _id, _like in (("whale_choir_hammer", "ember_war_axe"), ("tide_reef_hammer", "ember_war_axe"), ("storm_anvil_hammer", "ember_war_axe"),
+                   ("whale_star_staff", "abyss_bell_staff"), ("tide_pearl_staff", "abyss_bell_staff"), ("storm_cloud_staff", "abyss_bell_staff"),
+                   ("ember_kiln_staff", "abyss_bell_staff"), ("whale_deep_bell_staff", "abyss_bell_staff"), ("tide_surf_bell_staff", "abyss_bell_staff"),
+                   ("storm_thunder_bell_staff", "abyss_bell_staff"), ("ember_censer_bell_staff", "abyss_bell_staff"),
+                   ("ember_cinder_blade", "whalebone_greatsword"), ("ember_ash_knife", "waterway_fang"),
+                   # 六章「月」の武器 (story/ch6/gear)
+                   ("moon_scale_hammer", "ember_war_axe"), ("moon_tide_staff", "abyss_bell_staff"), ("moon_crescent_dagger", "waterway_fang"),
+                   ("moon_starlight_bell_staff", "abyss_bell_staff"), ("moon_waning_blade", "whalebone_greatsword"),
+                   ("moon_light_sword", "whalebone_greatsword"), ("moon_full_hammer", "ember_war_axe"), ("moon_new_staff", "abyss_bell_staff"),
+                   ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff"),
+                   # 終章の神器 (story/finale/gear)
+                   ("divine_sky_sword", "whalebone_greatsword"), ("divine_bell_hammer", "ember_war_axe"), ("divine_dawn_staff", "abyss_bell_staff"),
+                   ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff"),
+                   ("divine_warden_blade", "whalebone_greatsword"),
+                   ("divine_ash_hammer", "ember_war_axe"),
+                   ("divine_eyelid_staff", "abyss_bell_staff"),
+                   ("divine_moth_dagger", "waterway_fang"),
+                   ("divine_keeper_bell_staff", "abyss_bell_staff"),
+                   # あいだの塔の武器 (tower/gear)
+                   ("tower_balance_sword", "whalebone_greatsword"), ("tower_pull_hammer", "ember_war_axe"), ("tower_moon_staff", "abyss_bell_staff"),
+                   ("tower_sigil_dagger", "waterway_fang"), ("tower_clap_bell_staff", "abyss_bell_staff")):
+    if _like in HELD:
+        HELD[_id] = HELD[_like]
+
+# 野の装備 (docs/design/51。item/wild)。持ち方は同じ型の武器を借りる (tools/install/install_wild_gear.py の HOLD と同じ)
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "gen/wild_gear"))
+import spec as _wild  # noqa: E402
+WILD_HOLD = {"sword": "whalebone_greatsword", "greatsword": "whalebone_greatsword", "spear": "captain_pike", "glaive": "warden_glaive",
+             "hammer": "ember_war_axe", "maul": "ember_war_axe", "mace": "ember_war_axe", "axe": "ember_war_axe", "staff": "abyss_bell_staff",
+             "bell": "abyss_bell_staff", "totem": "abyss_bell_staff", "censer": "abyss_bell_staff", "dagger": "waterway_fang", "fang": "waterway_fang",
+             "claw": "raiju_claw", "bow": "thunder_wing_bow", "longbow": "thunder_wing_bow"}
+for _w in _wild.WEAPONS:
+    _like = WILD_HOLD[_w["kind"]]
+    if _like in HELD:
+        HELD[_w["id"]] = HELD[_like]
+    if _w["kind"] in ("bow", "longbow"):
+        for _n in range(3):
+            if f"{_like}_pulling_{_n}" in HELD:
+                HELD[f"{_w['id']}_pulling_{_n}"] = HELD[f"{_like}_pulling_{_n}"]
 
 
 if __name__ == "__main__":

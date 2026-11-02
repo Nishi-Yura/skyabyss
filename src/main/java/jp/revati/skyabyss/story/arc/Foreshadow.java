@@ -14,7 +14,7 @@ import jp.revati.skyabyss.story.Chapters;
 import net.minecraft.server.level.ServerPlayer;
 
 // 予兆 (foreshadowing) の枠: 章ごとに 3 つの拍 (痕跡 → 間接 → 一部) を、人ごとに、条件が合った順に一度ずつ起こす。
-// 仕様は docs/design/01 の 4.1 (予兆 3 拍)、17 の 1 章、計画は docs/review/chapter_per_titan_plan.md の 2.2。
+// 仕様は docs/design/01 の 4.1 (予兆 3 拍)、計画は docs/review/chapter_per_titan_plan.md の 2.2。
 //
 // ---------------------------------------------------------------- 使い方 (P4 の担当はここだけを見る。共有のファイルは編集しなくてよい)
 //   1. 拍を作る:      Beat.of(Chapters.TIDE, 1, "salt_cairns", (player, beat) -> { ...起こす...; return true; })

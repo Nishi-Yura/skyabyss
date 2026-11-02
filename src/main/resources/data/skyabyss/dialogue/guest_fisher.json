@@ -80,12 +80,12 @@
             "of": [
               {
                 "type": "item",
-                "item": "minecraft:string",
+                "item": "skyabyss:thread_spool",
                 "count": 8
               },
               {
                 "type": "item",
-                "item": "minecraft:cod",
+                "item": "skyabyss:dried_fish",
                 "count": 3
               }
             ]
@@ -93,12 +93,12 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:string",
+              "item": "skyabyss:thread_spool",
               "count": 8
             },
             {
               "type": "take",
-              "item": "minecraft:cod",
+              "item": "skyabyss:dried_fish",
               "count": 3
             },
             {

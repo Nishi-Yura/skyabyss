@@ -1,0 +1,22 @@
+# 開幕の場面 (はじまりの島。2026-10-26 に三つ目の撮影を高く引いた)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_opening.txt -PshotsName=island_opening
+world opening_island_op continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+waitchunks 600
+wait 60
+shot op_00
+wait 100
+shot op_05
+wait 200
+shot op_15
+wait 140
+shot op_22
+wait 100
+shot op_27
+wait 80
+shot op_31
+wait 100
+shot op_36

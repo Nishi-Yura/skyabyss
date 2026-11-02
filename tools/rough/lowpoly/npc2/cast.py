@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import props as PR
 import props2 as P2
+import props3 as P3
 
 SKIN = {"pale": (232, 192, 160), "mid": (214, 166, 128), "tan": (190, 140, 100), "brown": (150, 102, 70), "ruddy": (222, 160, 128),
         "old": (214, 178, 150)}
@@ -105,25 +106,6 @@ add("shrine_priest", ja="社の祭司", anim="hold_r",
     upper=dict(mantle=dict(bottom=17.0, clasp=True), sash=True, collar=True, collar_mat="trim"),
     lower="robe", sleeve="wide", arms=STAFF_R, props={"prop_r": P2.bell_staff})
 
-add("keep_veteran", ja="砦の老兵", anim="hold_r",
-    pal=dict(skin=SKIN["old"], hair=(196, 194, 188), coat=(88, 92, 98), apron=(124, 38, 38), apron2=(90, 30, 30), trim=(60, 60, 66), metal=(170, 174, 180),
-             metal2=(140, 144, 152), trousers=(60, 60, 66), boot=(44, 38, 34), leather=(80, 56, 40)),
-    face=dict(eye="narrow", iris=(100, 110, 120), brow="stern", mouth="frown", marks=[(["S", "S", "S", "S"], 4, 53, -1), (["EEE", "EEE"], 1, 51, 1)]),
-    hair=dict(style="short", front=28.2, side=25.0, back=24.0, off=0.3, fringe=[]),
-    beard="full", brow3d=dict(mat="brow", r=0.45, inner=25.95, outer=26.4), hairline=28.0, build="broad",
-    upper=dict(apron=dict(bottom=6.0, top=19.6, w=3.0, bib=True), pauldron=True, collar=True, collar_mat="metal2"),
-    lower="trousers", sleeve="fitted", arms=STAFF_R, props={"prop_r": P2.spear},
-    extra_body=[])
-
-add("archivist", ja="書庫番", anim="hold_l",
-    pal=dict(skin=SKIN["pale"], hair=(124, 118, 116), coat=(52, 58, 96), skirt=(52, 58, 96), sash=(200, 184, 140), trim=(176, 148, 82), hat=(40, 44, 78),
-             hat2=(176, 148, 82), metal=(176, 148, 82), trousers=(40, 44, 70), boot=(40, 36, 40)),
-    face=dict(eye="old", iris=(80, 90, 120), brow="worried", mouth="small", marks=[(["w"], 4, 47)]),
-    hair=dict(style="sidelocks", front=27.0, side=24.6, back=23.6, fringe=[]),
-    hat=dict(kind="cap"), specs=True, beard="goatee", hairline=26.8, build="old",
-    upper=dict(sash=True, collar=True, collar_mat="trim", mantle=dict(bottom=18.0, clasp=False)),
-    lower="robe", sleeve="wide", arms=HOLD_L, props={"prop_l": P2.book_stack})
-
 add("training_master", ja="師範", anim="hold_r",
     pal=dict(skin=SKIN["tan"], hair=(40, 34, 32), coat=(214, 206, 184), skirt=(48, 60, 104), sash=(40, 44, 60), trim=(170, 160, 136), hat=(214, 206, 184),
              trousers=(48, 60, 104), boot=(50, 40, 34), tie=(214, 206, 184)),
@@ -152,15 +134,6 @@ add("gravekeeper", ja="墓守", anim="hold_r",
     upper=dict(scarf=True, lapels=True, buttons=[13.4, 15.6]),
     lower="coat_long", sleeve="fitted", arms=STAFF_R, props={"prop_r": P2.shovel})
 
-add("mapmaker", ja="地図屋", anim="hold_l",
-    pal=dict(skin=SKIN["mid"], hair=(150, 96, 56), coat=(54, 104, 112), vest=(196, 172, 122), shirt=(220, 210, 186), trim=(40, 52, 76), hat=(150, 70, 50),
-             hat2=(110, 50, 36), metal=(186, 146, 70), trousers=(60, 56, 70), boot=(60, 44, 34), leather=(120, 84, 50)),
-    face=dict(eye="round", iris=(70, 120, 110), brow="high", mouth="smile", marks=[([".f.f", "f.f."], 3, 49)]),
-    hair=dict(style="short", front=27.6, side=25.0, back=23.6, fringe=[(-2.0, 28.0, 1.6, 0.7, -0.5), (-0.4, 28.1, 1.4, 0.7, 0.0), (1.4, 28.0, 1.5, 0.7, 0.5)]),
-    hat=dict(kind="beret"), hairline=27.6, build="slim",
-    upper=dict(vest=True, collar=True, collar_mat="shirt", bandolier=True, pouches=[(3.6, 10.4, "pouch")]),
-    lower="trousers", sleeve="rolled", arms=HOLD_L_LOW, props={"prop_l": P2.map_rolls, "prop_back": P2.map_tube})
-
 add("drunkard", ja="酔いどれ", anim="hold_r",
     pal=dict(skin=SKIN["ruddy"], hair=(96, 76, 58), coat=(110, 92, 70), vest=(122, 62, 78), shirt=(170, 156, 126), trim=(76, 60, 46), metal=(140, 120, 80),
              trousers=(70, 60, 50), boot=(54, 42, 34)),
@@ -178,16 +151,6 @@ add("trade_keeper", ja="取引所の番", anim="hold_l",
     hat=dict(kind="cap"), specs=True, beard="moustache", hairline=27.2, build="avg",
     upper=dict(vest=True, collar=True, collar_mat="shirt", buttons=[13.0, 15.0, 17.0], pouches=[(3.6, 10.4, "pouch")]),
     lower="tails", sleeve="fitted", arms=HOLD_L_LOW, props={"prop_l": P2.scales})
-
-add("stable_keeper", ja="厩舎の番", anim="hold_r",
-    pal=dict(skin=SKIN["tan"], hair=(104, 76, 52), coat=(116, 84, 56), vest=(92, 120, 76), shirt=(200, 186, 150), trim=(70, 48, 30), hat=(124, 92, 60),
-             hat2=(70, 48, 30), metal=(204, 172, 104), trousers=(80, 70, 56), boot=(70, 46, 30), glove=(130, 96, 60)),
-    face=dict(eye="kind", iris=(90, 70, 40), brow="soft", mouth="smile"),
-    hair=dict(style="short", front=27.4, side=24.8, back=23.4, fringe=[]),
-    hat=dict(kind="brim"), beard="full", hairline=27.4, build="avg",
-    upper=dict(vest=True, scarf=True, scarf_mat="scarf", pouches=[(3.8, 10.4, "pouch")]),
-    pal_extra=dict(scarf=(180, 70, 50)),
-    lower="trousers", sleeve="rolled", gloves=True, arms=STAFF_R, props={"prop_r": P2.pitchfork})
 
 # 都の案内人 (門と広場に立つ。話すと施設の一覧 → 選んだ施設の戸まで色つきの灯りの道。docs/design/35 の 6.12)。
 # 白い外套 (長い上着 + 肩掛け + 背へ下ろした頭巾)、金の縁、角灯を提げた杖に四色の房
@@ -351,6 +314,63 @@ add("guest_baker", ja="パン焼き", anim="hold_l",
     hat=dict(kind="kerchief"), beard="moustache", hairline=27.2, build="stout",
     upper=dict(apron=dict(bottom=4.8, top=18.0, w=3.4), collar=True, collar_mat="shirt"),
     lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P2.bread_basket})
+
+
+# ====================================================================== 市の三人 (食料屋・武具屋・素材屋。2026-10-27 に選んだ)
+# 食料屋 A 腸詰めを提げた肉屋 / B 杓子の汁売り / C 乾酪の輪を抱えた女
+add("food_vendor", ja="食料屋", anim="hold_l",
+    pal=dict(skin=SKIN["ruddy"], hair=(90, 60, 40), coat=(150, 74, 58), apron=(226, 214, 190), shirt=(220, 206, 178), trim=(96, 50, 40), hat=(226, 214, 190),
+             metal=(190, 150, 80), trousers=(66, 52, 44), boot=(54, 40, 30)),
+    face=dict(eye="kind", iris=(96, 70, 50), brow="thick", mouth="grin", blush=0.3),
+    hair=dict(style="short", front=27.4, side=24.8, back=23.6, fringe=[]),
+    hat=dict(kind="kerchief"), beard="full", hairline=27.2, build="broad",
+    upper=dict(apron=dict(bottom=4.6, top=18.4, w=3.6), collar=True, collar_mat="shirt"),
+    lower="trousers", sleeve="rolled", arms=HOLD_L_LOW, props={"prop_l": P3.sausages})
+
+add("outfitter", ja="武具屋", anim="free",
+    pal=dict(skin=SKIN["tan"], hair=(52, 42, 36), coat=(78, 70, 66), apron=(104, 70, 44), shirt=(160, 146, 120), trim=(48, 42, 40), metal=(112, 114, 120),
+             metal2=(150, 152, 158), trousers=(54, 50, 50), boot=(44, 36, 32), leather=(104, 70, 44), glove=(90, 62, 42)),
+    face=dict(eye="narrow", iris=(80, 76, 70), brow="thick", mouth="smirk", marks=[(["S", "S", "S"], 5, 52, -1)]),
+    hair=dict(style="short", front=28.2, side=25.0, back=24.0, off=0.3, fringe=[]),
+    beard="full", hairline=28.0, build="broad",
+    upper=dict(apron=dict(bottom=5.4, top=19.4, w=3.6, bib=True), pauldron=True, collar=True, collar_mat="metal2",
+               pouches=[(-3.8, 10.6, "pouch")]),
+    lower="trousers", sleeve="rolled", gloves=True, arms={}, props={})
+
+# 素材屋 (選び: C 鉱石を見る目利きの老女)
+add("material_trader", ja="素材屋", anim="hold_l",
+    pal=dict(skin=SKIN["old"], hair=(206, 202, 196), coat=(60, 76, 86), skirt=(56, 70, 80), sash=(176, 140, 70), trim=(150, 120, 60), hat=(60, 76, 86),
+             metal=(190, 160, 90), trousers=(50, 56, 62), boot=(44, 38, 36)),
+    face=dict(eye="old", iris=(100, 130, 140), brow="worried", mouth="small", marks=[(["w"], 4, 47)]),
+    hair=dict(style="bun", front=27.2, side=24.6, back=23.6, fringe=[]),
+    specs=True, hairline=27.0, build="old",
+    upper=dict(sash=True, collar=True, collar_mat="trim", mantle=dict(bottom=17.4, clasp=True)),
+    lower="robe", sleeve="wide", arms=HOLD_L, props={"prop_l": P3.ore_lump})
+
+
+# 封切り師 (封の箱を開ける人。docs/design/52 の 5 章)。封蝋の匠: 煤けた赤茶の上着に生成りの前掛け、腰に小刀と封蝋の棒の袋、
+# 左手で封の箱を抱える。眼鏡越しに封を見る年配の職人
+add("box_opener", ja="封切り師", anim="hold_l",
+    pal=dict(skin=SKIN["ruddy"], hair=(150, 140, 132), coat=(112, 52, 42), apron=(214, 200, 168), shirt=(196, 184, 160), trim=(64, 36, 28),
+             metal=(206, 168, 86), trousers=(56, 46, 42), boot=(48, 34, 26), leather=(110, 74, 46), wax=(170, 34, 38)),
+    face=dict(eye="calm", iris=(110, 84, 60), brow="flat", mouth="smirk", marks=[(["w"], 4, 47)]),
+    hair=dict(style="short", front=27.2, side=24.6, back=23.4, fringe=[]),
+    specs=True, beard="moustache", hairline=27.0, build="avg",
+    upper=dict(apron=dict(bottom=6.4, top=17.6, w=3.1), collar=True, collar_mat="trim", buttons=[18.6],
+               pouches=[(-3.8, 10.4, "pouch"), (3.8, 10.6, "pouch")]),
+    lower="trousers", sleeve="rolled", arms=HOLD_L, props={"prop_l": P3.sealed_box})
+
+
+# あいだの塔の塔守 (docs/design/54 の 2.2。都の広場の塔の受付)。天と淵のあいだの番人: 白い衣の裾は黒く、金の帯。頭巾と金縁の肩掛けの老人が、
+# 左手に小さな天秤 (金の皿と黒い石の皿) を提げる
+add("tower_keeper", ja="塔守", anim="hold_l",
+    pal=dict(skin=SKIN["old"], hair=(222, 220, 214), coat=(226, 222, 210), skirt=(40, 36, 52), sash=(206, 168, 86), trim=(206, 168, 86), hat=(226, 222, 210),
+             metal=(214, 176, 92), stone=(46, 42, 58), glow=(255, 230, 170), trousers=(40, 36, 52), boot=(34, 30, 42)),
+    face=dict(eye="old", iris=(150, 120, 200), brow="soft", mouth="small", marks=[(["w"], 4, 47)]),
+    hair=dict(style="short", front=27.2, side=24.6, back=23.6, fringe=[]),
+    hat=dict(kind="hood"), beard="full", hairline=27.0, build="slim",
+    upper=dict(sash=True, collar=True, collar_mat="trim", mantle=dict(bottom=17.2, clasp=True)),
+    lower="robe", sleeve="wide", arms=HOLD_L_LOW, props={"prop_l": P3.tower_balance})
 
 
 # ====================================================================== 旅の職人 (章ごとに絵だけ替える: variants)

@@ -154,7 +154,7 @@ public class AshSmith extends EmberMob {
     // 試験用: true なら、技を自分では選ばない (forceAction で呼んだ技だけ回す。怒りは体力で自動)
     public boolean passive;
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private int actionTick;
     private float multiplier = 1f;
@@ -376,7 +376,9 @@ public class AshSmith extends EmberMob {
         quenchCooldown--;
         sparksCooldown--;
         target = pickTarget(server);
-        if (!raged && getHealth() < getMaxHealth() * 0.5f && action == Action.NONE) {
+        // 闘の部屋の中ボス (段なし。trial/raid/mid/FightBossRoom) は怒らない
+        if (!raged && getHealth() < getMaxHealth() * 0.5f && action == Action.NONE
+                && !getTags().contains(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.SINGLE_STAGE)) {
             begin(server, Action.RAGE);
         }
         if (action != Action.NONE) {
@@ -1032,7 +1034,7 @@ public class AshSmith extends EmberMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return null;
+        return EmberSmithSetup.AMBIENT.get();
     }
 
     @Override

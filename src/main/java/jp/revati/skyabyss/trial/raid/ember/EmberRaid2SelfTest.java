@@ -97,7 +97,7 @@ final class EmberRaid2SelfTest {
         check(f, "ember is still an active raid", RaidRooms.active(Titans.EMBER));
         check(f, "registered ER4", RaidRooms.create(EmberChainPath.ID) instanceof EmberChainPath);
         check(f, "registered ER5", RaidRooms.create(EmberValves.ID) instanceof EmberValves);
-        check(f, "registered ER6", RaidRooms.create(EmberApprentices.ID) instanceof EmberApprentices);
+        check(f, "registered ER6", jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(RaidRooms.create(EmberApprentices.ID)) instanceof EmberApprentices);
         for (String lang : new String[] {"ja_jp", "en_us"}) {
             var map = SignFit.lang(lang);
             for (String id : new String[] {"ER4", "ER5", "ER6"}) {

@@ -111,9 +111,10 @@ public final class CinematicClient {
     // ---------------------------------------------------------------- 受信
     public static void receive(StartPayload payload) {
         Minecraft.getInstance().execute(() -> {
-            if (run != null || Scenes.get(payload.scene()) == null) {
+            if (Scenes.get(payload.scene()) == null) {
                 return;
             }
+            // 前の場面の終わり (暗転の戻り) の最中に次の場面が来たら、終わるのを待って始める (捨てるとサーバーが場面の最中のまま人を止め続ける)
             pending = payload;
         });
     }
@@ -285,7 +286,7 @@ public final class CinematicClient {
             }
             return;
         }
-        if (pending != null) {
+        if (pending != null && run == null) {
             if (!Config.CINEMATIC_SCENES.get()) {
                 // 見ない設定: 物語の効果だけ適用して、すぐ操作へ
                 PacketDistributor.sendToServer(new EndPayload(pending.scene(), true));
@@ -341,10 +342,10 @@ public final class CinematicClient {
         }
     }
 
-    // Space か Esc を押し続けるとスキップ。離すと戻る
+    // Enter を押し続けるとスキップ。離すと戻る (2026-11-02 の声「ムービースキップ系、全部 Enter にして」。前は Space か Esc)
     private static void tickSkip(Run r, Minecraft mc) {
         long window = mc.getWindow().getWindow();
-        boolean down = InputConstants.isKeyDown(window, 32) || InputConstants.isKeyDown(window, 256);
+        boolean down = InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER) || InputConstants.isKeyDown(window, org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER);
         if (down && r.ticks >= 10) {
             r.skipHeld++;
             if (r.skipHeld >= SKIP_HOLD) {

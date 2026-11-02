@@ -1,0 +1,18 @@
+{
+  "type": "skyabyss:tower",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "skyabyss:tower",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {
+          "block": "minecraft:air",
+          "height": 1
+        }
+      ],
+      "structure_overrides": []
+    }
+  }
+}

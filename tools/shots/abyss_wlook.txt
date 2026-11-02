@@ -1,0 +1,41 @@
+# 心臓の番人の姿 (光の中) を前・横・後ろから撮る (2026-10-28 の選定 A・大きさ 1.35)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_review.txt -PshotsName=abyss_review
+world abyss_wlook4 flat
+size 1280 720
+timeout 5400
+render 10
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd effect give @s night_vision 99999 0 true
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 1200
+cmd effect give @s resistance 99999 4 true
+cmd effect give @s regeneration 99999 4 true
+cmd skyabyss abyss layer go heart 180
+wait 5
+cmd skyabyss cinematic stop
+cmd tp @s 0 -298 14 180 5
+wait 20
+cmd gamemode creative
+cmd skyabyss abyss warden wake
+wait 2
+cmd data merge entity @e[type=skyabyss:heart_warden,limit=1] {NoAI:1b}
+wait 20
+cmd skyabyss abyss dev lamp
+hud off
+cmd execute at @e[type=skyabyss:heart_warden,limit=1] run tp @s ^ ^2 ^6 facing entity @e[type=skyabyss:heart_warden,limit=1] eyes
+wait 30
+shot w_front
+cmd execute at @e[type=skyabyss:heart_warden,limit=1] run tp @s ^6 ^2 ^ facing entity @e[type=skyabyss:heart_warden,limit=1] eyes
+wait 30
+shot w_side
+cmd execute at @e[type=skyabyss:heart_warden,limit=1] run tp @s ^ ^2 ^-6 facing entity @e[type=skyabyss:heart_warden,limit=1] eyes
+wait 30
+shot w_back
+cmd execute at @e[type=skyabyss:heart_warden,limit=1] run tp @s ^2 ^0.6 ^4 facing entity @e[type=skyabyss:heart_warden,limit=1] eyes
+wait 30
+shot w_low

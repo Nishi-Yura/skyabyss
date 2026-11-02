@@ -39,6 +39,8 @@ public final class GuildSelfTest {
             body(f, server, data);
             data.clearForTest();
             extras(f, server, data);
+            data.clearForTest();
+            runs(f, server);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST facility guild crashed", e);
             f.add("crashed: " + e);
@@ -47,9 +49,53 @@ public final class GuildSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST facility guild PASSED (create, apply/accept/deny, open join, 30 cap, leave/leader/disband, badge, save, "
-                    + "ranks, storage, emblem, banner, weekly request, leader stays/hand over/disband, patterns, achievements)");
+                    + "ranks, storage, emblem, banner, weekly request, leader stays/hand over/disband, patterns, achievements, run records)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST facility guild FAILED: {}", m));
+        }
+    }
+
+    // 踏破の記録: 速い順・10 件まで・人数の部・創造モードの回は残さない・ギルドの週の数・保存の往復
+    private static void runs(List<String> f, MinecraftServer server) {
+        TitanRunData d = TitanRunData.get(server);
+        TitanRunData before = TitanRunData.load(d.save(new net.minecraft.nbt.CompoundTag(), server.registryAccess()), server.registryAccess());
+        try {
+            d.clear();
+            FakePlayer a = fake(server, "run_a");
+            FakePlayer b = fake(server, "run_b");
+            check(f, Guilds.create(a, "速足の組", "RUN", 1, 2) == Guilds.Result.OK, "run guild created");
+            long now = server.overworld().getGameTime();
+            // 頼みの目的「踏破の時間」(run): 二十分 (24000 tick) を過ぎた回では済まず、内なら済む
+            jp.revati.skyabyss.quest.Quests.forget(b, "weekly_swift_run");
+            jp.revati.skyabyss.quest.Quests.start(b, "weekly_swift_run");
+            jp.revati.skyabyss.quest.Quests.onRun(b, "stone_whale", 30000);
+            jp.revati.skyabyss.quest.QuestLog.Entry qe = jp.revati.skyabyss.quest.QuestLog.of(b).quests().get("weekly_swift_run");
+            check(f, qe != null && !qe.done, "a 25-minute run finished the swift crossing");
+            jp.revati.skyabyss.quest.Quests.onRun(b, "tide_shell", 20000);
+            qe = jp.revati.skyabyss.quest.QuestLog.of(b).quests().get("weekly_swift_run");
+            check(f, qe != null && qe.done, "a 17-minute run did not finish the swift crossing");
+            jp.revati.skyabyss.quest.Quests.forget(b, "weekly_swift_run");
+            check(f, d.record(server, "stone_whale", 6000, List.of(a), now) == 1, "first solo run ranks 1");
+            check(f, d.record(server, "stone_whale", 4000, List.of(a), now) == 1 && d.top("stone_whale", 1).get(1).ticks() == 6000, "faster run takes 1st");
+            check(f, d.record(server, "stone_whale", 5000, List.of(a, b), now) == 1 && d.top("stone_whale", 2).size() == 1 && d.top("stone_whale", 1).size() == 2,
+                    "two-player run goes to its own bracket");
+            for (int k = 0; k < 12; k++) {
+                d.record(server, "tide_shell", 7000 + k * 10, List.of(b), now);
+            }
+            check(f, d.top("tide_shell", 1).size() == TitanRunData.TOP && d.record(server, "tide_shell", 99999, List.of(b), now) == 0, "top ten kept, slow run not ranked");
+            check(f, TitanRunData.bracket(6) == 4 && TitanRunData.bracket(0) == 1, "brackets clamp to 1..4");
+            b.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            check(f, d.record(server, "ember", 100, List.of(b), now) == 0 && d.top("ember", 1).isEmpty(), "creative runs are not recorded");
+            b.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            check(f, d.week(TitanRunData.weekOf(now)).getOrDefault("速足の組", 0) == 3, "guild weekly hearts counted per member (b is not in the guild): " + d.week(TitanRunData.weekOf(now)));
+            TitanRunData back = TitanRunData.load(d.save(new net.minecraft.nbt.CompoundTag(), server.registryAccess()), server.registryAccess());
+            check(f, back.top("stone_whale", 1).size() == 2 && back.top("stone_whale", 1).get(0).guilds().contains("速足の組")
+                    && back.week(TitanRunData.weekOf(now)).getOrDefault("速足の組", 0) == 3, "run records survive a save");
+            check(f, TitanRunData.clock(20 * 125) .equals("2:05"), "clock format");
+        } finally {
+            d.clear();
+            d.best.putAll(before.best);
+            d.weekly.putAll(before.weekly);
         }
     }
 
@@ -225,6 +271,8 @@ public final class GuildSelfTest {
         check(f, Guilds.transfer(a, b.getUUID()) == Guilds.Result.NEW_LEADER && g.leader.equals(b.getUUID()) && !g.officers.contains(b.getUUID())
                 && g.officers.contains(a.getUUID()), "officer takes over");
         c.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(c, jp.revati.skyabyss.facility.Coins.count(c));
         b.getInventory().clearContent();
+        jp.revati.skyabyss.facility.Coins.take(b, jp.revati.skyabyss.facility.Coins.count(b));
     }
 }

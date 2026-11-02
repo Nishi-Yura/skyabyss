@@ -22,7 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-// 二章の地上の敵の差し込み口と湧かせ方 (docs/design/21 の 4.1、P12)。
+// 二章の地上の敵の差し込み口と湧かせ方 (P12)。
 //   潮だまり貝 (tidepool_clam)  ひとり歩きの湧き。浜・石の浜 (水辺)、昼夜。沈んだ塩の蔵の入口の間 (湧き台は蔵の側が ID で置く)
 //   砂潜り (sand_burrower)      ひとり歩きの湧き。砂の浜、干潮の刻だけ (TideOcean.isLowTide)。蔵の塩樽の間
 //   宿借り (drift_hermit)       ひとり歩きの湧き。浜の昼。湧いた一匹が先頭になり、後ろに 2〜4 匹を連れて行列で歩く (DriftHermit)

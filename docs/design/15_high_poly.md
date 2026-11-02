@@ -153,7 +153,7 @@
 - 面を増やさずに効くのは塗りと AO の焼き直し。回転した骨（岩鯨の板）は削るだけにして、周りとぶつからないようにする。
 - 段階 2・3 を実機で撮るには、アリーナの戦闘か `/skyabyss <心臓> phase <n>` が要る（NoAI の召喚だけでは段階 1 のまま。`tools/shots/hp_hearts.txt` は 4 体の段階 1）。
 
-動きの仕上げ（`docs/review/boss_quality_2026-10-23.md`）: `python tools/gen/world/polish_boss_anims.py` が、心臓四体と巨神の animation.json に上書き・追加する（心臓や巨神の install を流し直したら、これも流す。足すぶれの元は `tools/sources/anim_base/`）。
+動きの仕上げ: `python tools/gen/world/polish_boss_anims.py` が、心臓四体と巨神の animation.json に上書き・追加する（心臓や巨神の install を流し直したら、これも流す。足すぶれの元は `tools/sources/anim_base/`）。
 - 技の当たりの形は予告が終わる tick に置く（予告は動きと同じ tick に出る）。岩鯨の心臓の棘の薙ぎ・地割れ・骨の棘の投射を合わせ、潮殻・雷翼・余燼の心臓の技には当たりの 0.45 秒前からの溜めの震えと当たりの押し出しを足した（全部の骨に同じずれ。部品が離れない）。
 - ひるみ `stagger`（2 秒）: 領域を解いて砕けた瞬間に流す（`HeartDomain.end`）。HeartBoss の動きの名前に自動で足される。
 - 眠る巨神: 岩鯨は `sleep`、潮殻は休みの姿と `head_sleep`（`isDormantNow`）。雷翼はすくむ、余燼は眠りの動き。
@@ -164,7 +164,7 @@
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 足したもの |
 | --- | --- | --- | --- | --- |
-| 番兵長 whalebone_captain | 1,318 / 4,616 | 20 | `tools/gen/mobs/gen_mobs.py`（+ ラフ `captain_v4.py`）。鉾は別モデル（item） | 兜・拳・腿の二段丸め（腕・脚の骨は縦の辺だけ）、鼻梁、覗き窓の縁、冠の継ぎ目、拳の関節、腕当て、指 4 本 + 親指、兜の口の格子 6 枚 |
+| 番兵長 whalebone_captain | 1,318 / 4,616 | 20 | `tools/gen/mobs/gen_mobs.py`（ラフの道具 `captain_v4.py` は消した。今の geo が正本）。鉾は別モデル（item） | 兜・拳・腿の二段丸め（腕・脚の骨は縦の辺だけ）、鼻梁、覗き窓の縁、冠の継ぎ目、拳の関節、腕当て、指 4 本 + 親指、兜の口の格子 6 枚 |
 | 潮招き tide_beckoner | 1,356 / 6,820 | 12 | `tools/install/install_tide_caller.py` | 甲羅の段と爪を 1.0 刻みで二段丸め、目の枠、全 6 脚の関節の棘、大鋏の歯（上下 2 段 × 12）、爪の筋、甲羅の背棘。変更の幅が最も大きい |
 | 雷獣 raiju | 1,322 / 6,195 | 17 | `tools/install/install_raiju.py` | 胸・胴・頭・脚の丸め（尾 3 骨・たてがみの結晶・1 単位の脚板は元のまま。全面だと 8,400 面で上限なので範囲を絞った）、牙 2、眉の庇、鼻の縁、肩・腰の棘（2 段）、背の筋 |
 | 鍛え手 ash_smith | 1,225 / 6,794 | 15 | `tools/install/install_ember_smith.py`（大鎚・火箸は gear） | 頭・腕・前腕・脚・腹と胴の積み板の丸め（鞴 2 つと前掛けは元のまま）、兜の覗き窓の縁、口の格子 5 枚、胴・脚の板の鋲（約 85） |
@@ -209,13 +209,13 @@
 | --- | --- | --- | --- | --- |
 | 語り部 storyteller | 688 / 1,981 | 10 | `tools/install/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の B 頭巾の語り部） | 滑らか版。頭は 1 つの丸い塊（0.25 の段の球）で、目・眉・口・頬を塊の表面に描く。鼻と眉の張りは同じ肌の塊の出っぱり。頭巾は頭にかぶさる殻（`hair`・`hair2`）で、前に生え際の窓を開ける。首と襟があり頭が体の軸に載る。肩掛け、帯、結び紐、組んだ手。床の高さの骨の pivot は新しい（アニメの骨名は同じ） |
 | イサナ whale_chaser | 690 / 2,362 | 9 | `tools/install/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の A つば広帽の旅人） | 滑らか版。頭は 1 つの丸い塊で、顔は表面に描く（太い眉・目・口）。つば広の帽子は頭にかぶさる殻、マフラー、ボタンつきのコート、手袋、ブーツ、背負い袋（丸めた地図）。`hair`・`hood2` の骨は箱なしの空 |
-| 見る者 watcher | 226 / 1,290 | 7 | `tools/gen/mobs/gen_npc_content.py`（ラフ `watcher_v2.py`） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
+| 見る者 watcher | 226 / 1,290 | 7 | データを直接直す（生成スクリプトはない） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
 
 - 語り部・イサナ・見る者は低ポリのメッシュ（9.6）。下の滑らか版の記述は、`LowPoly.enabled = false` のときの箱の描画の話になる。
 - 語り部とイサナの滑らか版（顔が頭の塊に収まる作り）は、`LowPoly.enabled = false` の箱の描画として assets に残る。比較シートは `docs/review/smooth_npc_roughs/{storyteller,whale_chaser}.png`、ゲーム内は `docs/review/previews/smooth_*.png`（台本 `tools/shots/smooth_npcs.txt`）。`tools/install/install_smooth_npcs.py` は入力のラフ（9.6）を消したので回らない。以下の `hp_npc.py` の記述は見る者にだけ当てはまる。
 - 作り方は `tools/rough/hp_npc.py`（`python tools/rough/hp_npc.py` でシート、`--install C` でゲームの assets へ）。NPC は発光層なし。小道具 `band`（巻き帯）・`vstrips`/`hstrips`（襞と縫い目）・`round_one`（小さな箱の 0.25 面取り）は `hp_npc.py` の中にあり、他でも写して使える。`add_box(safe=True)` が落とした数: 語り部 32、イサナ 43、見る者 11。
 - 語り部とイサナの顔のアイコン（`gui/face`）は絵なのでそのまま。
-- `npc.py`（ラフ）と `tools/gen/mobs/gen_npc_content.py` の geo 出力は古い箱のままなので、**再生成すると取り込みが戻る**。geo を再生成するときは先に `hp_npc.py --install C` を後ろに回す。
+- `npc.py`（ラフ）の geo 出力は古い箱のままなので、**再生成すると取り込みが戻る**。geo を再生成するときは先に `hp_npc.py --install C` を後ろに回す。
 - 見る者はクライアントだけの存在で遠くに立つ（`/skyabyss watcher show`）ので、ゲーム内では遠景しか撮れない。
 - 戻し方: `tools/sources/hp_base/entity/` の geo・png（見る者は glowmask も）を assets に戻す。
 
@@ -285,6 +285,8 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - 輝き（foil）: `stack.hasFoil()`（エンチャント・品の `foil`）のとき、本体のメッシュを `ItemRenderer.getFoilBuffer`（glint の描画型）へもう一度流す。光る画素（emissive）の層はそのまま。大剣・弓・盾の手（一人称・三人称）で紫の輝きを確認（`weapon_lp_extra_foil.png`）。地面の item・額縁は小さく輝きは見分けにくい
 - 盾の三人称の構え（構えていないとき）: 盾の display の平行移動は [2,-2,4]（左右とも）。メッシュ・元のボクセルは中心が原点なので、バニラの値 [10,6,-4]（盾の板の中心が原点から -8 ずれる前提）では盾が腕から 1 枚ぶん横に浮く（`models/item/coral_shield.json`・`item_voxel/coral_shield.json`）
 - 他の生き物の弓の引き絵: 引きの段は `holder`（`RenderLivingEvent` の間の生き物）の `isUsingItem` と使っている品の種類で決める。スケルトンに弓を持たせた三人称は撮ったが、横向きで弦の段までは見分けられなかった。未確認: ほかのプレイヤーの手の弓の引き絵の段（実機マルチ）、専用サーバーのマルチ
+
+- **作り込みをそろえる**（2026-10-27 の声「モデルのクオリティ、ちゃんと統一されてる?」）: 入っている武器を種類ごとに並べる `tools/rough/lowpoly/gear_style/installed_sheet.py`（環境変数 `SKYABYSS_ITEMS_TSV` に自己テスト `item audit` の記録を渡すと、品の階級で見える形の段を描き、面の数を書く）で見比べ、はじめのころの作り（大きな平たい棘の面）が残っていた 12 本を一品一案の段（`tools/rough/lowpoly/weapons/one/o_remake.py`）で描き直した。持ち方は品の今の item モデルのまま（`install_job_weapons.py` の `REMAKE`。借りる品 = 自分）。目安: エピック 350〜650 面、ヒロイック 380〜550 面、アーティファクト 480〜1300 面（金の縁・淵の欠片・浮く欠片）。
 
 #### 4.6.3 立体防具の低ポリメッシュ（C 骨組み）
 

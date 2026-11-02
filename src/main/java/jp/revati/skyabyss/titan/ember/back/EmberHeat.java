@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //
 // **熱の約束 (11.2節)**: 熱を動かすのは add(player, 量, 理由) と cool(player, 量) だけ (テストとコマンドは set)。
 // 試練 (C1〜C3)・敵 (D)・鍛え手 (E)・心臓 (F) はこの API だけを呼ぶ。たまり方の倍率 (火炎耐性 0.5、角杯 0.6、鎧 0.7)、
-// ふだんの冷え (1 秒に −3)、溶岩のそば・継ぎ目・灰溜まり・水、焦げの傷、火照りの光、85 の警告は B がこのファイルに書く (gainMultiplier と tickPlayer)。
+// ふだんの冷え (1 秒に −6)、溶岩のそば・継ぎ目・灰溜まり・水、焦げの傷、火照りの光、85 の警告は B がこのファイルに書く (gainMultiplier と tickPlayer)。
 // 骨組み (担当 0) の今の中身: 値の保持・範囲・帯・背中の外で 0・死んだら 0・目盛りへの同期 (EmberNetwork.Heat)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberHeat {
@@ -123,7 +123,8 @@ public final class EmberHeat {
     // 1 秒あたりの量
     public static final float NEAR_LAVA = 3f;
     public static final float HOT_GROUND = 1f;
-    public static final float PASSIVE_COOL = 3f;
+    // 2026-10-25 の試遊: 前もって道具を持たないと焦げを防げなかった。熱は避ければたまらない (攻撃・残り火)。離れればすぐ冷める
+    public static final float PASSIVE_COOL = 6f;
     public static final float ASH_COOL = 15f;
     public static final float WATER_COOL = 25f;
     // 焦げの傷 (1 秒に 2。85 を切るまで)

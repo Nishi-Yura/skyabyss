@@ -1,0 +1,86 @@
+{
+  "category": "main",
+  "chapter": "finale",
+  "order": 92,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_finale_bell",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "walk",
+      "xp": 90,
+      "objectives": [
+        {
+          "id": "arrive",
+          "type": "signal",
+          "targets": [
+            "finale_isle2_arrive"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lamps",
+      "xp": 260,
+      "objectives": [
+        {
+          "id": "w",
+          "type": "signal",
+          "targets": [
+            "finale_lamp_w"
+          ],
+          "count": 1
+        },
+        {
+          "id": "e",
+          "type": "signal",
+          "targets": [
+            "finale_lamp_e"
+          ],
+          "count": 1
+        },
+        {
+          "id": "s",
+          "type": "signal",
+          "targets": [
+            "finale_lamp_s"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "door",
+      "objectives": [
+        {
+          "id": "door",
+          "type": "signal",
+          "targets": [
+            "finale_lamp_door"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lord",
+      "objectives": [
+        {
+          "id": "lord",
+          "type": "signal",
+          "targets": [
+            "finale_lord_lamp"
+          ],
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 700
+  }
+}

@@ -1,0 +1,22 @@
+# 一章の鯨の碑・四章の灰の碑の台 (碑そのものは建てたあとに置くので、ここでは台と飾り)
+world tablets_a
+size 1280 720
+timeout 3000
+render 8
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss dev ch1 place ch1_tablet 0 -60 20
+cmd skyabyss dev ch1 place ch4_tablet 12 -60 20
+cmd skyabyss dev ch1 place ch3_tablet 24 -60 20
+wait 60
+camera 12 -55 9 0 25
+wait 30
+shot tablets

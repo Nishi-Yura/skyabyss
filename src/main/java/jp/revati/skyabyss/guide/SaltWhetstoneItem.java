@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 塩の砥石 (二章の砥石。21 の 1.2)。右クリックで使うと「塩の刃」(攻撃 +1.8) が 20 分。一つ使う。岩の砥石の研ぎとは重ねない (替わる)。
+// 塩の砥石 (二章の砥石)。右クリックで使うと「塩の刃」(攻撃 +1.8) が 20 分。一つ使う。岩の砥石の研ぎとは重ねない (替わる)。
 // 水の中でも切れる: 水の中の一撃は塩が散って +1 (Ch2Gear.onIncoming)。備えの刃は持ち歩いているだけで数える
 public class SaltWhetstoneItem extends Item {
     public SaltWhetstoneItem(Properties properties) {

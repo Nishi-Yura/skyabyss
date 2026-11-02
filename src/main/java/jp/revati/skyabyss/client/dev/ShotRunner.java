@@ -118,7 +118,8 @@ public final class ShotRunner {
         if (file == null || file.isBlank()) {
             return false;
         }
-        if (FMLEnvironment.production) {
+        // 本番の jar では動かない。配る前の起動確認 (tools/dev/prod_client.py) だけは、起動の印 -Dskyabyss.prodcheck=true を付けて動かす
+        if (FMLEnvironment.production && !Boolean.getBoolean("skyabyss.prodcheck")) {
             SkyAbyss.LOGGER.warn("[shots] {} is ignored outside the development environment", ENV);
             finished = true;
             return false;
@@ -252,6 +253,11 @@ public final class ShotRunner {
         String type = script.worldType;
         mc.createWorldOpenFlows().createFreshLevel(name, settings, options, registries -> switch (type) {
             case "normal" -> WorldPresets.createNormalWorldDimensions(registries);
+            // 天と淵の大陸 (docs/design/40 の 3 章)
+            case "continent" -> registries.registryOrThrow(Registries.WORLD_PRESET)
+                    .getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.WORLD_PRESET,
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "continent")))
+                    .value().createWorldDimensions();
             default -> registries.registryOrThrow(Registries.WORLD_PRESET)
                     .getHolderOrThrow(WorldPresets.FLAT)
                     .value().createWorldDimensions();
@@ -371,6 +377,22 @@ public final class ShotRunner {
                 return true;
             }
             case "echo" -> {
+                return true;
+            }
+            case "music" -> {
+                // music : 流れている BGM を記録に出す。music master <音量> : 全体の音量。music set <id> : 曲を決め打ち (空の名前 "-" で無音)。music auto : 決め打ちをやめる
+                if (first) {
+                    if (line.args().length > 0 && line.arg(0).equals("master")) {
+                        // 撮影では全体の音量が 0 (本体は 0 だと音を鳴らさない)。聞こえないほど小さくして鳴らす
+                        mc.options.getSoundSourceOptionInstance(net.minecraft.sounds.SoundSource.MASTER).set(line.doubleArg(1));
+                    } else if (line.args().length > 0 && line.arg(0).equals("set")) {
+                        jp.revati.skyabyss.client.music.MusicDirector.override(line.arg(1).equals("-") ? "" : line.arg(1));
+                    } else if (line.args().length > 0 && line.arg(0).equals("auto")) {
+                        jp.revati.skyabyss.client.music.MusicDirector.override(null);
+                    } else {
+                        jp.revati.skyabyss.SkyAbyss.LOGGER.info("[shots] music {}", jp.revati.skyabyss.client.music.MusicDirector.debugLine());
+                    }
+                }
                 return true;
             }
             case "prof" -> {
@@ -603,6 +625,28 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedTier = t.equals("auto") ? null : t;
                 return true;
             }
+            case "otherplayer" -> {
+                // otherplayer <dx> <dz> <名前> [<向きのずれ 度>] : 手元だけの別の人 (自分と同じ見た目・転生とスキンと防具の写し) を前に置く (名札の称号・スキンの確認用。サーバーには居ない)。
+                //   既定はこちらを向く。90 = 体の右をこちらへ、180 = 背中
+                if (mc.level != null && mc.player != null) {
+                    var rp = new net.minecraft.client.player.RemotePlayer(mc.level,
+                            new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes(("shot:" + line.arg(2)).getBytes()), line.arg(2)));
+                    float face = mc.player.getYRot() + 180f + (line.args().length > 3 ? (float) line.doubleArg(3) : 0f);
+                    rp.moveTo(mc.player.getX() + Double.parseDouble(line.arg(0)), mc.player.getY(), mc.player.getZ() + Double.parseDouble(line.arg(1)),
+                            face, 0f);
+                    rp.setYHeadRot(face);
+                    rp.yHeadRotO = face;
+                    rp.yBodyRot = face;
+                    rp.yBodyRotO = face;
+                    rp.setData(jp.revati.skyabyss.rebirth.RebirthSetup.DATA.get(), jp.revati.skyabyss.rebirth.RebirthView.data(mc.player));
+                    for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.HEAD,
+                            net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
+                        rp.setItemSlot(slot, mc.player.getItemBySlot(slot).copy());
+                    }
+                    mc.level.addEntity(rp);
+                }
+                return true;
+            }
             case "sneak" -> {
                 // sneak on|off : しゃがむキーを押し続ける / 放す (防具の姿勢の確認用。KeyMapping だけ。OS の入力ではない)
                 mc.options.keyShift.setDown(line.arg(0).equalsIgnoreCase("on"));
@@ -769,6 +813,15 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "click" -> {
+                // click <GUI 座標 x> <GUI 座標 y> [ボタン] : 開いている画面を押す (押して離す)
+                if (mc.screen != null) {
+                    int b = line.args().length > 2 ? line.intArg(2) : 0;
+                    mc.screen.mouseClicked(line.doubleArg(0), line.doubleArg(1), b);
+                    mc.screen.mouseReleased(line.doubleArg(0), line.doubleArg(1), b);
+                }
+                return true;
+            }
             case "drag" -> {
                 // drag <x0> <y0> <x1> <y1> [段] : 左のボタンを押して、(x0,y0) から (x1,y1) へ引く (段ごとに動かす。既定 8)。盤や一覧を動かす確認用
                 if (mc.screen != null) {
@@ -858,6 +911,18 @@ public final class ShotRunner {
             }
             case "close" -> {
                 mc.setScreen(null);
+                return true;
+            }
+            case "overlap" -> {
+                // overlap <名前> : 今の画面の文字と部品の重なりを調べ、撮影のフォルダの overlap.txt に書く (client/dev/OverlapAudit)
+                if (first) {
+                    OverlapAudit.arm(line.arg(0), out.resolve("overlap.txt"));
+                }
+                return OverlapAudit.done() || mc.screen == null;
+            }
+            case "window" -> {
+                // window <幅> <高さ> : 窓の大きさを変える (GUI の倍率ごとの重なりの検査)
+                GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), line.intArg(0), line.intArg(1));
                 return true;
             }
             case "respawn" -> {
@@ -1059,41 +1124,56 @@ public final class ShotRunner {
 
     // 開ける画面の名前。足りなければ、画面のクラスの完全な名前 (引数なしで作れるもの) でもよい
     private static Screen screen(Minecraft mc, String name) {
+        // creative_<つまみの名前>: クリエイティブの欄をその Mod のつまみで開く (main / weapons / gear / eggs / blocks)
+        if (name.toLowerCase(Locale.ROOT).startsWith("creative_")) {
+            String tab = name.substring("creative_".length());
+            var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.CREATIVE_MODE_TAB,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, tab));
+            var t = net.minecraft.core.registries.BuiltInRegistries.CREATIVE_MODE_TAB.get(key);
+            try {
+                var f = net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen.class.getDeclaredField("selectedTab");
+                f.setAccessible(true);
+                f.set(null, t);
+            } catch (ReflectiveOperationException e) {
+                jp.revati.skyabyss.SkyAbyss.LOGGER.warn("could not select the creative tab {}", tab, e);
+            }
+            return new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player, mc.player.connection.enabledFeatures(), true);
+        }
+        // skills_node:<節の id> : 技の木 v2 で、その節を選んだ状態で開く
+        if (name.startsWith("skills_node:")) {
+            String id = name.substring("skills_node:".length());
+            return new jp.revati.skyabyss.rpg.client.skill.SkillScreen().selectNode(id);
+        }
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);
             case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);
+            case "travel_map" -> () -> { jp.revati.skyabyss.client.map.MapClient.open(); return mc.screen; };
             case "travel_map_voyage_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(true);
             case "lore", "lorebook" -> jp.revati.skyabyss.lore.client.LoreBookScreen::new;
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
+            case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
+            case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
+            case "chat" -> () -> new net.minecraft.client.gui.screens.ChatScreen("");
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
-            case "calling" -> () -> {
-                var c = new jp.revati.skyabyss.rpg.client.skill.CallingScreen(1);
-                c.pick(jp.revati.skyabyss.rpg.skill.SkillTree.ROCK);
-                return c;
-            };
-            case "calling2" -> () -> {
-                var c = new jp.revati.skyabyss.rpg.client.skill.CallingScreen(2);
-                c.pick(jp.revati.skyabyss.rpg.skill.SkillTree.WIND);
-                return c;
-            };
+            case "tower_desk" -> jp.revati.skyabyss.tower.client.TowerDeskScreen::sample;
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
+            case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
+            case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);
             case "skills_tryon" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP)
                     .tryOn(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL, jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP);
             case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
-            // 橋の輪・淵・前世の技・変異と紋のページ (docs/design/31)
-            case "skills_bridge" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.HYBRID)
-                    .select(jp.revati.skyabyss.rpg.skill.Skill.DUST_CHARGE);
+            // 淵・前世の技・変異と紋のページ (docs/design/31)
             case "skills_deep" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP)
                     .select(jp.revati.skyabyss.rpg.skill.Skill.DEEP_MIRROR);
             case "skills_past" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.PAST)
                     .select(jp.revati.skyabyss.rpg.skill.Skill.ECHO_STRIKE);
             case "skills_ext" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().extPage(0, jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
-            case "skills_signal" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.SIGNAL);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
+            case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
             case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
             // 旅嚢の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)

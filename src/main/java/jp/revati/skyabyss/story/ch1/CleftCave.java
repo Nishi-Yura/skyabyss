@@ -33,7 +33,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 割れ殻の洞 (docs/design/21 の 3.1。備えの頼み 2・3 の舞台。10〜18 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_cleft_shell_cave.json (tools/gen/ch1/gen_ch1_sites.py)。
+// 割れ殻の洞 (備えの頼み 2・3 の舞台。10〜18 分の小さなダンジョン)。部品は data/skyabyss/opening/ch1_cleft_shell_cave.json (データを直接直す（生成スクリプトはない）)。
 //
 //   場所   ChapterSites の要素 (拠点から 60〜150)。地表に石レンガの口、階段で地下 15 ブロックへ。地下 3 部屋 (入口の間・棘の間・奥の間)。
 //          部屋は石レンガの殻で包んでいるので、自然の洞や水とつながらない
@@ -76,7 +76,7 @@ public final class CleftCave {
                         new SiteTreasure.Entry("skyabyss:bone_chip", 3),
                         new SiteTreasure.Entry("skyabyss:road_hardtack", 3)),
                 1, 2, List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 2, 4, 3), new SiteTreasure.Entry("skyabyss:bone_chip", 2, 3, 3),
-                        new SiteTreasure.Entry("skyabyss:hare_quill", 2, 4, 2), new SiteTreasure.Entry("minecraft:iron_ingot", 1, 2, 2))));
+                        new SiteTreasure.Entry("skyabyss:hare_quill", 2, 4, 2), new SiteTreasure.Entry("skyabyss:iron_lump", 1, 2, 2))));
         SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 2, 4, 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 1, 3, 3), new SiteTreasure.Entry("skyabyss:hare_quill", 1, 3, 2))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.WHALE, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, CleftCave::origins, CleftCave::yawAt));
@@ -258,6 +258,47 @@ public final class CleftCave {
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 40 * 40) {
                     Notice.narrate(p, "message.skyabyss.ch1.plate.open");
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 鳴り石を目立たせる (2026-10-29 の試遊「最後の謎解き、もっと押すブロック主張して」
+    // 「つるはしで壊さずに行けるように」: 格子を壊すものと思い、鳴り石に気づかなかった)。格子が閉じている間、近くの人に
+    //   鳴り石の上に光の粒 (毎秒)、格子か鳴り石に近づいたら一度だけ手がかりの帯
+    static final double SHOW_NEAR = 18;
+    private static final java.util.Set<String> HINTED = new java.util.HashSet<>();
+
+    @SubscribeEvent
+    static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 20 != 7) {
+            return;
+        }
+        ServerLevel level = server.overworld();
+        for (SiteData.Entry cave : entries(server)) {
+            BlockPos p1 = cave.extra("plate1");
+            BlockPos gate = cave.extra("gate4");
+            if (p1 == null || !level.hasChunkAt(p1) || gateOpen(level, cave)) {
+                continue;
+            }
+            for (ServerPlayer p : Players.snapshot(level.players())) {
+                boolean nearPlates = p.distanceToSqr(p1.getX() + 0.5, p1.getY(), p1.getZ() + 0.5) < SHOW_NEAR * SHOW_NEAR;
+                boolean nearGate = gate != null && p.distanceToSqr(gate.getX() + 0.5, gate.getY(), gate.getZ() + 0.5) < 6 * 6;
+                if (!nearPlates && !nearGate) {
+                    continue;
+                }
+                if (nearPlates) {
+                    for (int n = 1; n <= PLATES; n++) {
+                        BlockPos at = cave.extra("plate" + n);
+                        if (at != null) {
+                            level.sendParticles(p, ParticleTypes.END_ROD, true, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 2 + n, 0.25, 0.3, 0.25, 0.01);
+                            level.sendParticles(p, ParticleTypes.WAX_ON, true, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 4, 0.45, 0.45, 0.45, 0.0);
+                        }
+                    }
+                }
+                if (HINTED.add(p.getUUID() + "@" + cave.pos.asLong())) {
+                    Notice.objective(p, nearGate && !nearPlates ? "message.skyabyss.ch1.plate.gate_hint" : "message.skyabyss.ch1.plate.tap_hint");
                 }
             }
         }

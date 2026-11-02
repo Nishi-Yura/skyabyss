@@ -10,10 +10,18 @@
           "goto": "town_test",
           "kind": "quest",
           "if": {
-            "type": "quest",
-            "quest": "town/ch1_apprentice",
-            "is": "active",
-            "stage": "clerk"
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "town/ch1_apprentice",
+                "is": "active",
+                "stage": "clerk"
+              },
+              {
+                "type": "in_capital"
+              }
+            ]
           }
         }
       ]

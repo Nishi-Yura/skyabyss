@@ -18,7 +18,7 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// おなかは空かない。食べ物は、食べたその場で少し戻り、そのあと少しずつ決まった量まで戻る (2026-10-22 の二人の試遊: 回復が多すぎた)。docs/design/17 の 4 章
+// おなかは空かない。食べ物は、食べたその場で少し戻り、そのあと少しずつ決まった量まで戻る (2026-10-22 の二人の試遊: 回復が多すぎた)
 //   満腹度はいつも FOOD (17): 18 に届かないので自然の回復は起きず、6 より上なので走れる、20 でないのでいつでも食べられる。満腹度の隠れた値と疲れは 0。
 //   戻る量 (半ハート単位) = 栄養 + 隠れた満腹度 × 0.3 (パン 6.8、焼いた牛肉 11.8、金のにんじん 10.3)。その半分をすぐ、残りを 1 秒に 1 ずつ。
 //   空腹の効き目のある食べ物 (腐った肉・生の鶏肉・クモの目など): 戻る量は半分、空腹の効き目は弱体 (20 秒) と吐き気 (4 秒) に替える (空腹はもう意味がないので)。

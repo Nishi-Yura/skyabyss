@@ -32,14 +32,42 @@
           "topic": "town_g3_back"
         }
       ]
+    },
+    {
+      "id": "candle",
+      "objectives": [
+        {
+          "id": "candle",
+          "type": "collect",
+          "target": "minecraft:candle",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "light",
+      "objectives": [
+        {
+          "id": "light",
+          "type": "signal",
+          "target": "town_hand:attendant_gravekeeper",
+          "party": false
+        }
+      ],
+      "do": [
+        {
+          "type": "lore",
+          "entry": "town/grave_4"
+        }
+      ]
     }
   ],
   "reward": {
-    "xp": 40,
+    "xp": 90,
     "items": [
       {
         "item": "skyabyss:bell_coin",
-        "count": 12
+        "count": 27
       }
     ]
   }

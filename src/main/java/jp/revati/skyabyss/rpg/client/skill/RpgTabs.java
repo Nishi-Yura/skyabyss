@@ -16,6 +16,8 @@ public final class RpgTabs {
     public static final int STATUS = 0;
     public static final int SKILLS = 1;
     public static final int REBIRTH = 2;
+    // 旅の記録 (endgame/client/JourneyScreen。土地の名声・名所・図鑑・熟練)
+    public static final int JOURNEY = 3;
     static final int TAB_W = 56;
     static final int TAB_H = 16;
     static final int PANEL_H = 184;
@@ -33,8 +35,15 @@ public final class RpgTabs {
         add.accept(new Tab(cx - 112, top - TAB_H + 2, STATUS, active == STATUS));
         add.accept(new Tab(cx - 112 + TAB_W + 2, top - TAB_H + 2, SKILLS, active == SKILLS));
         // 転生のつまみ: Lv 40 になるか、転生したあとから (序盤に見せない。docs/design/31)
+        int slot = 2;
         if (rebirthVisible() || active == REBIRTH) {
-            add.accept(new Tab(cx - 112 + 2 * (TAB_W + 2), top - TAB_H + 2, REBIRTH, active == REBIRTH));
+            add.accept(new Tab(cx - 112 + slot * (TAB_W + 2), top - TAB_H + 2, REBIRTH, active == REBIRTH));
+            slot++;
+        }
+        // 旅のつまみ: Lv 10 から (名声も図鑑も空のうちは見せない)
+        Minecraft mc = Minecraft.getInstance();
+        if (active == JOURNEY || (mc.player != null && jp.revati.skyabyss.endgame.client.JourneyScreen.visible(mc.player))) {
+            add.accept(new Tab(cx - 112 + slot * (TAB_W + 2), top - TAB_H + 2, JOURNEY, active == JOURNEY));
         }
     }
 
@@ -62,7 +71,9 @@ public final class RpgTabs {
     }
 
     static void open(Minecraft mc, int which) {
-        if (which == REBIRTH) {
+        if (which == JOURNEY) {
+            mc.setScreen(new jp.revati.skyabyss.endgame.client.JourneyScreen());
+        } else if (which == REBIRTH) {
             mc.setScreen(new jp.revati.skyabyss.client.rebirth.SoulScreen());
         } else if (which == STATUS) {
             mc.setScreen(new GrowthScreen());
@@ -79,7 +90,7 @@ public final class RpgTabs {
 
         Tab(int x, int y, int which, boolean selected) {
             super(x, y, TAB_W, TAB_H, Component.translatable(which == STATUS ? "gui.skyabyss.skill.tab_status"
-                    : which == REBIRTH ? "gui.skyabyss.skill.tab_rebirth" : "gui.skyabyss.skill.tab_skills"));
+                    : which == REBIRTH ? "gui.skyabyss.skill.tab_rebirth" : which == JOURNEY ? "gui.skyabyss.skill.tab_journey" : "gui.skyabyss.skill.tab_skills"));
             this.which = which;
             this.selected = selected;
         }

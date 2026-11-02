@@ -32,7 +32,6 @@ DEFAULT = [
     ("attendant_a", "attendant_a_guild_clerk", "組合の書記"),
     ("attendant_a", "attendant_a_smith", "鍛冶師"),
     ("attendant_a", "attendant_a_innkeeper", "宿の女将"),
-    ("attendant_a", "attendant_a_stable_keeper", "厩舎の番"),
     ("attendant_a", "attendant_a_survivor_bone", "灯り番ミオ"),
     ("attendant_a", "attendant_a_abyss_porter", "荷運びロク"),
     ("attendant_a", "guest_baker", "町の人 (パン屋)"),

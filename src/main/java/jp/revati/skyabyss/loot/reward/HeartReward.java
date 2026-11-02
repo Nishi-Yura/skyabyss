@@ -52,6 +52,10 @@ public final class HeartReward {
     private static final int RETRY_TICKS = 40;
     private static final int RETRY_MAX = 6;
 
+    // 初めて止めたときに専用の逸品を選ばせるか。2026-10-28 の試遊「巨神を倒した後に伝説武器を手に入れられるようにしないで」で切った。
+    // 専用の逸品は心臓の周回でまれに落ちる (TitanGearSet の heartChance)。仕組みは残す (開発用の /titanmemory reward など)
+    public static final boolean CHOICE_ON_FIRST_CLEAR = false;
+
     public enum Result {
         OK, NOT_PENDING, BAD_ITEM, OWNED
     }
@@ -151,13 +155,11 @@ public final class HeartReward {
         // 初回の贈り物は記憶のカウンタを戻さない (天井の進みはそのまま)
         r.owned.add(itemId);
         ItemStack gift = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
-        int held = TitanLoot.handOver(player.server, player.getUUID(), player, List.of(gift), 0);
+        int held = jp.revati.skyabyss.loot.box.LootBoxes.direct(() -> TitanLoot.handOver(player.server, player.getUUID(), player, List.of(gift), 0));
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8f, 1f);
         Notice.alert(player, "message.skyabyss.legendary_new", TitanLoot.itemLink(gift));
         TitanLoot.tellHeld(player, held);
         sendState(player);
-        // 天職を選べるようになったら (一章の心臓のあと・雷翼のあと)、報酬の画面のあとに天職の画面を開く
-        jp.revati.skyabyss.rpg.skill.SkillCalling.offerSoon(player, jp.revati.skyabyss.rpg.skill.SkillCalling.OFFER_DELAY, false);
         return Result.OK;
     }
 

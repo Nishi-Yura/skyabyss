@@ -26,6 +26,8 @@ import net.minecraft.world.phys.AABB;
 //  - 偽物を叩くと弾けて消える (傷も湧きもない)。しばらくしてまた別の所に偽物が現れる。時間が無駄になるだけ
 //  - 母を倒せば越える。母は時々、手下の泡吹きを呼ぶ (数に上限)。偽物は人を追うが傷は与えない
 //  - 水・ダメージの仕掛けはない
+//  - 闘の試練では (32 の 9.5) 母を倒すと、潮招きが砂から現れ、影の潮招きが二体混じる。見分けは母と同じ (本物だけ足もとの影と濡れた足跡)。
+//    影は叩くと弾けて、しばらくしてまた別の所から現れる。技は出さない
 public final class TideBroodRoom extends RaidRoom {
     static final int HX = 13;
     static final int HZ = 13;
@@ -49,6 +51,9 @@ public final class TideBroodRoom extends RaidRoom {
     private int popped;
     private boolean done;
     private long nextHatch;
+    // 中ボスの段の本物の潮招き (null なら母の段)
+    private Mob beckoner;
+    static final int SHADOWS = 2;
 
     @Override
     public void build(RaidCtx ctx) {
@@ -124,6 +129,7 @@ public final class TideBroodRoom extends RaidRoom {
         decoys.clear();
         respawnAt.clear();
         mother = null;
+        beckoner = null;
         clearPrints(ctx);
         done = false;
     }
@@ -158,6 +164,9 @@ public final class TideBroodRoom extends RaidRoom {
     }
 
     private Mob spawnDecoy(RaidCtx ctx) {
+        if (beckoner != null) {
+            return spawnShadow(ctx);
+        }
         Mob d = TideRaid.spawn(ctx, TideMobSetup.REEF_SCUTTLER.get(), spot(ctx, -HZ + 3, 2));
         if (d != null) {
             d.addTag(DECOY_TAG);
@@ -166,6 +175,26 @@ public final class TideBroodRoom extends RaidRoom {
             d.setHealth((float) DECOY_HEALTH);
         }
         return d;
+    }
+
+    // 影の潮招き (技なし・ボスバーなし。叩くと弾ける)
+    private Mob spawnShadow(RaidCtx ctx) {
+        ServerLevel level = ctx.level();
+        jp.revati.skyabyss.titan.tide.back.TideBeckoner b = jp.revati.skyabyss.titan.tide.back.TideBackSetup.TIDE_BECKONER.get().create(level);
+        if (b == null) {
+            return null;
+        }
+        BlockPos at = spot(ctx, -HZ + 3, HZ - 4);
+        b.addTag(jp.revati.skyabyss.titan.tide.mob.TideMob.TRIAL_TAG);
+        b.addTag(DECOY_TAG);
+        b.setGroupId(ctx.group());
+        b.makeShadow(ctx.standing());
+        b.getAttribute(Attributes.MAX_HEALTH).setBaseValue(DECOY_HEALTH);
+        b.setHealth((float) DECOY_HEALTH);
+        b.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, ctx.rng().nextFloat() * 360f, 0);
+        level.addFreshEntity(b);
+        b.emergeAt(level, b.position());
+        return ctx.adopt(b);
     }
 
     private void clearPrints(RaidCtx ctx) {
@@ -193,7 +222,72 @@ public final class TideBroodRoom extends RaidRoom {
             finish(ctx);
             return;
         }
-        // 偽物: 傷を受けたら弾ける。ほかの理由で消えたものは数に入れなおす
+        tendDecoys(ctx, now);
+        markReal(ctx, mother, now);
+        // 手下: 時々、泡吹きを呼ぶ (数に上限)
+        if (now >= nextHatch) {
+            nextHatch = now + 260;
+            int helpers = 0;
+            for (Mob m : ctx.aliveMobs()) {
+                if (m != mother && !decoys.contains(m)) {
+                    helpers++;
+                }
+            }
+            if (helpers < 1 + ctx.scale()) {
+                TideRaid.spawn(ctx, TideMobSetup.BUBBLE_PUFFER.get(), spot(ctx, -HZ + 3, 4).above());
+            }
+        }
+        if (now % 40 == 0) {
+            TideRaid.purgeStrays(ctx, cell.inner());
+        }
+    }
+
+    // ---- 中ボスの段: 影の潮招きが二体混じる
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        beckoner = boss;
+        decoys.clear();
+        respawnAt.clear();
+        clearPrints(ctx);
+        for (int i = 0; i < SHADOWS; i++) {
+            Mob d = spawnShadow(ctx);
+            if (d != null) {
+                decoys.add(d);
+            }
+        }
+        ctx.say(Component.translatable("message.skyabyss.raid.TR7.shadows"));
+    }
+
+    @Override
+    public void bossTick(RaidCtx ctx, Mob boss) {
+        beckoner = boss;
+        long now = ctx.now();
+        tendDecoys(ctx, now);
+        markReal(ctx, boss, now);
+        if (now % 40 == 0) {
+            for (Mob d : decoys) {
+                if (d instanceof jp.revati.skyabyss.titan.tide.back.TideBeckoner b) {
+                    b.setDevFighters(ctx.standing());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        for (Mob d : new ArrayList<>(decoys)) {
+            if (!d.isRemoved()) {
+                pop(ctx, d);
+            }
+        }
+        decoys.clear();
+        respawnAt.clear();
+        clearPrints(ctx);
+    }
+
+    // 偽物: 傷を受けたら弾ける。ほかの理由で消えたものは数に入れなおす
+    private void tendDecoys(RaidCtx ctx, long now) {
+        ServerLevel level = ctx.level();
         for (int i = decoys.size() - 1; i >= 0; i--) {
             Mob d = decoys.get(i);
             if (d.isRemoved() || !d.isAlive()) {
@@ -217,11 +311,16 @@ public final class TideBroodRoom extends RaidRoom {
                 }
             }
         }
-        // 本物の印: 足もとの影 (4 tick おき)・足跡 (10 tick おき)
+    }
+
+    // 本物の印: 足もとの影 (4 tick おき)・足跡 (10 tick おき)
+    private void markReal(RaidCtx ctx, Mob mother, long now) {
+        ServerLevel level = ctx.level();
+        double ring = mother.getBbWidth() > 1.5 ? mother.getBbWidth() * 0.6 : 0.8;
         if (now % 4 == 0) {
             for (int k = 0; k < 8; k++) {
                 double a = Math.PI * 2 * k / 8;
-                level.sendParticles(TideRaid.dust(0.04f, 0.04f, 0.1f, 2.2f), mother.getX() + Math.cos(a) * 0.8, mother.getY() + 0.06, mother.getZ() + Math.sin(a) * 0.8, 1, 0.02, 0, 0.02, 0);
+                level.sendParticles(TideRaid.dust(0.04f, 0.04f, 0.1f, 2.2f), mother.getX() + Math.cos(a) * ring, mother.getY() + 0.06, mother.getZ() + Math.sin(a) * ring, 1, 0.02, 0, 0.02, 0);
             }
         }
         if (now % 10 == 0) {
@@ -244,22 +343,6 @@ public final class TideBroodRoom extends RaidRoom {
             if (level.getBlockState(at).is(PRINT.getBlock())) {
                 RaidKit.set(level, at, Blocks.AIR.defaultBlockState());
             }
-        }
-        // 手下: 時々、泡吹きを呼ぶ (数に上限)
-        if (now >= nextHatch) {
-            nextHatch = now + 260;
-            int helpers = 0;
-            for (Mob m : ctx.aliveMobs()) {
-                if (m != mother && !decoys.contains(m)) {
-                    helpers++;
-                }
-            }
-            if (helpers < 1 + ctx.scale()) {
-                TideRaid.spawn(ctx, TideMobSetup.BUBBLE_PUFFER.get(), spot(ctx, -HZ + 3, 4).above());
-            }
-        }
-        if (now % 40 == 0) {
-            TideRaid.purgeStrays(ctx, cell.inner());
         }
     }
 

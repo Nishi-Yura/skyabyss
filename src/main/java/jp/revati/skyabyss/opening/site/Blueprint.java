@@ -41,6 +41,8 @@ public final class Blueprint {
     public boolean anchor;
     public boolean water;
     public int ring = 3;
+    // 均す所と輪を丸く (見どころ。四角い台地と段々にしない)
+    public boolean round;
     public int minY;
     public int maxY;
     // 地面に沿って掘る・盛る列 (大きな足跡): {x, z, kind, a, b, c}。kind 0 = 掘る [深さ, 底のブロック (palette の番号), 雨水か]、
@@ -173,6 +175,7 @@ public final class Blueprint {
             if (meta.has("clearNear")) {
                 bp.clearNear = meta.get("clearNear").getAsInt();
             }
+            bp.round = meta.has("round") && meta.get("round").getAsBoolean();
             if (meta.has("ring")) {
                 bp.ring = meta.get("ring").getAsInt();
             }

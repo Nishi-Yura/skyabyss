@@ -38,7 +38,7 @@ public final class MobTuning {
     // 画面上のボスの帯を持つ敵 (中ボス・番人など) は雑魚ではない。帯 (ServerBossEvent) を持つ型かを型ごとに一度だけ調べる
     private static final java.util.Map<Class<?>, Boolean> BOSS = new java.util.concurrent.ConcurrentHashMap<>();
 
-    static boolean hasBossBar(Class<?> type) {
+    public static boolean hasBossBar(Class<?> type) {
         return BOSS.computeIfAbsent(type, t -> {
             for (Class<?> c = t; c != null && c != Object.class; c = c.getSuperclass()) {
                 for (java.lang.reflect.Field f : c.getDeclaredFields()) {

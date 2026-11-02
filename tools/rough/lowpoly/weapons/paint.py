@@ -44,6 +44,9 @@ PAL = dict(
     TRIM_R=A_([(46, 76, 128), (70, 110, 180), (110, 156, 222), (170, 204, 246), (224, 238, 255)]),
     TRIM_L=A_([(132, 90, 24), (192, 138, 36), (238, 188, 66), (255, 224, 126), (255, 246, 196)]),
     DARK=A_([(10, 10, 16), (20, 20, 28), (34, 34, 46)]),
+    # 深淵 (伝説の淵の欠片)
+    VOID=A_([(12, 8, 22), (24, 16, 40), (40, 26, 64), (60, 40, 94), (86, 60, 130)]),
+    STAR=A_([(150, 120, 230), (196, 170, 255), (234, 220, 255), (255, 255, 255)]),
 )
 GLOW = dict(whale="CYAN", tide="PINK", thunder="VEIN", ember="LAVA")
 
@@ -188,6 +191,12 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         dark_c = PAL["DARK"]
     put(m("cord"), pick(PAL["CORD"], shaded(PAL["CORD"], 0.6, 0.3, 0.06)))
     put(m("dark"), pick(PAL["DARK"], np.floor(1.2 + 1.2 * (0.5 + 0.5 * lit) + 0.8 * bay).astype(int)))
+    # 深淵の虚 (伝説に入る淵の欠片): 紫黒に、星のような光る粒
+    VO = PAL["VOID"]
+    put(m("void"), pick(VO, shaded(VO, 0.46, 0.30, 0.16) + (n_mid > 0.7)))
+    star = m("void") & (hash1(xx * 17 + yy * 23 + fi * 7, 11) < 0.045) & (D > 0.5)
+    put(star, ramp(PAL["STAR"], 0.4 + 0.5 * hash1(xx + yy * 5, 3)))
+    glow |= star
 
     # ---- 光る面 (gem) と巨神ごとの地の光
     gm = m("gem")

@@ -28,6 +28,12 @@ public final class TitanGearSets {
             TitanGearSet.piece(id("stone_whale_boots"), TitanLoot.ARMOR_CHANCE),
             TitanGearSet.piece(id("whalebone_greatsword"), TitanLoot.GREATSWORD_CHANCE),
             TitanGearSet.piece(id("resonance_charm"), TitanLoot.CHARM_CHANCE),
+            // 章の杖と鈴杖 (docs/design/43 の 5 段目)
+            TitanGearSet.piece(ChapterGear.WHALE_STAFF, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_BELL, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_HAMMER, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_BOW, ChapterGear.CHANCE),
+            TitanGearSet.piece(ChapterGear.WHALE_DAGGER, ChapterGear.CHANCE),
             TitanGearSet.exclusive(id("captain_pike"), TitanLoot.PIKE_CHANCE),
             TitanGearSet.exclusive(id("waterway_fang"), TitanLoot.FANG_CHANCE),
             TitanGearSet.exclusive(id("stone_whale_plating"), TitanLoot.PLATING_CHANCE)));
@@ -45,6 +51,12 @@ public final class TitanGearSets {
 
     public static List<TitanGearSet> all() {
         return Collections.unmodifiableList(SETS);
+    }
+
+    // 共鳴の炉で交換できる表 (専用の逸品があるもの)。雲海の神器とあいだの塔は交換の品を持たない (神器は物語と塔で手に入る。
+    // 2026-11-02 の声「雲海の神器、あいだの塔は交換で手に入らなくない？いらない要素では」)。サーバーと手元で同じ並び
+    public static synchronized List<TitanGearSet> exchangeable() {
+        return SETS.stream().filter(s -> !s.exclusives().isEmpty()).toList();
     }
 
     @Nullable

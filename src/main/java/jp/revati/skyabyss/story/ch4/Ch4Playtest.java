@@ -30,7 +30,7 @@ public final class Ch4Playtest {
         String draught = DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT);
         if ("brew".equals(draught)) {
             for (int i = 0; i < 2; i++) {
-                Quests.give(p, PotionContents.createItemStack(Items.POTION, Potions.FIRE_RESISTANCE));
+                Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.FIRE_WARD.get()));
             }
             Quests.poll(p, true);
             return "commands.skyabyss.playtest.now.ch4_draught";

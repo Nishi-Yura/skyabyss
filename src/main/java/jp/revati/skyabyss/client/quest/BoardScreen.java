@@ -175,7 +175,7 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
         int textW = w - 90;
         Component name = locked || def == null ? Component.translatable("gui.skyabyss.board.hidden") : Component.translatable(def.titleKey());
         String tag = def == null ? "" : Component.translatable("gui.skyabyss.quest.repeat." + def.repeat()).getString();
-        g.drawString(font, font.plainSubstrByWidth(name.getString(), textW - font.width(tag) - 8), left + 14, y + 4, faint ? SOFT : TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), left + 14, y + 4, textW - font.width(tag) - 8, faint ? SOFT : TEXT, false);
         g.drawString(font, tag, left + 14 + textW - font.width(tag), y + 4, def != null && def.repeat().equals("weekly") ? GOLD : TEAL, false);
         // 二行目: 何をするか (伏せたものは、何をすれば開くか)
         String second;

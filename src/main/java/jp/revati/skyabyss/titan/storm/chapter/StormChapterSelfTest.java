@@ -597,7 +597,7 @@ public final class StormChapterSelfTest {
             check(f, sites.size() == want, "every element was placed for the storm-chapter player (" + sites.size() + " of " + want + ")");
             for (ChapterSites.Site s : sites) {
                 check(f, s.built(), s.id() + "#" + s.index() + " was built");
-                // 三章の小要素は西の峰の跡地 (docs/design/33 の 3 章) の中心から、跡地のない世界では拠点から
+                // 三章の小要素は西の峰の跡地の中心から、跡地のない世界では拠点から
                 BlockPos anchor = ChapterSites.anchorFor(server, s.id(), siteBase);
                 check(f, anchor == null || Math.hypot(s.pos().getX() - anchor.getX(), s.pos().getZ() - anchor.getZ()) <= 150.5, s.id() + " is within 150 blocks of its anchor " + anchor);
             }
@@ -635,7 +635,8 @@ public final class StormChapterSelfTest {
                 }
                 if (e.siteId.equals(StormSites.PACK)) {
                     for (BlockPos q : BlockPos.betweenClosed(at.offset(-3, -2, -3), at.offset(3, 4, 3))) {
-                        if (level.getBlockEntity(q) instanceof BarrelBlockEntity b && b.getItem(2).is(net.minecraft.world.item.Items.LIGHTNING_ROD)) {
+                        // 荷の樽: 糧と避雷針 (松明は 0.9.22 から入れないので、避雷針の枠の位置は決めない)
+                        if (level.getBlockEntity(q) instanceof BarrelBlockEntity b && b.hasAnyOf(java.util.Set.of(net.minecraft.world.item.Items.LIGHTNING_ROD))) {
                             packs++;
                         }
                     }

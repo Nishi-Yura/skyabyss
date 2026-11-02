@@ -13,7 +13,7 @@ public final class Config {
             .defineInRange("horrorEventFrequency", 1.0, 0.0, 3.0);
 
     public static final ModConfigSpec.IntValue LOOP_LENGTH_DAYS = SERVER_BUILDER
-            .comment("1ループの長さ (ゲーム内日数)。月はこの日数で落ちる")
+            .comment("空の月の近さ (sky/ChapterSky の仮の計算) の周期 (ゲーム内日数)。日ごとに 1/日数 ずつ近づき、この日数でいちばん近くなって戻る。物語の月の動きがあるときはそちらが優先")
             .defineInRange("loopLengthDays", 7, 3, 30);
 
     // 序章「見る者」(prologue/WatcherEvents)
@@ -35,7 +35,21 @@ public final class Config {
             .comment("技の予告の粒 (旧来の点線) を、床の印とは別にサーバーからも送るか。false = 送らない (床の印と、クライアントの telegraphStyle の粒だけ)")
             .define("telegraphServerParticles", false);
 
+    // 管理者のコマンド (/skyabyss admin …。dev/play/PlayCommands) を使える権限の段 (2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」)
+    public static final ModConfigSpec.IntValue ADMIN_PERMISSION = SERVER_BUILDER
+            .comment("管理者のコマンド (/skyabyss admin …) を使える権限の段 (1〜4。2 = OP。シングルプレイでは「チートの許可」をオンにした世界)")
+            .defineInRange("adminPermissionLevel", 2, 1, 4);
+
     static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
+
+    // 管理者の権限の段 (設定を読む前は 2)
+    public static int adminLevel() {
+        try {
+            return ADMIN_PERMISSION.get();
+        } catch (IllegalStateException e) {
+            return 2;
+        }
+    }
 
     // --- クライアント設定: プレイヤーごとの見え方の好み ---
     private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
@@ -105,7 +119,7 @@ public final class Config {
             .comment("札の置き場。LEFT_FEED = 左の目的の帯の下に一行ずつ (既定・仮), BOTTOM_RIGHT = 右下に札を 2 枚まで, COMPACT = 右上に一行ずつの小さな列, TOP_RIGHT = 右上の札 (以前のまま)")
             .defineEnum("cardPlace", CardPlace.LEFT_FEED);
 
-    // 旅の地図 (M) の見た目 (client/map/TravelMapScreen。docs/design/33 の 4 章、ラフは docs/review/map_roughs/)
+    // 旅の地図 (M) の見た目 (client/map/TravelMapScreenラフは docs/review/map_roughs/)
     public enum MapStyle {
         SLATE,
         PARCHMENT,
@@ -123,10 +137,6 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue UI_SKIN_INSTALLED = CLIENT_BUILDER
             .comment("画面の絵柄のパック (A 暗い板) をはじめての起動で選んだか (一度だけ。外したあとは選び直さない。リソースパックの画面で A/B/C を替えられる)")
             .define("uiSkinInstalled", false);
-
-    public static final ModConfigSpec.BooleanValue FONT_INSTALLED = CLIENT_BUILDER
-            .comment("mod の字のパック (DotGothic16・Zen Antique) をはじめての起動で選んだか (一度だけ。外したあとは選び直さない。外すとバニラの字)")
-            .define("fontInstalled", false);
 
     public static final ModConfigSpec.EnumValue<NotifyMode> NOTIFY_MODE = CLIENT_BUILDER
             .comment("知らせの出し先。TOAST = 画面の演出 (字幕・札・帯) だけ, CHAT = チャットだけ (今までどおり), BOTH = 両方。流れた知らせは N の「知らせの記録」で読み返せる")
@@ -193,6 +203,14 @@ public final class Config {
             .comment("声が文字に合わせて鳴らない様式 (動機・環境音・息だけ) のときの、字幕が出る速さ (1 秒に出す文字数)。長い台詞は表示時間のうちに全文が出る速さまで上がる")
             .defineInRange("steadyRevealCps", 8.0, 2.0, 40.0);
 
+    public static final ModConfigSpec.BooleanValue SHOULDER_CAMERA = CLIENT_BUILDER
+            .comment("三人称をこの mod の肩越しにするか (F5 は 一人称 → 肩越し。カメラは片側の肩の後ろ、画面の真ん中に照準、体は照準の先を向く。F6 で左右を替える)。false = バニラの三人称")
+            .define("shoulderCamera", true);
+
+    public static final ModConfigSpec.DoubleValue SHOULDER_DISTANCE = CLIENT_BUILDER
+            .comment("肩越しのカメラの体からの遠さ (ブロック)。壁に当たると寄る。乗り物の上では少し足す")
+            .defineInRange("shoulderDistance", 4.0, 1.5, 6.0);
+
     public static final ModConfigSpec.BooleanValue CINEMATIC_SCENES = CLIENT_BUILDER
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);
@@ -204,6 +222,10 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue ENEMY_HEALTH_BARS = CLIENT_BUILDER
             .comment("敵の頭の上に体力の帯を出すか (雑魚も。画面上の大きな帯が出るボスは除く)")
             .define("enemyHealthBars", true);
+
+    public static final ModConfigSpec.BooleanValue DAMAGE_NUMBERS = CLIENT_BUILDER
+            .comment("与えた傷の数字を、当てた敵の上に浮かべるか")
+            .define("damageNumbers", true);
 
     public static final ModConfigSpec.BooleanValue GRAVE_MARKER = CLIENT_BUILDER
             .comment("自分の墓の標 (画面の中の札・画面の端の矢印と距離。8 ブロック以内で消える) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")

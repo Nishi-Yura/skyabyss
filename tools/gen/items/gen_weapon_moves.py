@@ -608,6 +608,74 @@ W["abyss_pulse_dagger"] = weapon(
     inspect("短剣の鼓動を聞く", 0.22, -0.1, -18.0, "RZ", 1.0, -0.9, side=-0.05),
 )
 
+# 島の祠の始めの武器 (docs/design/43 の 4 節)。杖と鈴杖は深淵の鈴杖、短剣は水路の牙の動きを借りる (名前の一行だけ替える)
+import copy as _copy  # noqa: E402
+for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の杖: 掲げて溜め、地を突いて星の石を光らせる"),
+                            ("shrine_bell_staff", "abyss_bell_staff", "祠の鈴杖: 掲げて溜め、地を突いて鈴を鳴らす"),
+                            ("shrine_dagger", "waterway_fang", "宿り木の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("whale_staff", "abyss_bell_staff", "鯨骨の星杖: 掲げて溜め、地を突いて石を光らせる"),
+                            ("whale_bell_staff", "abyss_bell_staff", "鯨歌いの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("tide_staff", "abyss_bell_staff", "潮殻の真珠杖: 掲げて溜め、地を突いて真珠を光らせる"),
+                            ("tide_bell_staff", "abyss_bell_staff", "潮鳴りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("storm_staff", "abyss_bell_staff", "雷羽の杖: 掲げて溜め、地を突いて雷を呼ぶ"),
+                            ("storm_bell_staff", "abyss_bell_staff", "雷鳴りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("ember_staff", "abyss_bell_staff", "熾火の杖: 掲げて溜め、地を突いて熾火を散らす"),
+                            ("ember_censer", "abyss_bell_staff", "灰の香炉: 掲げて溜め、地を突いて灰を撒く"),
+                            ("shrine_sword", "abyss_lamp_sword", "祠の剣: 斬り下ろし、返し、突く"),
+                            ("shrine_hammer", "smith_hammer", "祠の鎚: 振りかぶって打ち下ろす"),
+                            ("whale_hammer", "smith_hammer", "鯨骨の鎚: 振りかぶって打ち下ろす"),
+                            ("tide_hammer", "smith_hammer", "潮殻の鎚: 振りかぶって打ち下ろす"),
+                            ("storm_hammer", "smith_hammer", "雷の鎚: 振りかぶって打ち下ろす"),
+                            ("ember_greatsword", "whalebone_greatsword", "熾火の大剣: 大きく薙ぎ、振り下ろす"),
+                            ("ember_dagger", "waterway_fang", "熾の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_whale_hammer", "smith_hammer", "abyss_whale_hammer: 振りかぶって打ち下ろす"),
+                            ("abyss_whale_staff", "abyss_bell_staff", "abyss_whale_staff: 掲げて溜め、地を突く"),
+                            ("abyss_whale_fang", "waterway_fang", "abyss_whale_fang: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_whale_bell_staff", "abyss_bell_staff", "abyss_whale_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("abyss_tide_sword", "whalebone_greatsword", "abyss_tide_sword: 大きく薙ぎ、振り下ろす"),
+                            ("abyss_tide_hammer", "smith_hammer", "abyss_tide_hammer: 振りかぶって打ち下ろす"),
+                            ("abyss_tide_staff", "abyss_bell_staff", "abyss_tide_staff: 掲げて溜め、地を突く"),
+                            ("abyss_tide_dagger", "waterway_fang", "abyss_tide_dagger: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_storm_sword", "whalebone_greatsword", "abyss_storm_sword: 大きく薙ぎ、振り下ろす"),
+                            ("abyss_storm_hammer", "smith_hammer", "abyss_storm_hammer: 振りかぶって打ち下ろす"),
+                            ("abyss_storm_staff", "abyss_bell_staff", "abyss_storm_staff: 掲げて溜め、地を突く"),
+                            ("abyss_storm_dagger", "waterway_fang", "abyss_storm_dagger: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_storm_bell_staff", "abyss_bell_staff", "abyss_storm_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("abyss_ember_sword", "whalebone_greatsword", "abyss_ember_sword: 大きく薙ぎ、振り下ろす"),
+                            ("abyss_ember_staff", "abyss_bell_staff", "abyss_ember_staff: 掲げて溜め、地を突く"),
+                            ("abyss_ember_dagger", "waterway_fang", "abyss_ember_dagger: 右上から左下へ、返して X、突き抜ける"),
+                            ("abyss_ember_bell_staff", "abyss_bell_staff", "abyss_ember_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("abyss_lamp_staff", "abyss_bell_staff", "abyss_lamp_staff: 掲げて溜め、地を突く"),
+                            ("abyss_toll_bell_staff", "abyss_bell_staff", "abyss_toll_bell_staff: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("moon_scale_hammer", "smith_hammer", "月秤の鎚: 振りかぶって打ち下ろす"),
+                            ("moon_tide_staff", "abyss_bell_staff", "満ち引きの杖: 掲げて溜め、地を突く"),
+                            ("moon_crescent_dagger", "waterway_fang", "欠け月の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("moon_starlight_bell_staff", "abyss_bell_staff", "星灯りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("moon_waning_blade", "whalebone_greatsword", "残月の太刀: 大きく薙ぎ、振り下ろす"),
+                            ("moon_light_sword", "whalebone_greatsword", "月光の長剣: 大きく薙ぎ、振り下ろす"),
+                            ("moon_full_hammer", "smith_hammer", "望月の大鎚: 振りかぶって打ち下ろす"),
+                            ("moon_new_staff", "abyss_bell_staff", "朔の杖: 掲げて溜め、地を突く"),
+                            ("moon_umbra_dagger", "waterway_fang", "朔影の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("moon_halo_bell_staff", "abyss_bell_staff", "月暈の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("divine_sky_sword", "whalebone_greatsword", "天穹の剣: 大きく薙ぎ、振り下ろす"),
+                            ("divine_bell_hammer", "smith_hammer", "七つ鐘の大鎚: 振りかぶって打ち下ろす"),
+                            ("divine_dawn_staff", "abyss_bell_staff", "暁の灯杖: 掲げて溜め、地を突く"),
+                            ("divine_rewind_dagger", "waterway_fang", "巻き戻りの短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("divine_promise_bell_staff", "abyss_bell_staff", "約束の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("divine_warden_blade", "whalebone_greatsword", "羽の番人の大剣: 大きく薙ぎ、振り下ろす"),
+                            ("divine_ash_hammer", "smith_hammer", "灰打ちの大鎚: 振りかぶって打ち下ろす"),
+                            ("divine_eyelid_staff", "abyss_bell_staff", "雲の瞼の杖: 掲げて溜め、地を突く"),
+                            ("divine_moth_dagger", "waterway_fang", "灯蛾の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("divine_keeper_bell_staff", "abyss_bell_staff", "鐘守の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("tower_balance_sword", "whalebone_greatsword", "あいだの大剣: 大きく薙ぎ、振り下ろす"),
+                            ("tower_pull_hammer", "smith_hammer", "引き合いの鎚: 振りかぶって打ち下ろす"),
+                            ("tower_moon_staff", "abyss_bell_staff", "落ちる月の杖: 掲げて溜め、地を突く"),
+                            ("tower_sigil_dagger", "waterway_fang", "追う印の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("tower_clap_bell_staff", "abyss_bell_staff", "合掌の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす")):
+    W[_item] = _copy.deepcopy(W[_src])
+    W[_item]["item"] = _item
+    W[_item]["label"] = _label
+
 # 盾・弓は strike = 0 (サーバーは何も預けない)。盾は盾殴りの hit の key だけ持つ
 
 
@@ -723,6 +791,61 @@ def polish():
 
 def main():
     polish()
+    for _item, _src in (("shrine_staff", "abyss_bell_staff"), ("shrine_bell_staff", "abyss_bell_staff"), ("shrine_dagger", "waterway_fang"),
+                        ("whale_staff", "abyss_bell_staff"), ("whale_bell_staff", "abyss_bell_staff"), ("tide_staff", "abyss_bell_staff"),
+                        ("tide_bell_staff", "abyss_bell_staff"), ("storm_staff", "abyss_bell_staff"), ("storm_bell_staff", "abyss_bell_staff"),
+                        ("ember_staff", "abyss_bell_staff"), ("ember_censer", "abyss_bell_staff"),
+                        ("shrine_sword", "abyss_lamp_sword"), ("shrine_hammer", "smith_hammer"), ("whale_hammer", "smith_hammer"),
+                        ("tide_hammer", "smith_hammer"), ("storm_hammer", "smith_hammer"), ("ember_greatsword", "whalebone_greatsword"),
+                        ("ember_dagger", "waterway_fang"),
+                        ("abyss_whale_hammer", "smith_hammer"),
+                        ("abyss_whale_staff", "abyss_bell_staff"),
+                        ("abyss_whale_fang", "waterway_fang"),
+                        ("abyss_whale_bell_staff", "abyss_bell_staff"),
+                        ("abyss_tide_sword", "whalebone_greatsword"),
+                        ("abyss_tide_hammer", "smith_hammer"),
+                        ("abyss_tide_staff", "abyss_bell_staff"),
+                        ("abyss_tide_dagger", "waterway_fang"),
+                        ("abyss_storm_sword", "whalebone_greatsword"),
+                        ("abyss_storm_hammer", "smith_hammer"),
+                        ("abyss_storm_staff", "abyss_bell_staff"),
+                        ("abyss_storm_dagger", "waterway_fang"),
+                        ("abyss_storm_bell_staff", "abyss_bell_staff"),
+                        ("abyss_ember_sword", "whalebone_greatsword"),
+                        ("abyss_ember_staff", "abyss_bell_staff"),
+                        ("abyss_ember_dagger", "waterway_fang"),
+                        ("abyss_ember_bell_staff", "abyss_bell_staff"),
+                        ("abyss_lamp_staff", "abyss_bell_staff"),
+                        ("abyss_toll_bell_staff", "abyss_bell_staff"),
+                        ("moon_scale_hammer", "smith_hammer"), ("moon_tide_staff", "abyss_bell_staff"), ("moon_crescent_dagger", "waterway_fang"),
+                        ("moon_starlight_bell_staff", "abyss_bell_staff"), ("moon_waning_blade", "whalebone_greatsword"),
+                        ("moon_light_sword", "whalebone_greatsword"), ("moon_full_hammer", "smith_hammer"), ("moon_new_staff", "abyss_bell_staff"),
+                        ("moon_umbra_dagger", "waterway_fang"), ("moon_halo_bell_staff", "abyss_bell_staff"),
+                        ("divine_sky_sword", "whalebone_greatsword"), ("divine_bell_hammer", "smith_hammer"), ("divine_dawn_staff", "abyss_bell_staff"),
+                        ("divine_rewind_dagger", "waterway_fang"), ("divine_promise_bell_staff", "abyss_bell_staff"),
+                        ("divine_warden_blade", "whalebone_greatsword"),
+                        ("divine_ash_hammer", "smith_hammer"),
+                        ("divine_eyelid_staff", "abyss_bell_staff"),
+                        ("divine_moth_dagger", "waterway_fang"),
+                        ("divine_keeper_bell_staff", "abyss_bell_staff"),
+                        ("tower_balance_sword", "whalebone_greatsword"), ("tower_pull_hammer", "smith_hammer"), ("tower_moon_staff", "abyss_bell_staff"),
+                        ("tower_sigil_dagger", "waterway_fang"), ("tower_clap_bell_staff", "abyss_bell_staff")):
+        label = W[_item]["label"]
+        W[_item] = _copy.deepcopy(W[_src])
+        W[_item]["item"] = _item
+        W[_item]["label"] = label
+    # 野の装備 (docs/design/51。item/wild)。動きは同じ型の武器を写す (弓は動きを持たない)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "wild_gear"))
+    import spec as _wild
+    moves = {"sword": "whalebone_greatsword", "greatsword": "whalebone_greatsword", "spear": "captain_pike", "glaive": "warden_glaive",
+             "hammer": "smith_hammer", "maul": "smith_hammer", "mace": "smith_hammer", "axe": "ember_war_axe", "staff": "abyss_bell_staff",
+             "bell": "abyss_bell_staff", "totem": "abyss_bell_staff", "censer": "abyss_bell_staff", "dagger": "waterway_fang", "fang": "waterway_fang",
+             "claw": "raiju_claw"}
+    for _w in _wild.WEAPONS:
+        if _w["kind"] in moves:
+            W[_w["id"]] = _copy.deepcopy(W[moves[_w["kind"]]])
+            W[_w["id"]]["item"] = _w["id"]
+            W[_w["id"]]["label"] = _w["ja"] + ": " + W[moves[_w["kind"]]]["label"].split(": ", 1)[-1]
     os.makedirs(OUT, exist_ok=True)
     for item, d in W.items():
         with open(os.path.join(OUT, item + ".json"), "w", encoding="utf-8", newline="\n") as f:

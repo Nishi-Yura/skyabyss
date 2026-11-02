@@ -147,10 +147,14 @@ public final class RaidCtx {
     }
 
     // 自分で作った敵を部屋の敵として登録する (リセット・片付けで消える)。null はそのまま返す
+    // 同じ部屋で全滅した数 (RaidRun.wipe が入れる。RaidPace の救い)
+    public int assistWipes;
+
     @Nullable
     public Mob adopt(@Nullable Mob mob) {
         if (mob != null) {
             mobs.add(mob);
+            RaidPace.assist(mob, assistWipes);
         }
         return mob;
     }

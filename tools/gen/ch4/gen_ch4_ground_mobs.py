@@ -11,7 +11,7 @@
   geo/entity/<id>.geo.json + textures/entity/<id>.png   LowPoly.enabled = false のときの箱の代用
   animations/entity/<id>.animation.json                 熾り蟲・灰ひきずりはこのファイルで作る。古い灰の番人は灰の番人のアニメに「亀裂」「熱の波」を足す。屑は灰の番人のアニメをそのまま使う
   textures/item/<品>.png・models/item/<品>.json・models/item/<id>_spawn_egg.json
-  assets/skyabyss_ch4/sounds.json                        音の出来事 (skyabyss_ch4 の名前空間。既存の音の別名。字幕の文は tools/gen/ch4/gen_ch4_ground.py)
+  assets/skyabyss_ch4/sounds.json                        音の出来事 (skyabyss_ch4 の名前空間。既存の音の別名。字幕の文は lang)
   tools/sources/<品>/   選ばなかった案の絵
 
 案は CHOICE で選ぶ (2026-10-22 のユーザーの選定: 熾り蟲 A・灰の屑 C・灰ひきずり A・古い灰の番人 A、小物は煤鉄 A・灰麻 A・灰の護り糸 B・煤の砥石 C・灰の冷やし水 A)。

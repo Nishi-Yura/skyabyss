@@ -459,7 +459,7 @@ public final class StorySelfTest {
         next(p);
         check(node(p).equals("ms_key4") && stage(p, "main_key").equals("show"), "main_key should wait for Isana's answer: " + node(p) + " / " + stage(p, "main_key"), f);
         pick(p, ST, "ok", f);
-        // イサナは一度だけ鍵の話をする。答え (ms_c_key3) でメイン「天の鍵」が終わる (34 の 4.5: 二人の別々の答え)
+        // イサナは一度だけ鍵の話をする。答え (ms_c_key3) でメイン「天の鍵」が終わる 二人の別々の答え)
         talk(p, wc, "ms_c_key", f);
         next(p);
         next(p);
@@ -502,33 +502,28 @@ public final class StorySelfTest {
 
         // 四章の語り部の話 (ch4/fragments) は、話しかけると先に始まる入口。ここは頼みごとの流れを見るので、あらかじめ済ませておく (13 の 17.5)
         jp.revati.skyabyss.quest.Quests.forget(p, "ch4/fragments");
-        // 五章の入口 (main_abyss。天の鍵のあと) の語り部の噂も、話しかけると先に出る。噂の段だけ越えておく (34 の 4.7。
+        // 五章の入口 (main_abyss。天の鍵のあと) の語り部の噂も、話しかけると先に出る。噂の段だけ越えておく (
         // 外すと条件を満たしたまま始まり直すので、段を進める)
         Quests.start(p, "main_abyss");
         if ("rumor".equals(stage(p, "main_abyss"))) {
             Quests.forceStage(p, "main_abyss");
         }
-        // 冷めない炭: ネザーへ行き、マグマクリーム 4 つ → 語り部
+        // 冷めない炭: マグマクリーム 4 つ (道具屋で買える。ネザーへは行かない。00 の 278) → 語り部
         DialogueService.open(p, st);
         pick(p, ST, "errands", f);
         pick(p, ST, "coal", f);
         next(p);
         pick(p, ST, "accept", f);
         check(stage(p, "sub_warm_coal").equals("fetch"), "sub_warm_coal did not start", f);
-        p.getInventory().add(new ItemStack(Items.MAGMA_CREAM, 4));
         Quests.poll(p, true);
-        check(stage(p, "sub_warm_coal").equals("fetch"), "the coal quest passed without the Nether", f);
-        ServerLevel nether = server.getLevel(Level.NETHER);
-        if (nether != null) {
-            p.setServerLevel(nether);
-            Quests.poll(p, true);
-            p.setServerLevel(level);
-        }
-        check(stage(p, "sub_warm_coal").equals("tell"), "visiting the Nether with magma cream did not advance: " + stage(p, "sub_warm_coal"), f);
+        check(stage(p, "sub_warm_coal").equals("fetch"), "the coal quest passed without the magma cream", f);
+        p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.EMBER_DROP.get(), 4));
+        Quests.poll(p, true);
+        check(stage(p, "sub_warm_coal").equals("tell"), "four magma creams did not advance: " + stage(p, "sub_warm_coal"), f);
         talk(p, st, "ms_coal_done", f);
         next(p);
-        check(stage(p, "sub_warm_coal").equals("done") && p.getInventory().countItem(Items.MAGMA_CREAM) == 0
-                && p.getInventory().countItem(Items.CHARCOAL) == 1, "sub_warm_coal did not take the cream and give the coal", f);
+        check(stage(p, "sub_warm_coal").equals("done") && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.EMBER_DROP.get()) == 0
+                && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.CHARCOAL_LUMP.get()) == 1, "sub_warm_coal did not take the cream and give the coal", f);
         DialogueService.close(p);
         // 段階で開く: 板の日替わり・週替わりは段階 2 から
         check(QuestManager.quest("daily_tide_rounds").minStage() == 2 && QuestManager.quest("weekly_tide_heart").minStage() == 2,

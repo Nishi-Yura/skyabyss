@@ -83,7 +83,8 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final int BW = 304;
     static final int BH = 192;
     static final int TAB_W = 64;
-    static final int TAB_STEP = 68;
+    // つまみ 5 つ (大事な品・巨神・成長・縁と頁・記し) が書の幅に収まる間隔 (絵は 64 幅、少し重ねる)
+    static final int TAB_STEP = 54;
     static final int TAB_X0 = 14;
     static final int LX = 18;
     static final int LW = 128;
@@ -640,6 +641,8 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             Component label = Component.translatable(switch (row.action()) {
                 case RecordSnapshot.ACTION_CLAIM -> "skyabyss_record.gui.claim";
                 case RecordSnapshot.ACTION_RECALL_FRAGMENT, RecordSnapshot.ACTION_RECALL_KEY -> "skyabyss_record.gui.recall";
+                case RecordSnapshot.ACTION_REPLAY -> "skyabyss_record.gui.replay";
+                case RecordSnapshot.ACTION_RECORDS -> "skyabyss_record.gui.open";
                 default -> "skyabyss_record.gui.choose";
             });
             g.drawString(font, label, bx + (80 - font.width(label)) / 2, by + 3, TITLE, false);
@@ -726,6 +729,13 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             PacketDistributor.sendToServer(new RecordNetwork.Claim());
         } else if (row.action() == RecordSnapshot.ACTION_RECALL_FRAGMENT || row.action() == RecordSnapshot.ACTION_RECALL_KEY) {
             PacketDistributor.sendToServer(new RecordNetwork.Recall(row.action() == RecordSnapshot.ACTION_RECALL_KEY));
+        } else if (row.action() == RecordSnapshot.ACTION_REPLAY && row.key().startsWith(RecordSnapshot.REEL_ROW)) {
+            // 語りの画面はサーバーが開かせる (控え帳は閉じる)
+            PacketDistributor.sendToServer(new RecordNetwork.Replay(row.key().substring(RecordSnapshot.REEL_ROW.length())));
+            onClose();
+        } else if (row.action() == RecordSnapshot.ACTION_RECORDS) {
+            // 試練の記録の画面はサーバーが開かせる
+            PacketDistributor.sendToServer(new RecordNetwork.OpenTrials());
         } else if (row.action() == RecordSnapshot.ACTION_CHOOSE && minecraft.player != null) {
             // 遺物の選択画面 (サーバーが開かせる。docs/design/30)
             jp.revati.skyabyss.client.reward.HeartRewardClient.request();

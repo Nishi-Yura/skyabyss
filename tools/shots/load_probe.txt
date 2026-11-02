@@ -1,0 +1,79 @@
+# 重い場所の見回り: 都・野・ダンジョンの主の間・あいだの塔の戦いで、サーバーの 1 tick の時間を数える (LoadProbeDev)。
+# 結果は run/shots/load_probe/logs/latest.log の「LOAD <名前>:」の行。空き家 3 軒 (CapitalSeal) の戸も撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/load_probe.txt -PshotsName=load_probe
+world load_probe continent
+size 1280 720
+timeout 3600
+render 12
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamerule doDaylightCycle false
+cmd time set 6000
+cmd weather clear
+cmd skyabyss dev opening build
+wait 200
+hud off
+chat clear
+
+# ---- 都 (広場)
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 4 true
+cmd effect give @s minecraft:regeneration infinite 4 true
+cmd skyabyss dev opening at shelter 0 0 0 4 180 5
+waitchunks 600
+wait 400
+cmd skyabyss cinematic stop
+close
+shot capital_plaza
+cmd skyabyss dev load capital 20
+wait 440
+
+# ---- 空き家 3 軒の戸 (壁で塞いで碑なし)
+cmd gamemode spectator
+cmd skyabyss dev opening at shelter 0 87 1 0 0 8
+waitchunks 300
+wait 60
+shot sealed_stable
+cmd skyabyss dev opening at shelter 0 88 1 63 0 8
+waitchunks 300
+wait 60
+shot sealed_mapmaker
+cmd skyabyss dev opening at shelter 0 -48 6 -77 180 8
+waitchunks 300
+wait 60
+shot sealed_hall
+
+# ---- 野 (鯨骨の坑の入口のあたり。土地の敵が湧く)
+cmd gamemode survival
+cmd skyabyss dungeon mouth bone_pit
+waitchunks 600
+wait 600
+shot field
+cmd skyabyss dev load field 20
+wait 440
+
+# ---- ダンジョンの主の間 (骨掘りの大百足)
+cmd skyabyss dungeon enter bone_pit
+wait 60
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto boss
+wait 200
+shot dungeon_boss
+cmd skyabyss dev load dungeon_boss 20
+wait 440
+cmd skyabyss dungeon leave
+wait 100
+
+# ---- あいだの塔の戦い
+cmd skyabyss tower start
+wait 60
+waitchunks 300
+wait 500
+shot tower
+cmd skyabyss dev load tower 20
+wait 440
+cmd gamemode creative
+wait 20

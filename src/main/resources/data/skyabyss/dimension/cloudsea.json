@@ -1,0 +1,17 @@
+{
+  "type": "skyabyss:cloudsea",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "skyabyss:cloudsea",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:air", "height": 99},
+        {"block": "skyabyss:cloud", "height": 4}
+      ],
+      "structure_overrides": []
+    }
+  }
+}

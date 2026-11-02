@@ -8,55 +8,16 @@ public final class SkillRules {
     // 枠の数: はじめは 4、2 つ目の天職を迎えると 5 (記録の配列は最大の 5)
     public static final int BASE_SLOTS = 4;
     public static final int SLOTS = 5;
-    // 天職の層 (docs/design/27 の C 案)。false なら、5 つの木が最初から全部開いている (A 案)
-    public static boolean CALLINGS = true;
-    // 天性 (一つ目の天職だけ。docs/design/27 の 9.1)
-    public static final double TRAIT_ROCK_TOUGHNESS = 0.5;
-    public static final double TRAIT_ROCK_KNOCKBACK = 0.10;
-    public static final double TRAIT_WIND_MOVE = 0.03;
-    public static final double TRAIT_TIDE_MANA = 10;
-    public static final double TRAIT_TIDE_RANGE = 1;
-    public static final double TRAIT_ASH_ENHANCE = 0.10;
-    public static final double TRAIT_ASH_FIRE = 0.10;
-    public static final double TRAIT_BONE_DAMAGE = 0.05;
-    public static final double TRAIT_BONE_KEEP = 0.25;
     // 1 秒 = 20 tick
     public static final int SECOND = 20;
-    // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案)
-    // 天職の割引: 天職の木の段 3 つぶんを 1 点ずつ安くする (A01)
-    public static final int CALLING_DISCOUNT_MAX = 3;
-    // 木のセット (A04): 同じ木に点を 2・4・6 使うたびの小さな追加
-    public static final int[] SET_AT = {2, 4, 6};
-    // タグ (A03): 数えるのは 10 まで。1 つにつき、そのタグの技の力 +1%。4 と 7 で小さな足し (SkillBuild.tagThreshold)
-    public static final int TAG_COUNT_CAP = 10;
-    public static final double TAG_POWER_PER = 0.01;
-    public static final int TAG_STEP1 = 4;
-    public static final int TAG_STEP2 = 7;
-    // 条件の特性 (A15): そのタグが 3 つ以上あるとき。5 以上で大きいほう
-    public static final int COND_MIN_TAGS = 3;
-    public static final int COND_BIG_TAGS = 5;
+    // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案 → 48 で木の節へ)
+    // 木のセット・タグの数の足し・条件の特性は 48 で消した (型の点と閾値の節がその役)。よけた印は熟練の数えに残る
     public static final int COND_DODGE_TICKS = 3 * SECOND;
     public static final int COND_PERFECT_TICKS = 4 * SECOND;
     // 無傷のあとにこの間 (5 秒) 傷を受けていなければ、予告をよけたのは「完璧」
     public static final int PERFECT_CLEAN_TICKS = 5 * SECOND;
-    // 「低 HP」は 3❤ (6 点) 以下。回復や無敵は付けない
+    // 「低 HP」は 3❤ (6 点) 以下 (木の節 low_hp_armor の条件)。回復や無敵は付けない
     public static final float COND_LOW_HP = 6f;
-    public static final double COND_FULL_MANA = 0.98;
-    // 構え (A11): 切り替えの待ち 3 秒
-    public static final int STANCE_SWAP_TICKS = 3 * SECOND;
-    public static final double STANCE_GUARD_ARMOR = 3;
-    public static final double STANCE_GUARD_KNOCKBACK = 0.15;
-    public static final double STANCE_GUARD_DAMAGE = -0.10;
-    public static final double STANCE_SWIFT_MOVE = 0.08;
-    public static final double STANCE_SWIFT_COOLDOWN = -0.08;
-    public static final double STANCE_SWIFT_ARMOR = -2;
-    public static final double STANCE_SONG_REGEN = 0.35;
-    public static final double STANCE_SONG_SUPPORT = 0.15;
-    public static final double STANCE_SONG_DAMAGE = -0.10;
-    // 連鎖 (A10): 直前の枠の技から 2 秒以内に続けると、あとの技の力 +15%。立てられるのは 3 つ
-    public static final int CHAIN_MAX = 3;
-    public static final int CHAIN_WINDOW = 2 * SECOND;
-    public static final double CHAIN_POWER = 0.15;
     // 熟練 (A13): 使う +1、当てる +1、予告をよけた直後 (4 秒) に当てる +3。1〜5 の境
     public static final int[] MASTERY_AT = {15, 45, 100, 180, 300};
     public static final int MASTERY_RUNE_LEVEL = 3;
@@ -104,9 +65,9 @@ public final class SkillRules {
 
     // ---------------------------------------------------------------- 技の点
     // Lv 10 までは (L + 1) / 2 (Lv 1 で 1、Lv 10 で 5)、そのあとは 1 レベルごとに 1。Lv 50 で 45
+    // 1 レベルにつき 1 点 (Lv 1 で 1、Lv 50 で 50。docs/design/48 の 2.1)。職ごとに別に数える
     public static int pointsForLevel(int level) {
-        int l = Mth.clamp(level, 1, 50);
-        return l <= 10 ? (l + 1) / 2 : l - 5;
+        return Mth.clamp(level, 1, 50);
     }
 
     // ---------------------------------------------------------------- マナ
@@ -133,7 +94,9 @@ public final class SkillRules {
     // 刻印の付け替え (別の刻印に変える) の費用。初回は無料
     public static final int RUNE_SWAP_COST = 1;
     // 型の保存の数 (A05 で 2 から 4)
-    public static final int LOADOUTS = 4;
+    // 型の保存は職ごとに 2 つ (docs/design/43)。箱は職の順に 2 つずつ並ぶ
+    public static final int LOADOUTS_PER_JOB = 2;
+    public static final int LOADOUTS = LOADOUTS_PER_JOB * 6;
     // 刻印の付け替え・型の切り替えは、この間 (30 秒) 傷を受けも与えもしていないときだけ
     public static final int QUIET_TICKS = 30 * SECOND;
 
@@ -143,15 +106,25 @@ public final class SkillRules {
     }
 
     // レベルと「目利き」を見た全振り直しの費用 (結晶の数)。Lv 15 になるまでと、目利きがあるときは 0
-    public static int respecCost(int respecsSoFar, int level, boolean appraiser) {
-        if (level < FREE_RESPEC_LEVEL || appraiser) {
+    public static int respecCost(int respecsSoFar, int level) {
+        if (level < FREE_RESPEC_LEVEL) {
             return 0;
         }
         return RESPEC_COST;
     }
 
     // ---------------------------------------------------------------- 消費マナとクールダウン
+    // 技の待ちとマナ (docs/design/48 の 2.5。2026-11-02 の 00 の 343 A): 待ちを今の 6〜7 割に縮め、そのぶんマナを少し重くする。
+    // 主の大技のあとの隙 (3 秒) に技を重ねられ、打ち手の泉・マナ吸収で回す遊びにする
+    public static final double COOLDOWN_SCALE = 0.65;
+    public static final double MANA_SCALE = 1.15;
+
     public static int manaCost(Skill skill, int rank) {
+        int base = baseManaCost(skill, rank);
+        return base <= 0 ? base : Math.max(1, (int) Math.round(base * MANA_SCALE));
+    }
+
+    static int baseManaCost(Skill skill, int rank) {
         return switch (skill) {
             case TITAN_CLEAVE -> 10;
             case ROCK_CALL -> 12;
@@ -168,21 +141,42 @@ public final class SkillRules {
             case CLOUD_PIERCE -> 10;
             case BONE_TRAP -> 6;
             case SKY_RAIN -> 16;
-            case DUST_CHARGE -> 12;
-            case STEAM_BELL -> 14;
-            case CINDER_VOLLEY -> 12;
             case DEEP_PULL -> 12;
             case DEEP_ECHO -> 14;
             case DEEP_MAW -> 18;
             case ECHO_STRIKE -> 10;
             case GRAVE_BELL -> 12;
             case FINAL_LIGHT -> 18;
+            // 職の新しい技 (docs/design/43。星読みの木と、鍛冶師・暗殺者・呪術師の 4 つ目)
+            case THUNDER_BOLT -> 8;
+            case EMBER_ORB -> 14;
+            case FROST_TIDE -> 12;
+            case BLINK -> 10;
+            case FORGE_STOMP -> 12;
+            case MIST_VEIL -> 10;
+            case CURSE_MARK -> 8;
+            case LAMP_CHARM -> 14;
+            case SHIELD_RUSH -> 6;
+            case ARCHER_LEAP -> 4;
+            // 木 v2 で足した技 (docs/design/48)
+            case SHIELD_BASH -> 8;
+            case BONE_SWING -> 14;
+            case SPIN_CUT -> 10;
+            case TWIN_FANG -> 7;
+            case SPARK_BURST -> 10;
+            case SNARE_SHOT -> 8;
+            case STARDUST -> 12;
             default -> 0;
         };
     }
 
     // tick。段が上がると短くなる技もある (刻印の分は別。cooldownTicks(skill, rank, rune))
     public static int cooldownTicks(Skill skill, int rank) {
+        int base = baseCooldownTicks(skill, rank);
+        return base <= 0 ? base : Math.max(SkillRules.GLOBAL_COOLDOWN, (int) Math.round(base * COOLDOWN_SCALE));
+    }
+
+    static int baseCooldownTicks(Skill skill, int rank) {
         int r = Math.max(1, rank);
         return switch (skill) {
             case TITAN_CLEAVE -> 8 * SECOND;
@@ -200,16 +194,29 @@ public final class SkillRules {
             case CLOUD_PIERCE -> 6 * SECOND;
             case BONE_TRAP -> 9 * SECOND;
             case SKY_RAIN -> (r >= 2 ? 11 : 15) * SECOND;
-            case SIGNAL -> 6 * SECOND;
-            case DUST_CHARGE -> 10 * SECOND;
-            case STEAM_BELL -> 12 * SECOND;
-            case CINDER_VOLLEY -> 11 * SECOND;
             case DEEP_PULL -> 14 * SECOND;
             case DEEP_ECHO -> 20 * SECOND;
             case DEEP_MAW -> (r >= 2 ? 14 : 17) * SECOND;
             case ECHO_STRIKE -> 12 * SECOND;
             case GRAVE_BELL -> 14 * SECOND;
             case FINAL_LIGHT -> (r >= 2 ? 18 : 22) * SECOND;
+            case THUNDER_BOLT -> 50;
+            case EMBER_ORB -> 8 * SECOND;
+            case FROST_TIDE -> 10 * SECOND;
+            case BLINK -> (r >= 2 ? 7 : 9) * SECOND;
+            case FORGE_STOMP -> 10 * SECOND;
+            case MIST_VEIL -> 14 * SECOND;
+            case CURSE_MARK -> 9 * SECOND;
+            case LAMP_CHARM -> 18 * SECOND;
+            case SHIELD_RUSH -> (r >= 2 ? 4 : 6) * SECOND;
+            case ARCHER_LEAP -> (r >= 2 ? 3 : 5) * SECOND;
+            case SHIELD_BASH -> (r >= 2 ? 6 : 7) * SECOND;
+            case BONE_SWING -> 12 * SECOND;
+            case SPIN_CUT -> (r >= 2 ? 8 : 9) * SECOND;
+            case TWIN_FANG -> (r >= 2 ? 5 : 6) * SECOND;
+            case SPARK_BURST -> 9 * SECOND;
+            case SNARE_SHOT -> 8 * SECOND;
+            case STARDUST -> 9 * SECOND;
             default -> 0;
         };
     }
@@ -242,6 +249,69 @@ public final class SkillRules {
 
     // 巨神斬りの「重で +10%」(威力)
     public static final double CLEAVE_HEAVY_BONUS = 0.10;
+
+    // ---------------------------------------------------------------- 木 v2 で足した技 (docs/design/48。TreeActions)
+    // 盾殴り: 前 3 ブロック・80 度の扇、3 体まで。押し出して 2 秒の鈍足
+    public static final double BASH_RANGE = 3.0;
+    public static final double BASH_HALF_ANGLE = 40;
+    public static final int BASH_MAX_TARGETS = 3;
+    public static final double BASH_SLOW = 0.6;
+    public static final int BASH_SLOW_TICKS = 2 * SECOND;
+    public static final double BASH_PUSH = 0.8;
+
+    public static double bashMultiplier(int rank) {
+        return rank >= 2 ? 1.0 : 0.9;
+    }
+
+    // 鯨骨の振り: 見ている 4 ブロック以内の 1 体に ×2.2 (段 2 で ×2.5)。大きな相手には ×1.3
+    public static final double SWING_RANGE = 4.0;
+    public static final double SWING_LARGE = 1.3;
+
+    public static double swingMultiplier(int rank) {
+        return rank >= 2 ? 2.5 : 2.2;
+    }
+
+    // 回し斬り: まわり 2.5 ブロックを ×0.8 で薙ぎ、前へ 3 ブロックほど進む
+    public static final double SPIN_RADIUS = 2.5;
+    public static final double SPIN_PUSH = 0.4;
+    public static final double SPIN_DASH = 0.9;
+    public static final double SPIN_LIFT = 0.15;
+    public static final int SPIN_DASH_BLOCKS = 3;
+
+    public static double spinMultiplier(int rank) {
+        return rank >= 2 ? 0.9 : 0.8;
+    }
+
+    // 二連牙: 見ている 3.5 ブロック以内の敵に ×0.7 を二度。背後なら ×1.5
+    public static final double FANG_RANGE = 3.5;
+    public static final double FANG_MULTIPLIER = 0.7;
+    public static final double FANG_BACK = 1.5;
+    public static final int FANG_GAP = 4;
+
+    // 火花散らし: まわり 3 ブロックに ×0.8 と 2 秒の炎
+    public static final double SPARK_RADIUS = 3.0;
+    public static final int SPARK_BURN = 2 * SECOND;
+
+    public static double sparkMultiplier(int rank) {
+        return rank >= 2 ? 0.9 : 0.8;
+    }
+
+    // 足止めの矢: 見ている 12 ブロック以内の 1 体に矢の傷 (雲穿ちと同じ) と 50% の鈍足 3 秒 (段 2 で 4 秒)
+    public static final double SNARE_RANGE = 12;
+    public static final double SNARE_MULTIPLIER = 1.0;
+    public static final double SNARE_SLOW = 0.5;
+
+    public static int snareTicks(int rank) {
+        return (rank >= 2 ? 4 : 3) * SECOND;
+    }
+
+    // 星屑: まわり 4 ブロックに魔法の傷 ×0.9 (段 2 で ×1.0)
+    public static final double DUST_RADIUS = 4.0;
+    public static final double DUST_PUSH = 0.4;
+
+    public static double dustMultiplier(int rank) {
+        return rank >= 2 ? 1.0 : 0.9;
+    }
 
     // ---------------------------------------------------------------- 力 (傷・量に掛ける倍率) の部品
     // 潮歌いの要・共鳴の声: 近くの仲間 1 人につき +4% (最大 5 人)
@@ -588,44 +658,95 @@ public final class SkillRules {
         return rank >= 2 ? 4.5 : 3.0;
     }
 
-    // ---------------------------------------------------------------- 旅人
-    // 合図: 見ている先 (32 ブロック) に 20 秒の光の標。敵に当てると 5 秒の印 (鷹の目と同じ。高いほう) 5% / 8%
-    public static final double SIGNAL_RANGE = 32;
-    public static final int SIGNAL_TICKS = 20 * SECOND;
+    // ---------------------------------------------------------------- 職の新しい技 (docs/design/43)
+    // 魔法の傷 = 手の武器の攻撃力 × 倍率 × (1 + 精神 × GrowthRules.SPIRIT_SPELL)。星読みの技 (JobActions.spell)
+    // 雷の矢: 見ている向きへ 24 ブロックの稲妻。最初の敵に当たる。3 段で近くの敵へ 50% で跳ねる
+    public static final double BOLT_RANGE = 24;
+    public static final double BOLT_CHAIN = 0.5;
+    public static final double BOLT_CHAIN_RANGE = 5;
 
-    public static final int SIGNAL_MARK_TICKS = 8 * SECOND;
-
-    public static double signalMark(int rank) {
-        return rank >= 2 ? 0.15 : 0.10;
+    public static double boltMultiplier(int rank) {
+        return 1.2 + 0.4 * Math.max(1, rank);
     }
 
-    // 備えの報い: 備えの三灯がすべて青 (緑) のとき、最大マナ +4 / 8 / 12、攻撃力 +1 / 2 / 3%
-    public static double readinessMana(int rank) {
-        return 4.0 * rank;
+    // 星読みの心得: 星読みの木の武器 (杖) を持っている間、マナの戻りが増える
+    public static double starReadingRegen(int rank) {
+        return 0.15 * Math.max(1, rank);
     }
 
-    public static double readinessAttack(int rank) {
-        return 0.01 * rank;
+    // 熾火の玉: ゆっくり飛ぶ火の玉。当たる (敵か壁) と 3 ブロックに弾け、燃やす
+    public static final double ORB_RADIUS = 3;
+    public static final double ORB_SPEED = 1.0;
+    public static final int ORB_LIFE = 30;
+    public static final int ORB_BURN = 3 * SECOND;
+
+    public static double orbMultiplier(int rank) {
+        return rank >= 2 ? 2.8 : 2.2;
     }
 
-    // 野営の手: 焚き火・休み場・共鳴の炉の 6 ブロック以内で、マナの回復 ×1.5 / ×2、満腹度の減り −15% / −25%
-    public static final double CAMP_RANGE = 6;
+    // 凍て潮: 自分のまわりに冷たい潮。傷と、強い鈍足 (大きな相手は半分)
+    public static final double FROST_SLOW = 0.5;
 
-    public static double campRegen(int rank) {
-        return rank >= 2 ? 2.0 : 1.5;
+    public static double frostRadius(int rank) {
+        return rank >= 2 ? 6 : 5;
     }
 
-    public static double campHunger(int rank) {
-        return rank >= 2 ? 0.25 : 0.15;
+    public static double frostMultiplier(int rank) {
+        return rank >= 2 ? 1.3 : 1.0;
     }
 
-    // 逃げ足: 体力が 3❤ (6 点) 以下になったとき、移動 +8 / 12 / 16% (2 秒)。20 秒に 1 度
-    public static final float FLEET_HEALTH = 6f;
-    public static final int FLEET_TICKS = 2 * SECOND;
-    public static final int FLEET_COOLDOWN = 20 * SECOND;
+    public static int frostTicks(int rank) {
+        return (rank >= 2 ? 4 : 3) * SECOND;
+    }
 
-    public static double fleetBonus(int rank) {
-        return 0.04 + 0.04 * rank;
+    // 転移: 見ている向きへ跳ぶ (壁の手前まで)。落ちる傷は消える
+    public static double blinkRange(int rank) {
+        return rank >= 2 ? 11 : 8;
+    }
+
+    // 星の誓い (要): 星読みの技の傷 +25%、そのマナ +25%
+    public static final double STAR_OATH_POWER = 0.25;
+    public static final double STAR_OATH_MANA = 0.25;
+
+    // 炉の踏み (鍛冶師): 足もとを踏み鳴らして 3.5 ブロックに火の波。浮かせて燃やす
+    public static final double STOMP_RADIUS = 3.5;
+    public static final int STOMP_BURN = 2 * SECOND;
+
+    public static double stompMultiplier(int rank) {
+        return rank >= 2 ? 1.2 : 0.9;
+    }
+
+    // 霧隠れ (暗殺者): 姿を消し、速くなる。狙っていた敵は見失う。消えている間の最初の一撃 +50%
+    public static final double VEIL_SPEED = 0.2;
+    public static final double VEIL_STRIKE = 1.5;
+    public static final double VEIL_LOSE_RANGE = 16;
+
+    public static int veilTicks(int rank) {
+        return (rank >= 2 ? 4 : 3) * SECOND;
+    }
+
+    // 呪いの印 (呪術師): 見ている敵に印。受ける傷が増え、攻撃が弱る
+    public static final double CURSE_RANGE = 16;
+    public static final double CURSE_WEAKEN = 0.2;
+
+    public static double curseBonus(int rank) {
+        return rank >= 2 ? 0.2 : 0.15;
+    }
+
+    public static int curseTicks(int rank) {
+        return (rank >= 2 ? 8 : 6) * SECOND;
+    }
+
+    // 灯の守り札 (呪術師): 足もとに灯を置く。そばの自分と仲間に、2 秒ごとに吸収 (黄ハート) を足す (回復はしない)
+    public static final double LAMP_RADIUS = 4;
+    public static final int LAMP_PULSE = 2 * SECOND;
+
+    public static int lampTicks(int rank) {
+        return (rank >= 2 ? 10 : 8) * SECOND;
+    }
+
+    public static float lampAbsorb(int rank) {
+        return rank >= 2 ? 3f : 2f;
     }
 
     // ---------------------------------------------------------------- 画面の説明に渡す値
@@ -639,13 +760,13 @@ public final class SkillRules {
             case STONE_STANCE -> new Object[] {fmt(stanceArmor(r)), fmt(stanceKnockback(r) * 100)};
             case WHALE_SWEEP -> new Object[] {fmt(SWEEP_RADIUS), pct(sweepMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STONE_OATH -> new Object[] {pct(OATH_SHARE), 2, fmt(ALLY_RANGE)};
-            case LUNGE -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
+            case LUNGE, SHIELD_RUSH -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
             case NIMBLE -> new Object[] {fmt(nimbleMove(r) * 100), fmt(nimbleFall(r))};
-            case BACKSTEP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
+            case BACKSTEP, ARCHER_LEAP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
             case FORESIGHT -> new Object[] {fmt(foresightBonus(r) * 100), FORESIGHT_TICKS / SECOND};
             case WIND_REND -> new Object[] {pct(rendBack(r)), pct(rendFront(r))};
             case LONE_WIND -> new Object[] {pct(LONE_ATTACK), pct(LONE_MOVE), fmt(LONE_RANGE)};
-            case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), fmt(wardAbsorb(r)), fmt(wardAbsorb(r)), WARD_SONG_TICKS / SECOND};
+            case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), hp(wardAbsorb(r)), hp(wardAbsorb(r)), WARD_SONG_TICKS / SECOND};
             case CALM_HEART -> new Object[] {fmt(calmHeartBonus(r) * 100)};
             case EBB_TIDE -> new Object[] {fmt(ebbRange(r)), ebbSlowTicks(r) / SECOND};
             case RIPPLE -> new Object[] {fmt(rippleSlow(r) * 100), RIPPLE_TICKS / SECOND};
@@ -657,23 +778,12 @@ public final class SkillRules {
             case FORGE_MEMORY -> new Object[] {r, pct(FORGE_MEMORY_BONUS)};
             case ASH_SCATTER -> new Object[] {fmt(ASH_SCATTER_RADIUS), ashScatterTicks(r) / SECOND, pct(ASH_ATTACK), pct(ASH_PROJECTILE)};
             case SMITH_EYE -> new Object[] {fmt(SMITH_PER_LEVEL * 100), fmt(SMITH_PER_LEVEL * 100 * 10)};
-            case CLOUD_PIERCE -> new Object[] {pierceDamage(r), piercePierce(r)};
+            case CLOUD_PIERCE -> new Object[] {hp(pierceDamage(r)), piercePierce(r)};
             case FAR_SHOT -> new Object[] {fmt(0.06 * r * 100), fmt(FAR_FULL)};
             case BONE_TRAP -> new Object[] {TRAP_MAX, trapBindTicks(r) / SECOND, pct(trapMultiplier(r)), pct(TRAP_LARGE_MULTIPLIER)};
             case HAWK_EYE -> new Object[] {fmt(markBonus(r) * 100), MARK_TICKS / SECOND};
-            case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, fmt(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
+            case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, hp(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
             case STILL_STRING -> new Object[] {pct(STILL_BONUS), STILL_TICKS / SECOND};
-            case SIGNAL -> new Object[] {fmt(SIGNAL_RANGE), SIGNAL_TICKS / SECOND, fmt(signalMark(r) * 100), SIGNAL_MARK_TICKS / SECOND};
-            case READINESS_REWARD -> new Object[] {fmt(readinessMana(r)), fmt(readinessAttack(r) * 100)};
-            case CAMP_HAND -> new Object[] {fmt(campRegen(r)), fmt(campHunger(r) * 100)};
-            case APPRAISER -> new Object[] {1};
-            case FLEET_FOOT -> new Object[] {6, fmt(fleetBonus(r) * 100), FLEET_TICKS / SECOND, FLEET_COOLDOWN / SECOND};
-            case JOURNAL -> new Object[] {1};
-            case DUST_CHARGE -> new Object[] {fmt(DUST_LENGTH), pct(dustMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
-            case SEA_BREEZE -> new Object[] {fmt(seaMove(r) * 100), fmt(seaRegen(r) * 100)};
-            case STEAM_BELL -> new Object[] {fmt(STEAM_RADIUS), pct(steamMultiplier(r)), fmt(STEAM_SLOW * 100), STEAM_TICKS / SECOND};
-            case CINDER_VOLLEY -> new Object[] {VOLLEY_BOLTS, pct(volleyMultiplier(r)), fmt(VOLLEY_RANGE), VOLLEY_BURN / SECOND};
-            case STONE_AIM -> new Object[] {fmt(aimPower(r) * 100), AIM_TICKS / SECOND, fmt(aimArmor(r))};
             case DEEP_PULL -> new Object[] {fmt(PULL_RADIUS), pct(pullMultiplier(r)), fmt(PULL_SLOW * 100), PULL_SLOW_TICKS / SECOND};
             case DEEP_MIRROR -> new Object[] {fmt(mirrorPower(r) * 100), MIRROR_TAGS};
             case DEEP_ECHO -> new Object[] {fmt(echoPower(r) * 100), ECHO_TICKS / SECOND, fmtSeconds(cooldownTicks(skill, r))};
@@ -686,12 +796,34 @@ public final class SkillRules {
             case MEMORY_EDGE -> new Object[] {fmt(memoryPower(r, 6) * 100), fmt(MEMORY_PER_REBIRTH * 100), MEMORY_REBIRTH_MAX};
             case FINAL_LIGHT -> new Object[] {fmt(LIGHT_RADIUS), pct(lightMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
             case SOUL_THREAD -> new Object[] {fmt(-THREAD_COOLDOWN * 100)};
+            case THUNDER_BOLT -> new Object[] {fmt(BOLT_RANGE), pct(boltMultiplier(r)), r >= 3 ? pct(BOLT_CHAIN) : "0%", fmt(BOLT_CHAIN_RANGE)};
+            case STAR_READING -> new Object[] {fmt(starReadingRegen(r) * 100)};
+            case EMBER_ORB -> new Object[] {fmt(ORB_RADIUS), pct(orbMultiplier(r)), ORB_BURN / SECOND};
+            case FROST_TIDE -> new Object[] {fmt(frostRadius(r)), pct(frostMultiplier(r)), fmt(FROST_SLOW * 100), frostTicks(r) / SECOND};
+            case BLINK -> new Object[] {fmt(blinkRange(r)), fmtSeconds(cooldownTicks(skill, r))};
+            case STAR_OATH -> new Object[] {fmt(STAR_OATH_POWER * 100), fmt(STAR_OATH_MANA * 100)};
+            case FORGE_STOMP -> new Object[] {fmt(STOMP_RADIUS), pct(stompMultiplier(r)), STOMP_BURN / SECOND};
+            case SHIELD_BASH -> new Object[] {fmt(BASH_RANGE), pct(bashMultiplier(r)), BASH_SLOW_TICKS / SECOND};
+            case BONE_SWING -> new Object[] {fmt(SWING_RANGE), pct(swingMultiplier(r)), fmt(SWING_LARGE)};
+            case SPIN_CUT -> new Object[] {fmt(SPIN_RADIUS), pct(spinMultiplier(r)), SPIN_DASH_BLOCKS};
+            case TWIN_FANG -> new Object[] {pct(FANG_MULTIPLIER), fmt(FANG_BACK)};
+            case SPARK_BURST -> new Object[] {fmt(SPARK_RADIUS), pct(sparkMultiplier(r)), SPARK_BURN / SECOND};
+            case SNARE_SHOT -> new Object[] {fmt(SNARE_RANGE), hp(pierceDamage(r) * SNARE_MULTIPLIER), fmt(SNARE_SLOW * 100), snareTicks(r) / SECOND};
+            case STARDUST -> new Object[] {fmt(DUST_RADIUS), pct(dustMultiplier(r))};
+            case MIST_VEIL -> new Object[] {veilTicks(r) / SECOND, fmt(VEIL_SPEED * 100), pct(VEIL_STRIKE)};
+            case CURSE_MARK -> new Object[] {fmt(CURSE_RANGE), fmt(curseBonus(r) * 100), curseTicks(r) / SECOND};
+            case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, hp(lampAbsorb(r)), LAMP_PULSE / SECOND};
         };
     }
 
     // tick を「8」「5.5」のような秒の文字に
     public static String fmtSeconds(int ticks) {
         return fmt(ticks / (double) SECOND);
+    }
+
+    // 体力・傷の数 (画面の倍率 Hp.SHOWN で)
+    static String hp(double v) {
+        return jp.revati.skyabyss.Hp.number(v);
     }
 
     static String pct(double v) {
@@ -704,49 +836,7 @@ public final class SkillRules {
         return v == Math.floor(v) ? String.valueOf((long) v) : String.format(java.util.Locale.ROOT, "%.1f", v);
     }
 
-    // ---------------------------------------------------------------- 橋・淵・前世の技・紋・変異 (docs/design/31 の A08・A09・A14・B08・B09)
-    // 同格の基準: 段 2 の使う技 = 鯨尾薙ぎ (×0.9 / ×1.2、全員)。単体は巨神斬り段 1 (×1.2) 前後
-    public static final double DUST_LENGTH = 6;
-    public static final double DUST_WIDTH = 1.6;
-
-    public static double dustMultiplier(int rank) {
-        return rank >= 2 ? 1.2 : 0.9;
-    }
-
-    public static double seaMove(int rank) {
-        return rank >= 2 ? 0.05 : 0.03;
-    }
-
-    public static double seaRegen(int rank) {
-        return rank >= 2 ? 0.12 : 0.08;
-    }
-
-    public static final double STEAM_RADIUS = 4;
-    public static final double STEAM_SLOW = 0.30;
-    public static final int STEAM_TICKS = 3 * SECOND;
-
-    public static double steamMultiplier(int rank) {
-        return rank >= 2 ? 0.95 : 0.7;
-    }
-
-    public static final int VOLLEY_BOLTS = 5;
-    public static final double VOLLEY_RANGE = 14;
-    public static final int VOLLEY_BURN = 3 * SECOND;
-
-    public static double volleyMultiplier(int rank) {
-        return rank >= 2 ? 0.42 : 0.30;
-    }
-
-    public static final int AIM_TICKS = SECOND;
-
-    public static double aimPower(int rank) {
-        return rank >= 2 ? 0.09 : 0.06;
-    }
-
-    public static double aimArmor(int rank) {
-        return rank;
-    }
-
+    // ---------------------------------------------------------------- 淵・前世の技・紋・変異 (docs/design/31 の A08・A14・B08・B09)
     public static final double PULL_RADIUS = 7;
     public static final double PULL_SLOW = 0.35;
     public static final int PULL_SLOW_TICKS = 5 * SECOND / 2;

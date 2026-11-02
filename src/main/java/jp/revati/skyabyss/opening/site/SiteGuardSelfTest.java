@@ -13,7 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.food.Foods;
 
-// 荒らしよけと都の安全 (SiteGuard。docs/design/33 の 2 章) と、おなかの決まり (NoHunger。17 の 4 章) の自己テスト。段の名前は "site guard"。
+// 荒らしよけと都の安全 (SiteGuard) と、おなかの決まり (NoHunger) の自己テスト。段の名前は "site guard"。
 //  - 都が建っていれば: 鐘は都の範囲の中、都から 400 離れた所は外。都の中に置いたゾンビは、1 秒ごとの見回りで消える
 //  - 章の小要素が建っていれば: その設計図のブロックの一つが守られ、そのすぐ上の空気は守られない
 //  - パンで戻る体力は 8、焼いた牛肉は 14
@@ -43,7 +43,7 @@ public final class SiteGuardSelfTest {
         check(Math.abs(NoHunger.healOf(Foods.COOKED_BEEF) - 11.84f) < 0.01f, "cooked beef should heal 11.84 in all (" + NoHunger.healOf(Foods.COOKED_BEEF) + ")");
         check(NoHunger.spoiled(Foods.ROTTEN_FLESH) && NoHunger.healOf(Foods.ROTTEN_FLESH) < NoHunger.healOf(Foods.BREAD) * 0.5f,
                 "rotten flesh should be spoiled and heal little (" + NoHunger.healOf(Foods.ROTTEN_FLESH) + ")");
-        // 進捗・実績のつまみ: 実績の木と、報酬の鐘銭の関数が読める (tools/gen/story/gen_advancements.py)
+        // 進捗・実績のつまみ: 実績の木と、報酬の鐘銭の関数が読める (データを直接直す（生成スクリプトはない）)
         check(server.getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "achievement/trade")) != null,
                 "the achievement tab (achievement/trade) is missing");
         check(server.getFunctions().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "reward/coins_10")).isPresent(),
@@ -96,7 +96,10 @@ public final class SiteGuardSelfTest {
     private static void finish(MinecraftServer server) {
         SiteGuard.testing = false;
         if (zombie != null) {
-            check(!zombie.isAlive() || zombie.isRemoved(), "a zombie inside the capital should be removed by the sweep");
+            // 掃き出しは縁の外へ押し戻す。押し戻した先が読み込まれていなければ消える。全部を続けて回すと先が読み込まれていて残るので、外にいればよい
+            SiteGuard.Area a = SiteGuard.capital(server);
+            check(!zombie.isAlive() || zombie.isRemoved() || (a != null && !a.containsXZ(zombie.getX(), zombie.getZ())),
+                    "a zombie inside the capital should be pushed out by the sweep");
             zombie.discard();
         }
         if (FAILS.isEmpty()) {

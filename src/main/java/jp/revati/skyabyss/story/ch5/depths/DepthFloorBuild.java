@@ -109,6 +109,166 @@ public final class DepthFloorBuild {
         features();
         dress();
         decorate();
+        finish();
+    }
+
+    // ---------------------------------------------------------------- 仕上げ (形は変えない。2026-10-28 の見直し「箱の部屋が平たい」)
+    //   材料の斑: 壁・床・天井を型ごとの数種へ、ゆっくり変わる斑で。壁のいちばん下の段は台座の石、いちばん上の段は縁の石。
+    //   天井の蛇腹: 壁ぞいのいちばん上の空気 (床から 6 上。通るのを邪魔しない) に、逆さの階段を壁へ向けて。
+    //   罠の床 (ひびの深層岩タイル)・落ちる石・光る石は使わない (罠の見分け・灯りの決まり・床の下は空気)
+    record Mix(BlockState[] s, int[] w) {
+        static Mix of(Object... kv) {
+            BlockState[] s = new BlockState[kv.length / 2];
+            int[] w = new int[kv.length / 2];
+            for (int i = 0; i < s.length; i++) {
+                s[i] = ((net.minecraft.world.level.block.Block) kv[i * 2]).defaultBlockState();
+                w[i] = (Integer) kv[i * 2 + 1];
+            }
+            return new Mix(s, w);
+        }
+
+        BlockState pick(double u) {
+            int total = 0;
+            for (int x : w) {
+                total += x;
+            }
+            double t = Math.max(0, Math.min(0.999, u)) * total;
+            for (int i = 0; i < s.length; i++) {
+                t -= w[i];
+                if (t < 0) {
+                    return s[i];
+                }
+            }
+            return s[s.length - 1];
+        }
+    }
+
+    record Finish(Mix walls, Mix floors, Mix roofs, Mix base, BlockState band, BlockState cornice) {
+    }
+
+    static Finish finishOf(Kind k) {
+        return switch (k) {
+            case INVERTED_FOREST -> new Finish(Mix.of(Blocks.DEEPSLATE_TILES, 5, Blocks.DEEPSLATE_BRICKS, 3, Blocks.COBBLED_DEEPSLATE, 1),
+                    Mix.of(Blocks.MOSS_BLOCK, 6, Blocks.ROOTED_DIRT, 2, Blocks.COARSE_DIRT, 1), Mix.of(Blocks.ROOTED_DIRT, 5, Blocks.DIRT, 2, Blocks.MOSS_BLOCK, 1),
+                    Mix.of(Blocks.MOSS_BLOCK, 3, Blocks.MOSSY_COBBLESTONE, 2, Blocks.COBBLED_DEEPSLATE, 2), Blocks.STRIPPED_MANGROVE_LOG.defaultBlockState(),
+                    Blocks.MANGROVE_STAIRS.defaultBlockState());
+            case FLOATING_GRAVES -> new Finish(Mix.of(Blocks.DEEPSLATE_BRICKS, 6, Blocks.CRACKED_DEEPSLATE_BRICKS, 2, Blocks.DEEPSLATE_TILES, 1, Blocks.POLISHED_DEEPSLATE, 1),
+                    Mix.of(Blocks.POLISHED_BLACKSTONE_BRICKS, 6, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, 2, Blocks.POLISHED_BLACKSTONE, 1),
+                    Mix.of(Blocks.DEEPSLATE_BRICKS, 5, Blocks.DEEPSLATE_TILES, 2), Mix.of(Blocks.POLISHED_BLACKSTONE, 1),
+                    Blocks.CHISELED_DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState());
+            case PULSE_CAVE -> new Finish(Mix.of(Blocks.RED_NETHER_BRICKS, 6, Blocks.NETHER_BRICKS, 2, Blocks.NETHERRACK, 1),
+                    Mix.of(Blocks.NETHER_BRICKS, 6, Blocks.CRACKED_NETHER_BRICKS, 2, Blocks.RED_NETHER_BRICKS, 1, Blocks.NETHERRACK, 1),
+                    Mix.of(Blocks.NETHER_WART_BLOCK, 6, Blocks.NETHERRACK, 1, Blocks.RED_NETHER_BRICKS, 1), Mix.of(Blocks.NETHER_BRICKS, 3, Blocks.NETHERRACK, 1),
+                    Blocks.CHISELED_NETHER_BRICKS.defaultBlockState(), Blocks.RED_NETHER_BRICK_STAIRS.defaultBlockState());
+            case MIRROR_DARK -> new Finish(Mix.of(Blocks.BLACKSTONE, 6, Blocks.POLISHED_BLACKSTONE, 2, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, 1, Blocks.BASALT, 1),
+                    Mix.of(Blocks.POLISHED_BLACKSTONE_BRICKS, 6, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, 2, Blocks.POLISHED_BLACKSTONE, 1),
+                    Mix.of(Blocks.BLACKSTONE, 5, Blocks.BASALT, 2), Mix.of(Blocks.POLISHED_BLACKSTONE, 2, Blocks.POLISHED_BLACKSTONE_BRICKS, 1),
+                    Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState(), Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS.defaultBlockState());
+            case CHAIN_NET -> new Finish(Mix.of(Blocks.DEEPSLATE, 5, Blocks.COBBLED_DEEPSLATE, 3, Blocks.POLISHED_DEEPSLATE, 1, Blocks.DEEPSLATE_BRICKS, 1),
+                    Mix.of(Blocks.DEEPSLATE_TILES, 6, Blocks.DEEPSLATE_BRICKS, 2), Mix.of(Blocks.DEEPSLATE, 5, Blocks.COBBLED_DEEPSLATE, 2),
+                    Mix.of(Blocks.POLISHED_DEEPSLATE, 1), Blocks.DEEPSLATE_TILES.defaultBlockState(), Blocks.POLISHED_DEEPSLATE_STAIRS.defaultBlockState());
+            case LAMP_HALL -> new Finish(Mix.of(Blocks.DEEPSLATE_BRICKS, 6, Blocks.CRACKED_DEEPSLATE_BRICKS, 2, Blocks.DEEPSLATE_TILES, 1),
+                    Mix.of(Blocks.POLISHED_DEEPSLATE, 6, Blocks.DEEPSLATE_TILES, 2), Mix.of(Blocks.SCULK, 5, Blocks.DEEPSLATE, 2),
+                    Mix.of(Blocks.POLISHED_DEEPSLATE, 1), Blocks.CHISELED_DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState());
+            case DRY_WELL -> new Finish(Mix.of(Blocks.MUD_BRICKS, 6, Blocks.PACKED_MUD, 2, Blocks.BROWN_TERRACOTTA, 1),
+                    Mix.of(Blocks.PACKED_MUD, 5, Blocks.COARSE_DIRT, 2, Blocks.BROWN_TERRACOTTA, 1), Mix.of(Blocks.PACKED_MUD, 5, Blocks.DRIPSTONE_BLOCK, 2),
+                    Mix.of(Blocks.PACKED_MUD, 2, Blocks.DRIPSTONE_BLOCK, 1), Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState(), Blocks.MUD_BRICK_STAIRS.defaultBlockState());
+            case HOLLOW_STARS -> new Finish(Mix.of(Blocks.POLISHED_BASALT, 6, Blocks.BASALT, 2, Blocks.SMOOTH_BASALT, 2),
+                    Mix.of(Blocks.END_STONE_BRICKS, 6, Blocks.END_STONE, 2), Mix.of(Blocks.BLACKSTONE, 5, Blocks.BASALT, 1, Blocks.OBSIDIAN, 1),
+                    Mix.of(Blocks.SMOOTH_BASALT, 1), Blocks.PURPUR_PILLAR.defaultBlockState(), Blocks.END_STONE_BRICK_STAIRS.defaultBlockState());
+        };
+    }
+
+    private void finish() {
+        Finish f = finishOf(plan.kind());
+        long seed = plan.seed();
+        int top = FLOOR_YI + DepthPlan.ROOM_H;
+        int[][] d = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        Direction[] face = {Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH};
+        // 蛇腹 (斑より先に: 壁を pal.wall() で見分ける)
+        for (int x = 1; x < N - 1; x++) {
+            for (int z = 1; z < N - 1; z++) {
+                if (get(x, top, z) != AIR) {
+                    continue;
+                }
+                for (int i = 0; i < 4; i++) {
+                    if (get(x + d[i][0], top, z + d[i][1]) == pal.wall()) {
+                        set(x, top, z, f.cornice().setValue(net.minecraft.world.level.block.StairBlock.FACING, face[i])
+                                .setValue(net.minecraft.world.level.block.StairBlock.HALF, net.minecraft.world.level.block.state.properties.Half.TOP));
+                        break;
+                    }
+                }
+            }
+        }
+        // 材料の斑と壁の帯
+        for (int x = 0; x < N; x++) {
+            for (int z = 0; z < N; z++) {
+                for (int yi = 0; yi < H; yi++) {
+                    BlockState st = get(x, yi, z);
+                    if (st == null || st == AIR) {
+                        continue;
+                    }
+                    // 斑の値は真ん中に寄るので広げる (端の材料も出るように)
+                    double u = (noise(seed, x, yi, z, 4.0) - 0.5) * 1.8 + 0.5 + (r.nextDouble() - 0.5) * 0.15;
+                    // 型によって床・壁・天井が同じ材料のことがあるので、段で見分ける
+                    if (yi == CEIL_YI && st == pal.roof()) {
+                        set(x, yi, z, f.roofs().pick(u));
+                    } else if (yi == FLOOR_YI && st == pal.floor()) {
+                        set(x, yi, z, f.floors().pick(u));
+                    } else if (st == pal.wall() && yi > FLOOR_YI && yi < CEIL_YI) {
+                        set(x, yi, z, yi == FLOOR_YI + 1 ? f.base().pick(u) : yi == top ? f.band() : f.walls().pick(u));
+                    } else if (st == pal.wall()) {
+                        set(x, yi, z, f.walls().pick(u));
+                    }
+                }
+            }
+        }
+        // 型の小物: 乾いた井戸の枯れ草 (枯れ草が育つ床の上だけ)
+        if (plan.kind() == Kind.DRY_WELL) {
+            for (int x = 1; x < N - 1; x++) {
+                for (int z = 1; z < N - 1; z++) {
+                    BlockState fl = get(x, FLOOR_YI, z);
+                    if (freeTile(x, z) && (fl == Blocks.COARSE_DIRT.defaultBlockState() || fl == Blocks.BROWN_TERRACOTTA.defaultBlockState()) && r.nextInt(100) < 35) {
+                        set(x, FLOOR_YI + 1, z, Blocks.DEAD_BUSH.defaultBlockState());
+                    }
+                }
+            }
+        }
+    }
+
+    // ゆっくり変わる値の斑 (0..1)
+    static double noise(long seed, int x, int y, int z, double s) {
+        double fx = x / s;
+        double fy = y / s;
+        double fz = z / s;
+        int ix = (int) Math.floor(fx);
+        int iy = (int) Math.floor(fy);
+        int iz = (int) Math.floor(fz);
+        double tx = smooth(fx - ix);
+        double ty = smooth(fy - iy);
+        double tz = smooth(fz - iz);
+        double v = 0;
+        for (int a = 0; a <= 1; a++) {
+            for (int b = 0; b <= 1; b++) {
+                for (int c = 0; c <= 1; c++) {
+                    double w = (a == 0 ? 1 - tx : tx) * (b == 0 ? 1 - ty : ty) * (c == 0 ? 1 - tz : tz);
+                    v += w * hash(seed, ix + a, iy + b, iz + c);
+                }
+            }
+        }
+        return v;
+    }
+
+    private static double smooth(double t) {
+        return t * t * (3 - 2 * t);
+    }
+
+    private static double hash(long seed, int x, int y, int z) {
+        long h = seed ^ (x * 0x9E3779B97F4A7C15L) ^ (y * 0xC2B2AE3D27D4EB4FL) ^ (z * 0x165667B19E3779F9L);
+        h ^= h >>> 31;
+        h *= 0xBF58476D1CE4E5B9L;
+        h ^= h >>> 29;
+        return (h >>> 11) * 0x1.0p-53;
     }
 
     // ---------------------------------------------------------------- 空気と包み

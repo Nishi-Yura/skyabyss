@@ -1,0 +1,60 @@
+# 六章 区画 2〜4 (崖・野・淵) の作り込みの二回目の見比べ (docs/design/46 の 4.4.3・4.5.3・4.6.3)。暗視で形を見る。地形を直したら world の名前を変える
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_sections_pass2.txt -PshotsName=moon_sections_pass2
+world moon_sec_b continent
+size 1600 900
+timeout 2400
+render 14
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+cmd effect give @s minecraft:night_vision 99999 0 true
+hud off
+cmd tp @s 46 112 70 225 32
+waitchunks 300
+wait 80
+shot c01_overview
+cmd tp @s 92 30 16 240 14
+wait 40
+shot c02_path_low
+cmd tp @s 140 60 -60 20 20
+wait 40
+shot c03_massif_side
+cmd tp @s 194 92 -52 308 28
+wait 40
+shot c04_summit
+cmd tp @s -70 80 10 95 32
+waitchunks 300
+wait 80
+cmd skyabyss moonworld tide bright
+wait 10
+shot f01_overview
+cmd tp @s -98 26 60 90 22
+wait 40
+shot f02_gully
+cmd tp @s -186 24 -6 108 8
+wait 40
+shot f03_tower
+cmd tp @s -120 20 -20 135 10
+wait 40
+shot f04_plain
+cmd tp @s 150 75 128 0 52
+waitchunks 300
+wait 80
+shot r01_overview
+cmd tp @s 161 18 166 90 22
+wait 40
+shot r02_door
+cmd tp @s 139 -8 269 127 8
+wait 40
+shot r03_hall
+cmd tp @s 200 9 216 -90 14
+wait 40
+shot r04_arena

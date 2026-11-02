@@ -31,7 +31,7 @@ public record RuneData(String skill, boolean cooldown, int milli) {
     public static List<Skill> skills() {
         List<Skill> out = new ArrayList<>();
         for (Skill s : Skill.values()) {
-            if (s.kind == Skill.Kind.ACTIVE && s.tree != jp.revati.skyabyss.rpg.skill.SkillTree.TRAVELER && !s.tree.sealed) {
+            if (s.kind == Skill.Kind.ACTIVE && !s.tree.sealed) {
                 out.add(s);
             }
         }

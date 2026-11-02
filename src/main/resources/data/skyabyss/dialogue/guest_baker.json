@@ -62,12 +62,12 @@
             "of": [
               {
                 "type": "item",
-                "item": "minecraft:wheat",
+                "item": "skyabyss:wheat_sheaf",
                 "count": 16
               },
               {
                 "type": "item",
-                "item": "minecraft:coal",
+                "item": "skyabyss:charcoal_lump",
                 "count": 4
               }
             ]
@@ -75,12 +75,12 @@
           "do": [
             {
               "type": "take",
-              "item": "minecraft:wheat",
+              "item": "skyabyss:wheat_sheaf",
               "count": 16
             },
             {
               "type": "take",
-              "item": "minecraft:coal",
+              "item": "skyabyss:charcoal_lump",
               "count": 4
             },
             {

@@ -176,7 +176,7 @@
 
 1. 巨神の素材の言葉と輪郭の飾りを 2.4 に 1 行足す（これが先）。
 2. `armor_v2_sets.py` に組を足す（材質 `Mat`、`armor_v2_parts` の部品、飾り 1 つ）。武器は `armor_kit.Armor` で gear の骨名を使う。
-3. `python tools/rough/armor_v2_sets.py <名前>` で比較シート（正面・横・背・3/4・腕上げ・歩き・振り）。3 方向以上で作る場合は並べて選ぶ。比較シートの道具は `tools/rough/armor_v3_compare.py`・`armor_v3_icons_compare.py`、画像は `docs/review/armor_v2_roughs/`。
+3. `python tools/rough/armor_v2_sets.py <名前>` で比較シート（正面・横・背・3/4・腕上げ・歩き・振り）。3 方向以上で作る場合は並べて選ぶ。
 4. `python tools/install/install_armor_v2.py` で検査と書き込み（アイコンも）。
 5. `./gradlew runShots -Pscript=tools/shots/armor_v2.txt -PshotsName=<名前>` で実機を撮る（防具立て 4 つ、正面・横・背・歩き・腕上げ・近景。OS の入力は使わない）。
 

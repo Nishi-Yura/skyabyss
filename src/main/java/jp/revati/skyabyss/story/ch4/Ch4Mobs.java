@@ -20,7 +20,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
-// 四章の地上の敵の差し込み口と湧かせ方 (docs/design/21 の 6.1、P20)。
+// 四章の地上の敵の差し込み口と湧かせ方 (P20)。
 //   熾り蟲 (cinder_mite)     ひとり歩き (群れ 3〜5 匹。CinderMite が仲間を呼ぶ)。昼夜。消えた炉の坑の入口の間 (湧き台)
 //   灰被りの屑 (ash_husk)     ひとり歩き (夜)。坑の鍛えの跡 (湧き台)
 //   灰ひきずり (ash_dragger)  ひとり歩き (昼。敵意なし)。人に気づくと丸まって、煤の窯の跡へ転がって逃げる

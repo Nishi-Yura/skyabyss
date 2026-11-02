@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.entity.MobVoices;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.rpg.GrowthRewards;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
@@ -24,10 +26,12 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 深淵の敵 A の登録 (docs/design/36 の 4・4.1): 9 種の型・スポーンエッグ・素材 3 つ・経験値 (推奨の段は AbyssScaling.ABYSS_LEVEL)。
-// 素材の見た目は tools/gen/abyss/gen_abyss_mobs_a.py。数字は AbyssScaling。音は既存の音の別名を使う (新しい音の素材は作っていない)。
+// 素材の見た目は tools/gen/abyss/gen_abyss_mobs_a.py。数字は AbyssScaling。声 (環境音・被弾・倒れる) は skyabyss_abyss_a の音 (tools/gen/sound/gen_mob_voices.py)。
 public final class AbyssMobsA {
+    public static final String SOUND_NS = "skyabyss_abyss_a";
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
+    private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SOUND_NS);
 
     private static final Map<AbyssMobKind, DeferredHolder<EntityType<?>, EntityType<AbyssMob>>> TYPES = new EnumMap<>(AbyssMobKind.class);
     private static final Map<AbyssMobKind, DeferredItem<Item>> EGGS = new EnumMap<>(AbyssMobKind.class);
@@ -48,6 +52,21 @@ public final class AbyssMobsA {
     }
 
     private AbyssMobsA() {
+    }
+
+    // 声 (環境音・被弾・倒れる)。名前は <種>_ambient / _hurt / _death。AbyssMobB と同じく AbyssMob が MobVoices で引く
+    static {
+        for (AbyssMobKind k : AbyssMobKind.values()) {
+            MobVoices.put(k.id, voice(k.id));
+        }
+    }
+
+    private static MobVoices.Voice voice(String id) {
+        return new MobVoices.Voice(sound(id + "_ambient"), sound(id + "_hurt"), sound(id + "_death"));
+    }
+
+    private static DeferredHolder<SoundEvent, SoundEvent> sound(String name) {
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(SOUND_NS, name)));
     }
 
     public static DeferredHolder<EntityType<?>, EntityType<AbyssMob>> type(AbyssMobKind k) {
@@ -79,6 +98,7 @@ public final class AbyssMobsA {
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
+        SOUNDS.register(modEventBus);
         modEventBus.addListener(AbyssMobsA::onAttributes);
         modEventBus.addListener(AbyssMobsA::onCreativeTab);
         modEventBus.addListener(AbyssMobsA::onCommonSetup);
@@ -91,7 +111,7 @@ public final class AbyssMobsA {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (AbyssMobKind k : AbyssMobKind.values()) {
                 event.accept(EGGS.get(k).get());
             }

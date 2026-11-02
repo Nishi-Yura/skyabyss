@@ -25,7 +25,7 @@ public final class ForgeRules {
     }
 
     public static boolean accepts(ItemStack stack) {
-        // 旅装 (鯨道の旅装) は炉に入れない: 鍛えず、分解して巨神の欠片を稼げないように (21 の 1.2)
+        // 旅装 (鯨道の旅装) は炉に入れない: 鍛えず、分解して巨神の欠片を稼げないように
         return stack.getItem() instanceof ModGear && stack.getMaxStackSize() == 1 && !(stack.getItem() instanceof jp.revati.skyabyss.guide.WhaleRoadArmorItem);
     }
 
@@ -95,7 +95,8 @@ public final class ForgeRules {
     // 材料の枠に置かれたものが穴へ差せるものなら、その中身 (欠片・ルーン)。差せないものは null
     public static jp.revati.skyabyss.item.extra.Gem gemOf(ItemStack material) {
         if (material.getItem() instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard shard) {
-            return new jp.revati.skyabyss.item.extra.Gem(jp.revati.skyabyss.item.extra.Gem.SHARD, shard.element.id, 0);
+            return new jp.revati.skyabyss.item.extra.Gem(jp.revati.skyabyss.item.extra.Gem.SHARD, shard.element.id,
+                    jp.revati.skyabyss.item.extra.Powder.tier(material));
         }
         jp.revati.skyabyss.item.extra.RuneData d = jp.revati.skyabyss.item.extra.GearFreedomItems.runeOf(material);
         if (material.is(ModItems.SKILL_RUNE.get()) && d != null && d.valid()) {
@@ -108,7 +109,8 @@ public final class ForgeRules {
     public static ItemStack gemItem(jp.revati.skyabyss.item.extra.Gem gem) {
         if (gem.isShard()) {
             jp.revati.skyabyss.item.extra.Element e = jp.revati.skyabyss.item.extra.Element.byId(gem.arg());
-            return e == null ? ItemStack.EMPTY : new ItemStack(ModItems.socketShard(e).get());
+            return e == null ? ItemStack.EMPTY
+                    : jp.revati.skyabyss.item.extra.Powder.withTier(new ItemStack(ModItems.socketShard(e).get()), jp.revati.skyabyss.item.extra.Powder.tier(gem));
         }
         return jp.revati.skyabyss.item.extra.GearFreedomItems.rune(jp.revati.skyabyss.item.extra.RuneData.fromGem(gem));
     }
@@ -230,6 +232,10 @@ public final class ForgeRules {
     // 分解で戻る共鳴の欠片 (ヒロイック以上。由来の巨神の欠片)
     public static Item resonanceItem(ItemStack stack) {
         jp.revati.skyabyss.item.TitanGearSet set = TitanGearSets.of(stack.getItem());
+        // 雲海の神器とあいだの塔は共鳴の欠片を持たないので、その表の欠片 (心核の欠片・塔の欠片) を返す (前は岩鯨の欠片に落ちていた)
+        if (set != null && set.exclusives().isEmpty()) {
+            return jp.revati.skyabyss.item.TitanGearSet.item(set.shard).orElse(ModItems.resonanceShard("stone_whale"));
+        }
         return ModItems.resonanceShard(set == null ? "stone_whale" : set.titan);
     }
 

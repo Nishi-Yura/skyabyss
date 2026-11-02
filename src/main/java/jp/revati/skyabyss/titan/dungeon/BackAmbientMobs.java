@@ -22,7 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 岩鯨の背の「開けた」場所 (西の翼の竪穴 WB・崩れ橋 WC。天井が高く、空が見える) に出る骨鳥 (21 の 3.3。鐘楼・胸びれの小物の先取り)。
+// 岩鯨の背の「開けた」場所 (西の翼の竪穴 WB・崩れ橋 WC。天井が高く、空が見える) に出る骨鳥 (鐘楼・胸びれの小物の先取り)。
 // 広間の波ではなく、グループごとの環境の敵: そのグループの人が場所に入ると 2 体 (近くの人が増えるごとに半数、最大 4)、倒しきると
 // 90 秒あとにまた出る。人が離れる・グループが戻る (resetGroup) と消える。MOB_TAG つきなので保存されない。
 @EventBusSubscriber(modid = SkyAbyss.MODID)

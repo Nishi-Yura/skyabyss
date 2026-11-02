@@ -99,7 +99,7 @@ public final class AbyssGearSetup {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, LAMP_SWORD, LISTENER, CHARM, ANCHOR, DAGGER, PLUMB,
                     SHARD, CORE, RESONANCE_SHARD)) {
                 event.accept(item.get());

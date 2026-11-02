@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "skyabyss:block/moon_ledge_top",
+    "side": "skyabyss:block/moon_ledge"
+  }
+}

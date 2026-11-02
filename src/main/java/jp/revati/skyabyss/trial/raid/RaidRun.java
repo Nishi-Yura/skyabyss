@@ -21,6 +21,7 @@ import jp.revati.skyabyss.trial.TrialDraw;
 import jp.revati.skyabyss.trial.TrialFrame;
 import jp.revati.skyabyss.trial.TrialRoute;
 import jp.revati.skyabyss.trial.TrialSlot;
+import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -65,6 +66,9 @@ public final class RaidRun {
         public Phase phase = Phase.COUNTDOWN;
         public long until;
         public int wipes;
+        // 部屋が始まった時刻と、最後に邪魔の敵を出した時刻 (RaidPace)
+        public long activeSince;
+        public long lastHarass;
         public RaidHudNet.Hud lastHud;
         public boolean hudOff;
 
@@ -264,6 +268,8 @@ public final class RaidRun {
             case COUNTDOWN -> {
                 if (now >= run.until) {
                     run.phase = Phase.ACTIVE;
+                    run.activeSince = now;
+                    run.lastHarass = now;
                     RaidKit.setGate(ctx, ctx.cell().entryGate(), true);
                     try {
                         run.room.start(ctx);
@@ -278,6 +284,8 @@ public final class RaidRun {
                 } catch (RuntimeException e) {
                     SkyAbyss.LOGGER.warn("Raid room {} tick failed: {}", ctx.roomId(), e.toString());
                 }
+                // 部屋をそろえる共通の決まり (時間切れ・邪魔の敵)
+                RaidPace.tick(run, now);
                 String fail = ctx.takeFail();
                 if (fail != null) {
                     wipe(run, fail.isEmpty() ? null : fail);
@@ -409,6 +417,7 @@ public final class RaidRun {
     public static void wipe(Run run, @Nullable String reasonKey) {
         RaidCtx ctx = run.ctx;
         run.wipes++;
+        ctx.assistWipes = run.wipes;
         RaidRewards.onWipe(ctx.level(), ctx.group());
         int idx = 0;
         for (ServerPlayer p : ctx.players()) {
@@ -456,6 +465,10 @@ public final class RaidRun {
         Trial.Def def = TrialRoute.defOf(draw, run.step);
         if (def != null) {
             RaidRewards.onRoomCleared(ctx.level(), ctx.group(), ctx.titan(), ctx.roomId(), def.slot());
+        }
+        if (run.room instanceof jp.revati.skyabyss.trial.raid.mid.FightBossRoom) {
+            // 闘の部屋の中で中ボスを倒した: 中ボスの間の報い (素材・共鳴の欠片・結晶) と順路の「中ボス」の印
+            RaidRewards.onMidCleared(ctx.level(), ctx.group(), ctx.titan());
         }
         SkyAbyss.LOGGER.info("Raid: room {} cleared by group {} (wipes {})", ctx.roomId(), ctx.group(), run.wipes);
         if (key != null) {
@@ -509,7 +522,7 @@ public final class RaidRun {
         return run != null && run.ctx.level() == sp.level() && run.ctx.cell().bounds().contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) ? run : null;
     }
 
-    private static final Map<UUID, Long> LAST_USE = new HashMap<>();
+    private static final Map<UUID, Long> LAST_USE = PlayerMaps.track(new HashMap<>());
 
     private static void handleUse(Player player, BlockPos pos, boolean attack, Runnable cancel) {
         if (!(player instanceof ServerPlayer sp)) {
@@ -573,7 +586,7 @@ public final class RaidRun {
             boolean fin = done || run.phase == Phase.COMPLETE;
             BlockPos g = fin ? null : guideOf(run);
             hud = new RaidHudNet.Hud(run.ctx.roomId(), room.objectiveKey(), args, room.counter(), room.counterMax(), room.secondaryKey(), room.secondary(),
-                    room.secondaryMax(), room.timerTicks(), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ());
+                    room.secondaryMax(), RaidPace.timerTicks(run, run.ctx.now()), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ());
         }
         run.lastHud = hud;
         for (ServerPlayer p : run.ctx.players()) {

@@ -262,7 +262,8 @@ public final class ChapterSitesSelfTest {
             ServerLevel level = server.overworld();
             ChapterSites.element(MARKER, CH, "chapter_test_marker").count(3).dist(40, 140).arriveRadius(16).register();
             ChapterSites.element(HUT, CH, "chapter_test_hut").count(2).dist(40, 140).prefer(Prefer.HIGH).arriveRadius(16).onArrive((p, s) -> arrivals++).register();
-            baseA = OpeningSites.camp(server).orElse(level.getSharedSpawnPos());
+            // 野営地は海の向こうの島なので、遠い所の試しは鐘の都から
+            baseA = jp.revati.skyabyss.world.continent.ContinentLayout.get().capital();
             SiteFinder.Probe probe = new SiteFinder.Probe(level);
             baseC = dry(probe, 0, 700, 900, baseA);
             farPos = dry(probe, Math.PI, 500, 650, baseA, baseC);

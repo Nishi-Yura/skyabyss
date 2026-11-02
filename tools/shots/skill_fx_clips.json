@@ -89,29 +89,47 @@
   "frames": 132,
   "impact_frame": 14
  },
- "signal": {
+ "shield_bash": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 10
+ },
+ "bone_swing": {
   "fps": 30,
   "ticks": 36,
   "frames": 54,
   "impact_frame": 16
  },
- "dust_charge": {
+ "spin_cut": {
   "fps": 30,
   "ticks": 36,
   "frames": 54,
-  "impact_frame": 12
+  "impact_frame": 15
  },
- "steam_bell": {
+ "twin_fang": {
   "fps": 30,
   "ticks": 36,
   "frames": 54,
   "impact_frame": 14
  },
- "cinder_volley": {
+ "spark_burst": {
   "fps": 30,
   "ticks": 36,
   "frames": 54,
-  "impact_frame": 18
+  "impact_frame": 9
+ },
+ "snare_shot": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 10
+ },
+ "stardust": {
+  "fps": 30,
+  "ticks": 36,
+  "frames": 54,
+  "impact_frame": 14
  },
  "deep_pull": {
   "fps": 30,

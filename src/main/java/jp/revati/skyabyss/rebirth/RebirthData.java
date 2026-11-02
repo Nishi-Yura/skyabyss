@@ -13,6 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 //  unlocked : 解けた称号の印 (RebirthTitles の番号の bit)
 //  flawless : 死なずに転生した回数
 //  hidden   : 順位表に載せない (断る)
+// 名札の称号はいつも名前の上 (2026-11-01 に位置を選ぶのはやめた。前の保存の "title_pos" は読まない)
 public record RebirthData(int count, String title, long unlocked, int flawless, boolean hidden) {
     public static final RebirthData EMPTY = new RebirthData(0, "", 0L, 0, false);
 

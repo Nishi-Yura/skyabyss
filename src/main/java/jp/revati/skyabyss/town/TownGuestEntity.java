@@ -76,7 +76,7 @@ public class TownGuestEntity extends NpcEntity {
     @Override
     public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("Guest") && TownGuests.byId(tag.getString("Guest")) != null) {
+        if (tag.contains("Guest") && (TownGuests.byId(tag.getString("Guest")) != null || RegionFolk.byId(tag.getString("Guest")) != null)) {
             setGuest(tag.getString("Guest"));
         }
     }

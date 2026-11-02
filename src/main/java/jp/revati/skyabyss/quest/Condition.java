@@ -47,7 +47,7 @@ import net.minecraft.world.item.Item;
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -137,6 +137,7 @@ public final class Condition {
                 }
             }
             case "ward_ok" -> need("titan", errors, where);
+            case "in_town" -> need("town", errors, where);
             case "no_keepsake" -> {
                 need("item", errors, where);
                 if (item(GsonHelper.getAsString(json, "item", "")) == null && !GsonHelper.getAsBoolean(json, "optional", false)) {
@@ -197,7 +198,7 @@ public final class Condition {
                 yield s >= GsonHelper.getAsInt(json, "min", 0) && s <= GsonHelper.getAsInt(json, "max", Integer.MAX_VALUE);
             }
             case "stilled" -> jp.revati.skyabyss.progress.Progression.stopped(ctx.player().server, ctx.player().getUUID(), str("titan"));
-            // 周回: そのグループが心臓を止めている (first_cleared)。titan を省けばどの巨神でもよい (docs/design/21 の 1.7・1.8)
+            // 周回: そのグループが心臓を止めている (first_cleared)。titan を省けばどの巨神でもよい
             case "repeat_run" -> jp.revati.skyabyss.titan.group.FirstRun.hasCleared(ctx.player().server, jp.revati.skyabyss.titan.group.Groups.keyOf(ctx.player()),
                     optStr("titan"));
             case "world_stage" -> jp.revati.skyabyss.progress.Progression.worldStage(ctx.player().server) >= GsonHelper.getAsInt(json, "min", 0);
@@ -222,6 +223,17 @@ public final class Condition {
                     >= GsonHelper.getAsInt(json, "min", 1);
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);
             case "level" -> jp.revati.skyabyss.rebirth.Rebirth.gearLevel(ctx.player()) >= GsonHelper.getAsInt(json, "min", 1);
+            // 都 (はじまりの町) の中か。土地の町の係の人が、都の名を出さないように (docs/design/45 の 5 章)
+            case "in_capital" -> jp.revati.skyabyss.opening.OpeningSites.shelter(ctx.player().server)
+                    .map(c -> c.distSqr(ctx.player().blockPosition()) <= 200.0 * 200.0).orElse(false);
+            // 土地の町の中か (town = whale / tide / storm / ember。ContinentTowns.REGIONS)。係の人が町ごとに一言を変える
+            case "in_town" -> {
+                net.minecraft.server.MinecraftServer server = ctx.player().server;
+                jp.revati.skyabyss.opening.site.SiteData.Entry e = jp.revati.skyabyss.facility.TownGuide.townAt(server, ctx.player().blockPosition());
+                yield e != null && jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index).equals(str("town"));
+            }
+            // 見終えた結末の数 (終章。docs/design/53 の 3 章)
+            case "endings_seen" -> jp.revati.skyabyss.story.finale.FinaleEnding.seen(ctx.player()).size() >= GsonHelper.getAsInt(json, "min", 1);
             case "night" -> {
                 long t = ctx.player().server.overworld().getDayTime() % 24000L;
                 yield t >= 13000 && t < 23000;

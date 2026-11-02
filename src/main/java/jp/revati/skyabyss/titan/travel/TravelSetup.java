@@ -37,11 +37,11 @@ public final class TravelSetup {
     public static final DeferredItem<Item> TIDE_SHELL_CALL = ITEMS.register("tide_shell_call",
             () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.TIDE_SHELL, () -> TitanKind.TIDE_SHELL, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
-    // 雷翼の呼び羽。出会った人が掲げると、雷翼が近くの峰へ降りて止まる (旅はない。背へ乗るための呼び)。TODO: 絵は仮 (岩鯨の笛の色替え)。ラフ 3 案を作って選んでもらう
+    // 雷翼の呼び羽。出会った人が掲げると、雷翼が近くの峰へ降りて止まる (旅はない。背へ乗るための呼び)
     public static final DeferredItem<Item> THUNDER_WING_CALL = ITEMS.register("thunder_wing_call",
             () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.THUNDER_WING, null, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
-    // 余燼の呼び鈴。出会った人が鳴らすと、余燼が近くの陸に浮かんで口を開ける (旅はない)。TODO: 絵は仮 (岩鯨の笛の色替え)。ラフ 3 案を作って選んでもらう
+    // 余燼の呼び鈴。出会った人が鳴らすと、余燼が近くの陸に浮かんで口を開ける (旅はない)
     public static final DeferredItem<Item> EMBER_CALL = ITEMS.register("ember_call",
             () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.EMBER, null, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
@@ -80,7 +80,7 @@ public final class TravelSetup {
 
     // Mod のタブの末尾に並べる (ModItems の一覧には手を入れない)
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(STONE_WHALE_CALL.get());
             event.accept(TIDE_SHELL_CALL.get());
             event.accept(THUNDER_WING_CALL.get());

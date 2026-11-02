@@ -30,6 +30,12 @@ public abstract class MidRoom extends RaidRoom {
     protected boolean defeated;
     // 倒れた瞬間に間にいた人 (報酬を渡す相手)
     protected final Set<UUID> fighters = new LinkedHashSet<>();
+    // 闘の部屋の中で出る (FightBossRoom)。前触れの波は闘の部屋がやったので出さない
+    boolean inRoom;
+
+    // 闘の部屋に、この中ボスの戦いに要る仕掛けだけを建てる (間そのものは建てない。FightBossRoom が中ボスの段に入るとき)
+    protected void fitInto(RaidCtx ctx) {
+    }
 
     // 中ボスを湧かせる (ctx.adopt してから返す)。失敗したら null
     @Nullable
@@ -63,7 +69,9 @@ public abstract class MidRoom extends RaidRoom {
         defeated = false;
         fighters.clear();
         boss = null;
-        startFight(ctx);
+        if (!inRoom) {
+            startFight(ctx);
+        }
         if (!bossReady(ctx)) {
             return;
         }

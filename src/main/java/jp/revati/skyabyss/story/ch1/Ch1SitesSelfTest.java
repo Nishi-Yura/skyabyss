@@ -34,13 +34,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-// 一章の地上 (P6。docs/design/21 の 3.1〜3.2) の自己テスト。Ch1SelfTest の「ch1 sites」のあと (本物の世界に小要素が建ったあと) に流す。結果は SELFTEST ch1 p6 PASSED / FAILED
+// 一章の地上 (P6) の自己テスト。Ch1SelfTest の「ch1 sites」のあと (本物の世界に小要素が建ったあと) に流す。結果は SELFTEST ch1 p6 PASSED / FAILED
 //   sites    新しい場所が全部建つ (道の祠・骨の集め場・割れ殻の洞)・拠点から 150 以内・洞の部品が人のブロックを壊さない・
 //            洞の部屋の敵の立ち位置が空気 (向きが合っている)・鳴り石と格子の印・荷車の傍らの道・歌の間 (人の建てた物には置かない・置く・戸が開く・壁画)
 //   cave     洞の湧き台: 二つのグループが同時に入れる・敵が部屋に立つ・鳴り石の順 (誤りで戻る・低い順で格子が開く)・クリアの記録 (経験値・宝・合図)
-//   pit      骨の坑 (34 の 4.2.1): 碑 2 枚の文・荷の樽・冷えの戸 9 マス・鉄鉱石の筋・水の坑道・出口の梯子・湧き台の立ち位置、
+//   pit      骨の坑: 碑 2 枚の文・荷の樽・冷えの戸 9 マス・鉄鉱石の筋・水の坑道・出口の梯子・湧き台の立ち位置、
 //            冷えの戸 (鉄なしでは開かない・鉄の兜で開く)、湧き台 (グループの分だけ湧く → 倒しきるとクリアの記録・経験値・粗鉄)
-//   trails   支度の段 3 本 (34 の 4.2): イサナの鯨の話のあとに三本とも出る・覚書が渡る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
+//   trails   支度の段 3 本: イサナの鯨の話のあとに三本とも出る・覚書が渡る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
 //            折れた剣 (洞の台座の頁 → 職人 → 鉄の剣 + 砥石)・盾と糧 (語り部の話 → 盾 + 固焼き 8)・三本で ch1_ready と鯨追いの印 (一度)
 //   descent  岩鯨の降下の条件 (見たら降りる。場面の間は待つ。日・支度の本数は見ない。人ごと)、見つけてから鎖までの長さ、経験値の枠
 public final class Ch1SitesSelfTest {
@@ -452,7 +452,7 @@ public final class Ch1SitesSelfTest {
             // 冷えの戸: 鉄なしでは開かない、鉄の兜一つで開く (世界に一つ。前の実行で開いていれば確かめない)
             if (!BonePit.doorOpen(level, pit)) {
                 check(!BonePit.touchDoor(a, level, pit) && !BonePit.doorOpen(level, pit), "the cold door opened for a player without iron");
-                a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+                a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get()));
                 check(BonePit.ironWorn(a) == 1 && BonePit.touchDoor(a, level, pit) && BonePit.doorOpen(level, pit), "the cold door did not open for a player wearing an iron helmet");
                 a.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, ItemStack.EMPTY);
             }
@@ -473,7 +473,7 @@ public final class Ch1SitesSelfTest {
             SiteSpawner.tick(level, List.of(a), now + 40);
             check(progress.cleared(a.getUUID(), BonePit.SITE), "clearing the pit was not recorded");
             check(Growth.get(a).discoveries.contains("site:" + BonePit.SITE), "the pit clear xp was not granted");
-            check(jp.revati.skyabyss.quest.QuestItems.count(a, "minecraft:raw_iron", null) >= 4, "the first pit clear should hand over raw iron");
+            check(jp.revati.skyabyss.quest.QuestItems.count(a, "skyabyss:iron_lump", null) >= 4, "the first pit clear should hand over raw iron");
         } finally {
             SiteSpawner.clearAll(level);
             progress.forget(a.getUUID(), BonePit.SITE);
@@ -523,28 +523,28 @@ public final class Ch1SitesSelfTest {
                     "the blade and shield trails should wait for the iron trail");
             check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
 
-            // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・松明 8・頁) → 鉄の防具 4 部位を着る
+            // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・頁。松明は 0.9.22 から入れない: 置く品は持たせない) → 鉄の防具 4 部位を着る
             check(BonePit.openPack(p, level, null), "the pack did not open the first time");
             check(!BonePit.openPack(p, level, null), "the pack gave its contents twice");
             Tasks.flush();
             check(Lore.state(p).has(Ch1Prep.PAGE_IRON), "the pack did not record the page");
-            check(jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:iron_ingot", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 8,
-                    "the pack should hold two iron ingots and eight torches");
+            check(jp.revati.skyabyss.quest.QuestItems.count(p, "skyabyss:iron_lump", null) == 2 && jp.revati.skyabyss.quest.QuestItems.count(p, "minecraft:torch", null) == 0,
+                    "the pack should hold two iron ingots and no torches");
             Quests.poll(p, true);
             QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);
             check(iron.stage == 1 && !iron.done, "the page did not move the iron trail to the armor stage");
-            for (var it : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS)) {
+            for (var it : List.of(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get())) {
                 p.getInventory().add(new ItemStack(it));
             }
             Quests.poll(p, true);
             check(!QuestLog.of(p).entry(Ch1Prep.Q_IRON).done && QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) == 0, "carried (not worn) armor counted");
             p.getInventory().clearContent();
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get()));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get()));
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) == 2, "two worn pieces should read 2/4 (" + QuestLog.of(p).entry(Ch1Prep.Q_IRON).progress(0) + ")");
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get()));
+            p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get()));
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).done, "four worn iron pieces did not finish the iron trail");
             check(PrepQuests.done(p, 1) == 1 && !PrepQuests.ready(p, 1), "one trail step should count as one");
@@ -577,7 +577,7 @@ public final class Ch1SitesSelfTest {
             }
             Quests.onTalk(p, "skyabyss:storyteller", "ch1t_shield_tale");
             check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).stage == 1, "the tale did not move trail_shield to the pack stage");
-            p.getInventory().add(new ItemStack(Items.SHIELD));
+            p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.TRAVEL_SHIELD.get()));
             p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.TravelGear.ROAD_HARDTACK.get(), 7));
             Quests.poll(p, true);
             check(!QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done, "seven hardtack finished trail_shield");

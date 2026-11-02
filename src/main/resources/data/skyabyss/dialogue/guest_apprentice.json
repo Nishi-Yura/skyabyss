@@ -71,13 +71,13 @@
           "kind": "give",
           "if": {
             "type": "item",
-            "item": "minecraft:bone",
+            "item": "skyabyss:bone_chip",
             "count": 3
           },
           "do": [
             {
               "type": "take",
-              "item": "minecraft:bone",
+              "item": "skyabyss:bone_chip",
               "count": 3
             },
             {

@@ -172,7 +172,7 @@ public final class LoreEvents {
         Lore.fire(player, "sky_shadow", t -> true);
     }
 
-    // 書は必ず届く (06 の 2.7節): 最初の空の影が済んだのに、書を受け取っていない人 (屋内にいて影を見なかった・
+    // 書は必ず届く: 最初の空の影が済んだのに、書を受け取っていない人 (屋内にいて影を見なかった・
     // 影の途中で参加した・離れていた) にも、影が去った 3 秒後に落ちてくるよう予定を入れる
     private static void guaranteeBook(ServerPlayer player, ServerLevel level, LoreState state, long now) {
         if (level.dimension() != Level.OVERWORLD) {
@@ -274,11 +274,8 @@ public final class LoreEvents {
         LoreState state = Lore.state(player);
         state.bookGiven = true;
         state.bookDropAt = -1;
-        Vec3 look = player.getLookAngle().multiply(1, 0, 1);
-        if (look.lengthSqr() < 1.0e-4) {
-            look = new Vec3(0, 0, 1);
-        }
-        Vec3 at = player.position().add(look.normalize().scale(2.0)).add(0, 4.0, 0);
+        // その人の頭の上から落とす (目線の先だとブロックの奥に落ちて拾えないことがあった。2026-10-27 の声)
+        Vec3 at = player.position().add(0, 3.0, 0);
         // 天井があれば、その下に出す
         BlockPos head = BlockPos.containing(at);
         while (head.getY() > player.getBlockY() + 1 && !level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {

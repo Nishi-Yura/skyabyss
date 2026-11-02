@@ -539,8 +539,16 @@ public final class AshSmithSelfTest {
         check(s.isWeak(), "the bellows did not open after the breath", f);
         tick(s, p, 20);
         // 後ろ (向きの反対) と前から同じ傷を入れる
-        float front = hitFrom(s, p, fy, true);
-        float rear = hitFrom(s, p, fy, false);
+        // (構えと隙の倍率 combat/BossOpenings はここでは外す。背の弱みの倍率だけを見る)
+        jp.revati.skyabyss.combat.BossOpenings.plantedForTest = e -> false;
+        float front;
+        float rear;
+        try {
+            front = hitFrom(s, p, fy, true);
+            rear = hitFrom(s, p, fy, false);
+        } finally {
+            jp.revati.skyabyss.combat.BossOpenings.plantedForTest = null;
+        }
         // 受ける傷が 1.5 倍になる (防具 12 / 強靭 6 を通す前)。通したあとの値で見る
         double wantFront = 10 * GearCurve.armorTaken(10, 12, 6);
         double wantRear = 15 * GearCurve.armorTaken(15, 12, 6);
@@ -549,7 +557,13 @@ public final class AshSmithSelfTest {
         check(rear > front * 1.4, "the rear hit was not clearly bigger than the front hit", f);
         tick(s, p, AshSmith.WEAK_TICKS);
         check(!s.isWeak(), "the weak window did not end after 3 s", f);
-        float rear2 = hitFrom(s, p, fy, false);
+        jp.revati.skyabyss.combat.BossOpenings.plantedForTest = e -> false;
+        float rear2;
+        try {
+            rear2 = hitFrom(s, p, fy, false);
+        } finally {
+            jp.revati.skyabyss.combat.BossOpenings.plantedForTest = null;
+        }
         check(Math.abs(rear2 - front) < 0.01f, "rear hit after the window should be normal (" + rear2 + " vs " + front + ")", f);
         // 扇の外は無傷
         heal(p);

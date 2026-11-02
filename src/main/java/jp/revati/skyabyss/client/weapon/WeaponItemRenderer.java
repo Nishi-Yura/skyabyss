@@ -65,16 +65,19 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        // 見た目替え (endgame/Looks): 形は見た目の武器、鍛えた光と輝きは元の品のまま
+        net.minecraft.world.item.Item lookItem = jp.revati.skyabyss.endgame.Looks.look(stack);
+        ItemStack shown = lookItem == null ? stack : new ItemStack(lookItem);
+        String id = BuiltInRegistries.ITEM.getKey(shown.getItem()).getPath();
         int stage = pullStage(stack, context);
         if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
-            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(stack) + (stage >= 0 ? "_pull" + stage : ""));
+            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(shown) + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
-                renderMesh(mesh, id, tierName(stack), level(stack), stack.hasFoil(), context, pose, buffers, light, overlay);
+                renderMesh(mesh, id, tierName(shown), level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
                 return;
             }
         }
-        renderVoxel(id, stage, stack, pose, buffers, light, overlay);
+        renderVoxel(id, stage, shown, pose, buffers, light, overlay);
     }
 
     // ---------------------------------------------------------------- メッシュ
@@ -94,11 +97,21 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         return new float[] {0f, 0f};
     }
 
-    private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    // 神器 (七段目) か。形の段は伝説と同じなので、光の脈で見分ける (03 の 1.2。2026-11-02 の監査)
+    static boolean mythic(ItemStack stack) {
+        return stack.getItem() instanceof ModGear g && g.tier() == GearTier.MYTHIC;
+    }
+
+    // 神器の光の脈 (0〜1。約 2.6 秒で一巡)
+    public static float mythicPulse() {
+        return 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() / 420.0);
+    }
+
+    private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, boolean mythic, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         ResourceLocation[] tex = variant(mesh.texture, level);
         pose.pushPose();
         // 元のボクセルは盾以外、全部の要素を z 軸まわりに -45 度 (中心 8,8,8) 傾けていて、display (持ち方) はその傾きを前提にしている。メッシュは刃を立てて作ってあるので、同じだけ傾ける
-        if (!id.equals("coral_shield")) {
+        if (!id.equals("coral_shield") && !id.equals("travel_shield")) {
             pose.translate(0.5f, 0.5f, 0.5f);
             pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-45f));
             pose.translate(-0.5f, -0.5f, -0.5f);
@@ -106,8 +119,20 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         // item モデルの原点は block の角 (この時点で -0.5 ずみ)。メッシュは x = 0, z = 0 が中心で、LowPolyMesh は geo (GeckoLib) 向けに x を反転して焼くので、ここで戻す
         pose.translate(0.5f, 0f, 0.5f);
         pose.scale(-1f, 1f, 1f);
+        // 刃の向きが逆に作ってあるメッシュは、柄の軸で半回転 (2026-10-29 の試遊「短剣や斧、持ち方逆」: 一人称で刃が後ろを向いていた)。
+        // 鎚はどれも打つ面を +x に作ってあり、持ち方を借りた戦斧 (刃が -x) と逆なので、まとめて半回転 (2026-11-01「ハンマー、全体的に前後ろ逆かも」)
+        if (EDGE_FLIP.contains(id) || faceFlip(id)) {
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
+        }
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
         float grow = daggerGrow(id, tier);
+        // 一人称の短剣・爪は手に隠れるので、手元だけ一回り大きく見せる
+        if (context.firstPerson()) {
+            WeaponKind k = WeaponKind.of(id);
+            if (k == WeaponKind.FANG || k == WeaponKind.CLAW) {
+                grow *= 1.18f;
+            }
+        }
         if (grow != 1f) {
             pose.scale(grow, grow, grow);
         }
@@ -116,6 +141,11 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         LowPoly.drawAll(pose, body, mesh, light, overlay, WHITE);
         if (tex[1] != null) {
             LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
+            if (mythic) {
+                // 神器: 光る画素をもう一度、脈打つ濃さで重ねる
+                int a = (int) (40 + 150 * mythicPulse());
+                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
+            }
         }
         // 動きの間だけ: 光る画素をもう一度重ねて強め (GLOW)、刃の軌跡の帯を引く (TRAIL)
         float[] fx = effects(context);
@@ -125,6 +155,15 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
         WeaponTrail.draw(pose, buffers, mesh, id, context.firstPerson() ? -1 : holder == null ? -2 : holder.getId(), !context.firstPerson(), fx[0]);
         pose.popPose();
+    }
+
+    // 刃を +x に作ってある品 (宿り木の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
+    static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger", "gather_axe",
+            "wild_tusk_axe", "wild_conductor_axe", "wild_snowsplitter_axe", "wild_blasting_axe", "wild_molten_axe");
+
+    // 打つ面が +x の鎚 (武器の種類が鎚のもの。採集の道具は除く)
+    static boolean faceFlip(String id) {
+        return WeaponKind.of(id) == WeaponKind.HAMMER && !id.startsWith("gather_");
     }
 
     private static float daggerGrow(String id, String tier) {

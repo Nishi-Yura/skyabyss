@@ -1,0 +1,100 @@
+# 封切り師が都と四つの町の鍛冶屋のそばに立つか (docs/design/52 の 5 章)。前から撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/box_openers.txt -PshotsName=box_openers
+world box_openers continent
+size 1280 720
+timeout 9000
+render 10
+guiscale 2
+clouds off
+waitchunks 300
+wait 40
+cmd time set 3000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss cinematic stop
+close
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+cmd gamemode creative
+cmd skyabyss dev opening at shelter 0 0 2 20 180 6
+waitchunks 600
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~1 ~
+waitchunks 300
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run say opener here
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^ ^1.6 ^2.6 facing ~ ~1.4 ~
+wait 8
+chat clear
+shot capital_opener
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^1.5 ^3.2 ^4.5 facing ~ ~1 ~
+wait 8
+shot capital_opener_wide
+cmd gamemode creative
+cmd skyabyss dev opening at town 0 0 2 20 180 -6
+waitchunks 600
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~1 ~
+waitchunks 300
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run say opener here
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^ ^1.6 ^2.6 facing ~ ~1.4 ~
+wait 8
+chat clear
+shot town0_opener
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^1.5 ^3.2 ^4.5 facing ~ ~1 ~
+wait 8
+shot town0_opener_wide
+cmd gamemode creative
+cmd skyabyss dev opening at town 1 0 2 20 180 -6
+waitchunks 600
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~1 ~
+waitchunks 300
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run say opener here
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^ ^1.6 ^2.6 facing ~ ~1.4 ~
+wait 8
+chat clear
+shot town1_opener
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^1.5 ^3.2 ^4.5 facing ~ ~1 ~
+wait 8
+shot town1_opener_wide
+cmd gamemode creative
+cmd skyabyss dev opening at town 2 0 2 20 180 -6
+waitchunks 600
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~1 ~
+waitchunks 300
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run say opener here
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^ ^1.6 ^2.6 facing ~ ~1.4 ~
+wait 8
+chat clear
+shot town2_opener
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^1.5 ^3.2 ^4.5 facing ~ ~1 ~
+wait 8
+shot town2_opener_wide
+cmd gamemode creative
+cmd skyabyss dev opening at town 3 0 2 20 180 -6
+waitchunks 600
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"smith"},limit=1,sort=nearest] run tp @s ~ ~1 ~
+waitchunks 300
+wait 300
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run say opener here
+cmd gamemode spectator
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^ ^1.6 ^2.6 facing ~ ~1.4 ~
+wait 8
+chat clear
+shot town3_opener
+cmd execute at @e[type=skyabyss:attendant,nbt={Role:"box_opener"},limit=1,sort=nearest] run tp @s ^1.5 ^3.2 ^4.5 facing ~ ~1 ~
+wait 8
+shot town3_opener_wide
+quit

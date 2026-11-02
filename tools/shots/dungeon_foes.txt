@@ -1,0 +1,87 @@
+# 地下のダンジョン専用の敵と中ボス 12 体 (docs/design/55 の 4 の 7): 並べた姿と、技の予告
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/dungeon_foes.txt -PshotsName=dungeon_foes
+world shots flat
+size 1280 720
+timeout 1800
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode creative
+camera 0 -60 -10 0 6
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 40
+chat clear
+
+# ---- 並べた姿 (動かない)。yaw 180 = 北 (カメラの方) を向く
+cmd summon skyabyss:bone_roller -6 -60 0 {NoAI:1b,Rotation:[160f,0f]}
+cmd summon skyabyss:lava_slug -2.5 -60 0 {NoAI:1b,Rotation:[170f,0f]}
+cmd summon skyabyss:horn_beetle 1.5 -60 0 {NoAI:1b,Rotation:[190f,0f]}
+cmd summon skyabyss:cave_jelly 5.5 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:crystal_eye 2 -57.5 2 {NoAI:1b,NoGravity:1b,Rotation:[200f,0f]}
+camera 0 -59 -8 0 10
+wait 40
+shot row_small
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:pit_digger -3.5 -60 0 {NoAI:1b,Rotation:[165f,0f]}
+cmd summon skyabyss:drowned_sailor 0 -60 0.5 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:bellows_imp 3.5 -60 0 {NoAI:1b,Rotation:[195f,0f]}
+camera 0 -58.6 -7 0 6
+wait 40
+shot row_people
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:pit_foreman -10 -60 2 {NoAI:1b,Rotation:[160f,0f]}
+cmd summon skyabyss:bell_hermit -3.5 -60 2 {NoAI:1b,Rotation:[170f,0f]}
+cmd summon skyabyss:geode_golem 3.5 -60 2 {NoAI:1b,Rotation:[190f,0f]}
+cmd summon skyabyss:ox_smith 10 -60 2 {NoAI:1b,Rotation:[200f,0f]}
+camera 0 -57 -16 0 8
+wait 40
+shot row_mid
+cmd kill @e[type=!minecraft:player]
+
+# ---- 技の予告 (人がいると技を出す)。人は傷を受けない
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 4 true
+cmd effect give @s minecraft:regeneration infinite 4 true
+camera 0 -60 -9 0 18
+wait 20
+cmd summon skyabyss:pit_foreman 0 -60 2 {Rotation:[180f,0f]}
+wait 30
+shot atk_foreman_1
+wait 12
+shot atk_foreman_2
+wait 12
+shot atk_foreman_3
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:ox_smith 0 -60 -4 {Rotation:[180f,0f]}
+wait 24
+shot atk_ox_1
+wait 12
+shot atk_ox_2
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:horn_beetle 0 -60 -4 {Rotation:[180f,0f]}
+wait 24
+shot atk_beetle_1
+wait 14
+shot atk_beetle_2
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:bell_hermit 0 -60 -5.5 {Rotation:[180f,0f]}
+wait 24
+shot atk_hermit_1
+wait 14
+shot atk_hermit_2
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:crystal_eye 0 -58 -1 {Rotation:[180f,0f]}
+wait 40
+shot atk_eye_1
+wait 14
+shot atk_eye_2
+cmd kill @e[type=!minecraft:player]
+cmd gamemode creative
+wait 20

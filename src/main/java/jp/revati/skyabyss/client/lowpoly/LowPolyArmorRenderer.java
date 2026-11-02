@@ -18,6 +18,7 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 //  - 低ポリ: geo/armor/lowpoly_armor.geo.json (骨だけ) + lowpoly/armor/<組>/<部位>[_階級].json + 強化段階の絵 (LowPolyArmor)。光る画素は <絵>_glowmask.png を AutoGlowingGeoLayer が重ねる
 //  - LowPolyArmor.enabled = false: 元の geo/armor/<組>_armor.geo.json と textures/armor/<組>_armor.png (cube)
 // 防具の層はバニラの防具モデルを GeckoLib のこの描画に置き換えるので、バニラの層は描かれない
+@SuppressWarnings("unchecked")
 public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends GeoArmorRenderer<T> {
     private static final ResourceLocation LOW_GEO = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/armor/lowpoly_armor.geo.json");
 

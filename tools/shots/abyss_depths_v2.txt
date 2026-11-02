@@ -2,7 +2,7 @@
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/abyss_depths_v2.txt -PshotsName=depths_v2
 # 階は組ごとに作るので、型・部屋は開発用の命令で探す: cmd skyabyss abyss depth kind <型> / feature <shop|house|treasure|rest> / at <entry|stairs|...> / go <階> / kingstart
 # 見渡す向きは tp @s ~ ~ ~ <yaw> <pitch>。タイトル (序章の題) と HUD は、cinematic stop・title clear・hud off・huddemo off で消す
-world opening_depths_v2 normal
+world opening_depths_v2d flat
 size 1280 720
 timeout 2400
 render 10

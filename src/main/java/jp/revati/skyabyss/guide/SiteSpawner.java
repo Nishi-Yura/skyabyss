@@ -41,7 +41,7 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 場所ごとの湧き台 (docs/design/21 の 1.5、P3)。小さなダンジョン・集め場など、地上の場所の敵を出す共通の仕組み。章の担当 (P6 など) は
+// 場所ごとの湧き台 (P3)。小さなダンジョン・集め場など、地上の場所の敵を出す共通の仕組み。章の担当 (P6 など) は
 // 場所を登録するだけで、湧かせ方・グループごとの見え方・クリアの記録・宝・周回が揃う。
 //
 // ---------------------------------------------------------------- 口
@@ -460,7 +460,8 @@ public final class SiteSpawner {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onJoin(EntityJoinLevelEvent event) {
         Entity e = event.getEntity();
-        if (!event.getLevel().isClientSide && e.getTags().contains(TAG) && !LIVE.contains(e.getUUID()) && !ChapterMobSpawner.isLive(e.getUUID())) {
+        if (!event.getLevel().isClientSide && e.getTags().contains(TAG) && !LIVE.contains(e.getUUID()) && !ChapterMobSpawner.isLive(e.getUUID())
+                && !jp.revati.skyabyss.world.continent.RegionSpawner.isLive(e.getUUID())) {
             event.setCanceled(true);
         }
     }

@@ -44,7 +44,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 技の稽古 (都の訓練場の師範。クエストと会話は tools/gen/story/gen_skill_lesson.py)。
+// 技の稽古 (都の訓練場の師範。クエストと会話は データを直接直す（生成スクリプトはない）)。
 //   一章: lesson/skills (会う → 覚えて枠に置く → 木偶に技を二度 → 背後から → 構え → 振り直しを聞く)。段ごとに師範の一言と少しの経験。
 //         最後に一度だけ鐘銭。飛ばせる (師範の印 lesson_skip。自動では始まらなくなる)。済んだら師範に頼めば何度でも (報酬は初回だけ)
 //   後の章: 新しい木・要が開いたら一段だけの稽古 (lesson/tree_*) を始め、一言を出す。その木の技を木偶か敵に当てれば済む
@@ -63,7 +63,6 @@ public final class SkillLesson {
     public static final String SIG_SLOTTED = "skill_lesson:slotted";
     public static final String SIG_DUMMY = "skill_lesson:dummy";
     public static final String SIG_BEHIND = "skill_lesson:behind";
-    public static final String SIG_STANCE = "skill_lesson:stance";
     public static final String SIG_KEYSTONE = "skill_lesson:keystone";
     public static final String SIG_TREE = "skill_lesson:tree:";
     public static final int REWARD_COINS = 15;
@@ -71,7 +70,6 @@ public final class SkillLesson {
 
     // 後の章の一段だけの稽古 (名前・木。KEYSTONE は木でなく要)
     public enum Unlock {
-        HYBRID("tree_hybrid", SkillTree.HYBRID),
         KEYSTONE("tree_keystone", null),
         STAR("tree_star", SkillTree.STAR),
         ABYSS("tree_abyss", SkillTree.ABYSS),
@@ -94,16 +92,16 @@ public final class SkillLesson {
         // 開いたか (今の技の記録で)
         public boolean open(SkillData d, int level) {
             return switch (this) {
-                case HYBRID -> Skill.inTree(SkillTree.HYBRID).stream().anyMatch(d::bridgeOpen);
                 case KEYSTONE -> level >= Skill.STONE_OATH.minLevel;
-                case STAR, ABYSS -> d.unlockedTrees.contains(tree.id);
+                // 技の木 v2 の K の画面には星読み・深淵術師の木のつまみが無い (docs/design/48 の 7 章。木は職ごとと淵・前世だけ)。
+                // 「技の画面に新しい札がある」と案内すると行き先が無いので、この二つの稽古は始めない (星術・深淵術は自分のキーで使う)
+                case STAR, ABYSS -> false;
                 case DEEP, PAST -> d.rebirth >= 1;
             };
         }
     }
 
-    // 構えの覚え (変わったら合図) と、合図を送った最後の使用 (一回の使用で二度数えない)
-    private static final Map<UUID, Integer> STANCE = new HashMap<>();
+    // 合図を送った最後の使用 (一回の使用で二度数えない)
     private static final Map<UUID, Long> LAST_CAST = new HashMap<>();
 
     // ---------------------------------------------------------------- 今の段
@@ -189,10 +187,6 @@ public final class SkillLesson {
         if ("learn".equals(st) && anySlotted(d)) {
             Quests.signal(player, SIG_SLOTTED);
         }
-        Integer before = STANCE.put(id, d.stance);
-        if ("stance".equals(st) && before != null && before != d.stance) {
-            Quests.signal(player, SIG_STANCE);
-        }
         if (stageOf(player, Unlock.KEYSTONE.quest()) != null && knowsKeystone(d)) {
             Quests.signal(player, SIG_KEYSTONE);
         }
@@ -213,6 +207,15 @@ public final class SkillLesson {
             Skill s = d.slot(i);
             if (s != null && s.active && d.knows(s)) {
                 return true;
+            }
+        }
+        // 職ごとの枠 (docs/design/43): ほかの職の枠に置いてあってもよい
+        for (String[] bar : d.jobBars.values()) {
+            for (String id : bar) {
+                Skill s = Skill.byId(id);
+                if (s != null && s.active && d.knows(s)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -310,7 +313,6 @@ public final class SkillLesson {
 
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        STANCE.remove(event.getEntity().getUUID());
         LAST_CAST.remove(event.getEntity().getUUID());
     }
 }

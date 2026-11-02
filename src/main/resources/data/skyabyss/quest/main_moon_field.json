@@ -1,0 +1,112 @@
+{
+  "category": "main",
+  "chapter": "chapter3",
+  "order": 73,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon_cliff",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "meet",
+      "xp": 150,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:guest_moon_past3",
+          "topic": "ch6_field_meet3"
+        }
+      ]
+    },
+    {
+      "id": "pool",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "pool",
+          "type": "signal",
+          "targets": [
+            "moon_field_pool"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "shards",
+      "xp": 460,
+      "objectives": [
+        {
+          "id": "pond",
+          "type": "signal",
+          "targets": [
+            "moon_field_shard_pond"
+          ],
+          "count": 1
+        },
+        {
+          "id": "gully",
+          "type": "signal",
+          "targets": [
+            "moon_field_shard_gully"
+          ],
+          "count": 1
+        },
+        {
+          "id": "tower",
+          "type": "signal",
+          "targets": [
+            "moon_field_shard_tower"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "xp": 100,
+      "objectives": [
+        {
+          "id": "cross",
+          "type": "signal",
+          "targets": [
+            "moon_field_gate"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lord",
+      "xp": 760,
+      "objectives": [
+        {
+          "id": "defeat",
+          "type": "signal",
+          "targets": [
+            "moon_lord_full"
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "promise",
+      "xp": 150,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:guest_moon_past3",
+          "topic": "ch6_field_promise3"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 980
+  }
+}

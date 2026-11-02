@@ -222,11 +222,13 @@ public final class TideLoot {
             List<ItemStack> items = stacks(draws, level.random, unmade);
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(TITAN, level.random));
+            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
+            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(TITAN, level.random));
             int held = TitanLoot.handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = true;
+                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (!unmade.isEmpty()) {
                 SkyAbyss.LOGGER.info("Tide heart reward for {} skipped items that are not made yet: {}", uuid, unmade);

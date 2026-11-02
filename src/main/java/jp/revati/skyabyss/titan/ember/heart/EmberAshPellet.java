@@ -91,7 +91,7 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
 
     @Override
     public ItemStack getItem() {
-        return new ItemStack(Items.CHARCOAL);
+        return new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.CHARCOAL_LUMP.get());
     }
 
     @Override

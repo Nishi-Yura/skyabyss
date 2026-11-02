@@ -1,0 +1,38 @@
+# 六章 区画 3「満月の野」の模型の見直し: 望の灯守 (前 3/4・溜め・放ち)、影の竹馬 (立ち・像)、鏡背負い、光の群れを近くで
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/moon_field_models.txt -PshotsName=moon_field_models
+# 主の間の外 (野営の東の平ら) に AI なしで置いて撮る。観戦モード + 暗視
+world moon_strider_fold1 continent
+size 1600 900
+timeout 1800
+render 10
+clouds off
+waitchunks 300
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss moonworld enter
+waitchunks 200
+wait 100
+cmd skyabyss moonworld phase 2
+cmd gamemode spectator
+hud off
+cmd effect give @s minecraft:night_vision 99999 0 true
+cmd tp @s -96 30 4 90 20
+waitchunks 200
+wait 60
+cmd skyabyss moonworld tide dim
+cmd summon skyabyss:shade_strider -96 12 4 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd tp @s -96 16 9 180 14
+wait 40
+shot s01_front_rest
+cmd tp @s -91 16 4 90 14
+wait 20
+shot s02_side_rest
+cmd skyabyss moonworld pose fold
+wait 40
+shot s03_side_fold
+cmd tp @s -96 16 9 180 14
+wait 20
+shot s04_front_fold
+close

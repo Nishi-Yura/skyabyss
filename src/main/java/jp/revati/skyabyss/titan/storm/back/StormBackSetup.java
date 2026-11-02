@@ -19,7 +19,7 @@ public final class StormBackSetup {
             () -> new StormBlocks.Mirror(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(-1.0f, 3600000.0f)
                     .noLootTable().noOcclusion().sound(SoundType.COPPER).lightLevel(s -> 4)));
 
-    // 避雷の柱 (台・段の電球・軸・先の針)。壊せない。見た目は tools/gen/items/gen_back_blocks.py の専用モデル
+    // 避雷の柱 (台・段の電球・軸・先の針)。壊せない。見た目は データを直接直す（生成スクリプトはない） の専用モデル
     private static BlockBehaviour.Properties fixed(MapColor color, SoundType sound) {
         return BlockBehaviour.Properties.of().mapColor(color).strength(-1.0f, 3600000.0f).noLootTable().sound(sound).noOcclusion();
     }

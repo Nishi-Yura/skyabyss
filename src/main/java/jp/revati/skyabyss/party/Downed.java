@@ -159,10 +159,12 @@ public final class Downed {
         return out;
     }
 
-    // 倒れてよい場面か: ルールが有効・まだ倒れていない・同じ次元に起こせる仲間が残っている (背中でも地上でも)
+    // 倒れてよい場面か: ルールが有効・まだ倒れていない・同じ次元に起こせる仲間が残っている (背中でも地上でも)。
+    // 終章の約束の島では、一人でも野の私が起こしに来る (story/finale/PromiseIsle.canRaise)
     public static boolean mayDown(ServerPlayer player) {
         return enabled(player.server) && player.isAlive() && !player.isSpectator()
-                && !DOWNED.containsKey(player.getUUID()) && (!rescuers(player).isEmpty() || jp.revati.skyabyss.trial.raid.RaidRun.inRoom(player));
+                && !DOWNED.containsKey(player.getUUID()) && (!rescuers(player).isEmpty() || jp.revati.skyabyss.trial.raid.RaidRun.inRoom(player)
+                || jp.revati.skyabyss.story.finale.PromiseIsle.canRaise(player));
     }
 
     // 倒れた状態を解く (レイドの部屋の全滅のやり直しから)。倒れていなければ何もしない
@@ -202,7 +204,7 @@ public final class Downed {
         Notice.bar(player, ModText.deny("message.skyabyss.revive.down_self", DOWN_TICKS / 20));
         Component name = player.getName();
         for (ServerPlayer mate : rescuers(player)) {
-            Notice.alert(mate, "message.skyabyss.revive.down_mate", name);
+            Notice.alert(mate, "message.skyabyss.revive.down_mate", name, Component.keybind("key.use"));
         }
     }
 
@@ -242,8 +244,17 @@ public final class Downed {
         return true;
     }
 
+    // 仲間でない者が起こす (終章の約束の島の野の私)。倒れていなければ何もしない
+    public static void raise(ServerPlayer victim) {
+        if (DOWNED.containsKey(victim.getUUID())) {
+            revive(victim, null);
+        }
+    }
+
     private static void revive(ServerPlayer victim, @Nullable ServerPlayer reviver) {
         clear(victim.getUUID(), victim);
+        // 約束の小鈴: 起こした仲間に守り
+        jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.onRevived(victim, reviver);
         victim.setHealth(Math.max(1f, victim.getMaxHealth() * REVIVE_HEALTH));
         victim.fallDistance = 0;
         ReentryRules.guard(victim, false);
@@ -316,7 +327,7 @@ public final class Downed {
                 clear(id, p);
                 continue;
             }
-            if (!enabled(server) || rescuers(p).isEmpty() || now - s.start >= DOWN_TICKS) {
+            if (!enabled(server) || rescuers(p).isEmpty() && !jp.revati.skyabyss.story.finale.PromiseIsle.holds(p) || now - s.start >= DOWN_TICKS) {
                 expire(p);
                 continue;
             }
@@ -390,7 +401,8 @@ public final class Downed {
             s.progress = 0;
             return;
         }
-        s.progress++;
+        // 野の装備 (雲上の祝詞の鈴杖) で起こす速さ ×2 (docs/design/51)
+        s.progress += jp.revati.skyabyss.item.wild.WildGearEvents.reviveStep(holder);
         if (s.progress >= REVIVE_TICKS) {
             revive(victim, holder);
         }

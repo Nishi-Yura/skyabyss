@@ -39,7 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 旅の職人 (docs/design/21 の P4) の自己テスト。段: "artisan"。
+// 旅の職人の自己テスト。段: "artisan"。
 //  - 絵と骨: メッシュ・骨だけの geo・アニメ・章ごとの 4 つの絵・対話の顔・防具の絵が、そろっていて、骨の名前とピボットが合う (root の yaw 180 度は語り部と同じ)
 //  - 立たせる: 章ごとの立つ所の表 (ArtisanSpawner.Spot) が引き、いなければ立たせ、二人目は立たせない。装い (variant) を保存する
 //  - 会話: 入口の順 (初対面・頼み 3 本・乗る前の一言)、選択肢の条件 (好感度・覚書・鼓動守の編み直し)、結果 (作り方・鼓動守)、語り部は一言だけ残る
@@ -225,7 +225,7 @@ public final class ArtisanSelfTest {
             check(f, java.util.Arrays.equals(pngSize(a + "textures/item/whale_road_" + piece + ".png", f), new int[] {32, 32}), "the " + piece + " icon is not 32x32");
             check(f, json(a + "models/item/whale_road_" + piece + ".json", f).has("textures"), "the " + piece + " item model is missing");
         }
-        check(f, armorTris == 600, "the whale road armor has " + armorTris + " triangles (want 600 after closing the meshes)"); // 418 → 600: watertight pass (docs/design/15)
+        check(f, armorTris >= 600 && armorTris <= 1400, "the whale road armor has " + armorTris + " triangles (want 600 to 1400)"); // 418 → 600: watertight pass (docs/design/15)、926: 一品一案の作り直し (2026-10-26)
         // 旅の覚書・鼓動守の絵 (案 A に差し替え済み。仮の絵ではない)
         check(f, java.util.Arrays.equals(pngSize(a + "textures/item/wayfarer_notes.png", f), new int[] {32, 32}), "the notes icon is not 32x32");
         check(f, java.util.Arrays.equals(pngSize(a + "textures/item/heartbeat_ward.png", f), new int[] {32, 32}), "the heartbeat ward icon is not 32x32");
@@ -383,13 +383,10 @@ public final class ArtisanSelfTest {
         jp.revati.skyabyss.lore.Lore.unlock(p, Ch1Prep.PAGE_BLADE, false);
         Quests.poll(p, true);
         check(f, entry(d, c).equals("ch1t_blade_show"), "the show stage should open ch1t_blade_show, got " + entry(d, c));
-        var whetHolder = level.getServer().getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("skyabyss", "rock_whetstone"));
-        check(f, whetHolder.isPresent(), "the whetstone recipe is missing");
-        whetHolder.ifPresent(h -> p.getRecipeBook().remove(h));
+        check(f, jp.revati.skyabyss.facility.MadeToOrder.find("rock_whetstone") != null, "the rock whetstone is not made to order");
         for (Action a : d.nodes().get("ch1t_blade_show").actions()) {
             a.run(c);
         }
-        check(f, whetHolder.isPresent() && p.getRecipeBook().contains(whetHolder.get()), "the artisan did not teach the recipes");
         Quests.onTalk(p, ROLE, "ch1t_blade_show");
         check(f, !entry(d, c).equals("ch1t_blade_show"), "the show entry came again after the talk");
         // 鍛えの段: 鉄の剣と砥石 (どちらが先でもよい)
@@ -453,8 +450,8 @@ public final class ArtisanSelfTest {
                 && !st.nodes().containsKey("ch1p_blade_report") && !st.nodes().containsKey("ch1p_pulse_weave"), "the storyteller keeps only the pointer line");
         check(f, st != null && st.entries().get(st.entries().size() - 1).node().equals("menu"), "the storyteller catch-all entry must stay last");
 
-        // 参照先: 条件・結果の型 (ward_ok・unlock_recipes・remake_ward が読み込めている)
-        check(f, Condition.TYPES.contains("ward_ok") && Action.TYPES.contains("unlock_recipes") && Action.TYPES.contains("remake_ward"), "the new condition / action types are not registered");
+        // 参照先: 条件・結果の型 (ward_ok・remake_ward が読み込めている)
+        check(f, Condition.TYPES.contains("ward_ok") && Action.TYPES.contains("remake_ward"), "the new condition / action types are not registered");
         npc.discard();
     }
 

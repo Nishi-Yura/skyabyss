@@ -33,14 +33,14 @@ import net.minecraft.world.item.ItemStack;
 //   grave_choose                   : 墓の一覧の画面を開く。選んだ墓を語り部の救いで戻す (墓は消え、割合の分だけ手もとへ。grave パッケージ)
 //   grave_rescue                   : いちばん古い墓を語り部の救いで戻す (画面なし)
 //   give_notes  {chapter}          : 旅の覚書 (その章の手帳) を渡す。人ごとに一度、なくしたときは持っていなければ渡し直す (guide.WayfarerNotes)
-//   unlock_recipes {chapter}       : その章の旅の覚書のレシピを解く (旅装・砥石・糧と薬。guide.WayfarerNotes。職人が教える)。新しく解けた数を一行で知らせる
 //   remake_ward {titan}            : その巨神の鼓動守を編み直して渡す (持っていない人だけ、1 日 1 つまで。条件 ward_ok と組。素材は別に take)
 //   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
 //   facility    {open, shop}       : 都の施設の働き (店・預かり所・宿・止まり木・地図・ギルド・修理。facility.FacilityActions)
 //   town        {act}              : 町のクエストと裏通りの働き (酒場の地下の壁を開ける・地図屋の噂と描き足し。town.TownActions)
+//   runs        {titan?}           : 背中の踏破の記録 (巨神ごと・人数の部ごとの最速と、今週のギルドの心臓の数) をチャットに出す (facility.guild.TitanRunData)
 public final class Action {
     public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
-            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward", "facility", "town", "lesson");
+            "open_board", "grave_rescue", "grave_choose", "give_notes", "remake_ward", "facility", "town", "lesson", "runs");
 
     private final String type;
     private final JsonObject json;
@@ -111,7 +111,7 @@ public final class Action {
             case "lore" -> "entry";
             case "give", "take" -> "item";
             case "xp" -> "once";
-            case "give_notes", "unlock_recipes" -> "chapter";
+            case "give_notes" -> "chapter";
             case "remake_ward" -> "titan";
             case "facility" -> "open";
             case "town", "lesson" -> "act";
@@ -168,7 +168,12 @@ public final class Action {
             case "lore" -> Lore.unlock(player, str("entry"), true);
             case "give" -> {
                 Item item = Condition.item(str("item"));
-                if (item != null) {
+                if (item != null && optStr("page") != null) {
+                    // 破れた頁 (lore_page) は出どころ (page) を付けて渡す。読むとその出どころの伝承が書に移る (LorePageItem)
+                    ItemStack page = jp.revati.skyabyss.lore.LorePageItem.of(optStr("page"));
+                    page.setCount(Math.max(1, integer("count", 1)));
+                    Quests.give(player, page);
+                } else if (item != null) {
                     Quests.give(player, QuestItems.make(item, Math.max(1, integer("count", 1)), optStr("token"), optStr("name"), loreKeys()));
                 }
             }
@@ -180,7 +185,6 @@ public final class Action {
                 }
             }
             case "give_notes" -> jp.revati.skyabyss.guide.WayfarerNotes.give(player, integer("chapter", 1), true);
-            case "unlock_recipes" -> jp.revati.skyabyss.guide.WayfarerNotes.onOpen(player, integer("chapter", 1));
             case "remake_ward" -> {
                 if (jp.revati.skyabyss.guide.HeartbeatWard.remake(player, str("titan"))) {
                     Notice.hint(player, "message.skyabyss.heartbeat_ward.remade");
@@ -190,6 +194,7 @@ public final class Action {
             case "facility" -> jp.revati.skyabyss.facility.FacilityActions.run(player, ctx.npc(), str("open"), optStr("shop"));
             case "town" -> jp.revati.skyabyss.town.TownActions.run(player, ctx.npc(), str("act"));
             case "lesson" -> jp.revati.skyabyss.tutorial.SkillLesson.act(player, str("act"), optStr("line"));
+            case "runs" -> jp.revati.skyabyss.facility.guild.TitanRunData.show(player, optStr("titan"));
             case "grave_rescue" -> jp.revati.skyabyss.grave.GraveRescue.run(player);
             case "grave_choose" -> jp.revati.skyabyss.grave.GraveChooser.open(player);
             case "xp" -> {

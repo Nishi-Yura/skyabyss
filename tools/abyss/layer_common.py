@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""全部の層に共通の探すもの (docs/design/36 の 8 章)。gen_abyss_layers.py から build(ctx, layer, routes) で呼ばれる。
+"""全部の層に共通の探すもの (docs/design/36 の 8 章)。データを直接直す（生成スクリプトはない） から build(ctx, layer, routes) で呼ばれる。
 
   - 前の私の墓 (grave_<層>_1..3): 三本の道の最初の部屋の奥の隅に一つずつ。塚 (半石)・頭の印・蝋燭。右クリックで読む (story/ch5/AbyssFinds)
   - 前の私の刻み (carve_<層>_1..4): 道 1・2・3 の印の部屋の横の壁と、野営の西の壁。彫った深層岩
-  - 探掘隊の手記 (journal_<層>_1..3): 道ごとに一冊、二つめの部屋 (無ければ印の部屋) の隅の書見台。野営の帳面は journal_<層>_0 (gen_abyss_layers)
+  - 探掘隊の手記 (journal_<層>_1..3): 道ごとに一冊、二つめの部屋 (無ければ印の部屋) の隅の書見台。野営の帳面は journal_<層>_0 (データを直接直す（生成スクリプトはない）)
   - 見る者の立つ所 (watch_<層>): 道 2 の最初の部屋の奥 (story/ch5/AbyssHorror)
 """
 from __future__ import annotations

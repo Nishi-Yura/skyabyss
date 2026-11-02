@@ -6,10 +6,10 @@ import net.minecraft.util.Mth;
 // 表と理由は docs/design/04_growth_and_skills.md
 public final class GrowthRules {
     public static final int MAX_LEVEL = 50;
-    // レベルが 1 上がるごとに振り分けられる力
-    public static final int POINTS_PER_LEVEL = 3;
-    // ステータス一つに振れる上限
-    public static final int STAT_CAP = 50;
+    // レベルで振り分けられる力はない。基礎は技の木の節で上がる (docs/design/48)。前の版の記録の検めで使う
+    public static final int POINTS_PER_LEVEL = 0;
+    // ステータス一つの上限 (木の基礎の節の合計がこれを超えることはない)
+    public static final int STAT_CAP = 100;
     // 記憶の断片の器の、はじめの大きさ (03 の E9 で広げる)
     public static final int FRAGMENT_CAPACITY = 12;
 
@@ -23,8 +23,13 @@ public final class GrowthRules {
     // 精神: 最大マナ。素の値 20 に、1 あたり +2
     public static final double BASE_MANA = 20;
     public static final double SPIRIT_MANA = 2;
+    // 精神: 魔法 (星読みの技) の威力 ×(1 + 0.6% × 精神)。筋力の近接と同じ伸び (docs/design/43)
+    public static final double SPIRIT_SPELL = 0.006;
     // 耐久: 2 ごとに最大体力 +0.5 点 (ハート 0.25 個。表示は Hearts)
     public static final double VITALITY_HEALTH_PER_TWO = 0.5;
+    // レベル: 2 ごとに最大体力 +0.5 点 (Lv 50 で +12。2026-11-02 の声「HP はレベルに応じて少しずつ上がるように。最低の基礎値が上がると、ビルドも組みやすい」。
+    // Wynncraft も素の体力はレベルで伸び、残りを防具で伸ばす)
+    public static final double LEVEL_HEALTH_PER_TWO = 0.5;
 
     // ---------------------------------------------------------------- 経験値の補正
     // 内容の推奨レベル + この差までは満額。超えた 1 レベルごとに 10% 減り、最低 20%
@@ -33,9 +38,6 @@ public final class GrowthRules {
     public static final double FALLOFF_FLOOR = 0.20;
     // 一緒に倒した人が増えるごとに、全体の量が 25% 増える (一人あたりは減る)
     public static final double PARTY_BONUS = 0.25;
-    // バニラの敵は 1 日 (ゲーム内 20 分) にこの量までは満額、そのあとは 20%
-    public static final int VANILLA_DAILY = 100;
-    public static final double VANILLA_TIRED = 0.20;
 
     private GrowthRules() {
     }
@@ -116,6 +118,11 @@ public final class GrowthRules {
 
     public static double bonusHealth(int vitality) {
         return VITALITY_HEALTH_PER_TWO * (vitality / 2);
+    }
+
+    // レベルで増える最大体力 (Lv 1 は 0)
+    public static double levelHealth(int level) {
+        return LEVEL_HEALTH_PER_TWO * (Math.max(0, level - 1) / 2);
     }
 
     // 内容の推奨レベルより上がりすぎた人への補正

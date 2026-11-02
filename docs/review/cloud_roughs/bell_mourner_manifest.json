@@ -1,0 +1,16 @@
+{
+ "id": "moon_bell_mourner",
+ "short": "鐘の亡者",
+ "kind": "鐘の島の敵 一品一案 (50 の 4.2.1)",
+ "title": "鐘の亡者 (bell_mourner) — 割れた鐘を抱く前の都の人の抜け殻・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/bell_mourner.png"
+ ],
+ "extra": "雲海の言葉 (古い漆喰・鐘の青銅・朝の光)。骨 8 本。光るのは目だけ。 三角形 820 (目安 中の敵 600〜1000)。埋まった部品: leg-1-robe:0.53, leg1-robe:0.53, bellbody-robe:0.47。生成: tools/rough/lowpoly/moon/bell_mourner.py。三段の姿: 二段目 = 鐘の割れ目から朝の光が漏れる。三段目 = 鐘が二つ (背にも)。",
+ "options": {
+  "a": {
+   "name": "割れた鐘を抱く亡者 (820 三角形)",
+   "desc": "漆喰色の頭巾と外套、空ろな顔、胸に割れた青銅の鐘 (緑青の斑と縦の割れ目)。"
+  }
+ }
+}

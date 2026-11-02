@@ -161,7 +161,7 @@ public final class TideRaid2SelfTest {
                         targets.add(p.pearlHome(i));
                     }
                     targets.add(o.offset(0, 1, TidePearlRoom.ALTAR_Z + 2));
-                } else if (r instanceof TideSaplingRoom p) {
+                } else if (jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r) instanceof TideSaplingRoom p) {
                     for (int[] a : p.saplingSpots()) {
                         targets.add(o.offset(a[0], 1, a[1] + 2));
                     }
@@ -177,7 +177,7 @@ public final class TideRaid2SelfTest {
                     for (int k = 0; k < TideMoonRoom.DIALS; k++) {
                         targets.add(o.offset(TideMoonRoom.dialX(k), 1, TideMoonRoom.dialZ(k) + (k < 3 ? -2 : 2)));
                     }
-                } else if (r instanceof TideBroodRoom) {
+                } else if (jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(r) instanceof TideBroodRoom) {
                     targets.add(o.offset(0, 1, 0));
                 } else if (mid) {
                     for (int[] rock : new int[][] {{-14, -9}, {14, -9}, {-16, 6}, {16, 6}, {0, -13}, {-6, 11}, {7, 11}}) {
@@ -674,7 +674,7 @@ public final class TideRaid2SelfTest {
             begin("TR7", 3, 55L);
             return false;
         }
-        TideBroodRoom r = (TideBroodRoom) room;
+        TideBroodRoom r = (TideBroodRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(room);
         r.tick(ctx);
         put(a, ctx.cell().rest());
         put(b, ctx.cell().rest());

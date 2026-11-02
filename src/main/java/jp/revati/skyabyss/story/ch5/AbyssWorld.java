@@ -19,7 +19,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // 五章の深淵 (docs/design/36)。別のディメンション skyabyss:abyss (data/skyabyss/dimension*/abyss.json、バイオーム skyabyss:abyss)。
 //   高さ    y -1536 〜 255。本編の層の大縦穴は y 240 → -400 (骨・塩・雷・灰・心臓)、心臓の下の果てない深みはそれより下 (36 の 2)
 //   見た目  空も天井の光もなく、時刻は真夜中に止まる。霧は濃い (client/AbyssClient の DimensionSpecialEffects)
-//   入口    都の下の大坑道の底の境の門 (34 の 4.7)。中身ができるまで門は開かない。開発用: /skyabyss abyss enter | leave | build
+//   入口    都の下の大坑道の底の境の門。中身ができるまで門は開かない。開発用: /skyabyss abyss enter | leave | build
 //   着く所  縦穴の上端の縁の踊り場 (設計図 abyss_layers の印 arrival。AbyssBuild が建てる)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssWorld {

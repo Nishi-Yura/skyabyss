@@ -1,0 +1,54 @@
+# 終章の雲海 島 1「鐘の島」(docs/design/50 の 4.2.1): 白い橋・島と鐘楼・かけらへの鐘雲の道 (鳴らす前と後)・敵 2 種・主の間と最後の鐘守
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_isle1.txt -PshotsName=cloudsea_isle1
+world cloudsea_isle1_a
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 0 90 -120
+waitchunks 200
+wait 100
+camera 0 82 -58 180 4
+wait 60
+shot i01_bridge
+camera 70 126 -96 140 28
+wait 60
+shot i02_overview
+camera 0 81 -128 180 6
+wait 40
+shot i03_plaza_tower
+camera -26 84 -150 95 14
+wait 40
+shot i04_west_path_before
+cmd skyabyss cloudsea ring bell_w
+wait 10
+shot i05_west_path_rung
+cmd summon skyabyss:bell_mourner 2 77 -137 {NoAI:1b,Rotation:[160f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:mist_bird -2 80 -137 {NoAI:1b,Rotation:[200f,0f],PersistenceRequired:1b}
+wait 20
+camera 0 79 -131 180 8
+wait 30
+shot i06_foes
+cmd skyabyss cloudsea lord
+cmd skyabyss cloudsea ring arena_bell_1
+wait 60
+camera 0 116 -168 180 34
+wait 40
+shot i07_arena
+camera 0 107 -177 180 6
+wait 30
+shot i08_lord
+cmd skyabyss cloudsea crumble
+wait 20
+camera 0 116 -168 180 34
+wait 20
+shot i09_arena_crumbled

@@ -102,7 +102,7 @@ public final class BoardScreen extends Screen implements jp.revati.skyabyss.clie
                     g.drawString(font, RebirthText.symbols(l.rebirths(), RebirthClient.timeMs(), RebirthClient.still()).append(" ").append(value), x + 8, y + 12, TEXT, false);
                     y += 28;
                 } else {
-                    g.drawString(font, font.plainSubstrByWidth((i + 1) + ". " + l.name(), colW - 50), x, y, SOFT, false);
+                    jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal((i + 1) + ". " + l.name()), x, y, colW - 50, SOFT, false);
                     g.drawString(font, value, x + colW - 8 - font.width(value), y, SOFT, false);
                     y += 10;
                 }

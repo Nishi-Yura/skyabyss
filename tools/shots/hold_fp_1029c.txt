@@ -1,0 +1,76 @@
+world hold_1029
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier common
+weapontier off
+cmd item replace entity @s weapon.mainhand with minecraft:iron_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot iron_axe_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 20
+shot iron_axe_tp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:gather_axe
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot gather_axe_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 20
+shot gather_axe_tp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot shrine_dagger_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 20
+shot shrine_dagger_tp
+weapontier off
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_crescent_dagger
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 30
+shot moon_crescent_dagger_fp
+perspective front
+bodyyaw 70
+hud off
+close
+wait 20
+shot moon_crescent_dagger_tp

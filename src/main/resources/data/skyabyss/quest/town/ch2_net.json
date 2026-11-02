@@ -22,13 +22,13 @@
         {
           "id": "string",
           "type": "collect",
-          "target": "minecraft:string",
+          "target": "skyabyss:thread_spool",
           "count": 8
         },
         {
           "id": "cod",
           "type": "collect",
-          "target": "minecraft:cod",
+          "target": "skyabyss:dried_fish",
           "count": 3
         }
       ]
@@ -75,8 +75,8 @@
         "count": 20
       },
       {
-        "item": "minecraft:fishing_rod",
-        "count": 1
+        "item": "skyabyss:tide_pickle",
+        "count": 3
       }
     ]
   }

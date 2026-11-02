@@ -61,7 +61,7 @@ public class WhaleboneCaptain extends GuardMob {
     public static final int ROAR_WARN = 20;
     public static final double ROAR_RADIUS = 5.0;
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossBar = jp.revati.skyabyss.music.MusicArea.bossBar(new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10));
     private Action action = Action.NONE;
     private int actionTicks;
     private int sweepCooldown;
@@ -121,7 +121,7 @@ public class WhaleboneCaptain extends GuardMob {
                 return;
             }
             double dist = distanceTo(target);
-            boolean enraged = getHealth() < getMaxHealth() * 0.5f;
+            boolean enraged = enraged();
             if (enraged && !roared) {
                 begin(Action.ROAR, "roar");
             } else if (eruptCooldown == 0 && dist < 18 && random.nextFloat() < 0.4f) {
@@ -186,6 +186,10 @@ public class WhaleboneCaptain extends GuardMob {
     }
 
     private boolean enraged() {
+        // 闘の部屋の中ボス (段なし。trial/raid/mid/FightBossRoom) は怒らない
+        if (getTags().contains(jp.revati.skyabyss.trial.raid.mid.FightBossRoom.SINGLE_STAGE)) {
+            return false;
+        }
         return getHealth() < getMaxHealth() * 0.5f;
     }
 

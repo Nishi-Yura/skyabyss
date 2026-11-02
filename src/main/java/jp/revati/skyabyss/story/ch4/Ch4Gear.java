@@ -56,12 +56,12 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 
-// 四章「足もとから来るもの」の備えの品 (docs/design/21 の 1.2・6.1)。一〜三章の TravelGear・Ch2Gear・Ch3Gear と同じ型。
+// 四章「足もとから来るもの」の備えの品。一〜三章の TravelGear・Ch2Gear・Ch3Gear と同じ型。
 //  - 灰歩きの旅装 (4 部位): 防御 3/7/6/4 = 20、強靭 3.25 × 4 = 13 (GearCurve.TRAVEL[3])、余燼の背の熱のたまり −2.5% × 着ている部位 (一式 −10%。
 //    EmberHeat の重ねる倍率)、アンコモン、炉で鍛えない、必要 Lv 25。修理は煤鉄。一式で合図 SIGNAL_GEAR_MADE。着た姿は低ポリ (AshWalkingArmorRenderer)
 //  - 煤の砥石: 「煤の刃」(攻撃 +2.6、20 分)。岩・塩・雷の砥石とは重ねない (替わる)。煤の刃のあいだ、灰被りの系統の殻へ 1.5 倍 (Ch4Mobs.shellBonus)
 //  - 灰焼きのパン: 食べると吸収 II 60 秒と、余燼の背の熱 −15
-// レシピは旅の覚書 (四章) に教わるまで作れない (RecipeLock。Ch4Setup.RECIPES)。生成は tools/gen/ch4/gen_ch4_gear.py (レシピ・文・絵)
+// 品は鍛冶場・薬師の誂え (Ch4Setup.MADE)。生成は tools/gen/ch4/gen_ch4_gear.py (文・絵)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch4Gear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -134,7 +134,7 @@ public final class Ch4Gear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, ASH_BAKED_BREAD)) {
                 event.accept(i.get());
             }

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "skyabyss:block/light_path",
+    "top": "skyabyss:block/light_path",
+    "side": "skyabyss:block/light_path"
+  }
+}

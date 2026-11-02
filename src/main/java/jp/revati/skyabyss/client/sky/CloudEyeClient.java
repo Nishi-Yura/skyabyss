@@ -384,6 +384,11 @@ public final class CloudEyeClient {
         }
     }
 
+    // BGM を止めるか (client/music/MusicDirector。目が開いている間と、視線が合ったあとしばらく)
+    public static boolean hushesMusic() {
+        return eye != null || silence > 0;
+    }
+
     // 目が開いている間と、視線が合ったあとしばらくは、音楽・動物の声・環境音が止む (引き算)。敵の音は止めない
     @SubscribeEvent
     static void onPlaySound(PlaySoundEvent event) {

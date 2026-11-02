@@ -96,6 +96,11 @@ neoForge {
         server {
             server()
             programArgument '--nogui'
+            // 自己テストは新しい世界でチャンクを大量に作る段 (titan ground など) があり、既定のヒープ (物理メモリの 1/4 = 4 GB) では
+            // 全部を通しで流すと足りなくなる (2026-10-25)。自己テストのときだけ 6 GB
+            if (System.getenv('SKYABYSS_SELFTEST') != null) {
+                jvmArgument '-Xmx6G'
+            }
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 

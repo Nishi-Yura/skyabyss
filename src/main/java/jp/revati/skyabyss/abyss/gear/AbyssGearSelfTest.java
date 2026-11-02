@@ -97,7 +97,7 @@ public final class AbyssGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(AbyssGear.DUNGEON) == AbyssGear.SET, "abyss set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, AbyssGear.SET.collection().size() == 10 && AbyssGear.SET.exclusives().equals(List.of(AbyssGear.ANCHOR, AbyssGear.DAGGER, AbyssGear.PLUMB)),
+        check(f, AbyssGear.SET.collection().size() == 13 && AbyssGear.SET.exclusives().equals(List.of(AbyssGear.ANCHOR, AbyssGear.DAGGER, AbyssGear.PLUMB)),
                 "abyss codex should hold 10 items with 3 exclusives: " + AbyssGear.SET.collection());
         for (String id : AbyssGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
@@ -295,11 +295,11 @@ public final class AbyssGearSelfTest {
 
     // ---------------------------------------------------------------- レシピと荷運び
     private static void recipes(MinecraftServer server, List<String> f) {
+        // 灯籠の護符・鼓動の聴き筒は鍛冶場の誂え (五章から)
         for (String r : List.of("abyss_lantern_charm", "abyss_pulse_listener")) {
-            check(f, server.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, r)).isPresent(), "recipe " + r + " does not resolve");
+            jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
+            check(f, e != null && e.good().made() && e.shop().id().equals("smithy") && e.good().chapter() == 5, r + " is not made to order at the smithy from chapter 5");
         }
-        ItemStack relic = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "abyss_relic_bone_2")));
-        check(f, relic.hasCraftingRemainingItem() && relic.getCraftingRemainingItem().getItem() == relic.getItem(), "the relic should stay when traced at a crafting table");
         JsonObject porter = json("/data/skyabyss/dialogue/ch5/attendant_abyss_porter.json", f);
         if (porter != null) {
             String text = porter.toString();
@@ -369,9 +369,12 @@ public final class AbyssGearSelfTest {
 
     private static Map<String, String> lang(String locale, List<String> f) {
         Map<String, String> map = new java.util.HashMap<>();
-        JsonObject o = json("/assets/skyabyss_abyss_gear/lang/" + locale + ".json", f);
-        if (o != null) {
-            o.entrySet().forEach(e -> map.put(e.getKey(), e.getValue().getAsString()));
+        // 深淵の装備の言葉と、五章の職の武器 (abyss/LegendGear。主の言葉) の両方
+        for (String ns : List.of("skyabyss_abyss_gear", "skyabyss")) {
+            JsonObject o = json("/assets/" + ns + "/lang/" + locale + ".json", f);
+            if (o != null) {
+                o.entrySet().forEach(e -> map.put(e.getKey(), e.getValue().getAsString()));
+            }
         }
         return map;
     }

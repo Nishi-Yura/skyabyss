@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-// 岩の砥石 (一章の砥石。21 の 1.2)。右クリックで使うと「研いだ刃」(攻撃 +1.5) が 20 分。一つ使う。効いている間に使うと 20 分に延ばす (重ねない)。
+// 岩の砥石 (一章の砥石)。右クリックで使うと「研いだ刃」(攻撃 +1.5) が 20 分。一つ使う。効いている間に使うと 20 分に延ばす (重ねない)。
 // 備えの三灯の刃は、持ち歩いているだけで上乗せを数える (TravelGear の Readiness 登録)
 public class RockWhetstoneItem extends Item {
     public RockWhetstoneItem(Properties properties) {

@@ -24,8 +24,8 @@ import net.minecraft.server.level.ServerPlayer;
 //   巨神・段階          titan()   その章の巨神 (ProgressRules.TITAN_ORDER の名前。序章と五章以降は null)
 //                       stage()   その章を遊ぶ段階 (序章と一章 0、二章 1、三章 2、四章 3、五章 4。六章・終章は -1)
 //   レベル              levelFrom() 推奨レベルの始まり / levelTo() その章を終えるころ / levelCap() 着いたときの上限 (ProgressRules.LEVEL_CAP と同じ)
-//                       序章 1/4/15、一章 4/12/15、二章 12/18/21、三章 18/24/27、四章 24/30/33 (止めたあとは 40)、五章 40/50/50。六章・終章は -1 (未定)
-//   区分                reserved() 六章以降 (名前だけで中身は未着手) / titanChapter() 一〜四章 (巨神編。旧「1 章」) / written() 中身のある章
+//                       序章 1/4/15、一章 4/12/15、二章 12/18/21、三章 18/24/27、四章 24/30/33 (止めたあとは 40)、五章 32/50/50。六章・終章は -1 (巨神の段階の外。段階とレベルは各章の仕組みが決める)
+//   区分                reserved() は今は偽 (名前だけの章はない。六章・終章にも中身がある) / titanChapter() 一〜四章 (巨神編。旧「1 章」) / written() 序章と一〜四章 (五章以降は別の仕組み)
 //   次の章              next()  最後は null
 //
 // 内部の ID (伝承 chapter1/…、クエスト、段階 0〜4、上限、背のディメンション) は変えていない。伝承の旧「chapter1」章は
@@ -85,9 +85,10 @@ public enum Chapters {
         return levelCap;
     }
 
-    // 中身が未着手の章 (六章・終章)。五章「深淵」は 2026-10-22 に中身が入った
+    // 中身が未着手の章。今は無い (五章「深淵」は 2026-10-22、六章・終章は 2026-11-01 までに中身が入った)
     public boolean reserved() {
-        return ordinal() >= MOON.ordinal();
+        // 六章 (月) は中身ができ、終章 (雲海) も作りはじめた (docs/design/46・50)。名前だけの章はもうない
+        return false;
     }
 
     // 巨神編 (一〜四章。旧「1 章」、内部名 chapter1)
@@ -164,6 +165,29 @@ public enum Chapters {
     }
 
     public static Chapters of(ServerPlayer player) {
-        return of(Progression.stage(player), prologueDone(OpeningDirector.state(player)), SkyKey.assembled(player));
+        Chapters c = of(Progression.stage(player), prologueDone(OpeningDirector.state(player)), SkyKey.assembled(player));
+        // はじまりの島の道の間は序章 (2026-10-29 の試遊「最初のチュートリアル終わってないのに、一章始まった」。野営地の帳面で一章の頼みが始まり、下の頼みの章で一章になっていた)
+        if (Progression.stage(player) == 0 && jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(player)) {
+            return PROLOGUE;
+        }
+        // 進めているメインの頼みの章の方が先なら、そちら (2026-10-28 の試遊「三章なのに二章と書いてある」。巨神の段階だけで決めていた)
+        for (var e : jp.revati.skyabyss.quest.QuestLog.of(player).quests().entrySet()) {
+            var def = jp.revati.skyabyss.quest.QuestManager.quest(e.getKey());
+            if (def == null || e.getValue().done || !def.main()) {
+                continue;
+            }
+            Chapters q = byId(def.chapter());
+            if (q != null && q.ordinal() > c.ordinal()) {
+                c = q;
+            }
+        }
+        // 月へ渡った人 (頼み main_moon を終えた) は六章
+        if (c == ABYSS) {
+            jp.revati.skyabyss.quest.QuestLog.Entry moon = jp.revati.skyabyss.quest.QuestLog.of(player).entry("main_moon");
+            if (moon != null && moon.done) {
+                return MOON;
+            }
+        }
+        return c;
     }
 }

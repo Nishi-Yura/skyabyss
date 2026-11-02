@@ -1,0 +1,16 @@
+{
+ "id": "moon_pilgrim_plume",
+ "short": "巡礼者の羽",
+ "kind": "約束の島の主 一品一案 (50 の 4.2.4)",
+ "title": "巡礼者の羽 (pilgrim_plume) — 先触れに降りてくる片方の翼・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/pilgrim_plume.png"
+ ],
+ "extra": "雲海の言葉 (雲の白・淡い金・朝の光)。骨 5 本。光るのは珠と羽の先。 三角形 1804 (目安 主 1500〜3000)。埋まった部品: ray2-arm:0.89。生成: tools/rough/lowpoly/moon/pilgrim_plume.py。三段の姿: 二段目 = 羽の先の光が強まる。三段目 = 輪が二重に。",
+ "options": {
+  "a": {
+   "name": "片方の翼 (1804 三角形)",
+   "desc": "金の骨と白い風切羽の大きな片翼。付け根に金の輪と朝の光の珠。"
+  }
+ }
+}

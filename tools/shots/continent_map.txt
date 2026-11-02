@@ -1,0 +1,18 @@
+# 天と淵の大陸の旅の地図だけを撮る (continent_look の世界を使う)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/continent_map.txt -PshotsName=continent_look
+world continent_look continent
+size 1600 900
+timeout 600
+guiscale 2
+wait 80
+cmd tp @s -450 80 0
+waitchunks 300
+wait 30
+open travel_map
+wait 40
+mapscale 2400
+wait 20
+shot map_far2
+mapscale 4800
+wait 20
+shot map_max

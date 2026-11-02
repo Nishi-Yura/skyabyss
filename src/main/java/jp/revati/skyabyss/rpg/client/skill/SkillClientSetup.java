@@ -24,9 +24,6 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 public final class SkillClientSetup {
     public static final KeyMapping SKILLS_KEY = new KeyMapping("key.skyabyss.skills", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.SKILLS, "key.categories.skyabyss");
-    // 構えを順に切り替える (なし → 守 → 疾 → 歌 → なし)
-    public static final KeyMapping STANCE_KEY = new KeyMapping("key.skyabyss.skill_stance", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.STANCE, "key.categories.skyabyss");
     private static final int[] SLOT_DEFAULTS = jp.revati.skyabyss.KeyDefaults.SLOTS;
     public static final KeyMapping[] SLOT_KEYS = new KeyMapping[SkillRules.SLOTS];
     static {
@@ -42,7 +39,6 @@ public final class SkillClientSetup {
     @SubscribeEvent
     static void onKeys(RegisterKeyMappingsEvent event) {
         event.register(SKILLS_KEY);
-        event.register(STANCE_KEY);
         for (KeyMapping k : SLOT_KEYS) {
             event.register(k);
         }

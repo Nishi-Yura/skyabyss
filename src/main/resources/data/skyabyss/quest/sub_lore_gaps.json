@@ -13,7 +13,6 @@
             "prologue/the_book",
             "prologue/shadow",
             "prologue/counting_song",
-            "prologue/seventh_night",
             "prologue/shaved_peak",
             "prologue/watcher",
             "prologue/shadow_heading"
@@ -63,12 +62,16 @@
     "xp": 150,
     "items": [
       {
-        "item": "minecraft:blue_dye",
+        "item": "skyabyss:indigo_bookmark",
         "count": 1,
         "name": "item.skyabyss.keepsake.indigo_bookmark",
         "lore": [
           "item.skyabyss.keepsake.indigo_bookmark.lore"
         ]
+      },
+      {
+        "item": "skyabyss:resonance_shard",
+        "count": 2
       }
     ],
     "affinity": {

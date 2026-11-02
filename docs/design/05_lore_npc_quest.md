@@ -4,7 +4,7 @@
 
 - 文書番号: 05
 - 範囲: 伝承の書（碑文・破れた頁・出来事・会話で記される、プレイヤーごとの帳面）の仕組み、画面、項目の一覧と本文。NPC・会話・クエストの本体は 07。
-- 関連: [01](01_overview.md)、[02](02_stone_whale.md)、[07](07_npc_quest.md)、[08](08_tide_shell.md)、[12](12_thunder_wing.md)、[13](13_ember.md)、[14](14_beta.md)、[17](17_opening_and_rpg_feel.md)
+- 関連: [01](01_overview.md)、[02](02_stone_whale.md)、[07](07_npc_quest.md)、[08](08_tide_shell.md)、[12](12_thunder_wing.md)、[13](13_ember.md)、[14](14_beta.md)、17
 
 ---
 
@@ -25,7 +25,7 @@
 
 | きっかけ | 何が起きるか |
 | --- | --- |
-| 新しいワールドの目覚め（拍子 B1。[17](17_opening_and_rpg_feel.md)） | 野営地の古い帳面（`CampBuilder` が置いた伝承の書の ItemEntity。消えない）の 2.5 ブロック以内で「拾った」とみなし、人ごとに伝承の書を渡す。帳面そのものは拾えない。野営地へ行かなくても届く: 離れて 1 分・目覚めて 5 分・野営地のない世界は 20 秒後。「荷物の中に、見覚えのない古い帳面が入っていた」 |
+| 新しいワールドの目覚め（拍子 B1。17） | 野営地の古い帳面（`CampBuilder` が置いた伝承の書の ItemEntity。消えない）の 2.5 ブロック以内で「拾った」とみなし、人ごとに伝承の書を渡す。帳面そのものは拾えない。野営地へ行かなくても届く: 離れて 1 分・目覚めて 5 分・野営地のない世界は 20 秒後。「荷物の中に、見覚えのない古い帳面が入っていた」 |
 | 空の影を初めて見る（序章 B4） | 影の項目は書の持ち主には記さず、影が去って 3 秒後に**破れた頁**が頭上から落ちてくる（本人しか拾えない。2 分で荷物へ、14 分読まなければ自動で読む）。頁を読むと `prologue/shadow` が記される（`LoreEvents.watchSky` から `OpeningDirector.deferShadowToPage`） |
 | 書を持たない人が空の影を見る（クリエイティブなどの救済） | 影が去って 3 秒後、本人の頭上 4 ブロックから書が落ちてくる（光の粒と頁の音。本人しか拾えず消えない）。2 分拾わないと荷物へ入る。影が去るまでに地上を離れたら荷物へ入る |
 | 書より先にほかの項目が記された | その場で荷物へ入る |
@@ -162,7 +162,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | `finale` | 終章 | 雲海 | 雲海 | 枠 3 | 8.7（未着手） |
 
 - **項目の ID**: 巨神編（一〜四章）の項目の ID は `chapter1/<名前>` のまま（人ごとの保存・クエスト・会話・経験値表が参照する）。`"chapter"` 欄が巨神の章を指す。内部名の `chapter1` は「巨神編の項目のフォルダ」の意味。五章・六章の ID は `chapter2`・`chapter3` のまま使う。
-- 振り分けは `tools/lib/regroup_lore_chapters.py`（名前の型で決める。何度動かしても同じ。章の定義 JSON・章の文もここで作る）。新しい項目を足す生成スクリプト（`tools/gen/story/gen_story_quests.py`・`tools/gen/story/gen_storm_lore.py`・`tools/gen/story/gen_ember_lore.py`・`tools/gen/story/gen_free_quests.py`）は同じ写像を使う。
+- 振り分けは `tools/lib/regroup_lore_chapters.py`（名前の型で決める。何度動かしても同じ。章の定義 JSON・章の文もここで作る）。新しい項目を足す生成スクリプト（データを直接直す（生成スクリプトはない））は同じ写像を使う。
 - 章の文: `lore.skyabyss.chapter.<章 ID>.tab`（一章）／`.name`（岩鯨）／`.title`（題字。章の札で使う。P2）。
 - 章 1 つの項目は 10〜15 個。`LoreSelfTest` の許容は序章と一〜四章で 12〜75。
 
@@ -180,7 +180,6 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | `prologue/bone_hill` | 骨の丘 | 石板の近く（`manual`） | — |
 | `prologue/sky_song` | 空の歌 | 歌のあと（`manual`） | — |
 | `prologue/counting_song` | 村の数え歌 | 破れた頁（村）／語り部の話 | 雲の上の影、暦の書き込み |
-| `prologue/seventh_night` | 暦の書き込み | 破れた頁（村）／語り部の話（好感度 20 から） | 村の数え歌 |
 | `prologue/shaved_peak` | 平らな峰 | 破れた頁（村）／鯨追いの話 | 雲の上の影 |
 | `prologue/watcher` | 見る者 | 破れた頁（村）／語り部の話（見る者に気づいた人か好感度 10 から） | — |
 | `prologue/capital_skywatch` | 空見の砦 | 都の砦の碑を見る（`inscription_sign` = `sign.skyabyss.capital.keep`） | 白紙の帳面 |
@@ -190,7 +189,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 - 順は `the_book` 10、`camp` 12、`the_book_margin` 14、`footprints` 15、`shadow` 20、`shadow_heading` 25、`footsteps` 27、`bone_hill` 28、`sky_song` 29。都の碑の 4 項目は 70〜73（村の 4 項目の後）。
 - 都の碑の 4 項目（33 の 2.2）は碑を見ると記される（碑文の写し = 碑の 4 行。文は `assets/skyabyss_opening/lang`）。国の物語の入口で、閉じた施設は章が進むと開く（17 の 3.3）。墓地の「名のない墓」は見る者のほのめかし（六章まで言わない）。
-- 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、生成は `tools/gen/story/gen_opening_text.py`（全文は [17](17_opening_and_rpg_feel.md) の 11 章）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
+- 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、データを直接直す（生成スクリプトはない）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
 - 序章の村の 4 項目は、破れた頁と NPC の話の両方で記される（頁の運だけに頼らず、サブ「数え歌のつづき」を必ず終えられる。00 の 19 = A）。項目の JSON は変えていない（`Lore.unlock` は条件の種類を問わず記せる）。数え歌は語り部が歌う。
 - 石板の碑の文は `sign.skyabyss.lore_bone_slab.1〜4`（本体の lang。`SignFit` が幅を測る）。
 
@@ -221,14 +220,6 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 村の子どもたちが手まり歌に歌っている。いつつから先は、誰も知らないという。
 
 大人に尋ねると、話をそらされた。
-
-**暦の書き込み**（`prologue/seventh_night`）
-
-> 七日目の夜は、戸を閉めて外へ出ないこと。  
-
-古い暦の余白に、同じ一文が七日おきに書きこまれていた。
-
-村では、ずっと昔からの決まりだという。なぜ七日目なのかは、誰も知らない。
 
 **平らな峰**（`prologue/shaved_peak`）
 
@@ -393,7 +384,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 次に会ったとき、あの人は覚えているだろうか。
 
-**一章の支度の段の頁**（`lore/entry/ch1/`。34 の 2・5 章。生成は `tools/gen/ch1/gen_ch1_trails.py`。前の私の足跡 = 「誰かの跡」。正体は言わない）
+**一章の支度の段の頁**（`lore/entry/ch1/`。34 の 2・5 章。データを直接直す（生成スクリプトはない）。前の私の足跡 = 「誰かの跡」。正体は言わない）
 
 | ID | 題 | 記される条件 | 中身の芯 |
 | --- | --- | --- | --- |
@@ -406,7 +397,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 ### 8.3 巨神編の続き（ベータ。[14](14_beta.md)。章は 8.1 の表のとおり、岩鯨の分は一章、雷翼の分は三章、余燼・天の鍵の分は四章）
 
-文は `assets/skyabyss_story/lang`、生成は `tools/gen/story/gen_story_quests.py`。どれも `manual`（会話・天の鍵・巨神の担当が記す）。
+文は `assets/skyabyss_story/lang`、データを直接直す（生成スクリプトはない）。どれも `manual`（会話・天の鍵・巨神の担当が記す）。
 
 | 項目 | 題 | 記される時 | 本文の要点（言い切らない） |
 | --- | --- | --- | --- |
@@ -420,7 +411,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 ### 8.4 雷翼
 
-文は `assets/skyabyss_storm/lang`、生成は `tools/gen/story/gen_storm_lore.py`（全文は [12](12_thunder_wing.md) の 9 節）。
+文は `assets/skyabyss_storm/lang`、データを直接直す（生成スクリプトはない） の 9 節）。
 
 | 項目 | 題 | 記される時 | ほのめかし |
 | --- | --- | --- | --- |
@@ -442,7 +433,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | 巨神 | 項目 | 書類 |
 | --- | --- | --- |
 | 潮殻 | `tide_shell`（動く島）、`tide_ruins`、`tide_hours`、`beckoner`（潮招き）、`tide_heart_stilled`、碑文 `inscription_tide_{beach,hub,west,east,front,heart}` | [08](08_tide_shell.md)（碑文の文は 08 の碑の表） |
-| 余燼 | `ember_titan`、`ember_ruins`、`forge_ledger`（鍛えの帳。頁 `ember_back`）、`ash_smith`、`ember_stilled`、碑文 `inscription_ember_*`（6）。文は `assets/skyabyss_ember/lang`、生成 `tools/gen/story/gen_ember_lore.py` | [13](13_ember.md) の 9 章 |
+| 余燼 | `ember_titan`、`ember_ruins`、`forge_ledger`（鍛えの帳。頁 `ember_back`）、`ash_smith`、`ember_stilled`、碑文 `inscription_ember_*`（6）。文は `assets/skyabyss_ember/lang`、データを直接直す（生成スクリプトはない） | [13](13_ember.md) の 9 章 |
 
 - `chapter1/ember`（14 の仮の項目）と `sky_key_whole` の本文は、13 の「天の鍵」の文と同じことを言う。
 

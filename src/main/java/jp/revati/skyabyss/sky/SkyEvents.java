@@ -44,11 +44,11 @@ public final class SkyEvents {
     private static final long MAX_GAP = DAY * 4;
     // 条件が合わなかったときに再判定するまでの時間 (1分)
     private static final long RETRY_DELAY = 1200L;
-    // 最初の通過 (06 の 2.7節): ゲーム開始の昼 (6000 tick = 初日の正午) 以降の、最初の機会に必ず起こす。
+    // 最初の通過: ゲーム開始の昼 (6000 tick = 初日の正午) 以降の、最初の機会に必ず起こす。
     // 条件が合わなければ 10 秒おきに調べ直し、遅れた分だけ条件をゆるめる
     private static final long FIRST_PASS_AT = 6000L;
     private static final long FIRST_PASS_MIN_WAIT = 2400L;
-    // 最初の一回は雨でも起こす (17 の 3.3節)。丸一日遅れたら、空の見えない所にいる人の上にも起こす
+    // 最初の一回は雨でも起こす。丸一日遅れたら、空の見えない所にいる人の上にも起こす
     private static final long FIRST_LOOSEN_SKY = DAY;
     private static final float SPEED = 0.35f;
     // プレイヤーの何ブロック手前から歩いてくるか
@@ -128,6 +128,20 @@ public final class SkyEvents {
             // 初めての通過の予定が遠すぎる記録 (頻度を下げた設定のまま始めたワールドなど)。早い予定に引き直す
             data.schedule(firstPassTime(now));
         }
+        // 天と淵の大陸: 最初の通過は、外れの一本道の終わり (都の門の前) に人が着いたとき (docs/design/40 の 4 章)。
+        // 誰も来ないまま予定より一日遅れたら、いつもどおり (下の時刻の決まり) に起こす
+        if (first) {
+            ServerPlayer atGate = atCapitalGate(level);
+            if (atGate != null) {
+                start(level, atGate, true);
+                data.schedule(now + randomGap(level, frequency));
+                return;
+            }
+            // はじまりの島の図のある世界は、門の前に着くまで待つ (2026-10-29 の試遊「鯨さいしょっからみえちゃってる」。島で一日たつと島の上を渡っていた)
+            if (now < data.nextPassTick() + DAY || jp.revati.skyabyss.world.continent.IslandTrail.active(level)) {
+                return;
+            }
+        }
         if (now < data.nextPassTick()) {
             return;
         }
@@ -145,6 +159,23 @@ public final class SkyEvents {
         data.schedule(now + randomGap(level, frequency));
     }
 
+    // 都の門の前 (都の中心から GATE_RADIUS の中) にいる、地上の人 (観戦者は除く)。都がまだなければ null
+    static final double GATE_RADIUS = 130;
+
+    @Nullable
+    static ServerPlayer atCapitalGate(ServerLevel level) {
+        net.minecraft.core.BlockPos capital = jp.revati.skyabyss.opening.OpeningSites.shelter(level.getServer()).orElse(null);
+        if (capital == null) {
+            return null;
+        }
+        for (ServerPlayer p : level.players()) {
+            if (!p.isSpectator() && p.distanceToSqr(capital.getX() + 0.5, p.getY(), capital.getZ() + 0.5) <= GATE_RADIUS * GATE_RADIUS) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     // 最初の通過の予定の時刻: 初日の正午。始めたのがそれより遅ければ (古いワールド・夜に始めた) 2 分後
     public static long firstPassTime(long now) {
         return Math.max(now + FIRST_PASS_MIN_WAIT, FIRST_PASS_AT);
@@ -153,6 +184,10 @@ public final class SkyEvents {
     // その人のためだけの影 (序盤の拍子の遅れた人)。世界の影はそのまま (進行中でも起こせる)。影の通過数も数えない
     public static void startPersonal(ServerLevel level, ServerPlayer witness) {
         SkyPass current = PERSONAL.get(witness.getUUID());
+        // はじまりの島の道の間は鯨を見せない (都の門の前で初めて見る)
+        if (jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(witness)) {
+            return;
+        }
         if (current != null && current.isActive(level.getGameTime())) {
             return;
         }
@@ -269,6 +304,11 @@ public final class SkyEvents {
         Collections.shuffle(players);
         boolean anySky = first && firstOverdue >= FIRST_LOOSEN_SKY;
         for (ServerPlayer player : players) {
+            // はじまりの島の道の人 (まだ渡っていない・島の上) の上は渡らない
+            if (jp.revati.skyabyss.world.continent.ContinentOutskirts.onIslandTrail(player)
+                    || jp.revati.skyabyss.world.continent.ContinentOutskirts.onIsland(level, player.blockPosition())) {
+                continue;
+            }
             if (player.isAlive() && !player.isSpectator() && (anySky || level.canSeeSky(player.blockPosition().above()))) {
                 return player;
             }

@@ -2,7 +2,7 @@
   "parent": "skyabyss:root",
   "display": {
     "icon": {
-      "id": "minecraft:enchanted_book"
+      "id": "skyabyss:skill_rune"
     },
     "title": {
       "translate": "advancement.skyabyss.skill.title"

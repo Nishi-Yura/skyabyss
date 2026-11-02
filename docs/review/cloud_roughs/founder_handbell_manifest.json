@@ -1,0 +1,16 @@
+{
+ "id": "moon_founder_handbell",
+ "short": "始祖の小鐘",
+ "kind": "裏ボスの報酬 一品一案 (53 の 6 章)",
+ "title": "始祖の小鐘 (founder_handbell) — 青銅に緑青の帯、木の柄に金の環",
+ "sheets": [
+  "moon_roughs/founder_handbell.png"
+ ],
+ "extra": "骨 1 本 (root)。 三角形 608 (目安 200〜500)。埋まった部品: なし。生成: tools/rough/lowpoly/moon/founder_handbell.py。三段の姿: ",
+ "options": {
+  "a": {
+   "name": "始祖の小鐘 (608 三角形)",
+   "desc": "青銅の鐘に緑青の帯と金の口縁、木の柄。"
+  }
+ }
+}

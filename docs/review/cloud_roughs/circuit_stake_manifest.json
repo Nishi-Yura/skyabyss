@@ -1,0 +1,16 @@
+{
+ "id": "moon_circuit_stake",
+ "short": "淵の杭",
+ "kind": "巡り路の「壊す」課題の的 一品一案 (54 の 3.1.1)",
+ "title": "淵の杭 (circuit_stake) — 土地の敵が打ち込んだ、紫の割れ目の黒い杭・低ポリ + ドット絵 一案",
+ "sheets": [
+  "moon_roughs/circuit_stake.png"
+ ],
+ "extra": "骨 3 本。光るのは割れ目と結晶。 三角形 889 (目安 主 600〜1500)。埋まった部品: なし。生成: tools/rough/lowpoly/moon/circuit_stake.py。三段の姿: 段が進むと割れ目が増え、最後は結晶が砕けて紫の粒。",
+ "options": {
+  "a": {
+   "name": "黒い石の杭 (889 三角形)",
+   "desc": "八角の黒い石に紫の割れ目、結晶の房、錆びた鎖、根もとの骨と小石。"
+  }
+ }
+}

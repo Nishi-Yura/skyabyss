@@ -3,9 +3,12 @@ package jp.revati.skyabyss.abyss.mobs;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.entity.MobVoices;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -37,6 +40,11 @@ public abstract class AbyssMobB extends GuardMob {
     // 形 (1 元の姿・2 歪み・3 崩れ。A 組と同じ番号)
     public int stage() {
         return entityData.get(STAGE);
+    }
+
+    // 形を替える (打たれて崩れていく物。巡り路の淵の杭 endgame/CircuitStake)
+    protected void setStage(int form) {
+        entityData.set(STAGE, Math.max(1, Math.min(AbyssScaling.FORM_MAX, form)));
     }
 
     // 湧いたときに一度だけ。形と HP・傷の基の値 (湧いた高さの倍率はここで決める)
@@ -81,6 +89,25 @@ public abstract class AbyssMobB extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 声 (環境音・被弾・倒れる)。種の表 (MobVoices) にあればその音、なければバニラの音
+    @Override
+    protected SoundEvent getAmbientSound() {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getAmbientSound() : v.ambient().get();
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getHurtSound(source) : v.hurt().get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        MobVoices.Voice v = MobVoices.of(getType());
+        return v == null ? super.getDeathSound() : v.death().get();
     }
 
     protected void strike(LivingEntity target, float amount) {

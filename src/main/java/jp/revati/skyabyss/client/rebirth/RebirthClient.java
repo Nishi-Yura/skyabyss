@@ -9,7 +9,6 @@ import jp.revati.skyabyss.rebirth.RebirthConfig;
 import jp.revati.skyabyss.rebirth.RebirthNet;
 import jp.revati.skyabyss.rebirth.RebirthText;
 import jp.revati.skyabyss.rebirth.RebirthTier;
-import jp.revati.skyabyss.rebirth.RebirthTitles;
 import jp.revati.skyabyss.rebirth.RebirthView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,7 +27,7 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 
 // 転生の見せ方の client 側の入口。名札 (C03)・倒れ/立ち上がりの光 (C13)・枠 (C15)・順位表を開く (C11・C21)。
-//   名札: 転生した人の名前の左に束ねた記号 (✦✧✺) を段の色で。5 マス以内ではさらに「Lv 50+n」・称号・縁の飾り (金は金の点、プリズムは回る色)。
+//   名札: 転生した人の名前の左に束ねた記号 (✦✧✺) を段の色で。5 マス以内ではさらに「Lv 50+n」・縁の飾り (称号は別の行: TitleTagClient) (金は金の点、プリズムは回る色)。
 //   5 マスより遠くは記号と色だけ (飾りは描かない)。飾りは設定 (RebirthConfig) で切れる。バニラの名札の描き方は変えず、中の文だけを足す
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class RebirthClient {
@@ -120,13 +119,7 @@ public final class RebirthClient {
         if (effects) {
             out.append(Component.literal(" ")).append(ornament(n, t, still, 1));
         }
-        if (near && RebirthConfig.on(RebirthConfig.NAMETAG_TITLE)) {
-            RebirthTitles.Title title = RebirthTitles.byId(RebirthView.data(p).title());
-            if (title != null && RebirthTitles.has(RebirthView.data(p).unlocked(), title)) {
-                out.append(Component.literal(" ")).append(Component.translatable("title.skyabyss_rebirth." + title.id())
-                        .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xA9B4BA)).withItalic(true)));
-            }
-        }
+        // 称号は名前の上か下の一行 (TitleTagClient)
         return out;
     }
 

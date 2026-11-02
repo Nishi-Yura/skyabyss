@@ -1,0 +1,13 @@
+{
+ "id": "fallen_plume",
+ "letter": "a",
+ "installed": 486,
+ "before": 342,
+ "before_closed": 486,
+ "after": 930,
+ "after_closed": 1350,
+ "open_before": 0,
+ "open_after": 0,
+ "buried_before": [],
+ "buried_after": []
+}

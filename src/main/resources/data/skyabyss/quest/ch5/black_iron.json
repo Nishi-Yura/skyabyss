@@ -17,7 +17,7 @@
         {
           "id": "rod",
           "type": "collect",
-          "target": "minecraft:blaze_rod",
+          "target": "skyabyss:ember_rod",
           "count": 3,
           "party": false
         },
@@ -46,7 +46,7 @@
     "xp": 200,
     "items": [
       {
-        "item": "minecraft:netherite_upgrade_smithing_template",
+        "item": "skyabyss:resonance_crystal",
         "count": 1
       }
     ],

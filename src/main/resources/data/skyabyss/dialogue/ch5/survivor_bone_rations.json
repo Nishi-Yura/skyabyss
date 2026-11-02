@@ -20,7 +20,7 @@
               },
               {
                 "type": "item",
-                "item": "minecraft:bread",
+                "item": "skyabyss:town_bread",
                 "count": 12
               }
             ]
@@ -35,7 +35,7 @@
       "do": [
         {
           "type": "take",
-          "item": "minecraft:bread",
+          "item": "skyabyss:town_bread",
           "count": 12
         }
       ],

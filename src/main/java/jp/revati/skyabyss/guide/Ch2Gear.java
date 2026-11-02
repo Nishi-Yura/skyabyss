@@ -45,14 +45,14 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 二章「引く海」の備えの品 (docs/design/21 の 1.2・4.1、P5 の二章の分)。一章の TravelGear と同じ型。
+// 二章「引く海」の備えの品 (P5 の二章の分)。一章の TravelGear と同じ型。
 //  - 素材: 小真珠・塩結晶・真珠の護り糸 (鼓動守 潮殻の材料)・貝の欠け。落とす敵は二章の地上の敵 (別の担当が ID の文字列で参照する)
 //  - 潮渡りの旅装 (4 部位): 防御 3/7/5/3 = 18、強靭 2.25 × 4 = 9、水の中の動きの鈍りを軽くする (水中移動効率 +0.1 × 4 = 0.4)、
 //    アンコモン、炉で鍛えない、必要 Lv 13 (GearCurve.TRAVEL[1])。修理は塩結晶。一式で合図 SIGNAL_GEAR_MADE
 //  - 塩の砥石: 「塩の刃」(攻撃 +1.8、20 分)。水の中 (自分か相手が水に浸かっている) で当てると塩が散って +1 (SALT_WET_BONUS)。使うと合図 SIGNAL_WHETSTONE_USED
 //  - 潮の塩漬け (水中呼吸 60 秒 + 満腹)・真珠の粉薬 (即時に 3❤ 回復、浮遊と鈍足を治す)
 //  - 潮の刻みの砂時計 (消耗しない。次の干潮・満潮までの秒数を画面の帯に一度。クールダウン 30 秒)
-// レシピは旅の覚書 (二章) か職人 (unlock_recipes chapter 2) に教わるまで作れない (RecipeLock)。生成は tools/gen/ch2/gen_ch2_gear.py
+// 品は鍛冶場・薬師の誂え (MADE)。データを直接直す（生成スクリプトはない）
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch2Gear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -76,8 +76,8 @@ public final class Ch2Gear {
     // 砂時計で潮の刻みを読んだ
     public static final String SIGNAL_TIDE_READ = "ch2_tide_read";
 
-    // 旅の覚書 (二章) が解くレシピ (data/skyabyss/recipe)
-    public static final List<String> RECIPES = List.of("tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots",
+    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    public static final List<String> MADE = List.of("tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots",
             "salt_whetstone", "tide_pickle", "pearl_powder", "tide_hourglass");
 
     // ---------------------------------------------------------------- 数値
@@ -147,8 +147,6 @@ public final class Ch2Gear {
         Readiness.registerRemedy(Readiness.Lamp.BLADE, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.salt_whetstone"));
         Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.tide_pickle"));
         Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, TITAN, () -> Component.translatable("message.skyabyss.readiness.remedy.name.pearl_powder"));
-        // 旅の覚書 (二章) のレシピ
-        WayfarerNotes.registerRecipes(CHAPTER, RECIPES.stream().map(n -> ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, n)).toArray(ResourceLocation[]::new));
     }
 
     private Ch2Gear() {
@@ -176,7 +174,7 @@ public final class Ch2Gear {
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(ModItems.TAB.getKey())) {
+        if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> item : List.of(SMALL_PEARL, SALT_CRYSTAL, PEARL_WARD_THREAD, SHELL_CHIP, HELMET, CHESTPLATE, LEGGINGS, BOOTS,
                     SALT_WHETSTONE, TIDE_PICKLE, PEARL_POWDER, TIDE_HOURGLASS)) {
                 event.accept(item.get());

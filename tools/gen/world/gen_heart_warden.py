@@ -163,6 +163,8 @@ def install():
     with open(anim_path, "w", encoding="utf-8", newline="\n") as f:
         json.dump({"format_version": "1.8.0", "animations": animations()}, f, ensure_ascii=False, indent=2)
         f.write("\n")
+    # 七つの新しい技の動き (薙ぎ・叩き・肋の棘・鼓動の輪・挟み撃ち・跳びかかり・狂乱) は別の書き手が足す。書き直したら必ず足し直す
+    subprocess.check_call([sys.executable, os.path.join(ROOT, "tools", "gen", "world", "gen_heart_warden_moves.py")], cwd=ROOT)
 
 
 if __name__ == "__main__":

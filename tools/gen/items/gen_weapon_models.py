@@ -19,7 +19,7 @@ NeoForge の separate_transforms は base / perspectives の各値を BlockModel
 """
 
 # ---------------------------------------------------------------------------
-# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+# 上書き防止: 実行すると採用済みの素材を古い版で上書きする。
 #   上書きするもの: 武器 3 本の models/item/*.json (古い押し出しモデル)。途中で止まり半端な状態が残る
 #   採用版の生成元: tools/gen/items/gen_weapon_models_v2.py (これも SKYABYSS_ALLOW_REGEN=1 が必要)
 # どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。

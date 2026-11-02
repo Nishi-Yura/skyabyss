@@ -25,6 +25,8 @@ import org.joml.Vector3f;
 // 闘 WR6「縮む輪」: 広間の床の「安全な輪」が、時間とともに縮む。輪の外は赤く染まり、いると傷を受ける (敵も)。
 //  - 輪は最初は広間いっぱい (半径 14)、始まって少しあと (GRACE) から一定の速さで縮み、最後に半径 4.5 の輪になる。縁の床は赤い石の線になる
 //  - 輪の中で三つの波を倒すと越える。波は 4・6・8 体ほど (人数で増える)。最後の波に番兵長の影。波は前の波を倒した少しあとに輪の中へ湧く
+//  - 闘の試練では (bossFollows) 二つの波 (番兵長の影なし) のあと、本物の番兵長が輪の中へ (32 の 9.5)。輪は縮み続け、
+//    輪の外にいる番兵長は 0.5 秒ごとに体力の CAPTAIN_EDGE を失い、遅くなる。番兵長を輪の端へ追い込むと有利
 //  - 倒すのが遅いほど狭い場所で戦うことになる。人数がいると早く倒せる。全員が倒れたら部屋のやり直し (輪も床も最初へ)
 public final class WhaleRingRoom extends RaidRoom {
     static final int HX = 15;
@@ -40,6 +42,8 @@ public final class WhaleRingRoom extends RaidRoom {
     static final float MOB_DAMAGE = 2.0f;
     static final int DAMAGE_EVERY = 10;
     static final double BAND = 1.2;
+    // 輪の外の番兵長が 0.5 秒ごとに失う体力の割合
+    static final float CAPTAIN_EDGE = 0.025f;
 
     private record Cell(int x, int z, double d, BlockState orig) {
     }
@@ -134,6 +138,52 @@ public final class WhaleRingRoom extends RaidRoom {
     @Override
     public void tick(RaidCtx ctx) {
         long now = ctx.now();
+        ring(ctx, now, null);
+        // 波
+        if (cleared) {
+            return;
+        }
+        if (!waveOut) {
+            if (now >= nextWave) {
+                wave++;
+                spawnWave(ctx, wave);
+                waveOut = true;
+            }
+        } else if (ctx.aliveMobs().isEmpty()) {
+            waveOut = false;
+            if (wave >= waves()) {
+                cleared = true;
+                if (!bossFollows) {
+                    WhaleDecor.exitLamps(ctx, true);
+                }
+                return;
+            }
+            nextWave = now + WAVE_GAP;
+        }
+    }
+
+    // 闘の試練では二つ (三つ目の番兵長の影の代わりに本物の番兵長)
+    int waves() {
+        return bossFollows ? WAVES - 1 : WAVES;
+    }
+
+    @Override
+    public void bossBegin(RaidCtx ctx, Mob boss) {
+        ctx.say(Component.translatable("message.skyabyss.raid.WR6.captain"));
+    }
+
+    @Override
+    public void bossTick(RaidCtx ctx, Mob boss) {
+        ring(ctx, ctx.now(), boss);
+    }
+
+    @Override
+    public void bossDone(RaidCtx ctx) {
+        WhaleDecor.exitLamps(ctx, true);
+    }
+
+    // 輪の縮み・見た目・輪の外の傷 (captain = 中ボスの段の番兵長。輪の外で体力の割合で削れる)
+    private void ring(RaidCtx ctx, long now, @javax.annotation.Nullable Mob captain) {
         lastNow = now;
         ServerLevel level = ctx.level();
         radius = radiusAt(now);
@@ -151,28 +201,15 @@ public final class WhaleRingRoom extends RaidRoom {
             for (Mob m : ctx.aliveMobs()) {
                 if (dist(ctx, m.getX(), m.getZ()) > radius + 0.5) {
                     m.invulnerableTime = 0;
-                    m.hurt(level.damageSources().magic(), MOB_DAMAGE);
+                    if (m == captain) {
+                        m.hurt(level.damageSources().magic(), Math.max(MOB_DAMAGE, m.getMaxHealth() * CAPTAIN_EDGE));
+                        m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 15, 1, false, true));
+                        level.sendParticles(ParticleTypes.CRIMSON_SPORE, m.getX(), m.getY() + 1, m.getZ(), 6, 0.4, 0.6, 0.4, 0);
+                    } else {
+                        m.hurt(level.damageSources().magic(), MOB_DAMAGE);
+                    }
                 }
             }
-        }
-        // 波
-        if (cleared) {
-            return;
-        }
-        if (!waveOut) {
-            if (now >= nextWave) {
-                wave++;
-                spawnWave(ctx, wave);
-                waveOut = true;
-            }
-        } else if (ctx.aliveMobs().isEmpty()) {
-            waveOut = false;
-            if (wave >= WAVES) {
-                cleared = true;
-                WhaleDecor.exitLamps(ctx, true);
-                return;
-            }
-            nextWave = now + WAVE_GAP;
         }
     }
 
@@ -215,7 +252,7 @@ public final class WhaleRingRoom extends RaidRoom {
             String kind = w == 1 ? (i % 3 == 0 ? "archer" : "sentinel") : (i % 3 == 0 ? "archer" : i % 3 == 1 ? "crawler" : "sentinel");
             ctx.spawnGuard(kind, ctx.cell().floor(x, z));
         }
-        if (w == WAVES) {
+        if (w == WAVES && !bossFollows) {
             Mob shadow = ctx.spawnGuard("captain", ctx.cell().floor(0, 0));
             if (shadow instanceof WhaleboneCaptain) {
                 var health = shadow.getAttribute(Attributes.MAX_HEALTH);
@@ -266,7 +303,7 @@ public final class WhaleRingRoom extends RaidRoom {
 
     @Override
     public int counterMax() {
-        return WAVES;
+        return waves();
     }
 
     @Override

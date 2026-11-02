@@ -32,7 +32,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-// 二章の地上 (docs/design/34 の 4.3・C2、21 の 4.1)。二章の跡地 (33 の 3 章。都の東の浜) に世界で一つずつ置く。
+// 二章の地上。二章の跡地 (都の東の浜) に世界で一つずつ置く。
 //   支度の段 (メインの段。順不同。PrepQuests の章の表)
 //     ch2/salt_road (塩の道。語り部)  塩の道の標 5 (SaltVault が蔵から浜へ並べる) → 沈んだ塩の蔵の奥の刻み (伝承 ch2/salt_vault) + 潮の番人 (蔵のクリア)
 //     ch2/ebb_boat  (船と貝。イサナ)  船を作る (#minecraft:boats) → 沖の難破船 (Wreck) の箱で潮の民の頁 (ch2/wreck_page) + 潮見の貝を持つ
@@ -43,7 +43,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 //     漂着の筏の跡 ch2_drift_raft (30〜110、水辺)    人ごとに一度の抽選と頁 ch2/drift_raft、合図 ch2_raft。旅の職人 (二章の装い) が立つ
 //     引き潮の観測の杭 ch2_ebb_stakes (50〜140、水辺) 杭を触ると次の引き潮・満ち潮までの分と、大干潮は夜の前半という一行
 //     沖の難破船 (Wreck。場所の表ではなく、跡地の海の向きの浅い沖に、人が近づいたとき一度だけ置く)
-//   文は assets/skyabyss_ch2/lang、部品・クエスト・会話・伝承は tools/gen/ch2/gen_ch2_ground.py
+//   文は assets/skyabyss_ch2/lang、部品・クエスト・会話・伝承は データを直接直す（生成スクリプトはない）
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch2Ground {
     // 支度の段 (PrepQuests.ids(2) と同じ並び)
@@ -124,7 +124,7 @@ public final class Ch2Ground {
         // 漂着の筏の跡: 人ごとに一度の抽選と頁。職人が立つ所 (印 artisan)
         SiteTreasure.register(RAFT_TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:small_pearl", 3),
                 new SiteTreasure.Entry("skyabyss:salt_crystal", 2), new SiteTreasure.Entry("skyabyss:shell_chip", 2),
-                new SiteTreasure.Entry("minecraft:dried_kelp", 4))));
+                new SiteTreasure.Entry("skyabyss:dried_fish", 4))));
         ChapterSites.element(RAFT, Chapters.TIDE, RAFT).atGround().dist(30, 110).prefer(Prefer.SHORE).arriveRadius(8)
                 .post(job -> {
                     BlockPos at = job.mark("artisan");

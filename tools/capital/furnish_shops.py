@@ -32,7 +32,7 @@ class FurnishShops:
             ['fletching_table', self.LANT], [self.barrel('west'), self.barrel('west'), 'potted_fern'], [self.chest('west'), self.pot('west')],
             ['bookshelf', 'bookshelf', 'bookshelf'], ['crafting_table', self.candle(3)], [self.barrel('west'), self.chest('west')],
             ['grindstone[face=floor,facing=west]']])
-        self.npc('tool_merchant', 41, 0, -33)
+        self.npc('tool_merchant', 42, 0, -36)  # 市の四人の列 (x 42、2 おき) の北の端 (2026-10-28 の試遊「道具屋が前に出て横並びになってない」)
         # 客の側 x 35..39: 北の壁 z=-36 に売り物の樽と箱、南の壁 z=-30 に束ねた品
         self.fwall([(x, -36) for x in range(35, 40)], 'south', [
             [self.barrel('up'), self.candle(2)], [self.chest('south')], ['hay_block[axis=y]'], [self.barrel('up'), self.LANT], ['crafting_table']])

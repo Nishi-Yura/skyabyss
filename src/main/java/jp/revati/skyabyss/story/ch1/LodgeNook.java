@@ -15,7 +15,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 帰る場所 (E12。docs/design/17 の 1.5): 鐘の宿りの小屋の中に、ベッド (西の壁ぎわ) とかまど (東の壁ぎわ) を置く。
+// 帰る場所 (E12): 鐘の宿りの小屋の中に、ベッド (西の壁ぎわ) とかまど (東の壁ぎわ) を置く。
 // 夜に眠れる・火で温まれる、人のいる気配。言伝ての板は FreeQuestEvents が鐘のそばに立てるので、ここでは置かない。
 // 宿りの部品 (data/skyabyss/opening/shelter.json) には手を入れず、建て終わったあとに、部品の印 (door・bell・stand) から向きを割り出して足す。
 // すでに何かがある所には置かない。世界ごとに一度 (Ch1Data.nook)

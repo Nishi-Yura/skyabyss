@@ -1,0 +1,60 @@
+{
+  "category": "main",
+  "chapter": "chapter3",
+  "order": 72,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_moon_valley",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "meet",
+      "xp": 140,
+      "objectives": [
+        {"id": "talk", "type": "talk", "target": "skyabyss:guest_moon_past2", "topic": "ch6_cliff_meet3"}
+      ]
+    },
+    {
+      "id": "pool",
+      "xp": 90,
+      "objectives": [
+        {"id": "pool", "type": "signal", "targets": ["moon_cliff_pool"], "count": 1}
+      ]
+    },
+    {
+      "id": "shards",
+      "xp": 420,
+      "objectives": [
+        {"id": "tower", "type": "signal", "targets": ["moon_cliff_shard_tower"], "count": 1},
+        {"id": "ledge", "type": "signal", "targets": ["moon_cliff_shard_ledge"], "count": 1},
+        {"id": "balance", "type": "signal", "targets": ["moon_cliff_shard_balance"], "count": 1}
+      ]
+    },
+    {
+      "id": "gate",
+      "xp": 90,
+      "objectives": [
+        {"id": "cross", "type": "signal", "targets": ["moon_cliff_gate"], "count": 1}
+      ]
+    },
+    {
+      "id": "lord",
+      "xp": 700,
+      "objectives": [
+        {"id": "defeat", "type": "signal", "targets": ["moon_lord_waxing"], "count": 1}
+      ]
+    },
+    {
+      "id": "promise",
+      "xp": 140,
+      "objectives": [
+        {"id": "talk", "type": "talk", "target": "skyabyss:guest_moon_past2", "topic": "ch6_cliff_promise3"}
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 900
+  }
+}

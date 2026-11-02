@@ -1,0 +1,57 @@
+# 終章の雲海 島 3「炉の島」(docs/design/50 の 4.2.3): 光の橋・島と大炉・崩れた橋の巻き戻り (時をずらして 4 枚)・炉・敵 2 種・主の間と戻し手
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/cloudsea_isle3.txt -PshotsName=cloudsea_isle3
+world cloudsea_isle3_b
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 3 130 -400
+waitchunks 200
+wait 100
+camera 3 125 -331 180 10
+wait 60
+shot m01_light_bridge
+camera 78 160 -398 135 30
+wait 60
+shot m02_overview
+cmd tp @s 3 108 -430
+wait 40
+camera 3 105.5 -418 180 4
+wait 60
+shot m03_arrive_forge
+camera -21 107 -437 95 14
+wait 30
+shot m04_west_bridge_a
+wait 50
+shot m05_west_bridge_b
+wait 50
+shot m06_west_bridge_c
+wait 50
+shot m07_west_bridge_d
+cmd skyabyss cloudsea forge e
+camera 50 110 -446 120 18
+wait 30
+shot m08_east_forge_lit
+cmd summon skyabyss:ash_striker 1 106 -436 {NoAI:1b,Rotation:[160f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:backfire 5 106 -436 {NoAI:1b,Rotation:[200f,0f],PersistenceRequired:1b}
+wait 40
+camera 3 106 -430 180 10
+wait 30
+shot m09_foes
+cmd skyabyss cloudsea rewinder
+wait 60
+camera 3 141 -449 180 40
+wait 40
+shot m10_arena
+camera 3 130 -459 180 6
+wait 30
+shot m11_rewinder

@@ -1,0 +1,18 @@
+{
+  "type": "skyabyss:dungeon",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "skyabyss:dungeon",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {
+          "block": "minecraft:air",
+          "height": 1
+        }
+      ],
+      "structure_overrides": []
+    }
+  }
+}

@@ -64,7 +64,7 @@ public final class StormLore {
         return "chapter1/inscription_storm_" + place;
     }
 
-    // ---------------------------------------------------------------- クエスト (data/skyabyss/quest/*storm*。tools/gen/story/gen_storm_lore.py が書く)
+    // ---------------------------------------------------------------- クエスト (data/skyabyss/quest/*storm*。データを直接直す（生成スクリプトはない）)
     public static final Set<String> QUESTS = Set.of("daily_storm_rounds", "weekly_storm_heart");
 
     // ほかの担当が登録する ID。まだ登録されていないうちは、伝承と自己テストは「待っている」として扱う

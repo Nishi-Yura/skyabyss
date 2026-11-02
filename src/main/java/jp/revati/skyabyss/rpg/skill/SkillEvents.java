@@ -71,10 +71,6 @@ public final class SkillEvents {
             double bonus = SkillRules.foresightBonus(foresight) + (WeaponType.has(player, WeaponType.FAST) ? SkillRules.FORESIGHT_FAST_BONUS : 0);
             SkillEffects.timedMod(player, Attributes.ATTACK_SPEED, "foresight", bonus, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, SkillRules.FORESIGHT_TICKS);
         }
-        if (Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.FIRST)) {
-            SkillEffects.timedMod(player, Attributes.MOVEMENT_SPEED, "agility_15", Breakpoints.AGILITY_15_MOVE,
-                    AttributeModifier.Operation.ADD_MULTIPLIED_BASE, Breakpoints.AGILITY_15_TICKS);
-        }
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -87,6 +83,7 @@ public final class SkillEvents {
         d.tickCooldowns();
         long now = player.level().getGameTime();
         SkillPassives.tick(player, d, now);
+        Gauges.tick(player);
         SkillManager.regenTick(player, d, now);
         SkillManager.sendMana(player, false);
         if (player.tickCount % 20 == 7) {
@@ -97,7 +94,7 @@ public final class SkillEvents {
     // 技の点が増えたら一行で知らせる (レベルアップの知らせのすぐ後に出る)
     static void notifyPoints(ServerPlayer player, SkillData d) {
         int total = d.totalPoints(SkillManager.level(player));
-        // はじめの案内は、開幕の暗転・帳面の知らせと重ならないよう、書を持ち、Lv2 (鐘の宿り) に着くか、20 分たってから (17 の 5.2)
+        // はじめの案内は、開幕の暗転・帳面の知らせと重ならないよう、書を持ち、Lv2 (鐘の宿り) に着くか、20 分たってから
         if (d.notifiedPoints == 0 && total > 0 && !firstHintReady(player)) {
             return;
         }
@@ -108,11 +105,12 @@ public final class SkillEvents {
             if (first) {
                 // はじめて世界に来たとき: 増えたのではなく、はじめから一つ覚えられることを知らせる
                 Notice.hint(player, "message.skyabyss.skill.first_hint", Component.keybind("key.skyabyss.skills"));
+                jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.SKILLS);
                 return;
             }
             Notice.levelUp(player, "message.skyabyss.skill.points_gained", gained, d.unspentPoints(SkillManager.level(player)));
             if (d.spentPoints() == 0 || d.unspentPoints(SkillManager.level(player)) >= 3) {
-                Notice.hint(player, "message.skyabyss.skill.open_hint", Component.keybind("key.skyabyss.skills"));
+                jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.SKILLS);
             }
         } else if (total < d.notifiedPoints) {
             d.notifiedPoints = total;
@@ -143,6 +141,7 @@ public final class SkillEvents {
     static void onServerStopped(ServerStoppedEvent event) {
         SkillActions.clear();
         MARKS.clear();
+        Gauges.clear();
     }
 
     // ---------------------------------------------------------------- 矢が放たれた
@@ -164,6 +163,19 @@ public final class SkillEvents {
         }
         if (projectile.getOwner() instanceof LivingEntity owner && !(owner instanceof Player) && SkillEffects.ashed(owner)) {
             projectile.setDeltaMovement(projectile.getDeltaMovement().scale(1 - SkillRules.ASH_PROJECTILE));
+        }
+    }
+
+    // ---------------------------------------------------------------- 倒したときのマナ (技の木の節 mana_kill。Wynncraft の「倒してマナ」)
+    @SubscribeEvent
+    static void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (event.getEntity().level().isClientSide || event.getEntity() instanceof Player
+                || !(event.getSource().getEntity() instanceof ServerPlayer player) || player instanceof FakePlayer || !player.isAlive()) {
+            return;
+        }
+        double mana = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_kill");
+        if (mana > 0) {
+            SkillManager.gainMana(player, mana);
         }
     }
 
@@ -204,15 +216,12 @@ public final class SkillEvents {
             if (fire) {
                 amount *= (float) (1 - SkillRules.emberHeartReduction(vd.rank(Skill.EMBER_HEART)));
                 amount *= (float) (1 - SkillBuild.fireReduction(hurtPlayer));
-                // 炉の手 (灰の鍛え人の天性)
-                if (vd.callingTree() == SkillTree.ASH) {
-                    amount *= (float) (1 - SkillRules.TRAIT_ASH_FIRE);
-                }
             }
-            if (fire || poison) {
-                if (Breakpoints.reached(hurtPlayer, jp.revati.skyabyss.rpg.GrowthRules.Stat.VITALITY, Breakpoints.SECOND)) {
-                    amount *= (float) (1 - Breakpoints.VITALITY_30_FIRE);
-                }
+            // 木 v2 の節: 受ける傷 (動かずにいる間の分は 1 秒止まってから)
+            double taken = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(hurtPlayer, "damage_taken")
+                    + (vd.stillTicks >= 20 ? jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(hurtPlayer, "damage_taken_still") : 0);
+            if (taken != 0) {
+                amount *= (float) Math.max(0.2, 1 + taken);
             }
             // 重い声: 狙いを引いているあいだ、受ける傷 −10%
             if (vd.tauntRune == 2 && vd.tauntUntil >= now && SkillEffects.taunting(hurtPlayer, 16)) {
@@ -257,16 +266,25 @@ public final class SkillEvents {
                     level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), Skills.SOUND_RIPOSTE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
                 }
             }
-            // 炉の手 (灰の鍛え人の天性): 武器の強化の上乗せが 1 割増える
-            if (melee && d.callingTree() == SkillTree.ASH) {
-                net.minecraft.world.item.ItemStack held = player.getMainHandItem();
-                if (held.getItem() instanceof jp.revati.skyabyss.item.ModGear g && g.enhanceable()) {
-                    amount += (float) (SkillRules.TRAIT_ASH_ENHANCE * jp.revati.skyabyss.item.GearEvents.enhanceAttack(held.getItem(), jp.revati.skyabyss.item.ModGear.enhance(held)));
+            // 木 v2 の節: 吸い (近接。1 回 2 点まで)。職の武器でない武器なら攻撃力は半分 (docs/design/48 の 3 章)
+            if (melee) {
+                Job cur = Job.byId(d.curJob);
+                Job held = Job.of(player.getMainHandItem());
+                if (cur != null && held != null && held != cur && !SkillManager.IGNORE_JOBS) {
+                    amount *= 0.5f;
+                }
+                // 基礎の要求値に届いていない武器も半分 (GearRequirement)
+                if (!GearRequirement.met(player, player.getMainHandItem())) {
+                    amount *= 0.5f;
+                }
+                double steal = jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "lifesteal");
+                if (steal > 0 && amount > 0 && player.isAlive()) {
+                    player.heal((float) Math.min(2.0, amount * steal));
                 }
             }
-            // 骨の目 (骨の射手の天性): 飛び道具の傷 +5%
-            if (direct instanceof Projectile && d.callingTree() == SkillTree.BONE) {
-                amount *= (float) (1 + SkillRules.TRAIT_BONE_DAMAGE);
+            // 孤り (孤風の型の溜まるもの): 満ちていれば、この一撃 ×2.5
+            if (melee) {
+                amount *= (float) Gauges.meleeMultiplier(player);
             }
             // 炉の記憶: 溜まった熾を使い切る
             if (melee && d.embers > 0) {
@@ -325,28 +343,28 @@ public final class SkillEvents {
                 if (d.knows(Skill.RIPOSTE)) {
                     d.riposteUntil = now + SkillRules.RIPOSTE_WINDOW;
                 }
+                Gauges.onHurt(player);
                 // 岩の返り: 狙いを引いた敵の攻撃を受けた
                 if (d.tauntRune == 3 && d.tauntUntil >= now && SkillEffects.tauntedBy(from, player)) {
                     d.rockReturn = SkillRules.ROCK_RETURN_BONUS;
                 }
             }
-            // 逃げ足: 体力が 3❤ 以下になったとき、少しのあいだ速くなる (20 秒に 1 度)
-            int fleet = d.rank(Skill.FLEET_FOOT);
-            if (fleet > 0 && player.getHealth() - event.getNewDamage() <= SkillRules.FLEET_HEALTH && now >= d.fleetReadyAt && player.isAlive()) {
-                d.fleetReadyAt = now + SkillRules.FLEET_COOLDOWN;
-                SkillEffects.timedMod(player, Attributes.MOVEMENT_SPEED, "fleet_foot", SkillRules.fleetBonus(fleet),
-                        AttributeModifier.Operation.ADD_MULTIPLIED_BASE, SkillRules.FLEET_TICKS);
-                if (player.level() instanceof ServerLevel level) {
-                    level.sendParticles(Skills.SKY_MOTE.get(), player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.4, 0.1, 0.4, 0.03);
-                }
-            }
         }
         if (source.getEntity() instanceof ServerPlayer attackerPlayer && !SkillActions.riderless()) {
             SkillData ad = SkillManager.get(attackerPlayer);
+            // 型の溜まるもの: ふつうの近接 (技でない) が当たった・ふつうの矢 (技の矢でない) が当たった
+            if (victim != attackerPlayer && SkillActions.dealing() == null && SkillActions.isFoe(attackerPlayer, victim)) {
+                if (source.getDirectEntity() == attackerPlayer) {
+                    Gauges.onMelee(attackerPlayer, victim);
+                } else if (source.getDirectEntity() instanceof AbstractArrow arrow && !arrow.getTags().contains(SkillActions.PIERCE_TAG)) {
+                    Gauges.onArrow(attackerPlayer);
+                }
+            }
             // 焼き入れ: 熾の武器の近接に、炎の傷が乗る
             if (ad.temperUntil >= now && source.getDirectEntity() == attackerPlayer && SkillActions.dealing() != Skill.SKY_RAIN
                     && !(victim instanceof Player) && victim != attackerPlayer) {
-                double mult = ad.temperMult + (WeaponType.has(attackerPlayer, WeaponType.HEAVY) ? SkillRules.TEMPER_HEAVY_BONUS : 0);
+                double mult = (ad.temperMult + (WeaponType.has(attackerPlayer, WeaponType.HEAVY) ? SkillRules.TEMPER_HEAVY_BONUS : 0))
+                        * (Gauges.temperBoost(attackerPlayer) ? 2 : 1);
                 float extra = (float) (attackerPlayer.getAttributeValue(Attributes.ATTACK_DAMAGE) * mult * SkillEffects.damagePower(attackerPlayer, Skill.TEMPER));
                 if (extra > 0) {
                     SkillActions.hitPlain(attackerPlayer, victim, extra, Skill.TEMPER);
@@ -411,27 +429,6 @@ public final class SkillEvents {
         return m != null && m.until >= now ? m.bonus : 0;
     }
 
-    // 骨の目: 撃った矢の 25% は消えない (弓で撃った 1 本を次の tick に返す)
-    @SubscribeEvent
-    static void onArrowLoose(net.neoforged.neoforge.event.entity.player.ArrowLooseEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || player.isCreative() || event.getCharge() < 3) {
-            return;
-        }
-        if (SkillManager.get(player).callingTree() != SkillTree.BONE || player.getRandom().nextDouble() >= SkillRules.TRAIT_BONE_KEEP) {
-            return;
-        }
-        net.minecraft.world.item.ItemStack ammo = player.getProjectile(event.getBow());
-        if (ammo.isEmpty()) {
-            return;
-        }
-        net.minecraft.world.item.ItemStack back = ammo.copyWithCount(1);
-        jp.revati.skyabyss.story.ch1.Tasks.later(1, () -> {
-            if (!player.hasDisconnected() && !player.isRemoved() && !player.getInventory().add(back)) {
-                player.drop(back, false);
-            }
-        });
-    }
-
     // ---------------------------------------------------------------- 付け直しと同期
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -441,6 +438,7 @@ public final class SkillEvents {
             // 転生の回数を写し、足りなくなった淵・前世の技を戻す (版 3 以前の記録はそのまま通る)
             d.rebirth = jp.revati.skyabyss.rebirth.RebirthView.count(player);
             d.enforceRebirth();
+            SkillManager.refreshStats(player);
             SkillManager.applyModifiers(player);
             // ここではまだ上限まで切り詰めない。装備の特性 (共鳴・静心) の最大マナは最初の tick で付くので、
             // 上限を超えていれば regenTick がそのとき収める
@@ -452,8 +450,6 @@ public final class SkillEvents {
             }
             SkillManager.sync(player);
             SkillManager.sendMana(player, true);
-            // 天職を選べるのに、まだ選んでいない人 (あとでにした人・古いセーブ)
-            SkillCalling.offerSoon(player, SkillCalling.LOGIN_DELAY, false);
         }
     }
 
@@ -469,6 +465,7 @@ public final class SkillEvents {
             }
             d.riposteUntil = 0;
             d.embers = 0;
+            Gauges.reset(player);
             d.temperUntil = 0;
             d.rockReturn = 0;
             SkillManager.sync(player);

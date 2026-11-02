@@ -101,6 +101,10 @@ public final class CloudEyeEvents {
 
     @Nullable
     static String ineligible(ServerLevel level, ServerPlayer player) {
+        // 終章の結末を選んだ人の空には、もう雲の目は出ない
+        if (jp.revati.skyabyss.story.finale.FinaleEnding.chosen(player) != null) {
+            return "ending";
+        }
         ChapterSkyData.Entry entry = ChapterSkyData.get(level).entry(player.getUUID());
         boolean awake = player.isAlive() && !player.isSpectator() && !player.isSleeping();
         boolean outdoors = !player.isUnderWater() && level.canSeeSky(player.blockPosition().above());

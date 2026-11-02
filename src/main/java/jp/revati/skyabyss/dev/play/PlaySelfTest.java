@@ -39,7 +39,9 @@ public final class PlaySelfTest {
     private static final List<String> COMMANDS = List.of("play help", "play status", "play chapter 2", "play chapter 2 @a see", "play goto whale-heart",
             "play goto abyss-depth-5", "play kit tide", "play boss tide @a 2", "play boss warden", "play quest main_song done", "play quest main_song reset",
             "play quest main_song see_whale", "play lore unlock-all", "play lore reset", "play time day", "play weather clear", "play peaceful on",
-            "play heal", "play feed", "play god on", "play god off", "play reset me");
+            "play heal", "play feed", "play god on", "play god off", "play reset me",
+            "admin help", "admin status", "admin level 10", "admin coins 5 @a", "admin version", "help",
+            "admin tower ending calm", "admin tower start", "admin tower start @a", "admin tower day", "admin tower hp 50", "admin tower leave");
 
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();
@@ -60,13 +62,20 @@ public final class PlaySelfTest {
         // 1. 登録と構文
         var root = server.getCommands().getDispatcher().getRoot();
         CommandNode<CommandSourceStack> sky = root.getChild("skyabyss");
-        if (sky == null || sky.getChild("play") == null) {
-            f.add("skyabyss play is not registered");
+        if (sky == null || sky.getChild(PlayCommands.ADMIN) == null || sky.getChild(PlayCommands.DEV_ALIAS) == null) {
+            f.add("skyabyss admin / play is not registered");
             return;
         }
-        if (!sky.getRequirement().test(server.createCommandSourceStack().withPermission(2))
-                || sky.getRequirement().test(server.createCommandSourceStack().withPermission(1))) {
-            f.add("skyabyss play is not exactly permission 2");
+        // admin は設定の段 (既定 2) ちょうど、help は誰でも (dev/CommandGate)
+        var adminNode = sky.getChild(PlayCommands.ADMIN);
+        int lv = jp.revati.skyabyss.Config.adminLevel();
+        if (!adminNode.getRequirement().test(server.createCommandSourceStack().withPermission(lv))
+                || adminNode.getRequirement().test(server.createCommandSourceStack().withPermission(lv - 1))) {
+            f.add("skyabyss admin is not exactly permission " + lv);
+        }
+        if (sky.getChild(HelpCommands.HELP) == null || !sky.getChild(HelpCommands.HELP).getRequirement().test(server.createCommandSourceStack().withPermission(0))
+                || !sky.getRequirement().test(server.createCommandSourceStack().withPermission(0))) {
+            f.add("skyabyss help is not open to every player");
         }
         var disp = server.getCommands().getDispatcher();
         CommandSourceStack op = server.createCommandSourceStack().withPermission(4).withSuppressedOutput();
@@ -76,6 +85,24 @@ public final class PlaySelfTest {
                 f.add("does not parse: " + c);
             }
         }
+
+        // 1a. 塔の管理者の命令 (結末を選んだことにする・今日の一回を戻す)。偽の人で流す
+        FakePlayer tp = net.neoforged.neoforge.common.util.FakePlayerFactory.get(server.overworld(),
+                new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-0000000070e1"), "admin_tower"));
+        CommandSourceStack ts = tp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+        disp.execute("skyabyss admin tower ending calm", ts);
+        if (!"calm".equals(jp.revati.skyabyss.story.finale.FinaleEnding.chosen(tp)) || !jp.revati.skyabyss.tower.Towers.eligible(tp)) {
+            f.add("admin tower ending did not make the player eligible");
+        }
+        tp.getPersistentData().putString(jp.revati.skyabyss.tower.Towers.DAY, "2026-01-01");
+        disp.execute("skyabyss admin tower day", ts);
+        if (tp.getPersistentData().contains(jp.revati.skyabyss.tower.Towers.DAY)) {
+            f.add("admin tower day did not give back the entry");
+        }
+        if (disp.execute("skyabyss admin tower hp 50", ts) != 0) {
+            f.add("admin tower hp outside a run should do nothing");
+        }
+        tp.getPersistentData().remove(jp.revati.skyabyss.story.finale.FinaleEnding.KEY);
 
         // 1b. 既存の開始コマンドの形 (boss が流す文字列。木になければ構文の段階で落ちる)
         for (String c : List.of("tideheart start", "emberheart start", "stormheart start",

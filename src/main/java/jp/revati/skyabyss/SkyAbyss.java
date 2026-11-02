@@ -31,14 +31,18 @@ public class SkyAbyss {
         SelfTestRunner.listAndExitIfRequested();
         modEventBus.addListener(this::commonSetup);
         ModSounds.register(modEventBus);
+        jp.revati.skyabyss.music.MusicTracks.register(modEventBus);
         MobSounds.register(modEventBus);
         ModEffects.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
+        // 天と淵の大陸 (ワールドの種類。docs/design/40 の 3 章)
+        jp.revati.skyabyss.world.continent.ContinentSetup.register(modEventBus);
         jp.revati.skyabyss.advancement.Beats.register(modEventBus);
         jp.revati.skyabyss.registry.ModBlockEntities.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
+        jp.revati.skyabyss.registry.BossEggs.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMenus.register(modEventBus);
         // 装備の技の修飾 (ルーン・属性タグ) を SkillModifier へつなぐ
@@ -106,7 +110,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.ember.back.EmberBackSetup.register(modEventBus);
         // 余燼の背の敵 (灰被り・火の粉蛾・燠虫、スポーンエッグ、音)。13 の 11.2節の担当 D
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.register(modEventBus);
-        // 四章の地上の敵・品・音 (docs/design/34 の C4。story/ch4)
+        // 四章の地上の敵・品・音 (story/ch4)
         jp.revati.skyabyss.story.ch4.Ch4Setup.register(modEventBus);
         // 深淵の敵 A (骨・塩・雷の層の 9 種、段ごとの型・素材・経験値)。docs/design/36 の 4 節。abyss/mobs
         jp.revati.skyabyss.abyss.mobs.AbyssMobsA.register(modEventBus);
@@ -120,21 +124,43 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.register(modEventBus);
         jp.revati.skyabyss.abyss.AbyssSetup.register(modEventBus);
         jp.revati.skyabyss.abyss.gear.AbyssGearSetup.register(modEventBus);
+        jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.register(modEventBus);
+        jp.revati.skyabyss.story.finale.gear.DivineGearSetup.register(modEventBus);
+        // 野の装備 (土地ごとの武器 102 本と防具 18 式。docs/design/51)
+        jp.revati.skyabyss.item.wild.WildGearSetup.register(modEventBus);
+        jp.revati.skyabyss.dungeon.DungeonGear.register(modEventBus);
+        jp.revati.skyabyss.loot.box.LootBoxSetup.register(modEventBus);
+        jp.revati.skyabyss.rpg.skill.JobChoice.register(modEventBus);
+        jp.revati.skyabyss.item.ChapterGear.register(modEventBus);
+        jp.revati.skyabyss.abyss.LegendGear.register(modEventBus);
+        jp.revati.skyabyss.item.HeroicGear.register(modEventBus);
         // 前の私の落とし物 (深淵の墓の遺品 12。docs/design/36 の 9 章)
         jp.revati.skyabyss.story.ch5.AbyssRelics.register(modEventBus);
         jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup.register(modEventBus);
+        // 六章 区画 1「新月の谷」の仕掛けのブロック・星の灯・敵と主 (docs/design/46 の 4.3)
+        jp.revati.skyabyss.story.ch6.valley.ValleyBlocks.register(modEventBus);
+        jp.revati.skyabyss.story.ch6.cliff.CliffBlocks.register(modEventBus);
+        jp.revati.skyabyss.story.ch6.field.FieldBlocks.register(modEventBus);
+        jp.revati.skyabyss.story.ch6.rift.RiftBlocks.register(modEventBus);
+        jp.revati.skyabyss.story.finale.FinaleBlocks.register(modEventBus);
+        // 裏ボス「初代の空見」の報酬の品と肩掛けの見た目 (docs/design/53)
+        jp.revati.skyabyss.story.finale.founder.FounderItems.register(modEventBus);
+        jp.revati.skyabyss.tower.gear.TowerGearSetup.register(modEventBus);
         // 余燼の心臓 (最終ボス: 熾の底、三段階、灰の礫、報酬、天の鍵の四つ目の欠片)。13 の 11.2節の担当 F
         jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.register(modEventBus);
 
-        // 序盤の拍子 (プレイヤーごとの状態・音)。docs/design/17 の担当 3
+        // 序盤の拍子 (プレイヤーごとの状態・音)
         jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);
         // 章の演出の共通部品 (題字・余韻の札、予兆の枠)。docs/design/18 の 3 章、01 の 4.1
         jp.revati.skyabyss.story.arc.ArcSetup.register(modEventBus);
 
-        // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)。docs/design/21 の 1.4・1.5、P3
+        // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)P3
         jp.revati.skyabyss.guide.GuideSetup.register(modEventBus);
-        // 旅装・砥石・糧と薬 (一章の分。21 の 1.2、P5)
+        // 旅装・砥石・糧と薬 (一章の分P5)
         jp.revati.skyabyss.guide.TravelGear.register(modEventBus);
+        jp.revati.skyabyss.item.outfit.OutfitGear.register(modEventBus);
+        jp.revati.skyabyss.item.outfit.ConsumableGear.register(modEventBus);
+        jp.revati.skyabyss.item.outfit.MaterialGear.register(modEventBus);
 
         // クエストの見え方 (章の札・NPC の頭の印・更新の音)。docs/design/18 の 3.5 節
         jp.revati.skyabyss.quest.QuestUx.register(modEventBus);
@@ -145,6 +171,11 @@ public class SkyAbyss {
         // 転生の見せ方 (色の段・記号・名札・称号・背中の飾り・順位の石・飾り板)。docs/design/31
         jp.revati.skyabyss.rebirth.RebirthSetup.register(modEventBus, modContainer);
 
+        // スキン (見た目だけの一式。持っているものと着ているもの)。docs/design/54 の 6.1
+
+        // 釣り (魚 31 種と釣り竿)。docs/design/54 の 6.2.4.1
+        jp.revati.skyabyss.fishing.FishingSetup.register(modEventBus);
+
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
@@ -154,6 +185,8 @@ public class SkyAbyss {
     private void commonSetup(FMLCommonSetupEvent event) {
         // 層の主の戦いの合図を見た目 (BossLook) へつなぐ
         jp.revati.skyabyss.abyss.boss.BossLookHook.install();
+        // 技の木 v2 (docs/design/48) を jar から読む。壊れていればここで止まる
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.load();
         LOGGER.info("[{}] 天と淵のあいだ を読み込みました", MODID);
     }
 }

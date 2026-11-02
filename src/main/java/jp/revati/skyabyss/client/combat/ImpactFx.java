@@ -30,7 +30,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 
 // 予告した技が当たった瞬間の見た目と音だけ (ダメージ・判定には触れない)。
 // 床の印の範囲に、その技の主の属性 (石・水・雷・熱・深淵) に合う衝撃の輪と破片の粒を出し、近くのプレイヤーには小さく画面を揺らす。
-// 粒の数は上限つき (輪 24 + 破片 18 + 爆発 1)。揺れは screenShake 設定と weaponShake の強さに従う。
+// 粒の数は上限つき (輪 24 + 破片 18 + 爆発 1)。揺れは screenShake 設定と weaponShake の強さに従う。爆発と揺れは大きな技 (BIG_RADIUS) だけ。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class ImpactFx {
     enum Element {
@@ -38,6 +38,8 @@ public final class ImpactFx {
     }
 
     private static final int SHAKE_TICKS = 10;
+    // これより大きな範囲の技だけ爆発 (音・粒・揺れ)。半径 4.5 = 幅 9 の円や叩きつけ (名のある強敵・巨神・大技)
+    static final double BIG_RADIUS = 4.5;
     private static float shakeAmp;
     private static int shakeAge;
 
@@ -66,6 +68,9 @@ public final class ImpactFx {
         boolean light = d.style == Telegraph.Style.HARMLESS;
         Element el = elementNear(level, cx, y0, cz);
         float size = (float) Math.min(1.0, radius / 8.0);
+        // 爆発 (音・爆発の粒・画面の揺れ) は大きな技だけ。小さな技 (雑魚の一撃) は重い打撃の音と破片だけ
+        // (2026-10-27 の声「なんでもかんでも爆発つければいいんじゃない」)
+        boolean big = radius >= BIG_RADIUS;
         SoundEvent snd;
         float pitch;
         switch (el) {
@@ -78,16 +83,16 @@ public final class ImpactFx {
                 pitch = 1.3f;
             }
             case EMBER -> {
-                snd = SoundEvents.GENERIC_EXPLODE.value();
-                pitch = 1.4f;
+                snd = big ? SoundEvents.GENERIC_EXPLODE.value() : SoundEvents.FIRECHARGE_USE;
+                pitch = big ? 1.4f : 1.1f;
             }
             case ABYSS -> {
                 snd = SoundEvents.WARDEN_SONIC_BOOM;
                 pitch = 1.5f;
             }
             default -> {
-                snd = SoundEvents.GENERIC_EXPLODE.value();
-                pitch = 0.8f;
+                snd = big ? SoundEvents.GENERIC_EXPLODE.value() : SoundEvents.PLAYER_ATTACK_STRONG;
+                pitch = big ? 0.8f : 0.7f;
             }
         }
         level.playLocalSound(cx, y0, cz, snd, SoundSource.HOSTILE, light ? 0.5f : 0.9f + 0.5f * size, pitch + level.random.nextFloat() * 0.1f, false);
@@ -95,7 +100,9 @@ public final class ImpactFx {
             return;
         }
         if (bespoke) {
-            shake(cx, cz, radius, size);
+            if (big) {
+                shake(cx, cz, radius, size);
+            }
             return;
         }
         final double fy0 = y0;
@@ -125,8 +132,10 @@ public final class ImpactFx {
                 level.addParticle(debris, x, y + 0.2, z, 0, 0.18 + level.random.nextDouble() * 0.2, 0);
             }
         }
-        level.addParticle(ParticleTypes.EXPLOSION, cx, fy0 + 0.3, cz, 0, 0, 0);
-        shake(cx, cz, radius, size);
+        if (big) {
+            level.addParticle(ParticleTypes.EXPLOSION, cx, fy0 + 0.3, cz, 0, 0, 0);
+            shake(cx, cz, radius, size);
+        }
     }
 
     private static void shake(double cx, double cz, double radius, float size) {

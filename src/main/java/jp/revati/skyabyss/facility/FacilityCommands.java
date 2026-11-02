@@ -24,11 +24,10 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss facility shop <店>                  店を開く (どこからでも)
 //   /skyabyss facility stash                      預かり所を開く (どこからでも)
 //   /skyabyss facility coins <枚>                 鐘銭を渡す
-//   /skyabyss facility look <0..3>                近くの係の人の見た目の案を替える (撮影用)
+//   /skyabyss facility look <0..1>                近くの係の人の見た目の案を替える (撮影用)
 //   /skyabyss facility records                    砦の老兵の試練の記録を開く
 //   /skyabyss facility dummy                      足もとのまわり 8 の木偶の柱に的をかぶせる (撮影・試し用)
 //   /skyabyss facility keyroom offer|return       鍵の間に欠片を納める / 返してもらう (祭司と同じ)
-//   /skyabyss facility mapcopy                    書庫番の地図の写し (祭司・書庫番の働きと同じ)
 //   /skyabyss facility respec <skills|stats> [coins]   師範の振り直し
 //   /skyabyss facility brew                       薬師の醸造の手ほどき (四章の決まりのまま)
 //   /skyabyss facility trade [demo]               取引所の画面を番の前と同じに開く (出す・申請ができる。だれでもの /trade は番の前でない)。
@@ -51,7 +50,7 @@ public final class FacilityCommands {
                 .then(Commands.literal("facility")
                         .then(Commands.literal("spawn").then(Commands.argument("role", StringArgumentType.word()).suggests(ROLES)
                                 .executes(c -> spawn(c.getSource(), StringArgumentType.getString(c, "role"), 0))
-                                .then(Commands.argument("look", IntegerArgumentType.integer(0, 3))
+                                .then(Commands.argument("look", IntegerArgumentType.integer(0, 1))
                                         .executes(c -> spawn(c.getSource(), StringArgumentType.getString(c, "role"), IntegerArgumentType.getInteger(c, "look"))))))
                         .then(Commands.literal("mark").then(Commands.argument("name", StringArgumentType.word())
                                 .executes(c -> mark(c.getSource(), StringArgumentType.getString(c, "name")))))
@@ -114,22 +113,28 @@ public final class FacilityCommands {
                                         })))
                         .then(Commands.literal("place").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
-                            int n = Attendants.ensureAll(p.serverLevel(), OpeningSites.shelterExtras(p.server, AttendantRole.MARK_PREFIX));
+                            int n = Attendants.ensureAll(p.serverLevel(), Attendants.capitalSpots(p.serverLevel()));
                             c.getSource().sendSuccess(() -> Component.literal("attendants: " + n), false);
                             return n;
                         }))
                         .then(Commands.literal("shop").then(Commands.argument("shop", StringArgumentType.word()).suggests(SHOPS)
                                 .executes(c -> ShopService.open(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "shop"), null) ? 1 : 0)))
+                        // act <働き> : 係の人の働き (FacilityActions の open) を、話さずに起こす (撮影・画面の重なりの検査用)
+                        .then(Commands.literal("act").then(Commands.argument("open", StringArgumentType.word())
+                                .executes(c -> {
+                                    FacilityActions.run(c.getSource().getPlayerOrException(), null, StringArgumentType.getString(c, "open"), null);
+                                    return 1;
+                                })))
                         .then(Commands.literal("stash").executes(c -> {
                             StashMenu.open(c.getSource().getPlayerOrException(), null);
                             return 1;
                         }))
-                        .then(Commands.literal("coins").then(Commands.argument("n", IntegerArgumentType.integer(1, 9999))
+                        .then(Commands.literal("coins").then(Commands.argument("n", IntegerArgumentType.integer(1, Coins.MAX))
                                 .executes(c -> {
                                     Coins.give(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "n"));
                                     return 1;
                                 })))
-                        .then(Commands.literal("look").then(Commands.argument("look", IntegerArgumentType.integer(0, 3))
+                        .then(Commands.literal("look").then(Commands.argument("look", IntegerArgumentType.integer(0, 1))
                                 .executes(c -> {
                                     ServerPlayer p = c.getSource().getPlayerOrException();
                                     int look = IntegerArgumentType.getInteger(c, "look");
@@ -150,7 +155,6 @@ public final class FacilityCommands {
                         .then(Commands.literal("keyroom")
                                 .then(Commands.literal("offer").executes(c -> KeyRoom.offerAll(c.getSource().getPlayerOrException())))
                                 .then(Commands.literal("return").executes(c -> KeyRoom.giveBack(c.getSource().getPlayerOrException()))))
-                        .then(Commands.literal("mapcopy").executes(c -> FacilityActions.mapCopy(c.getSource().getPlayerOrException()) ? 1 : 0))
                         .then(Commands.literal("respec").then(Commands.argument("what", StringArgumentType.word())
                                 .suggests((ctx, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.List.of("skills", "stats"), b))
                                 .executes(c -> TrainingMaster.respec(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "what").equals("stats"), false)
