@@ -20,7 +20,9 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 // 近接の一撃の決まり (MeleeHits) の自己テスト。段の名前は "melee hits"。
 //  - 同じ人が同じ敵を、殴れる間のうちにもう一度殴っても空振り。ほかの人の一撃は同じ tick でも通る
 //  - 溜め 0 の一撃はほぼ傷にならない (満ちた一撃の 5% 未満)。溜め半分は満ちた一撃の 2.5 割ほど
-//  - 満ちていない一撃の中の回復は起こらず、満ちた一撃の中の回復は起こる
+//  - 満ちていない一撃の中の回復は起こらず、満ちた一撃の中の回復は起こる (自分も仲間も)
+//  - 二人: 同じ tick の満ちた一撃はどちらも通る。一人の弱い一撃の中でも、もう一人の傷は弱まらない
+//  - 溜めの手がかり: 弱い一撃が溜まり、戦いが落ち着いたら出る。満ちた一撃に慣れた人には出ない
 public final class MeleeHitsSelfTest {
     private MeleeHitsSelfTest() {
     }
@@ -104,6 +106,56 @@ public final class MeleeHitsSelfTest {
             if (a.getHealth() != 16f) {
                 f.add("a heal outside any hit was blocked (" + a.getHealth() + ")");
             }
+            // 二人: 同じ tick に満ちた一撃を当てると、どちらも通る
+            MeleeHits.forget(a);
+            MeleeHits.forget(b);
+            a.attackStrengthTicker = 100;
+            b.attackStrengthTicker = 100;
+            float h4 = z.getHealth();
+            boolean both = MeleeHits.attack(a, z) & MeleeHits.attack(b, z);
+            float two = h4 - z.getHealth();
+            if (!both || two < full * 1.9f) {
+                f.add("two players' full hits in the same tick did not both land (" + two + ", one " + full + ")");
+            }
+            // 二人: 一人の満ちていない一撃の中でも、もう一人の傷は弱まらない
+            float h5 = z.getHealth();
+            MeleeHits.during(a, 0.1f, () -> z.hurt(over.damageSources().playerAttack(b), 3f));
+            float bHit = h5 - z.getHealth();
+            float h6 = z.getHealth();
+            MeleeHits.during(a, 1f, () -> z.hurt(over.damageSources().playerAttack(b), 3f));
+            if (Math.abs(bHit - (h6 - z.getHealth())) > 0.01f || bHit <= 0) {
+                f.add("the other player's damage was scaled by this player's weak swing (" + bHit + " vs " + (h6 - z.getHealth()) + ")");
+            }
+            // 二人: 満ちていない一撃の中では、仲間を癒す効き目も起こらない。満ちた一撃では起こる
+            b.setHealth(10f);
+            MeleeHits.during(a, 0.5f, () -> b.heal(3f));
+            MeleeHits.during(a, 1f, () -> b.heal(3f));
+            if (b.getHealth() != 13f) {
+                f.add("an ally heal inside the swing was wrong (" + b.getHealth() + ", want 13: weak blocked, full passes)");
+            }
+            // 溜めの手がかり: 弱い一撃が WEAK_HITS 回たまり、近接が落ち着いたら出す。満ちた一撃を LEARNED 回当てた人には出さない
+            MeleeHits.forget(a);
+            a.getPersistentData().remove(MeleeHits.TIPS_KEY);
+            a.getPersistentData().remove(MeleeHits.FULL_KEY);
+            long now = over.getGameTime();
+            for (int i = 0; i < MeleeHits.WEAK_HITS; i++) {
+                MeleeHits.coach(a, 0.1f, now);
+            }
+            if (MeleeHits.tipDue(a, now)) {
+                f.add("the charge tip came during the fight");
+            }
+            if (!MeleeHits.tipDue(a, now + MeleeHits.CALM_MELEE)) {
+                f.add("the charge tip did not come after " + MeleeHits.WEAK_HITS + " weak swings and a calm moment");
+            }
+            MeleeHits.forget(a);
+            a.getPersistentData().putInt(MeleeHits.FULL_KEY, MeleeHits.LEARNED);
+            for (int i = 0; i < MeleeHits.WEAK_HITS; i++) {
+                MeleeHits.coach(a, 0.1f, now);
+            }
+            if (MeleeHits.tipDue(a, now + MeleeHits.CALM_MELEE)) {
+                f.add("the charge tip came for a player who already lands full hits");
+            }
+            a.getPersistentData().remove(MeleeHits.FULL_KEY);
             if (MeleeHits.cooldown(a) != Math.max(MeleeHits.MIN_COOLDOWN, Math.round(a.getCurrentItemAttackStrengthDelay() * MeleeHits.COOLDOWN_SHARE))) {
                 f.add("cooldown " + MeleeHits.cooldown(a) + " does not follow the swing length " + a.getCurrentItemAttackStrengthDelay());
             }
@@ -116,7 +168,7 @@ public final class MeleeHitsSelfTest {
             }
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST melee hits FAILED: {}", m));
             if (f.isEmpty()) {
-                SkyAbyss.LOGGER.info("SELFTEST melee hits PASSED (same-foe cooldown per player, others pass in the same tick, damage x charge^2, heals only on full-charge hits)");
+                SkyAbyss.LOGGER.info("SELFTEST melee hits PASSED (same-foe cooldown per player, others pass in the same tick, damage x charge^2, heals only on full-charge hits, two players, charge tip)");
             }
         }
     }

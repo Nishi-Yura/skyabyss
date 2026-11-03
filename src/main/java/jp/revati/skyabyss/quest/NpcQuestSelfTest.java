@@ -484,6 +484,10 @@ public final class NpcQuestSelfTest {
     }
 
     // ---------------------------------------------------------------- 会話とクエスト
+    // イサナの一章の脇の話のうち、世界の日数で割り込むもの (日 2・3 から)。自己テストの世界は回すほど日が進むので、試す人は聞いたことにする
+    // (脇の話そのものは Ch1SelfTest が確かめる)
+    public static final List<String> DAY_TALKS = List.of("ch1_why_told", "ch1_hush_told", "ch1_after_told");
+
     private static FakePlayer player(ServerLevel level, int n, BlockPos at) {
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a1e0b3c-0000-4000-8000-0000000000" + String.format("%02d", n)),
                 "[npc_test_" + n + "]"));
@@ -491,6 +495,7 @@ public final class NpcQuestSelfTest {
         p.getInventory().clearContent();
         Quests.forgetAll(p);
         p.setData(NpcSetup.BONDS, new NpcBonds());
+        NpcBonds.of(p).bond(NpcSetup.WHALE_CHASER_ID).flags().addAll(DAY_TALKS);
         p.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5);
         return p;
     }

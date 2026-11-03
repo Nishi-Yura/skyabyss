@@ -483,6 +483,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
         // 近接の一撃 (2026-11-04): 同じ敵を殴れる間・溜めの強さ・回復は満ちた一撃だけ。SKYABYSS_SELFTEST_ONLY="melee hits"
         steps.addAll(jp.revati.skyabyss.combat.MeleeHitsSelfTest.steps());
+        // 倒すまでの時間 (土地の敵を、その土地の目安のレベルの武器の満ちた一撃で)。SKYABYSS_SELFTEST_ONLY="ttk audit"
+        steps.addAll(jp.revati.skyabyss.combat.TtkAuditSelfTest.steps());
         // 完全な RPG の決まり (採集・水汲み・倒れたときの既定)。docs/design/40。SKYABYSS_SELFTEST_ONLY="rpg rules"
         steps.addAll(jp.revati.skyabyss.rpg.rules.RpgRulesSelfTest.steps());
         // 正式版の前の直し: データの版の移し替え・置く品を持たせない・頁が寄る (upgrade/)。SKYABYSS_SELFTEST_ONLY="upgrade"

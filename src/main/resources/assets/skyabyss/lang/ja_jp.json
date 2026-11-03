@@ -2622,5 +2622,7 @@
   "label.skyabyss.stone.depth_record": "記録の石",
   "label.skyabyss.stone.depth_record.sub": "右クリックで深みの記録を見る",
   "skyabyss.configuration.chargeRing": "近接の溜めの輪",
-  "skyabyss.configuration.chargeSound": "溜めが満ちた音"
+  "skyabyss.configuration.chargeSound": "溜めが満ちた音",
+  "message.skyabyss.island.charge_hint": "峠に野盗がいる。照準の輪が満ちてから振ると、一撃が強い",
+  "message.skyabyss.melee.charge_tip": "照準の輪が満ちてから振ると一撃が強い。満ちる前はほとんど効かない"
 }

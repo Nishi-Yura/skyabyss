@@ -2622,5 +2622,7 @@
   "label.skyabyss.stone.depth_record": "Record Stone",
   "label.skyabyss.stone.depth_record.sub": "Use to see the depth records",
   "skyabyss.configuration.chargeRing": "Melee Charge Ring",
-  "skyabyss.configuration.chargeSound": "Full Charge Sound"
+  "skyabyss.configuration.chargeSound": "Full Charge Sound",
+  "message.skyabyss.island.charge_hint": "Bandits ahead. Swing when the crosshair ring is full",
+  "message.skyabyss.melee.charge_tip": "Swing on a full crosshair ring: weak hits barely hurt"
 }

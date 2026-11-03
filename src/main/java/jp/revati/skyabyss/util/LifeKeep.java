@@ -18,6 +18,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 public final class LifeKeep {
     public static final List<String> KEYS = List.of(
             "skyabyss_rpg_kit",                       // はじめの持ち物を渡した (RpgRules)
+            "skyabyss_charge_tips",                   // 溜めの手がかりを出した数 (combat/MeleeHits)
+            "skyabyss_full_hits",                     // 満ちた一撃を当てた数 (LEARNED まで。combat/MeleeHits)
             "skyabyss_ferried",                       // はじまりの島から渡し船で都へ渡った (ContinentOutskirts)
             "skyabyss_town_tour",                     // 町めぐりの進み (TownTour)
             "skyabyss_warm_stone_given",              // 暖石を渡した (WarmStoneItem)

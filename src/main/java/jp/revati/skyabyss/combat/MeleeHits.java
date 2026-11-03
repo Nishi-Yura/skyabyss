@@ -28,6 +28,8 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 // 技・矢・品の効き目が直接与える傷 (hurt) は対象外 (その一撃の中で起きたものだけ、溜めの強さを掛ける)。
 // 偽のプレイヤー (FakePlayer など) は対象にしない (自己テストは testAllowFake)
 // 殴れる間に当てて空振りしたら、その人へ Miss を送る (クライアントの溜めの輪 client/weapon/ChargeRing が「弾かれた」を見せる)
+// 溜めの手がかり: 溜め WEAK 未満の一撃を WEAK_HITS 回振った人に、戦いが落ち着いてから (近接が CALM_MELEE tick なく、傷を CALM_HURT tick 受けていない。
+// 手がかりの字幕は戦いの最中は出ないため) 一度、手がかりの字幕。一人に TIP_MAX 回まで (TIPS_KEY)。満ちた一撃を LEARNED 回当てた人には出さない (FULL_KEY)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MeleeHits {
     // 同じ敵を殴れる間 = 振りの長さ (攻撃速度から。20 / 攻撃速度 tick) のこの割合。最短 MIN_COOLDOWN tick
@@ -36,8 +38,19 @@ public final class MeleeHits {
     // 「満ちた」溜め (バニラが薙ぎ払い・会心に使う境と同じ)
     public static final float FULL = 0.9f;
 
+    static final float WEAK = 0.5f;
+    static final int WEAK_HITS = 4;
+    static final int TIP_MAX = 2;
+    static final int LEARNED = 20;
+    static final int CALM_MELEE = 80;
+    static final int CALM_HURT = 210;
+    public static final String TIPS_KEY = "skyabyss_charge_tips";
+    public static final String FULL_KEY = "skyabyss_full_hits";
+
     // 人 → (敵の id → 次に殴れる tick)
     private static final Map<UUID, Map<Integer, Long>> NEXT = PlayerMaps.track(new HashMap<>());
+    // 人 → {弱い一撃の数, 最後に振った tick, 手がかりを待っているか (1)}
+    private static final Map<UUID, long[]> COACH = PlayerMaps.track(new HashMap<>());
     // 今解いている一撃 (attack の中だけ。入れ子は前の値へ戻す)
     private static ServerPlayer swinging;
     private static float swingCharge = 1f;
@@ -101,6 +114,7 @@ public final class MeleeHits {
         float outerCharge = swingCharge;
         swinging = p;
         swingCharge = p.getAttackStrengthScale(0.5f);
+        coach(p, swingCharge, now);
         try {
             p.attack(target);
         } finally {
@@ -113,6 +127,49 @@ public final class MeleeHits {
         }
         m.put(target.getId(), now + cooldown(p));
         return true;
+    }
+
+    // 溜めの手がかりの数え
+    static void coach(ServerPlayer p, float charge, long now) {
+        var pd = p.getPersistentData();
+        if (charge > FULL) {
+            if (pd.getInt(FULL_KEY) < LEARNED) {
+                pd.putInt(FULL_KEY, pd.getInt(FULL_KEY) + 1);
+            }
+            return;
+        }
+        if (charge >= WEAK || pd.getInt(TIPS_KEY) >= TIP_MAX || pd.getInt(FULL_KEY) >= LEARNED) {
+            return;
+        }
+        long[] c = COACH.computeIfAbsent(p.getUUID(), k -> new long[3]);
+        c[0]++;
+        c[1] = now;
+        if (c[0] >= WEAK_HITS) {
+            c[2] = 1;
+        }
+    }
+
+    @SubscribeEvent
+    static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (COACH.isEmpty() || event.getServer().getTickCount() % 20 != 11) {
+            return;
+        }
+        long now = event.getServer().overworld().getGameTime();
+        for (ServerPlayer p : event.getServer().getPlayerList().getPlayers()) {
+            if (!tipDue(p, now)) {
+                continue;
+            }
+            COACH.remove(p.getUUID());
+            p.getPersistentData().putInt(TIPS_KEY, p.getPersistentData().getInt(TIPS_KEY) + 1);
+            jp.revati.skyabyss.notice.Notice.hint(p, "message.skyabyss.melee.charge_tip");
+        }
+    }
+
+    // 手がかりを出す時か (弱い一撃が溜まっていて、戦いが落ち着いた)
+    static boolean tipDue(ServerPlayer p, long now) {
+        long[] c = COACH.get(p.getUUID());
+        return c != null && c[2] != 0 && now - c[1] >= CALM_MELEE
+                && (p.getLastHurtByMobTimestamp() <= 0 || p.tickCount - p.getLastHurtByMobTimestamp() >= CALM_HURT);
     }
 
     // 預かりのない近接 (素手・弓や盾で殴る など) を包んで呼び直す。預かりの武器のクリックは WeaponStrikes に任せる (当たる tick に attack が来る)
@@ -151,6 +208,7 @@ public final class MeleeHits {
     // 自己テスト用
     static void forget(Player p) {
         NEXT.remove(p.getUUID());
+        COACH.remove(p.getUUID());
     }
 
     static void during(ServerPlayer p, float charge, Runnable r) {

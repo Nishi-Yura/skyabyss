@@ -121,6 +121,7 @@ public final class FreeQuestSelfTest {
         p.setData(NpcSetup.BONDS, new NpcBonds());
         // 17-10: 序盤のサブクエストは、イサナと会うまで出ない。試す人は会ったことにする (閉じていることは OpeningStorySelfTest が確かめる)
         NpcBonds.of(p).bond(WC).flags().add("met");
+        NpcBonds.of(p).bond(WC).flags().addAll(jp.revati.skyabyss.quest.NpcQuestSelfTest.DAY_TALKS);
         Growth.get(p).level = 5;
         p.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5);
         return p;

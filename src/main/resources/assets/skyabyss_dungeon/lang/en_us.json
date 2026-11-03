@@ -130,10 +130,10 @@
   "gui.skyabyss.attack.ox_smith.bash": "Red-Hot Shield Bash",
   "gui.skyabyss.attack.ox_smith.slam": "Forge Slam",
   "gear.skyabyss.origin.wild_dungeon": "Item of the Underground Dungeons",
-  "message.skyabyss.dungeon.tip.tide": "Tide trap: the pools rise and fall every %2$s seconds. The lower path is open only at low tide (you are warned before it floods)",
-  "message.skyabyss.dungeon.tip.lava": "Lava trap: the lava pools swap every %3$s seconds. Sparks or steam mean a swap is coming",
-  "message.skyabyss.dungeon.tip.crystal": "Crystal trap: strike a glowing crystal %1$s times (melee, arrows or skills) to charge it. Charge every crystal of a door to open it",
-  "message.skyabyss.dungeon.tip.next": "Step into the glowing spot at the end of the floor (a minecart in the Bone Pit) to go down a floor",
-  "message.skyabyss.dungeon.tip.leave": "Use the return stone (lodestone) to go back to the entrance hall",
-  "message.skyabyss.dungeon.tip.cp": "This is where the floor starts. If you fall, you continue from the start of the deepest floor you reached"
+  "message.skyabyss.dungeon.tip.tide": "Tide trap: water ebbs every %2$s s; go low at low tide",
+  "message.skyabyss.dungeon.tip.lava": "Lava trap: pools swap every %3$s s; steam means soon",
+  "message.skyabyss.dungeon.tip.crystal": "Crystal trap: hit a crystal %1$s times; fill all to open",
+  "message.skyabyss.dungeon.tip.next": "Step into the glow at the floor's end to go down",
+  "message.skyabyss.dungeon.tip.leave": "Use the return stone to go back to the entrance hall",
+  "message.skyabyss.dungeon.tip.cp": "Floor start: if you fall, you come back to the deepest one"
 }
