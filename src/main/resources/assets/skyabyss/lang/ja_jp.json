@@ -2620,5 +2620,7 @@
   "label.skyabyss.stone.anchor": "錨石",
   "label.skyabyss.stone.anchor.sub": "右クリックで鎖を伝って地上へ降りる",
   "label.skyabyss.stone.depth_record": "記録の石",
-  "label.skyabyss.stone.depth_record.sub": "右クリックで深みの記録を見る"
+  "label.skyabyss.stone.depth_record.sub": "右クリックで深みの記録を見る",
+  "skyabyss.configuration.chargeRing": "近接の溜めの輪",
+  "skyabyss.configuration.chargeSound": "溜めが満ちた音"
 }

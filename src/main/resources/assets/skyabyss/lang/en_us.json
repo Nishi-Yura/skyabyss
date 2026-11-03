@@ -2620,5 +2620,7 @@
   "label.skyabyss.stone.anchor": "Anchor Stone",
   "label.skyabyss.stone.anchor.sub": "Use to climb down the chain to the surface",
   "label.skyabyss.stone.depth_record": "Record Stone",
-  "label.skyabyss.stone.depth_record.sub": "Use to see the depth records"
+  "label.skyabyss.stone.depth_record.sub": "Use to see the depth records",
+  "skyabyss.configuration.chargeRing": "Melee Charge Ring",
+  "skyabyss.configuration.chargeSound": "Full Charge Sound"
 }

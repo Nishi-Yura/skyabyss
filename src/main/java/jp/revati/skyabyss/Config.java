@@ -67,6 +67,15 @@ public final class Config {
             .comment("刃を振った軌跡の光の帯を出すか")
             .define("weaponTrail", true);
 
+    // 近接の溜め (client/weapon/ChargeRing): 振ったあと照準のまわりに溜まりの輪。満ちたら光る。同じ敵を殴れる間の空振りは輪が灰色に揺れる
+    public static final ModConfigSpec.BooleanValue CHARGE_RING = CLIENT_BUILDER
+            .comment("近接の武器を振ったあと、照準のまわりに溜まりの輪を出すか (出すときはバニラの照準の下の溜めの印を隠す)")
+            .define("chargeRing", true);
+
+    public static final ModConfigSpec.BooleanValue CHARGE_SOUND = CLIENT_BUILDER
+            .comment("溜めの小さな音 (満ちたときの澄んだ音・同じ敵を殴れる間の空振りの鈍い音) を鳴らすか")
+            .define("chargeSound", true);
+
     public static final ModConfigSpec.DoubleValue SCREEN_EFFECT_STRENGTH = CLIENT_BUILDER
             .comment("影の下での画面効果（暗さ・縁の暗がり・霧）の強さ (0 = なし, 1 = 標準)")
             .defineInRange("screenEffectStrength", 1.0, 0.0, 1.5);

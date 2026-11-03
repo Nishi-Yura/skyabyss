@@ -36,6 +36,8 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.titan.LampBandClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.weapon.StrikePayload.TYPE, jp.revati.skyabyss.weapon.StrikePayload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveStrike(payload))
+                .playToClient(jp.revati.skyabyss.combat.MeleeHits.Miss.TYPE, jp.revati.skyabyss.combat.MeleeHits.Miss.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.weapon.ChargeRing.receiveMiss())
                 .playBidirectional(jp.revati.skyabyss.weapon.InspectPayload.TYPE, jp.revati.skyabyss.weapon.InspectPayload.STREAM_CODEC,
                         new net.neoforged.neoforge.network.handling.DirectionalPayloadHandler<>(
                                 (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveInspect(payload),

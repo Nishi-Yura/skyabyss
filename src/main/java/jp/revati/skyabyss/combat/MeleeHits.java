@@ -27,6 +27,7 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 // 近接の一撃 = Player.attack。預かりの武器 (weapon/WeaponStrikes) は当たる tick に attack を呼び、それ以外の手 (素手・弓や盾で殴る) はここで包んで呼び直す。
 // 技・矢・品の効き目が直接与える傷 (hurt) は対象外 (その一撃の中で起きたものだけ、溜めの強さを掛ける)。
 // 偽のプレイヤー (FakePlayer など) は対象にしない (自己テストは testAllowFake)
+// 殴れる間に当てて空振りしたら、その人へ Miss を送る (クライアントの溜めの輪 client/weapon/ChargeRing が「弾かれた」を見せる)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MeleeHits {
     // 同じ敵を殴れる間 = 振りの長さ (攻撃速度から。20 / 攻撃速度 tick) のこの割合。最短 MIN_COOLDOWN tick
@@ -42,6 +43,18 @@ public final class MeleeHits {
     private static float swingCharge = 1f;
 
     static boolean testAllowFake;
+
+    // サーバー -> クライアント: 同じ敵を殴れる間の空振り (中身なし)
+    public record Miss() implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+        public static final Type<Miss> TYPE = new Type<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "melee_miss"));
+        public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, Miss> STREAM_CODEC =
+                net.minecraft.network.codec.StreamCodec.unit(new Miss());
+
+        @Override
+        public Type<? extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
 
     private MeleeHits() {
     }
@@ -79,6 +92,9 @@ public final class MeleeHits {
         long now = p.level().getGameTime();
         if (cooling(p, target)) {
             p.resetAttackStrengthTicker();
+            if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new Miss());
+            }
             return false;
         }
         ServerPlayer outer = swinging;
