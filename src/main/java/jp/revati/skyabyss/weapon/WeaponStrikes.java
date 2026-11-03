@@ -26,12 +26,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 武器の「当たる瞬間」をサーバーで動きに合わせる。
 // バニラは、クリックした tick にダメージを入れる。本 mod の武器は、動きに溜め (予備動作) があるので、クリックを一度預かり、
-// MoveSet の strike (振りの何割か) の tick に、そのまま Player.attack を呼び直す。ダメージの式・クールダウン・各武器の固有効果 (hurtEnemy) は
-// 全部バニラの経路のままなので、攻撃力・攻撃速度・1 秒あたりの与ダメージは変わらず、最初の一撃が 2〜8 tick 遅れるだけ。
+// MoveSet の strike (振りの何割か) の tick に、Player.attack を呼び直す (combat/MeleeHits を通す)。ダメージの式・クールダウン・各武器の固有効果 (hurtEnemy) は
+// バニラの経路のままなので、攻撃力・攻撃速度は変わらず、最初の一撃が 2〜8 tick 遅れるだけ (溜めの掛け目と同じ敵を殴れる間は MeleeHits の決まり)。
 //  - クリックした tick に、攻撃の強さの数え (attackStrengthTicker) を預けて 0 に戻す (クライアントも同じに戻す。連打で強さが貯まらない)。
 //    当たる tick に預けた値を戻して attack を呼び、そのあと「クリックからの経過」へ置き直す
 //  - 当たる tick に、相手が生きていて、手の届く範囲 (範囲 + MoveSet の reach の余裕) にいて、持ち物が同じなら当たる。外れたら空振り
 //  - 当たったら、持ち主と見ている人へ StrikePayload (ヒットストップ・画面の揺れ)
+//  - 当たる tick の attack は combat/MeleeHits を通す (同じ敵を殴れる間・溜めの強さ・回復は満ちた一撃だけ)
 // 偽のプレイヤー (FakePlayer など ServerPlayer そのものでないもの) と、通信のない人は対象にしない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WeaponStrikes {
@@ -72,6 +73,11 @@ public final class WeaponStrikes {
     static MoveSet setOf(ItemStack stack) {
         MoveSet ms = setOfAny(stack);
         return ms == null || ms.strike <= 0f ? null : ms;
+    }
+
+    // クリックを預かる手か (預かりの武器を持った人の、呼び直しでないクリック)。combat/MeleeHits が素通しにする
+    public static boolean holds(ServerPlayer p) {
+        return !replaying && applies(p) && setOf(p.getMainHandItem()) != null;
     }
 
     // 今の振りの段を数える (クリックと、空振りの振りの両方から呼ばれる。同じ振りは 1 度だけ数える)
@@ -145,7 +151,8 @@ public final class WeaponStrikes {
         replaying = true;
         p.attackStrengthTicker = pe.savedTicker();
         try {
-            p.attack(target);
+            // 同じ敵を殴れる間・溜めの強さ・満ちていない一撃の回復は combat/MeleeHits が見る
+            jp.revati.skyabyss.combat.MeleeHits.attack(p, target);
         } finally {
             replaying = false;
             // クリックからの経過に置き直す (クライアントがクリックで戻した数えと同じ)

@@ -165,6 +165,15 @@ public final class WeaponMoveSelfTest {
     private static boolean started;
     private static int index;
     private static final String[] FLOW_ITEMS = {"whalebone_greatsword", "waterway_fang", "captain_pike"};
+    private static boolean listening;
+
+    // 当たった tick は傷の知らせで覚える (自己テストの走らせ役は重い tick のあと呼ばれない tick があり、見回りだと遅れて見える)
+    static void onDamaged(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (started && strikeTickSeen < 0 && dummy != null && event.getEntity() == dummy && event.getSource().getEntity() == fake) {
+            strikeTickSeen = (int) (event.getEntity().level().getGameTime() - clickAt);
+            seenHow = event.getSource().getMsgId() + ", pending " + WeaponStrikes.pending() + ", hp " + healthBefore + "->" + dummy.getHealth();
+        }
+    }
 
     // 毎 tick 呼ぶ。全部の品を試し終えたら true
     public static boolean runFlow(MinecraftServer server) {
@@ -177,6 +186,10 @@ public final class WeaponMoveSelfTest {
         MoveSet ms = MoveSets.get(id);
         if (!started) {
             WeaponStrikes.testAllowFake = true;
+            if (!listening) {
+                listening = true;
+                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(WeaponMoveSelfTest::onDamaged);
+            }
             if (fake == null) {
                 fake = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skyabyss-weapon-test".getBytes()), "weapon_test"));
             }
@@ -218,13 +231,9 @@ public final class WeaponMoveSelfTest {
             started = true;
             return false;
         }
-        // 呼ばれた回数でなくゲームの時刻で数える (最初の tick が重いと、追いつく間に呼ばれ方がずれる)
+        // 呼ばれた回数でなくゲームの時刻で数える (最初の tick が重いと、追いつく間に呼ばれ方がずれる)。当たった tick は onDamaged が覚える
         tick = (int) (level.getGameTime() - clickAt);
         dummy.clearFire();
-        if (strikeTickSeen < 0 && dummy.getHealth() < healthBefore && dummy.getLastDamageSource() != null && dummy.getLastDamageSource().getEntity() == fake) {
-            strikeTickSeen = tick;
-            seenHow = dummy.getLastDamageSource().getMsgId() + ", pending " + WeaponStrikes.pending() + ", hp " + healthBefore + "->" + dummy.getHealth();
-        }
         if (tick >= expected + 6) {
             // 観測の順番で ±1 tick のずれはありうる (ほかの listener が同じ tick の前後どちらで走るか)
             check(strikeTickSeen >= 0, id + ": held click never landed");

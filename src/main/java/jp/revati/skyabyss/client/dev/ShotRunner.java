@@ -771,6 +771,14 @@ public final class ShotRunner {
                 mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 return true;
             }
+            case "attack" -> {
+                // attack : 照準の先の生き物を一度殴る (左クリックと同じ経路。gameMode.attack と振り)。連打と溜めの確かめ用
+                if (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh && mc.gameMode != null) {
+                    mc.gameMode.attack(mc.player, eh.getEntity());
+                }
+                mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                return true;
+            }
             case "mainhand" -> {
                 // mainhand left|right : 利き手の設定 (左利きの鏡写しの確認用)
                 mc.options.mainHand().set(line.arg(0).equalsIgnoreCase("left") ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);

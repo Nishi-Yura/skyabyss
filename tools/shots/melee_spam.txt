@@ -1,0 +1,84 @@
+# 2026-11-04: 近接の一撃の決まり (combat/MeleeHits)。満ちた一撃 1 回と、毎 tick の連打 12 回の減りを比べる (残りの体力 ×10 を右の得点の板に出す。体力の上限は 1024 なので 10240 から)。
+# 連打の 12 回は、満ちたところから始まる (一回目は満ちた一撃、残り 11 回が連打の上乗せ)
+# A = 石の剣 (預かりのない手。MeleeHits が包む)、B = 鯨骨の大剣 (預かりの武器。WeaponStrikes → MeleeHits)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/melee_spam.txt -PshotsName=melee
+world camp_check continent
+size 1600 900
+timeout 1500
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode creative
+hud on
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 100
+cmd skyabyss dungeon hall bone_pit
+wait 60
+cmd tp @s ~ ~ ~ ~ 22
+cmd kill @e[tag=melee_dummy]
+cmd execute at @s run summon skyabyss:bandit ^ ^ ^2.4 {NoAI:1b,PersistenceRequired:1b,Tags:["melee_dummy"]}
+wait 5
+cmd attribute @e[tag=melee_dummy,limit=1] minecraft:generic.max_health base set 2000
+cmd item replace entity @s weapon.mainhand with minecraft:stone_sword
+cmd scoreboard objectives add melee_hp dummy
+cmd scoreboard objectives setdisplay sidebar melee_hp
+chat clear
+# A1: 満ちた一撃
+cmd data merge entity @e[tag=melee_dummy,limit=1] {Health:2000f}
+wait 40
+attack
+wait 4
+cmd execute store result score A1_full melee_hp run data get entity @e[tag=melee_dummy,limit=1] Health 10
+wait 4
+shot a1_full
+# A2: 毎 tick 12 回
+cmd data merge entity @e[tag=melee_dummy,limit=1] {Health:2000f}
+wait 40
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+wait 4
+cmd execute store result score A2_spam12 melee_hp run data get entity @e[tag=melee_dummy,limit=1] Health 10
+wait 4
+shot a2_spam
+# B: 鯨骨の大剣
+chat clear
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+wait 10
+cmd data merge entity @e[tag=melee_dummy,limit=1] {Health:2000f}
+wait 60
+attack
+wait 12
+cmd execute store result score B1_full melee_hp run data get entity @e[tag=melee_dummy,limit=1] Health 10
+wait 4
+shot b1_full
+cmd data merge entity @e[tag=melee_dummy,limit=1] {Health:2000f}
+wait 60
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+wait 12
+cmd execute store result score B2_spam12 melee_hp run data get entity @e[tag=melee_dummy,limit=1] Health 10
+wait 4
+shot b2_spam
