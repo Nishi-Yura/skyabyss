@@ -1,0 +1,39 @@
+# 2026-11-04: 背の部屋の戸は、入口の碑を読むまで開かない (trial/raid/RaidLore.waiting)。帯の「入口の碑を読もう」と碑への矢印、
+# 碑を見て読む → 心の声の二行 (手がかりの字幕) → 戸が開く
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/raid_door_tablet.txt -PshotsName=raid_door
+world raid_door normal
+size 1600 900
+timeout 4000
+guiscale 3
+render 10
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyabyss playtest gear whale
+cmd skyabyss playtest board whale
+wait 600
+waitchunks
+wait 40
+chat clear
+hud on
+cmd skyroute start
+wait 300
+waitchunks
+wait 60
+shot d1_waiting_for_tablet
+# 碑は休み場の西の壁 (休み場から x −3)。西を向いて見る
+cmd tp @s ~ ~ ~ 90 2
+wait 30
+shot d2_read_text
+wait 80
+shot d3_voice
+cmd tp @s ~ ~ ~ 180 5
+wait 60
+shot d4_door_open
