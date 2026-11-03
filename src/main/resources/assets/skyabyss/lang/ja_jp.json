@@ -2624,5 +2624,7 @@
   "skyabyss.configuration.chargeRing": "近接の溜めの輪",
   "skyabyss.configuration.chargeSound": "溜めが満ちた音",
   "message.skyabyss.island.charge_hint": "峠に野盗がいる。照準の輪が満ちてから振ると、一撃が強い",
-  "message.skyabyss.melee.charge_tip": "照準の輪が満ちてから振ると一撃が強い。満ちる前はほとんど効かない"
+  "message.skyabyss.melee.charge_tip": "照準の輪が満ちてから振ると一撃が強い。満ちる前はほとんど効かない",
+  "raid.skyabyss.hud.read_tablet": "入口の碑を読もう（読むと戸が開く）",
+  "message.skyabyss.raid_lore.read_to_open": "部屋の戸は、入口の碑を読むと開く"
 }

@@ -354,7 +354,9 @@ public final class MapMarks {
 
     static void titanMarks(ServerPlayer player, ServerLevel over, List<Mark> out) {
         for (String titan : Titans.all()) {
-            if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan) || TitanDormancy.isResting(player.server, titan)) {
+            // 巨神そのものが見える人だけ (TitanVisibility。心臓を止めた人は、地図でも祠の印で見る)
+            if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan) || TitanDormancy.isResting(player.server, titan)
+                    || !jp.revati.skyabyss.titan.TitanVisibility.sees(player, titan)) {
                 continue;
             }
             Vec3 at = YoungReach.adultPos(over, titan);

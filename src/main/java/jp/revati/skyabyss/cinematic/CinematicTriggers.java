@@ -190,6 +190,10 @@ public final class CinematicTriggers {
         if (player.getServer() != null && jp.revati.skyabyss.titan.end.TitanDormancy.isResting(player.getServer(), titan)) {
             return false;
         }
+        // 巨神そのものが見えない人 (まだその章に来ていない・心臓を止めた) には始めない
+        if (!jp.revati.skyabyss.titan.TitanVisibility.sees(player, titan)) {
+            return false;
+        }
         if (level.getEntity(entity.getUUID()) != entity) {
             return true;
         }

@@ -828,7 +828,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         Vec3 ridge = ridgePoint();
         double range = isSurfaced() ? 96 : 48;
         for (ServerPlayer p : Players.snapshot(level.players())) {
-            if (!p.isSpectator() && Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) < range) {
+            if (!p.isSpectator() && Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) < range
+                    && jp.revati.skyabyss.titan.TitanVisibility.sees(p, jp.revati.skyabyss.progress.Titans.EMBER)) {
                 Lore.unlock(p, EmberIds.LORE_FOUND, true);
             }
         }

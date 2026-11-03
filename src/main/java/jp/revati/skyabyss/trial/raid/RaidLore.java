@@ -12,8 +12,9 @@ import net.minecraft.server.level.ServerPlayer;
 // レイドの部屋の物語 (fun_review 2026-10-23 の P1-3・P2-2)。部屋ごとに一つ:
 //   - 入口の間の西の壁に碑 (背中の民の言葉)。文のキーは古い試練の翼の碑文と同じ sign.skyabyss.lore_* で、
 //     読むと伝承の「碑文」の項目 (chapter1/inscription_*) が記される (Tablets.read → Lore.fire "sign")
+//   - 部屋の戸は、入口の碑をだれかが読むまで開かない (2026-11-04 の声「プレイヤーが何もしなくても進む所を直す」。前は越えると読まずに記された)。
+//     組のだれかが読む (前の周で読んでいた人も含む) と、その場の全員に記される (waiting)。全員がもう知っていれば待たない
 //   - 入口へ運ばれたとき、心の声を二行 (message.skyabyss.raid_lore.<部屋>.1 / .2)
-//   - 越えたら、その碑文の項目を記す (碑を読まずに越えた人にも、頁が一枚残る)
 public final class RaidLore {
     // 部屋 → 碑の文のキー
     public static final Map<String, String> SIGNS = Map.ofEntries(
@@ -69,11 +70,46 @@ public final class RaidLore {
         }
     }
 
-    // 越えたとき: 碑文の項目を記す (もう記してあれば何もしない)
-    static void onCleared(ServerPlayer player, String roomId) {
+    // 部屋の碑の伝承の項目 (碑の文のキー → unlock の sign の先)。碑のない部屋は null
+    @javax.annotation.Nullable
+    public static String entryOf(String roomId) {
         String key = SIGNS.get(roomId);
-        if (key != null) {
-            Lore.fire(player, "sign", t -> t.target().equals(key));
+        if (key == null) {
+            return null;
         }
+        for (jp.revati.skyabyss.lore.LoreEntry e : jp.revati.skyabyss.lore.LoreManager.catalog().entries()) {
+            for (jp.revati.skyabyss.lore.LoreTrigger t : e.unlock()) {
+                if (t.type().equals("sign") && t.target().equals(key)) {
+                    return e.id();
+                }
+            }
+        }
+        return null;
+    }
+
+    // 戸を開ける前に、入口の碑を読むのを待つか。だれかが知っていれば (読んだ・前の周で読んだ)、その場の全員に記して待たない
+    public static boolean waiting(java.util.List<ServerPlayer> members, String roomId) {
+        String entry = entryOf(roomId);
+        if (entry == null || members.isEmpty()) {
+            return false;
+        }
+        boolean any = false;
+        boolean all = true;
+        for (ServerPlayer p : members) {
+            boolean has = Lore.state(p).has(entry);
+            any |= has;
+            all &= has;
+        }
+        if (all) {
+            return false;
+        }
+        if (any) {
+            String key = SIGNS.get(roomId);
+            for (ServerPlayer p : members) {
+                Lore.fire(p, "sign", t -> t.target().equals(key));
+            }
+            return false;
+        }
+        return true;
     }
 }

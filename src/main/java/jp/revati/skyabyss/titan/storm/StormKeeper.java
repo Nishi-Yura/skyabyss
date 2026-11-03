@@ -167,7 +167,8 @@ public final class StormKeeper {
             return;
         }
         for (ServerPlayer player : Players.snapshot(level.players())) {
-            if (TitanKeeper.eligible(player) && player.distanceToSqr(titan.getX(), player.getY(), titan.getZ()) < LORE_RANGE * LORE_RANGE) {
+            if (TitanKeeper.eligible(player) && player.distanceToSqr(titan.getX(), player.getY(), titan.getZ()) < LORE_RANGE * LORE_RANGE
+                    && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.THUNDER_WING)) {
                 Lore.unlock(player, LORE_ENTRY, true);
             }
         }

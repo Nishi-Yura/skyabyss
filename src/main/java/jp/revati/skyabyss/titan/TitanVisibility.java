@@ -24,9 +24,11 @@ import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.util.Players;
 
-// 巨神の見え方 (docs/design/32 の 3.3)。空・海・嵐・地を泳ぐ成体の巨神は、その章を遊んでいる人 (まだその心臓を止めていない人) と、
-// その人のパーティ (同じグループのオンラインの人) にしか見えない。章を終えた人には、本体・鎖・昇り風・口の実体を送らず
-// (各実体の broadcastToPlayer)、歌・地鳴りの音も届けない (playSound)。体の当たり (TitanSolids) と乗り込み口も働かない。
+// 巨神の見え方 (docs/design/32 の 3.3)。空・海・嵐・地を泳ぐ成体の巨神は、物語がその巨神の章まで来ていて、まだその心臓を止めていない人にだけ見える
+// (2026-11-04 の声「その巨神までストーリーを進めていて、まだその心臓を止めていない人にだけ見えるように」。序章の人には岩鯨も見えない)。
+// 心臓を止めた人は、同じグループのオンラインの仲間に「今その巨神の章にいる人」がいるあいだだけ見える (手伝い。まだその章に来ていない仲間には見えない)。
+// 見えない人には、本体・鎖・昇り風・口の実体を送らず (各実体の broadcastToPlayer)、歌・地鳴りの音も届けない (playSound)。
+// 体の当たり (TitanSolids)・乗り込み口と光 (BoardGlow)・初見の場面 (CinematicTriggers)・地図の印 (MapMarks) も同じ判定を見る。
 // 物語の決まり (ゲームルール skyabyssStoryGate) を切っているときと、観戦者・クリエイティブには、いつも見える。
 // 例外: 心臓を止めて運び出された人 (と運ばれた仲間) は、その眠り (TitanDormancy) が終わるまで眠る姿と去る姿を見る (眠りの場面のため)。
 // 送るかどうかは、巨神が動いて区画をまたいだときだけでなく 1 秒ごとに見直す (resync。止まって待つ巨神でも、止めた人から消える)
@@ -72,6 +74,24 @@ public final class TitanVisibility {
         return STOPPED_OVERRIDE != null ? STOPPED_OVERRIDE.test(player, titan) : Progression.stopped(server, player, titan);
     }
 
+    // 自己テスト用: この人たちは、その巨神の章まで来ていることにする (null なら本物の章)
+    @Nullable
+    public static java.util.function.BiPredicate<UUID, String> REACHED_OVERRIDE;
+
+    // 物語がその巨神の章まで来ているか (序章の人は岩鯨の章に来ていない)
+    static boolean reached(ServerPlayer sp, String titan) {
+        if (REACHED_OVERRIDE != null) {
+            return REACHED_OVERRIDE.test(sp.getUUID(), titan);
+        }
+        jp.revati.skyabyss.story.Chapters need = jp.revati.skyabyss.story.Chapters.forTitan(titan);
+        return need == null || jp.revati.skyabyss.story.Chapters.of(sp).ordinal() >= need.ordinal();
+    }
+
+    // 自分の章の巨神として見えるか (章まで来ていて、心臓をまだ止めていない)
+    static boolean own(ServerPlayer sp, String titan) {
+        return !stopped(sp.server, sp.getUUID(), titan) && reached(sp, titan);
+    }
+
     // その人に、その巨神が見えるか
     public static boolean sees(Player player, String titan) {
         if (!(player instanceof ServerPlayer sp)) {
@@ -93,12 +113,17 @@ public final class TitanVisibility {
 
     static boolean compute(ServerPlayer sp, String titan) {
         MinecraftServer server = sp.server;
-        if (!stopped(server, sp.getUUID(), titan) || restWitness(server, sp.getUUID(), titan)) {
+        if (own(sp, titan) || restWitness(server, sp.getUUID(), titan)) {
             return true;
         }
+        // まだその章に来ていない人には、仲間が戦っていても見せない
+        if (!stopped(server, sp.getUUID(), titan)) {
+            return false;
+        }
+        // 心臓を止めた人: 同じグループに、今その巨神の章にいる仲間がいるあいだ (手伝い)
         UUID group = Groups.keyOf(sp);
         for (ServerPlayer o : Players.snapshot(server.getPlayerList().getPlayers())) {
-            if (o != sp && Groups.keyOf(o).equals(group) && !stopped(server, o.getUUID(), titan)) {
+            if (o != sp && Groups.keyOf(o).equals(group) && own(o, titan)) {
                 return true;
             }
         }
@@ -213,5 +238,6 @@ public final class TitanVisibility {
         REST_WITNESS.clear();
         HIDDEN.clear();
         STOPPED_OVERRIDE = null;
+        REACHED_OVERRIDE = null;
     }
 }

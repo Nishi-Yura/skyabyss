@@ -126,6 +126,8 @@ public final class ShrineSelfTest {
         try {
             TitanShrine.STOPPED = (s, id, t) -> stopped.contains(id);
             TitanVisibility.STOPPED_OVERRIDE = (id, t) -> stopped.contains(id);
+            Set<UUID> notReached = new java.util.HashSet<>();
+            TitanVisibility.REACHED_OVERRIDE = (id, t) -> !notReached.contains(id);
             for (String titan : Titans.all()) {
                 BlockPos c = TitanShrine.ensure(server, titan);
                 BlockState st = level.getBlockState(c);
@@ -164,6 +166,13 @@ public final class ShrineSelfTest {
                 stopped.clear();
                 TitanVisibility.clearCache();
                 check(f, TitanVisibility.sees(a, titan), titan + ": a chapter player cannot see the titan");
+                // まだその巨神の章に来ていない人には見えない (心臓を止めていなくても)
+                boolean gate0 = jp.revati.skyabyss.progress.Progression.gateOn(server);
+                notReached.add(a.getUUID());
+                TitanVisibility.clearCache();
+                check(f, !TitanVisibility.sees(a, titan) || !gate0, titan + ": a player whose story has not reached the titan sees it");
+                notReached.clear();
+                TitanVisibility.clearCache();
                 stopped.add(a.getUUID());
                 TitanVisibility.clearCache();
                 boolean gate = jp.revati.skyabyss.progress.Progression.gateOn(server);
@@ -195,6 +204,7 @@ public final class ShrineSelfTest {
         } finally {
             TitanShrine.STOPPED = jp.revati.skyabyss.progress.Progression::stopped;
             TitanVisibility.STOPPED_OVERRIDE = null;
+            TitanVisibility.REACHED_OVERRIDE = null;
             TitanVisibility.clearCache();
         }
         if (f.isEmpty()) {

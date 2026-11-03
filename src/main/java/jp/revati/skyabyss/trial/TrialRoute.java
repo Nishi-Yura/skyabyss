@@ -262,9 +262,6 @@ public final class TrialRoute {
         };
     }
 
-    // 岩鯨のレイドの部屋 1〜3 を越えたときに記す碑文 (一章のメインの段 inscriptions の三つ)
-    public static final List<String> WHALE_ROOM_INSCRIPTIONS = List.of("chapter1/inscription_west", "chapter1/inscription_east", "chapter1/inscription_below");
-
     // 石が鳴った (TrialSteles.onRung から。原型の石も新作の石も)。今の段の試練なら、次の段を記し、CARRY_DELAY のあとに運ぶ
     public static void onCleared(ServerLevel back, UUID group, String titanName, String key, @Nullable ServerPlayer by) {
         onCleared(back, group, titanName, key, by, false);
@@ -295,13 +292,6 @@ public final class TrialRoute {
             List<String> signals = jp.revati.skyabyss.titan.group.TrialSteles.signalsOf(titan);
             String signal = raid && step >= 1 && step <= signals.size() ? signals.get(step - 1) : null;
             jp.revati.skyabyss.rpg.GrowthRewards.onRouteTrialCleared(back, titan, members(back, group), signal);
-            if (raid && Titans.STONE_WHALE.equals(titan) && step >= 1 && step <= WHALE_ROOM_INSCRIPTIONS.size()) {
-                // 碑文は古い試練の翼にあり、レイドの順路では通らない。部屋を越えたら、その部屋の碑文を記す
-                // (入口の間に碑文を置いて読ませる形でも同じ id。先に読んでいれば何も起きない。P1-1)
-                for (ServerPlayer m : members(back, group)) {
-                    jp.revati.skyabyss.lore.Lore.unlock(m, WHALE_ROOM_INSCRIPTIONS.get(step - 1), true);
-                }
-            }
         }
         boolean mid = step == 3 && TrialMidBoss.needed(titan, draw);
         int next = mid ? 3 : step + 1;

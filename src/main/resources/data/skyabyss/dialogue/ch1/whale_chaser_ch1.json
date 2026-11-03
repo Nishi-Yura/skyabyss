@@ -10,6 +10,28 @@
           "entry": "chapter1/whale_chaser"
         },
         {
+          "type": "quest",
+          "quest": "main_song",
+          "is": "active",
+          "stage": "see_whale"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_why_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1_c_why1",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "chapter1/whale_chaser"
+        },
+        {
           "type": "day",
           "min": 2
         },

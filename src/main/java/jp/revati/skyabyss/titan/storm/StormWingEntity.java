@@ -769,7 +769,8 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         // うずくまる雷翼を 160 ブロック以内で見た人に、伝承「うずくまる巨神」を記す (12 の 11.1 の約束)
         if (modeTicks % 20 == 0) {
             for (ServerPlayer p : Players.snapshot(level.players())) {
-                if (TitanKeeper.eligible(p) && p.distanceToSqr(this) < COWER_LORE_RANGE * COWER_LORE_RANGE && p.hasLineOfSight(this)) {
+                if (TitanKeeper.eligible(p) && p.distanceToSqr(this) < COWER_LORE_RANGE * COWER_LORE_RANGE && p.hasLineOfSight(this)
+                        && jp.revati.skyabyss.titan.TitanVisibility.sees(p, jp.revati.skyabyss.progress.Titans.THUNDER_WING)) {
                     jp.revati.skyabyss.lore.Lore.unlock(p, jp.revati.skyabyss.titan.storm.lore.StormLore.LORE_COWER, true);
                 }
             }

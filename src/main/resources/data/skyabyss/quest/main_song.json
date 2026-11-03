@@ -172,7 +172,10 @@
           "targets": [
             "chapter1/inscription_west",
             "chapter1/inscription_east",
-            "chapter1/inscription_below"
+            "chapter1/inscription_below",
+            "chapter1/inscription_stomach",
+            "chapter1/inscription_floor",
+            "chapter1/inscription_ring"
           ]
         }
       ]
