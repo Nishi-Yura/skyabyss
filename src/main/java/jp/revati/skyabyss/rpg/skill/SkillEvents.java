@@ -253,7 +253,8 @@ public final class SkillEvents {
             d.lastCombat = now;
             Skill dealing = SkillActions.dealing();
             // 近接の攻撃 (技の斬撃を含む。驟雨・出血・炎の上乗せ・稲光は含まない)
-            boolean melee = direct == player && dealing != Skill.SKY_RAIN && !riderless;
+            // 満ちていない近接の一撃 (combat/MeleeHits) は数えない (返し刃・孤り・熾・岩の返りを使わない。吸いも起こさない)
+            boolean melee = direct == player && dealing != Skill.SKY_RAIN && !riderless && !jp.revati.skyabyss.combat.MeleeHits.weakHit(player);
             // ビルド: キーストーン・構え・条件の特性・木のセット・タグの足し (近接も飛び道具も技も)
             amount *= (float) (1 + SkillBuild.generalDamage(player, direct instanceof Projectile));
             // 返し刃
@@ -355,7 +356,9 @@ public final class SkillEvents {
             // 型の溜まるもの: ふつうの近接 (技でない) が当たった・ふつうの矢 (技の矢でない) が当たった
             if (victim != attackerPlayer && SkillActions.dealing() == null && SkillActions.isFoe(attackerPlayer, victim)) {
                 if (source.getDirectEntity() == attackerPlayer) {
-                    Gauges.onMelee(attackerPlayer, victim);
+                    if (!jp.revati.skyabyss.combat.MeleeHits.weakHit(attackerPlayer)) {
+                        Gauges.onMelee(attackerPlayer, victim);
+                    }
                 } else if (source.getDirectEntity() instanceof AbstractArrow arrow && !arrow.getTags().contains(SkillActions.PIERCE_TAG)) {
                     Gauges.onArrow(attackerPlayer);
                 }

@@ -95,6 +95,11 @@ public final class GearLevel {
         return !(entity instanceof Player player) || meets(player, stack);
     }
 
+    // 武器の固有の効き目 (当てたとき) を起こしてよいか: 必要レベルに届いていて、満ちていない近接の一撃の最中でない (combat/MeleeHits)
+    public static boolean proc(LivingEntity entity, ItemStack stack) {
+        return usable(entity, stack) && !jp.revati.skyabyss.combat.MeleeHits.weakHit(entity);
+    }
+
     // ---------------------------------------------------------------- 武器: 品の修飾子を打ち消す
     // 手の品の修飾子 (イベントで足された強化・特性を含む) を、同じ量だけ逆向きに足す。
     // 足し算と基礎への掛け算は符号を変え、全体への掛け算は 1/(1+a) − 1 を掛けて、ちょうど品を持たない値に戻す

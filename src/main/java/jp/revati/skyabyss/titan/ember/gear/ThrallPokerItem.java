@@ -58,7 +58,7 @@ public class ThrallPokerItem extends EmberWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack)) {
+        if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             boolean set = addAsh(target, stacksNeeded(stack));
             level.sendParticles(ParticleTypes.WHITE_ASH, target.getX(), target.getY(0.7), target.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
             if (set) {

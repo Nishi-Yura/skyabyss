@@ -25,7 +25,7 @@ public class LampSwordItem extends AbyssGearWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack) && AbyssGear.inDark(attacker)) {
+        if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack) && AbyssGear.inDark(attacker)) {
             boolean awake = ModGear.awakened(stack);
             int ticks = awake ? AbyssGear.SWORD_MARK_TICKS_AWAKENED : AbyssGear.SWORD_MARK_TICKS;
             target.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, true, false));

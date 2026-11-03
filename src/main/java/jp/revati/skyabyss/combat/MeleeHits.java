@@ -24,6 +24,7 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 //   - 同じ敵を殴れる間: 当てたあと、その人はその敵を「振りの長さ × COOLDOWN_SHARE」の間だけ殴れない (空振り。ほかの敵・仲間の一撃は通る)
 //   - 溜めの強さ: 傷 = 満ちたときの傷 × 溜め² (バニラは 0.2 + 0.8 × 溜め² で、溜め 0 でも 2 割が入る。その 2 割を無くす)
 //   - 回復: 溜めが満ちていない (FULL 以下の) 一撃の間に起こる人の回復 (吸血・当てて癒す・再生の効き目 など) は起こらない
+//   - 武器の効き目: 満ちていない一撃では、武器・装飾・技の木の「当てたとき」の効き目 (上乗せ・追加効果・数え・溜まり・マナ吸い) も起こらない (weakHit)
 // 近接の一撃 = Player.attack。預かりの武器 (weapon/WeaponStrikes) は当たる tick に attack を呼び、それ以外の手 (素手・弓や盾で殴る) はここで包んで呼び直す。
 // 技・矢・品の効き目が直接与える傷 (hurt) は対象外 (その一撃の中で起きたものだけ、溜めの強さを掛ける)。
 // 偽のプレイヤー (FakePlayer など) は対象にしない (自己テストは testAllowFake)
@@ -226,5 +227,11 @@ public final class MeleeHits {
 
     public static boolean swingingWeak() {
         return swinging != null && swingCharge <= FULL;
+    }
+
+    // この人の、満ちていない近接の一撃の最中か。武器の効き目 (上乗せ・追加効果・数え・溜まり・吸い) は起こさない
+    // (item/GearLevel.proc と各係の当てたときの口が見る。技・矢・時間ごとの効き目は対象外)
+    public static boolean weakHit(net.minecraft.world.entity.Entity who) {
+        return swinging != null && swinging == who && swingCharge <= FULL;
     }
 }

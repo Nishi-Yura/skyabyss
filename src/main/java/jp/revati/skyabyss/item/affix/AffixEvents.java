@@ -164,7 +164,7 @@ public final class AffixEvents {
     @SubscribeEvent
     static void onDamagePost(LivingDamageEvent.Post event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player) || event.getSource().getDirectEntity() != player
-                || event.getEntity() == player || event.getNewDamage() <= 0 || !player.isAlive()) {
+                || event.getEntity() == player || event.getNewDamage() <= 0 || !player.isAlive() || jp.revati.skyabyss.combat.MeleeHits.weakHit(player)) {
             return;
         }
         ItemStack hand = player.getMainHandItem();

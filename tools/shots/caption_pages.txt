@@ -1,0 +1,21 @@
+# 2026-11-04: 字幕の頁送り (client/notice/NoticeClient.captionPlan)。下の札が出ていて一行しか入らないとき、長い手がかりを頁に分けて送る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/caption_pages.txt -PshotsName=melee
+world camp_check continent
+size 1600 900
+timeout 1500
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode creative
+hud on
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+chat clear
+wait 40
+cmd skyabyss dev notice hint message.skyabyss.reward_pending
+wait 25
+shot p1_first_page
+wait 50
+shot p2_second_page

@@ -42,7 +42,7 @@ public class CoralHarpoonItem extends TideWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack)) {
+        if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             long now = level.getGameTime();
             if (now >= target.getPersistentData().getLong(NEXT_BIND)) {
                 boolean awakened = ModGear.awakened(stack);

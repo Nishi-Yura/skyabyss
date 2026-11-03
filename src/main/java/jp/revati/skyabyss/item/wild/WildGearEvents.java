@@ -188,7 +188,8 @@ public final class WildGearEvents {
         }
         // 与える側の人
         if (source.getEntity() instanceof Player player && player != target && !inProc) {
-            if (source.getDirectEntity() == player) {
+            // 満ちていない近接の一撃では、武器の効き目は起こさない (combat/MeleeHits)
+            if (source.getDirectEntity() == player && !jp.revati.skyabyss.combat.MeleeHits.weakHit(player)) {
                 m *= onHit(level, player, target, event.getAmount() * (float) m, now);
             } else if (source.getDirectEntity() instanceof AbstractArrow arrow && WildGearSetup.weapon(arrow.getWeaponItem()) != null) {
                 m *= onArrow(level, player, arrow, target, event.getAmount() * (float) m, now);

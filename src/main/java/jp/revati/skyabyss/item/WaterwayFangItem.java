@@ -39,8 +39,8 @@ public class WaterwayFangItem extends SwordItem implements ModGear {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        // 必要レベルに届かない人の手では、固有効果は出ない (GearLevel)
-        if (!GearLevel.usable(attacker, stack)) {
+        // 必要レベルに届かない人の手と、満ちていない一撃では、固有効果は出ない (GearLevel.proc)
+        if (!GearLevel.proc(attacker, stack)) {
             return super.hurtEnemy(stack, target, attacker);
         }
         // 出血 2秒。+5 からは 3秒の出血 II

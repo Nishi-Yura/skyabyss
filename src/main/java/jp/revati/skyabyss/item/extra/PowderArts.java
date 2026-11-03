@@ -44,7 +44,8 @@ public final class PowderArts {
             return;
         }
         // 当てた側 (人の武器)
-        if (event.getSource().getEntity() instanceof ServerPlayer p && !(p instanceof FakePlayer) && event.getSource().getDirectEntity() == p) {
+        if (event.getSource().getEntity() instanceof ServerPlayer p && !(p instanceof FakePlayer) && event.getSource().getDirectEntity() == p
+                && !jp.revati.skyabyss.combat.MeleeHits.weakHit(p)) {
             Element e = Powder.art(p.getMainHandItem());
             if (e != null) {
                 weaponArt(e, p, target, event.getNewDamage());

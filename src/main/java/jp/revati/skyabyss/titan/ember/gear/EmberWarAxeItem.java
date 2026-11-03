@@ -21,7 +21,7 @@ public class EmberWarAxeItem extends EmberWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack)) {
+        if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             EmberGearEvents.smolder(target, EmberGear.WAR_AXE_SMOLDER_TICKS);
             level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 3, 0.25, 0.25, 0.25, 0.0);
             level.sendParticles(ParticleTypes.SMALL_FLAME, target.getX(), target.getY(0.5), target.getZ(), 10, 0.3, 0.4, 0.3, 0.02);

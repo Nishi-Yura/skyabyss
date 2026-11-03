@@ -319,7 +319,7 @@ public final class MythicAbilities {
             m *= 1 + MELT_STEP * stacks;
         }
         // ---- 与える側
-        if (source.getEntity() instanceof ServerPlayer p && p != target && !(target instanceof Player)) {
+        if (source.getEntity() instanceof ServerPlayer p && p != target && !(target instanceof Player) && !jp.revati.skyabyss.combat.MeleeHits.weakHit(p)) {
             m *= dealt(level, p, target, source, amount, now);
         }
         if (m != 1) {

@@ -23,6 +23,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //  - 満ちていない一撃の中の回復は起こらず、満ちた一撃の中の回復は起こる (自分も仲間も)
 //  - 二人: 同じ tick の満ちた一撃はどちらも通る。一人の弱い一撃の中でも、もう一人の傷は弱まらない
 //  - 溜めの手がかり: 弱い一撃が溜まり、戦いが落ち着いたら出る。満ちた一撃に慣れた人には出ない
+//  - 武器の効き目 (上乗せ・追加効果) は満ちた一撃だけ (水路の牙の出血で確かめる)
 public final class MeleeHitsSelfTest {
     private MeleeHitsSelfTest() {
     }
@@ -133,6 +134,35 @@ public final class MeleeHitsSelfTest {
             if (b.getHealth() != 13f) {
                 f.add("an ally heal inside the swing was wrong (" + b.getHealth() + ", want 13: weak blocked, full passes)");
             }
+            // 武器の効き目は満ちた一撃だけ (weakHit・GearLevel.proc と、水路の牙の出血で通しを確かめる)
+            MeleeHits.during(a, 0.5f, () -> {
+                if (!MeleeHits.weakHit(a) || MeleeHits.weakHit(b) || jp.revati.skyabyss.item.GearLevel.proc(a, net.minecraft.world.item.ItemStack.EMPTY)) {
+                    f.add("inside a half-charge swing, weakHit/proc should hold for the swinger only");
+                }
+            });
+            MeleeHits.during(a, 1f, () -> {
+                if (MeleeHits.weakHit(a) || !jp.revati.skyabyss.item.GearLevel.proc(a, net.minecraft.world.item.ItemStack.EMPTY)) {
+                    f.add("inside a full-charge swing, weapon effects should be allowed");
+                }
+            });
+            int level = jp.revati.skyabyss.rpg.Growth.get(a).level;
+            jp.revati.skyabyss.rpg.Growth.get(a).level = 60;
+            a.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.WATERWAY_FANG.get()));
+            MeleeHits.forget(a);
+            z.removeAllEffects();
+            a.attackStrengthTicker = 0;
+            MeleeHits.attack(a, z);
+            boolean weakBled = z.hasEffect(jp.revati.skyabyss.registry.ModEffects.BLEEDING);
+            MeleeHits.forget(a);
+            a.attackStrengthTicker = 100;
+            MeleeHits.attack(a, z);
+            boolean fullBled = z.hasEffect(jp.revati.skyabyss.registry.ModEffects.BLEEDING);
+            if (weakBled || !fullBled) {
+                f.add("the waterway fang's bleed should come only from a full-charge hit (weak " + weakBled + ", full " + fullBled + ")");
+            }
+            a.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+            jp.revati.skyabyss.rpg.Growth.get(a).level = level;
+            z.removeAllEffects();
             // 溜めの手がかり: 弱い一撃が WEAK_HITS 回たまり、近接が落ち着いたら出す。満ちた一撃を LEARNED 回当てた人には出さない
             MeleeHits.forget(a);
             a.getPersistentData().remove(MeleeHits.TIPS_KEY);
@@ -168,7 +198,7 @@ public final class MeleeHitsSelfTest {
             }
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST melee hits FAILED: {}", m));
             if (f.isEmpty()) {
-                SkyAbyss.LOGGER.info("SELFTEST melee hits PASSED (same-foe cooldown per player, others pass in the same tick, damage x charge^2, heals only on full-charge hits, two players, charge tip)");
+                SkyAbyss.LOGGER.info("SELFTEST melee hits PASSED (same-foe cooldown per player, others pass in the same tick, damage x charge^2, heals and weapon effects only on full-charge hits, two players, charge tip)");
             }
         }
     }

@@ -130,7 +130,8 @@ public final class MoonGearEvents {
         double m = takenFactor(target, source);
         if (source.getEntity() instanceof Player player) {
             if (source.getDirectEntity() == player) {
-                m *= melee(level, player, target, event.getAmount());
+                // 満ちていない近接の一撃では、武器の効き目は起こさない (combat/MeleeHits)
+                m *= jp.revati.skyabyss.combat.MeleeHits.weakHit(player) ? 1 : melee(level, player, target, event.getAmount());
             } else if (source.getDirectEntity() instanceof AbstractArrow arrow && arrow.getWeaponItem() != null
                     && arrow.getWeaponItem().getItem() == MoonGearSetup.BOW.get() && !arrow.getPersistentData().getBoolean("skyabyss_echo")) {
                 ECHOES.add(new Echo(level.getGameTime() + MoonGear.BOW_ECHO_TICKS, target.getId(), (float) (event.getAmount() * MoonGear.BOW_ECHO),
