@@ -19,6 +19,7 @@ public final class LifeKeep {
     public static final List<String> KEYS = List.of(
             "skyabyss_rpg_kit",                       // はじめの持ち物を渡した (RpgRules)
             "skyabyss_charge_tips",                   // 溜めの手がかりを出した数 (combat/MeleeHits)
+            "skyabyss_iron_scraps",                   // 鉄の跡で見つけた鉄くず (story/ch1/IronTrail)
             "skyabyss_full_hits",                     // 満ちた一撃を当てた数 (LEARNED まで。combat/MeleeHits)
             "skyabyss_ferried",                       // はじまりの島から渡し船で都へ渡った (ContinentOutskirts)
             "skyabyss_town_tour",                     // 町めぐりの進み (TownTour)

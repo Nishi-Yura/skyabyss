@@ -28,6 +28,22 @@
   },
   "stages": [
     {
+      "id": "track",
+      "skip_if": {
+        "type": "lore",
+        "entry": "ch1/trail_iron"
+      },
+      "objectives": [
+        {
+          "id": "follow",
+          "type": "signal",
+          "target": "ch1_iron_scrap",
+          "count": 3,
+          "party": false
+        }
+      ]
+    },
+    {
       "id": "pit",
       "xp": 30,
       "objectives": [

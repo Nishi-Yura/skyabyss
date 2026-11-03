@@ -541,7 +541,8 @@ public final class Ch1SitesSelfTest {
                     "the pack should hold two iron ingots and no torches");
             Quests.poll(p, true);
             QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);
-            check(iron.stage == 1 && !iron.done, "the page did not move the iron trail to the armor stage");
+            check(!iron.done && "armor".equals(jp.revati.skyabyss.quest.QuestManager.quest(Ch1Prep.Q_IRON).stages().get(iron.stage).id()),
+                    "the page did not move the iron trail to the armor stage");
             for (var it : List.of(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get())) {
                 p.getInventory().add(new ItemStack(it));
             }

@@ -254,5 +254,11 @@
   "dialogue.skyabyss.storyteller.ch1_s_go2.why": "なぜ、その鍵を？",
   "dialogue.skyabyss.storyteller.ch1_s_go_why": "扉が開いたら何が来るのか、あたしは知らない。知らないから、確かめておきたいのさ。\n年寄りの、ただの好奇心だよ。……半分はね。",
   "dialogue.skyabyss.storyteller.ch1_s_go3": "危なくなったら、戻っておいで。鯨は逃げやしない。また降りてくるさ。\n戻ったら、上で見たものを聞かせておくれ。",
-  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "行ってくる。"
+  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "行ってくる。",
+  "quest.skyabyss.ch1.trail_iron.track.journal": "イサナが言っていた。「前の旅人は、町の北の外れから丘へ入った。鉄を着た足は重い。跡が残っているはずだ」\n落ちた鉄くずと鉄靴の跡をたどって、旅人の道を探そう。",
+  "quest.skyabyss.ch1.trail_iron.track.lead": "イサナ「鉄を着た足は重い。町の北の外れから、跡が残っているはずだ」",
+  "quest.skyabyss.ch1.trail_iron.track.follow": "前の旅人の鉄くずをたどろう",
+  "message.skyabyss.ch1.iron_scrap.1": "錆びた鉄の板と、ほどけた鎖。鉄靴の跡が、丘のほうへ続いている",
+  "message.skyabyss.ch1.iron_scrap.2": "また鉄くずだ。足跡は重く、ときどき止まっている。休みながら歩いたらしい",
+  "message.skyabyss.ch1.iron_scrap.3": "三つ目の鉄くず。足跡の先に、骨の坑の口が見える"
 }

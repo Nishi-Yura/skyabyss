@@ -254,5 +254,11 @@
   "dialogue.skyabyss.storyteller.ch1_s_go2.why": "Why that key?",
   "dialogue.skyabyss.storyteller.ch1_s_go_why": "I don't know what comes through that door if it opens. Because I don't know, I want to be sure.\nJust an old woman's curiosity. ...Half of it, anyway.",
   "dialogue.skyabyss.storyteller.ch1_s_go3": "If it turns dangerous, come back. The whale won't run off. It will come down again.\nWhen you return, tell me what you saw up there.",
-  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "I'll go."
+  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "I'll go.",
+  "quest.skyabyss.ch1.trail_iron.track.journal": "Isana said: \"The traveller before you went into the hills from the north edge of town. Feet in iron are heavy. There will be a trail.\"\nFollow the dropped iron scraps and the boot prints to find the traveller's way.",
+  "quest.skyabyss.ch1.trail_iron.track.lead": "Isana: \"Feet in iron are heavy. Start at the north edge of town; there will be a trail.\"",
+  "quest.skyabyss.ch1.trail_iron.track.follow": "Follow the traveller's iron scraps",
+  "message.skyabyss.ch1.iron_scrap.1": "A rusted iron plate and a loose chain. Boot prints lead to the hills",
+  "message.skyabyss.ch1.iron_scrap.2": "More scraps. Heavy prints that stop now and then: they rested here",
+  "message.skyabyss.ch1.iron_scrap.3": "The third scrap. Past the prints lies the mouth of the bone pit"
 }
