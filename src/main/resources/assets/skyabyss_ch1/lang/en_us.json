@@ -247,5 +247,12 @@
   "sign.skyabyss.ch1_whale_3.1": "The whale",
   "sign.skyabyss.ch1_whale_3.2": "descends",
   "sign.skyabyss.ch1_whale_3.3": "to sleep,",
-  "sign.skyabyss.ch1_whale_3.4": "or to end"
+  "sign.skyabyss.ch1_whale_3.4": "or to end",
+  "dialogue.skyabyss.storyteller.ch1_s_go": "Waiting for the whale, are you? ...Isana told me.\nYou mean to climb onto its back. I won't stop you, but there's something I'd like to give you first.",
+  "dialogue.skyabyss.storyteller.ch1_s_go2": "An old tale. The key to the sky's door was split in four and left in keeping. One piece, they say, is held by the one that swims the sky.\n...Laid beside the heartbeat deep in its back, I once heard.",
+  "dialogue.skyabyss.storyteller.ch1_s_go2.key": "I'll look beside the heartbeat.",
+  "dialogue.skyabyss.storyteller.ch1_s_go2.why": "Why that key?",
+  "dialogue.skyabyss.storyteller.ch1_s_go_why": "I don't know what comes through that door if it opens. Because I don't know, I want to be sure.\nJust an old woman's curiosity. ...Half of it, anyway.",
+  "dialogue.skyabyss.storyteller.ch1_s_go3": "If it turns dangerous, come back. The whale won't run off. It will come down again.\nWhen you return, tell me what you saw up there.",
+  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "I'll go."
 }

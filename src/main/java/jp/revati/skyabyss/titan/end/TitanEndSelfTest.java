@@ -149,7 +149,12 @@ public final class TitanEndSelfTest {
         r.wakeAt = server.overworld().getGameTime();
         check(f, TitanDormancy.tickWake(server) == 1 && !TitanDormancy.isResting(server, whale), "the titan did not wake after the minimum sleep");
         check(f, Progression.checkBoard(a, whale), "a player could not board the titan after it woke");
+        // 光は巨神が見える人だけ (物語がその章まで来ていることにする。TitanVisibility)
+        jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = (id, t) -> true;
+        jp.revati.skyabyss.titan.TitanVisibility.clearCache();
         check(f, BoardGlow.visibleTo(a, whale), "the boarding glow did not show for an eligible player once the titan woke");
+        jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = null;
+        jp.revati.skyabyss.titan.TitanVisibility.clearCache();
         // 戻らないまま長くたつと、自分で目覚める (背中に居座る人がいても眠りっぱなしにならない)
         TitanDormancy.Rest stuck = TitanDormancy.begin(server, whale, 0);
         stuck.since -= TitanDormancy.MAX_TICKS + 5;

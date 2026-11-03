@@ -184,6 +184,7 @@ public final class RaidLoreSelfTest {
                         f.add(id + ": reading the inscription did not record " + loreId);
                     }
                     // 戸: だれも知らなければ待つ。一人が読めば、その場の全員に記して待たない
+                    RaidLore.testCountFake = true;
                     Lore.lock(reader, loreId);
                     Lore.lock(clearer, loreId);
                     if (!RaidLore.waiting(List.of(reader, clearer), id)) {
@@ -192,6 +193,11 @@ public final class RaidLoreSelfTest {
                     Tablets.read(reader, key);
                     if (RaidLore.waiting(List.of(reader, clearer), id) || !Lore.state(clearer).has(loreId)) {
                         f.add(id + ": one reader did not open the door and record " + loreId + " for the whole group");
+                    }
+                    RaidLore.testCountFake = false;
+                    Lore.lock(clearer, loreId);
+                    if (RaidLore.waiting(List.of(reader, clearer), id)) {
+                        f.add(id + ": a group of test bots was made to wait for the inscription");
                     }
                 } finally {
                     try {

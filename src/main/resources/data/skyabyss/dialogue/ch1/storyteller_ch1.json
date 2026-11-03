@@ -3,6 +3,24 @@
   "extends": true,
   "entries": [
     {
+      "node": "ch1_s_go",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_song",
+          "is": "active",
+          "stage": "see_whale"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_go_told"
+          }
+        }
+      ]
+    },
+    {
       "node": "ch1_diary_tell",
       "if": {
         "type": "quest",
@@ -25,6 +43,46 @@
               "amount": 1
             }
           ]
+        }
+      ]
+    },
+    "ch1_s_go": {
+      "face": "neutral",
+      "next": "ch1_s_go2"
+    },
+    "ch1_s_go2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "key",
+          "goto": "ch1_s_go3"
+        },
+        {
+          "id": "why",
+          "goto": "ch1_s_go_why"
+        }
+      ]
+    },
+    "ch1_s_go_why": {
+      "face": "neutral",
+      "next": "ch1_s_go3"
+    },
+    "ch1_s_go3": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1_go_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
         }
       ]
     }

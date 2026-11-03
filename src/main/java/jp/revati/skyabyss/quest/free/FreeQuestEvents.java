@@ -25,7 +25,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 自由なモードのサブクエストの出来事を拾う。ほかの担当のコードには手を入れず、状態を見て「合図」を送る。
-//   sky_shadow_seen  : 空の影の通過を、空の見える所で見た (一つの通過につき一度)
+//   sky_shadow_seen  : 空の影の通過を、空の見える所で見上げて見た (仰ぎ SkyEvents.LOOK_UP より上。一つの通過につき一度。
+//                      2026-11-04: 前は近くを通るだけで数えた (影をもう見た人には影が描かれないのに)
 //   tide_low_watched : 干潮の刻に、休んでいる潮殻の巨神のそば (96 ブロック) にいた (一つの刻につき一度)
 //   back_trial_cleared : 岩鯨の背の試練を踏破した (GrowthRewards から。居合わせた人と、同じ背中の仲間)
 // あわせて、村の鐘のそばに言伝ての板を一枚立てる (村ごとに一度だけ)
@@ -78,7 +79,8 @@ public final class FreeQuestEvents {
         }
         double dx = player.getX() - pass.centerX(age);
         double dz = player.getZ() - pass.centerZ(age);
-        if (dx * dx + dz * dz > SHADOW_WITNESS * SHADOW_WITNESS || !level.canSeeSky(player.blockPosition().above())) {
+        if (dx * dx + dz * dz > SHADOW_WITNESS * SHADOW_WITNESS || !level.canSeeSky(player.blockPosition().above())
+                || player.getXRot() > SkyEvents.LOOK_UP) {
             return;
         }
         if (FreeQuestData.get(level).firstPass(player.getUUID(), pass.startTick())) {

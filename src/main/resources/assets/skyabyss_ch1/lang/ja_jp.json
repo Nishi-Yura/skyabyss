@@ -247,5 +247,12 @@
   "sign.skyabyss.ch1_whale_3.1": "鯨は降りぬ",
   "sign.skyabyss.ch1_whale_3.2": "降りる時は",
   "sign.skyabyss.ch1_whale_3.3": "眠る時か",
-  "sign.skyabyss.ch1_whale_3.4": "終わる時だ"
+  "sign.skyabyss.ch1_whale_3.4": "終わる時だ",
+  "dialogue.skyabyss.storyteller.ch1_s_go": "鯨を待っているんだね。……イサナから聞いたよ。\n背へ上がるつもりなんだろう。止めはしないけれど、ひとつ渡しておきたいものがある。",
+  "dialogue.skyabyss.storyteller.ch1_s_go2": "言い伝えさ。空の扉の鍵は、四つに分けて預けられた。ひとつは、空を泳ぐものが抱えている、とね。\n……背の奥の鼓動のそばに納めた、と聞いたことがある。",
+  "dialogue.skyabyss.storyteller.ch1_s_go2.key": "鼓動のそばを、見てくる。",
+  "dialogue.skyabyss.storyteller.ch1_s_go2.why": "なぜ、その鍵を？",
+  "dialogue.skyabyss.storyteller.ch1_s_go_why": "扉が開いたら何が来るのか、あたしは知らない。知らないから、確かめておきたいのさ。\n年寄りの、ただの好奇心だよ。……半分はね。",
+  "dialogue.skyabyss.storyteller.ch1_s_go3": "危なくなったら、戻っておいで。鯨は逃げやしない。また降りてくるさ。\n戻ったら、上で見たものを聞かせておくれ。",
+  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "行ってくる。"
 }

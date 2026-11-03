@@ -107,9 +107,14 @@ public final class RaidLore {
         return null;
     }
 
+    // 自己テスト用: 偽のプレイヤーも数える (ふだんは数えない。部屋を動かす自己テストの bot は碑を読まないので、戸を待たせない)
+    static boolean testCountFake;
+
     // 戸を開ける前に、入口の碑を読むのを待つか。だれかが知っていれば (読んだ・前の周で読んだ)、その場の全員に記して待たない
-    public static boolean waiting(java.util.List<ServerPlayer> members, String roomId) {
+    public static boolean waiting(java.util.List<ServerPlayer> present, String roomId) {
         String entry = entryOf(roomId);
+        java.util.List<ServerPlayer> members = testCountFake ? present
+                : present.stream().filter(p -> !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)).toList();
         if (entry == null || members.isEmpty()) {
             return false;
         }
