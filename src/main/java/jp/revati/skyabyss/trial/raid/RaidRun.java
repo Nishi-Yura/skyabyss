@@ -143,7 +143,6 @@ public final class RaidRun {
         for (ServerPlayer p : TrialRoute.members(back, group)) {
             TrialRoute.move(back, p, restSpot(ctx, idx++), yaw);
             Notice.alert(p, "message.skyabyss.route.step" + step, name);
-            RaidLore.voice(p, d.id());
             RouteCard.show(p, back, group, titan, draw, step, false);
         }
         sendHud(run, false);

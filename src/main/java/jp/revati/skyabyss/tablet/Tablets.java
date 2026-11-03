@@ -77,7 +77,12 @@ public final class Tablets {
         Notice.send(player, Notice.Kind.NARRATE, Notice.tag(Notice.Kind.NARRATE,
                 Component.literal("❖ ").withStyle(s -> s.withColor(0x7FD6D0)),
                 text(key).copy().withStyle(s -> s.withColor(0x7FD6D0).withItalic(true))));
+        // 背の部屋の碑を初めて読んだら、その部屋の心の声を二行 (RaidLore.voiceAfterRead。読んだ人の画面だけ)
+        boolean firstRaid = jp.revati.skyabyss.trial.raid.RaidLore.firstRead(player, key);
         Lore.fire(player, "sign", t -> t.target().equals(key));
+        if (firstRaid) {
+            jp.revati.skyabyss.trial.raid.RaidLore.voiceAfterRead(player, key);
+        }
         jp.revati.skyabyss.advancement.Beats.fire(player, "tablet:read");
     }
 

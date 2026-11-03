@@ -84,6 +84,23 @@
       "node": "ch1_c_after",
       "if": [
         {
+          "type": "quest",
+          "quest": "main_song",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_after_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1_c_after",
+      "if": [
+        {
           "type": "stage",
           "min": 1
         },

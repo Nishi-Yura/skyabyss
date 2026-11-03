@@ -14,7 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 //     読むと伝承の「碑文」の項目 (chapter1/inscription_*) が記される (Tablets.read → Lore.fire "sign")
 //   - 部屋の戸は、入口の碑をだれかが読むまで開かない (2026-11-04 の声「プレイヤーが何もしなくても進む所を直す」。前は越えると読まずに記された)。
 //     組のだれかが読む (前の周で読んでいた人も含む) と、その場の全員に記される (waiting)。全員がもう知っていれば待たない
-//   - 入口へ運ばれたとき、心の声を二行 (message.skyabyss.raid_lore.<部屋>.1 / .2)
+//   - 碑を初めて読んだとき、その部屋の心の声を二行 (message.skyabyss.raid_lore.<部屋>.1 / .2。手がかりの字幕で、読んだ人の画面だけ。
+//     2026-11-04: 水色の語りは画面に出さなくなったので、自分で読んだときだけ出す)
 public final class RaidLore {
     // 部屋 → 碑の文のキー
     public static final Map<String, String> SIGNS = Map.ofEntries(
@@ -62,11 +63,30 @@ public final class RaidLore {
         Tablets.write(ctx.level(), at, key);
     }
 
-    // 入口へ運ばれたとき (段の名前の語りのあと)
-    static void voice(ServerPlayer player, String roomId) {
-        if (SIGNS.containsKey(roomId)) {
-            Notice.narrate(player, "message.skyabyss.raid_lore." + roomId + ".1");
-            Notice.narrate(player, "message.skyabyss.raid_lore." + roomId + ".2");
+    // 碑の文のキーの部屋 (背の部屋の碑でなければ null)
+    @javax.annotation.Nullable
+    static String roomOfSign(String key) {
+        for (Map.Entry<String, String> e : SIGNS.entrySet()) {
+            if (e.getValue().equals(key)) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
+    // 背の部屋の碑で、この人がまだその碑文を記していないか (読む前に見る)
+    public static boolean firstRead(ServerPlayer player, String key) {
+        String room = roomOfSign(key);
+        String entry = room == null ? null : entryOf(room);
+        return entry != null && !Lore.state(player).has(entry);
+    }
+
+    // 碑を初めて読んだあと: その部屋の心の声を二行 (手がかりの字幕)
+    public static void voiceAfterRead(ServerPlayer player, String key) {
+        String room = roomOfSign(key);
+        if (room != null) {
+            Notice.hint(player, "message.skyabyss.raid_lore." + room + ".1");
+            Notice.hint(player, "message.skyabyss.raid_lore." + room + ".2");
         }
     }
 
