@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChainBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -32,7 +33,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 鉄の跡をたどる (一章の支度の段「鉄の跡」の最初の段 track。2026-11-04 の声「その頼みにしかない遊び (謎解き・追跡・潜入) を入れる」。追跡)。
 // 鯨見の町から骨の坑 (ch1_bone_pit) へ、前の旅人の鉄くずが三つ落ちている。目印の矢印は出さない。
-//   - 鉄くず: 道のりの FRACTIONS の所 (左右に互い違いに ZIG ずらす)。打ち捨てられた欠けた金床と、ほどけた鎖 (まわりの草は刈る)。近づくと (GLINT) 錆色の光の粒が昇る
+//   - 鉄くず: 町の外 (EDGE) から坑までの道のりの FRACTIONS の所 (左右に互い違いに ZIG ずらす。畑・水・道・建物の上ならそばの自然の地面へ)。
+//     打ち捨てられた欠けた金床と、ほどけた鎖 (まわりの草は刈る)。近づくと (GLINT) 錆色の光の粒が昇る
 //   - 鉄靴の跡: 鉄くずから次の鉄くず (最後は坑) のほうへ、PRINT_STEP おきに PRINTS 個、草や土を粗い土に (足跡の向きが次を指す)
 //   - 見つける: FIND の中に入ると合図 ch1_iron_scrap (三つで段が済む) と、その鉄くずの小さな話 (手がかりの字幕)
 // 建てるのは、その段の人が BUILD の中に来たとき (チャンクが読まれていれば)。世界に一度 (SiteData の KIND。消えていれば建て直す)
@@ -45,6 +47,11 @@ public final class IronTrail {
     static final String KIND = "ch1_iron_trail";
     static final String FOUND = "skyabyss_iron_scraps";
     static final double[] FRACTIONS = {0.18, 0.48, 0.78};
+    // 道のりは町の畑と家の外 (中心から EDGE。鯨見の町は 70 ほどまで畑がある) から数える。坑が近ければ道のりの EDGE_SHARE まで
+    static final double EDGE = 100;
+    static final double EDGE_SHARE = 0.35;
+    // 置き場が畑・水・道・建物の上なら、まわり NATURAL_R の中の自然の地面へずらす
+    static final int NATURAL_R = 6;
     static final double ZIG = 14;
     static final double FIND = 3.5;
     static final double BUILD = 72;
@@ -69,12 +76,16 @@ public final class IronTrail {
         double dx = pit.getX() - town.getX();
         double dz = pit.getZ() - town.getZ();
         double len = Math.max(1, Math.hypot(dx, dz));
-        double px = -dz / len;
-        double pz = dx / len;
+        double ux = dx / len;
+        double uz = dz / len;
+        double edge = Math.min(EDGE, len * EDGE_SHARE);
+        double sx = town.getX() + ux * edge;
+        double sz = town.getZ() + uz * edge;
+        double rest = len - edge;
         for (int i = 0; i < FRACTIONS.length; i++) {
             double side = (i % 2 == 0 ? 1 : -1) * ZIG;
-            out.add(new BlockPos((int) Math.round(town.getX() + dx * FRACTIONS[i] + px * side), 0,
-                    (int) Math.round(town.getZ() + dz * FRACTIONS[i] + pz * side)));
+            out.add(new BlockPos((int) Math.round(sx + ux * rest * FRACTIONS[i] - uz * side), 0,
+                    (int) Math.round(sz + uz * rest * FRACTIONS[i] + ux * side)));
         }
         return out;
     }
@@ -189,7 +200,8 @@ public final class IronTrail {
     }
 
     // 欠けた金床と、ほどけた鎖。そこから次の場所へ向かう鉄靴の跡。金床の場所を返す
-    static BlockPos build(ServerLevel level, BlockPos xz, @Nullable BlockPos next) {
+    static BlockPos build(ServerLevel level, BlockPos spot, @Nullable BlockPos next) {
+        BlockPos xz = natural(level, spot);
         // まわりの草を刈る (金床が草に埋もれて見えない)
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
@@ -229,9 +241,52 @@ public final class IronTrail {
             BlockPos top = ground(level, x, z).below();
             if (level.getBlockState(top).is(Blocks.GRASS_BLOCK) || level.getBlockState(top).is(Blocks.DIRT) || level.getBlockState(top).is(Blocks.PODZOL)) {
                 level.setBlock(top, Blocks.COARSE_DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
+                // 上の薄い雪や草をどける (雪の野では踏んだ所だけ土が見える)
+                BlockState over = level.getBlockState(top.above());
+                if (!over.isAir() && over.canBeReplaced()) {
+                    level.setBlock(top.above(), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
             }
         }
         return at;
+    }
+
+    // spot に近い自然の地面 (土・草・砂・砂利・石。上が空きか草で、となりに水がない)。畑や水路・道・建物の上には置かない。なければ spot のまま
+    static BlockPos natural(ServerLevel level, BlockPos spot) {
+        for (int r = 0; r <= NATURAL_R; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+                        continue;
+                    }
+                    int x = spot.getX() + dx;
+                    int z = spot.getZ() + dz;
+                    if (!level.hasChunkAt(new BlockPos(x, 0, z))) {
+                        continue;
+                    }
+                    BlockPos at = ground(level, x, z);
+                    if (wild(level, at)) {
+                        return at;
+                    }
+                }
+            }
+        }
+        return spot;
+    }
+
+    static boolean wild(ServerLevel level, BlockPos at) {
+        BlockState under = level.getBlockState(at.below());
+        boolean soil = under.is(net.minecraft.tags.BlockTags.DIRT) || under.is(net.minecraft.tags.BlockTags.SAND) || under.is(Blocks.GRAVEL)
+                || under.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD);
+        if (!soil || !(level.getBlockState(at).isAir() || level.getBlockState(at).canBeReplaced()) || !level.getFluidState(at).isEmpty()) {
+            return false;
+        }
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (!level.getFluidState(at.below().relative(d)).isEmpty() || !level.getFluidState(at.relative(d)).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // 地面の上の空き (葉と草は数えない)
@@ -298,6 +353,8 @@ public final class IronTrail {
                             BlockPos s = spots.get(i);
                             ServerLevel level = p.server.overworld();
                             level.getChunk(s.getX() >> 4, s.getZ() >> 4);
+                            // 立つ所が隣の区画のこともある (読み込まれていないと高さが世界の底になる)
+                            level.getChunk(s.getX() >> 4, (s.getZ() - 6) >> 4);
                             BlockPos g = ground(level, s.getX(), s.getZ() - 6);
                             p.teleportTo(level, g.getX() + 0.5, g.getY(), g.getZ() + 0.5, 0f, 12f);
                             return 1;

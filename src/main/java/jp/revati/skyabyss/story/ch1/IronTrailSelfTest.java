@@ -20,7 +20,8 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 鉄の跡 (IronTrail) の自己テスト。段の名前は "iron trail"。
 //  - 鉄くずの置き場は三つで、町から坑へ近づく順に並ぶ (町か坑がない世界は確かめるものがない)
-//  - 建てると欠けた金床が地面に置かれる
+//  - 一つ目は町の畑と家の外
+//  - 建てると欠けた金床が地面に置かれる (畑の上なら、となりの草の上へよける)
 //  - 見つけると一つずつ数え、同じものは二度数えない。三つで段 track が済み、段 pit へ
 public final class IronTrailSelfTest {
     private IronTrailSelfTest() {
@@ -47,19 +48,31 @@ public final class IronTrailSelfTest {
             }
             last = d;
         }
-        // 建てる (空の高い所の床の上で、置き場の形だけ確かめる)
+        // 一つ目は町の畑と家の外 (2026-11-04 の撮影で、鯨見の町の麦畑に置かれていた)
+        double len = Math.hypot(pit.getX() - town.getX(), pit.getZ() - town.getZ());
+        if (!spots.isEmpty() && Math.hypot(spots.get(0).getX() - town.getX(), spots.get(0).getZ() - town.getZ()) <= Math.min(IronTrail.EDGE, len * IronTrail.EDGE_SHARE)) {
+            f.add("the first scrap is inside the town (" + spots.get(0).toShortString() + ")");
+        }
+        // 建てる (空の高い所の床の上で、置き場の形だけ確かめる)。真ん中 3x3 は麦畑: 金床は畑をよけて草の上に置く
         BlockPos floor = level.getSharedSpawnPos().atY(240);
-        for (int x = -2; x <= 2; x++) {
-            for (int z = -2; z <= 12; z++) {
-                level.setBlock(floor.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -4; z <= 24; z++) {
+                boolean farm = Math.abs(x) <= 1 && Math.abs(z) <= 1;
+                level.setBlock(floor.offset(x, -1, z), farm ? Blocks.FARMLAND.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+                if (farm) {
+                    level.setBlock(floor.offset(x, 0, z), Blocks.WHEAT.defaultBlockState(), 2);
+                }
             }
         }
         BlockPos plate = IronTrail.build(level, floor, floor.offset(0, 0, 40));
         if (!level.getBlockState(plate).is(Blocks.DAMAGED_ANVIL)) {
             f.add("building a scrap did not put the broken anvil on the ground (" + level.getBlockState(plate) + ")");
         }
-        for (int x = -2; x <= 2; x++) {
-            for (int z = -2; z <= 12; z++) {
+        if (!level.getBlockState(plate.below()).is(Blocks.GRASS_BLOCK)) {
+            f.add("the broken anvil was not moved off the field (" + level.getBlockState(plate.below()) + ")");
+        }
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -4; z <= 24; z++) {
                 level.setBlock(floor.offset(x, -1, z), Blocks.AIR.defaultBlockState(), 2);
                 level.setBlock(floor.offset(x, 0, z), Blocks.AIR.defaultBlockState(), 2);
             }
@@ -93,7 +106,7 @@ public final class IronTrailSelfTest {
         Quests.forgetAll(p);
         f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch1 iron trail FAILED: {}", m));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch1 iron trail PASSED (3 scraps from the town to the bone pit, broken anvil placed, each counted once, track stage done)");
+            SkyAbyss.LOGGER.info("SELFTEST ch1 iron trail PASSED (3 scraps from outside the town to the bone pit, broken anvil placed off the field, each counted once, track stage done)");
         }
     }
 }
