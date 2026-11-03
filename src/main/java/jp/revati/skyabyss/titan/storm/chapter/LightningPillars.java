@@ -213,7 +213,7 @@ public final class LightningPillars {
                 }
             }
             if (m == (1 << STANDS) - 1 && modern(e) && openDoor(level, e)) {
-                close.forEach(p -> Notice.narrate(p, "message.skyabyss.ch3g.ruin.open"));
+                close.forEach(p -> Notice.hint(p, "message.skyabyss.ch3g.ruin.open"));
             }
             for (ServerPlayer p : close) {
                 credit(p, level, e, m);

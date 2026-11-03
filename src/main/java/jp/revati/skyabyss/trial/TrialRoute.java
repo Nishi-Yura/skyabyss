@@ -457,7 +457,7 @@ public final class TrialRoute {
         for (ServerPlayer p : members(back, group)) {
             move(back, p, at, yaw);
             n++;
-            Notice.narrate(p, "message.skyabyss.route.heart", Component.empty());
+            Notice.alert(p, "message.skyabyss.route.heart", Component.empty());
             RouteCard.show(p, back, group, titan, draw, LAST_STEP, false);
         }
         back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
@@ -822,7 +822,7 @@ public final class TrialRoute {
         boolean replay = !FirstRun.isFirstRun(back, group);
         end(back, group);
         for (ServerPlayer m : all) {
-            Notice.narrate(m, "message.skyabyss.route.abandoned");
+            Notice.hint(m, "message.skyabyss.route.abandoned");
             try {
                 if (!replay || !jp.revati.skyabyss.titan.shrine.TitanShrine.sendTo(m, titan)) {
                     Titans.sendDown(m, titan);

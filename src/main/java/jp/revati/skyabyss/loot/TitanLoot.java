@@ -365,7 +365,7 @@ public final class TitanLoot {
             } else if (canReceive(player) && jp.revati.skyabyss.record.Keepsakes.fragmentMissing(player)) {
                 // 受け取ったのにどこにも見当たらない欠片は、鼓動のそばで再び見つかる (11 の 4章)
                 items.add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
-                Notice.narrate(player, "skyabyss_record.guard.fragment_restored");
+                Notice.gain(player, "skyabyss_record.guard.fragment_restored");
             }
             Roll roll = rollHeart(r, level.random);
             items.addAll(roll.items());
@@ -385,13 +385,13 @@ public final class TitanLoot {
             if (fragment) {
                 Notice.unlock(player, "message.skyabyss.fragment_received");
             }
-            Notice.narrate(player, "message.skyabyss.boss_reward");
+            Notice.gain(player, "message.skyabyss.boss_reward");
             Notice.gain(player, rewardLine(items));
             announcePieces(level, player, r, roll);
             if (roll.guaranteed() != null) {
-                Notice.narrate(player, "message.skyabyss.memory_guarantee");
+                Notice.gain(player, "message.skyabyss.memory_guarantee");
             } else if (roll.pityShards()) {
-                Notice.narrate(player, "message.skyabyss.memory_all_owned");
+                Notice.gain(player, "message.skyabyss.memory_all_owned");
             }
             Notice.gain(player, memoryLine(r));
             tellHeld(player, held);
@@ -413,7 +413,7 @@ public final class TitanLoot {
             if (player == null) {
                 continue;
             }
-            Notice.narrate(player, "message.skyabyss.mid_boss_reward");
+            Notice.gain(player, "message.skyabyss.mid_boss_reward");
             Notice.gain(player, rewardLine(roll.items()));
             announcePieces(level, player, r, roll);
             tellHeld(player, held);

@@ -5,7 +5,7 @@
     PYTHONIOENCODING=utf-8 python -I tools/gen/world/gen_camps.py
 
 土地 (鯨見・汐守・風待・灰炉) ごとに一つ。町から TOWN_MIN〜TOWN_MAX、道から ROAD_MIN〜ROAD_MAX (道から見えて行ける、道の上ではない) の、
-平らな陸 (±8 の高さの差が FLAT 以下) で、見どころ・巨神の居場所・祠・跡地・隠れた発見・早駆けの標から離れた所。平らで、道から 40 ほどの所を選ぶ。
+平らな陸 (±8 の高さの差が FLAT 以下) で、見どころ・巨神の居場所・祠・跡地・隠れた発見から離れた所。平らで、道から 40 ほどの所を選ぶ。
 書くもの: src/main/resources/data/skyabyss/continent/camps.json ({id, region, x, z} の並び。id は土地の名前)
 """
 import gzip
@@ -36,7 +36,6 @@ def main():
     lairs = json.load(open(os.path.join(D, 'lairs.json'), encoding='utf-8'))
     pois = json.load(open(os.path.join(D, 'pois.json'), encoding='utf-8'))
     secrets = json.load(open(os.path.join(D, 'secrets.json'), encoding='utf-8'))['secrets']
-    races = json.load(open(os.path.join(D, 'races.json'), encoding='utf-8'))['courses']
     segs = [(a, b) for line in lay['roads'] for a, b in zip(line, line[1:])]
 
     def cell(x, z):
@@ -66,7 +65,6 @@ def main():
     keep += [((v['x'], v['z']), 140) for k, v in lairs.items() if isinstance(v, dict) and 'x' in v]
     keep += [(p, 80) for p in lairs['shrines'].values()]
     keep += [((s['x'], s['z']), 60) for s in secrets]
-    keep += [(c['post'], 40) for c in races]
     out = []
     for rid, land in LANDS.items():
         town = lay['towns'][land]

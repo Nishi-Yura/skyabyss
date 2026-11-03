@@ -433,7 +433,7 @@ public final class Dungeons {
             if (run.dungeon == Dungeon.BONE_PIT && floor == 0) {
                 // トロッコで下の層へ (乗った音のあと、着いた所で止まる音)
                 level.playSound(null, p.blockPosition(), SoundEvents.MINECART_RIDING, SoundSource.BLOCKS, 1f, 0.8f);
-                Notice.narrate(p, "message.skyabyss.dungeon.bone_pit.cart");
+                Notice.hint(p, "message.skyabyss.dungeon.bone_pit.cart");
                 Tasks.later(30, () -> {
                     if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                         moveTo(p, run, floor + 1);
@@ -450,7 +450,7 @@ public final class Dungeons {
             MOVING.put(p.getUUID(), t + 60);
             level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
             sendBack(p, run.dungeon);
-            Notice.narrate(p, "message.skyabyss.dungeon.returned", Component.translatable(run.dungeon.nameKey()));
+            Notice.hint(p, "message.skyabyss.dungeon.returned", Component.translatable(run.dungeon.nameKey()));
         }
     }
 
@@ -540,7 +540,7 @@ public final class Dungeons {
         Tasks.later(2, () -> {
             if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                 moveTo(p, run, run.checkpoint);
-                Notice.narrate(p, "message.skyabyss.dungeon.woke");
+                Notice.hint(p, "message.skyabyss.dungeon.woke");
             }
         });
     }

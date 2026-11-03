@@ -257,7 +257,7 @@ public final class CleftCave {
             level.sendParticles(ParticleTypes.POOF, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 12, 1.0, 1.0, 1.0, 0.02);
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 40 * 40) {
-                    Notice.narrate(p, "message.skyabyss.ch1.plate.open");
+                    Notice.hint(p, "message.skyabyss.ch1.plate.open");
                 }
             }
         }

@@ -175,7 +175,7 @@ public final class GuildRequests {
         for (UUID m : g.members) {
             ServerPlayer p = server.getPlayerList().getPlayer(m);
             if (p != null) {
-                Notice.narrate(p, "message.skyabyss.guild.req_complete", g.name);
+                Notice.gain(p, "message.skyabyss.guild.req_complete", g.name);
             }
         }
         GuildData.get(server).dirty();

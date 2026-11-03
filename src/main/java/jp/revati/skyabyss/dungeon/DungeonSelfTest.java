@@ -78,6 +78,8 @@ public final class DungeonSelfTest {
             }
             check(f, a.checkpoint == 0 && DungeonWorld.in(p), "the squad did not arrive on the first level");
             check(f, level.getBlockState(a.mark(0, "leave")).is(Blocks.LODESTONE), "the first level was not poured (no return stone)");
+            check(f, jp.revati.skyabyss.world.LodestoneLabels.describe(p, a.mark(0, "leave")) != null
+                    && jp.revati.skyabyss.world.LodestoneLabels.describe(p, a.mark(0, "leave").above(3)) == null, "the return stone has no name tag (or a plain spot got one)");
             BlockPos chest = a.mark(0, "chest_1");
             check(f, level.getBlockEntity(chest) instanceof ChestBlockEntity c && (!c.isEmpty() || jp.revati.skyabyss.loot.SharedChests.known(level, chest)),
                     "the first chest has nothing for players");

@@ -206,7 +206,7 @@ public final class TowerFight {
             if (since == 20) {
                 for (ServerPlayer p : here) {
                     Notice.place(p, Component.translatable("entity.skyabyss.tower_master"), Component.translatable("message.skyabyss.tower.intro_sub"));
-                    Notice.narrate(p, "message.skyabyss.tower.intro");
+                    Notice.alert(p, "message.skyabyss.tower.intro");
                 }
             }
             if (since == 40) {
@@ -260,7 +260,7 @@ public final class TowerFight {
             Vec3 cr = master.crown();
             far(level, RED, cr.x, cr.y, cr.z + 1, 80, 7, 4, 1, 0);
             for (ServerPlayer p : here) {
-                Notice.narrate(p, "message.skyabyss.tower.stoke");
+                Notice.alert(p, "message.skyabyss.tower.stoke");
             }
         }
         if (moon == null && moonsDone < 2 && master.getHealth() <= master.getMaxHealth() * floorFrac(moonsDone) + 0.5f) {
@@ -412,7 +412,7 @@ public final class TowerFight {
                 master.playAction("arrows");
                 ServerPlayer p = tg.get(rng.nextInt(tg.size()));
                 for (ServerPlayer q : here) {
-                    Notice.narrate(q, "message.skyabyss.tower.arrows", p.getDisplayName());
+                    Notice.alert(q, "message.skyabyss.tower.arrows", p.getDisplayName());
                 }
                 double share = 1.2 * Math.min(tg.size(), 3) * k;
                 zones.add(Zone.circle(p.position(), 5, now + 40, 1.6 * k, WHITE).follow(p, now + 25).fall());
@@ -483,7 +483,7 @@ public final class TowerFight {
         master.playAction("palm");
         sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 1.0f);
         for (ServerPlayer p : here) {
-            Notice.narrate(p, "message.skyabyss.tower.swarm");
+            Notice.alert(p, "message.skyabyss.tower.swarm");
         }
     }
 
@@ -538,7 +538,7 @@ public final class TowerFight {
         chasers.clear();
         sound(level, master.head(), CloudMobsSetup.MOON_FALL_TELL.get(), 6f, 0.6f);
         for (ServerPlayer p : here) {
-            Notice.narrate(p, "message.skyabyss.tower.moon");
+            Notice.alert(p, "message.skyabyss.tower.moon");
         }
         Mob m = TowerWorld.foe(level, CloudMobsSetup.TOWER_MOON.get(), rel(0, MOON_HOVER, MOON_START_Z), TowerMoon.HP * (1 + PARTY_STEP * (n - 1)) / TowerWorld.foeScale(n),
                 TowerMoon.DMG, n, run.id);
@@ -582,7 +582,7 @@ public final class TowerFight {
             master.setFloor(master.getMaxHealth() * floorFrac(moonsDone));
             sound(level, master.chest(), CloudMobsSetup.MOON_FALL.get(), 6f, 1.2f);
             for (ServerPlayer p : here) {
-                Notice.narrate(p, "message.skyabyss.tower.moon_gone");
+                Notice.alert(p, "message.skyabyss.tower.moon_gone");
             }
             restUntil = now + 60;
             return;

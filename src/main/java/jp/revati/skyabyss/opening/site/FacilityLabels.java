@@ -196,7 +196,7 @@ public final class FacilityLabels {
     }
 
     // ---------------------------------------------------------------- 置く・見回る
-    static ListTag floats(float... v) {
+    public static ListTag floats(float... v) {
         ListTag l = new ListTag();
         for (float f : v) {
             l.add(FloatTag.valueOf(f));

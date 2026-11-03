@@ -220,7 +220,7 @@ public final class TowerDesk {
             p.sendSystemMessage(button("message.skyabyss.tower.btn.leave", "leave", 0xC8A0E0));
             return;
         }
-        Notice.narrate(p, Towers.usedToday(p) ? "message.skyabyss.tower.desk.used" : "message.skyabyss.tower.desk.hello");
+        Notice.hint(p, Towers.usedToday(p) ? "message.skyabyss.tower.desk.used" : "message.skyabyss.tower.desk.hello");
         sendState(p, true);
     }
 

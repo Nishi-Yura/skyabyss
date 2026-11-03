@@ -109,11 +109,11 @@ public final class Progression {
     public static void tellCapped(ServerPlayer player, int cap) {
         String next = nextTitan(player);
         if (next == null && cap < ProgressRules.ABYSS_CAP && !wardenFelled(player)) {
-            Notice.narrate(player, "message.skyabyss.progress.capped_abyss", cap);
+            Notice.hint(player, "message.skyabyss.progress.capped_abyss", cap);
         } else if (next == null) {
-            Notice.narrate(player, "message.skyabyss.progress.capped_end", cap);
+            Notice.hint(player, "message.skyabyss.progress.capped_end", cap);
         } else {
-            Notice.narrate(player, "message.skyabyss.progress.capped", cap, titanName(next));
+            Notice.hint(player, "message.skyabyss.progress.capped", cap, titanName(next));
         }
     }
 
@@ -228,7 +228,7 @@ public final class Progression {
         String key = i + 1 < ProgressRules.TITAN_ORDER.size()
                 ? "message.skyabyss.progress.world_first" : "message.skyabyss.progress.world_first_last";
         for (ServerPlayer p : worldFirstAudience(Players.snapshot(server.getPlayerList().getPlayers()), by, i)) {
-            Notice.narrate(p, key, by.getDisplayName(), titanName(titan));
+            Notice.hint(p, key, by.getDisplayName(), titanName(titan));
         }
     }
 

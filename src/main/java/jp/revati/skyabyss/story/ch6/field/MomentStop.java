@@ -67,7 +67,7 @@ public final class MomentStop {
     // 使う。止めたものの数 (石を含む) を返す。月の外では -1
     public static int cast(ServerPlayer p) {
         if (p.level().dimension() != MoonWorld.LEVEL) {
-            Notice.narrate(p, "message.skyabyss.moon.moment_stop.not_moon");
+            Notice.hint(p, "message.skyabyss.moon.moment_stop.not_moon");
             return -1;
         }
         ServerLevel level = p.serverLevel();

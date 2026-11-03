@@ -1,0 +1,35 @@
+# 2026-11-03 夜: 天然磁石の名札 (world/LodestoneLabels)。地下のダンジョンの層の門と、中の帰り石
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/lodestone_labels.txt -PshotsName=dungeon_entrance
+world camp_check continent
+size 1600 900
+timeout 1800
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode creative
+chat clear
+hud on
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 200
+cmd skyabyss dungeon hall bone_pit
+wait 100
+shot s01_gate
+cmd tp @s ~ ~ ~ ~180 5
+wait 20
+shot s02_gate_back
+cmd skyabyss dungeon enter bone_pit
+wait 140
+shot s03_floor
+cmd tp @s ~ ~ ~ ~90 5
+wait 20
+shot s04_floor_side
+cmd tp @s ~ ~ ~ ~90 5
+wait 20
+shot s05_floor_back
+cmd tp @s ~ ~ ~ ~90 5
+wait 20
+shot s06_floor_other

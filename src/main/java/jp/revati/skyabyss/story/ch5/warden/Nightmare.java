@@ -138,7 +138,7 @@ public final class Nightmare {
             return false;
         }
         if (!passedHeart(p)) {
-            Notice.narrate(p, "message.skyabyss.abyss_nm.not_yet");
+            Notice.hint(p, "message.skyabyss.abyss_nm.not_yet");
             return true;
         }
         if (session != null || WardenArena.current(p.serverLevel()) != null) {
@@ -195,7 +195,7 @@ public final class Nightmare {
         switch (r) {
             case FAR -> Notice.hint(p, "message.skyabyss.abyss_nm.far");
             case LOCKED -> Notice.hint(p, "message.skyabyss.abyss_nm.locked");
-            case NOT_READY -> Notice.narrate(p, "message.skyabyss.abyss_nm.not_yet");
+            case NOT_READY -> Notice.hint(p, "message.skyabyss.abyss_nm.not_yet");
             case BUSY -> Notice.hint(p, "message.skyabyss.abyss_nm.busy");
             case OK -> {
             }

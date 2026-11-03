@@ -243,7 +243,7 @@ public final class CliffBalance {
 
     static void pickWeight(ServerPlayer p, BlockPos pile) {
         if (carried(p) >= CARRY_MAX) {
-            Notice.narrate(p, "message.skyabyss.moon.weight.full");
+            Notice.hint(p, "message.skyabyss.moon.weight.full");
             return;
         }
         Quests.give(p, new ItemStack(CliffBlocks.MOON_WEIGHT_ITEM.get()));
@@ -274,7 +274,7 @@ public final class CliffBalance {
             }
         }
         if (best < 0) {
-            Notice.narrate(p, "message.skyabyss.moon.weight.plate_full");
+            Notice.hint(p, "message.skyabyss.moon.weight.plate_full");
             return;
         }
         BlockPos at = new BlockPos(w.getX() + WEIGHT_SLOTS[best][0], westY() + 1, w.getZ() + WEIGHT_SLOTS[best][1]);

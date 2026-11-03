@@ -140,7 +140,7 @@ public final class RaidRun {
         int idx = 0;
         for (ServerPlayer p : TrialRoute.members(back, group)) {
             TrialRoute.move(back, p, restSpot(ctx, idx++), yaw);
-            Notice.narrate(p, "message.skyabyss.route.step" + step, name);
+            Notice.alert(p, "message.skyabyss.route.step" + step, name);
             RaidLore.voice(p, d.id());
             RouteCard.show(p, back, group, titan, draw, step, false);
         }
@@ -190,7 +190,7 @@ public final class RaidRun {
         int idx = 0;
         for (ServerPlayer p : TrialRoute.members(back, group)) {
             TrialRoute.move(back, p, restSpot(ctx, idx++), 180f);
-            Notice.narrate(p, "message.skyabyss.route.mid", name);
+            Notice.alert(p, "message.skyabyss.route.mid", name);
             RouteCard.show(p, back, group, titan, draw, 3, true);
         }
         sendHud(run, false);
@@ -358,7 +358,7 @@ public final class RaidRun {
             }
             STRAY.remove(p.getUUID());
             TrialRoute.move(ctx.level(), p, restSpot(ctx, ctx.players().indexOf(p)), 180f);
-            Notice.narrate(p, "message.skyabyss.raid.rejoin");
+            Notice.hint(p, "message.skyabyss.raid.rejoin");
             sendTo(p, run.lastHud == null ? RaidHudNet.Hud.OFF : run.lastHud);
             SkyAbyss.LOGGER.info("Raid: {} was outside room {} and was carried back to its rest", p.getGameProfile().getName(), ctx.roomId());
         }

@@ -314,7 +314,7 @@ public final class Rebirth {
         level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 1.0, 0.5, 0.06);
         level.sendParticles(ParticleTypes.GLOW, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.6, 1.0, 0.6, 0.02);
         Notice.alert(player, "message.skyabyss.rebirth.done", n);
-        Notice.narrate(player, "message.skyabyss.rebirth.done_detail", Component.translatable(arm.nameKey()), Component.translatable(boon.nameKey()));
+        Notice.gain(player, "message.skyabyss.rebirth.done_detail", Component.translatable(arm.nameKey()), Component.translatable(boon.nameKey()));
         jp.revati.skyabyss.advancement.Beats.fire(player, "rebirth:" + n);
     }
 

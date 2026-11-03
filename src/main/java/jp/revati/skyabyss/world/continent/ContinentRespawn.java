@@ -26,11 +26,17 @@ public final class ContinentRespawn {
 
     // 地上の休み場 (立つ場所) の一覧
     public static List<BlockPos> rests(ServerLevel over) {
+        return rests(over, null);
+    }
+
+    // who の行ったことのある土地の町だけ (null なら全部)。行ったことのない町では目覚めない
+    // (2026-11-03 の声「嵐の高地で死んだら、嵐の町に来た。行ったことないのに」)
+    public static List<BlockPos> rests(ServerLevel over, @Nullable ServerPlayer who) {
         SiteData data = SiteData.get(over);
         List<BlockPos> out = new ArrayList<>();
         for (SiteData.Entry e : data.entries(ContinentTowns.KIND)) {
             BlockPos r = e.extra("rest");
-            if (e.built && r != null) {
+            if (e.built && r != null && (who == null || ContinentAreas.visited(who, ContinentTowns.region(e.index)))) {
                 out.add(r);
             }
         }
@@ -88,7 +94,7 @@ public final class ContinentRespawn {
             return;
         }
         // 島を出た人は、島の休み場 (野営地・道ぞいの祠) では目覚めない。まだの人は島の中だけ
-        List<BlockPos> rests = new ArrayList<>(ContinentOutskirts.ferried(player) ? rests(over) : islandRests(over));
+        List<BlockPos> rests = new ArrayList<>(ContinentOutskirts.ferried(player) ? rests(over, player) : islandRests(over));
         // 宿で決めた寝台も休み場の一つ。倒れた所にいちばん近い所で目覚める (2026-10-29 の試遊「ボスで死んだら、前に戻されるんじゃなくて、最初の村で蘇生した」:
         // 寝台を持つ人は、倒れた所から遠くても寝台へ戻っていた)
         BlockPos bed = player.getRespawnPosition();

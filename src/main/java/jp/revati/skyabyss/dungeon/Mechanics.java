@@ -31,6 +31,9 @@ public final class Mechanics {
         if (here.isEmpty()) {
             return;
         }
+        if (t % 20 == 5) {
+            explain(f, here);
+        }
         long age = t - f.run.startedTick;
         for (String lo : f.terrain.marksStarting("tide_")) {
             if (!lo.endsWith("_lo")) {
@@ -69,6 +72,37 @@ public final class Mechanics {
                 }
             }
             set(f, level, box, on, Blocks.LAVA.defaultBlockState());
+        }
+    }
+
+    // ---------------------------------------------------------------- 仕掛けの説明
+    // 初めて仕掛けのそば (TIP_RADIUS) に来た人に、一度だけ一行の説明 (人ごとに覚え、倒れても消えない)
+    // (2026-11-03 の声「地下ダンジョン、ギミックの説明少しは欲しいね」)
+    static final double TIP_RADIUS = 10;
+    static final String TIPS = "skyabyss_dungeon_tips";
+    static final String[][] TIP_MARKS = {{"tide_", "tide"}, {"lava_", "lava"}, {"crystal_", "crystal"}, {"next", "next"}, {"leave", "leave"}, {"cp", "cp"}};
+
+    static void explain(DungeonFloor f, List<ServerPlayer> here) {
+        for (ServerPlayer p : here) {
+            if (!Dungeons.real(p)) {
+                continue;
+            }
+            String seen = p.getPersistentData().getString(TIPS);
+            for (String[] tm : TIP_MARKS) {
+                String tip = tm[1];
+                if (("," + seen + ",").contains("," + tip + ",")) {
+                    continue;
+                }
+                for (String k : f.terrain.marksStarting(tm[0])) {
+                    BlockPos at = f.at(k);
+                    if (at != null && p.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5) <= TIP_RADIUS * TIP_RADIUS) {
+                        Notice.hint(p, "message.skyabyss.dungeon.tip." + tip, CHARGE, TIDE_PERIOD / 40, LAVA_PERIOD / 20);
+                        p.getPersistentData().putString(TIPS, seen.isEmpty() ? tip : seen + "," + tip);
+                        seen = p.getPersistentData().getString(TIPS);
+                        break;
+                    }
+                }
+            }
         }
     }
 

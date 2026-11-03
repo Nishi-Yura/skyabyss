@@ -135,7 +135,7 @@ public final class Growth {
         int skill = jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level) - jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level - gained);
         Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level, skill);
         if (data.level >= GrowthRules.MAX_LEVEL) {
-            Notice.narrate(player, "message.skyabyss.growth.max_level");
+            Notice.hint(player, "message.skyabyss.growth.max_level");
         }
     }
 
@@ -240,7 +240,7 @@ public final class Growth {
         if (added > 0) {
             sync(player);
             player.playNotifySound(Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
-            Notice.narrate(player, "message.skyabyss.growth.fragment_gained",
+            Notice.gain(player, "message.skyabyss.growth.fragment_gained",
                     Component.translatable(MemoryFragments.nameKey(id.toString())), data.fragmentCount(), data.fragmentCapacity);
         }
         return added;

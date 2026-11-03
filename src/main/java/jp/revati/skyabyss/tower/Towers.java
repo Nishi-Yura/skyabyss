@@ -157,7 +157,7 @@ public final class Towers {
     // 挑戦が終わった (全滅・時間切れ): 全員を都の受付へ
     static void fail(TowerRun run, String why) {
         for (ServerPlayer p : run.online()) {
-            Notice.narrate(p, "message.skyabyss.tower." + why);
+            Notice.hint(p, "message.skyabyss.tower." + why);
             Tasks.later(60, () -> {
                 if (!p.hasDisconnected() && TowerWorld.in(p)) {
                     if (!p.isAlive()) {
@@ -213,7 +213,7 @@ public final class Towers {
             }
             Notice.place(p, Component.translatable("message.skyabyss.tower.clear_title"), Component.translatable("message.skyabyss.tower.clear_sub", time(ticks)));
             p.playNotifySound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.MASTER, 1f, 1f);
-            Notice.narrate(p, "message.skyabyss.tower.cleared", time(ticks));
+            Notice.gain(p, "message.skyabyss.tower.cleared", time(ticks));
             if (fastest) {
                 Notice.gain(p, "message.skyabyss.tower.record", run.members.size());
             }
@@ -394,7 +394,7 @@ public final class Towers {
             if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                 Vec3 e = run.markCenter("entry");
                 p.teleportTo(run.level(), e.x, e.y, e.z, 180f, 0f);
-                Notice.narrate(p, "message.skyabyss.tower.woke");
+                Notice.hint(p, "message.skyabyss.tower.woke");
             }
         });
     }

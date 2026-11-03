@@ -280,7 +280,7 @@ public final class DeathEvents {
             GraveData.Grave g = GraveData.get(player.server).get(note.getUUID("grave"));
             if (g != null) {
                 BlockPos p = g.pos;
-                Notice.narrate(player, "skyabyss_grave.made", jp.revati.skyabyss.record.RecordBuilder.dimension(g.dimension.location().toString()), p.getX(), p.getY(), p.getZ());
+                Notice.hint(player, "skyabyss_grave.made", jp.revati.skyabyss.record.RecordBuilder.dimension(g.dimension.location().toString()), p.getX(), p.getY(), p.getZ());
             }
         } else if (note.getBoolean("no_spot")) {
             Notice.warn(player, "skyabyss_grave.no_spot");

@@ -45,6 +45,8 @@ public final class SiteBuilds {
     public static final long NEW_WORLD_TICKS = 24000;
 
     private static final ArrayDeque<SiteJob> QUEUE = new ArrayDeque<>();
+    // この中にいる人の近くの物から建てる (ブロック)
+    static final double NEAR_FIRST = 160;
 
     private SiteBuilds() {
     }
@@ -292,6 +294,13 @@ public final class SiteBuilds {
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
         applyPlan(event.getServer());
+        // 人の近く (NEAR_FIRST) の物を、待ちの先頭へ。遠くの大きな物 (都・町) の後ろで、近づいた見どころ (地下のダンジョンの入口など) が
+        // なかなか建たなかった (2026-11-03 の声「大規模地下ダンジョンなんだけど、入り口の床うまってて、いけないよ」。作り直しのあと)
+        if (event.getServer().getTickCount() % 40 == 17 && !QUEUE.isEmpty()) {
+            for (net.minecraft.server.level.ServerPlayer p : event.getServer().overworld().players()) {
+                prioritizeNear(p.blockPosition(), NEAR_FIRST);
+            }
+        }
         SiteJob job;
         synchronized (SiteBuilds.class) {
             job = QUEUE.peek();

@@ -81,7 +81,7 @@ public final class ValleyPuzzles {
         }
         String no = refusal(level, site, pos);
         if (no != null) {
-            Notice.narrate(p, no);
+            Notice.hint(p, no);
             return;
         }
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.5f, 0.6f);
@@ -156,7 +156,7 @@ public final class ValleyPuzzles {
         ServerLevel level = p.serverLevel();
         boolean up = pos.getY() < MoonValley.mark("arena_entry").getY() - 6;
         if (up && !mayCross(p)) {
-            Notice.narrate(p, stage(p) < stageIndex("shards") ? "message.skyabyss.moon.gate_star.sealed" : "message.skyabyss.moon.gate_star.need_shards");
+            Notice.hint(p, stage(p) < stageIndex("shards") ? "message.skyabyss.moon.gate_star.sealed" : "message.skyabyss.moon.gate_star.need_shards");
             level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.BLOCKS, 1f, 0.5f);
             return;
         }

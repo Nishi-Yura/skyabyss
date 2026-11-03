@@ -214,7 +214,7 @@ public final class FacilityActions {
     }
 
     static void rumor(ServerPlayer player) {
-        Notice.narrate(player, "message.skyabyss.inn.rumor_head", rumorFor(player));
+        Notice.hint(player, "message.skyabyss.inn.rumor_head", rumorFor(player));
     }
 
     // ---------------------------------------------------------------- 止まり木

@@ -12,14 +12,6 @@
           "if": {
             "type": "in_capital"
           }
-        },
-        {
-          "id": "town_draw",
-          "goto": "town_draw",
-          "kind": "talk",
-          "if": {
-            "type": "in_capital"
-          }
         }
       ]
     }
@@ -31,22 +23,6 @@
         {
           "type": "town",
           "act": "guide_rumor"
-        }
-      ],
-      "options": [
-        {
-          "id": "ok",
-          "goto": "end",
-          "kind": "talk"
-        }
-      ]
-    },
-    "town_draw": {
-      "face": "neutral",
-      "do": [
-        {
-          "type": "town",
-          "act": "guide_draw"
         }
       ],
       "options": [

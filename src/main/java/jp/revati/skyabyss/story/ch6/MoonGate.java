@@ -69,7 +69,7 @@ public final class MoonGate {
             }
             String no = refusal(p);
             if (no != null) {
-                Notice.narrate(p, no);
+                Notice.hint(p, no);
                 return;
             }
             open(p, pos);
@@ -84,7 +84,7 @@ public final class MoonGate {
     public static void open(ServerPlayer p, BlockPos gate) {
         ServerLevel level = p.serverLevel();
         level.playSound(null, gate, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.5f, 0.6f);
-        Notice.narrate(p, "message.skyabyss.moon.gate.open");
+        Notice.hint(p, "message.skyabyss.moon.gate.open");
         for (int t = 0; t < BEAM_TICKS; t += 4) {
             int tt = t;
             Tasks.later(t, () -> {

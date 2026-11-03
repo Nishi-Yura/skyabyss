@@ -99,7 +99,7 @@ public final class RiftPuzzles {
         ServerLevel level = p.serverLevel();
         boolean down = pos.getY() > MoonRift.mark("arena_entry").getY() + 6;
         if (down && !mayCross(p)) {
-            Notice.narrate(p, stage(p) < stageIndex("shards") ? "message.skyabyss.moon.rift_gate.sealed" : "message.skyabyss.moon.rift_gate.need_shards");
+            Notice.hint(p, stage(p) < stageIndex("shards") ? "message.skyabyss.moon.rift_gate.sealed" : "message.skyabyss.moon.rift_gate.need_shards");
             level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.BLOCKS, 1f, 0.5f);
             return;
         }

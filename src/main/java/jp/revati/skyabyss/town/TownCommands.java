@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   /skyabyss town bell                 大鐘楼の頂の鐘を鳴らしたことにする (塔に登れないうちの試し)
 //   /skyabyss town well [reset]         古井戸の下の宝を受け取る (reset で受け取っていないことに)
 //   /skyabyss town cellar open|close    酒場の地下の奥の壁を開ける / 閉じたことにする
-//   /skyabyss town guide [draw]         案内人の噂 (draw で描き足し)
+//   /skyabyss town guide                案内人の噂
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TownCommands {
     private TownCommands() {
@@ -39,7 +39,7 @@ public final class TownCommands {
                         .then(Commands.literal("list").executes(c -> list(c.getSource(), c.getSource().getPlayerOrException())))
                         .then(Commands.literal("rumor").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
-                            Notice.narrate(p, "message.skyabyss.inn.rumor_head", jp.revati.skyabyss.facility.FacilityActions.rumorFor(p));
+                            Notice.hint(p, "message.skyabyss.inn.rumor_head", jp.revati.skyabyss.facility.FacilityActions.rumorFor(p));
                             return 1;
                         }))
                         .then(Commands.literal("start").then(Commands.argument("quest", StringArgumentType.greedyString())
@@ -74,7 +74,7 @@ public final class TownCommands {
                         .then(Commands.literal("guide").executes(c -> {
                             TownActions.guideRumor(c.getSource().getPlayerOrException());
                             return 1;
-                        }).then(Commands.literal("draw").executes(c -> TownActions.guideDraw(c.getSource().getPlayerOrException()) ? 1 : 0)))));
+                        }))));
     }
 
     static int list(CommandSourceStack source, ServerPlayer p) {

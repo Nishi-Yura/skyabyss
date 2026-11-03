@@ -1,0 +1,68 @@
+# 2026-11-03 夜: 地下のダンジョンの入口 (見どころ dungeon_<id>)。四つの口と入口の間 (地下)
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/dungeon_entrance_check.txt -PshotsName=dungeon_entrance
+world camp_check continent
+size 1600 900
+timeout 3600
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+chat clear
+hud off
+# bone_pit
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 400
+cmd skyabyss dungeon mouth bone_pit
+wait 60
+shot e_bone_pit_1mouth
+cmd skyabyss dungeon hall bone_pit
+wait 60
+shot e_bone_pit_2hall
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot e_bone_pit_3back
+# tide_cave
+cmd tp @s 1426 160 -112 0 25
+waitchunks 400
+wait 400
+cmd skyabyss dungeon mouth tide_cave
+wait 60
+shot e_tide_cave_1mouth
+cmd skyabyss dungeon hall tide_cave
+wait 60
+shot e_tide_cave_2hall
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot e_tide_cave_3back
+# storm_hollow
+cmd tp @s -1244 160 -282 0 25
+waitchunks 400
+wait 400
+cmd skyabyss dungeon mouth storm_hollow
+wait 60
+shot e_storm_hollow_1mouth
+cmd skyabyss dungeon hall storm_hollow
+wait 60
+shot e_storm_hollow_2hall
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot e_storm_hollow_3back
+# molten_mine
+cmd tp @s 240 160 1220 0 25
+waitchunks 400
+wait 400
+cmd skyabyss dungeon mouth molten_mine
+wait 60
+shot e_molten_mine_1mouth
+cmd skyabyss dungeon hall molten_mine
+wait 60
+shot e_molten_mine_2hall
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot e_molten_mine_3back

@@ -10,11 +10,13 @@ import jp.revati.skyabyss.SelfTestRunner;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.lore.LoreSetup;
 import jp.revati.skyabyss.rpg.rules.NoPlaceables;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
@@ -98,8 +100,39 @@ public final class UpgradeSelfTest {
         if (far.distanceToSqr(p) > 4) {
             f.add("a far page is not moved to the player's feet (" + far.position() + ")");
         }
+        // 早駆けの標の残り物 (OldRacePosts): 空の高い所に草の地面と標を建て、片付くか
+        BlockPos base = level.getSharedSpawnPos().atY(260);
+        for (int a = -3; a <= 3; a++) {
+            for (int b = -3; b <= 3; b++) {
+                level.setBlock(base.offset(a, -1, b), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+            }
+        }
+        level.setBlock(base.offset(0, -1, 0), Blocks.POLISHED_ANDESITE.defaultBlockState(), 2);
+        level.setBlock(base.offset(1, -1, 0), Blocks.COARSE_DIRT.defaultBlockState(), 2);
+        level.setBlock(base.offset(1, -1, 1), Blocks.ANDESITE.defaultBlockState(), 2);
+        level.setBlock(base, Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState(), 2);
+        level.setBlock(base.above(), Blocks.SPRUCE_FENCE.defaultBlockState(), 2);
+        level.setBlock(base.above(4), Blocks.LANTERN.defaultBlockState(), 2);
+        level.setBlock(base.above(3).east(), Blocks.RED_WALL_BANNER.defaultBlockState(), 2);
+        jp.revati.skyabyss.opening.site.SiteData sites = jp.revati.skyabyss.opening.site.SiteData.get(level);
+        sites.add(OldRacePosts.KIND, 0, base, 0).built = true;
+        int swept = OldRacePosts.sweep(level);
+        if (swept != 1 || !sites.entries(OldRacePosts.KIND).isEmpty()) {
+            f.add("the old race post entry was not swept (" + swept + ")");
+        }
+        if (!level.getBlockState(base).isAir() || !level.getBlockState(base.above(4)).isAir() || !level.getBlockState(base.above(3).east()).isAir()) {
+            f.add("the old race post blocks are still standing");
+        }
+        if (!level.getBlockState(base.below()).is(Blocks.GRASS_BLOCK) || !level.getBlockState(base.offset(1, -1, 1)).is(Blocks.GRASS_BLOCK)) {
+            f.add("the old race post's stone pad was not turned back into the ground around it");
+        }
+        for (int a = -3; a <= 3; a++) {
+            for (int b = -3; b <= 3; b++) {
+                level.setBlock(base.offset(a, -1, b), Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST upgrade PASSED (world and player data versions, placeable items told apart and swept, pages home in)");
+            SkyAbyss.LOGGER.info("SELFTEST upgrade PASSED (world and player data versions, placeable items told apart and swept, pages home in, old race posts cleared)");
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST upgrade FAILED: {}", s));
         }

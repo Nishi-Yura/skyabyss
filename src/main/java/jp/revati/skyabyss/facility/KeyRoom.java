@@ -163,7 +163,7 @@ public final class KeyRoom {
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 0.7f + 0.1f * set.size());
         player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
         if (tell) {
-            Notice.narrate(player, set.size() >= Titans.all().size() ? "message.skyabyss.keyroom.all" : "message.skyabyss.keyroom.offered",
+            Notice.hint(player, set.size() >= Titans.all().size() ? "message.skyabyss.keyroom.all" : "message.skyabyss.keyroom.offered",
                     Progression.titanName(titan), set.size());
         }
         SkyAbyss.LOGGER.info("[facility] {} laid a sky key fragment for {} ({} in the key room)", player.getGameProfile().getName(), titan, set.size());
@@ -180,7 +180,7 @@ public final class KeyRoom {
         }
         if (n > 0) {
             Set<String> set = offered(player);
-            Notice.narrate(player, set.size() >= Titans.all().size() ? "message.skyabyss.keyroom.all_at_once" : "message.skyabyss.keyroom.offered_some",
+            Notice.hint(player, set.size() >= Titans.all().size() ? "message.skyabyss.keyroom.all_at_once" : "message.skyabyss.keyroom.offered_some",
                     n, set.size());
         } else {
             Notice.hint(player, carried(player) <= 0 ? "message.skyabyss.keyroom.no_fragment" : "message.skyabyss.keyroom.nothing_to_offer");

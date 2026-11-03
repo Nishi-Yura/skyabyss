@@ -487,8 +487,10 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.upgrade.UpgradeSelfTest.steps());
         // 天と淵の大陸の地形 (図と、大陸の世界なら本物のチャンク)。docs/design/40 の 3 章。SKYABYSS_SELFTEST_ONLY="continent"
         steps.addAll(jp.revati.skyabyss.world.continent.ContinentSelfTest.steps());
-        // 早駆けの道 (道筋の形・走りきる・印・自己最高)。SKYABYSS_SELFTEST_ONLY="race courses"
-        steps.add(Step.once("race courses", jp.revati.skyabyss.world.continent.RaceSelfTest::runSelfTest));
+        // 大陸の道に越えられない段がない。SKYABYSS_SELFTEST_ONLY="continent roads"
+        steps.add(Step.once("continent roads", jp.revati.skyabyss.world.continent.ContinentRoadsSelfTest::runSelfTest));
+        // 倒れたあとは行ったことのある町の休み場だけ。SKYABYSS_SELFTEST_ONLY="continent respawn"
+        steps.add(Step.once("continent respawn", jp.revati.skyabyss.world.continent.ContinentRespawnSelfTest::runSelfTest));
         // 逃げる獣 (型と動き・出る所・硬さ・報い・締め出し)。SKYABYSS_SELFTEST_ONLY="rare beasts"
         steps.add(Step.once("rare beasts", jp.revati.skyabyss.world.continent.RareBeastSelfTest::runSelfTest));
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"

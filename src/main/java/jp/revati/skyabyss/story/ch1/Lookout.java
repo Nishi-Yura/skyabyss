@@ -65,7 +65,7 @@ public final class Lookout {
     // 覗く。夕方なら縁が見える。覗けたら true
     static boolean peer(ServerPlayer player, ServerLevel level, BlockPos scope) {
         if (!dusk(level.getDayTime()) || level.isThundering()) {
-            Notice.narrate(player, "message.skyabyss.ch1.lookout.wait");
+            Notice.hint(player, "message.skyabyss.ch1.lookout.wait");
             return false;
         }
         Component dir = Component.translatable("message.skyabyss.guide.dir." + OpeningBeats.compass(scope, edgeToward(level, scope)));

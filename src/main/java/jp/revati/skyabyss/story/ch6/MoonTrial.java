@@ -108,7 +108,7 @@ public final class MoonTrial {
         MoonWorld.build(level);
         MoonMob boss = active(level, lord);
         if (boss != null && !boss.getTags().contains(TAG)) {
-            Notice.narrate(p, "message.skyabyss.moon_trial.busy");
+            Notice.hint(p, "message.skyabyss.moon_trial.busy");
             return null;
         }
         BlockPos entry = entry(lord);

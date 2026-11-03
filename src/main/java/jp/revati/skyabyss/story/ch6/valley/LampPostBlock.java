@@ -52,7 +52,7 @@ public class LampPostBlock extends Block {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && level instanceof ServerLevel sl && player instanceof ServerPlayer sp) {
             if (!StarLampItem.carries(sp)) {
-                jp.revati.skyabyss.notice.Notice.narrate(sp, "message.skyabyss.moon.lamp_post.need_lamp");
+                jp.revati.skyabyss.notice.Notice.hint(sp, "message.skyabyss.moon.lamp_post.need_lamp");
                 return InteractionResult.SUCCESS;
             }
             light(sl, pos, sp.getUUID());
