@@ -120,41 +120,49 @@ public final class Circuits {
     }
 
     // ---------------------------------------------------------------- 案内人の会話から
+    // 町の案内人は、その土地の野営地の場所を教える (巡り路は野営地から。CircuitCamps)
     public static void offer(ServerPlayer p) {
         SiteData.Entry town = townHere(p);
-        if (town == null) {
+        CircuitCamps.Camp camp = town == null ? null : CircuitCamps.byRegion(regionOfTown(town.index));
+        if (camp == null) {
             Notice.hint(p, "message.skyabyss.circuit.no_town");
             return;
         }
-        if (runOf(p) != null) {
-            Notice.hint(p, "message.skyabyss.circuit.busy");
-            return;
-        }
-        String r = ContinentTowns.region(town.index);
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.head", Component.translatable("map.skyabyss.town." + r))
-                .withStyle(ChatFormatting.GOLD));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.body").withStyle(ChatFormatting.GRAY));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.left", Math.max(0, DAILY - runsToday(p)), DAILY)
-                .withStyle(ChatFormatting.GRAY));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.start").withStyle(Style.EMPTY.withColor(ChatFormatting.GREEN)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/skyabyss_circuit start"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("message.skyabyss.circuit.offer.hover")))));
+        tellCamp(p, camp);
+    }
+
+    // 野営地の向きと道のり (今いる所から)
+    static void tellCamp(ServerPlayer p, CircuitCamps.Camp camp) {
+        double dx = camp.x() - p.getX();
+        double dz = camp.z() - p.getZ();
+        int dist = (int) Math.round(Math.hypot(dx, dz));
+        String[] dirs = {"south", "southwest", "west", "northwest", "north", "northeast", "east", "southeast"};
+        int i = Math.floorMod((int) Math.round(Math.toDegrees(Math.atan2(-dx, dz)) / 45.0), 8);
+        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.camp_where", Component.translatable("label.skyabyss.facility.circuit_camp_" + camp.id() + ".sub"),
+                Component.translatable("gui.skyabyss.dir." + dirs[i]), dist).withStyle(ChatFormatting.GOLD));
+        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.camp_how").withStyle(ChatFormatting.GRAY));
     }
 
     // 案内人の会話の「歩き出す」から: 始めて、今日の報いの残りを知らせる
     public static void startFromGuide(ServerPlayer p) {
-        if (startHere(p)) {
-            int left = Math.max(0, DAILY - runsToday(p));
-            Notice.hint(p, left > 0 ? "message.skyabyss.circuit.left_today" : "message.skyabyss.circuit.none_today", left, DAILY);
+        if (CircuitCamps.near(p.serverLevel(), p.blockPosition()) == null) {
+            offer(p);
+            return;
         }
+        startHere(p);
     }
 
     static boolean startHere(ServerPlayer p) {
-        SiteData.Entry town = townHere(p);
-        if (town == null) {
-            Notice.hint(p, "message.skyabyss.circuit.no_town");
+        CircuitCamps.Camp camp = CircuitCamps.near(p.serverLevel(), p.blockPosition());
+        if (camp == null) {
+            Notice.hint(p, "message.skyabyss.circuit.no_camp");
             return false;
         }
+        return startAtCamp(p, camp);
+    }
+
+    // 野営地から歩き出す (近くの組の仲間も一緒)。今日の報いの残りを知らせる
+    public static boolean startAtCamp(ServerPlayer p, CircuitCamps.Camp camp) {
         if (runOf(p) != null) {
             Notice.hint(p, "message.skyabyss.circuit.busy");
             return false;
@@ -166,7 +174,9 @@ public final class Circuits {
                 members.add(m);
             }
         }
-        start(p.server, members, regionOfTown(town.index), p.blockPosition());
+        start(p.server, members, camp.region(), p.blockPosition());
+        int left = Math.max(0, DAILY - runsToday(p));
+        Notice.hint(p, left > 0 ? "message.skyabyss.circuit.left_today" : "message.skyabyss.circuit.none_today", left, DAILY);
         return true;
     }
 
@@ -191,6 +201,8 @@ public final class Circuits {
 
     public static void finish(MinecraftServer server, CircuitRun run) {
         ACTIVE.remove(run);
+        // 杭と、課題で湧いた敵を片づける (前は終わったあとも杭と体力の帯が残った)
+        cleanup(server.overworld(), run);
         for (UUID id : run.members) {
             BY_PLAYER.remove(id, run);
             ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -217,6 +229,7 @@ public final class Circuits {
         clearView(p);
         if (run.members.isEmpty()) {
             ACTIVE.remove(run);
+            cleanup(p.serverLevel(), run);
         }
     }
 
@@ -234,20 +247,30 @@ public final class Circuits {
         countRun(p);
         int coins = run.marks * COINS[Math.max(0, Math.min(COINS.length - 1, run.region))];
         Coins.give(p, coins);
-        int boxes = (run.marks + 1) / 2 + run.curses;
-        int band = jp.revati.skyabyss.item.wild.WildGearTypes.band(TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))]);
-        for (int i = 0; i < boxes; i++) {
-            int r = p.getRandom().nextInt(100);
-            GearTier tier = r < 60 ? GearTier.UNCOMMON : r < 92 ? GearTier.RARE : GearTier.EPIC;
-            giveBox(p, BoxKind.rarity(tier, band));
+        // 野営地の今の景品の表から、印 1 つにつき 1 回 (呪いの柱 1 本につき +1) 引く。引いた品は旅嚢へ、幕で一つずつ見せる
+        CircuitCamps.Camp camp = CircuitCamps.byRegion(run.region);
+        List<ItemStack> got = new ArrayList<>();
+        if (camp != null) {
+            List<net.minecraft.world.item.Item> pool = CircuitCamps.pool(camp, CircuitCamps.period());
+            int pulls = Math.min(CircuitCamps.MAX_PULLS, run.marks + run.curses);
+            for (int i = 0; i < pulls; i++) {
+                ItemStack s = CircuitCamps.pull(pool, p.getRandom());
+                if (!s.isEmpty()) {
+                    CircuitCamps.record(p, s);
+                    PouchRouting.giveOrDrop(p, s.copy());
+                    got.add(s);
+                }
+            }
         }
-        Notice.gain(p, "message.skyabyss.circuit.reward", coins, boxes);
-        String titan = run.region >= 0 && run.region < TITAN.length ? TITAN[run.region] : null;
-        if (run.marks >= 6 && titan != null) {
-            giveBox(p, BoxKind.titan(titan));
-            Notice.gain(p, "message.skyabyss.circuit.reward_titan");
+        Notice.gain(p, "message.skyabyss.circuit.reward", coins, got.size());
+        if (!(p instanceof FakePlayer) && p.connection != null) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new CircuitCamps.Reward(camp == null ? "" : camp.id(), run.marks, coins, got));
         }
+        LAST_PULLS.put(p.getUUID(), got.size());
     }
+
+    // 自己テスト用: 最後の報いで引いた数
+    static final java.util.Map<UUID, Integer> LAST_PULLS = new java.util.HashMap<>();
 
     static void giveBox(ServerPlayer p, @Nullable BoxKind kind) {
         var item = kind == null ? null : LootBoxSetup.item(kind);
@@ -617,6 +640,17 @@ public final class Circuits {
         }
         run.stake = stake.getUUID();
         return stake;
+    }
+
+    static void cleanup(ServerLevel level, CircuitRun run) {
+        removeStake(level, run);
+        for (UUID id : run.mobs) {
+            Entity e = level.getEntity(id);
+            if (e != null && e.isAlive()) {
+                e.discard();
+            }
+        }
+        run.mobs.clear();
     }
 
     static void removeStake(ServerLevel level, CircuitRun run) {

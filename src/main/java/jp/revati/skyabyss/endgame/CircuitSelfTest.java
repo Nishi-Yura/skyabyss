@@ -199,6 +199,8 @@ public final class CircuitSelfTest {
             // 紫の柱: 選ぶと呪いが重なり、敵の体力と攻撃が上がる (巡り路の終わりまで)
             CircuitRun.Offer o0 = run.offers.get(0);
             run.offers.set(0, new CircuitRun.Offer(o0.kind(), o0.spot(), o0.place(), o0.spot2(), o0.place2(), CircuitRun.Bonus.CURSE, o0.poi(), o0.poi2()));
+            // 前の柱を選んだときに紫が出ていれば呪いが重なっているので、ここから数える
+            run.curses = 0;
             Circuits.adopt(level, run, 0);
             net.minecraft.world.entity.Mob cursed = net.minecraft.world.entity.EntityType.ZOMBIE.create(level);
             if (cursed != null) {
@@ -219,6 +221,8 @@ public final class CircuitSelfTest {
             check(f, Circuits.runOf(p) == null, "a finished circuit still holds its walker");
             check(f, Coins.count(p) - before == 3 * Circuits.COINS[ContinentMap.WHALE], "circuit coins are wrong: " + (Coins.count(p) - before));
             check(f, Circuits.runsToday(p) == 1, "the circuit reward was not counted for today");
+            // 野営地の景品の表から、印 1 つにつき 1 回引く (CircuitCamps)
+            check(f, Circuits.LAST_PULLS.getOrDefault(p.getUUID(), -1) == 3, "the reward did not pull once per mark (" + Circuits.LAST_PULLS.get(p.getUUID()) + ")");
             check(f, RegionPoints.week(p, ContinentMap.WHALE) == 3 && RegionPoints.fame(p, ContinentMap.WHALE) == 3, "circuit marks did not count as region points");
 
             // 一日 3 回まで

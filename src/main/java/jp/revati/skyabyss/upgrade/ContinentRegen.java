@@ -47,8 +47,9 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 新しい世界 (地上のチャンクがまだない) は、今の版を書くだけ。大陸でない世界 (人が建てた物がありうる) は何もしない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ContinentRegen {
-    // 大陸の中身の版。1 = 2026-11-03 (地形の起伏・段丘・岩の露頭・池、祠を道から離す、鯨見の道を門で止める)
-    public static final int VERSION = 1;
+    // 大陸の中身の版。1 = 2026-11-03 (地形の起伏・段丘・岩の露頭・池、祠を道から離す、鯨見の道を門で止める)、
+    // 2 = 2026-11-03 夜 (祠の参道を丘の中のトンネルにしない。切り通しにする)
+    public static final int VERSION = 2;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
@@ -117,6 +118,7 @@ public final class ContinentRegen {
     static void onAboutToStart(ServerAboutToStartEvent event) {
         MinecraftServer server = event.getServer();
         regenFrom = -1;
+        LOADED.clear();
         SHRINES.clear();
         GRAVES.clear();
         if (!continent(server)) {
@@ -289,7 +291,12 @@ public final class ContinentRegen {
             return;
         }
         var tag = p.getPersistentData();
-        if (tag.getInt(PLAYER_KEY) >= VERSION) {
+        boolean first = tag.getInt(PLAYER_KEY) < VERSION;
+        // 版が上がってから初めて入った人と、この起動で作り直した世界に初めて入った人: まわりの地形と建物が揃うまで読み込み画面 (RegenLoading)
+        if (continent(p.server) && (first || regenerated() && LOADED.add(p.getUUID()))) {
+            RegenLoading.begin(p);
+        }
+        if (!first) {
             return;
         }
         tag.putInt(PLAYER_KEY, VERSION);
@@ -298,6 +305,9 @@ public final class ContinentRegen {
             unbury(p);
         }
     }
+
+    // この起動で読み込み画面を出した人 (作り直した起動のあいだに、二度は出さない)
+    private static final Set<UUID> LOADED = new HashSet<>();
 
     // 地面や壁の中にいたら、上の、足と頭が空いた所へ出す (最大 64 上まで)
     static void unbury(ServerPlayer p) {

@@ -208,6 +208,13 @@ public final class GuildWeek extends SavedData {
         return honor;
     }
 
+    // 開発・撮影: 土地の旗を今すぐ組合に持たせる
+    public void setFlagForTest(int region, String guildId, String name) {
+        flags.put(region, guildId);
+        names.put(guildId, name);
+        setDirty();
+    }
+
     // その人の組合が、その土地の旗を持っているか
     public static boolean holdsFlag(ServerPlayer p, int region) {
         GuildData.Guild g = Guilds.of(p);

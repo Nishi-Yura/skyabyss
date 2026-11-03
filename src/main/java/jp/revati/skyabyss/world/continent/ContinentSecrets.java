@@ -111,9 +111,9 @@ public final class ContinentSecrets {
             return false;
         }
         persisted(p).putIntArray(FOUND_TAG, found.stream().mapToInt(Integer::intValue).sorted().toArray());
-        Notice.place(p, Component.translatable("secret.skyabyss." + s.kind()),
-                Component.translatable("message.skyabyss.secret.found", found.size(), all().size()));
-        Notice.narrate(p, "secret.skyabyss." + s.region() + "." + s.kind());
+        // 言い伝えは場所の札の副題に (語りの一行は画面に出さないので)。数は経験値の札に
+        Notice.place(p, Component.translatable("secret.skyabyss." + s.kind()), Component.translatable("secret.skyabyss." + s.region() + "." + s.kind()));
+        Notice.gain(p, "message.skyabyss.secret.found", found.size(), all().size());
         int region = ContinentMap.get().region(s.x(), s.z());
         jp.revati.skyabyss.rpg.Growth.addXp(p, 2 * ContinentPois.DISCOVER_XP[Math.max(0, Math.min(ContinentPois.DISCOVER_XP.length - 1, region))],
                 "growth.skyabyss.reason.secret");

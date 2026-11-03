@@ -156,6 +156,11 @@ public final class NoticeClient {
                 return;
             }
         }
+        // 語り (画面下の水色の一行) は画面に出さない。知らせの記録 (NoticeLogScreen) とチャットの設定には残る
+        // (2026-11-03 の声「画面下に出る水色のメッセージ、正直いらない。ごちゃごちゃする」)
+        if (kind == Notice.Kind.NARRATE) {
+            return;
+        }
         if (kind == Notice.Kind.HINT && HINT_COUNT.merge(key, 1, Integer::sum) > HINT_MAX) {
             return;
         }

@@ -1,0 +1,83 @@
+# 2026-11-03 夜: 巡り路の野営地 (endgame/CircuitCamps)・報いの幕・地図の旗と野営地の印・祠の参道 (切り通し)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/lootrun_camps.txt -PshotsName=lootrun_camps
+world camp_check continent
+size 1600 900
+timeout 2400
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss level set @p 14
+cmd effect give @s resistance 1200 4 true
+cmd skyabyss circuit reset
+chat clear
+# 1. 鯨見の野営地 (南東から見る。近づくと建つ)
+cmd tp @s -104 150 -880 140 18
+waitchunks 400
+wait 260
+hud on
+shot c01_camp
+cmd tp @s -112 150 -884 150 50
+wait 120
+shot c02_camp_close
+# 2. 箱を押したときの画面 (今の景品・入れ替えまで・歩き出す)
+cmd skyabyss_camp view
+wait 30
+shot c03_camp_screen
+close
+# 3. 巡り路を歩く (印を 4 つ取って終える)
+cmd skyabyss circuit start 2
+wait 40
+shot c04_started
+cmd skyabyss circuit goto
+waitchunks 300
+wait 80
+shot c05_task
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 20
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 20
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 20
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit end
+# 4. 報いの幕 (箱が揺れて一つずつ出る)
+wait 8
+shot c06_reward_start
+wait 40
+shot c07_reward_mid
+wait 60
+wait 20
+shot c08_reward_all
+close
+# 5. 地図: 組合の旗と野営地の印
+cmd guild create "天の旅団" TEN blue yellow
+cmd skyabyss_camp flag 2 "天の旅団"
+wait 20
+open travel_map
+wait 60
+shot c09_map
+close
+# 6. 鯨見の祠の参道 (建ててから、南の上から見下ろす)
+cmd skyroute shrine stone_whale
+waitchunks 400
+wait 200
+cmd gamemode spectator
+cmd tp @s -18 ~14 -772 160 28
+wait 80
+shot c10_shrine_path
+cmd tp @s -30 ~-6 -790 180 10
+wait 60
+shot c11_shrine_path_low

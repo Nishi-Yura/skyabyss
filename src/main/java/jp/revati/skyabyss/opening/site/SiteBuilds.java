@@ -73,6 +73,40 @@ public final class SiteBuilds {
         return QUEUE.size();
     }
 
+    // at から radius の中に、まだ建てている物の数 (作り直しの読み込み画面が待つ。upgrade/RegenLoading)
+    public static synchronized int pendingNear(BlockPos at, double radius) {
+        int n = 0;
+        for (SiteJob j : QUEUE) {
+            if (Math.hypot(j.entry.pos.getX() - at.getX(), j.entry.pos.getZ() - at.getZ()) <= radius) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // at から radius の中の物を、待ちの先頭へ (近くの人が待っている物から建てる)
+    public static synchronized void prioritizeNear(BlockPos at, double radius) {
+        List<SiteJob> near = new java.util.ArrayList<>();
+        for (SiteJob j : QUEUE) {
+            if (Math.hypot(j.entry.pos.getX() - at.getX(), j.entry.pos.getZ() - at.getZ()) <= radius) {
+                near.add(j);
+            }
+        }
+        // いま建てている先頭の物は動かさない (途中から別の物へ移らない)
+        SiteJob head = QUEUE.peek();
+        near.remove(head);
+        QUEUE.removeAll(near);
+        for (int i = near.size() - 1; i >= 0; i--) {
+            if (head != null) {
+                QUEUE.removeFirst();
+                QUEUE.addFirst(near.get(i));
+                QUEUE.addFirst(head);
+            } else {
+                QUEUE.addFirst(near.get(i));
+            }
+        }
+    }
+
     // ほかの仕組み (大陸の見どころ) が建てる物を足す。同じ場所をもう待っていれば足さない
     public static synchronized boolean enqueue(SiteJob job) {
         for (SiteJob j : QUEUE) {

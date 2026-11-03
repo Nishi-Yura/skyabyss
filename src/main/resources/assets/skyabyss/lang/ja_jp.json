@@ -2627,5 +2627,13 @@
   "message.skyabyss.beast.appear.ember_mole": "灰の地面が、ぽこりと盛り上がった",
   "message.skyabyss.beast.escaped": "%s に逃げられた。今日はもう姿を見せないだろう",
   "message.skyabyss.beast.caught": "%s を捕まえた。鐘銭 %s と封の箱",
-  "growth.skyabyss.reason.beast": "逃げる獣"
+  "growth.skyabyss.reason.beast": "逃げる獣",
+  "gui.skyabyss.regen.title": "大陸を新しい版に作り直しています",
+  "gui.skyabyss.regen.sub": "地形と建物を読み込んでいます。少しお待ちください",
+  "gui.skyabyss.regen.land": "まわりの地形 %s%%",
+  "gui.skyabyss.regen.builds": "建物を建てています（残り %s）",
+  "map.skyabyss.territory": "%s の旗: %s",
+  "map.skyabyss.territory.short": "旗: %s",
+  "map.skyabyss.territory.how": "今週の土地の点が一番の組合が、来週この旗を持つ（店の値引きと週の品）",
+  "map.skyabyss.lootcamp": "巡り路の野営地（%s）"
 }

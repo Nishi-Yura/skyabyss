@@ -2627,5 +2627,13 @@
   "message.skyabyss.beast.appear.ember_mole": "The ash ahead of you bulges up",
   "message.skyabyss.beast.escaped": "The %s got away. It won't show itself again today",
   "message.skyabyss.beast.caught": "You caught the %s. %s bell coins and a sealed box",
-  "growth.skyabyss.reason.beast": "Rare beast"
+  "growth.skyabyss.reason.beast": "Rare beast",
+  "gui.skyabyss.regen.title": "Rebuilding the continent for the new version",
+  "gui.skyabyss.regen.sub": "Loading the land and its buildings. Please wait a moment",
+  "gui.skyabyss.regen.land": "Land around you %s%%",
+  "gui.skyabyss.regen.builds": "Raising buildings (%s left)",
+  "map.skyabyss.territory": "Flag of %s: %s",
+  "map.skyabyss.territory.short": "Flag: %s",
+  "map.skyabyss.territory.how": "The guild with the most land points this week holds this flag next week (shop discount and weekly goods)",
+  "map.skyabyss.lootcamp": "Circuit camp (%s)"
 }
