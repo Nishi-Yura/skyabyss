@@ -287,12 +287,21 @@ public class DialogueScreen extends Screen {
 
     private ResourceLocation faceTexture() {
         String path = show.role().substring(show.role().indexOf(':') + 1);
-        // 土地の町の人 (はじまりの島の渡し守も) は自分の肖像。なければ体と同じく都の町の人の肖像を借りる (town/RegionFolk)
-        if (path.startsWith("guest_") && Minecraft.getInstance().getResourceManager()
-                .getResource(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png")).isEmpty()) {
-            path = "guest_" + jp.revati.skyabyss.town.RegionFolk.lookOf(path.substring(6));
+        // 土地の町の人 (はじまりの島の渡し守も) は自分の肖像。なければ体の肖像 (町の案内人 = town_guide)、それもなければ都の町の人の肖像を借りる (town/RegionFolk)
+        if (path.startsWith("guest_") && !hasFace(path)) {
+            String id = path.substring(6);
+            String body = "guest_" + jp.revati.skyabyss.town.RegionFolk.body(id);
+            path = hasFace(body) ? body : "guest_" + jp.revati.skyabyss.town.RegionFolk.lookOf(id);
         }
+        return face(path);
+    }
+
+    private ResourceLocation face(String path) {
         return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png");
+    }
+
+    private boolean hasFace(String path) {
+        return Minecraft.getInstance().getResourceManager().getResource(face(path)).isPresent();
     }
 
     // 親しさの印: 段階の数だけ明るい菱形 (よそよそしいときは赤紫の一つ)

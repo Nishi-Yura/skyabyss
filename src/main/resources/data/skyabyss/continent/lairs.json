@@ -4,6 +4,6 @@
   "tide_shell": {"x": 1730, "z": -250, "yaw": 180, "base": 52, "volume": "tide_shell"},
   "thunder_wing": {"x": -1180, "z": -500, "yaw": 51.3, "base": 200, "volume": "thunder_wing"},
   "ember": {"x": 492, "z": 1108, "yaw": 36.9, "base": 118, "volume": "ember_titan"},
-  "_comment_shrines": "shrines = the replay shrine of each titan (titan/shrine/TitanShrine): beside the road from the regional town toward the site, about 90 blocks out of town. The ground is levelled in generation (radius 7, blended over 16)",
-  "shrines": {"stone_whale": [-10, -815], "tide_shell": [1353, 50], "thunder_wing": [-1184, -239], "ember": [-203, 1143]}
+  "_comment_shrines": "shrines = the replay shrine of each titan (titan/shrine/TitanShrine): just north of the road from the regional town toward the site, 90-200 blocks out of town. The terrace (+-12) and the approach (x +-4, z 12..31, south) stay at least 2 blocks off the road edge and the approach ends a few blocks short of the road (2026-11-03: the old spots, 16 from the road, put the terrace corners and the torii on the road). The ground is levelled in generation (radius 7, blended over 16)",
+  "shrines": {"stone_whale": [-30, -815], "tide_shell": [1403, 114], "thunder_wing": [-1196, -293], "ember": [-145, 1149]}
 }

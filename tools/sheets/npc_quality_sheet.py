@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """NPC (人の形) の見た目の比べ表。入っているメッシュ (assets/lowpoly/<名>.json) を絵 (textures/lowpoly/<絵>.png) で描く。
-一人につき 3/4 前・横・後ろ・顔の接写の 4 枚。語り部を基準に並べて、作りの差を見る (docs/review/npc_quality_2026-10-23.md)。
+一人につき 3/4 前・横・後ろ・顔の接写の 4 枚。語り部を基準に並べて、作りの差を見る。
 
   python -I tools/sheets/npc_quality_sheet.py <出力.png> [メッシュ:絵:見出し ...]
   見出しの指定が無ければ、既定の一覧 (語り部・鯨追い・職人・係の人・町の人・生き残り) を描く。
@@ -28,14 +28,14 @@ ASSETS = "src/main/resources/assets/skyabyss"
 DEFAULT = [
     ("storyteller", "storyteller", "語り部 (基準)"),
     ("whale_chaser", "whale_chaser", "鯨追いイサナ"),
-    ("artisan", "artisan_ch1", "旅の職人 (一章)"),
-    ("attendant_a", "attendant_a_guild_clerk", "組合の書記"),
-    ("attendant_a", "attendant_a_smith", "鍛冶師"),
-    ("attendant_a", "attendant_a_innkeeper", "宿の女将"),
-    ("attendant_a", "attendant_a_survivor_bone", "灯り番ミオ"),
-    ("attendant_a", "attendant_a_abyss_porter", "荷運びロク"),
-    ("attendant_a", "guest_baker", "町の人 (パン屋)"),
-    ("attendant_a", "guest_child", "町の人 (子ども)"),
+    ("npc_artisan", "npc_artisan_ch1", "旅の職人 (一章)"),
+    ("npc_guild_clerk", "npc_guild_clerk", "組合の書記"),
+    ("npc_smith", "npc_smith", "鍛冶師"),
+    ("npc_innkeeper", "npc_innkeeper", "宿の女将"),
+    ("npc_survivor_bone", "npc_survivor_bone", "灯り番ミオ"),
+    ("npc_abyss_porter", "npc_abyss_porter", "荷運びロク"),
+    ("npc_guest_baker", "npc_guest_baker", "町の人 (パン屋)"),
+    ("npc_guest_child", "npc_guest_child", "町の人 (子ども)"),
 ]
 
 

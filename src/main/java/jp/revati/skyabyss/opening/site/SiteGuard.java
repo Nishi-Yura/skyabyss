@@ -43,7 +43,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 荒らしよけと、都の中の安全 (2026-10-21 の試遊: 「町の建築壊せちゃう」「いろんなプレイヤーがいるので荒らし対策も」「町ではプレイヤーは無敵、mod の敵も湧かない・入れない」)。
 //   都 (設計図 capital の範囲): ブロックを壊す・置く・バケツ・火打ち石・TNT・爆発・敵の持ち去り・畑の踏み荒らしを止める (空き区画はない)
 //   (借りた区画はそのギルドの人だけ、借りていない区画は誰でも)。中の人は傷を受けない (/kill と奈落は別)。敵は湧かず、入ったら 1 秒ごとの見回りで消える。
-//   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックは壊せない (まわりの自然の地面は掘れる。割れ殻の洞は地表の口だけ壊せる)。
+//   章の小要素 (割れ殻の洞・骨の坑など): 設計図で置いたブロックは壊せない (まわりの自然の地面は掘れる)。
 //   小要素の箱の中にはブロックを置けない・バケツ・火も使えない (あとから来た人の道をふさがない。2026-10-22 の二人の試遊)。
 //   OP のクリエイティブは除く
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -241,14 +241,9 @@ public final class SiteGuard {
         int rot = SiteFinder.rot(e.yaw);
         boolean mirror = SiteFinder.mirror(e.yaw);
         BlockPos origin = e.pos.below();
-        boolean cave = e.blueprint.equals("ch1_cleft_shell_cave");
         for (Blueprint.Cell c : bp.cells) {
             // 鉱石 (骨の坑の鉄の筋など。掘ってよい) は守らない
             if (c.state().isAir() || c.state().is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) {
-                continue;
-            }
-            // 割れ殻の洞: 地表の口 (門の柱と楣・口の低い壁。部品の z -1..3、地面より上) は壊せる
-            if (cave && c.z() <= 3 && c.y() >= -1) {
                 continue;
             }
             out.add(Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin).asLong());

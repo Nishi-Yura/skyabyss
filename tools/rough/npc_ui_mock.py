@@ -5,7 +5,7 @@
 GUI の 1 単位を 2 画素で描く (GUI 拡大率 2 相当)。
 
 実行 (リポジトリ直下):  python tools/rough/npc_ui_mock.py
-出力: docs/review/npc_roughs/ui_mock.png
+出力: docs/review/previews/npc_ui_mock.png
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 LANG = json.loads((ROOT / "src/main/resources/assets/skyabyss_npc/lang/ja_jp.json").read_text(encoding="utf-8"))
 FACES = ROOT / "src/main/resources/assets/skyabyss/textures/gui/npc/face"
-OUT = ROOT / "docs/review/npc_roughs/ui_mock.png"
+OUT = ROOT / "docs/review/previews/npc_ui_mock.png"
 S = 2  # GUI 1 単位 = 2 画素
 NO_START = "、。，．,.・：；:;？！?!」』）)】〉》ー〜…‥ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々"
 

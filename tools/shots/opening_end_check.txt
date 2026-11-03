@@ -1,0 +1,32 @@
+# 開幕の終わりにカメラが地面に埋まる件の確かめ (2026-11-03)。開幕の間の本人の位置と、終わりの絵
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/opening_end_check.txt -PshotsName=<まだ使っていない名前>
+world opening_end_check continent
+size 1280 720
+timeout 1500
+render 10
+guiscale 3
+hud off
+wait 40
+cmd data get entity @s Pos
+wait 200
+cmd data get entity @s Pos
+wait 200
+cmd data get entity @s Pos
+wait 200
+cmd data get entity @s Pos
+shot e01_31s
+wait 60
+cmd data get entity @s Pos
+shot e02_34s
+wait 20
+shot e03_35s
+wait 20
+shot e04_36s
+cmd data get entity @s Pos
+wait 20
+shot e05_37s
+wait 40
+shot e06_39s
+cmd data get entity @s Pos
+cmd data get entity @s Pose
+echo done

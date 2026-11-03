@@ -179,6 +179,27 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BellowsImp>> BELLOWS_IMP = ENTITIES.register("bellows_imp",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BellowsImp::new, MobCategory.MONSTER)
                     .sized(0.8f, 1.4f).clientTrackingRange(10).build(SkyAbyss.MODID + ":bellows_imp"));
+    // 逃げる獣 (world/continent/RareBeast。docs/design/44 の 7 章)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.world.continent.RareBeast>> BELL_HARE = ENTITIES.register("bell_hare",
+            () -> EntityType.Builder.<jp.revati.skyabyss.world.continent.RareBeast>of((type, level) -> new jp.revati.skyabyss.world.continent.RareBeast(type, level,
+                            jp.revati.skyabyss.world.continent.RareBeast.Kind.HARE), MobCategory.CREATURE)
+                    .sized(0.6f, 0.75f).clientTrackingRange(10).build(SkyAbyss.MODID + ":bell_hare"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.world.continent.RareBeast>> MOSS_ROLLER = ENTITIES.register("moss_roller",
+            () -> EntityType.Builder.<jp.revati.skyabyss.world.continent.RareBeast>of((type, level) -> new jp.revati.skyabyss.world.continent.RareBeast(type, level,
+                            jp.revati.skyabyss.world.continent.RareBeast.Kind.ROLLER), MobCategory.CREATURE)
+                    .sized(0.75f, 0.7f).clientTrackingRange(10).build(SkyAbyss.MODID + ":moss_roller"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.world.continent.RareBeast>> PEARL_OTTER = ENTITIES.register("pearl_otter",
+            () -> EntityType.Builder.<jp.revati.skyabyss.world.continent.RareBeast>of((type, level) -> new jp.revati.skyabyss.world.continent.RareBeast(type, level,
+                            jp.revati.skyabyss.world.continent.RareBeast.Kind.OTTER), MobCategory.CREATURE)
+                    .sized(0.6f, 0.65f).clientTrackingRange(10).build(SkyAbyss.MODID + ":pearl_otter"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.world.continent.RareBeast>> BOLT_WEASEL = ENTITIES.register("bolt_weasel",
+            () -> EntityType.Builder.<jp.revati.skyabyss.world.continent.RareBeast>of((type, level) -> new jp.revati.skyabyss.world.continent.RareBeast(type, level,
+                            jp.revati.skyabyss.world.continent.RareBeast.Kind.WEASEL), MobCategory.CREATURE)
+                    .sized(0.5f, 0.45f).clientTrackingRange(10).build(SkyAbyss.MODID + ":bolt_weasel"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.world.continent.RareBeast>> EMBER_MOLE = ENTITIES.register("ember_mole",
+            () -> EntityType.Builder.<jp.revati.skyabyss.world.continent.RareBeast>of((type, level) -> new jp.revati.skyabyss.world.continent.RareBeast(type, level,
+                            jp.revati.skyabyss.world.continent.RareBeast.Kind.MOLE), MobCategory.CREATURE)
+                    .sized(0.75f, 0.6f).clientTrackingRange(10).build(SkyAbyss.MODID + ":ember_mole"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.LavaSlug>> LAVA_SLUG = ENTITIES.register("lava_slug",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.LavaSlug::new, MobCategory.MONSTER)
                     .sized(1.0f, 0.7f).clientTrackingRange(10).build(SkyAbyss.MODID + ":lava_slug"));
@@ -251,6 +272,11 @@ public final class ModEntities {
         event.put(GEODE_GOLEM.get(), jp.revati.skyabyss.dungeon.mob.GeodeGolem.createAttributes().build());
         event.put(BELLOWS_IMP.get(), jp.revati.skyabyss.dungeon.mob.BellowsImp.createAttributes().build());
         event.put(LAVA_SLUG.get(), jp.revati.skyabyss.dungeon.mob.LavaSlug.createAttributes().build());
+        event.put(BELL_HARE.get(), jp.revati.skyabyss.world.continent.RareBeast.createAttributes().build());
+        event.put(MOSS_ROLLER.get(), jp.revati.skyabyss.world.continent.RareBeast.createAttributes().build());
+        event.put(PEARL_OTTER.get(), jp.revati.skyabyss.world.continent.RareBeast.createAttributes().build());
+        event.put(BOLT_WEASEL.get(), jp.revati.skyabyss.world.continent.RareBeast.createAttributes().build());
+        event.put(EMBER_MOLE.get(), jp.revati.skyabyss.world.continent.RareBeast.createAttributes().build());
         event.put(OX_SMITH.get(), jp.revati.skyabyss.dungeon.mob.OxSmith.createAttributes().build());
     }
 

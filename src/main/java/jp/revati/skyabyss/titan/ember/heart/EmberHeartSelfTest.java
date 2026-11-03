@@ -824,7 +824,8 @@ public final class EmberHeartSelfTest {
         EmberHeartArena.restoreAll(back);
         heart.forceAction(EmberHeart.Action.FLOOR);
         tickHeart(heart, 2);
-        check(EmberHeartArena.sinkingCount() == 1, "the floor move did not crack a section", f);
+        check(EmberHeartArena.sinkingCount() == 1, "the floor move did not crack a section (sinking " + EmberHeartArena.sinkingCount() + ", bound " + heart.isBound()
+                + ", phase " + heart.getPhase() + ")", f);
         int crackedAt = 0;
         int sunkAt = -1;
         int maxAtOnce = 0;

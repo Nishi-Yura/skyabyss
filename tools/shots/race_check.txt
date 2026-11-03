@@ -1,0 +1,29 @@
+# 2026-11-03: 早駆けの道 (world/continent/RaceCourses)。都の北門の外の標と、走り出したときの光の輪と時間の帯
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/race_check.txt -PshotsName=race_check
+world race_check continent
+size 1600 900
+timeout 1800
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+chat clear
+# 標の北西から見る (創造で上から落ちて立つ。近づくと標が建つ)
+cmd tp @s -456 140 -106 -125 15
+waitchunks 400
+wait 240
+hud on
+shot r01_post
+# 走り出す (乗り物なし。合図の 3・2・1)
+cmd skyabyss_race go whale_road
+wait 25
+shot r02_count
+wait 60
+shot r03_go_rings
+wait 40
+shot r04_running

@@ -102,6 +102,9 @@ final class ContinentScatter {
         RandomSource r = RandomSource.create(chunk.getPos().toLong() * 0x9E3779B97F4A7C15L + 0x5CA77E2L);
         List<int[]> roads = ContinentChunkGenerator.roadSegments(x0, z0);
         int biome = map.biome(x0 + 8, z0 + 8);
+        // 地形の見どころ (2026-11-03 の声「もっと地形に作り込みが欲しい。移動の楽しみが減る」): 岩の露頭・岩のアーチ・池・花のかたまり。
+        // 道の縁から離して置く (spot)。下の switch の小物 (岩・茂み・倒木) より先に置く
+        landmarks(level, r, roads, x0, z0, biome);
         switch (biome) {
             case ContinentBiomes.PLAINS, ContinentBiomes.MEADOW, ContinentBiomes.SAVANNA -> {
                 if (r.nextFloat() < 0.16f) {
@@ -281,6 +284,7 @@ final class ContinentScatter {
 
     static boolean solidGround(BlockState s) {
         return s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.DIRT) || s.is(Blocks.COARSE_DIRT) || s.is(Blocks.PODZOL) || s.is(Blocks.STONE) || s.is(Blocks.ANDESITE)
+                || s.is(Blocks.MOSS_BLOCK) || s.is(Blocks.TUFF) || s.is(Blocks.DIORITE) || s.is(Blocks.COBBLESTONE) || s.is(Blocks.MOSSY_COBBLESTONE)
                 || s.is(Blocks.GRAVEL) || s.is(Blocks.SAND) || s.is(Blocks.RED_SAND) || s.is(Blocks.TERRACOTTA) || s.is(Blocks.MUD)
                 || s.is(Blocks.BASALT) || s.is(Blocks.BLACKSTONE) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.CALCITE)
                 || s.getBlock().getDescriptionId().endsWith("terracotta");
@@ -460,6 +464,359 @@ final class ContinentScatter {
                 }
                 put(level, p, (r.nextFloat() < 0.5f ? Blocks.MOSSY_STONE_BRICKS : r.nextBoolean() ? Blocks.CRACKED_STONE_BRICKS : Blocks.COBBLESTONE).defaultBlockState());
             }
+        }
+    }
+
+    // ---------------------------------------------------------------- 地形の見どころ (2026-11-03)
+    // 岩の材: 層の三つ (下から順に繰り返す)・上の面・根元
+    record Rock(Block a, Block b, Block c, Block top, Block base) {
+    }
+
+    static final Rock HILL_ROCK = new Rock(Blocks.STONE, Blocks.ANDESITE, Blocks.TUFF, Blocks.GRASS_BLOCK, Blocks.MOSSY_COBBLESTONE);
+    static final Rock WOOD_ROCK = new Rock(Blocks.STONE, Blocks.MOSSY_COBBLESTONE, Blocks.ANDESITE, Blocks.MOSS_BLOCK, Blocks.MOSSY_COBBLESTONE);
+    static final Rock SAVANNA_ROCK = new Rock(Blocks.GRANITE, Blocks.ANDESITE, Blocks.GRANITE, Blocks.COARSE_DIRT, Blocks.ANDESITE);
+    static final Rock MESA_ROCK = new Rock(Blocks.ORANGE_TERRACOTTA, Blocks.TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.RED_SAND, Blocks.TERRACOTTA);
+    static final Rock SAND_ROCK = new Rock(Blocks.SANDSTONE, Blocks.TERRACOTTA, Blocks.SANDSTONE, Blocks.SAND, Blocks.SANDSTONE);
+    static final Rock ASH_ROCK = new Rock(Blocks.BASALT, Blocks.BLACKSTONE, Blocks.TUFF, Blocks.BLACKSTONE, Blocks.BASALT);
+    static final Rock PEAK_ROCK = new Rock(Blocks.STONE, Blocks.ANDESITE, Blocks.CALCITE, Blocks.STONE, Blocks.ANDESITE);
+
+    // 土地ごとの見どころの出やすさ (チャンクごと)。岩の露頭はどこでも、アーチは岩がちな土地、池は湿った野、花のかたまりは野と花の林
+    static void landmarks(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, int biome) {
+        switch (biome) {
+            case ContinentBiomes.PLAINS, ContinentBiomes.MEADOW -> {
+                chance(r, 0.05f, () -> crag(level, r, roads, x0, z0, HILL_ROCK));
+                chance(r, 0.04f, () -> pond(level, r, roads, x0, z0, false));
+                chance(r, biome == ContinentBiomes.MEADOW ? 0.32f : 0.18f, () -> flowers(level, r, roads, x0, z0));
+                chance(r, 0.005f, () -> arch(level, r, roads, x0, z0, HILL_ROCK));
+            }
+            case ContinentBiomes.SAVANNA -> {
+                chance(r, 0.06f, () -> crag(level, r, roads, x0, z0, SAVANNA_ROCK));
+                chance(r, 0.01f, () -> arch(level, r, roads, x0, z0, SAVANNA_ROCK));
+            }
+            case ContinentBiomes.FOREST, ContinentBiomes.BIRCH_FOREST, ContinentBiomes.FLOWER_FOREST -> {
+                chance(r, 0.07f, () -> crag(level, r, roads, x0, z0, WOOD_ROCK));
+                chance(r, 0.04f, () -> pond(level, r, roads, x0, z0, false));
+                if (biome == ContinentBiomes.FLOWER_FOREST) {
+                    chance(r, 0.25f, () -> flowers(level, r, roads, x0, z0));
+                }
+            }
+            case ContinentBiomes.TAIGA, ContinentBiomes.PINE_TAIGA -> {
+                chance(r, 0.08f, () -> crag(level, r, roads, x0, z0, WOOD_ROCK));
+                chance(r, 0.025f, () -> pond(level, r, roads, x0, z0, false));
+            }
+            case ContinentBiomes.WINDSWEPT_HILLS, ContinentBiomes.GRAVELLY_HILLS -> {
+                chance(r, 0.12f, () -> crag(level, r, roads, x0, z0, HILL_ROCK));
+                chance(r, 0.015f, () -> arch(level, r, roads, x0, z0, HILL_ROCK));
+            }
+            case ContinentBiomes.STONY_PEAKS, ContinentBiomes.SNOWY_SLOPES -> chance(r, 0.08f, () -> crag(level, r, roads, x0, z0, PEAK_ROCK));
+            case ContinentBiomes.BADLANDS, ContinentBiomes.WOODED_BADLANDS -> {
+                chance(r, 0.06f, () -> crag(level, r, roads, x0, z0, MESA_ROCK));
+                chance(r, 0.03f, () -> arch(level, r, roads, x0, z0, MESA_ROCK));
+            }
+            case ContinentBiomes.ERODED_BADLANDS -> {
+                chance(r, 0.07f, () -> crag(level, r, roads, x0, z0, ASH_ROCK));
+                chance(r, 0.02f, () -> arch(level, r, roads, x0, z0, ASH_ROCK));
+            }
+            case ContinentBiomes.DESERT -> {
+                chance(r, 0.04f, () -> crag(level, r, roads, x0, z0, SAND_ROCK));
+                chance(r, 0.02f, () -> arch(level, r, roads, x0, z0, SAND_ROCK));
+            }
+            case ContinentBiomes.SWAMP -> chance(r, 0.15f, () -> pond(level, r, roads, x0, z0, true));
+            default -> {
+            }
+        }
+    }
+
+    // 乱数は必ず一つ引く (出る出ないで後の飾りの並びが変わらないように)
+    private static void chance(RandomSource r, float p, Runnable place) {
+        if (r.nextFloat() < p) {
+            place.run();
+        }
+    }
+
+    // 層の材: 2〜3 段ごとに a・b・c を繰り返す (場所で層の高さが少しずれる)
+    static Block layer(Rock rock, int x, int y, int z) {
+        int k = Math.floorDiv(y + (int) Math.floor(2.0 * ContinentMap.value(x / 9.0, z / 9.0, 0x4C2F)), 2 + Math.floorMod(x * 31 + z * 17, 2));
+        return switch (Math.floorMod(k, 3)) {
+            case 0 -> rock.a();
+            case 1 -> rock.b();
+            default -> rock.c();
+        };
+    }
+
+    // 形 (相対の箱の中で、置く所に true) を、層の材で置く。てっぺん (形の一番上から 2 段以内) の上が空く面は上の面の材 (草・苔・砂)、
+    // それより下の段の上面は岩のまま、ところどころ苔の敷物 (横の段に草の塊が点々と付くと継ぎはぎに見えた)。地面のすぐ上の縁は根元の材。
+    // 地面より上は空き (草花・雪) だけを置き換え、地面より下 (dy < 0) は土を置き換えて根を埋める
+    static void build(WorldGenLevel level, RandomSource r, BlockPos c, boolean[][][] shape, int ox, int oy, int oz, Rock rock) {
+        int sx = shape.length;
+        int sy = shape[0].length;
+        int sz = shape[0][0].length;
+        int peak = 0;
+        for (int i = 0; i < sx; i++) {
+            for (int k = 0; k < sz; k++) {
+                for (int j = sy - 1; j > peak; j--) {
+                    if (shape[i][j][k]) {
+                        peak = j;
+                        break;
+                    }
+                }
+            }
+        }
+        boolean mossy = rock.top() == Blocks.GRASS_BLOCK || rock.top() == Blocks.MOSS_BLOCK;
+        for (int i = 0; i < sx; i++) {
+            for (int k = 0; k < sz; k++) {
+                for (int j = 0; j < sy; j++) {
+                    if (!shape[i][j][k]) {
+                        continue;
+                    }
+                    int dy = j - oy;
+                    BlockPos p = c.offset(i - ox, dy, k - oz);
+                    BlockState here = level.getBlockState(p);
+                    if (dy > 0 && !free(here)) {
+                        continue;
+                    }
+                    boolean openAbove = j + 1 >= sy || !shape[i][j + 1][k];
+                    Block b;
+                    if (openAbove && dy >= 1 && j >= peak - 2) {
+                        b = r.nextFloat() < 0.85f ? rock.top() : rock.base();
+                    } else if (dy >= 0 && dy <= 1 && r.nextFloat() < 0.6f) {
+                        b = rock.base();
+                    } else {
+                        b = layer(rock, p.getX(), p.getY(), p.getZ());
+                    }
+                    put(level, p, b.defaultBlockState());
+                    BlockPos up = p.above();
+                    if (!openAbove || dy < 1 || !level.getBlockState(up).isAir()) {
+                        continue;
+                    }
+                    // てっぺんに草やシダ、下の段の岩の上面に苔の敷物 (草と苔の土地の岩だけ)
+                    if ((b == Blocks.GRASS_BLOCK || b == Blocks.MOSS_BLOCK) && r.nextFloat() < 0.35f) {
+                        put(level, up, (r.nextFloat() < 0.4f ? Blocks.FERN : Blocks.SHORT_GRASS).defaultBlockState());
+                    } else if (mossy && j < peak - 2 && r.nextFloat() < 0.3f) {
+                        put(level, up, Blocks.MOSS_CARPET.defaultBlockState());
+                    }
+                }
+            }
+        }
+    }
+
+    // 岩の露頭: 平たい楕円の塊 2〜3 個を、ずらしながら積んだ幅 7〜10・高さ 4〜8 の岩のかたまり (細く高い柱は塔のように見えた)。
+    // 上の塊が下からはみ出して軒ができる。置き場から ±5 に収める (チャンクの外へ出さない)。根は 2 段埋める
+    static void crag(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, Rock rock) {
+        BlockPos c = spot(level, r, roads, x0, z0, 5);
+        if (c == null) {
+            return;
+        }
+        int n = 2 + r.nextInt(2);
+        double[][] blobs = new double[n][];
+        double bx = 0;
+        double by = 0.5;
+        double bz = 0;
+        double rx = 3.6 + r.nextDouble() * 1.2;
+        double rz = 3.0 + r.nextDouble() * 1.2;
+        double ry = 1.8 + r.nextDouble() * 1.2;
+        double peak = 0;
+        for (int i = 0; i < n; i++) {
+            blobs[i] = new double[] {bx, by, bz, rx, ry, rz};
+            peak = Math.max(peak, by + ry * 1.11);
+            bx = Math.max(-1.5, Math.min(1.5, bx + (r.nextDouble() - 0.5) * 2.4));
+            bz = Math.max(-1.5, Math.min(1.5, bz + (r.nextDouble() - 0.5) * 2.4));
+            by += ry * (0.75 + r.nextDouble() * 0.4);
+            rx *= 0.68 + r.nextDouble() * 0.2;
+            rz *= 0.68 + r.nextDouble() * 0.2;
+            ry *= 0.85 + r.nextDouble() * 0.2;
+        }
+        int top = (int) Math.ceil(peak);
+        int ox = 5;
+        int oy = 2;
+        boolean[][][] shape = new boolean[11][top + oy + 1][11];
+        int salt = r.nextInt();
+        for (int i = 0; i < 11; i++) {
+            for (int k = 0; k < 11; k++) {
+                for (int j = 0; j < shape[0].length; j++) {
+                    double dx = i - ox;
+                    double dy = j - oy;
+                    double dz = k - ox;
+                    double rough = 0.22 * ContinentMap.hash(c.getX() + i, c.getY() + j, (c.getZ() + k) ^ salt);
+                    for (double[] b : blobs) {
+                        double ex = (dx - b[0]) / b[3];
+                        double ey = (dy - b[1]) / b[4];
+                        double ez = (dz - b[2]) / b[5];
+                        // 根 (地面より下) は一番下の塊の広さのまま埋める
+                        if (dy < 0) {
+                            ey = 0;
+                        }
+                        if (ex * ex + ey * ey + ez * ez <= 1.0 + rough) {
+                            shape[i][j][k] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        build(level, r, c, shape, ox, oy, ox, rock);
+    }
+
+    // 岩のアーチ: 半ばの高さ 5〜8、脚の間 8〜11 の弧。脚は地面へ 3 段埋める。両脚の地面の高さが置き場と 2 以上違えば置かない
+    static void arch(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, Rock rock) {
+        BlockPos c = spot(level, r, roads, x0, z0, 6);
+        if (c == null) {
+            return;
+        }
+        boolean alongX = r.nextBoolean();
+        double span = 3.5 + r.nextDouble() * 0.7;
+        double rise = 5.0 + r.nextDouble() * 3.0;
+        double thick = 1.1 + r.nextDouble() * 0.3;
+        for (int s = -1; s <= 1; s += 2) {
+            int lx = c.getX() + (alongX ? (int) Math.round(s * span) : 0);
+            int lz = c.getZ() + (alongX ? 0 : (int) Math.round(s * span));
+            int ly = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, lx, lz) - 1;
+            if (Math.abs(ly - c.getY()) > 2) {
+                return;
+            }
+        }
+        int ox = 6;
+        int oy = 3;
+        int height = (int) Math.ceil(rise + thick) + 1;
+        boolean[][][] shape = new boolean[13][height + oy + 1][13];
+        for (int i = 0; i < 13; i++) {
+            for (int k = 0; k < 13; k++) {
+                double along = alongX ? i - ox : k - ox;
+                double across = alongX ? k - ox : i - ox;
+                if (Math.abs(across) > thick + 0.6) {
+                    continue;
+                }
+                for (int j = 0; j < shape[0].length; j++) {
+                    double dy = j - oy;
+                    boolean in = false;
+                    // 弧: 半楕円の線から thick 以内
+                    for (int a = 0; a <= 48 && !in; a++) {
+                        double t = Math.PI * a / 48.0;
+                        double px = -Math.cos(t) * span;
+                        double py = Math.sin(t) * rise;
+                        double w = thick * (1.0 + 0.35 * (1.0 - Math.sin(t)));
+                        if ((along - px) * (along - px) + (dy - py) * (dy - py) + across * across * 1.3 <= w * w) {
+                            in = true;
+                        }
+                    }
+                    // 脚の根 (地面より下)
+                    if (!in && dy < 0.5 && Math.abs(Math.abs(along) - span) <= thick + 0.4 && Math.abs(across) <= thick + 0.4) {
+                        in = true;
+                    }
+                    shape[i][j][k] = in;
+                }
+            }
+        }
+        build(level, r, c, shape, ox, oy, ox, rock);
+    }
+
+    // 池: 楕円 (半径 2.5〜5)、深さ 1〜2。縁より一段下に水面。底は砂・粘土・砂利。縁にサトウキビ、水に睡蓮の葉 (沼は多め・縁は泥)。
+    // 縁がまわりより低い (水があふれる) 所・木の根元には作らない
+    static void pond(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, boolean swamp) {
+        BlockPos c = spot(level, r, roads, x0, z0, 6);
+        if (c == null) {
+            return;
+        }
+        BlockState ground = level.getBlockState(c);
+        if (!(ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.PODZOL) || ground.is(Blocks.MOSS_BLOCK) || ground.is(Blocks.COARSE_DIRT) || ground.is(Blocks.DIRT))) {
+            return;
+        }
+        double rx = 2.5 + r.nextDouble() * 2.5;
+        double rz = 2.0 + r.nextDouble() * 2.5;
+        int y = c.getY();
+        if (y <= ContinentChunkGenerator.SEA_LEVEL + 1) {
+            return;
+        }
+        // 平らか (水の所は地面が y、そのまわり 2 升ほどは y 以上)
+        for (int dx = -6; dx <= 6; dx++) {
+            for (int dz = -6; dz <= 6; dz++) {
+                double d = pondShape(c, dx, dz, rx, rz);
+                if (d > 2.4) {
+                    continue;
+                }
+                int top = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, c.getX() + dx, c.getZ() + dz) - 1;
+                if (d <= 1.0 ? top != y : top < y) {
+                    return;
+                }
+            }
+        }
+        BlockState water = Blocks.WATER.defaultBlockState();
+        for (int dx = -6; dx <= 6; dx++) {
+            for (int dz = -6; dz <= 6; dz++) {
+                double d = pondShape(c, dx, dz, rx, rz);
+                BlockPos at = c.offset(dx, 0, dz);
+                if (d <= 1.0) {
+                    int depth = d < 0.35 ? 2 : 1;
+                    for (int k = 0; k < depth; k++) {
+                        put(level, at.below(k), water);
+                    }
+                    double h = ContinentMap.hash(at.getX(), at.getZ(), 0x3A9);
+                    put(level, at.below(depth), (swamp ? Blocks.MUD : h > 0.3 ? Blocks.CLAY : h < -0.4 ? Blocks.GRAVEL : Blocks.SAND).defaultBlockState());
+                    for (int up = 1; up <= 2; up++) {
+                        BlockState s = level.getBlockState(at.above(up));
+                        if (!s.isAir() && s.canBeReplaced() && s.getFluidState().isEmpty()) {
+                            put(level, at.above(up), Blocks.AIR.defaultBlockState());
+                        }
+                    }
+                    if (level.getBlockState(at.above()).isAir() && r.nextFloat() < (swamp ? 0.3f : 0.1f)) {
+                        put(level, at.above(), Blocks.LILY_PAD.defaultBlockState());
+                    }
+                } else if (d <= 1.45 && level.getBlockState(at).is(Blocks.GRASS_BLOCK)) {
+                    // 岸: 土の縁 (沼は泥) と、水に接する所にサトウキビ
+                    if (r.nextFloat() < 0.35f) {
+                        put(level, at, (swamp ? Blocks.MUD : r.nextBoolean() ? Blocks.SAND : Blocks.COARSE_DIRT).defaultBlockState());
+                    }
+                    boolean wet = false;
+                    for (Direction dir : Direction.Plane.HORIZONTAL) {
+                        if (level.getBlockState(at.relative(dir)).is(Blocks.WATER)) {
+                            wet = true;
+                        }
+                    }
+                    if (wet && !swamp && r.nextFloat() < 0.3f && free(level.getBlockState(at.above()))) {
+                        if (level.getBlockState(at).is(Blocks.COARSE_DIRT)) {
+                            put(level, at, Blocks.SAND.defaultBlockState());
+                        }
+                        int h = 1 + r.nextInt(3);
+                        for (int k = 1; k <= h && free(level.getBlockState(at.above(k))); k++) {
+                            put(level, at.above(k), Blocks.SUGAR_CANE.defaultBlockState());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 池の形 (1 以下が水)。縁を少し揺らす
+    private static double pondShape(BlockPos c, int dx, int dz, double rx, double rz) {
+        return (dx * dx) / (rx * rx) + (dz * dz) / (rz * rz) + 0.15 * ContinentMap.hash(c.getX() + dx, c.getZ() + dz, 0x60D);
+    }
+
+    // 花のかたまり: 一種類 (ときどき二種類) の花を、半径 3〜4 に 14〜28 本
+    static final Block[] FLOWERS = {Blocks.POPPY, Blocks.DANDELION, Blocks.CORNFLOWER, Blocks.OXEYE_DAISY, Blocks.ALLIUM, Blocks.AZURE_BLUET,
+            Blocks.RED_TULIP, Blocks.ORANGE_TULIP, Blocks.WHITE_TULIP, Blocks.PINK_TULIP, Blocks.LILY_OF_THE_VALLEY};
+
+    static void flowers(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0) {
+        BlockPos c = spot(level, r, roads, x0, z0, 4);
+        if (c == null || !level.getBlockState(c).is(Blocks.GRASS_BLOCK)) {
+            return;
+        }
+        Block main = FLOWERS[r.nextInt(FLOWERS.length)];
+        Block second = r.nextFloat() < 0.3f ? FLOWERS[r.nextInt(FLOWERS.length)] : main;
+        int n = 14 + r.nextInt(15);
+        for (int i = 0; i < n; i++) {
+            int x = c.getX() + Math.max(-4, Math.min(4, (int) Math.round(r.nextGaussian() * 1.7)));
+            int z = c.getZ() + Math.max(-4, Math.min(4, (int) Math.round(r.nextGaussian() * 1.7)));
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+            BlockPos p = new BlockPos(x, y, z);
+            if (!level.getBlockState(p.below()).is(Blocks.GRASS_BLOCK)) {
+                // 草が生えていたら、その草と置き換える
+                if (level.getBlockState(p.below()).is(Blocks.SHORT_GRASS) && level.getBlockState(p.below(2)).is(Blocks.GRASS_BLOCK)) {
+                    p = p.below();
+                } else {
+                    continue;
+                }
+            }
+            put(level, p, (r.nextFloat() < 0.75f ? main : second).defaultBlockState());
         }
     }
 }

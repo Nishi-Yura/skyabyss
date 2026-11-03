@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Pose;
@@ -53,6 +54,8 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     static final double FLY_SCALE = 2.4;
     static final int FLY_CEILING = 40;
     static final double FLAP = 0.32;
+    // 相乗り (2026-11-03 の案「相乗りの道」。38 の 7 章): 持ち主の後ろに同じパーティの人を一人。後ろの席は胴の幅 × TANDEM_BACK だけ後ろ
+    static final double TANDEM_BACK = 0.42;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Nullable
@@ -131,12 +134,49 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
 
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-        return new Vec3(0, look().seat * scale, 0);
+        Vec3 seat = new Vec3(0, look().seat * scale, 0);
+        if (getPassengers().indexOf(passenger) == 1) {
+            return seat.add(new Vec3(0, 0.04, -look().width * TANDEM_BACK * scale).yRot(-yBodyRot * Mth.DEG_TO_RAD));
+        }
+        return seat;
+    }
+
+    // 席は二つ (持ち主と、後ろに一人)
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return getPassengers().size() < 2;
+    }
+
+    // 操るのは前の席の持ち主だけ (持ち主はサーバーだけが知っている。手元では前の席の人)
+    @Nullable
+    @Override
+    public LivingEntity getControllingPassenger() {
+        LivingEntity driver = super.getControllingPassenger();
+        if (driver != null && !level().isClientSide && owner != null && !owner.equals(driver.getUUID())) {
+            return null;
+        }
+        return driver;
+    }
+
+    // 後ろに乗れるか: 持ち主が前に乗っていて、席が空いていて、同じパーティの人
+    boolean canRideBehind(ServerPlayer rider) {
+        return getPassengers().size() == 1 && getFirstPassenger() instanceof ServerPlayer driver && owner != null && owner.equals(driver.getUUID())
+                && driver != rider && jp.revati.skyabyss.party.Parties.sameParty(driver, rider);
+    }
+
+    // 前の席に持ち主がいなければ、後ろの人も降ろす (持ち主が降りた・抜けた)
+    void tidyRiders() {
+        if (isVehicle() && owner != null && !(getFirstPassenger() instanceof Player first && owner.equals(first.getUUID()))) {
+            ejectPassengers();
+        }
     }
 
     @Override
     public void tick() {
         super.tick();
+        if (!level().isClientSide) {
+            tidyRiders();
+        }
         if (level().isClientSide) {
             double dx = getX() - xo;
             double dz = getZ() - zo;
@@ -218,7 +258,24 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (player.isSecondaryUseActive() || isVehicle()) {
+        if (player.isSecondaryUseActive() || player.getVehicle() == this) {
+            return InteractionResult.PASS;
+        }
+        if (isVehicle()) {
+            // 相乗り: 持ち主が乗っていれば、同じパーティの人が後ろに乗る
+            if (level().isClientSide) {
+                return getPassengers().size() == 1 ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            }
+            if (player instanceof ServerPlayer sp && canRideBehind(sp)) {
+                sp.startRiding(this);
+                if (getFirstPassenger() instanceof ServerPlayer driver) {
+                    jp.revati.skyabyss.notice.Notice.hint(driver, "message.skyabyss.mount.tandem_on", sp.getDisplayName());
+                }
+                return InteractionResult.CONSUME;
+            }
+            if (player instanceof ServerPlayer sp) {
+                jp.revati.skyabyss.notice.Notice.hint(sp, "message.skyabyss.mount.tandem_party");
+            }
             return InteractionResult.PASS;
         }
         if (player.getUUID().equals(owner)) {

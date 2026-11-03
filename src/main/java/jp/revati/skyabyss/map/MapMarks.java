@@ -121,8 +121,9 @@ public final class MapMarks {
         }
     }
 
-    // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑などの印で、指すと名前。
-    // まだ見つけていない見どころは extra を "poi~:<種類>" にして、画面で薄く描く (ContinentPois.discovered)
+    // 天と淵の大陸の見どころ。見つけた所だけ出す (建ったものは建った位置)。碑などの印で、指すと名前。
+    // 前は行く前から全部出していたが、地図が印で埋まって見にくかった (2026-11-03 の声「見どころをマップに全部書いてるけど、そのせいでみにくい」)。
+    // 見つけていない所へは、頼みの目的の標 (ObjectiveMarker) が案内する
     static void poiMarks(ServerPlayer player, List<Spot> entries, List<Mark> out) {
         if (entries.stream().noneMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
             return;
@@ -140,8 +141,11 @@ public final class MapMarks {
             if (!poi.site()) {
                 continue;
             }
+            if (!found.contains(i)) {
+                continue;
+            }
             BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
-            out.add(new Mark(Kind.WAYMARK, "poi" + i, "", (found.contains(i) ? "poi:" : "poi~:") + poi.kind(), at.getX(), at.getZ(), false, 0));
+            out.add(new Mark(Kind.WAYMARK, "poi" + i, "", "poi:" + poi.kind(), at.getX(), at.getZ(), false, 0));
         }
     }
 

@@ -82,7 +82,7 @@ public final class MountSelfTest {
             p.getInventory().clearContent();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, fall immunity, save, shop session, whistle)");
+            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, two seats, owner steers), fall immunity, save, shop session, whistle)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST mount FAILED: {}", m));
         }
@@ -211,6 +211,38 @@ public final class MountSelfTest {
         }
     }
 
+    // 相乗り: 後ろに乗れるのは同じパーティの人だけ、席は二つ、操るのは持ち主、持ち主が降りると後ろも降りる
+    private static void tandem(List<String> f, ServerLevel level, FakePlayer p, MountEntity m) {
+        jp.revati.skyabyss.party.PartyData pd = jp.revati.skyabyss.party.PartyData.get(level.getServer());
+        FakePlayer q = new RidingPlayer(level, new GameProfile(UUID.randomUUID(), "mount_q"));
+        FakePlayer r = new RidingPlayer(level, new GameProfile(UUID.randomUUID(), "mount_r"));
+        q.setPos(p.position());
+        r.setPos(p.position());
+        jp.revati.skyabyss.party.PartyData.Party party = null;
+        try {
+            m.mobInteract(q, InteractionHand.MAIN_HAND);
+            check(f, q.getVehicle() == null, "tandem: a stranger climbed on behind");
+            party = pd.create(p.getUUID(), "mount_p");
+            pd.add(party, q.getUUID(), "mount_q");
+            pd.add(party, r.getUUID(), "mount_r");
+            m.mobInteract(q, InteractionHand.MAIN_HAND);
+            check(f, q.getVehicle() == m && m.getPassengers().size() == 2 && m.getControllingPassenger() == p, "tandem: a party member rides behind and the owner steers");
+            check(f, m.getPassengerRidingPosition(p).distanceTo(m.getPassengerRidingPosition(q)) > 0.3, "tandem: the second seat is not behind the first");
+            m.mobInteract(r, InteractionHand.MAIN_HAND);
+            check(f, r.getVehicle() == null && m.getPassengers().size() == 2, "tandem: a third rider got on");
+            p.stopRiding();
+            m.tidyRiders();
+            check(f, q.getVehicle() == null && !m.isVehicle(), "tandem: the passenger stayed on after the owner got off");
+            p.startRiding(m);
+        } finally {
+            q.stopRiding();
+            r.stopRiding();
+            if (party != null) {
+                pd.disband(party);
+            }
+        }
+    }
+
     private static void summon(List<String> f, ServerLevel level, FakePlayer p) {
         MountData d = MountService.data(p);
         d.choose(MountLook.WHALE_CALF);
@@ -236,6 +268,7 @@ public final class MountSelfTest {
         // 乗る (持ち主だけ)
         net.minecraft.world.InteractionResult ir = m.mobInteract(p, InteractionHand.MAIN_HAND);
         check(f, p.getVehicle() == m && m.getControllingPassenger() == p, "owner rides and steers");
+        tandem(f, level, p, m);
         p.stopRiding();
         // 一人一頭
         MountEntity again = MountService.summon(p);

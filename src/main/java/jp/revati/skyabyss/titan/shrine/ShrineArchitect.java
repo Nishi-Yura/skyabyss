@@ -117,6 +117,11 @@ final class ShrineArchitect {
             }
             cur = want;
             h[z - PATH_START] = cur;
+            // 大陸の道の手前で止める (参道の幅 ±6 のどこかが道の縁にかかる段の、一つ手前が終わり。2026-11-03 の声「まだ道の上に建造物が立つ」)
+            if (z + 1 <= PATH_MAX_END && z > FLAT_UNTIL && nearRoad(center.getX(), center.getZ() + z + 1)) {
+                end = z;
+                break;
+            }
             if (z >= PATH_MIN_END) {
                 int g = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.getX() + 7, center.getZ() + z) - 1 - top;
                 if (g == cur) {
@@ -126,6 +131,19 @@ final class ShrineArchitect {
             }
         }
         return new Plan(h, end);
+    }
+
+    // 参道の一列 (x ±6) のどこかが大陸の道 (縁を含む) にかかるか。大陸でない世界では道がない
+    static boolean nearRoad(int cx, int z) {
+        if (!jp.revati.skyabyss.world.continent.RoadClearance.live()) {
+            return false;
+        }
+        for (int dx = -6; dx <= 6; dx++) {
+            if (jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(cx + dx, z) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 整地 (台座の前に)
@@ -596,12 +614,17 @@ final class ShrineArchitect {
     // ---------------------------------------------------------------- 置く
     private static int apply(ServerLevel level, Blueprint b) {
         int count = 0;
+        boolean roads = jp.revati.skyabyss.world.continent.RoadClearance.live();
         for (Map.Entry<BlockPos, BlockState> e : b.map.entrySet()) {
             BlockPos p = e.getKey();
             int rx = p.getX() - b.origin.getX();
             int rz = p.getZ() - b.origin.getZ();
             int ry = p.getY() - b.origin.getY();
             if (inPedestal(rx, ry, rz) && ry >= 0 && ry <= 1) {
+                continue;
+            }
+            // 大陸の道の上には何も置かない (祠は道から離して置くが、古い世界の祠の場所や地形の違いで縁にかかったときの備え)
+            if (roads && jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(p.getX(), p.getZ()) != null) {
                 continue;
             }
             level.setBlock(p, e.getValue(), 2);

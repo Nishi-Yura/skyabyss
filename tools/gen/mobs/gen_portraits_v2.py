@@ -33,7 +33,6 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "tools/rough/lowpoly/npc2"))
 import gen_portraits as GP  # noqa: E402
 from gen_portraits import ell, poly, rrect, bez, stroke, taper  # noqa: E402
-import gen_attendant_portraits as GAP  # noqa: E402
 import kit as K  # noqa: E402
 import cast as C  # noqa: E402
 import cast_folk  # noqa: E402,F401  (土地の町の 8 人の選んだ案)
@@ -68,16 +67,12 @@ def file_stem(name):
     return "attendant_" + name
 
 
-# 背景の色 (前の肖像の表 bg と同じ。生き残り 5 人と荷運びは新しく)
-def _guest_bg():
-    try:
-        import gen_town_guests as GT
-        return {"guest_" + k: v["bg"] for k, v in GT.G.items()} if hasattr(GT, "G") else {}
-    except Exception:
-        return {}
-
-
-BG_EXTRA = {
+# 背景の色 (人ごと。表に無い人は青灰)
+BG = {
+    "guild_clerk": (176, 138, 58), "smith": (220, 110, 50), "tool_merchant": (170, 150, 90), "apothecary": (110, 170, 110),
+    "storage_keeper": (170, 100, 50), "innkeeper": (230, 150, 80), "perch_keeper": (120, 180, 200), "shrine_priest": (220, 90, 60),
+    "training_master": (90, 110, 180), "black_marketeer": (110, 70, 130), "gravekeeper": (120, 140, 130), "drunkard": (200, 110, 90),
+    "trade_keeper": (200, 170, 90), "guide": (120, 170, 210), "box_opener": (170, 60, 50), "tower_keeper": (150, 110, 210),
     "survivor_bone": (236, 170, 80),     # 灯り番ミオ: 角灯の琥珀
     "survivor_salt": (110, 180, 200),    # 測量士ハヤセ: 塩の青白
     "survivor_storm": (120, 150, 200),   # 薬師シズ: 嵐の青
@@ -101,11 +96,7 @@ BG_EXTRA = {
 
 
 def bg_color(name):
-    if name in BG_EXTRA:
-        return BG_EXTRA[name]
-    if name in GAP.R:
-        return GAP.R[name]["bg"]
-    return (120, 140, 170)
+    return BG.get(name, (120, 140, 170))
 
 
 def background(name):

@@ -40,6 +40,25 @@ public final class UpgradeSelfTest {
         if (WorldUpgrade.run(server) != 0) {
             f.add("world steps ran twice");
         }
+        // 大陸の作り直し (ContinentRegen): この世界は今の版を書いてある (新しい世界・作り直したあと)。版のファイルの読み書きと、チャンクの有無の見分け
+        if (ContinentRegen.continent(server) && ContinentRegen.savedVersion(ContinentRegen.root(server)) != ContinentRegen.VERSION) {
+            f.add("continent version file " + ContinentRegen.savedVersion(ContinentRegen.root(server)) + " != " + ContinentRegen.VERSION);
+        }
+        try {
+            java.nio.file.Path tmp = java.nio.file.Files.createTempDirectory("skyabyss_regen");
+            if (ContinentRegen.savedVersion(tmp) != 0 || ContinentRegen.hasChunks(tmp)) {
+                f.add("an empty world folder should be version 0 without chunks");
+            }
+            ContinentRegen.writeVersion(tmp, 7);
+            java.nio.file.Files.createDirectories(tmp.resolve("region"));
+            java.nio.file.Files.writeString(tmp.resolve("region/r.0.0.mca"), "x");
+            if (ContinentRegen.savedVersion(tmp) != 7 || !ContinentRegen.hasChunks(tmp)) {
+                f.add("the continent version file or the chunk check does not round-trip");
+            }
+            ContinentRegen.deleteTree(tmp);
+        } catch (java.io.IOException e) {
+            f.add("temp folder: " + e);
+        }
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-00000000a9e1"), "upgrade_a"));
         p.getPersistentData().remove(PlayerUpgrade.KEY);
         PlayerUpgrade.run(p);

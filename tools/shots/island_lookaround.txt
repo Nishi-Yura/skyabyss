@@ -1,0 +1,65 @@
+# はじまりの島を、新しく始めた人の目で見回す (2026-11-03 の声「始まりの島で、なぜか水色のピンたってる」の確かめ)。HUD を出したまま
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_lookaround.txt -PshotsName=<まだ使っていない名前>
+world island_lookaround continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 3
+hud on
+wait 900
+cmd skyabyss job choose warrior
+close
+wait 40
+cmd time set 5000
+cmd weather clear
+shot l00_camp
+cmd execute at @s run tp @s ~ ~ ~ 45 0
+wait 20
+shot l01_camp_sw
+cmd execute at @s run tp @s ~ ~ ~ 90 0
+wait 20
+shot l02_camp_w
+cmd execute at @s run tp @s ~ ~ ~ 135 0
+wait 20
+shot l03_camp_nw
+cmd execute at @s run tp @s ~ ~ ~ 180 0
+wait 20
+shot l04_camp_n
+cmd execute at @s run tp @s ~ ~ ~ 225 0
+wait 20
+shot l05_camp_ne
+cmd execute at @s run tp @s ~ ~ ~ 270 0
+wait 20
+shot l06_camp_e
+cmd execute at @s run tp @s ~ ~ ~ 315 0
+wait 20
+shot l07_camp_se
+cmd execute at @s run tp @s ~ ~ ~ 0 0
+wait 20
+shot l08_camp_s
+cmd gamemode creative
+cmd execute at @s run tp @s ~ ~40 ~ 270 40
+wait 60
+shot l09_camp_air_e
+cmd execute at @s run tp @s ~ ~ ~ 90 40
+wait 30
+shot l10_camp_air_w
+cmd spreadplayers -1832 1752 0 1 false @s
+waitchunks 300
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 270 0
+wait 20
+shot l11_prints_view_e
+cmd execute at @s run tp @s ~ ~ ~ 90 0
+wait 20
+shot l12_prints_view_w
+cmd spreadplayers -1702 1779 0 1 false @s
+waitchunks 300
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 270 0
+wait 20
+shot l13_gate_e
+cmd execute at @s run tp @s ~ ~ ~ 90 0
+wait 20
+shot l14_gate_w
+echo done

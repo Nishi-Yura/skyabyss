@@ -64,14 +64,15 @@ bash tools/dev/selftest_fresh.sh
 | --- | --- |
 | 世界のデータ（保存の中身・決まり・建て直しの印） | `upgrade/WorldUpgrade`。世界ごとに「データの版」（`data/skyabyss_world_version.dat`）を持ち、サーバーが始まったとき、それより新しい段を古い順に一度ずつ流す。新しい段は `CURRENT` を一つ上げて `STEPS` の終わりに足す。段は何度流しても同じ結果になるように書く。一つの段がこけても世界は開け、版は進めずに次に開いたときもう一度流す |
 | 人のデータ（持ち物・人の印） | `upgrade/PlayerUpgrade`。人の永続データ `skyabyss_data_version`（倒れても残す `util/LifeKeep`）。入ったときに流す。足し方は世界と同じ |
-| 建物（町・跡地） | 建った物は建て直さないのが基本。作りを変えた建物は、その仕組みの「作りの版」の印で建て直す（土地の町は `ContinentTowns.VERSION_MARK`。上げると、人が近づいたときに建て直す）。都は建て直さない |
+| 大陸の地上（地形・道・木・建物の置き場） | `upgrade/ContinentRegen`。大陸の地上は Mod が作る物だけ（人はブロックを置けず壊せない）なので、まるごと作り直せる。地形・道・建物の置き場所の決まりを変えたら `VERSION` を一つ上げる。前の版の世界を開くと、地上を読む前に地上のチャンクの保存（`region`・`entities`・`poi`）を `skyabyss_backup/overworld_v<前の版>/` へ移し（前の控えは消して一つだけ残す）、新しい世界と同じに作り直す。開いたあと、建て物の「建った」印を消して今の設計図と置き場で建て直す（野営地・都・町・島・船着き場・章の小要素・跡地の均し・見どころは置き場から決め直す・祠は今の場所に・沖の難破船）。巨神は居場所へ出し直し、地上の墓は印のブロックを置き直し、地面に埋まった人は上へ出す。進み（クエスト・持ち物・見つけた見どころ・伝承・巨神の進み・墓の中身）は保存のデータにあるのでそのまま。版の記録は世界のフォルダの `skyabyss/continent_version.txt`。大陸でない世界は作り直さない。作り直す前の姿を見るときは `SKYABYSS_NO_REGEN=1` |
+| 建物（町・跡地） | 大陸の地上を作り直さない小さな直しは、その仕組みの「作りの版」の印で建て直す（土地の町は `ContinentTowns.VERSION_MARK`。上げると、人が近づいたときに建て直す）。巨神の背・塔・深淵などの別の世界は、それぞれの作りの版で建て直す（巨神の背は `*BodyBuilder.buildVersion`、深淵の大縦穴は `AbyssBuild.VERSION`） |
 | 都の係の人の立ち位置・町の印 | 今の設計図の印から読む（`facility/Attendants.capitalSpots`・`town/TownGuests.marks`）。設計図の印が立てる床なら新しい位置、立てなければ建てたときの位置。あとから足した印（町のクエストの家など）は設計図から足す |
 | 品・ブロック・敵の ID | 消した ID は、世界を開くと持ち物からも消える（NeoForge が外す）。名前を替えるときは消さずに `DeferredRegister.addAlias(古い ID, 新しい ID)` で古い ID を新しい物へつなぐ |
 | チャンクが要る直し | 段では直す印だけ立て、人が近づいたとき各仕組みが直す（例: 島の峠の柵は `IslandTrail.clearOldGate`、厩舎の名札は `ShelterBuilder.keepLabels`） |
 
 - 新しい版で保存した世界を古い版で開くと（データの版が `CURRENT` より大きい）、記録に知らせを残し、管理者が入ると注意を出す。版は下げない。
 - 版の確かめ: `/skyabyss admin version`（Mod の版・世界と自分のデータの版・最後に開いた Mod の版）。
-- 版を上げる前に、前の版で遊んだ世界（`run/` の古い世界の写し）を新しい jar で開き、記録（`run/logs/latest.log`）の `World upgrade:` と `Player upgrade:` の行と、町・係の人・クエストの進みが残っていることを見る。
+- 版を上げる前に、前の版で遊んだ世界（`run/` の古い世界の写し）を新しい jar で開き、記録（`run/logs/latest.log`）の `World upgrade:` と `Player upgrade:` の行と、町・係の人・クエストの進みが残っていることを見る。大陸の地上を作り直す版では、`Continent regen:` の行と、都・町が建ち直ることも見る（`tools/shots/regen_check.txt`。撮影では場所の建てが止まっているので `SKYABYSS_OPENING_SITES=1` を付ける）。
 
 ## 6. 記録
 

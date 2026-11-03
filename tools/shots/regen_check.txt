@@ -1,0 +1,36 @@
+# 前の版の大陸の世界を今の版で開き、地上が作り直されるのを見る (upgrade/ContinentRegen。docs/release.md の 5)。
+# 前に run/shots/<名前>/saves/facility_labels へ古い世界を写しておく (この台本は既にある世界を開く)。
+# 作り直す前の姿は SKYABYSS_NO_REGEN=1 を付けて同じ台本を流す (見比べ)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/regen_check.txt -PshotsName=regen_after
+world facility_labels continent
+size 1600 900
+timeout 3600
+render 12
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode spectator
+hud off
+chat clear
+# 都 (作り直したら建て直す)
+cmd skyabyss dev opening at shelter 0 0 0 4 180 5
+waitchunks 600
+wait 600
+shot r01_capital_plaza
+# 都の南の野 (起伏)
+cmd tp @s -440 112 350 160 30
+waitchunks 400
+wait 100
+shot r02_plains_air
+# 鯨見の南の門 (都からの道が門で止まる。町は近づいて建つ)
+cmd tp @s -120 150 -650 180 55
+waitchunks 400
+wait 1500
+shot r03_whale_gate_air
+cmd skyabyss admin version
+wait 20
+echo done

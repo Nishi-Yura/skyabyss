@@ -251,7 +251,7 @@ public final class SiteJob {
                 || s.is(Blocks.MELON) || s.is(Blocks.SWEET_BERRY_BUSH) || s.is(Blocks.BROWN_MUSHROOM) || s.is(Blocks.RED_MUSHROOM)
                 || s.is(Blocks.BROWN_MUSHROOM_BLOCK) || s.is(Blocks.RED_MUSHROOM_BLOCK) || s.is(Blocks.MUSHROOM_STEM) || s.is(Blocks.MOSS_CARPET)
                 || s.is(Blocks.BIG_DRIPLEAF) || s.is(Blocks.SMALL_DRIPLEAF) || s.is(Blocks.COCOA) || s.is(Blocks.VINE) || s.is(Blocks.BEE_NEST)
-                || s.is(Blocks.AZALEA) || s.is(Blocks.FLOWERING_AZALEA);
+                || s.is(Blocks.AZALEA) || s.is(Blocks.FLOWERING_AZALEA) || s.is(Blocks.LILY_PAD);
     }
 
     // 自然の地面か (人が置いたのではない)

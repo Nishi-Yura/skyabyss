@@ -234,7 +234,7 @@ public final class Circuits {
         countRun(p);
         int coins = run.marks * COINS[Math.max(0, Math.min(COINS.length - 1, run.region))];
         Coins.give(p, coins);
-        int boxes = (run.marks + 1) / 2;
+        int boxes = (run.marks + 1) / 2 + run.curses;
         int band = jp.revati.skyabyss.item.wild.WildGearTypes.band(TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))]);
         for (int i = 0; i < boxes; i++) {
             int r = p.getRandom().nextInt(100);
@@ -267,7 +267,7 @@ public final class Circuits {
         run.ambushed = false;
         run.dropped = false;
         run.taskStart = level.getGameTime();
-        // 次の課題の柱を二本 (種類は違うもの。色は白 50・金 25・青 25、二本とも白にはしない)
+        // 次の課題の柱を二本 (種類は違うもの。色は白 45・金 22・青 22・紫 11、二本とも白にはしない)
         CircuitRun.Kind[] kinds = CircuitRun.Kind.values();
         CircuitRun.Kind k1 = kinds[level.random.nextInt(kinds.length)];
         CircuitRun.Kind k2 = kinds[(k1.ordinal() + 1 + level.random.nextInt(kinds.length - 1)) % kinds.length];
@@ -287,7 +287,7 @@ public final class Circuits {
 
     static CircuitRun.Bonus rollBonus(ServerLevel level) {
         int r = level.random.nextInt(100);
-        return r < 50 ? CircuitRun.Bonus.NONE : r < 75 ? CircuitRun.Bonus.DOUBLE : CircuitRun.Bonus.TIME;
+        return r < 45 ? CircuitRun.Bonus.NONE : r < 67 ? CircuitRun.Bonus.DOUBLE : r < 89 ? CircuitRun.Bonus.TIME : CircuitRun.Bonus.CURSE;
     }
 
     static CircuitRun.Offer offer(ServerLevel level, CircuitRun run, BlockPos from, CircuitRun.Kind kind, CircuitRun.Bonus bonus) {
@@ -314,6 +314,42 @@ public final class Circuits {
         run.bonus = o.bonus();
         run.phase = 0;
         run.taskStart = level.getGameTime();
+        if (o.bonus() == CircuitRun.Bonus.CURSE) {
+            run.curses++;
+            for (ServerPlayer p : online(level, run)) {
+                Notice.warn(p, "message.skyabyss.circuit.cursed", run.curses, Math.round(CURSE_STEP * 100 * run.curses));
+            }
+        }
+    }
+
+    // 呪い一つで、敵の体力と攻撃が 25% ずつ上がる (重なる)。終わりの封の箱は呪い一つにつき一つ増える
+    static final double CURSE_STEP = 0.25;
+    static final net.minecraft.resources.ResourceLocation CURSE_HEALTH = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "circuit_curse_health");
+    static final net.minecraft.resources.ResourceLocation CURSE_DAMAGE = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "circuit_curse_damage");
+
+    static double curseScale(CircuitRun run) {
+        return 1.0 + CURSE_STEP * run.curses;
+    }
+
+    // 巡り路の敵に、いまの呪いの重さを掛ける (体力は満たし直す)
+    static void curse(Mob mob, CircuitRun run) {
+        if (run.curses <= 0) {
+            return;
+        }
+        double add = CURSE_STEP * run.curses;
+        var hp = mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        if (hp != null) {
+            hp.removeModifier(CURSE_HEALTH);
+            hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(CURSE_HEALTH, add,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            mob.setHealth(mob.getMaxHealth());
+        }
+        var dmg = mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+        if (dmg != null) {
+            dmg.removeModifier(CURSE_DAMAGE);
+            dmg.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(CURSE_DAMAGE, add,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
     }
 
     // 金の柱は 1.5 倍
@@ -554,11 +590,11 @@ public final class Circuits {
 
     // 杭の強さ: 土地の目安の Lv × 10 の体力 (人数で 1 + 0.5 × (人 - 1)、金の柱で 1.5 倍)、傷は 2 + Lv / 4
     static double stakeHealth(CircuitRun run, int people) {
-        return 10.0 * TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] * (1 + 0.5 * Math.max(0, people - 1)) * harder(run);
+        return 10.0 * TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] * (1 + 0.5 * Math.max(0, people - 1)) * harder(run) * curseScale(run);
     }
 
     static double stakeDamage(CircuitRun run) {
-        return 2 + TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] / 4.0;
+        return (2 + TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] / 4.0) * curseScale(run);
     }
 
     @Nullable
@@ -711,6 +747,7 @@ public final class Circuits {
             }
             Mob mob = e == null ? null : RegionSpawner.spawn(level, e.entity(), g, target);
             if (mob != null) {
+                curse(mob, run);
                 mob.setTarget(target);
                 run.mobs.add(mob.getUUID());
                 i++;

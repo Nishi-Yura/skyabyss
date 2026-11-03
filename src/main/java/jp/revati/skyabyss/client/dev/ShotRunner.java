@@ -1149,6 +1149,10 @@ public final class ShotRunner {
             }
             return new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player, mc.player.connection.enabledFeatures(), true);
         }
+        // hunt:<型> : 狩人の手帳を、その敵を選んだ状態で開く
+        if (name.startsWith("hunt:")) {
+            return new jp.revati.skyabyss.endgame.client.HunterNotesScreen().select(name.substring("hunt:".length()));
+        }
         // skills_node:<節の id> : 技の木 v2 で、その節を選んだ状態で開く
         if (name.startsWith("skills_node:")) {
             String id = name.substring("skills_node:".length());
@@ -1163,6 +1167,7 @@ public final class ShotRunner {
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
+            case "hunt" -> jp.revati.skyabyss.endgame.client.HunterNotesScreen::new;
             case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
             case "chat" -> () -> new net.minecraft.client.gui.screens.ChatScreen("");
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;

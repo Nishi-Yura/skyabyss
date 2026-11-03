@@ -381,6 +381,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("moon trial", jp.revati.skyabyss.story.ch6.MoonTrialSelfTest::run));
         steps.add(Step.once("moon memories", jp.revati.skyabyss.story.ch6.MoonMemoriesSelfTest::run));
         // 終章の雲海 (舞台と行き方。docs/design/50 の 4.1)。SKYABYSS_SELFTEST_ONLY="cloudsea"
+        steps.add(Step.once("cloudsea (load)", jp.revati.skyabyss.story.finale.FinaleSelfTest::load));
         steps.add(Step.once("cloudsea", jp.revati.skyabyss.story.finale.FinaleSelfTest::run));
         // 裏ボス「初代の空見」(docs/design/53)。SKYABYSS_SELFTEST_ONLY="founder"
         steps.add(Step.once("founder", jp.revati.skyabyss.story.finale.founder.FounderSelfTest::run));
@@ -399,6 +400,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("guild week", jp.revati.skyabyss.endgame.GuildWeekSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
+        // 狩人の手帳 (倒した数・頁・慣れ・見た技)。SKYABYSS_SELFTEST_ONLY="hunter notes"
+        steps.add(Step.once("hunter notes", jp.revati.skyabyss.endgame.HunterNotesSelfTest::runSelfTest));
         // 見た目替え (docs/design/54 の 5.4)。SKYABYSS_SELFTEST_ONLY="looks"
         steps.add(Step.once("looks", jp.revati.skyabyss.endgame.LooksSelfTest::run));
         // 釣り (魚の表・釣れ方・大きさ・図鑑・週の大会・店)。SKYABYSS_SELFTEST_ONLY="fishing"
@@ -482,6 +485,10 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.upgrade.UpgradeSelfTest.steps());
         // 天と淵の大陸の地形 (図と、大陸の世界なら本物のチャンク)。docs/design/40 の 3 章。SKYABYSS_SELFTEST_ONLY="continent"
         steps.addAll(jp.revati.skyabyss.world.continent.ContinentSelfTest.steps());
+        // 早駆けの道 (道筋の形・走りきる・印・自己最高)。SKYABYSS_SELFTEST_ONLY="race courses"
+        steps.add(Step.once("race courses", jp.revati.skyabyss.world.continent.RaceSelfTest::runSelfTest));
+        // 逃げる獣 (型と動き・出る所・硬さ・報い・締め出し)。SKYABYSS_SELFTEST_ONLY="rare beasts"
+        steps.add(Step.once("rare beasts", jp.revati.skyabyss.world.continent.RareBeastSelfTest::runSelfTest));
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"
         steps.addAll(jp.revati.skyabyss.trial.RouteRoomsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.trial.RoutePartySelfTest.steps());

@@ -16,9 +16,10 @@ public final class CircuitRun {
         HUNT, GUARD, CARRY, BREAK
     }
 
-    // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分
+    // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分、
+    // 紫 = 呪い (2026-11-03。Wynncraft の紫のビーコン): 選ぶと呪いが一つ重なり、巡り路の残りのあいだ敵が強くなる代わりに、終わりの封の箱が一つ増える
     public enum Bonus {
-        NONE(0xE6E2D6), DOUBLE(0xF2C14E), TIME(0x7FB8FF);
+        NONE(0xE6E2D6), DOUBLE(0xF2C14E), TIME(0x7FB8FF), CURSE(0xB070E8);
 
         public final int rgb;
 
@@ -71,6 +72,8 @@ public final class CircuitRun {
     // 次の課題の柱 (空でなければ選んでいるところ) と、いまの課題の柱の色
     final List<Offer> offers = new ArrayList<>();
     Bonus bonus = Bonus.NONE;
+    // 重なった呪い (紫の柱を選んだ数。巡り路の終わりまで残る)
+    int curses;
 
     CircuitRun(int region, BlockPos origin, long start, long end) {
         this.region = region;
@@ -101,6 +104,10 @@ public final class CircuitRun {
 
     public Bonus bonus() {
         return bonus;
+    }
+
+    public int curses() {
+        return curses;
     }
 
     public BlockPos spot() {

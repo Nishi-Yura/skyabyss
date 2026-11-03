@@ -105,6 +105,12 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.GEODE_GOLEM.get(), ctx -> noTilt(ctx, "geode_golem"));
         event.registerEntityRenderer(ModEntities.BELLOWS_IMP.get(), ctx -> noTilt(ctx, "bellows_imp"));
         event.registerEntityRenderer(ModEntities.LAVA_SLUG.get(), ctx -> noTilt(ctx, "lava_slug"));
+        // 逃げる獣 (倒れる動きは death アニメーションで横倒しにする)
+        event.registerEntityRenderer(ModEntities.BELL_HARE.get(), ctx -> noTilt(ctx, "bell_hare"));
+        event.registerEntityRenderer(ModEntities.MOSS_ROLLER.get(), ctx -> noTilt(ctx, "moss_roller"));
+        event.registerEntityRenderer(ModEntities.PEARL_OTTER.get(), ctx -> noTilt(ctx, "pearl_otter"));
+        event.registerEntityRenderer(ModEntities.BOLT_WEASEL.get(), ctx -> noTilt(ctx, "bolt_weasel"));
+        event.registerEntityRenderer(ModEntities.EMBER_MOLE.get(), ctx -> noTilt(ctx, "ember_mole"));
         event.registerEntityRenderer(ModEntities.OX_SMITH.get(), ctx -> noTilt(ctx, "ox_smith"));
         event.registerEntityRenderer(ModEntities.TIDE_CRAB.get(), ctx -> noTiltStillHead(ctx, "tide_crab"));
         event.registerEntityRenderer(ModEntities.STORM_RAM.get(), ctx -> noTiltStillHead(ctx, "storm_ram"));

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner;
@@ -117,31 +116,16 @@ public final class FacilitySelfTest {
 
     private static void assets(List<String> f) {
         String a = "/assets/skyabyss/";
-        for (String look : AttendantLook.LOOKS) {
-            check(f, resource(a + "lowpoly/attendant_" + look + ".json"), "mesh attendant_" + look);
-            check(f, resource(a + "geo/entity/attendant_" + look + "_lowpoly.geo.json"), "geo attendant_" + look);
-            for (AttendantRole r : AttendantRole.values()) {
-                check(f, resource(a + "textures/lowpoly/" + AttendantLook.texture(look.charAt(0) - 'a' + 1, r.id) + ".png"), "texture " + look + " " + r.id);
-            }
-        }
+        // 体・絵・動き (npc_<役>) は NpcModelSelfTest (段 lowpoly npc) が見る
         for (AttendantRole r : AttendantRole.values()) {
+            check(f, resource(a + "lowpoly/npc_" + r.id + ".json"), "mesh npc_" + r.id);
             for (String face : Dialogue.FACES) {
                 check(f, resource(a + "textures/gui/npc/face/attendant_" + r.id + "_" + face + ".png"), "face " + r.id + " " + face);
             }
             check(f, resource(a + "textures/gui/npc_marker/fac_" + r.id + ".png"), "facility icon " + r.id);
         }
-        try (InputStream in = FacilitySelfTest.class.getResourceAsStream(a + "animations/entity/attendant.animation.json")) {
-            String json = in == null ? "" : new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-            var anims = in == null ? null : JsonParser.parseString(json).getAsJsonObject().getAsJsonObject("animations");
-            for (String n : List.of("idle", "walk", "talk")) {
-                check(f, anims != null && anims.has("animation.attendant." + n), "animation.attendant." + n);
-            }
-        } catch (java.io.IOException | RuntimeException e) {
-            f.add("animation unreadable " + e);
-        }
         check(f, resource(a + "textures/item/bell_coin.png"), "bell coin texture");
         check(f, resource(a + "models/item/bell_coin.json"), "bell coin model");
-        check(f, AttendantLook.look(0).equals(AttendantLook.DEFAULT) && AttendantLook.look(2).equals(AttendantLook.DEFAULT), "look by variant");
     }
 
     // ---------------------------------------------------------------- 会話

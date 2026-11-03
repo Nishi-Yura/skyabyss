@@ -46,6 +46,19 @@ public final class ContinentSelfTest {
             if (map.surface(3000, 0) != ContinentMap.OUTSIDE_Y) {
                 f.add("outside the map is not sea floor");
             }
+            // 起伏 (2026-11-03): 都の南の野は 48 四方で 3 段以上うねる。都の中は平らのまま (上の Y 72)
+            int lo = Integer.MAX_VALUE;
+            int hi = Integer.MIN_VALUE;
+            for (int dx = 0; dx <= 48; dx += 4) {
+                for (int dz = 0; dz <= 48; dz += 4) {
+                    int y = map.surface(-500 + dx, 330 + dz);
+                    lo = Math.min(lo, y);
+                    hi = Math.max(hi, y);
+                }
+            }
+            if (hi - lo < 3) {
+                f.add("the fields south of the capital are flat (Y " + lo + ".." + hi + ")");
+            }
             int peak = 0;
             for (int z = -800; z <= 400; z += 20) {
                 peak = Math.max(peak, map.surface(-950, z));
@@ -179,12 +192,49 @@ public final class ContinentSelfTest {
                     f.add("real ground at the ridge " + real + " vs base " + base);
                 }
             }
+            // 隠れた発見 (ContinentSecrets): 20 か所、どれも陸で道から 30 以上、島にはない。形はどの種類も何か置く。見つけるのは人ごとに一度
+            List<ContinentSecrets.Secret> secrets = ContinentSecrets.all();
+            if (secrets.size() != 20) {
+                f.add("hidden discoveries: " + secrets.size() + " (want 20)");
+            }
+            for (ContinentSecrets.Secret s : secrets) {
+                if (map.surface(s.x(), s.z()) < ContinentChunkGenerator.SEA_LEVEL || RoadClearance.clearance(s.x(), s.z()) < 25
+                        || map.region(s.x(), s.z()) == ContinentMap.OUTSKIRTS) {
+                    f.add("hidden discovery " + s.id() + " at " + s.x() + ", " + s.z() + " is wet, on a road or on the island");
+                }
+            }
+            ServerLevel lv = server.overworld();
+            BlockPos at = new BlockPos(-450 + 60, 0, 300);
+            lv.getChunk(at);
+            int y0 = lv.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+            for (String kind : List.of("moss_shrine", "old_camp", "buried_head", "bell_shard", "bone_tip", "shell_cairn", "rod_stub", "ash_idol")) {
+                BlockPos b = new BlockPos(at.getX(), y0, at.getZ());
+                ContinentSecrets.place(lv, kind, b, net.minecraft.core.Direction.SOUTH);
+                if (lv.getBlockState(b).isAir() && lv.getBlockState(b.above()).isAir()) {
+                    f.add("the " + kind + " discovery placed nothing");
+                }
+                for (int dx = -3; dx <= 3; dx++) {
+                    for (int dz = -3; dz <= 3; dz++) {
+                        for (int dy = -1; dy <= 4; dy++) {
+                            lv.setBlock(b.offset(dx, dy, dz), dy < 0 ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
+                        }
+                    }
+                }
+            }
+            net.neoforged.neoforge.common.util.FakePlayer finder = new net.neoforged.neoforge.common.util.FakePlayer(lv,
+                    new com.mojang.authlib.GameProfile(java.util.UUID.fromString("5ec7e700-0000-4000-8000-00000000cafe"), "secret_finder"));
+            ContinentSecrets.forgetForTest(finder);
+            if (!secrets.isEmpty() && (!ContinentSecrets.discover(finder, secrets.get(0)) || ContinentSecrets.discover(finder, secrets.get(0))
+                    || ContinentSecrets.found(finder).size() != 1)) {
+                f.add("a hidden discovery was not found exactly once");
+            }
+            ContinentSecrets.forgetForTest(finder);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST continent crashed", e);
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional towns carry every facility; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; area names with town hysteresis; map mark cap fits the POIs; real chunks match when the world is a continent)");
+            SkyAbyss.LOGGER.info("SELFTEST continent PASSED (map loads; flat capital at Y 72, inland sea, outer deep sea, western peaks; regional towns carry every facility; regional enemy strength; no square pits; outskirts stops avoid footprints; discovery once per POI; area names with town hysteresis; map mark cap fits the POIs; real chunks match when the world is a continent; 20 hidden discoveries placed off the roads, found once)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST continent FAILED: {}", s);

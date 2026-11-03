@@ -55,5 +55,7 @@
   "gui.skyabyss.mount.locked.ch8": "終章のあとで並ぶ",
   "message.skyabyss.mount.locked.ch6": "まだ並んでいない（五章、深淵の門の先へ進むと並ぶ）",
   "message.skyabyss.mount.locked.ch7": "まだ並んでいない（月へ渡ると並ぶ）",
-  "message.skyabyss.mount.locked.ch8": "まだ並んでいない（終章を越えると並ぶ）"
+  "message.skyabyss.mount.locked.ch8": "まだ並んでいない（終章を越えると並ぶ）",
+  "message.skyabyss.mount.tandem_on": "%s が後ろに乗った",
+  "message.skyabyss.mount.tandem_party": "後ろに乗れるのは、乗り手と同じパーティの人だけ"
 }

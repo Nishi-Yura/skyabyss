@@ -1,0 +1,41 @@
+# 2026-11-03: 狩人の手帳 (endgame/HunterNotes・endgame/client/HunterNotesScreen)。GUI 3 と 2
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/hunt_notes.txt -PshotsName=hunt_notes
+world hunt_notes flat
+size 1600 900
+timeout 900
+render 6
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 60
+# 数を入れる: 野の犬は慣れまで、骨の歩兵は強さまで、穀の鼠は出る所だけ。番兵長は技だけ見た
+cmd skyabyss_hunt add skyabyss:feral_dog 31
+cmd skyabyss_hunt add skyabyss:bone_footman 7
+cmd skyabyss_hunt add skyabyss:grain_rat 2
+cmd skyabyss_hunt move skyabyss:whalebone_captain captain.sweep
+cmd skyabyss_hunt move skyabyss:whalebone_captain captain.leap
+cmd skyabyss_hunt move skyabyss:whalebone_captain captain.roar
+wait 40
+chat clear
+open hunt:skyabyss:feral_dog
+wait 30
+shot h01_notes_g3
+close
+guiscale 2
+open hunt:skyabyss:feral_dog
+wait 30
+shot h02_notes_g2
+close
+guiscale 3
+open hunt:skyabyss:whalebone_captain
+wait 30
+shot h03_notes_moves
+close
+open hunt:skyabyss:bone_footman
+wait 30
+shot h04_notes_stats
+close

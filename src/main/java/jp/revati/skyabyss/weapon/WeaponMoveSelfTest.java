@@ -157,9 +157,11 @@ public final class WeaponMoveSelfTest {
     private static FakePlayer fake;
     private static Zombie dummy;
     private static int tick;
+    private static long clickAt;
     private static int expected;
     private static float healthBefore;
     private static int strikeTickSeen = -1;
+    private static String seenHow = "";
     private static boolean started;
     private static int index;
     private static final String[] FLOW_ITEMS = {"whalebone_greatsword", "waterway_fang", "captain_pike"};
@@ -193,6 +195,9 @@ public final class WeaponMoveSelfTest {
             // 正面 (視線 = 南 = +z) 1.5 ブロック
             dummy.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 2.0);
             dummy.setHealth(dummy.getMaxHealth());
+            // 昼の日差しで燃えると、打撃より先に体力が減る (それを当たりと数えない)
+            dummy.clearFire();
+            dummy.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 20 * 60, 0, false, false));
             dummy.invulnerableTime = 0;
             dummy.hurtTime = 0;
             healthBefore = dummy.getHealth();
@@ -208,18 +213,22 @@ public final class WeaponMoveSelfTest {
                 FAILS.add(id + ": click was not held back (pending " + WeaponStrikes.pending() + ")");
             }
             tick = 0;
+            clickAt = level.getGameTime();
             strikeTickSeen = -1;
             started = true;
             return false;
         }
-        tick++;
-        if (strikeTickSeen < 0 && dummy.getHealth() < healthBefore) {
+        // 呼ばれた回数でなくゲームの時刻で数える (最初の tick が重いと、追いつく間に呼ばれ方がずれる)
+        tick = (int) (level.getGameTime() - clickAt);
+        dummy.clearFire();
+        if (strikeTickSeen < 0 && dummy.getHealth() < healthBefore && dummy.getLastDamageSource() != null && dummy.getLastDamageSource().getEntity() == fake) {
             strikeTickSeen = tick;
+            seenHow = dummy.getLastDamageSource().getMsgId() + ", pending " + WeaponStrikes.pending() + ", hp " + healthBefore + "->" + dummy.getHealth();
         }
         if (tick >= expected + 6) {
             // 観測の順番で ±1 tick のずれはありうる (ほかの listener が同じ tick の前後どちらで走るか)
             check(strikeTickSeen >= 0, id + ": held click never landed");
-            check(strikeTickSeen < 0 || Math.abs(strikeTickSeen - expected) <= 1, id + ": landed at tick " + strikeTickSeen + ", expected " + expected);
+            check(strikeTickSeen < 0 || Math.abs(strikeTickSeen - expected) <= 1, id + ": landed at tick " + strikeTickSeen + ", expected " + expected + " (" + seenHow + ")");
             check(WeaponStrikes.pending() == 0, id + ": click still pending after the strike");
             SkyAbyss.LOGGER.info("SELFTEST weapon strike {}: click held, landed {} ticks later (expected {})", id, strikeTickSeen, expected);
             started = false;

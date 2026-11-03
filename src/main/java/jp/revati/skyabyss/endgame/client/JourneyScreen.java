@@ -119,6 +119,11 @@ public class JourneyScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
+        // 図鑑の枠を押すと狩人の手帳
+        if (button == 0 && data != null && in((int) Math.floor(fit.x(screenX)), (int) Math.floor(fit.y(screenY)), left + 8, top + BOX_Y, 110, 47)) {
+            net.minecraft.client.Minecraft.getInstance().setScreen(new HunterNotesScreen());
+            return true;
+        }
         return super.mouseClicked(fit.x(screenX), fit.y(screenY), button);
     }
 
@@ -253,6 +258,7 @@ public class JourneyScreen extends Screen {
             }
             lines.add(Component.translatable("message.skyabyss.codex.foes_line", foes, foesTotal).withColor(foes >= foesTotal ? TEAL : TEXT));
             lines.add(Component.translatable("message.skyabyss.codex.foot").withColor(DIM));
+            lines.add(Component.translatable("gui.skyabyss.journey.codex_open").withColor(TEAL));
             tip(lines);
         }
     }

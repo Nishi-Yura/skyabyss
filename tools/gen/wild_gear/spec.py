@@ -309,7 +309,7 @@ PIECE_JA = {"helmet": "兜", "chestplate": "胴", "leggings": "脚", "boots": "�
 PIECE_EN = {"helmet": "Hood", "chestplate": "Coat", "leggings": "Leggings", "boots": "Boots"}
 
 A("wild_oilskin", "light", "uncommon", 3, "island", [], [("MOVE_SPEED", 0.05), ("SWIM", 0.5)],
-  "漁り合羽", "Fisher's Oilskin", "4 部位: 移動 +5%、水の中の移動 +", "4 pieces: +5% speed, faster swimming")
+  "漁り合羽", "Fisher's Oilskin", "4 部位: 移動 +5%、水の中の移動が速い", "4 pieces: +5% speed, faster swimming")
 A("wild_belfry", "mystic", "uncommon", 6, "meadow", [], [("MANA_REGEN", 0.15)],
   "鐘撞きの法衣", "Bellringer's Vestment", "4 部位: マナの戻り +15%", "4 pieces: +15% mana regeneration")
 A("wild_oldsoldier", "heavy", "rare", 9, "meadow", [("MAX_HEALTH", 4)], [("LAST_STAND", 0.3, 60, 1200)],
@@ -424,7 +424,7 @@ X("wild_herb_vial", "charm", "uncommon", 5, "meadow", [("CHARM_HEAL", 6)],
   "草薬の小瓶", "Herbal Vial", "使うと体力 +60（待ち 45 秒）", "Use: heal 60 (45s cooldown)", cd=45)
 # 帯 II
 X("wild_float_netsuke", "trinket", "uncommon", 12, "coast", [("SWIM", 0.4), ("BREATH", 1), ("MOVE_SPEED", 0.03)],
-  "浮き玉の根付", "Glass Float Netsuke", "水の中の移動 +、息が長い、移動 +3%", "Faster swimming, longer breath, +3% speed", mount=HIP_L)
+  "浮き玉の根付", "Glass Float Netsuke", "水の中の移動が速い、息が長い、移動 +3%", "Faster swimming, longer breath, +3% speed", mount=HIP_L)
 X("wild_wolf_tooth_necklace", "trinket", "rare", 16, "heights", [("CRIT", 0.08, 0.5)],
   "雷狼の牙の首飾り", "Stormwolf Tooth Necklace", "会心 8%（×1.5）", "8% critical chance (x1.5)", mount=CHEST)
 X("wild_crab_backplate", "trinket", "epic", 19, "coast", [("TOUGHNESS", 2), ("THORNS", 0.15, 3)],

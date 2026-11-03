@@ -69,6 +69,8 @@ public final class CinematicClient {
         float yaw0;
         float pitch0;
         Vec3 lastLook;
+        // 地形を避けて持ち上げている高さ (clip)
+        double lift;
 
         Run(Scene scene, StartPayload p, CameraMarker marker, boolean hudBefore) {
             this.scene = scene;
@@ -106,6 +108,12 @@ public final class CinematicClient {
     @Nullable
     static Run run() {
         return run;
+    }
+
+    // 人を描かないか (場面のカメラが動いている間。操作へ戻したら描く。mixin/CinematicHidePlayersMixin)
+    public static boolean hidesPlayers() {
+        Run r = run;
+        return r != null && !r.restored;
     }
 
     // ---------------------------------------------------------------- 受信
@@ -238,25 +246,54 @@ public final class CinematicClient {
         return CameraMath.sample(r.scene, seconds, new CameraMath.Ctx(r.origin, r.yaw, r.targetPos));
     }
 
-    // 地形に入り込まないよう、本人の目から見て壁があればその手前まで引く
+    // カメラのまわりに空ける幅 (この内に地形が来ると、近くの面が切れて地面や木の中が見える)
+    private static final double ROOM = 0.3;
+    // 地形に埋まった撮り位置を持ち上げる上限 (ブロック)
+    private static final double LIFT_MAX = 4.0;
+
+    // 地面に埋まらないよう (2026-11-03 の声「カメラが地面に埋まるのやめて」)、三段で直す:
+    //  1. 場面の道筋は原点からの相対なので、起伏のある所では撮り位置が丘や木の中に入る。まわり ROOM が空く高さまで持ち上げる
+    //     (上がるのは速く、下がるのはゆっくり。段差でカメラが跳ねないように)
+    //  2. 本人の目から見て壁があれば、その手前まで引く。バニラの三人称と同じく 8 隅をずらした線で測り、面からも ROOM 離す
     private static Vec3 clip(Run r, Vec3 want) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return want;
         }
+        double need = 0.0;
+        while (need < LIFT_MAX && !roomy(mc, want.add(0, need, 0))) {
+            need += 0.125;
+        }
+        if (need >= LIFT_MAX) {
+            need = 0.0; // 厚い地形の中 (洞の天井など): 持ち上げずに、目からの線で引く
+        }
+        r.lift = Math.max(need, r.lift - 0.08);
+        Vec3 lifted = want.add(0, r.lift, 0);
         Vec3 from = r.origin.add(0, CameraMath.EYE, 0);
-        Vec3 delta = want.subtract(from);
+        Vec3 delta = lifted.subtract(from);
         double len = delta.length();
         if (len < 0.5) {
-            return want;
+            return lifted;
         }
-        var hit = mc.level.clip(new ClipContext(from, want, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, r.marker));
-        if (hit.getType() == HitResult.Type.MISS) {
-            return want;
+        double best = len;
+        for (int i = 0; i < 8; i++) {
+            Vec3 o = new Vec3(((i & 1) * 2 - 1) * 0.1, ((i >> 1 & 1) * 2 - 1) * 0.1, ((i >> 2 & 1) * 2 - 1) * 0.1);
+            var hit = mc.level.clip(new ClipContext(from.add(o), lifted.add(o), ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, r.marker));
+            if (hit.getType() != HitResult.Type.MISS) {
+                best = Math.min(best, hit.getLocation().distanceTo(from.add(o)) - ROOM);
+            }
         }
-        double back = Math.min(0.35, len);
-        double reach = Math.max(0.0, hit.getLocation().subtract(from).length() - back);
-        return from.add(delta.scale(reach / len));
+        // 3. 斜めの面に沿った線では、面から ROOM 離しても地面すれすれに止まる (近くの面が地面を切って地中が見えた)。まわりが空くまで目の方へ寄せる
+        double reach = Math.max(0.0, Math.min(best, len));
+        while (reach > 0.0 && !roomy(mc, from.add(delta.scale(reach / len)))) {
+            reach -= 0.1;
+        }
+        return from.add(delta.scale(Math.max(0.0, reach) / len));
+    }
+
+    // 点のまわり ROOM に、ぶつかる地形がないか
+    private static boolean roomy(Minecraft mc, Vec3 p) {
+        return mc.level.noCollision(new net.minecraft.world.phys.AABB(p.x - ROOM, p.y - ROOM, p.z - ROOM, p.x + ROOM, p.y + ROOM, p.z + ROOM));
     }
 
     private static void applyCamera(Run r) {

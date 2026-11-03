@@ -289,6 +289,10 @@ public final class TrialRouteSelfTest {
                 boolean toMid = i == 3 && TrialMidBoss.needed(titan, draw);
                 int expect = toMid ? 3 : i + 1;
                 check(f, TrialRoute.step(back, ga) == expect && TrialRoute.mid(back, ga) == toMid, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
+                // 挑戦の加護: 越えた人にだけ二つ見せ、選ぶと持つ (持っているものは次から出ない)
+                check(f, RouteBoons.offered(a) && !RouteBoons.offered(b), titan + ": clearing step " + i + " did not offer a boon to the party only");
+                RouteBoons.choose(a, i % 2);
+                check(f, !RouteBoons.offered(a) && RouteBoons.held(a).size() == i, titan + ": the boon pick did not stick (" + RouteBoons.held(a) + ")");
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry was not queued");
                 TrialRoute.tick(back, titan, players, now + 1);
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry ran before its delay");
@@ -313,9 +317,11 @@ public final class TrialRouteSelfTest {
             TrialRoute.tick(back, titan, players, now + 5000 + TrialRoute.ENTRY_WAIT + 10);
             check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": standing at the entrance mid-route restarted the route");
             // 心臓を止めると順路が終わり、記録が増え、番号が返る
+            boons(f, a, b, titan);
             int clears = TrialCodex.get(back.getServer()).routeClears(a.getUUID(), titan);
             BackGroupData.Record r = GroupProgress.of(back, ga);
             TrialRoute.onHeartStopped(back, r);
+            check(f, RouteBoons.held(a).isEmpty(), titan + ": the challenge boons stayed after the heart stop");
             TrialData.onHeartStopped(r);
             check(f, TrialRoute.step(back, ga) == 0 && TrialSlot.of(r) == 0, titan + ": the heart stop did not end the route");
             check(f, TrialCodex.get(back.getServer()).routeClears(a.getUUID(), titan) == clears + 1, titan + ": the heart stop did not count the route");
@@ -348,6 +354,21 @@ public final class TrialRouteSelfTest {
             clean(back, ga, gb);
             TrialRoute.PLAYERS = l -> jp.revati.skyabyss.util.Players.snapshot(l.players());
         }
+    }
+
+    // 挑戦の加護の効き目: 守り・力は傷の量、命は体力の上限 (外すと戻る)
+    private static void boons(List<String> f, ServerPlayer a, ServerPlayer b, String titan) {
+        RouteBoons.clear(b);
+        RouteBoons.grant(b, RouteBoons.Boon.WARD);
+        RouteBoons.grant(a, RouteBoons.Boon.MIGHT);
+        float hit = RouteBoons.adjust(b.getUUID(), a.getUUID(), 10f);
+        check(f, Math.abs(hit - 10f * (float) RouteBoons.MIGHT * (float) RouteBoons.WARD) < 0.01f, titan + ": might/ward did not scale a hit (" + hit + ")");
+        check(f, Math.abs(RouteBoons.adjust(a.getUUID(), a.getUUID(), 10f) - RouteBoons.adjust(a.getUUID(), null, 10f)) < 0.01f, titan + ": might scaled a self hit");
+        double base = b.getMaxHealth();
+        RouteBoons.grant(b, RouteBoons.Boon.VIGOR);
+        check(f, Math.abs(b.getMaxHealth() - base * 1.2) < 0.01, titan + ": vigor did not raise max health (" + base + " -> " + b.getMaxHealth() + ")");
+        RouteBoons.clear(b);
+        check(f, Math.abs(b.getMaxHealth() - base) < 0.01 && RouteBoons.held(b).isEmpty(), titan + ": clearing the boons left max health at " + b.getMaxHealth());
     }
 
     // ---------------------------------------------------------------- 周回 (引いた三つ・戸・中ボス・二つの区画)

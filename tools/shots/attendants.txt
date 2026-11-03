@@ -1,5 +1,5 @@
-# 都の施設の係の人 (docs/design/35 の 6 章): 3 案の見た目 x 15 役の並び、近くの 5 役、頭の施設の印、会話・店・ギルド・預かり所の画面
-# ./gradlew runShots -Pscript=tools/shots/attendants.txt --no-daemon --offline  (絵は docs/review/npc_roughs/ingame_*.png へ写す)
+# 都の施設の係の人 (docs/design/35 の 6 章): 役ごとの見た目の並び、近くの 5 役、頭の施設の印、会話・店・ギルド・預かり所の画面
+# ./gradlew runShots -Pscript=tools/shots/attendants.txt --no-daemon --offline
 world shots flat
 size 1280 720
 timeout 900

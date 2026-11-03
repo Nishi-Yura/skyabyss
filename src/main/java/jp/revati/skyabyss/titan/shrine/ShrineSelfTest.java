@@ -137,9 +137,15 @@ public final class ShrineSelfTest {
                 String dark = unlit(level, c);
                 check(f, dark == null, titan + ": a walkable floor has no light nearby (mobs can spawn): " + dark);
                 check(f, TitanShrine.ensure(server, titan).equals(c) && c.equals(TitanShrine.posOf(server, titan)), titan + ": the shrine moved when ensured again");
-                a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
-                b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 9.5);
-                check(f, TitanShrine.inRing(a, c) && !TitanShrine.inRing(b, c), titan + ": the ring test is wrong");
+                // 集合台 (拝殿の南の入口の外の黒い床)。碑のそば (輪の中) は台ではない
+                check(f, level.getBlockState(c.offset(0, -1, TitanShrine.PAD_Z0 + 1)).equals(TitanShrine.PAD_BLOCK)
+                        && level.getBlockState(c.offset(TitanShrine.PAD_HALF, -1, TitanShrine.PAD_Z1)).equals(TitanShrine.PAD_BLOCK), titan + ": the gathering pad is not black");
+                check(f, level.getBlockState(c.offset(0, 0, TitanShrine.PAD_Z0 + 1)).getCollisionShape(level, c.offset(0, 0, TitanShrine.PAD_Z0 + 1)).isEmpty()
+                        && level.getBlockState(c.offset(0, 1, TitanShrine.PAD_Z0 + 1)).getCollisionShape(level, c.offset(0, 1, TitanShrine.PAD_Z0 + 1)).isEmpty(),
+                        titan + ": no standing room on the gathering pad");
+                a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + TitanShrine.PAD_Z0 + 1.5);
+                b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
+                check(f, TitanShrine.onPad(a, c) && !TitanShrine.onPad(b, c), titan + ": the pad test is wrong");
                 // 断り方
                 stopped.clear();
                 check(f, TitanShrine.refusal(server, a, titan, List.of(a), true, false) != null, titan + ": a stranger was let in");

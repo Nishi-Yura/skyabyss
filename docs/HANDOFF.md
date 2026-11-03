@@ -259,7 +259,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 週の賭け（`TowerWagers`。受付で隊長が三つまで選ぶ）・記録の板（`TowerRecords`。受付の [記録の板]）・称号 2 つはできた。
 - 塔守（係の人の役 `TOWER_KEEPER`）が受付に立つ（`TowerDesk.ensureDesk`。前の見えない Interaction は片付ける）。話すと受付の一覧・塔の店・記録の板。撮影 `tools/shots/tower_keeper.txt`。
 - まだ: 数字（体力・傷・月の速さ・箱の確率）は遊んで詰める。
-- 注意: `gen_attendant_portraits.py`・`install_attendants.py`・`gen_facility_icons.py` を流すと、ほかの役の今の絵まで書き換わる（今の絵は道具の出力とずれている）。新しい役を足すときは、その役の出力だけを残して、ほかは戻す。
+- 注意: `gen_facility_icons.py` を流すと、ほかの役の今の印まで書き換わる。新しい役を足すときは、その役の出力だけを残して、ほかは戻す。肖像は `gen_portraits_v2.py --install <役>` で描く（2026-11-03 に古い肖像の道具は消した）。
 
 ## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
 
@@ -346,7 +346,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 声「敵が直接防具を落とすのをやめたい。Wynncraft のように低確率で箱を落とす形に。同じ種類ならスタック。町に開封してくれる NPC、ルーレット。巨神は専用の箱 4 種、その他はレア度で」。00 の 306〜311 は推奨どおり（金の箱あり・深淵と月も階級の箱・5 人・無料・旅嚢の欄・心臓の数は今の品の数）。
 - 仕組み: 抽選は今のまま。当たった装備は渡す直前に箱に替わり、品（特性つき）は人ごとの封の列（`LootBoxData`、保存 `skyabyss_loot_boxes`）へ。開けると古い順。列が空の箱は表から引く。包むのは `TitanLoot.handOver`・`WildLoot.give`・敵の落とし物（`LivingDropsEvent` の一番後）。包まないのは `LootBoxes.direct`（交換・初回の選択・野営の返却）と `keepDirect`（層・区画の主の初回の部位）。
 - Java: `loot/box/`（`BoxKind` 19 品、`SealedBoxItem`、`LootBoxSetup`、`LootBoxes` 包む・表・開ける、`BoxService`・`BoxNetwork` 画面、`BoxOpeners` 立つ所、`BoxCommands`、`LootBoxSelfTest`）、`client/box/`（`BoxScreen` ルーレット、`BoxPouchScreen` 旅嚢の四つ目のつまみ）。つなぎ: `AttendantRole.BOX_OPENER`・`FacilityActions` の `boxes`・`PouchConfig.Category.BOX`（袋の枠には並ばない `PouchLayout.onGrid`）・つまみ 4 つ（`AccessoryScreen.addTabs`）・`AccessoryMeshes`（箱の形は `BoxKind.look()`）・告知の口止め（`TitanLoot.announcePieces`・`LegendLoot`）。
-- 封切り師: 都と四つの町の鍛冶屋の係の人（`npc_smith`）から 2〜4 ブロックの空いた床に立つ（設計図は触らない）。体は `tools/rough/lowpoly/npc2/cast.py` の box_opener（`install_npc2.py box_opener`）、顔と印は `gen_attendant_portraits.py`・`gen_facility_icons.py`（どちらも全員を描き直すので、ほかの役の絵は git で戻すこと）。
+- 封切り師: 都と四つの町の鍛冶屋の係の人（`npc_smith`）から 2〜4 ブロックの空いた床に立つ（設計図は触らない）。体は `tools/rough/lowpoly/npc2/cast.py` の box_opener（`install_npc2.py box_opener`）、顔は `gen_portraits_v2.py --install box_opener`、印は `gen_facility_icons.py`（全員を描き直すので、ほかの役の印は git で戻すこと）。
 - 形と絵: `tools/rough/lowpoly/weapons/wild/o_boxes.py`（9 形）→ `build_wild.py o_boxes` → `python -I tools/install/install_boxes.py`（帯の数字入りの絵も作る）。言葉と会話 `python tools/gen/loot/gen_box_text.py`。
 - 試遊: `/skyabyss play box give <種類> [数]`・`/skyabyss play box open`。撮影 `tools/shots/box_ui.txt`（画面と形）・`tools/shots/box_openers.txt`（都と町の立つ所）。
 - 確かめ: 自己テスト `loot boxes`・`pouch`・`facility`・`lowpoly npc`・`wild gear`・`command gate`・`lang` ほかが通った。quick_check も通った。
@@ -627,7 +627,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 監査の「中」も直した（2026-10-29 深夜）:
 - 旧スキル制度のコードを消した（43 の 3 章どおり）: 天職（`SkillCalling`・`CallingScreen`・通信 2 本）、構え（`SkillStance`・キー `.`）、連鎖（枠の印）、刻み目（`Breakpoints`）、旅人の木（合図・備えの報い・野営の手・目利き・逃げ足・手帖）と橋の木（5 本）。技は 65 → 54 本、アイコンの番号は `Skill.iconIndex`（淵・前世は icons2 の 5 番から）。技の画面の「ビルド」のページは鍵石だけ。自己テスト `skills`・`jobs`・`soul`・`lang`・`skill lesson` を通した。
 - 絵: 穴の欠片 5 枚を土地ごとに別の形に（確認の絵は 10-31 に消した。2026-10-30 にユーザーが確認して決まり）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
-- 係の人の見た目は A だけ（B・C の 54 枚と 2 体の骨格を消した。`AttendantLook.LOOKS = {"a"}`）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
+- 係の人の見た目は人ごとの形（NPC v2）だけ（2026-11-03 に案 A の体・絵・`AttendantLook` も消した）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
 - 片付け: `run/shots`・`run/mp_check`・`run/world_all4`・dump・`config/*.bak`・`build/portraits_v2`・`build/tmp_attendant`・0.8.0 の jar。`docs/review` の古い報告（assets/gear/mod_blocks/weapon_design_base と試遊表 0.7.1〜0.8.0）、決まったラフの案（legends・ch5・voice2・survivor・warden_paint・材料。比較の絵だけ残す）、`tools/once`・`tools/misc` の 4 本・`tools/rough` の v2〜v4 と gallery_v*。消した書類を指していたコメントと README は直した。
 - 残したもの（判断）: `textures/entity/` と `lowpoly/` の同じ絵 35 組は、立方体の geo（`LowPoly.enabled = false` の控え）が残っているのでそのまま。`elder_sentry`（一章の洞窟）と `elder_sentinel`（背の試練）は役が別なので二体のまま（突進・踏みの印は同じ動きなので同じ絵）。メッシュ監査（`tools/audit/mesh_audit.py`）: 開いた辺 0、非多様体の辺 2,028、つぶれた三角 104、関節の離れ 37（主に防具の脚）。直すなら `tools/lib/mesh_close.py` から。
 

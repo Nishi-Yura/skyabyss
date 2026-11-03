@@ -96,6 +96,19 @@ public final class ContinentLairsSelfTest {
             if (y < ContinentChunkGenerator.SEA_LEVEL) {
                 f.add(t + ": the shrine pad is under the sea");
             }
+            // 台地 (±12) と参道 (x ±4、南へ z 12..31) が道の縁から 1 以上離れる (2026-11-03 の声「まだ道の上に建造物が立つ」。前は台地の角と鳥居が道にかかった)
+            double worst = 1e9;
+            for (int dx = -12; dx <= 12; dx++) {
+                for (int dz = -12; dz <= 31; dz++) {
+                    if (dz > 12 && Math.abs(dx) > 4) {
+                        continue;
+                    }
+                    worst = Math.min(worst, RoadClearance.clearance(c[0] + dx, c[1] + dz));
+                }
+            }
+            if (worst < 1.0) {
+                f.add(t + ": the shrine terrace or its approach is " + String.format("%.1f", worst) + " from the road edge");
+            }
         }
         // 生きた巨神: 潮殻を居場所に出すと、居場所で休む (片付けて、ほかの段に残さない)
         var over = server.overworld();

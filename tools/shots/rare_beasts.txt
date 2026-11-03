@@ -1,0 +1,100 @@
+# 2026-11-03: 逃げる獣 5 体 (world/continent/RareBeast)。平らな世界で、前に出して落ち着いた姿と、近づいて逃げる姿
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/rare_beasts.txt -PshotsName=rare_beasts
+world shots flat
+size 1600 900
+timeout 1200
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+camera minecraft:overworld 0 -60 0 0 8
+waitchunks
+wait 120
+cmd skyabyss cinematic stop
+chat clear
+hud off
+fov 30
+# bell_hare
+cmd tp @s 0 -60 0 0 8
+cmd kill @e[type=skyabyss:bell_hare]
+wait 5
+cmd skyabyss_beast spawn bell_hare
+wait 30
+cmd tp @s 0 -60 0 facing entity @e[type=skyabyss:bell_hare,limit=1]
+wait 10
+shot b_bell_hare_calm
+cmd tp @s ^ ^ ^12
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:bell_hare,limit=1]
+wait 14
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:bell_hare,limit=1]
+wait 2
+shot b_bell_hare_flee
+cmd kill @e[type=skyabyss:bell_hare]
+# moss_roller
+cmd tp @s 0 -60 0 0 8
+cmd kill @e[type=skyabyss:moss_roller]
+wait 5
+cmd skyabyss_beast spawn moss_roller
+wait 30
+cmd tp @s 0 -60 0 facing entity @e[type=skyabyss:moss_roller,limit=1]
+wait 10
+shot b_moss_roller_calm
+cmd tp @s ^ ^ ^12
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:moss_roller,limit=1]
+wait 14
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:moss_roller,limit=1]
+wait 2
+shot b_moss_roller_flee
+cmd kill @e[type=skyabyss:moss_roller]
+# pearl_otter
+cmd tp @s 0 -60 0 0 8
+cmd kill @e[type=skyabyss:pearl_otter]
+wait 5
+cmd skyabyss_beast spawn pearl_otter
+wait 30
+cmd tp @s 0 -60 0 facing entity @e[type=skyabyss:pearl_otter,limit=1]
+wait 10
+shot b_pearl_otter_calm
+cmd tp @s ^ ^ ^12
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:pearl_otter,limit=1]
+wait 14
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:pearl_otter,limit=1]
+wait 2
+shot b_pearl_otter_flee
+cmd kill @e[type=skyabyss:pearl_otter]
+# bolt_weasel
+cmd tp @s 0 -60 0 0 8
+cmd kill @e[type=skyabyss:bolt_weasel]
+wait 5
+cmd skyabyss_beast spawn bolt_weasel
+wait 30
+cmd tp @s 0 -60 0 facing entity @e[type=skyabyss:bolt_weasel,limit=1]
+wait 10
+shot b_bolt_weasel_calm
+cmd tp @s ^ ^ ^12
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:bolt_weasel,limit=1]
+wait 14
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:bolt_weasel,limit=1]
+wait 2
+shot b_bolt_weasel_flee
+cmd kill @e[type=skyabyss:bolt_weasel]
+# ember_mole
+cmd tp @s 0 -60 0 0 8
+cmd kill @e[type=skyabyss:ember_mole]
+wait 5
+cmd skyabyss_beast spawn ember_mole
+wait 30
+cmd tp @s 0 -60 0 facing entity @e[type=skyabyss:ember_mole,limit=1]
+wait 10
+shot b_ember_mole_calm
+cmd tp @s ^ ^ ^12
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:ember_mole,limit=1]
+wait 14
+cmd tp @s ~ ~ ~ facing entity @e[type=skyabyss:ember_mole,limit=1]
+wait 2
+shot b_ember_mole_flee
+cmd kill @e[type=skyabyss:ember_mole]

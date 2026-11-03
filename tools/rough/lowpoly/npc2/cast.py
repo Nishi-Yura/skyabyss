@@ -1,7 +1,7 @@
 """NPC v2 の人の仕様。名前 = 入れる時のメッシュ名の後ろ (npc_<名>)。
 pal: 色 (skin / hair / coat / ...)。face: 目・眉・口のドットの型 (kit.face_pixels)。hair / hat / beard: 形。upper / lower: 服の重ね。
 arms: 腕の姿勢 {"r": (肘, 手首), "l": ...}。props: {受け口: 関数}。anim: 動きの型 (free / hold2 / hold_r / hold_l / shoulder_r / ground_r)。
-色は会話の肖像 (tools/gen/mobs/gen_attendant_portraits.py の R、gen_town_guests.py の R) と揃える。"""
+肖像の背景の色は tools/gen/mobs/gen_portraits_v2.py の BG。"""
 from __future__ import annotations
 
 import props as PR

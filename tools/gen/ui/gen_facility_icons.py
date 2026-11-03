@@ -3,7 +3,7 @@
 (暗い縁取り、左上の明るい縁、右下の影)。色は淡い骨の色だけにして、話の印 (金の「!」・青緑の巻物) と見分ける。
 使い方: python tools/gen/ui/gen_facility_icons.py
 出力: src/main/resources/assets/skyabyss/textures/gui/npc_marker/fac_<役>.png (15 枚)
-      docs/review/npc_roughs/facility_icons.png (6 倍の一覧。最後に今の話の印を並べて比べる)
+      docs/review/previews/facility_icons.png (6 倍の一覧。最後に今の話の印を並べて比べる)
 """
 from pathlib import Path
 import sys
@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "src/main/resources/assets/skyabyss/textures/gui/npc_marker"
-REVIEW = ROOT / "docs/review/npc_roughs"
+REVIEW = ROOT / "docs/review/previews"
 W, H = 16, 24
 OUTLINE = (26, 18, 8, 255)
 # 淡い骨の色 (吹き出しの PALE より少しくすませる)

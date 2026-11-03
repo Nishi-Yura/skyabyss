@@ -11,7 +11,7 @@
                          (前脚を上げて立ち上がり、耳が立って籠が揺れ、走り出す)
 向き (ゲームで確かめた値。tools/gen/mobs/gen_guard_hurt_death.py と同じ): ファイルの x の + で、立つ部品は前へ倒れ、垂れた部品 (脚) は後ろへ振れ、
 前へ伸びた部品 (頭) は先が下がる。z は長い軸のまわりの回転 (魚の節は z の 180 で腹が上)。
-WaterwayMaw・CinderMite・BoneHauler の生成スクリプト (gen_mobs.py・gen_ch4_ground_mobs.py) でアニメを書き出し直したら、これをもう一度流す。
+WaterwayMaw・CinderMite・BoneHauler の生成スクリプト (gen_ch4_ground_mobs.py) でアニメを書き出し直したら、これをもう一度流す。
 """
 import json
 import os

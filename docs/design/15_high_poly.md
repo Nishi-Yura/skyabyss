@@ -164,7 +164,7 @@
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 足したもの |
 | --- | --- | --- | --- | --- |
-| 番兵長 whalebone_captain | 1,318 / 4,616 | 20 | `tools/gen/mobs/gen_mobs.py`（ラフの道具 `captain_v4.py` は消した。今の geo が正本）。鉾は別モデル（item） | 兜・拳・腿の二段丸め（腕・脚の骨は縦の辺だけ）、鼻梁、覗き窓の縁、冠の継ぎ目、拳の関節、腕当て、指 4 本 + 親指、兜の口の格子 6 枚 |
+| 番兵長 whalebone_captain | 1,318 / 4,616 | 20 | 今の geo が正本（生成の道具は消した）。鉾は別モデル（item） | 兜・拳・腿の二段丸め（腕・脚の骨は縦の辺だけ）、鼻梁、覗き窓の縁、冠の継ぎ目、拳の関節、腕当て、指 4 本 + 親指、兜の口の格子 6 枚 |
 | 潮招き tide_beckoner | 1,356 / 6,820 | 12 | `tools/install/install_tide_caller.py` | 甲羅の段と爪を 1.0 刻みで二段丸め、目の枠、全 6 脚の関節の棘、大鋏の歯（上下 2 段 × 12）、爪の筋、甲羅の背棘。変更の幅が最も大きい |
 | 雷獣 raiju | 1,322 / 6,195 | 17 | `tools/install/install_raiju.py` | 胸・胴・頭・脚の丸め（尾 3 骨・たてがみの結晶・1 単位の脚板は元のまま。全面だと 8,400 面で上限なので範囲を絞った）、牙 2、眉の庇、鼻の縁、肩・腰の棘（2 段）、背の筋 |
 | 鍛え手 ash_smith | 1,225 / 6,794 | 15 | `tools/install/install_ember_smith.py`（大鎚・火箸は gear） | 頭・腕・前腕・脚・腹と胴の積み板の丸め（鞴 2 つと前掛けは元のまま）、兜の覗き窓の縁、口の格子 5 枚、胴・脚の板の鋲（約 85） |
@@ -172,7 +172,7 @@
 - 作り方は `tools/rough/hp_midboss.py`（`--install <名前> C`）。範囲の調整は `python tools/rough/hp_midboss_probe.py <名前> x0 y0 z0 x1 y1 z1` でその範囲の元の箱を引く。面取りの後に足す箱は同じ場所に元の箱があって入れないことが多い（`SKIPPED` に覚えて表示）。ポーズ確認は `hp_midboss_pose.py`。
 - 鍛え手の白い発光マスク（`ash_smith_glowmask_white.png`）もテクスチャと同じ uv なので取り込みで作り直す（`tools/install/install_ember_smith.py` の `whiten` と同じ式）。geo は元の整形（indent=1）のまま書く（`AshSmithSelfTest` が `"name": "bone"` の文字列を探す）。
 - 暗い飾りの色は、元のテクスチャに掛けた持ち上げ（08 の 5.4 節）と同じ式（`shade()`）を通す。
-- `install_{tide_caller,raiju,ember_smith}.py`・`tools/gen/mobs/gen_mobs.py` は元の geo を作り直して上書きするので、取り込み後に走らせない（走らせたら `hp_midboss.py --install <名前> C` で戻す）。
+- `install_{tide_caller,raiju,ember_smith}.py` は元の geo を作り直して上書きするので、取り込み後に走らせない（走らせたら `hp_midboss.py --install <名前> C` で戻す）。
 - 番兵長・鍛え手は 0.5 の階段で彫ってあるので、丸め + 0.25 では全身の差は小さい（顔・手の接写で分かる）。大きく変えるなら、鍛え手の炉の口・兜、番兵長の兜を 0.25 で彫り直す。
 - 戻し方: `tools/sources/hp_base/entity/` から geo・テクスチャ・発光マスクを戻す。
 
@@ -182,8 +182,8 @@
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 中身 |
 | --- | --- | --- | --- | --- |
-| 骨の番兵 bone_sentinel | 236 / 1,243 | 9 | `tools/gen/mobs/gen_mobs.py` | 頭蓋を丸め、眼窩を掘って**目が光る**、頬骨・眉・縁の枠・リベット・指・肋・膝 |
-| 肋の射手 rib_archer | 183 / 882 | 10 | `tools/gen/mobs/gen_mobs.py` | 頭蓋 3 段、眼窩に光る点、角は先細り、眉・頬骨、歯 10 本、指 4 本、膝・肘・肋の先 |
+| 骨の番兵 bone_sentinel | 236 / 1,243 | 9 | 今の geo が正本（生成の道具は消した） | 頭蓋を丸め、眼窩を掘って**目が光る**、頬骨・眉・縁の枠・リベット・指・肋・膝 |
+| 肋の射手 rib_archer | 183 / 882 | 10 | 今の geo が正本（生成の道具は消した） | 頭蓋 3 段、眼窩に光る点、角は先細り、眉・頬骨、歯 10 本、指 4 本、膝・肘・肋の先 |
 | 苔這い moss_crawler | 646 / 2,121 | 27 | `tools/install/install_moss_crawler_b.py`（ラフ `rough/smooth_mob2.py` の B 苔芋虫） | 滑らか版（上限 1,500 は超える。体の下に隠れる膝の丸は外してある）。五つの節（骨 `seg1`〜`seg5` が尾から頭へ鎖になり、前の節は後ろの節の回転を引き継ぐ）に骨の輪と背の苔、一つ目（骨 `eyes`。虹彩と瞳が光る）、顎と歯、2 本の触角と先の誘いの光（`ant_*`・`lure_*`）、六本の脚（`l1..3_u/_l`・`r1..3_u/_l`）、尾。描画は 1.3 倍。アニメは idle（節の呼吸・触角・瞬きと見回し）、walk（節に沿って進む波と脚）、pounce（前の節を起こして飛び込む）、hurt、death（渦を巻いて丸まる）。入れ方は `python tools/install/install_moss_crawler_b.py`（geo・png・glowmask・animation を書き、`tools/lib/fix_geo_face_sides.py --apply` と重なり検査 0 まで回す）。ゲーム内の絵は `docs/review/previews/moss_b_*.png`（台本 `tools/shots/moss_crawler_b.txt`。`/skyabyss dev anim` で動きの途中を撮る） |
 | 珊瑚憑き coral_thrall | 1,332 / 1,494 | 11 | `tools/install/install_tide_mobs.py` | 歯 6 本・眉・頬の飾り・指・こぶし、冠と肩の珊瑚に細い穂先、布の裾にぼろ。像の珊瑚（`statue_coral`）は 3 枚の板を重ねた塊（約 160 面）。像の姿は「起きた体 + 像の珊瑚」が全部見える |
 | 磯走り reef_scuttler | 151 / 785 | 6 | `tools/install/install_tide_mobs.py` | はさみの噛み合う歯、脚の面取り、甲羅の縁の飾り、目の柄の輪、脚先のつめ |
@@ -196,7 +196,7 @@
 | 燠虫 cinder_roller | 285 / 1,392 | 37 | `tools/install/install_ember_mobs.py` | 甲羅の面取り、背の筋、足の爪、触角のひげ、尾の棘 |
 
 - 光る画素: 射手 24〜28、苔 32、顎 108、珊瑚憑き 2、磯走り 48、泡吹き 12、羽守 62、雷蛾 190、雷乞い 200、灰被り 306、火の粉蛾 678、燠虫 3,786。
-- 生成: 岩鯨・潮殻の敵は `tools/rough/hp_mobs_whale_tide.py`（`cull_hidden` が同じ骨の箱に完全に覆われた面を消す。`tools/install/install_tide_mobs.py` が `install_picks` で採用案へ置き換える。珊瑚憑きの像のテクスチャも作る。`python tools/rough/hp_mobs_whale_tide.py [名前]` でシート、`--install`）。`tools/gen/mobs/gen_mobs.py`（停止中）の 3 種は、動かしたあとで `--install` をやり直す。
+- 生成: 岩鯨・潮殻の敵は `tools/rough/hp_mobs_whale_tide.py`（`cull_hidden` が同じ骨の箱に完全に覆われた面を消す。`tools/install/install_tide_mobs.py` が `install_picks` で採用案へ置き換える。珊瑚憑きの像のテクスチャも作る。`python tools/rough/hp_mobs_whale_tide.py [名前]` でシート、`--install`）。
 - 雷翼・余燼の敵は `tools/rough/hp_mobs_storm_ember.py`（取り込みは `tools/install/install_storm_mobs.py`・`tools/install/install_ember_mobs.py` の末尾の `install_mob()`。素の geo とテクスチャから作り直して上書きするので何度流しても同じ）。灰被りの燃え上がり、雷蛾の帯電の光の絵も、飾りの見本の行を足して同じ高さにそろえる。
 - `hp_mobs_storm_ember.py` の部品（他でも流用できる）: `prune`/`repair_pruned`/`prepare`（同じ剛体グループの箱に隠れた面を落とす。灰被りの殻 `crust_` と燃え上がり `flare_` は別状態なので互いの下の面は落とさない）、`pose_holes(name, geo, hide=)`（全アニメの全姿勢で開く面を調べる）、`bevel_cube`/`bevel_all`（近傍を見る面取り）、`remesh(m, bone, f=(2,1,2))`（荒い格子の多数決で箱を作り直す）、`veins`/`fringe`/`barbs`/`frame`/`box(stick=)`（筋・縁の歯・ひげ・縁取り・飾り）、`finish`（全姿勢で開く面があれば色で戻す安全網）、`spend`（工程を優先順に並べ、面が上限を超える工程は取り消す）。
 - 射手の弓（`socket_off`）・珊瑚憑きの銛（`socket_main`）は別モデルのまま。
@@ -207,8 +207,8 @@
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 中身 |
 | --- | --- | --- | --- | --- |
-| 語り部 storyteller | 688 / 1,981 | 10 | `tools/install/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の B 頭巾の語り部） | 滑らか版。頭は 1 つの丸い塊（0.25 の段の球）で、目・眉・口・頬を塊の表面に描く。鼻と眉の張りは同じ肌の塊の出っぱり。頭巾は頭にかぶさる殻（`hair`・`hair2`）で、前に生え際の窓を開ける。首と襟があり頭が体の軸に載る。肩掛け、帯、結び紐、組んだ手。床の高さの骨の pivot は新しい（アニメの骨名は同じ） |
-| イサナ whale_chaser | 690 / 2,362 | 9 | `tools/install/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の A つば広帽の旅人） | 滑らか版。頭は 1 つの丸い塊で、顔は表面に描く（太い眉・目・口）。つば広の帽子は頭にかぶさる殻、マフラー、ボタンつきのコート、手袋、ブーツ、背負い袋（丸めた地図）。`hair`・`hood2` の骨は箱なしの空 |
+| 語り部 storyteller | 688 / 1,981 | 10 | 今の geo が正本（B 頭巾の語り部。入れた道具は消した） | 滑らか版。頭は 1 つの丸い塊（0.25 の段の球）で、目・眉・口・頬を塊の表面に描く。鼻と眉の張りは同じ肌の塊の出っぱり。頭巾は頭にかぶさる殻（`hair`・`hair2`）で、前に生え際の窓を開ける。首と襟があり頭が体の軸に載る。肩掛け、帯、結び紐、組んだ手。床の高さの骨の pivot は新しい（アニメの骨名は同じ） |
+| イサナ whale_chaser | 690 / 2,362 | 9 | 今の geo が正本（A つば広帽の旅人。入れた道具は消した） | 滑らか版。頭は 1 つの丸い塊で、顔は表面に描く（太い眉・目・口）。つば広の帽子は頭にかぶさる殻、マフラー、ボタンつきのコート、手袋、ブーツ、背負い袋（丸めた地図）。`hair`・`hood2` の骨は箱なしの空 |
 | 見る者 watcher | 226 / 1,290 | 7 | データを直接直す（生成スクリプトはない） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
 
 - 語り部・イサナ・見る者は低ポリのメッシュ（9.6）。下の滑らか版の記述は、`LowPoly.enabled = false` のときの箱の描画の話になる。
@@ -407,7 +407,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - 負荷（この PC、1280x720、垂直同期なし、目の発光あり、他の作業と並行なので目安）: 番兵 36 体は低ポリ 7.8〜11.0 ms、cube（1,416 面）24.4〜29.7 ms。20 体は低ポリ 5.2〜7.1 ms、cube 12.0〜15.1 ms
 ### 9.6 採用した低ポリ（一覧。`python tools/install/install_lowpoly_five.py` で 5 体を一度に入れ直せる）
 
-> 旅の職人（21 の P4）と鯨道の旅装（P5）も同じ低ポリの流れで入れた: 職人は案 B「槌と砥石の荷人」（約 1000 三角形（閉じたメッシュ。自己テストは 740〜1200））の 1 つのメッシュに章ごとの 4 色の絵（`tools/install/install_artisan.py`。NPC の geo の root は yaw 180 度、アニメは `tools/gen/items/gen_artisan_anim.py`）、旅装は防具の様式 C の 4 部位（600 三角形（閉じたメッシュ）。`tools/install/install_whale_road_assets.py`）。仕様は 07 の 3.6・03 の 5.8。
+> 旅の職人は NPC v2 の人ごとの形（`npc_artisan`。07 の 3.6）。鯨道の旅装（P5）は防具の様式 C の 4 部位（600 三角形（閉じたメッシュ）。`tools/install/install_whale_road_assets.py`）。仕様は 07 の 3.6・03 の 5.8。
 
 | モブ | 採用 | 三角形 | 骨 | 入力（`docs/review/lowpoly_roughs/`） |
 | --- | --- | --- | --- | --- |
@@ -495,7 +495,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - **見る者**: `WatcherRenderer` は `LowPolyGeoRenderer` の派生で、半透明の描画（`entityTranslucent`）と「薄れる」濃さ、目のにじみ（glint）は箱のときのまま。目の座標は、低ポリの geo には cube が無いので、メッシュの骨 `eyes` の頂点の平均（焼いたあとの座標）から取る。目の光は `textures/lowpoly/watcher_glow.png`（アトラスの光る画素の色を黒の上に）。台本用に `ShotRunner` に `watcher x y z yaw`（足元の位置・体の向き。消えずに立つ。`WatcherClient.placeForShot`）を足した。
 - **確かめ**: 台本は `python tools/gen/shots/gen_lowpoly_ember_npc_shots.py` が `tools/shots/lp_ember_{thrall,moth,roller,smith,heart_p1,heart_p2,heart_p3,perf}.txt`・`lp_npc.txt`・`lp_watcher.txt` に書く（新しい世界は最初の約 360 tick が開幕の字幕なので、最初の絵の前に 330 tick 待つ。心臓の段階 2・3 は体力を下げた AI ありの心臓が吠えて進むのを待つ。燠虫の丸まりは、AI の燠虫と生存者の人が 3〜14 ブロックにいると丸まる）。比較シートは `python tools/sheets/lowpoly_ember_npc_sheets.py` が `docs/review/previews/lp_ember_{thrall,moth,roller,smith,heart,heart_cinematic}_sheet.png`・`lp_npc_{storyteller,isana}_sheet.png`・`lp_watcher_sheet.png` に書く（上がメッシュ、下が箱）。見る者の夜の 14・40 ブロックは暗いので、シートでは明るさを 3 倍にしてある（元の絵は `run/shots/lp_watcher/` に出る）。
 - **負荷**（`tools/shots/lp_ember_perf.txt`、灰被り 8（殻 4・燃え上がり 4）+ 火の粉蛾 8 + 燠虫 8 + 鍛え手 1 = 25 体、1280x720、垂直同期なし、他の作業と並行）: 低ポリ 7.6〜11.3 ms/frame、箱 16.8〜27.4 ms/frame（2〜3 倍ほど速い）。
-- **滑らかな NPC のラフ**: `docs/review/smooth_npc_roughs/<名前>/<案>/` の一式は消してある（比較シートの png だけ `docs/review/smooth_npc_roughs/` に残る）。`tools/install/install_smooth_npcs.py` は回らない。
+- **滑らかな NPC のラフ**: `docs/review/smooth_npc_roughs/<名前>/<案>/` の一式は消してある（比較シートの png だけ `docs/review/smooth_npc_roughs/` に残る）。
 
 ### 9.7 層の主・歪んだ王（深淵のボス 9 型。`python tools/gen/abyss/gen_abyss_boss_models.py` で一度に入る）
 
@@ -537,7 +537,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 | 5 | 5 |
 | 6 | 6 |
 | 7（試作の結果） | 1.1 の「学んだこと」、4.4（番兵）、4.2（潮殻の心臓）、4.3（雷獣） |
-| 8（作り直しの担当の分け方） | （削除: 担当の分け方は作業の経緯。敵・中ボス・心臓・NPC・gear・巨神の今の形は 4。`tools/gen/mobs/gen_mobs.py`・`tools/install/install_tide_mobs.py` が指す「15 の 8 章、担当 1a」は 4.4） |
+| 8（作り直しの担当の分け方） | （削除: 担当の分け方は作業の経緯。敵・中ボス・心臓・NPC・gear・巨神の今の形は 4。`tools/install/install_tide_mobs.py` が指す「15 の 8 章、担当 1a」は 4.4） |
 | 8.1（心臓の記録） | 4.2 |
 | 9（判断が要る点） | 8 |
 | 10（武器と防具の記録） | 4.6（防具は 16） |

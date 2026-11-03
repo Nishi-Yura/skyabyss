@@ -196,6 +196,15 @@ public final class Ch1SitesSelfTest {
         // 人のブロックを壊さない: 部品を置き直す検査は ChapterSites の「ch1 sites」「chapter sites (conflict)」が見る。ここでは、洞の殻の外は触っていない (深さの下限)
         Blueprint bp = Blueprint.get("ch1_cleft_shell_cave");
         check(bp.minY >= -17 && bp.maxY <= 5, "the cave blueprint reaches y " + bp.minY + ".." + bp.maxY);
+        // 戸口 (部品の x -1..1・y 0..1・z -1) は開いている (冒険モードで壊さずに入れる)
+        CleftCave.openMouth(level, cave);
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 1; y++) {
+                BlockPos at = Blueprint.transform(x, y + 1, -1, jp.revati.skyabyss.opening.site.SiteFinder.rot(cave.yaw),
+                        jp.revati.skyabyss.opening.site.SiteFinder.mirror(cave.yaw), cave.pos.below());
+                check(!level.getBlockState(at).isSolid(), "the cave doorway is blocked at " + at + " (" + level.getBlockState(at) + ")");
+            }
+        }
         songChamber(server, level);
     }
 

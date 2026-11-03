@@ -184,6 +184,10 @@ public final class TrialRoute {
 
     // 順路を終える (心臓を止めた・あきらめ・背を出た・グループのリセット)。記録とメモリの待ちを消す
     public static void finish(ServerLevel back, UUID group) {
+        // 挑戦の加護は順路が終わると消える (RouteBoons)
+        for (ServerPlayer m : members(back, group)) {
+            RouteBoons.clear(m);
+        }
         BackGroupData.Record r = BackGroupData.get(back).peek(group);
         if (r != null) {
             TrialSlot.release(back, r);
@@ -311,6 +315,10 @@ public final class TrialRoute {
         Component what = mid ? TrialMidBoss.name(titan) : next >= LAST_STEP ? Component.empty() : trialName(defOf(draw, next));
         for (ServerPlayer p : members(back, group)) {
             Notice.bar(p, ModText.progress(mid ? "message.skyabyss.route.next_mid" : next >= LAST_STEP ? "message.skyabyss.route.next_heart" : "message.skyabyss.route.next", what));
+            // 歩・智・闘を越えるたびに、一人ずつ加護を一つ選ぶ (RouteBoons)
+            if (step <= 3) {
+                RouteBoons.offer(p);
+            }
         }
         SkyAbyss.LOGGER.info("Route of the {}: group {} cleared step {} ({}), next {}{}", titan, group, step, key, next, mid ? " (mid-boss)" : "");
     }
@@ -856,6 +864,8 @@ public final class TrialRoute {
         long t = r.has(START) ? Math.max(0, back.getGameTime() - r.getLong(START)) : 0;
         TrialCodex codex = TrialCodex.get(back.getServer());
         for (UUID id : party(r)) {
+            // 順路が終わったので、挑戦の加護は消える (RouteBoons)
+            RouteBoons.clear(back.getServer(), id);
             ServerPlayer p = back.getServer().getPlayerList().getPlayer(id);
             boolean best = codex.addRoute(id, titan, t);
             if (p != null) {

@@ -55,5 +55,7 @@
   "gui.skyabyss.mount.locked.ch8": "After the finale",
   "message.skyabyss.mount.locked.ch6": "Not in stock yet (unlocks in chapter 5, past the abyss gate)",
   "message.skyabyss.mount.locked.ch7": "Not in stock yet (unlocks once you reach the moon)",
-  "message.skyabyss.mount.locked.ch8": "Not in stock yet (unlocks after the finale)"
+  "message.skyabyss.mount.locked.ch8": "Not in stock yet (unlocks after the finale)",
+  "message.skyabyss.mount.tandem_on": "%s climbed on behind you",
+  "message.skyabyss.mount.tandem_party": "Only the rider's party members can ride behind"
 }

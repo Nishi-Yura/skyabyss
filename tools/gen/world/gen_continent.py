@@ -436,6 +436,29 @@ def curve(points, step=24.0, seed=31):
     return [[int(round(q[0])), int(round(q[1]))] for q in res]
 
 
+def road_curve(points):
+    """街道の線。門の外の短い寄せ (長さ 30 以下で東西か南北にそろえた最初・最後の区間) は、曲線にせずまっすぐ引く
+    (2026-11-03 の声「まだ道の上に建造物が立つ」: 曲線が門の向こうへはみ出して、町の中の建物の下へ入り込んでいた)。
+    寄せのない道 (はじまりの島の道 = 島の地形の元) は curve と同じ"""
+    pts = [tuple(p) for p in points]
+
+    def stub(a, b):
+        return len(pts) >= 3 and math.hypot(b[0] - a[0], b[1] - a[1]) <= 30 and (a[0] == b[0] or a[1] == b[1])
+
+    def straight(a, b):
+        n = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1]) // 8))
+        return [[int(round(a[0] + (b[0] - a[0]) * k / n)), int(round(a[1] + (b[1] - a[1]) * k / n))] for k in range(n + 1)]
+
+    head = stub(pts[0], pts[1])
+    tail = stub(pts[-1], pts[-2])
+    out = curve(pts[(1 if head else 0):(len(pts) - 1 if tail else len(pts))])
+    if head:
+        out = straight(pts[0], pts[1])[:-1] + out
+    if tail:
+        out = out[:-1] + straight(pts[-2], pts[-1])
+    return out
+
+
 # 土地の名前 (地図に出す。lang の map.skyabyss.continent.<id>)
 REGION_NAMES = {'岩鯨の丘陵': 'whale', '潮の浜': 'tide', '嵐の高地': 'storm', '灰の荒野': 'ember', '外れの谷': 'outskirts', 'はじまりの島': 'outskirts', '内海': 'inland_sea'}
 LEVEL_REGIONS = ['capital', 'whale', 'tide', 'storm', 'ember']
@@ -497,7 +520,7 @@ def paint_map(lay, height, biome, path):
             d.point((x, y), fill=(60, 40, 36))
     # 道と渡し船
     for road in lay['roads']:
-        pts = [px(q) for q in curve(road)]
+        pts = [px(q) for q in road_curve(road)]
         # 2026-10-27 の声「マップもっと見やすく」: 道を太く濃く (縁の明るい線 + 濃い茶の芯)
         d.line(pts, fill=(246, 236, 210), width=7, joint='curve')
         d.line(pts, fill=(98, 60, 32), width=4, joint='curve')
@@ -596,7 +619,7 @@ def write_layout(lay, height=None):
         'dock': pt(lay.get('dock', lay['start'])),
         'towns': {towns[n]: pt(p) for n, p in lay['towns']},
         'sites': {kinds[n]: pt(p) for n, p in lay['sites']},
-        'roads': [curve(r) for r in lay['roads']],
+        'roads': [road_curve(r) for r in lay['roads']],
         'ferries': [[pt(p) for p in r] for r in lay['ferries']],
         'names': {REGION_NAMES[n]: pt(p) for n, p in lay['names']},
         'levels': {k: [lv.replace('Lv ', '').replace('–', '-'), pt(p)] for k, (lv, p) in zip(LEVEL_REGIONS, lay['levels'])},

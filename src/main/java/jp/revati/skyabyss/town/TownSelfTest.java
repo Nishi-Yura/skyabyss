@@ -131,11 +131,10 @@ public final class TownSelfTest {
             check(f, QuestManager.quest(tq.id()) != null, "quest missing " + tq.id());
         }
         String a = "/assets/skyabyss/";
-        check(f, resource(a + "animations/entity/town_guest.animation.json"), "town_guest animation");
         for (TownGuests.Guest g : TownGuests.ALL) {
             check(f, DialogueManager.dialogue(g.role()) != null, "dialogue missing " + g.role());
             check(f, TownQuests.byId(g.quest()) != null && QuestManager.quest(g.quest()) != null, "guest quest " + g.quest());
-            // 体の絵は v2 (npc_guest_<人>)。古い立方体の絵 guest_<人> は 2026-10-29 に消した
+            // 体の絵 (npc_guest_<人>)
             check(f, resource(a + "textures/lowpoly/npc_guest_" + g.id() + ".png"), "texture npc_guest_" + g.id());
             for (String face : Dialogue.FACES) {
                 check(f, resource(a + "textures/gui/npc/face/guest_" + g.id() + "_" + face + ".png"), "face guest_" + g.id() + " " + face);

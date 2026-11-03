@@ -196,6 +196,20 @@ public final class CircuitSelfTest {
             run.bonus = CircuitRun.Bonus.TIME;
             Circuits.complete(level, run);
             check(f, run.marks == marks0 + 3 && run.end == end0 + Circuits.TIME_BONUS, "a blue pillar did not add time");
+            // 紫の柱: 選ぶと呪いが重なり、敵の体力と攻撃が上がる (巡り路の終わりまで)
+            CircuitRun.Offer o0 = run.offers.get(0);
+            run.offers.set(0, new CircuitRun.Offer(o0.kind(), o0.spot(), o0.place(), o0.spot2(), o0.place2(), CircuitRun.Bonus.CURSE, o0.poi(), o0.poi2()));
+            Circuits.adopt(level, run, 0);
+            net.minecraft.world.entity.Mob cursed = net.minecraft.world.entity.EntityType.ZOMBIE.create(level);
+            if (cursed != null) {
+                double hp0 = cursed.getMaxHealth();
+                Circuits.curse(cursed, run);
+                check(f, run.curses() == 1 && Math.abs(cursed.getMaxHealth() - hp0 * 1.25) < 0.01 && cursed.getHealth() == cursed.getMaxHealth(),
+                        "a purple pillar did not curse the foes (" + run.curses() + ", " + cursed.getMaxHealth() + ")");
+                cursed.discard();
+            }
+            run.curses = 0;
+            run.bonus = CircuitRun.Bonus.NONE;
             run.marks = marks0;
             discard(level, run);
 

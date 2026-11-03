@@ -102,3 +102,14 @@
 敵はみな、環境音・被弾・倒れる音を持つ（月・雲海・深淵の A/B 組・章四の地上の敵・余燼の背・三つの心臓の倒れる音）。音は材質と声から作り、名前は `<種>_ambient` / `_hurt` / `_death`。
 素材は `tools/gen/sound/gen_mob_voices.py`（`python tools/gen/sound/gen_mob_voices.py`。乱数の種は固定）が `assets/skyabyss/sounds/voices/*.ogg` に書く。登録は各 Setup（月 `skyabyss_moon`・雲海 `skyabyss_finale`・深淵 B `skyabyss_abyss_b`・深淵 A `skyabyss_abyss_a`・章四 `skyabyss_ch4`・余燼・心臓は `skyabyss`）。
 月・雲海・深淵の種は `entity/MobVoices` の表で引く（`AbyssMobB` と `AbyssMob` が `getAmbientSound` / `getHurtSound` / `getDeathSound` を返す）。表にない種はバニラの音。
+
+## 7. 逃げる獣（2026-11-03。`world/continent/RareBeast`・`RareBeasts`。ドラクエのメタルスライム）
+
+- 土地ごとに一種、形の違う小さな獣（選んだ案はみな推奨）: 都のまわり = 鈴尾の野兎・鯨見 = 苔石の丸獣・汐守 = 真珠背の海獺・風待 = 雷尾の鼬・灰炉 = 熔背の土竜。はじまりの島には出ない。モデルは `tools/gen/mobs/rare_beasts_lp/`（ラフは `tools/rough/lowpoly/rare_beasts/roughs.py`）。
+- 出る: 大陸を道ぞい（道から 26 まで）に旅している人に、20 秒ごとに 3.5% で一体、人の前の少し先に出る。都（170）と町（110）の近くには出ない。一人に一体まで、出たあと 6 分は出ない。時刻や天気では縛らない。出たときに知らせの一行（「草むらの先で、小さな鈴が鳴った」など）。
+- 落ち着き: 人が 12（走る・乗っていると 18）まで来るか、傷を受けると逃げ出す。45 秒誰も来なければ黙って去る。
+- 逃げ方: 野兎 = 跳ねて走り、尾の鈴が鳴る / 丸獣 = 丸まって転がり、速い / 海獺 = 近くの水へ向かい、水の中は速く泳ぐ / 鼬 = 稲妻のように左右へ折れて走り、尾から火花 / 土竜 = 5 秒ごとに潜り、10〜14 離れた所から出る（潜っている間は傷つかない）。
+- 硬さ: 体力 8（画面では 80）、一撃で減るのは 2.5 まで。
+- 逃げ切る: 26 秒逃げきるか、42 より遠くに人がいなくなって 3 秒で消える。出した人はその日（サーバーの日付）、その土地の獣にもう出会わない。
+- 報い（倒した人）: 鐘銭（野兎 300・丸獣 450・海獺 600・鼬 800・土竜 1000）・稀の封の箱一つ（土地の帯 1〜5）・経験値（見どころの発見の 3 倍）。捕まえた数を覚える。
+- 開発・撮影 `/skyabyss_beast spawn <獣>`・`/skyabyss_beast unlock`。撮影 `tools/shots/rare_beasts.txt`。自己テスト `rare beasts`。
