@@ -91,7 +91,7 @@ public final class CoreArena {
         level.addFreshEntity(e);
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, players(level).size());
-        jp.revati.skyabyss.combat.PartyScale.resist(e, 2.6);
+        jp.revati.skyabyss.combat.PartyScale.resist(e, 3.03);
         e.playAction("roar");
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 120, 2.0, 2.0, 2.0, 0.08);
         level.playSound(null, at, MoonMobsSetup.CORE_ROAR.get(), SoundSource.HOSTILE, 3.0f, 0.7f);

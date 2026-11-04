@@ -138,7 +138,7 @@ public class FullKeeper extends MoonMob {
         release = -1;
         charge = 0;
         kneelFor = KNEEL_TICKS;
-        jp.revati.skyabyss.combat.BossOpenings.open(this, KNEEL_TICKS);
+        jp.revati.skyabyss.combat.BreakGauge.solved(this, KNEEL_TICKS);
         playAction("kneel");
         playSound(MoonMobsSetup.KEEPER_KNEEL.get(), 2.0f, 0.8f);
         sl.sendParticles(ParticleTypes.END_ROD, orb().x, orb().y, orb().z, 50, 1.0, 1.0, 1.0, 0.15);

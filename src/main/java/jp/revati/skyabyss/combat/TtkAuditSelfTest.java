@@ -36,6 +36,9 @@ public final class TtkAuditSelfTest {
     static final String[] REGIONS = {"meadow", "island", "whale", "tide", "storm", "ember"};
     // 土地の番号ごとの目安のレベル {下, 上} (ContinentAreas の REGION_LEVELS と同じ)
     static final int[][] LEVELS = {{1, 4}, {1, 1}, {4, 12}, {12, 18}, {18, 24}, {24, 30}};
+    // 主を倒すまでの秒の目安 (一人。崩しゲージ込みの見積もり BreakModel。docs/design/47 の 2.1): 中ボス・名のある敵
+    public static final double[] MID_BAND = {60, 90};
+    public static final double[] NAMED_BAND = {30, 45};
 
     private TtkAuditSelfTest() {
     }
@@ -99,10 +102,72 @@ public final class TtkAuditSelfTest {
                 }
             }
         }
+        bosses(level, at, f);
         f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ttk audit FAILED: {}", m));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ttk audit PASSED (region foes fall within {} full hits / {} s, wardens within {} s, to a plain weapon of the region's level)",
-                    MAX_HITS, MAX_SECONDS, ELITE_SECONDS);
+            SkyAbyss.LOGGER.info("SELFTEST ttk audit PASSED (region foes fall within {} full hits / {} s, wardens within {} s, to a plain weapon of the region's level; "
+                    + "mid bosses {}-{} s and named foes {}-{} s with the break gauge)", MAX_HITS, MAX_SECONDS, ELITE_SECONDS, MID_BAND[0], MID_BAND[1],
+                    NAMED_BAND[0], NAMED_BAND[1]);
+        }
+    }
+
+    // 中ボス 4 体 (その章の想定の装備 +0。HeartBalance と同じ人) と、土地ごとの名のある敵 (土地の目安のレベルの野の武器) を、崩しゲージ込みで倒す秒
+    static void bosses(ServerLevel level, BlockPos at, List<String> f) {
+        Object[][] mids = {
+            {jp.revati.skyabyss.registry.ModEntities.WHALEBONE_CAPTAIN.get(), "stone_whale"},
+            {jp.revati.skyabyss.titan.tide.back.TideBackSetup.TIDE_BECKONER.get(), "tide_shell"},
+            {jp.revati.skyabyss.titan.storm.raiju.RaijuSetup.RAIJU.get(), "thunder_wing"},
+            {jp.revati.skyabyss.titan.ember.smith.EmberSmithSetup.ASH_SMITH.get(), "ember"},
+        };
+        for (Object[] m : mids) {
+            Entity en = ((EntityType<?>) m[0]).create(level);
+            if (!(en instanceof net.minecraft.world.entity.LivingEntity le)) {
+                f.add("could not make the mid boss " + m[0]);
+                continue;
+            }
+            String stage = (String) m[1];
+            var s = HeartBalance.stage(stage);
+            double strength = jp.revati.skyabyss.item.GearCurve.strengthMultiplier(s.level());
+            double hit = s.dps0() / jp.revati.skyabyss.item.GearCurve.SWORD_SPEED * strength;
+            double dps = s.dps0() * strength * jp.revati.skyabyss.item.GearCurve.armorTaken(hit, le.getAttributeValue(Attributes.ARMOR),
+                    le.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+            double resist = PartyScale.typeResist(le);
+            BreakModel.Fight fight = BreakModel.fight(le.getMaxHealth(), dps * HeartBalance.UPTIME / resist, HeartBalance.UPTIME);
+            SkyAbyss.LOGGER.info(String.format(Locale.ROOT, "SELFTEST ttk audit mid    %-28s hp %6.1f armor %4.1f resist %.2f | dps %5.2f at %s +0 | %5.1f s, %d breaks",
+                    BuiltInRegistries.ENTITY_TYPE.getKey(le.getType()), le.getMaxHealth(), le.getAttributeValue(Attributes.ARMOR), resist, dps, stage, fight.seconds(),
+                    fight.breaks()));
+            if (fight.seconds() < MID_BAND[0] || fight.seconds() > MID_BAND[1]) {
+                f.add(String.format(Locale.ROOT, "mid boss %s takes %.1f s alone (want %s-%s)", BuiltInRegistries.ENTITY_TYPE.getKey(le.getType()), fight.seconds(),
+                        MID_BAND[0], MID_BAND[1]));
+            }
+            en.discard();
+        }
+        for (int region = 0; region < REGIONS.length; region++) {
+            jp.revati.skyabyss.world.continent.NamedFoes.Def d = jp.revati.skyabyss.world.continent.NamedFoes.def(region);
+            if (d == null) {
+                continue;
+            }
+            Foe foe = foe(level, d.entity(), region, at);
+            List<double[]> weapons = weapons(LEVELS[region][0], LEVELS[region][1]);
+            if (foe == null || weapons.isEmpty()) {
+                f.add("could not measure the named foe of " + REGIONS[region]);
+                continue;
+            }
+            double hp = foe.hp() * d.health();
+            List<Double> secs = new ArrayList<>();
+            List<Double> breaks = new ArrayList<>();
+            for (double[] w : weapons) {
+                double dps = afterArmor(1 + w[0], foe) * w[1];
+                BreakModel.Fight fight = BreakModel.fight(hp, dps * HeartBalance.UPTIME, HeartBalance.UPTIME);
+                secs.add(fight.seconds());
+                breaks.add((double) fight.breaks());
+            }
+            double ms = median(secs);
+            SkyAbyss.LOGGER.info(String.format(Locale.ROOT, "SELFTEST ttk audit named  %-6s %-21s hp %6.1f armor %4.1f | %5.1f s, %.0f breaks (%d weapons Lv %d-%d)",
+                    REGIONS[region], d.entity(), hp, foe.armor(), ms, median(breaks), weapons.size(), LEVELS[region][0], LEVELS[region][1]));
+            if (ms < NAMED_BAND[0] || ms > NAMED_BAND[1]) {
+                f.add(String.format(Locale.ROOT, "named foe of %s takes %.1f s alone (want %s-%s)", REGIONS[region], ms, NAMED_BAND[0], NAMED_BAND[1]));
+            }
         }
     }
 

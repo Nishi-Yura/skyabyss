@@ -67,19 +67,20 @@ public final class HeartBalanceSelfTest {
         SkyAbyss.LOGGER.info("[selftest] heart balance {}: effective hp {} (max {} x resist {}), player dps {} at +0 (x{} uptime {})",
                 id, fmt(p.effectiveHp()), p.maxHp(), p.resist(), fmt(dps), fmt(HeartBalance.UPTIME), "");
 
-        // 戦いの長さ
+        // 戦いの長さ (崩しゲージ込み)。一人は心臓ごとの帯、人数が増えても一人の ±20%
+        double[] band = HeartBalance.band(id);
         double solo = HeartBalance.fightSeconds(p, 1, 1.0);
+        ok(f, solo >= band[0] && solo <= band[1], id + " solo fight takes " + fmt(solo) + " s (want " + band[0] + "-" + band[1] + ")");
         for (int n : new int[] {1, 2, 4, 6}) {
             double t = HeartBalance.fightSeconds(p, n, 1.0);
-            SkyAbyss.LOGGER.info("[selftest] heart balance {}: {} player(s) -> {} s (scale x{})", id, n, fmt(t), fmt(HeartBalance.partyScale(n)));
-            ok(f, t >= HeartBalance.BAND_MIN && t <= HeartBalance.BAND_MAX, id + " fight with " + n + " players takes " + fmt(t) + " s (want "
-                    + HeartBalance.BAND_MIN + "-" + HeartBalance.BAND_MAX + ")");
+            SkyAbyss.LOGGER.info("[selftest] heart balance {}: {} player(s) -> {} s, {} breaks (scale x{})", id, n, fmt(t), HeartBalance.fight(p, n, 1.0).breaks(),
+                    fmt(HeartBalance.partyScale(n)));
             ok(f, t >= solo * 0.8 && t <= solo * 1.2, id + " fight with " + n + " players takes " + fmt(t) + " s vs solo " + fmt(solo) + " (want within 20%)");
         }
         double plus10 = HeartBalance.fightSeconds(p, 1, stage.dps10() / stage.dps0());
         SkyAbyss.LOGGER.info("[selftest] heart balance {}: +10 weapon solo -> {} s; half-prepared (x0.7 dps) -> {} s", id, fmt(plus10),
                 fmt(HeartBalance.fightSeconds(p, 1, 0.7)));
-        ok(f, plus10 >= 150, id + " fight with a +10 weapon takes only " + fmt(plus10) + " s (want >= 150)");
+        ok(f, plus10 >= band[0] * 0.75, id + " fight with a +10 weapon takes only " + fmt(plus10) + " s (want >= " + band[0] * 0.75 + ")");
         ok(f, HeartBalance.fightSeconds(p, 1, 0.7) <= 420, id + " fight with 70% of the expected dps takes over 7 minutes");
 
         // 一撃

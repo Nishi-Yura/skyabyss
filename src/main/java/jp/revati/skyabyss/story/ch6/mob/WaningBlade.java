@@ -211,7 +211,7 @@ public class WaningBlade extends MoonMob {
             return;
         }
         staggerFor = STAGGER_TICKS;
-        jp.revati.skyabyss.combat.BossOpenings.open(this, STAGGER_TICKS);
+        jp.revati.skyabyss.combat.BreakGauge.solved(this, STAGGER_TICKS);
         playAction("kneel");
         playSound(MoonMobsSetup.BLADE_STAGGER.get(), 2.0f, 0.8f);
         sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2, getZ(), 40, 0.8, 1.2, 0.8, 0.12);

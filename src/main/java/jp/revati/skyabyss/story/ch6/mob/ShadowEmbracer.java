@@ -135,7 +135,7 @@ public class ShadowEmbracer extends MoonMob {
         // 星灯りの中に出たら固まる
         if (!sunk() && !frozen() && freezeCooldown == 0 && roarFor == 0 && StarLamps.inLight(level(), position().add(0, 1, 0))) {
             frozenFor = FREEZE_TICKS;
-            jp.revati.skyabyss.combat.BossOpenings.open(this, FREEZE_TICKS);
+            jp.revati.skyabyss.combat.BreakGauge.solved(this, FREEZE_TICKS);
             entityData.set(FROZEN, true);
             playAction("frozen");
             playSound(MoonMobsSetup.EMBRACER_FROZEN.get(), 1.5f, 0.9f);

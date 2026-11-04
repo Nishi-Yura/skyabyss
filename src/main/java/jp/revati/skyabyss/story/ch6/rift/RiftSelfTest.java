@@ -275,7 +275,9 @@ public final class RiftSelfTest {
                     float h1 = lord.getHealth();
                     lord.invulnerableTime = 0;
                     lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
-                    check(f, h1 - lord.getHealth() >= 70f, "the staggered blade did not take extra damage: " + (h1 - lord.getHealth()));
+                    // 崩れた剣守は崩しゲージが半分溜まる (仕掛けを解いた。BreakGauge.solved)
+                    check(f, h1 - lord.getHealth() >= 38f && (jp.revati.skyabyss.combat.BreakGauge.fill(lord) >= jp.revati.skyabyss.combat.BreakGauge.SOLVED - 1.0E-6 || jp.revati.skyabyss.combat.BreakGauge.broken(lord)), "the staggered blade did not open up (damage " + (h1 - lord.getHealth())
+                            + ", gauge " + jp.revati.skyabyss.combat.BreakGauge.fill(lord) + ")");
                 }
                 RiftArena.waning(moon, lord);
                 check(f, RiftArena.crumbled(), "the third phase did not crumble the floor");

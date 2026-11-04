@@ -212,8 +212,8 @@ public final class EmberHeartSelfTest {
 
     // ---------------------------------------------------------------- 数 (13 の 8.2・8.3節の表)
     private static void checkNumbers(List<String> f, List<String> notes) {
-        check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 1.84f,
-                "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 1.84)", f);
+        check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 2.07f,
+                "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 2.07)", f);
         check(EmberHeart.BREATH_DAMAGE == 43f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 32.5f && EmberHeart.PULSE_HEAT == 10f
                 && EmberHeart.ORB_DAMAGE == 38f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
                 && EmberHeart.GALE_DAMAGE == 40.5f && EmberHeart.PELLET_DAMAGE == 24.5f && EmberHeart.FADING_DAMAGE == 50f

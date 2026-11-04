@@ -214,7 +214,9 @@ public final class CliffSelfTest {
                 lord.invulnerableTime = 0;
                 lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                 float d2 = h1 - lord.getHealth();
-                check(f, d2 >= 70f, "the toppled scale did not take extra damage: " + d2);
+                // 倒れた秤は硬さが外れ (×0.8)、崩しゲージが半分溜まる (仕掛けを解いた。BreakGauge.solved)
+                check(f, d2 >= 38f && d2 > d1 * 2 && (jp.revati.skyabyss.combat.BreakGauge.fill(lord) >= jp.revati.skyabyss.combat.BreakGauge.SOLVED - 1.0E-6 || jp.revati.skyabyss.combat.BreakGauge.broken(lord)), "the toppled scale did not open up (damage " + d2 + ", gauge "
+                        + jp.revati.skyabyss.combat.BreakGauge.fill(lord) + ")");
                 CliffArena.summon(moon);
                 int n = CliffArena.lords(moon).size();
                 check(f, n == 1, "summoning again should keep one lord, found " + n + " (lord at " + lord.blockPosition() + ", alive " + lord.isAlive() + ")");

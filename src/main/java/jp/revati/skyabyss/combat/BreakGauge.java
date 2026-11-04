@@ -165,7 +165,12 @@ public final class BreakGauge {
 
     // 主ごとの仕掛けを解いた (心臓の領域など): 大きさの SOLVED を一度に。大きな隙も開ける
     public static void solved(LivingEntity boss) {
-        BossOpenings.open(boss, BossOpenings.BIG_OPEN_TICKS);
+        solved(boss, BossOpenings.BIG_OPEN_TICKS);
+    }
+
+    // 主が自分で持つ「解かれた」弱い時間 (月の主の倒れる・膝をつく・崩れる・固まる): その長さの隙と、大きさの SOLVED
+    public static void solved(LivingEntity boss, int ticks) {
+        BossOpenings.open(boss, ticks);
         State st = state(boss);
         add(boss, size(boss, st.breaks) * SOLVED);
     }

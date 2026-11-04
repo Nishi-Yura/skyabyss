@@ -239,7 +239,9 @@ public final class FieldSelfTest {
                 lord.invulnerableTime = 0;
                 lord.hurt(moon.damageSources().playerAttack(hitter), 50f);
                 float d2 = h1 - lord.getHealth();
-                check(f, d2 >= 70f, "the kneeling keeper did not take extra damage: " + d2);
+                // 膝をついた灯守は硬さが外れ、崩しゲージが半分溜まる (仕掛けを解いた。BreakGauge.solved)
+                check(f, d2 >= 38f && d2 > d1 * 2 && (jp.revati.skyabyss.combat.BreakGauge.fill(lord) >= jp.revati.skyabyss.combat.BreakGauge.SOLVED - 1.0E-6 || jp.revati.skyabyss.combat.BreakGauge.broken(lord)), "the kneeling keeper did not open up (damage " + d2 + ", gauge "
+                        + jp.revati.skyabyss.combat.BreakGauge.fill(lord) + ")");
                 FieldArena.summon(moon);
                 int k = FieldArena.lords(moon).size();
                 check(f, k == 1, "summoning again should keep one keeper, found " + k);
