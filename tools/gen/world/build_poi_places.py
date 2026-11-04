@@ -312,7 +312,7 @@ def woodpile(p):
 
 
 def beacon_cairn(p):
-    """狼煙の台: 石の台と火"""
+    """狼煙の台: 石の台と火 (四辺は中へ上がる段、四隅は角の段 = 外角)"""
     for x in (-1, 0, 1):
         for z in (-1, 0, 1):
             p.set(x, -1, z, "minecraft:cobblestone")
@@ -322,7 +322,7 @@ def beacon_cairn(p):
                 f = {(1, 0): "west", (-1, 0): "east", (0, 1): "north", (0, -1): "south"}[(x, z)]
                 p.set(x, 0, z, stairs("cobblestone", f))
             else:
-                p.set(x, 0, z, slab("mossy_cobblestone"))
+                p.set(x, 0, z, stairs("mossy_cobblestone", "west" if x == 1 else "east"))
     p.set(0, 1, 0, "minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]")
 
 
@@ -652,6 +652,9 @@ def signpost():
             if abs(x) + abs(z) == 1 and z != 1:
                 f = {(1, 0): "west", (-1, 0): "east", (0, -1): "south"}[(x, z)]
                 cells[(x, 0, z)] = stairs("stone_brick", f)
+            elif abs(x) == 1 and z == -1:
+                # 北の二隅は横と北の段の列が出会うので角の段 (外角)。南の二隅は看板の前の半ブロックの列に続く
+                cells[(x, 0, z)] = stairs("mossy_stone_brick", "west" if x == 1 else "east")
             elif abs(x) == 1 and abs(z) == 1:
                 cells[(x, 0, z)] = slab("mossy_stone_brick")
     column(cells_bp(cells), 0, 0, 0, 3, log("dark_oak_log"))
@@ -775,9 +778,18 @@ def main():
 
     for code, key in (("ja_jp", "ja"), ("en_us", "en")):
         path = os.path.join(LANG, code + ".json")
-        data = json.load(open(path, encoding="utf-8"))
-        data = {k: v for k, v in data.items() if not k.startswith(PREFIXES)}
-        data.update(lang[key])
+        old = json.load(open(path, encoding="utf-8"))
+        new = lang[key]
+        # 今ある鍵は今の場所のまま書き直し、もう無い鍵 (この道具の頭のもの) は消し、新しい鍵は終わりに足す (前は全部を終わりへ回して並びが崩れた)
+        data = {}
+        for k, v in old.items():
+            if k in new:
+                data[k] = new[k]
+            elif not k.startswith(PREFIXES):
+                data[k] = v
+        for k, v in new.items():
+            if k not in data:
+                data[k] = v
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     print(len(built), "sites,", sum(1 for p in pois if p["kind"] == "signpost"), "signposts,", sum(1 for p in pois if p["kind"] == "gone"), "gone")
