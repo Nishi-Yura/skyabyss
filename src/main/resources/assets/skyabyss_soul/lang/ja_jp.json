@@ -92,5 +92,7 @@
   "message.skyabyss.rebirth.crystal_bonus": "結晶がひとつ、余分に出た。",
   "growth.skyabyss.reason.guide": "導き",
   "skyabyss_pouch.category.spare": "余白",
-  "skyabyss_pouch.screen.spare_empty": "余白の枠: 好きな品を 1 種類、倒れても残る形で預けられる"
+  "skyabyss_pouch.screen.spare_empty": "余白の枠: 好きな品を 1 種類、倒れても残る形で預けられる",
+  "gui.skyabyss.rebirth.page.board": "魂盤",
+  "gui.skyabyss.rebirth.page.terms": "残るもの"
 }
