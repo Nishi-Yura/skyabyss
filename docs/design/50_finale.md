@@ -264,6 +264,20 @@
 
 - 作りの場所: 選びと記録と音 `story/finale/FinaleEnding` (記録は人のデータ `skyabyss_finale_ending`。空の段は `ChapterSky.stage` が先に聞く。雲の目は `CloudEyeEvents.ineligible` が止める)、本人の空 `client/sky/EndingSkyClient` (`EndingPayload`。絵は `tools/gen/finale/gen_ending_sky.py`)、語り `tools/story/pixel/finale_end.py` → `install_reels.py` (`finale_end_<calm|break|accept>`)、伝承 `finale/ending_<結末>`、開発用 `/skyabyss cloudsea ending <calm|break|accept|none>`、撮影 `tools/shots/finale_endings.txt`、自己テスト `cloudsea`。
 
+### 4.4.1 地上の人が応える（2026-11-05 の fin_see・fin_after・fin_echo）
+
+- 見送り: 「雲の上へ」の段 ascend のあいだ、イサナが大鐘楼の門のそばに来る（07 の 3.2 の「章ごとのイサナ」）。「数えてた。四つと、底の一つ。……あと一つだな。行ってこい。俺は、ここから見てる」。
+- 結末のあと（今選んでいる結末ごとに一度。選び直すと別の結末の話）:
+
+| 結末 | 語り部（`dialogue/finale/storyteller_endings.json`） | イサナ（鯨見。`whale_chaser_finale.json`） |
+| --- | --- | --- |
+| 鎮める | 「鐘が、明るく鳴ってる。……鎮めたんだね」「ばあさまが見たかった空は、きっとこんな色だよ」 | 「鯨が歌ってる。……あれが本当の声か」 |
+| 壊す | 「鐘の音が低くなった。……壊したんだね」「これからは、あたしたちが自分の足で立つ番だよ」 | 「背には、まだ登れる。……でも、もう歌わない」 |
+| 受け入れる | 「鐘が、鳴らなくなった。……迎え入れたんだね」「少し、怖いね。でも、きれいだ」 | 「あの翼、昼も見える。……もう見張らなくていいんだな」 |
+
+- 雲の島のこだま: その島のかけらの記憶を読んだ人が今の人に話すと、一度だけ同じようなことを口にする（印 `fin_echo_told`。前の世界のことは知らない）。鐘の島の「礼拝堂の鐘守見習い」→ 都の鐘守、灯の島の「灯守の弟子」→ 汐守の灯台守、炉の島の「鍛冶頭の書き置き」→ 灰炉の村の鍛冶師（`dialogue/finale/*_echo.json`）。
+- 一度きりの話は、元の入口より先に見る（足し書きの `entries_first`。07 の 4.4）。自己テスト `story late`。
+
 ### 4.5 神器（作る順 5）
 
 - 6 職に一つずつ。階級はアーティファクト (★ 伝説)、必要 Lv 50、一品一案。どれも島と座で覚えた決まりを一つずつ持つ。

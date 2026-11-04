@@ -1,0 +1,119 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries_first": true,
+  "entries": [
+    {
+      "node": "fin_c_see",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_finale_ascend",
+          "is": "active",
+          "stage": "ascend"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_see_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "fin_c_calm",
+      "if": [
+        {
+          "type": "ending",
+          "is": "calm"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_calm_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "fin_c_break",
+      "if": [
+        {
+          "type": "ending",
+          "is": "break"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_break_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "fin_c_accept",
+      "if": [
+        {
+          "type": "ending",
+          "is": "accept"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_accept_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "fin_c_see": {
+      "face": "neutral",
+      "next": "fin_c_see2"
+    },
+    "fin_c_see2": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_see_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "fin_c_calm": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_calm_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "fin_c_break": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_break_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "fin_c_accept": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_accept_told"
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}

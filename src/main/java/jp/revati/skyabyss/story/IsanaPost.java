@@ -38,6 +38,11 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   HUT     風待の里の焚き火のそば (三章)。段階 2 で港を離れたあと。段階 3 (雷翼を止めた) でも、「俺は残る」の話 (印 ch3g_stay_told) をするまで。
 //           四章の頼み main_ember が支度の段を越えたら離れる。立つ所: 町の休み場 (印 rest) にいちばん近い焚き火 (24 以内) から 2〜6 の平らな所。
 //           そばに焚き火が無ければ、立つ所の 2 となりに一つ置く (印 isana_hut_fire)。顔は火の方へ
+//   GATE    都の地下の門の前の大広間 (五章。2026-11-05 の決めごと c5_isana = gate)。頼み main_abyss の段 door (酒場の地下の戸を開ける) を越えてから、心臓のあとの話 (印 ch5g_answer_told) をするか、
+//           六章の「近づく月」(main_moon_near) を終えるまで。立つ所: 門 (印 abyss_gate) から大広間の側へ 3〜7、横へ 1〜4 の立てる所。顔は門の方へ
+//   BELL    都の大鐘楼の鐘の間の門のそば (終章。2026-11-05 の fin_see)。「雲の上へ」(main_finale_ascend) の段 ascend のあいだ (門をくぐって雲海に着くと鯨見へ)。
+//           立つ所: 門 (天然磁石。MoonGate.gatePos) から 2〜4 の立てる所。顔は門の方へ
+//   GATE と BELL の立つ所は町の記録に書かず、門の印から毎回求める (覚えておくのは一つだけ)
 //   立つ所は町の記録 (SiteData) に印として書く。あとから地ならし・小岩が埋めたら選び直し、イサナが埋まっていたら立つ所へ戻す
 //   (見回りは町の中心から 192 以内の、その居場所のはずの人のそばで 2 秒ごと)。話す相手の目印 (SiteTargets の npc:whale_chaser) もそこを指す (SiteNetwork.payload)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -49,11 +54,18 @@ public final class IsanaPost {
     public static final String FLAG_DONE = "c2_harbor_done";
     // 三章の心臓のあと「俺は残る」と話した (火のそばを離れて鯨見へ戻る)
     public static final String FLAG_STAY = "ch3g_stay_told";
+    // 五章: 心臓のあと、門の前で「眠らせたんじゃない。返したんだな」と話した (鯨見へ戻る)
+    public static final String FLAG_GATE_DONE = "ch5g_answer_told";
+    static final String ABYSS_QUEST = "main_abyss";
+    static final String FINALE_QUEST = "main_finale_ascend";
+    static final String FINALE_STAGE = "ascend";
 
     public enum Post {
         TOWN(null, null, null),
         HARBOR("skyabyss_harbor_isana", "isana_harbor", "tide"),
-        HUT("skyabyss_hut_isana", "isana_hut", "storm");
+        HUT("skyabyss_hut_isana", "isana_hut", "storm"),
+        GATE("skyabyss_gate_isana", null, null),
+        BELL("skyabyss_bell_isana", null, null);
 
         @Nullable
         public final String tag;
@@ -77,6 +89,16 @@ public final class IsanaPost {
 
     // この人にとって、イサナがどこにいるか
     public static Post post(ServerPlayer p) {
+        QuestLog log0 = QuestLog.of(p);
+        if (atStage(log0, FINALE_QUEST, FINALE_STAGE)) {
+            return Post.BELL;
+        }
+        if (afterStage(log0, ABYSS_QUEST, "door") && !NpcBonds.of(p).bond(ROLE).flags().contains(FLAG_GATE_DONE)) {
+            QuestLog.Entry near = log0.entry(jp.revati.skyabyss.story.ch5.MoonNear.QUEST);
+            if (near == null || !near.done) {
+                return Post.GATE;
+            }
+        }
         int stage = Progression.stage(p);
         if (stage < 1 || stage > 3) {
             return Post.TOWN;
@@ -97,6 +119,30 @@ public final class IsanaPost {
         }
         QuestLog.Entry ember = log.entry("main_ember");
         return ember == null || !ember.done && ember.stage <= 1 ? Post.HUT : Post.TOWN;
+    }
+
+    // その段より先へ進んだか、済んだ (五章のイサナは、酒場の地下の戸が開いてから門の前に来る)
+    static boolean afterStage(QuestLog log, String quest, String stageId) {
+        QuestLog.Entry e = log.entry(quest);
+        jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(quest);
+        if (e == null || def == null) {
+            return false;
+        }
+        if (e.done) {
+            return true;
+        }
+        for (int i = 0; i < def.stages().size(); i++) {
+            if (def.stages().get(i).id().equals(stageId)) {
+                return e.stage > i;
+            }
+        }
+        return false;
+    }
+
+    static boolean atStage(QuestLog log, String quest, String stageId) {
+        QuestLog.Entry e = log.entry(quest);
+        jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(quest);
+        return e != null && !e.done && def != null && e.stage < def.stages().size() && def.stages().get(e.stage).id().equals(stageId);
     }
 
     public static boolean atHarbor(ServerPlayer p) {
@@ -143,6 +189,12 @@ public final class IsanaPost {
     // その居場所の立つ所 (分かっていなければ null。道しるべと確かめ用)
     @Nullable
     public static BlockPos spot(MinecraftServer server, Post post) {
+        if (post == Post.GATE) {
+            return gateSpot(server);
+        }
+        if (post == Post.BELL) {
+            return bellSpot(server);
+        }
         ServerLevel level = server.overworld();
         SiteData.Entry e = level == null || post.mark == null ? null : town(level, post);
         return e == null ? null : e.extra(post.mark);
@@ -232,6 +284,104 @@ public final class IsanaPost {
             }
         }
         return best;
+    }
+
+    // 五章: 地下の門の前の大広間 (門から大広間の側へ 3〜7、横へ 1〜4)。読み込まれていなければ null
+    private static BlockPos gateFor;
+    private static BlockPos gateSpotCache;
+
+    @Nullable
+    static BlockPos gateSpot(MinecraftServer server) {
+        BlockPos gate = jp.revati.skyabyss.town.TownGuests.mark(server, jp.revati.skyabyss.story.ch5.AbyssEntrance.GATE);
+        if (gate == null) {
+            return null;
+        }
+        if (gate.equals(gateFor) && gateSpotCache != null) {
+            return gateSpotCache;
+        }
+        ServerLevel level = server.overworld();
+        net.minecraft.core.Direction away = jp.revati.skyabyss.story.ch5.AbyssGate.hallSide(server);
+        if (away == null) {
+            return null;
+        }
+        net.minecraft.core.Direction side = away.getClockWise();
+        for (int d = 3; d <= 7; d++) {
+            for (int s : new int[] {2, -2, 3, -3, 4, -4, 1, -1}) {
+                for (int dy : new int[] {0, -1, 1}) {
+                    BlockPos feet = gate.relative(away, d).relative(side, s).above(dy);
+                    if (level.isLoaded(feet) && standable(level, feet) && roomy(level, feet, 5)) {
+                        gateFor = gate;
+                        gateSpotCache = feet.immutable();
+                        return gateSpotCache;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // 終章: 大鐘楼の鐘の間の門のそば (門から 2〜4)
+    private static BlockPos bellFor;
+    private static BlockPos bellSpotCache;
+
+    @Nullable
+    static BlockPos bellSpot(MinecraftServer server) {
+        BlockPos gate = jp.revati.skyabyss.story.ch6.MoonGate.gatePos(server);
+        if (gate == null) {
+            return null;
+        }
+        if (gate.equals(bellFor) && bellSpotCache != null) {
+            return bellSpotCache;
+        }
+        ServerLevel level = server.overworld();
+        // まわりの開けた所を先に (窓の張り出しに立つと外の眺めをふさぐ。2026-11-05 の撮影)
+        for (int need : new int[] {7, 6, 4}) {
+            for (int r = 2; r <= 4; r++) {
+                for (int[] d : new int[][] {{r, 0}, {-r, 0}, {0, r}, {0, -r}, {r, r}, {-r, r}, {r, -r}, {-r, -r}}) {
+                    for (int dy : new int[] {1, 0, 2}) {
+                        BlockPos feet = gate.offset(d[0], dy, d[1]);
+                        if (level.isLoaded(feet) && standable(level, feet) && roomy(level, feet, need)) {
+                            bellFor = gate;
+                            bellSpotCache = feet.immutable();
+                            return bellSpotCache;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // 屋内・地下用: まわり 8 マスのうち need マス以上で、足と頭が空いて床が固い
+    static boolean roomy(ServerLevel level, BlockPos feet, int need) {
+        int ok = 0;
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oz = -1; oz <= 1; oz++) {
+                if (ox == 0 && oz == 0) {
+                    continue;
+                }
+                BlockPos q = feet.offset(ox, 0, oz);
+                if (level.getBlockState(q).getCollisionShape(level, q).isEmpty() && level.getBlockState(q.above()).getCollisionShape(level, q.above()).isEmpty()
+                        && level.getBlockState(q.below()).isFaceSturdy(level, q.below(), net.minecraft.core.Direction.UP)) {
+                    ok++;
+                }
+            }
+        }
+        return ok >= need;
+    }
+
+    // GATE・BELL の顔の向き: 門の方 (五章は門の手前の着く所の方)
+    static float gateYaw(MinecraftServer server, Post post, BlockPos spot) {
+        BlockPos look;
+        if (post == Post.GATE) {
+            BlockPos gate = jp.revati.skyabyss.town.TownGuests.mark(server, jp.revati.skyabyss.story.ch5.AbyssEntrance.GATE);
+            net.minecraft.core.Direction away = jp.revati.skyabyss.story.ch5.AbyssGate.hallSide(server);
+            look = gate == null ? spot : away == null ? gate : gate.relative(away);
+        } else {
+            BlockPos gate = jp.revati.skyabyss.story.ch6.MoonGate.gatePos(server);
+            look = gate == null ? spot : gate;
+        }
+        return (float) (Mth.atan2(look.getZ() - spot.getZ(), look.getX() - spot.getX()) * (180 / Math.PI)) - 90f;
     }
 
     static boolean standable(ServerLevel level, BlockPos feet) {
@@ -349,7 +499,31 @@ public final class IsanaPost {
         if (post == Post.HUT) {
             ensureFire(level, town, spot);
         }
-        float yaw = yaw(level, town, post, spot);
+        keepSpot(level, post, spot, yaw(level, town, post, spot), found);
+    }
+
+    // 門のそば (GATE・BELL) のイサナ: その居場所のはずの人が近くにいれば立たせる・戻す
+    public static void keepAtGate(ServerLevel level, Post post, ServerPlayer player) {
+        if ((post != Post.GATE && post != Post.BELL) || post(player) != post) {
+            return;
+        }
+        BlockPos spot = spot(level.getServer(), post);
+        if (spot == null || !level.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(spot))) {
+            return;
+        }
+        if (!standable(level, spot)) {
+            gateSpotCache = null;
+            bellSpotCache = null;
+            return;
+        }
+        java.util.List<NpcEntity> found = level.getEntities(NpcSetup.WHALE_CHASER.get(), new AABB(spot).inflate(32), n -> n.isAlive() && n.getTags().contains(post.tag));
+        for (int i = 1; i < found.size(); i++) {
+            found.get(i).discard();
+        }
+        keepSpot(level, post, spot, gateYaw(level.getServer(), post, spot), found);
+    }
+
+    static void keepSpot(ServerLevel level, Post post, BlockPos spot, float yaw, java.util.List<NpcEntity> found) {
         if (!found.isEmpty()) {
             NpcEntity live = found.get(0);
             BlockPos at = live.blockPosition();
@@ -388,7 +562,12 @@ public final class IsanaPost {
             return;
         }
         Post now = post(p);
-        if (now != Post.TOWN) {
+        if (now == Post.GATE || now == Post.BELL) {
+            BlockPos spot = spot(p.server, now);
+            if (spot != null && spot.distSqr(p.blockPosition()) <= 48 * 48) {
+                keepAtGate(p.serverLevel(), now, p);
+            }
+        } else if (now != Post.TOWN) {
             SiteData.Entry town = town(p.serverLevel(), now);
             if (town != null && town.pos.distSqr(p.blockPosition()) <= (double) KEEP_RADIUS * KEEP_RADIUS) {
                 keep(p.serverLevel(), town, now, p);
@@ -405,14 +584,43 @@ public final class IsanaPost {
         LAST.remove(event.getEntity().getUUID());
     }
 
+    // OP の確かめ: /skyabyss dev isana goto (この人にとってのイサナのそばへ。五章は地下の門の前、終章は大鐘楼の門、港・火のそばは立つ所、鯨見は見張り台)
+    static int goTo(ServerPlayer p) {
+        Post post = post(p);
+        BlockPos to = null;
+        if (post == Post.GATE) {
+            jp.revati.skyabyss.story.ch5.AbyssGate.up(p);
+            return 1;
+        } else if (post == Post.BELL) {
+            to = jp.revati.skyabyss.story.ch6.MoonGate.gatePos(p.server);
+            to = to == null ? null : to.above();
+        } else if (post != Post.TOWN) {
+            to = spot(p.server, post);
+        } else {
+            to = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(p.server);
+        }
+        if (to == null) {
+            p.sendSystemMessage(net.minecraft.network.chat.Component.literal("no spot for " + post));
+            return 0;
+        }
+        p.teleportTo(p.serverLevel(), to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), 0f);
+        return 1;
+    }
+
     // OP の確かめ: /skyabyss dev isana (この人にとってのイサナの居場所・立つ所・近くの鯨追いと見えるか)
     @SubscribeEvent
     static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(src -> src.hasPermission(2))
-                .then(net.minecraft.commands.Commands.literal("dev").then(net.minecraft.commands.Commands.literal("isana").executes(ctx -> {
+                .then(net.minecraft.commands.Commands.literal("dev").then(net.minecraft.commands.Commands.literal("isana")
+                .then(net.minecraft.commands.Commands.literal("goto").executes(ctx -> goTo(ctx.getSource().getPlayerOrException())))
+                .executes(ctx -> {
                     ServerPlayer p = ctx.getSource().getPlayerOrException();
                     Post post = post(p);
                     StringBuilder b = new StringBuilder("post=" + post + " stage=" + Progression.stage(p) + " spot=" + (post == Post.TOWN ? "-" : spot(p.server, post)));
+                    if (post == Post.GATE) {
+                        b.append(" gate=").append(jp.revati.skyabyss.town.TownGuests.mark(p.server, jp.revati.skyabyss.story.ch5.AbyssEntrance.GATE))
+                                .append(" hall=").append(jp.revati.skyabyss.story.ch5.AbyssGate.hallSide(p.server));
+                    }
                     for (NpcEntity n : p.serverLevel().getEntities(NpcSetup.WHALE_CHASER.get(), p.getBoundingBox().inflate(128), NpcEntity::isAlive)) {
                         b.append(" | ").append(postOf(n)).append(" @").append(n.blockPosition().toShortString())
                                 .append(" visible=").append(visibleTo(n, p)).append(" broadcast=").append(n.broadcastToPlayer(p));

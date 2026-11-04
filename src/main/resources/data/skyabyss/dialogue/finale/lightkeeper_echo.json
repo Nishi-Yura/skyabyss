@@ -1,0 +1,41 @@
+{
+  "npc": "skyabyss:guest_tide_lightkeeper",
+  "extends": true,
+  "entries_first": true,
+  "entries": [
+    {
+      "node": "fin_e_guest_tide_lightkeeper",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "finale/lamp_echo_2"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_echo_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "fin_e_guest_tide_lightkeeper": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_echo_told"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

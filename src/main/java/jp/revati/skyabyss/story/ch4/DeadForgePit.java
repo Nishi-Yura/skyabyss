@@ -190,6 +190,30 @@ public final class DeadForgePit {
             player.getPersistentData().putBoolean(ECHO, true);
             jp.revati.skyabyss.story.ch1.Tasks.later(50, () -> Notice.hint(player, "message.skyabyss.ch4g.pit.stand_echo"));
         }
+        forgeFire(player, level, at);
+        return true;
+    }
+
+    // 五章の支度「黒い鉄の器」(ch5/black_iron の段 iron) のあいだに温石で台を温めると、台の熾が温石に移る (2026-11-05 の決めごと c5_iron = fire)。
+    // 都の鍛冶師の印 ch5_forge_fire (人ごと)。鍛冶師はその火で器を打つ (市の熾火の棒 3・黒曜石 2 の道も残る)。移したら true
+    public static final String FLAG_FORGE_FIRE = "ch5_forge_fire";
+    public static final String SMITH = "skyabyss:attendant_smith";
+    public static final String Q_IRON = "ch5/black_iron";
+
+    public static boolean forgeFire(ServerPlayer player, ServerLevel level, BlockPos at) {
+        jp.revati.skyabyss.quest.QuestLog.Entry e = jp.revati.skyabyss.quest.QuestLog.of(player).entry(Q_IRON);
+        if (e == null || e.done || e.stage != 0) {
+            return false;
+        }
+        jp.revati.skyabyss.npc.NpcBonds bonds = jp.revati.skyabyss.npc.NpcBonds.of(player);
+        if (!bonds.bond(SMITH).flags().add(FLAG_FORGE_FIRE)) {
+            return false;
+        }
+        jp.revati.skyabyss.npc.NpcBonds.sync(player);
+        level.sendParticles(ParticleTypes.FLAME, at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 16, 0.25, 0.2, 0.25, 0.02);
+        level.playSound(null, at, SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 0.35f, 0.6f);
+        jp.revati.skyabyss.story.ch1.Tasks.later(30, () -> Notice.narrate(player, "message.skyabyss.ch5.forge_fire"));
+        jp.revati.skyabyss.quest.Quests.refresh(player, false);
         return true;
     }
 

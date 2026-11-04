@@ -565,5 +565,21 @@
   "gui.skyabyss.attack.shadow_embracer.wave": "Shadow Wave",
   "gui.skyabyss.attack.waning_blade.slash": "Crescent Slash",
   "gui.skyabyss.attack.waning_blade.thrust": "Lunge Thrust",
-  "gui.skyabyss.attack.waning_blade.wave": "Flying Crescent"
+  "gui.skyabyss.attack.waning_blade.wave": "Flying Crescent",
+  "dialogue.skyabyss.guest_moon_past1.ch6_valley_ask": "...I feel I gave this lamp to someone on the night before, too.\nWas there a child keeping a lamp, deep under the ground? Is that child still keeping it lit?",
+  "dialogue.skyabyss.guest_moon_past2.ch6_cliff_ask": "There's someone on the watchtower at Kujirami who keeps counting something.\nOn the night before, they were counting too. ...Ask them if they still are.",
+  "dialogue.skyabyss.guest_moon_past3.ch6_field_ask": "In the capital there is a storyteller who doesn't know the counting song to the end.\nOn the night before, I fell asleep listening to that song. ...Is that person still counting the verses?",
+  "dialogue.skyabyss.guest_moon_past4.ch6_rift_ask": "At the capital's forge there is someone who strikes black iron.\nOn the night before, that person forged the frame of my mirror. ...Do they remember, I wonder.",
+  "dialogue.skyabyss.attendant_survivor_bone.ch6e_attendant_survivor_bone": "Am I still keeping the lamp lit? ...I feel someone asked me that before.",
+  "dialogue.skyabyss.attendant_survivor_bone.ch6e_attendant_survivor_bone2": "I am. If I put it out, someone loses their way home.\n...Tell them that, too.",
+  "dialogue.skyabyss.attendant_survivor_bone.ch6e_attendant_survivor_bone2.ok": "Nod",
+  "dialogue.skyabyss.whale_chaser.ch6e_whale_chaser": "Am I still counting? ...I feel someone asked me that before.",
+  "dialogue.skyabyss.whale_chaser.ch6e_whale_chaser2": "I am. Not the ones who didn't come back. The ones who did.\n...You're one of them.",
+  "dialogue.skyabyss.whale_chaser.ch6e_whale_chaser2.ok": "Nod",
+  "dialogue.skyabyss.storyteller.ch6e_storyteller": "Am I still counting the verses? ...I feel someone asked me that before.",
+  "dialogue.skyabyss.storyteller.ch6e_storyteller2": "Of course I am. A counting song stops being one the moment you stop counting.\n...Tell them so for me.",
+  "dialogue.skyabyss.storyteller.ch6e_storyteller2.ok": "Nod",
+  "dialogue.skyabyss.attendant_smith.ch6e_attendant_smith": "The frame of a mirror? ...I feel someone asked me that before.",
+  "dialogue.skyabyss.attendant_smith.ch6e_attendant_smith2": "I don't remember. But maybe these hands do.\nWhenever I forge a round frame, they always stop halfway.",
+  "dialogue.skyabyss.attendant_smith.ch6e_attendant_smith2.ok": "Nod"
 }

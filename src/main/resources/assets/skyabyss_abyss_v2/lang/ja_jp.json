@@ -392,8 +392,8 @@
   "quest.skyabyss.main_moon_near.title": "近づく月",
   "quest.skyabyss.main_moon_near.summary": "錨は緩んだまま。夜、空の月を見上げてみる。",
   "quest.skyabyss.main_moon_near.done": "月の話は、六章で続く。",
-  "quest.skyabyss.main_moon_near.look.journal": "深淵の底で、錨は緩んだままだと知った。月が近づいている、と語り部は言っていた。夜、外で月を見上げてみよう。",
-  "quest.skyabyss.main_moon_near.look.moon": "夜、外で月を見上げよう",
+  "quest.skyabyss.main_moon_near.look.journal": "深淵の底で、錨は緩んだままだと知った。月が近づいている、と語り部は言っていた。外で月を見上げてみよう。昼でも、北の空に白く見えるはずだ。",
+  "quest.skyabyss.main_moon_near.look.moon": "外で月を見上げよう（昼でも見える）",
   "quest.skyabyss.main_moon_near.tell.journal": "月は、前に見たときより大きかった。表の模様が、目で数えられるほどに。語り部に話そう。",
   "quest.skyabyss.main_moon_near.tell.talk": "見た月のことを、語り部に話そう",
   "message.skyabyss.moon_near.seen": "月が大きい。……前に見上げたときより、ずっと近い。表の模様まで、数えられそうだ。",
@@ -417,5 +417,6 @@
   "message.skyabyss.moon.phase.first.sub": "右の半分に光が満ちていく",
   "message.skyabyss.moon.phase.full.sub": "月がいちばん明るい。核の脈が聞こえる",
   "message.skyabyss.moon.phase.last.sub": "光が欠けはじめ、残像が濃くなる",
-  "biome.skyabyss.moon": "月の面"
+  "biome.skyabyss.moon": "月の面",
+  "message.skyabyss.moon_near.seen_day": "昼の空に、白い月が浮いている。……こんなに大きく見えたことはない。表の模様まで、数えられそうだ。"
 }

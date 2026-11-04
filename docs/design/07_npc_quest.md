@@ -80,9 +80,12 @@
 | 場所 | 鐘の都の大鐘楼の一階（鐘の 2 下の床、鐘から南へ 2。`NpcSpawner.capitalStorytellerSpot`） | 鯨見の町の見張り台のそば（`ContinentTowns.chaserSpot`）。**二章のあいだは汐守の港、三章のあいだは風待の里の休み場の火のそば**（下の「章ごとのイサナ」。人ごと） |
 | きっかけ | 都の鐘から 48 ブロック以内に人が来たとき | 鯨見の町の近くに、鯨追いを必要とする人（今の段階に「鯨追いと話す」目的がある、または依頼主が鯨追い）がいるとき（`keepTownChaser`）。港・火のそばのイサナは、そこにいるはずの人がその町の中心から 192 ブロック以内に来たとき（2 秒ごと） |
 
-**章ごとのイサナ**（`story/IsanaPost`。2026-11-04 の決めごと c2_isana = harbor・c3_isana = hut）。
+**章ごとのイサナ**（`story/IsanaPost`。2026-11-04 の決めごと c2_isana = harbor・c3_isana = hut、2026-11-05 の c5_isana = gate・fin_see = see）。
 - 居場所は人ごと。鯨見のイサナと、港（印 `skyabyss_harbor_isana`）・火のそば（印 `skyabyss_hut_isana`）のイサナが立ち、その人の進みで見える方が一人に決まる（`NpcEntity.broadcastToPlayer`。見えない方はその人には送らない）。話す相手の目印（道しるべ）も、その人の居場所を指す（`SiteNetwork.payload`）。
 - 三章: 港を離れたあと、風待の里の焚き火のそば（休み場の印 `rest` にいちばん近い焚き火から 2〜6 の平らな所。町の記録の印 `isana_hut`。火が無ければ一つ置く）。雷翼のあと「俺は残る」（印 `ch3g_stay_told`）で鯨見へ戻る（12 の 12.5）。
+- 五章: 頼み `main_abyss` の段 door（酒場の地下の戸を開ける）を越えてから、都の地下の門の前の大広間（印 `skyabyss_gate_isana`。門の印 `abyss_gate` から大広間の側へ 3〜7・横へ 1〜4 の立てる所。顔は門の手前の着く所の方）。深淵から帰りの祠で戻ると、そこにいる。「俺は下へは行けない。下に降りると、鯨の声が聞こえなくなる」（`ch5g_c_meet`。印 `ch5g_met`）。層の主を倒したあとに一度ずつ一言（骨・塩・雷・灰。次の層の主のあとは前の層の言葉は出さない）。心臓のあとに四章の問い「眠らせてよかったのか」に答える（「眠らせたんじゃない。返したんだな」。`ch5g_c_answer`〜`3`。印 `ch5g_answer_told`、好感度 +2）で鯨見へ戻る。答えを聞かなくても六章の「近づく月」を終えれば鯨見（`dialogue/ch5/whale_chaser_gate.json`）。
+- 終章: 「雲の上へ」（`main_finale_ascend`）の段 ascend のあいだ、大鐘楼の鐘の間の門（天然磁石）から 2〜4 の所（印 `skyabyss_bell_isana`）。「数えてた。四つと、底の一つ。……あと一つだな」（`fin_c_see`。印 `fin_see_told`）。雲海に着くと鯨見へ。結末を選んだあとは鯨見で結末ごとに一言（`fin_c_calm`・`fin_c_break`・`fin_c_accept`。印 `fin_<結末>_told`。選び直すと別の結末の一言。`dialogue/finale/whale_chaser_finale.json`）。
+- 確かめ: `/skyabyss dev isana goto`（その人にとってのイサナのそばへ）。自己テスト `isana post`・`story late`。撮影 `tools/shots/story_late.txt`。
 - 港にいる: 岩鯨を止めたあと、噂の話（`ms_c_tide2`）で「俺も汐守の港へ行く。……海は苦手だが、港で待っている」（`c2_h_ahead`。印 `c2_harbor`）と言ってから、または頼み `main_tide` が噂の段を越えてから。潮殻を止めたあとも、港で心臓のあとの話をするまで（印 `c2_harbor_done`）。三章の頼み `main_thunder` が支度の段を越えたら、話していなくても鯨見へ戻る。
 - 立つ所: 汐守の町の中心から 16 方向に海を探し、いちばん近い水際から 3〜12 手前の平らな立てる所（まわり 8 マスのうち 6 マス以上が同じ高さ ±1。町の記録に印 `isana_harbor` として書く）。顔は町の方へ（海に背を向ける）。町のまわりの地ならしや小岩があとから立つ所を埋めたら選び直し、イサナが埋まっていたら立つ所へ戻す。確かめは `/skyabyss dev isana`（その人にとっての居場所・立つ所・近くの鯨追いと見えるか）。自己テスト `isana post`。
 - 会話（`dialogue/ch2/whale_chaser_harbor.json`）: 港で初めて話すと、海が苦手なわけ（あの晩、船長が舵を切ったあと海が引き、船は干上がった底に座った。自分は引いた道を歩いて岸へ戻った）。割れた船の名板（08 の大干潮）を拾っていれば「勇。……船の名の、頭の一字だ。俺の名も、そこから取った」（好感度 +3、印 `c2_plate_told`）。心臓のあとは、報告（`ms_c_tide_back2`）の続きか次に話したときに「舟を一艘、借りた。少しだけ、沖へ出てみる。……あの晩から、初めてだ」「次は、鳴る雲か。……風待の里の、火のそばで待っている」（三章へ）。中身はほのめかしのまま。
@@ -291,6 +294,9 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 - 結果 `facility` `{open, shop}`: 都の施設の働き（`shop` 店・`stash` 預かり所・`inn_rest` 寝台・`rumor` 噂・`perch` 巨神の子を呼ぶ・`map` 地図・`guild` ギルドの窓口・`repair` 修理。35 の 6 章）。
 - 結果 `town` `{act}`: 町のクエストと裏通りの働き（`open_cellar` 酒場の地下の奥の壁を開ける・`guide_rumor` 跡地の噂。噂は都の案内人が言う）。町のクエストの限定の人（`skyabyss:guest_<人>`）の会話もこの仕組み。35 の 3.5・6.9。
 - 結果 `open_board`: 板の画面を開く（NPC が受け口になる）。結果 `grave_choose`: 墓の一覧の画面を開く（11 の 6.4 節）。結果 `grave_rescue`: 画面なしで一番古い墓を救う。結果 `give` の `name` / `lore` と、品の `token`、`optional` の欄は 6.1 節。
+
+- 条件 `quest` の `after`（段の id）: その段より先へ進んだか、済んだときだけ（2026-11-05。五章の門のイサナの層ごとの言葉）。条件 `ending`（`is`: calm・break・accept）: 今選んでいる終章の結末（`FinaleEnding.chosen`）。
+- 足し書き（`"extends": true`）の `"entries_first": true`: 入口を元の入口すべての前に足す（一度きりの話を、いつも当たる入口より先に見る。結末のあと・こだまの話）。
 
 ### 4.5 ループをまたぐ会話（「覚えているような」NPC）
 

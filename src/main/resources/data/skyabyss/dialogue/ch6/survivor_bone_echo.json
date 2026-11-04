@@ -1,0 +1,45 @@
+{
+  "npc": "skyabyss:attendant_survivor_bone",
+  "extends": true,
+  "entries_first": true,
+  "entries": [
+    {
+      "node": "ch6e_attendant_survivor_bone",
+      "if": [
+        {
+          "type": "flag",
+          "flag": "ch6_asked"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch6_answered"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch6e_attendant_survivor_bone": {
+      "face": "neutral",
+      "next": "ch6e_attendant_survivor_bone2"
+    },
+    "ch6e_attendant_survivor_bone2": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch6_answered"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

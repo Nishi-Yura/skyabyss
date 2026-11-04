@@ -175,7 +175,7 @@
 | （消した役）書庫番・地図屋・砦の老兵 | — | — | 2026-10-31 に消した（伝承の書の画面・M の地図・J の記録と同じことをするだけだった。老兵の試練の記録は J、本丸の頁は社の祭司へ）。祠と跡地は地図に最初から、跡地の噂は都の案内人が言う。前の世界に立っている人は消える（`AttendantRole.RETIRED`） |
 | `box_opener`（印なし） | 封切り師（都と四つの町に一人ずつ） | 鍛冶屋の係の人のそば（`npc_smith` から 2〜4 ブロックの空いた床。`loot/box/BoxOpeners`） | 封の箱を開ける（`boxes`。ルーレットの画面。[52](52_loot_boxes.md)）、箱のこと |
 
-- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes|fish_order|sprint_board", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
+- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|guild_storage|respec_quote|respec_skills|respec_skills_coins|job_room|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes|buyback|tower_desk|tower_shop|tower_records|secret_arts|circuit|circuit_start|journal|look|fishing_board|powder|dungeon_mood|fish_order|sprint_board", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
 ### 6.2 鐘銭と店（`facility/Coins`・`ShopDef`・`ShopService`、画面 `client/facility/ShopScreen`）
 

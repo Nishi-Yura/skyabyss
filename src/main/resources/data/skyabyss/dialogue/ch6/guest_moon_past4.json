@@ -272,6 +272,17 @@
     },
     "ch6_rift_promise2": {
       "face": "grave",
+      "next": "ch6_rift_ask"
+    },
+    "ch6_rift_ask": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "npc": "skyabyss:attendant_smith",
+          "flag": "ch6_asked"
+        }
+      ],
       "next": "ch6_rift_promise3"
     },
     "ch6_rift_promise3": {

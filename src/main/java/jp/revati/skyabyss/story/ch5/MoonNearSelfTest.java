@@ -38,7 +38,7 @@ public final class MoonNearSelfTest {
             Quests.poll(p, false);
             check(f, "look".equals(TownGuests.stageOf(p, MoonNear.QUEST)), "main_moon_near did not start after main_abyss (" + TownGuests.stageOf(p, MoonNear.QUEST) + ")");
             level.setDayTime(6000);
-            check(f, !MoonNear.looksAtMoon(p), "the moon was seen at noon");
+            check(f, MoonNear.looksAtMoon(p), "the pale day moon was not seen at noon looking up under the open sky");
             level.setDayTime(18000);
             check(f, MoonNear.looksAtMoon(p), "the moon was not seen at night looking up under the open sky");
             p.setXRot(10f);

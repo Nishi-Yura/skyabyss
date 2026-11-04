@@ -15,18 +15,33 @@
       "xp": 150,
       "objectives": [
         {
-          "id": "rod",
-          "type": "collect",
-          "target": "skyabyss:ember_rod",
-          "count": 3,
-          "party": false
-        },
-        {
-          "id": "obsidian",
-          "type": "collect",
-          "target": "minecraft:obsidian",
-          "count": 2,
-          "party": false
+          "id": "fire",
+          "type": "condition",
+          "if": {
+            "type": "any",
+            "of": [
+              {
+                "type": "flag",
+                "npc": "skyabyss:attendant_smith",
+                "flag": "ch5_forge_fire"
+              },
+              {
+                "type": "all",
+                "of": [
+                  {
+                    "type": "item",
+                    "item": "skyabyss:ember_rod",
+                    "count": 3
+                  },
+                  {
+                    "type": "item",
+                    "item": "minecraft:obsidian",
+                    "count": 2
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },

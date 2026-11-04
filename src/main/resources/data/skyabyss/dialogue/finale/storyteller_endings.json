@@ -1,0 +1,117 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries_first": true,
+  "entries": [
+    {
+      "node": "fin_s_calm",
+      "if": [
+        {
+          "type": "ending",
+          "is": "calm"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_s_calm_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "fin_s_break",
+      "if": [
+        {
+          "type": "ending",
+          "is": "break"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_s_break_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "fin_s_accept",
+      "if": [
+        {
+          "type": "ending",
+          "is": "accept"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_s_accept_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "fin_s_calm": {
+      "face": "grave",
+      "next": "fin_s_calm2"
+    },
+    "fin_s_calm2": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_s_calm_told"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "fin_s_break": {
+      "face": "grave",
+      "next": "fin_s_break2"
+    },
+    "fin_s_break2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_s_break_told"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "fin_s_accept": {
+      "face": "grave",
+      "next": "fin_s_accept2"
+    },
+    "fin_s_accept2": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_s_accept_told"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

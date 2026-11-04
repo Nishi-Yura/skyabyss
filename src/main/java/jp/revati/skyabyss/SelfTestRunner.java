@@ -405,6 +405,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("guild week", jp.revati.skyabyss.endgame.GuildWeekSelfTest::run));
         // イサナの章ごとの居場所 (港・火のそば・鯨見。story/IsanaPost)。SKYABYSS_SELFTEST_ONLY="isana post"
         steps.add(Step.once("isana post", jp.revati.skyabyss.story.IsanaPostSelfTest::run));
+        // 五章からの物語の厚み (門のイサナ・月の問いと地上の答え・終章の見送りと結末のあと・雲の島のこだま)。SKYABYSS_SELFTEST_ONLY="story late"
+        steps.add(Step.once("story late", jp.revati.skyabyss.story.StoryLateSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
         // 狩人の手帳 (倒した数・頁・慣れ・見た技)。SKYABYSS_SELFTEST_ONLY="hunter notes"

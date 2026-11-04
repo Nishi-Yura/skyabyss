@@ -44,10 +44,12 @@ import net.minecraft.world.item.Item;
 //   prep    {chapter, min}     : 備えの頼み (ch<n>/prep_*) を min 本以上終えた (min を省く = 三本ぜんぶ。guide.PrepQuests)
 //   ward_ok {titan}            : その巨神の鼓動守を編み直してもらえる (今は持っていない・枠にも付けていない・今日はまだ編み直していない。guide.HeartbeatWard)
 //   no_keepsake {item}         : その品が、自分のどこにもない (持ち物・箱・エンダーチェスト・預かり・地面・しまった箱。record/Keepsakes.locate の total が 0)
+//   quest に after {段の id} を書くと、その段より先へ進んだ (か済んだ) ときだけ (2026-11-05。五章の門のイサナが層の主のあとに話す)
+//   ending {is: calm|break|accept} : 今選んでいる終章の結末 (story/finale/FinaleEnding.chosen)
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen", "ending");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -138,6 +140,11 @@ public final class Condition {
             }
             case "ward_ok" -> need("titan", errors, where);
             case "in_town" -> need("town", errors, where);
+            case "ending" -> {
+                if (!jp.revati.skyabyss.story.finale.FinaleEnding.ENDINGS.contains(GsonHelper.getAsString(json, "is", ""))) {
+                    errors.add(where + ": ending condition 'is' must be calm/break/accept");
+                }
+            }
             case "no_keepsake" -> {
                 need("item", errors, where);
                 if (item(GsonHelper.getAsString(json, "item", "")) == null && !GsonHelper.getAsBoolean(json, "optional", false)) {
@@ -234,6 +241,8 @@ public final class Condition {
             }
             // 見終えた結末の数 (終章。docs/design/53 の 3 章)
             case "endings_seen" -> jp.revati.skyabyss.story.finale.FinaleEnding.seen(ctx.player()).size() >= GsonHelper.getAsInt(json, "min", 1);
+            // 今選んでいる結末
+            case "ending" -> str("is").equals(jp.revati.skyabyss.story.finale.FinaleEnding.chosen(ctx.player()));
             case "night" -> {
                 long t = ctx.player().server.overworld().getDayTime() % 24000L;
                 yield t >= 13000 && t < 23000;
@@ -254,6 +263,24 @@ public final class Condition {
             case "not_done" -> entry == null || !entry.done;
             default -> false;
         };
+        if (ok && json.has("after")) {
+            // その段より先へ進んだか、済んだ
+            QuestDef def = QuestManager.quest(questId);
+            if (entry == null || def == null) {
+                return false;
+            }
+            if (!entry.done) {
+                int at = -1;
+                for (int i = 0; i < def.stages().size(); i++) {
+                    if (def.stages().get(i).id().equals(str("after"))) {
+                        at = i;
+                    }
+                }
+                if (at < 0 || entry.stage <= at) {
+                    return false;
+                }
+            }
+        }
         if (ok && json.has("stage")) {
             QuestDef def = QuestManager.quest(questId);
             if (entry == null || entry.done || def == null || entry.stage >= def.stages().size()) {

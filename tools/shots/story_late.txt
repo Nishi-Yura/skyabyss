@@ -1,0 +1,97 @@
+# 2026-11-05 の五章からの決めごと: 地下の門の前のイサナ (五章)・大鐘楼の門のイサナ (終章の見送り)・昼の月 (六章の前)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/story_late.txt -PshotsName=story_late
+world circuit_check continent
+size 1280 720
+timeout 2400
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd skyabyss level set @p 40
+cmd time set noon
+cmd weather clear
+cmd effect give @s resistance 900 4 true
+cmd effect give @s night_vision 900 0 true
+hud on
+# 撮影の世界は毎回新しいので、都 (地下の門・大鐘楼) を先に建てる
+cmd skyabyss dev opening build
+wait 600
+waitchunks 300
+
+# 1. 五章: 酒場の地下の戸を開けたあと、地下の門の前で待つイサナ
+cmd skyabyss quest start @s main_abyss
+cmd skyabyss quest stage @s main_abyss shaft
+cmd skyabyss dev isana goto
+waitchunks 200
+wait 100
+cmd skyabyss dev isana
+chat clear
+hud off
+shot sl_1_gate_isana
+cmd tp @s ~ ~ ~ ~90 10
+wait 10
+shot sl_1b_gate_isana_right
+cmd tp @s ~ ~ ~ ~90 10
+wait 10
+shot sl_1c_gate_isana_back
+cmd tp @s ~ ~ ~ ~90 10
+wait 10
+shot sl_1d_gate_isana_left
+cmd tp @s ~ ~ ~ ~90 10
+hud on
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 30
+shot sl_2_gate_meet
+cmd skyabyss dev talk say continue
+wait 20
+shot sl_2b_gate_meet2
+close
+wait 10
+
+# 2. 終章: 大鐘楼の門のそばで見送るイサナ
+cmd skyabyss quest start @s main_finale_ascend
+cmd skyabyss quest stage @s main_finale_ascend ascend
+cmd skyabyss dev isana goto
+waitchunks 200
+wait 100
+cmd skyabyss dev isana
+chat clear
+hud off
+shot sl_3_bell_isana
+cmd tp @s ~ ~ ~ ~90 10
+wait 10
+shot sl_3b_bell_isana_turn
+cmd tp @s ~ ~ ~ ~90 10
+wait 10
+shot sl_3c_bell_isana_turn
+cmd tp @s ~ ~ ~ ~90 10
+wait 10
+shot sl_3d_bell_isana_turn
+hud on
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 30
+shot sl_4_bell_see
+close
+wait 10
+
+# 3. 昼の月: 深淵のメインを終えて、月の核を止めるまで。昼の北の空、仰角 50 度
+cmd skyabyss quest forget @s main_finale_ascend
+cmd skyabyss quest stage @s main_abyss report
+cmd skyabyss quest next @s main_abyss
+clouds off
+cmd weather clear
+cmd effect give @s slow_falling 600 0 true
+cmd time set 3000
+cmd tp @s ~ 260 ~ 180 -40
+waitchunks 200
+wait 60
+chat clear
+hud off
+shot sl_5_day_moon
+cmd time set 6000
+wait 20
+shot sl_5b_day_moon_noon
+cmd time set 11500
+wait 20
+shot sl_5c_day_moon_evening
