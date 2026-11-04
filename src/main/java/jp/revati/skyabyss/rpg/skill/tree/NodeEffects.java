@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 //   cooldown@<技> / mana_cost@<技> / power@<技>           : その技だけの待ち・マナの費用・力 (SkillBuild。Wynncraft の「○○の軽減」のような技ごとの節)
 //   mana_hit / mana_kill                                 : 近接で当てるたび (0.6 秒に一度) のマナ (AffixEvents)・敵を倒したときのマナ (SkillEvents)
 //   cd_kill                                              : 敵を倒すたびに、発動スキルの再使用までを縮める秒 (SkillEvents。熾火の肺)
+//   hex_mark / storm_call / sun_burst / blink_guard      : 呪いの詠唱・嵐呼び・太陽の心臓・潮渡りの動き (KeystoneEffects)
 // THRESHOLD の節は、その基礎 (今の職の木から導いた値) が at 以上のときだけ数える
 public final class NodeEffects {
     private NodeEffects() {

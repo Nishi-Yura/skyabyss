@@ -67,7 +67,7 @@ public final class ValleyArena {
         level.addFreshEntity(e);
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
-        jp.revati.skyabyss.combat.PartyScale.resist(e, 1.75);
+        jp.revati.skyabyss.combat.PartyScale.resist(e, 2.28);
         e.playAction("rise");
         level.sendParticles(ParticleTypes.SQUID_INK, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 80, 1.2, 1.5, 1.2, 0.05);
         level.playSound(null, at, MoonMobsSetup.EMBRACER_ROAR.get(), net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 0.7f);

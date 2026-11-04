@@ -139,7 +139,7 @@ public final class BreakGauge {
     }
 
     // 人が主の後ろにいるか (体の向きから BACK_COS より後ろ)
-    static boolean behind(LivingEntity boss, Entity from) {
+    public static boolean behind(LivingEntity boss, Entity from) {
         Vec3 to = new Vec3(from.getX() - boss.getX(), 0, from.getZ() - boss.getZ());
         if (to.lengthSqr() < 1.0E-4) {
             return false;

@@ -79,7 +79,7 @@ public final class PromiseArena {
         level.addFreshEntity(e);
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
-        jp.revati.skyabyss.combat.PartyScale.resist(e, 2.68);
+        jp.revati.skyabyss.combat.PartyScale.resist(e, 3.48);
         e.playAction("call");
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 6, at.getZ() + 0.5, 120, 2.0, 4.0, 2.0, 0.06);
         level.playSound(null, at, CloudMobsSetup.WING_ROAR.get(), SoundSource.HOSTILE, 2.0f, 0.9f);

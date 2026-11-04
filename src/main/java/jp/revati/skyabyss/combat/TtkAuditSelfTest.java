@@ -130,7 +130,7 @@ public final class TtkAuditSelfTest {
             double strength = jp.revati.skyabyss.item.GearCurve.strengthMultiplier(s.level());
             double hit = s.dps0() / jp.revati.skyabyss.item.GearCurve.SWORD_SPEED * strength;
             double dps = s.dps0() * strength * jp.revati.skyabyss.item.GearCurve.armorTaken(hit, le.getAttributeValue(Attributes.ARMOR),
-                    le.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+                    le.getAttributeValue(Attributes.ARMOR_TOUGHNESS)) * (1 + HeartBalance.treeBonus(s.level()));
             double resist = PartyScale.typeResist(le);
             BreakModel.Fight fight = BreakModel.fight(le.getMaxHealth(), dps * HeartBalance.UPTIME / resist, HeartBalance.UPTIME);
             SkyAbyss.LOGGER.info(String.format(Locale.ROOT, "SELFTEST ttk audit mid    %-28s hp %6.1f armor %4.1f resist %.2f | dps %5.2f at %s +0 | %5.1f s, %d breaks",
@@ -157,7 +157,7 @@ public final class TtkAuditSelfTest {
             List<Double> secs = new ArrayList<>();
             List<Double> breaks = new ArrayList<>();
             for (double[] w : weapons) {
-                double dps = afterArmor(1 + w[0], foe) * w[1];
+                double dps = afterArmor(1 + w[0], foe) * w[1] * (1 + HeartBalance.treeBonus((LEVELS[region][0] + LEVELS[region][1]) / 2));
                 BreakModel.Fight fight = BreakModel.fight(hp, dps * HeartBalance.UPTIME, HeartBalance.UPTIME);
                 secs.add(fight.seconds());
                 breaks.add((double) fight.breaks());

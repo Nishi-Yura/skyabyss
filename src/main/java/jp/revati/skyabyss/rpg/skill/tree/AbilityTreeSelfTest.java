@@ -205,21 +205,28 @@ public final class AbilityTreeSelfTest {
             // 排他
             takePath(p, t, "dull_iron", f);
             check(f, SkillManager.takeNode(p, "quick_iron") == SkillData.TakeResult.EXCLUDED, "an excluded node was taken");
-            check(f, Math.abs(NodeEffects.sum(p, "attack") - 0.12) < 1e-9 && Math.abs(NodeEffects.sum(p, "attack_speed") + 0.10) < 1e-9,
+            // 数は木の節から読む (2026-11-04 の手本の形で値が変わったため)
+            double dullAttack = t.node("dull_iron").effect.get("attack");
+            double dullSpeed = t.node("dull_iron").effect.get("attack_speed");
+            double heavySpeed = t.node("heavy_blow").effect.get("attack_speed");
+            int heavyAt = t.node("heavy_blow").at;
+            check(f, Math.abs(NodeEffects.sum(p, "attack") - dullAttack) < 1e-9 && Math.abs(NodeEffects.sum(p, "attack_speed") - dullSpeed) < 1e-9,
                     "effect nodes do not sum: attack " + NodeEffects.sum(p, "attack"));
-            check(f, SkillBuild.generalDamage(p, false) >= 0.12 - 1e-9, "general damage does not include effect nodes: " + SkillBuild.generalDamage(p, false));
+            check(f, SkillBuild.generalDamage(p, false) >= dullAttack - 1e-9, "general damage does not include effect nodes: " + SkillBuild.generalDamage(p, false));
             // 閾値: 耐久 24 で岩の肌 (まだ 12)、筋力 24 で重い一撃
             check(f, d.hasNode(Job.WARRIOR, "rock_skin") && Growth.get(p).stat(Stat.VITALITY) < 24 && NodeEffects.sum(p, "armor") == 0,
                     "a threshold node fired below its stat: vit " + Growth.get(p).stat(Stat.VITALITY));
             for (String id : List.of("wide_blade", "big_foe", "str_c", "str_d", "heavy_blow")) {
                 take(p, id, f);
             }
-            check(f, Growth.get(p).stat(Stat.STRENGTH) < 24 && Math.abs(NodeEffects.sum(p, "attack_speed") + 0.10) < 1e-9,
-                    "heavy blow fired below strength 24: str " + Growth.get(p).stat(Stat.STRENGTH));
+            // 閾値は筋力が at に届いたときだけ効く (届いていなければ効かない)
+            boolean reached = Growth.get(p).stat(Stat.STRENGTH) >= heavyAt;
+            check(f, Math.abs(NodeEffects.sum(p, "attack_speed") - (dullSpeed + (reached ? heavySpeed : 0))) < 1e-9,
+                    "heavy blow did not follow strength " + heavyAt + ": str " + Growth.get(p).stat(Stat.STRENGTH) + " aspeed " + NodeEffects.sum(p, "attack_speed"));
             for (String id : List.of("titan_cleave_3", "sword_spirit", "deep_wound", "str_e", "shield_rush_2", "str_f")) {
                 take(p, id, f);
             }
-            check(f, Growth.get(p).stat(Stat.STRENGTH) >= 24 && Math.abs(NodeEffects.sum(p, "attack_speed") + 0.02) < 1e-9,
+            check(f, Growth.get(p).stat(Stat.STRENGTH) >= heavyAt && Math.abs(NodeEffects.sum(p, "attack_speed") - (dullSpeed + heavySpeed)) < 1e-9,
                     "a threshold node did not fire at its stat: str " + Growth.get(p).stat(Stat.STRENGTH) + " aspeed " + NodeEffects.sum(p, "attack_speed"));
             // 型の点: 守り石の約束は盾の型に 20 点 (前提の耐久は取っておく)
             takePath(p, t, "vit_e", f);
@@ -255,6 +262,8 @@ public final class AbilityTreeSelfTest {
                 check(f, d.canTake(Job.WARRIOR, fifth, 50) == SkillData.TakeResult.ACTIVES_FULL, "a fifth active skill was allowed: " + fifth.id);
             }
             // 変異の節: 極めてから、素材を払って。払えば振り直しのあとも ただ
+            // ここから先は取った節の点が Lv 50 の点を越えるので (手本の形で節の点が上がった)、外されないよう点を足しておく (保存にも乗る)
+            d.bonusPoints = 200;
             AbilityNode mut = t.mutationNode(Skill.TITAN_CLEAVE);
             check(f, mut != null && d.rank(Skill.TITAN_CLEAVE) >= Skill.TITAN_CLEAVE.maxRank, "no titan cleave mutation node or not mastered");
             if (mut != null) {

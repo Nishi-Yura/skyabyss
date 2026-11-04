@@ -624,6 +624,8 @@ public final class SkillManager {
         SkillActions.fxTarget = null;
         // 舞 (風の舞い手の溜まるもの): 今の段の分だけ、この技の待ちが短い
         double gaugeCooldown = Gauges.cooldownScale(player, skill);
+        // 満ち潮 (呪術師の型の要): マナが半分より多いときの技は待ちが短い (KeystoneEffects)
+        gaugeCooldown *= KeystoneEffects.fullTideScale(player);
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
             Notice.bar(player, ModText.deny(failure));
@@ -637,6 +639,8 @@ public final class SkillManager {
         SkillActions.cooldownScale = 1;
         // 型の溜まるもの: 溜める技・放つ技 (rpg/skill/Gauges)
         Gauges.afterCast(player, skill);
+        // 型の要の動き (嵐呼び・潮渡り)
+        KeystoneEffects.afterCast(player, skill);
         // 炉の記憶: 技を使うたびに熾が 1 つ溜まる (次の近接で使い切る)
         int memory = d.rank(Skill.FORGE_MEMORY);
         if (memory > 0) {

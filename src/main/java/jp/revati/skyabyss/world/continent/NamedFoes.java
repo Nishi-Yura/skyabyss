@@ -54,15 +54,15 @@ public final class NamedFoes {
     }
 
     // 土地の番号 (ContinentMap: MEADOW, OUTSKIRTS, WHALE, TIDE, STORM, EMBER) ごと。
-    // 体力の倍率は、崩しゲージを入れて土地の目安のレベルの一人で 30〜45 秒になるよう (docs/design/47 の 2.1、TtkAuditSelfTest の見積もり。2026-11-04)
+    // 体力の倍率は、崩しゲージと技の木の上乗せ込みで、土地の目安のレベルの一人で 30〜45 秒になるよう (docs/design/47 の 2.1、TtkAuditSelfTest の見積もり。2026-11-04)
     static final Def[] DEFS = {
-        new Def("skyabyss:bone_standard", "entity.skyabyss.named.meadow", 7.1, 40),
+        new Def("skyabyss:bone_standard", "entity.skyabyss.named.meadow", 7.2, 40),
         // はじまりの島には名のある強敵を出さない (峠の頭目は峠の野盗の場面だけ。IslandTrail。2026-10-27 の声)
         null,
-        new Def("skyabyss:rock_boar", "entity.skyabyss.rock_boar", 1.8, 80),
-        new Def("skyabyss:tide_crab", "entity.skyabyss.tide_crab", 1.6, 120),
-        new Def("skyabyss:storm_ram", "entity.skyabyss.storm_ram", 1.5, 160),
-        new Def("skyabyss:ash_lizard", "entity.skyabyss.ash_lizard", 1.3, 220),
+        new Def("skyabyss:rock_boar", "entity.skyabyss.rock_boar", 1.9, 80),
+        new Def("skyabyss:tide_crab", "entity.skyabyss.tide_crab", 1.8, 120),
+        new Def("skyabyss:storm_ram", "entity.skyabyss.storm_ram", 1.8, 160),
+        new Def("skyabyss:ash_lizard", "entity.skyabyss.ash_lizard", 1.6, 220),
     };
 
     private static final Map<Integer, UUID> ALIVE = new HashMap<>();

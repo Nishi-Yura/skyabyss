@@ -93,13 +93,31 @@ public final class HeartBalance {
     }
 
     // ---------------------------------------------------------------- 攻め
-    // 一人の 1 秒あたりの傷 (心臓の防具を通したあと、殴り続けたとき)。weaponMultiplier: 想定の武器に対する倍 (+10 なら dps10 / dps0)
+    // 技の木の上乗せ (与える傷)。2026-11-04 に木の節を大きくした (docs/design/48 の 4.1) ので、主の硬さの見積もりに入れる。
+    // 木のデータから、レベル (= SP) で幹と型ひとつを傷の節から取ったときの上乗せ (近接・矢 0.6 + 技 0.4) を六職で平均し、その 0.75 倍 (ふつうの取り方) にした値
+    static final int[] TREE_LEVELS = {0, 4, 12, 18, 24, 30, 46};
+    static final double[] TREE_BONUS = {0, 0.02, 0.075, 0.16, 0.225, 0.26, 0.30};
+
+    public static double treeBonus(int level) {
+        if (level <= TREE_LEVELS[0]) {
+            return 0;
+        }
+        for (int i = 1; i < TREE_LEVELS.length; i++) {
+            if (level <= TREE_LEVELS[i]) {
+                double t = (level - TREE_LEVELS[i - 1]) / (double) (TREE_LEVELS[i] - TREE_LEVELS[i - 1]);
+                return TREE_BONUS[i - 1] + (TREE_BONUS[i] - TREE_BONUS[i - 1]) * t;
+            }
+        }
+        return TREE_BONUS[TREE_BONUS.length - 1];
+    }
+
+    // 一人の 1 秒あたりの傷 (心臓の防具を通したあと、殴り続けたとき。技の木の上乗せ込み)。weaponMultiplier: 想定の武器に対する倍 (+10 なら dps10 / dps0)
     public static double playerDps(String stage, double weaponMultiplier) {
         GearCurve.Stage s = stage(stage);
         double strength = GearCurve.strengthMultiplier(s.level());
         double hit = s.dps0() / GearCurve.SWORD_SPEED * strength;
         double taken = GearCurve.armorTaken(hit, heartArmor(stage), heartToughness(stage));
-        return s.dps0() * weaponMultiplier * strength * taken;
+        return s.dps0() * weaponMultiplier * strength * taken * (1 + treeBonus(s.level()));
     }
 
     // 崩しゲージ込みの戦い (BreakModel)。基本の硬さと人数の強さは受ける傷を割るので、体力の削りの速さを割る

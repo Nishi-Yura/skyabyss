@@ -112,6 +112,67 @@ public final class TreeKeystoneSelfTest {
             if (before || !guarded || Math.abs(soft - 10f * SkillRules.SMITH_GUARD) > 0.01f || next != 10f) {
                 f.add("smith's eye should soften only the next hit after a full swing to x" + SkillRules.SMITH_GUARD + " (" + before + "/" + guarded + ", " + soft + ", then " + next + ")");
             }
+            // ---- ほかの職の型の要 (KeystoneEffects)
+            jp.revati.skyabyss.rpg.skill.KeystoneEffects.class.getName();
+            // 硝子の刃: 背中への満ちた一撃 ×1.5 (与える傷 +14% も乗る)
+            d.keystones.clear();
+            foe.setPos(a.getX(), a.getY(), a.getZ() + 2);
+            foe.setYRot(0f);
+            foe.yBodyRot = 0f;
+            foe.setHealth(400);
+            foe.invulnerableTime = 0;
+            float g0 = foe.getHealth();
+            MeleeHits.during(a, 1f, () -> foe.hurt(level.damageSources().playerAttack(a), 6f));
+            float back = g0 - foe.getHealth();
+            d.keystones.add(SkillKeystone.GLASS_BLADE.id);
+            foe.invulnerableTime = 0;
+            float g1 = foe.getHealth();
+            MeleeHits.during(a, 1f, () -> foe.hurt(level.damageSources().playerAttack(a), 6f));
+            float glass = g1 - foe.getHealth();
+            double wantGlass = jp.revati.skyabyss.rpg.skill.KeystoneEffects.GLASS_BACK * (1 + SkillRules.KEY_GLASS_DAMAGE);
+            if (!BreakGauge.behind(foe, a) || back <= 0 || Math.abs(glass / back - wantGlass) > 0.04) {
+                f.add("glass blade should deal x" + wantGlass + " from behind (" + back + " -> " + glass + ", behind " + BreakGauge.behind(foe, a) + ")");
+            }
+            d.keystones.clear();
+            // 孤高の弦: 頭の高さの矢だけ
+            if (!jp.revati.skyabyss.rpg.skill.KeystoneEffects.headshot(foe, foe.getEyeY()) || jp.revati.skyabyss.rpg.skill.KeystoneEffects.headshot(foe, foe.getY() + 0.3)) {
+                f.add("lone string should count only arrows at head height");
+            }
+            // 満ち潮: マナが半分より多いときだけ待ち ×0.7
+            double max = SkillManager.maxMana(a);
+            if (max > 0) {
+                d.keystones.add(SkillKeystone.FULL_TIDE.id);
+                d.mana = (float) (max * 0.8);
+                double high = jp.revati.skyabyss.rpg.skill.KeystoneEffects.fullTideScale(a);
+                d.mana = (float) (max * 0.3);
+                double low = jp.revati.skyabyss.rpg.skill.KeystoneEffects.fullTideScale(a);
+                if (Math.abs(high - jp.revati.skyabyss.rpg.skill.KeystoneEffects.FULL_TIDE_COOLDOWN) > 1.0E-9 || low != 1.0) {
+                    f.add("full tide should shorten cooldowns only above half mana (" + high + ", " + low + ")");
+                }
+                d.keystones.clear();
+            }
+            // 魔法使い・呪術師・弓使いの節の鍵が数えられる (星の誓いは技を覚えたとき)
+            String[][] keys = {{"mage", "star_oath", ""}, {"mage", "sun_heart", "sun_burst"}, {"mage", "tide_walker", "blink_guard"}, {"shaman", "hex_chant", "hex_mark"},
+                {"archer", "storm_caller", "storm_call"}};
+            for (String[] k : keys) {
+                Job jb = Job.byId(k[0]);
+                d.curJob = jb.id;
+                d.nodesOf(jb).add(k[1]);
+                d.applyNodes();
+                boolean ok = k[2].isEmpty() ? d.knows(Skill.STAR_OATH) : jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(a, k[2]) > 0;
+                if (k[2].isEmpty() && ok && max > 0) {
+                    d.mana = (float) (max * 0.1);
+                    ok = jp.revati.skyabyss.rpg.skill.KeystoneEffects.starScale(a) == jp.revati.skyabyss.rpg.skill.KeystoneEffects.STAR_LOW_DAMAGE;
+                    d.mana = (float) max;
+                    ok &= jp.revati.skyabyss.rpg.skill.KeystoneEffects.starScale(a) == 1f;
+                }
+                if (!ok) {
+                    f.add(k[0] + " " + k[1] + " does not give its keystone effect " + k[2]);
+                }
+                d.nodesOf(jb).remove(k[1]);
+            }
+            d.curJob = Job.SMITH.id;
+            d.applyNodes();
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST tree keystones crashed", e);
             f.add("crashed: " + e);
@@ -130,7 +191,7 @@ public final class TreeKeystoneSelfTest {
         }
         f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST tree keystones FAILED: {}", m));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tree keystones PASSED (ash pact fills the break gauge x1.5 and hits broken bosses x1.2; smith's eye softens the next hit after a full swing; ember lung counts cd_kill)");
+            SkyAbyss.LOGGER.info("SELFTEST tree keystones PASSED (ash pact fills the break gauge x1.5 and hits broken bosses x1.2; smith's eye softens the next hit after a full swing; ember lung counts cd_kill; glass blade x1.5 from behind; lone string head height; full tide above half mana; star oath below 30% mana; sun heart, tide walker, hex chant and storm caller keys)");
         }
     }
 }
