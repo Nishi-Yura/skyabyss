@@ -60,15 +60,39 @@ public final class FacilitySelfTest {
         }
     }
 
+    // 読み込んだ 3 × 3 のチャンクがすべて生き物の動く状態か (訓練場の的は試しの場所から 6 ずれた隣のチャンクに置く)
+    static boolean ready(ServerLevel level) {
+        BlockPos base = testBase(level);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (!level.isPositionEntityTicking(base.offset(dx * 16, 0, dz * 16))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static List<SelfTestRunner.Step> steps() {
         // 先に試しの場所 (出現地点から 512 離れた所。都の本物の係の人と混ざらない) のチャンクを読み込み、生き物が動くまで待つ
         // (大陸の世界は試しの場所が海の上の新しいチャンクで、作るのに時間がかかる。生き物が動くまで待つ。30 秒で諦めて進む)
         int[] waited = {0};
+        int[] extrasWaited = {0};
         return List.of(SelfTestRunner.Step.once("facility (load)", FacilitySelfTest::load),
-                SelfTestRunner.Step.until("facility (wait)", server -> server.overworld().isPositionEntityTicking(testBase(server.overworld())) || ++waited[0] > 600),
+                SelfTestRunner.Step.until("facility (wait)", server -> ready(server.overworld()) || ++waited[0] > 600),
                 SelfTestRunner.Step.once("facility", 20, FacilitySelfTest::run),
                 SelfTestRunner.Step.once("facility guild", GuildSelfTest::run),
-                SelfTestRunner.Step.once("facility extras", FacilityExtrasSelfTest::run),
+                // 訓練場の的は試しの場所のそばに置く。"facility extras" だけを選ぶと上の読み込みの段が流れないので、自分で読み込み、まわりの 3 × 3 のチャンクで生き物が動くまで待つ (30 秒で諦めて進む)
+                SelfTestRunner.Step.until("facility extras", server -> {
+                    if (!ready(server.overworld()) && extrasWaited[0]++ < 600) {
+                        if (extrasWaited[0] == 1) {
+                            load(server);
+                        }
+                        return false;
+                    }
+                    FacilityExtrasSelfTest.run(server);
+                    return true;
+                }),
                 SelfTestRunner.Step.once("facility trade", jp.revati.skyabyss.facility.trade.TradeSelfTest::run));
     }
 

@@ -139,6 +139,8 @@ public final class FishingSelfTest {
                 }
                 net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(hook.blockPosition()).inflate(4);
                 level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box).forEach(net.minecraft.world.entity.Entity::discard);
+                // 出現地点のそばには、ほかの段や自己テストのときだけ湧くバニラの敵が残した経験の玉が先にあることがある。釣り上げて増えた玉だけを見る
+                List<net.minecraft.world.entity.ExperienceOrb> orbsBefore = level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box);
                 int damage = hook.retrieve(p.getMainHandItem());
                 List<net.minecraft.world.entity.item.ItemEntity> drops = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box);
                 int land = ContinentMap.get().inside(hook.getBlockX(), hook.getBlockZ())
@@ -146,7 +148,7 @@ public final class FishingSelfTest {
                 check(f, damage == 0 && drops.size() == 1 && drops.get(0).getItem().getItem() instanceof FishingSetup.FishItem fi
                         && (fi.species.region() == land || fi.species.region() == Fish.ANY) && drops.get(0).getItem().get(FishingSetup.FISH_SIZE.get()) != null,
                         "reeling in did not give one fish of the land: " + drops.stream().map(e -> e.getItem().toString()).toList() + " damage " + damage);
-                check(f, level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box).isEmpty(), "reeling in dropped experience");
+                check(f, level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box).stream().allMatch(orbsBefore::contains), "reeling in dropped experience");
                 drops.forEach(net.minecraft.world.entity.Entity::discard);
                 hook.discard();
             }
