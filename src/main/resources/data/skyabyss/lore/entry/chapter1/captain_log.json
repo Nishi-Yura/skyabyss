@@ -1,0 +1,15 @@
+{
+  "chapter": "titan_whale",
+  "order": 81,
+  "inscription_sign": "sign.skyabyss.captain_log_page",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.captain_log_page"
+    }
+  ],
+  "related": [
+    "chapter1/captain",
+    "chapter1/whale_chaser"
+  ]
+}

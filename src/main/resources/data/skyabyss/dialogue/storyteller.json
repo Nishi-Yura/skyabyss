@@ -991,6 +991,10 @@
     },
     "fragment_verse": {
       "face": "grave",
+      "next": "fragment_sea"
+    },
+    "fragment_sea": {
+      "face": "neutral",
       "next": "fragment3"
     },
     "fragment3": {

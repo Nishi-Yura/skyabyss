@@ -138,5 +138,7 @@
   "lore.skyabyss.chapter1.ember_tablets.title": "The Ash Tablets",
   "lore.skyabyss.chapter1.ember_tablets.body": "Three black stone tablets stood in the burnt land, dusted with ash.\n\nThe first said the ash does not fall from the sky, but rises from beneath your feet.\n\nThe second, that the ash folk borrowed fire and kept forging without ever setting a day to return it. The third: the mountain does not sleep. It holds its breath, and counts the names of the smiths.",
   "message.skyabyss.tablets.ch1_whale": "A mossy tablet. There seem to be two more somewhere in the hills.",
-  "message.skyabyss.tablets.ch4_ash": "An ash-covered tablet. There seem to be two more in the burnt land."
+  "message.skyabyss.tablets.ch4_ash": "An ash-covered tablet. There seem to be two more in the burnt land.",
+  "lore.skyabyss.chapter1.captain_log.title": "A Page of the Captain's Log",
+  "lore.skyabyss.chapter1.captain_log.body": "Pinned to a pillar at the back of the captain's hall: a single sea-warped page from a ship's log.\n\nThe hand is unsteady; only the last line is pressed hard. \"Turn the helm.\"\n\nIsana might know what it means."
 }

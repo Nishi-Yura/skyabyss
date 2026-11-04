@@ -2633,5 +2633,10 @@
   "message.skyabyss.weakened.applied": "弱っている（2 分）。与える傷 −15%・受ける傷 +15%。宿で休むと治る",
   "message.skyabyss.weakened.rested": "宿で休んで、弱りが抜けた",
   "entity.skyabyss.pack_leader": "%sの群れの頭",
-  "message.skyabyss.pack.first": "夜の野に手ごわい群れがいる。金の名札の頭は体力が多い"
+  "message.skyabyss.pack.first": "夜の野に手ごわい群れがいる。金の名札の頭は体力が多い",
+  "sign.skyabyss.captain_log_page.1": "歌は東から来る",
+  "sign.skyabyss.captain_log_page.2": "名を呼んでいる",
+  "sign.skyabyss.captain_log_page.3": "私の名ではない",
+  "sign.skyabyss.captain_log_page.4": "舵を切れ",
+  "message.skyabyss.captain_log.seen": "奥の柱に、潮で波打った紙が一枚とめてある"
 }

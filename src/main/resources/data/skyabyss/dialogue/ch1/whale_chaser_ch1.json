@@ -45,6 +45,22 @@
       ]
     },
     {
+      "node": "ch1_c_log1",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "chapter1/captain_log"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_log_given"
+          }
+        }
+      ]
+    },
+    {
       "node": "ch1_c_diary",
       "if": [
         {
@@ -184,6 +200,33 @@
         {
           "type": "flag",
           "flag": "ch1_after_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 3
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1_c_log1": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "show",
+          "goto": "ch1_c_log2"
+        }
+      ]
+    },
+    "ch1_c_log2": {
+      "face": "grave",
+      "next": "ch1_c_log3"
+    },
+    "ch1_c_log3": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1_log_given"
         },
         {
           "type": "affinity",

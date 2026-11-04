@@ -260,5 +260,9 @@
   "quest.skyabyss.ch1.trail_iron.track.follow": "Follow the traveller's iron scraps",
   "message.skyabyss.ch1.iron_scrap.1": "A broken anvil and a loose chain. Boot prints lead to the hills",
   "message.skyabyss.ch1.iron_scrap.2": "More scraps. Heavy prints that stop now and then: they rested here",
-  "message.skyabyss.ch1.iron_scrap.3": "The third scrap. Past the prints lies the mouth of the bone pit"
+  "message.skyabyss.ch1.iron_scrap.3": "The third scrap. Past the prints lies the mouth of the bone pit",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log1": "That paper... warped by the sea. Where did you find it?",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log1.show": "At the back of the captain's hall",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log2": "That's the captain's hand. No doubt of it.\n\"The song comes from the east. It calls a name. Not mine.\"...",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log3": "\"Turn the helm.\" ...That was all he said that night.\nWhose name it called, I can't say. But the song is still calling someone, somewhere.\nKeep the page. If you follow the song past the whale, more will turn up."
 }

@@ -2633,5 +2633,10 @@
   "message.skyabyss.weakened.applied": "Weakened for 2 min: -15% damage dealt, +15% taken. Rest at an inn",
   "message.skyabyss.weakened.rested": "You rested at the inn; the weakness is gone",
   "entity.skyabyss.pack_leader": "%s Pack Leader",
-  "message.skyabyss.pack.first": "Night pack nearby: its gold-named leader is sturdy"
+  "message.skyabyss.pack.first": "Night pack nearby: its gold-named leader is sturdy",
+  "sign.skyabyss.captain_log_page.1": "Song from the east",
+  "sign.skyabyss.captain_log_page.2": "It calls a name",
+  "sign.skyabyss.captain_log_page.3": "Not mine",
+  "sign.skyabyss.captain_log_page.4": "Turn the helm",
+  "message.skyabyss.captain_log.seen": "A sea-warped page is pinned to a pillar at the back"
 }
