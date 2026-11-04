@@ -1,0 +1,23 @@
+# 2026-11-05: 武器の札の「職: ○○」。鍛冶師の人が、ほかの職の弓 (赤紫と「使えない」) と自分の職の鎚 (金) を見る
+# 前に run/shots/regen_fix/saves/user_copy へ世界を写しておく (職は鍛冶師)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/job_tooltip.txt -PshotsName=regen_fix
+world user_copy continent
+size 1280 720
+timeout 900
+guiscale 3
+wait 60
+waitscreen 900 none
+wait 20
+cmd gamemode adventure
+cmd item replace entity @s hotbar.0 with skyabyss:whale_bow
+cmd item replace entity @s hotbar.1 with skyabyss:storm_hammer
+wait 10
+open inventory
+wait 20
+hover slot 36
+wait 10
+shot jt_1_bow_locked
+hover slot 37
+wait 10
+shot jt_2_hammer_own
+close

@@ -67,6 +67,7 @@
   "item.skyabyss.ember_staff.desc": "A staff holding an ember of the ember titan.",
   "item.skyabyss.ember_censer.desc": "A censer staff that burns embers.",
   "gui.skyabyss.job.tooltip": "Job: %s",
+  "gui.skyabyss.job.tooltip_locked": " (not usable in your current job)",
   "item.skyabyss.shrine_sword": "Shrine Sword",
   "item.skyabyss.shrine_sword.desc": "A sword the island shrine gives to rock guards. Straight and easy to handle.",
   "item.skyabyss.shrine_hammer": "Shrine Hammer",

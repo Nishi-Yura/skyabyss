@@ -67,6 +67,7 @@
   "item.skyabyss.ember_staff.desc": "余燼の熾火を宿した杖。",
   "item.skyabyss.ember_censer.desc": "熾火を焚く香炉の杖。",
   "gui.skyabyss.job.tooltip": "職: %s",
+  "gui.skyabyss.job.tooltip_locked": "（いまの職では使えない）",
   "item.skyabyss.shrine_sword": "祠の剣",
   "item.skyabyss.shrine_sword.desc": "島の祠が岩守りに授ける剣。まっすぐで扱いやすい。",
   "item.skyabyss.shrine_hammer": "祠の鎚",

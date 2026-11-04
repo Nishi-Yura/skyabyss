@@ -9,7 +9,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 // 武器の説明に「職: 魔法使い（星読み）」を一行。あわせて、特性の出来を Shift で見せるつなぎ (Wynncraft の武器の Class Req と同じ。docs/design/43)。
-// 持つとその職になる武器だけ。いまの職と同じなら金色、違えば灰色
+// いまの職の武器なら金色、ほかの職の武器なら赤紫で「（いまの職では使えない）」を添える (rpg/skill/JobWeaponLock)、職をまだ選んでいなければ灰色
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class JobTooltip {
     // 特性の出来は Shift を押しているあいだ出す (item/affix/AffixRules.line)
@@ -28,10 +28,15 @@ public final class JobTooltip {
         if (job == null || event.getToolTip().isEmpty()) {
             return;
         }
-        boolean mine = event.getEntity() != null && Job.held(event.getEntity()) == job;
-        Component line = Component.translatable("gui.skyabyss.job.tooltip",
+        Job cur = event.getEntity() == null ? null : Job.byId(jp.revati.skyabyss.rpg.skill.SkillManager.get(event.getEntity()).curJob);
+        boolean locked = event.getEntity() != null && jp.revati.skyabyss.rpg.skill.JobWeaponLock.wrongJob(event.getEntity(), event.getItemStack()) != null;
+        int color = locked ? 0xD9779A : cur == job ? 0xF2C14E : 0x9AA4B2;
+        net.minecraft.network.chat.MutableComponent line = Component.translatable("gui.skyabyss.job.tooltip",
                 Component.translatable("job.skyabyss.subtitle", Component.translatable(job.nameKey()), Component.translatable(job.tree.nameKey())))
-                .withStyle(s -> s.withColor(mine ? 0xF2C14E : 0x9AA4B2));
+                .withStyle(s -> s.withColor(color));
+        if (locked) {
+            line.append(Component.translatable("gui.skyabyss.job.tooltip_locked"));
+        }
         event.getToolTip().add(1, line);
         // 基礎の要求値 (docs/design/48 の 2.2): 届いていれば淡い青、足りなければ赤紫で今の値を添える
         jp.revati.skyabyss.rpg.skill.GearRequirement.Req req = jp.revati.skyabyss.rpg.skill.GearRequirement.of(event.getItemStack());
