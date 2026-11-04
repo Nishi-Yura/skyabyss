@@ -95,7 +95,7 @@ final class DeepSkillsSelfTest {
         // 紋: 5 種で穴 3〜6。6 つ以上は数えない
         check(f, Glyph.values().length == 5 && SkillRules.glyphSockets(0) == 3 && SkillRules.glyphSockets(3) == 6 && SkillRules.glyphSockets(20) == 6,
                 "glyph socket counts are wrong");
-        check(f, Mutation.values().length == 8, "mutation count");
+        check(f, Mutation.values().length == 10, "mutation count");
         for (Mutation m : Mutation.values()) {
             check(f, m.skill.active && !m.coreItem().equals(net.minecraft.world.item.Items.AIR) && !m.shardItem().equals(net.minecraft.world.item.Items.AIR),
                     "mutation " + m.id + " has no skill or material");
@@ -350,7 +350,7 @@ final class DeepSkillsSelfTest {
             skills.add(m.skill);
             perTitan.merge(m.titan, 1, Integer::sum);
         }
-        check(f, skills.size() == 8 && perTitan.size() == 4 && perTitan.values().stream().allMatch(n -> n == 2), "mutations are not spread over four titans");
+        check(f, skills.size() == 10 && perTitan.size() == 4 && perTitan.values().stream().allMatch(n -> n >= 2), "mutations are not spread over four titans");
         // 転生しても変異は残る
         SkillReset.forRebirth(p);
         check(f, "rend_blade".equals(d.mutations.get("wind_rend")) && SkillExtOps.active(p, Skill.WIND_REND) == null, "the rebirth reset lost or kept a mutation wrongly");

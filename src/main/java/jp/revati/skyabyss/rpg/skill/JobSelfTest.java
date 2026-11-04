@@ -105,10 +105,17 @@ public final class JobSelfTest {
             JobActions.perform(p, Skill.FORGE_STOMP, 1);
             check(f, z.getRemainingFireTicks() > 0, "forge stomp did not burn the zombie beside");
             // 星の誓い: 星読みの技のマナ +25%
-            int cost = SkillManager.manaCostFor(p, Skill.THUNDER_BOLT);
+            // 道の途中の節 (技の木) もマナや力を変えるので、星の誓いの節だけを外した形と比べる
             SkillManager.forceRank(p, Skill.STAR_OATH, 1);
-            check(f, SkillManager.manaCostFor(p, Skill.THUNDER_BOLT) == Math.round(cost * 1.25f) && JobActions.spell(p, 1.0) > plain * 1.2f,
-                    "star oath did not raise the star cost and power");
+            int withOath = SkillManager.manaCostFor(p, Skill.THUNDER_BOLT);
+            float powerWith = JobActions.spell(p, 1.0);
+            SkillManager.get(p).nodesOf(SkillTree.STAR).remove("star_oath");
+            SkillManager.get(p).applyNodes();
+            int withoutOath = SkillManager.manaCostFor(p, Skill.THUNDER_BOLT);
+            float powerWithout = JobActions.spell(p, 1.0);
+            SkillManager.forceRank(p, Skill.STAR_OATH, 1);
+            check(f, withOath > withoutOath && Math.abs(powerWith / powerWithout - (1 + SkillRules.STAR_OATH_POWER)) < 0.01,
+                    "star oath did not raise the star cost and power: " + withoutOath + " -> " + withOath + ", x" + powerWith / powerWithout);
             // 星読みの心得: 杖を持つとマナの戻りが速い
             SkillManager.forceRank(p, Skill.STAR_READING, 3);
             d.mana = 0;
@@ -226,14 +233,14 @@ public final class JobSelfTest {
         Growth.get(p).level = 10;
         int total = d.totalPoints(10);
         d.useJob(Job.WARRIOR);
-        for (String id : List.of("titan_cleave", "str_a", "vit_a", "riposte")) {
+        for (String id : List.of("titan_cleave", "str_1", "cheap_titan_cleave", "quick_titan_cleave")) {
             check(f, SkillManager.takeNode(p, id) == SkillData.TakeResult.OK, "warrior node " + id + " was refused");
         }
-        check(f, d.unspentFor(SkillTree.ROCK, 10) == total - 5, "warrior points are wrong: " + d.unspentFor(SkillTree.ROCK, 10));
+        check(f, d.unspentFor(SkillTree.ROCK, 10) == total - 4, "warrior points are wrong: " + d.unspentFor(SkillTree.ROCK, 10));
         check(f, d.unspentFor(SkillTree.BONE, 10) == total, "the warrior's points were taken from the archer: " + d.unspentFor(SkillTree.BONE, 10));
         d.useJob(Job.ARCHER);
         check(f, SkillManager.takeNode(p, "cloud_pierce") == SkillData.TakeResult.OK, "the archer root was refused");
-        check(f, d.unspentFor(SkillTree.BONE, 10) == total - 1 && d.unspentFor(SkillTree.ROCK, 10) == total - 5, "job points mixed: total " + total
+        check(f, d.unspentFor(SkillTree.BONE, 10) == total - 1 && d.unspentFor(SkillTree.ROCK, 10) == total - 4, "job points mixed: total " + total
                 + " bone " + d.unspentFor(SkillTree.BONE, 10) + " rock " + d.unspentFor(SkillTree.ROCK, 10) + " nodes " + d.nodes);
         check(f, Skill.byId("signal") == null && Skill.byId("dust_charge") == null && SkillTree.byId("traveler") == null, "the traveler / bridge trees still exist");
         // 職を替えると枠が入れ替わる (職の間。持ち替えでは替わらない)

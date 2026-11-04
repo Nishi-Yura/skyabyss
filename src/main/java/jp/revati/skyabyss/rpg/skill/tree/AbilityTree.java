@@ -53,9 +53,9 @@ public final class AbilityTree {
                     throw new IllegalArgumentException(key + "/" + n.id + ": requires unknown node " + r);
                 }
             }
-            for (String e : n.excludes) {
+            for (String e : n.blocks) {
                 if (!nodes.containsKey(e)) {
-                    throw new IllegalArgumentException(key + "/" + n.id + ": excludes unknown node " + e);
+                    throw new IllegalArgumentException(key + "/" + n.id + ": blocks unknown node " + e);
                 }
             }
             if (n.arch != null && !archetypes.contains(n.arch)) {
@@ -146,23 +146,60 @@ public final class AbilityTree {
         return out;
     }
 
-    // その節まで、幹から順に取る道 (前提は「どれか一つ」なので最初の前提をたどる)。自分も含む。開発・テスト用
+    // その節まで、幹から順に取る道 (開発・テスト用。forceRank もこれで節を入れる)。自分も含む。
+    // 根から前提を逆にたどり、重みの小さい道を選ぶ: 変化と変異は目当てでなければ通らない (100)、常に効く数・閾値はなるべく避ける (3)、ほかは 1。
+    // 横どうしの線があっても輪にならない
     public List<AbilityNode> pathTo(String id) {
-        LinkedHashSet<AbilityNode> out = new LinkedHashSet<>();
-        collect(nodes.get(id), out, 0);
-        List<AbilityNode> list = new ArrayList<>(out);
+        AbilityNode goal = nodes.get(id);
+        if (goal == null) {
+            return new ArrayList<>();
+        }
+        java.util.Map<String, Integer> dist = new java.util.HashMap<>();
+        java.util.Map<String, String> parent = new java.util.HashMap<>();
+        java.util.PriorityQueue<Object[]> queue = new java.util.PriorityQueue<>(java.util.Comparator.comparingInt(o -> (Integer) o[1]));
+        for (AbilityNode n : nodes.values()) {
+            if (n.requires.isEmpty()) {
+                dist.put(n.id, weight(n, id));
+                parent.put(n.id, null);
+                queue.add(new Object[] {n, weight(n, id)});
+            }
+        }
+        while (!queue.isEmpty()) {
+            Object[] top = queue.poll();
+            AbilityNode cur = (AbilityNode) top[0];
+            int d = (Integer) top[1];
+            if (d > dist.getOrDefault(cur.id, Integer.MAX_VALUE) || cur.id.equals(id)) {
+                continue;
+            }
+            for (AbilityNode n : nodes.values()) {
+                if (!n.requires.contains(cur.id)) {
+                    continue;
+                }
+                int nd = d + weight(n, id);
+                if (nd < dist.getOrDefault(n.id, Integer.MAX_VALUE)) {
+                    dist.put(n.id, nd);
+                    parent.put(n.id, cur.id);
+                    queue.add(new Object[] {n, nd});
+                }
+            }
+        }
+        List<AbilityNode> list = new ArrayList<>();
+        for (String at = id; at != null && parent.containsKey(at); at = parent.get(at)) {
+            list.add(nodes.get(at));
+        }
         Collections.reverse(list);
         return list;
     }
 
-    private void collect(@Nullable AbilityNode n, Set<AbilityNode> out, int depth) {
-        if (n == null || depth > 64 || out.contains(n)) {
-            return;
+    private static int weight(AbilityNode n, String goal) {
+        if (n.id.equals(goal)) {
+            return 1;
         }
-        out.add(n);
-        if (!n.requires.isEmpty()) {
-            collect(nodes.get(n.requires.get(0)), out, depth + 1);
-        }
+        return switch (n.kind) {
+            case RUNE, MUTATION -> 100;
+            case EFFECT, THRESHOLD -> 3;
+            default -> 1;
+        };
     }
 
     public String archKey(String arch) {

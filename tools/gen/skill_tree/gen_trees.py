@@ -738,6 +738,8 @@ def put_lang(path, entries):
 
 
 def main():
+    # 技の木 v3 (2026-11-04) からは gen_trees_v3.py が六職の木を書く。この古い生成は木を前の形に戻すので走らせない (関数は v3 が借りる)
+    raise SystemExit("the skill trees are written by tools/gen/skill_tree/gen_trees_v3.py now")
     ja = {}
     en = {}
     trees = [assassin(), shaman(), smith(), archer(), mage()]

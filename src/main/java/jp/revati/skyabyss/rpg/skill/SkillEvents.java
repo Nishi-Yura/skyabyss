@@ -495,6 +495,12 @@ public final class SkillEvents {
             if (d.notifiedPoints == 0 && d.spentPoints() > 0) {
                 d.notifiedPoints = d.totalPoints(SkillManager.level(player));
             }
+            // 技の木 v3 で取り方を戻したとき、一度だけ知らせる
+            if (d.treeReset) {
+                d.treeReset = false;
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.skyabyss.tree.reset_v3")
+                        .withStyle(net.minecraft.ChatFormatting.GOLD));
+            }
             SkillManager.sync(player);
             SkillManager.sendMana(player, true);
         }

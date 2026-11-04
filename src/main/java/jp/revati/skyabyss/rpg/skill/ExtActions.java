@@ -310,6 +310,8 @@ final class ExtActions {
             case LUNGE_SURGE -> surge(player, rank);
             case HAMMER_METEOR -> meteor(player, rank);
             case TRAP_MINE -> mine(player, rank);
+            case THUNDER_CLOUD -> TreeVariants.thunderCloud(player, rank);
+            case FROZEN_SEA -> TreeVariants.frozenSea(player, rank);
         };
     }
 

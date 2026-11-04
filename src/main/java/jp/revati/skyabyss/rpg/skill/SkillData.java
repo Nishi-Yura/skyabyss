@@ -480,7 +480,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 return TakeResult.REQUIRES;
             }
         }
-        for (String e : n.excludes) {
+        for (String e : n.blocks) {
             if (mine.contains(e)) {
                 return TakeResult.EXCLUDED;
             }
@@ -594,29 +594,41 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     // 一本の木の検め: 知らない節・転生の足りない節・前提の崩れた節・排他の重なりを外す。外したら true
     private boolean pruneTree(jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree, java.util.Set<String> mine) {
         boolean changed = mine.removeIf(id -> tree.node(id) == null || tree.node(id).rebirthAt > rebirth);
+        // 排他の重なりは、あとの方 (並びのあと) を外す
+        java.util.Set<String> kept = new java.util.LinkedHashSet<>();
+        for (String id : mine) {
+            jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
+            boolean clash = false;
+            for (String e : n.blocks) {
+                clash |= kept.contains(e);
+            }
+            if (!clash) {
+                kept.add(id);
+            }
+        }
+        // 根 (前提のない節) から前提をたどって届く節だけ残す。横どうしの線は互いを前提にするので、一つずつの検めでは切れた枝が残る (技の木 v3)
+        java.util.Set<String> reach = new java.util.LinkedHashSet<>();
         boolean again = true;
         while (again) {
             again = false;
-            for (String id : new java.util.ArrayList<>(mine)) {
+            for (String id : kept) {
+                if (reach.contains(id)) {
+                    continue;
+                }
                 jp.revati.skyabyss.rpg.skill.tree.AbilityNode n = tree.node(id);
                 boolean ok = n.requires.isEmpty();
                 for (String r : n.requires) {
-                    if (mine.contains(r)) {
-                        ok = true;
-                    }
+                    ok |= reach.contains(r);
                 }
-                for (String e : n.excludes) {
-                    if (mine.contains(e) && mine.contains(id)) {
-                        // 排他の重なりは、あとの方 (この節) を外す
-                        ok = false;
-                    }
-                }
-                if (!ok) {
-                    mine.remove(id);
+                if (ok) {
+                    reach.add(id);
                     again = true;
-                    changed = true;
                 }
             }
+        }
+        if (reach.size() != mine.size()) {
+            mine.retainAll(reach);
+            changed = true;
         }
         return changed;
     }
@@ -934,6 +946,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("v", version);
+        tag.putInt("treeVersion", TREE_VERSION);
         CompoundTag r = new CompoundTag();
         ranks.forEach(r::putInt);
         tag.put("ranks", r);
@@ -1027,6 +1040,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return tag;
     }
 
+    // 技の木の並びの版 (上がったら、読み込むときに職の木の取り方を戻す)。3 = 2026-11-04 の技の木 v3
+    public static final int TREE_VERSION = 3;
+    // 読み込んだときに職の木を戻したか (入ったときに一度だけ知らせる。保存しない)
+    public transient boolean treeReset;
+
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         // v がなければ前の版 (1)
@@ -1067,6 +1085,17 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             }
             nodes.put(k, set);
         }
+        // 技の木の並びが変わった版 (技の木 v3。docs/design/48 の 4 章): 職の木の取り方を一度だけ戻す (SP はすべて戻る。淵・前世の木はそのまま)
+        treeReset = false;
+        if (tag.getInt("treeVersion") < TREE_VERSION) {
+            for (Job j : Job.values()) {
+                java.util.Set<String> set = nodes.get(treeKey(j.tree));
+                if (set != null && !set.isEmpty()) {
+                    set.clear();
+                    treeReset = true;
+                }
+            }
+        }
         for (Loadout l : loadouts) {
             l.copyFrom(new Loadout());
         }
@@ -1084,8 +1113,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             }
             l.saved = lt.getBoolean("saved");
             l.nodes.clear();
-            for (Tag t : lt.getList("nodes", Tag.TAG_STRING)) {
-                l.nodes.add(t.getAsString());
+            if (tag.getInt("treeVersion") >= TREE_VERSION) {
+                for (Tag t : lt.getList("nodes", Tag.TAG_STRING)) {
+                    l.nodes.add(t.getAsString());
+                }
             }
         }
         keystones.clear();

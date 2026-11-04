@@ -245,6 +245,7 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.town.RegionFolkSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.world.continent.PoiPlacesSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.rpg.skill.TreeVariantsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.world.continent.IslandTrailSelfTest.steps());
         // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
         steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());

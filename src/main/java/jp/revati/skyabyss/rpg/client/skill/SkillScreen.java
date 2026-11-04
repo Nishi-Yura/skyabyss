@@ -1724,7 +1724,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 g.fill(x + sz - 4, y + 1, x + sz - 1, y + 4, taken ? 0xFF9FE8FF : 0xFF4A5060);
             }
             // 排他の節には赤紫の点 (左上)
-            if (!n.excludes.isEmpty()) {
+            if (!n.blocks.isEmpty()) {
                 g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF000000 | DENY);
             }
             // 同じスキルの変化を先に取っていて取れない節は、赤い × (2026-11-02「思ったような選択ルートにならない」: 黙って閉じていた)
@@ -1910,14 +1910,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
             lines.add(Component.translatable("gui.skyabyss.tree.requires", names).withColor(met ? SOFT : DENY));
         }
-        if (!n.excludes.isEmpty()) {
+        if (!n.blocks.isEmpty()) {
             MutableComponent names = Component.empty();
-            for (int i = 0; i < n.excludes.size(); i++) {
-                AbilityNode e = t.node(n.excludes.get(i));
+            for (int i = 0; i < n.blocks.size(); i++) {
+                AbilityNode e = t.node(n.blocks.get(i));
                 if (i > 0) {
                     names.append(Component.literal("・"));
                 }
-                names.append(e == null ? Component.literal(n.excludes.get(i)) : Component.translatable(e.nameKey(key)));
+                names.append(e == null ? Component.literal(n.blocks.get(i)) : Component.translatable(e.nameKey(key)));
             }
             lines.add(Component.translatable("gui.skyabyss.tree.excludes", names).withColor(DENY));
         }

@@ -47,6 +47,38 @@ public enum Rune {
     THIN_ARROW("thin_arrow", Skill.CLOUD_PIERCE, 1),
     HEAVY_ARROW("heavy_arrow", Skill.CLOUD_PIERCE, 2),
     LIGHTNING("lightning", Skill.CLOUD_PIERCE, 3),
+    // ---- 技の木 v3 の変化 (2026-11-04。docs/design/48 の 4 章)。発動から外した技は、残った技の変化にした (番号 8。4〜7 は書き換え・熟練の刻印)
+    BASH_RUSH("bash_rush", Skill.SHIELD_RUSH, 1),
+    SPIN_SWEEP("spin_sweep", Skill.WHALE_SWEEP, 8),
+    VEIL_LUNGE("veil_lunge", Skill.LUNGE, 8),
+    TRIPLE_FANG("triple_fang", Skill.TWIN_FANG, 1),
+    VENOM_FANG("venom_fang", Skill.TWIN_FANG, 2),
+    CYCLE_WARD("cycle_ward", Skill.WARD_SONG, 8),
+    WALKING_LAMP("walking_lamp", Skill.LAMP_CHARM, 1),
+    BURNING_LAMP("burning_lamp", Skill.LAMP_CHARM, 2),
+    LONG_MARK("long_mark", Skill.CURSE_MARK, 1),
+    PASSING_MARK("passing_mark", Skill.CURSE_MARK, 2),
+    SPARK_STOMP("spark_stomp", Skill.FORGE_STOMP, 1),
+    HEAVY_STOMP("heavy_stomp", Skill.FORGE_STOMP, 2),
+    DEEP_TEMPER("deep_temper", Skill.TEMPER, 1),
+    SHARED_FIRE("shared_fire", Skill.TEMPER, 2),
+    THICK_ASH("thick_ash", Skill.ASH_SCATTER, 1),
+    ASH_WIND("ash_wind", Skill.ASH_SCATTER, 2),
+    SNARE_PIERCE("snare_pierce", Skill.CLOUD_PIERCE, 8),
+    THROWN_TRAP("thrown_trap", Skill.BONE_TRAP, 1),
+    GREAT_TRAP("great_trap", Skill.BONE_TRAP, 2),
+    NARROW_RAIN("narrow_rain", Skill.SKY_RAIN, 1),
+    LONG_RAIN("long_rain", Skill.SKY_RAIN, 2),
+    PARTING_ARROWS("parting_arrows", Skill.ARCHER_LEAP, 1),
+    STARDUST_BOLT("stardust_bolt", Skill.THUNDER_BOLT, 1),
+    BRANCH_BOLT("branch_bolt", Skill.THUNDER_BOLT, 2),
+    HEAVY_BOLT("heavy_bolt", Skill.THUNDER_BOLT, 3),
+    TRIPLE_ORB("triple_orb", Skill.EMBER_ORB, 1),
+    EMBER_BED("ember_bed", Skill.EMBER_ORB, 2),
+    ICE_RING("ice_ring", Skill.FROST_TIDE, 1),
+    FROST_ROAD("frost_road", Skill.FROST_TIDE, 2),
+    STAR_REMNANT("star_remnant", Skill.BLINK, 1),
+    DOUBLE_BLINK("double_blink", Skill.BLINK, 2),
     // ---- 逸品の書き換え (4 番目。その武器を主の手に持つあいだだけ選べて、効く。docs/design/27 の 4.2)
     BONE_PIERCE("pike_bone", Skill.LUNGE, 4, "captain_pike"),
     BITE("fang_bite", Skill.WIND_REND, 4, "waterway_fang"),
@@ -118,6 +150,11 @@ public enum Rune {
 
     // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は逸品の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;
+
+    // 木の変化の番号か (1〜3 と 8 から。4〜7 は武器の書き換えと熟練の刻印)
+    public static boolean normal(int index) {
+        return index >= 1 && index <= 3 || index >= 8;
+    }
 
     public static boolean valid(Skill skill, int index) {
         return of(skill, index) != null || index == MASTERY && skill.active;

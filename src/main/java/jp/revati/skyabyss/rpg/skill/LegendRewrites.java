@@ -31,7 +31,15 @@ public final class LegendRewrites {
 
     // SkillActions.perform が、技が成った直後に呼ぶ。from = 技を使う前に立っていた所 (跳ぶ技の元の場所)
     static void after(ServerPlayer player, Skill skill, int rank, Vec3 from) {
-        Rune r = SkillManager.legendRune(player, skill);
+        apply(player, SkillManager.legendRune(player, skill), skill, rank, from);
+    }
+
+    // 技の木 v3 で発動から外した技 (霧隠れ・巡りの唄など) の書き換え: その技の変化を使ったとき、書き換えの武器を持っていれば効く (TreeVariants)
+    static void afterHeld(ServerPlayer player, Skill skill, int rank, Vec3 from) {
+        apply(player, Rune.heldLegend(skill, player), skill, rank, from);
+    }
+
+    private static void apply(ServerPlayer player, Rune r, Skill skill, int rank, Vec3 from) {
         if (r == null) {
             return;
         }

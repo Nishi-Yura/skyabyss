@@ -165,6 +165,11 @@ public final class SkillEffects {
         ASHED.put(foe, foe.level().getGameTime() + ticks);
     }
 
+    // 濃い灰 (灰散らしの変化): 弱める量をもう一つ重ねる (攻撃力と飛び道具の速さの弱りが 2 倍)
+    public static void thickAsh(LivingEntity foe, int ticks) {
+        timedMod(foe, Attributes.ATTACK_DAMAGE, "thick_ash", -SkillRules.ASH_ATTACK, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, ticks);
+    }
+
     public static boolean ashed(LivingEntity foe) {
         Long until = ASHED.get(foe);
         return until != null && until > foe.level().getGameTime();
@@ -364,6 +369,8 @@ public final class SkillEffects {
         public boolean spent;
         // 火床 (鍛え手の大鎚の書き換え): 熾火の中の敵は攻撃力 −10%
         public boolean weaken;
+        // 大罠 (骨の罠の変化。半径 2 倍の一つだけの罠)
+        public boolean great;
 
         Zone(ZoneKind kind, ServerLevel level, Vec3 center, double radius, UUID owner, int rank, long until) {
             this.kind = kind;
@@ -470,7 +477,7 @@ public final class SkillEffects {
                 }
                 case TRAP -> {
                     if (now % 3 == 0) {
-                        Zone near = new Zone(z.kind, z.level, z.center, SkillRules.TRAP_TRIGGER, z.owner, z.rank, z.until);
+                        Zone near = new Zone(z.kind, z.level, z.center, z.radius, z.owner, z.rank, z.until);
                         List<LivingEntity> foes = foesIn(owner, near);
                         if (!foes.isEmpty()) {
                             LivingEntity victim = foes.get(0);
