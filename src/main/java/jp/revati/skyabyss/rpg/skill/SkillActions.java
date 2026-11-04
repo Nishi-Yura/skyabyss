@@ -1121,10 +1121,8 @@ public final class SkillActions {
         ServerLevel level = player.serverLevel();
         int rune = rune(player, Skill.CLOUD_PIERCE);
         int pierce = SkillRules.piercePierce(rank) + (WeaponType.has(player, WeaponType.RANGED) ? 1 : 0) + Gauges.pierceBonus(player);
-        // 側の目の弓の欠点: 雲穿ちが貫かない
-        if (jp.revati.skyabyss.item.mythic.MythicAbilities.noPierce(player)) {
-            pierce = 0;
-        }
+        // 側の目の弓の欠点: 雲穿ちが貫かない (目覚めの段 2 からは貫く数が半分)
+        pierce = jp.revati.skyabyss.item.mythic.MythicAbilities.pierceLimit(player, pierce);
         double damageScale = SkillEffects.damagePower(player, Skill.CLOUD_PIERCE);
         float speed = SkillRules.PIERCE_SPEED;
         if (rune == 1) {

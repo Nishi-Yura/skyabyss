@@ -89,5 +89,8 @@
   "commands.skyabyss_play.said.tower_start": "Entered the Tower Between (%s player(s); the daily entry is not used)",
   "commands.skyabyss_play.tower_bad_ending": "The ending must be calm, break or accept: %s",
   "commands.skyabyss_play.tower_no_start": "Could not enter the tower (no tower world, no free stage, or everyone is already inside)",
-  "commands.skyabyss_play.tower_no_run": "Nobody is fighting the master inside the tower"
+  "commands.skyabyss_play.tower_no_run": "Nobody is fighting the master inside the tower",
+  "commands.skyabyss_play.help.19": "§e■ Artifacts §fadmin awaken <count> [targets] §7— set the kill count of the held artifact (awakening stages at 300, 1500, 5000; stage-ups announce as usual)",
+  "commands.skyabyss_play.act.awaken": "artifact kill count set",
+  "commands.skyabyss_play.awaken_none": "%s is not holding an artifact weapon"
 }

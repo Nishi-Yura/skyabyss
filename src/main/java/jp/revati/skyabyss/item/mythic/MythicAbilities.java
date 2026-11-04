@@ -63,6 +63,7 @@ import org.joml.Vector3f;
 //   弓使い 巡礼の羽弓「羽の嵐」/ 霞鳥の弓「霞隠れ」/ 側の目の弓「凝視の矢」
 //   暗殺者 巻き戻りの短剣「巻き戻し」/ 灯蛾の短剣「灯の粉」/ 追う印の短剣「追う印」
 //   呪術師 約束の鈴杖「約束」/ 鐘守の鈴杖「沈黙の鐘」/ 合掌の鈴杖「合掌」
+// 目覚め (MythicAwakening): 段 1 から大きな能力の芯の数値に B (1.15、段 3 で 1.30)、段 2 から欠点に D (0.5) を掛ける。
 // 数値はこの class の定数。技からは onSkillCast (SkillManager.cast)・manaScale / cooldownExtra / payWithLife (SkillManager)・
 // noPierce (SkillActions.pierce)・powerScale (SkillEffects.damagePower) を呼ぶ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -186,6 +187,24 @@ public final class MythicAbilities {
                 && GearLevel.meets(p, arrow.getWeaponItem());
     }
 
+    // 目覚めの倍率: 能力 (B) と欠点 (D)。手の品から
+    static double B(Player p) {
+        return MythicAwakening.boost(p);
+    }
+
+    static double D(Player p) {
+        return MythicAwakening.drawback(p);
+    }
+
+    // 矢の能力と欠点は、放った弓の品から
+    static double arrowB(Entity direct) {
+        return direct instanceof AbstractArrow arrow && arrow.getWeaponItem() != null ? MythicAwakening.boost(arrow.getWeaponItem()) : 1;
+    }
+
+    static double arrowD(Entity direct) {
+        return direct instanceof AbstractArrow arrow && arrow.getWeaponItem() != null ? MythicAwakening.drawback(arrow.getWeaponItem()) : 1;
+    }
+
     static float attack(Player p) {
         return (float) p.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
@@ -198,17 +217,24 @@ public final class MythicAbilities {
 
     // 技のマナに掛ける倍率 (落ちる月の杖: +20%)
     public static double manaScale(Player p, Skill skill) {
-        return holds(p, TowerGearSetup.STAFF.get()) ? MOON_MANA : 1;
+        return holds(p, TowerGearSetup.STAFF.get()) ? 1 + (MOON_MANA - 1) * D(p) : 1;
     }
 
     // 技の待ちに足す tick (天穹の剣: 巨神斬り +2 秒)
     public static int cooldownExtra(Player p, Skill skill) {
-        return skill == Skill.TITAN_CLEAVE && holds(p, DivineGearSetup.SWORD.get()) ? SKY_COOLDOWN : 0;
+        return skill == Skill.TITAN_CLEAVE && holds(p, DivineGearSetup.SWORD.get()) ? (int) Math.round(SKY_COOLDOWN * D(p)) : 0;
     }
 
-    // 雲穿ちが貫かない (側の目の弓)
+    // 雲穿ちが貫かない (側の目の弓)。目覚めの段 2 からは、貫く数が半分 (pierceLimit)
     public static boolean noPierce(Player p) {
-        return holds(p, TowerGearSetup.BOW.get());
+        return holds(p, TowerGearSetup.BOW.get()) && D(p) >= 1;
+    }
+
+    public static int pierceLimit(Player p, int pierce) {
+        if (!holds(p, TowerGearSetup.BOW.get())) {
+            return pierce;
+        }
+        return D(p) >= 1 ? 0 : pierce / 2;
     }
 
     // 暁の灯杖「命の灯」: 足りないマナを体力で払う (マナ 1 につき最大体力の 1%)。払えたら true
@@ -216,7 +242,7 @@ public final class MythicAbilities {
         if (missing <= 0 || !holds(p, DivineGearSetup.STAFF.get())) {
             return false;
         }
-        float cost = (float) (missing * LAMP_LIFE * p.getMaxHealth());
+        float cost = (float) (missing * LAMP_LIFE / B(p) * p.getMaxHealth());
         if (p.getHealth() <= cost + 1f) {
             return false;
         }
@@ -232,13 +258,14 @@ public final class MythicAbilities {
         ServerLevel level = p.serverLevel();
         // 巻き戻りの短剣「巻き戻し」: 1.5 秒後に同じ技がもう一度 (力は半分、マナは要らない)
         if (!s.echoing && holds(p, DivineGearSetup.DAGGER.get())) {
+            double echo = REWIND_POWER * B(p);
             level.sendParticles(ParticleTypes.SMALL_FLAME, p.getX(), p.getY() + 1, p.getZ(), 10, 0.3, 0.5, 0.3, 0.01);
             SkillEffects.later(level, REWIND_TICKS, () -> {
                 if (!p.isAlive() || p.level() != level || !holds(p, DivineGearSetup.DAGGER.get())) {
                     return;
                 }
                 s.echoing = true;
-                echoScale = REWIND_POWER;
+                echoScale = echo;
                 try {
                     SkillActions.perform(p, skill, rank);
                     level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.getX(), p.getY() + 1, p.getZ(), 20, 0.4, 0.6, 0.4, 0.05);
@@ -255,7 +282,7 @@ public final class MythicAbilities {
             if (target != null) {
                 int n = s.feathers;
                 s.feathers = 0;
-                float dmg = attack(p) * (float) FEATHER;
+                float dmg = attack(p) * (float) (FEATHER * B(p));
                 for (int i = 0; i < n; i++) {
                     SkillEffects.later(level, 2 + i, () -> {
                         if (target.isAlive() && target.level() == level) {
@@ -283,10 +310,10 @@ public final class MythicAbilities {
         // ---- 受ける側
         if (target instanceof ServerPlayer victim && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             if (holds(victim, DivineGearSetup.WARDEN.get())) {
-                m *= WARDEN_TAKEN;
+                m *= 1 + (WARDEN_TAKEN - 1) * D(victim);
             }
             if (holds(victim, DivineGearSetup.DAGGER.get())) {
-                m *= REWIND_TAKEN;
+                m *= 1 + (REWIND_TAKEN - 1) * D(victim);
             }
             if (state(victim).clapWardUntil > now) {
                 m *= CLAP_WARD;
@@ -305,7 +332,7 @@ public final class MythicAbilities {
                         } finally {
                             inner = false;
                         }
-                        SkillManager.gainMana(keeper, share * 0.5);
+                        SkillManager.gainMana(keeper, share * 0.5 * B(keeper));
                         line(level, keeper.position().add(0, 1, 0), victim.position().add(0, 1, 0), ParticleTypes.END_ROD, 8);
                         break;
                     }
@@ -316,7 +343,8 @@ public final class MythicAbilities {
         long[] melt = MELT.get(target);
         if (melt != null && source.getEntity() instanceof Player) {
             int stacks = (int) Math.max(0, melt[0] - (now - melt[1]) / MELT_DECAY);
-            m *= 1 + MELT_STEP * stacks;
+            double step = melt.length > 2 ? melt[2] / 10000.0 : MELT_STEP;
+            m *= 1 + step * stacks;
         }
         // ---- 与える側
         if (source.getEntity() instanceof ServerPlayer p && p != target && !(target instanceof Player) && !jp.revati.skyabyss.combat.MeleeHits.weakHit(p)) {
@@ -353,7 +381,7 @@ public final class MythicAbilities {
             }
         } else if (holds(p, TowerGearSetup.SWORD.get())) {
             if (p.getHealth() > p.getMaxHealth() * 0.5f) {
-                m *= 1 + BALANCE_HIGH;
+                m *= 1 + BALANCE_HIGH * B(p);
             }
         }
         // ---- 鍛冶師
@@ -366,7 +394,7 @@ public final class MythicAbilities {
             if (melee) {
                 long[] melt = MELT.get(target);
                 int stacks = melt == null ? 0 : (int) Math.max(0, melt[0] - (now - melt[1]) / MELT_DECAY);
-                MELT.put(target, new long[] {Math.min(MELT_MAX, stacks + 1), now});
+                MELT.put(target, new long[] {Math.min(MELT_MAX, stacks + 1), now, Math.round(MELT_STEP * B(p) * 10000)});
                 level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 2, 0.3, 0.3, 0.3, 0);
             }
         } else if (holds(p, TowerGearSetup.HAMMER.get())) {
@@ -378,7 +406,7 @@ public final class MythicAbilities {
         // ---- 魔法使い
         else if (holds(p, DivineGearSetup.EYELID.get())) {
             if (skill != null && target.getId() == s.gazeTarget && s.gaze > 0) {
-                m *= 1 + GAZE_STEP * Math.floor(s.gaze);
+                m *= 1 + GAZE_STEP * B(p) * Math.floor(s.gaze);
             }
         } else if (holds(p, TowerGearSetup.STAFF.get())) {
             if (skill != null && s.moonTick != now) {
@@ -392,7 +420,7 @@ public final class MythicAbilities {
         // ---- 弓使い
         else if (arrowFrom(direct, p, DivineGearSetup.BOW.get())) {
             if (skill == null && !direct.getTags().contains(SkillActions.PIERCE_TAG)) {
-                m *= PLUME_ARROW;
+                m *= 1 - (1 - PLUME_ARROW) * arrowD(direct);
                 if (s.feathers < FEATHERS) {
                     s.feathers++;
                 }
@@ -401,12 +429,12 @@ public final class MythicAbilities {
             MISTS.add(new Mist(level, target.position(), p.getUUID(), now + MIST_TICKS));
             level.sendParticles(MIST, target.getX(), target.getY() + 0.5, target.getZ(), 30, 1.2, 0.4, 1.2, 0);
             if (inOwnMist(level, p, now)) {
-                m *= MIST_ARROW;
+                m *= 1 + (MIST_ARROW - 1) * arrowB(direct);
             }
         } else if (arrowFrom(direct, p, TowerGearSetup.BOW.get())) {
             s.eyeCount = s.eyeTarget == target.getId() ? Math.min(EYE_MAX, s.eyeCount + 1) : 1;
             s.eyeTarget = target.getId();
-            m *= 1 + EYE_STEP * (s.eyeCount - 1);
+            m *= 1 + EYE_STEP * arrowB(direct) * (s.eyeCount - 1);
             level.sendParticles(GOLD, target.getX(), target.getY(0.6), target.getZ(), 2 + s.eyeCount, 0.3, 0.3, 0.3, 0);
         }
         // ---- 暗殺者
@@ -415,7 +443,7 @@ public final class MythicAbilities {
                 int dust = DUST.getOrDefault(target, 0);
                 if (MoonGearEvents.fromBehind(target, p.position())) {
                     if (dust > 0) {
-                        m *= 1 + DUST_STEP * dust;
+                        m *= 1 + DUST_STEP * B(p) * dust;
                         DUST.remove(target);
                         target.removeEffect(MobEffects.GLOWING);
                         level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10 + dust * 4, 0.3, 0.4, 0.3, 0.15);
@@ -423,7 +451,7 @@ public final class MythicAbilities {
                         DUST.put(target, 1);
                     }
                 } else {
-                    m *= MOTH_FRONT;
+                    m *= 1 - (1 - MOTH_FRONT) * D(p);
                     DUST.put(target, Math.min(DUST_MAX, dust + 1));
                     target.addEffect(new MobEffectInstance(MobEffects.GLOWING, 100, 0, true, false));
                     level.sendParticles(GOLD, target.getX(), target.getY(0.8), target.getZ(), 4 + dust * 2, 0.3, 0.3, 0.3, 0);
@@ -437,11 +465,11 @@ public final class MythicAbilities {
                 level.sendParticles(RED, target.getX(), target.getY() + 0.1, target.getZ(), 16, 0.6, 0, 0.6, 0);
                 marked = target;
             }
-            m *= marked == target ? SIGIL_ON : SIGIL_OFF;
+            m *= marked == target ? 1 + (SIGIL_ON - 1) * B(p) : 1 - (1 - SIGIL_OFF) * D(p);
         }
         // ---- 呪術師
         else if (holds(p, DivineGearSetup.BELL.get())) {
-            m *= PROMISE_OWN;
+            m *= 1 - (1 - PROMISE_OWN) * D(p);
         } else if (holds(p, DivineGearSetup.KEEPER.get())) {
             if (melee && ++s.keeper >= KEEPER_EVERY) {
                 s.keeper = 0;
@@ -449,7 +477,7 @@ public final class MythicAbilities {
             }
         } else if (holds(p, TowerGearSetup.BELL.get())) {
             if (melee) {
-                m *= CLAP_OWN;
+                m *= 1 - (1 - CLAP_OWN) * D(p);
                 if (++s.prayers >= PRAYERS) {
                     s.prayers = 0;
                     clap(level, p, now);
@@ -468,13 +496,13 @@ public final class MythicAbilities {
         LivingEntity victim = event.getEntity();
         if (victim instanceof ServerPlayer p && event.getSource().getEntity() instanceof LivingEntity && holds(p, DivineGearSetup.WARDEN.get())) {
             State s = state(p);
-            s.oath = Math.min(p.getMaxHealth() * 0.5, s.oath + event.getNewDamage() * WARDEN_OATH);
+            s.oath = Math.min(p.getMaxHealth() * 0.5, s.oath + event.getNewDamage() * WARDEN_OATH * B(p));
         }
         if (event.getSource().getEntity() instanceof ServerPlayer p && p != victim && !(victim instanceof Player) && holds(p, TowerGearSetup.SWORD.get())
                 && p.getHealth() <= p.getMaxHealth() * 0.5f) {
             inner = true;
             try {
-                p.heal(event.getNewDamage() * (float) BALANCE_DRAIN);
+                p.heal(event.getNewDamage() * (float) (BALANCE_DRAIN * B(p)));
             } finally {
                 inner = false;
             }
@@ -486,7 +514,7 @@ public final class MythicAbilities {
     @SubscribeEvent
     static void onHeal(LivingHealEvent event) {
         if (!inner && event.getEntity() instanceof ServerPlayer p && holds(p, TowerGearSetup.SWORD.get())) {
-            event.setAmount((float) (event.getAmount() * BALANCE_HEAL));
+            event.setAmount((float) (event.getAmount() * (1 - (1 - BALANCE_HEAL) * D(p))));
         }
     }
 
@@ -534,13 +562,14 @@ public final class MythicAbilities {
         long now = level.getGameTime();
         State s = state(p);
         if (p.tickCount % 10 == 0) {
-            toggle(p, Attributes.ATTACK_SPEED, M_BELL, holds(p, DivineGearSetup.HAMMER.get()), BELL_ASPEED);
-            toggle(p, Attributes.ARMOR, M_ASH, holds(p, DivineGearSetup.ASH.get()), ASH_ARMOR);
-            toggle(p, Attributes.MOVEMENT_SPEED, M_PULL, holds(p, TowerGearSetup.HAMMER.get()), PULL_MOVE);
-            toggle(p, Rpg.MAX_MANA, M_LAMP, holds(p, DivineGearSetup.STAFF.get()), LAMP_MANA);
-            toggle(p, Attributes.MOVEMENT_SPEED, M_EYELID, holds(p, DivineGearSetup.EYELID.get()), EYELID_MOVE);
-            toggle(p, Attributes.MAX_HEALTH, M_MIST, holds(p, DivineGearSetup.MIST.get()), MIST_HEALTH);
-            toggle(p, Attributes.ATTACK_SPEED, M_KEEPER, holds(p, DivineGearSetup.KEEPER.get()), KEEPER_ASPEED);
+            double d = D(p);
+            toggle(p, Attributes.ATTACK_SPEED, M_BELL, holds(p, DivineGearSetup.HAMMER.get()), BELL_ASPEED * d);
+            toggle(p, Attributes.ARMOR, M_ASH, holds(p, DivineGearSetup.ASH.get()), ASH_ARMOR * d);
+            toggle(p, Attributes.MOVEMENT_SPEED, M_PULL, holds(p, TowerGearSetup.HAMMER.get()), PULL_MOVE * d);
+            toggle(p, Rpg.MAX_MANA, M_LAMP, holds(p, DivineGearSetup.STAFF.get()), LAMP_MANA * d);
+            toggle(p, Attributes.MOVEMENT_SPEED, M_EYELID, holds(p, DivineGearSetup.EYELID.get()), EYELID_MOVE * d);
+            toggle(p, Attributes.MAX_HEALTH, M_MIST, holds(p, DivineGearSetup.MIST.get()), MIST_HEALTH * d);
+            toggle(p, Attributes.ATTACK_SPEED, M_KEEPER, holds(p, DivineGearSetup.KEEPER.get()), KEEPER_ASPEED * d);
             if (p.getHealth() > p.getMaxHealth()) {
                 p.setHealth(p.getMaxHealth());
             }
@@ -598,18 +627,21 @@ public final class MythicAbilities {
         if (inst == null) {
             return;
         }
-        boolean has = inst.getModifier(id) != null;
-        if (on && !has) {
-            inst.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-        } else if (!on && has) {
+        AttributeModifier cur = inst.getModifier(id);
+        // 目覚めで欠点の大きさが変わったら付け直す
+        if (cur != null && (!on || Math.abs(cur.amount() - amount) > 1e-6)) {
             inst.removeModifier(id);
+            cur = null;
+        }
+        if (on && cur == null) {
+            inst.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
     }
 
     // ---------------------------------------------------------------- 放つもの
     // 天の手: 巨神斬りの相手のまわりへ、溜めた手がみな落ちる
     static void skyHands(ServerLevel level, ServerPlayer p, Vec3 at, int hands) {
-        float dmg = attack(p) * (float) (SKY_HAND * hands);
+        float dmg = attack(p) * (float) (SKY_HAND * B(p) * hands);
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 6, at.z, 12 * hands, 0.6, 0.8, 0.6, 0.02);
         SkillEffects.later(level, 8, () -> {
             level.sendParticles(ParticleTypes.FLASH, at.x, at.y + 0.5, at.z, 1, 0, 0, 0, 0);
@@ -623,7 +655,7 @@ public final class MythicAbilities {
 
     // 七つ鐘: 大鐘 (まわり 6 に攻撃力の 300%。小さな敵は 2 秒縛り、大きな相手は鈍る)
     static void bigBell(ServerLevel level, ServerPlayer p, LivingEntity at) {
-        float dmg = attack(p) * (float) BELL_MULT;
+        float dmg = attack(p) * (float) (BELL_MULT * B(p));
         for (int i = 0; i < 36; i++) {
             double a = i / 36.0 * Math.PI * 2;
             level.sendParticles(ParticleTypes.WAX_ON, at.getX() + Math.cos(a) * BELL_RADIUS, at.getY() + 0.3, at.getZ() + Math.sin(a) * BELL_RADIUS, 1, 0, 0, 0, 0);
@@ -642,7 +674,7 @@ public final class MythicAbilities {
 
     // 引力: まわり 8 の敵を足もとへ引き寄せて叩く (大きな相手は引かない)
     static void pull(ServerLevel level, ServerPlayer p) {
-        float dmg = attack(p) * (float) PULL_MULT;
+        float dmg = attack(p) * (float) (PULL_MULT * B(p));
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(PULL_RADIUS), q -> SkillActions.isFoe(p, q))) {
             if (!SkillActions.isLarge(e)) {
                 Vec3 d = p.position().subtract(e.position()).multiply(1, 0, 1);
@@ -661,7 +693,7 @@ public final class MythicAbilities {
 
     // 新しい月: 狙った所へ小さな月が落ちる (まわり 4 に攻撃力の 250%)
     static void newMoon(ServerLevel level, ServerPlayer p, Vec3 at) {
-        float dmg = attack(p) * (float) MOON_MULT;
+        float dmg = attack(p) * (float) (MOON_MULT * B(p));
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 7, at.z, 16, 0.3, 0.6, 0.3, 0.01);
         SkillEffects.later(level, 10, () -> {
             level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.5, at.z, 40, MOON_RADIUS * 0.5, 0.3, MOON_RADIUS * 0.5, 0.06);
@@ -675,12 +707,13 @@ public final class MythicAbilities {
 
     // 沈黙の鐘: まわり 6 の小さな敵は 2 秒動けず傷も入れられない。大きな相手は鈍る
     static void silence(ServerLevel level, ServerPlayer p) {
+        int ticks = (int) Math.round(KEEPER_TICKS * B(p));
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(KEEPER_RADIUS), q -> SkillActions.isFoe(p, q))) {
             if (SkillActions.isLarge(e)) {
-                SkillEffects.slow(e, 0.4, KEEPER_TICKS);
+                SkillEffects.slow(e, 0.4, ticks);
             } else {
-                SkillEffects.bind(e, KEEPER_TICKS);
-                SkillEffects.timedMod(e, Attributes.ATTACK_DAMAGE, "mythic_silence", -0.95, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, KEEPER_TICKS);
+                SkillEffects.bind(e, ticks);
+                SkillEffects.timedMod(e, Attributes.ATTACK_DAMAGE, "mythic_silence", -0.95, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, ticks);
             }
             level.sendParticles(ParticleTypes.NOTE, e.getX(), e.getY() + e.getBbHeight() + 0.4, e.getZ(), 2, 0.2, 0.1, 0.2, 0);
         }
@@ -697,7 +730,7 @@ public final class MythicAbilities {
                 near.add(p);
             }
             for (Player ally : near) {
-                ally.heal(ally.getMaxHealth() * (float) CLAP_HEAL);
+                ally.heal(ally.getMaxHealth() * (float) (CLAP_HEAL * B(p)));
                 state(ally).clapWardUntil = now + CLAP_WARD_TICKS;
                 level.sendParticles(GOLD, ally.getX(), ally.getY() + 1.2, ally.getZ(), 14, 0.3, 0.5, 0.3, 0);
             }

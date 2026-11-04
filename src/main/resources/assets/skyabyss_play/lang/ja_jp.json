@@ -89,5 +89,8 @@
   "commands.skyabyss_play.said.tower_start": "あいだの塔へ入った (%s 人。一日一回は数えない)",
   "commands.skyabyss_play.tower_bad_ending": "結末は calm・break・accept のどれか: %s",
   "commands.skyabyss_play.tower_no_start": "塔へ入れなかった (塔の世界がない・空きの舞台がない・全員がもう塔の中)",
-  "commands.skyabyss_play.tower_no_run": "塔の中で主と戦っている人がいない"
+  "commands.skyabyss_play.tower_no_run": "塔の中で主と戦っている人がいない",
+  "commands.skyabyss_play.help.19": "§e■ 神器 §fadmin awaken <数> [対象] §7— 手に持った神器の倒した数を決める (目覚めの段: 300・1500・5000。段が上がると知らせも出る)",
+  "commands.skyabyss_play.act.awaken": "神器の倒した数を決めた",
+  "commands.skyabyss_play.awaken_none": "%s は神器の武器を手に持っていない"
 }

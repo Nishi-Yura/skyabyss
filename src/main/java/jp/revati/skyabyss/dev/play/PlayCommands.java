@@ -41,7 +41,7 @@ public final class PlayCommands {
     private PlayCommands() {
     }
 
-    static final int HELP_LINES = 19;
+    static final int HELP_LINES = 20;
     // 正式の名前と、開発の別名
     public static final String ADMIN = "admin";
     public static final String DEV_ALIAS = "play";
@@ -221,6 +221,14 @@ public final class PlayCommands {
                 (ctx, t) -> each(ctx, t, "level", p -> jp.revati.skyabyss.rpg.Growth.setLevel(p, IntegerArgumentType.getInteger(ctx, "level"))))));
         play.then(Commands.literal("coins").then(targeted(Commands.argument("amount", IntegerArgumentType.integer(1, 9_999_999)),
                 (ctx, t) -> each(ctx, t, "coins", p -> jp.revati.skyabyss.facility.Coins.give(p, IntegerArgumentType.getInteger(ctx, "amount"))))));
+        // 手に持った神器の倒した数を決める (目覚めの段の確かめ。docs/design/03 の 13.5)
+        play.then(Commands.literal("awaken").then(targeted(Commands.argument("kills", IntegerArgumentType.integer(0, 99_999)),
+                (ctx, t) -> each(ctx, t, "awaken", p -> {
+                    if (!jp.revati.skyabyss.item.mythic.MythicAwakening.set(p, p.getMainHandItem(), IntegerArgumentType.getInteger(ctx, "kills"))) {
+                        throw new com.mojang.brigadier.exceptions.SimpleCommandExceptionType(
+                                Component.translatable("commands.skyabyss_play.awaken_none", p.getGameProfile().getName())).create();
+                    }
+                }))));
         // あいだの塔 (超大型レイド。docs/design/54 の 2 章) をすぐ試す (2026-11-02 の声「超大型 raid やりたいんだけど」)
         play.then(tower());
         // Mod の版と、世界・人のデータの版 (upgrade/WorldUpgrade)
