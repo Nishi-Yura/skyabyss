@@ -299,6 +299,16 @@ public final class Dungeons {
         SkyAbyss.LOGGER.info("[dungeon] run #{} {} cleared in {}s", run.id, d.id, (level.getGameTime() - run.startedTick) / 20);
     }
 
+    // 越えた経験値 (55 の 2 章)。初めて越えた分は章の主の経験値 (章の 15%) の中 (04 の 3 章)
+    public static int clearXp(Dungeon d) {
+        return switch (d) {
+            case BONE_PIT -> 100;
+            case TIDE_CAVE -> 200;
+            case STORM_HOLLOW -> 360;
+            case MOLTEN_MINE -> 530;
+        };
+    }
+
     // 報酬 (55 の 2 章): 経験値・鐘銭・土地の粉はいつでも。主の封の箱は一日一度。初めて越えたら称号 (DungeonTitles)
     static void reward(ServerPlayer p, Dungeon d) {
         var data = p.getPersistentData();
@@ -313,7 +323,7 @@ public final class Dungeons {
         if (!real(p)) {
             return;
         }
-        int xp = 60 + d.level * 30;
+        int xp = clearXp(d);
         jp.revati.skyabyss.rpg.Growth.addXp(p, xp, "growth.skyabyss.reason.dungeon");
         int coins = 10 + d.level * 2;
         Coins.give(p, coins);

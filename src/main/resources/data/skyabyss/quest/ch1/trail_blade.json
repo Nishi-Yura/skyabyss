@@ -31,7 +31,7 @@
     },
     {
       "id": "cave",
-      "xp": 30,
+      "xp": 40,
       "objectives": [
         {
           "id": "sword",
@@ -67,7 +67,7 @@
     }
   ],
   "reward": {
-    "xp": 70,
+    "xp": 80,
     "items": [],
     "affinity": {
       "skyabyss:artisan": 3

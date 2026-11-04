@@ -56,18 +56,18 @@ public final class GrowthRewards {
     // この札のある敵は倒しても経験値を出さない (残像など)
     public static final String NO_REWARD = "skyabyss_no_reward";
     static {
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_sentinel", new Source(12, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":rib_archer", new Source(10, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_crawler", new Source(9, STONE_WHALE_LEVEL));
-        // 背の新しい敵: 骨の砲手 14、骨鳥 4、老番兵 (名づき) 60
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_mortar", new Source(14, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_gull", new Source(4, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentinel", new Source(60, STONE_WHALE_LEVEL));
-        // 一章の地上の敵 (章の経験値の枠には数えない小さな分): 岩殻虫 7、棘うさぎ 5、骨負い 2、老いた歩哨 40
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_shell_beetle", new Source(7, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":spine_hare", new Source(5, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_hauler", new Source(2, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentry", new Source(40, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_sentinel", new Source(7, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":rib_archer", new Source(6, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_crawler", new Source(5, STONE_WHALE_LEVEL));
+        // 背の新しい敵: 骨の砲手 8、骨鳥 2、老番兵 (名づき) 34
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_mortar", new Source(8, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_gull", new Source(2, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentinel", new Source(34, STONE_WHALE_LEVEL));
+        // 一章の地上の敵 (狩り。章の経験値の 10%): 岩殻虫 4、棘うさぎ 3、骨負い 1、老いた歩哨 22
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_shell_beetle", new Source(4, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":spine_hare", new Source(3, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_hauler", new Source(1, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentry", new Source(22, STONE_WHALE_LEVEL));
         // 大陸の新しい敵 (docs/design/44。推奨は島・草原のレベル)
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bandit", new Source(8, 3));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bandit_archer", new Source(7, 3));
@@ -78,64 +78,65 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":grain_rat", new Source(3, 3));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stray_wisp", new Source(4, 4));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":feral_dog", new Source(6, 4));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_dead", new Source(12, 12));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":mist_angler", new Source(14, 18));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wolf", new Source(12, 24));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_boar", new Source(120, 12));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_crab", new Source(160, 18));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":storm_ram", new Source(200, 24));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_lizard", new Source(260, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_dead", new Source(7, 12));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":mist_angler", new Source(9, 18));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wolf", new Source(9, 24));
+        // 名のある敵 (主。章の経験値の 15% の中)
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_boar", new Source(30, 12));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_crab", new Source(60, 18));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":storm_ram", new Source(100, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_lizard", new Source(155, 30));
         // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7。中ボスは名のある大物と同じ)
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":pit_digger", new Source(10, 10));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_roller", new Source(6, 10));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":pit_foreman", new Source(120, 12));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":drowned_sailor", new Source(14, 16));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":cave_jelly", new Source(10, 16));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bell_hermit", new Source(160, 18));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":horn_beetle", new Source(16, 22));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":crystal_eye", new Source(14, 22));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":geode_golem", new Source(200, 24));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bellows_imp", new Source(18, 28));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":lava_slug", new Source(16, 28));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":ox_smith", new Source(260, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":pit_digger", new Source(6, 10));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_roller", new Source(3, 10));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":pit_foreman", new Source(30, 12));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":drowned_sailor", new Source(9, 16));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":cave_jelly", new Source(6, 16));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bell_hermit", new Source(60, 18));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":horn_beetle", new Source(11, 22));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":crystal_eye", new Source(10, 22));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":geode_golem", new Source(100, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bellows_imp", new Source(20, 28));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":lava_slug", new Source(18, 28));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ox_smith", new Source(155, 30));
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(300, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(GrowthRewards.CAPTAIN_XP, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(GrowthRewards.HEART_XP, STONE_WHALE_LEVEL));
         // 潮殻の背の敵 (08 の 6.6節。推奨レベル 18)
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":coral_thrall", new Source(14, TIDE_SHELL_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
-        // 雷翼の背の敵 (12 の 6.6節。推奨レベル 24): 羽守 18、雷蛾 5、雷乞い 14
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":feather_warden", new Source(18, THUNDER_WING_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_moth", new Source(5, THUNDER_WING_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_supplicant", new Source(14, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":coral_thrall", new Source(9, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(2, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(6, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(13, TIDE_SHELL_LEVEL));
+        // 雷翼の背の敵 (12 の 6.6節。推奨レベル 24): 羽守 13、雷蛾 4、雷乞い 10
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":feather_warden", new Source(13, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_moth", new Source(4, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_supplicant", new Source(10, THUNDER_WING_LEVEL));
         // 雷翼の中ボス 雷獣 (12 の 6.6節。推奨レベル 24)。試練の雷獣は参加者の一覧で配る (RaijuLoot)。ここは試練の外で呼ばれたもの
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(170, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(jp.revati.skyabyss.titan.storm.raiju.RaijuLoot.GROWTH_XP, THUNDER_WING_LEVEL));
         // 余燼の背の敵 (13 の 6.6節。推奨レベル 30): 灰被り 26、火の粉蛾 4、燠虫 16
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.Xp.put(MOD_ENEMIES);
         jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.Xp.put(MOD_ENEMIES);
         // 余燼の中ボス 灰の鍛え手 (13 の 6.6節。推奨レベル 30)。試練の鍛え手は参加者の一覧で配る (AshSmithLoot)。ここは試練の外で呼ばれたもの
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_smith", new Source(220, 30));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wing_heart", new Source(480, THUNDER_WING_LEVEL)); // 雷翼の心臓 (12 の 6.6節。試練の外で倒したとき)
-        // 二章の地上の敵 (章の経験値の枠には数えない小さな分): 潮だまり貝 6、砂潜り 5、宿借り 2、潮の番人 50
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":tidepool_clam", new Source(6, TIDE_SHELL_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":sand_burrower", new Source(5, TIDE_SHELL_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":drift_hermit", new Source(2, TIDE_SHELL_LEVEL));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":shore_warden", new Source(50, TIDE_SHELL_LEVEL));
-        // 三章の地上の敵 (P16。章の経験値の枠には数えない小さな分。推奨レベル 21): 帯電毛玉 5、峰の雛 6、雷拾い 2、焼けた羽守 60
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_puff", new Source(5, 21));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":peak_fledgling", new Source(6, 21));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":lightning_gleaner", new Source(2, 21));
-        MOD_ENEMIES.put(SkyAbyss.MODID + ":scorched_warden", new Source(60, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_smith", new Source(jp.revati.skyabyss.titan.ember.smith.EmberSmithSetup.GROWTH_XP, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wing_heart", new Source(jp.revati.skyabyss.titan.storm.heart.StormLoot.HEART_XP, THUNDER_WING_LEVEL)); // 雷翼の心臓 (12 の 6.6節。試練の外で倒したとき)
+        // 二章の地上の敵 (狩り。章の経験値の 10%): 潮だまり貝 4、砂潜り 3、宿借り 1、潮の番人 32
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":tidepool_clam", new Source(4, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":sand_burrower", new Source(3, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":drift_hermit", new Source(1, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":shore_warden", new Source(32, TIDE_SHELL_LEVEL));
+        // 三章の地上の敵 (P16。狩り。章の経験値の 10%。推奨レベル 21): 帯電毛玉 4、峰の雛 4、雷拾い 1、焼けた羽守 43
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_puff", new Source(4, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":peak_fledgling", new Source(4, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":lightning_gleaner", new Source(1, 21));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":scorched_warden", new Source(43, 21));
     }
 
 
-    // 試練のボス: 参加者それぞれが満額を受け取る (人数で強くなるぶん、取り分は減らさない)
-    public static final int CAPTAIN_XP = 100;
-    public static final int CAPTAIN_FIRST_BONUS = 50;
-    public static final int HEART_XP = 300;
-    public static final int HEART_FIRST_BONUS = 200;
+    // 試練のボス: 参加者それぞれが満額を受け取る (人数で強くなるぶん、取り分は減らさない)。主は章の経験値の 15% の中 (04 の 3 章)
+    public static final int CAPTAIN_XP = 25;
+    public static final int CAPTAIN_FIRST_BONUS = 15;
+    public static final int HEART_XP = 80;
+    public static final int HEART_FIRST_BONUS = 55;
 
     // バニラのボス (日ごとの上限に数えない)
     public static final Map<String, Integer> VANILLA_BOSSES = Map.of(
@@ -145,7 +146,7 @@ public final class GrowthRewards {
             "minecraft:elder_guardian", 40);
 
     // 試練の踏破 (共鳴石が歌った)。そのとき石の近くにいた人へ
-    public static final int TRIAL_XP = 40;
+    public static final int TRIAL_XP = 10;
     public static final double TRIAL_RADIUS = 16;
     // 新しい場所 (一人一回)
     public static final int REST_POINT_XP = 30;

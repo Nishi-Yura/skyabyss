@@ -60,8 +60,8 @@ public final class StormLoot {
     public static final String TITAN = Titans.THUNDER_WING;   // "thunder_wing"
     public static final int STORM_LEVEL = 24;
     // 成長の経験値 (12 の 6.6節)。試練の外で倒したときの量は GrowthRewards.MOD_ENEMIES の thunder_wing_heart
-    public static final int HEART_XP = 480;
-    public static final int HEART_FIRST_BONUS = 300;
+    public static final int HEART_XP = 240;
+    public static final int HEART_FIRST_BONUS = 150;
 
     // 品の ID は装備の担当の StormGear (12 の 11.1節の名前)。まだ登録されていない品は抽選から外す
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");

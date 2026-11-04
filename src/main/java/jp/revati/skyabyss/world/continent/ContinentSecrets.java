@@ -115,7 +115,7 @@ public final class ContinentSecrets {
         Notice.place(p, Component.translatable("secret.skyabyss." + s.kind()), Component.translatable("secret.skyabyss." + s.region() + "." + s.kind()));
         Notice.gain(p, "message.skyabyss.secret.found", found.size(), all().size());
         int region = ContinentMap.get().region(s.x(), s.z());
-        jp.revati.skyabyss.rpg.Growth.addXp(p, 2 * ContinentPois.DISCOVER_XP[Math.max(0, Math.min(ContinentPois.DISCOVER_XP.length - 1, region))],
+        jp.revati.skyabyss.rpg.Growth.addXp(p, 2 * ContinentPois.discoverXp(region),
                 "growth.skyabyss.reason.secret");
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8f, 1.2f);
         if (found.size() == all().size()) {

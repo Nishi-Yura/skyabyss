@@ -21,7 +21,7 @@
   "stages": [
     {
       "id": "clear",
-      "xp": 40,
+      "xp": 70,
       "objectives": [
         {
           "id": "page",
@@ -45,7 +45,7 @@
     }
   ],
   "reward": {
-    "xp": 80,
+    "xp": 140,
     "items": [],
     "affinity": {
       "skyabyss:artisan": 3

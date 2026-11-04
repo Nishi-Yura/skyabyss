@@ -10,7 +10,7 @@
   "stages": [
     {
       "id": "gather",
-      "xp": 120,
+      "xp": 140,
       "objectives": [
         {
           "id": "cairn",
@@ -37,6 +37,6 @@
     }
   ],
   "reward": {
-    "xp": 160
+    "xp": 180
   }
 }

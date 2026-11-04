@@ -75,11 +75,12 @@ public final class GrowthSelfTest {
                 + 3L * GrowthRewards.TRIAL_XP + stage(song, "board") + stage(song, "inscriptions") + song.reward().xp();
         long clear = xp + back;
         int mainOnly = levelAt(clear);
-        check(f, mainOnly >= 10 && mainOnly <= 12, "first clear of the stone whale should be level 10-12, got " + mainOnly + " (" + clear + " xp)");
+        // 2026-11-04 の表 4-2 (クエスト 55%・場所 20%・主 15%・狩り 10%): 本筋と主だけでは上限 (12) に届かない。脇・町の頼み・見どころ・狩りを足して届く (xp table)
+        check(f, mainOnly >= 8 && mainOnly <= 10, "first clear of the stone whale should be level 8-10 on the main story alone, got " + mainOnly + " (" + clear + " xp)");
         // 序盤のサブクエスト (イサナと会ったあとに開く): 数え歌 40、影の帳面 60、包み 50、白いところ 150、日替わり 2 つ (薪 30・夜回り 40)
         long subs = 40 + 60 + 50 + 150 + 30 + 40;
         int withSubs = levelAt(clear + subs);
-        check(f, withSubs >= 11 && withSubs <= 13, "first clear with the early side quests should be level 11-13, got " + withSubs);
+        check(f, withSubs >= 9 && withSubs <= 11, "first clear with the early side quests should be level 9-11, got " + withSubs);
         // 技: Lv1 の 1 点で最初の一つ。Lv3 で 2 つ目、Lv5 で 3 つ目 (二段目の技の必要 Lv も 5)
         check(f, jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(1) == 1 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(3) == 3
                 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(5) == 5, "skill points at level 1, 3, 5 are wrong");

@@ -58,7 +58,7 @@ public final class StormBackTrials {
     public static final String TRIAL_TAG = "skyabyss_storm_trial";
     public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
-    public static final int TRIAL_XP = 60;
+    public static final int TRIAL_XP = 30;
     // 雷翼の推奨レベル (12 の 6.6節)
     public static final int STORM_LEVEL = 24;
     private static final String TAG_CHECKPOINT = "skyabyss_storm_checkpoint";

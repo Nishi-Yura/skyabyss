@@ -47,7 +47,13 @@ public final class ContinentPois {
     static final int DISCOVER_RADIUS = 20;
     static final String FOUND_TAG = "skyabyss_poi_found";
     // 土地ごとの発見の経験値 (野・島・岩鯨・潮殻・雷翼・余燼。ContinentMap の土地の番号の順)
-    static final int[] DISCOVER_XP = {20, 10, 30, 45, 65, 85};
+    // 土地ごと (草原・外れ・岩鯨・潮・嵐・灰)。章の初めての場所が章の経験値の 20% になるよう、土地の見どころの数で割った値 (04 の 3 章、自己テスト xp table)
+    static final int[] DISCOVER_XP = {5, 10, 8, 29, 78, 80};
+
+    // 土地の見どころを初めて見つけた経験値 (隠れた発見はその倍。ContinentSecrets)
+    public static int discoverXp(int region) {
+        return DISCOVER_XP[Math.max(0, Math.min(DISCOVER_XP.length - 1, region))];
+    }
 
     // a・b = 道しるべの行き先 (signpost.skyabyss.<id>)、da・db = そこまでのおおよその道のり
     public record Poi(String kind, int x, int z, String a, int da, String b, int db) {
@@ -187,7 +193,7 @@ public final class ContinentPois {
         jp.revati.skyabyss.notice.Notice.place(p, net.minecraft.network.chat.Component.translatable("map.skyabyss.poi." + poi.kind()),
                 net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", found.size(), all().stream().filter(Poi::site).count()));
         int region = ContinentMap.get().region(poi.x(), poi.z());
-        jp.revati.skyabyss.rpg.Growth.addXp(p, DISCOVER_XP[Math.max(0, Math.min(DISCOVER_XP.length - 1, region))], "growth.skyabyss.reason.discovery");
+        jp.revati.skyabyss.rpg.Growth.addXp(p, discoverXp(region), "growth.skyabyss.reason.discovery");
         p.serverLevel().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1.6f);
         // 旅帳と土地の名声 (endgame/RegionFame)
         jp.revati.skyabyss.endgame.RegionFame.discovered(p, region);

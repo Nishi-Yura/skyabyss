@@ -146,7 +146,7 @@
     },
     {
       "id": "board",
-      "xp": 60,
+      "xp": 70,
       "objectives": [
         {
           "id": "ride",
@@ -163,7 +163,7 @@
         "type": "stilled",
         "titan": "stone_whale"
       },
-      "xp": 90,
+      "xp": 110,
       "objectives": [
         {
           "id": "read",
@@ -219,7 +219,7 @@
     }
   ],
   "reward": {
-    "xp": 200,
+    "xp": 240,
     "affinity": {
       "skyabyss:storyteller": 5,
       "skyabyss:whale_chaser": 5

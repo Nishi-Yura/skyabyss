@@ -2627,5 +2627,6 @@
   "message.skyabyss.melee.charge_tip": "Swing on a full crosshair ring: weak hits barely hurt",
   "raid.skyabyss.hud.read_tablet": "Read the tablet at the entrance (the door opens once read)",
   "message.skyabyss.raid_lore.read_to_open": "The door opens once someone reads the entrance tablet",
-  "message.skyabyss.break.tip": "Full-charge hits fill the break bar to stagger it"
+  "message.skyabyss.break.tip": "Full-charge hits fill the break bar to stagger it",
+  "message.skyabyss.growth.bank_released": "Your saved xp (%s) came in"
 }

@@ -21,7 +21,7 @@
   "stages": [
     {
       "id": "pit",
-      "xp": 60,
+      "xp": 120,
       "objectives": [
         {
           "id": "page",
@@ -45,7 +45,7 @@
     }
   ],
   "reward": {
-    "xp": 160,
+    "xp": 320,
     "items": [],
     "affinity": {
       "skyabyss:storyteller": 3

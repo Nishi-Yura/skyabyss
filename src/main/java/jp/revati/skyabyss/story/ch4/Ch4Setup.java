@@ -88,9 +88,9 @@ public final class Ch4Setup {
 
     // 成長の経験値 (章の経験値の枠には数えない小さな分): 熾り蟲 2、灰被りの屑 10、灰ひきずり 3、古い灰被り 80
     public static final int XP_MITE = 2;
-    public static final int XP_HUSK = 10;
+    public static final int XP_HUSK = 11;
     public static final int XP_DRAGGER = 3;
-    public static final int XP_ELDER = 80;
+    public static final int XP_ELDER = 90;
 
     // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
     public static final List<String> MADE = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",

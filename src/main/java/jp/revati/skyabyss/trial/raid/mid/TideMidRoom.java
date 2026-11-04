@@ -48,8 +48,8 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
     // 岩の小島 (3 × 3、床の上 2。招き潮のあいだ立てる所)
     static final int[][] ROCKS = {{-14, -9}, {14, -9}, {-16, 6}, {16, 6}, {0, -13}, {-6, 11}, {7, 11}};
     // 元の値 (TideFlats の潮招きの報い)
-    static final int XP = 130;
-    static final int FIRST_BONUS = 60;
+    public static final int XP = 50;
+    public static final int FIRST_BONUS = 20;
     static final String SIGNAL = "tide_beckoner_stilled";
 
     @Nullable

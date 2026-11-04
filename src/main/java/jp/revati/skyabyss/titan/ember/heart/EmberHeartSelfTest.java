@@ -281,7 +281,7 @@ public final class EmberHeartSelfTest {
         notes.add(String.format("frozen: thaw %.1f s in an ember (two bursts %.1f dmg), hit phase 3 for %.0f s (normal %.0f s)", thawSeconds, thawCost, killFrozen, killNormal));
         // 6.6節の経験値: MOD_ENEMIES に一行 (Lv 30)
         GrowthRewards.Source src = GrowthRewards.MOD_ENEMIES.get(EmberIds.id(EmberIds.EMBER_HEART).toString());
-        check(src != null && src.xp() == 650 && src.contentLevel() == 30, "GrowthRewards.MOD_ENEMIES has no ember heart (650, Lv 30)", f);
+        check(src != null && src.xp() == EmberHeartSetup.Xp.HEART && src.contentLevel() == 30, "GrowthRewards.MOD_ENEMIES has no ember heart (" + EmberHeartSetup.Xp.HEART + ", Lv 30)", f);
     }
 
     // ---------------------------------------------------------------- 熾の底の形

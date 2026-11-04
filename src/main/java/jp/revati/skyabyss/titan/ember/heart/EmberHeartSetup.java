@@ -53,8 +53,8 @@ public final class EmberHeartSetup {
     // 成長の経験値 (13 の 6.6節)。GrowthRewards.MOD_ENEMIES に足す (rpg の表には一行だけ書く)。
     // 入れ子のクラスにしたのは、GrowthRewards の初期化で EmberHeartSetup (登録) を読み込まないため (EmberMobSetup.Xp と同じ)
     public static final class Xp {
-        public static final int HEART = 650;
-        public static final int HEART_FIRST_BONUS = 450;
+        public static final int HEART = 385;
+        public static final int HEART_FIRST_BONUS = 265;
         public static final int LEVEL = 30;
 
         private Xp() {

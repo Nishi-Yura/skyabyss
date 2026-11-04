@@ -21,8 +21,8 @@ public final class EmberSmithSetup {
 
     // 推奨レベルと成長の経験値 (13 の 6.6節: 220、初回 +100、推奨 Lv 30)
     public static final int CONTENT_LEVEL = 30;
-    public static final int GROWTH_XP = 220;
-    public static final int FIRST_BONUS = 100;
+    public static final int GROWTH_XP = 130;
+    public static final int FIRST_BONUS = 60;
 
     // 判定は 1.7 x 4.5 (背丈 4.5 ブロック)。技の動きを滑らかに見せるため毎 tick 送る
     public static final DeferredHolder<EntityType<?>, EntityType<AshSmith>> ASH_SMITH = ENTITIES.register(EmberIds.ASH_SMITH,

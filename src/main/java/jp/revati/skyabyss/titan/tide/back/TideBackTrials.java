@@ -59,7 +59,7 @@ public final class TideBackTrials {
     static final AABB ISLAND_BOX = new AABB(-135, 40, -145, 135, 230, 130);
     public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
-    public static final int TRIAL_XP = 50;
+    public static final int TRIAL_XP = 20;
     private static final String TAG_CHECKPOINT = "skyabyss_tide_checkpoint";
     private static final String TAG_CHECKPOINT_EPOCH = "skyabyss_tide_checkpoint_epoch";
     private static final String TAG_SEEN_EPOCH = "skyabyss_tide_epoch";

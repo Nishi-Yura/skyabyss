@@ -23,6 +23,8 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     public int level = 1;
     // いまのレベルの中で貯めた経験値 (次のレベルに要る量より少ない)
     public int xp;
+    // 物語の上限のレベルであふれた経験値 (上限が上がったら入る。Growth.releaseBank。04 の 3 章)
+    public long banked;
     public final int[] stats = new int[Stat.values().length];
     // レベル以外から得た力 (記憶の断片やクエストの報酬に使う予定。今は 0)
     public int bonusPoints;
@@ -107,6 +109,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         CompoundTag tag = new CompoundTag();
         tag.putInt("level", level);
         tag.putInt("xp", xp);
+        tag.putLong("banked", banked);
         CompoundTag s = new CompoundTag();
         for (Stat stat : Stat.values()) {
             s.putInt(stat.id, stat(stat));
@@ -134,6 +137,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         level = tag.contains("level") ? tag.getInt("level") : 1;
         xp = tag.getInt("xp");
+        banked = Math.max(0, tag.getLong("banked"));
         CompoundTag s = tag.getCompound("stats");
         for (Stat stat : Stat.values()) {
             stats[stat.ordinal()] = s.getInt(stat.id);

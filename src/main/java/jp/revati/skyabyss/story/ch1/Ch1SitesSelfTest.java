@@ -705,7 +705,7 @@ public final class Ch1SitesSelfTest {
             a.getInventory().clearContent();
             b.getInventory().clearContent();
         }
-        // 経験値の枠: 一章の新しい分 (支度の段 250 + 洞 40 + 骨の坑 40) は 400 に収まる
+        // 経験値の枠: 一章の新しい分 (支度の段 + 洞 40 + 骨の坑 40) は枠 (ChapterXpBudget.NEW_CAP) に収まる
         int fresh = ChapterXpBudget.newXp(QuestManager.all(), 1);
         check(fresh <= ChapterXpBudget.NEW_CAP[1], "chapter 1 new xp " + fresh + " exceeds " + ChapterXpBudget.NEW_CAP[1]);
         check(fresh >= 250 + CleftCave.XP + BonePit.XP, "chapter 1 new xp " + fresh + " does not count the trail steps, the cave and the pit");

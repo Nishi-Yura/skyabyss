@@ -45,7 +45,7 @@
     },
     {
       "id": "pit",
-      "xp": 30,
+      "xp": 40,
       "objectives": [
         {
           "id": "page",
@@ -73,7 +73,7 @@
     }
   ],
   "reward": {
-    "xp": 70,
+    "xp": 80,
     "items": [],
     "affinity": {
       "skyabyss:whale_chaser": 3

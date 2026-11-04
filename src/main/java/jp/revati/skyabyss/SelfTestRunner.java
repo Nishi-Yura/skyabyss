@@ -118,6 +118,7 @@ public final class SelfTestRunner {
         // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
         steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
+        steps.addAll(jp.revati.skyabyss.rpg.XpTableSelfTest.steps());
         // 技の木 v2 (docs/design/48): 木の読み込み・節の決まり・点・4 本の上限・基礎・保存。SKYABYSS_SELFTEST_ONLY="tree"
         steps.add(Step.once("tree", jp.revati.skyabyss.rpg.skill.tree.AbilityTreeSelfTest::runSelfTest));
         steps.add(Step.once("music", jp.revati.skyabyss.music.MusicSelfTest::run));

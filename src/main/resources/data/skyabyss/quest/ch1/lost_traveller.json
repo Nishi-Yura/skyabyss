@@ -6,7 +6,7 @@
   "stages": [
     {
       "id": "follow",
-      "xp": 15,
+      "xp": 20,
       "objectives": [
         {
           "id": "diary",
@@ -30,7 +30,7 @@
     }
   ],
   "reward": {
-    "xp": 25,
+    "xp": 30,
     "items": [],
     "affinity": {
       "skyabyss:storyteller": 3

@@ -19,7 +19,7 @@
           "topic": "ms_c_ember2"
         }
       ],
-      "xp": 40,
+      "xp": 80,
       "skip_if": {
         "type": "any",
         "of": [
@@ -71,7 +71,7 @@
           ]
         }
       ],
-      "xp": 80
+      "xp": 160
     },
     {
       "id": "board",
@@ -84,7 +84,7 @@
           ]
         }
       ],
-      "xp": 60,
+      "xp": 120,
       "skip_if": {
         "type": "stilled",
         "titan": "ember"
@@ -117,7 +117,7 @@
     }
   ],
   "reward": {
-    "xp": 400,
+    "xp": 800,
     "affinity": {
       "skyabyss:whale_chaser": 5
     }

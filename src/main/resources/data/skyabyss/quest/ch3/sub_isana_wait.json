@@ -12,7 +12,7 @@
   "stages": [
     {
       "id": "climb",
-      "xp": 60,
+      "xp": 110,
       "objectives": [
         {
           "id": "foot",
@@ -36,7 +36,7 @@
     }
   ],
   "reward": {
-    "xp": 200,
+    "xp": 360,
     "affinity": {
       "skyabyss:whale_chaser": 5
     }

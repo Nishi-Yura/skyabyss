@@ -30,7 +30,7 @@
   "stages": [
     {
       "id": "raise",
-      "xp": 50,
+      "xp": 90,
       "objectives": [
         {
           "id": "rods",
@@ -55,7 +55,7 @@
     }
   ],
   "reward": {
-    "xp": 100,
+    "xp": 180,
     "items": [],
     "affinity": {
       "skyabyss:storyteller": 3

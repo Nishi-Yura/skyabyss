@@ -61,7 +61,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public final class EmberBackTrials {
     public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
-    public static final int TRIAL_XP = 60;
+    public static final int TRIAL_XP = 35;
     public static final int EMBER_LEVEL = 30;
     private static final String TAG_CHECKPOINT = "skyabyss_ember_checkpoint";
     private static final String TAG_CHECKPOINT_EPOCH = "skyabyss_ember_checkpoint_epoch";
