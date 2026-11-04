@@ -178,10 +178,6 @@ public final class ContinentTowns {
             if (chaser != null) {
                 jp.revati.skyabyss.npc.NpcSpawner.keepTownChaser(level, chaser, player);
             }
-            // 二章のあいだ、イサナは汐守の港に立つ (人ごと。story/ch2/IsanaHarbor)
-            if ("tide".equals(region(e.index))) {
-                jp.revati.skyabyss.story.ch2.IsanaHarbor.keep(level, e, player);
-            }
         }
     }
 

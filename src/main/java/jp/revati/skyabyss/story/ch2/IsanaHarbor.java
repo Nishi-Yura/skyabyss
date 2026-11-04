@@ -30,7 +30,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 居場所は人ごと: 港のイサナと鯨見の町のイサナを二人立て、その人の進みで見える方を一人に決める (NpcEntity.broadcastToPlayer)。
 //   港にいる   段階 1 (岩鯨を止めた) で、噂の話を聞いた (印 c2_harbor) か、頼み main_tide が噂の段を越えた・終えた人。
 //              段階 2 (潮殻を止めた) でも、港で心臓のあとの話 (印 c2_harbor_done) をするまで。ただし三章の頼み main_thunder が支度の段を越えたら町へ戻る
-//   立つ所     汐守の町の中心から海へいちばん近い岸の、水際から 2〜8 手前の立てる所 (町の記録 SiteData に印 isana_harbor として一度だけ書く)。顔は町の方へ (海に背を向ける)
+//   立つ所     汐守の町の中心から海へいちばん近い岸の、水際から 3〜12 手前の平らな立てる所 (町の記録 SiteData に印 isana_harbor として書く)。顔は町の方へ (海に背を向ける)。
+//              町のまわりの地ならし・小岩があとから立つ所を埋めたら選び直し、イサナが埋まっていたら立つ所へ戻す (見回りは町の中心から 192 以内の、港にいるはずの人のそばで 2 秒ごと)
 //   道しるべ   港にいる人には、話す相手の目印 (SiteTargets の npc:whale_chaser) も港を指す (SiteNetwork.payload)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class IsanaHarbor {
@@ -115,15 +116,14 @@ public final class IsanaHarbor {
                 if (!level.getFluidState(w).is(FluidTags.WATER) || level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z) >= sea - 1) {
                     continue;
                 }
-                // 水際から町の方へ 2〜8 戻った、立てる所 (足もとが固く、水でなく、頭の上が空いている)
-                for (int back = 2; back <= 8; back++) {
+                // 水際から町の方へ 3〜12 戻った、立てる所 (足もとが固く、水でなく、頭の上が空いていて、まわり 8 マスのうち 6 マス以上が同じ高さ ±1 の
+                // 平らな地面。崖と水のあいだの細い帯には立たない。2026-11-04 の撮影)
+                for (int back = 3; back <= 12; back++) {
                     int bx = center.getX() + (int) Math.round(dx * (r - back));
                     int bz = center.getZ() + (int) Math.round(dz * (r - back));
                     int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
                     BlockPos feet = new BlockPos(bx, y, bz);
-                    BlockPos below = feet.below();
-                    if (y >= sea && y <= sea + 6 && level.getFluidState(below).isEmpty() && level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
-                            && level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir()) {
+                    if (y >= sea && y <= sea + 6 && standable(level, feet) && open(level, feet)) {
                         best = feet;
                         bestR = r;
                         break;
@@ -133,6 +133,31 @@ public final class IsanaHarbor {
             }
         }
         return best;
+    }
+
+    private static boolean standable(ServerLevel level, BlockPos feet) {
+        BlockPos below = feet.below();
+        return level.getFluidState(below).isEmpty() && level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
+                && level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir();
+    }
+
+    // まわり 8 マスのうち 6 マス以上が、同じ高さ ±1 の水でない地面
+    private static boolean open(ServerLevel level, BlockPos feet) {
+        int ok = 0;
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oz = -1; oz <= 1; oz++) {
+                if (ox == 0 && oz == 0) {
+                    continue;
+                }
+                int x = feet.getX() + ox;
+                int z = feet.getZ() + oz;
+                int h = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                if (Math.abs(h - feet.getY()) <= 1 && level.getFluidState(new BlockPos(x, h - 1, z)).isEmpty()) {
+                    ok++;
+                }
+            }
+        }
+        return ok >= 6;
     }
 
     // 港の立つ所 (印が無ければ探して書く)
@@ -160,6 +185,15 @@ public final class IsanaHarbor {
         if (spot == null || !level.hasChunk(spot.getX() >> 4, spot.getZ() >> 4) || !level.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(spot))) {
             return;
         }
+        // 町のまわりの地面をならす処理 (town_outskirts) が、あとから立つ所を砂で埋めることがある (2026-11-04 の撮影)。埋まったら選び直す
+        if (!standable(level, spot)) {
+            town.extraRemove(MARK);
+            SiteData.get(level).setDirty();
+            spot = ensureSpot(level, town);
+            if (spot == null) {
+                return;
+            }
+        }
         java.util.List<NpcEntity> found = level.getEntities(NpcSetup.WHALE_CHASER.get(), new AABB(spot).inflate(32), n -> n.isAlive() && n.getTags().contains(TAG));
         for (int i = 1; i < found.size(); i++) {
             found.get(i).discard();
@@ -167,7 +201,10 @@ public final class IsanaHarbor {
         float yaw = (float) (Mth.atan2(town.pos.getZ() - spot.getZ(), town.pos.getX() - spot.getX()) * (180 / Math.PI)) - 90f;
         if (!found.isEmpty()) {
             NpcEntity live = found.get(0);
-            if (live.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) > 64) {
+            // 遠くへ離れたか、地面に埋まっていたら (足もとか頭がふさがっている)、立つ所へ戻す
+            BlockPos at = live.blockPosition();
+            boolean buried = !level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty();
+            if (buried || live.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) > 64) {
                 live.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
                 live.setYRot(yaw);
                 live.setYHeadRot(yaw);
@@ -192,12 +229,21 @@ public final class IsanaHarbor {
     // 港にいるかどうかが変わった人に、話す相手の目印を送り直す (2 秒ごと)
     private static final Map<UUID, Boolean> LAST = new ConcurrentHashMap<>();
 
+    // 港のイサナを立たせる・戻す見回りの届く距離 (町の中心から。港は町の外の水際なので、町の見回り 96 より広く)
+    static final int KEEP_RADIUS = 192;
+
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 40 != 17 || p.level().dimension() != Level.OVERWORLD) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 40 != 17 || p.level().dimension() != Level.OVERWORLD || p.isSpectator()) {
             return;
         }
         boolean now = atHarbor(p);
+        if (now) {
+            SiteData.Entry town = tideTown(p.serverLevel());
+            if (town != null && town.pos.distSqr(p.blockPosition()) <= (double) KEEP_RADIUS * KEEP_RADIUS) {
+                keep(p.serverLevel(), town, p);
+            }
+        }
         Boolean before = LAST.put(p.getUUID(), now);
         if (before != null && before != now) {
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, jp.revati.skyabyss.opening.site.SiteNetwork.payload(p.server, p));
@@ -207,5 +253,23 @@ public final class IsanaHarbor {
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST.remove(event.getEntity().getUUID());
+    }
+
+    // OP の確かめ: /skyabyss dev isana (この人にとって港にいるか・港の立つ所・近くの鯨追いと見えるか)
+    @SubscribeEvent
+    static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(src -> src.hasPermission(2))
+                .then(net.minecraft.commands.Commands.literal("dev").then(net.minecraft.commands.Commands.literal("isana").executes(ctx -> {
+                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                    StringBuilder b = new StringBuilder("atHarbor=" + atHarbor(p) + " stage=" + Progression.stage(p) + " spot=" + spot(p.server));
+                    for (NpcEntity n : p.serverLevel().getEntities(NpcSetup.WHALE_CHASER.get(), p.getBoundingBox().inflate(128), NpcEntity::isAlive)) {
+                        b.append(" | ").append(n.getTags().contains(TAG) ? "harbor" : "town").append(" @").append(n.blockPosition().toShortString())
+                                .append(" visible=").append(visibleTo(n, p)).append(" broadcast=").append(n.broadcastToPlayer(p));
+                    }
+                    String msg = b.toString();
+                    ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(msg), false);
+                    SkyAbyss.LOGGER.info("[isana] {}", msg);
+                    return 1;
+                }))));
     }
 }
