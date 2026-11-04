@@ -51,19 +51,21 @@ public final class PouchNew {
     }
 
     // 札を描く。(x, y) は品の絵の左上 (16 画素の枠)。右上の角に重ねる
+    // 2026-11-04 (docs/design/56): 0.6 倍の「NEW」の字は画素がつぶれて読めなかったので、字のない小さな菱形の印にした (色は札と同じ)
     public static void badge(GuiGraphics g, Font font, int x, int y) {
-        Component label = Component.translatable("skyabyss_pouch.badge.new");
-        float scale = 0.6f;
-        int w = Math.round(font.width(label) * scale) + 3;
-        int h = Math.round(8 * scale) + 2;
-        int bx = x + 17 - w;
-        int by = y - 2;
+        int cx = x + 14;
+        int cy = y + 1;
         g.pose().pushPose();
         g.pose().translate(0, 0, 300);
-        g.fill(bx, by, bx + w, by + h, BG);
-        g.pose().translate(bx + 1.5f, by + 1.2f, 0);
-        g.pose().scale(scale, scale, 1f);
-        g.drawString(font, label, 0, 0, FG, false);
+        for (int d = -3; d <= 3; d++) {
+            int half = 3 - Math.abs(d);
+            g.fill(cx - half - 1, cy + d, cx + half + 2, cy + d + 1, 0xFF0A0C10);
+        }
+        for (int d = -2; d <= 2; d++) {
+            int half = 2 - Math.abs(d);
+            g.fill(cx - half, cy + d, cx + half + 1, cy + d + 1, BG | 0xFF000000);
+        }
+        g.fill(cx, cy - 1, cx + 1, cy, FG | 0xFF000000);
         g.pose().popPose();
     }
 }

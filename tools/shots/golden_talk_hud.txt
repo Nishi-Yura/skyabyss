@@ -1,0 +1,35 @@
+# 2026-11-04: 黄金比の会話の帯・HUD (等倍の字)・町の案内 (docs/design/56)。1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_talk_hud.txt -PshotsName=golden_talk_hud
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+# 新しい世界の開幕の場面を止めてから
+wait 40
+cmd skyabyss cinematic stop
+wait 40
+cmd execute at @s run summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[180f,0f],PersistenceRequired:1b}
+wait 10
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 60
+shot dialogue_intro
+cmd skyabyss dev talk say continue
+wait 60
+shot dialogue_menu
+close
+wait 5
+huddemo boss
+wait 75
+shot hud_boss
+huddemo off
