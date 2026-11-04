@@ -1056,7 +1056,9 @@ public class StoneWhaleHeart extends HeartBoss {
         }
         float before = getHealth();
         float domainTaken = domain != null ? domain.takenMultiplier() : 1f;
-        boolean result = super.hurt(source, (weakTicks > 0 ? amount * 1.5f : amount) * domainTaken / toughness);
+        // 硬さが 1 より小さいと、とどめの傷 (Float.MAX_VALUE) が無限大になって倒れない。有限に抑える
+        float scaled = (weakTicks > 0 ? amount * 1.5f : amount) * domainTaken / toughness;
+        boolean result = super.hurt(source, Float.isFinite(scaled) ? scaled : Float.MAX_VALUE);
         if (domain != null && level() instanceof ServerLevel server) {
             domain.damaged(server, before - getHealth());
         }
