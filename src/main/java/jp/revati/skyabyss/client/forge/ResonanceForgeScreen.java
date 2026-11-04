@@ -415,13 +415,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         for (Tab t : Tab.values()) {
             int tx = SIDE_X + TAB_X[t.ordinal()];
             Component label = Component.translatable(tabKeys[t.ordinal()]);
-            int w = font.width(label);
-            float scale = w > TAB_W - 4 ? (TAB_W - 4f) / w : 1f;
-            g.pose().pushPose();
-            g.pose().translate(tx + TAB_W / 2f - w * scale / 2f, 8 + (1 - scale) * 3.5f, 0);
-            g.pose().scale(scale, scale, 1f);
-            g.drawString(font, label, 0, 0, t == tab ? 0xFFFFFFFF : DIM, false);
-            g.pose().popPose();
+            // 字は等倍 (docs/design/56)。入らなければ「…」
+            jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, label, tx + TAB_W / 2, 8, TAB_W - 4, t == tab ? 0xFFFFFFFF : DIM, false);
         }
         g.drawString(font, Component.translatable("gui.skyabyss.forge.material"), ResonanceForgeMenu.MATERIAL_X - 2, ResonanceForgeMenu.MATERIAL_Y - 12, DIM, false);
         gearInfo(g);
