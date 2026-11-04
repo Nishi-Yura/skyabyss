@@ -207,6 +207,18 @@ public final class ContinentPois {
         return out;
     }
 
+    // 見つけた見どころのうち、今もある所の数 (消した見どころ "gone" で見つけた記録は数えない)
+    public static int foundCount(net.minecraft.world.entity.player.Player p) {
+        List<Poi> list = all();
+        int n = 0;
+        for (int i : discovered(p)) {
+            if (i >= 0 && i < list.size() && list.get(i).site()) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     static net.minecraft.nbt.CompoundTag persisted(net.minecraft.world.entity.player.Player p) {
         net.minecraft.nbt.CompoundTag root = p.getPersistentData();
         if (!root.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) {
@@ -223,7 +235,7 @@ public final class ContinentPois {
         }
         persisted(p).putIntArray(FOUND_TAG, found.stream().mapToInt(Integer::intValue).sorted().toArray());
         jp.revati.skyabyss.notice.Notice.place(p, poi.title(),
-                net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", found.size(), all().stream().filter(Poi::site).count()));
+                net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", foundCount(p), all().stream().filter(Poi::site).count()));
         int region = ContinentMap.get().region(poi.x(), poi.z());
         jp.revati.skyabyss.rpg.Growth.addXp(p, discoverXp(region), "growth.skyabyss.reason.discovery");
         p.serverLevel().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1.6f);

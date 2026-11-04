@@ -48,8 +48,9 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ContinentRegen {
     // 大陸の中身の版。1 = 2026-11-03 (地形の起伏・段丘・岩の露頭・池、祠を道から離す、鯨見の道を門で止める)、
-    // 2 = 2026-11-03 夜 (祠の参道を丘の中のトンネルにしない。切り通しにする)
-    public static final int VERSION = 2;
+    // 2 = 2026-11-03 夜 (祠の参道を丘の中のトンネルにしない。切り通しにする)、
+    // 3 = 2026-11-04 (見どころの作り替え: 道しるべ 6・頭目の兄弟の野営・旅人の野営・場所ごとの部品。docs/design/40 の 3.3)
+    public static final int VERSION = 3;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
