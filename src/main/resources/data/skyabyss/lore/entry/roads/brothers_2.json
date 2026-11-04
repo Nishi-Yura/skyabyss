@@ -1,0 +1,16 @@
+{
+  "chapter": "titan_tide",
+  "order": 95,
+  "inscription_sign": "sign.skyabyss.poi_note.mio_camp",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.poi_note.mio_camp"
+    }
+  ],
+  "related": [
+    "roads/brothers_1",
+    "roads/brothers_3",
+    "roads/brothers_4"
+  ]
+}

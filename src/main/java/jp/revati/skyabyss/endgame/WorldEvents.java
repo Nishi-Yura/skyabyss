@@ -237,7 +237,7 @@ public final class WorldEvents {
         }
         if (!ok.isEmpty()) {
             ContinentPois.Poi poi = ok.get(level.random.nextInt(ok.size()));
-            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), "map.skyabyss.poi." + poi.kind());
+            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), poi.titleKey());
         }
         BlockPos lair = NamedFoes.lair(region);
         BlockPos at = lair == null ? BlockPos.ZERO : lair;

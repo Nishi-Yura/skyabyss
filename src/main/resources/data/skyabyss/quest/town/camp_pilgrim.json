@@ -1,0 +1,40 @@
+{
+  "category": "sub",
+  "order": 212,
+  "giver": "skyabyss:guest_camp_pilgrim",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:@mossy_wayshrine",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_camp_pilgrim",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 40,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 10
+      }
+    ]
+  }
+}

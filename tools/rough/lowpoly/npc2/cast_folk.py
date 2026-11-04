@@ -183,8 +183,65 @@ folk("ember_watch", "焼けた砦の見張り", [
 ])
 
 
+# ---------------------------------------------------------------- 野営の旅人 (見どころの野営に一人ずつ。docs/design/40 の 3.3。2026-11-04)
+# 巡礼のヨシロウ (鐘の野。祠を四十年巡る老人。膝が悪い)
+folk("camp_pilgrim", "巡礼のヨシロウ", [
+    dict(anim="hold_l", pal=dict(skin=SKIN["tan"], hair=(200, 196, 190), coat=(150, 140, 120), mantle=(210, 200, 176), shirt=(226, 220, 204), trim=(110, 90, 60),
+                                 hat=(210, 200, 176), trousers=(120, 110, 96), boot=(70, 56, 44), metal=(190, 160, 90)),
+         face=dict(eye="old", iris=(90, 80, 70), brow="thick", mouth="smile"), hair=BALDISH, hat=dict(kind="hood"), beard="long", hairline=27.0,
+         build="old", upper=dict(mantle=dict(bottom=14.0, clasp=True), sash=True), lower="robe", sleeve="wide", arms=HOLD_L_LOW,
+         props={"prop_l": P2.handbell, "prop_back": PR.roku_sack}),
+    dict(anim="hold_r", pal=dict(skin=SKIN["ruddy"], hair=(170, 166, 160), coat=(90, 100, 80), mantle=(160, 150, 120), shirt=(210, 204, 190), trim=(60, 66, 50),
+                                 hat=(170, 150, 100), trousers=(80, 84, 70), boot=(60, 48, 38), metal=(150, 130, 90)),
+         face=dict(eye="kind", iris=(80, 90, 70), brow="soft", mouth="smile"), hair=BALDISH, hat=dict(kind="brim"), beard="full", hairline=27.0,
+         build="old", upper=dict(mantle=dict(bottom=15.0, clasp=True), pouches=[(3.6, 10.4, "pouch")]), lower="coat_long", sleeve="wide", arms=STAFF_R,
+         props={"prop_r": P2.bell_staff}),
+    dict(anim="hold_l", pal=dict(skin=SKIN["brown"], hair=(150, 146, 140), coat=(120, 60, 50), apron=(200, 190, 160), shirt=(220, 210, 190), trim=(80, 40, 34),
+                                 hat=(200, 190, 160), trousers=(90, 70, 60), boot=(56, 44, 36), metal=(170, 150, 110)),
+         face=dict(eye="sleepy", iris=(80, 70, 60), brow="flat", mouth="neutral"), hair=SHORT, hat=dict(kind="band"), beard="moustache", hairline=27.2,
+         build="old", upper=dict(apron=dict(bottom=6.0, top=17.0, w=3.0), sash=True), lower="trousers", sleeve="rolled", arms=HOLD_L_LOW,
+         props={"prop_l": P2.handbell, "prop_back": P2.tool_pack}),
+])
+
+# 楽師のシオネ (潮の浜。舟が返って楽の箱をなくした若い女の歌い手。手は空いている)
+folk("camp_minstrel", "楽師のシオネ", [
+    dict(anim="free", pal=dict(skin=SKIN["pale"], hair=(40, 50, 70), coat=(70, 120, 130), mantle=(220, 200, 150), shirt=(236, 230, 214), trim=(200, 160, 80),
+                               hat=(70, 120, 130), skirt=(60, 100, 112), trousers=(50, 80, 90), boot=(80, 60, 46), metal=(210, 180, 100), scarf=(200, 90, 80)),
+         face=dict(eye="lady", iris=(60, 110, 120), brow="arched", mouth="small", blush=0.15), hair=LONG, hat=dict(kind="kerchief"), hairline=27.6,
+         build="lady", upper=dict(mantle=dict(bottom=17.0, clasp=True), scarf=True), lower="skirt", sleeve="puff"),
+    dict(anim="free", pal=dict(skin=SKIN["mid"], hair=(160, 70, 50), coat=(200, 190, 170), vest=(90, 60, 110), shirt=(236, 230, 220), trim=(60, 40, 80),
+                               hat=(90, 60, 110), skirt=(80, 56, 100), trousers=(60, 44, 80), boot=(70, 50, 40), metal=(200, 170, 100)),
+         face=dict(eye="glint", iris=(90, 120, 80), brow="soft", mouth="smile", blush=0.12), hair=BRAID, hat=dict(kind="beret"), hairline=27.8,
+         build="lady", upper=dict(vest=True, collar=True, collar_mat="shirt"), lower="skirt", sleeve="puff"),
+    dict(anim="free", pal=dict(skin=SKIN["tan"], hair=(30, 30, 36), coat=(170, 60, 60), mantle=(60, 70, 90), shirt=(230, 220, 200), trim=(220, 190, 110),
+                               hat=(60, 70, 90), skirt=(130, 50, 50), trousers=(90, 40, 40), boot=(60, 44, 36), metal=(220, 190, 110)),
+         face=dict(eye="calm", iris=(70, 70, 90), brow="arched", mouth="lips"), hair=BUN, hat=dict(kind="band"), hairline=27.6,
+         build="lady", upper=dict(mantle=dict(bottom=16.0, clasp=True), sash=True), lower="skirt", sleeve="fitted"),
+])
+
+# 地図描きのセキ (灰の荒野。地図の白いところが落ち着かない、痩せた男)
+folk("camp_mapmaker", "地図描きのセキ", [
+    dict(anim="hold_l", pal=dict(skin=SKIN["mid"], hair=(60, 50, 44), coat=(110, 96, 70), mantle=(70, 66, 60), shirt=(220, 210, 190), trim=(50, 44, 36),
+                                 hat=(70, 66, 60), trousers=(70, 60, 50), boot=(50, 40, 32), metal=(180, 150, 90)),
+         face=dict(eye="narrow", iris=(80, 70, 60), brow="flat", mouth="neutral"), hair=SHORT, hat=dict(kind="brim"), beard="stubble", hairline=27.4,
+         build="slim", upper=dict(mantle=dict(bottom=17.0, clasp=True), pouches=[(-3.6, 10.4, "pouch")]), lower="coat_long", sleeve="fitted", arms=HOLD_L,
+         props={"prop_l": P2.map_rolls}),
+    dict(anim="hold_l", pal=dict(skin=SKIN["pale"], hair=(120, 100, 80), coat=(60, 80, 70), vest=(170, 150, 110), shirt=(226, 220, 204), trim=(40, 50, 44),
+                                 hat=(170, 150, 110), trousers=(56, 64, 56), boot=(56, 44, 36), metal=(170, 150, 100)),
+         face=dict(eye="sharp", iris=(90, 100, 80), brow="stern", mouth="small"), hair=SHORT, hat=dict(kind="beret"), beard="none", hairline=27.4,
+         build="slim", upper=dict(vest=True, collar=True, collar_mat="shirt"), lower="tails", sleeve="fitted", arms=HOLD_L,
+         props={"prop_l": PR.ledger}),
+    dict(anim="free", pal=dict(skin=SKIN["brown"], hair=(30, 28, 26), coat=(90, 70, 50), mantle=(140, 120, 90), shirt=(210, 200, 180), trim=(60, 46, 34),
+                               hat=(140, 120, 90), trousers=(60, 50, 40), boot=(46, 38, 30), metal=(160, 140, 100)),
+         face=dict(eye="calm", iris=(70, 60, 50), brow="thick", mouth="smirk"), hair=SHORT, hat=dict(kind="kasa"), beard="goatee", hairline=27.4,
+         build="avg", upper=dict(mantle=dict(bottom=15.0, clasp=True), sash=True), lower="trousers", sleeve="rolled",
+         props={"prop_back": P2.map_tube}),
+])
+
 # 選定 (2026-10-28): 8 人とも A。cast の guest_<人> として登録する (install_npc2 が読む。人の動きの型も A のもの)
 PICK = {p: "a" for p in ("island_ferryman", "tide_ferryman", "inner_ferryman", "tide_lightkeeper", "storm_elder", "storm_hutkeeper", "ember_survivor", "ember_watch")}
+# 野営の旅人 3 人 (2026-11-04): 仮に A (選ぶのは人。docs/review の朝の頁)
+PICK.update({p: "a" for p in ("camp_pilgrim", "camp_minstrel", "camp_mapmaker")})
 for _p, _k in PICK.items():
     C.CAST[f"guest_{_p}"] = C.CAST[f"guest_{_p}_{_k}"]
 

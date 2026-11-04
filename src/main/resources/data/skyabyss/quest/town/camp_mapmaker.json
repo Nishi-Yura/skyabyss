@@ -1,0 +1,46 @@
+{
+  "category": "sub",
+  "order": 306,
+  "giver": "skyabyss:guest_camp_mapmaker",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "fort",
+          "type": "signal",
+          "target": "poi:@one_night_fort",
+          "party": false
+        },
+        {
+          "id": "gate",
+          "type": "signal",
+          "target": "poi:@split_gate",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_camp_mapmaker",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 220,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 30
+      }
+    ]
+  }
+}

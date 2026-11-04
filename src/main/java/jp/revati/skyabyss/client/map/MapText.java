@@ -18,7 +18,7 @@ public final class MapText {
         return switch (m.kind()) {
             case TITAN -> Component.translatable("progress.skyabyss.titan." + m.name());
             case WAYMARK -> m.extra().startsWith("poi~:") ? Component.translatable("map.skyabyss.poi.undiscovered", Component.translatable("map.skyabyss.poi." + m.extra().substring(5)))
-                    : m.extra().startsWith("poi:") ? Component.translatable("map.skyabyss.poi." + m.extra().substring(4))
+                    : m.extra().startsWith("poi:") ? Component.translatable(m.name().isEmpty() ? "map.skyabyss.poi." + m.extra().substring(4) : "map.skyabyss.poi_name." + m.name())
                     : m.name().isEmpty() ? TravelDest.waymarkName(m.extra()) : Component.literal(m.name());
             case SITE -> siteName(m.name(), m.extra());
             case SPAWN -> Component.translatable("gui.skyabyss.travel.spawn");

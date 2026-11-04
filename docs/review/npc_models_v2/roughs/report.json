@@ -1119,5 +1119,206 @@
     "atlas": 64
    }
   }
+ },
+ "guest_camp_pilgrim_a": {
+  "tris": 1573,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ],
+   [
+    "clasp",
+    "beard",
+    0.54
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 92,
+    "atlas": 64
+   },
+   "prop_back": {
+    "tris": 476,
+    "atlas": 128
+   }
+  }
+ },
+ "guest_camp_pilgrim_b": {
+  "tris": 1676,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 190,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_camp_pilgrim_c": {
+  "tris": 1492,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 92,
+    "atlas": 64
+   },
+   "prop_back": {
+    "tris": 196,
+    "atlas": 128
+   }
+  }
+ },
+ "guest_camp_minstrel_a": {
+  "tris": 1798,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {}
+ },
+ "guest_camp_minstrel_b": {
+  "tris": 1716,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {}
+ },
+ "guest_camp_minstrel_c": {
+  "tris": 1665,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {}
+ },
+ "guest_camp_mapmaker_a": {
+  "tris": 1592,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 144,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_camp_mapmaker_b": {
+  "tris": 1566,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 57,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_camp_mapmaker_c": {
+  "tris": 1468,
+  "atlas": 256,
+  "buried": [
+   [
+    "fr0",
+    "kasa",
+    0.58
+   ],
+   [
+    "fr1",
+    "kasa",
+    0.58
+   ]
+  ],
+  "props": {
+   "prop_back": {
+    "tris": 84,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_camp_pilgrim": {
+  "tris": 1573,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ],
+   [
+    "clasp",
+    "beard",
+    0.54
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 92,
+    "atlas": 64
+   },
+   "prop_back": {
+    "tris": 476,
+    "atlas": 128
+   }
+  }
+ },
+ "guest_camp_minstrel": {
+  "tris": 1798,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {}
+ },
+ "guest_camp_mapmaker": {
+  "tris": 1592,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 144,
+    "atlas": 64
+   }
+  }
  }
 }

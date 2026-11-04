@@ -106,6 +106,12 @@ public final class LoreSelfTest {
         signKeys.addAll(jp.revati.skyabyss.trial.raid.RaidLore.SIGNS.values());
         // 番兵長の間の奥の柱の、船長の日誌の頁 (番兵長を倒すと WhaleMidRoom.placeLogPage が刻む)
         signKeys.add(jp.revati.skyabyss.trial.raid.mid.WhaleMidRoom.LOG_PAGE);
+        // 野盗の頭目の兄弟の野営の碑 (ContinentPois が場所の書付を刻む。docs/design/40 の 3.3)
+        for (jp.revati.skyabyss.world.continent.ContinentPois.Poi poi : jp.revati.skyabyss.world.continent.ContinentPois.all()) {
+            if (!poi.chief().isEmpty()) {
+                signKeys.add(jp.revati.skyabyss.world.continent.ContinentPois.noteKey(poi));
+            }
+        }
         // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
         Set<String> pending = new java.util.TreeSet<>();
         Set<String> usedSigns = new HashSet<>();

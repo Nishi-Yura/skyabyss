@@ -1,0 +1,16 @@
+{
+  "chapter": "titan_whale",
+  "order": 95,
+  "inscription_sign": "sign.skyabyss.poi_note.koishi_camp",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.poi_note.koishi_camp"
+    }
+  ],
+  "related": [
+    "roads/brothers_2",
+    "roads/brothers_3",
+    "roads/brothers_4"
+  ]
+}

@@ -73,7 +73,8 @@ public final class XpTableSelfTest {
         for (int region : regions(chapter)) {
             int xp = ContinentPois.discoverXp(region);
             for (ContinentPois.Poi poi : ContinentPois.all()) {
-                if (map.region(poi.x(), poi.z()) == region) {
+                // 見つけて経験値が入るのは行ける見どころだけ (道しるべ・消した空きは数えない)
+                if (poi.site() && map.region(poi.x(), poi.z()) == region) {
                     sum += xp;
                 }
             }

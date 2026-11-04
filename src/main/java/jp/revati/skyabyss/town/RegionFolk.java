@@ -16,6 +16,9 @@ public final class RegionFolk {
     public record Folk(String id, String look, String town, String mark) {
     }
 
+    // 見どころの野営の旅人の「町」
+    public static final String CAMP = "camp";
+
     public static final List<Folk> ALL = List.of(
             new Folk("tide_ferryman", "sailor", "tide", "folk_a"),
             new Folk("tide_lightkeeper", "fisher", "tide", "folk_b"),
@@ -31,7 +34,11 @@ public final class RegionFolk {
             new Folk("town_guide_whale", "bellkeeper", "whale", "guide"),
             new Folk("town_guide_tide", "bellkeeper", "tide", "guide"),
             new Folk("town_guide_storm", "bellkeeper", "storm", "guide"),
-            new Folk("town_guide_ember", "bellkeeper", "ember", "guide"));
+            new Folk("town_guide_ember", "bellkeeper", "ember", "guide"),
+            // 野営の旅人 (見どころの野営に一人ずつ。町 CAMP、印 = 場所の名。world/continent/ContinentPois が立たせる。docs/design/40 の 3.3)
+            new Folk("camp_pilgrim", "herbalist", CAMP, "pilgrim_camp"),
+            new Folk("camp_minstrel", "bard", CAMP, "minstrel_camp"),
+            new Folk("camp_mapmaker", "apprentice", CAMP, "mapmaker_camp"));
 
     private RegionFolk() {
     }

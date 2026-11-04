@@ -33,7 +33,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 天と淵の大陸の見どころ (風車・灯台・巨神の肋骨・焼けた砦・野盗の野営など。docs/design/40 の 3 章)。
-// 置き場は data/skyabyss/continent/pois.json、部品は data/skyabyss/opening/poi_<種類>.json (どちらも データを直接直す（生成スクリプトはない）)。
+// 置き場は data/skyabyss/continent/pois.json、部品は data/skyabyss/opening/poi_<種類>.json。
+//   名のある場所 (name) は、その場所だけの部品 poi_<種類>__<名> (添え物・碑・旅人の立つ所。tools/gen/world/build_poi_places.py) と、
+//   名 (map.skyabyss.poi_name.<名>)・書付 (碑。sign.skyabyss.poi_note.<名>) を持つ。道しるべは名の 4 行 (sign.skyabyss.waypost.<名>) を看板に書く
 //   世界が始まったときには建てない。人が BUILD_RADIUS まで近づいたら、その一つを SiteData (種類 "poi"、番号 = pois.json の並び) に足して建てる
 //   建てたら、印 loot に宝箱 (鐘銭・糧・その土地の巨神の粉) を置く。野盗の野営・古い塚 (印 foes) は、人が近くに来ると野盗・骨の兵が出る (間を置いて何度でも)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -41,6 +43,7 @@ public final class ContinentPois {
     public static final String KIND = "poi";
     static final int BUILD_RADIUS = 240;
     static final int FOES_RADIUS = 28;
+    static final int FOLK_RADIUS = 64;
     static final long FOES_COOLDOWN = 20 * 60 * 8;
     static final int CHECK = 40;
     // 発見 (Wynncraft の Discovery): この距離まで近づいたら見つけたことにする
@@ -48,19 +51,39 @@ public final class ContinentPois {
     static final String FOUND_TAG = "skyabyss_poi_found";
     // 土地ごとの発見の経験値 (野・島・岩鯨・潮殻・雷翼・余燼。ContinentMap の土地の番号の順)
     // 土地ごと (草原・外れ・岩鯨・潮・嵐・灰)。章の初めての場所が章の経験値の 20% になるよう、土地の見どころの数で割った値 (04 の 3 章、自己テスト xp table)
-    static final int[] DISCOVER_XP = {5, 10, 8, 29, 78, 80};
+    static final int[] DISCOVER_XP = {6, 10, 9, 33, 92, 98};
 
     // 土地の見どころを初めて見つけた経験値 (隠れた発見はその倍。ContinentSecrets)
     public static int discoverXp(int region) {
         return DISCOVER_XP[Math.max(0, Math.min(DISCOVER_XP.length - 1, region))];
     }
 
-    // a・b = 道しるべの行き先 (signpost.skyabyss.<id>)、da・db = そこまでのおおよその道のり
-    public record Poi(String kind, int x, int z, String a, int da, String b, int db) {
+    // a・b = 古い道しるべの行き先 (signpost.skyabyss.<id>)、da・db = そこまでのおおよその道のり。
+    // name = 場所の名の id (なければ種類の名と書付)、chief = 野盗の頭目の兄弟の id (entity.skyabyss.bandit_brother.<id>)
+    public record Poi(String kind, int x, int z, String a, int da, String b, int db, String name, String chief) {
         // 行ける見どころ (道しるべと、消した見どころの空き "gone" を除く)。
         // 見どころは pois.json の並びの番号で覚える (建った印・発見) ので、消すときは並びから抜かずに "gone" にする
         public boolean site() {
             return !kind.equals("signpost") && !kind.equals(GONE);
+        }
+
+        // 建てるもの (道しるべも建てる。消した空きは建てない)
+        public boolean built() {
+            return !kind.equals(GONE);
+        }
+
+        // 部品の名 (名のある場所はその場所の部品)
+        public String blueprint() {
+            return name.isEmpty() || kind.equals("signpost") ? "poi_" + kind : "poi_" + kind + "__" + name;
+        }
+
+        // 地図・発見の札の名 (名のある場所はその名、ほかは種類の名)
+        public String titleKey() {
+            return name.isEmpty() ? "map.skyabyss.poi." + kind : "map.skyabyss.poi_name." + name;
+        }
+
+        public net.minecraft.network.chat.Component title() {
+            return net.minecraft.network.chat.Component.translatable(titleKey());
         }
     }
 
@@ -81,7 +104,8 @@ public final class ContinentPois {
                         JsonObject o = e.getAsJsonObject();
                         out.add(new Poi(o.get("kind").getAsString(), o.get("x").getAsInt(), o.get("z").getAsInt(),
                                 o.has("a") ? o.get("a").getAsString() : "", o.has("da") ? o.get("da").getAsInt() : 0,
-                                o.has("b") ? o.get("b").getAsString() : "", o.has("db") ? o.get("db").getAsInt() : 0));
+                                o.has("b") ? o.get("b").getAsString() : "", o.has("db") ? o.get("db").getAsInt() : 0,
+                                o.has("name") ? o.get("name").getAsString() : "", o.has("chief") ? o.get("chief").getAsString() : ""));
                     }
                 }
             } catch (java.io.IOException ex) {
@@ -109,8 +133,8 @@ public final class ContinentPois {
             }
             for (int i = 0; i < list.size(); i++) {
                 Poi poi = list.get(i);
-                // 道しるべの看板は建てない (2026-10-28 の試遊「看板の向きや置いてる位置がおかしいときがある。消してもいい」)。消した見どころも
-                if (!poi.site()) {
+                // 消した見どころは建てない (道しるべは大きな分かれ道の六つだけ建てる。docs/design/40 の 3.3)
+                if (!poi.built()) {
                     continue;
                 }
                 double d2 = p.distanceToSqr(poi.x() + 0.5, p.getY(), poi.z() + 0.5);
@@ -132,15 +156,23 @@ public final class ContinentPois {
                         SiteBuilds.enqueue(job(over, data, e));
                     }
                 } else {
-                    if (d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
+                    if (poi.site() && d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
                         discover(p, i, poi);
-                        // 見どころに着いた (土地の町の人の頼み「〜を見てこよう」。初めてでなくても毎回)
+                        // 見どころに着いた (土地の町の人の頼み「〜を見てこよう」。初めてでなくても毎回)。名のある場所は「poi:@<名>」も
                         jp.revati.skyabyss.quest.Quests.signal(p, "poi:" + poi.kind());
+                        if (!poi.name().isEmpty()) {
+                            jp.revati.skyabyss.quest.Quests.signal(p, "poi:@" + poi.name());
+                        }
+                    }
+                    // 野営の旅人 (人が近くにいるあいだ立たせる。town/RegionFolk の町 "camp"、印 = 場所の名)
+                    BlockPos folk = e.extra("folk");
+                    if (folk != null && d2 <= (double) FOLK_RADIUS * FOLK_RADIUS) {
+                        jp.revati.skyabyss.town.RegionFolk.ensure(over, jp.revati.skyabyss.town.RegionFolk.CAMP, poi.name(), folk);
                     }
                     // はじまりの島の見どころは敵を出さない (島の敵は IslandTrail の目的の場所だけ)
                     if (e.extra("foes") != null && d2 <= (double) FOES_RADIUS * FOES_RADIUS
                             && ContinentMap.get().region(poi.x(), poi.z()) != ContinentMap.OUTSKIRTS) {
-                        foes(over, e, list.get(i).kind());
+                        foes(over, e, list.get(i));
                     }
                 }
             }
@@ -190,7 +222,7 @@ public final class ContinentPois {
             return false;
         }
         persisted(p).putIntArray(FOUND_TAG, found.stream().mapToInt(Integer::intValue).sorted().toArray());
-        jp.revati.skyabyss.notice.Notice.place(p, net.minecraft.network.chat.Component.translatable("map.skyabyss.poi." + poi.kind()),
+        jp.revati.skyabyss.notice.Notice.place(p, poi.title(),
                 net.minecraft.network.chat.Component.translatable("message.skyabyss.poi.discovered", found.size(), all().stream().filter(Poi::site).count()));
         int region = ContinentMap.get().region(poi.x(), poi.z());
         jp.revati.skyabyss.rpg.Growth.addXp(p, discoverXp(region), "growth.skyabyss.reason.discovery");
@@ -221,7 +253,7 @@ public final class ContinentPois {
     // 見どころの部品の半径 (向きによらず収まる半分の大きさ + 地均しの輪)。部品が読めなければ 8
     static int radius(Poi poi) {
         try {
-            Blueprint bp = Blueprint.get("poi_" + poi.kind());
+            Blueprint bp = Blueprint.get(poi.blueprint());
             return Math.max(bp.rx1 - bp.rx0, bp.rz1 - bp.rz0) / 2 + 1 + bp.ring;
         } catch (RuntimeException ex) {
             return 8;
@@ -259,25 +291,30 @@ public final class ContinentPois {
 
     public static SiteJob job(ServerLevel level, SiteData data, SiteData.Entry entry) {
         Poi poi = all().get(Math.max(0, Math.min(all().size() - 1, entry.index)));
-        return new SiteJob(level, data, entry, Blueprint.get("poi_" + poi.kind()), "poi " + poi.kind(), job -> {
+        return new SiteJob(level, data, entry, Blueprint.get(poi.blueprint()), "poi " + poi.blueprint(), job -> {
             BlockPos foes = job.mark("foes");
             if (foes != null) {
                 job.entry.extra("foes", foes);
             }
             BlockPos sign = job.mark("sign");
-            if (sign != null && !poi.a().isEmpty() && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
-                be.setText(new net.minecraft.world.level.block.entity.SignText()
-                        .setMessage(0, net.minecraft.network.chat.Component.translatable("signpost.skyabyss." + poi.a()))
-                        .setMessage(1, net.minecraft.network.chat.Component.literal(poi.da() + " m"))
-                        .setMessage(2, net.minecraft.network.chat.Component.translatable("signpost.skyabyss." + poi.b()))
-                        .setMessage(3, net.minecraft.network.chat.Component.literal(poi.db() + " m")), true);
+            if (sign != null && !poi.name().isEmpty() && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
+                // 行き先と道のり・土地の名・目安のレベル (4 行。sign.skyabyss.waypost.<名>.1〜4)
+                net.minecraft.world.level.block.entity.SignText text = new net.minecraft.world.level.block.entity.SignText();
+                for (int k = 0; k < 4; k++) {
+                    text = text.setMessage(k, net.minecraft.network.chat.Component.translatable("sign.skyabyss.waypost." + poi.name() + "." + (k + 1)));
+                }
+                be.setText(text, true);
                 be.setWaxed(true);
                 be.setChanged();
                 level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);
             }
             BlockPos tablet = job.mark("tablet");
             if (tablet != null) {
-                jp.revati.skyabyss.tablet.Tablets.write(level, tablet, "sign.skyabyss.poi_" + poi.kind());
+                jp.revati.skyabyss.tablet.Tablets.write(level, tablet, noteKey(poi));
+            }
+            BlockPos folk = job.mark("folk");
+            if (folk != null) {
+                job.entry.extra("folk", folk);
             }
             BlockPos loot = job.mark("loot");
             if (loot != null) {
@@ -291,6 +328,11 @@ public final class ContinentPois {
                 }
             }
         });
+    }
+
+    // 碑の文の鍵 (名のある場所はその場所の書付、ほかは種類の書付)
+    public static String noteKey(Poi poi) {
+        return poi.name().isEmpty() ? "sign.skyabyss.poi_" + poi.kind() : "sign.skyabyss.poi_note." + poi.name();
     }
 
     // 建った見どころ kind の印 extra の世界の座標 (まだ建っていなければ null)。地下のダンジョンの層の門・帰り着く所
@@ -358,7 +400,8 @@ public final class ContinentPois {
     }
 
     // 野盗: 弓の野盗二人と斧の野盗一人と頭 (土地の強さは ContinentDanger が掛ける)。前に出てから FOES_COOLDOWN たつまで出さない
-    static void foes(ServerLevel level, SiteData.Entry e, String kind) {
+    static void foes(ServerLevel level, SiteData.Entry e, Poi poi) {
+        String kind = poi.kind();
         long now = level.getGameTime();
         BlockPos at = e.extra("foes");
         BlockPos last = e.extra("foes_at");
@@ -382,7 +425,9 @@ public final class ContinentPois {
             int y = below ? at.getY() : level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
             leader.moveTo(at.getX() + 0.5, y, at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
             leader.finalizeSpawn(level, level.getCurrentDifficultyAt(leader.blockPosition()), MobSpawnType.EVENT, null);
-            leader.setCustomName(net.minecraft.network.chat.Component.translatable(undead ? "entity.skyabyss.poi_leader_bone" : "entity.skyabyss.poi_leader_bandit"));
+            // 野盗の頭目の兄弟は名で呼ぶ (docs/design/40 の 3.3)
+            leader.setCustomName(net.minecraft.network.chat.Component.translatable(!poi.chief().isEmpty() ? "entity.skyabyss.bandit_brother." + poi.chief()
+                    : undead ? "entity.skyabyss.poi_leader_bone" : "entity.skyabyss.poi_leader_bandit"));
             leader.setCustomNameVisible(true);
             leader.addTag(LEADER_TAG);
             leader.setPersistenceRequired();

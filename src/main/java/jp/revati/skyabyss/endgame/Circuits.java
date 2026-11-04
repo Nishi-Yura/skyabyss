@@ -406,7 +406,7 @@ public final class Circuits {
             int i = ok.get(level.random.nextInt(ok.size()));
             run.usedPois.add(i);
             ContinentPois.Poi poi = all.get(i);
-            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), "map.skyabyss.poi." + poi.kind(), i);
+            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), poi.titleKey(), i);
         }
         for (int t = 0; t < 60; t++) {
             double a = level.random.nextDouble() * Math.PI * 2;

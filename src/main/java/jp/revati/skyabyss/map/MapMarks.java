@@ -174,7 +174,8 @@ public final class MapMarks {
                 continue;
             }
             BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
-            out.add(new Mark(Kind.WAYMARK, "poi" + i, "", "poi:" + poi.kind(), at.getX(), at.getZ(), false, 0));
+            // 名のある場所は名 (MapText が map.skyabyss.poi_name.<名> にする)
+            out.add(new Mark(Kind.WAYMARK, "poi" + i, poi.name(), "poi:" + poi.kind(), at.getX(), at.getZ(), false, 0));
         }
     }
 

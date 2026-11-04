@@ -1,0 +1,44 @@
+{
+  "category": "sub",
+  "order": 302,
+  "giver": "skyabyss:guest_camp_minstrel",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:@minstrel_boat",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_camp_minstrel",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 80,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 15
+      },
+      {
+        "item": "skyabyss:road_hardtack",
+        "count": 2
+      }
+    ]
+  }
+}

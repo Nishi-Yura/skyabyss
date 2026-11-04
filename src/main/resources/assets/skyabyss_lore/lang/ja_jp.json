@@ -140,5 +140,13 @@
   "message.skyabyss.tablets.ch1_whale": "苔むした碑だ。丘のどこかに、あと二枚あるらしい。",
   "message.skyabyss.tablets.ch4_ash": "灰をかぶった碑だ。焼けた地のどこかに、あと二枚あるらしい。",
   "lore.skyabyss.chapter1.captain_log.title": "船長の日誌の頁",
-  "lore.skyabyss.chapter1.captain_log.body": "番兵長の間の奥、柱に、潮で波打った紙が一枚とめてあった。海の船の日誌の頁だ。\n\n字は乱れていて、最後の行だけが強く書かれている。「舵を切れ」。\n\nイサナに見せれば、何か分かるかもしれない。"
+  "lore.skyabyss.chapter1.captain_log.body": "番兵長の間の奥、柱に、潮で波打った紙が一枚とめてあった。海の船の日誌の頁だ。\n\n字は乱れていて、最後の行だけが強く書かれている。「舵を切れ」。\n\nイサナに見せれば、何か分かるかもしれない。",
+  "lore.skyabyss.roads.brothers_1.title": "頭目の兄弟 一　末弟コイシ",
+  "lore.skyabyss.roads.brothers_1.body": "岩鯨の丘陵の野盗の野営に、三男ミオから末弟コイシへの手紙が残っていた。\n\n都の荷を狙うのは、母の分を取り返すためだという。兄弟は四人いて、ほかの土地にもそれぞれ野営を張っているらしい。",
+  "lore.skyabyss.roads.brothers_2.title": "頭目の兄弟 二　三男ミオ",
+  "lore.skyabyss.roads.brothers_2.body": "潮の浜の野営には、次男ツムジからミオへの手紙。\n\n兄弟の村、沢渡は、ある夜に土に埋まった。その夜、都は門を閉じたという。ツムジは「忘れるな」と書いている。",
+  "lore.skyabyss.roads.brothers_3.title": "頭目の兄弟 三　次男ツムジ",
+  "lore.skyabyss.roads.brothers_3.body": "嵐の高地の野営には、長兄クロガネからツムジへの手紙。\n\n母は都の門の外で冷えていった。そのあいだも、都の鐘は鳴り止まなかった。兄弟の恨みは、その夜から始まっている。",
+  "lore.skyabyss.roads.brothers_4.title": "頭目の兄弟 四　長兄クロガネ",
+  "lore.skyabyss.roads.brothers_4.body": "灰の荒野の野営に、誰にも宛てていない書付があった。\n\nクロガネは、あの夜に門を閉じた門番の墓を見つけた。母の墓の隣だった。門番もまた、門の外で冷えたのだ。\n\n恨む相手はいなくなった。それでも、野営の火はまだ消えていない。"
 }

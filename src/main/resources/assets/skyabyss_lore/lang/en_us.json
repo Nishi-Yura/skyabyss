@@ -140,5 +140,13 @@
   "message.skyabyss.tablets.ch1_whale": "A mossy tablet. There seem to be two more somewhere in the hills.",
   "message.skyabyss.tablets.ch4_ash": "An ash-covered tablet. There seem to be two more in the burnt land.",
   "lore.skyabyss.chapter1.captain_log.title": "A Page of the Captain's Log",
-  "lore.skyabyss.chapter1.captain_log.body": "Pinned to a pillar at the back of the captain's hall: a single sea-warped page from a ship's log.\n\nThe hand is unsteady; only the last line is pressed hard. \"Turn the helm.\"\n\nIsana might know what it means."
+  "lore.skyabyss.chapter1.captain_log.body": "Pinned to a pillar at the back of the captain's hall: a single sea-warped page from a ship's log.\n\nThe hand is unsteady; only the last line is pressed hard. \"Turn the helm.\"\n\nIsana might know what it means.",
+  "lore.skyabyss.roads.brothers_1.title": "The Bandit Brothers I: Koishi, the Youngest",
+  "lore.skyabyss.roads.brothers_1.body": "In the bandit camp in the Whale Hills, a letter from Mio, the third brother, to Koishi, the youngest.\n\nThey rob the city's carts to take back what was Mother's. There are four brothers, each with a camp in another land.",
+  "lore.skyabyss.roads.brothers_2.title": "The Bandit Brothers II: Mio, the Third",
+  "lore.skyabyss.roads.brothers_2.body": "In the camp on the Tide Shore, a letter from Tsumuji, the second brother, to Mio.\n\nThe brothers' village, Sawatari, was buried one night. That night, the city shut its gate. Tsumuji wrote: \"Never forget.\"",
+  "lore.skyabyss.roads.brothers_3.title": "The Bandit Brothers III: Tsumuji, the Second",
+  "lore.skyabyss.roads.brothers_3.body": "In the camp on the Storm Heights, a letter from Kurogane, the eldest, to Tsumuji.\n\nMother went cold outside the city gate, and all the while the city's bell kept ringing. The brothers' grudge began that night.",
+  "lore.skyabyss.roads.brothers_4.title": "The Bandit Brothers IV: Kurogane, the Eldest",
+  "lore.skyabyss.roads.brothers_4.body": "In the camp in the Ash Wilds, a note addressed to no one.\n\nKurogane found the grave of the gatekeeper who shut the gate that night. It was beside Mother's. The gatekeeper, too, had gone cold outside the gate.\n\nThere is no one left to hate. Still, the camp's fire has not gone out."
 }
