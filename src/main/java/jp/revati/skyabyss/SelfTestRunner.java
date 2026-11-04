@@ -411,6 +411,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("clocks", jp.revati.skyabyss.quest.ClocksSelfTest::run));
         // 記録の画面 (踏破・塔・深み・釣り・早駆け・転生・空見。record/RecordsHub)。SKYABYSS_SELFTEST_ONLY="records hub"
         steps.add(Step.once("records hub", jp.revati.skyabyss.record.RecordsHubSelfTest::run));
+        // 登録した音の出来事がどれも sounds.json に行を持つ (行が無い音は鳴らない)。SKYABYSS_SELFTEST_ONLY="sound events"
+        steps.add(Step.once("sound events", jp.revati.skyabyss.registry.SoundEventsSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
         // 狩人の手帳 (倒した数・頁・慣れ・見た技)。SKYABYSS_SELFTEST_ONLY="hunter notes"

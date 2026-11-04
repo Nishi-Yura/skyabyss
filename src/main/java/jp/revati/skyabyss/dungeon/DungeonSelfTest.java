@@ -93,16 +93,13 @@ public final class DungeonSelfTest {
             f0.wakeRooms(level, List.of(p));
             int foes = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(40), m -> m.getTags().contains(a.foeTag())).size();
             check(f, f0.woke.contains("a") && foes >= f0.roomFoes.get("a").size(), "room a did not wake (" + foes + " foes)");
-            // 鍵持ちを倒して扉へ寄ると開く
+            // 鍵持ちを倒して扉へ寄ると開く (鍵の日 DungeonMood.KEYS は鍵持ちが二体なので、いる分を全部倒す)
             Vec3 rb = a.markCenter(0, "room_b");
             p.moveTo(rb.x, rb.y, rb.z, 0f, 0f);
             f0.wakeRooms(level, List.of(p));
-            Mob key = null;
-            for (Mob m : level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(40), m -> m.getTags().contains(Dungeons.KEY_TAG) && m.getTags().contains(a.foeTag()))) {
-                key = m;
-            }
-            check(f, key != null, "no key bearer in room b");
-            if (key != null) {
+            List<Mob> keys = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(40), m -> m.getTags().contains(Dungeons.KEY_TAG) && m.getTags().contains(a.foeTag()));
+            check(f, keys.size() >= f0.keyNeed, "too few key bearers in room b (" + keys.size() + " of " + f0.keyNeed + ")");
+            for (Mob key : keys) {
                 key.hurt(level.damageSources().genericKill(), Float.MAX_VALUE);
             }
             check(f, f0.keyTaken, "killing the key bearer did not give the key");
