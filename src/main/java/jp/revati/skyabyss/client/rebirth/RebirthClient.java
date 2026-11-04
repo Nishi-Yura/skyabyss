@@ -175,11 +175,6 @@ public final class RebirthClient {
         }
     }
 
-    // ---------------------------------------------------------------- 画面を開く
-    public static void openBoard(RebirthNet.BoardPayload payload) {
-        Minecraft.getInstance().setScreen(new BoardScreen(payload));
-    }
-
     @SubscribeEvent
     static void onClientCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal("rebirthfx").executes(ctx -> {

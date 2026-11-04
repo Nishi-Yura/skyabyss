@@ -28,8 +28,8 @@ import net.minecraft.world.item.ItemStack;
 public final class RaijuLoot {
     public static final int VANILLA_XP = 50;
     // 成長の経験値 (6.6節): 170、初回 +80、推奨 Lv 24 から離れると減る
-    public static final int GROWTH_XP = 170;
-    public static final int FIRST_BONUS = 80;
+    public static final int GROWTH_XP = 85;
+    public static final int FIRST_BONUS = 40;
     public static final int LEVEL = 24;
     public static final String SIGNAL = "raiju_stilled";
 

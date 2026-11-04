@@ -153,58 +153,7 @@ public final class ArtisanSelfTest {
 
     private static void assets(List<String> f) {
         String a = "/assets/skyabyss/";
-        JsonObject mesh = json(a + "lowpoly/artisan.json", f);
-        JsonObject geo = json(a + "geo/entity/artisan_lowpoly.geo.json", f);
-        JsonObject anim = json(a + "animations/entity/artisan.animation.json", f);
-        // 骨: メッシュとスケルトンで名前・親・ピボットが合う。root だけ yaw 180 (語り部・イサナと同じ向き)
-        Set<String> meshBones = new HashSet<>();
-        int tris = 0;
-        JsonObject mb = mesh.has("bones") ? mesh.getAsJsonObject("bones") : new JsonObject();
-        for (var e : mb.entrySet()) {
-            meshBones.add(e.getKey());
-            tris += e.getValue().getAsJsonObject().getAsJsonArray("triangles").size();
-        }
-        check(f, meshBones.equals(Set.of("root", "body", "head", "armL", "armR", "legL", "legR")), "the artisan mesh bones are " + meshBones);
-        check(f, tris >= 740 && tris <= 1200, "the artisan mesh has " + tris + " triangles (want 740 to 1200: the closed mesh grows with joint fixes)"); // 740 → 1058: watertight pass (docs/design/15)
-        Set<String> geoBones = new HashSet<>();
-        JsonArray bones = geo.has("minecraft:geometry") ? geo.getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject().getAsJsonArray("bones") : new JsonArray();
-        for (JsonElement e : bones) {
-            JsonObject b = e.getAsJsonObject();
-            String name = b.get("name").getAsString();
-            geoBones.add(name);
-            JsonObject m = mb.has(name) ? mb.getAsJsonObject(name) : null;
-            check(f, m != null, "geo bone " + name + " is not in the mesh");
-            if (m == null) {
-                continue;
-            }
-            check(f, b.get("pivot").toString().equals(pivot(m)), "pivot of " + name + " differs between geo and mesh: " + b.get("pivot") + " vs " + pivot(m));
-            String parent = m.has("parent") && !m.get("parent").isJsonNull() ? m.get("parent").getAsString() : null;
-            check(f, (b.has("parent") ? b.get("parent").getAsString() : null) == null ? parent == null : b.get("parent").getAsString().equals(parent), "parent of " + name + " differs");
-            if (name.equals("root")) {
-                // 2026-10-21: 180 度だとゲームの中で後ろ向きだった。root は回さず、頭の上下は NpcRenderer.ArtisanModel が符号を戻す (係の人と同じ)
-                check(f, !b.has("rotation") || b.getAsJsonArray("rotation").get(1).getAsDouble() == 0.0, "the artisan root must not be yawed (faces forward unrotated, like the attendants)");
-            }
-        }
-        check(f, geoBones.equals(meshBones), "geo bones " + geoBones + " do not match mesh bones " + meshBones);
-        // 肩・腰・首のピボット (腕は肩、頭は首、脚は腰)
-        check(f, pivot(mb.getAsJsonObject("armL")).equals("[4.8,20.6,0.0]") && pivot(mb.getAsJsonObject("armR")).equals("[-4.8,20.6,0.0]")
-                && pivot(mb.getAsJsonObject("head")).equals("[0.0,22.0,0.0]") && pivot(mb.getAsJsonObject("legL")).equals("[2.0,12.4,0.0]"), "the artisan pivots are not at shoulder / neck / hip");
-        // アニメ: idle / walk / talk があり、使う骨は全部ある
-        JsonObject anims = anim.has("animations") ? anim.getAsJsonObject("animations") : new JsonObject();
-        for (String n : List.of("idle", "walk", "talk")) {
-            check(f, anims.has("animation.artisan." + n), "animation " + n + " is missing");
-            if (anims.has("animation.artisan." + n)) {
-                for (String bone : anims.getAsJsonObject("animation.artisan." + n).getAsJsonObject("bones").keySet()) {
-                    check(f, geoBones.contains(bone), "animation " + n + " moves a bone that does not exist: " + bone);
-                }
-            }
-        }
-        // 絵: 章ごとの 4 つ (同じ大きさ。メッシュの texture_size と同じ) と、既定の絵、対話の顔 (80x80 が 3 枚)
-        int[] size = {256, 256};
-        for (int ch = 1; ch <= 4; ch++) {
-            check(f, java.util.Arrays.equals(pngSize(a + "textures/lowpoly/artisan_ch" + ch + ".png", f), size), "artisan_ch" + ch + " is not 256x256");
-        }
-        check(f, java.util.Arrays.equals(pngSize(a + "textures/lowpoly/artisan.png", f), size), "the default artisan texture is not 256x256");
+        // 体・章ごとの絵・動き (npc_artisan) は NpcModelSelfTest (段 lowpoly npc) が見る。ここは対話の顔 (128x128 が 3 枚) と防具
         for (String face : List.of("neutral", "smile", "grave")) {
             check(f, java.util.Arrays.equals(pngSize(a + "textures/gui/npc/face/artisan_" + face + ".png", f), new int[] {128, 128}), "the artisan face " + face + " is not 128x128");
         }
@@ -279,6 +228,13 @@ public final class ArtisanSelfTest {
         NpcEntity first = null;
         try {
             check(f, NpcSpawner.entitiesLoaded(level, mark), "the entities around the test mark did not load in time");
+            // 前の回の職人 (保存されて残る) と、立てた時刻の記録 (立て直しの待ち) を消す。同じ世界で続けて流すと、どちらかで立たずに落ちた
+            for (NpcEntity old : level.getEntities(NpcSetup.ARTISAN.get(), new net.minecraft.world.phys.AABB(mark).inflate(30), e -> true)) {
+                old.discard();
+            }
+            for (int ch = 1; ch <= 5; ch++) {
+                NpcWorldData.get(level.getServer().overworld()).markSpawned(mark.asLong(), NpcSetup.ARTISAN_ID + "#" + ch, -1L);
+            }
             first = ArtisanSpawner.ensure(level, mark, 3);
             check(f, first != null && first.variant() == 3 && first.getType() == NpcSetup.ARTISAN.get(), "ensure did not stand a chapter-3 artisan (" + first + ")");
             if (first != null) {

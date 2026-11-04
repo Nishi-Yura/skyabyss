@@ -29,6 +29,30 @@ public final class PanZoomCanvas {
     private double panX;
     private double panY;
     private boolean dragging;
+    // 画素ちょうど (docs/design/56): 0 より大きければ、論理の 1 画素 = 画面の unit 画素として、拡大は 1/unit 刻み、
+    // 位置は画面の 1 画素刻みにそろえる (字と節の画素の太さがそろう)
+    private float unit;
+
+    public void setPixelUnit(float unit) {
+        this.unit = unit >= 1f ? Math.round(unit) : 0f;
+    }
+
+    // 拡大を画面の画素にそろえる (下へ丸め。MIN_ZOOM..MAX_ZOOM に入る 1/unit の倍数)
+    private float snapZoom(float z) {
+        if (unit <= 0) {
+            return z;
+        }
+        int k = Mth.clamp((int) Math.floor(z * unit + 1e-3), minStep(), maxStep());
+        return k / unit;
+    }
+
+    private int minStep() {
+        return Math.max(1, (int) Math.ceil(MIN_ZOOM * unit - 1e-3));
+    }
+
+    private int maxStep() {
+        return (int) Math.floor(MAX_ZOOM * unit + 1e-3);
+    }
 
     public void setViewport(int x, int y, int w, int h) {
         this.x = x;
@@ -55,7 +79,7 @@ public final class PanZoomCanvas {
 
     // 最初の大きさと位置: 盤が枠に入る大きさ (枠より小さい盤は 1 倍。下限まで) で、横は真ん中、縦は盤が枠より長ければ上から
     public void reset() {
-        zoom = Mth.clamp(Math.min((float) w / cw, (float) h / ch), startMin, 1f);
+        zoom = snapZoom(Mth.clamp(Math.min((float) w / cw, (float) h / ch), startMin, 1f));
         double sw = cw * zoom;
         double sh = ch * zoom;
         panX = (w - sw) / 2.0;
@@ -79,7 +103,13 @@ public final class PanZoomCanvas {
     public void begin(GuiGraphics g) {
         TextClip.clipPosed(g, x, y, w, h);
         g.pose().pushPose();
-        g.pose().translate((float) (x + panX), (float) (y + panY), 0f);
+        double px = panX;
+        double py = panY;
+        if (unit > 0) {
+            px = Math.round(px * unit) / unit;
+            py = Math.round(py * unit) / unit;
+        }
+        g.pose().translate((float) (x + px), (float) (y + py), 0f);
         g.pose().scale(zoom, zoom, 1f);
     }
 
@@ -126,7 +156,14 @@ public final class PanZoomCanvas {
         if (!contains(mx, my) || dy == 0) {
             return false;
         }
-        float next = Mth.clamp(dy > 0 ? zoom * STEP : zoom / STEP, MIN_ZOOM, MAX_ZOOM);
+        float next;
+        if (unit > 0) {
+            // 画素ちょうど: 1/unit ずつ
+            int k = Mth.clamp(Math.round(zoom * unit) + (dy > 0 ? 1 : -1), minStep(), maxStep());
+            next = k / unit;
+        } else {
+            next = Mth.clamp(dy > 0 ? zoom * STEP : zoom / STEP, MIN_ZOOM, MAX_ZOOM);
+        }
         if (next == zoom) {
             return true;
         }

@@ -39,6 +39,8 @@ public final class GearEvents {
     //  防具: 強靭だけ 1 部位 +0.3。防御力はバニラの効きの上限 (20) の手前にあり、1 足すごとに受ける傷が 1 割以上減るので足さない
     public static final double ATTACK_RATE_PER_LEVEL = 0.03;
     public static final double TOUGHNESS_PER_LEVEL = 0.3;
+    // 防具の強化: 1 段 1 部位ごとに受ける傷 −0.4% (四部位 +10 で −16%。2026-11-05 の粉と炉の頁 2-1)。強靭はそのまま
+    public static final double GUARD_PER_LEVEL = 0.004;
     // 岩鯨の補強板: 甲殻 2 部位で強靭 +3 (以前は防御 +2)
     public static final double PLATING_TOUGHNESS = 3;
 
@@ -73,6 +75,30 @@ public final class GearEvents {
             String part = armor.getEquipmentSlot().getName();
             EquipmentSlotGroup slot = EquipmentSlotGroup.bySlot(armor.getEquipmentSlot());
             event.addModifier(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(id("enhance_toughness_" + part), level * TOUGHNESS_PER_LEVEL, AttributeModifier.Operation.ADD_VALUE), slot);
+        }
+    }
+
+    // 着ている防具の強化で減る受ける傷の割合 (0.16 = −16%)。必要 Lv に届いていない部位は数えない
+    public static double enhanceGuard(net.minecraft.world.entity.LivingEntity entity) {
+        double sum = 0;
+        for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.HEAD,
+                net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
+            ItemStack s = entity.getItemBySlot(slot);
+            if (s.getItem() instanceof ArmorItem && s.getItem() instanceof ModGear g && g.enhanceable() && GearLevel.usable(entity, s)) {
+                sum += ModGear.enhance(s) * GUARD_PER_LEVEL;
+            }
+        }
+        return sum;
+    }
+
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOW)
+    static void onDamagePre(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Pre event) {
+        if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player) || player.level().isClientSide || event.getNewDamage() <= 0) {
+            return;
+        }
+        double guard = enhanceGuard(player);
+        if (guard > 0) {
+            event.setNewDamage((float) (event.getNewDamage() * (1 - guard)));
         }
     }
 

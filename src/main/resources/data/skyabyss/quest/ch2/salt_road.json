@@ -30,7 +30,7 @@
   "stages": [
     {
       "id": "road",
-      "xp": 40,
+      "xp": 50,
       "objectives": [
         {
           "id": "marks",
@@ -47,7 +47,7 @@
     },
     {
       "id": "vault",
-      "xp": 60,
+      "xp": 70,
       "mode": "all",
       "objectives": [
         {
@@ -67,7 +67,7 @@
     }
   ],
   "reward": {
-    "xp": 80,
+    "xp": 90,
     "items": [],
     "affinity": {
       "skyabyss:storyteller": 3

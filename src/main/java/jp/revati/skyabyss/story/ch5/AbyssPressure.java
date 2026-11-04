@@ -150,7 +150,7 @@ public final class AbyssPressure {
         }
         if (s.voice >= 95 && !s.warned) {
             s.warned = true;
-            Notice.narrate(p, "message.skyabyss.abyss.voice_full");
+            Notice.hint(p, "message.skyabyss.abyss.voice_full");
         } else if (s.voice < 50) {
             s.warned = false;
         }

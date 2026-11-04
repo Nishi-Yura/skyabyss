@@ -257,7 +257,7 @@ public final class CleftCave {
             level.sendParticles(ParticleTypes.POOF, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 12, 1.0, 1.0, 1.0, 0.02);
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 40 * 40) {
-                    Notice.narrate(p, "message.skyabyss.ch1.plate.open");
+                    Notice.hint(p, "message.skyabyss.ch1.plate.open");
                 }
             }
         }
@@ -277,6 +277,7 @@ public final class CleftCave {
         }
         ServerLevel level = server.overworld();
         for (SiteData.Entry cave : entries(server)) {
+            openMouth(level, cave);
             BlockPos p1 = cave.extra("plate1");
             BlockPos gate = cave.extra("gate4");
             if (p1 == null || !level.hasChunkAt(p1) || gateOpen(level, cave)) {
@@ -302,6 +303,37 @@ public final class CleftCave {
                 }
             }
         }
+    }
+
+    // ---------------------------------------------------------------- 地表の口
+    // 戸口 (部品の x -1..1・y 0..1・z -1) は開けてある。1.0.0 までの設計図は割れた石レンガでふさいでいて、冒険モードでは入れなかった
+    // (2026-11-03 の声「入口閉じてる」)。前に建った洞は、チャンクが読まれているときに一度、戸口の石レンガだけを空気にする
+    private static final java.util.Set<Long> MOUTH_OPENED = new java.util.HashSet<>();
+
+    static void openMouth(ServerLevel level, SiteData.Entry cave) {
+        if (MOUTH_OPENED.contains(cave.pos.asLong())) {
+            return;
+        }
+        int rot = jp.revati.skyabyss.opening.site.SiteFinder.rot(cave.yaw);
+        boolean mirror = jp.revati.skyabyss.opening.site.SiteFinder.mirror(cave.yaw);
+        BlockPos origin = cave.pos.below();
+        List<BlockPos> door = new ArrayList<>();
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 1; y++) {
+                BlockPos at = jp.revati.skyabyss.opening.site.Blueprint.transform(x, y + 1, -1, rot, mirror, origin);
+                if (!level.hasChunkAt(at)) {
+                    return;
+                }
+                door.add(at);
+            }
+        }
+        for (BlockPos at : door) {
+            BlockState s = level.getBlockState(at);
+            if (s.is(Blocks.STONE_BRICKS) || s.is(Blocks.CRACKED_STONE_BRICKS) || s.is(Blocks.MOSSY_STONE_BRICKS)) {
+                level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+        MOUTH_OPENED.add(cave.pos.asLong());
     }
 
     // 自己テスト用: 進みを消す

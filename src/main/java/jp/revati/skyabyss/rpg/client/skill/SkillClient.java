@@ -68,7 +68,8 @@ public final class SkillClient {
 
     public static void onJobChoiceOpen(boolean switching) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && !(mc.screen instanceof JobChoiceScreen)) {
+        // 島の画面は、ほかの画面 (ゲームのメニュー・話・頁) の上には開かず、閉じてすぐにも開かない。野営地にいるあいだ 1 秒ごとに届く
+        if (mc.player != null && !(mc.screen instanceof JobChoiceScreen) && (switching || mc.screen == null && JobChoiceScreen.mayReopen())) {
             mc.setScreen(new JobChoiceScreen(switching));
         }
     }

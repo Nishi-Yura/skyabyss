@@ -299,7 +299,7 @@ public class MoonScale extends MoonMob {
     public void topple(ServerLevel sl) {
         toppleFor = TOPPLE_TICKS;
         tiltFor = 0;
-        jp.revati.skyabyss.combat.BossOpenings.open(this, TOPPLE_TICKS);
+        jp.revati.skyabyss.combat.BreakGauge.solved(this, TOPPLE_TICKS);
         playAction("topple");
         playSound(MoonMobsSetup.SCALE_TOPPLE.get(), 2.0f, 0.8f);
         for (long[] w : landed) {

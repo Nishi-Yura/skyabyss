@@ -227,6 +227,11 @@ public final class LoreEvents {
                 continue;
             }
             for (Entity entity : level.getEntities(type, player.getBoundingBox().inflate(radius), Entity::isAlive)) {
+                // 見えない巨神 (まだその章に来ていない・心臓を止めた。TitanVisibility) の近くでは記さない
+                if (entity instanceof jp.revati.skyabyss.titan.TitanVisibility.Hidden h
+                        && !jp.revati.skyabyss.titan.TitanVisibility.sees(player, h.visibilityTitan())) {
+                    continue;
+                }
                 double d = entity.distanceTo(player);
                 Lore.fire(player, "near_entity", t -> t.target().equals(target) && d <= t.radius());
             }

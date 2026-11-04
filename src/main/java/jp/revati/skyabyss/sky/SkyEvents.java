@@ -274,7 +274,7 @@ public final class SkyEvents {
         SkyEventData.get(level).countPass(level.getGameTime());
         // 影をもう見た人には送らない (見た人には二度目以降の影を見せない。2026-10-21 の試遊)。開発の pass は起こした人には送る
         for (ServerPlayer p : level.players()) {
-            if ((force && p == witness) || !jp.revati.skyabyss.lore.LoreEvents.sawSkyShadow(p)) {
+            if ((force && p == witness) || loggingShadows(p) || (!jp.revati.skyabyss.lore.LoreEvents.sawSkyShadow(p) && !whaleStopped(p))) {
                 PacketDistributor.sendToPlayer(p, new SkyPassPayload(active));
             }
         }
@@ -309,11 +309,36 @@ public final class SkyEvents {
                     || jp.revati.skyabyss.world.continent.ContinentOutskirts.onIsland(level, player.blockPosition())) {
                 continue;
             }
-            if (player.isAlive() && !player.isSpectator() && (anySky || level.canSeeSky(player.blockPosition().above()))) {
+            // 岩鯨の心臓を止めた人の空は渡らない (序章と一章の「空の影」。巨神の見え方 TitanVisibility と同じ考え)。
+            // 語り部に「空を見ていなさい」と言われた人 (一章の段 watch_sky) の上は、その人が空を見上げたとき (仰ぎ LOOK_UP 度より上) に渡る
+            // (2026-11-04 の声「プレイヤーが何もしなくても進む所を直す」。前は昼になれば勝手に渡った)
+            if (player.isAlive() && !player.isSpectator() && (!whaleStopped(player) || loggingShadows(player)) && (!askedToWatch(player) || player.getXRot() <= LOOK_UP)
+                    && (anySky || level.canSeeSky(player.blockPosition().above()))) {
                 return player;
             }
         }
         return null;
+    }
+
+    // 見上げたとみなす仰ぎの角度 (マインクラフトの pitch。上向きが負)
+    public static final float LOOK_UP = -30f;
+
+    // 「影の記録」の頼み (sub_shadow_log) を受けている人。影をもう見た人にも、記録のあいだは影を描く
+    static boolean loggingShadows(ServerPlayer p) {
+        jp.revati.skyabyss.quest.QuestLog.Entry e = jp.revati.skyabyss.quest.QuestLog.of(p).entry("sub_shadow_log");
+        return e != null && !e.done;
+    }
+
+    // 一章のメイン (main_song) の段が watch_sky (語り部に空を見ていなさいと言われた) か
+    static boolean askedToWatch(ServerPlayer p) {
+        jp.revati.skyabyss.quest.QuestLog.Entry e = jp.revati.skyabyss.quest.QuestLog.of(p).entry("main_song");
+        jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest("main_song");
+        return e != null && !e.done && def != null && e.stage >= 0 && e.stage < def.stages().size() && "watch_sky".equals(def.stages().get(e.stage).id());
+    }
+
+    static boolean whaleStopped(ServerPlayer p) {
+        return jp.revati.skyabyss.progress.Progression.gateOn(p.server)
+                && jp.revati.skyabyss.progress.Progression.stopped(p.server, p.getUUID(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
     }
 
     private static long randomGap(ServerLevel level, double frequency) {

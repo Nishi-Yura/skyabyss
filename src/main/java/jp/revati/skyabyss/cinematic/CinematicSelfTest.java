@@ -504,6 +504,18 @@ public final class CinematicSelfTest {
 
     // 潮殻・雷翼・余燼の初見の条件 (人ごと・二人目・再入室・範囲・船)。巨神の代わりに置物を立てて、条件の判定 (firstSight) だけを確かめる
     private static void firstSights(ServerLevel level, FakePlayer a, FakePlayer b, List<String> f) {
+        // 見る人は、その巨神の章まで来ていることにする (巨神の見え方 TitanVisibility)
+        jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = (id, t) -> true;
+        jp.revati.skyabyss.titan.TitanVisibility.clearCache();
+        try {
+            firstSightsInner(level, a, b, f);
+        } finally {
+            jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = null;
+            jp.revati.skyabyss.titan.TitanVisibility.clearCache();
+        }
+    }
+
+    private static void firstSightsInner(ServerLevel level, FakePlayer a, FakePlayer b, List<String> f) {
         for (String titan : Scenes.FIRST_SIGHT_TITANS) {
             String scene = Scenes.firstId(titan);
             // 眠っている巨神は見せない作りなので、前の段 (祠・巨神の子など) がワールドに残した眠りの記録を外してから確かめる

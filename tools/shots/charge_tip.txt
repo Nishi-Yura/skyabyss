@@ -1,0 +1,70 @@
+# 2026-11-04: 溜めの手がかり (combat/MeleeHits の coach)。連打で弱い一撃が溜まり、近接が 4 秒止むと手がかりの字幕
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/charge_tip.txt -PshotsName=melee
+world camp_check continent
+size 1600 900
+timeout 1500
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode creative
+cmd weather clear
+hud on
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 100
+cmd skyabyss dungeon hall bone_pit
+wait 60
+cmd tp @s ~ ~ ~ ~ 22
+cmd kill @e[tag=melee_dummy]
+cmd execute at @s run summon skyabyss:bandit ^ ^ ^2.4 {NoAI:1b,PersistenceRequired:1b,Tags:["melee_dummy"]}
+wait 5
+cmd attribute @e[tag=melee_dummy,limit=1] minecraft:generic.max_health base set 2000
+cmd item replace entity @s weapon.mainhand with minecraft:stone_sword
+chat clear
+wait 40
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+attack
+wait 90
+shot t1_tip
+wait 20
+shot t2_tip_later

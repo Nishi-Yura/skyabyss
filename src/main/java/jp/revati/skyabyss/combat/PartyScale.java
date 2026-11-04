@@ -23,6 +23,12 @@ public final class PartyScale {
     // 主の硬さ (心臓の BASE_RESIST と同じ役)。体力の上限 1024 を越えられない主が、心臓と同じ長さ (一人で 200 秒前後) の戦いになるよう、
     // 人から受ける傷をこの値でも割る。値は 47 の 2.6 の表 (dps(Lv) × 0.55 × 200 ÷ 主の HP ÷ 平均の倍率)。2026-11-02
     public static final String RESIST = "skyabyss_resist";
+    // 型ごとの硬さ (中ボス 4 体。崩しゲージと技の木の上乗せ込みで一人 60〜90 秒になるよう。docs/design/47 の 2.1、TtkAuditSelfTest の見積もりで決めた。2026-11-04)
+    static final java.util.Map<String, Double> TYPE_RESIST = java.util.Map.of(
+            "skyabyss:whalebone_captain", 1.75,
+            "skyabyss:tide_beckoner", 1.83,
+            "skyabyss:raiju", 2.02,
+            "skyabyss:ash_smith", 1.86);
 
     private PartyScale() {
     }
@@ -57,11 +63,17 @@ public final class PartyScale {
         }
     }
 
-    // 書いてある倍率 (人数 × 硬さ。なければ 1)
+    // 型ごとの硬さ (なければ 1)
+    public static double typeResist(LivingEntity e) {
+        Double r = TYPE_RESIST.get(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString());
+        return r == null ? 1 : r;
+    }
+
+    // 書いてある倍率 (人数 × 硬さ × 型ごとの硬さ。なければ 1)
     public static double of(LivingEntity e) {
         double k = e.getPersistentData().getDouble(KEY);
         double r = e.getPersistentData().getDouble(RESIST);
-        return (k > 1 ? k : 1) * (r > 1 ? r : 1);
+        return (k > 1 ? k : 1) * (r > 1 ? r : 1) * typeResist(e);
     }
 
     // 自己テスト用: 人数と硬さを外して素の傷を見る

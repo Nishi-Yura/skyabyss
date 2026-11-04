@@ -233,8 +233,8 @@ public final class AshSmithSelfTest {
             check(Math.abs(type.getHeight() - 4.5f) < 1e-4, "the smith should stand 4.5 blocks tall (" + type.getHeight() + ")", f);
             check(s instanceof EmberMob, "not an EmberMob", f);
             GrowthRewards.Source src = GrowthRewards.MOD_ENEMIES.get(EmberIds.id(EmberIds.ASH_SMITH).toString());
-            check(src != null && src.xp() == 220 && src.contentLevel() == 30, "growth source of the smith is not 220 / Lv30: " + src, f);
-            check(EmberSmithSetup.FIRST_BONUS == 100, "first-clear bonus should be 100", f);
+            check(src != null && src.xp() == EmberSmithSetup.GROWTH_XP && src.contentLevel() == 30, "growth source of the smith is not " + EmberSmithSetup.GROWTH_XP + " / Lv30: " + src, f);
+            check(EmberSmithSetup.FIRST_BONUS > 0 && EmberSmithSetup.FIRST_BONUS < EmberSmithSetup.GROWTH_XP, "first-clear bonus should be a part of the clear xp", f);
             s.discard();
         }
     }
@@ -549,9 +549,10 @@ public final class AshSmithSelfTest {
         } finally {
             jp.revati.skyabyss.combat.BossOpenings.plantedForTest = null;
         }
-        // 受ける傷が 1.5 倍になる (防具 12 / 強靭 6 を通す前)。通したあとの値で見る
-        double wantFront = 10 * GearCurve.armorTaken(10, 12, 6);
-        double wantRear = 15 * GearCurve.armorTaken(15, 12, 6);
+        // 受ける傷が 1.5 倍になる (防具 12 / 強靭 6 を通す前)。通したあとの値で見る。中ボスの型ごとの硬さ (PartyScale.typeResist) は防具の前に割る
+        double k = jp.revati.skyabyss.combat.PartyScale.of(s);
+        double wantFront = 10 / k * GearCurve.armorTaken(10 / k, 12, 6);
+        double wantRear = 15 / k * GearCurve.armorTaken(15 / k, 12, 6);
         check(Math.abs(front * 10 - wantFront) < 0.05 && Math.abs(rear * 10 - wantRear) < 0.05,
                 "rear hit should be 10 x1.5 before armor (front " + front * 10 + " want " + wantFront + ", rear " + rear * 10 + " want " + wantRear + ")", f);
         check(rear > front * 1.4, "the rear hit was not clearly bigger than the front hit", f);

@@ -13,6 +13,8 @@ import net.minecraft.world.phys.Vec3;
 // 一つの組の、一つのダンジョンの写し (docs/design/55 の 2 章)。区画 slot を使い、層ごとの DungeonFloor を持つ。
 //   checkpoint  着いた一番深い層 (倒れて起きたとき・入り直したときはここの入口へ。戻り石)
 //   members     入った人。あとから同じ組の人が層の門を使うと、ここに加わって checkpoint の層へ
+//   deep        深く潜る (主を一度倒した人が、しゃがんで層の門を使う。敵と主 +40%・仕掛けが速い・主の箱が一つ上。55 の 2 章)
+//   mood        その日の坑の様子 (DungeonMood。入ったときに決まる)
 public final class DungeonRun {
     public final int id;
     public final Dungeon dungeon;
@@ -23,11 +25,15 @@ public final class DungeonRun {
     public int checkpoint;
     final DungeonFloor[] floors = new DungeonFloor[Dungeon.FLOORS.length];
     public boolean cleared;
+    public final boolean deep;
+    public DungeonMood mood;
     long clearedAt;
     long emptyTicks;
 
-    DungeonRun(MinecraftServer server, int id, Dungeon dungeon, int slot, List<UUID> members, long startedTick, int checkpoint) {
+    DungeonRun(MinecraftServer server, int id, Dungeon dungeon, int slot, List<UUID> members, long startedTick, int checkpoint, boolean deep, DungeonMood mood) {
         this.server = server;
+        this.deep = deep;
+        this.mood = mood;
         this.id = id;
         this.dungeon = dungeon;
         this.slot = slot;

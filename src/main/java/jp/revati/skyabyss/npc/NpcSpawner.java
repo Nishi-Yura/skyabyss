@@ -104,6 +104,10 @@ public final class NpcSpawner {
         if (n.getType() != NpcSetup.WHALE_CHASER.get() || !jp.revati.skyabyss.world.continent.ContinentPois.in(level)) {
             return false;
         }
+        // 章の居場所のイサナ (港・火のそば。story/IsanaPost) も残す
+        if (jp.revati.skyabyss.story.IsanaPost.isPosted(n)) {
+            return true;
+        }
         BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
         return spot != null && n.blockPosition().distSqr(spot) <= SEARCH * SEARCH;
     }

@@ -156,6 +156,11 @@ public final class NoticeClient {
                 return;
             }
         }
+        // 語り (画面下の水色の一行) は画面に出さない。知らせの記録 (NoticeLogScreen) とチャットの設定には残る
+        // (2026-11-03 の声「画面下に出る水色のメッセージ、正直いらない。ごちゃごちゃする」)
+        if (kind == Notice.Kind.NARRATE) {
+            return;
+        }
         if (kind == Notice.Kind.HINT && HINT_COUNT.merge(key, 1, Integer::sum) > HINT_MAX) {
             return;
         }
@@ -315,25 +320,44 @@ public final class NoticeClient {
         }
     }
 
-    private record CapPlan(List<FormattedCharSequence> lines, int w, int h) {
+    // all = 折り返した全部の行、per = 一度に出す行の数 (入りきらなければ頁に分ける)
+    private record CapPlan(List<FormattedCharSequence> all, int per, int w, int h) {
+        int pages() {
+            return (all.size() + per - 1) / per;
+        }
+
+        List<FormattedCharSequence> page(int i) {
+            int from = Math.min(all.size(), i * per);
+            return all.subList(from, Math.min(all.size(), from + per));
+        }
     }
 
-    // 字幕: 折り返した文 (上限 4 行。高さに収まるまで行を減らす)。帯は文の左右に 12 ずつ
-    private static CapPlan captionPlan(Font font, Component text, int guiW, int maxW, int maxH) {
+    // 字幕: 折り返した文 (上限 4 行。高さに収まるまで行を減らす)。帯は文の左右に 12 ずつ。
+    // 入りきらない行は捨てずに頁に分け、出ている間に順に送る (2026-11-04。下の札が出ている間は一行しか入らず、長い手がかりの後ろが切れていた)
+    static CapPlan captionPlan(Font font, Component text, int guiW, int maxW, int maxH) {
         int wrap = Math.min(Math.min(guiW - 40, Math.max(160, (int) (guiW * 0.6f))), maxW - 24);
         int maxLines = Mth.clamp((maxH - 9) / 11, 0, 4);
         if (wrap < 100 || maxLines < 1) {
             return null;
         }
         List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, text, wrap);
-        if (lines.size() > maxLines) {
-            lines = lines.subList(0, maxLines);
-        }
+        int per = Math.max(1, Math.min(maxLines, lines.size()));
         int w = 0;
         for (FormattedCharSequence l : lines) {
             w = Math.max(w, font.width(l));
         }
-        return new CapPlan(lines, w + 24, lines.size() * 11 + 9);
+        return new CapPlan(lines, per, w + 24, per * 11 + 9);
+    }
+
+    // 今の頁: 出ている時間 (現れてから消え始めるまで) を頁の数で等分して送る
+    static int capPage(CapPlan p, long age, long hold) {
+        int n = p.pages();
+        if (n <= 1) {
+            return 0;
+        }
+        long shown = Math.max(0, age - NoticeQueue.FADE_IN / 2);
+        long span = Math.max(1, (NoticeQueue.FADE_IN / 2 + hold) / n);
+        return (int) Math.min(n - 1, shown / span);
     }
 
     private record CenterPlan(List<FormattedCharSequence> lines, int textW, int w, int h) {
@@ -439,7 +463,8 @@ public final class NoticeClient {
         }
         int cx = r.x() + r.w() / 2;
         int top = r.y() + 5;
-        int bottom = top + p.lines.size() * 11;
+        List<FormattedCharSequence> lines = p.page(capPage(p, e.age(), e.hold()));
+        int bottom = top + p.per() * 11;
         int x0 = r.x();
         int x1 = r.right();
         // 帯は両端に向かって薄くなるように二段に重ねる
@@ -449,7 +474,7 @@ public final class NoticeClient {
         g.fill(x0 + 18, top - 5, x1 - 18, top - 4, lineColor);
         g.fill(x0 + 18, bottom + 3, x1 - 18, bottom + 4, lineColor);
         int y = top;
-        for (FormattedCharSequence l : p.lines) {
+        for (FormattedCharSequence l : lines) {
             g.drawString(font, l, cx - font.width(l) / 2, y, alphaOf(a) | 0xFFFFFF, true);
             y += 11;
         }

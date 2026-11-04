@@ -1,0 +1,37 @@
+# 2026-11-04: 巨神の見え方 (titan/TitanVisibility)。同じ場所・同じ向きで、w0 = 創造 (いつも見える)、w1 = 一章の人 (見える)、w2 = 心臓を止めた人 (見えない)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/titan_sight_rule.txt -PshotsName=titan_sight
+world titan_sight continent
+size 1600 900
+timeout 3000
+guiscale 3
+render 16
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+hud on
+# 島を渡ったことにする (渡しの場面を止めると着く。着いて 70 tick 後の到着の場面も止めてから鯨へ)
+cmd skyabyss island cross
+wait 20
+cmd skyabyss cinematic stop
+wait 120
+cmd skyabyss cinematic stop
+wait 40
+cmd skyabyss playtest whale
+wait 300
+cmd skyabyss cinematic stop
+wait 40
+cmd gamemode creative
+wait 60
+shot w0_creative
+# 一章の人 (冒険。島を渡った): 見える
+cmd gamemode adventure
+wait 60
+shot w1_chapter1
+# 岩鯨の心臓を止めた人 (冒険): 見えない (同じ場所・同じ向き)
+cmd skyabyss progress grant @s stone_whale
+wait 80
+shot w2_stopped
+cmd skyabyss progress revoke @s stone_whale

@@ -3,11 +3,35 @@
   "chapter": "titan_tide",
   "order": 46,
   "start_when": {
-    "type": "flag",
-    "flag": "ch2_ebb",
-    "npc": "skyabyss:storyteller"
+    "type": "any",
+    "of": [
+      {
+        "type": "flag",
+        "flag": "ch2_ebb",
+        "npc": "skyabyss:storyteller"
+      },
+      {
+        "type": "flag",
+        "flag": "ch2_stakes_read",
+        "npc": "skyabyss:storyteller"
+      }
+    ]
   },
   "stages": [
+    {
+      "id": "call",
+      "objectives": [
+        {
+          "id": "call",
+          "type": "condition",
+          "if": {
+            "type": "flag",
+            "flag": "ch2_ebb",
+            "npc": "skyabyss:storyteller"
+          }
+        }
+      ]
+    },
     {
       "id": "walk",
       "objectives": [
@@ -22,6 +46,6 @@
     }
   ],
   "reward": {
-    "xp": 220
+    "xp": 250
   }
 }

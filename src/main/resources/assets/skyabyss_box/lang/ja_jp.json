@@ -39,5 +39,10 @@
   "skyabyss_box.pouch.rarity": "階級の箱",
   "skyabyss_box.pouch.artifact": "金の箱",
   "skyabyss_box.pouch.hint": "町の封切り師 (都と四つの町の鍛冶屋のそば) に渡すと、ルーレットで中身が決まる。",
-  "skyabyss_pouch.category.box": "封の箱"
+  "skyabyss_pouch.category.box": "封の箱",
+  "item.skyabyss.box.hint.none": "次の中身: まだ決まっていない（開けたときに決まる）",
+  "item.skyabyss.box.hint.job_weapon": "次の中身: 今の職の武器の気配",
+  "item.skyabyss.box.hint.weapon": "次の中身: 武器の気配（ほかの職）",
+  "item.skyabyss.box.hint.armor": "次の中身: 防具の気配",
+  "item.skyabyss.box.hint.trinket": "次の中身: 装飾の気配"
 }

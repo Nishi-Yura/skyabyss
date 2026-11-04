@@ -178,6 +178,8 @@ public final class ContinentOutskirts {
         BlockPos c = jp.revati.skyabyss.opening.OpeningSites.shelter(over.getServer()).orElse(ContinentLayout.get().capital());
         int x = c.getX();
         int z = c.getZ() + 112;
+        // 読み込まれていない区画の高さは世界の底になる (奈落へ落ちる)。先に読み込む
+        over.getChunk(x >> 4, z >> 4);
         return new BlockPos(x, over.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
     }
 

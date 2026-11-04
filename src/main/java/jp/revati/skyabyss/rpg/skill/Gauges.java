@@ -326,7 +326,8 @@ public final class Gauges {
         long now = player.level().getGameTime();
         switch (s.kind) {
             case SHIELD -> {
-                if (skill == Skill.SHIELD_BASH && full(player)) {
+                // 技の木 v3: 盾殴りは盾の踏み込みの変化になったので、満ちた盾の踏み込み (どの変化でも) で放つ
+                if ((skill == Skill.SHIELD_RUSH || skill == Skill.SHIELD_BASH) && full(player)) {
                     rockSmash(player);
                     set(player, 0);
                 } else if (skill == Skill.SHIELD_RUSH || skill == Skill.ROCK_CALL || skill == Skill.SHIELD_BASH) {
@@ -347,7 +348,8 @@ public final class Gauges {
                 }
             }
             case ASH -> {
-                if (skill == Skill.SPARK_BURST && s.value > 0) {
+                // 火花散らしは炉の踏みの変化になったので、炉の踏み (どの変化でも) で放つ
+                if ((skill == Skill.FORGE_STOMP || skill == Skill.SPARK_BURST) && s.value > 0) {
                     ashBurn(player, s.value);
                     set(player, 0);
                 }
@@ -464,7 +466,8 @@ public final class Gauges {
                 }
             }
             case TRAP -> {
-                if (skill == Skill.SNARE_SHOT) {
+                // 足止めの矢は雲穿ちの変化になったので、雲穿ち (どの変化でも) を当てた敵のまわりではぜる
+                if (skill == Skill.SNARE_SHOT || skill == Skill.CLOUD_PIERCE) {
                     trapBurst(player, target);
                 }
             }

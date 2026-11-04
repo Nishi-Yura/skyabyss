@@ -801,7 +801,7 @@ public final class GuideSelfTest {
         ServerLevel level = server.overworld();
         Runnable restore = null;
         try {
-            // 表の整合: 既存 + 新しい分の上限 = 合計の上限、合計は 1 レベル分の 1.6 倍まで
+            // 表の整合: 既存 + 新しい分の上限 = 合計の上限、合計は 1 レベル分の MAX_RATIO 倍まで
             for (int n = 1; n <= 4; n++) {
                 check(f, ChapterXpBudget.EXISTING[n] + ChapterXpBudget.NEW_CAP[n] == ChapterXpBudget.TOTAL_CAP[n], "chapter " + n + ": the budget table does not add up");
                 check(f, ChapterXpBudget.TOTAL_CAP[n] <= ChapterXpBudget.LEVEL_XP[n] * ChapterXpBudget.MAX_RATIO, "chapter " + n + ": the total is above the per-level ratio");

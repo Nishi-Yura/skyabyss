@@ -71,6 +71,8 @@ public final class RaidRun {
         public long lastHarass;
         public RaidHudNet.Hud lastHud;
         public boolean hudOff;
+        // 入口の碑を読むのを待っている (RaidLore.waiting)。手がかりは一度だけ
+        public boolean readAsked;
 
         Run(RaidRoom room, RaidCtx ctx, int step, boolean mid) {
             this.room = room;
@@ -140,8 +142,7 @@ public final class RaidRun {
         int idx = 0;
         for (ServerPlayer p : TrialRoute.members(back, group)) {
             TrialRoute.move(back, p, restSpot(ctx, idx++), yaw);
-            Notice.narrate(p, "message.skyabyss.route.step" + step, name);
-            RaidLore.voice(p, d.id());
+            Notice.alert(p, "message.skyabyss.route.step" + step, name);
             RouteCard.show(p, back, group, titan, draw, step, false);
         }
         sendHud(run, false);
@@ -190,7 +191,7 @@ public final class RaidRun {
         int idx = 0;
         for (ServerPlayer p : TrialRoute.members(back, group)) {
             TrialRoute.move(back, p, restSpot(ctx, idx++), 180f);
-            Notice.narrate(p, "message.skyabyss.route.mid", name);
+            Notice.alert(p, "message.skyabyss.route.mid", name);
             RouteCard.show(p, back, group, titan, draw, 3, true);
         }
         sendHud(run, false);
@@ -266,7 +267,15 @@ public final class RaidRun {
         RaidCtx ctx = run.ctx;
         switch (run.phase) {
             case COUNTDOWN -> {
-                if (now >= run.until) {
+                if (now >= run.until && !run.mid && RaidLore.waiting(ctx.players(), ctx.roomId())) {
+                    // 戸は入口の碑をだれかが読むまで開かない
+                    if (!run.readAsked) {
+                        run.readAsked = true;
+                        for (ServerPlayer p : ctx.players()) {
+                            Notice.hint(p, "message.skyabyss.raid_lore.read_to_open");
+                        }
+                    }
+                } else if (now >= run.until) {
                     run.phase = Phase.ACTIVE;
                     run.activeSince = now;
                     run.lastHarass = now;
@@ -358,7 +367,7 @@ public final class RaidRun {
             }
             STRAY.remove(p.getUUID());
             TrialRoute.move(ctx.level(), p, restSpot(ctx, ctx.players().indexOf(p)), 180f);
-            Notice.narrate(p, "message.skyabyss.raid.rejoin");
+            Notice.hint(p, "message.skyabyss.raid.rejoin");
             sendTo(p, run.lastHud == null ? RaidHudNet.Hud.OFF : run.lastHud);
             SkyAbyss.LOGGER.info("Raid: {} was outside room {} and was carried back to its rest", p.getGameProfile().getName(), ctx.roomId());
         }
@@ -459,9 +468,6 @@ public final class RaidRun {
         }
         TrialDraw.Draw draw = TrialData.current(ctx.level(), ctx.group());
         String key = TrialRoute.keyOf(ctx.titan(), draw, run.step);
-        for (ServerPlayer p : ctx.players()) {
-            RaidLore.onCleared(p, ctx.roomId());
-        }
         Trial.Def def = TrialRoute.defOf(draw, run.step);
         if (def != null) {
             RaidRewards.onRoomCleared(ctx.level(), ctx.group(), ctx.titan(), ctx.roomId(), def.slot());
@@ -576,7 +582,10 @@ public final class RaidRun {
     private static void sendHud(Run run, boolean done) {
         RaidRoom room = run.room;
         RaidHudNet.Hud hud;
-        if (run.phase == Phase.COUNTDOWN) {
+        if (run.phase == Phase.COUNTDOWN && run.readAsked && run.ctx.cell() != null) {
+            BlockPos t = RaidLore.tabletPos(run.ctx.cell());
+            hud = new RaidHudNet.Hud(run.ctx.roomId(), "raid.skyabyss.hud.read_tablet", List.of(), 0, 0, "", 0, 0, 0, false, true, t.getX(), t.getY(), t.getZ());
+        } else if (run.phase == Phase.COUNTDOWN) {
             hud = new RaidHudNet.Hud(run.ctx.roomId(), "raid.skyabyss.hud.ready", List.of(), 0, 0, "", 0, 0, (int) Math.max(0, run.until - run.ctx.now()), false);
         } else {
             List<String> args = new ArrayList<>();

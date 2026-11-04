@@ -8,22 +8,23 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.story.Chapters;
 
-// 章ごとの経験値の予算。章の小要素は 1 章あたり「そのときの 1 レベル分の 1〜1.5 倍」までに抑え、上限を超えさせない。
+// 章ごとの小要素 (quest/ch<n>/ のクエストと湧き台の場所) の経験値の歯止め。章の経験値の配り方そのものは表 4-2 (04 の 3 章、自己テスト xp table:
+// クエスト 55%・初めての場所 20%・主 15%・狩り 10%)。ここは、小要素を足しすぎてその割合を崩さないための上限 (2026-11-04 に表 4-2 に合わせて広げた)。
 //   章 n (一〜四章)   1 レベル分 / 既存の小要素 / 新しい分の上限 / 合計の上限
-//   一章               480 / 350 / +400 / 750
-//   二章               850 / 500 / +600 / 1,100
-//   三章              1,400 / 800 / +900 / 1,700
-//   四章              2,000 / 1,450 / +1,200 / 2,650
+//   一章               480 / 420 / +450 / 870
+//   二章               850 / 575 / +700 / 1,275
+//   三章              1,400 / 1,440 / +1,000 / 2,440
+//   四章              2,000 / 2,900 / +1,600 / 4,500
 // 「新しい分」に数えるもの: quest/ch<n>/ のクエスト (既存の LEGACY を除く。繰り返す頼みは数えない) の、段階の経験値と報酬の経験値の合計、
 // と、湧き台の場所 (SiteSpawner.Def) のクリアの経験値。読み込みのとき (QuestManager) と自己テスト (`xp budget`) が、この枠を超えていないか検める。
 // 超えた章の場所の経験値は、湧き台が渡すとき 0 に切る (allowSite)。品は渡す
 public final class ChapterXpBudget {
     public static final int[] LEVEL_XP = {0, 480, 850, 1400, 2000};
-    public static final int[] EXISTING = {0, 350, 500, 800, 1450};
-    public static final int[] NEW_CAP = {0, 400, 600, 900, 1200};
-    public static final int[] TOTAL_CAP = {0, 750, 1100, 1700, 2650};
-    // 合計の上限が 1 レベル分の何倍までか (表の一章は 750 / 480)
-    public static final double MAX_RATIO = 1.6;
+    public static final int[] EXISTING = {0, 420, 575, 1440, 2900};
+    public static final int[] NEW_CAP = {0, 450, 700, 1000, 1600};
+    public static final int[] TOTAL_CAP = {0, 870, 1275, 2440, 4500};
+    // 合計の上限が 1 レベル分の何倍までか (表の四章は 4,500 / 2,000)
+    public static final double MAX_RATIO = 2.3;
 
     // 「既存の小要素」に数え済みのクエスト (新しい分に数えない)
     public static final Set<String> LEGACY = Set.of("ch1/lost_traveller", "ch2/ebb_road", "ch2/shore_signs",

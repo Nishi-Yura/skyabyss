@@ -145,6 +145,7 @@ final class TreeActions {
         float base = SkillActions.attackDamage(player) * (float) SkillRules.FANG_MULTIPLIER;
         boolean back = SkillActions.behind(target, player);
         float damage = back ? base * (float) SkillRules.FANG_BACK : base;
+        SkillActions.lastTarget = target;
         SkillActions.hit(player, target, damage, Skill.TWIN_FANG);
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillEffects.later(level, SkillRules.FANG_GAP, () -> {

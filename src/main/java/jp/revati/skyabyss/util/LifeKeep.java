@@ -18,12 +18,18 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 public final class LifeKeep {
     public static final List<String> KEYS = List.of(
             "skyabyss_rpg_kit",                       // はじめの持ち物を渡した (RpgRules)
+            "skyabyss_charge_tips",                   // 溜めの手がかりを出した数 (combat/MeleeHits)
+            "skyabyss_iron_scraps",                   // 鉄の跡で見つけた鉄くず (story/ch1/IronTrail)
+            "skyabyss_full_hits",                     // 満ちた一撃を当てた数 (LEARNED まで。combat/MeleeHits)
+            "skyabyss_break_tip",                     // 崩しゲージの手がかりを出した (combat/BreakGauge)
+            "skyabyss_pack_tip",                      // 夜の群れの手がかりを出した (RegionSpawner)
             "skyabyss_ferried",                       // はじまりの島から渡し船で都へ渡った (ContinentOutskirts)
             "skyabyss_town_tour",                     // 町めぐりの進み (TownTour)
             "skyabyss_warm_stone_given",              // 暖石を渡した (WarmStoneItem)
             "skyabyss_tide_watching_shell_given",     // 潮見の殻を渡した (TideChapter)
             "skyabyss_shrine_pair",                   // 祠の対の札を見せた (CapitalShrine)
-            "skyabyss_ch2_stakes_read",               // 二章の杭を読んだ (Ch2Ground)
+            "skyabyss_ch2_stakes_read",
+            "skyabyss_ch4_stone_echo",                // 四章の温石の台でイサナの言葉を出した (DeadForgePit)               // 二章の杭を読んだ (Ch2Ground)
             "skyabyss_ch2_wreck_seen",                // 二章の難破船を見た (Wreck)
             "skyabyss_ch2_salt_seen",                 // 塩の標を見た (SaltVault)
             "skyabyss_ch2_salt_counted",              // 塩の標を数えた (SaltVault)

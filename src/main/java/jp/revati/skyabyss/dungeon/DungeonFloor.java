@@ -52,6 +52,10 @@ public final class DungeonFloor {
     static final double TRAP_REACH = 2.2;
     static final int TRAP_WARN = 18;
     static final int TRAP_REST = 80;
+    // 深く潜る: 罠の休みが短い (落石・棘が早く戻る)
+    static final int DEEP_TRAP_REST = 50;
+    // 罠の日: 二度目の落ち (一度目のあと)
+    static final int TRAP_ECHO = 16;
     static final float TRAP_HURT = 0.16f;
     static final double DOOR_REACH = 6;
     static final double BOSS_WAKE = 18;
@@ -74,6 +78,11 @@ public final class DungeonFloor {
     final Map<String, Integer> charge = new HashMap<>();
     final Map<String, Boolean> phase = new HashMap<>();
     boolean keyTaken;
+    // 鍵の日は鍵持ちが二人 (二人とも倒すと鍵が開く)
+    int keyNeed = 1;
+    int keyKills;
+    // 群れの日: 二つに一つの印でもう一体
+    int swarmCount;
     UUID mid;
     boolean midDown;
     UUID boss;
@@ -218,7 +227,24 @@ public final class DungeonFloor {
             SkyAbyss.LOGGER.warn("[dungeon] {} unknown foe kind {} at {}", run.dungeon.id, kind, mark);
             return null;
         }
-        Mob m = create(level, id, at(mark));
+        Mob m = spawnOne(level, id, at(mark), mark, key, isMid);
+        if (m == null) {
+            return null;
+        }
+        // 鍵の日: 鍵持ちがもう一人 (少し離れて)
+        if (key && run.mood == DungeonMood.KEYS) {
+            keyNeed = 2;
+            spawnOne(level, id, at(mark).offset(2, 0, 0), mark, true, false);
+        }
+        // 群れの日: 道中の敵は二つに一つの印でもう一体 (中ボス・鍵持ちは増やさない)
+        if (!key && !isMid && run.mood == DungeonMood.SWARM && swarmCount++ % 2 == 0) {
+            spawnOne(level, id, at(mark).offset(1, 0, 1), mark, false, false);
+        }
+        return m;
+    }
+
+    Mob spawnOne(ServerLevel level, String id, BlockPos pos, String mark, boolean key, boolean isMid) {
+        Mob m = create(level, id, pos);
         if (m == null) {
             return null;
         }
@@ -244,6 +270,7 @@ public final class DungeonFloor {
             m.setCustomNameVisible(true);
         }
         PartyScale.apply(m, Math.max(1, run.members.size()));
+        Dungeons.deepen(m, run);
         foeMark.put(m.getUUID(), mark);
         return m;
     }
@@ -276,7 +303,7 @@ public final class DungeonFloor {
     // 敵が倒れた (Dungeons.onDeath から)
     void foeDied(ServerLevel level, LivingEntity e) {
         foeMark.remove(e.getUUID());
-        if (e.getTags().contains(Dungeons.KEY_TAG) && !keyTaken) {
+        if (e.getTags().contains(Dungeons.KEY_TAG) && !keyTaken && ++keyKills >= keyNeed) {
             keyTaken = true;
             for (ServerPlayer p : run.present()) {
                 Notice.gain(p, "message.skyabyss.dungeon.key");
@@ -292,7 +319,26 @@ public final class DungeonFloor {
         if (e.getUUID().equals(boss)) {
             bossDown = true;
             bossDownAt = level.getGameTime();
+            // 宝の日: 主の間 (主の立っていた所) に宝箱がもう一つ
+            if (run.mood == DungeonMood.TREASURE) {
+                treasure(level);
+            }
             Dungeons.cleared(run, level);
+        }
+    }
+
+    void treasure(ServerLevel level) {
+        BlockPos at = at("boss");
+        level.setBlock(at, Blocks.CHEST.defaultBlockState(), 3);
+        if (level.getBlockEntity(at) instanceof ChestBlockEntity chest) {
+            DungeonLoot.fill(chest, run.dungeon, 1, level.random);
+        }
+        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.03);
+        level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.4f, 1.0f);
+        for (ServerPlayer p : run.present()) {
+            if (Dungeons.real(p)) {
+                Notice.gain(p, "message.skyabyss.dungeon.mood_chest");
+            }
         }
     }
 
@@ -361,9 +407,19 @@ public final class DungeonFloor {
             if (hit == null) {
                 continue;
             }
-            trapReady.put(k, t + TRAP_REST);
+            boolean traps = run.mood == DungeonMood.TRAPS;
+            int rest = run.deep ? DEEP_TRAP_REST : TRAP_REST;
+            trapReady.put(k, t + (traps ? rest / 2 : rest));
             String kind = k.substring(k.lastIndexOf('_') + 1);
             spring(level, kind, c);
+            // 罠の日: 少し遅れてもう一度落ちる (一度目をよけた所へ)
+            if (traps) {
+                jp.revati.skyabyss.story.ch1.Tasks.later(TRAP_ECHO, () -> {
+                    if (Dungeons.RUNS.containsKey(run.id)) {
+                        spring(level, kind, c);
+                    }
+                });
+            }
         }
     }
 
@@ -414,6 +470,7 @@ public final class DungeonFloor {
                 PartyScale.apply(m, Math.max(1, run.members.size()));
                 // 主の硬さ (47 の 2.6): 目安 Lv が高いほど人の傷を割る
                 PartyScale.resist(m, 1.2 + (run.dungeon.level - 10) * 0.035);
+                Dungeons.deepen(m, run);
                 if (m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss b) {
                     List<Vec3> holes = new ArrayList<>();
                     for (String k : terrain.marksStarting("burrow_")) {

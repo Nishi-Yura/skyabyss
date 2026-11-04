@@ -92,11 +92,12 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final int RW = 124;
     static final int LIST_TOP = 31;
     static final int LIST_BOTTOM = 182;
+    // 行は 13 の段 (docs/design/56。紙の本の形はそのまま): 見出し 13、品 26 (名前と値の 2 行)、値 13
     static final int H_HEADER = 13;
-    static final int H_ITEM = 19;
-    static final int H_VALUE = 11;
+    static final int H_ITEM = 26;
+    static final int H_VALUE = 13;
     static final int BODY_TOP = 33;
-    static final int LINE_H = 10;
+    static final int LINE_H = 13;
     static final int GAP_H = 3;
     static final int BUTTON_Y = 166;
     // 1 秒ごとに最新を頼む
@@ -561,31 +562,31 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         int valueColor = isChanged ? AMBER : markColor(r.mark());
         if (r.kind() == Kind.ITEM) {
             if (!r.icon().isEmpty()) {
-                g.renderItem(r.icon(), x, y + 1);
-                if (mouseX >= x && mouseX < x + 16 && mouseY >= y + 1 && mouseY < y + 17 && inside) {
+                g.renderItem(r.icon(), x, y + 5);
+                if (mouseX >= x && mouseX < x + 16 && mouseY >= y + 5 && mouseY < y + 21 && inside) {
                     hover = new ItemHover(r.icon());
                 }
             } else {
                 // 正体を伏せた品
-                g.drawString(font, "？", x + 4, y + 5, FADED, false);
+                g.drawString(font, "？", x + 4, y + 9, FADED, false);
             }
             int tx = x + 19;
             int room = LW - 19 - 12;
-            g.drawString(font, ellipsize(r.label(), room), tx, y + 1, INK, false);
-            g.drawString(font, ellipsize(r.value(), room), tx, y + 10, valueColor, false);
+            g.drawString(font, ellipsize(r.label(), room), tx, y + 3, INK, false);
+            g.drawString(font, ellipsize(r.value(), room), tx, y + 16, valueColor, false);
             Sprite m = markSprite(r.mark());
             if (m != null) {
-                m.draw(g, x + LW - 11, y + 5);
+                m.draw(g, x + LW - 11, y + 9);
             }
         } else {
             int bar = r.bar() >= 0 ? 1 : 0;
             FormattedCharSequence value = ellipsize(r.value(), LW / 2);
             int vw = font.width(value);
-            g.drawString(font, ellipsize(r.label(), LW - vw - 8), x, y + 1, INK, false);
-            g.drawString(font, value, x + LW - 4 - vw, y + 1, valueColor, false);
+            g.drawString(font, ellipsize(r.label(), LW - vw - 8), x, y + 2, INK, false);
+            g.drawString(font, value, x + LW - 4 - vw, y + 2, valueColor, false);
             if (bar > 0) {
-                g.fill(x, y + 10, x + LW - 4, y + 11, 0x30000000);
-                g.fill(x, y + 10, x + Math.round((LW - 4) * Mth.clamp(r.bar(), 0f, 1f)), y + 11, TEAL);
+                g.fill(x, y + 11, x + LW - 4, y + 12, 0x30000000);
+                g.fill(x, y + 11, x + Math.round((LW - 4) * Mth.clamp(r.bar(), 0f, 1f)), y + 12, TEAL);
             }
         }
         return hover;
@@ -622,7 +623,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         int y = bt - bodyScroll;
         for (BodyLine l : body) {
             if (y + l.height() > bt && y < bb) {
-                g.drawString(font, l.text(), x, y, l.color(), false);
+                g.drawString(font, l.text(), x, y + (l.height() >= LINE_H ? 2 : 0), l.color(), false);
             }
             y += l.height();
         }

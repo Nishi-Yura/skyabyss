@@ -93,6 +93,9 @@ public final class FinaleSelfTest {
             if (p != null) {
                 p.discard();
             }
+            if (cloud != null) {
+                release(cloud);
+            }
         }
         report(f);
     }
@@ -408,6 +411,33 @@ public final class FinaleSelfTest {
         Quests.forgetAll(p);
     }
 
+    // 段「cloudsea (load)」: 巡礼者の座の主の間 (と手の立つ所) のチャンクを、段の前の tick から強く読み込む。
+    // 読み込まれていない (生き物の区画が見えない) チャンクに立てた部位は、探しても見えない。チャンクの読み込みは同じ tick のうちには
+    // 生き物の区画に届かないので、前の tick で読む (全部の段を続けて流すと、手の立つ東西のチャンクが落ちていて「二つの手が上がらない」で落ちた。2026-11-03)
+    static final List<net.minecraft.world.level.ChunkPos> HELD = new ArrayList<>();
+
+    public static void load(MinecraftServer server) {
+        ServerLevel cloud = server.getLevel(FinaleWorld.LEVEL);
+        if (cloud == null) {
+            return;
+        }
+        net.minecraft.world.phys.AABB b = SeatArena.box().inflate(12);
+        for (int cx = ((int) Math.floor(b.minX)) >> 4; cx <= ((int) Math.floor(b.maxX)) >> 4; cx++) {
+            for (int cz = ((int) Math.floor(b.minZ)) >> 4; cz <= ((int) Math.floor(b.maxZ)) >> 4; cz++) {
+                if (cloud.setChunkForced(cx, cz, true)) {
+                    HELD.add(new net.minecraft.world.level.ChunkPos(cx, cz));
+                }
+            }
+        }
+    }
+
+    static void release(ServerLevel cloud) {
+        for (net.minecraft.world.level.ChunkPos c : HELD) {
+            cloud.setChunkForced(c.x, c.z, false);
+        }
+        HELD.clear();
+    }
+
     // 巡礼者の座 (50 の 4.3): 光の橋・関所 / 鐘雲の輪と鐘 / 三形態の部位 / 第 3 形態の四人 (盾の円) / 片付け
     static void seat(ServerLevel cloud, FakePlayer p, List<String> f) {
         check(f, FinaleWorld.version(cloud.getServer()) >= 6, "the seat was not poured (version " + FinaleWorld.version(cloud.getServer()) + ")");
@@ -457,7 +487,7 @@ public final class FinaleSelfTest {
         PilgrimSeat.gate(p);
         check(f, p.blockPosition().closerThan(PromiseIsle.mark("arena_entry"), 2), "the light bridge let someone through before the pilgrim's plume");
         check(f, !PilgrimSeat.mayChallenge(p), "the seat could be touched without the quest");
-        // 三形態の部位
+        // 三形態の部位 (主の間のチャンクは、前の tick の段「cloudsea (load)」で強く読み込んである)
         SeatArena.toForm(cloud, 1);
         check(f, SeatArena.parts(cloud).stream().filter(x -> x instanceof jp.revati.skyabyss.story.finale.mob.PilgrimHand).count() == 2, "the pilgrim's two hands did not rise");
         SeatArena.toForm(cloud, 2);

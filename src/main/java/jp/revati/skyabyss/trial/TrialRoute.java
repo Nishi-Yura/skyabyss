@@ -184,6 +184,10 @@ public final class TrialRoute {
 
     // 順路を終える (心臓を止めた・あきらめ・背を出た・グループのリセット)。記録とメモリの待ちを消す
     public static void finish(ServerLevel back, UUID group) {
+        // 挑戦の加護は順路が終わると消える (RouteBoons)
+        for (ServerPlayer m : members(back, group)) {
+            RouteBoons.clear(m);
+        }
         BackGroupData.Record r = BackGroupData.get(back).peek(group);
         if (r != null) {
             TrialSlot.release(back, r);
@@ -258,9 +262,6 @@ public final class TrialRoute {
         };
     }
 
-    // 岩鯨のレイドの部屋 1〜3 を越えたときに記す碑文 (一章のメインの段 inscriptions の三つ)
-    public static final List<String> WHALE_ROOM_INSCRIPTIONS = List.of("chapter1/inscription_west", "chapter1/inscription_east", "chapter1/inscription_below");
-
     // 石が鳴った (TrialSteles.onRung から。原型の石も新作の石も)。今の段の試練なら、次の段を記し、CARRY_DELAY のあとに運ぶ
     public static void onCleared(ServerLevel back, UUID group, String titanName, String key, @Nullable ServerPlayer by) {
         onCleared(back, group, titanName, key, by, false);
@@ -291,13 +292,6 @@ public final class TrialRoute {
             List<String> signals = jp.revati.skyabyss.titan.group.TrialSteles.signalsOf(titan);
             String signal = raid && step >= 1 && step <= signals.size() ? signals.get(step - 1) : null;
             jp.revati.skyabyss.rpg.GrowthRewards.onRouteTrialCleared(back, titan, members(back, group), signal);
-            if (raid && Titans.STONE_WHALE.equals(titan) && step >= 1 && step <= WHALE_ROOM_INSCRIPTIONS.size()) {
-                // 碑文は古い試練の翼にあり、レイドの順路では通らない。部屋を越えたら、その部屋の碑文を記す
-                // (入口の間に碑文を置いて読ませる形でも同じ id。先に読んでいれば何も起きない。P1-1)
-                for (ServerPlayer m : members(back, group)) {
-                    jp.revati.skyabyss.lore.Lore.unlock(m, WHALE_ROOM_INSCRIPTIONS.get(step - 1), true);
-                }
-            }
         }
         boolean mid = step == 3 && TrialMidBoss.needed(titan, draw);
         int next = mid ? 3 : step + 1;
@@ -311,6 +305,10 @@ public final class TrialRoute {
         Component what = mid ? TrialMidBoss.name(titan) : next >= LAST_STEP ? Component.empty() : trialName(defOf(draw, next));
         for (ServerPlayer p : members(back, group)) {
             Notice.bar(p, ModText.progress(mid ? "message.skyabyss.route.next_mid" : next >= LAST_STEP ? "message.skyabyss.route.next_heart" : "message.skyabyss.route.next", what));
+            // 歩・智・闘を越えるたびに、一人ずつ加護を一つ選ぶ (RouteBoons)
+            if (step <= 3) {
+                RouteBoons.offer(p);
+            }
         }
         SkyAbyss.LOGGER.info("Route of the {}: group {} cleared step {} ({}), next {}{}", titan, group, step, key, next, mid ? " (mid-boss)" : "");
     }
@@ -449,7 +447,7 @@ public final class TrialRoute {
         for (ServerPlayer p : members(back, group)) {
             move(back, p, at, yaw);
             n++;
-            Notice.narrate(p, "message.skyabyss.route.heart", Component.empty());
+            Notice.alert(p, "message.skyabyss.route.heart", Component.empty());
             RouteCard.show(p, back, group, titan, draw, LAST_STEP, false);
         }
         back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
@@ -814,7 +812,7 @@ public final class TrialRoute {
         boolean replay = !FirstRun.isFirstRun(back, group);
         end(back, group);
         for (ServerPlayer m : all) {
-            Notice.narrate(m, "message.skyabyss.route.abandoned");
+            Notice.hint(m, "message.skyabyss.route.abandoned");
             try {
                 if (!replay || !jp.revati.skyabyss.titan.shrine.TitanShrine.sendTo(m, titan)) {
                     Titans.sendDown(m, titan);
@@ -856,6 +854,8 @@ public final class TrialRoute {
         long t = r.has(START) ? Math.max(0, back.getGameTime() - r.getLong(START)) : 0;
         TrialCodex codex = TrialCodex.get(back.getServer());
         for (UUID id : party(r)) {
+            // 順路が終わったので、挑戦の加護は消える (RouteBoons)
+            RouteBoons.clear(back.getServer(), id);
             ServerPlayer p = back.getServer().getPlayerList().getPlayer(id);
             boolean best = codex.addRoute(id, titan, t);
             if (p != null) {

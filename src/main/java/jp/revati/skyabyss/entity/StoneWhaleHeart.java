@@ -116,7 +116,7 @@ public class StoneWhaleHeart extends HeartBoss {
     // 挑む人数による強さ。受ける傷をこの値で割る (1 人で 1.0、1 人増えるごとに +0.6)。
     // 体力の上限 (1024) を超えないよう、体力そのものではなく受ける傷で強くする (実質の体力は 450 × この値)
     // 基本の硬さ (最大体力 HeartBalance.MAX_HP に掛けた値が実質の体力。02 の 5.6)
-    public static final float BASE_RESIST = 1.03f;   // 2026-10-22 の二人の試遊で体力が多いと感じた: 1.28 → 1.03 (戦いの長さを帯 3〜5 分の短い側へ)
+    public static final float BASE_RESIST = 0.91f;   // 2026-11-04: 崩しゲージと技の木の上乗せ (HeartBalance.treeBonus) を入れて、一人 150〜180 秒 (表 3-3)
     private float toughness = BASE_RESIST;
     // 憤怒に入ったか (体力 HeartBalance.ENRAGE_AT 未満)。咆哮のあとに立つ。段階 (模型) は 3 のまま
     private boolean enraged;
@@ -1056,7 +1056,9 @@ public class StoneWhaleHeart extends HeartBoss {
         }
         float before = getHealth();
         float domainTaken = domain != null ? domain.takenMultiplier() : 1f;
-        boolean result = super.hurt(source, (weakTicks > 0 ? amount * 1.5f : amount) * domainTaken / toughness);
+        // 硬さが 1 より小さいと、とどめの傷 (Float.MAX_VALUE) が無限大になって倒れない。有限に抑える
+        float scaled = (weakTicks > 0 ? amount * 1.5f : amount) * domainTaken / toughness;
+        boolean result = super.hurt(source, Float.isFinite(scaled) ? scaled : Float.MAX_VALUE);
         if (domain != null && level() instanceof ServerLevel server) {
             domain.damaged(server, before - getHealth());
         }

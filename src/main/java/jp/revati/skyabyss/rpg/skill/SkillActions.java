@@ -69,6 +69,18 @@ public final class SkillActions {
     static double cooldownScale = 1;
     // 見た目の合図に載せる当たりの点 (技が決めたら置く。SkillManager が合図を送るときに取り出して消す)
     static Vec3 fxTarget;
+    // 見た目の合図に載せる技 (変化が中身の技で動いたとき。null なら使った技)
+    static Skill fxSkill;
+    // 直前に一体を狙った技の的 (二連牙・呪いの印が置く。TreeVariants が続きの変化に使う)
+    static LivingEntity lastTarget;
+
+    static LivingEntity lastHit(ServerPlayer player) {
+        return lastTarget != null && lastTarget.isAlive() && lastTarget.level() == player.level() ? lastTarget : null;
+    }
+
+    static LivingEntity lastHitOrAimed(ServerPlayer player) {
+        return lastHit(player);
+    }
 
     private record TrackedArrow(AbstractArrow arrow, int[] age, int lifetime) {
     }
@@ -78,14 +90,19 @@ public final class SkillActions {
         final Vec3 center;
         final UUID caster;
         final double damage;
+        // 半径と降る回数 (狭い雨・長雨の変化で変わる)
+        final double radius;
+        final int maxPulses;
         int ticks;
         int pulses;
 
-        Rain(ServerLevel level, Vec3 center, UUID caster, double damage) {
+        Rain(ServerLevel level, Vec3 center, UUID caster, double damage, double radius, int maxPulses) {
             this.level = level;
             this.center = center;
             this.caster = caster;
             this.damage = damage;
+            this.radius = radius;
+            this.maxPulses = maxPulses;
         }
     }
 
@@ -107,8 +124,14 @@ public final class SkillActions {
             return ExtActions.mutated(player, mutation, rank);
         }
         Vec3 from = player.position();
-        String failure = base(player, skill, rank);
+        // 技の木 v3 の変化 (元の技の代わりに動くもの)。PASS なら元の技
+        String failure = TreeVariants.before(player, skill, rank);
+        if (failure == TreeVariants.PASS) {
+            failure = base(player, skill, rank);
+        }
         if (failure == null) {
+            // 元の技に続く変化 (霧隠れ・盾殴り・置き矢・熾す灯・星の残り・二度の転移)
+            TreeVariants.after(player, skill, rank, from);
             // 伝説の書き換え (巨神の色の上乗せ。rpg/skill/LegendRewrites)
             LegendRewrites.after(player, skill, rank, from);
             // 秘伝 (枠に付けた秘伝の上乗せ。rpg/skill/SecretArts。docs/design/54 の 3.2.1)
@@ -944,10 +967,23 @@ public final class SkillActions {
                 }
             }
         }
+        // 変化: 深い焼き (続く時間 ×2・炎の傷 ×0.7)、分け火 (自分と見ている仲間の両方に・続く時間 ×0.5)
+        int tr = rune(player, Skill.TEMPER);
+        int ticks = SkillRules.TEMPER_TICKS;
+        double mult = SkillRules.temperMultiplier(rank);
+        if (tr == 1) {
+            ticks *= 2;
+            mult *= 0.7;
+        } else if (tr == 2) {
+            ticks /= 2;
+            if (!targets.contains(player)) {
+                targets.add(player);
+            }
+        }
         for (ServerPlayer t : targets) {
             SkillData d = SkillManager.get(t);
-            d.temperUntil = now + SkillRules.TEMPER_TICKS;
-            d.temperMult = SkillRules.temperMultiplier(rank);
+            d.temperUntil = now + ticks;
+            d.temperMult = mult;
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_RIPOSTE.get(), 0.9f, 0.6f);
@@ -1085,10 +1121,8 @@ public final class SkillActions {
         ServerLevel level = player.serverLevel();
         int rune = rune(player, Skill.CLOUD_PIERCE);
         int pierce = SkillRules.piercePierce(rank) + (WeaponType.has(player, WeaponType.RANGED) ? 1 : 0) + Gauges.pierceBonus(player);
-        // 側の目の弓の欠点: 雲穿ちが貫かない
-        if (jp.revati.skyabyss.item.mythic.MythicAbilities.noPierce(player)) {
-            pierce = 0;
-        }
+        // 側の目の弓の欠点: 雲穿ちが貫かない (目覚めの段 2 からは貫く数が半分)
+        pierce = jp.revati.skyabyss.item.mythic.MythicAbilities.pierceLimit(player, pierce);
         double damageScale = SkillEffects.damagePower(player, Skill.CLOUD_PIERCE);
         float speed = SkillRules.PIERCE_SPEED;
         if (rune == 1) {
@@ -1144,7 +1178,9 @@ public final class SkillActions {
         boolean large = isLarge(victim);
         float amount = attackDamage(owner) * (float) (large ? SkillRules.TRAP_LARGE_MULTIPLIER : SkillRules.trapMultiplier(rank));
         if (!large) {
-            SkillEffects.bind(victim, SkillRules.trapBindTicks(rank));
+            // 大罠の変化: 縛る時間 ×1.5
+            boolean great = SkillManager.runeOf(owner, Skill.BONE_TRAP) == 2;
+            SkillEffects.bind(victim, (int) Math.round(SkillRules.trapBindTicks(rank) * (great ? TreeVariants.GREAT_TRAP_BIND : 1.0)));
         }
         hit(owner, victim, amount, Skill.BONE_TRAP);
         level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 0.8f, 0.6f);
@@ -1176,7 +1212,14 @@ public final class SkillActions {
         }
         int agility = Growth.get(player).stat(GrowthRules.Stat.AGILITY);
         double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility));
-        RAINS.add(new Rain(level, center, player.getUUID(), damage));
+        // 変化: 狭い雨 (半径 ×0.5・降る回数 ×1.5)、長雨 (降る回数 ×2・一度の傷 ×0.5)
+        int rr = rune(player, Skill.SKY_RAIN);
+        double radius = rr == 1 ? SkillRules.RAIN_RADIUS * 0.5 : SkillRules.RAIN_RADIUS;
+        int pulses = rr == 1 ? (int) Math.round(SkillRules.RAIN_PULSES * 1.5) : rr == 2 ? SkillRules.RAIN_PULSES * 2 : SkillRules.RAIN_PULSES;
+        if (rr == 2) {
+            damage *= 0.5;
+        }
+        RAINS.add(new Rain(level, center, player.getUUID(), damage, radius, pulses));
         fxTarget = center;
         player.swing(InteractionHand.MAIN_HAND, true);
         level.playSound(null, center.x, center.y, center.z, Skills.SOUND_RAIN.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
@@ -1222,18 +1265,18 @@ public final class SkillActions {
             r.pulses++;
             ServerPlayer caster = server.getPlayerList().getPlayer(r.caster);
             if (caster != null && caster.level() == r.level && caster.isAlive()) {
-                AABB box = new AABB(r.center, r.center).inflate(SkillRules.RAIN_RADIUS, 1, SkillRules.RAIN_RADIUS).expandTowards(0, 4, 0);
+                AABB box = new AABB(r.center, r.center).inflate(r.radius, 1, r.radius).expandTowards(0, 4, 0);
                 for (LivingEntity e : r.level.getEntitiesOfClass(LivingEntity.class, box, e -> isFoe(caster, e))) {
                     double dx = e.getX() - r.center.x;
                     double dz = e.getZ() - r.center.z;
-                    if (dx * dx + dz * dz <= SkillRules.RAIN_RADIUS * SkillRules.RAIN_RADIUS + e.getBbWidth()) {
+                    if (dx * dx + dz * dz <= r.radius * r.radius + e.getBbWidth()) {
                         if (hit(caster, e, (float) r.damage, Skill.SKY_RAIN)) {
                             r.level.sendParticles(Skills.RUNE_SPARK.get(), e.getX(), e.getY() + e.getBbHeight() * 0.7, e.getZ(), 1, 0.2, 0.2, 0.2, 0.05);
                         }
                     }
                 }
             }
-            if (r.pulses >= SkillRules.RAIN_PULSES || caster == null) {
+            if (r.pulses >= r.maxPulses || caster == null) {
                 it.remove();
             }
         }

@@ -36,12 +36,26 @@ public final class SiteNetwork {
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer p) {
-            PacketDistributor.sendToPlayer(p, payload(p.server));
+            PacketDistributor.sendToPlayer(p, payload(p.server, p));
         }
     }
 
+    // 人ごとに送る (二章・三章のあいだ、話す相手の鯨追いの目印は港・火のそばを指す。story/IsanaPost)
     public static void broadcast(MinecraftServer server) {
-        PacketDistributor.sendToAllPlayers(payload(server));
+        for (net.minecraft.server.level.ServerPlayer p : jp.revati.skyabyss.util.Players.snapshot(server.getPlayerList().getPlayers())) {
+            PacketDistributor.sendToPlayer(p, payload(server, p));
+        }
+    }
+
+    public static SiteTargetsPayload payload(MinecraftServer server, net.minecraft.server.level.ServerPlayer player) {
+        SiteTargetsPayload base = payload(server);
+        BlockPos harbor = jp.revati.skyabyss.story.IsanaPost.target(server, player);
+        if (harbor == null) {
+            return base;
+        }
+        Map<String, BlockPos> m = new LinkedHashMap<>(base.sites());
+        m.put(SiteTargets.NPC_PREFIX + "whale_chaser", harbor);
+        return new SiteTargetsPayload(m);
     }
 
     public static SiteTargetsPayload payload(MinecraftServer server) {
@@ -144,7 +158,7 @@ public final class SiteNetwork {
         SiteTargetsPayload p = payload(server);
         if (moved(lastSent, p.sites())) {
             lastSent = Map.copyOf(p.sites());
-            PacketDistributor.sendToAllPlayers(p);
+            broadcast(server);
         }
     }
 

@@ -21,6 +21,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 成長の記録を読み書きする入口。ほかの担当 (報酬、クエスト、スキル) もここを通す。
 // 書き換えたら sync で持ち主へ送り、ステータスが変わったら修飾子を付け直す
+@net.neoforged.fml.common.EventBusSubscriber(modid = jp.revati.skyabyss.SkyAbyss.MODID)
 public final class Growth {
     // 修飾子の ID。バニラの値は置き換えず、この ID の分だけ上乗せする
     public static final ResourceLocation MOD_STRENGTH = id("growth/strength_melee");
@@ -58,6 +59,8 @@ public final class Growth {
         amount = jp.revati.skyabyss.rebirth.Rebirth.scaleXp(player, amount);
         // 物語の進みで決まるレベルの上限 (10 の 5 章)
         int cap = jp.revati.skyabyss.progress.Progression.levelCap(player);
+        // 上限が上がっていれば、貯めていた分を先に入れる
+        releaseBank(player);
         // Lv 50 (上限) のあとの経験値は、いまの職の熟練へ (rpg/JobMastery)
         if (data.level >= GrowthRules.MAX_LEVEL) {
             JobMastery.add(player, amount);
@@ -82,8 +85,10 @@ public final class Growth {
         return addXpRaw(data, amount, GrowthRules.MAX_LEVEL);
     }
 
-    // cap: 物語の進みで決まるレベルの上限。上限のレベルでは、バーが満ちる 1 手前まで貯まり、あふれた分は捨てる
-    // (物語が進んで上限が上がれば、次の経験値ですぐ上がる)。50 では 0 のまま (バーは満ちたまま)
+    // cap: 物語の進みで決まるレベルの上限。上限のレベルでは、バーが満ちる 1 手前まで貯まり、あふれた分は貯めておく (banked。上限から BANK_LEVELS レベル分まで)。
+    // 物語が進んで上限が上がれば、貯めた分が入る (releaseBank)。50 では 0 のまま (バーは満ちたまま)
+    public static final int BANK_LEVELS = 6;
+
     public static int addXpRaw(GrowthData data, long amount, int cap) {
         int before = data.level;
         int limit = Math.min(cap, GrowthRules.MAX_LEVEL);
@@ -95,9 +100,50 @@ public final class Growth {
         if (data.level >= GrowthRules.MAX_LEVEL) {
             data.xp = 0;
         } else {
-            data.xp = (int) Math.min(xp, data.xpNeed() - 1L);
+            long room = data.xpNeed() - 1L;
+            if (xp > room && data.level >= limit) {
+                data.banked = Math.min(bankMax(data.level), data.banked + (xp - room));
+            }
+            data.xp = (int) Math.min(xp, room);
         }
         return data.level - before;
+    }
+
+    // 貯めておける経験値の上限 (上限のレベルから BANK_LEVELS レベル分)
+    public static long bankMax(int level) {
+        long sum = 0;
+        for (int lv = level; lv < Math.min(GrowthRules.MAX_LEVEL, level + BANK_LEVELS); lv++) {
+            sum += GrowthRules.xpToNext(lv);
+        }
+        return sum;
+    }
+
+    // 上限が上がっていれば、貯めていた経験値を入れる。入れたら true
+    public static boolean releaseBank(ServerPlayer player) {
+        GrowthData data = get(player);
+        int cap = jp.revati.skyabyss.progress.Progression.levelCap(player);
+        if (data.banked <= 0 || data.level >= Math.min(cap, GrowthRules.MAX_LEVEL)) {
+            return false;
+        }
+        long amount = data.banked;
+        data.banked = 0;
+        int gained = addXpRaw(data, amount, cap);
+        sync(player);
+        if (gained > 0) {
+            applyModifiers(player);
+            celebrate(player, data, gained);
+        }
+        jp.revati.skyabyss.notice.Notice.gain(player, "message.skyabyss.growth.bank_released", amount);
+        return true;
+    }
+
+    // 上限が上がったら (心臓を止めた・番人を倒した) すぐ入るよう、ときどき見る
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer p && p.tickCount % 40 == 7 && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)
+                && get(p).banked > 0) {
+            releaseBank(p);
+        }
     }
 
     // レベルを直接決める (管理者・テスト用)。使いすぎた力は戻す
@@ -135,7 +181,7 @@ public final class Growth {
         int skill = jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level) - jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level - gained);
         Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level, skill);
         if (data.level >= GrowthRules.MAX_LEVEL) {
-            Notice.narrate(player, "message.skyabyss.growth.max_level");
+            Notice.hint(player, "message.skyabyss.growth.max_level");
         }
     }
 
@@ -240,7 +286,7 @@ public final class Growth {
         if (added > 0) {
             sync(player);
             player.playNotifySound(Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
-            Notice.narrate(player, "message.skyabyss.growth.fragment_gained",
+            Notice.gain(player, "message.skyabyss.growth.fragment_gained",
                     Component.translatable(MemoryFragments.nameKey(id.toString())), data.fragmentCount(), data.fragmentCapacity);
         }
         return added;

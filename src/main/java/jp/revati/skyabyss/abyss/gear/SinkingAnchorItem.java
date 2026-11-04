@@ -40,7 +40,7 @@ public class SinkingAnchorItem extends AbyssGearWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack)) {
+        if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             int hits = attacker.getPersistentData().getInt(HITS) + 1;
             if (hits >= every(stack)) {
                 hits = 0;

@@ -1,0 +1,59 @@
+# 2026-11-05 の削る・まとめる頁: クエストログの「今日・今週」・記録の画面 (7 つの頁)・大鐘楼の門の再戦の暦
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/cuts_screens.txt -PshotsName=cuts_screens
+world circuit_check continent
+size 1280 720
+timeout 2400
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd skyabyss level set @p 50
+cmd time set noon
+cmd weather clear
+cmd effect give @s resistance 900 4 true
+hud on
+cmd skyabyss dev opening build
+wait 600
+waitchunks 300
+
+# 1. クエストログの「今日・今週」(一覧のいちばん上の行を押す)
+open questlog
+wait 20
+click 95 52
+wait 40
+shot cs_1_clock_page
+close
+wait 10
+
+# 2. 記録の画面: 踏破・塔・深み・釣り・早駆け・転生・空見
+cmd skyabyss facility records hub 0
+wait 30
+shot cs_2_records_clear
+cmd skyabyss facility records hub 3
+wait 30
+shot cs_3_records_fishing
+cmd skyabyss facility records hub 4
+wait 30
+shot cs_4_records_sprint
+cmd skyabyss facility records hub 5
+wait 30
+shot cs_5_records_rebirth
+close
+wait 10
+
+# 3. 大鐘楼の門の再戦の暦 (月の核を止めた人)
+cmd skyabyss quest start @s main_moon_core
+cmd skyabyss quest next @s main_moon_core
+cmd skyabyss quest next @s main_moon_core
+cmd skyabyss quest next @s main_moon_core
+cmd skyabyss quest next @s main_moon_core
+cmd skyabyss cinematic stop
+close
+cmd skyabyss moonworld gate
+waitchunks 200
+wait 60
+chat clear
+cmd skyabyss_gate trial
+wait 20
+shot cs_6_rematch_calendar

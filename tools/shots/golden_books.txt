@@ -1,0 +1,33 @@
+# 2026-11-04: 黄金比の板のクエストログ・狩人の手帳と、行 13 の伝承の書 (docs/design/56)。1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_books.txt -PshotsName=golden_books
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss quest start @s main_song
+cmd skyabyss quest start @s "ch1/trail_iron"
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+open quests
+wait 15
+shot quests
+close
+open hunt
+wait 20
+shot hunt
+close
+open lore
+wait 10
+shot lore
+close

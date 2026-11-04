@@ -253,7 +253,7 @@ public final class TownQuests {
         Coins.give(player, WELL_COINS);
         Quests.give(player, new ItemStack(jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get()));
         Lore.unlock(player, WELL_LORE, true);
-        Notice.narrate(player, "message.skyabyss.town.well.found");
+        Notice.hint(player, "message.skyabyss.town.well.found");
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.8f, 0.7f);
         SkyAbyss.LOGGER.info("[town] {} took the old well treasure", player.getGameProfile().getName());
         return true;

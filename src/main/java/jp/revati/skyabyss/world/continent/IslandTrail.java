@@ -200,8 +200,6 @@ public final class IslandTrail {
             double camp = Math.hypot(p.getX() - lay.start().getX(), p.getZ() - lay.start().getZ());
             if (camp < CAMP_NEAR && openingOver(p)) {
                 jp.revati.skyabyss.rpg.skill.JobChoice.prompt(p);
-            } else if (camp > CAMP_NEAR + 4) {
-                jp.revati.skyabyss.rpg.skill.JobChoice.away(p);
             }
             return;
         }
@@ -212,6 +210,8 @@ public final class IslandTrail {
             }
             if (near) {
                 mark(p, PRINTS);
+                // 次は峠の野盗 (島の最初の戦い): 溜めの輪を先に教える (戦いの最中は手がかりの字幕が出ないので、ここで)
+                Notice.hint(p, "message.skyabyss.island.charge_hint");
             }
         }
         // 目的は左上の順にしか進まない (2026-10-27 の声「左上のクエスト通りに行かないと先に進めない」): 野盗は足跡を見てから立ち、数える

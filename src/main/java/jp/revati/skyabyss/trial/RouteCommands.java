@@ -43,6 +43,11 @@ public final class RouteCommands {
                 .then(Commands.literal("clear").requires(s -> s.hasPermission(2)).executes(RouteCommands::clear))
                 // 開発・撮影 (R6 の通しの撮影): 今の段を越えたことにする (本物と同じ 4 秒のあと次の段へ運ばれる)
                 .then(Commands.literal("pass").requires(s -> s.hasPermission(2)).executes(RouteCommands::pass))
+                // 開発・撮影: 挑戦の加護を見せる (試練を越えたときと同じ二択)
+                .then(Commands.literal("boon").requires(s -> s.hasPermission(2)).executes(ctx -> {
+                    RouteBoons.offer(ctx.getSource().getPlayerOrException());
+                    return 1;
+                }))
                 // 開発・撮影: 初回の手引き (十字の下の操作の案内) を済ませる (序章を飛ばした撮影で残るため)
                 .then(Commands.literal("tidyhud").requires(s -> s.hasPermission(2)).executes(ctx -> {
                     ServerPlayer p = ctx.getSource().getPlayerOrException();

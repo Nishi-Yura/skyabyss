@@ -1,0 +1,58 @@
+# 2026-11-03 の声の確かめ: 場面の黒帯と字幕の暗がり (開幕)、場面の間に人を描かない・カメラが地形に埋まらない、
+# はじまりの島の地図の水色のピン
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/island_pin_check.txt -PshotsName=<まだ使っていない名前>
+world island_pin_check continent
+size 1600 900
+timeout 3000
+render 10
+guiscale 3
+hud off
+wait 60
+shot p00_open
+wait 200
+shot p01_open_lid
+wait 120
+shot p02_open_rise
+wait 100
+shot p03_open_down
+wait 120
+shot p04_open_wide
+wait 100
+shot p05_open_wide2
+wait 100
+shot p06_open_return
+wait 120
+shot p07_control
+cmd gamemode creative
+cmd time set 3000
+cmd weather clear
+cmd spreadplayers -1930 1820 0 1 false @s
+waitchunks 300
+wait 100
+hud on
+shot p08_camp
+open travel_map
+wait 40
+shot p09_map_camp
+close
+cmd spreadplayers -1806 1700 0 1 false @s
+waitchunks 300
+wait 60
+open travel_map
+wait 40
+shot p10_map_prints
+close
+hud off
+# 起伏のある島で、本人の近くから離れる場面 (町に初めて着く場面の道筋) を流す
+cmd skyabyss cinematic play town_first_whale
+wait 20
+shot p11_scene_a
+wait 40
+shot p12_scene_b
+wait 60
+shot p13_scene_c
+wait 60
+shot p14_scene_d
+wait 60
+shot p15_scene_e
+echo done

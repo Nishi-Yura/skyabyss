@@ -177,6 +177,45 @@ public final class SkillEvents {
         if (mana > 0) {
             SkillManager.gainMana(player, mana);
         }
+        // 熾火の肺 (cd_kill): 倒すたびに、発動スキルの再使用までが縮む (群れの中で技を連ねる)
+        int ticks = (int) Math.round(jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "cd_kill") * 20);
+        if (ticks > 0) {
+            SkillData d = SkillManager.get(player);
+            if (!d.cooldowns.isEmpty()) {
+                d.cooldowns.replaceAll((k, v) -> v - ticks);
+                d.cooldowns.values().removeIf(v -> v <= 0);
+                SkillManager.sync(player);
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 鍛え人の目 (満ちた一撃のあと、次に受ける一撃を和らげる)
+    private static final java.util.Map<java.util.UUID, Long> SMITH_GUARD = new java.util.HashMap<>();
+
+    @SubscribeEvent
+    static void onDealt(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (event.getEntity().level().isClientSide || !(event.getSource().getEntity() instanceof ServerPlayer player)
+                || event.getSource().getDirectEntity() != player || !jp.revati.skyabyss.combat.MeleeHits.fullHit(player)
+                || !SkillManager.get(player).knows(Skill.SMITH_EYE)) {
+            return;
+        }
+        SMITH_GUARD.put(player.getUUID(), player.level().getGameTime() + SkillRules.SMITH_GUARD_TICKS);
+    }
+
+    // 守りが残っていれば、受ける傷を和らげて使い切る
+    public static float smithGuard(ServerPlayer player, float amount) {
+        Long until = SMITH_GUARD.get(player.getUUID());
+        if (until == null || amount <= 0) {
+            return amount;
+        }
+        SMITH_GUARD.remove(player.getUUID());
+        return player.level().getGameTime() <= until ? amount * SkillRules.SMITH_GUARD : amount;
+    }
+
+    // 自己テスト用
+    public static boolean smithGuarded(ServerPlayer player) {
+        Long until = SMITH_GUARD.get(player.getUUID());
+        return until != null && player.level().getGameTime() <= until;
     }
 
     // ---------------------------------------------------------------- 押し出される強さ
@@ -205,6 +244,11 @@ public final class SkillEvents {
         boolean riderless = SkillActions.riderless();
         // 戦っている印 (マナの回復が遅くなる)
         if (victim instanceof ServerPlayer hurtPlayer) {
+            // 鍛え人の目: 満ちた一撃のあとの一撃を和らげる
+            if (attacker instanceof LivingEntity && !(attacker instanceof Player)) {
+                amount = smithGuard(hurtPlayer, amount);
+                event.setAmount(amount);
+            }
             SkillData vd = SkillManager.get(hurtPlayer);
             vd.lastCombat = now;
             if (amount > 0) {
@@ -253,7 +297,8 @@ public final class SkillEvents {
             d.lastCombat = now;
             Skill dealing = SkillActions.dealing();
             // 近接の攻撃 (技の斬撃を含む。驟雨・出血・炎の上乗せ・稲光は含まない)
-            boolean melee = direct == player && dealing != Skill.SKY_RAIN && !riderless;
+            // 満ちていない近接の一撃 (combat/MeleeHits) は数えない (返し刃・孤り・熾・岩の返りを使わない。吸いも起こさない)
+            boolean melee = direct == player && dealing != Skill.SKY_RAIN && !riderless && !jp.revati.skyabyss.combat.MeleeHits.weakHit(player);
             // ビルド: キーストーン・構え・条件の特性・木のセット・タグの足し (近接も飛び道具も技も)
             amount *= (float) (1 + SkillBuild.generalDamage(player, direct instanceof Projectile));
             // 返し刃
@@ -355,7 +400,9 @@ public final class SkillEvents {
             // 型の溜まるもの: ふつうの近接 (技でない) が当たった・ふつうの矢 (技の矢でない) が当たった
             if (victim != attackerPlayer && SkillActions.dealing() == null && SkillActions.isFoe(attackerPlayer, victim)) {
                 if (source.getDirectEntity() == attackerPlayer) {
-                    Gauges.onMelee(attackerPlayer, victim);
+                    if (!jp.revati.skyabyss.combat.MeleeHits.weakHit(attackerPlayer)) {
+                        Gauges.onMelee(attackerPlayer, victim);
+                    }
                 } else if (source.getDirectEntity() instanceof AbstractArrow arrow && !arrow.getTags().contains(SkillActions.PIERCE_TAG)) {
                     Gauges.onArrow(attackerPlayer);
                 }
@@ -447,6 +494,12 @@ public final class SkillEvents {
             }
             if (d.notifiedPoints == 0 && d.spentPoints() > 0) {
                 d.notifiedPoints = d.totalPoints(SkillManager.level(player));
+            }
+            // 技の木 v3 で取り方を戻したとき、一度だけ知らせる
+            if (d.treeReset) {
+                d.treeReset = false;
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.skyabyss.tree.reset_v3")
+                        .withStyle(net.minecraft.ChatFormatting.GOLD));
             }
             SkillManager.sync(player);
             SkillManager.sendMana(player, true);

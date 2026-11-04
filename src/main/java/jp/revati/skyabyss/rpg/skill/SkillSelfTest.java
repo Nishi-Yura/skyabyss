@@ -94,8 +94,8 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(9) == 9 && SkillRules.pointsForLevel(10) == 10 && SkillRules.pointsForLevel(12) == 12
                 && SkillRules.pointsForLevel(15) == 15 && SkillRules.pointsForLevel(21) == 21 && SkillRules.pointsForLevel(33) == 33
                 && SkillRules.pointsForLevel(50) == 50, "skill points per level are wrong");
-        // 6 職の木 42 本 + 木 v2 で足した 7 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)。刻印は月のヒロイックの書き換え 6 を足して 85
-        check(f, Skill.values().length == 61 && Rune.values().length == 91, "skill / rune counts are wrong (" + Skill.values().length + " / " + Rune.values().length + ")");
+        // 6 職の木 42 本 + 木 v2 で足した 7 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)。刻印は 91 + 技の木 v3 の変化 31 で 122
+        check(f, Skill.values().length == 61 && Rune.values().length == 122, "skill / rune counts are wrong (" + Skill.values().length + " / " + Rune.values().length + ")");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;

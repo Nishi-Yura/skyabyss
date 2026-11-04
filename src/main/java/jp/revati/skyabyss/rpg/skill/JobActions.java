@@ -53,6 +53,8 @@ public final class JobActions {
         final Vec3 dir;
         // 熾火 (火の型の溜まるもの) で広がった弾ける広さ
         double radiusBonus;
+        // 残り火 (熾火の玉の変化): 弾けた所が燃え続ける
+        boolean bed;
         Vec3 pos;
         int age;
 
@@ -102,7 +104,7 @@ public final class JobActions {
     }
 
     // 見ている向きの最初の敵 (届く所まで)。壁で止まる
-    private static LivingEntity aimed(ServerPlayer player, double range, Vec3[] stopOut) {
+    static LivingEntity aimed(ServerPlayer player, double range, Vec3[] stopOut) {
         ServerLevel level = player.serverLevel();
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(range));
@@ -119,7 +121,7 @@ public final class JobActions {
         return null;
     }
 
-    private static void line(ServerLevel level, Vec3 a, Vec3 b, net.minecraft.core.particles.ParticleOptions p, double step) {
+    static void line(ServerLevel level, Vec3 a, Vec3 b, net.minecraft.core.particles.ParticleOptions p, double step) {
         Vec3 d = b.subtract(a);
         int n = Math.max(1, (int) (d.length() / step));
         for (int i = 0; i <= n; i++) {
@@ -128,7 +130,7 @@ public final class JobActions {
         }
     }
 
-    private static void ring(ServerLevel level, Vec3 c, double r, net.minecraft.core.particles.ParticleOptions p, int n) {
+    static void ring(ServerLevel level, Vec3 c, double r, net.minecraft.core.particles.ParticleOptions p, int n) {
         for (int i = 0; i < n; i++) {
             double a = i * Math.PI * 2 / n;
             level.sendParticles(p, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.01);
@@ -175,9 +177,22 @@ public final class JobActions {
         Vec3 from = player.getEyePosition().add(dir.scale(0.8)).subtract(0, 0.2, 0);
         // 熾火 (火の型): 熾火一つにつき、大きく (+1 ブロック) 強く (+20%)。玉は飛んでから弾けるので、撃つときに決める
         int stacks = Gauges.orbStacks(player);
-        Orb orb = new Orb(player.serverLevel(), player, spell(player, SkillRules.orbMultiplier(rank)) * (float) Gauges.orbPower(stacks), from, dir);
-        orb.radiusBonus = stacks;
-        ORBS.add(orb);
+        float dmg = spell(player, SkillRules.orbMultiplier(rank)) * (float) Gauges.orbPower(stacks);
+        // 変化: 三つ玉 (小さな玉を扇に 3 つ。一つ ×0.45)、残り火 (弾けた所が 4 秒燃える)
+        int r = SkillManager.runeOf(player, Skill.EMBER_ORB);
+        if (r == 1) {
+            for (int k = -1; k <= 1; k++) {
+                Vec3 d = dir.yRot((float) Math.toRadians(14 * k)).normalize();
+                Orb orb = new Orb(player.serverLevel(), player, dmg * 0.45f, from, d);
+                orb.radiusBonus = stacks;
+                ORBS.add(orb);
+            }
+        } else {
+            Orb orb = new Orb(player.serverLevel(), player, dmg, from, dir);
+            orb.radiusBonus = stacks;
+            orb.bed = r == 2;
+            ORBS.add(orb);
+        }
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8f, 1.1f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
@@ -220,6 +235,22 @@ public final class JobActions {
                 e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), SkillRules.ORB_BURN));
             }
         }
+        if (o.bed) {
+            // 残り火: 1 秒ごとに 4 度、弾けた所の敵を焼く (玉の傷の 2 割)
+            float burn = o.damage * 0.2f;
+            for (int t = 20; t <= 80; t += 20) {
+                SkillEffects.later(level, t, () -> {
+                    if (!owner.isAlive() || owner.level() != level) {
+                        return;
+                    }
+                    for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r, 1.5, r), e -> SkillActions.isFoe(owner, e))) {
+                        SkillActions.hit(owner, e, burn, Skill.EMBER_ORB);
+                        e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), 30));
+                    }
+                    level.sendParticles(ParticleTypes.FLAME, c.x, c.y + 0.2, c.z, 12, r * 0.4, 0.1, r * 0.4, 0.01);
+                });
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 凍て潮
@@ -248,7 +279,8 @@ public final class JobActions {
         Vec3 dir = player.getLookAngle().normalize();
         Vec3 start = player.position();
         Vec3 eye = player.getEyePosition();
-        double range = SkillRules.blinkRange(rank);
+        // 二度の転移の変化: 跳ぶ距離は半分
+        double range = SkillRules.blinkRange(rank) * (SkillManager.runeOf(player, Skill.BLINK) == 2 ? TreeVariants.DOUBLE_BLINK_RANGE : 1);
         BlockHitResult block = level.clip(new ClipContext(eye, eye.add(dir.scale(range)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         double reach = block.getType() == HitResult.Type.MISS ? range : Math.max(0, block.getLocation().distanceTo(eye) - 0.6);
         Vec3 dest = null;
@@ -340,6 +372,7 @@ public final class JobActions {
             return "message.skyabyss.skill.no_target";
         }
         int ticks = SkillRules.curseTicks(rank);
+        SkillActions.lastTarget = target;
         SkillEvents.mark(target, SkillRules.curseBonus(rank), level.getGameTime(), ticks, player);
         SkillEffects.timedMod(target, Attributes.ATTACK_DAMAGE, "curse_mark", -SkillRules.CURSE_WEAKEN, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, ticks);
         // 呪いの重ね (呪いの型の溜まるもの)
@@ -367,7 +400,12 @@ public final class JobActions {
 
     // 灯のそばの自分と仲間の吸収を、段の量まで満たす (SkillEffects の LAMP の場が 2 秒ごとに呼ぶ)
     static void lampPulse(ServerPlayer owner, Vec3 center, int rank, double radius) {
-        float amount = (float) (SkillRules.lampAbsorb(rank) * SkillEffects.supportPower(owner, Skill.LAMP_CHARM));
+        lampPulse(owner, center, rank, radius, 1.0);
+    }
+
+    // scale = 満たす量の掛け目 (歩む灯の変化は ×0.7)
+    static void lampPulse(ServerPlayer owner, Vec3 center, int rank, double radius, double scale) {
+        float amount = (float) (SkillRules.lampAbsorb(rank) * SkillEffects.supportPower(owner, Skill.LAMP_CHARM) * scale);
         List<ServerPlayer> near = new ArrayList<>();
         double r2 = radius * radius;
         if (owner.isAlive() && owner.position().distanceToSqr(center) <= r2) {

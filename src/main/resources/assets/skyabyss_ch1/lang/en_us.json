@@ -247,5 +247,22 @@
   "sign.skyabyss.ch1_whale_3.1": "The whale",
   "sign.skyabyss.ch1_whale_3.2": "descends",
   "sign.skyabyss.ch1_whale_3.3": "to sleep,",
-  "sign.skyabyss.ch1_whale_3.4": "or to end"
+  "sign.skyabyss.ch1_whale_3.4": "or to end",
+  "dialogue.skyabyss.storyteller.ch1_s_go": "Waiting for the whale, are you? ...Isana told me.\nYou mean to climb onto its back. I won't stop you, but there's something I'd like to give you first.",
+  "dialogue.skyabyss.storyteller.ch1_s_go2": "An old tale. The key to the sky's door was split in four and left in keeping. One piece, they say, is held by the one that swims the sky.\n...Laid beside the heartbeat deep in its back, I once heard.",
+  "dialogue.skyabyss.storyteller.ch1_s_go2.key": "I'll look beside the heartbeat.",
+  "dialogue.skyabyss.storyteller.ch1_s_go2.why": "Why that key?",
+  "dialogue.skyabyss.storyteller.ch1_s_go_why": "I don't know what comes through that door if it opens. Because I don't know, I want to be sure.\nJust an old woman's curiosity. ...Half of it, anyway.",
+  "dialogue.skyabyss.storyteller.ch1_s_go3": "If it turns dangerous, come back. The whale won't run off. It will come down again.\nWhen you return, tell me what you saw up there.",
+  "dialogue.skyabyss.storyteller.ch1_s_go3.ok": "I'll go.",
+  "quest.skyabyss.ch1.trail_iron.track.journal": "Isana said: \"The traveller before you went into the hills from the edge of town. Feet in iron are heavy. There will be a trail.\"\nFollow the dropped iron scraps and the boot prints to find the traveller's way.",
+  "quest.skyabyss.ch1.trail_iron.track.lead": "Isana: \"Feet in iron are heavy. Start at the edge of town; there will be a trail.\"",
+  "quest.skyabyss.ch1.trail_iron.track.follow": "Follow the traveller's iron scraps",
+  "message.skyabyss.ch1.iron_scrap.1": "A broken anvil and a loose chain. Boot prints lead to the hills",
+  "message.skyabyss.ch1.iron_scrap.2": "More scraps. Heavy prints that stop now and then: they rested here",
+  "message.skyabyss.ch1.iron_scrap.3": "The third scrap. Past the prints lies the mouth of the bone pit",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log1": "That paper... warped by the sea. Where did you find it?",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log1.show": "At the back of the captain's hall",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log2": "That's the captain's hand. No doubt of it.\n\"The song comes from the east. It calls a name. Not mine.\"...",
+  "dialogue.skyabyss.whale_chaser.ch1_c_log3": "\"Turn the helm.\" ...That was all he said that night.\nWhose name it called, I can't say. But the song is still calling someone, somewhere.\nKeep the page. If you follow the song past the whale, more will turn up."
 }

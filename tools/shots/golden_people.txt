@@ -1,0 +1,42 @@
+# 2026-11-04: 黄金比の板のプロフィール・知らせ・職選び・パーティ・墓 (docs/design/56)。1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_people.txt -PshotsName=golden_people
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+cmd skyabyss quest start @s main_song
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+open profile
+wait 15
+shot profile
+close
+open notices
+wait 10
+shot notices
+close
+open job_choice_shaman
+wait 10
+shot job_choice
+close
+open party
+wait 10
+shot party
+close
+open grave
+wait 10
+shot grave
+close

@@ -46,7 +46,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // ---------------------------------------------------------------- 支度の段 (メインの段。順不同。PrepQuests の三章の 3 本)
 //   ch3/lightning_pillars (語り部)  台に避雷針 4 本 (合図 ch3_pillar ×4) → 戸の奥の風の民の書 (伝承 ch3/stayer_returns)
 //   ch3/scorched_watch    (職人)    焼けた見張り塔を抜ける (伝承 ch3/scorched_watch) → 職人に頁を見せる
-//   ch3/sky_stone         (イサナ)  ダイヤ 5、またはダイヤの胸当てか剣
+//   ch3/sky_stone         (イサナ)  雷拾いの原から硝子の筋をたどり、風読みの崖のそばの巣で空石 5 (GleanerNest)。市の空石 5 か空石の鱗の胴でもよい
 //   三本そろうと合図 ch3_ready (進捗 storm_trail)。竜骨の間の入口の遅れた影は MirrorLag、イサナの決意と語り部の数え歌は会話の足し書き (dialogue/ch3/*_ground.json)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Ch3Ground {
@@ -97,6 +97,7 @@ public final class Ch3Ground {
         SiteTreasure.register(FIELD_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:copper_lump", 8),
                 new SiteTreasure.Entry(Ch3Mobs.COPPER_WIRE, 3), new SiteTreasure.Entry(Ch3Mobs.SCORCHED_FEATHER, 2))));
         LightningPillars.register();
+        GleanerNest.register();
         PrepQuests.onReady(3, p -> Notice.narrate(p, "message.skyabyss.ch3g.ready"));
         // 旅の職人の三章の立つ所: 焼けた見張り塔の南西の野営
         ArtisanSpawner.register(new ArtisanSpawner.Spot(3, WATCH, "artisan", p -> Chapters.of(p) == Chapters.STORM));

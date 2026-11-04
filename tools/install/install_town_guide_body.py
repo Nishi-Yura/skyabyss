@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """土地の町の案内人 (town/RegionFolk の town_guide_<町>) の体を、都の案内人 (係の人 guide。install_npc2.py guide) から写す。
 都の案内人と同じ白い外套と角灯の杖で、「案内人」と一目で分かるように (2026-10-29)。
-写すもの: lowpoly/npc_guide(.json / _prop_r.json)・textures/lowpoly/npc_guide(.png / _prop_r.png)・geo・animation。
+写すもの: lowpoly/npc_guide(.json / _prop_r.json)・textures/lowpoly/npc_guide(.png / _prop_r.png)・geo・animation・会話の肖像 (attendant_guide_<表情>)。
 名前は npc_guest_town_guide、動きの名前は町の人の型 (animation.town_guest.*) に替える。都の案内人を作り直したら、これをもう一度流す。
 使い方: python -X utf8 tools/install/install_town_guide_body.py
 """
@@ -23,4 +23,7 @@ geo = (A / "geo/entity" / f"{SRC}_lowpoly.geo.json").read_text(encoding="utf-8")
 anim = json.loads((A / "animations/entity" / f"{SRC}.animation.json").read_text(encoding="utf-8"))
 anim["animations"] = {k.replace("animation.attendant.", "animation.town_guest."): v for k, v in anim["animations"].items()}
 (A / "animations/entity" / f"{DST}.animation.json").write_text(json.dumps(anim, ensure_ascii=False, indent=2), encoding="utf-8")
+# 会話の肖像も都の案内人のもの (DialogueScreen は guest_town_guide_<表情> を体の肖像として使う)
+for face in ("neutral", "smile", "grave"):
+    shutil.copyfile(A / "textures/gui/npc/face" / f"attendant_guide_{face}.png", A / "textures/gui/npc/face" / f"guest_town_guide_{face}.png")
 print("wrote", DST)

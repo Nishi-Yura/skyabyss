@@ -67,12 +67,13 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
     private static final int RIGHT_W = 126;
     private static final int HEADER_Y = 16;
     private static final int LIST_Y = 33;
-    private static final int ROW_H = 11;
-    private static final int LIST_ROWS = 12;
+    // 行は 13 (docs/design/56。紙の本の形はそのまま)
+    private static final int ROW_H = 13;
+    private static final int LIST_ROWS = 10;
     private static final int BODY_Y = 33;
     private static final int BODY_BOTTOM = 180;
     private static final int COUNT_Y = 176;
-    private static final int LINE_H = 10;
+    private static final int LINE_H = 13;
     private static final int GAP_H = 5;
 
     private int left;
@@ -268,7 +269,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         }
     }
 
-    // 漢字や仮名の行は 10、英字だけの行は 9 (バニラの行の高さ)。日本語は字が詰まって見えるので 1 だけ空ける
+    // 漢字や仮名の行は 13、英字だけの行は 12 (docs/design/56 の行の高さ)
     private static int lineHeight(String line) {
         for (int i = 0; i < line.length(); i++) {
             if (line.charAt(i) >= 0x2E80) {
@@ -382,17 +383,17 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             boolean unlocked = LoreClient.unlocked(entry.id());
             boolean hover = mouseX >= x && mouseX < x + LEFT_W && mouseY >= y && mouseY < y + ROW_H;
             if (entry.id().equals(selected)) {
-                blitWidget(g, x - 2, y - 1, W_ROW_SELECTED);
+                blitWidget(g, x - 2, y, W_ROW_SELECTED);
             }
-            blitWidget(g, x, y + 1, unlocked ? W_MARK_KNOWN : W_MARK_LOCKED);
+            blitWidget(g, x, y + 2, unlocked ? W_MARK_KNOWN : W_MARK_LOCKED);
             Component title = unlocked ? Component.translatable(entry.titleKey()) : Component.literal("？？？");
             FormattedText clipped = font.substrByWidth(title, LEFT_W - 22);
             // 選んだ行は濃い青緑の帯の上なので、羊皮紙の色で書く (墨の色では帯に沈んで読めない)
             boolean isSelected = entry.id().equals(selected);
             int color = !unlocked ? FADED : isSelected ? PAPER : hover ? TEAL : INK;
-            g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(clipped), x + 11, y + 1, color, false);
+            g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(clipped), x + 11, y + 3, color, false);
             if (LoreClient.isNew(entry.id())) {
-                blitWidget(g, x + LEFT_W - 9, y + 1, W_MARK_NEW);
+                blitWidget(g, x + LEFT_W - 9, y + 2, W_MARK_NEW);
             }
         }
         if (listScroll > 0) {
@@ -427,7 +428,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             }
             if (line.bar() && line.text() == FormattedCharSequence.EMPTY) {
                 // 伏せ字の墨の帯 (color に幅を入れてある)
-                drawInkBar(g, x, y + 2, line.color());
+                drawInkBar(g, x, y + 4, line.color());
             } else {
                 if (line.bar()) {
                     g.fill(x + 1, y - 1, x + 2, y + line.height() - 1, 0x801D6E69);
@@ -436,7 +437,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
                 if (line.link() != null && mouseX >= x && mouseX < x + RIGHT_W && mouseY >= y && mouseY < y + line.height()) {
                     color = TITLE;
                 }
-                g.drawString(font, line.text(), x + line.indent(), y, color, false);
+                g.drawString(font, line.text(), x + line.indent(), y + 2, color, false);
             }
             y += line.height();
         }

@@ -8,7 +8,13 @@ public enum SkillKeystone {
     FULL_TIDE("full_tide", SkillTag.TIDE),
     ASH_PACT("ash_pact", SkillTag.ASH),
     LONE_STRING("lone_string", SkillTag.BONE),
-    WIND_DANCE("wind_dance", SkillTag.WIND);
+    WIND_DANCE("wind_dance", SkillTag.WIND),
+    // 技の木 v3 で奥義にした五つ (動きは KeystoneEffects・SkillEvents が節の数 (hex_mark・cd_kill・storm_call・sun_burst・blink_guard) から見る)
+    HEX_CHANT("hex_chant", SkillTag.TIDE),
+    EMBER_LUNG("ember_lung", SkillTag.ASH),
+    STORM_CALLER("storm_caller", SkillTag.BONE),
+    SUN_HEART("sun_heart", SkillTag.ASH),
+    TIDE_WALKER("tide_walker", SkillTag.TIDE);
 
     public final String id;
     public final SkillTag tag;

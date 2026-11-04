@@ -1,0 +1,126 @@
+# 2026-11-03 の声の確かめ: 地形の作り込み (うねり・段丘・崖の地層・岩の露頭・池・花)、道に建物がかからない (鯨見の南の門・祠)、
+# 場面のカメラが地形に埋まらない・人を描かない
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/terrain_1103.txt -PshotsName=<まだ使っていない名前>   (新しい名前 = 新しいワールド。地形は新しく作るチャンクだけ変わる)
+world terrain_1103 continent
+size 1600 900
+timeout 4200
+render 12
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode spectator
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamerule doWeatherCycle false
+hud off
+# 都の南の野 (平原)
+cmd spreadplayers -440 350 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 160 8
+wait 30
+shot t01_plains_road
+cmd execute at @s run tp @s ~ ~30 ~ 160 30
+wait 60
+shot t02_plains_air
+# 林 (都と灰炉のあいだ)
+cmd spreadplayers -443 503 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ -135 5
+wait 30
+shot t03_forest_road
+# 都 → 鯨見の道の中ほど (丘陵)
+cmd spreadplayers -330 -420 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 180 5
+wait 30
+shot t04_whale_road
+cmd execute at @s run tp @s ~ ~35 ~ 150 35
+wait 60
+shot t05_whale_air
+# 岩鯨の跡地への丘 (吹きさらしの丘)
+cmd spreadplayers 134 -940 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ -44 5
+wait 30
+shot t06_hills_road
+cmd execute at @s run tp @s ~ ~35 ~ -44 35
+wait 60
+shot t07_hills_air
+# 嵐の高地 (峰と雪の坂)
+cmd spreadplayers -1180 -31 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 90 0
+wait 30
+shot t08_peaks_road
+cmd spreadplayers -1203 -224 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ -90 5
+wait 30
+shot t09_snow_road
+# 赤い荒野と灰の荒野
+cmd spreadplayers 21 1301 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 0 5
+wait 30
+shot t10_badlands_road
+cmd execute at @s run tp @s ~ ~35 ~ 0 35
+wait 60
+shot t11_badlands_air
+cmd spreadplayers 193 1283 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ 90 5
+wait 30
+shot t12_ash_road
+# 砂漠 (汐守の北)
+cmd spreadplayers 1403 -132 0 1 false @s
+waitchunks 400
+wait 80
+cmd execute at @s run tp @s ~ ~ ~ -44 5
+wait 30
+shot t13_desert_road
+# 鯨見の南の門 (都からの道が門で止まる)
+cmd tp @s -120 110 -640 180 25
+waitchunks 400
+wait 900
+shot t14_whale_gate
+cmd tp @s -120 140 -700 180 60
+wait 60
+shot t15_whale_gate_air
+# 鯨と雷翼の祠 (台地と参道が道にかからない)。見下ろしは観戦の姿で (落ちない)
+cmd skyroute shrine stone_whale
+waitchunks 400
+wait 120
+cmd execute at @s run tp @s ~ ~34 ~-6 0 55
+wait 60
+shot t16_whale_shrine_air
+cmd skyroute shrine thunder_wing
+waitchunks 400
+wait 120
+cmd execute at @s run tp @s ~ ~34 ~-6 0 55
+wait 60
+shot t17_storm_shrine_air
+# 起伏のある所で場面を流す (カメラが地形に埋まらない・人を描かない)
+cmd gamemode creative
+cmd spreadplayers 134 -940 0 1 false @s
+waitchunks 300
+wait 60
+cmd skyabyss cinematic play town_first_whale
+wait 30
+shot t18_scene_a
+wait 50
+shot t19_scene_b
+wait 50
+shot t20_scene_c
+wait 50
+shot t21_scene_d
+echo done

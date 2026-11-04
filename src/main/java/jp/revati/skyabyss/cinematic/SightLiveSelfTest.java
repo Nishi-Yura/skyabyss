@@ -42,6 +42,9 @@ public final class SightLiveSelfTest {
             BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, level.getSharedSpawnPos());
             player.setPos(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5);
             player.setHealth(player.getMaxHealth());
+            // 見る人は、その巨神の章まで来ていることにする (巨神の見え方 TitanVisibility)
+            jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = (id, t) -> true;
+            jp.revati.skyabyss.titan.TitanVisibility.clearCache();
             Cinematics.state(player).forgetAll();
             Cinematics.stop(player, false);
             if (Titans.THUNDER_WING.equals(titan)) {
@@ -97,6 +100,8 @@ public final class SightLiveSelfTest {
     }
 
     private static void finish(ServerLevel level) {
+        jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = null;
+        jp.revati.skyabyss.titan.TitanVisibility.clearCache();
         if (forced != null) {
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {

@@ -22,8 +22,11 @@ import net.minecraft.world.phys.Vec3;
 
 // 岩鯨の中ボス「番兵長」の間 (元は東の翼の番兵長の広間 E3。13 × 31、高さ 11、柱の列)。
 // 前触れの波 (骨の番兵 2・肋の射手・苔這い 2。人が一人増えるごとに 2 体) を倒すと、番兵長が間の奥に現れる
-// (人が一人増えるごとに番兵と射手が 1 体ずつ。番兵長の体力は 280 × (1 + 0.6 × (人数 − 1)))。倒すと越える
+// (人が一人増えるごとに番兵と射手が 1 体ずつ。番兵長の体力は 280 × (1 + 0.6 × (人数 − 1)))。倒すと越える。
+// 倒したあと、奥の柱 (西の列のいちばん奥) の南の面に「船長の日誌の頁」の碑が現れる (読むと伝承 chapter1/captain_log。イサナに見せる。docs/design/01)
 public final class WhaleMidRoom extends MidRoom {
+    public static final String LOG_PAGE = "sign.skyabyss.captain_log_page";
+    static final String LOG_ENTRY = "chapter1/captain_log";
     public static final String ID = "WRM";
     static final int HX = 6;
     static final int HZ = 15;
@@ -112,11 +115,32 @@ public final class WhaleMidRoom extends MidRoom {
         }
         TitanLoot.onCaptainDefeat(ctx.level(), ps, ids);
         jp.revati.skyabyss.titan.group.FightBadges.onVictory(ctx.level(), boss, ids, 0);
+        placeLogPage(ctx);
+        for (ServerPlayer p : ps) {
+            if (!jp.revati.skyabyss.lore.Lore.state(p).has(LOG_ENTRY)) {
+                Notice.hint(p, "message.skyabyss.captain_log.seen");
+            }
+        }
+    }
+
+    // 船長の日誌の頁の碑の場所 (奥の柱の南の面。柱は x = -HX + 2、z = -HZ + 5)
+    public static net.minecraft.core.BlockPos logPagePos(RaidCtx ctx) {
+        return ctx.local(-HX + 2, 2, -HZ + 6);
+    }
+
+    public static void placeLogPage(RaidCtx ctx) {
+        net.minecraft.core.BlockPos at = logPagePos(ctx);
+        RaidKit.set(ctx.level(), at, jp.revati.skyabyss.tablet.Tablets.wallState(net.minecraft.core.Direction.SOUTH));
+        jp.revati.skyabyss.tablet.Tablets.write(ctx.level(), at, LOG_PAGE);
     }
 
     @Override
     protected void resetFixtures(RaidCtx ctx) {
         wave = 0;
+        // 頁の碑は番兵長を倒すたびに現れる
+        if (ctx.level().getBlockState(logPagePos(ctx)).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get())) {
+            RaidKit.set(ctx.level(), logPagePos(ctx), Blocks.AIR.defaultBlockState());
+        }
         if (!inRoom) {
             jp.revati.skyabyss.trial.raid.whale.WhaleDecor.exitLamps(ctx, false);
         }

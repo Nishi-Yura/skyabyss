@@ -1,0 +1,16 @@
+{
+  "chapter": "titan_storm",
+  "order": 95,
+  "inscription_sign": "sign.skyabyss.poi_note.tsumuji_camp",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.poi_note.tsumuji_camp"
+    }
+  ],
+  "related": [
+    "roads/brothers_1",
+    "roads/brothers_2",
+    "roads/brothers_4"
+  ]
+}

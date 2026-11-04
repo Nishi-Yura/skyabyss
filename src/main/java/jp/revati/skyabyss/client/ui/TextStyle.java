@@ -32,8 +32,14 @@ public enum TextStyle {
         this.accent = accent;
     }
 
+    // 拡大は画素ちょうど (docs/design/56): 字の 1 画素が画面の整数の画素になる倍率へ丸める (GUI 3 で 1.5 倍なら 5/3 倍)。
+    // 半端な倍率では画の太さがそろわない
     public float scale() {
-        return scale;
+        double gui = net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScale();
+        if (gui <= 0 || scale == 1f) {
+            return scale;
+        }
+        return (float) (Math.max(1, Math.round(scale * gui)) / gui);
     }
 
     // 既定の色 (0xRRGGBB)
@@ -87,7 +93,8 @@ public enum TextStyle {
     private void draw(GuiGraphics g, Font font, FormattedCharSequence text, int x, int y, float alpha, int rgb, boolean centered) {
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
-        g.pose().scale(scale, scale, 1f);
+        float k = scale();
+        g.pose().scale(k, k, 1f);
         int ox = centered ? -font.width(text) / 2 : 0;
         g.drawString(font, text, ox, 0, alpha(alpha) | (rgb & 0xFFFFFF), true);
         g.pose().popPose();

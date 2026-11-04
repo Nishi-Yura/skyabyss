@@ -39,7 +39,7 @@ public class PulseDaggerItem extends AbyssGearWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack)) {
+        if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             CompoundTag tag = attacker.getPersistentData().getCompound(CHAIN);
             long now = level.getGameTime();
             boolean same = tag.hasUUID("t") && tag.getUUID("t").equals(target.getUUID());

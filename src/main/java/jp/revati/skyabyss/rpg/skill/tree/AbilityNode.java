@@ -27,7 +27,7 @@ import jp.revati.skyabyss.rpg.skill.SkillKeystone;
 //   x, y      : 格子の位置 (左上が 0, 0。画面は x * 48, y * 48)
 //   arch      : 型 (枝) の id。幹は null。archPoints = その型の点がこれ以上で取れる
 //   requires  : つながる節 (どれか一つ取っていればよい)。空なら幹の入口
-//   excludes  : 排他 (どれかを取っていると取れない)。刻印どうしは同じ技なら自動で排他
+//   blocks    : 封じる節 (どれかを取っていると取れない。どちらの向きにも効く。古い名 excludes も読む)。同じ技の変化どうしも書く
 //   effect    : 常に効く数 (NodeEffects の鍵 → 値)。armor・knockback・move・attack_speed・attack・projectile・skill_power・cooldown・
 //               mana_cost・mana・regen・damage_taken・damage_taken_still・fire_resist・big_target・lifesteal・low_hp_armor
 public final class AbilityNode {
@@ -52,7 +52,7 @@ public final class AbilityNode {
     public final String arch;
     public final int archPoints;
     public final List<String> requires;
-    public final List<String> excludes;
+    public final List<String> blocks;
     @Nullable
     public final Skill skill;
     public final int rune;
@@ -68,7 +68,7 @@ public final class AbilityNode {
     // 取るのに要る転生の回数 (淵・前世の木。職の木は 0)
     public final int rebirthAt;
 
-    AbilityNode(String id, Kind kind, int cost, int x, int y, @Nullable String arch, int archPoints, List<String> requires, List<String> excludes,
+    AbilityNode(String id, Kind kind, int cost, int x, int y, @Nullable String arch, int archPoints, List<String> requires, List<String> blocks,
             @Nullable Skill skill, int rune, @Nullable Stat stat, int amount, int at, Map<String, Double> effect, @Nullable SkillKeystone keystone,
             @Nullable Mutation mutation, int rebirthAt) {
         this.id = id;
@@ -79,7 +79,7 @@ public final class AbilityNode {
         this.arch = arch;
         this.archPoints = archPoints;
         this.requires = Collections.unmodifiableList(requires);
-        this.excludes = Collections.unmodifiableList(excludes);
+        this.blocks = Collections.unmodifiableList(blocks);
         this.skill = skill;
         this.rune = rune;
         this.stat = stat;
@@ -100,7 +100,8 @@ public final class AbilityNode {
         String arch = o.has("arch") && !o.get("arch").isJsonNull() ? o.get("arch").getAsString() : null;
         int archPoints = o.has("arch_points") ? o.get("arch_points").getAsInt() : 0;
         List<String> requires = strings(o.get("requires"));
-        List<String> excludes = strings(o.get("excludes"));
+        List<String> blocks = strings(o.get("blocks"));
+        blocks.addAll(strings(o.get("excludes")));
         Skill skill = null;
         if (o.has("skill")) {
             skill = Skill.byId(o.get("skill").getAsString());
@@ -139,8 +140,8 @@ public final class AbilityNode {
                 }
             }
             case RUNE -> {
-                if (skill == null || !Rune.valid(skill, rune) || rune >= 4) {
-                    throw new IllegalArgumentException(job + "/" + id + ": RUNE needs a skill and a rune 1..3");
+                if (skill == null || !Rune.valid(skill, rune) || !Rune.normal(rune)) {
+                    throw new IllegalArgumentException(job + "/" + id + ": RUNE needs a skill and a rune 1..3 or 8..");
                 }
             }
             case STAT -> {
@@ -172,7 +173,7 @@ public final class AbilityNode {
             }
         }
         int rebirthAt = o.has("rebirth_at") ? o.get("rebirth_at").getAsInt() : skill != null ? skill.rebirthAt() : 0;
-        return new AbilityNode(id, kind, cost, x, y, arch, archPoints, requires, excludes, skill, rune, stat, amount, at, effect, keystone, mutation, rebirthAt);
+        return new AbilityNode(id, kind, cost, x, y, arch, archPoints, requires, blocks, skill, rune, stat, amount, at, effect, keystone, mutation, rebirthAt);
     }
 
     private static List<String> strings(@Nullable JsonElement e) {

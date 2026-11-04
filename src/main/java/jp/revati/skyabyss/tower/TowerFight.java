@@ -152,7 +152,7 @@ public final class TowerFight {
         m.setFloor(m.getMaxHealth() * floorFrac(0));
         level.addFreshEntity(m);
         // 硬さ 2.0: 四人で 15〜20 分 (54 の 2.3)。隙の決まりが入って 0.3 倍で削り切る形でなくなったぶん (47 の 2.6)
-        jp.revati.skyabyss.combat.PartyScale.resist(m, 2.0);
+        jp.revati.skyabyss.combat.PartyScale.resist(m, 1.82);
         master = m;
         String[][] marks = {{"eye_l_1", "s"}, {"eye_r_1", "s"}, {"eye_l_2", "s"}, {"eye_r_2", "s"}, {"eye_big_l", "b"}, {"eye_big_r", "b"}};
         int i = 0;
@@ -206,7 +206,13 @@ public final class TowerFight {
             if (since == 20) {
                 for (ServerPlayer p : here) {
                     Notice.place(p, Component.translatable("entity.skyabyss.tower_master"), Component.translatable("message.skyabyss.tower.intro_sub"));
-                    Notice.narrate(p, "message.skyabyss.tower.intro");
+                    Notice.alert(p, "message.skyabyss.tower.intro");
+                }
+            }
+            // 今週の構え (TowerStance)
+            if (since == 60) {
+                for (ServerPlayer p : here) {
+                    Notice.hint(p, "message.skyabyss.tower.stance_now", Component.translatable(run.stance.nameKey()), Component.translatable(run.stance.descKey()));
                 }
             }
             if (since == 40) {
@@ -252,7 +258,8 @@ public final class TowerFight {
         if (!swarmDone && f <= 0.7f) {
             swarm(level, here);
         }
-        if (stoke < 1 && f <= 0.6f || stoke < 2 && f <= 0.3f) {
+        float[] stokeAt = run.stance == TowerStance.BALANCE ? TowerStance.BALANCE_STOKE : TowerStance.STOKE;
+        if (stoke < 1 && f <= stokeAt[0] || stoke < 2 && f <= stokeAt[1]) {
             stoke++;
             // 角の上に天秤の印が開く (Annihilation の Stoke the Blaze)
             master.playAction("stoke");
@@ -260,7 +267,7 @@ public final class TowerFight {
             Vec3 cr = master.crown();
             far(level, RED, cr.x, cr.y, cr.z + 1, 80, 7, 4, 1, 0);
             for (ServerPlayer p : here) {
-                Notice.narrate(p, "message.skyabyss.tower.stoke");
+                Notice.alert(p, "message.skyabyss.tower.stoke");
             }
         }
         if (moon == null && moonsDone < 2 && master.getHealth() <= master.getMaxHealth() * floorFrac(moonsDone) + 0.5f) {
@@ -294,17 +301,26 @@ public final class TowerFight {
             return rng.nextBoolean() ? "stars" : "breath";
         }
         moves++;
-        if (moves % 4 == 0 && adds.stream().filter(LivingEntity::isAlive).count() < 2 + n) {
+        TowerStance st = run.stance;
+        // 淵の週: 群れを 3 技ごとに
+        if (moves % (st == TowerStance.ABYSS ? 3 : 4) == 0 && adds.stream().filter(LivingEntity::isAlive).count() < 2 + n) {
             return "kids";
         }
         List<String> pool = new ArrayList<>(List.of("rake", "flense", "breath", "beams", "sigil", "exhort"));
-        if (f <= 0.8f) {
+        if (st == TowerStance.ABYSS) {
+            pool.add("breath");
+        }
+        // 星の週: 星屑をはじめから二倍、天の三矢は 6 割から
+        if (st == TowerStance.STAR) {
+            pool.add("stars");
+            pool.add("stars");
+        } else if (f <= 0.8f) {
             pool.add("stars");
         }
         if (moonsDone >= 1) {
             pool.add("clap");
         }
-        if (f <= 0.4f) {
+        if (f <= (st == TowerStance.STAR ? TowerStance.STAR_ARROWS : 0.4f)) {
             pool.add("arrows");
         }
         pool.remove(last);
@@ -412,7 +428,7 @@ public final class TowerFight {
                 master.playAction("arrows");
                 ServerPlayer p = tg.get(rng.nextInt(tg.size()));
                 for (ServerPlayer q : here) {
-                    Notice.narrate(q, "message.skyabyss.tower.arrows", p.getDisplayName());
+                    Notice.alert(q, "message.skyabyss.tower.arrows", p.getDisplayName());
                 }
                 double share = 1.2 * Math.min(tg.size(), 3) * k;
                 zones.add(Zone.circle(p.position(), 5, now + 40, 1.6 * k, WHITE).follow(p, now + 25).fall());
@@ -483,7 +499,7 @@ public final class TowerFight {
         master.playAction("palm");
         sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 1.0f);
         for (ServerPlayer p : here) {
-            Notice.narrate(p, "message.skyabyss.tower.swarm");
+            Notice.alert(p, "message.skyabyss.tower.swarm");
         }
     }
 
@@ -538,7 +554,7 @@ public final class TowerFight {
         chasers.clear();
         sound(level, master.head(), CloudMobsSetup.MOON_FALL_TELL.get(), 6f, 0.6f);
         for (ServerPlayer p : here) {
-            Notice.narrate(p, "message.skyabyss.tower.moon");
+            Notice.alert(p, "message.skyabyss.tower.moon");
         }
         Mob m = TowerWorld.foe(level, CloudMobsSetup.TOWER_MOON.get(), rel(0, MOON_HOVER, MOON_START_Z), TowerMoon.HP * (1 + PARTY_STEP * (n - 1)) / TowerWorld.foeScale(n),
                 TowerMoon.DMG, n, run.id);
@@ -555,7 +571,7 @@ public final class TowerFight {
 
     // 月の進み (0 = 広場、1 = 南の端)。賭け fast_moon で速い
     double moonProgress(long now) {
-        double ticks = MOON_TICKS * (TowerWagers.isOn(run, "fast_moon") ? TowerWagers.FAST_MOON : 1);
+        double ticks = MOON_TICKS * (TowerWagers.isOn(run, "fast_moon") ? TowerWagers.FAST_MOON : 1) * (run.stance == TowerStance.MOON ? TowerStance.MOON_SPEED : 1);
         return Math.min(1.0, (now - moonBorn) / ticks);
     }
 
@@ -582,7 +598,7 @@ public final class TowerFight {
             master.setFloor(master.getMaxHealth() * floorFrac(moonsDone));
             sound(level, master.chest(), CloudMobsSetup.MOON_FALL.get(), 6f, 1.2f);
             for (ServerPlayer p : here) {
-                Notice.narrate(p, "message.skyabyss.tower.moon_gone");
+                Notice.alert(p, "message.skyabyss.tower.moon_gone");
             }
             restUntil = now + 60;
             return;

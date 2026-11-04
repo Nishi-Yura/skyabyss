@@ -92,27 +92,30 @@ public final class DepthRecords {
         return DepthData.get(server).playerBest.getOrDefault(player, 0);
     }
 
-    // 順位の石の画面 (組と一人の上位 TOP と、見る人の組・人の最深)。client/depths/DepthRankScreen
-    public static void show(MinecraftServer server, ServerPlayer p) {
+    // 記録の画面 (record/RecordsHub) の「深み」の頁: 自分の一番・人の上位・組の上位
+    public static List<net.minecraft.network.chat.Component> hubLines(MinecraftServer server, ServerPlayer p) {
         DepthData d = DepthData.get(server);
-        List<DepthRankPayload.Line> groups = new ArrayList<>();
-        for (Map.Entry<UUID, Integer> e : top(d.groupBest)) {
-            groups.add(new DepthRankPayload.Line(d.names.getOrDefault(e.getKey(), short_(e.getKey())), DepthPlan.totalDepth(e.getValue()), e.getValue()));
-        }
-        List<DepthRankPayload.Line> players = new ArrayList<>();
-        for (Map.Entry<UUID, Integer> e : top(d.playerBest)) {
-            players.add(new DepthRankPayload.Line(d.names.getOrDefault(e.getKey(), nameOf(server, e.getKey())), DepthPlan.totalDepth(e.getValue()), e.getValue()));
-        }
+        List<net.minecraft.network.chat.Component> out = new ArrayList<>();
         int mine = d.playerBest.getOrDefault(p.getUUID(), 0);
-        int ours = d.groupBest.getOrDefault(Groups.keyOf(p), 0);
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new DepthRankPayload(groups, players,
-                ours == 0 ? 0 : DepthPlan.totalDepth(ours), mine == 0 ? 0 : DepthPlan.totalDepth(mine), nextMilestone(mine)));
-    }
-
-    // 次の節目 (階の数)。全部越えていれば 0
-    static int nextMilestone(int beyond) {
-        int c = milestoneCount(0, beyond);
-        return c < MILESTONES.length ? MILESTONES[c] : 0;
+        out.add(net.minecraft.network.chat.Component.translatable("gui.skyabyss.records_hub.depth.mine").withStyle(s -> s.withColor(0xF2D78A)));
+        out.add(mine > 0 ? net.minecraft.network.chat.Component.translatable("gui.skyabyss.records_hub.depth.floor", DepthPlan.totalDepth(mine))
+                : net.minecraft.network.chat.Component.translatable("gui.skyabyss.records_hub.none"));
+        String[][] lists = {{"gui.skyabyss.records_hub.depth.players", "p"}, {"gui.skyabyss.records_hub.depth.groups", "g"}};
+        for (String[] l : lists) {
+            out.add(net.minecraft.network.chat.Component.empty());
+            out.add(net.minecraft.network.chat.Component.translatable(l[0]).withStyle(s -> s.withColor(0xF2D78A)));
+            List<Map.Entry<UUID, Integer>> top = top(l[1].equals("p") ? d.playerBest : d.groupBest);
+            if (top.isEmpty()) {
+                out.add(net.minecraft.network.chat.Component.translatable("gui.skyabyss.records_hub.none"));
+            }
+            for (int i = 0; i < top.size(); i++) {
+                Map.Entry<UUID, Integer> e = top.get(i);
+                String name = d.names.getOrDefault(e.getKey(), l[1].equals("p") ? nameOf(server, e.getKey()) : short_(e.getKey()));
+                out.add(net.minecraft.network.chat.Component.translatable("gui.skyabyss.records_hub.rank", i + 1, name,
+                        net.minecraft.network.chat.Component.translatable("gui.skyabyss.records_hub.depth.floor", DepthPlan.totalDepth(e.getValue()))));
+            }
+        }
+        return out;
     }
 
     // 上位 TOP。同じ深さは先に記録した方を上にする (値の大きい順、同じなら鍵の文字の順)

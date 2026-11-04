@@ -63,6 +63,16 @@ public final class WhaleDecorSelfTest {
                     continue;
                 }
                 check(level, id, plain, deco, f);
+                // 番兵長の間: 倒したあとの船長の日誌の頁は、奥の柱の南の面に掛かり、前が空いている
+                if (id.equals(jp.revati.skyabyss.trial.raid.mid.WhaleMidRoom.ID)) {
+                    jp.revati.skyabyss.trial.raid.mid.WhaleMidRoom.placeLogPage(deco);
+                    BlockPos page = jp.revati.skyabyss.trial.raid.mid.WhaleMidRoom.logPagePos(deco);
+                    if (!level.getBlockState(page).is(jp.revati.skyabyss.registry.ModBlocks.TABLET.get()) || !level.getBlockState(page.north()).isSolid()
+                            || !level.getBlockState(page.south()).isAir()) {
+                        f.add(id + ": the captain's log page is not on the pillar face with room in front (" + level.getBlockState(page) + ", behind "
+                                + level.getBlockState(page.north()) + ", front " + level.getBlockState(page.south()) + ")");
+                    }
+                }
                 WhaleDecor.Stats s = WhaleDecor.stats(id);
                 if (s == null) {
                     f.add(id + ": no decoration stats");

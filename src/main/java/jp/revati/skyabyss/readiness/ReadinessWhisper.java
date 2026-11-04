@@ -71,7 +71,7 @@ public final class ReadinessWhisper {
         if (worst == null) {
             return false;
         }
-        Notice.narrate(player, key(worst, result.colour(worst)));
+        Notice.hint(player, key(worst, result.colour(worst)));
         player.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.AMBIENT, 0.6f, 0.6f);
         return true;
     }

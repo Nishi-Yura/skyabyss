@@ -146,7 +146,7 @@
     },
     {
       "id": "board",
-      "xp": 60,
+      "xp": 70,
       "objectives": [
         {
           "id": "ride",
@@ -163,7 +163,7 @@
         "type": "stilled",
         "titan": "stone_whale"
       },
-      "xp": 90,
+      "xp": 110,
       "objectives": [
         {
           "id": "read",
@@ -172,7 +172,10 @@
           "targets": [
             "chapter1/inscription_west",
             "chapter1/inscription_east",
-            "chapter1/inscription_below"
+            "chapter1/inscription_below",
+            "chapter1/inscription_stomach",
+            "chapter1/inscription_floor",
+            "chapter1/inscription_ring"
           ]
         }
       ]
@@ -216,7 +219,7 @@
     }
   ],
   "reward": {
-    "xp": 200,
+    "xp": 240,
     "affinity": {
       "skyabyss:storyteller": 5,
       "skyabyss:whale_chaser": 5

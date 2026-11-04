@@ -28,7 +28,7 @@
           "topic": "ms_c_tide2"
         }
       ],
-      "xp": 40,
+      "xp": 50,
       "skip_if": {
         "type": "any",
         "of": [
@@ -80,7 +80,7 @@
           ]
         }
       ],
-      "xp": 60
+      "xp": 70
     },
     {
       "id": "board",
@@ -93,7 +93,7 @@
           ]
         }
       ],
-      "xp": 60
+      "xp": 70
     },
     {
       "id": "inscriptions",
@@ -112,7 +112,7 @@
           "count": 2
         }
       ],
-      "xp": 90,
+      "xp": 100,
       "skip_if": {
         "type": "stilled",
         "titan": "tide_shell"
@@ -151,7 +151,7 @@
     }
   ],
   "reward": {
-    "xp": 300,
+    "xp": 340,
     "affinity": {
       "skyabyss:storyteller": 5,
       "skyabyss:whale_chaser": 5

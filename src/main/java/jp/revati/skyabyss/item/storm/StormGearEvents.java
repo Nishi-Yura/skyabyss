@@ -131,7 +131,7 @@ public final class StormGearEvents {
             shock(level, target, player, enhance >= ModGear.AWAKEN_LEVEL);
         }
         // 嵐の護符 (近接か、自分の飛び道具。同じ tick に何体斬っても 1 回だけ数える)
-        boolean own = direct == player || (direct instanceof Projectile p && p.getOwner() == player);
+        boolean own = (direct == player && !jp.revati.skyabyss.combat.MeleeHits.weakHit(player)) || (direct instanceof Projectile p && p.getOwner() == player);
         if (own && target.isAlive() && StormCharmItem.charges(player) > 0) {
             long now = level.getGameTime();
             if (player.getPersistentData().getLong(SkyAbyss.MODID + ":storm_charm_tick") != now) {

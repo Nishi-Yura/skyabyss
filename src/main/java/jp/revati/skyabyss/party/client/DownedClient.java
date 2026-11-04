@@ -83,6 +83,11 @@ public final class DownedClient {
         return null;
     }
 
+    // 照準の先に起こせる仲間がいて、照準のまわりに起こす輪を出しているか (溜めの輪 ChargeRing はそのあいだ出さない)
+    public static boolean aimingRevive() {
+        return aimed() != null;
+    }
+
     // 照準の先にいる、起こせる倒れた仲間 (なければ null)
     private static DownedPackets.Entry aimed() {
         Minecraft mc = Minecraft.getInstance();

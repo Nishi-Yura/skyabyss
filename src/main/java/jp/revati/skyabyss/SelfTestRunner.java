@@ -118,6 +118,7 @@ public final class SelfTestRunner {
         // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
         steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
+        steps.addAll(jp.revati.skyabyss.rpg.XpTableSelfTest.steps());
         // 技の木 v2 (docs/design/48): 木の読み込み・節の決まり・点・4 本の上限・基礎・保存。SKYABYSS_SELFTEST_ONLY="tree"
         steps.add(Step.once("tree", jp.revati.skyabyss.rpg.skill.tree.AbilityTreeSelfTest::runSelfTest));
         steps.add(Step.once("music", jp.revati.skyabyss.music.MusicSelfTest::run));
@@ -243,6 +244,8 @@ public final class SelfTestRunner {
         // 町のクエスト (限定の人・噂・墓守・酔いどれ・地図屋・古井戸)。docs/design/35 の 3.3・3.5。SKYABYSS_SELFTEST_ONLY=town
         steps.addAll(jp.revati.skyabyss.town.TownSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.town.RegionFolkSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.world.continent.PoiPlacesSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.rpg.skill.TreeVariantsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.world.continent.IslandTrailSelfTest.steps());
         // NPC v2 (人ごとの形・持ち物・動き)。docs/review/npc_quality_2026-10-23.md。SKYABYSS_SELFTEST_ONLY="lowpoly npc"
         steps.addAll(jp.revati.skyabyss.npc.NpcModelSelfTest.steps());
@@ -381,6 +384,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("moon trial", jp.revati.skyabyss.story.ch6.MoonTrialSelfTest::run));
         steps.add(Step.once("moon memories", jp.revati.skyabyss.story.ch6.MoonMemoriesSelfTest::run));
         // 終章の雲海 (舞台と行き方。docs/design/50 の 4.1)。SKYABYSS_SELFTEST_ONLY="cloudsea"
+        steps.add(Step.once("cloudsea (load)", jp.revati.skyabyss.story.finale.FinaleSelfTest::load));
         steps.add(Step.once("cloudsea", jp.revati.skyabyss.story.finale.FinaleSelfTest::run));
         // 裏ボス「初代の空見」(docs/design/53)。SKYABYSS_SELFTEST_ONLY="founder"
         steps.add(Step.once("founder", jp.revati.skyabyss.story.finale.founder.FounderSelfTest::run));
@@ -389,6 +393,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("dungeons", jp.revati.skyabyss.dungeon.DungeonSelfTest::run));
         // 巡り路 (docs/design/54 の 3.1)。SKYABYSS_SELFTEST_ONLY="circuit"
         steps.add(Step.once("circuit", jp.revati.skyabyss.endgame.CircuitSelfTest::run));
+        // 巡り路の野営地 (四つの土地・景品の表と入れ替え・引き)。SKYABYSS_SELFTEST_ONLY="circuit camps"
+        steps.add(Step.once("circuit camps", jp.revati.skyabyss.endgame.CircuitCampsSelfTest::runSelfTest));
         // 大陸の大事件 (docs/design/54 の 3.3)。SKYABYSS_SELFTEST_ONLY="world event"
         steps.add(Step.once("world event", jp.revati.skyabyss.endgame.WorldEventSelfTest::run));
         // 土地の名声と旅帳 (docs/design/54 の 6.2.2・6.2.3)。SKYABYSS_SELFTEST_ONLY="fame"
@@ -397,8 +403,20 @@ public final class SelfTestRunner {
         steps.add(Step.once("mastery", jp.revati.skyabyss.rpg.JobMasterySelfTest::run));
         // 組合の週 (旗取り・塔の順位。docs/design/54 の 5.1・3.5)。SKYABYSS_SELFTEST_ONLY="guild week"
         steps.add(Step.once("guild week", jp.revati.skyabyss.endgame.GuildWeekSelfTest::run));
+        // イサナの章ごとの居場所 (港・火のそば・鯨見。story/IsanaPost)。SKYABYSS_SELFTEST_ONLY="isana post"
+        steps.add(Step.once("isana post", jp.revati.skyabyss.story.IsanaPostSelfTest::run));
+        // 五章からの物語の厚み (門のイサナ・月の問いと地上の答え・終章の見送りと結末のあと・雲の島のこだま)。SKYABYSS_SELFTEST_ONLY="story late"
+        steps.add(Step.once("story late", jp.revati.skyabyss.story.StoryLateSelfTest::run));
+        // 今日・今週 (クエストログの時計の頁。quest/Clocks)。SKYABYSS_SELFTEST_ONLY="clocks"
+        steps.add(Step.once("clocks", jp.revati.skyabyss.quest.ClocksSelfTest::run));
+        // 記録の画面 (踏破・塔・深み・釣り・早駆け・転生・空見。record/RecordsHub)。SKYABYSS_SELFTEST_ONLY="records hub"
+        steps.add(Step.once("records hub", jp.revati.skyabyss.record.RecordsHubSelfTest::run));
+        // 登録した音の出来事がどれも sounds.json に行を持つ (行が無い音は鳴らない)。SKYABYSS_SELFTEST_ONLY="sound events"
+        steps.add(Step.once("sound events", jp.revati.skyabyss.registry.SoundEventsSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
+        // 狩人の手帳 (倒した数・頁・慣れ・見た技)。SKYABYSS_SELFTEST_ONLY="hunter notes"
+        steps.add(Step.once("hunter notes", jp.revati.skyabyss.endgame.HunterNotesSelfTest::runSelfTest));
         // 見た目替え (docs/design/54 の 5.4)。SKYABYSS_SELFTEST_ONLY="looks"
         steps.add(Step.once("looks", jp.revati.skyabyss.endgame.LooksSelfTest::run));
         // 釣り (魚の表・釣れ方・大きさ・図鑑・週の大会・店)。SKYABYSS_SELFTEST_ONLY="fishing"
@@ -415,7 +433,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("abyss v3", 60, jp.revati.skyabyss.story.ch5.layers.AbyssV3SelfTest::run));
         // 形 B の層の護りの下り道 (塩・灰。道すじに歩いて届く・一人で送りきる・気力が尽きると前の待ち場から・崩れに呑まれると待ち場 3 から・二人で灰を送る)。
         // SKYABYSS_SELFTEST_ONLY="abyss escort"
-        steps.add(Step.once("abyss escort (load)", jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::load));
+        steps.add(Step.until("abyss escort (load)", jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::loadUntil));
         steps.add(Step.once("abyss escort", 60, jp.revati.skyabyss.story.ch5.layers.AbyssEscortSelfTest::run));
         // 番人の悪夢 (段の表・入る条件・段の進み・報酬・保存・閉じたあとの後片付け)。docs/design/36 の 9。SKYABYSS_SELFTEST_ONLY="abyss nightmare"
         steps.add(Step.once("abyss nightmare (load)", jp.revati.skyabyss.story.ch5.warden.WardenSelfTest::load));
@@ -476,12 +494,23 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.RaidLightSelfTest.steps());
         // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.combat.TreeKeystoneSelfTest.steps());
+        // 近接の一撃 (2026-11-04): 同じ敵を殴れる間・溜めの強さ・回復は満ちた一撃だけ。SKYABYSS_SELFTEST_ONLY="melee hits"
+        steps.addAll(jp.revati.skyabyss.combat.MeleeHitsSelfTest.steps());
+        // 倒すまでの時間 (土地の敵を、その土地の目安のレベルの武器の満ちた一撃で)。SKYABYSS_SELFTEST_ONLY="ttk audit"
+        steps.addAll(jp.revati.skyabyss.combat.TtkAuditSelfTest.steps());
         // 完全な RPG の決まり (採集・水汲み・倒れたときの既定)。docs/design/40。SKYABYSS_SELFTEST_ONLY="rpg rules"
         steps.addAll(jp.revati.skyabyss.rpg.rules.RpgRulesSelfTest.steps());
         // 正式版の前の直し: データの版の移し替え・置く品を持たせない・頁が寄る (upgrade/)。SKYABYSS_SELFTEST_ONLY="upgrade"
         steps.addAll(jp.revati.skyabyss.upgrade.UpgradeSelfTest.steps());
         // 天と淵の大陸の地形 (図と、大陸の世界なら本物のチャンク)。docs/design/40 の 3 章。SKYABYSS_SELFTEST_ONLY="continent"
         steps.addAll(jp.revati.skyabyss.world.continent.ContinentSelfTest.steps());
+        // 大陸の道に越えられない段がない。SKYABYSS_SELFTEST_ONLY="continent roads"
+        steps.add(Step.once("continent roads", jp.revati.skyabyss.world.continent.ContinentRoadsSelfTest::runSelfTest));
+        // 倒れたあとは行ったことのある町の休み場だけ。SKYABYSS_SELFTEST_ONLY="continent respawn"
+        steps.add(Step.once("continent respawn", jp.revati.skyabyss.world.continent.ContinentRespawnSelfTest::runSelfTest));
+        // 逃げる獣 (型と動き・出る所・硬さ・報い・締め出し)。SKYABYSS_SELFTEST_ONLY="rare beasts"
+        steps.add(Step.once("rare beasts", jp.revati.skyabyss.world.continent.RareBeastSelfTest::runSelfTest));
         // 順路の部屋が分かれている (封じを壁として歩く)。SKYABYSS_SELFTEST_ONLY="route rooms"
         steps.addAll(jp.revati.skyabyss.trial.RouteRoomsSelfTest.steps());
         steps.addAll(jp.revati.skyabyss.trial.RoutePartySelfTest.steps());

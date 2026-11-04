@@ -34,7 +34,7 @@
     },
     {
       "id": "wreck",
-      "xp": 60,
+      "xp": 70,
       "mode": "all",
       "objectives": [
         {
@@ -55,7 +55,7 @@
     }
   ],
   "reward": {
-    "xp": 90,
+    "xp": 100,
     "items": [],
     "affinity": {
       "skyabyss:whale_chaser": 3

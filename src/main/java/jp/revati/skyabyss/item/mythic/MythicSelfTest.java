@@ -186,6 +186,9 @@ public final class MythicSelfTest {
             check(f, jp.revati.skyabyss.item.WeaponLines.of(DivineGearSetup.SWORD.get()).equals(jp.revati.skyabyss.item.WeaponLines.make0(DivineGearSetup.SWORD.get())),
                     "weapon lines are not fixed per item");
             check(f, jp.revati.skyabyss.item.WeaponLines.of(net.minecraft.world.item.Items.DIAMOND_SWORD).isEmpty(), "a vanilla sword got stat lines");
+
+            // 目覚め (MythicAwakening): 段の境、能力と欠点の倍率、倒した数を手の品に書く
+            awakening(f, level, p, zs, px, py, pz);
         } catch (Exception e) {
             f.add("threw " + e);
             SkyAbyss.LOGGER.error("SELFTEST mythic threw", e);
@@ -195,10 +198,42 @@ public final class MythicSelfTest {
             }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST mythic PASSED (18 mythic weapons: abilities, drawbacks, releases)");
+            SkyAbyss.LOGGER.info("SELFTEST mythic PASSED (18 mythic weapons: abilities, drawbacks, releases; awakening steps, boosts, halved drawbacks, kill counting)");
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST mythic FAILED: {}", s));
         }
+    }
+
+    private static void awakening(List<String> f, ServerLevel level, FakePlayer p, List<Zombie> zs, double px, double py, double pz) {
+        check(f, MythicAwakening.items().size() == 18, "there should be 18 artifacts: " + MythicAwakening.items().size());
+        check(f, MythicAwakening.stage(299) == 0 && MythicAwakening.stage(300) == 1 && MythicAwakening.stage(1499) == 1 && MythicAwakening.stage(1500) == 2
+                && MythicAwakening.stage(5000) == 3, "awakening steps should be 300 / 1,500 / 5,000");
+        ItemStack sword = new ItemStack(DivineGearSetup.SWORD.get());
+        p.setItemInHand(InteractionHand.MAIN_HAND, sword);
+        check(f, MythicAwakening.boost(p) == 1 && MythicAwakening.drawback(p) == 1 && MythicAwakening.toNext(sword) == 300, "a fresh artifact should not be awakened");
+        MythicAwakening.add(null, sword, 300);
+        check(f, Math.abs(MythicAwakening.boost(p) - 1.15) < 1e-9 && MythicAwakening.drawback(p) == 1, "stage 1 should give +15% and keep the drawback");
+        MythicAwakening.add(null, sword, 1200);
+        check(f, MythicAwakening.drawback(p) == 0.5 && MythicAbilities.cooldownExtra(p, Skill.TITAN_CLEAVE) == MythicAbilities.SKY_COOLDOWN / 2,
+                "stage 2 should halve the drawback (titan cleave +1 s)");
+        MythicAwakening.add(null, sword, 3500);
+        check(f, MythicAwakening.stage(sword) == 3 && Math.abs(MythicAwakening.boost(p) - 1.30) < 1e-9 && MythicAwakening.toNext(sword) == 0, "stage 3 should give +30%");
+        // 側の目の弓: 段 2 から雲穿ちが半分まで貫く
+        ItemStack bow = new ItemStack(TowerGearSetup.BOW.get());
+        p.setItemInHand(InteractionHand.MAIN_HAND, bow);
+        check(f, MythicAbilities.pierceLimit(p, 4) == 0, "the eye bow should not pierce before awakening");
+        MythicAwakening.add(null, bow, 1500);
+        check(f, MythicAbilities.pierceLimit(p, 4) == 2 && !MythicAbilities.noPierce(p), "an awakened eye bow should pierce half");
+        // 倒した数: 神器で傷を入れた敵が倒れると、手の品に 1 (大きな相手は 25)
+        ItemStack fresh = new ItemStack(DivineGearSetup.HAMMER.get());
+        p.setItemInHand(InteractionHand.MAIN_HAND, fresh);
+        Zombie z = zombie(level, px, py, pz + 2.0, zs);
+        z.invulnerableTime = 0;
+        z.hurt(level.damageSources().playerAttack(p), 2f);
+        z.invulnerableTime = 0;
+        z.hurt(level.damageSources().generic(), 1000f);
+        int worth = z.getMaxHealth() >= MythicAwakening.BOSS_HEALTH ? MythicAwakening.BOSS_WORTH : 1;
+        check(f, MythicAwakening.kills(p.getMainHandItem()) == worth, "a foe hurt with the artifact should count when it dies (" + worth + "): " + MythicAwakening.kills(p.getMainHandItem()));
     }
 
     private static void hold(FakePlayer p, Item item) {

@@ -111,7 +111,7 @@ public final class RaijuSelfTest {
         checkTimings(failures);
         checkLang(failures);
         GrowthRewards.Source src = GrowthRewards.MOD_ENEMIES.get(SkyAbyss.MODID + ":raiju");
-        check(src != null && src.xp() == 170 && src.contentLevel() == 24, "growth source for raiju is not 170 / Lv24", failures);
+        check(src != null && src.xp() == RaijuLoot.GROWTH_XP && src.contentLevel() == 24, "growth source for raiju is not " + RaijuLoot.GROWTH_XP + " / Lv24", failures);
         checkNest(site, failures);
         checkPlugs(site, failures);
         checkBattle(site, failures, notes);

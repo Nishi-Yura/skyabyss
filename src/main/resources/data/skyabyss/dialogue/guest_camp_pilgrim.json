@@ -1,0 +1,124 @@
+{
+  "npc": "skyabyss:guest_camp_pilgrim",
+  "entries": [
+    {
+      "node": "q_back",
+      "if": {
+        "type": "quest",
+        "quest": "town/camp_pilgrim",
+        "is": "active",
+        "stage": "back"
+      }
+    },
+    {
+      "node": "q_wait",
+      "if": {
+        "type": "quest",
+        "quest": "town/camp_pilgrim",
+        "is": "active"
+      }
+    },
+    {
+      "node": "after",
+      "if": {
+        "type": "quest",
+        "quest": "town/camp_pilgrim",
+        "is": "done"
+      }
+    },
+    {
+      "node": "idle"
+    }
+  ],
+  "nodes": {
+    "idle": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ask",
+          "goto": "q_ask",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 0
+              },
+              {
+                "type": "quest",
+                "quest": "town/camp_pilgrim",
+                "is": "none"
+              }
+            ]
+          },
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "town/camp_pilgrim"
+            }
+          ]
+        },
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "after": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "bye",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "q_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    },
+    "q_wait": {
+      "face": "neutral"
+    },
+    "q_back": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "give",
+          "goto": "q_done",
+          "kind": "give",
+          "do": [
+            {
+              "type": "signal",
+              "signal": "town_hand:guest_camp_pilgrim"
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "end",
+          "kind": "leave"
+        }
+      ]
+    },
+    "q_done": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

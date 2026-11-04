@@ -187,13 +187,9 @@ public final class GearTierSelfTest {
         check(f, t.length == 7 && t[0] == GearTier.COMMON && t[5] == GearTier.ARTIFACT && t[6] == GearTier.MYTHIC, "the ladder is not the seven tiers");
         double prevSockets = -1;
         for (int i = 0; i < t.length; i++) {
-            int[] odds = t[i].socketOdds();
-            double total = odds[0] + odds[1] + odds[2];
-            double mean = (odds[1] + 2 * odds[2]) / total;
-            if (t[i].affixed()) {
-                check(f, mean > prevSockets, t[i] + " has no more sockets than the tier below");
-                prevSockets = mean;
-            }
+            // 穴の数は上の階級ほど減らない
+            check(f, t[i].sockets() >= prevSockets, t[i] + " has fewer sockets than the tier below");
+            prevSockets = t[i].sockets();
             if (i == 0) {
                 continue;
             }

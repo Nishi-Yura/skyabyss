@@ -115,6 +115,12 @@ public class NpcEntity extends PathfinderMob implements GeoEntity {
         setCustomName(Component.translatable(getType().getDescriptionId()));
     }
 
+    // 鯨追いは二章・三章のあいだ人ごとに居場所が違う (港・火のそばのイサナと鯨見のイサナ。story/IsanaPost)。見える方だけを送る
+    @Override
+    public boolean broadcastToPlayer(ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.story.IsanaPost.visibleTo(this, player);
+    }
+
     public void setHome(BlockPos pos) {
         this.home = pos.immutable();
         restrictTo(home, homeRadius);

@@ -372,4 +372,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # 今の敵のメッシュは、入れたあとで直したもの (関節の直し・tools/rough/lowpoly/densify_1102 で細かくした形)。流すと前の形に戻るので止めてある
+    if os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+        sys.exit("tools/gen/ch1/gen_ch1_ground_mobs.py は停止中です: あとで直した今の敵のメッシュを前の形で上書きするため。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
     main()

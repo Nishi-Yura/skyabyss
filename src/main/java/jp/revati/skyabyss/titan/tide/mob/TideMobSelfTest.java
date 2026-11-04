@@ -127,7 +127,7 @@ public final class TideMobSelfTest {
 
     // 経験値 (08 の 6.6節): 14 / 3 / 10、推奨レベル 18
     private static void checkXp(List<String> failures) {
-        String[][] rows = {{"coral_thrall", "14"}, {"reef_scuttler", "3"}, {"bubble_puffer", "10"}};
+        String[][] rows = {{"coral_thrall", "9"}, {"reef_scuttler", "2"}, {"bubble_puffer", "6"}};
         for (String[] r : rows) {
             GrowthRewards.Source s = GrowthRewards.MOD_ENEMIES.get(SkyAbyss.MODID + ":" + r[0]);
             check(failures, s != null && s.xp() == Integer.parseInt(r[1]) && s.contentLevel() == 18, "xp of " + r[0] + " = " + s);

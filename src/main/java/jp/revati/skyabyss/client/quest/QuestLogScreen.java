@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.lore.LoreWrap;
 import jp.revati.skyabyss.quest.QuestDef;
@@ -27,23 +28,26 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // クエストログ (U)。左に一覧 (メイン・サブ・終えたもの)、右に選んだクエストの今の書き付け、目的、報酬。
 // 「やること」を書く帳面で、「知ったこと」は伝承の書に分ける。下の釦で、左の小さな表示に出すクエストを選ぶ。
-// 一覧と右の頁は、どちらも目盛りつきの送り (ホイール・つまみ・キー)。窓は画面に合わせて広がる (2026-10-22 の部屋の見直し)。
+// 一覧と右の頁は、どちらも目盛りつきの送り (ホイール・つまみ・キー)。板は黄金比の大きい板 (client/ui/Golden。docs/design/56):
+// 一覧は脇の列 (左)、読む中身は主の列 (右)、下の段に伝承の書への案内と追う釦。窓に合わせて画素ちょうどで大きくする。
 // 章の見出し (「· 一章　岩鯨」) を押すと、その下の最初のクエストを開く。
 // 終えたクエストの頁: 題・章・依頼主・受けた日と終えた日・終わりの書き付け・やったこと (段ごとの目的を ■ で)・受け取った報酬
+// 一覧のいちばん上の「今日・今週」(2026-11-05 の ct_clock): 日・週で戻るものを一行ずつ (quest/Clocks。開いているあいだ 2 秒ごとにサーバーへ頼む)
 public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int MAX_W = 400;
-    private static final int MAX_H = 260;
-    private static final int LIST_W = 112;
-    private static final int ROW_H = 12;
-    private static final int LINE_H = 11;
-    private static final int PANEL = 0xFA101318;
-    private static final int EDGE = 0xFF2E5552;
+    // 一覧の「今日・今週」の行 (クエストの id とぶつからない印)
+    static final String CLOCK = "#clock";
+    static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
+    private static final Golden.Box LIST = LAYOUT.body().minor(true);
+    private static final Golden.Box PAGE = LAYOUT.body().major(false);
+    private static final int ROW_H = Golden.ROW;
+    private static final int LINE_H = Golden.ROW;
     private static final int EDGE_IN = 0xFF17302F;
-    private static final int TEAL = 0xFF7FD6D0;
-    private static final int GOLD = 0xFFF2C14E;
-    private static final int TEXT = 0xFFE9E3D4;
-    private static final int SOFT = 0xFF8C8CA0;
-    private static final int DIM = 0xFF5C5C6C;
+    private static final int TEAL = 0xFF000000 | Golden.TEAL;
+    private static final int GOLD = 0xFF000000 | Golden.GOLD;
+    private static final int TEXT = 0xFF000000 | Golden.TEXT;
+    private static final int SOFT = 0xFF000000 | Golden.SOFT;
+    private static final int DIM = 0xFF000000 | Golden.DIM;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private int w;
     private int h;
@@ -74,28 +78,34 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     // 窓の大きさと場所、一覧と頁の見える所 (画面が変わったら、ここで決め直す)
     private void layout() {
-        w = Math.min(MAX_W, width - 16);
-        h = Math.min(MAX_H, height - 16);
-        left = (width - w) / 2;
-        top = (height - h) / 2;
-        listPanel.setViewport(left + 8, top + 26, LIST_W - 2, h - 26 - 24);
-        int bx = left + LIST_W + 18;
-        bodyPanel.setViewport(bx, top + 40, left + w - 12 - bx, h - 40 - 24);
+        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
+        w = Golden.L_W;
+        h = Golden.L_H;
+        left = 0;
+        top = 0;
+        listPanel.setViewport(LIST.x() + 2, LIST.y() + 2, LIST.w() - 3, LIST.h() - 4);
+        // 頁: 題の一行と線の下から。目盛りの余白 (8) の分だけ右へ広げる
+        bodyPanel.setViewport(bodyLeft(), PAGE.y() + Golden.ROW + Golden.S8, PAGE.right() - 2 - bodyLeft(), PAGE.h() - Golden.ROW - Golden.S8 - 2);
     }
 
     private int bodyLeft() {
-        return left + LIST_W + 18;
+        return PAGE.x() + Golden.S8;
     }
 
     @Override
     protected void init() {
         layout();
+        Golden.Box foot = LAYOUT.footUnder(PAGE);
         trackButton = addRenderableWidget(Button.builder(Component.empty(), b -> toggleTrack())
-                .bounds(left + w - 98, top + h - 24, 88, 16).build());
+                .bounds(foot.right() - Golden.S89, foot.y() + 4, Golden.S89, Golden.BTN).build());
         rebuild();
         if (selected == null) {
             QuestLog log = log();
             selected = log != null && !log.tracked().isEmpty() ? log.tracked() : firstQuest();
+            // 受けているクエストがなければ「今日・今週」
+            if (selected == null) {
+                selected = CLOCK;
+            }
         }
         if (selected != null) {
             reveal(selected);
@@ -111,7 +121,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     @Nullable
     private String firstQuest() {
         for (Row r : rows) {
-            if (r.quest() != null) {
+            if (r.quest() != null && !CLOCK.equals(r.quest())) {
                 return r.quest();
             }
         }
@@ -126,6 +136,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             syncList();
             return;
         }
+        rows.add(new Row(CLOCK, Component.translatable("quest.skyabyss.clock.row"), GOLD));
         List<QuestDef> main = new ArrayList<>();
         List<QuestDef> sub = new ArrayList<>();
         List<QuestDef> done = new ArrayList<>();
@@ -183,6 +194,30 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         }
     }
 
+    // 右の頁 (今日・今週): 名前・様子・戻るまで・受ける所
+    private int clockVersion = -1;
+    private int clockAsk;
+
+    private void clockBody(Font font, int bw) {
+        for (String l : LoreWrap.wrap(Component.translatable("quest.skyabyss.clock.lead").getString(), bw, font::width)) {
+            body.add(new BodyLine(l, SOFT, 0));
+        }
+        for (jp.revati.skyabyss.quest.Clocks.Row r : jp.revati.skyabyss.quest.Clocks.CLIENT) {
+            body.add(new BodyLine("", SOFT, 0));
+            body.add(new BodyLine(Component.translatable("quest.skyabyss.clock.name." + r.id()).getString(), GOLD, 0));
+            for (String l : LoreWrap.wrap(jp.revati.skyabyss.quest.Clocks.status(r).getString(), bw - Golden.S8, font::width)) {
+                body.add(new BodyLine(l, TEXT, Golden.S8));
+            }
+            if (r.reset() != jp.revati.skyabyss.quest.Clocks.NONE) {
+                String key = r.reset() == jp.revati.skyabyss.quest.Clocks.DAY ? "quest.skyabyss.clock.reset.day" : "quest.skyabyss.clock.reset.week";
+                body.add(new BodyLine(Component.translatable(key, jp.revati.skyabyss.quest.Clocks.left(r.ticks())).getString(), TEAL, Golden.S8));
+            }
+            for (String l : LoreWrap.wrap(Component.translatable("quest.skyabyss.clock.where", Component.translatable(r.where())).getString(), bw - Golden.S8, font::width)) {
+                body.add(new BodyLine(l, DIM, Golden.S8));
+            }
+        }
+    }
+
     // 右の頁: 題、依頼主、書き付け、目的、報酬
     private void rebuildBody() {
         body.clear();
@@ -193,6 +228,11 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         QuestLog.Entry entry = log == null || selected == null ? null : log.entry(selected);
         updateTrackButton(def, entry, log);
+        if (CLOCK.equals(selected)) {
+            clockBody(font, bw);
+            bodySync();
+            return;
+        }
         bodySync();
         if (def == null || entry == null) {
             return;
@@ -237,7 +277,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 String text = QuestHud.objectiveText(def, stage, ob);
                 List<String> wrapped = QuestHud.wrapWithCount(text, ob.count() > 1 ? have + "/" + ob.count() : "", bw - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
-                    body.add(new BodyLine((k == 0 ? (ok ? "■ " : "□ ") : "") + wrapped.get(k), ok ? SOFT : TEXT, k == 0 ? 0 : 11));
+                    body.add(new BodyLine((k == 0 ? (ok ? "■ " : "□ ") : "") + wrapped.get(k), ok ? SOFT : TEXT, k == 0 ? 0 : Golden.S13));
                 }
             }
             body.add(new BodyLine("", TEXT, 0));
@@ -250,7 +290,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 List<String> wrapped = QuestHud.wrapWithCount(d.alternative() ? or + " " + text : text, d.count(), bw - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
                     String head = k > 0 ? "" : d.alternative() ? "　" : "■ ";
-                    body.add(new BodyLine(head + wrapped.get(k), SOFT, k == 0 ? 0 : 11));
+                    body.add(new BodyLine(head + wrapped.get(k), SOFT, k == 0 ? 0 : Golden.S13));
                 }
             }
             body.add(new BodyLine("", TEXT, 0));
@@ -331,6 +371,18 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public void tick() {
+        if (CLOCK.equals(selected)) {
+            if (clockAsk-- <= 0) {
+                clockAsk = 40;
+                PacketDistributor.sendToServer(new jp.revati.skyabyss.quest.Clocks.Request());
+            }
+            if (clockVersion != jp.revati.skyabyss.quest.Clocks.clientVersion) {
+                clockVersion = jp.revati.skyabyss.quest.Clocks.clientVersion;
+                int scroll = bodyPanel.scroll();
+                rebuildBody();
+                bodyPanel.setScroll(scroll);
+            }
+        }
         // 記録が変わったら (目的が進んだ等) 作り直す
         QuestLog log = log();
         if (log != null) {
@@ -354,23 +406,35 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // 枠と中身は背景として描き、その上に釦 (super.render の部品) が乗る
-        layout();
         g.fill(0, 0, width, height, 0x80000000);
+    }
+
+    // 板・中身・釦は、窓に合わせた変換 (fit。画素ちょうど) の中で描く。当たりも同じ変換を通す
+    @Override
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        layout();
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
         drawPanel(g, mouseX, mouseY);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        fit.end(g);
     }
 
     private void drawPanel(GuiGraphics g, int mouseX, int mouseY) {
         Font font = Minecraft.getInstance().font;
-        g.fill(left, top, left + w, top + h, PANEL);
-        g.renderOutline(left, top, w, h, EDGE);
-        g.renderOutline(left + 2, top + 2, w - 4, h - 4, EDGE_IN);
-        g.drawString(font, title, left + 10, top + 8, TEAL, false);
-        g.fill(left + 8, top + 19, left + w - 8, top + 20, EDGE_IN);
-        // 縦の仕切りは下の一行 (伝承の書への案内) の上で止める。案内を左の列に押し込むと「伝承の書／に。」と切れるため
-        g.fill(left + LIST_W + 10, top + 24, left + LIST_W + 11, top + h - 26, EDGE_IN);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), Golden.PALE, false);
+        Golden.recess(g, LIST);
+        Golden.recess(g, PAGE);
+        g.drawString(font, Component.translatable("gui.skyabyss.quest.lore_hint"), LAYOUT.foot().x() + Golden.S5,
+                Golden.textY(LAYOUT.foot().y(), LAYOUT.foot().h()), DIM, false);
         if (rows.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.quest.empty"), left + w / 2, top + h / 2 - 4, SOFT);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.quest.empty"), LAYOUT.body().cx(), Golden.textY(LAYOUT.body().y() + LAYOUT.body().h() / 2 - 6, Golden.ROW), SOFT);
             return;
         }
         // 一覧 (目盛りつき。見える行だけ描く)
@@ -383,18 +447,21 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             Row r = rows.get(ri);
             if (r.quest() == null) {
                 boolean hover = r.jump() != null && inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
-                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.label().getString()), left + 10, y + 2, listTextW(), hover ? TEXT : r.color(), false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.label().getString()), LIST.x() + Golden.S5,
+                        Golden.textY(y, ROW_H), listTextW(), hover ? TEXT : r.color(), false);
             } else {
                 boolean sel = r.quest().equals(selected);
                 boolean hover = inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
-                if (sel || hover) {
-                    g.fill(left + 8, y, left + LIST_W + 6, y + ROW_H, sel ? 0x502E8F88 : 0x281E5552);
+                if (sel) {
+                    Golden.selected(g, new Golden.Box(LIST.x() + 2, y, LIST.w() - 7, ROW_H));
+                } else if (hover) {
+                    g.fill(LIST.x() + 2, y, LIST.right() - 5, y + ROW_H, 0x281E5552);
                 }
-                String label = font.plainSubstrByWidth(r.label().getString(), listTextW() - 4);
-                g.drawString(font, label, left + 16, y + 2, r.color(), false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(r.label().getString()), LIST.x() + Golden.S13, Golden.textY(y, ROW_H),
+                        listTextW() - Golden.S8, r.color(), false);
                 QuestLog log = log();
                 if (log != null && r.quest().equals(log.tracked())) {
-                    g.drawString(font, "▸", left + 9, y + 2, r.color(), false);
+                    g.drawString(font, "▸", LIST.x() + Golden.S5, Golden.textY(y, ROW_H), r.color(), false);
                 }
             }
         }
@@ -403,8 +470,11 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         int bx = bodyLeft();
-        if (def != null) {
-            g.drawString(font, Component.translatable(def.titleKey()), bx, top + 26, def.main() ? GOLD : TEAL, false);
+        boolean clock = CLOCK.equals(selected);
+        if (def != null || clock) {
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(clock ? "quest.skyabyss.clock.title" : def.titleKey()), bx, Golden.textY(PAGE.y() + 2, Golden.ROW),
+                    PAGE.w() - 2 * Golden.S8, clock || def.main() ? GOLD : TEAL, false);
+            Golden.rule(g, bx, PAGE.right() - Golden.S8, PAGE.y() + Golden.ROW + Golden.S5);
             bodyPanel.begin(g);
             for (int i = 0; i < body.size(); i++) {
                 int y = bodyPanel.top() + i * LINE_H;
@@ -412,17 +482,16 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                     continue;
                 }
                 BodyLine l = body.get(i);
-                g.drawString(font, l.text(), bx + l.indent(), y, l.color(), false);
+                g.drawString(font, l.text(), bx + l.indent(), Golden.textY(y, LINE_H), l.color(), false);
             }
             bodyPanel.end(g);
             bodyPanel.drawBar(g, EDGE_IN, 0x887FD6D0);
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.quest.lore_hint"), left + 10, top + h - 19, DIM, false);
     }
 
     // 一覧の字の幅 (送りの印が出るときは、その分だけ短く切る)
     private int listTextW() {
-        return LIST_W - 12;
+        return LIST.w() - Golden.S5 - Golden.S8;
     }
 
     private boolean inList(double mx, double my) {
@@ -430,7 +499,9 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double sx, double sy, int button) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         if (inList(mx, my) && button == 0) {
             int ri = (int) Math.floor((my - listPanel.top()) / ROW_H);
             if (ri >= 0 && ri < rows.size()) {
@@ -446,13 +517,19 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+    public boolean mouseDragged(double sx, double sy, int button, double sdx, double sdy) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
+        double dx = sdx / fit.scale();
+        double dy = sdy / fit.scale();
         return listPanel.mouseDragged(mx, my, button, dx, dy) || bodyPanel.mouseDragged(mx, my, button, dx, dy)
                 || super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(double sx, double sy, int button) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         return listPanel.mouseReleased(mx, my, button) || bodyPanel.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
     }
 
@@ -477,13 +554,16 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         reveal(quest);
         if (!quest.equals(selected)) {
             selected = quest;
+            clockAsk = 0;
             rebuildBody();
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.2f, 0.4f));
         }
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+    public boolean mouseScrolled(double sx, double sy, double dx, double dy) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         if (bodyPanel.mouseScrolled(mx, my, dy) || listPanel.mouseScrolled(mx, my, dy)) {
             return true;
         }
@@ -514,6 +594,6 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     @Override
     public int[] textBounds() {
         layout();
-        return new int[] {left, top, w, h};
+        return fit.screenRect(0, 0, w, h);
     }
 }

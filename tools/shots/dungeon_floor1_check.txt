@@ -1,0 +1,51 @@
+# 2026-11-03 夜: 地下のダンジョンに入った所 (1 層目の入口)。四つ
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/dungeon_floor1_check.txt -PshotsName=dungeon_entrance
+world camp_check continent
+size 1600 900
+timeout 3600
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode adventure
+cmd effect give @s resistance 1200 4 true
+chat clear
+hud on
+# bone_pit
+cmd skyabyss dungeon enter bone_pit
+wait 160
+shot f_bone_pit_1
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot f_bone_pit_2
+cmd skyabyss dungeon leave
+wait 80
+# tide_cave
+cmd skyabyss dungeon enter tide_cave
+wait 160
+shot f_tide_cave_1
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot f_tide_cave_2
+cmd skyabyss dungeon leave
+wait 80
+# storm_hollow
+cmd skyabyss dungeon enter storm_hollow
+wait 160
+shot f_storm_hollow_1
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot f_storm_hollow_2
+cmd skyabyss dungeon leave
+wait 80
+# molten_mine
+cmd skyabyss dungeon enter molten_mine
+wait 160
+shot f_molten_mine_1
+cmd tp @s ~ ~ ~ ~180 10
+wait 20
+shot f_molten_mine_2
+cmd skyabyss dungeon leave
+wait 80

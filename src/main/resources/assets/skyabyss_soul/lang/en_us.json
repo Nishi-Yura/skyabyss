@@ -92,5 +92,7 @@
   "message.skyabyss.rebirth.crystal_bonus": "An extra crystal turned up.",
   "growth.skyabyss.reason.guide": "Guidance",
   "skyabyss_pouch.category.spare": "Spare",
-  "skyabyss_pouch.screen.spare_empty": "Spare slot: keeps one item type of your choice, even if you fall"
+  "skyabyss_pouch.screen.spare_empty": "Spare slot: keeps one item type of your choice, even if you fall",
+  "gui.skyabyss.rebirth.page.board": "Board",
+  "gui.skyabyss.rebirth.page.terms": "Terms"
 }

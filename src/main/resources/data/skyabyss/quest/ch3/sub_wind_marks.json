@@ -11,7 +11,7 @@
   "stages": [
     {
       "id": "trace",
-      "xp": 150,
+      "xp": 270,
       "objectives": [
         {
           "id": "vane",
@@ -46,6 +46,6 @@
     }
   ],
   "reward": {
-    "xp": 150
+    "xp": 270
   }
 }

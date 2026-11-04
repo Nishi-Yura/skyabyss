@@ -72,7 +72,7 @@
   "dialogue.skyabyss.storyteller.song0_b": "I always thought we sang \"three, don't you look up\" so that children wouldn't see what can't be seen.\nNow I think it may be so that we aren't seen.",
   "dialogue.skyabyss.storyteller.song0_c": "I fear that if I called its name, it would turn around.\n...So I've decided not to call it.",
   "dialogue.skyabyss.storyteller.fragment": "...You came back.\nShow me what's in your hand.",
-  "dialogue.skyabyss.storyteller.fragment2": "Warm... It's beating. As if it were alive.\nThe old tales say the key to the sky's door was split in four. One the whale had. The rest... who knows where.",
+  "dialogue.skyabyss.storyteller.fragment2": "Warm... It's beating. As if it were alive.\nJust as the old tale said. The key to the sky's door is four pieces. One the whale had. The rest... who knows where.",
   "dialogue.skyabyss.storyteller.fragment_verse": "...Do you remember the first line of the counting song? \"One, at noon the shadow comes.\"\nPerhaps it was the whale's shadow all along. The children sang it without knowing.",
   "dialogue.skyabyss.storyteller.fragment3.thanks": "Thank you.",
   "dialogue.skyabyss.storyteller.fragment3": "You're going to the sky, aren't you. ...I won't stop you.",
@@ -155,11 +155,11 @@
   "quest.skyabyss.main_song.board.lead": "If the chain reaches you, you can climb to its back. The place Isana never once reached.",
   "quest.skyabyss.main_song.board.ride": "Climb the chain to its back",
   "quest.skyabyss.main_song.board.ride.wait": "Follow the stone whale",
-  "quest.skyabyss.main_song.inscriptions.journal": "On its back lay a ruined town. Past the entrance, three trial rooms follow one after another.\nAt the entrance of each, the people of the back left an inscription. Cross all three and go deeper.",
+  "quest.skyabyss.main_song.inscriptions.journal": "On its back lay a ruined town. Past the entrance, three trial rooms follow one after another.\nAt the entrance of each, the people of the back left an inscription. Reading it opens the room's door. Read all three and go deeper.",
   "quest.skyabyss.main_song.inscriptions.lead": "A ruined town lies on its back. The inscriptions in the three trial rooms may tell who lived here.",
-  "quest.skyabyss.main_song.inscriptions.read": "Clear the trials, read their words",
-  "quest.skyabyss.main_song.heart.journal": "The three trials are behind me. Past the sentry captain, something is beating.\nSomething, they say, was laid to rest beside the heartbeat.",
-  "quest.skyabyss.main_song.heart.lead": "Beyond the three trials and the sentry captain, something beats.",
+  "quest.skyabyss.main_song.inscriptions.read": "Read three room inscriptions",
+  "quest.skyabyss.main_song.heart.journal": "I read three inscriptions and crossed three trials. Every one of them spoke of a heartbeat deep in the back.\nPast the sentry captain lies that heartbeat. Go and see what was laid beside it.",
+  "quest.skyabyss.main_song.heart.lead": "The heartbeat the inscriptions spoke of beats beyond the sentry captain.",
   "quest.skyabyss.main_song.heart.still": "Find what beats deep inside the body",
   "quest.skyabyss.main_song.heart.fragment": "Take what was laid beside the heartbeat",
   "quest.skyabyss.main_song.return.journal": "The fragment is faintly warm.\nReturn to the capital and tell them.",
@@ -227,5 +227,6 @@
   "dialogue.skyabyss.artisan.a_menu.bye": "I will be back.",
   "dialogue.skyabyss.artisan.a_hammer": "This hammer? The haft has been changed three times. The head, never. ...Or once? I have no memory of that part.\nA hammer does not remember how often it fell. The hand does.",
   "dialogue.skyabyss.artisan.a_whet": "A whetstone wears down before the blade does. Every time you hone, it rounds off. That is fine. That is what it is for.\n...Some people name the things that wear away. I do not. Name it, and the hand starts to spare it.",
-  "dialogue.skyabyss.artisan.a_hands": "The hands remember. How the needle goes in, how the hammer falls, which way a knot lies. ...Who taught me, the hands will not say.\nStill, when I hold a tool, I feel I am standing on the owner's side. Odd. Forget I said it."
+  "dialogue.skyabyss.artisan.a_hands": "The hands remember. How the needle goes in, how the hammer falls, which way a knot lies. ...Who taught me, the hands will not say.\nStill, when I hold a tool, I feel I am standing on the owner's side. Odd. Forget I said it.",
+  "dialogue.skyabyss.storyteller.fragment_sea": "An old boat song says one of the other keys lies beyond the tide.\nThe shore town has people who read the ebb and flow. Isana will likely head that way too."
 }

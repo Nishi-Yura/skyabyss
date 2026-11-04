@@ -146,7 +146,7 @@ public final class Ch4GroundSelfTest {
             clean(p);
         }
         report("ch4 ground", f, "2 trail steps + 2 sub quests + daily, dialogue, lore, ja/en text, xp budget, main_ember board, main_key answers, ward weave, "
-                + "trail flow and ch4_ready, pack and kiln cache once, warm stand, whetstone, cooler");
+                + "trail flow and ch4_ready, pack and kiln cache once, warm stand and the chapter-5 forge fire, whetstone, cooler");
     }
 
     private static void data(List<String> f) {
@@ -292,6 +292,17 @@ public final class Ch4GroundSelfTest {
         check(f, DeadForgePit.touchStand(p, level, stand) && stand.equals(DeadForgePit.warmStandNear(level, stand.offset(3, 0, 2), 16))
                 && DeadForgePit.warmStandNear(level, stand.offset(40, 0, 0), 16) == null, "a warm stone should warm the stand for mites within 16");
         check(f, p.getInventory().countItem(jp.revati.skyabyss.titan.ember.EmberTitanSetup.WARM_STONE.get()) == 1, "warming the stand used up the warm stone");
+        // 五章の支度「黒い鉄の器」の段 iron のあいだだけ、台の熾が温石に移る (鍛冶師の印)。印で段が「見せる」へ進む (2026-11-05 の c5_iron = fire)
+        var smithFlags = jp.revati.skyabyss.npc.NpcBonds.of(p).bond(DeadForgePit.SMITH).flags();
+        check(f, !smithFlags.contains(DeadForgePit.FLAG_FORGE_FIRE), "the forge fire passed into the stone outside the chapter-5 preparation");
+        Quests.start(p, DeadForgePit.Q_IRON);
+        check(f, DeadForgePit.touchStand(p, level, stand) && smithFlags.contains(DeadForgePit.FLAG_FORGE_FIRE) && !DeadForgePit.forgeFire(p, level, stand),
+                "the stand should pass its fire into the warm stone once during the black iron step");
+        Quests.refresh(p, false);
+        QuestLog.Entry iron = QuestLog.of(p).entry(DeadForgePit.Q_IRON);
+        check(f, iron != null && !iron.done && iron.stage == 1, "the forge fire should finish the black iron step (stage " + (iron == null ? "none" : iron.stage) + ")");
+        Quests.forget(p, DeadForgePit.Q_IRON);
+        smithFlags.remove(DeadForgePit.FLAG_FORGE_FIRE);
         DeadForgePit.forget();
         // 煤の砥石: 研いだ刃 + 灰の殻へ 1.5 倍。冷やし水: 耐火
         check(f, Ch4Mobs.shellBonus(level.damageSources().playerAttack(p)) == 1f, "an unwhetted blade got the soot bonus");

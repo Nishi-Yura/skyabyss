@@ -56,7 +56,7 @@ public final class DialogueManager extends SimpleJsonResourceReloadListener {
         Map<String, Dialogue> loaded = new LinkedHashMap<>();
         // 足し書き ("extends": true) は、同じ役の元の会話に混ぜてから読む。元のファイルに手を入れずに、話題や節を足せる
         //   nodes       : 節を足す (同じ名前は不可)
-        //   entries     : 入口を、元の最後の入口 (条件なし) の手前に足す
+        //   entries     : 入口を、元の最後の入口 (条件なし) の手前に足す ("entries_first": true なら、元の入口すべての前に)
         //   add_options : {"<節>": {"before": "<選択肢>", "options": [...]}} 元の節の選択肢に足す (before を省くと末尾)
         Map<String, com.google.gson.JsonObject> bases = new LinkedHashMap<>();
         Map<String, List<Map.Entry<ResourceLocation, com.google.gson.JsonObject>>> extensions = new LinkedHashMap<>();
@@ -110,7 +110,14 @@ public final class DialogueManager extends SimpleJsonResourceReloadListener {
                 nodes.add(n.getKey(), n.getValue());
             }
         }
-        if (ext.has("entries")) {
+        if (ext.has("entries") && net.minecraft.util.GsonHelper.getAsBoolean(ext, "entries_first", false)) {
+            // 一度きりの話 (結末のあと・こだま) は、元の入口より先に見る
+            com.google.gson.JsonArray old = base.has("entries") ? base.getAsJsonArray("entries") : new com.google.gson.JsonArray();
+            com.google.gson.JsonArray merged = new com.google.gson.JsonArray();
+            ext.getAsJsonArray("entries").forEach(merged::add);
+            old.forEach(merged::add);
+            base.add("entries", merged);
+        } else if (ext.has("entries")) {
             com.google.gson.JsonArray old = base.has("entries") ? base.getAsJsonArray("entries") : new com.google.gson.JsonArray();
             com.google.gson.JsonArray merged = new com.google.gson.JsonArray();
             for (int i = 0; i < old.size() - 1; i++) {

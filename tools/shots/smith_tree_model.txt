@@ -1,0 +1,52 @@
+# 2026-11-04: 技の木の手本 (鍛冶師。docs/design/48 の 4.1)。小さな節をまとめた木の全体と、動きが変わる型の要 (灰の契り・鍛え人の目・熾火の肺) と、まとめた節 (熱い鉄)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/smith_tree_model.txt -PshotsName=smith_tree
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose smith
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 20
+
+open skills
+wait 10
+shot smith_tree
+# ホイール一回で一段縮む。いちばん縮めて (0.5 倍) 全体を見る
+wheel 90 100 -1
+wheel 90 100 -1
+wheel 90 100 -1
+wheel 90 100 -1
+wheel 90 100 -1
+wheel 90 100 -1
+wheel 90 100 -1
+wait 5
+shot smith_tree_all
+close
+open skills_node:ash_pact
+wait 10
+shot smith_ash_pact
+close
+open skills_node:smith_eye
+wait 10
+shot smith_eye
+close
+open skills_node:ember_lung
+wait 10
+shot smith_ember_lung
+close
+open skills_node:hot_iron
+wait 10
+shot smith_hot_iron
+close

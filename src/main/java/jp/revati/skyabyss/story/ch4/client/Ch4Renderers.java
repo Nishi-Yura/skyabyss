@@ -54,6 +54,8 @@ public final class Ch4Renderers {
         event.enqueueWork(() -> {
             // 四章の支度の段とサブ: 消えた炉の坑・灰の道の標・煤の窯の跡 (Ch4Ground が SiteNetwork.EXTRA_TARGETS で送る)
             SiteTargets.bind("ch4/forge_ruins/pit", Ch4Ground.PIT);
+            // 五章の支度「黒い鉄の器」: 炉の坑の台で温石に火を移す (市で買う道もある)
+            SiteTargets.bind("ch5/black_iron/iron", Ch4Ground.PIT);
             SiteTargets.bind("ch4/ash_road/trace", Ch4Ground.MARK);
             SiteTargets.bind("ch4/dragger_trail/follow", Ch4Ground.KILN);
             SiteTargets.bind("main_ember/board", SiteTargets.TITAN_PREFIX + "ember");

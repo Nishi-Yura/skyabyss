@@ -107,6 +107,27 @@
           "goto": "lesson_review"
         },
         {
+          "id": "ash",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "flag",
+                "flag": "ch4_warm_ash"
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "flag",
+                  "flag": "ash_brewed"
+                }
+              }
+            ]
+          },
+          "goto": "ash1"
+        },
+        {
           "id": "about",
           "kind": "talk",
           "goto": "again"
@@ -117,6 +138,29 @@
           "goto": "end"
         }
       ]
+    },
+    "ash1": {
+      "face": "grave",
+      "next": "ash2"
+    },
+    "ash2": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give",
+          "item": "skyabyss:fire_ward_draught",
+          "count": 2
+        },
+        {
+          "type": "flag",
+          "flag": "ash_brewed"
+        }
+      ],
+      "next": "ash3"
+    },
+    "ash3": {
+      "face": "smile",
+      "next": "menu"
     }
   }
 }

@@ -1,6 +1,7 @@
 package jp.revati.skyabyss.client.mount;
 
 import jp.revati.skyabyss.client.facility.FacilityUi;
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.TextClip;
 import jp.revati.skyabyss.facility.FacilitySetup;
 import jp.revati.skyabyss.mount.MountEntity;
@@ -20,13 +21,19 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 厩舎の画面 (docs/design/38 の 5 章)。左に見た目の一覧 (押すと買う・選ぶ)、右に今の見た目の姿 (一覧に触れるとその見た目)、
-// 速さ・跳び・体力の段 (押すと一段上げる)、笛をもらうボタン。決めるのはサーバー (MountService)。押すたびに新しい持ち物が届いて描き直す
+// 速さ・跳びの段 (押すと一段上げる)、笛をもらう釦。決めるのはサーバー (MountService)。押すたびに新しい持ち物が届いて描き直す。
+// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 見出しの帯に名前と銭、脇の列 (左) に見た目の一覧 (一行 26)、主の列 (右) に姿 (89)・段 (一行 21)・笛・手引き
 public class MountShopScreen extends Screen {
-    private static final int LOOK_H = 24;
-    private static final int STAT_H = 18;
+    private static final Golden.Layout LAYOUT = Golden.Layout.large(0);
+    private static final Golden.Box LEFT = LAYOUT.body().minor(true);
+    private static final Golden.Box RIGHT = LAYOUT.body().major(false);
+    private static final Golden.Box LOOKS = LEFT.afterTop(Golden.ROW);
+    private static final Golden.Box PREVIEW = RIGHT.top(Golden.S89);
+    private static final int LOOK_H = 2 * Golden.ROW;
+    private static final int STAT_H = Golden.S21;
 
     private MountNetwork.View view;
-    private int x0, y0, w, h;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     // 見た目の一覧の先頭の行 (見た目が 10 になり、枠に入りきらないのでホイールで送る)
     private int scroll;
     private MountEntity preview;
@@ -42,16 +49,13 @@ public class MountShopScreen extends Screen {
 
     @Override
     protected void init() {
-        w = Math.min(400, width - 16);
-        h = Math.min(236, height - 8);
-        x0 = (width - w) / 2;
-        y0 = (height - h) / 2;
+        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
         // 今の見た目が見える所から
         scroll = Math.max(0, Math.min(maxScroll(), view.chosen() - visibleRows() + 1));
     }
 
     private int visibleRows() {
-        return Math.max(3, Math.min(MountLook.values().length, (y0 + h - 18 - lookY()) / LOOK_H));
+        return Math.min(MountLook.values().length, (LOOKS.h() - 4) / LOOK_H);
     }
 
     private int maxScroll() {
@@ -75,58 +79,55 @@ public class MountShopScreen extends Screen {
         g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
     }
 
-    private int leftW() {
-        return Math.min(176, w / 2 - 6);
-    }
-
-    private int rightX() {
-        return x0 + 10 + leftW() + 8;
-    }
-
-    private int rightW() {
-        return x0 + w - 10 - rightX();
-    }
-
     private int lookY() {
-        return y0 + 42;
+        return LOOKS.y() + 2;
     }
 
     private int statY() {
-        return y0 + 34 + (h - 100 > 150 ? 92 : 78) + 6;
-    }
-
-    private int previewH() {
-        return h - 100 > 150 ? 92 : 78;
+        return PREVIEW.bottom() + Golden.S5;
     }
 
     private int whistleY() {
-        return statY() + MountStats.KEYS.length * STAT_H + 4;
+        return statY() + MountStats.KEYS.length * STAT_H + Golden.S5;
     }
 
+    private static final int NAME_W = 52;
+
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
         Font font = Minecraft.getInstance().font;
-        FacilityUi.panel(g, x0, y0, w, h);
-        FacilityUi.gem(g, x0 + 12, y0 + 13);
-        g.drawString(font, title, x0 + 18, y0 + 9, FacilityUi.TEXT, false);
+        fit.begin(g);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.Box head = LAYOUT.head();
+        int hy = Golden.textY(head.y(), head.h());
+        FacilityUi.gem(g, head.x() + 4, head.y() + head.h() / 2);
+        g.drawString(font, title, head.x() + 10, hy, FacilityUi.TEXT, false);
         String coins = Integer.toString(view.coins());
-        int cx = x0 + w - 14 - font.width(coins);
-        g.drawString(font, coins, cx, y0 + 9, FacilityUi.GOLD, false);
-        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), cx - 18, y0 + 5);
+        int cx = head.right() - Golden.S5 - font.width(coins);
+        g.drawString(font, coins, cx, hy, FacilityUi.GOLD, false);
+        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), cx - 18, head.y() + (head.h() - 16) / 2);
+        // 絆 (乗った距離の段)。見出しの銭の左に
+        Component bond = Component.translatable("gui.skyabyss.mount.bond", Component.translatable("gui.skyabyss.mount.bond." + view.bond()),
+                String.format("%.1f", view.ridden() / 1000.0));
+        int bw = Math.min(font.width(bond), cx - 24 - (head.x() + 10 + font.width(title) + 12));
+        TextClip.line(g, font, bond, cx - 24 - bw, hy, bw, FacilityUi.GOLD, false);
 
         // 見た目の一覧
-        int lx = x0 + 10;
-        int lw = leftW();
-        g.drawString(font, Component.translatable("gui.skyabyss.mount.looks"), lx, y0 + 28, FacilityUi.TEAL, false);
+        int lx = LOOKS.x() + 1;
+        int lw = LOOKS.w() - 2;
+        g.drawString(font, Component.translatable("gui.skyabyss.mount.looks"), LEFT.x() + Golden.S5, Golden.textY(LEFT.y(), Golden.ROW), FacilityUi.TEAL, false);
         int rows = visibleRows();
-        FacilityUi.well(g, lx, lookY(), lw, rows * LOOK_H);
+        Golden.recess(g, LOOKS);
         // 上と下にまだあるときの印
         if (scroll > 0) {
-            g.drawString(font, "▲", lx + lw - 10, y0 + 28, FacilityUi.TEAL, false);
+            g.drawString(font, "▲", LEFT.right() - 20, Golden.textY(LEFT.y(), Golden.ROW), FacilityUi.TEAL, false);
         }
         if (scroll < maxScroll()) {
-            g.drawString(font, "▼", lx + lw - 10, lookY() + rows * LOOK_H + 2, FacilityUi.TEAL, false);
+            g.drawString(font, "▼", LEFT.right() - 10, Golden.textY(LEFT.y(), Golden.ROW), FacilityUi.TEAL, false);
         }
         MountLook hoverLook = null;
         for (int i = 0; i < rows && scroll + i < MountLook.values().length; i++) {
@@ -135,7 +136,7 @@ public class MountShopScreen extends Screen {
             boolean hover = mouseX >= lx && mouseX < lx + lw && mouseY >= ry && mouseY < ry + LOOK_H;
             boolean chosen = view.owns(look) && view.chosen() == look.ordinal();
             if (chosen) {
-                g.fill(lx, ry, lx + lw, ry + LOOK_H, 0xFF1E3A44);
+                Golden.selected(g, new Golden.Box(lx, ry, lw, LOOK_H));
             } else if (hover) {
                 g.fill(lx, ry, lx + lw, ry + LOOK_H, FacilityUi.ROW_HOVER);
             } else if (look.ordinal() % 2 == 1) {
@@ -147,34 +148,55 @@ public class MountShopScreen extends Screen {
             lookRow(g, font, look, lx, ry, lw, chosen);
         }
 
-        // 姿
-        int rx = rightX();
-        int rw = rightW();
+        // 姿の欄 (姿そのものは変換の外で描く: 切り抜きが板の変換を通らないため)
+        int rx = RIGHT.x();
+        int rw = RIGHT.w();
         MountLook shown = hoverLook != null ? hoverLook : MountLook.byOrdinal(view.chosen());
-        FacilityUi.well(g, rx, y0 + 34, rw, previewH());
-        renderPreview(g, shown, rx, y0 + 34, rw, previewH(), mouseX, mouseY);
-        TextClip.line(g, font, Component.translatable(shown.nameKey()), rx + 4, y0 + 38, rw - 8, FacilityUi.TEXT, false);
-        TextClip.line(g, font, Component.translatable(shown.nameKey() + ".desc"), rx + 4, y0 + 34 + previewH() - 11, rw - 8, FacilityUi.DIM, false);
+        Golden.recess(g, PREVIEW);
+        fit.end(g);
+        int[] pr = fit.screenRect(PREVIEW.x() + 1, PREVIEW.y() + 1, PREVIEW.w() - 2, PREVIEW.h() - 2);
+        renderPreview(g, shown, pr[0], pr[1], pr[2], pr[3], screenX, screenY);
+        fit.begin(g);
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 200);
+        TextClip.line(g, font, Component.translatable(shown.nameKey()), rx + Golden.S5, Golden.textY(PREVIEW.y() + 2, Golden.ROW), rw - 2 * Golden.S5, FacilityUi.TEXT, false);
+        TextClip.line(g, font, Component.translatable(shown.nameKey() + ".desc"), rx + Golden.S5, Golden.textY(PREVIEW.bottom() - 2 - Golden.ROW, Golden.ROW), rw - 2 * Golden.S5,
+                FacilityUi.DIM, false);
+        g.pose().popPose();
 
         // 性能の段 (速さ・跳び。体力は段がない)
         for (int k = 0; k < MountStats.KEYS.length; k++) {
-            statRow(g, font, k, rx, statY() + k * STAT_H, rw, mouseX, mouseY);
+            statRow(g, font, k, rx + Golden.S5, statY() + k * STAT_H, rw - 2 * Golden.S5, mouseX, mouseY);
         }
         // 笛
         int wy = whistleY();
-        boolean hw = mouseX >= rx && mouseX < rx + rw && mouseY >= wy && mouseY < wy + 14;
-        g.fill(rx, wy, rx + rw, wy + 14, view.whistle() ? 0xFF161B22 : hw ? 0xFF2A5E6A : 0xFF243440);
-        g.renderOutline(rx, wy, rw, 14, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
+        boolean canName = view.bond() >= 2;
+        int ww = canName ? rw - NAME_W - 4 : rw;
+        boolean hw = mouseX >= rx && mouseX < rx + ww && mouseY >= wy && mouseY < wy + Golden.BTN;
+        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF2A5E6A : 0xFF243440);
+        g.renderOutline(rx, wy, ww, Golden.BTN, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
         TextClip.line(g, font, Component.translatable(view.whistle() ? "gui.skyabyss.mount.whistle_have" : "gui.skyabyss.mount.whistle_get"),
-                rx + 4, wy + 3, rw - 8, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
-        TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.hint"), x0 + 12, y0 + h - 13, w - 24, FacilityUi.DIM, false);
+                rx + Golden.S5, Golden.textY(wy, Golden.BTN), ww - 2 * Golden.S5, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
+        // 名付ける (絆 II から。笛の行の右)
+        if (canName) {
+            int nx = rx + rw - NAME_W;
+            boolean hn = mouseX >= nx && mouseX < nx + NAME_W && mouseY >= wy && mouseY < wy + Golden.BTN;
+            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF2A5E6A : 0xFF243440);
+            g.renderOutline(nx, wy, NAME_W, Golden.BTN, FacilityUi.TEAL);
+            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.name_button"), nx + 4, Golden.textY(wy, Golden.BTN), NAME_W - 8, 0xFFFFFFFF, false);
+        }
+        TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.hint"), rx + Golden.S5, Golden.textY(RIGHT.bottom() - Golden.ROW, Golden.ROW), rw - 2 * Golden.S5,
+                0xFF000000 | Golden.DIM, false);
+        fit.end(g);
     }
 
     private void lookRow(GuiGraphics g, Font font, MountLook look, int x, int y, int rw, boolean chosen) {
         boolean owned = view.owns(look);
         boolean locked = !owned && view.chapter() < look.chapter;
         int color = locked ? FacilityUi.DIM : FacilityUi.TEXT;
-        TextClip.line(g, font, Component.translatable(look.nameKey()), x + 6, y + 3, rw - 70, color, false);
+        String price = Integer.toString(look.price);
+        int tw = !owned && !locked ? 6 + 18 + font.width(price) + 2 : 0;
+        TextClip.line(g, font, Component.translatable(look.nameKey()), x + Golden.S5, Golden.textY(y, Golden.ROW), rw - Golden.S8 - tw - 4, color, false);
         Component sub;
         int subColor;
         if (chosen) {
@@ -190,39 +212,45 @@ public class MountShopScreen extends Screen {
             sub = Component.translatable("gui.skyabyss.mount.for_sale");
             subColor = FacilityUi.DIM;
         }
-        TextClip.line(g, font, sub, x + 6, y + 13, rw - 70, subColor, false);
-        if (!owned && !locked) {
-            String s = Integer.toString(look.price);
-            int tw = 6 + 18 + font.width(s) + 2;
-            int tx = x + rw - 4 - tw;
-            FacilityUi.tag(g, tx, y + 3, tw, 18);
-            g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), tx + 2, y + 4);
-            g.drawString(font, s, tx + 20, y + 8, view.coins() >= look.price ? FacilityUi.GOLD : FacilityUi.LACK, false);
+        TextClip.line(g, font, sub, x + Golden.S5, Golden.textY(y + Golden.ROW, Golden.ROW), rw - Golden.S8 - tw - 4, subColor, false);
+        if (tw > 0) {
+            int tx = x + rw - 3 - tw;
+            FacilityUi.tag(g, tx, y + 4, tw, 18);
+            g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), tx + 2, y + 5);
+            g.drawString(font, price, tx + 20, Golden.textY(y, LOOK_H), view.coins() >= look.price ? FacilityUi.GOLD : FacilityUi.LACK, false);
         }
     }
 
+    // 段の一行 (高さ 21): 名前・段の箱・上げる札 (銭と値段)
     private void statRow(GuiGraphics g, Font font, int kind, int x, int y, int rw, int mx, int my) {
         int tier = view.tier(kind);
         boolean maxed = tier >= MountStats.tiers(kind);
-        g.drawString(font, Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]), x, y + 5, FacilityUi.TEXT, false);
-        int px = x + 36;
+        g.drawString(font, Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]), x, Golden.textY(y, STAT_H), FacilityUi.TEXT, false);
+        int px = x + Golden.S34;
         for (int i = 0; i < MountStats.tiers(kind); i++) {
             int bx = px + i * 9;
-            g.fill(bx, y + 5, bx + 7, y + 12, i < tier ? FacilityUi.GOLD : 0xFF2A2F38);
-            g.renderOutline(bx, y + 5, 7, 7, FacilityUi.LINE);
+            g.fill(bx, y + 7, bx + 7, y + 14, i < tier ? FacilityUi.GOLD : 0xFF2A2F38);
+            g.renderOutline(bx, y + 7, 7, 7, FacilityUi.LINE);
         }
-        int bw = rw - 36 - MountStats.MAX_TIERS * 9 - 4;
+        int bw = rw - Golden.S34 - MountStats.MAX_TIERS * 9 - Golden.S5;
         int bx = x + rw - bw;
         if (maxed) {
-            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.max"), bx + 2, y + 5, bw - 2, FacilityUi.TEAL, false);
+            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.max"), bx + 2, Golden.textY(y, STAT_H), bw - 2, FacilityUi.TEAL, false);
             return;
         }
         int price = MountStats.price(kind, tier + 1);
-        boolean hover = mx >= bx && mx < bx + bw && my >= y && my < y + STAT_H - 2;
-        g.fill(bx, y, bx + bw, y + STAT_H - 2, hover ? 0xFF2A5E6A : 0xFF1C222C);
-        g.renderOutline(bx, y, bw, STAT_H - 2, hover ? FacilityUi.TEAL : FacilityUi.LINE);
-        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), bx + 1, y - 1);
-        g.drawString(font, Integer.toString(price), bx + 19, y + 4, view.coins() >= price ? FacilityUi.GOLD : FacilityUi.LACK, false);
+        boolean hover = statHit(kind, mx, my);
+        g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF2A5E6A : 0xFF1C222C);
+        g.renderOutline(bx, y + 1, bw, STAT_H - 2, hover ? FacilityUi.TEAL : FacilityUi.LINE);
+        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), bx + 1, y + 2);
+        g.drawString(font, Integer.toString(price), bx + 19, Golden.textY(y, STAT_H), view.coins() >= price ? FacilityUi.GOLD : FacilityUi.LACK, false);
+    }
+
+    private boolean statHit(int kind, double mx, double my) {
+        int y = statY() + kind * STAT_H;
+        int bw = RIGHT.w() - 2 * Golden.S5 - Golden.S34 - MountStats.MAX_TIERS * 9 - Golden.S5;
+        int bx = RIGHT.right() - Golden.S5 - bw;
+        return mx >= bx && mx < bx + bw && my >= y && my < y + STAT_H;
     }
 
     private void renderPreview(GuiGraphics g, MountLook look, int x, int y, int pw, int ph, int mx, int my) {
@@ -241,24 +269,27 @@ public class MountShopScreen extends Screen {
         preview.yBodyRotO = 200f;
         preview.yRotO = 200f;
         preview.yHeadRotO = 200f;
-        InventoryScreen.renderEntityInInventoryFollowsMouse(g, x, y + 8, x + pw, y + ph, ph / 3, 0.0625f, mx, my, preview);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(g, x, y + 8, x + pw, y + ph, Math.round(ph / 3f), 0.0625f, mx, my, preview);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double sx, double sy) {
-        int lx = x0 + 10;
-        if (mx >= lx && mx < lx + leftW() && my >= lookY() && my < lookY() + visibleRows() * LOOK_H && sy != 0) {
-            scroll = Math.max(0, Math.min(maxScroll(), scroll - (int) Math.signum(sy)));
+    public boolean mouseScrolled(double sx, double sy, double dx, double dy) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
+        if (LOOKS.contains(mx, my) && dy != 0) {
+            scroll = Math.max(0, Math.min(maxScroll(), scroll - (int) Math.signum(dy)));
             return true;
         }
-        return super.mouseScrolled(mx, my, sx, sy);
+        return super.mouseScrolled(sx, sy, dx, dy);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double sx, double sy, int button) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         if (button == 0) {
-            int lx = x0 + 10;
-            int lw = leftW();
+            int lx = LOOKS.x() + 1;
+            int lw = LOOKS.w() - 2;
             int index = scroll + (int) ((my - lookY()) / LOOK_H);
             if (mx >= lx && mx < lx + lw && my >= lookY() && my < lookY() + visibleRows() * LOOK_H && index < MountLook.values().length) {
                 MountLook look = MountLook.values()[index];
@@ -271,22 +302,24 @@ public class MountShopScreen extends Screen {
                 }
                 return true;
             }
-            int rx = rightX();
-            int rw = rightW();
             for (int k = 0; k < MountStats.KEYS.length; k++) {
-                int sy = statY() + k * STAT_H;
-                if (mx >= rx && mx < rx + rw && my >= sy && my < sy + STAT_H - 2 && view.tier(k) < MountStats.tiers(k)) {
+                if (statHit(k, mx, my) && view.tier(k) < MountStats.tiers(k)) {
                     send(MountNetwork.BUY_TIER, k);
                     return true;
                 }
             }
             int wy = whistleY();
-            if (mx >= rx && mx < rx + rw && my >= wy && my < wy + 14 && !view.whistle()) {
+            int nx = RIGHT.right() - NAME_W;
+            if (view.bond() >= 2 && mx >= nx && mx < RIGHT.right() && my >= wy && my < wy + Golden.BTN) {
+                Minecraft.getInstance().setScreen(new MountNameScreen(this, view.name()));
+                return true;
+            }
+            if (mx >= RIGHT.x() && mx < RIGHT.right() && my >= wy && my < wy + Golden.BTN && !view.whistle()) {
                 send(MountNetwork.WHISTLE, 0);
                 return true;
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(sx, sy, button);
     }
 
     private void send(int action, int arg) {

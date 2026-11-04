@@ -1,0 +1,253 @@
+"""見どころの一か所ずつの中身 (docs/design/40 の 3.3)。build_poi_places.py が読む。
+
+PLACES: pois.json の番号 -> (名の id, 日本語の名, 英語の名, 添え物, 日本語の書付, 英語の書付)
+  名の id   : 英小文字と _。map.skyabyss.poi_name.<id> (名)・sign.skyabyss.poi_note.<id>.1〜4 (書付)・部品 poi_<種類>__<id>
+  添え物     : build_poi_places.PIECES の名 (その場所にしかない小さな作り)。None なら添えない
+  書付       : 「|」で行を分ける (4 行まで)。碑に刻み、読むと字幕に出る
+GONE: 消す見どころ (pois.json では "gone" にする。番号は並びのまま)
+WAYPOSTS: 建てる道しるべ (番号 -> 名の id・4 行)。NEW_WAYPOSTS は pois.json の末尾に足す
+BROTHERS: 野盗の頭目の兄弟 (番号 -> 名の id・頭の名)。書付は PLACES に
+TRAVELERS: 旅人のいる野営 (番号 -> 人の id)
+"""
+
+# ---------------------------------------------------------------- 消す (道しるべ 16 -> 6・野盗の野営 10 -> 4 + 島・旅人の野営 6 -> 3)
+GONE = [
+    # 道しるべ
+    106, 107, 110, 111, 112, 114, 115, 116, 117, 118, 119, 120,
+    # 野盗の野営 (鐘の野の二つ・岩鯨の東・潮の北・灰の東)
+    10, 25, 39, 70, 98,
+    # 旅人の野営
+    31, 74, 93,
+]
+
+# ---------------------------------------------------------------- 道しるべ (都の四つの門の外・岩鯨の町から背への分かれ道・内海の向こう岸)
+WAYPOSTS = {
+    105: ("gate_north", ["鯨見の町 690m", "岩鯨の丘陵", "目安 Lv 4-12", "鐘の都 150m"],
+          ["Whalewatch 690m", "Whale Hills", "Lv 4-12", "Bell City 150m"]),
+    109: ("gate_west", ["風待の里 590m", "嵐の高地", "目安 Lv 18-24", "鐘の都 150m"],
+          ["Windwait 590m", "Storm Heights", "Lv 18-24", "Bell City 150m"]),
+    113: ("gate_south", ["灰炉の村 970m", "灰の荒野", "目安 Lv 24-30", "鐘の都 150m"],
+          ["Ashforge 970m", "Ash Wilds", "Lv 24-30", "Bell City 150m"]),
+    108: ("whale_back", ["岩鯨の跡地 270m", "巨神の背へ", "目安 Lv 4-12", "鯨見の町 60m"],
+          ["Whale Site 270m", "Titan's back", "Lv 4-12", "Whalewatch 60m"]),
+}
+# 足す道しるべ: 都の東の門の外 (渡し場への道) と、内海の向こう岸の渡し場。x・z は道の点 (build_poi_places が道の上から少しずらす)
+NEW_WAYPOSTS = [
+    ("gate_east", "road", 8, 150, ["渡し場 {far}m", "舟で 潮の浜へ", "目安 Lv 12-18", "鐘の都 150m"],
+     ["Ferry {far}m", "To Tide Shore", "Lv 12-18", "Bell City 150m"]),
+    ("tide_landing", "road", 9, 20, ["汐守の港 {far}m", "潮の浜", "目安 Lv 12-18", "渡し場 20m"],
+     ["Tidekeep {far}m", "Tide Shore", "Lv 12-18", "Ferry 20m"]),
+]
+
+# ---------------------------------------------------------------- 野盗の頭目の兄弟 (四つで一続き。岩鯨 -> 潮 -> 嵐 -> 灰 の順に兄になる)
+BROTHERS = {
+    53: ("koishi", "末弟 コイシ", "Koishi, the Youngest"),
+    60: ("mio", "三男 ミオ", "Mio, the Third Brother"),
+    81: ("tsumuji", "次男 ツムジ", "Tsumuji, the Second Brother"),
+    88: ("kurogane", "長兄 クロガネ", "Kurogane, the Eldest"),
+}
+
+# ---------------------------------------------------------------- 旅人 (野営に一人ずつ。town/RegionFolk の town "camp"、印は場所の名の id)
+TRAVELERS = {
+    16: "camp_pilgrim",
+    64: "camp_minstrel",
+    103: "camp_mapmaker",
+}
+
+# ---------------------------------------------------------------- 場所
+P = [
+    # ======================================== 鐘の野 (目安 Lv 1-4)
+    (14, "seven_finger_barrow", "七つ指の塚", "Seven-Finger Barrow", "offering",
+     "ここに眠るのは|指を七本|なくした王|起こすな", "Here sleeps|a king who lost|seven fingers|Do not wake him"),
+    (29, "shepherd_barrow", "羊飼いの塚", "Shepherd's Barrow", "pen",
+     "羊を守って|狼と組みあい|ここに眠る|羊は一頭も死なず", "He held the wolf|to save the flock|and sleeps here|No sheep died"),
+    (20, "drip_cave", "水滴の洞", "Dripstone Mouth", "bedroll",
+     "中で水の落ちる音を|数えた|九百で|眠った", "I counted drops|falling inside|At nine hundred|I fell asleep"),
+    (35, "foxfire_cave", "狐火の洞", "Foxfire Hollow", "cairn_lamp",
+     "西へ百三十歩|古い焚き火の跡|誰かが|まだ待っている", "130 steps west|an old campfire|Someone there|is still waiting"),
+    (7, "thresher_farm", "麦打ちの家", "Thresher's Farm", "scarecrow",
+     "鐘が鳴ったら|麦を刈れ|鳴らぬ年は|刈るな", "At the bell|cut the wheat|In a silent year|leave it be"),
+    (11, "cracked_bell_field", "割れ鐘の畑", "Cracked-Bell Field", "bell_post",
+     "畑から鐘の欠片が|出てきた|西の土に|もう一つ眠る", "A bell shard|rose in this field|Another sleeps|west of here"),
+    (22, "scarecrow_acre", "かかしの野", "Scarecrow Acre", "scarecrow_pair",
+     "かかしの名は|ゴンベエ|夜は少し|歩く", "The scarecrow|is named Gonbe|At night he|walks a little"),
+    (26, "wellhouse_farm", "井戸のある農家", "Wellhouse Farm", "well",
+     "井戸の底から|歌が聞こえる|母は|汲むなと言う", "From the well|someone sings|Mother says|don't draw from it"),
+    (19, "nameless_hill", "無名の丘", "Nameless Hill", "fresh_grave",
+     "名を刻まぬ墓|首だけは|南の土に|埋めてある", "No name carved|Only the head|is buried|to the south"),
+    (34, "bellguard_graves", "鐘衛の墓所", "Bellguard Graves", "banner_pole",
+     "都の鐘を守った者|鐘より先に|黙った|一人ずつ", "Guards of|the city's bell|fell silent first|one by one"),
+    (17, "cradle_tree", "揺りかごの大樹", "Cradle Tree", "swing",
+     "枝に揺りかごを|吊るした|子は巨神の夢を|見て笑う", "We hung a cradle|on the bough|Dreaming titans|the child laughs"),
+    (32, "cityview_tree", "都見の樹", "City-View Tree", "view_bench",
+     "梢から|都の鐘楼が見える|鳴る前に|少し揺れる", "From the crown|the bell tower|sways a little|before it rings"),
+    (15, "pigeon_hamlet", "鳩笛の集落", "Pigeon-Whistle Hamlet", "dovecote",
+     "鳩を飛ばして|都へ知らせる|戻ってきた鳩は|まだ一羽もない", "We send pigeons|to the city|Not one|has come back"),
+    (30, "three_roofs", "三つ屋根", "Three Roofs", "lantern_row",
+     "家は三つ|住むのは二人|三つ目の灯りは|誰が点ける", "Three houses|two people|Who lights|the third lamp"),
+    (9, "mossy_wayshrine", "苔むした道祖", "Mossy Wayshrine", "cairn",
+     "旅の無事を|小石一つで願う|石はもう|山になった", "One pebble|for a safe road|The pebbles|are a hill now"),
+    (24, "bellcharm_shrine", "鈴の祠", "Bell-Charm Shrine", "bell_post",
+     "北の苔の祠が|本当の祠|ここは|その写し", "The true shrine|is the mossy one|to the north|This is a copy"),
+    (12, "weaver_ruin", "機織りの家", "Weaver's Ruin", "loom",
+     "布を織りかけたまま|出て行った|糸はまだ|張っている", "She left|cloth half woven|The threads|are still taut"),
+    (27, "twins_house", "双子の家", "Twins' House", "garden",
+     "柱に背丈の印が|二本|一本だけ|途中で止まる", "Two height marks|on the post|One of them|stops halfway"),
+    (18, "bellless_tower", "鐘なしの塔", "Bell-less Tower", "banner_pole",
+     "鐘は都へ|運ばれた|塔は今も|鳴る時を待つ", "The bell went|to the city|The tower still|waits to ring"),
+    (33, "northwatch_tower", "北見の塔", "North-Watch Tower", "view_bench",
+     "北の丘が|一晩で形を変えた|岩鯨が|寝返った", "The north hills|shifted overnight|The Stone Whale|turned in sleep"),
+    (8, "crowscare_tower", "鳥追いの櫓", "Crowscare Tower", "woodpile",
+     "鴉を追い払うのが|役目だった|今は鴉が|見張っている", "My task was|chasing crows|Now the crows|keep watch"),
+    (23, "beacon_tower", "狼煙の櫓", "Beacon Tower", "beacon_cairn",
+     "三度上がれば|都の門を閉めよ|狼煙は|まだ二度", "Three smokes|and the city|shuts its gate|Only two so far"),
+    (6, "silent_mill", "鳴らずの風車", "Silent Mill", "broken_cart",
+     "風が吹いても|回らない|羽根が下を向いて|止まった", "The wind blows|it does not turn|The sails stopped|pointing down"),
+    (13, "miller_mill", "粉屋の風車", "Miller's Mill", "sacks",
+     "粉は都へ|都の鐘は|粉屋の|目覚まし", "Our flour goes|to the city|Its bell wakes|the miller"),
+    (21, "named_sails_mill", "名書きの風車", "Named-Sail Mill", "garden",
+     "羽根に名前を|書いた|回るたび|呼ばれている", "I wrote names|on the sails|Each turn|calls them"),
+    (28, "eastwind_mill", "東風の風車", "East-Wind Mill", "view_bench",
+     "東風の日は|歌が混じる|海の向こうの|歌", "East wind days|bring a song|A song from|across the sea"),
+
+    # ======================================== 岩鯨の丘陵 (目安 Lv 4-12)
+    (53, "koishi_camp", "小石の野営", "Koishi's Camp", "weapon_rack",
+     "コイシへ|都の荷を狙え|母の分を返して|もらうだけだ ミオ", "Koishi|Rob city carts|Just take back|Mom's share -Mio"),
+    (43, "moss_barrow", "苔塚", "Moss Barrow", "offering",
+     "北へ百歩|墓守の焚き火が|消えずに|ある", "100 steps north|a gravekeeper's|fire|still burns"),
+    (49, "whale_nostril", "鯨の鼻の洞", "Whale's Nostril", "bone_pile",
+     "洞が息をする|北西の土に|首が一つ|埋まって聞いている", "The cave sighs|In soil to|the northwest|a head listens"),
+    (46, "backwarden_graves", "背守りの墓", "Backwardens' Graves", "fresh_grave",
+     "背に登った者の墓|降りてきた者は|ここには|いない", "Graves of|back climbers|Those who came|down aren't here"),
+    (47, "whalebone_tree", "鯨骨の樹", "Whalebone Tree", "bone_pile",
+     "根が骨を|抱いている|骨が樹を|育てた", "The roots|hold the bones|The bones|raised the tree"),
+    (44, "jawbone_hamlet", "顎骨の集落", "Jawbone Hamlet", "lantern_row",
+     "顎の骨を門にした|夜|門が少し|閉じる", "We made the jaw|our gate|At night|it closes a little"),
+    (45, "bluestone_mine", "青石の坑道", "Bluestone Mine", "broken_cart",
+     "青い石が出る|岩鯨の涙だと|坑夫は|言う", "Blue stones here|The miners say|they are|the whale's tears"),
+    (37, "hushed_abbey", "祈り止めの僧院", "Hushed Abbey", "bell_post",
+     "鐘を鳴らすな|呼ばれて来るものは|鯨だけでは|ない", "Ring no bell|What it calls|is not only|the whale"),
+    (51, "scriptorium", "写本の僧院", "Scriptorium", "lectern",
+     "巨神の名を|写していた|最後の頁は|白いまま", "We copied|the titans' names|The last page|is still blank"),
+    (41, "stonecutter_house", "石割りの家", "Stonecutter's House", "stone_stack",
+     "背から落ちた石で|家を建てた|夜は|温かい", "Stone fallen|from the back|built this house|It's warm at night"),
+    (55, "fledgling_house", "巣立ちの家", "Fledgling House", "garden",
+     "子らは|鯨見の町へ移った|窓に|鳥の巣だけ", "Children moved|to Whalewatch|Only a nest|in the window"),
+    (48, "backwatch_tower", "背見の塔", "Back-Watch Tower", "view_bench",
+     "岩鯨の背が|一番よく見える|背の上の灯りは|誰のものか", "Best view of|the whale's back|Whose lights|are up there"),
+    (38, "nine_stones", "九つ石", "Nine Stones", "offering",
+     "石は九つ|巨神は四つ|残る五つは|まだ眠っている", "Nine stones|four titans|The other five|still sleep"),
+    (52, "leaning_stones", "傾き石", "Leaning Stones", "cairn",
+     "石がみな|北へ傾いた|岩鯨の|ほうへ", "Every stone|leans north|toward|the whale"),
+    (36, "first_rib", "一番肋", "First Rib", "bone_pile",
+     "南西の苔の祠に|骨の歌を|置いていった|誰かが", "Someone left|a bone song|at the southwest|mossy shrine"),
+    (40, "north_ribs", "北の肋", "North Ribs", "view_bench",
+     "骨は空から落ちた|岩鯨の骨ではない|もっと|古い", "These bones fell|from the sky|Not the whale's|Older"),
+    (50, "singing_ribs", "鳴る肋", "Singing Ribs", "bell_post",
+     "風が通ると|骨が鳴る|北西の|骨の先も", "When wind passes|the bones sing|So does the tip|to the northwest"),
+    (54, "gate_ribs", "門の肋", "Gate Ribs", "banner_pole",
+     "鯨見の人は|ここをくぐって背へ|帰りは|別の道", "Whalewatch folk|go under here|to the back|Home another way"),
+    (42, "whalewatch_post", "鯨見櫓", "Whalewatch Post", "beacon_cairn",
+     "岩鯨が|寝返りを打てば|三度|鐘を打て", "If the whale|turns in its sleep|strike the bell|three times"),
+    (56, "mistwatch_post", "霧見の櫓", "Mistwatch Post", "woodpile",
+     "霧の朝は|背が近く見える|近いのは|霧のほうだ", "On misty mornings|the back is near|No, the mist|is what is near"),
+
+    # ======================================== 潮の浜 (目安 Lv 12-18)
+    (60, "mio_camp", "澪の野営", "Mio's Camp", "weapon_rack",
+     "ミオへ|沢渡が埋まった夜|都は門を閉じた|忘れるな ツムジ", "Never forget, Mio|the gate shut|as Sawatari was|buried -Tsumuji"),
+    (58, "whaler_wreck", "鯨捕り船の残骸", "Whaler's Wreck", "anchor",
+     "空の鯨を追った船|海に落ちた|舵はまだ|東を向いている", "Sky whale chaser|fell into the sea|Its helm still|points east"),
+    (61, "minstrel_boat", "楽師の舟", "Minstrel's Boat", "sea_chests",
+     "楽の箱は|濡らすな|歌が|流れ出る", "Keep the|music box dry|or the songs|will run out"),
+    (68, "brine_hulk", "塩漬けの船", "Brine Hulk", "bedroll",
+     "西の砂丘に|生き残りの焚き火|三日で|消えた", "On west dunes|the survivors'|fire went out|in three days"),
+    (71, "northern_strand", "北の座礁船", "Northern Strand", "anchor",
+     "潮殻の背に|乗り上げた|島だと|思った", "We beached on|the Tide Shell|We thought|it was an island"),
+    (59, "net_huts", "網干し小屋", "Net-Dryer Huts", "drying_rack",
+     "網に首が|かかった|西の砂に|返した", "A head came up|in the net|We gave it back|to western sand"),
+    (62, "shellroof_huts", "貝殻葺きの小屋", "Shell-Roof Huts", "cairn",
+     "屋根の貝は|夜に鳴る|潮殻の|子守歌", "The roof shells|sing at night|The Tide Shell's|lullaby"),
+    (69, "inland_boathouse", "内海の舟屋", "Inland Boathouse", "upturned_boat",
+     "内海の魚は甘い|外の海の魚は|名を|呼ぶ", "Inland fish|are sweet|Outer sea fish|call your name"),
+    (72, "smokehouse", "燻し小屋", "Smokehouse", "woodpile",
+     "煙の向きで|明日の潮を読む|今日は|南", "The smoke tells|tomorrow's tide|Today|south"),
+    (65, "tidewait_tree", "潮待ちの樹", "Tidewait Tree", "view_bench",
+     "北の砂から|骨の先が出ている|根と|同じ向き", "North, a bone|juts from sand|It points|like the roots"),
+    (75, "saltbloom_tree", "塩吹きの樹", "Saltbloom Tree", "garden",
+     "葉が|塩を吹く|なめると少し|泣きたくなる", "The leaves|bloom with salt|Taste it, and|you nearly cry"),
+    (63, "strand_three", "浜の三軒", "Strand Three", "lantern_row",
+     "潮の夜は|戸を開けて寝る|閉じると|叩く音がする", "On tide nights|doors stay open|Shut them, and|something knocks"),
+    (73, "shellroad_hamlet", "貝の道の集落", "Shellroad Hamlet", "cairn",
+     "南東の貝塚に|願いを置く|叶うのは|潮が引くとき", "Leave a wish|at the southeast|shell mound|True at low tide"),
+    (57, "ferry_light", "渡し場の灯", "Ferry Light", "banner_pole",
+     "灯は海を照らさない|空を照らす|潮殻が|迷わぬように", "It lights the sky|not the sea|so the Tide Shell|never strays"),
+    (67, "northcape_light", "北岬の灯", "North Cape Light", "view_bench",
+     "灯守は|毎晩一つ数える|今夜で|九千", "The keeper adds|one every night|Tonight makes|nine thousand"),
+    (66, "tidewatch_ruin", "潮見の塔", "Tidewatch Ruin", "beacon_cairn",
+     "潮が引きすぎた朝|海の底に|背が|見えた", "Once the tide|went too far out|A back showed|on the seabed"),
+    (76, "sunk_tower", "沈み塔", "Sunk Tower", "sea_chests",
+     "塔は年に一段|砂に沈む|あと|四段", "The tower sinks|one step a year|Four steps|left"),
+    (64, "minstrel_camp", "楽師の野営", "Minstrel's Camp", None,
+     "舟が返った|楽の箱は|東の浜の|舟の中", "My boat capsized|My music box|is in the boat|at the east beach"),
+
+    # ======================================== 嵐の高地 (目安 Lv 18-24)
+    (81, "tsumuji_camp", "旋風の野営", "Tsumuji's Camp", "weapon_rack",
+     "ツムジへ|母は門の外で冷えた|鐘は|鳴り止まなかった", "Tsumuji|Mother froze|outside the gate|The bell rang on"),
+    (83, "windcut_barrow", "風切り塚", "Windcut Barrow", "offering",
+     "北西の岩に|骨の先|風が|指している", "Northwest rocks:|a bone tip|The wind|points to it"),
+    (84, "kite_hamlet", "凧揚げの里", "Kite Hamlet", "banner_pole",
+     "凧を上げて|雷を呼ぶ|子らの|遊び", "Fly a kite|call the thunder|A children's|game"),
+    (79, "ridge_hut", "峰の番小屋", "Ridge Hut", "woodpile",
+     "南の苔の祠で|雷の夜を越せ|小屋より|固い", "Wait out storms|at the south|mossy shrine|not this hut"),
+    (78, "strike_tower", "雷受けの塔", "Strike Tower", "rod_stub",
+     "雷は塔を選ぶ|人を選ばぬように|塔は九十九回|選ばれた", "Lightning picks|the tower, not|a person|Picked 99 times"),
+    (82, "scorched_tower", "焦げ塔", "Scorched Tower", "fresh_grave",
+     "百回目の雷で|塔の番人が光った|それから|見ない", "The 100th bolt|lit the keeper|We have not|seen him since"),
+    (77, "east_windgate", "東の風門", "East Windgate", "wind_chime",
+     "東の丘に|折れた避雷の棒|風の民が|折った", "On the east hill|a lightning rod|snapped by|the wind folk"),
+    (80, "south_windgate", "南の風門", "South Windgate", "bedroll",
+     "南東の野営は|通れなかった者の|最後の|焚き火", "Southeast camp:|the last fire|of those who|could not pass"),
+
+    # ======================================== 灰の荒野 (目安 Lv 24-30)
+    (88, "kurogane_camp", "鉄の野営", "Kurogane's Camp", "weapon_rack",
+     "門番の墓を見つけた|母の隣だった|恨む相手が|いなくなった", "I found the|gatekeeper's|grave by Mother|None left to hate"),
+    (87, "black_gate", "黒門", "Black Gate", "ash_statue",
+     "灰の民の門|火は下から来る|下へ|返せ", "Ash folk gate|Fire rises|from below|Send it back down"),
+    (97, "split_gate", "割れ門", "Split Gate", "beacon_cairn",
+     "東の灰に|首が一つ|門を割った|者の首", "East, in the ash|lies the head|of the one who|split the gate"),
+    (85, "one_night_fort", "一夜砦", "One-Night Fort", "banner_pole",
+     "砦は一夜で焼けた|空から火が降った|誰も|逃げなかった", "The fort burned|in one night|Fire from the sky|No one ran"),
+    (90, "ashwatch_fort", "灰見砦", "Ashwatch Fort", "ash_statue",
+     "見張りは最後まで|空を見ていた|火は|下から来た", "The watch kept|eyes on the sky|The fire came|from below"),
+    (95, "south_cinder_fort", "南の焼け砦", "South Cinder Fort", "fresh_grave",
+     "余燼の背が|動いた夜|砦の影が|逆に伸びた", "The night|the Ember stirred|the fort's shadow|fell backwards"),
+    (100, "furnaceguard_fort", "炉番の砦", "Furnaceguard Fort", "sacks",
+     "炉の火を守る砦が|炉の火で|焼けた|笑うな", "The fort guarded|the forge fire|and burned by it|Don't laugh"),
+    (86, "old_ashforge", "灰炉の古炉", "Old Ashforge", "anvil",
+     "炉は冷えた|鍛え手は下へ行った|戻ると|言った", "The forge is cold|The smiths went|below, saying|they'd return"),
+    (89, "hammer_ruin", "鎚の跡", "Hammer Ruin", "anvil_pair",
+     "鎚を振った数だけ|地面が|熱い|まだ熱い", "The ground is hot|from each blow|of the hammers|Still hot"),
+    (96, "northern_forge", "北の炉跡", "Northern Forge", "bell_post",
+     "都の鐘を鋳た炉|割れた鐘は|ここへ|戻された", "This forge cast|the city's bell|The cracked bell|came back here"),
+    (99, "soot_forge", "煤の炉", "Soot Forge", "sea_chests",
+     "煤で名を書いた|雨が|一つずつ|消していく", "Names in soot|The rain|erases them|one by one"),
+    (94, "ash_graves", "灰の墓所", "Ash Graves", "offering",
+     "灰の民は|墓を掘らない|灰に|混ぜる", "The ash folk|dig no graves|They mix you|into the ash"),
+    (104, "cinderfield_graves", "焼け野の墓所", "Cinderfield Graves", "fresh_grave",
+     "東の灰から|骨の先|掘るな|指しているだけだ", "A bone tip|in the ash east|Don't dig|it only points"),
+    (91, "charcoal_hamlet", "炭焼きの里", "Charcoal Hamlet", "woodpile",
+     "東の焚き火跡は|炭焼きの|最初の|窯", "The old fire east|was the first kiln|of the charcoal|burners"),
+    (101, "blacktile_hamlet", "黒瓦の集落", "Black-Tile Hamlet", "lantern_row",
+     "瓦は|余燼の鱗|雨の日は|湯気が立つ", "The tiles are|Ember's scales|On rainy days|they steam"),
+    (92, "sulfur_mine", "硫黄の坑道", "Sulfur Mine", "broken_cart",
+     "掘るほどに|下は温かくなった|淵は|近い", "We dug deeper|and it got warmer|The abyss|is near"),
+    (102, "idol_mine", "灰像の坑道", "Idol Mine", "ash_statue",
+     "南の灰に|像が埋まる|坑夫が|拝んでいた", "In the south ash|lies an idol|The miners|prayed to it"),
+    (103, "mapmaker_camp", "地図描きの野営", "Mapmaker's Camp", None,
+     "この荒野の地図は|まだ半分白い|門と砦を|描きたい", "My map here|is still half blank|I want the gate|and the fort"),
+    (16, "pilgrim_camp", "巡礼の野営", "Pilgrim's Camp", None,
+     "祠を巡る旅|膝が|言うことを|聞かない", "A pilgrimage|of shrines|My knees|won't listen"),
+    # ======================================== 嵐の高地の小さな集落 (一つだけの見どころ)
+]
+
+PLACES = {i: (slug, ja, en, piece, nja, nen) for i, slug, ja, en, piece, nja, nen in P}

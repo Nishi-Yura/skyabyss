@@ -217,7 +217,10 @@ public final class RecordBuilder {
         int kept = Keepsakes.keptStacks(p);
         rows.add(value("kept", t("r.kept"), kept > 0 ? t("v.stacks", kept) : t("v.none"),
                 kept > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE, List.of(t("d.kept"))));
-        rows.add(graveRow(p));
+        Row grave = graveRow(p);
+        if (grave != null) {
+            rows.add(grave);
+        }
 
         rows.add(header("rights"));
         TitanMemoryData.Record r = memory(p);
@@ -306,31 +309,22 @@ public final class RecordBuilder {
         return value("route", t("r.route"), v, step > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE, detail);
     }
 
-    // 墓 (grave パッケージ。倒れたときの持ち物の入口)。場所・中身の数・救いの決まりを出す
+    // 前の版の墓 (grave パッケージ。もう作らない。開けると中身が戻る)。残っているときだけ場所と中身の数を出す
+    @org.jetbrains.annotations.Nullable
     private static Row graveRow(ServerPlayer p) {
         List<jp.revati.skyabyss.grave.GraveData.Grave> graves = jp.revati.skyabyss.grave.GraveData.get(p.server).owned(p.getUUID());
+        if (graves.isEmpty()) {
+            return null;
+        }
         List<Component> detail = new ArrayList<>();
-        detail.add(t(graves.isEmpty() ? "d.grave_none" : "d.grave_has"));
-        if (!graves.isEmpty()) {
-            detail.add(t("d.grave_marker", jp.revati.skyabyss.grave.GraveMarkers.NEAR_BLOCKS));
-        }
-        int n = 0;
+        detail.add(t("d.grave_legacy"));
+        int n = 1;
         for (jp.revati.skyabyss.grave.GraveData.Grave g : graves) {
-            if (++n > 40) {
-                break;
-            }
             detail.add(t("d.grave_item", n, g.itemCount(), g.xp, dimension(g.dimension.location().toString()), g.pos.getX(), g.pos.getY(), g.pos.getZ()));
-        }
-        int rescue = jp.revati.skyabyss.grave.DeathRules.rescuePercent(p.server);
-        detail.add(rescue > 0 ? t("d.grave_rescue", rescue) : t("d.grave_rescue_off"));
-        detail.add(t(jp.revati.skyabyss.grave.DeathRules.ownerOnly(p.server) ? "d.grave_owner_only" : "d.grave_open"));
-        int expire = jp.revati.skyabyss.grave.DeathRules.expireMinutes(p.server);
-        if (expire > 0) {
-            detail.add(t("d.grave_expire", expire));
+            n++;
         }
         return new Row("grave", Kind.ITEM, new ItemStack(net.minecraft.world.item.Items.MOSSY_COBBLESTONE), t("r.grave"),
-                graves.isEmpty() ? t("v.grave_none") : t("v.graves", graves.size()),
-                graves.isEmpty() ? RecordSnapshot.MARK_NONE : RecordSnapshot.MARK_ATTENTION, -1, detail, RecordSnapshot.ACTION_NONE);
+                t("v.graves", graves.size()), RecordSnapshot.MARK_ATTENTION, -1, detail, RecordSnapshot.ACTION_NONE);
     }
 
     // 天の鍵の欠片の総数 (巨神の数)
@@ -499,7 +493,7 @@ public final class RecordBuilder {
         // 天と淵の大陸の見どころの発見 (ContinentPois.discover)
         if (jp.revati.skyabyss.world.continent.ContinentPois.in(p.level())) {
             long total = jp.revati.skyabyss.world.continent.ContinentPois.all().stream().filter(jp.revati.skyabyss.world.continent.ContinentPois.Poi::site).count();
-            rows.add(value("discoveries", t("r.discoveries"), t("v.of", jp.revati.skyabyss.world.continent.ContinentPois.discovered(p).size(), total),
+            rows.add(value("discoveries", t("r.discoveries"), t("v.of", jp.revati.skyabyss.world.continent.ContinentPois.foundCount(p), total),
                     RecordSnapshot.MARK_NONE, List.of(t("d.discoveries"))));
         }
         long left = Voyages.cooldownLeft(p);

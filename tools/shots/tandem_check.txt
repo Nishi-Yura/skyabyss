@@ -1,0 +1,39 @@
+# 2026-11-03: 相乗り (mount/MountEntity の二つ目の席)。前に自分、後ろに町の人を乗せ、背中側と正面から見る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/tandem_check.txt -PshotsName=tandem_check
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+camera minecraft:overworld 0 -60 2 180 8
+waitchunks
+wait 200
+cmd skyabyss cinematic stop
+cmd kill @e[type=skyabyss:mount]
+cmd kill @e[type=skyabyss:attendant]
+chat clear
+hud off
+cmd tp @s 0 -60 -2 0 0
+cmd skyabyss facility mount demo
+wait 40
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+cmd summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"guide",Variant:1,PersistenceRequired:1b}
+wait 5
+cmd ride @e[type=skyabyss:attendant,limit=1,sort=nearest] mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 20
+perspective back
+wait 20
+shot t01_back
+perspective front
+wait 20
+shot t02_front
+bodyyaw 70
+wait 10
+shot t03_front_side

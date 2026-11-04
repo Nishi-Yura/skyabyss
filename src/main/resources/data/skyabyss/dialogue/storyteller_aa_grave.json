@@ -9,23 +9,15 @@
           "id": "grave",
           "kind": "give",
           "if": {
-            "type": "any",
+            "type": "all",
             "of": [
               {
-                "type": "grave"
+                "type": "stage",
+                "min": 1
               },
               {
-                "type": "all",
-                "of": [
-                  {
-                    "type": "stage",
-                    "min": 1
-                  },
-                  {
-                    "type": "no_keepsake",
-                    "item": "skyabyss:tide_watching_shell"
-                  }
-                ]
+                "type": "no_keepsake",
+                "item": "skyabyss:tide_watching_shell"
               }
             ]
           },
@@ -38,14 +30,6 @@
     "lost_ask": {
       "face": "grave",
       "options": [
-        {
-          "id": "grave",
-          "kind": "give",
-          "if": {
-            "type": "grave"
-          },
-          "goto": "grave_ask"
-        },
         {
           "id": "conch",
           "kind": "give",
@@ -63,26 +47,6 @@
             ]
           },
           "goto": "ch2_conch_ask"
-        },
-        {
-          "id": "no",
-          "kind": "talk",
-          "goto": "menu"
-        }
-      ]
-    },
-    "grave_ask": {
-      "face": "grave",
-      "options": [
-        {
-          "id": "yes",
-          "kind": "give",
-          "if": {
-            "type": "grave"
-          },
-          "do": {
-            "type": "grave_choose"
-          }
         },
         {
           "id": "no",

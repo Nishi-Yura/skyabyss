@@ -46,7 +46,9 @@ import net.minecraft.world.phys.Vec3;
 public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
     public enum Kind {
-        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN, FOE
+        // 足すときは末尾に (パケットは順番の番号で送る)。TERRITORY = 土地の旗を持つ組合 (endgame/GuildWeek)、LOOTCAMP = 巡り路の野営地 (endgame/CircuitCamps)
+        // FISHING = 見つけた釣り場 (fishing/FishingSpots)、SPRINT = 乗り物の早駆けの道の始まり (mount/MountSprint)
+        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN, FOE, TERRITORY, LOOTCAMP, FISHING, SPRINT
     }
 
     // 一つの印。name は文の鍵の材料 (種類ごと。画面の MapText が文にする)、extra は付け足し (碑の土地の名・章の ID)。
@@ -89,6 +91,21 @@ public final class MapMarks {
         titanMarks(player, over, out);
         shrineMarks(player, out);
         foeMarks(out);
+        territoryMarks(player.server, out);
+        for (jp.revati.skyabyss.endgame.CircuitCamps.Camp c : jp.revati.skyabyss.endgame.CircuitCamps.all()) {
+            out.add(new Mark(Kind.LOOTCAMP, "lootcamp:" + c.id(), "", c.id(), c.x(), c.z(), false, 0xF2C14E));
+        }
+        // 見つけた釣り場
+        for (jp.revati.skyabyss.fishing.FishingSpots.Spot s : jp.revati.skyabyss.fishing.FishingSpots.all()) {
+            if (jp.revati.skyabyss.fishing.FishingSpots.found(player, s)) {
+                out.add(new Mark(Kind.FISHING, s.id(), "", String.valueOf(s.land()), s.x(), s.z(), false, 0x5FC8F0));
+            }
+        }
+        // 乗り物の早駆けの道の始まり
+        for (jp.revati.skyabyss.mount.MountSprint.Route r : jp.revati.skyabyss.mount.MountSprint.routes()) {
+            net.minecraft.core.BlockPos st = r.points().get(0);
+            out.add(new Mark(Kind.SPRINT, "sprint:" + r.id(), "", r.id(), st.getX(), st.getZ(), false, 0xE8C27A));
+        }
         // 祠と開いた章の跡地のありか (前は書庫番の「地図の写し」で載った。書庫番を消したので最初から)
         archiveMarks(player.server, data.grounds(), Chapters.of(player), out);
         if (data.first("camp") == null) {
@@ -101,6 +118,30 @@ public final class MapMarks {
         boolean townKnown = out.stream().anyMatch(m -> m.kind() == Kind.TOWN && !m.rumor());
         return new Sheet(center.getX(), center.getZ(), townKnown, out.size() > MAX ? List.copyOf(out.subList(0, MAX)) : List.copyOf(out));
     }
+
+    // 土地の旗を持つ組合 (2026-11-03 の声「まっぷでどこのギルドが領地占領しているかわかる様にしてほしい」)。町の東に、組合の色の旗と名前。
+    // name = 組合の名前、extra = 土地 (RegionSpawner.REGIONS の名前)、id = "territory:" + 組合の略号、color = 組合の色
+    static void territoryMarks(net.minecraft.server.MinecraftServer server, List<Mark> out) {
+        jp.revati.skyabyss.endgame.GuildWeek week = jp.revati.skyabyss.endgame.GuildWeek.get(server);
+        jp.revati.skyabyss.facility.guild.GuildData guilds = jp.revati.skyabyss.facility.guild.GuildData.get(server);
+        jp.revati.skyabyss.world.continent.ContinentLayout lay = jp.revati.skyabyss.world.continent.ContinentLayout.get();
+        for (int r : jp.revati.skyabyss.endgame.RegionFame.LANDS) {
+            String land = jp.revati.skyabyss.world.continent.RegionSpawner.REGIONS[r];
+            String gid = week.flag(r);
+            BlockPos at = r == jp.revati.skyabyss.world.continent.ContinentMap.MEADOW ? lay.capital() : lay.town(land);
+            if (gid == null || at == null) {
+                continue;
+            }
+            jp.revati.skyabyss.facility.guild.GuildData.Guild g = guilds.byId(gid);
+            String name = g != null ? g.name : week.name(gid);
+            String tag = g != null && g.tag != null ? g.tag : "";
+            int color = g != null ? g.color & 0xFFFFFF : 0xF2C14E;
+            out.add(new Mark(Kind.TERRITORY, "territory:" + tag, name, land, at.getX() + TERRITORY_EAST, at.getZ(), false, color));
+        }
+    }
+
+    // 旗の印を町の印から東へ離す (町と、町の北の野営地の札に重ねない)
+    static final int TERRITORY_EAST = 80;
 
     // 名のある強敵の棲み家 (土地ごとに一つ。生きていれば赤く縁取る)
     static void foeMarks(List<Mark> out) {
@@ -121,8 +162,9 @@ public final class MapMarks {
         }
     }
 
-    // 天と淵の大陸の見どころ (Wynncraft の地図のように、行く前から全部出す。建ったものは建った位置)。碑などの印で、指すと名前。
-    // まだ見つけていない見どころは extra を "poi~:<種類>" にして、画面で薄く描く (ContinentPois.discovered)
+    // 天と淵の大陸の見どころ。見つけた所だけ出す (建ったものは建った位置)。碑などの印で、指すと名前。
+    // 前は行く前から全部出していたが、地図が印で埋まって見にくかった (2026-11-03 の声「見どころをマップに全部書いてるけど、そのせいでみにくい」)。
+    // 見つけていない所へは、頼みの目的の標 (ObjectiveMarker) が案内する
     static void poiMarks(ServerPlayer player, List<Spot> entries, List<Mark> out) {
         if (entries.stream().noneMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
             return;
@@ -140,8 +182,12 @@ public final class MapMarks {
             if (!poi.site()) {
                 continue;
             }
+            if (!found.contains(i)) {
+                continue;
+            }
             BlockPos at = built.getOrDefault(i, new BlockPos(poi.x(), 0, poi.z()));
-            out.add(new Mark(Kind.WAYMARK, "poi" + i, "", (found.contains(i) ? "poi:" : "poi~:") + poi.kind(), at.getX(), at.getZ(), false, 0));
+            // 名のある場所は名 (MapText が map.skyabyss.poi_name.<名> にする)
+            out.add(new Mark(Kind.WAYMARK, "poi" + i, poi.name(), "poi:" + poi.kind(), at.getX(), at.getZ(), false, 0));
         }
     }
 
@@ -321,7 +367,9 @@ public final class MapMarks {
 
     static void titanMarks(ServerPlayer player, ServerLevel over, List<Mark> out) {
         for (String titan : Titans.all()) {
-            if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan) || TitanDormancy.isResting(player.server, titan)) {
+            // 巨神そのものが見える人だけ (TitanVisibility。心臓を止めた人は、地図でも祠の印で見る)
+            if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan) || TitanDormancy.isResting(player.server, titan)
+                    || !jp.revati.skyabyss.titan.TitanVisibility.sees(player, titan)) {
                 continue;
             }
             Vec3 at = YoungReach.adultPos(over, titan);

@@ -9,6 +9,7 @@ import jp.revati.skyabyss.client.ui.TextStyle;
 import jp.revati.skyabyss.trial.Trial;
 import jp.revati.skyabyss.trial.TrialBoardNet;
 import jp.revati.skyabyss.trial.TrialCatalog;
+import jp.revati.skyabyss.client.ui.Golden;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -41,13 +42,19 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int COMMON = 0x4A6A72;
     private static final int ABYSS = 0xD8343C;
 
-    private static final int W = 360;
-    private static final int H = 262;
+    // 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 中身の一行目に頁の札・歌片を作る・深淵のつまみ、その下に
+    // いまの三つ (同じ幅の三列の札) か図鑑 (行 13)、下の段 (34) に順路の記録・歌片・称号・手引き
+    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT2);
+    private static final Golden.Box BODY = LAYOUT.body();
+    private static final Golden.Box CONTENT = BODY.afterTop(Golden.ROW);
+    private static final int W = Golden.L_W;
+    private static final int H = Golden.L_H;
+    private static final int ROW = Golden.ROW;
 
     private static final int ABYSS_W = 118;
-    private static final int CRAFT_W = 86;
-    // 頁の札の幅。二つの札・歌片を作る・深淵のつまみが一列に並んで重ならない幅 (360 - 余白 24 - 86 - 118 - 間 18 = 114 を二つに)
-    private static final int TAB_W = 57;
+    private static final int CRAFT_W = Golden.S89;
+    private static final int TAB_W = Golden.S55;
+    private static final int TOOL_Y = BODY.y();
 
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private TrialBoardNet.Open data;
@@ -101,22 +108,22 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         double my = fit.y(screenY);
         int px = 0;
         int py = 0;
-        if (button == 0 && my >= py + 34 && my < py + 50) {
+        if (button == 0 && my >= TOOL_Y && my < TOOL_Y + ROW) {
             for (int t = 0; t < 2; t++) {
-                int tx = px + 12 + t * (TAB_W + 6);
+                int tx = BODY.x() + t * (TAB_W + Golden.S3);
                 if (mx >= tx && mx < tx + TAB_W) {
                     tab = t;
                     return true;
                 }
             }
             // 歌片を作る (祠の炉。足りるかはサーバーが確かめる)
-            int cx = px + W - 12 - ABYSS_W - 6 - CRAFT_W;
+            int cx = BODY.right() - ABYSS_W - Golden.S5 - CRAFT_W;
             if (mx >= cx && mx < cx + CRAFT_W) {
                 net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.CraftShard(data.titan()));
                 return true;
             }
             // 深淵のつまみ (転生 3 回以上の人だけ押せる。グループごと。サーバーが確かめる)
-            int ax = px + W - 12 - ABYSS_W;
+            int ax = BODY.right() - ABYSS_W;
             if (mx >= ax && mx < ax + ABYSS_W) {
                 if (data.abyssOpen()) {
                     net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.AbyssToggle(data.titan(), !data.abyssOn()));
@@ -194,46 +201,45 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         Font font = Minecraft.getInstance().font;
         g.fill(0, 0, width, height, argb(0.80f, BG));
-        // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換)。論理の (0, 0) に置く
-        fit.fit(width, height, W, H, 2.5f, 0.5f);
+        // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換。画素ちょうど)。論理の (0, 0) に置く
+        fit.fit(width, height, W, H, 3f, 0.5f);
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        int px = 0;
-        int py = 0;
-        frame(g, px, py, W, H, 0x3A4A58, PANEL);
-        // 題字
-        TextStyle.HEADING.drawLeft(g, font, Component.translatable("gui.skyabyss.trial.title"), px + 12, py + 9, 1f, GOLD);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.Box head = LAYOUT.head();
+        int hy = Golden.textY(head.y(), head.h());
+        g.drawString(font, Component.translatable("gui.skyabyss.trial.title"), head.x() + Golden.S5, hy, argb(1f, GOLD), false);
         Component titan = Component.translatable(TrialCatalog.titanKey(data.titan()));
-        Component sub = Component.translatable("gui.skyabyss.trial.cycle", data.cycle());
-        g.drawString(font, titan.copy().append("  ").append(sub), px + 120, py + 14, argb(1f, TEAL), false);
+        Component sub = titan.copy().append("  ").append(Component.translatable("gui.skyabyss.trial.cycle", data.cycle()));
+        g.drawString(font, sub, head.right() - Golden.S5 - font.width(sub), hy, argb(1f, TEAL), false);
         // 頁
         String[] tabs = {"gui.skyabyss.trial.tab.now", "gui.skyabyss.trial.tab.codex"};
         for (int t = 0; t < 2; t++) {
-            int tx = px + 12 + t * (TAB_W + 6);
-            boolean on = tab == t;
-            frame(g, tx, py + 34, TAB_W, 16, on ? GOLD : 0x2C3846, on ? 0x2A2618 : CARD);
-            Component label = Component.translatable(tabs[t]);
-            g.drawString(font, label, tx + TAB_W / 2 - font.width(label) / 2, py + 38, argb(1f, on ? GOLD : DIM), false);
+            int tx = BODY.x() + t * (TAB_W + Golden.S3);
+            boolean hover = mouseX >= tx && mouseX < tx + TAB_W && mouseY >= TOOL_Y && mouseY < TOOL_Y + ROW;
+            Golden.tab(g, font, new Golden.Box(tx, TOOL_Y, TAB_W, ROW), Component.translatable(tabs[t]), tab == t, hover);
         }
-        renderAbyssToggle(g, font, px + W - 12 - ABYSS_W, py + 34, mouseX, mouseY);
-        renderCraft(g, font, px + W - 12 - ABYSS_W - 6 - CRAFT_W, py + 34, mouseX, mouseY);
+        renderAbyssToggle(g, font, BODY.right() - ABYSS_W, TOOL_Y, mouseX, mouseY);
+        renderCraft(g, font, BODY.right() - ABYSS_W - Golden.S5 - CRAFT_W, TOOL_Y, mouseX, mouseY);
         if (tab == 0) {
-            renderNow(g, font, px, py);
+            renderNow(g, font);
         } else {
-            renderCodex(g, font, px, py);
+            renderCodex(g, font);
         }
         // 足: 順路の記録・歌片・称号
-        renderFoot(g, font, px, py);
+        renderFoot(g, font);
         fit.end(g);
     }
 
     // 歌片を作るボタン (祠の東の縁の共鳴の炉)
     private void renderCraft(GuiGraphics g, Font font, int x, int y, int mx, int my) {
-        boolean hover = mx >= x && mx < x + CRAFT_W && my >= y && my < y + 16;
-        frame(g, x, y, CRAFT_W, 16, hover ? GOLD : 0x4A4A2C, hover ? 0x2A2618 : CARD);
+        boolean hover = mx >= x && mx < x + CRAFT_W && my >= y && my < y + ROW;
+        g.fill(x, y, x + CRAFT_W, y + ROW, argb(1f, hover ? 0x2A2618 : CARD));
+        Golden.outline(g, x, y, x + CRAFT_W, y + ROW, argb(1f, hover ? GOLD : 0x4A4A2C));
         Component label = Component.translatable("gui.skyabyss.shrine.craft");
-        g.drawString(font, label, x + CRAFT_W / 2 - font.width(label) / 2, y + 4, argb(1f, hover ? GOLD : TEAL), false);
+        g.drawString(font, label, x + CRAFT_W / 2 - font.width(label) / 2, Golden.textY(y, ROW), argb(1f, hover ? GOLD : TEAL), false);
         if (hover) {
             g.renderTooltip(font, Component.translatable("gui.skyabyss.shrine.craft_tip", jp.revati.skyabyss.trial.TrialBoard.SHARD_MATERIALS,
                     jp.revati.skyabyss.trial.TrialBoard.SHARD_RESONANCE), mx, my);
@@ -244,72 +250,79 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private void renderAbyssToggle(GuiGraphics g, Font font, int x, int y, int mx, int my) {
         boolean open = data.abyssOpen();
         boolean on = data.abyssOn();
-        boolean hover = open && mx >= x && mx < x + ABYSS_W && my >= y && my < y + 16;
+        boolean hover = open && mx >= x && mx < x + ABYSS_W && my >= y && my < y + ROW;
         float pulse = on ? 0.75f + 0.25f * (float) Math.sin(age * 0.2) : 1f;
         int line = on ? ABYSS : open ? (hover ? 0x8C4A50 : 0x4A2C32) : 0x2C3846;
-        frame(g, x, y, ABYSS_W, 16, line, on ? 0x2A1216 : open ? 0x181014 : CARD);
+        g.fill(x, y, x + ABYSS_W, y + ROW, argb(1f, on ? 0x2A1216 : open ? 0x181014 : CARD));
+        Golden.outline(g, x, y, x + ABYSS_W, y + ROW, argb(1f, line));
         String key = !open ? "gui.skyabyss.trial.abyss.locked" : on ? "gui.skyabyss.trial.abyss.on" : "gui.skyabyss.trial.abyss.off";
         Component label = Component.translatable(key, jp.revati.skyabyss.abyss.Abyss.OPEN_AT);
-        g.drawString(font, label, x + ABYSS_W / 2 - font.width(label) / 2, y + 4, argb(pulse, on ? 0xFF8A90 : open ? 0xC8A0A6 : DIM), false);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, label, x + ABYSS_W / 2, Golden.textY(y, ROW), ABYSS_W - 4, argb(pulse, on ? 0xFF8A90 : open ? 0xC8A0A6 : DIM), false);
         if (hover) {
             g.renderTooltip(font, Component.translatable("gui.skyabyss.trial.abyss.tip"), mx, my);
         }
     }
 
-    private void renderNow(GuiGraphics g, Font font, int px, int py) {
-        int y = py + 54;
+    // いまの三つ: 同じ幅の三列の札。上から 枠の絵と名前・類と段・説明 (入るだけ。あふれは「…」)・修飾 (一つずつ一行)・状態
+    private void renderNow(GuiGraphics g, Font font) {
+        int colW = (CONTENT.w() - 2 * Golden.GAP) / 3;
+        int i = 0;
         for (TrialBoardNet.Card card : data.cards()) {
             Trial.Def def = TrialCatalog.get(card.cellId());
-            if (def == null) {
+            if (def == null || i >= 3) {
                 continue;
             }
+            int x = CONTENT.x() + i * (colW + Golden.GAP);
+            int y = CONTENT.y();
+            int h = CONTENT.h();
+            i++;
             int rc = rarityColor(card.rarity());
-            frame(g, px + 10, y, W - 20, 52, rc, CARD);
+            Golden.recess(g, new Golden.Box(x, y, colW, h));
+            Golden.outline(g, x, y, x + colW, y + h, argb(1f, rc));
+            int tx = x + Golden.S5;
+            int tw = colW - 2 * Golden.S5;
             // 枠の絵と名前
-            icon(g, slotIcon(def.slot()), px + 19, y + 5, 18, 1f);
-            Component slot = Component.translatable("trial.skyabyss.slot." + def.slot().id);
-            g.drawString(font, slot, px + 28 - font.width(slot) / 2, y + 24, argb(1f, DIM), false);
-            Component name = Component.translatable(def.nameKey());
-            g.drawString(font, name, px + 48, y + 7, argb(1f, GOLD), true);
-            // 類・段 (右上)
+            icon(g, slotIcon(def.slot()), tx, y + 2, 12, 1f);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(def.nameKey()), tx + 15, Golden.textY(y + 1, ROW), tw - 15, argb(1f, GOLD), true);
+            // 類と段
+            int ky = y + 1 + ROW;
+            icon(g, I_KIND + def.kind().ordinal(), tx, ky + 1, 12, 1f);
             Component kind = Component.translatable("trial.skyabyss.kind." + def.kind().id());
             String st = stars(def.tier());
-            int kw = font.width(kind);
-            int rx = px + W - 20 - 8;
-            g.drawString(font, st, rx - font.width(st), y + 7, argb(1f, GOLD), false);
-            g.drawString(font, kind, rx - font.width(st) - 8 - kw, y + 7, argb(1f, TEAL), false);
-            icon(g, I_KIND + def.kind().ordinal(), rx - font.width(st) - 8 - kw - 14, y + 6, 12, 1f);
-            // 一行の説明
-            Component desc = Component.translatable(def.descKey());
-            // 説明は二行まで (一行目 y+18、二行目 y+27)。三行目以降は切らずに、この二行で収まる文だけを出す
-            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, desc, W - 20 - 48 - 12);
-            for (int i = 0; i < Math.min(2, dl.size()); i++) {
-                g.drawString(font, dl.get(i), px + 48, y + 18 + i * 9, argb(1f, DIM), false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, kind, tx + 15, Golden.textY(ky, ROW), tw - 15 - font.width(st) - 4, argb(1f, TEAL), false);
+            g.drawString(font, st, tx + tw - font.width(st), Golden.textY(ky, ROW), argb(1f, GOLD), false);
+            // 説明: 修飾の札と状態の行を残して入るだけ。入りきらなければ最後の行に「…」 (前は二行で切って、下に空きが残った)
+            int dy = ky + ROW + 2;
+            int bottomRow = y + h - 2 - ROW;
+            int chipsH = card.chips().isEmpty() ? ROW : card.chips().size() * 16;
+            int maxLines = Math.max(2, (bottomRow - 3 - chipsH - dy) / ROW);
+            String more = "…";
+            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw - font.width(more));
+            int shown = Math.min(maxLines, dl.size());
+            for (int l = 0; l < shown; l++) {
+                int ly = Golden.textY(dy + l * ROW, ROW);
+                g.drawString(font, dl.get(l), tx, ly, argb(1f, DIM), false);
+                if (l == shown - 1 && dl.size() > shown) {
+                    g.drawString(font, more, tx + font.width(dl.get(l)), ly, argb(1f, DIM), false);
+                }
             }
-            // 修飾の札
-            int cx = px + 48;
-            int cy = y + 38;
+            // 修飾の札 (一つずつ一行)
+            int cy = dy + shown * ROW + 3;
             if (card.chips().isEmpty()) {
-                g.drawString(font, Component.translatable("trial.skyabyss.chip.plain"), cx, cy + 4, argb(1f, DIM), false);
+                g.drawString(font, Component.translatable("trial.skyabyss.chip.plain"), tx, Golden.textY(cy, ROW), argb(1f, DIM), false);
             }
             for (TrialBoardNet.Chip chip : card.chips()) {
-                Component text = chipText(chip);
-                int cw = font.width(text) + 20;
-                if (cx + cw > px + W - 18) {
-                    cx = px + 48;
-                    cy += 16;
+                if (cy + 14 > bottomRow) {
+                    break;
                 }
                 int col = rarityColor(chip.rarity());
-                frame(g, cx, cy, cw, 14, col, 0x0E1118);
-                icon(g, chipIcon(chip), cx + 3, cy + 1, 12, 1f);
-                g.drawString(font, text, cx + 17, cy + 3, argb(1f, chip.rarity() >= 1 ? col : TEXT), false);
-                cx += cw + 4;
+                g.fill(tx, cy, tx + tw, cy + 14, 0xFF0E1118);
+                Golden.outline(g, tx, cy, tx + tw, cy + 14, argb(1f, col));
+                icon(g, chipIcon(chip), tx + 2, cy + 1, 12, 1f);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, chipText(chip), tx + 16, cy + 3, tw - 18, argb(1f, chip.rarity() >= 1 ? col : TEXT), false);
+                cy += 14 + 2;
             }
-            // 済み・図鑑
-            if (card.clearedNow()) {
-                Component done = Component.translatable("gui.skyabyss.trial.cleared_now");
-                g.drawString(font, done, px + W - 28 - font.width(done), y + 20, argb(1f, GOOD), false);
-            }
+            // 状態 (下の端): 左に図鑑の印、右に今回済み
             String badge = switch (card.state()) {
                 case 0 -> "gui.skyabyss.trial.state.new";
                 case 2 -> "gui.skyabyss.trial.state.cleared";
@@ -317,59 +330,71 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 default -> null;
             };
             if (badge != null) {
-                Component b = Component.translatable(badge);
-                g.drawString(font, b, px + 28 - font.width(b) / 2, y + 34, argb(1f, card.state() == 0 ? GOLD : GOOD), false);
+                g.drawString(font, Component.translatable(badge), tx, Golden.textY(bottomRow, ROW), argb(1f, card.state() == 0 ? GOLD : GOOD), false);
             }
-            y += 56;
+            if (card.clearedNow()) {
+                Component done = Component.translatable("gui.skyabyss.trial.cleared_now");
+                g.drawString(font, done, tx + tw - font.width(done), Golden.textY(bottomRow, ROW), argb(1f, GOOD), false);
+            }
         }
     }
 
-    private void renderCodex(GuiGraphics g, Font font, int px, int py) {
-        int y = py + 56;
+    // 図鑑: 行 13 (1 行おきに地の色)
+    private void renderCodex(GuiGraphics g, Font font) {
+        Golden.recess(g, CONTENT);
+        int x0 = CONTENT.x() + Golden.S5;
+        int y = CONTENT.y() + 2;
         int row = 0;
         for (TrialBoardNet.Row r : data.codex()) {
             Trial.Def def = TrialCatalog.get(r.cellId());
-            if (def == null || y > py + H - 54) {
+            if (def == null || y + ROW > CONTENT.bottom() - 2) {
                 continue;
             }
-            frame(g, px + 10, y, W - 20, 20, r.cleared() > 0 ? 0x3E6B58 : 0x2C3846, CARD);
-            icon(g, slotIcon(def.slot()), px + 15, y + 3, 14, r.seen() ? 1f : 0.35f);
+            if (row % 2 == 0) {
+                Golden.stripe(g, new Golden.Box(CONTENT.x() + 1, y, CONTENT.w() - 2, ROW));
+            }
+            int ty = Golden.textY(y, ROW);
+            icon(g, slotIcon(def.slot()), x0, y, 12, r.seen() ? 1f : 0.35f);
             Component name = r.seen() ? Component.translatable(def.nameKey()) : Component.translatable("trial.skyabyss.unknown");
-            g.drawString(font, name, px + 34, y + 6, argb(1f, r.seen() ? GOLD : DIM), false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, x0 + 16, ty, 120, argb(1f, r.seen() ? GOLD : DIM), false);
             if (r.seen()) {
-                icon(g, I_KIND + def.kind().ordinal(), px + 150, y + 4, 12, 1f);
-                g.drawString(font, stars(def.tier()), px + 166, y + 6, argb(1f, GOLD), false);
+                icon(g, I_KIND + def.kind().ordinal(), x0 + 140, y, 12, 1f);
+                g.drawString(font, stars(def.tier()), x0 + 156, ty, argb(1f, GOLD), false);
                 Component n = Component.translatable("gui.skyabyss.trial.codex.cleared", r.cleared());
-                g.drawString(font, n, px + 206, y + 6, argb(1f, r.cleared() > 0 ? GOOD : DIM), false);
+                g.drawString(font, n, x0 + 196, ty, argb(1f, r.cleared() > 0 ? GOOD : DIM), false);
                 if (r.modsTotal() > 0) {
-                    int bx = px + 270;
-                    int bw = 56;
-                    g.fill(bx, y + 8, bx + bw, y + 12, 0xFF0A0C12);
-                    g.fill(bx, y + 8, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), y + 12, argb(1f, TEAL));
-                    g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, y + 6, argb(1f, DIM), false);
+                    int bx = x0 + 252;
+                    int bw = Golden.S34 + Golden.S8;
+                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0A0C12);
+                    g.fill(bx, y + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), y + 8, argb(1f, TEAL));
+                    g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 3, ty, argb(1f, DIM), false);
                 }
                 if (r.goals() > 0) {
-                    icon(g, I_GOAL, px + W - 32, y + 4, 12, 1f);
+                    icon(g, I_GOAL, CONTENT.right() - Golden.S5 - 12, y, 12, 1f);
                 }
             }
-            y += 22;
+            y += ROW;
             row++;
         }
         if (row == 0) {
-            g.drawString(font, Component.translatable("gui.skyabyss.trial.codex.empty"), px + 14, y + 4, argb(1f, DIM), false);
+            g.drawString(font, Component.translatable("gui.skyabyss.trial.codex.empty"), x0, Golden.textY(y, ROW), argb(1f, DIM), false);
         }
     }
 
-    private void renderFoot(GuiGraphics g, Font font, int px, int py) {
-        int y = py + H - 40;
-        g.fill(px + 10, y - 3, px + W - 10, y - 2, argb(0.5f, 0x3A4A58));
+    // 下の段 (34): 一行目に順路の記録と歌片、二行目に称号と手引き
+    private void renderFoot(GuiGraphics g, Font font) {
+        Golden.Box foot = LAYOUT.foot();
+        int x = foot.x() + Golden.S5;
+        int r1 = Golden.textY(foot.y() + 4, ROW);
+        int r2 = Golden.textY(foot.y() + 4 + ROW, ROW);
         // 順路の記録と歌片 (docs/design/32 の 6 章)
         long best = data.routeBest() / 20;
         Component record = data.routeClears() <= 0 ? Component.translatable("gui.skyabyss.shrine.record_none")
                 : Component.translatable("gui.skyabyss.shrine.record", data.routeClears(), String.format("%d:%02d", best / 60, best % 60));
-        g.drawString(font, record, px + 14, y, argb(1f, TEAL), false);
         Component shards = Component.translatable("gui.skyabyss.shrine.shards", data.shards());
-        g.drawString(font, shards, px + W - 14 - font.width(shards), y, argb(1f, data.shards() > 0 ? GOOD : GOLD), false);
+        int sw = font.width(shards);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, record, x, r1, foot.w() - Golden.S13 - sw - Golden.S8, argb(1f, TEAL), false);
+        g.drawString(font, shards, foot.right() - Golden.S5 - sw, r1, argb(1f, data.shards() > 0 ? GOOD : GOLD), false);
         MutableComponent titles = Component.translatable("gui.skyabyss.trial.titles");
         if (data.titles().isEmpty()) {
             titles.append(Component.translatable("gui.skyabyss.trial.titles_none"));
@@ -378,18 +403,16 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 titles.append(i > 0 ? "　" : "").append(Component.translatable("trial.skyabyss.title." + data.titles().get(i)));
             }
         }
-        // 称号は二行まで (三つ揃うと一行に入らない)
-        List<FormattedCharSequence> tl = jp.revati.skyabyss.client.ui.JpWrap.split(font, titles, W - 28);
-        for (int i = 0; i < Math.min(2, tl.size()); i++) {
-            g.drawString(font, tl.get(i), px + 14, y + 11 + i * 8, argb(1f, GOLD), false);
-        }
-        g.drawString(font, Component.translatable("gui.skyabyss.trial.help"), px + 14, y + 27, argb(1f, DIM), false);
+        Component help = Component.translatable("gui.skyabyss.trial.help");
+        int hw = Math.min(font.width(help), foot.w() / 2);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, titles, x, r2, foot.w() - Golden.S13 - hw - Golden.S8, argb(1f, GOLD), false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, help, foot.right() - Golden.S5 - hw, r2, hw, argb(1f, Golden.DIM), false);
     }
 
     @Override
     public int[] textBounds() {
         // 文字の範囲は描くときと同じ変換を通した画面の矩形 (論理の座標のままだと、倍率が 1 でない GUI で字が切れる)
-        fit.fit(width, height, W, H, 2.5f, 0.5f);
+        fit.fit(width, height, W, H, 3f, 0.5f);
         return fit.screenRect(0, 0, W, H);
     }
 }

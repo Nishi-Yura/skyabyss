@@ -60,8 +60,8 @@ public final class TideLoot {
     public static final String TITAN = TideKeeper.SLOT;   // "tide_shell"
     public static final int TIDE_LEVEL = 18;
     // 成長の経験値 (08 の 6.6節)
-    public static final int HEART_XP = 380;
-    public static final int HEART_FIRST_BONUS = 250;
+    public static final int HEART_XP = 140;
+    public static final int HEART_FIRST_BONUS = 95;
 
     // 品の ID (まだ登録されていないものを含む)
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");

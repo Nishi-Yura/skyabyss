@@ -112,13 +112,18 @@ final class ShrineArchitect {
         for (int z = PATH_START; z <= PATH_MAX_END; z++) {
             int want = cur;
             if (z > FLAT_UNTIL) {
-                int g = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.getX() + 7, center.getZ() + z) - 1 - top;
+                int g = ground(level, center.getX(), center.getZ() + z, top);
                 want = Math.max(cur - 1, Math.min(cur + 1, g));
             }
             cur = want;
             h[z - PATH_START] = cur;
+            // 大陸の道の手前で止める (参道の幅 ±6 のどこかが道の縁にかかる段の、一つ手前が終わり。2026-11-03 の声「まだ道の上に建造物が立つ」)
+            if (z + 1 <= PATH_MAX_END && z > FLAT_UNTIL && nearRoad(center.getX(), center.getZ() + z + 1)) {
+                end = z;
+                break;
+            }
             if (z >= PATH_MIN_END) {
-                int g = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.getX() + 7, center.getZ() + z) - 1 - top;
+                int g = ground(level, center.getX(), center.getZ() + z, top);
                 if (g == cur) {
                     end = z;
                     break;
@@ -126,6 +131,33 @@ final class ShrineArchitect {
             }
         }
         return new Plan(h, end);
+    }
+
+    // 参道の一列の地面の高さ (台座の床からの段)。大陸では地形の元の値 (建てた物を数えない) の、参道の幅 (x ±6) で一番高い所。
+    // 前は道の脇の一列 (x+7) の今のブロックで測っていたので、起伏の大きい所で参道が丘の中へ潜り、掘る高さ (11) を越えてトンネルになった
+    // (2026-11-03 の声「巨神の祠のこれなに」)。大陸でない世界は今のブロックの高さ
+    static int ground(ServerLevel level, int cx, int z, int top) {
+        if (jp.revati.skyabyss.world.continent.RoadClearance.live()) {
+            int m = Integer.MIN_VALUE;
+            for (int dx = -6; dx <= 6; dx += 3) {
+                m = Math.max(m, jp.revati.skyabyss.world.continent.ContinentMap.get().surface(cx + dx, z));
+            }
+            return m - top;
+        }
+        return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx + 7, z) - 1 - top;
+    }
+
+    // 参道の一列 (x ±6) のどこかが大陸の道 (縁を含む) にかかるか。大陸でない世界では道がない
+    static boolean nearRoad(int cx, int z) {
+        if (!jp.revati.skyabyss.world.continent.RoadClearance.live()) {
+            return false;
+        }
+        for (int dx = -6; dx <= 6; dx++) {
+            if (jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(cx + dx, z) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 整地 (台座の前に)
@@ -151,9 +183,17 @@ final class ShrineArchitect {
         for (int z = PATH_START; z <= plan.end; z++) {
             int h = plan.at(z);
             for (int dx = -6; dx <= 6; dx++) {
-                clearColumn(level, cx + dx, cz + z, top + h + 1, top + h + 11, air);
-                if (Math.abs(dx) <= 6) {
-                    foundation(level, cx + dx, cz + z, top + h - 1, d(Blocks.DEEPSLATE_BRICKS));
+                // 上は地面の上まで全部掘る (天井を残さない)
+                int sky = level.getHeight(Heightmap.Types.MOTION_BLOCKING, cx + dx, cz + z);
+                clearColumn(level, cx + dx, cz + z, top + h + 1, Math.max(top + h + 11, sky), air);
+                foundation(level, cx + dx, cz + z, top + h - 1, d(Blocks.DEEPSLATE_BRICKS));
+            }
+            // 切り通しの法面: 参道の外の 4 列は、外ほど高い所から上を削る (切り立った壁にしない)
+            for (int k = 1; k <= 4; k++) {
+                for (int sx : new int[] {-1, 1}) {
+                    int x = cx + sx * (6 + k);
+                    int sky = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, cz + z);
+                    clearColumn(level, x, cz + z, top + h + 1 + 2 * k, sky, air);
                 }
             }
         }
@@ -596,12 +636,17 @@ final class ShrineArchitect {
     // ---------------------------------------------------------------- 置く
     private static int apply(ServerLevel level, Blueprint b) {
         int count = 0;
+        boolean roads = jp.revati.skyabyss.world.continent.RoadClearance.live();
         for (Map.Entry<BlockPos, BlockState> e : b.map.entrySet()) {
             BlockPos p = e.getKey();
             int rx = p.getX() - b.origin.getX();
             int rz = p.getZ() - b.origin.getZ();
             int ry = p.getY() - b.origin.getY();
             if (inPedestal(rx, ry, rz) && ry >= 0 && ry <= 1) {
+                continue;
+            }
+            // 大陸の道の上には何も置かない (祠は道から離して置くが、古い世界の祠の場所や地形の違いで縁にかかったときの備え)
+            if (roads && jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(p.getX(), p.getZ()) != null) {
                 continue;
             }
             level.setBlock(p, e.getValue(), 2);

@@ -33,19 +33,14 @@ public final class NpcRenderer {
     static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(NpcSetup.STORYTELLER.get(), ctx -> create(ctx, "storyteller", 0.38f));
         event.registerEntityRenderer(NpcSetup.WHALE_CHASER.get(), ctx -> create(ctx, "whale_chaser", 0.42f));
-        // 旅の職人: 形は一つ、章 (variant 1〜4) ごとに絵 (textures/lowpoly/artisan_ch<n>.png) が替わる
-        event.registerEntityRenderer(NpcSetup.ARTISAN.get(), ctx -> new LowPolyGeoRenderer<>(ctx, new ArtisanModel(), e -> NpcModels.has("artisan") ? NpcModels.mesh("artisan") : "artisan", 1.0f) {
+        // 旅の職人: 形は一つ (NpcModels の npc_artisan)、章 (variant 1〜4) ごとに絵 (textures/lowpoly/npc_artisan_ch<n>.png) が替わる
+        event.registerEntityRenderer(NpcSetup.ARTISAN.get(), ctx -> new LowPolyGeoRenderer<>(ctx, new ArtisanModel(), e -> NpcModels.mesh("artisan"), 1.0f) {
             {
                 this.shadowRadius = 0.42f;
-                // v2 (NpcModels): 右手の槌は別のメッシュ
-                addRenderLayer(new NpcModels.PropLayer<>(this, e -> NpcModels.has("artisan") ? NpcModels.mesh("artisan") : null));
+                // 右手の槌は別のメッシュ
+                addRenderLayer(new NpcModels.PropLayer<>(this, e -> NpcModels.mesh("artisan")));
             }
         });
-    }
-
-    // 職人の装いの絵 (章 1〜4。範囲外は一章)
-    public static ResourceLocation artisanTexture(int variant) {
-        return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + ArtisanLook.texture(variant) + ".png");
     }
 
     static final class ArtisanModel extends Model {
@@ -63,28 +58,21 @@ public final class NpcRenderer {
             }
         }
 
-        // 職人には元の滑らかな版 (cube の geo) が無いので、LowPoly.enabled = false でも低ポリの骨と絵のまま (メッシュは描かれず、消えるだけで落ちない)
         @Override
         public ResourceLocation getModelResource(NpcEntity entity) {
-            if (NpcModels.has("artisan")) {
-                return NpcModels.geo("artisan");
-            }
-            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/artisan_lowpoly.geo.json");
+            return NpcModels.geo("artisan");
         }
 
+        // 章ごとの絵 (npc_artisan_ch<n>.png。形は一つ)
         @Override
         public ResourceLocation getTextureResource(NpcEntity entity) {
-            if (NpcModels.has("artisan")) {
-                // 章ごとの絵 (npc_artisan_ch<n>.png。形は一つ)
-                return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + NpcModels.mesh("artisan") + "_"
-                        + ArtisanLook.texture(entity.variant()).substring("artisan_".length()) + ".png");
-            }
-            return artisanTexture(entity.variant());
+            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + NpcModels.mesh("artisan") + "_"
+                    + ArtisanLook.texture(entity.variant()).substring("artisan_".length()) + ".png");
         }
 
         @Override
         public ResourceLocation getAnimationResource(NpcEntity entity) {
-            return NpcModels.has("artisan") ? NpcModels.animation("artisan") : super.getAnimationResource(entity);
+            return NpcModels.animation("artisan");
         }
     }
 

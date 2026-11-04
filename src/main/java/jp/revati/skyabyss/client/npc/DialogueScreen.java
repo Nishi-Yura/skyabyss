@@ -35,7 +35,8 @@ public class DialogueScreen extends Screen {
     private static final int EDGE = 0xFF2E5552;
     private static final int EDGE_IN = 0xFF17302F;
     private static final int HOVER = 0x402E8F88;
-    private static final int LINE_H = 11;
+    // 行は 13 (docs/design/56)
+    private static final int LINE_H = jp.revati.skyabyss.client.ui.Golden.ROW;
     private static final int OPTION_H = 13;
     // 肖像は 128x128 のドット絵。画面の画素に対して整数倍で、ぼかさず (最近傍) 出す。GUI の倍率が 2 なら等倍、3 なら等倍で小さめ、4 以上は 2 倍
     private static final int PORTRAIT_PX = 128;
@@ -96,9 +97,10 @@ public class DialogueScreen extends Screen {
         double scale = Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
         facePx = Math.max(1, (int) Math.floor(64 * scale / PORTRAIT_PX + 0.35));
         face = (int) Math.ceil(PORTRAIT_PX * facePx / scale);
-        panelW = Math.min(420, width - 16);
-        textX = 16 + face + 14;
-        textW = panelW - textX - 12;
+        // 幅は黄金比の大きい板と同じ 356 (一行 28 字ほど。読みやすい長さ)。縁 8・顔の欄・あいだ 5・本文
+        panelW = Math.min(jp.revati.skyabyss.client.ui.Golden.L_W, width - 16);
+        textX = jp.revati.skyabyss.client.ui.Golden.FRAME + faceColW() + jp.revati.skyabyss.client.ui.Golden.S8;
+        textW = panelW - textX - jp.revati.skyabyss.client.ui.Golden.FRAME - jp.revati.skyabyss.client.ui.Golden.S8;
         lines.clear();
         lines.addAll(wrapBalanced(Component.translatable(show.textKey()).getString(), textW, font));
         totalChars = lines.stream().mapToInt(String::length).sum();
@@ -112,17 +114,27 @@ public class DialogueScreen extends Screen {
         }
         int textH = lines.size() * LINE_H;
         // 本文と選択肢は右の欄に収め、窓の高さを越えるときは目盛りつきで送る (2026-10-22 の部屋の見直し)
-        int natural = Math.max(face + 52, 10 + textH + 8 + optionsH + 10);
-        panelH = Math.min(natural, Math.max(face + 52, height - 20));
+        int minH = 2 * jp.revati.skyabyss.client.ui.Golden.FRAME + faceColH();
+        int natural = Math.max(minH, 2 * jp.revati.skyabyss.client.ui.Golden.FRAME + 4 + textH + 8 + optionsH + 4);
+        panelH = Math.min(natural, Math.max(minH, height - 20));
         panelX = (width - panelW) / 2;
-        panelY = height - panelH - 10;
+        panelY = height - panelH - jp.revati.skyabyss.client.ui.Golden.S8;
         selected = Mth.clamp(selected, 0, Math.max(0, optionLines.size() - 1));
-        body.setViewport(panelX + textX - 4, panelY + 10, panelW - textX - 4, panelH - 18);
+        body.setViewport(panelX + textX - 4, panelY + jp.revati.skyabyss.client.ui.Golden.FRAME + 2, panelW - textX - 4, panelH - 2 * jp.revati.skyabyss.client.ui.Golden.FRAME - 4);
         body.setContentHeight(textH + 8 + optionsH);
     }
 
     // 本文と選択肢の欄 (右の欄。目盛りつきで送る)
     private final ScrollPanel body = new ScrollPanel(LINE_H * 2);
+
+    // 顔の欄 (左): 顔と、下に名前・親しさ・印。幅は顔 + 余白、高さは顔 + 3 行
+    private int faceColW() {
+        return face + 2 * jp.revati.skyabyss.client.ui.Golden.S8;
+    }
+
+    private int faceColH() {
+        return face + jp.revati.skyabyss.client.ui.Golden.S8 + 3 * jp.revati.skyabyss.client.ui.Golden.ROW + jp.revati.skyabyss.client.ui.Golden.S5;
+    }
 
     // 選んだ選択肢が欄の中に見えるよう送る
     private void revealOption(int i) {
@@ -198,16 +210,15 @@ public class DialogueScreen extends Screen {
         Font font = Minecraft.getInstance().font;
         int x = panelX;
         int y = panelY;
-        // 枠
-        g.fill(x, y, x + panelW, y + panelH, PANEL);
-        g.renderOutline(x, y, panelW, panelH, EDGE);
-        g.renderOutline(x + 2, y + 2, panelW - 4, panelH - 4, EDGE_IN);
+        // 枠 (黄金比の板と同じ絵柄。docs/design/56) と顔の欄
+        jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x, y, panelW, panelH));
+        int cx = x + jp.revati.skyabyss.client.ui.Golden.FRAME;
+        int cy = y + jp.revati.skyabyss.client.ui.Golden.FRAME;
+        jp.revati.skyabyss.client.ui.Golden.recess(g, new jp.revati.skyabyss.client.ui.Golden.Box(cx, cy, faceColW(), panelH - 2 * jp.revati.skyabyss.client.ui.Golden.FRAME));
         // 顔
-        int fx = x + 13;
-        int fy = y + 10;
-        g.fill(fx - 3, fy - 3, fx + face + 3, fy + face + 3, 0xFF0A0C10);
-        g.renderOutline(fx - 3, fy - 3, face + 6, face + 6, EDGE);
-        g.renderOutline(fx - 1, fy - 1, face + 2, face + 2, EDGE_IN);
+        int fx = cx + jp.revati.skyabyss.client.ui.Golden.S8;
+        int fy = cy + jp.revati.skyabyss.client.ui.Golden.S8;
+        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0A0C10);
         // 画面の画素に合わせた整数倍 (facePx 画素 = 絵の 1 画素)。GUI 単位に直した倍率で拡大する
         float k = facePx / (float) Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
         g.pose().pushPose();
@@ -217,11 +228,13 @@ public class DialogueScreen extends Screen {
         g.pose().popPose();
         // 名前と親しさ
         Component name = Component.translatable("entity." + show.role().replace(':', '.'));
-        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, fx + face / 2, fy + face + 7, face + 18, NAME, true);
+        int ny = fy + face + jp.revati.skyabyss.client.ui.Golden.S5;
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, fx + face / 2, jp.revati.skyabyss.client.ui.Golden.textY(ny, LINE_H), faceColW() - 4, NAME, true);
         int affinity = Minecraft.getInstance().player == null ? 0 : NpcBonds.of(Minecraft.getInstance().player).affinity(show.role());
         int tier = Affinity.tier(affinity);
-        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2, fy + face + 18, face + 18, SOFT, true);
-        drawMarks(g, fx + face / 2, fy + face + 29, tier);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2,
+                jp.revati.skyabyss.client.ui.Golden.textY(ny + LINE_H, LINE_H), faceColW() - 4, SOFT, true);
+        drawMarks(g, fx + face / 2, ny + 2 * LINE_H + 3, tier);
         // 本文 (一字ずつ)
         int tx = x + textX;
         // 本文と選択肢は目盛りつきの欄の中 (はみ出すぶんは送る)
@@ -233,7 +246,7 @@ public class DialogueScreen extends Screen {
                 break;
             }
             String part = line.length() <= left ? line : line.substring(0, left);
-            g.drawString(font, part, tx, ty, TEXT, false);
+            g.drawString(font, part, tx, jp.revati.skyabyss.client.ui.Golden.textY(ty, LINE_H), TEXT, false);
             left -= line.length();
             ty += LINE_H;
         }
@@ -265,10 +278,10 @@ public class DialogueScreen extends Screen {
                     case "give" -> "◇";
                     default -> ".";
                 };
-                g.drawString(font, mark, tx, ty, i == selected ? color : (color & 0x00FFFFFF) | 0xB0000000, false);
+                g.drawString(font, mark, tx, jp.revati.skyabyss.client.ui.Golden.textY(ty - 2, OPTION_H), i == selected ? color : (color & 0x00FFFFFF) | 0xB0000000, false);
                 int ly = ty;
                 for (String l : ol) {
-                    g.drawString(font, l, tx + MARK_W, ly, i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
+                    g.drawString(font, l, tx + MARK_W, jp.revati.skyabyss.client.ui.Golden.textY(ly - 2, OPTION_H), i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
                     ly += LINE_H;
                 }
                 ty += h;
@@ -280,19 +293,28 @@ public class DialogueScreen extends Screen {
         if (fullyShown() && more) {
             long t = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
             if ((t / 10) % 2 == 0) {
-                g.drawString(font, "▼", x + panelW - 16, y + panelH - 14, NAME, false);
+                g.drawString(font, "▼", x + panelW - jp.revati.skyabyss.client.ui.Golden.FRAME - 12, y + panelH - jp.revati.skyabyss.client.ui.Golden.FRAME - 11, NAME, false);
             }
         }
     }
 
     private ResourceLocation faceTexture() {
         String path = show.role().substring(show.role().indexOf(':') + 1);
-        // 土地の町の人 (はじまりの島の渡し守も) は自分の肖像。なければ体と同じく都の町の人の肖像を借りる (town/RegionFolk)
-        if (path.startsWith("guest_") && Minecraft.getInstance().getResourceManager()
-                .getResource(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png")).isEmpty()) {
-            path = "guest_" + jp.revati.skyabyss.town.RegionFolk.lookOf(path.substring(6));
+        // 土地の町の人 (はじまりの島の渡し守も) は自分の肖像。なければ体の肖像 (町の案内人 = town_guide)、それもなければ都の町の人の肖像を借りる (town/RegionFolk)
+        if (path.startsWith("guest_") && !hasFace(path)) {
+            String id = path.substring(6);
+            String body = "guest_" + jp.revati.skyabyss.town.RegionFolk.body(id);
+            path = hasFace(body) ? body : "guest_" + jp.revati.skyabyss.town.RegionFolk.lookOf(id);
         }
+        return face(path);
+    }
+
+    private ResourceLocation face(String path) {
         return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/npc/face/" + path + "_" + show.face() + ".png");
+    }
+
+    private boolean hasFace(String path) {
+        return Minecraft.getInstance().getResourceManager().getResource(face(path)).isPresent();
     }
 
     // 親しさの印: 段階の数だけ明るい菱形 (よそよそしいときは赤紫の一つ)

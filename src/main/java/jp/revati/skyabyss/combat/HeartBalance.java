@@ -20,10 +20,15 @@ public final class HeartBalance {
     // 人数による強さ: 受ける傷を (1 + PARTY_STEP × (人数 − 1)) で割る。一人あたりの戦いの長さがほぼ同じになる値
     public static final double PARTY_STEP = 0.85;
     public static final int MAX_PARTY = 6;
-    // 一人のときの戦いの長さの狙い (秒) と、許す帯
-    public static final double TARGET_SECONDS = 200;   // 2026-10-22: 帯の短い側へ (前は 240)
-    public static final double BAND_MIN = 180;
-    public static final double BAND_MAX = 300;
+    // 一人のときの戦いの長さの帯 (秒)。2026-11-04 の表 3-3: 序盤は短く、後ろの心臓ほど少し長く (崩しゲージ込み。BreakModel)
+    public static double[] band(String stage) {
+        return switch (stage) {
+            case "stone_whale" -> new double[] {150, 180};
+            case "tide_shell" -> new double[] {170, 200};
+            case "thunder_wing" -> new double[] {190, 220};
+            default -> new double[] {210, 240};
+        };
+    }
     // 最大体力 (属性の上限 1024 の下)。実質の体力はこれに基本の硬さ (resist) を掛けた値
     public static final float MAX_HP = 1000f;
     // 最終段階 (憤怒) に入る体力の割合と、各段階が受け持つ体力の割合 (段階 1 / 2 / 3 / 憤怒)
@@ -32,7 +37,7 @@ public final class HeartBalance {
     // 心臓の一撃の狙い: 想定の防具の +0 で、最も重い一撃が想定の体力の何割か (3〜4 回で危ない)
     // 2026-10-25: 一撃を重く (前は 0.28・0.22〜0.34)。2〜3 回で危ない
     // 心臓の技の傷の倍率 (BossOpenings が掛ける)。2026-10-28 に 1.2 を試したが、避けそこね 4 回で体力の 1.5 倍までの公平の決まりを越えたので 1.0 のまま。
-    // ごり押しは、構えと隙 (BossOpenings) と戦いの中の食事の間 (FightRations) で防ぐ (docs/design/47 の 2.3)
+    // ごり押しは、崩しゲージ (BreakGauge) と戦いの中の食事の間 (FightRations) で防ぐ (docs/design/47 の 2.3)
     public static final double HIT_SCALE = 1.0;
     public static final double HEAVY_SHARE = 0.38;
     public static final double HEAVY_SHARE_MIN = 0.30;
@@ -88,25 +93,48 @@ public final class HeartBalance {
     }
 
     // ---------------------------------------------------------------- 攻め
-    // 一人の 1 秒あたりの傷 (心臓の防具を通したあと、殴り続けたとき)。weaponMultiplier: 想定の武器に対する倍 (+10 なら dps10 / dps0)
+    // 技の木の上乗せ (与える傷)。2026-11-04 に木の節を大きくした (docs/design/48 の 4.1) ので、主の硬さの見積もりに入れる。
+    // 木のデータから、レベル (= SP) で幹と型ひとつを傷の節から取ったときの上乗せ (近接・矢 0.6 + 技 0.4) を六職で平均し、その 0.75 倍 (ふつうの取り方) にした値。
+    // 技の木 v3 (2026-11-04) で数え直した (前提の道の SP を輪なしで数える)。前の表とほぼ同じ (中ほどで少し上、後ろで少し下)
+    static final int[] TREE_LEVELS = {0, 4, 12, 18, 24, 30, 46};
+    static final double[] TREE_BONUS = {0, 0.0, 0.055, 0.164, 0.235, 0.266, 0.284};
+
+    public static double treeBonus(int level) {
+        if (level <= TREE_LEVELS[0]) {
+            return 0;
+        }
+        for (int i = 1; i < TREE_LEVELS.length; i++) {
+            if (level <= TREE_LEVELS[i]) {
+                double t = (level - TREE_LEVELS[i - 1]) / (double) (TREE_LEVELS[i] - TREE_LEVELS[i - 1]);
+                return TREE_BONUS[i - 1] + (TREE_BONUS[i] - TREE_BONUS[i - 1]) * t;
+            }
+        }
+        return TREE_BONUS[TREE_BONUS.length - 1];
+    }
+
+    // 一人の 1 秒あたりの傷 (心臓の防具を通したあと、殴り続けたとき。技の木の上乗せ込み)。weaponMultiplier: 想定の武器に対する倍 (+10 なら dps10 / dps0)
     public static double playerDps(String stage, double weaponMultiplier) {
         GearCurve.Stage s = stage(stage);
         double strength = GearCurve.strengthMultiplier(s.level());
         double hit = s.dps0() / GearCurve.SWORD_SPEED * strength;
         double taken = GearCurve.armorTaken(hit, heartArmor(stage), heartToughness(stage));
-        return s.dps0() * weaponMultiplier * strength * taken;
+        return s.dps0() * weaponMultiplier * strength * taken * (1 + treeBonus(s.level()));
+    }
+
+    // 崩しゲージ込みの戦い (BreakModel)。基本の硬さと人数の強さは受ける傷を割るので、体力の削りの速さを割る
+    public static BreakModel.Fight fight(Profile p, int players, double weaponMultiplier) {
+        double hps = playerDps(p.stage(), weaponMultiplier) * players * partyUptime(players) / (p.resist() * partyScale(players));
+        return BreakModel.fight(p.maxHp(), hps, partyUptime(players));
     }
 
     // 倒すまでの秒 (咆哮などの傷を受けない時間込み)
     public static double fightSeconds(Profile p, int players, double weaponMultiplier) {
-        double dps = playerDps(p.stage(), weaponMultiplier) * players * partyUptime(players);
-        return p.effectiveHp() * partyScale(players) / dps + p.invulnTicks() / 20.0;
+        return fight(p, players, weaponMultiplier).seconds() + p.invulnTicks() / 20.0;
     }
 
     // 段階ごとの戦いの秒 (傷を受けない時間は最初の段階以外に均等に割る)
     public static double phaseSeconds(Profile p, int phase, int players, double weaponMultiplier) {
-        double dps = playerDps(p.stage(), weaponMultiplier) * players * partyUptime(players);
-        double base = p.effectiveHp() * partyScale(players) * PHASE_SHARE[phase] / dps;
+        double base = fight(p, players, weaponMultiplier).seconds() * PHASE_SHARE[phase];
         return base + (phase == 0 ? 0 : p.invulnTicks() / 20.0 / 3);
     }
 

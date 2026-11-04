@@ -53,7 +53,7 @@ public final class AffixEvents {
     @SubscribeEvent
     static void onAttributeModifiers(ItemAttributeModifierEvent event) {
         ItemStack stack = event.getItemStack();
-        AffixType.Slot kind = AffixRules.slotOf(stack.getItem());
+        AffixType.Slot kind = jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(stack.getItem());
         if (kind == null) {
             return;
         }
@@ -102,13 +102,13 @@ public final class AffixEvents {
         double sum = 0;
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = entity.getItemBySlot(slot);
-            if (AffixRules.slotOf(stack.getItem()) == AffixType.Slot.ARMOR) {
+            if (jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(stack.getItem()) == AffixType.Slot.ARMOR) {
                 sum += AffixRules.value(stack, AffixType.WARD);
             }
         }
         // 左手の盾の守り (必要 Lv に届いていれば)
         ItemStack off = entity.getOffhandItem();
-        if (off.getItem() instanceof net.minecraft.world.item.ShieldItem && AffixRules.slotOf(off.getItem()) == AffixType.Slot.ARMOR
+        if (off.getItem() instanceof net.minecraft.world.item.ShieldItem && jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(off.getItem()) == AffixType.Slot.ARMOR
                 && GearLevel.usable(entity, off)) {
             sum += AffixRules.value(off, AffixType.WARD);
         }
@@ -120,7 +120,7 @@ public final class AffixEvents {
         double sum = 0;
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = entity.getItemBySlot(slot);
-            if (AffixRules.slotOf(stack.getItem()) == AffixType.Slot.ARMOR) {
+            if (jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(stack.getItem()) == AffixType.Slot.ARMOR) {
                 sum += AffixRules.value(stack, AffixType.MANA_REGEN);
             }
         }
@@ -130,7 +130,7 @@ public final class AffixEvents {
     // 手の武器の技の威力 (0.06 = +6%)。要るレベル・要る基礎に届いていなければ効かない
     public static double spellPower(Player player) {
         ItemStack hand = player.getMainHandItem();
-        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)
+        if (jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)
                 || !jp.revati.skyabyss.rpg.skill.GearRequirement.met(player, hand)) {
             return 0;
         }
@@ -140,7 +140,7 @@ public final class AffixEvents {
     // 技の待ちに掛ける倍率 (手の武器の冴え)
     public static double cooldownScale(Player player) {
         ItemStack hand = player.getMainHandItem();
-        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)) {
+        if (jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)) {
             return 1;
         }
         return 1 - Math.min(KEEN_CAP, AffixRules.value(hand, AffixType.KEEN));
@@ -163,12 +163,20 @@ public final class AffixEvents {
 
     @SubscribeEvent
     static void onDamagePost(LivingDamageEvent.Post event) {
-        if (!(event.getSource().getEntity() instanceof ServerPlayer player) || event.getSource().getDirectEntity() != player
-                || event.getEntity() == player || event.getNewDamage() <= 0 || !player.isAlive()) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player) || event.getEntity() == player || event.getNewDamage() <= 0 || !player.isAlive()) {
+            return;
+        }
+        // 弓の矢: 骨の粉の吸う (渇き) だけ効く (弓の矢の当たりは近接の決まりの外。粉と炉の頁 1-1)
+        if (event.getSource().getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow
+                && jp.revati.skyabyss.item.extra.GearFreedom.isBow(player.getMainHandItem()) && GearLevel.meets(player, player.getMainHandItem())) {
+            thirst(player, AffixRules.value(player.getMainHandItem(), AffixType.THIRST), event.getNewDamage());
+            return;
+        }
+        if (event.getSource().getDirectEntity() != player || jp.revati.skyabyss.combat.MeleeHits.weakHit(player)) {
             return;
         }
         ItemStack hand = player.getMainHandItem();
-        boolean weapon = AffixRules.slotOf(hand.getItem()) == AffixType.Slot.WEAPON && GearLevel.meets(player, hand);
+        boolean weapon = jp.revati.skyabyss.item.extra.GearFreedom.socketSlot(hand.getItem()) == AffixType.Slot.WEAPON && GearLevel.meets(player, hand);
         long tick = player.level().getGameTime();
         // マナ吸収: 当てるたびにマナ +値 (0.6 秒に一度)。武器の特性と技の木の節 (mana_hit) を足す
         double steal = (weapon ? AffixRules.value(hand, AffixType.MANA_STEAL) : 0) + jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "mana_hit")
@@ -180,7 +188,10 @@ public final class AffixEvents {
                 jp.revati.skyabyss.rpg.skill.SkillManager.gainMana(player, steal);
             }
         }
-        double thirst = weapon ? AffixRules.value(hand, AffixType.THIRST) : 0;
+        thirst(player, weapon ? AffixRules.value(hand, AffixType.THIRST) : 0, event.getNewDamage());
+    }
+
+    private static void thirst(ServerPlayer player, double thirst, float dealt) {
         if (thirst <= 0 || player.getHealth() >= player.getMaxHealth()) {
             return;
         }
@@ -190,7 +201,7 @@ public final class AffixEvents {
             return;
         }
         lastThirst.put(player, now);
-        player.heal((float) Math.min(THIRST_MAX_HEAL, event.getNewDamage() * thirst));
+        player.heal((float) Math.min(THIRST_MAX_HEAL, dealt * thirst));
     }
 
     // ---------------------------------------------------------------- 特性のない装備

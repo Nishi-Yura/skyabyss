@@ -263,6 +263,17 @@
     },
     "ch6_valley_promise2": {
       "face": "grave",
+      "next": "ch6_valley_ask"
+    },
+    "ch6_valley_ask": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "npc": "skyabyss:attendant_survivor_bone",
+          "flag": "ch6_asked"
+        }
+      ],
       "next": "ch6_valley_promise3"
     },
     "ch6_valley_promise3": {

@@ -7,7 +7,6 @@ import java.util.UUID;
 import com.mojang.brigadier.arguments.StringArgumentType;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.grave.GraveMarkerHud;
 import jp.revati.skyabyss.client.notice.NoticeClient;
 import jp.revati.skyabyss.client.quest.ObjectiveStrip;
 import jp.revati.skyabyss.client.quest.QuestClient;
@@ -15,7 +14,6 @@ import jp.revati.skyabyss.client.quest.QuestHud;
 import jp.revati.skyabyss.client.titan.BossAttackCue;
 import jp.revati.skyabyss.client.tutorial.TutorialClient;
 import jp.revati.skyabyss.client.vow.VowHud;
-import jp.revati.skyabyss.grave.GraveMarkers;
 import jp.revati.skyabyss.hud.HudLayout;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.notice.NoticePayload;
@@ -119,8 +117,6 @@ public final class HudDemo {
             PartyMarkers.clear();
             DownedClient.clear();
             PingClient.clear();
-            GraveMarkerHud.clear();
-            GraveMarkerHud.forceShow(false);
             BossAttackCue.clear();
             NoticeClient.clear();
             if (mc.player != null && savedSkills != null) {
@@ -234,8 +230,6 @@ public final class HudDemo {
             DownedClient.receive(new DownedPackets.Sync(List.of(new DownedPackets.Entry("00000000-0000-4000-8000-00000000000d", "ハル", dim,
                     (int) (p.x + look.x * 9 - right.x * 7), (int) p.y, (int) (p.z + look.z * 9 - right.z * 7), 400, 0))));
             PingClient.receive(new Ping.Show(a, "イサナ", dim, p.x + look.x * 20 + right.x * 10, p.y + 2, p.z + look.z * 20 + right.z * 10, -1, false, 100));
-            GraveMarkerHud.forceShow(true);
-            GraveMarkerHud.receive(new GraveMarkers.Pos(List.of(new GraveMarkers.Mark(dim, (int) (p.x - look.x * 40), (int) p.y, (int) (p.z - look.z * 40)))));
         }
         // 技の枠とマナ
         if (slow && has(Part.SKILLS)) {

@@ -1,0 +1,56 @@
+# 2026-11-04: 三章のイサナ (風待の休み場の火のそば。story/IsanaPost の HUT) と、雷拾いの巣への硝子の筋 (titan/storm/chapter/GleanerNest)
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ch3_post_nest.txt -PshotsName=ch3_post_nest
+world ch3_post_nest continent
+size 1280 720
+timeout 2400
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode creative
+cmd effect give @s resistance 2400 4 true
+cmd skyabyss admin chapter 3
+wait 40
+cmd skyabyss cinematic stop
+close
+cmd skyabyss quest stage @s main_thunder see
+chat clear
+# 1. 三章の地上の場所を建てて、巣の頼みを始める
+cmd skyabyss dev grounds prepare storm
+wait 100
+cmd skyabyss_nest start
+wait 10
+cmd skyabyss_nest goto 0
+waitchunks 400
+wait 200
+hud on
+chat clear
+shot nest_streak0
+cmd skyabyss_nest goto 3
+waitchunks 400
+wait 200
+chat clear
+shot nest_nest
+# 2. 風待の里の休み場の火のそばのイサナ
+cmd tp @s -1180 160 -100
+waitchunks 400
+wait 600
+cmd skyabyss dev isana
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] run tp @s ~5 ~3 ~5
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 100
+chat clear
+shot isana_hut
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] run tp @s ~2 ~ ~2
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 30
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 30
+shot isana_hut_talk

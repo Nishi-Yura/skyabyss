@@ -16,7 +16,7 @@ import net.minecraft.world.item.component.CustomData;
 //   - 段は VI まで (2026-11-02 の声「穴にいれる粉系、1 しかなくない？もっといいやつは？」。Wynncraft の粉と同じ六段)。
 //     心臓と試練では、その巨神の章の段の粉が落ちる (岩鯨 I・潮殻 II・雷翼 III・余燼 IV。GearFreedomLoot)
 //   - 粉の技: 一つの装備に差した粉の段を属性ごとに足し、WEIGHT_FOR_ART 以上なら、その属性の粉の技が働く (PowderArts)。
-//     穴は二つまでなので、III と I、II と II などで届く
+//     IV 一つ、III と I、II と II などで届く。穴が三つの品では二つの粉の技が働くこともある
 public final class Powder {
     public static final String TIER_KEY = "powder_tier";
     public static final int MAX_TIER = 6;
@@ -72,14 +72,21 @@ public final class Powder {
         return out;
     }
 
-    // 粉の技が働く属性 (なければ null。二つ届くことはない: 穴は二つまで)
-    @Nullable
-    public static Element art(ItemStack gear) {
+    // 粉の技が働く粉と、その段の和 (穴が三つあれば二つ届くこともある)
+    public static Map<Element, Integer> arts(ItemStack gear) {
+        Map<Element, Integer> out = new EnumMap<>(Element.class);
         for (Map.Entry<Element, Integer> e : weights(gear).entrySet()) {
             if (e.getValue() >= WEIGHT_FOR_ART) {
-                return e.getKey();
+                out.put(e.getKey(), e.getValue());
             }
         }
-        return null;
+        return out;
+    }
+
+    // 粉の技が働く粉の一つ目 (なければ null)
+    @Nullable
+    public static Element art(ItemStack gear) {
+        Map<Element, Integer> a = arts(gear);
+        return a.isEmpty() ? null : a.keySet().iterator().next();
     }
 }

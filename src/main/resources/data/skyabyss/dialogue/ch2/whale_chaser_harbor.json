@@ -1,0 +1,234 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "c2_h_after1",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_tide",
+          "is": "done"
+        },
+        {
+          "type": "stage",
+          "min": 2,
+          "max": 2
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "c2_harbor_done"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_thunder",
+            "is": "done"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_thunder",
+            "is": "active",
+            "stage": "see"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_thunder",
+            "is": "active",
+            "stage": "board"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_thunder",
+            "is": "active",
+            "stage": "trials"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_thunder",
+            "is": "active",
+            "stage": "heart"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_thunder",
+            "is": "active",
+            "stage": "report"
+          }
+        }
+      ]
+    },
+    {
+      "node": "c2_h_plate1",
+      "if": [
+        {
+          "type": "stage",
+          "min": 1,
+          "max": 2
+        },
+        {
+          "type": "lore",
+          "entry": "ch2/ship_plate"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "c2_plate_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "c2_h_first1",
+      "if": [
+        {
+          "type": "stage",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "type": "quest",
+          "quest": "main_tide",
+          "is": "active"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_tide",
+            "is": "active",
+            "stage": "rumor"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "c2_h_first_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "c2_h_ahead": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c2_harbor"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    },
+    "c2_h_first1": {
+      "face": "grave",
+      "next": "c2_h_first2"
+    },
+    "c2_h_first2": {
+      "face": "grave",
+      "next": "c2_h_first3"
+    },
+    "c2_h_first3": {
+      "face": "grave",
+      "next": "c2_h_first4"
+    },
+    "c2_h_first4": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c2_h_first_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "c_menu"
+    },
+    "c2_h_plate1": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "show",
+          "goto": "c2_h_plate2"
+        }
+      ]
+    },
+    "c2_h_plate2": {
+      "face": "grave",
+      "next": "c2_h_plate3"
+    },
+    "c2_h_plate3": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c2_plate_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 3
+        }
+      ],
+      "next": "c_menu"
+    },
+    "c2_h_after1": {
+      "face": "neutral",
+      "next": "c2_h_after2"
+    },
+    "c2_h_after2": {
+      "face": "smile",
+      "next": "c2_h_after3"
+    },
+    "c2_h_after3": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c2_harbor_done"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

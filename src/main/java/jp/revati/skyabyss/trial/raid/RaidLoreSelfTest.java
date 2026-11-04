@@ -20,7 +20,8 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // レイドの部屋の物語 (RaidLore)。SKYABYSS_SELFTEST_ONLY="raid lore"
 // 十二の部屋をそれぞれ遠くの空に建て、入口の間に碑があり文のキーが刻まれているか、心の声の二行と碑の四行の文があるか、
-// 碑を読む (右クリックと同じ Tablets.read) と碑文の伝承が記されるか、越えたとき (RaidLore.onCleared) にも記されるかを見る。
+// 碑を読む (右クリックと同じ Tablets.read) と碑文の伝承が記されるか、だれも知らないあいだは戸が待つか (RaidLore.waiting)、
+// 一人が読むとその場の全員に記されて待たないかを見る。
 // メインの碑文の段が、周ごとのどの引きでも済むか (draws) も見る
 public final class RaidLoreSelfTest {
     private RaidLoreSelfTest() {
@@ -30,8 +31,8 @@ public final class RaidLoreSelfTest {
     private static int stagesChecked;
 
     // 碑文の段 (main_song・main_tide・main_thunder の inscriptions / trials の lore の目的) が、周ごとのどの引き (枠ごとに 2 部屋から一つ) でも
-    // 三つの部屋を越えれば済むか。越えたときに記されるのは、部屋の入口の碑の項目 (RaidLore.onCleared) と、岩鯨の部屋 1〜3 の決まった三つ
-    // (TrialRoute.WHALE_ROOM_INSCRIPTIONS)。あわせて、その段に「心臓を止めたら飛ばす」(skip_if stilled) があるか
+    // 三つの部屋を越えれば済むか。部屋ごとに記されるのは、入口の碑の項目 (戸が開く前に読む。RaidLore.waiting)。
+    // あわせて、その段に「心臓を止めたら飛ばす」(skip_if stilled) があるか
     static void draws(List<String> f) {
         drawsChecked = 0;
         stagesChecked = 0;
@@ -63,7 +64,7 @@ public final class RaidLoreSelfTest {
                         String key = RaidLore.SIGNS.get(room);
                         String entry = key == null ? null : entryOfSign.get(key);
                         if (entry == null) {
-                            f.add(room + ": clearing the room records no inscription (sign " + key + ")");
+                            f.add(room + ": the room has no inscription to read (sign " + key + ")");
                         } else {
                             r.add(entry);
                         }
@@ -71,9 +72,6 @@ public final class RaidLoreSelfTest {
                     }
                 }
                 runs = next;
-            }
-            if (jp.revati.skyabyss.progress.Titans.STONE_WHALE.equals(titan)) {
-                runs.forEach(r -> r.addAll(jp.revati.skyabyss.trial.TrialRoute.WHALE_ROOM_INSCRIPTIONS));
             }
             java.util.Set<String> all = new java.util.HashSet<>();
             runs.forEach(all::addAll);
@@ -185,11 +183,21 @@ public final class RaidLoreSelfTest {
                     if (!Lore.state(reader).has(loreId)) {
                         f.add(id + ": reading the inscription did not record " + loreId);
                     }
-                    // 越えた → 読まなかった人にも記される
+                    // 戸: だれも知らなければ待つ。一人が読めば、その場の全員に記して待たない
+                    RaidLore.testCountFake = true;
+                    Lore.lock(reader, loreId);
                     Lore.lock(clearer, loreId);
-                    RaidLore.onCleared(clearer, id);
-                    if (!Lore.state(clearer).has(loreId)) {
-                        f.add(id + ": clearing the room did not record " + loreId);
+                    if (!RaidLore.waiting(List.of(reader, clearer), id)) {
+                        f.add(id + ": the door did not wait for the inscription to be read");
+                    }
+                    Tablets.read(reader, key);
+                    if (RaidLore.waiting(List.of(reader, clearer), id) || !Lore.state(clearer).has(loreId)) {
+                        f.add(id + ": one reader did not open the door and record " + loreId + " for the whole group");
+                    }
+                    RaidLore.testCountFake = false;
+                    Lore.lock(clearer, loreId);
+                    if (RaidLore.waiting(List.of(reader, clearer), id)) {
+                        f.add(id + ": a group of test bots was made to wait for the inscription");
                     }
                 } finally {
                     try {
@@ -209,7 +217,7 @@ public final class RaidLoreSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST raid lore PASSED ({} rooms: entrance inscription placed and keyed, 4 inscription lines + 2 inner voice lines, "
-                    + "reading records the lore entry, clearing records it too; {} draws x {} inscription stages complete)", RaidLore.SIGNS.size(), drawsChecked, stagesChecked);
+                    + "reading records the lore entry, the door waits until someone reads and shares it; {} draws x {} inscription stages complete)", RaidLore.SIGNS.size(), drawsChecked, stagesChecked);
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST raid lore FAILED: {}", x));
         }

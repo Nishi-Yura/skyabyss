@@ -87,6 +87,8 @@ public final class Ch1SelfTest {
         steps.add(Step.once("ch1 p6 (load)", s -> Ch1SitesSelfTest.load(s, base)));
         steps.add(Step.until("ch1 p6 (wait)", Ch1SitesSelfTest::loaded));
         steps.add(Step.once("ch1 p6", s -> Ch1SitesSelfTest.run(s, base)));
+        // 鉄の跡 (追跡の段)。SKYABYSS_SELFTEST_ONLY="ch1 iron"
+        steps.add(Step.once("ch1 iron trail", IronTrailSelfTest::runSelfTest));
         steps.add(Step.once("ch1 end", Ch1SelfTest::end));
         return steps;
     }
@@ -443,7 +445,8 @@ public final class Ch1SelfTest {
         Oddities.firstAfter = 0;
         try {
             // 日 N の昼に一つだけ。同じ日にもう一度は起きない
-            long base = Math.floorDiv(level.getDayTime(), 24000L) * 24000L;
+            // 日の数え (Repeats.day) は時刻と経過の大きい方。使い回した世界は経過が時刻より進んでいるので、大きい方から数える
+            long base = Math.max(Math.floorDiv(level.getDayTime(), 24000L), Math.floorDiv(level.getGameTime(), 24000L)) * 24000L;
             Set<Oddities.Kind> kinds = new HashSet<>();
             for (int d = 0; d < 3; d++) {
                 level.setDayTime(base + 24000L * (d + 1) + 11400);

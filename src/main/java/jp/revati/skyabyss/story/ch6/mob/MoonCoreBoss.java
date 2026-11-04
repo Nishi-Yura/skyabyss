@@ -363,7 +363,7 @@ public class MoonCoreBoss extends MoonMob {
             // 崩れる
             rewind = -1;
             staggerFor = STAGGER_TICKS;
-            jp.revati.skyabyss.combat.BossOpenings.open(this, STAGGER_TICKS);
+            jp.revati.skyabyss.combat.BreakGauge.solved(this, STAGGER_TICKS);
             playAction("stagger");
             playSound(MoonMobsSetup.CORE_BREAK.get(), 2.5f, 0.8f);
             sl.sendParticles(ParticleTypes.FLASH, orb().x, orb().y, orb().z, 2, 0, 0, 0, 0);

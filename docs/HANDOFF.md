@@ -1,6 +1,17 @@
-# 引き継ぎ（2026-11-02 の夜）
+# 引き継ぎ（2026-11-05）
 
 ブランチ `m1-sky-pass`（push 済み）と、技の木 v2 の作業ブランチ `wip/skill-tree-v2`。設計書の入口は `docs/design/README.md`。00 の未決は空（340〜345 は 2026-11-02 の午後に答えが出て作った）。
+
+## 2026-11-05: 1.1.0（片づけ・最適化）
+
+声「2,3,4お願い。島の青いピンは無視して。あと、容量削減できないか、いらないもの無いか等の最適化行って。内容や見た目が変わらないようにして。」版は 1.1.0、m1-sky-pass から PR を作って main へ取り込む（選んだ）。
+
+- **片づけ**: 記録の画面のつまみを金の板の絵柄（`Golden.tab`）に。転生の頁に「順位表に載せる」の釦（前の順位表の画面にあった物）を戻した。記録の画面にまとめて使われなくなった深みの順位の画面・転生の板の画面とその通信を外した（`DepthRankScreen`・`DepthRankPayload`・`BoardScreen`・`RebirthNet.BoardPayload`）。深みの開発コマンド `records` は記録の画面の深みの頁を開く。撮影 `tools/shots/records_tabs.txt`。
+- **承認待ちの確かめ（54）**: 見た目替えは作っていない（00 の 334）、組合の旗は 00 の 338 に答えがある。秘伝の巻物の絵は入っている（見本の 8 倍を渡した）。
+- **最適化**: jar の中身は変えられる所が無かった（PNG の可逆圧縮と JSON の詰め込みは前から。メッシュの索引化は 4% ほど、UI の B・C の組は選んでもらう物、自己テストの組 2.4 MB は外すと危ない）。作業場所 `run/` を 13 GB から 1.4 GB に（残したのは `run/server.properties` の世界・`st_full_100`・今日の撮影と記録）、`git gc`。`docs/review` の済んだ見本（boxes・money・finale）を外した。使われていない物を探す `tools/audit/find_orphans.py`（名前を組み立てる物が多く、出た候補は手で確かめる）。使われていない音を探したら、終章の敵 16 種の声 48 個が sounds.json に行が無く、1.0.0 から鳴っていなかった（11/02 の 7712b56a3 で `skyabyss_finale/sounds.json` を書き直したときに消えた。登録 `CloudMobsSetup` と字幕は残っていた）。消える前の行をそのまま戻した（音の素材は作り直していない）。同じ取りこぼしを見る自己テスト `sound events`（登録した音の出来事がどれも sounds.json に行を持つ）を足した。
+- **出す前の検査の直し**: quick_check が落ちていた所。英語の看板 71 枚（見どころの書き付けと船長の頁）を、看板の幅 90 px・4 行に入る言い回しに（日本語は変えない。生成のデータ `tools/gen/world/poi_places_data.py` も同じに）。GUI 倍率 4 で切れていた知らせ 8 件（塔 5・ダンジョンの深潜り・巡り路の呪い・天の三矢の日本語）と炉の小つまみ（英語 Reforge → Recast。大つまみと同じ語）。検査の規則: 要の効果は今は折り返して出すので「札の幅 200・4 行」に。見どころの書き付けの台（四隅が半ブロック）と石板の前の段は許す例に（形は変えない）。`build_poi_places.py` を流すと lang の鍵の並びが変わる（中身は同じ。並びは戻した）。
+- **版**: `mod_version=1.1.0`、README（題の絵も）・遊び方・01・14・サイト（更新履歴に v1.1.0）。1.0.0 の世界を開くと大陸の地上を作り直す（大陸の版 3）。確認表は `docs/review/playtest_1104.md` の 23 節まで。
+- 確かめ: quick_check 全部 OK。全段の自己テスト（新しい大陸の世界）237 段 PASSED、落ちた `dungeons` は試験の作りの誤り（今日がその迷宮の「鍵の日」で鍵持ちが二体なのに一体しか倒していなかった。全部倒すように直して PASSED）。新しい `sound events` PASSED（787 の音）。`build/libs/skyabyss-1.1.0.jar`（80.0 MB、中の版 1.1.0）を本番の形のサーバー（`C:\Users\nisimoto\skyabyss_prod\server`。前の世界の写しは `..\world_1.0.0`）で起動: `Continent regen: … continent version 0 -> 3`・建物 14 か所を建て直し・`World upgrade: opened with 1.1.0 (last 0.9.23)`。「last 0.9.23」は 1.0.0 の確かめでサーバーを stop せずに終えたため（今回は stop で保存し、世界のデータは mod 1.1.0）。人と世界の直しの段（`PlayerUpgrade`・`WorldUpgrade`）は 1.0.0 から変わっていない。本番のクライアントでは入っていない。
 
 ## 2026-11-02 の夜 5: 本番の形での確かめ・相性・英語・1.0.0
 
@@ -212,7 +223,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 ## 今の形（要点）
 
 - 世界: 天と淵の大陸（40）。はじまりの島 → 渡し船 → 鐘の都の町めぐり → 土地の町から各章（42）。6 職は島の野営地で選び、町の職の間（訓練場の師範）で替える（48）。技は職ごとの木 v2（Wynncraft 型。使う技は 4 本まで、基礎は木の節）。敵は Mod の敵だけ（44。バニラの敵はどの湧き方でも入らない）。
-- 正式版: 1.0.0（`build/libs/skyabyss-1.0.0.jar`。確認表 `docs/review/playtest_0.9.21.md`（17 節が名札・乗り物・地下のダンジョン・都の空き家、16 節が神器・武器・技の回し、15 節が 0.9.22 のあとの声、14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
+- 正式版: 1.1.0（`build/libs/skyabyss-1.1.0.jar`。確認表 `docs/review/playtest_1104.md`（1.0.0 のあとの直し、1〜22 節）・`docs/review/playtest_0.9.21.md`（17 節が名札・乗り物・地下のダンジョン・都の空き家、16 節が神器・武器・技の回し、15 節が 0.9.22 のあとの声、14 節が 0.9.22 の正式版の前の直し、1〜12 節が塔・神器・秘伝・エンドコンテンツ）・`docs/review/playtest_0.9.21.md` の 13.1 節（島・町の人・店）・`docs/review/playtest_0.9.21.md` の 13.2 節（野の装備・封の箱）と `docs/review/playtest_0.9.4.md`（0.9.5〜0.9.17 は点検の直し・章の小要素・終章の入口と島 1〜4・巡礼者の座・結末・神器・巡礼の試し・終章の通しの点検）、終章は `docs/review/playtest_finale.md`、月は `playtest_0.9.1.md`、遊び方 `docs/beta_how_to_play.md`）。
 - 自己テスト: `bash tools/dev/selftest_fresh.sh "<名前,…>" [<世界名>]`（空なら全部。大陸の新しい世界で回す。前は scratchpad にあって消えた）。`abyss escort` はほかと一緒に流すとまれに落ちる（単独でも淵の順でも通る。灰の封のチャンクを読み込むよう直し、落ちたら失敗の文に状態が出る）。`titan ground` も全部を流したときにまれに落ちる（2026-11-01 の夜: サーバーが 14 秒遅れていた所で、潮の殻が一 tick で 2 ブロック上下した。単独では 2 回とも通る）。
 
 ## 2026-11-01 の昼から夕方に入れたもの
@@ -259,7 +270,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 週の賭け（`TowerWagers`。受付で隊長が三つまで選ぶ）・記録の板（`TowerRecords`。受付の [記録の板]）・称号 2 つはできた。
 - 塔守（係の人の役 `TOWER_KEEPER`）が受付に立つ（`TowerDesk.ensureDesk`。前の見えない Interaction は片付ける）。話すと受付の一覧・塔の店・記録の板。撮影 `tools/shots/tower_keeper.txt`。
 - まだ: 数字（体力・傷・月の速さ・箱の確率）は遊んで詰める。
-- 注意: `gen_attendant_portraits.py`・`install_attendants.py`・`gen_facility_icons.py` を流すと、ほかの役の今の絵まで書き換わる（今の絵は道具の出力とずれている）。新しい役を足すときは、その役の出力だけを残して、ほかは戻す。
+- 注意: `gen_facility_icons.py` を流すと、ほかの役の今の印まで書き換わる。新しい役を足すときは、その役の出力だけを残して、ほかは戻す。肖像は `gen_portraits_v2.py --install <役>` で描く（2026-11-03 に古い肖像の道具は消した）。
 
 ## 鐘銭まわり（2026-11-01。設計 [35](design/35_capital_facilities.md) の 6.2・6.11、[52](design/52_loot_boxes.md) の 5 章）
 
@@ -346,7 +357,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 声「敵が直接防具を落とすのをやめたい。Wynncraft のように低確率で箱を落とす形に。同じ種類ならスタック。町に開封してくれる NPC、ルーレット。巨神は専用の箱 4 種、その他はレア度で」。00 の 306〜311 は推奨どおり（金の箱あり・深淵と月も階級の箱・5 人・無料・旅嚢の欄・心臓の数は今の品の数）。
 - 仕組み: 抽選は今のまま。当たった装備は渡す直前に箱に替わり、品（特性つき）は人ごとの封の列（`LootBoxData`、保存 `skyabyss_loot_boxes`）へ。開けると古い順。列が空の箱は表から引く。包むのは `TitanLoot.handOver`・`WildLoot.give`・敵の落とし物（`LivingDropsEvent` の一番後）。包まないのは `LootBoxes.direct`（交換・初回の選択・野営の返却）と `keepDirect`（層・区画の主の初回の部位）。
 - Java: `loot/box/`（`BoxKind` 19 品、`SealedBoxItem`、`LootBoxSetup`、`LootBoxes` 包む・表・開ける、`BoxService`・`BoxNetwork` 画面、`BoxOpeners` 立つ所、`BoxCommands`、`LootBoxSelfTest`）、`client/box/`（`BoxScreen` ルーレット、`BoxPouchScreen` 旅嚢の四つ目のつまみ）。つなぎ: `AttendantRole.BOX_OPENER`・`FacilityActions` の `boxes`・`PouchConfig.Category.BOX`（袋の枠には並ばない `PouchLayout.onGrid`）・つまみ 4 つ（`AccessoryScreen.addTabs`）・`AccessoryMeshes`（箱の形は `BoxKind.look()`）・告知の口止め（`TitanLoot.announcePieces`・`LegendLoot`）。
-- 封切り師: 都と四つの町の鍛冶屋の係の人（`npc_smith`）から 2〜4 ブロックの空いた床に立つ（設計図は触らない）。体は `tools/rough/lowpoly/npc2/cast.py` の box_opener（`install_npc2.py box_opener`）、顔と印は `gen_attendant_portraits.py`・`gen_facility_icons.py`（どちらも全員を描き直すので、ほかの役の絵は git で戻すこと）。
+- 封切り師: 都と四つの町の鍛冶屋の係の人（`npc_smith`）から 2〜4 ブロックの空いた床に立つ（設計図は触らない）。体は `tools/rough/lowpoly/npc2/cast.py` の box_opener（`install_npc2.py box_opener`）、顔は `gen_portraits_v2.py --install box_opener`、印は `gen_facility_icons.py`（全員を描き直すので、ほかの役の印は git で戻すこと）。
 - 形と絵: `tools/rough/lowpoly/weapons/wild/o_boxes.py`（9 形）→ `build_wild.py o_boxes` → `python -I tools/install/install_boxes.py`（帯の数字入りの絵も作る）。言葉と会話 `python tools/gen/loot/gen_box_text.py`。
 - 試遊: `/skyabyss play box give <種類> [数]`・`/skyabyss play box open`。撮影 `tools/shots/box_ui.txt`（画面と形）・`tools/shots/box_openers.txt`（都と町の立つ所）。
 - 確かめ: 自己テスト `loot boxes`・`pouch`・`facility`・`lowpoly npc`・`wild gear`・`command gate`・`lang` ほかが通った。quick_check も通った。
@@ -403,14 +414,14 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 
 - 6 職に一つずつの神器（アーティファクト、必要 Lv 50、一品一案。`o_divine.py`・雲海の塗り `paint_divine.py`）: 天穹の剣・七つ鐘の大鎚・暁の灯杖・巡礼の羽弓・巻き戻りの短剣・約束の鈴杖。固有の効果（`DivineGearEvents`）と、職の幹の技の書き換え（`Rune.DIVINE_*`・`LegendRewrites`）。
 - 巡礼者の月を初めて倒すと、いまの職の神器と雲上の心核（`DivineGear.reward`。`SeatArena.onDeath`）。職の間で職を替えると神器も替わる（`JobChoice.switchTo` → `DivineGear.swap`。強化そのまま）。燃料は心核の欠片で、七つの心核はしゃがんで使うと欠片 5 つに砕ける。
-- 確かめ: 自己テスト `cloudsea`（6 本と職・受け取り・持ち替え・心核・書き換え）と装備の検査。撮影 `tools/shots/divine_relics.txt`（見直し `docs/review/finale/divine_relics.jpg`）。数値と書き換えの手ざわりは試遊で。
+- 確かめ: 自己テスト `cloudsea`（6 本と職・受け取り・持ち替え・心核・書き換え）と装備の検査。撮影 `tools/shots/divine_relics.txt`。数値と書き換えの手ざわりは試遊で。
 - 次: 作る順 6（クリア後: 巡礼の試し）。その 9 で済み。
 
 ## 終章「雲海」その 7: 結末と結末のあとの世界（0.9.13。設計 [50](design/50_finale.md) の 4.4）
 
 - 月を倒したあと、座のそばでチャットの選び（[鎮める]・[壊す]・条件を満たした人だけ [受け入れる]）。選ぶと結末の紙芝居（`finale_end_<結末>`、5 枚ずつ。`tools/story/pixel/finale_end.py`）→ 見終えると記録（人ごと。`FinaleEnding`）、終章の完の札・伝承の頁・結末の札。座に触れ直すと選び直す／挑み直す。
 - 結末のあとの世界（本人だけ）: 鎮める＝月が遠く空が晴れ、巨神の歌がときどき・都の鐘が明るく／壊す＝空の裂け目・鐘が低く／受け入れる＝翼が昼の空を巡り・鐘は鳴らない。どれも雲の中の目はもう出ない（`CloudEyeEvents`）。空は `ChapterSky.stage` が結末の段を先に返し、絵は `client/sky/EndingSkyClient`。
-- 確かめ: 自己テスト `cloudsea`（結末の条件・記録・空の段・素材）。撮影 `tools/shots/finale_endings.txt`（見直し `docs/review/finale/ending_sky.jpg`、語りは `docs/review/finale/ending_reels.jpg`）。紙芝居の読み心地と、空の見え方は試遊で。
+- 確かめ: 自己テスト `cloudsea`（結末の条件・記録・空の段・素材）。撮影 `tools/shots/finale_endings.txt`。紙芝居の読み心地と、空の見え方は試遊で。
 - 次: 作る順 5（神器）。その 8 で済み。
 
 ## 終章「雲海」その 6: 巡礼者の座とラスボス（0.9.12。設計 [50](design/50_finale.md) の 4.3）
@@ -418,7 +429,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 月見の岩の上の北の縁の橋の台から光の橋が上る。約束の島を終えていない人は橋の関所で戻る（`PilgrimSeat.gate`）。
 - 地形 `seat.json`（`FinaleWorld` の版 6）: 内の固い床（金の八芒の星）・鐘雲の輪（`BellIsle` に足して同じ見張りで固める）・四隅の鐘と陰の柱・南北の道・北の台の巡礼者の座。
 - 戦い（`SeatArena`）: 座に触れると始まる（頼み `main_finale_seat`）。第 1 形態 手 二つ（叩きつけのあと床に突いたまま＝打てる隙・輪を削ると鐘の固まりが解ける）→ 第 2 形態 目（回る筋・凝視は柱の陰・閉じると傷 ×1.5）→ 第 3 形態 月（月の引き・巻き戻し・満ち欠けの刃・月落とし）。第 3 形態で前の自分たち四人が加勢し、術は約束の島と同じ（`PromiseIsle.active` が座の四人を先に見る）。月が倒れると合図 `finale_lord_pilgrim`、語りの最後に「結末は次の版」。
-- 確かめ: 自己テスト `cloudsea`（橋・関所・鐘雲の輪と鐘・三形態の部位・四人の盾の円・片付け）。撮影 `tools/shots/cloudsea_seat.txt`（見直し `docs/review/finale/seat_shots.jpg`）。戦いの長さと難しさ（体力の合計 4820）は試遊で。
+- 確かめ: 自己テスト `cloudsea`（橋・関所・鐘雲の輪と鐘・三形態の部位・四人の盾の円・片付け）。撮影 `tools/shots/cloudsea_seat.txt`。戦いの長さと難しさ（体力の合計 4820）は試遊で。
 - 次: 作る順 4（結末の場面と結末のあとの世界）。その 7 で済み。
 
 ## 終章「雲海」その 5: 島 4「約束の島」（0.9.11。設計 [50](design/50_finale.md) の 4.2.4）
@@ -427,7 +438,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 地形 `isle4.json`（`FinaleWorld` の版 5）: 前の月の野営（月の砂の地面・くぼみ・焚き火と四つの石の座・四人の天幕と持ち物・刺さった巡礼者の羽）、北の端の月見の岩（上に主の間 半径 12、北の縁に座への橋の台 `seat_bridge`）。
 - 前の自分たち: 天幕の前に月の四人の幻（`TownGuestEntity` moon_past1〜4、名札に術の名）。話して「並ぶ」（会話 `fin_promise_*` が合図 `finale_promise_<k>`）と付いて歩き、術で助ける: 谷 = 盾の円（傷半分・押されない・審きの光を防ぐ）・崖 = 引きつけ・野 = 一人でも倒れて起こしてもらえる（`Downed.mayDown` / `tick` が `PromiseIsle.canRaise` / `holds` を聞く。60 秒に一度）・淵 = 癒し。四人と並ぶと月見の岩の扉が開く（頼み `main_finale_promise`）。
 - 敵: 羽の番人（槍の突きで押し出す）・落ち羽（光の筋に羽根の矢）。主: 巡礼者の羽（羽ばたき・羽の雨・先触れの印・審きの光・落ち羽を呼ぶ）。模型は一品一案（`docs/review/cloud_roughs/`）。
-- 確かめ: 自己テスト `cloudsea`（橋・関所・幻・並ぶ・扉・盾の円・起こす・筋・主）。撮影 `tools/shots/cloudsea_isle4.txt`（見直し `docs/review/finale/isle4_shots.jpg`）。戦いの手ざわりと、四人の術の効き方は試遊で。
+- 確かめ: 自己テスト `cloudsea`（橋・関所・幻・並ぶ・扉・盾の円・起こす・筋・主）。撮影 `tools/shots/cloudsea_isle4.txt`。戦いの手ざわりと、四人の術の効き方は試遊で。
 - 次: 作る順 3（巡礼者の座とラスボス「雲上の巡礼者」）。その 6 で済み。
 
 ## 終章「雲海」その 4: 島 3「炉の島」（0.9.10。設計 [50](design/50_finale.md) の 4.2.3）
@@ -436,7 +447,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 地形 `isle3.json`（`FinaleWorld` の版 4）: 前の灰炉（灰と黒石の斑の地面・冷えた溶け跡・崩れた鍛冶場 4・割れた金床・燃え残りの焚き火）、かけら 3（吹子場・鋳型場・炭置き場）と崩れた石の橋、北の端の大炉（煉瓦。上に主の間 半径 12）。
 - 巻き戻り: 橋の崩れた所と主の間の外の輪は戻り石（`skyabyss:rewind_stone`）。10 秒ごとに 1 秒の残り火の輪郭 → 3 秒だけ石（最後の 1 秒は薄い）。橋ごとに時がずれる。主の間の輪は戻し手の段 2 から巻き戻る。敵と主の技は同じ所でもう一度起こる（`Echoes`。残り火の印が予告）。炉 3 つで扉が開く（頼み `main_finale_forge`）。
 - 敵: 灰の打ち手（大槌 → 2.5 秒後にもう一度）・戻り火（火の玉 → 2.5 秒後にもう一度）。主: 戻し手（打ち下ろし・薙ぎが 3 秒後にもう一度、段 3 は二度・足跡が燃える・打ち手を呼ぶ）。模型は一品一案（`docs/review/cloud_roughs/`）。
-- 確かめ: 自己テスト `cloudsea`（橋・関所・炉・扉・戻り石の組と相・打ちの範囲・主）。撮影 `tools/shots/cloudsea_isle3.txt`（見直し `docs/review/finale/isle3_shots.jpg`。崩れた橋は時をずらした 4 枚）。戦いの手ざわりは試遊で。
+- 確かめ: 自己テスト `cloudsea`（橋・関所・炉・扉・戻り石の組と相・打ちの範囲・主）。撮影 `tools/shots/cloudsea_isle3.txt`（。崩れた橋は時をずらした 4 枚）。戦いの手ざわりは試遊で。
 - 次: 島 4「約束の島」（前の自分たちと並ぶ）。その 5 で済み。
 
 ## 終章「雲海」その 3: 島 2「灯の島」（0.9.9。設計 [50](design/50_finale.md) の 4.2.2）
@@ -445,7 +456,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 - 地形 `isle2.json`（`FinaleWorld` の版 3）: 前の潮の浜（砂と砂利・潮だまり・流木・伏せた舟・干し網の竿）、漁師の小屋 5、海食の岩の柱 12 と崩れた石垣 5（陰）、西・東・南東の突堤と漁の灯、北の端の傾いた灯台（灯の部屋の帯・上に主の間 半径 12・石柱 4）。
 - 視線: 灯の部屋から光の筋が 12 秒で島を一周。見えていると重い（歩み半分・跳べない。属性の一時の変え）、2 秒より長いと毎秒 最大体力 6%。陰で外れる。灯蛾に灯されると陰でも見つかる。漁の灯 3 つで扉が開く（頼み `main_finale_lamp`）。
 - 敵: 網打ち（扇へ網、1.5 秒の足止め）・灯蛾（光って触れると 6 秒灯す）。主: 灯守の目（回る筋・凝視は石柱の陰で避ける・凝視のあと 3 秒 目を閉じて傷 1.5 倍・灯の雨・灯蛾を呼ぶ）。模型は一品一案（`docs/review/cloud_roughs/`）。
-- 確かめ: 自己テスト `cloudsea`（橋の途切れ・関所・灯・扉・筋と陰と灯される・重さ・主）。撮影 `tools/shots/cloudsea_isle2.txt`（見直し `docs/review/finale/isle2_shots.jpg`）。戦いの手ざわりは試遊で。
+- 確かめ: 自己テスト `cloudsea`（橋の途切れ・関所・灯・扉・筋と陰と灯される・重さ・主）。撮影 `tools/shots/cloudsea_isle2.txt`。戦いの手ざわりは試遊で。
 - 次: 島 3「炉の島」（巻き戻り）。その 4 で済み。
 
 ## 終章「雲海」その 2: 島 1「鐘の島」（0.9.8。設計 [50](design/50_finale.md) の 4.2・4.2.1）
@@ -627,7 +638,7 @@ git push origin --delete wip/abyss-armor wip/abyss-boss-models wip/abyss-depths 
 監査の「中」も直した（2026-10-29 深夜）:
 - 旧スキル制度のコードを消した（43 の 3 章どおり）: 天職（`SkillCalling`・`CallingScreen`・通信 2 本）、構え（`SkillStance`・キー `.`）、連鎖（枠の印）、刻み目（`Breakpoints`）、旅人の木（合図・備えの報い・野営の手・目利き・逃げ足・手帖）と橋の木（5 本）。技は 65 → 54 本、アイコンの番号は `Skill.iconIndex`（淵・前世は icons2 の 5 番から）。技の画面の「ビルド」のページは鍵石だけ。自己テスト `skills`・`jobs`・`soul`・`lang`・`skill lesson` を通した。
 - 絵: 穴の欠片 5 枚を土地ごとに別の形に（確認の絵は 10-31 に消した。2026-10-30 にユーザーが確認して決まり）。技の印の同じ絵 4 組を描き分け、潮殻の `shell_slam`・`shell_sweep` の印を足した（`gen_attack_icons.py`）。`gui.skyabyss.attack.pearl_keeper.*` の古い文を消した。
-- 係の人の見た目は A だけ（B・C の 54 枚と 2 体の骨格を消した。`AttendantLook.LOOKS = {"a"}`）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
+- 係の人の見た目は人ごとの形（NPC v2）だけ（2026-11-03 に案 A の体・絵・`AttendantLook` も消した）。孤児の低ポリの絵 23 枚（`*_flared`・`waterway_maw`・`pearl_keeper`・古い `guest_*`・小道具の `_glow`）を消した。
 - 片付け: `run/shots`・`run/mp_check`・`run/world_all4`・dump・`config/*.bak`・`build/portraits_v2`・`build/tmp_attendant`・0.8.0 の jar。`docs/review` の古い報告（assets/gear/mod_blocks/weapon_design_base と試遊表 0.7.1〜0.8.0）、決まったラフの案（legends・ch5・voice2・survivor・warden_paint・材料。比較の絵だけ残す）、`tools/once`・`tools/misc` の 4 本・`tools/rough` の v2〜v4 と gallery_v*。消した書類を指していたコメントと README は直した。
 - 残したもの（判断）: `textures/entity/` と `lowpoly/` の同じ絵 35 組は、立方体の geo（`LowPoly.enabled = false` の控え）が残っているのでそのまま。`elder_sentry`（一章の洞窟）と `elder_sentinel`（背の試練）は役が別なので二体のまま（突進・踏みの印は同じ動きなので同じ絵）。メッシュ監査（`tools/audit/mesh_audit.py`）: 開いた辺 0、非多様体の辺 2,028、つぶれた三角 104、関節の離れ 37（主に防具の脚）。直すなら `tools/lib/mesh_close.py` から。
 

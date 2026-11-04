@@ -25,7 +25,8 @@
     "BossHealthOverlayAccessor",
     "AbstractWidgetAuditMixin",
     "CameraShoulderMixin",
-    "MouseHandlerShoulderMixin"
+    "MouseHandlerShoulderMixin",
+    "CinematicHidePlayersMixin"
   ],
   "injectors": {
     "defaultRequire": 1

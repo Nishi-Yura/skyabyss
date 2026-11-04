@@ -94,7 +94,8 @@ public final class TitanCalls {
 
     // 乗れる姿を、プレイヤーが見ているか (巨神が乗れる姿で止まっていて、MEET_RANGE 以内)。眠っている巨神は数えない
     static boolean sees(ServerPlayer player, String id) {
-        if (player.level().dimension() != Level.OVERWORLD || TitanDormancy.isResting(player.server, id)) {
+        if (player.level().dimension() != Level.OVERWORLD || TitanDormancy.isResting(player.server, id)
+                || !jp.revati.skyabyss.titan.TitanVisibility.sees(player, id)) {
             return false;
         }
         ServerLevel level = player.serverLevel();

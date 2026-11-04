@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner;
@@ -61,15 +60,39 @@ public final class FacilitySelfTest {
         }
     }
 
+    // 読み込んだ 3 × 3 のチャンクがすべて生き物の動く状態か (訓練場の的は試しの場所から 6 ずれた隣のチャンクに置く)
+    static boolean ready(ServerLevel level) {
+        BlockPos base = testBase(level);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (!level.isPositionEntityTicking(base.offset(dx * 16, 0, dz * 16))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static List<SelfTestRunner.Step> steps() {
         // 先に試しの場所 (出現地点から 512 離れた所。都の本物の係の人と混ざらない) のチャンクを読み込み、生き物が動くまで待つ
         // (大陸の世界は試しの場所が海の上の新しいチャンクで、作るのに時間がかかる。生き物が動くまで待つ。30 秒で諦めて進む)
         int[] waited = {0};
+        int[] extrasWaited = {0};
         return List.of(SelfTestRunner.Step.once("facility (load)", FacilitySelfTest::load),
-                SelfTestRunner.Step.until("facility (wait)", server -> server.overworld().isPositionEntityTicking(testBase(server.overworld())) || ++waited[0] > 600),
+                SelfTestRunner.Step.until("facility (wait)", server -> ready(server.overworld()) || ++waited[0] > 600),
                 SelfTestRunner.Step.once("facility", 20, FacilitySelfTest::run),
                 SelfTestRunner.Step.once("facility guild", GuildSelfTest::run),
-                SelfTestRunner.Step.once("facility extras", FacilityExtrasSelfTest::run),
+                // 訓練場の的は試しの場所のそばに置く。"facility extras" だけを選ぶと上の読み込みの段が流れないので、自分で読み込み、まわりの 3 × 3 のチャンクで生き物が動くまで待つ (30 秒で諦めて進む)
+                SelfTestRunner.Step.until("facility extras", server -> {
+                    if (!ready(server.overworld()) && extrasWaited[0]++ < 600) {
+                        if (extrasWaited[0] == 1) {
+                            load(server);
+                        }
+                        return false;
+                    }
+                    FacilityExtrasSelfTest.run(server);
+                    return true;
+                }),
                 SelfTestRunner.Step.once("facility trade", jp.revati.skyabyss.facility.trade.TradeSelfTest::run));
     }
 
@@ -117,31 +140,16 @@ public final class FacilitySelfTest {
 
     private static void assets(List<String> f) {
         String a = "/assets/skyabyss/";
-        for (String look : AttendantLook.LOOKS) {
-            check(f, resource(a + "lowpoly/attendant_" + look + ".json"), "mesh attendant_" + look);
-            check(f, resource(a + "geo/entity/attendant_" + look + "_lowpoly.geo.json"), "geo attendant_" + look);
-            for (AttendantRole r : AttendantRole.values()) {
-                check(f, resource(a + "textures/lowpoly/" + AttendantLook.texture(look.charAt(0) - 'a' + 1, r.id) + ".png"), "texture " + look + " " + r.id);
-            }
-        }
+        // 体・絵・動き (npc_<役>) は NpcModelSelfTest (段 lowpoly npc) が見る
         for (AttendantRole r : AttendantRole.values()) {
+            check(f, resource(a + "lowpoly/npc_" + r.id + ".json"), "mesh npc_" + r.id);
             for (String face : Dialogue.FACES) {
                 check(f, resource(a + "textures/gui/npc/face/attendant_" + r.id + "_" + face + ".png"), "face " + r.id + " " + face);
             }
             check(f, resource(a + "textures/gui/npc_marker/fac_" + r.id + ".png"), "facility icon " + r.id);
         }
-        try (InputStream in = FacilitySelfTest.class.getResourceAsStream(a + "animations/entity/attendant.animation.json")) {
-            String json = in == null ? "" : new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-            var anims = in == null ? null : JsonParser.parseString(json).getAsJsonObject().getAsJsonObject("animations");
-            for (String n : List.of("idle", "walk", "talk")) {
-                check(f, anims != null && anims.has("animation.attendant." + n), "animation.attendant." + n);
-            }
-        } catch (java.io.IOException | RuntimeException e) {
-            f.add("animation unreadable " + e);
-        }
         check(f, resource(a + "textures/item/bell_coin.png"), "bell coin texture");
         check(f, resource(a + "models/item/bell_coin.json"), "bell coin model");
-        check(f, AttendantLook.look(0).equals(AttendantLook.DEFAULT) && AttendantLook.look(2).equals(AttendantLook.DEFAULT), "look by variant");
     }
 
     // ---------------------------------------------------------------- 会話

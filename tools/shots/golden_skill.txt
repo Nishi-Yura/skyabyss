@@ -1,0 +1,52 @@
+# 2026-11-04: 黄金比の板に載せ替えた技の画面 (docs/design/56)。GUI 3 / 1280x720 と GUI 4 / 1920x1080
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_skill.txt -PshotsName=golden_skill
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+open skills
+wait 10
+shot skills_tree
+hover 150 120
+wait 3
+shot skills_hover
+close
+open skills_node:titan_cleave
+wait 10
+shot skills_node_active
+close
+open skills_node:str_1
+wait 10
+shot skills_node_stat
+close
+open skills_ext
+wait 10
+shot skills_ext
+close
+open growth
+wait 10
+shot growth_tabs
+close
+size 1920 1080
+guiscale 4
+wait 20
+open skills_node:titan_cleave
+wait 10
+shot skills_1080
+close

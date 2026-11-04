@@ -1,0 +1,238 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries_first": true,
+  "entries": [
+    {
+      "node": "ch5g_c_answer",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_abyss",
+          "is": "started",
+          "after": "heart"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch5g_answer_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch5g_c_meet",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_abyss",
+          "is": "active",
+          "after": "door"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_abyss",
+            "is": "started",
+            "after": "heart"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch5g_met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch5g_c_ash",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_abyss",
+          "is": "active",
+          "after": "ash_lord"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_abyss",
+            "is": "started",
+            "after": "heart"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch5g_ash_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch5g_c_storm",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_abyss",
+          "is": "active",
+          "after": "storm_lord"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_abyss",
+            "is": "started",
+            "after": "ash_lord"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch5g_storm_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch5g_c_salt",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_abyss",
+          "is": "active",
+          "after": "salt_lord"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_abyss",
+            "is": "started",
+            "after": "storm_lord"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch5g_salt_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch5g_c_bone",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_abyss",
+          "is": "active",
+          "after": "bone_lord"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "quest",
+            "quest": "main_abyss",
+            "is": "started",
+            "after": "salt_lord"
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch5g_bone_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch5g_c_meet": {
+      "face": "neutral",
+      "next": "ch5g_c_meet2"
+    },
+    "ch5g_c_meet2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch5g_met"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch5g_c_bone": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch5g_bone_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch5g_c_salt": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch5g_salt_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch5g_c_storm": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch5g_storm_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch5g_c_ash": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch5g_ash_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch5g_c_answer": {
+      "face": "grave",
+      "next": "ch5g_c_answer2"
+    },
+    "ch5g_c_answer2": {
+      "face": "neutral",
+      "next": "ch5g_c_answer3"
+    },
+    "ch5g_c_answer3": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch5g_answer_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}

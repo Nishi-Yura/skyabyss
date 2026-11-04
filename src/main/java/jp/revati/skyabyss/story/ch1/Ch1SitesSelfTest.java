@@ -196,6 +196,15 @@ public final class Ch1SitesSelfTest {
         // 人のブロックを壊さない: 部品を置き直す検査は ChapterSites の「ch1 sites」「chapter sites (conflict)」が見る。ここでは、洞の殻の外は触っていない (深さの下限)
         Blueprint bp = Blueprint.get("ch1_cleft_shell_cave");
         check(bp.minY >= -17 && bp.maxY <= 5, "the cave blueprint reaches y " + bp.minY + ".." + bp.maxY);
+        // 戸口 (部品の x -1..1・y 0..1・z -1) は開いている (冒険モードで壊さずに入れる)
+        CleftCave.openMouth(level, cave);
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 1; y++) {
+                BlockPos at = Blueprint.transform(x, y + 1, -1, jp.revati.skyabyss.opening.site.SiteFinder.rot(cave.yaw),
+                        jp.revati.skyabyss.opening.site.SiteFinder.mirror(cave.yaw), cave.pos.below());
+                check(!level.getBlockState(at).isSolid(), "the cave doorway is blocked at " + at + " (" + level.getBlockState(at) + ")");
+            }
+        }
         songChamber(server, level);
     }
 
@@ -532,7 +541,8 @@ public final class Ch1SitesSelfTest {
                     "the pack should hold two iron ingots and no torches");
             Quests.poll(p, true);
             QuestLog.Entry iron = QuestLog.of(p).entry(Ch1Prep.Q_IRON);
-            check(iron.stage == 1 && !iron.done, "the page did not move the iron trail to the armor stage");
+            check(!iron.done && "armor".equals(jp.revati.skyabyss.quest.QuestManager.quest(Ch1Prep.Q_IRON).stages().get(iron.stage).id()),
+                    "the page did not move the iron trail to the armor stage");
             for (var it : List.of(jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_HELMET.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_CHESTPLATE.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_LEGGINGS.get(), jp.revati.skyabyss.item.outfit.OutfitGear.IRONCLAD_BOOTS.get())) {
                 p.getInventory().add(new ItemStack(it));
             }
@@ -695,7 +705,7 @@ public final class Ch1SitesSelfTest {
             a.getInventory().clearContent();
             b.getInventory().clearContent();
         }
-        // 経験値の枠: 一章の新しい分 (支度の段 250 + 洞 40 + 骨の坑 40) は 400 に収まる
+        // 経験値の枠: 一章の新しい分 (支度の段 + 洞 40 + 骨の坑 40) は枠 (ChapterXpBudget.NEW_CAP) に収まる
         int fresh = ChapterXpBudget.newXp(QuestManager.all(), 1);
         check(fresh <= ChapterXpBudget.NEW_CAP[1], "chapter 1 new xp " + fresh + " exceeds " + ChapterXpBudget.NEW_CAP[1]);
         check(fresh >= 250 + CleftCave.XP + BonePit.XP, "chapter 1 new xp " + fresh + " does not count the trail steps, the cave and the pit");

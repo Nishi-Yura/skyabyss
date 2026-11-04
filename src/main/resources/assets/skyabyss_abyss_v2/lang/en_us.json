@@ -392,8 +392,8 @@
   "quest.skyabyss.main_moon_near.title": "The Moon Draws Near",
   "quest.skyabyss.main_moon_near.summary": "The anchor is still loose. Look up at the moon at night.",
   "quest.skyabyss.main_moon_near.done": "The moon's tale continues in chapter six.",
-  "quest.skyabyss.main_moon_near.look.journal": "At the bottom of the abyss you learned the anchor is still loose. The storyteller said the moon is coming closer. Go outside at night and look up at it.",
-  "quest.skyabyss.main_moon_near.look.moon": "Look up at the moon outside at night",
+  "quest.skyabyss.main_moon_near.look.journal": "At the bottom of the abyss you learned the anchor is still loose. The storyteller said the moon is coming closer. Go outside and look up at it. Even by day it should show white in the northern sky.",
+  "quest.skyabyss.main_moon_near.look.moon": "Look up at the moon outside",
   "quest.skyabyss.main_moon_near.tell.journal": "The moon was bigger than the last time you looked, close enough to count the marks on its face. Tell the storyteller.",
   "quest.skyabyss.main_moon_near.tell.talk": "Tell the storyteller about the moon",
   "message.skyabyss.moon_near.seen": "The moon is big. ... Much nearer than the last time you looked. You could almost count the marks on its face.",
@@ -417,5 +417,6 @@
   "message.skyabyss.moon.phase.first.sub": "Light fills the right half",
   "message.skyabyss.moon.phase.full.sub": "The moon at its brightest. The core's pulse can be heard",
   "message.skyabyss.moon.phase.last.sub": "The light wanes and the afterimages thicken",
-  "biome.skyabyss.moon": "The Moon's Face"
+  "biome.skyabyss.moon": "The Moon's Face",
+  "message.skyabyss.moon_near.seen_day": "A white moon hangs in the daytime sky. ...It has never looked this big. You could almost count the marks on its face."
 }

@@ -115,6 +115,14 @@ public final class WorldEvents {
     }
 
     @Nullable
+    // 次の大事件までの tick (まだ決まっていない・止めている世界なら -1。クエストログの「今日・今週」quest/Clocks)
+    public static long ticksUntilNext(net.minecraft.server.MinecraftServer server) {
+        if (nextAt < 0 || current != null) {
+            return -1;
+        }
+        return Math.max(0, nextAt - server.overworld().getGameTime());
+    }
+
     public static Event current() {
         return current;
     }
@@ -237,7 +245,7 @@ public final class WorldEvents {
         }
         if (!ok.isEmpty()) {
             ContinentPois.Poi poi = ok.get(level.random.nextInt(ok.size()));
-            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), "map.skyabyss.poi." + poi.kind());
+            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), poi.titleKey());
         }
         BlockPos lair = NamedFoes.lair(region);
         BlockPos at = lair == null ? BlockPos.ZERO : lair;

@@ -1,0 +1,48 @@
+# 2026-11-04: 黄金比の板の店・厩舎・町の案内・試練の記録・取引・ギルド (docs/design/56)。1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_facility.txt -PshotsName=golden_facility
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+cmd skyabyss facility shop food_shop
+wait 15
+shot shop
+close
+wait 5
+cmd skyabyss facility act mount_shop
+wait 15
+shot mount_shop
+close
+wait 5
+cmd skyabyss facility act guide
+wait 15
+shot town_guide
+close
+wait 5
+cmd skyabyss facility records
+wait 15
+shot records
+close
+wait 5
+cmd skyabyss facility act guild
+wait 15
+shot guild
+close
+wait 5
+cmd skyabyss facility act trade
+wait 15
+shot trade
+close

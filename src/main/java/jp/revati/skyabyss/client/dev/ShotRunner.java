@@ -771,6 +771,14 @@ public final class ShotRunner {
                 mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                 return true;
             }
+            case "attack" -> {
+                // attack : 照準の先の生き物を一度殴る (左クリックと同じ経路。gameMode.attack と振り)。連打と溜めの確かめ用
+                if (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh && mc.gameMode != null) {
+                    mc.gameMode.attack(mc.player, eh.getEntity());
+                }
+                mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                return true;
+            }
             case "mainhand" -> {
                 // mainhand left|right : 利き手の設定 (左利きの鏡写しの確認用)
                 mc.options.mainHand().set(line.arg(0).equalsIgnoreCase("left") ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);
@@ -1149,6 +1157,10 @@ public final class ShotRunner {
             }
             return new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player, mc.player.connection.enabledFeatures(), true);
         }
+        // hunt:<型> : 狩人の手帳を、その敵を選んだ状態で開く
+        if (name.startsWith("hunt:")) {
+            return new jp.revati.skyabyss.endgame.client.HunterNotesScreen().select(name.substring("hunt:".length()));
+        }
         // skills_node:<節の id> : 技の木 v2 で、その節を選んだ状態で開く
         if (name.startsWith("skills_node:")) {
             String id = name.substring("skills_node:".length());
@@ -1163,6 +1175,7 @@ public final class ShotRunner {
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
+            case "hunt" -> jp.revati.skyabyss.endgame.client.HunterNotesScreen::new;
             case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
             case "chat" -> () -> new net.minecraft.client.gui.screens.ChatScreen("");
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
@@ -1185,7 +1198,6 @@ public final class ShotRunner {
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
-            case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
             // 旅嚢の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)
             case "pouchwheel_2" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(2);
             case "pouchwheel_5" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(5);

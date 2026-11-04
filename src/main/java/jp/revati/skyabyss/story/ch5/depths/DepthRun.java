@@ -409,7 +409,7 @@ public final class DepthRun {
         BlockPos pos = event.getPos();
         BlockPos stone = heartStone();
         if (stone != null && pos.equals(stone)) {
-            DepthRecords.show(p.server, p);
+            jp.revati.skyabyss.record.RecordsHub.open(p, jp.revati.skyabyss.record.RecordsHub.DEPTH);
             event.setCanceled(true);
             return;
         }
@@ -509,7 +509,7 @@ public final class DepthRun {
                                     return devAt(p, StringArgumentType.getString(c, "what"));
                                 })))
                                 .then(Commands.literal("records").executes(c -> {
-                                    DepthRecords.show(c.getSource().getServer(), c.getSource().getPlayerOrException());
+                                    jp.revati.skyabyss.record.RecordsHub.open(c.getSource().getPlayerOrException(), jp.revati.skyabyss.record.RecordsHub.DEPTH);
                                     return 1;
                                 })))));
     }

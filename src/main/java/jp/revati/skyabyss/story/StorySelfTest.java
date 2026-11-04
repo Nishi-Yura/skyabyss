@@ -119,6 +119,7 @@ public final class StorySelfTest {
         p.getInventory().clearContent();
         Quests.forgetAll(p);
         p.setData(NpcSetup.BONDS, new NpcBonds());
+        jp.revati.skyabyss.quest.NpcQuestSelfTest.hushDayTalks(p);
         NpcBonds.of(p).bond(WC).flags().add("met");
         p.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5);
         StoryData.get(server).clear(p.getUUID());
@@ -329,6 +330,7 @@ public final class StorySelfTest {
         p.getInventory().clearContent();
         Quests.forgetAll(p);
         p.setData(NpcSetup.BONDS, new NpcBonds());
+        jp.revati.skyabyss.quest.NpcQuestSelfTest.hushDayTalks(p);
         NpcBonds bonds = NpcBonds.of(p);
         bonds.bond(ST).flags().add("met");
         bonds.bond(WC).flags().add("met");

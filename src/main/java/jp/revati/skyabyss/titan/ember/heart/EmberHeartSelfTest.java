@@ -212,8 +212,8 @@ public final class EmberHeartSelfTest {
 
     // ---------------------------------------------------------------- 数 (13 の 8.2・8.3節の表)
     private static void checkNumbers(List<String> f, List<String> notes) {
-        check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 1.84f,
-                "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 1.84)", f);
+        check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 2.61f,
+                "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 2.61)", f);
         check(EmberHeart.BREATH_DAMAGE == 43f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 32.5f && EmberHeart.PULSE_HEAT == 10f
                 && EmberHeart.ORB_DAMAGE == 38f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
                 && EmberHeart.GALE_DAMAGE == 40.5f && EmberHeart.PELLET_DAMAGE == 24.5f && EmberHeart.FADING_DAMAGE == 50f
@@ -281,7 +281,7 @@ public final class EmberHeartSelfTest {
         notes.add(String.format("frozen: thaw %.1f s in an ember (two bursts %.1f dmg), hit phase 3 for %.0f s (normal %.0f s)", thawSeconds, thawCost, killFrozen, killNormal));
         // 6.6節の経験値: MOD_ENEMIES に一行 (Lv 30)
         GrowthRewards.Source src = GrowthRewards.MOD_ENEMIES.get(EmberIds.id(EmberIds.EMBER_HEART).toString());
-        check(src != null && src.xp() == 650 && src.contentLevel() == 30, "GrowthRewards.MOD_ENEMIES has no ember heart (650, Lv 30)", f);
+        check(src != null && src.xp() == EmberHeartSetup.Xp.HEART && src.contentLevel() == 30, "GrowthRewards.MOD_ENEMIES has no ember heart (" + EmberHeartSetup.Xp.HEART + ", Lv 30)", f);
     }
 
     // ---------------------------------------------------------------- 熾の底の形
@@ -824,7 +824,8 @@ public final class EmberHeartSelfTest {
         EmberHeartArena.restoreAll(back);
         heart.forceAction(EmberHeart.Action.FLOOR);
         tickHeart(heart, 2);
-        check(EmberHeartArena.sinkingCount() == 1, "the floor move did not crack a section", f);
+        check(EmberHeartArena.sinkingCount() == 1, "the floor move did not crack a section (sinking " + EmberHeartArena.sinkingCount() + ", bound " + heart.isBound()
+                + ", phase " + heart.getPhase() + ")", f);
         int crackedAt = 0;
         int sunkAt = -1;
         int maxAtOnce = 0;

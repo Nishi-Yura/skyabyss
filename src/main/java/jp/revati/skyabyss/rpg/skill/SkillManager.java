@@ -362,6 +362,11 @@ public final class SkillManager {
     public static int runeOf(Player player, Skill skill) {
         SkillData d = get(player);
         int r = d.rune(skill);
+        // 技の木の変化の節 (技の木 v3): その技を知っていて節を取っていれば効く (段を極めなくてよい。節を取ったのに黙って効かない形をなくす)
+        if (r > 0 && Rune.normal(r) && Rune.of(skill, r) != null && !Rune.of(skill, r).legendary() && d.knows(skill)
+                && treeRune(player, skill, r)) {
+            return r;
+        }
         if (r <= 0 || !d.runeUsable(skill, r)) {
             return 0;
         }
@@ -371,6 +376,21 @@ public final class SkillManager {
             return held == null ? 0 : held.index;
         }
         return Rune.valid(skill, r) && Rune.heldOf(skill, r, player) ? r : 0;
+    }
+
+    // その変化が今の職の木の節として取られているか
+    private static boolean treeRune(Player player, Skill skill, int r) {
+        SkillData d = get(player);
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree);
+        if (tree == null) {
+            return false;
+        }
+        for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode n : tree.runesOf(skill)) {
+            if (n.rune == r && d.nodesOf(skill.tree).contains(n.id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // いま効いている伝説の書き換え (選んでいて、その武器を持っている。なければ null)
@@ -624,6 +644,8 @@ public final class SkillManager {
         SkillActions.fxTarget = null;
         // 舞 (風の舞い手の溜まるもの): 今の段の分だけ、この技の待ちが短い
         double gaugeCooldown = Gauges.cooldownScale(player, skill);
+        // 満ち潮 (呪術師の型の要): マナが半分より多いときの技は待ちが短い (KeystoneEffects)
+        gaugeCooldown *= KeystoneEffects.fullTideScale(player);
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
             Notice.bar(player, ModText.deny(failure));
@@ -637,6 +659,8 @@ public final class SkillManager {
         SkillActions.cooldownScale = 1;
         // 型の溜まるもの: 溜める技・放つ技 (rpg/skill/Gauges)
         Gauges.afterCast(player, skill);
+        // 型の要の動き (嵐呼び・潮渡り)
+        KeystoneEffects.afterCast(player, skill);
         // 炉の記憶: 技を使うたびに熾が 1 つ溜まる (次の近接で使い切る)
         int memory = d.rank(Skill.FORGE_MEMORY);
         if (memory > 0) {
@@ -654,9 +678,12 @@ public final class SkillManager {
         sendResult(player, slot, true);
         // 見た目の合図 (持ち主と近くの人へ 1 通。段取りは手元で組む)
         if (!(player instanceof FakePlayer) && player.connection != null) {
-            PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), skill.id, rank, false, SkillActions.fxTarget));
+            // 変化が元の技の代わりに動いたときは、その中身の技の見た目 (回し斬り・星屑など。TreeVariants)
+            Skill fx = SkillActions.fxSkill != null ? SkillActions.fxSkill : skill;
+            PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), fx.id, rank, false, SkillActions.fxTarget));
         }
         SkillActions.fxTarget = null;
+        SkillActions.fxSkill = null;
         // 鐘の内の初代の空見は、技の音を聞く (docs/design/53 の 5.1)
         jp.revati.skyabyss.story.finale.mob.FounderBoss.heardSkill(player);
         // 灯守の法衣 (4 部位): 技を使うと、まわりの仲間に灯の守り

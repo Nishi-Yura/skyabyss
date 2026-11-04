@@ -359,6 +359,21 @@ public final class AbyssEscort {
         return new Vec3(c.getX() + 0.5, y, c.getZ() + 0.5);
     }
 
+    // 近くに立っている、この道の人 (見失った・前に立てた人) を使う。二人目からは消す
+    @Nullable
+    static Entity adopt(ServerLevel level, Run run, BlockPos at) {
+        List<AttendantEntity> near = level.getEntitiesOfClass(AttendantEntity.class, new net.minecraft.world.phys.AABB(at).inflate(48, 24, 48),
+                e -> e.isAlive() && e.getTags().contains(TAG + "_" + run.layer));
+        if (near.isEmpty()) {
+            return null;
+        }
+        for (int i = 1; i < near.size(); i++) {
+            near.get(i).discard();
+        }
+        run.npc = near.get(0).getUUID();
+        return near.get(0);
+    }
+
     static void spawnNpc(ServerLevel level, Run run) {
         AttendantEntity a = FacilitySetup.ATTENDANT.get().create(level);
         if (a == null) {
@@ -381,10 +396,19 @@ public final class AbyssEscort {
     public static void tick(ServerLevel level, Run run, long now, List<ServerPlayer> players) {
         Entity npc = npc(level, run);
         if (npc == null || !npc.isAlive()) {
-            spawnNpc(level, run);
-            npc = npc(level, run);
-            if (npc == null) {
+            // 道の人の居場所のチャンクが動いていない間は立て直さない。立てた人は見えないだけでそこにいるので、
+            // 毎 tick 立て直すと人が増え続けた (2026-11-03 の自己テストで一万九千人。押し合いでサーバーが止まった)
+            BlockPos at = BlockPos.containing(run.pos());
+            if (!level.isPositionEntityTicking(at)) {
                 return;
+            }
+            npc = adopt(level, run, at);
+            if (npc == null) {
+                spawnNpc(level, run);
+                npc = npc(level, run);
+                if (npc == null) {
+                    return;
+                }
             }
         }
         Vec3 here = run.pos();

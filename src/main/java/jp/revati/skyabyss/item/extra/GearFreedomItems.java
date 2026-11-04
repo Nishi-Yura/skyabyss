@@ -67,12 +67,15 @@ public final class GearFreedomItems {
             tooltip.add(Component.literal(" ◇ ").withStyle(s -> s.withColor(AffixRules.MARK_COLOR))
                     .append(Component.translatable("item.skyabyss.socket_shard.armor").withStyle(ChatFormatting.DARK_GRAY))
                     .append(AffixRules.describe(new Affix(element.armor, element.armorValue * t)).withStyle(s -> s.withColor(AffixRules.LINE_COLOR))));
-            tooltip.add(Component.translatable("item.skyabyss.powder.art", Component.translatable("powder_art.skyabyss." + element.id + ".weapon"),
-                    Component.translatable("powder_art.skyabyss." + element.id + ".armor"), Powder.WEIGHT_FOR_ART).withStyle(s -> s.withColor(GearFreedom.ASPECT_COLOR)));
+            int color = PowderArts.COLORS[element.ordinal()];
+            tooltip.add(Component.translatable("item.skyabyss.powder.art_weapon", Component.translatable(PowderArts.artKey(element, true)),
+                    Component.translatable("powder_art.skyabyss." + element.id + ".weapon")).withStyle(s -> s.withColor(color)));
+            tooltip.add(Component.translatable("item.skyabyss.powder.art_armor", Component.translatable(PowderArts.artKey(element, false)),
+                    Component.translatable("powder_art.skyabyss." + element.id + ".armor")).withStyle(s -> s.withColor(color)));
+            tooltip.add(Component.translatable("item.skyabyss.powder.art_rule", Powder.WEIGHT_FOR_ART).withStyle(ChatFormatting.DARK_GRAY));
             if (t < Powder.MAX_TIER) {
                 tooltip.add(Component.translatable("item.skyabyss.powder.combine", Powder.COMBINE).withStyle(ChatFormatting.DARK_GRAY));
             }
-            tooltip.add(Component.translatable("item.skyabyss.socket_shard.tag", Component.translatable(element.tree.nameKey())).withStyle(s -> s.withColor(GearFreedom.TAG_COLOR)));
         }
     }
 

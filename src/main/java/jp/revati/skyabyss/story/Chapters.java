@@ -69,6 +69,17 @@ public enum Chapters {
         return titan;
     }
 
+    // その巨神の章 (巨神でなければ null)
+    @javax.annotation.Nullable
+    public static Chapters forTitan(String titan) {
+        for (Chapters c : values()) {
+            if (titan.equals(c.titan)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     public int stage() {
         return stage;
     }

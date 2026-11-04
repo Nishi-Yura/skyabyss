@@ -12,13 +12,15 @@ import net.minecraft.core.BlockPos;
 
 // 一回の巡り路 (Circuits)。歩く人たち・土地・残り時間・印と、いまの課題
 public final class CircuitRun {
+    // DIG・TIDE・CHARGE・FIRE は土地ごとの課題 (CircuitLand。その土地の巡り路にだけ出る)
     public enum Kind {
-        HUNT, GUARD, CARRY, BREAK
+        HUNT, GUARD, CARRY, BREAK, DIG, TIDE, CHARGE, FIRE
     }
 
-    // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分
+    // 柱の色 (Wynncraft のルートランのビーコン): 白 = ふつう、金 = 印が二つ (手ごわい)、青 = 越えると残り時間 +2 分、
+    // 紫 = 呪い (2026-11-03。Wynncraft の紫のビーコン): 選ぶと呪いが一つ重なり、巡り路の残りのあいだ敵が強くなる代わりに、終わりの封の箱が一つ増える
     public enum Bonus {
-        NONE(0xE6E2D6), DOUBLE(0xF2C14E), TIME(0x7FB8FF);
+        NONE(0xE6E2D6), DOUBLE(0xF2C14E), TIME(0x7FB8FF), CURSE(0xB070E8);
 
         public final int rgb;
 
@@ -71,6 +73,19 @@ public final class CircuitRun {
     // 次の課題の柱 (空でなければ選んでいるところ) と、いまの課題の柱の色
     final List<Offer> offers = new ArrayList<>();
     Bonus bonus = Bonus.NONE;
+    // 重なった呪い (紫の柱を選んだ数。巡り路の終わりまで残る)
+    int curses;
+    // 土地の課題 (CircuitLand): 掘る所・結晶・焚き火・沖の杭と、その進み。置いたブロック (片づける)。潮待ちの印を持つ人と潮の始まり
+    final List<BlockPos> points = new ArrayList<>();
+    final List<Integer> pointProgress = new ArrayList<>();
+    final List<BlockPos> placed = new ArrayList<>();
+    @Nullable
+    UUID holder;
+    long cycleStart;
+    // 早越え (5 分の限りの半分以内) の連なり (2026-11-05 のダンジョンの頁 3-2)。3 で印 +1、5 で印 +2 (そこで数え直し)
+    int streak;
+    // いまの時 (目的の帯の一行が使う)
+    long now;
 
     CircuitRun(int region, BlockPos origin, long start, long end) {
         this.region = region;
@@ -101,6 +116,14 @@ public final class CircuitRun {
 
     public Bonus bonus() {
         return bonus;
+    }
+
+    public int curses() {
+        return curses;
+    }
+
+    public int streak() {
+        return streak;
     }
 
     public BlockPos spot() {

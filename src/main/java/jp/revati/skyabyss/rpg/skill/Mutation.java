@@ -16,7 +16,10 @@ public enum Mutation {
     EBB_WHIRL("ebb_whirl", Skill.EBB_TIDE, "tide_shell"),
     LUNGE_SURGE("lunge_surge", Skill.LUNGE, "tide_shell"),
     HAMMER_METEOR("hammer_meteor", Skill.EMBER_HAMMER, "ember"),
-    TRAP_MINE("trap_mine", Skill.BONE_TRAP, "ember");
+    TRAP_MINE("trap_mine", Skill.BONE_TRAP, "ember"),
+    // 技の木 v3 (2026-11-04): 魔法使いの変異
+    THUNDER_CLOUD("thunder_cloud", Skill.THUNDER_BOLT, "thunder_wing"),
+    FROZEN_SEA("frozen_sea", Skill.FROST_TIDE, "tide_shell");
 
     public static final int CORES = 1;
     public static final int SHARDS = 3;

@@ -218,6 +218,7 @@ public final class OpeningStorySelfTest {
         p.getInventory().clearContent();
         Quests.forgetAll(p);
         p.setData(NpcSetup.BONDS, new NpcBonds());
+        jp.revati.skyabyss.quest.NpcQuestSelfTest.hushDayTalks(p);
         p.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5);
         return p;
     }

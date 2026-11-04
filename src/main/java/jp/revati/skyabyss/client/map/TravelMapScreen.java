@@ -10,9 +10,7 @@ import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.grave.GraveMarkerHud;
 import jp.revati.skyabyss.client.quest.ObjectiveStrip;
-import jp.revati.skyabyss.grave.GraveMarkers;
 import jp.revati.skyabyss.map.MapMarks;
 import jp.revati.skyabyss.party.PartyLocator;
 import jp.revati.skyabyss.party.client.PartyMarkers;
@@ -570,8 +568,13 @@ public class TravelMapScreen extends Screen {
             return;
         }
         jp.revati.skyabyss.world.continent.ContinentLayout lay = jp.revati.skyabyss.world.continent.ContinentLayout.get();
-        // 土地の名前: 引くほど大きく (1.25〜1.75 倍)、紙の色の縁取りの上に濃い茶の字
+        // 土地の名前: 引くほど大きく (1.25〜1.75 倍)、紙の色の縁取りの上に濃い茶の字。
+        // 倍率は画素ちょうどへ丸める (docs/design/56 の 4.1。半端な倍率では字の画の太さがそろわない)
+        double gui = minecraft.getWindow().getGuiScale();
         float big = (float) Mth.clamp(1.25 + (view - NAMES_FROM) / (NAMES_TO - NAMES_FROM) * 0.5, 1.25, 1.75);
+        if (gui > 0) {
+            big = (float) (Math.max(1, Math.round(big * gui)) / gui);
+        }
         for (var e : lay.names().entrySet()) {
             int[] at = project(e.getValue().getX(), e.getValue().getZ());
             if (at[2] == 0) {
@@ -766,6 +769,21 @@ public class TravelMapScreen extends Screen {
                 hits.add(hit(at, layer(m), List.of(MapText.name(m), MapText.where(me, m.x(), m.z())), null));
                 continue;
             }
+            if (m.kind() == MapMarks.Kind.TERRITORY) {
+                // 組合の旗: 竿と、組合の色の布 (縁は暗く)。札は「旗: 組合の名前」を組合の色で
+                if (at[2] == 1) {
+                    continue;
+                }
+                int c = 0xFF000000 | m.color();
+                g.fill(at[0] - 1, at[1] - 9, at[0] + 1, at[1] + 7, 0xFF2A2018);
+                g.fill(at[0] + 1, at[1] - 9, at[0] + 11, at[1] - 1, 0xFF05070A);
+                g.fill(at[0] + 1, at[1] - 8, at[0] + 10, at[1] - 2, c);
+                g.fill(at[0] + 1, at[1] - 4, at[0] + 10, at[1] - 3, 0x40000000);
+                icons.add(new int[] {at[0] - 2, at[1] - 9, 13, 16});
+                labels.add(new Label(at[0] + 4, at[1] - 4, Component.translatable("map.skyabyss.territory.short", m.name()), c, labelPriority(m)));
+                hits.add(hit(at, layer(m), List.of(MapText.name(m), Component.translatable("map.skyabyss.territory.how")), null));
+                continue;
+            }
             if (m.rumor()) {
                 sprite(g, S_RUMOR, at[0], at[1], 0, 0.85f);
             } else {
@@ -819,20 +837,7 @@ public class TravelMapScreen extends Screen {
                 hits.add(hit(at, 50, lines, d.valid() ? d.id() : null));
             }
         }
-        // 墓・仲間・目的・自分 (クライアントが持っているもの)
-        for (GraveMarkers.Mark gm : graves()) {
-            if (!gm.dimension().equals(here())) {
-                continue;
-            }
-            int[] at = project(gm.x() + 0.5, gm.z() + 0.5);
-            backing(g, at[0], at[1], 0.75f);
-            sprite(g, S_GRAVE, at[0], at[1], 0xFFD9779A, at[2] == 1 ? 0.6f : 1f);
-            icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
-            if (at[2] == 0) {
-                labels.add(new Label(at[0], at[1], Component.translatable("map.skyabyss.mark.grave"), 0xFFD9779A, 60));
-            }
-            hits.add(hit(at, 60, List.of(Component.translatable("map.skyabyss.mark.grave"), MapText.where(me, gm.x() + 0.5, gm.z() + 0.5)), null));
-        }
+        // 仲間・目的・自分 (クライアントが持っているもの)
         for (PartyLocator.Entry e : party()) {
             if (!e.dimension().equals(here())) {
                 continue;
@@ -881,7 +886,11 @@ public class TravelMapScreen extends Screen {
     private int labelPriority(MapMarks.Mark m) {
         return switch (m.kind()) {
             case TOWN -> 80;
+            case TERRITORY -> 78;
             case TITAN -> 75;
+            case LOOTCAMP -> 62;
+            case SPRINT -> 46;
+            case FISHING -> view <= 1600 ? 44 : 0;
             case SHRINE -> 70;
             case SITE -> 65;
             case FOE -> m.extra().equals("alive") ? 72 : view <= 1600 ? 50 : 0;
@@ -973,6 +982,9 @@ public class TravelMapScreen extends Screen {
             case SITE, WAYMARK, SHRINE -> 10;
             case FOOTPRINT, RIBS, SPAWN -> 20;
             case FOE -> 38;
+            case TERRITORY -> 36;
+            case LOOTCAMP -> 34;
+            case FISHING, SPRINT -> 28;
             case CAMP -> 30;
             case TOWN -> 35;
             case TITAN -> 40;
@@ -1001,6 +1013,9 @@ public class TravelMapScreen extends Screen {
             case SHRINE -> S_SHRINE;
             case SPAWN -> S_SPAWN;
             case FOE -> S_FOE;
+            case TERRITORY -> S_TOWN;
+            case LOOTCAMP -> S_CAMP;
+            case FISHING, SPRINT -> S_WAYMARK;
         };
     }
 
@@ -1024,15 +1039,6 @@ public class TravelMapScreen extends Screen {
             }
         }
         return best;
-    }
-
-    private List<GraveMarkers.Mark> graves() {
-        if (demo) {
-            Minecraft mc = Minecraft.getInstance();
-            BlockPos at = mc.player == null ? BlockPos.ZERO : mc.player.blockPosition();
-            return List.of(new GraveMarkers.Mark(Level.OVERWORLD.location().toString(), at.getX() + 150, 64, at.getZ() + 60));
-        }
-        return GraveMarkerHud.marks();
     }
 
     private List<PartyLocator.Entry> party() {

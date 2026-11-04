@@ -27,9 +27,8 @@
 | `site/` | サイト用 (別作業) |
 
 フォルダの移動にともなう `sys.path` は、各スクリプトの先頭で他グループを足して解決する。
-採用済みの素材を古い版で上書きしてしまうスクリプトは止めてある。
-どうしても動かすときだけ、環境変数 `SKYABYSS_ALLOW_REGEN=1` を付ける。`tools/gen/items/gen_items.py` だけは `SKYABYSS_ALLOW_GEN_ITEMS=1`。
-経緯: 2026-10-16 の素材の監査で、古い生成スクリプトが採用済みの素材を上書きしていたため。
+採用済みの素材を古い版で上書きしてしまう生成スクリプトは置かない (2026-11-03 に消した。古い見た目・古い版は残さず、履歴は git に任せる)。
+今の素材の元でも、流すと上書きするものは止めてある (`SKYABYSS_ALLOW_REGEN=1` を付けたときだけ動く。下の「止めてあるもの」)。
 
 ## ゲームを立ち上げる担当の決まり (並列で動かすとき)
 
@@ -199,7 +198,7 @@ PYTHONPATH=tools/lib python tools/audit/check_generators.py --list          # �
 - 古い・見ない生成スクリプト (一覧に入れていない。止めたまま残す):
   - `tools/gen/world/gen_titan_volumes.py` — 巨神の立入禁止の体積をメッシュから焼く。メッシュが変わると結果が変わる (`data/skyabyss/titan_volumes/*`)。メッシュを直したときだけ手で走らせる。
   - `tools/gen/ch4/gen_ch4_gear.py`・`tools/gen/abyss/gen_abyss_mobs_a.py` など `docs/review` のラフを読むもの — ラフが無いと走らない (一時コピーに入れていない)。
-  - `*_ground_mobs.py`・`gen_mobs.py`・`gen_items.py`・`gen_weapon_models*.py`・`gen_block_textures.py`・`gen_opening_sounds.py`・`gen_sky_sounds.py`・`gen_titan_sounds.py`・`gen_heart.py`・`gen_titan_model.py` — 採用済みの素材を上書きするので止めてある (`SKYABYSS_ALLOW_REGEN`)。**古い**。
+  - `*_ground_mobs.py`・`gen_weapon_models_v2.py`・`gen_sky_sounds.py` — 採用済みの素材を上書きするので止めてある (`SKYABYSS_ALLOW_REGEN`)。
 - `sys.path` の足し (`for p in ('../lib')` のように文字列の括弧だけだったもの) は、1 字ずつ分かれて効いていなかった。`('../lib',)` に直した (40 本)。
 
 ## ソースの検査 (ゲームを立てずに)
@@ -282,7 +281,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 心臓: `geo/entity/stone_whale_heart_p1..p3.geo.json`、`textures/entity/stone_whale_heart_p*`、`animations/entity/stone_whale_heart.animation.json` | `tools/install/install_heart_v4.py` (形の元は `tools/sources/heart/`。`rough/boss_v4.py` の A 案) | |
 | 射手: `geo/entity/rib_archer.geo.json`、弓の `geo/gear/rib_archer_bow.geo.json` など | 生成の道具 `rough/rib_archer_v4.py` は消した (依存の `mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (履歴は git に残る) |
 | 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | 生成の道具 `rough/captain_v4.py` は消した (`captain_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (履歴は git に残る) |
-| 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `tools/install/install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる。`tools/gen/mobs/gen_mobs.py` の苔這いは古い版なので走らせない |
+| 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `tools/install/install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる |
 | `textures/gui/sky_vignette.png` | `tools/gen/ui/gen_vignette.py` | 同じ物ができる |
 | 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `tools/gen/items/gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
 | 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | 生成の道具 `rough/watcher.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (`rough/watcher_v2.py` も同じ理由で走らない) |
@@ -290,7 +289,9 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 技: `textures/gui/skill/{icons,skills}.png`、`textures/particle/{rune_spark,sky_mote}_*.png`、`particles/*.json`、`sounds/rpg/skill/*.ogg` | `tools/gen/ui/gen_skill_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。アイコンのラフ 3 案と比較画像は `docs/review/skill_icons_roughs/`、採用は `ADOPTED`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `SkillScreen.java` と値をそろえる |
 | 共鳴の炉の画面: `textures/gui/forge/forge.png` (左右の板・つまみ・印・候補の札、2 倍密度) | `tools/gen/items/gen_forge_assets.py` | 同じ物ができる。画面の配置を変えたら `ResonanceForgeScreen.java` と値をそろえる |
 | 旅嚢の画面: `textures/gui/pouch/pouch.png` (画面・枠 3 種・「？」・ボタン 3 状態・輪の札と中心、2 倍密度。装飾の画面と同じ作り。`--preview` で `docs/review/_gallery_pouch/pouch_screen_preview.png`) | `tools/gen/items/gen_pouch_assets.py` | 同じ物ができる。画面の配置を変えたら `PouchLayout.java`・`PouchScreen.java` と値をそろえる。つまみは装飾の画面の素材を使う (`tools/gen/items/gen_accessory_assets.py`) |
-| 語り部・鯨追い: `geo/entity/{storyteller,whale_chaser}.geo.json`、`textures/entity/{storyteller,whale_chaser}.png`、`animations/entity/{storyteller,whale_chaser}.animation.json`、顔 `textures/gui/npc/face/*.png` | 生成の道具 `rough/npc.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 (画面の見本の `rough/npc_ui_mock.py` は残す) | ラフと採用の記録は `docs/review/npc_roughs/` (README の表) |
+| 語り部・鯨追い: `lowpoly/{storyteller,whale_chaser}.json`、`textures/lowpoly/{storyteller,whale_chaser}.png`、`animations/entity/{storyteller,whale_chaser}.animation.json`、顔 `textures/gui/npc/face/{storyteller,whale_chaser}_<表情>.png` | 今の素材が正本 (顔は `tools/gen/mobs/gen_portraits.py` の案 A) | |
+| 係の人・町の人・生き残り・旅の職人 (人ごとの形。NPC v2): `lowpoly/npc_<名>.json` (+ 持ち物 `_prop_*`)、`textures/lowpoly/npc_<名>.png`、`geo/entity/npc_<名>_lowpoly.geo.json`、`animations/entity/npc_<名>.animation.json` | `python -I tools/rough/lowpoly/npc2/build.py <名>` → `python -I tools/install/install_npc2.py <名>` (人の表は `rough/lowpoly/npc2/cast*.py`) | 同じ物ができる (決定的)。町の案内人の体と肖像は `tools/install/install_town_guide_body.py` で都の案内人から写す |
+| 会話の肖像 (NPC v2 の人): `textures/gui/npc/face/<肖像名>_<表情>.png` | `python -I tools/gen/mobs/gen_portraits_v2.py --install <名>` (人のメッシュから描く。背景の色の表 `BG` もここ) | 同じ物ができる。人を足したら必ずこれで描く |
 | 1章の空 雲の目: `textures/environment/sky_eye/{sclera,iris,lid,lid_glow,patch}.png` | `rough/sky_eye.py --install` | ラフ 3 案と夜空の比較は `docs/review/sky_eye_roughs/`、採用は `CHOSEN` (今は b 月蝕の瞳)。`--install` なしなら docs にだけ書く。描画の割合を変えたら `CloudEyeRenderer.java` と値をそろえる |
 | `sounds/sky_ch1/*.ogg` (削られた山頂・雲の目の音) | `tools/gen/sound/gen_chapter_sky_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 巨神での移動: `textures/item/stone_whale_call.png`、`textures/block/titan_waymark_{front,side,base,cap}.png`、`textures/gui/travel/chart.png`、`sounds/titan/travel/*.ogg` | `tools/gen/world/gen_titan_travel_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。ラフ 3 案と比較画像は `docs/review/titan_travel_roughs/`、採用は `ADOPTED_CALL` / `ADOPTED_MARK`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `TravelChartScreen.java` と値をそろえる |
@@ -301,10 +302,9 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 余燼の装備 (戦斧・大鎚・火掻き): `models/item/{ember_war_axe,smith_hammer,thrall_poker}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{ember_war_axe,smith_hammer,thrall_poker,ember_mantle,kindling_charm,ember_lantern,ember_horn,ember_core,ember_shard,spark_dust,cinder_husk}.png` と、アイコンだけの品の `models/item/*.json` | `tools/gen/items/gen_ember_items.py` (ラフは `rough/ember_gear.py`、3 案と比較画像は `docs/review/ember_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/ember_gear/` から入れ直す) | 同じ物ができる。大鎚の持ち方 (`HAMMER_DISPLAY`) は目分量の最初の値 (実機で確認すること) |
 | 4 巨神の立体防具 (岩鯨の甲殻・潮殻の鎧・雷翼の羽衣・余燼の鎧): `geo/armor/<名前>_armor.geo.json`、`textures/armor/<名前>_armor{,_glowmask}.png`、`textures/item/<名前>_{helmet,chestplate,leggings,boots}.png` (32x32、3D の各部位を描いた絵) | `tools/install/install_armor_v2.py` (設計は 16。部品は `rough/armor_v2_parts.py`、4 体の形・素材・飾りは `rough/armor_v2_sets.py`、道具は `rough/armor_kit.py`、アイコンは `rough/armor_v2_icons.py`。重なり 0・光る画素・面の予算を検査して書く。台本 `shots/armor_v2.txt`) | 同じ物ができる (決定的)。バニラ層 `textures/models/armor/*_layer_{1,2}.png` と `models/item/*.json` は触らない |
 | 雷翼の装備 (弓・爪・鉤槍と、アイコンだけの品 7 つ): `models/item/{thunder_wing_bow,thunder_wing_bow_pulling_{0,1,2},raiju_claw,warden_glaive,storm_charm,storm_anklet,storm_eye_feather,thunder_wing_shard,thunder_wing_core,cloudgap_fruit,moth_dust}.json`、`textures/item/3d/*.png`、`textures/item/*.png`、`textures/mob_effect/static_ward.png` | `tools/install/install_storm_gear.py` (ラフは `rough/storm_items.py`、3 案と比較画像は `docs/review/storm_gear_roughs/`。採用は 03 の 12.4節。`--option <品>=<a\|b\|c>`、`--from-sources` で `tools/sources/storm_gear/` から) | 同じ物ができる。弓の持ち方はバニラの `item/bow.json` の値 |
-| 町のクエストの限定の人の絵: `textures/lowpoly/guest_<人>.png`、肖像 `textures/gui/npc/face/guest_<人>_<表情>.png`、動き `animations/entity/town_guest.animation.json`、一覧 `docs/review/town_quests/guests.png` | `tools/gen/mobs/gen_town_guests.py` (係の人の案 A の形と描き方 `rough/lowpoly/fac/attendants.py`・`tools/gen/mobs/gen_attendant_portraits.py` を読むだけ。色の表はこのスクリプトが持つ) | 同じ物ができる (決定的) |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
-`rough/` のそのほか (`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。
+`rough/` の `boss.py`、`stone_whale*.py`、`weapons.py`、`items_blocks*.py` は、今の入れる道具が部品として読む (自分の出力先の `docs/roughs/` は片付けてある)。
 
 ## 作り直しの元データ (`tools/sources/`)
 
@@ -336,17 +336,12 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 - `tools/gen/mobs/gen_anemone_art.py`: 光るイソギンチャクの品の絵 (`item_{a,b,c}`) は生きているが、灯りの台の絵 (`pedestal_*`・`anemone_bloom`) は消えた。台の部分を外す。
 - `tools/shots/whale_fix2.txt`・`whale_scale.txt`・`whale_board.txt`・`storm_scale.txt`・`storm_scale2.txt`: 室内の場所 (東の翼・肋・眼・回路・炉など) へ飛ぶ行があれば外す。
 
-## 止めてあるもの (引退)
+## 止めてあるもの
 
 | スクリプト | 上書きしてしまうもの | 代わり |
 |---|---|---|
-| `tools/gen/items/gen_items.py` | `textures/item/*.png` 16 枚と `textures/models/armor/*` | `rough/items_blocks_32.py` |
-| `tools/gen/items/gen_block_textures.py` | `textures/block/*.png` と `sky_key_fragment.png` | `rough/items_blocks_32.py` |
-| `tools/gen/mobs/gen_mobs.py` | 番兵・射手・苔這い・顎・番兵長の geo / png / glowmask / animation | 上の表 |
-| `tools/gen/world/gen_titan_model.py` | 岩鯨の近景 geo / png / glowmask / animation | `tools/install/install_stone_whale.py` |
-| `tools/gen/world/gen_heart.py` | 心臓の animation (古い骨名に戻る) | `tools/install/install_heart_v4.py` |
-| `tools/gen/items/gen_weapon_models.py` (v1) | 武器 3 本のモデルを古い押し出しモデルに戻し、途中で止まる | `tools/gen/items/gen_weapon_models_v2.py` |
-| `tools/gen/sound/gen_sky_sounds.py`、`tools/gen/sound/gen_titan_sounds.py` | `sounds/sky/*.ogg`、`sounds/titan/*.ogg` | なし (今の src が正本) |
+| `tools/gen/sound/gen_sky_sounds.py` (音の部品として多くの生成が読む。単体で流すと) | `sounds/sky/*.ogg` | なし (今の src が正本) |
+| `tools/gen/items/gen_gear_freedom_assets.py` の芯とルーンの絵 (欠片の絵はいつも書く) | あとで描き直して採用した芯・ルーンの絵 | なし (今の src が正本) |
 
 `tools/gen/items/gen_weapon_models_v2.py` も止めてある。武器 3 本の `models/item/{whalebone_greatsword,captain_pike,waterway_fang}.json` と
 パレット `textures/item/3d/*.png` (16x16) の生成元で、`SKYABYSS_ALLOW_REGEN=1` を付ければ今と同じ物ができる。

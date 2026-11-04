@@ -1,0 +1,90 @@
+# 粉と炉 (2026-11-05 の粉と炉の頁): 炉のつまみ (強化・粉・再鍛造・交換)、粉を差す・合わせる、再鍛造の中の抽出、町の鍛冶師の粉だけの画面、粉の技の見え方
+# ./gradlew runShots -Pscript=tools/shots/powder_forge.txt -PshotsName=powder_forge
+# 画面の座標 (1280x720・guiscale 3): 左上 (47, 37)。つまみ 強化 (229,48)・粉 (284,48)・再鍛造 (321,48)・交換 (358,48)
+world shots flat
+size 1280 720
+timeout 500
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 30
+cmd clear @p
+cmd item replace entity @p weapon.mainhand with skyabyss:whalebone_greatsword
+cmd item replace entity @p weapon.offhand with skyabyss:socket_shard_stone[minecraft:custom_data={powder_tier:4}] 4
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 50
+
+# 1. 炉を開く (強化のつまみ) → 粉のつまみ
+cmd skyabyss_forge open
+wait 20
+click 284 48
+wait 10
+shot pf_1_powder_tab
+# 2. 岩の粉 IV を差す (地割れが働く)
+click 269 169
+wait 15
+shot pf_2_inserted
+# 3. 残り三つを合わせる (IV ×3 → V)
+click 337 169
+wait 15
+shot pf_3_combined
+# 4. 再鍛造のつまみ (再鍛造・抽出・刻印の頁)
+click 321 48
+wait 10
+shot pf_4_reforge
+click 303 64
+wait 10
+shot pf_5_extract
+click 229 48
+wait 10
+shot pf_6_enhance
+close
+wait 10
+
+# 5. 町の鍛冶師の粉だけの画面 (弓と風の粉)
+cmd clear @p
+cmd item replace entity @p weapon.mainhand with skyabyss:whale_bow
+cmd item replace entity @p weapon.offhand with skyabyss:socket_shard_wind[minecraft:custom_data={powder_tier:2}] 3
+wait 30
+cmd skyabyss_forge powder
+wait 20
+shot pf_7_powder_only
+click 269 169
+wait 15
+shot pf_8_bow_wind
+close
+wait 10
+
+# 6. 粉の技: 岩 IV の大剣で 4 回当てると地割れ (粉の色の数字・まわりの敵も)
+close
+cmd skyabyss cinematic stop
+cmd clear @p
+cmd item replace entity @p weapon.mainhand with skyabyss:whalebone_greatsword[skyabyss:gear_extras={sockets:2,gems:[{kind:"shard",arg:"stone",milli:4}]}]
+cmd tp @s ~ ~ ~ 0 20
+wait 10
+cmd execute at @s run summon skyabyss:moss_crawler ^ ^ ^2.4 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:moss_crawler ^1.5 ^ ^3.6 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:moss_crawler ^-1.5 ^ ^3.6 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+wait 30
+attack
+wait 25
+attack
+wait 25
+attack
+wait 3
+shot pf_8b_third_hit
+wait 22
+attack
+wait 3
+shot pf_9_quake
+wait 4
+shot pf_10_quake_late

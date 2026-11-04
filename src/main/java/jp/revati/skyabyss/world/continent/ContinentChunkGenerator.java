@@ -32,6 +32,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 // 上の数段を土地ごとの土 (草・砂・石・雪・赤い粘土・玄武岩) にし、海の高さまで水を張る。
 // layout.json の道を土の道にする。洞窟は掘らない。マインクラフトの構造物 (村・砦など) は出さない。木・草・鉱石は生物群系のとおりに生える (地上の溶岩の池は抜く)
 public final class ContinentChunkGenerator extends ChunkGenerator {
+    // 地形や道を変えたら、前の版の世界は地上を作り直す (upgrade/ContinentRegen の VERSION を上げる)
     public static final MapCodec<ContinentChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(g -> g.biomeSource)).apply(i, i.stable(ContinentChunkGenerator::new)));
 
@@ -152,32 +153,89 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
             default -> {
                 // 草の土地 (野・林・谷・丘陵・針葉樹・浜の奥)
                 boolean rocky = steep || biome == ContinentBiomes.WINDSWEPT_HILLS && slope >= 2 && n > 0.2;
-                if (depth < 4 && !rocky) {
+                // 中くらいの坂の、岩の出た筋 (2026-11-03 の声「地形に作り込み」。丘の肌を草一色にしない)
+                boolean scree = !rocky && !underwater && slope == 2 && ContinentMap.value(x / 5.0, z / 5.0, 0x63E1) > 0.5;
+                if (depth < 4 && !rocky && !scree) {
                     if (underwater) {
                         return depth < 2 ? Blocks.SAND.defaultBlockState() : Blocks.DIRT.defaultBlockState();
                     }
                     if (depth == 0) {
-                        return biome == ContinentBiomes.TAIGA && n > 0.5 ? Blocks.PODZOL.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState();
+                        return grassTop(x, z, biome, n);
                     }
                     return Blocks.DIRT.defaultBlockState();
                 }
-                // 崖の面 (2026-10-26): 石一色にせず、安山岩の筋と、林の崖には苔のまだら
-                if (rocky && depth < 2) {
+                if (scree && depth < 2) {
+                    double h = ContinentMap.hash(x, y, z ^ 0x2D93);
+                    return depth == 0 && h > 0.35 ? Blocks.GRAVEL.defaultBlockState() : h < -0.4 ? Blocks.ANDESITE.defaultBlockState() : STONE;
+                }
+                // 崖の面 (2026-10-26): 石一色にせず、林の崖には苔のまだら。2026-11-03 から地層: 3 段ごとの横の層 (石・安山岩・凝灰岩・閃緑岩)。
+                // 建物の置き場の見分け (SiteJob.naturalGround) が自然と見る石だけを使う (丸石を混ぜると、一章の骨の置き場が「人が建てた所」と見て動き続け、建たなかった)。
+                // 層の高さは場所でゆっくりずれ、崖の上の縁 (depth 0) は苔の丸石か草の根の土
+                if (rocky && depth < 3) {
                     double h = ContinentMap.hash(x, y, z ^ 0x51C7);
-                    double band = ContinentMap.value(y / 2.5, (x + z) / 11.0, 0x7A31);
-                    if ((biome == ContinentBiomes.FOREST || biome == ContinentBiomes.BIRCH_FOREST) && h > 0.55 && depth == 0) {
+                    if ((biome == ContinentBiomes.FOREST || biome == ContinentBiomes.BIRCH_FOREST || biome == ContinentBiomes.FLOWER_FOREST) && h > 0.55 && depth == 0) {
                         return Blocks.MOSS_BLOCK.defaultBlockState();
                     }
-                    if (band > 0.35) {
-                        return Blocks.ANDESITE.defaultBlockState();
-                    }
-                    if (band < -0.5) {
-                        return Blocks.TUFF.defaultBlockState();
+                    int layer = Math.floorDiv(y + (int) Math.floor(3.0 * ContinentMap.value(x / 23.0, z / 23.0, 0x5A11)), 3);
+                    switch (Math.floorMod(layer * 7 + 3, 6)) {
+                        case 0, 3 -> {
+                            return h > 0.8 ? Blocks.ANDESITE.defaultBlockState() : STONE;
+                        }
+                        case 1 -> {
+                            return Blocks.ANDESITE.defaultBlockState();
+                        }
+                        case 2 -> {
+                            return h > 0.5 ? Blocks.STONE.defaultBlockState() : Blocks.TUFF.defaultBlockState();
+                        }
+                        case 4 -> {
+                            return depth == 0 && h > 0.2 ? Blocks.MOSSY_COBBLESTONE.defaultBlockState() : STONE;
+                        }
+                        default -> {
+                            return h > 0.3 ? Blocks.ANDESITE.defaultBlockState() : Blocks.DIORITE.defaultBlockState();
+                        }
                     }
                 }
             }
         }
         return y < 0 ? DEEPSLATE : STONE;
+    }
+
+    // 草の土地の上面: 草を土台に、土地ごとのまだら (2026-11-03 の声「地形に作り込み」)。
+    // 林は落ち葉の土 (ポドゾル) と苔、針葉樹は落ち葉の土と荒れた土、サバンナと平原は乾いた荒れ土。野 (花の丘) は草のまま
+    static BlockState grassTop(int x, int z, int biome, double n) {
+        double p = ContinentMap.value(x / 14.0, z / 14.0, 0x7B3D);
+        double q = ContinentMap.hash(x, z, 0x1F2B);
+        switch (biome) {
+            case ContinentBiomes.FOREST, ContinentBiomes.BIRCH_FOREST, ContinentBiomes.FLOWER_FOREST -> {
+                if (p > 0.5 && q > -0.3) {
+                    return Blocks.PODZOL.defaultBlockState();
+                }
+                if (p < -0.62 && q > 0.1) {
+                    return Blocks.MOSS_BLOCK.defaultBlockState();
+                }
+            }
+            case ContinentBiomes.TAIGA, ContinentBiomes.PINE_TAIGA -> {
+                if (n > 0.35 || p > 0.55 && q > 0) {
+                    return Blocks.PODZOL.defaultBlockState();
+                }
+                if (p < -0.6 && q > 0.2) {
+                    return Blocks.COARSE_DIRT.defaultBlockState();
+                }
+            }
+            case ContinentBiomes.SAVANNA -> {
+                if (p > 0.35 && q > -0.2) {
+                    return Blocks.COARSE_DIRT.defaultBlockState();
+                }
+            }
+            case ContinentBiomes.PLAINS, ContinentBiomes.WINDSWEPT_HILLS -> {
+                if (p > 0.68 && q > 0.1) {
+                    return Blocks.COARSE_DIRT.defaultBlockState();
+                }
+            }
+            default -> {
+            }
+        }
+        return Blocks.GRASS_BLOCK.defaultBlockState();
     }
 
     // 上面の Y を (x0-1..x0+16, z0-1..z0+16) の 18 x 18 で
@@ -221,6 +279,10 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     int z = z0 + dz;
                     int top = Math.min(t[(dz + 1) * 18 + dx + 1], maxY - 1);
                     int sl = slope(t, dx, dz);
+                    // 段丘の土地の段差 2 と、道の切り通し (道の縁から 6 以内の段差 2) は、土の壁ではなく岩の面にする (2026-11-03)
+                    if (sl == 2 && (map.terraceAt(x, z) > 0.25 || !roads.isEmpty() && roadDistance(roads, x, z) < ROAD_EDGE + 6)) {
+                        sl = 3;
+                    }
                     int biome = map.biome(x, z);
                     int upto = Math.max(top, SEA_LEVEL - 1);
                     BlockState road = road(roads, x, z);

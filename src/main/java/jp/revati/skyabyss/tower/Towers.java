@@ -157,7 +157,7 @@ public final class Towers {
     // 挑戦が終わった (全滅・時間切れ): 全員を都の受付へ
     static void fail(TowerRun run, String why) {
         for (ServerPlayer p : run.online()) {
-            Notice.narrate(p, "message.skyabyss.tower." + why);
+            Notice.hint(p, "message.skyabyss.tower." + why);
             Tasks.later(60, () -> {
                 if (!p.hasDisconnected() && TowerWorld.in(p)) {
                     if (!p.isAlive()) {
@@ -213,11 +213,12 @@ public final class Towers {
             }
             Notice.place(p, Component.translatable("message.skyabyss.tower.clear_title"), Component.translatable("message.skyabyss.tower.clear_sub", time(ticks)));
             p.playNotifySound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.MASTER, 1f, 1f);
-            Notice.narrate(p, "message.skyabyss.tower.cleared", time(ticks));
+            Notice.gain(p, "message.skyabyss.tower.cleared", time(ticks));
             if (fastest) {
                 Notice.gain(p, "message.skyabyss.tower.record", run.members.size());
             }
             reward(p, run);
+            wagerMark(p, run);
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
             Notice.hint(p, "message.skyabyss.tower.clear_back");
         }
@@ -248,6 +249,45 @@ public final class Towers {
         jp.revati.skyabyss.facility.Coins.give(p, jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
         Notice.gain(p, "message.skyabyss.tower.reward", shards,
                 jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
+    }
+
+    // 重ね賭けの印 (2026-11-05 のダンジョンの頁 2-2): 賭けを三つ付けて越えた週は、その週に一度だけ塔の箱を必ず (15% の抽選と天井とは別)。
+    // 記録の板に名前、印の週の数で称号 (tower_wager3 = 1 週・tower_wager3_10 = 10 週)
+    public static final String MARK_WEEK = "skyabyss_tower_mark_week";
+    public static final String MARK_WEEKS = "skyabyss_tower_mark_weeks";
+
+    static void wagerMark(ServerPlayer p, TowerRun run) {
+        if (run == null || run.wagers.size() < TowerWagers.MAX_PICK) {
+            return;
+        }
+        var d = p.getPersistentData();
+        String week = TowerWagers.week().toString();
+        if (week.equals(d.getString(MARK_WEEK))) {
+            return;
+        }
+        d.putString(MARK_WEEK, week);
+        d.putInt(MARK_WEEKS, d.getInt(MARK_WEEKS) + 1);
+        if (run.server != null) {
+            TowerRecords.get(run.server).addMark(p.getGameProfile().getName());
+        }
+        net.minecraft.world.item.Item box = jp.revati.skyabyss.loot.box.LootBoxSetup.item(jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower"));
+        if (box != null) {
+            jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(box));
+        }
+        Notice.unlock(p, "message.skyabyss.tower.mark", d.getInt(MARK_WEEKS));
+    }
+
+    // 称号の印 (rebirth/Rebirths.facts): 重ね賭けの印の週の数
+    public static java.util.Set<String> marks(ServerPlayer p) {
+        int n = p.getPersistentData().getInt(MARK_WEEKS);
+        java.util.Set<String> out = new java.util.HashSet<>();
+        if (n >= 1) {
+            out.add("tower_wager3");
+        }
+        if (n >= 10) {
+            out.add("tower_wager3_10");
+        }
+        return out;
     }
 
     // 塔の箱を引く (force = 必ず)。出たら true
@@ -394,7 +434,7 @@ public final class Towers {
             if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                 Vec3 e = run.markCenter("entry");
                 p.teleportTo(run.level(), e.x, e.y, e.z, 180f, 0f);
-                Notice.narrate(p, "message.skyabyss.tower.woke");
+                Notice.hint(p, "message.skyabyss.tower.woke");
             }
         });
     }

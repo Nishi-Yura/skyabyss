@@ -120,7 +120,8 @@ public final class CircuitSelfTest {
             }
             check(f, run.marks == 2, "defeating the circuit foes did not clear the task");
 
-            // 運ぶ: 受け取り、落とし、拾い直して届ける
+            // 運ぶ: 受け取り、落とし、拾い直して届ける (早越えの連なりは下の landTasks で確かめるので、ここでは 0 から)
+            run.streak = 0;
             run.offers.clear();
             run.bonus = CircuitRun.Bonus.NONE;
             run.kind = CircuitRun.Kind.CARRY;
@@ -146,6 +147,7 @@ public final class CircuitSelfTest {
             discard(level, run);
 
             // 壊す: 着くと杭が立つ。打つと割れ目が広がり、消えただけでは越えず (戻ると立て直す)、壊すと越える
+            run.streak = 0;
             run.offers.clear();
             run.bonus = CircuitRun.Bonus.NONE;
             run.kind = CircuitRun.Kind.BREAK;
@@ -196,8 +198,30 @@ public final class CircuitSelfTest {
             run.bonus = CircuitRun.Bonus.TIME;
             Circuits.complete(level, run);
             check(f, run.marks == marks0 + 3 && run.end == end0 + Circuits.TIME_BONUS, "a blue pillar did not add time");
+            // 紫の柱: 選ぶと呪いが重なり、敵の体力と攻撃が上がる (巡り路の終わりまで)
+            CircuitRun.Offer o0 = run.offers.get(0);
+            run.offers.set(0, new CircuitRun.Offer(o0.kind(), o0.spot(), o0.place(), o0.spot2(), o0.place2(), CircuitRun.Bonus.CURSE, o0.poi(), o0.poi2()));
+            // 前の柱を選んだときに紫が出ていれば呪いが重なっているので、ここから数える
+            run.curses = 0;
+            Circuits.adopt(level, run, 0);
+            net.minecraft.world.entity.Mob cursed = net.minecraft.world.entity.EntityType.ZOMBIE.create(level);
+            if (cursed != null) {
+                double hp0 = cursed.getMaxHealth();
+                Circuits.curse(cursed, run);
+                check(f, run.curses() == 1 && Math.abs(cursed.getMaxHealth() - hp0 * 1.25) < 0.01 && cursed.getHealth() == cursed.getMaxHealth(),
+                        "a purple pillar did not curse the foes (" + run.curses() + ", " + cursed.getMaxHealth() + ")");
+                cursed.discard();
+            }
+            run.curses = 0;
+            run.bonus = CircuitRun.Bonus.NONE;
             run.marks = marks0;
             discard(level, run);
+
+            // 土地の課題と早越えの連なり (2026-11-05 のダンジョンの頁 3-1・3-2)
+            landTasks(f, level, run, p);
+            run.marks = marks0;
+            run.streak = 0;
+            run.curses = 0;
 
             // 報い: 印 3 × 25 鐘銭、一日の回数
             int before = Coins.count(p);
@@ -205,6 +229,8 @@ public final class CircuitSelfTest {
             check(f, Circuits.runOf(p) == null, "a finished circuit still holds its walker");
             check(f, Coins.count(p) - before == 3 * Circuits.COINS[ContinentMap.WHALE], "circuit coins are wrong: " + (Coins.count(p) - before));
             check(f, Circuits.runsToday(p) == 1, "the circuit reward was not counted for today");
+            // 野営地の景品の表から、印 1 つにつき 1 回引く (CircuitCamps)
+            check(f, Circuits.LAST_PULLS.getOrDefault(p.getUUID(), -1) == 3, "the reward did not pull once per mark (" + Circuits.LAST_PULLS.get(p.getUUID()) + ")");
             check(f, RegionPoints.week(p, ContinentMap.WHALE) == 3 && RegionPoints.fame(p, ContinentMap.WHALE) == 3, "circuit marks did not count as region points");
 
             // 一日 3 回まで
@@ -265,6 +291,86 @@ public final class CircuitSelfTest {
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST circuit FAILED: {}", m));
         }
+    }
+
+    static void landTasks(List<String> f, ServerLevel level, CircuitRun run, FakePlayer p) {
+        check(f, Circuits.landKind(ContinentMap.WHALE) == CircuitRun.Kind.DIG && Circuits.landKind(ContinentMap.TIDE) == CircuitRun.Kind.TIDE
+                && Circuits.landKind(ContinentMap.STORM) == CircuitRun.Kind.CHARGE && Circuits.landKind(ContinentMap.EMBER) == CircuitRun.Kind.FIRE,
+                "each land does not have its own circuit task");
+        // 潮待ち: はじめ満ち 10 秒、引き 20 秒・満ち 12 秒
+        run.cycleStart = 0;
+        check(f, !CircuitLand.ebb(run, 100) && CircuitLand.ebb(run, 250) && !CircuitLand.ebb(run, 700) && CircuitLand.ebb(run, 860), "the tide cycle is wrong");
+        // 早越え: 三つ続くと +1、五つで +2 (そこで数え直し)
+        int m0 = run.marks;
+        run.streak = 0;
+        for (int i = 0; i < 5; i++) {
+            if (run.choosing()) {
+                Circuits.adopt(level, run, 0);
+            }
+            run.bonus = CircuitRun.Bonus.NONE;
+            run.taskStart = level.getGameTime();
+            Circuits.complete(level, run);
+        }
+        check(f, run.marks == m0 + 5 + 1 + 2 && run.streak == 0, "quick clears did not add streak marks (" + (run.marks - m0) + ")");
+        run.taskStart = level.getGameTime() - Circuits.TASK_LIMIT;
+        if (run.choosing()) {
+            Circuits.adopt(level, run, 0);
+        }
+        run.bonus = CircuitRun.Bonus.NONE;
+        run.taskStart = level.getGameTime() - Circuits.TASK_LIMIT;
+        Circuits.complete(level, run);
+        check(f, run.streak == 0, "a slow clear did not reset the streak");
+        discard(level, run);
+        // 掘り出す: 着くと光る所が三つ、しゃがみ続けると骨、三つで越える
+        if (run.choosing()) {
+            Circuits.adopt(level, run, 0);
+        }
+        run.bonus = CircuitRun.Bonus.NONE;
+        run.kind = CircuitRun.Kind.DIG;
+        run.phase = 0;
+        run.progress = 0;
+        run.need = 0;
+        run.points.clear();
+        run.pointProgress.clear();
+        run.spot = p.blockPosition();
+        int m1 = run.marks;
+        long now = level.getGameTime();
+        CircuitLand.stepDig(level, run, List.of(p), now);
+        check(f, run.phase == 1 && run.points.size() == CircuitLand.DIG_POINTS, "arriving did not mark three dig spots");
+        p.setShiftKeyDown(true);
+        for (int i = 0; i < CircuitLand.DIG_POINTS && run.kind == CircuitRun.Kind.DIG; i++) {
+            BlockPos at = run.points.get(i);
+            p.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+            for (int k = 0; k < CircuitLand.DIG_STEPS && run.kind == CircuitRun.Kind.DIG; k++) {
+                CircuitLand.stepDig(level, run, List.of(p), now);
+            }
+        }
+        p.setShiftKeyDown(false);
+        check(f, run.marks == m1 + 1, "digging three bones did not clear the task");
+        discard(level, run);
+        // 雷を集める: 結晶が三つ立ち、三回ずつ当てると満ちて越える。終わると片づく
+        if (run.choosing()) {
+            Circuits.adopt(level, run, 0);
+        }
+        run.bonus = CircuitRun.Bonus.NONE;
+        run.kind = CircuitRun.Kind.CHARGE;
+        run.phase = 0;
+        run.progress = 0;
+        run.spot = p.blockPosition();
+        int m2 = run.marks;
+        CircuitLand.stepCharge(level, run, List.of(p), now);
+        List<BlockPos> crystals = new ArrayList<>(run.placed);
+        check(f, run.phase == 1 && crystals.size() == CircuitLand.CRYSTALS && crystals.stream().allMatch(c -> level.getBlockState(c).is(net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK)),
+                "arriving did not raise three crystals (" + crystals.size() + ")");
+        for (BlockPos c : crystals) {
+            for (int k = 0; k < CircuitLand.CRYSTAL_HITS; k++) {
+                CircuitLand.strike(level, run, c);
+            }
+        }
+        CircuitLand.stepCharge(level, run, List.of(p), now);
+        check(f, run.marks == m2 + 1, "filling the crystals did not clear the task");
+        check(f, crystals.stream().allMatch(c -> level.getBlockState(c).isAir()), "the crystals were not cleared away");
+        discard(level, run);
     }
 
     static void discard(ServerLevel level, CircuitRun run) {

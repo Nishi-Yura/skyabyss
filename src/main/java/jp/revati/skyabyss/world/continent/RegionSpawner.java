@@ -49,6 +49,18 @@ public final class RegionSpawner {
     public static final double KEEP = 96;
     static final String TAG = jp.revati.skyabyss.guide.SiteSpawner.TAG;
     static final String REGION_TAG = "skyabyss_region_mob";
+    // 夜の手ごわい群れ (docs/design/44 の 2 章。2026-11-04 の表 5-2「道中に少し緊張を」): 夜に湧かせるとき PACK_CHANCE / 1000 で、
+    // ふつうの敵 (体力 PACK_MAX_HP 未満) を PACK_MIN〜PACK_MAX 体の群れにする。一体は頭 (体力 ×PACK_LEAD_HEALTH、名札「〇〇の群れの頭」が遠くからも見える)。
+    // 見えたら避けるか戦うか選べる。初めて群れが湧いた人に一度だけ手がかり
+    public static final int PACK_CHANCE = 120;
+    public static final int PACK_MIN = 3;
+    public static final int PACK_MAX = 5;
+    public static final double PACK_LEAD_HEALTH = 1.5;
+    public static final double PACK_MAX_HP = 100;
+    public static final String PACK_TAG = "skyabyss_pack";
+    public static final String PACK_LEAD_TAG = "skyabyss_pack_lead";
+    static final String PACK_TIP = "skyabyss_pack_tip";
+    static final ResourceLocation PACK_HEALTH = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "pack_lead_health");
 
     public enum Time { DAY, NIGHT, ANY }
 
@@ -235,14 +247,45 @@ public final class RegionSpawner {
             return 0;
         }
         int n = e.min() + (e.max() > e.min() ? level.random.nextInt(e.max() - e.min() + 1) : 0);
+        boolean pack = night(level) && level.random.nextInt(1000) < PACK_CHANCE;
+        boolean packed = false;
         int made = 0;
         for (int i = 0; i < n; i++) {
             BlockPos p = i == 0 ? at : ground(level, x + level.random.nextInt(5) - 2, z + level.random.nextInt(5) - 2);
-            if (p != null && spawn(level, e.entity(), p, player) != null) {
-                made++;
+            Mob m = p == null ? null : spawn(level, e.entity(), p, player);
+            if (m == null) {
+                continue;
+            }
+            made++;
+            // 一体目で群れにできるか決める (大物は群れにしない)。群れなら頭にして、数を群れの数にする
+            if (i == 0 && pack && m.getMaxHealth() < PACK_MAX_HP) {
+                lead(m);
+                m.addTag(PACK_TAG);
+                packed = true;
+                n = PACK_MIN + level.random.nextInt(PACK_MAX - PACK_MIN + 1);
+                if (!player.getPersistentData().getBoolean(PACK_TIP)) {
+                    player.getPersistentData().putBoolean(PACK_TIP, true);
+                    jp.revati.skyabyss.notice.Notice.hint(player, "message.skyabyss.pack.first");
+                }
+            } else if (packed) {
+                m.addTag(PACK_TAG);
             }
         }
         return made;
+    }
+
+    // 群れの頭にする: 体力 ×PACK_LEAD_HEALTH と、遠くからも見える名札
+    public static void lead(Mob m) {
+        net.minecraft.world.entity.ai.attributes.AttributeInstance hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        if (hp != null && !hp.hasModifier(PACK_HEALTH)) {
+            hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(PACK_HEALTH, PACK_LEAD_HEALTH - 1,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
+        m.setHealth(m.getMaxHealth());
+        m.addTag(PACK_LEAD_TAG);
+        m.setCustomName(net.minecraft.network.chat.Component.translatable("entity.skyabyss.pack_leader", m.getType().getDescription())
+                .withStyle(net.minecraft.ChatFormatting.GOLD));
+        m.setCustomNameVisible(true);
     }
 
     @Nullable

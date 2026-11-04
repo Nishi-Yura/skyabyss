@@ -42,7 +42,7 @@ public final class GearFreedomSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST gear freedom PASSED (sockets roll, extract/imprint, socket/unsocket, rune cap, generations, persistence, loot)");
+            SkyAbyss.LOGGER.info("SELFTEST gear freedom PASSED (sockets by tier incl. uncommon and bows, extract/imprint, free unsocket, combine, powder arts, armor guard, rune cap, generations, persistence, loot)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST gear freedom FAILED: {}", m));
         }
@@ -52,6 +52,89 @@ public final class GearFreedomSelfTest {
         if (!ok) {
             f.add(what);
         }
+    }
+
+    private static void powderArts(List<String> f, ServerLevel level, FakePlayer p) {
+        check(f, PowderArts.strength(4) == 1 && PowderArts.strength(8) == 1.5 && PowderArts.strength(12) == 2 && PowderArts.strength(18) == 2,
+                "powder art strength should be x1 / x1.5 / x2");
+        double px = p.getX(), py = p.getY(), pz = p.getZ();
+        List<net.minecraft.world.entity.monster.Zombie> zs = new ArrayList<>();
+        try {
+            net.minecraft.world.entity.monster.Zombie a = zombie(level, px + 3, py, pz, zs);
+            net.minecraft.world.entity.monster.Zombie b = zombie(level, px + 4.5, py, pz, zs);
+            // 岩 IV の武器: 4 回目の当たりで地割れ (当てた敵のまわりの敵にも傷)
+            ItemStack sword = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 2);
+            ForgeRules.insertGem(sword, Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_STONE.get()), 4));
+            p.setItemInHand(InteractionHand.MAIN_HAND, sword);
+            PowderArts.reset(p);
+            check(f, PowderArts.weaponArts(p).getOrDefault(Element.STONE, 0) == 4, "a tier IV stone powder should wake the quake");
+            for (int i = 0; i < 3; i++) {
+                PowderArts.onWeaponHit(p, a, 4f);
+            }
+            check(f, b.getHealth() == b.getMaxHealth(), "the quake fired before the 4th hit");
+            PowderArts.onWeaponHit(p, a, 4f);
+            check(f, b.getHealth() < b.getMaxHealth() && PowderArts.hitCount(p) == 0, "the 4th hit did not fire the quake on the nearby foe");
+            // 骨の呪い: 受ける傷 +12%
+            heal(a);
+            PowderArts.fireWeapon(Element.BONE, p, a, 4f, 1);
+            a.invulnerableTime = 0;
+            a.hurt(level.damageSources().generic(), 5f);
+            check(f, PowderArts.cursed(a) && Math.abs(a.getMaxHealth() - a.getHealth() - 5.6f) < 0.01, "the bone curse should add 12% damage: " + (a.getMaxHealth() - a.getHealth()));
+            // 熾の印: 燃え尽きると、まわりの敵へ爆ぜる
+            heal(b);
+            PowderArts.fireWeapon(Element.ASH, p, a, 4f, 1);
+            check(f, PowderArts.branded(a), "the ember brand was not set");
+            PowderArts.burstNow(a);
+            check(f, !PowderArts.branded(a) && b.getHealth() < b.getMaxHealth(), "the ember brand did not burst on the nearby foe");
+            // 引き潮: 与えた傷の 20% を癒す (そばに人がいなければ自分だけ)
+            p.setHealth(p.getMaxHealth() - 6);
+            float hp = p.getHealth();
+            PowderArts.fireWeapon(Element.TIDE, p, a, 10f, 1);
+            check(f, Math.abs(p.getHealth() - hp - 2f) < 0.01, "the ebb should heal 20% of the damage: " + (p.getHealth() - hp));
+            // 防具: 岩肌で受ける傷 −30%、8 秒に一度
+            ItemStack chest = rolled(ModItems.STONE_WHALE_CHESTPLATE.get(), 2);
+            ForgeRules.insertGem(chest, Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_STONE.get()), 4));
+            p.setItemSlot(EquipmentSlot.CHEST, chest);
+            check(f, PowderArts.armorArts(p).containsKey(Element.STONE), "a tier IV stone powder in armor should wake stoneskin");
+            PowderArts.onArmorHit(p, a, 2f);
+            check(f, PowderArts.skinned(p), "stoneskin did not start");
+            p.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+            p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            PowderArts.reset(p);
+            // 落ちる粉の段: 丘陵 I・浜 II・高地 III・荒野 IV、深淵 V
+            check(f, PowderArts.DROP_TIER[2] == 1 && PowderArts.DROP_TIER[3] == 2 && PowderArts.DROP_TIER[4] == 3 && PowderArts.DROP_TIER[5] == 4 && PowderArts.ABYSS_TIER == 5,
+                    "land powder tiers are wrong");
+            // 防具の強化: 1 段 1 部位 −0.4%、四部位 +10 で −16%
+            EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+            net.minecraft.world.item.Item[] pieces = {ModItems.STONE_WHALE_HELMET.get(), ModItems.STONE_WHALE_CHESTPLATE.get(), ModItems.STONE_WHALE_LEGGINGS.get(), ModItems.STONE_WHALE_BOOTS.get()};
+            for (int i = 0; i < 4; i++) {
+                ItemStack piece = new ItemStack(pieces[i]);
+                piece.set(ModDataComponents.ENHANCE.get(), 10);
+                p.setItemSlot(slots[i], piece);
+            }
+            check(f, Math.abs(jp.revati.skyabyss.item.GearEvents.enhanceGuard(p) - 0.16) < 1e-9, "four +10 armor pieces should cut 16%: " + jp.revati.skyabyss.item.GearEvents.enhanceGuard(p));
+            for (EquipmentSlot slot : slots) {
+                p.setItemSlot(slot, ItemStack.EMPTY);
+            }
+        } finally {
+            zs.forEach(net.minecraft.world.entity.Entity::discard);
+        }
+    }
+
+    private static net.minecraft.world.entity.monster.Zombie zombie(ServerLevel level, double x, double y, double z, List<net.minecraft.world.entity.monster.Zombie> zs) {
+        net.minecraft.world.entity.monster.Zombie zb = new net.minecraft.world.entity.monster.Zombie(level);
+        zb.moveTo(x, y, z, 0, 0);
+        zb.setNoAi(true);
+        zb.setSilent(true);
+        zb.setPersistenceRequired();
+        level.addFreshEntity(zb);
+        zs.add(zb);
+        return zb;
+    }
+
+    private static void heal(net.minecraft.world.entity.LivingEntity e) {
+        e.setHealth(e.getMaxHealth());
+        e.invulnerableTime = 0;
     }
 
     private static ItemStack rolled(net.minecraft.world.item.Item item, int sockets) {
@@ -67,33 +150,29 @@ public final class GearFreedomSelfTest {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "freedom_test"));
         jp.revati.skyabyss.rpg.Growth.get(p).level = jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL;
 
-        // ---- 穴の抽選と、古い装備の移行
-        int[] rare = new int[3];
-        int[] legend = new int[3];
-        int[] epic = new int[3];
-        int[] artifact = new int[3];
-        for (int i = 0; i < 6000; i++) {
-            rare[GearFreedom.rollSockets(GearTier.RARE, random)]++;
-            legend[GearFreedom.rollSockets(GearTier.HEROIC, random)]++;
-            epic[GearFreedom.rollSockets(GearTier.EPIC, random)]++;
-            artifact[GearFreedom.rollSockets(GearTier.ARTIFACT, random)]++;
-        }
-        // 階級が上がるほど穴が多い (0 個の割合が減り、2 個の割合が増える)
-        // レアは穴 1 つまで (階級の上限 GearTier.maxSockets。2 の目は 1 になる)
-        check(f, rare[0] > epic[0] && epic[0] > legend[0] && legend[0] > artifact[0] && rare[2] == 0 && epic[2] < legend[2] && legend[2] < artifact[2],
-                "socket odds do not rise with the tier " + java.util.Arrays.toString(rare) + java.util.Arrays.toString(epic) + java.util.Arrays.toString(legend) + java.util.Arrays.toString(artifact));
-        check(f, Math.abs(rare[0] / 6000.0 - 0.50) < 0.03 && rare[2] == 0, "rare socket odds off " + java.util.Arrays.toString(rare));
-        // 上限: コモン・アンコモン 0 / レア 1 / エピック 2 / ヒロイック・アーティファクト 3
-        check(f, GearTier.COMMON.maxSockets() == 0 && GearTier.UNCOMMON.maxSockets() == 0 && GearTier.RARE.maxSockets() == 1 && GearTier.EPIC.maxSockets() == 2
-                && GearTier.HEROIC.maxSockets() == 3 && GearTier.ARTIFACT.maxSockets() == 3, "socket caps per tier are wrong");
-        check(f, Math.abs(legend[0] / 6000.0 - 0.30) < 0.03 && Math.abs(legend[2] / 6000.0 - 0.25) < 0.03, "heroic socket odds off " + java.util.Arrays.toString(legend));
+        // ---- 穴の数 (階級で決まる。抽選なし。2026-11-05 の粉と炉の頁 1-3) と、古い装備の移行
+        check(f, GearTier.COMMON.sockets() == 0 && GearTier.UNCOMMON.sockets() == 1 && GearTier.RARE.sockets() == 1 && GearTier.EPIC.sockets() == 2
+                && GearTier.HEROIC.sockets() == 2 && GearTier.ARTIFACT.sockets() == 3 && GearTier.MYTHIC.sockets() == 3, "socket counts per tier are wrong");
         ItemStack old = new ItemStack(ModItems.WHALEBONE_GREATSWORD.get());
         old.set(ModDataComponents.AFFIXES.get(), List.of(new Affix(AffixType.SHARP, 0.05)));
-        check(f, !GearFreedom.has(old) && GearFreedom.ensure(old, random) && GearFreedom.has(old), "legacy gear did not get its sockets rolled once");
-        check(f, !GearFreedom.ensure(old, random), "sockets were rolled twice");
-        check(f, AffixRules.affixes(old).size() == 1, "socket roll changed the affixes");
+        check(f, !GearFreedom.has(old) && GearFreedom.ensure(old, random) && GearFreedom.sockets(old) == 2, "legacy epic gear did not get its 2 sockets");
+        check(f, !GearFreedom.ensure(old, random), "sockets were set twice");
+        check(f, AffixRules.affixes(old).size() == 1, "socket setup changed the affixes");
+        ItemStack few = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 0);
+        check(f, GearFreedom.ensure(few, random) && GearFreedom.sockets(few) == 2, "an epic with 0 rolled sockets was not raised to 2");
+        ItemStack many = rolled(ModItems.CAPTAIN_PIKE.get(), 3);
+        check(f, !GearFreedom.ensure(many, random) && GearFreedom.sockets(many) == 3, "a heroic that rolled 3 sockets lost one");
         ItemStack junk = new ItemStack(ModItems.STONE_WHALE_SHARD.get());
-        check(f, !GearFreedom.ensure(junk, random), "material got sockets");
+        check(f, !GearFreedom.ensure(junk, random) && !GearFreedom.socketable(junk), "material got sockets");
+        // アンコモンと弓にも穴 (特性は付かない)
+        ItemStack uncommon = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "wild_guard_sword")));
+        check(f, GearFreedom.socketable(uncommon) && !GearFreedom.eligible(uncommon) && GearFreedom.ensure(uncommon, random) && GearFreedom.sockets(uncommon) == 1,
+                "an uncommon sword should have 1 socket and no affixes");
+        ItemStack bow = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "whale_bow")));
+        check(f, GearFreedom.socketSlot(bow.getItem()) == AffixType.Slot.WEAPON && GearFreedom.ensure(bow, random) && GearFreedom.sockets(bow) == 2,
+                "an epic bow should have 2 sockets: " + GearFreedom.sockets(bow));
+        ForgeRules.insertGem(bow, new ItemStack(ModItems.SOCKET_SHARD_WIND.get()));
+        check(f, Math.abs(AffixRules.value(bow, AffixType.STRIDE) - 0.01) < 1e-9, "wind powder on a bow should give movement speed");
 
         // ---- 抽出・刻印 (アスペクト)
         // 手の枠 (0) と重ならない所へ置く
@@ -134,7 +213,6 @@ public final class GearFreedomSelfTest {
         ItemStack shard = new ItemStack(ModItems.SOCKET_SHARD_STONE.get(), 3);
         check(f, ForgeRules.insertGem(s2, shard) && shard.getCount() == 2, "shard not socketed or not consumed");
         check(f, Math.abs(AffixRules.value(s2, AffixType.SHARP) - sharp0 - 0.02) > -1 && Math.abs(AffixRules.value(s2, AffixType.SHARP) - (sharp0 + 0.02)) < 1e-9, "stone shard did not add attack");
-        check(f, GearFreedom.tags(s2).size() == 1, "tag missing");
         check(f, ForgeRules.insertGem(s2, shard) && !ForgeRules.insertGem(s2, shard), "sockets overflowed (max 2)");
         ItemStack chestShard = rolled(ModItems.STONE_WHALE_CHESTPLATE.get(), 1);
         ForgeRules.insertGem(chestShard, new ItemStack(ModItems.SOCKET_SHARD_WIND.get()));
@@ -142,7 +220,7 @@ public final class GearFreedomSelfTest {
         int before = ForgeRules.count(p, ModItems.RESONANCE_CRYSTAL.get());
         ItemStack back = ForgeRules.removeGem(p, s2, 0);
         check(f, back.is(ModItems.SOCKET_SHARD_STONE.get()) && GearFreedom.freeSockets(s2) == 1, "unsocket failed");
-        check(f, ForgeRules.count(p, ModItems.RESONANCE_CRYSTAL.get()) == before - 1, "unsocket did not cost a crystal");
+        check(f, ForgeRules.count(p, ModItems.RESONANCE_CRYSTAL.get()) == before, "unsocketing should be free");
         // ---- 巨神の粉 (docs/design/41): 段は数字に掛かる・外すと段のまま戻る・段の和 4 で粉の技・三つで一つ上の段
         ItemStack ps = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 2);
         double sharpBase = AffixRules.value(ps, AffixType.SHARP);
@@ -164,16 +242,15 @@ public final class GearFreedomSelfTest {
         }
         check(f, three.isEmpty() && gotII, "three tier I wind powders did not make one tier II");
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        // 打ち直しで穴を足す: 必ず付き、エピックは 2 で止まる
-        ItemStack none = rolled(ModItems.WHALEBONE_GREATSWORD.get(), 0);
-        p.getInventory().setItem(21, new ItemStack(ForgeRules.shardItem(none), 40));
-        check(f, ForgeRules.addSocket(p, none) && GearFreedom.sockets(none) == 1 && ForgeRules.addSocket(p, none) && GearFreedom.sockets(none) == 2
-                && !ForgeRules.addSocket(p, none), "guaranteed socket add failed");
-        // ヒロイックは 3 つまで (エピックの大剣は上の 2 で止まる)
-        ItemStack heroic = rolled(ModItems.CAPTAIN_PIKE.get(), 0);
-        p.getInventory().setItem(22, new ItemStack(ForgeRules.shardItem(heroic), 64));
-        boolean opened3 = ForgeRules.addSocket(p, heroic) && ForgeRules.addSocket(p, heroic) && ForgeRules.addSocket(p, heroic);
-        check(f, opened3 && GearFreedom.sockets(heroic) == 3 && !ForgeRules.addSocket(p, heroic), "a heroic weapon should open up to 3 sockets: " + GearFreedom.sockets(heroic));
+        // 粉を合わせる (炉の粉のつまみ): 同じ段三つ → 一つ上
+        ItemStack tri = Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_ASH.get(), 4), 2);
+        ItemStack up = ForgeRules.combinePowder(tri);
+        check(f, up.is(ModItems.SOCKET_SHARD_ASH.get()) && Powder.tier(up) == 3 && tri.getCount() == 1, "combining three tier II powders failed");
+        check(f, ForgeRules.combinePowder(tri).isEmpty(), "one powder combined alone");
+        check(f, ForgeRules.combinePowder(Powder.withTier(new ItemStack(ModItems.SOCKET_SHARD_ASH.get(), 3), Powder.MAX_TIER)).isEmpty(), "tier VI combined further");
+
+        // 粉の技 (見える技): 強さ・数え方・五つの武器の技・防具の技
+        powderArts(f, level, p);
 
         // ---- ルーン: 1 つの技に 1 枚・倍率の上限
         ItemStack runeA = GearFreedomItems.rune(new RuneData("lunge", false, 1200));
@@ -198,7 +275,7 @@ public final class GearFreedomSelfTest {
             ForgeRules.insertGem(a, new ItemStack(ModItems.SOCKET_SHARD_WIND.get()));
             p.setItemSlot(slot, a);
         }
-        check(f, SkillBuild.extraTagCount(p, jp.revati.skyabyss.rpg.skill.SkillTag.WIND) >= 4, "socketed shards were not counted as tags");
+        check(f, SkillBuild.extraTagCount(p, jp.revati.skyabyss.rpg.skill.SkillTag.WIND) == 0, "powders should no longer count as skill tags");
         check(f, SkillBuild.skillPower(p, Skill.LUNGE) <= SkillRules.POWER_CAP + 1e-9, "skill power passed the cap: " + SkillBuild.skillPower(p, Skill.LUNGE));
         check(f, SkillRules.POWER_CAP == 1.0, "power cap is no longer +100%");
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

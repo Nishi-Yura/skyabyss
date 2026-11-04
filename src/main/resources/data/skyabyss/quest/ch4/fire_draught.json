@@ -30,7 +30,7 @@
   "stages": [
     {
       "id": "brew",
-      "xp": 60,
+      "xp": 120,
       "objectives": [
         {
           "id": "potion",
@@ -54,7 +54,7 @@
     }
   ],
   "reward": {
-    "xp": 120,
+    "xp": 240,
     "items": [],
     "affinity": {
       "skyabyss:artisan": 3

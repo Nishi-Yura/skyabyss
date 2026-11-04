@@ -48,7 +48,9 @@ public class ChapterBowItem extends BowItem implements ModGear {
         if (arrow.getOwner() instanceof Player player && !GearLevel.meets(player, weaponStack)) {
             return arrow;
         }
-        arrow.setBaseDamage(arrow.getBaseDamage() * multiplier(ModGear.enhance(weaponStack)));
+        // 岩の粉の「攻撃力 +n%」は矢の傷に掛ける (攻撃力の修飾子は矢に効かないため。粉と炉の頁 1-1)
+        double powder = 1 + jp.revati.skyabyss.item.affix.AffixRules.value(weaponStack, jp.revati.skyabyss.item.affix.AffixType.SHARP);
+        arrow.setBaseDamage(arrow.getBaseDamage() * multiplier(ModGear.enhance(weaponStack)) * powder);
         return arrow;
     }
 

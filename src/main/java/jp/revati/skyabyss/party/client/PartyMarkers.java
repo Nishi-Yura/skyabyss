@@ -142,7 +142,7 @@ public final class PartyMarkers {
         }
     }
 
-    // 世界の位置 pos を画面に投影して、札 (画面の中) か矢印 (画面の外の縁) を描く。仲間の札と墓の標 (GraveMarkerHud) が共用する。
+    // 世界の位置 pos を画面に投影して、札 (画面の中) か矢印 (画面の外の縁) を描く。仲間の札が共用する。
     // hp: 0..100 なら札のそばに体力の棒 (長さ = 体力。色に頼らない)。負なら棒なし
     public static void drawMarker(GuiGraphics g, Vec3 pos, Component text, int rgb, Symbol symbol, int hp, List<int[]> taken) {
         Minecraft mc = Minecraft.getInstance();
@@ -245,38 +245,49 @@ public final class PartyMarkers {
         }
     }
 
-    // 体力の棒 (幅 14、長さ = 体力)
-    // 体力の棒: 札の幅いっぱい、太さ 3 (前は 14 画素で短かった。2026-10-22 の二人の試遊)
-    private static void drawBar(GuiGraphics g, int x, int y, int w, int hp, int rgb) {
-        g.fill(x, y, x + w, y + 3, 0x88000000);
-        g.fill(x, y, x + Math.round(w * Mth.clamp(hp, 0, 100) / 100f), y + 3, 0xFF000000 | rgb);
+    // 札の縮尺: GUI の大きさのおよそ半分で、字の 1 ドットが画面の整数の画素 (2 画素より小さくしない。漢字が読めなくなる) に乗る大きさ。
+    // GUI 2 → そのまま、3 → 2/3、4 → 1/2、6 → 1/2 (2026-11-03 の声「パーティーの味方の HP がでかすぎて、画面が見にくい」)
+    static float tagScale() {
+        double gs = Minecraft.getInstance().getWindow().getGuiScale();
+        return (float) Math.min(1.0, Math.max(2, Math.round(gs * 0.5)) / gs);
+    }
+
+    // 札の中身 (記号 + 名前と距離 + 体力の棒) を、(x, y) を左上に scale 倍で描く。札の大きさは (lw + 6) x 12、棒はその下に太さ 2
+    // 体力の棒: 札の幅いっぱい (前は 14 画素で短かった。2026-10-22 の二人の試遊)
+    private static void drawBox(GuiGraphics g, Font font, Component label, int x, int y, float scale, int lw, int rgb, Symbol symbol, int hp, int textColor) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(scale, scale, 1f);
+        int bw = lw + 6;
+        g.fill(0, 0, bw, 12, 0x58000000);
+        drawSymbol(g, 3, 3, symbol, rgb);
+        g.drawString(font, label, 3 + ICON_W, 2, textColor, true);
+        if (hp >= 0) {
+            g.fill(0, 12, bw, 14, 0x88000000);
+            g.fill(0, 12, Math.round(bw * Mth.clamp(hp, 0, 100) / 100f), 14, 0xFF000000 | rgb);
+        }
+        g.pose().popPose();
     }
 
     // 頭の上の札: 記号 + 名前と距離 + 体力の棒 + 小さな三角。重なったら上へずらす
     private static void drawTag(GuiGraphics g, Font font, Component label, int sx, int sy, int lw, List<int[]> taken, int rgb, Symbol symbol, int hp) {
-        int y = sy - 14;
-        int[] box = place(sx - lw / 2 - 3, y - 2, lw + 6, 12, taken, -12);
-        g.fill(box[0], box[1], box[0] + box[2], box[1] + box[3], 0x58000000);
-        drawSymbol(g, box[0] + 3, box[1] + 3, symbol, rgb);
-        g.drawString(font, label, box[0] + 3 + ICON_W, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.BODY.color(), true);
-        int ty = box[1] + box[3] + (hp >= 0 ? 4 : 1);
+        float s = tagScale();
+        int bw = Math.round((lw + 6) * s);
+        int bh = Math.round((hp >= 0 ? 14 : 12) * s);
+        int[] box = place(sx - bw / 2, sy - bh - 4, bw, bh, taken, -bh);
+        drawBox(g, font, label, box[0], box[1], s, lw, rgb, symbol, hp, TextStyle.alpha(0.88f) | TextStyle.BODY.color());
+        int ty = box[1] + box[3] + 1;
         int color = TextStyle.alpha(0.8f) | rgb;
-        g.fill(sx - 2, ty, sx + 3, ty + 1, color);
-        g.fill(sx - 1, ty + 1, sx + 2, ty + 2, color);
-        g.fill(sx, ty + 2, sx + 1, ty + 3, color);
-        if (hp >= 0) {
-            drawBar(g, box[0], box[1] + box[3], box[2], hp, rgb);
-        }
+        g.fill(sx - 1, ty, sx + 2, ty + 1, color);
+        g.fill(sx, ty + 1, sx + 1, ty + 2, color);
     }
 
     private static void placeLabel(GuiGraphics g, Font font, Component label, int cx, int y, int lw, List<int[]> taken, int rgb, Symbol symbol, int hp) {
-        int[] box = place(cx - lw / 2 - 3, y - 2, lw + 6, 12, taken, 12);
-        g.fill(box[0], box[1], box[0] + box[2], box[1] + box[3], 0x58000000);
-        drawSymbol(g, box[0] + 3, box[1] + 3, symbol, rgb);
-        g.drawString(font, label, box[0] + 3 + ICON_W, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.CAPTION.color() | 0x202020, true);
-        if (hp >= 0) {
-            drawBar(g, box[0], box[1] + box[3], box[2], hp, rgb);
-        }
+        float s = tagScale();
+        int bw = Math.round((lw + 6) * s);
+        int bh = Math.round((hp >= 0 ? 14 : 12) * s);
+        int[] box = place(cx - bw / 2, y - 2, bw, bh, taken, bh);
+        drawBox(g, font, label, box[0], box[1], s, lw, rgb, symbol, hp, TextStyle.alpha(0.88f) | TextStyle.CAPTION.color() | 0x202020);
     }
 
     // すでに置いたものと重ならない場所へ、step ずつずらして置く

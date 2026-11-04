@@ -54,6 +54,7 @@ public final class LootBoxSelfTest {
             pools(f, notes);
             queue(server, f);
             buyback(server, f);
+            hints(server, f);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("loot boxes selftest crashed", e);
             f.add("crashed: " + e);
@@ -64,6 +65,29 @@ public final class LootBoxSelfTest {
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST loot boxes FAILED: {}", x));
         }
+    }
+
+    // 箱の手がかり (BoxHints): 列の先頭の品の種類と、今の職の武器か。列が空ならまだ決まっていない
+    private static void hints(MinecraftServer server, List<String> f) {
+        FakePlayer p = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "[box_hint]"));
+        net.minecraft.world.item.ItemStack sword = new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.WHALEBONE_GREATSWORD.get());
+        net.minecraft.world.item.ItemStack chest = new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.STONE_WHALE_CHESTPLATE.get());
+        jp.revati.skyabyss.rpg.skill.Job warrior = jp.revati.skyabyss.rpg.skill.Job.of(sword);
+        jp.revati.skyabyss.rpg.skill.Job other = null;
+        for (jp.revati.skyabyss.rpg.skill.Job j : jp.revati.skyabyss.rpg.skill.Job.values()) {
+            if (j != warrior) {
+                other = j;
+            }
+        }
+        check(f, BoxHints.of(sword, warrior) == BoxHints.JOB_WEAPON && BoxHints.of(sword, other) == BoxHints.WEAPON && BoxHints.of(chest, warrior) == BoxHints.ARMOR
+                && BoxHints.of(net.minecraft.world.item.ItemStack.EMPTY, warrior) == BoxHints.NONE, "box hints do not tell weapon / armor / job apart");
+        java.util.Map<String, Integer> before = BoxHints.compute(p);
+        check(f, before.values().stream().allMatch(v -> v == BoxHints.NONE), "an empty queue should give no hint");
+        net.minecraft.world.item.ItemStack box = LootBoxes.wrap(server, p.getUUID(), chest.copy());
+        if (box.getItem() instanceof SealedBoxItem s) {
+            check(f, BoxHints.compute(p).get(s.kind.id()) == BoxHints.ARMOR, "a queued chestplate should hint armor");
+        }
+        LootBoxData.get(server).clear(p.getUUID());
     }
 
     private static void check(List<String> f, boolean ok, String what) {

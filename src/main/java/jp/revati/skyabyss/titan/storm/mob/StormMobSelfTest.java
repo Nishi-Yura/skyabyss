@@ -151,7 +151,7 @@ public final class StormMobSelfTest {
 
     // 経験値 (12 の 6.6節): 18 / 5 / 14、推奨レベル 24
     private static void checkXp(List<String> failures) {
-        String[][] rows = {{"feather_warden", "18"}, {"static_moth", "5"}, {"thunder_supplicant", "14"}};
+        String[][] rows = {{"feather_warden", "13"}, {"static_moth", "4"}, {"thunder_supplicant", "10"}};
         for (String[] r : rows) {
             GrowthRewards.Source s = GrowthRewards.MOD_ENEMIES.get(SkyAbyss.MODID + ":" + r[0]);
             check(failures, s != null && s.xp() == Integer.parseInt(r[1]) && s.contentLevel() == 24, "xp of " + r[0] + " = " + s);

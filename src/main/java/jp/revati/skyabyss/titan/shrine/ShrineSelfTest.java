@@ -126,6 +126,8 @@ public final class ShrineSelfTest {
         try {
             TitanShrine.STOPPED = (s, id, t) -> stopped.contains(id);
             TitanVisibility.STOPPED_OVERRIDE = (id, t) -> stopped.contains(id);
+            Set<UUID> notReached = new java.util.HashSet<>();
+            TitanVisibility.REACHED_OVERRIDE = (id, t) -> !notReached.contains(id);
             for (String titan : Titans.all()) {
                 BlockPos c = TitanShrine.ensure(server, titan);
                 BlockState st = level.getBlockState(c);
@@ -137,9 +139,15 @@ public final class ShrineSelfTest {
                 String dark = unlit(level, c);
                 check(f, dark == null, titan + ": a walkable floor has no light nearby (mobs can spawn): " + dark);
                 check(f, TitanShrine.ensure(server, titan).equals(c) && c.equals(TitanShrine.posOf(server, titan)), titan + ": the shrine moved when ensured again");
-                a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
-                b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 9.5);
-                check(f, TitanShrine.inRing(a, c) && !TitanShrine.inRing(b, c), titan + ": the ring test is wrong");
+                // 集合台 (拝殿の南の入口の外の黒い床)。碑のそば (輪の中) は台ではない
+                check(f, level.getBlockState(c.offset(0, -1, TitanShrine.PAD_Z0 + 1)).equals(TitanShrine.PAD_BLOCK)
+                        && level.getBlockState(c.offset(TitanShrine.PAD_HALF, -1, TitanShrine.PAD_Z1)).equals(TitanShrine.PAD_BLOCK), titan + ": the gathering pad is not black");
+                check(f, level.getBlockState(c.offset(0, 0, TitanShrine.PAD_Z0 + 1)).getCollisionShape(level, c.offset(0, 0, TitanShrine.PAD_Z0 + 1)).isEmpty()
+                        && level.getBlockState(c.offset(0, 1, TitanShrine.PAD_Z0 + 1)).getCollisionShape(level, c.offset(0, 1, TitanShrine.PAD_Z0 + 1)).isEmpty(),
+                        titan + ": no standing room on the gathering pad");
+                a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + TitanShrine.PAD_Z0 + 1.5);
+                b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
+                check(f, TitanShrine.onPad(a, c) && !TitanShrine.onPad(b, c), titan + ": the pad test is wrong");
                 // 断り方
                 stopped.clear();
                 check(f, TitanShrine.refusal(server, a, titan, List.of(a), true, false) != null, titan + ": a stranger was let in");
@@ -158,6 +166,13 @@ public final class ShrineSelfTest {
                 stopped.clear();
                 TitanVisibility.clearCache();
                 check(f, TitanVisibility.sees(a, titan), titan + ": a chapter player cannot see the titan");
+                // まだその巨神の章に来ていない人には見えない (心臓を止めていなくても)
+                boolean gate0 = jp.revati.skyabyss.progress.Progression.gateOn(server);
+                notReached.add(a.getUUID());
+                TitanVisibility.clearCache();
+                check(f, !TitanVisibility.sees(a, titan) || !gate0, titan + ": a player whose story has not reached the titan sees it");
+                notReached.clear();
+                TitanVisibility.clearCache();
                 stopped.add(a.getUUID());
                 TitanVisibility.clearCache();
                 boolean gate = jp.revati.skyabyss.progress.Progression.gateOn(server);
@@ -189,6 +204,7 @@ public final class ShrineSelfTest {
         } finally {
             TitanShrine.STOPPED = jp.revati.skyabyss.progress.Progression::stopped;
             TitanVisibility.STOPPED_OVERRIDE = null;
+            TitanVisibility.REACHED_OVERRIDE = null;
             TitanVisibility.clearCache();
         }
         if (f.isEmpty()) {

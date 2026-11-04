@@ -65,7 +65,7 @@ public class TitanShrineBlock extends HorizontalDirectionalBlock {
         String titan = titanOf(state);
         if (hand == InteractionHand.MAIN_HAND && stack.is(ModItems.songShard(titan))) {
             if (player instanceof ServerPlayer sp) {
-                TitanShrine.hold(sp, titan, pos);
+                TitanShrine.shardTouch(sp, titan);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }

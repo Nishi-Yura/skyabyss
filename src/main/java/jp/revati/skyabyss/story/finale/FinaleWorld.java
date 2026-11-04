@@ -181,7 +181,7 @@ public final class FinaleWorld {
         p.serverLevel().playSound(null, pos, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.4f, 0.8f);
         p.serverLevel().playSound(null, pos, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.0f, 0.8f);
         Quests.signal(p, GATE_SIGNAL);
-        Notice.narrate(p, "message.skyabyss.cloudsea.gate");
+        Notice.hint(p, "message.skyabyss.cloudsea.gate");
     }
 
     // 開発用: /skyabyss cloudsea enter | leave | ring <鐘の印> | lord | crumble | lamp <w|e|s> | eye | forge <w|e|n> | rewinder | selves | plume | seat <1|2|3> | ending <calm|break|accept|none> | trial <1..5> (権限 2)

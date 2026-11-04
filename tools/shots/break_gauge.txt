@@ -1,0 +1,57 @@
+# 2026-11-04: 崩しゲージ (combat/BreakGauge・client/combat/BreakGaugeClient)。鯨骨の隊長を満ちた一撃で打ち、ボスバーの下の帯が溜まって (85% から金に脈打つ)、崩れて白く光り、崩れの残りで縮むまで
+# 隊長の体力を 100 にして一撃の溜まりを大きくする (大きさ = 最大体力 × 0.22)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/break_gauge.txt -PshotsName=break_gauge
+world camp_check continent
+size 1600 900
+timeout 2000
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode creative
+hud on
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 100
+cmd skyabyss dungeon hall bone_pit
+wait 60
+cmd tp @s ~ ~ ~ ~ 10
+cmd kill @e[tag=break_dummy]
+cmd execute at @s run summon skyabyss:whalebone_captain ^ ^ ^3 {PersistenceRequired:1b,Tags:["break_dummy"]}
+wait 5
+cmd attribute @e[tag=break_dummy,limit=1] minecraft:generic.max_health base set 100
+cmd attribute @e[tag=break_dummy,limit=1] minecraft:generic.movement_speed base set 0
+cmd data merge entity @e[tag=break_dummy,limit=1] {Health:100f}
+cmd item replace entity @s weapon.mainhand with minecraft:iron_sword
+chat clear
+wait 40
+attack
+wait 6
+shot b1_first_hit
+wait 30
+attack
+wait 6
+shot b2
+wait 30
+attack
+wait 6
+shot b3
+wait 30
+attack
+wait 3
+shot b4
+wait 30
+attack
+wait 3
+shot b5
+wait 30
+attack
+wait 3
+shot b6
+wait 30
+attack
+wait 2
+shot b7_break
+wait 30
+shot b8_broken_later

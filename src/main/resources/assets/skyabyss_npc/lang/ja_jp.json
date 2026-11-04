@@ -72,7 +72,7 @@
   "dialogue.skyabyss.storyteller.song0_b": "みっつ、みあげちゃだめよ、と歌うのは、見えないものを見ないようにするためだと思っていたんだ。\n今はね、見られないためかもしれないと思うよ。",
   "dialogue.skyabyss.storyteller.song0_c": "名前を呼んだら、振り向かれる気がしてね。\n……だから、あたしは呼ばないことにしているんだ。",
   "dialogue.skyabyss.storyteller.fragment": "……戻ったんだね。\n手の中のそれ、見せておくれ。",
-  "dialogue.skyabyss.storyteller.fragment2": "温かい……。脈を打っているよ。まるで、生きているみたいだ。\n言い伝えでは、空の扉の鍵は四つに分かれているという。ひとつは鯨が。残りは……さあ、どこだろうね。",
+  "dialogue.skyabyss.storyteller.fragment2": "温かい……。脈を打っているよ。まるで、生きているみたいだ。\n言い伝えのとおりだね。空の扉の鍵は四つ。ひとつは鯨が。残りは……さあ、どこだろうね。",
   "dialogue.skyabyss.storyteller.fragment_verse": "……数え歌の、ひとつめを覚えているかい。「ひとつ　ひるまにかげがくる」。\nあれは、鯨の影のことだったのかもしれないね。子どもらは、知らずに歌っていたんだ。",
   "dialogue.skyabyss.storyteller.fragment3.thanks": "ありがとう。",
   "dialogue.skyabyss.storyteller.fragment3": "あんたは、空へ行くんだね。……止めはしないよ。",
@@ -155,11 +155,11 @@
   "quest.skyabyss.main_song.board.lead": "鎖が届けば、背中へ上がれる。イサナが一度もたどり着けなかった場所だ。",
   "quest.skyabyss.main_song.board.ride": "鎖をのぼって、岩鯨の背中へ渡ろう",
   "quest.skyabyss.main_song.board.ride.wait": "空の岩鯨を、追いかけよう",
-  "quest.skyabyss.main_song.inscriptions.journal": "背中には、崩れた町があった。入口から先は、三つの試練の間が一つずつ続いている。\nどの間の入口にも、背中の民の碑文がある。三つを越えて、背の奥へ進もう。",
+  "quest.skyabyss.main_song.inscriptions.journal": "背中には、崩れた町があった。入口から先は、三つの試練の間が一つずつ続いている。\nどの間の入口にも、背中の民の碑文がある。碑文を読むと、間の戸が開く。三つの碑文を読み、背の奥へ進もう。",
   "quest.skyabyss.main_song.inscriptions.lead": "背中には、崩れた町があった。三つの試練の間の碑文が、ここに誰がいたのかを語るかもしれない。",
-  "quest.skyabyss.main_song.inscriptions.read": "三つの試練を越え、間の碑文を読もう",
-  "quest.skyabyss.main_song.heart.journal": "三つの試練を越えた。番兵長を退ければ、その先で何かが脈を打っている。\n鼓動のそばに、何かが納められているという。",
-  "quest.skyabyss.main_song.heart.lead": "三つの試練の先、番兵長の向こうで、何かが脈を打っている。",
+  "quest.skyabyss.main_song.inscriptions.read": "試練の間の入口の碑文を、三つ読もう",
+  "quest.skyabyss.main_song.heart.journal": "三つの碑文を読み、三つの試練を越えた。碑文はどれも、背の奥で打つ鼓動のことを語っていた。\n番兵長を退ければ、その鼓動に届く。鼓動のそばに納められたものを、確かめに行こう。",
+  "quest.skyabyss.main_song.heart.lead": "碑文の語る鼓動が、番兵長の向こうで打っている。",
   "quest.skyabyss.main_song.heart.still": "体の奥で脈打つものを、確かめに行こう",
   "quest.skyabyss.main_song.heart.fragment": "鼓動のそばに納められたものを、手に取ろう",
   "quest.skyabyss.main_song.return.journal": "欠片は、ほのかに温かい。\n都へ戻って、このことを話そう。",
@@ -227,5 +227,6 @@
   "dialogue.skyabyss.artisan.a_menu.bye": "また来る。",
   "dialogue.skyabyss.artisan.a_hammer": "この槌か。柄は三度替えた。頭は、一度も。……いや、一度だったか。どうも、そこだけ覚えがない。\n槌は、振った数を覚えていない。覚えているのは、手のほうだ。",
   "dialogue.skyabyss.artisan.a_whet": "砥石は、削られるほうが先に減る。刃を研ぐたびに、石は丸くなる。それでいい。石は、そのためにある。\n……減っていくものに、名前を付ける奴がいる。俺は付けない。付けると、手が惜しむ。",
-  "dialogue.skyabyss.artisan.a_hands": "手は、覚えている。針の入れ方、槌の落とし方、結び目の向き。……誰に教わったのかは、手に聞いても答えない。\nそれでも、道具を持つと、持ち主の側へ立っている気がする。変な話だ。聞き流してくれ。"
+  "dialogue.skyabyss.artisan.a_hands": "手は、覚えている。針の入れ方、槌の落とし方、結び目の向き。……誰に教わったのかは、手に聞いても答えない。\nそれでも、道具を持つと、持ち主の側へ立っている気がする。変な話だ。聞き流してくれ。",
+  "dialogue.skyabyss.storyteller.fragment_sea": "残りの鍵のひとつは、潮の向こうだと、古い舟歌にある。\n浜の町には、満ち引きを読む人たちがいる。イサナも、きっとそっちへ向かうよ。"
 }

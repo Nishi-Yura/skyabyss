@@ -18,7 +18,7 @@ import net.minecraft.world.level.Level;
 
 // 町のクエストの間だけ現れる人 (docs/design/35 の 3.5)。型は一つ (skyabyss:town_guest) で、誰か (TownGuests.Guest の id) を持つ。
 //   会話の役の ID は skyabyss:guest_<id> (NpcEntity.role を上書き)。会話は data/skyabyss/dialogue/guest_<id>.json
-//   見た目は係の人の案 A の形 (attendant_a) に、人ごとの絵 (textures/lowpoly/guest_<id>.png)。子どもは小さく描く (TownGuests.Guest.scale)
+//   見た目は人ごとの形と絵 (npc_guest_<id>。client/npc/NpcModels)。子どもは小さく描く (TownGuests.Guest.scale)
 //   **保存しない** (shouldBeSaved = false)。いるべきかはクエストの記録から毎回決め直す (TownGuests の見回り)
 //   連れ歩き: follow を決めると、その人のあとを付いて歩く (雷の夜の子ども)
 public class TownGuestEntity extends NpcEntity {

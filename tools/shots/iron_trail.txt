@@ -1,0 +1,36 @@
+# 2026-11-04: 鉄の跡をたどる (story/ch1/IronTrail)。一つ目の鉄くず (欠けた金床・ほどけた鎖・錆色の光)、見つけたときの字幕、上から見た鉄靴の跡
+# 骨の坑は一章に入った人のまわりに置かれるので、島を渡ってから置かれるのを待つ (撮影で場所を建てるのは世界の名前が opening で始まるときだけ)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/iron_trail.txt -PshotsName=iron_trail
+world opening_iron continent
+size 1600 900
+timeout 6000
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+hud on
+cmd skyabyss playtest skip opening
+wait 100
+cmd skyabyss island cross
+wait 20
+cmd skyabyss cinematic stop
+wait 120
+cmd skyabyss cinematic stop
+wait 1500
+cmd skyabyss_iron start
+wait 20
+cmd skyabyss_iron goto 0
+waitchunks 400
+wait 80
+shot i1_scrap
+cmd tp @s ~ ~ ~4 0 30
+wait 40
+shot i2_found
+cmd gamemode spectator
+cmd tp @s ~ ~16 ~-4 0 75
+wait 40
+shot i3_prints_from_above

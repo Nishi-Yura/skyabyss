@@ -33,7 +33,8 @@ public final class RegionFolkSelfTest {
     static final String[][] ERRANDS = {
             {"tide_ferryman", "town/tide_ferry"}, {"tide_lightkeeper", "town/tide_light"},
             {"storm_elder", "town/storm_rods"}, {"storm_hutkeeper", "town/storm_hut"},
-            {"ember_survivor", "town/ember_forge"}, {"ember_watch", "town/ember_watch"}};
+            {"ember_survivor", "town/ember_forge"}, {"ember_watch", "town/ember_watch"},
+            {"camp_pilgrim", "town/camp_pilgrim"}, {"camp_minstrel", "town/camp_minstrel"}, {"camp_mapmaker", "town/camp_mapmaker"}};
 
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();

@@ -354,6 +354,11 @@ public final class Telegraph {
 
         public Telegraph start() {
             Telegraph t = new Telegraph(this);
+            // 崩れている主は技を出せない (BreakGauge)。出なかった技として終わらせる
+            if (owner != null && BreakGauge.silenced(owner)) {
+                t.done = true;
+                return t;
+            }
             ACTIVE.computeIfAbsent(level, l -> new ArrayList<>()).add(t);
             if (sound != null) {
                 level.playSound(null, shape.centerX(), floor + 1, shape.centerZ(), sound, SoundSource.HOSTILE, soundVolume, soundPitch);

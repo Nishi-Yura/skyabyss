@@ -1,0 +1,41 @@
+{
+  "npc": "skyabyss:guest_bellkeeper",
+  "extends": true,
+  "entries_first": true,
+  "entries": [
+    {
+      "node": "fin_e_guest_bellkeeper",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "finale/bell_echo_1"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "fin_echo_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "fin_e_guest_bellkeeper": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "fin_echo_told"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "kind": "talk"
+        }
+      ]
+    }
+  }
+}

@@ -51,6 +51,9 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   層       next に乗ると次の層へ (鯨骨の坑はトロッコ)。帰り石 (天然磁石) を右クリックすると入口の間へ
 //   倒れた   起きると checkpoint の層の入口へ (墓は作らない。写しの中の死は 11 の地上の死に入れない)
 //   主       倒すと報酬 (cleared)、主の間の奥の光に入ると入口の間へ。主のあとの写しは CLEAR_END で閉じる
+//   深く潜る 主を一度倒した人が、しゃがんで層の門を使う (組の写しはその深さのまま)。敵と主の体力と傷 +40%・仕掛けが速い (Mechanics)・
+//            罠の休みが短い。主の箱は一つ上の階級で、ふつうとは別に一日一度 (2026-11-05 のダンジョンの頁 1-1)
+//   坑の様子 その日の DungeonMood (宝・罠・鍵・群れ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Dungeons {
     public static final String FOE_TAG = "skyabyss_dungeon_foe";
@@ -59,6 +62,11 @@ public final class Dungeons {
     public static final String PROGRESS = "skyabyss_dungeon_cp_";
     public static final String CLEARS = "skyabyss_dungeon_clears_";
     public static final String BOX_DAY = "skyabyss_dungeon_box_";
+    public static final String DEEP_BOX_DAY = "skyabyss_dungeon_deepbox_";
+    // 深く潜ったときの敵と主 (体力は修飾子、傷は onDeepHit で +40%)
+    public static final String DEEP_TAG = "skyabyss_dungeon_deep";
+    public static final double DEEP = 0.40;
+    static final net.minecraft.resources.ResourceLocation DEEP_HEALTH = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "dungeon_deep_health");
     // 誰も写しにいなくなってから閉じるまで (抜けて戻っても続きから。10 分)
     static final int EMPTY_END = 12000;
     // 主のあと写しを閉じるまで
@@ -103,6 +111,15 @@ public final class Dungeons {
     // ---------------------------------------------------------------- 入る
     // 層の門を使った: 組の写しがあれば加わり、なければ近くの組の人と新しく始める
     public static DungeonRun enter(ServerPlayer p, Dungeon d) {
+        return enter(p, d, false);
+    }
+
+    // deep: 深く潜る (主を一度倒した人だけ。倒していなければふつうに入って知らせる)
+    public static DungeonRun enter(ServerPlayer p, Dungeon d, boolean deep) {
+        if (deep && clears(p, d) <= 0) {
+            deep = false;
+            Notice.hint(p, "message.skyabyss.dungeon.deep_locked");
+        }
         DungeonRun mine = runOf(p);
         if (mine != null && mine.dungeon != d) {
             // 別のダンジョンの写しの続きは捨てる (一人一つ)
@@ -137,10 +154,14 @@ public final class Dungeons {
                 squad.add(o);
             }
         }
-        return start(p.server, d, squad);
+        return start(p.server, d, squad, deep);
     }
 
     public static DungeonRun start(MinecraftServer server, Dungeon d, List<ServerPlayer> squad) {
+        return start(server, d, squad, false);
+    }
+
+    public static DungeonRun start(MinecraftServer server, Dungeon d, List<ServerPlayer> squad, boolean deep) {
         ServerLevel level = DungeonWorld.level(server);
         if (level == null || squad.isEmpty()) {
             return null;
@@ -164,16 +185,20 @@ public final class Dungeons {
             ids.add(p.getUUID());
             from = Math.min(from, progress(p, d));
         }
-        DungeonRun run = new DungeonRun(server, nextId++, d, slot, ids, level.getGameTime(), Math.max(0, from));
+        DungeonRun run = new DungeonRun(server, nextId++, d, slot, ids, level.getGameTime(), Math.max(0, from), deep, DungeonMood.today(d));
         RUNS.put(run.id, run);
         for (ServerPlayer p : squad) {
             BY_PLAYER.put(p.getUUID(), run.id);
         }
-        SkyAbyss.LOGGER.info("[dungeon] run #{} {} slot {} from floor {} with {} player(s)", run.id, d.id, slot, run.checkpoint, squad.size());
+        SkyAbyss.LOGGER.info("[dungeon] run #{} {} slot {} from floor {} with {} player(s), deep {}, mood {}", run.id, d.id, slot, run.checkpoint, squad.size(), deep, run.mood.id);
         for (ServerPlayer p : squad) {
             moveTo(p, run, run.checkpoint);
             if (real(p)) {
-                Notice.place(p, Component.translatable(d.nameKey()), Component.translatable("message.skyabyss.dungeon.sub", d.level, squad.size()));
+                Notice.place(p, Component.translatable(d.nameKey()), Component.translatable(deep ? "message.skyabyss.dungeon.sub_deep" : "message.skyabyss.dungeon.sub", d.level, squad.size()));
+                Notice.hint(p, "message.skyabyss.dungeon.mood_enter", Component.translatable(run.mood.nameKey()), Component.translatable(run.mood.descKey()));
+                if (deep) {
+                    Notice.alert(p, "message.skyabyss.dungeon.deep_enter");
+                }
             }
         }
         return run;
@@ -282,6 +307,30 @@ public final class Dungeons {
         SkyAbyss.LOGGER.info("[dungeon] run #{} {} ended (cleared {})", run.id, run.dungeon.id, run.cleared);
     }
 
+    // 深く潜った写しの敵と主: 体力 +40% (傷は onDeepHit)
+    static void deepen(Mob m, DungeonRun run) {
+        if (!run.deep) {
+            return;
+        }
+        m.addTag(DEEP_TAG);
+        var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        if (hp != null) {
+            hp.removeModifier(DEEP_HEALTH);
+            hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(DEEP_HEALTH, DEEP,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            m.setHealth(m.getMaxHealth());
+        }
+    }
+
+    // 深く潜った写しの敵と主の傷 +40% (近接・予告の技・飛び道具のどれでも。源の生き物の印で見る)
+    @SubscribeEvent
+    static void onDeepHit(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Pre event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player && event.getSource().getEntity() != null
+                && event.getSource().getEntity().getTags().contains(DEEP_TAG)) {
+            event.setNewDamage((float) (event.getNewDamage() * (1 + DEEP)));
+        }
+    }
+
     // ---------------------------------------------------------------- 主を倒した
     static void cleared(DungeonRun run, ServerLevel level) {
         if (run.cleared) {
@@ -294,35 +343,60 @@ public final class Dungeons {
             if (run.floorOf(p) != Dungeon.BOSS_FLOOR) {
                 continue;
             }
-            reward(p, d);
+            reward(p, d, run.deep, run.mood);
         }
         SkyAbyss.LOGGER.info("[dungeon] run #{} {} cleared in {}s", run.id, d.id, (level.getGameTime() - run.startedTick) / 20);
     }
 
+    // 越えた経験値 (55 の 2 章)。初めて越えた分は章の主の経験値 (章の 15%) の中 (04 の 3 章)
+    public static int clearXp(Dungeon d) {
+        return switch (d) {
+            case BONE_PIT -> 100;
+            case TIDE_CAVE -> 200;
+            case STORM_HOLLOW -> 360;
+            case MOLTEN_MINE -> 530;
+        };
+    }
+
     // 報酬 (55 の 2 章): 経験値・鐘銭・土地の粉はいつでも。主の封の箱は一日一度。初めて越えたら称号 (DungeonTitles)
     static void reward(ServerPlayer p, Dungeon d) {
+        reward(p, d, false, DungeonMood.today(d));
+    }
+
+    // 主の箱の階級: ふつうは目安 Lv 20 未満がレア、以上がエピック。深く潜ったときは一つ上
+    public static jp.revati.skyabyss.item.GearTier boxTier(Dungeon d, boolean deep) {
+        var base = d.level < 20 ? jp.revati.skyabyss.item.GearTier.RARE : jp.revati.skyabyss.item.GearTier.EPIC;
+        return deep ? (base == jp.revati.skyabyss.item.GearTier.RARE ? jp.revati.skyabyss.item.GearTier.EPIC : jp.revati.skyabyss.item.GearTier.HEROIC) : base;
+    }
+
+    static void reward(ServerPlayer p, Dungeon d, boolean deep, DungeonMood mood) {
         var data = p.getPersistentData();
         int clears = data.getInt(CLEARS + d.id) + 1;
         data.putInt(CLEARS + d.id, clears);
         data.putInt(PROGRESS + d.id, 0);
         String today = jp.revati.skyabyss.util.DayClock.today().toString();
-        boolean box = !today.equals(data.getString(BOX_DAY + d.id));
+        String dayKey = (deep ? DEEP_BOX_DAY : BOX_DAY) + d.id;
+        boolean box = !today.equals(data.getString(dayKey));
         if (box) {
-            data.putString(BOX_DAY + d.id, today);
+            data.putString(dayKey, today);
+        }
+        // 主の装飾品が育つ (深く潜ったら 2 回ぶん。DungeonGear)
+        if (clears > 1) {
+            DungeonGear.grow(p, d, deep ? 2 : 1);
         }
         if (!real(p)) {
             return;
         }
-        int xp = 60 + d.level * 30;
+        int xp = (int) Math.round(clearXp(d) * (mood == DungeonMood.TRAPS ? 1 + DungeonMood.TRAP_XP : 1));
         jp.revati.skyabyss.rpg.Growth.addXp(p, xp, "growth.skyabyss.reason.dungeon");
         int coins = 10 + d.level * 2;
         Coins.give(p, coins);
-        Quests.give(p, new ItemStack(ModItems.socketShard(d.element).get(), 2));
+        Quests.give(p, new ItemStack(ModItems.socketShard(d.element).get(), mood == DungeonMood.SWARM ? 3 : 2));
         Notice.place(p, Component.translatable("message.skyabyss.dungeon.clear_title"), Component.translatable(d.nameKey()));
         p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1f, 1f);
         Notice.gain(p, "message.skyabyss.dungeon.reward", xp, coins);
         if (box) {
-            BoxKind kind = BoxKind.rarity(d.level < 20 ? jp.revati.skyabyss.item.GearTier.RARE : jp.revati.skyabyss.item.GearTier.EPIC, (d.level - 1) / 10 + 1);
+            BoxKind kind = BoxKind.rarity(boxTier(d, deep), (d.level - 1) / 10 + 1);
             var item = kind == null ? null : LootBoxSetup.item(kind);
             if (item != null) {
                 Quests.give(p, new ItemStack(item));
@@ -333,6 +407,7 @@ public final class Dungeons {
             Notice.unlock(p, "message.skyabyss.dungeon.first", Component.translatable(d.nameKey()));
             // 初めて越えた人に、そのダンジョンだけの装飾品を一つ (DungeonGear)
             ItemStack trinket = new ItemStack(DungeonGear.item(d));
+            DungeonGear.setClears(trinket, 1);
             Quests.give(p, trinket);
             Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
@@ -414,6 +489,11 @@ public final class Dungeons {
                 if (p.blockPosition().distSqr(gate) < 7 * 7 && t - HINTED.getOrDefault(p.getUUID(), (long) -HINT_REST) >= HINT_REST) {
                     HINTED.put(p.getUUID(), t);
                     Notice.hint(p, "message.skyabyss.dungeon.gate_hint");
+                    DungeonMood m = DungeonMood.today(d);
+                    Notice.hint(p, "message.skyabyss.dungeon.mood_enter", Component.translatable(m.nameKey()), Component.translatable(m.descKey()));
+                    if (clears(p, d) > 0) {
+                        Notice.hint(p, "message.skyabyss.dungeon.deep_hint");
+                    }
                 }
             }
         }
@@ -433,7 +513,7 @@ public final class Dungeons {
             if (run.dungeon == Dungeon.BONE_PIT && floor == 0) {
                 // トロッコで下の層へ (乗った音のあと、着いた所で止まる音)
                 level.playSound(null, p.blockPosition(), SoundEvents.MINECART_RIDING, SoundSource.BLOCKS, 1f, 0.8f);
-                Notice.narrate(p, "message.skyabyss.dungeon.bone_pit.cart");
+                Notice.hint(p, "message.skyabyss.dungeon.bone_pit.cart");
                 Tasks.later(30, () -> {
                     if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                         moveTo(p, run, floor + 1);
@@ -450,7 +530,7 @@ public final class Dungeons {
             MOVING.put(p.getUUID(), t + 60);
             level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
             sendBack(p, run.dungeon);
-            Notice.narrate(p, "message.skyabyss.dungeon.returned", Component.translatable(run.dungeon.nameKey()));
+            Notice.hint(p, "message.skyabyss.dungeon.returned", Component.translatable(run.dungeon.nameKey()));
         }
     }
 
@@ -478,7 +558,8 @@ public final class Dungeons {
             BlockPos gate = ContinentPois.extraOf(p.serverLevel(), d.poiKind(), "gate");
             if (gate != null && gate.distManhattan(pos) <= 1) {
                 event.setCanceled(true);
-                enter(p, d);
+                // しゃがんで使うと深く潜る (主を一度倒した人)
+                enter(p, d, p.isShiftKeyDown());
                 return;
             }
         }
@@ -540,7 +621,7 @@ public final class Dungeons {
         Tasks.later(2, () -> {
             if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                 moveTo(p, run, run.checkpoint);
-                Notice.narrate(p, "message.skyabyss.dungeon.woke");
+                Notice.hint(p, "message.skyabyss.dungeon.woke");
             }
         });
     }
@@ -590,7 +671,10 @@ public final class Dungeons {
                         }).executes(c -> {
                             Dungeon d = Dungeon.byId(StringArgumentType.getString(c, "id"));
                             return d != null && enter(c.getSource().getPlayerOrException(), d) != null ? 1 : 0;
-                        })))
+                        }).then(Commands.literal("deep").executes(c -> {
+                            Dungeon d = Dungeon.byId(StringArgumentType.getString(c, "id"));
+                            return d != null && enter(c.getSource().getPlayerOrException(), d, true) != null ? 1 : 0;
+                        }))))
                         .then(Commands.literal("floor").then(Commands.argument("floor", IntegerArgumentType.integer(0, Dungeon.BOSS_FLOOR)).executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             DungeonRun run = runOf(p);
@@ -684,6 +768,14 @@ public final class Dungeons {
     // 自己テスト用
     public static DungeonRun startForTest(MinecraftServer server, Dungeon d, List<ServerPlayer> squad) {
         return start(server, d, squad);
+    }
+
+    public static DungeonRun startForTest(MinecraftServer server, Dungeon d, List<ServerPlayer> squad, boolean deep) {
+        return start(server, d, squad, deep);
+    }
+
+    public static void rewardForTest(ServerPlayer p, Dungeon d, boolean deep, DungeonMood mood) {
+        reward(p, d, deep, mood);
     }
 
     public static void endForTest(DungeonRun run) {

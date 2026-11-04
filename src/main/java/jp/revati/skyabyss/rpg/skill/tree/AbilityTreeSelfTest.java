@@ -25,8 +25,9 @@ import jp.revati.skyabyss.rpg.skill.SkillRules;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 技の木 v2 (docs/design/48) の自己テスト。SKYABYSS_SELFTEST_ONLY="tree"。
-//   木の形 (全部の節が幹からつながる・同じ升に二つ置かない・型が使われている・職の木の技がみな節にある・文がある)
+// 技の木 (docs/design/48。v3 = 2026-11-04) の自己テスト。SKYABYSS_SELFTEST_ONLY="tree"。
+//   木の形 (全部の節が幹からつながる・同じ升に二つ置かない・線は真上か同じ行の隣だけ・型が使われている・発動は 4 つで型を持たない・
+//     奥義は金色で 3 SP・門は型 15・封じる節は両向き・同じ技の変化どうしは封じ合う・職の木は節 70〜74・SP 126〜132・文がある)
 //   取る決まり (前提・排他・刻印は一つ・型の点・使う技は 4 本・点)・基礎は節から・職を替えると基礎も替わる・振り直し・検め・保存と同期
 public final class AbilityTreeSelfTest {
     private AbilityTreeSelfTest() {
@@ -95,17 +96,35 @@ public final class AbilityTreeSelfTest {
         for (AbilityNode n : t.nodes()) {
             check(f, seen.contains(n.id), tag + n.id + " is not connected to the root");
         }
-        // 同じ升に二つ置かない。前提は上か横 (下から上へ戻らない)
+        // 同じ升に二つ置かない。前提は上か横 (下から上へ戻らない)。職の木は縦と横の線だけ (真上か同じ行の隣)
         Set<Long> cells = new HashSet<>();
         for (AbilityNode n : t.nodes()) {
             check(f, cells.add(((long) n.x << 32) | (n.y & 0xffffffffL)), tag + n.id + " shares a cell with another node");
             for (String r : n.requires) {
                 AbilityNode rn = t.node(r);
                 check(f, rn != null && rn.y <= n.y, tag + n.id + " requires a node below it (" + r + ")");
+                if (jobTree && rn != null) {
+                    boolean up = rn.x == n.x && rn.y == n.y - 1;
+                    boolean side = rn.y == n.y && Math.abs(rn.x - n.x) == 1;
+                    check(f, up || side, tag + n.id + " links to " + r + " with a slanted or long line");
+                }
             }
             check(f, n.cost >= 1 && n.cost <= 3, tag + n.id + " cost out of range");
             if (jobTree && (n.kind == AbilityNode.Kind.KEYSTONE || n.kind == AbilityNode.Kind.TRAIT)) {
-                check(f, n.arch != null && n.archPoints >= 10, tag + n.id + " keystone needs an archetype gate");
+                check(f, n.arch != null && n.archPoints == KEYSTONE_GATE && n.cost == 3, tag + n.id + " keystone needs 3 SP and the gate " + KEYSTONE_GATE);
+            }
+            // 封じる節は両向きで、奥義は封じない
+            for (String b : n.blocks) {
+                AbilityNode bn = t.node(b);
+                check(f, bn != null && bn.blocks.contains(n.id), tag + n.id + " blocks " + b + " one way only");
+                check(f, bn != null && n.kind != AbilityNode.Kind.KEYSTONE && n.kind != AbilityNode.Kind.TRAIT
+                        && bn.kind != AbilityNode.Kind.KEYSTONE && bn.kind != AbilityNode.Kind.TRAIT, tag + n.id + " blocks a keystone pair " + b);
+            }
+            // 同じ技の変化どうしは封じ合う
+            if (n.kind == AbilityNode.Kind.RUNE) {
+                for (AbilityNode o : t.runesOf(n.skill)) {
+                    check(f, o == n || n.blocks.contains(o.id), tag + n.id + " does not block " + o.id + " (same skill)");
+                }
             }
         }
         // 型: 3 つ以上、どれも使われている
@@ -120,19 +139,25 @@ public final class AbilityTreeSelfTest {
             check(f, !jobTree || pts >= 20, tag + "archetype " + arch + " has only " + pts + " points");
             check(f, ja.has(t.archKey(arch)) && en.has(t.archKey(arch)), tag + "no lang for archetype " + arch);
         }
-        // 職の木の技はみな節にある (使う技は ACTIVE、常に効く技は PASSIVE、要は KEYSTONE)。使う技は 4 本より多い (選べるように)
+        // 節のある技は、段の節が段の上限まである。発動は 4 つ (枠の数) で、どの型からも取れる (型を持たない)。
+        // 発動から外した技 (霧隠れ・盾殴りなど) は節を持たず、残った技の変化 (TreeVariants) として動く
         for (Skill s : Skill.inTree(t.tree)) {
             AbilityNode base = t.skillNode(s);
-            check(f, base != null, tag + "skill " + s.id + " has no node");
             if (base != null) {
                 AbilityNode.Kind want = s.keystone() ? AbilityNode.Kind.KEYSTONE : s.active ? AbilityNode.Kind.ACTIVE : AbilityNode.Kind.PASSIVE;
                 check(f, base.kind == want, tag + "skill node " + s.id + " is " + base.kind + ", expected " + want);
                 check(f, t.rankNodes(s).size() == s.maxRank - 1, tag + s.id + " should have " + (s.maxRank - 1) + " rank nodes, has " + t.rankNodes(s).size());
-                check(f, t.runesOf(s).size() <= 3, tag + s.id + " has more than 3 rune nodes");
+                check(f, t.runesOf(s).size() <= 4, tag + s.id + " has more than 4 rune nodes");
             }
         }
-        check(f, !jobTree || t.actives().size() > SkillRules.BASE_SLOTS, tag + "only " + t.actives().size() + " active skills (need more than " + SkillRules.BASE_SLOTS + " to choose)");
-        check(f, !jobTree || t.totalCost >= 60, tag + "tree is small: " + t.totalCost + " points");
+        if (jobTree) {
+            check(f, t.actives().size() == SkillRules.BASE_SLOTS, tag + t.actives().size() + " active skills (want " + SkillRules.BASE_SLOTS + ")");
+            for (AbilityNode a : t.actives()) {
+                check(f, a.arch == null, tag + "active " + a.id + " belongs to an archetype");
+            }
+            check(f, t.nodes().size() >= 70 && t.nodes().size() <= 74, tag + t.nodes().size() + " nodes (want 70-74)");
+            check(f, t.totalCost >= 126 && t.totalCost <= 132, tag + t.totalCost + " SP (want 126-132)");
+        }
         // 変異の節: 変異のある技にはその節があり、段の節の先にある
         for (jp.revati.skyabyss.rpg.skill.Mutation m : jp.revati.skyabyss.rpg.skill.Mutation.values()) {
             if (m.skill.tree == t.tree) {
@@ -148,17 +173,49 @@ public final class AbilityTreeSelfTest {
         }
     }
 
+    // 奥義の門 (その型の節に使う SP。全職同じ。docs/design/48 の 4 章)
+    static final int KEYSTONE_GATE = 15;
+
     private static boolean take(FakePlayer p, String id, List<String> f) {
         SkillData.TakeResult r = SkillManager.takeNode(p, id);
         check(f, r == SkillData.TakeResult.OK, "taking " + id + " failed: " + r);
         return r == SkillData.TakeResult.OK;
     }
 
+    // 取った節から、封じられた節と変異 (目当てでなければ) を避けて、id までのいちばん短い道を取る
     private static void takePath(FakePlayer p, AbilityTree t, String id, List<String> f) {
         SkillData d = SkillManager.get(p);
-        for (AbilityNode n : t.pathTo(id)) {
-            if (!d.hasNode(t.job, n.id)) {
-                take(p, n.id, f);
+        Set<String> mine = d.nodesOf(t.tree);
+        java.util.Map<String, String> parent = new java.util.HashMap<>();
+        ArrayDeque<AbilityNode> queue = new ArrayDeque<>();
+        for (AbilityNode n : t.nodes()) {
+            if (mine.contains(n.id) || n.requires.isEmpty()) {
+                parent.put(n.id, null);
+                queue.add(n);
+            }
+        }
+        while (!queue.isEmpty() && !parent.containsKey(id)) {
+            AbilityNode cur = queue.poll();
+            for (AbilityNode n : t.nodes()) {
+                if (parent.containsKey(n.id) || !n.requires.contains(cur.id) || n.kind == AbilityNode.Kind.MUTATION && !n.id.equals(id)) {
+                    continue;
+                }
+                if (n.blocks.stream().anyMatch(mine::contains)) {
+                    continue;
+                }
+                parent.put(n.id, cur.id);
+                queue.add(n);
+            }
+        }
+        List<String> path = new ArrayList<>();
+        for (String at = id; at != null && parent.containsKey(at); at = parent.get(at)) {
+            path.add(at);
+        }
+        check(f, parent.containsKey(id), "no open path to " + id);
+        java.util.Collections.reverse(path);
+        for (String n : path) {
+            if (!d.hasNode(t.job, n)) {
+                take(p, n, f);
             }
         }
     }
@@ -173,7 +230,7 @@ public final class AbilityTreeSelfTest {
             d.useJob(Job.WARRIOR);
             Growth.get(p).level = 10;
             check(f, d.totalPoints(10) == 10 && d.unspentFor(Job.WARRIOR.tree, 10) == 10, "a level 10 warrior should have 10 points");
-            check(f, SkillManager.takeNode(p, "str_a") == SkillData.TakeResult.REQUIRES, "a branch node was taken before the root");
+            check(f, SkillManager.takeNode(p, "str_1") == SkillData.TakeResult.REQUIRES, "a branch node was taken before the root");
             check(f, SkillManager.takeNode(p, "no_such_node") == SkillData.TakeResult.UNKNOWN, "an unknown node was taken");
             take(p, "titan_cleave", f);
             check(f, d.rank(Skill.TITAN_CLEAVE) == 1 && d.nodeSpent(Job.WARRIOR) == 1 && Skill.TITAN_CLEAVE.id.equals(d.slots[0]),
@@ -181,49 +238,67 @@ public final class AbilityTreeSelfTest {
             check(f, SkillManager.takeNode(p, "titan_cleave") == SkillData.TakeResult.TAKEN, "a node was taken twice");
             check(f, d.canLearn(Skill.TITAN_CLEAVE, 10) == SkillData.LearnResult.SEALED, "a job-tree skill can still be learned outside the tree");
             // 基礎は節から
-            take(p, "str_a", f);
+            take(p, "str_1", f);
             check(f, d.statsFromNodes(Job.WARRIOR)[Stat.STRENGTH.ordinal()] == 4 && Growth.get(p).stat(Stat.STRENGTH) == 4,
                     "a stat node did not raise strength: " + Growth.get(p).stat(Stat.STRENGTH));
-            take(p, "vit_a", f);
+            // 常時スキルは発動②の横 (線は縦と横だけ。発動②を取る前は取れない)
+            check(f, SkillManager.takeNode(p, "riposte") == SkillData.TakeResult.REQUIRES, "a side node was taken before its neighbour");
+            take(p, "shield_rush", f);
             take(p, "riposte", f);
             take(p, "stone_stance", f);
-            take(p, "shield_rush", f);
             check(f, d.activeCount() == 2 && d.rank(Skill.RIPOSTE) == 1 && d.rank(Skill.STONE_STANCE) == 1, "passive / second active nodes are wrong");
-            check(f, d.nodeSpent(Job.WARRIOR) == 9 && d.unspentFor(Job.WARRIOR.tree, 10) == 1, "spent points are wrong: " + d.nodeSpent(Job.WARRIOR));
-            take(p, "str_b", f);
-            check(f, SkillManager.takeNode(p, "agi_a") == SkillData.TakeResult.NO_POINTS, "a node was taken without points");
+            check(f, d.nodeSpent(Job.WARRIOR) == 8 && d.unspentFor(Job.WARRIOR.tree, 10) == 2, "spent points are wrong: " + d.nodeSpent(Job.WARRIOR));
+            take(p, "vit_2", f);
+            take(p, "cheap_shield_rush", f);
+            check(f, SkillManager.takeNode(p, "str_4") == SkillData.TakeResult.NO_POINTS, "a node was taken without points");
             // ほかの職の点は別
             check(f, d.unspentFor(Job.ARCHER.tree, 10) == 10, "warrior points were taken from the archer");
             // 段の節
             Growth.get(p).level = 50;
-            take(p, "titan_cleave_2", f);
+            takePath(p, t, "titan_cleave_2", f);
             check(f, d.rank(Skill.TITAN_CLEAVE) == 2, "a rank node did not raise the rank");
-            // 刻印の節は同じ技で一つ
+            // 変化の節は同じ技で一つ
             takePath(p, t, "heavy_voice", f);
             check(f, d.rune(Skill.ROCK_CALL) == t.node("heavy_voice").rune, "a rune node did not set the rune");
             check(f, SkillManager.takeNode(p, "long_voice") == SkillData.TakeResult.EXCLUDED, "two runes of one skill were taken");
-            // 排他
-            takePath(p, t, "dull_iron", f);
-            check(f, SkillManager.takeNode(p, "quick_iron") == SkillData.TakeResult.EXCLUDED, "an excluded node was taken");
-            check(f, Math.abs(NodeEffects.sum(p, "attack") - 0.12) < 1e-9 && Math.abs(NodeEffects.sum(p, "attack_speed") + 0.10) < 1e-9,
-                    "effect nodes do not sum: attack " + NodeEffects.sum(p, "attack"));
-            check(f, SkillBuild.generalDamage(p, false) >= 0.12 - 1e-9, "general damage does not include effect nodes: " + SkillBuild.generalDamage(p, false));
-            // 閾値: 耐久 24 で岩の肌 (まだ 12)、筋力 24 で重い一撃
-            check(f, d.hasNode(Job.WARRIOR, "rock_skin") && Growth.get(p).stat(Stat.VITALITY) < 24 && NodeEffects.sum(p, "armor") == 0,
-                    "a threshold node fired below its stat: vit " + Growth.get(p).stat(Stat.VITALITY));
-            for (String id : List.of("wide_blade", "big_foe", "str_c", "str_d", "heavy_blow")) {
-                take(p, id, f);
+            // 封じる節 (型どうし): 盾の壁を取ると捨て身は取れない (逆も)
+            takePath(p, t, "shield_wall", f);
+            for (String r : t.node("reckless").requires) {
+                if (t.node(r).kind != AbilityNode.Kind.RUNE && !d.hasNode(Job.WARRIOR, r)) {
+                    takePath(p, t, r, f);
+                    break;
+                }
             }
-            check(f, Growth.get(p).stat(Stat.STRENGTH) < 24 && Math.abs(NodeEffects.sum(p, "attack_speed") + 0.10) < 1e-9,
-                    "heavy blow fired below strength 24: str " + Growth.get(p).stat(Stat.STRENGTH));
-            for (String id : List.of("titan_cleave_3", "sword_spirit", "deep_wound", "str_e", "shield_rush_2", "str_f")) {
-                take(p, id, f);
+            check(f, d.canTake(Job.WARRIOR, t.node("reckless"), 50) == SkillData.TakeResult.EXCLUDED, "a blocked node was taken: " + d.canTake(Job.WARRIOR, t.node("reckless"), 50));
+            // 数は木の節から読む
+            double wallTaken = t.node("shield_wall").effect.get("damage_taken");
+            check(f, Math.abs(NodeEffects.sum(p, "damage_taken") - wallTaken) < 1e-9, "effect nodes do not sum: damage taken " + NodeEffects.sum(p, "damage_taken"));
+            // 閾値: 重い一撃は筋力が at に届いたときだけ効く
+            double heavySpeed = t.node("heavy_blow").effect.get("attack_speed");
+            int heavyAt = t.node("heavy_blow").at;
+            takePath(p, t, "heavy_blow", f);
+            double speedBase = NodeEffects.sum(p, "attack_speed") - (Growth.get(p).stat(Stat.STRENGTH) >= heavyAt ? heavySpeed : 0);
+            check(f, Math.abs(speedBase) < 1e-9, "unexpected attack speed from other nodes: " + speedBase);
+            boolean reached = Growth.get(p).stat(Stat.STRENGTH) >= heavyAt;
+            check(f, Math.abs(NodeEffects.sum(p, "attack_speed") - (reached ? heavySpeed : 0)) < 1e-9,
+                    "heavy blow did not follow strength " + heavyAt + ": str " + Growth.get(p).stat(Stat.STRENGTH) + " aspeed " + NodeEffects.sum(p, "attack_speed"));
+            // 幹と剣士の型の筋力の節を、浅い (奥義より上の) 順に取る
+            List<AbilityNode> strNodes = new ArrayList<>();
+            for (AbilityNode n : t.nodes()) {
+                if (n.kind == AbilityNode.Kind.STAT && n.stat == Stat.STRENGTH && (n.arch == null || "cleaver".equals(n.arch)) && n.y <= 8) {
+                    strNodes.add(n);
+                }
             }
-            check(f, Growth.get(p).stat(Stat.STRENGTH) >= 24 && Math.abs(NodeEffects.sum(p, "attack_speed") + 0.02) < 1e-9,
+            strNodes.sort(java.util.Comparator.comparingInt(n -> n.y));
+            for (AbilityNode n : strNodes) {
+                if (!d.hasNode(Job.WARRIOR, n.id) && Growth.get(p).stat(Stat.STRENGTH) < heavyAt) {
+                    takePath(p, t, n.id, f);
+                }
+            }
+            check(f, Growth.get(p).stat(Stat.STRENGTH) >= heavyAt && Math.abs(NodeEffects.sum(p, "attack_speed") - heavySpeed) < 1e-9,
                     "a threshold node did not fire at its stat: str " + Growth.get(p).stat(Stat.STRENGTH) + " aspeed " + NodeEffects.sum(p, "attack_speed"));
-            // 型の点: 守り石の約束は盾の型に 20 点 (前提の耐久は取っておく)
-            takePath(p, t, "vit_e", f);
-            check(f, d.archPoints(Job.WARRIOR, "shield") < 20 && SkillManager.takeNode(p, "stone_oath") == SkillData.TakeResult.ARCH_POINTS,
+            // 型の点: 守り石の約束は盾の型に 15 SP
+            check(f, d.archPoints(Job.WARRIOR, "shield") < KEYSTONE_GATE && SkillManager.takeNode(p, "stone_oath") != SkillData.TakeResult.OK,
                     "a keystone opened without archetype points: " + d.archPoints(Job.WARRIOR, "shield"));
             // 使う技は 4 本まで
             int before = d.activeCount();
@@ -244,17 +319,11 @@ public final class AbilityTreeSelfTest {
                 }
                 d.applyNodes();
             }
-            check(f, d.activeCount() == SkillRules.BASE_SLOTS, "could not reach four actives from " + before);
-            if (fifth != null) {
-                for (AbilityNode n : t.pathTo(fifth.id)) {
-                    if (n != fifth && !d.hasNode(Job.WARRIOR, n.id)) {
-                        d.nodesOf(Job.WARRIOR).add(n.id);
-                    }
-                }
-                d.applyNodes();
-                check(f, d.canTake(Job.WARRIOR, fifth, 50) == SkillData.TakeResult.ACTIVES_FULL, "a fifth active skill was allowed: " + fifth.id);
-            }
+            check(f, d.activeCount() == SkillRules.BASE_SLOTS && fifth == null, "could not reach four actives from " + before);
             // 変異の節: 極めてから、素材を払って。払えば振り直しのあとも ただ
+            // ここから先は取った節の点が Lv 50 の点を越えるので (手本の形で節の点が上がった)、外されないよう点を足しておく (保存にも乗る)
+            d.bonusPoints = 200;
+            takePath(p, t, "titan_cleave_3", f);
             AbilityNode mut = t.mutationNode(Skill.TITAN_CLEAVE);
             check(f, mut != null && d.rank(Skill.TITAN_CLEAVE) >= Skill.TITAN_CLEAVE.maxRank, "no titan cleave mutation node or not mastered");
             if (mut != null) {

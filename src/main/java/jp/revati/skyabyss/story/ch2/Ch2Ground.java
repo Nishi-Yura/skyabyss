@@ -41,7 +41,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 //     沈んだ塩の蔵 ch2_salt_vault (90〜150、水辺)    小さなダンジョン (SaltVault)。入口の間・塩樽の間・奥の間。潮の喉は世界の潮で乾く/沈む (ふさがない)
 //     潮だまりの浜 ch2_tidal_pools ×2 (30〜120、水辺) 潮だまり貝 2 (湧き台)。クリアで小真珠
 //     漂着の筏の跡 ch2_drift_raft (30〜110、水辺)    人ごとに一度の抽選と頁 ch2/drift_raft、合図 ch2_raft。旅の職人 (二章の装い) が立つ
-//     引き潮の観測の杭 ch2_ebb_stakes (50〜140、水辺) 杭を触ると次の引き潮・満ち潮までの分と、大干潮は夜の前半という一行
+//     引き潮の観測の杭 ch2_ebb_stakes (50〜140、水辺) 杭を触ると次の引き潮・満ち潮までの分と、一番下の新しい刻みのそばの巻き貝の絵の一行。
+//                                                  そばで潮見の貝を吹くと大干潮が来る (TideEbb.callAtStakes)。初めて読んだ二章の人に語り部の印 ch2_stakes_read (頼み ch2/ebb_road が始まる)
 //     沖の難破船 (Wreck。場所の表ではなく、跡地の海の向きの浅い沖に、人が近づいたとき一度だけ置く)
 //   文は assets/skyabyss_ch2/lang、部品・クエスト・会話・伝承は データを直接直す（生成スクリプトはない）
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -78,6 +79,8 @@ public final class Ch2Ground {
     public static final String POOL_REPEAT = "ch2_tidal_pool_repeat";
 
     public static final String STAKES_SIGN = "sign.skyabyss.ch2_ebb_stakes";
+    // 杭を読んだ二章の人 (語り部の印。頼み ch2/ebb_road の start_when が見る)
+    public static final String FLAG_STAKES_READ = "ch2_stakes_read";
 
     // 敵の ID (地上の敵の担当 Ch2Mobs と同じ名前。まだ登録されていなければ、潮殻の背の敵を代わりに使う)
     public static final String CLAM = "skyabyss:tidepool_clam";
@@ -184,6 +187,9 @@ public final class Ch2Ground {
         if (!p.getPersistentData().getBoolean("skyabyss_ch2_stakes_read")) {
             p.getPersistentData().putBoolean("skyabyss_ch2_stakes_read", true);
             Quests.signal(p, SIGNAL_STAKES);
+        }
+        if (inChapter(p) && jp.revati.skyabyss.npc.NpcBonds.of(p).bond(jp.revati.skyabyss.titan.tide.chapter.TideEbb.STORYTELLER).flags().add(FLAG_STAKES_READ)) {
+            jp.revati.skyabyss.npc.NpcBonds.sync(p);
         }
     }
 

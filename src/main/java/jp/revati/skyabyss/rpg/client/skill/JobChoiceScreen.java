@@ -3,6 +3,7 @@ package jp.revati.skyabyss.rpg.client.skill;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.rpg.skill.Job;
 import jp.revati.skyabyss.rpg.skill.JobChoice;
@@ -20,16 +21,24 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 島の宿り木の祠で職を選ぶ画面 (docs/design/43 の 4 節) と、街の職の間で職を替える画面 (switching。docs/design/48 の 3 章)。
+// 島の野営地で職を選ぶ画面 (docs/design/43 の 4 節) と、街の職の間で職を替える画面 (switching。docs/design/48 の 3 章)。
 // 左に六つの職 (始めの武器の絵・名前・副題)、右に役目・受け取る武器・使う技・最初に覚える技。「この職で始める」「この職に替える」は二度押し。
-// 職の間では、いまの職に（いま）を添え、その職の木に使った点を見せる (替えても残る)
+// 職の間では、いまの職に（いま）を添え、その職の木に使った点を見せる (替えても残る)。
+// 島の画面には「あとで」を置かない: 職を選ぶまで島は進まず、街の職の間は渡し船の先なので、ほかに選ぶ所がない
+// (2026-11-03 の声「最初に選ばなかったら、どこで選ぶの？ 後での項目いらなくない？」)。Esc では閉じられ、野営地にいれば REOPEN_MS のあとでまた開く (JobChoice.prompt)
+// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 職の一覧は脇の列 (左)、説明は主の列 (右)、決める釦は下の段の右
 public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int MAX_W = 340;
-    private static final int MAX_H = 200;
-    private static final int ROW_Y = 30;
+    // 島の画面を閉じてから、また開くまで (この間に Esc をもう一度押せばゲームのメニューが開く)
+    static final long REOPEN_MS = 5000;
+    private static long closedAt;
+    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
+    private static final Golden.Box LIST = LAYOUT.body().minor(true);
+    private static final Golden.Box PAGE = LAYOUT.body().major(false);
+    private static final int ROW_Y = LIST.y() + 3;
     private static final int ROW_H = 24;
-    private static final int LIST_W = 112;
-    private static final int LINE_H = 11;
+    private static final int LIST_W = LIST.w() - 6;
+    private static final int LINE_H = Golden.ROW;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private int w;
     private int h;
@@ -39,7 +48,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     private boolean armed;
     private int armedTicks;
     private Button start;
-    private Button later;
     private final ScrollPanel right = new ScrollPanel(LINE_H * 2);
     private final boolean switching;
 
@@ -68,19 +76,25 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     private void layout() {
-        w = Math.min(MAX_W, width - 16);
-        h = Math.min(MAX_H, height - 16);
-        left = (width - w) / 2;
-        top = (height - h) / 2;
+        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
+        w = Golden.L_W;
+        h = Golden.L_H;
+        left = 0;
+        top = 0;
     }
 
     @Override
     protected void init() {
         layout();
+        Golden.Box foot = LAYOUT.footUnder(PAGE);
+        int by = foot.y() + 4;
+        if (switching) {
+            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.job_room.later"), b -> onClose())
+                    .bounds(foot.right() - Golden.S55, by, Golden.S55, Golden.BTN).build());
+        }
+        int sx = foot.right() - Golden.S89 - (switching ? Golden.S55 + Golden.S3 : 0);
         start = addRenderableWidget(Button.builder(Component.translatable(switching ? "gui.skyabyss.job_room.switch_btn" : "gui.skyabyss.job_choice.start"), b -> press())
-                .bounds(left + LIST_W + 16, top + h - 22, 96, 14).build());
-        later = addRenderableWidget(Button.builder(Component.translatable(switching ? "gui.skyabyss.job_room.later" : "gui.skyabyss.job_choice.later"), b -> onClose())
-                .bounds(left + LIST_W + 116, top + h - 22, w - LIST_W - 124, 14).build());
+                .bounds(sx, by, Golden.S89, Golden.BTN).build());
         update();
     }
 
@@ -115,13 +129,15 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double sx, double sy, int button) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         if (right.mouseClicked(mx, my, button)) {
             return true;
         }
         Job[] jobs = Job.values();
         for (int i = 0; i < jobs.length; i++) {
-            int x = left + 8;
+            int x = LIST.x() + 3;
             int y = top + ROW_Y + i * ROW_H;
             if (mx >= x && mx < x + LIST_W && my >= y && my < y + ROW_H - 2) {
                 pick(jobs[i]);
@@ -133,18 +149,22 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        return right.mouseDragged(mx, my, button, dx, dy) || super.mouseDragged(mx, my, button, dx, dy);
+    public boolean mouseDragged(double sx, double sy, int button, double dx, double dy) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
+        return right.mouseDragged(mx, my, button, dx / fit.scale(), dy / fit.scale()) || super.mouseDragged(mx, my, button, dx / fit.scale(), dy / fit.scale());
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(double sx, double sy, int button) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         return right.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        return right.mouseScrolled(mx, my, dy) || super.mouseScrolled(mx, my, dx, dy);
+    public boolean mouseScrolled(double sx, double sy, double dx, double dy) {
+        return right.mouseScrolled(fit.x(sx), fit.y(sy), dy) || super.mouseScrolled(sx, sy, dx, dy);
     }
 
     @Override
@@ -158,50 +178,76 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     @Override
-    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(g, mouseX, mouseY, partialTick);
-        layout();
-        int x = left;
-        int y = top;
-        g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF0B0E14);
-        g.fill(x, y, x + w, y + h, 0xF0141922);
-        g.fill(x, y, x + w, y + 1, 0xFF3E5A6B);
-        g.fill(x, y + h - 1, x + w, y + h, 0xFF3E5A6B);
-        g.fill(x, y, x + 1, y + h, 0xFF3E5A6B);
-        g.fill(x + w - 1, y, x + w, y + h, 0xFF3E5A6B);
+    public void removed() {
+        super.removed();
+        if (!switching) {
+            closedAt = net.minecraft.Util.getMillis();
+        }
+    }
+
+    // 島の画面をまた開いてよいか (閉じてから REOPEN_MS たった)
+    static boolean mayReopen() {
+        return net.minecraft.Util.getMillis() - closedAt >= REOPEN_MS;
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        g.drawCenteredString(font, title, left + w / 2, top + 7, SkillScreen.TITLE);
-        g.drawCenteredString(font, Component.translatable(switching ? "gui.skyabyss.job_room.lead" : "gui.skyabyss.job_choice.lead"), left + w / 2, top + 18, SkillScreen.SOFT);
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(g, mouseX, mouseY, partialTick);
+    }
+
+    // 板・中身・釦は、窓に合わせた変換 (fit。画素ちょうど) の中で描く
+    @Override
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        layout();
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.recess(g, LIST);
+        Golden.recess(g, PAGE);
+        Golden.Box head = LAYOUT.head();
+        g.drawString(font, title, head.x() + Golden.S5, Golden.textY(head.y(), head.h()), SkillScreen.TITLE, false);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
         Job cur = switching ? current() : null;
         Job[] jobs = Job.values();
         for (int i = 0; i < jobs.length; i++) {
             Job j = jobs[i];
-            int x = left + 8;
-            int y = top + ROW_Y + i * ROW_H;
+            int x = LIST.x() + 3;
+            int y = ROW_Y + i * ROW_H;
             boolean hover = mouseX >= x && mouseX < x + LIST_W && mouseY >= y && mouseY < y + ROW_H - 2;
             boolean isPicked = j == picked;
-            g.fill(x, y, x + LIST_W, y + ROW_H - 2, isPicked ? 0xFF24384A : hover ? 0xFF1C2733 : 0xFF10151D);
             if (isPicked) {
-                g.fill(x, y, x + 2, y + ROW_H - 2, 0xFF000000 | SkillScreen.GOLD);
+                Golden.selected(g, new Golden.Box(x, y, LIST_W, ROW_H - 1));
+                g.fill(x, y, x + 2, y + ROW_H - 1, 0xFF000000 | SkillScreen.GOLD);
+            } else if (hover) {
+                g.fill(x, y, x + LIST_W, y + ROW_H - 1, 0xFF1C2733);
             }
-            g.renderItem(JobChoice.starter(j), x + 4, y + 3);
+            g.renderItem(JobChoice.starter(j), x + Golden.S5, y + 4);
             MutableComponent rowName = Component.translatable(j.nameKey());
             if (j == cur) {
                 rowName.append(Component.translatable("gui.skyabyss.job_room.current"));
             }
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, rowName, x + 24, y + 2, LIST_W - 28, isPicked ? SkillScreen.GOLD : j == cur ? SkillScreen.PALE : SkillScreen.TEXT, false);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(j.tree.nameKey()), x + 24, y + 12, LIST_W - 28, SkillScreen.DIM, false);
+            int tx = x + Golden.S5 + 16 + Golden.S5;
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, rowName, tx, y + 2, x + LIST_W - tx - 3, isPicked ? SkillScreen.GOLD : j == cur ? SkillScreen.PALE : SkillScreen.TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(j.tree.nameKey()), tx, y + 13, x + LIST_W - tx - 3, SkillScreen.SOFT, false);
         }
-        int rx = left + LIST_W + 16;
-        int rw = w - LIST_W - 24;
-        right.setViewport(rx, top + ROW_Y, rw, h - ROW_Y - 28);
+        int rx = PAGE.x() + Golden.S8;
+        int rw = PAGE.right() - 2 - rx;
+        right.setViewport(rx, PAGE.y() + 2, rw, PAGE.h() - 4);
+        renderPage(g, rx);
+        fit.end(g);
+    }
+
+    private void renderPage(GuiGraphics g, int rx) {
         if (picked == null) {
+            // 導きの一行と選び方 (職を選ぶまで)
             right.begin(g);
-            int y = block(g, Component.translatable(switching ? "gui.skyabyss.job_room.pick" : "gui.skyabyss.job_choice.pick"), rx, right.top(), right.width(), SkillScreen.SOFT);
+            int y = block(g, Component.translatable(switching ? "gui.skyabyss.job_room.lead" : "gui.skyabyss.job_choice.lead"), rx, right.top(), right.width(), SkillScreen.TEXT);
+            y = block(g, Component.translatable(switching ? "gui.skyabyss.job_room.pick" : "gui.skyabyss.job_choice.pick"), rx, y + Golden.S5, right.width(), SkillScreen.SOFT);
             right.end(g);
             right.setContentHeight(y - right.top());
             return;
@@ -210,9 +256,9 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         int y = right.top();
         int tw = right.width();
         g.drawString(font, Component.translatable("job.skyabyss.subtitle", Component.translatable(picked.nameKey()), Component.translatable(picked.tree.nameKey())),
-                rx, y, SkillScreen.GOLD, false);
-        y += 13;
-        y = block(g, Component.translatable(picked.nameKey() + ".role"), rx, y, tw, SkillScreen.TEXT) + 4;
+                rx, Golden.textY(y, LINE_H), SkillScreen.GOLD, false);
+        y += LINE_H + Golden.S5;
+        y = block(g, Component.translatable(picked.nameKey() + ".role"), rx, y, tw, SkillScreen.TEXT) + Golden.S5;
         ItemStack weapon = JobChoice.starter(picked);
         y = block(g, Component.translatable("gui.skyabyss.job_choice.weapon", weapon.getHoverName()), rx, y, tw, SkillScreen.PALE);
         List<Skill> actives = new ArrayList<>();
@@ -238,7 +284,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
                 y = block(g, Component.translatable("gui.skyabyss.job_choice.first", Component.translatable(first.nameKey())), rx, y, tw, SkillScreen.PALE);
             }
         }
-        y += 4;
+        y += Golden.S5;
         if (switching) {
             Minecraft mc = Minecraft.getInstance();
             int spent = mc.player == null ? 0 : jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player).nodeSpent(picked);
@@ -254,7 +300,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
 
     private int block(GuiGraphics g, Component text, int x, int y, int tw, int color) {
         for (FormattedCharSequence line : TextWrap.split(font, text, tw)) {
-            g.drawString(font, line, x, y, color, false);
+            g.drawString(font, line, x, Golden.textY(y, LINE_H), color, false);
             y += LINE_H;
         }
         return y;
@@ -263,6 +309,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     @Override
     public int[] textBounds() {
         layout();
-        return new int[] {left, top, w, h};
+        return fit.screenRect(0, 0, w, h);
     }
 }

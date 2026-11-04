@@ -22,6 +22,47 @@ public final class FishingSelfTest {
     private FishingSelfTest() {
     }
 
+    // 魚の注文 (FishOrders) と釣り場 (FishingSpots)
+    static void ordersAndSpots(List<String> f, FakePlayer p) {
+        int land = jp.revati.skyabyss.world.continent.ContinentMap.WHALE;
+        FishOrders.Order d = FishOrders.daily(land, 20000);
+        check(f, d.equals(FishOrders.daily(land, 20000)) && d.species().region() == land && d.species().rarity() != 'R' && d.count() >= 1 && d.count() <= 3,
+                "the daily fish order is not a stable land fish x1-3: " + d);
+        FishOrders.Order w = FishOrders.weekly(land, 20000);
+        check(f, w.species().rarity() == 'R' && w.count() == 1, "the weekly order is not one rare fish: " + w);
+        check(f, d.pay() == d.species().sell() * FishOrders.PAY * d.count(), "the order pays the wrong amount");
+        p.getInventory().clearContent();
+        check(f, !FishOrders.deliver(p, d), "an order was filled without the fish");
+        for (int i = 0; i < d.count(); i++) {
+            p.getInventory().add(FishingSetup.stack(d.species(), d.species().minMm() + 10 * i));
+        }
+        check(f, FishOrders.deliver(p, d) && p.getInventory().isEmpty(), "delivering the ordered fish did not take them");
+        // 釣り場: 土地ごとに二つ、互いに離れて、岸 (陸で隣が水)
+        var spots = FishingSpots.all();
+        for (int l : FishingSpots.LANDS) {
+            long n = spots.stream().filter(s -> s.land() == l).count();
+            check(f, n == FishingSpots.PER_LAND, "land " + l + " has " + n + " fishing spots");
+        }
+        if (!spots.isEmpty()) {
+            FishingSpots.Spot s = spots.get(0);
+            check(f, FishingSpots.near(s.x(), s.z()) && !FishingSpots.near(s.x() + 500, s.z() + 500), "the fishing spot reach is wrong");
+            p.getPersistentData().remove(FishingSpots.FOUND);
+            check(f, !FishingSpots.found(p, s), "a spot was found before visiting");
+            FishingSpots.find(p, s);
+            check(f, FishingSpots.found(p, s), "visiting did not find the spot");
+            p.getPersistentData().remove(FishingSpots.FOUND);
+        }
+        // 釣り場では、ときどき・まれが 2 倍
+        net.minecraft.util.RandomSource r = net.minecraft.util.RandomSource.create(7);
+        int plain = 0;
+        int boosted = 0;
+        for (int i = 0; i < 20000; i++) {
+            plain += Fish.roll(land, r, false).rarity() == 'R' ? 1 : 0;
+            boosted += Fish.roll(land, r, true).rarity() == 'R' ? 1 : 0;
+        }
+        check(f, boosted > plain * 1.7, "a fishing spot does not double rare fish (" + plain + " → " + boosted + ")");
+    }
+
     private static void check(List<String> f, boolean ok, String what) {
         if (!ok) {
             f.add(what);
@@ -98,6 +139,8 @@ public final class FishingSelfTest {
                 }
                 net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(hook.blockPosition()).inflate(4);
                 level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box).forEach(net.minecraft.world.entity.Entity::discard);
+                // 出現地点のそばには、ほかの段や自己テストのときだけ湧くバニラの敵が残した経験の玉が先にあることがある。釣り上げて増えた玉だけを見る
+                List<net.minecraft.world.entity.ExperienceOrb> orbsBefore = level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box);
                 int damage = hook.retrieve(p.getMainHandItem());
                 List<net.minecraft.world.entity.item.ItemEntity> drops = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box);
                 int land = ContinentMap.get().inside(hook.getBlockX(), hook.getBlockZ())
@@ -105,7 +148,7 @@ public final class FishingSelfTest {
                 check(f, damage == 0 && drops.size() == 1 && drops.get(0).getItem().getItem() instanceof FishingSetup.FishItem fi
                         && (fi.species.region() == land || fi.species.region() == Fish.ANY) && drops.get(0).getItem().get(FishingSetup.FISH_SIZE.get()) != null,
                         "reeling in did not give one fish of the land: " + drops.stream().map(e -> e.getItem().toString()).toList() + " damage " + damage);
-                check(f, level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box).isEmpty(), "reeling in dropped experience");
+                check(f, level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, box).stream().allMatch(orbsBefore::contains), "reeling in dropped experience");
                 drops.forEach(net.minecraft.world.entity.Entity::discard);
                 hook.discard();
             }
@@ -150,6 +193,7 @@ public final class FishingSelfTest {
             w.last.clear();
             w.week = "";
             w.setDirty();
+            ordersAndSpots(f, p);
             // 店: 道具屋に竿、食べ物屋が全部の魚を買い取る
             var tool = jp.revati.skyabyss.facility.ShopManager.shop("tool_shop");
             var food = jp.revati.skyabyss.facility.ShopManager.shop("food_shop");

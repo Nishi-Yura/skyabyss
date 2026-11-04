@@ -135,37 +135,31 @@ public final class ForgeRules {
                 && crystalsAvailable(player, jp.revati.skyabyss.item.extra.GearFreedom.UNSOCKET_CRYSTALS);
     }
 
-    // 外す (結晶 1)。外したものを品にして返す (できなければ空)
+    // 粉を合わせる: 同じ段の粉三つ → 一つ上の段の粉一つ (材料の枠の粉。VI が上限)
+    public static boolean canCombine(ItemStack mat) {
+        return mat.getItem() instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard
+                && mat.getCount() >= jp.revati.skyabyss.item.extra.Powder.COMBINE
+                && jp.revati.skyabyss.item.extra.Powder.tier(mat) < jp.revati.skyabyss.item.extra.Powder.MAX_TIER;
+    }
+
+    // 合わせた粉を返す (材料は三つ減る)。できなければ空
+    public static ItemStack combinePowder(ItemStack mat) {
+        if (!canCombine(mat)) {
+            return ItemStack.EMPTY;
+        }
+        int t = jp.revati.skyabyss.item.extra.Powder.tier(mat);
+        ItemStack out = jp.revati.skyabyss.item.extra.Powder.withTier(new ItemStack(mat.getItem()), t + 1);
+        mat.shrink(jp.revati.skyabyss.item.extra.Powder.COMBINE);
+        return out;
+    }
+
+    // 外す (無料。粉と炉の頁 1-4)。外したものを品にして返す (できなければ空)
     public static ItemStack removeGem(Player player, ItemStack gear, int index) {
         if (!canRemoveGem(player, gear, index)) {
             return ItemStack.EMPTY;
         }
         payCrystals(player, jp.revati.skyabyss.item.extra.GearFreedom.UNSOCKET_CRYSTALS);
         return gemItem(jp.revati.skyabyss.item.extra.GearFreedom.remove(gear, index));
-    }
-
-    // 穴を足す (打ち直し。結晶 2 と、由来の巨神の素材。一つ目 8、二つ目 16)。運に頼らず必ず付けられる
-    public static int addSocketMaterial(ItemStack gear) {
-        int n = jp.revati.skyabyss.item.extra.GearFreedom.sockets(gear);
-        return jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_MATERIAL[Math.min(n, jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_MATERIAL.length - 1)];
-    }
-
-    public static boolean canAddSocket(Player player, ItemStack gear) {
-        return jp.revati.skyabyss.item.extra.GearFreedom.canAddSocket(gear)
-                && affordable(player, new Cost(addSocketMaterial(gear), jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_CRYSTALS), shardItem(gear));
-    }
-
-    public static boolean addSocket(Player player, ItemStack gear) {
-        if (!canAddSocket(player, gear)) {
-            return false;
-        }
-        Item shard = shardItem(gear);
-        int material = addSocketMaterial(gear);
-        if (!player.isCreative()) {
-            remove(player, shard, material);
-            remove(player, ModItems.RESONANCE_CRYSTAL.get(), jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_CRYSTALS);
-        }
-        return jp.revati.skyabyss.item.extra.GearFreedom.addSocket(gear);
     }
 
     public static int extractCost(boolean destroy) {

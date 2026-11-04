@@ -8,7 +8,6 @@ import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.grave.DeathRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -117,8 +116,8 @@ public final class RpgRulesSelfTest {
                     }
                 }
             }
-            if (DeathRules.mode(server) != DeathRules.Mode.KEEP) {
-                f.add("death mode default should be keep, got " + DeathRules.mode(server));
+            if (!server.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_KEEPINVENTORY)) {
+                f.add("keepInventory should be on (items are kept on death)");
             }
             // 一度きりの印は倒れても残る (はじめの持ち物を二度もらえた・渡し船で渡ったのが消えた不具合)
             if (!jp.revati.skyabyss.util.LifeKeep.KEYS.contains(RpgRules.KIT_TAG)
@@ -135,6 +134,22 @@ public final class RpgRulesSelfTest {
                     || fresh.getPersistentData().contains("skyabyss_some_cooldown")) {
                 f.add("death clone: kit " + fresh.getPersistentData().getBoolean(RpgRules.KIT_TAG) + " ferried "
                         + fresh.getPersistentData().getBoolean(jp.revati.skyabyss.world.continent.ContinentOutskirts.FERRIED) + " (cooldowns must not carry over)");
+            }
+            // 敵を倒しても経験の玉を出さない (バニラの dropExperience はこの知らせが止められると 0 を出す)。人の分は止めない (墓・預かりの決まりが決める)
+            var foeType = net.minecraft.world.entity.EntityType.byString(SkyAbyss.MODID + ":moss_crawler").orElse(null);
+            net.minecraft.world.entity.Entity foe = foeType == null ? null : foeType.create(level);
+            if (!(foe instanceof net.minecraft.world.entity.LivingEntity living)) {
+                f.add("cannot make a moss crawler to test experience drops");
+            } else {
+                var drop = new net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent(living, dead, 5);
+                if (!net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(drop).isCanceled()) {
+                    f.add("a slain foe still drops experience orbs (" + drop.getDroppedExperience() + ")");
+                }
+                foe.discard();
+            }
+            FakePlayer xpPlayer = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "xp_drop"));
+            if (net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent(xpPlayer, null, 5)).isCanceled()) {
+                f.add("a player's own experience drop was cancelled by the foe rule");
             }
             if (c == null) {
                 f.add("no place outside the capital to test gathering");
@@ -227,7 +242,7 @@ public final class RpgRulesSelfTest {
             }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST rpg rules PASSED (shared chests: each person takes a copy with a personal 20-min wait, empty chests stay plain; rules registered, keep on death by default, log/ore gathering with tool check and regrow, no gathering of crafted blocks, bucket fill keeps the source, fake players left alone)");
+            SkyAbyss.LOGGER.info("SELFTEST rpg rules PASSED (shared chests: each person takes a copy with a personal 20-min wait, empty chests stay plain; rules registered, keep on death by default, no experience orbs from slain foes, log/ore gathering with tool check and regrow, no gathering of crafted blocks, bucket fill keeps the source, fake players left alone)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST rpg rules FAILED: {}", s);

@@ -696,6 +696,7 @@ def fix_joints(data, mesh_name):
         if float(cKDTree(psamp).query(ma.surface_samples(bones[n]))[0].min()) > 0.4 * ext:
             continue
         orig = b["vertices"]
+        orig_v = np.array(orig, float)
         best = (_joint_score(bad_now[n]), orig)
         for st in steps:
             b["vertices"] = orig
@@ -703,6 +704,8 @@ def fix_joints(data, mesh_name):
                 break
             if ma.analyze(np.array(b["vertices"], float), np.array(b["triangles"], int))["inv"]:
                 continue  # 裏返った (薄い部品が突き抜けた)
+            if n == "head" and (np.linalg.norm(np.array(b["vertices"], float) - orig_v, axis=1) > 0.05).mean() > 0.35:
+                continue  # 首でなく顔の大半が動いた (胸にかかる長いひげで付け根を見誤る。社の祭司は顔が横へずれた)
             nb, bn = joint_bad(data, mesh_name)
             j = ma.joint_check(bn, mesh_name).get(n) if bn else None
             if j is None:

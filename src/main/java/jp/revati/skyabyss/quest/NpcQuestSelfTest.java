@@ -484,6 +484,43 @@ public final class NpcQuestSelfTest {
     }
 
     // ---------------------------------------------------------------- 会話とクエスト
+    // 世界の日数で割り込む脇の話 (入口の条件に "day" と「まだ聞いていない」の印 (not flag) があるもの) を、聞いたことにする。
+    // 自己テストの世界は回すほど日が進み、イサナや語り部の入口に割り込んで、試したい会話にたどり着けなくなる (脇の話そのものは Ch1SelfTest などが確かめる)
+    public static void hushDayTalks(net.minecraft.server.level.ServerPlayer p) {
+        for (java.util.Map.Entry<String, Dialogue> e : DialogueManager.all().entrySet()) {
+            for (Dialogue.Entry en : e.getValue().entries()) {
+                if (en.condition() != null && mentionsDay(en.condition())) {
+                    java.util.List<String> flags = new java.util.ArrayList<>();
+                    notFlags(en.condition(), false, flags);
+                    NpcBonds.of(p).bond(e.getKey()).flags().addAll(flags);
+                }
+            }
+        }
+    }
+
+    private static boolean mentionsDay(Condition c) {
+        if ("day".equals(c.type())) {
+            return true;
+        }
+        for (Condition x : c.children()) {
+            if (mentionsDay(x)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 「not { flag X }」の X を集める (その人の印。npc を名指しした印は除く)
+    private static void notFlags(Condition c, boolean negated, java.util.List<String> out) {
+        if (negated && "flag".equals(c.type()) && c.json().has("flag") && !c.json().has("npc")) {
+            out.add(c.json().get("flag").getAsString());
+        }
+        boolean not = "not".equals(c.type());
+        for (Condition x : c.children()) {
+            notFlags(x, not != negated, out);
+        }
+    }
+
     private static FakePlayer player(ServerLevel level, int n, BlockPos at) {
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a1e0b3c-0000-4000-8000-0000000000" + String.format("%02d", n)),
                 "[npc_test_" + n + "]"));
@@ -491,6 +528,7 @@ public final class NpcQuestSelfTest {
         p.getInventory().clearContent();
         Quests.forgetAll(p);
         p.setData(NpcSetup.BONDS, new NpcBonds());
+        hushDayTalks(p);
         p.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5);
         return p;
     }

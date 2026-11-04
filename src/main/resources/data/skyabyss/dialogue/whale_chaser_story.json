@@ -126,7 +126,7 @@
       "options": [
         {
           "id": "go",
-          "goto": "end",
+          "goto": "c2_h_ahead",
           "do": [
             {
               "type": "affinity",
@@ -164,7 +164,7 @@
       "options": [
         {
           "id": "ok",
-          "goto": "end"
+          "goto": "c2_h_after1"
         }
       ]
     },

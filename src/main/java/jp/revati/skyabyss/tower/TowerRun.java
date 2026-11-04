@@ -26,6 +26,8 @@ public final class TowerRun {
     public boolean cleared;
     // 選んだ週の賭け (TowerWagers)
     public final Set<String> wagers = new java.util.LinkedHashSet<>();
+    // 挑戦が始まったときの週の主の構え (TowerStance)
+    public TowerStance stance = TowerStance.thisWeek();
     final MinecraftServer server;
 
     TowerRun(MinecraftServer server, int id, int slot, List<UUID> members, long now) {

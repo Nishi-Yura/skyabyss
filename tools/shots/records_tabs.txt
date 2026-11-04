@@ -1,0 +1,30 @@
+# 記録の画面のつまみ (金の板の絵柄) と、転生の頁の「順位表に載せる」釦。GUI 倍率 3 と 4
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/records_tabs.txt -PshotsName=records_tabs
+world records_tabs continent
+size 1280 720
+timeout 900
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+hud on
+wait 20
+
+cmd skyabyss facility records hub 0
+wait 30
+shot rt_1_clear_x3
+cmd skyabyss facility records hub 5
+wait 30
+shot rt_2_rebirth_x3
+close
+wait 10
+guiscale 4
+wait 10
+cmd skyabyss facility records hub 5
+wait 30
+shot rt_3_rebirth_x4
+cmd skyabyss facility records hub 2
+wait 30
+shot rt_4_depth_x4
+close

@@ -1,0 +1,58 @@
+# 2026-11-04: 近接の溜めの輪 (client/weapon/ChargeRing)。振った直後・溜まる途中・満ちた光・同じ敵を殴れる間の空振り、肩越しの視点
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/charge_ring.txt -PshotsName=melee
+world camp_check continent
+size 1600 900
+timeout 1500
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamemode creative
+hud on
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 100
+cmd tp @s ~ ~ ~ ~ 22
+cmd kill @e[tag=melee_dummy]
+cmd execute at @s run summon skyabyss:bandit ^ ^ ^2.4 {NoAI:1b,PersistenceRequired:1b,Tags:["melee_dummy"]}
+wait 5
+cmd attribute @e[tag=melee_dummy,limit=1] minecraft:generic.max_health base set 1000
+cmd data merge entity @e[tag=melee_dummy,limit=1] {Health:1000f}
+cmd item replace entity @s weapon.mainhand with minecraft:stone_sword
+chat clear
+wait 40
+# 石の剣 (振りの長さ 12.5 tick)
+attack
+wait 3
+shot c1_swung
+wait 4
+shot c2_half
+wait 2
+shot c3_full_a
+shot c3_full_b
+shot c3_full_c
+shot c3_full_d
+wait 30
+# 満ちて当てたあと、すぐもう一度 (同じ敵を殴れる間 = 8 tick) → 空振り
+attack
+wait 3
+attack
+wait 1
+shot c4_miss
+wait 40
+# 鯨骨の大剣 (預かりの武器)
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+wait 60
+attack
+wait 6
+shot c5_greatsword_charging
+wait 60
+# 肩越しの視点
+perspective back
+wait 20
+attack
+wait 6
+shot c6_shoulder_charging
+perspective first

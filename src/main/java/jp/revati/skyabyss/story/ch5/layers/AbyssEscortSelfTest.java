@@ -44,6 +44,32 @@ public final class AbyssEscortSelfTest {
         AbyssLayersV2SelfTest.load(server);
     }
 
+    // 読み込みを頼み、強制読み込みのチャンクが生き物の動くところまで上がるのを待つ (新しい世界では作るのに数 tick かかる。
+    // 道の人は、動いていないチャンクでは立て直さないので、待たずに始めると道の途中で止まった。最大 LOAD_MAX tick)
+    private static int loadTicks;
+    static final int LOAD_MAX = 600;
+
+    public static boolean loadUntil(MinecraftServer server) {
+        if (loadTicks++ == 0) {
+            load(server);
+        }
+        ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
+        boolean ready = level != null;
+        for (int cx = -5; ready && cx <= 4; cx++) {
+            for (int cz = -5; cz <= 4; cz++) {
+                if (!level.isPositionEntityTicking(new BlockPos(cx * 16 + 8, 64, cz * 16 + 8))) {
+                    ready = false;
+                    break;
+                }
+            }
+        }
+        if (ready || loadTicks > LOAD_MAX) {
+            loadTicks = 0;
+            return true;
+        }
+        return false;
+    }
+
     public static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         ServerLevel level = server.getLevel(AbyssWorld.LEVEL);

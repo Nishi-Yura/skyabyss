@@ -1,0 +1,15 @@
+# 2026-11-03 夜: 大陸の版が上がった世界に初めて入ったときの読み込み画面 (upgrade/RegenLoading)。
+# 前に run/shots/<名前>/saves/facility_labels へ前の版の世界を写しておく (この台本は既にある世界を開く)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/regen_loading.txt -PshotsName=regen_after
+world facility_labels continent
+size 1600 900
+timeout 1800
+render 10
+guiscale 3
+wait 30
+shot l01_loading
+wait 100
+shot l02_loading_later
+waitscreen 1200 none
+wait 40
+shot l03_after

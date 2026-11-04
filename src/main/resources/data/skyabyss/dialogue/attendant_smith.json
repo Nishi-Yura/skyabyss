@@ -62,6 +62,17 @@
           "goto": "end"
         },
         {
+          "id": "powder",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "powder"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "forge",
           "kind": "talk",
           "goto": "forge"

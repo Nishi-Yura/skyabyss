@@ -1,0 +1,101 @@
+# 2026-11-03 の直しの確かめ: 社の祭司の顔・割れ殻の洞の戸口・会話の肖像 (封切り師・塔守・町の案内人)・祠の黒い集合台・仲間の札の大きさ
+world oldlooks flat
+size 1280 720
+timeout 900
+render 10
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+
+# ---- 社の祭司 (正面・斜め。頭は正面のまま)
+cmd summon skyabyss:attendant -3 -60 0.5 {NoAI:1b,Role:"shrine_priest",Rotation:[0f,0f],PersistenceRequired:1b}
+fov 50
+camera minecraft:overworld -3 -60.1 2.6 180 2
+waitchunks
+wait 40
+shot priest_front
+camera minecraft:overworld -1.7 -60.1 2.2 150 2
+wait 10
+shot priest_threeq
+
+# ---- 割れ殻の洞の口 (石の台地の上。地面の上面 y=-30。口は北 = -z を向く)
+fov 70
+cmd forceload add 150 -16 192 34
+wait 120
+cmd fill 150 -49 -16 170 -31 34 stone
+cmd fill 171 -49 -16 192 -31 34 stone
+cmd fill 150 -30 -16 192 -30 34 grass_block
+cmd skyabyss dev ch1 place ch1_cleft_shell_cave 160 -30 0 0
+wait 200
+camera minecraft:overworld 160.5 -29 -8 0 8
+waitchunks
+wait 40
+shot cave_mouth
+camera minecraft:overworld 160.5 -29 -2.6 0 30
+wait 20
+shot cave_inside
+
+# ---- 会話の肖像
+camera minecraft:overworld 0.5 -60 -4 0 0
+cmd gamemode creative
+wait 20
+hud on
+cmd summon skyabyss:attendant 0.5 -60 0.5 {NoAI:1b,Role:"box_opener",PersistenceRequired:1b,Invulnerable:1b}
+wait 40
+cmd skyabyss dev talk "skyabyss:attendant_box_opener"
+wait 140
+shot talk_box_opener
+close
+wait 20
+cmd kill @e[type=skyabyss:attendant,distance=..20]
+cmd summon skyabyss:attendant 0.5 -60 0.5 {NoAI:1b,Role:"tower_keeper",PersistenceRequired:1b,Invulnerable:1b}
+wait 40
+cmd skyabyss dev talk "skyabyss:attendant_tower_keeper"
+wait 140
+shot talk_tower_keeper
+close
+wait 20
+cmd execute at @s run summon skyabyss:town_guest ~ ~ ~3 {Guest:"town_guide_whale",NoAI:1b,Rotation:[180f,0f],PersistenceRequired:1b}
+wait 20
+cmd skyabyss dev talk "skyabyss:guest_town_guide_whale"
+wait 140
+shot talk_town_guide
+close
+
+# ---- 祠の黒い集合台 (拝殿の南の入口の外)。心臓を止めていない人が乗ると、断りの帯
+cmd gamemode creative
+cmd skyroute shrine stone_whale
+waitchunks
+wait 200
+cmd gamemode spectator
+hud off
+cmd execute at @s run tp @s ~ ~2 ~12 180 28
+wait 30
+shot shrine_pad
+cmd gamemode creative
+cmd execute at @s run tp @s ~ ~-2 ~-5 180 10
+hud on
+wait 40
+shot shrine_pad_on
+
+# ---- 仲間の札 (頭の上の名前・距離・体力)。GUI 2 と 3
+cmd gamemode creative
+cmd execute at @s run tp @s ~ ~ ~20 0 0
+guiscale 2
+hud on
+huddemo boss
+wait 75
+shot party_tags_g2
+guiscale 3
+wait 30
+shot party_tags_g3
+huddemo off
+quit

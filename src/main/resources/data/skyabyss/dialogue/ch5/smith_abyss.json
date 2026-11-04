@@ -37,6 +37,10 @@
     },
     "ch5_iron_tell2": {
       "face": "neutral",
+      "next": "ch5_iron_tell3"
+    },
+    "ch5_iron_tell3": {
+      "face": "neutral",
       "options": [
         {
           "id": "ok",

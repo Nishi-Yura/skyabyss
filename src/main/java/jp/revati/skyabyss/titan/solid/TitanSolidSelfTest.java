@@ -265,7 +265,18 @@ public final class TitanSolidSelfTest {
             SkyAbyss.LOGGER.info("SELFTEST titan solid: cleared a stale stone whale record of the test player ({} clears)", mem.clears);
             mem.clears = 0;
         }
+        // 物語が岩鯨の章まで来ていることにする (序章の人には岩鯨が見えず、体の当たりもない。TitanVisibility)
+        jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = (id, t) -> true;
         jp.revati.skyabyss.titan.TitanVisibility.clearCache();
+        try {
+            liveInner(f, level, whale, p, cx, cz);
+        } finally {
+            jp.revati.skyabyss.titan.TitanVisibility.REACHED_OVERRIDE = null;
+            jp.revati.skyabyss.titan.TitanVisibility.clearCache();
+        }
+    }
+
+    private static void liveInner(List<String> f, ServerLevel level, StoneWhaleEntity whale, FakePlayer p, double cx, double cz) {
         float yaw = whale.getYRot();
         // 体の中 (体の外寄り 横 12、上 22): いちばん近い外へ向かう速さをもらう
         Vec3 inside = new Vec3(cx, 120, cz).add(TitanSolids.toWorldDelta(yaw, new Vec3(17.2, 20, 0)));

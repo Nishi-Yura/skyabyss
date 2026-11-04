@@ -122,7 +122,7 @@ public final class WildLoot {
         }
     }
 
-    static List<ServerPlayer> recipients(ServerLevel level, ServerPlayer killer, LivingEntity dead) {
+    public static List<ServerPlayer> recipients(ServerLevel level, ServerPlayer killer, LivingEntity dead) {
         List<ServerPlayer> out = new ArrayList<>();
         out.add(killer);
         var party = jp.revati.skyabyss.party.Parties.of(killer);

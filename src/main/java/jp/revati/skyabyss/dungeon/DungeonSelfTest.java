@@ -16,6 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -78,6 +79,8 @@ public final class DungeonSelfTest {
             }
             check(f, a.checkpoint == 0 && DungeonWorld.in(p), "the squad did not arrive on the first level");
             check(f, level.getBlockState(a.mark(0, "leave")).is(Blocks.LODESTONE), "the first level was not poured (no return stone)");
+            check(f, jp.revati.skyabyss.world.LodestoneLabels.describe(p, a.mark(0, "leave")) != null
+                    && jp.revati.skyabyss.world.LodestoneLabels.describe(p, a.mark(0, "leave").above(3)) == null, "the return stone has no name tag (or a plain spot got one)");
             BlockPos chest = a.mark(0, "chest_1");
             check(f, level.getBlockEntity(chest) instanceof ChestBlockEntity c && (!c.isEmpty() || jp.revati.skyabyss.loot.SharedChests.known(level, chest)),
                     "the first chest has nothing for players");
@@ -90,16 +93,13 @@ public final class DungeonSelfTest {
             f0.wakeRooms(level, List.of(p));
             int foes = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(40), m -> m.getTags().contains(a.foeTag())).size();
             check(f, f0.woke.contains("a") && foes >= f0.roomFoes.get("a").size(), "room a did not wake (" + foes + " foes)");
-            // 鍵持ちを倒して扉へ寄ると開く
+            // 鍵持ちを倒して扉へ寄ると開く (鍵の日 DungeonMood.KEYS は鍵持ちが二体なので、いる分を全部倒す)
             Vec3 rb = a.markCenter(0, "room_b");
             p.moveTo(rb.x, rb.y, rb.z, 0f, 0f);
             f0.wakeRooms(level, List.of(p));
-            Mob key = null;
-            for (Mob m : level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(40), m -> m.getTags().contains(Dungeons.KEY_TAG) && m.getTags().contains(a.foeTag()))) {
-                key = m;
-            }
-            check(f, key != null, "no key bearer in room b");
-            if (key != null) {
+            List<Mob> keys = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(40), m -> m.getTags().contains(Dungeons.KEY_TAG) && m.getTags().contains(a.foeTag()));
+            check(f, keys.size() >= f0.keyNeed, "too few key bearers in room b (" + keys.size() + " of " + f0.keyNeed + ")");
+            for (Mob key : keys) {
                 key.hurt(level.damageSources().genericKill(), Float.MAX_VALUE);
             }
             check(f, f0.keyTaken, "killing the key bearer did not give the key");
@@ -156,6 +156,8 @@ public final class DungeonSelfTest {
                     quickRun(f, server, level, other, q, runs);
                 }
             }
+            // 深く潜る・坑の様子・育つ装飾品 (2026-11-05 のダンジョンの頁)
+            deepAndMoods(f, server, level, q, runs);
             // 続きから: 続きのある人と無い人がいっしょに入ると、浅い方から
             p.getPersistentData().putInt(Dungeons.PROGRESS + d.id, 1);
             Dungeons.endForTest(a);
@@ -180,6 +182,73 @@ public final class DungeonSelfTest {
             }
         }
         report(f, built);
+    }
+
+    static void deepAndMoods(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer p, List<DungeonRun> runs) {
+        // 坑の様子: 一つのダンジョンは日ごとに四つを巡り、同じ日の四つのダンジョンはみな違う
+        java.util.Set<DungeonMood> days = java.util.EnumSet.noneOf(DungeonMood.class);
+        java.util.Set<DungeonMood> same = java.util.EnumSet.noneOf(DungeonMood.class);
+        for (int i = 0; i < 4; i++) {
+            days.add(DungeonMood.of(1000 + i, Dungeon.BONE_PIT));
+            same.add(DungeonMood.of(1000, Dungeon.values()[i]));
+        }
+        check(f, days.size() == 4 && same.size() == 4, "dungeon moods do not rotate by day and dungeon");
+        // 主の箱の階級: ふつう レア/エピック、深く潜ると一つ上
+        check(f, Dungeons.boxTier(Dungeon.BONE_PIT, false) == jp.revati.skyabyss.item.GearTier.RARE && Dungeons.boxTier(Dungeon.BONE_PIT, true) == jp.revati.skyabyss.item.GearTier.EPIC
+                && Dungeons.boxTier(Dungeon.MOLTEN_MINE, false) == jp.revati.skyabyss.item.GearTier.EPIC && Dungeons.boxTier(Dungeon.MOLTEN_MINE, true) == jp.revati.skyabyss.item.GearTier.HEROIC,
+                "the deep boss box is not one tier up");
+        p.getPersistentData().remove(Dungeons.PROGRESS + Dungeon.BONE_PIT.id);
+        DungeonRun run = Dungeons.startForTest(server, Dungeon.BONE_PIT, List.of(p), true);
+        if (run == null) {
+            f.add("a deep run did not start");
+            return;
+        }
+        runs.add(run);
+        DungeonFloor f0 = run.floor(0);
+        check(f, run.deep && Mechanics.tidePeriod(f0) == Mechanics.DEEP_TIDE_PERIOD && Mechanics.lavaPeriod(f0) == Mechanics.DEEP_LAVA_PERIOD
+                && Mechanics.charge(f0) == Mechanics.DEEP_CHARGE, "a deep run does not speed up the mechanisms");
+        // 深く潜った敵: 体力 +40% の修飾子と印、傷 +40%
+        run.mood = DungeonMood.KEYS;
+        String keyMark = null;
+        for (List<String> marks : f0.roomFoes.values()) {
+            for (String m : marks) {
+                if (m.endsWith("_key")) {
+                    keyMark = m;
+                }
+            }
+        }
+        if (keyMark == null) {
+            f.add("bone pit level 1 has no key bearer");
+            return;
+        }
+        net.minecraft.world.entity.Mob key = f0.spawnFoe(level, keyMark);
+        check(f, key != null && key.getTags().contains(Dungeons.DEEP_TAG)
+                && key.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).getModifier(Dungeons.DEEP_HEALTH) != null
+                && key.getHealth() == key.getMaxHealth(), "a deep foe did not get +40% health");
+        long bearers = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(f0.at(keyMark)).inflate(6),
+                m -> m.getTags().contains(Dungeons.KEY_TAG) && m.getTags().contains(run.foeTag())).size();
+        check(f, bearers == 2 && f0.keyNeed == 2, "a key day did not bring two key bearers (" + bearers + ")");
+        // 宝の日: 主の間に宝箱がもう一つ
+        DungeonFloor fb = run.floor(Dungeon.BOSS_FLOOR);
+        fb.pourNow(level);
+        fb.treasure(level);
+        check(f, level.getBlockState(fb.at("boss")).is(net.minecraft.world.level.block.Blocks.CHEST), "a treasure day did not leave a chest in the boss hall");
+        // 育つ装飾品: 5 回で II (×1.25)、15 回で III (×1.5)。深く潜ると 2 回ぶん
+        ItemStack trinket = new ItemStack(DungeonGear.item(Dungeon.BONE_PIT));
+        DungeonGear.setClears(trinket, 1);
+        p.getInventory().clearContent();
+        p.getInventory().add(trinket);
+        DungeonGear.grow(p, Dungeon.BONE_PIT, 2);
+        DungeonGear.grow(p, Dungeon.BONE_PIT, 2);
+        ItemStack held = p.getInventory().getItem(0);
+        check(f, DungeonGear.clears(held) == 5 && DungeonGear.stage(held) == 1 && DungeonGear.scale(held) == 1.25, "a trinket did not grow to II at 5 clears ("
+                + DungeonGear.clears(held) + ")");
+        var row = ((jp.revati.skyabyss.item.wild.WildAccessoryItem) held.getItem()).row();
+        var scaled = DungeonGear.scaled(held, row.fx());
+        check(f, Math.abs(scaled.get(0).p(0) - row.fx().get(0).p(0) * 1.25) < 1e-9, "a grown trinket did not scale its numbers");
+        DungeonGear.setClears(held, 15);
+        check(f, DungeonGear.stage(held) == 2 && DungeonGear.scale(held) == 1.5, "a trinket at 15 clears is not III");
+        p.getInventory().clearContent();
     }
 
     // 一つのダンジョンを流して: 扉は閉じている・結晶を満たすと結晶の扉が開く・満ち引きと溶岩の箱が入れ替わる・主が出て倒れると越える

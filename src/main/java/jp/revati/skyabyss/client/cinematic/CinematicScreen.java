@@ -101,7 +101,7 @@ final class CinematicScreen extends Screen {
         }
         Font font = mc.font;
         if (!fadeIn) {
-            renderLine(g, font, r, sec, w, h, (int) (h * BAR));
+            renderLine(g, font, r, sec, w, h, (int) (h * BAR), barH);
             renderSkip(g, font, r, sec, w, h, barH);
         }
         // 暗転 (スキップ・終わり)
@@ -116,7 +116,7 @@ final class CinematicScreen extends Screen {
     }
 
     // 台詞: 話し手ごとに色と見せ方が違う。画面の下、黒帯のすぐ上に、薄い暗がりを敷いて
-    private void renderLine(GuiGraphics g, Font font, CinematicClient.Run r, float sec, int w, int h, int barFull) {
+    private void renderLine(GuiGraphics g, Font font, CinematicClient.Run r, float sec, int w, int h, int barFull, int barH) {
         DialogueLine line = null;
         int lineIndex = -1;
         for (int i = 0; i < r.scene.lines().size(); i++) {
@@ -170,8 +170,8 @@ final class CinematicScreen extends Screen {
         int bottom = h - barFull - 16;
         int top = bottom - blockH;
         int cx = w / 2;
-        // 暗がり: 上へ向かって消える
-        g.fillGradient(0, top - 26, w, bottom + 10, 0x00000000, ((int) (a * 0x99) << 24) | 0x05080C);
+        // 暗がり: 上へ向かって消える。下は今の黒帯の縁までつなげる (2026-11-03 の声「上下の薄い黒が間空いてる」。前は帯の手前で切れて隙間が見えた)
+        g.fillGradient(0, top - 26, w, h - barH, 0x00000000, ((int) (a * 0x99) << 24) | 0x05080C);
         g.fill(cx - 36, top - 6, cx + 36, top - 5, ((int) (a * 0xB0) << 24) | accent);
         g.drawCenteredString(font, label, cx, top, alpha | labelColor);
         int y = top + 13;

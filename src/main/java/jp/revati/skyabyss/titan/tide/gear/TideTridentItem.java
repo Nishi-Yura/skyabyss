@@ -38,7 +38,7 @@ public class TideTridentItem extends TideWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (GearLevel.usable(attacker, stack)) {
+        if (GearLevel.proc(attacker, stack)) {
             boolean awakened = ModGear.awakened(stack);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, TideGear.TRIDENT_SLOW_TICKS, awakened ? 1 : 0), attacker);
             if (attacker.level() instanceof ServerLevel level) {

@@ -46,7 +46,7 @@
     }
   ],
   "reward": {
-    "xp": 60,
+    "xp": 120,
     "items": [
       {
         "item": "skyabyss:bell_coin",

@@ -1,0 +1,93 @@
+# 2026-11-04: 画面を黄金比で組み直す前の今の画面 (主な画面と HUD)。GUI 3 / 1280x720
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_before.txt -PshotsName=golden_before
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+cmd skyabyss quest start @s main_song
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+huddemo boss
+wait 60
+shot hud_boss
+huddemo off
+wait 10
+
+open skills
+wait 10
+shot skills_tree
+close
+open skills_node:titan_cleave
+wait 10
+shot skills_node
+close
+open skills_build
+wait 10
+shot skills_build
+close
+open quests
+wait 15
+shot quests
+close
+open travel_map
+wait 25
+shot travel_map
+close
+open growth
+wait 10
+shot growth
+close
+open journey
+wait 10
+shot journey
+close
+open profile
+wait 15
+shot profile
+close
+open hunt
+wait 10
+shot hunt
+close
+open lore
+wait 10
+shot lore
+close
+open party
+wait 10
+shot party
+close
+open notices
+wait 10
+shot notices
+close
+open inventory
+wait 10
+shot inventory
+close
+open job_choice
+wait 10
+shot job_choice
+close
+open grave
+wait 10
+shot grave
+close
+open tower_desk
+wait 10
+shot tower_desk
+close

@@ -1,0 +1,70 @@
+# 2026-11-04: ギルドと取引所の中身も黄金比で (docs/design/56。00 の 385)。作れる条件 (00 の 80) も見る。1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_guild_trade.txt -PshotsName=golden_guild_trade
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+hud on
+camera 0 -60 8 180 0
+waitchunks
+wait 40
+cmd skyabyss cinematic stop
+chat clear
+
+# 1. まだ止めていない人は作れない (知らせが出る)
+cmd guild create "鐘の守り" KANE blue white
+wait 10
+cmd skyabyss facility act guild
+wait 15
+shot guild_list
+close
+wait 5
+# 2. 岩鯨を止めたことにして作り、つまみ 4 つ
+cmd skyabyss admin chapter 2
+wait 40
+cmd skyabyss cinematic stop
+chat clear
+cmd guild create "鐘の守り" KANE blue white
+wait 10
+cmd guild menu 0
+wait 15
+shot guild_members
+cmd guild menu 1
+wait 15
+shot guild_request
+cmd guild menu 2
+wait 15
+shot guild_banner
+cmd guild menu 3
+wait 15
+shot guild_achievements
+close
+cmd guild disband confirm
+wait 5
+# 3. 取引所 (撮影用の出品)
+cmd skyabyss facility spawn trade_keeper
+cmd skyabyss facility trade demo
+wait 10
+cmd skyabyss facility trade
+wait 15
+shot trade_market
+cmd trade 1
+wait 10
+shot trade_sell
+cmd trade 2
+wait 10
+shot trade_mine
+cmd trade 3
+wait 10
+shot trade_applied
+cmd trade 4
+wait 10
+shot trade_mail
+close

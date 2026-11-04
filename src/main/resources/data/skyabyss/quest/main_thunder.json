@@ -19,7 +19,7 @@
           "topic": "ms_thunder2"
         }
       ],
-      "xp": 40,
+      "xp": 70,
       "skip_if": {
         "type": "any",
         "of": [
@@ -77,7 +77,7 @@
           "count": 1
         }
       ],
-      "xp": 80
+      "xp": 140
     },
     {
       "id": "board",
@@ -90,7 +90,7 @@
           ]
         }
       ],
-      "xp": 60,
+      "xp": 110,
       "skip_if": {
         "type": "stilled",
         "titan": "thunder_wing"
@@ -124,7 +124,7 @@
           "party": false
         }
       ],
-      "xp": 90,
+      "xp": 160,
       "skip_if": {
         "type": "stilled",
         "titan": "thunder_wing"
@@ -163,7 +163,7 @@
     }
   ],
   "reward": {
-    "xp": 400,
+    "xp": 720,
     "affinity": {
       "skyabyss:storyteller": 5,
       "skyabyss:whale_chaser": 5

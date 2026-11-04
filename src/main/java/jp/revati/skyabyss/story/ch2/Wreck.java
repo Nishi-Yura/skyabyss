@@ -107,6 +107,15 @@ public final class Wreck {
         return Data.get(server).spot;
     }
 
+    // 置いた記録を消す (地上を作り直したとき。upgrade/ContinentRegen。次に人が近づいたら置き直す)
+    public static void forget(MinecraftServer server) {
+        Data d = Data.get(server);
+        d.spot = null;
+        d.box = null;
+        d.tries = 0;
+        d.setDirty();
+    }
+
     // ---------------------------------------------------------------- 置く
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {

@@ -175,7 +175,7 @@ def bone_pit_hall(c, cv):
         c.cells[(x, F + 1, -58)] = lantern(False, True)
     c.marks["back"] = [0, F, -53]
     c.cells[(-9, F, -46)] = "minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]"
-    for x, z, f in ((-11, -46, "east"), (-7, -46, "west"), (-9, -48, "south"), (-9, -44, "north")):
+    for x, z, f in ((-11, -46, "west"), (-7, -46, "east"), (-9, -48, "north"), (-9, -44, "south")):  # 腰掛けは火の方を向く (背もたれが外)
         c.cells[(x, F, z)] = stair("spruce", f)
     for x, z in ((-13, -42), (-13, -43), (-12, -42)):
         c.cells[(x, F, z)] = "minecraft:barrel[facing=up,open=false]"
@@ -254,7 +254,7 @@ def themed_hall(arch, dais, side, lamp_soul, pillar, decor):
             c.cells[(x, F + 1, -58)] = lantern(False, lamp_soul)
         c.marks["back"] = [0, F, -53]
         c.cells[(-9, F, -46)] = "minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]"
-        for x, z, f in ((-11, -46, "east"), (-7, -46, "west"), (-9, -48, "south"), (-9, -44, "north")):
+        for x, z, f in ((-11, -46, "west"), (-7, -46, "east"), (-9, -48, "north"), (-9, -44, "south")):  # 腰掛けは火の方を向く (背もたれが外)
             c.cells[(x, F, z)] = stair("spruce", f)
         c.marks["rest"] = [-9, F, -46]
         c.marks["rumor"] = [9, F, -45]

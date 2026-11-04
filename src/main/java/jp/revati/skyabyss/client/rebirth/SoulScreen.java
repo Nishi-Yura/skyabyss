@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.client.rebirth;
 
+import jp.revati.skyabyss.client.ui.Golden;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,31 +25,40 @@ import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // K 画面の「転生」パネル (docs/design/31、見取り図は docs/review/rebirth/index.html)。
-// 左: 転生の準備 (いまと転生後、代価、恩恵の 3 択、ボタン)。中: 残るもの・戻るもの・魂盤の力。右: 魂盤 (6 つの腕。次の節を足す腕を選ぶ)。
+// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56)。見出しの帯に記録・技・転生・旅のつまみと、右の列の頁のつまみ (魂盤 / 残るもの)。
+// 脇の列 (左): 転生の準備 (いまと転生後、代価、恩恵の 3 択、釦)。主の列 (右): 魂盤 (6 つの腕。次の節を足す腕を選ぶ) か、残るもの・戻るもの・魂盤の力 (送れる)。
+// 転生の釦を一度押す (確かめ待ち) と、右の列は「残るもの」の頁になる。
 // ボタンは二度押しで送る (押しまちがえない)。Lv 50 になるまで・20 回を超えたあとは、灰色の説明だけ
 public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    static final int W = 380;
-    static final int H = 184;
+    static final Golden.Layout LAYOUT = Golden.Layout.large(0);
+    static final int W = Golden.L_W;
+    static final int H = Golden.L_H;
+    static final Golden.Box LEFT = LAYOUT.body().minor(true);
+    static final Golden.Box RIGHT = LAYOUT.body().major(false);
+    static final int ROW = Golden.ROW;
 
-    static final int TITLE = 0x9FE8FF;
-    static final int TEXT = 0xE6E2D6;
-    static final int SOFT = 0xA9AEBC;
-    static final int GOLD = 0xF2C14E;
-    static final int DENY = 0xD9779A;
-    static final int OK = 0x7FD6D0;
-    static final int DIM = 0x5E6472;
-    static final int PANEL = 0xF0141820;
-    static final int PANEL_EDGE = 0xFF3A4252;
-    static final int BOX = 0xFF1B212C;
+    static final int TITLE = Golden.PALE;
+    static final int TEXT = Golden.TEXT;
+    static final int SOFT = Golden.SOFT;
+    static final int GOLD = Golden.GOLD;
+    static final int DENY = Golden.DENY;
+    static final int OK = Golden.TEAL;
+    static final int DIM = Golden.DIM;
 
-    // 左の列・真ん中の列・右の列
-    static final int C1 = 10;
-    static final int C1W = 118;
-    static final int C2 = 134;
-    static final int C2W = 116;
-    static final int C3 = 256;
-    static final int BOARD_CX = 314;
-    static final int BOARD_CY = 82;
+    // 左の列の中の字の左と幅
+    static final int C1 = LEFT.x() + Golden.S5;
+    static final int C1W = LEFT.w() - 2 * Golden.S5;
+    // 恩恵の札 (高さ 26 = 二行) と転生の釦
+    static final int BOON_H = 2 * ROW;
+    static final int GO_Y = LEFT.bottom() - Golden.S5 - Golden.BTN;
+    static final int BOON_Y = GO_Y - Golden.S5 - 3 * (BOON_H + Golden.S3) + Golden.S3;
+    // 魂盤の真ん中 (右の列の上の題の下)
+    static final int BOARD_CX = RIGHT.cx();
+    static final int BOARD_CY = RIGHT.y() + ROW + Golden.S5 + 56;
+    // 右の列の頁 (0 = 魂盤、1 = 残るもの・戻るもの・力) と、そのつまみ (見出しの帯の右寄せ)
+    static final int PAGE_W = Golden.S55;
+    private static int page;
+    private final jp.revati.skyabyss.client.ui.ScrollPanel terms = new jp.revati.skyabyss.client.ui.ScrollPanel(ROW * 3);
 
     private int left;
     private int top;
@@ -68,9 +78,10 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
 
     @Override
     protected void init() {
-        fit.fit(width, height, W + 4, H + 24, 2.5f);
-        left = 2;
-        top = 20;
+        fit.fit(width, height, W, H, 3f);
+        left = 0;
+        top = 0;
+        terms.setViewport(RIGHT.x() + Golden.S8, RIGHT.y() + 2, RIGHT.w() - Golden.S8 - 2, RIGHT.h() - 4);
         arms.clear();
         boons.clear();
         SoulData d = Rebirth.data(minecraft.player);
@@ -89,12 +100,12 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             arms.add(addRenderableWidget(new ArmButton(x, y, a)));
         }
         for (int i = 0; i < 3; i++) {
-            boons.add(addRenderableWidget(new BoonButton(left + C1, top + 91 + i * 22, i)));
+            boons.add(addRenderableWidget(new BoonButton(C1, BOON_Y + i * (BOON_H + Golden.S3), i)));
         }
-        go = addRenderableWidget(Button.builder(Component.empty(), b -> press()).bounds(left + C1, top + 158, C1W, 16).build());
+        go = addRenderableWidget(Button.builder(Component.empty(), b -> press()).bounds(C1, GO_Y, C1W, Golden.BTN).build());
         shardButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
-                .bounds(left + C3, top + 160, 60, 14).build());
-        RpgTabs.addAt(this::addRenderableWidget, left + W / 2, top, RpgTabs.REBIRTH);
+                .bounds(RIGHT.right() - Golden.S5 - Golden.S55, RIGHT.bottom() - Golden.S5 - Golden.BTN, Golden.S55, Golden.BTN).build());
+        RpgTabs.addHead(this::addRenderableWidget, LAYOUT.head(), RpgTabs.REBIRTH);
         refresh();
     }
 
@@ -136,12 +147,14 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
                 RebirthRules.COST_CRYSTALS));
         SoulData d = Rebirth.data(minecraft.player);
         shardButton.active = d.canClaimShardNode();
+        shardButton.visible = page == 0;
         for (BoonButton b : boons) {
             b.visible = ready && b.index < offer.size();
             b.active = b.visible;
         }
         for (ArmButton a : arms) {
             a.active = true;
+            a.visible = page == 0;
         }
     }
 
@@ -159,6 +172,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
     private void press() {
         if (armed <= 0) {
             armed = 80;
+            page = 1;
             refresh();
             return;
         }
@@ -210,116 +224,156 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         fit.end(g);
     }
 
+    // 頁のつまみの左端 (見出しの帯の右寄せ)
+    private static int pageX(int i) {
+        return LAYOUT.head().right() - 2 * PAGE_W - Golden.S3 + i * (PAGE_W + Golden.S3);
+    }
+
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
-        return super.mouseClicked(fit.x(screenX), fit.y(screenY), button);
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
+        int ty = LAYOUT.head().y() + 4;
+        if (button == 0 && my >= ty && my < ty + Golden.BTN) {
+            for (int i = 0; i < 2; i++) {
+                if (mx >= pageX(i) && mx < pageX(i) + PAGE_W) {
+                    page = i;
+                    refresh();
+                    return true;
+                }
+            }
+        }
+        if (page == 1 && terms.mouseClicked(mx, my, button)) {
+            return true;
+        }
+        return super.mouseClicked(mx, my, button);
     }
 
     @Override
     public boolean mouseDragged(double screenX, double screenY, int button, double dx, double dy) {
+        if (page == 1 && terms.mouseDragged(fit.x(screenX), fit.y(screenY), button, dx / fit.scale(), dy / fit.scale())) {
+            return true;
+        }
         return super.mouseDragged(fit.x(screenX), fit.y(screenY), button, dx / fit.scale(), dy / fit.scale());
     }
 
     @Override
     public boolean mouseReleased(double screenX, double screenY, int button) {
+        terms.mouseReleased(fit.x(screenX), fit.y(screenY), button);
         return super.mouseReleased(fit.x(screenX), fit.y(screenY), button);
     }
 
     @Override
     public boolean mouseScrolled(double screenX, double screenY, double dx, double dy) {
+        if (page == 1 && terms.mouseScrolled(fit.x(screenX), fit.y(screenY), dy)) {
+            return true;
+        }
         return super.mouseScrolled(fit.x(screenX), fit.y(screenY), dx, dy);
     }
 
     private void renderPanel(GuiGraphics g) {
-        g.fill(left, top, left + W, top + H, PANEL);
-        g.renderOutline(left, top, W, H, PANEL_EDGE);
-        g.renderOutline(left + 2, top + 2, W - 4, H - 4, 0xFF222834);
-        // 列の箱
-        box(g, C1 - 4, 20, C1W + 8, H - 24);
-        box(g, C2 - 4, 20, C2W + 8, H - 24);
-        box(g, C3 - 4, 20, W - C3 - 4, H - 24);
-    }
-
-    private void box(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(left + x, top + y, left + x + w, top + y + h, BOX);
-        g.renderOutline(left + x, top + y, w, h, 0xFF2A3342);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.recess(g, LEFT);
+        Golden.recess(g, RIGHT);
     }
 
     private void renderBody(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.drawCenteredString(font, title, left + W / 2, top + 7, TITLE);
+        // 頁のつまみ
+        int ty = LAYOUT.head().y() + 4;
+        String[] keys = {"gui.skyabyss.rebirth.page.board", "gui.skyabyss.rebirth.page.terms"};
+        for (int i = 0; i < 2; i++) {
+            boolean hover = mouseX >= pageX(i) && mouseX < pageX(i) + PAGE_W && mouseY >= ty && mouseY < ty + Golden.BTN;
+            Golden.tab(g, font, new Golden.Box(pageX(i), ty, PAGE_W, Golden.BTN), Component.translatable(keys[i]), page == i, hover);
+        }
         GrowthData gd = growth();
         SoulData rd = Rebirth.data(minecraft.player);
         int n = gd.rebirths;
         long ms = System.currentTimeMillis();
         drawLeft(g, gd, n, ms);
-        drawMiddle(g, gd, rd, n);
-        drawBoard(g, rd, n, ms);
+        if (page == 0) {
+            drawBoard(g, rd, n, ms);
+        } else {
+            drawMiddle(g, gd, rd, n);
+        }
         drawTooltips(g, rd, mouseX, mouseY);
     }
 
     private void drawLeft(GuiGraphics g, GrowthData gd, int n, long ms) {
-        int x = left + C1;
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.prep"), x, top + 24, GOLD, false);
-        // いま
+        int x = C1;
+        int y = LEFT.y() + 2;
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.prep"), x, Golden.textY(y, ROW), GOLD, false);
+        y += ROW;
+        // いまと回数 (一行)
         String now = Rebirth.levelLabel(gd.level, n);
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.now", now), x, top + 35, 0xFF000000 | Rebirth.tierColor(n, ms), false);
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.count", n, RebirthRules.MAX_REBIRTHS), x, top + 45, SOFT, false);
+        Component nowLine = Component.translatable("gui.skyabyss.rebirth.now", now).copy().append("  ")
+                .append(Component.translatable("gui.skyabyss.rebirth.count", n, RebirthRules.MAX_REBIRTHS).withColor(SOFT));
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, nowLine, x, Golden.textY(y, ROW), C1W, 0xFF000000 | Rebirth.tierColor(n, ms), false);
+        y += ROW;
         if (!ready()) {
             // Lv 50 になるまで、20 回を超えたあと: 灰色の説明だけ
-            int y = top + 60;
             boolean maxed = n >= RebirthRules.MAX_REBIRTHS;
-            y = line(g, x, y, C1W, SOFT, Component.translatable(maxed ? "gui.skyabyss.rebirth.maxed" : "gui.skyabyss.rebirth.locked", RebirthRules.MIN_LEVEL));
-            y += 6;
-            line(g, x, y, C1W, DIM, Component.translatable("gui.skyabyss.rebirth.altar"));
+            y = line(g, x, y + Golden.S5, C1W, SOFT, Component.translatable(maxed ? "gui.skyabyss.rebirth.maxed" : "gui.skyabyss.rebirth.locked", RebirthRules.MIN_LEVEL));
+            line(g, x, y + Golden.S5, C1W, DIM, Component.translatable("gui.skyabyss.rebirth.altar"));
             go.visible = false;
             return;
         }
         go.visible = true;
-        // 経験値のバー (Lv 50 は満ちている)
-        g.fill(x, top + 56, x + C1W, top + 58, 0xFF2E7F85);
+        // 経験値の帯 (Lv 50 は満ちている)
+        g.fill(x, y + 1, x + C1W, y + 3, 0xFF2E7F85);
+        y += Golden.S5;
         // 転生後
         int after = n + 1;
         Component afterLabel = Component.translatable("gui.skyabyss.rebirth.after_label");
-        g.drawString(font, afterLabel, x, top + 62, SOFT, false);
-        int lx = x + font.width(afterLabel) + 5;
-        g.drawString(font, Rebirth.levelLabel(RebirthRules.MIN_LEVEL, after), lx, top + 62, 0xFF000000 | Rebirth.tierColor(after, ms), false);
+        g.drawString(font, afterLabel, x, Golden.textY(y, ROW), SOFT, false);
+        g.drawString(font, Rebirth.levelLabel(RebirthRules.MIN_LEVEL, after), x + font.width(afterLabel) + 5, Golden.textY(y, ROW), 0xFF000000 | Rebirth.tierColor(after, ms), false);
+        y += ROW;
         // 代価
         boolean cost = minecraft.player.isCreative() || crystals() >= RebirthRules.COST_CRYSTALS;
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.cost", RebirthRules.COST_CRYSTALS, crystals()), x, top + 73, cost ? OK : DENY, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.boon_title"), x, top + 82, SOFT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.rebirth.cost", RebirthRules.COST_CRYSTALS, crystals()), x, Golden.textY(y, ROW), C1W,
+                cost ? OK : DENY, false);
+        y += ROW;
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.rebirth.boon_title"), x, Golden.textY(Math.min(y, BOON_Y - ROW), ROW), C1W, SOFT, false);
     }
 
+    // 残るもの・戻るもの・魂盤の力 (右の列の二頁目。行 13、送れる)
     private void drawMiddle(GuiGraphics g, GrowthData gd, SoulData rd, int n) {
-        int x = left + C2;
-        int y = top + 24;
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.kept_title"), x, y, OK, false);
-        y += 11;
-        y = lines(g, x, y, C2W, SOFT, "gui.skyabyss.rebirth.kept.gear", "gui.skyabyss.rebirth.kept.story", "gui.skyabyss.rebirth.kept.records");
-        y = line(g, x, y, C2W, SOFT, Component.translatable("gui.skyabyss.rebirth.kept.board", rd.nodes.size(), rd.boons.size()));
-        y += 3;
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.reset_title"), x, y, DENY, false);
-        y += 11;
+        int x = terms.x();
+        int w = terms.width();
+        terms.begin(g);
+        int y = terms.top();
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.kept_title"), x, Golden.textY(y, ROW), OK, false);
+        y += ROW;
+        y = lines(g, x, y, w, SOFT, "gui.skyabyss.rebirth.kept.gear", "gui.skyabyss.rebirth.kept.story", "gui.skyabyss.rebirth.kept.records");
+        y = line(g, x, y, w, SOFT, Component.translatable("gui.skyabyss.rebirth.kept.board", rd.nodes.size(), rd.boons.size()));
+        y += Golden.S5;
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.reset_title"), x, Golden.textY(y, ROW), DENY, false);
+        y += ROW;
         int skillPts = jp.revati.skyabyss.rpg.skill.SkillManager.get(minecraft.player).spentPoints();
-        y = line(g, x, y, C2W, SOFT, Component.translatable("gui.skyabyss.rebirth.reset.level", Math.round((1 - RebirthRules.xpScale(n + 1)) * 100)));
-        y = line(g, x, y, C2W, SOFT, Component.translatable("gui.skyabyss.rebirth.reset.points", skillPts, gd.spentPoints()));
-        y = line(g, x, y, C2W, SOFT, Component.translatable("gui.skyabyss.rebirth.reset.calling"));
-        y += 3;
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.power_title"), x, y, GOLD, false);
-        y += 11;
+        y = line(g, x, y, w, SOFT, Component.translatable("gui.skyabyss.rebirth.reset.level", Math.round((1 - RebirthRules.xpScale(n + 1)) * 100)));
+        y = line(g, x, y, w, SOFT, Component.translatable("gui.skyabyss.rebirth.reset.points", skillPts, gd.spentPoints()));
+        y = line(g, x, y, w, SOFT, Component.translatable("gui.skyabyss.rebirth.reset.calling"));
+        y += Golden.S5;
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.power_title"), x, Golden.textY(y, ROW), GOLD, false);
+        y += ROW;
         RebirthRules.Effects e = Rebirth.effects(minecraft.player);
         String[] keys = {"damage", "projectile", "reduction", "cooldown", "mana", "move", "pickup", "crystal"};
         double[] values = {e.damage() * 100, e.projectile() * 100, e.reduction() * 100, e.cooldown() * 100, e.maxMana(), e.moveSpeed() * 100,
                 e.pickup(), e.crystal() * 100};
         int shown = 0;
-        for (int i = 0; i < keys.length && y < top + H - 12; i++) {
+        for (int i = 0; i < keys.length; i++) {
             if (fx(g, x, y, keys[i], values[i], i == 4 ? 0 : 1)) {
-                y += 9;
+                y += ROW;
                 shown++;
             }
         }
         if (shown == 0) {
-            g.drawString(font, Component.translatable("gui.skyabyss.rebirth.power_none"), x, y, DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.rebirth.power_none"), x, Golden.textY(y, ROW), DIM, false);
+            y += ROW;
         }
+        terms.end(g);
+        terms.setContentHeight(y - terms.top());
+        terms.drawBar(g, 0xFF10151D, 0xAA3E5A6B);
     }
 
     private boolean fx(GuiGraphics g, int x, int y, String key, double value, int decimals) {
@@ -327,7 +381,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             return false;
         }
         String v = decimals == 0 ? String.valueOf(Math.round(value)) : String.format("%.1f", value);
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.fx." + key, v), x, y, TEXT, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.fx." + key, v), x, Golden.textY(y, ROW), TEXT, false);
         return true;
     }
 
@@ -340,8 +394,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
 
     private int line(GuiGraphics g, int x, int y, int w, int color, Component text) {
         for (FormattedCharSequence part : jp.revati.skyabyss.client.ui.JpWrap.split(font, text, w)) {
-            g.drawString(font, part, x, y, color, false);
-            y += 9;
+            g.drawString(font, part, x, Golden.textY(y, ROW), color, false);
+            y += ROW;
         }
         return y;
     }
@@ -350,7 +404,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
     private void drawBoard(GuiGraphics g, SoulData rd, int n, long ms) {
         int cx = left + BOARD_CX;
         int cy = top + BOARD_CY;
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.board_title"), left + C3, top + 24, GOLD, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.board_title"), RIGHT.x() + Golden.S8, Golden.textY(RIGHT.y() + 2, ROW), GOLD, false);
         // 中心: 転生の回数
         int tint = 0xFF000000 | Rebirth.tierColor(n, ms);
         g.fill(cx - 7, cy - 1, cx + 7, cy + 1, tint & 0x80FFFFFF | 0x40000000);
@@ -404,7 +458,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             }
         }
         // 欠片
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.shards", rd.shards, RebirthRules.SHARDS_PER_NODE), left + C3, top + 150, rd.shards > 0 ? TEXT : SOFT, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.shards", rd.shards, RebirthRules.SHARDS_PER_NODE), RIGHT.x() + Golden.S8,
+                Golden.textY(RIGHT.bottom() - Golden.S5 - Golden.BTN, Golden.BTN), rd.shards > 0 ? TEXT : SOFT, false);
     }
 
     private void drawTooltips(GuiGraphics g, SoulData rd, int mouseX, int mouseY) {
@@ -430,7 +485,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
                 return;
             }
         }
-        if (shardButton.isHovered() || (mouseX >= left + C3 && mouseX < left + C3 + 90 && mouseY >= top + 148 && mouseY < top + 160)) {
+        if (page == 0 && (shardButton.isHovered() || (mouseX >= RIGHT.x() && mouseX < RIGHT.x() + 120 && mouseY >= RIGHT.bottom() - Golden.S5 - Golden.BTN && mouseY < RIGHT.bottom() - Golden.S5))) {
             g.renderComponentTooltip(font, List.of(Component.translatable("gui.skyabyss.rebirth.shards_desc", RebirthRules.GUIDE_PER_DAY,
                     RebirthRules.MAX_SHARD_NODES).withColor(SOFT)), mouseX, mouseY);
         }
@@ -474,7 +529,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         final int index;
 
         BoonButton(int x, int y, int index) {
-            super(x, y, C1W, 21, Component.empty());
+            super(x, y, C1W, BOON_H, Component.empty());
             this.index = index;
         }
 
@@ -494,8 +549,10 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             boolean sel = selBoon == index;
             g.fill(getX(), getY(), getX() + width, getY() + height, sel ? 0xFF2A3342 : isHoveredOrFocused() ? 0xFF222A37 : 0xFF161B24);
             g.renderOutline(getX(), getY(), width, height, sel ? 0xFFF2C14E : 0xFF303846);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.nameKey()).getString()), getX() + 4, getY() + 3, width - 6, sel ? GOLD : TEXT, false);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.descKey()).getString()), getX() + 4, getY() + 12, width - 6, SOFT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.nameKey()).getString()), getX() + 4,
+                    Golden.textY(getY(), ROW), width - 6, sel ? GOLD : TEXT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.descKey()).getString()), getX() + 4,
+                    Golden.textY(getY() + ROW, ROW), width - 6, SOFT, false);
         }
 
         @Override
@@ -506,6 +563,6 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
 
     @Override
     public int[] textBounds() {
-        return fit.screenRect(left - 1, top - 18, W + 2, H + 19);
+        return fit.screenRect(0, 0, W, H);
     }
 }

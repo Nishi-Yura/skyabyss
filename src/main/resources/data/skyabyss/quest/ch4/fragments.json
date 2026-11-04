@@ -52,7 +52,7 @@
     }
   ],
   "reward": {
-    "xp": 400,
+    "xp": 800,
     "affinity": {
       "skyabyss:storyteller": 3,
       "skyabyss:whale_chaser": 3

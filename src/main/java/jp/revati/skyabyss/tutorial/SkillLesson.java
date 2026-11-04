@@ -126,11 +126,11 @@ public final class SkillLesson {
         switch (act) {
             case "say" -> {
                 if (line != null) {
-                    Notice.narrate(player, "message.skyabyss.lesson.say." + line);
+                    Notice.hint(player, "message.skyabyss.lesson.say." + line);
                 }
             }
             case "finish" -> {
-                Notice.narrate(player, "message.skyabyss.lesson.say.finish");
+                Notice.hint(player, "message.skyabyss.lesson.say.finish");
                 NpcBonds bonds = NpcBonds.of(player);
                 if (!bonds.hasFlag(MASTER, REWARD_FLAG)) {
                     bonds.bond(MASTER).flags().add(REWARD_FLAG);
@@ -196,7 +196,7 @@ public final class SkillLesson {
         for (Unlock u : Unlock.values()) {
             if (log.entry(u.quest()) == null && QuestManager.quest(u.quest()) != null && u.open(d, level)) {
                 if (Quests.start(player, u.quest())) {
-                    Notice.narrate(player, "message.skyabyss.lesson.say." + u.name);
+                    Notice.hint(player, "message.skyabyss.lesson.say." + u.name);
                 }
             }
         }

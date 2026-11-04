@@ -17,7 +17,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 五章の終わりから六章 (月) への引き (docs/design/36 の 7 章の終わり)。
 //   深淵のメインを終えると、メイン「近づく月」(main_moon_near) が始まる: 夜、外で月を見上げる → 語り部に話す (六章で続く)
-//   見上げた: 段が look の人が、地上で夜 (13000〜23000)、頭の上に空が見え、上を向いている (縦の向き -25 度より上) と合図 moon_seen と一言
+//   見上げた: 段が look の人が、地上で頭の上に空が見え、上を向いている (縦の向き -25 度より上) と合図 moon_seen と一言。
+//            どの時刻でも (2026-11-05 の決めごと c6_look = day。昼は北の空に白く薄い月が見える。client/sky/DayMoonRenderer)。一言は昼と夜で違う
 //   五章の空: 月の近さに少し足し、空をうすく銀青へ寄せる (錨が緩んで月が寄る)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class MoonNear {
@@ -37,8 +38,7 @@ public final class MoonNear {
         if (p.level().dimension() != Level.OVERWORLD || p.getXRot() > -25f) {
             return false;
         }
-        long t = p.level().getDayTime() % 24000L;
-        return t >= 13000 && t <= 23000 && p.level().canSeeSky(BlockPos.containing(p.getEyePosition()));
+        return p.level().canSeeSky(BlockPos.containing(p.getEyePosition()));
     }
 
     @SubscribeEvent
@@ -49,7 +49,8 @@ public final class MoonNear {
         if (!"look".equals(TownGuests.stageOf(p, QUEST)) || !looksAtMoon(p)) {
             return;
         }
-        Notice.narrate(p, "message.skyabyss.moon_near.seen");
+        long t = p.level().getDayTime() % 24000L;
+        Notice.narrate(p, t >= 13000 && t <= 23000 ? "message.skyabyss.moon_near.seen" : "message.skyabyss.moon_near.seen_day");
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.AMBIENT, 1.0f, 0.5f);
         Quests.signal(p, SIGNAL);
     }

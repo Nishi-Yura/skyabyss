@@ -208,6 +208,16 @@ public final class AbyssGate {
         }
     }
 
+    // 門の前の大広間の側への向き (格子の列から離れる向き)。門の印が無ければ null (story/IsanaPost の五章の立つ所)
+    @Nullable
+    public static Direction hallSide(MinecraftServer server) {
+        BlockPos gate = TownGuests.mark(server, AbyssEntrance.GATE);
+        if (gate == null || !server.overworld().isLoaded(gate)) {
+            return null;
+        }
+        return facing(server, server.overworld(), gate).toward().getOpposite();
+    }
+
     // 深淵から底の境の門の南へ戻す (都の印が無ければ起きる所へ)
     public static void up(ServerPlayer p) {
         BlockPos gate = TownGuests.mark(p.server, AbyssEntrance.GATE);
@@ -217,6 +227,9 @@ public final class AbyssGate {
         }
         Notice.hint(p, "message.skyabyss.abyss.exit");
         ServerLevel ow = p.server.overworld();
+        // 深淵から戻るときは門のチャンクがまだ読み込まれていないことが多い。読み込まずに向きを決めると既定の北になり、
+        // 都が回って建っていると門の裏や壁ぎわに降りる (2026-11-05 の撮影)。先に読み込んでから向きを決める
+        ow.getChunkAt(gate);
         Facing f = facing(p.server, ow, gate);
         // 格子の列から離れる向きに一歩 (都が回っていても、門を背にして大広間の側へ)
         BlockPos at = gate.relative(f.toward().getOpposite());

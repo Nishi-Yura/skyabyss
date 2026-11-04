@@ -25,6 +25,8 @@ public final class DamageNumbers {
     public static final int NORMAL = 0;
     public static final int SKILL = 1;
     public static final int KILL = 2;
+    // 粉の技の傷: POWDER + 粉の番号 (Element の並び)。数字は粉の色 (item/extra/PowderArts.COLORS)
+    public static final int POWDER = 10;
 
     private DamageNumbers() {
     }
@@ -62,7 +64,9 @@ public final class DamageNumbers {
                 || !(event.getSource().getEntity() instanceof ServerPlayer attacker) || attacker instanceof FakePlayer || attacker.connection == null) {
             return;
         }
-        int kind = victim.isDeadOrDying() ? KILL : jp.revati.skyabyss.rpg.skill.SkillActions.dealing() != null ? SKILL : NORMAL;
+        jp.revati.skyabyss.item.extra.Element powder = jp.revati.skyabyss.item.extra.PowderArts.dealing();
+        int kind = powder != null ? POWDER + powder.ordinal()
+                : victim.isDeadOrDying() ? KILL : jp.revati.skyabyss.rpg.skill.SkillActions.dealing() != null ? SKILL : NORMAL;
         PacketDistributor.sendToPlayer(attacker, new Payload(victim.getId(), victim.getX(), victim.getY() + victim.getBbHeight(), victim.getZ(), amount, kind));
     }
 }

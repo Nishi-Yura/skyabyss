@@ -565,5 +565,21 @@
   "gui.skyabyss.attack.shadow_embracer.wave": "影の波",
   "gui.skyabyss.attack.waning_blade.slash": "三日月の薙ぎ",
   "gui.skyabyss.attack.waning_blade.thrust": "踏み込みの突き",
-  "gui.skyabyss.attack.waning_blade.wave": "飛ぶ三日月の刃"
+  "gui.skyabyss.attack.waning_blade.wave": "飛ぶ三日月の刃",
+  "dialogue.skyabyss.guest_moon_past1.ch6_valley_ask": "……この灯り、前の夜にも誰かに預けた気がする。\n地の底で、灯りを守っていた子がいなかったかい。あの子は、まだ灯しているかな。",
+  "dialogue.skyabyss.guest_moon_past2.ch6_cliff_ask": "鯨見の見張り台に、ずっと何かを数えている奴がいるだろう。\n前の夜も、そいつは数えていた。……まだ数えているか、聞いてみてくれ。",
+  "dialogue.skyabyss.guest_moon_past3.ch6_field_ask": "都に、数え歌を最後まで知らない語り部がいるだろう。\n前の夜、私はあの人の歌を聞きながら眠った。……あの人は、まだ歌を数えているかな。",
+  "dialogue.skyabyss.guest_moon_past4.ch6_rift_ask": "都の鍛冶場に、黒い鉄を打つ人がいるだろう。\n前の夜、私の鏡の枠はあの人が打った。……あの人は、覚えているかな。",
+  "dialogue.skyabyss.attendant_survivor_bone.ch6e_attendant_survivor_bone": "灯りを、まだ灯しているかって？　……前にも、誰かにそう聞かれた気がする。",
+  "dialogue.skyabyss.attendant_survivor_bone.ch6e_attendant_survivor_bone2": "灯してるよ。消したら、誰かが帰り道をなくすから。\n……その人にも、そう言っておいて。",
+  "dialogue.skyabyss.attendant_survivor_bone.ch6e_attendant_survivor_bone2.ok": "うなずく",
+  "dialogue.skyabyss.whale_chaser.ch6e_whale_chaser": "まだ数えているか、だって？　……前にも、誰かにそう聞かれた気がする。",
+  "dialogue.skyabyss.whale_chaser.ch6e_whale_chaser2": "数えてるさ。戻らなかった数じゃない。戻ってきた数を。\n……あんたも、その一つだ。",
+  "dialogue.skyabyss.whale_chaser.ch6e_whale_chaser2.ok": "うなずく",
+  "dialogue.skyabyss.storyteller.ch6e_storyteller": "あたしが、まだ歌を数えているかって？　……前にも、誰かにそう聞かれた気がするよ。",
+  "dialogue.skyabyss.storyteller.ch6e_storyteller2": "数えているとも。数え歌はね、数えるのをやめたら、ただの歌になっちまう。\n……その人に、そう伝えておくれ。",
+  "dialogue.skyabyss.storyteller.ch6e_storyteller2.ok": "うなずく",
+  "dialogue.skyabyss.attendant_smith.ch6e_attendant_smith": "鏡の枠？　……前にも、誰かにそう聞かれた気がする。",
+  "dialogue.skyabyss.attendant_smith.ch6e_attendant_smith2": "覚えちゃいない。だが、この手は覚えてるのかもしれん。\n丸い枠を打つと、いつも途中で手が止まる。",
+  "dialogue.skyabyss.attendant_smith.ch6e_attendant_smith2.ok": "うなずく"
 }

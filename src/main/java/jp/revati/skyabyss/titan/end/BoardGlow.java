@@ -55,9 +55,10 @@ public final class BoardGlow {
         return 0.5f + 0.5f * Mth.sin((float) (tick % PULSE) / PULSE * Mth.TWO_PI);
     }
 
-    // この人に光を見せてよいか (乗る資格があり、巨神が眠っていない)
+    // この人に光を見せてよいか (乗る資格があり、巨神が眠っていない。巨神そのものが見える人だけ: TitanVisibility)
     public static boolean visibleTo(ServerPlayer player, String titan) {
-        return !player.isSpectator() && Progression.canBoard(player, titan) && !TitanDormancy.isResting(player.server, titan);
+        return !player.isSpectator() && Progression.canBoard(player, titan) && !TitanDormancy.isResting(player.server, titan)
+                && jp.revati.skyabyss.titan.TitanVisibility.sees(player, titan);
     }
 
     // 光の柱と枠 (クライアントが描く。TitanEndNetwork.Beam)。centre = 枠の中心、hx・hy・hz = 枠の半分の大きさ (hx は yaw の向きの横、hz は奥行き)、

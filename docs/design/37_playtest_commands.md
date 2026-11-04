@@ -4,7 +4,7 @@
 - 状態: **棚卸しは静的（ソースの登録とその参照先を読んだもの）。実行して確かめたのは `play` の自己テストだけ。** 古いコマンドの実行確認は未了。
 - 関係: 試遊のコマンドは `/skyabyss play ...` の一本に集めた。旧 `/skyabyss playtest ...` は当面そのまま動く（働きの同じ語は `play` に統合済み。1 節の表の「試遊（旧）」）。`play` は `Playtest` の補助と公開の API（`Quests`・`Progression`・`Growth`・`Lore`・`TrialRoute`）だけを使う薄い層。
 - 実装: `jp.revati.skyabyss.dev.play`（`PlayCommands`・`HelpCommands`・`PlayChapters`・`PlayPlaces`・`PlayQuests`・`PlayRaid`・`PlaySelfTest`・`PlayMultiSelfTest`）。文言は `assets/skyabyss_play/lang`。
-- **正式版の形（2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」）**: 試遊の木は管理者のコマンド `/skyabyss admin …` に改めた（中身は play と同じ木に `inspect <人>`・`level <1-50> [人]`・`coins <数> [人]`・`version`、あいだの塔をすぐ試す `tower ending|start|day|hp|leave` を足した）。使える権限の段はサーバーの設定 `adminPermissionLevel`（既定 2）。遊ぶ人の一覧 `/skyabyss help`（誰でも。押すと入力欄に入る）。`/skyabyss play` は開発の別名として残し（撮影の台本が使う）、製品版では隠す。振り分けは `dev/CommandGate`: `/skyabyss` の根は誰でも通し、根の権限 2 を子の節へ移す（help = 誰でも、admin = 設定の段、そのほか = 製品版では隠す・開発では 2）。下の 2 節以降の `play` は `admin` と読み替える。
+- **正式版の形（2026-11-02 の声「正式版なので、コマンド整理して管理者用も設定して」）**: 試遊の木は管理者のコマンド `/skyabyss admin …` に改めた（中身は play と同じ木に `inspect <人>`・`level <1-50> [人]`・`coins <数> [人]`・`version`、あいだの塔をすぐ試す `tower ending|start|day|hp|leave`、手に持った神器の倒した数を決める `awaken <数> [人]`（目覚めの段の確かめ。03 の 13.5）を足した）。使える権限の段はサーバーの設定 `adminPermissionLevel`（既定 2）。遊ぶ人の一覧 `/skyabyss help`（誰でも。押すと入力欄に入る）。`/skyabyss play` は開発の別名として残し（撮影の台本が使う）、製品版では隠す。振り分けは `dev/CommandGate`: `/skyabyss` の根は誰でも通し、根の権限 2 を子の節へ移す（help = 誰でも、admin = 設定の段、そのほか = 製品版では隠す・開発では 2）。下の 2 節以降の `play` は `admin` と読み替える。
 
 ## 1. 棚卸し
 
@@ -46,7 +46,7 @@
 | 悪夢 | `skyabyss_nightmare` | enter | 2 | 要確認 | 根が `skyabyss` の外（統一が要る） |
 | 村・人 | `npc` | spawn village affinity bonds reset loop set advance | 2 | 試遊 | |
 | 町 | `town` | list rumor start place bell well reset cellar open close mapmaker draw | 2 | 試遊 | |
-| 施設・ギルド・交易 | `facility`・`guild`・`trade` | spawn mark place shop stash coins look records dummy keyroom offer return respec brew trade demo・create apply join accept deny leave kick open info list menu officer take storage deliver banner leader disband confirm pattern plate achievements | 一部 2 | プレイヤー | `coins` が `FacilityCommands` に二度ある（後述 3） |
+| 施設・ギルド・交易 | `facility`・`guild`・`trade` | spawn mark place shop stash coins look records（hub <0〜6> で記録の画面）dummy keyroom offer return respec brew trade demo mount（ride・sprint）・create apply join accept deny leave kick open info list menu officer take storage deliver banner leader disband confirm pattern plate achievements | 一部 2 | プレイヤー | `coins` が `FacilityCommands` に二度ある（後述 3） |
 | パーティ | `party` | invite accept decline leave kick leader | なし | プレイヤー | |
 | 拾得・報酬 | `titanmemory`・`heartreward` | claim choose memory set clear・reward reset dev | 2 | 試遊 | |
 | 旅嚢 | `pouch` | （品の袋の確認） | 2 | 試遊 | |

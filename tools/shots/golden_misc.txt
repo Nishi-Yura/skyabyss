@@ -1,0 +1,54 @@
+# 2026-11-04: 黄金比の板の残りの画面 (塔の受付・転生・称号・試練の板・封切り・野営・深みの順位)。1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_misc.txt -PshotsName=golden_misc
+world shots flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+hud on
+camera 0 -60 8 180 0
+waitchunks
+wait 40
+cmd skyabyss cinematic stop
+wait 20
+chat clear
+
+open tower_desk
+wait 10
+shot tower_desk
+close
+open jp.revati.skyabyss.client.rebirth.SoulScreen
+wait 10
+shot soul
+close
+open rebirth
+wait 10
+shot rebirth_titles
+close
+cmd skyabyss dev trial board whale
+wait 20
+shot trial_board
+close
+wait 5
+cmd skyabyss facility act boxes
+wait 15
+shot boxes
+close
+wait 5
+cmd skyabyss facility act circuit
+wait 15
+shot circuit_camp
+close
+wait 5
+cmd skyabyss abyss depth records
+wait 15
+shot depth_rank
+close

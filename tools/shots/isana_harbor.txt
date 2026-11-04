@@ -1,0 +1,52 @@
+# 2026-11-04: 二章のイサナは汐守の港に立つ (story/ch2/IsanaHarbor。docs/design/07 の 3.2)。港のイサナを前から撮り、港での初めての話を開く
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/isana_harbor.txt -PshotsName=isana_harbor
+world isana_harbor3 continent
+size 1280 720
+timeout 1800
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode creative
+cmd effect give @s resistance 1200 4 true
+cmd skyabyss admin chapter 2
+wait 40
+cmd skyabyss cinematic stop
+close
+cmd skyabyss quest start @s main_tide
+cmd skyabyss quest stage @s main_tide prepare
+chat clear
+# 汐守の町の広場へ。町が建ち、港の立つ所が決まり、港のイサナが立つまで待つ
+cmd tp @s 1330 140 160
+waitchunks 400
+wait 600
+cmd skyabyss dev grounds mark town 1 stand
+waitchunks 400
+wait 400
+cmd skyabyss dev isana
+# 港のイサナの少し上・後ろから (海と彼女が一緒に入る)
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_harbor_isana,limit=1] run tp @s ~6 ~3 ~6
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_harbor_isana,limit=1] eyes
+wait 100
+hud on
+chat clear
+shot isana_harbor
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_harbor_isana,limit=1] run tp @s ~14 ~8 ~14
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_harbor_isana,limit=1] feet
+wait 100
+shot isana_harbor_wide
+# 港での初めての話
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_harbor_isana,limit=1] run tp @s ~2 ~ ~2
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_harbor_isana,limit=1] eyes
+wait 40
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 30
+shot isana_harbor_talk

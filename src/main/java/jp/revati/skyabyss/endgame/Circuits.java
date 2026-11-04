@@ -57,6 +57,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //     守る  GUARD : 柱のそば (GUARD_R) に誰かがいるあいだだけ進む (40 秒)。10 秒ごとに敵が寄せてくる
 //     運ぶ  CARRY : 柱の所で荷を背負い (足が少し重い)、もう一つの柱の所へ届ける。半ばで待ち伏せ。背負った人が倒れる・離れると荷が落ちる
 //     壊す  BREAK : 着くと淵の杭 (CircuitStake) と守りの敵 (2 + 人数) が湧く。杭が立っているあいだ BREAK_WAVE ごとに寄せ手。杭を壊すと越える
+//     土地の課題 (CircuitLand): 丘陵 = 掘り出す、浜 = 潮待ち、高地 = 雷を集める、荒野 = 火を守る。柱の種類の候補に、その土地の一つが加わる
+//   早越え: 課題を 5 分の限りの半分以内に越えると連なりが一つ増える。3 で印 +1、5 で印 +2 (そこで数え直し)。越えられなかった・遅かったら 0
 //   課題を越えるたびに、次の課題の柱が二本立つ (Wynncraft のルートランのビーコン)。先に近づいた方が次の課題になる。柱の色は
 //     白 = ふつう、金 = 印が二つ (倒す数・守る時間・待ち伏せが 1.5 倍)、青 = 越えると残り時間 +2 分。二本は課題の種類が違う
 //   越えるたびに「巡りの印」+1 (金は +2)。課題ごとに 5 分で間に合わなければ次へ (印なし。柱を選んでいるあいだは数えない)。近くの組の仲間 (START_NEAR) も一緒に歩く
@@ -93,7 +95,25 @@ public final class Circuits {
     private Circuits() {
     }
 
+    // その土地の課題 (丘陵 2・浜 3・高地 4・荒野 5。ほかは無し)
     @Nullable
+    public static CircuitRun.Kind landKind(int region) {
+        return switch (region) {
+            case 2 -> CircuitRun.Kind.DIG;
+            case 3 -> CircuitRun.Kind.TIDE;
+            case 4 -> CircuitRun.Kind.CHARGE;
+            case 5 -> CircuitRun.Kind.FIRE;
+            default -> null;
+        };
+    }
+
+    public static final int STREAK_ONE = 3;
+    public static final int STREAK_TWO = 5;
+
+    static CircuitRun of(ServerPlayer p) {
+        return BY_PLAYER.get(p.getUUID());
+    }
+
     public static CircuitRun runOf(ServerPlayer p) {
         return BY_PLAYER.get(p.getUUID());
     }
@@ -120,41 +140,49 @@ public final class Circuits {
     }
 
     // ---------------------------------------------------------------- 案内人の会話から
+    // 町の案内人は、その土地の野営地の場所を教える (巡り路は野営地から。CircuitCamps)
     public static void offer(ServerPlayer p) {
         SiteData.Entry town = townHere(p);
-        if (town == null) {
+        CircuitCamps.Camp camp = town == null ? null : CircuitCamps.byRegion(regionOfTown(town.index));
+        if (camp == null) {
             Notice.hint(p, "message.skyabyss.circuit.no_town");
             return;
         }
-        if (runOf(p) != null) {
-            Notice.hint(p, "message.skyabyss.circuit.busy");
-            return;
-        }
-        String r = ContinentTowns.region(town.index);
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.head", Component.translatable("map.skyabyss.town." + r))
-                .withStyle(ChatFormatting.GOLD));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.body").withStyle(ChatFormatting.GRAY));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.left", Math.max(0, DAILY - runsToday(p)), DAILY)
-                .withStyle(ChatFormatting.GRAY));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.offer.start").withStyle(Style.EMPTY.withColor(ChatFormatting.GREEN)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/skyabyss_circuit start"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("message.skyabyss.circuit.offer.hover")))));
+        tellCamp(p, camp);
+    }
+
+    // 野営地の向きと道のり (今いる所から)
+    static void tellCamp(ServerPlayer p, CircuitCamps.Camp camp) {
+        double dx = camp.x() - p.getX();
+        double dz = camp.z() - p.getZ();
+        int dist = (int) Math.round(Math.hypot(dx, dz));
+        String[] dirs = {"south", "southwest", "west", "northwest", "north", "northeast", "east", "southeast"};
+        int i = Math.floorMod((int) Math.round(Math.toDegrees(Math.atan2(-dx, dz)) / 45.0), 8);
+        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.camp_where", Component.translatable("label.skyabyss.facility.circuit_camp_" + camp.id() + ".sub"),
+                Component.translatable("gui.skyabyss.dir." + dirs[i]), dist).withStyle(ChatFormatting.GOLD));
+        p.sendSystemMessage(Component.translatable("message.skyabyss.circuit.camp_how").withStyle(ChatFormatting.GRAY));
     }
 
     // 案内人の会話の「歩き出す」から: 始めて、今日の報いの残りを知らせる
     public static void startFromGuide(ServerPlayer p) {
-        if (startHere(p)) {
-            int left = Math.max(0, DAILY - runsToday(p));
-            Notice.hint(p, left > 0 ? "message.skyabyss.circuit.left_today" : "message.skyabyss.circuit.none_today", left, DAILY);
+        if (CircuitCamps.near(p.serverLevel(), p.blockPosition()) == null) {
+            offer(p);
+            return;
         }
+        startHere(p);
     }
 
     static boolean startHere(ServerPlayer p) {
-        SiteData.Entry town = townHere(p);
-        if (town == null) {
-            Notice.hint(p, "message.skyabyss.circuit.no_town");
+        CircuitCamps.Camp camp = CircuitCamps.near(p.serverLevel(), p.blockPosition());
+        if (camp == null) {
+            Notice.hint(p, "message.skyabyss.circuit.no_camp");
             return false;
         }
+        return startAtCamp(p, camp);
+    }
+
+    // 野営地から歩き出す (近くの組の仲間も一緒)。今日の報いの残りを知らせる
+    public static boolean startAtCamp(ServerPlayer p, CircuitCamps.Camp camp) {
         if (runOf(p) != null) {
             Notice.hint(p, "message.skyabyss.circuit.busy");
             return false;
@@ -166,7 +194,9 @@ public final class Circuits {
                 members.add(m);
             }
         }
-        start(p.server, members, regionOfTown(town.index), p.blockPosition());
+        start(p.server, members, camp.region(), p.blockPosition());
+        int left = Math.max(0, DAILY - runsToday(p));
+        Notice.hint(p, left > 0 ? "message.skyabyss.circuit.left_today" : "message.skyabyss.circuit.none_today", left, DAILY);
         return true;
     }
 
@@ -191,6 +221,8 @@ public final class Circuits {
 
     public static void finish(MinecraftServer server, CircuitRun run) {
         ACTIVE.remove(run);
+        // 杭と、課題で湧いた敵を片づける (前は終わったあとも杭と体力の帯が残った)
+        cleanup(server.overworld(), run);
         for (UUID id : run.members) {
             BY_PLAYER.remove(id, run);
             ServerPlayer p = server.getPlayerList().getPlayer(id);
@@ -217,6 +249,7 @@ public final class Circuits {
         clearView(p);
         if (run.members.isEmpty()) {
             ACTIVE.remove(run);
+            cleanup(p.serverLevel(), run);
         }
     }
 
@@ -234,20 +267,30 @@ public final class Circuits {
         countRun(p);
         int coins = run.marks * COINS[Math.max(0, Math.min(COINS.length - 1, run.region))];
         Coins.give(p, coins);
-        int boxes = (run.marks + 1) / 2;
-        int band = jp.revati.skyabyss.item.wild.WildGearTypes.band(TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))]);
-        for (int i = 0; i < boxes; i++) {
-            int r = p.getRandom().nextInt(100);
-            GearTier tier = r < 60 ? GearTier.UNCOMMON : r < 92 ? GearTier.RARE : GearTier.EPIC;
-            giveBox(p, BoxKind.rarity(tier, band));
+        // 野営地の今の景品の表から、印 1 つにつき 1 回 (呪いの柱 1 本につき +1) 引く。引いた品は旅嚢へ、幕で一つずつ見せる
+        CircuitCamps.Camp camp = CircuitCamps.byRegion(run.region);
+        List<ItemStack> got = new ArrayList<>();
+        if (camp != null) {
+            List<net.minecraft.world.item.Item> pool = CircuitCamps.pool(camp, CircuitCamps.period());
+            int pulls = Math.min(CircuitCamps.MAX_PULLS, run.marks + run.curses);
+            for (int i = 0; i < pulls; i++) {
+                ItemStack s = CircuitCamps.pull(pool, p.getRandom());
+                if (!s.isEmpty()) {
+                    CircuitCamps.record(p, s);
+                    PouchRouting.giveOrDrop(p, s.copy());
+                    got.add(s);
+                }
+            }
         }
-        Notice.gain(p, "message.skyabyss.circuit.reward", coins, boxes);
-        String titan = run.region >= 0 && run.region < TITAN.length ? TITAN[run.region] : null;
-        if (run.marks >= 6 && titan != null) {
-            giveBox(p, BoxKind.titan(titan));
-            Notice.gain(p, "message.skyabyss.circuit.reward_titan");
+        Notice.gain(p, "message.skyabyss.circuit.reward", coins, got.size());
+        if (!(p instanceof FakePlayer) && p.connection != null) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new CircuitCamps.Reward(camp == null ? "" : camp.id(), run.marks, coins, got));
         }
+        LAST_PULLS.put(p.getUUID(), got.size());
     }
+
+    // 自己テスト用: 最後の報いで引いた数
+    static final java.util.Map<UUID, Integer> LAST_PULLS = new java.util.HashMap<>();
 
     static void giveBox(ServerPlayer p, @Nullable BoxKind kind) {
         var item = kind == null ? null : LootBoxSetup.item(kind);
@@ -259,6 +302,10 @@ public final class Circuits {
     // ---------------------------------------------------------------- 課題
     static void nextTask(ServerLevel level, CircuitRun run) {
         removeStake(level, run);
+        CircuitLand.clear(level, run);
+        run.points.clear();
+        run.pointProgress.clear();
+        run.holder = null;
         run.mobs.clear();
         run.progress = 0;
         run.need = 0;
@@ -267,10 +314,15 @@ public final class Circuits {
         run.ambushed = false;
         run.dropped = false;
         run.taskStart = level.getGameTime();
-        // 次の課題の柱を二本 (種類は違うもの。色は白 50・金 25・青 25、二本とも白にはしない)
-        CircuitRun.Kind[] kinds = CircuitRun.Kind.values();
-        CircuitRun.Kind k1 = kinds[level.random.nextInt(kinds.length)];
-        CircuitRun.Kind k2 = kinds[(k1.ordinal() + 1 + level.random.nextInt(kinds.length - 1)) % kinds.length];
+        // 次の課題の柱を二本 (種類は違うもの。色は白 45・金 22・青 22・紫 11、二本とも白にはしない)
+        // 候補はいつもの四つと、その土地の課題一つ
+        List<CircuitRun.Kind> kinds = new ArrayList<>(List.of(CircuitRun.Kind.HUNT, CircuitRun.Kind.GUARD, CircuitRun.Kind.CARRY, CircuitRun.Kind.BREAK));
+        CircuitRun.Kind land = landKind(run.region);
+        if (land != null) {
+            kinds.add(land);
+        }
+        CircuitRun.Kind k1 = kinds.remove(level.random.nextInt(kinds.size()));
+        CircuitRun.Kind k2 = kinds.get(level.random.nextInt(kinds.size()));
         CircuitRun.Bonus b1 = rollBonus(level);
         CircuitRun.Bonus b2 = rollBonus(level);
         if (b1 == CircuitRun.Bonus.NONE && b2 == CircuitRun.Bonus.NONE) {
@@ -287,7 +339,7 @@ public final class Circuits {
 
     static CircuitRun.Bonus rollBonus(ServerLevel level) {
         int r = level.random.nextInt(100);
-        return r < 50 ? CircuitRun.Bonus.NONE : r < 75 ? CircuitRun.Bonus.DOUBLE : CircuitRun.Bonus.TIME;
+        return r < 45 ? CircuitRun.Bonus.NONE : r < 67 ? CircuitRun.Bonus.DOUBLE : r < 89 ? CircuitRun.Bonus.TIME : CircuitRun.Bonus.CURSE;
     }
 
     static CircuitRun.Offer offer(ServerLevel level, CircuitRun run, BlockPos from, CircuitRun.Kind kind, CircuitRun.Bonus bonus) {
@@ -314,6 +366,42 @@ public final class Circuits {
         run.bonus = o.bonus();
         run.phase = 0;
         run.taskStart = level.getGameTime();
+        if (o.bonus() == CircuitRun.Bonus.CURSE) {
+            run.curses++;
+            for (ServerPlayer p : online(level, run)) {
+                Notice.warn(p, "message.skyabyss.circuit.cursed", run.curses, Math.round(CURSE_STEP * 100 * run.curses));
+            }
+        }
+    }
+
+    // 呪い一つで、敵の体力と攻撃が 25% ずつ上がる (重なる)。終わりの封の箱は呪い一つにつき一つ増える
+    static final double CURSE_STEP = 0.25;
+    static final net.minecraft.resources.ResourceLocation CURSE_HEALTH = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "circuit_curse_health");
+    static final net.minecraft.resources.ResourceLocation CURSE_DAMAGE = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "circuit_curse_damage");
+
+    static double curseScale(CircuitRun run) {
+        return 1.0 + CURSE_STEP * run.curses;
+    }
+
+    // 巡り路の敵に、いまの呪いの重さを掛ける (体力は満たし直す)
+    static void curse(Mob mob, CircuitRun run) {
+        if (run.curses <= 0) {
+            return;
+        }
+        double add = CURSE_STEP * run.curses;
+        var hp = mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        if (hp != null) {
+            hp.removeModifier(CURSE_HEALTH);
+            hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(CURSE_HEALTH, add,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            mob.setHealth(mob.getMaxHealth());
+        }
+        var dmg = mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+        if (dmg != null) {
+            dmg.removeModifier(CURSE_DAMAGE);
+            dmg.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(CURSE_DAMAGE, add,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
     }
 
     // 金の柱は 1.5 倍
@@ -347,7 +435,7 @@ public final class Circuits {
             int i = ok.get(level.random.nextInt(ok.size()));
             run.usedPois.add(i);
             ContinentPois.Poi poi = all.get(i);
-            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), "map.skyabyss.poi." + poi.kind(), i);
+            return new Spot(new BlockPos(poi.x(), map.surface(poi.x(), poi.z()) + 1, poi.z()), poi.titleKey(), i);
         }
         for (int t = 0; t < 60; t++) {
             double a = level.random.nextDouble() * Math.PI * 2;
@@ -364,6 +452,22 @@ public final class Circuits {
 
     static void complete(ServerLevel level, CircuitRun run) {
         int add = run.bonus == CircuitRun.Bonus.DOUBLE ? 2 : 1;
+        // 早越えの連なり
+        boolean fast = level.getGameTime() - run.taskStart <= TASK_LIMIT / 2;
+        run.streak = fast ? run.streak + 1 : 0;
+        int streakBonus = 0;
+        if (run.streak == STREAK_ONE) {
+            streakBonus = 1;
+        } else if (run.streak >= STREAK_TWO) {
+            streakBonus = 2;
+            run.streak = 0;
+        }
+        if (streakBonus > 0) {
+            add += streakBonus;
+            for (ServerPlayer p : online(level, run)) {
+                Notice.unlock(p, "message.skyabyss.circuit.streak", streakBonus == 1 ? STREAK_ONE : STREAK_TWO, streakBonus);
+            }
+        }
         run.marks += add;
         run.tasks++;
         if (run.bonus == CircuitRun.Bonus.TIME) {
@@ -382,6 +486,7 @@ public final class Circuits {
 
     static void fail(ServerLevel level, CircuitRun run) {
         run.tasks++;
+        run.streak = 0;
         run.bonus = CircuitRun.Bonus.NONE;
         for (ServerPlayer p : online(level, run)) {
             Notice.warn(p, "message.skyabyss.circuit.failed");
@@ -395,6 +500,8 @@ public final class Circuits {
             adopt(level, run, 0);
             run.bonus = CircuitRun.Bonus.NONE;
         }
+        // 開発の近道は早越えに数えない (連なりを 0 に)
+        run.taskStart = level.getGameTime() - TASK_LIMIT;
         complete(level, run);
     }
 
@@ -445,6 +552,7 @@ public final class Circuits {
 
     public static void step(ServerLevel level, CircuitRun run, boolean show) {
         long now = level.getGameTime();
+        run.now = now;
         List<ServerPlayer> ps = online(level, run);
         // 誰もいない (落ちた・ほかの次元) あいだは時計だけ進む。全員が抜けたら終わり
         if (now >= run.end || run.members.isEmpty()) {
@@ -481,6 +589,10 @@ public final class Circuits {
             case GUARD -> stepGuard(level, run, ps, now);
             case CARRY -> stepCarry(level, run, ps);
             case BREAK -> stepBreak(level, run, ps, now);
+            case DIG -> CircuitLand.stepDig(level, run, ps, now);
+            case TIDE -> CircuitLand.stepTide(level, run, ps, now);
+            case CHARGE -> CircuitLand.stepCharge(level, run, ps, now);
+            case FIRE -> CircuitLand.stepFire(level, run, ps, now);
         }
         if (show && ACTIVE.contains(run)) {
             for (ServerPlayer p : ps) {
@@ -554,11 +666,11 @@ public final class Circuits {
 
     // 杭の強さ: 土地の目安の Lv × 10 の体力 (人数で 1 + 0.5 × (人 - 1)、金の柱で 1.5 倍)、傷は 2 + Lv / 4
     static double stakeHealth(CircuitRun run, int people) {
-        return 10.0 * TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] * (1 + 0.5 * Math.max(0, people - 1)) * harder(run);
+        return 10.0 * TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] * (1 + 0.5 * Math.max(0, people - 1)) * harder(run) * curseScale(run);
     }
 
     static double stakeDamage(CircuitRun run) {
-        return 2 + TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] / 4.0;
+        return (2 + TOP_LEVEL[Math.max(0, Math.min(TOP_LEVEL.length - 1, run.region))] / 4.0) * curseScale(run);
     }
 
     @Nullable
@@ -581,6 +693,18 @@ public final class Circuits {
         }
         run.stake = stake.getUUID();
         return stake;
+    }
+
+    static void cleanup(ServerLevel level, CircuitRun run) {
+        removeStake(level, run);
+        CircuitLand.clear(level, run);
+        for (UUID id : run.mobs) {
+            Entity e = level.getEntity(id);
+            if (e != null && e.isAlive()) {
+                e.discard();
+            }
+        }
+        run.mobs.clear();
     }
 
     static void removeStake(ServerLevel level, CircuitRun run) {
@@ -711,6 +835,7 @@ public final class Circuits {
             }
             Mob mob = e == null ? null : RegionSpawner.spawn(level, e.entity(), g, target);
             if (mob != null) {
+                curse(mob, run);
                 mob.setTarget(target);
                 run.mobs.add(mob.getUUID());
                 i++;
@@ -747,6 +872,9 @@ public final class Circuits {
             return Component.translatable("circuit.skyabyss.task.choose", offerLabel(run.offers.get(0)), offerLabel(run.offers.get(1)));
         }
         Component line = taskLine0(run);
+        if (run.streak > 0) {
+            line = Component.translatable("circuit.skyabyss.task.with_streak", line, run.streak);
+        }
         return run.bonus == CircuitRun.Bonus.NONE ? line
                 : Component.translatable("circuit.skyabyss.task.with_bonus", line, Component.translatable("circuit.skyabyss.bonus." + run.bonus.name().toLowerCase(java.util.Locale.ROOT)));
     }
@@ -763,12 +891,17 @@ public final class Circuits {
                     : Component.translatable("circuit.skyabyss.task.carry", place(run.place2));
             case BREAK -> run.phase == 0 ? Component.translatable("circuit.skyabyss.task.break_go", place(run.place))
                     : Component.translatable("circuit.skyabyss.task.break");
+            case DIG, TIDE, CHARGE, FIRE -> CircuitLand.taskLine(run, run.now);
         };
     }
 
     static BlockPos target(CircuitRun run) {
         if (run.choosing()) {
             return run.offers.get(0).spot();
+        }
+        BlockPos land = CircuitLand.target(run);
+        if (land != null) {
+            return land;
         }
         return run.kind == CircuitRun.Kind.CARRY && run.phase == 1 ? run.spot2 : run.spot;
     }
@@ -843,6 +976,29 @@ public final class Circuits {
                                 forceComplete(p.serverLevel(), run);
                             }
                             return run == null ? 0 : 1;
+                        }))
+                        // land: いまの課題を、その土地の課題 (CircuitLand) にして足もとで始める (撮影・確かめ用)
+                        .then(Commands.literal("land").executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            CircuitRun run = runOf(p);
+                            CircuitRun.Kind land = run == null ? null : landKind(run.region);
+                            if (land == null) {
+                                return 0;
+                            }
+                            if (run.choosing()) {
+                                adopt(p.serverLevel(), run, 0);
+                            }
+                            CircuitLand.clear(p.serverLevel(), run);
+                            run.bonus = CircuitRun.Bonus.NONE;
+                            run.kind = land;
+                            run.phase = 0;
+                            run.progress = 0;
+                            run.need = 0;
+                            run.points.clear();
+                            run.pointProgress.clear();
+                            run.spot = p.blockPosition();
+                            run.taskStart = p.serverLevel().getGameTime();
+                            return 1;
                         }))
                         .then(Commands.literal("goto").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();

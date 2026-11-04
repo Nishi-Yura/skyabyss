@@ -49,7 +49,8 @@ public final class Guilds {
         NEW_LEADER("new_leader"),
         DISBANDED("disbanded"),
         PATTERN_LOCKED("pattern_locked"),
-        PLATE_LOCKED("plate_locked");
+        PLATE_LOCKED("plate_locked"),
+        NEED_HEART("need_heart");
 
         public final String key;
 
@@ -87,6 +88,10 @@ public final class Guilds {
         if (data.of(player.getUUID()) != null) {
             return Result.IN_GUILD;
         }
+        // 作れるのは岩鯨の心臓を止めた人だけ (00 の 80。入るのはだれでも)。自己テストの代わりの人は数えない
+        if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer) && !canFound(player.server, player.getUUID())) {
+            return Result.NEED_HEART;
+        }
         if (name.codePointCount(0, name.length()) < GuildData.NAME_MIN || name.codePointCount(0, name.length()) > GuildData.NAME_MAX) {
             return Result.NAME_LENGTH;
         }
@@ -107,6 +112,11 @@ public final class Guilds {
         SkyAbyss.LOGGER.info("[guild] {} created {} [{}]", player.getGameProfile().getName(), g.name, g.tag);
         jp.revati.skyabyss.advancement.Beats.fire(player, "guild:join");
         return Result.OK;
+    }
+
+    // ギルドを作れる人: 岩鯨の心臓を止めた (周回の撃破の記録でもよい)
+    public static boolean canFound(net.minecraft.server.MinecraftServer server, java.util.UUID player) {
+        return jp.revati.skyabyss.progress.Progression.stopped(server, player, "stone_whale");
     }
 
     static int clampDye(int c) {

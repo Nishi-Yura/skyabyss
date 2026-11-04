@@ -52,6 +52,9 @@ public final class BossCue {
             }
             if (p.distanceToSqr(boss) < RANGE * RANGE && GroupOwned.visibleTo(boss, p)) {
                 PacketDistributor.sendToPlayer(p, payload);
+                // 狩人の手帳に、見た技として記す
+                jp.revati.skyabyss.endgame.HunterNotes.sawMove(p, net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(boss.getType()).toString(),
+                        bossKey + "." + attackKey);
             }
         }
     }

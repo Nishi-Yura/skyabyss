@@ -42,17 +42,24 @@ public final class MountNetwork {
                     if (c.player() instanceof ServerPlayer player) {
                         MountService.closed(player);
                     }
+                })
+                .playToServer(Rename.TYPE, Rename.STREAM_CODEC, (p, c) -> {
+                    if (c.player() instanceof ServerPlayer player) {
+                        MountService.rename(player, p.name());
+                    }
                 });
     }
 
     public static View view(ServerPlayer player) {
         MountData d = MountService.data(player);
         return new View(Coins.count(player), MountService.chapter(player), d.ownedBits(), d.chosen().ordinal(),
-                d.tier(0), d.tier(1), d.tier(2), MountService.hasWhistle(player));
+                d.tier(0), d.tier(1), d.tier(2), MountService.hasWhistle(player), d.bond(), (int) d.ridden(), d.name());
     }
 
     // owned = 買った見た目の bit、chosen = 今の見た目の ordinal、speed / jump / health = 性能の段
-    public record View(int coins, int chapter, int owned, int chosen, int speed, int jump, int health, boolean whistle) implements CustomPacketPayload {
+    // bond = 絆の段、ridden = 乗った距離 (ブロック)、name = 付けた名前
+    public record View(int coins, int chapter, int owned, int chosen, int speed, int jump, int health, boolean whistle, int bond, int ridden,
+            String name) implements CustomPacketPayload {
         public static final Type<View> TYPE = typeOf("mount_view");
         public static final StreamCodec<RegistryFriendlyByteBuf, View> STREAM_CODEC = StreamCodec.of(
                 (buf, p) -> {
@@ -64,9 +71,12 @@ public final class MountNetwork {
                     buf.writeVarInt(p.jump);
                     buf.writeVarInt(p.health);
                     buf.writeBoolean(p.whistle);
+                    buf.writeVarInt(p.bond);
+                    buf.writeVarInt(p.ridden);
+                    buf.writeUtf(p.name);
                 },
                 buf -> new View(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
-                        buf.readVarInt(), buf.readBoolean()));
+                        buf.readVarInt(), buf.readBoolean(), buf.readVarInt(), buf.readVarInt(), buf.readUtf()));
 
         public boolean owns(MountLook look) {
             return (owned & (1 << look.ordinal())) != 0;
@@ -100,6 +110,17 @@ public final class MountNetwork {
                     buf.writeVarInt(p.arg);
                 },
                 buf -> new Act(buf.readVarInt(), buf.readVarInt()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    public record Rename(String name) implements CustomPacketPayload {
+        public static final Type<Rename> TYPE = typeOf("mount_rename");
+        public static final StreamCodec<RegistryFriendlyByteBuf, Rename> STREAM_CODEC = StreamCodec.of((buf, p) -> buf.writeUtf(p.name, 64),
+                buf -> new Rename(buf.readUtf(64)));
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

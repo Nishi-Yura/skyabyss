@@ -252,16 +252,12 @@ public final class QuickCard {
             return;
         }
         Component label = openHintLabel();
-        float scale = 0.75f;
+        // 字は等倍 (docs/design/56。縮めた字は画素がつぶれて読めない)
         int tw = mc.font.width(label);
         int x = r.x();
         int y = r.y();
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().scale(scale, scale, 1f);
-        g.drawString(mc.font, label, 0, 0, 0xCCD8DCE6, true);
-        g.pose().popPose();
-        PouchNew.badge(g, mc.font, x + Math.round(tw * scale) - 3, y - 1);
+        g.drawString(mc.font, label, x, y, 0xCCD8DCE6, true);
+        PouchNew.badge(g, mc.font, x + tw - 3, y - 1);
     }
 
     private static boolean renderCard(GuiGraphics g, Minecraft mc) {
@@ -314,17 +310,13 @@ public final class QuickCard {
         Component label = age < NAME_MS
                 ? Component.literal("[").append(key).append("] ").append(e.item().getDescription())
                 : Component.literal("[").append(key).append("]");
-        float scale = 0.75f;
+        // 字は等倍 (docs/design/56)。絵の上の一行
         int tw = mc.font.width(label);
-        float lx = (leftSide ? spriteX + 11.5f : spriteX + 17.5f) - tw * scale / 2f;
-        float ly = spriteY - 8;
+        int lx = Math.round((leftSide ? spriteX + 11.5f : spriteX + 17.5f) - tw / 2f);
+        int ly = Math.round(spriteY) - 10;
         float alpha = age < NAME_MS ? 1f : 0.7f;
         int color = ((int) (Mth.clamp(alpha, 0f, 1f) * 255) << 24) | 0xD8DCE6;
-        g.pose().pushPose();
-        g.pose().translate(lx, ly, 0);
-        g.pose().scale(scale, scale, 1f);
-        g.drawString(mc.font, label, 0, 0, color, true);
-        g.pose().popPose();
+        g.drawString(mc.font, label, lx, ly, color, true);
         return true;
     }
 }

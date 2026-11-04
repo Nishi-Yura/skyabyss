@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.client.facility;
 
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.facility.KeepRecords;
 import jp.revati.skyabyss.trial.Trial;
@@ -13,11 +14,13 @@ import net.minecraft.network.chat.Component;
 // 空見の砦の老兵の「試練の記録」(docs/design/35 の 3.2。中身は facility.KeepRecords)。施設の画面と同じ石板と骨の枠。
 //   上に巨神のつまみ 4 つ (出会っていない巨神は「？」)、その巨神の順路の記録 (越えた回数・最速)、試練の一覧 (見ていない試練は「？？？」、済んだ回数、修飾の帯、任意の目標の印)。
 //   下に称号の数と済んだ試練の合計
-// 2026-10-22 の部屋の見直し: 窓は画面に合わせて広がり、試練の一覧は目盛りつきで送る (以前は 12 行で切れていた)
+// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 見出しの帯の右に巨神のつまみ、一行目に順路の記録、その下に試練の一覧 (行 13・送れる)、下の段に合計
 public class RecordsScreen extends Screen {
-    private static final int MAX_W = 380;
-    private static final int MAX_H = 300;
-    private static final int ROW_H = 14;
+    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
+    private static final Golden.Box LIST = LAYOUT.body().afterTop(Golden.ROW);
+    private static final int ROW_H = Golden.ROW;
+    private static final int TAB_W = Golden.S34;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private final KeepRecords.View view;
     private int page;
@@ -44,15 +47,27 @@ public class RecordsScreen extends Screen {
 
     @Override
     protected void init() {
-        w = Math.min(MAX_W, width - 16);
-        h = Math.min(MAX_H, height - 16);
-        x0 = (width - w) / 2;
-        y0 = (height - h) / 2;
-        int lx = x0 + 16;
-        int ly = y0 + 54;
-        int listW = w - 32;
-        int listH = h - 84;
-        rows.setViewport(lx + 2, ly + 2, listW - 4, listH - 4);
+        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
+        w = Golden.L_W;
+        h = Golden.L_H;
+        x0 = 0;
+        y0 = 0;
+        rows.setViewport(LIST.x() + 2, LIST.y() + 2, LIST.w() - 3, LIST.h() - 4);
+    }
+
+    // つまみ i の幅と左端 (見出しの帯の右寄せ)
+    private int tabW(int i) {
+        KeepRecords.TitanPage p = view.pages().get(i);
+        Component c = p.met() ? Component.translatable("progress.skyabyss.titan." + p.titan()) : Component.literal("？");
+        return Math.max(TAB_W, font.width(c) + 10);
+    }
+
+    private int tabX(int i) {
+        int x = LAYOUT.head().right();
+        for (int k = view.pages().size() - 1; k >= i; k--) {
+            x -= tabW(k) + (k < view.pages().size() - 1 ? Golden.S3 : 0);
+        }
+        return x;
     }
 
     @Override
@@ -61,41 +76,47 @@ public class RecordsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        renderBackground(g, mx, my, partialTick);
-        FacilityUi.panel(g, x0, y0, w, h);
+    public void render(GuiGraphics g, int sx, int sy, float partialTick) {
+        renderBackground(g, sx, sy, partialTick);
+        int mx = (int) Math.floor(fit.x(sx));
+        int my = (int) Math.floor(fit.y(sy));
+        fit.begin(g);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
         Font font = this.font;
-        FacilityUi.gem(g, x0 + 12, y0 + 13);
-        g.drawString(font, title, x0 + 18, y0 + 9, FacilityUi.TEXT, false);
-        // つまみ
-        int tx = x0 + 16;
+        Golden.Box head = LAYOUT.head();
+        FacilityUi.gem(g, head.x() + 4, head.y() + head.h() / 2);
+        g.drawString(font, title, head.x() + 10, Golden.textY(head.y(), head.h()), FacilityUi.TEXT, false);
+        // つまみ (見出しの帯の右寄せ)
+        int ty = head.y() + 4;
         for (int i = 0; i < view.pages().size(); i++) {
             KeepRecords.TitanPage p = view.pages().get(i);
             Component c = p.met() ? Component.translatable("progress.skyabyss.titan." + p.titan()) : Component.literal("？");
-            int tw = Math.max(40, font.width(c) + 12);
+            int tx = tabX(i);
+            int tw = tabW(i);
             boolean on = page == i;
-            boolean hover = mx >= tx && mx < tx + tw && my >= y0 + 22 && my < y0 + 36;
-            g.fill(tx, y0 + 22, tx + tw, y0 + 36, on ? 0xFF2A5E6A : hover ? FacilityUi.ROW_HOVER : FacilityUi.ROW);
-            g.renderOutline(tx, y0 + 22, tw, 14, on ? FacilityUi.TEAL : FacilityUi.LINE);
-            g.drawString(font, c, tx + 6, y0 + 25, p.stopped() ? FacilityUi.GOLD : on ? FacilityUi.TEXT : FacilityUi.DIM, false);
-            tx += tw + 3;
+            boolean hover = mx >= tx && mx < tx + tw && my >= ty && my < ty + Golden.BTN;
+            Golden.tab(g, font, new Golden.Box(tx, ty, tw, Golden.BTN), p.stopped() ? c.copy().withStyle(st -> st.withColor(Golden.GOLD)) : c, on, hover);
         }
+        Golden.Box foot = LAYOUT.foot();
+        g.drawString(font, Component.translatable("gui.skyabyss.records.foot", view.totalCleared(), view.titles()), foot.x() + Golden.S5,
+                Golden.textY(foot.y(), foot.h()), FacilityUi.DIM, false);
         if (view.pages().isEmpty()) {
+            fit.end(g);
             return;
         }
         KeepRecords.TitanPage p = view.pages().get(page);
-        int x = x0 + 16;
-        int y = y0 + 42;
+        int x = LIST.x();
+        int y = Golden.textY(LAYOUT.body().y(), Golden.ROW);
         long best = p.routeBest() / 20;
         Component route = p.routeClears() <= 0 ? Component.translatable("gui.skyabyss.records.route_none")
                 : Component.translatable("gui.skyabyss.records.route", p.routeClears(), String.format("%d:%02d", best / 60, best % 60));
         g.drawString(font, route, x, y, FacilityUi.TEXT, false);
-        int ly = y + 12;
-        int lw = w - 32;
-        int lh = h - 84;
-        FacilityUi.well(g, x, ly, lw, lh);
+        int ly = LIST.y();
+        int lw = LIST.w();
+        Golden.recess(g, LIST);
         if (!p.met()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.records.unmet"), x + 6, ly + 6, FacilityUi.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.records.unmet"), x + Golden.S8, Golden.textY(ly + 2, Golden.ROW), FacilityUi.DIM, false);
         } else {
             rows.setContentHeight(p.rows().size() * ROW_H);
             rows.begin(g);
@@ -107,42 +128,42 @@ public class RecordsScreen extends Screen {
                 KeepRecords.Row r = p.rows().get(i);
                 Trial.Def def = TrialCatalog.get(r.cellId());
                 Component name = r.seen() && def != null ? Component.translatable(def.nameKey()) : Component.translatable("trial.skyabyss.unknown");
-                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), x + 6, ry + 2, 130, r.seen() ? FacilityUi.TEXT : FacilityUi.DIM, false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), x + Golden.S8, Golden.textY(ry, ROW_H), 130, r.seen() ? FacilityUi.TEXT : FacilityUi.DIM, false);
                 if (!r.seen()) {
                     continue;
                 }
                 Component n = Component.translatable("gui.skyabyss.trial.codex.cleared", r.cleared());
-                g.drawString(font, n, x + 140, ry + 2, r.cleared() > 0 ? FacilityUi.TEAL : FacilityUi.DIM, false);
+                g.drawString(font, n, x + 144, Golden.textY(ry, ROW_H), r.cleared() > 0 ? FacilityUi.TEAL : FacilityUi.DIM, false);
                 if (r.modsTotal() > 0) {
-                    int bx = x + 196;
-                    int bw = 48;
-                    g.fill(bx, ry + 4, bx + bw, ry + 8, 0xFF0A0C12);
-                    g.fill(bx, ry + 4, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, FacilityUi.TEAL);
-                    g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, ry + 2, FacilityUi.DIM, false);
+                    int bx = x + 212;
+                    int bw = Golden.S55;
+                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF0A0C12);
+                    g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, FacilityUi.TEAL);
+                    g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, Golden.textY(ry, ROW_H), FacilityUi.DIM, false);
                 }
                 if (r.goals() > 0) {
-                    g.drawString(font, "◆", x + lw - 14, ry + 2, FacilityUi.GOLD, false);
+                    g.drawString(font, "◆", x + lw - 18, Golden.textY(ry, ROW_H), FacilityUi.GOLD, false);
                 }
             }
             rows.end(g);
             rows.drawBar(g, 0xFF0A0C12, FacilityUi.TEAL);
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.records.foot", view.totalCleared(), view.titles()), x, y0 + h - 22, FacilityUi.DIM, false);
+        fit.end(g);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        return rows.mouseScrolled(mx, my, dy) || super.mouseScrolled(mx, my, dx, dy);
+        return rows.mouseScrolled(fit.x(mx), fit.y(my), dy) || super.mouseScrolled(mx, my, dx, dy);
     }
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        return rows.mouseDragged(mx, my, button, dx, dy) || super.mouseDragged(mx, my, button, dx, dy);
+        return rows.mouseDragged(fit.x(mx), fit.y(my), button, dx / fit.scale(), dy / fit.scale()) || super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
-        return rows.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
+        return rows.mouseReleased(fit.x(mx), fit.y(my), button) || super.mouseReleased(mx, my, button);
     }
 
     @Override
@@ -151,26 +172,26 @@ public class RecordsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double sx, double sy, int button) {
+        double mx = fit.x(sx);
+        double my = fit.y(sy);
         if (button == 0) {
             if (rows.mouseClicked(mx, my, button)) {
                 return true;
             }
-            int tx = x0 + 16;
+            int ty = LAYOUT.head().y() + 4;
             for (int i = 0; i < view.pages().size(); i++) {
-                KeepRecords.TitanPage p = view.pages().get(i);
-                Component c = p.met() ? Component.translatable("progress.skyabyss.titan." + p.titan()) : Component.literal("？");
-                int tw = Math.max(40, font.width(c) + 12);
-                if (mx >= tx && mx < tx + tw && my >= y0 + 22 && my < y0 + 36) {
+                int tx = tabX(i);
+                int tw = tabW(i);
+                if (mx >= tx && mx < tx + tw && my >= ty && my < ty + Golden.BTN) {
                     page = i;
                     rows.setScroll(0);
                     Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                             net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 1.2f, 0.4f));
                     return true;
                 }
-                tx += tw + 3;
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(sx, sy, button);
     }
 }

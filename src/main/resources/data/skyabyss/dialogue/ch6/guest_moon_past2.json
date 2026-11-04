@@ -263,6 +263,17 @@
     },
     "ch6_cliff_promise2": {
       "face": "grave",
+      "next": "ch6_cliff_ask"
+    },
+    "ch6_cliff_ask": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "npc": "skyabyss:whale_chaser",
+          "flag": "ch6_asked"
+        }
+      ],
       "next": "ch6_cliff_promise3"
     },
     "ch6_cliff_promise3": {
