@@ -32,7 +32,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 一覧は脇の列 (左)、読む中身は主の列 (右)、下の段に伝承の書への案内と追う釦。窓に合わせて画素ちょうどで大きくする。
 // 章の見出し (「· 一章　岩鯨」) を押すと、その下の最初のクエストを開く。
 // 終えたクエストの頁: 題・章・依頼主・受けた日と終えた日・終わりの書き付け・やったこと (段ごとの目的を ■ で)・受け取った報酬
+// 一覧のいちばん上の「今日・今週」(2026-11-05 の ct_clock): 日・週で戻るものを一行ずつ (quest/Clocks。開いているあいだ 2 秒ごとにサーバーへ頼む)
 public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
+    // 一覧の「今日・今週」の行 (クエストの id とぶつからない印)
+    static final String CLOCK = "#clock";
     static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
     private static final Golden.Box LIST = LAYOUT.body().minor(true);
     private static final Golden.Box PAGE = LAYOUT.body().major(false);
@@ -99,6 +102,10 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         if (selected == null) {
             QuestLog log = log();
             selected = log != null && !log.tracked().isEmpty() ? log.tracked() : firstQuest();
+            // 受けているクエストがなければ「今日・今週」
+            if (selected == null) {
+                selected = CLOCK;
+            }
         }
         if (selected != null) {
             reveal(selected);
@@ -114,7 +121,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     @Nullable
     private String firstQuest() {
         for (Row r : rows) {
-            if (r.quest() != null) {
+            if (r.quest() != null && !CLOCK.equals(r.quest())) {
                 return r.quest();
             }
         }
@@ -129,6 +136,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             syncList();
             return;
         }
+        rows.add(new Row(CLOCK, Component.translatable("quest.skyabyss.clock.row"), GOLD));
         List<QuestDef> main = new ArrayList<>();
         List<QuestDef> sub = new ArrayList<>();
         List<QuestDef> done = new ArrayList<>();
@@ -186,6 +194,30 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         }
     }
 
+    // 右の頁 (今日・今週): 名前・様子・戻るまで・受ける所
+    private int clockVersion = -1;
+    private int clockAsk;
+
+    private void clockBody(Font font, int bw) {
+        for (String l : LoreWrap.wrap(Component.translatable("quest.skyabyss.clock.lead").getString(), bw, font::width)) {
+            body.add(new BodyLine(l, SOFT, 0));
+        }
+        for (jp.revati.skyabyss.quest.Clocks.Row r : jp.revati.skyabyss.quest.Clocks.CLIENT) {
+            body.add(new BodyLine("", SOFT, 0));
+            body.add(new BodyLine(Component.translatable("quest.skyabyss.clock.name." + r.id()).getString(), GOLD, 0));
+            for (String l : LoreWrap.wrap(jp.revati.skyabyss.quest.Clocks.status(r).getString(), bw - Golden.S8, font::width)) {
+                body.add(new BodyLine(l, TEXT, Golden.S8));
+            }
+            if (r.reset() != jp.revati.skyabyss.quest.Clocks.NONE) {
+                String key = r.reset() == jp.revati.skyabyss.quest.Clocks.DAY ? "quest.skyabyss.clock.reset.day" : "quest.skyabyss.clock.reset.week";
+                body.add(new BodyLine(Component.translatable(key, jp.revati.skyabyss.quest.Clocks.left(r.ticks())).getString(), TEAL, Golden.S8));
+            }
+            for (String l : LoreWrap.wrap(Component.translatable("quest.skyabyss.clock.where", Component.translatable(r.where())).getString(), bw - Golden.S8, font::width)) {
+                body.add(new BodyLine(l, DIM, Golden.S8));
+            }
+        }
+    }
+
     // 右の頁: 題、依頼主、書き付け、目的、報酬
     private void rebuildBody() {
         body.clear();
@@ -196,6 +228,11 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         QuestLog.Entry entry = log == null || selected == null ? null : log.entry(selected);
         updateTrackButton(def, entry, log);
+        if (CLOCK.equals(selected)) {
+            clockBody(font, bw);
+            bodySync();
+            return;
+        }
         bodySync();
         if (def == null || entry == null) {
             return;
@@ -334,6 +371,18 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public void tick() {
+        if (CLOCK.equals(selected)) {
+            if (clockAsk-- <= 0) {
+                clockAsk = 40;
+                PacketDistributor.sendToServer(new jp.revati.skyabyss.quest.Clocks.Request());
+            }
+            if (clockVersion != jp.revati.skyabyss.quest.Clocks.clientVersion) {
+                clockVersion = jp.revati.skyabyss.quest.Clocks.clientVersion;
+                int scroll = bodyPanel.scroll();
+                rebuildBody();
+                bodyPanel.setScroll(scroll);
+            }
+        }
         // 記録が変わったら (目的が進んだ等) 作り直す
         QuestLog log = log();
         if (log != null) {
@@ -421,9 +470,10 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         int bx = bodyLeft();
-        if (def != null) {
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(def.titleKey()), bx, Golden.textY(PAGE.y() + 2, Golden.ROW),
-                    PAGE.w() - 2 * Golden.S8, def.main() ? GOLD : TEAL, false);
+        boolean clock = CLOCK.equals(selected);
+        if (def != null || clock) {
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(clock ? "quest.skyabyss.clock.title" : def.titleKey()), bx, Golden.textY(PAGE.y() + 2, Golden.ROW),
+                    PAGE.w() - 2 * Golden.S8, clock || def.main() ? GOLD : TEAL, false);
             Golden.rule(g, bx, PAGE.right() - Golden.S8, PAGE.y() + Golden.ROW + Golden.S5);
             bodyPanel.begin(g);
             for (int i = 0; i < body.size(); i++) {
@@ -504,6 +554,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         reveal(quest);
         if (!quest.equals(selected)) {
             selected = quest;
+            clockAsk = 0;
             rebuildBody();
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.2f, 0.4f));
         }

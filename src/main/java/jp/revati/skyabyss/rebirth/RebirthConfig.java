@@ -31,9 +31,6 @@ public final class RebirthConfig {
     public static final ModConfigSpec.BooleanValue CHAT_PREFIX = SERVER_BUILDER
             .comment("チャット・倒れた知らせ・一覧の名前の前に 「✦n」 を段の色で付ける。ほかの Mod の名前の書き換えには重ねる (置き換えない)")
             .define("chatPrefix", true);
-    public static final ModConfigSpec.BooleanValue GRAVE_FLAIR = SERVER_BUILDER
-            .comment("転生した人の墓に ✦ の数・色・花を付ける")
-            .define("graveFlair", true);
     public static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
 
     private RebirthConfig() {

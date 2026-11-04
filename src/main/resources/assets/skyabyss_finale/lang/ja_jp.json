@@ -638,5 +638,14 @@
   "dialogue.skyabyss.guest_tide_lightkeeper.fin_e_guest_tide_lightkeeper": "灯は見るためにある。見ていれば、誰かが帰ってくる。……誰に聞いた？\nわしの師も、そのまた師も、同じことを言った。……目を閉じると、帰り道が消える気がしてな。",
   "dialogue.skyabyss.guest_tide_lightkeeper.fin_e_guest_tide_lightkeeper.ok": "うなずく",
   "dialogue.skyabyss.attendant_smith.fin_e_attendant_smith": "しくじった打ちは、やり直せばいい。鉄は熱いうちなら何度でも戻る。……弟子にはいつもそう言ってる。\n……だがな、やり直しをやめられなくなったら、それはもう打ちじゃない。誰かが止めてやらにゃならん。",
-  "dialogue.skyabyss.attendant_smith.fin_e_attendant_smith.ok": "うなずく"
+  "dialogue.skyabyss.attendant_smith.fin_e_attendant_smith.ok": "うなずく",
+  "message.skyabyss.gate.choose.trial": "[試し]",
+  "message.skyabyss.rematch.head": "再戦の暦。挑む相手を選ぶ（段は次に挑む段）。",
+  "message.skyabyss.rematch.moon": "月の主:",
+  "message.skyabyss.rematch.pilgrim": "雲海:",
+  "message.skyabyss.rematch.pilgrim_name": "雲上の巡礼者",
+  "message.skyabyss.rematch.founder": "鐘の内:",
+  "message.skyabyss.rematch.pick": "[%s 段 %s]",
+  "message.skyabyss.rematch.best": "越えた段: %s",
+  "message.skyabyss.rematch.none": "まだ挑み直せる主はいない。"
 }

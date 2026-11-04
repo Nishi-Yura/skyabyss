@@ -638,5 +638,14 @@
   "dialogue.skyabyss.guest_tide_lightkeeper.fin_e_guest_tide_lightkeeper": "A light is for watching. If you watch, someone comes home. ...Who told you that?\nMy master said the same, and his master before him. ...I feel the way home would vanish if I closed my eyes.",
   "dialogue.skyabyss.guest_tide_lightkeeper.fin_e_guest_tide_lightkeeper.ok": "Nod",
   "dialogue.skyabyss.attendant_smith.fin_e_attendant_smith": "A botched strike can be struck again. Iron goes back as many times as you like while it's hot. ...I always tell my apprentices that.\n...But once you can't stop striking again, it isn't smithing anymore. Someone has to stop you.",
-  "dialogue.skyabyss.attendant_smith.fin_e_attendant_smith.ok": "Nod"
+  "dialogue.skyabyss.attendant_smith.fin_e_attendant_smith.ok": "Nod",
+  "message.skyabyss.gate.choose.trial": "[Trials]",
+  "message.skyabyss.rematch.head": "The rematch calendar. Choose whom to face (the tier is your next one).",
+  "message.skyabyss.rematch.moon": "Moon lords:",
+  "message.skyabyss.rematch.pilgrim": "Cloud sea:",
+  "message.skyabyss.rematch.pilgrim_name": "Pilgrim Above the Clouds",
+  "message.skyabyss.rematch.founder": "Inside the bell:",
+  "message.skyabyss.rematch.pick": "[%s tier %s]",
+  "message.skyabyss.rematch.best": "Cleared tier: %s",
+  "message.skyabyss.rematch.none": "No lord to face again yet."
 }

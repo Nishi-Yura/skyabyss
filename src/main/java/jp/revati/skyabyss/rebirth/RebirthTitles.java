@@ -32,7 +32,7 @@ public final class RebirthTitles {
     public record Title(int index, String id, Predicate<Facts> rule) {
     }
 
-    public static final int MAX = 54;
+    public static final int MAX = 56;
     private static final long HOUR = 72_000L;
     private static final List<Title> ALL = new ArrayList<>();
 

@@ -18,7 +18,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   skyabyssAdventure  (既定 true) サバイバルの人はアドベンチャーで遊ぶ (壊さない・置かない)。入る・生き返る・世界を移る時と、2 秒ごとに見る。
 //                      クリエイティブ・観戦者はそのまま
 //   skyabyssNoWear     (既定 true) 人の持つ武器・防具・道具の耐久は減らない (mixin/ItemStackDurabilityMixin)
-// 倒れても落とさない決まりは grave/DeathRules (既定の型 keep・耐久の減り 0)。
+// 倒れても落とさない決まりは keepInventory (migrate) と grave/DeathEvents (切られていても残す)。
 // 前から遊んでいた世界は、初めてこの版で開いたときに一度だけ、倒れたときの型を keep・耐久の減りを 0 にする (Migrated)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RpgRules {
@@ -144,14 +144,10 @@ public final class RpgRules {
 
     public static void migrate(net.minecraft.server.MinecraftServer server) {
         Migrated m = Migrated.get(server);
-        if (m.version >= Migrated.VERSION || jp.revati.skyabyss.grave.DeathRules.MODE == null) {
+        if (m.version >= Migrated.VERSION) {
             return;
         }
         GameRules rules = server.getGameRules();
-        if (m.version < 1) {
-            rules.getRule(jp.revati.skyabyss.grave.DeathRules.MODE).set(jp.revati.skyabyss.grave.DeathRules.Mode.KEEP.ordinal(), server);
-            rules.getRule(jp.revati.skyabyss.grave.DeathRules.DURABILITY).set(jp.revati.skyabyss.grave.DeathRules.DEFAULT_DURABILITY, server);
-        }
         // 持ち物の保持 (バニラ)。入っていれば倒れたときの持ち物はバニラのとおり全部残る (DeathEvents は何もしない)
         rules.getRule(GameRules.RULE_KEEPINVENTORY).set(true, server);
         m.version = Migrated.VERSION;
@@ -243,7 +239,7 @@ public final class RpgRules {
     }
 
     // 敵 (人のほかの生き物すべて) を倒しても、バニラの経験の玉を出さない (2026-11-05)。緑の経験値のバーは出していない (client/hud/VitalsHud) ので玉に使い道がない。
-    // 成長の経験値は倒した人へ直に入る (別の仕組み)。人が倒れたときの玉は、墓・預かりの決まり (grave/DeathEvents・TitanBackTrials) のまま
+    // 成長の経験値は倒した人へ直に入る (別の仕組み)。人が倒れたときの経験値は預かって戻す (grave/DeathEvents・TitanBackTrials)
     @SubscribeEvent
     static void onExperienceDrop(net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent event) {
         if (!(event.getEntity() instanceof Player)) {

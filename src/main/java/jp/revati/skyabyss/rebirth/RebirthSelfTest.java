@@ -32,7 +32,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 
 // 転生の見せ方の自己テスト: 色の段・記号の計算、称号の解除、順位表の並び、同期 (データ・パケット・記録画面・パーティ一覧の符号化の往復)、
-// 記録 (人生の最速・最少の倒れ・巨神の最速)、名前の飾り、墓の飾り、日英の文の鍵
+// 記録 (人生の最速・最少の倒れ・巨神の最速)、名前の飾り、日英の文の鍵
 public final class RebirthSelfTest {
     private RebirthSelfTest() {
     }
@@ -69,7 +69,6 @@ public final class RebirthSelfTest {
             leaderboard(f);
             sync(server, f);
             flow(server, f);
-            graves(server, f);
             lang(f);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("rebirth selftest crashed", e);
@@ -79,7 +78,7 @@ public final class RebirthSelfTest {
         force(server, false);
         RebirthView.useSource(Rebirth::displayCount);
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST rebirth PASSED (tier math, symbols, titles, leaderboard order, sync round trips, life records, names, grave flair, ja/en)");
+            SkyAbyss.LOGGER.info("SELFTEST rebirth PASSED (tier math, symbols, titles, leaderboard order, sync round trips, life records, names, ja/en)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST rebirth FAILED: {}", m));
         }
@@ -136,8 +135,8 @@ public final class RebirthSelfTest {
     // ---------------------------------------------------------------- 称号
     private static void titles(List<String> f) {
         List<RebirthTitles.Title> all = RebirthTitles.all();
-        check(f, all.size() == 54 && all.size() <= RebirthTitles.MAX && RebirthTitles.MAX <= 64,
-                "54 titles (24 + the founder + the tower two + fame five + journal four + mastery six + codex six + fishing two + dungeons four): " + all.size());
+        check(f, all.size() == 56 && all.size() <= RebirthTitles.MAX && RebirthTitles.MAX <= 64,
+                "56 titles (24 + the founder + the tower two + fame five + journal four + mastery six + codex six + fishing two + dungeons four + triple wager two): " + all.size());
         Set<String> ids = new HashSet<>();
         for (int i = 0; i < all.size(); i++) {
             check(f, all.get(i).index() == i, "title index order at " + i);
@@ -298,44 +297,6 @@ public final class RebirthSelfTest {
         net.minecraft.nbt.CompoundTag saved = stats.save(new net.minecraft.nbt.CompoundTag(), server.registryAccess());
         check(f, saved.getList("entries", 10).size() >= 1 && saved.getList("records", 10).size() >= 1, "stats save to NBT");
         Rebirths.refreshNames(p);
-    }
-
-    // ---------------------------------------------------------------- 墓の飾り
-    private static void graves(MinecraftServer server, List<String> f) {
-        ServerLevel level = server.overworld();
-        FakePlayer p = player(server, "grave_p");
-        BlockPos base = graveBase(server);
-        level.getChunk(base);
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
-                level.setBlock(base.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
-                for (int y = 0; y < 4; y++) {
-                    level.setBlock(base.offset(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-                }
-            }
-        }
-        // 前の実行の札が同じ世界 (run/) に残っていることがあるので、先に消す (世界は実行をまたいで残る)
-        RebirthFx.graveRemoved(level, base);
-        Rebirths.setCount(p, 0);
-        RebirthFx.graveCreated(p, level, base);
-        check(f, RebirthFx.labels(level, base).isEmpty(), "no flair for a player who has not reborn");
-        Rebirths.setCount(p, 7);
-        RebirthFx.graveCreated(p, level, base);
-        List<Display.TextDisplay> labels = RebirthFx.labels(level, base);
-        check(f, labels.size() == 1, "one label floats over the grave: " + labels.size());
-        if (!labels.isEmpty()) {
-            String json = labels.get(0).saveWithoutId(new net.minecraft.nbt.CompoundTag()).getString("text");
-            check(f, json.contains("✧") && json.contains("✦") && json.contains("Lv 50+7"), "label shows the bundled symbols and the level: " + json);
-        }
-        int flowers = 0;
-        for (BlockPos q : BlockPos.betweenClosed(base.offset(-1, 0, -1), base.offset(1, 0, 1))) {
-            if (level.getBlockState(q).is(Blocks.DANDELION)) {
-                flowers++;
-            }
-        }
-        check(f, flowers == 3, "gold tier plants 3 dandelions: " + flowers);
-        RebirthFx.graveRemoved(level, base);
-        check(f, RebirthFx.labels(level, base).isEmpty(), "label is removed with the grave");
     }
 
     // ---------------------------------------------------------------- 日英の文 (動的に作る鍵)

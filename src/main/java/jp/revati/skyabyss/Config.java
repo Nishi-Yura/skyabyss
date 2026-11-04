@@ -236,10 +236,6 @@ public final class Config {
             .comment("与えた傷の数字を、当てた敵の上に浮かべるか")
             .define("damageNumbers", true);
 
-    public static final ModConfigSpec.BooleanValue GRAVE_MARKER = CLIENT_BUILDER
-            .comment("自分の墓の標 (画面の中の札・画面の端の矢印と距離。8 ブロック以内で消える) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
-            .define("graveMarker", true);
-
     public static final ModConfigSpec.BooleanValue POUCH_QUICK_CARD = CLIENT_BUILDER
             .comment("ホットバーの左に、旅嚢の短押しで使う道具の札 (場面に合わせて自動で入れ替わる) を出すか (false = 出さない。短押しは前回の道具)")
             .define("pouchQuickCard", true);

@@ -407,6 +407,10 @@ public final class SelfTestRunner {
         steps.add(Step.once("isana post", jp.revati.skyabyss.story.IsanaPostSelfTest::run));
         // 五章からの物語の厚み (門のイサナ・月の問いと地上の答え・終章の見送りと結末のあと・雲の島のこだま)。SKYABYSS_SELFTEST_ONLY="story late"
         steps.add(Step.once("story late", jp.revati.skyabyss.story.StoryLateSelfTest::run));
+        // 今日・今週 (クエストログの時計の頁。quest/Clocks)。SKYABYSS_SELFTEST_ONLY="clocks"
+        steps.add(Step.once("clocks", jp.revati.skyabyss.quest.ClocksSelfTest::run));
+        // 記録の画面 (踏破・塔・深み・釣り・早駆け・転生・空見。record/RecordsHub)。SKYABYSS_SELFTEST_ONLY="records hub"
+        steps.add(Step.once("records hub", jp.revati.skyabyss.record.RecordsHubSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
         // 狩人の手帳 (倒した数・頁・慣れ・見た技)。SKYABYSS_SELFTEST_ONLY="hunter notes"

@@ -142,7 +142,7 @@ public final class PartyMarkers {
         }
     }
 
-    // 世界の位置 pos を画面に投影して、札 (画面の中) か矢印 (画面の外の縁) を描く。仲間の札と墓の標 (GraveMarkerHud) が共用する。
+    // 世界の位置 pos を画面に投影して、札 (画面の中) か矢印 (画面の外の縁) を描く。仲間の札が共用する。
     // hp: 0..100 なら札のそばに体力の棒 (長さ = 体力。色に頼らない)。負なら棒なし
     public static void drawMarker(GuiGraphics g, Vec3 pos, Component text, int rgb, Symbol symbol, int hp, List<int[]> taken) {
         Minecraft mc = Minecraft.getInstance();

@@ -9,8 +9,6 @@ import java.util.UUID;
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.grave.GraveData;
-import jp.revati.skyabyss.grave.GraveMarkers;
 import jp.revati.skyabyss.party.PartyData;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.storm.StormTravel;
@@ -42,7 +40,6 @@ public final class UxPolishSelfTest {
         try {
             respawnGuard(server, f);
             whoRang(server, f);
-            graveMarker(server, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ux polish crashed", e);
             f.add("crashed: " + e);
@@ -206,64 +203,5 @@ public final class UxPolishSelfTest {
                 }
             }
         }
-    }
-
-    // ---------------------------------------------------------------- A8
-    private static void graveMarker(MinecraftServer server, List<String> f) {
-        ServerLevel over = server.overworld();
-        GraveData data = GraveData.get(server);
-        FakePlayer a = player(over, "ux_grave_a");
-        FakePlayer b = player(over, "ux_grave_b");
-        FakePlayer c = player(over, "ux_grave_c");
-        UUID idA = UUID.randomUUID();
-        UUID idB = UUID.randomUUID();
-        try {
-            GraveMarkers.clearForTest();
-            data.add(new GraveData.Grave(idA, a.getUUID(), "ux_grave_a", over.dimension(), new BlockPos(500, 70, 500), 1000L, 3, new ArrayList<>(List.of(new ItemStack(Items.STONE, 4)))));
-            data.add(new GraveData.Grave(idB, b.getUUID(), "ux_grave_b", over.dimension(), new BlockPos(-700, 70, 900), 1000L, 0, new ArrayList<>(List.of(new ItemStack(Items.DIRT, 2)))));
-            Map<UUID, List<GraveMarkers.Pos>> got = new HashMap<>();
-            java.util.function.BiConsumer<ServerPlayer, GraveMarkers.Pos> sink = (p, pos) -> got.computeIfAbsent(p.getUUID(), k -> new ArrayList<>()).add(pos);
-            List<ServerPlayer> all = List.of(a, b, c);
-            GraveMarkers.tick(server, all, sink);
-            check(f, got.getOrDefault(a.getUUID(), List.of()).size() == 1, "the owner did not get a marker");
-            check(f, got.getOrDefault(b.getUUID(), List.of()).size() == 1, "the second owner did not get a marker");
-            check(f, !got.containsKey(c.getUUID()), "a player without a grave got a packet");
-            GraveMarkers.Pos pa = got.get(a.getUUID()).get(0);
-            check(f, pa.marks().size() == 1 && pa.marks().get(0).x() == 500 && pa.marks().get(0).z() == 500, "the owner's marker has the wrong place");
-            for (GraveMarkers.Mark m : pa.marks()) {
-                check(f, m.x() != -700, "another player's grave was sent to the owner");
-            }
-            // 変わらなければ送り直さない
-            GraveMarkers.tick(server, all, sink);
-            check(f, got.get(a.getUUID()).size() == 1 && got.get(b.getUUID()).size() == 1, "an unchanged marker was sent again");
-            // 拾い終えて墓がなくなれば、空を一度だけ
-            data.remove(idA);
-            GraveMarkers.tick(server, all, sink);
-            GraveMarkers.tick(server, all, sink);
-            List<GraveMarkers.Pos> after = got.get(a.getUUID());
-            check(f, after.size() == 2 && after.get(1).marks().isEmpty(), "a collected grave did not send a single empty marker (" + after.size() + " packets)");
-            check(f, got.get(b.getUUID()).size() == 1, "an unrelated grave change resent the other owner's marker");
-            // 中身が空の墓は標にしない
-            GraveData.Grave empty = new GraveData.Grave(idA, a.getUUID(), "ux_grave_a", over.dimension(), new BlockPos(1, 70, 1), 1000L, 0, new ArrayList<>());
-            data.add(empty);
-            check(f, GraveMarkers.marksFor(data, a.getUUID()).isEmpty(), "an emptied grave still shows a marker");
-            // 一度に送る数の上限
-            data.remove(idA);
-            List<UUID> extra = new ArrayList<>();
-            for (int i = 0; i < GraveMarkers.MAX + 2; i++) {
-                UUID id = UUID.randomUUID();
-                extra.add(id);
-                data.add(new GraveData.Grave(id, c.getUUID(), "ux_grave_c", over.dimension(), new BlockPos(i, 70, 0), 2000L + i, 1, new ArrayList<>()));
-            }
-            check(f, GraveMarkers.marksFor(data, c.getUUID()).size() == GraveMarkers.MAX, "the marker count is not capped");
-            for (UUID id : extra) {
-                data.remove(id);
-            }
-        } finally {
-            data.remove(idA);
-            data.remove(idB);
-            GraveMarkers.clearForTest();
-        }
-        check(f, new Vec3(0, 0, 0).distanceTo(new Vec3(GraveMarkers.NEAR_BLOCKS, 0, 0)) == 8.0, "the near distance is not 8 blocks");
     }
 }

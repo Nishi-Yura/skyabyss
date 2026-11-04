@@ -13,7 +13,6 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import io.netty.buffer.Unpooled;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.grave.DeathEvents;
-import jp.revati.skyabyss.grave.DeathRules;
 import jp.revati.skyabyss.grave.GraveData;
 import jp.revati.skyabyss.loot.TitanLoot;
 import jp.revati.skyabyss.loot.TitanMemoryData;
@@ -72,14 +71,14 @@ public final class PouchSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST pouch PASSED (registry, save/sync round trip, add/take/limit, component refusal, give, pickup, sweep, loan mark, withdraw rules, "
-                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, quick card pick and pin, defaults flip)");
+                    + "death keeps everything, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, quick card pick and pin, defaults flip)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST pouch FAILED: {}", x));
         }
     }
 
     // テストで変えるゲームルールを元へ戻す
-    private record PouchSetupState(boolean master, int withdraw, int deathMode, boolean keepInventory) {
+    private record PouchSetupState(boolean master, int withdraw, boolean keepInventory) {
         static PouchSetupState capture(MinecraftServer server) {
             GameRules rules = server.getGameRules();
             boolean on = rules.getBoolean(PouchConfig.MASTER_RULE);
@@ -87,14 +86,13 @@ public final class PouchSelfTest {
             // 既定は取り出し不可 (0)。取り出しの決まりを確かめる段は、ここで可 (1) にして、段ごとに 0 へ切り替える
             int withdraw = rules.getInt(PouchConfig.WITHDRAW_RULE);
             rules.getRule(PouchConfig.WITHDRAW_RULE).set(1, server);
-            return new PouchSetupState(on, withdraw, rules.getInt(DeathRules.MODE), rules.getBoolean(GameRules.RULE_KEEPINVENTORY));
+            return new PouchSetupState(on, withdraw, rules.getBoolean(GameRules.RULE_KEEPINVENTORY));
         }
 
         void restore(MinecraftServer server) {
             GameRules rules = server.getGameRules();
             rules.getRule(PouchConfig.MASTER_RULE).set(master, server);
             rules.getRule(PouchConfig.WITHDRAW_RULE).set(withdraw, server);
-            rules.getRule(DeathRules.MODE).set(deathMode, server);
             rules.getRule(GameRules.RULE_KEEPINVENTORY).set(keepInventory, server);
         }
     }
@@ -374,27 +372,25 @@ public final class PouchSelfTest {
         Pouch.take(p, fragment, 9);
         p.getInventory().clearContent();
 
-        // ---- 倒れても残る (22 の 5 章)
-        for (int mode = 0; mode < DeathRules.Mode.values().length; mode++) {
-            server.getGameRules().getRule(DeathRules.MODE).set(mode, server);
-            FakePlayer dead = player(level, "[pouch_dead" + mode + "]");
+        // ---- 倒れても残る (22 の 5 章)。keepInventory が切られていても、預かって新しい体へ (墓はもう作らない)
+        server.getGameRules().getRule(GameRules.RULE_KEEPINVENTORY).set(false, server);
+        {
+            FakePlayer dead = player(level, "[pouch_dead]");
             Pouch.add(dead, new ItemStack(shard, 30));
             Pouch.add(dead, new ItemStack(core, 1));
             Pouch.add(dead, new ItemStack(crystal, 5));
             Pouch.add(dead, new ItemStack(key));
+            dead.getInventory().add(new ItemStack(Items.EMERALD, 3));
             DeathEvents.handleDeath(dead);
             check(f, Pouch.count(dead, shard) == 30 && Pouch.count(dead, core) == 1 && Pouch.count(dead, crystal) == 5 && Pouch.count(dead, key) == 1,
-                    "death in mode " + DeathRules.Mode.values()[mode] + " changed the pouch");
-            FakePlayer fresh = player(level, "[pouch_fresh" + mode + "]");
+                    "death changed the pouch");
+            FakePlayer fresh = player(level, "[pouch_fresh]");
             check(f, Pouch.data(fresh).isEmpty(), "the new body started with a non-empty pouch");
             NeoForge.EVENT_BUS.post(new PlayerEvent.Clone(fresh, dead, true));
             check(f, Pouch.count(fresh, shard) == 30 && Pouch.count(fresh, core) == 1 && Pouch.count(fresh, crystal) == 5 && Pouch.count(fresh, key) == 1,
-                    "the pouch did not carry over to the new body in mode " + DeathRules.Mode.values()[mode]);
-            for (GraveData.Grave g : GraveData.get(server).owned(dead.getUUID())) {
-                for (ItemStack s : g.items) {
-                    check(f, PouchEntries.any(s.getItem()) == null, "a pouch item was put in the grave: " + s);
-                }
-            }
+                    "the pouch did not carry over to the new body");
+            check(f, fresh.getInventory().countItem(Items.EMERALD) == 3, "the inventory was not kept on death with keepInventory off");
+            check(f, GraveData.get(server).owned(dead.getUUID()).isEmpty(), "a grave was made on death");
         }
         // 墓の中の昔の品は、渡されるとき袋へ (22 の 4.2)。ここでは墓の取り出し口 (Graves.collect) を直接は呼ばず、渡しの入口で確かめた (上)
         server.getGameRules().getRule(GameRules.RULE_KEEPINVENTORY).set(true, server);

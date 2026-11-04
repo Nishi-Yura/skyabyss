@@ -10,9 +10,7 @@ import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.grave.GraveMarkerHud;
 import jp.revati.skyabyss.client.quest.ObjectiveStrip;
-import jp.revati.skyabyss.grave.GraveMarkers;
 import jp.revati.skyabyss.map.MapMarks;
 import jp.revati.skyabyss.party.PartyLocator;
 import jp.revati.skyabyss.party.client.PartyMarkers;
@@ -839,20 +837,7 @@ public class TravelMapScreen extends Screen {
                 hits.add(hit(at, 50, lines, d.valid() ? d.id() : null));
             }
         }
-        // 墓・仲間・目的・自分 (クライアントが持っているもの)
-        for (GraveMarkers.Mark gm : graves()) {
-            if (!gm.dimension().equals(here())) {
-                continue;
-            }
-            int[] at = project(gm.x() + 0.5, gm.z() + 0.5);
-            backing(g, at[0], at[1], 0.75f);
-            sprite(g, S_GRAVE, at[0], at[1], 0xFFD9779A, at[2] == 1 ? 0.6f : 1f);
-            icons.add(new int[] {at[0] - 8, at[1] - 8, 16, 16});
-            if (at[2] == 0) {
-                labels.add(new Label(at[0], at[1], Component.translatable("map.skyabyss.mark.grave"), 0xFFD9779A, 60));
-            }
-            hits.add(hit(at, 60, List.of(Component.translatable("map.skyabyss.mark.grave"), MapText.where(me, gm.x() + 0.5, gm.z() + 0.5)), null));
-        }
+        // 仲間・目的・自分 (クライアントが持っているもの)
         for (PartyLocator.Entry e : party()) {
             if (!e.dimension().equals(here())) {
                 continue;
@@ -1054,15 +1039,6 @@ public class TravelMapScreen extends Screen {
             }
         }
         return best;
-    }
-
-    private List<GraveMarkers.Mark> graves() {
-        if (demo) {
-            Minecraft mc = Minecraft.getInstance();
-            BlockPos at = mc.player == null ? BlockPos.ZERO : mc.player.blockPosition();
-            return List.of(new GraveMarkers.Mark(Level.OVERWORLD.location().toString(), at.getX() + 150, 64, at.getZ() + 60));
-        }
-        return GraveMarkerHud.marks();
     }
 
     private List<PartyLocator.Entry> party() {

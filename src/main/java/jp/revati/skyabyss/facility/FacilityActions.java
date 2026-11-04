@@ -80,7 +80,8 @@ public final class FacilityActions {
             case "respec_skills_coins" -> TrainingMaster.respec(player, false, true);
             case "key_offer" -> KeyRoom.offerAll(player);
             case "key_return" -> KeyRoom.giveBack(player);
-            case "records" -> KeepRecords.open(player);
+            // 記録の間の老兵・塔守・食べ物屋・旅の番の板は、一つの記録の画面のその頁を開く (record/RecordsHub。2026-11-05 の ct_records)
+            case "records" -> jp.revati.skyabyss.record.RecordsHub.open(player, jp.revati.skyabyss.record.RecordsHub.CLEAR);
             case "brew_lesson" -> brewLesson(player);
             case "trade" -> jp.revati.skyabyss.facility.trade.TradeService.open(player, npc);
             case "mount_shop" -> jp.revati.skyabyss.mount.MountService.open(player, npc);
@@ -89,10 +90,7 @@ public final class FacilityActions {
             case "buyback" -> ShopService.open(player, Buyback.ID, npc);
             case "tower_desk" -> jp.revati.skyabyss.tower.TowerDesk.menu(player);
             case "tower_shop" -> jp.revati.skyabyss.tower.TowerDesk.openShop(player);
-            case "tower_records" -> {
-                jp.revati.skyabyss.tower.TowerDesk.records(player);
-                jp.revati.skyabyss.endgame.ChatMenus.open(player);
-            }
+            case "tower_records" -> jp.revati.skyabyss.record.RecordsHub.open(player, jp.revati.skyabyss.record.RecordsHub.TOWER);
             case "secret_arts" -> {
                 jp.revati.skyabyss.rpg.skill.SecretArts.menu(player);
                 jp.revati.skyabyss.endgame.ChatMenus.open(player);
@@ -103,10 +101,7 @@ public final class FacilityActions {
                 jp.revati.skyabyss.endgame.RegionFame.show(player);
                 jp.revati.skyabyss.endgame.ChatMenus.open(player);
             }
-            case "fishing_board" -> {
-                jp.revati.skyabyss.fishing.Fishing.show(player);
-                jp.revati.skyabyss.endgame.ChatMenus.open(player);
-            }
+            case "fishing_board" -> jp.revati.skyabyss.record.RecordsHub.open(player, jp.revati.skyabyss.record.RecordsHub.FISHING);
             // 町の鍛冶師: 粉を差す・外す・合わせるだけの炉の画面 (2026-11-05 の粉と炉の頁 1-4)
             case "powder" -> {
                 if (npc != null) {
@@ -118,7 +113,7 @@ public final class FacilityActions {
             // 食べ物屋: 魚の注文を見る・納める (fishing/FishOrders)
             case "fish_order" -> jp.revati.skyabyss.fishing.FishOrders.talk(player, npc);
             // 旅の番: 乗り物の早駆けの記録 (mount/MountSprint)
-            case "sprint_board" -> jp.revati.skyabyss.mount.MountSprint.show(player);
+            case "sprint_board" -> jp.revati.skyabyss.record.RecordsHub.open(player, jp.revati.skyabyss.record.RecordsHub.SPRINT);
             case "look" -> {
                 jp.revati.skyabyss.endgame.Looks.menu(player);
                 jp.revati.skyabyss.endgame.ChatMenus.open(player);

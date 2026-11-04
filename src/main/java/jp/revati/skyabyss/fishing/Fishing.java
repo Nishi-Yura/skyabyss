@@ -272,27 +272,27 @@ public final class Fishing {
     public static void show(ServerPlayer p) {
         Week w = Week.get(p.server);
         w.roll();
-        p.sendSystemMessage(Component.translatable("message.skyabyss.fishing.head", codexCount(p), Fish.ALL.size()).withStyle(ChatFormatting.GOLD));
+        jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.fishing.head", codexCount(p), Fish.ALL.size()).withStyle(ChatFormatting.GOLD));
         List<Entry> top = w.top(5);
         if (top.isEmpty()) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.fishing.board_empty").withStyle(ChatFormatting.GRAY));
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.fishing.board_empty").withStyle(ChatFormatting.GRAY));
         }
         for (int i = 0; i < top.size(); i++) {
             Entry e = top.get(i);
-            p.sendSystemMessage(Component.translatable("message.skyabyss.fishing.board_line", i + 1, e.name(), Component.translatable("item.skyabyss.fish_" + e.fish()),
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.fishing.board_line", i + 1, e.name(), Component.translatable("item.skyabyss.fish_" + e.fish()),
                     String.format("%.1f", e.size() / 10.0), e.score() / 10.0).withStyle(i == 0 ? ChatFormatting.YELLOW : ChatFormatting.WHITE));
         }
         Entry mine = w.of(p.getUUID());
         if (mine != null) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.fishing.board_mine", Component.translatable("item.skyabyss.fish_" + mine.fish()),
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.fishing.board_mine", Component.translatable("item.skyabyss.fish_" + mine.fish()),
                     String.format("%.1f", mine.size() / 10.0), mine.score() / 10.0).withStyle(ChatFormatting.AQUA));
         }
         if (!w.last.isEmpty()) {
             Entry e = w.last.get(0);
-            p.sendSystemMessage(Component.translatable("message.skyabyss.fishing.board_last", e.name(), Component.translatable("item.skyabyss.fish_" + e.fish()),
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.fishing.board_last", e.name(), Component.translatable("item.skyabyss.fish_" + e.fish()),
                     String.format("%.1f", e.size() / 10.0)).withStyle(ChatFormatting.GRAY));
         }
-        p.sendSystemMessage(Component.translatable("message.skyabyss.fishing.board_foot", PRIZE[0], PRIZE[1], PRIZE[2]).withStyle(ChatFormatting.DARK_GRAY));
+        jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.fishing.board_foot", PRIZE[0], PRIZE[1], PRIZE[2]).withStyle(ChatFormatting.DARK_GRAY));
     }
 
     // /skyabyss_fishing と、開発用 /skyabyss fishing catch [id] (釣れたことにする)・roll (週を替える)・reset

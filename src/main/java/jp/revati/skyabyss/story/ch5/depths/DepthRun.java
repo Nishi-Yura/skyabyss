@@ -409,7 +409,7 @@ public final class DepthRun {
         BlockPos pos = event.getPos();
         BlockPos stone = heartStone();
         if (stone != null && pos.equals(stone)) {
-            DepthRecords.show(p.server, p);
+            jp.revati.skyabyss.record.RecordsHub.open(p, jp.revati.skyabyss.record.RecordsHub.DEPTH);
             event.setCanceled(true);
             return;
         }

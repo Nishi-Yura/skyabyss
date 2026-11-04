@@ -54,7 +54,7 @@ public class RecordBoardBlock extends HorizontalDirectionalBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            RebirthBoards.openRecords(sp);
+            jp.revati.skyabyss.record.RecordsHub.open(sp, jp.revati.skyabyss.record.RecordsHub.CLEAR);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

@@ -92,36 +92,36 @@ public final class TowerDesk {
     // 記録の板: 人数ごとの最速と、今週の組合の順位
     public static void records(ServerPlayer p) {
         TowerRecords r = TowerRecords.get(p.server);
-        p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.head").withStyle(s -> s.withColor(0xF2D78A)));
+        jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.head").withStyle(s -> s.withColor(0xF2D78A)));
         boolean any = false;
         for (int n = 1; n <= Towers.MAX_SQUAD; n++) {
             TowerRecords.Best b = r.best(n);
             if (b != null) {
                 any = true;
-                p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.best", n, Towers.time(b.ticks()), String.join("、", b.names()), b.day()));
+                jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.best", n, Towers.time(b.ticks()), String.join("、", b.names()), b.day()));
             }
         }
         if (!any) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.none"));
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.none"));
         }
         // 今週の重ね賭けの印 (賭けを三つ付けて越えた人)
-        p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.mark_head").withStyle(s -> s.withColor(0xF2D78A)));
-        p.sendSystemMessage(r.marks().isEmpty() ? Component.translatable("message.skyabyss.tower.records.none")
+        jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.mark_head").withStyle(s -> s.withColor(0xF2D78A)));
+        jp.revati.skyabyss.record.RecordsHub.say(p, r.marks().isEmpty() ? Component.translatable("message.skyabyss.tower.records.none")
                 : Component.translatable("message.skyabyss.tower.records.marks", String.join("、", r.marks())));
-        p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.guild_head").withStyle(s -> s.withColor(0xF2D78A)));
+        jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.guild_head").withStyle(s -> s.withColor(0xF2D78A)));
         var top = r.ranking(5);
         for (int i = 0; i < top.size(); i++) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.guild", i + 1, r.guildName(top.get(i).getKey()), top.get(i).getValue()));
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.guild", i + 1, r.guildName(top.get(i).getKey()), top.get(i).getValue()));
         }
         if (top.isEmpty()) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.none"));
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.tower.records.none"));
         }
         // 先週の上位 3 組合 (塔の誉れ。endgame/GuildWeek)
         var week = jp.revati.skyabyss.endgame.GuildWeek.get(p.server);
         var honors = new java.util.ArrayList<>(week.honors().entrySet());
         honors.sort(java.util.Map.Entry.comparingByValue());
         for (var h : honors) {
-            p.sendSystemMessage(Component.translatable("message.skyabyss.guild_week.honor_line", h.getValue(), week.name(h.getKey())).withStyle(s -> s.withColor(0xF2D78A)));
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.guild_week.honor_line", h.getValue(), week.name(h.getKey())).withStyle(s -> s.withColor(0xF2D78A)));
         }
     }
 

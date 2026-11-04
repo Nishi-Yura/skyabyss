@@ -100,6 +100,18 @@ public final class StoryLateSelfTest {
                 Lore.unlock(p, e[1], false);
                 check(f, want.equals(entry(p, e[0])), e[0] + " should echo the isle's memory: " + entry(p, e[0]));
             }
+            // 主との再戦の暦 (2026-11-05 の ct_rematch): 挑める主がいるときだけ門に [試し]
+            FakePlayer r = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "rematch_t"));
+            check(f, !jp.revati.skyabyss.story.finale.Rematch.available(r), "a fresh player could open the rematch calendar");
+            Quests.start(r, jp.revati.skyabyss.story.ch6.core.CorePuzzles.QUEST);
+            for (int i = 0; i < 8 && !jp.revati.skyabyss.story.ch6.MoonTrial.open(r); i++) {
+                Quests.forceStage(r, jp.revati.skyabyss.story.ch6.core.CorePuzzles.QUEST);
+            }
+            check(f, jp.revati.skyabyss.story.finale.Rematch.available(r), "stopping the moon core should open the rematch calendar");
+            check(f, jp.revati.skyabyss.story.finale.Rematch.gateOption("skyabyss_gate").getStyle().getClickEvent() != null
+                    && jp.revati.skyabyss.story.finale.Rematch.gateOption("skyabyss_gate").getStyle().getClickEvent().getValue().equals("/skyabyss_gate trial"),
+                    "the [trial] option should run /skyabyss_gate trial");
+            Quests.forget(r, jp.revati.skyabyss.story.ch6.core.CorePuzzles.QUEST);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST story late crashed", e);
             f.add("crashed: " + e);
@@ -109,7 +121,7 @@ public final class StoryLateSelfTest {
             }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST story late PASSED (Isana at the gate: meet, layer lines, answer; moon questions and ground answers once; see-off, ending lines for Isana and the storyteller, isle echoes)");
+            SkyAbyss.LOGGER.info("SELFTEST story late PASSED (Isana at the gate: meet, layer lines, answer; moon questions and ground answers once; see-off, ending lines for Isana and the storyteller, isle echoes, rematch calendar opens after the moon core)");
         } else {
             SkyAbyss.LOGGER.error("SELFTEST story late FAILED: {}", f);
         }

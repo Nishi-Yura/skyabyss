@@ -115,6 +115,14 @@ public final class WorldEvents {
     }
 
     @Nullable
+    // 次の大事件までの tick (まだ決まっていない・止めている世界なら -1。クエストログの「今日・今週」quest/Clocks)
+    public static long ticksUntilNext(net.minecraft.server.MinecraftServer server) {
+        if (nextAt < 0 || current != null) {
+            return -1;
+        }
+        return Math.max(0, nextAt - server.overworld().getGameTime());
+    }
+
     public static Event current() {
         return current;
     }

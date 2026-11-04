@@ -82,6 +82,10 @@ public class JourneyScreen extends Screen {
         left = 0;
         top = 0;
         RpgTabs.addHead(this::addRenderableWidget, LAYOUT.head(), RpgTabs.JOURNEY);
+        // 記録の画面 (踏破・塔・深み・釣り・早駆け・転生・空見。record/RecordsHub) を開く釦。つまみの右
+        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.translatable("gui.skyabyss.records_hub.open"),
+                b -> jp.revati.skyabyss.client.record.RecordsHubScreen.request(jp.revati.skyabyss.record.RecordsHub.CLEAR))
+                .bounds(LAYOUT.head().x() + RpgTabs.headWidth(RpgTabs.JOURNEY) + Golden.S8, LAYOUT.head().y() + 4, Golden.S55, Golden.BTN).build());
         PacketDistributor.sendToServer(new Journey.Request());
     }
 

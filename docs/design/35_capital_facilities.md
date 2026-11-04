@@ -25,7 +25,7 @@
 | 宿「鐘の宿」 | 西の大通りの南の 1 列目 | 寝台を取る（客室 9）、噂、食堂 | 宿の女将 |
 | 子の止まり木 | 西門の内の南 | 子を呼ぶ・地図。東に降り場の丸い台 | 止まり木の番 |
 | 四巨神の社 | 西の大通りの北（心臓を二つ止めると開く） | 転生の台座、鍵の間（欠片を納める）、誓いの説明 | 社の祭司 |
-| 空見の砦の記録の間 | 北の段（心臓を二つ止めると開く） | 順位の石、記録の板 2 枚（係の人はいない。試練の記録は J の記録） | — |
+| 空見の砦の記録の間 | 北の段（心臓を二つ止めると開く） | 順位の石、記録の板 2 枚（係の人はいない。押すと記録の画面。下の「記録の画面」） | — |
 | 空見の館・旧厩舎・地図屋（空き家 3 軒） | 北の段・東の大通りの南・南東の奥 | 入れない。戸は壁で塞ぎ、碑も無い（2026-11-02 の声「完全に入れなくしてもいい。碑もなくしていい」。設計図は `tools/capital/seal_vacant.py`、前の版で建てた都は `opening/site/CapitalSeal` が印 `seal_<名>_<番号>` の所を今の設計図のブロックで置き直す。前に開いた空見の館の戸口も塞ぐ）。名札・係の人・案内の一覧にも出さない | — |
 | 闇市 | 南東の横通り（裏） | 店 `black_market` | 顔を隠した商人 |
 | 酒場「深い杯」と地下 | 宿の南の路地 | 一階は酒場、階段で地下へ。地下の奥の壁の向こうに隠し通路（閉じたまま。酔いどれの四章の頼みで開く。6.9・6.10） | 酔いどれ（地下） |
@@ -175,6 +175,7 @@
 | （消した役）書庫番・地図屋・砦の老兵 | — | — | 2026-10-31 に消した（伝承の書の画面・M の地図・J の記録と同じことをするだけだった。老兵の試練の記録は J、本丸の頁は社の祭司へ）。祠と跡地は地図に最初から、跡地の噂は都の案内人が言う。前の世界に立っている人は消える（`AttendantRole.RETIRED`） |
 | `box_opener`（印なし） | 封切り師（都と四つの町に一人ずつ） | 鍛冶屋の係の人のそば（`npc_smith` から 2〜4 ブロックの空いた床。`loot/box/BoxOpeners`） | 封の箱を開ける（`boxes`。ルーレットの画面。[52](52_loot_boxes.md)）、箱のこと |
 
+- **記録の画面**（2026-11-05 の決めごと ct_records = one。`record/RecordsHub`・`client/record/RecordsHubScreen`）: 速さや数の記録を一つの画面に、つまみ 7 つで分ける。踏破（巨神ごとの出会い・心臓・順路の回数と最速・試練の数・巨神ごとの最速の人）・塔（人数ごとの最速・重ね賭けの印・組合の順位と誉れ）・深み（自分・人の上位・組の上位）・釣り（今週の上位 5 人・自分・先週の一番）・早駆け（道ごとの自分の一番と今週の上位 5 人）・転生（転生の数・最速の人生・最少の倒れの上位 10）・空見（初代の空見の最速）。今の板と係の人は残し、押すとその頁が開く: 記録の間の老兵（`records`）→ 踏破、塔守（`tower_records`）→ 塔、深みの順位の石 → 深み、食べ物屋（`fishing_board`）→ 釣り、旅の番（`sprint_board`）→ 早駆け、転生の石 → 転生、背中の記録の板 → 踏破。旅の記録（つまみの「旅」）の見出しの「記録」の釦からも開く。前にチャットへ書いていた塔・釣り・早駆けの行は、画面の行に集める（`RecordsHub.say`）。開発 `/skyabyss facility records hub <0〜6>`。自己テスト `records hub`。
 - 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|guild_storage|respec_quote|respec_skills|respec_skills_coins|job_room|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes|buyback|tower_desk|tower_shop|tower_records|secret_arts|circuit|circuit_start|journal|look|fishing_board|powder|dungeon_mood|fish_order|sprint_board", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
 ### 6.2 鐘銭と店（`facility/Coins`・`ShopDef`・`ShopService`、画面 `client/facility/ShopScreen`）

@@ -283,17 +283,19 @@ public final class MountSprint {
     // 旅の番の「早駆けの記録を見る」: 道ごとに自分の一番と今週の上位 5 人
     public static void show(ServerPlayer p) {
         Board b = Board.get(p.server);
-        p.sendSystemMessage(Component.translatable("message.skyabyss.sprint.board_head").withStyle(s -> s.withColor(RGB)));
+        jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.sprint.board_head").withStyle(s -> s.withColor(RGB)));
         for (Route r : routes()) {
             long mine = best(p, r.id());
-            p.sendSystemMessage(Component.translatable("message.skyabyss.sprint.board_route", Component.translatable("mount.skyabyss.sprint." + r.id()),
+            jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.sprint.board_route", Component.translatable("mount.skyabyss.sprint." + r.id()),
                     mine > 0 ? time(mine) : "―"));
             List<Board.Entry> top = b.top(r.id());
             for (int i = 0; i < top.size(); i++) {
-                p.sendSystemMessage(Component.translatable("message.skyabyss.sprint.board_line", i + 1, top.get(i).name(), time(top.get(i).ticks())));
+                jp.revati.skyabyss.record.RecordsHub.say(p, Component.translatable("message.skyabyss.sprint.board_line", i + 1, top.get(i).name(), time(top.get(i).ticks())));
             }
         }
-        jp.revati.skyabyss.endgame.ChatMenus.open(p);
+        if (!jp.revati.skyabyss.record.RecordsHub.capturing()) {
+            jp.revati.skyabyss.endgame.ChatMenus.open(p);
+        }
     }
 
     // ---------------------------------------------------------------- 週の上位 5 人 (地上に保存。週が替わると空に)

@@ -145,7 +145,11 @@ public final class FacilityCommands {
                         .then(Commands.literal("records").executes(c -> {
                             KeepRecords.open(c.getSource().getPlayerOrException());
                             return 1;
-                        }))
+                        }).then(Commands.literal("hub").then(Commands.argument("tab", IntegerArgumentType.integer(0, jp.revati.skyabyss.record.RecordsHub.TABS.length - 1)).executes(c -> {
+                            // 記録の画面 (record/RecordsHub) のその頁を開く (撮影・確かめ用)
+                            jp.revati.skyabyss.record.RecordsHub.open(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "tab"));
+                            return 1;
+                        }))))
                         .then(Commands.literal("dummy").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             int n = TrainingYard.ensureDummies(p.serverLevel(), TrainingYard.findColumns(p.serverLevel(), p.blockPosition(), 8));

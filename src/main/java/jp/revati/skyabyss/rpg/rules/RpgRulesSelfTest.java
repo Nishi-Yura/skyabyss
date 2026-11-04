@@ -8,7 +8,6 @@ import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.grave.DeathRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -117,8 +116,8 @@ public final class RpgRulesSelfTest {
                     }
                 }
             }
-            if (DeathRules.mode(server) != DeathRules.Mode.KEEP) {
-                f.add("death mode default should be keep, got " + DeathRules.mode(server));
+            if (!server.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_KEEPINVENTORY)) {
+                f.add("keepInventory should be on (items are kept on death)");
             }
             // 一度きりの印は倒れても残る (はじめの持ち物を二度もらえた・渡し船で渡ったのが消えた不具合)
             if (!jp.revati.skyabyss.util.LifeKeep.KEYS.contains(RpgRules.KIT_TAG)

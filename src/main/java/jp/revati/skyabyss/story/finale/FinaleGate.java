@@ -23,6 +23,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   初めて: 紙芝居「巨神の昇り」(finale_ascend) を見て雲海の着く所へ (合図 cloudsea_arrive)
 //   二度目から: 月にも行ける人にはチャットの二択 ([月へ] / [雲海へ]。/skyabyss_gate moon|cloud。門のそばでだけ)。
 //   裏ボスの頼み (founder/Founder) の段 enter 以降の人には [鐘の内へ] も (/skyabyss_gate bell)
+//   主に挑み直せる人には [試し] も (/skyabyss_gate trial。月の主・巡礼者・初代の空見を一つの暦から。Rematch)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FinaleGate {
     public static final String QUEST = "main_finale_ascend";
@@ -59,6 +60,14 @@ public final class FinaleGate {
     // 門を触られた。雲海の側で扱ったら true (MoonGate は何もしない)
     public static boolean route(ServerPlayer p, BlockPos gate) {
         if (!open(p)) {
+            // 雲海はまだでも、月の主に挑み直せる人には [月へ] と [試し] (Rematch。2026-11-05 の ct_rematch)
+            if (Rematch.available(p) && MoonGate.refusal(p) == null) {
+                Notice.narrate(p, "message.skyabyss.gate.choose");
+                Component moon = Component.translatable("message.skyabyss.gate.choose.moon")
+                        .withStyle(Style.EMPTY.withColor(0x9CB4F0).withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + COMMAND + " moon")));
+                p.sendSystemMessage(Component.empty().append(moon).append("  ").append(Rematch.gateOption(COMMAND)));
+                return true;
+            }
             return false;
         }
         if (!p.getPersistentData().getBoolean(ASCENDED)) {
@@ -76,6 +85,9 @@ public final class FinaleGate {
             Component line = Component.empty().append(moon).append("  ").append(cloud);
             if (jp.revati.skyabyss.story.finale.founder.Founder.available(p)) {
                 line = line.copy().append("  ").append(jp.revati.skyabyss.story.finale.founder.Founder.gateOption(COMMAND));
+            }
+            if (Rematch.available(p)) {
+                line = line.copy().append("  ").append(Rematch.gateOption(COMMAND));
             }
             p.sendSystemMessage(line);
             return true;
@@ -119,6 +131,20 @@ public final class FinaleGate {
                     }
                     return 1;
                 }))
+                // 主との再戦の暦 (Rematch): 暦を出す・月の主へ・巡礼者へ。門のそばでだけ
+                .then(Commands.literal("trial").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    if (nearGate(p)) {
+                        Rematch.offer(p, COMMAND);
+                    }
+                    return 1;
+                }).then(Commands.literal("moon").then(Commands.argument("lord", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    return nearGate(p) && Rematch.moon(p, com.mojang.brigadier.arguments.StringArgumentType.getString(c, "lord")) ? 1 : 0;
+                }))).then(Commands.literal("pilgrim").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    return nearGate(p) && Rematch.pilgrim(p) ? 1 : 0;
+                })))
                 .then(Commands.literal("cloud").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     if (nearGate(p) && open(p)) {
