@@ -104,6 +104,10 @@ public final class TowerDesk {
         if (!any) {
             p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.none"));
         }
+        // 今週の重ね賭けの印 (賭けを三つ付けて越えた人)
+        p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.mark_head").withStyle(s -> s.withColor(0xF2D78A)));
+        p.sendSystemMessage(r.marks().isEmpty() ? Component.translatable("message.skyabyss.tower.records.none")
+                : Component.translatable("message.skyabyss.tower.records.marks", String.join("、", r.marks())));
         p.sendSystemMessage(Component.translatable("message.skyabyss.tower.records.guild_head").withStyle(s -> s.withColor(0xF2D78A)));
         var top = r.ranking(5);
         for (int i = 0; i < top.size(); i++) {
@@ -249,7 +253,7 @@ public final class TowerDesk {
         List<String> chosen = mine == null ? List.of() : new ArrayList<>(WAGERS.getOrDefault(mine, new LinkedHashSet<>()));
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new TowerDeskState(open, Towers.usedToday(p), mine == null ? "" : name(p.server, mine), members,
                 mine != null && mine.equals(p.getUUID()), Towers.MAX_SQUAD, joinLeaders, joinCounts, TowerWagers.thisWeek(), chosen, TowerWagers.MAX_PICK,
-                (int) Math.round(TowerWagers.SHARD_BONUS * 100)));
+                (int) Math.round(TowerWagers.SHARD_BONUS * 100), TowerStance.thisWeek().id));
     }
 
     // その隊の人 (と受付のそばの人) の開いている画面を新しくする

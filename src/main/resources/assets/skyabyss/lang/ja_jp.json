@@ -3101,5 +3101,6 @@
   "mutation.skyabyss.frozen_sea": "凍て海",
   "mutation.skyabyss.frozen_sea.effect": "冷たい潮の代わりに、6 秒残る氷の床。小さな敵は凍って動けない。",
   "message.skyabyss.tree.reset_v3": "技の木が新しくなりました。取っていた節を戻し、SP をすべて返しました（技の木で取り直せます）。",
-  "gear.skyabyss.enhance_guard": "強化 +%1$s: 受ける傷 −%2$s%%"
+  "gear.skyabyss.enhance_guard": "強化 +%1$s: 受ける傷 −%2$s%%",
+  "label.skyabyss.stone.dungeon_gate.today": "層の門 ─ 今日は「%s」"
 }

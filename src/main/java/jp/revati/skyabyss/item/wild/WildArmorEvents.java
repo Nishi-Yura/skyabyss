@@ -74,7 +74,8 @@ public final class WildArmorEvents {
                 }
                 ItemStack s = jp.revati.skyabyss.item.accessory.Accessories.stack(p, i);
                 if (s.getItem() instanceof WildAccessoryItem a && !a.row().charm() && jp.revati.skyabyss.item.GearLevel.meets(p, s)) {
-                    out.addAll(a.row().fx());
+                    // ダンジョンの装飾品は育った段で数字が伸びる (dungeon/DungeonGear)
+                    out.addAll(jp.revati.skyabyss.dungeon.DungeonGear.scaled(s, a.row().fx()));
                 }
             }
         }

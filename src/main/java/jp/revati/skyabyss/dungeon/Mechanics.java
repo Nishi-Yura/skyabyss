@@ -23,6 +23,22 @@ public final class Mechanics {
     public static final int LAVA_PERIOD = 400;
     public static final int WARN = 60;
     public static final int CHARGE = 3;
+    // 深く潜る: 潮 70 → 50 秒・溶岩 20 → 14 秒・結晶 3 → 4 回 (2026-11-05 のダンジョンの頁 1-1)
+    public static final int DEEP_TIDE_PERIOD = 1000;
+    public static final int DEEP_LAVA_PERIOD = 280;
+    public static final int DEEP_CHARGE = 4;
+
+    public static int tidePeriod(DungeonFloor f) {
+        return f.run.deep ? DEEP_TIDE_PERIOD : TIDE_PERIOD;
+    }
+
+    public static int lavaPeriod(DungeonFloor f) {
+        return f.run.deep ? DEEP_LAVA_PERIOD : LAVA_PERIOD;
+    }
+
+    public static int charge(DungeonFloor f) {
+        return f.run.deep ? DEEP_CHARGE : CHARGE;
+    }
 
     private Mechanics() {
     }
@@ -35,13 +51,15 @@ public final class Mechanics {
             explain(f, here);
         }
         long age = t - f.run.startedTick;
+        int tidePeriod = tidePeriod(f);
+        int lavaPeriod = lavaPeriod(f);
         for (String lo : f.terrain.marksStarting("tide_")) {
             if (!lo.endsWith("_lo")) {
                 continue;
             }
             String box = lo.substring(0, lo.length() - 3);
-            boolean high = (age / (TIDE_PERIOD / 2)) % 2 == 0;
-            long toNext = TIDE_PERIOD / 2 - age % (TIDE_PERIOD / 2);
+            boolean high = (age / (tidePeriod / 2)) % 2 == 0;
+            long toNext = tidePeriod / 2 - age % (tidePeriod / 2);
             if (toNext == WARN) {
                 for (ServerPlayer p : here) {
                     if (Dungeons.real(p)) {
@@ -58,8 +76,8 @@ public final class Mechanics {
             }
             String box = lo.substring(0, lo.length() - 3);
             boolean a = box.endsWith("_a");
-            boolean on = ((age / LAVA_PERIOD) % 2 == 0) == a;
-            long toNext = LAVA_PERIOD - age % LAVA_PERIOD;
+            boolean on = ((age / lavaPeriod) % 2 == 0) == a;
+            long toNext = lavaPeriod - age % lavaPeriod;
             if (toNext <= WARN && t % 10 == 0) {
                 // 切り替わる前: 溶岩の来る所から熱い粒、引く所から湯気
                 BlockPos p0 = f.at(lo);
@@ -96,7 +114,7 @@ public final class Mechanics {
                 for (String k : f.terrain.marksStarting(tm[0])) {
                     BlockPos at = f.at(k);
                     if (at != null && p.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5) <= TIP_RADIUS * TIP_RADIUS) {
-                        Notice.hint(p, "message.skyabyss.dungeon.tip." + tip, CHARGE, TIDE_PERIOD / 40, LAVA_PERIOD / 20);
+                        Notice.hint(p, "message.skyabyss.dungeon.tip." + tip, charge(f), tidePeriod(f) / 40, lavaPeriod(f) / 20);
                         p.getPersistentData().putString(TIPS, seen.isEmpty() ? tip : seen + "," + tip);
                         seen = p.getPersistentData().getString(TIPS);
                         break;
@@ -143,13 +161,14 @@ public final class Mechanics {
                 continue;
             }
             int n = f.charge.getOrDefault(k, 0);
-            if (n >= CHARGE) {
+            int need = charge(f);
+            if (n >= need) {
                 return false;
             }
             f.charge.put(k, n + 1);
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, c.getX() + 0.5, c.getY() + 1.0, c.getZ() + 0.5, 20 + 10 * n, 0.4, 0.6, 0.4, 0.2);
             level.playSound(null, c, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.4f, 0.8f + 0.3f * n);
-            if (n + 1 >= CHARGE) {
+            if (n + 1 >= need) {
                 level.setBlock(c, Blocks.SEA_LANTERN.defaultBlockState(), 3);
                 // 主の間の結晶: 大蜥蜴の背の溜まりを抜く
                 if (f.boss != null && level.getEntity(f.boss) instanceof jp.revati.skyabyss.dungeon.mob.CrystalLizard lizard) {
@@ -176,7 +195,7 @@ public final class Mechanics {
         for (String k : f.terrain.marksStarting("crystal_")) {
             if (k.endsWith("_" + n)) {
                 any = true;
-                if (f.charge.getOrDefault(k, 0) < CHARGE) {
+                if (f.charge.getOrDefault(k, 0) < charge(f)) {
                     return false;
                 }
             }

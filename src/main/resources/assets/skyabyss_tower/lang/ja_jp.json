@@ -243,5 +243,18 @@
   "message.skyabyss.tower.announce_enter": "【あいだの塔】%1$s の隊（%2$s 人）が、塔へ挑んだ。",
   "message.skyabyss.tower.announce_clear": "【あいだの塔】%1$s の隊が、あいだに座すものを退けた（%2$s）。",
   "message.skyabyss.tower.clear_title": "塔を越えた",
-  "message.skyabyss.tower.clear_sub": "あいだに座すものは門の向こうへ（%s）"
+  "message.skyabyss.tower.clear_sub": "あいだに座すものは門の向こうへ（%s）",
+  "message.skyabyss.tower.stance.star": "星の週",
+  "message.skyabyss.tower.stance.star.desc": "星屑の雨がはじめから多く、天の三矢が早い",
+  "message.skyabyss.tower.stance.moon": "月の週",
+  "message.skyabyss.tower.stance.moon.desc": "落ちる月が速い",
+  "message.skyabyss.tower.stance.abyss": "淵の週",
+  "message.skyabyss.tower.stance.abyss.desc": "天と淵の群れと淵の吐息が多い",
+  "message.skyabyss.tower.stance.balance": "天秤の週",
+  "message.skyabyss.tower.stance.balance.desc": "引き合いの高まりが早く来る",
+  "message.skyabyss.tower.stance_now": "今週の主の構えは「%1$s」: %2$s",
+  "gui.skyabyss.tower_desk.rule_stance": "一人一日一回・隊は 1〜12 人。今週の主は「%s」",
+  "message.skyabyss.tower.mark": "重ね賭けの印（%s 週目）: 今週の塔の箱を一つ",
+  "message.skyabyss.tower.records.mark_head": "― 今週の重ね賭けの印（賭けを三つ付けて越えた人）―",
+  "message.skyabyss.tower.records.marks": "%s"
 }

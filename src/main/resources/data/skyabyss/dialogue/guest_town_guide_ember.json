@@ -52,6 +52,17 @@
           ]
         },
         {
+          "id": "dungeon_mood",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "dungeon_mood"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "way",
           "kind": "talk",
           "do": [

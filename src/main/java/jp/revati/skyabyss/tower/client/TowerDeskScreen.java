@@ -53,7 +53,7 @@ public final class TowerDeskScreen extends Screen {
     // 撮影用: 隊長で、隊に三人、賭けを二つ選んだ見本
     public static TowerDeskScreen sample() {
         return new TowerDeskScreen(new TowerDeskState(true, false, "Dev", List.of("Dev", "ミナト", "カイ"), true, 12, List.of(), List.of(),
-                List.of("half_heal", "no_revive", "fast_adds", "short_time", "fast_moon", "hard_eyes"), List.of("half_heal", "fast_moon"), 3, 30));
+                List.of("half_heal", "no_revive", "fast_adds", "short_time", "fast_moon", "hard_eyes"), List.of("half_heal", "fast_moon"), 3, 30, "star"));
     }
 
     public static void receive(TowerDeskState state) {
@@ -153,7 +153,9 @@ public final class TowerDeskScreen extends Screen {
         // 今日の挑戦と決まり
         Component today = Component.translatable(state.usedToday() ? "gui.skyabyss.tower_desk.used" : "gui.skyabyss.tower_desk.ready");
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, today, x, Golden.textY(BODY.y(), ROW), tw, state.usedToday() ? DENY : TEXT, false);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.rule"), x, Golden.textY(BODY.y() + ROW, ROW), tw, SOFT, false);
+        // 決まりの行に、今週の主の構え (TowerStance)
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.rule_stance",
+                Component.translatable("message.skyabyss.tower.stance." + state.stance())), x, Golden.textY(BODY.y() + ROW, ROW), tw, SOFT, false);
         // 隊
         Component sq = state.leader().isEmpty() ? Component.translatable("gui.skyabyss.tower_desk.no_squad")
                 : Component.translatable("gui.skyabyss.tower_desk.squad", state.leader(), state.members().size(), state.max());

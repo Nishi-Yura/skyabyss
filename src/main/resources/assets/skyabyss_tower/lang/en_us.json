@@ -243,5 +243,18 @@
   "message.skyabyss.tower.announce_enter": "[Tower Between] %1$s's squad (%2$s) has entered the tower.",
   "message.skyabyss.tower.announce_clear": "[Tower Between] %1$s's squad drove back the One Seated Between (%2$s).",
   "message.skyabyss.tower.clear_title": "Tower Cleared",
-  "message.skyabyss.tower.clear_sub": "The One Seated Between is gone beyond the gate (%s)"
+  "message.skyabyss.tower.clear_sub": "The One Seated Between is gone beyond the gate (%s)",
+  "message.skyabyss.tower.stance.star": "Star Week",
+  "message.skyabyss.tower.stance.star.desc": "more Stardust Rain from the start, Heaven's Three Arrows sooner",
+  "message.skyabyss.tower.stance.moon": "Moon Week",
+  "message.skyabyss.tower.stance.moon.desc": "the Falling Moon is faster",
+  "message.skyabyss.tower.stance.abyss": "Abyss Week",
+  "message.skyabyss.tower.stance.abyss.desc": "more swarms and Abyss Breath",
+  "message.skyabyss.tower.stance.balance": "Balance Week",
+  "message.skyabyss.tower.stance.balance.desc": "the Rising Pull comes earlier",
+  "message.skyabyss.tower.stance_now": "The master's stance this week: %1$s: %2$s",
+  "gui.skyabyss.tower_desk.rule_stance": "Once a day · squads of 1-12. This week: %s",
+  "message.skyabyss.tower.mark": "Triple Wager mark (week %s): a tower box this week",
+  "message.skyabyss.tower.records.mark_head": "― This week's Triple Wager marks ―",
+  "message.skyabyss.tower.records.marks": "%s"
 }

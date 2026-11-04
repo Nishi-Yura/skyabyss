@@ -64,6 +64,9 @@ public final class RebirthTitles {
         add("yattsume", f -> f.founder);
         add("tower_1", f -> f.towerClears >= 1);
         add("tower_50", f -> f.towerClears >= 50);
+        // 重ね賭けの印 (tower/Towers.wagerMark): 賭けを三つ付けて越えた週の数
+        add("tower_wager3", f -> f.marks.contains("tower_wager3"));
+        add("tower_wager3_10", f -> f.marks.contains("tower_wager3_10"));
         // 土地の名声の 5 段 (endgame/RegionFame) と、四つの土地すべて
         for (String land : new String[] {"whale", "tide", "storm", "ember"}) {
             add("hero_" + land, f -> f.marks.contains("hero:" + land));

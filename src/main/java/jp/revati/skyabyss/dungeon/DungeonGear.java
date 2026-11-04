@@ -62,4 +62,119 @@ public final class DungeonGear {
     public static Item item(Dungeon d) {
         return ITEM_OF.get(BY_DUNGEON.get(d)).get();
     }
+
+    // ---------------------------------------------------------------- 育つ (2026-11-05 のダンジョンの頁 1-2)
+    // 同じ主を倒すたびに数える (深く潜ったら 2 回ぶん)。5 回で II、15 回で III。効き目の数字が 1.25 倍・1.5 倍。数は品に書く
+    public static final String GROW_KEY = "skyabyss_trinket_clears";
+    public static final int[] GROW_STEPS = {5, 15};
+    public static final double[] GROW_SCALE = {1.0, 1.25, 1.5};
+
+    public static boolean isTrinket(Item item) {
+        for (Dungeon d : Dungeon.values()) {
+            DeferredItem<Item> it = ITEM_OF.get(BY_DUNGEON.get(d));
+            if (it != null && it.get() == item) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int clears(net.minecraft.world.item.ItemStack s) {
+        net.minecraft.world.item.component.CustomData d = s.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        return d == null ? 0 : d.copyTag().getInt(GROW_KEY);
+    }
+
+    public static void setClears(net.minecraft.world.item.ItemStack s, int n) {
+        net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, s, t -> t.putInt(GROW_KEY, n));
+    }
+
+    public static int stage(int clears) {
+        int st = 0;
+        for (int step : GROW_STEPS) {
+            if (clears >= step) {
+                st++;
+            }
+        }
+        return st;
+    }
+
+    public static int stage(net.minecraft.world.item.ItemStack s) {
+        return isTrinket(s.getItem()) ? stage(clears(s)) : 0;
+    }
+
+    public static double scale(net.minecraft.world.item.ItemStack s) {
+        return GROW_SCALE[stage(s)];
+    }
+
+    // 育った装飾品の効き目 (数字をみな掛ける)
+    public static List<WildEffect.Fx> scaled(net.minecraft.world.item.ItemStack s, List<WildEffect.Fx> fx) {
+        double k = scale(s);
+        if (k == 1.0) {
+            return fx;
+        }
+        List<WildEffect.Fx> out = new java.util.ArrayList<>(fx.size());
+        for (WildEffect.Fx f : fx) {
+            double[] p = f.p().clone();
+            for (int i = 0; i < p.length; i++) {
+                p[i] *= k;
+            }
+            out.add(new WildEffect.Fx(f.kind(), p));
+        }
+        return out;
+    }
+
+    // そのダンジョンの装飾品 (装飾の枠を先に、なければ持ち物) に数を足す。段が上がったら知らせる
+    public static void grow(net.minecraft.server.level.ServerPlayer p, Dungeon d, int n) {
+        Item want = item(d);
+        net.minecraft.world.item.ItemStack found = net.minecraft.world.item.ItemStack.EMPTY;
+        boolean worn = false;
+        for (int i = 0; i < jp.revati.skyabyss.item.accessory.AccessoryData.SIZE && found.isEmpty(); i++) {
+            net.minecraft.world.item.ItemStack s = jp.revati.skyabyss.item.accessory.Accessories.stack(p, i);
+            if (s.is(want)) {
+                found = s;
+                worn = true;
+            }
+        }
+        var inv = p.getInventory();
+        for (int i = 0; i < inv.getContainerSize() && found.isEmpty(); i++) {
+            if (inv.getItem(i).is(want)) {
+                found = inv.getItem(i);
+            }
+        }
+        if (found.isEmpty()) {
+            return;
+        }
+        int before = clears(found);
+        int after = Math.max(1, before) + n;
+        setClears(found, after);
+        if (worn) {
+            jp.revati.skyabyss.item.accessory.Accessories.sync(p);
+        } else {
+            inv.setChanged();
+        }
+        if (stage(after) > stage(before) && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            jp.revati.skyabyss.notice.Notice.gain(p, "message.skyabyss.dungeon.trinket_grew", found.getHoverName(), roman(stage(after)));
+            p.playNotifySound(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_RESONATE, net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1.2f);
+        }
+    }
+
+    static String roman(int stage) {
+        return stage >= 2 ? "III" : stage == 1 ? "II" : "I";
+    }
+
+    // ツールチップ: 育ちの段と次まで
+    public static void tooltip(net.minecraft.world.item.ItemStack s, List<net.minecraft.network.chat.Component> out) {
+        if (!isTrinket(s.getItem())) {
+            return;
+        }
+        int c = Math.max(1, clears(s));
+        int st = stage(c);
+        int color = 0xE8C27A;
+        if (st >= GROW_STEPS.length) {
+            out.add(net.minecraft.network.chat.Component.translatable("tooltip.skyabyss.trinket_grow.max", roman(st), GROW_SCALE[st]).withStyle(x -> x.withColor(color)));
+        } else {
+            out.add(net.minecraft.network.chat.Component.translatable("tooltip.skyabyss.trinket_grow", roman(st), GROW_SCALE[st], GROW_STEPS[st] - c)
+                    .withStyle(x -> x.withColor(color)));
+        }
+    }
 }

@@ -209,6 +209,12 @@ public final class TowerFight {
                     Notice.alert(p, "message.skyabyss.tower.intro");
                 }
             }
+            // 今週の構え (TowerStance)
+            if (since == 60) {
+                for (ServerPlayer p : here) {
+                    Notice.hint(p, "message.skyabyss.tower.stance_now", Component.translatable(run.stance.nameKey()), Component.translatable(run.stance.descKey()));
+                }
+            }
             if (since == 40) {
                 master.playAction("roar");
                 sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 0.6f);
@@ -252,7 +258,8 @@ public final class TowerFight {
         if (!swarmDone && f <= 0.7f) {
             swarm(level, here);
         }
-        if (stoke < 1 && f <= 0.6f || stoke < 2 && f <= 0.3f) {
+        float[] stokeAt = run.stance == TowerStance.BALANCE ? TowerStance.BALANCE_STOKE : TowerStance.STOKE;
+        if (stoke < 1 && f <= stokeAt[0] || stoke < 2 && f <= stokeAt[1]) {
             stoke++;
             // 角の上に天秤の印が開く (Annihilation の Stoke the Blaze)
             master.playAction("stoke");
@@ -294,17 +301,26 @@ public final class TowerFight {
             return rng.nextBoolean() ? "stars" : "breath";
         }
         moves++;
-        if (moves % 4 == 0 && adds.stream().filter(LivingEntity::isAlive).count() < 2 + n) {
+        TowerStance st = run.stance;
+        // 淵の週: 群れを 3 技ごとに
+        if (moves % (st == TowerStance.ABYSS ? 3 : 4) == 0 && adds.stream().filter(LivingEntity::isAlive).count() < 2 + n) {
             return "kids";
         }
         List<String> pool = new ArrayList<>(List.of("rake", "flense", "breath", "beams", "sigil", "exhort"));
-        if (f <= 0.8f) {
+        if (st == TowerStance.ABYSS) {
+            pool.add("breath");
+        }
+        // 星の週: 星屑をはじめから二倍、天の三矢は 6 割から
+        if (st == TowerStance.STAR) {
+            pool.add("stars");
+            pool.add("stars");
+        } else if (f <= 0.8f) {
             pool.add("stars");
         }
         if (moonsDone >= 1) {
             pool.add("clap");
         }
-        if (f <= 0.4f) {
+        if (f <= (st == TowerStance.STAR ? TowerStance.STAR_ARROWS : 0.4f)) {
             pool.add("arrows");
         }
         pool.remove(last);
@@ -555,7 +571,7 @@ public final class TowerFight {
 
     // 月の進み (0 = 広場、1 = 南の端)。賭け fast_moon で速い
     double moonProgress(long now) {
-        double ticks = MOON_TICKS * (TowerWagers.isOn(run, "fast_moon") ? TowerWagers.FAST_MOON : 1);
+        double ticks = MOON_TICKS * (TowerWagers.isOn(run, "fast_moon") ? TowerWagers.FAST_MOON : 1) * (run.stance == TowerStance.MOON ? TowerStance.MOON_SPEED : 1);
         return Math.min(1.0, (now - moonBorn) / ticks);
     }
 

@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 // 塔の受付の画面に見せる今の状態 (サーバー → その人)。open = 受付で話したとき (画面を開く)。false は開いている画面を新しくするだけ。
 // 2026-11-02 の声「なぜ大規模レイドの入り方がチャット？これまで通り UI 出したらいいんじゃない」(前はチャットの押せる一覧)
 public record TowerDeskState(boolean open, boolean usedToday, String leader, List<String> members, boolean isLeader, int max,
-        List<String> joinLeaders, List<Integer> joinCounts, List<String> wagers, List<String> chosen, int pickMax, int bonusPct) implements CustomPacketPayload {
+        List<String> joinLeaders, List<Integer> joinCounts, List<String> wagers, List<String> chosen, int pickMax, int bonusPct, String stance) implements CustomPacketPayload {
     public static final Type<TowerDeskState> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "tower_desk_state"));
     public static final StreamCodec<FriendlyByteBuf, TowerDeskState> STREAM_CODEC = StreamCodec.of((buf, s) -> {
         buf.writeBoolean(s.open);
@@ -28,6 +28,7 @@ public record TowerDeskState(boolean open, boolean usedToday, String leader, Lis
         writeList(buf, s.chosen);
         buf.writeVarInt(s.pickMax);
         buf.writeVarInt(s.bonusPct);
+        buf.writeUtf(s.stance);
     }, buf -> {
         boolean open = buf.readBoolean();
         boolean used = buf.readBoolean();
@@ -43,7 +44,9 @@ public record TowerDeskState(boolean open, boolean usedToday, String leader, Lis
         }
         List<String> wagers = readList(buf);
         List<String> chosen = readList(buf);
-        return new TowerDeskState(open, used, leader, members, isLeader, max, join, counts, wagers, chosen, buf.readVarInt(), buf.readVarInt());
+        int pick = buf.readVarInt();
+        int bonus = buf.readVarInt();
+        return new TowerDeskState(open, used, leader, members, isLeader, max, join, counts, wagers, chosen, pick, bonus, buf.readUtf());
     });
 
     private static void writeList(FriendlyByteBuf buf, List<String> list) {

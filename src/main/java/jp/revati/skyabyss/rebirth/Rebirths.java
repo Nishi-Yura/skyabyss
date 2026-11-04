@@ -130,6 +130,7 @@ public final class Rebirths {
         marks.addAll(jp.revati.skyabyss.endgame.Codex.marks(p));
         marks.addAll(jp.revati.skyabyss.fishing.Fishing.marks(p));
         marks.addAll(jp.revati.skyabyss.dungeon.Dungeons.marks(p));
+        marks.addAll(jp.revati.skyabyss.tower.Towers.marks(p));
         if (e == null) {
             return new RebirthTitles.Facts(count, 0, Progression.stage(p), 0, -1, -1, 0, founder, tower, marks);
         }

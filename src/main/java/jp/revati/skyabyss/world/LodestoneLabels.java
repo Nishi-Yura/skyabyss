@@ -64,7 +64,9 @@ public final class LodestoneLabels {
             for (Dungeon d : Dungeon.values()) {
                 BlockPos gate = ContinentPois.extraOf(level, d.poiKind(), "gate");
                 if (gate != null && gate.distManhattan(pos) <= 1) {
-                    return new Text(Component.translatable("label.skyabyss.stone.dungeon_gate"),
+                    // 題に今日の坑の様子 (dungeon/DungeonMood)
+                    return new Text(Component.translatable("label.skyabyss.stone.dungeon_gate.today",
+                            Component.translatable(jp.revati.skyabyss.dungeon.DungeonMood.today(d).nameKey())),
                             Component.translatable("label.skyabyss.stone.dungeon_gate.sub", Component.translatable(d.nameKey())));
                 }
             }

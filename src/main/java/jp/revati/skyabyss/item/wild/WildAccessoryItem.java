@@ -91,6 +91,7 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         ModGear.tooltip(stack, tooltip, tier(), "item.skyabyss." + row.id() + ".desc", false);
+        jp.revati.skyabyss.dungeon.DungeonGear.tooltip(stack, tooltip);
     }
 
     // ---------------------------------------------------------------- 護符を使う

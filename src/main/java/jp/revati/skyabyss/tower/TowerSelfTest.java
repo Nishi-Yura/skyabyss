@@ -76,6 +76,7 @@ public final class TowerSelfTest {
                 check(f, Towers.runOf(p) == null && !Towers.RUNS.containsKey(a.id), "the run did not end");
             }
             p.getPersistentData().remove(FinaleEnding.KEY);
+            stancesAndMarks(f, server, p);
         } catch (Exception ex) {
             SkyAbyss.LOGGER.error("SELFTEST tower crashed", ex);
             f.add("crashed: " + ex);
@@ -85,6 +86,38 @@ public final class TowerSelfTest {
             }
         }
         report(f);
+    }
+
+    // 週の構え (4 つを週ごとに巡る) と、重ね賭けの印 (賭け三つで越えた週に一度、塔の箱と記録の板の名前と称号)
+    static void stancesAndMarks(List<String> f, MinecraftServer server, FakePlayer p) {
+        java.util.Set<TowerStance> seen = java.util.EnumSet.noneOf(TowerStance.class);
+        for (int i = 0; i < 4; i++) {
+            seen.add(TowerStance.of(2900 + i));
+        }
+        check(f, seen.size() == 4 && TowerStance.of(2900) == TowerStance.of(2904), "the weekly stances do not cycle through four");
+        p.getPersistentData().remove(Towers.MARK_WEEK);
+        p.getPersistentData().remove(Towers.MARK_WEEKS);
+        TowerRun run = new TowerRun(server, -77, 0, List.of(p.getUUID()), 0);
+        run.wagers.addAll(List.of("half_heal", "fast_moon", "hard_eyes"));
+        int boxes = count(p);
+        Towers.wagerMark(p, run);
+        Towers.wagerMark(p, run);
+        check(f, p.getPersistentData().getInt(Towers.MARK_WEEKS) == 1 && count(p) == boxes + 1, "three wagers did not give one mark and one box this week");
+        check(f, Towers.marks(p).contains("tower_wager3") && TowerRecords.get(server).marks().contains(p.getGameProfile().getName()),
+                "the wager mark did not reach the title marks and the record board");
+        TowerRun two = new TowerRun(server, -78, 0, List.of(p.getUUID()), 0);
+        two.wagers.addAll(List.of("half_heal", "fast_moon"));
+        p.getPersistentData().remove(Towers.MARK_WEEK);
+        Towers.wagerMark(p, two);
+        check(f, p.getPersistentData().getInt(Towers.MARK_WEEKS) == 1, "two wagers gave a mark");
+        p.getPersistentData().remove(Towers.MARK_WEEK);
+        p.getPersistentData().remove(Towers.MARK_WEEKS);
+        p.getInventory().clearContent();
+    }
+
+    static int count(FakePlayer p) {
+        net.minecraft.world.item.Item box = jp.revati.skyabyss.loot.box.LootBoxSetup.item(jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower"));
+        return box == null ? 0 : jp.revati.skyabyss.pouch.Pouch.countAll(p, box);
     }
 
     // 主の一戦 (人のいない区画で、段を手で進める)

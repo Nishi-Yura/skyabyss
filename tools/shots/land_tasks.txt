@@ -1,0 +1,88 @@
+# 2026-11-05 のダンジョンの頁: 塔の受付 (今週の構えの行) と、巡り路の土地の課題 (掘り出す・潮待ち・雷を集める・火を守る)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/land_tasks.txt -PshotsName=land_tasks
+world circuit_check continent
+size 1280 720
+timeout 2400
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd skyabyss level set @p 30
+cmd time set noon
+cmd weather clear
+cmd effect give @s resistance 900 4 true
+hud on
+
+# 1. 塔の受付 (見本の画面)
+open tower_desk
+wait 20
+shot lt_1_tower_desk
+close
+wait 10
+
+# 2. 岩鯨の丘陵: 掘り出す
+cmd tp @s -116 150 -894
+waitchunks 300
+wait 60
+cmd skyabyss circuit reset
+cmd skyabyss circuit start 2
+wait 40
+cmd skyabyss circuit land
+wait 40
+cmd tp @s ~ ~4 ~ ~ 50
+wait 30
+chat clear
+shot lt_2_dig
+cmd skyabyss circuit end
+wait 40
+
+# 3. 嵐の高地: 雷を集める
+cmd tp @s -936 160 -48
+waitchunks 300
+wait 60
+cmd skyabyss circuit reset
+cmd skyabyss circuit start 4
+wait 40
+cmd skyabyss circuit land
+wait 40
+cmd tp @s ~ ~4 ~ ~ 45
+wait 30
+chat clear
+shot lt_3_charge
+cmd skyabyss circuit end
+wait 40
+
+# 4. 灰の荒野: 火を守る (灰の風の予告の帯)
+cmd tp @s -266 160 1266
+waitchunks 300
+wait 60
+cmd skyabyss circuit reset
+cmd skyabyss circuit start 5
+wait 40
+cmd skyabyss circuit land
+wait 40
+cmd tp @s ~ ~5 ~ ~ 55
+wait 100
+chat clear
+shot lt_4_fire
+wait 30
+shot lt_4b_fire_wind
+cmd skyabyss circuit end
+wait 40
+
+# 5. 潮の浜: 潮待ち
+cmd tp @s 1340 160 290
+waitchunks 300
+wait 60
+cmd skyabyss circuit reset
+cmd skyabyss circuit start 3
+wait 40
+cmd skyabyss circuit land
+wait 40
+chat clear
+shot lt_5_tide_wait
+wait 240
+shot lt_5b_tide_ebb
+cmd skyabyss circuit end
+wait 40

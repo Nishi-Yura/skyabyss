@@ -26,6 +26,8 @@ public class TowerRecords extends SavedData {
     final Map<String, Integer> guilds = new HashMap<>();
     final Map<String, String> guildNames = new HashMap<>();
     String week = "";
+    // 今週の重ね賭けの印 (賭けを三つ付けて越えた人の名前。週が替わったら空にする)
+    final java.util.LinkedHashSet<String> marks = new java.util.LinkedHashSet<>();
 
     public static TowerRecords get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(TowerRecords::new, TowerRecords::load), NAME);
@@ -54,8 +56,21 @@ public class TowerRecords extends SavedData {
             week = w;
             guilds.clear();
             guildNames.clear();
+            marks.clear();
             setDirty();
         }
+    }
+
+    public void addMark(String name) {
+        rollWeek();
+        if (marks.add(name)) {
+            setDirty();
+        }
+    }
+
+    public List<String> marks() {
+        rollWeek();
+        return new ArrayList<>(marks);
     }
 
     public Best best(int size) {
@@ -95,6 +110,9 @@ public class TowerRecords extends SavedData {
             r.guildNames.put(k, gt.getCompound(k).getString("name"));
         }
         r.week = tag.getString("week");
+        for (Tag t : tag.getList("marks", Tag.TAG_STRING)) {
+            r.marks.add(t.getAsString());
+        }
         return r;
     }
 
@@ -119,6 +137,9 @@ public class TowerRecords extends SavedData {
             gt.put(e.getKey(), c);
         }
         tag.put("guilds", gt);
+        ListTag mk = new ListTag();
+        marks.forEach(n -> mk.add(StringTag.valueOf(n)));
+        tag.put("marks", mk);
         tag.putString("week", week);
         return tag;
     }

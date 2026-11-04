@@ -755,5 +755,9 @@
   "quest.skyabyss.town.camp_mapmaker.back.journal": "砦も門も見た。地図描きに話そう。",
   "quest.skyabyss.town.camp_mapmaker.back.back": "地図描きに見たものを話そう",
   "quest.skyabyss.town.camp_mapmaker.go.fort": "一夜砦を見てこよう（野営から東）",
-  "quest.skyabyss.town.camp_mapmaker.go.gate": "割れ門を見てこよう（一夜砦の先、南東）"
+  "quest.skyabyss.town.camp_mapmaker.go.gate": "割れ門を見てこよう（一夜砦の先、南東）",
+  "dialogue.skyabyss.guest_town_guide_whale.ask.dungeon_mood": "鯨骨の坑の今日の様子を聞く",
+  "dialogue.skyabyss.guest_town_guide_tide.ask.dungeon_mood": "潮の洞の今日の様子を聞く",
+  "dialogue.skyabyss.guest_town_guide_storm.ask.dungeon_mood": "雷晶の空洞の今日の様子を聞く",
+  "dialogue.skyabyss.guest_town_guide_ember.ask.dungeon_mood": "熔けた坑道の今日の様子を聞く"
 }

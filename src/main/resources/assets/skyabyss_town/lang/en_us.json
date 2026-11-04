@@ -755,5 +755,9 @@
   "quest.skyabyss.town.camp_mapmaker.back.journal": "You saw the fort and the gate. Tell the mapmaker.",
   "quest.skyabyss.town.camp_mapmaker.back.back": "Tell the mapmaker what you saw",
   "quest.skyabyss.town.camp_mapmaker.go.fort": "Look at the One-Night Fort (east of the camp)",
-  "quest.skyabyss.town.camp_mapmaker.go.gate": "Look at the Split Gate (southeast past the fort)"
+  "quest.skyabyss.town.camp_mapmaker.go.gate": "Look at the Split Gate (southeast past the fort)",
+  "dialogue.skyabyss.guest_town_guide_whale.ask.dungeon_mood": "Ask how the Bone Pit is today",
+  "dialogue.skyabyss.guest_town_guide_tide.ask.dungeon_mood": "Ask how the Tide Cave is today",
+  "dialogue.skyabyss.guest_town_guide_storm.ask.dungeon_mood": "Ask how the Storm Hollow is today",
+  "dialogue.skyabyss.guest_town_guide_ember.ask.dungeon_mood": "Ask how the Molten Mine is today"
 }

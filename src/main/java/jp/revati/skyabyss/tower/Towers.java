@@ -218,6 +218,7 @@ public final class Towers {
                 Notice.gain(p, "message.skyabyss.tower.record", run.members.size());
             }
             reward(p, run);
+            wagerMark(p, run);
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
             Notice.hint(p, "message.skyabyss.tower.clear_back");
         }
@@ -248,6 +249,45 @@ public final class Towers {
         jp.revati.skyabyss.facility.Coins.give(p, jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
         Notice.gain(p, "message.skyabyss.tower.reward", shards,
                 jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
+    }
+
+    // 重ね賭けの印 (2026-11-05 のダンジョンの頁 2-2): 賭けを三つ付けて越えた週は、その週に一度だけ塔の箱を必ず (15% の抽選と天井とは別)。
+    // 記録の板に名前、印の週の数で称号 (tower_wager3 = 1 週・tower_wager3_10 = 10 週)
+    public static final String MARK_WEEK = "skyabyss_tower_mark_week";
+    public static final String MARK_WEEKS = "skyabyss_tower_mark_weeks";
+
+    static void wagerMark(ServerPlayer p, TowerRun run) {
+        if (run == null || run.wagers.size() < TowerWagers.MAX_PICK) {
+            return;
+        }
+        var d = p.getPersistentData();
+        String week = TowerWagers.week().toString();
+        if (week.equals(d.getString(MARK_WEEK))) {
+            return;
+        }
+        d.putString(MARK_WEEK, week);
+        d.putInt(MARK_WEEKS, d.getInt(MARK_WEEKS) + 1);
+        if (run.server != null) {
+            TowerRecords.get(run.server).addMark(p.getGameProfile().getName());
+        }
+        net.minecraft.world.item.Item box = jp.revati.skyabyss.loot.box.LootBoxSetup.item(jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower"));
+        if (box != null) {
+            jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(box));
+        }
+        Notice.unlock(p, "message.skyabyss.tower.mark", d.getInt(MARK_WEEKS));
+    }
+
+    // 称号の印 (rebirth/Rebirths.facts): 重ね賭けの印の週の数
+    public static java.util.Set<String> marks(ServerPlayer p) {
+        int n = p.getPersistentData().getInt(MARK_WEEKS);
+        java.util.Set<String> out = new java.util.HashSet<>();
+        if (n >= 1) {
+            out.add("tower_wager3");
+        }
+        if (n >= 10) {
+            out.add("tower_wager3_10");
+        }
+        return out;
     }
 
     // 塔の箱を引く (force = 必ず)。出たら true

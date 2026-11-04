@@ -3101,5 +3101,6 @@
   "mutation.skyabyss.frozen_sea": "Frozen Sea",
   "mutation.skyabyss.frozen_sea.effect": "Instead of a cold tide, leaves a frozen floor for 6 s. Small foes freeze in place.",
   "message.skyabyss.tree.reset_v3": "The skill trees have changed. Your nodes were reset and all SP refunded (retake them in the skill tree).",
-  "gear.skyabyss.enhance_guard": "Resonance +%1$s: damage taken −%2$s%%"
+  "gear.skyabyss.enhance_guard": "Resonance +%1$s: damage taken −%2$s%%",
+  "label.skyabyss.stone.dungeon_gate.today": "Floor Gate ─ today: %s"
 }
