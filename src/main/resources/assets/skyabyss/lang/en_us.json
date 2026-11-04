@@ -1915,6 +1915,7 @@
   "message.skyabyss.skill.node_failed.rank_max": "Already mastered",
   "message.skyabyss.skill.node_failed.sealed": "That tree is not open yet",
   "message.skyabyss.skill.no_job": "You have not chosen a job yet",
+  "message.skyabyss.skill.wrong_job_attack": "Your job is %s. You cannot fight with another job's weapon (change jobs at a town's job hall)",
   "message.skyabyss.skill.wrong_job_weapon": "Your job is %s. Skills need that job's weapon (change jobs at a town's job hall)",
   "gui.skyabyss.job_room.title": "Job Hall",
   "gui.skyabyss.job_room.lead": "Change to any of the six jobs. Each job keeps its own tree and loadouts",

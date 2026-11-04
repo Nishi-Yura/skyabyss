@@ -311,14 +311,9 @@ public final class SkillEvents {
                     level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), Skills.SOUND_RIPOSTE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
                 }
             }
-            // 木 v2 の節: 吸い (近接。1 回 2 点まで)。職の武器でない武器なら攻撃力は半分 (docs/design/48 の 3 章)
+            // 木 v2 の節: 吸い (近接。1 回 2 点まで)。ほかの職の武器では打てない (JobWeaponLock。docs/design/48 の 3 章)
             if (melee) {
-                Job cur = Job.byId(d.curJob);
-                Job held = Job.of(player.getMainHandItem());
-                if (cur != null && held != null && held != cur && !SkillManager.IGNORE_JOBS) {
-                    amount *= 0.5f;
-                }
-                // 基礎の要求値に届いていない武器も半分 (GearRequirement)
+                // 基礎の要求値に届いていない武器は半分 (GearRequirement)
                 if (!GearRequirement.met(player, player.getMainHandItem())) {
                     amount *= 0.5f;
                 }

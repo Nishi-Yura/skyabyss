@@ -29,7 +29,6 @@ public final class TownTour {
     // 前は厩舎だった。2026-11-01 に厩舎の番を旅の番へまとめたので、乗り物を売る人のいる所へ
     static final List<String> STOPS = List.of("smithy", "inn", "perch", "tool_shop", "guild");
     static final int[] COINS = {3, 3, 3, 5, 5};
-    static final double ARRIVE = 5.0;
     static final int CHECK = 20;
     public static final int DONE = STOPS.size() + 1;
 
@@ -101,12 +100,9 @@ public final class TownTour {
         }
     }
 
-    // 戸に着いたか。戸の印は壁の看板 (地面から 4〜7 段上) なので、横の近さと、看板より下 (下がり 9 段まで) で見る
+    // 戸に着いたか (案内の灯りと同じ判定。TownGuide.arrived)
     public static boolean arrived(double x, double y, double z, BlockPos door) {
-        double dx = x - (door.getX() + 0.5);
-        double dz = z - (door.getZ() + 0.5);
-        double dy = y - door.getY();
-        return dx * dx + dz * dz <= ARRIVE * ARRIVE && dy <= 2.0 && dy >= -9.0;
+        return TownGuide.arrived(x, y, z, door);
     }
 
     static void show(ServerPlayer p, int s) {

@@ -1915,6 +1915,7 @@
   "message.skyabyss.skill.node_failed.rank_max": "もう極めている",
   "message.skyabyss.skill.node_failed.sealed": "その木はまだ開いていない",
   "message.skyabyss.skill.no_job": "まだ職を選んでいない",
+  "message.skyabyss.skill.wrong_job_attack": "いまの職は%s。ほかの職の武器では戦えない（職は街の職の間で替える）",
   "message.skyabyss.skill.wrong_job_weapon": "いまの職は%s。その職の武器を持たないと技は使えない（職は街の職の間で替える）",
   "gui.skyabyss.job_room.title": "職の間",
   "gui.skyabyss.job_room.lead": "六つの職のどれにでも替えられる。木の取り方と型は職ごとに残る",

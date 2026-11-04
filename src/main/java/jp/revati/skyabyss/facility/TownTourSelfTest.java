@@ -27,6 +27,16 @@ public final class TownTourSelfTest {
 
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
+        // 着いた判定 (TownGuide.arrived): 看板の印が地面から 7 上でも、その下の地面の横 6 までは着いた。横 7・印より上 3 は着いていない
+        BlockPos sign = new BlockPos(0, 77, 0);
+        if (!TownGuide.arrived(0.5, 70, 6.4, sign) || !TownGuide.arrived(4.5, 70, 4.5, sign) || TownGuide.arrived(0.5, 70, 7.6, sign)
+                || TownGuide.arrived(0.5, 80, 0.5, sign) || TownGuide.arrived(0.5, 66, 0.5, sign)) {
+            f.add("the arrival check should reach 6 across and from 9 below to 2 above the door mark");
+        }
+        // 封切り師は鍛冶師の立つ所へ案内する
+        if (!"npc_smith".equals(TownGuide.place("box_opener").mark())) {
+            f.add("the box opener should be guided to the smith's spot, not " + TownGuide.place("box_opener").mark());
+        }
         Map<String, BlockPos> doors = TownGuide.doors(server);
         BlockPos center = TownGuide.center(server);
         if (doors.isEmpty() || center == null) {
