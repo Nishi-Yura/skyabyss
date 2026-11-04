@@ -19,13 +19,29 @@ public final class UiFit {
     // floor は一番小さい倍率 (1 より小さくして、窓の低い GUI の大きさにも入れる。文字は小さくなる)
     public void fit(int screenW, int screenH, int logicalW, int logicalH, float cap, float floor) {
         float s = Math.min((screenW - 12f) / Math.max(1, logicalW), (screenH - 12f) / Math.max(1, logicalH));
-        scale = Mth.clamp(s, floor, cap);
+        scale = pixelExact(Mth.clamp(s, floor, cap));
         ox = Math.round((screenW - logicalW * scale) / 2f);
         oy = Math.round((screenH - logicalH * scale) / 2f);
     }
 
+    // 画素ちょうど (docs/design/56): 論理の 1 画素が画面の整数の画素になる倍率へ下に丸める。GUI 3 なら 1 倍・4/3 倍、GUI 4 なら 0.75 倍・1 倍・1.25 倍。
+    // 1.09 倍のような半端な倍率では、字の 1 画素が画面の 3 画素と 4 画素に分かれ、画の太さがそろわなかった
+    public static float pixelExact(float s) {
+        double gui = net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScale();
+        if (gui <= 0) {
+            return s;
+        }
+        int px = Math.max(1, (int) Math.floor(s * gui + 1e-3));
+        return (float) (px / gui);
+    }
+
     public float scale() {
         return scale;
+    }
+
+    // 論理の 1 画素が画面の何画素か (画素ちょうどなら整数。PanZoomCanvas.setPixelUnit に渡す)
+    public float pixelUnit() {
+        return (float) (scale * net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScale());
     }
 
     public void begin(GuiGraphics g) {

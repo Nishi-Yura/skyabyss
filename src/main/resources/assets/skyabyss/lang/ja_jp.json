@@ -1200,7 +1200,7 @@
   "gui.skyabyss.skill.tryon": "試着",
   "gui.skyabyss.skill.tryon_ok": "確定",
   "gui.skyabyss.skill.tryon_undo": "戻す",
-  "gui.skyabyss.skill.tryon_cancel": "取り消し",
+  "gui.skyabyss.skill.tryon_cancel": "やめる",
   "gui.skyabyss.skill.tryon_locked": "試着のあいだは、技を覚える操作だけできる。",
   "gui.skyabyss.skill.tryon_banner": "試着中（仮に %s 個）",
   "gui.skyabyss.skill.tryon_tip": "SPを仮に振って、効果・マナ・待ちを確かめる。確定するまで何も変わらない。",

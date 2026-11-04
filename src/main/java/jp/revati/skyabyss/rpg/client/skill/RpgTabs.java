@@ -47,6 +47,40 @@ public final class RpgTabs {
         }
     }
 
+    // 黄金比の板 (client/ui/Golden) の見出しの帯の中に、左から並べる (幅 34・高さ 13・あいだ 3)。docs/design/56
+    public static void addHead(Consumer<AbstractButton> add, jp.revati.skyabyss.client.ui.Golden.Box head, int active) {
+        int[] slot = {0};
+        Consumer<Integer> put = which -> {
+            int x = head.x() + slot[0] * (HEAD_TAB_W + jp.revati.skyabyss.client.ui.Golden.S3);
+            add.accept(new Tab(x, head.y() + 4, HEAD_TAB_W, jp.revati.skyabyss.client.ui.Golden.BTN, which, active == which, true));
+            slot[0]++;
+        };
+        put.accept(STATUS);
+        put.accept(SKILLS);
+        if (rebirthVisible() || active == REBIRTH) {
+            put.accept(REBIRTH);
+        }
+        Minecraft mc = Minecraft.getInstance();
+        if (active == JOURNEY || (mc.player != null && jp.revati.skyabyss.endgame.client.JourneyScreen.visible(mc.player))) {
+            put.accept(JOURNEY);
+        }
+    }
+
+    // 見出しの帯の中のつまみが占める幅 (つまみの右に何かを置く画面が使う)
+    public static int headWidth(int active) {
+        int n = 2;
+        if (rebirthVisible() || active == REBIRTH) {
+            n++;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        if (active == JOURNEY || (mc.player != null && jp.revati.skyabyss.endgame.client.JourneyScreen.visible(mc.player))) {
+            n++;
+        }
+        return n * HEAD_TAB_W + (n - 1) * jp.revati.skyabyss.client.ui.Golden.S3;
+    }
+
+    static final int HEAD_TAB_W = jp.revati.skyabyss.client.ui.Golden.S34;
+
     // 画面の keyPressed から呼ぶ。J なら記録、K なら技へ (今の画面と同じなら閉じる)。扱ったら true
     public static boolean keyPressed(int keyCode, int scanCode, int active) {
         Minecraft mc = Minecraft.getInstance();
@@ -87,12 +121,18 @@ public final class RpgTabs {
     static final class Tab extends AbstractButton {
         private final int which;
         private final boolean selected;
+        private final boolean golden;
 
         Tab(int x, int y, int which, boolean selected) {
-            super(x, y, TAB_W, TAB_H, Component.translatable(which == STATUS ? "gui.skyabyss.skill.tab_status"
+            this(x, y, TAB_W, TAB_H, which, selected, false);
+        }
+
+        Tab(int x, int y, int w, int h, int which, boolean selected, boolean golden) {
+            super(x, y, w, h, Component.translatable(which == STATUS ? "gui.skyabyss.skill.tab_status"
                     : which == REBIRTH ? "gui.skyabyss.skill.tab_rebirth" : which == JOURNEY ? "gui.skyabyss.skill.tab_journey" : "gui.skyabyss.skill.tab_skills"));
             this.which = which;
             this.selected = selected;
+            this.golden = golden;
         }
 
         @Override
@@ -104,6 +144,11 @@ public final class RpgTabs {
 
         @Override
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            if (golden) {
+                jp.revati.skyabyss.client.ui.Golden.tab(g, Minecraft.getInstance().font,
+                        new jp.revati.skyabyss.client.ui.Golden.Box(getX(), getY(), getWidth(), getHeight()), getMessage(), selected, isHoveredOrFocused());
+                return;
+            }
             int u = selected ? 116 : 0;
             g.pose().pushPose();
             // 選んでいるつまみは画面の縁より手前に描き、縁とつながって見えるようにする

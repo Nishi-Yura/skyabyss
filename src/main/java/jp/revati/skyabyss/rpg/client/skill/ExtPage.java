@@ -2,6 +2,8 @@ package jp.revati.skyabyss.rpg.client.skill;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jp.revati.skyabyss.client.ui.Golden;
 import java.util.function.Consumer;
 
 import jp.revati.skyabyss.rpg.skill.Glyph;
@@ -24,6 +26,9 @@ final class ExtPage {
     static final int HIT_BAG = 4;
     private static final int ROW_H = 15;
     private static final int CHIPS = 12;
+    // 紋の盤の縦の位置 (右の欄の上端 + 2 から)
+    private static final int PICK_HEAD = Golden.ROW + 2 * 33 + 1;
+    private static final int BAG_ROW = PICK_HEAD + Golden.ROW + 14 + 2 + Golden.ROW;
     private static final int GOLD = SkillScreen.GOLD;
     private static final int TEXT = SkillScreen.TEXT;
     private static final int SOFT = SkillScreen.SOFT;
@@ -68,24 +73,36 @@ final class ExtPage {
     }
 
     // ---------------------------------------------------------------- 描画
-    void render(GuiGraphics g, Font font, Minecraft mc, SkillData d, int left, int top, int mx, int my) {
+    // 黄金比の板の中身 (docs/design/56): 左の脇の列 (0.382) に変異の案内、右の主の列 (0.618) に紋の盤
+    static Golden.Box left(Golden.Box body) {
+        return body.minor(true);
+    }
+
+    static Golden.Box right(Golden.Box body) {
+        return body.major(false);
+    }
+
+    void render(GuiGraphics g, Font font, Minecraft mc, SkillData d, Golden.Box body, int mx, int my) {
         hits.clear();
         List<Component> tip = null;
         // ---- 左: 変異は木の節へ (案内)
-        int x0 = left + 10;
-        g.drawString(font, Component.translatable("gui.skyabyss.ext.mutation_head"), x0, top + 23, GOLD, false);
-        int ly = top + 36;
-        for (net.minecraft.util.FormattedCharSequence line : TextWrap.split(font, Component.translatable("gui.skyabyss.ext.mutation_moved"), 160)) {
-            g.drawString(font, line, x0, ly, SOFT, false);
-            ly += 10;
+        Golden.Box lb = left(body);
+        int x0 = lb.x() + Golden.S5;
+        g.drawString(font, Component.translatable("gui.skyabyss.ext.mutation_head"), x0, Golden.textY(lb.y() + 2, Golden.ROW), GOLD, false);
+        int ly = lb.y() + 2 + Golden.ROW + Golden.S3;
+        for (net.minecraft.util.FormattedCharSequence line : TextWrap.split(font, Component.translatable("gui.skyabyss.ext.mutation_moved"), lb.w() - 2 * Golden.S5)) {
+            g.drawString(font, line, x0, Golden.textY(ly, Golden.ROW), SOFT, false);
+            ly += Golden.ROW;
         }
         // ---- 右: 紋の盤
-        int rx = left + 186;
+        Golden.Box rb = right(body);
+        int rx = rb.x() + Golden.S5 + (rb.w() - 2 * Golden.S5 - 3 * 61) / 2;
+        int top = rb.y() + 2;
         int open = SkillRules.glyphSockets(d.rebirth);
-        g.drawString(font, Component.translatable("gui.skyabyss.ext.glyph_head", open, SkillRules.GLYPH_SOCKETS), rx, top + 23, GOLD, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.ext.glyph_head", open, SkillRules.GLYPH_SOCKETS), rx, Golden.textY(top, Golden.ROW), GOLD, false);
         for (int i = 0; i < SkillRules.GLYPH_SOCKETS; i++) {
             int cx = rx + (i % 3) * 61;
-            int cy = top + 34 + (i / 3) * 33;
+            int cy = top + Golden.ROW + (i / 3) * 33;
             boolean closed = i >= open;
             boolean sel = i == socket;
             boolean hover = in(mx, my, cx, cy, 59, 31);
@@ -93,8 +110,14 @@ final class ExtPage {
             g.fill(cx + 1, cy + 1, cx + 58, cy + 30, closed ? 0xFF10131A : 0xFF161A22);
             Glyph.Placed p = Glyph.parsePlaced(d.glyphSockets[i]);
             if (closed) {
+                // 閉じた穴: 「転生 n で開く」を穴の中に収まるよう折って、真ん中に
                 Component lock = Component.translatable("gui.skyabyss.ext.socket_closed", i - SkillRules.GLYPH_SOCKETS_BASE + 1);
-                g.drawString(font, lock, cx + (59 - font.width(lock)) / 2, cy + 11, DIM, false);
+                List<net.minecraft.util.FormattedCharSequence> ls = TextWrap.split(font, lock, 55);
+                int ty = cy + (31 - ls.size() * 10) / 2 + 1;
+                for (net.minecraft.util.FormattedCharSequence l : ls) {
+                    g.drawString(font, l, cx + (59 - font.width(l)) / 2, ty, DIM, false);
+                    ty += 10;
+                }
             } else if (p == null) {
                 g.drawString(font, "+", cx + 28, cy + 12, sel ? GOLD : DIM, false);
             } else {
@@ -115,10 +138,10 @@ final class ExtPage {
         }
         // 中心の技の選び (覚えている技。ホイールで送る)
         List<Skill> ks = known(d);
-        int py = top + 100;
+        int py = top + PICK_HEAD;
         pickScroll = Math.max(0, Math.min(pickScroll, Math.max(0, ks.size() - CHIPS)));
-        g.drawString(font, Component.translatable("gui.skyabyss.ext.pick_head"), rx, py - 0, SOFT, false);
-        py += 10;
+        g.drawString(font, Component.translatable("gui.skyabyss.ext.pick_head"), rx, Golden.textY(py, Golden.ROW), SOFT, false);
+        py += Golden.ROW;
         for (int k = 0; k < CHIPS; k++) {
             int idx = pickScroll + k;
             int x = rx + k * 15;
@@ -133,12 +156,16 @@ final class ExtPage {
             }
         }
         // 持っている紋
-        int by = top + 135;
+        int by = top + BAG_ROW;
         bagScroll = Math.max(0, Math.min(bagScroll, Math.max(0, d.glyphBag.size() - CHIPS)));
         Glyph.Item hoverItem = null;
         for (int k = 0; k < CHIPS; k++) {
             int idx = bagScroll + k;
             int x = rx + k * 15;
+            if (d.glyphBag.isEmpty()) {
+                // 空なら札の枠は描かず、案内の一行だけ
+                break;
+            }
             g.fill(x, by, x + 14, by + 14, 0xFF2A3038);
             Glyph.Item item = idx < d.glyphBag.size() ? Glyph.parse(d.glyphBag.get(idx)) : null;
             if (item != null) {
@@ -155,8 +182,8 @@ final class ExtPage {
             }
         }
         Component more = Component.translatable("gui.skyabyss.ext.bag_count", d.glyphBag.size(), SkillRules.GLYPH_BAG_MAX);
-        g.drawString(font, more, rx + 180 - font.width(more), by - 10, d.glyphBag.isEmpty() ? DIM : SOFT, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.ext.bag_head"), rx, by - 10, SOFT, false);
+        g.drawString(font, more, rx + 180 - font.width(more), Golden.textY(by - Golden.ROW, Golden.ROW), d.glyphBag.isEmpty() ? DIM : SOFT, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.ext.bag_head"), rx, Golden.textY(by - Golden.ROW, Golden.ROW), SOFT, false);
         if (hoverItem == null && d.glyphBag.isEmpty()) {
             g.drawString(font, Component.translatable("gui.skyabyss.ext.bag_empty"), rx + 2, by + 3, DIM, false);
         }
@@ -231,13 +258,14 @@ final class ExtPage {
         click.run();
     }
 
-    boolean scroll(double mx, double my, double delta, SkillData d, int left, int top) {
-        int rx = left + 186;
-        if (my >= top + 114 && my < top + 128 && mx >= rx) {
+    boolean scroll(double mx, double my, double delta, SkillData d, Golden.Box body) {
+        Golden.Box rb = right(body);
+        int top = rb.y() + 2;
+        if (my >= top + PICK_HEAD + Golden.ROW && my < top + PICK_HEAD + Golden.ROW + 14 && mx >= rb.x()) {
             pickScroll -= (int) Math.signum(delta) * 3;
             return true;
         }
-        if (my >= top + 140 && my < top + 154 && mx >= rx) {
+        if (my >= top + BAG_ROW && my < top + BAG_ROW + 14 && mx >= rb.x()) {
             bagScroll -= (int) Math.signum(delta) * 3;
             return true;
         }

@@ -1,0 +1,38 @@
+# 2026-11-04: 黄金比の板の記録・技・旅 (docs/design/56)。1280x720 / GUI 3 (いちばん多い大きさで 1 倍に入るか)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_rpg.txt -PshotsName=golden_rpg
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 30
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+open growth
+wait 10
+shot growth
+close
+open journey
+wait 20
+shot journey
+close
+open skills_node:titan_cleave
+wait 10
+shot skills_node
+close
+open skills_node:str_1
+wait 10
+shot skills_stat
+close

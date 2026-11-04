@@ -7,9 +7,10 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 
 // 一行の枠に文を収めて描く (品の名前・人の名前・見出しなど、折り返せない所)。入ればそのまま、少しはみ出すなら字を縮め (MIN_SCALE まで)、
-// それでも入らなければ末尾を「…」にする。長い文が枠の外へ出て隣の字に重なったり、画面の外で見えなくなったりしないように (2026-10-26 の声)
+// それでも入らなければ末尾を「…」にする。長い文が枠の外へ出て隣の字に重なったり、画面の外で見えなくなったりしないように (2026-10-26 の声)。
+// 2026-11-04 の画面の決まり (docs/design/56) で字は等倍だけにしたので、縮めずに「…」にする (縮めた字は画素がつぶれて読めない)
 public final class FitText {
-    public static final float MIN_SCALE = 0.75f;
+    public static final float MIN_SCALE = 1f;
 
     private FitText() {
     }
