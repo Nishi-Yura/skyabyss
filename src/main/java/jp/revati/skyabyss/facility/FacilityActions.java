@@ -181,6 +181,8 @@ public final class FacilityActions {
         boolean isBed = player.serverLevel().getBlockState(bed).getBlock() instanceof BedBlock;
         player.setRespawnPosition(Level.OVERWORLD, bed, player.getYRot(), !isBed, false);
         Notice.hint(player, "message.skyabyss.inn.rested");
+        // 倒れたあとの弱りは宿で休むと消える (combat/DeathWeakness)
+        jp.revati.skyabyss.combat.DeathWeakness.rest(player);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.NEUTRAL, 0.3f, 1.6f);
         return true;
     }

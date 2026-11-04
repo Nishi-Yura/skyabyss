@@ -2628,5 +2628,10 @@
   "raid.skyabyss.hud.read_tablet": "Read the tablet at the entrance (the door opens once read)",
   "message.skyabyss.raid_lore.read_to_open": "The door opens once someone reads the entrance tablet",
   "message.skyabyss.break.tip": "Full-charge hits fill the break bar to stagger it",
-  "message.skyabyss.growth.bank_released": "Your saved xp (%s) came in"
+  "message.skyabyss.growth.bank_released": "Your saved xp (%s) came in",
+  "effect.skyabyss.weakened": "Weakened",
+  "message.skyabyss.weakened.applied": "Weakened for 2 min: -15% damage dealt, +15% taken. Rest at an inn",
+  "message.skyabyss.weakened.rested": "You rested at the inn; the weakness is gone",
+  "entity.skyabyss.pack_leader": "%s Pack Leader",
+  "message.skyabyss.pack.first": "Night pack nearby: its gold-named leader is sturdy"
 }

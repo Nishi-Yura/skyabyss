@@ -158,6 +158,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.guide.GuideSetup.register(modEventBus);
         // 旅装・砥石・糧と薬 (一章の分P5)
         jp.revati.skyabyss.guide.TravelGear.register(modEventBus);
+        jp.revati.skyabyss.combat.DeathWeakness.register(modEventBus);
         jp.revati.skyabyss.item.outfit.OutfitGear.register(modEventBus);
         jp.revati.skyabyss.item.outfit.ConsumableGear.register(modEventBus);
         jp.revati.skyabyss.item.outfit.MaterialGear.register(modEventBus);

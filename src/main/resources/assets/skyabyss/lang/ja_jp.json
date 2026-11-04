@@ -2628,5 +2628,10 @@
   "raid.skyabyss.hud.read_tablet": "入口の碑を読もう（読むと戸が開く）",
   "message.skyabyss.raid_lore.read_to_open": "部屋の戸は、入口の碑を読むと開く",
   "message.skyabyss.break.tip": "満ちた一撃で主の崩しの帯が溜まる。満ちると主が崩れる",
-  "message.skyabyss.growth.bank_released": "貯めていた経験値 %s が入った"
+  "message.skyabyss.growth.bank_released": "貯めていた経験値 %s が入った",
+  "effect.skyabyss.weakened": "弱り",
+  "message.skyabyss.weakened.applied": "弱っている（2 分）。与える傷 −15%・受ける傷 +15%。宿で休むと治る",
+  "message.skyabyss.weakened.rested": "宿で休んで、弱りが抜けた",
+  "entity.skyabyss.pack_leader": "%sの群れの頭",
+  "message.skyabyss.pack.first": "夜の野に手ごわい群れがいる。金の名札の頭は体力が多い"
 }

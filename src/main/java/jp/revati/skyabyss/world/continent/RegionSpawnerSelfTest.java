@@ -89,13 +89,23 @@ public final class RegionSpawnerSelfTest {
         } else if (!m.isAlive() || level.getEntity(m.getUUID()) == null) {
             f.add("a region spawn was removed right after joining");
         }
+        // 夜の群れの頭: 体力 ×1.5 と名札
+        Mob lead = RegionSpawner.spawn(level, SkyAbyss.MODID + ":spine_hare", at.offset(3, 0, 0), p);
+        if (lead != null) {
+            float plain = lead.getMaxHealth();
+            RegionSpawner.lead(lead);
+            if (Math.abs(lead.getMaxHealth() - plain * RegionSpawner.PACK_LEAD_HEALTH) > 0.01f || lead.getHealth() < lead.getMaxHealth() - 0.01f
+                    || !lead.isCustomNameVisible() || !lead.getTags().contains(RegionSpawner.PACK_LEAD_TAG)) {
+                f.add("a pack leader should have x" + RegionSpawner.PACK_LEAD_HEALTH + " health and a visible name (" + plain + " -> " + lead.getMaxHealth() + ")");
+            }
+        }
         BlockPos center = jp.revati.skyabyss.facility.TownGuide.center(server);
         if (center != null && !jp.revati.skyabyss.opening.site.SiteGuard.inTown(level, center)) {
             f.add("the capital center is not counted as town (spawns would enter it)");
         }
         RegionSpawner.clearAll(level);
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST region spawns PASSED ({} entries in {} regions, day/night/terrain picks, marked spawns, towns kept clear)", entries, t.size());
+            SkyAbyss.LOGGER.info("SELFTEST region spawns PASSED ({} entries in {} regions, day/night/terrain picks, marked spawns, towns kept clear, night pack leader)", entries, t.size());
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST region spawns FAILED: {}", s));
         }

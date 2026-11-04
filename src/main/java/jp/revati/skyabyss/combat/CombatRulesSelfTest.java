@@ -157,6 +157,32 @@ public final class CombatRulesSelfTest {
                     foe.discard();
                 }
             }
+            // 倒れたあとの弱り (DeathWeakness): 与える傷 ×0.85
+            Zombie dummy = EntityType.ZOMBIE.create(over);
+            if (dummy != null) {
+                dummy.setPos(at.getX() + 12.5, at.getY(), at.getZ() + 0.5);
+                dummy.setNoAi(true);
+                over.addFreshEntity(dummy);
+                dummy.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);
+                dummy.setHealth(200);
+                try {
+                    dummy.invulnerableTime = 0;
+                    float h0 = dummy.getHealth();
+                    dummy.hurt(over.damageSources().playerAttack(a), 10f);
+                    float plain = h0 - dummy.getHealth();
+                    a.addEffect(new net.minecraft.world.effect.MobEffectInstance(DeathWeakness.WEAKENED, 100));
+                    dummy.invulnerableTime = 0;
+                    float h1 = dummy.getHealth();
+                    dummy.hurt(over.damageSources().playerAttack(a), 10f);
+                    float weak = h1 - dummy.getHealth();
+                    if (plain <= 0 || Math.abs(weak - plain * DeathWeakness.DEALT) > 0.05f) {
+                        f.add("a weakened player should deal x" + DeathWeakness.DEALT + " (" + plain + " -> " + weak + ")");
+                    }
+                } finally {
+                    a.removeEffect(DeathWeakness.WEAKENED);
+                    dummy.discard();
+                }
+            }
             if (!FightRations.ration(new ItemStack(Items.BREAD)) || FightRations.ration(new ItemStack(Items.IRON_SWORD))) {
                 f.add("bread should count as a ration and a sword should not");
             }
@@ -165,7 +191,7 @@ public final class CombatRulesSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; boss break gauge (x0.8, fills, opening x3, breaks x2.0, grows, mechanic half), no bracing, rations)");
+            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; boss break gauge (x0.8, fills, opening x3, breaks x2.0, grows, mechanic half), no bracing, weakened after death x0.85, rations)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST combat rules FAILED: {}", s);
