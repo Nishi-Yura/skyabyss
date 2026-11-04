@@ -188,6 +188,43 @@ public final class Ch3GroundSelfTest {
         check(f, ruin != null && ruin.blueprint().equals(LightningPillars.BLUEPRINT) && ruin.post() != null, "the ruin should be built from ch3_rod_tower with a finish");
     }
 
+    // 雷拾いの巣 (GleanerNest): 筋 3 つで段 trail が済む。巣の底は雷拾いがそばにいると開かず、いなければ人ごとに一度、空石 5 で頼みが済む
+    private static void nest(MinecraftServer server, List<String> f) {
+        net.minecraft.server.level.ServerLevel level = server.overworld();
+        FakePlayer n = new FakePlayer(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "nest_t"));
+        jp.revati.skyabyss.titan.storm.chapter.mob.LightningGleaner bird = null;
+        try {
+            GleanerNest.forget(n);
+            Quests.start(n, Ch3Ground.Q_STONE);
+            for (int i = 0; i < 3; i++) {
+                GleanerNest.find(n, i);
+            }
+            Quests.poll(n, true);
+            QuestLog.Entry e = QuestLog.of(n).entry(Ch3Ground.Q_STONE);
+            check(f, e != null && !e.done && e.stage == 1, "three glass streaks should finish the trail stage: " + (e == null ? "none" : e.stage + "/" + e.done));
+            net.minecraft.core.BlockPos at = level.getSharedSpawnPos();
+            level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+            bird = Ch3Mobs.LIGHTNING_GLEANER_TYPE.get().create(level);
+            if (bird != null) {
+                bird.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 0.5, 0, 0);
+                level.addFreshEntity(bird);
+                bird.addTag(GleanerNest.NEST_TAG);
+                check(f, !GleanerNest.openNest(n, level, at), "a gleaner by the nest should keep it shut");
+                bird.discard();
+            }
+            check(f, GleanerNest.openNest(n, level, at) && QuestItems.count(n, "skyabyss:sky_stone", null) >= 5, "the nest should give five sky stones");
+            check(f, !GleanerNest.openNest(n, level, at), "the nest gives its stones once per player");
+            Quests.poll(n, true);
+            check(f, QuestLog.of(n).entry(Ch3Ground.Q_STONE).done, "the nest's stones should finish the sky stone");
+        } finally {
+            if (bird != null && bird.isAlive()) {
+                bird.discard();
+            }
+            Quests.forget(n, Ch3Ground.Q_STONE);
+            GleanerNest.forget(n);
+        }
+    }
+
     private static void trails(MinecraftServer server, FakePlayer p, List<String> f) {
         ServerLevel level = server.overworld();
         clean(p);
@@ -209,6 +246,7 @@ public final class Ch3GroundSelfTest {
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_STONE).done, "a worn diamond chestplate did not finish the sky stone");
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
+        nest(server, f);
 
         // 焼けた見張り塔: 頂の頁 → 職人に見せる
         Lore.unlock(p, Ch3Ground.PAGE_WATCH, false);

@@ -20,6 +20,33 @@
   },
   "stages": [
     {
+      "id": "trail",
+      "mode": "any",
+      "objectives": [
+        {
+          "id": "streaks",
+          "type": "signal",
+          "target": "ch3_glass_streak",
+          "count": 3,
+          "party": false
+        },
+        {
+          "id": "diamonds",
+          "type": "collect",
+          "target": "skyabyss:sky_stone",
+          "count": 5,
+          "party": false
+        },
+        {
+          "id": "chest",
+          "type": "collect",
+          "target": "skyabyss:sky_stone_chestplate",
+          "count": 1,
+          "party": false
+        }
+      ]
+    },
+    {
       "id": "dig",
       "mode": "any",
       "objectives": [

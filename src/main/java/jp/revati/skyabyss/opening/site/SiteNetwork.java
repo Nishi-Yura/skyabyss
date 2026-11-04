@@ -40,7 +40,7 @@ public final class SiteNetwork {
         }
     }
 
-    // 人ごとに送る (二章のあいだ、話す相手の鯨追いの目印は港を指す。story/ch2/IsanaHarbor)
+    // 人ごとに送る (二章・三章のあいだ、話す相手の鯨追いの目印は港・火のそばを指す。story/IsanaPost)
     public static void broadcast(MinecraftServer server) {
         for (net.minecraft.server.level.ServerPlayer p : jp.revati.skyabyss.util.Players.snapshot(server.getPlayerList().getPlayers())) {
             PacketDistributor.sendToPlayer(p, payload(server, p));
@@ -49,7 +49,7 @@ public final class SiteNetwork {
 
     public static SiteTargetsPayload payload(MinecraftServer server, net.minecraft.server.level.ServerPlayer player) {
         SiteTargetsPayload base = payload(server);
-        BlockPos harbor = jp.revati.skyabyss.story.ch2.IsanaHarbor.atHarbor(player) ? jp.revati.skyabyss.story.ch2.IsanaHarbor.spot(server) : null;
+        BlockPos harbor = jp.revati.skyabyss.story.IsanaPost.target(server, player);
         if (harbor == null) {
             return base;
         }
