@@ -477,7 +477,8 @@ public final class TideChapterSelfTest {
         perPlayer(level, d, f);
     }
 
-    // 大干潮は人ごとに一度ずつ: 近くの二章の人は同じものを迎え、迎えた人には二度起きず、まだの人には（前のが終わっていても）新しく起きる
+    // 大干潮は人ごとに一度ずつ: 杭のそばで貝を吹いた人が呼び (見回りだけでは始まらない)、近くの二章の人は同じものを迎え、
+    // 迎えた人には二度起きず、まだの人は（前のが終わっていても）自分で呼べる
     private static void perPlayer(ServerLevel level, TideEbb.EbbData d, List<String> f) {
         int sea = level.getSeaLevel();
         FakePlayer a = fake(level, "ebb_a");
@@ -491,7 +492,9 @@ public final class TideChapterSelfTest {
         b.setPos(X + 14, sea + 1, Z + 66);
         c.setPos(X + 12, sea + 1, Z + 62);
         TideEbb.tryTrigger(level, d, List.of(a));
-        check(f, d.runs.size() == 1 && d.witnessed.contains(a.getUUID()) && !d.witnessed.contains(b.getUUID()), "a chapter 2 player near the sea should get an ebb of their own");
+        check(f, !d.active() && !d.witnessed.contains(a.getUUID()), "being near the sea alone must not start the great ebb (the conch at the stakes calls it)");
+        check(f, TideEbb.call(level, d, a, X + 10, Z + 64, List.of(a)), "blowing the conch at the stakes should be handled");
+        check(f, d.runs.size() == 1 && d.witnessed.contains(a.getUUID()) && !d.witnessed.contains(b.getUUID()), "the caller should get an ebb of their own");
         TideEbb.tryTrigger(level, d, List.of(a, b));
         check(f, d.runs.size() == 1 && d.witnessed.contains(b.getUUID()), "a neighbour should share the running ebb, not start a second road: runs " + d.runs.size());
         TideEbb.tryTrigger(level, d, List.of(a, b));
@@ -501,7 +504,13 @@ public final class TideChapterSelfTest {
         TideEbb.tryTrigger(level, d, List.of(a, b));
         check(f, !d.active(), "a and b already had their ebb: no second one for them");
         TideEbb.tryTrigger(level, d, List.of(a, b, c));
-        check(f, d.runs.size() == 1 && d.witnessed.contains(c.getUUID()), "a player who has not had their ebb gets one even after an earlier ebb ended");
+        check(f, !d.active(), "c has not called yet: the watch alone must not start an ebb");
+        TideEbb.call(level, d, c, X + 10, Z + 64, List.of(a, b, c));
+        check(f, d.runs.size() == 1 && d.witnessed.contains(c.getUUID()), "a player who has not had their ebb can call one even after an earlier ebb ended");
+        // 道の先に着いた人: 潮の民の頁と、割れた船の名板 (伝承 ch2/ship_plate)
+        jp.revati.skyabyss.lore.Lore.lock(c, TideEbb.LORE_PLATE);
+        TideEbb.arrive(c);
+        check(f, jp.revati.skyabyss.lore.Lore.state(c).has(TideEbb.LORE_PLATE), "arriving at the end of the road should record the broken nameplate");
         TideEbb.EbbData back = TideEbb.EbbData.load(d.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
         check(f, back.witnessed.size() == 3 && back.witnessed.contains(a.getUUID()), "who had their ebb should survive save and load");
         TideEbb.end(level, d, List.of(a, b, c));

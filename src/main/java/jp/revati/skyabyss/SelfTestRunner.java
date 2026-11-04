@@ -403,6 +403,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("mastery", jp.revati.skyabyss.rpg.JobMasterySelfTest::run));
         // 組合の週 (旗取り・塔の順位。docs/design/54 の 5.1・3.5)。SKYABYSS_SELFTEST_ONLY="guild week"
         steps.add(Step.once("guild week", jp.revati.skyabyss.endgame.GuildWeekSelfTest::run));
+        // 二章のイサナの居場所 (港と鯨見。story/ch2/IsanaHarbor)。SKYABYSS_SELFTEST_ONLY="isana harbor"
+        steps.add(Step.once("isana harbor", jp.revati.skyabyss.story.ch2.IsanaHarborSelfTest::run));
         // 図鑑の完成の報い (docs/design/54 の 3.4)。SKYABYSS_SELFTEST_ONLY="codex"
         steps.add(Step.once("codex", jp.revati.skyabyss.endgame.CodexSelfTest::run));
         // 狩人の手帳 (倒した数・頁・慣れ・見た技)。SKYABYSS_SELFTEST_ONLY="hunter notes"

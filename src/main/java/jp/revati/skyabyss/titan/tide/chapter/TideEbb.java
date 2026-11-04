@@ -39,17 +39,24 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // 大干潮 (二章の中盤の出来事。01 の 4.2、08 の 2.8節)。巨神が現れたあと、海がいつもより遠くまで引き、浅い海底に遺跡の道が現れる。
 // 人ごとに一度ずつ (自分の大干潮)。安全に歩ける (水は膝まで。道の両側は壁で、海は元のまま。溺れず、敵も入らない)。道の先に潮の民の頁。
 //
-//   始まり   巨神が現れていて (TideKeeper の記録)、まだ自分の大干潮を迎えていない二章 (段階 1) の人が海から 96 ブロック以内にいて (時刻では閉じない。2026-10-27)、
-//            近くで途中の大干潮があればそれを共有し (道の枠から 128 ブロック以内)、なければその近くに道が通せる海があるとき (途中の道と重ならない所だけ)。道は岸の最初の水から沖へまっすぐ (北南東西のどれか) 24〜56 ブロック、幅 3、
+//   始まり   まだ自分の大干潮を迎えていない二章 (段階 1) の人が、岬の潮の杭 (Ch2Ground.STAKES) から 16 ブロック以内で潮見の貝を吹いたとき (callAtStakes。
+//            2026-11-04 の決めごと c2_play = read: 前は海の近くにいると勝手に始まった)。巨神が現れていること (TideKeeper の記録。時刻では閉じない)。
+//            杭の刻みのそばの巻き貝の絵と杭の札「貝の 声で / 島は 息を吐く」、浜の碑の句「島は待つ者のもとへ寄る」が手がかり。
+//            近くで途中の大干潮があればそれを共有し (道の枠から 128 ブロック以内。ほかの人が呼んだ大干潮に、近くの二章の人も加わる)、
+//            なければ杭の近くに道を通す (途中の道と重ならない所だけ)。道は岸の最初の水から沖へまっすぐ (北南東西のどれか) 24〜56 ブロック、幅 3、
 //            海底に沿って (一歩の差は 1 まで、水深 1〜10)。海底の高さに床 (遺跡の石)、両側と先に壁 (海面まで。上の段は窓)、
 //            中は膝まで (床の上 1 ブロック) だけ水を残し、上は空気。岸の側は陸を削って床へつなぐ
-//   途中     壁の中から敵を除く。道の先 (台) に 3 ブロック以内まで来た人に、潮の民の頁 (伝承 chapter1/ch2_ebb_page) と合図 ch2_ebb_walked
+//   途中     壁の中から敵を除く。道の先 (台) に 3 ブロック以内まで来た人に、潮の民の頁 (伝承 chapter1/ch2_ebb_page) と合図 ch2_ebb_walked。
+//            台の脇の床に割れた船の名板 (濡れた黒樫の上げ蓋)。着いた人に伝承 ch2/ship_plate (「勇」の一文字。港のイサナに見せる。story/ch2/IsanaHarbor)
 //   終わり   始まりから MAX_TICKS で、水が戻る。壁と中の水は元の海へ (床と壁の根もとは海の底の遺跡の道として残る)。
 //            中にいる人は岸へ戻す (水中呼吸つき)。終わる 400 tick 前に語りで知らせる
 //   保存     EbbData (オーバーワールド。途中の大干潮の列と、自分の大干潮を迎えた人の UUID)。再起動をまたぐ。途中で止まっても、次に動いたとき時刻が過ぎていれば水を戻す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideEbb {
     public static final String LORE_PAGE = "chapter1/ch2_ebb_page";
+    public static final String LORE_PLATE = "ch2/ship_plate";
+    // 潮見の貝を吹くと大干潮が来る、杭からの距離
+    public static final int STAKES_RADIUS = 16;
     public static final String SIGNAL_WALKED = "ch2_ebb_walked";
     public static final String QUEST = "ch2/ebb_road";
     // 大干潮が始まったとき二章の人に立てる会話の印 (クエストの start_when が見る)
@@ -234,6 +241,10 @@ public final class TideEbb {
         }
         level.setBlock(lateral(p, p.len - 1, -1, p.floor[p.len - 1] + 1), Blocks.SEA_LANTERN.defaultBlockState(), F);
         level.setBlock(lateral(p, p.len - 1, 1, p.floor[p.len - 1] + 1), Blocks.SEA_LANTERN.defaultBlockState(), F);
+        // 割れた船の名板 (台の脇の床。水に浸かった黒樫の上げ蓋を寝かせる)。水が戻ると海の底に沈む
+        int pi = Math.max(1, p.len - 3);
+        level.setBlock(lateral(p, pi, 1, p.floor[pi] + 1), Blocks.DARK_OAK_TRAPDOOR.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.TrapDoorBlock.WATERLOGGED, true), F);
         // 岸の側: 陸を削って床へなだらかにつなぐ (一歩 1 ブロックの上り)
         int stand = p.floor[0] + 1;
         for (int k = 1; k <= 4; k++) {
@@ -554,33 +565,85 @@ public final class TideEbb {
         if (first) {
             Notice.narrate(p, "message.skyabyss.ch2.ebb.page");
         }
+        if (Lore.unlock(p, LORE_PLATE, true)) {
+            jp.revati.skyabyss.story.ch1.Tasks.later(60, () -> Notice.narrate(p, "message.skyabyss.ch2.ebb.plate"));
+        }
         Quests.signal(p, SIGNAL_WALKED);
         return first;
     }
 
-    // まだ自分の大干潮を迎えていない二章の人に、大干潮を迎えさせる (見回りごと)。
-    // 近くで途中のものがあればそれを共有し、なければ新しく道を通す (途中の道と重ならない所だけ)
+    // まだ自分の大干潮を迎えていない二章の人が、途中の大干潮の近くにいれば、それを迎える (見回りごと)。
+    // 新しい大干潮は、ここでは始めない (杭のそばで潮見の貝を吹いたときだけ。callAtStakes)
     static void tryTrigger(ServerLevel level, EbbData data) {
         tryTrigger(level, data, Players.snapshot(level.players()));
     }
 
     static void tryTrigger(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
-        if (!mayBegin(level, data)) {
+        if (data.runs.isEmpty()) {
             return;
         }
         for (ServerPlayer p : players) {
-            if (!eligible(p) || data.witnessed.contains(p.getUUID())) {
-                continue;
-            }
-            if (runNear(data, p) != null) {
+            if (eligible(p) && !data.witnessed.contains(p.getUUID()) && runNear(data, p) != null) {
                 witness(data, p);
-                continue;
-            }
-            Plan plan = plan(level, p.getBlockX(), p.getBlockZ());
-            if (plan != null) {
-                begin(level, data, plan, players);
             }
         }
+    }
+
+    // 岬の潮の杭 (この人から STAKES_RADIUS 以内の、建った杭の場所)。無ければ null
+    @Nullable
+    static BlockPos stakesNear(ServerPlayer p) {
+        for (jp.revati.skyabyss.opening.site.ChapterSites.Site s : jp.revati.skyabyss.opening.site.ChapterSites.sites(p.server, jp.revati.skyabyss.story.ch2.Ch2Ground.STAKES)) {
+            if (s.built() && s.pos().distSqr(p.blockPosition()) <= (double) STAKES_RADIUS * STAKES_RADIUS) {
+                return s.pos();
+            }
+        }
+        return null;
+    }
+
+    // 潮見の貝を吹いた: 杭のそばの、まだ自分の大干潮を迎えていない二章の人なら、大干潮を呼ぶ (始めたか、知らせを出したら true。
+    // false ならふつうの貝として島を呼ぶ)
+    public static boolean callAtStakes(ServerPlayer p) {
+        ServerLevel level = p.serverLevel();
+        if (level.dimension() != Level.OVERWORLD || !eligible(p)) {
+            return false;
+        }
+        BlockPos stakes = stakesNear(p);
+        if (stakes == null) {
+            return false;
+        }
+        EbbData data = EbbData.get(level);
+        if (data.witnessed.contains(p.getUUID())) {
+            return false;
+        }
+        return call(level, data, p, stakes.getX(), stakes.getZ(), Players.snapshot(level.players()));
+    }
+
+    // (x, z) の近くで大干潮を呼ぶ (自己テストからも)。途中のものが近くにあれば、それを迎える
+    static boolean call(ServerLevel level, EbbData data, ServerPlayer p, int x, int z, java.util.Collection<? extends ServerPlayer> players) {
+        if (!mayBegin(level, data)) {
+            Notice.narrate(p, "message.skyabyss.ch2.ebb.no_island");
+            return true;
+        }
+        if (runNear(data, p) != null) {
+            witness(data, p);
+            return true;
+        }
+        Plan plan = plan(level, x, z);
+        if (plan == null) {
+            plan = plan(level, p.getBlockX(), p.getBlockZ());
+        }
+        java.util.List<ServerPlayer> with = new ArrayList<>(players);
+        if (!with.contains(p)) {
+            with.add(p);
+        }
+        if (plan == null || !begin(level, data, plan, with)) {
+            Notice.narrate(p, "message.skyabyss.ch2.ebb.no_road");
+            return true;
+        }
+        if (!data.witnessed.contains(p.getUUID())) {
+            witness(data, p);
+        }
+        return true;
     }
 
     @SubscribeEvent

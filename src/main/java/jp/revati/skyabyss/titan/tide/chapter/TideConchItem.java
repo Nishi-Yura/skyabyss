@@ -135,6 +135,11 @@ public class TideConchItem extends Item implements jp.revati.skyabyss.pouch.Pouc
     // 吹く。結果を返す (自己テストが使う)。巨神がいない・海から遠い場合は null
     @Nullable
     static TideShellEntity.RequestResult blow(ServerPlayer sp, ServerLevel server) {
+        // 岬の潮の杭のそばで吹くと、まだの二章の人には大干潮が来る (TideEbb.callAtStakes。島は呼ばない)
+        if (TideEbb.callAtStakes(sp)) {
+            server.playSound(null, sp.getX(), sp.getY(), sp.getZ(), TideChapterSetup.CONCH_FAR.get(), SoundSource.PLAYERS, 1.6f, 0.8f);
+            return null;
+        }
         TideShellEntity titan = server.dimension() == Level.OVERWORLD ? TideKeeper.KEEPER.current(server) : null;
         if (titan == null) {
             Notice.bar(sp, Component.translatable("message.skyabyss.ch2.conch.none"));

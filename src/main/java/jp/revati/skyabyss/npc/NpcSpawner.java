@@ -104,6 +104,10 @@ public final class NpcSpawner {
         if (n.getType() != NpcSetup.WHALE_CHASER.get() || !jp.revati.skyabyss.world.continent.ContinentPois.in(level)) {
             return false;
         }
+        // 二章の港のイサナ (story/ch2/IsanaHarbor) も残す
+        if (n.getTags().contains(jp.revati.skyabyss.story.ch2.IsanaHarbor.TAG)) {
+            return true;
+        }
         BlockPos spot = jp.revati.skyabyss.world.continent.ContinentTowns.chaserSpot(level.getServer());
         return spot != null && n.blockPosition().distSqr(spot) <= SEARCH * SEARCH;
     }
