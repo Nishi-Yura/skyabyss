@@ -3,6 +3,7 @@ package jp.revati.skyabyss.client.notice;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.client.gui.Font;
@@ -11,23 +12,18 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
-// 知らせの記録 (N)。流れた語り・獲得・場所の名前を、時刻つきで新しい順に読み返す窓。クエストログと同じ暗い石板の色
-// 2026-10-22 の部屋の見直し: 窓は画面に合わせて広げ、字の行は間をあけ、送りは目盛りつき (ホイール・つまみ・キー)
+// 知らせの記録 (N)。流れた語り・獲得・場所の名前を、時刻つきで新しい順に読み返す窓。
+// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 中身は一覧一つ (時刻の列 34・行 13)、下の段に動かし方
 public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int MAX_W = 380;
-    private static final int MAX_H = 260;
-    private static final int ROW_H = 12;
-    private static final int TIME_W = 40;
-    private static final int PANEL = 0xFA101318;
-    private static final int EDGE = 0xFF2E5552;
+    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
+    private static final Golden.Box BODY = LAYOUT.body();
+    private static final int ROW_H = Golden.ROW;
+    private static final int TIME_W = Golden.S34;
     private static final int EDGE_IN = 0xFF17302F;
-    private static final int TEAL = 0xFF7FD6D0;
-    private static final int SOFT = 0xFF8C8CA0;
+    private static final int TEAL = 0xFF000000 | Golden.TEAL;
+    private static final int SOFT = 0xFF000000 | Golden.SOFT;
     private final ScrollPanel list = new ScrollPanel(ROW_H * 3);
-    private int left;
-    private int top;
-    private int w;
-    private int h;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private record Row(String time, int color, FormattedCharSequence text) {
     }
@@ -57,31 +53,28 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     private void layout() {
-        w = Math.min(MAX_W, width - 24);
-        h = Math.min(MAX_H, height - 24);
-        left = (width - w) / 2;
-        top = (height - h) / 2;
-        list.setViewport(left + 10, top + 27, w - 20, h - 27 - 20);
+        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
+        list.setViewport(BODY.x() + Golden.S5, BODY.y() + 2, BODY.w() - Golden.S5 - 2, BODY.h() - 4);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        return list.mouseScrolled(mx, my, dy) || super.mouseScrolled(mx, my, dx, dy);
+        return list.mouseScrolled(fit.x(mx), fit.y(my), dy) || super.mouseScrolled(mx, my, dx, dy);
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        return list.mouseClicked(mx, my, button) || super.mouseClicked(mx, my, button);
+        return list.mouseClicked(fit.x(mx), fit.y(my), button) || super.mouseClicked(mx, my, button);
     }
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        return list.mouseDragged(mx, my, button, dx, dy) || super.mouseDragged(mx, my, button, dx, dy);
+        return list.mouseDragged(fit.x(mx), fit.y(my), button, dx / fit.scale(), dy / fit.scale()) || super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
-        return list.mouseReleased(mx, my, button) || super.mouseReleased(mx, my, button);
+        return list.mouseReleased(fit.x(mx), fit.y(my), button) || super.mouseReleased(mx, my, button);
     }
 
     @Override
@@ -91,17 +84,18 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
-        // 背景 (ぼかさない) と枠と中身を描く。クエストログと同じ流儀
+        // 背景 (ぼかさない) と板と中身を描く。板は窓に合わせた変換 (画素ちょうど) の中で
         layout();
         g.fill(0, 0, width, height, 0x80000000);
-        g.fill(left, top, left + w, top + h, PANEL);
-        g.renderOutline(left, top, w, h, EDGE);
-        g.drawString(font, title, left + 10, top + 8, TEAL, false);
-        g.fill(left + 8, top + 20, left + w - 8, top + 21, EDGE);
+        fit.begin(g);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.recess(g, BODY);
+        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), TEAL, false);
         List<Row> rows = rows(font, list.width() - TIME_W);
         list.setContentHeight(rows.size() * ROW_H);
         if (rows.isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.notice.log_empty"), left + 10, top + 30, SOFT, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.notice.log_empty"), BODY.x() + Golden.S8, Golden.textY(BODY.y() + 2, ROW_H), SOFT, false);
         }
         list.begin(g);
         for (int i = 0; i < rows.size(); i++) {
@@ -110,17 +104,20 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
                 continue;
             }
             Row r = rows.get(i);
-            g.drawString(font, r.time(), left + 10, y + 2, SOFT, false);
-            g.drawString(font, r.text(), left + 10 + TIME_W, y + 2, r.color(), false);
+            int ty = Golden.textY(y, ROW_H);
+            g.drawString(font, r.time(), list.x(), ty, SOFT, false);
+            g.drawString(font, r.text(), list.x() + TIME_W, ty, r.color(), false);
         }
         list.end(g);
         list.drawBar(g, EDGE_IN, 0x887FD6D0);
-        g.drawString(font, Component.translatable("gui.skyabyss.notice.log_hint"), left + 10, top + h - 11, SOFT, false);
+        Golden.Box foot = LAYOUT.foot();
+        g.drawString(font, Component.translatable("gui.skyabyss.notice.log_hint"), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()), 0xFF000000 | Golden.DIM, false);
+        fit.end(g);
     }
 
     @Override
     public int[] textBounds() {
         layout();
-        return new int[] {left, top, w, h};
+        return fit.screenRect(0, 0, Golden.L_W, Golden.L_H);
     }
 }

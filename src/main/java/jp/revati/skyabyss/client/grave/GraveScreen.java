@@ -3,6 +3,7 @@ package jp.revati.skyabyss.client.grave;
 import java.util.List;
 
 import jp.revati.skyabyss.grave.GraveNetwork;
+import jp.revati.skyabyss.client.ui.Golden;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,29 +16,25 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 語り部に頼む墓の一覧の画面。古い順に、場所・品の数・経験値・経った時間を一行ずつ並べ、「呼び戻す」で一つ選ぶ。
 // 中身はサーバーが決めて送る (GraveNetwork.Open)。選ぶとサーバーが確かめて救い、残りの一覧を送り返す (空なら閉じる)。
-// 2026-10-22 の部屋の見直し: 窓は画面に合わせて広がり、行の数も画面の高さに合わせる。入りきらない分は目盛りつきの送り (ホイール・キー)
+// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 一行目に分け前、その下に墓を一つずつ欄に (高さ 34)、下の段に手引きと頁。
+// 入りきらない分はホイールとキーで送る
 public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int MAX_W = 380;
-    private static final int ROW_H = 28;
-    private static final int MAX_ROWS = 10;
-    private static final int PANEL = 0xFA15120E;
-    private static final int EDGE = 0xFF6B5534;
-    private static final int EDGE_IN = 0xFF3A2E1C;
-    private static final int PAPER = 0x30F0E2C0;
-    private static final int PAPER_HOVER = 0x50F0E2C0;
-    private static final int TEAL = 0xFF7FD6D0;
-    private static final int GOLD = 0xFFF2C14E;
-    private static final int TEXT = 0xFFE9E3D4;
-    private static final int SOFT = 0xFF9C9480;
-    private static final int DIM = 0xFF5F5848;
+    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
+    private static final Golden.Box BODY = LAYOUT.body();
+    private static final int ROW_H = Golden.S34;
+    private static final int ROW_STEP = ROW_H + Golden.S5;
+    private static final int ROWS_Y = BODY.y() + Golden.ROW + Golden.S5;
+    private static final int MAX_ROWS = (BODY.bottom() - ROWS_Y + Golden.S5) / ROW_STEP;
+    private static final int TEAL = 0xFF000000 | Golden.TEAL;
+    private static final int GOLD = 0xFF000000 | Golden.GOLD;
+    private static final int TEXT = 0xFF000000 | Golden.TEXT;
+    private static final int SOFT = 0xFF000000 | Golden.SOFT;
+    private static final int DIM = 0xFF000000 | Golden.DIM;
 
     private GraveNetwork.Open data;
     private int scroll;
-    private int w;
-    private int left;
-    private int top;
-    private int panelH;
     private int shown;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     public GraveScreen(GraveNetwork.Open data) {
         super(Component.translatable("gui.skyabyss.grave.title"));
@@ -61,29 +58,29 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
-    // 画面の高さに入る行の数 (上の題と下の注の分を除く)
     private int maxRows() {
-        return Math.max(2, Math.min(MAX_ROWS, (height - 130) / ROW_H));
+        return MAX_ROWS;
     }
 
     private int rows() {
         return Math.min(maxRows(), Math.max(1, data.entries().size() - scroll));
     }
 
+    private static Golden.Box row(int i) {
+        return new Golden.Box(BODY.x(), ROWS_Y + i * ROW_STEP, BODY.w() - Golden.S8, ROW_H);
+    }
+
     @Override
     protected void init() {
-        w = Math.min(MAX_W, width - 16);
+        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
         shown = rows();
-        panelH = 54 + shown * ROW_H + 20;
-        left = (width - w) / 2;
-        top = Math.max(4, (height - panelH) / 2);
         for (int i = 0; i < shown && scroll + i < data.entries().size(); i++) {
             GraveNetwork.Entry e = data.entries().get(scroll + i);
-            int y = top + 46 + i * ROW_H;
+            Golden.Box r = row(i);
             addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.grave.pick"), b -> {
                 b.active = false;
                 PacketDistributor.sendToServer(new GraveNetwork.Pick(e.id()));
-            }).bounds(left + w - 66, y + 5, 56, 16).build());
+            }).bounds(r.right() - Golden.S8 - Golden.S55, r.y() + (ROW_H - Golden.BTN) / 2, Golden.S55, Golden.BTN).build());
         }
     }
 
@@ -119,49 +116,79 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
     }
 
     @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        return super.mouseClicked(fit.x(mx), fit.y(my), button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        return super.mouseReleased(fit.x(mx), fit.y(my), button);
+    }
+
+    @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         g.fill(0, 0, width, height, 0x80000000);
+    }
+
+    @Override
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
         draw(g, Minecraft.getInstance().font, mouseX, mouseY);
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        fit.end(g);
     }
 
     private void draw(GuiGraphics g, Font font, int mouseX, int mouseY) {
-        g.fill(left, top, left + w, top + panelH, PANEL);
-        g.renderOutline(left, top, w, panelH, EDGE);
-        g.renderOutline(left + 2, top + 2, w - 4, panelH - 4, EDGE_IN);
-        g.drawString(font, title, left + 10, top + 8, GOLD, false);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.Box head = LAYOUT.head();
+        g.drawString(font, title, head.x() + Golden.S5, Golden.textY(head.y(), head.h()), GOLD, false);
         Component count = Component.translatable("gui.skyabyss.grave.count", data.entries().size());
-        g.drawString(font, count, left + w - 10 - font.width(count), top + 8, TEAL, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.grave.share", data.percent()), left + 10, top + 22, SOFT, false);
-        g.fill(left + 8, top + 36, left + w - 8, top + 37, EDGE_IN);
+        g.drawString(font, count, head.right() - Golden.S5 - font.width(count), Golden.textY(head.y(), head.h()), TEAL, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.grave.share", data.percent()), BODY.x() + Golden.S5,
+                Golden.textY(BODY.y(), Golden.ROW), BODY.w() - Golden.S13, SOFT, false);
         for (int i = 0; i < shown && scroll + i < data.entries().size(); i++) {
-            drawRow(g, font, data.entries().get(scroll + i), top + 46 + i * ROW_H, mouseX, mouseY);
+            drawRow(g, font, data.entries().get(scroll + i), row(i), mouseX, mouseY);
         }
+        Golden.Box foot = LAYOUT.foot();
+        int fy = Golden.textY(foot.y(), foot.h());
         if (data.entries().size() > shown) {
             // 送りの目盛り (行の数に対する、見えている所)
-            int track = shown * ROW_H;
+            int track = shown * ROW_STEP - Golden.S5;
             int total = data.entries().size();
             int thumb = Math.max(8, track * shown / total);
             int max = Math.max(1, total - shown);
-            int ty = top + 46 + (track - thumb) * scroll / max;
-            g.fill(left + w - 5, top + 46, left + w - 3, top + 46 + track, 0x40000000);
-            g.fill(left + w - 5, ty, left + w - 3, ty + thumb, 0x90F2C14E);
+            int bx = BODY.right() - 3;
+            int ty = ROWS_Y + (track - thumb) * scroll / max;
+            g.fill(bx, ROWS_Y, bx + 2, ROWS_Y + track, 0x40000000);
+            g.fill(bx, ty, bx + 2, ty + thumb, 0x90F2C14E);
             String page = (scroll + 1) + "-" + Math.min(data.entries().size(), scroll + shown) + " / " + data.entries().size();
-            g.drawString(font, page, left + w - 10 - font.width(page), top + panelH - 15, DIM, false);
+            g.drawString(font, page, foot.right() - Golden.S5 - font.width(page), fy, DIM, false);
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.grave.footer"), left + 10, top + panelH - 15, DIM, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.grave.footer"), foot.x() + Golden.S5, fy, DIM, false);
     }
 
-    private void drawRow(GuiGraphics g, Font font, GraveNetwork.Entry e, int y, int mouseX, int mouseY) {
-        boolean hover = mouseX >= left + 8 && mouseX < left + w - 8 && mouseY >= y && mouseY < y + ROW_H - 3;
-        g.fill(left + 8, y, left + w - 8, y + ROW_H - 3, hover ? PAPER_HOVER : PAPER);
-        g.fill(left + 8, y, left + 10, y + ROW_H - 3, TEAL);
+    private void drawRow(GuiGraphics g, Font font, GraveNetwork.Entry e, Golden.Box r, int mouseX, int mouseY) {
+        Golden.recess(g, r);
+        if (r.contains(mouseX, mouseY)) {
+            g.fill(r.x() + 1, r.y() + 1, r.right() - 1, r.bottom() - 1, 0x181E5552);
+        }
+        g.fill(r.x() + 1, r.y() + 1, r.x() + 3, r.bottom() - 1, TEAL);
         // 一行目: 場所。二行目: 品の数・経験値・経った時間
+        int x = r.x() + Golden.S8;
+        int tw = r.w() - Golden.S8 - Golden.S55 - Golden.S13;
         String place = Component.translatable("gui.skyabyss.grave.place", dimensionName(e.dimension()), e.x(), e.y(), e.z()).getString();
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(place), left + 14, y + 4, w - 96, TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(place), x, Golden.textY(r.y() + 4, Golden.ROW), tw, TEXT, false);
         String contents = Component.translatable("gui.skyabyss.grave.contents", e.items(), e.xp()).getString();
         String age = age(e.age());
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(contents), left + 14, y + 15, w - 74 - font.width(age) - 14 - 6, SOFT, false);
-        g.drawString(font, age, left + w - 74 - font.width(age), y + 15, SOFT, false);
+        int ay = Golden.textY(r.y() + 4 + Golden.ROW, Golden.ROW);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(contents), x, ay, tw - font.width(age) - Golden.S8, SOFT, false);
+        g.drawString(font, age, x + tw - font.width(age), ay, SOFT, false);
     }
 
     // 経った時間 (墓のできた tick からの差。20 tick = 1 秒)
@@ -201,6 +228,6 @@ public class GraveScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     @Override
     public int[] textBounds() {
-        return new int[] {left, top, w, panelH};
+        return fit.screenRect(0, 0, Golden.L_W, Golden.L_H);
     }
 }
