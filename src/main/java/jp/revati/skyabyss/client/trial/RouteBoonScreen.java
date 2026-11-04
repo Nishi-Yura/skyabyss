@@ -6,6 +6,7 @@ import org.lwjgl.glfw.GLFW;
 
 import jp.revati.skyabyss.client.ui.TextStyle;
 import jp.revati.skyabyss.trial.RouteBoons;
+import jp.revati.skyabyss.client.ui.Golden;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,8 +17,10 @@ import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 挑戦の加護を選ぶ画面 (trial/RouteBoons)。試練の板と同じ石板の枠に、二枚の札。
-// 押す (または 1 / 2) と選んで閉じる。Esc は閉じるだけ (残りの秒がたつとサーバーが一つ目に決める)
+// 押す (または 1 / 2) と選んで閉じる。Esc は閉じるだけ (残りの秒がたつとサーバーが一つ目に決める)。
+// 板は黄金比の中の板 (288x178。client/ui/Golden。docs/design/56): 見出しの帯に題と残りの秒、中身に同じ幅の札二枚 (説明は行 13)、下の段に手引き
 public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
+    private static final Golden.Layout LAYOUT = Golden.Layout.medium(Golden.FOOT);
     private static final int BG = 0x07090E;
     private static final int PANEL = 0x10131A;
     private static final int CARD = 0x171B25;
@@ -26,11 +29,11 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     private static final int TEXT = 0xE6E8EE;
     private static final int DIM = 0x8C98A4;
 
-    private static final int W = 300;
-    private static final int H = 128;
-    private static final int CARD_W = 134;
-    private static final int CARD_H = 60;
-    private static final int CARD_Y = 40;
+    private static final int W = Golden.M_W;
+    private static final int H = Golden.M_H;
+    private static final int CARD_W = (LAYOUT.body().w() - Golden.GAP) / 2;
+    private static final int CARD_H = LAYOUT.body().h();
+    private static final int CARD_Y = LAYOUT.body().y();
 
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private final RouteBoons.Boon[] boons;
@@ -93,7 +96,7 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     private static int cardX(int i) {
-        return 12 + i * (CARD_W + 8);
+        return LAYOUT.body().x() + i * (CARD_W + Golden.GAP);
     }
 
     private static int cardAt(double mx, double my) {
@@ -123,36 +126,49 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         Font font = Minecraft.getInstance().font;
         g.fill(0, 0, width, height, argb(0.55f, BG));
-        fit.fit(width, height, W, H, 2.5f, 0.5f);
+        fit.fit(width, height, W, H, 3f, 0.5f);
         hover = cardAt(fit.x(screenX), fit.y(screenY));
         fit.begin(g);
-        frame(g, 0, 0, W, H, 0x3A4A58, PANEL);
-        TextStyle.HEADING.drawLeft(g, font, Component.translatable("gui.skyabyss.boon.title"), 12, 9, 1f, GOLD);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.Box head = LAYOUT.head();
+        g.drawString(font, Component.translatable("gui.skyabyss.boon.title"), head.x() + Golden.S5, Golden.textY(head.y(), head.h()), argb(1f, GOLD), false);
         int left = (int) Math.max(0, Math.ceil((until - System.currentTimeMillis()) / 1000.0));
         Component sub = Component.translatable("gui.skyabyss.boon.choose", left);
-        g.drawString(font, sub, W - 12 - font.width(sub), 14, argb(1f, TEAL), false);
+        g.drawString(font, sub, head.right() - Golden.S5 - font.width(sub), Golden.textY(head.y(), head.h()), argb(1f, TEAL), false);
         for (int i = 0; i < 2; i++) {
             RouteBoons.Boon b = boons[i];
             int x = cardX(i);
             boolean on = hover == i;
-            frame(g, x, CARD_Y, CARD_W, CARD_H, on ? GOLD : 0x2C3846, on ? 0x2A2618 : CARD);
+            Golden.recess(g, new Golden.Box(x, CARD_Y, CARD_W, CARD_H));
+            if (on) {
+                Golden.outline(g, x, CARD_Y, x + CARD_W, CARD_Y + CARD_H, argb(1f, GOLD));
+                g.fill(x + 1, CARD_Y + 1, x + CARD_W - 1, CARD_Y + CARD_H - 1, argb(0.08f, GOLD));
+            }
             // 押す数字の札
-            frame(g, x + 6, CARD_Y + 6, 14, 14, on ? GOLD : 0x4A5A68, 0x0E1118);
+            int nx = x + Golden.S5;
+            int ny = CARD_Y + Golden.S5;
+            Golden.outline(g, nx, ny, nx + Golden.S13, ny + Golden.S13, argb(1f, on ? GOLD : 0x4A5A68));
             String n = String.valueOf(i + 1);
-            g.drawString(font, n, x + 13 - font.width(n) / 2, CARD_Y + 9, argb(1f, on ? GOLD : TEXT), false);
-            g.drawString(font, Component.translatable(b.key()), x + 26, CARD_Y + 9, argb(1f, GOLD), true);
-            List<FormattedCharSequence> lines = font.split(Component.translatable(b.key() + ".desc"), CARD_W - 16);
-            for (int l = 0; l < Math.min(3, lines.size()); l++) {
-                g.drawString(font, lines.get(l), x + 8, CARD_Y + 28 + l * 10, argb(1f, TEXT), false);
+            g.drawString(font, n, nx + 7 - font.width(n) / 2, Golden.textY(ny, Golden.S13), argb(1f, on ? GOLD : TEXT), false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(b.key()), nx + Golden.S13 + Golden.S5, Golden.textY(ny, Golden.S13),
+                    CARD_W - 2 * Golden.S5 - Golden.S13 - Golden.S5, argb(1f, GOLD), true);
+            int ly = ny + Golden.S13 + Golden.S5;
+            List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(b.key() + ".desc"), CARD_W - 2 * Golden.S8);
+            for (int l = 0; l < lines.size() && ly + Golden.ROW <= CARD_Y + CARD_H - 2; l++) {
+                g.drawString(font, lines.get(l), x + Golden.S8, Golden.textY(ly, Golden.ROW), argb(1f, TEXT), false);
+                ly += Golden.ROW;
             }
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.boon.help"), 12, H - 18, argb(1f, DIM), false);
+        Golden.Box foot = LAYOUT.foot();
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.boon.help"), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()),
+                foot.w() - Golden.S13, argb(1f, Golden.DIM), false);
         fit.end(g);
     }
 
     @Override
     public int[] textBounds() {
-        fit.fit(width, height, W, H, 2.5f, 0.5f);
+        fit.fit(width, height, W, H, 3f, 0.5f);
         return fit.screenRect(0, 0, W, H);
     }
 }
