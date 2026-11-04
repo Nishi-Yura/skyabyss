@@ -88,6 +88,13 @@ public class CircuitStake extends CloudMob {
         }
     }
 
+    // 巡り路を終えた・次の課題へ移ったときは discard() で消すので die() を通らない。帯はここでも外す (残ると画面に 100% の帯が出たままになった)
+    @Override
+    public void remove(RemovalReason reason) {
+        super.remove(reason);
+        bar.removeAllPlayers();
+    }
+
     // 帯: 体力の割合と、近く (40 ブロック) の人への出し入れ
     private void updateBar(ServerLevel sl) {
         bar.setProgress(Math.max(0f, getHealth() / getMaxHealth()));

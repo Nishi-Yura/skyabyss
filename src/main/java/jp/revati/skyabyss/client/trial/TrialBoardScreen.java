@@ -263,7 +263,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         }
     }
 
-    // いまの三つ: 同じ幅の三列の札。上から 枠の絵と名前・類と段・説明 (二行)・修飾 (一つずつ一行)・状態
+    // いまの三つ: 同じ幅の三列の札。上から 枠の絵と名前・類と段・説明 (入るだけ。あふれは「…」)・修飾 (一つずつ一行)・状態
     private void renderNow(GuiGraphics g, Font font) {
         int colW = (CONTENT.w() - 2 * Golden.GAP) / 3;
         int i = 0;
@@ -291,15 +291,23 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             String st = stars(def.tier());
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, kind, tx + 15, Golden.textY(ky, ROW), tw - 15 - font.width(st) - 4, argb(1f, TEAL), false);
             g.drawString(font, st, tx + tw - font.width(st), Golden.textY(ky, ROW), argb(1f, GOLD), false);
-            // 説明 (二行まで)
+            // 説明: 修飾の札と状態の行を残して入るだけ。入りきらなければ最後の行に「…」 (前は二行で切って、下に空きが残った)
             int dy = ky + ROW + 2;
-            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw);
-            for (int l = 0; l < Math.min(2, dl.size()); l++) {
-                g.drawString(font, dl.get(l), tx, Golden.textY(dy + l * ROW, ROW), argb(1f, DIM), false);
+            int bottomRow = y + h - 2 - ROW;
+            int chipsH = card.chips().isEmpty() ? ROW : card.chips().size() * 16;
+            int maxLines = Math.max(2, (bottomRow - 3 - chipsH - dy) / ROW);
+            String more = "…";
+            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw - font.width(more));
+            int shown = Math.min(maxLines, dl.size());
+            for (int l = 0; l < shown; l++) {
+                int ly = Golden.textY(dy + l * ROW, ROW);
+                g.drawString(font, dl.get(l), tx, ly, argb(1f, DIM), false);
+                if (l == shown - 1 && dl.size() > shown) {
+                    g.drawString(font, more, tx + font.width(dl.get(l)), ly, argb(1f, DIM), false);
+                }
             }
             // 修飾の札 (一つずつ一行)
-            int cy = dy + 2 * ROW + 3;
-            int bottomRow = y + h - 2 - ROW;
+            int cy = dy + shown * ROW + 3;
             if (card.chips().isEmpty()) {
                 g.drawString(font, Component.translatable("trial.skyabyss.chip.plain"), tx, Golden.textY(cy, ROW), argb(1f, DIM), false);
             }

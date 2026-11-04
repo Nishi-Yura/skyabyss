@@ -1,0 +1,67 @@
+# 2026-11-04: 試練の板の説明 (入るだけ)、巡り路を終えたあと淵の杭の帯が残らないこと、都の案内人の一覧。大陸の世界で 1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_places2.txt -PshotsName=golden_places2
+world golden_places2 continent
+size 1280 720
+timeout 2400
+render 8
+clouds off
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss level set @p 30
+cmd effect give @s resistance 1200 4 true
+cmd skyabyss circuit reset
+chat clear
+hud on
+# 1. 試練の板
+cmd skyabyss dev trial board stone_whale
+wait 30
+shot trial_board
+close
+wait 5
+# 2. 巡り路: 課題を進めずに終える (杭の課題で止めても帯が残らないこと)
+cmd tp @s -112 150 -884 150 50
+waitchunks 400
+wait 200
+cmd skyabyss circuit start 2
+wait 40
+cmd skyabyss circuit goto
+waitchunks 300
+wait 80
+shot circuit_task
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 60
+shot circuit_task2
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 60
+shot circuit_task3
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 60
+shot circuit_task4
+cmd skyabyss circuit end
+wait 200
+close
+wait 40
+shot circuit_after
+# 3. 都の案内人の一覧 (都を建ててから広場へ)
+cmd skyabyss dev opening build
+wait 200
+cmd skyabyss facility guide go plaza
+waitchunks 400
+wait 300
+chat clear
+cmd skyabyss facility guide
+wait 30
+shot town_guide
+close
