@@ -370,9 +370,9 @@ public abstract class HeartDomain {
         removeNodes(level);
         if (shattered) {
             stun = STUN_TICKS;
-            // 主ごとの仕掛けを解いた: 大きな隙 (docs/design/47 の 2.1)
+            // 主ごとの仕掛けを解いた: 崩しゲージが半分溜まり、大きな隙 (docs/design/47 の 2.1)
             if (heart instanceof net.minecraft.world.entity.LivingEntity le) {
-                jp.revati.skyabyss.combat.BossOpenings.open(le, jp.revati.skyabyss.combat.BossOpenings.BIG_OPEN_TICKS);
+                jp.revati.skyabyss.combat.BreakGauge.solved(le);
             }
             // 砕けた瞬間、心臓がひるむ (2 秒の動き。傷の倍率や技の間は変えない)
             if (heart instanceof jp.revati.skyabyss.entity.GuardMob g && heart.isAlive()) {

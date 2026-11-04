@@ -88,7 +88,7 @@ public final class CombatRulesSelfTest {
                     f.add("durability dropped on a titan back: sword " + sword.getDamageValue() + ", chestplate " + chest.getDamageValue());
                 }
             }
-            // 構えと隙・身構え (docs/design/47 の 2.1 と 3)
+            // 崩しゲージ (docs/design/47 の 2.1)。ふつうの敵には倍率なし (身構えは外した)
             Zombie boss = EntityType.ZOMBIE.create(over);
             Zombie foe = EntityType.ZOMBIE.create(over);
             if (boss != null && foe != null) {
@@ -99,29 +99,60 @@ public final class CombatRulesSelfTest {
                 over.addFreshEntity(boss);
                 over.addFreshEntity(foe);
                 BossOpenings.plantedForTest = e -> e == boss;
+                // 一撃ではゲージが満ちない大きさに
+                boss.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);
+                boss.setHealth(200);
                 try {
-                    if (BossOpenings.multiplier(boss, false) != BossOpenings.GUARD) {
-                        f.add("a guarded boss should take x" + BossOpenings.GUARD);
+                    if (BossOpenings.multiplier(boss) != BreakGauge.NORMAL || BossOpenings.multiplier(foe) != 1f) {
+                        f.add("a boss should take x" + BreakGauge.NORMAL + " and a plain foe x1 (" + BossOpenings.multiplier(boss) + ", "
+                                + BossOpenings.multiplier(foe) + ")");
                     }
-                    BossOpenings.moveEnded(boss);
-                    if (BossOpenings.multiplier(boss, false) != BossOpenings.OPEN) {
-                        f.add("a boss should be open (x" + BossOpenings.OPEN + ") right after its move lands");
+                    for (int i = 0; i < 8; i++) {
+                        foe.invulnerableTime = 0;
+                        foe.setHealth(foe.getMaxHealth());
+                        foe.hurt(over.damageSources().playerAttack(a), 1f);
                     }
+                    if (BossOpenings.multiplier(foe) != 1f) {
+                        f.add("a foe hit many times should not brace any more");
+                    }
+                    // 技・矢の傷で溜まる (×SKILL)。隙のあいだは ×OPENING
                     float hp = boss.getHealth();
                     boss.invulnerableTime = 0;
-                    boss.hurt(over.damageSources().playerAttack(a), 4f);
-                    float open = hp - boss.getHealth();
-                    if (open < 4f * BossOpenings.OPEN * 0.85f) {
-                        f.add("an open boss lost only " + open + " from a 4 hit");
+                    boss.hurt(over.damageSources().playerAttack(a), 2f);
+                    double plain = BreakGauge.fill(boss);
+                    if (hp - boss.getHealth() > 2f * BreakGauge.NORMAL + 0.01f || plain <= 0) {
+                        f.add("a boss hit should deal x" + BreakGauge.NORMAL + " and fill the gauge (lost " + (hp - boss.getHealth()) + ", fill " + plain + ")");
                     }
-                    for (int i = 0; i < BossOpenings.BRACE_HITS; i++) {
-                        BossOpenings.multiplier(foe, true);
+                    BossOpenings.moveEnded(boss);
+                    boss.setHealth(boss.getMaxHealth());
+                    boss.invulnerableTime = 0;
+                    boss.hurt(over.damageSources().playerAttack(a), 1f);
+                    double opened = BreakGauge.fill(boss) - plain;
+                    if (opened < plain * 0.5 * BreakGauge.OPENING * 0.9) {
+                        f.add("a hit in the opening should fill x" + BreakGauge.OPENING + " (" + plain + " then +" + opened + ")");
                     }
-                    if (!BossOpenings.isBraced(foe) || BossOpenings.multiplier(foe, false) != BossOpenings.BRACE) {
-                        f.add("a foe hit " + BossOpenings.BRACE_HITS + " times quickly should brace");
+                    // 満ちると崩れる: 傷 ×BROKEN、技を出せない、次のゲージは大きい
+                    double first = BreakGauge.size(boss, 0);
+                    if (!BreakGauge.add(boss, first) || !BreakGauge.broken(boss) || BossOpenings.multiplier(boss) != BreakGauge.BROKEN
+                            || !BreakGauge.silenced(boss)) {
+                        f.add("a full gauge should break the boss (x" + BreakGauge.BROKEN + ", no moves)");
+                    }
+                    if (BreakGauge.breaks(boss) != 1 || Math.abs(BreakGauge.size(boss, 1) - first * BreakGauge.GROW[1]) > 1.0E-6
+                            || Math.abs(BreakGauge.size(boss, 5) - first * BreakGauge.GROW[2]) > 1.0E-6) {
+                        f.add("the next gauge should grow x" + BreakGauge.GROW[1] + " then x" + BreakGauge.GROW[2]);
+                    }
+                    if (BreakGauge.add(boss, first * 3) || BreakGauge.fill(boss) != 0) {
+                        f.add("a broken boss should not fill");
+                    }
+                    // 仕掛けを解くと半分
+                    BreakGauge.forget(boss);
+                    BreakGauge.solved(boss);
+                    if (Math.abs(BreakGauge.fill(boss) - BreakGauge.SOLVED) > 1.0E-6 || !BossOpenings.isOpen(boss)) {
+                        f.add("solving a mechanic should fill " + BreakGauge.SOLVED + " and open the boss (" + BreakGauge.fill(boss) + ")");
                     }
                 } finally {
                     BossOpenings.plantedForTest = null;
+                    BreakGauge.forget(boss);
                     boss.discard();
                     foe.discard();
                 }
@@ -134,7 +165,7 @@ public final class CombatRulesSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; guarded/open bosses, bracing foes, rations)");
+            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; boss break gauge (x0.8, fills, opening x3, breaks x2.0, grows, mechanic half), no bracing, rations)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST combat rules FAILED: {}", s);

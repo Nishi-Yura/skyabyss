@@ -234,4 +234,9 @@ public final class MeleeHits {
     public static boolean weakHit(net.minecraft.world.entity.Entity who) {
         return swinging != null && swinging == who && swingCharge <= FULL;
     }
+
+    // この人の、満ちた近接の一撃の最中か (主の崩しゲージが溜まる。BreakGauge)
+    public static boolean fullHit(net.minecraft.world.entity.Entity who) {
+        return swinging != null && swinging == who && swingCharge > FULL;
+    }
 }
