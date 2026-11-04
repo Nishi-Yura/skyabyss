@@ -28,6 +28,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //   下に「抜ける」(長は抜けられないので「解散する」。二度押し)
 // 決めるのはサーバー (GuildService)。押すたびに新しい中身が届いて描き直す
 public class GuildScreen extends Screen {
+    // 板は黄金比の大きい板 (356x220。docs/design/56)。中身 (320x214) はその真ん中に、並びは前のまま
     private static final int W = 320;
     private static final int H = 214;
     private static final int ROW_H = 14;
@@ -87,9 +88,9 @@ public class GuildScreen extends Screen {
 
     @Override
     protected void init() {
-        fit.fit(width, height, W + 16, H + 16, 2.5f);
-        x0 = 8;
-        y0 = 8;
+        fit.fit(width, height, jp.revati.skyabyss.client.ui.Golden.L_W, jp.revati.skyabyss.client.ui.Golden.L_H, 3f);
+        x0 = (jp.revati.skyabyss.client.ui.Golden.L_W - W) / 2;
+        y0 = (jp.revati.skyabyss.client.ui.Golden.L_H - H) / 2;
         bottom = null;
         if (view.mine().isEmpty()) {
             String oldName = name == null ? "" : name.getValue();
@@ -233,7 +234,7 @@ public class GuildScreen extends Screen {
     }
 
     private void renderBoard(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        FacilityUi.panel(g, x0, y0, W, H);
+        FacilityUi.panel(g, 0, 0, jp.revati.skyabyss.client.ui.Golden.L_W, jp.revati.skyabyss.client.ui.Golden.L_H);
         Font font = this.font;
         FacilityUi.gem(g, x0 + 12, y0 + 13);
         g.drawString(font, title, x0 + 18, y0 + 9, FacilityUi.TEXT, false);

@@ -27,7 +27,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 決めるのはサーバー (TradeService → Trades)。押すたびに新しい中身が届いて描き直す。出す・申請は取引所の番の前でだけ (/trade からは見る・受ける・断るだけ)
 public class TradeScreen extends Screen {
     private static final int W = 340;
-    private static final int H = 230;
+    // 板は黄金比の大きい板 (356x220。docs/design/56)。中身 (幅 340) はその真ん中に、並びは前のまま
+    private static final int H = jp.revati.skyabyss.client.ui.Golden.L_H;
     private static final int ROW_H = 24;
     private static final int ROWS = 6;
     private static final String[] TABS = {"market", "sell", "mine", "applied", "mail"};
@@ -99,9 +100,9 @@ public class TradeScreen extends Screen {
 
     @Override
     protected void init() {
-        fit.fit(width, height, W + 16, H + 16, 2.5f);
-        x0 = 8;
-        y0 = 8;
+        fit.fit(width, height, jp.revati.skyabyss.client.ui.Golden.L_W, jp.revati.skyabyss.client.ui.Golden.L_H, 3f);
+        x0 = (jp.revati.skyabyss.client.ui.Golden.L_W - W) / 2;
+        y0 = 0;
         coinsBox = null;
         int by = y0 + H - 26;
         switch (tab) {
@@ -235,7 +236,7 @@ public class TradeScreen extends Screen {
     }
 
     private void renderBoard(GuiGraphics g, int mx, int my, float partialTick) {
-        FacilityUi.panel(g, x0, y0, W, H);
+        FacilityUi.panel(g, 0, 0, jp.revati.skyabyss.client.ui.Golden.L_W, jp.revati.skyabyss.client.ui.Golden.L_H);
         hits.clear();
         hitActions.clear();
         hitRight.clear();
