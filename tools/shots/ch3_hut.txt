@@ -1,0 +1,45 @@
+# 2026-11-04: 三章のイサナ (風待の焚き火のそば。story/IsanaPost の HUT)
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ch3_hut.txt -PshotsName=ch3_hut
+world ch3_hut2 continent
+size 1280 720
+timeout 1500
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss admin chapter 3
+wait 40
+cmd skyabyss cinematic stop
+close
+cmd skyabyss quest stage @s main_thunder see
+chat clear
+cmd tp @s -1180 160 -100
+waitchunks 400
+wait 600
+cmd skyabyss dev isana
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] run tp @s ~-5 ~1 ~0
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 80
+hud on
+chat clear
+shot isana_hut_w
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] run tp @s ~0 ~1 ~-5
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 80
+shot isana_hut_n
+cmd execute at @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] run tp @s ~0 ~1 ~5
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 80
+shot isana_hut_s
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 30
+shot isana_hut_talk

@@ -35,8 +35,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   HARBOR  汐守の港 (二章)。段階 1 (岩鯨を止めた) で、噂の話を聞いた (印 c2_harbor) か、頼み main_tide が噂の段を越えた・終えた人。
 //           段階 2 (潮殻を止めた) でも、港で心臓のあとの話 (印 c2_harbor_done) をするまで。三章の頼み main_thunder が支度の段を越えたら港を離れる
 //           立つ所: 汐守の町の中心から海へいちばん近い岸の、水際から 3〜12 手前の平らな所。顔は町の方へ (海に背を向ける)
-//   HUT     風待の里の休み場の火のそば (三章)。段階 2 で港を離れたあと。段階 3 (雷翼を止めた) でも、「俺は残る」の話 (印 ch3g_stay_told) をするまで。
-//           四章の頼み main_ember が支度の段を越えたら離れる。立つ所: 町の休み場 (印 rest) から 2〜6 の平らな所。顔は火の方へ
+//   HUT     風待の里の焚き火のそば (三章)。段階 2 で港を離れたあと。段階 3 (雷翼を止めた) でも、「俺は残る」の話 (印 ch3g_stay_told) をするまで。
+//           四章の頼み main_ember が支度の段を越えたら離れる。立つ所: 町の休み場 (印 rest) にいちばん近い焚き火 (24 以内) から 2〜6 の平らな所。
+//           そばに焚き火が無ければ、立つ所の 2 となりに一つ置く (印 isana_hut_fire)。顔は火の方へ
 //   立つ所は町の記録 (SiteData) に印として書く。あとから地ならし・小岩が埋めたら選び直し、イサナが埋まっていたら立つ所へ戻す
 //   (見回りは町の中心から 192 以内の、その居場所のはずの人のそばで 2 秒ごと)。話す相手の目印 (SiteTargets の npc:whale_chaser) もそこを指す (SiteNetwork.payload)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -192,16 +193,20 @@ public final class IsanaPost {
         return best;
     }
 
-    // 風待: 休み場 (rest) から 2〜6 の、平らな立てる所 (決まった順に探す)
+    // 風待: 休み場 (rest) にいちばん近い町の焚き火 (FIRE_R の中。無ければ休み場) から 2〜6 の、平らな立てる所 (決まった順に探す)
+    static final int FIRE_R = 24;
+
     @Nullable
     static BlockPos findNearRest(ServerLevel level, BlockPos rest) {
         if (!level.hasChunk(rest.getX() >> 4, rest.getZ() >> 4)) {
             return null;
         }
+        BlockPos fire = fireNear(level, rest);
+        BlockPos from = fire != null ? fire : rest;
         for (int r = 2; r <= 6; r++) {
             for (int[] d : new int[][] {{r, 0}, {-r, 0}, {0, r}, {0, -r}, {r, r}, {-r, r}, {r, -r}, {-r, -r}}) {
                 for (int dy = -2; dy <= 2; dy++) {
-                    BlockPos feet = rest.offset(d[0], dy, d[1]);
+                    BlockPos feet = from.offset(d[0], dy, d[1]);
                     if (standable(level, feet) && open(level, feet)) {
                         return feet;
                     }
@@ -209,6 +214,24 @@ public final class IsanaPost {
             }
         }
         return null;
+    }
+
+    // 休み場にいちばん近い焚き火 (読み込まれた所だけ)
+    @Nullable
+    static BlockPos fireNear(ServerLevel level, BlockPos rest) {
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        for (BlockPos q : BlockPos.betweenClosed(rest.offset(-FIRE_R, -4, -FIRE_R), rest.offset(FIRE_R, 4, FIRE_R))) {
+            if (!level.hasChunkAt(q) || !level.getBlockState(q).is(net.minecraft.world.level.block.Blocks.CAMPFIRE)) {
+                continue;
+            }
+            double d = q.distSqr(rest);
+            if (d < bd) {
+                bd = d;
+                best = q.immutable();
+            }
+        }
+        return best;
     }
 
     static boolean standable(ServerLevel level, BlockPos feet) {
@@ -257,9 +280,47 @@ public final class IsanaPost {
         return at;
     }
 
-    // 顔の向き: 港は町の方 (海に背を向ける)、火のそばは休み場の方
-    static float yaw(SiteData.Entry town, Post post, BlockPos spot) {
-        BlockPos look = post == Post.HUT && town.extra("rest") != null ? town.extra("rest") : town.pos;
+    // 火のそばの焚き火: 町の焚き火が近くに無ければ、立つ所の 2 となりに一つ置く (町の記録に印 isana_hut_fire。消えていれば置き直す)
+    static final String FIRE_MARK = "isana_hut_fire";
+
+    @Nullable
+    static BlockPos ensureFire(ServerLevel level, SiteData.Entry town, BlockPos spot) {
+        BlockPos near = fireNear(level, spot);
+        if (near != null && near.distSqr(spot) <= 16) {
+            return near;
+        }
+        BlockPos at = town.extra(FIRE_MARK);
+        if (at != null && at.distSqr(spot) <= 16) {
+            if (level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.CAMPFIRE)) {
+                return at;
+            }
+            if (level.getBlockState(at).isAir()) {
+                level.setBlock(at, net.minecraft.world.level.block.Blocks.CAMPFIRE.defaultBlockState(), 3);
+                return at;
+            }
+        }
+        for (int[] d : new int[][] {{2, 0}, {-2, 0}, {0, 2}, {0, -2}, {2, 1}, {-2, 1}, {1, 2}, {1, -2}}) {
+            BlockPos f = spot.offset(d[0], 0, d[1]);
+            BlockPos below = f.below();
+            if (level.getBlockState(f).isAir() && level.getFluidState(below).isEmpty()
+                    && level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)) {
+                level.setBlock(f, net.minecraft.world.level.block.Blocks.CAMPFIRE.defaultBlockState(), 3);
+                town.extra(FIRE_MARK, f);
+                SiteData.get(level).setDirty();
+                SkyAbyss.LOGGER.info("[isana] lit a fire by the hut spot at {}", f.toShortString());
+                return f;
+            }
+        }
+        return null;
+    }
+
+    // 顔の向き: 港は町の方 (海に背を向ける)、火のそばは焚き火 (無ければ休み場) の方
+    static float yaw(ServerLevel level, SiteData.Entry town, Post post, BlockPos spot) {
+        BlockPos look = town.pos;
+        if (post == Post.HUT && town.extra("rest") != null) {
+            BlockPos fire = fireNear(level, spot);
+            look = fire != null && fire.distSqr(spot) <= 64 ? fire : town.extra("rest");
+        }
         return (float) (Mth.atan2(look.getZ() - spot.getZ(), look.getX() - spot.getX()) * (180 / Math.PI)) - 90f;
     }
 
@@ -285,7 +346,10 @@ public final class IsanaPost {
         for (int i = 1; i < found.size(); i++) {
             found.get(i).discard();
         }
-        float yaw = yaw(town, post, spot);
+        if (post == Post.HUT) {
+            ensureFire(level, town, spot);
+        }
+        float yaw = yaw(level, town, post, spot);
         if (!found.isEmpty()) {
             NpcEntity live = found.get(0);
             BlockPos at = live.blockPosition();

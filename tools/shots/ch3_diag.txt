@@ -1,0 +1,40 @@
+# 三章の確かめの撮り直し (ch3_post_nest の世界を使う): 筋・巣・火のそばのイサナを、上と横から
+world ch3_post_nest continent
+size 1280 720
+timeout 1200
+render 10
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 5000
+cmd weather clear
+cmd tp @s -1186 224 -376
+waitchunks 300
+wait 100
+cmd execute as @s at @s run tp @s ~ ~ ~ facing -1190 217 -382
+wait 60
+hud off
+shot diag_streak
+cmd tp @s -1199 226 -474
+waitchunks 300
+wait 100
+cmd execute as @s at @s run tp @s ~ ~ ~ facing -1205 220 -480
+wait 100
+shot diag_nest
+cmd tp @s -1172 190 -94
+waitchunks 300
+wait 100
+cmd execute as @s at @s run tp @s ~ ~ ~ facing -1172 173 -94
+wait 60
+shot diag_hut_above
+cmd tp @s -1166 175 -94
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 60
+shot diag_hut_e
+cmd tp @s -1178 175 -94
+wait 5
+cmd execute as @s at @s run tp @s ~ ~ ~ facing entity @e[type=skyabyss:whale_chaser,tag=skyabyss_hut_isana,limit=1] eyes
+wait 60
+shot diag_hut_w
