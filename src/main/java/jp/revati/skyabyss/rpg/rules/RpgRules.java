@@ -242,6 +242,15 @@ public final class RpgRules {
         }
     }
 
+    // 敵 (人のほかの生き物すべて) を倒しても、バニラの経験の玉を出さない (2026-11-05)。緑の経験値のバーは出していない (client/hud/VitalsHud) ので玉に使い道がない。
+    // 成長の経験値は倒した人へ直に入る (別の仕組み)。人が倒れたときの玉は、墓・預かりの決まり (grave/DeathEvents・TitanBackTrials) のまま
+    @SubscribeEvent
+    static void onExperienceDrop(net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            event.setCanceled(true);
+        }
+    }
+
     // どんな湧き方でも (村への襲撃・ファントム・変身・湧き台・前の世界に残っていた分も)、バニラの敵とさまよう商人は世界に入れない。
     // 決まりの入った世界か地上のとき。試遊の確かめ (自己テスト) はバニラのゾンビを使うので、そのあいだは入れる
     @SubscribeEvent
