@@ -198,19 +198,6 @@ public final class RebirthSelfTest {
         check(f, RebirthData.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, d).result().flatMap(t -> RebirthData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, t).result())
                 .map(d::equals).orElse(false), "RebirthData save round trip");
         check(f, new RebirthData(99, null, 0, 0, false).count() == 20, "count is clamped on load");
-        // 順位の石・飾り板のパケット
-        var board = new RebirthNet.BoardPayload(0, true, List.of(List.of(new RebirthNet.Line("abe", 5, 5), new RebirthNet.Line("bob", 3, 3)), List.of(), List.of(new RebirthNet.Line("cara", 1, 2))),
-                List.of());
-        RegistryFriendlyByteBuf b2 = buf(server);
-        RebirthNet.BoardPayload.STREAM_CODEC.encode(b2, board);
-        var back = RebirthNet.BoardPayload.STREAM_CODEC.decode(b2);
-        check(f, back.hidden() && back.lists().size() == 3 && back.lists().get(0).get(1).name().equals("bob") && back.lists().get(2).get(0).value() == 2, "leaderboard payload round trip");
-        var rec = new RebirthNet.BoardPayload(1, false, List.of(), List.of(new RebirthNet.RecordLine(Component.literal("T"), "abe", 1234, true, true),
-                new RebirthNet.RecordLine(Component.literal("U"), "", -1, false, false)));
-        RegistryFriendlyByteBuf b3 = buf(server);
-        RebirthNet.BoardPayload.STREAM_CODEC.encode(b3, rec);
-        var rb = RebirthNet.BoardPayload.STREAM_CODEC.decode(b3);
-        check(f, rb.records().size() == 2 && rb.records().get(0).ticks() == 1234 && rb.records().get(0).fresh() && rb.records().get(1).ticks() < 0, "record plaque payload round trip");
         // パーティ一覧: 転生の回数が往復で残る
         var member = new PartyNetwork.Member("id", "abe", 50, 20f, 20f, true, true, false, 12);
         var sync = new PartyNetwork.Sync(1, 20, 1, "stone_whale", 50, List.of(member), "");

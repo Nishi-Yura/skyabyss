@@ -153,7 +153,7 @@ public final class RecordsHub {
             return;
         }
         int t = Math.max(0, Math.min(TABS.length - 1, tab));
-        PacketDistributor.sendToPlayer(p, new View(t, lines(p, t)));
+        PacketDistributor.sendToPlayer(p, new View(t, jp.revati.skyabyss.rebirth.RebirthView.data(p).hidden(), lines(p, t)));
     }
 
     // ---------------------------------------------------------------- 通信 (手元の画面は client/record/RecordsHubScreen)
@@ -167,10 +167,11 @@ public final class RecordsHub {
         }
     }
 
-    public record View(int tab, List<Component> lines) implements CustomPacketPayload {
+    // hidden: 転生の順位表に載せない設定 (「転生」の頁の釦。前の順位の石の画面の釦と同じ。RebirthNet.HiddenPayload で切り替える)
+    public record View(int tab, boolean hidden, List<Component> lines) implements CustomPacketPayload {
         public static final Type<View> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "records_hub_view"));
         public static final StreamCodec<RegistryFriendlyByteBuf, View> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, View::tab,
-                ComponentSerialization.TRUSTED_STREAM_CODEC.apply(ByteBufCodecs.list()), View::lines, View::new);
+                ByteBufCodecs.BOOL, View::hidden, ComponentSerialization.TRUSTED_STREAM_CODEC.apply(ByteBufCodecs.list()), View::lines, View::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

@@ -148,7 +148,7 @@
   "message.skyabyss.dungeon.mood_enter": "Today in the depths: \"%1$s\": %2$s",
   "message.skyabyss.dungeon.mood_chest": "Treasure Day: another chest in the boss hall",
   "message.skyabyss.dungeon.sub_deep": "Deep dive · Lv %s · %s players",
-  "message.skyabyss.dungeon.deep_enter": "Deep dive: foes and the boss hit harder, mechanisms run faster, the boss box is a tier higher",
+  "message.skyabyss.dungeon.deep_enter": "Deep dive: foes and boss hit harder, traps run faster, boss box one tier up",
   "message.skyabyss.dungeon.deep_locked": "You can dive deep after defeating this boss once (entering normally today)",
   "message.skyabyss.dungeon.deep_hint": "Use the gate while sneaking to dive deep (harder foes, faster mechanisms, a better boss box)",
   "message.skyabyss.dungeon.trinket_grew": "%1$s has grown (%2$s)",

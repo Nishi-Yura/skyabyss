@@ -82,7 +82,7 @@
   "powder_art.skyabyss.ash.armor_name": "Sparks",
   "powder_art.skyabyss.bone.armor_name": "Bone Thorns",
   "gui.skyabyss.forge.tab_powder": "Powder",
-  "gui.skyabyss.forge.sub_reforge": "Reforge",
+  "gui.skyabyss.forge.sub_reforge": "Recast",
   "gui.skyabyss.forge.combine": "Combine",
   "gui.skyabyss.forge.combine_hint": "Turn %s powders of the same tier in the material slot into one of the next tier",
   "gui.skyabyss.forge.combine_ready": "%1$s powders (%2$s) → one %3$s",

@@ -33,11 +33,15 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
     private int tab;
     private List<Component> lines = List.of();
     private final List<FormattedCharSequence> wrapped = new ArrayList<>();
-    private final List<Button> tabButtons = new ArrayList<>();
+    private final List<GoldTab> tabButtons = new ArrayList<>();
+    // 転生の順位表に載せない (「転生」の頁だけ釦を出す)
+    private boolean hidden;
+    private Button hideButton;
 
-    public RecordsHubScreen(int tab, List<Component> lines) {
+    public RecordsHubScreen(int tab, boolean hidden, List<Component> lines) {
         super(Component.translatable("gui.skyabyss.records_hub.title"));
         this.tab = tab;
+        this.hidden = hidden;
         this.lines = lines;
     }
 
@@ -45,9 +49,10 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
     public static void receive(RecordsHub.View v) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof RecordsHubScreen s) {
+            s.hidden = v.hidden();
             s.show(v.tab(), v.lines());
         } else {
-            mc.setScreen(new RecordsHubScreen(v.tab(), v.lines()));
+            mc.setScreen(new RecordsHubScreen(v.tab(), v.hidden(), v.lines()));
         }
     }
 
@@ -62,8 +67,16 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         panel.setScroll(0);
         rewrap();
         for (int i = 0; i < tabButtons.size(); i++) {
-            tabButtons.get(i).active = i != tab;
+            tabButtons.get(i).selected = i == tab;
         }
+        if (hideButton != null) {
+            hideButton.visible = tab == RecordsHub.REBIRTH;
+            hideButton.setMessage(hideLabel());
+        }
+    }
+
+    private Component hideLabel() {
+        return Component.translatable("skyabyss_rebirth.gui.toggle.board", Component.translatable(hidden ? "options.off" : "options.on"));
     }
 
     private void layout() {
@@ -91,12 +104,17 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         int n = RecordsHub.TABS.length;
         int w = (TABS.w() - (n - 1) * 3) / n;
         for (int i = 0; i < n; i++) {
-            int which = i;
-            Button b = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[i]), x -> request(which))
-                    .bounds(TABS.x() + i * (w + 3), TABS.y(), w, Golden.BTN).build());
-            b.active = i != tab;
+            GoldTab b = addRenderableWidget(new GoldTab(TABS.x() + i * (w + 3), TABS.y(), w, i));
+            b.selected = i == tab;
             tabButtons.add(b);
         }
+        // 転生の頁: 順位表に載せる・載せない (見出しの帯の左)
+        hideButton = addRenderableWidget(Button.builder(hideLabel(), x -> {
+            hidden = !hidden;
+            PacketDistributor.sendToServer(new jp.revati.skyabyss.rebirth.RebirthNet.HiddenPayload(hidden));
+            x.setMessage(hideLabel());
+        }).bounds(LAYOUT.head().x(), LAYOUT.head().y() + 4, Golden.S89 + Golden.S55, Golden.BTN).build());
+        hideButton.visible = tab == RecordsHub.REBIRTH;
         rewrap();
     }
 
@@ -171,10 +189,38 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         return fit.screenRect(0, 0, Golden.L_W, Golden.L_H);
     }
 
+    // つまみ (金縁の板の絵柄。旅の記録のつまみと同じ Golden.tab)。選んでいる頁を押しても頼み直さない
+    final class GoldTab extends net.minecraft.client.gui.components.AbstractButton {
+        final int which;
+        boolean selected;
+
+        GoldTab(int x, int y, int w, int which) {
+            super(x, y, w, Golden.BTN, Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[which]));
+            this.which = which;
+        }
+
+        @Override
+        public void onPress() {
+            if (!selected) {
+                request(which);
+            }
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            Golden.tab(g, font, new Golden.Box(getX(), getY(), getWidth(), getHeight()), getMessage(), selected, isHoveredOrFocused());
+        }
+
+        @Override
+        protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput out) {
+            defaultButtonNarrationText(out);
+        }
+    }
+
     // 撮影用: 見本の頁 (`open jp.revati.skyabyss.client.record.RecordsHubScreen$Sample`)
     public static final class Sample extends RecordsHubScreen {
         public Sample() {
-            super(RecordsHub.FISHING, List.of(Component.literal("釣り大会（今週）").withStyle(s -> s.withColor(0xF2D78A)),
+            super(RecordsHub.FISHING, false, List.of(Component.literal("釣り大会（今週）").withStyle(s -> s.withColor(0xF2D78A)),
                     Component.literal("1. Alice　黄金のマス 52.3 cm"), Component.literal("2. Bob　岩魚 41.0 cm"), Component.empty(),
                     Component.literal("自分の一番: 岩魚 38.2 cm")));
         }

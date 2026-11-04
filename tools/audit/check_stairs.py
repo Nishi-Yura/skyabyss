@@ -47,6 +47,16 @@ ALLOW = [
     # 汐守の町の宿の正面: 戸口の柱のまわりの飾りの階段 (y 0〜1)。入口の段そのもの (y 0 の南向きの列) は正しい
     ('town_tide', 'STAIR_RUN', (-25, 0, -24, -21, 1, -22), 'facade trim stairs around the door pillars'),
     ('town_tide', 'STAIR_RUN', (-1, 0, -24, 8, 2, -22), 'facade trim stairs around the door pillars'),
+    # 見どころの書き付けの台 (2026-11-04 の作り直し): 3x3 の台座。四辺が中へ上がる段、四隅が半ブロック。歩く段ではなく台座の面取り。
+    # 書き付けの石板が段の前に立つ所は、段が石板と台に挟まって見える (飾り)
+    ('poi_signpost', 'CORNER_SLAB', (-1, 0, -1, 1, 0, 1), 'note plinth: stair sides, slab corners'),
+    ('poi_basalt_gate__split_gate', 'CORNER_SLAB', (-4, 0, 4, -2, 0, 6), 'note plinth: stair sides, slab corners'),
+    ('poi_ruined_tower__tidewatch_ruin', 'CORNER_SLAB', (-7, 0, 3, -5, 0, 5), 'note plinth: stair sides, slab corners'),
+    ('poi_watchtower__beacon_tower', 'CORNER_SLAB', (-1, 0, 5, 1, 0, 7), 'note plinth: stair sides, slab corners'),
+    ('poi_watchtower__whalewatch_post', 'CORNER_SLAB', (5, 0, 0, 7, 0, 2), 'note plinth: stair sides, slab corners'),
+    ('poi_watchtower__beacon_tower', 'STAIR_BURIED', (0, 0, 7, 0, 0, 7), 'note tablet in front of the plinth step'),
+    ('poi_watchtower__whalewatch_post', 'STAIR_BURIED', (6, 0, 2, 6, 0, 2), 'note tablet in front of the plinth step'),
+    ('poi_fishing_huts__inland_boathouse', 'STAIR_BURIED', (1, 0, -9, 1, 0, -9), 'note tablet in front of the floor-edge step'),
 ]
 
 # 当たりの無いもの

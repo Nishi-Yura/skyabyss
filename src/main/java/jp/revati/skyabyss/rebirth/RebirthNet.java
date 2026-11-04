@@ -31,58 +31,6 @@ public final class RebirthNet {
     }
 
     // kind 0 = 順位表の石 (lists に 3 表)、1 = 飾り板 (records)
-    public record BoardPayload(int kind, boolean hidden, List<List<Line>> lists, List<RecordLine> records) implements CustomPacketPayload {
-        public static final Type<BoardPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "rebirth_board"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, BoardPayload> STREAM_CODEC = StreamCodec.of(
-                (buf, p) -> {
-                    buf.writeVarInt(p.kind);
-                    buf.writeBoolean(p.hidden);
-                    buf.writeVarInt(p.lists.size());
-                    for (List<Line> l : p.lists) {
-                        buf.writeVarInt(l.size());
-                        for (Line x : l) {
-                            buf.writeUtf(x.name, 32);
-                            buf.writeVarInt(x.rebirths);
-                            buf.writeVarLong(x.value);
-                        }
-                    }
-                    buf.writeVarInt(p.records.size());
-                    for (RecordLine r : p.records) {
-                        ComponentSerialization.STREAM_CODEC.encode(buf, r.titan);
-                        buf.writeUtf(r.who, 32);
-                        buf.writeLong(r.ticks);
-                        buf.writeBoolean(r.fresh);
-                        buf.writeBoolean(r.here);
-                    }
-                },
-                buf -> {
-                    int kind = buf.readVarInt();
-                    boolean hidden = buf.readBoolean();
-                    int n = Math.min(buf.readVarInt(), 8);
-                    List<List<Line>> lists = new ArrayList<>();
-                    for (int i = 0; i < n; i++) {
-                        int m = Math.min(buf.readVarInt(), 32);
-                        List<Line> l = new ArrayList<>();
-                        for (int j = 0; j < m; j++) {
-                            l.add(new Line(buf.readUtf(32), buf.readVarInt(), buf.readVarLong()));
-                        }
-                        lists.add(l);
-                    }
-                    int k = Math.min(buf.readVarInt(), 8);
-                    List<RecordLine> recs = new ArrayList<>();
-                    for (int i = 0; i < k; i++) {
-                        recs.add(new RecordLine(ComponentSerialization.STREAM_CODEC.decode(buf), buf.readUtf(32), buf.readLong(), buf.readBoolean(), buf.readBoolean()));
-                    }
-                    return new BoardPayload(kind, hidden, lists, recs);
-                });
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
-        }
-    }
-
-    // 倒れた・立ち上がった: 段の色の光 (対象のエンティティ番号。色と回数は client が対象から読む)
     public record BurstPayload(int entityId, boolean rise) implements CustomPacketPayload {
         public static final Type<BurstPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "rebirth_burst"));
         public static final StreamCodec<RegistryFriendlyByteBuf, BurstPayload> STREAM_CODEC = StreamCodec.composite(
@@ -119,7 +67,6 @@ public final class RebirthNet {
     @SubscribeEvent
     static void onPayloads(RegisterPayloadHandlersEvent event) {
         event.registrar("2")
-                .playToClient(BoardPayload.TYPE, BoardPayload.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.rebirth.RebirthClient.openBoard(p))
                 .playToClient(BurstPayload.TYPE, BurstPayload.STREAM_CODEC, (p, ctx) -> jp.revati.skyabyss.client.rebirth.RebirthClient.burst(p))
                 .playToServer(SelectTitlePayload.TYPE, SelectTitlePayload.STREAM_CODEC, (p, ctx) -> {
                     if (ctx.player() instanceof ServerPlayer sp) {

@@ -44,9 +44,9 @@ public final class RecordsHubSelfTest {
             }
             RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), server.registryAccess());
             List<Component> lines = RecordsHub.lines(p, RecordsHub.FISHING);
-            RecordsHub.View.STREAM_CODEC.encode(buf, new RecordsHub.View(RecordsHub.FISHING, lines));
+            RecordsHub.View.STREAM_CODEC.encode(buf, new RecordsHub.View(RecordsHub.FISHING, true, lines));
             RecordsHub.View back = RecordsHub.View.STREAM_CODEC.decode(buf);
-            check(f, back.tab() == RecordsHub.FISHING && back.lines().size() == lines.size(), "the records view did not survive the round trip");
+            check(f, back.tab() == RecordsHub.FISHING && back.hidden() && back.lines().size() == lines.size(), "the records view did not survive the round trip");
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("SELFTEST records hub crashed", e);
             f.add("crashed: " + e);

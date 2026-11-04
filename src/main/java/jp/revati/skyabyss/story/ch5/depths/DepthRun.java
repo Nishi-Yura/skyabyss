@@ -509,7 +509,7 @@ public final class DepthRun {
                                     return devAt(p, StringArgumentType.getString(c, "what"));
                                 })))
                                 .then(Commands.literal("records").executes(c -> {
-                                    DepthRecords.show(c.getSource().getServer(), c.getSource().getPlayerOrException());
+                                    jp.revati.skyabyss.record.RecordsHub.open(c.getSource().getPlayerOrException(), jp.revati.skyabyss.record.RecordsHub.DEPTH);
                                     return 1;
                                 })))));
     }

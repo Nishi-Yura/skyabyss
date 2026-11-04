@@ -36,24 +36,7 @@ public final class RebirthBoards {
         SPOTS.clear();
     }
 
-    // ---------------------------------------------------------------- 開く中身
-    public static void openLeaderboard(ServerPlayer player) {
-        List<List<RebirthNet.Line>> lists = new ArrayList<>();
-        for (RebirthLeaderboard.Metric m : RebirthLeaderboard.Metric.values()) {
-            List<RebirthNet.Line> lines = new ArrayList<>();
-            for (RebirthLeaderboard.Row r : Rebirths.top(player.server, m, LIST_SIZE)) {
-                long value = switch (m) {
-                    case REBIRTHS -> r.rebirths();
-                    case FASTEST -> r.fastestLife();
-                    case FEWEST_DEATHS -> r.fewestDeaths();
-                };
-                lines.add(new RebirthNet.Line(r.name(), r.rebirths(), value));
-            }
-            lists.add(lines);
-        }
-        PacketDistributor.sendToPlayer(player, new RebirthNet.BoardPayload(0, RebirthView.data(player).hidden(), lists, List.of()));
-    }
-
+    // ---------------------------------------------------------------- 開く中身 (記録の画面 record/RecordsHub の「踏破」の頁が使う)
     public static List<RebirthNet.RecordLine> recordLines(MinecraftServer server, @Nullable String here) {
         RebirthStats stats = RebirthStats.get(server);
         long now = server.overworld().getGameTime();
@@ -64,11 +47,6 @@ public final class RebirthBoards {
             lines.add(new RebirthNet.RecordLine(Progression.titanName(titan), r == null ? "" : r.name(), r == null ? -1 : r.ticks(), fresh, titan.equals(here)));
         }
         return lines;
-    }
-
-    public static void openRecords(ServerPlayer player) {
-        String here = Progression.titanOfBack(player.level().dimension());
-        PacketDistributor.sendToPlayer(player, new RebirthNet.BoardPayload(1, false, List.of(), recordLines(player.server, here)));
     }
 
     public static boolean fresh(long now, long at) {

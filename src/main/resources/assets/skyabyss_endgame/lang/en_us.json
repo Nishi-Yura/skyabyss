@@ -146,7 +146,7 @@
   "circuit.skyabyss.bonus.curse": "curse",
   "circuit.skyabyss.bonus.time": "+2 min",
   "message.skyabyss.circuit.choose": "Next task: head for either pillar. Gold gives two marks (harder), blue adds 2 minutes when cleared",
-  "message.skyabyss.circuit.cursed": "Cursed (%s). Until the circuit ends, foes have +%s%% health and damage. One more sealed box at the end",
+  "message.skyabyss.circuit.cursed": "Cursed (%s): foes +%s%% health and damage until the circuit ends. +1 sealed box at the end",
   "message.skyabyss.circuit.time_bonus": "Time left +%s min",
   "gui.skyabyss.profile.title": "Profile",
   "gui.skyabyss.profile.card_no_title": "No title",
