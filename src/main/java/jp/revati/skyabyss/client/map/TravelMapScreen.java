@@ -570,8 +570,13 @@ public class TravelMapScreen extends Screen {
             return;
         }
         jp.revati.skyabyss.world.continent.ContinentLayout lay = jp.revati.skyabyss.world.continent.ContinentLayout.get();
-        // 土地の名前: 引くほど大きく (1.25〜1.75 倍)、紙の色の縁取りの上に濃い茶の字
+        // 土地の名前: 引くほど大きく (1.25〜1.75 倍)、紙の色の縁取りの上に濃い茶の字。
+        // 倍率は画素ちょうどへ丸める (docs/design/56 の 4.1。半端な倍率では字の画の太さがそろわない)
+        double gui = minecraft.getWindow().getGuiScale();
         float big = (float) Mth.clamp(1.25 + (view - NAMES_FROM) / (NAMES_TO - NAMES_FROM) * 0.5, 1.25, 1.75);
+        if (gui > 0) {
+            big = (float) (Math.max(1, Math.round(big * gui)) / gui);
+        }
         for (var e : lay.names().entrySet()) {
             int[] at = project(e.getValue().getX(), e.getValue().getZ());
             if (at[2] == 0) {
