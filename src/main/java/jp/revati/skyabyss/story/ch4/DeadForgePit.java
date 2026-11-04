@@ -176,6 +176,7 @@ public final class DeadForgePit {
     }
 
     // ---------------------------------------------------------------- 温石の台
+    static final String ECHO = "skyabyss_ch4_stone_echo";
     // 温石を持った人が台に触れると、台が WARM_TICKS 温まる (温石は減らない)。温めたら true
     public static boolean touchStand(ServerPlayer player, ServerLevel level, BlockPos at) {
         if (player.getInventory().countItem(EmberTitanSetup.WARM_STONE.get()) <= 0) {
@@ -184,6 +185,11 @@ public final class DeadForgePit {
         }
         warm(level, at);
         Notice.narrate(player, "message.skyabyss.ch4g.pit.stand_warm");
+        // 初めて置いたとき、温石をくれたイサナの言葉を一行 (2026-11-04 の決めごと c4_warm = echo。人ごとに一度)
+        if (!player.getPersistentData().getBoolean(ECHO)) {
+            player.getPersistentData().putBoolean(ECHO, true);
+            jp.revati.skyabyss.story.ch1.Tasks.later(50, () -> Notice.hint(player, "message.skyabyss.ch4g.pit.stand_echo"));
+        }
         return true;
     }
 

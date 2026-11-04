@@ -28,7 +28,8 @@ public final class LifeKeep {
             "skyabyss_warm_stone_given",              // 暖石を渡した (WarmStoneItem)
             "skyabyss_tide_watching_shell_given",     // 潮見の殻を渡した (TideChapter)
             "skyabyss_shrine_pair",                   // 祠の対の札を見せた (CapitalShrine)
-            "skyabyss_ch2_stakes_read",               // 二章の杭を読んだ (Ch2Ground)
+            "skyabyss_ch2_stakes_read",
+            "skyabyss_ch4_stone_echo",                // 四章の温石の台でイサナの言葉を出した (DeadForgePit)               // 二章の杭を読んだ (Ch2Ground)
             "skyabyss_ch2_wreck_seen",                // 二章の難破船を見た (Wreck)
             "skyabyss_ch2_salt_seen",                 // 塩の標を見た (SaltVault)
             "skyabyss_ch2_salt_counted",              // 塩の標を数えた (SaltVault)

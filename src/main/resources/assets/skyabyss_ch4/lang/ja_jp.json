@@ -125,8 +125,8 @@
   "quest.skyabyss.ch4.dragger_trail.follow.kiln": "灰ひきずりを追い、窯の跡を探そう",
   "quest.skyabyss.ch4.dragger_trail.summary": "灰を引きずる虫を追って、灰の民の窯の跡へ。",
   "quest.skyabyss.ch4.dragger_trail.title": "灰ひきずり",
-  "quest.skyabyss.ch4.fire_draught.brew.journal": "旅の職人が言っていた。「灰の民は、火の薬を飲んでから炉に入った。二つ持っておけ。炉は一度じゃ済まない」\n火除けの薬は、灰炉の村や都の薬師の店で買える。",
-  "quest.skyabyss.ch4.fire_draught.brew.potion": "火除けの薬を二つそろえよう（薬師の店）",
+  "quest.skyabyss.ch4.fire_draught.brew.journal": "旅の職人が言っていた。「灰の民は、火の薬を飲んでから炉に入った。二つ持っておけ。炉は一度じゃ済まない」\n灰の道の標の五つ目の杭の、まだ温かい灰を薬師に見せれば、灰の民のやり方で作ってくれるかもしれない。（灰炉の村や都の薬師の店でも買える）",
+  "quest.skyabyss.ch4.fire_draught.brew.potion": "火除けの薬を二つそろえよう（薬師）",
   "quest.skyabyss.ch4.fire_draught.done": "「火を飲んで、火の中へ。灰の民は、そうやって炉に入ったんだ」",
   "quest.skyabyss.ch4.fire_draught.show.journal": "火除けの薬が二つ、そろった。旅の職人に見せよう。",
   "quest.skyabyss.ch4.fire_draught.show.talk": "火除けの薬を、旅の職人に見せよう",
@@ -215,5 +215,11 @@
   "subtitles.skyabyss_ch4.cinder_mite_hurt": "熾り蟲がひるむ",
   "gui.skyabyss.attack.elder_thrall.rake": "火掻き",
   "gui.skyabyss.attack.elder_thrall.crack": "亀裂",
-  "gui.skyabyss.attack.elder_thrall.wave": "熱の波"
+  "gui.skyabyss.attack.elder_thrall.wave": "熱の波",
+  "message.skyabyss.ch4g.marks.ash": "杭の根もとの灰を、ひとつまみ布に包んだ。……灰の民は、これを薬の瓶の底に沈めたという。",
+  "message.skyabyss.ch4g.pit.stand_echo": "「握ると、ずっと温かい」……鯨見で、今も数えているだろうか。",
+  "dialogue.skyabyss.attendant_apothecary.menu.ash": "円の縁の、温かい灰を見せる",
+  "dialogue.skyabyss.attendant_apothecary.ash1": "その包み……灰の降る円の縁の灰ですね。まだ温かい。",
+  "dialogue.skyabyss.attendant_apothecary.ash2": "灰の民は、火の薬の瓶の底に灰をひとつまみ沈めたそうです。火に、自分たちの匂いを覚えさせるために。\n……やってみましょう。",
+  "dialogue.skyabyss.attendant_apothecary.ash3": "二本です。炉は一度じゃ済まない、と職人さんも言うでしょうね。"
 }

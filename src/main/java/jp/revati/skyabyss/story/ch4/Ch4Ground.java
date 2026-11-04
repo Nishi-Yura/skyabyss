@@ -48,7 +48,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 既存の四章の小要素 3 つ (灰の民の炉跡・灰降り観測点・温かい岩棚。EmberChapter) に足す。
 //
 // ---------------------------------------------------------------- 場所
-//   ch4_ash_mark        灰の道の標 5     丘から灰の降る円の縁へ (高台)。着くと合図 ch4_ash_mark (サブ ch4/ash_road)。五つ目で一行 (人ごとに一度)
+//   ch4_ash_mark        灰の道の標 5     丘から灰の降る円の縁へ (高台)。着くと合図 ch4_ash_mark (サブ ch4/ash_road)。五つ目で一行 (人ごとに一度)。
+//                                        五つそろうと、まだ温かい灰をひとつまみ包む (薬師の会話の印 ch4_warm_ash。薬師が火除けの薬を二つ作る)
 //   ch4_dead_forge_pit  消えた炉の坑     小さなダンジョン (DeadForgePit)。旅の職人の四章の立つ所 (印 artisan)
 //   ch4_warm_rocks      温かい岩の群れ 2 玄武岩の柱の群れと温石の台。温石を持って台に触れると、岩が熱を返す (粒と一行。背中の熱の予習)
 //   ch4_soot_kiln       煤の窯の跡       灰の民の窯。拾い残しの箱 (人ごとに一度、煤鉄 4・灰麻 3)、碑 (伝承 ch4/soot_kiln)。着くと合図 ch4_kiln (サブ ch4/dragger_trail)。
@@ -56,7 +57,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   ch4_ash_watch       灰降りの高台     石の舞台と碑。夜に着くと、灰の地の眠る場所の上に赤い粒 (眠る場所の見当)。イサナに「高台」の一言の印
 //
 // ---------------------------------------------------------------- 支度の段 (メインの段。順不同。PrepQuests の四章の 2 本)
-//   ch4/fire_draught  (職人)   耐火のポーション 2 (醸造台。都の薬師の醸造の手ほどき・ネザーのマグマクリーム) → 職人に見せる (伝承 ch4/fire_draught)
+//   ch4/fire_draught  (職人)   火除けの薬 2 (円の縁の温かい灰を薬師に見せると二つ作ってくれる。薬師の店でも買える) → 職人に見せる (伝承 ch4/fire_draught)
 //   ch4/forge_ruins   (語り部) 消えた炉の坑を抜ける (伝承 ch4/forge_page) → 語り部に頁を見せる
 //   二本そろうと合図 ch4_ready (進捗 ember_trail)。メイン「灰の昇る山」には「乗る」の段 (伝承 chapter1/ember_ruins) を足した。
 //   灰の鍛え手 (背中の中ボス) が構える前の一言「返しに来たか」(伝承 ch4/return_the_beat) は、鍛え手が現れたとき近くの人に (onSmithJoin)
@@ -231,10 +232,21 @@ public final class Ch4Ground {
     static void markArrive(ServerPlayer p, ChapterSites.Site site) {
         Notice.narrate(p, "message.skyabyss.ch4g.arrive." + MARK);
         Quests.signal(p, SIGNAL_MARK);
-        if (marksVisited(p.server, p, site.pos()) >= MARKS && Growth.discover(p, "ch4_marks_all")) {
-            Tasks.later(40, () -> Notice.narrate(p, "message.skyabyss.ch4g.marks.last"));
+        if (marksVisited(p.server, p, site.pos()) >= MARKS) {
+            if (Growth.discover(p, "ch4_marks_all")) {
+                Tasks.later(40, () -> Notice.narrate(p, "message.skyabyss.ch4g.marks.last"));
+            }
+            // 円の縁の、まだ温かい灰をひとつまみ包む (薬師の会話の印。灰の民のやり方で火除けの薬を二つ作ってもらえる。2026-11-04 の決めごと c4_play = ash)
+            if (jp.revati.skyabyss.npc.NpcBonds.of(p).bond(APOTHECARY).flags().add(FLAG_WARM_ASH)) {
+                jp.revati.skyabyss.npc.NpcBonds.sync(p);
+                Tasks.later(100, () -> Notice.narrate(p, "message.skyabyss.ch4g.marks.ash"));
+            }
         }
     }
+
+    // 温かい灰を持った人に、薬師が火除けの薬を作る (会話 attendant_apothecary の節 ash1〜3)
+    public static final String APOTHECARY = "skyabyss:attendant_apothecary";
+    public static final String FLAG_WARM_ASH = "ch4_warm_ash";
 
     // その人が着いた標の数 (今着いた標を含む)
     public static int marksVisited(MinecraftServer server, ServerPlayer p, @Nullable BlockPos now) {

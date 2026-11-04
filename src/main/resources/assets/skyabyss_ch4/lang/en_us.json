@@ -125,8 +125,8 @@
   "quest.skyabyss.ch4.dragger_trail.follow.kiln": "Follow a dragger to the kiln",
   "quest.skyabyss.ch4.dragger_trail.summary": "Chase the ash-dragging bug to the ash people's kiln.",
   "quest.skyabyss.ch4.dragger_trail.title": "The Ash Dragger",
-  "quest.skyabyss.ch4.fire_draught.brew.journal": "The travelling artisan said: 'The ash folk drank a fire draught before the forge. Carry two. One trip won't do.'\nFire-resistance potions are sold at the apothecaries in Hairo and the capital.",
-  "quest.skyabyss.ch4.fire_draught.brew.potion": "Two fire-res potions (apothecary)",
+  "quest.skyabyss.ch4.fire_draught.brew.journal": "The travelling artisan said: \"The ash folk drank fire potion before entering the forge. Carry two. The forge never takes just one.\"\nShow the still-warm ash from the fifth ash-road stake to an apothecary and they may brew it the ash folk's way. (Hairo and capital apothecaries also sell it.)",
+  "quest.skyabyss.ch4.fire_draught.brew.potion": "Two fire-ward draughts (apothecary)",
   "quest.skyabyss.ch4.fire_draught.done": "\"Drink fire, walk into fire. That is how the ash people entered the forge.\"",
   "quest.skyabyss.ch4.fire_draught.show.journal": "Two fire draughts are ready. Show them to the traveling artisan.",
   "quest.skyabyss.ch4.fire_draught.show.talk": "Show the potions to the artisan",
@@ -215,5 +215,11 @@
   "subtitles.skyabyss_ch4.cinder_mite_hurt": "Cinder Mite recoils",
   "gui.skyabyss.attack.elder_thrall.rake": "Ember Rake",
   "gui.skyabyss.attack.elder_thrall.crack": "Crack",
-  "gui.skyabyss.attack.elder_thrall.wave": "Heat Wave"
+  "gui.skyabyss.attack.elder_thrall.wave": "Heat Wave",
+  "message.skyabyss.ch4g.marks.ash": "You wrap a pinch of the ash at the stake's foot in a cloth. ...The ash folk sank this in the bottom of their potion bottles.",
+  "message.skyabyss.ch4g.pit.stand_echo": "\"Hold it and it stays warm.\" ...Is she still counting, back in Kujirami?",
+  "dialogue.skyabyss.attendant_apothecary.menu.ash": "Show the warm ash from the edge of the circle",
+  "dialogue.skyabyss.attendant_apothecary.ash1": "That bundle... ash from the edge of the falling-ash circle. It's still warm.",
+  "dialogue.skyabyss.attendant_apothecary.ash2": "They say the ash folk sank a pinch of ash in the bottom of every fire potion, so the fire would learn their smell.\n...Let me try.",
+  "dialogue.skyabyss.attendant_apothecary.ash3": "Two bottles. The forge never takes just one, as the artisan would say."
 }
