@@ -25,6 +25,7 @@ public final class Golden {
     public static final int S21 = 21;
     public static final int S34 = 34;
     public static final int S55 = 55;
+    public static final int S89 = 89;
     // 板の外から中身まで (縁 5 + 余白 3)
     public static final int FRAME = 8;
     // 欄と欄のあいだ
