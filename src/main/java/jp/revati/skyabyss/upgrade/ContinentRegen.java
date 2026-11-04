@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -120,6 +121,7 @@ public final class ContinentRegen {
         MinecraftServer server = event.getServer();
         regenFrom = -1;
         LOADED.clear();
+        SETTLE.clear();
         SHRINES.clear();
         GRAVES.clear();
         if (!continent(server)) {
@@ -230,6 +232,8 @@ public final class ContinentRegen {
         titans.setDirty();
         // 沖の難破船は、もう一度置く
         jp.revati.skyabyss.story.ch2.Wreck.forget(server);
+        // 語り部・鯨追い・職人を立たせた時刻: 地上の生き物ごと消えたので、待たずに立て直す (2026-11-05 の声「アプデしたら、語り部がいない」)
+        jp.revati.skyabyss.npc.NpcWorldData.get(over).forgetAll();
         // 地上の墓は、印のブロックを置き直す
         for (jp.revati.skyabyss.grave.GraveData.Grave g : jp.revati.skyabyss.grave.GraveData.get(server).all()) {
             if (g.dimension == Level.OVERWORLD) {
@@ -296,19 +300,138 @@ public final class ContinentRegen {
         // 版が上がってから初めて入った人と、この起動で作り直した世界に初めて入った人: まわりの地形と建物が揃うまで読み込み画面 (RegenLoading)
         if (continent(p.server) && (first || regenerated() && LOADED.add(p.getUUID()))) {
             RegenLoading.begin(p);
-        }
-        if (!first) {
+            // 地面に立たせるのは、まわりが読めて建物が建ったあと (読み込み画面が終わったとき。released)。版の印もそのとき書く
+            // (読み込みの途中で抜けた人は、次に入ったときにもう一度)
+            if (first) {
+                SETTLE.add(p.getUUID());
+            }
             return;
         }
-        tag.putInt(PLAYER_KEY, VERSION);
-        // 地上の外にいる人 (背中・塔など) は、戻ったときの場所が作り直した地上の上なのでそのまま
-        if (p.level().dimension() == Level.OVERWORLD) {
-            unbury(p);
+        if (first) {
+            tag.putInt(PLAYER_KEY, VERSION);
         }
     }
 
     // この起動で読み込み画面を出した人 (作り直した起動のあいだに、二度は出さない)
     private static final Set<UUID> LOADED = new HashSet<>();
+    // 読み込み画面が終わったら地面に立たせる人 (版が上がってから初めて入った人)
+    private static final Set<UUID> SETTLE = new HashSet<>();
+
+    // 読み込み画面が終わった (RegenLoading)。版が上がってから初めての人は、地面に立たせて版の印を書く
+    static void released(ServerPlayer p) {
+        if (!SETTLE.remove(p.getUUID())) {
+            return;
+        }
+        p.getPersistentData().putInt(PLAYER_KEY, VERSION);
+        // 地上の外にいる人 (背中・塔など) は、戻ったときの場所が作り直した地上の上なのでそのまま
+        if (p.level().dimension() == Level.OVERWORLD) {
+            settle(p);
+        }
+    }
+
+    // 前の版の立ち位置が、作り直した地上では海の上・宙・地面の中になっていることがある (2026-11-05 の声「自分は海に落ちた」)。
+    //   地面や壁の中 → 上の空いた所 (unbury)。足の下 3 までに地面がある → そのまま。
+    //   下が陸 → その陸の上。下が水 (海・湖) → 近くの陸 (まわり 96 まで)。どれも無ければ起き上がる場所
+    static void settle(ServerPlayer p) {
+        ServerLevel level = p.serverLevel();
+        unbury(p);
+        BlockPos from = p.blockPosition();
+        BlockPos to = settleTarget(level, from);
+        if (to == null) {
+            return;
+        }
+        if (to.equals(NO_LAND)) {
+            BlockPos home = p.getRespawnPosition() != null && p.getRespawnDimension() == Level.OVERWORLD ? p.getRespawnPosition() : level.getSharedSpawnPos();
+            level.getChunk(home.getX() >> 4, home.getZ() >> 4);
+            // 起き上がる場所そのもの (か、そのそばの立てる所)。列のいちばん上にすると屋根の上に出る
+            to = standNear(level, home);
+            if (to == null) {
+                to = new BlockPos(home.getX(), level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, home.getX(), home.getZ()), home.getZ());
+            }
+        }
+        p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), p.getXRot());
+        p.resetFallDistance();
+        SkyAbyss.LOGGER.info("Continent regen: moved {} from {} to {} (the old spot was over water or in the air)", p.getGameProfile().getName(), from, to);
+    }
+
+    // at のそば (横 2・下 1・上 2) で、足と頭が空いて足の下に地面がある所。近い順。無ければ null
+    static BlockPos standNear(ServerLevel level, BlockPos at) {
+        BlockPos best = null;
+        int bestD = Integer.MAX_VALUE;
+        for (int dy = -1; dy <= 2; dy++) {
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    BlockPos p = at.offset(dx, dy, dz);
+                    int d = dx * dx + dz * dz + dy * dy;
+                    if (d < bestD && level.getBlockState(p).getCollisionShape(level, p).isEmpty()
+                            && level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
+                            && !level.getBlockState(p.below()).getCollisionShape(level, p.below()).isEmpty()
+                            && level.getFluidState(p).isEmpty()) {
+                        best = p;
+                        bestD = d;
+                    }
+                }
+            }
+        }
+        return best;
+    }
+
+    // 近くに陸が無い (起き上がる場所へ)
+    static final BlockPos NO_LAND = new BlockPos(0, Integer.MIN_VALUE / 2, 0);
+    static final int LAND_SEARCH = 96;
+
+    // 足の位置 feet の人をどこへ移すか。null = 動かさない、NO_LAND = 起き上がる場所へ
+    static BlockPos settleTarget(ServerLevel level, BlockPos feet) {
+        boolean wet = !level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty();
+        if (!wet) {
+            for (int i = 1; i <= 3; i++) {
+                BlockPos b = feet.below(i);
+                if (!level.getBlockState(b).getCollisionShape(level, b).isEmpty()) {
+                    return null;
+                }
+            }
+        }
+        BlockPos here = wet ? null : dryTop(level, feet.getX(), feet.getZ());
+        if (here != null) {
+            return here;
+        }
+        BlockPos best = null;
+        for (int r = 1; r <= LAND_SEARCH && best == null; r += r < 8 ? 1 : 4) {
+            int step = Math.max(1, r / 8);
+            double bestD = Double.MAX_VALUE;
+            for (int a = -r; a <= r; a += step) {
+                for (int[] d : new int[][] {{a, -r}, {a, r}, {-r, a}, {r, a}}) {
+                    BlockPos land = dryTop(level, feet.getX() + d[0], feet.getZ() + d[1]);
+                    if (land != null) {
+                        double dist = (double) d[0] * d[0] + (double) d[1] * d[1];
+                        if (dist < bestD) {
+                            bestD = dist;
+                            best = land;
+                        }
+                    }
+                }
+            }
+        }
+        return best != null ? best : NO_LAND;
+    }
+
+    // 列 (x, z) のいちばん上が水でない地面なら、その上 (足の高さ)。水・溶岩が上にある列、読めていない列は null
+    static BlockPos dryTop(ServerLevel level, int x, int z) {
+        if (!level.hasChunk(x >> 4, z >> 4)) {
+            return null;
+        }
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        int floor = level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z);
+        if (top > floor || top <= level.getMinBuildHeight() + 1) {
+            return null;
+        }
+        BlockPos at = new BlockPos(x, top, z);
+        if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty()
+                || !level.getFluidState(at.below()).isEmpty()) {
+            return null;
+        }
+        return at;
+    }
 
     // 地面や壁の中にいたら、上の、足と頭が空いた所へ出す (最大 64 上まで)
     static void unbury(ServerPlayer p) {
@@ -326,5 +449,21 @@ public final class ContinentRegen {
                 return;
             }
         }
+    }
+
+    // OP の確かめ: /skyabyss dev regen settle (作り直したあとの立ち位置の直しを、今いる所で流す。海の上・宙で試す)
+    @SubscribeEvent
+    static void onCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        event.getDispatcher().register(net.minecraft.commands.Commands.literal(SkyAbyss.MODID).requires(src -> src.hasPermission(2))
+                .then(net.minecraft.commands.Commands.literal("dev").then(net.minecraft.commands.Commands.literal("regen")
+                        .then(net.minecraft.commands.Commands.literal("settle").executes(ctx -> {
+                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                            BlockPos to = settleTarget(p.serverLevel(), p.blockPosition());
+                            String msg = "settle from " + p.blockPosition().toShortString() + " -> " + (to == null ? "stay" : to.equals(NO_LAND) ? "respawn point" : to.toShortString());
+                            SkyAbyss.LOGGER.info("[regen] {}", msg);
+                            ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(msg), false);
+                            settle(p);
+                            return 1;
+                        })))));
     }
 }

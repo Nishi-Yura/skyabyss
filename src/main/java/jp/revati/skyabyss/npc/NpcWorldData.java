@@ -35,6 +35,14 @@ public class NpcWorldData extends SavedData {
         return m == null ? -1 : m.getOrDefault(role, -1L);
     }
 
+    // 立たせた時刻を全部忘れる (大陸の地上を作り直して、NPC が生き物ごと消えたとき。upgrade/ContinentRegen・WorldUpgrade の段 2)
+    public int forgetAll() {
+        int n = villages.size();
+        villages.clear();
+        setDirty();
+        return n;
+    }
+
     void markSpawned(long bell, String role, long time) {
         villages.computeIfAbsent(bell, b -> new HashMap<>()).put(role, time);
         setDirty();

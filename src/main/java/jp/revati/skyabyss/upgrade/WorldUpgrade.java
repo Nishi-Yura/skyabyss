@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 // 新しい段を足すとき: CURRENT を一つ上げ、STEPS の終わりに new Step(番号, 名前, 中身) を足す (docs/release.md の「版を上げるとき」)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WorldUpgrade extends SavedData {
-    public static final int CURRENT = 1;
+    public static final int CURRENT = 2;
     static final String NAME = "skyabyss_world_version";
     private static final Factory<WorldUpgrade> FACTORY = new Factory<>(WorldUpgrade::new, WorldUpgrade::load);
 
@@ -36,6 +36,12 @@ public final class WorldUpgrade extends SavedData {
             // 1.0.0: 版の記録を始める。前の版の世界でもう済んでいる移し替え (倒れても落とさない・大陸の縁・町の作りの版・蜂の巣・留め袋) は
             // それぞれの仕組みが自分で見ているので、ここでは何もしない
             new Step(1, "start version tracking", server -> {
+            }),
+            // 1.1.1: 1.1.0 で大陸の地上を作り直した世界は、語り部・鯨追い・職人が生き物ごと消えたのに「立たせた時刻」が残り、
+            // 一日たつまで立ち直らなかった。記録を消して、近づいたときにすぐ立たせる (生きている人は見つけて二人目を立てない)
+            new Step(2, "forget npc spawn times", server -> {
+                int n = jp.revati.skyabyss.npc.NpcWorldData.get(server.overworld()).forgetAll();
+                SkyAbyss.LOGGER.info("World upgrade: forgot the spawn times of {} npc place(s)", n);
             }));
 
     int version;
