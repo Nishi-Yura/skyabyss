@@ -1,9 +1,7 @@
 package jp.revati.skyabyss.item.extra;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -27,18 +25,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 // 装備の自由度 (docs/design/31 の A02 アスペクト・A06 技の修飾ルーン・A07 ソケット・B15 世代刻み) の決まり。
-// 画面 (forge) もコマンドも自己テストも、ここだけを呼ぶ。対象は特性の付く装備 (レア以上の武器・防具・盾)
+// 画面 (forge) もコマンドも自己テストも、ここだけを呼ぶ。
+//   穴と粉: アンコモン以上の武器 (弓も)・防具・盾 (socketable)。穴の数は階級で決まる (GearTier.sockets)
+//   アスペクト・世代: 特性の付く装備 (レア以上の剣の類・防具・盾。eligible)
 public final class GearFreedom {
-    // 穴の抽選 (0 個・1 個・2 個の重み) は階級の表 GearTier.socketOdds
 
     // 炉の費用 (共鳴の結晶)
     public static final int EXTRACT_DESTROY_CRYSTALS = 2;
     public static final int EXTRACT_KEEP_CRYSTALS = 4;
     public static final int IMPRINT_CRYSTALS = 1;
-    public static final int UNSOCKET_CRYSTALS = 1;
-    // 穴を足す (打ち直し): 結晶 + 由来の巨神の素材。2 つ目のほうが高い
-    public static final int ADD_SOCKET_CRYSTALS = 2;
-    public static final int[] ADD_SOCKET_MATERIAL = {8, 16, 24};
+    // 外すのは無料 (粉と炉の頁 1-4。粉は段のまま戻るので、差し替えて試せる)
+    public static final int UNSOCKET_CRYSTALS = 0;
 
     public static final int TAG_COLOR = 0x8FD1C9;
     public static final int ASPECT_COLOR = 0xF2D78A;
@@ -50,6 +47,33 @@ public final class GearFreedom {
     // ---------------------------------------------------------------- 読む
     public static boolean eligible(ItemStack stack) {
         return AffixRules.eligible(stack);
+    }
+
+    // 穴の側から見た品の種類 (武器か防具か)。特性の付く品はその種類、アンコモンと弓もここで武器・防具になる
+    @Nullable
+    public static AffixType.Slot socketSlot(net.minecraft.world.item.Item item) {
+        AffixType.Slot s = AffixRules.slotOf(item);
+        if (s != null) {
+            return s;
+        }
+        if (!(item instanceof ModGear g) || g.tier().sockets() <= 0) {
+            return null;
+        }
+        if (item instanceof net.minecraft.world.item.SwordItem || item instanceof net.minecraft.world.item.BowItem) {
+            return AffixType.Slot.WEAPON;
+        }
+        if (item instanceof net.minecraft.world.item.ArmorItem || item instanceof net.minecraft.world.item.ShieldItem) {
+            return AffixType.Slot.ARMOR;
+        }
+        return null;
+    }
+
+    public static boolean socketable(ItemStack stack) {
+        return !stack.isEmpty() && socketSlot(stack.getItem()) != null;
+    }
+
+    public static boolean isBow(ItemStack stack) {
+        return stack.getItem() instanceof net.minecraft.world.item.BowItem;
     }
 
     public static boolean has(ItemStack stack) {
@@ -77,36 +101,27 @@ public final class GearFreedom {
         return extras(stack).generation();
     }
 
-    // ---------------------------------------------------------------- 抽選 (手にしたとき・古い装備)
-    public static int rollSockets(GearTier tier, RandomSource random) {
-        int[] odds = tier.socketOdds();
-        int total = 0;
-        for (int o : odds) {
-            total += o;
-        }
-        int r = random.nextInt(total);
-        for (int i = 0; i < odds.length; i++) {
-            r -= odds[i];
-            if (r < 0) {
-                return Math.min(i, tier.maxSockets());
-            }
-        }
-        return 0;
-    }
-
-    // その装備に開けられる穴の数の上限 (階級で決まる)
+    // ---------------------------------------------------------------- 穴の数 (手にしたとき・古い装備)
+    // その装備の穴の数 (階級で決まる)
     public static int maxSockets(ItemStack stack) {
-        return stack.getItem() instanceof ModGear g ? Math.min(GearExtras.MAX_SOCKETS, g.tier().maxSockets()) : 0;
+        return socketable(stack) && stack.getItem() instanceof ModGear g ? Math.min(GearExtras.MAX_SOCKETS, g.tier().sockets()) : 0;
     }
 
-    // 付いていなければ穴を抽選して付ける (新しい装備も古いセーブの装備も、手にしたときに一度)。付けたら true
+    // 穴を階級の数にそろえる (新しい装備も古いセーブの装備も。前の抽選で多く開いていた品は減らさない)。変えたら true
     public static boolean ensure(ItemStack stack, RandomSource random) {
-        if (!eligible(stack) || has(stack)) {
+        if (!socketable(stack)) {
             return false;
         }
-        GearTier tier = ((ModGear) stack.getItem()).tier();
-        stack.set(ModDataComponents.GEAR_EXTRAS.get(), GearExtras.EMPTY.withSockets(rollSockets(tier, random)));
-        return true;
+        int want = maxSockets(stack);
+        if (!has(stack)) {
+            stack.set(ModDataComponents.GEAR_EXTRAS.get(), GearExtras.EMPTY.withSockets(want));
+            return true;
+        }
+        if (sockets(stack) < want) {
+            put(stack, extras(stack).withSockets(want));
+            return true;
+        }
+        return false;
     }
 
     private static void put(ItemStack stack, GearExtras x) {
@@ -115,7 +130,7 @@ public final class GearFreedom {
 
     // ---------------------------------------------------------------- 穴 (A07) と修飾ルーン (A06)
     public static boolean canInsert(ItemStack stack, Gem gem) {
-        if (!eligible(stack) || freeSockets(stack) <= 0) {
+        if (!socketable(stack) || freeSockets(stack) <= 0) {
             return false;
         }
         if (gem.isShard()) {
@@ -160,23 +175,10 @@ public final class GearFreedom {
         return out;
     }
 
-    public static boolean canAddSocket(ItemStack stack) {
-        return eligible(stack) && sockets(stack) < maxSockets(stack);
-    }
-
-    // 打ち直しで穴を足す (抽選の運に頼らず、必ず付けられる道)。費用は ForgeRules が払う
-    public static boolean addSocket(ItemStack stack) {
-        if (!canAddSocket(stack)) {
-            return false;
-        }
-        put(stack, extras(stack).withSockets(sockets(stack) + 1));
-        return true;
-    }
-
     // ---------------------------------------------------------------- 数字: 欠片と形見の特性は特性と同じ道で効く
     // その装備の欠片・形見の特性が足す数字 (種類は武器か防具の側に合わせる)
     public static List<Affix> bonus(ItemStack stack) {
-        AffixType.Slot slot = AffixRules.slotOf(stack.getItem());
+        AffixType.Slot slot = socketSlot(stack.getItem());
         GearExtras x = extras(stack);
         if (slot == null || (x.gems().isEmpty() && x.traits().isEmpty())) {
             return List.of();
@@ -185,24 +187,22 @@ public final class GearFreedom {
         for (Gem g : x.gems()) {
             Element e = g.isShard() ? Element.byId(g.arg()) : null;
             if (e != null) {
-                int t = Powder.tier(g);
-                out.add(slot == AffixType.Slot.WEAPON ? new Affix(e.weapon, e.weaponValue * t) : new Affix(e.armor, e.armorValue * t));
+                out.add(line(e, slot, isBow(stack), Powder.tier(g)));
             }
         }
         out.addAll(x.traits());
         return out;
     }
 
-    // 差した欠片の属性タグ (重なれば重なった数だけ)
-    public static List<Element> tags(ItemStack stack) {
-        List<Element> out = new ArrayList<>();
-        for (Gem g : extras(stack).gems()) {
-            Element e = g.isShard() ? Element.byId(g.arg()) : null;
-            if (e != null) {
-                out.add(e);
-            }
+    // 粉一つの数字の行 (段の数だけ掛ける)。弓は風が移動の速さになる (攻撃の速さは矢に効かないため)。岩の攻撃力は矢にも掛ける (ChapterBowItem)
+    public static Affix line(Element e, AffixType.Slot slot, boolean bow, int tier) {
+        if (slot == AffixType.Slot.ARMOR) {
+            return new Affix(e.armor, e.armorValue * tier);
         }
-        return out;
+        if (bow && e == Element.WIND) {
+            return new Affix(AffixType.STRIDE, Element.WIND.armorValue * tier);
+        }
+        return new Affix(e.weapon, e.weaponValue * tier);
     }
 
     // ---------------------------------------------------------------- アスペクト (A02)
@@ -276,17 +276,17 @@ public final class GearFreedom {
     public static List<ItemStack> worn(Player player) {
         List<ItemStack> out = new ArrayList<>(6);
         ItemStack hand = player.getMainHandItem();
-        if (AffixRules.slotOf(hand.getItem()) == AffixType.Slot.WEAPON && GearLevel.meets(player, hand)) {
+        if (socketSlot(hand.getItem()) == AffixType.Slot.WEAPON && GearLevel.meets(player, hand)) {
             out.add(hand);
         }
         for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack s = player.getItemBySlot(slot);
-            if (AffixRules.slotOf(s.getItem()) == AffixType.Slot.ARMOR && GearLevel.meets(player, s)) {
+            if (socketSlot(s.getItem()) == AffixType.Slot.ARMOR && GearLevel.meets(player, s)) {
                 out.add(s);
             }
         }
         ItemStack off = player.getOffhandItem();
-        if (off.getItem() instanceof net.minecraft.world.item.ShieldItem && AffixRules.slotOf(off.getItem()) == AffixType.Slot.ARMOR
+        if (off.getItem() instanceof net.minecraft.world.item.ShieldItem && socketSlot(off.getItem()) == AffixType.Slot.ARMOR
                 && GearLevel.meets(player, off)) {
             out.add(off);
         }
@@ -301,15 +301,6 @@ public final class GearFreedom {
             }
         }
         return false;
-    }
-
-    // いま効いている属性タグ
-    public static Set<Element> activeTags(Player player) {
-        Set<Element> out = EnumSet.noneOf(Element.class);
-        for (ItemStack s : worn(player)) {
-            out.addAll(tags(s));
-        }
-        return out;
     }
 
     // ---------------------------------------------------------------- 世代 (B15)
@@ -382,7 +373,7 @@ public final class GearFreedom {
 
     // ---------------------------------------------------------------- ツールチップ
     public static void tooltip(ItemStack stack, List<Component> out) {
-        if (!eligible(stack) || !has(stack)) {
+        if (!socketable(stack) || !has(stack)) {
             return;
         }
         GearExtras x = extras(stack);
@@ -393,6 +384,7 @@ public final class GearFreedom {
                 out.add(Component.translatable("gear.skyabyss.socket_empty").withStyle(ChatFormatting.DARK_GRAY));
             }
         }
+        artLines(stack, out);
         if (!x.aspect().isEmpty()) {
             Rune r = Rune.byId(x.aspect());
             if (r != null) {
@@ -416,6 +408,35 @@ public final class GearFreedom {
         }
     }
 
+    // 粉の技の行: 差した粉ごとに、技の名前と段の和 (4 以上で働く)
+    public static void artLines(ItemStack stack, List<Component> out) {
+        boolean weapon = socketSlot(stack.getItem()) == AffixType.Slot.WEAPON;
+        for (java.util.Map.Entry<Element, Integer> e : Powder.weights(stack).entrySet()) {
+            boolean on = e.getValue() >= Powder.WEIGHT_FOR_ART;
+            Component name = Component.translatable(PowderArts.artKey(e.getKey(), weapon));
+            int color = PowderArts.COLORS[e.getKey().ordinal()];
+            if (on) {
+                out.add(Component.translatable("gear.skyabyss.powder_art_on", name, e.getValue(), Powder.WEIGHT_FOR_ART).withStyle(s -> s.withColor(color)));
+            } else {
+                out.add(Component.translatable("gear.skyabyss.powder_art_off", name, e.getValue(), Powder.WEIGHT_FOR_ART).withStyle(ChatFormatting.DARK_GRAY));
+            }
+        }
+    }
+
+    // 炉の粉のつまみの短い一行 (「岩 IV ─ 攻撃力 +8%」)。ルーンはいつもの一行
+    public static Component gemShort(Gem g, ItemStack stack) {
+        Element e = g.isShard() ? Element.byId(g.arg()) : null;
+        if (e == null) {
+            return gemLine(g, stack);
+        }
+        AffixType.Slot slot = socketSlot(stack.getItem());
+        int t = Powder.tier(g);
+        Affix a = line(e, slot == null ? AffixType.Slot.WEAPON : slot, isBow(stack), t);
+        return Component.translatable(e.nameKey() + ".short").append(" " + Powder.roman(t)).withStyle(s -> s.withColor(TAG_COLOR))
+                .append(Component.literal(" ─ ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(AffixRules.describe(a).withStyle(s -> s.withColor(AffixRules.LINE_COLOR)));
+    }
+
     // 穴に差したものの一行 (名前と効き目)
     public static Component gemLine(Gem g, ItemStack stack) {
         if (g.isShard()) {
@@ -423,9 +444,9 @@ public final class GearFreedom {
             if (e == null) {
                 return Component.translatable("affix.skyabyss.unknown").withStyle(ChatFormatting.GRAY);
             }
-            AffixType.Slot slot = AffixRules.slotOf(stack.getItem());
+            AffixType.Slot slot = socketSlot(stack.getItem());
             int t = Powder.tier(g);
-            Affix a = slot == AffixType.Slot.ARMOR ? new Affix(e.armor, e.armorValue * t) : new Affix(e.weapon, e.weaponValue * t);
+            Affix a = line(e, slot == null ? AffixType.Slot.WEAPON : slot, isBow(stack), t);
             return Component.translatable(e.nameKey()).append(" " + Powder.roman(t)).withStyle(s -> s.withColor(TAG_COLOR))
                     .append(Component.literal(" ─ ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(AffixRules.describe(a).withStyle(s -> s.withColor(AffixRules.LINE_COLOR)));

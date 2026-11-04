@@ -110,6 +110,10 @@ public interface ModGear {
         if (enhanceable) {
             int level = enhance(stack);
             tooltip.add(Component.translatable("gear.skyabyss.enhance", level, MAX_ENHANCE).withStyle(s -> s.withColor(0x9FE8FF)));
+            if (level > 0 && stack.getItem() instanceof net.minecraft.world.item.ArmorItem) {
+                tooltip.add(Component.translatable("gear.skyabyss.enhance_guard", level,
+                        String.format(java.util.Locale.ROOT, "%.1f", level * GearEvents.GUARD_PER_LEVEL * 100)).withStyle(s -> s.withColor(0x9FE8FF)));
+            }
             if (level >= AWAKEN_LEVEL) {
                 tooltip.add(Component.translatable("gear.skyabyss.awakened").withStyle(s -> s.withColor(0xF2B53A)));
             }

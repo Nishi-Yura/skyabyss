@@ -44,10 +44,11 @@ import net.minecraft.world.level.block.BedBlock;
 //   buyback   : 封切り師の買い取り。装備を鐘銭に (Buyback。店の画面を売るだけで開く)
 //   tower_desk / tower_shop / tower_records : 塔守。あいだの塔の受付の一覧・塔の店・記録の板 (tower/TowerDesk)
 //   guide     : 都の案内人。施設の一覧の画面 → 選んだ施設の戸まで灯りの道 (TownGuide)
+//   powder    : 町の鍛冶師。粉を差す・外す・合わせるだけの炉の画面 (forge/ResonanceForgeMenu.openPowder。docs/design/41 の 3)
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board", "powder");
 
     private FacilityActions() {
     }
@@ -102,6 +103,12 @@ public final class FacilityActions {
             case "fishing_board" -> {
                 jp.revati.skyabyss.fishing.Fishing.show(player);
                 jp.revati.skyabyss.endgame.ChatMenus.open(player);
+            }
+            // 町の鍛冶師: 粉を差す・外す・合わせるだけの炉の画面 (2026-11-05 の粉と炉の頁 1-4)
+            case "powder" -> {
+                if (npc != null) {
+                    jp.revati.skyabyss.forge.ResonanceForgeMenu.openPowder(player, npc);
+                }
             }
             case "look" -> {
                 jp.revati.skyabyss.endgame.Looks.menu(player);

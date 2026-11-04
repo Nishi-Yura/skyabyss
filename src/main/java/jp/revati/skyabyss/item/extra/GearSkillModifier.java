@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 // 装備の技の修飾 (A06 ルーン・A03/A07 属性タグ) を SkillBuild の SkillModifier へつなぐ。
 //  - ルーン: その技のルーンは、身につけている装備の中で最もよい一枚だけ (1 つの技に 1 枚)。力は +10〜30%、待ちは −10〜20%
-//  - 属性タグ: 差した欠片一つが、その木のタグを 1 つ数える (数えた数の効きは SkillBuild.tagPower)
+//  - 粉は技の木のタグを数えない (2026-11-05 の粉と炉の頁 1-1 で外した。タグは技と装飾と印だけ)
 //  - 技の力の合計は SkillBuild で +100% (×2.0) を超えない
 public final class GearSkillModifier implements SkillModifier {
     public static final GearSkillModifier INSTANCE = new GearSkillModifier();
@@ -45,18 +45,5 @@ public final class GearSkillModifier implements SkillModifier {
             }
         }
         return best;
-    }
-
-    @Override
-    public int extraTags(Player player, SkillTag tag) {
-        int n = 0;
-        for (ItemStack s : GearFreedom.worn(player)) {
-            for (Element e : GearFreedom.tags(s)) {
-                if (e.tree == tag.tree) {
-                    n++;
-                }
-            }
-        }
-        return n;
     }
 }

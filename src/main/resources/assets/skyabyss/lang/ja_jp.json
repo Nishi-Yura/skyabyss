@@ -47,7 +47,7 @@
   "item.skyabyss.abyss_toll_bell_staff.desc": "結び目のある綱で鳴らす、青銅の弔いの鐘。",
   "gear.skyabyss.affix_range": "（%s〜%s）",
   "gear.skyabyss.affix_shift_hint": "Shift: 特性の出来",
-  "gui.skyabyss.forge.sockets_of": "穴 %1$s/%2$s（最大 %3$s）",
+  "gui.skyabyss.forge.sockets_of": "差したもの %1$s/%2$s",
   "gear.skyabyss.origin.island_shrine": "島の祠の品",
   "gear.skyabyss.origin_weapon.island_shrine": "島の祠の武器",
   "item.skyabyss.whale_hammer.desc": "岩鯨の背の石を打ち固めた鎚。",
@@ -483,7 +483,7 @@
   "gear.skyabyss.origin.stone_whale": "岩鯨の専用装備",
   "gear.skyabyss.origin_weapon.stone_whale": "岩鯨の専用武器",
   "gear.skyabyss.enhance": "共鳴の強化 +%s / +%s",
-  "gear.skyabyss.awakened": "◆ 覚醒: 固有効果が強まっている",
+  "gear.skyabyss.awakened": "◆ 鍛え冴え: 固有効果が強まっている",
   "gui.skyabyss.forge.enhance": "強化",
   "gui.skyabyss.forge.dismantle": "分解",
   "gui.skyabyss.forge.confirm": "本当に？",
@@ -3100,5 +3100,6 @@
   "mutation.skyabyss.thunder_cloud.effect": "稲妻の代わりに、見ている先に雷雲を呼ぶ。4 秒のあいだ、雲の下の敵へ雷が落ち続ける。",
   "mutation.skyabyss.frozen_sea": "凍て海",
   "mutation.skyabyss.frozen_sea.effect": "冷たい潮の代わりに、6 秒残る氷の床。小さな敵は凍って動けない。",
-  "message.skyabyss.tree.reset_v3": "技の木が新しくなりました。取っていた節を戻し、SP をすべて返しました（技の木で取り直せます）。"
+  "message.skyabyss.tree.reset_v3": "技の木が新しくなりました。取っていた節を戻し、SP をすべて返しました（技の木で取り直せます）。",
+  "gear.skyabyss.enhance_guard": "強化 +%1$s: 受ける傷 −%2$s%%"
 }

@@ -5,18 +5,18 @@ import net.minecraft.network.chat.TextColor;
 // 装備の階級 (03 の 1.2節。2026-10-24 に 6 段へ、2026-11-01 に 7 段へ): コモン(白) / アンコモン(緑) / レア(青) / エピック(紫) / ヒロイック(橙) /
 // アーティファクト(金。表示は「★ 伝説」) / 神器(紅紫。Wynncraft のミシックの立ち位置: いちばん上、終章の神器とあいだの塔の装備だけ)。
 // 階級は品で決まる (セーブには書かない)。品の ID が変わらないので、前のセーブの装備は新しい階級をそのまま読む。
-// 階級ごとの決まりはこの表だけに置く: 名前の色、特性の数と幅 (AffixRules)、穴の抽選 (GearFreedom)、分解 (ForgeRules)、
+// 階級ごとの決まりはこの表だけに置く: 名前の色、特性の数と幅 (AffixRules)、穴の数 (GearFreedom)、分解 (ForgeRules)、
 // 必要 Lv の差 (GearLevel)、立体の形の段 (meshTier: 手・地面・額縁・装飾の立体。絵は変えない)、アスペクトの芯を刻めるか。
 // 旧「伝説」はアーティファクトに改名した (キーは artifact)。神器 (mythic) は 2026-11-01 の声「レア度神器は Wynncraft のミシックのような立ち位置」で足した
 public enum GearTier {
-    //        key          色        分解 特性   少ない側 幅広 穴 0/1/2        欠片 結晶 Lv差 形
-    COMMON("common", 0xE4E4E4, 0, 0, 0, 0f, false, new int[]{100, 0, 0}, false, 0, 4, "common"),
-    UNCOMMON("uncommon", 0x7BD66B, 1, 0, 0, 0f, false, new int[]{100, 0, 0}, false, 0, 4, "common"),
-    RARE("rare", 0x5AA9FF, 3, 1, 2, 0.6f, false, new int[]{50, 38, 12}, false, 1, 4, "rare"),
-    EPIC("epic", 0xB98CFF, 5, 1, 2, 0.35f, false, new int[]{40, 42, 18}, false, 1, 4, "rare"),
-    HEROIC("heroic", 0xFF7A3D, 10, 2, 3, 0.6f, true, new int[]{30, 45, 25}, true, 2, 2, "legend"),
-    ARTIFACT("artifact", 0xF2C94C, 10, 2, 3, 0.35f, true, new int[]{20, 45, 35}, true, 3, 2, "legend"),
-    MYTHIC("mythic", 0xE040FB, 12, 3, 3, 0f, true, new int[]{10, 40, 50}, true, 4, 2, "legend");
+    //        key          色        分解 特性   少ない側 幅広 穴 欠片 結晶 Lv差 形
+    COMMON("common", 0xE4E4E4, 0, 0, 0, 0f, false, 0, false, 0, 4, "common"),
+    UNCOMMON("uncommon", 0x7BD66B, 1, 0, 0, 0f, false, 1, false, 0, 4, "common"),
+    RARE("rare", 0x5AA9FF, 3, 1, 2, 0.6f, false, 1, false, 1, 4, "rare"),
+    EPIC("epic", 0xB98CFF, 5, 1, 2, 0.35f, false, 2, false, 1, 4, "rare"),
+    HEROIC("heroic", 0xFF7A3D, 10, 2, 3, 0.6f, true, 2, true, 2, 2, "legend"),
+    ARTIFACT("artifact", 0xF2C94C, 10, 2, 3, 0.35f, true, 3, true, 3, 2, "legend"),
+    MYTHIC("mythic", 0xE040FB, 12, 3, 3, 0f, true, 3, true, 4, 2, "legend");
 
     public final String key;
     public final TextColor color;
@@ -30,7 +30,8 @@ public enum GearTier {
     // 特性の幅を 1.25 倍にするか (AffixType.min/max の wide)
     public final boolean wideAffixes;
     // 穴の数の重み (0 個・1 個・2 個)
-    private final int[] socketOdds;
+    // 穴の数 (2026-11-05 の粉と炉の頁 1-3: 抽選をやめ、階級で決める)
+    private final int sockets;
     // 分解で共鳴の欠片 (交換の通貨) が出るか。出ない階級は素材が戻る
     public final boolean shardDismantle;
     // 特性の付く品を分解したときの共鳴の結晶
@@ -41,7 +42,7 @@ public enum GearTier {
     public final String meshTier;
 
     GearTier(String key, int rgb, int dismantleValue, int affixMin, int affixMax, float fewerChance, boolean wideAffixes,
-            int[] socketOdds, boolean shardDismantle, int dismantleCrystals, int levelMargin, String meshTier) {
+            int sockets, boolean shardDismantle, int dismantleCrystals, int levelMargin, String meshTier) {
         this.key = key;
         this.color = TextColor.fromRgb(rgb);
         this.dismantleValue = dismantleValue;
@@ -49,7 +50,7 @@ public enum GearTier {
         this.affixMax = affixMax;
         this.fewerChance = fewerChance;
         this.wideAffixes = wideAffixes;
-        this.socketOdds = socketOdds;
+        this.sockets = sockets;
         this.shardDismantle = shardDismantle;
         this.dismantleCrystals = dismantleCrystals;
         this.levelMargin = levelMargin;
@@ -60,18 +61,10 @@ public enum GearTier {
         return color.getValue();
     }
 
-    public int[] socketOdds() {
-        return socketOdds.clone();
-    }
-
-    // 穴 (サブ効果の欠片・ルーンを差す所) を開けられる数の上限 (2026-10-26 の声)。抽選も打ち直しもこの数まで
-    public int maxSockets() {
-        return switch (this) {
-            case COMMON, UNCOMMON -> 0;
-            case RARE -> 1;
-            case EPIC -> 2;
-            case HEROIC, ARTIFACT, MYTHIC -> 3;
-        };
+    // 穴 (粉・ルーンを差す所) の数。コモン 0・アンコモン 1・レア 1・エピック 2・ヒロイック 2・アーティファクトと神器 3。
+    // 品はいつもこの数 (前の抽選で多く開いていた品は減らさない。GearFreedom.ensure)
+    public int sockets() {
+        return sockets;
     }
 
     public boolean atLeast(GearTier other) {

@@ -47,7 +47,7 @@
   "item.skyabyss.abyss_toll_bell_staff.desc": "A bronze funeral bell rung by a knotted rope.",
   "gear.skyabyss.affix_range": " (%s to %s)",
   "gear.skyabyss.affix_shift_hint": "Shift: roll quality",
-  "gui.skyabyss.forge.sockets_of": "Sockets %1$s/%2$s (max %3$s)",
+  "gui.skyabyss.forge.sockets_of": "Socketed %1$s/%2$s",
   "gear.skyabyss.origin.island_shrine": "From the island shrine",
   "gear.skyabyss.origin_weapon.island_shrine": "Island shrine weapon",
   "item.skyabyss.whale_hammer.desc": "A hammer of stone from the stone whale's back.",
@@ -483,7 +483,7 @@
   "gear.skyabyss.origin.stone_whale": "Stone Whale gear",
   "gear.skyabyss.origin_weapon.stone_whale": "Stone Whale weapon",
   "gear.skyabyss.enhance": "Resonance +%s / +%s",
-  "gear.skyabyss.awakened": "◆ Awakened: unique effect empowered",
+  "gear.skyabyss.awakened": "◆ Honed: unique effect empowered",
   "gui.skyabyss.forge.enhance": "Enhance",
   "gui.skyabyss.forge.dismantle": "Dismantle",
   "gui.skyabyss.forge.confirm": "Sure?",
@@ -3100,5 +3100,6 @@
   "mutation.skyabyss.thunder_cloud.effect": "Instead of a bolt, summon a thundercloud where you look. For 4 s, lightning keeps striking foes beneath it.",
   "mutation.skyabyss.frozen_sea": "Frozen Sea",
   "mutation.skyabyss.frozen_sea.effect": "Instead of a cold tide, leaves a frozen floor for 6 s. Small foes freeze in place.",
-  "message.skyabyss.tree.reset_v3": "The skill trees have changed. Your nodes were reset and all SP refunded (retake them in the skill tree)."
+  "message.skyabyss.tree.reset_v3": "The skill trees have changed. Your nodes were reset and all SP refunded (retake them in the skill tree).",
+  "gear.skyabyss.enhance_guard": "Resonance +%1$s: damage taken −%2$s%%"
 }

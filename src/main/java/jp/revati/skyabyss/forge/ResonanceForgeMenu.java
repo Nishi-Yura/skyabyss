@@ -27,8 +27,10 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-// 共鳴の炉の画面: 装備を置く枠が一つと、持ち物。ボタンで強化・分解・再鍛造・交換する (費用は持ち物から払う)
-// 交換に要る「持っている専用の逸品」と「交換できるか」はサーバーの記録にしかないので、数の枠 (DataSlot) で送る
+// 共鳴の炉の画面: 装備を置く枠が一つと、材料の枠と、持ち物。ボタンで強化・分解・粉・再鍛造・交換する (費用は持ち物から払う)
+// 交換に要る「持っている専用の逸品」と「交換できるか」はサーバーの記録にしかないので、数の枠 (DataSlot) で送る。
+// 町の鍛冶師に話すと、同じ画面を「粉だけ」で開く (openPowder。2026-11-05 の粉と炉の頁 1-4)。そのときは粉の操作だけ通し、鍛冶師のそばにいるあいだ開いている
+@net.neoforged.fml.common.EventBusSubscriber(modid = jp.revati.skyabyss.SkyAbyss.MODID)
 public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_ENHANCE = 0;
     public static final int BUTTON_DISMANTLE = 1;
@@ -45,10 +47,12 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_EXTRACT_KEEP = 101;
     public static final int BUTTON_IMPRINT = 102;
     public static final int BUTTON_INSERT = 103;
-    // 外す: 穴 0・1 (104・105)
+    // 外す: 穴 0〜2 (104〜106)
     public static final int BUTTON_REMOVE = 104;
-    // 外す (BUTTON_REMOVE + 穴の番号 0〜2) と重ならないように
-    public static final int BUTTON_ADD_SOCKET = 108;
+    // 粉を合わせる (材料の枠の同じ段の粉三つ → 一つ上の段一つ)。外す (BUTTON_REMOVE + 穴の番号 0〜2) と重ならないように
+    public static final int BUTTON_COMBINE = 108;
+    // 町の鍛冶師のそばで開いた「粉だけ」の画面で、鍛冶師から離れてよい距離
+    public static final double ANCHOR_RANGE = 8;
     public static final int GEAR_X = 44;
     public static final int GEAR_Y = 35;
     // 材料の枠 (欠片・ルーン・アスペクトの芯)
@@ -70,6 +74,11 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         }
     };
     private final ContainerLevelAccess access;
+    // 粉だけの画面を開いた鍛冶師 (炉で開いたときは null)
+    @org.jetbrains.annotations.Nullable
+    private final net.minecraft.world.entity.Entity anchor;
+    // 1 = 粉だけ (町の鍛冶師)。画面へは数の枠で送る
+    private final net.minecraft.world.inventory.DataSlot mode = net.minecraft.world.inventory.DataSlot.standalone();
     // 巨神ごとに二つ (TitanGearSets の並び): [2t] 持っている専用の逸品の印、[2t+1] 交換の状態 (ForgeRules.ExchangeState の順番)
     private final ContainerData exchange;
 
@@ -78,8 +87,21 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     }
 
     public ResonanceForgeMenu(int id, Inventory inventory, ContainerLevelAccess access) {
+        this(id, inventory, access, null);
+    }
+
+    public ResonanceForgeMenu(int id, Inventory inventory, ContainerLevelAccess access, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity anchor) {
+        this(id, inventory, access, anchor, anchor != null);
+    }
+
+    // anchor: 開いている間そばにいる相手 (鍛冶師。炉で開いたときは null)。powderOnly: 粉の操作だけ
+    public ResonanceForgeMenu(int id, Inventory inventory, ContainerLevelAccess access, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity anchor,
+            boolean powderOnly) {
         super(ModMenus.RESONANCE_FORGE.get(), id);
         this.access = access;
+        this.anchor = anchor;
+        mode.set(powderOnly ? 1 : 0);
+        addDataSlot(mode);
         int sets = TitanGearSets.exchangeable().size();
         if (inventory.player instanceof ServerPlayer server) {
             exchange = new ContainerData() {
@@ -134,6 +156,44 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         return gear.getItem(0);
     }
 
+    // 町の鍛冶師の「粉だけ」の画面か
+    public boolean powderOnly() {
+        return mode.get() == 1;
+    }
+
+    // 町の鍛冶師に話して、粉だけの画面を開く (facility/FacilityActions の "powder")
+    public static void openPowder(ServerPlayer player, net.minecraft.world.entity.Entity smith) {
+        player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inv, p) -> new ResonanceForgeMenu(id, inv, ContainerLevelAccess.create(player.level(), smith.blockPosition()), smith),
+                net.minecraft.network.chat.Component.translatable("gui.skyabyss.forge.powder_title")));
+    }
+
+    // 開発・撮影: /skyabyss_forge open|powder : 炉 (か粉だけ) の画面を開き、手の品を装備の枠へ、左手の品を材料の枠へ移す
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onRegisterCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        event.getDispatcher().register(net.minecraft.commands.Commands.literal("skyabyss_forge").requires(s -> s.hasPermission(2))
+                .then(net.minecraft.commands.Commands.literal("open").executes(c -> devOpen(c.getSource().getPlayerOrException(), false)))
+                .then(net.minecraft.commands.Commands.literal("powder").executes(c -> devOpen(c.getSource().getPlayerOrException(), true))));
+    }
+
+    private static int devOpen(ServerPlayer player, boolean powder) {
+        ItemStack hand = player.getMainHandItem().copy();
+        ItemStack off = player.getOffhandItem().copy();
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        player.openMenu(new net.minecraft.world.SimpleMenuProvider((id, inv, p) -> {
+            ResonanceForgeMenu m = new ResonanceForgeMenu(id, inv, ContainerLevelAccess.create(player.level(), player.blockPosition()), player, powder);
+            m.gear.setItem(0, hand);
+            m.material.setItem(0, off);
+            return m;
+        }, net.minecraft.network.chat.Component.translatable(powder ? "gui.skyabyss.forge.powder_title" : "block.skyabyss.resonance_forge")));
+        return 1;
+    }
+
+    static boolean powderButton(int id) {
+        return id == BUTTON_INSERT || id == BUTTON_COMBINE || id >= BUTTON_REMOVE && id < BUTTON_REMOVE + jp.revati.skyabyss.item.extra.GearExtras.MAX_SOCKETS;
+    }
+
     public ItemStack material() {
         return material.getItem(0);
     }
@@ -156,6 +216,21 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
+        if (powderOnly() && !powderButton(id)) {
+            return false;
+        }
+        // 粉を合わせるのは材料の枠だけを使う
+        if (id == BUTTON_COMBINE) {
+            ItemStack out = ForgeRules.combinePowder(material());
+            if (out.isEmpty()) {
+                return false;
+            }
+            material.setChanged();
+            placeBack(player, out);
+            inscribeEffects(true);
+            fireForge(player, "powder_combine");
+            return true;
+        }
         // 交換は装備の枠を使わない
         if (id >= BUTTON_EXCHANGE && id < BUTTON_EXTRACT_DESTROY) {
             int t = (id - BUTTON_EXCHANGE) / EXCHANGE_STRIDE;
@@ -269,15 +344,6 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
                 material.setChanged();
                 inscribeEffects(false);
                 fireForge(player, "socket");
-                return true;
-            }
-            case BUTTON_ADD_SOCKET -> {
-                if (!ForgeRules.addSocket(player, stack)) {
-                    return false;
-                }
-                gear.setChanged();
-                inscribeEffects(true);
-                fireForge(player, "socket_add");
                 return true;
             }
             default -> {
@@ -403,6 +469,9 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
+        if (anchor != null) {
+            return anchor.isAlive() && !anchor.isRemoved() && player.distanceToSqr(anchor) <= ANCHOR_RANGE * ANCHOR_RANGE;
+        }
         return stillValid(access, player, ModBlocks.RESONANCE_FORGE.get());
     }
 

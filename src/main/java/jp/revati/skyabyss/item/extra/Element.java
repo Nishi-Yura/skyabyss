@@ -5,8 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.item.affix.AffixType;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 
-// 欠片の属性 (岩・風・潮・灰・骨)。差すと、その木の属性タグが付き (SkillBuild のタグの数に 1 つ足す)、小さな数字が上がる。
-// 数字は武器と防具で別。特性と同じ修飾子の道 (AffixRules.effective) で効く
+// 巨神の粉の属性 (岩・風・潮・灰・骨)。差すと小さな数字が上がる (段の数だけ掛ける)。数字は武器と防具で別 (弓は GearFreedom.line)。
+// 特性と同じ修飾子の道 (AffixRules.effective) で効く。tree は粉の名前と木の対応 (2026-11-05 から技のタグには数えない)
 public enum Element {
     STONE("stone", SkillTree.ROCK, AffixType.SHARP, 0.02, AffixType.BULWARK, 0.25),
     WIND("wind", SkillTree.WIND, AffixType.SWIFT, 0.02, AffixType.STRIDE, 0.01),

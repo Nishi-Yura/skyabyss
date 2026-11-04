@@ -68,7 +68,8 @@ public final class DamageNumbersClient {
             return;
         }
         for (Num n : NUMS) {
-            if (n.entity == p.entity() && n.age <= MERGE_TICKS) {
+            // 粉の技の数字は、ほかの数字と混ぜない (粉の色のまま別に出す)
+            if (n.entity == p.entity() && n.age <= MERGE_TICKS && (n.kind >= DamageNumbers.POWDER) == (p.kind() >= DamageNumbers.POWDER)) {
                 n.amount += p.amount();
                 n.kind = Math.max(n.kind, p.kind());
                 n.age = 0;
@@ -145,7 +146,8 @@ public final class DamageNumbersClient {
                 continue;
             }
             // 出た瞬間は白く光り、2 tick で種類の色 (ふつう 白、技 金、とどめ 赤みの金) へ
-            int rgb = n.kind == DamageNumbers.KILL ? 0xFFB347 : n.kind == DamageNumbers.SKILL ? 0xFFD966 : 0xFFFFFF;
+            int rgb = n.kind >= DamageNumbers.POWDER ? powderColor(n.kind - DamageNumbers.POWDER)
+                    : n.kind == DamageNumbers.KILL ? 0xFFB347 : n.kind == DamageNumbers.SKILL ? 0xFFD966 : 0xFFFFFF;
             if (age < 2) {
                 rgb = mix(0xFFFFFF, rgb, age / 2f);
             }
@@ -174,5 +176,10 @@ public final class DamageNumbersClient {
         int g = (int) Mth.lerp(k, a >> 8 & 255, b >> 8 & 255);
         int bl = (int) Mth.lerp(k, a & 255, b & 255);
         return r << 16 | g << 8 | bl;
+    }
+
+    private static int powderColor(int i) {
+        int[] c = jp.revati.skyabyss.item.extra.PowderArts.COLORS;
+        return i >= 0 && i < c.length ? c[i] : 0xFFFFFF;
     }
 }

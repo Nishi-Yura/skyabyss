@@ -11,7 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 // 装備に付く「特性の外側」の刻み (docs/design/31 の A02・A06・A07・B15)。装備のデータ skyabyss:gear_extras。
-//  sockets   穴の数 0〜2 (付いていない装備は、手にしたときに一度だけ抽選する。GearFreedom.ensure)
+//  sockets   穴の数 0〜3 (階級で決まる GearTier.sockets。手にしたときにそろえる。GearFreedom.ensure)
 //  gems      差したもの (欠片・ルーン)。数は sockets 以下
 //  aspect    刻んだアスペクト (逸品の書き換え Rune の id。空 = なし)。1 装備に 1 つ
 //  hollow    逸品の書き換えを抜いて、印だけ残した品 (その武器自身の書き換えは効かない)
