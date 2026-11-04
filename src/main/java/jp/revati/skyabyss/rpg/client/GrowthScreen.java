@@ -189,11 +189,13 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                     r.w() - Golden.S34 - Golden.S8, SOFT, false);
         }
 
-        // 記憶の断片 (脇の列の下の端)
-        int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
-        Golden.rule(g, sx, sx + sw, fy - Golden.S3);
-        Component frag = Component.translatable("gui.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, frag, sx, Golden.textY(fy, Golden.ROW), sw, LORE, false);
+        // 記憶の断片 (脇の列の下の端)。効果を作るまで渡さないので、持っていないときは出さない (00 の 384。いつも 0 の欄は何の数か分からなかった)
+        if (d.fragmentCount() > 0) {
+            int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
+            Golden.rule(g, sx, sx + sw, fy - Golden.S3);
+            Component frag = Component.translatable("gui.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, frag, sx, Golden.textY(fy, Golden.ROW), sw, LORE, false);
+        }
 
         renderHover(g, d, mouseX, mouseY);
     }
@@ -228,7 +230,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             }
         }
         int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
-        if (mouseX >= SIDE.x() && mouseX < SIDE.right() && mouseY >= fy && mouseY < fy + Golden.ROW) {
+        if (d.fragmentCount() > 0 && mouseX >= SIDE.x() && mouseX < SIDE.right() && mouseY >= fy && mouseY < fy + Golden.ROW) {
             List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.fragments_desc"), 200));
             d.fragments.forEach((id, n) -> lines.add(Component.translatable(jp.revati.skyabyss.rpg.MemoryFragments.nameKey(id))
                     .append(" ×" + n).withColor(LORE).getVisualOrderText()));

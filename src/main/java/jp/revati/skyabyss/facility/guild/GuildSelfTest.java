@@ -107,6 +107,13 @@ public final class GuildSelfTest {
         FakePlayer a = fake(server, "guild_a");
         FakePlayer b = fake(server, "guild_b");
         FakePlayer c = fake(server, "guild_c");
+        // 作れるのは岩鯨の心臓を止めた人だけ (00 の 80)。止めた記録が付くと作れる
+        java.util.UUID founder = java.util.UUID.randomUUID();
+        jp.revati.skyabyss.progress.ProgressData pd = jp.revati.skyabyss.progress.ProgressData.get(server);
+        check(f, !Guilds.canFound(server, founder), "someone who has not stilled the whale cannot found a guild");
+        pd.markPersonal(founder, "stone_whale");
+        check(f, Guilds.canFound(server, founder), "stilling the whale's heart lets a player found a guild");
+        pd.clearPersonal(founder, "stone_whale");
         check(f, Guilds.create(a, "鐘", "K", 1, 2) == Guilds.Result.NAME_LENGTH, "one-letter name refused");
         check(f, Guilds.create(a, "鐘の守り", "KANEX", 1, 2) == Guilds.Result.TAG_LENGTH, "five-letter tag refused");
         check(f, Guilds.create(a, "  鐘の守り ", "kane", DyeColor.BLUE.getId(), DyeColor.WHITE.getId()) == Guilds.Result.OK, "create");
