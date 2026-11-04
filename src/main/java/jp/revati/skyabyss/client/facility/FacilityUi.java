@@ -2,7 +2,7 @@ package jp.revati.skyabyss.client.facility;
 
 import net.minecraft.client.gui.GuiGraphics;
 
-// 都の施設の画面 (店・ギルド) の絵柄: 暗い石板の地、骨の枠、角の青緑のひし形 (旅の地図の枠・装飾の画面と同じ作り。TravelMapScreen.frame を写した)
+// 都の施設の画面 (店・ギルド・取引・厩舎・記録・町の案内) の絵柄: 板と欄は黄金比の板 (client/ui/Golden) と同じ。frame は旅の地図の枠 (半分の画素) として残す
 public final class FacilityUi {
     public static final int TEXT = 0xFFE2D9C2;
     public static final int DIM = 0xFF8E8A7C;
@@ -18,16 +18,14 @@ public final class FacilityUi {
     private FacilityUi() {
     }
 
-    // 枠つきの板 (地を塗ってから枠)
+    // 枠つきの板。2026-11-04 から全画面と同じ黄金比の板の絵柄 (client/ui/Golden。docs/design/56)
     public static void panel(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(x + 2, y + 2, x + w - 2, y + h - 2, SLATE);
-        frame(g, x, y, w, h);
+        jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x, y, w, h));
     }
 
-    // 窓 (板の中の一段暗い四角。一覧の地)
+    // 窓 (板の中の一段暗い欄。一覧の地)。x, y, w, h は中身の範囲 (縁はその 1 外)
     public static void well(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(x, y, x + w, y + h, SLATE_IN);
-        g.renderOutline(x - 1, y - 1, w + 2, h + 2, LINE);
+        jp.revati.skyabyss.client.ui.Golden.recess(g, new jp.revati.skyabyss.client.ui.Golden.Box(x - 1, y - 1, w + 2, h + 2));
     }
 
     // 値段の札 (骨の色の小さな札。中に銭と素材を描く)
