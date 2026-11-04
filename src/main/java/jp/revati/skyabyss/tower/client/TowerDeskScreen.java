@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.revati.skyabyss.tower.TowerDeskState;
+import jp.revati.skyabyss.client.ui.Golden;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -16,14 +17,27 @@ import net.minecraft.util.FormattedCharSequence;
 // 塔の受付の画面 (あいだの塔。docs/design/54 の 2.2)。2026-11-02 の声「なぜ大規模レイドの入り方がチャット？これまで通り UI 出したらいいんじゃない」。
 //   上: 今日の挑戦 (一人一日一回)。中: 隊 (作る・入る・抜ける・隊の人)。隊長には今週の賭け (三つまで) と「塔へ入る」。下: 塔の店・記録の板・閉じる。
 //   押した釦は受付の命令 (/skyabyss_tower …) を送る。サーバーが確かめ、受付のそばの人の画面を新しくする (TowerDeskState の open = false)
+//   板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 中身は上から今日の挑戦・決まり・隊・隊の人、左の列に作る・入る、右の列に入れる隊、隊長は賭け (二列)。下の段に店・記録・閉じる
 public final class TowerDeskScreen extends Screen {
-    static final int W = 300;
-    static final int H = 214;
-    static final int GOLD = 0xF2D78A;
-    static final int TEXT = 0xE6E1D2;
-    static final int SOFT = 0xA8A496;
-    static final int DENY = 0xD9779A;
+    static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
+    static final int W = Golden.L_W;
+    static final int H = Golden.L_H;
+    static final int GOLD = Golden.GOLD;
+    static final int TEXT = Golden.TEXT;
+    static final int SOFT = Golden.SOFT;
+    static final int DENY = Golden.DENY;
+    static final int ROW = Golden.ROW;
+    // 釦の行 (高さ 13 + あいだ 5)
+    static final int STEP = Golden.BTN + Golden.S5;
+    static final Golden.Box BODY = LAYOUT.body();
+    static final Golden.Box LEFT = BODY.minor(true);
+    static final Golden.Box RIGHT = BODY.major(false);
+    // 縦の位置 (中身の上から)
+    static final int Y_SQUAD = BODY.y() + 2 * ROW + Golden.S5;
+    static final int Y_BUTTONS = Y_SQUAD + 2 * ROW + Golden.S5;
+    static final int Y_WAGERS = Y_BUTTONS + STEP;
 
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private TowerDeskState state;
     private int left;
     private int top;
@@ -54,48 +68,53 @@ public final class TowerDeskScreen extends Screen {
 
     @Override
     protected void init() {
-        left = (width - W) / 2;
-        top = (height - H) / 2;
-        int y = top + 92;
+        fit.fit(width, height, W, H, 3f);
+        left = 0;
+        top = 0;
+        int y = Y_BUTTONS;
         if (state.leader().isEmpty()) {
             Button create = Button.builder(Component.translatable("gui.skyabyss.tower_desk.create"), b -> cmd("create"))
-                    .bounds(left + 12, y, 132, 18).build();
+                    .bounds(LEFT.x(), y, LEFT.w(), Golden.BTN).build();
             create.active = !state.usedToday();
             addRenderableWidget(create);
             for (int i = 0; i < Math.min(4, state.joinLeaders().size()); i++) {
                 String leader = state.joinLeaders().get(i);
                 Button join = Button.builder(Component.translatable("gui.skyabyss.tower_desk.join", leader, state.joinCounts().get(i), state.max()), b -> cmd("join " + leader))
-                        .bounds(left + 152, y + i * 20, 136, 18).build();
+                        .bounds(RIGHT.x(), y + i * STEP, RIGHT.w(), Golden.BTN).build();
                 join.active = !state.usedToday();
                 addRenderableWidget(join);
             }
         } else {
             if (state.isLeader()) {
                 addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.start"), b -> cmd("start"))
-                        .bounds(left + 12, y, 132, 18).build());
+                        .bounds(LEFT.x(), y, LEFT.w(), Golden.BTN).build());
             }
+            Golden.Box quitBox = state.isLeader() ? RIGHT : LEFT;
             addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.quit"), b -> cmd("quit"))
-                    .bounds(left + (state.isLeader() ? 152 : 12), y, 136, 18).build());
+                    .bounds(quitBox.x(), y, Math.min(quitBox.w(), Golden.S89 + Golden.S34), Golden.BTN).build());
             if (state.isLeader()) {
-                // 今週の賭け: 押すと選ぶ / 外す (三つまで)
+                // 今週の賭け: 押すと選ぶ / 外す (三つまで)。二列
+                int colW = (BODY.w() - Golden.GAP) / 2;
                 for (int i = 0; i < state.wagers().size(); i++) {
                     String id = state.wagers().get(i);
                     boolean on = state.chosen().contains(id);
                     Component label = Component.literal(on ? "✔ " : "").append(Component.translatable("message.skyabyss.tower.wager." + id));
-                    Button w = Button.builder(label, b -> cmd("wager " + id)).bounds(left + 12 + (i % 2) * 140, top + 124 + (i / 2) * 20, 136, 18)
+                    Button w = Button.builder(label, b -> cmd("wager " + id))
+                            .bounds(BODY.x() + (i % 2) * (colW + Golden.GAP), Y_WAGERS + ROW + 3 + (i / 2) * STEP, colW, Golden.BTN)
                             .tooltip(Tooltip.create(Component.translatable("message.skyabyss.tower.wager." + id + ".desc"))).build();
                     w.active = on || state.chosen().size() < state.pickMax();
                     addRenderableWidget(w);
                 }
             }
         }
-        int by = top + H - 26;
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(left + 12, by, 88, 18).build());
+        Golden.Box foot = LAYOUT.foot();
+        int by = foot.y() + 4;
+        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(foot.x(), by, Golden.S89, Golden.BTN).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.records"), b -> {
             cmd("records");
             Minecraft.getInstance().setScreen(new ChatScreen(""));
-        }).bounds(left + 106, by, 88, 18).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.close"), b -> onClose()).bounds(left + 200, by, 88, 18).build());
+        }).bounds(foot.x() + Golden.S89 + Golden.S5, by, Golden.S89, Golden.BTN).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.close"), b -> onClose()).bounds(foot.right() - Golden.S89, by, Golden.S89, Golden.BTN).build());
     }
 
     private void cmd(String sub) {
@@ -117,34 +136,51 @@ public final class TowerDeskScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        g.fill(left - 1, top - 1, left + W + 1, top + H + 1, 0xFF000000 | GOLD);
-        g.fill(left, top, left + W, top + H, 0xF0141118);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        g.drawCenteredString(font, title, left + W / 2, top + 8, GOLD);
-        // 今日の挑戦
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        renderBackground(g, screenX, screenY, partialTick);
+        int mouseX = (int) Math.floor(fit.x(screenX));
+        int mouseY = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        Golden.panel(g, LAYOUT.panel());
+        Golden.headLine(g, LAYOUT);
+        Golden.Box head = LAYOUT.head();
+        g.drawString(font, title, head.x() + Golden.S5, Golden.textY(head.y(), head.h()), GOLD, false);
+        int x = BODY.x() + Golden.S5;
+        int tw = BODY.w() - Golden.S13;
+        // 今日の挑戦と決まり
         Component today = Component.translatable(state.usedToday() ? "gui.skyabyss.tower_desk.used" : "gui.skyabyss.tower_desk.ready");
-        g.drawString(font, today, left + 12, top + 26, state.usedToday() ? DENY : TEXT, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.tower_desk.rule"), left + 12, top + 38, SOFT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, today, x, Golden.textY(BODY.y(), ROW), tw, state.usedToday() ? DENY : TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.rule"), x, Golden.textY(BODY.y() + ROW, ROW), tw, SOFT, false);
         // 隊
-        Component head = state.leader().isEmpty() ? Component.translatable("gui.skyabyss.tower_desk.no_squad")
+        Component sq = state.leader().isEmpty() ? Component.translatable("gui.skyabyss.tower_desk.no_squad")
                 : Component.translatable("gui.skyabyss.tower_desk.squad", state.leader(), state.members().size(), state.max());
-        g.drawString(font, head, left + 12, top + 56, GOLD, false);
-        List<FormattedCharSequence> lines = new ArrayList<>();
-        if (!state.members().isEmpty()) {
-            lines.addAll(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.literal(String.join("、", state.members())), W - 24));
-        } else if (state.joinLeaders().isEmpty()) {
-            lines.addAll(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.tower_desk.hint"), W - 24));
-        }
-        for (int i = 0; i < Math.min(2, lines.size()); i++) {
-            g.drawString(font, lines.get(i), left + 12, top + 68 + i * 10, TEXT, false);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, sq, x, Golden.textY(Y_SQUAD, ROW), tw, GOLD, false);
+        Component second = !state.members().isEmpty() ? Component.literal(String.join("、", state.members()))
+                : state.joinLeaders().isEmpty() ? Component.translatable("gui.skyabyss.tower_desk.hint") : null;
+        if (second != null) {
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, second, x, Golden.textY(Y_SQUAD + ROW, ROW), tw, TEXT, false);
         }
         if (state.isLeader()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.tower_desk.wagers", state.pickMax(), state.bonusPct(), state.chosen().size()), left + 12, top + 113, SOFT, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.wagers", state.pickMax(), state.bonusPct(), state.chosen().size()),
+                    x, Golden.textY(Y_WAGERS, ROW), tw, SOFT, false);
         }
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mouseX, mouseY, partialTick);
+        }
+        fit.end(g);
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        return super.mouseClicked(fit.x(mx), fit.y(my), button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        return super.mouseReleased(fit.x(mx), fit.y(my), button);
     }
 
     @Override
