@@ -1,0 +1,79 @@
+# 2026-11-04: 黄金比の板のうち、場所が要る画面 (試練の板・挑戦の加護・巡り路の野営地・巡りの報い・町の案内)。大陸の世界で 1280x720 / GUI 3
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/golden_places.txt -PshotsName=golden_places
+world golden_places continent
+size 1280 720
+timeout 2400
+render 8
+clouds off
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss level set @p 30
+cmd skyabyss job reset
+cmd skyabyss job choose warrior
+cmd effect give @s resistance 1200 4 true
+cmd skyabyss circuit reset
+chat clear
+# 1. 試練の板 (岩鯨。いまの三つ)
+cmd skyabyss dev trial board stone_whale
+wait 30
+hud on
+shot trial_board
+close
+wait 5
+# 2. 挑戦の加護の二択
+cmd skyroute boon
+wait 30
+shot route_boon
+close
+wait 10
+# 3. 鯨見の野営地 (近づくと建つ) と箱の画面
+cmd tp @s -112 150 -884 150 50
+waitchunks 400
+wait 260
+cmd skyabyss_camp view
+wait 30
+shot circuit_camp
+close
+wait 5
+# 4. 巡り路を歩いて終える → 報いの幕
+cmd skyabyss circuit start 2
+wait 40
+cmd skyabyss circuit goto
+waitchunks 300
+wait 60
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 20
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 20
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit goto
+wait 20
+cmd skyabyss circuit next
+wait 20
+cmd skyabyss circuit end
+wait 40
+shot circuit_reward_mid
+wait 160
+shot circuit_reward_end
+close
+wait 10
+# 5. 都の広場で案内人の一覧
+cmd skyabyss facility guide go plaza
+waitchunks 400
+wait 240
+chat clear
+cmd skyabyss facility guide
+wait 30
+shot town_guide
+close
