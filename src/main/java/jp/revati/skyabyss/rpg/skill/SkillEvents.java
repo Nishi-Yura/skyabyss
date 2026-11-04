@@ -177,6 +177,45 @@ public final class SkillEvents {
         if (mana > 0) {
             SkillManager.gainMana(player, mana);
         }
+        // 熾火の肺 (cd_kill): 倒すたびに、発動スキルの再使用までが縮む (群れの中で技を連ねる)
+        int ticks = (int) Math.round(jp.revati.skyabyss.rpg.skill.tree.NodeEffects.sum(player, "cd_kill") * 20);
+        if (ticks > 0) {
+            SkillData d = SkillManager.get(player);
+            if (!d.cooldowns.isEmpty()) {
+                d.cooldowns.replaceAll((k, v) -> v - ticks);
+                d.cooldowns.values().removeIf(v -> v <= 0);
+                SkillManager.sync(player);
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 鍛え人の目 (満ちた一撃のあと、次に受ける一撃を和らげる)
+    private static final java.util.Map<java.util.UUID, Long> SMITH_GUARD = new java.util.HashMap<>();
+
+    @SubscribeEvent
+    static void onDealt(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (event.getEntity().level().isClientSide || !(event.getSource().getEntity() instanceof ServerPlayer player)
+                || event.getSource().getDirectEntity() != player || !jp.revati.skyabyss.combat.MeleeHits.fullHit(player)
+                || !SkillManager.get(player).knows(Skill.SMITH_EYE)) {
+            return;
+        }
+        SMITH_GUARD.put(player.getUUID(), player.level().getGameTime() + SkillRules.SMITH_GUARD_TICKS);
+    }
+
+    // 守りが残っていれば、受ける傷を和らげて使い切る
+    public static float smithGuard(ServerPlayer player, float amount) {
+        Long until = SMITH_GUARD.get(player.getUUID());
+        if (until == null || amount <= 0) {
+            return amount;
+        }
+        SMITH_GUARD.remove(player.getUUID());
+        return player.level().getGameTime() <= until ? amount * SkillRules.SMITH_GUARD : amount;
+    }
+
+    // 自己テスト用
+    public static boolean smithGuarded(ServerPlayer player) {
+        Long until = SMITH_GUARD.get(player.getUUID());
+        return until != null && player.level().getGameTime() <= until;
     }
 
     // ---------------------------------------------------------------- 押し出される強さ
@@ -205,6 +244,11 @@ public final class SkillEvents {
         boolean riderless = SkillActions.riderless();
         // 戦っている印 (マナの回復が遅くなる)
         if (victim instanceof ServerPlayer hurtPlayer) {
+            // 鍛え人の目: 満ちた一撃のあとの一撃を和らげる
+            if (attacker instanceof LivingEntity && !(attacker instanceof Player)) {
+                amount = smithGuard(hurtPlayer, amount);
+                event.setAmount(amount);
+            }
             SkillData vd = SkillManager.get(hurtPlayer);
             vd.lastCombat = now;
             if (amount > 0) {

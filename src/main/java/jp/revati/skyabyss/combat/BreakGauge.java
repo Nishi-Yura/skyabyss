@@ -119,7 +119,12 @@ public final class BreakGauge {
         if (MeleeHits.weakHit(attacker)) {
             return 0;
         }
-        double k = MeleeHits.fullHit(attacker) && direct == attacker ? 1.0 : SKILL;
+        boolean full = MeleeHits.fullHit(attacker) && direct == attacker;
+        double k = full ? 1.0 : SKILL;
+        // 灰の契り (鍛冶師の型の要): 満ちた一撃で帯がよく溜まる
+        if (full && ashPact(attacker)) {
+            k *= jp.revati.skyabyss.rpg.skill.SkillRules.KEY_ASH_BREAK_FILL;
+        }
         if (BossOpenings.isOpen(boss)) {
             k *= OPENING;
         }
@@ -127,6 +132,10 @@ public final class BreakGauge {
             k *= BACK;
         }
         return k;
+    }
+
+    static boolean ashPact(Player p) {
+        return jp.revati.skyabyss.rpg.skill.SkillBuild.has(jp.revati.skyabyss.rpg.skill.SkillManager.get(p), jp.revati.skyabyss.rpg.skill.SkillKeystone.ASH_PACT);
     }
 
     // 人が主の後ろにいるか (体の向きから BACK_COS より後ろ)

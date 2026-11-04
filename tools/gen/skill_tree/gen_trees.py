@@ -50,6 +50,10 @@ class Tree:
     def stat(self, id, stat, x, y, req=None, arch=None):
         return self.n(id, "stat", x, y, 1, req, arch, stat=stat, amount=4)
 
+    # まとめた能力値の節 (+8、2 SP。2026-11-04 の手本の木)
+    def stat8(self, id, stat, x, y, req=None, arch=None):
+        return self.n(id, "stat", x, y, 2, req, arch, stat=stat, amount=8)
+
     def eff(self, id, x, y, effect, ja, en, ja_e, en_e, req=None, arch=None, cost=1, excludes=None, arch_points=0):
         extra = {"effect": effect}
         if excludes:
@@ -59,9 +63,9 @@ class Tree:
         self.names[id] = (ja, en, ja_e, en_e)
         return self.n(id, "effect", x, y, cost, req, arch, **extra)
 
-    def thr(self, id, x, y, stat, at, effect, ja, en, ja_e, en_e, req=None, arch=None):
+    def thr(self, id, x, y, stat, at, effect, ja, en, ja_e, en_e, req=None, arch=None, cost=1):
         self.names[id] = (ja, en, ja_e, en_e)
-        return self.n(id, "threshold", x, y, 1, req, arch, stat=stat, at=at, effect=effect)
+        return self.n(id, "threshold", x, y, cost, req, arch, stat=stat, at=at, effect=effect)
 
     # 変異 (素材で開く。技を極めてから)
     def mutation(self, mutation, x, y, req, arch):
@@ -418,6 +422,8 @@ def shaman():
 
 # ---------------------------------------------------------------- 鍛冶師 (灰の鍛え人)
 def smith():
+    # 2026-11-04 の手本 (docs/design/48 の 4.1): 小さな節をまとめ、一つ取れば違いが分かる大きさ (15〜25%) にした。能力値は +8 (2 SP)。
+    # 型の要には動きが変わる効果を一つずつ (灰の契り = 崩しの帯がよく溜まる、鍛え人の目 = 満ちた一撃のあとの守り、熾火の肺 = 倒すと技の待ちが縮む)
     t = Tree("smith", ["ember", "temper", "ash"])
     t.active("temper", 4, 0, cost=1)
     t.stat("str_a", "strength", 3, 1, "temper").stat("spi_a", "spirit", 5, 1, "temper")
@@ -426,61 +432,65 @@ def smith():
     a = "ember"
     t.rune("long_fire", "ember_hammer", 1, 0, 4, "str_b", a).rune("double_strike", "ember_hammer", 2, 1, 4, "str_b", a).rune("fire_pillar", "ember_hammer", 3, 2, 4, "str_b", a, cost=2)
     t.rank("ember_hammer", 2, 0, 5, ["long_fire", "double_strike"], a)
-    t.stat("str_d", "strength", 1, 5, "double_strike", a)
-    t.eff("hot_iron", 2, 5, {"attack": 0.05}, "熱い鉄", "Hot Iron", "与える傷 +5%", "Damage dealt +5%", "fire_pillar", a)
-    t.stat("str_e", "strength", 0, 6, "ember_hammer_2", a)
-    t.thr("heavy_arm", 1, 6, "strength", 20, {"attack_speed": 0.06}, "重い腕", "Heavy Arm", "攻撃速度 +6%", "Attack speed +6%", "str_d", a)
-    t.eff("fire_skin", 2, 6, {"fire_resist": 0.2}, "火の肌", "Fire Skin", "火の傷 −20%", "Fire damage −20%", "hot_iron", a)
-    t.eff("anvil_weight", 0, 7, {"knockback": 0.15}, "金床の重み", "Anvil Weight", "ノックバック耐性 +15%", "Knockback resistance +15%", "str_e", a)
-    t.stat("str_f", "strength", 1, 7, "heavy_arm", a).stat("spi_c", "spirit", 2, 7, "fire_skin", a)
-    t.stat("str_g", "strength", 0, 8, "anvil_weight", a)
-    t.eff("big_hammer", 1, 8, {"big_target": 0.1}, "大槌", "Big Hammer", "大きな相手への技の傷 +10%", "Skill damage to large foes +10%", "str_f", a)
-    t.eff("cinder", 2, 8, {"skill_power": 0.05}, "燠", "Cinder", "技の力 +5%", "Skill power +5%", "spi_c", a)
-    t.mutation("hammer_meteor", 0, 9, "str_g", a)
-    t.trait("ash_pact", 1, 9, ["str_g", "big_hammer", "cinder"], a)
-    t.thr("mountain_arm", 0, 10, "strength", 40, {"attack": 0.06, "big_target": 0.06}, "山の腕", "Mountain Arm", "与える傷 +6%、大きな相手への技の傷 +6%", "Damage dealt +6%, skill damage to large foes +6%", "ash_pact", a)
-    t.eff("slow_burn", 2, 10, {"regen": 0.08}, "とろ火", "Slow Burn", "マナの回復 +8%", "Mana regeneration +8%", "ash_pact", a, cost=2)
+    t.stat8("str_d", "strength", 1, 5, "double_strike", a)
+    t.eff("hot_iron", 2, 5, {"attack": 0.15}, "熱い鉄", "Hot Iron", "与える傷 +15%", "Damage dealt +15%", "fire_pillar", a, cost=3)
+    t.stat8("str_e", "strength", 0, 6, "ember_hammer_2", a)
+    t.thr("heavy_arm", 1, 6, "strength", 20, {"attack_speed": 0.12}, "重い腕", "Heavy Arm", "攻撃速度 +12%", "Attack speed +12%", "str_d", a, cost=2)
+    t.eff("fire_skin", 2, 6, {"fire_resist": 0.25, "damage_taken": -0.05}, "火の肌", "Fire Skin", "火の傷 −25%、受ける傷 −5%", "Fire damage −25%, damage taken −5%",
+          "hot_iron", a, cost=2)
+    t.stat8("str_g", "strength", 0, 7, "str_e", a)
+    t.eff("big_hammer", 1, 7, {"big_target": 0.25, "knockback": 0.15}, "大槌", "Big Hammer", "大きな相手への技の傷 +25%、ノックバック耐性 +15%",
+          "Skill damage to large foes +25%, knockback resistance +15%", ["heavy_arm", "str_e"], a, cost=3)
+    t.eff("cinder", 2, 7, {"skill_power": 0.15}, "燠", "Cinder", "技の力 +15%", "Skill power +15%", "fire_skin", a, cost=3)
+    t.mutation("hammer_meteor", 0, 8, "str_g", a)
+    t.trait("ash_pact", 1, 8, ["str_g", "big_hammer", "cinder"], a)
+    t.thr("mountain_arm", 0, 9, "strength", 40, {"attack": 0.12, "big_target": 0.12}, "山の腕", "Mountain Arm", "与える傷 +12%、大きな相手への技の傷 +12%",
+          "Damage dealt +12%, skill damage to large foes +12%", "ash_pact", a, cost=2)
+    t.eff("slow_burn", 2, 9, {"regen": 0.2}, "とろ火", "Slow Burn", "マナの回復 +20%", "Mana regeneration +20%", "ash_pact", a, cost=2)
     a = "temper"
     t.rank("temper", 2, 3, 4, "str_c", a)
     t.active("forge_stomp", 4, 4, req="str_c", arch=a)
-    t.stat("str_h", "strength", 5, 4, "str_c", a)
-    t.eff("hard_edge", 3, 5, {"attack": 0.04}, "硬い刃", "Hard Edge", "与える傷 +4%", "Damage dealt +4%", "temper_2", a)
+    t.stat8("str_h", "strength", 5, 4, "str_c", a)
+    t.eff("hard_edge", 3, 5, {"attack": 0.15}, "硬い刃", "Hard Edge", "与える傷 +15%", "Damage dealt +15%", "temper_2", a, cost=3)
     t.rank("forge_stomp", 2, 4, 5, "forge_stomp", a)
-    t.stat("str_i", "strength", 5, 5, "str_h", a)
+    t.thr("iron_will", 5, 5, "strength", 24, {"damage_taken": -0.1}, "鉄の意志", "Iron Will", "受ける傷 −10%", "Damage taken −10%", "str_h", a, cost=2)
     t.rank("temper", 3, 3, 6, "hard_edge", a)
-    t.eff("wide_stomp", 4, 6, {"knockback": 0.1}, "広い踏み", "Wide Stomp", "ノックバック耐性 +10%", "Knockback resistance +10%", "forge_stomp_2", a)
-    t.thr("iron_will", 5, 6, "strength", 24, {"damage_taken": -0.05}, "鉄の意志", "Iron Will", "受ける傷 −5%", "Damage taken −5%", "str_i", a)
-    t.stat("spi_d", "spirit", 3, 7, "temper_3", a).stat("str_j", "strength", 4, 7, "wide_stomp", a).stat("str_k", "strength", 5, 7, "iron_will", a)
-    t.eff("keen_temper", 3, 8, {"skill_power": 0.06}, "鋭い焼き", "Keen Temper", "技の力 +6%", "Skill power +6%", "spi_d", a)
-    t.eff("thick_plate", 4, 8, {"armor": 2}, "厚い板金", "Thick Plate", "防具 +2", "Armor +2", "str_j", a)
-    t.eff("quench", 5, 8, {"fire_resist": 0.15, "damage_taken": -0.03}, "焼き戻し", "Quench", "火の傷 −15%、受ける傷 −3%", "Fire damage −15%, damage taken −3%", "str_k", a)
-    t.rank("forge_memory", 2, 3, 9, "keen_temper", a)
-    t.keystone("smith_eye", 4, 9, ["keen_temper", "thick_plate", "quench"], a)
-    t.rank("forge_memory", 3, 5, 9, "quench", a)
-    t.eff("master_eye", 3, 10, {"attack": 0.05, "cooldown": -0.05}, "匠の目", "Master's Eye", "与える傷 +5%、技の待ち −5%", "Damage dealt +5%, skill cooldowns −5%", "smith_eye", a, cost=2)
-    t.thr("steel_body", 5, 10, "strength", 40, {"armor": 2, "knockback": 0.15}, "鋼の体", "Steel Body", "防具 +2、ノックバック耐性 +15%", "Armor +2, knockback resistance +15%", "smith_eye", a)
+    t.eff("thick_plate", 4, 6, {"armor": 5, "knockback": 0.2}, "厚い板金", "Thick Plate", "防具 +5、ノックバック耐性 +20%", "Armor +5, knockback resistance +20%",
+          "forge_stomp_2", a, cost=3)
+    t.stat8("str_j", "strength", 5, 6, "iron_will", a)
+    t.eff("keen_temper", 3, 7, {"skill_power": 0.15}, "鋭い焼き", "Keen Temper", "技の力 +15%", "Skill power +15%", "temper_3", a, cost=3)
+    t.stat8("spi_d", "spirit", 4, 7, "thick_plate", a)
+    t.eff("quench", 5, 7, {"fire_resist": 0.25, "damage_taken": -0.05}, "焼き戻し", "Quench", "火の傷 −25%、受ける傷 −5%", "Fire damage −25%, damage taken −5%",
+          "str_j", a, cost=2)
+    t.rank("forge_memory", 2, 3, 8, "keen_temper", a)
+    t.keystone("smith_eye", 4, 8, ["keen_temper", "spi_d", "quench"], a)
+    t.rank("forge_memory", 3, 5, 8, "quench", a)
+    t.eff("master_eye", 3, 9, {"attack": 0.1, "cooldown": -0.1}, "匠の目", "Master's Eye", "与える傷 +10%、技の待ち −10%", "Damage dealt +10%, skill cooldowns −10%",
+          "smith_eye", a, cost=3)
+    t.thr("steel_body", 5, 9, "strength", 40, {"armor": 4, "knockback": 0.3}, "鋼の体", "Steel Body", "防具 +4、ノックバック耐性 +30%", "Armor +4, knockback resistance +30%",
+          "smith_eye", a, cost=2)
     a = "ash"
     t.rank("ember_heart", 2, 6, 4, "spi_b", a)
     t.active("ash_scatter", 7, 4, req="spi_b", arch=a)
     t.active("spark_burst", 8, 4, req="spi_b", arch=a)
-    t.stat("spi_e", "spirit", 6, 5, ["ash_scatter", "ember_heart_2"], a)
+    t.stat8("spi_e", "spirit", 6, 5, ["ash_scatter", "ember_heart_2"], a)
     t.rank("ash_scatter", 2, 7, 5, "ash_scatter", a)
-    t.eff("grey_cloud", 8, 5, {"damage_taken": -0.04}, "灰色の雲", "Grey Cloud", "受ける傷 −4%", "Damage taken −4%", ["ash_scatter", "spark_burst"], a)
-    t.eff("hot_ash", 6, 6, {"skill_power": 0.05}, "熱い灰", "Hot Ash", "技の力 +5%", "Skill power +5%", "spi_e", a)
-    t.stat("spi_f", "spirit", 7, 6, "ash_scatter_2", a).stat("spi_g", "spirit", 8, 6, "grey_cloud", a)
-    t.thr("ash_mind", 6, 7, "spirit", 20, {"mana": 0.1}, "灰の心", "Ash Mind", "最大マナ +10%", "Max mana +10%", "hot_ash", a)
-    t.eff("choking_ash", 7, 7, {"attack": 0.05}, "むせる灰", "Choking Ash", "与える傷 +5%", "Damage dealt +5%", "spi_f", a)
-    t.eff("ash_veil", 8, 7, {"move": 0.04}, "灰の帳", "Ash Veil", "移動 +4%", "Movement +4%", "spi_g", a)
-    t.stat("spi_h", "spirit", 6, 8, "ash_mind", a).stat("spi_i", "spirit", 7, 8, "choking_ash", a).stat("spi_j", "spirit", 8, 8, "ash_veil", a)
-    t.rank("ember_heart", 3, 6, 9, "spi_h", a)
-    t.rank("spark_burst", 2, 8, 9, "spi_j", a)
-    t.eff("ember_lung", 7, 9, {"regen": 0.1, "skill_power": 0.04}, "熾火の肺", "Ember Lung", "マナの回復 +10%、技の力 +4%", "Mana regeneration +10%, skill power +4%", ["spi_h", "spi_i", "spi_j"], a, cost=2, arch_points=20)
-    t.thr("white_ash", 6, 10, "spirit", 36, {"skill_power": 0.06, "cooldown": -0.04}, "白い灰", "White Ash", "技の力 +6%、技の待ち −4%", "Skill power +6%, skill cooldowns −4%", "ember_lung", a)
-    t.eff("ash_heart", 8, 10, {"low_hp_armor": 4, "fire_resist": 0.1}, "灰の心臓", "Ash Heart", "体力が少ないとき防具 +4、火の傷 −10%", "Armor +4 while low on health, fire damage −10%", "ember_lung", a, cost=2)
+    t.eff("grey_cloud", 8, 5, {"damage_taken": -0.06, "move": 0.1}, "灰の帳", "Ash Veil", "受ける傷 −6%、移動 +10%", "Damage taken −6%, movement +10%",
+          ["ash_scatter", "spark_burst"], a, cost=3)
+    t.eff("hot_ash", 6, 6, {"skill_power": 0.15}, "熱い灰", "Hot Ash", "技の力 +15%", "Skill power +15%", "spi_e", a, cost=3)
+    t.stat8("spi_f", "spirit", 7, 6, "ash_scatter_2", a).stat8("spi_g", "spirit", 8, 6, "grey_cloud", a)
+    t.thr("ash_mind", 6, 7, "spirit", 20, {"mana": 0.2}, "灰の心", "Ash Mind", "最大マナ +20%", "Max mana +20%", "hot_ash", a, cost=2)
+    t.rank("ember_heart", 3, 7, 7, "spi_f", a)
+    t.rank("spark_burst", 2, 8, 7, "spi_g", a)
+    t.eff("ember_lung", 7, 8, {"cd_kill": 1.0, "regen": 0.1}, "熾火の肺", "Ember Lung", "敵を倒すたびに、発動スキルの再使用まで −1 秒。マナの回復 +10%",
+          "Each kill cuts your active skill cooldowns by 1 s. Mana regeneration +10%", ["ash_mind", "ember_heart_3", "spark_burst_2"], a, cost=3, arch_points=20)
+    t.thr("white_ash", 6, 9, "spirit", 36, {"skill_power": 0.12, "cooldown": -0.1}, "白い灰", "White Ash", "技の力 +12%、技の待ち −10%", "Skill power +12%, skill cooldowns −10%",
+          "ember_lung", a, cost=2)
+    t.eff("ash_heart", 8, 9, {"low_hp_armor": 6, "fire_resist": 0.15}, "灰の心臓", "Ash Heart", "体力が少ないとき防具 +6、火の傷 −15%",
+          "Armor +6 while low on health, fire damage −15%", "ember_lung", a, cost=2)
     return t
 
 
-# ---------------------------------------------------------------- 弓使い (骨の射手)
 def archer():
     t = Tree("archer", ["pierce", "trap", "rain"])
     t.active("cloud_pierce", 4, 0, cost=1)

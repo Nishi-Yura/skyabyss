@@ -98,6 +98,10 @@ public final class BossOpenings {
             return;
         }
         float m = multiplier(target);
+        // 灰の契り (鍛冶師の型の要): 崩れた主へ与える傷が増える
+        if (BreakGauge.broken(target) && event.getSource().getEntity() instanceof Player p && BreakGauge.ashPact(p)) {
+            m *= (float) jp.revati.skyabyss.rpg.skill.SkillRules.KEY_ASH_BROKEN_DAMAGE;
+        }
         if (m != 1f) {
             event.setAmount(event.getAmount() * m);
         }

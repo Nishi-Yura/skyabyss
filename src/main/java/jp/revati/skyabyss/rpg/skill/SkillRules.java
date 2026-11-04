@@ -39,6 +39,9 @@ public final class SkillRules {
     public static final double KEY_TIDE_REGEN = -0.30;
     public static final double KEY_ASH_DAMAGE = 0.12;
     public static final double KEY_ASH_MANA_COST = 0.30;
+    // 灰の契り (2026-11-04 の手本の木。動きが変わる効果): 満ちた近接の一撃で主の崩しの帯が ×KEY_ASH_BREAK_FILL 溜まり、崩れた主へ与える傷 ×KEY_ASH_BROKEN_DAMAGE
+    public static final double KEY_ASH_BREAK_FILL = 1.5;
+    public static final double KEY_ASH_BROKEN_DAMAGE = 1.2;
     public static final double KEY_STRING_PROJECTILE = 0.22;
     public static final double KEY_STRING_COOLDOWN = 0.15;
     public static final double KEY_DANCE_MOVE = 0.12;
@@ -326,6 +329,9 @@ public final class SkillRules {
 
     // 灰の鍛え人の要・鍛え人の目: 手の武器の強化段階 1 つにつき技の傷 +1.5%
     public static final double SMITH_PER_LEVEL = 0.015;
+    // 鍛え人の目 (2026-11-04 の手本の木。動きが変わる効果): 満ちた近接の一撃を当てたあと SMITH_GUARD_TICKS のあいだ、次に受ける一撃の傷 ×SMITH_GUARD
+    public static final int SMITH_GUARD_TICKS = 40;
+    public static final float SMITH_GUARD = 0.7f;
 
     // 骨の射手の要・静かな弦: 3 秒動かずに引いた矢の威力 +25%
     public static final int STILL_TICKS = 3 * SECOND;

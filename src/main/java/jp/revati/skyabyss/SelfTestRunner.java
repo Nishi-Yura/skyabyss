@@ -482,6 +482,7 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.trial.raid.RaidLightSelfTest.steps());
         // 二人の試遊 (2026-10-22): 敵の無敵の間・背の耐久。SKYABYSS_SELFTEST_ONLY="combat rules"
         steps.addAll(jp.revati.skyabyss.combat.CombatRulesSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.combat.TreeKeystoneSelfTest.steps());
         // 近接の一撃 (2026-11-04): 同じ敵を殴れる間・溜めの強さ・回復は満ちた一撃だけ。SKYABYSS_SELFTEST_ONLY="melee hits"
         steps.addAll(jp.revati.skyabyss.combat.MeleeHitsSelfTest.steps());
         // 倒すまでの時間 (土地の敵を、その土地の目安のレベルの武器の満ちた一撃で)。SKYABYSS_SELFTEST_ONLY="ttk audit"
