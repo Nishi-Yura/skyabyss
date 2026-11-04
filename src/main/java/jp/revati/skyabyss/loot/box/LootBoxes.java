@@ -376,7 +376,7 @@ public final class LootBoxes {
         }
     }
 
-    static Job currentJob(ServerPlayer p) {
+    public static Job currentJob(ServerPlayer p) {
         String id = jp.revati.skyabyss.rpg.skill.SkillManager.get(p).curJob;
         if (id != null && !id.isEmpty()) {
             return Job.byId(id);

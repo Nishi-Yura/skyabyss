@@ -1,0 +1,49 @@
+# 2026-11-05 の封の箱・釣り・乗り物の頁: 乗り物の店の絆の行・名付けの画面・絆 III の鞍の房・早駆けの始まり・箱の手がかり
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/box_fish_mount.txt -PshotsName=box_fish_mount
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 30
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 40
+
+# 1. 乗り物の店: 絆 II (名付けるの札)
+cmd skyabyss facility mount ride 21000
+wait 5
+cmd skyabyss facility mount
+wait 20
+shot bfm_1_shop_bond2
+close
+wait 10
+
+# 2. 絆 III: 呼ぶと駆け寄ってくる・鞍の房
+cmd skyabyss cinematic stop
+close
+wait 10
+cmd skyabyss facility mount ride 30000
+wait 5
+cmd item replace entity @p weapon.mainhand with skyabyss:mount_whistle
+wait 5
+use
+wait 12
+cmd tp @s ~ ~ ~ 180 20
+wait 4
+shot bfm_2_runs_to
+wait 80
+cmd tp @s ~ ~ ~ 90 30
+wait 10
+shot bfm_3_tassel
+close
+

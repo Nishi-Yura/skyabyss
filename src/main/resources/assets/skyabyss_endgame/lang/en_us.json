@@ -395,5 +395,16 @@
   "message.skyabyss.circuit.charge_start": "Strike each crystal around the beacon %s times to fill it (melee or arrows)",
   "message.skyabyss.circuit.charged": "A crystal is full (%s/%s)",
   "message.skyabyss.circuit.fire_start": "The fire holds while someone stays beside it. Dodge the ash wind (the warned band)",
-  "message.skyabyss.circuit.streak": "%s quick clears in a row: +%s circuit marks"
+  "message.skyabyss.circuit.streak": "%s quick clears in a row: +%s circuit marks",
+  "message.skyabyss.fish_order.daily": "Today's order: %2$s %1$s (%3$s coins)",
+  "message.skyabyss.fish_order.daily_done": "Today's order is filled (%2$s %1$s)",
+  "message.skyabyss.fish_order.weekly": "This week's order: %2$s %1$s (%3$s coins)",
+  "message.skyabyss.fish_order.weekly_done": "This week's order is filled (%2$s %1$s)",
+  "message.skyabyss.fish_order.daily_paid": "Delivered %2$s %1$s: %3$s coins, land fame +2",
+  "message.skyabyss.fish_order.weekly_paid": "Delivered this week's %2$s %1$s: %3$s coins, land fame +5",
+  "message.skyabyss.fishing.spot_found": "Found a fishing spot (near %s). Uncommon and rare fish bite more here",
+  "message.skyabyss.fishing.spot_shore": "the shore",
+  "sign.skyabyss.fishing_spot": "Fishing Spot",
+  "sign.skyabyss.fishing_spot.sub": "Rare fish bite here",
+  "map.skyabyss.mark.fishing": "Fishing spot"
 }

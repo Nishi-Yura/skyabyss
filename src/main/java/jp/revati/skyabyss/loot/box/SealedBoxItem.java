@@ -53,6 +53,8 @@ public class SealedBoxItem extends Item {
         };
         tooltip.add(head.copy().withStyle(s -> s.withColor(color(kind))));
         tooltip.add(Component.translatable("item.skyabyss.box.contents").withStyle(ChatFormatting.GRAY));
+        // 次に開けて出る品の手がかり (BoxHints。手元に送られた写し)
+        tooltip.add(BoxHints.line(kind.id()).copy().withStyle(s -> s.withColor(0xE8D9A8)));
         tooltip.add(Component.translatable("item.skyabyss.box.open_hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 }

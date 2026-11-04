@@ -32,6 +32,51 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class MountService {
     public static final double REACH = 8.0;
     public static final double FAR = 96.0;
+    // 絆 I の駆け寄る速さ
+    static final double RUN_TO = 1.8;
+    // 一度に数える距離の上限 (乗ったまま運ばれた・場所を移された分を数えない)
+    static final double RIDE_STEP_MAX = 25;
+    // 乗っている人の、最後に数えた所
+    private static final Map<UUID, Vec3> LAST = new HashMap<>();
+    // 駆け寄っている乗り物 (持ち主 → 呼んだ時)。道が見つからなくても毎 tick 持ち主の方へ進め、RUN_MAX で着かなければそばへ移す
+    private static final Map<UUID, Long> APPROACH = new HashMap<>();
+    static final int RUN_MAX = 100;
+    static final double RUN_STOP = 2.6;
+
+    @SubscribeEvent
+    static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (APPROACH.isEmpty()) {
+            return;
+        }
+        for (var it = APPROACH.entrySet().iterator(); it.hasNext();) {
+            var e = it.next();
+            ServerPlayer p = event.getServer().getPlayerList().getPlayer(e.getKey());
+            MountEntity m = p == null ? null : ACTIVE.get(e.getKey());
+            if (p == null || m == null || m.isRemoved() || m.isVehicle() || m.level() != p.level()) {
+                it.remove();
+                continue;
+            }
+            long t = m.level().getGameTime() - e.getValue();
+            double d = m.distanceTo(p);
+            if (d <= RUN_STOP) {
+                m.getNavigation().stop();
+                it.remove();
+                continue;
+            }
+            if (t >= RUN_MAX) {
+                Vec3 at = spot(p.serverLevel(), p, m);
+                m.teleportTo(at.x, at.y, at.z);
+                m.getNavigation().stop();
+                it.remove();
+                continue;
+            }
+            // 道を引き直す (着かないうちに道が切れたとき) と、向きと進み
+            if (t % 10 == 0 || m.getNavigation().isDone()) {
+                m.getNavigation().moveTo(p, RUN_TO);
+            }
+            m.getMoveControl().setWantedPosition(p.getX(), p.getY(), p.getZ(), RUN_TO);
+        }
+    }
 
     public enum Result { OK, NO_COINS, LOCKED, OWNED, NOT_OWNED, MAXED, CLOSED }
 
@@ -117,15 +162,54 @@ public final class MountService {
             return null;
         }
         m.setOwner(player);
-        m.apply(data(player), true);
-        m.setCustomName(net.minecraft.network.chat.Component.translatable(m.look().nameKey()));
-        Vec3 at = spot(level, player, m);
+        MountData data = data(player);
+        m.apply(data, true);
+        m.setCustomName(displayName(data, m.look()));
+        // 絆 I から: 少し離れた所に現れ、駆け寄ってくる
+        Vec3 far = data.bond() >= 1 ? farSpot(level, player, m) : null;
+        Vec3 at = far != null ? far : spot(level, player, m);
         m.moveTo(at.x, at.y, at.z, player.getYRot() + 180f, 0f);
-        level.addFreshEntity(m);
+        if (!level.addFreshEntity(m) && far != null) {
+            // 離れた所に出せなかった (区画の端など): いつもどおり目の前に
+            far = null;
+            at = spot(level, player, m);
+            m.moveTo(at.x, at.y, at.z, player.getYRot() + 180f, 0f);
+            level.addFreshEntity(m);
+        }
+        SkyAbyss.LOGGER.debug("[mount] {} summoned {} at {} (far {})", player.getGameProfile().getName(), m.look().id, at, far != null);
         ACTIVE.put(player.getUUID(), m);
+        LAST.remove(player.getUUID());
         level.playSound(null, at.x, at.y, at.z, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1.2f);
-        Notice.hint(player, "message.skyabyss.mount.called", net.minecraft.network.chat.Component.translatable(m.look().nameKey()));
+        if (far != null) {
+            APPROACH.put(player.getUUID(), level.getGameTime());
+            m.getNavigation().moveTo(player, RUN_TO);
+            Notice.hint(player, "message.skyabyss.mount.runs_to", displayName(data, m.look()));
+        } else {
+            Notice.hint(player, "message.skyabyss.mount.called", displayName(data, m.look()));
+        }
         return m;
+    }
+
+    // 呼んだ乗り物の名前 (付けた名前があればそれ)
+    public static net.minecraft.network.chat.Component displayName(MountData data, MountLook look) {
+        return data.name().isEmpty() ? net.minecraft.network.chat.Component.translatable(look.nameKey()) : net.minecraft.network.chat.Component.literal(data.name());
+    }
+
+    // 絆 I: 後ろ 9〜13 の、入れる所 (なければ null = いつもどおり目の前)
+    @Nullable
+    private static Vec3 farSpot(ServerLevel level, ServerPlayer player, MountEntity m) {
+        Vec3 back = Vec3.directionFromRotation(0, player.getYRot() + 180f).normalize();
+        for (double d : new double[] {11, 9, 13}) {
+            for (double side : new double[] {0, 3, -3}) {
+                Vec3 p = player.position().add(back.scale(d)).add(back.yRot((float) (Math.PI / 2)).scale(side));
+                int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(p.x), (int) Math.floor(p.z));
+                Vec3 q = new Vec3(p.x, y, p.z);
+                if (Math.abs(y - player.getY()) <= 3 && level.noCollision(m, m.getDimensions(m.getPose()).makeBoundingBox(q))) {
+                    return q;
+                }
+            }
+        }
+        return null;
     }
 
     // 目の前 2 ブロックから、近い順に、入れる所を探す
@@ -298,13 +382,73 @@ public final class MountService {
     static void watch(ServerPlayer player) {
         MountEntity m = active(player);
         if (m == null) {
+            LAST.remove(player.getUUID());
             return;
+        }
+        if (player.getVehicle() == m) {
+            ride(player, m);
+        } else {
+            LAST.remove(player.getUUID());
         }
         if (m.level() != player.level() || m.distanceToSqr(player) > FAR * FAR) {
             dismiss(player, false);
         } else if (refusal(player) != null) {
             dismiss(player, true);
         }
+    }
+
+    // 乗っている距離を数える (10 tick ごと)。絆の段が上がったら知らせ、出ている乗り物に当てる
+    static void ride(ServerPlayer player, MountEntity m) {
+        Vec3 now = player.position();
+        Vec3 last = LAST.put(player.getUUID(), now);
+        if (last == null) {
+            return;
+        }
+        double d = Math.hypot(now.x - last.x, now.z - last.z);
+        if (d <= 0 || d > RIDE_STEP_MAX) {
+            return;
+        }
+        addRide(player, d);
+    }
+
+    public static void addRide(ServerPlayer player, double blocks) {
+        MountData data = data(player);
+        int before = data.bond();
+        data.ride(blocks);
+        int after = data.bond();
+        if (after > before) {
+            MountEntity m = active(player);
+            if (m != null) {
+                m.apply(data, false);
+            }
+            if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+                Notice.unlock(player, "message.skyabyss.mount.bond." + after, displayName(data, data.chosen()));
+                player.playNotifySound(net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1.4f);
+            }
+        }
+    }
+
+    // 名前を付ける (絆 II から。16 文字まで、色の記号は外す)。付けたら true
+    public static boolean rename(ServerPlayer player, String raw) {
+        MountData data = data(player);
+        if (data.bond() < 2) {
+            Notice.hint(player, "message.skyabyss.mount.name_locked");
+            return false;
+        }
+        String n = raw == null ? "" : net.minecraft.ChatFormatting.stripFormatting(raw).replace("\n", "").trim();
+        if (n.length() > MountData.NAME_MAX) {
+            n = n.substring(0, MountData.NAME_MAX);
+        }
+        data.setName(n);
+        MountEntity m = active(player);
+        if (m != null) {
+            m.setCustomName(displayName(data, m.look()));
+        }
+        Notice.gain(player, n.isEmpty() ? "message.skyabyss.mount.name_cleared" : "message.skyabyss.mount.named", n);
+        if (isOpen(player)) {
+            send(player, MountNetwork.view(player));
+        }
+        return true;
     }
 
     @SubscribeEvent

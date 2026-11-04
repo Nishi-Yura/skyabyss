@@ -1,0 +1,51 @@
+# 2026-11-05: 乗り物の絆 III (呼ぶと駆け寄る・鞍の房) と早駆けの始まり
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/mount_bond.txt -PshotsName=mount_bond
+world circuit_check continent
+size 1280 720
+timeout 1200
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd skyabyss level set @p 30
+cmd time set noon
+cmd weather clear
+cmd effect give @s resistance 600 4 true
+hud on
+cmd tp @s -116 150 -894 0 20
+waitchunks 300
+wait 60
+cmd skyabyss facility mount ride 60000
+cmd item replace entity @p weapon.mainhand with skyabyss:mount_whistle
+wait 10
+chat clear
+use
+wait 10
+cmd execute if entity @e[type=skyabyss:mount] run say mount_at_10
+cmd tp @s ~ ~ ~ 180 15
+wait 2
+shot mb_1_runs_to
+wait 40
+cmd execute if entity @e[type=skyabyss:mount] run say mount_at_52
+wait 50
+cmd execute if entity @e[type=skyabyss:mount] run say mount_at_102
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 10
+hud off
+perspective back
+wait 10
+chat clear
+shot mb_2_tassel
+perspective front
+wait 10
+shot mb_3_tassel_front
+perspective first
+hud on
+
+# 早駆け: 北の早駆けの始まりの手前へ乗り物ごと
+cmd skyabyss facility mount sprint north
+waitchunks 300
+wait 60
+chat clear
+shot mb_4_sprint_gate

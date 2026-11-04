@@ -65,7 +65,8 @@ public final class Fishing {
         event.damageRodBy(0);
         FishingHook hook = event.getHookEntity();
         int region = ContinentMap.get().inside(hook.getBlockX(), hook.getBlockZ()) ? ContinentMap.get().region(hook.getBlockX(), hook.getBlockZ()) : ContinentMap.MEADOW;
-        Fish.Species s = Fish.roll(region, level.random);
+        // 釣り場 (FishingSpots) のそばなら、ときどき・まれが 2 倍
+        Fish.Species s = Fish.roll(region, level.random, FishingSpots.near(hook.getBlockX(), hook.getBlockZ()));
         int size = Fish.size(s, level.random);
         ItemStack stack = FishingSetup.stack(s, size);
         ItemEntity item = new ItemEntity(level, hook.getX(), hook.getY(), hook.getZ(), stack);

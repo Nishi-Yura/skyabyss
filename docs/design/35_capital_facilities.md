@@ -164,7 +164,7 @@
 | `apothecary` | 薬師 | 薬師の店 | 店 `apothecary`、醸造のこと（三章まで）→ 四章から醸造を教わる（`brew_lesson`）・おさらい |
 | `storage_keeper` | 預かり番 | 預かり所 | 預かり所（6.3） |
 | `innkeeper` | 宿の女将 | 宿「鐘の宿」 | 寝台を取る（6.4）、噂、待ち合わせのこと |
-| `perch_keeper` | 旅の番 | 子の止まり木 | 巨神の子を呼ぶ、乗り物を見る・買う（`mount_shop`。38）、乗り笛の決まり、旅の決まり（地図は M キー）。2026-11-01 に厩舎の番をまとめた（都の厩舎の建物は入れない空き家。前の世界の厩舎の番は消える `AttendantRole.RETIRED`） |
+| `perch_keeper` | 旅の番 | 子の止まり木 | 巨神の子を呼ぶ、乗り物を見る・買う・名付ける（`mount_shop`。38）、早駆けの記録を見る（`sprint_board`。38 の 8）、乗り笛の決まり、旅の決まり（地図は M キー）。2026-11-01 に厩舎の番をまとめた（都の厩舎の建物は入れない空き家。前の世界の厩舎の番は消える `AttendantRole.RETIRED`） |
 | `shrine_priest` | 社の祭司 | 四巨神の社 | 転生のこと、誓いのこと（誓いごとの説明）、欠片を納める（`key_offer`）・返してもらう（`key_return`）、鍵の間のこと |
 | `training_master` | 師範 | 訓練場 | 振り直し（技の木 × 結晶・鐘銭。`respec_*`）、職の間（`job_room`）、木偶のこと |
 | `black_marketeer` | 顔を隠した商人 | 闇市（裏通り） | 店 `black_market` |
@@ -175,7 +175,7 @@
 | （消した役）書庫番・地図屋・砦の老兵 | — | — | 2026-10-31 に消した（伝承の書の画面・M の地図・J の記録と同じことをするだけだった。老兵の試練の記録は J、本丸の頁は社の祭司へ）。祠と跡地は地図に最初から、跡地の噂は都の案内人が言う。前の世界に立っている人は消える（`AttendantRole.RETIRED`） |
 | `box_opener`（印なし） | 封切り師（都と四つの町に一人ずつ） | 鍛冶屋の係の人のそば（`npc_smith` から 2〜4 ブロックの空いた床。`loot/box/BoxOpeners`） | 封の箱を開ける（`boxes`。ルーレットの画面。[52](52_loot_boxes.md)）、箱のこと |
 
-- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
+- 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|repair|guild_storage|respec_quote|respec_skills|respec_skills_coins|respec_stats|respec_stats_coins|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes|fish_order|sprint_board", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
 ### 6.2 鐘銭と店（`facility/Coins`・`ShopDef`・`ShopService`、画面 `client/facility/ShopScreen`）
 

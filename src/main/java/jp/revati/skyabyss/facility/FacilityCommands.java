@@ -164,7 +164,37 @@ public final class FacilityCommands {
                         .then(Commands.literal("brew").executes(c -> FacilityActions.brewLesson(c.getSource().getPlayerOrException()) ? 1 : 0))
                         .then(Commands.literal("mount")
                                 .executes(c -> jp.revati.skyabyss.mount.MountService.open(c.getSource().getPlayerOrException(), null) ? 1 : 0)
-                                .then(Commands.literal("demo").executes(c -> jp.revati.skyabyss.mount.MountService.demo(c.getSource().getPlayerOrException()))))
+                                .then(Commands.literal("demo").executes(c -> jp.revati.skyabyss.mount.MountService.demo(c.getSource().getPlayerOrException())))
+                                // ride <ブロック>: 乗った距離を足す (絆の段の確かめ。docs/design/38 の 9)
+                                .then(Commands.literal("ride").then(Commands.argument("blocks", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 100000))
+                                        .executes(c -> {
+                                            jp.revati.skyabyss.mount.MountService.addRide(c.getSource().getPlayerOrException(),
+                                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "blocks"));
+                                            return 1;
+                                        })))
+                                // sprint <道>: 早駆けの道の始まりの少し手前へ (乗り物ごと。撮影・確かめ用)
+                                .then(Commands.literal("sprint").then(Commands.argument("route", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                                    var p = c.getSource().getPlayerOrException();
+                                    var r = jp.revati.skyabyss.mount.MountSprint.route(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "route"));
+                                    if (r == null) {
+                                        return 0;
+                                    }
+                                    net.minecraft.core.BlockPos a = r.points().get(0);
+                                    net.minecraft.core.BlockPos b2 = r.points().get(1);
+                                    double dx = a.getX() - b2.getX();
+                                    double dz = a.getZ() - b2.getZ();
+                                    double len = Math.max(1, Math.hypot(dx, dz));
+                                    double x = a.getX() + 0.5 + dx / len * 14;
+                                    double z = a.getZ() + 0.5 + dz / len * 14;
+                                    float yaw = (float) Math.toDegrees(Math.atan2(dx, -dz));
+                                    net.minecraft.world.entity.Entity mover = p.getVehicle() != null ? p.getVehicle() : p;
+                                    // 読み込まれていない区画でも高さが分かるように、大陸の図の地面から
+                                    int y = jp.revati.skyabyss.world.continent.ContinentMap.get().surface((int) Math.floor(x), (int) Math.floor(z)) + 1;
+                                    p.serverLevel().getChunk((int) Math.floor(x) >> 4, (int) Math.floor(z) >> 4);
+                                    mover.teleportTo(x, y + 0.5, z);
+                                    mover.setYRot(yaw);
+                                    return 1;
+                                }))))
                         .then(Commands.literal("trade").executes(c -> {
                             jp.revati.skyabyss.facility.trade.TradeService.open(c.getSource().getPlayerOrException(), null);
                             return 1;

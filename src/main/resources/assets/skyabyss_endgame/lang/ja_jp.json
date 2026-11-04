@@ -395,5 +395,16 @@
   "message.skyabyss.circuit.charge_start": "柱のまわりの結晶に %s 回ずつ当てて、雷を満たそう（殴る・矢）",
   "message.skyabyss.circuit.charged": "結晶が満ちた（%s/%s）",
   "message.skyabyss.circuit.fire_start": "焚き火のそばにいるあいだ火が守られる。灰の風（予告の帯）をよけよう",
-  "message.skyabyss.circuit.streak": "早越えが %s 続いた: 巡りの印 +%s"
+  "message.skyabyss.circuit.streak": "早越えが %s 続いた: 巡りの印 +%s",
+  "message.skyabyss.fish_order.daily": "今日の注文: %1$s を %2$s 匹（鐘銭 %3$s）",
+  "message.skyabyss.fish_order.daily_done": "今日の注文は納めた（%1$s を %2$s 匹）",
+  "message.skyabyss.fish_order.weekly": "今週の注文: %1$s を %2$s 匹（鐘銭 %3$s）",
+  "message.skyabyss.fish_order.weekly_done": "今週の注文は納めた（%1$s を %2$s 匹）",
+  "message.skyabyss.fish_order.daily_paid": "注文の %1$s を %2$s 匹納めた: 鐘銭 %3$s・土地の名声 +2",
+  "message.skyabyss.fish_order.weekly_paid": "今週の注文の %1$s を %2$s 匹納めた: 鐘銭 %3$s・土地の名声 +5",
+  "message.skyabyss.fishing.spot_found": "釣り場を見つけた（%s のそば）。ここでは、ときどき・まれの魚がよく釣れる",
+  "message.skyabyss.fishing.spot_shore": "岸",
+  "sign.skyabyss.fishing_spot": "釣り場",
+  "sign.skyabyss.fishing_spot.sub": "まれな魚がよく釣れる",
+  "map.skyabyss.mark.fishing": "釣り場"
 }

@@ -71,6 +71,17 @@
           "goto": "mount_rules"
         },
         {
+          "id": "sprint",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "sprint_board"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "about",
           "kind": "talk",
           "goto": "again"

@@ -98,11 +98,18 @@ public final class Fish {
 
     // 一匹を引く (まれさを決め、その土地の表から。表にないまれさは一つ下へ)
     public static Species roll(int region, RandomSource random) {
+        return roll(region, random, false);
+    }
+
+    // boost = 釣り場 (FishingSpots): ときどき・まれが 2 倍 (ふつうが減る)
+    public static Species roll(int region, RandomSource random, boolean boost) {
         int r = random.nextInt(100);
         if (r < PCT_LEGEND) {
             return byId("dream_fish");
         }
-        char rarity = r < PCT_LEGEND + PCT_RARE ? 'R' : r < PCT_LEGEND + PCT_RARE + PCT_UNCOMMON ? 'U' : 'C';
+        int rare = boost ? PCT_RARE * 2 : PCT_RARE;
+        int unc = boost ? PCT_UNCOMMON * 2 : PCT_UNCOMMON;
+        char rarity = r < PCT_LEGEND + rare ? 'R' : r < PCT_LEGEND + rare + unc ? 'U' : 'C';
         int land = fishingRegion(region);
         for (char c : new char[] {rarity, 'U', 'C'}) {
             if (c == 'U' && rarity == 'C') {

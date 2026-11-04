@@ -809,5 +809,7 @@
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount": "乗り物を見る・買う (見た目と性能)",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount_rules": "乗り笛の決まり",
   "dialogue.skyabyss.attendant_food_vendor.menu.fishing": "釣り大会の番付を見る",
-  "dialogue.skyabyss.attendant_smith.menu.powder": "粉を差す・外す・合わせる"
+  "dialogue.skyabyss.attendant_smith.menu.powder": "粉を差す・外す・合わせる",
+  "dialogue.skyabyss.attendant_perch_keeper.menu.sprint": "早駆けの記録を見る",
+  "dialogue.skyabyss.attendant_food_vendor.menu.fish_order": "魚の注文を見る・納める"
 }

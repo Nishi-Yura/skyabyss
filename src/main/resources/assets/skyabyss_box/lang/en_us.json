@@ -39,5 +39,10 @@
   "skyabyss_box.pouch.rarity": "Rarity boxes",
   "skyabyss_box.pouch.artifact": "Gold box",
   "skyabyss_box.pouch.hint": "Bring them to a box opener (next to the smith in the capital and the four towns) to spin for the contents.",
-  "skyabyss_pouch.category.box": "Sealed boxes"
+  "skyabyss_pouch.category.box": "Sealed boxes",
+  "item.skyabyss.box.hint.none": "Next inside: not decided yet (decided when opened)",
+  "item.skyabyss.box.hint.job_weapon": "Next inside: feels like a weapon for your calling",
+  "item.skyabyss.box.hint.weapon": "Next inside: feels like a weapon (another calling)",
+  "item.skyabyss.box.hint.armor": "Next inside: feels like armor",
+  "item.skyabyss.box.hint.trinket": "Next inside: feels like a trinket"
 }

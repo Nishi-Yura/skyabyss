@@ -91,6 +91,8 @@ public class MountShopScreen extends Screen {
         return statY() + MountStats.KEYS.length * STAT_H + Golden.S5;
     }
 
+    private static final int NAME_W = 52;
+
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         renderBackground(g, screenX, screenY, partialTick);
@@ -108,6 +110,11 @@ public class MountShopScreen extends Screen {
         int cx = head.right() - Golden.S5 - font.width(coins);
         g.drawString(font, coins, cx, hy, FacilityUi.GOLD, false);
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), cx - 18, head.y() + (head.h() - 16) / 2);
+        // 絆 (乗った距離の段)。見出しの銭の左に
+        Component bond = Component.translatable("gui.skyabyss.mount.bond", Component.translatable("gui.skyabyss.mount.bond." + view.bond()),
+                String.format("%.1f", view.ridden() / 1000.0));
+        int bw = Math.min(font.width(bond), cx - 24 - (head.x() + 10 + font.width(title) + 12));
+        TextClip.line(g, font, bond, cx - 24 - bw, hy, bw, FacilityUi.GOLD, false);
 
         // 見た目の一覧
         int lx = LOOKS.x() + 1;
@@ -163,11 +170,21 @@ public class MountShopScreen extends Screen {
         }
         // 笛
         int wy = whistleY();
-        boolean hw = mouseX >= rx && mouseX < rx + rw && mouseY >= wy && mouseY < wy + Golden.BTN;
-        g.fill(rx, wy, rx + rw, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF2A5E6A : 0xFF243440);
-        g.renderOutline(rx, wy, rw, Golden.BTN, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
+        boolean canName = view.bond() >= 2;
+        int ww = canName ? rw - NAME_W - 4 : rw;
+        boolean hw = mouseX >= rx && mouseX < rx + ww && mouseY >= wy && mouseY < wy + Golden.BTN;
+        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF2A5E6A : 0xFF243440);
+        g.renderOutline(rx, wy, ww, Golden.BTN, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
         TextClip.line(g, font, Component.translatable(view.whistle() ? "gui.skyabyss.mount.whistle_have" : "gui.skyabyss.mount.whistle_get"),
-                rx + Golden.S5, Golden.textY(wy, Golden.BTN), rw - 2 * Golden.S5, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
+                rx + Golden.S5, Golden.textY(wy, Golden.BTN), ww - 2 * Golden.S5, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
+        // 名付ける (絆 II から。笛の行の右)
+        if (canName) {
+            int nx = rx + rw - NAME_W;
+            boolean hn = mouseX >= nx && mouseX < nx + NAME_W && mouseY >= wy && mouseY < wy + Golden.BTN;
+            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF2A5E6A : 0xFF243440);
+            g.renderOutline(nx, wy, NAME_W, Golden.BTN, FacilityUi.TEAL);
+            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.name_button"), nx + 4, Golden.textY(wy, Golden.BTN), NAME_W - 8, 0xFFFFFFFF, false);
+        }
         TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.hint"), rx + Golden.S5, Golden.textY(RIGHT.bottom() - Golden.ROW, Golden.ROW), rw - 2 * Golden.S5,
                 0xFF000000 | Golden.DIM, false);
         fit.end(g);
@@ -292,6 +309,11 @@ public class MountShopScreen extends Screen {
                 }
             }
             int wy = whistleY();
+            int nx = RIGHT.right() - NAME_W;
+            if (view.bond() >= 2 && mx >= nx && mx < RIGHT.right() && my >= wy && my < wy + Golden.BTN) {
+                Minecraft.getInstance().setScreen(new MountNameScreen(this, view.name()));
+                return true;
+            }
             if (mx >= RIGHT.x() && mx < RIGHT.right() && my >= wy && my < wy + Golden.BTN && !view.whistle()) {
                 send(MountNetwork.WHISTLE, 0);
                 return true;

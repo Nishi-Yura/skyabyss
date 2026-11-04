@@ -42,6 +42,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 見た目 (MountLook) と性能 (MountStats の段) は持ち主の MountData から MountService が与える。落下で傷つかない
 public class MountEntity extends AbstractHorse implements GeoEntity {
     private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(MountEntity.class, EntityDataSerializers.INT);
+    // 絆の段 (MountData.bond)。3 で鞍に飾りの房 (client/mount の描き手)
+    private static final EntityDataAccessor<Integer> BOND = SynchedEntityData.defineId(MountEntity.class, EntityDataSerializers.INT);
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.mount.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.mount.walk");
     private static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.mount.run");
@@ -85,6 +87,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(LOOK, 0);
+        builder.define(BOND, 0);
     }
 
     @Override
@@ -103,6 +106,14 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         entityData.set(LOOK, look.ordinal());
     }
 
+    public int bond() {
+        return entityData.get(BOND);
+    }
+
+    public void setBond(int b) {
+        entityData.set(BOND, b);
+    }
+
     @Nullable
     public UUID owner() {
         return owner;
@@ -115,6 +126,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     // 持ち主の持ち物の見た目と段を当てる。healFull = 体力を満たす (呼んだとき)
     public void apply(MountData data, boolean healFull) {
         setLook(data.chosen());
+        setBond(data.bond());
         double oldMax = getMaxHealth();
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(MountStats.speed(data.tier(MountStats.SPEED)));
         getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(MountStats.jump(data.tier(MountStats.JUMP)));

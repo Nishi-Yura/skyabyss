@@ -904,6 +904,8 @@ public class TravelMapScreen extends Screen {
             case TERRITORY -> 78;
             case TITAN -> 75;
             case LOOTCAMP -> 62;
+            case SPRINT -> 46;
+            case FISHING -> view <= 1600 ? 44 : 0;
             case SHRINE -> 70;
             case SITE -> 65;
             case FOE -> m.extra().equals("alive") ? 72 : view <= 1600 ? 50 : 0;
@@ -997,6 +999,7 @@ public class TravelMapScreen extends Screen {
             case FOE -> 38;
             case TERRITORY -> 36;
             case LOOTCAMP -> 34;
+            case FISHING, SPRINT -> 28;
             case CAMP -> 30;
             case TOWN -> 35;
             case TITAN -> 40;
@@ -1027,6 +1030,7 @@ public class TravelMapScreen extends Screen {
             case FOE -> S_FOE;
             case TERRITORY -> S_TOWN;
             case LOOTCAMP -> S_CAMP;
+            case FISHING, SPRINT -> S_WAYMARK;
         };
     }
 

@@ -46,6 +46,17 @@
           "goto": "end"
         },
         {
+          "id": "fish_order",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "fish_order"
+            }
+          ],
+          "goto": "end"
+        },
+        {
           "id": "fishing",
           "kind": "talk",
           "do": [

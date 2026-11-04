@@ -47,6 +47,55 @@ public final class MountSelfTest {
         }
     }
 
+    // 絆 (乗った距離で 3 段・名前は II から) と早駆けの道 (4 本・輪を順にくぐる・降りるとやめる・一番を覚える)
+    static void bondAndSprint(List<String> f, ServerLevel level, FakePlayer p) {
+        MountData d = MountService.data(p);
+        d.ridden = 0;
+        d.setName("");
+        check(f, d.bond() == 0 && !MountService.rename(p, "シロ"), "a mount could be named before bond II");
+        MountService.addRide(p, 5000);
+        check(f, d.bond() == 1, "5 km did not reach bond I");
+        MountService.addRide(p, 15000);
+        check(f, d.bond() == 2 && MountService.rename(p, "シロ§aの子と長い長い長い長い名前") && d.name().length() <= MountData.NAME_MAX && !d.name().contains("§"),
+                "bond II did not allow a clean name: " + d.name());
+        MountService.addRide(p, 30000);
+        check(f, d.bond() == 3, "50 km did not reach bond III");
+        MountEntity m = MountService.summon(p);
+        check(f, m != null && m.bond() == 3, "a summoned mount does not carry the bond");
+        MountService.dismiss(p, false);
+        d.ridden = 0;
+        d.setName("");
+        // 早駆け
+        var routes = MountSprint.routes();
+        check(f, routes.size() == 4 && routes.stream().allMatch(r -> r.points().size() >= 3), "there should be four sprint routes with rings: " + routes.size());
+        if (routes.isEmpty()) {
+            return;
+        }
+        MountSprint.Route r = routes.get(0);
+        p.getPersistentData().remove(MountSprint.BEST + r.id());
+        long now = 1000;
+        net.minecraft.core.BlockPos st = r.points().get(0);
+        p.setPos(st.getX() + 0.5, st.getY(), st.getZ() + 0.5);
+        MountSprint.step(p, now, false);
+        check(f, !MountSprint.running(p), "walking through the start began a sprint");
+        MountSprint.step(p, now, true);
+        check(f, MountSprint.running(p) && MountSprint.nextRing(p) == 1, "riding through the start did not begin the sprint");
+        for (int i = 1; i < r.points().size(); i++) {
+            net.minecraft.core.BlockPos q = r.points().get(i);
+            p.setPos(q.getX() + 0.5, q.getY(), q.getZ() + 0.5);
+            MountSprint.step(p, now + i * 100, true);
+        }
+        check(f, !MountSprint.running(p) && MountSprint.best(p, r.id()) > 0, "riding through every ring did not finish and record the time");
+        // 降りるとやめる
+        p.setPos(st.getX() + 0.5, st.getY(), st.getZ() + 0.5);
+        MountSprint.cancel(p);
+        MountSprint.step(p, now + 99999, true);
+        boolean began = MountSprint.running(p);
+        MountSprint.step(p, now + 100000, false);
+        check(f, began && !MountSprint.running(p), "dismounting did not stop the sprint");
+        p.getPersistentData().remove(MountSprint.BEST + r.id());
+    }
+
     private static void check(List<String> f, boolean ok, String what) {
         if (!ok) {
             f.add(what);
@@ -73,6 +122,7 @@ public final class MountSelfTest {
             summon(f, level, p);
             refusal(f, server);
             save(f);
+            bondAndSprint(f, level, p);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST mount crashed", e);
             f.add("crashed: " + e);
@@ -82,7 +132,7 @@ public final class MountSelfTest {
             p.getInventory().clearContent();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, two seats, owner steers), fall immunity, save, shop session, whistle)");
+            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, two seats, owner steers), fall immunity, save, shop session, whistle, bond stages and naming, sprint routes)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST mount FAILED: {}", m));
         }
