@@ -240,7 +240,7 @@ folk("camp_mapmaker", "地図描きのセキ", [
 
 # 選定 (2026-10-28): 8 人とも A。cast の guest_<人> として登録する (install_npc2 が読む。人の動きの型も A のもの)
 PICK = {p: "a" for p in ("island_ferryman", "tide_ferryman", "inner_ferryman", "tide_lightkeeper", "storm_elder", "storm_hutkeeper", "ember_survivor", "ember_watch")}
-# 野営の旅人 3 人 (2026-11-04): 仮に A (選ぶのは人。docs/review の朝の頁)
+# 野営の旅人 3 人 (2026-11-04 の選定): 3 人とも A
 PICK.update({p: "a" for p in ("camp_pilgrim", "camp_minstrel", "camp_mapmaker")})
 for _p, _k in PICK.items():
     C.CAST[f"guest_{_p}"] = C.CAST[f"guest_{_p}_{_k}"]
