@@ -135,6 +135,10 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.ThunderWolf>> THUNDER_WOLF = ENTITIES.register("thunder_wolf",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.ThunderWolf::new, MobCategory.MONSTER)
                     .sized(0.9f, 1.1f).eyeHeight(0.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":thunder_wolf"));
+    // 熾の山犬 (灰の荒野。2026-11-05)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.EmberJackal>> EMBER_JACKAL = ENTITIES.register("ember_jackal",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.EmberJackal::new, MobCategory.MONSTER)
+                    .sized(0.8f, 1.0f).eyeHeight(0.85f).clientTrackingRange(8).build(SkyAbyss.MODID + ":ember_jackal"));
     // 地下のダンジョンの主 (docs/design/55。dungeon/DungeonFloor が主の間に湧かせる)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BoneCentipede>> BONE_CENTIPEDE = ENTITIES.register("bone_centipede",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BoneCentipede::new, MobCategory.MONSTER)
@@ -253,6 +257,7 @@ public final class ModEntities {
         event.put(MOSS_DEAD.get(), jp.revati.skyabyss.entity.foe.MossDead.createAttributes().build());
         event.put(MIST_ANGLER.get(), jp.revati.skyabyss.entity.foe.MistAngler.createAttributes().build());
         event.put(THUNDER_WOLF.get(), jp.revati.skyabyss.entity.foe.ThunderWolf.createAttributes().build());
+        event.put(EMBER_JACKAL.get(), jp.revati.skyabyss.entity.foe.EmberJackal.createAttributes().build());
         event.put(ROCK_BOAR.get(), jp.revati.skyabyss.entity.foe.RockBoar.createAttributes().build());
         event.put(TIDE_CRAB.get(), jp.revati.skyabyss.entity.foe.TideCrab.createAttributes().build());
         event.put(STORM_RAM.get(), jp.revati.skyabyss.entity.foe.StormRam.createAttributes().build());
