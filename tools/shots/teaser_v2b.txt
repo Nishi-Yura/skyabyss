@@ -1,0 +1,136 @@
+# 2026-11-05: ティザー映像 二回目の「遊び」2。岩鯨の背を駆ける・地下のダンジョンの主と戦う (横から)・あいだの塔の主の技を避ける。
+# 録画は 1920x1080・30 fps、録るあいだはゲームの時計を 1/10 (tick rate 2)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/teaser_v2b.txt -PshotsName=teaser
+world teaser continent
+size 1920 1080
+timeout 14000
+quality 24 12
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd skyabyss cinematic stop
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd skyabyss level set @p 50
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_sky_sword
+cmd item replace entity @s armor.head with skyabyss:divine_bellkeeper_helmet
+cmd item replace entity @s armor.chest with skyabyss:divine_bellkeeper_chestplate
+cmd item replace entity @s armor.legs with skyabyss:divine_bellkeeper_leggings
+cmd item replace entity @s armor.feet with skyabyss:divine_bellkeeper_boots
+cmd skyabyss skill learn @s titan_cleave 3
+cmd skyabyss skill learn @s whale_sweep 3
+cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss skill slot @s 2 whale_sweep
+hud off
+chat clear
+
+# ---------------- W1 岩鯨の背を駆ける (右後ろから追う)
+cmd gamemode spectator
+cmd time set 11000
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 300
+camera skyabyss:titan_back 0 150 140 180 0
+waitchunks 900
+cmd gamemode adventure
+cmd effect give @s resistance 99999 4 true
+cmd effect give @s slow_falling 6 0 true
+wait 160
+chat clear
+cam player 2.5 1.2 -5
+camfollow 2.5 1.2 -5 0.2
+wait 10
+cmd tick rate 2
+record w1_back_run 110 30
+hold forward on
+hold sprint on
+wait 30
+hold jump on
+wait 5
+hold jump off
+wait 40
+aim 20 ~25 ~
+recwait
+hold forward off
+hold sprint off
+cmd tick rate 20
+camoff
+
+# ---------------- W2 地下のダンジョン (骨掘りの大百足) と戦う。横から
+cmd skyabyss dungeon enter bone_pit
+wait 60
+cmd skyabyss dungeon floor 2
+wait 60
+cmd skyabyss dungeon goto boss
+cmd execute as @s at @s run tp @s ~ ~ ~8 180 10
+wait 60
+cmd execute as @s at @s facing entity @e[type=!minecraft:player,distance=..30,limit=1,sort=nearest] eyes run tp @s ^ ^ ^-2 ~ ~
+wait 60
+chat clear
+cam player 6 1.5 1
+camlook on
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cooldowns @s
+cmd tick rate 2
+record w2_dungeon_fight 130 30
+camdolly 130 ~-2 ~1 ~-3
+hold forward on
+wait 12
+hold forward off
+attack
+wait 8
+attack
+wait 8
+cmd skyabyss skill cast @s 1
+wait 30
+cmd execute as @s at @s facing entity @e[type=!minecraft:player,distance=..30,limit=1,sort=nearest] eyes run tp @s ~ ~ ~ ~ ~
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 2
+wait 20
+attack
+recwait
+cmd tick rate 20
+camoff
+cmd skyabyss dungeon leave
+wait 40
+
+# ---------------- W3 あいだの塔: 主の星屑の雨を走って避ける (後ろの高い所から)
+cmd gamemode creative
+cmd skyabyss tower start
+wait 60
+cmd gamemode adventure
+cmd effect give @s resistance 99999 4 true
+camera skyabyss:tower 0 122 20 180 -8
+waitchunks 300
+wait 480
+cmd skyabyss cinematic stop
+wait 10
+chat clear
+cam 6 128 34 165 12
+camlook on
+wait 10
+cmd tick rate 2
+record w3_tower_dodge 140 30
+cmd skyabyss tower act stars
+wait 14
+hold left on
+hold sprint on
+wait 26
+hold left off
+hold right on
+wait 26
+hold right off
+hold sprint off
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 30
+recwait
+cmd tick rate 20
+camoff
+cmd skyabyss tower leave
+wait 40
+quit
