@@ -169,23 +169,6 @@ public final class FacilityCommands {
                         .then(Commands.literal("mount")
                                 .executes(c -> jp.revati.skyabyss.mount.MountService.open(c.getSource().getPlayerOrException(), null) ? 1 : 0)
                                 .then(Commands.literal("demo").executes(c -> jp.revati.skyabyss.mount.MountService.demo(c.getSource().getPlayerOrException())))
-                                // as <見た目>: その見た目を持ったことにして選び、呼んで乗る (撮影用。空鱏 sky_ray など)
-                                .then(Commands.literal("as").then(Commands.argument("look", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
-                                    ServerPlayer p = c.getSource().getPlayerOrException();
-                                    jp.revati.skyabyss.mount.MountLook look = jp.revati.skyabyss.mount.MountLook.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "look"));
-                                    if (look == null) {
-                                        return 0;
-                                    }
-                                    var d = jp.revati.skyabyss.mount.MountService.data(p);
-                                    d.own(look);
-                                    d.choose(look);
-                                    var m = jp.revati.skyabyss.mount.MountService.summon(p);
-                                    if (m == null) {
-                                        return 0;
-                                    }
-                                    p.startRiding(m, true);
-                                    return 1;
-                                })))
                                 // ride <ブロック>: 乗った距離を足す (絆の段の確かめ。docs/design/38 の 9)
                                 .then(Commands.literal("ride").then(Commands.argument("blocks", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 100000))
                                         .executes(c -> {

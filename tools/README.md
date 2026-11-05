@@ -96,10 +96,6 @@ python tools/install/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly
 | `cmd <コマンド>` | 統合サーバーで権限 4 で実行 (`/` はあってもなくても)。終わるまで待つ |
 | `camera [次元] <x> <y> <z> <yaw> <pitch>` | 体ごとそこへ置いて向きを決める (yaw 0=南 90=西 180=北 270=東、pitch 90=真下)。着くまで待つ。壁を抜けたいときは先に `cmd gamemode spectator` |
 | `look <yaw> <pitch>` | 向きだけ変える |
-| `dolly <tick> <x> <y> <z> <yaw> <pitch> [linear]` | 今の所と向きから目当てへ、`<tick>` かけて滑らかに動かす (映像用。観戦の姿で)。どの数も `~` で今のまま、`~10` で今から +10。既定はゆっくり出てゆっくり止まる。`record` と一緒に: `record <名> <tick>` → `dolly` → `recwait` |
-| `cam` / `camdolly` / `camlook` / `camfollow` / `camoff` | 別のカメラ (自分の体とは別の見る所) を置いて、動く自分を外から撮る。書き方は `client/dev/ShotCamera` の頭。カメラの動きは手順を止めない |
-| `hold <forward\|back\|left\|right\|jump\|sprint\|sneak\|attack\|use> on\|off` / `aim <tick> <yaw> <pitch>` | キーを押し続ける・放す / 向きだけを滑らかに回す (別のカメラのあいだも人が動く) |
-| `quality <描く距離> <処理の距離> [fabulous]` | 映像用の高い設定 (遠くの生き物・粒・なめらかな光・雲も) |
 | `waitchunks [最大 tick]` | まわりの描画が出そろうまで待つ (既定 600 tick まで) |
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
@@ -185,14 +181,6 @@ SKYABYSS_LANG=en_us ./gradlew runShots -Pscript=tools/shots/first_hour.txt   # �
 - 巨神が地形にめり込まない・潮殻の乗り場の輪 (`TitanGround`、08 の 2.2〜2.4): `python tools/gen/shots/gen_titan_ground_shots.py` → `SKYABYSS_SHOTS_SEED=4242 ./gradlew runShots -Pscript=tools/shots/titan_ground.txt` → `python tools/sheets/titan_ground_sheet.py` で `docs/review/previews/titan_ground_sheet.png` (前後。開発コマンド `/skyabyss dev titanground <true|false>`・`place tide <x> <z> <yaw>`・`scout`)。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan ground" ./gradlew runServer` (体積の柱ごとにブロックを数える)。台本の世界の種は環境変数 `SKYABYSS_SHOTS_SEED` で変えられる
 - 施設の浮く名札 (`opening/site/FacilityLabels`、35 の 2.1): `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/facility_labels.txt -PshotsName=facility_labels` (都の 10 枚と鯨見の町・風待の里の市を、係の人から名札の向きの正面と、壁に沿った横から。係の人は観戦の人のそばには立たないので、はじめは創造で待つ)。置き場の検めは自己テスト `facility labels` (設計図だけで 38 枚)。
 - 乗り物の新しい見た目のラフ (00 の 346〜348): `python -I tools/rough/lowpoly/mounts2/roughs.py [abyss|moon|sky]` → `docs/review/roughs_mounts2/<題>.png` と案ごとの `<題>_<a|b|c>.png`。部品は `tools/gen/mobs/mounts_lp/mlp.py`。選んだ案は `mounts_lp/<id>.py` へ移して作り込み、`build_all.py` で入れる。
-
-## ティザー映像 (`tools/gen/teaser/make_teaser.py`)
-
-- キービジュアル (映像だけの一枚絵): `tools/gen/teaser/key_visual.py` (物語のドット絵と同じ `tools/story/pixel/pxkit`。案は `docs/review/teaser_roughs/`)。
-- 素材の録画: `tools/shots/teaser_a.txt` (島・都・岩鯨)、`teaser_b.txt` (職の技・ダンジョンの主)、`teaser_c.txt` (あいだの塔)。どれも世界 `teaser` (大陸) で、1920x1080・30 fps。
-  録るあいだは `cmd tick rate 2` でゲームの時計を 1/10 にする (描くのが 30 fps に届かないと絵が落ちるため。`record` はゲームの時刻で撮る)。
-- つなぐ: `python -X utf8 tools/gen/teaser/make_teaser.py` → `build/teaser/skyabyss_teaser.mp4`。場面の並び・字幕・長さは頭の `CUTS`、音は `MUSIC_PLAN` (この mod の BGM)。`--preview` で半分の大きさ、`--only <場面>` で一つだけ。
-- 物語のドット絵 (`textures/gui/story`) と README の題の絵 (`docs/readme/plate_title.png`) も使う。ffmpeg は `imageio_ffmpeg` の同梱のもの。
 
 ## 生成スクリプトとコミット済みデータの同期 (`tools/audit/check_generators.py`)
 
