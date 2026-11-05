@@ -45,6 +45,10 @@ public final class TitanGroundSelfTest {
     // 巡航: 1 tick に進める回数 (3600 回ぶんを 1 tick で回すと重い)
     private static final int CRUISE_TICKS = 3600;
     private static final int CRUISE_PER_TICK = 25;
+    // 巡航の一歩ごとに、潮殻のまわり CRUISE_AROUND 区画が読み込まれるまで待つ (サーバーが遅れていると、読み込み中の区画の地形を「分からない」として進み、
+    // 読み込まれたときに一 tick で 2 ブロックとびはねた。全段でまれに落ちた元)。待ちは CRUISE_WAIT_MAX サーバー tick まで
+    private static final int CRUISE_AROUND = 3;
+    private static final int CRUISE_WAIT_MAX = 2400;
     // 読み込みに固定して、まだ読み込み中の区画の数の上限 (多すぎると背景の生成と光の計算でメモリが足りなくなる)
     private static final int MAX_PENDING = 128;
 
@@ -130,6 +134,7 @@ public final class TitanGroundSelfTest {
         double minMargin = Double.MAX_VALUE;
         double lastY;
         String maxStepInfo = "";
+        int waits;
 
         Cruise(TideShellEntity titan, double sx, double sz, Shore shore, boolean found) {
             this.titan = titan;
@@ -398,6 +403,10 @@ public final class TitanGroundSelfTest {
             return true;
         }
         for (int i = 0; i < CRUISE_PER_TICK && c.t < CRUISE_TICKS; i++, c.t++) {
+            if (c.waits < CRUISE_WAIT_MAX && !ensure(r, c.titan.getX(), c.titan.getZ(), CRUISE_AROUND)) {
+                c.waits++;
+                return false;
+            }
             c.titan.tick();
             double overlap = TitanGround.overlap(r.level, TitanGround.Surface.FLOOR, r.shell, c.titan.getX(), c.titan.getY(), c.titan.getZ(), c.titan.getYRot());
             c.worstOverlap = Math.max(c.worstOverlap, overlap);

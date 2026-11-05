@@ -29,7 +29,8 @@
 ## よく使う手順
 
 - 検査一式: `bash tools/dev/quick_check.sh`
-- 自己テスト: `bash tools/dev/selftest_fresh.sh "<段,…>" [<世界名>]`（段を空にすると全部。約 20 分）。決まった段だけなら `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="<段>" bash tools/dev/mc_run.sh runServer --no-daemon`。`abyss escort` と `titan ground` は全部を流したときにまれに落ちることがある（単独では通る）。
+- 自己テスト: `bash tools/dev/selftest_fresh.sh "<段,…>" [<世界名>]`（段を空にすると全部。約 20 分）。決まった段だけなら `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="<段>" bash tools/dev/mc_run.sh runServer --no-daemon`。`abyss escort` と `titan ground` が全部を流したときにまれに落ちていたのは、サーバーが遅れて区画の読み込みが間に合わないまま進んでいたため（2026-11-05 に、付き添いは道すじの区画が動くまで・潮殻の巡航はまわりの区画が読み込まれるまで待つようにした）。また落ちたら、失敗の文の「guide chunk active」と、巡航の待ちの記録を見る。
+- ラフの生成元（`tools/rough/lowpoly/<組>/`）は、見比べの道具（`sheet.py`・`compare.py`・`build_all.py`）が三つの案をまとめて作り、選んだ案の出力もそこから書く。選ばなかった案の `opt_*.py` だけを消すと選んだ案も作り直せなくなるので、消すなら生成元ごと書き直す。
 - 撮影: `bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/<台本>.txt -PshotsName=<名>`。遊んだ人の世界を見るときは `run/shots/<名>/saves/<世界>` へ写してから開く。
 - 本番の形での確かめ: リポジトリの外の `C:\Users\nisimoto\skyabyss_prod`（サーバーとクライアント）。`python -X utf8 tools/dev/prod_client.py <client> --script tools/shots/prod_check_mp.txt`。手順は [release.md](release.md) の 2 章。
 - jar: `bash tools/dev/mc_run.sh build --no-daemon -q -x test` → `build/libs/skyabyss-<版>.jar`。
