@@ -8,6 +8,7 @@ GONE: 消す見どころ (pois.json では "gone" にする。番号は並びの
 WAYPOSTS: 建てる道しるべ (番号 -> 名の id・4 行)。NEW_WAYPOSTS は pois.json の末尾に足す
 BROTHERS: 野盗の頭目の兄弟 (番号 -> 名の id・頭の名)。書付は PLACES に
 TRAVELERS: 旅人のいる野営 (番号 -> 人の id)
+NEW_PLACES: pois.json の末尾に足す場所 (種類・x・z・名の id・日本語の名・英語の名・添え物・書付)。名の id で探し、あれば同じ番号に書き直す
 """
 
 # ---------------------------------------------------------------- 消す (道しるべ 16 -> 6・野盗の野営 10 -> 4 + 島・旅人の野営 6 -> 3)
@@ -251,3 +252,25 @@ P = [
 ]
 
 PLACES = {i: (slug, ja, en, piece, nja, nen) for i, slug, ja, en, piece, nja, nen in P}
+
+
+# ---------------------------------------------------------------- 足す場所 (2026-11-05 の頁 d_storm_places = A。嵐の高地は 9 か所で、ほかの土地の半分だった)
+# 置き場所は高さの地図で選んだ (平ら・陸・ほかの見どころ 150・町と跡地 170 から離す。北の端・峰の上・東の台地・南の谷へ散らす)
+NEW_PLACES = [
+    ("stone_circle", -1024, -864, "thunderstone_ring", "雷石の環", "Thunderstone Ring", "cairn",
+     "雷の落ちた石だけ|環に並べる|九つめの座は|まだ空いている", "Only struck stones|stand in this ring|The ninth place|is still empty"),
+    ("watchtower", -928, -656, "cloudwatch_post", "雲見の櫓", "Cloudwatch Post", "view_bench",
+     "雲が東へ流れる日|雷翼は西で眠る|逆の日は|櫓を降りろ", "When clouds run east|the Wing sleeps west|On other days|climb down"),
+    ("ruined_tower", -1136, -544, "brokenwing_tower", "折れ羽の塔", "Brokenwing Tower", "bone_pile",
+     "塔に羽が一枚|刺さっている|人の背丈より|長い羽が", "One feather is|stuck in the tower|Longer than|a man is tall"),
+    ("graveyard", -896, -160, "struckmen_graves", "雷打たれの墓", "Struckmen's Graves", "lantern_row",
+     "ここに眠るのは|雷に選ばれた者|墓石は|みな北を向く", "Here lie those|the lightning chose|Every stone|faces north"),
+    ("mountain_hut", -880, 64, "vane_hut", "風見の小屋", "Weathervane Hut", "rod_stub",
+     "風見が三度回れば|嵐が来る|四度回れば|もう来ている", "Three turns of the vane|a storm is coming|Four turns|it is already here"),
+    ("cave", -1216, 464, "rumble_cave", "雷鳴の洞", "Rumble Cave", "cairn_lamp",
+     "洞の奥で|雷が鳴る|空は|晴れているのに", "Thunder rolls|deep in the cave|though the sky|is clear"),
+    ("ruined_house", -1120, 624, "kitemaker_house", "凧作りの家", "Kitemaker's House", "loom",
+     "凧の糸は|銅を撚って作る|雷を|地へ逃がすために", "Kite string is|twisted copper|to lead the lightning|into the ground"),
+    ("roadside_shrine", -1392, 560, "south_moss_shrine", "南の苔祠", "South Moss Shrine", "offering",
+     "雷の夜は|ここで越せ|苔が|雷を吸う", "Spend storm nights|here|The moss|drinks the lightning"),
+]

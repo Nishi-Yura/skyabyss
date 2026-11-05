@@ -51,7 +51,7 @@ public final class ContinentPois {
     static final String FOUND_TAG = "skyabyss_poi_found";
     // 土地ごとの発見の経験値 (野・島・岩鯨・潮殻・雷翼・余燼。ContinentMap の土地の番号の順)
     // 土地ごと (草原・外れ・岩鯨・潮・嵐・灰)。章の初めての場所が章の経験値の 20% になるよう、土地の見どころの数で割った値 (04 の 3 章、自己テスト xp table)
-    static final int[] DISCOVER_XP = {6, 10, 9, 33, 92, 98};
+    static final int[] DISCOVER_XP = {6, 10, 9, 33, 63, 98};
 
     // 土地の見どころを初めて見つけた経験値 (隠れた発見はその倍。ContinentSecrets)
     public static int discoverXp(int region) {

@@ -739,6 +739,18 @@ def main():
             lang["ja"][f"sign.skyabyss.waypost.{name}.{k + 1}"] = ja[k].format(far=far)
             lang["en"][f"sign.skyabyss.waypost.{name}.{k + 1}"] = en[k].format(far=far)
 
+    # 足す場所 (名の id で探す。無ければ末尾に足す)
+    for kind, x, z, slug, ja, en, piece, nja, nen in D.NEW_PLACES:
+        hit = [k for k, p in enumerate(pois) if p.get("name") == slug]
+        entry = {"kind": kind, "x": x, "z": z, "name": slug}
+        if hit:
+            pois[hit[0]] = entry
+            k = hit[0]
+        else:
+            pois.append(entry)
+            k = len(pois) - 1
+        D.PLACES[k] = (slug, ja, en, piece, nja, nen)
+
     # 場所
     built = []
     for i, p in enumerate(pois):

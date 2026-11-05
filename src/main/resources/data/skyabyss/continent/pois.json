@@ -125,5 +125,13 @@
   {"kind": "dungeon_storm_hollow", "x": -1244, "z": -282},
   {"kind": "dungeon_molten_mine", "x": 240, "z": 1220},
   {"kind": "signpost", "x": -216, "z": 62, "name": "gate_east"},
-  {"kind": "signpost", "x": 1224, "z": 157, "name": "tide_landing"}
+  {"kind": "signpost", "x": 1224, "z": 157, "name": "tide_landing"},
+  {"kind": "stone_circle", "x": -1024, "z": -864, "name": "thunderstone_ring"},
+  {"kind": "watchtower", "x": -928, "z": -656, "name": "cloudwatch_post"},
+  {"kind": "ruined_tower", "x": -1136, "z": -544, "name": "brokenwing_tower"},
+  {"kind": "graveyard", "x": -896, "z": -160, "name": "struckmen_graves"},
+  {"kind": "mountain_hut", "x": -880, "z": 64, "name": "vane_hut"},
+  {"kind": "cave", "x": -1216, "z": 464, "name": "rumble_cave"},
+  {"kind": "ruined_house", "x": -1120, "z": 624, "name": "kitemaker_house"},
+  {"kind": "roadside_shrine", "x": -1392, "z": 560, "name": "south_moss_shrine"}
 ]
