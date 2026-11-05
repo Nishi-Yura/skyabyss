@@ -101,6 +101,11 @@ public final class ShotRunner {
     private static int recTicks;
     private static double recNext;
     private static int recFrames;
+    // dolly: 動かし始めの所と向き {x, y, z, yaw, pitch}、目当て、かける tick、まっすぐか
+    private static double[] dollyFrom;
+    private static double[] dollyTo;
+    private static int dollyTicks;
+    private static boolean dollyLinear;
 
     private ShotRunner() {
     }
@@ -551,6 +556,44 @@ public final class ShotRunner {
                 mc.player.xRotO = mc.player.getXRot();
                 mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.getYRot();
                 return true;
+            }
+            case "dolly" -> {
+                // dolly <tick> <x> <y> <z> <yaw> <pitch> [linear] : 今の所と向きから、目当ての所と向きへ <tick> かけて滑らかに動かす (映像の撮影。観戦の姿で)。
+                // どの数も ~ で今のまま、~10 で今から +10。向きは近い回りで回す。既定はゆっくり出てゆっくり止まる (linear で一定の速さ)。
+                // 録画 (record は手順を止めない) と一緒に: record <名> <tick> → dolly <tick> … → recwait。自分の側で置き、前の tick の所を xo に残すので描く絵も滑らか
+                if (first) {
+                    double[] from = {mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYRot(), mc.player.getXRot()};
+                    double[] to = new double[5];
+                    for (int k = 0; k < 5; k++) {
+                        String a = line.arg(k + 1);
+                        to[k] = a.startsWith("~") ? from[k] + (a.length() > 1 ? Double.parseDouble(a.substring(1)) : 0) : Double.parseDouble(a);
+                    }
+                    to[3] = from[3] + net.minecraft.util.Mth.wrapDegrees(to[3] - from[3]);
+                    dollyFrom = from;
+                    dollyTo = to;
+                    dollyTicks = Math.max(1, line.intArg(0));
+                    dollyLinear = line.args().length > 6 && line.arg(6).equalsIgnoreCase("linear");
+                }
+                double t = Math.min(1.0, (stepTicks + 1) / (double) dollyTicks);
+                double e = dollyLinear ? t : t * t * (3 - 2 * t);
+                double[] v = new double[5];
+                for (int k = 0; k < 5; k++) {
+                    v[k] = dollyFrom[k] + (dollyTo[k] - dollyFrom[k]) * e;
+                }
+                var p = mc.player;
+                p.xo = p.xOld = p.getX();
+                p.yo = p.yOld = p.getY();
+                p.zo = p.zOld = p.getZ();
+                p.yRotO = p.getYRot();
+                p.xRotO = p.getXRot();
+                p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                p.setPos(v[0], v[1], v[2]);
+                p.setYRot((float) v[3]);
+                p.setXRot((float) v[4]);
+                p.yBodyRotO = p.yBodyRot;
+                p.yHeadRotO = p.yHeadRot;
+                p.yBodyRot = p.yHeadRot = p.getYRot();
+                return stepTicks + 1 >= dollyTicks;
             }
             case "waitchunks" -> {
                 // 描く区画の数が 20 tick 変わらず、組み立ての列が空になるまで (最大 n tick、既定 600)
