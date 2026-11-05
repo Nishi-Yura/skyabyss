@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cast as C  # noqa: E402
-from cast import SKIN, HOLD_L, HOLD_L_LOW, STAFF_R, HOLD2_LOW, add  # noqa: E402
+from cast import SKIN, HOLD_L, HOLD_L_LOW, STAFF_R, HOLD2_LOW, BIRD_L, add  # noqa: E402
 import props as PR  # noqa: E402
 import props2 as P2  # noqa: E402
 
@@ -236,6 +236,40 @@ folk("camp_mapmaker", "地図描きのセキ", [
          face=dict(eye="calm", iris=(70, 60, 50), brow="thick", mouth="smirk"), hair=SHORT, hat=dict(kind="kasa"), beard="goatee", hairline=27.4,
          build="avg", upper=dict(mantle=dict(bottom=15.0, clasp=True), sash=True), lower="trousers", sleeve="rolled",
          props={"prop_back": P2.map_tube}),
+])
+
+# ---------------------------------------------------------------- 鯨見の骨削り (岩鯨の肋を削って道具にする職人。2026-11-05 の頁 d_whale_town)
+folk("whale_bonecarver", "鯨見の骨削り", [
+    dict(anim="hold_r", pal=dict(skin=SKIN["old"], hair=(200, 196, 188), coat=(110, 104, 92), apron=(150, 120, 84), shirt=(214, 206, 186), trim=(70, 60, 48),
+                                 hat=(150, 120, 84), trousers=(70, 64, 56), boot=(52, 44, 36), metal=(200, 196, 180), glove=(120, 96, 70), leather=(120, 90, 60)),
+         face=dict(eye="narrow", iris=(90, 90, 80), brow="thick", mouth="neutral", marks=[(["w"], 4, 48)]), hair=BALDISH, hat=dict(kind="band"),
+         beard="full", hairline=27.0, build="old", upper=dict(apron=dict(bottom=5.0, top=18.4, w=3.2), pouches=[(-3.6, 10.6, "pouch")]),
+         lower="trousers", sleeve="rolled", props={"prop_r": P2.hammer}),
+    dict(anim="free", pal=dict(skin=SKIN["tan"], hair=(60, 44, 34), coat=(84, 96, 80), mantle=(200, 190, 160), shirt=(220, 212, 190), trim=(50, 60, 46),
+                               hat=(84, 96, 80), skirt=(70, 80, 64), trousers=(60, 64, 54), boot=(56, 46, 36), metal=(210, 204, 186), leather=(110, 84, 56)),
+         face=dict(eye="calm", iris=(80, 90, 70), brow="flat", mouth="small"), hair=BUN, hat=dict(kind="kerchief"), hairline=27.6,
+         build="lady", upper=dict(mantle=dict(bottom=16.0, clasp=True), sash=True), lower="skirt", sleeve="rolled", props={"prop_back": P2.tool_pack}),
+    dict(anim="hold_r", pal=dict(skin=SKIN["ruddy"], hair=(140, 100, 66), coat=(70, 66, 60), mantle=(176, 168, 150), shirt=(206, 196, 172), trim=(46, 40, 34),
+                                 hat=(176, 168, 150), trousers=(62, 56, 48), boot=(50, 42, 34), metal=(196, 190, 170)),
+         face=dict(eye="sharp", iris=(80, 70, 56), brow="stern", mouth="smirk"), hair=SHORT, hat=dict(kind="brim"), beard="stubble", hairline=27.4,
+         build="stout", upper=dict(mantle=dict(bottom=15.0, clasp=True), buttons=[14.0, 16.0]), lower="trousers", sleeve="rolled",
+         arms={"r": ((-6.4, 17.4, -1.2), (-4.8, 21.0, -3.0))}, props={"prop_r": PR.toya_pick}),
+])
+
+# ---------------------------------------------------------------- 鯨見の見張り (町の櫓から空の巨神を見張る若い人)
+folk("whale_lookout", "鯨見の見張り", [
+    dict(anim="hold_l", pal=dict(skin=SKIN["pale"], hair=(170, 110, 60), coat=(70, 90, 120), vest=(200, 180, 130), shirt=(230, 224, 210), trim=(40, 56, 80),
+                                 hat=(70, 90, 120), trousers=(56, 66, 86), boot=(70, 56, 40), metal=(200, 180, 110), scarf=(190, 70, 50)),
+         face=dict(eye="round", iris=(80, 110, 140), brow="soft", mouth="grin"), hair=SHORT, hat=dict(kind="cap"), beard="none", hairline=27.4,
+         build="slim", upper=dict(vest=True, scarf=True), lower="trousers", sleeve="fitted", arms=HOLD_L, props={"prop_l": P2.map_tube}),
+    dict(anim="hold_l", pal=dict(skin=SKIN["mid"], hair=(40, 34, 32), coat=(110, 80, 60), mantle=(160, 140, 100), shirt=(220, 210, 186), trim=(70, 50, 36),
+                                 hat=(110, 80, 60), skirt=(90, 66, 50), trousers=(70, 56, 44), boot=(56, 44, 34), metal=(220, 190, 100), glass=(250, 230, 150)),
+         face=dict(eye="lady", iris=(70, 60, 50), brow="soft", mouth="small", blush=0.15), hair=BRAID, hat=dict(kind="hood"), hairline=27.8,
+         build="lady", upper=dict(mantle=dict(bottom=16.0, clasp=True)), lower="skirt", sleeve="fitted", arms=HOLD_L_LOW, props={"prop_l": lantern_l}),
+    dict(anim="hold_l", pal=dict(skin=SKIN["tan"], hair=(90, 60, 40), coat=(60, 76, 60), vest=(120, 100, 70), shirt=(214, 206, 186), trim=(40, 50, 40),
+                                 hat=(60, 76, 60), trousers=(56, 60, 50), boot=(56, 44, 34), metal=(180, 170, 140)),
+         face=dict(eye="glint", iris=(90, 100, 80), brow="arched", mouth="smile"), hair=LONG, hat=dict(kind="band"), beard="none", hairline=27.6,
+         build="avg", upper=dict(vest=True, collar=True, collar_mat="shirt"), lower="trousers", sleeve="rolled", arms=BIRD_L, props={"prop_l": P2.bird}),
 ])
 
 # 選定 (2026-10-28): 8 人とも A。cast の guest_<人> として登録する (install_npc2 が読む。人の動きの型も A のもの)
