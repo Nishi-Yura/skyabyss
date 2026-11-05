@@ -23,7 +23,7 @@ public final class LowPoly {
     // プレイヤーの武器 13 種 (手・地面・額縁) を低ポリメッシュで描くか。false にすると元のボクセルのモデル (models/item_voxel/) で描く (client/weapon/WeaponItemRenderer)。
     // 台本の `weaponmesh on|off`
     public static volatile boolean weaponMeshes = true;
-    // 開発用: 武器のメッシュの階級を common|rare|legend に固定する (null = 品の階級)。台本の `weapontier <階級|off>`
+    // 開発用: 武器のメッシュの階級を common|rare|legend に固定する (null = 品の階級)。台本の `weapontier <階級|off>`。品の階級は一つに決まっているので、その段のメッシュが無い品は品の階級で描く
     public static volatile String weaponTier = null;
 
     // 装飾品・補助の品 16 種 (手・地面・額縁) を低ポリメッシュで描くか。false にすると元の平絵のモデル (models/item_flat/) で描く (client/accessory/AccessoryItemRenderer)。台本の `accmesh on|off`

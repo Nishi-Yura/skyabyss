@@ -1,6 +1,7 @@
-"""装飾品・補助の品 16 種の低ポリメッシュを入れる (docs/design/15 の 4.6.3、03 の 6.3)。
+"""装飾品・補助の品 14 種の低ポリメッシュを入れる (docs/design/15 の 4.6.3、03 の 6.3)。
 
-入力: docs/review/lowpoly_roughs/accessories_final/<id>/{common,rare,legend}_{mesh.json,atlas.png,glowmask.png}
+品の階級は決まっている (item/GearTier) ので、入れるのはその階級の段だけ (TIER_OF)。前は三段とも書いていて、流すと消した段が戻った。
+入力: docs/review/lowpoly_roughs/accessories_final/<id>/<段>_{mesh.json,atlas.png,glowmask.png}
        (tools/rough/lowpoly/accessories/build_final.py が作る。採用した A 案)
 出力:
   assets/skyabyss/lowpoly/items/<id>/<段>.json                      メッシュ (texture は items/<id>/<段>_atlas)
@@ -31,11 +32,12 @@ import mesh_close  # noqa: E402  (書き出す前に水密にする: tools/lib/m
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "docs/review/lowpoly_roughs/accessories_final"
 ASSETS = ROOT / "src/main/resources/assets/skyabyss"
-ITEMS = ["storm_charm", "storm_anklet", "storm_eye_feather", "gale_feather",
-         "kindling_charm", "ember_mantle", "ember_lantern", "ember_horn", "cinder_lamp",
-         "resonance_charm", "moss_talisman", "stone_whale_plating",
-         "tide_chime_charm", "moontide_pearl", "tide_watching_shell", "tide_pearl"]
-TIERS = ["common", "rare", "legend"]
+# 品 → 段 (品の階級。client/accessory/AccessoryMeshes.IDS の巨神の装飾と同じ並び)
+TIER_OF = {"storm_charm": "rare", "storm_anklet": "rare", "storm_eye_feather": "legend",
+           "kindling_charm": "rare", "ember_mantle": "rare", "ember_lantern": "legend", "ember_horn": "common", "cinder_lamp": "common",
+           "resonance_charm": "rare", "moss_talisman": "rare", "stone_whale_plating": "legend",
+           "tide_chime_charm": "rare", "moontide_pearl": "legend", "tide_watching_shell": "common"}
+ITEMS = list(TIER_OF)
 
 # 持ち方 (バニラの item/generated の表を土台に、メッシュ用に調えたもの。全品共通)
 DISPLAY = {
@@ -70,7 +72,7 @@ def install_meshes():
         tex_dir = ASSETS / "textures/lowpoly/items" / item
         mesh_dir.mkdir(parents=True, exist_ok=True)
         tex_dir.mkdir(parents=True, exist_ok=True)
-        for tier in TIERS:
+        for tier in [TIER_OF[item]]:
             mesh = json.loads((src / f"{tier}_mesh.json").read_text(encoding="utf-8"))
             mesh["texture"] = f"items/{item}/{tier}_atlas"
             mesh.pop("glowmask", None)

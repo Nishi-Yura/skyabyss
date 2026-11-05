@@ -71,9 +71,10 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         String id = BuiltInRegistries.ITEM.getKey(shown.getItem()).getPath();
         int stage = pullStage(stack, context);
         if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
-            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(shown) + (stage >= 0 ? "_pull" + stage : ""));
+            String tier = tierName(shown, id);
+            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tier + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
-                renderMesh(mesh, id, tierName(shown), level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
+                renderMesh(mesh, id, tier, level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
                 return;
             }
         }
@@ -194,9 +195,10 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         return ModGear.enhance(stack);
     }
 
-    private static String tierName(ItemStack stack) {
+    // メッシュの段 = 品の階級。台本の weapontier で固定していても、その段のメッシュが無ければ (品の階級は一つに決まり、ほかの段は消した) 品の階級
+    private static String tierName(ItemStack stack, String id) {
         String forced = LowPoly.weaponTier;
-        if (forced != null) {
+        if (forced != null && LowPolyMeshes.get("items/" + id + "/" + forced) != null) {
             return forced;
         }
         GearTier tier = stack.getItem() instanceof ModGear g ? g.tier() : GearTier.COMMON;

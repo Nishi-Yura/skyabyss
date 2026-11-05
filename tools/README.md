@@ -164,7 +164,7 @@ python tools/gen/shots/gen_weapon_lp_shots.py [id ...]   # 台本 tools/shots/we
 python tools/sheets/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_<id>.png (コンタクトシート) ほか
 ```
 
-台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`tools/gen/items/gen_ember_items.py` `tools/install/install_storm_gear.py` `tools/install/install_tide_gear.py` `tools/gen/items/gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `tools/install/install_lowpoly_weapons.py` と `tools/lib/weapon_display.py` を流す。
+台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用。品の階級は一つに決まっているので、その段のメッシュが無い品は品の階級で描く)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`tools/gen/items/gen_ember_items.py` `tools/install/install_storm_gear.py` `tools/install/install_tide_gear.py` `tools/gen/items/gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `tools/install/install_lowpoly_weapons.py` と `tools/lib/weapon_display.py` を流す。
 
 ### マルチの確かめ (専用サーバー + 二人)
 `run/server.properties` に `online-mode=false`・`server-port=25666`・`enable-rcon=true`・`rcon.port=25766`・`rcon.password=test`・新しい `level-name`・`level-seed=4242`、`run/eula.txt` に `eula=true`。`./gradlew runServer` で起動し、台本の頭の `server localhost:25666` で専用サーバーへ入るクライアントを `./gradlew runShots -Pscript=tools/shots/mp_alice.txt -PshotsUser=Alice`、`mp_bob.txt -PshotsUser=Bob` で動かす (Alice が入ってから Bob を起動)。台本の `waitfile <ファイル>` は外 (`signal` か手) がファイルを置くまで待つ。サーバーへの命令は `python tools/dev/rcon.py "<命令>"` (OP の権限。`skyabyss cinematic play <場面> Bob` など)。
@@ -284,7 +284,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `tools/install/install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる |
 | `textures/gui/sky_vignette.png` | `tools/gen/ui/gen_vignette.py` | 同じ物ができる |
 | 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `tools/gen/items/gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
-| 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | 生成の道具 `rough/watcher.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (`rough/watcher_v2.py` も同じ理由で走らない) |
+| 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | 生成の道具 `rough/watcher.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する |
 | `sounds/prologue/*.ogg` (見る者の音) | `tools/gen/sound/gen_watcher_sounds.py` | 同じ物ができる |
 | 技: `textures/gui/skill/{icons,skills}.png`、`textures/particle/{rune_spark,sky_mote}_*.png`、`particles/*.json`、`sounds/rpg/skill/*.ogg` | `tools/gen/ui/gen_skill_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。アイコンのラフ 3 案と比較画像は `docs/review/skill_icons_roughs/`、採用は `ADOPTED`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `SkillScreen.java` と値をそろえる |
 | 共鳴の炉の画面: `textures/gui/forge/forge.png` (左右の板・つまみ・印・候補の札、2 倍密度) | `tools/gen/items/gen_forge_assets.py` | 同じ物ができる。画面の配置を変えたら `ResonanceForgeScreen.java` と値をそろえる |
@@ -324,6 +324,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 - 生成スクリプトが入力に使う物 (`tools/sources/` へ移す)
 - ユーザーがまだ選んでいない案 (`docs/review/*_roughs/`)。選ばれたら、比較画像 1 枚と選定理由 (書類) だけ残し、ほかは消す
+- 取り込みの道具 (`tools/install`・`tools/gen`) が今読む物 (選んだ案の出力)。見比べの絵・撮影の絵 (`sheet`・`preview`・`ingame`・`before`/`after` など) と、どの道具も読まない場所は消してよい (2026-11-05 に約 100 MB を消した)
 
 下の `_roughs/` を書くスクリプトは、どれも `docs/review` のラフを入力に読まない (`--install` も、その場で作った案を書き出す)。消したラフはスクリプトを動かせば作り直せるので、`tools/sources/` へ移した物はない。
 

@@ -3,3 +3,6 @@
 # are changed when only line endings change.
 src/generated/**/.cache/* text eol=lf
 src/generated/**/*.json text eol=lf
+
+# tools/gen/loot/gen_box_text.py が LF で書く lang (check_generators が流すたびに、改行の違いだけで「変更あり」にならないように)
+src/main/resources/assets/skyabyss_box/lang/*.json text eol=lf
