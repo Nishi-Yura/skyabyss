@@ -6,7 +6,7 @@ import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import net.minecraft.server.level.ServerPlayer;
 
-// 訓練場の師範の振り直し (docs/design/35 の 3.2、27 の 17 節の決まりのまま)。
+// 訓練場の師範の振り直し (docs/design/35 の 3.2、04 の 7.6 の決まりのまま)。
 //   師範の前は「共鳴の炉のそば」と同じに扱う (炉まで行かなくてよい)。代価は 27 のとおり共鳴の結晶 (技: 結晶 1、目利きで無料、
 //   Lv 15 まで無料。力: 初回無料、以後 1〜5)。結晶の代わりに鐘銭でも払える (結晶 1 つ = COINS_PER_CRYSTAL 枚)
 //   見積もり (quote) は、振り直しの節に入ったときに一行で出す

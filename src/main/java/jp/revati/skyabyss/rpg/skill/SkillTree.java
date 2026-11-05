@@ -3,7 +3,7 @@ package jp.revati.skyabyss.rpg.skill;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
 
 // スキルツリー (系統)。5 つの系統と共通の木 (旅人)、封じた 2 本 (星術師・深淵術師。技はまだない)。
-// 木の形は 4 行 (Lv 1・5・12・20): 入口の 2 つ、2 行目の 2 つ、奥義の使う技 1、要 1 (docs/design/27_builds_and_classes.md の 2.2)
+// 今の技の木は職ごと (docs/design/48)。この系統は技ごとの印の木として残る (木の印・タグ。docs/design/04 の 7.8)
 public enum SkillTree {
     ROCK("rock", Stat.STRENGTH, false, "sword"),
     WIND("wind", Stat.AGILITY, false, "sword"),

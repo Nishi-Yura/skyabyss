@@ -3,7 +3,7 @@ package jp.revati.skyabyss.rpg.skill;
 import net.minecraft.util.Mth;
 
 // 技とマナの数値。ゲームの状態に触れない計算だけを置く (自己テストで直接たしかめる)。
-// 表と理由は docs/design/04_growth_and_skills.md (10 章) と 27_builds_and_classes.md
+// 表と理由は docs/design/04 の 7 章と 48
 public final class SkillRules {
     // 枠の数: はじめは 4、2 つ目の天職を迎えると 5 (記録の配列は最大の 5)
     public static final int BASE_SLOTS = 4;
@@ -411,7 +411,7 @@ public final class SkillRules {
     public static final double LUNGE_MULTIPLIER = 1.3;
     // 突き通し: 通り道の全員に ×0.6
     public static final double PIERCE_THROUGH_MULTIPLIER = 0.6;
-    // 逸品の書き換え (docs/design/27 の 4.2)
+    // 武器の書き換え (docs/design/04 の 7.8)
     // 突き通し・骨: 通り道の全員に ×1.0、3 回に 1 度、着いた足もとから骨 (半径 2.5、×0.5)
     public static final double BONE_PIERCE_MULTIPLIER = 1.0;
     public static final int BONE_EVERY = 3;

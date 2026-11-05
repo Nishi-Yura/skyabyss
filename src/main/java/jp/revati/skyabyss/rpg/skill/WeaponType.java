@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.TridentItem;
 
-// 武器の型 (重・長・速・遠・守)。武器 13 種を 5 つにまとめる (docs/design/27 の 3.9)。
+// 武器の型 (重・長・速・遠・守)。武器 13 種を 5 つにまとめる (docs/design/04 の 7.8)。
 // 縛りは作らない: どの武器でも技は使える。合う型を持つと、その技にちょっとしたおまけが付く (上限 +15%)。
 // 品の種類は名前で見分ける (まだ作られていない武器も、名前が合えば効く)。バニラの品も近いものへ
 public enum WeaponType {

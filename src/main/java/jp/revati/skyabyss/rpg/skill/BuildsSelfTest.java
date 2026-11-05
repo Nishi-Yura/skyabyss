@@ -540,7 +540,7 @@ final class BuildsSelfTest {
         }
         double skillDps = regen * best;
         double bonus = skillDps / basic;
-        // 精神 20 でマナを全部技へ回しても、ふつうの攻撃の +10〜65% (04 の 7.7。章 1 のころは 15〜20% の増加、章 2 以降で本数が増える)
+        // 精神 20 でマナを全部技へ回しても、ふつうの攻撃の +10〜65% (04 の 7.1。章 1 のころは 15〜20% の増加、章 2 以降で本数が増える)
         check(f, bonus >= 0.10 && bonus <= 0.65, "skill rotation bonus is out of range: " + bonus);
         // 心臓 (体力 450)・番兵長 (体力 150 とみなす) を、攻撃力 8 の一人が倒す時間 (秒)
         double heart = 450 / (8 * (basic + skillDps));

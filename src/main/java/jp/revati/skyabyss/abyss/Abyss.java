@@ -100,7 +100,7 @@ public final class Abyss {
     public static final float LEGEND_CHANCE = 0.25f;
     public static final int LEGEND_PITY = 4;
 
-    // ---------------------------------------------------------------- 深淵のアーティファクトの書き換え (docs/design/27 の 4.2 と同格。数字は小さく、形で遊ぶ)
+    // ---------------------------------------------------------------- 深淵のアーティファクトの書き換え (docs/design/04 の 7.8 の武器の書き換えと同格。数字は小さく、形で遊ぶ)
     // 奈落断ち (巨神斬り): 遅れた第二の刃
     public static final int ECHO_DELAY = 24;
     public static final double ECHO_SCALE = 0.6;

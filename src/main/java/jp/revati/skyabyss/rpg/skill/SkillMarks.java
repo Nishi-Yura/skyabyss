@@ -6,7 +6,7 @@ import jp.revati.skyabyss.item.affix.AffixType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-// 装備の「木の印」(特性) が技の力へ足す割合。手の武器の印 (docs/design/27 の 4.1)。P3 で中身を入れる
+// 装備の「木の印」(特性) が技の力へ足す割合。手の武器の印 (docs/design/04 の 7.8)
 public final class SkillMarks {
     private SkillMarks() {
     }

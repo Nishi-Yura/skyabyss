@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // 刻印 (ルーン)。使う技 1 つにつき 3 択で、技の形が変わる (数字の増減ではなく)。
-// 開くのは、その技を極めたとき (段が最大)。1 点で選び、同時に有効なのは 1 つ。付け替えは共鳴の炉で結晶 1 (docs/design/27 の 3.8、5)。
+// 開くのは、その技を極めたとき (段が最大)。1 点で選び、同時に有効なのは 1 つ。付け替えは共鳴の炉で結晶 1 (今の木では技を変える節。docs/design/48 の 2.4)。
 // 第一段階は 10 本 × 3 = 30。ほかの使う技 (巡りの唄・焼き入れ・灰散らし・骨の罠・天の驟雨・合図) は第二段階
 public enum Rune {
     // ---- 巨神斬り
@@ -79,7 +79,7 @@ public enum Rune {
     FROST_ROAD("frost_road", Skill.FROST_TIDE, 2),
     STAR_REMNANT("star_remnant", Skill.BLINK, 1),
     DOUBLE_BLINK("double_blink", Skill.BLINK, 2),
-    // ---- 逸品の書き換え (4 番目。その武器を主の手に持つあいだだけ選べて、効く。docs/design/27 の 4.2)
+    // ---- 逸品の書き換え (4 番目。その武器を主の手に持つあいだだけ選べて、効く。docs/design/04 の 7.8)
     BONE_PIERCE("pike_bone", Skill.LUNGE, 4, "captain_pike"),
     BITE("fang_bite", Skill.WIND_REND, 4, "waterway_fang"),
     SNIP("shears_cut", Skill.WHALE_SWEEP, 4, "tidecaller_claw"),
