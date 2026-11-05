@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
 
-// 土地の町の人 (docs/design/42 の 1.2、00 の 278 = A)。二〜四章の町に二人ずつ。見た目は都の町の人 (TownGuests) の絵を借り、
+// 土地の町の人 (docs/design/42 の 1.2、00 の 278 = A)。鯨見と二〜四章の町に二人ずつ。体と肖像は一人ずつ自分のもの (無いときだけ look の都の町の人の絵を借りる)、
 // 名前 (entity.skyabyss.guest_<id>) と会話 (data/skyabyss/dialogue/guest_<id>.json) は新しい。
 // 町の部品の印 (folk_a・folk_b。tools/gen/world/town_arch.py) に立つ。保存しない (TownGuestEntity) ので、人が近くに来るたびに ContinentTowns が立たせ直す
 public final class RegionFolk {
@@ -20,6 +20,9 @@ public final class RegionFolk {
     public static final String CAMP = "camp";
 
     public static final List<Folk> ALL = List.of(
+            // 鯨見の町の二人 (2026-11-05。自分の体と肖像。借りる見た目は体が無いときだけ)
+            new Folk("whale_bonecarver", "fisher", "whale", "folk_a"),
+            new Folk("whale_lookout", "apprentice", "whale", "folk_b"),
             new Folk("tide_ferryman", "sailor", "tide", "folk_a"),
             new Folk("tide_lightkeeper", "fisher", "tide", "folk_b"),
             new Folk("storm_elder", "weaver", "storm", "folk_a"),

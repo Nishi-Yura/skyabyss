@@ -57,6 +57,8 @@ GUESTS = {"guest_apprentice", "guest_bellkeeper", "guest_fisher", "guest_bard", 
           # 土地の町の 8 人 (2026-10-28 から自分の体。cast_folk)
           "guest_island_ferryman", "guest_tide_ferryman", "guest_inner_ferryman", "guest_tide_lightkeeper", "guest_storm_elder",
           "guest_storm_hutkeeper", "guest_ember_survivor", "guest_ember_watch",
+          # 鯨見の町の 2 人 (2026-11-05) と野営の旅人 3 人 (cast_folk)
+          "guest_whale_bonecarver", "guest_whale_lookout", "guest_camp_pilgrim", "guest_camp_minstrel", "guest_camp_mapmaker",
           # 六章の人 (cast_moon)
           "guest_moon_past1", "guest_moon_past2", "guest_moon_past3", "guest_moon_past4"}
 
@@ -88,6 +90,9 @@ BG = {
     "guest_island_ferryman": (170, 150, 100), "guest_tide_ferryman": (90, 150, 190), "guest_inner_ferryman": (90, 150, 150),
     "guest_tide_lightkeeper": (230, 200, 110), "guest_storm_elder": (170, 110, 120), "guest_storm_hutkeeper": (170, 110, 80),
     "guest_ember_survivor": (220, 110, 50), "guest_ember_watch": (200, 80, 60),
+    "guest_whale_bonecarver": (200, 186, 150),  # 骨削り: 岩鯨の骨の白
+    "guest_whale_lookout": (110, 160, 210),     # 見張り: 空の青
+    "guest_camp_pilgrim": (120, 170, 100), "guest_camp_minstrel": (190, 90, 120), "guest_camp_mapmaker": (170, 150, 100),
     "guest_moon_past1": (130, 170, 230),     # 前のループの自分: 星の角灯の青白
     "guest_moon_past2": (150, 160, 180),     # 前のループの自分 (二人目): 色あせた鉄の灰青
     "guest_moon_past3": (160, 190, 235),     # 前のループの自分 (三人目): 月の砂時計の青白

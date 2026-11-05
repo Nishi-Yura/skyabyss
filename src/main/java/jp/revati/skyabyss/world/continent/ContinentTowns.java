@@ -161,7 +161,7 @@ public final class ContinentTowns {
             }
             Attendants.ensureAll(level, marks);
             jp.revati.skyabyss.opening.site.FacilityLabels.keep(level, e, true);
-            // 土地の町の人 (town/RegionFolk。二〜四章の町に二人ずつ)
+            // 土地の町の人 (town/RegionFolk。鯨見と二〜四章の町に二人ずつ)
             for (String fm : new String[] {"folk_a", "folk_b"}) {
                 BlockPos at = e.extra(fm);
                 if (at != null) {

@@ -31,6 +31,7 @@ public final class RegionFolkSelfTest {
 
     // 町の人 → 頼み
     static final String[][] ERRANDS = {
+            {"whale_bonecarver", "town/whale_bone"}, {"whale_lookout", "town/whale_watch"},
             {"tide_ferryman", "town/tide_ferry"}, {"tide_lightkeeper", "town/tide_light"},
             {"storm_elder", "town/storm_rods"}, {"storm_hutkeeper", "town/storm_hut"},
             {"ember_survivor", "town/ember_forge"}, {"ember_watch", "town/ember_watch"},

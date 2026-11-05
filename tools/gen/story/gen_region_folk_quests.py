@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 # 土地の町の人の頼み (town/RegionFolk、00 の 278 = A の続き)。近くの見どころ (ContinentPois の poi:<kind> の合図) へ行き、品を持って戻る
+#
+#   python -X utf8 -I tools/gen/story/gen_region_folk_quests.py <人 ...>   (例: whale_bonecarver whale_lookout)
+#
+# 名を渡した人だけ書き出す。汐守・風待・灰炉の六人の頼みは、書き出したあとで手で直した所がある (敵を mod の野盗に、褒美を
+# 土地の品に、経験を章に合わせて)。この表のままもう一度書くと戻ってしまうので、その六人は渡さない
 import json
+import sys
 
 # 段: ('go', poi の種類) / ('get', 品, 数) / ('kill', 敵, 数) / ('back',) = 話して渡す (品があれば渡す)
 FOLK = {
@@ -158,6 +164,72 @@ FOLK = {
                        "Red, was it. ...From up there you can see it breathing, can't you.\nThanks. These are the watch's emergency rations. Take them."),
             done_ok=('ありがとう', 'Thank you'),
         )),
+    # 鯨見の町の二人 (2026-11-05 の頁 d_whale_town。自分の体と肖像。一章のはじめから受けられる)
+    'whale_bonecarver': dict(
+        quest='town/whale_bone', chapter='titan_whale', min=0, order=213,
+        stages=[('kill', 'skyabyss:moss_crawler', 3), ('go', '@singing_ribs'), ('back',)],
+        give=[], reward=dict(xp=60, coins=12, items=[('skyabyss:rock_whetstone', 1)]),
+        text=dict(
+            title=('鳴る肋', 'The Singing Ribs'),
+            summary=('骨削りのゴンジに頼まれて、骨の採り場を荒らす苔這いを払い、鳴る肋がまだ鳴るか聞いてくる。',
+                     'For Gonji the bone carver, drive off the moss crawlers that gnaw at the bone yard, then hear whether the Singing Ribs still sing.'),
+            done=('鳴る肋は、風が通るたびに低く鳴っていた。ゴンジは、その音で削る骨を決めるという。',
+                  'The Singing Ribs hummed low each time the wind went through. Gonji says he picks which bone to carve by that sound.'),
+            kill_journal=('町の外の草地や林に、苔這いがいる。骨にこびりついた苔ごとかじるらしい。三匹ほど払おう。',
+                          'Moss crawlers roam the grass and woods outside town. They gnaw the bones, moss and all. Drive off about three.'),
+            kill_obj=('苔這いを払おう（町の外の草地や林）', 'Drive off moss crawlers (grass and woods outside town)'),
+            go_journal=('町から北北東、鳴る肋。風が通ると骨が鳴るという。まだ鳴るか聞いてこよう。',
+                        'North-northeast of town: the Singing Ribs. They say the bones sing when the wind goes through. Go and hear whether they still do.'),
+            go_obj=('鳴る肋の音を聞いてこよう（町から北北東）', 'Hear the Singing Ribs (north-northeast of town)'),
+            back_journal=('肋は低く鳴っていた。ゴンジに伝えよう。', 'The ribs hummed low. Tell Gonji.'),
+            back_obj=('骨削りのゴンジに伝えよう', 'Tell Gonji the bone carver'),
+            menu=('困っていることは？', 'Is something troubling you?'),
+            ask=('このところ、採り場の骨に苔這いがたかってな。苔ごと骨をかじりよる。三匹ばかり払ってくれんか。\n'
+                 'それと、ついでに北北東の鳴る肋まで行って、まだ鳴っとるか聞いてきてくれ。……わしはな、あの音で削る骨を決めとるんだ。',
+                 'Moss crawlers have been swarming the bones in the yard lately. They gnaw right through, moss and all. Would you drive off three or so?\n'
+                 'And while you are out, go north-northeast to the Singing Ribs and hear whether they still sing. ...I choose which bone to carve by that sound.'),
+            ask_ok=('引き受ける', "I'll do it"),
+            wait=('苔這いは町の外の草地や林だ。鳴る肋は北北東。……耳を澄ませてな。', 'The crawlers are in the grass and woods outside town. The Singing Ribs are north-northeast. ...Listen closely.'),
+            back=('どうだった。鳴っとったか。', 'Well? Were they singing?'),
+            back_give=('低く鳴っていた、と伝える', 'Tell him they hummed low'),
+            later=('また来る', "I'll come back"),
+            done_line=('低く、か。……そうか。なら、まだ削れる。鳴らなくなった骨は、削ると割れるんだ。\n'
+                       '礼に砥石をやろう。骨を削ったあとの石だが、刃にもよく効く。',
+                       'Low, was it. ...Good. Then they can still be carved. A bone that has stopped singing splits when you carve it.\n'
+                       'Take this whetstone for your trouble. I use it on bone, but it works on a blade just as well.'),
+            done_ok=('ありがとう', 'Thank you'),
+        )),
+    'whale_lookout': dict(
+        quest='town/whale_watch', chapter='titan_whale', min=0, order=214,
+        stages=[('go', '@whalewatch_post'), ('back',)],
+        give=[], reward=dict(xp=50, coins=10, items=[('skyabyss:road_hardtack', 2)]),
+        text=dict(
+            title=('鯨見櫓の鐘', 'The Bell of the Whalewatch Post'),
+            summary=('鐘打ちのハルに頼まれて、東の鯨見櫓へ行き、岩鯨の向きを見てくる。',
+                     'For Haru the bell-ringer, go to the Whalewatch Post to the east and see which way the stone whale is heading.'),
+            done=('鯨見櫓の板には「岩鯨が寝返りを打てば三度鐘を打て」とあった。ハルは、その日から鐘の数を数えている。',
+                  'The board at the Whalewatch Post read "If the stone whale turns over in its sleep, strike the bell three times." Haru has counted the strokes ever since.'),
+            go_journal=('町から東、鯨見櫓。昔の見張りが使っていた櫓だ。上から岩鯨の向きを見て、板の言葉も読んでこよう。',
+                        'East of town: the Whalewatch Post, where the old watch kept their eyes on the sky. Look at which way the stone whale is heading, and read the board.'),
+            go_obj=('鯨見櫓から岩鯨の向きを見てこよう（町から東）', 'See where the stone whale is heading from the Whalewatch Post (east of town)'),
+            back_journal=('板には「三度鐘を打て」とあった。ハルに伝えよう。', 'The board said "strike the bell three times". Tell Haru.'),
+            back_obj=('鐘打ちのハルに伝えよう', 'Tell Haru the bell-ringer'),
+            menu=('困っていることは？', 'Is something troubling you?'),
+            ask=('ぼく、町の鐘打ちなんだ。岩鯨が見えたら鐘を鳴らす。でも、何回鳴らせばいいのか、誰も覚えてないんだよ。\n'
+                 '東の鯨見櫓に、昔の見張りの決まりが書いてあるって聞いた。見てきてくれない？　ついでに、鯨がどっちを向いてるかも。',
+                 "I'm the town's bell-ringer. When the stone whale shows, I ring the bell. But nobody remembers how many times.\n"
+                 "They say the old watch's rule is written at the Whalewatch Post to the east. Would you go and see? And which way the whale is facing, too."),
+            ask_ok=('見てくる', "I'll go and look"),
+            wait=('鯨見櫓は町から東だよ。上まで登ると、空がぜんぶ見える。', 'The Whalewatch Post is east of town. From the top you can see the whole sky.'),
+            back=('どうだった！　何回って書いてあった？', 'Well? How many times did it say?'),
+            back_give=('「寝返りを打てば三度」と伝える', 'Tell him "three times if it turns over"'),
+            later=('また来る', "I'll come back"),
+            done_line=('三度……寝返りのときだけ三度か。じゃあ、ふだんは一度でいいんだ。\n'
+                       'ありがとう！　これ、見張りのおやつ。……イサナさんには、ぼくが自分で調べたって言っといてね。',
+                       "Three... only three when it turns over. So the rest of the time, once is enough.\n"
+                       "Thanks! These are the watch's snacks. ...And tell Isana I found it out myself, okay?"),
+            done_ok=('ありがとう', 'Thank you'),
+        )),
 }
 
 
@@ -173,7 +245,7 @@ def quest_json(fid, f):
         elif st[0] == 'get':
             stages.append({'id': 'get', 'objectives': [{'id': 'get', 'type': 'collect', 'target': st[1], 'count': st[2]}]})
         elif st[0] == 'kill':
-            stages.append({'id': 'kill', 'objectives': [{'id': 'kill', 'type': 'kill', 'target': st[1], 'count': st[2]}]})
+            stages.append({'id': 'kill', 'objectives': [{'id': 'kill', 'type': 'kill', 'count': st[2], 'targets': [st[1]]}]})
         else:
             stages.append({'id': 'back', 'objectives': [{'id': 'back', 'type': 'signal', 'target': 'town_hand:guest_' + fid, 'party': False}]})
     r = f['reward']
@@ -246,7 +318,11 @@ def lang(fid, f, i):
     return kv
 
 
-for fid, f in FOLK.items():
+IDS = sys.argv[1:]
+if not IDS:
+    sys.exit('人の名を渡す (例: whale_bonecarver whale_lookout)。頭の注を読むこと')
+for fid in IDS:
+    f = FOLK[fid]
     with open(f'src/main/resources/data/skyabyss/quest/{f["quest"]}.json', 'w', encoding='utf8', newline='\n') as fh:
         json.dump(quest_json(fid, f), fh, ensure_ascii=False, indent=2)
         fh.write('\n')
@@ -261,8 +337,8 @@ for lg, i in (('ja_jp', 0), ('en_us', 1)):
     s = open(p, encoding='utf8').read()
     d = json.loads(s)
     kv = {}
-    for fid, f in FOLK.items():
-        kv.update(lang(fid, f, i))
+    for fid in IDS:
+        kv.update(lang(fid, FOLK[fid], i))
     for k, v in kv.items():
         if k in d:
             old = f'  "{k}": {json.dumps(d[k], ensure_ascii=False)}'
