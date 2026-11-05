@@ -91,7 +91,7 @@ public final class LoreSelfTest {
         if (unlockable != early) {
             failures.add("only the prologue, chapters 1-6 and the finale may be written (" + unlockable + " unlockable)");
         }
-        // 終章 (finale「雲海」) は 2026-10-30 に中身が入りはじめた (鐘の島の最後の言葉 3)。仮の項目 (unknown_*) は書いた分だけ減らす
+        // 終章 (finale「雲海」) は 2026-10-30 に中身が入りはじめた (鐘の島の最後の言葉 3)。仮の項目 (unknown_*) は書いた分だけ減らした (2026-11-05 に深淵の 4 つも消して、今は無い)
         if (catalog.entry(Lore.BOOK_ENTRY) == null) {
             failures.add("the book's own entry " + Lore.BOOK_ENTRY + " is missing");
         }
@@ -111,6 +111,10 @@ public final class LoreSelfTest {
             if (!poi.chief().isEmpty()) {
                 signKeys.add(jp.revati.skyabyss.world.continent.ContinentPois.noteKey(poi));
             }
+        }
+        // 都の鯨追いの組合の奥の「帰らなかった者の名簿」の碑 (ShelterBuilder が都の部品の印 sign_guild_roll に刻む。chapter1/guild_roll)
+        if (jp.revati.skyabyss.opening.site.Blueprint.get("capital").marks.containsKey("sign_guild_roll")) {
+            signKeys.add("sign.skyabyss.capital.guild_roll");
         }
         // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
         Set<String> pending = new java.util.TreeSet<>();
@@ -349,14 +353,16 @@ public final class LoreSelfTest {
             }
         }
         // 読んだ印は、記された項目にだけ付く
-        Lore.markSeen(b, "chapter2/unknown_1");
+        Lore.markSeen(b, "ch6/memory_12");
         Lore.markSeen(b, "prologue/shadow");
-        if (sb.seen().contains("chapter2/unknown_1") || !sb.seen().contains("prologue/shadow")) {
+        if (sb.seen().contains("ch6/memory_12") || !sb.seen().contains("prologue/shadow")) {
             failures.add("seen marks are wrong: " + sb.seen());
         }
-        // 枠だけの項目は、コマンドでも記されない
-        if (Lore.unlock(b, "chapter2/unknown_1", false)) {
-            failures.add("a placeholder entry was unlocked");
+        // 枠だけの項目は、コマンドでも記されない (今は枠が一つもない。足したときに見る)
+        for (LoreEntry e : catalog.entries()) {
+            if (e.placeholder() && Lore.unlock(b, e.id(), false)) {
+                failures.add("a placeholder entry was unlocked: " + e.id());
+            }
         }
         // 保存: プレイヤーのデータに書かれ、読み戻すと同じ記録になる
         CompoundTag attachments = a.serializeAttachments(server.registryAccess());

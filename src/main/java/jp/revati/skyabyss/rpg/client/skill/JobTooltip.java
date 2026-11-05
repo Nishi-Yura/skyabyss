@@ -38,8 +38,9 @@ public final class JobTooltip {
             line.append(Component.translatable("gui.skyabyss.job.tooltip_locked"));
         }
         event.getToolTip().add(1, line);
-        // 基礎の要求値 (docs/design/48 の 2.2): 届いていれば淡い青、足りなければ赤紫で今の値を添える
-        jp.revati.skyabyss.rpg.skill.GearRequirement.Req req = jp.revati.skyabyss.rpg.skill.GearRequirement.of(event.getItemStack());
+        // 基礎の要求値 (docs/design/48 の 2.2): 届いていれば淡い青、足りなければ赤紫で今の値を添える。
+        // いまの職では使えない武器には出さない (使えないことは職の行で分かり、要る基礎は職を替えてからの話。札が長くなるだけだった)
+        jp.revati.skyabyss.rpg.skill.GearRequirement.Req req = locked ? null : jp.revati.skyabyss.rpg.skill.GearRequirement.of(event.getItemStack());
         if (req != null) {
             int now = event.getEntity() == null ? -1 : jp.revati.skyabyss.rpg.Growth.get(event.getEntity()).stat(req.stat());
             boolean ok = now < 0 || now >= req.amount() || event.getEntity().isCreative();
