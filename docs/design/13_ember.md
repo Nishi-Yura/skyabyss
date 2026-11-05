@@ -1060,7 +1060,7 @@
 
 ## 15. 見た目の採用案
 
-**選んだ案で実装する**（選ばれなかった案のデータも残す。差し替えは install の 1 行）。比較画像は `docs/review/ember_roughs/`、生成は `tools/rough/ember_titan.py`・`ember_heart.py`・`ember_mobs*.py`・`ember_smith.py`（乱数なし）、比較ページ用の一覧は `tools/rough/gallery_ember.json`。どれも 0.5 単位の格子で、立方体の重なりは 0。
+**選んだ案で実装する**（選ばれなかった案は消した。差し替えるときはラフを作り直す）。比較画像は `docs/review/ember_roughs/`、生成は `tools/rough/ember_titan.py`・`ember_heart.py`・`ember_mobs*.py`・`ember_smith.py`（乱数なし）、比較ページ用の一覧は `tools/rough/gallery_ember.json`。どれも 0.5 単位の格子で、立方体の重なりは 0。
 
 | 対象 | 採用案 | 特徴・理由 | 残る弱み |
 |---|---|---|---|

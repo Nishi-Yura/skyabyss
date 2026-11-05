@@ -83,13 +83,26 @@ public final class TownGuide {
             new Place("perch", Group.BLUE, "label_perch"),
             new Place("guild", Group.RED, "open_guild"),
             new Place("smithy", Group.RED, "label_smithy"),
-            // 封切り師は鍛冶屋の中に立つ (印を持たない。loot/box/BoxOpeners)ので、鍛冶屋の戸へ案内する
-            new Place("box_opener", Group.RED, "label_smithy"),
+            // 封切り師は鍛冶師のそば (npc_smith から 2〜4。印を持たない。loot/box/BoxOpeners) に立つので、鍛冶師の立つ所へ案内する
+            // (前は鍛冶屋の看板へ案内していて、封切り師から 13 ブロックほど離れた面に着いていた。2026-11-05 の声)
+            new Place("box_opener", Group.RED, "npc_smith"),
             new Place("training", Group.RED, "open_training"),
             new Place("shrine", Group.VIOLET, "open_shrine"),
             new Place("keep", Group.VIOLET, "open_keep"),
             new Place("tavern", Group.GREY, "label_tavern"),
             new Place("graveyard", Group.GREY, "sign_graveyard"));
+
+    // 戸 (行き先の印) に着いたか: 横 ARRIVE 以内で、印より下 9 段から上 2 段まで。都の戸の印は壁の看板 (地面から 5〜8 段上) なので
+    // 下を広く見る (前は上下 4.5 で、地面を歩くと着いたことにならなかった。2026-11-05 の声「到着した判定にならない。判定大きくしてほしい」)。
+    // 案内の灯り (client/guide/TownGuideClient) と町めぐり (TownTour) が使う
+    public static final double ARRIVE = 6.0;
+
+    public static boolean arrived(double x, double y, double z, BlockPos door) {
+        double dx = x - (door.getX() + 0.5);
+        double dz = z - (door.getZ() + 0.5);
+        double dy = y - door.getY();
+        return dx * dx + dz * dz <= ARRIVE * ARRIVE && dy <= 2.0 && dy >= -9.0;
+    }
 
     private static final Map<java.util.UUID, Long> LAST_PICK = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.concurrent.ConcurrentHashMap<>());
 

@@ -37,13 +37,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //  - 案内人の一覧 (Menu) が届いたら TownGuideScreen を開く。選んだら Pick を送る
 //  - 道 (Path) が届いたら、道にそって 3 ブロックごとに色つきの小さな灯り (施設の種類の色) を地面に置く。見えるのはこの人だけ
 //  - 足もとから先 56 ブロックまでを描く。手前ほど明るく、光の波が戸の方へ流れる。戸の前の灯りは一回り大きい
-//  - 消えるとき: 戸に着いた (3.5 ブロック) / 5 分たった / 別の施設を選んだ / 都から離れた (戸から 260) / 世界を移った。消えるときはゆっくり薄れる
+//  - 消えるとき: 戸に着いた (横 6・印より下 9 段から上 2 段。TownGuide.arrived) / 5 分たった / 別の施設を選んだ / 都から離れた (戸から 260) / 世界を移った。消えるときはゆっくり薄れる
 //  - 目的の帯の一行「〜へ向かおう」と距離・画面の目印 (ObjectiveStrip.resolve) は、案内のあいだ戸を指す
 // 描画は灯りの数 (多くて 20 ほど) x 小さな箱と光の輪だけ。道しるべの帯 (GuideTrailRenderer) より軽い
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TownGuideClient {
     static final double SHOW = 56.0;
-    static final double ARRIVE = 3.5;
     static final double LEAVE = 260.0;
     static final long TIMEOUT_MS = 5 * 60_000L;
     static final long FADE_IN_MS = 700L;
@@ -152,7 +151,7 @@ public final class TownGuideClient {
         double dx = r.door.getX() + 0.5 - mc.player.getX();
         double dz = r.door.getZ() + 0.5 - mc.player.getZ();
         double d2 = dx * dx + dz * dz;
-        if (d2 <= ARRIVE * ARRIVE && Math.abs(r.door.getY() - mc.player.getY()) < 4.5) {
+        if (TownGuide.arrived(mc.player.getX(), mc.player.getY(), mc.player.getZ(), r.door)) {
             clear(true);
         } else if (d2 > LEAVE * LEAVE || Util.getMillis() - r.at > TIMEOUT_MS) {
             clear(false);

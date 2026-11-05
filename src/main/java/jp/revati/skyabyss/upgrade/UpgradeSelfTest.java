@@ -131,8 +131,45 @@ public final class UpgradeSelfTest {
                 level.setBlock(base.offset(a, -1, b), Blocks.AIR.defaultBlockState(), 2);
             }
         }
+        // 作り直したあとの立ち位置 (ContinentRegen.settleTarget): 空の高い所に池 (石の床・ガラスの縁・3x3 の水) を作って
+        BlockPos o = level.getSharedSpawnPos().offset(40, 0, 0).atY(230);
+        for (int a = -3; a <= 3; a++) {
+            for (int b = -3; b <= 3; b++) {
+                level.setBlock(o.offset(a, 0, b), Blocks.STONE.defaultBlockState(), 2);
+                int m = Math.max(Math.abs(a), Math.abs(b));
+                level.setBlock(o.offset(a, 1, b), m <= 1 ? Blocks.WATER.defaultBlockState() : m == 2 ? Blocks.GLASS.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+        BlockPos overWater = ContinentRegen.settleTarget(level, o.offset(0, 20, 0));
+        BlockPos inWater = ContinentRegen.settleTarget(level, o.offset(0, 1, 0));
+        for (BlockPos t : java.util.Arrays.asList(overWater, inWater)) {
+            if (t == null || t.equals(ContinentRegen.NO_LAND) || t.getY() != o.getY() + 2 || Math.max(Math.abs(t.getX() - o.getX()), Math.abs(t.getZ() - o.getZ())) != 2) {
+                f.add("a player over or in the pool should move to its glass rim, got " + t);
+            }
+        }
+        if (ContinentRegen.settleTarget(level, o.offset(2, 2, 0)) != null) {
+            f.add("a player standing on the rim should stay");
+        }
+        BlockPos drop = ContinentRegen.settleTarget(level, o.offset(3, 15, 3));
+        if (drop == null || !drop.equals(o.offset(3, 1, 3))) {
+            f.add("a player high over dry ground should be put on it, got " + drop);
+        }
+        for (int a = -3; a <= 3; a++) {
+            for (int b = -3; b <= 3; b++) {
+                level.setBlock(o.offset(a, 1, b), Blocks.AIR.defaultBlockState(), 2);
+                level.setBlock(o.offset(a, 0, b), Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+        // NPC を立たせた時刻は作り直しで忘れる (二度目は 0)・大陸の版の印は倒れても残す
+        jp.revati.skyabyss.npc.NpcWorldData.get(level).forgetAll();
+        if (jp.revati.skyabyss.npc.NpcWorldData.get(level).forgetAll() != 0) {
+            f.add("the npc spawn times were not forgotten");
+        }
+        if (!jp.revati.skyabyss.util.LifeKeep.KEYS.contains(ContinentRegen.PLAYER_KEY)) {
+            f.add("the player's continent version is lost on death (not in LifeKeep)");
+        }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST upgrade PASSED (world and player data versions, placeable items told apart and swept, pages home in, old race posts cleared)");
+            SkyAbyss.LOGGER.info("SELFTEST upgrade PASSED (world and player data versions, placeable items told apart and swept, pages home in, old race posts cleared, settle after regen, npc spawn times forgotten)");
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST upgrade FAILED: {}", s));
         }

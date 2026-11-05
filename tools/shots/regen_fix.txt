@@ -1,0 +1,28 @@
+# 2026-11-05: 1.1.0 で大陸を作り直した世界 (遊んだ人の世界の写し) を開き、語り部が大鐘楼に立つか、海の上の立ち位置が陸へ直るかを見る。
+# 前に run/shots/regen_fix/saves/user_copy へ世界を写しておく (この台本は既にある世界を開く)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/regen_fix.txt -PshotsName=regen_fix
+world user_copy continent
+size 1280 720
+timeout 1500
+guiscale 3
+wait 60
+waitscreen 1500 none
+wait 40
+hud on
+cmd gamemode creative
+cmd effect give @s resistance 900 4 true
+
+# 1. 大鐘楼の一階 (鐘の 2 下・南へ 2)。語り部は 100 tick ごとに見て立つ
+cmd tp @s -480 78 -68 180 10
+waitchunks 200
+wait 260
+shot rf_1_storyteller
+
+# 2. 前の立ち位置 (1.0.0 の地上では陸、作り直したあとは海の上)
+cmd gamemode adventure
+cmd tp @s 6142 96 -2
+waitchunks 300
+wait 20
+cmd skyabyss dev regen settle
+wait 60
+shot rf_2_after_settle

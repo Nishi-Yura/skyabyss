@@ -8,6 +8,12 @@ from sitelib import REPO, T, page, sec
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v1.1.1", "2026-11-05", [
+            ("1.1.0 で作り直した世界で、語り部・鯨追い・職人がすぐに立つようになりました。作り直しで海や宙になった所にいた人は、読み込みのあと近くの陸（無ければ起き上がる場所）に立ちます。", "In worlds rebuilt by 1.1.0, the storyteller, the whale chaser and the artisans now stand again right away. Players left over sea or air by the rebuild now land on the nearest ground (or the respawn point) after loading."),
+            ("今の職でない武器では戦えなくなりました（弓も引けません）。武器の説明の「職」の行は、今の職の武器なら金、ほかの職の武器なら赤紫で「（いまの職では使えない）」と出ます。都の案内の灯りは、着いたことを広めにとるようにしました。", "Weapons of another job no longer work (bows cannot be drawn). The job line in a weapon's tooltip is gold for your job's weapons and red-purple with \"not usable in your current job\" for others. The capital guide's lights now count arrival more generously."),
+            ("見どころの台座（狼煙の台・道しるべ）の隅を角の段にしました。前の版で建った台も、近づいたときに直ります。伝承「名簿の最後の頁」が組合の奥の碑を読むと記されるようになり、深淵の章に残っていた白い頁をなくしました。", "Point-of-interest plinths (beacon cairns, signposts) now have corner stairs; plinths built by earlier versions are fixed when you come near. The lore page \"The Last Page of the Roll\" is now written by reading the tablet at the back of the guild, and the blank pages left in the abyss chapter are gone."),
+            ("wiki にエンドコンテンツの頁を足しました（物語のあとの遊び 25 種を、始まる時・回数・報いと一緒に）。", "The wiki has a new endgame page: 25 post-story activities with when they open, how often, and their rewards."),
+        ]),
         ("v1.1.0", "2026-11-05", [
             ("1.0.0 の世界はそのまま続けられます。大陸の地上（地形・道・見どころ）は開いたときに作り直し、クエスト・持ち物・見つけた場所はそのまま残ります。", "Worlds from 1.0.0 carry over. The continent surface (terrain, roads, points of interest) is rebuilt when the world opens; quests, items and found places are kept."),
             ("戦いの手ざわり: 近接は溜めた分だけ強く（照準のまわりに溜めの輪）、回復と武器の効果は溜めきった一撃だけ。主と名のある敵は崩しの帯を削りきると崩れ、大きく削れます。経験値はクエスト・場所・主・狩りの割合を決め直しました。", "Combat feel: melee hits scale with charge (a charge ring sits around the crosshair), and heals and weapon effects need a full charge. Bosses and named foes have a break gauge that opens them up when emptied. Experience is rebalanced across quests, places, bosses and hunting."),

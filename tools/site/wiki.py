@@ -7,6 +7,7 @@
   品の説明の行 (色つき、遊ぶ人の画面と同じ)・生き物の基の属性・技の段ごとの効果の文
 - src/main/resources: lang (ja_jp)・技の木 (assets/skyabyss/skill_tree)・クエスト・店・湧き・伝承・進捗 (data/skyabyss)・大陸 (continent)
 - コードの表: ダンジョン (dungeon/Dungeon.java)・乗り物 (mount/MountLook.java)
+- エンドコンテンツの頁 (wiki-endgame.html): 設計書の表と、tools/site/endgame.py の手で書いた要約 (仕様を変えたら、そこも直す)
 数字: 体力と攻撃は画面と同じ 10 倍 (Hp.SHOWN)。
 """
 import glob
@@ -40,6 +41,7 @@ PAGES = [
     ("wiki-enemies.html", "敵と主", "場所ごとの敵と主、体力と攻撃"),
     ("wiki-skills.html", "技の木", "職ごとの木の全部の節"),
     ("wiki-quests.html", "クエスト", "メイン・サブ・日替わり・週替わり"),
+    ("wiki-endgame.html", "エンドコンテンツ", "物語のあとの遊びの全部（塔・裏ボス・巡り路・神器・秘伝など）"),
     ("wiki-shops.html", "店", "店ごとの品と値段"),
     ("wiki-places.html", "場所", "土地・町・見どころ・ダンジョン・巨神の居場所"),
     ("wiki-mounts.html", "乗り物", "見た目と値段"),
@@ -700,6 +702,51 @@ def lore_page():
     wiki_page("wiki-lore.html", "伝承の書", "伝承の書に記される頁 %d 件。物語の核心のネタばれを含みます。" % n, body, spoiler=True, count="%d 頁" % n)
 
 
+# ================================================================== エンドコンテンツ
+def _doc_cell(c):
+    # 設計書の表の字の中の、作りの名前 (`code`) を落とす
+    c = re.sub(r"（`[^`]*`）", "", c)
+    c = re.sub(r"（\d\d の [^）]*）", "", c)  # 設計書どうしの参照 (「（03 の 13.4。欠点つき）」)
+    c = re.sub(r"`[A-Za-z0-9_./:<>-]+`", "", c)
+    return md_inline(c).strip()
+
+
+def endgame_page():
+    """物語のあとの遊びの全部 (tools/site/endgame.py の要約と、設計書の表)"""
+    import endgame as EG
+    by = {}
+    for e in EG.ENTRIES:
+        by.setdefault(e["group"], []).append(e)
+    over = ""
+    for gid, gname, _ in EG.GROUPS:
+        for e in by.get(gid, []):
+            over += '<tr><th scope="row"><a href="#%s">%s</a></th><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
+                e["id"], esc(e["name"]), esc(gname), esc(e["when"]), esc(e["cadence"]), esc(e["reward"]))
+    body = ('<div class="wrap"><p class="small">日替わり・週替わりは、どれも実時間です（朝 5 時で日が、月曜の朝 5 時で週が替わります。ゲームの中で寝ても替わりません）。'
+            'U のクエストログの先頭の「今日・今週」の頁に、替わるまでの時間がまとまっています。下の表の一部は設計書の表をそのまま載せています。</p></div>')
+    body += section("all", "一覧（%d）" % len(EG.ENTRIES),
+                    '<div class="tablewrap"><table><thead><tr><th scope="col">もの</th><th scope="col">群</th><th scope="col">始まる時</th>'
+                    '<th scope="col">回数</th><th scope="col">主な報い</th></tr></thead><tbody>%s</tbody></table></div>' % over)
+    for gid, gname, gnote in EG.GROUPS:
+        inner = ""
+        for e in by.get(gid, []):
+            chips = "".join('<span class="chip%s">%s: %s</span>' % (" g" if k == "始まる時" else "", k, esc(v))
+                            for k, v in (("始まる時", e["when"]), ("回数", e["cadence"]), ("報い", e["reward"])) if v and v != "—")
+            inner += '<h3 id="%s">%s</h3><div class="chips">%s</div>' % (e["id"], esc(e["name"]), chips)
+            inner += '<ul class="list" style="margin-top:10px">%s</ul>' % "".join("<li>%s</li>" % esc(b) for b in e["bullets"])
+            for doc, heading, nth, cap in e["tables"]:
+                head, rows_ = doc_table(doc, heading, nth)
+                inner += ('<p class="small" style="margin-top:12px">%s</p><div class="tablewrap"><table><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>' % (
+                    esc(cap), "".join('<th scope="col">%s</th>' % _doc_cell(h) for h in head),
+                    "".join("<tr>%s</tr>" % "".join(("<th scope=\"row\">%s</th>" if k == 0 else "<td>%s</td>") % _doc_cell(c) for k, c in enumerate(r)) for r in rows_)))
+            if e["links"]:
+                inner += '<p class="small" style="margin-top:10px">関連: %s</p>' % "・".join('<a href="%s">%s</a>' % (h, esc(t)) for h, t in e["links"])
+            add_search(e["name"], "エンドコンテンツ", "wiki-endgame.html#" + e["id"])
+        body += section("g-" + gid, gname, inner, gnote)
+    wiki_page("wiki-endgame.html", "エンドコンテンツ", "物語のあと（と、物語の途中から続けて遊べるもの）の遊びを全部。どこで始まり、何度でき、何がもらえるか。",
+              body, spoiler=True, count="%d 種" % len(EG.ENTRIES))
+
+
 _LANG_ALL = {}
 
 
@@ -735,6 +782,7 @@ def build():
     enemies_page(dump["mobs"])
     skills_page(dump["skills"])
     quests_page(names)
+    endgame_page()
     shops_page(names)
     places_page()
     mounts_page()

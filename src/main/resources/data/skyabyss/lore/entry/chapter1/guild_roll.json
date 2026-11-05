@@ -4,7 +4,8 @@
   "inscription_sign": "sign.skyabyss.capital.guild_roll",
   "unlock": [
     {
-      "type": "manual"
+      "type": "sign",
+      "target": "sign.skyabyss.capital.guild_roll"
     }
   ],
   "related": [

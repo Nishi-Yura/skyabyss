@@ -110,6 +110,7 @@ public final class RegenLoading {
                 p.setInvulnerable(w.wasInvulnerable());
                 it.remove();
                 SkyAbyss.LOGGER.info("Regen loading: released {} after {} ticks", p.getGameProfile().getName(), t);
+                ContinentRegen.released(p);
             }
         }
     }

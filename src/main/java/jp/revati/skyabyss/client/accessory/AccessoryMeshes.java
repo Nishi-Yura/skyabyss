@@ -73,9 +73,10 @@ public final class AccessoryMeshes {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
     }
 
+    // 台本の固定 (accessorytier) は、その段のメッシュがあるときだけ (品の階級は一つに決まり、ほかの段は消した)
     public static String tierName(ItemStack stack) {
         String forced = LowPoly.accessoryTier;
-        if (forced != null) {
+        if (forced != null && LowPolyMeshes.get("items/" + idOf(stack) + "/" + forced) != null) {
             return forced;
         }
         GearTier tier = stack.getItem() instanceof ModGear g ? g.tier() : GearTier.COMMON;

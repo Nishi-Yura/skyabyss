@@ -1,0 +1,22 @@
+# 2026-11-05: ほかの職の武器は使えない (rpg/skill/JobWeaponLock)。鍛冶師の人が弓を引こうとする・弓で打とうとする
+# 前に run/shots/regen_fix/saves/user_copy へ世界を写しておく (職は鍛冶師)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/job_weapon_lock.txt -PshotsName=regen_fix
+world user_copy continent
+size 1280 720
+timeout 900
+guiscale 3
+wait 60
+waitscreen 900 none
+wait 20
+hud on
+cmd gamemode adventure
+cmd tp @s -440 73 20 180 0
+waitchunks 120
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+wait 10
+use
+wait 15
+shot jw_1_bow_draw
+stopuse
+wait 10
+cmd item replace entity @s weapon.mainhand with minecraft:air

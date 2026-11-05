@@ -164,7 +164,7 @@ python tools/gen/shots/gen_weapon_lp_shots.py [id ...]   # 台本 tools/shots/we
 python tools/sheets/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_<id>.png (コンタクトシート) ほか
 ```
 
-台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`tools/gen/items/gen_ember_items.py` `tools/install/install_storm_gear.py` `tools/install/install_tide_gear.py` `tools/gen/items/gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `tools/install/install_lowpoly_weapons.py` と `tools/lib/weapon_display.py` を流す。
+台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用。品の階級は一つに決まっているので、その段のメッシュが無い品は品の階級で描く)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`tools/gen/items/gen_ember_items.py` `tools/install/install_storm_gear.py` `tools/install/install_tide_gear.py` `tools/gen/items/gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `tools/install/install_lowpoly_weapons.py` と `tools/lib/weapon_display.py` を流す。
 
 ### マルチの確かめ (専用サーバー + 二人)
 `run/server.properties` に `online-mode=false`・`server-port=25666`・`enable-rcon=true`・`rcon.port=25766`・`rcon.password=test`・新しい `level-name`・`level-seed=4242`、`run/eula.txt` に `eula=true`。`./gradlew runServer` で起動し、台本の頭の `server localhost:25666` で専用サーバーへ入るクライアントを `./gradlew runShots -Pscript=tools/shots/mp_alice.txt -PshotsUser=Alice`、`mp_bob.txt -PshotsUser=Bob` で動かす (Alice が入ってから Bob を起動)。台本の `waitfile <ファイル>` は外 (`signal` か手) がファイルを置くまで待つ。サーバーへの命令は `python tools/dev/rcon.py "<命令>"` (OP の権限。`skyabyss cinematic play <場面> Bob` など)。
@@ -284,7 +284,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 | 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `tools/install/install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる |
 | `textures/gui/sky_vignette.png` | `tools/gen/ui/gen_vignette.py` | 同じ物ができる |
 | 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `tools/gen/items/gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
-| 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | 生成の道具 `rough/watcher.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する (`rough/watcher_v2.py` も同じ理由で走らない) |
+| 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | 生成の道具 `rough/watcher.py` は消した (`mobs_small_v2` が無く、走らなかった)。今の geo が正本 | 直すときは geo とアトラスを直接編集する |
 | `sounds/prologue/*.ogg` (見る者の音) | `tools/gen/sound/gen_watcher_sounds.py` | 同じ物ができる |
 | 技: `textures/gui/skill/{icons,skills}.png`、`textures/particle/{rune_spark,sky_mote}_*.png`、`particles/*.json`、`sounds/rpg/skill/*.ogg` | `tools/gen/ui/gen_skill_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。アイコンのラフ 3 案と比較画像は `docs/review/skill_icons_roughs/`、採用は `ADOPTED`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `SkillScreen.java` と値をそろえる |
 | 共鳴の炉の画面: `textures/gui/forge/forge.png` (左右の板・つまみ・印・候補の札、2 倍密度) | `tools/gen/items/gen_forge_assets.py` | 同じ物ができる。画面の配置を変えたら `ResonanceForgeScreen.java` と値をそろえる |
@@ -324,6 +324,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 - 生成スクリプトが入力に使う物 (`tools/sources/` へ移す)
 - ユーザーがまだ選んでいない案 (`docs/review/*_roughs/`)。選ばれたら、比較画像 1 枚と選定理由 (書類) だけ残し、ほかは消す
+- 取り込みの道具 (`tools/install`・`tools/gen`) が今読む物 (選んだ案の出力)。見比べの絵・撮影の絵 (`sheet`・`preview`・`ingame`・`before`/`after` など) と、どの道具も読まない場所は消してよい (2026-11-05 に約 100 MB を消した)
 
 下の `_roughs/` を書くスクリプトは、どれも `docs/review` のラフを入力に読まない (`--install` も、その場で作った案を書き出す)。消したラフはスクリプトを動かせば作り直せるので、`tools/sources/` へ移した物はない。
 
@@ -374,7 +375,7 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 - 頁を書き出す: `python -I tools/site/build.py`（`pages.py` がトップと 6 頁、`jobs.py` が職の切り替え、`changelog.py` が更新履歴、部品は `sitelib.py`）。新しい版を出したら `changelog.py` の `ver` の頭に足す。
 - ゲームの中の絵: 元は `tools/sources/site/shots/<名>.webp`（幅 1600）→ `python -I tools/site/gen_site_shots.py` が `site/img/shot/<名>.webp`（1600 と 640 の `_s`）と共有用の `site/img/og.jpg`（`hero` から）を作る。撮り方は `tools/shots/site_showcase.txt`（都・大陸・月・雲海・塔）・`site_titans.txt`（四体の巨神をそれぞれの居場所 `data/skyabyss/continent/lairs.json` で）・`site_extra.txt`（土地の町・都の三人称・順路の部屋・深淵）。ほかの絵は各機能の確かめの撮影から選んだ。
 - 職の立ち姿: `tools/shots/site_jobs.txt`（ライムの幕の前で、職ごとの防具と神器を持って正面から）→ `python -I tools/site/cut_job_renders.py`（幕を抜いて `tools/sources/site/jobs/<職>.png` と顔の `<職>_face.png`）→ `gen_site_shots.py` が `site/img/job/` へ。台本の `perspective front` は肩越しの視点の F5 の飛ばしに戻されない（`ShoulderCam.keepFront`）。
-- wiki（`site/wiki.html` と `wiki-*.html` の 13 頁。武器・防具・装飾品・道具と素材・敵と主・技の木・クエスト・店・場所・乗り物・称号・記し・伝承の書）: `tools/site/wiki.py` がゲームの中身から作る。手で書かない。
+- wiki（`site/wiki.html` と `wiki-*.html` の 14 頁。武器・防具・装飾品・道具と素材・敵と主・技の木・クエスト・エンドコンテンツ・店・場所・乗り物・称号・記し・伝承の書）: `tools/site/wiki.py` がゲームの中身から作る。手で書かない。エンドコンテンツの頁だけは、設計書の表と `tools/site/endgame.py` の要約（手で書いた文）から作るので、エンドコンテンツの仕様を変えたら要約も直す。
   1. 品・生き物・技を書き出す: `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/wiki_dump.txt -PshotsName=wiki_dump`（台本の `wikidump`。`client/dev/WikiDump` が、品の説明の行を色つきで・生き物の基の属性・技の段ごとの効果の文を `run/shots/wiki_dump/shots/wiki_dump/wiki.json` に書く）
   2. `cp run/shots/wiki_dump/shots/wiki_dump/wiki.json tools/sources/site/wiki.json`（コミットする元）→ `python -I tools/site/build.py`
   - ほかの元は mod の JSON と lang（技の木・クエスト・店・湧き・伝承・進捗・大陸の見どころ）と、コードの表（`dungeon/Dungeon.java`・`mount/MountLook.java` を正規表現で読む）。品・敵・技・品を足したり数値を変えたりしたら 1 から流し直す。

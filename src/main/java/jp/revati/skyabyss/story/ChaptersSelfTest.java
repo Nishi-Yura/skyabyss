@@ -184,7 +184,7 @@ public final class ChaptersSelfTest {
                 {"chapter1/tide_shell", "titan_tide"}, {"chapter1/tide_hours", "titan_tide"},
                 {"chapter1/thunder_wing", "titan_storm"}, {"chapter1/storm_path", "titan_storm"},
                 {"chapter1/ember", "titan_ember"}, {"chapter1/fifth_verse", "titan_ember"}, {"chapter1/sky_key_whole", "titan_ember"},
-                {"prologue/camp", "prologue"}, {"chapter2/unknown_1", "chapter2"}, {"finale/bell_echo_1", "finale"}};
+                {"prologue/camp", "prologue"}, {"ch5/carvings_ash", "chapter2"}, {"finale/bell_echo_1", "finale"}};
         for (String[] p : pinned) {
             LoreEntry e = catalog.entry(p[0]);
             check(e != null && e.chapter().equals(p[1]), p[0] + " should sit in " + p[1] + " (" + (e == null ? "missing" : e.chapter()) + ")", failures);
