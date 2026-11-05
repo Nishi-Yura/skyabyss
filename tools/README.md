@@ -97,6 +97,9 @@ python tools/install/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly
 | `camera [次元] <x> <y> <z> <yaw> <pitch>` | 体ごとそこへ置いて向きを決める (yaw 0=南 90=西 180=北 270=東、pitch 90=真下)。着くまで待つ。壁を抜けたいときは先に `cmd gamemode spectator` |
 | `look <yaw> <pitch>` | 向きだけ変える |
 | `dolly <tick> <x> <y> <z> <yaw> <pitch> [linear]` | 今の所と向きから目当てへ、`<tick>` かけて滑らかに動かす (映像用。観戦の姿で)。どの数も `~` で今のまま、`~10` で今から +10。既定はゆっくり出てゆっくり止まる。`record` と一緒に: `record <名> <tick>` → `dolly` → `recwait` |
+| `cam` / `camdolly` / `camlook` / `camfollow` / `camoff` | 別のカメラ (自分の体とは別の見る所) を置いて、動く自分を外から撮る。書き方は `client/dev/ShotCamera` の頭。カメラの動きは手順を止めない |
+| `hold <forward\|back\|left\|right\|jump\|sprint\|sneak\|attack\|use> on\|off` / `aim <tick> <yaw> <pitch>` | キーを押し続ける・放す / 向きだけを滑らかに回す (別のカメラのあいだも人が動く) |
+| `quality <描く距離> <処理の距離> [fabulous]` | 映像用の高い設定 (遠くの生き物・粒・なめらかな光・雲も) |
 | `waitchunks [最大 tick]` | まわりの描画が出そろうまで待つ (既定 600 tick まで) |
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
@@ -185,6 +188,7 @@ SKYABYSS_LANG=en_us ./gradlew runShots -Pscript=tools/shots/first_hour.txt   # �
 
 ## ティザー映像 (`tools/gen/teaser/make_teaser.py`)
 
+- キービジュアル (映像だけの一枚絵): `tools/gen/teaser/key_visual.py` (物語のドット絵と同じ `tools/story/pixel/pxkit`。案は `docs/review/teaser_roughs/`)。
 - 素材の録画: `tools/shots/teaser_a.txt` (島・都・岩鯨)、`teaser_b.txt` (職の技・ダンジョンの主)、`teaser_c.txt` (あいだの塔)。どれも世界 `teaser` (大陸) で、1920x1080・30 fps。
   録るあいだは `cmd tick rate 2` でゲームの時計を 1/10 にする (描くのが 30 fps に届かないと絵が落ちるため。`record` はゲームの時刻で撮る)。
 - つなぐ: `python -X utf8 tools/gen/teaser/make_teaser.py` → `build/teaser/skyabyss_teaser.mp4`。場面の並び・字幕・長さは頭の `CUTS`、音は `MUSIC_PLAN` (この mod の BGM)。`--preview` で半分の大きさ、`--only <場面>` で一つだけ。

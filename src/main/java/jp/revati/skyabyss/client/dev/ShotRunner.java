@@ -277,6 +277,14 @@ public final class ShotRunner {
         }
     }
 
+    // 毎 tick の頭: 別のカメラのあいだも、押したキーで人を動かす (ShotCamera.preTick)
+    @SubscribeEvent
+    static void onClientTickPre(ClientTickEvent.Pre event) {
+        if (active()) {
+            ShotCamera.preTick(Minecraft.getInstance());
+        }
+    }
+
     // ---------------------------------------------------------------- 毎 tick: 手順を進める
     @SubscribeEvent
     static void onClientTick(ClientTickEvent.Post event) {
@@ -322,6 +330,7 @@ public final class ShotRunner {
                 say("  recorded " + recFrames + " frames (" + recTotal + " ticks at " + recFps + " fps) -> " + recDir);
             }
         }
+        ShotCamera.tick(mc);
         if (watching) {
             watchTick(mc);
         }
@@ -354,6 +363,9 @@ public final class ShotRunner {
 
     private static boolean step(Minecraft mc, ShotScript.Line line) {
         boolean first = stepTicks == 0;
+        if (ShotCamera.handles(line.op())) {
+            return ShotCamera.step(mc, line, first, stepTicks);
+        }
         if (first) {
             say("line " + line.number() + ": " + line.op() + (line.rest().isEmpty() ? "" : " " + line.rest()));
         }
@@ -847,6 +859,21 @@ public final class ShotRunner {
                 mc.options.cloudStatus().set(line.arg(0).equalsIgnoreCase("off") ? net.minecraft.client.CloudStatus.OFF : net.minecraft.client.CloudStatus.FANCY);
                 return true;
             }
+            case "quality" -> {
+                // quality <描く距離> <処理の距離> [fabulous] : 映像用の高い設定 (描く距離・統合サーバーの処理の距離・遠くの生き物・粒・なめらかな光・色のなじみ・雲)
+                mc.options.renderDistance().set(line.intArg(0));
+                mc.options.simulationDistance().set(line.intArg(1));
+                mc.options.entityDistanceScaling().set(5.0);
+                mc.options.particles().set(net.minecraft.client.ParticleStatus.ALL);
+                mc.options.ambientOcclusion().set(true);
+                mc.options.biomeBlendRadius().set(7);
+                mc.options.cloudStatus().set(net.minecraft.client.CloudStatus.FANCY);
+                mc.options.graphicsMode().set(line.args().length > 2 && line.arg(2).equalsIgnoreCase("fabulous")
+                        ? net.minecraft.client.GraphicsStatus.FABULOUS : net.minecraft.client.GraphicsStatus.FANCY);
+                mc.options.broadcastOptions();
+                mc.levelRenderer.allChanged();
+                return true;
+            }
             case "render" -> {
                 // render <チャンク> : 描く距離 (統合サーバーの見える距離もこれに合わせて変わる)
                 mc.options.renderDistance().set(line.intArg(0));
@@ -1285,6 +1312,7 @@ public final class ShotRunner {
             return;
         }
         finished = true;
+        ShotCamera.off(Minecraft.getInstance());
         if (failures > 0 && result.startsWith("SHOTS OK")) {
             result = "SHOTS FAILED: " + failures + " step(s) failed, " + shots + " shots";
         }
