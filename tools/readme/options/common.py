@@ -9,7 +9,9 @@ import icons, icons2  # noqa: F401
 import scenes
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", "docs", "readme", "options"))
-VERSION = "v1.1.0"
+# 版は gradle.properties の mod_version から (題の絵に入る)
+with open(os.path.join(HERE, "..", "..", "..", "gradle.properties"), encoding="utf-8") as _f:
+    VERSION = "v" + next(l.split("=", 1)[1].strip() for l in _f if l.startswith("mod_version="))
 
 
 def outdir(name):

@@ -6,7 +6,7 @@
 
 - `gradle.properties` の `mod_version` を上げる（例 0.9.18 → 0.9.19）。
 - 同じ数字に直す所: `README.md`（jar の名前・末尾の「ベータ版（…）」）、`docs/beta_how_to_play.md`（jar の名前・冒頭の「… の試遊では」）、`docs/design/01_overview.md`（9 章の「試遊版は」）、`docs/design/14_beta.md`（1 章）、`docs/HANDOFF.md`（「今の形」の試遊版の行）。
-- サイトの変更履歴 `tools/site/pages_c.py` の `ver` に版の塊を足す（日本語と英語の対）。`python tools/site/build.py` で `site/*.html` を作り直す（版の数字は `gradle.properties` から入る）。
+- サイトの変更履歴 `tools/site/changelog.py` の `ver` に版の塊を足す（日本語と英語の対）。`python tools/site/build.py` で `site/*.html` を作り直す（版の数字は `gradle.properties` から入る）。
 
 ## 2. 確かめる
 
