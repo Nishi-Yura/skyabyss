@@ -156,6 +156,14 @@ public final class ContinentPois {
                         SiteBuilds.enqueue(job(over, data, e));
                     }
                 } else {
+                    if (e.extra(CORNERS_MARK) == null) {
+                        int n = fixCorners(over, Blueprint.get(poi.blueprint()), e.pos, e.yaw);
+                        if (n >= 0) {
+                            e.extra(CORNERS_MARK, e.pos);
+                            data.setDirty();
+                            SkyAbyss.LOGGER.info("Continent pois: {} at {} (yaw {}) got {} corner stair(s) in place of slabs", poi.blueprint(), e.pos, e.yaw, n);
+                        }
+                    }
                     if (poi.site() && d2 <= (double) DISCOVER_RADIUS * DISCOVER_RADIUS) {
                         discover(p, i, poi);
                         // 見どころに着いた (土地の町の人の頼み「〜を見てこよう」。初めてでなくても毎回)。名のある場所は「poi:@<名>」も
@@ -308,6 +316,8 @@ public final class ContinentPois {
             if (foes != null) {
                 job.entry.extra("foes", foes);
             }
+            // いまの部品で建てたので、隅の置き換えは要らない
+            job.entry.extra(CORNERS_MARK, job.entry.pos);
             BlockPos sign = job.mark("sign");
             if (sign != null && !poi.name().isEmpty() && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
                 // 行き先と道のり・土地の名・目安のレベル (4 行。sign.skyabyss.waypost.<名>.1〜4)
@@ -340,6 +350,39 @@ public final class ContinentPois {
                 }
             }
         });
+    }
+
+    // 台座の隅 (2026-11-05 の声「置き換えて」): 狼煙の台 (見どころの書き付けの台) と道しるべの隅を、半ブロックから角の段にした (tools/gen/world/build_poi_places.py)。
+    // 前の版で建った見どころは建て直さず、人が近づいて辺りのチャンクが読み込まれたとき一度だけ、部品で段の所に同じ石の下付きの半ブロックが
+    // 残っていれば、その段に置き換える。済んだら印 CORNERS_MARK (いまの部品で建てたものは建てたときに付ける)。大陸の作り直しは要らない
+    public static final String CORNERS_MARK = "corners_v1";
+
+    // 建った見どころ (部品 bp・立つ所 pos・向き yaw) の、段であるべき所に残った半ブロックを段に替える。替えた数。辺りのチャンクがまだなければ -1 (何もしない)
+    public static int fixCorners(ServerLevel level, Blueprint bp, BlockPos pos, int yaw) {
+        int rot = jp.revati.skyabyss.opening.site.SiteFinder.rot(yaw);
+        boolean mirror = jp.revati.skyabyss.opening.site.SiteFinder.mirror(yaw);
+        List<Blueprint.Cell> stairs = new ArrayList<>();
+        for (Blueprint.Cell c : bp.cells) {
+            if (c.state().getBlock() instanceof net.minecraft.world.level.block.StairBlock) {
+                if (!level.isLoaded(Blueprint.transform(c.x(), c.y(), c.z(), rot, mirror, pos))) {
+                    return -1;
+                }
+                stairs.add(c);
+            }
+        }
+        int n = 0;
+        for (Blueprint.Cell c : stairs) {
+            BlockPos at = Blueprint.transform(c.x(), c.y(), c.z(), rot, mirror, pos);
+            net.minecraft.world.level.block.state.BlockState now = level.getBlockState(at);
+            if (now.getBlock() instanceof net.minecraft.world.level.block.SlabBlock
+                    && now.getValue(net.minecraft.world.level.block.SlabBlock.TYPE) == net.minecraft.world.level.block.state.properties.SlabType.BOTTOM
+                    && net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(now.getBlock()).getPath()
+                            .equals(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(c.state().getBlock()).getPath().replace("_stairs", "_slab"))) {
+                level.setBlock(at, Blueprint.transform(c.state(), rot, mirror), SiteJob.FLAGS);
+                n++;
+            }
+        }
+        return n;
     }
 
     // 碑の文の鍵 (名のある場所はその場所の書付、ほかは種類の書付)
