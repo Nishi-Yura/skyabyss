@@ -1,0 +1,131 @@
+# 2026-11-06: 外れの集落の形のラフ 3 案 (tools/capital/frontier_hamlet.py) を、土地 4 つずつ平らな世界に並べて撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/frontier_hamlets.txt -PshotsName=frontier_hamlets
+# 案 a / b / c = x 0 / 100 / 200、土地 whale / tide / storm / ember = z 0 / 100 / 200 / 300。正面 (道の口) は南
+world frontierhamlets flat
+size 1600 900
+timeout 2400
+render 12
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 3000
+cmd weather clear
+cmd gamemode spectator
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+wait 100
+cmd tp @s 0 -40 0
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_a_whale 0 -61 0 0
+cmd tp @s 0 -40 100
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_a_tide 0 -61 100 0
+cmd tp @s 0 -40 200
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_a_storm 0 -61 200 0
+cmd tp @s 0 -40 300
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_a_ember 0 -61 300 0
+cmd tp @s 100 -40 0
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_b_whale 100 -61 0 0
+cmd tp @s 100 -40 100
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_b_tide 100 -61 100 0
+cmd tp @s 100 -40 200
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_b_storm 100 -61 200 0
+cmd tp @s 100 -40 300
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_b_ember 100 -61 300 0
+cmd tp @s 200 -40 0
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_c_whale 200 -61 0 0
+cmd tp @s 200 -40 100
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_c_tide 200 -61 100 0
+cmd tp @s 200 -40 200
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_c_storm 200 -61 200 0
+cmd tp @s 200 -40 300
+waitchunks
+cmd skyabyss dev ch1 place frontier_rough_c_ember 200 -61 300 0
+wait 60
+cmd tp @s 44 -21 44 135 38
+waitchunks
+wait 30
+shot a_whale_aerial
+cmd tp @s 0 14 0 180 90
+waitchunks
+wait 20
+shot a_whale_top
+cmd tp @s 0 -58 33 180 -3
+waitchunks
+wait 20
+shot a_whale_street
+cmd tp @s 144 -21 44 135 38
+waitchunks
+wait 30
+shot b_whale_aerial
+cmd tp @s 100 14 0 180 90
+waitchunks
+wait 20
+shot b_whale_top
+cmd tp @s 100 -58 33 180 -3
+waitchunks
+wait 20
+shot b_whale_street
+cmd tp @s 244 -21 44 135 38
+waitchunks
+wait 30
+shot c_whale_aerial
+cmd tp @s 200 14 0 180 90
+waitchunks
+wait 20
+shot c_whale_top
+cmd tp @s 200 -58 33 180 -3
+waitchunks
+wait 20
+shot c_whale_street
+cmd tp @s 44 -21 144 135 38
+waitchunks
+wait 30
+shot a_tide_aerial
+cmd tp @s 144 -21 144 135 38
+waitchunks
+wait 30
+shot b_tide_aerial
+cmd tp @s 244 -21 144 135 38
+waitchunks
+wait 30
+shot c_tide_aerial
+cmd tp @s 44 -21 244 135 38
+waitchunks
+wait 30
+shot a_storm_aerial
+cmd tp @s 144 -21 244 135 38
+waitchunks
+wait 30
+shot b_storm_aerial
+cmd tp @s 244 -21 244 135 38
+waitchunks
+wait 30
+shot c_storm_aerial
+cmd tp @s 44 -21 344 135 38
+waitchunks
+wait 30
+shot a_ember_aerial
+cmd tp @s 144 -21 344 135 38
+waitchunks
+wait 30
+shot b_ember_aerial
+cmd tp @s 244 -21 344 135 38
+waitchunks
+wait 30
+shot c_ember_aerial
+quit
