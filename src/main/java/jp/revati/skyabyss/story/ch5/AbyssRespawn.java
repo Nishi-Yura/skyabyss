@@ -117,8 +117,11 @@ public final class AbyssRespawn {
         if (abyss == null || at == null) {
             return;
         }
-        abyss.getChunk(at);
-        p.teleportTo(abyss, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
-        Notice.hint(p, "message.skyabyss.abyss.woke_at_rest");
+        // 復活が済んでから移す (util/RespawnMove)
+        jp.revati.skyabyss.util.RespawnMove.after(p, abyss, () -> {
+            abyss.getChunk(at);
+            p.teleportTo(abyss, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
+            Notice.hint(p, "message.skyabyss.abyss.woke_at_rest");
+        });
     }
 }

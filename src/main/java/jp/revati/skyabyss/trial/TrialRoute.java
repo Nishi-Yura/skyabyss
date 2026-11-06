@@ -48,7 +48,8 @@ import jp.revati.skyabyss.util.Players;
 //    三つ目 (闘。中ボスはその中) のあとは、心臓の間の手前の前室 (焚き火) へ
 //  - 途中から乗り込んだ仲間は、到着の台に着くと参加者に加わり、今の部屋へ運ばれる (rejoin)
 //  - あきらめは焚き火で提案し、全員の「はい」で成立。成立するとグループ全員が背の外へ出される (2.4)
-//  - 参加者が背に一人もいなくなって EMPTY_GRACE たつと順路は終わる (背を出る・ログアウト)。3 分の不在のリセットでも終わる
+//  - 参加者が背に一人もいなくなって EMPTY_GRACE たつと順路は終わる (背を出る・ログアウト。復活の画面にいる参加者がいるあいだは終えない)。3 分の不在のリセットでも終わる
+//  - 背中で倒れた人は、どの巨神でも、目を覚ますと今の段の部屋の入口の休み場へ戻る (rejoinAfterDeath。全員倒れても順路は続く)
 //  - 記録はグループの記録の keep.trial.* (keep. なので試練のリセットでは消えない)。順路を終えるとき (心臓を止めた・あきらめ・
 //    背を出た・グループのリセット) に明示的に消す
 // 区画 (32 の 5 章) の番号は TrialSlot が割り当てる
@@ -821,6 +822,26 @@ public final class TrialRoute {
         return true;
     }
 
+    // 背中で倒れて目を覚ました人を、順路の途中なら今の段の部屋の入口の休み場へ (どの巨神でも同じ。2026-11-07 の声
+    // 「巨神によって、死んだ後に降ろされるのか前の部屋に飛ばされるのか違うから統一して」)。運んだら true
+    public static boolean rejoinAfterDeath(ServerLevel back, ServerPlayer p) {
+        String titan = Titans.titanOfBack(back.dimension());
+        UUID group = Groups.keyOf(p);
+        return titan != null && active(back, group) && rejoin(back, group, titan, p);
+    }
+
+    // 倒れて目を覚ます前の参加者 (復活の画面にいる人) がいるか。いるあいだは順路を終えない
+    static boolean awaitingRespawn(ServerLevel back, UUID group) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        Set<UUID> party = r == null ? Set.of() : party(r);
+        for (ServerPlayer p : Players.snapshot(back.getServer().getPlayerList().getPlayers())) {
+            if (!p.isAlive() && Groups.isMember(p, group) && (party.isEmpty() || party.contains(p.getUUID()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 動いている順路の見張り: 中ボスを倒したか・参加者が背に残っているか (背を出る・ログアウトは EMPTY_GRACE の猶予で終わる)
     private static void tickGroups(ServerLevel back, String titan, long now) {
         for (UUID group : BackGroupData.get(back).ids()) {
@@ -836,7 +857,7 @@ public final class TrialRoute {
                 // 入り直した人・ログインし直した人にも、今の段を送り直す
                 sync(back, group);
             }
-            if (!members(back, group).isEmpty() || PENDING.containsKey(group)) {
+            if (!members(back, group).isEmpty() || PENDING.containsKey(group) || awaitingRespawn(back, group)) {
                 EMPTY_SINCE.remove(group);
                 continue;
             }

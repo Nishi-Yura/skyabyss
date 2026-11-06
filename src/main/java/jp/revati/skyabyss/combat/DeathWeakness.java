@@ -66,7 +66,9 @@ public final class DeathWeakness {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onIncoming(LivingIncomingDamageEvent event) {
-        if (event.getEntity().level().isClientSide()) {
+        // /kill・虚空 (無敵を抜ける傷) は倍にしない: Float.MAX を倍にすると Infinity になり、防具の計算で体力が NaN になって
+        // 「体力 0 のまま生きていて何もできない」になった (2026-11-07 の二人の試遊。仲間を /kill しても戻らなかった)
+        if (event.getEntity().level().isClientSide() || event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
         if (event.getEntity() instanceof Player target && weak(target)) {

@@ -375,10 +375,14 @@ public final class DepthRun {
             return false;
         }
         BlockPos at = now.entryFeet();
-        level.getChunk(at);
-        p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
-        p.getPersistentData().putInt(FLOOR, now.floor);
-        Notice.hint(p, "message.skyabyss.depths.fell", now.floor);
+        int floor = now.floor;
+        p.getPersistentData().putInt(FLOOR, floor);
+        // 復活が済んでから移す (util/RespawnMove)
+        jp.revati.skyabyss.util.RespawnMove.after(p, level, () -> {
+            level.getChunk(at);
+            p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
+            Notice.hint(p, "message.skyabyss.depths.fell", floor);
+        });
         return true;
     }
 

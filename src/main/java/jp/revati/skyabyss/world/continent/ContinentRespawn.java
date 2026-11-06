@@ -111,7 +111,8 @@ public final class ContinentRespawn {
             return;
         }
         if (at != null) {
-            player.teleportTo(over, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player.getXRot());
+            jp.revati.skyabyss.util.RespawnMove.after(player, over,
+                    () -> player.teleportTo(over, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player.getXRot()));
         }
     }
 }
