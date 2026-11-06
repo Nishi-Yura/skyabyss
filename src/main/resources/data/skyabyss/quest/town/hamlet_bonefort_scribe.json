@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 321,
+  "giver": "skyabyss:guest_bonefort_scribe",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "scriptorium",
+          "type": "signal",
+          "target": "poi:@scriptorium",
+          "party": false
+        },
+        {
+          "id": "hushed_abbey",
+          "type": "signal",
+          "target": "poi:@hushed_abbey",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_bonefort_scribe",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 150,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 40
+      },
+      {
+        "item": "skyabyss:box_rare_1",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 327,
+  "giver": "skyabyss:guest_tidefort_netmender",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "whaler_wreck",
+          "type": "signal",
+          "target": "poi:@whaler_wreck",
+          "party": false
+        },
+        {
+          "id": "brine_hulk",
+          "type": "signal",
+          "target": "poi:@brine_hulk",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_tidefort_netmender",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 220,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 50
+      },
+      {
+        "item": "skyabyss:box_rare_2",
+        "count": 1
+      }
+    ]
+  }
+}

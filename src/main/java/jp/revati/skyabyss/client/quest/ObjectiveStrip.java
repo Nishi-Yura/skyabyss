@@ -321,7 +321,15 @@ public final class ObjectiveStrip {
         Function<String, BlockPos> provider = targets;
         BlockPos target = null;
         if (provider != null) {
-            target = provider.apply(def.id() + "/" + stage.id());
+            // 目的ごとの行き先 (「クエスト/段#番号」。土地の人の頼みで二か所を回る段は、済んでいない最初の目的を指す)
+            for (int i = 0; i < stage.objectives().size() && target == null; i++) {
+                if (entry.progress(i) < stage.objectives().get(i).count()) {
+                    target = provider.apply(def.id() + "/" + stage.id() + "#" + i);
+                }
+            }
+            if (target == null) {
+                target = provider.apply(def.id() + "/" + stage.id());
+            }
             if (target == null) {
                 target = provider.apply(def.id());
             }

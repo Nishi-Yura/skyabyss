@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 323,
+  "giver": "skyabyss:guest_bellwatch_miner",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 4,
+          "targets": [
+            "skyabyss:rock_shell_beetle"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "bluestone_mine",
+          "type": "signal",
+          "target": "poi:@bluestone_mine",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_bellwatch_miner",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 150,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 40
+      },
+      {
+        "item": "skyabyss:box_rare_1",
+        "count": 1
+      }
+    ]
+  }
+}

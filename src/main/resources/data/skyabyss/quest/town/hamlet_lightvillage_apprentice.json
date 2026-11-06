@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 324,
+  "giver": "skyabyss:guest_lightvillage_apprentice",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 4,
+          "targets": [
+            "skyabyss:sand_burrower"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "northcape_light",
+          "type": "signal",
+          "target": "poi:@northcape_light",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_lightvillage_apprentice",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 220,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 50
+      },
+      {
+        "item": "skyabyss:box_rare_2",
+        "count": 1
+      }
+    ]
+  }
+}

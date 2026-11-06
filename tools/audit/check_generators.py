@@ -24,6 +24,7 @@ tools/gen/world/build_poi_places.py
 tools/gen/shop/gen_made_to_order.py
 tools/gen/wild_gear/gen_wild_gear.py
 tools/gen/loot/gen_box_text.py
+tools/gen/story/gen_hamlet_folk.py
 """.split()
 
 COPY = ["tools", "src/main/resources", "docs/design"]

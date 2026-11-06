@@ -37,6 +37,7 @@ import kit as K  # noqa: E402
 import cast as C  # noqa: E402
 import cast_folk  # noqa: E402,F401  (土地の町の 8 人の選んだ案)
 import cast_moon  # noqa: E402,F401  (六章の人の選んだ案)
+import cast_hamlet  # noqa: E402,F401  (外れの集落の住人と霜の渡し守の選んだ案)
 import build as B  # noqa: E402
 from lpkit import rot_x, rot_y  # noqa: E402
 
@@ -59,6 +60,11 @@ GUESTS = {"guest_apprentice", "guest_bellkeeper", "guest_fisher", "guest_bard", 
           "guest_storm_hutkeeper", "guest_ember_survivor", "guest_ember_watch",
           # 鯨見の町の 2 人 (2026-11-05) と野営の旅人 3 人 (cast_folk)
           "guest_whale_bonecarver", "guest_whale_lookout", "guest_camp_pilgrim", "guest_camp_minstrel", "guest_camp_mapmaker",
+          # 外れの集落の 16 人と霜の渡し守 (cast_hamlet。2026-11-06)
+          "guest_bonefort_beacon", "guest_bonefort_scribe", "guest_bellwatch_crone", "guest_bellwatch_miner",
+          "guest_lightvillage_apprentice", "guest_lightvillage_comber", "guest_tidefort_watch", "guest_tidefort_netmender",
+          "guest_emberfort_smith", "guest_emberfort_survivor", "guest_smokewatch_reader", "guest_smokewatch_twin",
+          "guest_frostfort_hunter", "guest_frostfort_fletcher", "guest_windmill_keeper", "guest_windmill_mossguard", "guest_isle_ferryman",
           # 六章の人 (cast_moon)
           "guest_moon_past1", "guest_moon_past2", "guest_moon_past3", "guest_moon_past4"}
 
@@ -93,6 +99,13 @@ BG = {
     "guest_whale_bonecarver": (200, 186, 150),  # 骨削り: 岩鯨の骨の白
     "guest_whale_lookout": (110, 160, 210),     # 見張り: 空の青
     "guest_camp_pilgrim": (120, 170, 100), "guest_camp_minstrel": (190, 90, 120), "guest_camp_mapmaker": (170, 150, 100),
+    # 外れの集落 (土地の色: 骨の白・藍・紺・潮の青緑・炉の赤・煙の灰・氷の青・草の緑)
+    "guest_bonefort_beacon": (210, 140, 80), "guest_bonefort_scribe": (150, 160, 190), "guest_bellwatch_crone": (110, 130, 190),
+    "guest_bellwatch_miner": (110, 170, 220), "guest_lightvillage_apprentice": (230, 200, 110), "guest_lightvillage_comber": (90, 170, 170),
+    "guest_tidefort_watch": (70, 140, 150), "guest_tidefort_netmender": (120, 160, 160), "guest_emberfort_smith": (220, 100, 50),
+    "guest_emberfort_survivor": (190, 110, 80), "guest_smokewatch_reader": (150, 150, 170), "guest_smokewatch_twin": (170, 120, 90),
+    "guest_frostfort_hunter": (150, 180, 210), "guest_frostfort_fletcher": (170, 200, 230), "guest_windmill_keeper": (180, 190, 110),
+    "guest_windmill_mossguard": (110, 190, 140), "guest_isle_ferryman": (160, 190, 220),
     "guest_moon_past1": (130, 170, 230),     # 前のループの自分: 星の角灯の青白
     "guest_moon_past2": (150, 160, 180),     # 前のループの自分 (二人目): 色あせた鉄の灰青
     "guest_moon_past3": (160, 190, 235),     # 前のループの自分 (三人目): 月の砂時計の青白

@@ -42,6 +42,7 @@ public final class FrontierHamlets {
     static final int KEEP_RADIUS = 96;
     static final int CHECK = 40;
     static final String[] MARKS = {"rest", "board", "inn", "shop", "stand", "folk_a", "folk_b", "door", Attendants.INN_BED};
+    static final String[] FOLK_MARKS = {"folk_a", "folk_b"};
     // 口から道までの小道の半幅
     static final int PATH_HALF = 1;
 
@@ -70,7 +71,7 @@ public final class FrontierHamlets {
     }
 
     @Nullable
-    static SiteData.Entry entry(SiteData data, int index) {
+    public static SiteData.Entry entry(SiteData data, int index) {
         for (SiteData.Entry e : data.entries(KIND)) {
             if (e.index == index) {
                 return e;
@@ -246,6 +247,13 @@ public final class FrontierHamlets {
                     }
                     Attendants.ensureAll(over, marks);
                     jp.revati.skyabyss.opening.site.FacilityLabels.keep(over, e, true);
+                    // 集落の住人二人 (town/RegionFolk の町 "hamlet_<key>"、印 folk_a・folk_b。頼みは quest/town/hamlet_<人>)
+                    for (String mark : FOLK_MARKS) {
+                        BlockPos at = e.extra(mark);
+                        if (at != null) {
+                            jp.revati.skyabyss.town.RegionFolk.ensure(over, townId(i), mark, at);
+                        }
+                    }
                 }
             }
         }

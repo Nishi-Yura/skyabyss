@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 335,
+  "giver": "skyabyss:guest_windmill_mossguard",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "south_moss_shrine",
+          "type": "signal",
+          "target": "poi:@south_moss_shrine",
+          "party": false
+        },
+        {
+          "id": "rumble_cave",
+          "type": "signal",
+          "target": "poi:@rumble_cave",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_windmill_mossguard",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 60
+      },
+      {
+        "item": "skyabyss:box_rare_3",
+        "count": 1
+      }
+    ]
+  }
+}

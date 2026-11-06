@@ -50,6 +50,15 @@ public final class QuestCommands {
                         .then(Commands.literal("start").then(Commands.argument("players", EntityArgument.players())
                                 .then(Commands.argument("quest", StringArgumentType.string()).suggests(QUESTS).executes(ctx -> each(ctx,
                                         p -> Quests.start(p, quest(ctx)))))))
+                        // 追跡するクエスト (目的の帯と標が指す。クエストの記録の画面で選ぶのと同じ。撮影の台本向け)
+                        .then(Commands.literal("track").then(Commands.argument("players", EntityArgument.players())
+                                .then(Commands.argument("quest", StringArgumentType.string()).suggests(QUESTS).executes(ctx -> each(ctx, p -> {
+                                    if (QuestLog.of(p).entry(quest(ctx)) == null) {
+                                        return false;
+                                    }
+                                    Quests.track(p, quest(ctx));
+                                    return true;
+                                })))))
                         .then(Commands.literal("stage").then(Commands.argument("players", EntityArgument.players())
                                 .then(Commands.argument("quest", StringArgumentType.string()).suggests(QUESTS)
                                         .then(Commands.argument("stage", StringArgumentType.word()).suggests((ctx, b) -> {

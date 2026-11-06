@@ -1,0 +1,68 @@
+# 2026-11-06: 外れの集落の住人と頼み (town/RegionFolk の hamlet_*、quest/town/hamlet_*)。骨垣の砦村の二人の体・会話・頼みを受けたときの目的の帯と標、霜の渡し守の会話
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/hamlet_folk.txt -PshotsName=hamlet_folk
+world hamletfolk continent
+size 1600 900
+timeout 5000
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+hud off
+# 骨垣の砦村 (724, -1112): 近づいて建つのを待つ
+cmd tp @s 724 200 -1060 180 40
+waitchunks 400
+wait 1200
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"bonefort_beacon"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 60
+shot beacon_body
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"bonefort_scribe"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 60
+shot scribe_body
+hud on
+# 写字生と話して頼みを受ける (ふだんの台詞 → 頼み → 受ける)
+cmd skyabyss dev talk "skyabyss:guest_bonefort_scribe"
+wait 40
+shot scribe_idle
+cmd skyabyss dev talk say 0
+wait 40
+shot scribe_ask
+cmd skyabyss dev talk say 0
+wait 30
+close
+wait 40
+cmd skyabyss quest track @s "town/hamlet_bonefort_scribe"
+wait 40
+# 目的の帯と標が写本の僧院 (西北西) を指すか: 砦の外から西を向く
+cmd tp @s 700 150 -1112 90 10
+wait 80
+shot scribe_strip
+# 一か所めを済ませると、標が祈り止めの僧院 (西南西) へ移る
+cmd tp @s 424 150 -1200 180 30
+waitchunks 300
+wait 400
+cmd tp @s 700 150 -1112 120 10
+wait 60
+shot scribe_strip_second
+# 霜の渡し守 (本土の岸の船着き場 -1222, -941)
+hud off
+cmd tp @s -1222 150 -930 180 30
+waitchunks 300
+wait 300
+cmd execute as @e[type=skyabyss:town_guest,nbt={Guest:"isle_ferryman"},limit=1] at @s run tp @a ^ ^1 ^3 facing entity @s eyes
+wait 60
+shot isle_ferryman_body
+hud on
+cmd skyabyss dev talk "skyabyss:guest_isle_ferryman"
+wait 40
+shot isle_ferryman_talk
+cmd skyabyss dev talk say 1
+wait 40
+shot isle_ferryman_sea
+quit

@@ -88,7 +88,8 @@ public final class ContinentFerries {
         for (SiteData.Entry e : SiteData.get(over).entries(KIND)) {
             BlockPos stand = e.extra("stand");
             if (e.built && stand != null && stand.distSqr(p.blockPosition()) < 80 * 80) {
-                jp.revati.skyabyss.town.RegionFolk.ensure(over, "ferry", "dock", stand);
+                // 一つめ (内海) は内海の渡し守、二つめ (霜の小島) は霜の渡し守
+                jp.revati.skyabyss.town.RegionFolk.ensure(over, (e.index >> 1) == 1 ? jp.revati.skyabyss.town.RegionFolk.ISLE_FERRY : "ferry", "dock", stand);
             }
         }
     }
