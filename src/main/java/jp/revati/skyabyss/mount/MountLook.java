@@ -24,7 +24,10 @@ public enum MountLook {
     // 2026-11-02 に選んだ三つ (00 の 346〜348)。五章・六章・終章のあと
     ABYSS_GECKO("abyss_gecko", 6, 220, 1.10f, 1.70f, 1.551, -30f, 56f, 2),
     STAR_LYNX("star_lynx", 7, 260, 1.00f, 1.99f, 1.840, -25f, 44f, 2),
-    SKY_RAY("sky_ray", 8, 400, 1.60f, 1.94f, 1.792, -65f, 44f, 3);
+    SKY_RAY("sky_ray", 8, 400, 1.60f, 1.94f, 1.792, -65f, 44f, 3),
+    // 二頭立ての幌の荷車 (2026-11-07 の頁「二頭立ての車」の選定 A・最大 6 人・四つの心臓のあと。tools/gen/mobs/mounts_lp/carriage.py)。
+    // 乗る人は腰掛けに座る (脚は前へ)。席の並びは MountEntity.CARRIAGE_SEATS
+    CARRIAGE("carriage", 5, 240, 2.00f, 3.00f, 1.334, -80f, 16f, 6);
 
     // 飛ぶ見た目
     public boolean flies() {

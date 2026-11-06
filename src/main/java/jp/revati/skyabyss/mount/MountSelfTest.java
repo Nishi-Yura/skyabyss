@@ -103,7 +103,7 @@ public final class MountSelfTest {
             p.getInventory().clearContent();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, seats start at one and grow with the seats tier up to the look's maximum, owner steers), fall immunity, save, shop session, whistle, bond stages and naming)");
+            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, seats start at one and grow with the seats tier up to the look's maximum, the covered wagon's six seats, owner steers), fall immunity, save, shop session, whistle, bond stages and naming)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST mount FAILED: {}", m));
         }
@@ -122,7 +122,18 @@ public final class MountSelfTest {
         // 乗り物の店は旅の番 (止まり木の番。2026-11-01 に厩舎の番をまとめた)
         check(f, resource(a + "textures/gui/npc_marker/fac_perch_keeper.png"), "travel keeper icon");
         check(f, resource("/data/skyabyss/dialogue/attendant_perch_keeper.json"), "travel keeper dialogue");
-        check(f, MountLook.values().length == 10 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
+        // 幌の荷車の六つの席: 重ならず (0.5 以上離れ)、荷車の中 (横 1、前後 2.5 の内)
+        boolean apart = MountEntity.CARRIAGE_SEATS.length == 6;
+        for (int i = 0; i < MountEntity.CARRIAGE_SEATS.length; i++) {
+            double[] sa = MountEntity.CARRIAGE_SEATS[i];
+            apart &= Math.abs(sa[0]) <= 1.0 && Math.abs(sa[2]) <= 2.5;
+            for (int j = i + 1; j < MountEntity.CARRIAGE_SEATS.length; j++) {
+                double[] sb = MountEntity.CARRIAGE_SEATS[j];
+                apart &= Math.hypot(sa[0] - sb[0], sa[2] - sb[2]) >= 0.5;
+            }
+        }
+        check(f, apart, "the wagon's six seats overlap or sit outside the wagon");
+        check(f, MountLook.values().length == 11 && MountLook.CARRIAGE.maxSeats == 6 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
         // 2026-11-02 の三つ: 五章・六章・終章のあと。飛ぶのは空鱏だけ
         check(f, MountLook.ABYSS_GECKO.chapter == 6 && MountLook.STAR_LYNX.chapter == 7 && MountLook.SKY_RAY.chapter == 8, "new looks unlock in chapters 5, 6 and after the finale");
         int flyers = 0;
@@ -140,7 +151,7 @@ public final class MountSelfTest {
         check(f, MountStats.speed(MountStats.tiers(MountStats.SPEED)) > MountStats.speed(5) && MountStats.speed(5) > MountStats.speed(0)
                 && MountStats.jump(5) > MountStats.jump(0), "stats rise (speed beyond the old tier 5)");
         // 店の行は速さ・跳び・人数 (体力は無い)。人数ははじめ 1、段ごとに +1
-        check(f, java.util.Arrays.asList(MountStats.KEYS).equals(List.of("speed", "jump", "seats")) && MountStats.seats(0) == 1 && MountStats.seats(MountStats.tiers(MountStats.SEATS)) == 4,
+        check(f, java.util.Arrays.asList(MountStats.KEYS).equals(List.of("speed", "jump", "seats")) && MountStats.seats(0) == 1 && MountStats.seats(MountStats.tiers(MountStats.SEATS)) == 6,
                 "the shop rows are not speed / jump / seats, or seats do not start at one");
         check(f, MountStats.healthRefund(5) == 18 + 36 + 60 + 95 + 150 && MountStats.healthRefund(0) == 0, "no health tiers; refund of old ones");
     }

@@ -61,6 +61,13 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     // 相乗り (2026-11-03 の案「相乗りの道」。38 の 7 章): 持ち主の後ろに同じパーティの人を、乗れる人数 (seats) まで。
     // 後ろの席は胴の幅 × TANDEM_BACK だけ後ろ。三人以上乗れるときは、二つめ・三つめの席を左右に並べ、四つめはその後ろ
     static final double TANDEM_BACK = 0.42;
+    // 幌の荷車の席 (ブロック。x = 横、y = 座る高さ、z = 前が正)。前の御者台が持ち主、後ろの三列の腰掛けに五人
+    // (tools/gen/mobs/mounts_lp/carriage.py の BENCHES: 御者台 z -0.5・上面 22.35、後ろ z 13 / 23 / 33・上面 19.85。1/16 ブロック、前 = -z)
+    static final double[][] CARRIAGE_SEATS = {
+            {0, 1.334, 0.03},
+            {0.34, 1.178, -0.81}, {-0.34, 1.178, -0.81},
+            {0.34, 1.178, -1.44}, {-0.34, 1.178, -1.44},
+            {0, 1.178, -2.06}};
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Nullable
@@ -161,6 +168,10 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
         Vec3 seat = new Vec3(0, look().seat * scale, 0);
         int i = getPassengers().indexOf(passenger);
+        if (look() == MountLook.CARRIAGE) {
+            double[] c = CARRIAGE_SEATS[Math.max(0, Math.min(CARRIAGE_SEATS.length - 1, i))];
+            return new Vec3(c[0] * scale, c[1] * scale, c[2] * scale).yRot(-yBodyRot * Mth.DEG_TO_RAD);
+        }
         if (i <= 0) {
             return seat;
         }

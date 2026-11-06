@@ -866,6 +866,10 @@ class W:
     def eval(self, t, d, period, stride):
         v = self.off
         for amp, k, ph, src in self.terms:
+            if src == "lin":
+                # 道のりに比べて増える (輪の回り。amp 度 / ブロック)
+                v += amp * d
+                continue
             x = t * 360.0 / period if src == "t" else d * 360.0 / stride
             v += amp * math.sin(math.radians(x * k + ph))
         return v
@@ -875,6 +879,9 @@ class W:
             return round(self.off, 3)
         parts = [f"{self.off:.3f}"] if abs(self.off) > 1e-6 else []
         for amp, k, ph, src in self.terms:
+            if src == "lin":
+                parts.append(f"{amp:.3f}*variable.mount_dist")
+                continue
             if src == "t":
                 x = f"query.anim_time*{360.0 * k / period:.4f}"
             else:

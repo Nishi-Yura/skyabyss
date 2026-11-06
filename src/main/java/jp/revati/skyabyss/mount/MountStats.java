@@ -1,6 +1,6 @@
 package jp.revati.skyabyss.mount;
 
-// 乗り物の性能 (docs/design/38 の 3 章)。速さ (8 段)・跳び (5 段)・乗れる人数 (3 段) を鐘銭で上げる。どの見た目にも同じ段が掛かる。
+// 乗り物の性能 (docs/design/38 の 3 章)。速さ (8 段)・跳び (5 段)・乗れる人数 (5 段。いちばん多く乗れる幌の荷車で 6 人) を鐘銭で上げる。どの見た目にも同じ段が掛かる。
 // 乗れる人数ははじめ 1 (持ち主だけ)。段ごとに 1 人ずつ増え、見た目ごとの最大 (MountLook.maxSeats) で頭打ち (2026-11-07 の声
 // 「ペットによって乗れる最大人数増やせるようにしてほしいのと、載せる人数増やす強化も追加でできるようにして。なので最初は1」)。
 // 段 0 = 買う前。値段は段が上がるほど高い。
@@ -15,7 +15,7 @@ public final class MountStats {
     public static final String[] KEYS = {"speed", "jump", "seats"};
     public static final int[] ROW_KIND = {SPEED, JUMP, SEATS};
     // 種類ごとの段の数 (体力は前の段の数。返す額を数えるためだけ)
-    private static final int[] TIER_COUNT = {8, 5, 5, 3};
+    private static final int[] TIER_COUNT = {8, 5, 5, 5};
     public static final int MAX_TIERS = 8;
     public static final double FIXED_HEALTH = 60;
 
@@ -24,7 +24,7 @@ public final class MountStats {
             {25, 50, 85, 130, 200, 300, 420, 600},
             {18, 36, 60, 95, 150},
             {18, 36, 60, 95, 150},
-            {80, 220, 500},
+            {80, 220, 500, 800, 1200},
     };
     // 段 0〜n の値。速さは馬の中ほどから、段 5 で馬の最上位 (0.35)、段 8 で 0.44 (2026-11-02 の声「速さはもう少し速く」)。跳びは馬の下から上
     private static final double[] SPEED_VALUE = {0.20, 0.23, 0.26, 0.29, 0.32, 0.35, 0.38, 0.41, 0.44};

@@ -1,0 +1,41 @@
+# 2026-11-07: 二頭立ての幌の荷車 (MountLook.CARRIAGE) をゲームの中で。並べた見た目の中の荷車・近くから・乗って (後ろから)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/carriage.txt -PshotsName=carriage
+world carriageshots continent
+size 1600 900
+timeout 3000
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 5000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+cmd fill -26 199 -6 10 199 20 minecraft:grass_block
+cmd tp @s 0.5 200 0.5 0 10
+wait 20
+cmd skyabyss facility mount demo
+wait 60
+hud off
+cmd gamemode spectator
+cmd tp @s -10 206 -2 -30 30
+wait 40
+shot row
+cmd tp @s -12 202.5 4 -50 12
+wait 40
+shot near_front
+cmd tp @s -22 202.5 14 -150 14
+wait 40
+shot near_back
+cmd gamemode creative
+cmd tp @s -17 200 9.5 0 0
+wait 10
+cmd ride @s mount @e[type=skyabyss:mount,limit=1,sort=nearest]
+wait 20
+perspective back
+wait 20
+shot ride_back
+quit
