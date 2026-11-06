@@ -302,7 +302,7 @@ folk("isle_ferryman", "霜の渡し守", [
          build="stout", upper=dict(vest=True, scarf=True), lower="trousers", sleeve="rolled", props={"prop_r": P2.harpoon}),
 ])
 
-# 選定: まだ持ち主に見せていない。推しの案を先に入れておく (頁で変えられる)
+# 選定 (2026-11-06、頁「外れの住人の体」): 17 人とも推奨のまま
 PICK = {p: "a" for p in IDS}
 PICK.update(smokewatch_reader="b", frostfort_fletcher="b")  # 煙読み: A の高い帽子は桶に見える。矢羽師: 背の矢筒の方が職がわかる
 for _p, _k in PICK.items():
