@@ -1021,6 +1021,19 @@ public final class ChapterSites {
         }
     }
 
+    // その人が着いた (onArrive が動いた) 要素 siteId の数。index >= 0 ならその番の要素だけ (クエストの合図を状態から数える。Quests.SIGNAL_STATES)
+    public static int arrivedCount(net.minecraft.server.MinecraftServer server, UUID id, String siteId, int index) {
+        int n = 0;
+        for (SiteData.ChapterPlan plan : SiteData.get(server.overworld()).plans()) {
+            for (SiteData.Entry e : plan.sites) {
+                if (e.built && e.siteId.equals(siteId) && (index < 0 || e.index == index) && e.arrived.contains(id)) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
     private static void pollArrive(SiteData data, ServerPlayer p, Chapters c) {
         arrive(data, p.getUUID(), p.blockPosition(), c, (el, site) -> el.onArrive().arrive(p, site));
     }

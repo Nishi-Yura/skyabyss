@@ -281,24 +281,28 @@ public final class Quests {
         return changed;
     }
 
-    // 状態で決まる合図 (章の担当が登録する。例: 塩の蔵の白い戸が開いている ch2_salt_door)。後から来た人・先に済ませた人も済む
-    public static final Map<String, java.util.function.Predicate<ServerPlayer>> SIGNAL_STATES = new java.util.concurrent.ConcurrentHashMap<>();
+    // 状態で決まる合図 (章の担当が登録する。合図の数を返す)。後から来た人・先に済ませた人も済む
+    // (2026-11-07: 着いたとき・見つけたときに一度だけ出る合図は、クエストがその段に着く前だと数えられず、二度と出なかった)。
+    // 例: 塩の蔵の白い戸が開いている ch2_salt_door、三章の風見・跡・荷・風の碑に着いた、灰の道の標に着いた数、硝子の筋を見つけた数
+    public static final Map<String, java.util.function.ToIntFunction<ServerPlayer>> SIGNAL_STATES = new java.util.concurrent.ConcurrentHashMap<>();
 
+    // 合図の目的の、今の状態から数えた値 (場所のクリア site_clear:<id> は人ごとのクリアの記録)
     static int siteCleared(ServerPlayer player, QuestDef.Objective ob) {
-        for (String t : ob.targets()) {
-            java.util.function.Predicate<ServerPlayer> st = SIGNAL_STATES.get(t);
-            if (st != null && st.test(player)) {
-                return ob.count();
-            }
-        }
         jp.revati.skyabyss.guide.SiteProgressData data = jp.revati.skyabyss.guide.SiteProgressData.get(player.server);
         int n = 0;
         for (String t : ob.targets()) {
-            if (t.startsWith("site_clear:") && data.cleared(player.getUUID(), t.substring("site_clear:".length()))) {
-                n++;
+            if (t.startsWith("site_clear:")) {
+                if (data.cleared(player.getUUID(), t.substring("site_clear:".length()))) {
+                    n++;
+                }
+                continue;
+            }
+            java.util.function.ToIntFunction<ServerPlayer> st = SIGNAL_STATES.get(t);
+            if (st != null) {
+                n += Math.max(0, st.applyAsInt(player));
             }
         }
-        return n == 0 ? 0 : ob.count();
+        return Math.min(n, ob.count());
     }
 
     // 受けた場所 (板) の radius 以内に、その生き物が count 頭いる。本人も近く (32 以内) にいるときだけ数える

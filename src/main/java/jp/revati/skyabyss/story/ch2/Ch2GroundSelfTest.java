@@ -194,6 +194,20 @@ public final class Ch2GroundSelfTest {
                 walled &= !level.getBlockState(top.relative(d)).isAir();
             }
             check(walled, "the exit trapdoor was not walled in again");
+            // 開けたままの戸は、そばに人がいなければ閉じる。戸がなければ置く。戸より上の人は外 (開けられない)
+            var st = level.getBlockState(top);
+            level.setBlock(top, st.setValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN, true), 2 | 16);
+            var spot = new jp.revati.skyabyss.opening.site.SiteHatches.Spot(top, st);
+            check(jp.revati.skyabyss.opening.site.SiteHatches.mend(level, spot, List.of()) && !level.getBlockState(top).getValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN),
+                    "an open exit trapdoor with nobody near did not close");
+            level.setBlock(top, Blocks.AIR.defaultBlockState(), 2 | 16);
+            check(jp.revati.skyabyss.opening.site.SiteHatches.mend(level, spot, List.of()) && level.getBlockState(top).getBlock() instanceof net.minecraft.world.level.block.TrapDoorBlock,
+                    "a missing exit trapdoor was not put back");
+            FakePlayer above = fake(server, "hatch");
+            above.setPos(top.getX() + 0.5, top.getY() + 1, top.getZ() + 0.5);
+            check(jp.revati.skyabyss.opening.site.SiteHatches.outside(above, top), "a player standing on the trapdoor should count as outside");
+            above.setPos(top.getX() + 0.5, top.getY() - 1.2, top.getZ() + 0.5);
+            check(!jp.revati.skyabyss.opening.site.SiteHatches.outside(above, top), "a player on the ladder below should count as inside");
         }
         int door = 0;
         for (int k = 0; k < SaltVault.DOOR_CELLS; k++) {

@@ -374,6 +374,7 @@
   "message.skyabyss.hall_begin": "The hall doors slam shut. The guards awaken",
   "message.skyabyss.hall_cleared": "The hall falls silent. The way forward opens",
   "message.skyabyss.checkpoint": "Reached the rest point \"%s\"",
+  "message.skyabyss.hatch.inside_only": "The trapdoor only opens from the inside.",
   "message.skyabyss.revived_on_back": "You come to. The titan's heartbeat seems to have carried you back",
   "message.skyabyss.fragment_received": "You received a Sky Key Fragment. It is faintly warm",
   "message.skyabyss.fragment_already": "The pedestal is quiet. You have already taken your Sky Key Fragment",

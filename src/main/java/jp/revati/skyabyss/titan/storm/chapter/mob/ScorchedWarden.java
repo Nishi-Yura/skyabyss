@@ -298,8 +298,10 @@ public class ScorchedWarden extends FeatherWarden {
         if (!(level() instanceof ServerLevel server)) {
             return;
         }
+        // ボスバーは焼けた見張り塔の湧き台の名づきだけ (雷の土地の夜・雷晶の空洞のダンジョンの個体には出さない。2026-11-07 の潮の番人と同じ)
+        boolean named = jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(this);
         for (ServerPlayer p : Players.snapshot(server.players())) {
-            if (p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p)) {
+            if (named && p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p)) {
                 bossBar.addPlayer(p);
             } else {
                 bossBar.removePlayer(p);

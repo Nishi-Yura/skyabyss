@@ -374,6 +374,7 @@
   "message.skyabyss.hall_begin": "広間の扉が閉ざされた。番兵たちが目を覚ます",
   "message.skyabyss.hall_cleared": "広間は静まり返った。奥への扉が開く",
   "message.skyabyss.checkpoint": "休み場「%s」にたどり着いた",
+  "message.skyabyss.hatch.inside_only": "跳ね上げ戸は、内側からしか開かないようだ。",
   "message.skyabyss.revived_on_back": "意識が戻る。巨神の鼓動が、ここまで連れ戻してくれたようだ",
   "message.skyabyss.fragment_received": "天の鍵の欠片を受け取った。ほのかに温かい",
   "message.skyabyss.fragment_already": "台座は静かだ。この巨神の欠片は、もう受け取っている",

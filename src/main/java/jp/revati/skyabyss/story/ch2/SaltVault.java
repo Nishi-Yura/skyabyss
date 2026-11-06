@@ -156,12 +156,14 @@ public final class SaltVault {
             ServerLevel level = p.server.overworld();
             for (Vault v : vaults(p.server)) {
                 if (doorOpenKnown(level, v)) {
-                    return true;
+                    return 1;
                 }
             }
-            return false;
+            return 0;
         });
         jp.revati.skyabyss.opening.site.SiteNetwork.PLAYER_TARGETS.add(SaltVault::targets);
+        // 出口の縦穴の戸: 外からは開かず、開けたままなら閉じる (opening/site/SiteHatches)
+        jp.revati.skyabyss.opening.site.SiteHatches.register(SITE, (level, e) -> exitTop(level, new Vault(e.pos, e.yaw)));
     }
 
     public static final String SIGNAL_DOOR = "ch2_salt_door";
@@ -410,7 +412,7 @@ public final class SaltVault {
     // ---------------------------------------------------------------- 出口の縦穴
     // 奥の間の壇の裏から地上への梯子。部品では地面の高さ (印 exit の一つ下) に跳ね上げ戸。地面がそれより高ければ、戸を地表まで上げて梯子を延ばす。
     // 2026-11-07 の声 (画像: 砂の窪みから梯子が見え、外から入れてボスへ行けた): 延ばした所と戸の高さのまわりは石レンガで囲う (空気・水・草の所だけ)。
-    // 戸は外 (上) からは開かない (onUse。内側から出るためのもの)。何度呼んでも同じ形になる (前は二度目で戸が梯子に替わった)
+    // 戸は外 (上) からは開かず、開けたままなら閉じる (opening/site/SiteHatches。内側から出るためのもの)。何度呼んでも同じ形になる (前は二度目で戸が梯子に替わった)
     @Nullable
     public static BlockPos exitTop(ServerLevel level, Vault v) {
         BlockPos exit = v.mark("exit");
@@ -976,14 +978,6 @@ public final class SaltVault {
         }
         BlockPos pos = event.getPos();
         BlockState state = level.getBlockState(pos);
-        if (state.getBlock() instanceof TrapDoorBlock && player.getY() >= pos.getY() + 0.5) {
-            Vault ev = vaultNear(level.getServer(), pos, 56);
-            if (ev != null && pos.equals(exitTop(level, ev))) {
-                event.setCanceled(true);
-                Notice.hint(player, "message.skyabyss.ch2.vault.exit_shut");
-                return;
-            }
-        }
         boolean carrying = carried(player) > 0;
         if (!carrying && !state.is(Blocks.BARREL) && !state.is(Blocks.SMOOTH_QUARTZ)) {
             return;
