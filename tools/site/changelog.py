@@ -8,6 +8,9 @@ from sitelib import REPO, T, page, sec
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v1.1.3", "2026-11-06", [
+            ("1.1.2 の直し: 「熾火の棒」（五章の黒い鉄の素材）が素材屋で魔法使いにしか並ばなかったのを直しました。wiki の店の頁に、職の品（「戦士だけ」など）を書き、敵の頁に熾の山犬の姿を足しました。", "Fix for 1.1.2: the ember rod (a chapter 5 material) was only listed for mages at the material shop. The wiki shop page now marks job-only goods, and the foes page shows the ember jackal."),
+        ]),
         ("v1.1.2", "2026-11-06", [
             ("鯨見の町に、骨削りのゴンジと鐘打ちのハルが住むようになりました（頼みが一つずつ）。野営の旅人 3 人も自分の顔で話します。", "Gonji the bone carver and Haru the bell-ringer now live in the whale-watch town, with an errand each. The three camp travelers now speak with their own faces."),
             ("灰の荒野に新しい敵「熾の山犬」。三、四頭の群れで、一頭が吠えると仲間が背中側へ回り込んで噛みつきます（床の帯の予告つき）。嵐の高地の見どころを 8 か所足しました（今の世界でも、近づくと建ちます）。", "A new foe in the ash wilds: the ember jackal. Packs of three or four; when one howls, the others circle behind you and bite (with the usual floor warning). Eight more named places in the storm highlands (they appear in existing worlds as you approach)."),
