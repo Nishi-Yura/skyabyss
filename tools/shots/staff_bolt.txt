@@ -1,0 +1,39 @@
+# 2026-11-07: 魔法使いの魔弾 (combat/StaffBolts)。溜めてから撃つ・飛ぶ・当たる演出、マナの減り
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/staff_bolt.txt -PshotsName=staff_bolt
+world staffbolt continent
+size 1600 900
+timeout 3000
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 13000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode adventure
+cmd fill -4 199 -4 4 199 16 minecraft:stone_bricks
+cmd tp @s 0.5 200 0.5 0 12
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_scribe_staff
+cmd summon skyabyss:moss_crawler 0.5 200 9.5 {NoAI:1b,PersistenceRequired:1b}
+wait 60
+shot ready
+key key.attack
+wait 3
+shot flying_1
+wait 3
+shot flying_2
+wait 4
+shot hit
+wait 30
+perspective back
+cmd tp @s 0.5 200 0.5 0 12
+wait 40
+key key.attack
+wait 4
+shot third_flying
+wait 5
+shot third_hit
+quit

@@ -11,7 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 魔法使いの魔弾 (combat/StaffBolts) の手元: 杖を持って、手の届く敵を指していない左クリックで撃つ合図を送る。
+// 魔法使いの魔弾 (combat/StaffBolts) の手元: 杖を持って、手の届く敵を指していない左クリックで、溜めが足りていれば撃つ合図を送る。
 // 手の届く敵を指しているときは、今までどおり杖で打つ (バニラの一撃 → weapon/WeaponStrikes)。押し続けても、続けて撃てる間より早くは送らない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class StaffBoltClient {
@@ -30,6 +30,10 @@ public final class StaffBoltClient {
             return;
         }
         if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.ENTITY) {
+            return;
+        }
+        // 溜めが足りなければ送らない (サーバーも同じに見る。連打では撃てない)
+        if (mc.player.getAttackStrengthScale(0.5f) < StaffBolts.READY) {
             return;
         }
         long now = mc.level.getGameTime();

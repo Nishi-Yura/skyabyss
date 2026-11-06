@@ -856,6 +856,7 @@
   "item.skyabyss.heartbeat_ward_thunder_wing": "Thunder Wing Heartbeat Ward",
   "item.skyabyss.heartbeat_ward_ember": "Ember Heartbeat Ward",
   "item.skyabyss.heartbeat_ward.desc": "Worn in an accessory slot, it lets you survive one lethal blow at 10 HP, once per heart fight. It shatters when used",
+  "message.skyabyss.staff_bolt.no_mana": "Not enough mana for a staff bolt",
   "message.skyabyss.prep.ready": "You are ready for %s",
   "message.skyabyss.heartbeat_ward.used": "The heartbeat ward shattered and held you back",
   "growth.skyabyss.reason.site": "Cleared a small place",
