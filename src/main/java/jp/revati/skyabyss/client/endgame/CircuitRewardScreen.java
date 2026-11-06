@@ -247,6 +247,7 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
             g.pose().translate(s[0] + 1, s[1] + 1, 0);
             g.pose().scale(2f, 2f, 1f);
             g.renderItem(st, 0, 0);
+            g.renderItemDecorations(font, st, 0, 0);
             g.pose().popPose();
             if (on) {
                 hovered = st;

@@ -61,8 +61,10 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   置き場  data/skyabyss/continent/camps.json (tools/gen/world/gen_camps.py が町から少し離れた、道の見える平らな所を選ぶ)。鯨見・汐守・風待・灰炉に一つずつ
 //   建てる  人が BUILD_RADIUS まで来たら建てる (幕屋・焚き火・帆柱と旗・木箱・灯り・報いの箱)。建った印は SiteData の KIND。遠くからも見えるよう、光の柱 (その人にだけ)
 //   箱      報いの箱を押すと、野営地の画面 (今の景品の一覧・入れ替えまでの時間・今日の残り・歩き出す)。始まりは野営地から (近くの組の仲間も一緒)
-//   景品    野営地ごとの品の表 (その土地の巨神の品・その土地の目安の帯の階級の品・神器)。PERIOD_DAYS ごとに表を引き直す (野営地と期の番号で決まる。誰が見ても同じ)
-//   引き    終わると、印 1 つにつき 1 回 (呪いの柱 1 本につき +1)、表から引く。階級の重み WEIGHTS (神器は 0.1%)。引いた品は旅嚢へ入れ、
+//   景品    野営地ごとの品の表 (その土地の巨神の品・その土地の目安の帯の階級の品 (レア・エピック・ヒロイック)・神器 (塔と雲上の品)・
+//           旅の支え (回復の薬・その土地の糧・鐘銭))。PERIOD_DAYS ごとに表を引き直す (野営地と期の番号で決まる。誰が見ても同じ)。
+//           アンコモンと伝説は入れない (2026-11-06 の声「ミシックおいて。逆に伝説なくして。アンコモンなくして、回復とか食べ物、金銭もおいてほしい」)
+//   引き    終わると、印 1 つにつき 1 回 (呪いの柱 1 本につき +1)、表から引く。重み WEIGHTS と SUPPLY_WEIGHT (神器は 0.1%)。引いた品は旅嚢へ入れ、
 //           画面の幕 (client/endgame/CircuitRewardScreen) で一つずつ見せる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class CircuitCamps {
@@ -73,10 +75,12 @@ public final class CircuitCamps {
     // 箱から、始められる所・画面を開ける所
     public static final double NEAR = 14;
     public static final int MAX_PULLS = 24;
-    // 表の中身の数 (階級ごと) と、引きの重み (1 万分率)。神器は表に一つ、引きは 0.1%
-    public static final GearTier[] TIERS = {GearTier.UNCOMMON, GearTier.RARE, GearTier.EPIC, GearTier.HEROIC, GearTier.ARTIFACT};
-    static final int[] COUNTS = {4, 4, 3, 2, 1};
-    public static final int[] WEIGHTS = {6170, 2700, 860, 260, 10};
+    // 表の中身の数 (階級ごと) と、引きの重み (1 万分率。旅の支えと合わせて 1 万)。神器は表に一つ、引きは 0.1%
+    public static final GearTier[] TIERS = {GearTier.RARE, GearTier.EPIC, GearTier.HEROIC, GearTier.MYTHIC};
+    static final int[] COUNTS = {4, 3, 3, 1};
+    public static final int[] WEIGHTS = {3800, 1450, 540, 10};
+    // 旅の支え (回復の薬・土地の糧・鐘銭) の重みと、表の枠の数
+    public static final int SUPPLY_WEIGHT = 4200;
 
     public record Camp(int index, String id, int region, int x, int z) {
         public String titan() {
@@ -180,10 +184,17 @@ public final class CircuitCamps {
         for (int t = 0; t < TIERS.length; t++) {
             GearTier tier = TIERS[t];
             List<Item> from = new ArrayList<>();
-            if (tier == GearTier.ARTIFACT) {
-                BoxKind a = BoxKind.byId("box_artifact");
-                if (a != null) {
-                    from.addAll(LootBoxes.pool(a));
+            if (tier == GearTier.MYTHIC) {
+                // 神器: あいだの塔の品と雲上の品から
+                for (String box : new String[] {"box_tower", "box_cloud"}) {
+                    BoxKind a = BoxKind.byId(box);
+                    if (a != null) {
+                        for (Item i : LootBoxes.pool(a)) {
+                            if (i instanceof ModGear g && g.tier() == GearTier.MYTHIC) {
+                                from.add(i);
+                            }
+                        }
+                    }
                 }
             } else {
                 BoxKind k = BoxKind.rarity(tier, band);
@@ -201,28 +212,70 @@ public final class CircuitCamps {
             Collections.shuffle(from, r);
             out.addAll(from.subList(0, Math.min(COUNTS[t], from.size())));
         }
+        out.addAll(supplies(c));
         return out;
+    }
+
+    // 旅の支え: 回復の薬 (嵐と余燼は強い薬)・その土地の糧・鐘銭
+    public static List<Item> supplies(Camp c) {
+        List<Item> out = new ArrayList<>();
+        String heal = c.region() >= 4 ? "strong_healing_draught" : "healing_draught";
+        String food = switch (c.region()) {
+            case 3 -> "dried_fish";
+            case 4 -> "wind_dumpling";
+            case 5 -> "ash_baked_bread";
+            default -> "road_hardtack";
+        };
+        for (String id : new String[] {heal, food, "bell_coin"}) {
+            Item i = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id));
+            if (i != null && i != net.minecraft.world.item.Items.AIR) {
+                out.add(i);
+            }
+        }
+        return out;
+    }
+
+    // 旅の支えの品か (装備でない品)
+    public static boolean supply(Item i) {
+        return !(i instanceof ModGear);
+    }
+
+    // 旅の支えを引いたときの数: 薬 2・糧 4・鐘銭 は土地の帯ごとに 20〜
+    static int supplyCount(Item i, RandomSource random) {
+        String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(i).getPath();
+        if (path.equals("bell_coin")) {
+            return 20 + random.nextInt(21);
+        }
+        return path.contains("draught") ? 2 : 4;
     }
 
     static GearTier tierOf(Item i) {
         return i instanceof ModGear g ? g.tier() : GearTier.COMMON;
     }
 
-    // 表から一つ引く: 階級を重みで決め (表にない階級は外す)、その階級の品から一つ。特性を付ける
+    // 表から一つ引く: 階級 (と旅の支え) を重みで決め (表にない階級は外す)、その品から一つ。装備には特性を付ける
     public static ItemStack pull(List<Item> pool, RandomSource random) {
         int total = 0;
         int[] w = new int[TIERS.length];
         for (int t = 0; t < TIERS.length; t++) {
             GearTier tier = TIERS[t];
-            if (pool.stream().anyMatch(i -> tierOf(i) == tier)) {
+            if (pool.stream().anyMatch(i -> !supply(i) && tierOf(i) == tier)) {
                 w[t] = WEIGHTS[t];
                 total += w[t];
             }
         }
+        List<Item> sup = pool.stream().filter(CircuitCamps::supply).toList();
+        int sw = sup.isEmpty() ? 0 : SUPPLY_WEIGHT;
+        total += sw;
         if (total <= 0 || pool.isEmpty()) {
             return ItemStack.EMPTY;
         }
         int roll = random.nextInt(total);
+        if (roll < sw) {
+            Item i = sup.get(random.nextInt(sup.size()));
+            return new ItemStack(i, supplyCount(i, random));
+        }
+        roll -= sw;
         GearTier tier = TIERS[0];
         for (int t = 0; t < TIERS.length; t++) {
             if (roll < w[t]) {
@@ -232,7 +285,7 @@ public final class CircuitCamps {
             roll -= w[t];
         }
         GearTier picked = tier;
-        List<Item> of = pool.stream().filter(i -> tierOf(i) == picked).toList();
+        List<Item> of = pool.stream().filter(i -> !supply(i) && tierOf(i) == picked).toList();
         ItemStack s = new ItemStack(of.get(random.nextInt(of.size())));
         return AffixRules.withAffixes(s, random);
     }
@@ -425,6 +478,17 @@ public final class CircuitCamps {
         }
     }
 
+    // 人 → サーバー: 巡り路をやめる (野営地の画面の「やめる」。それまでの印の報いは受け取る)
+    public record Stop() implements CustomPacketPayload {
+        public static final Type<Stop> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "circuit_stop"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Stop> STREAM_CODEC = StreamCodec.unit(new Stop());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     // サーバー → 人: 終わりの報いの幕 (引いた品を一つずつ見せる)
     public record Reward(String camp, int marks, int coins, List<ItemStack> items) implements CustomPacketPayload {
         public static final Type<Reward> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "circuit_reward"));
@@ -475,6 +539,11 @@ public final class CircuitCamps {
                         (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.client.endgame.CircuitCampScreen.receive(payload)))
                 .playToClient(Reward.TYPE, Reward.STREAM_CODEC,
                         (payload, context) -> context.enqueueWork(() -> jp.revati.skyabyss.client.endgame.CircuitRewardScreen.receive(payload)))
+                .playToServer(Stop.TYPE, Stop.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer p) {
+                        Circuits.leave(p);
+                    }
+                }))
                 .playToServer(Start.TYPE, Start.STREAM_CODEC, (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer p) {
                         Camp c = byId(payload.camp());

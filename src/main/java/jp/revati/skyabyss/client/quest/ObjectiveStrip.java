@@ -141,10 +141,11 @@ public final class ObjectiveStrip {
         if (town != null) {
             return new Cur(town, new Resolved(jp.revati.skyabyss.client.guide.TownGuideClient.door(), false));
         }
-        // 巡り路 (endgame/Circuits) を歩いているあいだは、残り時間・印・いまの課題と行き先
+        // 巡り路 (endgame/Circuits) を歩いているあいだは、残り時間・印・いまの課題。矢印と距離は出さない (行き先の柱には目的の標。
+        // 2026-11-06 の声「ルートランだけど、左上の矢印はいらない。柱見えない場合もあるので、その場所にミッションのようにアイコン出して」)
         String circuit = jp.revati.skyabyss.endgame.client.CircuitClient.objective();
         if (circuit != null) {
-            return new Cur(circuit, new Resolved(jp.revati.skyabyss.endgame.client.CircuitClient.target(), false));
+            return new Cur(circuit, Resolved.NONE);
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {

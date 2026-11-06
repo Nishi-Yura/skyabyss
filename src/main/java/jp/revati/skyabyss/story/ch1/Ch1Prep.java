@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import jp.revati.skyabyss.guide.PrepQuests;
-import jp.revati.skyabyss.guide.WayfarerNotes;
 import jp.revati.skyabyss.rpg.GrowthRewards;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +64,7 @@ public final class Ch1Prep {
     // 「はじめて見た物」の経験値 (一人一回。章の枠では「既存の小要素」の側に数える小さな分。頁は 0 = 経験値は支度の段が持つ)
     public static final Map<String, Integer> LORE_XP = Map.of(ROAD_SHRINE, 10, SONG_CHAMBER, 10, CLEFT_CAVE_LORE, 0);
 
-    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    // この章から鍛冶場・薬師で誂えられる品 (その章の品。自己テストが確かめる)
     public static final List<String> MADE = List.of("whale_road_helmet", "whale_road_chestplate", "whale_road_leggings", "whale_road_boots",
             "rock_whetstone", "road_hardtack", "moss_salve");
 

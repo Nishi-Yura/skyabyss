@@ -12,7 +12,6 @@ import jp.revati.skyabyss.guide.GuideSetup;
 import jp.revati.skyabyss.guide.PrepQuests;
 import jp.revati.skyabyss.guide.SiteProgressData;
 import jp.revati.skyabyss.guide.SiteSpawner;
-import jp.revati.skyabyss.guide.WayfarerNotes;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.opening.site.Blueprint;
 import jp.revati.skyabyss.opening.site.ChapterSites;
@@ -40,7 +39,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //   cave     洞の湧き台: 二つのグループが同時に入れる・敵が部屋に立つ・鳴り石の順 (誤りで戻る・低い順で格子が開く)・クリアの記録 (経験値・宝・合図)
 //   pit      骨の坑: 碑 2 枚の文・荷の樽・冷えの戸 9 マス・鉄鉱石の筋・水の坑道・出口の梯子・湧き台の立ち位置、
 //            冷えの戸 (鉄なしでは開かない・鉄の兜で開く)、湧き台 (グループの分だけ湧く → 倒しきるとクリアの記録・経験値・粗鉄)
-//   trails   支度の段 3 本: イサナの鯨の話のあとに三本とも出る・覚書が渡る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
+//   trails   支度の段 3 本: イサナの鯨の話のあとに三本とも出る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
 //            折れた剣 (洞の台座の頁 → 職人 → 鉄の剣 + 砥石)・盾と糧 (語り部の話 → 盾 + 固焼き 8)・三本で ch1_ready と鯨追いの印 (一度)
 //   descent  岩鯨の降下の条件 (見たら降りる。場面の間は待つ。日・支度の本数は見ない。人ごと)、見つけてから鎖までの長さ、経験値の枠
 public final class Ch1SitesSelfTest {
@@ -520,7 +519,7 @@ public final class Ch1SitesSelfTest {
             }
             check(QuestManager.quest("ch1/prep_gear") == null && QuestManager.quest("ch1/prep_blade") == null && QuestManager.quest("ch1/prep_pulse") == null,
                     "the old prep quests should be absorbed");
-            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、鉄の跡だけが出る (一本ずつ順に)。覚書も渡る
+            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、鉄の跡だけが出る (一本ずつ順に)
             Quests.poll(p, false);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) == null, "the trail steps appeared before Isana's whale talk");
             jp.revati.skyabyss.quest.StoryContext ctx = jp.revati.skyabyss.quest.StoryContext.of(p);
@@ -530,7 +529,6 @@ public final class Ch1SitesSelfTest {
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) != null, "the iron trail did not start after Isana's whale talk");
             check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) == null, "the blade trail should wait for the iron trail");
             check(QuestManager.quest("ch1/trail_shield") == null, "the shield trail should be gone (2026-11-06)");
-            check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
 
             // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・頁。松明は 0.9.22 から入れない: 置く品は持たせない) → 鉄の防具 4 部位を着る
             check(BonePit.openPack(p, level, null), "the pack did not open the first time");

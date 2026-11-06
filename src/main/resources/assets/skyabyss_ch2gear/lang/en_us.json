@@ -33,12 +33,5 @@
   "message.skyabyss.salt_whetstone.used": "You worked salt into the edge. For twenty minutes it will not dull, even in water.",
   "message.skyabyss.tide_hourglass.high": "Low tide in %s seconds. High tide again in %s seconds.",
   "message.skyabyss.tide_hourglass.low": "The sand runs fast. It is low tide now. High tide in %s seconds.",
-  "message.skyabyss.tide_hourglass.still": "The sand does not move. The tide is still.",
-  "wayfarer_notes.ch2.line.1": "A tidepool clam looks like any closed shell. It opens slowly as you near. Step away before it gapes and it shuts again.",
-  "wayfarer_notes.ch2.line.2": "When ebb-tide sand bulges, a sand burrower waits below. Keep moving and step off the bulge.",
-  "wayfarer_notes.ch2.line.3": "Drift hermits only flee; they never bite. Tap the shell and they cough up finds. Follow the line and it leads somewhere.",
-  "wayfarer_notes.ch2.line.4": "The shore warden draws back its harpoon before it thrusts. When a blue ring spreads on the floor, leave it. That ground will flood.",
-  "wayfarer_notes.ch2.line.5": "The Sunken Salt Vault can be walked into at low tide, or entered by diving with a held breath at high tide. Read the tide with the tide-watching shell and the hourglass before you go.",
-  "wayfarer_notes.ch2.line.6": "A salt-honed edge does not dull in water. On the tide's back, it cuts deeper the wetter the foe.",
-  "wayfarer_notes.ch2.line.7": "Small pearls and salt crystals make travel gear, salt whetstones, pickles and powder. The smithy and the apothecary make them."
+  "message.skyabyss.tide_hourglass.still": "The sand does not move. The tide is still."
 }

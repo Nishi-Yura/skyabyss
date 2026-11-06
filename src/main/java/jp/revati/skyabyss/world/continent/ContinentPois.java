@@ -396,8 +396,9 @@ public final class ContinentPois {
 
     // 地下のダンジョンの入口の坑 (2026-11-06 の声「ダンジョンの入口、閉じてる」): 前の版の部品は、口の前の地面の層が坑の頭 (最初の段と、
     // その先の段の頭の上) を塞いでいた (tools/gen/world/dungeon_entrances.py)。前の版で建った入口は建て直さず、人が近づいて辺りのチャンクが
-    // 読み込まれたとき一度だけ、坑の筋 (部品の x -2〜2、z -3〜-36、y -1〜-26) を今の部品で置き直す。済んだら印 MOUTH_MARK
-    public static final String MOUTH_MARK = "mouth_v2";
+    // 読み込まれたとき一度だけ、坑の筋 (部品の x -2〜2、z -3〜-36、y -1〜-26) を今の部品で置き直す。済んだら印 MOUTH_MARK。
+    // v3 (同じ日の夜の声「登れない。階段一マス無くて」): 最後の段が床より一つ上で止まっていたのに、床と同じ高さの段を足した
+    public static final String MOUTH_MARK = "mouth_v3";
 
     // 置き直した数。辺りのチャンクがまだなければ -1 (何もしない)
     public static int fixMouth(ServerLevel level, Blueprint bp, BlockPos pos, int yaw) {

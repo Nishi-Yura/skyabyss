@@ -30,7 +30,6 @@ import net.minecraft.world.item.ItemStack;
 //   xp          {amount, once}     : 成長の経験値。once の鍵で一人一回だけ (会話をくり返して稼げないように)
 //   give は optional を書ける (まだ登録されていない品なら何もしない)
 //   give / take は token・name・lore を書ける (印の付いた品。QuestItems)。item はタグ ("#minecraft:logs") でもよい (take だけ)
-//   give_notes  {chapter}          : 旅の覚書 (その章の手帳) を渡す。人ごとに一度、なくしたときは持っていなければ渡し直す (guide.WayfarerNotes)
 //   remake_ward {titan}            : その巨神の鼓動守を編み直して渡す (持っていない人だけ、1 日 1 つまで。条件 ward_ok と組。素材は別に take)
 //   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
 //   facility    {open, shop}       : 都の施設の働き (店・預かり所・宿・止まり木・地図・ギルド・修理。facility.FacilityActions)
@@ -38,7 +37,7 @@ import net.minecraft.world.item.ItemStack;
 //   runs        {titan?}           : 背中の踏破の記録 (巨神ごと・人数の部ごとの最速と、今週のギルドの心臓の数) をチャットに出す (facility.guild.TitanRunData)
 public final class Action {
     public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
-            "open_board", "give_notes", "remake_ward", "facility", "town", "lesson", "runs");
+            "open_board", "remake_ward", "facility", "town", "lesson", "runs");
 
     private final String type;
     private final JsonObject json;
@@ -109,7 +108,6 @@ public final class Action {
             case "lore" -> "entry";
             case "give", "take" -> "item";
             case "xp" -> "once";
-            case "give_notes" -> "chapter";
             case "remake_ward" -> "titan";
             case "facility" -> "open";
             case "town", "lesson" -> "act";
@@ -182,7 +180,6 @@ public final class Action {
                     Notice.hint(player, "message.skyabyss.npc.handed", shown.getHoverName(), count);
                 }
             }
-            case "give_notes" -> jp.revati.skyabyss.guide.WayfarerNotes.give(player, integer("chapter", 1), true);
             case "remake_ward" -> {
                 if (jp.revati.skyabyss.guide.HeartbeatWard.remake(player, str("titan"))) {
                     Notice.hint(player, "message.skyabyss.heartbeat_ward.remade");

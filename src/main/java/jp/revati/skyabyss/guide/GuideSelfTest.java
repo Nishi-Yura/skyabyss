@@ -44,7 +44,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-// 章の導きの基盤の自己テスト。段: "prep chain" (備えの頼みの規則・合図・覚書の受け渡し)、"wayfarer notes" (覚書の渡し直し)、
+// 章の導きの基盤の自己テスト。段: "prep chain" (備えの頼みの規則・合図)、"guide texts" (導きの品と合図の文)、
 // "heartbeat ward" (鼓動守)、"site cave" (湧き台・クリアの記録・宝・周回・グループごと・章のひとり歩き)、"xp budget" (経験値の枠)。
 // 場所とクエストは、自己テストの中でだけ作る仮のもの (dev 専用。本番のデータには入らない)
 public final class GuideSelfTest {
@@ -59,7 +59,7 @@ public final class GuideSelfTest {
     public static List<SelfTestRunner.Step> steps() {
         return List.of(
                 SelfTestRunner.Step.once("prep chain", GuideSelfTest::prepChain),
-                SelfTestRunner.Step.once("wayfarer notes", GuideSelfTest::wayfarerNotes),
+                SelfTestRunner.Step.once("guide texts", GuideSelfTest::guideTexts),
                 SelfTestRunner.Step.once("heartbeat ward (load)", GuideSelfTest::heartbeatWardLoad),
                 SelfTestRunner.Step.once("heartbeat ward", 60, GuideSelfTest::heartbeatWard),
                 SelfTestRunner.Step.once("site cave (load)", GuideSelfTest::siteCaveLoad),
@@ -174,12 +174,6 @@ public final class GuideSelfTest {
             QuestLog log = QuestLog.of(a);
             check(f, log.entry("ch2/prep_gear") != null && log.entry("ch2/prep_blade") != null && log.entry("ch2/prep_pulse") != null,
                     "the prep quests did not appear on their own (start_when)");
-            // 覚書: 3 本のどれかを受けたとき、人ごとに一度
-            check(f, WayfarerNotes.has(a, 2) && countNotes(a, 2) == 1, "the notes were not handed over when the prep quests started");
-            Quests.forget(a, "ch2/prep_gear");
-            Quests.start(a, "ch2/prep_gear");
-            check(f, countNotes(a, 2) == 1, "the notes were handed over twice");
-            check(f, !WayfarerNotes.has(b, 2), "another player got the notes");
 
             // 順番はふさがない: 刃 → 糧 のあと身ごしらえ。二本のとき ready ではないが atLeast(2)
             Condition two = Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":2,\"min\":2}"), errors, "t");
@@ -213,15 +207,10 @@ public final class GuideSelfTest {
             Quests.signal(b, "t_blade2");
             check(f, PrepQuests.ready(b, 2), "a different order did not finish the chain");
 
-            // 結果 give_notes: なくした人に渡し直す。持っていれば渡さない
+            // 旅の覚書は 2026-11-06 に消した: 会話の結果 give_notes はもう読めない
             List<String> ae = new ArrayList<>();
-            List<Action> give = Action.parseList(JsonParser.parseString("{\"type\":\"give_notes\",\"chapter\":2}"), ae, "t");
-            check(f, ae.isEmpty() && give.size() == 1, "give_notes did not parse: " + ae);
-            give.get(0).run(StoryContext.of(a));
-            check(f, countNotes(a, 2) == 1, "give_notes gave a second copy to someone who has one");
-            a.getInventory().clearContent();
-            give.get(0).run(StoryContext.of(a));
-            check(f, countNotes(a, 2) == 1, "give_notes did not replace lost notes");
+            Action.parseList(JsonParser.parseString("{\"type\":\"give_notes\",\"chapter\":2}"), ae, "t");
+            check(f, !ae.isEmpty(), "give_notes (the removed notes) still parses");
             // 条件の検査: 章が 1〜4 でなければ警告
             List<String> ce = new ArrayList<>();
             Condition.parse(JsonParser.parseString("{\"type\":\"prep\",\"chapter\":9}"), ce, "t");
@@ -245,50 +234,27 @@ public final class GuideSelfTest {
         report("prep chain", f);
     }
 
-    private static int countNotes(ServerPlayer p, int chapter) {
-        int n = 0;
-        var inv = p.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.is(GuideSetup.WAYFARER_NOTES.get()) && WayfarerNotes.chapterOf(s) == chapter) {
-                n += s.getCount();
-            }
-        }
-        return n;
-    }
-
-    // ================================================================ 旅の覚書
-    static void wayfarerNotes(MinecraftServer server) {
+    // ================================================================ 導きの文
+    static void guideTexts(MinecraftServer server) {
         List<String> f = new ArrayList<>();
-        ServerLevel level = server.overworld();
-        FakePlayer a = player(level, "notes_a");
         try {
-            ItemStack notes = WayfarerNotes.make(2);
-            check(f, WayfarerNotes.chapterOf(notes) == 2 && notes.is(GuideSetup.WAYFARER_NOTES.get()) && WayfarerNotes.chapterOf(WayfarerNotes.make(9)) == 4
-                    && WayfarerNotes.chapterOf(new ItemStack(Items.PAPER)) == 0, "the notes did not keep their chapter");
-            // 渡す: 人ごとに一度。渡し直しは持っていないときだけ
-            check(f, WayfarerNotes.give(a, 2) && !WayfarerNotes.give(a, 2) && countNotes(a, 2) == 1, "give did not hand over once");
-            check(f, !WayfarerNotes.give(a, 2, true) && countNotes(a, 2) == 1, "a reissue duplicated the notes");
-            a.getInventory().clearContent();
-            check(f, WayfarerNotes.give(a, 2, true) && countNotes(a, 2) == 1, "a reissue did not replace lost notes");
             // 文: 日英 (ja_jp.json / en_us.json に、ここで使うキーがある)
             for (String lang : List.of("ja_jp", "en_us")) {
                 java.util.Map<?, ?> texts = langFile(lang);
-                for (String key : List.of("item.skyabyss.wayfarer_notes", "item.skyabyss.wayfarer_notes.named", "item.skyabyss.wayfarer_notes.desc",
-                    "message.skyabyss.notes.given", "message.skyabyss.prep.ready", "wayfarer_notes.empty",
-                    "item.skyabyss.heartbeat_ward_stone_whale", "item.skyabyss.heartbeat_ward_tide_shell", "item.skyabyss.heartbeat_ward_thunder_wing",
-                    "item.skyabyss.heartbeat_ward_ember", "item.skyabyss.heartbeat_ward.desc", "message.skyabyss.heartbeat_ward.used",
+                for (String key : List.of("message.skyabyss.prep.ready",
+                        "item.skyabyss.heartbeat_ward_stone_whale", "item.skyabyss.heartbeat_ward_tide_shell", "item.skyabyss.heartbeat_ward_thunder_wing",
+                        "item.skyabyss.heartbeat_ward_ember", "item.skyabyss.heartbeat_ward.desc", "message.skyabyss.heartbeat_ward.used",
                         "growth.skyabyss.reason.site")) {
                     check(f, texts != null && texts.containsKey(key), lang + " is missing " + key);
                 }
+                // 消した旅の覚書の文は残っていない
+                check(f, texts == null || !texts.containsKey("item.skyabyss.wayfarer_notes"), lang + " still names the removed wayfarer notes");
             }
         } catch (RuntimeException e) {
-            SkyAbyss.LOGGER.error("SELFTEST wayfarer notes crashed", e);
+            SkyAbyss.LOGGER.error("SELFTEST guide texts crashed", e);
             f.add("crashed: " + e);
-        } finally {
-            Growth.get(a).discoveries.clear();
         }
-        report("wayfarer notes", f);
+        report("guide texts", f);
     }
 
     private static java.util.Map<?, ?> langFile(String lang) {

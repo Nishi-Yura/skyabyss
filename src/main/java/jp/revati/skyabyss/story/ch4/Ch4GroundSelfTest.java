@@ -190,7 +190,7 @@ public final class Ch4GroundSelfTest {
                 "quest.skyabyss.ch4.dragger_trail.follow.kiln", "quest.skyabyss.daily_mite_clear.sweep.kill", "quest.skyabyss.main_ember.board.board",
                 "quest.skyabyss.main_key.show.isana", "message.skyabyss.ch4g.smith.return", "message.skyabyss.ch4g.pit.crack", "message.skyabyss.ch4g.ready",
                 "entity.skyabyss.elder_thrall", "entity.skyabyss.cinder_mite", "entity.skyabyss.ash_husk", "entity.skyabyss.ash_dragger",
-                "item.skyabyss.soot_iron", "item.skyabyss.ash_ward_thread.desc", "item.skyabyss.ash_cooler.desc", "wayfarer_notes.ch4.line.1",
+                "item.skyabyss.soot_iron", "item.skyabyss.ash_ward_thread.desc", "item.skyabyss.ash_cooler.desc",
                 "dialogue.skyabyss.storyteller.ms_key_return", "dialogue.skyabyss.whale_chaser.ms_c_key3", "dialogue.skyabyss.artisan.ch4a_ward_offer",
                 "advancement.skyabyss.dead_forge_pit.title", "advancement.skyabyss.ember_trail.description", "subtitles.skyabyss_ch4.elder_thrall_crack"));
         for (String id : Ch4Ground.LORE) {
@@ -325,7 +325,7 @@ public final class Ch4GroundSelfTest {
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, ItemStack.EMPTY);
         check(f, Ch4Gear.ASH_BAKED_BREAD.get().components().get(net.minecraft.core.component.DataComponents.FOOD) != null, "the ash-baked bread is not food");
-        // 誂え (旅の覚書の四章の品は、四章から鍛冶場・薬師で)
+        // 誂え (四章の品は、四章から鍛冶場・薬師で)
         check(f, Ch4Setup.MADE.stream().allMatch(r -> {
                     jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
                     return e != null && e.good().chapter() == 4;

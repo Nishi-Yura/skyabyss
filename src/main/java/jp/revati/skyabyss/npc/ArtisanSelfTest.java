@@ -19,7 +19,6 @@ import jp.revati.skyabyss.SelfTestRunner;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.guide.GuideSetup;
 import jp.revati.skyabyss.guide.HeartbeatWard;
-import jp.revati.skyabyss.guide.WayfarerNotes;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.quest.Action;
 import jp.revati.skyabyss.quest.Condition;
@@ -42,7 +41,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 // 旅の職人の自己テスト。段: "artisan"。
 //  - 絵と骨: メッシュ・骨だけの geo・アニメ・章ごとの 4 つの絵・対話の顔・防具の絵が、そろっていて、骨の名前とピボットが合う (root の yaw 180 度は語り部と同じ)
 //  - 立たせる: 章ごとの立つ所の表 (ArtisanSpawner.Spot) が引き、いなければ立たせ、二人目は立たせない。装い (variant) を保存する
-//  - 会話: 入口の順 (初対面・頼み 3 本・乗る前の一言)、選択肢の条件 (好感度・覚書・鼓動守の編み直し)、結果 (作り方・鼓動守)、語り部は一言だけ残る
+//  - 会話: 入口の順 (初対面・頼み 3 本・乗る前の一言)、選択肢の条件 (好感度・鼓動守の編み直し)、結果 (作り方・鼓動守)、語り部は一言だけ残る
 //  - 頼みの依頼主は職人、日英の文
 public final class ArtisanSelfTest {
     private static final String ROLE = NpcSetup.ARTISAN_ID;
@@ -175,10 +174,9 @@ public final class ArtisanSelfTest {
             check(f, json(a + "models/item/whale_road_" + piece + ".json", f).has("textures"), "the " + piece + " item model is missing");
         }
         check(f, armorTris >= 600 && armorTris <= 1400, "the whale road armor has " + armorTris + " triangles (want 600 to 1400)"); // 418 → 600: watertight pass (docs/design/15)、926: 一品一案の作り直し (2026-10-26)
-        // 旅の覚書・鼓動守の絵 (案 A に差し替え済み。仮の絵ではない)
-        check(f, java.util.Arrays.equals(pngSize(a + "textures/item/wayfarer_notes.png", f), new int[] {32, 32}), "the notes icon is not 32x32");
+        // 鼓動守の絵 (案 A に差し替え済み。仮の絵ではない)
         check(f, java.util.Arrays.equals(pngSize(a + "textures/item/heartbeat_ward.png", f), new int[] {32, 32}), "the heartbeat ward icon is not 32x32");
-        check(f, !placeholderMark(a + "textures/item/wayfarer_notes.png") && !placeholderMark(a + "textures/item/heartbeat_ward.png"), "a placeholder mark (magenta, top right) is still on the notes / ward icon");
+        check(f, !placeholderMark(a + "textures/item/heartbeat_ward.png"), "a placeholder mark (magenta, top right) is still on the ward icon");
     }
 
     private static String pivot(JsonObject bone) {
@@ -326,10 +324,10 @@ public final class ArtisanSelfTest {
         check(f, shown(d, "a_menu", c).equals(Set.of("hammer", "whet", "hands", "bye")), "affinity 60 should open the hands talk: " + shown(d, "a_menu", c));
         Affinity.set(p, ROLE, 0);
 
-        // 支度の段「折れた剣」: 受けると作り方と覚書の選択肢が出る。洞の段のうちは一度だけ「折れた剣を見た」
+        // 支度の段「折れた剣」: 受けると作り方の選択肢が出る (旅の覚書の選択肢は 2026-11-06 に消した)。洞の段のうちは一度だけ「折れた剣を見た」
         Quests.start(p, Ch1Prep.Q_BLADE);
         Set<String> menu = shown(d, "a_menu", c);
-        check(f, menu.contains("teach") && menu.contains("notes"), "starting trail_blade should open the teach / notes options: " + menu);
+        check(f, menu.contains("teach") && !menu.contains("notes"), "starting trail_blade should open the teach option (and no notes): " + menu);
         // 最初の段 (イサナに言われて刃のことを聞きに来た): 初めて会う人は名乗りから続けて、会った人はすぐ「折れた剣を見た」
         check(f, entry(d, c).equals("ch1t_blade_tell") || entry(d, c).equals("ch1a_first_blade"), "the hear stage should open ch1t_blade_tell, got " + entry(d, c));
         d.nodes().get("ch1t_blade_tell").actions().forEach(a -> a.run(c));
@@ -391,12 +389,6 @@ public final class ArtisanSelfTest {
         check(f, !HeartbeatWard.remakeable(p, "stone_whale") && !shown(d, "a_menu", c).contains("ward"), "a second ward was woven on the same day");
         Growth.get(p).discoveries.removeIf(k -> k.startsWith("ward_remake:"));
         check(f, HeartbeatWard.remakeable(p, "stone_whale") && !HeartbeatWard.remakeable(p, "no_such_titan"), "the daily ward limit did not reset / accepted an unknown titan");
-
-        // 覚書の渡し直し (結果)
-        p.getInventory().clearContent();
-        check(f, !WayfarerNotes.has(p, 1), "the player still has the notes");
-        d.nodes().get("ch1a_notes").actions().forEach(a -> a.run(c));
-        check(f, WayfarerNotes.has(p, 1), "the artisan did not hand the notes back");
 
         // 折れた剣の依頼主は職人。語り部には職人を指す一言が残る
         QuestDef bladeDef = QuestManager.quest(Ch1Prep.Q_BLADE);

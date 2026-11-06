@@ -39,7 +39,6 @@ import net.minecraft.server.level.ServerPlayer;
 //            現れない (物語の運び。story.ch1.Ch1Trails.callReady・titan.TitanEvents)。見たあとの降下は今までどおり (Ch1Descent)。
 //            三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
 //            章ごとの仕上げ (一章の記念品「鯨追いの印」) は onReady で足す (合図のあと、人ごとに一度)
-//   覚書     その章の 3 本のどれかを受けたとき、その章の旅の覚書 (WayfarerNotes) を人ごとに一度渡す。
 //   マルチ   ready / atLeast は人ごと。「グループの誰かが満たせば」は groupAtLeast (オンラインの仲間まで)。
 public final class PrepQuests {
     public static final List<String> KINDS = List.of("gear", "blade", "pulse");
@@ -167,10 +166,7 @@ public final class PrepQuests {
 
     // ---------------------------------------------------------------- クエストからの呼び出し (Quests.start / finish)
     public static void onStarted(ServerPlayer player, QuestDef def) {
-        int chapter = chapterOf(def.id());
-        if (chapter > 0) {
-            WayfarerNotes.give(player, chapter);
-        }
+        // 受けたときに足すものは今はない (呼び口だけ残す)
     }
 
     public static void onFinished(ServerPlayer player, QuestDef def) {
@@ -180,7 +176,7 @@ public final class PrepQuests {
         }
         // 合図は人ごとに一度 (経験値と同じ鍵の流儀。やり直しで二度鳴らさない)
         if (Growth.discover(player, "prep_ready:" + chapter)) {
-            Notice.alert(player, "message.skyabyss.prep.ready", WayfarerNotes.chapterName(chapter));
+            Notice.alert(player, "message.skyabyss.prep.ready", chapterName(chapter));
             Quests.signal(player, readySignal(chapter));
             Consumer<ServerPlayer> extra = ON_READY.get(chapter);
             if (extra != null) {
@@ -220,5 +216,11 @@ public final class PrepQuests {
                 errors.add(where + ": must not repeat or go on the board");
             }
         }
+    }
+
+    // 章の名前 (目的の帯の章の札と同じ)
+    public static net.minecraft.network.chat.Component chapterName(int chapter) {
+        jp.revati.skyabyss.story.Chapters[] all = jp.revati.skyabyss.story.Chapters.values();
+        return net.minecraft.network.chat.Component.translatable(all[Math.max(0, Math.min(all.length - 1, chapter))].tabKey());
     }
 }

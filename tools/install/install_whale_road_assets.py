@@ -8,7 +8,6 @@
     assets/skyabyss/textures/lowpoly/armor/whale_road/<部位>.png と _glowmask.png (琥珀の留め金)
     assets/skyabyss/textures/item/whale_road_<部位>.png + models/item/whale_road_<部位>.json   インベントリのアイコン (icons/a_<部位>_32.png)
     骨だけの geo は共通の geo/armor/lowpoly_armor.geo.json (同じ 8 本の骨。tools/install/install_armor_lowpoly.py)
-  旅の覚書 A (icons/notebook_a_32.png) -> textures/item/wayfarer_notes.png
   鼓動守 A (icons/pulse_ward_a_32.png) -> textures/item/heartbeat_ward.png (4 巨神共通。ラフは 1 枚だけ。巨神ごとに分けるなら models/item/heartbeat_ward_<titan>.json)
 仮の絵 (右上のマゼンタの印) を置き換える。何度流しても同じ。
 """
@@ -71,7 +70,6 @@ def main():
         shutil.copyfile(os.path.join(SRC, "armor_ch1", "icons", "a_%s_32.png" % p), icon)
         write_json(os.path.join(ASSETS, "models", "item", "whale_road_%s.json" % p),
                    {"parent": "minecraft:item/generated", "textures": {"layer0": "skyabyss:item/whale_road_" + p}})
-    shutil.copyfile(os.path.join(SRC, "icons", "notebook_a_32.png"), os.path.join(ASSETS, "textures", "item", "wayfarer_notes.png"))
     shutil.copyfile(os.path.join(SRC, "icons", "pulse_ward_a_32.png"), os.path.join(ASSETS, "textures", "item", "heartbeat_ward.png"))
     print("whale road armor: 4 meshes (%d triangles), atlases, glow masks, 4 icons; notebook A and heartbeat ward A icons" % tris)
 

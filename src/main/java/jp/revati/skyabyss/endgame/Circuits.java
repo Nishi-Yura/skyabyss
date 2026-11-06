@@ -213,6 +213,7 @@ public final class Circuits {
             BY_PLAYER.put(m.getUUID(), run);
             Notice.place(m, Component.translatable("circuit.skyabyss.title"), Component.translatable("message.skyabyss.circuit.started"));
             m.playNotifySound(SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.8f, 1.2f);
+            tellRules(m);
         }
         ACTIVE.add(run);
         nextTask(level, run);
@@ -230,11 +231,75 @@ public final class Circuits {
                 p = run.fakes.get(id);
             }
             if (p != null) {
-                reward(p, run);
+                if (p.isDeadOrDying() && !(p instanceof FakePlayer)) {
+                    // 倒れている人 (起き上がる前) は、起き上がったときに報いを渡す (持ち物が落ちる間に渡さない)
+                    PENDING_REWARD.put(id, run);
+                } else {
+                    reward(p, run);
+                }
                 clearView(p);
             }
         }
         run.members.clear();
+    }
+
+    // 倒れて終わった巡り路の、起き上がるのを待っている報い
+    static final Map<UUID, CircuitRun> PENDING_REWARD = new HashMap<>();
+    // 倒れて、次の見回りで終える巡り路
+    static final java.util.Set<CircuitRun> ENDING = new java.util.LinkedHashSet<>();
+
+    // 決まり (始めたとき、歩く人ごとに一度): 一度倒れたら終わり・いつでもやめられる (押せる一行)
+    static void tellRules(ServerPlayer m) {
+        if (m instanceof FakePlayer || m.connection == null) {
+            return;
+        }
+        m.sendSystemMessage(Component.translatable("message.skyabyss.circuit.rules").withStyle(ChatFormatting.GRAY));
+        Component stop = Component.translatable("message.skyabyss.circuit.stop_button").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withUnderlined(true)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/skyabyss_circuit leave"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("message.skyabyss.circuit.stop_hover"))));
+        m.sendSystemMessage(Component.translatable("message.skyabyss.circuit.stop_line", stop).withStyle(ChatFormatting.GRAY));
+    }
+
+    // 歩いている人が倒れた (起こされずに死んだ): その巡り路はみな終わり (2026-11-06 の声「ルートランは一回死んだら終了」)。それまでの印の報いは渡す
+    @SubscribeEvent
+    static void onPlayerDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.level().isClientSide()) {
+            return;
+        }
+        CircuitRun run = BY_PLAYER.get(p.getUUID());
+        if (run == null || !ACTIVE.contains(run)) {
+            return;
+        }
+        for (UUID id : run.members) {
+            ServerPlayer m = p.server.getPlayerList().getPlayer(id);
+            if (m != null) {
+                Notice.alert(m, "message.skyabyss.circuit.died", p.getDisplayName());
+            }
+        }
+        ENDING.add(run);
+    }
+
+    // 倒れた人のいた巡り路を終える (見回りの頭で)
+    static void endFallen(MinecraftServer server) {
+        if (ENDING.isEmpty()) {
+            return;
+        }
+        for (CircuitRun run : List.copyOf(ENDING)) {
+            if (ACTIVE.contains(run)) {
+                finish(server, run);
+            }
+        }
+        ENDING.clear();
+    }
+
+    @SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p) {
+            CircuitRun run = PENDING_REWARD.remove(p.getUUID());
+            if (run != null) {
+                reward(p, run);
+            }
+        }
     }
 
     // 一人だけ抜ける (残りの人は続ける。誰もいなくなれば終わり)。抜けた人にも、それまでの印の報いを渡す
@@ -283,14 +348,22 @@ public final class Circuits {
             }
         }
         Notice.gain(p, "message.skyabyss.circuit.reward", coins, got.size());
+        int pulledCoins = 0;
+        for (ItemStack s : got) {
+            if (s.is(jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get())) {
+                pulledCoins += s.getCount();
+            }
+        }
+        LAST_COINS.put(p.getUUID(), coins + pulledCoins);
         if (!(p instanceof FakePlayer) && p.connection != null) {
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new CircuitCamps.Reward(camp == null ? "" : camp.id(), run.marks, coins, got));
         }
         LAST_PULLS.put(p.getUUID(), got.size());
     }
 
-    // 自己テスト用: 最後の報いで引いた数
+    // 自己テスト用: 最後の報いで引いた数と、受け取った鐘銭 (印の分 + 引いた鐘銭)
     static final java.util.Map<UUID, Integer> LAST_PULLS = new java.util.HashMap<>();
+    static final java.util.Map<UUID, Integer> LAST_COINS = new java.util.HashMap<>();
 
     static void giveBox(ServerPlayer p, @Nullable BoxKind kind) {
         var item = kind == null ? null : LootBoxSetup.item(kind);
@@ -541,6 +614,7 @@ public final class Circuits {
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
+        endFallen(server);
         if (ACTIVE.isEmpty() || server.getTickCount() % 10 != 0) {
             return;
         }
@@ -915,14 +989,16 @@ public final class Circuits {
             // 柱二本 (色は柱の色)。帯の行き先は近い方
             CircuitRun.Offer a = run.offers.get(0);
             CircuitRun.Offer b = run.offers.get(1);
-            BlockPos near = flat(a.spot(), p.getX(), p.getZ()) <= flat(b.spot(), p.getX(), p.getZ()) ? a.spot() : b.spot();
-            PacketDistributor.sendToPlayer(p, new CircuitPayload(true, seconds, run.marks, taskLine(run), true, near));
+            boolean aNear = flat(a.spot(), p.getX(), p.getZ()) <= flat(b.spot(), p.getX(), p.getZ());
+            CircuitRun.Offer n = aNear ? a : b;
+            CircuitRun.Offer o = aNear ? b : a;
+            PacketDistributor.sendToPlayer(p, new CircuitPayload(true, seconds, run.marks, taskLine(run), true, n.spot(), n.bonus().rgb, true, o.spot(), o.bonus().rgb));
             beam(p, "circuit", a.spot(), a.bonus().rgb, 60);
             beam(p, "circuit2", b.spot(), b.bonus().rgb, 60);
             return;
         }
         BlockPos t = target(run);
-        PacketDistributor.sendToPlayer(p, new CircuitPayload(true, seconds, run.marks, taskLine(run), true, t));
+        PacketDistributor.sendToPlayer(p, new CircuitPayload(true, seconds, run.marks, taskLine(run), true, t, run.bonus.rgb, false, BlockPos.ZERO, 0));
         beam(p, "circuit", t, run.bonus.rgb, 60);
         beam(p, "circuit2", t, run.bonus.rgb, 1);
     }

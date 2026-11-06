@@ -520,7 +520,7 @@ public final class RecordBuilder {
         }
         rows.add(header(titan, Progression.titanName(titan)));
         rows.add(readinessRow(p, titan));
-        // この章の進み (A9): 備えの頼み・寄り道・旅の覚書。まだ現れない巨神 (page == null) の章も、頼みと覚書は見える
+        // この章の進み (A9): 備えの頼み・寄り道。まだ現れない巨神 (page == null) の章も、頼みは見える
         rows.addAll(ChapterChecklist.rows(p, titan));
         if (page == null) {
             // 順番は来たが、この世界にまだ現れない (ベータでは本体がない)

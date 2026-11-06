@@ -66,7 +66,7 @@
 
 | 部分 | 作り |
 | --- | --- |
-| 入口 | 大陸の見どころ `dungeon_<id>`（`continent/pois.json` の末尾）。部品 `opening/poi_dungeon_<id>.json`（`tools/gen/world/dungeon_entrances.py`）。地上は岩の口の前だけならし、階段の坑で 24 段下りた本物の地下に入口の間（口の部品の地面の層を先に書き、坑の段と頭の上の空きはそのあとに書き直す。前の版は地面の層が坑の頭を塞いでいた。前の版で建った入口は、近づいたとき一度だけ坑の筋を置き直す `ContinentPois.fixMouth`、印 `mouth_v2`。口から帰り着く所まで歩けるかは `tools/audit/check_dungeon_mouths.py`）（約 34×28、天井 12）。印 gate（層の門の天然磁石）・back（帰り着く所）・rest（焚き火の休み場）・rumor（噂の主）・tablet（名前と目安 Lv の碑） |
+| 入口 | 大陸の見どころ `dungeon_<id>`（`continent/pois.json` の末尾）。部品 `opening/poi_dungeon_<id>.json`（`tools/gen/world/dungeon_entrances.py`）。地上は岩の口の前だけならし、階段の坑で 25 段下りた本物の地下に入口の間（口の部品の地面の層を先に書き、坑の段と頭の上の空きはそのあとに書き直す。最後の段は入口の間の床と同じ高さ。前の版で建った入口は、近づいたとき一度だけ坑の筋を置き直す `ContinentPois.fixMouth`、印 `mouth_v3`。口から帰り着く所まで歩いて下り、また登って戻れるか（1 ブロックまで跳んで上がれる）は `tools/audit/check_dungeon_mouths.py`）（約 34×28、天井 12）。印 gate（層の門の天然磁石）・back（帰り着く所）・rest（焚き火の休み場）・rumor（噂の主）・tablet（名前と目安 Lv の碑） |
 | 写し | 次元 `skyabyss:dungeon`（暗い虚空・天井あり）。ダンジョンごとに区画 12、区画の原点 x = (番号 × 12 + 区画) × 256、層 k は z = k × 320。区画はそのダンジョンだけが使い、二度目からは扉・宝箱・仕掛けを戻すだけ（`TowerTerrain.of("dungeon", …)` の流し込み） |
 | 層 | `data/skyabyss/dungeon/<id>_<1｜2｜boss>.json`（`tools/gen/world/build_dungeons.py`）。壁は空きのまわり 3 マスの殻だけ書く。一層目は入るときに流し、二層目と主の間は組が上にいるあいだに少しずつ流す |
 | 入る | 層の門の天然磁石を右クリック。近く（16）の同じ組の人もいっしょに入る。組の写しがあれば、あとから来た人はその戻り石の層へ加わる。Lv の決まりはない。層の門・帰り石の上には、何が起こるかの名札が浮かぶ（`world/LodestoneLabels`。40 の 2 章） |

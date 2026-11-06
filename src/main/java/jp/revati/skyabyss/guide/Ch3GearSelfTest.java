@@ -47,7 +47,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //  - 峰越えの旅装 4 部位の値 (防御 19・強靭 11・アンコモン・鍛えない・必要 Lv 19・修理は銅線) と GearCurve.TRAVEL[2]、備えの身の灯
 //  - 感電の傷: 雷と雷を使う敵の傷だけ。旅装の部位 × 6.25%・避雷の油で半分 (着て雷を受けると実際に減る)
 //  - 雷の砥石 (+2.2・20 分・岩/塩の砥石と重ねない・備えの刃は大きい方だけ)、団子 (吸収 II 60 秒・落下速度低下 20 秒)、油 (避雷 90 秒・糧の点 2)
-//  - 手段の名前が雷翼のときだけ三章の品、レシピ 9 本 (旅装の素材の合計は 焦げ羽 12・帯電綿 6・銅線 6・潮殻の殻片 4)・鍵・覚書 (三章) が解く
+//  - 手段の名前が雷翼のときだけ三章の品、レシピ 9 本 (旅装の素材の合計は 焦げ羽 12・帯電綿 6・銅線 6・潮殻の殻片 4)・鍵
 //  - 風読みの小旗 (消えない・30 秒の待ち・光の筋が立つ・方位の文)、鼓動守 (雷翼) の編み方の表と編み直し、一式の合図
 public final class Ch3GearSelfTest {
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -325,9 +325,6 @@ public final class Ch3GearSelfTest {
             keys.add("item.skyabyss.peak_crossing_" + p);
             keys.add("item.skyabyss.peak_crossing_" + p + ".story");
         }
-        for (int i = 1; i <= 7; i++) {
-            keys.add(WayfarerNotes.lineKey(3, i));
-        }
         for (String lang : List.of("ja_jp", "en_us")) {
             Map<String, String> t = lang("/assets/skyabyss_ch3gear/lang/" + lang + ".json");
             for (String k : keys) {
@@ -376,7 +373,7 @@ public final class Ch3GearSelfTest {
         check(f, total.equals(want), "the " + what + " costs " + total + " (want " + want + ")");
     }
 
-    // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
+    // その章の品は、みなその章から誂えられる (並ぶ品も可)
     private static void madeChapter(List<String> f, int chapter, List<String> items) {
         for (String r : items) {
             jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);

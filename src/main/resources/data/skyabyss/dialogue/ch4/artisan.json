@@ -101,10 +101,6 @@
           "flag": "met"
         },
         {
-          "type": "give_notes",
-          "chapter": 4
-        },
-        {
           "type": "affinity",
           "amount": 1
         }

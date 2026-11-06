@@ -69,7 +69,9 @@ def entrance(dungeon, theme, seed, mouth, hall_decor, stair_block="stone_brick",
     steps = []
     # 踊り場 (途中の平らな所)。段ではなく平らな床 (段の一つ下の高さの床の上を歩く)
     landing = set()
-    while y > HALL_FLOOR:
+    # 最後の段は入口の間の床と同じ高さ (足もと HALL_FLOOR) に置く。前は一つ上で止まっていて、床から最後の段まで 1.5 あり、
+    # 跳んでも登れなかった (2026-11-06 の声「登れない。階段一マス無くて」)
+    while y >= HALL_FLOOR:
         steps.append((z, y))
         if y == -13:
             for _ in range(3):
