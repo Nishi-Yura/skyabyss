@@ -154,6 +154,30 @@ public final class Ch2GroundSelfTest {
                     "the vault " + t[0] + " does not carry " + t[1] + " (at " + at + ")");
         }
         check(LoreManager.catalog().entry(Ch2Ground.LORE_VAULT) != null, "the vault carving lore is missing");
+        // 坑口: 敷居があり、階段の通りが部品どおり。埋めて水を張っても手当てで戻る (2026-11-07「入口ふさがってる」)
+        for (int x = -1; x <= 1; x++) {
+            check(level.getBlockState(v.at(x, 0, -1)).is(Blocks.STONE_BRICK_SLAB), "the vault mouth has no sill at x " + x);
+        }
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                level.setBlock(v.at(x, 0, z), (z + x) % 2 == 0 ? Blocks.SAND.defaultBlockState() : Blocks.GRAVEL.defaultBlockState(), 2 | 16);
+                level.setBlock(v.at(x, -1, z + 1), Blocks.WATER.defaultBlockState(), 2 | 16);
+            }
+        }
+        level.setBlock(v.at(0, 0, -1), Blocks.WATER.defaultBlockState(), 2 | 16);
+        level.setBlock(v.at(0, -11, 25), Blocks.WATER.defaultBlockState(), 2 | 16);
+        int mended = SaltVault.clearMouth(level, v);
+        boolean open = true;
+        for (int z = 0; z <= 3; z++) {
+            for (int x = -1; x <= 1; x++) {
+                open &= level.getBlockState(v.at(x, 0, z)).isAir() || z == 3;
+                open &= level.getBlockState(v.at(x, -1, z + 1)).isAir();
+            }
+        }
+        check(open && mended >= 20, "the buried vault mouth was not cleared (" + mended + " cells)");
+        check(level.getBlockState(v.at(0, 0, -1)).is(Blocks.STONE_BRICK_SLAB), "the sill did not come back over the water");
+        check(level.getBlockState(v.at(0, -11, 25)).isAir(), "water in the entrance hall was not drained");
+        check(SaltVault.clearMouth(level, v) == 0, "mending a clear mouth should change nothing");
         int door = 0;
         for (int k = 0; k < SaltVault.DOOR_CELLS; k++) {
             if (level.getBlockState(v.door(k)).is(Blocks.SMOOTH_QUARTZ)) {

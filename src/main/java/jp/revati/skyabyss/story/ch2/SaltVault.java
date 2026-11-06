@@ -217,12 +217,132 @@ public final class SaltVault {
         rememberYaw(job);
         Vault v = new Vault(job.entry.pos, job.entry.yaw);
         decorate(job.level, v);
+        job.entry.extra(MOUTH_FIX, BlockPos.ZERO);
         // 塩の道の標の場所 (跡地の中心から蔵へ向かう線)。建てるのはチャンクが読み込まれてから (tick)
         ChapterGrounds.center(job.level.getServer(), Chapters.TIDE).ifPresent(c -> planRoad(job.entry, c, v.mark("stand")));
     }
 
+    // ---------------------------------------------------------------- 坑口の手当て
+    // 2026-11-07 の声「入口ふさがってる」: 浜の水ぎわに建った蔵で、建てる途中に浜の水が階段へ流れ込み、
+    // 水ぎわの埋め (SiteJob.sealShoreWater) で階段の上が砂・砂利・砂岩で埋まり、水も階段へ流れ落ちていた。
+    // 遊んだ世界では、坑口のまわりの壁と碑も浜の砂・砂利・水に替わり、流れ込んだ水が地下の部屋の床と開いた塩の戸に溜まっていた。
+    // 建て終わり (decorate) と、前の版で建った蔵には一度だけ (印 MOUTH_FIX。見回りでチャンクが読み込まれていれば。碑の文も decorate で刻み直す):
+    //   階段の通り (部品の x -1..1、z 0..12) と地表の部分 (部品の y >= -1。出口の縦穴と、大陸の道にかかる所は除く) を部品どおりに置き直す /
+    //   地下で、部品にない水を抜く (部品で空気の所と開いた塩の戸は空気、ほかは部品の物に。潮の喉は除く) /
+    //   坑口の前 (z = -1 の 3 マス) に石レンガの半ブロックの敷居を置き、浜の水が入らないようにする (半ブロックなので歩いて越せる)
+    public static final String MOUTH_FIX = "mouth_fix1";
+    static final int CORRIDOR_END = 12;
+
+    static boolean corridor(int x, int z) {
+        return Math.abs(x) <= 1 && z >= 0 && z <= CORRIDOR_END;
+    }
+
+    // 置き直したセルの数を返す (自己テスト)
+    public static int clearMouth(ServerLevel level, Vault v) {
+        Blueprint bp = Blueprint.get(SITE);
+        java.util.Set<Long> keep = new java.util.HashSet<>();
+        for (int[] c : sumpCells()) {
+            keep.add(BlockPos.asLong(c[0], c[1], c[2]));
+        }
+        java.util.Set<Long> doors = new java.util.HashSet<>();
+        for (int k = 0; k < DOOR_CELLS; k++) {
+            int[] m = bp.marks.get("door" + k);
+            doors.add(BlockPos.asLong(m[0], m[1], m[2]));
+        }
+        int[] exit = bp.marks.get("exit");
+        int fixed = 0;
+        for (Blueprint.Cell c : bp.cells) {
+            BlockPos at = v.at(c.x(), c.y(), c.z());
+            BlockState want = Blueprint.transform(c.state(), v.rot(), v.mirror());
+            BlockState now = level.getBlockState(at);
+            if (now.equals(want) || keep.contains(BlockPos.asLong(c.x(), c.y(), c.z()))) {
+                continue;
+            }
+            BlockState put = null;
+            if (corridor(c.x(), c.z())) {
+                put = want;
+            } else if (c.y() >= -1) {
+                boolean exitColumn = exit != null && c.x() == exit[0] && c.z() == exit[2];
+                boolean onRoad = !want.isAir() && !want.hasBlockEntity() && c.y() >= 0
+                        && jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(at.getX(), at.getZ()) != null;
+                if (!exitColumn && !onRoad) {
+                    put = want;
+                }
+            } else if (now.is(Blocks.WATER) && !want.is(Blocks.WATER)) {
+                put = want.isAir() || doors.contains(BlockPos.asLong(c.x(), c.y(), c.z())) ? Blocks.AIR.defaultBlockState() : want;
+            }
+            if (put != null && !now.equals(put)) {
+                level.setBlock(at, put, 2 | 16);
+                fixed++;
+            }
+        }
+        BlockState sill = Blocks.STONE_BRICK_SLAB.defaultBlockState();
+        for (int x = -1; x <= 1; x++) {
+            BlockPos at = v.at(x, 0, -1);
+            BlockState s = level.getBlockState(at);
+            if (s.isAir() || s.canBeReplaced() || !s.getFluidState().isEmpty()) {
+                level.setBlock(at, sill, 2 | 16);
+                fixed++;
+            }
+        }
+        return fixed;
+    }
+
+    // 部品の広がり (x, z の最小・最大)。前の版の蔵を手当てする前に、チャンクが読み込まれているか見る
+    private static int[] bounds;
+
+    static synchronized int[] bounds() {
+        if (bounds == null) {
+            int[] b = {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+            for (Blueprint.Cell c : Blueprint.get(SITE).cells) {
+                b[0] = Math.min(b[0], c.x());
+                b[1] = Math.min(b[1], c.z());
+                b[2] = Math.max(b[2], c.x());
+                b[3] = Math.max(b[3], c.z());
+            }
+            bounds = b;
+        }
+        return bounds;
+    }
+
+    static boolean loaded(ServerLevel level, Vault v) {
+        int[] b = bounds();
+        for (int x : new int[] {b[0] - 1, b[2] + 1}) {
+            for (int z : new int[] {b[1] - 1, b[3] + 1}) {
+                BlockPos at = v.at(x, 0, z);
+                if (!level.hasChunk(at.getX() >> 4, at.getZ() >> 4)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // 前の版で建った蔵の坑口を一度だけ手当てする
+    static void mendOld(MinecraftServer server, ServerLevel level) {
+        boolean dirty = false;
+        for (SiteData.Entry e : entries(server)) {
+            if (e.extra(MOUTH_FIX) != null) {
+                continue;
+            }
+            Vault v = new Vault(e.pos, e.yaw);
+            if (!loaded(level, v)) {
+                continue;
+            }
+            int n = clearMouth(level, v);
+            decorate(level, v);
+            e.extra(MOUTH_FIX, BlockPos.ZERO);
+            dirty = true;
+            SkyAbyss.LOGGER.info("Salt vault at {}: mouth mended ({} cells)", e.pos, n);
+        }
+        if (dirty) {
+            SiteData.get(level).setDirty();
+        }
+    }
+
     // 碑の文を刻み、出口の縦穴の口を地表まで延ばす (開発コマンドの蔵にも)
     public static void decorate(ServerLevel level, Vault v) {
+        clearMouth(level, v);
         BlockPos tablet = v.mark("tablet");
         if (tablet != null) {
             Tablets.write(level, tablet, SIGN);
@@ -614,6 +734,7 @@ public final class SaltVault {
             }
         }
         if (t % 40 == 7) {
+            mendOld(server, level);
             for (Vault v : vaults(server)) {
                 if (!level.isLoaded(v.pos()) || !anyNear(players, v.pos(), ACTIVE)) {
                     continue;
