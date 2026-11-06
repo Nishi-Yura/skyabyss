@@ -904,6 +904,17 @@ public final class ShotRunner {
                 mc.setScreen(screen);
                 return true;
             }
+            case "shoptab" -> {
+                // shoptab buy|sell|back : 開いている店の画面のつまみを替える (撮影用)
+                if (mc.screen instanceof jp.revati.skyabyss.client.facility.ShopScreen shop) {
+                    switch (line.arg(0)) {
+                        case "back" -> shop.showBack();
+                        case "sell" -> shop.showSell(true);
+                        default -> shop.showSell(false);
+                    }
+                }
+                return true;
+            }
             case "mapstyle" -> {
                 // mapstyle slate|parchment|ink : 旅の地図の見た目 (設定 mapStyle) を替える。開いている地図にもすぐ効く
                 jp.revati.skyabyss.Config.MapStyle st = jp.revati.skyabyss.Config.MapStyle.valueOf(line.arg(0).toUpperCase(Locale.ROOT));
