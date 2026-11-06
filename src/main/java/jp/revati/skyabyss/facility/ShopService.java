@@ -115,7 +115,7 @@ public final class ShopService {
             ShopDef.Buy b = shop.buys().get(i);
             sells.add(new FacilityNetwork.SellView(i, new ItemStack(b.item(), b.per()), b.coins(), sellableCount(player, b.item())));
         }
-        return new FacilityNetwork.ShopView(shop.id(), shop.titleKey(), Coins.count(player), goods, sells);
+        return new FacilityNetwork.ShopView(shop.id(), shop.titleKey(), Coins.count(player), goods, sells).withSold(SoldLog.views(player));
     }
 
     // 今の職で使える品か (2026-11-05 の声「戦士しか使えない盾を買わせるのはどうなのか」)。職の品はその職の人にだけ並べ、売らない。
@@ -243,8 +243,38 @@ public final class ShopService {
         }
         takeSellable(player, b.item(), lots * b.per());
         Coins.give(player, lots * b.coins());
+        SoldLog.add(player, new ItemStack(b.item(), lots * b.per()), lots * b.coins());
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.5f, 1.1f);
         return Result.OK;
+    }
+
+    // ---------------------------------------------------------------- 買い戻す (SoldLog)
+    public static SoldLog.Result buyBack(ServerPlayer player, String shopId, int index) {
+        Session s = SESSIONS.get(player.getUUID());
+        if (s == null || !s.shop().equals(shopId)) {
+            return SoldLog.Result.NO_ENTRY;
+        }
+        if (!reach(player, s)) {
+            close(player);
+            return SoldLog.Result.NO_ENTRY;
+        }
+        SoldLog.Result r = SoldLog.buyBack(player, index);
+        switch (r) {
+            case OK -> player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 1.0f);
+            case NO_COINS -> Notice.hint(player, "message.skyabyss.shop.no_coins_back");
+            case NO_ROOM -> Notice.hint(player, "message.skyabyss.shop.no_room_back");
+            default -> {
+            }
+        }
+        if (Buyback.ID.equals(shopId)) {
+            send(player, Buyback.view(player));
+        } else {
+            ShopDef shop = ShopManager.shop(shopId);
+            if (shop != null) {
+                send(player, view(player, shop));
+            }
+        }
+        return r;
     }
 
     // 売れる品か (印のない・傷んでいない・名前を付けていない)

@@ -59,7 +59,7 @@ public final class Buyback {
                 sells.add(new FacilityNetwork.SellView(i, s.copy(), p, s.getCount()));
             }
         }
-        return new FacilityNetwork.ShopView(ID, TITLE, Coins.count(player), List.of(), sells);
+        return new FacilityNetwork.ShopView(ID, TITLE, Coins.count(player), List.of(), sells).withSold(SoldLog.views(player));
     }
 
     // 枠 slot の品を times 個まで売る。売った数 (0 = 売れない)
@@ -74,7 +74,9 @@ public final class Buyback {
             return 0;
         }
         int n = Math.min(Math.max(1, times), s.getCount());
+        ItemStack gone = s.copyWithCount(n);
         s.shrink(n);
+        SoldLog.add(player, gone, n * p);
         player.getInventory().setChanged();
         Coins.give(player, n * p);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.5f, 1.1f);
