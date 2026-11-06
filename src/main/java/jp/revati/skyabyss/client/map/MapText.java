@@ -26,7 +26,6 @@ public final class MapText {
                     : Component.translatable("map.skyabyss.foe.lair", Component.translatable(m.name()));
             case LOOTCAMP -> Component.translatable("label.skyabyss.facility.circuit_camp_" + m.extra() + ".sub");
             case FISHING -> Component.translatable("map.skyabyss.mark.fishing");
-            case SPRINT -> Component.translatable("map.skyabyss.mark.sprint", Component.translatable("mount.skyabyss.sprint." + m.extra()));
             case TERRITORY -> Component.translatable("map.skyabyss.territory", Component.translatable("endgame.skyabyss.land." + m.extra()), m.name());
             case TOWN -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.town") : Component.translatable("map.skyabyss.town." + m.extra());
             case SHRINE -> m.extra().isEmpty() ? Component.translatable("map.skyabyss.mark.shrine")

@@ -188,6 +188,8 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.MIST_ANGLER, 0x54523A, 0x78F0D2, new Item.Properties()));
     public static final DeferredItem<Item> THUNDER_WOLF_EGG = ITEMS.register("thunder_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.THUNDER_WOLF, 0x3E4862, 0x8CD2FF, new Item.Properties()));
+    public static final DeferredItem<Item> EMBER_JACKAL_EGG = ITEMS.register("ember_jackal_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.EMBER_JACKAL, 0x4A4442, 0xFC9C38, new Item.Properties()));
     public static final DeferredItem<Item> BONE_CENTIPEDE_EGG = ITEMS.register("bone_centipede_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.BONE_CENTIPEDE, 0xDCD4BE, 0x5A2A26, new Item.Properties()));
     public static final DeferredItem<Item> SHELL_OCTOPUS_EGG = ITEMS.register("shell_octopus_spawn_egg",

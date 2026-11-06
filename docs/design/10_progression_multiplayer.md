@@ -114,7 +114,7 @@
 
 章の導出は `story/Chapters.of(player)`、題字・余韻の札は `story/arc/ChapterCards`（18 の 9 章）、予兆の枠は `story/arc/Foreshadow`（01 の 4.1）、小要素を置く共通基盤は `opening/site/ChapterSites`（17 の 3.8）。題字の札は、すでに遊んでいた人（`OpeningState.legacy`）と序章には出さず、先の章にいる人には今の章の札だけを出す。
 
-**まだ作っていない**: 各章の小要素そのもの（共通基盤に登録するだけ）。内部の ID（伝承の `chapter1/…`、メインのクエスト、段階、背中のディメンション）は章を作るときも変えない。
+各章の小要素は、それぞれの章の書類にある（共通基盤 `opening/site/ChapterSites` に登録する）。内部の ID（伝承の `chapter1/…`、メインのクエスト、段階、背中のディメンション）は章を作るときも変えない。
 
 ---
 

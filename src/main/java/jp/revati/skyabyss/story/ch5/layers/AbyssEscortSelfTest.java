@@ -45,15 +45,47 @@ public final class AbyssEscortSelfTest {
     }
 
     // 読み込みを頼み、強制読み込みのチャンクが生き物の動くところまで上がるのを待つ (新しい世界では作るのに数 tick かかる。
-    // 道の人は、動いていないチャンクでは立て直さないので、待たずに始めると道の途中で止まった。最大 LOAD_MAX tick)
+    // 道の人は、動いていないチャンクでは立て直さないので、待たずに始めると道の途中で止まった。付き添いは一つのサーバー tick の中で
+    // 歩き切るので、始める前に、塩と灰の層の印 (道すじ・待ち場・杭・灯り・封・門・主の間) のある区画と、そのまわり 1 区画をみな動かしておく。
+    // 全段で流すとサーバーが遅れ、前の上限 600 tick では間に合わずに始まって、道の人が止まり時間切れで落ちることがあった。上限 LOAD_MAX tick
     private static int loadTicks;
-    static final int LOAD_MAX = 600;
+    static final int LOAD_MAX = 3000;
+    private static final Set<Long> EXTRA = new HashSet<>();
+
+    static Set<Long> routeChunks() {
+        Set<Long> out = new HashSet<>();
+        for (Map.Entry<String, int[]> e : Blueprint.get(AbyssBuild.BLUEPRINT).marks.entrySet()) {
+            String n = e.getKey();
+            if (!n.contains("salt") && !n.contains("ash")) {
+                continue;
+            }
+            int cx = e.getValue()[0] >> 4;
+            int cz = e.getValue()[2] >> 4;
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    out.add(net.minecraft.world.level.ChunkPos.asLong(cx + dx, cz + dz));
+                }
+            }
+        }
+        return out;
+    }
 
     public static boolean loadUntil(MinecraftServer server) {
+        ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
         if (loadTicks++ == 0) {
             load(server);
+            EXTRA.clear();
+            if (level != null) {
+                for (long k : routeChunks()) {
+                    int cx = net.minecraft.world.level.ChunkPos.getX(k);
+                    int cz = net.minecraft.world.level.ChunkPos.getZ(k);
+                    if (cx < -5 || cx > 4 || cz < -5 || cz > 4) {
+                        level.setChunkForced(cx, cz, true);
+                        EXTRA.add(k);
+                    }
+                }
+            }
         }
-        ServerLevel level = server.getLevel(AbyssWorld.LEVEL);
         boolean ready = level != null;
         for (int cx = -5; ready && cx <= 4; cx++) {
             for (int cz = -5; cz <= 4; cz++) {
@@ -63,7 +95,18 @@ public final class AbyssEscortSelfTest {
                 }
             }
         }
+        if (ready) {
+            for (long k : EXTRA) {
+                if (!level.isPositionEntityTicking(new BlockPos(net.minecraft.world.level.ChunkPos.getX(k) * 16 + 8, 64, net.minecraft.world.level.ChunkPos.getZ(k) * 16 + 8))) {
+                    ready = false;
+                    break;
+                }
+            }
+        }
         if (ready || loadTicks > LOAD_MAX) {
+            if (!ready) {
+                SkyAbyss.LOGGER.warn("SELFTEST abyss escort: the route chunks were not all active after {} ticks; starting anyway", loadTicks);
+            }
             loadTicks = 0;
             return true;
         }
@@ -100,6 +143,10 @@ public final class AbyssEscortSelfTest {
                     level.setChunkForced(cx, cz, false);
                 }
             }
+            for (long k : EXTRA) {
+                level.setChunkForced(net.minecraft.world.level.ChunkPos.getX(k), net.minecraft.world.level.ChunkPos.getZ(k), false);
+            }
+            EXTRA.clear();
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST abyss escort PASSED (type B layout reachable on foot; solo salt escort: stake, well lamp, anchor hold, "
@@ -234,7 +281,7 @@ public final class AbyssEscortSelfTest {
             check(f, failedOnce, "the endurance failure was never tried");
             check(f, escapeFailed, "the escape failure was never tried");
             check(f, run.state() == AbyssEscort.State.DONE, "the solo salt escort did not finish (" + steps + " steps, state " + run.state() + ", cp "
-                    + run.secured() + ", at " + run.at() + ")");
+                    + run.secured() + ", at " + run.at() + ", guide chunk active " + level.isPositionEntityTicking(BlockPos.containing(run.pos())) + ")");
             check(f, AbyssMarks.count(a, "salt") == 3 && d.has(a.getUUID(), "escort:salt"), "the solo player lacks marks or the escort record: "
                     + AbyssMarks.count(a, "salt"));
             Quests.poll(a, true);
@@ -302,7 +349,8 @@ public final class AbyssEscortSelfTest {
             }
             check(f, run.state() == AbyssEscort.State.DONE, "the party ash escort did not finish (" + steps + " steps, state " + run.state() + ", cp "
                     + run.secured() + ", at " + run.at() + ", fails " + run.fails() + ", seal loaded " + (sealAt != null && level.isLoaded(sealAt))
-                    + ", alive " + b.isAlive() + "/" + c.isAlive() + ", spectator " + b.isSpectator() + "/" + c.isSpectator() + ")");
+                    + ", alive " + b.isAlive() + "/" + c.isAlive() + ", spectator " + b.isSpectator() + "/" + c.isSpectator()
+                    + ", guide chunk active " + level.isPositionEntityTicking(BlockPos.containing(run.pos())) + ")");
             check(f, run.participants().contains(c.getUUID()), "the second player did not join the escort");
             for (FakePlayer q : List.of(b, c)) {
                 Quests.poll(q, true);

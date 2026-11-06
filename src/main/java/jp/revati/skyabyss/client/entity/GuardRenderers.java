@@ -87,6 +87,7 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.MOSS_DEAD.get(), ctx -> noTilt(ctx, "moss_dead"));
         event.registerEntityRenderer(ModEntities.MIST_ANGLER.get(), ctx -> noTilt(ctx, "mist_angler"));
         event.registerEntityRenderer(ModEntities.THUNDER_WOLF.get(), ctx -> noTiltStillHead(ctx, "thunder_wolf"));
+        event.registerEntityRenderer(ModEntities.EMBER_JACKAL.get(), ctx -> noTiltStillHead(ctx, "ember_jackal"));
         event.registerEntityRenderer(ModEntities.ROCK_BOAR.get(), ctx -> noTiltStillHead(ctx, "rock_boar"));
         // 地下のダンジョンの主 (docs/design/55)
         event.registerEntityRenderer(ModEntities.BONE_CENTIPEDE.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "bone_centipede", 1.8f));

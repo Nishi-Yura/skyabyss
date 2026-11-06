@@ -1320,5 +1320,125 @@
     "atlas": 64
    }
   }
+ },
+ "guest_whale_bonecarver_a": {
+  "tris": 1540,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 56,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_whale_bonecarver_b": {
+  "tris": 1737,
+  "atlas": 256,
+  "buried": [
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_back": {
+    "tris": 196,
+    "atlas": 128
+   }
+  }
+ },
+ "guest_whale_bonecarver_c": {
+  "tris": 1464,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 74,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_whale_lookout_a": {
+  "tris": 1482,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 84,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_whale_lookout_b": {
+  "tris": 1731,
+  "atlas": 256,
+  "buried": [
+   [
+    "hair",
+    "hood",
+    0.55
+   ],
+   [
+    "br0",
+    "hood",
+    0.77
+   ],
+   [
+    "legRt",
+    "skirt",
+    0.45
+   ],
+   [
+    "legLt",
+    "skirt",
+    0.45
+   ]
+  ],
+  "props": {
+   "prop_l": {
+    "tris": 160,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_whale_lookout_c": {
+  "tris": 1488,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 143,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_whale_bonecarver": {
+  "tris": 1540,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_r": {
+    "tris": 56,
+    "atlas": 64
+   }
+  }
+ },
+ "guest_whale_lookout": {
+  "tris": 1482,
+  "atlas": 256,
+  "buried": [],
+  "props": {
+   "prop_l": {
+    "tris": 84,
+    "atlas": 64
+   }
+  }
  }
 }

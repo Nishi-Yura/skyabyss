@@ -3837,5 +3837,49 @@
         "name": "skyabyss:voices/tide_heart_death"
       }
     ]
+  },
+  "ember_jackal_ambient": {
+    "subtitle": "subtitles.skyabyss.ember_jackal_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wolf.growl",
+        "pitch": 0.8,
+        "volume": 0.7,
+        "type": "event"
+      }
+    ]
+  },
+  "ember_jackal_hurt": {
+    "subtitle": "subtitles.skyabyss.ember_jackal_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wolf.hurt",
+        "pitch": 0.8,
+        "volume": 0.9,
+        "type": "event"
+      }
+    ]
+  },
+  "ember_jackal_death": {
+    "subtitle": "subtitles.skyabyss.ember_jackal_death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wolf.death",
+        "pitch": 0.75,
+        "volume": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "ember_jackal_howl": {
+    "subtitle": "subtitles.skyabyss.ember_jackal_howl",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wolf.howl",
+        "pitch": 0.7,
+        "volume": 1.5,
+        "type": "event"
+      }
+    ]
   }
 }

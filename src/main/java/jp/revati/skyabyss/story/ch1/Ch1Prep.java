@@ -11,13 +11,13 @@ import net.minecraft.resources.ResourceLocation;
 
 // 一章の支度の名前と、職人 (P4)・旅装と砥石 (P5)・地上の敵 (P7)・岩鯨の背 (P8) との差し込み口の一覧。
 //
-// 支度の段 3 本 (メインの段。順不同) は data/skyabyss/quest/ch1/trail_iron|trail_blade|trail_shield.json (データを直接直す（生成スクリプトはない）)。型の決まりは 07 の 6.8。
-// イサナの「鯨の話」(印 c_whale_heard) のあと、一章の人に三本とも出る。旧い備えの頼み (prep_gear・prep_blade・prep_pulse) はこの三本に吸収した。
+// 支度の段 2 本 (メインの段。鉄の跡 → 折れた剣) は data/skyabyss/quest/ch1/trail_iron|trail_blade.json (データを直接直す（生成スクリプトはない）)。型の決まりは 07 の 6.8。
+// イサナの「鯨の話」(印 c_whale_heard) のあと、一章の人に一本ずつ出る。旧い備えの頼み (prep_gear・prep_blade・prep_pulse) は吸収した。
 //   trail_iron   (鉄の跡。イサナ。100)   骨の坑 (BonePit) の奥の前の私の荷で頁 ch1/trail_iron → 鉄の防具 4 部位を着る (目的 wear)
 //   trail_blade  (折れた剣。職人。100)  割れ殻の洞 (CleftCave) を抜けると台座に折れた剣 = 頁 ch1/trail_blade → 職人に話す (作り方を教わる) →
 //                                       鉄の剣を持つ + 岩の砥石を作る (合図 SIGNAL_WHETSTONE_USED。名前は前のまま)
-//   trail_shield (盾と糧。語り部。50)   盾と道の固焼き 8 を持つ。報酬で頁 ch1/trail_shield。鼓動守 (護り糸を職人に編んでもらう) と鯨道の旅装は任意
-//   三本そろう   合図 ch1_ready (PrepQuests) と記念品「鯨追いの印」(WHALE_CHASER_MARK。見た目だけ)、進捗 whale_trail
+//   語り部の足音の晩の話 (頁 ch1/trail_shield) は、折れた剣のあとに一度だけ語る (クエストではない。盾と糧の段は 2026-11-06 に消した)。鼓動守と鯨道の旅装は任意
+//   二本そろう   合図 ch1_ready (PrepQuests) と記念品「鯨追いの印」(WHALE_CHASER_MARK。見た目だけ)、進捗 whale_trail
 //
 // ---------------------------------------------------------------- 差し込み口の状況
 //   [P4 職人 済]  旅の職人 (skyabyss:artisan) が trail_blade の依頼主。立つ所は荷車の傍らの道 (印 "artisan") = npc/ArtisanSpawner の Spot。
@@ -31,8 +31,7 @@ public final class Ch1Prep {
     // 支度の段 (PrepQuests.ids(1) と同じ並び)
     public static final String Q_IRON = "ch1/trail_iron";
     public static final String Q_BLADE = "ch1/trail_blade";
-    public static final String Q_SHIELD = "ch1/trail_shield";
-    public static final List<String> TRAILS = List.of(Q_IRON, Q_BLADE, Q_SHIELD);
+    public static final List<String> TRAILS = List.of(Q_IRON, Q_BLADE);
 
     // 地上の新しい場所の要素 ID (ChapterSites)
     public static final String ROAD_SHRINE_ID = "ch1_road_shrine";

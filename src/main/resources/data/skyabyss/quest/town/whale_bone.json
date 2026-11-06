@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 213,
+  "giver": "skyabyss:guest_whale_bonecarver",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 3,
+          "targets": [
+            "skyabyss:moss_crawler"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:@singing_ribs",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_whale_bonecarver",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 12
+      },
+      {
+        "item": "skyabyss:rock_whetstone",
+        "count": 1
+      }
+    ]
+  }
+}

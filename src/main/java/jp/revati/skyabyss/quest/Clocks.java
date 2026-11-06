@@ -105,16 +105,6 @@ public final class Clocks {
         out.add(mine == null
                 ? new Row("fish_week", K + "fish_week.none", List.of(), WEEK, week, K + "fish.where")
                 : new Row("fish_week", K + "fish_week.status", List.of(fishName(mine.fish()), String.format("%.1f", mine.size() / 10.0)), WEEK, week, K + "fish.where"));
-        // 早駆けの週の上位
-        int routes = 0;
-        int best = 0;
-        for (jp.revati.skyabyss.mount.MountSprint.Route r : jp.revati.skyabyss.mount.MountSprint.routes()) {
-            routes++;
-            if (jp.revati.skyabyss.mount.MountSprint.best(p, r.id()) > 0) {
-                best++;
-            }
-        }
-        out.add(new Row("sprint", K + "sprint.status", List.of(n(best), n(routes)), WEEK, week, K + "sprint.where"));
         // 組合の旗取り (週)
         out.add(new Row("guild_week", K + "guild_week.status", List.of(), WEEK, week, K + "guild_week.where"));
         // 大陸の大事件 (45 分ごと)

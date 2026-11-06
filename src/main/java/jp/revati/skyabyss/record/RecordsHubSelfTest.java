@@ -52,7 +52,7 @@ public final class RecordsHubSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST records hub PASSED (seven pages with lines, chat boards captured, ja/en tabs, round trip)");
+            SkyAbyss.LOGGER.info("SELFTEST records hub PASSED ({} pages with lines, chat boards captured, ja/en tabs, round trip)", RecordsHub.TABS.length);
         } else {
             SkyAbyss.LOGGER.error("SELFTEST records hub FAILED: {}", f);
         }

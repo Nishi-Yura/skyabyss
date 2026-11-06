@@ -45,7 +45,7 @@ public final class FoesOneSelfTest {
     private static final int FLOOR = 200;
     private static final float HEALTH = 1000f;
     static final String[] IDS = {"bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp",
-        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf", "rock_boar", "tide_crab", "storm_ram", "ash_lizard"};
+        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf", "ember_jackal", "rock_boar", "tide_crab", "storm_ram", "ash_lizard"};
 
     private FoesOneSelfTest() {
     }
@@ -104,8 +104,8 @@ public final class FoesOneSelfTest {
             unload(level);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST new foes PASSED (16 foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
-                    + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew; dog howl sends the pack, wolf howl marks the target; named foe tag, health, bar, coins, cooldown)");
+            SkyAbyss.LOGGER.info("SELFTEST new foes PASSED ({} foes registered with eggs/xp/animations/spawn rows; every telegraph matches its hit; "
+                    + "footman shield 30% from the front; banner ward revives once; chief shout hastes the crew; dog howl sends the pack, wolf howl marks the target, jackal howl sends a packmate behind the target to bite; named foe tag, health, bar, coins, cooldown)", IDS.length);
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST new foes FAILED: {}", m));
         }
@@ -192,6 +192,7 @@ public final class FoesOneSelfTest {
                 new Case("moss_dead", ModEntities.MOSS_DEAD::get, 2.4, MossDead.SLAM_WARN),
                 new Case("mist_angler", ModEntities.MIST_ANGLER::get, 9.0, MistAngler.NET_WARN),
                 new Case("thunder_wolf", ModEntities.THUNDER_WOLF::get, 2.0, PackBeast.BITE_WARN),
+                new Case("ember_jackal", ModEntities.EMBER_JACKAL::get, 2.0, PackBeast.BITE_WARN),
                 new Case("rock_boar", ModEntities.ROCK_BOAR::get, 8.0, RockBoar.CHARGE_WARN),
                 new Case("tide_crab", ModEntities.TIDE_CRAB::get, 4.0, TideCrab.SLAM_WARN),
                 new Case("storm_ram", ModEntities.STORM_RAM::get, 8.0, StormRam.CHARGE_WARN),
@@ -311,6 +312,24 @@ public final class FoesOneSelfTest {
         check(shapes.stream().anyMatch(s -> s.contains(SX, SZ + 6) && !s.contains(SX, SZ)), "the thunder wolf's howl did not mark the target's feet", f);
         wolf.discard();
         wmate.discard();
+        // 熾の山犬: 吠えると仲間が人の背中側へ跳んで回り込み、間をおいて (帯を出して) 噛む
+        p.setYRot(180f);    // 北 (-z。山犬のほう) を向く。背中側は南 (+z)
+        EmberJackal jackal = spawn(lv, ModEntities.EMBER_JACKAL.get(), SX, SZ, 0f);
+        EmberJackal jmate = spawn(lv, ModEntities.EMBER_JACKAL.get(), SX + 2, SZ, 0f);
+        jackal.setTarget(p);
+        jmate.setTarget(p);
+        jackal.tickCount = 1000;
+        for (int i = 0; i < 24 && !jmate.flanking(); i++) {
+            tick(lv, jackal, 1);
+        }
+        check(jmate.flanking(), "the ember jackal's howl did not send its packmate around", f);
+        for (int i = 0; i < EmberJackal.FLANK_WAIT + 12 && jmate.flanking(); i++) {
+            tick(lv, jmate, 1);
+        }
+        check(jmate.getZ() > SZ + 6, "the ember jackal did not get around behind the target (z " + jmate.getZ() + ", target z " + (SZ + 6) + ")", f);
+        check(jmate.busy(), "the ember jackal did not bite after getting around", f);
+        jackal.discard();
+        jmate.discard();
         p.discard();
     }
 

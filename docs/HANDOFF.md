@@ -4,15 +4,15 @@
 
 ## 今の状態
 
-- **版**: 1.1.1（`gradle.properties` の `mod_version`、`build/libs/skyabyss-1.1.1.jar`）。1.1.0 のあとの直し（語り部・海の上の立ち位置・職の武器の決まり・案内の着いた判定・武器の札・台座の角・伝承の点検・道具とラフの片づけ・wiki のエンドコンテンツの頁）を入れた版。main へは PR で取り込む（サイトは main から出る）。
+- **版**: 1.1.2（`gradle.properties` の `mod_version`、`build/libs/skyabyss-1.1.2.jar`）。1.1.1 のあとの足しと直し（鯨見の町の二人と頼み・熾の山犬・嵐の高地の見どころ 8 か所・店は今の職の品だけ・地図は指したときだけ字・溜めの帯・一章の支度「盾と糧」と乗り物の早駆けを消した・巨神の背の到着の台の鐘）。main へは PR で取り込む（サイトは main から出る）。
 - **ブランチ**: `m1-sky-pass`（push 済み）。次の版も、持ち主が「出す」と言うまで版を上げず、main にも入れない。リモートの作業ブランチ `wip/*` はもう無い。
 - **中身**: 序章から終章まで全部の章、四巨神と背中、五章「深淵」、六章「月」、終章「雲海」、エンドコンテンツ（あいだの塔・神器・秘伝・巡り路・地下のダンジョン・封の箱・釣り・乗り物）までできている。2026-11-04 の磨きの指示（巨神の見え方・物語・崩しゲージ・経験値の表・難しさ・見どころ・仕組みの深め・名前は「天と淵のあいだ」のまま）の 8 件もすべて作った。
 - **未決**: 設計書 00 の未決は空。
-- **確かめ**: 全段の自己テスト（新しい大陸の世界、419 手順）241 段 PASSED・FAILED 0、`quick_check` 全部 OK（どちらも 2026-11-05）。手ざわりは持ち主がゲームの中で確かめる（まだ）。
+- **確かめ**: 全段の自己テスト（新しい大陸の世界）241 段のうち 238 段 PASSED、落ちた 3 段（見どころが巨神の居場所の中・支度の数・時計の行）は直して流し直し PASSED、`quick_check` 全部 OK（どれも 2026-11-06）。本番の形での起動確認（`skyabyss_prod`）は、作業の権限で jar を入れ替えられず 1.1.2 では流していない。手ざわりは持ち主がゲームの中で確かめる（まだ）。
 
 ## 残っていること
 
-1. **ゲームの中での確かめ**（持ち主）: 確認表 [review/playtest_1104.md](review/playtest_1104.md) の 1〜24 節。自己テストが通っても「直った」とは言わず、確かめてほしい点を短く書いて渡す。
+1. **ゲームの中での確かめ**（持ち主）: 確認表 [review/playtest_1104.md](review/playtest_1104.md) の 1〜24 節。あわせて 2026-11-05 の内容の濃さの分（鯨見の町の骨削りのゴンジと鐘打ちのハルとその頼み、灰の荒野の熾の山犬、嵐の高地の見どころ 8 か所。撮影の台本 `tools/shots/density_1105.txt`）。自己テストが通っても「直った」とは言わず、確かめてほしい点を短く書いて渡す。
 2. **試遊の声での数値の調整**: 技の木（節の値・点の総量・要求値。48）、主の強さと崩しゲージ（04・54・55）、経験値の表（04）、箱の確率（52）、釣り（54）。声が来たら案を表にして見せてから数字を入れる。
 3. **次の版を出す**（持ち主が決める）: 手順は [release.md](release.md)。版上げ・サイトの変更履歴・README の題の絵（`tools/readme/final/make_readme.py`。版は `gradle.properties` から入る）・PR を main へ。
 4. **持ち主が決めること**: モデルの古い透け（剣守の胴の真下など。下からしか見えないものが多い）を直すか。`.git`（約 2.3 GB。9 割は消したラフの古い版）は履歴を書き直さず今のままにする、と決まった。
@@ -29,7 +29,8 @@
 ## よく使う手順
 
 - 検査一式: `bash tools/dev/quick_check.sh`
-- 自己テスト: `bash tools/dev/selftest_fresh.sh "<段,…>" [<世界名>]`（段を空にすると全部。約 20 分）。決まった段だけなら `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="<段>" bash tools/dev/mc_run.sh runServer --no-daemon`。`abyss escort` と `titan ground` は全部を流したときにまれに落ちることがある（単独では通る）。
+- 自己テスト: `bash tools/dev/selftest_fresh.sh "<段,…>" [<世界名>]`（段を空にすると全部。約 20 分）。決まった段だけなら `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="<段>" bash tools/dev/mc_run.sh runServer --no-daemon`。`abyss escort` と `titan ground` が全部を流したときにまれに落ちていたのは、サーバーが遅れて区画の読み込みが間に合わないまま進んでいたため（2026-11-05 に、付き添いは道すじの区画が動くまで・潮殻の巡航はまわりの区画が読み込まれるまで待つようにした）。また落ちたら、失敗の文の「guide chunk active」と、巡航の待ちの記録を見る。
+- ラフの生成元（`tools/rough/lowpoly/<組>/`）は、見比べの道具（`sheet.py`・`compare.py`・`build_all.py`）が三つの案をまとめて作り、選んだ案の出力もそこから書く。選ばなかった案の `opt_*.py` だけを消すと選んだ案も作り直せなくなるので、消すなら生成元ごと書き直す。
 - 撮影: `bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/<台本>.txt -PshotsName=<名>`。遊んだ人の世界を見るときは `run/shots/<名>/saves/<世界>` へ写してから開く。
 - 本番の形での確かめ: リポジトリの外の `C:\Users\nisimoto\skyabyss_prod`（サーバーとクライアント）。`python -X utf8 tools/dev/prod_client.py <client> --script tools/shots/prod_check_mp.txt`。手順は [release.md](release.md) の 2 章。
 - jar: `bash tools/dev/mc_run.sh build --no-daemon -q -x test` → `build/libs/skyabyss-<版>.jar`。

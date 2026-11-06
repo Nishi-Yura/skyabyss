@@ -164,7 +164,7 @@
 | `apothecary` | 薬師 | 薬師の店 | 店 `apothecary`、醸造のこと（三章まで）→ 四章から醸造を教わる（`brew_lesson`）・おさらい |
 | `storage_keeper` | 預かり番 | 預かり所 | 預かり所（6.3） |
 | `innkeeper` | 宿の女将 | 宿「鐘の宿」 | 寝台を取る（6.4）、噂、待ち合わせのこと |
-| `perch_keeper` | 旅の番 | 子の止まり木 | 巨神の子を呼ぶ、乗り物を見る・買う・名付ける（`mount_shop`。38）、早駆けの記録を見る（`sprint_board`。38 の 8）、乗り笛の決まり、旅の決まり（地図は M キー）。2026-11-01 に厩舎の番をまとめた（都の厩舎の建物は入れない空き家。前の世界の厩舎の番は消える `AttendantRole.RETIRED`） |
+| `perch_keeper` | 旅の番 | 子の止まり木 | 巨神の子を呼ぶ、乗り物を見る・買う・名付ける（`mount_shop`。38）、乗り笛の決まり、旅の決まり（地図は M キー）。2026-11-01 に厩舎の番をまとめた（都の厩舎の建物は入れない空き家。前の世界の厩舎の番は消える `AttendantRole.RETIRED`） |
 | `shrine_priest` | 社の祭司 | 四巨神の社 | 転生のこと、誓いのこと（誓いごとの説明）、欠片を納める（`key_offer`）・返してもらう（`key_return`）、鍵の間のこと |
 | `training_master` | 師範 | 訓練場 | 振り直し（技の木 × 結晶・鐘銭。`respec_*`）、職の間（`job_room`）、木偶のこと |
 | `black_marketeer` | 顔を隠した商人 | 闇市（裏通り） | 店 `black_market` |
@@ -175,7 +175,7 @@
 | （消した役）書庫番・地図屋・砦の老兵 | — | — | 2026-10-31 に消した（伝承の書の画面・M の地図・J の記録と同じことをするだけだった。老兵の試練の記録は J、本丸の頁は社の祭司へ）。祠と跡地は地図に最初から、跡地の噂は都の案内人が言う。前の世界に立っている人は消える（`AttendantRole.RETIRED`） |
 | `box_opener`（印なし） | 封切り師（都と四つの町に一人ずつ） | 鍛冶屋の係の人のそば（`npc_smith` から 2〜4 ブロックの空いた床。`loot/box/BoxOpeners`） | 封の箱を開ける（`boxes`。ルーレットの画面。[52](52_loot_boxes.md)）、箱のこと |
 
-- **記録の画面**（2026-11-05 の決めごと ct_records = one。`record/RecordsHub`・`client/record/RecordsHubScreen`）: 速さや数の記録を一つの画面に、つまみ 7 つで分ける。踏破（巨神ごとの出会い・心臓・順路の回数と最速・試練の数・巨神ごとの最速の人）・塔（人数ごとの最速・重ね賭けの印・組合の順位と誉れ）・深み（自分・人の上位・組の上位）・釣り（今週の上位 5 人・自分・先週の一番）・早駆け（道ごとの自分の一番と今週の上位 5 人）・転生（転生の数・最速の人生・最少の倒れの上位 10）・空見（初代の空見の最速）。今の板と係の人は残し、押すとその頁が開く: 記録の間の老兵（`records`）→ 踏破、塔守（`tower_records`）→ 塔、深みの順位の石 → 深み、食べ物屋（`fishing_board`）→ 釣り、旅の番（`sprint_board`）→ 早駆け、転生の石 → 転生、背中の記録の板 → 踏破。旅の記録（つまみの「旅」）の見出しの「記録」の釦からも開く。前にチャットへ書いていた塔・釣り・早駆けの行は、画面の行に集める（`RecordsHub.say`）。開発 `/skyabyss facility records hub <0〜6>`。自己テスト `records hub`。
+- **記録の画面**（2026-11-05 の決めごと ct_records = one。`record/RecordsHub`・`client/record/RecordsHubScreen`）: 速さや数の記録を一つの画面に、つまみ 6 つで分ける。踏破（巨神ごとの出会い・心臓・順路の回数と最速・試練の数・巨神ごとの最速の人）・塔（人数ごとの最速・重ね賭けの印・組合の順位と誉れ）・深み（自分・人の上位・組の上位）・釣り（今週の上位 5 人・自分・先週の一番）・転生（転生の数・最速の人生・最少の倒れの上位 10）・空見（初代の空見の最速）。今の板と係の人は残し、押すとその頁が開く: 記録の間の老兵（`records`）→ 踏破、塔守（`tower_records`）→ 塔、深みの順位の石 → 深み、食べ物屋（`fishing_board`）→ 釣り、転生の石 → 転生、背中の記録の板 → 踏破。旅の記録（つまみの「旅」）の見出しの「記録」の釦からも開く。前にチャットへ書いていた塔・釣りの行は、画面の行に集める（`RecordsHub.say`）。開発 `/skyabyss facility records hub <0〜5>`。自己テスト `records hub`。
 - 会話の結果 `{"type": "facility", "open": "shop|stash|inn_rest|rumor|perch|map|guild|guild_storage|respec_quote|respec_skills|respec_skills_coins|job_room|key_offer|key_return|records|brew_lesson|trade|mount_shop|guide|boxes|buyback|tower_desk|tower_shop|tower_records|secret_arts|circuit|circuit_start|journal|look|fishing_board|powder|dungeon_mood|fish_order|sprint_board", "shop": "<店>"}`（`FacilityActions`。知らない名前は読み込みで弾く）。
 
 ### 6.2 鐘銭と店（`facility/Coins`・`ShopDef`・`ShopService`、画面 `client/facility/ShopScreen`）

@@ -19,7 +19,7 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 // 死んでも (copyOnDeath)、ディメンションを移っても、ログアウトしても残る。月のループでも消さない。
 // 書き換えは SkillManager を通す (同期と修飾子の付け直しをそこでまとめて行う)
 public final class SkillData implements INBTSerializable<CompoundTag> {
-    // 記録の版。1 = 剣士・弓使いの木の 10 の技だけ、2 = 5 つの木・刻印・型の保存 (docs/design/27)、
+    // 記録の版。1 = 剣士・弓使いの木の 10 の技だけ、2 = 5 つの木・刻印・型の保存 (前の版)、
     // 4 = 変異・紋の盤・橋・淵・前世の技 (docs/design/31 の A08・A09・A14・B08・B09。新しい欄は空で始まる)、
     // 3 = 全部の木を最初から開く・キーストーン・構え・連鎖・熟練・型 4 つ・武器ごとの枠 (docs/design/31 の A 案)
     public static final int VERSION = 4;

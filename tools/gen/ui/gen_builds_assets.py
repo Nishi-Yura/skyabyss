@@ -1,4 +1,4 @@
-"""ビルド (5 つの木・36 の技・刻印・天職) の画面の素材を作る。docs/design/27_builds_and_classes.md、04 の 7.8。
+"""ビルド (5 つの木・36 の技・刻印・天職) の画面の素材を作る。前の版の 5 つの木の画面の素材 (今の K の画面は docs/design/48 の 5 章、04 の 7.5)。
 
 使い方:
     python tools/gen/ui/gen_builds_assets.py

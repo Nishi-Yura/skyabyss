@@ -81,6 +81,7 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":moss_dead", new Source(7, 12));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":mist_angler", new Source(9, 18));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wolf", new Source(9, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ember_jackal", new Source(11, 30));
         // 名のある敵 (主。章の経験値の 15% の中)
         MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_boar", new Source(30, 12));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_crab", new Source(60, 18));

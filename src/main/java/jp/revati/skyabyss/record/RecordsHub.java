@@ -18,19 +18,18 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 記録 (2026-11-05 の削る・まとめる頁 ct_records = one)。速さや数の記録を一つの画面に、つまみで分けて:
-//   踏破 (巨神ごとの出会い・心臓・順路の回数と最速・試練の数・巨神ごとの最速の人) / 塔 / 深み / 釣り / 早駆け / 転生 / 空見
-// 今の場所の板と係の人は残し、押すと同じ画面のその頁が開く (記録の間の老兵・塔守・深みの順位の石・食べ物屋・旅の番・転生の石と記録の板)。
-// 旅の記録 (つまみの「旅」) の釦からも開く。中身はサーバーが行の並びにして送る (Request → View)。チャットに書いていた塔・釣り・早駆けは say で集める
+//   踏破 (巨神ごとの出会い・心臓・順路の回数と最速・試練の数・巨神ごとの最速の人) / 塔 / 深み / 釣り / 転生 / 空見
+// 今の場所の板と係の人は残し、押すと同じ画面のその頁が開く (記録の間の老兵・塔守・深みの順位の石・食べ物屋・転生の石と記録の板)。
+// 旅の記録 (つまみの「旅」) の釦からも開く。中身はサーバーが行の並びにして送る (Request → View)。チャットに書いていた塔・釣りは say で集める
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RecordsHub {
     public static final int CLEAR = 0;
     public static final int TOWER = 1;
     public static final int DEPTH = 2;
     public static final int FISHING = 3;
-    public static final int SPRINT = 4;
-    public static final int REBIRTH = 5;
-    public static final int FOUNDER = 6;
-    public static final String[] TABS = {"clear", "tower", "depth", "fishing", "sprint", "rebirth", "founder"};
+    public static final int REBIRTH = 4;
+    public static final int FOUNDER = 5;
+    public static final String[] TABS = {"clear", "tower", "depth", "fishing", "rebirth", "founder"};
     static final int GOLD = 0xF2D78A;
 
     private RecordsHub() {
@@ -75,7 +74,6 @@ public final class RecordsHub {
             case TOWER -> capture(() -> jp.revati.skyabyss.tower.TowerDesk.records(p));
             case DEPTH -> depth(p);
             case FISHING -> capture(() -> jp.revati.skyabyss.fishing.Fishing.show(p));
-            case SPRINT -> capture(() -> jp.revati.skyabyss.mount.MountSprint.show(p));
             case REBIRTH -> rebirth(p);
             default -> founder(p);
         };

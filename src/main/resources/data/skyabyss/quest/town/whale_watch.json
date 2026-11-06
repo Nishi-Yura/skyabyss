@@ -1,0 +1,44 @@
+{
+  "category": "sub",
+  "order": 214,
+  "giver": "skyabyss:guest_whale_lookout",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "signal",
+          "target": "poi:@whalewatch_post",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_whale_lookout",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 50,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 10
+      },
+      {
+        "item": "skyabyss:road_hardtack",
+        "count": 2
+      }
+    ]
+  }
+}

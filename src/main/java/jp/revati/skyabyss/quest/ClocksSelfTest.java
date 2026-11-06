@@ -17,9 +17,9 @@ import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 今日・今週 (quest/Clocks。2026-11-05 の ct_clock)。SKYABYSS_SELFTEST_ONLY="clocks"
-//   一覧の行がそろう (12)・名前・様子・受ける所の文が日英にある・板の日替わりの数が数えられる・通信の往復
+//   一覧の行がそろう (11。早駆けの行は 2026-11-06 に消した)・名前・様子・受ける所の文が日英にある・板の日替わりの数が数えられる・通信の往復
 public final class ClocksSelfTest {
-    static final List<String> IDS = List.of("board_day", "board_week", "circuit", "tower", "dungeon", "fish_order", "fish_week", "sprint",
+    static final List<String> IDS = List.of("board_day", "board_week", "circuit", "tower", "dungeon", "fish_order", "fish_week",
             "guild_week", "world_event", "camp_prizes", "chests");
 
     private ClocksSelfTest() {
@@ -35,7 +35,7 @@ public final class ClocksSelfTest {
             Clocks.Row board = rows.get(0);
             check(f, board.args().equals(List.of("0", String.valueOf(jp.revati.skyabyss.quest.free.Board.QUOTA))) && board.reset() == Clocks.DAY,
                     "the daily board row should read 0 / quota and reset daily: " + board);
-            check(f, rows.stream().filter(r -> r.reset() == Clocks.WEEK).count() >= 4, "weekly rows are missing");
+            check(f, rows.stream().filter(r -> r.reset() == Clocks.WEEK).count() >= 3, "weekly rows are missing");
             for (String lang : new String[] {"ja_jp", "en_us"}) {
                 try (InputStream in = ClocksSelfTest.class.getResourceAsStream("/assets/skyabyss_quest/lang/" + lang + ".json")) {
                     JsonObject o = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
@@ -60,7 +60,7 @@ public final class ClocksSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST clocks PASSED (12 rows, ja/en names, statuses and places, daily board count, round trip)");
+            SkyAbyss.LOGGER.info("SELFTEST clocks PASSED ({} rows, ja/en names, statuses and places, daily board count, round trip)", IDS.size());
         } else {
             SkyAbyss.LOGGER.error("SELFTEST clocks FAILED: {}", f);
         }

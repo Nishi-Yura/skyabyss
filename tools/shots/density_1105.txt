@@ -1,0 +1,65 @@
+# 2026-11-05 の内容の濃さの頁: 嵐の高地に足した見どころ 8 か所・鯨見の町の二人・熾の山犬。平らな世界に並べて撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/density_1105.txt -PshotsName=density_1105
+world density1105 flat
+size 1280 720
+timeout 1200
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+cmd forceload add -40 -40 240 120
+wait 40
+cmd skyabyss dev ch1 place poi_stone_circle__thunderstone_ring 0 -61 0 0
+cmd skyabyss dev ch1 place poi_watchtower__cloudwatch_post 60 -61 0 0
+cmd skyabyss dev ch1 place poi_ruined_tower__brokenwing_tower 120 -61 0 0
+cmd skyabyss dev ch1 place poi_graveyard__struckmen_graves 180 -61 0 0
+cmd skyabyss dev ch1 place poi_mountain_hut__vane_hut 0 -61 70 0
+cmd skyabyss dev ch1 place poi_cave__rumble_cave 60 -61 70 0
+cmd skyabyss dev ch1 place poi_ruined_house__kitemaker_house 120 -61 70 0
+cmd skyabyss dev ch1 place poi_roadside_shrine__south_moss_shrine 180 -61 70 0
+wait 160
+cmd tp @s 0.5 -42 30.5 180 35
+wait 40
+shot d1_thunderstone_ring
+cmd tp @s 60.5 -40 32.5 180 30
+wait 40
+shot d2_cloudwatch_post
+cmd tp @s 120.5 -40 32.5 180 30
+wait 40
+shot d3_brokenwing_tower
+cmd tp @s 180.5 -42 30.5 180 35
+wait 40
+shot d4_struckmen_graves
+cmd tp @s 0.5 -44 100.5 180 30
+wait 40
+shot d5_vane_hut
+cmd tp @s 60.5 -44 100.5 180 30
+wait 40
+shot d6_rumble_cave
+cmd tp @s 120.5 -44 100.5 180 30
+wait 40
+shot d7_kitemaker_house
+cmd tp @s 180.5 -48 92.5 180 30
+wait 40
+shot d8_south_moss_shrine
+# 鯨見の二人 (動かないようにして正面から)
+cmd summon skyabyss:town_guest 230.5 -60 10.5 {Guest:"whale_bonecarver",NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:town_guest 232.5 -60 10.5 {Guest:"whale_lookout",NoAI:1b,Rotation:[0f,0f]}
+cmd tp @s 231.5 -58.4 15.5 180 8
+wait 60
+shot d9_whale_folk
+# 熾の山犬 (群れ 3 頭。動かないようにして斜めから)
+cmd summon skyabyss:ember_jackal 230.5 -60 40.5 {NoAI:1b,Rotation:[30f,0f]}
+cmd summon skyabyss:ember_jackal 232.5 -60 42.5 {NoAI:1b,Rotation:[60f,0f]}
+cmd summon skyabyss:ember_jackal 229.0 -60 43.0 {NoAI:1b,Rotation:[0f,0f]}
+cmd tp @s 235.5 -58 48.5 150 15
+wait 60
+shot d10_ember_jackals

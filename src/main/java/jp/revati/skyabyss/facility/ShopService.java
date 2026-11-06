@@ -96,6 +96,9 @@ public final class ShopService {
         ShopLedger ledger = player.getData(FacilitySetup.LEDGER);
         List<FacilityNetwork.GoodView> goods = new ArrayList<>();
         for (ShopDef.Good g : shop.today(day)) {
+            if (!forJob(player, g)) {
+                continue;
+            }
             List<ItemStack> mats = new ArrayList<>();
             List<Integer> have = new ArrayList<>();
             for (ShopDef.Price p : g.materials()) {
@@ -113,6 +116,17 @@ public final class ShopService {
             sells.add(new FacilityNetwork.SellView(i, new ItemStack(b.item(), b.per()), b.coins(), sellableCount(player, b.item())));
         }
         return new FacilityNetwork.ShopView(shop.id(), shop.titleKey(), Coins.count(player), goods, sells);
+    }
+
+    // 今の職で使える品か (2026-11-05 の声「戦士しか使えない盾を買わせるのはどうなのか」)。職の品はその職の人にだけ並べ、売らない。
+    // 品の職は good の job か、なければ品そのもの (Job.of: 盾は戦士、弓は弓使い …)。職を選ぶ前の人・クリエイティブには全部並べる
+    public static boolean forJob(ServerPlayer player, ShopDef.Good g) {
+        jp.revati.skyabyss.rpg.skill.Job need = g.job() != null ? jp.revati.skyabyss.rpg.skill.Job.byId(g.job()) : jp.revati.skyabyss.rpg.skill.Job.of(g.item());
+        if (need == null || player.isCreative()) {
+            return true;
+        }
+        jp.revati.skyabyss.rpg.skill.Job cur = jp.revati.skyabyss.rpg.skill.Job.byId(jp.revati.skyabyss.rpg.skill.SkillManager.get(player).curJob);
+        return cur == null || cur == need;
     }
 
     static int materialCount(ServerPlayer player, Item item) {
@@ -141,7 +155,7 @@ public final class ShopService {
     public static Result buy(ServerPlayer player, ShopDef shop, String goodId, int times) {
         long day = day(player);
         ShopDef.Good g = shop.good(goodId, day);
-        if (g == null) {
+        if (g == null || !forJob(player, g)) {
             return Result.NO_GOOD;
         }
         if (Coins.chapter(player) < g.chapter()) {

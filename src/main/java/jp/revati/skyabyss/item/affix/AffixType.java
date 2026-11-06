@@ -17,7 +17,7 @@ public enum AffixType {
     // マナ吸収 (近接で当てるたびにマナ +値。0.6 秒に一度)・技の威力 (+割合)
     MANA_STEAL("mana_steal", Slot.WEAPON, 15, 1, 3, 1, false),
     SPELL("spell", Slot.WEAPON, 15, 0.04, 0.10, 0.005, true),
-    // 木の印 (docs/design/27 の 4.1): その木の技の力 +5〜10%。5 種合わせて重み 10 (一つずつ 2)。1 装備に 1 つまで
+    // 木の印 (docs/design/04 の 7.8): その木の技の力 +5〜10%。5 種合わせて重み 10 (一つずつ 2)。1 装備に 1 つまで
     MARK_STONE("mark_stone", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
     MARK_WIND("mark_wind", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
     MARK_TIDE("mark_tide", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),

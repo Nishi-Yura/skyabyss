@@ -402,7 +402,6 @@ data/<名前空間>/quest/<名前>.json
 | 地下のダンジョン | 四つの今日の様子 | 毎朝 |
 | 魚の注文 | 今日・今週 納めた土地の数 / 5 | 毎朝 |
 | 釣り大会 | 今週の自分の一番 | 月曜 |
-| 早駆けの道 | 自分の一番がある道 / 4 | 月曜 |
 | 組合の旗取り | 旅の地図と組合の受付で | 月曜 |
 | 大陸の大事件 | いま起きている / 次はあと何分 | — |
 | 野営地の景品 | 替わるまであと何日 | — |
@@ -453,7 +452,7 @@ data/<名前空間>/quest/<名前>.json
 
 | 決まり | 中身 |
 | --- | --- |
-| 置き場・ID | `data/skyabyss/quest/ch<n>/prep_gear.json`（身ごしらえ）、`prep_blade.json`（刃を研ぐ）、`prep_pulse.json`（鼓動を聞く）。n = 2〜4（一章は `ch1/trail_iron`・`trail_blade`・`trail_shield`）。ID は `ch<n>/prep_<kind>`、文のキーは `quest.skyabyss.ch<n>.prep_<kind>.title` など |
+| 置き場・ID | `data/skyabyss/quest/ch<n>/prep_gear.json`（身ごしらえ）、`prep_blade.json`（刃を研ぐ）、`prep_pulse.json`（鼓動を聞く）。n = 2〜4（一章は `ch1/trail_iron`・`trail_blade`）。ID は `ch<n>/prep_<kind>`、文のキーは `quest.skyabyss.ch<n>.prep_<kind>.title` など |
 | 必須の欄 | `category` = `sub`、`chapter` = その章の ID（一章 `titan_whale`・二章 `titan_tide`・三章 `titan_storm`・四章 `titan_ember`）、`start_when`（章の頭にクエストログへ自動で出る）。`repeat` と `board` は付けない。違えば読み込みの警告（`QuestManager.loadErrors`。`PrepQuests.validate`） |
 | 順番 | ふさがない。どれから受けても終えてもよい（ログの並びは `order`） |
 | 合図 | 3 本が終わったとき（どの順でも）、その人へ `ch<n>_ready` の合図（`Quests.signal`）を一度だけ送る（人ごと。`Growth.discover` の鍵 `prep_ready:<n>`）。3 本の定義がそろっていない章は合図が出ない（中身のない章） |
@@ -467,12 +466,12 @@ data/<名前空間>/quest/<名前>.json
 - 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
-**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 3 本が**メインの段**（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣 → 盾と糧の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）・`trail_shield`（盾と糧。語り部。50）、データを直接直す（生成スクリプトはない）。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」、盾と糧が「折れた剣を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 3 本）で待ち、三本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
+**一章の支度の段（34 の 4.2、C1。実装済み）**: 一章だけは 2 本が**メインの段**（`PrepQuests` の章の表。`category` = `main`。**鉄の跡 → 折れた剣の順に一本ずつ**出る）。`quest/ch1/trail_iron`（鉄の跡。イサナ。100）・`trail_blade`（折れた剣。職人。100）、データを直接直す（生成スクリプトはない）。開始の条件は、鉄の跡が「一章（段階 0）で、イサナの鯨の話を聞いた（印 `c_whale_heard`）か岩鯨を見た」、折れた剣が「鉄の跡を終えた」。最初の一本を受けると覚書（一章）が渡る。メイン「雲の下の歌」は鯨追いの話のあと段 `prepare`（目的 `condition`: 支度 2 本）で待ち、二本そろうと岩鯨が初めて現れる（17 の 2.8）。各段の書き出しの一言は `quest.skyabyss.ch1.trail_*.<段>.lead`。
   - **鉄の跡**: 段 `track`（追跡。2026-11-04。鯨見の町の外（中心から 100。坑が近ければ道のりの 35% まで）から骨の坑までの道のりの 18%・48%・78% の所（左右に互い違いに 14 ずらす。畑・水・道・建物の上なら、まわり 6 の中の自然の地面へずらす）に、前の旅人の鉄くず（欠けた金床とほどけた鎖。まわりの草を刈る。40 以内で錆色の光の粒）。鉄くずから次の鉄くず（最後は坑）のほうへ鉄靴の跡（粗い土を左右交互に 6 つ）。目印の矢印は出さない。3.5 以内に入ると合図 `ch1_iron_scrap` と小さな話の字幕。三つで済む。坑の頁をもう読んだ人は飛ばす。町か坑がないまま 60 秒たてば済ませる。`story/ch1/IronTrail`、開発 `/skyabyss_iron start|goto <0-2>`、自己テスト `ch1 iron trail`）→ 段 `pit`（骨の坑の前の私の荷で頁 `ch1/trail_iron`。`story/ch1/BonePit.openPack`。経験値 30）→ 段 `armor`（目的 `wear`: 鉄張りの旅装の兜・鎖帷子・腰当て・靴のうち着ている種類の数。帯は「鉄張りの旅装を身につけよう（市の武具屋）」）。報酬 70、イサナの好感度 +3。理由はイサナの `c_whale_iron`（「鎖は、素手では上れない。……前にここへ来た旅人は、鉄を着ていた。丘を越えていく石標が、その人の道だ」）と `c_whale3`（「鯨が降りてくる前に、支度をしておけ。まずは鉄だ」）。頁のあとのイサナの一言 `ch1t_c_page`（市の武具屋で買えば足りる）、着たあとの `ch1t_c_iron`（次は刃。職人を指す。`dialogue/ch1/whale_chaser_trail.json`）。
-  - **折れた剣**: 段 `hear`（職人に刃のことを聞く。入口 `ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続けて）→ 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。終わりの一言で語り部を指す。
+  - **折れた剣**: 段 `hear`（職人に刃のことを聞く。入口 `ch1t_blade_tell`。初めて会う人は名乗りの `ch1a_first_blade` から続けて）→ 段 `cave`（割れ殻の洞をクリアすると台座の頁 `ch1/trail_blade`。`story/ch1/Ch1Trails` が `SiteSpawner.onCleared` で記す。先に洞を抜けた人もさかのぼって済む。30）→ 段 `show`（職人の入口 `ch1t_blade_show`。作り方を教わる）→ 段 `forge`（`all`: 鉄の剣を持つ・岩の砥石を使う `ch1_whetstone_used`）。報酬 70、職人 +3。終わりの一言で語り部を指す（語り部は足音の晩の話をしたがっている）。
     - 洞の奥の鉄格子は、棘の間の東の壁ぎわの鳴り石三つを、上のろうそくの少ない順に右クリックで叩くと開く（壊して通る所ではない）。格子が閉じている間、鳴り石から 18 以内の人には石の上に光の粒（毎秒）、鳴り石か格子に近づくと一度だけ手がかりの帯（「光る鳴り石を右クリックで叩こう。ろうそくの少ない順に」/「鉄格子は壊せない。鳴り石で開く」）を出す（`CleftCave`。2026-10-29 の声「最後の謎解き、もっと押すブロック主張して」「つるはしで壊さずに行けるように」）。
-  - **盾と糧**: 段 `tale`（語り部の入口 `ch1t_shield_tale`。足音の晩の話。結果で頁 `ch1/trail_shield`。`dialogue/ch1/storyteller_trail.json`）→ 段 `pack`（`all`: 盾 1・道の固焼き 8）。報酬 50、語り部 +3。鼓動守（護り糸を職人に）と鯨道の旅装は任意。
-  - **三本そろう**: 合図 `ch1_ready`（進捗 `whale_trail`）と記念品「鯨追いの印」（`skyabyss:whale_chaser_mark`。説明つき。人ごとに一度。`PrepQuests.onReady`）。語り部の一言 `ch1t_s_ready`（「この字、どこかで見た気がするよ」）。報告ではイサナが `c_fragment_hand`（頁を見つけた人だけの選択肢。「鯨骨の船長の日誌と同じ字に見えた」）、語り部が `fragment_verse`（数え歌のひとつめ）を言う。
+  - **足音の晩の話**（クエストではない。盾と糧の段は 2026-11-06 に消した。声「盾を買うクエストは消して」）: 折れた剣を終えたあと、頁を見るまで語り部の入口 `ch1t_shield_tale` に出る。話すと頁 `ch1/trail_shield`（`dialogue/ch1/storyteller_trail.json`）。鼓動守（護り糸を職人に）と鯨道の旅装は任意。
+  - **二本そろう**: 合図 `ch1_ready`（進捗 `whale_trail`）と記念品「鯨追いの印」（`skyabyss:whale_chaser_mark`。説明つき。人ごとに一度。`PrepQuests.onReady`）。語り部の一言 `ch1t_s_ready`（「この字、どこかで見た気がするよ」）。報告ではイサナが `c_fragment_hand`（頁を見つけた人だけの選択肢。「鯨骨の船長の日誌と同じ字に見えた」）、語り部が `fragment_verse`（数え歌のひとつめ）を言う。
   - 目的の帯の行き先: `ch1/trail_iron/pit` → 骨の坑、`ch1/trail_blade/cave` → 割れ殻の洞（`SiteNetwork.CHAPTER_TARGETS`・`SiteTargets.bindChapterTargets`）。ほかの段は話す相手の居場所。一章の降下の条件の読み方は 02 の 2.3（支度の段を 2 本）。
 
 **経験値の枠**（`ChapterXpBudget`）: 21 の 1.5 の表（章ごとの 1 レベル分・既存・新しい分の上限・合計の上限）を持ち、`quest/ch<n>/` の新しいクエスト（既存の小要素に数え済みの `LEGACY` と繰り返す頼みを除く、段階と報酬の経験値の合計）と、場所の湧き台のクリアの経験値を足す。読み込みのとき（`QuestManager`）と自己テスト `xp budget` が、新しい分の上限と合計の上限を超えていないか検める。超えた章の場所の経験値は、湧き台が 0 に切る（品は渡す）。

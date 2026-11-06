@@ -4,12 +4,20 @@
   "entries": [
     {
       "node": "ch1t_shield_tale",
-      "if": {
-        "type": "quest",
-        "quest": "ch1/trail_shield",
-        "is": "active",
-        "stage": "tale"
-      }
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch1/trail_blade",
+          "is": "done"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "lore",
+            "entry": "ch1/trail_shield"
+          }
+        }
+      ]
     },
     {
       "node": "ch1t_s_ready",
@@ -17,7 +25,7 @@
         {
           "type": "prep",
           "chapter": 1,
-          "min": 3
+          "min": 2
         },
         {
           "type": "not",

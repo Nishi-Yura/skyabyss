@@ -1,0 +1,51 @@
+# 2026-11-06: 巨神の背の到着の台を集合の場所に (台の鐘。全員そろってから鳴らすと 5 秒で出発。trial/TrialRoute)。四体の台と帯の一行を撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/arrival_bell.txt -PshotsName=arrival_bell
+world arrivalbell flat
+size 1280 720
+timeout 1200
+render 12
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud on
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 60
+chat clear
+shot a1_whale
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a1_whale_bell
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 60
+chat clear
+shot a2_tide
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a2_tide_bell
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 60
+chat clear
+shot a3_storm
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a3_storm_bell
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 60
+chat clear
+shot a4_ember
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a4_ember_bell
+quit

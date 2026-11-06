@@ -492,7 +492,7 @@ public final class Ch1SitesSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- trails (支度の段 3 本)
+    // ---------------------------------------------------------------- trails (支度の段 2 本)
     private static void trails(MinecraftServer server) {
         ServerLevel level = server.overworld();
         FakePlayer p = fake(server, "trail");
@@ -511,7 +511,7 @@ public final class Ch1SitesSelfTest {
         };
         try {
             clean.run();
-            check(PrepQuests.defined(1) && PrepQuests.ids(1).equals(Ch1Prep.TRAILS), "the three chapter-1 trail steps are not all defined (" + QuestManager.loadErrors() + ")");
+            check(PrepQuests.defined(1) && PrepQuests.ids(1).equals(Ch1Prep.TRAILS), "the chapter-1 trail steps are not all defined (" + QuestManager.loadErrors() + ")");
             check(QuestManager.loadErrors().stream().noneMatch(s -> s.contains("prep")), "trail steps were flagged: " + QuestManager.loadErrors());
             for (String id : Ch1Prep.TRAILS) {
                 var def = QuestManager.quest(id);
@@ -528,8 +528,8 @@ public final class Ch1SitesSelfTest {
                     "{\"type\":\"flag\",\"flag\":\"c_whale_heard\",\"npc\":\"skyabyss:whale_chaser\"}"), new ArrayList<>(), "t").get(0).run(ctx);
             Quests.poll(p, false);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) != null, "the iron trail did not start after Isana's whale talk");
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) == null && QuestLog.of(p).entry(Ch1Prep.Q_SHIELD) == null,
-                    "the blade and shield trails should wait for the iron trail");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) == null, "the blade trail should wait for the iron trail");
+            check(QuestManager.quest("ch1/trail_shield") == null, "the shield trail should be gone (2026-11-06)");
             check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
 
             // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・頁。松明は 0.9.22 から入れない: 置く品は持たせない) → 鉄の防具 4 部位を着る
@@ -558,10 +558,9 @@ public final class Ch1SitesSelfTest {
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON).done, "four worn iron pieces did not finish the iron trail");
             check(PrepQuests.done(p, 1) == 1 && !PrepQuests.ready(p, 1), "one trail step should count as one");
-            // 鉄の跡を終えると折れた剣が出る (盾と糧はまだ)
+            // 鉄の跡を終えると折れた剣が出る
             Quests.poll(p, false);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) != null && QuestLog.of(p).entry(Ch1Prep.Q_SHIELD) == null,
-                    "finishing the iron trail should start only the blade trail");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) != null, "finishing the iron trail did not start the blade trail");
 
             // 折れた剣: 職人に刃のことを聞く → 洞の台座の頁 → 職人に話す → 鉄の剣と砥石
             Quests.onTalk(p, "skyabyss:artisan", "ch1t_blade_tell");
@@ -575,35 +574,23 @@ public final class Ch1SitesSelfTest {
             Quests.poll(p, true);
             Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
             check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "an iron sword and the whetstone did not finish trail_blade");
-            Quests.poll(p, false);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD) != null, "finishing the blade trail did not start the shield trail");
 
-            // 盾と糧: 語り部の足音の晩の話 (伝承) → 盾と固焼き 8
-            var st = jp.revati.skyabyss.npc.DialogueManager.dialogue(jp.revati.skyabyss.npc.NpcSetup.STORYTELLER_ID);
-            check(st != null && st.nodes().containsKey("ch1t_shield_tale"), "the storyteller has no shield tale");
-            if (st != null && st.nodes().containsKey("ch1t_shield_tale")) {
-                st.nodes().get("ch1t_shield_tale").actions().forEach(x -> x.run(ctx));
-                check(Lore.state(p).has(Ch1Prep.PAGE_SHIELD), "the shield tale did not record its page");
-            }
-            Quests.onTalk(p, "skyabyss:storyteller", "ch1t_shield_tale");
-            check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).stage == 1, "the tale did not move trail_shield to the pack stage");
-            p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.TRAVEL_SHIELD.get()));
-            p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.TravelGear.ROAD_HARDTACK.get(), 7));
-            Quests.poll(p, true);
-            check(!QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done, "seven hardtack finished trail_shield");
-            p.getInventory().add(new ItemStack(jp.revati.skyabyss.guide.TravelGear.ROAD_HARDTACK.get(), 1));
-            Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done, "a shield and eight hardtack did not finish trail_shield");
-
-            // 三本で ch1_ready と鯨追いの印 (一度だけ)
-            check(PrepQuests.ready(p, 1) && Growth.get(p).discoveries.contains("prep_ready:1"), "the three trail steps did not raise ch1_ready");
+            // 二本で ch1_ready と鯨追いの印 (一度だけ)
+            check(PrepQuests.ready(p, 1) && Growth.get(p).discoveries.contains("prep_ready:1"), "the two trail steps did not raise ch1_ready");
             check(p.getInventory().countItem(GuideSetup.WHALE_CHASER_MARK.get()) == 1, "the whale chaser's mark was not given once");
-            Quests.forget(p, Ch1Prep.Q_SHIELD);
-            Quests.start(p, Ch1Prep.Q_SHIELD);
-            for (int i = 0; i < 3 && !QuestLog.of(p).entry(Ch1Prep.Q_SHIELD).done; i++) {
-                Quests.forceStage(p, Ch1Prep.Q_SHIELD);
+            Quests.forget(p, Ch1Prep.Q_BLADE);
+            Quests.start(p, Ch1Prep.Q_BLADE);
+            for (int i = 0; i < 5 && !QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done; i++) {
+                Quests.forceStage(p, Ch1Prep.Q_BLADE);
             }
             check(p.getInventory().countItem(GuideSetup.WHALE_CHASER_MARK.get()) == 1, "the whale chaser's mark was given twice");
+            // 語り部の足音の晩の話 (クエストではない): 折れた剣のあと、頁を見るまで入口に出て、話すと頁を記す
+            var st = jp.revati.skyabyss.npc.DialogueManager.dialogue(jp.revati.skyabyss.npc.NpcSetup.STORYTELLER_ID);
+            check(st != null && st.nodes().containsKey("ch1t_shield_tale"), "the storyteller has no footsteps tale");
+            if (st != null && st.nodes().containsKey("ch1t_shield_tale")) {
+                st.nodes().get("ch1t_shield_tale").actions().forEach(x -> x.run(ctx));
+                check(Lore.state(p).has(Ch1Prep.PAGE_SHIELD), "the footsteps tale did not record its page");
+            }
             // 文 (日英)
             for (String key : List.of("item.skyabyss.whale_chaser_mark", "item.skyabyss.whale_chaser_mark.lore", "message.skyabyss.ch1.pit.pack",
                     "message.skyabyss.ch1.pit.cold_open", "quest.skyabyss.ch1.trail_iron.armor.wear", "lore.skyabyss.ch1.cold_door.body",
@@ -705,10 +692,10 @@ public final class Ch1SitesSelfTest {
             a.getInventory().clearContent();
             b.getInventory().clearContent();
         }
-        // 経験値の枠: 一章の新しい分 (支度の段 + 洞 40 + 骨の坑 40) は枠 (ChapterXpBudget.NEW_CAP) に収まる
+        // 経験値の枠: 一章の新しい分 (支度の段 2 本 = 鉄の跡 100・折れた剣 100 + 洞 40 + 骨の坑 40) は枠 (ChapterXpBudget.NEW_CAP) に収まる
         int fresh = ChapterXpBudget.newXp(QuestManager.all(), 1);
         check(fresh <= ChapterXpBudget.NEW_CAP[1], "chapter 1 new xp " + fresh + " exceeds " + ChapterXpBudget.NEW_CAP[1]);
-        check(fresh >= 250 + CleftCave.XP + BonePit.XP, "chapter 1 new xp " + fresh + " does not count the trail steps, the cave and the pit");
+        check(fresh >= 200 + CleftCave.XP + BonePit.XP, "chapter 1 new xp " + fresh + " does not count the trail steps, the cave and the pit");
         check(ChapterXpBudget.overruns(QuestManager.all(), 1).isEmpty(), "chapter 1 is over its xp budget: " + ChapterXpBudget.overruns(QuestManager.all(), 1));
         int lore = Ch1Prep.LORE_XP.values().stream().mapToInt(Integer::intValue).sum();
         check(ChapterXpBudget.EXISTING[1] + fresh + lore <= (int) (ChapterXpBudget.LEVEL_XP[1] * ChapterXpBudget.MAX_RATIO),

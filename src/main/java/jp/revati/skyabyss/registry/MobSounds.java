@@ -181,6 +181,10 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HURT = register("thunder_wolf_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_DEATH = register("thunder_wolf_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_WOLF_HOWL = register("thunder_wolf_howl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_JACKAL_AMBIENT = register("ember_jackal_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_JACKAL_HURT = register("ember_jackal_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_JACKAL_DEATH = register("ember_jackal_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> EMBER_JACKAL_HOWL = register("ember_jackal_howl");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_AMBIENT = register("rock_boar_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_HURT = register("rock_boar_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_BOAR_DEATH = register("rock_boar_death");

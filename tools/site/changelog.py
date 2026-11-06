@@ -8,6 +8,13 @@ from sitelib import REPO, T, page, sec
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v1.1.2", "2026-11-06", [
+            ("鯨見の町に、骨削りのゴンジと鐘打ちのハルが住むようになりました（頼みが一つずつ）。野営の旅人 3 人も自分の顔で話します。", "Gonji the bone carver and Haru the bell-ringer now live in the whale-watch town, with an errand each. The three camp travelers now speak with their own faces."),
+            ("灰の荒野に新しい敵「熾の山犬」。三、四頭の群れで、一頭が吠えると仲間が背中側へ回り込んで噛みつきます（床の帯の予告つき）。嵐の高地の見どころを 8 か所足しました（今の世界でも、近づくと建ちます）。", "A new foe in the ash wilds: the ember jackal. Packs of three or four; when one howls, the others circle behind you and bite (with the usual floor warning). Eight more named places in the storm highlands (they appear in existing worlds as you approach)."),
+            ("巨神の背の到着の台に鐘を置きました。鐘を鳴らすと 5 秒で出発します。そろった人たちだけでも鳴らせ、あとから着いた仲間は今の部屋へ運ばれます。", "The arrival platforms on the titans' backs now have a bell. Ring it to set out after five seconds; you can go with whoever has gathered, and late arrivals are carried to the current room."),
+            ("店は今の職で使えない品を並べません（旅の盾は戦士、光る矢は弓使いだけ）。一章の支度「盾と糧」と、乗り物の早駆けを無くしました。", "Shops only list what your current job can use (the travel shield for warriors, glow arrows for archers). The chapter 1 prep quest \"shield and provisions\" and the mount sprint routes are gone."),
+            ("旅の地図には字を書かず、印や土地を指したときに名前と目安の Lv を出します。近接の溜めは、照準の下の細い帯になりました。", "The travel map no longer writes names on the map; hover a mark or a land to see its name and level. The melee charge is now a thin bar under the crosshair."),
+        ]),
         ("v1.1.1", "2026-11-05", [
             ("1.1.0 で作り直した世界で、語り部・鯨追い・職人がすぐに立つようになりました。作り直しで海や宙になった所にいた人は、読み込みのあと近くの陸（無ければ起き上がる場所）に立ちます。", "In worlds rebuilt by 1.1.0, the storyteller, the whale chaser and the artisans now stand again right away. Players left over sea or air by the rebuild now land on the nearest ground (or the respawn point) after loading."),
             ("今の職でない武器では戦えなくなりました（弓も引けません）。武器の説明の「職」の行は、今の職の武器なら金、ほかの職の武器なら赤紫で「（いまの職では使えない）」と出ます。都の案内の灯りは、着いたことを広めにとるようにしました。", "Weapons of another job no longer work (bows cannot be drawn). The job line in a weapon's tooltip is gold for your job's weapons and red-purple with \"not usable in your current job\" for others. The capital guide's lights now count arrival more generously."),

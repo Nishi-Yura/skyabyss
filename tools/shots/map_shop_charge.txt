@@ -1,0 +1,54 @@
+# 2026-11-05 の声: 地図に字を書かない (指したときだけ)・店は今の職の品だけ・溜めは照準の下の細い帯
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/map_shop_charge.txt -PshotsName=map_shop_charge
+world mapshop continent
+size 1600 900
+timeout 1500
+guiscale 2
+render 10
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss dev opening at shelter 0 0 0 4 180 5
+waitchunks 600
+wait 60
+# 店: 魔法使いには盾と光る矢が並ばない
+cmd skyabyss job choose mage
+wait 10
+cmd skyabyss facility shop outfit_shop
+wait 30
+shot s1_outfit_mage
+close
+wait 10
+# 地図: 字はなく、指すと名前
+open travel_map
+wait 40
+mapscale 2400
+wait 20
+shot m1_map_plain
+hover 330 190
+wait 10
+shot m2_map_hover_land
+hover 400 225
+wait 10
+shot m3_map_hover_self
+mapscale 300
+wait 20
+shot m4_map_near
+close
+wait 10
+# 溜めの帯: 振った直後・途中・満ちた光
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with minecraft:stone_sword
+chat clear
+hud on
+wait 20
+attack
+wait 3
+shot c1_swung
+wait 5
+shot c2_half
+wait 3
+shot c3_full

@@ -67,8 +67,8 @@ public final class TrialRoute {
     public static final String MID = "keep.trial.mid";
     // 越えてから次へ運ぶまで (29 の 4.6 の 4 秒)
     public static final int CARRY_DELAY = 80;
-    // 入口に全員がそろってから始まるまでの予告
-    public static final int ENTRY_WAIT = 60;
+    // 台の鐘を鳴らしてから始まるまでの数え下ろし (5 秒。鐘は全員が台にそろってから鳴らせる)
+    public static final int ENTRY_WAIT = 100;
     // あきらめの提案が流れるまで / 次の提案まで
     public static final int ABANDON_WAIT = 20 * 30;
     public static final int ABANDON_COOLDOWN = 20 * 120;
@@ -88,7 +88,10 @@ public final class TrialRoute {
     private static final Map<UUID, Pending> PENDING = new HashMap<>();
     private static final Map<UUID, Abandon> ABANDON = new HashMap<>();
     private static final Map<UUID, Long> ABANDON_LAST = new HashMap<>();
+    // 鐘を鳴らした時刻 (グループ → tick)。台を誰かが降りると消える
     private static final Map<UUID, Long> ENTRY_START = new HashMap<>();
+    // 到着の台の鐘の置き場 (巨神 → 位置。台の足もとから 2〜4 の平らな所を一度だけ探す)
+    private static final Map<String, BlockPos> BELLS = new HashMap<>();
     private static final Map<UUID, Long> EMPTY_SINCE = new HashMap<>();
     // 同じ試練の二重の合図をまとめる (グループ|鍵)
     private static final Set<String> CLEARED_KEYS = new LinkedHashSet<>();
@@ -406,6 +409,110 @@ public final class TrialRoute {
         return list;
     }
 
+    // ---------------------------------------------------------------- 集合 (到着の台と鐘)
+    // 台にそろうのを待つ人: その背にいるグループの人と、サーバーにいるグループの人 (まだ乗り込んでいない仲間も数える。観戦者は除く)
+    public static List<ServerPlayer> gathering(ServerLevel back, UUID group) {
+        List<ServerPlayer> list = present(back, group);
+        for (ServerPlayer p : Players.snapshot(back.getServer().getPlayerList().getPlayers())) {
+            if (!p.isSpectator() && Groups.isMember(p, group) && !list.contains(p)) {
+                list.add(p);
+            }
+        }
+        return list;
+    }
+
+    // まだ台にいない仲間の名前 (「、」でつなぐ)
+    static Component awayNames(List<ServerPlayer> all, List<ServerPlayer> inside) {
+        List<String> names = new ArrayList<>();
+        for (ServerPlayer p : all) {
+            if (!inside.contains(p)) {
+                names.add(p.getGameProfile().getName());
+            }
+        }
+        return Component.literal(String.join("、", names));
+    }
+
+    // 台の鐘の位置 (足もとから 2〜4 の所で、下が固く、その所と上が空いている所。見つからなければ null。見つかれば覚える)
+    @Nullable
+    public static BlockPos bellPos(ServerLevel back, String titan) {
+        BlockPos known = BELLS.get(titan);
+        if (known != null) {
+            return known;
+        }
+        BlockPos f = RouteSeals.safeFeet(titan);
+        if (!back.isLoaded(f)) {
+            return null;
+        }
+        for (int r = 2; r <= 4; r++) {
+            for (int dz = -r; dz <= r; dz++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+                        continue;
+                    }
+                    for (int dy : new int[] {0, 1, -1}) {
+                        BlockPos at = f.offset(dx, dy, dz);
+                        net.minecraft.world.level.block.state.BlockState here = back.getBlockState(at);
+                        if (here.is(net.minecraft.world.level.block.Blocks.BELL)
+                                || here.isAir() && back.getBlockState(at.above()).isAir()
+                                && back.getBlockState(at.below()).isFaceSturdy(back, at.below(), net.minecraft.core.Direction.UP)) {
+                            BELLS.put(titan, at.immutable());
+                            return at.immutable();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // 台に鐘がなければ置く (床の鐘。足もとのほうを向ける)
+    static void ensureBell(ServerLevel back, String titan) {
+        BlockPos at = bellPos(back, titan);
+        if (at == null || !back.isLoaded(at) || back.getBlockState(at).is(net.minecraft.world.level.block.Blocks.BELL)) {
+            return;
+        }
+        BlockPos f = RouteSeals.safeFeet(titan);
+        net.minecraft.core.Direction face = net.minecraft.core.Direction.getNearest(f.getX() - at.getX(), 0, f.getZ() - at.getZ());
+        if (face.getAxis().isVertical()) {
+            face = net.minecraft.core.Direction.NORTH;
+        }
+        back.setBlock(at, net.minecraft.world.level.block.Blocks.BELL.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.BellBlock.FACING, face)
+                .setValue(net.minecraft.world.level.block.BellBlock.ATTACHMENT, net.minecraft.world.level.block.state.properties.BellAttachType.FLOOR), 3);
+    }
+
+    // 鐘を鳴らす: 台の上の人が鳴らすと数え下ろしが始まる (全員そろっていなくてよい。2026-11-06 の声「そろった人たちのみで鐘を鳴らせるように」)。
+    // 数え終わったときに台にいる人で出発し、あとから台に来た仲間は今の部屋へ運ばれる (rejoin)。始まった (もう始まっている) か
+    public static boolean ring(ServerLevel back, String titan, ServerPlayer p, long now) {
+        AABB box = entryBox(titan);
+        UUID group = Groups.keyOf(p);
+        if (box == null || !box.contains(p.position()) || active(back, group)) {
+            return false;
+        }
+        if (!FirstRun.isFirstRun(back, group)) {
+            Notice.bar(p, ModText.hint("message.skyabyss.route.use_shrine"));
+            return false;
+        }
+        if (ENTRY_START.putIfAbsent(group, now) == null) {
+            back.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0f, 1.0f);
+        }
+        return true;
+    }
+
+    @SubscribeEvent
+    static void onBell(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || !(event.getLevel() instanceof ServerLevel back)
+                || !back.getBlockState(event.getPos()).is(net.minecraft.world.level.block.Blocks.BELL)) {
+            return;
+        }
+        String titan = Titans.titanOfBack(back.dimension());
+        if (titan == null || !event.getPos().equals(BELLS.get(titan))) {
+            return;
+        }
+        event.setCanceled(true);
+        ring(back, titan, p, back.getGameTime());
+    }
+
     // その背にいる順路の参加者 (順路が動いていなければ、その背にいるグループの人)
     public static List<ServerPlayer> members(ServerLevel back, UUID group) {
         List<ServerPlayer> all = present(back, group);
@@ -575,6 +682,7 @@ public final class TrialRoute {
         if (box == null || players.isEmpty()) {
             return;
         }
+        ensureBell(back, titan);
         Set<UUID> groups = new LinkedHashSet<>();
         for (ServerPlayer p : players) {
             if (p.isAlive() && !p.isSpectator() && box.contains(p.position())) {
@@ -612,20 +720,24 @@ public final class TrialRoute {
                 }
                 continue;
             }
-            List<ServerPlayer> all = present(back, group);
-            if (inside.size() < all.size()) {
-                trace(group, titan, "waiting " + inside.size() + " of " + all.size());
-                ENTRY_START.remove(group);
+            List<ServerPlayer> all = gathering(back, group);
+            Long t0 = ENTRY_START.get(group);
+            if (t0 == null) {
+                // 鐘を待つ: そろっていなければ、誰がまだかを添える (そろった人たちだけでも鳴らせる)
+                trace(group, titan, "waiting for the bell, " + inside.size() + " of " + all.size() + " on the platform");
+                Component bar = inside.size() < all.size()
+                        ? ModText.progress("message.skyabyss.route.waiting", inside.size(), all.size(), awayNames(all, inside))
+                        : ModText.progress("message.skyabyss.route.ring");
                 for (ServerPlayer p : inside) {
-                    Notice.bar(p, ModText.progress("message.skyabyss.route.waiting", inside.size(), all.size()));
+                    Notice.bar(p, bar);
                 }
                 continue;
             }
-            long t0 = ENTRY_START.computeIfAbsent(group, g -> now);
             long left = ENTRY_WAIT - (now - t0);
             trace(group, titan, left <= 0 ? "starting" : "counting down");
             if (left <= 0) {
-                start(back, group, titan, all);
+                ENTRY_START.remove(group);
+                start(back, group, titan, inside);
                 continue;
             }
             for (ServerPlayer p : inside) {
