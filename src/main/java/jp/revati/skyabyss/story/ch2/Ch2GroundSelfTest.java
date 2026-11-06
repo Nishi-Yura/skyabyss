@@ -178,6 +178,23 @@ public final class Ch2GroundSelfTest {
         check(level.getBlockState(v.at(0, 0, -1)).is(Blocks.STONE_BRICK_SLAB), "the sill did not come back over the water");
         check(level.getBlockState(v.at(0, -11, 25)).isAir(), "water in the entrance hall was not drained");
         check(SaltVault.clearMouth(level, v) == 0, "mending a clear mouth should change nothing");
+        // 出口の縦穴: 上に跳ね上げ戸。何度手当てしても戸は戸のまま。まわりを掘っても石レンガで囲い直す (外から梯子へ入れない)
+        BlockPos top = SaltVault.exitTop(level, v);
+        check(top != null, "the vault exit shaft has no trapdoor on top");
+        if (top != null) {
+            SaltVault.decorate(level, v);
+            SaltVault.decorate(level, v);
+            check(top.equals(SaltVault.exitTop(level, v)), "decorating twice moved or broke the exit trapdoor (" + SaltVault.exitTop(level, v) + ")");
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                level.setBlock(top.relative(d), Blocks.AIR.defaultBlockState(), 2 | 16);
+            }
+            SaltVault.decorate(level, v);
+            boolean walled = true;
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                walled &= !level.getBlockState(top.relative(d)).isAir();
+            }
+            check(walled, "the exit trapdoor was not walled in again");
+        }
         int door = 0;
         for (int k = 0; k < SaltVault.DOOR_CELLS; k++) {
             if (level.getBlockState(v.door(k)).is(Blocks.SMOOTH_QUARTZ)) {

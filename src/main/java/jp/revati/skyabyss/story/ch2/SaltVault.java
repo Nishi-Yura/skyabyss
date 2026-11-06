@@ -151,6 +151,59 @@ public final class SaltVault {
         SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:salt_crystal", 2, 3, 3),
                 new SiteTreasure.Entry("skyabyss:small_pearl", 1, 2, 2), new SiteTreasure.Entry("skyabyss:shell_chip", 1, 1, 1))));
         SiteSpawner.register(new SiteSpawner.Def(SITE, Chapters.TIDE, pads(), XP, TREASURE, REPEAT_TREASURE, SiteSpawner.MAX_MOBS, SaltVault::origins, SaltVault::yawAt));
+        // 白い戸が開いている (世界に一つ。一度開けば残る) → 支度「塩の道」の蔵の段の一つめ。後から来た人も済む
+        Quests.SIGNAL_STATES.put(SIGNAL_DOOR, p -> {
+            ServerLevel level = p.server.overworld();
+            for (Vault v : vaults(p.server)) {
+                if (doorOpenKnown(level, v)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        jp.revati.skyabyss.opening.site.SiteNetwork.PLAYER_TARGETS.add(SaltVault::targets);
+    }
+
+    public static final String SIGNAL_DOOR = "ch2_salt_door";
+    static final String BARREL_HINT = "skyabyss_ch2_salt_barrel_hint";
+
+    // 戸が開いているか (読み込まれていない所は開いていないとみなす)
+    static boolean doorOpenKnown(ServerLevel level, Vault v) {
+        for (int k = 0; k < DOOR_CELLS; k++) {
+            BlockPos at = v.door(k);
+            if (at == null || !level.isLoaded(at) || level.getBlockState(at).is(Blocks.SMOOTH_QUARTZ)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 黄色のひし形の行き先 (人ごと。2026-11-07 の声「黄色のひし形の場所バグってる」: 道の段も蔵の段も蔵の基点の一つを指していた):
+    //   道の段 → まだ数えていない一番手前の標 (建つ前は予定の場所) / 蔵の段 → 戸 (塩樽の間)・潮の番人 (奥の間)・奥の刻み
+    static void targets(ServerPlayer p, Map<String, BlockPos> m) {
+        List<SiteData.Entry> list = entries(p.server);
+        if (list.isEmpty()) {
+            return;
+        }
+        SiteData.Entry e = list.get(0);
+        Vault v = new Vault(e.pos, e.yaw);
+        int counted = p.getPersistentData().getInt(COUNTED);
+        for (int n = 1; n <= MARKS; n++) {
+            BlockPos at = roadMark(e, n);
+            if (at != null && (counted & (1 << n)) == 0) {
+                m.put(Ch2Ground.Q_SALT + "/road#0", at.getY() == PLAN_Y ? new BlockPos(at.getX(), e.pos.getY(), at.getZ()) : at);
+                break;
+            }
+        }
+        putMark(m, Ch2Ground.Q_SALT + "/vault#0", v.mark("room2"));
+        putMark(m, Ch2Ground.Q_SALT + "/vault#1", v.mark("room3"));
+        putMark(m, Ch2Ground.Q_SALT + "/vault#2", v.mark("wall_tablet"));
+    }
+
+    private static void putMark(Map<String, BlockPos> m, String key, @Nullable BlockPos at) {
+        if (at != null) {
+            m.put(key, at);
+        }
     }
 
     // 湧き台 (部品の座標。床は y = -12、敵が立つのは -11)。最後の部屋 (奥の間) がクリア後の再訪で戻る
@@ -351,22 +404,74 @@ public final class SaltVault {
         if (wall != null) {
             Tablets.write(level, wall, WALL_SIGN);
         }
+        mendExit(level, v);
+    }
+
+    // ---------------------------------------------------------------- 出口の縦穴
+    // 奥の間の壇の裏から地上への梯子。部品では地面の高さ (印 exit の一つ下) に跳ね上げ戸。地面がそれより高ければ、戸を地表まで上げて梯子を延ばす。
+    // 2026-11-07 の声 (画像: 砂の窪みから梯子が見え、外から入れてボスへ行けた): 延ばした所と戸の高さのまわりは石レンガで囲う (空気・水・草の所だけ)。
+    // 戸は外 (上) からは開かない (onUse。内側から出るためのもの)。何度呼んでも同じ形になる (前は二度目で戸が梯子に替わった)
+    @Nullable
+    public static BlockPos exitTop(ServerLevel level, Vault v) {
         BlockPos exit = v.mark("exit");
-        if (exit != null) {
-            BlockPos top = exit.below();
-            BlockState trap = level.getBlockState(top);
-            BlockState ladder = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING,
-                    trap.hasProperty(TrapDoorBlock.FACING) ? trap.getValue(TrapDoorBlock.FACING) : Direction.SOUTH);
-            BlockPos cur = exit;
-            for (int i = 0; i < 16; i++) {
-                BlockState s = level.getBlockState(cur);
+        if (exit == null) {
+            return null;
+        }
+        BlockPos cur = exit.below();
+        for (int i = 0; i < 24 && level.getBlockState(cur).is(Blocks.LADDER); i++) {
+            cur = cur.above();
+        }
+        return level.getBlockState(cur).getBlock() instanceof TrapDoorBlock ? cur : null;
+    }
+
+    static void mendExit(ServerLevel level, Vault v) {
+        BlockPos exit = v.mark("exit");
+        if (exit == null) {
+            return;
+        }
+        BlockPos base = exit.below();
+        int[] m = Blueprint.get(SITE).marks.get("exit");
+        BlockState trap = null;
+        for (Blueprint.Cell c : Blueprint.get(SITE).cells) {
+            if (c.x() == m[0] && c.y() == m[1] - 1 && c.z() == m[2]) {
+                trap = Blueprint.transform(c.state(), v.rot(), v.mirror());
+            }
+        }
+        if (trap == null || !trap.hasProperty(TrapDoorBlock.FACING)) {
+            return;
+        }
+        Direction face = trap.getValue(TrapDoorBlock.FACING);
+        BlockState ladder = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, face);
+        BlockState shut = trap.hasProperty(TrapDoorBlock.OPEN) ? trap.setValue(TrapDoorBlock.OPEN, false) : trap;
+        // 今の戸の高さ (梯子をたどる)。戸がなければ部品の高さに戻す
+        BlockPos top = base;
+        for (int i = 0; i < 24 && level.getBlockState(top).is(Blocks.LADDER); i++) {
+            top = top.above();
+        }
+        if (!(level.getBlockState(top).getBlock() instanceof TrapDoorBlock)) {
+            top = base;
+        }
+        // 戸の上が地面なら、地表まで延ばす
+        for (int i = 0; i < 16; i++) {
+            BlockState above = level.getBlockState(top.above());
+            if (above.isAir() || above.canBeReplaced() || !above.getFluidState().isEmpty()) {
+                break;
+            }
+            level.setBlock(top, ladder, 2 | 16);
+            top = top.above();
+        }
+        if (!(level.getBlockState(top).getBlock() instanceof TrapDoorBlock)) {
+            level.setBlock(top, shut, 2 | 16);
+        }
+        // 囲う: 部品の戸の高さから今の戸の高さまで、四方の空き (空気・水・草) を石レンガに。梯子の背は部品の壁
+        BlockState wall = Blocks.STONE_BRICKS.defaultBlockState();
+        for (BlockPos cur = base; cur.getY() <= top.getY(); cur = cur.above()) {
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                BlockPos n = cur.relative(d);
+                BlockState s = level.getBlockState(n);
                 if (s.isAir() || s.canBeReplaced() || !s.getFluidState().isEmpty()) {
-                    break;
+                    level.setBlock(n, wall, 2 | 16);
                 }
-                level.setBlock(top, ladder, 2 | 16);
-                level.setBlock(cur, trap.hasProperty(TrapDoorBlock.HALF) ? trap.setValue(TrapDoorBlock.HALF, Half.TOP) : trap, 2 | 16);
-                top = cur;
-                cur = cur.above();
             }
         }
     }
@@ -687,6 +792,7 @@ public final class SaltVault {
         for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 32 * 32) {
                 Notice.narrate(p, "message.skyabyss.ch2.vault.door");
+                Quests.signal(p, SIGNAL_DOOR);
             }
         }
     }
@@ -749,6 +855,15 @@ public final class SaltVault {
                     }
                 }
                 tidyBarrels(level, v, players);
+                // 塩樽の間に初めて入った人に、樽の運び方を一度だけ
+                BlockPos room = v.mark("room2");
+                for (ServerPlayer p : players) {
+                    if (room != null && !p.isSpectator() && !p.getPersistentData().getBoolean(BARREL_HINT)
+                            && p.distanceToSqr(room.getX() + 0.5, room.getY() + 0.5, room.getZ() + 0.5) < 8 * 8 && !doorOpen(level, v)) {
+                        p.getPersistentData().putBoolean(BARREL_HINT, true);
+                        Notice.hint(p, "message.skyabyss.ch2.vault.barrels");
+                    }
+                }
             }
         }
         roadTick(server, level, players);
@@ -826,6 +941,8 @@ public final class SaltVault {
         if ((counted & (1 << n)) == 0) {
             d.putInt(COUNTED, counted | (1 << n));
             Quests.signal(p, Ch2Ground.SIGNAL_MARK);
+            // 黄色のひし形を次の標へ
+            jp.revati.skyabyss.opening.site.SiteNetwork.sendTo(p);
         }
     }
 
@@ -859,6 +976,14 @@ public final class SaltVault {
         }
         BlockPos pos = event.getPos();
         BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof TrapDoorBlock && player.getY() >= pos.getY() + 0.5) {
+            Vault ev = vaultNear(level.getServer(), pos, 56);
+            if (ev != null && pos.equals(exitTop(level, ev))) {
+                event.setCanceled(true);
+                Notice.hint(player, "message.skyabyss.ch2.vault.exit_shut");
+                return;
+            }
+        }
         boolean carrying = carried(player) > 0;
         if (!carrying && !state.is(Blocks.BARREL) && !state.is(Blocks.SMOOTH_QUARTZ)) {
             return;

@@ -103,7 +103,7 @@ public final class MarkerArt {
 
     // ---------------------------------------------------------------- 描く
 
-    // 光の知らせの鍵から巨神の名前 (「巨神#名札」の形は同じ巨神の二つ目の標。潮殻の浜の乗り場など)
+    // 光の知らせの鍵から巨神の名前 (「巨神#名札」の形は同じ巨神の二つ目の標)
     static String titanOf(TitanEndNetwork.Beam b) {
         String k = b.key();
         int i = k.indexOf('#');

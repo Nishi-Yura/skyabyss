@@ -261,7 +261,9 @@ public final class Quests {
                 case "talk" -> !def.repeats() && ob.topic() != null && ob.targets().stream().anyMatch(t -> QuestLog.of(player).heard(def.id(), t, ob.topic()))
                         ? ob.count() : entry.progress(i);
                 // 試練のあとの石の合図は、パーティの誰かが鳴らせば全員のもの (グループの記録から数える。増えるだけ)
-                case "signal" -> Math.max(entry.progress(i), jp.revati.skyabyss.titan.group.TrialSteles.cleared(player, ob.targets()));
+                // 場所のクリア (site_clear:<id>) は、人ごとのクリアの記録があれば済む (クエストがその段に着く前に倒していても。合図は初回にしか出ない)
+                case "signal" -> Math.max(Math.max(entry.progress(i), jp.revati.skyabyss.titan.group.TrialSteles.cleared(player, ob.targets())),
+                        siteCleared(player, ob));
                 case "near" -> slow ? (near(player, ob) ? ob.count() : entry.progress(i)) : entry.progress(i);
                 default -> entry.progress(i);
             };
@@ -277,6 +279,26 @@ public final class Quests {
             }
         }
         return changed;
+    }
+
+    // 状態で決まる合図 (章の担当が登録する。例: 塩の蔵の白い戸が開いている ch2_salt_door)。後から来た人・先に済ませた人も済む
+    public static final Map<String, java.util.function.Predicate<ServerPlayer>> SIGNAL_STATES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    static int siteCleared(ServerPlayer player, QuestDef.Objective ob) {
+        for (String t : ob.targets()) {
+            java.util.function.Predicate<ServerPlayer> st = SIGNAL_STATES.get(t);
+            if (st != null && st.test(player)) {
+                return ob.count();
+            }
+        }
+        jp.revati.skyabyss.guide.SiteProgressData data = jp.revati.skyabyss.guide.SiteProgressData.get(player.server);
+        int n = 0;
+        for (String t : ob.targets()) {
+            if (t.startsWith("site_clear:") && data.cleared(player.getUUID(), t.substring("site_clear:".length()))) {
+                n++;
+            }
+        }
+        return n == 0 ? 0 : ob.count();
     }
 
     // 受けた場所 (板) の radius 以内に、その生き物が count 頭いる。本人も近く (32 以内) にいるときだけ数える

@@ -51,17 +51,23 @@
       "mode": "all",
       "objectives": [
         {
-          "id": "wall",
-          "type": "lore",
-          "targets": [
-            "ch2/salt_vault"
-          ]
+          "id": "door",
+          "type": "signal",
+          "target": "ch2_salt_door",
+          "count": 1
         },
         {
           "id": "warden",
           "type": "signal",
           "target": "site_clear:ch2_salt_vault",
           "count": 1
+        },
+        {
+          "id": "wall",
+          "type": "lore",
+          "targets": [
+            "ch2/salt_vault"
+          ]
         }
       ]
     }

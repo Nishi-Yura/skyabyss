@@ -45,6 +45,9 @@ import net.minecraft.world.phys.Vec3;
 //   満ち潮の輪   銛を頭上へ掲げ、狙った人の足もとに青い輪 (半径 2.6) が 1.2 秒 (RING_WARN) 満ちる → 石突を床へ。
 //                輪の中の人に 4 と鈍足 II 2 秒。輪の中の床は FLOOD_TICKS (5 秒) 水に沈み (ShoreFlood)、そのあと元に戻る
 // 浅い水の部屋 (12〜14 × 12〜19、天井 6) で戦う前提。水の中でも溺れない
+// 名づきは沈んだ塩の蔵の湧き台の個体だけ (named。蔵の基点から 64 以内の場所の敵)。ボスバーと、床を水に沈める技はその個体だけ。
+// 潮の洞 (ダンジョンの敵 warden) の個体は、ボスバーを出さず、輪は水を置かない (水しぶきと鈍足だけ)。
+// (2026-11-07 の声「潮の番人めっちゃいるのに、ボスバー出るからうざい」「潮の番人が出した水消えない」。夜の浜の湧きの表からは外した)
 public class ShoreWarden extends GroundFoe {
     public static final float HEALTH = 160f;
     public static final float THRUST_DAMAGE = 9f;
@@ -69,6 +72,21 @@ public class ShoreWarden extends GroundFoe {
     private boolean scaled;
     private boolean holdAttacks;
     private final List<ShoreFlood.Patch> floods = new ArrayList<>();
+    // 蔵の名づきか (最初に調べて覚える。試験は setNamed で決める)
+    private Boolean named;
+
+    public void setNamed(boolean v) {
+        named = v;
+    }
+
+    public boolean named() {
+        if (named == null) {
+            named = level() instanceof ServerLevel server && jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(this)
+                    && jp.revati.skyabyss.story.ch2.SaltVault.vaults(server.getServer()).stream()
+                            .anyMatch(v -> Math.hypot(v.pos().getX() - getX(), v.pos().getZ() - getZ()) < 64);
+        }
+        return named;
+    }
 
     public ShoreWarden(EntityType<? extends Monster> type, Level level) {
         super(type, level, "shore_warden", "thrust", "ring", "hurt", "death");
@@ -127,7 +145,11 @@ public class ShoreWarden extends GroundFoe {
         }
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 10 == 0) {
-            updateBossBarViewers();
+            if (named()) {
+                updateBossBarViewers();
+            } else {
+                bossBar.removeAllPlayers();
+            }
         }
         if (cooldown > 0) {
             cooldown--;
@@ -246,7 +268,7 @@ public class ShoreWarden extends GroundFoe {
                     server.playSound(null, cx, y, cz, MobSounds.SHORE_WARDEN_FLOOD.get(), SoundSource.HOSTILE, 1.6f, 1.0f);
                     server.sendParticles(ParticleTypes.SPLASH, cx, y + 0.3, cz, 40, RING_RADIUS * 0.5, 0.2, RING_RADIUS * 0.5, 0.2);
                     server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, cx, y + 0.2, cz, 20, RING_RADIUS * 0.4, 0.1, RING_RADIUS * 0.4, 0.05);
-                    if (isAlive()) {
+                    if (isAlive() && named()) {
                         floods.add(ShoreFlood.flood(server, cx, floorY, cz, RING_RADIUS, FLOOD_TICKS));
                     }
                 })

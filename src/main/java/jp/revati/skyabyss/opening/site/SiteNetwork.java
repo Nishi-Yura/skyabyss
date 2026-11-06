@@ -47,15 +47,26 @@ public final class SiteNetwork {
         }
     }
 
+    // 人ごとの行き先を足す口 (章の担当が登録する。二章の塩の道の次の標・蔵の部屋など。キーは「クエスト/段#目的の番号」も使える)
+    public static final java.util.List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, Map<String, BlockPos>>> PLAYER_TARGETS =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
+
     public static SiteTargetsPayload payload(MinecraftServer server, net.minecraft.server.level.ServerPlayer player) {
         SiteTargetsPayload base = payload(server);
-        BlockPos harbor = jp.revati.skyabyss.story.IsanaPost.target(server, player);
-        if (harbor == null) {
-            return base;
-        }
         Map<String, BlockPos> m = new LinkedHashMap<>(base.sites());
-        m.put(SiteTargets.NPC_PREFIX + "whale_chaser", harbor);
+        BlockPos harbor = jp.revati.skyabyss.story.IsanaPost.target(server, player);
+        if (harbor != null) {
+            m.put(SiteTargets.NPC_PREFIX + "whale_chaser", harbor);
+        }
+        for (var hook : PLAYER_TARGETS) {
+            hook.accept(player, m);
+        }
         return new SiteTargetsPayload(m);
+    }
+
+    // 一人に送り直す (人ごとの行き先が変わったとき)
+    public static void sendTo(net.minecraft.server.level.ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player, payload(player.server, player));
     }
 
     public static SiteTargetsPayload payload(MinecraftServer server) {
