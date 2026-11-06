@@ -11,19 +11,20 @@ import org.jetbrains.annotations.Nullable;
 //   width / height : 当たりの大きさ。seat = 乗る人の座る高さ (足もとからのブロック数。鞍の上面 - 1/16)
 //   legPitch / legSpread : 乗った人の脚の向き (度。前への回し・外への開き)。脚が体に入らない向きを生成の道具が選ぶ
 //   (tools/gen/mobs/mounts_lp/build_all.py が低ポリのモデルから測って書き換える)
+//   maxSeats : 乗れる人数の最大 (持ち主を入れて。人数の段を上げてもこれまで)
 //   flies   : 飛ぶ乗り物 (38 の 6 章。乗ると見ている向きへ飛ぶ。MountEntity.travel)
 public enum MountLook {
-    HORN_BEAST("horn_beast", 1, 0, 1.00f, 2.23f, 2.081, -30f, 52f),
-    ASH_DEER("ash_deer", 1, 30, 1.00f, 2.01f, 1.862, -30f, 44f),
-    GREAT_LIZARD("great_lizard", 1, 30, 1.00f, 1.77f, 1.623, -40f, 48f),
-    WHALE_CALF("whale_calf", 2, 60, 1.60f, 2.37f, 2.220, -70f, 40f),
-    SHELL_TORTOISE("shell_tortoise", 3, 100, 1.60f, 2.12f, 1.973, -40f, 44f),
-    STORM_CHICK("storm_chick", 4, 140, 1.43f, 2.19f, 2.037, -40f, 56f),
-    EMBER_FOX("ember_fox", 5, 180, 1.00f, 1.92f, 1.775, -30f, 44f),
+    HORN_BEAST("horn_beast", 1, 0, 1.00f, 2.23f, 2.081, -30f, 52f, 2),
+    ASH_DEER("ash_deer", 1, 30, 1.00f, 2.01f, 1.862, -30f, 44f, 2),
+    GREAT_LIZARD("great_lizard", 1, 30, 1.00f, 1.77f, 1.623, -40f, 48f, 2),
+    WHALE_CALF("whale_calf", 2, 60, 1.60f, 2.37f, 2.220, -70f, 40f, 3),
+    SHELL_TORTOISE("shell_tortoise", 3, 100, 1.60f, 2.12f, 1.973, -40f, 44f, 3),
+    STORM_CHICK("storm_chick", 4, 140, 1.43f, 2.19f, 2.037, -40f, 56f, 2),
+    EMBER_FOX("ember_fox", 5, 180, 1.00f, 1.92f, 1.775, -30f, 44f, 2),
     // 2026-11-02 に選んだ三つ (00 の 346〜348)。五章・六章・終章のあと
-    ABYSS_GECKO("abyss_gecko", 6, 220, 1.10f, 1.70f, 1.551, -30f, 56f),
-    STAR_LYNX("star_lynx", 7, 260, 1.00f, 1.99f, 1.840, -25f, 44f),
-    SKY_RAY("sky_ray", 8, 400, 1.60f, 1.94f, 1.792, -65f, 44f);
+    ABYSS_GECKO("abyss_gecko", 6, 220, 1.10f, 1.70f, 1.551, -30f, 56f, 2),
+    STAR_LYNX("star_lynx", 7, 260, 1.00f, 1.99f, 1.840, -25f, 44f, 2),
+    SKY_RAY("sky_ray", 8, 400, 1.60f, 1.94f, 1.792, -65f, 44f, 3);
 
     // 飛ぶ見た目
     public boolean flies() {
@@ -43,8 +44,10 @@ public enum MountLook {
     public final double seat;
     public final float legPitch;
     public final float legSpread;
+    public final int maxSeats;
 
-    MountLook(String id, int chapter, int price, float width, float height, double seat, float legPitch, float legSpread) {
+    MountLook(String id, int chapter, int price, float width, float height, double seat, float legPitch, float legSpread, int maxSeats) {
+        this.maxSeats = maxSeats;
         this.id = id;
         this.chapter = chapter;
         this.price = price;

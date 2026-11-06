@@ -137,8 +137,15 @@ public final class FrontierHamletsSelfTest {
                         BlockPos hand = spots.get("town/hamlet_" + rf.id() + "/back");
                         check(f, hand != null && hand.equals(e.extra(rf.mark())), rf.id() + ": the hand-in spot is " + hand + ", expected " + e.extra(rf.mark()));
                         check(f, spots.containsKey("town/hamlet_" + rf.id() + "/go#0"), rf.id() + ": the first place of the errand has no spot");
+                        check(f, spots.containsKey("town/hamlet_" + rf.id() + "/giver"), rf.id() + ": the errand has no giver spot for stages without a place");
                     }
                 }
+                // 頼んだ人のいない板の頼み: 倒す敵の出る土地の真ん中 (潮殻の土地の敵 → 潮殻の土地)
+                BlockPos tide = spots.get("daily_tide_rounds/giver");
+                var tideLevel = ContinentLayout.get().levels().get("tide");
+                check(f, jp.revati.skyabyss.quest.QuestManager.quest("daily_tide_rounds") == null
+                        || tide != null && tideLevel != null && tide.getX() == tideLevel.pos().getX() && tide.getZ() == tideLevel.pos().getZ(),
+                        "the board's tide rounds have no spot in the tide land: " + tide);
                 BlockPos door = e.extra("door");
                 check(f, door != null, "the built hamlet has no door point");
                 if (door != null) {

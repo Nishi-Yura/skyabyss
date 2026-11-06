@@ -278,10 +278,12 @@ public final class MountService {
         return Result.OK;
     }
 
-    public static Result buyTier(ServerPlayer player, int kind) {
-        if (kind < 0 || kind >= MountStats.KEYS.length) {
+    public static Result buyTier(ServerPlayer player, int row) {
+        // row = 店の行 (MountStats.KEYS の順)
+        if (row < 0 || row >= MountStats.KEYS.length) {
             return Result.CLOSED;
         }
+        int kind = MountStats.ROW_KIND[row];
         MountData d = data(player);
         int next = d.tier(kind) + 1;
         if (next > MountStats.tiers(kind)) {
@@ -294,7 +296,7 @@ public final class MountService {
         }
         d.setTier(kind, next);
         refresh(player);
-        Notice.hint(player, "message.skyabyss.mount.bought_tier", net.minecraft.network.chat.Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]), next);
+        Notice.hint(player, "message.skyabyss.mount.bought_tier", net.minecraft.network.chat.Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[row]), next);
         return Result.OK;
     }
 

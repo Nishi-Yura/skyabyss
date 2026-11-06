@@ -117,7 +117,8 @@ public final class ObjectiveMarker {
             subPos = null;
         }
         Placement pm = mainPos == null ? null : place(g, mc, Vec3.atCenterOf(mainPos), BASE, 5.0);
-        Placement ps = subPos == null || subPos.equals(mainPos) ? null : place(g, mc, Vec3.atCenterOf(subPos), BASE * 0.8f, 5.0);
+        // 追跡中のサブも、メインと同じ大きさの黄色のひし形 (2026-11-07 の声「クエストにはすべて黄色のひし形で場所示してあげて」)
+        Placement ps = subPos == null || subPos.equals(mainPos) ? null : place(g, mc, Vec3.atCenterOf(subPos), BASE, 5.0);
         // 同じ場所・近い場所・画面で重なる標は一つにまとめる。金が先で、青緑は小さな点で「サブもここ」と添える
         if (pm != null && ps != null && merged(pm, ps, mainPos, subPos)) {
             show(g, mc, pm, GOLD, true);
@@ -127,7 +128,7 @@ public final class ObjectiveMarker {
             show(g, mc, pm, GOLD, false);
         }
         if (ps != null) {
-            show(g, mc, ps, TEAL, false);
+            show(g, mc, ps, GOLD, false);
         }
     }
 

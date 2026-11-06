@@ -53,12 +53,12 @@ public final class MountNetwork {
     public static View view(ServerPlayer player) {
         MountData d = MountService.data(player);
         return new View(Coins.count(player), MountService.chapter(player), d.ownedBits(), d.chosen().ordinal(),
-                d.tier(0), d.tier(1), d.tier(2), MountService.hasWhistle(player), d.bond(), (int) d.ridden(), d.name());
+                d.tier(MountStats.SPEED), d.tier(MountStats.JUMP), d.tier(MountStats.SEATS), MountService.hasWhistle(player), d.bond(), (int) d.ridden(), d.name());
     }
 
-    // owned = 買った見た目の bit、chosen = 今の見た目の ordinal、speed / jump / health = 性能の段
+    // owned = 買った見た目の bit、chosen = 今の見た目の ordinal、speed / jump / seats = 性能の段 (tier(行) は店の行の順)
     // bond = 絆の段、ridden = 乗った距離 (ブロック)、name = 付けた名前
-    public record View(int coins, int chapter, int owned, int chosen, int speed, int jump, int health, boolean whistle, int bond, int ridden,
+    public record View(int coins, int chapter, int owned, int chosen, int speed, int jump, int seats, boolean whistle, int bond, int ridden,
             String name) implements CustomPacketPayload {
         public static final Type<View> TYPE = typeOf("mount_view");
         public static final StreamCodec<RegistryFriendlyByteBuf, View> STREAM_CODEC = StreamCodec.of(
@@ -69,7 +69,7 @@ public final class MountNetwork {
                     buf.writeVarInt(p.chosen);
                     buf.writeVarInt(p.speed);
                     buf.writeVarInt(p.jump);
-                    buf.writeVarInt(p.health);
+                    buf.writeVarInt(p.seats);
                     buf.writeBoolean(p.whistle);
                     buf.writeVarInt(p.bond);
                     buf.writeVarInt(p.ridden);
@@ -83,7 +83,7 @@ public final class MountNetwork {
         }
 
         public int tier(int kind) {
-            return kind == 0 ? speed : kind == 1 ? jump : health;
+            return kind == 0 ? speed : kind == 1 ? jump : seats;
         }
 
         @Override

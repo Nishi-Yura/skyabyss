@@ -28,7 +28,8 @@ public class MountShopScreen extends Screen {
     private static final Golden.Box LEFT = LAYOUT.body().minor(true);
     private static final Golden.Box RIGHT = LAYOUT.body().major(false);
     private static final Golden.Box LOOKS = LEFT.afterTop(Golden.ROW);
-    private static final Golden.Box PREVIEW = RIGHT.top(Golden.S89);
+    // 見た目の絵の枠 (性能の行が三つになったので、一行ぶん低くした)
+    private static final Golden.Box PREVIEW = RIGHT.top(Golden.S89 - Golden.S21);
     private static final int LOOK_H = 2 * Golden.ROW;
     private static final int STAT_H = Golden.S21;
 
@@ -164,7 +165,7 @@ public class MountShopScreen extends Screen {
                 FacilityUi.DIM, false);
         g.pose().popPose();
 
-        // 性能の段 (速さ・跳び。体力は段がない)
+        // 性能の段 (速さ・跳び・乗れる人数。体力は段がない)
         for (int k = 0; k < MountStats.KEYS.length; k++) {
             statRow(g, font, k, rx + Golden.S5, statY() + k * STAT_H, rw - 2 * Golden.S5, mouseX, mouseY);
         }
@@ -212,6 +213,8 @@ public class MountShopScreen extends Screen {
             sub = Component.translatable("gui.skyabyss.mount.for_sale");
             subColor = FacilityUi.DIM;
         }
+        // 乗れる人数の最大 (見た目ごと)
+        sub = Component.translatable("gui.skyabyss.mount.seats_max", sub, look.maxSeats);
         TextClip.line(g, font, sub, x + Golden.S5, Golden.textY(y + Golden.ROW, Golden.ROW), rw - Golden.S8 - tw - 4, subColor, false);
         if (tw > 0) {
             int tx = x + rw - 3 - tw;
@@ -224,10 +227,10 @@ public class MountShopScreen extends Screen {
     // 段の一行 (高さ 21): 名前・段の箱・上げる札 (銭と値段)
     private void statRow(GuiGraphics g, Font font, int kind, int x, int y, int rw, int mx, int my) {
         int tier = view.tier(kind);
-        boolean maxed = tier >= MountStats.tiers(kind);
+        boolean maxed = tier >= MountStats.tiers(MountStats.ROW_KIND[kind]);
         g.drawString(font, Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]), x, Golden.textY(y, STAT_H), FacilityUi.TEXT, false);
         int px = x + Golden.S34;
-        for (int i = 0; i < MountStats.tiers(kind); i++) {
+        for (int i = 0; i < MountStats.tiers(MountStats.ROW_KIND[kind]); i++) {
             int bx = px + i * 9;
             g.fill(bx, y + 7, bx + 7, y + 14, i < tier ? FacilityUi.GOLD : 0xFF2A2F38);
             g.renderOutline(bx, y + 7, 7, 7, FacilityUi.LINE);
@@ -238,7 +241,7 @@ public class MountShopScreen extends Screen {
             TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.max"), bx + 2, Golden.textY(y, STAT_H), bw - 2, FacilityUi.TEAL, false);
             return;
         }
-        int price = MountStats.price(kind, tier + 1);
+        int price = MountStats.price(MountStats.ROW_KIND[kind], tier + 1);
         boolean hover = statHit(kind, mx, my);
         g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF2A5E6A : 0xFF1C222C);
         g.renderOutline(bx, y + 1, bw, STAT_H - 2, hover ? FacilityUi.TEAL : FacilityUi.LINE);
@@ -303,7 +306,7 @@ public class MountShopScreen extends Screen {
                 return true;
             }
             for (int k = 0; k < MountStats.KEYS.length; k++) {
-                if (statHit(k, mx, my) && view.tier(k) < MountStats.tiers(k)) {
+                if (statHit(k, mx, my) && view.tier(k) < MountStats.tiers(MountStats.ROW_KIND[k])) {
                     send(MountNetwork.BUY_TIER, k);
                     return true;
                 }

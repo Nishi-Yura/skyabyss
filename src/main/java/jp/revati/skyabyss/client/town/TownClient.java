@@ -35,7 +35,8 @@ public final class TownClient {
             event.enqueueWork(() -> {
                 Function<String, BlockPos> previous = ObjectiveStrip.targets;
                 ObjectiveStrip.targets = id -> {
-                    BlockPos p = id.startsWith("town/") ? spot(id) : null;
+                    // 町の頼みの行き先と、頼みの「頼んだ人・土地」(クエスト/giver。town/RegionErrandSpots)
+                    BlockPos p = id.startsWith("town/") || id.endsWith("/giver") ? spot(id) : null;
                     return p != null || previous == null ? p : previous.apply(id);
                 };
             });
