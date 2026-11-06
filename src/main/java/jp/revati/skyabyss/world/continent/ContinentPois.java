@@ -156,6 +156,14 @@ public final class ContinentPois {
                         SiteBuilds.enqueue(job(over, data, e));
                     }
                 } else {
+                    if (poi.kind().startsWith("dungeon_") && e.extra(MOUTH_MARK) == null) {
+                        int n = fixMouth(over, Blueprint.get(poi.blueprint()), e.pos, e.yaw);
+                        if (n >= 0) {
+                            e.extra(MOUTH_MARK, e.pos);
+                            data.setDirty();
+                            SkyAbyss.LOGGER.info("Continent pois: {} at {} (yaw {}): re-placed {} block(s) of the stair shaft", poi.blueprint(), e.pos, e.yaw, n);
+                        }
+                    }
                     if (e.extra(CORNERS_MARK) == null) {
                         int n = fixCorners(over, Blueprint.get(poi.blueprint()), e.pos, e.yaw);
                         if (n >= 0) {
@@ -316,8 +324,9 @@ public final class ContinentPois {
             if (foes != null) {
                 job.entry.extra("foes", foes);
             }
-            // いまの部品で建てたので、隅の置き換えは要らない
+            // いまの部品で建てたので、隅と坑の置き換えは要らない
             job.entry.extra(CORNERS_MARK, job.entry.pos);
+            job.entry.extra(MOUTH_MARK, job.entry.pos);
             BlockPos sign = job.mark("sign");
             if (sign != null && !poi.name().isEmpty() && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
                 // 行き先と道のり・土地の名・目安のレベル (4 行。sign.skyabyss.waypost.<名>.1〜4)
@@ -379,6 +388,36 @@ public final class ContinentPois {
                     && net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(now.getBlock()).getPath()
                             .equals(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(c.state().getBlock()).getPath().replace("_stairs", "_slab"))) {
                 level.setBlock(at, Blueprint.transform(c.state(), rot, mirror), SiteJob.FLAGS);
+                n++;
+            }
+        }
+        return n;
+    }
+
+    // 地下のダンジョンの入口の坑 (2026-11-06 の声「ダンジョンの入口、閉じてる」): 前の版の部品は、口の前の地面の層が坑の頭 (最初の段と、
+    // その先の段の頭の上) を塞いでいた (tools/gen/world/dungeon_entrances.py)。前の版で建った入口は建て直さず、人が近づいて辺りのチャンクが
+    // 読み込まれたとき一度だけ、坑の筋 (部品の x -2〜2、z -3〜-36、y -1〜-26) を今の部品で置き直す。済んだら印 MOUTH_MARK
+    public static final String MOUTH_MARK = "mouth_v2";
+
+    // 置き直した数。辺りのチャンクがまだなければ -1 (何もしない)
+    public static int fixMouth(ServerLevel level, Blueprint bp, BlockPos pos, int yaw) {
+        int rot = jp.revati.skyabyss.opening.site.SiteFinder.rot(yaw);
+        boolean mirror = jp.revati.skyabyss.opening.site.SiteFinder.mirror(yaw);
+        List<Blueprint.Cell> shaft = new ArrayList<>();
+        for (Blueprint.Cell c : bp.cells) {
+            if (c.x() >= -2 && c.x() <= 2 && c.z() <= -3 && c.z() >= -36 && c.y() <= -1 && c.y() >= -26) {
+                if (!level.isLoaded(Blueprint.transform(c.x(), c.y(), c.z(), rot, mirror, pos))) {
+                    return -1;
+                }
+                shaft.add(c);
+            }
+        }
+        int n = 0;
+        for (Blueprint.Cell c : shaft) {
+            BlockPos at = Blueprint.transform(c.x(), c.y(), c.z(), rot, mirror, pos);
+            net.minecraft.world.level.block.state.BlockState want = Blueprint.transform(c.state(), rot, mirror);
+            if (!level.getBlockState(at).equals(want)) {
+                level.setBlock(at, want, SiteJob.FLAGS);
                 n++;
             }
         }

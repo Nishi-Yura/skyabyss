@@ -98,6 +98,23 @@ public final class BoxService {
         SESSIONS.remove(player.getUUID());
     }
 
+    // 旅嚢の箱の欄から持ち物へ取り出す (一つ / 全部)。取り出した箱には取り出し済みの印が付くので、掃除で袋へ戻らず、
+    // 持ち物から落とせる・箱に入れられる・仲間に渡せる。拾い直すと袋へ入る。中身は開ける人の封の列から (空なら箱の表から引く。LootBoxData)
+    static void takeOut(ServerPlayer player, String kindId, boolean all) {
+        BoxKind kind = BoxKind.byId(kindId);
+        net.minecraft.world.item.Item item = kind == null ? null : LootBoxSetup.item(kind);
+        if (item == null) {
+            return;
+        }
+        int moved = jp.revati.skyabyss.pouch.Pouch.withdraw(player, item, all ? 999 : 1, true);
+        if (moved > 0) {
+            player.playNotifySound(SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.PLAYERS, 0.6f, 1.0f);
+            jp.revati.skyabyss.notice.Notice.hint(player, "skyabyss_box.pouch.taken", new ItemStack(item).getHoverName(), moved);
+        } else if (jp.revati.skyabyss.pouch.Pouch.count(player, item) > 0) {
+            jp.revati.skyabyss.notice.Notice.warn(player, "skyabyss_box.pouch.full");
+        }
+    }
+
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         SESSIONS.remove(event.getEntity().getUUID());

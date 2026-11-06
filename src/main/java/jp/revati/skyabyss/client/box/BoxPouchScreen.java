@@ -16,7 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-// 封の箱の欄 (旅嚢のつまみの四つ目。docs/design/52 の 7 章・00 の 310)。持っている封の箱を種類ごとに見るだけの画面 (開けるのは町の封切り師)。
+// 封の箱の欄 (旅嚢のつまみの四つ目。docs/design/52 の 7 章・00 の 310)。持っている封の箱を種類ごとに見る画面 (開けるのは町の封切り師)。
+// 押すと一つ (シフトで全部) 持ち物へ取り出せる (落とす・仲間に渡すため。BoxNetwork.TakeOut)。
 //   上: 巨神の箱 4 種 / 中: 階級の箱 (行 = 階級、列 = 帯 I〜V) / 下: 淵の金の箱
 public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
@@ -141,6 +142,17 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
         if (s != null) {
             g.renderTooltip(font, stack(s.kind()), mouseX, mouseY);
         }
+    }
+
+    // 箱を押すと一つ (シフトで全部) 持ち物へ取り出す。持ち物から Q で落とせる・仲間に渡せる (2026-11-06 の声)
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        Spot s = hovered((int) mx, (int) my);
+        if (s != null && button == 0 && count(s.kind()) > 0) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToServer(new jp.revati.skyabyss.loot.box.BoxNetwork.TakeOut(s.kind().id(), hasShiftDown()));
+            return true;
+        }
+        return super.mouseClicked(mx, my, button);
     }
 
     @Override

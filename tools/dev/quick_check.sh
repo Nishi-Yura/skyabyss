@@ -25,6 +25,7 @@ fi
 [ -f tools/audit/mesh_audit.py ] && run mesh_audit python -I tools/audit/mesh_audit.py --check
 [ -f tools/audit/check_generators.py ] && run check_generators python tools/audit/check_generators.py
 [ -f tools/audit/check_text_fit.py ] && run check_text_fit python tools/audit/check_text_fit.py
+[ -f tools/audit/check_dungeon_mouths.py ] && run check_dungeon_mouths python -I tools/audit/check_dungeon_mouths.py
 for f in tools/audit/check_stairs*.py tools/audit/stairs*.py; do
   [ -f "$f" ] && run "$(basename "$f" .py)" python "$f"
 done
