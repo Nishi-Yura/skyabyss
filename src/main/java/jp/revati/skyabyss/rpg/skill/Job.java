@@ -85,12 +85,16 @@ public enum Job {
             return null;
         }
         String path = BuiltInRegistries.ITEM.getKey(item).getPath();
+        // スポーンエッグは武器ではない (waning_blade_spawn_egg など)
+        if (path.endsWith("_spawn_egg")) {
+            return null;
+        }
         // 呪術師の鈴の杖・祭具 (鈴だけ・お守り (charm) は武器ではない: 鐘銭・遺物の鈴・装身具)
         if (word(path, "rite", "totem", "censer") || word(path, "bell") && word(path, "staff", "wand")) {
             return SHAMAN;
         }
         if (word(path, "staff", "wand", "rod", "scepter")) {
-            return path.contains("lightning_rod") || path.contains("fishing_rod") || path.contains("blaze_rod") || path.contains("breeze_rod") ? null : MAGE;
+            return path.contains("lightning_rod") || path.contains("fishing_rod") || path.contains("blaze_rod") || path.contains("breeze_rod") || path.contains("ember_rod") ? null : MAGE;
         }
         if (word(path, "bow", "crossbow", "longbow")) {
             return ARCHER;

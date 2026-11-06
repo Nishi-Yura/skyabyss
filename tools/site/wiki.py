@@ -565,6 +565,32 @@ def quests_page(names):
 
 
 # ================================================================== 店
+# 品の職 (rpg/skill/Job.of と同じ語の見分け。店の品の "job" があればそれ)。職の品でなければ None
+_JOB_WORDS = [
+    ("shaman", ("rite", "totem", "censer")),
+    ("mage", ("staff", "wand", "rod", "scepter")),
+    ("archer", ("bow", "crossbow", "longbow")),
+    ("assassin", ("fang", "dagger", "claw", "shears", "pincer", "knife")),
+    ("smith", ("hammer", "warhammer", "axe", "waraxe", "battleaxe", "greataxe", "poker", "mace", "maul", "anchor", "scythe")),
+    ("warrior", ("sword", "greatsword", "blade", "pike", "spear", "lance", "glaive", "halberd", "harpoon", "trident", "shield")),
+]
+
+
+def good_job(g):
+    if g.get("job"):
+        return g["job"]
+    path = (g.get("item") or "").split(":")[-1]
+    toks = path.split("_")
+    if path.startswith("gather_") or path in ("fishing_rod", "lightning_rod", "blaze_rod", "breeze_rod", "ember_rod"):
+        return None
+    if "bell" in toks and ("staff" in toks or "wand" in toks):
+        return "shaman"
+    for job, words in _JOB_WORDS:
+        if any(t == w or t == w + "s" for t in toks for w in words):
+            return job
+    return None
+
+
 def shops_page(names):
     body = ""
     for f in sorted(glob.glob(os.path.join(DATA, "shop", "*.json"))):
@@ -575,7 +601,9 @@ def shops_page(names):
             for g in s.get(key, []) if isinstance(s.get(key), list) else []:
                 nm = names.get(g.get("item"), g.get("item"))
                 mats = "、".join("%s ×%d" % (names.get(m.get("item"), m.get("item")), m.get("count", 1)) for m in g.get("materials", []))
-                notes = [x for x in ("日替わり" if key == "daily" else "", ("%s章から" % "一二三四五六"[g["chapter"] - 1]) if isinstance(g.get("chapter"), int) and 1 <= g["chapter"] <= 6 else "") if x]
+                job = good_job(g)
+                notes = [x for x in ("日替わり" if key == "daily" else "", ("%s章から" % "一二三四五六"[g["chapter"] - 1]) if isinstance(g.get("chapter"), int) and 1 <= g["chapter"] <= 6 else "",
+                                     (lang("job.skyabyss." + job) + "だけ") if job else "") if x]
                 rows.append('<tr><th scope="row"><a href="%s">%s</a></th><td class="num">%s</td><td class="num">%s</td><td>%s</td><td>%s</td></tr>' % (
                     item_link(g.get("item")), esc(nm), g.get("count", 1), g.get("coins", "—"), esc(mats) or "—", "・".join(notes)))
         buys = []
@@ -589,7 +617,7 @@ def shops_page(names):
         if buys:
             inner += '<h3>買い取り</h3><div class="tablewrap"><table><thead><tr><th scope="col">品</th><th scope="col">いくつで</th><th scope="col">鐘銭</th></tr></thead><tbody>%s</tbody></table></div>' % "".join(buys)
         body += section("s-" + sid, name, inner)
-    wiki_page("wiki-shops.html", "店", "店ごとの品と値段（鐘銭）。", body, count="%d 軒" % len(glob.glob(os.path.join(DATA, "shop", "*.json"))))
+    wiki_page("wiki-shops.html", "店", "店ごとの品と値段（鐘銭）。職の品（「〇〇だけ」）は、その職の人にだけ並びます。", body, count="%d 軒" % len(glob.glob(os.path.join(DATA, "shop", "*.json"))))
 
 
 _link_page = {}

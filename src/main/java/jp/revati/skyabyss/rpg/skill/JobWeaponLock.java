@@ -68,11 +68,18 @@ public final class JobWeaponLock {
         if (axe.isEmpty() || wrongJob(Job.MAGE, axe) != null) {
             f.add("the gathering axe should never be locked");
         }
+        // 名前に「rod」が入る素材は杖ではない (熾火の棒は灰の荒野の素材。店は職の品を今の職の人にだけ並べるので、杖と見ると魔法使いにしか売られない)
+        for (String id : java.util.List.of("ember_rod", "fishing_rod")) {
+            var item = BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, id));
+            if (item != net.minecraft.world.item.Items.AIR && Job.of(item) != null) {
+                f.add(id + " is read as a " + Job.of(item) + " weapon");
+            }
+        }
         if (wrongJob(Job.MAGE, ItemStack.EMPTY) != null || wrongJob((Job) null, bow) != null) {
             f.add("bare hands and players without a job should never be locked");
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST job weapons PASSED (other jobs' weapons locked, own weapon, bare hands and gathering tools free)");
+            SkyAbyss.LOGGER.info("SELFTEST job weapons PASSED (other jobs' weapons locked, own weapon, bare hands, gathering tools and rod materials free)");
         } else {
             SkyAbyss.LOGGER.error("SELFTEST job weapons FAILED: {}", f);
         }
