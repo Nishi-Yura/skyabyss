@@ -1,0 +1,106 @@
+# 2026-11-07: 巨神の背の到着の台 (集まって鐘を待つ所) のまわり。岩鯨以外は台から歩いて出られるという声の確かめ。四体の台を上と四方から
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/arrival_pen.txt -PshotsName=arrival_pen
+world arrivalpen flat
+size 1280 720
+timeout 1500
+render 12
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 260
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~22 ~ 0 89
+wait 30
+shot 1_whale_top
+cmd tp @s ~ ~-19 ~ 0 25
+wait 20
+shot 1_whale_s
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot 1_whale_n
+cmd tp @s ~ ~ ~ 90 25
+wait 20
+shot 1_whale_w
+cmd tp @s ~ ~ ~ -90 25
+wait 20
+shot 1_whale_e
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 260
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~22 ~ 0 89
+wait 30
+shot 2_tide_top
+cmd tp @s ~ ~-19 ~ 0 25
+wait 20
+shot 2_tide_s
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot 2_tide_n
+cmd tp @s ~ ~ ~ 90 25
+wait 20
+shot 2_tide_w
+cmd tp @s ~ ~ ~ -90 25
+wait 20
+shot 2_tide_e
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 260
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~22 ~ 0 89
+wait 30
+shot 3_storm_top
+cmd tp @s ~ ~-19 ~ 0 25
+wait 20
+shot 3_storm_s
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot 3_storm_n
+cmd tp @s ~ ~ ~ 90 25
+wait 20
+shot 3_storm_w
+cmd tp @s ~ ~ ~ -90 25
+wait 20
+shot 3_storm_e
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 260
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~22 ~ 0 89
+wait 30
+shot 4_ember_top
+cmd tp @s ~ ~-19 ~ 0 25
+wait 20
+shot 4_ember_s
+cmd tp @s ~ ~ ~ 180 25
+wait 20
+shot 4_ember_n
+cmd tp @s ~ ~ ~ 90 25
+wait 20
+shot 4_ember_w
+cmd tp @s ~ ~ ~ -90 25
+wait 20
+shot 4_ember_e
+hud on
+quit

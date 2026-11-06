@@ -84,7 +84,7 @@ public final class TitanBackSelfTest {
     public static List<SelfTestRunner.Step> trialSteps() {
         return List.of(SelfTestRunner.Step.once("titan back", 20, server -> {
             if (PENDING.isEmpty()) {
-                SkyAbyss.LOGGER.info("SELFTEST titan back PASSED (four backs are outside-only: body kept, old insides filled, arrival pad is the route entry, "
+                SkyAbyss.LOGGER.info("SELFTEST titan back PASSED (four backs are outside-only: body kept, old insides filled, arrival pad is the route entry and penned in, "
                         + "sealed heart arenas outside the bodies; rebuild ms {})", REBUILD_MS);
             } else {
                 PENDING.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST titan back FAILED: {}", f));
@@ -149,6 +149,15 @@ public final class TitanBackSelfTest {
         AABB box = TrialRoute.entryBox(titan);
         if (box == null || !box.contains(Vec3.atBottomCenterOf(feet).add(0, 0.1, 0))) {
             f.add(titan + ": the arrival pad is not inside the route entry box");
+        }
+        // 台は囲われていて、鐘を待つあいだに背の上へ歩いて出られない (岩鯨は胸壁。ほかは ArrivalPen。2026-11-07)
+        if (jp.revati.skyabyss.trial.ArrivalPen.wallOf(titan) != null) {
+            jp.revati.skyabyss.trial.ArrivalPen.place(back, titan);
+            int again = jp.revati.skyabyss.trial.ArrivalPen.place(back, titan);
+            int open = jp.revati.skyabyss.trial.ArrivalPen.openColumns(back, titan);
+            if (again != 0 || open != 0) {
+                f.add(titan + ": the arrival pen is not closed (" + open + " open columns, " + again + " blocks placed on the second pass)");
+            }
         }
         // 体の外の心臓の間: 建っていて、中の空気が部屋の箱の外へ抜けない
         if (!InstanceArenas.heartBuilt(back, titan)) {
