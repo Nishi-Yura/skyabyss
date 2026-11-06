@@ -836,7 +836,10 @@ public final class ShotRunner {
                 if (mc.screen != null) {
                     int b = line.args().length > 2 ? line.intArg(2) : 0;
                     mc.screen.mouseClicked(line.doubleArg(0), line.doubleArg(1), b);
-                    mc.screen.mouseReleased(line.doubleArg(0), line.doubleArg(1), b);
+                    // 押した拍子に画面が閉じることがある (選ぶ画面など)
+                    if (mc.screen != null) {
+                        mc.screen.mouseReleased(line.doubleArg(0), line.doubleArg(1), b);
+                    }
                 }
                 return true;
             }

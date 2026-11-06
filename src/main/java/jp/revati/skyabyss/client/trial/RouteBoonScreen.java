@@ -17,8 +17,10 @@ import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 挑戦の加護を選ぶ画面 (trial/RouteBoons)。試練の板と同じ石板の枠に、二枚の札。
-// 押す (または 1 / 2) と選んで閉じる。Esc は閉じるだけ (残りの秒がたつとサーバーが一つ目に決める)。
+// 押す (または 1 / 2) と選んで閉じる。Esc では閉じない (閉じると選び直せず、選び終わるまで仲間も次の部屋へ運ばれないため。
+// 残りの秒がたつとサーバーが一つ目に決めて閉じる)。幕の最中に届いたら預かり、幕が終わって画面が空いたら開く。
 // 板は黄金比の中の板 (288x178。client/ui/Golden。docs/design/56): 見出しの帯に題と残りの秒、中身に同じ幅の札二枚 (説明は行 13)、下の段に手引き
+@net.neoforged.fml.common.EventBusSubscriber(modid = jp.revati.skyabyss.SkyAbyss.MODID, value = net.neoforged.api.distmarker.Dist.CLIENT)
 public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.medium(Golden.FOOT);
     private static final int BG = 0x07090E;
@@ -40,30 +42,67 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     private final long until;
     private int hover = -1;
 
+    // 幕の最中に届いた見せ方と、その締め切り (System.currentTimeMillis)
+    private static RouteBoons.Offer deferred;
+    private static long deferredUntil;
+
     public RouteBoonScreen(RouteBoons.Offer offer) {
-        super(Component.translatable("gui.skyabyss.boon.title"));
-        this.boons = new RouteBoons.Boon[] { RouteBoons.Offer.boon(offer.a()), RouteBoons.Offer.boon(offer.b()) };
-        this.until = System.currentTimeMillis() + offer.seconds() * 1000L;
+        this(offer, System.currentTimeMillis() + offer.seconds() * 1000L);
     }
 
-    // サーバーから: 見せる・閉じる。幕の最中は割り込まない (サーバーが残りの秒で決める)
+    private RouteBoonScreen(RouteBoons.Offer offer, long until) {
+        super(Component.translatable("gui.skyabyss.boon.title"));
+        this.boons = new RouteBoons.Boon[] { RouteBoons.Offer.boon(offer.a()), RouteBoons.Offer.boon(offer.b()) };
+        this.until = until;
+    }
+
+    // サーバーから: 見せる・閉じる。幕の最中は割り込まず、幕が終わってから開く (締め切りはサーバーと同じ)
     public static void receive(RouteBoons.Offer offer) {
         Minecraft mc = Minecraft.getInstance();
         if (!offer.open()) {
+            deferred = null;
             if (mc.screen instanceof RouteBoonScreen) {
                 mc.setScreen(null);
             }
             return;
         }
-        if (RouteBoons.Offer.boon(offer.a()) == null || RouteBoons.Offer.boon(offer.b()) == null
-                || jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+        if (RouteBoons.Offer.boon(offer.a()) == null || RouteBoons.Offer.boon(offer.b()) == null) {
             return;
         }
+        if (jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+            deferred = offer;
+            deferredUntil = System.currentTimeMillis() + offer.seconds() * 1000L;
+            return;
+        }
+        deferred = null;
         mc.setScreen(new RouteBoonScreen(offer));
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (deferred == null) {
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || System.currentTimeMillis() >= deferredUntil - 1000L) {
+            deferred = null;
+            return;
+        }
+        if (mc.screen == null && !jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+            RouteBoons.Offer o = deferred;
+            deferred = null;
+            mc.setScreen(new RouteBoonScreen(o, deferredUntil));
+        }
     }
 
     @Override
     public boolean isPauseScreen() {
+        return false;
+    }
+
+    // Esc では閉じない (選ぶか、時間切れでサーバーが閉じる)
+    @Override
+    public boolean shouldCloseOnEsc() {
         return false;
     }
 

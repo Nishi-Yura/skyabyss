@@ -44,7 +44,8 @@ import jp.revati.skyabyss.util.Players;
 //  - 初回 (物語): 乗り込みで着く到着の台 (entryBox) に、その背にいるグループ全員がそろうと 3 秒の予告のあと部屋 1 の中へ運ぶ (2.2)。
 //    ほかのグループの順路が動いていても待たない (部屋は区画ごとに別)
 //  - 周回: 祠 (titan/shrine) で品を使うと start が呼ばれる。到着の台では始まらない
-//  - 部屋を越えると 4 秒後に、順路の参加者を次の部屋の中へ運ぶ (2.3)。三つ目のあとは中ボスの間の中 (段 3.5)、倒すと心臓の間の中へ
+//  - 部屋を越えると 4 秒後に、順路の参加者を次の部屋の入口の休み場へ運ぶ (2.3)。挑戦の加護を選んでいる人がいれば、選び終わる (時間切れ) まで待つ。
+//    三つ目 (闘。中ボスはその中) のあとは、心臓の間の手前の前室 (焚き火) へ
 //  - 途中から乗り込んだ仲間は、到着の台に着くと参加者に加わり、今の部屋へ運ばれる (rejoin)
 //  - あきらめは焚き火で提案し、全員の「はい」で成立。成立するとグループ全員が背の外へ出される (2.4)
 //  - 参加者が背に一人もいなくなって EMPTY_GRACE たつと順路は終わる (背を出る・ログアウト)。3 分の不在のリセットでも終わる
@@ -537,9 +538,10 @@ public final class TrialRoute {
             sync(back, group);
             return members(back, group).size();
         }
-        // 心臓の段は、体の外の封じた心臓の間 (trial/raid/InstanceArenas) の中へ直に運ぶ (前室を歩かない。中に入ると集合の 5 秒のあと封じる)
+        // 心臓の段は、体の外の封じた心臓の間 (trial/raid/InstanceArenas) の手前の前室 (焚き火) へ運ぶ。
+        // ほかの部屋の入口の休み場と同じく、支度をしてから大門をくぐる (中に入ると集合の 5 秒のあと封じ、前室の仲間も中へ入れる)
         if (!mid && step >= LAST_STEP) {
-            BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
+            BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartRest(back, titan);
             if (in != null) {
                 return carryIntoHeart(back, group, titan, TrialData.current(back, group), in);
             }
@@ -549,18 +551,38 @@ public final class TrialRoute {
     }
 
     private static int carryIntoHeart(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw, BlockPos at) {
-        float yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntryYaw(titan);
+        // 前の部屋の進み (帯・部屋の外の人を戻す見回り) を止める
+        jp.revati.skyabyss.trial.raid.RaidRun.leave(back, group);
+        float yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartRestYaw(at, titan);
         int n = 0;
         for (ServerPlayer p : members(back, group)) {
-            move(back, p, at, yaw);
+            move(back, p, heartRestSpot(back, at, n), yaw);
             n++;
             Notice.alert(p, "message.skyabyss.route.heart", Component.empty());
             RouteCard.show(p, back, group, titan, draw, LAST_STEP, false);
         }
         back.playSound(null, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);
         sync(back, group);
-        SkyAbyss.LOGGER.info("Route of the {}: group {} carried into the heart arena at {} x{}", titan, group, at.toShortString(), n);
+        SkyAbyss.LOGGER.info("Route of the {}: group {} carried to the heart front room at {} x{}", titan, group, at.toShortString(), n);
         return n;
+    }
+
+    // 前室の i 番目の人の立つ所: 休み場から少しずらす (重なって互いの体で前が見えなくならないように)。
+    // ずらした所に立てなければ次のずらし方を試し、どれもだめなら休み場そのもの
+    private static final int[][] REST_SPREAD = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {1, 1}, {-1, 1}, {0, -1}, {1, -1}, {-1, -1}};
+
+    static BlockPos heartRestSpot(ServerLevel back, BlockPos rest, int i) {
+        if (Math.floorMod(i, REST_SPREAD.length) == 0) {
+            return rest;
+        }
+        for (int k = 0; k < REST_SPREAD.length - 1; k++) {
+            int idx = 1 + Math.floorMod(i - 1 + k, REST_SPREAD.length - 1);
+            BlockPos at = rest.offset(REST_SPREAD[idx][0], 0, REST_SPREAD[idx][1]);
+            if (TitanBackTrials.isSafeStand(back, at)) {
+                return at;
+            }
+        }
+        return rest;
     }
 
     public static void move(ServerLevel back, ServerPlayer p, BlockPos at) {
@@ -657,6 +679,18 @@ public final class TrialRoute {
     public static void tick(ServerLevel back, String titan, List<ServerPlayer> players, long now) {
         for (Pending p : new ArrayList<>(PENDING.values())) {
             if (now < p.due() || Titans.backOf(p.titan()) != back.dimension()) {
+                continue;
+            }
+            // 挑戦の加護を選んでいる人がいれば、選び終わるまで運ばない (選ぶ前に次の部屋へ飛ばさない。時間切れで一つ目に決まる)
+            List<ServerPlayer> who = members(back, p.group());
+            long boonLeft = RouteBoons.waitLeft(who, now);
+            if (boonLeft > 0) {
+                Component wait = ModText.progress("message.skyabyss.route.wait_boons", (boonLeft + 19) / 20);
+                for (ServerPlayer m : who) {
+                    if (!RouteBoons.offered(m)) {
+                        Notice.bar(m, wait);
+                    }
+                }
                 continue;
             }
             PENDING.remove(p.group());
@@ -768,8 +802,12 @@ public final class TrialRoute {
         float yaw = 180f;
         jp.revati.skyabyss.trial.raid.RaidRun.Run run = jp.revati.skyabyss.trial.raid.RaidRun.of(group);
         if (step >= LAST_STEP) {
-            at = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
-            yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntryYaw(titan);
+            // 心臓の段: 仲間と同じ前室の焚き火のそばへ (戦いの最中なら、大門が開くまでそこで待つ)
+            BlockPos rest = jp.revati.skyabyss.trial.raid.InstanceArenas.heartRest(back, titan);
+            if (rest != null) {
+                at = heartRestSpot(back, rest, Math.max(0, members(back, group).indexOf(p)));
+                yaw = jp.revati.skyabyss.trial.raid.InstanceArenas.heartRestYaw(rest, titan);
+            }
         } else if (run != null && run.mid == mid && (mid || run.step == step)) {
             at = jp.revati.skyabyss.trial.raid.RaidRun.restSpot(run.ctx, Math.max(0, members(back, group).indexOf(p)));
         }
@@ -1018,6 +1056,8 @@ public final class TrialRoute {
         for (Pending p : new ArrayList<>(PENDING.values())) {
             PENDING.put(p.group(), new Pending(p.group(), p.titan(), p.step(), p.mid(), 0));
         }
+        // 加護を選ぶ待ちも切る (偽の人は選ばないので。運びのあと、サーバーの見回りが一つ目に決める)
+        RouteBoons.expireForTest();
     }
 
     public static void clearAll() {

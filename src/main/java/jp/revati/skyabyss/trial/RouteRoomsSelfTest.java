@@ -25,7 +25,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 順路の部屋の自己テスト (docs/design/32 の 2.2・2.5。段の名前は "route rooms")。四体の背で、一人の偽の人が:
 //  - 乗り込んで到着の台に着くと、歩かずに (予告のあと) 区画のレイドの部屋 1 の中へ運ばれる
-//  - 部屋 1〜3 を越えるたびに次の部屋の中へ、三つ目のあとは中ボスの間の中へ、中ボスを倒すと体の外の心臓の間の中へ (前室を歩かない)
+//  - 部屋 1〜3 を越えるたびに次の部屋の中へ、三つ目 (闘。中ボスはその中) のあとは体の外の心臓の間の手前の前室 (焚き火) へ
 //  - 運ばれた先のどの部屋も封じてある (休み場から空気を辿って、部屋の箱の外へ抜けない)
 public final class RouteRoomsSelfTest {
     private RouteRoomsSelfTest() {
@@ -87,8 +87,11 @@ public final class RouteRoomsSelfTest {
                     f.add(titan + ": a separate mid-boss step appeared after the third room");
                 }
                 AABB heart = InstanceArenas.heartArena(titan);
-                if (TrialRoute.step(back, group) != TrialRoute.LAST_STEP || heart == null || !heart.contains(p.position())) {
-                    f.add(titan + ": after the mid-boss the player is not inside the heart arena (step " + TrialRoute.step(back, group) + ", at " + p.position() + ")");
+                BlockPos rest = InstanceArenas.heartRest(back, titan);
+                if (TrialRoute.step(back, group) != TrialRoute.LAST_STEP || heart == null || rest == null || heart.contains(p.position())
+                        || p.position().distanceTo(Vec3.atBottomCenterOf(rest)) > 2.5) {
+                    f.add(titan + ": after the third room the player is not in the heart front room by the campfire (step " + TrialRoute.step(back, group) + ", at " + p.position()
+                            + ", rest " + rest + ")");
                 } else {
                     sealed(f, back, titan + " heart", InstanceArenas.heartEntry(titan), heart.inflate(24));
                     rooms++;
@@ -106,7 +109,7 @@ public final class RouteRoomsSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST route rooms PASSED (four titans: the arrival pad carries one player straight into room 1, then rooms 2-3, "
-                    + "the mid-boss arena and the heart arena; {} rooms, all sealed)", rooms);
+                    + "then the heart front room by the campfire (outside the arena); {} rooms, all sealed)", rooms);
         } else {
             f.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST route rooms FAILED: {}", s));
         }

@@ -116,7 +116,7 @@ public final class TitanBackLayout {
 
     // ---------------------------------------------------------------- 心臓の間 (最終ボス。体の外の封じた部屋)
     // 2026-10-23: 心臓の間は体の中から、背の次元の区画 0 番の枠 (trial/raid/InstanceArenas) の封じた一室へ移した。形と戦いは元のまま、
-    // 元の座標 (中心 (0, 104, -136)) を HEART_DX / HEART_DZ だけずらす。順路の段 4 では、運ばれた人は部屋の中へ直に着く。
+    // 元の座標 (中心 (0, 104, -136)) を HEART_DX / HEART_DZ だけずらす。順路の段 4 では、運ばれた人は前室 (休み場 heart) の焚き火のそばに着き、歩いて大門をくぐる。
     // 部屋の南に、倒れた人が目を覚ます小さな前室 (休み場 heart) と大門が付く (戦いの途中に扉から戻る。再入場)
     public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
     public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 136;

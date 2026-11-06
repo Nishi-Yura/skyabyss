@@ -58,7 +58,7 @@ public final class StormHeartArena {
     static final int GATE_Z = StormBackLayout.KEEL_ANTE.z2() + 1;
 
     // 入口の鏡の壁 (三章の「遅れて映る影」。titan/storm/chapter/MirrorLag): 入口の内側 (中心から北へ 6) に、竜骨の筋をはさんで羽鏡が東西 3 つずつ。
-    // 順路の段 4 で運ばれた人の着く所 (InstanceArenas.heartEntry = CX+3, CZ-11) から南へ 5 ブロック。羽鏡の台は FLOOR の高さに立つ
+    // 前室から大門をくぐって入った所 (InstanceArenas.heartEntry = CX+3, CZ-11) から南へ 5 ブロック。羽鏡の台は FLOOR の高さに立つ
     public static final int MIRROR_Z = CZ - 6;
     public static final int[] MIRROR_DX = {-4, -3, -2, 2, 3, 4};
 

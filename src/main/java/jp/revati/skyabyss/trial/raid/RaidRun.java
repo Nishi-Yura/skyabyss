@@ -200,14 +200,32 @@ public final class RaidRun {
         return true;
     }
 
-    // 開発・撮影 (/skyroute pass): 今の部屋を越えたことにする。完了の処理と報いをそのまま通す。動いている部屋がなければ false
+    // 開発・撮影 (/skyroute pass): 今の部屋を越えたことにする。完了の処理と報いをそのまま通す。戸が開く前 (碑を読む前) でもよい。
+    // 越えていない部屋がなければ false
     public static boolean devComplete(UUID group) {
         Run run = RUNS.get(group);
-        if (run == null || run.phase != Phase.ACTIVE) {
+        if (run == null || run.phase == Phase.COMPLETE) {
             return false;
         }
         complete(run);
         return true;
+    }
+
+    // 部屋の段を離れる (心臓の段へ運ぶとき): 部屋の進みを止め、帯を消す。止めないと、越えていない部屋の見回り (gather) が、
+    // 部屋の外 (心臓の前室) にいる人を部屋の休み場へ連れ戻す。建てた部屋は順路が終わるまで残す (onFinish が片付ける)
+    public static void leave(ServerLevel back, UUID group) {
+        Run run = RUNS.remove(group);
+        if (run == null) {
+            return;
+        }
+        if (run.phase != Phase.COMPLETE) {
+            SkyAbyss.LOGGER.info("Raid: group {} left room {} before it was complete (phase {})", group, run.ctx.roomId(), run.phase);
+        }
+        safeEnd(run);
+        for (ServerPlayer p : TrialRoute.present(back, group)) {
+            STRAY.remove(p.getUUID());
+            sendTo(p, RaidHudNet.Hud.OFF);
+        }
     }
 
     // そのグループの中ボスの部屋を越えたか
@@ -458,6 +476,13 @@ public final class RaidRun {
         run.phase = Phase.COMPLETE;
         run.until = ctx.now() + 100;
         ctx.clearMobs();
+        // 越えた瞬間に倒れていた仲間は、その場で起こす (戦いは終わった。倒れの 15 秒は、加護を選ぶ待ちより短く、次の部屋へ運ばれる前に力尽きていた)
+        for (ServerPlayer p : ctx.players()) {
+            if (Downed.isDowned(p)) {
+                Downed.reviveFull(p);
+                p.setHealth(Math.max(p.getHealth(), p.getMaxHealth() * Downed.REVIVE_HEALTH));
+            }
+        }
         RaidKit.setGate(ctx, ctx.cell().exitGate(), true);
         sendHud(run, true);
         if (run.mid) {

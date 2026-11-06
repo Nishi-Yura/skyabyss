@@ -438,6 +438,11 @@ public final class GroupBossRoom {
         Set<UUID> ids = new LinkedHashSet<>();
         for (ServerPlayer player : mine(level, host)) {
             ids.add(player.getUUID());
+            // 倒した瞬間に倒れていた仲間は起こす (勝ったあと、運び出しの前に倒れの時間が切れて力尽きないように)
+            if (jp.revati.skyabyss.party.Downed.isDowned(player)) {
+                jp.revati.skyabyss.party.Downed.reviveFull(player);
+                player.setHealth(Math.max(player.getHealth(), player.getMaxHealth() * jp.revati.skyabyss.party.Downed.REVIVE_HEALTH));
+            }
         }
         for (UUID id : died) {
             ids.add(id);

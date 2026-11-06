@@ -71,6 +71,7 @@ public final class RaidMultiSelfTest {
                 } else {
                     downs(run, a, b, f);
                     strays(run, a, b, other, f);
+                    clearRevives(run, group, a, b, f);
                 }
             }
         } catch (RuntimeException e) {
@@ -86,7 +87,7 @@ public final class RaidMultiSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST raid multi PASSED (one down with a mate standing is no wipe, both down wipes and revives both at the rest, "
-                    + "a member outside the room is carried back after the grace and not before, another group's player is left alone)");
+                    + "a member outside the room is carried back after the grace and not before, another group's player is left alone, a member down at the clear is stood up)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST raid multi FAILED: {}", x));
         }
@@ -130,6 +131,18 @@ public final class RaidMultiSelfTest {
         Downed.down(b);
         RaidRun.tickRun(run, t + RaidRun.STRAY_GRACE + 1);
         check(f, run.wipes == wipes + 1, "after the carry back, both down did not wipe");
+        Downed.reviveFull(a);
+        Downed.reviveFull(b);
+    }
+
+    // 越えた瞬間に倒れていた仲間は起こされる (加護を選ぶ待ちのあいだに倒れの時間が切れないように)
+    private static void clearRevives(RaidRun.Run run, UUID group, FakePlayer a, FakePlayer b, List<String> f) {
+        run.phase = RaidRun.Phase.ACTIVE;
+        Downed.down(a);
+        check(f, Downed.isDowned(a), "the test could not put a member down before the clear");
+        check(f, RaidRun.devComplete(group), "the room could not be completed for the revive check");
+        check(f, !Downed.isDowned(a) && a.getHealth() >= a.getMaxHealth() * Downed.REVIVE_HEALTH - 0.01f,
+                "a member who was down when the room was cleared was not stood up (health " + a.getHealth() + ")");
         Downed.reviveFull(a);
         Downed.reviveFull(b);
     }

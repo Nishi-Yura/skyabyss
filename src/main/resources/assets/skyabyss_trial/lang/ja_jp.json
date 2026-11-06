@@ -217,6 +217,7 @@
   "message.skyabyss.route.heart": "三つの試練を越えた。封印の奥で、鼓動が待っている。",
   "message.skyabyss.route.next": "越えた。次は、%s",
   "message.skyabyss.route.next_heart": "越えた。次は、心臓",
+  "message.skyabyss.route.wait_boons": "仲間が加護を選んでいる……（あと %s 秒）",
   "message.skyabyss.route.abandon_ask": "%s が、順路をあきらめようとしている。",
   "message.skyabyss.route.abandon_yes": "[はい]",
   "message.skyabyss.route.abandon_no": "[いいえ]",
@@ -371,7 +372,7 @@
   "boon.skyabyss.leech.desc": "与えた傷の 4% だけ体力が戻る。",
   "gui.skyabyss.boon.title": "挑戦の加護",
   "gui.skyabyss.boon.choose": "一つ選ぶ（残り %s 秒）",
-  "gui.skyabyss.boon.help": "押すか 1・2 で選ぶ。閉じると時間切れで左になる",
+  "gui.skyabyss.boon.help": "押すか 1・2 で選ぶ。選ばずにいると時間切れで左になる",
   "message.skyabyss.boon.got": "加護「%s」を得た。順路が終わるまで続く",
   "message.skyabyss.boon.faded": "挑戦の加護が消えた"
 }
