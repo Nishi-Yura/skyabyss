@@ -139,7 +139,29 @@ public final class StructureDump {
                                     PRESETS.keySet().forEach(b::suggest);
                                     return b.buildFuture();
                                 })
-                                .executes(StructureDump::arrive)))));
+                                .executes(StructureDump::arrive)))
+                        // /skyabyss dev bell : 今いる背の到着の台の鐘の前 (4 ブロック) へ、鐘を向いて移る (撮影・確かめ用。trial/TrialRoute.bellPos)
+                        .then(Commands.literal("bell").executes(StructureDump::bell))));
+    }
+
+    private static int bell(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        net.minecraft.server.level.ServerPlayer p = ctx.getSource().getPlayerOrException();
+        String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(p.serverLevel().dimension());
+        net.minecraft.core.BlockPos at = titan == null ? null : jp.revati.skyabyss.trial.TrialRoute.bellPos(p.serverLevel(), titan);
+        if (at == null) {
+            ctx.getSource().sendFailure(Component.literal("no arrival bell here"));
+            return 0;
+        }
+        net.minecraft.core.BlockPos f = jp.revati.skyabyss.trial.RouteSeals.safeFeet(titan);
+        double dx = f.getX() - at.getX();
+        double dz = f.getZ() - at.getZ();
+        double len = Math.max(1, Math.hypot(dx, dz));
+        double x = at.getX() + 0.5 + dx / len * 4;
+        double z = at.getZ() + 0.5 + dz / len * 4;
+        float yaw = (float) Math.toDegrees(Math.atan2(-(at.getX() + 0.5 - x), at.getZ() + 0.5 - z));
+        p.teleportTo(p.serverLevel(), x, f.getY(), z, yaw, 20f);
+        ctx.getSource().sendSuccess(() -> Component.literal("bell at " + at.toShortString()), false);
+        return 1;
     }
 
     private static int preset(CommandContext<CommandSourceStack> ctx) {

@@ -79,11 +79,10 @@ public final class RoutePartySelfTest {
             TrialRoute.PLAYERS = l -> players;
             long now = back.getGameTime();
 
-            // ---- 入口の箱: 一人だけでは始まらない
+            // ---- 入口の箱: 鐘を鳴らすまでは始まらない (そろった人たちだけでも鳴らせる)
             TrialRoute.tick(back, titan, players, now);
-            check(f, !TrialRoute.ring(back, titan, a, now), "the bell rang with one of two on the platform");
             TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 10);
-            check(f, TrialRoute.step(back, group) == 0, "the route started with one of two in the entry box");
+            check(f, TrialRoute.step(back, group) == 0, "the route started without the bell");
             // 二人そろうと、予告のあと始まり、二人とも運ばれる
             b.setPos(door);
             long t1 = now + 1000;

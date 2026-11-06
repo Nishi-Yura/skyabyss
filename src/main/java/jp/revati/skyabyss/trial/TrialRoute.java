@@ -481,7 +481,8 @@ public final class TrialRoute {
                 .setValue(net.minecraft.world.level.block.BellBlock.ATTACHMENT, net.minecraft.world.level.block.state.properties.BellAttachType.FLOOR), 3);
     }
 
-    // 鐘を鳴らす: 台の上の人が鳴らし、オンラインの仲間が全員台にそろっていれば数え下ろしが始まる。始まった (もう始まっている) か
+    // 鐘を鳴らす: 台の上の人が鳴らすと数え下ろしが始まる (全員そろっていなくてよい。2026-11-06 の声「そろった人たちのみで鐘を鳴らせるように」)。
+    // 数え終わったときに台にいる人で出発し、あとから台に来た仲間は今の部屋へ運ばれる (rejoin)。始まった (もう始まっている) か
     public static boolean ring(ServerLevel back, String titan, ServerPlayer p, long now) {
         AABB box = entryBox(titan);
         UUID group = Groups.keyOf(p);
@@ -490,17 +491,6 @@ public final class TrialRoute {
         }
         if (!FirstRun.isFirstRun(back, group)) {
             Notice.bar(p, ModText.hint("message.skyabyss.route.use_shrine"));
-            return false;
-        }
-        List<ServerPlayer> all = gathering(back, group);
-        List<ServerPlayer> inside = new ArrayList<>();
-        for (ServerPlayer m : all) {
-            if (m.isAlive() && m.level() == back && box.contains(m.position())) {
-                inside.add(m);
-            }
-        }
-        if (inside.size() < all.size()) {
-            Notice.bar(p, ModText.hint("message.skyabyss.route.not_all", inside.size(), all.size(), awayNames(all, inside)));
             return false;
         }
         if (ENTRY_START.putIfAbsent(group, now) == null) {
@@ -731,20 +721,15 @@ public final class TrialRoute {
                 continue;
             }
             List<ServerPlayer> all = gathering(back, group);
-            if (inside.size() < all.size()) {
-                trace(group, titan, "waiting " + inside.size() + " of " + all.size());
-                ENTRY_START.remove(group);
-                Component away = awayNames(all, inside);
-                for (ServerPlayer p : inside) {
-                    Notice.bar(p, ModText.progress("message.skyabyss.route.waiting", inside.size(), all.size(), away));
-                }
-                continue;
-            }
             Long t0 = ENTRY_START.get(group);
             if (t0 == null) {
-                trace(group, titan, "gathered, waiting for the bell");
+                // 鐘を待つ: そろっていなければ、誰がまだかを添える (そろった人たちだけでも鳴らせる)
+                trace(group, titan, "waiting for the bell, " + inside.size() + " of " + all.size() + " on the platform");
+                Component bar = inside.size() < all.size()
+                        ? ModText.progress("message.skyabyss.route.waiting", inside.size(), all.size(), awayNames(all, inside))
+                        : ModText.progress("message.skyabyss.route.ring");
                 for (ServerPlayer p : inside) {
-                    Notice.bar(p, ModText.progress("message.skyabyss.route.ring"));
+                    Notice.bar(p, bar);
                 }
                 continue;
             }

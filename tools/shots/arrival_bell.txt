@@ -17,19 +17,35 @@ waitchunks
 wait 60
 chat clear
 shot a1_whale
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a1_whale_bell
 cmd skyabyss dev arrive tide_back
 waitchunks
 wait 60
 chat clear
 shot a2_tide
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a2_tide_bell
 cmd skyabyss dev arrive storm_back
 waitchunks
 wait 60
 chat clear
 shot a3_storm
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a3_storm_bell
 cmd skyabyss dev arrive ember_back
 waitchunks
 wait 60
 chat clear
 shot a4_ember
+cmd skyabyss dev bell
+wait 30
+chat clear
+shot a4_ember_bell
 quit
