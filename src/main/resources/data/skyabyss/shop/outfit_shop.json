@@ -1,12 +1,6 @@
 {
   "goods": [
     {
-      "id": "arrow",
-      "item": "skyabyss:travel_arrow",
-      "count": 8,
-      "coins": 3
-    },
-    {
       "id": "made_spectral_arrow",
       "item": "skyabyss:glow_arrow",
       "count": 2,
@@ -18,7 +12,8 @@
         }
       ],
       "chapter": 4,
-      "made": true
+      "made": true,
+      "job": "archer"
     },
     {
       "id": "travel_shield",

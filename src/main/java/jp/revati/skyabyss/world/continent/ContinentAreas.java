@@ -58,6 +58,21 @@ public final class ContinentAreas {
         return "region:" + ContinentMap.get().region(x, z);
     }
 
+    // 地図で指した所の名前 (旅の地図。字は地図に書かず、指したときだけ。2026-11-05 の声): 町 = 町の名前と土地、鐘の都、土地 = 名前と目安の Lv
+    public static java.util.List<Component> mapName(int x, int z) {
+        String area = area(x, z, "");
+        if (area.startsWith("town:")) {
+            String t = area.substring(5);
+            return java.util.List.of(Component.translatable("map.skyabyss.town." + t), Component.translatable("map.skyabyss.continent." + t));
+        }
+        if (area.equals("capital")) {
+            return java.util.List.of(Component.translatable("signpost.skyabyss.capital"), Component.translatable("message.skyabyss.area.capital"));
+        }
+        int r = Math.max(0, Math.min(REGION_KEYS.length - 1, Integer.parseInt(area.substring(7))));
+        return java.util.List.of(Component.translatable("map.skyabyss.continent." + REGION_KEYS[r]),
+                Component.translatable("message.skyabyss.area.level", REGION_LEVELS[r]));
+    }
+
     @SubscribeEvent
     static void onTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || p.isSpectator() || p.level().dimension() != Level.OVERWORLD

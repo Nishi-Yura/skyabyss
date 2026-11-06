@@ -301,7 +301,27 @@ public final class FacilitySelfTest {
         // 冒険モードでは置けないので、道具屋はブロック (灯り・寝台) を売らない (2026-10-31 の係の人の見直し)
         check(f, !toolShop.goods().isEmpty() && toolShop.goods().stream().noneMatch(g -> g.item() instanceof net.minecraft.world.item.BlockItem), "tool shop sells blocks players cannot place");
         check(f, tools.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()), "food vendor sells bread");
-        check(f, outfit.goods().stream().anyMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get()), "outfitter sells arrows");
+        // ふつうの矢は売らない (弓は矢がなくても撃てる)。職の品は今の職の人にだけ並ぶ (2026-11-05 の声「戦士しか使えない盾を買わせるのはどうなのか」)
+        check(f, outfit.goods().stream().noneMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TRAVEL_ARROW.get()), "outfitter still sells plain arrows");
+        {
+            var sd = jp.revati.skyabyss.rpg.skill.SkillManager.get(p);
+            String was = sd.curJob;
+            ShopDef.Good shield = outfit.goods().stream().filter(g -> g.id().equals("travel_shield")).findFirst().orElse(null);
+            ShopDef.Good glow = outfit.goods().stream().filter(g -> g.id().equals("made_spectral_arrow")).findFirst().orElse(null);
+            ShopDef.Good helm = outfit.goods().stream().filter(g -> g.id().equals("ironclad_helmet")).findFirst().orElse(null);
+            check(f, shield != null && glow != null && helm != null, "outfitter goods for the job check are missing");
+            if (shield != null && glow != null && helm != null) {
+                sd.curJob = "mage";
+                check(f, !ShopService.forJob(p, shield) && !ShopService.forJob(p, glow) && ShopService.forJob(p, helm), "a mage is shown the shield or glow arrows, or not the helmet");
+                check(f, ShopService.view(p, outfit).goods().stream().noneMatch(v -> v.id().equals("travel_shield")), "the shop view lists the shield for a mage");
+                check(f, ShopService.buy(p, outfit, "travel_shield", 1) == ShopService.Result.NO_GOOD, "a mage can buy the warrior's shield");
+                sd.curJob = "warrior";
+                check(f, ShopService.forJob(p, shield) && !ShopService.forJob(p, glow), "a warrior is not shown the shield, or is shown glow arrows");
+                sd.curJob = "archer";
+                check(f, ShopService.forJob(p, glow) && !ShopService.forJob(p, shield), "an archer is not shown glow arrows, or is shown the shield");
+            }
+            sd.curJob = was;
+        }
         check(f, toolShop.goods().stream().noneMatch(g -> g.item() == jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get() || g.item() == Items.IRON_SWORD), "tool shop no longer sells food or swords");
         ShopDef apo = ShopManager.shop("apothecary");
         // 薬は mod の飲み薬 (2026-10-27。バニラのポーションは売らない)

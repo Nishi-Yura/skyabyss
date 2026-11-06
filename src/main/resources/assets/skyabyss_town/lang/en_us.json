@@ -40,7 +40,7 @@
   "dialogue.skyabyss.guest_whale_lookout.after.ask": "Is something troubling you?",
   "dialogue.skyabyss.guest_whale_lookout.after.bye": "See you",
   "quest.skyabyss.town.whale_watch.go.journal": "East of town: the Whalewatch Post, where the old watch kept their eyes on the sky. Look at which way the stone whale is heading, and read the board.",
-  "quest.skyabyss.town.whale_watch.go.go": "See where the stone whale is heading from the Whalewatch Post (east of town)",
+  "quest.skyabyss.town.whale_watch.go.go": "Watch the whale from the Whalewatch Post (east of town)",
   "quest.skyabyss.town.whale_watch.back.journal": "The board said \"strike the bell three times\". Tell Haru.",
   "quest.skyabyss.town.whale_watch.back.back": "Tell Haru the bell-ringer",
   "entity.skyabyss.guest_whale_bonecarver": "Gonji the Bone Carver",

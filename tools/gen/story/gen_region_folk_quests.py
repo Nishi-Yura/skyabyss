@@ -211,7 +211,7 @@ FOLK = {
                   'The board at the Whalewatch Post read "If the stone whale turns over in its sleep, strike the bell three times." Haru has counted the strokes ever since.'),
             go_journal=('町から東、鯨見櫓。昔の見張りが使っていた櫓だ。上から岩鯨の向きを見て、板の言葉も読んでこよう。',
                         'East of town: the Whalewatch Post, where the old watch kept their eyes on the sky. Look at which way the stone whale is heading, and read the board.'),
-            go_obj=('鯨見櫓から岩鯨の向きを見てこよう（町から東）', 'See where the stone whale is heading from the Whalewatch Post (east of town)'),
+            go_obj=('鯨見櫓から岩鯨の向きを見てこよう（町から東）', 'Watch the whale from the Whalewatch Post (east of town)'),
             back_journal=('板には「三度鐘を打て」とあった。ハルに伝えよう。', 'The board said "strike the bell three times". Tell Haru.'),
             back_obj=('鐘打ちのハルに伝えよう', 'Tell Haru the bell-ringer'),
             menu=('困っていることは？', 'Is something troubling you?'),
