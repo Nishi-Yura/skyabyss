@@ -305,8 +305,10 @@ public final class EmberHeartSelfTest {
         check(back.getBlockState(new BlockPos(cx + 9, fl - 1, cz)).is(Blocks.LAVA) && back.getBlockState(new BlockPos(cx + 9, fl - 3, cz)).is(Blocks.LAVA)
                 && !back.getBlockState(new BlockPos(cx + 9, fl - 4, cz)).isAir() && !back.getBlockState(new BlockPos(cx + 9, fl - 4, cz)).is(Blocks.LAVA),
                 "the lava pool under a section is not 3 deep", f);
-        check(back.getBlockState(new BlockPos(cx + 15, fl, cz)).is(Blocks.LAVA), "moat has no lava", f);
-        check(back.getBlockState(new BlockPos(cx + 16, fl + 3, cz)).getBlock() != Blocks.AIR && !back.getBlockState(new BlockPos(cx + 16, fl + 3, cz)).is(Blocks.LAVA), "wall is open", f);
+        int sr = EmberHeartArena.SECTION_R;
+        int rr = EmberHeartArena.RADIUS;
+        check(back.getBlockState(new BlockPos(cx + sr, fl, cz)).is(Blocks.LAVA), "moat has no lava", f);
+        check(back.getBlockState(new BlockPos(cx + rr, fl + 3, cz)).getBlock() != Blocks.AIR && !back.getBlockState(new BlockPos(cx + rr, fl + 3, cz)).is(Blocks.LAVA), "wall is open", f);
         check(jp.revati.skyabyss.trial.raid.HeartHall.roofed(back, cx, cz + 3, EmberHeartArena.CEILING, EmberHeartArena.SURFACE), "chamber has no ceiling", f);
         check(back.getBlockState(new BlockPos(cx, fl + 1, cz + 6)).isAir() && back.getBlockState(new BlockPos(cx + 7, EmberHeartArena.CEILING - 1, cz - 7)).isAir(), "interior is not open", f);
         // 入口: 橋 (幅 3、溝の上) と通り道、封印する壁の 1 枚は空いている
@@ -328,15 +330,18 @@ public final class EmberHeartSelfTest {
         check(EmberHeartArena.ante().contains(EmberHeartArena.anteSpawn()), "antechamber spawn is outside the antechamber", f);
         check(EmberHeartArena.arena().contains(EmberHeartArena.insideSpawn(0.5)), "inside spawn is outside the arena", f);
         check(EmberHeartArena.sectorAt(cx + 0.5, cz - 12.5) == 3 && EmberHeartArena.sectorAt(cx + 0.5, cz + 12.5) == 0, "entrance sector is not 3 (south is 0)", f);
-        check(EmberHeartArena.onPlatform(cx + 0.5, cz + 2) && !EmberHeartArena.onPlatform(cx + 5.5, cz + 0.5), "platform test is wrong", f);
+        check(EmberHeartArena.onPlatform(cx + 0.5, cz + 2) && !EmberHeartArena.onPlatform(cx + EmberHeartArena.PLATFORM_R + 1.5, cz + 0.5), "platform test is wrong", f);
         // 六つの区画: 大きさがそろい、台と溝に重ならない
         int total = 0;
         for (int k = 0; k < EmberHeartArena.SECTIONS; k++) {
             int n = EmberHeartArena.sectionSize(k);
             total += n;
-            check(n >= 95 && n <= 125, "section " + k + " has " + n + " blocks", f);
+            // 区画の輪 (台の外 PLATFORM_R 〜 SECTION_R) を六つに分けた広さのおよそ (2026-11-07 に間を広げたので、輪の広さから決める)
+            double each = Math.PI * (EmberHeartArena.SECTION_R * EmberHeartArena.SECTION_R - EmberHeartArena.PLATFORM_R * EmberHeartArena.PLATFORM_R) / EmberHeartArena.SECTIONS;
+            check(n >= each * 0.8 && n <= each * 1.2, "section " + k + " has " + n + " blocks (about " + Math.round(each) + ")", f);
         }
-        check(total > 600 && total < 760, "sections have " + total + " blocks in all", f);
+        double ring = Math.PI * (EmberHeartArena.SECTION_R * EmberHeartArena.SECTION_R - EmberHeartArena.PLATFORM_R * EmberHeartArena.PLATFORM_R);
+        check(total > ring * 0.85 && total < ring * 1.15, "sections have " + total + " blocks in all (about " + Math.round(ring) + ")", f);
         // 歩いて行ける: 入口の橋の奥から、台と六つの区画のすべてへ (段差は 1 まで)
         Set<Long> seen = new HashSet<>();
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -483,7 +488,7 @@ public final class EmberHeartSelfTest {
         BlockPos vein = findVein(back);
         check(vein != null && back.getBlockState(vein).is(Blocks.MAGMA_BLOCK), "no glowing vein in the wall", f);
         int fl = EmberHeartArena.FLOOR;
-        BlockPos moat = new BlockPos(EmberHeartArena.CX + 15, fl, EmberHeartArena.CZ);
+        BlockPos moat = new BlockPos(EmberHeartArena.CX + EmberHeartArena.SECTION_R, fl, EmberHeartArena.CZ);
         check(back.getBlockState(moat).is(Blocks.LAVA), "moat not lava when warm", f);
         EmberHeartArena.setCold(back, true);
         check(EmberHeartArena.isCold(), "cold flag", f);

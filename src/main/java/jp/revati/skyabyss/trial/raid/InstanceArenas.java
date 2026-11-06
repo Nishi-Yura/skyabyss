@@ -142,7 +142,9 @@ public final class InstanceArenas {
     // 心臓の間が建っているか (運ばれる所の足もとが床で、頭まで空いている)
     public static boolean heartBuilt(ServerLevel level, String titan) {
         BlockPos in = heartEntry(titan);
-        return in != null && !level.getBlockState(in.below()).isAir() && level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir();
+        // 立つ所と頭は通れればよい (雷翼の間は頭の高さに見えない光のブロックを散らしてある)
+        return in != null && !level.getBlockState(in.below()).isAir() && level.getBlockState(in).getCollisionShape(level, in).isEmpty()
+                && level.getBlockState(in.above()).getCollisionShape(level, in.above()).isEmpty();
     }
 
     // 建っていなければ建てる (自己テスト・古い世界の保険)。建てたか
@@ -186,9 +188,9 @@ public final class InstanceArenas {
             case Titans.STONE_WHALE -> new BlockPos(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART_CX, jp.revati.skyabyss.titan.dungeon.TitanBackLayout.FLOOR + 1,
                     jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART_GATE_Z - 5);
             case Titans.TIDE_SHELL -> new BlockPos(jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CX, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.FLOOR,
-                    jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CZ + 10);
+                    jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CZ + jp.revati.skyabyss.titan.tide.heart.TideHeartArena.RADIUS - 4);
             case Titans.THUNDER_WING -> new BlockPos(jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CX + 3, jp.revati.skyabyss.titan.storm.heart.StormHeartArena.FLOOR,
-                    jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CZ - 11);
+                    jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CZ - jp.revati.skyabyss.titan.storm.heart.StormHeartArena.RADIUS + 4);
             case Titans.EMBER -> BlockPos.containing(jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.insideSpawn(jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.CX + 0.5));
             default -> null;
         };

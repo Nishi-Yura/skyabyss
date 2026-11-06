@@ -103,11 +103,13 @@ public class EmberHeart extends HeartBoss {
 
     // 予告の数値 (warn は tick。予告の長さは Telegraph.MIN_WARN_TICKS = 16 以上)
     public static final int BREATH_WARN = 24;
-    public static final double BREATH_LENGTH = 16;
+    // 間の広さの倍率 (元の半径 16 からの伸び。2026-11-07 に半径 25 へ広げたとき、遠くへ届く技の長さを同じ割合で伸ばした)
+    public static final double ROOM_SCALE = EmberHeartArena.RADIUS / 16.0;
+    public static final double BREATH_LENGTH = 16 * ROOM_SCALE;
     public static final double BREATH_HALF_WIDTH = 1.5;
     public static final int PULSE_WARN = 20;
     public static final double PULSE_START = 3.2;
-    public static final double PULSE_REACH = 15.5;
+    public static final double PULSE_REACH = 15.5 * ROOM_SCALE;
     public static final double LANE_HALF = Math.toRadians(20);
     public static final int ORB_WARN = 30;
     public static final double ORB_RADIUS = 2.3;
@@ -132,7 +134,7 @@ public class EmberHeart extends HeartBoss {
     // 炉打ち (憤怒だけ): 扇 (半径 FORGE_RANGE、片側 45 度) を 120 度ずつ回して三打、最後に中央の円 (半径 5)
     public static final int FORGE_WARN = 24;
     public static final int FORGE_STEP = 16;
-    public static final double FORGE_RANGE = 15.5;
+    public static final double FORGE_RANGE = 15.5 * ROOM_SCALE;
     public static final double FORGE_HALF = Math.toRadians(45);
     public static final int FORGE_CORE_WARN = 72;
     public static final double FORGE_CORE_RADIUS = 5;

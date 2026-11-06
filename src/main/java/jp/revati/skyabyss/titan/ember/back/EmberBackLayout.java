@@ -34,7 +34,8 @@ public final class EmberBackLayout {
     // 32: 封じた炉心の広間に歩く道の灯りを置かない (RouteLamps。trial/RouteSeals)
     // 33: 熾の底と前室を体の外 (trial/raid/InstanceArenas) へ移した
     // 34: 巨神の中は建てない (外見だけ。体・地の下・皮の割れ目の栓・口と、体の外の熾の底)。2026-10-23
-    public static final int LAYOUT_VERSION = 34;
+    // 35: 熾の底の戦う床を半径 16 → 25 (HEART_GROW)。前室・入口・休み場 heart をその分北へ (2026-11-07)
+    public static final int LAYOUT_VERSION = 35;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)
@@ -146,11 +147,13 @@ public final class EmberBackLayout {
     // 元の座標 (中心 (0, 50, -4)) を HEART_DX / HEART_DZ だけずらす。高さは元のまま。螺旋の縦穴 (GATE_SHAFT) とはつながらない
     public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
     public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 4;
-    public static final Box HEART_ANTE = new Box(-4 + HEART_DX, FLOOR_HEART, -29 + HEART_DZ, 4 + HEART_DX, 56, -23 + HEART_DZ);
+    // 熾の底を元 (半径 16) から広げた分 (2026-11-07 の声「心臓の間は大きくなったが動ける範囲は広くない」)。前室・入口・休み場もこの分だけ北へ
+    public static final int HEART_GROW = 9;
+    public static final Box HEART_ANTE = new Box(-4 + HEART_DX, FLOOR_HEART, -29 - HEART_GROW + HEART_DZ, 4 + HEART_DX, 56, -23 - HEART_GROW + HEART_DZ);
     // 熾の底 (円 半径 16、天井まで 14。床の輪: 台 0〜4、区画 4〜15、溝 15〜16。区画の下に深さ 3 の溶岩の溜め。戦いの部屋は大きさ据え置き) → F
     public static final BlockPos HEART_CENTER = new BlockPos(HEART_DX, FLOOR_HEART, -4 + HEART_DZ);
-    public static final int HEART_RADIUS = 16;
-    public static final Box HEART = new Box(-17 + HEART_DX, 46, -21 + HEART_DZ, 17 + HEART_DX, 64, 13 + HEART_DZ);
+    public static final int HEART_RADIUS = 16 + HEART_GROW;
+    public static final Box HEART = new Box(-17 - HEART_GROW + HEART_DX, 46, -21 - HEART_GROW + HEART_DZ, 17 + HEART_GROW + HEART_DX, 64, 13 + HEART_GROW + HEART_DZ);
     // 体の中にあったころの熾の底・前室・螺旋の下の範囲 (建て直しで灰の原に戻す所)
     public static final Box OLD_UNDERGROUND = new Box(-19, 44, -57, 19, PLAIN_TOP, 15);
 
@@ -158,7 +161,7 @@ public final class EmberBackLayout {
     // 鍛えの間の奥 → 鍛え手の間 (EAST と SMITH のあいだの 3 枚の壁)。扉 (SealedGateBlock) を置くのは C2、戦いの間に閉じるのは E (BossRoom)
     public static final Box SMITH_DOOR = new Box(43, FLOOR_EAST + 1, 57, 45, FLOOR_EAST + 4, 59);
     // 前室 → 熾の底 (1 枚の壁)。封印を置いて開け閉めするのは F (BossRoom)
-    public static final Box HEART_DOOR = new Box(-1 + HEART_DX, FLOOR_HEART + 1, -22 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -22 + HEART_DZ);
+    public static final Box HEART_DOOR = new Box(-1 + HEART_DX, FLOOR_HEART + 1, -22 - HEART_GROW + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -22 - HEART_GROW + HEART_DZ);
     // 冷えた溶岩洞 (広間の西・東の扉から横へ、そこから試練の入口へ下る南の脚。南は広間の南の扉から真っすぐ)。幅 7
     public static final int TUBE_WEST_X = -43;
     public static final int TUBE_EAST_X = 44;
@@ -236,7 +239,7 @@ public final class EmberBackLayout {
     }
 
     // 背は外見だけ (体の中は建てない) なので、休み場は心臓の間の前室 (区画の封じた部屋) だけ
-    public static final List<Rest> RESTS = List.of(new Rest("heart", new BlockPos(HEART_DX, FLOOR_HEART, -27 + HEART_DZ), 0f));
+    public static final List<Rest> RESTS = List.of(new Rest("heart", new BlockPos(HEART_DX, FLOOR_HEART, -27 - HEART_GROW + HEART_DZ), 0f));
 
     public static Rest rest(String name) {
         for (Rest r : RESTS) {
@@ -257,7 +260,7 @@ public final class EmberBackLayout {
                 // 奥 (東の熾り石・光る床・碑文)
                 out.add(new Box(39, FLOOR_EAST, 80, 49, FLOOR_EAST + 4, 86));
             }
-            case "heart" -> out.add(new Box(-1 + HEART_DX, FLOOR_HEART, -21 + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -20 + HEART_DZ));
+            case "heart" -> out.add(new Box(-1 + HEART_DX, FLOOR_HEART, -21 - HEART_GROW + HEART_DZ, 1 + HEART_DX, FLOOR_HEART + 4, -20 - HEART_GROW + HEART_DZ));
             default -> {
             }
         }

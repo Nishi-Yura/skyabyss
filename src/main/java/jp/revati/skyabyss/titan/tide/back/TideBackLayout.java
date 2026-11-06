@@ -48,7 +48,8 @@ public final class TideBackLayout {
     // 32: 封じた潮の広間の灯り・壁の柱を外した (trial/RouteSeals。2026-10-22)
     // 33: 心臓の間 (殻の底) と休み場 heart を体の外 (trial/raid/InstanceArenas) へ移した
     // 34: 巨神の中は建てない (外見だけ。体・甲羅の溝の手直し・潮門の到着の段と、体の外の心臓の間)。2026-10-23
-    public static final int LAYOUT_VERSION = 34;
+    // 35: 心臓の間の戦う床を半径 14 → 24 (HEART_GROW)。前室と休み場 heart をその分南へ (2026-11-07)
+    public static final int LAYOUT_VERSION = 35;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
 
@@ -177,8 +178,10 @@ public final class TideBackLayout {
     // HEART_DX / HEART_DZ だけずらす。前室の南の休み場 heart も一緒に動く (螺旋の階段とはつながらない)
     public static final int HEART_DX = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_X;
     public static final int HEART_DZ = jp.revati.skyabyss.trial.raid.InstanceArenas.HEART_Z + 30;
-    public static final Area HEART_HALL = new Area(-1 + HEART_DX, 1 + HEART_DX, -9 + HEART_DZ, -3 + HEART_DZ, 50, 4);
-    public static final Area HEART_REST = new Area(-4 + HEART_DX, 4 + HEART_DX, -9 + HEART_DZ, -3 + HEART_DZ, 50, 4);
+    // 心臓の間を元 (半径 14) から広げた分。前室・休み場 heart もこの分だけ南へずらす (TideHeartArena.RADIUS = 14 + HEART_GROW)
+    public static final int HEART_GROW = 10;
+    public static final Area HEART_HALL = new Area(-1 + HEART_DX, 1 + HEART_DX, -9 + HEART_GROW + HEART_DZ, -3 + HEART_GROW + HEART_DZ, 50, 4);
+    public static final Area HEART_REST = new Area(-4 + HEART_DX, 4 + HEART_DX, -9 + HEART_GROW + HEART_DZ, -3 + HEART_GROW + HEART_DZ, 50, 4);
 
     // ---------------------------------------------------------------- 潮鳴り石と、抜け道 (石が鳴ると光る床。踏むと戻れる)
     public static final BlockPos STONE_WEST = new BlockPos(ALTAR[0], ALTAR_TOP + 1, ALTAR[1] - 2);
@@ -189,7 +192,8 @@ public final class TideBackLayout {
     }
 
     // 背は外見だけ (体の中は建てない) なので、休み場は心臓の間の前室 (区画の封じた部屋の南) だけ
-    public static final Rest HEART_REST_SPOT = new Rest("heart", HEART_REST, new BlockPos(3 + HEART_DX, 51, -6 + HEART_DZ), new BlockPos(-2 + HEART_DX, 51, -6 + HEART_DZ));
+    public static final Rest HEART_REST_SPOT = new Rest("heart", HEART_REST, new BlockPos(3 + HEART_DX, 51, -6 + HEART_GROW + HEART_DZ),
+            new BlockPos(-2 + HEART_DX, 51, -6 + HEART_GROW + HEART_DZ));
     public static final List<Rest> RESTS = List.of(HEART_REST_SPOT);
 
     // 看板の位置と、文が向く向き (試練の入口の一言。TideIslandBuilder)

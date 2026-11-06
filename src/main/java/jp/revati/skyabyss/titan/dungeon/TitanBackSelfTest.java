@@ -161,7 +161,9 @@ public final class TitanBackSelfTest {
         }
         // 体の外の心臓の間: 建っていて、中の空気が部屋の箱の外へ抜けない
         if (!InstanceArenas.heartBuilt(back, titan)) {
-            f.add(titan + ": the heart arena outside the body is not built");
+            BlockPos e = InstanceArenas.heartEntry(titan);
+            f.add(titan + ": the heart arena outside the body is not built (entry " + e + ": below " + (e == null ? "-" : back.getBlockState(e.below()))
+                    + ", at " + (e == null ? "-" : back.getBlockState(e)) + ", above " + (e == null ? "-" : back.getBlockState(e.above())) + ")");
             return;
         }
         BlockPos entry = InstanceArenas.heartEntry(titan);

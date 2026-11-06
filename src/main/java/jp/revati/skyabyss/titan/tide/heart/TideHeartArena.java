@@ -17,9 +17,10 @@ import net.minecraft.world.phys.Vec3;
 
 // 殻の底 (心臓の間、08 の 3.6節)。本番の島では潮の広間の南の、干潟の前室の真下 (中心 0, 51, -30。天井 y=62)。
 // 潮の底の門の下の螺旋の階段 → 休み場 heart の小部屋 → 前室 (南の口) → 入口の封印 → 部屋 (TideIslandBuilder が先に建てる)。
-//  - 丸い部屋 (内側の半径 14、天井まで 10)。床は砂と平らな石、壁は海の石と真珠層 (方解石) の白い筋
-//  - 中心から半径約 8.5 に、高さ 2 の「岩の島」が 4 つ (北東・北西・南東・南西。上は 3x3)
-//  - 床の外周に水の溜めの溝 (半径 12.5〜13.5、1 段低い)
+//  - 丸い部屋 (内側の半径 RADIUS = 24、天井まで 12)。床は砂と平らな石、壁は海の石と真珠層 (方解石) の白い筋
+//    (2026-11-07 の声「部屋は大きくなったが動ける範囲は広くなっていない」: 半径 14 から 24 へ。技の届く長さも同じ割合で伸ばした。TideHeart)
+//  - 中心から ISLAND_OFFSET (半径の 0.43) の斜めに、高さ 2 の「岩の島」が 4 つ (北東・北西・南東・南西。上は 3x3)
+//  - 床の外周に水の溜めの溝 (半径 RADIUS - 1.5 〜 RADIUS - 0.5、1 段低い)
 //  - 南の壁に入口 (幅 3、高さ 3。戦いの間は封印)。その外に前室 (休み場の代わり)。前室の南の光る床で島へ戻る
 //  - 島の頂の柱の跡の真ん中に「潮の底へ降りる」床。踏むと前室へ降りる
 // 満ち潮: 床の高さの一段 (FLOOR) に水を置き、6 秒で引く。島の上 (FLOOR + 2) は濡れない
@@ -29,21 +30,21 @@ public final class TideHeartArena {
     public static final int CX = jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_DX;
     public static final int CZ = -30 + jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_DZ;
     public static final int FLOOR = 51;
-    public static final int RADIUS = 14;
+    public static final int RADIUS = 14 + jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_GROW;
     // 天井の高さ: 床の上の空気が 12 段 (床 51 〜 62)。広い技 (大波・輪) と心臓 (高さ 6.3) が収まる。ボス部屋は 12 以上
     public static final int CEILING = 63;
     // 溝 (床の外周、1 段低い水)
-    static final double GROOVE_IN = 12.5;
-    static final double GROOVE_OUT = 13.5;
+    static final double GROOVE_IN = RADIUS - 1.5;
+    static final double GROOVE_OUT = RADIUS - 0.5;
     // 岩の島: 中心 (±6, ±6)、上は 3x3、高さ 2
-    public static final int ISLAND_OFFSET = 6;
+    public static final int ISLAND_OFFSET = (int) Math.round(RADIUS * 0.43);
     public static final int ISLAND_HEIGHT = 2;
     // 入口 (南の壁、z = 15。x -1〜1、y FLOOR〜FLOOR+2) と前室 (z 16〜20)
-    static final int GATE_Z = 15;
-    static final int ANTE_Z0 = 16;
-    static final int ANTE_Z1 = 20;
+    static final int GATE_Z = RADIUS + 1;
+    static final int ANTE_Z0 = RADIUS + 2;
+    static final int ANTE_Z1 = RADIUS + 6;
     // 前室の南の端の、島へ戻る光る床 (z = 20)
-    static final int EXIT_Z = 20;
+    static final int EXIT_Z = ANTE_Z1;
 
     // 満ち潮の状態 (部屋は一つなので static)。fillTicks: 満ちていく残り、holdTicks: 満ちたままの残り、drainTicks: 引く残り
     private static int fillTicks;
@@ -81,7 +82,7 @@ public final class TideHeartArena {
 
     // 前室に降りたときの位置 (北の入口を向く)
     public static Vec3 anteSpawn() {
-        return new Vec3(CX + 0.5, FLOOR, CZ + 18.5);
+        return new Vec3(CX + 0.5, FLOOR, CZ + ANTE_Z0 + 2.5);
     }
 
     static double dist(int x, int z) {
@@ -189,16 +190,22 @@ public final class TideHeartArena {
             }
         }
         // 明かり: 天井だけでは床が暗く、予告の粒 (色の粒は周りの明るさで暗くなる) が見えにくいので、
-        // 床に埋めた海のランタン (半径 4.5 に 8、半径 10 に 12)、壁の足もと (12 か所)、岩の島の上の真ん中
+        // 床に埋めた海のランタン (半径 4.5 に 8、半径の 0.7 に 12、半径の 0.45 にもう 12)、壁の足もと (16 か所)、岩の島の上の真ん中
         for (int k = 0; k < 8; k++) {
             double a = Math.toRadians(22.5 + 45 * k);
             floorLamp(back, (int) Math.round(Math.cos(a) * 4.5), (int) Math.round(Math.sin(a) * 4.5), lamp, flags);
         }
         for (int k = 0; k < 12; k++) {
             double a = Math.toRadians(15 + 30 * k);
-            floorLamp(back, (int) Math.round(Math.cos(a) * 10), (int) Math.round(Math.sin(a) * 10), lamp, flags);
-            int wx = (int) Math.round(Math.cos(a) * 15);
-            int wz = (int) Math.round(Math.sin(a) * 15);
+            double mid = RADIUS * 0.7;
+            floorLamp(back, (int) Math.round(Math.cos(a) * mid), (int) Math.round(Math.sin(a) * mid), lamp, flags);
+            double near = RADIUS * 0.45;
+            floorLamp(back, (int) Math.round(Math.cos(a + 0.26) * near), (int) Math.round(Math.sin(a + 0.26) * near), lamp, flags);
+        }
+        for (int k = 0; k < 16; k++) {
+            double a = Math.toRadians(11.25 + 22.5 * k);
+            int wx = (int) Math.round(Math.cos(a) * (RADIUS + 1));
+            int wz = (int) Math.round(Math.sin(a) * (RADIUS + 1));
             if (!inside(CX + wx, CZ + wz) && dist(CX + wx, CZ + wz) <= RADIUS + 2) {
                 back.setBlock(new BlockPos(CX + wx, FLOOR + 1, CZ + wz), lamp, flags);
             }

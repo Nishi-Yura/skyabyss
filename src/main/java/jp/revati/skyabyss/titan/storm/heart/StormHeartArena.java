@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 // 部屋の穴と前室・入口は背中の担当が鳥の中に彫る (StormBirdBuilder.keel)。ここは穴の中の形 (柱・風穴・竜骨の筋・壁と天井の飾り) を
 // 建て直すだけで、背中の担当が彫った範囲 (中心から半径 HEART_ROOM_RADIUS + 1.6、床のブロック HEART_ROOM.y 〜 天井のブロック) の外は触らない。
 // 前室・螺旋の階段・天井の上の低い道 (竜骨の門から) は背中の担当のもの。
-//  - 丸い部屋 (内側の半径 15、立つ高さ 122、天井のブロック 134)。床は竜骨の稜線に沿って中央の幅 3 が 1 段低い (浅い舟の底)。
+//  - 丸い部屋 (内側の半径 RADIUS = 25 (2026-11-07 に 15 から広げた)、立つ高さ 122、天井のブロック 134)。床は竜骨の稜線に沿って中央の幅 3 が 1 段低い (浅い舟の底)。
 //    壁は肋と飛ぶための筋の束: 灰白の石 (磨いた閃緑岩) に、方解石の縦の肋と、白い羽毛の層の帯。赤みは使わない
 //  - 避雷の柱 4 本 (北東・北西・南東・南西、中心から (±6, ±6))。銅の柱、高さ 6。中の 3 段は銅の電球で、満ちた段だけ灯る。先は光る
 //  - 風穴 4 つ (北・南・東・西、中心から 5)。床の銅の格子、下に光。段階 2 で昇り風が立つ (高さは心臓の下の端まで)
@@ -47,11 +47,11 @@ public final class StormHeartArena {
     // 竜骨の稜線 (1 段低い中央の筋): |x - CX| <= KEEL_HALF
     static final int KEEL_HALF = 1;
     // 避雷の柱 (中心から ±ROD_OFFSET)。柱は FLOOR から ROD_HEIGHT 段、いちばん上が光る先
-    public static final int ROD_OFFSET = 6;
+    public static final int ROD_OFFSET = 10;
     public static final int ROD_HEIGHT = 6;
     public static final int ROD_STAGES = 3;
     // 風穴 (中心から HOLE_OFFSET。3x3 の格子)。昇り風の半径と上の端
-    public static final int HOLE_OFFSET = 5;
+    public static final int HOLE_OFFSET = 8;
     public static final double UPDRAFT_RADIUS = 1.6;
     public static final double UPDRAFT_TOP = FLOOR + 5.5;
     // 入口 (北の壁。前室 KEEL_ANTE の北の口 = 背中の HEART_DOOR) と、その内側の壁の厚み (z GATE_Z + 1)
@@ -59,7 +59,7 @@ public final class StormHeartArena {
 
     // 入口の鏡の壁 (三章の「遅れて映る影」。titan/storm/chapter/MirrorLag): 入口の内側 (中心から北へ 6) に、竜骨の筋をはさんで羽鏡が東西 3 つずつ。
     // 前室から大門をくぐって入った所 (InstanceArenas.heartEntry = CX+3, CZ-11) から南へ 5 ブロック。羽鏡の台は FLOOR の高さに立つ
-    public static final int MIRROR_Z = CZ - 6;
+    public static final int MIRROR_Z = CZ - RADIUS + 9;
     public static final int[] MIRROR_DX = {-4, -3, -2, 2, 3, 4};
 
     // 柱の満ちた段 (部屋は一つ。竜骨の間は一度に一つのグループだけが入れる部屋なので、その持ち主の戦いの段)

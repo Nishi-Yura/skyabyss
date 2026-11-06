@@ -122,7 +122,7 @@ public final class TideHeartSelfTest {
                 check(!back.getBlockState(top).isAir() && back.getBlockState(top.above()).isAir(), "rock island missing or covered at " + top, failures);
             }
         }
-        check(back.getBlockState(new BlockPos(TideHeartArena.CX + 13, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "groove has no water", failures);
+        check(back.getBlockState(new BlockPos(TideHeartArena.CX + TideHeartArena.RADIUS - 1, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "groove has no water", failures);
         check(back.getBlockState(new BlockPos(TideHeartArena.CX + 3, f, TideHeartArena.CZ + 3)).isAir() && back.getBlockState(new BlockPos(TideHeartArena.CX + 3, TideHeartArena.CEILING - 1, TideHeartArena.CZ + 3)).isAir(),
                 "chamber interior is not open", failures);
         check(!back.getBlockState(new BlockPos(TideHeartArena.CX, TideHeartArena.CEILING, TideHeartArena.CZ + 0)).isAir(), "chamber has no ceiling", failures);
@@ -134,7 +134,7 @@ public final class TideHeartSelfTest {
         check(TideHeartArena.ante().contains(TideHeartArena.anteSpawn()), "antechamber spawn is outside the antechamber", failures);
         check(!TideHeartArena.arena().contains(TideHeartArena.anteSpawn()), "antechamber spawn is inside the fight", failures);
         // 前室の南の口は、休み場の小部屋と螺旋の階段へ開いている (本番の島)
-        check(back.getBlockState(new BlockPos(TideHeartArena.CX, f, TideHeartArena.CZ + 21)).isAir(), "antechamber has no way out to the stairs", failures);
+        check(back.getBlockState(new BlockPos(TideHeartArena.CX, f, TideHeartArena.CZ + TideHeartArena.ANTE_Z1 + 1)).isAir(), "antechamber has no way out to the stairs", failures);
         check(TideHeartArena.onIsland(TideHeartArena.CX + o + 0.5, f + 2, TideHeartArena.CZ + o + 0.5) && !TideHeartArena.onIsland(TideHeartArena.CX + 3.5, f, TideHeartArena.CZ + 3.5), "island test is wrong", failures);
         check(TideHeartArena.arena().contains(TideHeartArena.heartHome()), "heart home outside the arena", failures);
     }
@@ -155,7 +155,7 @@ public final class TideHeartSelfTest {
         }
         check(!TideHeartArena.flooding(), "flood did not end", failures);
         check(back.getBlockState(new BlockPos(TideHeartArena.CX + 3, f, TideHeartArena.CZ + 3)).isAir() && back.getBlockState(new BlockPos(TideHeartArena.CX - 10, f, TideHeartArena.CZ + 2)).isAir(), "flood did not drain", failures);
-        check(back.getBlockState(new BlockPos(TideHeartArena.CX + 13, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "draining emptied the groove", failures);
+        check(back.getBlockState(new BlockPos(TideHeartArena.CX + TideHeartArena.RADIUS - 1, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "draining emptied the groove", failures);
     }
 
     // テストのグループ (一人のグループの鍵)。心臓の戦いと撃破の記録はグループごと
@@ -275,7 +275,7 @@ public final class TideHeartSelfTest {
         tickHeart(heart, 200);
         check(heart.currentAction() == TideHeart.Action.NONE, "spring tide did not finish", failures);
         // 部屋の外へ出た心臓は戻る。誰もいなければ 3 秒で放棄
-        heart.moveTo(TideHeartArena.CX + 0.5, TideHeartArena.FLOOR + 1, TideHeartArena.CZ + 30.5);
+        heart.moveTo(TideHeartArena.CX + 0.5, TideHeartArena.FLOOR + 1, TideHeartArena.CZ + TideHeartArena.RADIUS + 16.5);
         TideHeartBattle.room(GROUP_A).tick(back, TideHeartBattle.HOST);
         check(heart.distanceToSqr(TideHeartArena.heartHome()) < 1, "heart outside the room was not brought back", failures);
         for (int i = 0; i < 6; i++) {

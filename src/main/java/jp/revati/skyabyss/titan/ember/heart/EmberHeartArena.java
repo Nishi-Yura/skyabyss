@@ -47,8 +47,9 @@ public final class EmberHeartArena {
     // 人が立つ高さ (床のブロックの上面)
     public static final int SURFACE = FLOOR + 1;
     public static final int RADIUS = EmberBackLayout.HEART_RADIUS;
-    public static final int PLATFORM_R = 4;
-    public static final int SECTION_R = 15;
+    // 台と区画の輪 (2026-11-07 に間を広げたとき、台を 4 → 6、区画の外の端を半径 - 1 に)
+    public static final int PLATFORM_R = 6;
+    public static final int SECTION_R = RADIUS - 1;
     public static final int BOTTOM = EmberBackLayout.HEART.minY();
     public static final int CEILING = EmberBackLayout.HEART.maxY();
     public static final int SECTIONS = 6;
