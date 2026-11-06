@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 乗り物に名前を付ける (絆 II から。docs/design/38 の 9)。打って「決める」でサーバーへ送り、店の画面へ戻る。空なら名前を外す
+// 乗り物に名前を付ける (絆 II から。docs/design/38 の 8)。打って「決める」でサーバーへ送り、店の画面へ戻る。空なら名前を外す
 public class MountNameScreen extends Screen {
     private final Screen parent;
     private final String current;

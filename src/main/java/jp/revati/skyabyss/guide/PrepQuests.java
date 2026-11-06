@@ -21,8 +21,8 @@ import net.minecraft.server.level.ServerPlayer;
 // 支度の段・備えの頼み。各章 (一〜四章) に 3 本。章の頭に、クエストログへ自動で出る。
 //
 // ---------------------------------------------------------------- 章ごとの 3 本
-//   一章     支度の段 (メインの段 = category main): ch1/trail_iron (鉄の跡)・ch1/trail_blade (折れた剣)・ch1/trail_shield (盾と糧)。
-//            データを直接直す（生成スクリプトはない）。旧い備えの頼み ch1/prep_* は、この 3 本に吸収した (置くと読み込みの警告)
+//   一章     支度の段 2 本 (メインの段 = category main): ch1/trail_iron (鉄の跡)・ch1/trail_blade (折れた剣)。盾と糧は 2026-11-06 に消した
+//            (声「盾を買うクエストは消して」)。データを直接直す（生成スクリプトはない）。旧い備えの頼み ch1/prep_* は吸収した (置くと読み込みの警告)
 //   二章     支度の段 2 本: ch2/salt_road (塩の道)・ch2/ebb_boat (船と貝)。データを直接直す（生成スクリプトはない）。旅装は任意のサブ ch2/wader_gear
 //   三章     支度の段: ch3/lightning_pillars (避雷の柱)・ch3/scorched_watch (焼けた見張り塔)・ch3/sky_stone (空の石)。データを直接直す（生成スクリプトはない）
 //   四章     支度の段 2 本: ch4/fire_draught (火除けの薬) → ch4/forge_ruins (炉跡)。データを直接直す（生成スクリプトはない）
@@ -46,7 +46,7 @@ public final class PrepQuests {
     private static final Pattern ID = Pattern.compile("ch([1-4])/prep_([a-z_]+)");
     // 既定の形 (ch<n>/prep_<kind>) でない章の 3 本 (章 → ID の並び。kind は ID の最後の「_」より後ろ)
     private static final Map<Integer, List<String>> CHAPTER_IDS = new ConcurrentHashMap<>(Map.of(
-            1, List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"),
+            1, List.of("ch1/trail_iron", "ch1/trail_blade"),
             // 二章は 2 本 (塩の道・船と貝。データを直接直す（生成スクリプトはない）)
             2, List.of("ch2/salt_road", "ch2/ebb_boat"),
             // 三章の支度の段 (避雷の柱・焼けた見張り塔・空の石。データを直接直す（生成スクリプトはない）)

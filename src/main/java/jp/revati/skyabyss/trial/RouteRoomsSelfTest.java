@@ -58,6 +58,7 @@ public final class RouteRoomsSelfTest {
                 p.setPos(pad.x, pad.y, pad.z);
                 long now = back.getGameTime();
                 TrialRoute.tick(back, titan, players, now);
+                TrialRoute.ring(back, titan, p, now);
                 TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 1);
                 if (TrialRoute.step(back, group) != 1) {
                     f.add(titan + ": standing on the arrival pad did not start the route (step " + TrialRoute.step(back, group) + ")");

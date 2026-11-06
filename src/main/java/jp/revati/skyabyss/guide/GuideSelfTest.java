@@ -119,11 +119,11 @@ public final class GuideSelfTest {
         try {
             // 規則 (ID・種類・検査)
             // 一章は支度の段 (ch1/trail_*)。二〜四章は既定の形 (ch<n>/prep_*)。一章の ch1/prep_* はもう 3 本に数えない
-            check(f, PrepQuests.chapterOf("ch1/trail_iron") == 1 && PrepQuests.chapterOf("ch1/trail_shield") == 1 && PrepQuests.chapterOf("ch1/prep_gear") == 0
+            check(f, PrepQuests.chapterOf("ch1/trail_iron") == 1 && PrepQuests.chapterOf("ch1/trail_blade") == 1 && PrepQuests.chapterOf("ch1/prep_gear") == 0
                     && PrepQuests.chapterOf("ch2/prep_gear") == 2 && PrepQuests.chapterOf("ch4/prep_pulse") == 4 && PrepQuests.chapterOf("ch5/prep_gear") == 0
                     && PrepQuests.chapterOf("ch1/day1_traces") == 0 && PrepQuests.chapterOf("main_song") == 0, "chapterOf does not read ch1/trail_* and ch2〜ch4/prep_*");
-            check(f, PrepQuests.kindOf("ch2/prep_blade").equals("blade") && PrepQuests.kindOf("ch1/trail_shield").equals("shield") && PrepQuests.readySignal(3).equals("ch3_ready")
-                    && PrepQuests.id(2, "pulse").equals("ch2/prep_pulse") && PrepQuests.ids(1).equals(List.of("ch1/trail_iron", "ch1/trail_blade", "ch1/trail_shield"))
+            check(f, PrepQuests.kindOf("ch2/prep_blade").equals("blade") && PrepQuests.kindOf("ch1/trail_blade").equals("blade") && PrepQuests.readySignal(3).equals("ch3_ready")
+                    && PrepQuests.id(2, "pulse").equals("ch2/prep_pulse") && PrepQuests.ids(1).equals(List.of("ch1/trail_iron", "ch1/trail_blade"))
                     && PrepQuests.isTrail(1) && !PrepQuests.isTrail(2), "kind / signal / id helpers are wrong");
             List<String> errors = new ArrayList<>();
             List<QuestDef> good = prepDefs(errors, "titan_tide", 2);
@@ -158,8 +158,7 @@ public final class GuideSelfTest {
             check(f, be.stream().anyMatch(s -> s.contains("ch2/prep_pulse") && s.contains("board")), "a prep quest on the board was not flagged");
 
             // 三本が定義されていない章は、準備ができたことにならない
-            check(f, PrepQuests.defined(1) == (QuestManager.quest("ch1/trail_iron") != null && QuestManager.quest("ch1/trail_blade") != null
-                    && QuestManager.quest("ch1/trail_shield") != null), "defined() disagrees with the loaded data");
+            check(f, PrepQuests.defined(1) == (QuestManager.quest("ch1/trail_iron") != null && QuestManager.quest("ch1/trail_blade") != null), "defined() disagrees with the loaded data");
             check(f, !PrepQuests.defined(2), "chapter 2 should not have prep quests in the shipped data yet");
             // 流れ: 仮の三本 (二章) + 合図を受ける見張り
             List<QuestDef> temp = new ArrayList<>(good);

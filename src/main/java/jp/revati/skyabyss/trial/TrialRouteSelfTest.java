@@ -261,6 +261,9 @@ public final class TrialRouteSelfTest {
             TrialRoute.tick(back, titan, players, now);
             check(f, TrialRoute.step(back, ga) == 0, titan + ": the route started without the warning");
             TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 10);
+            check(f, TrialRoute.step(back, ga) == 0, titan + ": the route started before anyone rang the bell");
+            check(f, TrialRoute.ring(back, titan, a, now + TrialRoute.ENTRY_WAIT + 10), titan + ": the bell did not ring for a gathered party");
+            TrialRoute.tick(back, titan, players, now + 2 * TrialRoute.ENTRY_WAIT + 20);
             check(f, TrialRoute.step(back, ga) == 1, titan + ": the route did not start after the warning (step " + TrialRoute.step(back, ga) + ")");
             check(f, TrialRoute.step(back, gb) == 0, titan + ": another group's route started");
             TrialDraw.Draw draw = TrialData.current(back, ga);
@@ -272,6 +275,7 @@ public final class TrialRouteSelfTest {
             // ほかのグループの初回の順路が動いていても、待たずに始まる (部屋は区画ごとに別。docs/design/32 の 5.1)
             b.setPos(door);
             TrialRoute.tick(back, titan, players, now + 1000);
+            TrialRoute.ring(back, titan, b, now + 1000);
             TrialRoute.tick(back, titan, players, now + 1000 + TrialRoute.ENTRY_WAIT + 10);
             check(f, TrialRoute.step(back, gb) == 1, titan + ": a second first-run group waited for the other group's route");
             check(f, TrialSlot.of(GroupProgress.of(back, gb)) > 0 && TrialSlot.of(GroupProgress.of(back, gb)) != TrialSlot.of(GroupProgress.of(back, ga)),
@@ -314,6 +318,7 @@ public final class TrialRouteSelfTest {
             // 順路の途中で入口に立っても始め直さない
             a.setPos(door);
             TrialRoute.tick(back, titan, players, now + 5000);
+            check(f, !TrialRoute.ring(back, titan, a, now + 5000), titan + ": the bell rang mid-route");
             TrialRoute.tick(back, titan, players, now + 5000 + TrialRoute.ENTRY_WAIT + 10);
             check(f, TrialRoute.step(back, ga) == TrialRoute.LAST_STEP, titan + ": standing at the entrance mid-route restarted the route");
             // 心臓を止めると順路が終わり、記録が増え、番号が返る
@@ -329,6 +334,7 @@ public final class TrialRouteSelfTest {
             r.markFirstCleared();
             a.setPos(door);
             TrialRoute.tick(back, titan, players, now + 9000);
+            check(f, !TrialRoute.ring(back, titan, a, now + 9000), titan + ": a replay group rang the bell at the entrance");
             TrialRoute.tick(back, titan, players, now + 9000 + TrialRoute.ENTRY_WAIT + 10);
             check(f, TrialRoute.step(back, ga) == 0, titan + ": a replay group started the route from the entrance");
             // あきらめ: 一人のグループは提案で成立し、記録が消える (外へ出すのは偽の人では確かめない)

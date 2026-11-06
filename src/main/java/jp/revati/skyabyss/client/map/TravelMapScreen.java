@@ -861,7 +861,7 @@ public class TravelMapScreen extends Screen {
             case FOE -> 38;
             case TERRITORY -> 36;
             case LOOTCAMP -> 34;
-            case FISHING, SPRINT -> 28;
+            case FISHING -> 28;
             case CAMP -> 30;
             case TOWN -> 35;
             case TITAN -> 40;
@@ -892,7 +892,7 @@ public class TravelMapScreen extends Screen {
             case FOE -> S_FOE;
             case TERRITORY -> S_TOWN;
             case LOOTCAMP -> S_CAMP;
-            case FISHING, SPRINT -> S_WAYMARK;
+            case FISHING -> S_WAYMARK;
         };
     }
 

@@ -689,10 +689,10 @@ public final class NpcQuestSelfTest {
         check(node(a).equals("c_whale_iron"), "the chaser should mention the traveller who wore iron, got " + node(a), failures);
         next(a);
         pick(a, WC, "grab", failures);
-        // 鯨の話のあと、一章の支度の段 3 本が出る。語り部の入口に割り込む一言 (職人を指す・足音の晩の話) は、ここで済ませておく
+        // 鯨の話のあと、一章の支度の段が出る。語り部の入口に割り込む一言 (職人を指す・足音の晩の話) は、ここで済ませておく
         Quests.poll(a, true);
-        // 支度の段は一本ずつ順に (鉄の跡 → 折れた剣 → 盾と糧)。鯨の話のあとに出るのは鉄の跡だけ
-        check(QuestLog.of(a).entry("ch1/trail_iron") != null && QuestLog.of(a).entry("ch1/trail_blade") == null && QuestLog.of(a).entry("ch1/trail_shield") == null,
+        // 支度の段は一本ずつ順に (鉄の跡 → 折れた剣)。鯨の話のあとに出るのは鉄の跡だけ
+        check(QuestLog.of(a).entry("ch1/trail_iron") != null && QuestLog.of(a).entry("ch1/trail_blade") == null,
                 "only the iron trail should start after the chaser's whale talk", failures);
         NpcBonds.of(a).bond(ST).flags().add("ch1p_pointer_told");
         Quests.onTalk(a, ST, "ch1t_shield_tale");

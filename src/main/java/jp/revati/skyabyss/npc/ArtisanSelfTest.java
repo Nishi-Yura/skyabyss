@@ -362,14 +362,14 @@ public final class ArtisanSelfTest {
         check(f, !entry(d, c).equals("ch1t_ward_weave"), "the first-ward entry came twice");
 
         // 乗る前の一言 (三本そろった。鉄の跡・盾と糧は段を飛ばして済ませる)
-        for (String id : List.of(Ch1Prep.Q_IRON, Ch1Prep.Q_SHIELD)) {
+        for (String id : List.of(Ch1Prep.Q_IRON)) {
             Quests.start(p, id);
             for (int i = 0; i < 4 && !QuestLog.of(p).entry(id).done; i++) {
                 Quests.forceStage(p, id);
             }
         }
-        check(f, Ch1PrepDone.allDone(p), "the three trail steps are not all done");
-        check(f, entry(d, c).equals("ch1a_ready"), "all three done should open ch1a_ready, got " + entry(d, c));
+        check(f, Ch1PrepDone.allDone(p), "the trail steps are not all done");
+        check(f, entry(d, c).equals("ch1a_ready"), "both trails done should open ch1a_ready, got " + entry(d, c));
 
         // 鼓動守の編み直し: 持っていない・今日まだ・岩殻片 8 つ
         p.getInventory().clearContent();

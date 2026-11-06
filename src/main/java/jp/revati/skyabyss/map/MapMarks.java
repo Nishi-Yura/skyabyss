@@ -47,8 +47,8 @@ public final class MapMarks {
     // 印の種類 (画面の絵の番号と同じ順。MapSprites)
     public enum Kind {
         // 足すときは末尾に (パケットは順番の番号で送る)。TERRITORY = 土地の旗を持つ組合 (endgame/GuildWeek)、LOOTCAMP = 巡り路の野営地 (endgame/CircuitCamps)
-        // FISHING = 見つけた釣り場 (fishing/FishingSpots)、SPRINT = 乗り物の早駆けの道の始まり (mount/MountSprint)
-        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN, FOE, TERRITORY, LOOTCAMP, FISHING, SPRINT
+        // FISHING = 見つけた釣り場 (fishing/FishingSpots)
+        TOWN, CAMP, FOOTPRINT, RIBS, WAYMARK, SITE, TITAN, SHRINE, SPAWN, FOE, TERRITORY, LOOTCAMP, FISHING
     }
 
     // 一つの印。name は文の鍵の材料 (種類ごと。画面の MapText が文にする)、extra は付け足し (碑の土地の名・章の ID)。
@@ -100,11 +100,6 @@ public final class MapMarks {
             if (jp.revati.skyabyss.fishing.FishingSpots.found(player, s)) {
                 out.add(new Mark(Kind.FISHING, s.id(), "", String.valueOf(s.land()), s.x(), s.z(), false, 0x5FC8F0));
             }
-        }
-        // 乗り物の早駆けの道の始まり
-        for (jp.revati.skyabyss.mount.MountSprint.Route r : jp.revati.skyabyss.mount.MountSprint.routes()) {
-            net.minecraft.core.BlockPos st = r.points().get(0);
-            out.add(new Mark(Kind.SPRINT, "sprint:" + r.id(), "", r.id(), st.getX(), st.getZ(), false, 0xE8C27A));
         }
         // 祠と開いた章の跡地のありか (前は書庫番の「地図の写し」で載った。書庫番を消したので最初から)
         archiveMarks(player.server, data.grounds(), Chapters.of(player), out);

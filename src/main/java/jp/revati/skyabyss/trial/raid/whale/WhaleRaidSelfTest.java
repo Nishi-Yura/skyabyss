@@ -161,6 +161,7 @@ public final class WhaleRaidSelfTest {
         player.setPos(entry.getCenter());
         long now = back.getGameTime();
         TrialRoute.tick(back, Titans.STONE_WHALE, players, now);
+        TrialRoute.ring(back, Titans.STONE_WHALE, player, now);
         TrialRoute.tick(back, Titans.STONE_WHALE, players, now + TrialRoute.ENTRY_WAIT + 10);
         check(TrialRoute.step(back, group) == 1, "the route did not start (step " + TrialRoute.step(back, group) + ")");
         TrialDraw.Draw draw = TrialData.current(back, group);

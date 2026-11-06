@@ -81,13 +81,19 @@ public final class RoutePartySelfTest {
 
             // ---- 入口の箱: 一人だけでは始まらない
             TrialRoute.tick(back, titan, players, now);
+            check(f, !TrialRoute.ring(back, titan, a, now), "the bell rang with one of two on the platform");
             TrialRoute.tick(back, titan, players, now + TrialRoute.ENTRY_WAIT + 10);
             check(f, TrialRoute.step(back, group) == 0, "the route started with one of two in the entry box");
             // 二人そろうと、予告のあと始まり、二人とも運ばれる
             b.setPos(door);
             long t1 = now + 1000;
             TrialRoute.tick(back, titan, players, t1);
-            check(f, TrialRoute.step(back, group) == 0, "the route started without the warning when the second player stepped in");
+            TrialRoute.tick(back, titan, players, t1 + TrialRoute.ENTRY_WAIT + 10);
+            check(f, TrialRoute.step(back, group) == 0, "the route started before anyone rang the bell");
+            t1 += TrialRoute.ENTRY_WAIT + 10;
+            check(f, TrialRoute.ring(back, titan, b, t1), "the bell did not ring with the whole party on the platform");
+            TrialRoute.tick(back, titan, players, t1);
+            check(f, TrialRoute.step(back, group) == 0, "the route started without the warning when the bell rang");
             TrialRoute.tick(back, titan, players, t1 + TrialRoute.ENTRY_WAIT + 10);
             check(f, TrialRoute.step(back, group) == 1, "the route did not start with the whole party in the box (step " + TrialRoute.step(back, group) + ")");
             TrialDraw.Draw draw = TrialData.current(back, group);
