@@ -101,6 +101,7 @@ public final class DungeonFoesSelfTest {
             tables(f);
             attacks(level, f);
             sides(level, f);
+            unstick(level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST dungeon foes crashed", e);
             f.add("crashed: " + e);
@@ -113,7 +114,7 @@ public final class DungeonFoesSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST dungeon foes PASSED (12 dungeon foes and mid bosses registered with eggs/xp/meshes/animations; the four dungeon tables use them; "
-                    + "every telegraph covers its target, hits after the warning and spares a player outside; ox smith shield 0.35x from the front, geode golem chest 1.5x / back 0.6x)");
+                    + "every telegraph covers its target, hits after the warning and spares a player outside; ox smith shield 0.35x from the front, geode golem chest 1.5x / back 0.6x; every boss steps up one block and a boss behind a wall moves to a clear spot beside the player)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST dungeon foes FAILED: {}", m));
         }
@@ -246,6 +247,43 @@ public final class DungeonFoesSelfTest {
                 }
             }
         }
+    }
+
+    // 主のつっかえ直し (2026-11-06): どの主も 1 ブロックの段を上がれる。壁の向こうの人のそばへ、体の収まる・人の見える所を見つけて移る
+    private static void unstick(ServerLevel lv, List<String> f) {
+        List<EntityType<? extends DungeonBoss>> bosses = List.of(jp.revati.skyabyss.registry.ModEntities.BONE_CENTIPEDE.get(),
+                jp.revati.skyabyss.registry.ModEntities.SHELL_OCTOPUS.get(), jp.revati.skyabyss.registry.ModEntities.CRYSTAL_LIZARD.get(),
+                jp.revati.skyabyss.registry.ModEntities.FORGE_GIANT.get(), jp.revati.skyabyss.registry.ModEntities.PIT_FOREMAN.get(),
+                jp.revati.skyabyss.registry.ModEntities.BELL_HERMIT.get(), jp.revati.skyabyss.registry.ModEntities.GEODE_GOLEM.get(),
+                jp.revati.skyabyss.registry.ModEntities.OX_SMITH.get());
+        for (EntityType<? extends DungeonBoss> t : bosses) {
+            DungeonBoss b = t.create(lv);
+            check(b != null && b.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT) >= DungeonBoss.STEP - 1e-6,
+                    t.getDescriptionId() + " cannot step up one block", f);
+            if (b != null) {
+                b.discard();
+            }
+        }
+        // 壁 (高さ 4・幅 13) の向こうの人: 大きな主 (炉の巨人) が、人のそばの見える所へ移る
+        FakePlayer p = fake(lv, "unstick", SX + 8.5, SZ + 0.5);
+        for (int z = SZ - 6; z <= SZ + 6; z++) {
+            for (int y = 0; y < 4; y++) {
+                lv.setBlock(new BlockPos(SX, FLOOR + y, z), Blocks.STONE.defaultBlockState(), 2);
+            }
+        }
+        DungeonBoss giant = spawn(lv, jp.revati.skyabyss.registry.ModEntities.FORGE_GIANT.get(), SX - 8.5, SZ + 0.5, -90f);
+        check(!giant.hasLineOfSight(p), "the wall did not hide the player from the boss", f);
+        giant.unstick(p);
+        check(giant.distanceTo(p) <= 9.5 && giant.hasLineOfSight(p), "unstick did not move the boss beside the player (distance "
+                + (int) giant.distanceTo(p) + ", sees " + giant.hasLineOfSight(p) + ")", f);
+        check(lv.noCollision(giant, giant.getBoundingBox()), "unstick put the boss inside blocks", f);
+        giant.discard();
+        for (int z = SZ - 6; z <= SZ + 6; z++) {
+            for (int y = 0; y < 4; y++) {
+                lv.setBlock(new BlockPos(SX, FLOOR + y, z), Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+        p.discard();
     }
 
     private static FakePlayer fake(ServerLevel lv, String tag, double x, double z) {

@@ -70,11 +70,7 @@ public class BoneCentipede extends DungeonBoss {
             return;
         }
         if (distance > 9 || tickCount - lastBurrow > 360) {
-            move = BURROW;
-            lastBurrow = tickCount;
-            begin(target, "burrow");
-            cue("bone_centipede", "burrow", BURROW_DOWN + BURROW_HIDDEN);
-            server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 2f, 0.5f);
+            burrow(target);
             return;
         }
         if (distance < SWEEP_RADIUS - 0.5 && tickCount - lastSweep > 160) {
@@ -107,6 +103,25 @@ public class BoneCentipede extends DungeonBoss {
                         player.knockback(0.9, -f.x, -f.z);
                     })
                     .start();
+        }
+    }
+
+    // 潜る (床へ潜り、掘り穴か人の足もとから出て突進する)
+    void burrow(LivingEntity target) {
+        move = BURROW;
+        lastBurrow = tickCount;
+        begin(target, "burrow");
+        cue("bone_centipede", "burrow", BURROW_DOWN + BURROW_HIDDEN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 2f, 0.5f);
+    }
+
+    // つっかえたら潜って出直す (地を蹴って移る代わり)
+    @Override
+    protected void unstick(LivingEntity target) {
+        if (onGround()) {
+            burrow(target);
+        } else {
+            super.unstick(target);
         }
     }
 
