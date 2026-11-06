@@ -261,7 +261,7 @@ NEW_PLACES = [
      "雷の落ちた石だけ|環に並べる|九つめの座は|まだ空いている", "Struck stones|only, in a ring|Ninth place|still empty"),
     ("watchtower", -928, -656, "cloudwatch_post", "雲見の櫓", "Cloudwatch Post", "view_bench",
      "雲が東へ流れる日|雷翼は西で眠る|逆の日は|櫓を降りろ", "Clouds east?|Wing sleeps west|Clouds west?|Climb down"),
-    ("ruined_tower", -1136, -544, "brokenwing_tower", "折れ羽の塔", "Brokenwing Tower", "bone_pile",
+    ("ruined_tower", -912, -464, "brokenwing_tower", "折れ羽の塔", "Brokenwing Tower", "bone_pile",
      "塔に羽が一枚|刺さっている|人の背丈より|長い羽が", "One feather is|stuck in tower|Longer than|a man is tall"),
     ("graveyard", -896, -160, "struckmen_graves", "雷打たれの墓", "Struckmen's Graves", "lantern_row",
      "ここに眠るのは|雷に選ばれた者|墓石は|みな北を向く", "Here lie those|lightning chose|Every stone|faces north"),

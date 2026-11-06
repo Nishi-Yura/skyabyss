@@ -128,7 +128,7 @@
   {"kind": "signpost", "x": 1224, "z": 157, "name": "tide_landing"},
   {"kind": "stone_circle", "x": -1024, "z": -864, "name": "thunderstone_ring"},
   {"kind": "watchtower", "x": -928, "z": -656, "name": "cloudwatch_post"},
-  {"kind": "ruined_tower", "x": -1136, "z": -544, "name": "brokenwing_tower"},
+  {"kind": "ruined_tower", "x": -912, "z": -464, "name": "brokenwing_tower"},
   {"kind": "graveyard", "x": -896, "z": -160, "name": "struckmen_graves"},
   {"kind": "mountain_hut", "x": -880, "z": 64, "name": "vane_hut"},
   {"kind": "cave", "x": -1216, "z": 464, "name": "rumble_cave"},

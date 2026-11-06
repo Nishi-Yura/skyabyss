@@ -419,7 +419,7 @@ public final class ReadinessSelfTest {
         // 章のチェックリスト (A9): 一章の頁に頼み・覚書の行 (寄り道は場所が登録されていれば)。見ていない巨神には出さない
         check(f, page.row("h.checklist") != null, "whale page has the chapter checklist header");
         RecordSnapshot.Row prep = page.row("check_prep");
-        check(f, !jp.revati.skyabyss.guide.PrepQuests.defined(1) || (prep != null && prep.detail().size() == 4), "prep row (when the chapter has its requests): three requests and the note");
+        check(f, !jp.revati.skyabyss.guide.PrepQuests.defined(1) || (prep != null && prep.detail().size() == jp.revati.skyabyss.guide.PrepQuests.ids(1).size() + 1), "prep row (when the chapter has its requests): one line per request and the note");
         check(f, jp.revati.skyabyss.guide.PrepQuests.defined(1) == (prep != null), "prep row appears exactly when the chapter has its requests");
         check(f, page.row("check_notes") != null, "notebook row on the whale page");
         long whaleSites = SiteSpawner.defs().stream().filter(d -> d.chapter() == Chapters.WHALE).count();
