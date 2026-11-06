@@ -6,8 +6,10 @@
   A 街道の宿場: 東西の一本の通りの両側に宿・店・家。通りの東に馬留め、西に畑、北に果樹。道の口に灯り
   B 柵の砦村: 丸太の柵で囲み (南に門・四隅の見張り台)、真ん中に見張りの塔 (頂に狼煙の火。遠くから見える)。宿と家は柵ぞい
   C 目印の里: 真ん中に土地の目印 (岩鯨 = 鐘の見張り塔 / 潮殻 = 灯台 / 雷翼 = 風車 / 余燼 = 炉の煙突)。丸い小道と、まわりを囲む家 5 つ
-python -I tools/capital/frontier_hamlet.py [a b c] [whale tide storm ember]
-  → src/main/resources/data/skyabyss/opening/frontier_rough_<案>_<土地>.json (ラフ。選んだあと、本物の名前で書き直す)
+選定 (2026-11-06。頁「外れの集落の形」の h_shape = d): 土地ごとに、奥のダンジョンに近いほうを B、もう一つを C (FINAL)
+python -I tools/capital/frontier_hamlet.py           → src/main/resources/data/skyabyss/opening/hamlet_<鍵>.json (8 か所。world/continent/FrontierHamlets)
+python -I tools/capital/frontier_hamlet.py rough [a b c] [whale tide storm ember]
+  → src/main/resources/data/skyabyss/opening/frontier_rough_<案>_<土地>.json (見比べのラフ。選んだので、ふだんは書かない)
 撮影: tools/shots/frontier_hamlets.txt
 """
 from __future__ import annotations
@@ -29,10 +31,10 @@ R_OUT = 34  # 部品の範囲の半分 (地面をならす所)
 
 
 class FrontierHamlet(RegionTown):
-    def __init__(self, region, option):
+    def __init__(self, region, option, key=''):
         super().__init__(region)
         self.option = option
-        self.v = vox.Vox(seed=(sum(map(ord, region + option)) * 131) % 100000 + 7)
+        self.v = vox.Vox(seed=(sum(map(ord, region + option + key)) * 131) % 100000 + 7)
         self.rng = self.v.rng
 
     # ---------------------------------------------------------------- 小道具
@@ -303,16 +305,46 @@ class FrontierHamlet(RegionTown):
 
     def build(self):
         getattr(self, 'option_' + self.option)()
+        # 口: 正面 (南) の端の小道の上。建てたとき、ここから一番近い道まで小道を敷く (FrontierHamlets)
+        self.mark('door', 0, 0, R_OUT - 1)
         self.tidy_for_walkers()
         self.drop_floaters()
         self.fix_stairs()
         self.house_lights()
         self.drop_unsupported()
         self.v.connect()
+        # 片付けのあとにもう一度 (灯り・支えの無い物を外したあとで、段の向きと埋まりを直す)
+        self.fix_stairs()
         return self.v
 
 
+# 置き場の鍵 (tools/lib/frontier_roads.SPOTS) → (土地, 形)。奥のダンジョンに近いほうが B (柵の砦村)、もう一つが C (目印の里)
+FINAL = {
+    'w_ne': ('whale', 'b'), 'w_nw': ('whale', 'c'),
+    't_se': ('tide', 'b'), 't_e': ('tide', 'c'),
+    'e_se': ('ember', 'b'), 'e_n': ('ember', 'c'),
+    's_nw': ('storm', 'b'), 's_sw': ('storm', 'c'),
+}
+
+
+def final():
+    for key, (region, o) in FINAL.items():
+        t = FrontierHamlet(region, o, key)
+        v = t.build()
+        meta = {'rect': [-R_OUT, -R_OUT, R_OUT, R_OUT], 'level': True, 'ring': 6, 'height': 34}
+        data = v.runs(meta)
+        data['site'] = 'hamlet_' + key
+        path = os.path.join(T.DATA, 'hamlet_%s.json' % key)
+        _check_blocks(data, region)
+        vox.save(path, data)
+        n = sum(1 for s in v.b.values() if s != 'air')
+        print('wrote', os.path.basename(path), os.path.getsize(path) // 1024, 'KB', n, 'blocks', 'marks', sorted(v.marks))
+
+
 def main():
+    if 'rough' not in sys.argv[1:]:
+        final()
+        return
     opts = [a for a in sys.argv[1:] if a in ('a', 'b', 'c')] or ['a', 'b', 'c']
     regions = [a for a in sys.argv[1:] if a in STYLES] or list(STYLES)
     for o in opts:

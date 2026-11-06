@@ -48,6 +48,16 @@ public final class MusicTracks {
             String id = "town_" + area.substring(5);
             return ALL.contains(id) ? id : null;
         }
+        // 外れの集落は、その土地の町の曲
+        if (area.startsWith("hamlet:")) {
+            try {
+                jp.revati.skyabyss.world.continent.ContinentLayout.Frontier f = jp.revati.skyabyss.world.continent.FrontierHamlets.spot(Integer.parseInt(area.substring(7)));
+                String id = f == null ? null : "town_" + f.region();
+                return id != null && ALL.contains(id) ? id : null;
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
         if (area.startsWith("region:")) {
             try {
                 int r = Integer.parseInt(area.substring(7));

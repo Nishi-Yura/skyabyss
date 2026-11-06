@@ -137,6 +137,8 @@ public final class ContinentTowns {
                 out.add(b);
             }
         }
+        // 外れの集落の宿の寝台も
+        out.addAll(FrontierHamlets.innBeds(server));
         return out;
     }
 

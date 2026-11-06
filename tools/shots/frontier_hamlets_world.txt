@@ -1,0 +1,47 @@
+# 2026-11-06: 外れの集落 (FrontierHamlets) を大陸の世界で。近づくと建ち、正面が道を向き、口から道まで小道がつながるか
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/frontier_hamlets_world.txt -PshotsName=frontier_hamlets_world
+world hamletworld continent
+size 1600 900
+timeout 5000
+render 12
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+hud off
+# 岩鯨の北東: 骨垣の砦村 (724, -1112)
+cmd tp @s 724 160 -1040 180 40
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd tp @s 790 235 -1046 135 45
+waitchunks 200
+wait 60
+shot w_ne_aerial
+hud on
+cmd tp @s 724 245 -1112 180 90
+waitchunks 200
+wait 40
+shot w_ne_top
+hud off
+# 岩鯨の北西: 鐘見の里 (-528, -1204)
+cmd gamemode creative
+cmd tp @s -528 160 -1130 180 40
+waitchunks 400
+wait 300
+cmd gamemode spectator
+cmd tp @s -462 235 -1138 135 45
+waitchunks 200
+wait 60
+shot w_nw_aerial
+cmd tp @s -528 245 -1204 180 90
+waitchunks 200
+wait 40
+shot w_nw_top
+quit

@@ -62,6 +62,11 @@ LINKS = [
 # 水を渡る枝は、岸で切って渡し舟にする
 FERRY_LINKS = {'deep_ice'}
 
+# 外れの集落: 道が避ける半径と、口 (道の通る所) の中心からの距離。集落の部品は半径 34 (tools/capital/frontier_hamlet.R_OUT)
+HAMLET_KEEP = 56
+HAMLET_DOOR = 46
+HAMLET_PASS = 80
+
 # 行き先の手前で止める距離 (部品の半分 + 道の半幅 + 少し)
 STOP = {'hamlet': 30, 'deep': 24, 'poi': 18}
 
@@ -117,6 +122,13 @@ def main():
         if p['kind'] not in ('gone', 'signpost'):
             keep_out(p['x'], p['z'], 22)
     cost = np.where(block, cost + 60.0, cost)
+    # 外れの集落は道が中を通らないよう強く避ける (道は集落の口の前を通る。HAMLET_DOOR)
+    hblock = np.zeros((n, n), dtype=bool)
+    for kind, region, key, x, z in SPOTS:
+        if kind == 'hamlet':
+            ci, cj = cell(x, z)
+            hblock[np.hypot(ii - ci, jj - cj) * cs < HAMLET_KEEP] = True
+    cost = np.where(hblock, cost + 400.0, cost)
 
     # つなぎ先は今の道だけ (layout.json に外れの道がもう入っていれば、その分を除く。外れの道どうしは探した順につなぐ)
     base = lay['roads']
@@ -195,6 +207,11 @@ def main():
             return on_road(x, z), None
         if tok.startswith('#'):
             s = spots[tok[1:]]
+            if s[0] == 'hamlet' and toward is not None:
+                # 集落のそばを通る点: 中心から、道の来る方 (toward) へ HAMLET_PASS 出た所。集落へは、あとで一番近い道から口まで短い枝を出す
+                dx, dz = toward[0] - s[3], toward[1] - s[4]
+                L = math.hypot(dx, dz) or 1.0
+                return (int(round(s[3] + dx / L * HAMLET_PASS)), int(round(s[4] + dz / L * HAMLET_PASS))), None
             return (s[3], s[4]), STOP['hamlet' if s[0] == 'hamlet' else 'deep']
         x, z = poi_at[tok[1:]]
         return (x, z), STOP['poi']
@@ -203,16 +220,18 @@ def main():
     ferries = []
     for name, toks in LINKS:
         pts = []
+        prev = None
         for idx in range(len(toks) - 1):
-            a, _ = resolve(toks[idx], None)
-            b, stop = resolve(toks[idx + 1], None)
+            a, _ = resolve(toks[idx], None) if prev is None else (prev, None)
+            b, stop = resolve(toks[idx + 1], a)
+            prev = b
             seg = astar(a, b)
             seg[0] = a
             seg[-1] = b
             pts = pts + (seg if not pts else seg[1:])
         # 終わりが行き先 (つなぎでない) なら、手前で止める
         last = toks[-1]
-        if not last.startswith('@'):
+        if not last.startswith('@') and not (last.startswith('#') and spots[last[1:]][0] == 'hamlet'):
             end, stop = resolve(last, None)
             while len(pts) > 2 and math.hypot(pts[-2][0] - end[0], pts[-2][1] - end[1]) < stop:
                 pts.pop()
@@ -245,6 +264,27 @@ def main():
         print(f'{name:12s} {len(thin):3d} points, {int(length):5d} blocks, {wet} wet samples')
         out.append((name, [[int(p[0]), int(p[1])] for p in thin]))
         roads.append(np.array(pts, dtype=float))
+
+    # 集落への枝: 一番近い道 (今の道と、ここまでに探した道) の点から、集落の口 (中心から HAMLET_DOOR、その点の方) まで。
+    # 集落はこの枝の端 (一番近い道) を向いて建ち、建てるときに口から枝の端まで小道を敷く (FrontierHamlets)
+    for kind, region, key, x, z in SPOTS:
+        if kind != 'hamlet':
+            continue
+        best = None
+        for r in roads:
+            d = np.hypot(r[:, 0] - x, r[:, 1] - z)
+            m = int(np.argmin(d))
+            if best is None or d[m] < best[0]:
+                best = (d[m], (int(r[m, 0]), int(r[m, 1])))
+        start = best[1]
+        dx, dz = start[0] - x, start[1] - z
+        L = math.hypot(dx, dz) or 1.0
+        door = (int(round(x + dx / L * HAMLET_DOOR)), int(round(z + dz / L * HAMLET_DOOR)))
+        seg = astar(start, door)
+        seg[0], seg[-1] = start, door
+        ctrl = rdp([tuple(p) for p in seg], 6)
+        print(f'spur {key}: road {int(best[0])} from the centre, {len(ctrl)} points')
+        out.append(('spur_' + key, [[int(p[0]), int(p[1])] for p in ctrl]))
 
     with open(OUT, 'w', encoding='utf-8', newline='\n') as f:
         f.write('# -*- coding: utf-8 -*-\n')

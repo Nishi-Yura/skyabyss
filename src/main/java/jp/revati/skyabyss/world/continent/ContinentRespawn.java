@@ -40,6 +40,8 @@ public final class ContinentRespawn {
                 out.add(r);
             }
         }
+        // 外れの集落 (訪れた所だけ)
+        out.addAll(FrontierHamlets.rests(over, who));
         for (String kind : new String[] {"shelter"}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 if (e.built) {

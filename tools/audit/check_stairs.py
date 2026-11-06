@@ -51,6 +51,8 @@ ALLOW = [
     ('poi_watchtower__beacon_tower', 'STAIR_BURIED', (0, 0, 7, 0, 0, 7), 'note tablet in front of the plinth step'),
     ('poi_watchtower__whalewatch_post', 'STAIR_BURIED', (6, 0, 2, 6, 0, 2), 'note tablet in front of the plinth step'),
     ('poi_fishing_huts__inland_boathouse', 'STAIR_BURIED', (1, 0, -9, 1, 0, -9), 'note tablet in front of the floor-edge step'),
+    # 外れの集落 灯守の里の宿の裏の壁: 窓の上の向かい合う庇の段 (土地の町の宿と同じ飾り。y 4 の壁の外。歩く所ではない)
+    ('hamlet_t_e', 'STAIR_RUN', (-8, 4, -29, 4, 4, -29), 'window hood trim on the inn back wall'),
 ]
 
 # 当たりの無いもの
