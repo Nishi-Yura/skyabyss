@@ -340,15 +340,26 @@ public final class Ch2GroundSelfTest {
         check(wreckPlaced, "the shipwreck template could not be placed");
         int chests = 0;
         int loot = 0;
+        java.util.List<String> foreign = new java.util.ArrayList<>();
         for (BlockPos q : BlockPos.betweenClosed(WRECK_AT.offset(-24, -3, -24), WRECK_AT.offset(24, 30, 24))) {
             if (level.getBlockState(q).is(Blocks.CHEST)) {
                 chests++;
-                if (level.getBlockEntity(q) instanceof ChestBlockEntity be && be.getLootTable() != null) {
+                if (level.getBlockEntity(q) instanceof ChestBlockEntity be && be.getLootTable() != null
+                        && be.getLootTable().location().getNamespace().equals(jp.revati.skyabyss.SkyAbyss.MODID)) {
                     loot++;
+                    // 中身は Mod の品だけ (本・地図・紙などバニラの品は入らない)
+                    be.unpackLootTable(null);
+                    for (int i = 0; i < be.getContainerSize(); i++) {
+                        var st = be.getItem(i);
+                        if (!st.isEmpty() && !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(st.getItem()).getNamespace().equals(jp.revati.skyabyss.SkyAbyss.MODID)) {
+                            foreign.add(st.getItem().toString());
+                        }
+                    }
                 }
             }
         }
-        check(chests >= 1 && loot == chests, "the wreck should carry chests with shipwreck loot (" + chests + " chests, " + loot + " with loot)");
+        check(chests >= 1 && loot == chests, "the wreck should carry chests with the mod's wreck loot (" + chests + " chests, " + loot + " with it)");
+        check(foreign.isEmpty(), "the wreck chests hold vanilla items: " + foreign);
         // 浅瀬の探し: 浅い水の箱の中に見つかる
         check(found != null && Math.abs(found.getX() - WRECK_AT.getX()) <= 24, "the wreck spot search did not find the shallow box (" + found + ")");
         FakePlayer p = fake(server, "wreck");
