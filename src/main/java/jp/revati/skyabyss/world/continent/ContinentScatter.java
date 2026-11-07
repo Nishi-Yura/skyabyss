@@ -395,6 +395,22 @@ final class ContinentScatter {
                 }
             }
         }
+        // 坂の下側で根が宙に浮かないよう、根の下を地面まで埋める (浮いた根の下に 1〜2 段の、くぐれないすき間ができていた)
+        int ri = (int) Math.ceil(2.8f);
+        for (int dx = -ri; dx <= ri; dx++) {
+            for (int dz = -ri; dz <= ri; dz++) {
+                if (dx * dx + dz * dz > 2.8f * 2.8f) {
+                    continue;
+                }
+                for (int dy = -3; dy > -16; dy--) {
+                    BlockPos p = c.offset(dx, dy, dz);
+                    if (!free(level.getBlockState(p))) {
+                        break;
+                    }
+                    put(level, p, main.defaultBlockState());
+                }
+            }
+        }
     }
 
     // 木立: 3〜6 本の小さな木 (幹 4〜6 と丸い葉。サバンナはアカシア)。白樺をまぜる
@@ -628,7 +644,8 @@ final class ContinentScatter {
         }
         int top = (int) Math.ceil(peak);
         int ox = 5;
-        int oy = 2;
+        // 根は 4 段 (急な坂の下側でも、根の下が宙に浮かない)
+        int oy = 4;
         boolean[][][] shape = new boolean[11][top + oy + 1][11];
         int salt = r.nextInt();
         for (int i = 0; i < 11; i++) {
@@ -654,6 +671,7 @@ final class ContinentScatter {
                 }
             }
         }
+        lowGaps(level, c, shape, ox, oy, ox, true);
         build(level, r, c, shape, ox, oy, ox, rock);
     }
 
@@ -707,7 +725,75 @@ final class ContinentScatter {
                 }
             }
         }
+        // 斜面で弧の下の地面が高く、くぐれない (すき間 1〜2) アーチは置かない (2026-11-08 の声「火のバイオームのところ、高さが無く通れない場所」)
+        if (lowGaps(level, c, shape, ox, oy, ox, false)) {
+            return;
+        }
         build(level, r, c, shape, ox, oy, ox, rock);
+    }
+
+    // 岩の張り出しの下で、地面とのすき間が 1〜2 段 (人がくぐれず、這うしかない) の所があるか。fill なら、その張り出しの下を地面まで岩で埋める
+    static boolean lowGaps(WorldGenLevel level, BlockPos c, boolean[][][] shape, int ox, int oy, int oz, boolean fill) {
+        boolean low = false;
+        for (int i = 0; i < shape.length; i++) {
+            for (int k = 0; k < shape[0][0].length; k++) {
+                for (int j = 1; j < shape[0].length; j++) {
+                    if (!shape[i][j][k] || shape[i][j - 1][k]) {
+                        continue;
+                    }
+                    // 張り出しの下の空き (形の外の、置ける所) を数える
+                    int gap = 0;
+                    while (gap < 3) {
+                        int jj = j - 1 - gap;
+                        if (jj >= 0 && shape[i][jj][k]) {
+                            break;
+                        }
+                        BlockPos at = c.offset(i - ox, jj - oy, k - oz);
+                        if (!free(level.getBlockState(at))) {
+                            break;
+                        }
+                        gap++;
+                    }
+                    if (gap >= 1 && gap <= 2) {
+                        low = true;
+                        if (!fill) {
+                            return true;
+                        }
+                        for (int g = 1; g <= gap; g++) {
+                            if (j - g >= 0) {
+                                shape[i][j - g][k] = true;
+                            }
+                        }
+                    }
+                }
+                // 上向き: この岩の上の面と、先に置かれた岩 (隣の岩山やアーチ) の張り出しのあいだが 1〜2 段
+                for (int j = oy; j < shape[0].length; j++) {
+                    if (!shape[i][j][k] || j + 1 < shape[0].length && shape[i][j + 1][k]) {
+                        continue;
+                    }
+                    int gap = 0;
+                    while (gap < 3) {
+                        BlockPos at = c.offset(i - ox, j + 1 + gap - oy, k - oz);
+                        if (!free(level.getBlockState(at))) {
+                            break;
+                        }
+                        gap++;
+                    }
+                    BlockPos lid = c.offset(i - ox, j + 1 + gap - oy, k - oz);
+                    if (gap >= 1 && gap <= 2 && level.getBlockState(lid).blocksMotion() && !level.getBlockState(lid).is(net.minecraft.tags.BlockTags.LEAVES)) {
+                        low = true;
+                        if (!fill) {
+                            return true;
+                        }
+                        // 岩山は下を削る: この柱の、すき間の真下の一段を外す (上の張り出しとのあいだを 3 段以上にする)
+                        for (int g = 0; g < 3 - gap && j - g >= 0; g++) {
+                            shape[i][j - g][k] = false;
+                        }
+                    }
+                }
+            }
+        }
+        return low;
     }
 
     // 池: 楕円 (半径 2.5〜5)、深さ 1〜2。縁より一段下に水面。底は砂・粘土・砂利。縁にサトウキビ、水に睡蓮の葉 (沼は多め・縁は泥)。

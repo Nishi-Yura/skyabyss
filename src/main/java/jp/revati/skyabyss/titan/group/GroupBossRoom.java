@@ -38,6 +38,8 @@ public final class GroupBossRoom {
     public static final int RETRY_COOLDOWN = 100;
     // 戦いの途中から入った人が参加者になるまでの、部屋にいた時間 (tick)
     public static final int JOIN_TICKS = 30;
+    // 全滅のとき、部屋の中心からこの距離 (ブロック) にいる同じグループの人も地上へ帰す (前室を含む)
+    public static final double WIPE_SWEEP = 96;
     private static final int STEP = 10;
 
     // 部屋ごとに違うところ。group は戦っているグループの鍵
@@ -294,7 +296,15 @@ public final class GroupBossRoom {
         if (inside.isEmpty()) {
             // 心臓の戦いで参加者が全員倒れた: 待たずに戦いを戻し、倒れた人は地上 (物語は巨神の前、周回は祠の前) で目覚める (WipeReturn)
             if (!participants.isEmpty() && died.containsAll(participants) && boss instanceof jp.revati.skyabyss.entity.HeartBoss) {
-                Set<UUID> fallen = Set.copyOf(died);
+                // 帰すのは倒れた人だけでなく、参加者と、部屋・前室のあたりにいる同じグループの人ぜんぶ。倒れた状態から死んだ人や、
+                // 先に起きて前室で待っていた人が数えから漏れ、一人だけ前室に残っていた (2026-11-08 の声「何人かは巨神前、自分だけ心臓のスポーン部屋」)
+                Set<UUID> fallen = new LinkedHashSet<>(died);
+                fallen.addAll(participants);
+                for (ServerPlayer p : level.players()) {
+                    if (Groups.isMember(p, group) && p.position().distanceToSqr(home) <= WIPE_SWEEP * WIPE_SWEEP) {
+                        fallen.add(p.getUUID());
+                    }
+                }
                 reset(level, host, false);
                 WipeReturn.wiped(level, group, fallen);
                 cooldown = RETRY_COOLDOWN;

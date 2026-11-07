@@ -53,7 +53,8 @@ public final class ContinentRegen {
     // 3 = 2026-11-04 (見どころの作り替え: 道しるべ 6・頭目の兄弟の野営・旅人の野営・場所ごとの部品。docs/design/40 の 3.3)、
     // 4 = 2026-11-07 (半ブロックが面で接するように: 町の岩を巻く段・灯の笠・風車・門のまぐさ・僧院の屑。tools/audit/check_slabs.py)、
     // 5 = 2026-11-08 (潮殻と岩鯨の祠を町の外へ。町の広場と縁が祠の台地に重なっていた。「祠の位置と建物がかぶってる」)
-    public static final int VERSION = 5;
+    // 6 = 2026-11-08 夜 (岩のアーチ・岩山の張り出しの下に、くぐれない 1〜2 段のすき間を作らない。「火のバイオームのところ、高さが無く通れない」)
+    public static final int VERSION = 6;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
