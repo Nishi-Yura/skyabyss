@@ -7,6 +7,14 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.combat.BossCue;
+import jp.revati.skyabyss.combat.BossOpenings;
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import jp.revati.skyabyss.entity.foe.RegionBoss;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,7 +39,16 @@ import net.minecraft.world.phys.Vec3;
 //   - 道が見つからない・STUCK_CHECK ごとに 0.6 も進まないときは、人へまっすぐ歩く
 //   - それでも STUCK_LIMIT tick 進まない、または人が BLIND_LIMIT tick 見えないときは unstick: 人のそばの、体が収まって人の見える所へ
 //     地を蹴って移る (土煙と音。主ごとに変えられる。大百足は潜る)。UNSTICK_GAP tick に一度まで
+// 後半 (2026-11-07 の声「中ダンジョンのボス (ムカデ等々) もまだまだ手直しほしい」):
+//   体力が PHASE2 を切ると、吠えて (まわりを押し返す輪。予兆つき) 手下を MINIONS 体呼び、後半に入る。
+//   後半は技の間が PHASE2_COOLDOWN 倍になり、主ごとの後半の技が加わる (phase2)。
+//   大技のあとは大きな隙 (opening: BossOpenings.open。白い火花と澄んだ音)
 public abstract class DungeonBoss extends RegionBoss {
+    public static final float PHASE2 = 0.5f;
+    public static final int MINIONS = 2;
+    public static final float PHASE2_COOLDOWN = 0.7f;
+    public static final int RAGE_WARN = 24;
+    public static final double RAGE_RADIUS = 7;
     public static final double STEP = 1.1;
     static final int STUCK_CHECK = 10;
     public static final int STUCK_LIMIT = 60;
@@ -39,6 +56,8 @@ public abstract class DungeonBoss extends RegionBoss {
     static final int UNSTICK_GAP = 160;
 
     protected final List<Vec3> holes = new ArrayList<>();
+    // 後半に入ったか
+    protected boolean phase2;
     private Vec3 lastPos;
     private int stuck;
     private int blind;
@@ -79,8 +98,78 @@ public abstract class DungeonBoss extends RegionBoss {
         return 4.0;
     }
 
+    // 技の名前の知らせに使う主の名 (gui.skyabyss.attack.<boss>.<技>)
+    protected abstract String bossId();
+
+    // 後半に呼ぶ手下 (そのダンジョンの道中の敵)。null なら呼ばない
+    @Nullable
+    protected String minionId() {
+        return null;
+    }
+
+    public boolean inPhase2() {
+        return phase2;
+    }
+
+    // 大技のあとの大きな隙
+    protected void opening() {
+        BossOpenings.open(this, BossOpenings.BIG_OPEN_TICKS);
+    }
+
+    // 後半に入る: 吠えて押し返し、手下を呼ぶ
+    protected void enterPhase2(LivingEntity target) {
+        phase2 = true;
+        cooldown = Math.max(cooldown, RAGE_WARN + 16);
+        cue(bossId(), "rage", RAGE_WARN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.55f);
+        server().sendParticles(ParticleTypes.ANGRY_VILLAGER, getX(), getY() + getBbHeight(), getZ(), 10, getBbWidth() * 0.4, 0.4, getBbWidth() * 0.4, 0);
+        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RAGE_RADIUS))
+                .floor(getY()).warn(RAGE_WARN).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onImpact(server -> server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 6, RAGE_RADIUS * 0.3, 0.2, RAGE_RADIUS * 0.3, 0))
+                .onHit((server, player) -> {
+                    player.hurt(attackSource(), damage() * 0.5f);
+                    Vec3 away = player.position().subtract(position()).normalize();
+                    player.knockback(2.0, -away.x, -away.z);
+                })
+                .start();
+        String id = minionId();
+        if (id == null) {
+            return;
+        }
+        var type = BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.parse(id)).orElse(null);
+        for (int i = 0; type != null && i < MINIONS; i++) {
+            Vec3 at = target.position();
+            Vec3 free = freeSpotNear(target);
+            if (free != null) {
+                at = free;
+            }
+            if (type.create(server()) instanceof Mob m) {
+                m.moveTo(at.x + (i - 0.5) * 2, at.y, at.z, random.nextFloat() * 360f, 0f);
+                m.finalizeSpawn(server(), server().getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
+                m.addTag("skyabyss_boss_minion");
+                if (server().addFreshEntity(m)) {
+                    m.setTarget(target);
+                    server().sendParticles(ParticleTypes.POOF, m.getX(), m.getY() + 0.5, m.getZ(), 16, 0.5, 0.5, 0.5, 0.05);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void finish() {
+        super.finish();
+        if (phase2) {
+            cooldown = Math.round(cooldown * PHASE2_COOLDOWN);
+        }
+    }
+
     @Override
     protected void customServerAiStep() {
+        LivingEntity rageAt = getTarget();
+        if (!phase2 && !level().isClientSide && hp() < PHASE2 && rageAt != null && rageAt.isAlive() && !busy() && !isInvisible()) {
+            enterPhase2(rageAt);
+        }
         super.customServerAiStep();
         if (unstickWait > 0) {
             unstickWait--;

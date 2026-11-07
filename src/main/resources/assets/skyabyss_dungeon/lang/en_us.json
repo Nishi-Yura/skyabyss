@@ -174,5 +174,18 @@
   "dungeon.skyabyss.mini.ch4_dead_forge_pit.floor1": "Forge Floor",
   "message.skyabyss.dungeon.mini_enter": "Defeat every foe in a room to open the next door. The master waits at the end",
   "label.skyabyss.stone.mini_gate": "Ruin Gate",
-  "label.skyabyss.stone.mini_gate.sub": "Right-click: enter %s (with your party)"
+  "label.skyabyss.stone.mini_gate.sub": "Right-click: enter %s (with your party)",
+  "gui.skyabyss.attack.bone_centipede.spit": "Bone Spit",
+  "gui.skyabyss.attack.shell_octopus.whirl": "Whirlpool Pull",
+  "gui.skyabyss.attack.crystal_lizard.bolts": "Running Bolts",
+  "gui.skyabyss.attack.forge_giant.combo": "Triple Strike",
+  "gui.skyabyss.attack.forge_giant.trench": "Molten Trench",
+  "gui.skyabyss.attack.bone_centipede.rage": "Enraged Roar",
+  "gui.skyabyss.attack.shell_octopus.rage": "Enraged Roar",
+  "gui.skyabyss.attack.crystal_lizard.rage": "Enraged Roar",
+  "gui.skyabyss.attack.forge_giant.rage": "Enraged Roar",
+  "gui.skyabyss.attack.pit_foreman.rage": "Enraged Roar",
+  "gui.skyabyss.attack.ox_smith.rage": "Enraged Roar",
+  "gui.skyabyss.attack.bell_hermit.rage": "Enraged Roar",
+  "gui.skyabyss.attack.geode_golem.rage": "Enraged Roar"
 }

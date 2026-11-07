@@ -413,5 +413,13 @@
   "message.skyabyss.fishing.spot_shore": "the shore",
   "sign.skyabyss.fishing_spot": "Fishing Spot",
   "sign.skyabyss.fishing_spot.sub": "Rare fish bite here",
-  "map.skyabyss.mark.fishing": "Fishing spot"
+  "map.skyabyss.mark.fishing": "Fishing spot",
+  "entity.skyabyss.world_event.herald": "Herald %s",
+  "message.skyabyss.world_event.herald": "The heralds have come. Defeat the herald and its pack, and the great foe will appear",
+  "message.skyabyss.world_event.seal": "%s raised a ward. Stand in the glowing rings around it and fill all three",
+  "message.skyabyss.world_event.seal_broken": "The ward broke! %s is down on its knees. Strike now",
+  "message.skyabyss.world_event.seal_failed": "%s broke free before the rings were filled. It is enraged",
+  "message.skyabyss.world_event.rage": "%s is enraged. Its field attacks come faster",
+  "gui.skyabyss.world_event.bar_seal": "%s ─ Seal rings %s/%s",
+  "gui.skyabyss.world_event.bar_rage": "%s ─ Enraged"
 }

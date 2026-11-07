@@ -174,5 +174,18 @@
   "dungeon.skyabyss.mini.ch4_dead_forge_pit.floor1": "炉の底",
   "message.skyabyss.dungeon.mini_enter": "部屋の敵を全部倒すと、次の扉が開く。奥に主がいる",
   "label.skyabyss.stone.mini_gate": "跡地の門",
-  "label.skyabyss.stone.mini_gate.sub": "右クリックで %s へ（組ごと）"
+  "label.skyabyss.stone.mini_gate.sub": "右クリックで %s へ（組ごと）",
+  "gui.skyabyss.attack.bone_centipede.spit": "骨の礫",
+  "gui.skyabyss.attack.shell_octopus.whirl": "渦の引き込み",
+  "gui.skyabyss.attack.crystal_lizard.bolts": "雷の走り",
+  "gui.skyabyss.attack.forge_giant.combo": "三連の打ち",
+  "gui.skyabyss.attack.forge_giant.trench": "熔けた溝",
+  "gui.skyabyss.attack.bone_centipede.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.shell_octopus.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.crystal_lizard.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.forge_giant.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.pit_foreman.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.ox_smith.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.bell_hermit.rage": "怒りの咆哮",
+  "gui.skyabyss.attack.geode_golem.rage": "怒りの咆哮"
 }

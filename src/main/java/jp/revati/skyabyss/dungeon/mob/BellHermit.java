@@ -100,6 +100,11 @@ public class BellHermit extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "bell_hermit";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case PINCH -> PINCH_WARN + 10;

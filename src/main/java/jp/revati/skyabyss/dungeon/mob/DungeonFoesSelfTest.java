@@ -102,6 +102,7 @@ public final class DungeonFoesSelfTest {
             attacks(level, f);
             sides(level, f);
             unstick(level, f);
+            phases(level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST dungeon foes crashed", e);
             f.add("crashed: " + e);
@@ -284,6 +285,44 @@ public final class DungeonFoesSelfTest {
             }
         }
         p.discard();
+    }
+
+    // 後半 (2026-11-07): 四体の主は体力半分で後半に入り、手下を 2 体呼ぶ。新しい技 (骨の礫・渦・雷の走り・三連打ち・熔けた溝) は予兆を出す
+    private static void phases(ServerLevel lv, List<String> f) {
+        FakePlayer p = fake(lv, "phases", SX + 6.5, SZ + 0.5);
+        List<DungeonBoss> made = new java.util.ArrayList<>();
+        try {
+            BoneCentipede c = spawn(lv, jp.revati.skyabyss.registry.ModEntities.BONE_CENTIPEDE.get(), SX - 4.5, SZ + 0.5, -90f);
+            ShellOctopus o = spawn(lv, jp.revati.skyabyss.registry.ModEntities.SHELL_OCTOPUS.get(), SX - 4.5, SZ + 0.5, -90f);
+            CrystalLizard l = spawn(lv, jp.revati.skyabyss.registry.ModEntities.CRYSTAL_LIZARD.get(), SX - 4.5, SZ + 0.5, -90f);
+            ForgeGiant g = spawn(lv, jp.revati.skyabyss.registry.ModEntities.FORGE_GIANT.get(), SX - 4.5, SZ + 0.5, -90f);
+            made.addAll(List.of(c, o, l, g));
+            for (DungeonBoss b : made) {
+                int before = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+                b.setTarget(p);
+                b.enterPhase2(p);
+                long minions = lv.getEntitiesOfClass(Mob.class, b.getBoundingBox().inflate(24), m -> m.getTags().contains("skyabyss_boss_minion")).size();
+                check(b.inPhase2() && minions == DungeonBoss.MINIONS, b.getType().getDescriptionId() + " did not enter its second half with "
+                        + DungeonBoss.MINIONS + " minions (" + minions + ")", f);
+                check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) > before, b.getType().getDescriptionId() + " roared without a warning ring", f);
+                for (Mob m : lv.getEntitiesOfClass(Mob.class, b.getBoundingBox().inflate(24), m -> m.getTags().contains("skyabyss_boss_minion"))) {
+                    m.discard();
+                }
+            }
+            int before = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+            c.spit(p);
+            o.whirl(p);
+            l.bolts(p);
+            g.combo(p);
+            g.trench(p);
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= before + 3 + 1 + 8 + 3 + 1, "a new boss attack did not show its warning ("
+                    + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - before) + ")", f);
+        } finally {
+            for (DungeonBoss b : made) {
+                b.discard();
+            }
+            p.discard();
+        }
     }
 
     private static FakePlayer fake(ServerLevel lv, String tag, double x, double z) {

@@ -111,6 +111,11 @@ public class PitForeman extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "pit_foreman";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case SLAM -> SLAM_WARN + 16;

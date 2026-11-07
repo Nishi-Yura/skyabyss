@@ -413,5 +413,13 @@
   "message.skyabyss.fishing.spot_shore": "岸",
   "sign.skyabyss.fishing_spot": "釣り場",
   "sign.skyabyss.fishing_spot.sub": "まれな魚がよく釣れる",
-  "map.skyabyss.mark.fishing": "釣り場"
+  "map.skyabyss.mark.fishing": "釣り場",
+  "entity.skyabyss.world_event.herald": "先触れの%s",
+  "message.skyabyss.world_event.herald": "前触れの群れが来た。先触れと群れを倒すと、大いなるものが現れる",
+  "message.skyabyss.world_event.seal": "%sが守りを張った。まわりの光る輪に立って、三つとも満たそう",
+  "message.skyabyss.world_event.seal_broken": "守りが割れた！ %sが膝をついた。今のうちに攻めよう",
+  "message.skyabyss.world_event.seal_failed": "輪が満ちる前に、%sが守りを破った。荒ぶっている",
+  "message.skyabyss.world_event.rage": "%sが荒ぶっている。場の攻撃が速くなる",
+  "gui.skyabyss.world_event.bar_seal": "%s ─ 封じの輪 %s/%s",
+  "gui.skyabyss.world_event.bar_rage": "%s ─ 荒ぶり"
 }

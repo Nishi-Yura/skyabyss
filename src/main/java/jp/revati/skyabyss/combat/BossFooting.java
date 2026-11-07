@@ -20,7 +20,8 @@ public final class BossFooting {
         if (e instanceof Player) {
             return false;
         }
-        if (e.getTags().contains(jp.revati.skyabyss.world.continent.NamedFoes.TAG) || MobTuning.hasBossBar(e.getClass())) {
+        if (e.getTags().contains(jp.revati.skyabyss.world.continent.NamedFoes.TAG) || e.getTags().contains(jp.revati.skyabyss.endgame.WorldEvents.TAG)
+                || MobTuning.hasBossBar(e.getClass())) {
             return true;
         }
         AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
