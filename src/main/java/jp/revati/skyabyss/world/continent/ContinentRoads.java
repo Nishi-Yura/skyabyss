@@ -20,7 +20,7 @@ final class ContinentRoads {
     static final double FADE = 10.0;
     static final int CELL = 32;
     // 道の端がこの距離より近い別の道に合わさるとき、端の高さをその道に合わせる
-    static final double JOIN = 8.0;
+    static final double JOIN = 16.0;
 
     // 道の点 (x, z, 均した高さ。NaN はならさない点)
     private final double[] xs;

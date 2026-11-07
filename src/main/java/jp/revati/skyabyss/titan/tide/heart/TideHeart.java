@@ -784,6 +784,19 @@ public class TideHeart extends HeartBoss {
     }
 
     // 輪が抜ける安全な筋 (角度の一覧)。基準の角から等間隔
+    // 抜け筋の向き: 部屋の真ん中から離れているときは、一本を部屋の真ん中へ向ける (部屋の縁から撃つと筋が壁へ向いて床がほとんど残らなかった。
+    // 2026-11-07 の自己テスト tide_telegraph)。真ん中にいれば好きな向き
+    private double laneBase() {
+        if (arena != null) {
+            double cx = (arena.minX + arena.maxX) / 2;
+            double cz = (arena.minZ + arena.maxZ) / 2;
+            if (Math.hypot(cx - getX(), cz - getZ()) > 4) {
+                return Telegraph.angleOf(cx - getX(), cz - getZ()) + (random.nextDouble() - 0.5) * Math.toRadians(20);
+            }
+        }
+        return random.nextDouble() * Math.PI * 2;
+    }
+
     private static double[] lanes(double base, int count) {
         double[] gaps = new double[count];
         for (int i = 0; i < count; i++) {
@@ -933,7 +946,7 @@ public class TideHeart extends HeartBoss {
             sound(server, TideHeartSetup.SHELL.get(), 2f, 1f);
             int n = present(server);
             lockedCount = shellRings(n);
-            double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+            double[] gaps = lanes(laneBase(), shellLanes(n));
             tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SHELL_STRIKE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.4f);
@@ -1198,7 +1211,7 @@ public class TideHeart extends HeartBoss {
                     })
                     .start();
             if (lockedCount > 0) {
-                double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+                double[] gaps = lanes(laneBase(), shellLanes(n));
                 ebbGaps = gaps;
                 for (int i = 0; i < lockedCount; i++) {
                     ripple(server, EBB_BLAST + 1.0, EBB_WARN + i * 14, gaps, EBB_RIPPLE_DAMAGE, true, false);
@@ -1336,7 +1349,7 @@ public class TideHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.EBB.get(), 2.5f, 1.3f);
             int n = present(server);
-            springGaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+            springGaps = lanes(laneBase(), shellLanes(n));
             tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), SPRING_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SPRING_TIDE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);

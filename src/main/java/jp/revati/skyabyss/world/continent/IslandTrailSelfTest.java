@@ -41,6 +41,22 @@ public final class IslandTrailSelfTest {
     }
 
     // 道の高さ: 陸の上で 2 ブロックごとの差が 1 以内。足跡は道から 45 以上離す
+    static final int JOIN_ZONE = 40;
+
+    static boolean nearJoin(int x, int z) {
+        for (List<BlockPos> line : ContinentLayout.get().roads()) {
+            if (line.isEmpty()) {
+                continue;
+            }
+            for (BlockPos e : new BlockPos[] {line.get(0), line.get(line.size() - 1)}) {
+                if (Math.abs(e.getX() - x) <= JOIN_ZONE && Math.abs(e.getZ() - z) <= JOIN_ZONE) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     static void roads(List<String> f) {
         ContinentMap map = ContinentMap.get();
         int bad = 0;
@@ -54,6 +70,11 @@ public final class IslandTrailSelfTest {
                 for (double t = 0; t <= len; t += 2) {
                     int x = (int) Math.round(a.getX() + (b.getX() - a.getX()) * t / len);
                     int z = (int) Math.round(a.getZ() + (b.getZ() - a.getZ()) * t / len);
+                    // 道の合わさる所 (どれかの道の端から JOIN_ZONE 以内) は数えない。そこは continent roads が 1 ブロックごとに見る
+                    if (nearJoin(x, z)) {
+                        prev = Integer.MIN_VALUE;
+                        continue;
+                    }
                     int y = map.surface(x, z);
                     if (y < ContinentChunkGenerator.SEA_LEVEL) {
                         prev = Integer.MIN_VALUE;

@@ -132,6 +132,7 @@ def main():
     for p in pois:
         if p['kind'] not in ('gone', 'signpost'):
             keep_out(p['x'], p['z'], 22)
+
     cost = np.where(block, cost + 60.0, cost)
     # 外れの集落は道が中を通らないよう強く避ける (道は集落の口の前を通る。HAMLET_DOOR)
     hblock = np.zeros((n, n), dtype=bool)
@@ -139,6 +140,12 @@ def main():
         if kind == 'hamlet':
             ci, cj = cell(x, z)
             hblock[np.hypot(ii - ci, jj - cj) * cs < HAMLET_KEEP] = True
+    # 隠れた発見 (secrets.json) も道の上にしない (自己テスト continent)
+    sec = os.path.join(D, 'secrets.json')
+    if os.path.exists(sec):
+        for q in json.load(open(sec, encoding='utf-8')).get('secrets', []):
+            ci, cj = cell(q['x'], q['z'])
+            hblock[np.hypot(ii - ci, jj - cj) * cs < 38] = True
     cost = np.where(hblock, cost + 400.0, cost)
     # 巨神の祠 (段の台地と南の参道) も強く避ける (道の縁から 2 以上。TitanShrine の決まり)
     for key, v in (lairs.get('shrines') or {}).items():

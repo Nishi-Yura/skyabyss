@@ -248,6 +248,8 @@ public final class TideTelegraphSelfTest {
         heart.setPersistenceRequired();
         heart.skipIntro();
         heart.holdAttacks();
+        // 床の円 (半径 14) の部屋 (技の筋の向きは部屋の真ん中を見る)
+        heart.bindArena(new net.minecraft.world.phys.AABB(SX - 16, FLOOR - 2, SZ - 16, SX + 17, FLOOR + 24, SZ + 17), 1);
         level.addFreshEntity(heart);
         return heart;
     }
