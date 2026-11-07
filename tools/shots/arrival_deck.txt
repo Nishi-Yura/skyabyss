@@ -56,6 +56,15 @@ shot 2_tide_w
 cmd tp @s ~ ~ ~ -90 25
 wait 20
 shot 2_tide_e
+cmd tp @s ~14 ~3 ~14 135 22
+wait 20
+shot 2_tide_outer_se
+cmd tp @s ~-28 ~ ~-28 -45 22
+wait 20
+shot 2_tide_outer_nw
+cmd tp @s ~14 ~-1 ~10 180 8
+wait 20
+shot 2_tide_shrine
 hud on
 cmd gamemode creative
 cmd skyabyss dev arrive storm_back
@@ -79,6 +88,15 @@ shot 3_storm_w
 cmd tp @s ~ ~ ~ -90 25
 wait 20
 shot 3_storm_e
+cmd tp @s ~14 ~3 ~14 135 22
+wait 20
+shot 3_storm_outer_se
+cmd tp @s ~-28 ~ ~-28 -45 22
+wait 20
+shot 3_storm_outer_nw
+cmd tp @s ~14 ~-1 ~10 180 8
+wait 20
+shot 3_storm_shrine
 hud on
 cmd gamemode creative
 cmd skyabyss dev arrive ember_back
@@ -102,5 +120,14 @@ shot 4_ember_w
 cmd tp @s ~ ~ ~ -90 25
 wait 20
 shot 4_ember_e
+cmd tp @s ~14 ~3 ~14 135 22
+wait 20
+shot 4_ember_outer_se
+cmd tp @s ~-28 ~ ~-28 -45 22
+wait 20
+shot 4_ember_outer_nw
+cmd tp @s ~14 ~-1 ~10 180 8
+wait 20
+shot 4_ember_shrine
 hud on
 quit

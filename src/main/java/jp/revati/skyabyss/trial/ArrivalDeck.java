@@ -1,5 +1,8 @@
 package jp.revati.skyabyss.trial;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -7,6 +10,7 @@ import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
+import jp.revati.skyabyss.opening.site.Blueprint;
 import jp.revati.skyabyss.progress.Titans;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -15,7 +19,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,19 +30,18 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 到着の台の作りと、地上へ帰る石 (2026-11-07 の声「塀で囲むのは突貫工事すぎる。ちゃんと建築を凝る (最低でも岩鯨のように)。帰る場所も用意して。
-// 巨神によっては全然帰れないことがあった」)。
-//   台 (潮殻・雷翼・余燼。岩鯨は TitanBackBuilder の左のわき腹の台): 入口の箱 (TrialRoute.entryBox。到着の足もと ±6) のすぐ外の一周 (±RING) に、
-//     その巨神の石の胸壁 (足の高さに台石 + その上に塀。跳んで越せない高さ 2.5)。四隅は灯りの柱 (高さ 4 + 灯)、各辺の真ん中に低い灯りの柱。
-//     胸壁の下が空いていれば地面まで台の石で支え (宙に浮かせない)、台の内の足もとが抜けていれば床を張る。台のほかの物 (床・飾り・鐘) は壊さない。
-//     前の版の塀の上の見えない壁 (ArrivalPen) は外す
-//   帰りの石 (天然磁石): 到着の台の内の隅と、心臓の前室 (休み場 heart) のそば。右クリックで地上へ (Titans.sendDown。笛がなくても帰れる)。
+// 巨神によっては全然帰れないことがあった」「岩鯨の集まる所に塀はない。建築ちゃんと凝って」)。
+//   台 (潮殻・雷翼・余燼。岩鯨は TitanBackBuilder の左のわき腹の台): 部品 arrival_<巨神> (tools/gen/world/build_arrival_decks.py) を到着の足もとに置く。
+//     床 ±6 (縁の帯・十字の道・紋・市松)、縁 ±7 は欄干 (塀の石 1 段。跳んで越せない)、±8 は植え込みの棚、外は一段ずつ下がる石組みの裾。
+//     四隅に屋根つきの塔、三辺の真ん中に灯りの柱と旗、北の辺に帰りの石を納める切妻の祠。下は地面まで支える。石と飾りは巨神ごと
+//   帰りの石 (天然磁石): 到着の台の祠の中と、心臓の前室 (休み場 heart) のそば。右クリックで地上へ (Titans.sendDown。笛がなくても帰れる)。
 //     岩鯨の到着の台は錨石 (TitanTravel) がその役。名札は world/LodestoneLabels
 //   背を建て直しても戻るように、人が背にいるあいだ CHECK_EVERY ごとに見て、欠けた所を置く (何度置いても同じ形)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ArrivalDeck {
     public static final int RING = 7;
     static final int CHECK_EVERY = 200;
-    static final int DOWN = 6;
+    static final int DOWN = 14;
     static final int UP = 2;
 
     // 巨神ごとの石: 支え・台石・塀・柱・灯・床
@@ -65,14 +70,14 @@ public final class ArrivalDeck {
     private ArrivalDeck() {
     }
 
-    // 到着の台の帰りの石 (足もとから外へ 4・横へ 4。岩鯨は錨石なので null)
+    // 到着の台の帰りの石 (北の祠の中。部品の印 home_stone。岩鯨は錨石なので null)
     @Nullable
     public static BlockPos homeStone(String titan) {
         if (paletteOf(titan) == null) {
             return null;
         }
         BlockPos f = RouteSeals.safeFeet(titan);
-        return f.offset(4, 0, 4);
+        return f.offset(0, 0, -6);
     }
 
     @Nullable
@@ -108,20 +113,22 @@ public final class ArrivalDeck {
         HEART_STONES.clear();
     }
 
-    // 台を置く (読み込まれていない列は飛ばす)。置いたブロックの数
+    // 台を置く (読み込まれていない列は飛ばす)。置いたブロックの数。
+    // 部品 arrival_<巨神> (tools/gen/world/build_arrival_decks.py) を到着の足もとに合わせて置く:
+    //   台の内 (±8・床から上) は部品どおり (空気も。前の版の塀・砂の盛り上がり・前の到着の台の手すりを取り除く)。
+    //   外の裾は空き・地形・前の台の石だけを置き換える。封じの戸・天然磁石・鐘・箱 (旗のほかのブロックエンティティ) は残す。
+    //   部品のいちばん下の段の下は、地面に着くまで支えの石で埋める。塀・階段・板は置いたあとに隣とつなぐ形へ直す
     public static int place(ServerLevel back, String titan) {
         Palette pal = paletteOf(titan);
         if (pal == null) {
             return 0;
         }
+        Blueprint bp = Blueprint.get("arrival_" + titan);
         BlockPos f = RouteSeals.safeFeet(titan);
         int n = 0;
         // 前の版の見えない壁を外す
-        for (int dx = -RING; dx <= RING; dx++) {
-            for (int dz = -RING; dz <= RING; dz++) {
-                if (Math.max(Math.abs(dx), Math.abs(dz)) != RING) {
-                    continue;
-                }
+        for (int dx = -RING - 1; dx <= RING + 1; dx++) {
+            for (int dz = -RING - 1; dz <= RING + 1; dz++) {
                 for (int y = f.getY() - 2; y <= f.getY() + 4; y++) {
                     BlockPos p = new BlockPos(f.getX() + dx, y, f.getZ() + dz);
                     if (back.hasChunkAt(p) && back.getBlockState(p).is(Blocks.BARRIER)) {
@@ -131,81 +138,86 @@ public final class ArrivalDeck {
                 }
             }
         }
-        // 台の内の床。潮殻 (殻の上の砂浜で床がない) は、足もとの高さを平らにならして石畳を敷く (縁は台石の帯、真ん中に模様)。
-        // ほかは抜けている所だけ (雷翼・余燼の台には床が敷いてある)
-        boolean pave = titan.equals(Titans.TIDE_SHELL);
-        for (int dx = -RING + 1; dx <= RING - 1; dx++) {
-            for (int dz = -RING + 1; dz <= RING - 1; dz++) {
-                BlockPos fl = new BlockPos(f.getX() + dx, f.getY() - 1, f.getZ() + dz);
-                if (!back.hasChunkAt(fl)) {
-                    continue;
-                }
-                BlockState tile = deckTile(pal, dx, dz);
-                if (pave) {
-                    for (int up = 0; up <= 2; up++) {
-                        BlockPos q = fl.above(1 + up);
-                        if (natural(back, q)) {
-                            back.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-                            n++;
-                        }
-                    }
-                    if (natural(back, fl) || open(back, fl)) {
-                        n += set(back, fl, tile);
-                        n += footing(back, fl.below(), pal.footing(), 3);
-                    }
-                } else if (open(back, fl) && open(back, fl.above())) {
-                    n += put(back, fl, tile);
-                    n += footing(back, fl.below(), pal.footing(), 3);
-                }
+        Map<Long, Integer> lowest = new HashMap<>();
+        List<BlockPos> shaped = new ArrayList<>();
+        for (Blueprint.Cell c : bp.cells) {
+            BlockPos p = f.offset(c.x(), c.y(), c.z());
+            if (!back.hasChunkAt(p)) {
+                continue;
+            }
+            if (!c.state().isAir()) {
+                lowest.merge(BlockPos.asLong(c.x(), 0, c.z()), c.y(), Math::min);
+            }
+            BlockState now = back.getBlockState(p);
+            BlockState want = c.state();
+            if (now.getBlock() == want.getBlock() || keep(now)) {
+                continue;
+            }
+            boolean core = Math.max(Math.abs(c.x()), Math.abs(c.z())) <= CORE && c.y() >= -1;
+            if (!core && !(open(back, p) || natural(back, p) || oldDeck(now))) {
+                continue;
+            }
+            back.setBlock(p, want, Block.UPDATE_CLIENTS);
+            if (n < 6) {
+                SkyAbyss.LOGGER.debug("Arrival deck of the {}: {} {} -> {}", titan, c.x() + "," + c.y() + "," + c.z(), now, want);
+            }
+            n++;
+            Block wb = want.getBlock();
+            if (wb instanceof WallBlock || wb instanceof StairBlock || wb instanceof IronBarsBlock) {
+                shaped.add(p);
             }
         }
-        // 胸壁と柱
-        for (int dx = -RING; dx <= RING; dx++) {
-            for (int dz = -RING; dz <= RING; dz++) {
-                if (Math.max(Math.abs(dx), Math.abs(dz)) != RING) {
-                    continue;
-                }
-                int x = f.getX() + dx;
-                int z = f.getZ() + dz;
-                BlockPos feet = new BlockPos(x, f.getY(), z);
-                if (!back.hasChunkAt(feet)) {
-                    continue;
-                }
-                if (solid(back, feet) && solid(back, feet.above()) && !mine(back, feet, pal) && !mine(back, feet.above(), pal)) {
-                    continue;
-                }
-                boolean corner = Math.abs(dx) == RING && Math.abs(dz) == RING;
-                boolean mid = (dx == 0 || dz == 0);
-                // 台石の下を地面まで支える
-                n += footing(back, feet.below(), pal.footing(), DOWN);
-                if (corner) {
-                    for (int y = 0; y < 4; y++) {
-                        n += put(back, feet.above(y), pal.post());
-                    }
-                    n += put(back, feet.above(4), pal.light());
-                } else if (mid) {
-                    n += put(back, feet, pal.post());
-                    n += put(back, feet.above(), pal.post());
-                    n += put(back, feet.above(2), pal.light());
-                } else {
-                    n += put(back, feet, pal.base());
-                    n += put(back, feet.above(), pal.wall());
-                }
+        // 支え: 部品の列のいちばん下の一つ下から、地面に着くまで
+        for (Map.Entry<Long, Integer> e : lowest.entrySet()) {
+            BlockPos col = BlockPos.of(e.getKey());
+            n += footing(back, f.offset(col.getX(), e.getValue() - 1, col.getZ()), pal.footing(), DOWN);
+        }
+        for (BlockPos p : shaped) {
+            BlockState st = back.getBlockState(p);
+            BlockState fixed = Block.updateFromNeighbourShapes(st, back, p);
+            if (fixed != st && !fixed.isAir()) {
+                back.setBlock(p, fixed, Block.UPDATE_CLIENTS);
             }
         }
-        // 到着の台の帰りの石 (台の上の隅。下に床)
+        // 前の版の帰りの石 (台の隅 +4, +4) を外す (帰りの石は祠の中へ移った)
+        BlockPos oldStone = f.offset(4, 0, 4);
+        if (back.hasChunkAt(oldStone) && back.getBlockState(oldStone).is(Blocks.LODESTONE)) {
+            back.setBlock(oldStone, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            n++;
+        }
+        // 到着の台の帰りの石 (祠の中)
         BlockPos stone = homeStone(titan);
-        if (stone != null && back.hasChunkAt(stone)) {
-            n += put(back, stone.below(), pal.base());
-            if (!back.getBlockState(stone).is(Blocks.LODESTONE)) {
-                back.setBlock(stone, Blocks.LODESTONE.defaultBlockState(), Block.UPDATE_ALL);
-                n++;
-            }
+        if (stone != null && back.hasChunkAt(stone) && !back.getBlockState(stone).is(Blocks.LODESTONE)) {
+            back.setBlock(stone, Blocks.LODESTONE.defaultBlockState(), Block.UPDATE_ALL);
+            n++;
         }
         if (n > 0) {
             SkyAbyss.LOGGER.info("Arrival deck of the {}: placed {} blocks", titan, n);
         }
         return n;
+    }
+
+    // 部品どおりに置き直す内の広さ (到着から ±8 の、床から上)
+    static final int CORE = RING + 1;
+
+    // 残すもの: 封じの戸・天然磁石・鐘・箱など (旗は台の物なので置き換えてよい)
+    private static boolean keep(BlockState s) {
+        if (s.is(Blocks.LODESTONE) || s.is(Blocks.BELL) || s.getBlock() instanceof jp.revati.skyabyss.titan.dungeon.SealedGateBlock) {
+            return true;
+        }
+        return s.hasBlockEntity() && !(s.getBlock() instanceof net.minecraft.world.level.block.AbstractBannerBlock);
+    }
+
+    // 前の版の台の石 (ArrivalPen・前の ArrivalDeck の塀・柱・灯)
+    private static boolean oldDeck(BlockState s) {
+        for (String t : Titans.all()) {
+            Palette p = paletteOf(t);
+            if (p != null && (s.is(p.wall().getBlock()) || s.is(p.base().getBlock()) || s.is(p.post().getBlock()) || s.is(p.light().getBlock())
+                    || s.is(p.footing().getBlock()))) {
+                return true;
+            }
+        }
+        return s.is(Blocks.BARRIER);
     }
 
     // 心臓の前室の帰りの石: 休み場の立つ所のまわり (2〜4) で、足もとが空き・下が固い所。決めたら覚える
@@ -284,18 +296,6 @@ public final class ArrivalDeck {
         return open;
     }
 
-    // 石畳の模様: 縁の一周は台石、真ん中 (半径 2) は柱の石の円、その間は床の二色の市松
-    static BlockState deckTile(Palette pal, int dx, int dz) {
-        int r = Math.max(Math.abs(dx), Math.abs(dz));
-        if (r == RING - 1) {
-            return pal.base();
-        }
-        if (dx * dx + dz * dz <= 5) {
-            return pal.post();
-        }
-        return Math.floorMod(dx + dz, 2) == 0 ? pal.floor() : pal.floor2();
-    }
-
     // 均してよい地形 (背の砂浜・土・石)。台の物 (鐘・石・灯・模様の石・木) は含めない
     private static boolean natural(ServerLevel back, BlockPos p) {
         BlockState s = back.getBlockState(p);
@@ -308,14 +308,6 @@ public final class ArrivalDeck {
                 || s.is(Blocks.CUT_SANDSTONE) || (s.canBeReplaced() && s.getFluidState().isEmpty());
     }
 
-    private static int set(ServerLevel back, BlockPos p, BlockState state) {
-        if (back.getBlockState(p).is(state.getBlock())) {
-            return 0;
-        }
-        back.setBlock(p, state, Block.UPDATE_ALL);
-        return 1;
-    }
-
     private static boolean open(ServerLevel back, BlockPos p) {
         BlockState s = back.getBlockState(p);
         return s.isAir() || s.canBeReplaced() || !s.getFluidState().isEmpty();
@@ -324,11 +316,6 @@ public final class ArrivalDeck {
     private static boolean solid(ServerLevel back, BlockPos p) {
         BlockState s = back.getBlockState(p);
         return !s.getCollisionShape(back, p).isEmpty() && !s.is(Blocks.BARRIER);
-    }
-
-    private static boolean mine(ServerLevel back, BlockPos p, Palette pal) {
-        BlockState s = back.getBlockState(p);
-        return s.is(pal.wall().getBlock()) || s.is(pal.base().getBlock()) || s.is(pal.post().getBlock());
     }
 
     // 下へ空いている所を、地面に着くまで (max 段) 支えの石で埋める
@@ -341,18 +328,5 @@ public final class ArrivalDeck {
             p = p.below();
         }
         return n;
-    }
-
-    private static int put(ServerLevel back, BlockPos p, BlockState state) {
-        BlockState s = back.getBlockState(p);
-        if (s.is(state.getBlock())) {
-            return 0;
-        }
-        // 前の版の塀 (ArrivalPen の塀) と見えない壁は置き換えてよい
-        if (open(back, p) || s.is(Blocks.BARRIER) || s.is(Blocks.PRISMARINE_WALL) || s.is(Blocks.DIORITE_WALL) || s.is(Blocks.POLISHED_BLACKSTONE_BRICK_WALL)) {
-            back.setBlock(p, state.hasProperty(LanternBlock.HANGING) ? state.setValue(LanternBlock.HANGING, false) : state, Block.UPDATE_ALL);
-            return 1;
-        }
-        return 0;
     }
 }
