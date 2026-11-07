@@ -1,6 +1,6 @@
 {
-  "message.skyabyss.beats.page_falls": "空から、破れた頁が一枚、ひらりと落ちてくる。",
-  "message.skyabyss.beats.page_appeared": "破れた頁が一枚、荷物の中に紛れ込んでいる。",
+  "message.skyabyss.beats.page_falls": "空から、破れたページが一枚、ひらりと落ちてくる。",
+  "message.skyabyss.beats.page_appeared": "破れたページが一枚、荷物の中に紛れ込んでいる。",
   "commands.skyabyss.opening.go": "%3$s の序盤の拍子 B%1$s (%2$s) を起こした",
   "commands.skyabyss.opening.back": "%3$s の序盤の拍子を B%1$s (%2$s) 以降に戻した",
   "commands.skyabyss.opening.reset": "%1$s の序盤の拍子を消した (B0 からもう一度)",
@@ -11,5 +11,5 @@
   "subtitles.skyabyss.opening_wind": "低い風が吹く",
   "subtitles.skyabyss.opening_rumble": "地面が低く鳴る",
   "subtitles.skyabyss.opening_song": "空から歌が降ってくる",
-  "item.skyabyss.lore_page.desc.shadow": "空から舞い降りた頁"
+  "item.skyabyss.lore_page.desc.shadow": "空から舞い降りたページ"
 }

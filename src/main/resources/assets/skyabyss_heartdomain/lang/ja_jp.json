@@ -10,7 +10,7 @@
   "gui.skyabyss.domain.thunder_cage.name": "雷の檻",
   "gui.skyabyss.domain.thunder_cage.line": "空は、雷の格子に閉ざされた。",
   "gui.skyabyss.domain.hearth_core.name": "炉心",
-  "gui.skyabyss.domain.hearth_core.line": "床は、熾の底へ還る。",
+  "gui.skyabyss.domain.hearth_core.line": "床は、おき火の底へ還る。",
   "gui.skyabyss.attack.whale.thrust": "殻の突き",
   "gui.skyabyss.attack.whale.sweep": "石棘の掃射",
   "gui.skyabyss.attack.whale.leap": "跳躍の叩きつけ",
@@ -96,9 +96,9 @@
   "gui.skyabyss.domain.shell_match.shuffle": "印が配りなおされる……（合わせた %s/%s）",
   "gui.skyabyss.domain.thunder_cage.hit": "強く光る柱を叩いて雷を逃がせ (逃がした %s/%s)",
   "gui.skyabyss.domain.thunder_cage.wait": "次に雷が溜まる柱を待て (逃がした %s/%s)",
-  "gui.skyabyss.domain.hearth_core.cool": "熾の核のそばでしゃがみ続けて冷ませ (冷めた %s/%s)",
+  "gui.skyabyss.domain.hearth_core.cool": "おき火の核のそばでしゃがみ続けて冷ませ (冷めた %s/%s)",
   "gui.skyabyss.domain.round": "巡 %s/%s",
   "gui.skyabyss.domain.round_wait": "領域が揺らぐ。次の巡に備えろ (第 %s / %s 巡)",
   "message.skyabyss.domain.round_clear": "一巡が崩れた。だが領域はまだ終わらない (%s / %s 巡)",
-  "message.skyabyss.domain.round_start": "第 %s / %s 巡。仕掛けは立て直され、前より手強い"
+  "message.skyabyss.domain.round_start": "第 %s / %s 巡。仕掛けは立て直され、前より手強くなった"
 }
