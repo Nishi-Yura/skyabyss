@@ -57,6 +57,9 @@ public final class ArrivalDeck {
             case Titans.THUNDER_WING -> new Palette(Blocks.POLISHED_DIORITE.defaultBlockState(), Blocks.CALCITE.defaultBlockState(),
                     Blocks.DIORITE_WALL.defaultBlockState(), Blocks.WAXED_CUT_COPPER.defaultBlockState(),
                     Blocks.LANTERN.defaultBlockState(), Blocks.POLISHED_DIORITE.defaultBlockState(), Blocks.CALCITE.defaultBlockState());
+            case Titans.STONE_WHALE -> new Palette(Blocks.DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE_BRICKS.defaultBlockState(),
+                    Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState(), Blocks.POLISHED_DEEPSLATE.defaultBlockState(), Blocks.SOUL_LANTERN.defaultBlockState(),
+                    Blocks.POLISHED_DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE_TILES.defaultBlockState());
             case Titans.EMBER -> new Palette(Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState(),
                     Blocks.POLISHED_BLACKSTONE_BRICK_WALL.defaultBlockState(), Blocks.POLISHED_BASALT.defaultBlockState(),
                     Blocks.SHROOMLIGHT.defaultBlockState(), Blocks.POLISHED_BLACKSTONE.defaultBlockState(), Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
@@ -70,14 +73,28 @@ public final class ArrivalDeck {
     private ArrivalDeck() {
     }
 
-    // 到着の台の帰りの石 (北の祠の中。部品の印 home_stone。岩鯨は錨石なので null)
+    // 待機場所の帰りの石 (立石の輪の祠の真ん中。部品の印 home_stone)。岩鯨は錨石も帰りの石の役 (TitanTravel)
     @Nullable
     public static BlockPos homeStone(String titan) {
+        int[] m = mark(titan, "home_stone");
+        return m == null ? null : RouteSeals.safeFeet(titan).offset(m[0], m[1], m[2]);
+    }
+
+    // 渦の中心 (足もとの高さ)
+    @Nullable
+    public static BlockPos vortex(String titan) {
+        int[] m = mark(titan, "vortex");
+        return m == null ? null : RouteSeals.safeFeet(titan).offset(m[0], m[1], m[2]);
+    }
+
+    // 部品の印 (足もとからのずれ)。部品がなければ null
+    @Nullable
+    static int[] mark(String titan, String name) {
         if (paletteOf(titan) == null) {
             return null;
         }
-        BlockPos f = RouteSeals.safeFeet(titan);
-        return f.offset(0, 0, -6);
+        Blueprint bp = Blueprint.get("arrival_" + titan);
+        return bp == null ? null : bp.marks.get(name);
     }
 
     @Nullable
@@ -113,64 +130,90 @@ public final class ArrivalDeck {
         HEART_STONES.clear();
     }
 
-    // 台を置く (読み込まれていない列は飛ばす)。置いたブロックの数。
-    // 部品 arrival_<巨神> (tools/gen/world/build_arrival_decks.py) を到着の足もとに合わせて置く:
-    //   台の内 (±8・床から上) は部品どおり (空気も。前の版の塀・砂の盛り上がり・前の到着の台の手すりを取り除く)。
-    //   外の裾は空き・地形・前の台の石だけを置き換える。封じの戸・天然磁石・鐘・箱 (旗のほかのブロックエンティティ) は残す。
-    //   部品のいちばん下の段の下は、地面に着くまで支えの石で埋める。塀・階段・板は置いたあとに隣とつなぐ形へ直す
+    // 待機場所を置く (読み込まれていない所は飛ばす)。置いたブロックの数。
+    // 部品 arrival_<巨神> (固い部品。tools/gen/world/build_arrival_lobbies.py) は部品どおりに置く (空気も: 広場の上・堀・渦・洞)。
+    //   ただし残すもの (天然磁石・鐘・鎖・封じの戸・箱。岩鯨の背では錨石の鎖の骨の梁も) と、液体 (堀に入った海の水) はそのまま。
+    // 部品 arrival_<巨神>_soft (柔らかい部品: 広場の下の岩の塊) は、空き・地形・前の台の石の所にだけ置く。
+    // 塀・階段・鉄格子は置いたあとに隣とつなぐ形へ直す。前の版の帰りの石 (台の隅 / 北の祠) と見えない壁は外す
     public static int place(ServerLevel back, String titan) {
-        Palette pal = paletteOf(titan);
-        if (pal == null) {
+        if (paletteOf(titan) == null) {
             return 0;
         }
-        Blueprint bp = Blueprint.get("arrival_" + titan);
+        Blueprint hard = Blueprint.get("arrival_" + titan);
+        Blueprint soft = Blueprint.get("arrival_" + titan + "_soft");
         BlockPos f = RouteSeals.safeFeet(titan);
-        int n = 0;
-        // 前の版の見えない壁を外す
-        for (int dx = -RING - 1; dx <= RING + 1; dx++) {
-            for (int dz = -RING - 1; dz <= RING + 1; dz++) {
-                for (int y = f.getY() - 2; y <= f.getY() + 4; y++) {
-                    BlockPos p = new BlockPos(f.getX() + dx, y, f.getZ() + dz);
-                    if (back.hasChunkAt(p) && back.getBlockState(p).is(Blocks.BARRIER)) {
-                        back.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-                        n++;
-                    }
+        boolean whale = titan.equals(Titans.STONE_WHALE);
+        // 待機場所の広さのチャンクを先に読み込む (置くときの隣の形の直しが、まだ読まれていないチャンクを読み、二度目に残りを置くことになるので)
+        for (Blueprint bp : new Blueprint[] {hard, soft}) {
+            if (bp == null) {
+                continue;
+            }
+            for (int cx = (f.getX() + bp.rx0 - 1) >> 4; cx <= (f.getX() + bp.rx1 + 1) >> 4; cx++) {
+                for (int cz = (f.getZ() + bp.rz0 - 1) >> 4; cz <= (f.getZ() + bp.rz1 + 1) >> 4; cz++) {
+                    back.getChunk(cx, cz);
                 }
             }
         }
-        Map<Long, Integer> lowest = new HashMap<>();
+        int n = 0;
         List<BlockPos> shaped = new ArrayList<>();
-        for (Blueprint.Cell c : bp.cells) {
+        for (Blueprint.Cell c : hard.cells) {
             BlockPos p = f.offset(c.x(), c.y(), c.z());
             if (!back.hasChunkAt(p)) {
                 continue;
             }
-            if (!c.state().isAir()) {
-                lowest.merge(BlockPos.asLong(c.x(), 0, c.z()), c.y(), Math::min);
-            }
             BlockState now = back.getBlockState(p);
             BlockState want = c.state();
-            if (now.getBlock() == want.getBlock() || keep(now)) {
+            if (now.getBlock() == want.getBlock() || keep(now, whale)) {
                 continue;
             }
-            boolean core = Math.max(Math.abs(c.x()), Math.abs(c.z())) <= CORE && c.y() >= -1;
-            if (!core && !(open(back, p) || natural(back, p) || oldDeck(now))) {
+            if (want.isAir() && !now.getFluidState().isEmpty()) {
                 continue;
             }
             back.setBlock(p, want, Block.UPDATE_CLIENTS);
-            if (n < 6) {
-                SkyAbyss.LOGGER.debug("Arrival deck of the {}: {} {} -> {}", titan, c.x() + "," + c.y() + "," + c.z(), now, want);
-            }
             n++;
             Block wb = want.getBlock();
             if (wb instanceof WallBlock || wb instanceof StairBlock || wb instanceof IronBarsBlock) {
                 shaped.add(p);
             }
         }
-        // 支え: 部品の列のいちばん下の一つ下から、地面に着くまで
-        for (Map.Entry<Long, Integer> e : lowest.entrySet()) {
-            BlockPos col = BlockPos.of(e.getKey());
-            n += footing(back, f.offset(col.getX(), e.getValue() - 1, col.getZ()), pal.footing(), DOWN);
+        if (soft != null) {
+            for (Blueprint.Cell c : soft.cells) {
+                BlockPos p = f.offset(c.x(), c.y(), c.z());
+                if (!back.hasChunkAt(p)) {
+                    continue;
+                }
+                BlockState now = back.getBlockState(p);
+                if (now.getBlock() == c.state().getBlock() || keep(now, whale) || !(open(back, p) || natural(back, p) || oldDeck(now))) {
+                    continue;
+                }
+                back.setBlock(p, c.state(), Block.UPDATE_CLIENTS);
+                n++;
+            }
+        }
+        // 堀や渦で掘った所のそばに、地形が一つだけ宙に残ったら外す (まわりの六面に固い物がない地形)
+        if (n > 0) {
+            java.util.Set<Long> mine = new java.util.HashSet<>();
+            for (Blueprint bp : new Blueprint[] {hard, soft}) {
+                if (bp != null) {
+                    for (Blueprint.Cell c : bp.cells) {
+                        mine.add(BlockPos.asLong(c.x(), c.y(), c.z()));
+                    }
+                }
+            }
+            for (Blueprint.Cell c : hard.cells) {
+                if (!c.state().isAir()) {
+                    continue;
+                }
+                BlockPos p = f.offset(c.x(), c.y(), c.z());
+                for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+                    BlockPos q = p.relative(d);
+                    if (!mine.contains(BlockPos.asLong(c.x() + d.getStepX(), c.y() + d.getStepY(), c.z() + d.getStepZ())) && solid(back, q) && natural(back, q)
+                            && lone(back, q)) {
+                        back.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                        n++;
+                    }
+                }
+            }
         }
         for (BlockPos p : shaped) {
             BlockState st = back.getBlockState(p);
@@ -179,30 +222,45 @@ public final class ArrivalDeck {
                 back.setBlock(p, fixed, Block.UPDATE_CLIENTS);
             }
         }
-        // 前の版の帰りの石 (台の隅 +4, +4) を外す (帰りの石は祠の中へ移った)
-        BlockPos oldStone = f.offset(4, 0, 4);
-        if (back.hasChunkAt(oldStone) && back.getBlockState(oldStone).is(Blocks.LODESTONE)) {
-            back.setBlock(oldStone, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-            n++;
-        }
-        // 到着の台の帰りの石 (祠の中)
+        // 前の版の帰りの石 (台の隅 +4, +4 / 北の祠 0, -6) を外す。帰りの石は立石の輪の祠へ移った
         BlockPos stone = homeStone(titan);
+        for (BlockPos old : new BlockPos[] {f.offset(4, 0, 4), f.offset(0, 0, -6)}) {
+            if (!old.equals(stone) && back.hasChunkAt(old) && back.getBlockState(old).is(Blocks.LODESTONE) && !(whale && old.equals(TitanBackAnchor.ANCHOR))) {
+                back.setBlock(old, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                n++;
+            }
+        }
         if (stone != null && back.hasChunkAt(stone) && !back.getBlockState(stone).is(Blocks.LODESTONE)) {
             back.setBlock(stone, Blocks.LODESTONE.defaultBlockState(), Block.UPDATE_ALL);
             n++;
         }
         if (n > 0) {
-            SkyAbyss.LOGGER.info("Arrival deck of the {}: placed {} blocks", titan, n);
+            SkyAbyss.LOGGER.info("Arrival lobby of the {}: placed {} blocks", titan, n);
         }
         return n;
     }
 
-    // 部品どおりに置き直す内の広さ (到着から ±8 の、床から上)
-    static final int CORE = RING + 1;
+    // まわりの六面のどこにも固い物がない
+    private static boolean lone(ServerLevel back, BlockPos q) {
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+            if (solid(back, q.relative(d))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-    // 残すもの: 封じの戸・天然磁石・鐘・箱など (旗は台の物なので置き換えてよい)
-    private static boolean keep(BlockState s) {
-        if (s.is(Blocks.LODESTONE) || s.is(Blocks.BELL) || s.getBlock() instanceof jp.revati.skyabyss.titan.dungeon.SealedGateBlock) {
+    // 錨石の位置 (岩鯨。外さない)
+    static final class TitanBackAnchor {
+        static final BlockPos ANCHOR = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.anchor();
+    }
+
+    // 残すもの: 天然磁石・鐘・鎖・封じの戸・箱など (旗は台の物なので置き換えてよい)。岩鯨の背では錨石の鎖の骨の梁も
+    private static boolean keep(BlockState s, boolean whale) {
+        if (s.is(Blocks.LODESTONE) || s.is(Blocks.BELL) || s.is(Blocks.CHAIN) || s.getBlock() instanceof jp.revati.skyabyss.titan.dungeon.SealedGateBlock) {
+            return true;
+        }
+        if (whale && s.is(Blocks.BONE_BLOCK)) {
             return true;
         }
         return s.hasBlockEntity() && !(s.getBlock() instanceof net.minecraft.world.level.block.AbstractBannerBlock);
@@ -218,6 +276,51 @@ public final class ArrivalDeck {
             }
         }
         return s.is(Blocks.BARRIER);
+    }
+
+    // ---------------------------------------------------------------- 落ちた人を戻す
+    // 広場の外 (堀・渦・空・海・口の外の落ち込み) へ落ちた人を、足もとへ戻す。広場の中心から (印 radius + 4) の円の中で、
+    // 足もとより 2.5 低く 48 までの所にいる人 (見物のほかの全員)。10 tick ごと。順路の部屋と心臓の間は遠くにあるので入らない
+    static final double FALL_BELOW = 2.5;
+    static final double FALL_DEPTH = 48;
+
+    public static boolean fallen(String titan, double x, double y, double z) {
+        int[] c = mark(titan, "center");
+        int[] r = mark(titan, "radius");
+        if (c == null || r == null) {
+            return false;
+        }
+        BlockPos f = RouteSeals.safeFeet(titan);
+        double cx = f.getX() + c[0] + 0.5;
+        double cz = f.getZ() + c[2] + 0.5;
+        double rad = r[0] + 4;
+        return (x - cx) * (x - cx) + (z - cz) * (z - cz) <= rad * rad && y < f.getY() - FALL_BELOW && y > f.getY() - FALL_DEPTH;
+    }
+
+    @SubscribeEvent
+    static void onFallTick(ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 10 != 3) {
+            return;
+        }
+        for (String titan : Titans.all()) {
+            var dim = Titans.backOf(titan);
+            ServerLevel back = dim == null ? null : server.getLevel(dim);
+            if (back == null || back.players().isEmpty() || paletteOf(titan) == null) {
+                continue;
+            }
+            BlockPos f = RouteSeals.safeFeet(titan);
+            for (ServerPlayer p : jp.revati.skyabyss.util.Players.snapshot(back.players())) {
+                if (p.isSpectator() || !fallen(titan, p.getX(), p.getY(), p.getZ())) {
+                    continue;
+                }
+                p.teleportTo(back, f.getX() + 0.5, f.getY(), f.getZ() + 0.5, p.getYRot(), 0f);
+                p.resetFallDistance();
+                p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                Notice.hint(p, "message.skyabyss.arrival.fell");
+                SkyAbyss.LOGGER.info("{} fell off the {} arrival lobby and was set back", p.getGameProfile().getName(), titan);
+            }
+        }
     }
 
     // 心臓の前室の帰りの石: 休み場の立つ所のまわり (2〜4) で、足もとが空き・下が固い所。決めたら覚える
@@ -278,22 +381,23 @@ public final class ArrivalDeck {
     }
 
     // ---------------------------------------------------------------- 調べ (自己テスト)
-    // 一周のうち、足の高さと頭の高さのどちらも塞がっていない列の数 (0 なら台から歩いて出られない)
-    public static int openColumns(ServerLevel back, String titan) {
+    // 足もとのまわり (半径 4) の床が抜けている、または頭の高さまでが塞がっている所の数 (0 なら集まる所は平らに立てる)
+    public static int badStanding(ServerLevel back, String titan) {
         BlockPos f = RouteSeals.safeFeet(titan);
-        int open = 0;
-        for (int dx = -RING; dx <= RING; dx++) {
-            for (int dz = -RING; dz <= RING; dz++) {
-                if (Math.max(Math.abs(dx), Math.abs(dz)) != RING) {
+        int bad = 0;
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dz = -4; dz <= 4; dz++) {
+                if (dx * dx + dz * dz > 16) {
                     continue;
                 }
-                BlockPos feet = new BlockPos(f.getX() + dx, f.getY(), f.getZ() + dz);
-                if (!solid(back, feet) && !solid(back, feet.above())) {
-                    open++;
+                BlockPos feet = f.offset(dx, 0, dz);
+                boolean ok = solid(back, feet.below()) && !solid(back, feet) && !solid(back, feet.above());
+                if (!ok && !back.getBlockState(feet).is(Blocks.BELL)) {
+                    bad++;
                 }
             }
         }
-        return open;
+        return bad;
     }
 
     // 均してよい地形 (背の砂浜・土・石)。台の物 (鐘・石・灯・模様の石・木) は含めない

@@ -1,0 +1,69 @@
+# 到着の台のまわり ±40 を書き出し、真上から広く撮る (待機場所の作り直しの下調べ)
+world arrivalspace flat
+size 1280 1280
+timeout 1500
+render 14
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 300
+cmd skyabyss dev dump space_whale ~-40 ~-20 ~-40 ~40 ~30 ~40
+waitdump
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~60 ~ 0 90
+waitchunks
+wait 40
+shot whale_wide
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 300
+cmd skyabyss dev dump space_tide ~-40 ~-20 ~-40 ~40 ~30 ~40
+waitdump
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~60 ~ 0 90
+waitchunks
+wait 40
+shot tide_wide
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 300
+cmd skyabyss dev dump space_storm ~-40 ~-20 ~-40 ~40 ~30 ~40
+waitdump
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~60 ~ 0 90
+waitchunks
+wait 40
+shot storm_wide
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 300
+cmd skyabyss dev dump space_ember ~-40 ~-20 ~-40 ~40 ~30 ~40
+waitdump
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~ ~60 ~ 0 90
+waitchunks
+wait 40
+shot ember_wide
+hud on
+cmd gamemode creative

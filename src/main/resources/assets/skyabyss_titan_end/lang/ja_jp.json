@@ -22,5 +22,6 @@
   "message.skyabyss.return_beacon.offer": "試練は終わった。近くの光の中でしゃがむと、真ん中へ戻れる",
   "message.skyabyss.return_beacon.leaving": "光に包まれ、真ん中へ運ばれていく。",
   "message.skyabyss.return_beacon.confirm": "地上へ下りる？ 5 秒以内にもう一度笛を使うと下りる",
-  "message.skyabyss.return_beacon.descending": "笛の音とともに、足もとが遠のいていく。"
+  "message.skyabyss.return_beacon.descending": "笛の音とともに、足もとが遠のいていく。",
+  "message.skyabyss.arrival.fell": "足を踏み外した。待機場所へ戻された"
 }

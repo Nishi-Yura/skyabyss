@@ -150,18 +150,29 @@ public final class TitanBackSelfTest {
         if (box == null || !box.contains(Vec3.atBottomCenterOf(feet).add(0, 0.1, 0))) {
             f.add(titan + ": the arrival pad is not inside the route entry box");
         }
-        // 台は胸壁で囲われていて、鐘を待つあいだに背の上へ歩いて出られない。帰りの石がある (岩鯨は胸壁と錨石。ほかは ArrivalDeck。2026-11-07)
+        // 待機場所「渦の口」(ArrivalDeck。2026-11-07): 二度目に置く物がない・集まる所は平らに立てる・広場の外 (渦・堀・空) に落ちた人は戻る・
+        // 広場の上の人は戻らない・心臓の前室と間の入口は見張りの円の外・帰りの石がある
         if (jp.revati.skyabyss.trial.ArrivalDeck.paletteOf(titan) != null) {
             jp.revati.skyabyss.trial.ArrivalDeck.place(back, titan);
             int again = jp.revati.skyabyss.trial.ArrivalDeck.place(back, titan);
-            int open = jp.revati.skyabyss.trial.ArrivalDeck.openColumns(back, titan);
-            if (again != 0 || open != 0) {
-                f.add(titan + ": the arrival deck is not closed (" + open + " open columns, " + again + " blocks placed on the second pass)");
+            int bad = jp.revati.skyabyss.trial.ArrivalDeck.badStanding(back, titan);
+            if (again != 0 || bad != 0) {
+                f.add(titan + ": the arrival lobby is not settled (" + bad + " bad standing cells round the feet, " + again + " blocks placed on the second pass)");
+            }
+            BlockPos vortex = jp.revati.skyabyss.trial.ArrivalDeck.vortex(titan);
+            if (vortex == null || !jp.revati.skyabyss.trial.ArrivalDeck.fallen(titan, vortex.getX() + 0.5, vortex.getY() - 8, vortex.getZ() + 0.5)
+                    || jp.revati.skyabyss.trial.ArrivalDeck.fallen(titan, feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5)) {
+                f.add(titan + ": the lobby fall guard does not catch a fall into the vortex, or catches a player standing on the feet");
+            }
+            for (BlockPos q : new BlockPos[] {InstanceArenas.heartRest(back, titan), InstanceArenas.heartEntry(titan)}) {
+                if (q != null && jp.revati.skyabyss.trial.ArrivalDeck.fallen(titan, q.getX() + 0.5, q.getY(), q.getZ() + 0.5)) {
+                    f.add(titan + ": the lobby fall guard reaches the heart rooms at " + q.toShortString());
+                }
             }
             BlockPos stone = jp.revati.skyabyss.trial.ArrivalDeck.homeStone(titan);
             if (stone == null || !back.getBlockState(stone).is(net.minecraft.world.level.block.Blocks.LODESTONE)
                     || !jp.revati.skyabyss.trial.ArrivalDeck.isReturnStone(back, stone)) {
-                f.add(titan + ": no return stone on the arrival deck at " + stone);
+                f.add(titan + ": no return stone in the arrival lobby at " + stone);
             }
         }
         // 体の外の心臓の間: 建っていて、中の空気が部屋の箱の外へ抜けない
