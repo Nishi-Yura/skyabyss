@@ -150,13 +150,18 @@ public final class TitanBackSelfTest {
         if (box == null || !box.contains(Vec3.atBottomCenterOf(feet).add(0, 0.1, 0))) {
             f.add(titan + ": the arrival pad is not inside the route entry box");
         }
-        // 台は囲われていて、鐘を待つあいだに背の上へ歩いて出られない (岩鯨は胸壁。ほかは ArrivalPen。2026-11-07)
-        if (jp.revati.skyabyss.trial.ArrivalPen.wallOf(titan) != null) {
-            jp.revati.skyabyss.trial.ArrivalPen.place(back, titan);
-            int again = jp.revati.skyabyss.trial.ArrivalPen.place(back, titan);
-            int open = jp.revati.skyabyss.trial.ArrivalPen.openColumns(back, titan);
+        // 台は胸壁で囲われていて、鐘を待つあいだに背の上へ歩いて出られない。帰りの石がある (岩鯨は胸壁と錨石。ほかは ArrivalDeck。2026-11-07)
+        if (jp.revati.skyabyss.trial.ArrivalDeck.paletteOf(titan) != null) {
+            jp.revati.skyabyss.trial.ArrivalDeck.place(back, titan);
+            int again = jp.revati.skyabyss.trial.ArrivalDeck.place(back, titan);
+            int open = jp.revati.skyabyss.trial.ArrivalDeck.openColumns(back, titan);
             if (again != 0 || open != 0) {
-                f.add(titan + ": the arrival pen is not closed (" + open + " open columns, " + again + " blocks placed on the second pass)");
+                f.add(titan + ": the arrival deck is not closed (" + open + " open columns, " + again + " blocks placed on the second pass)");
+            }
+            BlockPos stone = jp.revati.skyabyss.trial.ArrivalDeck.homeStone(titan);
+            if (stone == null || !back.getBlockState(stone).is(net.minecraft.world.level.block.Blocks.LODESTONE)
+                    || !jp.revati.skyabyss.trial.ArrivalDeck.isReturnStone(back, stone)) {
+                f.add(titan + ": no return stone on the arrival deck at " + stone);
             }
         }
         // 体の外の心臓の間: 建っていて、中の空気が部屋の箱の外へ抜けない

@@ -2502,6 +2502,8 @@
   "label.skyabyss.stone.moon_gate.sub": "Use to cross to the moon",
   "label.skyabyss.stone.moon_return.sub": "Use to go back to the surface",
   "label.skyabyss.stone.cloud_return.sub": "Use to go back to the surface",
+  "label.skyabyss.stone.home": "Return Stone",
+  "label.skyabyss.stone.home.sub": "Use to go back down to the surface",
   "label.skyabyss.stone.anchor": "Anchor Stone",
   "label.skyabyss.stone.anchor.sub": "Use to climb down the chain to the surface",
   "label.skyabyss.stone.depth_record": "Record Stone",

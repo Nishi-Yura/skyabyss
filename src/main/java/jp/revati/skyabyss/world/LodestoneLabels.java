@@ -92,6 +92,9 @@ public final class LodestoneLabels {
         if (level.dimension() == jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK && pos.equals(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.anchor())) {
             return new Text(Component.translatable("label.skyabyss.stone.anchor"), Component.translatable("label.skyabyss.stone.anchor.sub"));
         }
+        if (jp.revati.skyabyss.trial.ArrivalDeck.isReturnStone(level, pos)) {
+            return new Text(Component.translatable("label.skyabyss.stone.home"), Component.translatable("label.skyabyss.stone.home.sub"));
+        }
         if (jp.revati.skyabyss.story.ch5.AbyssWorld.in(p) && pos.equals(jp.revati.skyabyss.story.ch5.depths.DepthRun.heartStone())) {
             return new Text(Component.translatable("label.skyabyss.stone.depth_record"), Component.translatable("label.skyabyss.stone.depth_record.sub"));
         }

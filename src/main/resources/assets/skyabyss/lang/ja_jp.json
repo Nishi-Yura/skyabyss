@@ -2502,6 +2502,8 @@
   "label.skyabyss.stone.moon_gate.sub": "右クリックで月へ渡る",
   "label.skyabyss.stone.moon_return.sub": "右クリックで地上へ帰る",
   "label.skyabyss.stone.cloud_return.sub": "右クリックで地上へ帰る",
+  "label.skyabyss.stone.home": "帰りの石",
+  "label.skyabyss.stone.home.sub": "右クリックで地上へ帰る",
   "label.skyabyss.stone.anchor": "錨石",
   "label.skyabyss.stone.anchor.sub": "右クリックで鎖を伝って地上へ降りる",
   "label.skyabyss.stone.depth_record": "記録の石",

@@ -1,6 +1,6 @@
-# 2026-11-07: 巨神の背の到着の台 (集まって鐘を待つ所) のまわり。岩鯨以外は台から歩いて出られるという声の確かめ。四体の台を上と四方から
-# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/arrival_pen.txt -PshotsName=arrival_pen
-world arrivalpen flat
+# 2026-11-07: 巨神の背の到着の台 (胸壁・灯りの柱・帰りの石。trial/ArrivalDeck)。四体の台を上と四方から
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/arrival_deck.txt -PshotsName=arrival_deck
+world arrivaldeck flat
 size 1280 720
 timeout 1500
 render 12
@@ -18,10 +18,10 @@ wait 260
 chat clear
 hud off
 cmd gamemode spectator
-cmd tp @s ~ ~22 ~ 0 89
+cmd tp @s ~ ~16 ~ 0 70
 wait 30
 shot 1_whale_top
-cmd tp @s ~ ~-19 ~ 0 25
+cmd tp @s ~ ~-13 ~ 0 25
 wait 20
 shot 1_whale_s
 cmd tp @s ~ ~ ~ 180 25
@@ -41,10 +41,10 @@ wait 260
 chat clear
 hud off
 cmd gamemode spectator
-cmd tp @s ~ ~22 ~ 0 89
+cmd tp @s ~ ~16 ~ 0 70
 wait 30
 shot 2_tide_top
-cmd tp @s ~ ~-19 ~ 0 25
+cmd tp @s ~ ~-13 ~ 0 25
 wait 20
 shot 2_tide_s
 cmd tp @s ~ ~ ~ 180 25
@@ -64,10 +64,10 @@ wait 260
 chat clear
 hud off
 cmd gamemode spectator
-cmd tp @s ~ ~22 ~ 0 89
+cmd tp @s ~ ~16 ~ 0 70
 wait 30
 shot 3_storm_top
-cmd tp @s ~ ~-19 ~ 0 25
+cmd tp @s ~ ~-13 ~ 0 25
 wait 20
 shot 3_storm_s
 cmd tp @s ~ ~ ~ 180 25
@@ -87,10 +87,10 @@ wait 260
 chat clear
 hud off
 cmd gamemode spectator
-cmd tp @s ~ ~22 ~ 0 89
+cmd tp @s ~ ~16 ~ 0 70
 wait 30
 shot 4_ember_top
-cmd tp @s ~ ~-19 ~ 0 25
+cmd tp @s ~ ~-13 ~ 0 25
 wait 20
 shot 4_ember_s
 cmd tp @s ~ ~ ~ 180 25
