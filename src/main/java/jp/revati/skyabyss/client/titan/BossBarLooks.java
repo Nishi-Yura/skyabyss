@@ -64,6 +64,8 @@ public final class BossBarLooks {
             // 段のない: 塔・雷の章・熾の章・潮の番人
             Map.entry("entity.skyabyss.tower_master", solo("tower_master", "tower_solo", 0xE8D27A, 0xFFF8D8, 0xE8D27A)),
             Map.entry("entity.skyabyss.scorched_warden", solo("scorched_warden", "storm_solo", 0xC8803C, 0xF0B060, 0xE8A058)),
+            // 避雷の塔の跡の小ダンジョンの主 (2026-11-08 の声「風守のボスバーない」: 細いバニラの帯だけで、見えていなかった)
+            Map.entry("entity.skyabyss.feather_warden", solo("named_ochre", "storm_solo", 0x6FA8D8, 0xD8ECFF, 0xA8CCEE)),
             Map.entry("entity.skyabyss.elder_thrall", solo("elder_thrall", "ember_solo", 0xD85A2A, 0xFF9A60, 0xF08048)),
             Map.entry("entity.skyabyss.shore_warden", solo("shore_warden", "shore_solo", 0x6CC8C0, 0xD8FFF8, 0x9CE8E0)),
             // 名のある強敵 (土地ごとの土の色)
@@ -94,6 +96,24 @@ public final class BossBarLooks {
             key = inner.getKey();
         }
         return STYLES.get(key);
+    }
+
+    // 型を持たない Mod の主・中ボス (地下のダンジョンの中ボスなど) は、石の色の型で出す (細いバニラの帯にしない)。
+    // ほかの担当 (心臓・船長・番人など) が描いた帯には触れないよう、いちばん後に見る
+    static final PhasedBossBar.Style DEFAULT = solo("named_stone", "named_stone", 0x9A9080, 0xD8D0C0, 0xC0B8A8);
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void onPlainBossBar(CustomizeGuiOverlayEvent.BossEventProgress event) {
+        Minecraft mc = Minecraft.getInstance();
+        BossEvent boss = event.getBossEvent();
+        if (mc.level == null || mc.player == null || event.isCanceled() || !(boss.getName().getContents() instanceof TranslatableContents t)
+                || !t.getKey().startsWith("entity.skyabyss.")) {
+            return;
+        }
+        event.setCanceled(true);
+        PhasedBossBar.draw(event.getGuiGraphics(), mc, DEFAULT, boss.getName(), AbyssBossBars.phaseOf(boss), AbyssBossBars.roaring(boss), boss,
+                event.getX(), event.getY() - BossBarShift.UP);
+        event.setIncrement(event.getIncrement() + PhasedBossBar.EXTRA_HEIGHT);
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
