@@ -80,12 +80,12 @@ def head(title, desc, canonical):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="%(fonts)s">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=%(v)s">
 <script>document.documentElement.classList.add("js")</script>
-<script src="js/main.js" defer></script>
+<script src="js/main.js?v=%(v)s" defer></script>
 </head>
 <body>
-""" % dict(t=esc(title), d=esc(desc), site=SITE_URL, c="" if canonical == "index.html" else canonical, fonts=FONTS)
+""" % dict(t=esc(title), d=esc(desc), site=SITE_URL, c="" if canonical == "index.html" else canonical, fonts=FONTS, v=VERSION)
 
 
 def header(current):

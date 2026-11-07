@@ -153,7 +153,7 @@ def wiki_page(fname, title, lead, body, spoiler=False, count=None):
         COUNTS[fname] = count
     head_ = ('<div class="wrap wiki-head"><p class="eyebrow">天と淵のあいだ WIKI</p><h1>%s</h1><p class="lead">%s</p>%s</div>'
              % (title, lead, '<p class="spoiler-note">このページはネタばれを含みます。</p>' if spoiler else ""))
-    page(fname, "%s — 天と淵のあいだ wiki" % title, lead, wiki_nav(fname) + head_ + body + '<script src="js/wiki.js" defer></script>')
+    page(fname, "%s — 天と淵のあいだ wiki" % title, lead, wiki_nav(fname) + head_ + body + '<script src="js/wiki.js?v=%s" defer></script>' % VERSION)
 
 
 def section(id_, h, inner, note=""):
@@ -470,7 +470,7 @@ def skills_page(dump_skills):
             inner += '<h3>%s<small>%d 節</small></h3><div class="tablewrap"><table class="nodes"><thead><tr><th scope="col">節</th><th scope="col">種類</th><th scope="col">点</th><th scope="col">効き目</th><th scope="col">前提</th></tr></thead><tbody>%s</tbody></table></div>' % (
                 esc(aname), len(ns), "".join(rows))
         body += section("tree-" + job, "%s（%d 節）" % (jname, len(nodes)), inner)
-    wiki_page("wiki-skills.html", "スキルツリー", "ジョブごとのスキルツリーの全部のノード。使うスキルの効き目は、1 段目の数字です（段を上げると変わります）。", body, count="%d 節" % total_nodes)
+    wiki_page("wiki-skills.html", "スキルツリー", "ジョブごとのスキルツリーの全部のノード。使うスキルの効き目は、1 段目の数字です（段を上げると変わります）。組んでみるときは <a href=\"skill-tree.html\">スキルツリーを試す</a> へ。", body, count="%d 節" % total_nodes)
 
 
 def node_name(job, n, sk, stat_ja):

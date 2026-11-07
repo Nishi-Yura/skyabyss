@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import changelog
 import pages
+import planner
 import wiki
 from sitelib import redirect
 
@@ -38,6 +39,7 @@ def main():
     pages.start()
     changelog.changelog()
     wiki.build()
+    planner.build()
     for old, new in OLD.items():
         redirect(old, new)
     print("built")
