@@ -23,20 +23,20 @@ GONE = [
 
 # ---------------------------------------------------------------- 道しるべ (都の四つの門の外・岩鯨の町から背への分かれ道・内海の向こう岸)
 WAYPOSTS = {
-    105: ("gate_north", ["鯨見の町 690m", "岩鯨の丘陵", "目安 Lv 4-12", "鐘の都 150m"],
+    105: ("gate_north", ["鯨見の町 690m", "岩鯨の丘陵", "推奨 Lv 4-12", "鐘の都 150m"],
           ["Whalewatch 690m", "Whale Hills", "Lv 4-12", "Bell City 150m"]),
-    109: ("gate_west", ["風待の里 590m", "嵐の高地", "目安 Lv 18-24", "鐘の都 150m"],
+    109: ("gate_west", ["風待の里 590m", "嵐の高地", "推奨 Lv 18-24", "鐘の都 150m"],
           ["Windwait 590m", "Storm Heights", "Lv 18-24", "Bell City 150m"]),
-    113: ("gate_south", ["灰炉の村 970m", "灰の荒野", "目安 Lv 24-30", "鐘の都 150m"],
+    113: ("gate_south", ["灰炉の村 970m", "灰の荒野", "推奨 Lv 24-30", "鐘の都 150m"],
           ["Ashforge 970m", "Ash Wilds", "Lv 24-30", "Bell City 150m"]),
-    108: ("whale_back", ["岩鯨の跡地 270m", "巨神の背へ", "目安 Lv 4-12", "鯨見の町 60m"],
+    108: ("whale_back", ["岩鯨の跡地 270m", "巨神の背へ", "推奨 Lv 4-12", "鯨見の町 60m"],
           ["Whale Site 270m", "Titan's back", "Lv 4-12", "Whalewatch 60m"]),
 }
 # 足す道しるべ: 都の東の門の外 (渡し場への道) と、内海の向こう岸の渡し場。x・z は道の点 (build_poi_places が道の上から少しずらす)
 NEW_WAYPOSTS = [
-    ("gate_east", "road", 8, 150, ["渡し場 {far}m", "舟で 潮の浜へ", "目安 Lv 12-18", "鐘の都 150m"],
+    ("gate_east", "road", 8, 150, ["渡し場 {far}m", "舟で潮の浜へ", "推奨 Lv 12-18", "鐘の都 150m"],
      ["Ferry {far}m", "To Tide Shore", "Lv 12-18", "Bell City 150m"]),
-    ("tide_landing", "road", 9, 20, ["汐守の港 {far}m", "潮の浜", "目安 Lv 12-18", "渡し場 20m"],
+    ("tide_landing", "road", 9, 20, ["汐守の港 {far}m", "潮の浜", "推奨 Lv 12-18", "渡し場 20m"],
      ["Tidekeep {far}m", "Tide Shore", "Lv 12-18", "Ferry 20m"]),
 ]
 
@@ -99,7 +99,7 @@ P = [
     (33, "northwatch_tower", "北見の塔", "North-Watch Tower", "view_bench",
      "北の丘が|一晩で形を変えた|岩鯨が|寝返った", "The north hills|shifted overnight|The Stone Whale|turned in sleep"),
     (8, "crowscare_tower", "鳥追いの櫓", "Crowscare Tower", "woodpile",
-     "鴉を追い払うのが|役目だった|今は鴉が|見張っている", "My task was|chasing crows|Now the crows|keep watch"),
+     "からすを追い払う|のが役目だった|今はからすが|見張っている", "My task was|chasing crows|Now the crows|keep watch"),
     (23, "beacon_tower", "狼煙の櫓", "Beacon Tower", "beacon_cairn",
      "三度上がれば|都の門を閉めよ|狼煙は|まだ二度", "Three smokes|and the city|shuts its gate|Only two so far"),
     (6, "silent_mill", "鳴らずの風車", "Silent Mill", "broken_cart",
@@ -111,7 +111,7 @@ P = [
     (28, "eastwind_mill", "東風の風車", "East-Wind Mill", "view_bench",
      "東風の日は|歌が混じる|海の向こうの|歌", "East wind days|bring a song|A song from|across the sea"),
 
-    # ======================================== 岩鯨の丘陵 (目安 Lv 4-12)
+    # ======================================== 岩鯨の丘陵 (推奨 Lv 4-12)
     (53, "koishi_camp", "小石の野営", "Koishi's Camp", "weapon_rack",
      "コイシへ|都の荷を狙え|母の分を返して|もらうだけだ ミオ", "Koishi|Rob city carts|Just take back|Mom's share -Mio"),
     (43, "moss_barrow", "苔塚", "Moss Barrow", "offering",
@@ -129,7 +129,7 @@ P = [
     (37, "hushed_abbey", "祈り止めの僧院", "Hushed Abbey", "bell_post",
      "鐘を鳴らすな|呼ばれて来るものは|鯨だけでは|ない", "Ring no bell|What it calls|is not only|the whale"),
     (51, "scriptorium", "写本の僧院", "Scriptorium", "lectern",
-     "巨神の名を|写していた|最後の頁は|白いまま", "We copied|the titans' names|The last page|is still blank"),
+     "巨神の名を|写していた|最後のページは|白いまま", "We copied|the titans' names|The last page|is still blank"),
     (41, "stonecutter_house", "石割りの家", "Stonecutter's House", "stone_stack",
      "背から落ちた石で|家を建てた|夜は|温かい", "Stone fallen|from the back|built this house|It's warm at night"),
     (55, "fledgling_house", "巣立ちの家", "Fledgling House", "garden",
@@ -153,7 +153,7 @@ P = [
     (56, "mistwatch_post", "霧見の櫓", "Mistwatch Post", "woodpile",
      "霧の朝は|背が近く見える|近いのは|霧のほうだ", "On misty mornings|the back is near|No, the mist|is what is near"),
 
-    # ======================================== 潮の浜 (目安 Lv 12-18)
+    # ======================================== 潮の浜 (推奨 Lv 12-18)
     (60, "mio_camp", "澪の野営", "Mio's Camp", "weapon_rack",
      "ミオへ|沢渡が埋まった夜|都は門を閉じた|忘れるな ツムジ", "Never forget, Mio|the gate shut|as Sawatari was|buried -Tsumuji"),
     (58, "whaler_wreck", "鯨捕り船の残骸", "Whaler's Wreck", "anchor",
@@ -191,7 +191,7 @@ P = [
     (64, "minstrel_camp", "楽師の野営", "Minstrel's Camp", None,
      "舟が返った|楽の箱は|東の浜の|舟の中", "My boat capsized|My music box|is in the boat|at the east beach"),
 
-    # ======================================== 嵐の高地 (目安 Lv 18-24)
+    # ======================================== 嵐の高地 (推奨 Lv 18-24)
     (81, "tsumuji_camp", "旋風の野営", "Tsumuji's Camp", "weapon_rack",
      "ツムジへ|母は門の外で冷えた|鐘は|鳴り止まなかった", "Tsumuji|Mother froze|outside the gate|The bell rang on"),
     (83, "windcut_barrow", "風切り塚", "Windcut Barrow", "offering",
@@ -209,7 +209,7 @@ P = [
     (80, "south_windgate", "南の風門", "South Windgate", "bedroll",
      "南東の野営は|通れなかった者の|最後の|焚き火", "Southeast camp:|the last fire|of those who|could not pass"),
 
-    # ======================================== 灰の荒野 (目安 Lv 24-30)
+    # ======================================== 灰の荒野 (推奨 Lv 24-30)
     (88, "kurogane_camp", "鉄の野営", "Kurogane's Camp", "weapon_rack",
      "門番の墓を見つけた|母の隣だった|恨む相手が|いなくなった", "I found the|gatekeeper's|grave by Mother|None left to hate"),
     (87, "black_gate", "黒門", "Black Gate", "ash_statue",
@@ -227,11 +227,11 @@ P = [
     (86, "old_ashforge", "灰炉の古炉", "Old Ashforge", "anvil",
      "炉は冷えた|鍛え手は下へ行った|戻ると|言った", "The forge is cold|The smiths went|below, saying|they'd return"),
     (89, "hammer_ruin", "鎚の跡", "Hammer Ruin", "anvil_pair",
-     "鎚を振った数だけ|地面が|熱い|まだ熱い", "The ground is hot|from each blow|of the hammers|Still hot"),
+     "つちを振った数だけ|地面が|熱い|まだ熱い", "The ground is hot|from each blow|of the hammers|Still hot"),
     (96, "northern_forge", "北の炉跡", "Northern Forge", "bell_post",
      "都の鐘を鋳た炉|割れた鐘は|ここへ|戻された", "This forge cast|the city's bell|The cracked bell|came back here"),
     (99, "soot_forge", "煤の炉", "Soot Forge", "sea_chests",
-     "煤で名を書いた|雨が|一つずつ|消していく", "Names in soot|The rain|erases them|one by one"),
+     "すすで名を書いた|雨が|一つずつ|消していく", "Names in soot|The rain|erases them|one by one"),
     (94, "ash_graves", "灰の墓所", "Ash Graves", "offering",
      "灰の民は|墓を掘らない|灰に|混ぜる", "The ash folk|dig no graves|They mix you|into the ash"),
     (104, "cinderfield_graves", "焼け野の墓所", "Cinderfield Graves", "fresh_grave",
@@ -270,7 +270,7 @@ NEW_PLACES = [
     ("cave", -1216, 464, "rumble_cave", "雷鳴の洞", "Rumble Cave", "cairn_lamp",
      "洞の奥で|雷が鳴る|空は|晴れているのに", "Thunder rolls|deep in the cave|though the sky|is clear"),
     ("ruined_house", -1120, 624, "kitemaker_house", "凧作りの家", "Kitemaker's House", "loom",
-     "凧の糸は|銅を撚って作る|雷を|地へ逃がすために", "Kite string is|twisted copper|to ground|the lightning"),
+     "凧の糸は|銅をねじって作る|雷を|地へ逃がすために", "Kite string is|twisted copper|to ground|the lightning"),
     ("roadside_shrine", -1392, 560, "south_moss_shrine", "南の苔祠", "South Moss Shrine", "offering",
      "雷の夜は|ここで越せ|苔が|雷を吸う", "Wait out storms|here|The moss|drinks lightning"),
 ]

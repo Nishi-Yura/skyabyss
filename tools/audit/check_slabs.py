@@ -240,6 +240,20 @@ def floating_alone(cells, x, y, z):
     return True
 
 
+def fix_cells(cells, meta=None):
+    """生成スクリプトから: 設計図のマス (dict) の半ブロックを直して返す (build_poi_places.py が書く前に呼ぶ)"""
+    meta = meta or {}
+    c = Cells(cells)
+    c.ground = 10 ** 6 if 'bottom' in meta and not meta.get('level') else -1
+    for _ in range(3):
+        found = check(c, '')
+        if not found:
+            break
+        fix(c, found)
+    LOG.clear()
+    return dict(c)
+
+
 def save(path, d, cells):
     """直したマスを blocks に書き戻す (runs・boxes の上に後から書いたものが勝つ)"""
     pal = d['palette']

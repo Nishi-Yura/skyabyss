@@ -1,8 +1,8 @@
-"""封の箱の文言と封切り師の会話 (docs/design/52) を書く。"""
+"""封印の箱の文言と封切り師の会話 (docs/design/52) を書く。"""
 import json
 import os
 
-ROOT = "C:/Users/nisimoto/Desktop/mod/src/main/resources/"
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "src", "main", "resources") + "/"
 LANG = ROOT + "assets/skyabyss_box/lang/"
 os.makedirs(LANG, exist_ok=True)
 
@@ -12,12 +12,12 @@ TIERS = [("uncommon", "アンコモン", "Uncommon", [1, 2]), ("rare", "レア",
 
 ja, en = {}, {}
 for t, j, e in TITANS:
-    ja[f"item.skyabyss.box_{t}"] = f"{j}の封の箱"
+    ja[f"item.skyabyss.box_{t}"] = f"{j}の封印の箱"
     en[f"item.skyabyss.box_{t}"] = f"{e} Sealed Box"
 for t, j, e, bands in TIERS:
     for b in bands:
         lo, hi = (b - 1) * 10 + 1, b * 10
-        ja[f"item.skyabyss.box_{t}_{b}"] = f"{j}の封の箱 [Lv {lo}-{hi}]"
+        ja[f"item.skyabyss.box_{t}_{b}"] = f"{j}の封印の箱 [Lv {lo}-{hi}]"
         en[f"item.skyabyss.box_{t}_{b}"] = f"{e} Sealed Box [Lv {lo}-{hi}]"
 ja["item.skyabyss.box_artifact"] = "淵の金の箱"
 en["item.skyabyss.box_artifact"] = "Abyssal Gold Box"
@@ -26,10 +26,10 @@ J = {
     "item.skyabyss.box.kind_titan": "巨神の箱 · %s",
     "item.skyabyss.box.kind_rarity": "%sの箱 · Lv %s〜%s",
     "item.skyabyss.box.kind_artifact": "金の箱 · 深淵のアーティファクトと伝説の武器",
-    "item.skyabyss.box.contents": "武器・防具・装飾のどれかが入っている",
+    "item.skyabyss.box.contents": "武器・防具・アクセサリーのどれかが入っている",
     "item.skyabyss.box.open_hint": "町の封切り師に渡すと開けてくれる",
     "message.skyabyss.box.opened": "封を切った (%s): %s",
-    "skyabyss_box.tab": "封の箱",
+    "skyabyss_box.tab": "封印の箱",
     "skyabyss_box.screen.title": "封切り師",
     "skyabyss_box.screen.open": "開ける",
     "skyabyss_box.screen.open_all": "まとめて開ける (%s)",
@@ -37,32 +37,32 @@ J = {
     "skyabyss_box.screen.back": "一覧へ",
     "skyabyss_box.screen.count": "持っている数: %s",
     "skyabyss_box.screen.cutting": "封を切っている…",
-    "skyabyss_box.screen.none": "封の箱を持っていない。敵や主がまれに落とす。巨神の背では、その巨神の箱が出る。",
+    "skyabyss_box.screen.none": "封印の箱を持っていない。敵や主がまれに落とす。巨神の背では、その巨神の箱が出る。",
     "skyabyss_box.screen.skip": "Esc で飛ばす",
     "skyabyss_box.screen.summary": "開けた品 (%s)",
     "skyabyss_box.pouch.titan": "巨神の箱",
     "skyabyss_box.pouch.rarity": "階級の箱",
     "skyabyss_box.pouch.artifact": "金の箱",
-    "skyabyss_box.pouch.hint": "押すと一つ持ち物へ出す（シフトで全部）。持ち物から Q で落とせる。開けるのは町の封切り師。",
-    "skyabyss_box.pouch.taken": "%s を %s 個、持ち物へ出した。Q で落とせる・仲間に渡せる",
+    "skyabyss_box.pouch.hint": "押すと一つ持ち物へ出す（シフトを押しながらだと全部）。持ち物から Q で落とせる。開けるのは町の封切り師。",
+    "skyabyss_box.pouch.taken": "%s を %s 個、持ち物へ出した。Q で落とせるし、仲間に渡せる",
     "skyabyss_box.pouch.full": "持ち物がいっぱいで、箱を出せない",
-    "skyabyss_pouch.category.box": "封の箱",
-    # 封の箱の札: 次に開けたときの中身の気配 (loot/box の hint。開けるまで決まらない箱は none)
+    "skyabyss_pouch.category.box": "封印の箱",
+    # 封印の箱の札: 次に開けたときの中身の気配 (loot/box の hint。開けるまで決まらない箱は none)
     "item.skyabyss.box.hint.none": "次の中身: まだ決まっていない（開けたときに決まる）",
-    "item.skyabyss.box.hint.job_weapon": "次の中身: 今の職の武器の気配",
-    "item.skyabyss.box.hint.weapon": "次の中身: 武器の気配（ほかの職）",
+    "item.skyabyss.box.hint.job_weapon": "次の中身: 今のジョブの武器の気配",
+    "item.skyabyss.box.hint.weapon": "次の中身: 武器の気配（ほかのジョブ）",
     "item.skyabyss.box.hint.armor": "次の中身: 防具の気配",
-    "item.skyabyss.box.hint.trinket": "次の中身: 装飾の気配",
+    "item.skyabyss.box.hint.trinket": "次の中身: アクセサリーの気配",
     "entity.skyabyss.attendant.box_opener": "封切り師",
     "entity.skyabyss.attendant_box_opener": "封切り師",
-    "dialogue.skyabyss.attendant_box_opener.intro": "封の箱を持ってきたか。敵が落とす箱は、封を切るまで中身が眠っている。わしが切ってやろう。代はいらん。封の音を聞くのが好きでな。",
+    "dialogue.skyabyss.attendant_box_opener.intro": "封印の箱を持ってきたか。敵が落とす箱は、封を切るまで中身が眠っている。わしが切ってやろう。代はいらん。封の音を聞くのが好きでな。",
     "dialogue.skyabyss.attendant_box_opener.menu": "……箱か。",
     "dialogue.skyabyss.attendant_box_opener.menu.open": "箱を開けてもらう",
     "dialogue.skyabyss.attendant_box_opener.menu.sell": "品を買い取ってもらう",
     "dialogue.skyabyss.attendant_box_opener.menu.rules": "箱のこと",
-    "dialogue.skyabyss.attendant_box_opener.menu.about": "ここは何をする所？",
+    "dialogue.skyabyss.attendant_box_opener.menu.about": "ここは何をするところ？",
     "dialogue.skyabyss.attendant_box_opener.menu.bye": "また来る",
-    "dialogue.skyabyss.attendant_box_opener.rules": "巨神の背で落ちる箱は、その巨神の印の箱だ。中にはその巨神の品しか入っておらん。ほかの箱は色で階級が分かる。緑・青・紫・朱。帯の数は、中の品の重さ (Lv) の幅だ。金の箱は淵の底のもの。同じ箱なら重ねて持てる。",
+    "dialogue.skyabyss.attendant_box_opener.rules": "巨神の背で落ちる箱は、その巨神の印の箱だ。中にはその巨神の品しか入っておらん。ほかの箱は色で階級が分かる。緑・青・紫・朱。帯の数は、中の品の重さ (Lv) の幅だ。金の箱は淵の底にあるもの。同じ箱なら重ねて持てる。",
 }
 E = {
     "item.skyabyss.box.kind_titan": "Titan box · %s",
@@ -109,12 +109,12 @@ TOWN_LINES = {
     "whale": ("……箱か。鯨骨の留めは固い。小刀でこじるのが一番だ。", "...A box? Whalebone clasps are stubborn. A small knife pries them best."),
     "tide": ("……箱か。潮で封が湿っとる。少し乾かしてから切ろう。", "...A box? The tide's dampened the seal. Let it dry a moment before I cut."),
     "storm": ("……箱か。風の強い日は、封がひとりでに鳴るんだ。", "...A box? On windy days the seals hum all by themselves."),
-    "ember": ("……箱か。燠で焼き切れば、封は音もなく開く。", "...A box? Burn it with an ember and the seal opens without a sound."),
+    "ember": ("……箱か。おきで焼き切れば、封は音もなく開く。", "...A box? Burn it with an ember and the seal opens without a sound."),
 }
 for town, (j, e) in TOWN_LINES.items():
     J["dialogue.skyabyss.attendant_box_opener.menu_" + town] = j
     E["dialogue.skyabyss.attendant_box_opener.menu_" + town] = e
-J["dialogue.skyabyss.attendant_box_opener.menu"] = "……箱か。封蝋の匂いは、都の鐘の音より好きでね。"
+J["dialogue.skyabyss.attendant_box_opener.menu"] = "……箱か。封ろうの匂いは、都の鐘の音より好きでね。"
 E["dialogue.skyabyss.attendant_box_opener.menu"] = "...A box? I like the smell of sealing wax more than the capital's bells."
 ja.update(J)
 en.update(E)

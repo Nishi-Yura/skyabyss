@@ -3,6 +3,7 @@
 #   bash tools/dev/quick_check.sh            全部
 #   bash tools/dev/quick_check.sh --no-java  compileJava を飛ばす (Python の確認だけ)
 # 失敗した確認の名前を最後にまとめて出し、ひとつでも失敗なら終了コード 1。
+export PYTHONIOENCODING=utf-8
 set -u
 fails=()
 run() {

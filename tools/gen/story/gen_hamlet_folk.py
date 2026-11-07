@@ -45,7 +45,7 @@ person('bonefort_beacon', 'w_ne', 'folk_a', 'whale', 320, ('狼煙番のトウ�
          ('狼煙台の骨組みに、骨鳥がたかっている。骨の髄をつつくらしい。砦のまわりの丘で四羽払おう。',
           'Bone gulls flock to the beacon frame and peck at the marrow. Drive off four in the hills around the fort.')),
     go([('north_ribs', ('北の肋を見てこよう（砦から西北西）', 'Look at the North Ribs (west-northwest of the fort)'))],
-       ('砦から西北西に、北の肋。空から落ちた骨だという。砦の骨垣と同じ骨か、見てこよう。',
+       ('北の肋は、砦から西北西にある。空から落ちた骨だという。砦の骨垣と同じ骨か、見てこよう。',
         "West-northwest of the fort: the North Ribs, bones said to have fallen from the sky. See whether they match the fort's bone wall.")),
 ], dict(
     title=('北の肋の骨', 'The Bones of the North Ribs'),
@@ -63,7 +63,7 @@ person('bonefort_beacon', 'w_ne', 'folk_a', 'whale', 320, ('狼煙番のトウ�
     wait=('骨鳥は砦のまわりの丘だ。北の肋は西北西。碑があるはずだ。', 'The gulls are in the hills around the fort. The North Ribs are west-northwest. There should be a marker.'),
     back=('見てきたか。何と書いてあった。', 'Did you see it? What did it say?'),
     back_give=('「岩鯨の骨ではない。もっと古い」と伝える', 'Tell him "Not the stone whale\'s bones. Older."'),
-    done_line=('もっと古い、か。……巨神より前に、空から落ちたものがおったんだな。\nわしらは、それで垣を組んで、その内で寝とる。……礼だ。持っていけ。',
+    done_line=('もっと古い、か。……巨神より前に、空から落ちたものがおったんだな。\nわしらは、それで垣を組み、その中で寝とる。……礼だ。持っていけ。',
                'Older, eh. ...So something fell from the sky before the titans did.\nAnd we built our wall from it and sleep inside. ...Here. Take this for your trouble.'),
     idle=('狼煙台は都の方へ向けて組んである。晴れた晩は三つ焚いて「無事」を送る。\n……東の岬の先からも、ときどき灯が見える。誰が焚いとるのかは知らん。',
           'The beacon faces the capital. On clear nights I light three fires to send "all is well".\n...Sometimes a light shows past the eastern cape too. Who lights it, I couldn\'t say.'),
@@ -76,29 +76,29 @@ person('bonefort_beacon', 'w_ne', 'folk_a', 'whale', 320, ('狼煙番のトウ�
 person('bonefort_scribe', 'w_ne', 'folk_b', 'whale', 321, ('写字生のセツ', 'Setsu the Copyist'), [
     go([('scriptorium', ('写本の僧院を見てこよう（砦から西北西）', 'Visit the Scriptorium (west-northwest of the fort)')),
         ('hushed_abbey', ('祈り止めの僧院を見てこよう（砦から西南西）', 'Visit the Hushed Abbey (west-southwest of the fort)'))],
-       ('砦から西北西の写本の僧院と、西南西の祈り止めの僧院。セツが写しかけた巨神の名の帳面が、どちらかに残っているかもしれない。',
+       ('砦から西北西にある写本の僧院と、西南西にある祈り止めの僧院。セツが写しかけた巨神の名の帳面が、どちらかに残っているかもしれない。',
         'The Scriptorium west-northwest of the fort, and the Hushed Abbey west-southwest. The book of titan names Setsu was copying may still be in one of them.')),
 ], dict(
-    title=('白い頁', 'The Blank Page'),
+    title=('白いページ', 'The Blank Page'),
     summary=('写字生のセツに頼まれて、写本の僧院と祈り止めの僧院を見てくる。', 'For Setsu the copyist, visit the Scriptorium and the Hushed Abbey.'),
-    done=('写本の僧院の帳面の最後の頁は、白いままだった。祈り止めの僧院には「鐘を鳴らすな」とあった。セツは、何も書かずに筆を置いた。',
+    done=('写本の僧院の帳面の最後のページは、白いままだった。祈り止めの僧院には「鐘を鳴らすな」とあった。セツは、何も書かずに筆を置いた。',
           'The last page of the book at the Scriptorium was still blank. The Hushed Abbey said "Do not ring the bell." Setsu set down her brush without writing a word.'),
-    back_journal=('帳面の最後の頁は白いままだった。セツに伝えよう。', 'The last page was still blank. Tell Setsu.'),
+    back_journal=('帳面の最後のページは白いままだった。セツに伝えよう。', 'The last page was still blank. Tell Setsu.'),
     back_obj=('写字生のセツに伝えよう', 'Tell Setsu the copyist'),
     ask=('わたし、写本の僧院で巨神の名を写していたの。でも最後の一つが、どうしても書けなかった。書こうとすると、筆が止まるの。\n'
-         '僧院には、もう戻れない。西北西の写本の僧院と、西南西の祈り止めの僧院。帳面がどうなったか、見てきてくれる？',
+         '僧院には、もう戻れない。写本の僧院は西北西、祈り止めの僧院は西南西にある。帳面がどうなったか、見てきてくれる？',
          'I used to copy the names of the titans at the Scriptorium. But I could never write the last one. Every time I tried, my brush stopped.\n'
          "I can't go back there now. Would you look at the Scriptorium to the west-northwest and the Hushed Abbey to the west-southwest, and see what became of the book?"),
     ask_ok=('見てくる', "I'll go and look"),
     wait=('写本の僧院は砦から西北西、祈り止めの僧院は西南西。……鐘があっても、鳴らさないでね。',
           "The Scriptorium is west-northwest of the fort, the Hushed Abbey west-southwest. ...If there's a bell, don't ring it."),
-    back=('どうだった？　最後の頁は……。', 'Well? The last page...?'),
+    back=('どうだった？　最後のページは……。', 'Well? The last page...?'),
     back_give=('白いままだった、と伝える', 'Tell her it was still blank'),
     done_line=('白いまま。……そう。誰にも書けなかったのね。わたしだけじゃなかった。\nこれ、僧院から持ち出した箱。開けられなくて、ずっと持っていたの。あなたが持っていて。',
                "Still blank. ...I see. No one could write it. It wasn't only me.\nThis is a box I took from the abbey. I never could open it. You keep it."),
     idle=('巨神の名は、写すたびに一字ずつ変わるの。だから僧院では、毎朝写し直していた。\n……変わらなくなったら、その巨神は眠ったってこと。',
           "The titans' names change by one letter every time you copy them. So at the abbey we copied them fresh every morning.\n...When a name stops changing, that titan has gone to sleep."),
-    hint=('最後の名前はね、書こうとすると頁が冷たくなるの。霜みたいに。\n……北の、もっと寒いところの名前なんだと思う。',
+    hint=('最後の名前はね、書こうとするとページが冷たくなるの。霜みたいに。\n……北の、もっと寒いところの名前なんだと思う。',
           "The last name... when you try to write it, the page turns cold. Like frost.\n...I think it is the name of something in the north, somewhere colder."),
     after=('岩鯨の名前が、今朝は変わらなかった。……眠ったのね。\n書き写すのが、少しだけ寂しい。',
            "This morning the stone whale's name didn't change. ...It's asleep.\nCopying it feels a little lonely now."),
@@ -108,7 +108,7 @@ person('bonefort_scribe', 'w_ne', 'folk_b', 'whale', 321, ('写字生のセツ',
 person('bellwatch_crone', 'w_nw', 'folk_a', 'whale', 322, ('鐘聞きのオトメ', 'Otome the Bell-Listener'), [
     go([('nine_stones', ('九つ石を見てこよう（里から南南東）', 'Visit the Nine Stones (south-southeast of the hamlet)')),
         ('backwarden_graves', ('背守りの墓を見てこよう（里から東）', 'Visit the Backwarden Graves (east of the hamlet)'))],
-       ('里から南南東の九つ石と、東の背守りの墓。オトメの夫は岩鯨の背に登ったきり戻らなかった。墓に名があるか、石が何を言うか、見てこよう。',
+       ('九つ石は里から南南東、背守りの墓は里から東にある。オトメの夫は岩鯨の背に登ったきり戻らなかった。墓に名があるか、石が何を言うか、見てこよう。',
         "The Nine Stones south-southeast of the hamlet and the Backwarden Graves to the east. Otome's husband climbed the stone whale's back and never came down. See whether his name is on a grave, and what the stones say.")),
 ], dict(
     title=('九つ石と背守りの墓', 'The Nine Stones and the Backwarden Graves'),
@@ -139,10 +139,10 @@ person('bellwatch_crone', 'w_nw', 'folk_a', 'whale', 322, ('鐘聞きのオト�
 
 person('bellwatch_miner', 'w_nw', 'folk_b', 'whale', 323, ('青石掘りのイワオ', 'Iwao the Bluestone Miner'), [
     kill(['skyabyss:rock_shell_beetle'], 4, ('岩殻虫を払おう（里のまわり）', 'Drive off rock shell beetles (around the hamlet)'),
-         ('里のまわりに、岩殻虫が出る。坑道の口に殻を寄せて塞ぐらしい。四匹払おう。',
+         ('里のまわりに、岩殻虫が出る。坑道の口に殻を積んで塞ぐらしい。四匹払おう。',
           "Rock shell beetles roam around the hamlet, piling their shells over the mine's mouth. Drive off four.")),
     go([('bluestone_mine', ('青石の坑道を見てこよう（里から東南東）', 'Look at the Bluestone Mine (east-southeast of the hamlet)'))],
-       ('里から東南東の青石の坑道。青い石は岩鯨の涙だという。壁がまだ濡れているか見てこよう。',
+       ('青石の坑道は、里から東南東にある。青い石は岩鯨の涙だという。壁がまだ濡れているか、見てこよう。',
         "The Bluestone Mine east-southeast of the hamlet. They say the blue stone is the stone whale's tears. See whether the walls are still wet.")),
 ], dict(
     title=('青石の坑道', 'The Bluestone Mine'),
@@ -175,7 +175,7 @@ person('lightvillage_apprentice', 't_e', 'folk_a', 'tide', 324, ('灯守見習�
          ('里と岬のあいだの草原に、砂潜りが出る。油を運ぶ道で足を取られる。四匹払おう。',
           'Sand burrowers lurk in the grassland between the hamlet and the cape, tripping up the oil carriers. Drive off four.')),
     go([('northcape_light', ('北岬の灯を見てこよう（里から南東）', 'Visit the Northcape Light (southeast of the hamlet)'))],
-       ('里から南東の北岬の灯。前の灯守は毎晩ひとつずつ夜を数えていたという。今いくつか見てこよう。',
+       ('北岬の灯は里から南東にある。前の灯守は毎晩ひとつずつ夜を数えていたという。今いくつか見てこよう。',
         'The Northcape Light, southeast of the hamlet. The old keeper counted one night at a time. See what the count is now.')),
 ], dict(
     title=('九千の夜', 'Nine Thousand Nights'),
@@ -185,14 +185,14 @@ person('lightvillage_apprentice', 't_e', 'folk_a', 'tide', 324, ('灯守見習�
     back_journal=('数は九千だった。ミナトに伝えよう。', 'The count was nine thousand. Tell Minato.'),
     back_obj=('灯守見習いのミナトに伝えよう', 'Tell Minato the apprentice'),
     ask=('北岬の灯の灯守さん、毎晩ひとつずつ夜を数えてたんだって。ぼく、そのあとを継ぐことになったんだけど……今いくつなのか、誰も知らないんだ。\n'
-         '南東の岬まで見てきてくれない？　途中の草原の砂潜りも、四匹くらい払ってくれると助かる。油を運ぶとき、足を取られるんだ。',
+         '南東の北岬まで見てきてくれない？　途中の草原の砂潜りも、四匹くらい払ってくれると助かる。油を運ぶとき、足を取られるんだ。',
          "The keeper at the Northcape Light counted one night at a time, every night. I'm to take over after them... but nobody knows what the count is now.\n"
          "Would you go to the cape to the southeast and look? And if you could drive off four or so sand burrowers in the grassland on the way, that'd help. They trip us up when we carry the oil."),
     ask_ok=('引き受ける', "I'll do it"),
     wait=('砂潜りは草原の砂の下。北岬の灯は南東だよ。壁に刻んであると思う。', 'The burrowers are under the sand in the grassland. The Northcape Light is southeast. I think the count is carved on the wall.'),
     back=('いくつだった？', 'What was the count?'),
     back_give=('九千だった、と伝える', 'Tell him it was nine thousand'),
-    done_line=('九千……。灯守さん、ぼくが生まれる前からずっと数えてたんだ。\nじゃあ今夜から、ぼくが九千と一だね。……ありがとう。これ、灯の油代にってもらった箱。ぼくより、旅の人が持ってた方がいい。',
+    done_line=('九千……。灯守さん、ぼくが生まれる前からずっと数えてたんだ。\nじゃあ今夜から、ぼくが九千と一だね。……ありがとう。これ、灯の油代にと渡された箱。ぼくより、旅の人が持っていた方がいい。',
                "Nine thousand... They'd been counting since before I was born.\nSo tonight I'm nine thousand and one. ...Thanks. This box was given to me for lamp oil. It's better off with a traveller than with me."),
     idle=('この里はね、灯守の家ばかりなんだ。北岬、東の岬、南の岬。みんな交代で灯をともす。\n消えた灯があったら、その晩は誰も寝ないで、海を見てる。',
           "This hamlet is all lightkeepers' houses. North cape, east cape, south cape — everyone takes turns lighting them.\nIf a light ever goes out, nobody sleeps that night. We all watch the sea."),
@@ -205,7 +205,7 @@ person('lightvillage_apprentice', 't_e', 'folk_a', 'tide', 324, ('灯守見習�
 person('lightvillage_comber', 't_e', 'folk_b', 'tide', 325, ('浜拾いのアオ', 'Ao the Beachcomber'), [
     go([('northern_strand', ('北の座礁船を見てこよう（里から東）', 'Visit the Northern Strand wreck (east of the hamlet)')),
         ('tidewatch_ruin', ('潮見の塔を見てこよう（里から南）', 'Visit the Tidewatch Ruin (south of the hamlet)'))],
-       ('里から東の北の座礁船と、南の潮見の塔。アオの拾う大きな貝殻がどこから来るのか。どちらにも、昔の人の書き残しがあるという。',
+       ('北の座礁船は里から東、潮見の塔は南にある。アオの拾う大きな貝殻が、どこから来るのか。どちらにも、昔の人の書き残しがあるという。',
         'The Northern Strand wreck east of the hamlet, and the Tidewatch Ruin to the south. Where do the huge shells Ao finds come from? Both places hold words left by people long ago.')),
 ], dict(
     title=('島だと思った', 'We Thought It Was an Island'),
@@ -245,7 +245,7 @@ person('tidefort_watch', 't_se', 'folk_a', 'tide', 326, ('潮垣の見張りカ�
     summary=('潮垣の見張りカジに頼まれて、磯走りを払い、沈み塔に何段残っているか見てくる。', 'For Kaji of the Tidewall watch, drive off the reef scuttlers and see how many steps of the Sunken Tower remain.'),
     done=('沈み塔の碑には「あと四段」とあったが、砂の上に出ている段は三つだった。カジは、砦の垣を一段高く組み直すと言った。',
           'The Sunken Tower\'s marker said "four steps left", but only three showed above the sand. Kaji said he would build the fort\'s wall one course higher.'),
-    back_journal=('碑は「あと四段」、見えるのは三段だった。カジに伝えよう。', 'The marker said four, but only three showed. Tell Kaji.'),
+    back_journal=('碑は「あと四段」とあったが、見えるのは三段だった。カジに伝えよう。', 'The marker said four, but only three showed. Tell Kaji.'),
     back_obj=('潮垣の見張りカジに伝えよう', 'Tell Kaji of the watch'),
     ask=('磯走りどもが、夜な夜な垣の下を掘りやがる。五匹ほど払ってくれ。\n'
          'それと、北北西の沈み塔だ。あれは年に一段ずつ砂に沈む。碑には「あと四段」とあるはずだ。……本当に四段残ってるか、数えてきてくれ。',
@@ -268,7 +268,7 @@ person('tidefort_watch', 't_se', 'folk_a', 'tide', 326, ('潮垣の見張りカ�
 person('tidefort_netmender', 't_se', 'folk_b', 'tide', 327, ('網繕いのフサ', 'Fusa the Net Mender'), [
     go([('whaler_wreck', ('鯨捕り船の残骸を見てこよう（砦から北西）', "Visit the Whaler's Wreck (northwest of the fort)")),
         ('brine_hulk', ('塩漬けの船を見てこよう（砦から北北東）', 'Visit the Brine Hulk (north-northeast of the fort)'))],
-       ('砦から北西の鯨捕り船の残骸と、北北東の塩漬けの船。フサの亭主は、空の鯨を追う船に乗っていた。どちらかに、その船の名残があるかもしれない。',
+       ('鯨捕り船の残骸は砦から北西、塩漬けの船は砦から北北東にある。フサの亭主は、空の鯨を追う船に乗っていた。どちらかに、その船の名残があるかもしれない。',
         "The Whaler's Wreck northwest of the fort, and the Brine Hulk to the north-northeast. Fusa's husband sailed on a ship that chased the whale in the sky. One of them may hold a trace of it.")),
 ], dict(
     title=('東を向いた舵', 'The Rudder Facing East'),
@@ -301,7 +301,7 @@ person('emberfort_smith', 'e_se', 'folk_a', 'ember', 328, ('砦鍛冶のタタ�
          ('砦のまわりの荒れ地に、熾の山犬がいる。炭を運ぶ者を群れで追うという。四匹払おう。',
           'Ember jackals roam the badlands around the fort, hunting the charcoal carriers in packs. Drive off four.')),
     go([('black_gate', ('黒門の言葉を読んでこよう（砦から西）', 'Read the Black Gate (west of the fort)'))],
-       ('砦から西の黒門。灰の民の門だという。門に刻まれた言葉を読んでこよう。', "The Black Gate, west of the fort: the ash folk's gate. Read the words carved on it.")),
+       ('黒門は砦から西にある。灰の民の門だという。門に刻まれた言葉を読んでこよう。', "The Black Gate, west of the fort: the ash folk's gate. Read the words carved on it.")),
 ], dict(
     title=('下へ返せ', 'Return It Below'),
     summary=('砦鍛冶のタタラに頼まれて、熾の山犬を払い、黒門の言葉を読んでくる。', 'For Tatara the fort smith, drive off the ember jackals and read the words on the Black Gate.'),
@@ -331,7 +331,7 @@ person('emberfort_survivor', 'e_se', 'folk_b', 'ember', 329, ('灰見のシノ',
     kill(['skyabyss:cinder_mite'], 5, ('熾り蟲を払おう（砦のまわりの荒れ地）', 'Drive off cinder mites (badlands around the fort)'),
          ('灰見砦への道に、熾り蟲が湧いている。灰の中で群れているらしい。五匹払おう。', 'Cinder mites swarm on the way to Ashwatch Fort, nesting in the ash. Drive off five.')),
     go([('ashwatch_fort', ('灰見砦の見張り台を見てこよう（砦から西）', "Look at Ashwatch Fort's watchtower (west of the fort)"))],
-       ('砦から西の灰見砦。シノが見張りをしていた砦だ。見張り台に何が残っているか見てこよう。', 'Ashwatch Fort, to the west, where Shino once kept watch. See what remains on its watchtower.')),
+       ('灰見砦は砦から西にある。シノが見張りをしていた砦だ。見張り台に何が残っているか、見てこよう。', 'Ashwatch Fort, to the west, where Shino once kept watch. See what remains on its watchtower.')),
 ], dict(
     title=('空を見ていた見張り', 'The Watch Who Watched the Sky'),
     summary=('灰見砦の生き残りシノに頼まれて、熾り蟲を払い、灰見砦の見張り台を見てくる。', "For Shino, a survivor of Ashwatch Fort, clear the cinder mites and look at the fort's watchtower."),
@@ -340,7 +340,7 @@ person('emberfort_survivor', 'e_se', 'folk_b', 'ember', 329, ('灰見のシノ',
     back_journal=('「火は下から来た」とあった。シノに伝えよう。', 'It said "The fire came from below." Tell Shino.'),
     back_obj=('灰見のシノに伝えよう', 'Tell Shino of Ashwatch'),
     ask=('わたしは灰見砦の見張りだった。あの晩も、空を見てた。余燼が来るなら空からだと思ってたから。\n'
-         '西の灰見砦まで行って、見張り台に何が残ってるか見てきて。途中の熾り蟲も五匹くらい。灰の中に湧いてて、近づけないの。',
+         '西の灰見砦まで行って、見張り台に何が残ってるか見てきて。途中の熾り蟲も五匹くらい払ってほしい。灰の中に湧いてて、近づけないの。',
          "I was a watch at Ashwatch Fort. That night too, I was watching the sky. I thought if the Ember came, it'd come from the sky.\n"
          "Go west to Ashwatch Fort and see what's left on the watchtower. And clear about five cinder mites on the way. They breed in the ash and I can't get near."),
     ask_ok=('引き受ける', "I'll do it"),
@@ -362,16 +362,16 @@ person('smokewatch_reader', 'e_n', 'folk_a', 'ember', 330, ('煙読みのユウ'
     kill(['skyabyss:ash_dragger'], 3, ('灰ひきずりを払おう（里のまわり）', 'Drive off ash draggers (around the hamlet)'),
          ('里のまわりに、灰ひきずりが出る。煙の筋を乱すらしい。三匹払おう。', 'Ash draggers roam around the hamlet, tangling the lines of smoke. Drive off three.')),
     go([('northern_forge', ('北の炉跡を見てこよう（里から西）', 'Visit the Northern Forge (west of the hamlet)'))],
-       ('里から西の北の炉跡。そこの煙だけ、風に逆らって都の方へ流れるという。何の炉だったか見てこよう。',
+       ('北の炉跡は里から西にある。そこの煙だけ、風に逆らって都の方へ流れるという。何の炉だったか見てこよう。',
         'The Northern Forge, west of the hamlet. Its smoke alone drifts toward the capital, against the wind. Find out what it forged.')),
 ], dict(
     title=('割れた鐘の炉', 'The Forge of the Cracked Bell'),
     summary=('煙読みのユウに頼まれて、灰ひきずりを払い、北の炉跡を見てくる。', 'For Yu the smoke reader, drive off the ash draggers and visit the Northern Forge.'),
-    done=('北の炉跡は、都の鐘を鋳た炉だった。割れた鐘はそこへ戻されたという。ユウは、煙がいつも都の方へ流れる訳がわかったと言った。',
+    done=('北の炉跡は、都の鐘を鋳た炉だった。割れた鐘はそこへ戻されたという。ユウは、煙がいつも都の方へ流れるわけがわかったと言った。',
           "The Northern Forge was where the capital's bell was cast; the cracked bell was brought back there. Yu said now he understood why the smoke always drifts toward the capital."),
     back_journal=('都の鐘を鋳た炉だった。ユウに伝えよう。', "It was where the capital's bell was cast. Tell Yu."),
     back_obj=('煙読みのユウに伝えよう', 'Tell Yu the smoke reader'),
-    ask=('煙はな、風の向きに流れる。当たり前だ。だが西の北の炉跡の煙だけは、風に逆らって都の方へ流れよる。\n'
+    ask=('煙はな、風の向きに流れる。当たり前だ。だが、里から西にある北の炉跡の煙だけは、風に逆らって都の方へ流れよる。\n'
          '何の炉だったか見てきてくれ。それと、灰ひきずりを三匹ほど。あいつらが通ると煙の筋が乱れて、読めんのだ。',
          'Smoke drifts with the wind. Obviously. But the smoke from the Northern Forge to the west drifts toward the capital, against the wind.\n'
          "Go and see what that forge made. And drive off three or so ash draggers. When they pass, the smoke lines tangle and I can't read them."),
@@ -392,7 +392,7 @@ person('smokewatch_reader', 'e_n', 'folk_a', 'ember', 330, ('煙読みのユウ'
 person('smokewatch_twin', 'e_n', 'folk_b', 'ember', 331, ('双子のヨル', 'Yoru the Twin'), [
     go([('twins_house', ('双子の家を見てこよう（里から北西）', "Visit the Twins' House (northwest of the hamlet)")),
         ('drip_cave', ('水滴の洞を見てこよう（里から西北西）', 'Visit the Drip Cave (west-northwest of the hamlet)'))],
-       ('里から北西の双子の家と、西北西の水滴の洞。ヨルの片割れは、洞で水の落ちる音を数えるのが好きだった。',
+       ('双子の家は里から北西、水滴の洞は西北西にある。ヨルの片割れは、洞で水の落ちる音を数えるのが好きだった。',
         "The Twins' House northwest of the hamlet, and the Drip Cave west-northwest. Yoru's twin loved to count the drops falling in the cave.")),
 ], dict(
     title=('二本の背丈', 'Two Height Marks'),
@@ -424,7 +424,7 @@ person('frostfort_hunter', 's_nw', 'folk_a', 'storm', 332, ('霜垣の狩人シ�
     kill(['skyabyss:static_puff'], 5, ('帯電毛玉を払おう（砦のまわり）', 'Drive off static puffs (around the fort)'),
          ('砦のまわりに、帯電毛玉が漂っている。垣の銅の釘にまとわりつくらしい。五匹払おう。', "Static puffs drift around the fort, clinging to the wall's copper nails. Drive off five.")),
     go([('thunderstone_ring', ('雷石の環を見てこよう（砦から南南西）', 'Visit the Thunderstone Ring (south-southwest of the fort)'))],
-       ('砦から南南西の雷石の環。雷の落ちた石だけを環に並べるという。いくつ並んでいるか見てこよう。',
+       ('雷石の環は砦から南南西にある。雷の落ちた石だけを環に並べるという。いくつ並んでいるか、見てこよう。',
         'The Thunderstone Ring, south-southwest of the fort, where only lightning-struck stones are set. See how many are there.')),
 ], dict(
     title=('九つめの座', 'The Ninth Seat'),
@@ -454,7 +454,7 @@ person('frostfort_hunter', 's_nw', 'folk_a', 'storm', 332, ('霜垣の狩人シ�
 person('frostfort_fletcher', 's_nw', 'folk_b', 'storm', 333, ('矢羽師のハヤ', 'Haya the Fletcher'), [
     go([('brokenwing_tower', ('折れ羽の塔を見てこよう（砦から南）', 'Visit the Brokenwing Tower (south of the fort)')),
         ('cloudwatch_post', ('雲見の櫓を見てこよう（砦から南）', 'Visit the Cloudwatch Post (south of the fort)'))],
-       ('砦から南の折れ羽の塔と雲見の櫓。塔には大きな羽が刺さっているという。矢羽にできるか見てこよう。櫓では、羽の主の居場所の読み方がわかるかもしれない。',
+       ('折れ羽の塔と雲見の櫓は、砦から南にある。塔には大きな羽が刺さっているという。矢羽にできるか見てこよう。櫓では、羽の主の居場所の読み方がわかるかもしれない。',
         "The Brokenwing Tower and the Cloudwatch Post, both south of the fort. A huge feather is said to be stuck in the tower — see if it could fletch arrows. The post may tell how to read where the feather's owner is.")),
 ], dict(
     title=('人の背丈より長い羽', 'A Feather Taller Than a Man'),
@@ -486,7 +486,7 @@ person('windmill_keeper', 's_sw', 'folk_a', 'storm', 334, ('風車番のカザ�
     kill(['skyabyss:peak_fledgling'], 4, ('峰の雛を払おう（里のまわり）', 'Drive off peak fledglings (around the hamlet)'),
          ('里のまわりに、峰の雛が降りてくる。風車の羽をつついて破るらしい。四羽払おう。', 'Peak fledglings come down around the hamlet and peck holes in the windmill sails. Drive off four.')),
     go([('kitemaker_house', ('凧作りの家を見てこよう（里から北東）', "Visit the Kitemaker's House (northeast of the hamlet)"))],
-       ('里から北東の凧作りの家。雷の日も凧を上げていた家だという。どうやって雷を避けたのか見てこよう。',
+       ('凧作りの家は里から北東にある。雷の日も凧を上げていた家だという。どうやって雷を避けたのか、見てこよう。',
         "The Kitemaker's House, northeast of the hamlet. They flew kites even in thunderstorms. Find out how they kept the lightning off.")),
 ], dict(
     title=('銅の凧糸', 'Copper Kite String'),
@@ -496,7 +496,7 @@ person('windmill_keeper', 's_sw', 'folk_a', 'storm', 334, ('風車番のカザ�
     back_journal=('凧の糸は銅だった。カザミに伝えよう。', 'The kite string was copper. Tell Kazami.'),
     back_obj=('風車番のカザミに伝えよう', 'Tell Kazami the windmill keeper'),
     ask=('雷の晩になると、風車に雷が落ちる。羽が焦げて、軸が割れる。去年は二度建て直した。\n'
-         '北東の凧作りの家の人は、雷の日も平気で凧を上げてたって聞く。どうしてたのか見てきてくれ。それと、峰の雛を四羽。羽をつつきに来やがる。',
+         '北東の凧作りの家の人は、雷の日も平気で凧を上げてたって聞く。どうしてたのか見てきてくれ。それと、峰の雛を四羽払ってくれ。羽をつつきに来やがる。',
          'On thunder nights the lightning hits the windmill. Scorched sails, split axle. Rebuilt it twice last year.\n'
          'They say the kitemakers to the northeast flew kites even in thunderstorms without a care. Go and see how. And four peak fledglings — they come to peck the sails.'),
     ask_ok=('引き受ける', "I'll do it"),
@@ -516,7 +516,7 @@ person('windmill_keeper', 's_sw', 'folk_a', 'storm', 334, ('風車番のカザ�
 person('windmill_mossguard', 's_sw', 'folk_b', 'storm', 335, ('苔守のミドリ', 'Midori the Moss Keeper'), [
     go([('south_moss_shrine', ('南の苔祠を見てこよう（里から北）', 'Visit the South Moss Shrine (north of the hamlet)')),
         ('rumble_cave', ('雷鳴の洞を見てこよう（里から北北東）', 'Visit the Rumble Cave (north-northeast of the hamlet)'))],
-       ('里から北の南の苔祠と、北北東の雷鳴の洞。苔祠の苔は雷を吸うという。洞の雷がどこから来るのか、二つを見比べよう。',
+       ('里から北にある南の苔祠と、北北東の雷鳴の洞。苔祠の苔は雷を吸うという。洞の雷がどこから来るのか、二つを見比べよう。',
         "The South Moss Shrine north of the hamlet, and the Rumble Cave north-northeast. The shrine's moss is said to drink lightning. Compare the two and see where the cave's thunder comes from.")),
 ], dict(
     title=('晴れた日の雷鳴', 'Thunder on a Clear Day'),
@@ -525,7 +525,7 @@ person('windmill_mossguard', 's_sw', 'folk_b', 'storm', 335, ('苔守のミド�
           "The moss at the South Moss Shrine glowed blue with drunk lightning. Deep in the Rumble Cave, thunder rolled under a clear sky. Midori drew the path the thunder takes from the cave to the shrine."),
     back_journal=('苔は光り、洞は鳴っていた。ミドリに伝えよう。', 'The moss glowed; the cave rumbled. Tell Midori.'),
     back_obj=('苔守のミドリに伝えよう', 'Tell Midori the moss keeper'),
-    ask=('わたしは北の苔祠の苔を守ってるの。雷を吸う苔でね、雷の夜はみんな祠で夜を越すのよ。\n'
+    ask=('わたしは南の苔祠の苔を守ってるの。雷を吸う苔でね、雷の夜はみんな祠で夜を越すのよ。\n'
          'でもこのごろ、晴れた日にも苔が光るの。北北東の雷鳴の洞は、晴れてても中で雷が鳴るんだって。……つながってる気がするの。両方見てきてくれる？',
          'I keep the moss at the shrine to the north. It drinks lightning — on thunder nights everyone sees the night out at the shrine.\n'
          "But lately the moss glows even on clear days. And they say thunder rolls inside the Rumble Cave to the north-northeast, clear sky or not. ...I think they're connected. Would you look at both?"),
