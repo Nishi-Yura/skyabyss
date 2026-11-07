@@ -68,6 +68,14 @@ public final class WhaleRaidSelfTest {
         }
     }
 
+    // 部屋を越えると加護を選ぶ画面が出て、選ぶまで次の部屋へ運ばれない (TrialRoute。偽の人は選ばないので一つ目を選ぶ)
+    private static boolean pickBoon() {
+        if (player != null && jp.revati.skyabyss.trial.RouteBoons.offered(player)) {
+            jp.revati.skyabyss.trial.RouteBoons.choose(player, 0);
+        }
+        return true;
+    }
+
     private static boolean waitFor(BooleanSupplier cond, int maxTicks, String what) {
         if (cond.getAsBoolean()) {
             waited = 0;
@@ -256,7 +264,7 @@ public final class WhaleRaidSelfTest {
         if (!WhaleRaid.WIT.equals(DRAWN[1])) {
             wit2();
         } else {
-        STAGES.add(() -> waitFor(() -> run() != null && run().step == 2 && run().room instanceof WhaleBonesRoom, 400, "carried to WR2"));
+        STAGES.add(() -> waitFor(() -> pickBoon() && run() != null && run().step == 2 && run().room instanceof WhaleBonesRoom, 400, "carried to WR2"));
         STAGES.add(() -> waitFor(() -> active(WhaleBonesRoom.class), 400, "WR2 active"));
         STAGES.add(() -> waitFor(() -> hudLive("WR2"), 60, "WR2 objective strip"));
         STAGES.add(() -> waitFor(() -> !((WhaleBonesRoom) run().room).listening() && !run().room.isComplete(), 600, "WR2 input phase"));
@@ -302,7 +310,7 @@ public final class WhaleRaidSelfTest {
         if (!WhaleRaid.FIGHT.equals(DRAWN[2])) {
             fight2();
         } else {
-        STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room) instanceof WhaleCoreRoom, 400, "carried to WR3"));
+        STAGES.add(() -> waitFor(() -> pickBoon() && run() != null && run().step == 3 && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room) instanceof WhaleCoreRoom, 400, "carried to WR3"));
         STAGES.add(() -> waitFor(() -> active(WhaleCoreRoom.class), 400, "WR3 active"));
         STAGES.add(() -> waitFor(() -> hudLive("WR3"), 60, "WR3 objective strip"));
         STAGES.add(() -> waitFor(() -> ((WhaleCoreRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room)).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR3 wave 1"));
@@ -377,7 +385,7 @@ public final class WhaleRaidSelfTest {
     }
 
     private static void wit2() {
-        STAGES.add(() -> waitFor(() -> run() != null && run().step == 2 && run().room instanceof WhaleTilesRoom, 400, "carried to WR5"));
+        STAGES.add(() -> waitFor(() -> pickBoon() && run() != null && run().step == 2 && run().room instanceof WhaleTilesRoom, 400, "carried to WR5"));
         STAGES.add(() -> waitFor(() -> active(WhaleTilesRoom.class), 400, "WR5 active"));
         STAGES.add(() -> waitFor(() -> hudLive("WR5"), 60, "WR5 objective strip"));
         STAGES.add(() -> {
@@ -422,7 +430,7 @@ public final class WhaleRaidSelfTest {
     }
 
     private static void fight2() {
-        STAGES.add(() -> waitFor(() -> run() != null && run().step == 3 && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room) instanceof WhaleRingRoom, 400, "carried to WR6"));
+        STAGES.add(() -> waitFor(() -> pickBoon() && run() != null && run().step == 3 && jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room) instanceof WhaleRingRoom, 400, "carried to WR6"));
         STAGES.add(() -> waitFor(() -> active(WhaleRingRoom.class), 400, "WR6 active"));
         STAGES.add(() -> waitFor(() -> hudLive("WR6"), 60, "WR6 objective strip"));
         STAGES.add(() -> waitFor(() -> ((WhaleRingRoom) jp.revati.skyabyss.trial.raid.mid.FightBossRoom.unwrap(run().room)).wave() >= 1 && !run().ctx.aliveMobs().isEmpty(), 400, "WR6 wave 1"));

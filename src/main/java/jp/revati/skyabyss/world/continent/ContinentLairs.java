@@ -149,7 +149,7 @@ public final class ContinentLairs {
     }
 
     // 祠の広場の平らな所 (と少しの縁) か
-    static boolean onPad(int x, int z) {
+    public static boolean onPad(int x, int z) {
         for (int[] c : shrines().values()) {
             if (Math.hypot(x - c[0], z - c[1]) <= PAD_R + 3) {
                 return true;

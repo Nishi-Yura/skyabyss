@@ -15,10 +15,10 @@ RES = os.path.join(ROOT, 'src', 'main', 'resources')
 
 # 土地ごと: 章・受けられる段・巨神・経験・鐘銭・箱
 LAND = {
-    'whale': dict(chapter='titan_whale', min=0, titan='stone_whale', xp=150, coins=40, box='skyabyss:box_rare_1'),
-    'tide': dict(chapter='titan_tide', min=1, titan='tide_shell', xp=220, coins=50, box='skyabyss:box_rare_2'),
-    'storm': dict(chapter='titan_storm', min=2, titan='thunder_wing', xp=300, coins=60, box='skyabyss:box_rare_3'),
-    'ember': dict(chapter='titan_ember', min=3, titan='ember', xp=380, coins=70, box='skyabyss:box_rare_3'),
+    'whale': dict(chapter='titan_whale', min=0, titan='stone_whale', xp=15, coins=80, box='skyabyss:box_rare_1'),
+    'tide': dict(chapter='titan_tide', min=1, titan='tide_shell', xp=35, coins=100, box='skyabyss:box_rare_2'),
+    'storm': dict(chapter='titan_storm', min=2, titan='thunder_wing', xp=90, coins=120, box='skyabyss:box_rare_3'),
+    'ember': dict(chapter='titan_ember', min=3, titan='ember', xp=70, coins=140, box='skyabyss:box_rare_3'),
 }
 
 

@@ -71,6 +71,10 @@ HAMLET_PASS = 80
 STOP = {'hamlet': 30, 'deep': 24, 'poi': 18}
 
 
+LAIR_KEEP = 200
+SHRINE_KEEP = 56
+
+
 def rb(name):
     raw = gzip.decompress(open(os.path.join(D, name), 'rb').read())
     size, scale, x0, z0 = struct.unpack('>iiii', raw[4:20])
@@ -118,6 +122,13 @@ def main():
     for key, v in lairs.items():
         if isinstance(v, dict) and 'x' in v:
             keep_out(v['x'], v['z'], 90)
+    # 地に伏せた巨神 (base のある居場所) の体は大きく、90 の弱い避けでは道が体の下を通った (2026-11-07 の自己テスト titan lairs)。
+    # 体のまわり LAIR_KEEP は集落と同じく強く避ける
+    lblock = np.zeros((n, n), dtype=bool)
+    for key, v in lairs.items():
+        if isinstance(v, dict) and 'x' in v and 'base' in v:
+            ci, cj = cell(v['x'], v['z'])
+            lblock[np.hypot(ii - ci, jj - cj) * cs < LAIR_KEEP] = True
     for p in pois:
         if p['kind'] not in ('gone', 'signpost'):
             keep_out(p['x'], p['z'], 22)
@@ -129,6 +140,11 @@ def main():
             ci, cj = cell(x, z)
             hblock[np.hypot(ii - ci, jj - cj) * cs < HAMLET_KEEP] = True
     cost = np.where(hblock, cost + 400.0, cost)
+    # 巨神の祠 (段の台地と南の参道) も強く避ける (道の縁から 2 以上。TitanShrine の決まり)
+    for key, v in (lairs.get('shrines') or {}).items():
+        ci, cj = cell(v[0], v[1])
+        lblock[np.hypot(ii - ci, jj - cj) * cs < SHRINE_KEEP] = True
+    cost = np.where(lblock, cost + 400.0, cost)
 
     # つなぎ先は今の道だけ (layout.json に外れの道がもう入っていれば、その分を除く。外れの道どうしは探した順につなぐ)
     base = lay['roads']

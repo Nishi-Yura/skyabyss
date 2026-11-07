@@ -79,6 +79,7 @@ public final class WorldEventFight {
         e.stage = WorldEvents.Event.HERALD;
         e.heraldUntil = level.getGameTime() + HERALD_LAST * 20L;
         e.herald.clear();
+        e.heraldMobs.clear();
         int people = nearby(level, e.spot).size();
         int count = Math.min(9, 4 + people);
         ContinentMap map = ContinentMap.get();
@@ -109,6 +110,7 @@ public final class WorldEventFight {
             m.addTag(WorldEvents.ADD_TAG);
             m.setTarget(near);
             e.herald.add(m.getUUID());
+            e.heraldMobs.add(m);
             i++;
         }
         for (ServerPlayer p : nearby(level, e.spot)) {
@@ -121,8 +123,8 @@ public final class WorldEventFight {
     // 前触れの残り (生きている数)
     public static int heraldLeft(ServerLevel level, WorldEvents.Event e) {
         int left = 0;
-        for (UUID id : e.herald) {
-            if (level.getEntity(id) instanceof LivingEntity le && le.isAlive()) {
+        for (Mob m : e.heraldMobs) {
+            if (m.isAlive() && !m.isRemoved()) {
                 left++;
             }
         }

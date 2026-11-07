@@ -56,7 +56,8 @@ public final class DialogueService {
         // 初めて会うとき (名乗りから続く) と、入口の節やその続き・選択肢から話題へ行けるとき (話題の並ぶ節) は、ふだんの入口のまま
         Dialogue.Node node = dialogue.entryNode(ctx);
         Dialogue.Node topic = questTopic(player, role, dialogue);
-        if (topic != null && (node == null || (NpcBonds.of(player).bond(role).talks > 0 && !leadsTo(dialogue, node, topic.id())))) {
+        // 入口がクエストの段で決まった節 (頼みの報せ・渡し) なら、そのまま (2026-11-07 の自己テスト freequest: 影の記録の報せが本筋の話題に負けた)
+        if (topic != null && (node == null || (NpcBonds.of(player).bond(role).talks > 0 && !dialogue.entryIsQuest(ctx) && !leadsTo(dialogue, node, topic.id())))) {
             node = topic;
         }
         if (node == null) {

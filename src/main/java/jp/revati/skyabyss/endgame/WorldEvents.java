@@ -98,6 +98,8 @@ public final class WorldEvents {
         static final int GREAT = 2;
         int stage = WAITING;
         final List<UUID> herald = new ArrayList<>();
+        // 前触れの体そのもの (区画がまだ動いていないと UUID で引けないので)
+        final List<Mob> heraldMobs = new ArrayList<>();
         long heraldUntil;
         long nextHazard;
         int sealsDone;
@@ -418,6 +420,11 @@ public final class WorldEvents {
         for (UUID id : e.herald) {
             if (level.getEntity(id) instanceof LivingEntity le && le.isAlive()) {
                 le.discard();
+            }
+        }
+        for (Mob m : e.heraldMobs) {
+            if (!m.isRemoved()) {
+                m.discard();
             }
         }
         for (Entity en : level.getAllEntities()) {

@@ -42,11 +42,11 @@
     }
   ],
   "reward": {
-    "xp": 150,
+    "xp": 15,
     "items": [
       {
         "item": "skyabyss:bell_coin",
-        "count": 40
+        "count": 80
       },
       {
         "item": "skyabyss:box_rare_1",
