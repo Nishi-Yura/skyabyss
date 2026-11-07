@@ -59,7 +59,7 @@ public class StoneWhaleHeart extends HeartBoss {
     // 段階の数 (1 から 3 までの模型がある)
     public static final int PHASE_COUNT = 3;
     // 見た目と判定箱の大きさ (前の 1.5 倍。ModEntities の sized と StoneWhaleHeartRenderer の SCALE を合わせる)
-    public static final double BODY_SCALE = 1.5;
+    public static final double BODY_SCALE = 3.0;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
     // 段階が変わる体力の割合 (段階2 へ 66%、段階3 へ 33%)
     private static final float PHASE_TWO_AT = 0.66f;
     private static final float PHASE_THREE_AT = 0.33f;

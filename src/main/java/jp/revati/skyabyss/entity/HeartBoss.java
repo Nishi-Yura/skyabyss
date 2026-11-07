@@ -516,6 +516,12 @@ public abstract class HeartBoss extends GuardMob {
         }
     }
 
+    // 2 倍の体が部屋の天井や壁に食い込んでも、埋まった傷は受けない (心臓は動かない)
+    @Override
+    public boolean isInWall() {
+        return false;
+    }
+
     // 戦利品 (経験値) は、倒れる演出が終わってから落とす
     @Override
     protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {

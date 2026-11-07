@@ -24,7 +24,7 @@ public final class StormHeartSetup {
     // 判定は 4.5 x 6 (前の 1.5 倍。迫力のため)。模型は描画で 3 倍 (段階 2 の開いた翼の幅は約 9 ブロック)
     public static final DeferredHolder<EntityType<?>, EntityType<StormHeart>> STORM_HEART = ENTITIES.register("thunder_wing_heart",
             () -> EntityType.Builder.<StormHeart>of(StormHeart::new, MobCategory.MONSTER)
-                    .sized(4.5f, 6.0f)
+                    .sized(9.0f, 12.0f)
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":thunder_wing_heart"));

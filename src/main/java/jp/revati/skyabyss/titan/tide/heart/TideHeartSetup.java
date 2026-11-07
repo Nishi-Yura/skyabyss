@@ -22,7 +22,7 @@ public final class TideHeartSetup {
     // 判定は 4.5 x 6.3 (前の 1.5 倍。迫力のため)。模型は描画で 3 倍 (巻貝の殻の幅は約 6.75 ブロック)。TideHeart.BODY_SCALE と TideHeartRenderer の SCALE を合わせる
     public static final DeferredHolder<EntityType<?>, EntityType<TideHeart>> TIDE_HEART = ENTITIES.register("tide_heart",
             () -> EntityType.Builder.<TideHeart>of(TideHeart::new, MobCategory.MONSTER)
-                    .sized(4.5f, 6.3f)
+                    .sized(9.0f, 12.6f)
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":tide_heart"));

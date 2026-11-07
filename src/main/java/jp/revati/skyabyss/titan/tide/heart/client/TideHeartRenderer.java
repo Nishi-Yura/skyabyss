@@ -21,7 +21,7 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 // 核・部屋・月・水滴を光らせる (GlowLayer)。模型は tools/install/install_tide_heart.py が書く
 public class TideHeartRenderer extends jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<TideHeart> {
     // 模型は 約 36 単位 (2.25 ブロック) の大きさ。判定箱 (4.5 x 6.3) に合わせて 3 倍 (迫力のため、前の 2 倍の 1.5 倍)
-    private static final float SCALE = 3.0f;
+    private static final float SCALE = 6.0f;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
 
     public TideHeartRenderer(EntityRendererProvider.Context context) {
         // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo と自前の発光層に戻る

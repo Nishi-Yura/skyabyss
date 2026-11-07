@@ -49,7 +49,7 @@ public final class PhasedBossBar {
             Component label = roaring ? Component.translatable(style.roaringKey()) : Component.translatable(style.phaseKey() + n);
             g.drawString(mc.font, label, labelX, y + 4, roaring ? style.roaringColor() : style.label()[p], true);
         }
-        String percent = Math.round(boss.getProgress() * 100) + "%";
+        String percent = hpText(mc, boss);
         g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
 
         int barY = y + ICON + 2;
@@ -63,5 +63,17 @@ public final class PhasedBossBar {
             g.fill(left, top, left + fill, top + TRACK_H, 0xFF000000 | style.fill()[p]);
             g.fill(left, top, left + fill, top + 1, 0xFF000000 | style.fillTop()[p]);
         }
+    }
+
+    // 帯の右の数: 持ち主の体力「1,240 / 3,000」(画面の数。Hp.SHOWN 倍)。持ち主が見つからなければ割合
+    // (2026-11-08 の声「敵のhp表記、今%だけど、数値にして」)
+    public static String hpText(net.minecraft.client.Minecraft mc, net.minecraft.world.BossEvent boss) {
+        net.minecraft.world.entity.LivingEntity owner = jp.revati.skyabyss.client.BossOwners.find(mc, boss, net.minecraft.world.entity.LivingEntity.class, 160);
+        if (owner == null || owner.getMaxHealth() <= 0) {
+            return Math.round(boss.getProgress() * 100) + "%";
+        }
+        int max = jp.revati.skyabyss.Hp.whole(owner.getMaxHealth());
+        int now = Math.min(max, Math.round(boss.getProgress() * max));
+        return String.format("%,d/%,d", now, max);
     }
 }

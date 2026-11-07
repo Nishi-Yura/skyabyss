@@ -56,7 +56,7 @@ import org.joml.Vector3f;
 public class TideHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     // 見た目と判定箱の大きさ (前の 1.5 倍。TideHeartSetup の sized と TideHeartRenderer の SCALE を合わせる)
-    public static final double BODY_SCALE = 1.5;
+    public static final double BODY_SCALE = 3.0;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
     public static final int ROAR_TICKS = 60;

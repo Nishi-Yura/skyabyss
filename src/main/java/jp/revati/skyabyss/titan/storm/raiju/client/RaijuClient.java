@@ -74,7 +74,7 @@ public final class RaijuClient {
         if (label != null) {
             g.drawString(mc.font, label, x + ICON + 4 + mc.font.width(name) + 6, y + 4, raiju.isStunned() ? 0xFFE66A : 0xFF9AB4, true);
         }
-        String percent = Math.round(boss.getProgress() * 100) + "%";
+        String percent = jp.revati.skyabyss.client.titan.PhasedBossBar.hpText(mc, boss);
         g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
         int barY = y + ICON + 2;
         g.blit(FRAME_TEX, x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);

@@ -721,7 +721,7 @@ public class EmberHeart extends HeartBoss {
 
     // 心臓の中心の高さ (模型の核)
     private double coreY() {
-        return getY() + 3.0;
+        return getY() + 6.0;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
     }
 
     // 床の高さ: 部屋に縛られていれば部屋の床の面。そうでなければ真下へたどって最初の床

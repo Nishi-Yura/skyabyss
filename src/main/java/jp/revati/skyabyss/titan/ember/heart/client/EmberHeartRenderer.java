@@ -24,7 +24,7 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 // 光る画素は基のテクスチャの上に _glowmask の色を目の光 (陰なし・足し合わせ) で重ねる
 public class EmberHeartRenderer extends LowPolyGeoRenderer<EmberHeart> {
     // 模型は 約 24 単位 (1.5 ブロック) の大きさ。判定箱 (4.5 x 6.3) に合わせて 3 倍 (迫力のため、前の 3 x 4.2 の 1.5 倍)
-    private static final float SCALE = 3.0f;
+    private static final float SCALE = 6.0f;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
 
     public EmberHeartRenderer(EntityRendererProvider.Context context) {
         // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ (ember_heart_pN)。LowPoly.enabled = false で元のキューブの geo に戻る

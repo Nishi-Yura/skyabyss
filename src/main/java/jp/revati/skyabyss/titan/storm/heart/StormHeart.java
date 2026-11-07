@@ -134,7 +134,7 @@ public class StormHeart extends HeartBoss {
     public static final double GUST_GAP_DEG = 24;
     public static final double DOWNDRAFT_RADIUS = StormHeartArena.UPDRAFT_RADIUS + 0.5;
     // 模型の核の高さ (足もとから。模型は描画で 3 倍)
-    public static final double CORE_OFFSET = 3.3;
+    public static final double CORE_OFFSET = 6.6;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
 
     private static final EntityDataAccessor<Integer> DATA_PHASE = SynchedEntityData.defineId(StormHeart.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(StormHeart.class, EntityDataSerializers.BOOLEAN);

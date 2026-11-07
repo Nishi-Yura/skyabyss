@@ -55,6 +55,7 @@ public final class AbilityTreeSelfTest {
         if (AbilityTrees.of(Job.WARRIOR) != null) {
             play(server, f);
         }
+        variants(server, f);
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST tree PASSED ({} trees: shape, lang, take rules, four actives, stats from nodes, job switch, reset, sanitize, save, sync)", trees);
         } else {
@@ -184,6 +185,10 @@ public final class AbilityTreeSelfTest {
 
     // 取った節から、封じられた節と変異 (目当てでなければ) を避けて、id までのいちばん短い道を取る
     private static void takePath(FakePlayer p, AbilityTree t, String id, List<String> f) {
+        takePathAvoiding(p, t, id, List.of(), f);
+    }
+
+    private static void takePathAvoiding(FakePlayer p, AbilityTree t, String id, java.util.Collection<String> avoid, List<String> f) {
         SkillData d = SkillManager.get(p);
         Set<String> mine = d.nodesOf(t.tree);
         java.util.Map<String, String> parent = new java.util.HashMap<>();
@@ -197,10 +202,16 @@ public final class AbilityTreeSelfTest {
         while (!queue.isEmpty() && !parent.containsKey(id)) {
             AbilityNode cur = queue.poll();
             for (AbilityNode n : t.nodes()) {
-                if (parent.containsKey(n.id) || !n.requires.contains(cur.id) || n.kind == AbilityNode.Kind.MUTATION && !n.id.equals(id)) {
+                // 目当てでない変化・変異は通らない (同じ技の変化は一つだけ)。道の上の節と封じ合う節も通らない
+                boolean side = (n.kind == AbilityNode.Kind.MUTATION || n.kind == AbilityNode.Kind.RUNE) && !n.id.equals(id);
+                if (parent.containsKey(n.id) || !n.requires.contains(cur.id) || side || avoid.contains(n.id)) {
                     continue;
                 }
-                if (n.blocks.stream().anyMatch(mine::contains)) {
+                java.util.Set<String> chain = new java.util.HashSet<>(mine);
+                for (String at = cur.id; at != null; at = parent.get(at)) {
+                    chain.add(at);
+                }
+                if (n.blocks.stream().anyMatch(chain::contains) || t.nodes().stream().anyMatch(o -> chain.contains(o.id) && o.blocks.contains(n.id))) {
                     continue;
                 }
                 parent.put(n.id, cur.id);
@@ -218,6 +229,47 @@ public final class AbilityTreeSelfTest {
                 take(p, n, f);
             }
         }
+    }
+
+    // ---- 変化の節: どの職の木でも、変化の節を取ると、その技の変化として効く (2026-11-08 の声「スキル変化とってるのに、スキル変化していない」)
+    // 職を替えて、Lv 50 で節までの道を取り、SkillManager.runeOf がその番号を返すか。取ったあと読み直しても (保存・型の切り替え) 残るか
+    private static void variants(MinecraftServer server, List<String> f) {
+        FakePlayer p = new FakePlayer(server.overworld(), new GameProfile(UUID.randomUUID(), "tree_v"));
+        int checked = 0;
+        for (Job job : Job.values()) {
+            AbilityTree t = AbilityTrees.of(job);
+            if (t == null) {
+                continue;
+            }
+            for (AbilityNode n : t.nodes()) {
+                if (n.kind != AbilityNode.Kind.RUNE) {
+                    continue;
+                }
+                SkillManager.forgetAll(p);
+                SkillData d = SkillManager.get(p);
+                d.useJob(job);
+                Growth.get(p).level = 50;
+                // 先にその技そのものを覚え、変化と封じ合う節は通らずに変化の節へ
+                for (AbilityNode a : t.nodes()) {
+                    if (a.kind == AbilityNode.Kind.ACTIVE && a.skill == n.skill) {
+                        takePath(p, t, a.id, f);
+                    }
+                }
+                takePathAvoiding(p, t, n.id, n.blocks, f);
+                int got = SkillManager.runeOf(p, n.skill);
+                check(f, got == n.rune, job.id + ": the variant node " + n.id + " (" + n.skill.id + " #" + n.rune + ") did not change the skill (runeOf " + got
+                        + ", knows " + d.knows(n.skill) + ", rune " + d.rune(n.skill) + ")");
+                // 型に保存して読み直しても変わらない
+                SkillManager.saveLoadout(p, 0);
+                p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+                SkillManager.loadLoadout(p, 0);
+                check(f, SkillManager.runeOf(p, n.skill) == n.rune, job.id + ": the variant " + n.id + " was lost after reloading the loadout");
+                p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                checked++;
+            }
+        }
+        check(f, checked >= 30, "too few variant nodes were checked: " + checked);
+        SkyAbyss.LOGGER.info("SELFTEST tree variants: {} variant nodes checked", checked);
     }
 
     // ---- 取る決まり (戦士の木)

@@ -49,6 +49,8 @@ public final class EmberHeartArena {
     public static final int RADIUS = EmberBackLayout.HEART_RADIUS;
     // 台と区画の輪 (2026-11-07 に間を広げたとき、台を 4 → 6、区画の外の端を半径 - 1 に)
     public static final int PLATFORM_R = 6;
+    // 灰溜まりの真ん中 (心臓の真ん中から)。台 (PLATFORM_R) の内に収まる
+    public static final int[][] ASH_POOLS = {{4, 0}, {-4, 0}, {0, 4}, {0, -4}};
     public static final int SECTION_R = RADIUS - 1;
     public static final int BOTTOM = EmberBackLayout.HEART.minY();
     public static final int CEILING = EmberBackLayout.HEART.maxY();
@@ -354,6 +356,15 @@ public final class EmberHeartArena {
         }
         for (BlockPos l : lampCells) {
             level.setBlock(l, lamp, flags);
+        }
+        // 灰溜まり (2026-11-08 の声「炎の心臓のボス、ボス部屋で熱さませるようにして」): 沈まない真ん中の台の四方に、熱を冷ます灰色の灰 (EmberHeat の ASH) を 3x3 ずつ
+        BlockState ash = Blocks.GRAY_WOOL.defaultBlockState();
+        for (int[] c : ASH_POOLS) {
+            for (int ax = -1; ax <= 1; ax++) {
+                for (int az = -1; az <= 1; az++) {
+                    level.setBlock(new BlockPos(CX + c[0] + ax, FLOOR, CZ + c[1] + az), ash, flags);
+                }
+            }
         }
         // 入口の壁の 1 枚 (前室とのあいだ) は、開いた既定の扉 (戦うグループにだけ閉じる)
         GroupGates.place(level, gate(), true);
