@@ -60,6 +60,8 @@
 | `trait` 奥義（鍵石） | 3 | 金色。鍵石（硝子の刃・満ち潮・灰の契り・独り弦・疾風の舞・呪いの詠唱・熾火の肺・嵐呼び・太陽の心臓・潮渡り。`SkillKeystone`）。動きを変える数は `effect` に持てる（呪いの詠唱 `hex_mark` など）。型の節に 15 SP で開く |
 | `mutation` 変異 | 2 | 技の変異（`Mutation`）。極めた技の枝の奥。取るとき巨神の核 1 と欠片 3 を払う（`SkillExtOps.payMutation`。一度払えば `SkillData.mutations` に残り、振り直し後の取り直しはただ）。効くのは節を取っていて技を極めているあいだ |
 
+- **変化が効く決まり**: 取った変化の節が、いつもその技の変化になる（`SkillManager.runeOf` は節から番号を読む。`takenTreeRune`）。技ごとの番号の置き場（`SkillData.runes`）は伝説の書き換え・熟練の刻印と一つを分け合うので、そちらを選ぶ・古い型を読み直すと、前は変化が元の技に戻っていた（2026-11-08 の声「雷の波動のやつが、まっすぐ飛ぶ雷になってた」）。書き換えの上乗せは `legendRune` が別に見る。型の読み直しは、変化の番号を戻さない（節から決まる）。自己テスト `tree` は全職の変化の節 60 を取り、置き場の番号を熟練・ほかの変化・書き換えに替えても、型を読み直しても変化が残るかを見る。
+
 - `effect` の鍵（`NodeEffects`）: `armor` `knockback` `move` `attack_speed` `mana`（属性）、`attack` `projectile`（与える傷の割合）、`skill_power` `cooldown` `mana_cost` `regen`（技）、`damage_taken` `damage_taken_still`（1 秒止まってから）`fire_resist`（受ける傷）、`big_target`（大きな相手への技の傷）`lifesteal`（近接の吸い。1 回 1❤ まで）`low_hp_armor`。
   技ごとの鍵: `cooldown@<技>` `mana_cost@<技>` `power@<技>`（その技だけの再使用まで・マナ・力。`SkillBuild` で全体の値と足し、上限は同じ）。マナ: `mana_hit`（近接で当てるたび。0.6 秒に一度。武器の特性マナ吸収と足す。`AffixEvents`）`mana_kill`（敵を倒したとき。`SkillEvents.onDeath`）。`cd_kill`（敵を倒すたびに、発動スキルの再使用までを縮める秒。`SkillEvents.onDeath`）。
 - 前提 `requires` はどれか一つ取っていればよい（線）。**型の点** = その型（`arch`）の節に使った点の合計。
