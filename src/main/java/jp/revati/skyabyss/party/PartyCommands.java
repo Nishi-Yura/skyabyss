@@ -41,6 +41,17 @@ public final class PartyCommands {
                 .then(Commands.literal("invite").then(Commands.argument("player", EntityArgument.player())
                         .executes(ctx -> ok(Parties.invite(ctx.getSource().getPlayerOrException(), EntityArgument.getPlayer(ctx, "player"))))))
                 .then(Commands.literal("accept").executes(ctx -> ok(Parties.accept(ctx.getSource().getPlayerOrException()))))
+                // パーティー募集の画面を開く (O の画面の「募集」と同じ)
+                .then(Commands.literal("find").executes(ctx -> {
+                    ServerPlayer p = ctx.getSource().getPlayerOrException();
+                    PartyNetwork.sendFinder(p);
+                    return 1;
+                })
+                        // 募集を出す (目的) ・やめる
+                        .then(Commands.literal("post").then(Commands.argument("goal", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(PartyFinder.GOALS, b))
+                                .executes(ctx -> ok(PartyFinder.post(ctx.getSource().getPlayerOrException(), StringArgumentType.getString(ctx, "goal"))))))
+                        .then(Commands.literal("stop").executes(ctx -> ok(PartyFinder.close(ctx.getSource().getPlayerOrException())))))
                 .then(Commands.literal("decline").executes(ctx -> ok(Parties.decline(ctx.getSource().getPlayerOrException()))))
                 .then(Commands.literal("leave").executes(ctx -> ok(Parties.leave(ctx.getSource().getPlayerOrException()))))
                 .then(Commands.literal("kick").then(memberArg().executes(ctx -> member(ctx, true))))

@@ -447,8 +447,25 @@ public final class YoungSelfTest {
             SkyAbyss.LOGGER.warn("SELFTEST young rules: no ocean found within 2000 blocks; ocean limits not checked");
         }
         if (land != null) {
-            check(YoungReach.refuse(level, YoungKind.WHALE, from, land).isEmpty(), "the whale calf refused a land destination");
+            // どの子もどこへでも (2026-11-07)。陸の行き先はどの子も断らない
+            for (YoungKind k : YoungKind.values()) {
+                check(YoungReach.refuse(level, k, from, land).isEmpty(), k + " refused a land destination: " + YoungReach.refuse(level, k, from, land));
+            }
         }
+        // 得意の地形で速い: 陸は雷翼の雛、海は潮殻の稚貝がいちばん速く、岩鯨の仔は陸でいちばん遅い
+        for (YoungKind k : YoungKind.values()) {
+            if (k != YoungKind.STORM) {
+                check(YoungKind.STORM.speedOn(false) > k.speedOn(false), "the fledgling is not the fastest on land (" + k + ")");
+            }
+            if (k != YoungKind.TIDE) {
+                check(YoungKind.TIDE.speedOn(true) > k.speedOn(true), "the hatchling is not the fastest at sea (" + k + ")");
+            }
+            if (k != YoungKind.WHALE) {
+                check(YoungKind.WHALE.speedOn(false) < k.speedOn(false) || k == YoungKind.TIDE, "the whale calf is faster than " + k + " on land");
+            }
+        }
+        check(YoungReach.estimateTicks(2000, YoungKind.STORM.land) < YoungReach.estimateTicks(2000, YoungKind.WHALE.land),
+                "a long land trip is not shorter on the faster young one");
         // 成体の体の外: 岩鯨が止まっているとして、止まる所は立入禁止の外
         Vec3 at = new Vec3(300, 130, 300);
         TitanVolume volume = TitanVolume.get("stone_whale");

@@ -1211,6 +1211,8 @@ public final class ShotRunner {
             case "skills_ext" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().extPage(0, jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
+            // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
+            case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);

@@ -30,8 +30,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 final class ShrineBuild {
     private ShrineBuild() {
     }
-    // 建て直すための版 (TitanShrine.Data の ver)。2 = 巨神ごとの祠、3 = 雷翼の羽根の段を面でつなぐ (2026-11-07「ハーフブロックが接していない」)
-    static final int VERSION = 3;
+    // 建て直すための版 (TitanShrine.Data の ver)。2 = 巨神ごとの祠、3 = 雷翼の羽根の段を面でつなぐ (2026-11-07「ハーフブロックが接していない」)、
+    // 4 = 町に削られた祠を建て直す (2026-11-07「鯨の祠の建築、変」)
+    static final int VERSION = 4;
     static final int CLEAR_UP = 36;
     static final int FOOT_DOWN = 24;
     static final int PATH_MORE = 16;
@@ -52,6 +53,11 @@ final class ShrineBuild {
     private static BlockPos mark(Blueprint bp, String name) {
         int[] m = bp.marks.get(name);
         return new BlockPos(m[0], m[1], m[2]);
+    }
+
+    // 集合台の半径
+    static int padRadius(String titan) {
+        return layout(titan).padR();
     }
 
     // 碑の位置 → 部品の原点 (広場の真ん中、地面の一つ上)

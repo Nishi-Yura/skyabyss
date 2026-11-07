@@ -7,15 +7,16 @@ import net.minecraft.network.chat.Component;
 
 // 巨神の「子」(docs/design/28)。四体それぞれの子が、その巨神の呼び笛で現れ、パーティ全員 (最大 6 人) を乗せて運ぶ。
 // 巨神ごとの得意 (空・海・峰・地) で、運べる所と動き方が違う。
-//   WHALE (岩鯨の仔)   空を泳ぐ。どこへでも
-//   TIDE  (潮殻の稚貝) 海の上を滑る。海辺から海辺へ。陸は短く転がるだけ
-//   STORM (雷翼の雛)   低く飛び、稜線を渡る。海の上へは降りない
-//   EMBER (余燼の仔)   地面を駆ける・溶岩を渡る。深い水は渡らない
+// どの子もどこへでも行ける (海の上に降りるのは潮殻の稚貝だけ)。違いは地形ごとの速さ:
+//   WHALE (岩鯨の仔)   空を泳ぐ。どこでも同じ速さ (いちばん遅い)
+//   TIDE  (潮殻の稚貝) 海の上を滑る。海の上がいちばん速く、陸は転がるので遅い
+//   STORM (雷翼の雛)   低く飛び、稜線を渡る。陸の上がいちばん速い。海の上はふつう
+//   EMBER (余燼の仔)   地面を駆ける・溶岩を渡る・湯気を上げて水を泳ぐ。陸は速く、水は遅い
 public enum YoungKind {
-    WHALE(Titans.STONE_WHALE, "young_stone_whale", Gait.SKY, 1.25, 2400, 20.0, 3.625, 1.0f),
-    TIDE(Titans.TIDE_SHELL, "young_tide_shell", Gait.SEA, 0.95, 3200, 0.0, 1.0, 1.0f),
-    STORM(Titans.THUNDER_WING, "young_thunder_wing", Gait.RIDGE, 1.05, 2600, 9.0, 2.25, 1.0f),
-    EMBER(Titans.EMBER, "young_ember", Gait.GROUND, 0.8, 1800, 0.0, 2.5, 1.0f);
+    WHALE(Titans.STONE_WHALE, "young_stone_whale", Gait.SKY, 1.0, 1.0, 4000, 20.0, 3.625, 1.0f),
+    TIDE(Titans.TIDE_SHELL, "young_tide_shell", Gait.SEA, 0.75, 1.7, 4000, 0.0, 1.0, 1.0f),
+    STORM(Titans.THUNDER_WING, "young_thunder_wing", Gait.RIDGE, 1.5, 1.05, 4000, 9.0, 2.25, 1.0f),
+    EMBER(Titans.EMBER, "young_ember", Gait.GROUND, 1.3, 0.75, 4000, 0.0, 2.5, 1.0f);
 
     public enum Gait { SKY, SEA, RIDGE, GROUND }
 
@@ -30,7 +31,10 @@ public enum YoungKind {
     // geo / animations / texture / lowpoly の名前 (assets/skyabyss/.../<model>)
     public final String model;
     public final Gait gait;
-    // 巡航の速さ (ブロック/tick)
+    // 巡航の速さ (ブロック/tick)。陸の上と水の上 (2026-11-07 の声「鯨が強すぎて他の巨神を使わない」: どの子もどこへでも行け、得意の地形で速い)
+    public final double land;
+    public final double water;
+    // 速いほう (見積りの上限)
     public final double speed;
     // この子が運ぶ水平距離の上限 (ブロック)
     public final int maxRange;
@@ -40,11 +44,13 @@ public enum YoungKind {
     public final double seatY;
     public final float scale;
 
-    YoungKind(String titan, String model, Gait gait, double speed, int maxRange, double clearance, double seatY, float scale) {
+    YoungKind(String titan, String model, Gait gait, double land, double water, int maxRange, double clearance, double seatY, float scale) {
         this.titan = titan;
         this.model = model;
         this.gait = gait;
-        this.speed = speed;
+        this.land = land;
+        this.water = water;
+        this.speed = Math.max(land, water);
         this.maxRange = maxRange;
         this.clearance = clearance;
         this.seatY = seatY;
@@ -59,6 +65,11 @@ public enum YoungKind {
             }
         }
         return null;
+    }
+
+    // その地形での巡航の速さ
+    public double speedOn(boolean overWater) {
+        return overWater ? water : land;
     }
 
     public boolean flies() {

@@ -842,5 +842,11 @@
   "gui.skyabyss.records_hub.depth.floor": "%s 階",
   "gui.skyabyss.records_hub.depth.players": "深みの上位（人）",
   "gui.skyabyss.records_hub.depth.groups": "深みの上位（組）",
-  "gui.skyabyss.records_hub.founder.mine": "初代の空見の最速（自分）"
+  "gui.skyabyss.records_hub.founder.mine": "初代の空見の最速（自分）",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine": "巨神の祠へ、ようこそ。仲間がそろったら、私が歌でルートへ送ります。",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.go": "仲間とルートへ渡る",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.how": "渡り方を聞く",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.board": "祠の記録を見る",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.vow": "誓いを選ぶ",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine_how": "パーティー全員が、この台のそばに集まってください。そろったら私に声をかけて。5 秒数えて、全員を歌でルートへ送ります。\n巨神の歌片が一つ要ります（誰か一人が持っていれば足ります）。数えているあいだに誰かが離れたら、止めます。"
 }

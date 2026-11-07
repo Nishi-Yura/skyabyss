@@ -92,6 +92,12 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.leave"), b -> send(PartyNetwork.Action.LEAVE, ""))
                     .bounds(MEMBERS.right() - Golden.S5 - Golden.S55, MEMBERS.y() + 2, Golden.S55, Golden.BTN).build());
         }
+        // パーティー募集の画面 (脇の列の見出しの右)
+        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.finder.open"), b -> {
+            minecraft.setScreen(new PartyFinderScreen(this));
+            send(PartyNetwork.Action.FINDER_LIST, "");
+        }).bounds(OTHERS.right() - Golden.S5 - Golden.S34, OTHERS.y() + 2, Golden.S34, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.translatable("gui.skyabyss.party.finder.open_tip"))).build());
         // 招待できる人 (脇の列)
         inviteButtons.clear();
         if (leader && s.members().size() < 4) {

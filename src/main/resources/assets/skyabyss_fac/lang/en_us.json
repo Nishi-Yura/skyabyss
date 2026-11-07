@@ -842,5 +842,11 @@
   "gui.skyabyss.records_hub.depth.floor": "floor %s",
   "gui.skyabyss.records_hub.depth.players": "Deepest players",
   "gui.skyabyss.records_hub.depth.groups": "Deepest groups",
-  "gui.skyabyss.records_hub.founder.mine": "Your fastest First Skywatcher"
+  "gui.skyabyss.records_hub.founder.mine": "Your fastest First Skywatcher",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine": "Welcome to the titan's shrine. When your party is together, I will send you onto the route with the song.",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.go": "Take the route with my party",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.how": "How does it work?",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.board": "See the shrine records",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine.vow": "Choose a vow",
+  "dialogue.skyabyss.attendant_shrine_priest.shrine_how": "Gather your whole party near this pad, then speak to me. I count five seconds and send everyone onto the route.\nIt takes one song shard of the titan (one person carrying it is enough). If anyone steps away while I count, I stop."
 }

@@ -50,7 +50,7 @@ import net.minecraft.world.level.block.BedBlock;
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board", "powder", "dungeon_mood", "fish_order");
+            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board", "powder", "dungeon_mood", "fish_order", "shrine_go", "shrine_board", "shrine_vow");
 
     private FacilityActions() {
     }
@@ -70,6 +70,20 @@ public final class FacilityActions {
             case "inn_rest" -> innRest(player, npc);
             case "rumor" -> rumor(player);
             case "perch" -> perchCall(player);
+            // 地上の巨神の祠の祭司 (titan/shrine/TitanShrine): 仲間と順路へ渡る・祠の記録・誓い
+            case "shrine_go" -> jp.revati.skyabyss.titan.shrine.TitanShrine.ask(player);
+            case "shrine_board" -> {
+                String t = jp.revati.skyabyss.titan.shrine.TitanShrine.shrineNear(player, jp.revati.skyabyss.titan.shrine.TitanShrine.PRIEST_REACH);
+                if (t != null) {
+                    jp.revati.skyabyss.trial.TrialBoard.open(player, t);
+                }
+            }
+            case "shrine_vow" -> {
+                String t = jp.revati.skyabyss.titan.shrine.TitanShrine.shrineNear(player, jp.revati.skyabyss.titan.shrine.TitanShrine.PRIEST_REACH);
+                if (t != null) {
+                    jp.revati.skyabyss.titan.vow.VowCommands.show(player, t);
+                }
+            }
             case "map" -> ShopService.send(player, new FacilityNetwork.OpenMap());
             case "guild" -> GuildService.open(player, npc);
             case "guild_storage" -> jp.revati.skyabyss.facility.guild.GuildStorage.open(player, npc);

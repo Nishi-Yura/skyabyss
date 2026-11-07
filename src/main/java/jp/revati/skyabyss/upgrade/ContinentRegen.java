@@ -255,7 +255,8 @@ public final class ContinentRegen {
         if (server.getTickCount() % 20 != 7) {
             return;
         }
-        if (!SHRINES.isEmpty()) {
+        // 祠は、町などの建て物が建ち終わってから (先に建てると、あとの建て物が空けた所が祠を削る)
+        if (!SHRINES.isEmpty() && !jp.revati.skyabyss.opening.site.SiteBuilds.busy()) {
             String titan = SHRINES.iterator().next();
             SHRINES.remove(titan);
             try {

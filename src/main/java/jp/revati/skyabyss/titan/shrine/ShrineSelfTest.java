@@ -180,6 +180,13 @@ public final class ShrineSelfTest {
                 a.setPos(pad.getX() + 0.5, pad.getY(), pad.getZ() + 0.5);
                 b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
                 check(f, TitanShrine.onPad(a, c, titan) && !TitanShrine.onPad(b, c, titan), titan + ": the pad test is wrong");
+                // 祭司に頼んで渡る (2026-11-07): 集まる所は台のまわり GATHER_RANGE。祭司は台の縁の外の立てる床に立つ
+                b.setPos(pad.getX() + 0.5 + TitanShrine.GATHER_RANGE + 6, pad.getY(), pad.getZ() + 0.5);
+                check(f, TitanShrine.nearPad(a, c, titan) && !TitanShrine.nearPad(b, c, titan), titan + ": the gathering range test is wrong");
+                check(f, titan.equals(TitanShrine.shrineNear(a, TitanShrine.PRIEST_REACH)), titan + ": the priest does not know this shrine");
+                BlockPos priest = TitanShrine.priestSpot(level, titan, c);
+                check(f, priest != null && walkable(level, priest) && Math.sqrt(priest.distSqr(pad)) <= TitanShrine.GATHER_RANGE,
+                        titan + ": no standing room for the shrine priest near the pad (" + priest + ")");
                 // 断り方
                 stopped.clear();
                 check(f, TitanShrine.refusal(server, a, titan, List.of(a), true, false) != null, titan + ": a stranger was let in");

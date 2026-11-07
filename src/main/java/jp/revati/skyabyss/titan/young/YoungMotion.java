@@ -98,7 +98,8 @@ final class YoungMotion {
         // 速さ: 近づくほど落とす。見えない先がある間は半分
         // 転生の絆 (docs/design/31 の B14): 持ち主が転生を重ねていると、運ぶ速さが上がる
         double bond = jp.revati.skyabyss.rebirth.Rebirth.youngSpeed(e.level().getServer(), e.owner());
-        double wanted = Math.min(kind.speed * bond, Math.max(0.1, dist * 0.04));
+        // 得意の地形で速い (YoungKind.land / water)
+        double wanted = Math.min(kind.speedOn(isWater(level, p.x, p.z)) * bond, Math.max(0.1, dist * 0.04));
         boolean unknown = false;
         double yr = yaw * Mth.DEG_TO_RAD;
         double fx = -Math.sin(yr);
@@ -179,19 +180,36 @@ final class YoungMotion {
                 return h - 0.5;
             }
             if (isWater(level, x, z)) {
-                // 浅い水は底を歩く
+                // 浅い水は底を歩く。深い水は湯気を上げて泳ぐ (水面)
                 double floor = height(level, Heightmap.Types.OCEAN_FLOOR, x, z);
-                return Double.isNaN(floor) ? h : floor;
+                if (Double.isNaN(floor) || h - floor > 2) {
+                    return h - 0.6;
+                }
+                return floor;
             }
         }
         return h;
+    }
+
+    // 前の半円 (40 ブロック先まで) に水があるか (潮殻の稚貝が海を選べるか)
+    private boolean anyWaterAhead(ServerLevel level, Vec3 p) {
+        for (int a = -80; a <= 80; a += 40) {
+            double yr = (e.getYRot() + a) * Mth.DEG_TO_RAD;
+            for (int d = 8; d <= 40; d += 16) {
+                if (isWater(level, p.x - Math.sin(yr) * d, p.z + Math.cos(yr) * d)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 曲がる向き (地上の子)
 
     // 行きたい向き want のまわりで、前が通れる向きを探す (どれも通れなければ NaN)。前回選んだ側を先に見る
     private float steer(ServerLevel level, Vec3 p, float want, double padDistance) {
-        boolean landOk = kind.gait != YoungKind.Gait.SEA || landLeft > 0 || padDistance < LAND_BUDGET + 10;
+        // 潮殻の稚貝は、海を選んで進み、海がなければ陸を転がる (2026-11-07 からどこへでも行く)。陸の残りを使い切ったら、また海を探す
+        boolean landOk = kind.gait != YoungKind.Gait.SEA || landLeft > 0 || padDistance < LAND_BUDGET + 10 || !anyWaterAhead(level, p);
         float current = e.getYRot();
         for (int off = 0; off <= 160; off += 20) {
             for (int s = 0; s < (off == 0 ? 1 : 2); s++) {
@@ -224,9 +242,6 @@ final class YoungMotion {
             }
             boolean water = isWater(level, x, z);
             if (kind.gait == YoungKind.Gait.GROUND) {
-                if (water && depth(level, x, z) > 2) {
-                    return false;
-                }
             } else if (kind.gait == YoungKind.Gait.SEA && !water) {
                 if (!landOk) {
                     return false;

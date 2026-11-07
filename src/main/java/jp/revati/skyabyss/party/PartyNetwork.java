@@ -42,6 +42,7 @@ public final class PartyNetwork {
     static void register(RegisterPayloadHandlersEvent event) {
         event.registrar(PROTOCOL_VERSION)
                 .playToClient(Sync.TYPE, Sync.STREAM_CODEC, (payload, context) -> PartyClient.receive(payload))
+                .playToClient(Finder.TYPE, Finder.STREAM_CODEC, (payload, context) -> jp.revati.skyabyss.party.client.PartyFinderScreen.receive(payload))
                 .playToServer(Action.TYPE, Action.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         handle(player, payload);
@@ -148,6 +149,12 @@ public final class PartyNetwork {
                 }
             }
             case Action.ACCEPT -> Parties.accept(player);
+            // パーティー募集 (PartyFinder)。どの操作のあとも、今の一覧を送り返す
+            case Action.FINDER_LIST -> {
+            }
+            case Action.FINDER_POST -> PartyFinder.post(player, action.name());
+            case Action.FINDER_CLOSE -> PartyFinder.close(player);
+            case Action.FINDER_JOIN -> PartyFinder.join(player, action.name());
             case Action.DECLINE -> Parties.decline(player);
             case Action.LEAVE -> Parties.leave(player);
             case Action.KICK, Action.PROMOTE -> {
@@ -165,6 +172,52 @@ public final class PartyNetwork {
             }
         }
         syncSoon(player);
+        if (action.op() >= Action.FINDER_LIST) {
+            sendFinder(player);
+        }
+    }
+
+    // 募集の一覧を送る
+    public static void sendFinder(ServerPlayer player) {
+        if (player.connection == null) {
+            return;
+        }
+        PartyData.Party party = Parties.of(player);
+        PartyFinder.Listing mine = PartyFinder.of(player.getUUID());
+        boolean canPost = party == null || party.isLeader(player.getUUID());
+        PacketDistributor.sendToPlayer(player, new Finder(PartyFinder.rows(player), mine == null ? "" : mine.goal(), canPost, party != null));
+    }
+
+    // 募集の一覧 (サーバー → 人)。myGoal = 自分の募集の目的 (出していなければ空)。canPost = リーダーか一人。inParty = パーティーにいる (加われない)
+    public record Finder(List<PartyFinder.Row> rows, String myGoal, boolean canPost, boolean inParty) implements CustomPacketPayload {
+        public static final Type<Finder> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "party_finder"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Finder> STREAM_CODEC = StreamCodec.of(
+                (buf, f) -> {
+                    buf.writeVarInt(f.rows.size());
+                    for (PartyFinder.Row r : f.rows) {
+                        buf.writeUtf(r.leaderName(), 32);
+                        buf.writeUtf(r.goal(), 32);
+                        buf.writeVarInt(r.members());
+                        buf.writeVarInt(r.avgLevel());
+                        buf.writeBoolean(r.mine());
+                    }
+                    buf.writeUtf(f.myGoal, 32);
+                    buf.writeBoolean(f.canPost);
+                    buf.writeBoolean(f.inParty);
+                },
+                buf -> {
+                    int n = Math.min(buf.readVarInt(), 64);
+                    List<PartyFinder.Row> rows = new ArrayList<>();
+                    for (int i = 0; i < n; i++) {
+                        rows.add(new PartyFinder.Row(buf.readUtf(32), buf.readUtf(32), buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
+                    }
+                    return new Finder(rows, buf.readUtf(32), buf.readBoolean(), buf.readBoolean());
+                });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
     }
 
     // rebirths: 転生の回数 (名前の枠の色と記号に使う。docs/design/31 の C15)
@@ -232,6 +285,11 @@ public final class PartyNetwork {
         public static final int LEAVE = 3;
         public static final int KICK = 4;
         public static final int PROMOTE = 5;
+        // パーティー募集: 一覧を求める・出す (name = 目的)・やめる・加わる (name = 募集した人)
+        public static final int FINDER_LIST = 6;
+        public static final int FINDER_POST = 7;
+        public static final int FINDER_CLOSE = 8;
+        public static final int FINDER_JOIN = 9;
         public static final Type<Action> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "party_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Action> STREAM_CODEC = StreamCodec.of(
                 (buf, a) -> {

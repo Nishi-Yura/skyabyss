@@ -62,6 +62,12 @@ public final class YoungTrip {
     public static final double VEIL_DISTANCE = 700;
     public static final double VEIL_EXIT = 200;
     public static final int CRUISE_BEFORE_VEIL = 180;
+    // 帳の前に飛ぶ長さ (tick)。帳は道のりの真ん中を縮めるが、遅い子ほど長く飛ぶ (縮める割合 VEIL_SQUEEZE)。速さの差が所要時間に出る
+    static final double VEIL_SQUEEZE = 5.0;
+
+    public static int cruiseTicks(double distance, double speed) {
+        return (int) Mth.clamp((distance - VEIL_EXIT) / Math.max(0.3, speed) / VEIL_SQUEEZE, 100, 900);
+    }
     public static final int VEIL_FADE = 20;
     // 降りる輪 (成体の乗り込み口)
     public static final double RING_RADIUS = 4.5;
@@ -85,6 +91,8 @@ public final class YoungTrip {
     @Nullable
     private Vec3 roughTarget;
     private double startDistance;
+    // 帳の前に飛ぶ tick (cruiseTicks。出発のときに道のりの速さから決める)
+    private int cruiseTicks = CRUISE_BEFORE_VEIL;
     private YoungMotion motion;
     private int veilStage;
     private int veilTicks;
@@ -287,6 +295,8 @@ public final class YoungTrip {
     private void origin(ServerLevel level) {
         startDistance = Math.hypot(dest.x() + 0.5 - e.getX(), dest.z() + 0.5 - e.getZ());
         BlockPos dp = new BlockPos(dest.x(), dest.y(), dest.z());
+        cruiseTicks = cruiseTicks(startDistance, YoungReach.routeSpeed(level, e.kind, e.position(), dp)
+                * jp.revati.skyabyss.rebirth.Rebirth.youngSpeed(level.getServer(), e.owner()));
         roughTarget = null;
         pad = null;
         padSettled = false;
@@ -377,7 +387,7 @@ public final class YoungTrip {
 
     // 雲の帳。戻り値 true = この tick の動きは帳が受け持った
     private boolean tickVeil(ServerLevel level, List<ServerPlayer> riders, double dist) {
-        if (veilStage == 0 && !veilDone && startDistance > VEIL_DISTANCE && carryTicks >= CRUISE_BEFORE_VEIL && dist > VEIL_EXIT + 160) {
+        if (veilStage == 0 && !veilDone && startDistance > VEIL_DISTANCE && carryTicks >= cruiseTicks && dist > VEIL_EXIT + 160) {
             startVeil(level, riders, false);
         }
         if (veilStage == 0) {
