@@ -320,8 +320,16 @@ public final class DungeonFoesSelfTest {
             // 後半の場の技: 降りそそぎ (足もと 1 + まわり 2) と回る薙ぎ (2 本)
             int field = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
             c.hazardsNow();
-            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= field + 3 + 2, "the second-half field attacks did not show their warnings ("
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= field + 3 + 2 + 1, "the second-half field attacks did not show their warnings ("
                     + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - field) + ")", f);
+            // 封じ: 守りを張ると受ける傷が減り、輪を満たすと膝をつく
+            c.beginSeal();
+            float before2 = c.getHealth();
+            c.invulnerableTime = 0;
+            c.hurt(lv.damageSources().playerAttack(p), 20f);
+            check(c.sealed() && before2 - c.getHealth() <= 20f * DungeonBoss.SEALED + 0.01f, "the seal did not shield the boss (" + (before2 - c.getHealth()) + ")", f);
+            c.endSeal(true);
+            check(!c.sealed() && jp.revati.skyabyss.combat.BreakGauge.broken(c), "filling the seals did not make the boss kneel", f);
         } finally {
             for (DungeonBoss b : made) {
                 b.discard();

@@ -125,6 +125,26 @@ def bug_gaits(legs=("legs_l", "legs_r"), head="head", period=0.6, death_flip=Tru
     return g
 
 
+
+
+# ---------------------------------------------------------------------- 中ボスの動きの作り込み (2026-11-08 の声「ミニボス手抜きだから動きを作ったり、攻撃要素増やしたり」)
+def replace_keys(g, name, length, frames, hold=False):
+    """同じ名前の動きを置き換える (なければ足す)"""
+    for i, x in enumerate(g):
+        if x.name == name:
+            g[i] = keys(name, length, frames, hold)
+            return
+    g.append(keys(name, length, frames, hold))
+
+
+def breath_idle(g, chest="torso", head="head", amp=2.0):
+    """待機に胸の上下と首の揺れを重ねる (人の形)"""
+    for x in g:
+        if x.name == "idle":
+            x.rot(head, W(0).s(3.0, 1, 0, "t"), W(0).s(5.0, 1, 90, "t"))
+            x.pos(chest, None, W(0).s(amp * 0.2, 2, 0, "t"))
+
+
 # ====================================================================== 鯨骨の坑
 
 def pit_digger():
@@ -231,6 +251,27 @@ def pit_foreman():
     lift = {"leg_l": {"rot": (-45, 0, 0)}, "torso": {"rot": (-6, 0, 6)}, "arm_l": {"rot": (-20, 0, 20)}}
     stamp = {"leg_l": {"rot": (4, 0, 0)}, "torso": {"rot": (12, 0, -2)}, "body": {"pos": (0, -2, 0)}}
     g.append(keys("stomp", 1.4, [(0.0, {}), (0.7, lift), (0.9, stamp), (1.1, stamp), (1.4, {})]))
+    # 作り込み: 地割りは溜め (腰を落とし槌を背へ) → 振り下ろし (体ごと前へ) → 反動 → 担ぎ直し
+    crouch = {"body": {"pos": (0, -2.4, 1.0)}, "torso": {"rot": (-22, 10, 0)}, "arm_r": {"rot": (-40, 0, 10)}, "arm_l": {"rot": (-30, 0, 20)},
+              "head": {"rot": (-14, 0, 0)}, "leg_l": {"rot": (-24, 0, 0)}, "leg_r": {"rot": (18, 0, 0)}}
+    hit = {"body": {"pos": (0, -3.6, -2.4)}, "torso": {"rot": (34, -6, 0)}, "arm_r": {"rot": (160, 0, -6)}, "arm_l": {"rot": (40, 0, 10)},
+           "head": {"rot": (12, 0, 0)}, "leg_l": {"rot": (-36, 0, 0)}, "leg_r": {"rot": (24, 0, 0)}}
+    rebound = {"body": {"pos": (0, -2.8, -1.8)}, "torso": {"rot": (24, -4, 0)}, "arm_r": {"rot": (138, 0, -6)}, "head": {"rot": (4, 0, 0)}}
+    replace_keys(g, "slam", 1.7, [(0.0, {}), (0.55, crouch), (0.8, crouch), (0.95, hit), (1.1, rebound), (1.3, hit), (1.7, {})])
+    # 跳び割り (新): 屈む → 高く跳ぶ → 落ちて槌を地に打つ
+    squat = {"body": {"pos": (0, -4.0, 0)}, "torso": {"rot": (20, 0, 0)}, "arm_r": {"rot": (-30, 0, 0)}, "leg_l": {"rot": (-50, 0, 0)}, "leg_r": {"rot": (-50, 0, 0)}}
+    air = {"body": {"pos": (0, 10.0, -6.0)}, "torso": {"rot": (-20, 0, 0)}, "arm_r": {"rot": (-170, 0, 0)}, "arm_l": {"rot": (-120, 0, 30)},
+           "leg_l": {"rot": (-30, 0, 0)}, "leg_r": {"rot": (20, 0, 0)}}
+    land = {"body": {"pos": (0, -3.0, -10.0)}, "torso": {"rot": (36, 0, 0)}, "arm_r": {"rot": (150, 0, 0)}, "arm_l": {"rot": (30, 0, 20)},
+            "leg_l": {"rot": (-40, 0, 0)}, "leg_r": {"rot": (30, 0, 0)}}
+    g.append(keys("leap", 2.0, [(0.0, {}), (0.5, squat), (0.9, air), (1.15, land), (1.5, land), (2.0, {})]))
+    # 骨投げ (新): 左手で背の骨塊を掴み、振りかぶって投げる
+    grab = {"arm_l": {"rot": (-150, 0, 40)}, "torso": {"rot": (-10, 30, 0)}, "head": {"rot": (-10, 20, 0)}}
+    wind = {"arm_l": {"rot": (-170, 0, 10)}, "torso": {"rot": (-18, 40, 0)}, "leg_r": {"rot": (20, 0, 0)}}
+    throw = {"arm_l": {"rot": (-30, 0, -10)}, "torso": {"rot": (20, -30, 0)}, "head": {"rot": (6, -20, 0)}, "leg_l": {"rot": (-24, 0, 0)}}
+    g.append(keys("throw", 1.6, [(0.0, {}), (0.4, grab), (0.8, wind), (1.0, throw), (1.2, throw), (1.6, {})]))
+    breath_idle(g)
+    m.poses = [("slam", 0.8), ("slam", 0.95), ("leap", 0.9), ("leap", 1.2), ("throw", 0.8), ("throw", 1.05)]
     m.gaits = g
     m.poses = [("slam", 0.8), ("slam", 1.05), ("sweep", 0.8), ("stomp", 0.7)]
     return m
@@ -350,6 +391,22 @@ def bell_hermit():
     g.append(keys("ring", 1.8, frames))
     duck = {"body": {"pos": (0, -3, 0), "rot": (10, 0, 0)}, "claw_r": {"rot": (30, 0, 0)}, "claw_l": {"rot": (30, 0, 0)}}
     g.append(keys("charge", 2.2, [(0.0, {}), (0.6, duck), (2.0, duck), (2.2, {})]))
+    # 作り込み: 鋏は振りかぶりを大きく、挟んで引く
+    raise2 = {"claw_r": {"rot": (-60, 20, 0)}, "body": {"pos": (0, 1.2, 1.0), "rot": (-8, 0, 0)}, "shell": {"rot": (0, 0, 6)}}
+    snap = {"claw_r": {"rot": (30, -20, 0)}, "body": {"pos": (0, -0.8, -2.4), "rot": (8, 0, 0)}, "shell": {"rot": (0, 0, -4)}}
+    pull = {"claw_r": {"rot": (0, -10, 0)}, "body": {"pos": (0, 0, 0.8)}}
+    replace_keys(g, "pinch", 1.2, [(0.0, {}), (0.5, raise2), (0.75, snap), (0.9, snap), (1.05, pull), (1.2, {})])
+    # 殻回し (新): 殻にこもって二回まわる
+    frames = [(0.0, {}), (0.4, {"body": {"pos": (0, -2.0, 0)}, "claw_r": {"rot": (40, 0, 0)}, "claw_l": {"rot": (40, 0, 0)}})]
+    for k in range(1, 5):
+        frames.append((0.4 + 0.3 * k, {"body": {"pos": (0, -2.0, 0), "rot": (0, 180 * k, 0)}, "claw_r": {"rot": (40, 0, 0)}, "claw_l": {"rot": (40, 0, 0)}}))
+    frames += [(2.0, {})]
+    g.append(keys("spin", 2.0, frames))
+    # 泡吐き (新): 身を起こして三度吐く
+    rear = {"body": {"rot": (-18, 0, 0), "pos": (0, 2.0, 0)}, "claw_r": {"rot": (-30, 0, 0)}, "claw_l": {"rot": (-30, 0, 0)}}
+    spit = {"body": {"rot": (6, 0, 0), "pos": (0, 0.6, -1.0)}}
+    g.append(keys("spit", 1.8, [(0.0, {}), (0.4, rear), (0.6, spit), (0.8, rear), (1.0, spit), (1.2, rear), (1.4, spit), (1.8, {})]))
+    m.poses = [("pinch", 0.75), ("spin", 1.0), ("spit", 0.6), ("ring", 0.48)]
     m.gaits = g
     m.poses = [("pinch", 0.55), ("ring", 0.3), ("ring", 0.48), ("charge", 1.0)]
     return m
@@ -456,6 +513,21 @@ def geode_golem():
     g.append(keys("pound", 1.8, [(0.0, {}), (0.8, both), (1.05, down), (1.35, down), (1.8, {})]))
     arch = {"torso": {"rot": (-24, 0, 0)}, "arm_l": {"rot": (0, 0, 50)}, "arm_r": {"rot": (0, 0, -50)}, "head": {"rot": (-20, 0, 0)}}
     g.append(keys("shards", 1.8, [(0.0, {}), (0.7, arch), (1.4, arch), (1.8, {})]))
+    # 作り込み: 拳は体をひねって打ち抜く
+    pull2 = {"arm_r": {"rot": (-30, 0, -30)}, "torso": {"rot": (-6, -35, 0)}, "head": {"rot": (0, 10, 0)}, "leg_r": {"rot": (14, 0, 0)}}
+    punch2 = {"arm_r": {"rot": (-95, 0, 0)}, "torso": {"rot": (12, 30, 0)}, "head": {"rot": (6, -10, 0)}, "body": {"pos": (0, -1.0, -3.0)}, "leg_l": {"rot": (-24, 0, 0)}}
+    replace_keys(g, "punch", 1.3, [(0.0, {}), (0.55, pull2), (0.75, punch2), (0.95, punch2), (1.3, {})])
+    # 岩落とし (新): 両腕で天井を打ち、岩が降る
+    up = {"arm_l": {"rot": (-175, 0, 20)}, "arm_r": {"rot": (-175, 0, -20)}, "torso": {"rot": (-24, 0, 0)}, "head": {"rot": (-30, 0, 0)}}
+    shake = {"arm_l": {"rot": (-165, 0, 30)}, "arm_r": {"rot": (-165, 0, -30)}, "torso": {"rot": (-18, 0, 4)}, "body": {"pos": (0, 1.0, 0)}}
+    g.append(keys("rockfall", 1.8, [(0.0, {}), (0.5, up), (0.7, shake), (0.85, up), (1.0, shake), (1.4, up), (1.8, {})]))
+    # 突進 (新): 前かがみで肩から突っ込む
+    lean = {"torso": {"rot": (34, 0, 0)}, "arm_l": {"rot": (20, 0, 30)}, "arm_r": {"rot": (20, 0, -30)}, "head": {"rot": (-24, 0, 0)}, "body": {"pos": (0, -2.0, 0)}}
+    run = {"torso": {"rot": (40, 0, 0)}, "leg_l": {"rot": (-40, 0, 0)}, "leg_r": {"rot": (30, 0, 0)}, "arm_l": {"rot": (30, 0, 30)}, "arm_r": {"rot": (10, 0, -30)}}
+    run2 = {"torso": {"rot": (40, 0, 0)}, "leg_l": {"rot": (30, 0, 0)}, "leg_r": {"rot": (-40, 0, 0)}, "arm_l": {"rot": (10, 0, 30)}, "arm_r": {"rot": (30, 0, -30)}}
+    g.append(keys("charge", 2.2, [(0.0, {}), (0.6, lean), (0.9, run), (1.1, run2), (1.3, run), (1.5, run2), (1.7, run), (2.2, {})]))
+    breath_idle(g)
+    m.poses = [("punch", 0.75), ("rockfall", 0.7), ("charge", 1.1), ("pound", 1.05)]
     m.gaits = g
     m.poses = [("punch", 0.8), ("pound", 0.8), ("pound", 1.1), ("shards", 1.0)]
     return m
@@ -576,6 +648,23 @@ def ox_smith():
     lift = {"arm_l": {"rot": (-170, 0, 0)}, "arm_r": {"rot": (-160, 0, 0)}, "torso": {"rot": (-10, 0, 0)}}
     smash = {"arm_l": {"rot": (-40, 0, 0)}, "arm_r": {"rot": (-40, 0, 0)}, "torso": {"rot": (30, 0, 0)}, "body": {"pos": (0, -3, 0)}}
     g.append(keys("slam", 1.8, [(0.0, {}), (0.8, lift), (1.05, smash), (1.35, smash), (1.8, {})]))
+    # 作り込み: 叩きつけは両腕を高く、体ごと落とす
+    lift2 = {"arm_l": {"rot": (-175, 0, 10)}, "arm_r": {"rot": (-170, 0, -10)}, "torso": {"rot": (-18, 0, 0)}, "head": {"rot": (-16, 0, 0)}, "body": {"pos": (0, 1.0, 0)}}
+    smash2 = {"arm_l": {"rot": (-30, 0, 0)}, "arm_r": {"rot": (-30, 0, 0)}, "torso": {"rot": (36, 0, 0)}, "body": {"pos": (0, -3.6, -1.6)}, "head": {"rot": (10, 0, 0)},
+              "leg_l": {"rot": (-30, 0, 0)}, "leg_r": {"rot": (24, 0, 0)}}
+    replace_keys(g, "slam", 1.8, [(0.0, {}), (0.7, lift2), (0.95, smash2), (1.1, smash2), (1.25, {"body": {"pos": (0, -2.4, -1.0)}, "torso": {"rot": (26, 0, 0)}}), (1.8, {})])
+    # 鉄塊投げ (新): 火ばさみで焼けた鉄を掴み、振りかぶって投げる
+    scoop = {"arm_r": {"rot": (-20, 0, 0)}, "torso": {"rot": (30, 0, 0)}, "body": {"pos": (0, -2.0, 0)}}
+    back = {"arm_r": {"rot": (-170, 0, -20)}, "torso": {"rot": (-14, 30, 0)}, "head": {"rot": (-6, 10, 0)}}
+    fling = {"arm_r": {"rot": (-40, 0, 10)}, "torso": {"rot": (16, -30, 0)}, "leg_l": {"rot": (-24, 0, 0)}}
+    g.append(keys("hurl", 1.7, [(0.0, {}), (0.4, scoop), (0.8, back), (1.0, fling), (1.2, fling), (1.7, {})]))
+    # 火の息 (新): 鼻から火を吹く。首を振る
+    inhale = {"head": {"rot": (-20, 0, 0)}, "torso": {"rot": (-10, 0, 0)}}
+    blow_l = {"head": {"rot": (14, 26, 0)}, "torso": {"rot": (10, 10, 0)}}
+    blow_r = {"head": {"rot": (14, -26, 0)}, "torso": {"rot": (10, -10, 0)}}
+    g.append(keys("breath", 2.0, [(0.0, {}), (0.5, inhale), (0.8, blow_l), (1.2, blow_r), (1.6, blow_l), (2.0, {})]))
+    breath_idle(g)
+    m.poses = [("slam", 0.95), ("hurl", 0.8), ("hurl", 1.05), ("breath", 1.0)]
     m.gaits = g
     m.poses = [("grab", 0.8), ("grab", 1.4), ("bash", 0.6), ("slam", 1.1)]
     return m

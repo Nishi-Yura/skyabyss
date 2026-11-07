@@ -30,6 +30,13 @@ public class GeodeGolem extends DungeonBoss {
     static final int PUNCH = 1;
     static final int POUND = 2;
     static final int SHARDS = 3;
+    static final int ROCKFALL = 4;
+    static final int CHARGE = 5;
+    public static final int ROCKFALL_WARN = 26;
+    public static final int CHARGE_WARN = 22;
+    public static final double CHARGE_LENGTH = 14;
+    private int lastRockfall = -140;
+    private int lastCharge = -200;
     public static final int PUNCH_WARN = 16;
     public static final double PUNCH_LENGTH = 6;
     public static final int POUND_WARN = 21;
@@ -42,7 +49,7 @@ public class GeodeGolem extends DungeonBoss {
 
     public GeodeGolem(EntityType<? extends Monster> type, Level level) {
         super(type, level, "geode_golem", () -> SoundEvents.AMETHYST_BLOCK_CHIME, () -> SoundEvents.IRON_GOLEM_HURT, () -> SoundEvents.IRON_GOLEM_DEATH,
-                "punch", "pound", "shards", "hurt", "death");
+                "punch", "pound", "shards", "rockfall", "charge", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -57,6 +64,20 @@ public class GeodeGolem extends DungeonBoss {
 
     @Override
     protected void choose(LivingEntity target, double distance) {
+        // 岩落とし (2026-11-08 の作り込み): 天井を打ち、人の足もとと、まわりに四つの岩が降る
+        if (tickCount - lastRockfall > 180) {
+            move = ROCKFALL;
+            lastRockfall = tickCount;
+            volley(target, "rockfall", ROCKFALL_WARN, 4, 2.4, 1.0f, net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK.defaultBlockState());
+            return;
+        }
+        // 突進 (2026-11-08 の作り込み): 離れた人へ肩から突っ込む (前の長い帯)
+        if (distance > 7 && distance < CHARGE_LENGTH && tickCount - lastCharge > 200) {
+            lastCharge = tickCount;
+            cue("geode_golem", "charge", CHARGE_WARN);
+            charge(target, CHARGE, "charge", CHARGE_WARN, CHARGE_LENGTH, 1.6, 0.75, () -> SoundEvents.IRON_GOLEM_ATTACK);
+            return;
+        }
         if (hp() < 0.6f && tickCount - lastShards > 260) {
             shards(target);
             return;
@@ -155,6 +176,8 @@ public class GeodeGolem extends DungeonBoss {
         return switch (move) {
             case PUNCH -> PUNCH_WARN + 10;
             case POUND -> POUND_WARN + 16;
+            case ROCKFALL -> ROCKFALL_WARN + 12;
+            case CHARGE -> CHARGE_WARN + (int) Math.ceil(CHARGE_LENGTH / 0.75) + 10;
             default -> SHARDS_WARN + 10;
         };
     }
