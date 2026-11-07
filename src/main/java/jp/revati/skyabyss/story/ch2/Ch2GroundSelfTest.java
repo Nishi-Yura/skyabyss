@@ -286,17 +286,11 @@ public final class Ch2GroundSelfTest {
             BlockPos r1 = v.mark("room1");
             b.setPos(r1.getX() + 0.5, r1.getY(), r1.getZ() + 0.5);
             long now = level.getGameTime();
+            // 中は小ダンジョンの写し (dungeon/MiniDungeons): 地上の湧き台は湧かない。越えた数えは SiteSpawner.credit (主が倒れたとき写しにいた人)
             SiteSpawner.tick(level, List.of(b), now);
             UUID g = Groups.keyOf(b);
-            int live = SiteSpawner.liveCount(SaltVault.SITE, v.pos(), g) + SiteSpawner.pendingCount(SaltVault.SITE, v.pos(), g);
-            check(live == 6, "the vault should hold 6 enemies for the group (" + live + ")");
-            for (UUID id : SiteSpawner.liveIds(SaltVault.SITE, v.pos(), g)) {
-                Entity e = level.getEntity(id);
-                if (e != null) {
-                    e.discard();
-                }
-            }
-            SiteSpawner.tick(level, List.of(b), now + 40);
+            check(SiteSpawner.liveCount(SaltVault.SITE, v.pos(), g) + SiteSpawner.pendingCount(SaltVault.SITE, v.pos(), g) == 0, "the vault still spawns on the surface");
+            SiteSpawner.credit(level, SaltVault.SITE, List.of(b));
             check(progress.cleared(b.getUUID(), SaltVault.SITE), "clearing the vault was not recorded");
             check(Growth.get(b).discoveries.contains("site:" + SaltVault.SITE), "the vault clear xp was not granted");
             if (itemExists("skyabyss:salt_crystal")) {

@@ -80,6 +80,10 @@ public class ShoreWarden extends GroundFoe {
     }
 
     public boolean named() {
+        // 小ダンジョン (沈んだ塩の蔵の写し) の主も名づき: 床を水に沈める技を使う。ボスバーは写しの層が出す (dungeon/DungeonFloor)
+        if (getTags().contains(jp.revati.skyabyss.dungeon.MiniDungeons.BOSS_TAG)) {
+            return true;
+        }
         if (named == null) {
             named = level() instanceof ServerLevel server && jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(this)
                     && jp.revati.skyabyss.story.ch2.SaltVault.vaults(server.getServer()).stream()
@@ -145,7 +149,7 @@ public class ShoreWarden extends GroundFoe {
         }
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 10 == 0) {
-            if (named()) {
+            if (named() && !getTags().contains(jp.revati.skyabyss.dungeon.MiniDungeons.BOSS_TAG)) {
                 updateBossBarViewers();
             } else {
                 bossBar.removeAllPlayers();

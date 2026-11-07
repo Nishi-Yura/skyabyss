@@ -70,8 +70,6 @@ public final class BonePit {
 
     // ---------------------------------------------------------------- 登録 (Sites.registerP6 から)
     static void register() {
-        // 奥から地上へ出る縦穴の戸: 外からは開かず、開けたままなら閉じる (opening/site/SiteHatches。2026-11-07。骨の坑の梯子の口)
-        jp.revati.skyabyss.opening.site.SiteHatches.registerCell(SITE, -11, -1, 0);
         ChapterSites.element(SITE, Chapters.WHALE, SITE).atGround().dist(45, 110).prefer(Prefer.HIGH).arriveRadius(14)
                 .post(BonePit::finish)
                 .onArrive((p, s) -> {
@@ -210,10 +208,13 @@ public final class BonePit {
         if (server.getTickCount() % 10 != 3) {
             return;
         }
-        ServerLevel level = server.overworld();
-        for (SiteData.Entry e : entries(server)) {
-            BlockPos pack = e.extra("pack");
-            if (pack == null || !level.isLoaded(pack)) {
+        // 荷は小ダンジョンの写しの中 (dungeon/MiniDungeons。部屋 C の印 pack)
+        ServerLevel level = jp.revati.skyabyss.dungeon.DungeonWorld.level(server);
+        if (level == null) {
+            return;
+        }
+        for (BlockPos pack : jp.revati.skyabyss.dungeon.Dungeons.marksOf(server, jp.revati.skyabyss.dungeon.Dungeon.MINI_BONE_PIT, "pack")) {
+            if (!level.isLoaded(pack)) {
                 continue;
             }
             boolean anyone = false;

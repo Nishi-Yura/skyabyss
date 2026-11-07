@@ -61,7 +61,7 @@ public final class LodestoneLabels {
         ServerLevel level = p.serverLevel();
         MinecraftServer server = p.server;
         if (level.dimension() == Level.OVERWORLD) {
-            for (Dungeon d : Dungeon.values()) {
+            for (Dungeon d : Dungeon.mids()) {
                 BlockPos gate = ContinentPois.extraOf(level, d.poiKind(), "gate");
                 if (gate != null && gate.distManhattan(pos) <= 1) {
                     // 題に今日の坑の様子 (dungeon/DungeonMood)
@@ -72,6 +72,10 @@ public final class LodestoneLabels {
             }
             if (pos.equals(jp.revati.skyabyss.story.ch6.MoonGate.gatePos(server))) {
                 return new Text(Component.translatable("label.skyabyss.stone.moon_gate"), Component.translatable("label.skyabyss.stone.moon_gate.sub"));
+            }
+            Dungeon mini = jp.revati.skyabyss.dungeon.MiniDungeons.gateAt(server, pos);
+            if (mini != null) {
+                return new Text(Component.translatable("label.skyabyss.stone.mini_gate"), Component.translatable("label.skyabyss.stone.mini_gate.sub", Component.translatable(mini.nameKey())));
             }
             return null;
         }

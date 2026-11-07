@@ -1,0 +1,186 @@
+# 章の跡地の小ダンジョン 6 つ (dungeon/MiniDungeons、docs/design/55 の 6 章): 部屋の層 (入口・部屋 A〜C・奥の光) と主の間
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/mini_dungeons.txt -PshotsName=mini_dungeons
+world mini_dungeons flat
+size 1600 900
+timeout 2400
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+hud off
+chat clear
+# ---- ch1_bone_pit
+cmd skyabyss dungeon enter ch1_bone_pit
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon goto cp room_a
+wait 40
+shot ch1_bone_pit_1_entry
+cmd skyabyss dungeon goto room_a room_b
+wait 60
+shot ch1_bone_pit_2_room_a
+cmd skyabyss dungeon goto room_b room_c
+wait 60
+shot ch1_bone_pit_3_room_b
+cmd skyabyss dungeon goto room_c next
+wait 60
+shot ch1_bone_pit_4_room_c
+cmd skyabyss dungeon floor 1
+wait 100
+cmd skyabyss dungeon goto entry boss
+wait 80
+shot ch1_bone_pit_5_hall
+cmd skyabyss dungeon goto view_dais dais
+wait 40
+shot ch1_bone_pit_6_dais
+cmd skyabyss dungeon boss
+wait 60
+cmd skyabyss dungeon leave
+wait 80
+# ---- ch1_cleft_shell_cave
+cmd skyabyss dungeon enter ch1_cleft_shell_cave
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon goto cp room_a
+wait 40
+shot ch1_cleft_shell_cave_1_entry
+cmd skyabyss dungeon goto room_a room_b
+wait 60
+shot ch1_cleft_shell_cave_2_room_a
+cmd skyabyss dungeon goto room_b room_c
+wait 60
+shot ch1_cleft_shell_cave_3_room_b
+cmd skyabyss dungeon goto room_c next
+wait 60
+shot ch1_cleft_shell_cave_4_room_c
+cmd skyabyss dungeon floor 1
+wait 100
+cmd skyabyss dungeon goto entry boss
+wait 80
+shot ch1_cleft_shell_cave_5_hall
+cmd skyabyss dungeon goto view_dais dais
+wait 40
+shot ch1_cleft_shell_cave_6_dais
+cmd skyabyss dungeon boss
+wait 60
+cmd skyabyss dungeon leave
+wait 80
+# ---- ch2_salt_vault
+cmd skyabyss dungeon enter ch2_salt_vault
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon goto cp room_a
+wait 40
+shot ch2_salt_vault_1_entry
+cmd skyabyss dungeon goto room_a room_b
+wait 60
+shot ch2_salt_vault_2_room_a
+cmd skyabyss dungeon goto room_b room_c
+wait 60
+shot ch2_salt_vault_3_room_b
+cmd skyabyss dungeon goto room_c next
+wait 60
+shot ch2_salt_vault_4_room_c
+cmd skyabyss dungeon floor 1
+wait 100
+cmd skyabyss dungeon goto entry boss
+wait 80
+shot ch2_salt_vault_5_hall
+cmd skyabyss dungeon goto view_dais dais
+wait 40
+shot ch2_salt_vault_6_dais
+cmd skyabyss dungeon boss
+wait 60
+cmd skyabyss dungeon leave
+wait 80
+# ---- storm_ruin
+cmd skyabyss dungeon enter storm_ruin
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon goto cp room_a
+wait 40
+shot storm_ruin_1_entry
+cmd skyabyss dungeon goto room_a room_b
+wait 60
+shot storm_ruin_2_room_a
+cmd skyabyss dungeon goto room_b room_c
+wait 60
+shot storm_ruin_3_room_b
+cmd skyabyss dungeon goto room_c next
+wait 60
+shot storm_ruin_4_room_c
+cmd skyabyss dungeon floor 1
+wait 100
+cmd skyabyss dungeon goto entry boss
+wait 80
+shot storm_ruin_5_hall
+cmd skyabyss dungeon goto view_dais dais
+wait 40
+shot storm_ruin_6_dais
+cmd skyabyss dungeon boss
+wait 60
+cmd skyabyss dungeon leave
+wait 80
+# ---- ch3_scorched_watch
+cmd skyabyss dungeon enter ch3_scorched_watch
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon goto cp room_a
+wait 40
+shot ch3_scorched_watch_1_entry
+cmd skyabyss dungeon goto room_a room_b
+wait 60
+shot ch3_scorched_watch_2_room_a
+cmd skyabyss dungeon goto room_b room_c
+wait 60
+shot ch3_scorched_watch_3_room_b
+cmd skyabyss dungeon goto room_c next
+wait 60
+shot ch3_scorched_watch_4_room_c
+cmd skyabyss dungeon floor 1
+wait 100
+cmd skyabyss dungeon goto entry boss
+wait 80
+shot ch3_scorched_watch_5_hall
+cmd skyabyss dungeon goto view_dais dais
+wait 40
+shot ch3_scorched_watch_6_dais
+cmd skyabyss dungeon boss
+wait 60
+cmd skyabyss dungeon leave
+wait 80
+# ---- ch4_dead_forge_pit
+cmd skyabyss dungeon enter ch4_dead_forge_pit
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon goto cp room_a
+wait 40
+shot ch4_dead_forge_pit_1_entry
+cmd skyabyss dungeon goto room_a room_b
+wait 60
+shot ch4_dead_forge_pit_2_room_a
+cmd skyabyss dungeon goto room_b room_c
+wait 60
+shot ch4_dead_forge_pit_3_room_b
+cmd skyabyss dungeon goto room_c next
+wait 60
+shot ch4_dead_forge_pit_4_room_c
+cmd skyabyss dungeon floor 1
+wait 100
+cmd skyabyss dungeon goto entry boss
+wait 80
+shot ch4_dead_forge_pit_5_hall
+cmd skyabyss dungeon goto view_dais dais
+wait 40
+shot ch4_dead_forge_pit_6_dais
+cmd skyabyss dungeon boss
+wait 60
+cmd skyabyss dungeon leave
+wait 80
+wait 20

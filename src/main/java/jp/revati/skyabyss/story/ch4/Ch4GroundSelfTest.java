@@ -655,20 +655,11 @@ public final class Ch4GroundSelfTest {
         a.setPos(e.pos.getX() + 0.5, e.pos.getY(), e.pos.getZ() + 0.5);
         long now = level.getGameTime();
         int total = def.pads().stream().mapToInt(x -> x.spawns().stream().mapToInt(SiteSpawner.Spawn::count).sum()).sum();
+        // 中は小ダンジョンの写し (dungeon/MiniDungeons): 地上の湧き台は湧かない。越えた数えは SiteSpawner.credit (主が倒れたとき写しにいた人)
         SiteSpawner.tick(level, List.of(a), now);
         UUID ga = Groups.keyOf(a);
-        int live = SiteSpawner.liveCount(DeadForgePit.SITE, e.pos, ga) + SiteSpawner.pendingCount(DeadForgePit.SITE, e.pos, ga);
-        check(f, live == total, "the pit should hold " + total + " enemies for the group (" + live + ")");
-        boolean sawElder = false;
-        for (UUID id : SiteSpawner.liveIds(DeadForgePit.SITE, e.pos, ga)) {
-            Entity x = level.getEntity(id);
-            sawElder |= x instanceof ElderThrall;
-            if (x != null) {
-                x.discard();
-            }
-        }
-        check(f, sawElder || SiteSpawner.pendingCount(DeadForgePit.SITE, e.pos, ga) > 0, "the elder thrall was not among the pit's enemies");
-        SiteSpawner.tick(level, List.of(a), now + 40);
+        check(f, total > 0 && SiteSpawner.liveCount(DeadForgePit.SITE, e.pos, ga) + SiteSpawner.pendingCount(DeadForgePit.SITE, e.pos, ga) == 0, "the pit still spawns on the surface");
+        SiteSpawner.credit(level, DeadForgePit.SITE, List.of(a));
         check(f, progress.cleared(a.getUUID(), DeadForgePit.SITE), "clearing the pit was not recorded");
         check(f, QuestItems.count(a, "skyabyss:soot_iron", null) >= 4, "the first pit clear should hand over soot iron");
         laterWait = 0;

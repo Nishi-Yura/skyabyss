@@ -395,7 +395,8 @@ public class ElderSentry extends GroundFoe {
             return;
         }
         for (ServerPlayer p : Players.snapshot(server.players())) {
-            boolean near = p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p);
+            // 小ダンジョンの主のときは写しの層がボスバーを出す (二本にしない)
+            boolean near = p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p) && !getTags().contains(jp.revati.skyabyss.dungeon.MiniDungeons.BOSS_TAG);
             if (near) {
                 bossBar.addPlayer(p);
             } else {

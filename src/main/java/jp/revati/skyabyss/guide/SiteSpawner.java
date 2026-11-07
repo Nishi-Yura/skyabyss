@@ -138,6 +138,18 @@ public final class SiteSpawner {
     private static final Map<String, Instance> INSTANCES = new HashMap<>();
     // クリアを聞く口 (場所の ID → 聞き手)。クリアの場にいた人ごとに、初回も周回も呼ぶ (first = その人の初回)。頁や伝承を記すのに使う
     private static final Map<String, List<java.util.function.BiConsumer<ServerPlayer, Boolean>>> CLEAR_LISTENERS = new ConcurrentHashMap<>();
+    // 地上では湧かせない場所 (組ごとの写しの小ダンジョンになった章の跡地。dungeon/MiniDungeons)。登録 (宝・経験値・頁の口) は残し、クリアは credit で数える
+    public static final java.util.Set<String> INSTANCED = ConcurrentHashMap.newKeySet();
+
+    // 写しの小ダンジョンのクリアを、地上の場所のクリアと同じに数える (初回の経験値・宝・合図 site_clear:<id>・頁の口。1 日ごとの周回の素材)
+    public static void credit(ServerLevel level, String siteId, List<ServerPlayer> players) {
+        Def def = DEFS.get(siteId);
+        if (def == null || players.isEmpty()) {
+            return;
+        }
+        Instance inst = new Instance(def, BlockPos.ZERO, UUID.randomUUID(), false);
+        cleared(level, inst, players, level.getGameTime());
+    }
 
     private SiteSpawner() {
     }
@@ -213,6 +225,9 @@ public final class SiteSpawner {
         MinecraftServer server = level.getServer();
         Set<String> seen = new HashSet<>();
         for (Def def : List.copyOf(DEFS.values())) {
+            if (INSTANCED.contains(def.id())) {
+                continue;
+            }
             for (BlockPos origin : def.origins().apply(server)) {
                 // この場所の近くにいる人を、グループごとに
                 Map<UUID, List<ServerPlayer>> near = new LinkedHashMap<>();

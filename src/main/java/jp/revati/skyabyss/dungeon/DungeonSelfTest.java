@@ -28,6 +28,8 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //   写し       二つの組は別の区画。層を流すと帰り石 (天然磁石) と宝箱 (中身つき) が立つ。宝箱の受け取りの鍵は区画によらない
 //   進み       部屋に寄ると敵が出る。鍵持ちを倒して扉に寄ると扉が開く。中ボスを倒すと扉が開く。罠を踏むと予告が出る
 //   続きから   次の層へ移ると checkpoint と人ごとの続きが進む。主を倒すと報酬 (越えた回数・続きが消える・箱の日)
+//   小ダンジョン 六つ (MiniDungeons): 部屋 3 つの層と主の間。部屋に寄ると敵が出て、その部屋の敵がみな倒れるまで扉は閉じ、倒れると開く。
+//              荷・温石の台・碑。主は毎回出て (名づき・小ダンジョンの印)、倒すと越えて、章の場所のクリア (SiteSpawner.credit) が数えられる
 public final class DungeonSelfTest {
     private DungeonSelfTest() {
     }
@@ -151,10 +153,13 @@ public final class DungeonSelfTest {
                         "the clear reward was not recorded");
             }
             // ほかの三つ: 層を流して扉・仕掛け・主を確かめる
-            for (Dungeon other : Dungeon.values()) {
+            for (Dungeon other : Dungeon.mids()) {
                 if (other != d) {
                     quickRun(f, server, level, other, q, runs);
                 }
+            }
+            for (Dungeon mini : Dungeon.minis()) {
+                miniRun(f, server, level, mini, q, runs);
             }
             // 深く潜る・坑の様子・育つ装飾品 (2026-11-05 のダンジョンの頁)
             deepAndMoods(f, server, level, q, runs);
@@ -317,6 +322,91 @@ public final class DungeonSelfTest {
         p.getPersistentData().remove(Dungeons.PROGRESS + d.id);
     }
 
+    // 小ダンジョン一つを通す (部屋 A〜C の全滅の扉・荷・主・章の場所のクリア)
+    static void miniRun(List<String> f, MinecraftServer server, ServerLevel level, Dungeon d, FakePlayer p, List<DungeonRun> runs) {
+        jp.revati.skyabyss.guide.SiteProgressData progress = jp.revati.skyabyss.guide.SiteProgressData.get(server);
+        progress.forget(p.getUUID(), d.id);
+        DungeonRun run = Dungeons.startForTest(server, d, List.of(p));
+        if (run == null) {
+            f.add(d.id + ": could not start");
+            return;
+        }
+        runs.add(run);
+        check(f, run.checkpoint == 0 && run.mood == null && !run.deep, d.id + ": a mini run should start on its first level with no mood");
+        Dungeons.moveTo(p, run, 0);
+        DungeonFloor f0 = run.floor(0);
+        check(f, f0.ready() && run.floorOf(p) == 0, d.terrain(0) + ": the level was not poured / entered");
+        check(f, level.getBlockState(run.mark(0, "leave")).is(Blocks.LODESTONE), d.terrain(0) + ": no return stone");
+        String[] rooms = {"a", "b", "c"};
+        for (int i = 0; i < rooms.length; i++) {
+            String room = rooms[i];
+            String door = "door_" + (i + 1) + "_clear" + room;
+            if (!f0.terrain.has(door + "_lo")) {
+                f.add(d.terrain(0) + ": lacks " + door);
+                continue;
+            }
+            check(f, bars(level, f0, door) > 0, d.terrain(0) + ": " + door + " is not barred");
+            Vec3 rc = run.markCenter(0, "room_" + room);
+            p.moveTo(rc.x, rc.y, rc.z, 0f, 0f);
+            f0.doors(level, List.of(p));
+            check(f, !f0.opened.contains(door), d.terrain(0) + ": " + door + " opened before room " + room + " woke");
+            f0.wakeRooms(level, List.of(p));
+            List<Mob> foes = level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(48), m -> m.isAlive() && m.getTags().contains(run.foeTag()));
+            int want = f0.roomFoes.getOrDefault(room, List.of()).size();
+            check(f, f0.woke.contains(room) && want >= 3 && foes.size() >= want, d.terrain(0) + ": room " + room + " did not wake (" + foes.size() + " of " + want + ")");
+            f0.doors(level, List.of(p));
+            check(f, !f0.opened.contains(door), d.terrain(0) + ": " + door + " opened with foes alive");
+            for (Mob m : foes) {
+                m.hurt(level.damageSources().genericKill(), Float.MAX_VALUE);
+            }
+            f0.doors(level, List.of(p));
+            check(f, f0.opened.contains(door) && bars(level, f0, door) == 0, d.terrain(0) + ": " + door + " did not open after room " + room + " fell");
+        }
+        if (f0.terrain.has("pack")) {
+            check(f, level.getBlockState(run.mark(0, "pack")).is(Blocks.BARREL) && MiniDungeons.pack(p, run, 0, run.mark(0, "pack")), d.terrain(0) + ": the old pack does not open");
+        }
+        if (d == Dungeon.MINI_FORGE_PIT) {
+            check(f, f0.terrain.has("warm_stand") && level.getBlockState(run.mark(0, "warm_stand")).is(Blocks.SMOOTH_BASALT)
+                    && MiniDungeons.pack(p, run, 0, run.mark(0, "warm_stand")), d.terrain(0) + ": the warm stand is missing");
+        }
+        check(f, f0.terrain.has("chest_1") && level.getBlockEntity(run.mark(0, "chest_1")) instanceof ChestBlockEntity, d.terrain(0) + ": no chest in room b");
+        // 主の間
+        int bf = d.bossFloor();
+        Dungeons.moveTo(p, run, bf);
+        DungeonFloor fb = run.floor(bf);
+        check(f, fb.ready() && run.floorOf(p) == bf, d.terrain(bf) + ": the master's hall was not poured / entered");
+        for (String k : fb.terrain.marksStarting("tablet:")) {
+            check(f, level.getBlockState(fb.at(k)).getBlock() instanceof jp.revati.skyabyss.tablet.TabletBlock, d.terrain(bf) + ": " + k + " is not a tablet");
+        }
+        Vec3 bc = run.markCenter(bf, "boss");
+        p.moveTo(bc.x, bc.y, bc.z + 6, 0f, 0f);
+        fb.bossTick(level, level.getGameTime(), List.of(p));
+        var boss = fb.boss == null ? null : level.getEntity(fb.boss);
+        check(f, boss instanceof LivingEntity && boss.getTags().contains(MiniDungeons.BOSS_TAG)
+                && BuiltInRegistries.ENTITY_TYPE.getKey(boss.getType()).toString().equals(d.boss), d.id + ": the master " + d.boss + " did not appear");
+        if (boss instanceof LivingEntity le) {
+            le.hurt(level.damageSources().genericKill(), Float.MAX_VALUE);
+        }
+        check(f, fb.bossDown && run.cleared, d.id + ": killing the master did not clear the run");
+        // 偽の人は写しの中の人に数えられないので、越えた報いは直に渡して確かめる
+        MiniDungeons.reward(run, level, List.of(p));
+        check(f, progress.cleared(p.getUUID(), d.id), d.id + ": the clear did not count for the chapter site");
+        Dungeons.endForTest(run);
+        runs.remove(run);
+        progress.forget(p.getUUID(), d.id);
+    }
+
+    // 扉の箱の中の鉄格子の数
+    static int bars(ServerLevel level, DungeonFloor fl, String door) {
+        int n = 0;
+        for (BlockPos q : BlockPos.betweenClosed(fl.at(door + "_lo"), fl.at(door + "_hi"))) {
+            if (level.getBlockState(q).is(Blocks.IRON_BARS)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     static int count(ServerLevel level, DungeonFloor fl, String box, net.minecraft.world.level.block.Block b) {
         int n = 0;
         for (BlockPos q : BlockPos.betweenClosed(fl.at(box + "_lo"), fl.at(box + "_hi"))) {
@@ -332,7 +422,7 @@ public final class DungeonSelfTest {
     static void gear(List<String> f) {
         java.util.Map<String, String> ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
         java.util.Map<String, String> en = jp.revati.skyabyss.SignFit.lang("en_us");
-        for (Dungeon d : Dungeon.values()) {
+        for (Dungeon d : Dungeon.mids()) {
             var item = DungeonGear.item(d);
             String id = BuiltInRegistries.ITEM.getKey(item).getPath();
             check(f, item instanceof jp.revati.skyabyss.item.wild.WildAccessoryItem a && !a.row().charm() && !a.row().fx().isEmpty() && a.row().mount() != null
@@ -375,6 +465,10 @@ public final class DungeonSelfTest {
 
     // 層の印と敵の種
     static void marks(List<String> f, Dungeon d) {
+        if (d.mini) {
+            miniMarks(f, d);
+            return;
+        }
         jp.revati.skyabyss.opening.site.Blueprint bp = null;
         try {
             bp = jp.revati.skyabyss.opening.site.Blueprint.get("poi_" + d.poiKind());
@@ -415,6 +509,29 @@ public final class DungeonSelfTest {
                 check(f, id != null && BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(id)), d.terrain(k) + " foe kind " + kind + " has no entity");
             }
         }
+    }
+
+    // 小ダンジョンの層の印: 部屋の層に entry・leave・cp・next・room_a..c、主の間に entry・boss・exit。敵の種は表にある
+    static void miniMarks(List<String> f, Dungeon d) {
+        for (int k = 0; k < d.floors().length; k++) {
+            TowerTerrain t;
+            try {
+                t = DungeonWorld.terrain(d, k);
+            } catch (RuntimeException ex) {
+                f.add(d.terrain(k) + " cannot be read: " + ex.getMessage());
+                continue;
+            }
+            List<String> need = k == d.bossFloor() ? List.of("entry", "boss", "exit") : List.of("entry", "leave", "cp", "next", "room_a", "room_b", "room_c");
+            for (String m : need) {
+                check(f, t.has(m), d.terrain(k) + " lacks mark " + m);
+            }
+            for (String m : t.marksStarting("foe_")) {
+                String[] p = m.split("_", 4);
+                String id = p.length == 4 ? d.foes.get(p[3]) : null;
+                check(f, id != null && BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(id)), d.terrain(k) + " foe mark " + m + " has no entity");
+            }
+        }
+        check(f, d.boss != null && BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(d.boss)), d.id + ": the master " + d.boss + " is not registered");
     }
 
     static void report(List<String> f, int built) {

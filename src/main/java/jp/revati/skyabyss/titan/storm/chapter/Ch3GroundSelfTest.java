@@ -255,21 +255,15 @@ public final class Ch3GroundSelfTest {
         Quests.onTalk(p, "skyabyss:artisan", "ch3g_watch_show");
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_WATCH).done, "showing the page to the artisan did not finish the watch quest");
 
-        // 避雷の柱: 台の合図 4 (人ごとに台一つにつき一度) → 書
+        // 避雷の柱: 塔の跡の小ダンジョンを越える (site_clear:storm_ruin。台の針は数えない) → 書
         check(f, "raise".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)), "the pillars quest should start at raise");
-        for (int k = 0; k < 3; k++) {
-            if (Growth.discover(p, "ch3_pillar:" + k)) {
-                Quests.signal(p, Ch3Ground.SIGNAL_PILLAR);
-            }
+        for (int k = 0; k < LightningPillars.STANDS; k++) {
+            Quests.signal(p, Ch3Ground.SIGNAL_PILLAR);
         }
-        check(f, !Growth.discover(p, "ch3_pillar:0"), "a stand counted twice");
-        check(f, QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).progress(0) == 3 && "raise".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)),
-                "three rods should read 3/4 (" + QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).progress(0) + ")");
-        Growth.discover(p, "ch3_pillar:3");
-        Quests.signal(p, Ch3Ground.SIGNAL_PILLAR);
-        check(f, "vault".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)), "four rods did not open the vault stage");
-        check(f, LightningPillars.openVault(p, level, null) && !LightningPillars.openVault(p, level, null), "the vault gave its copper twice or never");
-        check(f, QuestItems.count(p, "skyabyss:copper_lump", null) == 4 && Lore.state(p).has(Ch3Ground.PAGE_STAYER), "the vault should hand over four copper and the page");
+        check(f, "raise".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)), "old rod signals still move the pillars quest");
+        Quests.signal(p, jp.revati.skyabyss.guide.SiteSpawner.signal(StormSites.RUIN));
+        check(f, "vault".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)), "clearing the ruin's mini dungeon did not open the vault stage");
+        Lore.unlock(p, Ch3Ground.PAGE_STAYER, false);
         Quests.poll(p, true);
         check(f, QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).done, "the page did not finish the pillars quest");
         check(f, PrepQuests.ready(p, 3) && Growth.get(p).discoveries.contains("prep_ready:3"), "the three chapter-3 steps did not raise ch3_ready");
@@ -429,7 +423,7 @@ public final class Ch3GroundSelfTest {
         } finally {
             clean(p);
         }
-        report("ch3 ground (sites)", f, "ruin stands, door, vault and sample pillar; watch tablet, pillar, pads, strike, crown, clear; flags turn; field cache; cliff spyglass");
+        report("ch3 ground (sites)", f, "ruin stands and sample pillar; watch tablet, pillar, pads, strike, crown, clear; flags turn; field cache; cliff spyglass");
     }
 
     private static void ruin(ServerLevel level, FakePlayer p, List<String> f) {
@@ -450,42 +444,6 @@ public final class Ch3GroundSelfTest {
             BlockPos at = LightningPillars.stand(ruin, k);
             check(f, at != null && level.getBlockState(at.below()).is(Blocks.WAXED_CHISELED_COPPER), "stand " + k + " has no copper plinth under " + at);
         }
-        // 針を外して数える → 3 本では戸は開かず 3/4、4 本で戸が開き書へ
-        for (int k = 0; k < LightningPillars.STANDS; k++) {
-            level.setBlock(LightningPillars.stand(ruin, k), Blocks.AIR.defaultBlockState(), 3);
-        }
-        boolean wasOpen = LightningPillars.doorOpen(level, ruin);
-        if (!wasOpen) {
-            int cells = 0;
-            for (int k = 0; k < LightningPillars.DOOR_CELLS; k++) {
-                if (level.getBlockState(ruin.extra("door" + k)).is(Blocks.WAXED_OXIDIZED_CUT_COPPER)) {
-                    cells++;
-                }
-            }
-            check(f, cells == LightningPillars.DOOR_CELLS, "the copper door should be nine cells (" + cells + ")");
-        }
-        Quests.start(p, Ch3Ground.Q_PILLARS);
-        BlockState rod = Blocks.LIGHTNING_ROD.defaultBlockState();
-        for (int k = 0; k < 3; k++) {
-            level.setBlock(LightningPillars.stand(ruin, k), rod, 3);
-        }
-        int m = LightningPillars.mask(level, ruin);
-        check(f, m == 7, "three raised rods should read mask 7 (" + m + ")");
-        LightningPillars.credit(p, level, ruin, m);
-        LightningPillars.credit(p, level, ruin, m);
-        check(f, QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).progress(0) == 3, "three stands should count once each (" + QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).progress(0) + ")");
-        check(f, wasOpen || !LightningPillars.doorOpen(level, ruin), "the door opened before the fourth rod");
-        level.setBlock(LightningPillars.stand(ruin, 3), rod, 3);
-        m = LightningPillars.mask(level, ruin);
-        check(f, m == 15, "four rods should read mask 15");
-        if (!wasOpen) {
-            check(f, LightningPillars.openDoor(level, ruin) && LightningPillars.doorOpen(level, ruin) && !LightningPillars.openDoor(level, ruin), "the door did not open once");
-        }
-        LightningPillars.credit(p, level, ruin, m);
-        check(f, "vault".equals(LightningPillars.stageOf(p, Ch3Ground.Q_PILLARS)) && Lore.state(p).has(Ch3Ground.PAGE_PILLARS), "four stands did not move to the vault stage with the pillars page");
-        check(f, LightningPillars.openVault(p, level, ruin.extra("vault_pack")), "the vault did not open");
-        Quests.poll(p, true);
-        check(f, QuestLog.of(p).entry(Ch3Ground.Q_PILLARS).done, "the vault page did not finish the pillars quest");
         // 見本の柱の電球
         BlockPos bulb = ruin.extra("sample_bulb");
         LightningPillars.bulb(level, bulb, true);
@@ -545,17 +503,11 @@ public final class Ch3GroundSelfTest {
         a.setPos(w.pos.getX() + 0.5, w.pos.getY(), w.pos.getZ() + 0.5);
         long now = level.getGameTime();
         int total = def.pads().stream().mapToInt(x -> x.spawns().stream().mapToInt(SiteSpawner.Spawn::count).sum()).sum();
+        // 中は小ダンジョンの写し (dungeon/MiniDungeons): 地上の湧き台は湧かない。越えた数えは SiteSpawner.credit (主が倒れたとき写しにいた人)
         SiteSpawner.tick(level, List.of(a), now);
         UUID ga = Groups.keyOf(a);
-        int live = SiteSpawner.liveCount(ScorchedWatch.SITE, w.pos, ga) + SiteSpawner.pendingCount(ScorchedWatch.SITE, w.pos, ga);
-        check(f, live == total, "the watch should hold " + total + " enemies for the group (" + live + ")");
-        for (UUID id : SiteSpawner.liveIds(ScorchedWatch.SITE, w.pos, ga)) {
-            Entity x = level.getEntity(id);
-            if (x != null) {
-                x.discard();
-            }
-        }
-        SiteSpawner.tick(level, List.of(a), now + 40);
+        check(f, total > 0 && SiteSpawner.liveCount(ScorchedWatch.SITE, w.pos, ga) + SiteSpawner.pendingCount(ScorchedWatch.SITE, w.pos, ga) == 0, "the watch still spawns on the surface");
+        SiteSpawner.credit(level, ScorchedWatch.SITE, List.of(a));
         check(f, progress.cleared(a.getUUID(), ScorchedWatch.SITE), "clearing the watch was not recorded");
         check(f, QuestItems.count(a, "skyabyss:copper_lump", null) >= 6, "the first watch clear should hand over copper");
         laterWait = 0;

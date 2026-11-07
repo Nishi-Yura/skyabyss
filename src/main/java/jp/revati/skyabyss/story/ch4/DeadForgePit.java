@@ -62,8 +62,6 @@ public final class DeadForgePit {
     }
 
     static void register() {
-        // 奥から地上へ出る縦穴の戸: 外からは開かず、開けたままなら閉じる (opening/site/SiteHatches。2026-11-07。消えた炉の坑の梯子の口)
-        jp.revati.skyabyss.opening.site.SiteHatches.registerCell(SITE, -5, 0, -2);
         ChapterSites.element(SITE, Chapters.EMBER, SITE).atGround().dist(60, 150).prefer(Prefer.HIGH).arriveRadius(14)
                 .post(DeadForgePit::finish)
                 .onArrive((p, s) -> {
@@ -253,11 +251,14 @@ public final class DeadForgePit {
         if (WARM.isEmpty()) {
             return;
         }
-        ServerLevel level = server.overworld();
-        long now = level.getGameTime();
+        // 台は小ダンジョンの写しの中 (dungeon/MiniDungeons)。前の版の地上の台も同じ表
+        ServerLevel over = server.overworld();
+        ServerLevel inside = jp.revati.skyabyss.dungeon.DungeonWorld.level(server);
+        long now = over.getGameTime();
         WARM.entrySet().removeIf(e -> e.getValue() <= now);
         for (long key : WARM.keySet()) {
             BlockPos at = BlockPos.of(key);
+            ServerLevel level = inside != null && inside.isLoaded(at) && inside.getBlockState(at).is(net.minecraft.world.level.block.Blocks.SMOOTH_BASALT) ? inside : over;
             if (level.isLoaded(at)) {
                 level.sendParticles(ParticleTypes.SMALL_FLAME, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 2, 0.15, 0.05, 0.15, 0.01);
                 level.sendParticles(ParticleTypes.WHITE_ASH, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.01);

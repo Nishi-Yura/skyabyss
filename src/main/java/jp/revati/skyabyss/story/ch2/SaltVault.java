@@ -144,7 +144,6 @@ public final class SaltVault {
                 .post(SaltVault::finish)
                 .onArrive((p, s) -> {
                     Notice.narrate(p, "message.skyabyss.ch2.arrive." + SITE);
-                    Tasks.later(60, () -> Notice.hint(p, flooded(p.serverLevel()) ? "message.skyabyss.ch2.vault.wet" : "message.skyabyss.ch2.vault.dry"));
                 }).register();
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:salt_crystal", 6),
                 new SiteTreasure.Entry("skyabyss:pearl_ward_thread", 1), new SiteTreasure.Entry("skyabyss:small_pearl", 4))));
@@ -162,11 +161,11 @@ public final class SaltVault {
             return 0;
         });
         jp.revati.skyabyss.opening.site.SiteNetwork.PLAYER_TARGETS.add(SaltVault::targets);
-        // 出口の縦穴の戸: 外からは開かず、開けたままなら閉じる (opening/site/SiteHatches)
-        jp.revati.skyabyss.opening.site.SiteHatches.register(SITE, (level, e) -> exitTop(level, new Vault(e.pos, e.yaw)));
     }
 
     public static final String SIGNAL_DOOR = "ch2_salt_door";
+    // 前の版の地下の仕掛け (潮の喉・塩樽・白い戸・出口の縦穴) はもう動かさない (2026-11-07。dungeon/MiniDungeons)
+    public static final boolean RETIRED_UNDERGROUND = true;
     static final String BARREL_HINT = "skyabyss_ch2_salt_barrel_hint";
 
     // 戸が開いているか (読み込まれていない所は開いていないとみなす)
@@ -197,9 +196,10 @@ public final class SaltVault {
                 break;
             }
         }
-        putMark(m, Ch2Ground.Q_SALT + "/vault#0", v.mark("room2"));
-        putMark(m, Ch2Ground.Q_SALT + "/vault#1", v.mark("room3"));
-        putMark(m, Ch2Ground.Q_SALT + "/vault#2", v.mark("wall_tablet"));
+        // 蔵の中は小ダンジョンの写し (dungeon/MiniDungeons)。番人も奥の刻みも、口の門の石を指す
+        BlockPos gate = jp.revati.skyabyss.dungeon.MiniDungeons.gateOf(e, jp.revati.skyabyss.dungeon.Dungeon.MINI_SALT_VAULT);
+        putMark(m, Ch2Ground.Q_SALT + "/vault#0", gate);
+        putMark(m, Ch2Ground.Q_SALT + "/vault#1", gate);
     }
 
     private static void putMark(Map<String, BlockPos> m, String key, @Nullable BlockPos at) {
@@ -840,6 +840,11 @@ public final class SaltVault {
             if (carried(p) > 0) {
                 p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0, false, false, true));
             }
+        }
+        // 潮の喉・塩樽・坑口の手当ては前の版の地下のもの。地下は小ダンジョンの写しへ移り、地上の口は埋めた (dungeon/MiniDungeons)
+        if (RETIRED_UNDERGROUND) {
+            roadTick(server, level, players);
+            return;
         }
         if (t % 40 == 7) {
             mendOld(server, level);

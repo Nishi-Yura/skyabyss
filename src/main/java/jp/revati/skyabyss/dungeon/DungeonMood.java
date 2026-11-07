@@ -46,7 +46,7 @@ public enum DungeonMood {
     public static void tell(ServerPlayer p, @Nullable Entity npc) {
         int region = ContinentMap.get().region(npc != null ? npc.getBlockX() : p.getBlockX(), npc != null ? npc.getBlockZ() : p.getBlockZ());
         Dungeon d = null;
-        for (Dungeon x : Dungeon.values()) {
+        for (Dungeon x : Dungeon.mids()) {
             if (x.region == region) {
                 d = x;
             }
