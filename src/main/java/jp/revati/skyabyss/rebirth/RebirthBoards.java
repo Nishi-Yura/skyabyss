@@ -81,7 +81,7 @@ public final class RebirthBoards {
 
     // 記録が更新されたとき: 立っている板をすぐ光らせる
     public static void refresh(MinecraftServer server, String titan) {
-        BlockPos center = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(server, titan);
+        BlockPos center = jp.revati.skyabyss.titan.shrine.TitanShrine.hubOf(server, titan);
         if (center != null) {
             install(server.overworld(), titan, center);
         }

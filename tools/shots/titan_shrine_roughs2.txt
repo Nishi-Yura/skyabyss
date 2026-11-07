@@ -1,0 +1,110 @@
+# 地上の巨神の祠のラフ 2 回目 (巨神ごと。tools/rough/titan_shrine/roughs_v2.py)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/titan_shrine_roughs2.txt -PshotsName=titan_shrine_roughs2
+world titanshrineroughs2 flat
+size 1600 900
+timeout 2000
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 7000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+chat clear
+cmd forceload add -40 -40 260 40
+cmd forceload add 360 -40 660 40
+wait 100
+cmd skyabyss dev ch2 place rough_shrine2_whale 0 -61 0
+wait 20
+cmd skyabyss dev ch2 place rough_shrine2_tide 200 -61 0
+wait 20
+cmd skyabyss dev ch2 place rough_shrine2_storm 400 -61 0
+wait 20
+cmd skyabyss dev ch2 place rough_shrine2_ember 600 -61 0
+wait 20
+wait 80
+cmd tp @s 24 -42 30 142 26
+waitchunks 100
+wait 30
+shot whale_1_over
+cmd tp @s 0 -55 30 180 -4
+waitchunks 100
+wait 30
+shot whale_2_path
+cmd tp @s 0 -55 10 180 -2
+waitchunks 100
+wait 30
+shot whale_3_nave
+cmd tp @s -6 -55 -6 160 6
+waitchunks 100
+wait 30
+shot whale_4_skull
+cmd tp @s -30 -48 -8 -110 16
+waitchunks 100
+wait 30
+shot whale_5_side
+cmd tp @s 224 -43 30 142 26
+waitchunks 100
+wait 30
+shot tide_1_over
+cmd tp @s 200 -56 30 180 -4
+waitchunks 100
+wait 30
+shot tide_2_path
+cmd tp @s 200 -56 4 180 -8
+waitchunks 100
+wait 30
+shot tide_3_shell
+cmd tp @s 200 -56 -6 180 4
+waitchunks 100
+wait 30
+shot tide_4_inside
+cmd tp @s 214 -53 10 135 26
+waitchunks 100
+wait 30
+shot tide_5_pools
+cmd tp @s 426 -40 32 142 24
+waitchunks 100
+wait 30
+shot storm_1_over
+cmd tp @s 400 -54 32 180 -8
+waitchunks 100
+wait 30
+shot storm_2_path
+cmd tp @s 403 -54 6 165 -26
+waitchunks 100
+wait 30
+shot storm_3_ring
+cmd tp @s 400 -54 -2 180 6
+waitchunks 100
+wait 30
+shot storm_4_altar
+cmd tp @s 370 -46 -4 -100 6
+waitchunks 100
+wait 30
+shot storm_5_side
+cmd tp @s 624 -42 30 142 24
+waitchunks 100
+wait 30
+shot ember_1_over
+cmd tp @s 600 -55 30 180 -6
+waitchunks 100
+wait 30
+shot ember_2_path
+cmd tp @s 600 -55 4 180 -14
+waitchunks 100
+wait 30
+shot ember_3_gate
+cmd tp @s 603 -55 -3 195 14
+waitchunks 100
+wait 30
+shot ember_4_anvil
+cmd tp @s 572 -48 4 -110 12
+waitchunks 100
+wait 30
+shot ember_5_side

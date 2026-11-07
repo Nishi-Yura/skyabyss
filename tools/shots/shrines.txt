@@ -1,9 +1,9 @@
-# 巨神の祠 (2026-10-28「祠が地形になじまない、どうやって行けばいい」→ 町を出た道ばたの平らな広場)
-# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/shrines.txt -PshotsName=shrines
-world shrines1 continent
+# 2026-11-07: 大陸の地上の巨神の祠 (titan/shrine/ShrineBuild、tools/gen/world/build_titan_shrines.py)。四体の祠を置き場で撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/shrines.txt -PshotsName=shrines
+world shrines2 continent
 size 1600 900
 timeout 4000
-render 10
+render 12
 guiscale 2
 waitchunks 200
 wait 60
@@ -13,55 +13,79 @@ cmd gamemode creative
 cmd time set 4000
 cmd weather clear
 cmd gamerule doDaylightCycle false
+hud on
+cmd gamemode creative
 cmd skyroute shrine stone_whale
 waitchunks 300
-wait 400
+wait 300
 cmd gamemode spectator
 hud off
-cmd execute at @s run tp @s ~ ~7 ~14 180 22
+chat clear
+cmd execute at @s run tp @s ~24 ~18 ~30 141 26
+waitchunks 100
+wait 40
+shot stone_whale_1_over
+cmd execute at @s run tp @s ~-24 ~-18 ~-30 180 -3
+cmd execute at @s run tp @s ~ ~2 ~22 180 -4
 wait 30
-shot stone_whale_1_near
-cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+shot stone_whale_2_path
+cmd execute at @s run tp @s ~ ~-2 ~-22 180 -6
 wait 30
-shot stone_whale_2_wide
+shot stone_whale_3_pad
 hud on
 cmd gamemode creative
 cmd skyroute shrine tide_shell
 waitchunks 300
-wait 400
+wait 300
 cmd gamemode spectator
 hud off
-cmd execute at @s run tp @s ~ ~7 ~14 180 22
+chat clear
+cmd execute at @s run tp @s ~24 ~18 ~30 141 26
+waitchunks 100
+wait 40
+shot tide_shell_1_over
+cmd execute at @s run tp @s ~-24 ~-18 ~-30 180 -3
+cmd execute at @s run tp @s ~ ~2 ~22 180 -4
 wait 30
-shot tide_shell_1_near
-cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+shot tide_shell_2_path
+cmd execute at @s run tp @s ~ ~-2 ~-22 180 -6
 wait 30
-shot tide_shell_2_wide
+shot tide_shell_3_pad
 hud on
 cmd gamemode creative
 cmd skyroute shrine thunder_wing
 waitchunks 300
-wait 400
+wait 300
 cmd gamemode spectator
 hud off
-cmd execute at @s run tp @s ~ ~7 ~14 180 22
+chat clear
+cmd execute at @s run tp @s ~24 ~18 ~30 141 26
+waitchunks 100
+wait 40
+shot thunder_wing_1_over
+cmd execute at @s run tp @s ~-24 ~-18 ~-30 180 -3
+cmd execute at @s run tp @s ~ ~2 ~22 180 -4
 wait 30
-shot thunder_wing_1_near
-cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+shot thunder_wing_2_path
+cmd execute at @s run tp @s ~ ~-2 ~-22 180 -6
 wait 30
-shot thunder_wing_2_wide
+shot thunder_wing_3_pad
 hud on
 cmd gamemode creative
 cmd skyroute shrine ember
 waitchunks 300
-wait 400
+wait 300
 cmd gamemode spectator
 hud off
-cmd execute at @s run tp @s ~ ~7 ~14 180 22
+chat clear
+cmd execute at @s run tp @s ~24 ~18 ~30 141 26
+waitchunks 100
+wait 40
+shot ember_1_over
+cmd execute at @s run tp @s ~-24 ~-18 ~-30 180 -3
+cmd execute at @s run tp @s ~ ~2 ~22 180 -4
 wait 30
-shot ember_1_near
-cmd execute at @s run tp @s ~18 ~16 ~10 130 35
+shot ember_2_path
+cmd execute at @s run tp @s ~ ~-2 ~-22 180 -6
 wait 30
-shot ember_2_wide
-hud on
-cmd gamemode creative
+shot ember_3_pad
