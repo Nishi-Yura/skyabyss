@@ -10,6 +10,7 @@ ALLOW = {
     "sign.skyabyss.library_",  # TitanBackSelfTest: startsWith の頭 (WingsBuilder が番号を足す。実キーは lang にある)
     "sign.skyabyss.ch3_wind_",  # StormChapterSelfTest: startsWith の頭 (tabletKey(index) が実キーを作る。実キーは lang にある)
     "opening.skyabyss.hint_move",  # OpeningStorySelfTest: 「この生キーはもう無い」ことを確かめる否定の検査
+    "item.skyabyss.wayfarer_notes",  # GuideSelfTest: 消した旅の覚書の文が残っていないことを確かめる否定の検査
 }
 
 

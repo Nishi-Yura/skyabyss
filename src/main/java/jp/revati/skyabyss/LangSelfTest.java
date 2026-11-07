@@ -37,7 +37,9 @@ public final class LangSelfTest {
             // StormChapterSelfTest: startsWith の頭 (StormSites.tabletKey(index) が実キーを作る。実キーは lang にある)
             "sign.skyabyss.ch3_wind_",
             // OpeningStorySelfTest: 「この生キーはもう無い」ことを確かめる否定の検査
-            "opening.skyabyss.hint_move");
+            "opening.skyabyss.hint_move",
+            // GuideSelfTest: 消した旅の覚書の文が残っていないことを確かめる否定の検査
+            "item.skyabyss.wayfarer_notes");
     // <種類>.skyabyss[_名前空間].<名前> の文字列リテラル。続けて + があれば「頭だけのキー」(あとで番号などを足す)
     private static final Pattern CODE_KEY = Pattern.compile("\"([a-z][A-Za-z]*\\.skyabyss(?:_[a-z0-9_]+)?\\.[A-Za-z0-9_.]*[A-Za-z0-9_])\"(\\s*\\+)?");
     private static final Pattern BRACE_ARG = Pattern.compile("\\{\\d+\\}");
