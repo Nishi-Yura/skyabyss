@@ -220,7 +220,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)11 の 9 章
         steps.add(Step.once("readiness", jp.revati.skyabyss.readiness.ReadinessSelfTest::runSelfTest));
-        // 章の導きの基盤 (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・章のひとり歩き・経験値の枠)
+        // 章の導きの基盤 (備えの頼み・鼓動守・場所の湧き台と宝・章のひとり歩き・経験値の枠)
         steps.addAll(jp.revati.skyabyss.guide.GuideSelfTest.steps());
         // 旅装・砥石・糧と薬 (P5) と旅の職人 (P4)1.4
         steps.addAll(jp.revati.skyabyss.guide.TravelSelfTest.steps());
@@ -499,6 +499,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.TreeKeystoneSelfTest.steps());
         // 近接の一撃 (2026-11-04): 同じ敵を殴れる間・溜めの強さ・回復は満ちた一撃だけ。SKYABYSS_SELFTEST_ONLY="melee hits"
         steps.addAll(jp.revati.skyabyss.combat.MeleeHitsSelfTest.steps());
+        // 魔法使いの魔弾 (左クリックで遠くの敵へ。2026-11-06)
+        steps.addAll(jp.revati.skyabyss.combat.StaffBoltSelfTest.steps());
         // 倒すまでの時間 (土地の敵を、その土地の目安のレベルの武器の満ちた一撃で)。SKYABYSS_SELFTEST_ONLY="ttk audit"
         steps.addAll(jp.revati.skyabyss.combat.TtkAuditSelfTest.steps());
         // 完全な RPG の決まり (採集・水汲み・倒れたときの既定)。docs/design/40。SKYABYSS_SELFTEST_ONLY="rpg rules"
@@ -509,6 +511,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.world.continent.ContinentSelfTest.steps());
         // 大陸の道に越えられない段がない。SKYABYSS_SELFTEST_ONLY="continent roads"
         steps.add(Step.once("continent roads", jp.revati.skyabyss.world.continent.ContinentRoadsSelfTest::runSelfTest));
+        // 外れの集落 (8 か所の部品と印・道が中を通らない・建てた所の守り・起きる所・寝台・場所の名と曲・口から道までの小道)。SKYABYSS_SELFTEST_ONLY="frontier hamlets"
+        steps.add(Step.once("frontier hamlets", jp.revati.skyabyss.world.continent.FrontierHamletsSelfTest::runSelfTest));
         // 倒れたあとは行ったことのある町の休み場だけ。SKYABYSS_SELFTEST_ONLY="continent respawn"
         steps.add(Step.once("continent respawn", jp.revati.skyabyss.world.continent.ContinentRespawnSelfTest::runSelfTest));
         // 逃げる獣 (型と動き・出る所・硬さ・報い・締め出し)。SKYABYSS_SELFTEST_ONLY="rare beasts"

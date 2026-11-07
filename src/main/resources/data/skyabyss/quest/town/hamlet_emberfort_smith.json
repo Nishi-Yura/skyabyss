@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 328,
+  "giver": "skyabyss:guest_emberfort_smith",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 4,
+          "targets": [
+            "skyabyss:ember_jackal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "black_gate",
+          "type": "signal",
+          "target": "poi:@black_gate",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_emberfort_smith",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 70,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 140
+      },
+      {
+        "item": "skyabyss:box_rare_3",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+# 2026-11-07: 店の売る行の詳しい札と、買い戻すつまみ (facility/SoldLog)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/shop_buyback.txt -PshotsName=shop_buyback
+world shopbuyback flat
+size 1280 720
+timeout 900
+render 6
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd give @s skyabyss:bone_chip 16
+cmd skyabyss facility shop material_shop
+wait 30
+shoptab sell
+wait 10
+hover 240 120
+wait 10
+shot a_sell_tooltip
+close
+wait 10
+cmd skyabyss facility shop material_shop
+wait 20
+shoptab sell
+wait 5
+click 240 88
+wait 20
+click 240 88
+wait 20
+shoptab back
+wait 10
+hover 240 88
+wait 10
+shot b_back_tab
+quit

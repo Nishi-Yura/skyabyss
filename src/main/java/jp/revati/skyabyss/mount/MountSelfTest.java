@@ -103,7 +103,7 @@ public final class MountSelfTest {
             p.getInventory().clearContent();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, two seats, owner steers), fall immunity, save, shop session, whistle, bond stages and naming)");
+            SkyAbyss.LOGGER.info("SELFTEST mount PASSED (assets, buy look/tier with coins, chapter wall, summon/dismiss, stats applied, refusal in backs/abyss, far dismiss, ride, tandem (party only, seats start at one and grow with the seats tier up to the look's maximum, the covered wagon's six seats, owner steers), fall immunity, save, shop session, whistle, bond stages and naming)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST mount FAILED: {}", m));
         }
@@ -122,7 +122,18 @@ public final class MountSelfTest {
         // 乗り物の店は旅の番 (止まり木の番。2026-11-01 に厩舎の番をまとめた)
         check(f, resource(a + "textures/gui/npc_marker/fac_perch_keeper.png"), "travel keeper icon");
         check(f, resource("/data/skyabyss/dialogue/attendant_perch_keeper.json"), "travel keeper dialogue");
-        check(f, MountLook.values().length == 10 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
+        // 幌の荷車の六つの席: 重ならず (0.5 以上離れ)、荷車の中 (横 1、前後 2.5 の内)
+        boolean apart = MountEntity.CARRIAGE_SEATS.length == 6;
+        for (int i = 0; i < MountEntity.CARRIAGE_SEATS.length; i++) {
+            double[] sa = MountEntity.CARRIAGE_SEATS[i];
+            apart &= Math.abs(sa[0]) <= 1.0 && Math.abs(sa[2]) <= 2.5;
+            for (int j = i + 1; j < MountEntity.CARRIAGE_SEATS.length; j++) {
+                double[] sb = MountEntity.CARRIAGE_SEATS[j];
+                apart &= Math.hypot(sa[0] - sb[0], sa[2] - sb[2]) >= 0.5;
+            }
+        }
+        check(f, apart, "the wagon's six seats overlap or sit outside the wagon");
+        check(f, MountLook.values().length == 11 && MountLook.CARRIAGE.maxSeats == 6 && MountLook.HORN_BEAST.price == 0 && MountLook.HORN_BEAST.chapter == 1, "roster: starter is free from the start");
         // 2026-11-02 の三つ: 五章・六章・終章のあと。飛ぶのは空鱏だけ
         check(f, MountLook.ABYSS_GECKO.chapter == 6 && MountLook.STAR_LYNX.chapter == 7 && MountLook.SKY_RAY.chapter == 8, "new looks unlock in chapters 5, 6 and after the finale");
         int flyers = 0;
@@ -132,15 +143,17 @@ public final class MountSelfTest {
         }
         check(f, flyers == 1 && MountLook.SKY_RAY.flies(), "only the sky ray flies");
         check(f, MountLook.SKY_RAY.lockedKey("gui.skyabyss.mount.locked").equals("gui.skyabyss.mount.locked.ch8") && MountLook.EMBER_FOX.lockedKey("x").equals("x"), "locked labels per chapter");
-        for (int k = 0; k < MountStats.KEYS.length; k++) {
+        for (int k : MountStats.ROW_KIND) {
             for (int t = 2; t <= MountStats.tiers(k); t++) {
                 check(f, MountStats.price(k, t) > MountStats.price(k, t - 1), "price rises per tier " + k + "/" + t);
             }
         }
         check(f, MountStats.speed(MountStats.tiers(MountStats.SPEED)) > MountStats.speed(5) && MountStats.speed(5) > MountStats.speed(0)
                 && MountStats.jump(5) > MountStats.jump(0), "stats rise (speed beyond the old tier 5)");
-        // 体力は段がない (店に並ばない)。前の段の返す額は値段の合計
-        check(f, MountStats.KEYS.length == 2 && MountStats.healthRefund(5) == 18 + 36 + 60 + 95 + 150 && MountStats.healthRefund(0) == 0, "no health tiers; refund of old ones");
+        // 店の行は速さ・跳び・人数 (体力は無い)。人数ははじめ 1、段ごとに +1
+        check(f, java.util.Arrays.asList(MountStats.KEYS).equals(List.of("speed", "jump", "seats")) && MountStats.seats(0) == 1 && MountStats.seats(MountStats.tiers(MountStats.SEATS)) == 6,
+                "the shop rows are not speed / jump / seats, or seats do not start at one");
+        check(f, MountStats.healthRefund(5) == 18 + 36 + 60 + 95 + 150 && MountStats.healthRefund(0) == 0, "no health tiers; refund of old ones");
     }
 
     private static void shop(List<String> f, FakePlayer p) {
@@ -167,12 +180,13 @@ public final class MountSelfTest {
         check(f, MountService.chooseLook(p, MountLook.SHELL_TORTOISE) == MountService.Result.NOT_OWNED, "cannot choose an unowned look");
         check(f, MountService.chooseLook(p, MountLook.HORN_BEAST) == MountService.Result.OK && d.chosen() == MountLook.HORN_BEAST, "choose owned look");
         // 段を最大まで。どの見た目でも同じ段
-        for (int k = 0; k < MountStats.KEYS.length; k++) {
-            while (d.tier(k) < MountStats.tiers(k)) {
+        for (int row = 0; row < MountStats.KEYS.length; row++) {
+            int k = MountStats.ROW_KIND[row];
+            for (int guard = 0; d.tier(k) < MountStats.tiers(k) && guard < 20; guard++) {
                 Coins.give(p, 700);
-                check(f, MountService.buyTier(p, k) == MountService.Result.OK, "buy tier " + k + "/" + (d.tier(k) + 1));
+                check(f, MountService.buyTier(p, row) == MountService.Result.OK, "buy tier " + k + "/" + (d.tier(k) + 1));
             }
-            check(f, MountService.buyTier(p, k) == MountService.Result.MAXED, "tier " + k + " maxed");
+            check(f, MountService.buyTier(p, row) == MountService.Result.MAXED, "tier " + k + " maxed");
         }
         Coins.take(p, Coins.count(p));
         MountData fresh = new MountData();
@@ -246,11 +260,24 @@ public final class MountSelfTest {
             party = pd.create(p.getUUID(), "mount_p");
             pd.add(party, q.getUUID(), "mount_q");
             pd.add(party, r.getUUID(), "mount_r");
+            // 人数の段 0 (はじめ): 席は持ち主だけ
+            m.setSeats(MountStats.seats(0));
+            m.mobInteract(q, InteractionHand.MAIN_HAND);
+            check(f, q.getVehicle() == null, "tandem: someone climbed on with only one seat");
+            // 人数の段 1: 二人
+            m.setSeats(MountStats.seats(1));
             m.mobInteract(q, InteractionHand.MAIN_HAND);
             check(f, q.getVehicle() == m && m.getPassengers().size() == 2 && m.getControllingPassenger() == p, "tandem: a party member rides behind and the owner steers");
             check(f, m.getPassengerRidingPosition(p).distanceTo(m.getPassengerRidingPosition(q)) > 0.3, "tandem: the second seat is not behind the first");
             m.mobInteract(r, InteractionHand.MAIN_HAND);
             check(f, r.getVehicle() == null && m.getPassengers().size() == 2, "tandem: a third rider got on");
+            // 段を上げても、見た目の最大より多くは乗れない
+            m.setSeats(MountStats.seats(3));
+            check(f, m.seats() == m.look().maxSeats, "tandem: seats went past the look's maximum (" + m.seats() + ")");
+            if (m.look().maxSeats >= 3) {
+                m.mobInteract(r, InteractionHand.MAIN_HAND);
+                check(f, r.getVehicle() == m && m.getPassengers().size() == 3, "tandem: a third rider could not get on a three-seat mount");
+            }
             p.stopRiding();
             m.tidyRiders();
             check(f, q.getVehicle() == null && !m.isVehicle(), "tandem: the passenger stayed on after the owner got off");

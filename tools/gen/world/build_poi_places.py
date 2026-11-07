@@ -615,6 +615,10 @@ def build_site(index, kind, slug, piece_name, folk):
     elif need_tablet:
         raise SystemExit(f"{index} {kind} {slug} needs a piece to carry its tablet")
     connect_fences(cells)
+    # 半ブロックが何にも接していない所を直す (tools/audit/check_slabs.py。2026-11-07「ハーフブロックが接していない」)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "audit"))
+    import check_slabs
+    cells = check_slabs.fix_cells(cells, base["meta"])
     palette = []
     idx = {}
     blocks = []

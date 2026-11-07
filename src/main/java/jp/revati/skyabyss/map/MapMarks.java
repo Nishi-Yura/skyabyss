@@ -240,6 +240,20 @@ public final class MapMarks {
                 out.add(new Mark(Kind.TOWN, "town_" + region, "town", region, e.pos().getX(), e.pos().getZ(), false, 0));
             }
         }
+        // 外れの集落 (いつも出す。まだ建っていない所も図の置き場に。外れの行き先が地図から見える。名前は map.skyabyss.town.hamlet_<鍵>)
+        if (entries.stream().anyMatch(e -> e.kind().equals(jp.revati.skyabyss.world.continent.ContinentTowns.KIND))) {
+            java.util.List<jp.revati.skyabyss.world.continent.ContinentLayout.Frontier> hs = jp.revati.skyabyss.world.continent.FrontierHamlets.spots();
+            for (int i = 0; i < hs.size(); i++) {
+                BlockPos at = hs.get(i).pos();
+                for (Spot e : entries) {
+                    if (e.kind().equals(jp.revati.skyabyss.world.continent.FrontierHamlets.KIND) && e.index() == i) {
+                        at = e.pos();
+                    }
+                }
+                String id = jp.revati.skyabyss.world.continent.FrontierHamlets.townId(i);
+                out.add(new Mark(Kind.TOWN, id, "town", id, at.getX(), at.getZ(), false, 0));
+            }
+        }
         Spot ribsSpot = first(entries, "ribs");
         BlockPos ribs = ribsSpot == null ? null : ribsSpot.pos();
         if (ribs != null) {

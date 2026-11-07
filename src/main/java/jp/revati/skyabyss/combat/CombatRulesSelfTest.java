@@ -183,6 +183,45 @@ public final class CombatRulesSelfTest {
                     dummy.discard();
                 }
             }
+            // 傷と体力は有限のまま (DamageSanity。2026-11-07: /kill × 弱りで体力が NaN になり、体力 0 のまま動けなくなった)
+            Zombie odd = EntityType.ZOMBIE.create(over);
+            if (odd != null) {
+                odd.setPos(at.getX() + 14.5, at.getY(), at.getZ() + 0.5);
+                odd.setNoAi(true);
+                over.addFreshEntity(odd);
+                try {
+                    odd.setAbsorptionAmount(Float.NaN);
+                    odd.setHealth(Float.NaN);
+                    if (!DamageSanity.repair(odd) || !Float.isFinite(odd.getHealth()) || odd.getHealth() <= 0 || odd.getAbsorptionAmount() != 0f) {
+                        f.add("non-finite health was not repaired (" + odd.getHealth() + " / " + odd.getAbsorptionAmount() + ")");
+                    }
+                    odd.invulnerableTime = 0;
+                    odd.hurt(over.damageSources().generic(), Float.POSITIVE_INFINITY);
+                    if (!Float.isFinite(odd.getHealth()) || odd.isAlive()) {
+                        f.add("an infinite hit should kill with finite health (" + odd.getHealth() + ")");
+                    }
+                } finally {
+                    odd.discard();
+                }
+            }
+            // 壁に埋まった人は窒息せず、上の立てる所へ出る (WallRescue。2026-11-07 の潮招きの間)
+            {
+                net.minecraft.core.BlockPos feet = a.blockPosition();
+                net.minecraft.world.phys.Vec3 before = a.position();
+                over.setBlock(feet, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 2);
+                over.setBlock(feet.above(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 2);
+                try {
+                    boolean stuck = WallRescue.stuck(a);
+                    boolean freed = WallRescue.free(a);
+                    if (!stuck || !freed || WallRescue.stuck(a)) {
+                        f.add("a player buried in stone was not freed (stuck " + stuck + ", freed " + freed + ", at " + a.blockPosition() + ")");
+                    }
+                } finally {
+                    over.setBlock(feet, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                    over.setBlock(feet.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                    a.setPos(before.x, before.y, before.z);
+                }
+            }
             if (!FightRations.ration(new ItemStack(Items.BREAD)) || FightRations.ration(new ItemStack(Items.IRON_SWORD))) {
                 f.add("bread should count as a ration and a sword should not");
             }
@@ -191,7 +230,7 @@ public final class CombatRulesSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; boss break gauge (x0.8, fills, opening x3, breaks x2.0, grows, mechanic half), no bracing, weakened after death x0.85, rations)");
+            SkyAbyss.LOGGER.info("SELFTEST combat rules PASSED (player hits pass with no invulnerability on foes; no wear on titan backs; boss break gauge (x0.8, fills, opening x3, breaks x2.0, grows, mechanic half), no bracing, weakened after death x0.85, finite damage and health, buried players freed, rations)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST combat rules FAILED: {}", s);

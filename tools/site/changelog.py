@@ -8,6 +8,22 @@ from sitelib import REPO, T, page, sec
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v1.1.4", "2026-11-07", [
+            ("大陸の外れができました。大陸をめぐる環の道と内海の南岸の道、外れの集落 8 か所（住人 16 人と頼み）。前の世界は開いたときに地上を作り直します（クエスト・持ち物・見つけた場所はそのまま）。",
+             "The continent's frontier: a ring road around the continent, a road along the inland sea's south shore, and eight frontier hamlets (16 residents with errands). Older worlds rebuild the overworld when opened (quests, items and found places stay)."),
+            ("巨神の背の待機場所を「渦の口」に作り直し、地上の巨神の祠を巨神ごとの建物にしました（鯨骨の聖堂・潮の神殿・雷の歌の環・炉の門）。集合は広場の真ん中の光る円い台です。",
+             "The waiting areas on the titans' backs are rebuilt as vortex mouths, and each ground shrine has its own building (whale-bone cathedral, tide temple, thunder song ring, forge gate). Gather on the glowing round dais in the plaza."),
+            ("大陸の大事件を作り直しました。前触れの群れ、土地ごとの場の技、体力 2/3 と 1/3 で張る守り（光る「封じの輪」三つに立つと割れて膝をつく）、残り 1/4 の荒ぶり。体力だけ多い相手ではなくなりました。",
+             "World events are a staged fight now: a herald pack, field attacks per region, a ward at 2/3 and 1/3 health (stand in three glowing seal rings to break it and bring the foe to its knees), and an enrage at 1/4. No longer just a big health pool."),
+            ("地下のダンジョンの主に後半（体力半分で吠えて手下を呼び、技が速くなる）、新しい技（骨の礫・渦の引き込み・雷の走り・三連の打ち・熔けた溝）、大技のあとの大きな隙を足しました。",
+             "Dungeon bosses get a second half (a roar and two minions at half health, faster attacks), new attacks (bone spit, whirlpool pull, running bolts, triple strike, molten trench) and big openings after their heavy moves."),
+            ("日本語の文言を全部見直しました。仕組みの言葉はカタカナ（パーティー・スキル・スキルツリー・ジョブ・ダメージ・スロット・クールダウンなど）、難しい漢字を減らし、切りつめた文をふつうの文にしました。",
+             "All Japanese text was reviewed: game terms in katakana (party, skill, skill tree, job, damage, slot, cooldown), fewer hard kanji, clipped sentences made whole."),
+            ("半ブロックが何にも接していなかった所（祠の羽根・灯の笠・町の岩を巻く段など 107 か所）を直しました。名前の重なり（灯番の法衣・満ち欠けの砂時計）と、布の一式の頭（頭巾）、鉄の一式の名前も直しました。",
+             "Slabs touching nothing (shrine feathers, lamp caps, the steps around the town rocks: 107 spots) are fixed. Duplicate names (Lampwatch set, Hourglass of Phases), cloth hoods and the iron outfit names are fixed too."),
+            ("ポーズ画面の「進捗」で記録の功績が開くようになりました。スキルの画面の下の帯に節の字が透けなくなりました。心臓の間を広げ、二章の塩の蔵の口・0 体力で止まる不具合・ダンジョンの口と階段・荷馬車（6 人乗り）も入っています。",
+             "The pause menu's Advancements button opens the record book's deeds again; node labels no longer show through the skill screen's hint strip. Also: wider heart arenas, the salt vault mouth, the stuck-at-0-HP fix, dungeon mouths and stairs, and the covered wagon (six riders)."),
+        ]),
         ("v1.1.3", "2026-11-06", [
             ("1.1.2 の直し: 「熾火の棒」（五章の黒い鉄の素材）が素材屋で魔法使いにしか並ばなかったのを直しました。wiki の店の頁に、職の品（「戦士だけ」など）を書き、敵の頁に熾の山犬の姿を足しました。", "Fix for 1.1.2: the ember rod (a chapter 5 material) was only listed for mages at the material shop. The wiki shop page now marks job-only goods, and the foes page shows the ember jackal."),
         ]),

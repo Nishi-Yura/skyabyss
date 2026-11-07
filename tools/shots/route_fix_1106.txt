@@ -1,0 +1,78 @@
+# 2026-11-06: 岩鯨の順路の二つの直し。
+#  1. 試練を越えたあとの挑戦の加護: 選ぶまで次の部屋へ運ばない (4 秒を過ぎても画面が出たまま、元の部屋にいる)。選ぶと運ばれる
+#  2. 心臓の段: 心臓の間の中ではなく、手前の前室 (焚き火の休み場) へ運ばれる。歩いて大門をくぐると集合のあと閉じる
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/route_fix_1106.txt -PshotsName=route_fix
+world route_fix normal
+size 1280 720
+timeout 6000
+guiscale 2
+render 10
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss playtest skip opening
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd skyabyss playtest god on
+cmd skyabyss playtest gear whale
+cmd skyabyss playtest board whale
+wait 600
+waitchunks
+wait 40
+chat clear
+hud on
+cmd skyroute start
+wait 300
+waitchunks
+wait 60
+chat clear
+shot r1_room1
+
+# 部屋 1 を越える → 加護の画面。運びの 4 秒を過ぎても画面が出たまま、部屋 1 にいる
+cmd skyroute pass
+waitscreen 100 RouteBoonScreen
+wait 160
+shot r2_boon_still_room1
+cmd skyroute status
+# 左の札を押す → 閉じて、すぐ部屋 2 へ
+click 250 180
+wait 10
+shot r3_picked
+wait 80
+waitchunks
+wait 40
+shot r4_room2
+
+# 部屋 2 → 加護 → 部屋 3
+cmd skyroute pass
+waitscreen 100 RouteBoonScreen
+wait 20
+click 250 180
+wait 120
+waitchunks
+wait 40
+shot r5_room3
+
+# 部屋 3 (闘) → 加護 → 心臓の前室 (焚き火)
+cmd skyroute pass
+waitscreen 100 RouteBoonScreen
+wait 20
+click 250 180
+wait 120
+waitchunks
+wait 60
+chat clear
+shot r6_heart_front_room
+cmd skyroute status
+# 大門のほうへ歩いて入る
+walk on
+wait 100
+walk off
+wait 20
+shot r7_walked_in
+wait 120
+shot r8_sealed
+quit

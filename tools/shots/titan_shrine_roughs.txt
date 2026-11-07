@@ -1,0 +1,75 @@
+# 地上の巨神の祠のラフ 3 案 (tools/rough/titan_shrine/roughs.py)。平らな世界に置いて撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/titan_shrine_roughs.txt -PshotsName=titan_shrine_roughs
+world titanshrineroughs flat
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 7000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+chat clear
+cmd forceload add -60 -60 460 60
+wait 100
+cmd skyabyss dev ch2 place rough_shrine_a 0 -61 0
+wait 20
+cmd skyabyss dev ch2 place rough_shrine_b 200 -61 0
+wait 20
+cmd skyabyss dev ch2 place rough_shrine_c 400 -61 0
+wait 20
+wait 60
+cmd tp @s 20 -46 26 145 22
+waitchunks 100
+wait 30
+shot a_1_over
+cmd tp @s 0 -55 26 180 -8
+waitchunks 100
+wait 30
+shot a_2_path
+cmd tp @s 0 -56 6 180 -18
+waitchunks 100
+wait 30
+shot a_3_gate
+cmd tp @s 0 -15 0 0 90
+waitchunks 100
+wait 30
+shot a_4_top
+cmd tp @s 220 -46 26 145 24
+waitchunks 100
+wait 30
+shot b_1_over
+cmd tp @s 200 -55 26 180 -6
+waitchunks 100
+wait 30
+shot b_2_path
+cmd tp @s 206 -56 4 150 -14
+waitchunks 100
+wait 30
+shot b_3_ring
+cmd tp @s 200 -15 0 0 90
+waitchunks 100
+wait 30
+shot b_4_top
+cmd tp @s 420 -46 26 145 22
+waitchunks 100
+wait 30
+shot c_1_over
+cmd tp @s 400 -55 26 180 -6
+waitchunks 100
+wait 30
+shot c_2_path
+cmd tp @s 400 -56 8 180 -6
+waitchunks 100
+wait 30
+shot c_3_nave
+cmd tp @s 400 -15 0 0 90
+waitchunks 100
+wait 30
+shot c_4_top

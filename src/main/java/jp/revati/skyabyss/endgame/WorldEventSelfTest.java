@@ -63,6 +63,15 @@ public final class WorldEventSelfTest {
                 }
             }
 
+            // 前触れ: 先触れ (名前つき) と群れが出て、去るときに消える
+            WorldEvents.Event h = WorldEvents.begin(level, ContinentMap.WHALE);
+            p.setPos(h.spot.getX() + 0.5, h.spot.getY() + 1, h.spot.getZ() + 0.5);
+            int heralds = WorldEventFight.herald(level, h, p);
+            check(f, heralds >= 3 && WorldEventFight.heraldLeft(level, h) == heralds, "the herald pack did not come: " + heralds);
+            WorldEvents.leave(level);
+            check(f, WorldEventFight.heraldLeft(level, h) == 0, "the herald pack stayed after the event left");
+            p.setPos(spawn.getX() + 0.5, spawn.getY() + 1, spawn.getZ() + 0.5);
+
             WorldEvents.Event e = WorldEvents.begin(level, ContinentMap.WHALE);
             boss = WorldEvents.spawnBoss(level, e, p);
             check(f, boss != null, "the great foe did not appear");
@@ -73,6 +82,25 @@ public final class WorldEventSelfTest {
                 check(f, boss.getAttribute(Attributes.SCALE).getValue() > 1.5, "the great foe is not bigger");
                 WorldEvents.TEST.put(p.getUUID(), p);
                 WorldEvents.TEST.put(q.getUUID(), q);
+                // 封じ: 体力が 2/3 を切ると守りを張り、輪を三つ満たすと割れて膝をつく
+                boss.setHealth(boss.getMaxHealth() * 0.6f);
+                long t = level.getGameTime();
+                WorldEventFight.step(level, e, boss, t);
+                check(f, WorldEventFight.sealed(e) && e.seals.size() == 3, "the great foe did not raise its ward under 2/3");
+                float before = boss.getHealth();
+                boss.hurt(level.damageSources().playerAttack(p), 40);
+                check(f, before - boss.getHealth() < 40 * WorldEventFight.SEALED * 1.5f + 0.5f, "the ward did not soften hits: " + (before - boss.getHealth()));
+                for (WorldEventFight.Seal s : new ArrayList<>(e.seals)) {
+                    p.setPos(s.pos().x, s.pos().y, s.pos().z);
+                    for (int i = 0; i < 4 && !s.full(); i++) {
+                        WorldEventFight.step(level, e, boss, t);
+                    }
+                    check(f, s.full(), "standing in a seal ring did not fill it");
+                }
+                WorldEventFight.step(level, e, boss, t);
+                check(f, !WorldEventFight.sealed(e) && e.sealsDone == 1 && jp.revati.skyabyss.combat.BreakGauge.broken(boss),
+                        "filling the seal rings did not break the ward and bring the great foe to its knees");
+                p.setPos(spawn.getX() + 0.5, spawn.getY() + 1, spawn.getZ() + 0.5);
                 WorldEvents.dealt(p.getUUID(), 500);
                 WorldEvents.dealt(q.getUUID(), 5);
                 p.getPersistentData().remove(RegionPoints.FAME);

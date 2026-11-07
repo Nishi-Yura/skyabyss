@@ -2,9 +2,9 @@
   "vow.skyabyss.hardy": "硬き敵",
   "vow.skyabyss.hardy.desc": "背中の敵の体力が 3 割増える",
   "vow.skyabyss.sharp": "鋭き予兆",
-  "vow.skyabyss.sharp.desc": "技の予告が 25% 短くなる（0.8 秒より短くはならない）",
+  "vow.skyabyss.sharp.desc": "スキルの予兆が 25% 短くなる（0.8 秒より短くはならない）",
   "vow.skyabyss.thin": "薄き守り",
-  "vow.skyabyss.thin.desc": "背中で受ける傷が 25% 増える",
+  "vow.skyabyss.thin.desc": "背中で受けるダメージが 25% 増える",
   "vow.skyabyss.bare": "素手の旅",
   "vow.skyabyss.bare.desc": "背中で野営の道具（焚き火・たいまつ・灯り・箱）を置けない",
   "vow.skyabyss.hasty": "急ぐ足",
@@ -26,7 +26,7 @@
   "message.skyabyss.vow.reward_shard": " ・ 共鳴の欠片 +%s",
   "message.skyabyss.vow.best": "誓いの最高の段を更新した（段 %s）。控え帳に残る",
   "message.skyabyss.vow.title": "称号を得た：%s",
-  "message.skyabyss.vow.closed.not_repeat": "誓いを立てられるのは、その巨神の心臓を一度止めてから",
+  "message.skyabyss.vow.closed.not_repeat": "誓いを立てられるのは、その巨神の心臓を一度止めたあと",
   "message.skyabyss.vow.closed.started": "試練を進めたあとは、誓いを変えられない（心臓を止めれば降りる）",
   "message.skyabyss.vow.closed.no_back": "その巨神の背中は、まだこの世界にない",
   "message.skyabyss.vow.fail.no_back": "その巨神の背中は、まだこの世界にない",
@@ -40,5 +40,5 @@
   "skyabyss_record.r.vow_best": "誓いの最高の段",
   "skyabyss_record.v.vow_best": "段 %s ・ %s",
   "skyabyss_record.v.vow_none": "まだ",
-  "skyabyss_record.d.vow_best": "周回で立てた誓いの合計の重さ（最大 6）の、これまでの最高。称号は飾りだけで、装備の確率は変わらない。誓いは /vow で、乗る前か最初の休み場までに立てる。"
+  "skyabyss_record.d.vow_best": "周回で立てた誓いの重さの合計の、これまでの最高（最大 6）。称号は飾りだけで、装備の確率は変わらない。誓いは /vow で、乗る前か最初の休み場までに立てる。"
 }

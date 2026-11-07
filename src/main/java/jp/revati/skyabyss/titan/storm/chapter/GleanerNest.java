@@ -323,6 +323,11 @@ public final class GleanerNest {
         }
     }
 
+    // 見つけた筋の数
+    public static int foundCount(ServerPlayer p) {
+        return Integer.bitCount(p.getPersistentData().getInt(FOUND));
+    }
+
     // i 番目の筋を見つけた (人ごとに一度)。新しく見つけたら true
     public static boolean find(ServerPlayer p, int i) {
         int mask = p.getPersistentData().getInt(FOUND);

@@ -50,13 +50,30 @@ public final class ShrineSelfTest {
                 && !level.getBlockState(feet.below()).getCollisionShape(level, feet.below()).isEmpty();
     }
 
-    // 参道のはじめ (南 15 マス) から碑の南の隣まで、一段ずつ (跳んで一段まで) 歩いて行けるか
-    static boolean reachable(ServerLevel level, BlockPos c) {
-        return walkSet(level, c).contains(c.south());
+    // 参道の終わりから、集合台と碑のそば (水平 2・高さ ±2) まで、一段ずつ (跳んで一段まで) 歩いて行けるか
+    static boolean reachable(ServerLevel level, BlockPos c, String titan) {
+        java.util.Set<BlockPos> w = walkSet(level, c, titan);
+        if (!w.contains(ShrineBuild.padOf(c, titan))) {
+            return false;
+        }
+        for (BlockPos p : w) {
+            if (Math.abs(p.getX() - c.getX()) <= 2 && Math.abs(p.getZ() - c.getZ()) <= 2 && Math.abs(p.getY() - c.getY()) <= 2) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    static java.util.Set<BlockPos> walkSet(ServerLevel level, BlockPos c) {
-        BlockPos start = c.south(15);
+    static BlockPos pathStart(BlockPos c, String titan) {
+        ShrineBuild.Layout l = ShrineBuild.layout(titan);
+        return ShrineBuild.originOf(c, titan).offset(0, 1, l.pathEnd());
+    }
+
+    static java.util.Set<BlockPos> walkSet(ServerLevel level, BlockPos c, String titan) {
+        BlockPos o = ShrineBuild.originOf(c, titan);
+        ShrineBuild.Layout l = ShrineBuild.layout(titan);
+        int r = l.radius() + 3;
+        BlockPos start = pathStart(c, titan);
         java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
         java.util.Set<BlockPos> seen = new java.util.HashSet<>();
         queue.add(start);
@@ -69,7 +86,7 @@ public final class ShrineSelfTest {
             for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
                 for (int dy = 1; dy >= -3; dy--) {
                     BlockPos n = p.relative(d).above(dy);
-                    if (Math.abs(n.getX() - c.getX()) > 14 || n.getZ() - c.getZ() > 45 || n.getZ() - c.getZ() < -14 || !walkable(level, n)) {
+                    if (Math.abs(n.getX() - o.getX()) > r || n.getZ() - o.getZ() > l.pathEnd() || n.getZ() - o.getZ() < -r || !walkable(level, n)) {
                         continue;
                     }
                     if (dy == 1 && !level.getBlockState(p.above(2)).getCollisionShape(level, p.above(2)).isEmpty()) {
@@ -85,21 +102,28 @@ public final class ShrineSelfTest {
         return seen;
     }
 
-    // 台地・拝殿・参道の立てる床のうち、近く (歩いて 9 マス) に光るものがない所 (なければ null)
-    static String unlit(ServerLevel level, BlockPos c) {
+    // 歩いて行ける床のうち、近く (9 歩) に光るものがない所 (なければ null)
+    static String unlit(ServerLevel level, BlockPos c, String titan) {
+        BlockPos o = ShrineBuild.originOf(c, titan);
+        int r = ShrineBuild.layout(titan).radius() + 3;
         List<BlockPos> sources = new ArrayList<>();
-        for (int x = -13; x <= 13; x++) {
-            for (int z = -13; z <= 40; z++) {
-                for (int y = -30; y <= 24; y++) {
-                    BlockPos p = c.offset(x, y, z);
+        for (int x = -r; x <= r; x++) {
+            for (int z = -r; z <= ShrineBuild.layout(titan).pathEnd(); z++) {
+                for (int y = -4; y <= 36; y++) {
+                    BlockPos p = o.offset(x, y, z);
                     if (level.getBlockState(p).getLightEmission() > 0) {
                         sources.add(p);
                     }
                 }
             }
         }
-        java.util.Set<BlockPos> built = ShrineArchitect.STANDING.getOrDefault(c, java.util.Set.of());
-        for (BlockPos p : walkSet(level, c)) {
+        java.util.Set<BlockPos> built = new java.util.HashSet<>();
+        for (jp.revati.skyabyss.opening.site.Blueprint.Cell cell : ShrineBuild.layout(titan).bp().cells) {
+            if (!cell.state().isAir()) {
+                built.add(o.offset(cell.x(), cell.y() + 1, cell.z()));
+            }
+        }
+        for (BlockPos p : walkSet(level, c, titan)) {
             if (!built.contains(p)) {
                 continue;
             }
@@ -111,7 +135,7 @@ public final class ShrineSelfTest {
                 }
             }
             if (!lit) {
-                return p.toShortString() + " rel=" + p.subtract(c).toShortString();
+                return p.toShortString() + " rel=" + p.subtract(o).toShortString();
             }
         }
         return null;
@@ -133,21 +157,29 @@ public final class ShrineSelfTest {
                 BlockState st = level.getBlockState(c);
                 check(f, st.is(ModBlocks.TITAN_SHRINE.get()) && st.getValue(RelicStyle.PROP) == RelicStyle.ofTitan(titan), titan + ": the shrine stele is missing at " + c);
                 check(f, TitanShrineBlock.titanOf(st).equals(titan), titan + ": the stele names another titan");
-                check(f, level.getBlockState(c.below().north(TitanShrine.RING)).equals(TitanShrine.ringBlock(titan)), titan + ": the ring is not of the titan's stone");
-                check(f, level.getBlockState(c.east(TitanShrine.PEDESTAL)).is(ModBlocks.RESONANCE_FORGE.get()), titan + ": no resonance forge beside the shrine");
-                check(f, reachable(level, c), titan + ": the stele cannot be walked to from the approach path");
-                String dark = unlit(level, c);
+                check(f, level.getBlockState(ShrineBuild.forgeOf(c, titan)).is(ModBlocks.RESONANCE_FORGE.get()), titan + ": no resonance forge at the shrine");
+                if (!reachable(level, c, titan)) {
+                    java.util.Set<BlockPos> w = walkSet(level, c, titan);
+                    BlockPos best = null;
+                    for (BlockPos q : w) {
+                        if (best == null || q.distSqr(c) < best.distSqr(c)) {
+                            best = q;
+                        }
+                    }
+                    f.add(titan + ": the gathering dais (" + w.contains(ShrineBuild.padOf(c, titan)) + ") or the stele cannot be walked to; walked " + w.size()
+                            + ", nearest to the stele " + (best == null ? "-" : best.subtract(ShrineBuild.originOf(c, titan)).toShortString()) + ", start "
+                            + walkable(level, pathStart(c, titan)));
+                }
+                String dark = unlit(level, c, titan);
                 check(f, dark == null, titan + ": a walkable floor has no light nearby (mobs can spawn): " + dark);
                 check(f, TitanShrine.ensure(server, titan).equals(c) && c.equals(TitanShrine.posOf(server, titan)), titan + ": the shrine moved when ensured again");
-                // 集合台 (拝殿の南の入口の外の黒い床)。碑のそば (輪の中) は台ではない
-                check(f, level.getBlockState(c.offset(0, -1, TitanShrine.PAD_Z0 + 1)).equals(TitanShrine.PAD_BLOCK)
-                        && level.getBlockState(c.offset(TitanShrine.PAD_HALF, -1, TitanShrine.PAD_Z1)).equals(TitanShrine.PAD_BLOCK), titan + ": the gathering pad is not black");
-                check(f, level.getBlockState(c.offset(0, 0, TitanShrine.PAD_Z0 + 1)).getCollisionShape(level, c.offset(0, 0, TitanShrine.PAD_Z0 + 1)).isEmpty()
-                        && level.getBlockState(c.offset(0, 1, TitanShrine.PAD_Z0 + 1)).getCollisionShape(level, c.offset(0, 1, TitanShrine.PAD_Z0 + 1)).isEmpty(),
-                        titan + ": no standing room on the gathering pad");
-                a.setPos(c.getX() + 0.5, c.getY(), c.getZ() + TitanShrine.PAD_Z0 + 1.5);
-                b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 2.5);
-                check(f, TitanShrine.onPad(a, c) && !TitanShrine.onPad(b, c), titan + ": the pad test is wrong");
+                // 集合台 (広場の真ん中の円い壇)。碑のそばは台ではない
+                BlockPos pad = ShrineBuild.padOf(c, titan);
+                check(f, !level.getBlockState(pad.below()).getCollisionShape(level, pad.below()).isEmpty() && walkable(level, pad),
+                        titan + ": no standing room on the gathering dais at " + pad.toShortString());
+                a.setPos(pad.getX() + 0.5, pad.getY(), pad.getZ() + 0.5);
+                b.setPos(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
+                check(f, TitanShrine.onPad(a, c, titan) && !TitanShrine.onPad(b, c, titan), titan + ": the pad test is wrong");
                 // 断り方
                 stopped.clear();
                 check(f, TitanShrine.refusal(server, a, titan, List.of(a), true, false) != null, titan + ": a stranger was let in");
@@ -208,7 +240,7 @@ public final class ShrineSelfTest {
             TitanVisibility.clearCache();
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST trial shrine PASSED (four shrines built, refusals, song shards, titan visibility)");
+            SkyAbyss.LOGGER.info("SELFTEST trial shrine PASSED (four shrines built from their own blueprints, walkable and lit, refusals, song shards, titan visibility)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST trial shrine FAILED: {}", s);

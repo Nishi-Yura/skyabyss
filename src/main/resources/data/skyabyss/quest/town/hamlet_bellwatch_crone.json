@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 322,
+  "giver": "skyabyss:guest_bellwatch_crone",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "nine_stones",
+          "type": "signal",
+          "target": "poi:@nine_stones",
+          "party": false
+        },
+        {
+          "id": "backwarden_graves",
+          "type": "signal",
+          "target": "poi:@backwarden_graves",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_bellwatch_crone",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 15,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 80
+      },
+      {
+        "item": "skyabyss:box_rare_1",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -110,6 +110,12 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
                 }
             }
         }
+        // 岩の小島・台の段を置いた所に立っていた人を、上へ出す (埋まって窒息し続けていた。2026-11-07)
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, new AABB(ctx.local(-hx, -1, -hz)).minmax(new AABB(ctx.local(hx, HEIGHT, hz))))) {
+            if (jp.revati.skyabyss.combat.WallRescue.stuck(p)) {
+                jp.revati.skyabyss.combat.WallRescue.free(p);
+            }
+        }
     }
 
     @Override

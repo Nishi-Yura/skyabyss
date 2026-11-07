@@ -532,6 +532,7 @@ public final class Ch2MobsSelfTest {
     // ---------------------------------------------------------------- 潮の番人
     private static ShoreWarden wardenAt(ServerLevel level, double x, double z) {
         ShoreWarden w = spawn(level, ModEntities.SHORE_WARDEN.get(), x, z, 0f);
+        w.setNamed(true);
         w.holdAttacks();
         return w;
     }
@@ -668,6 +669,10 @@ public final class Ch2MobsSelfTest {
             }
             notes.add("burrower salt " + bs);
             clearItems(level);
+            // 蔵の外の番人 (潮の洞の敵など) は名づきではない: ボスバーも床の水もない
+            ShoreWarden stray = spawn(level, ModEntities.SHORE_WARDEN.get(), SX + 0.5, SZ + 0.5, 0f);
+            check(!stray.named(), "a shore warden outside the salt vault counts as the named warden", f);
+            stray.discard();
             for (int i = 0; i < 3; i++) {
                 ShoreWarden w = spawn(level, ModEntities.SHORE_WARDEN.get(), SX + 0.5, SZ + 0.5, 0f);
                 w.hurt(level.damageSources().playerAttack(killer), 100000f);

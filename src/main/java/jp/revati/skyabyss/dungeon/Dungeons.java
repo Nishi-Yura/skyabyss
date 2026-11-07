@@ -84,6 +84,22 @@ public final class Dungeons {
     private Dungeons() {
     }
 
+    // いま開いている写しの、印 mark の位置 (そのダンジョンの全部の層。印のない層は飛ばす)
+    public static java.util.List<BlockPos> marksOf(net.minecraft.server.MinecraftServer server, Dungeon d, String mark) {
+        java.util.List<BlockPos> out = new java.util.ArrayList<>();
+        for (DungeonRun run : RUNS.values()) {
+            if (run.dungeon != d) {
+                continue;
+            }
+            for (int f = 0; f < d.floors().length; f++) {
+                if (run.floor(f).terrain.has(mark)) {
+                    out.add(run.mark(f, mark));
+                }
+            }
+        }
+        return out;
+    }
+
     public static DungeonRun runOf(ServerPlayer p) {
         Integer id = BY_PLAYER.get(p.getUUID());
         return id == null ? null : RUNS.get(id);
@@ -116,6 +132,10 @@ public final class Dungeons {
 
     // deep: 深く潜る (主を一度倒した人だけ。倒していなければふつうに入って知らせる)
     public static DungeonRun enter(ServerPlayer p, Dungeon d, boolean deep) {
+        if (d.mini) {
+            // 小ダンジョンには深く潜るはない
+            deep = false;
+        }
         if (deep && clears(p, d) <= 0) {
             deep = false;
             Notice.hint(p, "message.skyabyss.dungeon.deep_locked");
@@ -180,22 +200,27 @@ public final class Dungeons {
             return null;
         }
         List<UUID> ids = new ArrayList<>();
-        int from = Dungeon.BOSS_FLOOR;
+        int from = d.bossFloor();
         for (ServerPlayer p : squad) {
             ids.add(p.getUUID());
             from = Math.min(from, progress(p, d));
         }
-        DungeonRun run = new DungeonRun(server, nextId++, d, slot, ids, level.getGameTime(), Math.max(0, from), deep, DungeonMood.today(d));
+        DungeonRun run = new DungeonRun(server, nextId++, d, slot, ids, level.getGameTime(), Math.max(0, from), deep, d.mini ? null : DungeonMood.today(d));
         RUNS.put(run.id, run);
         for (ServerPlayer p : squad) {
             BY_PLAYER.put(p.getUUID(), run.id);
         }
-        SkyAbyss.LOGGER.info("[dungeon] run #{} {} slot {} from floor {} with {} player(s), deep {}, mood {}", run.id, d.id, slot, run.checkpoint, squad.size(), deep, run.mood.id);
+        SkyAbyss.LOGGER.info("[dungeon] run #{} {} slot {} from floor {} with {} player(s), deep {}, mood {}", run.id, d.id, slot, run.checkpoint, squad.size(), deep,
+                run.mood == null ? "-" : run.mood.id);
         for (ServerPlayer p : squad) {
             moveTo(p, run, run.checkpoint);
             if (real(p)) {
                 Notice.place(p, Component.translatable(d.nameKey()), Component.translatable(deep ? "message.skyabyss.dungeon.sub_deep" : "message.skyabyss.dungeon.sub", d.level, squad.size()));
-                Notice.hint(p, "message.skyabyss.dungeon.mood_enter", Component.translatable(run.mood.nameKey()), Component.translatable(run.mood.descKey()));
+                if (run.mood != null) {
+                    Notice.hint(p, "message.skyabyss.dungeon.mood_enter", Component.translatable(run.mood.nameKey()), Component.translatable(run.mood.descKey()));
+                } else {
+                    Notice.hint(p, "message.skyabyss.dungeon.mini_enter");
+                }
                 if (deep) {
                     Notice.alert(p, "message.skyabyss.dungeon.deep_enter");
                 }
@@ -255,6 +280,10 @@ public final class Dungeons {
     // 入口の間へ帰す (写しの続きは残る)
     public static void sendBack(ServerPlayer p, Dungeon d) {
         ServerLevel over = p.server.overworld();
+        if (d.mini) {
+            MiniDungeons.sendHome(p, d);
+            return;
+        }
         BlockPos back = hall(over, d);
         // 層の門の方を向いて立つ
         BlockPos gate = ContinentPois.extraOf(over, d.poiKind(), "gate");
@@ -339,8 +368,13 @@ public final class Dungeons {
         run.cleared = true;
         run.clearedAt = level.getGameTime();
         Dungeon d = run.dungeon;
+        if (d.mini) {
+            MiniDungeons.cleared(run, level);
+            SkyAbyss.LOGGER.info("[dungeon] run #{} {} cleared in {}s", run.id, d.id, (level.getGameTime() - run.startedTick) / 20);
+            return;
+        }
         for (ServerPlayer p : run.present()) {
-            if (run.floorOf(p) != Dungeon.BOSS_FLOOR) {
+            if (run.floorOf(p) != d.bossFloor()) {
                 continue;
             }
             reward(p, d, run.deep, run.mood);
@@ -355,6 +389,7 @@ public final class Dungeons {
             case TIDE_CAVE -> 200;
             case STORM_HOLLOW -> 360;
             case MOLTEN_MINE -> 530;
+            default -> 0;
         };
     }
 
@@ -450,7 +485,7 @@ public final class Dungeons {
                     on.add(p);
                 }
             }
-            if (!on.isEmpty() || (f == Dungeon.BOSS_FLOOR && run.floor(f).boss != null)) {
+            if (!on.isEmpty() || (f == run.dungeon.bossFloor() && run.floor(f).boss != null)) {
                 run.floor(f).tick(level, t, on);
             }
             for (ServerPlayer p : on) {
@@ -480,7 +515,7 @@ public final class Dungeons {
         if (t % 40 != 0 || over.players().isEmpty()) {
             return;
         }
-        for (Dungeon d : Dungeon.values()) {
+        for (Dungeon d : Dungeon.mids()) {
             BlockPos gate = ContinentPois.extraOf(over, d.poiKind(), "gate");
             if (gate == null) {
                 continue;
@@ -508,7 +543,7 @@ public final class Dungeons {
         if (!f.ready()) {
             return;
         }
-        if (floor < Dungeon.BOSS_FLOOR && f.terrain.has("next") && p.position().distanceTo(f.center("next")) < STEP_REACH) {
+        if (floor < run.dungeon.bossFloor() && f.terrain.has("next") && p.position().distanceTo(f.center("next")) < STEP_REACH) {
             MOVING.put(p.getUUID(), t + 60);
             if (run.dungeon == Dungeon.BONE_PIT && floor == 0) {
                 // トロッコで下の層へ (乗った音のあと、着いた所で止まる音)
@@ -526,7 +561,7 @@ public final class Dungeons {
             }
             return;
         }
-        if (floor == Dungeon.BOSS_FLOOR && f.bossDown && f.terrain.has("exit") && p.position().distanceTo(f.center("exit")) < 2.2) {
+        if (floor == run.dungeon.bossFloor() && f.bossDown && f.terrain.has("exit") && p.position().distanceTo(f.center("exit")) < 2.2) {
             MOVING.put(p.getUUID(), t + 60);
             level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
             sendBack(p, run.dungeon);
@@ -547,14 +582,23 @@ public final class Dungeons {
             if (run != null && f >= 0 && run.floor(f).terrain.has("leave") && pos.equals(run.mark(f, "leave"))) {
                 event.setCanceled(true);
                 leave(p);
+            } else if (run != null && f >= 0 && run.dungeon.mini && MiniDungeons.pack(p, run, f, pos)) {
+                event.setCanceled(true);
             }
             return;
         }
         if (p.level().dimension() != Level.OVERWORLD) {
             return;
         }
+        // 章の跡地の小ダンジョンの口の門 (MiniDungeons)
+        Dungeon mini = MiniDungeons.gateAt(p.server, pos);
+        if (mini != null) {
+            event.setCanceled(true);
+            MiniDungeons.use(p, mini);
+            return;
+        }
         // 入口の間の層の門
-        for (Dungeon d : Dungeon.values()) {
+        for (Dungeon d : Dungeon.mids()) {
             BlockPos gate = ContinentPois.extraOf(p.serverLevel(), d.poiKind(), "gate");
             if (gate != null && gate.distManhattan(pos) <= 1) {
                 event.setCanceled(true);
@@ -601,7 +645,7 @@ public final class Dungeons {
         for (DungeonRun run : RUNS.values()) {
             if (e.getTags().contains(run.foeTag())) {
                 DungeonWorld.Place at = DungeonWorld.place(e.blockPosition());
-                int f = at == null ? Dungeon.BOSS_FLOOR : at.floor();
+                int f = at == null ? run.dungeon.bossFloor() : at.floor();
                 run.floor(f).foeDied(level, e);
                 return;
             }
@@ -690,10 +734,10 @@ public final class Dungeons {
                         }))
                         .then(Commands.literal("boss").executes(c -> {
                             DungeonRun run = runOf(c.getSource().getPlayerOrException());
-                            if (run == null || run.floor(Dungeon.BOSS_FLOOR).boss == null) {
+                            if (run == null || run.floor(run.dungeon.bossFloor()).boss == null) {
                                 return 0;
                             }
-                            var e = run.level().getEntity(run.floor(Dungeon.BOSS_FLOOR).boss);
+                            var e = run.level().getEntity(run.floor(run.dungeon.bossFloor()).boss);
                             if (e instanceof LivingEntity le) {
                                 le.hurt(le.damageSources().genericKill(), Float.MAX_VALUE);
                             }

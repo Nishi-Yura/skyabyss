@@ -76,7 +76,7 @@ public final class Ch2Gear {
     // 砂時計で潮の刻みを読んだ
     public static final String SIGNAL_TIDE_READ = "ch2_tide_read";
 
-    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    // この章から鍛冶場・薬師で誂えられる品 (その章の品。自己テストが確かめる)
     public static final List<String> MADE = List.of("tide_wader_helmet", "tide_wader_chestplate", "tide_wader_leggings", "tide_wader_boots",
             "salt_whetstone", "tide_pickle", "pearl_powder", "tide_hourglass");
 

@@ -67,12 +67,17 @@ def entrance(dungeon, theme, seed, mouth, hall_decor, stair_block="stone_brick",
     cv.tunnel([(0, -1, -3), (0, -1, -6)], 2.2, 4.6, seed=seed + 1)
     y, z = -1, -6
     steps = []
-    while y > HALL_FLOOR:
+    # 踊り場 (途中の平らな所)。段ではなく平らな床 (段の一つ下の高さの床の上を歩く)
+    landing = set()
+    # 最後の段は入口の間の床と同じ高さ (足もと HALL_FLOOR) に置く。前は一つ上で止まっていて、床から最後の段まで 1.5 あり、
+    # 跳んでも登れなかった (2026-11-06 の声「登れない。階段一マス無くて」)
+    while y >= HALL_FLOOR:
         steps.append((z, y))
         if y == -13:
             for _ in range(3):
                 z -= 1
                 steps.append((z, y))
+                landing.add((z, y))
         z -= 1
         y -= 1
     for (sz, sy) in steps:
@@ -86,17 +91,22 @@ def entrance(dungeon, theme, seed, mouth, hall_decor, stair_block="stone_brick",
     for k in [k for k in cv.mats if k[1] >= -1]:
         del cv.mats[k]
     hall_decor(c, cv)
-    for (sz, sy) in steps:
-        for x in range(-1, 2):
-            c.set(x, sy, sz, stair(stair_block, "south"))
-        for x in (-2, 2):
-            c.set(x, sy, sz, side_block)
-        for x in range(-2, 3):
-            c.set(x, sy - 1, sz, side_block)
-        if sy % 4 == 0:
+
+    def write_steps():
+        for (sz, sy) in steps:
+            for x in range(-1, 2):
+                # 踊り場は段を置かず空ける (足もとは下の床。前の段の低い側から半段下り、次の段の背と同じ高さ)
+                c.set(x, sy, sz, AIR if (sz, sy) in landing else stair(stair_block, "south"))
             for x in (-2, 2):
-                c.set(x, sy + 1, sz, side_block)
-                c.set(x, sy + 2, sz, lantern())
+                c.set(x, sy, sz, side_block)
+            for x in range(-2, 3):
+                c.set(x, sy - 1, sz, side_block)
+            if sy % 4 == 0:
+                for x in (-2, 2):
+                    c.set(x, sy + 1, sz, side_block)
+                    c.set(x, sy + 2, sz, lantern())
+
+    write_steps()
     # 彫った空き・壁の殻・飾りを見どころのセルへ (y -1 より上は口の部品に任せる)
     xs, ys, zs = np.nonzero(cv.air)
     for i in range(len(xs)):
@@ -110,6 +120,14 @@ def entrance(dungeon, theme, seed, mouth, hall_decor, stair_block="stone_brick",
         if c.cells.get(p) in (None, AIR):
             c.cells[p] = s
     mouth(c, PK)
+    # 口の部品の地面の層 (PK.ground は y -1 に半径 9 で敷く) が、坑の頭 (最初の段と、その先の段の頭の上) を塞いでいた
+    # (2026-11-06 の声「ダンジョンの入口、閉じてる」)。口を書いたあとで、段の上の空き (頭まで 4) と段・壁を書き直す。
+    # y 0 より上は口の部品の c.clear が空けている
+    for (sz, sy) in steps:
+        for x in range(-2, 3):
+            for yy in range(sy + 1, min(sy + 5, 0)):
+                c.set(x, yy, sz, AIR)
+    write_steps()
     return c.save("poi_dungeon_" + dungeon, [-9, -6, 9, 9])
 
 

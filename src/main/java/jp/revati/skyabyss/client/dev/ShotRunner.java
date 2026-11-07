@@ -836,7 +836,10 @@ public final class ShotRunner {
                 if (mc.screen != null) {
                     int b = line.args().length > 2 ? line.intArg(2) : 0;
                     mc.screen.mouseClicked(line.doubleArg(0), line.doubleArg(1), b);
-                    mc.screen.mouseReleased(line.doubleArg(0), line.doubleArg(1), b);
+                    // 押した拍子に画面が閉じることがある (選ぶ画面など)
+                    if (mc.screen != null) {
+                        mc.screen.mouseReleased(line.doubleArg(0), line.doubleArg(1), b);
+                    }
                 }
                 return true;
             }
@@ -899,6 +902,17 @@ public final class ShotRunner {
             case "open" -> {
                 Screen screen = screen(mc, line.arg(0));
                 mc.setScreen(screen);
+                return true;
+            }
+            case "shoptab" -> {
+                // shoptab buy|sell|back : 開いている店の画面のつまみを替える (撮影用)
+                if (mc.screen instanceof jp.revati.skyabyss.client.facility.ShopScreen shop) {
+                    switch (line.arg(0)) {
+                        case "back" -> shop.showBack();
+                        case "sell" -> shop.showSell(true);
+                        default -> shop.showSell(false);
+                    }
+                }
                 return true;
             }
             case "mapstyle" -> {
@@ -1168,6 +1182,9 @@ public final class ShotRunner {
         }
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);
+            // バニラの進捗の画面 (ポーズ画面の「進捗・実績」・L キーと同じ。控え帳の「記し」へ差し替わるか)
+            case "advancements" -> () -> new net.minecraft.client.gui.screens.advancements.AdvancementsScreen(mc.player.connection.getAdvancements());
+            case "pause" -> () -> new PauseScreen(true);
             case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);
             case "travel_map" -> () -> { jp.revati.skyabyss.client.map.MapClient.open(); return mc.screen; };
             case "travel_map_voyage_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(true);

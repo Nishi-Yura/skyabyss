@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 333,
+  "giver": "skyabyss:guest_frostfort_fletcher",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "brokenwing_tower",
+          "type": "signal",
+          "target": "poi:@brokenwing_tower",
+          "party": false
+        },
+        {
+          "id": "cloudwatch_post",
+          "type": "signal",
+          "target": "poi:@cloudwatch_post",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_frostfort_fletcher",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 90,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 120
+      },
+      {
+        "item": "skyabyss:box_rare_3",
+        "count": 1
+      }
+    ]
+  }
+}

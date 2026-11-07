@@ -1,0 +1,255 @@
+# 2026-11-07: 巨神の背の待機場所「渦の口」(trial/ArrivalDeck、tools/gen/world/build_arrival_lobbies.py)。四体の全体・渦・祠・真上
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/arrival_lobby.txt -PshotsName=arrival_lobby
+world arrivallobbyb flat
+size 1600 900
+timeout 2400
+render 14
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 300
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-40 ~16 ~32 -140 21
+waitchunks
+wait 40
+shot 1_whale_over
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-6 ~1 ~1 90 8
+waitchunks
+wait 40
+shot 1_whale_vortex
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-6 ~1 ~-4 155 4
+waitchunks
+wait 40
+shot 1_whale_shrine
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-13 ~40 ~0 0 90
+waitchunks
+wait 40
+shot 1_whale_top
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-36 ~4 ~-6 -80 6
+waitchunks
+wait 40
+shot 1_whale_back
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 300
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-36 ~18 ~30 -137 23
+waitchunks
+wait 40
+shot 2_tide_over
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-4 ~1 ~-2 107 10
+waitchunks
+wait 40
+shot 2_tide_vortex
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-4 ~1 ~0 196 4
+waitchunks
+wait 40
+shot 2_tide_shrine
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-6 ~40 ~-2 0 90
+waitchunks
+wait 40
+shot 2_tide_top
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-30 ~4 ~-12 -60 6
+waitchunks
+wait 40
+shot 2_tide_back
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 300
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~30 ~20 ~22 133 26
+waitchunks
+wait 40
+shot 3_storm_over
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~0 ~1 ~-4 180 10
+waitchunks
+wait 40
+shot 3_storm_vortex
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~0 ~1 ~-2 0 4
+waitchunks
+wait 40
+shot 3_storm_shrine
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~0 ~42 ~-6 0 90
+waitchunks
+wait 40
+shot 3_storm_top
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-3 ~4 ~-32 10 8
+waitchunks
+wait 40
+shot 3_storm_back
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 300
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~6 ~6 ~-6 20 19
+waitchunks
+wait 40
+shot 4_ember_over
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~0 ~1 ~2 0 10
+waitchunks
+wait 40
+shot 4_ember_vortex
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-3 ~1 ~1 85 6
+waitchunks
+wait 40
+shot 4_ember_shrine
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~-8 ~8 ~-4 -30 27
+waitchunks
+wait 40
+shot 4_ember_wide
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive ember_back
+waitchunks
+wait 40
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s ~4 ~3 ~20 170 8
+waitchunks
+wait 40
+shot 4_ember_back
+hud on

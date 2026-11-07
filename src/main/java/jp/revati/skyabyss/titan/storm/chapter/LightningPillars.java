@@ -54,6 +54,8 @@ public final class LightningPillars {
     public static final double SAMPLE_NEAR = 32;
     public static final int SAMPLE_EVERY = 1200;
     static final int EVERY = 20;
+    // 台を数える仕掛けはもう動かさない (見本の柱の雷だけ残す)
+    public static final boolean RETIRED = true;
     // 旧い跡で針を探す範囲
     static final int LEGACY_REACH = 8;
 
@@ -199,6 +201,10 @@ public final class LightningPillars {
                 continue;
             }
             sample(level, e, now);
+            // 台の針・銅の戸・石の箱は前の版の仕掛け。2026-11-07 から支度の段は塔の跡の小ダンジョンを越えること (dungeon/MiniDungeons。site_clear:storm_ruin)
+            if (RETIRED) {
+                continue;
+            }
             int m = mask(level, e);
             long key = e.pos.asLong();
             int before = LAST_MASK.getOrDefault(key, m);

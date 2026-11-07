@@ -132,6 +132,23 @@ public final class OverlapAudit {
         TEXTS.add(new Text(s, r, owner, cut));
     }
 
+    // 不透明な地を上に敷いた (例: スキルの盤の下の帯)。それより前に描いた字で、地に半分以上隠れたものは見えないので数えない
+    public static void cover(GuiGraphics g, int x0, int y0, int x1, int y1) {
+        if (!capturing) {
+            return;
+        }
+        Matrix4f m = g.pose().last().pose();
+        float cx0 = m.m00() * x0 + m.m30();
+        float cy0 = m.m11() * y0 + m.m31();
+        float cx1 = m.m00() * x1 + m.m30();
+        float cy1 = m.m11() * y1 + m.m31();
+        TEXTS.removeIf(t -> {
+            float ix = Math.max(0, Math.min(t.r.x + t.r.w, cx1) - Math.max(t.r.x, cx0));
+            float iy = Math.max(0, Math.min(t.r.y + t.r.h, cy1) - Math.max(t.r.y, cy0));
+            return ix * iy * 2 >= t.r.w * t.r.h;
+        });
+    }
+
     static String plain(FormattedCharSequence seq) {
         StringBuilder b = new StringBuilder();
         seq.accept((i, style, cp) -> {

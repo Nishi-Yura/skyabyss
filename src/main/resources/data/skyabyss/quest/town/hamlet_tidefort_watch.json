@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 326,
+  "giver": "skyabyss:guest_tidefort_watch",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 5,
+          "targets": [
+            "skyabyss:reef_scuttler"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "sunk_tower",
+          "type": "signal",
+          "target": "poi:@sunk_tower",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_tidefort_watch",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 35,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 100
+      },
+      {
+        "item": "skyabyss:box_rare_2",
+        "count": 1
+      }
+    ]
+  }
+}

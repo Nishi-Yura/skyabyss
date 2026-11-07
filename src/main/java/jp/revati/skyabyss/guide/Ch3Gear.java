@@ -98,7 +98,7 @@ public final class Ch3Gear {
     public static final String SIGNAL_OIL_USED = "ch3_oil_used";
     public static final String SIGNAL_WIND_READ = "ch3_wind_read";
 
-    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    // この章から鍛冶場・薬師で誂えられる品 (その章の品。自己テストが確かめる)
     public static final List<String> MADE = List.of("peak_crossing_helmet", "peak_crossing_chestplate", "peak_crossing_leggings", "peak_crossing_boots",
             "thunder_whetstone", "wind_dumpling", "lightning_oil", "wind_streamer", "copper_wire");
 

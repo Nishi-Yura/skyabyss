@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 325,
+  "giver": "skyabyss:guest_lightvillage_comber",
+  "chapter": "titan_tide",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "northern_strand",
+          "type": "signal",
+          "target": "poi:@northern_strand",
+          "party": false
+        },
+        {
+          "id": "tidewatch_ruin",
+          "type": "signal",
+          "target": "poi:@tidewatch_ruin",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_lightvillage_comber",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 35,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 100
+      },
+      {
+        "item": "skyabyss:box_rare_2",
+        "count": 1
+      }
+    ]
+  }
+}

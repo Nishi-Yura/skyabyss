@@ -636,18 +636,20 @@ public class TideHeart extends HeartBoss {
         return bars == 1 ? 110 : bars == 2 ? 90 : 70;
     }
 
-    // 真珠の雨の円の数: 人数 × 3 (最大 14)
+    // 真珠の雨の円の数: 人数 × 5 (最大 24。間が広くなった分ふやした)
     public static int rainCircles(int n) {
-        return Math.min(14, 3 * Math.max(n, 1));
+        return Math.min(24, 5 * Math.max(n, 1));
     }
 
     // ---- 範囲と予告の長さ ----
+    // 間の広さの倍率 (元の半径 14 からの伸び。2026-11-07 に半径 24 へ広げたとき、遠くへ届く技の長さを同じ割合で伸ばした。端で当たらない所を作らない)
+    public static final double ROOM_SCALE = TideHeartArena.RADIUS / 14.0;
     public static final int BREATH_WARN = 24;
-    public static final double BREATH_LENGTH = 17;
+    public static final double BREATH_LENGTH = 17 * ROOM_SCALE;
     public static final double BREATH_HALF_WIDTH = 1.5;
     public static final int SHELL_WARN = 20;
     public static final double SHELL_CORE = 3.6;
-    public static final double SHELL_REACH = 15.5;
+    public static final double SHELL_REACH = 15.5 * ROOM_SCALE;
     public static final double SHELL_SPEED = 0.6;
     public static final float SHELL_CORE_DAMAGE = 19f;
     public static final int WHIRL_WARN = 70;
@@ -666,11 +668,11 @@ public class TideHeart extends HeartBoss {
     public static final float EBB_RIPPLE_DAMAGE = 20f;
     public static final int MOON_WARN = 40;
     public static final int MOON_ACTIVE = 40;
-    public static final double MOON_LENGTH = 15;
+    public static final double MOON_LENGTH = 15 * ROOM_SCALE;
     public static final double MOON_HALF_WIDTH = 1.4;
     public static final int RAIN_WARN = 30;
     public static final double RAIN_RADIUS = 2.0;
-    public static final double ROAR_PUSH_RADIUS = 8;
+    public static final double ROAR_PUSH_RADIUS = 8 * ROOM_SCALE;
     public static final int ROAR_PUSH_WARN = 22;
     // 島の上に立つ人は、床の技 (reach を低くしたもの) に当たらない: 床 + 1.9 より上
     private static final double FLOOR_REACH = 1.9;
@@ -782,6 +784,19 @@ public class TideHeart extends HeartBoss {
     }
 
     // 輪が抜ける安全な筋 (角度の一覧)。基準の角から等間隔
+    // 抜け筋の向き: 部屋の真ん中から離れているときは、一本を部屋の真ん中へ向ける (部屋の縁から撃つと筋が壁へ向いて床がほとんど残らなかった。
+    // 2026-11-07 の自己テスト tide_telegraph)。真ん中にいれば好きな向き
+    private double laneBase() {
+        if (arena != null) {
+            double cx = (arena.minX + arena.maxX) / 2;
+            double cz = (arena.minZ + arena.maxZ) / 2;
+            if (Math.hypot(cx - getX(), cz - getZ()) > 4) {
+                return Telegraph.angleOf(cx - getX(), cz - getZ()) + (random.nextDouble() - 0.5) * Math.toRadians(20);
+            }
+        }
+        return random.nextDouble() * Math.PI * 2;
+    }
+
     private static double[] lanes(double base, int count) {
         double[] gaps = new double[count];
         for (int i = 0; i < count; i++) {
@@ -931,7 +946,7 @@ public class TideHeart extends HeartBoss {
             sound(server, TideHeartSetup.SHELL.get(), 2f, 1f);
             int n = present(server);
             lockedCount = shellRings(n);
-            double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+            double[] gaps = lanes(laneBase(), shellLanes(n));
             tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SHELL_STRIKE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.4f);
@@ -1196,7 +1211,7 @@ public class TideHeart extends HeartBoss {
                     })
                     .start();
             if (lockedCount > 0) {
-                double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+                double[] gaps = lanes(laneBase(), shellLanes(n));
                 ebbGaps = gaps;
                 for (int i = 0; i < lockedCount; i++) {
                     ripple(server, EBB_BLAST + 1.0, EBB_WARN + i * 14, gaps, EBB_RIPPLE_DAMAGE, true, false);
@@ -1334,7 +1349,7 @@ public class TideHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.EBB.get(), 2.5f, 1.3f);
             int n = present(server);
-            springGaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+            springGaps = lanes(laneBase(), shellLanes(n));
             tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), SPRING_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.TIDE_SPRING_TIDE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);

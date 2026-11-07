@@ -138,7 +138,9 @@ public final class SiteGuard {
     private static long townsStamp = Long.MIN_VALUE;
 
     public static List<Area> towns(MinecraftServer server) {
-        List<SiteData.Entry> list = SiteData.get(server.overworld()).entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND);
+        // 外れの集落 (world/continent/FrontierHamlets) も町と同じ守り
+        List<SiteData.Entry> list = new ArrayList<>(SiteData.get(server.overworld()).entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND));
+        list.addAll(SiteData.get(server.overworld()).entries(jp.revati.skyabyss.world.continent.FrontierHamlets.KIND));
         long stamp = 17;
         for (SiteData.Entry e : list) {
             if (e.built) {
@@ -150,7 +152,10 @@ public final class SiteGuard {
         }
         TOWNS.clear();
         for (SiteData.Entry e : list) {
-            Blueprint bp = e.built ? Blueprint.get(e.blueprint.isEmpty() ? "town_" + jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index) : e.blueprint) : null;
+            String name = !e.blueprint.isEmpty() ? e.blueprint
+                    : e.kind.equals(jp.revati.skyabyss.world.continent.FrontierHamlets.KIND) ? jp.revati.skyabyss.world.continent.FrontierHamlets.blueprint(e.index)
+                    : "town_" + jp.revati.skyabyss.world.continent.ContinentTowns.region(e.index);
+            Blueprint bp = e.built && !name.isEmpty() ? Blueprint.get(name) : null;
             if (bp == null) {
                 continue;
             }

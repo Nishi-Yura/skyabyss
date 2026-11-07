@@ -167,6 +167,17 @@ public final class WeaponStrikes {
         }
     }
 
+    // 預けずにすぐ一撃を解く (手の届かない所への一撃。魔法使いの魔弾 combat/StaffBolts)。MeleeHits の決まりは通す
+    public static boolean attackNow(ServerPlayer p, Entity target) {
+        boolean outer = replaying;
+        replaying = true;
+        try {
+            return jp.revati.skyabyss.combat.MeleeHits.attack(p, target);
+        } finally {
+            replaying = outer;
+        }
+    }
+
     // 預かっているクリックの数 (自己テスト用)
     public static int pending() {
         return QUEUE.size();

@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 332,
+  "giver": "skyabyss:guest_frostfort_hunter",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 5,
+          "targets": [
+            "skyabyss:static_puff"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "thunderstone_ring",
+          "type": "signal",
+          "target": "poi:@thunderstone_ring",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_frostfort_hunter",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 90,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 120
+      },
+      {
+        "item": "skyabyss:box_rare_3",
+        "count": 1
+      }
+    ]
+  }
+}

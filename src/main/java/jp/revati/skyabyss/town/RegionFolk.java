@@ -18,6 +18,8 @@ public final class RegionFolk {
 
     // 見どころの野営の旅人の「町」
     public static final String CAMP = "camp";
+    // 霜の小島の渡しの「町」(渡し守は内海の渡しと別の人)
+    public static final String ISLE_FERRY = "isle_ferry";
 
     public static final List<Folk> ALL = List.of(
             // 鯨見の町の二人 (2026-11-05。自分の体と肖像。借りる見た目は体が無いときだけ)
@@ -41,7 +43,27 @@ public final class RegionFolk {
             // 野営の旅人 (見どころの野営に一人ずつ。町 CAMP、印 = 場所の名。world/continent/ContinentPois が立たせる。docs/design/40 の 3.3)
             new Folk("camp_pilgrim", "herbalist", CAMP, "pilgrim_camp"),
             new Folk("camp_minstrel", "bard", CAMP, "minstrel_camp"),
-            new Folk("camp_mapmaker", "apprentice", CAMP, "mapmaker_camp"));
+            new Folk("camp_mapmaker", "apprentice", CAMP, "mapmaker_camp"),
+            // 霜の小島の渡し守 (二つめの渡しの両岸。world/continent/ContinentFerries)
+            new Folk("isle_ferryman", "sailor", ISLE_FERRY, "dock"),
+            // 外れの集落の住人 (集落ごとに二人。町 = hamlet_<key>、印 folk_a・folk_b。world/continent/FrontierHamlets が立たせる。
+            // 頼みは quest/town/hamlet_<人> (tools/gen/story/gen_hamlet_folk.py)。docs/design/40 の 3.3)
+            new Folk("bonefort_beacon", "fisher", "hamlet_w_ne", "folk_a"),
+            new Folk("bonefort_scribe", "weaver", "hamlet_w_ne", "folk_b"),
+            new Folk("bellwatch_crone", "herbalist", "hamlet_w_nw", "folk_a"),
+            new Folk("bellwatch_miner", "fisher", "hamlet_w_nw", "folk_b"),
+            new Folk("lightvillage_apprentice", "apprentice", "hamlet_t_e", "folk_a"),
+            new Folk("lightvillage_comber", "sailor", "hamlet_t_e", "folk_b"),
+            new Folk("tidefort_watch", "sailor", "hamlet_t_se", "folk_a"),
+            new Folk("tidefort_netmender", "weaver", "hamlet_t_se", "folk_b"),
+            new Folk("emberfort_smith", "ash_apprentice", "hamlet_e_se", "folk_a"),
+            new Folk("emberfort_survivor", "bard", "hamlet_e_se", "folk_b"),
+            new Folk("smokewatch_reader", "herbalist", "hamlet_e_n", "folk_a"),
+            new Folk("smokewatch_twin", "apprentice", "hamlet_e_n", "folk_b"),
+            new Folk("frostfort_hunter", "bard", "hamlet_s_nw", "folk_a"),
+            new Folk("frostfort_fletcher", "weaver", "hamlet_s_nw", "folk_b"),
+            new Folk("windmill_keeper", "apprentice", "hamlet_s_sw", "folk_a"),
+            new Folk("windmill_mossguard", "herbalist", "hamlet_s_sw", "folk_b"));
 
     private RegionFolk() {
     }

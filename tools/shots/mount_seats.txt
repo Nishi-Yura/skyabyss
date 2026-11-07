@@ -1,0 +1,25 @@
+# 2026-11-07: 乗り物の店の「人数」の行 (はじめ 1・段で +1・見た目ごとの最大) と、追跡中のサブの黄色のひし形
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/mount_seats.txt -PshotsName=mount_seats
+world mountseats continent
+size 1600 900
+timeout 3000
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+cmd give @s skyabyss:bell_coin 600
+wait 20
+cmd skyabyss facility act mount_shop
+wait 40
+hover 2 2
+wait 10
+shot shop_seats
+close
+quit

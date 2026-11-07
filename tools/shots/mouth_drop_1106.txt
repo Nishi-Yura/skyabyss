@@ -1,0 +1,55 @@
+# 2026-11-06: ダンジョンの入口の坑 (口の前の地面の層が坑の頭を塞いでいた) と、地面に落ちた装備・封の箱の稀さの色 (名札と光の粒)
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/mouth_drop_1106.txt -PshotsName=mouth_drop
+world mouth_drop continent
+size 1280 720
+timeout 5000
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+chat clear
+hud off
+# 鯨骨の坑: 口の前に立って口を見る → 歩いて坑へ入る
+cmd tp @s 60 160 -798 0 25
+waitchunks 400
+wait 400
+cmd skyabyss dungeon mouth bone_pit
+waitchunks 200
+wait 60
+shot m1_mouth
+# 口の 16 ブロック手前の 5 上から、口を向いて落ちて歩く (アドベンチャーなので落ちる)
+cmd gamemode adventure
+wait 40
+walk on
+wait 140
+shot m2_walking_in
+wait 120
+walk off
+wait 20
+shot m3_in_shaft
+# 落ちた品: アンコモン・レア・エピック・英雄の武器と、岩鯨の箱 3 つ
+respawn
+wait 20
+cmd gamemode creative
+cmd skyabyss dungeon mouth bone_pit
+wait 40
+cmd summon item ^-2 ^0.5 ^4 {Item:{id:"skyabyss:wild_guard_sword",count:1},PickupDelay:32767}
+cmd summon item ^-1 ^0.5 ^4 {Item:{id:"skyabyss:wild_banner_spear",count:1},PickupDelay:32767}
+cmd summon item ^0 ^0.5 ^4 {Item:{id:"skyabyss:wild_ramhorn_greatsword",count:1},PickupDelay:32767}
+cmd summon item ^1 ^0.5 ^4 {Item:{id:"skyabyss:wild_lavajaw_greatsword",count:1},PickupDelay:32767}
+cmd summon item ^2 ^0.5 ^4 {Item:{id:"skyabyss:box_stone_whale",count:3},PickupDelay:32767}
+wait 60
+hud on
+chat clear
+shot d1_dropped
+cmd time set 18000
+wait 40
+shot d2_dropped_night
+quit

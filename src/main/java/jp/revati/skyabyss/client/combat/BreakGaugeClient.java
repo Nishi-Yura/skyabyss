@@ -65,20 +65,33 @@ public final class BreakGaugeClient {
         draw(event.getGuiGraphics(), event.getX(), event.getY() + event.getIncrement() - 9 - HEIGHT - 2, s, now);
     }
 
+    // 同じ名前の主が何体もいる (潮の番人など) ときは、名前が合うもののうち、残りの体力がバーの長さにいちばん近い体の帯
+    // (2026-11-07 の声「近くの敵全員に同じスタンダメージはいってた」: 名前だけで見て、どのバーにも最初の一体の帯を描いていた)
     static Shown match(Minecraft mc, BossEvent bar) {
         String name = bar.getName().getString();
+        Shown byName = null;
+        float byNameGap = Float.MAX_VALUE;
+        int named = 0;
         Shown byLength = null;
         for (Map.Entry<Integer, Shown> e : SHOWN.entrySet()) {
             Entity en = mc.level.getEntity(e.getKey());
-            if (!(en instanceof LivingEntity le)) {
+            if (!(en instanceof LivingEntity le) || le.getMaxHealth() <= 0) {
                 continue;
             }
+            float gap = Math.abs(le.getHealth() / le.getMaxHealth() - bar.getProgress());
             if (le.getDisplayName().getString().equals(name)) {
-                return e.getValue();
-            }
-            if (byLength == null && le.getMaxHealth() > 0 && Math.abs(le.getHealth() / le.getMaxHealth() - bar.getProgress()) < 0.015f) {
+                named++;
+                if (gap < byNameGap) {
+                    byNameGap = gap;
+                    byName = e.getValue();
+                }
+            } else if (byLength == null && gap < 0.015f) {
                 byLength = e.getValue();
             }
+        }
+        if (byName != null) {
+            // 同じ名前が何体もいて、どれも長さが合わなければ描かない (よそのバーの帯を描かない)
+            return named == 1 || byNameGap < 0.02f ? byName : null;
         }
         return byLength;
     }

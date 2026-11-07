@@ -122,6 +122,11 @@ public class OxSmith extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "ox_smith";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case GRAB -> GRAB_WARN + 22;

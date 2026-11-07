@@ -51,7 +51,15 @@ public final class DialogueService {
         // 新しい頼みの自動開始は見回りに任せる (会話の入口を、話しかけた瞬間に始まった頼みが横取りしないように)
         Quests.refresh(player, false);
         StoryContext ctx = new StoryContext(player, role, npc);
+        // クエストの話を先に (2026-11-07 の声「クエストの人に話しかけてるのに違う話をしてくる。まずはクエストを優先して」):
+        // 今の段に「この人とこの話題を話す」目的があり、ふだんの入口 (一度きりの話・世間話) がその話題へつながらないなら、話題の節から始める。
+        // 初めて会うとき (名乗りから続く) と、入口の節やその続き・選択肢から話題へ行けるとき (話題の並ぶ節) は、ふだんの入口のまま
         Dialogue.Node node = dialogue.entryNode(ctx);
+        Dialogue.Node topic = questTopic(player, role, dialogue);
+        // 入口がクエストの段で決まった節 (頼みの報せ・渡し) なら、そのまま (2026-11-07 の自己テスト freequest: 影の記録の報せが本筋の話題に負けた)
+        if (topic != null && (node == null || (NpcBonds.of(player).bond(role).talks > 0 && !dialogue.entryIsQuest(ctx) && !leadsTo(dialogue, node, topic.id())))) {
+            node = topic;
+        }
         if (node == null) {
             return;
         }
@@ -77,6 +85,67 @@ public final class DialogueService {
             }
         }
         enter(player, npc, dialogue, node);
+    }
+
+    // from の節から、続き (next) と選択肢の行き先をたどって target に着くか (6 歩まで。話題の並ぶ節から話題の連なりの先にある節も含む)
+    public static boolean leadsTo(Dialogue dialogue, Dialogue.Node from, String target) {
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        java.util.List<Dialogue.Node> layer = new java.util.ArrayList<>(java.util.List.of(from));
+        for (int depth = 0; depth <= 6 && !layer.isEmpty(); depth++) {
+            java.util.List<Dialogue.Node> nextLayer = new java.util.ArrayList<>();
+            for (Dialogue.Node n : layer) {
+                if (n == null || !seen.add(n.id())) {
+                    continue;
+                }
+                if (n.id().equals(target)) {
+                    return true;
+                }
+                if (n.next() != null) {
+                    nextLayer.add(dialogue.nodes().get(n.next()));
+                }
+                for (Dialogue.Option o : n.options()) {
+                    if (target.equals(o.target())) {
+                        return true;
+                    }
+                    nextLayer.add(dialogue.nodes().get(o.target()));
+                }
+            }
+            layer = nextLayer;
+        }
+        return false;
+    }
+
+    // 今の段で、この人と話す話題 (topic) の目的のうち、まだ済んでいない最初のものの節。追っているクエスト → メイン → ほかの順。なければ null
+    @javax.annotation.Nullable
+    public static Dialogue.Node questTopic(ServerPlayer player, String role, Dialogue dialogue) {
+        jp.revati.skyabyss.quest.QuestLog log = jp.revati.skyabyss.quest.QuestLog.of(player);
+        java.util.List<String> order = new java.util.ArrayList<>(log.quests().keySet());
+        String tracked = log.tracked();
+        order.sort(java.util.Comparator.comparingInt(id -> {
+            if (id.equals(tracked)) {
+                return 0;
+            }
+            jp.revati.skyabyss.quest.QuestDef d = jp.revati.skyabyss.quest.QuestManager.quest(id);
+            return d != null && d.main() ? 1 : 2;
+        }));
+        for (String id : order) {
+            jp.revati.skyabyss.quest.QuestLog.Entry e = log.quests().get(id);
+            jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(id);
+            if (def == null || e == null || e.done || e.stage >= def.stages().size()) {
+                continue;
+            }
+            jp.revati.skyabyss.quest.QuestDef.Stage stage = def.stages().get(e.stage);
+            for (int i = 0; i < stage.objectives().size(); i++) {
+                jp.revati.skyabyss.quest.QuestDef.Objective ob = stage.objectives().get(i);
+                if (ob.type().equals("talk") && ob.topic() != null && ob.targets().contains(role) && e.progress(i) < ob.count()) {
+                    Dialogue.Node n = dialogue.nodes().get(ob.topic());
+                    if (n != null) {
+                        return n;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // 画面で選んだ。node は画面が映している節 (食い違えば古い画面からの選択なので捨てる)

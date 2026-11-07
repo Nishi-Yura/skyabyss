@@ -82,6 +82,8 @@ public final class TownNetwork {
                 }
             }
         }
+        // 土地の人 (土地の町・野営・外れの集落) の頼みの行き先と、頼んだ人の立つ所
+        RegionErrandSpots.addTo(server, out);
         return out;
     }
 

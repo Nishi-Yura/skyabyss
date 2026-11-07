@@ -73,6 +73,15 @@ public final class StormSites {
         ChapterSites.element(TABLET, Chapters.STORM, "ch3_tablet").atGround().dist(40, 145).count(TABLETS).arriveRadius(6)
                 .post(StormSites::finishTablet)
                 .onArrive((p, s) -> tabletArrive(p, s.index())).register();
+        // 着いたときの合図は、クエストがその段に着く前に着いていても数える (Quests.SIGNAL_STATES)
+        Quests.SIGNAL_STATES.put("ch3_vane", p -> Math.min(1, ChapterSites.arrivedCount(p.server, p.getUUID(), VANE, -1)));
+        Quests.SIGNAL_STATES.put("ch3_ruin", p -> Math.min(1, ChapterSites.arrivedCount(p.server, p.getUUID(), RUIN, -1)));
+        Quests.SIGNAL_STATES.put("ch3_pack", p -> Math.min(1, ChapterSites.arrivedCount(p.server, p.getUUID(), PACK, -1)));
+        for (int k = 0; k < TABLETS; k++) {
+            int index = k;
+            Quests.SIGNAL_STATES.put("ch3_wind_" + (k + 1), p -> Math.min(1, ChapterSites.arrivedCount(p.server, p.getUUID(), TABLET, index)));
+        }
+        Quests.SIGNAL_STATES.put(GleanerNest.SIGNAL, GleanerNest::foundCount);
         // 三章の地上の残り (風の道の旗・焼けた見張り塔・雷拾いの原・風読みの崖)
         Ch3Ground.register();
     }

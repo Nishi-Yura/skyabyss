@@ -1,0 +1,37 @@
+# 2026-11-07: 塩の蔵の坑口と出口の縦穴の手当て (SaltVault.clearMouth / mendExit / mendOld) を、遊んだ世界の写しで確かめる。
+# 写しは run/shots/vault_mend/saves/vaultcopy に手で置く (遊んだ世界の saves から region・data・level.dat などを写す)。蔵の基点は (1496, 73, -288)、坑口は東へ下る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/vault_mend.txt -PshotsName=vault_mend
+world vaultcopy
+size 1600 900
+timeout 3000
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 5000
+cmd weather clear
+cmd gamemode spectator
+cmd tp @s 1488.5 76 -287.5 -90 20
+waitchunks 300
+wait 200
+hud off
+shot front
+cmd tp @s 1494.5 75.5 -287.5 -90 45
+wait 30
+shot down
+cmd tp @s 1497.5 72.2 -287.5 -90 30
+wait 30
+shot inside
+cmd tp @s 1508.5 62 -287.5 -90 10
+wait 30
+shot hall
+cmd tp @s 1496.5 92 -287.5 -90 89
+wait 30
+shot top
+cmd tp @s 1509.5 75.5 -319.5 180 35
+wait 30
+shot exit
+quit

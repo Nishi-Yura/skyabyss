@@ -84,10 +84,46 @@ public final class NpcQuestSelfTest {
         }
     }
 
+    // クエストの話を先に (DialogueService.questTopic): 最初の段に話題つきの「話す」目的があるクエストを、偽の人で始めると、その人の会話はその話題の節から
+    private static void questFirst(MinecraftServer server, List<String> failures, List<String> notes) {
+        net.neoforged.neoforge.common.util.FakePlayer p = net.neoforged.neoforge.common.util.FakePlayerFactory.get(server.overworld(),
+                new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes("skyabyss_quest_first".getBytes()), "skyabyss_qfirst"));
+        int tried = 0;
+        for (QuestDef def : QuestManager.all()) {
+            if (def.stages().isEmpty() || tried >= 5) {
+                continue;
+            }
+            for (QuestDef.Objective ob : def.stages().get(0).objectives()) {
+                if (!ob.type().equals("talk") || ob.topic() == null || ob.targets().isEmpty()) {
+                    continue;
+                }
+                String role = ob.targets().get(0);
+                jp.revati.skyabyss.npc.Dialogue d = jp.revati.skyabyss.npc.DialogueManager.dialogue(role);
+                if (d == null || !d.nodes().containsKey(ob.topic())) {
+                    continue;
+                }
+                Quests.forgetAll(p);
+                if (!Quests.start(p, def.id())) {
+                    continue;
+                }
+                tried++;
+                jp.revati.skyabyss.npc.Dialogue.Node n = jp.revati.skyabyss.npc.DialogueService.questTopic(p, role, d);
+                check(n != null && n.id().equals(ob.topic()), def.id() + ": the quest topic for " + role + " should be " + ob.topic()
+                        + " (got " + (n == null ? "null" : n.id()) + ")", failures);
+                check(jp.revati.skyabyss.npc.DialogueService.leadsTo(d, n == null ? d.nodes().values().iterator().next() : n, ob.topic()), "a node should lead to itself", failures);
+                break;
+            }
+        }
+        Quests.forgetAll(p);
+        check(tried > 0, "no quest with a talk topic in its first stage to try the quest-first opening on", failures);
+        notes.add("quest-first opening checked on " + tried + " quests");
+    }
+
     private static void run(MinecraftServer server, List<String> failures, List<String> notes) {
         loading(failures, notes);
         texts(failures, notes);
         doneView(server, failures, notes);
+        questFirst(server, failures, notes);
         ServerLevel level = server.overworld();
         BlockPos spawn = level.getSharedSpawnPos();
         BlockPos at = new BlockPos(spawn.getX(), 300, spawn.getZ());
@@ -361,7 +397,7 @@ public final class NpcQuestSelfTest {
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
             // 深淵の層の生き残りの会話の文は skyabyss_abyss_v2 (データを直接直す（生成スクリプトはない）)
-            // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の覚書・鼓動守の会話は skyabyss_ch3gear)
+            // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある (三章の職人の鼓動守の会話は skyabyss_ch3gear)
             for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch3gear", "skyabyss_ch4", "skyabyss_ch5", "skyabyss_abyss_v2", "skyabyss_vow", "skyabyss_fac", "skyabyss_town", "skyabyss_lesson", "skyabyss_moon", "skyabyss_finale", "skyabyss_tower", "skyabyss_endgame")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {

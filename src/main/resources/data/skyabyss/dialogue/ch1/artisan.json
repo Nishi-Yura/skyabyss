@@ -141,10 +141,6 @@
       "face": "neutral",
       "do": [
         {
-          "type": "give_notes",
-          "chapter": 1
-        },
-        {
           "type": "affinity",
           "amount": 1
         }
@@ -155,10 +151,6 @@
       "face": "neutral",
       "do": [
         {
-          "type": "give_notes",
-          "chapter": 1
-        },
-        {
           "type": "affinity",
           "amount": 1
         }
@@ -167,12 +159,6 @@
     },
     "ch1a_deja": {
       "face": "grave",
-      "do": [
-        {
-          "type": "give_notes",
-          "chapter": 1
-        }
-      ],
       "next": "a_menu"
     },
     "ch1t_blade_show": {
@@ -257,16 +243,6 @@
       ],
       "next": "a_menu"
     },
-    "ch1a_notes": {
-      "face": "neutral",
-      "do": [
-        {
-          "type": "give_notes",
-          "chapter": 1
-        }
-      ],
-      "next": "a_menu"
-    },
     "ch1a_ward": {
       "face": "smile",
       "do": [
@@ -304,16 +280,6 @@
             "is": "started"
           },
           "goto": "ch1p_teach"
-        },
-        {
-          "id": "notes",
-          "kind": "quest",
-          "if": {
-            "type": "quest",
-            "quest": "ch1/trail_blade",
-            "is": "started"
-          },
-          "goto": "ch1a_notes"
         },
         {
           "id": "ward",

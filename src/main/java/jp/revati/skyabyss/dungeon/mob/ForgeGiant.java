@@ -21,12 +21,20 @@ import net.minecraft.world.phys.Vec3;
 //   振り下ろし  鎚を振り上げて前の輪へ叩きつける (予告 1.0 秒)。重い一撃 (47)
 //   横薙ぎ      鎚で前の広い扇を薙ぐ (予告 0.9 秒)
 //   足踏み      片足を上げて踏み、足もとから外へ広がる熔けた輪 (内は安全な輪。予告 1.0 秒)。寄った人へ、ときどき
+//   三連打ち    鎚で前へ三度、だんだん遠くへ打つ (予告 0.9 → 1.3 → 1.7 秒)。横へ抜ける
+//   熔けた溝    後半: 鎚で床を裂き、前へ熔けた溝を引く。溝はしばらく燃え続ける (4 秒。立つと 1 秒ごとに焼ける)
+//   炉の噴き上げのあとは、背の炉が開いて大きな隙。後半 (体力半分から) は熔岩の蛞蝓を 2 体呼ぶ
 //   炉の噴き上げ 体力が 6 割を切ると、前かがみになって背の炉から火を噴き上げ、人ごとの落ちる火の輪 (予告 1.4 秒)
 public class ForgeGiant extends DungeonBoss {
     static final int HAMMER = 1;
     static final int SWEEP = 2;
     static final int STOMP = 3;
     static final int BLAST = 4;
+    static final int COMBO = 5;
+    static final int TRENCH = 6;
+    public static final int COMBO_WARN = 18;
+    public static final int TRENCH_WARN = 20;
+    public static final double TRENCH_LENGTH = 15;
     public static final int HAMMER_WARN = 20;
     public static final double HAMMER_REACH = 5.5;
     public static final int SWEEP_WARN = 18;
@@ -37,6 +45,8 @@ public class ForgeGiant extends DungeonBoss {
     public static final int BLAST_WARN = 28;
     private int lastStomp = -200;
     private int lastBlast = -300;
+    private int lastCombo = -200;
+    private int lastTrench = -300;
 
     public ForgeGiant(EntityType<? extends Monster> type, Level level) {
         super(type, level, "forge_giant", () -> SoundEvents.IRON_GOLEM_STEP, () -> SoundEvents.IRON_GOLEM_HURT, () -> SoundEvents.IRON_GOLEM_DEATH,
@@ -63,6 +73,14 @@ public class ForgeGiant extends DungeonBoss {
         Vec3 f = forward();
         if (hp() < 0.6f && tickCount - lastBlast > 300) {
             blast(target);
+            return;
+        }
+        if (phase2 && distance > 6 && distance <= TRENCH_LENGTH && tickCount - lastTrench > 260) {
+            trench(target);
+            return;
+        }
+        if (distance <= 11 && tickCount - lastCombo > 220 && random.nextFloat() < 0.5f) {
+            combo(target);
             return;
         }
         if (distance < STOMP_OUTER - 1 && tickCount - lastStomp > 200) {
@@ -116,6 +134,50 @@ public class ForgeGiant extends DungeonBoss {
         }
     }
 
+    // 三連打ち: 前へ三つの輪、だんだん遠く・遅く
+    void combo(LivingEntity target) {
+        move = COMBO;
+        lastCombo = tickCount;
+        begin(target, "hammer");
+        cue("forge_giant", "combo", COMBO_WARN);
+        Vec3 f = target.position().subtract(position()).multiply(1, 0, 1).normalize();
+        for (int k = 0; k < 3; k++) {
+            Vec3 c = position().add(f.scale(3.5 + k * 3.5));
+            Telegraph.in(server(), TelegraphShape.circle(c.x, c.z, 2.8))
+                    .floor(getY()).warn(COMBO_WARN + k * 8).danger().owner(this).target(target)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        server.sendParticles(ParticleTypes.FLAME, c.x, getY() + 0.3, c.z, 40, 1.2, 0.2, 1.2, 0.08);
+                        server.playSound(null, c.x, getY(), c.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.4f, 0.6f);
+                    })
+                    .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.95f))
+                    .start();
+        }
+    }
+
+    // 熔けた溝: 前へ長い帯。予兆のあと 4 秒燃え続ける
+    void trench(LivingEntity target) {
+        move = TRENCH;
+        lastTrench = tickCount;
+        begin(target, "sweep");
+        cue("forge_giant", "trench", TRENCH_WARN);
+        double a = Telegraph.angleOf(target.position().subtract(position()));
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, TRENCH_LENGTH, 1.3))
+                .floor(getY()).warn(TRENCH_WARN).active(80).repeatEvery(20).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onImpact(server -> {
+                    for (int i = 1; i < TRENCH_LENGTH; i += 2) {
+                        server.sendParticles(ParticleTypes.LAVA, getX() + Math.cos(a) * i, getY() + 0.2, getZ() + Math.sin(a) * i, 3, 0.4, 0.1, 0.4, 0.05);
+                    }
+                    server.playSound(null, getX(), getY(), getZ(), SoundEvents.LAVA_POP, SoundSource.HOSTILE, 2f, 0.6f);
+                })
+                .onHit((server, player) -> {
+                    player.hurt(attackSource(), damage() * 0.45f);
+                    player.igniteForSeconds(2);
+                })
+                .start();
+    }
+
     void blast(LivingEntity target) {
         move = BLAST;
         lastBlast = tickCount;
@@ -159,18 +221,34 @@ public class ForgeGiant extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "forge_giant";
+    }
+
+    @Override
+    protected String minionId() {
+        return "skyabyss:lava_slug";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case HAMMER -> HAMMER_WARN + 14;
             case SWEEP -> SWEEP_WARN + 12;
             case STOMP -> STOMP_WARN + 10;
+            case COMBO -> COMBO_WARN + 16 + 12;
+            case TRENCH -> TRENCH_WARN + 14;
             default -> BLAST_WARN + 10;
         };
     }
 
     @Override
     protected void finish() {
-        cooldown = move == HAMMER || move == BLAST ? 28 : 16 + random.nextInt(10);
+        if (move == BLAST) {
+            // 噴き上げのあとは背の炉が開く (大きな隙)
+            opening();
+        }
+        cooldown = move == HAMMER || move == BLAST || move == COMBO ? 28 : 16 + random.nextInt(10);
         super.finish();
     }
 }

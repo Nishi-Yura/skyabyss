@@ -7,7 +7,7 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 // 人ごとの乗り物の持ち物 (保存する。死んでも残る。同期はしない = 店の画面を開くときに送る)。
 //   owned  : 買った見た目 (MountLook の順の bit)。角の荷獣は最初から持つ
 //   chosen : 今の見た目 (MountLook の ordinal)
-//   tiers  : 速さ・跳び・体力の段 (MountStats。体力の段は 2026-11-02 から使わない。前に買った分は PlayerUpgrade が返して 0 にする)
+//   tiers  : 速さ・跳び・体力・乗れる人数の段 (MountStats。体力の段は 2026-11-02 から使わない。前に買った分は PlayerUpgrade が返して 0 にする)
 //   ridden : 乗った距離 (ブロック)。絆の段 (BOND_STEPS: 5 km・20 km・50 km。2026-11-05 の封の箱の頁 3-2)
 //   name   : 付けた名前 (絆 II から。空 = 見た目の名前)
 public final class MountData implements INBTSerializable<CompoundTag> {
@@ -15,7 +15,7 @@ public final class MountData implements INBTSerializable<CompoundTag> {
     public static final int NAME_MAX = 16;
     int owned = 1 << MountLook.HORN_BEAST.ordinal();
     int chosen = MountLook.HORN_BEAST.ordinal();
-    final int[] tiers = new int[3];
+    final int[] tiers = new int[4];
     public double ridden;
     String name = "";
 

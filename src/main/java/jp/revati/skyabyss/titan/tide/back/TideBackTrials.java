@@ -323,18 +323,23 @@ public final class TideBackTrials {
         int epoch = epochOf(back, player);
         String cp = validCheckpoint(tag, epoch);
         BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, cp);
-        REVIVING.add(player.getUUID());
-        try {
-            player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
-        } finally {
-            REVIVING.remove(player.getUUID());
-        }
+        boolean lost = cp.isEmpty() && tag.contains(TAG_CHECKPOINT);
         tag.putInt(TAG_SEEN_EPOCH, epoch);
-        jp.revati.skyabyss.titan.group.RespawnGuard.begin(player);
-        Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);
         }
+        // 背中へは復活が済んでから移す (util/RespawnMove)。順路の途中なら、どの巨神でも今の部屋の入口の休み場へ (TrialRoute.rejoinAfterDeath)
+        jp.revati.skyabyss.util.RespawnMove.after(player, back, () -> {
+            REVIVING.add(player.getUUID());
+            try {
+                player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
+            } finally {
+                REVIVING.remove(player.getUUID());
+            }
+            boolean inRoute = jp.revati.skyabyss.trial.TrialRoute.rejoinAfterDeath(back, player);
+            jp.revati.skyabyss.titan.group.RespawnGuard.begin(player);
+            Notice.narrate(player, !inRoute && lost ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
+        });
     }
 
     // 乗り込み・地上へ戻る (次元の移動) では休み場の記録を消す。背中で倒れて連れ戻すときだけは残す

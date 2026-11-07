@@ -355,7 +355,7 @@ public final class ReadinessSelfTest {
         check(f, ReadinessWhisper.antechamber(Titans.STONE_WHALE).test(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART_REST.center()),
                 "whale antechamber contains its centre");
         check(f, ReadinessWhisper.antechamber(Titans.TIDE_SHELL).test(jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_REST.center()), "tide antechamber contains its centre");
-        check(f, ReadinessWhisper.antechamber(Titans.THUNDER_WING).test(new BlockPos(jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_DX, jp.revati.skyabyss.titan.storm.back.StormBackLayout.KEEL_ANTE.floor() + 2, -44 + jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_DZ)), "storm antechamber contains the antechamber centre");
+        check(f, ReadinessWhisper.antechamber(Titans.THUNDER_WING).test(new BlockPos(jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_DX, jp.revati.skyabyss.titan.storm.back.StormBackLayout.KEEL_ANTE.floor() + 2, -44 - jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_GROW + jp.revati.skyabyss.titan.storm.back.StormBackLayout.HEART_DZ)), "storm antechamber contains the antechamber centre");
         var ante = jp.revati.skyabyss.titan.ember.back.EmberBackLayout.HEART_ANTE;
         check(f, ReadinessWhisper.antechamber(Titans.EMBER).test(new BlockPos((ante.minX() + ante.maxX()) / 2, ante.minY() + 1, (ante.minZ() + ante.maxZ()) / 2)),
                 "ember antechamber contains its centre");
@@ -416,12 +416,12 @@ public final class ReadinessSelfTest {
             check(f, row.detail().size() == 5, "readiness row detail has the intro, three lamps and the free note, got " + row.detail().size());
             check(f, row.mark() == RecordSnapshot.MARK_LOST, "a bare player's readiness row is marked as short (red)");
         }
-        // 章のチェックリスト (A9): 一章の頁に頼み・覚書の行 (寄り道は場所が登録されていれば)。見ていない巨神には出さない
+        // 章のチェックリスト (A9): 一章の頁に頼みの行 (寄り道は場所が登録されていれば)。見ていない巨神には出さない
         check(f, page.row("h.checklist") != null, "whale page has the chapter checklist header");
         RecordSnapshot.Row prep = page.row("check_prep");
         check(f, !jp.revati.skyabyss.guide.PrepQuests.defined(1) || (prep != null && prep.detail().size() == jp.revati.skyabyss.guide.PrepQuests.ids(1).size() + 1), "prep row (when the chapter has its requests): one line per request and the note");
         check(f, jp.revati.skyabyss.guide.PrepQuests.defined(1) == (prep != null), "prep row appears exactly when the chapter has its requests");
-        check(f, page.row("check_notes") != null, "notebook row on the whale page");
+        check(f, page.row("check_notes") == null, "the removed notebook row is still on the whale page");
         long whaleSites = SiteSpawner.defs().stream().filter(d -> d.chapter() == Chapters.WHALE).count();
         check(f, (page.row("check_sites") != null) == (whaleSites > 0), "sites row appears exactly when the chapter has sites");
         // 見つけた数: 近づくと数える (クリアも見つけたことになる)
@@ -435,8 +435,7 @@ public final class ReadinessSelfTest {
         sites.forget(p.getUUID(), "selftest_site2");
         for (String lang : new String[] {"ja_jp", "en_us"}) {
             Map<String, String> rl = read("/assets/skyabyss_record/lang/" + lang + ".json", f);
-            for (String k : List.of("h.checklist", "r.check_prep", "d.check_prep", "r.check_sites", "v.check_sites", "d.check_sites", "d.check_sites_hint",
-                    "r.check_notes", "v.check_notes_yes", "v.check_notes_no", "d.check_notes")) {
+            for (String k : List.of("h.checklist", "r.check_prep", "d.check_prep", "r.check_sites", "v.check_sites", "d.check_sites", "d.check_sites_hint")) {
                 check(f, rl.containsKey("skyabyss_record." + k), lang + " record lang missing " + k);
             }
         }

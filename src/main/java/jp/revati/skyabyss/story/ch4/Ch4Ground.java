@@ -107,6 +107,9 @@ public final class Ch4Ground {
             return;
         }
         registered = true;
+        // 着いたときの合図は、クエストがその段に着く前に着いていても数える (Quests.SIGNAL_STATES。2026-11-07)
+        Quests.SIGNAL_STATES.put(SIGNAL_MARK, p -> ChapterSites.arrivedCount(p.server, p.getUUID(), MARK, -1));
+        Quests.SIGNAL_STATES.put(SIGNAL_KILN, p -> Math.min(1, ChapterSites.arrivedCount(p.server, p.getUUID(), KILN, -1)));
         ChapterSites.element(MARK, Chapters.EMBER, MARK).atGround().dist(30, 140).count(MARKS).prefer(Prefer.HIGH).arriveRadius(6)
                 .post(job -> clearFloatingPlants(job, 3))
                 .onArrive(Ch4Ground::markArrive).register();

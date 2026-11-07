@@ -47,6 +47,11 @@ public final class RecordClient {
         Minecraft mc = Minecraft.getInstance();
         if (event.getNewScreen() instanceof net.minecraft.client.gui.screens.advancements.AdvancementsScreen && mc.player != null) {
             event.setCanceled(true);
+            // ポーズ画面から押したとき: 一人遊びではポーズ画面のあいだサーバーが止まり、控え帳の中身が返ってこない
+            // (2026-11-07 の声「実績・進捗押したら進捗表示されない」)。先にポーズ画面を閉じてサーバーを動かしてから頼む
+            if (mc.screen != null && mc.screen.isPauseScreen()) {
+                mc.setScreen(null);
+            }
             mc.player.connection.sendCommand(RecordCommands.COMMAND + " " + RecordSnapshot.DEEDS);
         }
     }

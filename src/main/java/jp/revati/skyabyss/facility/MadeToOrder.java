@@ -9,7 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 
 // 誂え (作業台をなくした代わりに、鍛冶場・薬師・道具屋が作る品。ShopDef.Good.made)。2026-10-26 の声「クラフトとかもしない」。
-// 品ぞろえは tools/gen/shop/gen_made_to_order.py が、もとのレシピから書いた。ここは品から誂えの口を探すだけ (自己テストと覚書の文)
+// 品ぞろえは tools/gen/shop/gen_made_to_order.py が、もとのレシピから書いた。ここは品から誂えの口を探すだけ (自己テスト)
 public final class MadeToOrder {
     private MadeToOrder() {
     }

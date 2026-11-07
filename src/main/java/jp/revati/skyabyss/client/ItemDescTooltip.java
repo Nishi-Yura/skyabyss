@@ -42,7 +42,9 @@ public final class ItemDescTooltip {
             if (!I18n.exists(base + suffix)) {
                 continue;
             }
-            String text = I18n.get(base + suffix);
+            // I18n.get は String.format を通すので、「+15% 速さ」のような % を含む説明が「Format error: …」になっていた
+            // (2026-11-06 の声)。訳文をそのまま読み、%% だけを % に戻す
+            String text = net.minecraft.locale.Language.getInstance().getOrDefault(base + suffix).replace("%%", "%");
             String head = text.substring(0, Math.min(8, text.length()));
             if (tip.stream().anyMatch(c -> c.getString().contains(head))) {
                 continue;

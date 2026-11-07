@@ -19,6 +19,8 @@ final class ContinentRoads {
     static final double CORE = 5.4;
     static final double FADE = 10.0;
     static final int CELL = 32;
+    // 道の端がこの距離より近い別の道に合わさるとき、端の高さをその道に合わせる
+    static final double JOIN = 16.0;
 
     // 道の点 (x, z, 均した高さ。NaN はならさない点)
     private final double[] xs;
@@ -59,6 +61,9 @@ final class ContinentRoads {
     // 道の点を作り、高さをならす (raw = ならす前の地面の高さ)
     static ContinentRoads build(List<List<BlockPos>> roads, java.util.function.BiFunction<Double, Double, Double> raw) {
         List<double[]> pts = new ArrayList<>();
+        List<List<double[]>> lines = new ArrayList<>();
+        List<double[]> avgs = new ArrayList<>();
+        List<boolean[]> wets = new ArrayList<>();
         for (List<BlockPos> line : roads) {
             List<double[]> ln = new ArrayList<>();
             for (int i = 0; i + 1 < line.size(); i++) {
@@ -103,7 +108,51 @@ final class ContinentRoads {
             for (int i = n - 2; i >= 0; i--) {
                 avg[i] = Math.min(avg[i], avg[i + 1] + step);
             }
-            for (int i = 0; i < n; i++) {
+            lines.add(ln);
+            avgs.add(avg);
+            wets.add(wet);
+        }
+        // 道の合わさる所 (2026-11-07 の自己テスト island trail: 外れの道が今の道に合わさる所で 2〜3 の段): 端が別の道のそば (JOIN 以内) なら、
+        // その道の高さから 1 点ごとに勾配の上限までしか離れないよう、端から内へ寄せる
+        double step = MAX_GRADE * SPACING;
+        for (int li = 0; li < lines.size(); li++) {
+            List<double[]> ln = lines.get(li);
+            double[] avg = avgs.get(li);
+            int n = ln.size();
+            for (int end = 0; end < 2 && n > 1; end++) {
+                double[] tip = ln.get(end == 0 ? 0 : n - 1);
+                double target = Double.NaN;
+                double bestD = JOIN * JOIN;
+                for (int lj = 0; lj < lines.size(); lj++) {
+                    if (lj == li) {
+                        continue;
+                    }
+                    List<double[]> other = lines.get(lj);
+                    for (int k = 0; k < other.size(); k++) {
+                        double dx = other.get(k)[0] - tip[0];
+                        double dz = other.get(k)[1] - tip[1];
+                        double d2 = dx * dx + dz * dz;
+                        if (d2 < bestD && !wets.get(lj)[k]) {
+                            bestD = d2;
+                            target = avgs.get(lj)[k];
+                        }
+                    }
+                }
+                if (Double.isNaN(target)) {
+                    continue;
+                }
+                for (int k = 0; k < n; k++) {
+                    int i = end == 0 ? k : n - 1 - k;
+                    double lim = step * k;
+                    avg[i] = Math.max(target - lim, Math.min(target + lim, avg[i]));
+                }
+            }
+        }
+        for (int li = 0; li < lines.size(); li++) {
+            List<double[]> ln = lines.get(li);
+            double[] avg = avgs.get(li);
+            boolean[] wet = wets.get(li);
+            for (int i = 0; i < ln.size(); i++) {
                 boolean flat = flattened(ln.get(i)[0], ln.get(i)[1]);
                 pts.add(new double[] {ln.get(i)[0], ln.get(i)[1], wet[i] || flat ? Double.NaN : Math.max(avg[i], ContinentChunkGenerator.SEA_LEVEL)});
             }

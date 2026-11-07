@@ -22,7 +22,8 @@ public final class HeartHall {
     }
 
     // 広間の外壁の半径 (鯨の間の半分の幅 27 にそろえる)
-    public static final int HALL_R = 28;
+    // 2026-11-07: 戦う床を半径 24 前後に広げたので、谷と柱が収まるように 36 へ (前は 28)
+    public static final int HALL_R = 36;
     // 谷の深さ (戦う床の空気の段から下へ) と、外壁の高さ (上へ)
     static final int DEPTH = 13;
     static final int TOP = 22;

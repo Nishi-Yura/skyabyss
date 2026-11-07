@@ -314,7 +314,7 @@ public final class StormTelegraphSelfTest {
             tickHeart(level, h, 2);
             FakePlayer onLine = fake(level, "ch_in", SX + 13, FLOOR, SZ + 0.4);
             FakePlayer beside = fake(level, "ch_out", SX + 13, FLOOR, SZ + 2.8);
-            FakePlayer beyond = fake(level, "ch_far", SX + 18.5, FLOOR, SZ);
+            FakePlayer beyond = fake(level, "ch_far", SX + jp.revati.skyabyss.titan.storm.heart.StormHeart.CHAIN_LENGTH + 0.5, FLOOR, SZ);
             extra.addAll(List.of(onLine, beside, beyond));
             tickHeart(level, h, 40);
             check(lost(onLine) >= StormHeart.CHAIN_DAMAGE * 0.7f, "chain: a player on the line was not hurt (" + lost(onLine) + ")", f);

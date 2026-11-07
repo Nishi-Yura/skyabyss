@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import jp.revati.skyabyss.guide.PrepQuests;
 import jp.revati.skyabyss.guide.SiteProgressData;
 import jp.revati.skyabyss.guide.SiteSpawner;
-import jp.revati.skyabyss.guide.WayfarerNotes;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
@@ -22,7 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 // 控え帳の巨神の頁の「この章の進み」(A9、docs/design/07 の 6.8、11 の 3.x)。章 (一〜四章) ごとに、巨神の頁の中に出す:
 //   備えの頼み  済み / 3 と、三本の名前に印 (済み ✔・受けた …・まだ ・)
 //   寄り道      見つけた数と終えた数 / その章の場所の数 (場所の名前は出さない。輪郭だけ)
-//   旅の覚書    受け取り済みか
 // 見ていない巨神の頁 (RecordBuilder.titanPage の伏せ字) には出さない。物語の核心は書かない。読むだけで書き換えない
 final class ChapterChecklist {
     private ChapterChecklist() {
@@ -84,9 +82,6 @@ final class ChapterChecklist {
                     cleared >= total ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
                     List.of(RecordBuilder.t("d.check_sites", found, cleared, total), RecordBuilder.t("d.check_sites_hint"))));
         }
-        boolean notes = Growth.discovered(p, "notes:ch" + n) || WayfarerNotes.has(p, n);
-        rows.add(RecordBuilder.value("check_notes", RecordBuilder.t("r.check_notes"), RecordBuilder.t(notes ? "v.check_notes_yes" : "v.check_notes_no"),
-                notes ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(RecordBuilder.t("d.check_notes"))));
         return rows;
     }
 

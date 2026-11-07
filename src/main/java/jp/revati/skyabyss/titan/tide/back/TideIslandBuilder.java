@@ -48,7 +48,8 @@ public final class TideIslandBuilder {
         s.thenJob("load area", () -> jp.revati.skyabyss.titan.BackBuildJobs.loadArea(kit.level(), -190, -245, 190, 170));
         // 体の中は建てない (外見だけ。docs/design/32 の 2.5)。外から見える所の手直しと、地上へ戻る潮門の到着の段だけ
         s.then("trenches", () -> fillTrenches(kit));
-        s.then("gate", () -> gate(kit));
+        // 潮門の段と廊下は建てない。形に残る潮門の枠と光る面は継ぎ当てで閉じる (titan/BackSeal。2026-11-07「完全に閉じて」)
+        s.then("seal", () -> jp.revati.skyabyss.titan.BackSeal.apply(kit.level(), "tide_back"));
         s.then("wells", () -> fillWells(kit));
         // 心臓の間 (殻の底) と休み場 heart は体の外の封じた部屋 (trial/raid/InstanceArenas)
         jp.revati.skyabyss.trial.raid.InstanceArenas.addHeartSteps(s, kit.level(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
@@ -131,110 +132,12 @@ public final class TideIslandBuilder {
     }
 
     // ---------------------------------------------------------------- 潮門 (モデルの左後ろの門)、到着の段、見送りの段、潮門の廊下
-    private static void gate(TideKit kit) {
-        kit.zone(TideZone.BEACH);
-        Area l = LANDING;
-        // 到着の段 (床 64): 甲羅の縁と後ろのひれの付け根の上。段の上 8 段を空ける (光る面の下をくぐる)
-        for (int x = l.x1(); x <= l.x2(); x++) {
-            for (int z = l.z1(); z <= l.z2(); z++) {
-                for (int y = 60; y <= l.floor(); y++) {
-                    kit.set(x, y, z, y == l.floor() ? landingFloor(x, z) : TideKit.SANDSTONE);
-                }
-                for (int y = l.floor() + 1; y <= l.floor() + 8; y++) {
-                    kit.set(x, y, z, TideKit.AIR);
-                }
-            }
-        }
-        // ひれの上 (南) から到着の段へ下りる 5 段 (登る向きは南。幅 7)
-        int top0 = 69;
-        for (int i = 0; i < 5; i++) {
-            int z = l.z2() + 1 + i;
-            int f = l.floor() + 1 + i;
-            for (int x = -106; x <= -100; x++) {
-                for (int y = GATE_FLOOR - 2; y < f; y++) {
-                    kit.set(x, y, z, TideKit.SANDSTONE);
-                }
-                kit.stair(x, f, z, Direction.SOUTH, Blocks.SMOOTH_SANDSTONE_STAIRS.defaultBlockState());
-                for (int y = f + 1; y <= top0 + 4; y++) {
-                    kit.set(x, y, z, TideKit.AIR);
-                }
-            }
-        }
-        // 見送りの段: 段の西 (x -109〜-112) を、海へ一段ずつ下りる。いちばん下 (x -113〜-111) に入ると地上へ戻る (inReturnGate)
-        BlockState water = Blocks.WATER.defaultBlockState();
-        for (int i = 0; i < 4; i++) {
-            int x = l.x1() - 1 - i;
-            int top = l.floor() - 1 - i;
-            for (int z = GATE_Z - 1; z <= GATE_Z + 2; z++) {
-                boolean side = z == GATE_Z - 1 || z == GATE_Z + 2;
-                for (int y = 58; y <= l.floor() + 6; y++) {
-                    BlockState s;
-                    if (side && i == 0) {
-                        // 段の両脇の灯りの柱
-                        s = y <= l.floor() ? TideKit.BRICK : y == l.floor() + 1 ? Blocks.PRISMARINE_WALL.defaultBlockState()
-                                : y == l.floor() + 2 ? TideKit.LAMP : TideKit.AIR;
-                    } else if (side) {
-                        s = y < SEA ? water : TideKit.AIR;
-                    } else if (y < top) {
-                        s = TideKit.SANDSTONE;
-                    } else if (y == top) {
-                        s = Blocks.SMOOTH_SANDSTONE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST)
-                                .setValue(StairBlock.WATERLOGGED, y < SEA);
-                    } else {
-                        s = y < SEA ? water : TideKit.AIR;
-                    }
-                    kit.set(x, y, z, s);
-                }
-            }
-        }
-        // 潮門の廊下: 光る面のうしろ (x -90) から浜の西の壁 (x -53) まで。幅 6 (床は z 84〜89)、高さ 6。床 64、x -56・-55 の段で浜の床 66 へ
-        int bx = BEACH.x1();
-        for (int x = l.x2() + 1; x <= bx - 1; x++) {
-            int f = x <= bx - 5 ? GATE_FLOOR : x == bx - 4 ? GATE_FLOOR + 1 : BEACH.floor();
-            for (int z = GATE_HALL_Z1 - 1; z <= GATE_HALL_Z2 + 1; z++) {
-                boolean wall = z == GATE_HALL_Z1 - 1 || z == GATE_HALL_Z2 + 1;
-                for (int y = GATE_FLOOR - 2; y <= f + 7; y++) {
-                    BlockState s;
-                    if (wall) {
-                        // 壁: 6 マスおきに、骨の柱の間に灯り
-                        boolean pil = Math.floorMod(x, 8) == 0 && y > f && y <= f + 6;
-                        s = pil ? (y == f + 3 ? TideKit.LAMP : Blocks.BONE_BLOCK.defaultBlockState()) : kit.wall(x, y, z);
-                    } else if (y < f) {
-                        s = TideKit.BRICK;
-                    } else if (y == f) {
-                        if (x == bx - 4 || x == bx - 3) {
-                            kit.stair(x, y, z, Direction.EAST, Blocks.SMOOTH_SANDSTONE_STAIRS.defaultBlockState());
-                            continue;
-                        }
-                        s = kit.floorAt(x, z);
-                        if ((z == GATE_HALL_Z1 || z == GATE_HALL_Z2) && Math.floorMod(x, 4) == 0) {
-                            s = TideKit.NACRE;
-                        }
-                    } else if (y == f + 7) {
-                        s = Math.floorMod(x, 8) == 4 ? TideKit.LAMP : TideKit.DARK;
-                    } else {
-                        s = TideKit.AIR;
-                    }
-                    kit.set(x, y, z, s);
-                }
-            }
-        }
-        // 廊下の骨のアーチ (8 マスおき。柱の頭を結ぶ梁)
-        for (int x = l.x2() + 4; x <= bx - 6; x += 8) {
-            for (int z = GATE_HALL_Z1; z <= GATE_HALL_Z2; z++) {
-                kit.set(x, GATE_FLOOR + 6, z, Blocks.BONE_BLOCK.defaultBlockState());
-            }
-        }
-    }
-
-    private static BlockState landingFloor(int x, int z) {
-        int h = Math.floorMod(x * 5 + z * 7, 11);
-        return h < 6 ? Blocks.SMOOTH_SANDSTONE.defaultBlockState() : h < 9 ? Blocks.CUT_SANDSTONE.defaultBlockState() : TideKit.ROUGH;
-    }
+    static final boolean RETURN_GATE = false;
 
     // 地上へ戻る見送りの段 (いちばん下の段とその先の水) に入っているか
     public static boolean inReturnGate(double x, double y, double z) {
-        return x >= GATE_X - 1 && x < GATE_X + 2 && z >= GATE_Z && z < GATE_Z + 2 && y >= GATE_Y0 - 0.5 && y < GATE_Y1;
+        // 潮門の見送りの段はもうない (地上へは待機場所の帰りの石で。trial/ArrivalDeck。2026-11-07)
+        return RETURN_GATE && x >= GATE_X - 1 && x < GATE_X + 2 && z >= GATE_Z && z < GATE_Z + 2 && y >= GATE_Y0 - 0.5 && y < GATE_Y1;
     }
 
     private static int surface(int x, int z) {

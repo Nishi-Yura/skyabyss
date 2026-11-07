@@ -183,11 +183,11 @@ public final class StructureDump {
             ctx.getSource().sendFailure(Component.literal("unknown back " + name));
             return 0;
         }
-        BlockPos a = name.equals("titan_back") ? jp.revati.skyabyss.titan.dungeon.TitanBackLayout.arrival()
-                : name.equals("storm_back") ? jp.revati.skyabyss.titan.storm.back.StormBackLayout.ARRIVAL
-                : jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL;
+        // 到着の台の足もと (どの背も RouteSeals.safeFeet。前は余燼の背でも潮殻の座標へ移していた)
+        String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(level.dimension());
+        BlockPos a = titan != null ? jp.revati.skyabyss.trial.RouteSeals.safeFeet(titan) : jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL;
         float yaw = name.equals("titan_back") ? 180f : name.equals("storm_back") ? jp.revati.skyabyss.titan.storm.back.StormBackLayout.ARRIVAL_YAW
-                : jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW;
+                : name.equals("tide_back") ? jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW : 180f;
         player.teleportTo(level, a.getX() + 0.5, a.getY(), a.getZ() + 0.5, yaw, 0f);
         ctx.getSource().sendSuccess(() -> Component.literal("arrived at " + name + " " + a.toShortString() + " yaw " + yaw), false);
         return 1;

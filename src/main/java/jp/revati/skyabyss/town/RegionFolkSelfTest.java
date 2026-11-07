@@ -35,7 +35,16 @@ public final class RegionFolkSelfTest {
             {"tide_ferryman", "town/tide_ferry"}, {"tide_lightkeeper", "town/tide_light"},
             {"storm_elder", "town/storm_rods"}, {"storm_hutkeeper", "town/storm_hut"},
             {"ember_survivor", "town/ember_forge"}, {"ember_watch", "town/ember_watch"},
-            {"camp_pilgrim", "town/camp_pilgrim"}, {"camp_minstrel", "town/camp_minstrel"}, {"camp_mapmaker", "town/camp_mapmaker"}};
+            {"camp_pilgrim", "town/camp_pilgrim"}, {"camp_minstrel", "town/camp_minstrel"}, {"camp_mapmaker", "town/camp_mapmaker"},
+            // 外れの集落の十六人 (tools/gen/story/gen_hamlet_folk.py)
+            {"bonefort_beacon", "town/hamlet_bonefort_beacon"}, {"bonefort_scribe", "town/hamlet_bonefort_scribe"},
+            {"bellwatch_crone", "town/hamlet_bellwatch_crone"}, {"bellwatch_miner", "town/hamlet_bellwatch_miner"},
+            {"lightvillage_apprentice", "town/hamlet_lightvillage_apprentice"}, {"lightvillage_comber", "town/hamlet_lightvillage_comber"},
+            {"tidefort_watch", "town/hamlet_tidefort_watch"}, {"tidefort_netmender", "town/hamlet_tidefort_netmender"},
+            {"emberfort_smith", "town/hamlet_emberfort_smith"}, {"emberfort_survivor", "town/hamlet_emberfort_survivor"},
+            {"smokewatch_reader", "town/hamlet_smokewatch_reader"}, {"smokewatch_twin", "town/hamlet_smokewatch_twin"},
+            {"frostfort_hunter", "town/hamlet_frostfort_hunter"}, {"frostfort_fletcher", "town/hamlet_frostfort_fletcher"},
+            {"windmill_keeper", "town/hamlet_windmill_keeper"}, {"windmill_mossguard", "town/hamlet_windmill_mossguard"}};
 
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();

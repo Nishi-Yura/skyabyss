@@ -160,6 +160,7 @@ public final class DungeonFloor {
     }
 
     void afterPour(ServerLevel level) {
+        MiniDungeons.afterPour(this, level);
         for (String k : terrain.marksStarting("chest_")) {
             BlockPos at = at(k);
             if (!(level.getBlockEntity(at) instanceof ChestBlockEntity chest) || SharedChests.known(level, at)) {
@@ -180,7 +181,7 @@ public final class DungeonFloor {
         }
         traps(level, t, here);
         Mechanics.tick(this, level, t, here);
-        if (index == Dungeon.BOSS_FLOOR) {
+        if (index == run.dungeon.bossFloor()) {
             bossTick(level, t, here);
         }
         if (t % 20 == 0) {
@@ -360,7 +361,7 @@ public final class DungeonFloor {
             boolean open = switch (cond) {
                 case "key" -> keyTaken && near;
                 case "mid" -> midDown;
-                default -> Mechanics.doorOpen(this, door);
+                default -> cond.startsWith("clear") ? roomCleared(level, cond.substring("clear".length())) : Mechanics.doorOpen(this, door);
             };
             if (open) {
                 openDoor(level, door);
@@ -372,6 +373,40 @@ public final class DungeonFloor {
                 }
             }
         }
+    }
+
+    // 部屋 room の敵が出て、みな倒れたか (小ダンジョンの扉 door_<n>_clear<部屋>。2026-11-07 の声「前の部屋の敵を全部倒したら」)
+    boolean roomCleared(ServerLevel level, String room) {
+        if (!woke.contains(room)) {
+            return false;
+        }
+        for (var en : foeMark.entrySet()) {
+            String mark = en.getValue();
+            if (mark.startsWith("foe_" + room + "_")) {
+                Entity e = level.getEntity(en.getKey());
+                if (e != null && e.isAlive()) {
+                    return false;
+                }
+                if (e == null && !level.isPositionEntityTicking(at(mark))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // 部屋 room に残っている敵の数 (小ダンジョンの知らせ)
+    int roomLeft(ServerLevel level, String room) {
+        int n = 0;
+        for (var en : foeMark.entrySet()) {
+            if (en.getValue().startsWith("foe_" + room + "_")) {
+                Entity e = level.getEntity(en.getKey());
+                if (e != null && e.isAlive()) {
+                    n++;
+                }
+            }
+        }
+        return n;
     }
 
     void openDoor(ServerLevel level, String door) {
@@ -469,7 +504,12 @@ public final class DungeonFloor {
                 boss = m.getUUID();
                 PartyScale.apply(m, Math.max(1, run.members.size()));
                 // 主の硬さ (47 の 2.6): 目安 Lv が高いほど人の傷を割る
-                PartyScale.resist(m, 1.2 + (run.dungeon.level - 10) * 0.035);
+                PartyScale.resist(m, run.dungeon.mini ? 1.0 + Math.max(0, run.dungeon.level - 6) * 0.02 : 1.2 + (run.dungeon.level - 10) * 0.035);
+                if (run.dungeon.mini) {
+                    // 小ダンジョンの主: 名づきの大物と同じ扱い (技の名前・ボスバーの見た目)。潮の番人は床を水に沈める技を使う (ShoreWarden.named)
+                    m.addTag(MiniDungeons.BOSS_TAG);
+                    m.addTag(NamedFoes.TAG);
+                }
                 Dungeons.deepen(m, run);
                 if (m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss b) {
                     List<Vec3> holes = new ArrayList<>();
@@ -506,7 +546,7 @@ public final class DungeonFloor {
     }
 
     void bars(ServerLevel level, List<ServerPlayer> here) {
-        UUID id = index == Dungeon.BOSS_FLOOR ? boss : mid;
+        UUID id = index == run.dungeon.bossFloor() ? boss : mid;
         Entity e = id == null ? null : level.getEntity(id);
         if (!(e instanceof LivingEntity le) || !le.isAlive()) {
             if (bar != null) {
@@ -518,7 +558,7 @@ public final class DungeonFloor {
             return;
         }
         if (bar == null) {
-            bar = new ServerBossEvent(le.getDisplayName(), index == Dungeon.BOSS_FLOOR ? BossEvent.BossBarColor.RED : BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
+            bar = new ServerBossEvent(le.getDisplayName(), index == run.dungeon.bossFloor() ? BossEvent.BossBarColor.RED : BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
         }
         bar.setProgress(Math.max(0f, le.getHealth() / le.getMaxHealth()));
         for (ServerPlayer p : here) {

@@ -1,16 +1,11 @@
 package jp.revati.skyabyss.guide;
 
-import com.mojang.serialization.Codec;
-
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModItems;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -18,14 +13,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 共有の ModItems・ModDataComponents には手を入れず、ここで別に登録する
 public final class GuideSetup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
-    private static final DeferredRegister.DataComponents COMPONENTS = DeferredRegister.createDataComponents(SkyAbyss.MODID);
-
-    // 旅の覚書の章 (0 = 序章、1〜4 = 一〜四章)。冊ごとに持つ
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> NOTES_CHAPTER = COMPONENTS.registerComponentType("notes_chapter",
-            b -> b.persistent(Codec.intRange(0, 4)).networkSynchronized(ByteBufCodecs.VAR_INT));
-
-    public static final DeferredItem<Item> WAYFARER_NOTES = ITEMS.register("wayfarer_notes",
-            () -> new WayfarerNotesItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     // 鼓動守 (巨神ごと)。titan は ProgressRules.TITAN_ORDER の名前
     public static final DeferredItem<Item> HEARTBEAT_WARD_STONE_WHALE = ward("stone_whale");
@@ -58,15 +45,11 @@ public final class GuideSetup {
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
-        COMPONENTS.register(modEventBus);
         modEventBus.addListener(GuideSetup::onCreativeTab);
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
-            for (int c = 0; c <= WayfarerNotes.MAX_CHAPTER; c++) {
-                event.accept(WayfarerNotes.make(c));
-            }
             event.accept(ROCK_SHELL_SCRAP.get());
             event.accept(BONE_CHIP.get());
             event.accept(HARE_QUILL.get());

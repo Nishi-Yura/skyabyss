@@ -217,6 +217,7 @@
   "message.skyabyss.route.heart": "Three trials crossed. Beyond the seal, the heartbeat waits.",
   "message.skyabyss.route.next": "Crossed. Next: %s",
   "message.skyabyss.route.next_heart": "Crossed. Next: the heart",
+  "message.skyabyss.route.wait_boons": "Your companions are choosing their boons... (%s s)",
   "message.skyabyss.route.abandon_ask": "%s wants to abandon the route.",
   "message.skyabyss.route.abandon_yes": "[Yes]",
   "message.skyabyss.route.abandon_no": "[No]",
@@ -371,7 +372,7 @@
   "boon.skyabyss.leech.desc": "Heal 4% of the damage you deal.",
   "gui.skyabyss.boon.title": "Challenge Boon",
   "gui.skyabyss.boon.choose": "Pick one (%s s left)",
-  "gui.skyabyss.boon.help": "Click or press 1 / 2. If closed, the left one is taken.",
+  "gui.skyabyss.boon.help": "Click or press 1 / 2. When time runs out, the left one is taken.",
   "message.skyabyss.boon.got": "Boon gained: %s. Lasts until the route ends",
   "message.skyabyss.boon.faded": "Your challenge boons faded"
 }

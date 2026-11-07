@@ -7,7 +7,7 @@ WEAPONS = {
     "wild_banner_spear": ("「旗は破れても、穂先は錆びなかった」", "\"The banner tore; the spearhead never rusted.\""),
     "wild_quarry_hammer": ("「石の目を読めば、山も素直に割れる」", "\"Read the grain of the stone and the mountain splits willingly.\""),
     "wild_tusk_axe": ("「猪は丘の主。牙はその証文だ」", "\"The boar was lord of the hills. Its tusk is the deed.\""),
-    "wild_scribe_staff": ("「写し損じた頁ほど、よく燃える」", "\"Miscopied pages burn the brightest.\""),
+    "wild_scribe_staff": ("「写し損じたページほど、よく燃える」", "\"Miscopied pages burn the brightest.\""),
     "wild_moss_staff": ("「苔の灯りは、夜の丘で道を覚えている」", "\"Moss light remembers the paths across the night hills.\""),
     "wild_crow_bow": ("「鳥は追い払うもの。射るのは最後だ」", "\"You chase the crows off. Shooting them comes last.\""),
     "wild_bonespike_bow": ("「骨は軽くて、よくしなる。死んだ後も」", "\"Bone is light and supple. Even after death.\""),
@@ -180,10 +180,10 @@ ARMORS = {
         ("「塩を踏む音で、隊の足並みが分かる」", "\"The crunch of salt tells you the squad's pace.\""),
     ],
     "wild_lampkeeper": [
-        ("「灯守の頭巾は、灯の傍で外さない」", "\"A lampkeeper never lowers the hood beside a lamp.\""),
+        ("「灯番の頭巾は、灯のそばで外さない」", "\"A lampwatcher never lowers the hood beside a lamp.\""),
         ("「法衣の内に、消えない灯を一つ」", "\"Inside the vestment, one flame that never goes out.\""),
         ("「灯を運ぶ脚は、決して走らない」", "\"Legs that carry the lamp never run.\""),
-        ("「灯守の足音は、闇を退ける」", "\"A lampkeeper's footsteps push back the dark.\""),
+        ("「灯番の足音は、闇を退ける」", "\"A lampwatcher's footsteps push back the dark.\""),
     ],
     "wild_hanged": [
         ("「吊られた者の頭巾は、上を向かない」", "\"The hanged one's hood never looks up.\""),
@@ -248,6 +248,6 @@ ACCESSORIES = {
     "wild_meteor_ring": ("「隕鉄の環は、月の引く方へ傾く」", "\"The meteoric ring leans toward the moon's pull.\""),
     "wild_skylark_plume": ("「雲雀の羽根は、雲の上の歌を覚えている」", "\"The skylark plume remembers the songs above the clouds.\""),
     "wild_starchart_compass": ("「星図の針は、まだ見ぬ星を指す」", "\"The starchart needle points to unseen stars.\""),
-    "wild_moon_hourglass": ("「月の砂時計は、満ち欠けで時を測る」", "\"The lunar hourglass measures time in phases.\""),
+    "wild_moon_hourglass": ("「この砂時計は、月の満ち欠けで時を測る」", "\"This hourglass measures time by the moon's phases.\""),
     "wild_cloudhymn_slip": ("「祝詞の札は、巡礼者の道の守り」", "\"The hymn slip guards the pilgrim's road.\""),
 }

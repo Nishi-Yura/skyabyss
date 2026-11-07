@@ -23,12 +23,17 @@ import net.minecraft.world.phys.Vec3;
 //            掘り穴がなければ (卵から出したとき) 人の足もとの輪から突き上げる。離れた人へ、または間を置いて
 //   落石     体力が半分を切ると、吠えて天井を揺らし、人のまわりに落石の輪を降らせる (予告 1.5 秒)
 //   潜っている間は見えず、傷を受けない (人は掘り穴の帯の予告を見て避ける)
+//   骨の礫   少し離れた人へ、口から骨の礫を三本の帯に吐く (予告 0.9 秒)。間を抜ける
+//   突進のあとは頭を打って止まる (大きな隙)。後半 (体力半分から) は突進のあとにもう一度だけ潜り、別の穴から続けて突進する。骨の坑夫を 2 体呼ぶ
 public class BoneCentipede extends DungeonBoss {
     static final int BITE = 1;
     static final int SWEEP = 2;
     static final int BURROW = 3;
     static final int CHARGE = 4;
     static final int ROCKS = 5;
+    static final int SPIT = 6;
+    public static final int SPIT_WARN = 18;
+    public static final double SPIT_LENGTH = 15;
     public static final int BITE_WARN = 14;
     public static final double BITE_RANGE = 6.5;
     public static final int SWEEP_WARN = 18;
@@ -42,6 +47,8 @@ public class BoneCentipede extends DungeonBoss {
     private int lastBurrow = -200;
     private int lastRocks = -400;
     private Vec3 rise;
+    private int lastSpit = -200;
+    private boolean chained;
 
     public BoneCentipede(EntityType<? extends Monster> type, Level level) {
         super(type, level, "bone_centipede", () -> SoundEvents.SILVERFISH_AMBIENT, () -> SoundEvents.SILVERFISH_HURT, () -> SoundEvents.RAVAGER_DEATH,
@@ -69,12 +76,12 @@ public class BoneCentipede extends DungeonBoss {
             rocks(target);
             return;
         }
+        if (distance > 6 && distance <= SPIT_LENGTH && tickCount - lastSpit > 140 && random.nextFloat() < 0.6f) {
+            spit(target);
+            return;
+        }
         if (distance > 9 || tickCount - lastBurrow > 360) {
-            move = BURROW;
-            lastBurrow = tickCount;
-            begin(target, "burrow");
-            cue("bone_centipede", "burrow", BURROW_DOWN + BURROW_HIDDEN);
-            server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 2f, 0.5f);
+            burrow(target);
             return;
         }
         if (distance < SWEEP_RADIUS - 0.5 && tickCount - lastSweep > 160) {
@@ -107,6 +114,45 @@ public class BoneCentipede extends DungeonBoss {
                         player.knockback(0.9, -f.x, -f.z);
                     })
                     .start();
+        }
+    }
+
+    // 骨の礫: 人へ向けた三本の帯 (間は通れる)
+    void spit(LivingEntity target) {
+        move = SPIT;
+        lastSpit = tickCount;
+        begin(target, "bite");
+        cue("bone_centipede", "spit", SPIT_WARN);
+        double base = Telegraph.angleOf(target.position().subtract(position()));
+        for (int k = -1; k <= 1; k++) {
+            double a = base + k * 0.42;
+            Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, SPIT_LENGTH, 0.9))
+                    .floor(getY()).warn(SPIT_WARN + Math.abs(k) * 4).danger().owner(this).target(target)
+                    .victims(this::canHit)
+                    .onImpact(server -> server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                            getX() + Math.cos(a) * SPIT_LENGTH * 0.6, getY() + 0.6, getZ() + Math.sin(a) * SPIT_LENGTH * 0.6, 30, 2.5, 0.3, 2.5, 0.1))
+                    .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.8f))
+                    .start();
+        }
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.SKELETON_SHOOT, SoundSource.HOSTILE, 1.6f, 0.5f);
+    }
+
+    // 潜る (床へ潜り、掘り穴か人の足もとから出て突進する)
+    void burrow(LivingEntity target) {
+        move = BURROW;
+        lastBurrow = tickCount;
+        begin(target, "burrow");
+        cue("bone_centipede", "burrow", BURROW_DOWN + BURROW_HIDDEN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 2f, 0.5f);
+    }
+
+    // つっかえたら潜って出直す (地を蹴って移る代わり)
+    @Override
+    protected void unstick(LivingEntity target) {
+        if (onGround()) {
+            burrow(target);
+        } else {
+            super.unstick(target);
         }
     }
 
@@ -192,12 +238,23 @@ public class BoneCentipede extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "bone_centipede";
+    }
+
+    @Override
+    protected String minionId() {
+        return "skyabyss:pit_digger";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case BITE -> BITE_WARN + 12;
             case SWEEP -> SWEEP_WARN + 12;
             case BURROW -> BURROW_DOWN + BURROW_HIDDEN + 20;
             case CHARGE -> CHARGE_WARN + (int) Math.ceil(CHARGE_LENGTH / 0.9) + 12;
+            case SPIT -> SPIT_WARN + 16;
             default -> ROCKS_WARN + 14;
         };
     }
@@ -207,6 +264,18 @@ public class BoneCentipede extends DungeonBoss {
         if (isInvisible()) {
             setInvisible(false);
             setInvulnerable(false);
+        }
+        if (move == CHARGE) {
+            // 頭を打って止まる (大きな隙)。後半は一度だけ続けて潜る
+            if (phase2 && !chained) {
+                chained = true;
+                lastBurrow = tickCount - 1000;
+                cooldown = 4;
+                super.finish();
+                return;
+            }
+            chained = false;
+            opening();
         }
         cooldown = switch (move) {
             case CHARGE, ROCKS -> 36;

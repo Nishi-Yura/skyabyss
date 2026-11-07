@@ -119,14 +119,19 @@ def lang():
         en[f"item.skyabyss.{w['id']}.desc"] = w["abil_en"]
     for a in S.ARMORS:
         for p in S.PIECES:
-            ja[f"item.skyabyss.{a['id']}_{p}"] = f"{a['ja']}の{S.PIECE_JA[p]}"
-            en[f"item.skyabyss.{a['id']}_{p}"] = f"{a['en']} {S.PIECE_EN[p]}"
+            # 部位の名前: 一式ごとの名前 (S.PIECE_NAMES) が先。布の一式の頭は「頭巾」(2026-11-07。英語の Hood と合わせる)
+            names = S.PIECE_NAMES.get(a["id"])
+            piece = S.PIECE_JA[p]
+            if p == "helmet" and S.CLOTH.search(a["ja"]):
+                piece = "頭巾"
+            ja[f"item.skyabyss.{a['id']}_{p}"] = names[0][p] if names else f"{a['ja']}の{piece}"
+            en[f"item.skyabyss.{a['id']}_{p}"] = names[1][p] if names else f"{a['en']} {S.PIECE_EN[p]}"
         ja[f"item.skyabyss.{a['id']}.desc"] = f"{ROLE_JA[a['role']]}の一式。{a['set_ja']}"
         en[f"item.skyabyss.{a['id']}.desc"] = f"{ROLE_EN[a['role']]} set. {a['set_en']}"
     for x in S.ACCESSORIES:
         ja[f"item.skyabyss.{x['id']}"] = x["ja"]
         en[f"item.skyabyss.{x['id']}"] = x["en"]
-        ja[f"item.skyabyss.{x['id']}.desc"] = ("護符（[H] で使う）。" if x["kind"] == "charm" else "装飾。") + x["abil_ja"]
+        ja[f"item.skyabyss.{x['id']}.desc"] = ("護符（[H] で使う）。" if x["kind"] == "charm" else "アクセサリー。") + x["abil_ja"]
         en[f"item.skyabyss.{x['id']}.desc"] = ("Charm ([H] to use). " if x["kind"] == "charm" else "Trinket. ") + x["abil_en"]
     # 物語の一行 (stories.py。GearCurveSelfTest の story が見る)
     import stories as T

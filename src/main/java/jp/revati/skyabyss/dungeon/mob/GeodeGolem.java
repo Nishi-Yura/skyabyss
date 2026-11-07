@@ -146,6 +146,11 @@ public class GeodeGolem extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "geode_golem";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case PUNCH -> PUNCH_WARN + 10;

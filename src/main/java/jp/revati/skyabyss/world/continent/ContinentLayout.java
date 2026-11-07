@@ -41,6 +41,12 @@ public final class ContinentLayout {
     public record Level(String text, BlockPos pos) {
     }
 
+    // 外れの置き場 (2026-11-06。kind = hamlet (外れの集落) | deep (奥のダンジョン)、region = 土地 (whale / tide / storm / ember)、key = 名前の鍵)
+    public record Frontier(String kind, String region, String key, BlockPos pos) {
+    }
+
+    private final List<Frontier> frontier = new ArrayList<>();
+
     private ContinentLayout(JsonObject o) {
         capital = pos(o.getAsJsonArray("capital"));
         start = pos(o.getAsJsonArray("start"));
@@ -72,6 +78,13 @@ public final class ContinentLayout {
                 } else {
                     island.put(e.getKey(), pos(e.getValue().getAsJsonArray()));
                 }
+            }
+        }
+        if (o.has("frontier")) {
+            for (JsonElement e : o.getAsJsonArray("frontier")) {
+                JsonObject f = e.getAsJsonObject();
+                frontier.add(new Frontier(f.get("kind").getAsString(), f.get("region").getAsString(), f.get("key").getAsString(),
+                        new BlockPos(f.get("x").getAsInt(), 0, f.get("z").getAsInt())));
             }
         }
         if (o.has("levels")) {
@@ -243,6 +256,22 @@ public final class ContinentLayout {
     }
 
     // 土地ごとの目安のレベル (capital・whale・tide・storm・ember)
+    // 外れの置き場 (古い図には無い: 空)
+    public List<Frontier> frontier() {
+        return frontier;
+    }
+
+    // 外れの集落だけ (並び = 置き場の番号)
+    public List<Frontier> hamlets() {
+        List<Frontier> out = new ArrayList<>();
+        for (Frontier f : frontier) {
+            if (f.kind().equals("hamlet")) {
+                out.add(f);
+            }
+        }
+        return out;
+    }
+
     public Map<String, Level> levels() {
         return levels;
     }

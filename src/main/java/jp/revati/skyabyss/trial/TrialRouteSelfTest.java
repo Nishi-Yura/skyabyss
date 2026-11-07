@@ -33,7 +33,7 @@ import jp.revati.skyabyss.trial.Trial.Mods;
 //  - 初回の流れ (到着の台に立てる巨神): 台に立つ → 予告のあと部屋 1 の中へ → 越えるたびに次の部屋の中へ → 中ボスの間 → 心臓の間の中。
 //    別のグループの人は動かない。越えた順が前後しても段は戻らない。途中で台に立っても始め直さない。ほかのグループの初回の順路が
 //    動いていても待たない (部屋は区画ごとに別)。周回のグループは台では始まらない (祠から)
-//  - 周回の流れ: 引いた三つの部屋の中へ運ばれ、三つ目のあと中ボスの間、倒すと心臓の間の中へ。二つのグループは別の区画の番号で同時に進み、終えると番号が返る
+//  - 周回の流れ: 引いた三つの部屋の中へ運ばれ、三つ目のあと心臓の間の手前の前室へ (加護を選び終わるまで運ばない)。二つのグループは別の区画の番号で同時に進み、終えると番号が返る
 //  - あきらめ (一人は提案で成立)・参加者がいなくなったとき・心臓を止めたときに順路が終わる。心臓で順路の記録 (回数) が増える
 public final class TrialRouteSelfTest {
     private TrialRouteSelfTest() {
@@ -163,11 +163,11 @@ public final class TrialRouteSelfTest {
     }
 
     private static boolean near(ServerPlayer p, ServerLevel back, String titan, TrialDraw.Draw draw, int step, boolean mid) {
-        // 心臓の段は、体の外の封じた心臓の間の中 (trial/raid/InstanceArenas)
+        // 心臓の段は、体の外の封じた心臓の間の手前の前室 (焚き火のそば。trial/raid/InstanceArenas.heartRest)。間の中ではない
         if (!mid && step >= TrialRoute.LAST_STEP) {
-            BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
-            return in != null && jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(titan).contains(p.position())
-                    && p.position().distanceTo(Vec3.atBottomCenterOf(in)) < 2.5;
+            BlockPos rest = jp.revati.skyabyss.trial.raid.InstanceArenas.heartRest(back, titan);
+            return rest != null && !jp.revati.skyabyss.trial.raid.InstanceArenas.heartArena(titan).contains(p.position())
+                    && p.position().distanceTo(Vec3.atBottomCenterOf(rest)) < 2.5;
         }
         // レイドの部屋の段は、区画に建てた部屋の中 (docs/design/32 の 7 章)
         if (!mid && jp.revati.skyabyss.trial.raid.RaidRun.isRaidStep(back, Groups.keyOf(p), step)) {
@@ -190,8 +190,32 @@ public final class TrialRouteSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 心臓の段: パーティ全員が、体の外の封じた心臓の間の中へ直に運ばれる
-    // (立てる床の上・頭まで空き・戦いの箱の中・入口の封印より奥。前室を歩かない)。心臓の間が背の体の外 (区画 0 番の枠) にある
+    // 体の高さ 2 の人が from から to まで歩いて (縦にも 1 ずつ) 行けるか。limit の箱の中だけを、40 万マスまで辿る。大門は既定の開け閉めで見る
+    static boolean walkable(ServerLevel level, BlockPos from, BlockPos to, AABB limit) {
+        java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        q.add(from);
+        seen.add(from.asLong());
+        while (!q.isEmpty() && seen.size() < 400_000) {
+            BlockPos at = q.poll();
+            if (at.equals(to)) {
+                return true;
+            }
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+                BlockPos n = at.relative(d);
+                if (!limit.contains(n.getX() + 0.5, n.getY() + 0.5, n.getZ() + 0.5) || !seen.add(n.asLong())) {
+                    continue;
+                }
+                if (level.getBlockState(n).getCollisionShape(level, n).isEmpty() && level.getBlockState(n.above()).getCollisionShape(level, n.above()).isEmpty()) {
+                    q.add(n);
+                }
+            }
+        }
+        return false;
+    }
+
+    // ---------------------------------------------------------------- 心臓の段: パーティ全員が、体の外の封じた心臓の間の手前の前室 (焚き火) へ運ばれる
+    // (立てる床の上・頭まで空き・間の外。二人は別のマス)。前室から大門をくぐって間へ歩いて行ける。心臓の間が背の体の外 (区画 0 番の枠) にある
     private static void heartCarry(List<String> f, MinecraftServer server, ServerLevel back, String titan) {
         TrialRoute.clearAll();
         jp.revati.skyabyss.party.PartyData parties = jp.revati.skyabyss.party.PartyData.get(server);
@@ -222,12 +246,18 @@ public final class TrialRouteSelfTest {
                     titan + ": the heart arena is not in the slot-0 instance frame: " + arena);
             for (ServerPlayer p : both) {
                 BlockPos feet = p.blockPosition();
-                check(f, arena.contains(p.position()), titan + ": " + p.getGameProfile().getName() + " was not carried inside the heart arena: " + p.position() + " (arena " + arena + ")");
+                check(f, near(p, back, titan, TrialData.current(back, g), TrialRoute.LAST_STEP, false),
+                        titan + ": " + p.getGameProfile().getName() + " was not carried to the heart front room (campfire): " + p.position() + " (arena " + arena + ")");
                 check(f, back.getBlockState(feet).getCollisionShape(back, feet).isEmpty() && back.getBlockState(feet.above()).getCollisionShape(back, feet.above()).isEmpty()
                         && !back.getBlockState(feet.below()).getCollisionShape(back, feet.below()).isEmpty(),
                         titan + ": the heart arrival is not a standing spot at " + feet.toShortString());
             }
-            SkyAbyss.LOGGER.info("SELFTEST trial route {}: the party was carried into the heart arena at {}", titan, a.blockPosition().toShortString());
+            check(f, !a.blockPosition().equals(b.blockPosition()), titan + ": the two were put on the same block in the front room");
+            // 前室から大門をくぐって間の中へ歩いて行ける (戦いの前は大門が開いている)
+            BlockPos in = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
+            check(f, in != null && walkable(back, a.blockPosition(), in, arena.inflate(24)),
+                    titan + ": the heart arena cannot be walked into from the front room (" + a.blockPosition().toShortString() + " -> " + in + ")");
+            SkyAbyss.LOGGER.info("SELFTEST trial route {}: the party was carried to the heart front room at {}", titan, a.blockPosition().toShortString());
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST trial route heart carry crashed", e);
             f.add(titan + ": heart carry crashed: " + e);
@@ -295,6 +325,9 @@ public final class TrialRouteSelfTest {
                 check(f, TrialRoute.step(back, ga) == expect && TrialRoute.mid(back, ga) == toMid, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
                 // 挑戦の加護: 越えた人にだけ二つ見せ、選ぶと持つ (持っているものは次から出ない)
                 check(f, RouteBoons.offered(a) && !RouteBoons.offered(b), titan + ": clearing step " + i + " did not offer a boon to the party only");
+                // 選ぶ前は、運びの時刻を過ぎても次の部屋へ運ばない (2026-11-06 の声「選んでないのに次の部屋に飛ばされる」)
+                TrialRoute.tick(back, titan, players, now + 1 + TrialRoute.CARRY_DELAY);
+                check(f, TrialRoute.pendingCount() == 1, titan + ": the carry to step " + expect + " ran while the boon was still being chosen");
                 RouteBoons.choose(a, i % 2);
                 check(f, !RouteBoons.offered(a) && RouteBoons.held(a).size() == i, titan + ": the boon pick did not stick (" + RouteBoons.held(a) + ")");
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry was not queued");

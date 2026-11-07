@@ -626,6 +626,9 @@ def write_layout(lay, height=None):
     }
     if height is not None:
         out['ferry_docks'] = [ferry_docks(f, height) for f in lay['ferries']]
+    # 外れの置き場 (集落 hamlet・奥のダンジョン deep。tools/lib/frontier_roads.SPOTS。world/continent/ContinentLayout.frontier)
+    if lay.get('frontier'):
+        out['frontier'] = [{'kind': k, 'region': r, 'key': key, 'x': int(x), 'z': int(z)} for k, r, key, x, z in lay['frontier']]
     plan = lay.get('island_plan')
     if plan:
         pk = {n: pt(c) for n, c, _, _ in plan['pockets']}

@@ -1,0 +1,51 @@
+# 2026-11-07: 舟に乗ったまま別の次元へ移ると舟が持ち物に戻る (item/outfit/BoatKeeper) と、壁に埋まると上へ出る (combat/WallRescue) の確かめ。
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/boat_wall.txt -PshotsName=boat_wall
+world boatwall flat
+size 1280 720
+timeout 1200
+render 8
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd clear @s
+# ---- 舟: 水を張って小舟に乗り、潮殻の背へ移る
+cmd fill -4 -61 -4 4 -61 4 minecraft:water
+cmd tp @s 0.5 -59 0.5 0 30
+wait 20
+cmd summon skyabyss:skiff 0.5 -60.5 2.5
+wait 10
+cmd ride @s mount @e[type=skyabyss:skiff,limit=1,sort=nearest]
+wait 20
+chat clear
+shot boat_a_riding
+cmd execute in skyabyss:tide_back run tp @s -124 70 114
+waitchunks
+wait 40
+chat clear
+cmd clear @s skyabyss:skiff 0
+wait 10
+shot boat_b_on_back_count
+cmd execute in minecraft:overworld run tp @s 0.5 -58 -3.5 0 30
+waitchunks
+wait 30
+chat clear
+cmd kill @e[type=skyabyss:skiff]
+wait 10
+shot boat_c_overworld_left
+# ---- 壁: 冒険のモードで石に埋める
+cmd gamemode adventure
+cmd tp @s 10.5 -60 0.5 0 0
+wait 10
+cmd fill 9 -60 -1 11 -58 1 minecraft:stone
+wait 60
+chat clear
+cmd data get entity @s Pos
+cmd data get entity @s Health
+wait 10
+shot wall_after
+cmd gamemode creative
+quit

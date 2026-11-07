@@ -29,15 +29,6 @@
       ]
     },
     {
-      "entity": "skyabyss:elder_thrall",
-      "weight": 1,
-      "time": "day",
-      "group": [
-        1,
-        1
-      ]
-    },
-    {
       "entity": "skyabyss:ash_husk",
       "weight": 4,
       "time": "night",

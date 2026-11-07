@@ -227,7 +227,8 @@ public final class CircuitSelfTest {
             int before = Coins.count(p);
             Circuits.finish(server, run);
             check(f, Circuits.runOf(p) == null, "a finished circuit still holds its walker");
-            check(f, Coins.count(p) - before == 3 * Circuits.COINS[ContinentMap.WHALE], "circuit coins are wrong: " + (Coins.count(p) - before));
+            check(f, Coins.count(p) - before == Circuits.LAST_COINS.getOrDefault(p.getUUID(), -1) && Circuits.LAST_COINS.get(p.getUUID()) >= 3 * Circuits.COINS[ContinentMap.WHALE],
+                    "circuit coins are wrong: " + (Coins.count(p) - before));
             check(f, Circuits.runsToday(p) == 1, "the circuit reward was not counted for today");
             // 野営地の景品の表から、印 1 つにつき 1 回引く (CircuitCamps)
             check(f, Circuits.LAST_PULLS.getOrDefault(p.getUUID(), -1) == 3, "the reward did not pull once per mark (" + Circuits.LAST_PULLS.get(p.getUUID()) + ")");
@@ -259,14 +260,30 @@ public final class CircuitSelfTest {
             discard(level, duo);
             int qBefore = Coins.count(q);
             Circuits.leave(q);
-            check(f, Circuits.runOf(q) == null && Circuits.runOf(p) == duo && Coins.count(q) - qBefore == 2 * Circuits.COINS[ContinentMap.WHALE],
+            check(f, Circuits.runOf(q) == null && Circuits.runOf(p) == duo && Coins.count(q) - qBefore == Circuits.LAST_COINS.getOrDefault(q.getUUID(), -1)
+                    && Circuits.LAST_COINS.get(q.getUUID()) >= 2 * Circuits.COINS[ContinentMap.WHALE],
                     "leaving a party circuit did not pay the leaver or broke the run");
             int pBefore = Coins.count(p);
             Circuits.forceComplete(level, duo);
             discard(level, duo);
             Circuits.finish(server, duo);
-            check(f, Coins.count(p) - pBefore == 3 * Circuits.COINS[ContinentMap.WHALE] && Circuits.runsToday(q) == 1,
-                    "the walker who stayed was not paid for every mark");
+            check(f, Coins.count(p) - pBefore == Circuits.LAST_COINS.getOrDefault(p.getUUID(), -1) && Circuits.LAST_COINS.get(p.getUUID()) >= 3 * Circuits.COINS[ContinentMap.WHALE]
+                    && Circuits.runsToday(q) == 1, "the walker who stayed was not paid for every mark");
+            // 一人が倒れたら、その巡り路はみな終わる (2026-11-06)。倒れていない人にはすぐ、それまでの印の報い
+            p.getPersistentData().remove(Circuits.DAY);
+            p.getPersistentData().remove(Circuits.RUNS);
+            q.getPersistentData().remove(Circuits.DAY);
+            q.getPersistentData().remove(Circuits.RUNS);
+            CircuitRun fall = Circuits.start(server, List.of(p, q), ContinentMap.WHALE, town);
+            made.add(fall);
+            Circuits.forceComplete(level, fall);
+            discard(level, fall);
+            int pFall = Coins.count(p);
+            Circuits.onPlayerDeath(new net.neoforged.neoforge.event.entity.living.LivingDeathEvent(q, level.damageSources().generic()));
+            check(f, Circuits.runOf(p) == fall, "the circuit ended before the next round after a fall");
+            Circuits.endFallen(server);
+            check(f, Circuits.runOf(p) == null && Circuits.runOf(q) == null && Coins.count(p) - pFall == Circuits.LAST_COINS.getOrDefault(p.getUUID(), -1),
+                    "a fall did not end the circuit for everyone or did not pay the marks so far");
             q.getPersistentData().remove(Circuits.DAY);
             q.getPersistentData().remove(Circuits.RUNS);
             q.getPersistentData().remove(RegionPoints.WEEK);
@@ -287,7 +304,7 @@ public final class CircuitSelfTest {
             p.getPersistentData().remove(RegionPoints.FAME);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST circuit PASSED (two pillars to choose, tasks stay in the region at fair distances, gold and blue pillars, guard, hunt with respawn, carry with drop, break the stake, timeout, coins, daily limit, region points, party walk and leave)");
+            SkyAbyss.LOGGER.info("SELFTEST circuit PASSED (two pillars to choose, tasks stay in the region at fair distances, gold and blue pillars, guard, hunt with respawn, carry with drop, break the stake, timeout, coins, daily limit, region points, party walk and leave, one fall ends the circuit)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST circuit FAILED: {}", m));
         }

@@ -95,6 +95,16 @@ public final class ObjectiveMarker {
             // 光海の迷路 (版 25): ひし形の標は出さない。道しるべは左上の目的の帯の大きな矢印と距離 (ObjectiveStrip)
             return;
         }
+        // 巡り路: 行き先の柱ごとに、柱の色の標 (柱を選んでいるあいだは二本とも)
+        if (jp.revati.skyabyss.endgame.client.CircuitClient.active()) {
+            for (jp.revati.skyabyss.endgame.client.CircuitClient.Spot sp : jp.revati.skyabyss.endgame.client.CircuitClient.spots()) {
+                Placement pc = place(g, mc, Vec3.atCenterOf(sp.pos()), BASE, 5.0);
+                if (pc != null) {
+                    show(g, mc, pc, sp.rgb() == 0 ? GOLD : sp.rgb() & 0xFFFFFF, false);
+                }
+            }
+            return;
+        }
         ObjectiveStrip.Resolved main = ObjectiveStrip.demo ? new ObjectiveStrip.Resolved(mc.player.blockPosition().offset(60, 3, -30), false) : ObjectiveStrip.resolve(mc);
         BlockPos mainPos = main.pos();
         ObjectiveStrip.Resolved sub = ObjectiveStrip.resolveTracked(mc);
@@ -107,7 +117,8 @@ public final class ObjectiveMarker {
             subPos = null;
         }
         Placement pm = mainPos == null ? null : place(g, mc, Vec3.atCenterOf(mainPos), BASE, 5.0);
-        Placement ps = subPos == null || subPos.equals(mainPos) ? null : place(g, mc, Vec3.atCenterOf(subPos), BASE * 0.8f, 5.0);
+        // 追跡中のサブも、メインと同じ大きさの黄色のひし形 (2026-11-07 の声「クエストにはすべて黄色のひし形で場所示してあげて」)
+        Placement ps = subPos == null || subPos.equals(mainPos) ? null : place(g, mc, Vec3.atCenterOf(subPos), BASE, 5.0);
         // 同じ場所・近い場所・画面で重なる標は一つにまとめる。金が先で、青緑は小さな点で「サブもここ」と添える
         if (pm != null && ps != null && merged(pm, ps, mainPos, subPos)) {
             show(g, mc, pm, GOLD, true);
@@ -117,7 +128,7 @@ public final class ObjectiveMarker {
             show(g, mc, pm, GOLD, false);
         }
         if (ps != null) {
-            show(g, mc, ps, TEAL, false);
+            show(g, mc, ps, GOLD, false);
         }
     }
 

@@ -49,6 +49,11 @@ public final class FacilityNetwork {
                         ShopService.sell(player, p.shop(), p.index(), p.times());
                     }
                 })
+                .playToServer(ShopBuyBack.TYPE, ShopBuyBack.STREAM_CODEC, (p, c) -> {
+                    if (c.player() instanceof ServerPlayer player) {
+                        ShopService.buyBack(player, p.shop(), p.index());
+                    }
+                })
                 .playToServer(ShopClosed.TYPE, ShopClosed.STREAM_CODEC, (p, c) -> {
                     if (c.player() instanceof ServerPlayer player) {
                         ShopService.closed(player);
@@ -72,7 +77,16 @@ public final class FacilityNetwork {
     public record SellView(int index, ItemStack item, int coins, int have) {
     }
 
-    public record ShopView(String shop, String title, int coins, List<GoodView> goods, List<SellView> sells) implements CustomPacketPayload {
+    // sold = 売った品の控え (SoldLog。「買い戻す」つまみ。coins = 買い戻す値)
+    public record ShopView(String shop, String title, int coins, List<GoodView> goods, List<SellView> sells, List<SellView> sold) implements CustomPacketPayload {
+        public ShopView(String shop, String title, int coins, List<GoodView> goods, List<SellView> sells) {
+            this(shop, title, coins, goods, sells, List.of());
+        }
+
+        public ShopView withSold(List<SellView> sold) {
+            return new ShopView(shop, title, coins, goods, sells, sold);
+        }
+
         public static final Type<ShopView> TYPE = typeOf("shop_view");
         public static final StreamCodec<RegistryFriendlyByteBuf, ShopView> STREAM_CODEC = StreamCodec.of(
                 (buf, p) -> {
@@ -96,6 +110,13 @@ public final class FacilityNetwork {
                     }
                     buf.writeVarInt(p.sells.size());
                     for (SellView s : p.sells) {
+                        buf.writeVarInt(s.index());
+                        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, s.item());
+                        buf.writeVarInt(s.coins());
+                        buf.writeVarInt(s.have());
+                    }
+                    buf.writeVarInt(p.sold.size());
+                    for (SellView s : p.sold) {
                         buf.writeVarInt(s.index());
                         ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, s.item());
                         buf.writeVarInt(s.coins());
@@ -126,7 +147,12 @@ public final class FacilityNetwork {
                     for (int i = 0; i < s; i++) {
                         sells.add(new SellView(buf.readVarInt(), ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readVarInt()));
                     }
-                    return new ShopView(shop, title, coins, goods, sells);
+                    int o = buf.readVarInt();
+                    List<SellView> sold = new ArrayList<>(o);
+                    for (int i = 0; i < o; i++) {
+                        sold.add(new SellView(buf.readVarInt(), ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readVarInt()));
+                    }
+                    return new ShopView(shop, title, coins, goods, sells, sold);
                 });
 
         @Override
@@ -160,6 +186,22 @@ public final class FacilityNetwork {
                     buf.writeVarInt(p.times);
                 },
                 buf -> new ShopSell(buf.readUtf(), buf.readVarInt(), buf.readVarInt()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // 売った品の控えの index 番目を買い戻す (SoldLog)
+    public record ShopBuyBack(String shop, int index) implements CustomPacketPayload {
+        public static final Type<ShopBuyBack> TYPE = typeOf("shop_buy_back");
+        public static final StreamCodec<RegistryFriendlyByteBuf, ShopBuyBack> STREAM_CODEC = StreamCodec.of(
+                (buf, p) -> {
+                    buf.writeUtf(p.shop);
+                    buf.writeVarInt(p.index);
+                },
+                buf -> new ShopBuyBack(buf.readUtf(), buf.readVarInt()));
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

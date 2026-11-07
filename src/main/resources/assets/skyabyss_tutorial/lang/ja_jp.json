@@ -3,9 +3,9 @@
   "tutorial.skyabyss.lore_book.hand": "右クリックで伝承の書を読む",
   "tutorial.skyabyss.lore_book.short": "[%s] を短く押して伝承の書を開く",
   "tutorial.skyabyss.lore_book.wheel": "[%s] 長押しで旅嚢の輪 → 伝承の書を選んで離す",
-  "tutorial.skyabyss.lore_page.hand": "右クリックで破れた頁を読む",
-  "tutorial.skyabyss.lore_page.short": "[%s] を短く押して破れた頁を読む",
-  "tutorial.skyabyss.lore_page.wheel": "[%s] 長押しで旅嚢の輪 → 破れた頁を選んで離すと読める",
+  "tutorial.skyabyss.lore_page.hand": "右クリックで破れたページを読む",
+  "tutorial.skyabyss.lore_page.short": "[%s] を短く押して破れたページを読む",
+  "tutorial.skyabyss.lore_page.wheel": "[%s] 長押しで旅嚢の輪 → 破れたページを選んで離すと読める",
   "tutorial.skyabyss.pouch": "[%s] で旅嚢を開く",
   "tutorial.skyabyss.whistle.hand": "右クリックで笛を吹いて、巨神の子を呼ぶ",
   "tutorial.skyabyss.whistle.short": "左の札が笛のとき、[%s] を短く押して吹く（巨神の子を呼ぶ）",
@@ -13,6 +13,6 @@
   "tutorial.skyabyss.record": "[%s] で控え帳を開く",
   "tutorial.skyabyss.ping": "[%s] で見ている先を仲間に知らせる",
   "tutorial.skyabyss.quest_log": "[%s] でクエストログを開く",
-  "tutorial.skyabyss.status": "[%s] で今の力（ステータス）を見る。力は技の木の節で上がる",
-  "tutorial.skyabyss.skills": "[%s] で技の画面を開く"
+  "tutorial.skyabyss.status": "[%s] で今の力（ステータス）を見る。力はスキルツリーのノードで上がる",
+  "tutorial.skyabyss.skills": "[%s] でスキルの画面を開く"
 }

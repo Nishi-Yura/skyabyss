@@ -7,7 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
-// 巡り路 (endgame/Circuits) の手元の表示: 目的の帯 (client/quest/ObjectiveStrip) に「巡り路 12:34・印 3：〜」と行き先を出す。
+// 巡り路 (endgame/Circuits) の手元の表示: 目的の帯 (client/quest/ObjectiveStrip) に「巡り路 12:34・印 3：〜」(矢印は出さない)、
+// 行き先の柱には目的の標 (client/guide/ObjectiveMarker。柱の色。二本のときは両方)。
 // 秒はサーバーから毎秒届く。届かなくなったら (3 秒) 消す
 public final class CircuitClient {
     private static volatile CircuitPayload last;
@@ -44,5 +45,22 @@ public final class CircuitClient {
     public static BlockPos target() {
         CircuitPayload p = now();
         return p == null || !p.hasTarget() ? null : p.target();
+    }
+
+    // 目的の標を出す所 (柱を選んでいるあいだは二本とも) と、その柱の色
+    public record Spot(BlockPos pos, int rgb) {
+    }
+
+    public static java.util.List<Spot> spots() {
+        CircuitPayload p = now();
+        if (p == null || !p.hasTarget()) {
+            return java.util.List.of();
+        }
+        return p.hasSecond() ? java.util.List.of(new Spot(p.target(), p.rgb()), new Spot(p.second(), p.rgb2())) : java.util.List.of(new Spot(p.target(), p.rgb()));
+    }
+
+    // 巡り路を歩いているか (目的の帯は文だけ。矢印と距離は出さない)
+    public static boolean active() {
+        return now() != null;
     }
 }

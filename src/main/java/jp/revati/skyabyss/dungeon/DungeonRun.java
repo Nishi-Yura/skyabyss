@@ -23,7 +23,7 @@ public final class DungeonRun {
     public final List<UUID> members = new ArrayList<>();
     public final long startedTick;
     public int checkpoint;
-    final DungeonFloor[] floors = new DungeonFloor[Dungeon.FLOORS.length];
+    final DungeonFloor[] floors;
     public boolean cleared;
     public final boolean deep;
     public DungeonMood mood;
@@ -31,6 +31,7 @@ public final class DungeonRun {
     long emptyTicks;
 
     DungeonRun(MinecraftServer server, int id, Dungeon dungeon, int slot, List<UUID> members, long startedTick, int checkpoint, boolean deep, DungeonMood mood) {
+        this.floors = new DungeonFloor[dungeon.floors().length];
         this.server = server;
         this.deep = deep;
         this.mood = mood;

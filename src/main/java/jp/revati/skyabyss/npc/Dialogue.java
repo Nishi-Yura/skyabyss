@@ -27,7 +27,8 @@ public record Dialogue(String role, List<Entry> entries, Map<String, Node> nodes
     public static final Set<String> FACES = Set.of("neutral", "smile", "grave");
     public static final Set<String> KINDS = Set.of("talk", "quest", "give", "leave");
 
-    public record Entry(Condition condition, String node) {
+    // quest = 条件にクエストの段が入っている入口 (頼みの報せ・渡し。クエストの話を先にでも上書きしない)
+    public record Entry(Condition condition, String node, boolean quest) {
     }
 
     public record Node(String id, String face, String textKey, List<Action> actions, @Nullable String next, List<Option> options) {
@@ -38,6 +39,16 @@ public record Dialogue(String role, List<Entry> entries, Map<String, Node> nodes
     }
 
     @Nullable
+    // ふだんの入口の条件がクエストの段で決まったか (その段の報せの節)
+    public boolean entryIsQuest(StoryContext ctx) {
+        for (Entry e : entries) {
+            if (e.condition().test(ctx)) {
+                return e.quest();
+            }
+        }
+        return false;
+    }
+
     public Node entryNode(StoryContext ctx) {
         for (Entry e : entries) {
             if (e.condition().test(ctx)) {
@@ -74,7 +85,8 @@ public record Dialogue(String role, List<Entry> entries, Map<String, Node> nodes
             for (JsonElement e : o.getAsJsonArray("entries")) {
                 JsonObject eo = e.getAsJsonObject();
                 String node = GsonHelper.getAsString(eo, "node", "");
-                entries.add(new Entry(Condition.parse(eo.get("if"), errors, where + " entry " + node), node));
+                entries.add(new Entry(Condition.parse(eo.get("if"), errors, where + " entry " + node), node,
+                        eo.has("if") && eo.get("if").toString().replace(" ", "").contains("\"type\":\"quest\"")));
             }
         }
         if (entries.isEmpty()) {

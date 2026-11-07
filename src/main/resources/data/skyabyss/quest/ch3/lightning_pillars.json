@@ -35,9 +35,8 @@
         {
           "id": "rods",
           "type": "signal",
-          "target": "ch3_pillar",
-          "count": 4,
-          "party": false
+          "target": "site_clear:storm_ruin",
+          "count": 1
         }
       ]
     },

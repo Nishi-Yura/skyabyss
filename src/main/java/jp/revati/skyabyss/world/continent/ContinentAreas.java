@@ -23,6 +23,8 @@ public final class ContinentAreas {
     static final int STABLE = 2;
     static final int TOWN_IN = 45;
     static final int TOWN_OUT = 60;
+    static final int HAMLET_IN = 40;
+    static final int HAMLET_OUT = 52;
     static final int CAPITAL_IN = 170;
     static final int CAPITAL_OUT = 200;
     // 土地の番号 (ContinentMap) → 名前の鍵と目安のレベル
@@ -41,6 +43,14 @@ public final class ContinentAreas {
     // いまいる所の名前 ("town:whale"・"capital"・"region:2")。前にいた所で出入りの幅を変える
     static String area(int x, int z, String before) {
         ContinentLayout lay = ContinentLayout.get();
+        // 外れの集落 ("hamlet:<番号>"。FrontierHamlets)
+        int h = FrontierHamlets.at(x, z, HAMLET_IN);
+        if (h < 0 && before.startsWith("hamlet:")) {
+            h = FrontierHamlets.at(x, z, HAMLET_OUT);
+        }
+        if (h >= 0) {
+            return "hamlet:" + h;
+        }
         for (String t : TOWNS) {
             BlockPos c = lay.town(t);
             if (c != null) {
@@ -67,6 +77,12 @@ public final class ContinentAreas {
         }
         if (area.equals("capital")) {
             return java.util.List.of(Component.translatable("signpost.skyabyss.capital"), Component.translatable("message.skyabyss.area.capital"));
+        }
+        if (area.startsWith("hamlet:")) {
+            int i = Integer.parseInt(area.substring(7));
+            ContinentLayout.Frontier f = FrontierHamlets.spot(i);
+            return java.util.List.of(Component.translatable("map.skyabyss.town." + FrontierHamlets.townId(i)),
+                    Component.translatable("map.skyabyss.continent." + (f == null ? "meadow" : f.region())));
         }
         int r = Math.max(0, Math.min(REGION_KEYS.length - 1, Integer.parseInt(area.substring(7))));
         return java.util.List.of(Component.translatable("map.skyabyss.continent." + REGION_KEYS[r]),
@@ -138,6 +154,13 @@ public final class ContinentAreas {
         } else if (area.equals("capital")) {
             title = Component.translatable("signpost.skyabyss.capital");
             sub = Component.translatable("message.skyabyss.area.capital");
+        } else if (area.startsWith("hamlet:")) {
+            int i = Integer.parseInt(area.substring(7));
+            String id = FrontierHamlets.townId(i);
+            markVisited(p, id);
+            ContinentLayout.Frontier f = FrontierHamlets.spot(i);
+            title = Component.translatable("map.skyabyss.town." + id);
+            sub = Component.translatable("message.skyabyss.area.hamlet", Component.translatable("map.skyabyss.continent." + (f == null ? "meadow" : f.region())));
         } else {
             int r = Math.max(0, Math.min(REGION_KEYS.length - 1, Integer.parseInt(area.substring(7))));
             title = Component.translatable("map.skyabyss.continent." + REGION_KEYS[r]);

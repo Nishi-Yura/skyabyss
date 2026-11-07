@@ -52,7 +52,8 @@ public final class ContinentLairsSelfTest {
                     for (int k = 0; k <= 8; k++) {
                         int x = a.getX() + (b.getX() - a.getX()) * k / 8;
                         int z = a.getZ() + (b.getZ() - a.getZ()) * k / 8;
-                        if (ContinentLairs.inside(x, z)) {
+                        // 体の下で地面を下げる高さ (cap) が道の高さに届く所だけ (空に浮いた体の下を道が通るのは構わない)
+                        if (ContinentLairs.inside(x, z) && (ContinentLairs.onPad(x, z) || ContinentLairs.cap(x, z) <= map.surface(x, z) + 3)) {
                             f.add(l.titan() + ": a road runs through the lair at " + x + ", " + z);
                             k = 9;
                             i = road.size();

@@ -226,7 +226,7 @@ public final class StormHeartSelfTest {
             BlockPos r = StormHeartArena.rod(i);
             check(back.getBlockState(r.above(StormHeartArena.ROD_HEIGHT - 1)).is(Blocks.END_ROD), "rod " + i + " has no glowing tip", failures);
             check(back.getBlockState(r.above(1)).is(StormBackSetup.ROD_BULB.get()), "rod " + i + " has no charge bulbs", failures);
-            check(Math.abs(StormHeartArena.dist(r.getX(), r.getZ()) - 9) < 1.0, "rod " + i + " is not about 9 from the centre", failures);
+            check(Math.abs(StormHeartArena.dist(r.getX(), r.getZ()) - StormHeartArena.ROD_OFFSET * Math.sqrt(2)) < 1.0, "rod " + i + " is not about " + StormHeartArena.ROD_OFFSET + " * sqrt 2 from the centre", failures);
         }
         for (int k = 0; k < 4; k++) {
             Vec3 h = StormHeartArena.hole(k);

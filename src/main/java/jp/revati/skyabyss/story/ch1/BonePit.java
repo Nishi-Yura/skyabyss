@@ -208,10 +208,13 @@ public final class BonePit {
         if (server.getTickCount() % 10 != 3) {
             return;
         }
-        ServerLevel level = server.overworld();
-        for (SiteData.Entry e : entries(server)) {
-            BlockPos pack = e.extra("pack");
-            if (pack == null || !level.isLoaded(pack)) {
+        // 荷は小ダンジョンの写しの中 (dungeon/MiniDungeons。部屋 C の印 pack)
+        ServerLevel level = jp.revati.skyabyss.dungeon.DungeonWorld.level(server);
+        if (level == null) {
+            return;
+        }
+        for (BlockPos pack : jp.revati.skyabyss.dungeon.Dungeons.marksOf(server, jp.revati.skyabyss.dungeon.Dungeon.MINI_BONE_PIT, "pack")) {
+            if (!level.isLoaded(pack)) {
                 continue;
             }
             boolean anyone = false;

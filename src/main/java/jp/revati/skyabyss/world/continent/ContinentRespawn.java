@@ -40,6 +40,8 @@ public final class ContinentRespawn {
                 out.add(r);
             }
         }
+        // 外れの集落 (訪れた所だけ)
+        out.addAll(FrontierHamlets.rests(over, who));
         for (String kind : new String[] {"shelter"}) {
             for (SiteData.Entry e : data.entries(kind)) {
                 if (e.built) {
@@ -109,7 +111,8 @@ public final class ContinentRespawn {
             return;
         }
         if (at != null) {
-            player.teleportTo(over, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player.getXRot());
+            jp.revati.skyabyss.util.RespawnMove.after(player, over,
+                    () -> player.teleportTo(over, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player.getXRot()));
         }
     }
 }

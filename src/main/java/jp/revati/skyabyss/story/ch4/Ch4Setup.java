@@ -92,7 +92,7 @@ public final class Ch4Setup {
     public static final int XP_DRAGGER = 3;
     public static final int XP_ELDER = 90;
 
-    // この章から鍛冶場・薬師で誂えられる品 (旅の覚書の章の品。自己テストが確かめる)
+    // この章から鍛冶場・薬師で誂えられる品 (その章の品。自己テストが確かめる)
     public static final List<String> MADE = List.of("ash_walking_helmet", "ash_walking_chestplate", "ash_walking_leggings", "ash_walking_boots",
             "soot_whetstone", "ash_cooler", "ash_baked_bread");
 

@@ -70,7 +70,7 @@ public final class DungeonGear {
     public static final double[] GROW_SCALE = {1.0, 1.25, 1.5};
 
     public static boolean isTrinket(Item item) {
-        for (Dungeon d : Dungeon.values()) {
+        for (Dungeon d : Dungeon.mids()) {
             DeferredItem<Item> it = ITEM_OF.get(BY_DUNGEON.get(d));
             if (it != null && it.get() == item) {
                 return true;

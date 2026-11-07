@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 // 部屋は背ごとに一つ。各巨神の心臓の配置 (TitanBackLayout・TideHeartArena・StormBackLayout・EmberBackLayout) は、元の座標をここへずらしてある。
 //  - 心臓の間の中心の水平の位置は (HEART_X, HEART_Z)。床の高さは元のまま (巨神ごとに違う)
 //  - 部屋のまわりは元の体の材質で詰めた箱 (水密)。そこへ元の部屋の掘り方・飾りをそのまま当てる。入口の外に、倒れた人が目を覚ます小さな前室 (休み場 heart) と大門
-//  - 順路の段 4 (心臓) へ運ばれる人は、前室ではなく部屋の中の入口の側へ直に着く (heartEntry)。集合の 5 秒のあと封じて心臓が現れる
+//  - 順路の段 4 (心臓) へ運ばれる人は、前室の焚き火のそば (heartRest) に着く。大門をくぐって間に入ると、集合の 5 秒のあと封じて心臓が現れる
 public final class InstanceArenas {
     private InstanceArenas() {
     }
@@ -142,7 +142,9 @@ public final class InstanceArenas {
     // 心臓の間が建っているか (運ばれる所の足もとが床で、頭まで空いている)
     public static boolean heartBuilt(ServerLevel level, String titan) {
         BlockPos in = heartEntry(titan);
-        return in != null && !level.getBlockState(in.below()).isAir() && level.getBlockState(in).isAir() && level.getBlockState(in.above()).isAir();
+        // 立つ所と頭は通れればよい (雷翼の間は頭の高さに見えない光のブロックを散らしてある)
+        return in != null && !level.getBlockState(in.below()).isAir() && level.getBlockState(in).getCollisionShape(level, in).isEmpty()
+                && level.getBlockState(in.above()).getCollisionShape(level, in.above()).isEmpty();
     }
 
     // 建っていなければ建てる (自己テスト・古い世界の保険)。建てたか
@@ -186,12 +188,34 @@ public final class InstanceArenas {
             case Titans.STONE_WHALE -> new BlockPos(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART_CX, jp.revati.skyabyss.titan.dungeon.TitanBackLayout.FLOOR + 1,
                     jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART_GATE_Z - 5);
             case Titans.TIDE_SHELL -> new BlockPos(jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CX, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.FLOOR,
-                    jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CZ + 10);
+                    jp.revati.skyabyss.titan.tide.heart.TideHeartArena.CZ + jp.revati.skyabyss.titan.tide.heart.TideHeartArena.RADIUS - 4);
             case Titans.THUNDER_WING -> new BlockPos(jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CX + 3, jp.revati.skyabyss.titan.storm.heart.StormHeartArena.FLOOR,
-                    jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CZ - 11);
+                    jp.revati.skyabyss.titan.storm.heart.StormHeartArena.CZ - jp.revati.skyabyss.titan.storm.heart.StormHeartArena.RADIUS + 4);
             case Titans.EMBER -> BlockPos.containing(jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.insideSpawn(jp.revati.skyabyss.titan.ember.heart.EmberHeartArena.CX + 0.5));
             default -> null;
         };
+    }
+
+    // 順路の段 4 で運ばれる所 (足の位置のブロック): 心臓の間の手前の前室 (焚き火の休み場 heart)。ほかの部屋と同じく、焚き火のそばに着いて
+    // 支度をしてから大門をくぐる (2026-11-06 の声「ボス部屋の中ではなく手前の焚火の所へ」)。間に入ると集合の 5 秒のあと封じ、前室の仲間も中へ入れる
+    @Nullable
+    public static BlockPos heartRest(ServerLevel level, String titan) {
+        return switch (titan) {
+            case Titans.STONE_WHALE -> jp.revati.skyabyss.titan.dungeon.TitanBackTrials.restSpawn(level, "heart");
+            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.back.TideBackTrials.restSpawn(level, "heart");
+            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackTrials.restSpawn(level, "heart");
+            case Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackTrials.restSpawn(level, "heart");
+            default -> null;
+        };
+    }
+
+    // 前室の立つ所から、大門の内側 (heartEntry) への向き (yaw)
+    public static float heartRestYaw(BlockPos rest, String titan) {
+        BlockPos in = heartEntry(titan);
+        if (in == null) {
+            return 0f;
+        }
+        return (float) (Math.toDegrees(Math.atan2(in.getZ() - rest.getZ(), in.getX() - rest.getX())) - 90.0);
     }
 
     // 入口の内側から心臓の居場所への向き (yaw)

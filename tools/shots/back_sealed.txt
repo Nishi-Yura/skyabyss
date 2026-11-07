@@ -1,0 +1,48 @@
+# 2026-11-07: 雷翼と潮殻の背の門・天窓・塔を閉じたあと (titan/BackSeal)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/back_sealed.txt -PshotsName=back_sealed
+world backsealed flat
+size 1280 900
+timeout 1200
+render 14
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 300
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s 30 175 100 145 25
+waitchunks
+wait 40
+shot storm_gate_area
+cmd tp @s 0 190 30 180 30
+waitchunks
+wait 40
+shot storm_skylight_area
+cmd tp @s 0 175 190 180 18
+waitchunks
+wait 40
+shot storm_from_lobby
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 300
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s -135 85 120 -135 20
+waitchunks
+wait 40
+shot tide_gate_area
+cmd tp @s -125 78 87 -90 10
+waitchunks
+wait 40
+shot tide_gate_front

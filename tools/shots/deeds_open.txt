@@ -1,0 +1,19 @@
+# 進捗・実績の開き方 (ポーズ画面のボタンと L キーで控え帳の「記し」が出るか)
+world deedsopen flat
+size 1280 720
+timeout 600
+wait 100
+cmd skyabyss cinematic stop
+close
+wait 20
+open advancements
+wait 60
+shot 1_from_advancements
+close
+wait 20
+open pause
+wait 20
+shot 2_pause
+open advancements
+wait 60
+shot 3_from_pause

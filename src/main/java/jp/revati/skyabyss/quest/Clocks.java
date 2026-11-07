@@ -80,11 +80,11 @@ public final class Clocks {
         }
         // ダンジョンの今日の様子
         List<String> moods = new ArrayList<>();
-        for (jp.revati.skyabyss.dungeon.Dungeon d : jp.revati.skyabyss.dungeon.Dungeon.values()) {
+        for (jp.revati.skyabyss.dungeon.Dungeon d : jp.revati.skyabyss.dungeon.Dungeon.mids()) {
             moods.add(key(d.nameKey()));
             moods.add(key(jp.revati.skyabyss.dungeon.DungeonMood.today(d).nameKey()));
         }
-        out.add(new Row("dungeon", K + "dungeon.status." + jp.revati.skyabyss.dungeon.Dungeon.values().length, moods, DAY, day, K + "dungeon.where"));
+        out.add(new Row("dungeon", K + "dungeon.status." + jp.revati.skyabyss.dungeon.Dungeon.mids().size(), moods, DAY, day, K + "dungeon.where"));
         // 魚の注文 (日・週)。土地ごとに一度
         int fishDay = 0;
         int fishWeek = 0;

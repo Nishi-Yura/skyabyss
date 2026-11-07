@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 334,
+  "giver": "skyabyss:guest_windmill_keeper",
+  "chapter": "titan_storm",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 4,
+          "targets": [
+            "skyabyss:peak_fledgling"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "kitemaker_house",
+          "type": "signal",
+          "target": "poi:@kitemaker_house",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_windmill_keeper",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 90,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 120
+      },
+      {
+        "item": "skyabyss:box_rare_3",
+        "count": 1
+      }
+    ]
+  }
+}

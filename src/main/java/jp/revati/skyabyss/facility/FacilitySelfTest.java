@@ -360,6 +360,21 @@ public final class FacilitySelfTest {
         check(f, Coins.count(p) == coins + 2 && p.getInventory().countItem(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) == 1,
                 "sold two lots, one chip left");
         check(f, ShopService.sell(p, mats, idx, 1) == ShopService.Result.NO_MATERIALS, "cannot sell a partial lot");
+        // 買い戻す (SoldLog): 売った二口は控えの先頭にあり、売った値で戻る。戻すと控えから消える
+        java.util.List<SoldLog.Sold> sold = SoldLog.list(p);
+        check(f, !sold.isEmpty() && sold.get(0).coins() == 2 && sold.get(0).stack().is(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()),
+                "the sale was not logged for buying back (" + sold.size() + ")");
+        int beforeBack = Coins.count(p);
+        int chipsBefore = p.getInventory().countItem(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get());
+        check(f, SoldLog.buyBack(p, 0) == SoldLog.Result.OK && Coins.count(p) == beforeBack - 2
+                && p.getInventory().countItem(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get()) == chipsBefore + 8 && SoldLog.list(p).size() == sold.size() - 1,
+                "buying back did not return the chips for the same price");
+        check(f, SoldLog.buyBack(p, 99) == SoldLog.Result.NO_ENTRY, "buying back a missing entry should fail");
+        for (int k = 0; k < SoldLog.MAX + 3; k++) {
+            SoldLog.add(p, new ItemStack(Items.BONE), 1);
+        }
+        check(f, SoldLog.list(p).size() == SoldLog.MAX, "the sold log should keep only the last " + SoldLog.MAX);
+        SoldLog.clear(p);
         ItemStack named = new ItemStack(Items.BONE, 8);
         named.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("keep"));
         check(f, !ShopService.plain(named), "named items are not sold");

@@ -106,17 +106,19 @@ public class StormHeart extends HeartBoss {
     public static final double BLADE_LOW = 1.6;
     public static final double BLADE_HIGH = 2.4;
     public static final double CHAIN_HALF_WIDTH = 1.0;
-    public static final double CHAIN_LENGTH = 18;
+    // 間の広さの倍率 (元の半径 15 からの伸び。2026-11-07 に半径 25 へ広げたとき、遠くへ届く技の長さを同じ割合で伸ばした)
+    public static final double ROOM_SCALE = StormHeartArena.RADIUS / 15.0;
+    public static final double CHAIN_LENGTH = 18 * ROOM_SCALE;
     public static final double CHAIN_NODE_RADIUS = 1.8;
     public static final double FEATHER_RADIUS = 2.0;
     public static final double FLASH_CONE_DEG = 60;
     // 風の刃 (回る帯): 長さ・半幅・予告・振れる tick。人数ぶん増えても、振れる角の合計は 180 度のまま
-    public static final double BLADE_REACH = 13;
+    public static final double BLADE_REACH = 13 * ROOM_SCALE;
     public static final double BLADE_HALF_WIDTH = 1.3;
     public static final int BLADE_WARN = 24;
     public static final int BLADE_ACTIVE = 30;
     // 雷の網 (回る腕。跳び越えられる): 長さ・半幅・振れる tick。腕の数が増えても、振れる角の合計は 180 度
-    public static final double WEB_REACH = 13;
+    public static final double WEB_REACH = 13 * ROOM_SCALE;
     public static final double WEB_HALF_WIDTH = 1.0;
     public static final int WEB_TICKS = 80;
     public static final double WEB_JUMP = 1.0;
@@ -124,10 +126,10 @@ public class StormHeart extends HeartBoss {
     public static final double CHARGE_RADIUS = 3.0;
     public static final int CHARGE_ACTIVE = 50;
     // 閃光の扇 (一本あたり半角 22 度・射程 13)
-    public static final double FLASH_RANGE = 13;
+    public static final double FLASH_RANGE = 13 * ROOM_SCALE;
     public static final double FLASH_HALF_ANGLE = 22;
     // 咆哮の押し返し (円)
-    public static final double ROAR_PUSH_RADIUS = 7.5;
+    public static final double ROAR_PUSH_RADIUS = 7.5 * ROOM_SCALE;
     // 突風の輪 (羽ばたき): 輪の中の筋 (安全な床) の半角と、風穴の下降風の半径
     public static final double GUST_GAP_DEG = 24;
     public static final double DOWNDRAFT_RADIUS = StormHeartArena.UPDRAFT_RADIUS + 0.5;

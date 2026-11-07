@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 320,
+  "giver": "skyabyss:guest_bonefort_beacon",
+  "chapter": "titan_whale",
+  "min_stage": 0,
+  "stages": [
+    {
+      "id": "kill",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "count": 4,
+          "targets": [
+            "skyabyss:bone_gull"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "north_ribs",
+          "type": "signal",
+          "target": "poi:@north_ribs",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_bonefort_beacon",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 15,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 80
+      },
+      {
+        "item": "skyabyss:box_rare_1",
+        "count": 1
+      }
+    ]
+  }
+}

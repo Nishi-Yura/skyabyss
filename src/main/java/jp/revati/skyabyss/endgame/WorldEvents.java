@@ -68,6 +68,8 @@ public final class WorldEvents {
     public static final int ADDS_EVERY = 20 * 30;
     public static final int MIN_CHAPTER = 2;
     public static final String TAG = "skyabyss_world_event";
+    // 前触れと封じのあいだに寄る敵 (去るときにいっしょに消す)
+    public static final String ADD_TAG = "skyabyss_world_event_add";
     static final int RGB = 0xE8443A;
     static final ResourceLocation HEALTH_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "world_event_health");
     static final ResourceLocation DAMAGE_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "world_event_damage");
@@ -90,6 +92,21 @@ public final class WorldEvents {
         final Map<UUID, Float> dealt = new HashMap<>();
         @Nullable
         ServerBossEvent bar;
+        // 戦いの流れ (WorldEventFight): まだ / 前触れ / 大いなるもの
+        static final int WAITING = 0;
+        static final int HERALD = 1;
+        static final int GREAT = 2;
+        int stage = WAITING;
+        final List<UUID> herald = new ArrayList<>();
+        // 前触れの体そのもの (区画がまだ動いていないと UUID で引けないので)
+        final List<Mob> heraldMobs = new ArrayList<>();
+        long heraldUntil;
+        long nextHazard;
+        int sealsDone;
+        final List<WorldEventFight.Seal> seals = new ArrayList<>();
+        long sealUntil;
+        long nextSealAdds;
+        boolean enraged;
 
         Event(int region, BlockPos spot, @Nullable String place, long endAt) {
             this.region = region;
@@ -166,18 +183,28 @@ public final class WorldEvents {
         }
         Entity boss = e.boss == null ? null : level.getEntity(e.boss);
         if (e.boss == null) {
+            ServerPlayer near = null;
             for (ServerPlayer p : level.players()) {
                 if (!p.isSpectator() && Math.hypot(p.getX() - e.spot.getX(), p.getZ() - e.spot.getZ()) <= SPAWN_NEAR && level.isLoaded(e.spot)) {
-                    spawnBoss(level, e, p);
+                    near = p;
                     break;
                 }
+            }
+            if (near != null && e.stage == Event.WAITING) {
+                // まず前触れ (先触れと群れ)。出せなければすぐ大いなるもの
+                if (WorldEventFight.herald(level, e, near) == 0) {
+                    spawnBoss(level, e, near);
+                }
+            } else if (near != null && e.stage == Event.HERALD && (WorldEventFight.heraldLeft(level, e) == 0 || now >= e.heraldUntil)) {
+                spawnBoss(level, e, near);
             }
         } else if (boss instanceof Mob m && m.isAlive()) {
             if (Math.hypot(m.getX() - e.spot.getX(), m.getZ() - e.spot.getZ()) > LEASH) {
                 m.setTarget(null);
                 m.getNavigation().moveTo(e.spot.getX() + 0.5, m.getY(), e.spot.getZ() + 0.5, 1.3);
             }
-            if (now >= e.nextAdds) {
+            // 寄る敵は封じのあいだだけ (WorldEventFight)。ふだんは体力が半分を切ってから、間を空けて
+            if (now >= e.nextAdds && m.getHealth() < m.getMaxHealth() * 0.5f && !WorldEventFight.sealed(e)) {
                 e.nextAdds = now + ADDS_EVERY;
                 adds(level, e, m);
             }
@@ -186,6 +213,7 @@ public final class WorldEvents {
                 m.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200, 0, false, false));
             }
             if (e.bar != null) {
+                WorldEventFight.step(level, e, m, now);
                 e.bar.setProgress(Math.max(0f, m.getHealth() / m.getMaxHealth()));
                 for (ServerPlayer p : level.players()) {
                     boolean near = p.distanceToSqr(m) < BAR_RANGE * BAR_RANGE;
@@ -306,6 +334,8 @@ public final class WorldEvents {
         m.setTarget(near);
         e.maxHealth = m.getMaxHealth();
         e.nextAdds = level.getGameTime() + ADDS_EVERY;
+        e.stage = Event.GREAT;
+        e.nextHazard = level.getGameTime() + 8 * 20L;
         clearBar(e);
         e.bar = new ServerBossEvent(name, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_20);
         for (ServerPlayer p : level.players()) {
@@ -319,7 +349,7 @@ public final class WorldEvents {
 
     // 体力の倍率 (近くの人の数で伸びる)
     public static double health(int people) {
-        return 12 + 6 * (people - 1);
+        return 6 + 3 * (people - 1);
     }
 
     // 近くのいちばん高い Lv と土地の目安の Lv の差 (gap) での、体力と攻めの倍率
@@ -350,6 +380,7 @@ public final class WorldEvents {
             RegionSpawner.Entry en = RegionSpawner.pick(e.region, map.biome(x, z), RegionSpawner.night(level), level.random.nextInt(1000));
             Mob add = en == null ? null : RegionSpawner.spawn(level, en.entity(), g, target);
             if (add != null) {
+                add.addTag(ADD_TAG);
                 add.setTarget(target);
                 i++;
             }
@@ -381,6 +412,26 @@ public final class WorldEvents {
             }
         }
         clearBeams(level);
+        clearAdds(level, e);
+    }
+
+    // 前触れと寄った敵を消す (去るとき)
+    static void clearAdds(ServerLevel level, Event e) {
+        for (UUID id : e.herald) {
+            if (level.getEntity(id) instanceof LivingEntity le && le.isAlive()) {
+                le.discard();
+            }
+        }
+        for (Mob m : e.heraldMobs) {
+            if (!m.isRemoved()) {
+                m.discard();
+            }
+        }
+        for (Entity en : level.getAllEntities()) {
+            if (en.getTags().contains(ADD_TAG) && en.isAlive() && en.distanceToSqr(e.spot.getX(), e.spot.getY(), e.spot.getZ()) < 96 * 96) {
+                en.discard();
+            }
+        }
     }
 
     static void clearBeams(ServerLevel level) {
@@ -416,7 +467,8 @@ public final class WorldEvents {
     static void onIncoming(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         Event e = current;
         if (e != null && e.boss != null && event.getEntity().getUUID().equals(e.boss)) {
-            event.setAmount(event.getAmount() / soak(e, event.getEntity()));
+            float a = event.getAmount() / soak(e, event.getEntity());
+            event.setAmount(WorldEventFight.sealed(e) ? a * WorldEventFight.SEALED : a);
         }
     }
 

@@ -58,7 +58,7 @@ public final class DungeonWorld {
     public static Place place(BlockPos pos) {
         int g = Math.floorDiv(pos.getX() + SLOT_DX / 2, SLOT_DX);
         int floor = Math.floorDiv(pos.getZ() + FLOOR_DZ / 2, FLOOR_DZ);
-        if (g < 0 || floor < 0 || floor >= Dungeon.FLOORS.length) {
+        if (g < 0 || floor < 0 || floor >= Dungeon.MAX_FLOORS) {
             return null;
         }
         int di = g / SLOTS;
@@ -66,6 +66,9 @@ public final class DungeonWorld {
             return null;
         }
         Dungeon d = Dungeon.values()[di];
+        if (floor >= d.floors().length) {
+            return null;
+        }
         int slot = g % SLOTS;
         BlockPos local = pos.subtract(origin(d, slot, floor));
         return new Place(d, slot, floor, local);

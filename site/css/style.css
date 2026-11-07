@@ -386,3 +386,56 @@ details.lore p { font-size: 15px; line-height: 2; max-width: 68ch; }
   .wiki-head h1 { font-size: 34px; }
   .wiki-sec h2 { font-size: 24px; }
 }
+
+/* ---------------------------------------------------------------- スキルツリーを試す (skill-tree.html。tools/site/planner.py・js/planner.js) */
+.pl-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 16px; }
+.pl-jobs { display: flex; flex-wrap: wrap; gap: 6px; }
+.pl-jobs button, .pl-btn { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.pl-jobs button[aria-selected="true"] { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+.pl-jobs button:hover, .pl-btn:hover { border-color: var(--gold); }
+.pl-lv { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.pl-lv input { width: 160px; accent-color: var(--gold); }
+.pl-lv b { color: var(--gold); min-width: 2ch; }
+.pl-main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.pl-board-wrap { overflow: auto; background: #0c1430; border: 1px solid var(--line); border-radius: 10px; padding: 12px; max-height: 78vh; }
+.pl-board { position: relative; margin: 0 auto; }
+.pl-lines { position: absolute; left: 0; top: 0; }
+.pl-lines line { stroke: #2c3a63; stroke-width: 3; }
+.pl-lines line.on { stroke: var(--gold); }
+.pl-node { position: absolute; padding: 0; border-radius: 8px; border: 2px solid #33406a; background: #151f42; cursor: pointer; }
+.pl-node .ic { position: absolute; left: 2px; top: 2px; right: 2px; bottom: 2px; image-rendering: pixelated; background-repeat: no-repeat; }
+.pl-node .cap { position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%); font: 11px/1 var(--f-pixel); color: var(--dim); white-space: nowrap; }
+.pl-node.k-active, .pl-node.big { border-radius: 50%; }
+.pl-node.shut .ic { opacity: 0.35; filter: grayscale(0.7); }
+.pl-node.open { border-color: #9fb3e8; box-shadow: 0 0 0 2px rgba(159, 179, 232, 0.18); }
+.pl-node.open .cap { color: var(--fg); }
+.pl-node.taken { border-color: var(--gold); background: #2a2610; box-shadow: 0 0 10px rgba(228, 186, 98, 0.45); }
+.pl-node.taken .cap { color: var(--gold); }
+.pl-node:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.pl-side { display: grid; gap: 14px; position: sticky; top: 76px; }
+.pl-sum, .pl-info { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.pl-pts { margin: 0 0 6px; color: var(--muted); }
+.pl-pts b { font: 28px/1 var(--f-pixel); color: var(--gold); }
+.pl-act { margin: 0 0 10px; color: var(--muted); }
+.pl-act b { color: var(--fg); }
+.pl-arch { position: relative; display: flex; justify-content: space-between; padding: 4px 8px; margin-bottom: 4px; border-radius: 4px; overflow: hidden; background: #0e1733; }
+.pl-arch span, .pl-arch b { position: relative; z-index: 1; }
+.pl-arch i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gold-soft); }
+.pl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px 8px; margin: 10px 0; text-align: center; }
+.pl-stats dt { color: var(--dim); font-size: 12px; }
+.pl-stats dd { margin: 0; font: 18px/1.2 var(--f-pixel); color: var(--fg); }
+.pl-actives { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pl-actives li { display: flex; align-items: center; gap: 8px; }
+.pl-actives .ic { display: inline-block; width: 24px; height: 24px; image-rendering: pixelated; }
+.pl-actives small { color: var(--dim); }
+.pl-info h3 { margin: 2px 0 6px; font-size: 18px; color: var(--gold); }
+.pl-kind { margin: 0; color: var(--dim); font-size: 12px; }
+.pl-why { margin: 8px 0 0; font-size: 13px; }
+.pl-why.ok { color: #9fe0a8; }
+.pl-why.no { color: var(--warn); }
+.pl-legend { margin-top: 12px; }
+@media (max-width: 860px) {
+  .pl-main { grid-template-columns: 1fr; }
+  .pl-side { position: static; }
+  .pl-board-wrap { max-height: 70vh; }
+}

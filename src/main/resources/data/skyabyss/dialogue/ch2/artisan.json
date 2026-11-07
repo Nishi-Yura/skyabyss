@@ -55,10 +55,6 @@
           "flag": "met"
         },
         {
-          "type": "give_notes",
-          "chapter": 2
-        },
-        {
           "type": "affinity",
           "amount": 1
         }

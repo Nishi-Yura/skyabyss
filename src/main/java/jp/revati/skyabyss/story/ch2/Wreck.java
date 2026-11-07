@@ -35,7 +35,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnorePr
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -203,6 +202,11 @@ public final class Wreck {
                 && !level.getFluidState(new BlockPos(x, surface - 1, z)).isEmpty();
     }
 
+    public static final ResourceKey<LootTable> TREASURE_TABLE = ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "chests/ch2_wreck_treasure"));
+    public static final ResourceKey<LootTable> SUPPLY_TABLE = ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE,
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "chests/ch2_wreck_supply"));
+
     // 難破船を置く (floor = 海の底の一つ上)。置いたら箱の範囲を記録して目的の帯へ送る (開発コマンド・自己テストからも)
     public static boolean place(ServerLevel level, BlockPos floor, Rotation rotation, @Nullable Data data) {
         Optional<StructureTemplate> found = level.getStructureManager().get(TEMPLATE).or(() -> level.getStructureManager().get(FALLBACK));
@@ -219,16 +223,16 @@ public final class Wreck {
         BlockPos pos = new BlockPos(floor.getX() - pivot.getX(), floor.getY() - 2, floor.getZ() - pivot.getZ());
         RandomSource random = level.random;
         t.placeInWorld(level, pos, pos, settings, random, 2);
-        // 箱の印 (data の構造ブロック) → バニラの難破船の戦利品
+        // 箱の印 (data の構造ブロック) → Mod の品だけの戦利品 (2026-11-07 の声「本とか地図いらない」: バニラの難破船の表は地図・本・紙が出た)。
+        // 地図の箱と宝の箱は宝の表 (小真珠・塩結晶・鐘銭・薬・真珠の護り糸)、荷の箱は荷の表 (干し魚・薬・塩結晶・殻のかけら・鐘銭)
         for (StructureTemplate.StructureBlockInfo info : t.filterBlocks(pos, settings, Blocks.STRUCTURE_BLOCK)) {
             if (info.nbt() == null) {
                 continue;
             }
             String meta = info.nbt().getString("metadata");
             ResourceKey<LootTable> table = switch (meta) {
-                case "map_chest" -> BuiltInLootTables.SHIPWRECK_MAP;
-                case "treasure_chest" -> BuiltInLootTables.SHIPWRECK_TREASURE;
-                case "supply_chest" -> BuiltInLootTables.SHIPWRECK_SUPPLY;
+                case "map_chest", "treasure_chest" -> TREASURE_TABLE;
+                case "supply_chest" -> SUPPLY_TABLE;
                 default -> null;
             };
             if (table != null) {

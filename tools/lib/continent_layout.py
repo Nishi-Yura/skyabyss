@@ -174,6 +174,16 @@ LAYOUTS.update({
         'levels': [('Lv 1–4', (-260, 300)), ('Lv 4–12', (-420, -900)), ('Lv 12–18', (1350, 500)), ('Lv 18–24', (-1450, 250)),
                    ('Lv 24–30', (700, 1300))],
     }),
+})
+
+# 外れの道 (2026-11-06。案の頁「大陸の外れ」の m_roads = a): 環の道・外れの集落と奥のダンジョンへの枝・今のダンジョンへの枝と、北西の小島への渡し舟。
+# 道筋は tools/gen/world/plan_frontier_roads.py が高さの図の上で探して tools/lib/frontier_roads.py に書く。今の道 (番号) の後ろに足す
+import frontier_roads as _frontier
+LAYOUTS['c1']['roads'] = LAYOUTS['c1']['roads'] + [list(map(tuple, r)) for r in _frontier.ROADS]
+LAYOUTS['c1']['ferries'] = LAYOUTS['c1']['ferries'] + [[tuple(a), tuple(b)] for a, b in _frontier.FERRIES]
+LAYOUTS['c1']['frontier'] = _frontier.SPOTS
+
+LAYOUTS.update({
     'c2': dict(LAYOUT_C_BASE, **{
         'title': '案 C2　海へ開く内海',
         'lead': '内海が東の海峡で外の海へつながる。二章の船出が「外の海へ」になる',

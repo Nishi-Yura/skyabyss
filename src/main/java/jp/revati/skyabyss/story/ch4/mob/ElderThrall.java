@@ -165,8 +165,10 @@ public class ElderThrall extends AshThrall {
         }
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 10 == 0) {
+            // ボスバーは坑の奥の間の湧き台の名づきだけ (灰の土地の昼・溶けた坑のダンジョンの個体には出さない。2026-11-07 の潮の番人と同じ)
+            boolean named = jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(this);
             for (ServerPlayer p : Players.snapshot(((ServerLevel) level()).players())) {
-                if (p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p)) {
+                if (named && p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p)) {
                     bossBar.addPlayer(p);
                 } else {
                     bossBar.removePlayer(p);

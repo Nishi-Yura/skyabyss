@@ -23,12 +23,17 @@ import net.minecraft.world.phys.Vec3;
 //   突進      前の長い帯 (予告 1.2 秒)。離れた人へ
 //   溜まり    技を一つ出すたびに背の結晶が溜まる (CHARGE_MAX)。満ちると後ろ脚で立って雷を放つ:
 //             足もとの輪 (半径 6) と、人ごとの雷の輪 (予告 1.6 秒)。放つと溜まりは 0 に戻る
+//   雷の走り  背晶から床へ十字の四本の雷の帯 (予告 1.1 秒)。後半は斜めの十字が続く
+//   放電のあとは力が抜けて大きな隙。後半 (体力半分から) は突進が二度続く。晶の目玉を 2 体呼ぶ
 //   主の間の結晶 (印 crystal_*) に人が技を当てて満たすと、大蜥蜴の溜まりが抜ける (Mechanics から drain)
 public class CrystalLizard extends DungeonBoss {
     static final int BITE = 1;
     static final int TAIL = 2;
     static final int DASH = 3;
     static final int CHARGE_UP = 4;
+    static final int BOLTS = 5;
+    public static final int BOLTS_WARN = 22;
+    public static final double BOLTS_LENGTH = 15;
     public static final int BITE_WARN = 14;
     public static final double BITE_RANGE = 6;
     public static final int TAIL_WARN = 16;
@@ -39,6 +44,8 @@ public class CrystalLizard extends DungeonBoss {
     public static final int CHARGE_MAX = 5;
     private int charge;
     private int lastDash = -200;
+    private int lastBolts = -200;
+    private boolean dashedTwice;
 
     public CrystalLizard(EntityType<? extends Monster> type, Level level) {
         super(type, level, "crystal_lizard", () -> SoundEvents.HOGLIN_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH,
@@ -76,6 +83,11 @@ public class CrystalLizard extends DungeonBoss {
             return;
         }
         Vec3 f = forward();
+        if (tickCount - lastBolts > 200 && distance < BOLTS_LENGTH) {
+            bolts(target);
+            charge++;
+            return;
+        }
         Vec3 to = target.position().subtract(position());
         boolean behind = to.x * f.x + to.z * f.z < 0;
         if (behind && distance <= TAIL_RANGE) {
@@ -112,6 +124,31 @@ public class CrystalLizard extends DungeonBoss {
                     .start();
             charge++;
         }
+    }
+
+    // 雷の走り: 十字の四本 (後半は斜めの十字が続く)
+    void bolts(LivingEntity target) {
+        move = BOLTS;
+        lastBolts = tickCount;
+        begin(target, "discharge");
+        cue("crystal_lizard", "bolts", BOLTS_WARN);
+        double base = Telegraph.angleOf(forward());
+        for (int set = 0; set < (phase2 ? 2 : 1); set++) {
+            for (int k = 0; k < 4; k++) {
+                double a = base + k * Math.PI / 2 + set * Math.PI / 4;
+                Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, BOLTS_LENGTH, 1.0))
+                        .floor(getY()).warn(BOLTS_WARN + set * 14).danger().owner(this).target(target)
+                        .victims(this::canHit)
+                        .onImpact(server -> {
+                            for (int i = 2; i < BOLTS_LENGTH; i += 3) {
+                                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Math.cos(a) * i, getY() + 0.4, getZ() + Math.sin(a) * i, 6, 0.3, 0.3, 0.3, 0.2);
+                            }
+                        })
+                        .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.85f))
+                        .start();
+            }
+        }
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.HOSTILE, 1.4f, 1.4f);
     }
 
     void discharge(LivingEntity target) {
@@ -154,17 +191,43 @@ public class CrystalLizard extends DungeonBoss {
     }
 
     @Override
+    protected String bossId() {
+        return "crystal_lizard";
+    }
+
+    @Override
+    protected String minionId() {
+        return "skyabyss:crystal_eye";
+    }
+
+    @Override
     protected int length() {
         return switch (move) {
             case BITE -> BITE_WARN + 10;
             case TAIL -> TAIL_WARN + 12;
             case DASH -> DASH_WARN + (int) Math.ceil(DASH_LENGTH / 0.85) + 12;
+            case BOLTS -> BOLTS_WARN + (phase2 ? 14 : 0) + 12;
             default -> CHARGE_WARN + 20;
         };
     }
 
     @Override
     protected void finish() {
+        if (move == CHARGE_UP) {
+            // 放電のあとは力が抜ける (大きな隙)
+            opening();
+        }
+        if (move == DASH && phase2 && !dashedTwice) {
+            // 後半: 突進がもう一度続く
+            dashedTwice = true;
+            lastDash = tickCount - 1000;
+            cooldown = 4;
+            super.finish();
+            return;
+        }
+        if (move == DASH) {
+            dashedTwice = false;
+        }
         cooldown = move == CHARGE_UP || move == DASH ? 30 : 14 + random.nextInt(10);
         super.finish();
     }

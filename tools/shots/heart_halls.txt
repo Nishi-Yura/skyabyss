@@ -1,0 +1,51 @@
+# 2026-11-07: 広げた心臓の間 (潮殻 24・雷翼 25・余燼 25。大広間の壁 36) を上と床の端から。鯨の間も上から
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/heart_halls.txt -PshotsName=heart_halls
+world hearthalls flat
+size 1280 720
+timeout 2400
+render 12
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+cmd gamemode creative
+cmd skyabyss play goto tide-heart
+waitchunks
+wait 200
+cmd gamemode spectator
+cmd execute in skyabyss:tide_back run tp @s 4352.5 91 4096.5 0 89
+waitchunks
+wait 60
+shot tide_top
+cmd execute in skyabyss:tide_back run tp @s 4352.5 53 4073.5 0 12
+wait 40
+shot tide_floor
+cmd gamemode creative
+cmd skyabyss play goto storm-heart
+waitchunks
+wait 200
+cmd gamemode spectator
+cmd execute in skyabyss:storm_back run tp @s 4352.5 159 4096.5 0 89
+waitchunks
+wait 60
+shot storm_top
+cmd execute in skyabyss:storm_back run tp @s 4352.5 121 4073.5 0 12
+wait 40
+shot storm_floor
+cmd gamemode creative
+cmd skyabyss play goto ember-heart
+waitchunks
+wait 200
+cmd gamemode spectator
+cmd execute in skyabyss:ember_back run tp @s 4352.5 91 4096.5 0 89
+waitchunks
+wait 60
+shot ember_top
+cmd execute in skyabyss:ember_back run tp @s 4352.5 53 4073.5 0 12
+wait 40
+shot ember_floor
+quit

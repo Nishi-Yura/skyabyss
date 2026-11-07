@@ -12,7 +12,6 @@ import jp.revati.skyabyss.guide.GuideSetup;
 import jp.revati.skyabyss.guide.PrepQuests;
 import jp.revati.skyabyss.guide.SiteProgressData;
 import jp.revati.skyabyss.guide.SiteSpawner;
-import jp.revati.skyabyss.guide.WayfarerNotes;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.opening.site.Blueprint;
 import jp.revati.skyabyss.opening.site.ChapterSites;
@@ -40,7 +39,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 //   cave     洞の湧き台: 二つのグループが同時に入れる・敵が部屋に立つ・鳴り石の順 (誤りで戻る・低い順で格子が開く)・クリアの記録 (経験値・宝・合図)
 //   pit      骨の坑: 碑 2 枚の文・荷の樽・冷えの戸 9 マス・鉄鉱石の筋・水の坑道・出口の梯子・湧き台の立ち位置、
 //            冷えの戸 (鉄なしでは開かない・鉄の兜で開く)、湧き台 (グループの分だけ湧く → 倒しきるとクリアの記録・経験値・粗鉄)
-//   trails   支度の段 3 本: イサナの鯨の話のあとに三本とも出る・覚書が渡る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
+//   trails   支度の段 3 本: イサナの鯨の話のあとに三本とも出る・鉄の跡 (荷の頁 → 鉄の防具 4 部位を着る)・
 //            折れた剣 (洞の台座の頁 → 職人 → 鉄の剣 + 砥石)・盾と糧 (語り部の話 → 盾 + 固焼き 8)・三本で ch1_ready と鯨追いの印 (一度)
 //   descent  岩鯨の降下の条件 (見たら降りる。場面の間は待つ。日・支度の本数は見ない。人ごと)、見つけてから鎖までの長さ、経験値の枠
 public final class Ch1SitesSelfTest {
@@ -306,35 +305,12 @@ public final class Ch1SitesSelfTest {
             Quests.start(a, Ch1Prep.Q_BLADE);
             // 最初の段 (職人に刃のことを聞く) を済ませておく
             Quests.onTalk(a, "skyabyss:artisan", "ch1t_blade_tell");
+            // 中は小ダンジョンの写し (dungeon/MiniDungeons): 地上の湧き台は湧かない。越えた数えは SiteSpawner.credit (主が倒れたとき写しにいた人)
             SiteSpawner.tick(level, List.of(a, b), now);
-            // a と b は別々のグループ (パーティなし)
             UUID ga = Groups.keyOf(a);
             UUID gb = Groups.keyOf(b);
             check(!ga.equals(gb), "two lone players should be two groups");
-            int live = SiteSpawner.liveCount(CleftCave.SITE, origin, ga) + SiteSpawner.pendingCount(CleftCave.SITE, origin, ga);
-            check(live == total, "group A's cave should hold " + total + " enemies (" + live + ")");
-            check(SiteSpawner.liveCount(CleftCave.SITE, origin, gb) + SiteSpawner.pendingCount(CleftCave.SITE, origin, gb) == total, "group B did not get its own cave at the same time");
-            List<Entity> mine = new ArrayList<>();
-            for (UUID id : SiteSpawner.liveIds(CleftCave.SITE, origin, ga)) {
-                Entity e = level.getEntity(id);
-                if (e != null) {
-                    mine.add(e);
-                }
-            }
-            check(!mine.isEmpty() && mine.stream().allMatch(e -> e instanceof GroupOwned o && ga.equals(o.groupId())), "cave enemies are not marked with their group");
-            // 敵は部屋の湧き台の近くにいる
-            boolean placed = true;
-            for (Entity e : mine) {
-                boolean ok = false;
-                for (SiteSpawner.Pad pad : def.pads()) {
-                    BlockPos at = def.padAt(pad, origin);
-                    if (e.distanceToSqr(at.getX() + 0.5, at.getY(), at.getZ() + 0.5) < 9) {
-                        ok = true;
-                    }
-                }
-                placed &= ok;
-            }
-            check(placed, "a cave enemy is not standing at a room's spawn pad");
+            check(total > 0 && SiteSpawner.liveCount(CleftCave.SITE, origin, ga) + SiteSpawner.pendingCount(CleftCave.SITE, origin, ga) == 0, "the cave still spawns on the surface");
 
             // 鳴り石: 誤り → 戻る、1 → 2 → 3 で格子が開く。進みはグループごと
             CleftCave.resetForTest(level, cave);
@@ -355,13 +331,7 @@ public final class Ch1SitesSelfTest {
 
             // クリア: a のグループだけ全部倒す → 記録・経験値・宝 (護り糸)・合図 (頼みが洞の段を終える)
             int xpBefore = Growth.get(a).xp;
-            for (UUID id : SiteSpawner.liveIds(CleftCave.SITE, origin, ga)) {
-                Entity e = level.getEntity(id);
-                if (e != null) {
-                    e.discard();
-                }
-            }
-            SiteSpawner.tick(level, List.of(a), now + 40);
+            SiteSpawner.credit(level, CleftCave.SITE, List.of(a));
             check(progress.cleared(a.getUUID(), CleftCave.SITE) && !progress.cleared(b.getUUID(), CleftCave.SITE), "the clear was not recorded for exactly group A");
             check(jp.revati.skyabyss.pouch.Pouch.countAll(a, GuideSetup.ROCK_SHELL_THREAD.get()) == 1, "the first clear should hand over one ward thread");
             check(jp.revati.skyabyss.pouch.Pouch.countAll(a, GuideSetup.ROCK_SHELL_SCRAP.get()) >= 4, "the first clear should hand over shell scraps");
@@ -373,7 +343,6 @@ public final class Ch1SitesSelfTest {
             check(!Lore.state(b).has(Ch1Prep.PAGE_BLADE), "the broken sword page leaked to the other group");
             QuestLog.Entry e = QuestLog.of(a).entry(Ch1Prep.Q_BLADE);
             check(e != null && e.stage >= 2, "the broken sword page did not finish the cave stage of trail_blade");
-            check(SiteSpawner.liveCount(CleftCave.SITE, origin, gb) + SiteSpawner.pendingCount(CleftCave.SITE, origin, gb) > 0, "clearing group A changed group B's cave");
         } finally {
             SiteSpawner.clearAll(level);
             for (FakePlayer p : List.of(a, b)) {
@@ -469,17 +438,11 @@ public final class Ch1SitesSelfTest {
             a.setPos(pit.pos.getX() + 0.5, pit.pos.getY() - 12, pit.pos.getZ() + 0.5);
             long now = level.getGameTime();
             int total = def.pads().stream().mapToInt(p -> p.spawns().stream().mapToInt(SiteSpawner.Spawn::count).sum()).sum();
+            // 中は小ダンジョンの写し (dungeon/MiniDungeons): 地上の湧き台は湧かない。越えた数えは SiteSpawner.credit (主が倒れたとき写しにいた人)
             SiteSpawner.tick(level, List.of(a), now);
             UUID ga = Groups.keyOf(a);
-            int live = SiteSpawner.liveCount(BonePit.SITE, pit.pos, ga) + SiteSpawner.pendingCount(BonePit.SITE, pit.pos, ga);
-            check(live == total, "the pit should hold " + total + " enemies for the group (" + live + ")");
-            for (UUID id : SiteSpawner.liveIds(BonePit.SITE, pit.pos, ga)) {
-                Entity e = level.getEntity(id);
-                if (e != null) {
-                    e.discard();
-                }
-            }
-            SiteSpawner.tick(level, List.of(a), now + 40);
+            check(total > 0 && SiteSpawner.liveCount(BonePit.SITE, pit.pos, ga) + SiteSpawner.pendingCount(BonePit.SITE, pit.pos, ga) == 0, "the pit still spawns on the surface");
+            SiteSpawner.credit(level, BonePit.SITE, List.of(a));
             check(progress.cleared(a.getUUID(), BonePit.SITE), "clearing the pit was not recorded");
             check(Growth.get(a).discoveries.contains("site:" + BonePit.SITE), "the pit clear xp was not granted");
             check(jp.revati.skyabyss.quest.QuestItems.count(a, "skyabyss:iron_lump", null) >= 4, "the first pit clear should hand over raw iron");
@@ -520,7 +483,7 @@ public final class Ch1SitesSelfTest {
             }
             check(QuestManager.quest("ch1/prep_gear") == null && QuestManager.quest("ch1/prep_blade") == null && QuestManager.quest("ch1/prep_pulse") == null,
                     "the old prep quests should be absorbed");
-            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、鉄の跡だけが出る (一本ずつ順に)。覚書も渡る
+            // 開始: イサナの鯨の話 (印 c_whale_heard) のあと、鉄の跡だけが出る (一本ずつ順に)
             Quests.poll(p, false);
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) == null, "the trail steps appeared before Isana's whale talk");
             jp.revati.skyabyss.quest.StoryContext ctx = jp.revati.skyabyss.quest.StoryContext.of(p);
@@ -530,7 +493,6 @@ public final class Ch1SitesSelfTest {
             check(QuestLog.of(p).entry(Ch1Prep.Q_IRON) != null, "the iron trail did not start after Isana's whale talk");
             check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE) == null, "the blade trail should wait for the iron trail");
             check(QuestManager.quest("ch1/trail_shield") == null, "the shield trail should be gone (2026-11-06)");
-            check(WayfarerNotes.has(p, 1), "starting the trail steps did not hand over the chapter-1 notes");
 
             // 鉄の跡: 骨の坑の荷 (人ごとに一度、鉄 2・頁。松明は 0.9.22 から入れない: 置く品は持たせない) → 鉄の防具 4 部位を着る
             check(BonePit.openPack(p, level, null), "the pack did not open the first time");

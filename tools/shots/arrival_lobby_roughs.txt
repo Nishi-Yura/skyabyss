@@ -1,0 +1,87 @@
+# 待機場所と祠のラフ 3 案 (tools/rough/arrival_lobby/roughs.py)。平らな世界の上に浮かべて撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/arrival_lobby_roughs.txt -PshotsName=arrival_lobby_roughs
+world arrivallobby flat
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 7000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+chat clear
+cmd forceload add -60 -60 460 60
+wait 100
+cmd skyabyss dev ch2 place rough_lobby_a 0 -40 0
+wait 20
+cmd skyabyss dev ch2 place rough_lobby_b 200 -40 0
+wait 20
+cmd skyabyss dev ch2 place rough_lobby_c 400 -40 0
+wait 20
+wait 60
+cmd tp @s 38 -14 38 135 28
+waitchunks 100
+wait 30
+shot a_1_over
+cmd tp @s 0 -35 8 180 -12
+waitchunks 100
+wait 30
+shot a_2_gate
+cmd tp @s 0 -35 0 0 5
+waitchunks 100
+wait 30
+shot a_3_shrine
+cmd tp @s 0 10 0 0 90
+waitchunks 100
+wait 30
+shot a_4_top
+cmd tp @s -12 -35 9 -120 -2
+waitchunks 100
+wait 30
+shot a_5_colonnade
+cmd tp @s 240 -12 40 135 30
+waitchunks 100
+wait 30
+shot b_1_over
+cmd tp @s 200 -35 9 180 8
+waitchunks 100
+wait 30
+shot b_2_vortex
+cmd tp @s 200 -35 6 0 5
+waitchunks 100
+wait 30
+shot b_3_shrine
+cmd tp @s 200 12 -2 0 90
+waitchunks 100
+wait 30
+shot b_4_top
+cmd tp @s 212 -26 0 145 42
+waitchunks 100
+wait 30
+shot b_5_rim
+cmd tp @s 440 -12 40 135 28
+waitchunks 100
+wait 30
+shot c_1_over
+cmd tp @s 397 -30 4 180 -14
+waitchunks 100
+wait 30
+shot c_2_spire
+cmd tp @s 368 -36 2 -90 4
+waitchunks 100
+wait 30
+shot c_3_shrine
+cmd tp @s 400 10 -2 0 90
+waitchunks 100
+wait 30
+shot c_4_top
+cmd tp @s 430 -32 10 110 8
+waitchunks 100
+wait 30
+shot c_5_falls

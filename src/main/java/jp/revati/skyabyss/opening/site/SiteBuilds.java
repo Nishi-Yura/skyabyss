@@ -286,6 +286,7 @@ public final class SiteBuilds {
             case jp.revati.skyabyss.world.continent.ContinentTowns.KIND -> jp.revati.skyabyss.world.continent.ContinentTowns.create(level, data, e);
             case jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND -> jp.revati.skyabyss.world.continent.ContinentOutskirts.create(level, data, e);
             case jp.revati.skyabyss.world.continent.ContinentFerries.KIND -> jp.revati.skyabyss.world.continent.ContinentFerries.create(level, data, e);
+            case jp.revati.skyabyss.world.continent.FrontierHamlets.KIND -> jp.revati.skyabyss.world.continent.FrontierHamlets.create(level, data, e);
             default -> throw new IllegalArgumentException("unknown opening site kind " + e.kind);
         };
     }

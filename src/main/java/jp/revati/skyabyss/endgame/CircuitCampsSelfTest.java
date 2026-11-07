@@ -50,28 +50,38 @@ public final class CircuitCampsSelfTest {
             for (GearTier t : CircuitCamps.TIERS) {
                 check(f, pool.stream().anyMatch(i -> CircuitCamps.tierOf(i) == t), c.id() + ": no " + t.key + " item in the reward list");
             }
-            check(f, pool.stream().filter(i -> CircuitCamps.tierOf(i) == GearTier.ARTIFACT).count() == 1, c.id() + ": the list should hold one artifact");
+            check(f, pool.stream().filter(i -> !CircuitCamps.supply(i) && CircuitCamps.tierOf(i) == GearTier.MYTHIC).count() == 1, c.id() + ": the list should hold one mythic");
+            // アンコモンと伝説は入れない。旅の支え (薬・糧・鐘銭) が三つ
+            check(f, pool.stream().noneMatch(i -> !CircuitCamps.supply(i) && (CircuitCamps.tierOf(i) == GearTier.UNCOMMON || CircuitCamps.tierOf(i) == GearTier.ARTIFACT)),
+                    c.id() + ": the list still holds uncommon or legendary gear");
+            check(f, pool.stream().filter(CircuitCamps::supply).count() == 3 && pool.stream().anyMatch(i -> i == jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get()),
+                    c.id() + ": the list should hold three supplies including bell coins: " + pool.stream().filter(CircuitCamps::supply).toList());
         }
         // 引き: 品は空でなく、神器は 0.1% ほど (2 万回で 60 回より少ない)
         RandomSource r = RandomSource.create(42);
         int artifacts = 0;
+        int supplies = 0;
         int empty = 0;
         int n = 20000;
         for (int i = 0; i < n; i++) {
             ItemStack s = CircuitCamps.pull(a0, r);
             if (s.isEmpty()) {
                 empty++;
-            } else if (CircuitCamps.tierOf(s.getItem()) == GearTier.ARTIFACT) {
+            } else if (CircuitCamps.supply(s.getItem())) {
+                supplies++;
+                check(f, s.getCount() >= 2, "a supply pull came as a single item: " + s);
+            } else if (CircuitCamps.tierOf(s.getItem()) == GearTier.MYTHIC) {
                 artifacts++;
             }
         }
         check(f, empty == 0, empty + " empty pulls");
-        check(f, artifacts > 0 && artifacts < 60, "artifact pulls " + artifacts + " of " + n + " (expected about 20)");
+        check(f, artifacts > 0 && artifacts < 60, "mythic pulls " + artifacts + " of " + n + " (expected about 20)");
+        check(f, supplies > n * 0.35 && supplies < n * 0.5, "supply pulls " + supplies + " of " + n + " (expected about 42%)");
         check(f, CircuitCamps.ticksUntilRotation() > 0 && CircuitCamps.ticksUntilRotation() <= CircuitCamps.PERIOD_DAYS * 24L * 3600L * 20L,
                 "rotation countdown out of range: " + CircuitCamps.ticksUntilRotation());
         f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST circuit camps FAILED: {}", m));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST circuit camps PASSED (4 camps, one per land outside its town; reward list per camp and per {}-day period with every tier and one artifact; artifact pulls {} / {})",
+            SkyAbyss.LOGGER.info("SELFTEST circuit camps PASSED (4 camps, one per land outside its town; reward list per camp and per {}-day period with rare to heroic, one mythic and three supplies, no uncommon or legendary; mythic pulls {} / {})",
                     CircuitCamps.PERIOD_DAYS, artifacts, n);
         }
     }

@@ -34,7 +34,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 挑戦の加護 (2026-11-03 の案「挑戦の加護」。Wynncraft のレイドの加護の部屋。docs/design/32 の 9.7)。
 // 心臓の順路で、歩・智・闘の試練を越えるたびに (TrialRoute.onCleared)、背の中の一人ずつに二つの加護を見せ、一つを選ばせる。
-// 選ばずに CHOOSE_TICKS たつと一つ目。加護は順路が終わる・背を出る・抜けるまで続き、重なる (持っている加護は出さない)
+// 選ばずに CHOOSE_TICKS たつと一つ目。選んでいる人がいる間は、次の部屋へ運ばない (TrialRoute.tick が waitLeft を見る)。
+// 加護は順路が終わる・背を出る・抜けるまで続き、重なる (持っている加護は出さない)
 //   力 = 与える傷 +15%、守り = 受ける傷 -15%、命 = 体力の上限 +20%、風 = 歩く速さ +12%、癒し = 3 秒ごとに体力 2% 戻る、吸命 = 与えた傷の 4% 戻る
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RouteBoons {
@@ -153,9 +154,27 @@ public final class RouteBoons {
         }
     }
 
-    // 見せて、まだ選んでいないか (自己テスト)
+    // 見せて、まだ選んでいないか
     public static boolean offered(ServerPlayer p) {
         return PENDING.containsKey(p.getUUID());
+    }
+
+    // この人たちの誰かが選び終わるまでの残り (tick。誰も選んでいなければ 0)。次の部屋へ運ぶのはこれが 0 になってから (TrialRoute.tick)。
+    // 時間切れのあとも、見回り (1 秒ごと) が一つ目に決めて画面を閉じるまでは少し待つ (画面が出たまま運ばれないように)
+    public static long waitLeft(List<ServerPlayer> who, long now) {
+        long left = 0;
+        for (ServerPlayer p : who) {
+            Pending n = PENDING.get(p.getUUID());
+            if (n != null && n.until() - now > -40) {
+                left = Math.max(left, Math.max(1, n.until() - now));
+            }
+        }
+        return left;
+    }
+
+    // 選ぶ待ちの時刻を今にする (自己テスト。偽の人は選ばないので。見回りが一つ目に決める)
+    public static void expireForTest() {
+        PENDING.replaceAll((id, n) -> new Pending(n.a(), n.b(), 0));
     }
 
     // ---------------------------------------------------------------- 効き目

@@ -44,6 +44,8 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(MountEntity.class, EntityDataSerializers.INT);
     // 絆の段 (MountData.bond)。3 で鞍に飾りの房 (client/mount の描き手)
     private static final EntityDataAccessor<Integer> BOND = SynchedEntityData.defineId(MountEntity.class, EntityDataSerializers.INT);
+    // 乗れる人数 (持ち主を入れて。MountStats.seats(人数の段) と見た目の最大の小さいほう。はじめ 1)
+    private static final EntityDataAccessor<Integer> SEATS = SynchedEntityData.defineId(MountEntity.class, EntityDataSerializers.INT);
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.mount.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.mount.walk");
     private static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.mount.run");
@@ -56,8 +58,16 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     static final double FLY_SCALE = 2.4;
     static final int FLY_CEILING = 40;
     static final double FLAP = 0.32;
-    // 相乗り (2026-11-03 の案「相乗りの道」。38 の 7 章): 持ち主の後ろに同じパーティの人を一人。後ろの席は胴の幅 × TANDEM_BACK だけ後ろ
+    // 相乗り (2026-11-03 の案「相乗りの道」。38 の 7 章): 持ち主の後ろに同じパーティの人を、乗れる人数 (seats) まで。
+    // 後ろの席は胴の幅 × TANDEM_BACK だけ後ろ。三人以上乗れるときは、二つめ・三つめの席を左右に並べ、四つめはその後ろ
     static final double TANDEM_BACK = 0.42;
+    // 幌の荷車の席 (ブロック。x = 横、y = 座る高さ、z = 前が正)。前の御者台が持ち主、後ろの三列の腰掛けに五人
+    // (tools/gen/mobs/mounts_lp/carriage.py の BENCHES: 御者台 z -0.5・上面 22.35、後ろ z 13 / 23 / 33・上面 19.85。1/16 ブロック、前 = -z)
+    static final double[][] CARRIAGE_SEATS = {
+            {0, 1.334, 0.03},
+            {0.34, 1.178, -0.81}, {-0.34, 1.178, -0.81},
+            {0.34, 1.178, -1.44}, {-0.34, 1.178, -1.44},
+            {0, 1.178, -2.06}};
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Nullable
@@ -88,6 +98,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         super.defineSynchedData(builder);
         builder.define(LOOK, 0);
         builder.define(BOND, 0);
+        builder.define(SEATS, 1);
     }
 
     @Override
@@ -114,6 +125,14 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         entityData.set(BOND, b);
     }
 
+    public int seats() {
+        return Math.max(1, entityData.get(SEATS));
+    }
+
+    public void setSeats(int n) {
+        entityData.set(SEATS, Math.max(1, Math.min(look().maxSeats, n)));
+    }
+
     @Nullable
     public UUID owner() {
         return owner;
@@ -127,6 +146,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     public void apply(MountData data, boolean healFull) {
         setLook(data.chosen());
         setBond(data.bond());
+        setSeats(MountStats.seats(data.tier(MountStats.SEATS)));
         double oldMax = getMaxHealth();
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(MountStats.speed(data.tier(MountStats.SPEED)));
         getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(MountStats.jump(data.tier(MountStats.JUMP)));
@@ -147,16 +167,30 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
         Vec3 seat = new Vec3(0, look().seat * scale, 0);
-        if (getPassengers().indexOf(passenger) == 1) {
-            return seat.add(new Vec3(0, 0.04, -look().width * TANDEM_BACK * scale).yRot(-yBodyRot * Mth.DEG_TO_RAD));
+        int i = getPassengers().indexOf(passenger);
+        if (look() == MountLook.CARRIAGE) {
+            double[] c = CARRIAGE_SEATS[Math.max(0, Math.min(CARRIAGE_SEATS.length - 1, i))];
+            return new Vec3(c[0] * scale, c[1] * scale, c[2] * scale).yRot(-yBodyRot * Mth.DEG_TO_RAD);
         }
-        return seat;
+        if (i <= 0) {
+            return seat;
+        }
+        double back = look().width * TANDEM_BACK * scale;
+        Vec3 off;
+        if (seats() <= 2) {
+            off = new Vec3(0, 0.04, -back);
+        } else if (i <= 2) {
+            off = new Vec3(i == 1 ? 0.32 * scale : -0.32 * scale, 0.04, -back);
+        } else {
+            off = new Vec3(0, 0.06, -back * 2);
+        }
+        return seat.add(off.yRot(-yBodyRot * Mth.DEG_TO_RAD));
     }
 
-    // 席は二つ (持ち主と、後ろに一人)
+    // 席は乗れる人数まで (持ち主と、後ろに seats - 1 人)
     @Override
     protected boolean canAddPassenger(Entity passenger) {
-        return getPassengers().size() < 2;
+        return getPassengers().size() < seats();
     }
 
     // 操るのは前の席の持ち主だけ (持ち主はサーバーだけが知っている。手元では前の席の人)
@@ -172,7 +206,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
 
     // 後ろに乗れるか: 持ち主が前に乗っていて、席が空いていて、同じパーティの人
     boolean canRideBehind(ServerPlayer rider) {
-        return getPassengers().size() == 1 && getFirstPassenger() instanceof ServerPlayer driver && owner != null && owner.equals(driver.getUUID())
+        return getPassengers().size() >= 1 && getPassengers().size() < seats() && getFirstPassenger() instanceof ServerPlayer driver && owner != null && owner.equals(driver.getUUID())
                 && driver != rider && jp.revati.skyabyss.party.Parties.sameParty(driver, rider);
     }
 
@@ -276,7 +310,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         if (isVehicle()) {
             // 相乗り: 持ち主が乗っていれば、同じパーティの人が後ろに乗る
             if (level().isClientSide) {
-                return getPassengers().size() == 1 ? InteractionResult.SUCCESS : InteractionResult.PASS;
+                return getPassengers().size() < seats() ? InteractionResult.SUCCESS : InteractionResult.PASS;
             }
             if (player instanceof ServerPlayer sp && canRideBehind(sp)) {
                 sp.startRiding(this);
@@ -286,7 +320,8 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
                 return InteractionResult.CONSUME;
             }
             if (player instanceof ServerPlayer sp) {
-                jp.revati.skyabyss.notice.Notice.hint(sp, "message.skyabyss.mount.tandem_party");
+                // 席が足りない (人数の段がまだ・見た目の最大) か、同じパーティでない
+                jp.revati.skyabyss.notice.Notice.hint(sp, getPassengers().size() >= seats() ? "message.skyabyss.mount.tandem_full" : "message.skyabyss.mount.tandem_party");
             }
             return InteractionResult.PASS;
         }

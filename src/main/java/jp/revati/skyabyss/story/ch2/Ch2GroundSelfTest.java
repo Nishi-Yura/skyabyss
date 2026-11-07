@@ -154,6 +154,61 @@ public final class Ch2GroundSelfTest {
                     "the vault " + t[0] + " does not carry " + t[1] + " (at " + at + ")");
         }
         check(LoreManager.catalog().entry(Ch2Ground.LORE_VAULT) != null, "the vault carving lore is missing");
+        // 坑口: 敷居があり、階段の通りが部品どおり。埋めて水を張っても手当てで戻る (2026-11-07「入口ふさがってる」)
+        for (int x = -1; x <= 1; x++) {
+            check(level.getBlockState(v.at(x, 0, -1)).is(Blocks.STONE_BRICK_SLAB), "the vault mouth has no sill at x " + x);
+        }
+        for (int z = 0; z <= 2; z++) {
+            for (int x = -1; x <= 1; x++) {
+                level.setBlock(v.at(x, 0, z), (z + x) % 2 == 0 ? Blocks.SAND.defaultBlockState() : Blocks.GRAVEL.defaultBlockState(), 2 | 16);
+                level.setBlock(v.at(x, -1, z + 1), Blocks.WATER.defaultBlockState(), 2 | 16);
+            }
+        }
+        level.setBlock(v.at(0, 0, -1), Blocks.WATER.defaultBlockState(), 2 | 16);
+        level.setBlock(v.at(0, -11, 25), Blocks.WATER.defaultBlockState(), 2 | 16);
+        int mended = SaltVault.clearMouth(level, v);
+        boolean open = true;
+        for (int z = 0; z <= 3; z++) {
+            for (int x = -1; x <= 1; x++) {
+                open &= level.getBlockState(v.at(x, 0, z)).isAir() || z == 3;
+                open &= level.getBlockState(v.at(x, -1, z + 1)).isAir();
+            }
+        }
+        check(open && mended >= 20, "the buried vault mouth was not cleared (" + mended + " cells)");
+        check(level.getBlockState(v.at(0, 0, -1)).is(Blocks.STONE_BRICK_SLAB), "the sill did not come back over the water");
+        check(level.getBlockState(v.at(0, -11, 25)).isAir(), "water in the entrance hall was not drained");
+        check(SaltVault.clearMouth(level, v) == 0, "mending a clear mouth should change nothing");
+        // 出口の縦穴: 上に跳ね上げ戸。何度手当てしても戸は戸のまま。まわりを掘っても石レンガで囲い直す (外から梯子へ入れない)
+        BlockPos top = SaltVault.exitTop(level, v);
+        check(top != null, "the vault exit shaft has no trapdoor on top");
+        if (top != null) {
+            SaltVault.decorate(level, v);
+            SaltVault.decorate(level, v);
+            check(top.equals(SaltVault.exitTop(level, v)), "decorating twice moved or broke the exit trapdoor (" + SaltVault.exitTop(level, v) + ")");
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                level.setBlock(top.relative(d), Blocks.AIR.defaultBlockState(), 2 | 16);
+            }
+            SaltVault.decorate(level, v);
+            boolean walled = true;
+            for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                walled &= !level.getBlockState(top.relative(d)).isAir();
+            }
+            check(walled, "the exit trapdoor was not walled in again");
+            // 開けたままの戸は、そばに人がいなければ閉じる。戸がなければ置く。戸より上の人は外 (開けられない)
+            var st = level.getBlockState(top);
+            level.setBlock(top, st.setValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN, true), 2 | 16);
+            var spot = new jp.revati.skyabyss.opening.site.SiteHatches.Spot(top, st);
+            check(jp.revati.skyabyss.opening.site.SiteHatches.mend(level, spot, List.of()) && !level.getBlockState(top).getValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN),
+                    "an open exit trapdoor with nobody near did not close");
+            level.setBlock(top, Blocks.AIR.defaultBlockState(), 2 | 16);
+            check(jp.revati.skyabyss.opening.site.SiteHatches.mend(level, spot, List.of()) && level.getBlockState(top).getBlock() instanceof net.minecraft.world.level.block.TrapDoorBlock,
+                    "a missing exit trapdoor was not put back");
+            FakePlayer above = fake(server, "hatch");
+            above.setPos(top.getX() + 0.5, top.getY() + 1, top.getZ() + 0.5);
+            check(jp.revati.skyabyss.opening.site.SiteHatches.outside(above, top), "a player standing on the trapdoor should count as outside");
+            above.setPos(top.getX() + 0.5, top.getY() - 1.2, top.getZ() + 0.5);
+            check(!jp.revati.skyabyss.opening.site.SiteHatches.outside(above, top), "a player on the ladder below should count as inside");
+        }
         int door = 0;
         for (int k = 0; k < SaltVault.DOOR_CELLS; k++) {
             if (level.getBlockState(v.door(k)).is(Blocks.SMOOTH_QUARTZ)) {
@@ -231,17 +286,11 @@ public final class Ch2GroundSelfTest {
             BlockPos r1 = v.mark("room1");
             b.setPos(r1.getX() + 0.5, r1.getY(), r1.getZ() + 0.5);
             long now = level.getGameTime();
+            // 中は小ダンジョンの写し (dungeon/MiniDungeons): 地上の湧き台は湧かない。越えた数えは SiteSpawner.credit (主が倒れたとき写しにいた人)
             SiteSpawner.tick(level, List.of(b), now);
             UUID g = Groups.keyOf(b);
-            int live = SiteSpawner.liveCount(SaltVault.SITE, v.pos(), g) + SiteSpawner.pendingCount(SaltVault.SITE, v.pos(), g);
-            check(live == 6, "the vault should hold 6 enemies for the group (" + live + ")");
-            for (UUID id : SiteSpawner.liveIds(SaltVault.SITE, v.pos(), g)) {
-                Entity e = level.getEntity(id);
-                if (e != null) {
-                    e.discard();
-                }
-            }
-            SiteSpawner.tick(level, List.of(b), now + 40);
+            check(SiteSpawner.liveCount(SaltVault.SITE, v.pos(), g) + SiteSpawner.pendingCount(SaltVault.SITE, v.pos(), g) == 0, "the vault still spawns on the surface");
+            SiteSpawner.credit(level, SaltVault.SITE, List.of(b));
             check(progress.cleared(b.getUUID(), SaltVault.SITE), "clearing the vault was not recorded");
             check(Growth.get(b).discoveries.contains("site:" + SaltVault.SITE), "the vault clear xp was not granted");
             if (itemExists("skyabyss:salt_crystal")) {
@@ -299,15 +348,26 @@ public final class Ch2GroundSelfTest {
         check(wreckPlaced, "the shipwreck template could not be placed");
         int chests = 0;
         int loot = 0;
+        java.util.List<String> foreign = new java.util.ArrayList<>();
         for (BlockPos q : BlockPos.betweenClosed(WRECK_AT.offset(-24, -3, -24), WRECK_AT.offset(24, 30, 24))) {
             if (level.getBlockState(q).is(Blocks.CHEST)) {
                 chests++;
-                if (level.getBlockEntity(q) instanceof ChestBlockEntity be && be.getLootTable() != null) {
+                if (level.getBlockEntity(q) instanceof ChestBlockEntity be && be.getLootTable() != null
+                        && be.getLootTable().location().getNamespace().equals(jp.revati.skyabyss.SkyAbyss.MODID)) {
                     loot++;
+                    // 中身は Mod の品だけ (本・地図・紙などバニラの品は入らない)
+                    be.unpackLootTable(null);
+                    for (int i = 0; i < be.getContainerSize(); i++) {
+                        var st = be.getItem(i);
+                        if (!st.isEmpty() && !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(st.getItem()).getNamespace().equals(jp.revati.skyabyss.SkyAbyss.MODID)) {
+                            foreign.add(st.getItem().toString());
+                        }
+                    }
                 }
             }
         }
-        check(chests >= 1 && loot == chests, "the wreck should carry chests with shipwreck loot (" + chests + " chests, " + loot + " with loot)");
+        check(chests >= 1 && loot == chests, "the wreck should carry chests with the mod's wreck loot (" + chests + " chests, " + loot + " with it)");
+        check(foreign.isEmpty(), "the wreck chests hold vanilla items: " + foreign);
         // 浅瀬の探し: 浅い水の箱の中に見つかる
         check(found != null && Math.abs(found.getX() - WRECK_AT.getX()) <= 24, "the wreck spot search did not find the shallow box (" + found + ")");
         FakePlayer p = fake(server, "wreck");

@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 331,
+  "giver": "skyabyss:guest_smokewatch_twin",
+  "chapter": "titan_ember",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "go",
+      "objectives": [
+        {
+          "id": "twins_house",
+          "type": "signal",
+          "target": "poi:@twins_house",
+          "party": false
+        },
+        {
+          "id": "drip_cave",
+          "type": "signal",
+          "target": "poi:@drip_cave",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "objectives": [
+        {
+          "id": "back",
+          "type": "signal",
+          "target": "town_hand:guest_smokewatch_twin",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 70,
+    "items": [
+      {
+        "item": "skyabyss:bell_coin",
+        "count": 140
+      },
+      {
+        "item": "skyabyss:box_rare_3",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -22,5 +22,6 @@
   "message.skyabyss.return_beacon.offer": "The trial is over. Crouch in the nearby light to return to the hub",
   "message.skyabyss.return_beacon.leaving": "Light closes around you and carries you to the hub.",
   "message.skyabyss.return_beacon.confirm": "Go down to the surface? Use the whistle again within 5 seconds",
-  "message.skyabyss.return_beacon.descending": "With the call of the whistle, the ground falls away."
+  "message.skyabyss.return_beacon.descending": "With the call of the whistle, the ground falls away.",
+  "message.skyabyss.arrival.fell": "You slipped off the edge and were set back in the waiting area"
 }

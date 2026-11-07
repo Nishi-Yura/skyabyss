@@ -924,7 +924,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         int w = Math.min(font.width(text) + 2 * Golden.S5, BOARD_VW);
         g.pose().pushPose();
         g.pose().translate(0, 0, 150);
-        g.fill(x, y, x + w, y + LH, 0xF20C0E13);
+        g.fill(x, y, x + w, y + LH, 0xFF0C0E13);
+        jp.revati.skyabyss.client.dev.OverlapAudit.cover(g, x, y, x + w, y + LH);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, text, x + Golden.S5, Golden.textY(y, LH), BOARD_VW - 2 * Golden.S5, color, false);
         g.pose().popPose();
     }
@@ -935,7 +936,9 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         int y = top + BOARD_VY + BOARD_VH - LH;
         g.pose().pushPose();
         g.pose().translate(0, 0, 150);
-        g.fill(x, y, x + BOARD_VW, y + LH, 0xF20C0E13);
+        // 不透明 (下の節の「+4」「2SP」が透けて字に重ならないように)
+        g.fill(x, y, x + BOARD_VW, y + LH, 0xFF0C0E13);
+        jp.revati.skyabyss.client.dev.OverlapAudit.cover(g, x, y, x + BOARD_VW, y + LH);
         int w = Math.min(font.width(text), BOARD_VW - 2 * Golden.S5);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, text, x + (BOARD_VW - w) / 2, Golden.textY(y, LH), BOARD_VW - 2 * Golden.S5, color, false);
         g.pose().popPose();

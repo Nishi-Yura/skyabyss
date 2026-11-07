@@ -48,7 +48,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 // 旅装・砥石・糧と薬 (P5。一章の分) の自己テスト。段: "travel gear"。
 //  - 防具 4 部位の値 (防御 17・強靭 5・踏ん張り 0.1・アンコモン・鍛えない・特性なし・必要 Lv 7) と、GearCurve.TRAVEL の表との照合 (巨神の装備を超えない、段ごとに伸びる、備えの身の灯)
 //  - 砥石 (使うと効き目・攻撃 +1.5・備えの刃に入る・手段の登録)・固焼き・軟膏 (糧の点・鈍足を治す)
-//  - レシピ (7 本。旅装の素材の合計は備えの頼みの集める数と同じ)・鍵 (覚書か職人に教わるまで作業台の完成品が空になる)・旅装を一式作ると合図
+//  - レシピ (7 本。旅装の素材の合計は備えの頼みの集める数と同じ)・鍵 (職人に教わるまで作業台の完成品が空になる)・旅装を一式作ると合図
 public final class TravelSelfTest {
     private TravelSelfTest() {
     }
@@ -222,7 +222,7 @@ public final class TravelSelfTest {
                     "item.skyabyss.rock_whetstone.desc", "item.skyabyss.road_hardtack", "item.skyabyss.road_hardtack.desc", "item.skyabyss.moss_salve",
                     "item.skyabyss.moss_salve.desc", "effect.skyabyss.whetted", "message.skyabyss.whetstone.used",
                     "message.skyabyss.readiness.remedy.name.travel_gear", "message.skyabyss.readiness.remedy.name.whetstone",
-                    "message.skyabyss.readiness.remedy.name.hardtack", "message.skyabyss.readiness.remedy.name.salve", "wayfarer_notes.ch1.line.7",
+                    "message.skyabyss.readiness.remedy.name.hardtack", "message.skyabyss.readiness.remedy.name.salve",
                     "item.skyabyss.whale_road_helmet.story", "item.skyabyss.whale_road_boots.story")) {
                 check(f, texts.containsKey(key) || lang(lang.equals("ja_jp") ? "gear_story_ja" : "gear_story_en").containsKey(key), lang + " is missing " + key);
             }
@@ -298,7 +298,7 @@ public final class TravelSelfTest {
         check(f, total.equals(want), "the " + what + " costs " + total + " (want " + want + ")");
     }
 
-    // 覚書の章の品は、みなその章から誂えられる (並ぶ品も可)
+    // その章の品は、みなその章から誂えられる (並ぶ品も可)
     private static void madeChapter(List<String> f, int chapter, List<String> items) {
         for (String r : items) {
             jp.revati.skyabyss.facility.MadeToOrder.Entry e = jp.revati.skyabyss.facility.MadeToOrder.find(r);
@@ -327,7 +327,7 @@ public final class TravelSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 鍵 (覚書か職人に教わるまで作れない)
+    // ---------------------------------------------------------------- 鍵 (職人に教わるまで作れない)
     private static void lock(List<String> f, MinecraftServer server, ServerLevel level, FakePlayer a) {
         a.getInventory().clearContent();
         noCrafting(f, server, level, a);

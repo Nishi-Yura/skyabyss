@@ -47,8 +47,9 @@ import jp.revati.skyabyss.util.Players;
 // 巨神の祠 (docs/design/32 の 3.1)。周回の順路の入口。巨神ごとに世界に一つ、地上に建つ。壊せない (台座 9×9 を守る)。
 //   置き場 (仮): はじまりの都 (鐘) から、その巨神の跡地の方位 岩鯨 北・潮殻 東・雷翼 西・余燼 南) へ、距離の帯の近い端。
 //     本当の置き場は、地図と地形の生成 が決まったら差し替える。心臓を初めて止めたとき (誰かが) に建てる (ensure)
-//   形: 深層岩の台座 (9×9)・巨神ごとの材質の輪 (半径 3)・中央の碑 (titan_shrine)・台座の東の縁に共鳴の炉。まわりに順位の石と飾り板 (RebirthBoards)
-//   使い方 (Wynncraft のレイドの入口と同じ。2026-11-03 の声「始まるときに集まる場所」): 拝殿の南の入口の外の黒い台 (集合台。PAD_*) に
+//   形: 巨神ごとに別の建物 (ShrineBuild。部品 shrine_<巨神>。岩鯨 = 鯨骨の聖堂・潮殻 = 潮の神殿・雷翼 = 雷の歌の環・余燼 = 炉の門)。
+//     記録する位置 (Data.pos) は碑。広場の真ん中の集合台 (縁が光る円い壇)・共鳴の炉。まわりに順位の石と飾り板 (RebirthBoards。集合台のまわり)
+//   使い方 (Wynncraft のレイドの入口と同じ。2026-11-03 の声「始まるときに集まる場所」): 集合台に
 //     パーティのオンラインの全員 (一人なら一人) が立つと、GATHER_TICKS の数え下ろしのあと、台の上の誰かの歌片が一つ減り (旅嚢か持ち物。代表が払う)、
 //     雲の帳のあいだに台の上の人をその巨神の背へ運び、順路の段 1 へ (TrialRoute.start)。数えるあいだに誰かが台を降りると止まる
 //   断るとき: 心臓を止めていない人が台にいる / 台の誰も歌片を持っていない / そのグループの順路がもう動いている (台の上の人の帯に理由)
@@ -57,12 +58,6 @@ public final class TitanShrine {
     private TitanShrine() {
     }
 
-    public static final int RING = 3;
-    public static final int PEDESTAL = 4;
-    // 集合台: 拝殿の南の入口 (ShrineArchitect の柱廊の口 z = 5) の前、下の屋根の軒 (±7) の外の黒い床。碑からの相対 x -PAD_HALF..PAD_HALF・z PAD_Z0..PAD_Z1
-    public static final int PAD_HALF = 2;
-    public static final int PAD_Z0 = 8;
-    public static final int PAD_Z1 = 10;
     // 全員がそろってから始まるまで (5 秒)
     public static final int GATHER_TICKS = 100;
     // 雲の帳を上げるまで
@@ -111,22 +106,22 @@ public final class TitanShrine {
         if (data.pos.remove(titan) == null) {
             return false;
         }
+        data.ver.remove(titan);
         data.setDirty();
         return true;
     }
 
-    // 祠を建てる (もう建っていれば、その位置)。チャンクを読み込む (心臓を止めたときに一度)
+    // 祠を建てる (もう建っていれば、その位置)。チャンクを読み込む (心臓を止めたときに一度)。前の版 (拝殿の祠) なら、同じ場所に建て直す
     public static BlockPos ensure(MinecraftServer server, String titan) {
         Data data = Data.get(server);
         BlockPos have = data.pos.get(titan);
+        ServerLevel level = server.overworld();
         if (have != null) {
-            // 集合台より前に建った祠には、ここでも台を塗る
-            if (server.overworld().hasChunkAt(have) && !padPainted(server.overworld(), have)) {
-                paintPad(server.overworld(), have);
+            if (data.ver.getOrDefault(titan, 1) < ShrineBuild.VERSION) {
+                return rebuildOld(server, titan, have);
             }
             return have;
         }
-        ServerLevel level = server.overworld();
         // 跡地 (ChapterGrounds) が取っておいた台座の場所。跡地がまだ決まっていない世界だけ、方位と距離の帯の近い端
         // 大陸: 決まった道ばたの広場 (world.continent.ContinentLairs.shrine。2026-10-28 の試遊「祠が地形になじまない、どうやって行けばいい」)
         int[] fixed = jp.revati.skyabyss.world.continent.ContinentLairs.shrine(server.overworld(), titan);
@@ -145,94 +140,46 @@ public final class TitanShrine {
         }
         level.getChunk(x >> 4, z >> 4);
         int y = Math.max(level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), level.getSeaLevel() + 1);
-        BlockPos center = new BlockPos(x, y, z);
-        build(level, center, titan);
-        data.pos.put(titan, center);
+        return place(server, titan, new BlockPos(x, y, z));
+    }
+
+    // 広場の真ん中 (地面の一つ上) に建てて記録する。碑の位置を返す
+    static BlockPos place(MinecraftServer server, String titan, BlockPos origin) {
+        ShrineBuild.build(server.overworld(), origin, titan);
+        BlockPos tablet = ShrineBuild.tabletOf(origin, titan);
+        Data data = Data.get(server);
+        data.pos.put(titan, tablet);
+        data.ver.put(titan, ShrineBuild.VERSION);
         data.setDirty();
-        SkyAbyss.LOGGER.info("Built the shrine of the {} at {}", titan, center);
-        return center;
+        jp.revati.skyabyss.rebirth.RebirthBoards.clearCache();
+        SkyAbyss.LOGGER.info("Built the shrine of the {} (tablet {})", titan, tablet);
+        return tablet;
     }
 
-    // 輪の材質
-    static BlockState ringBlock(String titan) {
-        return switch (titan) {
-            case Titans.TIDE_SHELL -> Blocks.PRISMARINE_BRICKS.defaultBlockState();
-            case Titans.THUNDER_WING -> Blocks.OXIDIZED_CUT_COPPER.defaultBlockState();
-            case Titans.EMBER -> Blocks.GILDED_BLACKSTONE.defaultBlockState();
-            default -> Blocks.BONE_BLOCK.defaultBlockState();
-        };
+    // 前の版の祠 (碑 = 広場の真ん中の地面の一つ上に立っていた) を、同じ真ん中に今の作りで建て直す
+    static BlockPos rebuildOld(MinecraftServer server, String titan, BlockPos oldTablet) {
+        SkyAbyss.LOGGER.info("Rebuilding the old shrine of the {} at {}", titan, oldTablet);
+        return place(server, titan, oldTablet);
     }
 
-    // 台座 (足もとの高さ center.y - 1 の 9×9)・輪・碑・四隅の灯り・炉。台座の下は地面まで深層岩で埋め、上は空ける
-    static void build(ServerLevel level, BlockPos center, String titan) {
-        int cx = center.getX();
-        int cz = center.getZ();
-        int top = center.getY() - 1;
-        ShrineArchitect.Plan plan = ShrineArchitect.plan(level, center);
-        ShrineArchitect.prepare(level, center, plan);
-        for (int dx = -PEDESTAL; dx <= PEDESTAL; dx++) {
-            for (int dz = -PEDESTAL; dz <= PEDESTAL; dz++) {
-                int x = cx + dx;
-                int z = cz + dz;
-                double r = Math.sqrt(dx * dx + dz * dz);
-                BlockState floor = Math.abs(r - RING) < 0.55 ? ringBlock(titan)
-                        : Math.max(Math.abs(dx), Math.abs(dz)) == PEDESTAL ? Blocks.POLISHED_DEEPSLATE.defaultBlockState() : Blocks.DEEPSLATE_TILES.defaultBlockState();
-                level.setBlock(new BlockPos(x, top, z), floor, 2);
-                for (int y = top - 1; y > top - 16; y--) {
-                    BlockPos p = new BlockPos(x, y, z);
-                    BlockState s = level.getBlockState(p);
-                    if (!s.isAir() && s.getFluidState().isEmpty() && !s.canBeReplaced()) {
-                        break;
-                    }
-                    level.setBlock(p, Blocks.DEEPSLATE_BRICKS.defaultBlockState(), 2);
-                }
-                for (int y = top + 1; y <= top + 6; y++) {
-                    level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), 2);
-                }
-            }
-        }
-        level.setBlock(center, ModBlocks.TITAN_SHRINE.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH)
-                .setValue(RelicStyle.PROP, RelicStyle.ofTitan(titan)), 3);
-        for (int sx : new int[] {-PEDESTAL, PEDESTAL}) {
-            for (int sz : new int[] {-PEDESTAL, PEDESTAL}) {
-                level.setBlock(new BlockPos(cx + sx, top + 1, cz + sz), Blocks.LANTERN.defaultBlockState(), 2);
-            }
-        }
-        level.setBlock(new BlockPos(cx + PEDESTAL, top + 1, cz), ModBlocks.RESONANCE_FORGE.get().defaultBlockState()
-                .setValue(jp.revati.skyabyss.forge.ResonanceForgeBlock.FACING, Direction.WEST), 3);
-        int blocks = ShrineArchitect.finish(level, center, titan, plan);
-        paintPad(level, center);
-        SkyAbyss.LOGGER.info("Shrine of the {} architecture: {} blocks, path to z+{}", titan, blocks, plan.end());
+    // 集合台の真ん中の立つ所 (順位の石と飾り板の真ん中・あきらめた順路の出口)
+    @Nullable
+    public static BlockPos hubOf(MinecraftServer server, String titan) {
+        BlockPos c = posOf(server, titan);
+        return c == null ? null : ShrineBuild.padOf(c, titan);
     }
 
-    // 台座の守る箱 (壊せない)
-    static AABB guard(BlockPos center) {
-        return new AABB(center.getX() - ShrineArchitect.TERRACE, center.getY() - 2, center.getZ() - ShrineArchitect.TERRACE, center.getX() + ShrineArchitect.TERRACE + 1,
-                center.getY() + 24, center.getZ() + ShrineArchitect.TERRACE + 1);
-    }
-
-    // 集合台の床 (黒) を塗る。古い世界の祠にも、人が近づいたときに塗る (onServerTick)
-    static final BlockState PAD_BLOCK = Blocks.BLACK_CONCRETE.defaultBlockState();
-
-    static void paintPad(ServerLevel level, BlockPos center) {
-        int top = center.getY() - 1;
-        for (int dx = -PAD_HALF; dx <= PAD_HALF; dx++) {
-            for (int dz = PAD_Z0; dz <= PAD_Z1; dz++) {
-                level.setBlock(new BlockPos(center.getX() + dx, top, center.getZ() + dz), PAD_BLOCK, 2);
-            }
-        }
-    }
-
-    static boolean padPainted(ServerLevel level, BlockPos center) {
-        return level.getBlockState(center.offset(0, -1, PAD_Z0 + 1)).equals(PAD_BLOCK);
+    // 守る箱 (広場の円を囲む箱)
+    static AABB guard(BlockPos tablet, String titan) {
+        BlockPos o = ShrineBuild.originOf(tablet, titan);
+        int r = ShrineBuild.guardRadius(titan);
+        return new AABB(o.getX() - r, o.getY() - 3, o.getZ() - r, o.getX() + r + 1, o.getY() + 34, o.getZ() + r + 1);
     }
 
     // 集合台の上か
-    public static boolean onPad(ServerPlayer p, BlockPos center) {
-        double x = p.getX() - center.getX();
-        double z = p.getZ() - center.getZ();
+    public static boolean onPad(ServerPlayer p, BlockPos tablet, String titan) {
         return p.level().dimension() == net.minecraft.world.level.Level.OVERWORLD && !p.isSpectator() && p.isAlive()
-                && x >= -PAD_HALF && x < PAD_HALF + 1 && z >= PAD_Z0 && z < PAD_Z1 + 1 && Math.abs(p.getY() - center.getY()) <= 2;
+                && ShrineBuild.onPad(p.getX(), p.getY(), p.getZ(), tablet, titan);
     }
 
     // 祠のそばか (誓いを選べる)
@@ -242,14 +189,14 @@ public final class TitanShrine {
                 && p.distanceToSqr(c.getX() + 0.5, c.getY(), c.getZ() + 0.5) <= VOW_REACH * VOW_REACH;
     }
 
-    // 祠の輪の南の縁へ送る (あきらめた周回の順路の出口)。送れたか
+    // 祠の集合台へ送る (あきらめた周回の順路の出口)。送れたか
     public static boolean sendTo(ServerPlayer p, String titan) {
-        BlockPos c = posOf(p.server, titan);
+        BlockPos c = hubOf(p.server, titan);
         if (c == null) {
             return false;
         }
         p.stopRiding();
-        p.teleportTo(p.server.overworld(), c.getX() + 0.5, c.getY(), c.getZ() + 2.5, 180f, 0f);
+        p.teleportTo(p.server.overworld(), c.getX() + 0.5, c.getY(), c.getZ() + 0.5, 180f, 0f);
         p.fallDistance = 0;
         return true;
     }
@@ -294,12 +241,12 @@ public final class TitanShrine {
     }
 
     // 集合台の上の、その人のグループのオンラインの人 (本人を先に)
-    public static List<ServerPlayer> ring(ServerPlayer by, BlockPos center) {
+    public static List<ServerPlayer> ring(ServerPlayer by, BlockPos center, String titan) {
         List<ServerPlayer> out = new ArrayList<>();
         out.add(by);
         UUID group = Groups.keyOf(by);
         for (ServerPlayer p : Players.snapshot(by.server.getPlayerList().getPlayers())) {
-            if (p != by && Groups.keyOf(p).equals(group) && onPad(p, center)) {
+            if (p != by && Groups.keyOf(p).equals(group) && onPad(p, center, titan)) {
                 out.add(p);
             }
         }
@@ -319,7 +266,7 @@ public final class TitanShrine {
             return;
         }
         UUID group = Groups.keyOf(by);
-        List<ServerPlayer> ring = ring(by, pos);
+        List<ServerPlayer> ring = ring(by, pos, titan);
         Component why = refusal(server, by, titan, ring, hasShard(by, titan), TrialRoute.active(back, group));
         if (why != null) {
             Notice.bar(by, why);
@@ -383,7 +330,7 @@ public final class TitanShrine {
             return;
         }
         ServerLevel level = server.overworld();
-        for (Map.Entry<String, BlockPos> e : Data.get(server).pos.entrySet()) {
+        for (Map.Entry<String, BlockPos> e : new ArrayList<>(Data.get(server).pos.entrySet())) {
             BlockPos c = e.getValue();
             if (!level.hasChunkAt(c)) {
                 continue;
@@ -396,13 +343,16 @@ public final class TitanShrine {
                 }
             }
             if (someone) {
-                // 碑が無くなっていたら (古い世界の書き換え・コマンド) 建て直す
-                if (!level.getBlockState(c).is(ModBlocks.TITAN_SHRINE.get())) {
-                    build(level, c, e.getKey());
-                } else if (!padPainted(level, c)) {
-                    paintPad(level, c);
+                // 前の版の祠・碑が無くなった祠 (古い世界の書き換え・コマンド) は建て直す
+                if (Data.get(server).ver.getOrDefault(e.getKey(), 1) < ShrineBuild.VERSION) {
+                    rebuildOld(server, e.getKey(), c);
+                    continue;
                 }
-                jp.revati.skyabyss.rebirth.RebirthBoards.install(level, e.getKey(), c);
+                if (!level.getBlockState(c).is(ModBlocks.TITAN_SHRINE.get())) {
+                    place(server, e.getKey(), ShrineBuild.originOf(c, e.getKey()));
+                    continue;
+                }
+                jp.revati.skyabyss.rebirth.RebirthBoards.install(level, e.getKey(), ShrineBuild.padOf(c, e.getKey()));
             }
         }
     }
@@ -419,7 +369,7 @@ public final class TitanShrine {
             }
             Map<UUID, List<ServerPlayer>> pads = new java.util.LinkedHashMap<>();
             for (ServerPlayer p : Players.snapshot(level.players())) {
-                if (onPad(p, c)) {
+                if (onPad(p, c, titan)) {
                     pads.computeIfAbsent(Groups.keyOf(p), k -> new ArrayList<>()).add(p);
                 }
             }
@@ -468,7 +418,7 @@ public final class TitanShrine {
                 }
                 if (st[1] != sec) {
                     st[1] = sec;
-                    level.playSound(null, c.offset(0, 0, PAD_Z0 + 1), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 0.8f, sec == 1 ? 1.4f : 0.9f);
+                    level.playSound(null, ShrineBuild.padOf(c, titan), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 0.8f, sec == 1 ? 1.4f : 0.9f);
                 }
             }
         }
@@ -476,15 +426,15 @@ public final class TitanShrine {
         GATHER.keySet().retainAll(seen);
     }
 
-    // 台座は壊せない (クリエイティブは除く。33 の保護は祠の台座 9×9 だけ)
+    // 祠は壊せない (クリエイティブは除く。広場の円を囲む箱)
     @SubscribeEvent
     static void onBreak(BlockEvent.BreakEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != net.minecraft.world.level.Level.OVERWORLD
                 || event.getPlayer() == null || event.getPlayer().isCreative()) {
             return;
         }
-        for (BlockPos c : Data.get(level.getServer()).pos.values()) {
-            if (guard(c).contains(event.getPos().getCenter())) {
+        for (Map.Entry<String, BlockPos> e : Data.get(level.getServer()).pos.entrySet()) {
+            if (guard(e.getValue(), e.getKey()).contains(event.getPos().getCenter())) {
                 event.setCanceled(true);
                 Notice.bar(event.getPlayer(), ModText.deny("message.skyabyss.shrine.guarded"));
                 return;
@@ -503,6 +453,8 @@ public final class TitanShrine {
     public static final class Data extends SavedData {
         private static final String NAME = "skyabyss_titan_shrines";
         final Map<String, BlockPos> pos = new HashMap<>();
+        // 祠の作りの版 (ShrineBuild.VERSION。前の版の祠は 1)
+        final Map<String, Integer> ver = new HashMap<>();
 
         public static Data get(MinecraftServer server) {
             return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(Data::new, Data::load, null), NAME);
@@ -510,8 +462,13 @@ public final class TitanShrine {
 
         private static Data load(CompoundTag tag, HolderLookup.Provider registries) {
             Data d = new Data();
+            CompoundTag vers = tag.getCompound("ver");
             for (String titan : tag.getAllKeys()) {
+                if (titan.equals("ver")) {
+                    continue;
+                }
                 d.pos.put(titan, BlockPos.of(tag.getLong(titan)));
+                d.ver.put(titan, vers.contains(titan) ? vers.getInt(titan) : 1);
             }
             return d;
         }
@@ -519,12 +476,16 @@ public final class TitanShrine {
         @Override
         public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
             pos.forEach((t, p) -> tag.putLong(t, p.asLong()));
+            CompoundTag vers = new CompoundTag();
+            ver.forEach(vers::putInt);
+            tag.put("ver", vers);
             return tag;
         }
 
         // 自己テスト用
         public void forget(String titan) {
             pos.remove(titan);
+            ver.remove(titan);
             setDirty();
         }
     }

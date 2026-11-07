@@ -57,7 +57,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //              同じ場所に二つのグループが同時に入れる。敵は保存しない (サーバーが止まる・読み込みから戻った個体は消す)。
 //              湧かせる敵は GroupOwned を実装していること (GuardMob の系統など)。していなければ登録の時点で警告し、湧かせる
 //     上限     一つの場所・一つのグループで同時に生きている敵は maxMobs (既定 12) まで。残りは、倒れたぶん順に湧く
-//     クリア   湧かせた敵がすべて倒れたら、そのとき基点の近く (96 以内) にいたグループの人全員に、人ごとの記録 (site_clear.<id>) を付ける。
+//     クリア   湧かせた敵がすべて倒れたら (最後の部屋の敵がみな倒れたら、ほかの部屋の残りは消して)、そのとき基点の近く (96 以内) にいたグループの人と、湧いてから近く (48) に来たことのあるグループの人
+//              (倒れて都で起きている人も) 全員に、人ごとの記録 (site_clear.<id>) を付ける。
 //              初めての人には経験値 (Growth.discover の鍵) と宝 (SiteTreasure.claim) と合図 `site_clear:<id>` (クエストの signal の目的)
 //     再訪     クリアした人だけのグループには、前に素材を受け取ってから 24000 tick たつと、最後の部屋だけ敵が戻る。倒すと周回の素材 (repeatTreasure。
 //              経験値なし)。まだクリアしていない人が近くにいれば全部の部屋 (その人の初回)
@@ -112,8 +113,13 @@ public final class SiteSpawner {
         final boolean repeat;
         final Deque<Task> pending = new ArrayDeque<>();
         final Map<UUID, BlockPos> live = new LinkedHashMap<>();
+        // 生きている個体の部屋 (最後の部屋の敵が倒れたらクリア)
+        final Map<UUID, String> rooms = new java.util.HashMap<>();
         int spawned;
         int idle;
+        // 湧いてから基点の近く (ACTIVATE) に来たグループの人。倒れて都で起きていても、離れていても、クリアのときにいっしょに数える
+        // (2026-11-07 の声「フレンドといったのに、潮の番人倒していない判定になった」)
+        final Set<UUID> joined = new java.util.LinkedHashSet<>();
 
         Instance(Def def, BlockPos origin, UUID group, boolean repeat) {
             this.def = def;
@@ -132,6 +138,18 @@ public final class SiteSpawner {
     private static final Map<String, Instance> INSTANCES = new HashMap<>();
     // クリアを聞く口 (場所の ID → 聞き手)。クリアの場にいた人ごとに、初回も周回も呼ぶ (first = その人の初回)。頁や伝承を記すのに使う
     private static final Map<String, List<java.util.function.BiConsumer<ServerPlayer, Boolean>>> CLEAR_LISTENERS = new ConcurrentHashMap<>();
+    // 地上では湧かせない場所 (組ごとの写しの小ダンジョンになった章の跡地。dungeon/MiniDungeons)。登録 (宝・経験値・頁の口) は残し、クリアは credit で数える
+    public static final java.util.Set<String> INSTANCED = ConcurrentHashMap.newKeySet();
+
+    // 写しの小ダンジョンのクリアを、地上の場所のクリアと同じに数える (初回の経験値・宝・合図 site_clear:<id>・頁の口。1 日ごとの周回の素材)
+    public static void credit(ServerLevel level, String siteId, List<ServerPlayer> players) {
+        Def def = DEFS.get(siteId);
+        if (def == null || players.isEmpty()) {
+            return;
+        }
+        Instance inst = new Instance(def, BlockPos.ZERO, UUID.randomUUID(), false);
+        cleared(level, inst, players, level.getGameTime());
+    }
 
     private SiteSpawner() {
     }
@@ -207,6 +225,9 @@ public final class SiteSpawner {
         MinecraftServer server = level.getServer();
         Set<String> seen = new HashSet<>();
         for (Def def : List.copyOf(DEFS.values())) {
+            if (INSTANCED.contains(def.id())) {
+                continue;
+            }
             for (BlockPos origin : def.origins().apply(server)) {
                 // この場所の近くにいる人を、グループごとに
                 Map<UUID, List<ServerPlayer>> near = new LinkedHashMap<>();
@@ -240,7 +261,10 @@ public final class SiteSpawner {
                         fill(inst);
                         INSTANCES.put(key, inst);
                     }
-                    step(level, inst, credit.getOrDefault(entry.getKey(), entry.getValue()), now);
+                    for (ServerPlayer p : entry.getValue()) {
+                        inst.joined.add(p.getUUID());
+                    }
+                    step(level, inst, withJoined(server, inst, credit.getOrDefault(entry.getKey(), entry.getValue())), now);
                 }
             }
         }
@@ -268,6 +292,18 @@ public final class SiteSpawner {
                 it.remove();
             }
         }
+    }
+
+    // クリアを数える人: 近く (CREDIT) の人と、この湧きに加わったことのある人 (つながっている人だけ)
+    static List<ServerPlayer> withJoined(MinecraftServer server, Instance inst, List<ServerPlayer> near) {
+        List<ServerPlayer> out = new ArrayList<>(near);
+        for (UUID id : inst.joined) {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && !out.contains(p)) {
+                out.add(p);
+            }
+        }
+        return out;
     }
 
     private static String key(Def def, BlockPos origin, UUID group) {
@@ -317,6 +353,7 @@ public final class SiteSpawner {
             // 見つからない個体は、その場所が動いている (エンティティが tick する) ときだけ倒れたとみなす。読み込まれていない所の個体は、いるものとして残す
             if (mob == null ? level.isPositionEntityTicking(e.getValue()) : !mob.isAlive()) {
                 LIVE.remove(e.getKey());
+                inst.rooms.remove(e.getKey());
                 it.remove();
             }
         }
@@ -326,8 +363,14 @@ public final class SiteSpawner {
             Mob mob = spawn(level, inst, task);
             if (mob != null) {
                 inst.live.put(mob.getUUID(), mob.blockPosition());
+                inst.rooms.put(mob.getUUID(), task.pad().room());
                 inst.spawned++;
             }
+        }
+        // 最後の部屋 (主の部屋) の敵がみな倒れたら、ほかの部屋の残り (閉じて待つ貝・砂に潜った敵など) は消してクリアにする
+        // (2026-11-07 の声「潮の番人を倒したのに、倒していない判定になった」: 入口の間の貝が残っていて、クリアにならなかった)
+        if (inst.pending.isEmpty() && !inst.live.isEmpty() && !inst.rooms.containsValue(inst.def.lastRoom())) {
+            discardMobs(level, inst);
         }
         if (inst.pending.isEmpty() && inst.live.isEmpty()) {
             cleared(level, inst, credit, now);
@@ -374,6 +417,7 @@ public final class SiteSpawner {
             LIVE.remove(id);
         }
         inst.live.clear();
+        inst.rooms.clear();
         inst.pending.clear();
     }
 

@@ -36,7 +36,7 @@ import net.minecraft.sounds.SoundSource;
 //   部屋   入口の間  熾り蟲 4。西の壁ぎわに温石の台 (玄武岩の柱。温石を持って触れると 30 秒温まり、熾り蟲は人より台へ寄る)        予習: 火の粉蛾の「いちばん熱いもの」
 //          鍛えの跡  灰被りの屑 2。冷えた金床・水の釜・崩れた道具棚                                                            予習: 灰被りの殻
 //          奥の間    古い灰被り (名づき)。北の壇に碑 (sign.skyabyss.ch4_forge)・前の私の荷 (樽。人ごとに一度: ブレイズパウダー 1・松明 8)・冷えた金床。
-//                    東の壁の外に地上へ出る梯子の縦穴                                                                          予習: 灰の鍛え手の亀裂
+//                    東の壁の外に地上へ出る梯子の縦穴 (口に跳ね上げ戸。内側からだけ開く。SiteHatches)                                                                    予習: 灰の鍛え手の亀裂
 //   クリア 湧かせた敵がすべて倒れる → 初めての人に経験値 80・宝 (煤鉄 4・灰麻 4・石炭 4)・合図 site_clear:ch4_dead_forge_pit。
 //          冷えた金床の上の頁 (伝承 ch4/forge_page。支度の段「炉跡」の最初の段)。再訪は 1 日ごとに奥の間の主が戻り、煤鉄と灰麻 (経験値なし)
 public final class DeadForgePit {
@@ -251,11 +251,14 @@ public final class DeadForgePit {
         if (WARM.isEmpty()) {
             return;
         }
-        ServerLevel level = server.overworld();
-        long now = level.getGameTime();
+        // 台は小ダンジョンの写しの中 (dungeon/MiniDungeons)。前の版の地上の台も同じ表
+        ServerLevel over = server.overworld();
+        ServerLevel inside = jp.revati.skyabyss.dungeon.DungeonWorld.level(server);
+        long now = over.getGameTime();
         WARM.entrySet().removeIf(e -> e.getValue() <= now);
         for (long key : WARM.keySet()) {
             BlockPos at = BlockPos.of(key);
+            ServerLevel level = inside != null && inside.isLoaded(at) && inside.getBlockState(at).is(net.minecraft.world.level.block.Blocks.SMOOTH_BASALT) ? inside : over;
             if (level.isLoaded(at)) {
                 level.sendParticles(ParticleTypes.SMALL_FLAME, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 2, 0.15, 0.05, 0.15, 0.01);
                 level.sendParticles(ParticleTypes.WHITE_ASH, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.01);

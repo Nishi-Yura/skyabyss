@@ -1,0 +1,48 @@
+# 2026-11-06: 巡り路 (ルートラン) の見え方。目的の帯に矢印が出ない・行き先の柱に色の標 (柱を選ぶあいだは二本)・野営地の画面の決まりと「やめる」・景品の表 (神器と旅の支え)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/circuit_1106.txt -PshotsName=circuit_1106
+world circuitshots continent
+size 1600 900
+timeout 3000
+render 10
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+respawn
+wait 20
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd weather clear
+cmd gamemode creative
+# 鯨見の野営地のそば
+cmd tp @s -116 140 -880 180 10
+waitchunks 300
+wait 200
+cmd skyabyss quest forget @s all
+wait 20
+cmd skyabyss_camp view
+wait 20
+hover 2 2
+wait 40
+shot camp_before
+close
+wait 10
+cmd skyabyss circuit start 2
+wait 80
+shot circuit_choose_south
+cmd tp @s ~ ~ ~ 0 10
+wait 30
+shot circuit_choose_north
+cmd tp @s ~ ~ ~ 90 10
+wait 30
+shot circuit_choose_west
+cmd tp @s ~ ~ ~ -90 10
+wait 30
+shot circuit_choose_east
+cmd skyabyss_camp view
+wait 20
+hover 2 2
+wait 40
+shot camp_running
+close
+quit

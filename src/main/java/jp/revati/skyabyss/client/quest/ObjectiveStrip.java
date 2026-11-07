@@ -141,10 +141,11 @@ public final class ObjectiveStrip {
         if (town != null) {
             return new Cur(town, new Resolved(jp.revati.skyabyss.client.guide.TownGuideClient.door(), false));
         }
-        // 巡り路 (endgame/Circuits) を歩いているあいだは、残り時間・印・いまの課題と行き先
+        // 巡り路 (endgame/Circuits) を歩いているあいだは、残り時間・印・いまの課題。矢印と距離は出さない (行き先の柱には目的の標。
+        // 2026-11-06 の声「ルートランだけど、左上の矢印はいらない。柱見えない場合もあるので、その場所にミッションのようにアイコン出して」)
         String circuit = jp.revati.skyabyss.endgame.client.CircuitClient.objective();
         if (circuit != null) {
-            return new Cur(circuit, new Resolved(jp.revati.skyabyss.endgame.client.CircuitClient.target(), false));
+            return new Cur(circuit, Resolved.NONE);
         }
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
@@ -321,7 +322,15 @@ public final class ObjectiveStrip {
         Function<String, BlockPos> provider = targets;
         BlockPos target = null;
         if (provider != null) {
-            target = provider.apply(def.id() + "/" + stage.id());
+            // 目的ごとの行き先 (「クエスト/段#番号」。土地の人の頼みで二か所を回る段は、済んでいない最初の目的を指す)
+            for (int i = 0; i < stage.objectives().size() && target == null; i++) {
+                if (entry.progress(i) < stage.objectives().get(i).count()) {
+                    target = provider.apply(def.id() + "/" + stage.id() + "#" + i);
+                }
+            }
+            if (target == null) {
+                target = provider.apply(def.id() + "/" + stage.id());
+            }
             if (target == null) {
                 target = provider.apply(def.id());
             }
@@ -345,10 +354,62 @@ public final class ObjectiveStrip {
                 }
             }
         }
+        // 場所の決まっていない段も、標を出す (2026-11-07 の声「クエストにはすべて黄色のひし形で場所示してあげて」):
+        //   倒す段 → 近く (FOE_NEAR) に見えているその敵のいちばん近い一体、それもなければ頼んだ人 (サーバーが送る「クエスト/giver」、話す相手の居場所)
+        if (any == null) {
+            any = nearestFoe(stage, entry);
+            if (any != null) {
+                return new Resolved(any, false);
+            }
+        }
+        if (any == null && provider != null) {
+            any = provider.apply(def.id() + "/giver");
+        }
+        if (any == null && def.giver() != null && !def.giver().isEmpty()) {
+            any = SiteTargets.npc(def.giver());
+        }
         if (any == null) {
             return Resolved.NONE;
         }
         return overworld ? new Resolved(any, false) : new Resolved(null, true);
+    }
+
+    static final double FOE_NEAR = 96;
+
+    // 倒す目的 (まだ足りないもの) の敵のうち、いま見えているいちばん近い一体の足もと
+    @Nullable
+    static BlockPos nearestFoe(QuestDef.Stage stage, QuestLog.Entry entry) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) {
+            return null;
+        }
+        java.util.Set<String> want = new java.util.HashSet<>();
+        for (int i = 0; i < stage.objectives().size(); i++) {
+            QuestDef.Objective ob = stage.objectives().get(i);
+            if (ob.type().equals("kill") && entry.progress(i) < ob.count()) {
+                want.addAll(ob.targets());
+            }
+        }
+        if (want.isEmpty()) {
+            return null;
+        }
+        net.minecraft.world.entity.Entity best = null;
+        double bd = FOE_NEAR * FOE_NEAR;
+        for (net.minecraft.world.entity.Entity e : mc.level.entitiesForRendering()) {
+            if (!(e instanceof net.minecraft.world.entity.LivingEntity le) || !le.isAlive()) {
+                continue;
+            }
+            String id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString();
+            if (!want.contains(id)) {
+                continue;
+            }
+            double d = e.distanceToSqr(mc.player);
+            if (d < bd) {
+                bd = d;
+                best = e;
+            }
+        }
+        return best == null ? null : best.blockPosition();
     }
 
     static void render(GuiGraphics g, DeltaTracker delta) {

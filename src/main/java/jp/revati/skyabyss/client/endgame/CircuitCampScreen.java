@@ -18,7 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 巡り路の野営地の画面 (endgame/CircuitCamps。報いの箱を押すと開く)。試練の板と同じ石板の枠:
-//   題と野営地の名・今の景品 (階級の色の枠。指すと品の説明)・入れ替えまでの時間・階級ごとの出やすさ・今日の残り・「歩き出す」。
+//   題と野営地の名・今の景品 (階級の色の枠。指すと品の説明)・入れ替えまでの時間・階級ごとの出やすさ・決まり・今日の残り・「歩き出す」
+//   (歩いているあいだは「やめる」。それまでの印の報いを受け取って終える)。
 //   板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 景品は 34 角の枠 7 x 2、下の段に今日の残りと「歩き出す」(89)
 public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
@@ -95,8 +96,8 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
     public boolean mouseClicked(double screenX, double screenY, int button) {
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
-        if (button == 0 && !view.running() && mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H) {
-            PacketDistributor.sendToServer(new CircuitCamps.Start(view.camp()));
+        if (button == 0 && mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H) {
+            PacketDistributor.sendToServer(view.running() ? new CircuitCamps.Stop() : new CircuitCamps.Start(view.camp()));
             onClose();
             return true;
         }
@@ -143,7 +144,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
         }
         // 階級ごとの出やすさ
         int y = GRID_Y + 2 * SLOT + SLOT_GAP + Golden.S5;
-        int total = 0;
+        int total = CircuitCamps.SUPPLY_WEIGHT;
         for (int w : CircuitCamps.WEIGHTS) {
             total += w;
         }
@@ -156,8 +157,12 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
             String pct = String.format(java.util.Locale.ROOT, CircuitCamps.WEIGHTS[t] * 100.0 / total < 1 ? "%.1f%%" : "%.0f%%", CircuitCamps.WEIGHTS[t] * 100.0 / total);
             odds.append(Component.translatable("gear.skyabyss.tier." + tier.key).withColor(tier.rgb())).append(Component.literal(" " + pct).withColor(DIM));
         }
+        odds.append(Component.literal("  ").withColor(DIM)).append(Component.translatable("gui.skyabyss.camp.supply").withColor(TEXT))
+                .append(Component.literal(" " + String.format(java.util.Locale.ROOT, "%.0f%%", CircuitCamps.SUPPLY_WEIGHT * 100.0 / total)).withColor(DIM));
         g.drawString(font, odds, bx, Golden.textY(y, Golden.ROW), -1, false);
-        for (var line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.camp.how"), LAYOUT.body().w() - Golden.S13)) {
+        // 決まりと引き方
+        Component how = Component.translatable("gui.skyabyss.camp.rules").append(Component.literal(" ")).append(Component.translatable("gui.skyabyss.camp.how"));
+        for (var line : jp.revati.skyabyss.client.ui.JpWrap.split(font, how, LAYOUT.body().w() - Golden.S13)) {
             y += Golden.ROW;
             if (y + Golden.ROW > LAYOUT.body().bottom()) {
                 break;
@@ -167,12 +172,12 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
         Golden.Box foot = LAYOUT.foot();
         g.drawString(font, Component.translatable("gui.skyabyss.camp.left", view.runsLeft()), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()),
                 argb(1f, view.runsLeft() > 0 ? TEAL : DIM), false);
-        // 歩き出す
-        boolean on = !view.running() && mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H;
+        // 歩き出す (歩いているあいだは、やめる)
+        boolean on = mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H;
         g.fill(btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, on ? 0xFF2A2618 : 0xFF171B25);
-        Golden.outline(g, btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, argb(1f, view.running() ? 0x2C3846 : on ? GOLD : 0x8A6E2C));
-        Component b = Component.translatable(view.running() ? "gui.skyabyss.camp.running" : "gui.skyabyss.camp.start");
-        g.drawString(font, b, btnX() + BTN_W / 2 - font.width(b) / 2, Golden.textY(btnY(), BTN_H), argb(1f, view.running() ? DIM : GOLD), false);
+        Golden.outline(g, btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, argb(1f, on ? GOLD : 0x8A6E2C));
+        Component b = Component.translatable(view.running() ? "gui.skyabyss.camp.stop" : "gui.skyabyss.camp.start");
+        g.drawString(font, b, btnX() + BTN_W / 2 - font.width(b) / 2, Golden.textY(btnY(), BTN_H), argb(1f, GOLD), false);
         fit.end(g);
         if (!hovered.isEmpty()) {
             g.renderTooltip(font, hovered, screenX, screenY);
