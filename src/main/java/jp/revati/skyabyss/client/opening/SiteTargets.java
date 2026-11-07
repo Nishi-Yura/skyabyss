@@ -68,6 +68,14 @@ public final class SiteTargets {
         bind("ch3/lightning_pillars/raise", "storm_ruin");
         bind("ch3/lightning_pillars/vault", "storm_ruin");
         bind("ch3/scorched_watch/clear", "ch3_scorched_watch");
+        // 空の石: 見つけた硝子の筋の数で、次の筋 (三つ見つけたら巣) を指す
+        bindPos("ch3/sky_stone/trail", () -> {
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            jp.revati.skyabyss.quest.QuestLog.Entry e = mc.player == null ? null : jp.revati.skyabyss.quest.QuestLog.of(mc.player).entry("ch3/sky_stone");
+            int found = e == null ? 0 : Math.min(3, e.progress(0));
+            BlockPos p = site("ch3_glass_streak_" + found);
+            return p != null ? p : site("ch3_gleaner_field");
+        });
     }
 
     // 語り部・鯨追いなど、話す相手の居場所 (サーバーが SiteNetwork で送る。キー npc.<役の名前>)

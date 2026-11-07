@@ -421,5 +421,6 @@
   "message.skyabyss.world_event.seal_failed": "%s broke free before the rings were filled. It is enraged",
   "message.skyabyss.world_event.rage": "%s is enraged. Its field attacks come faster",
   "gui.skyabyss.world_event.bar_seal": "%s ─ Seal rings %s/%s",
-  "gui.skyabyss.world_event.bar_rage": "%s ─ Enraged"
+  "gui.skyabyss.world_event.bar_rage": "%s ─ Enraged",
+  "message.skyabyss.world_event.herald_left": "Herald pack: %s left (defeat them all and the great one appears)"
 }

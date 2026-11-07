@@ -197,6 +197,14 @@ public final class WorldEvents {
                 }
             } else if (near != null && e.stage == Event.HERALD && (WorldEventFight.heraldLeft(level, e) == 0 || now >= e.heraldUntil)) {
                 spawnBoss(level, e, near);
+            } else if (e.stage == Event.HERALD && now % 20 == 0) {
+                // 前触れの残り (2026-11-08 の声「エリアに何体敵残ってるか出してほしい」)
+                int left = WorldEventFight.heraldLeft(level, e);
+                for (ServerPlayer p : level.players()) {
+                    if (!p.isSpectator() && Math.hypot(p.getX() - e.spot.getX(), p.getZ() - e.spot.getZ()) <= SPAWN_NEAR) {
+                        Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.world_event.herald_left", left));
+                    }
+                }
             }
         } else if (boss instanceof Mob m && m.isAlive()) {
             if (Math.hypot(m.getX() - e.spot.getX(), m.getZ() - e.spot.getZ()) > LEASH) {

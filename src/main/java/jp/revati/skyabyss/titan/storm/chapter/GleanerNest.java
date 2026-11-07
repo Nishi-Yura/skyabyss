@@ -71,6 +71,30 @@ public final class GleanerNest {
 
     static void register() {
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:sky_stone", 5))));
+        // クエストの標 (2026-11-08 の声「雷拾いの原から…のクエスト、ピンさしている位置がおかしい」: 頼んだ人を指していた)。
+        // 筋 3 つ (TARGET + 番号) と巣 (TARGET + 3)。クライアントは見つけた数で次の一つを指す (SiteTargets)
+        for (int i = 0; i <= NEST_INDEX; i++) {
+            final int k = i;
+            jp.revati.skyabyss.opening.site.SiteNetwork.EXTRA_TARGETS.put(TARGET + i, server -> spotAt(server, k));
+        }
+    }
+
+    public static final String TARGET = "ch3_glass_streak_";
+
+    // 筋 i (巣は NEST_INDEX) の場所。建っていればその位置、まだなら原の高さで
+    @Nullable
+    static BlockPos spotAt(MinecraftServer server, int i) {
+        for (SiteData.Entry x : SiteData.get(server.overworld()).entries(KIND)) {
+            if (x.index == i && x.built) {
+                return x.pos;
+            }
+        }
+        List<BlockPos> spots = spots(server);
+        BlockPos field = nearest(server, Ch3Ground.FIELD, null);
+        if (i >= spots.size() || field == null) {
+            return null;
+        }
+        return new BlockPos(spots.get(i).getX(), field.getY(), spots.get(i).getZ());
     }
 
     // この人が頼み「空の石」を進めているか

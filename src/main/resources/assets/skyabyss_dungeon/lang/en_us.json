@@ -187,5 +187,7 @@
   "gui.skyabyss.attack.pit_foreman.rage": "Enraged Roar",
   "gui.skyabyss.attack.ox_smith.rage": "Enraged Roar",
   "gui.skyabyss.attack.bell_hermit.rage": "Enraged Roar",
-  "gui.skyabyss.attack.geode_golem.rage": "Enraged Roar"
+  "gui.skyabyss.attack.geode_golem.rage": "Enraged Roar",
+  "message.skyabyss.dungeon.tip.next_cart": "Ride the minecart at the end of the pit to go down",
+  "message.skyabyss.dungeon.room_left": "Foes left in this room: %s (defeat them all to open the way)"
 }

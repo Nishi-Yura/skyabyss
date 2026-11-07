@@ -133,7 +133,7 @@
   "message.skyabyss.dungeon.tip.tide": "潮の仕掛け: 水は %2$s 秒ごとに満ち引きする。引いた間だけ下の道を通れる",
   "message.skyabyss.dungeon.tip.lava": "溶岩の仕掛け: 溶岩は %3$s 秒ごとに入れ替わる。湯気はその合図",
   "message.skyabyss.dungeon.tip.crystal": "結晶の仕掛け: 光る結晶を %1$s 回打つと満ちる。扉のすべての結晶を満たすと開く",
-  "message.skyabyss.dungeon.tip.next": "層の奥の光る所（鯨骨の坑はトロッコ）に入ると、下の層へ進む",
+  "message.skyabyss.dungeon.tip.next": "層の奥の光る所に入ると、下の層へ進む",
   "message.skyabyss.dungeon.tip.leave": "帰り石（天然磁石）を右クリックすると、入口の間へ帰れる",
   "message.skyabyss.dungeon.tip.cp": "ここが層の始まり。倒れたら、たどり着いた一番深い層の始まりから続く",
   "dungeon.skyabyss.mood.treasure": "宝の日",
@@ -187,5 +187,7 @@
   "gui.skyabyss.attack.pit_foreman.rage": "怒りの咆哮",
   "gui.skyabyss.attack.ox_smith.rage": "怒りの咆哮",
   "gui.skyabyss.attack.bell_hermit.rage": "怒りの咆哮",
-  "gui.skyabyss.attack.geode_golem.rage": "怒りの咆哮"
+  "gui.skyabyss.attack.geode_golem.rage": "怒りの咆哮",
+  "message.skyabyss.dungeon.tip.next_cart": "坑の奥のトロッコに乗ると、下の層へ進む",
+  "message.skyabyss.dungeon.room_left": "この部屋の敵: 残り %s 体（全部倒すと先の戸が開く）"
 }

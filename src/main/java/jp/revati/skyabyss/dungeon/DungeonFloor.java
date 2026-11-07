@@ -365,6 +365,18 @@ public final class DungeonFloor {
             };
             if (open) {
                 openDoor(level, door);
+            } else if (cond.startsWith("clear") && level.getGameTime() % 20 == 0) {
+                // 全滅で開く部屋: 部屋の中の人に、残りの敵の数 (2026-11-08 の声「エリアに何体敵残ってるか出してほしい」)
+                String room = cond.substring("clear".length());
+                int left = roomLeft(level, room);
+                if (left > 0 && terrain.has("room_" + room)) {
+                    Vec3 rc = center("room_" + room);
+                    for (ServerPlayer p : here) {
+                        if (Dungeons.real(p) && p.isAlive() && p.position().distanceTo(rc) < WAKE + 6 && Math.abs(p.getY() - rc.y) < 10) {
+                            Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.dungeon.room_left", left));
+                        }
+                    }
+                }
             } else if (near && cond.equals("key") && level.getGameTime() % 60 == 0) {
                 for (ServerPlayer p : here) {
                     if (Dungeons.real(p) && p.position().distanceTo(mid3) < DOOR_REACH) {
