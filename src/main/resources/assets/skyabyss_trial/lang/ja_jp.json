@@ -378,5 +378,6 @@
   "message.skyabyss.shrine.gather_broken": "%s が離れたので止めた。もう一度、祭司に話しかけて",
   "message.skyabyss.shrine.asked": "%s が祭司に頼んだ。%s 秒でルートへ渡る（台のそばを離れないで）",
   "message.skyabyss.shrine.talk_priest": "祠の祭司に話しかけると、ルートが始まる",
-  "message.skyabyss.shrine.not_here": "祠のそばで頼んで"
+  "message.skyabyss.shrine.not_here": "祠のそばで頼んで",
+  "message.skyabyss.route.bell_step_in": "台の上に立ってから、鐘を鳴らそう"
 }

@@ -109,7 +109,7 @@
   "skill.skyabyss.ember_orb.effect": "Throws a slow fireball. On hitting a foe or wall it bursts in %1$s blocks: %2$s spell damage and %3$s s of fire.",
   "skill.skyabyss.frost_tide": "Frost Tide",
   "skill.skyabyss.frost_tide.flavor": "The winter sea freezes you from the ankles up.",
-  "skill.skyabyss.frost_tide.effect": "A cold tide around you (%1$s blocks): %2$s spell damage and %3$s%% slow for %4$s s (half on large foes).",
+  "skill.skyabyss.frost_tide.effect": "A cold tide where you aim (%1$s blocks): %2$s spell damage and %3$s%% slow for %4$s s (half on large foes).",
   "skill.skyabyss.blink": "Blink",
   "skill.skyabyss.blink.flavor": "The gap between stars is shorter than you think.",
   "skill.skyabyss.blink.effect": "Leaps up to %1$s blocks the way you look (stops before walls). Clears fall height. Cooldown %2$s s.",
@@ -127,7 +127,7 @@
   "skill.skyabyss.curse_mark.effect": "Marks the foe you look at (within %1$s blocks) for %3$s s. It takes +%2$s%% damage from everyone and hits weaker.",
   "skill.skyabyss.lamp_charm": "Lamp Charm",
   "skill.skyabyss.lamp_charm.flavor": "By the lamp, even the waves are calm.",
-  "skill.skyabyss.lamp_charm.effect": "Places a lamp at your feet (%1$s blocks, %2$s s). Every %4$s s it tops up ward HP to %3$s for you and allies nearby.",
+  "skill.skyabyss.lamp_charm.effect": "Places a lamp where you aim (%1$s blocks, %2$s s). Every %4$s s it tops up ward HP to %3$s for you and allies nearby.",
   "message.skyabyss.skill.blink_blocked": "No room to blink",
   "gui.skyabyss.job_choice.title": "Choose a Job",
   "gui.skyabyss.job_choice.lead": "The mistletoe shrine offers six weapons",
@@ -531,7 +531,7 @@
   "message.skyabyss.gear_new": "New gear: %s (collection %s/%s)",
   "message.skyabyss.reward_pending": "Rewards you couldn't receive are being held. You get them when you wake (or with /titanmemory claim)",
   "message.skyabyss.reward_overflow": "Your inventory is full; %s reward(s) are being held. Make room and use /titanmemory claim",
-  "message.skyabyss.reward_delivered": "You received the rewards that were held for you",
+  "message.skyabyss.reward_delivered": "You received rewards held for you earlier (pack full or down)",
   "message.skyabyss.reward_none_pending": "No rewards are being held for you",
   "key.skyabyss.swap_shoulder": "Swap Shoulder (Third Person)",
   "key.categories.skyabyss": "Between Sky and Abyss",
@@ -3159,5 +3159,6 @@
   "sign.skyabyss.poi_note.south_moss_shrine.1": "Wait out storms",
   "sign.skyabyss.poi_note.south_moss_shrine.2": "here",
   "sign.skyabyss.poi_note.south_moss_shrine.3": "The moss",
-  "sign.skyabyss.poi_note.south_moss_shrine.4": "drinks lightning"
+  "sign.skyabyss.poi_note.south_moss_shrine.4": "drinks lightning",
+  "raid.skyabyss.hud.foes_left": "%s foes left"
 }

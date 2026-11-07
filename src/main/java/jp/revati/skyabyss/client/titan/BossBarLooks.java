@@ -86,16 +86,38 @@ public final class BossBarLooks {
 
     @Nullable
     static PhasedBossBar.Style styleOf(BossEvent boss) {
-        if (!(boss.getName().getContents() instanceof TranslatableContents t)) {
+        String key = entityKey(boss.getName(), 0);
+        return key == null ? null : STYLES.get(key);
+    }
+
+    // 帯の名前の中から、Mod の生き物の名前のキーを探す。名前は「封じ 2/3」「荒ぶる〜」(WorldEventFight)、「深淵の〜」(HeartBoss)、
+    // チームの色付け (Component.empty() + 名前) などで包まれることがあり、外側のキーだけ見ると型が外れて、ときどきバニラの帯に戻っていた
+    // (2026-11-08 の声「ボスバーがたまに既存デザインになる」)。包みの引数と子をたどって、いちばん内側の entity.skyabyss.* を返す
+    @Nullable
+    static String entityKey(Component c, int depth) {
+        if (c == null || depth > 6) {
             return null;
         }
-        String key = t.getKey();
-        // 大いなる〜 (WorldEvents): 中の名前の土地の型
-        if (key.equals(WORLD_EVENT) && t.getArgs().length > 0 && t.getArgs()[0] instanceof Component c
-                && c.getContents() instanceof TranslatableContents inner) {
-            key = inner.getKey();
+        if (c.getContents() instanceof TranslatableContents t) {
+            for (Object a : t.getArgs()) {
+                if (a instanceof Component inner) {
+                    String k = entityKey(inner, depth + 1);
+                    if (k != null) {
+                        return k;
+                    }
+                }
+            }
+            if (t.getKey().startsWith("entity.skyabyss.") && !t.getKey().equals(WORLD_EVENT)) {
+                return t.getKey();
+            }
         }
-        return STYLES.get(key);
+        for (Component sib : c.getSiblings()) {
+            String k = entityKey(sib, depth + 1);
+            if (k != null) {
+                return k;
+            }
+        }
+        return null;
     }
 
     // 型を持たない Mod の主・中ボス (地下のダンジョンの中ボスなど) は、石の色の型で出す (細いバニラの帯にしない)。
@@ -106,8 +128,7 @@ public final class BossBarLooks {
     static void onPlainBossBar(CustomizeGuiOverlayEvent.BossEventProgress event) {
         Minecraft mc = Minecraft.getInstance();
         BossEvent boss = event.getBossEvent();
-        if (mc.level == null || mc.player == null || event.isCanceled() || !(boss.getName().getContents() instanceof TranslatableContents t)
-                || !t.getKey().startsWith("entity.skyabyss.")) {
+        if (mc.level == null || mc.player == null || event.isCanceled() || entityKey(boss.getName(), 0) == null) {
             return;
         }
         event.setCanceled(true);

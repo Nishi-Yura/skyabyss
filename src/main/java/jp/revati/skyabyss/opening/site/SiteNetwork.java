@@ -69,6 +69,11 @@ public final class SiteNetwork {
         PacketDistributor.sendToPlayer(player, payload(player.server, player));
     }
 
+    public static final String SHOP_PREFIX = "shop.";
+    static final jp.revati.skyabyss.facility.AttendantRole[] SHOP_ROLES = {jp.revati.skyabyss.facility.AttendantRole.OUTFITTER,
+            jp.revati.skyabyss.facility.AttendantRole.TOOL_MERCHANT, jp.revati.skyabyss.facility.AttendantRole.MATERIAL_TRADER,
+            jp.revati.skyabyss.facility.AttendantRole.APOTHECARY};
+
     public static SiteTargetsPayload payload(MinecraftServer server) {
         Map<String, BlockPos> m = new LinkedHashMap<>();
         OpeningSites.camp(server).ifPresent(p -> m.put("camp", p));
@@ -93,11 +98,53 @@ public final class SiteNetwork {
         });
         // 旅の職人: 章の立つ所 (ArtisanSpawner.Spot) の印の最初の場所 (拠点が複数あれば先頭。話す目的の道しるべ)
         if (server.overworld() != null) {
+            // 拠点が複数あれば全部 (npc.artisan.<番号>)。クライアントがいちばん近い人を指す (2026-11-08 の声「npcをピンさしてくれるメインクエスト、一番近くのnpcさして」)
+            int an = 0;
             for (var spot : jp.revati.skyabyss.npc.ArtisanSpawner.spots()) {
                 var marks = jp.revati.skyabyss.npc.ArtisanSpawner.marks(server.overworld(), spot);
                 if (!marks.isEmpty()) {
-                    m.put(SiteTargets.NPC_PREFIX + "artisan", marks.get(0));
-                    break;
+                    if (an == 0) {
+                        m.put(SiteTargets.NPC_PREFIX + "artisan", marks.get(0));
+                    }
+                    m.put(SiteTargets.NPC_PREFIX + "artisan." + an++, marks.get(0));
+                }
+            }
+            // 施設の係の人 (都と土地の町の全部。npc.attendant_<役>.<番号>)。頼みの相手が係の人のとき、いちばん近い人を指す
+            for (jp.revati.skyabyss.facility.AttendantRole role : jp.revati.skyabyss.facility.AttendantRole.values()) {
+                int n = 0;
+                for (BlockPos b : OpeningSites.shelterExtras(server, role.mark()).values()) {
+                    m.put(SiteTargets.NPC_PREFIX + "attendant_" + role.id + "." + n++, b);
+                }
+                for (jp.revati.skyabyss.opening.site.SiteData.Entry e : jp.revati.skyabyss.opening.site.SiteData.get(server.overworld())
+                        .entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
+                    BlockPos b = e.extra(role.mark());
+                    if (e.built && b != null) {
+                        m.put(SiteTargets.NPC_PREFIX + "attendant_" + role.id + "." + n++, b);
+                    }
+                }
+            }
+        }
+        // 土地の町の真ん中 (キー town_<土地>。クエストの「〇〇の町へ行こう」の段の行き先)
+        for (String region : jp.revati.skyabyss.world.continent.ContinentTowns.REGIONS) {
+            BlockPos t = jp.revati.skyabyss.world.continent.ContinentLayout.get().town(region);
+            if (t != null) {
+                m.put("town_" + region, t);
+            }
+        }
+        // 店の主の立つ所 (キー shop.<役>.<番号>。都と土地の町の全部。クライアントがいちばん近い店を指す)。
+        // 2026-11-08 の声「メインクエストで市を訪れる時、ピンが表示されない」: 「（市の武具屋）」の段は行き先がなく、帯に標が出ていなかった
+        if (server.overworld() != null) {
+            for (jp.revati.skyabyss.facility.AttendantRole role : SHOP_ROLES) {
+                int n = 0;
+                for (BlockPos b : OpeningSites.shelterExtras(server, role.mark()).values()) {
+                    m.put(SHOP_PREFIX + role.id + "." + n++, b);
+                }
+                for (jp.revati.skyabyss.opening.site.SiteData.Entry e : jp.revati.skyabyss.opening.site.SiteData.get(server.overworld())
+                        .entries(jp.revati.skyabyss.world.continent.ContinentTowns.KIND)) {
+                    BlockPos b = e.extra(role.mark());
+                    if (e.built && b != null) {
+                        m.put(SHOP_PREFIX + role.id + "." + n++, b);
+                    }
                 }
             }
         }

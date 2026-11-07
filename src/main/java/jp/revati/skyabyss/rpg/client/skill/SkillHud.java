@@ -45,11 +45,16 @@ public final class SkillHud {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.player.isSpectator()) {
             return;
         }
-        if (!anySlot(SkillManager.get(mc.player))) {
+        boolean skills = anySlot(SkillManager.get(mc.player));
+        boolean charm = !charm(mc.player).isEmpty();
+        if (!skills && !charm) {
             return;
         }
-        // 右端に構えの字の分 (11) を足す
-        int row = SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11;
+        // 右端に構えの字の分 (11) を足す。護符を付けていれば、その右に護符の枠
+        int row = skills ? SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11 : 0;
+        if (charm) {
+            row += (skills ? CHARM_GAP : 0) + SLOT;
+        }
         out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
@@ -83,6 +88,7 @@ public final class SkillHud {
         if (showMana(mc.player, d) && !jp.revati.skyabyss.client.hud.VitalsHud.manaInFoodSlot()) {
             renderMana(g, mc, d);
         }
+        renderCharm(g, mc, d, delta);
         if (anySlot(d)) {
             // 今の職の武器を持っていない間は、枠を薄く出す (使えないことが分かるように。消さない。docs/design/48 の 3 章)
             jp.revati.skyabyss.rpg.skill.Job cur = jp.revati.skyabyss.rpg.skill.Job.byId(d.curJob);
@@ -146,6 +152,41 @@ public final class SkillHud {
             int a = (int) (SkillClient.manaFlash / 14f * 0xC0);
             g.fill(mx, my, mx + MANA_W, my + 4, (a << 24) | 0xD9779A);
         }
+    }
+
+    // 護符の枠 (2026-11-08 の声「護符付けてもスロット表示されない。画面に」): 技の枠の右に、付けている護符の絵・使うキー・待ちの覆い
+    static final int CHARM_GAP = 4;
+
+    static net.minecraft.world.item.ItemStack charm(Player p) {
+        return jp.revati.skyabyss.item.accessory.Accessories.stack(p, jp.revati.skyabyss.item.accessory.AccessoryData.CHARM);
+    }
+
+    private static void renderCharm(GuiGraphics g, Minecraft mc, SkillData d, DeltaTracker delta) {
+        net.minecraft.world.item.ItemStack stack = charm(mc.player);
+        int[] o = slotOrigin();
+        if (stack.isEmpty() || o == null) {
+            return;
+        }
+        int x = o[0] + (anySlot(d) ? d.slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11 + CHARM_GAP : 0);
+        int y = o[1];
+        g.blit(TEXTURE, x, y, SLOT, SLOT, 468, 384, 40, 40, TEX_W, TEX_H);
+        g.renderItem(stack, x + 2, y + 2);
+        boolean ready = jp.revati.skyabyss.item.GearLevel.meets(mc.player, stack);
+        float cd = mc.player.getCooldowns().getCooldownPercent(stack.getItem(), delta.getGameTimeDeltaPartialTick(true));
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 200);
+        if (!ready) {
+            g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A3A1010);
+        } else if (cd > 0) {
+            int h = Mth.clamp(Math.round(16f * cd), 1, 16);
+            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB0101418);
+        }
+        String k = jp.revati.skyabyss.client.accessory.AccessoryClient.CHARM_KEY.getTranslatedKeyMessage().getString();
+        if (k.length() > 3) {
+            k = k.substring(0, 3);
+        }
+        g.drawString(mc.font, k, x + SLOT - 1 - mc.font.width(k), y + SLOT - 8, cd > 0 || !ready ? 0x6A707C : 0xE8D9A0, true);
+        g.pose().popPose();
     }
 
     // 枠の置き場: HudManager が割り当てた長方形 (ホットバーの右、または左上)

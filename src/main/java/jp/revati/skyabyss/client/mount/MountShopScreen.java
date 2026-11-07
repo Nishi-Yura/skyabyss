@@ -228,7 +228,13 @@ public class MountShopScreen extends Screen {
     private void statRow(GuiGraphics g, Font font, int kind, int x, int y, int rw, int mx, int my) {
         int tier = view.tier(kind);
         boolean maxed = tier >= MountStats.tiers(MountStats.ROW_KIND[kind]);
-        g.drawString(font, Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]), x, Golden.textY(y, STAT_H), FacilityUi.TEXT, false);
+        Component label = Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]);
+        if (MountStats.ROW_KIND[kind] == MountStats.SEATS) {
+            // 人数の行: 今の見た目で何人乗れるか (荷車でない見た目は 2 人まで。2026-11-08 の声「2人しか乗れないのに、強化6人まで見えてたら見にくい」)
+            jp.revati.skyabyss.mount.MountLook chosen = jp.revati.skyabyss.mount.MountLook.values()[Math.max(0, Math.min(jp.revati.skyabyss.mount.MountLook.values().length - 1, view.chosen()))];
+            label = Component.translatable("mount.skyabyss.stat.seats_now", MountStats.seats(tier, chosen));
+        }
+        g.drawString(font, label, x, Golden.textY(y, STAT_H), FacilityUi.TEXT, false);
         int px = x + Golden.S34;
         for (int i = 0; i < MountStats.tiers(MountStats.ROW_KIND[kind]); i++) {
             int bx = px + i * 9;

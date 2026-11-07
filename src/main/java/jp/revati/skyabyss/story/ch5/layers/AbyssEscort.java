@@ -658,7 +658,13 @@ public final class AbyssEscort {
                 yield left <= 0 && boss == null;
             }
             case CLEAR -> {
-                if (alive(level, run.mobs) == 0 && run.wave < 2) {
+                int left = alive(level, run.mobs);
+                if (left > 0 && now % 20 == 0) {
+                    for (ServerPlayer p : party) {
+                        p.displayClientMessage(Component.translatable(NS + "foes_left", left), true);
+                    }
+                }
+                if (left == 0 && run.wave < 2) {
                     wave(level, run, k, 4);
                     say(level, run, "wave." + run.layer);
                 }

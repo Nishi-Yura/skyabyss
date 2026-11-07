@@ -109,7 +109,7 @@
   "skill.skyabyss.ember_orb.effect": "ゆっくり飛ぶ火の玉を放つ。敵か壁に当たると %1$s ブロックに弾け、魔法のダメージ %2$s を与え、%3$s 秒の炎が上がる。",
   "skill.skyabyss.frost_tide": "凍て潮",
   "skill.skyabyss.frost_tide.flavor": "冬の海は、足首から凍らせる。",
-  "skill.skyabyss.frost_tide.effect": "自分のまわり %1$s ブロックに冷たい潮が広がる。敵に魔法のダメージ %2$s と、%4$s 秒の鈍足 %3$s%%（大きな相手は半分）。",
+  "skill.skyabyss.frost_tide.effect": "狙った地面のまわり %1$s ブロックに冷たい潮が広がる。敵に魔法のダメージ %2$s と、%4$s 秒の鈍足 %3$s%%（大きな相手は半分）。",
   "skill.skyabyss.blink": "転移",
   "skill.skyabyss.blink.flavor": "星と星のあいだは、思うより近い。",
   "skill.skyabyss.blink.effect": "見ている向きへ %1$s ブロックまで跳ぶ（壁の手前で止まる）。落ちた高さは消える。次に使えるまで %2$s 秒。",
@@ -127,7 +127,7 @@
   "skill.skyabyss.curse_mark.effect": "見ている敵（%1$s ブロック以内）に %3$s 秒の印をつける。印の敵は誰の攻撃でも受けるダメージが +%2$s%%。その敵の攻撃は弱る。",
   "skill.skyabyss.lamp_charm": "灯の守り札",
   "skill.skyabyss.lamp_charm.flavor": "灯のそばでは、波もおとなしい。",
-  "skill.skyabyss.lamp_charm.effect": "足もとに灯を置く（%1$s ブロック、%2$s 秒）。そばの自分と仲間の護りの体力を、%4$s 秒ごとに %3$s 点まで満たす。",
+  "skill.skyabyss.lamp_charm.effect": "狙った地面に灯を置く（%1$s ブロック、%2$s 秒）。そばの自分と仲間の護りの体力を、%4$s 秒ごとに %3$s 点まで満たす。",
   "message.skyabyss.skill.blink_blocked": "跳べる場所がない",
   "gui.skyabyss.job_choice.title": "ジョブを選ぶ",
   "gui.skyabyss.job_choice.lead": "宿り木の祠が、六つの得物を差し出している",
@@ -531,7 +531,7 @@
   "message.skyabyss.gear_new": "新しい装備 %s を手にした（図鑑 %s/%s）",
   "message.skyabyss.reward_pending": "受け取れなかった報酬を預かっている。目を覚ましたとき（または /titanmemory claim）に渡す",
   "message.skyabyss.reward_overflow": "持ち物がいっぱいで、%s 個の報酬を預かった。空きを作って /titanmemory claim で受け取れる",
-  "message.skyabyss.reward_delivered": "預かっていた報酬を受け取った",
+  "message.skyabyss.reward_delivered": "前に預かっていた報酬を受け取った（持ち物がいっぱいだった・倒れていたときの分）",
   "message.skyabyss.reward_none_pending": "預かっている報酬はない",
   "key.skyabyss.swap_shoulder": "三人称の肩を替える",
   "key.categories.skyabyss": "天と淵のあいだ",
@@ -3159,5 +3159,6 @@
   "sign.skyabyss.poi_note.south_moss_shrine.1": "雷の夜は",
   "sign.skyabyss.poi_note.south_moss_shrine.2": "ここで越せ",
   "sign.skyabyss.poi_note.south_moss_shrine.3": "苔が",
-  "sign.skyabyss.poi_note.south_moss_shrine.4": "雷を吸う"
+  "sign.skyabyss.poi_note.south_moss_shrine.4": "雷を吸う",
+  "raid.skyabyss.hud.foes_left": "敵 残り %s"
 }

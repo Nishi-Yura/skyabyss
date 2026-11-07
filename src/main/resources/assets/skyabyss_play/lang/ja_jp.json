@@ -92,5 +92,12 @@
   "commands.skyabyss_play.tower_no_run": "塔の中で主と戦っている人がいない",
   "commands.skyabyss_play.help.19": "§e■ 神器 §fadmin awaken <数> [対象] §7— 手に持った神器の倒した数を決める (目覚めの段: 300・1500・5000。段が上がると知らせも出る)",
   "commands.skyabyss_play.act.awaken": "神器の倒した数を決めた",
-  "commands.skyabyss_play.awaken_none": "%s は神器の武器を手に持っていない"
+  "commands.skyabyss_play.awaken_none": "%s は神器の武器を手に持っていない",
+  "commands.skyabyss.help.stuck": "動けなくなったとき。3 秒動かずにいると、近くの休み場（背の上なら今の部屋の入口、ダンジョンなら層の入口）へ移る（1 分に一度）",
+  "message.skyabyss.stuck.wait": "%s 秒そのまま動かずにいると、近くの安全な所へ移る",
+  "message.skyabyss.stuck.moved": "動いたので、やめた",
+  "message.skyabyss.stuck.combat": "戦っている最中は使えない",
+  "message.skyabyss.stuck.cooldown": "あと %s 秒は使えない",
+  "message.skyabyss.stuck.done": "近くの安全な所へ移った",
+  "message.skyabyss.stuck.none": "移れる所が見つからなかった"
 }

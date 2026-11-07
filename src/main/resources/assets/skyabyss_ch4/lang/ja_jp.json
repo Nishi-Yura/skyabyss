@@ -125,8 +125,8 @@
   "quest.skyabyss.ch4.dragger_trail.follow.kiln": "灰ひきずりを追い、窯の跡を探そう",
   "quest.skyabyss.ch4.dragger_trail.summary": "灰を引きずる虫を追って、灰の民の窯の跡へ。",
   "quest.skyabyss.ch4.dragger_trail.title": "灰ひきずり",
-  "quest.skyabyss.ch4.fire_draught.brew.journal": "旅の職人が言っていた。「灰の民は、火の薬を飲んでから炉に入った。二つ持っておけ。炉は一度じゃ済まない」\n灰の道の標の五つ目の杭の、まだ温かい灰を薬師に見せれば、灰の民のやり方で作ってくれるかもしれない。（灰炉の村や都の薬師の店でも買える）",
-  "quest.skyabyss.ch4.fire_draught.brew.potion": "火除けの薬を二つそろえよう（薬師）",
+  "quest.skyabyss.ch4.fire_draught.brew.journal": "温かい灰が手に入った。灰炉の村の薬師なら、灰の民のやり方で火除けの薬にしてくれる。二つそろえよう。（都の薬師の店でも買える）",
+  "quest.skyabyss.ch4.fire_draught.brew.potion": "灰炉の薬師で火除けの薬を二つ",
   "quest.skyabyss.ch4.fire_draught.done": "「火を飲んで、火の中へ。灰の民は、そうやって炉に入ったんだ」",
   "quest.skyabyss.ch4.fire_draught.show.journal": "火除けの薬が二つ、そろった。旅の職人に見せよう。",
   "quest.skyabyss.ch4.fire_draught.show.talk": "火除けの薬を、旅の職人に見せよう",
@@ -214,5 +214,11 @@
   "dialogue.skyabyss.attendant_apothecary.menu.ash": "円の縁の、温かい灰を見せる",
   "dialogue.skyabyss.attendant_apothecary.ash1": "その包み……灰の降る円の縁の灰ですね。まだ温かい。",
   "dialogue.skyabyss.attendant_apothecary.ash2": "灰の民は、火の薬の瓶の底に灰をひとつまみ沈めたそうです。火に、自分たちの匂いを覚えさせるために。\n……やってみましょう。",
-  "dialogue.skyabyss.attendant_apothecary.ash3": "二本です。炉は一度じゃ済まない、と職人さんも言うでしょうね。"
+  "dialogue.skyabyss.attendant_apothecary.ash3": "二本です。炉は一度じゃ済まない、と職人さんも言うでしょうね。",
+  "quest.skyabyss.ch4.fire_draught.town.arrive": "灰の荒れ地の灰炉の村へ行こう",
+  "quest.skyabyss.ch4.fire_draught.town.lead": "旅の職人「炉に入るなら、火を飲め。灰の民のやり方は、灰炉の村に残っている」",
+  "quest.skyabyss.ch4.fire_draught.town.journal": "旅の職人が言っていた。「灰の民は、火の薬を飲んでから炉に入った。二つ持っておけ。炉は一度じゃ済まない」\n火除けの薬の作り方は、灰の荒れ地の灰炉の村に残っているという。",
+  "quest.skyabyss.ch4.fire_draught.ash.draggers": "灰ひきずりを三体倒そう",
+  "quest.skyabyss.ch4.fire_draught.ash.lead": "村の薬師「薬の芯は、まだ温かい灰だよ。灰ひきずりが引きずって歩いている」",
+  "quest.skyabyss.ch4.fire_draught.ash.journal": "灰炉の村の薬師によると、火除けの薬の芯は、まだ温かい灰だという。村のまわりの荒れ地を歩く灰ひきずりが、引きずっている。"
 }

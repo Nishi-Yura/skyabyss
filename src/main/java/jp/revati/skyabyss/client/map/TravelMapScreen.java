@@ -108,7 +108,12 @@ public class TravelMapScreen extends Screen {
         this.sheet = sheet;
         // 海図は遠くまで行くので世界の縮尺から
         this.view = chart != null ? FAR : onMoon() ? MOON_NEAR : NEAR;
+        // 町の中で開いたら、町の地図 (LocalArea) が見えるところまで寄せる
+        if (chart == null && !onMoon() && LocalArea.inTown(Minecraft.getInstance())) {
+            this.view = LocalArea.TOWN_VIEW;
+        }
         this.target = view;
+        LocalArea.rebuild(Minecraft.getInstance());
         pickDefault();
     }
 
@@ -408,6 +413,7 @@ public class TravelMapScreen extends Screen {
         drawContinent(g);
         drawTown(g, p);
         List<Hit> hits = new ArrayList<>();
+        drawLocal(g, hits);
         drawMarks(g, p, hits, mouseX, mouseY);
         drawCompass(g, p);
         drawHeader(g, p, mouseX, mouseY);
@@ -569,6 +575,38 @@ public class TravelMapScreen extends Screen {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         g.enableScissor(rx0, ry0, rx1, ry1);
         g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
+        g.disableScissor();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+
+    // 町の地図: 寄せたとき、読み込んである土地を上から描いた絵を重ね、施設の係の人を名前つきの点で載せる (LocalArea)
+    private void drawLocal(GuiGraphics g, List<Hit> hits) {
+        net.minecraft.resources.ResourceLocation tex = LocalArea.id();
+        if (tex == null || view > LocalArea.SHOW_BELOW || onMoon() || radius <= 0 || self() == null) {
+            return;
+        }
+        double k = radius / view;
+        int x0 = cx + (int) Math.round((LocalArea.originX() - centerX()) * k);
+        int y0 = cy + (int) Math.round((LocalArea.originZ() - centerZ()) * k);
+        int size = (int) Math.round(LocalArea.R * 2 * k);
+        // 寄せるほど濃く (大陸の絵から町の絵へ移る)
+        float a = (float) Mth.clamp((LocalArea.SHOW_BELOW - view) / 80.0, 0, 1);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.enableScissor(rx0, ry0, rx1, ry1);
+        g.setColor(1f, 1f, 1f, a);
+        g.blit(tex, x0, y0, size, size, 0, 0, LocalArea.R * 2, LocalArea.R * 2, LocalArea.R * 2, LocalArea.R * 2);
+        g.setColor(1f, 1f, 1f, 1f);
+        if (a > 0.5f) {
+            for (LocalArea.Keeper kp : LocalArea.keepers(Minecraft.getInstance())) {
+                int[] at = project(kp.x(), kp.z());
+                if (at[2] == 1) {
+                    continue;
+                }
+                g.fill(at[0] - 2, at[1] - 2, at[0] + 3, at[1] + 3, 0xFF2A2018);
+                g.fill(at[0] - 1, at[1] - 1, at[0] + 2, at[1] + 2, 0xFFF2D27A);
+                hits.add(hit(at, 0, List.of(kp.name()), null));
+            }
+        }
         g.disableScissor();
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }

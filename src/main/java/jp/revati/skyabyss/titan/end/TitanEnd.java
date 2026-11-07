@@ -134,7 +134,11 @@ public final class TitanEnd {
 
     private static void markShrineRun(ServerLevel back, Set<UUID> fought) {
         for (ServerPlayer p : targets(back.getServer(), back, fought)) {
-            if (jp.revati.skyabyss.trial.TrialRoute.active(back, jp.revati.skyabyss.titan.group.Groups.keyOf(p))) {
+            // 祠から渡るのは周回だけ。初回 (到着の台の鐘から始めた順路) は巨神の下へ運び、眠りの場面を見せる
+            // (2026-11-08 の声「初めて巨神倒したのに、祠でめざめた」: 順路が動いているだけで祠の人にしていた)。
+            // onFirstCleared より前に呼ぶので、この撃破で初回を終える組はまだ初回のまま
+            UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(p);
+            if (jp.revati.skyabyss.trial.TrialRoute.active(back, group) && !jp.revati.skyabyss.titan.group.FirstRun.isFirstRun(back, group)) {
                 SHRINE_RUN.add(p.getUUID());
             }
         }

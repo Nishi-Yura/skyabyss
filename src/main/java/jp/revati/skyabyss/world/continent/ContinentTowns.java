@@ -82,6 +82,11 @@ public final class ContinentTowns {
                 }
             }
             job.entry.extra(VERSION_MARK, job.entry.pos);
+            // 鍛冶場の共鳴の炉 (2026-11-08 の声「共鳴の炉、すべての鍛冶場にない」。都の鍛冶場と同じく、鍛冶師のそばに一つ)
+            BlockPos smith = job.mark(AttendantRole.SMITH.mark());
+            if (smith != null) {
+                placeForge(level, smith);
+            }
             BlockPos sign = job.mark("sign");
             if (sign != null && level.getBlockEntity(sign) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
                 ContinentLayout.Level lv = ContinentLayout.get().levels().get(region);
@@ -105,6 +110,32 @@ public final class ContinentTowns {
                 }
             }
         });
+    }
+
+    // 鍛冶師の立つ所から 2〜3 先の、床が固く上が二段あいている所に共鳴の炉を置く。鍛冶師の立つ所と、その前後左右は空けておく。置いた所 (なければ null)
+    @org.jetbrains.annotations.Nullable
+    public static BlockPos placeForge(ServerLevel level, BlockPos smith) {
+        for (int r = 2; r <= 3; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+                        continue;
+                    }
+                    for (int dy = 0; dy >= -1; dy--) {
+                        BlockPos at = smith.offset(dx, dy, dz);
+                        if (level.getBlockState(at).is(jp.revati.skyabyss.registry.ModBlocks.RESONANCE_FORGE.get())) {
+                            return at;
+                        }
+                        if (level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir()
+                                && level.getBlockState(at.below()).isFaceSturdy(level, at.below(), net.minecraft.core.Direction.UP)) {
+                            level.setBlock(at, jp.revati.skyabyss.registry.ModBlocks.RESONANCE_FORGE.get().defaultBlockState(), 3);
+                            return at;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // 前の版 (広場と宿と店と家二つの小さな町) で建った町を、建て直しの列に戻す。建て直しは SiteBuilds が近くに人が来たときに進める

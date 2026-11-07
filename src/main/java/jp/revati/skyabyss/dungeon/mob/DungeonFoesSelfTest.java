@@ -317,6 +317,11 @@ public final class DungeonFoesSelfTest {
             g.trench(p);
             check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= before + 3 + 1 + 8 + 3 + 1, "a new boss attack did not show its warning ("
                     + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - before) + ")", f);
+            // 後半の場の技: 降りそそぎ (足もと 1 + まわり 2) と回る薙ぎ (2 本)
+            int field = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+            c.hazardsNow();
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= field + 3 + 2, "the second-half field attacks did not show their warnings ("
+                    + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - field) + ")", f);
         } finally {
             for (DungeonBoss b : made) {
                 b.discard();

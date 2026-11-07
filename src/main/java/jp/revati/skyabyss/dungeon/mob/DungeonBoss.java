@@ -43,6 +43,10 @@ import net.minecraft.world.phys.Vec3;
 //   体力が PHASE2 を切ると、吠えて (まわりを押し返す輪。予兆つき) 手下を MINIONS 体呼び、後半に入る。
 //   後半は技の間が PHASE2_COOLDOWN 倍になり、主ごとの後半の技が加わる (phase2)。
 //   大技のあとは大きな隙 (opening: BossOpenings.open。白い火花と澄んだ音)
+// 後半の場の技 (2026-11-08 の声「亀の第3形態がめっちゃ面白い。中ダンジョンのボスもそのくらい派手だと楽しい」):
+//   潮殻の心臓の段階3 にならい、主の技に重ねて、部屋じゅうを使う技を HAZARD_GAP ごとに一つ出す (主が技の途中でも出る)。
+//   降りそそぎ (人の足もとと、まわりに二つの円。真珠の雨の形) と、回る薙ぎ (主から二本の帯がまわる。月潮の大波の形) を交互に。
+//   色と粒は主ごと (骨・潮・水晶・灰)。予告はどれも 1.5 秒以上
 public abstract class DungeonBoss extends RegionBoss {
     public static final float PHASE2 = 0.5f;
     public static final int MINIONS = 2;
@@ -54,6 +58,19 @@ public abstract class DungeonBoss extends RegionBoss {
     public static final int STUCK_LIMIT = 60;
     public static final int BLIND_LIMIT = 80;
     static final int UNSTICK_GAP = 160;
+    // 後半の場の技の間 (tick) と、降りそそぎ・回る薙ぎの数値
+    public static final int HAZARD_GAP = 90;
+    public static final int HAZARD_SPAN = 30;
+    public static final int RAIN_WARN = 32;
+    public static final double RAIN_RADIUS = 2.0;
+    public static final int SWEEP_WARN = 40;
+    public static final int SWEEP_ACTIVE = 30;
+    public static final double SWEEP_LENGTH = 13;
+    public static final double SWEEP_HALF_WIDTH = 1.3;
+    private int hazardWait = 60;
+    private int hazardCount;
+    private final List<Vec3> rainSpots = new ArrayList<>();
+    private int rainTicks = -1;
 
     protected final List<Vec3> holes = new ArrayList<>();
     // 後半に入ったか
@@ -174,6 +191,7 @@ public abstract class DungeonBoss extends RegionBoss {
         if (unstickWait > 0) {
             unstickWait--;
         }
+        stepHazards();
         LivingEntity t = getTarget();
         if (t == null || !t.isAlive() || busy() || isInvisible()) {
             stuck = 0;
@@ -202,6 +220,136 @@ public abstract class DungeonBoss extends RegionBoss {
             blind = 0;
             unstickWait = UNSTICK_GAP;
             unstick(t);
+        }
+    }
+
+    // ---------------------------------------------------------------- 後半の場の技
+    private void stepHazards() {
+        if (level().isClientSide || !phase2 || isInvisible() || !isAlive()) {
+            return;
+        }
+        LivingEntity t = getTarget();
+        if (rainTicks >= 0) {
+            rainFalling();
+        }
+        if (t == null || !t.isAlive() || --hazardWait > 0) {
+            return;
+        }
+        hazardWait = HAZARD_GAP + random.nextInt(HAZARD_SPAN);
+        if (hazardCount++ % 2 == 0) {
+            rain();
+        } else {
+            sweep();
+        }
+    }
+
+    // 主の間にいる、当たりうる人
+    private List<ServerPlayer> hazardTargets() {
+        List<ServerPlayer> out = new ArrayList<>(server().getPlayers(p -> p.isAlive() && !p.isSpectator() && !p.isCreative() && p.distanceToSqr(this) < 28 * 28 && canHit(p)));
+        if (getTarget() instanceof ServerPlayer t && !out.contains(t) && t.isAlive() && canHit(t)) {
+            out.add(t);
+        }
+        return out;
+    }
+
+    // 自己テスト: 場の技を二つとも出す
+    void hazardsNow() {
+        rain();
+        sweep();
+    }
+
+    // 主ごとの色の石 (粒と予告の見た目)
+    protected net.minecraft.world.level.block.state.BlockState hazardBlock() {
+        return switch (bossId()) {
+            case "bone_centipede", "pit_foreman" -> net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState();
+            case "shell_octopus", "bell_hermit" -> net.minecraft.world.level.block.Blocks.PRISMARINE.defaultBlockState();
+            case "crystal_lizard", "geode_golem" -> net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK.defaultBlockState();
+            case "forge_giant", "ox_smith" -> net.minecraft.world.level.block.Blocks.MAGMA_BLOCK.defaultBlockState();
+            default -> net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        };
+    }
+
+    // 降りそそぎ: 人の足もとに一つと、まわり (3〜5 先) に二つ
+    private void rain() {
+        List<ServerPlayer> ps = hazardTargets();
+        if (ps.isEmpty()) {
+            return;
+        }
+        cue(bossId(), "field_rain", RAIN_WARN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.HOSTILE, 2.0f, 0.5f);
+        rainSpots.clear();
+        for (ServerPlayer p : ps) {
+            rainSpots.add(p.position());
+            for (int i = 0; i < 2; i++) {
+                double a = random.nextDouble() * Math.PI * 2;
+                double r = 3.0 + random.nextDouble() * 2.0;
+                rainSpots.add(new Vec3(p.getX() + Math.cos(a) * r, p.getY(), p.getZ() + Math.sin(a) * r));
+            }
+        }
+        var block = hazardBlock();
+        for (Vec3 c : rainSpots) {
+            double x = c.x;
+            double z = c.z;
+            double y = c.y;
+            Telegraph.in(server(), TelegraphShape.circle(x, z, RAIN_RADIUS)).floor(y).warn(RAIN_WARN).danger().owner(this)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        server.playSound(null, x, y, z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.7f);
+                        server.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, block), x, y + 0.4, z, 30, 1.0, 0.3, 1.0, 0.15);
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * 0.8f);
+                        player.setDeltaMovement(player.getDeltaMovement().add(0, 0.5, 0));
+                        player.hurtMarked = true;
+                    })
+                    .start();
+        }
+        rainTicks = 0;
+    }
+
+    // 落ちてくる石 (最後の 0.5 秒。見た目だけ)
+    private void rainFalling() {
+        rainTicks++;
+        if (rainTicks >= RAIN_WARN) {
+            rainTicks = -1;
+            return;
+        }
+        if (rainTicks >= RAIN_WARN - 10 && rainTicks % 2 == 0) {
+            double drop = (RAIN_WARN - rainTicks) / 10.0;
+            var opt = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock());
+            for (Vec3 c : rainSpots) {
+                server().sendParticles(opt, c.x, c.y + 1 + drop * 9, c.z, 3, 0.3, 0.2, 0.3, 0);
+            }
+        }
+    }
+
+    // 回る薙ぎ: 主から二本の帯 (向かい合わせ) が 100° まわる。帯の外と、まわり終えた後ろが安全
+    private void sweep() {
+        cue(bossId(), "field_sweep", SWEEP_WARN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 1.6f, 0.8f);
+        double base = random.nextDouble() * Math.PI * 2;
+        double span = Math.toRadians(100);
+        var opt = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock());
+        for (int i = 0; i < 2; i++) {
+            double start = base + Math.PI * i;
+            boolean first = i == 0;
+            Telegraph.in(server(), TelegraphShape.sweep(getX(), getZ(), start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).floor(getY()).warn(SWEEP_WARN)
+                    .active(SWEEP_ACTIVE).danger().owner(this).victims(this::canHit)
+                    .onImpact(server -> {
+                        if (first) {
+                            server.playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.4f, 1.2f);
+                        }
+                        for (double d = 2; d <= SWEEP_LENGTH; d += 1.5) {
+                            server.sendParticles(opt, getX() + Math.cos(start) * d, getY() + 0.6, getZ() + Math.sin(start) * d, 4, 0.3, 0.3, 0.3, 0.1);
+                        }
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * 0.9f);
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.4, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
         }
     }
 

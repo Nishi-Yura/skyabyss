@@ -418,5 +418,7 @@
   "message.skyabyss.moon.phase.full.sub": "The moon at its brightest. The core's pulse can be heard",
   "message.skyabyss.moon.phase.last.sub": "The light wanes and the afterimages thicken",
   "biome.skyabyss.moon": "The Moon's Face",
-  "message.skyabyss.moon_near.seen_day": "A white moon hangs in the daytime sky. ...It has never looked this big. You could almost count the marks on its face."
+  "message.skyabyss.moon_near.seen_day": "A white moon hangs in the daytime sky. ...It has never looked this big. You could almost count the marks on its face.",
+  "message.skyabyss.abyss_v2.wave_left": "Wave %1$s/%2$s - %3$s left",
+  "message.skyabyss.abyss_v2.escort.foes_left": "%s foes left (defeat them all to go on)"
 }

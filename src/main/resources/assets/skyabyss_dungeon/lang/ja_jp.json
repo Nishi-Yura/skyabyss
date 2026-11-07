@@ -189,5 +189,21 @@
   "gui.skyabyss.attack.bell_hermit.rage": "怒りの咆哮",
   "gui.skyabyss.attack.geode_golem.rage": "怒りの咆哮",
   "message.skyabyss.dungeon.tip.next_cart": "坑の奥のトロッコに乗ると、下の層へ進む",
-  "message.skyabyss.dungeon.room_left": "この部屋の敵: 残り %s 体（全部倒すと先の戸が開く）"
+  "message.skyabyss.dungeon.room_left": "この部屋の敵: 残り %s 体（全部倒すと先の戸が開く）",
+  "gui.skyabyss.attack.bone_centipede.field_rain": "骨の雨",
+  "gui.skyabyss.attack.bone_centipede.field_sweep": "坑を巡る大振り",
+  "gui.skyabyss.attack.shell_octopus.field_rain": "真珠の雨",
+  "gui.skyabyss.attack.shell_octopus.field_sweep": "潮の渦巻き",
+  "gui.skyabyss.attack.crystal_lizard.field_rain": "水晶の雨",
+  "gui.skyabyss.attack.crystal_lizard.field_sweep": "雷晶の旋回",
+  "gui.skyabyss.attack.forge_giant.field_rain": "火の粉の雨",
+  "gui.skyabyss.attack.forge_giant.field_sweep": "炉の大回し",
+  "gui.skyabyss.attack.pit_foreman.field_rain": "落盤",
+  "gui.skyabyss.attack.pit_foreman.field_sweep": "鶴嘴の大回し",
+  "gui.skyabyss.attack.bell_hermit.field_rain": "鐘の雨",
+  "gui.skyabyss.attack.bell_hermit.field_sweep": "潮鐘の大回し",
+  "gui.skyabyss.attack.geode_golem.field_rain": "晶石の雨",
+  "gui.skyabyss.attack.geode_golem.field_sweep": "晶腕の大回し",
+  "gui.skyabyss.attack.ox_smith.field_rain": "火花の雨",
+  "gui.skyabyss.attack.ox_smith.field_sweep": "鎚の大回し"
 }

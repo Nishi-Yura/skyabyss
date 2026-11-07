@@ -1,0 +1,51 @@
+# 2026-11-08 夜の直し: 護符の枠 (技の枠の右)・潮殻と岩鯨の祠の新しい置き場 (町の外)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/fix_1108c.txt -PshotsName=fix_1108c
+world fix1108c_a continent
+size 1600 900
+timeout 4000
+render 12
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd time set 4000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd effect give @s resistance 99999 4 true
+hud on
+chat clear
+acccharm resonance_charm
+wait 40
+shot charm_slot
+cmd skyroute shrine stone_whale
+waitchunks 300
+wait 600
+cmd gamemode spectator
+hud off
+chat clear
+cmd execute at @s run tp @s ~70 ~60 ~70 135 35
+waitchunks 100
+wait 60
+shot whale_shrine_over
+cmd execute at @s run tp @s ~-70 ~-60 ~-70 180 -3
+cmd execute at @s run tp @s ~ ~3 ~30 180 5
+wait 30
+shot whale_shrine_front
+hud on
+cmd gamemode creative
+cmd skyroute shrine tide_shell
+waitchunks 300
+wait 600
+cmd gamemode spectator
+hud off
+chat clear
+cmd execute at @s run tp @s ~-70 ~60 ~70 -135 35
+waitchunks 100
+wait 60
+shot tide_shrine_over
+cmd execute at @s run tp @s ~70 ~-60 ~-70 180 -3
+cmd execute at @s run tp @s ~ ~3 ~30 180 5
+wait 30
+shot tide_shrine_front

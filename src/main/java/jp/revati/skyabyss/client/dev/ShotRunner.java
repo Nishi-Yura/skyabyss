@@ -710,6 +710,14 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "acccharm" -> {
+                // acccharm <護符の id> : 自分のクライアントの護符の枠 (0 番) に品を入れる (画面の護符の枠の確認用)。引数なし = 空にする
+                jp.revati.skyabyss.item.accessory.AccessoryData data = mc.player.getData(jp.revati.skyabyss.item.accessory.AccessorySetup.DATA);
+                data.items.set(0, line.args().length == 0 ? net.minecraft.world.item.ItemStack.EMPTY
+                        : new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                                ResourceLocation.fromNamespaceAndPath("skyabyss", line.arg(0)))));
+                return true;
+            }
             case "watcher" -> {
                 // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
                 if (first) {

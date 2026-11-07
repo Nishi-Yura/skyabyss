@@ -157,10 +157,8 @@ def wreck(cv, x0, z0, z1, y, lean=1):
             bottom = y + int(round(abs(dx) * 0.8)) - (1 if dx * lean > 0 else 0)
             for yy in range(bottom, deck):
                 edge = abs(dx) == half or yy == bottom
-                if edge:
-                    cv.put(x0 + dx, yy, z, "minecraft:dark_oak_planks" if hsh(dx, yy, z) < 0.85 else "minecraft:stripped_dark_oak_log[axis=z]")
-                else:
-                    cv.put(x0 + dx, yy, z, AIR)
+                # 胴の中は詰める (2026-11-08 の声「舟入ったら出れない」: 甲板の抜けから中の空き (高さ 4) へ落ちると、上がれなかった)
+                cv.put(x0 + dx, yy, z, "minecraft:dark_oak_planks" if edge or hsh(dx, yy, z) < 0.85 else "minecraft:stripped_dark_oak_log[axis=z]")
             # 甲板 (ところどころ抜けている)
             if hsh(dx, z, 77) < 0.86:
                 cv.put(x0 + dx, deck, z, "minecraft:dark_oak_slab[type=bottom,waterlogged=false]" if abs(dx) < half else "minecraft:dark_oak_planks")

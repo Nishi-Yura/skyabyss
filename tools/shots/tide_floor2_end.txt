@@ -1,0 +1,49 @@
+# 潮の洞の二層目の奥 (2026-11-08 の声「海の中ダンジョン、2層目の最後おかしい。舟入ったら出れないし、砂で最後埋まってる」)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tide_floor2_end.txt -PshotsName=tide_floor2_end
+world tide_floor2_a continent
+size 1600 900
+timeout 3600
+render 8
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+chat clear
+cmd tp @s 1426 190 -82 180 30
+waitchunks 600
+wait 600
+cmd skyabyss dungeon mouth tide_cave
+waitchunks 300
+wait 60
+cmd skyabyss dungeon enter tide_cave
+wait 80
+cmd skyabyss dungeon floor 1
+wait 120
+cmd gamemode spectator
+cmd skyabyss dungeon goto view_wreck view_wreck_to
+wait 60
+shot f2_wreck
+cmd skyabyss dungeon goto view_mid view_mid_to
+wait 40
+shot f2_mid
+cmd skyabyss dungeon goto room_mid next
+wait 40
+shot f2_to_next
+cmd skyabyss dungeon goto next room_mid
+wait 40
+shot f2_next_back
+cmd execute as @s at @s run tp @s ~ ~4 ~ ~180 40
+wait 30
+shot f2_next_down
+cmd gamemode creative
+wait 200
+cmd skyabyss dungeon goto room_mid next
+wait 30
+shot f2_after_physics

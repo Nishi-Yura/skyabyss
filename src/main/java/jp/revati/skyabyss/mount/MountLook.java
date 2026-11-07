@@ -17,17 +17,18 @@ public enum MountLook {
     HORN_BEAST("horn_beast", 1, 0, 1.00f, 2.23f, 2.081, -30f, 52f, 2),
     ASH_DEER("ash_deer", 1, 30, 1.00f, 2.01f, 1.862, -30f, 44f, 2),
     GREAT_LIZARD("great_lizard", 1, 30, 1.00f, 1.77f, 1.623, -40f, 48f, 2),
-    WHALE_CALF("whale_calf", 2, 60, 1.60f, 2.37f, 2.220, -70f, 40f, 3),
-    SHELL_TORTOISE("shell_tortoise", 3, 100, 1.60f, 2.12f, 1.973, -40f, 44f, 3),
+    WHALE_CALF("whale_calf", 2, 60, 1.60f, 2.37f, 2.220, -70f, 40f, 2),
+    SHELL_TORTOISE("shell_tortoise", 3, 100, 1.60f, 2.12f, 1.973, -40f, 44f, 2),
     STORM_CHICK("storm_chick", 4, 140, 1.43f, 2.19f, 2.037, -40f, 56f, 2),
     EMBER_FOX("ember_fox", 5, 180, 1.00f, 1.92f, 1.775, -30f, 44f, 2),
     // 2026-11-02 に選んだ三つ (00 の 346〜348)。五章・六章・終章のあと
     ABYSS_GECKO("abyss_gecko", 6, 220, 1.10f, 1.70f, 1.551, -30f, 56f, 2),
     STAR_LYNX("star_lynx", 7, 260, 1.00f, 1.99f, 1.840, -25f, 44f, 2),
-    SKY_RAY("sky_ray", 8, 400, 1.60f, 1.94f, 1.792, -65f, 44f, 3),
+    SKY_RAY("sky_ray", 8, 400, 1.60f, 1.94f, 1.792, -65f, 44f, 2),
     // 二頭立ての幌の荷車 (2026-11-07 の頁「二頭立ての車」の選定 A・最大 6 人・四つの心臓のあと。tools/gen/mobs/mounts_lp/carriage.py)。
-    // 乗る人は腰掛けに座る (脚は前へ)。席の並びは MountEntity.CARRIAGE_SEATS
-    CARRIAGE("carriage", 5, 240, 2.00f, 3.00f, 1.334, -80f, 16f, 6);
+    // 乗る人は腰掛けに座る (脚は前へ)。席の並びは MountEntity.CARRIAGE_SEATS。
+    // 2026-11-08 の声「6人乗れるやつ以外は2人乗りが最大。6人乗りはめっちゃ高くしていい」: ほかは 2 人まで、荷車だけ 6 人で、値段は 30,000
+    CARRIAGE("carriage", 5, 30_000, 2.00f, 3.00f, 1.334, -80f, 16f, 6);
 
     // 飛ぶ見た目
     public boolean flies() {

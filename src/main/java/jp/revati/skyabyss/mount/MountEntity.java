@@ -146,7 +146,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
     public void apply(MountData data, boolean healFull) {
         setLook(data.chosen());
         setBond(data.bond());
-        setSeats(MountStats.seats(data.tier(MountStats.SEATS)));
+        setSeats(MountStats.seats(data.tier(MountStats.SEATS), data.chosen()));
         double oldMax = getMaxHealth();
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(MountStats.speed(data.tier(MountStats.SPEED)));
         getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(MountStats.jump(data.tier(MountStats.JUMP)));
@@ -222,6 +222,7 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         super.tick();
         if (!level().isClientSide) {
             tidyRiders();
+            unstickStep();
         }
         if (level().isClientSide) {
             double dx = getX() - xo;
@@ -236,6 +237,48 @@ public class MountEntity extends AbstractHorse implements GeoEntity {
         boolean fly = flying();
         if (isNoGravity() != fly) {
             setNoGravity(fly);
+        }
+    }
+
+    // ---------------------------------------------------------------- つっかえ直し (2026-11-08 の声「ペットたまに引っかかって動かなくなる」)
+    // 乗って前へ押しているのに、壁や木に当たって STUCK_TICKS ほとんど進まないとき・体が地面や壁に埋まっているときは、
+    // 進む向き (なければ上) の、体が収まる所 (前へ 1〜2・上へ 0〜2) へ少しずらす
+    static final int STUCK_TICKS = 30;
+    private int stuckTicks;
+    private Vec3 stuckFrom;
+
+    private void unstickStep() {
+        boolean wedged = !level().noCollision(this, getBoundingBox().deflate(0.05));
+        boolean pushing = getControllingPassenger() instanceof Player p && Math.abs(p.zza) > 0.01f && horizontalCollision;
+        if (!wedged && !pushing) {
+            stuckTicks = 0;
+            stuckFrom = null;
+            return;
+        }
+        if (stuckFrom == null || position().distanceToSqr(stuckFrom) > 0.36) {
+            stuckFrom = position();
+            stuckTicks = 0;
+            return;
+        }
+        if (++stuckTicks < (wedged ? 4 : STUCK_TICKS)) {
+            return;
+        }
+        stuckTicks = 0;
+        float yaw = (getControllingPassenger() instanceof Player p ? p.getYRot() : getYRot()) * Mth.DEG_TO_RAD;
+        Vec3 fwd = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw));
+        for (double up : new double[] {0, 1, 2}) {
+            for (double ahead : new double[] {1.0, 2.0, 0.0}) {
+                if (up == 0 && ahead == 0) {
+                    continue;
+                }
+                Vec3 to = position().add(fwd.scale(ahead)).add(0, up, 0);
+                if (level().noCollision(this, getBoundingBox().move(to.subtract(position())).deflate(0.05))) {
+                    moveTo(to.x, to.y, to.z, getYRot(), getXRot());
+                    setDeltaMovement(Vec3.ZERO);
+                    stuckFrom = null;
+                    return;
+                }
+            }
         }
     }
 

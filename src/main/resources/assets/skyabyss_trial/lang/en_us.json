@@ -378,5 +378,6 @@
   "message.skyabyss.shrine.gather_broken": "%s left, so it stopped. Talk to the priest again",
   "message.skyabyss.shrine.asked": "%s asked the priest. The route begins in %s s (stay near the pad)",
   "message.skyabyss.shrine.talk_priest": "Talk to the shrine priest to start the route",
-  "message.skyabyss.shrine.not_here": "Ask at a shrine"
+  "message.skyabyss.shrine.not_here": "Ask at a shrine",
+  "message.skyabyss.route.bell_step_in": "Step onto the platform, then ring the bell"
 }

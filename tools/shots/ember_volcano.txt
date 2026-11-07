@@ -1,0 +1,38 @@
+# 余燼の巨神の火山の部分 (2026-11-08 の声「炎の巨神のモデルおかしいかも。火山の部分」「建築物がすぐ上にあり、高さが無く通れない」)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ember_volcano.txt -PshotsName=ember_volcano
+world ember_volc_a continent
+size 1600 900
+timeout 3000
+render 12
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd effect give @s resistance 99999 4 true
+cmd tp @s -300 120 1180
+waitchunks 300
+wait 200
+cmd skyabyss titan summon ember
+wait 200
+cmd skyabyss titan status ember
+hud off
+chat clear
+cmd gamemode spectator
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] run tp @s ~60 ~40 ~60 135 25
+waitchunks 100
+wait 80
+shot volc_over
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] run tp @s ~-60 ~30 ~-60 -45 20
+wait 60
+shot volc_over2
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] positioned ~30 ~ ~0 run tp @s ~ ~3 ~ 90 -20
+wait 60
+shot volc_low_side
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] run tp @s ~ ~2 ~ 0 -60
+wait 60
+shot volc_under

@@ -620,7 +620,8 @@ public final class RaidRun {
             boolean fin = done || run.phase == Phase.COMPLETE;
             BlockPos g = fin ? null : guideOf(run);
             hud = new RaidHudNet.Hud(run.ctx.roomId(), room.objectiveKey(), args, room.counter(), room.counterMax(), room.secondaryKey(), room.secondary(),
-                    room.secondaryMax(), RaidPace.timerTicks(run, run.ctx.now()), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ());
+                    room.secondaryMax(), RaidPace.timerTicks(run, run.ctx.now()), fin, g != null, g == null ? 0 : g.getX(), g == null ? 0 : g.getY(), g == null ? 0 : g.getZ(),
+                    fin ? 0 : run.ctx.aliveMobs().size());
         }
         run.lastHud = hud;
         for (ServerPlayer p : run.ctx.players()) {

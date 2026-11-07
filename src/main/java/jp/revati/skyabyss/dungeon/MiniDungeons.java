@@ -53,7 +53,12 @@ public final class MiniDungeons {
     static final double NEAR = 64;
 
     // 入った人が戻る門 (人 → 門の位置)
-    private static final Map<UUID, BlockPos> HOME = new HashMap<>();
+    // 人 → 入った門 (どの小ダンジョンのものか)。前は門だけを覚えて消さず、仲間の分は「なければ足す」だったので、前に別の小ダンジョン
+    // (潮殻の塩の蔵など) へ入った仲間が、そこの門へ戻されていた (2026-11-08 の声「最初のミニダンジョン、クリアしたら亀の方のミニダンジョンtpさせられた」)
+    private record Home(Dungeon dungeon, BlockPos gate) {
+    }
+
+    private static final Map<UUID, Home> HOME = new HashMap<>();
 
     private MiniDungeons() {
     }
@@ -139,7 +144,7 @@ public final class MiniDungeons {
             }
         }
         if (best != null) {
-            HOME.put(p.getUUID(), best);
+            HOME.put(p.getUUID(), new Home(d, best));
         }
         p.level().playSound(null, p.blockPosition(), SoundEvents.RESPAWN_ANCHOR_SET_SPAWN, SoundSource.PLAYERS, 0.8f, 1.4f);
         DungeonRun run = Dungeons.enter(p, d);
@@ -147,7 +152,7 @@ public final class MiniDungeons {
             // 一緒に入った人も同じ門へ戻る
             for (UUID id : run.members) {
                 if (best != null) {
-                    HOME.putIfAbsent(id, best);
+                    HOME.put(id, new Home(d, best));
                 }
             }
         }
@@ -156,7 +161,8 @@ public final class MiniDungeons {
     // 入った門の前へ戻す (門の石の前、石を向いて)
     public static void sendHome(ServerPlayer p, Dungeon d) {
         ServerLevel over = p.server.overworld();
-        BlockPos gate = HOME.get(p.getUUID());
+        Home home = HOME.remove(p.getUUID());
+        BlockPos gate = home != null && home.dungeon() == d ? home.gate() : null;
         if (gate == null) {
             List<SiteData.Entry> list = entries(p.server, d);
             gate = list.isEmpty() ? null : gateOf(list.get(0), d);

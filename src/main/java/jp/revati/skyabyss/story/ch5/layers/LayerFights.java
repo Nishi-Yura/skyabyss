@@ -133,7 +133,14 @@ public final class LayerFights {
         if (idle(level, run, inside, now)) {
             return;
         }
-        if (alive(level, run) > 0 || now < run.nextAt) {
+        int left = alive(level, run);
+        // 残りの敵の数 (全部倒すと次の波。2026-11-08 の声「何体残ってるか出して」)
+        if (left > 0 && now % 20 == 0) {
+            for (ServerPlayer p : inside) {
+                p.displayClientMessage(Component.translatable("message.skyabyss.abyss_v2.wave_left", run.wave + 1, NEST_WAVES[k].length, left), true);
+            }
+        }
+        if (left > 0 || now < run.nextAt) {
             return;
         }
         run.wave++;

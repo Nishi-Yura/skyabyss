@@ -92,5 +92,12 @@
   "commands.skyabyss_play.tower_no_run": "Nobody is fighting the master inside the tower",
   "commands.skyabyss_play.help.19": "§e■ Artifacts §fadmin awaken <count> [targets] §7— set the kill count of the held artifact (awakening stages at 300, 1500, 5000; stage-ups announce as usual)",
   "commands.skyabyss_play.act.awaken": "artifact kill count set",
-  "commands.skyabyss_play.awaken_none": "%s is not holding an artifact weapon"
+  "commands.skyabyss_play.awaken_none": "%s is not holding an artifact weapon",
+  "commands.skyabyss.help.stuck": "When you are stuck. Stand still for 3 s to move to a nearby resting place (on a titan's back, the current room's entrance; in a dungeon, the floor's entrance). Once a minute",
+  "message.skyabyss.stuck.wait": "Stand still for %s s to move somewhere safe nearby",
+  "message.skyabyss.stuck.moved": "You moved, so it was called off",
+  "message.skyabyss.stuck.combat": "Not while fighting",
+  "message.skyabyss.stuck.cooldown": "Not for another %s s",
+  "message.skyabyss.stuck.done": "You moved somewhere safe nearby",
+  "message.skyabyss.stuck.none": "There was nowhere to move"
 }

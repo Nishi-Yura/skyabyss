@@ -189,5 +189,21 @@
   "gui.skyabyss.attack.bell_hermit.rage": "Enraged Roar",
   "gui.skyabyss.attack.geode_golem.rage": "Enraged Roar",
   "message.skyabyss.dungeon.tip.next_cart": "Ride the minecart at the end of the pit to go down",
-  "message.skyabyss.dungeon.room_left": "Foes left in this room: %s (defeat them all to open the way)"
+  "message.skyabyss.dungeon.room_left": "Foes left in this room: %s (defeat them all to open the way)",
+  "gui.skyabyss.attack.bone_centipede.field_rain": "Bone Rain",
+  "gui.skyabyss.attack.bone_centipede.field_sweep": "Pit Circle",
+  "gui.skyabyss.attack.shell_octopus.field_rain": "Pearl Rain",
+  "gui.skyabyss.attack.shell_octopus.field_sweep": "Tide Whirl",
+  "gui.skyabyss.attack.crystal_lizard.field_rain": "Crystal Rain",
+  "gui.skyabyss.attack.crystal_lizard.field_sweep": "Storm Spin",
+  "gui.skyabyss.attack.forge_giant.field_rain": "Ember Rain",
+  "gui.skyabyss.attack.forge_giant.field_sweep": "Forge Swing",
+  "gui.skyabyss.attack.pit_foreman.field_rain": "Cave-in",
+  "gui.skyabyss.attack.pit_foreman.field_sweep": "Pick Swing",
+  "gui.skyabyss.attack.bell_hermit.field_rain": "Bell Rain",
+  "gui.skyabyss.attack.bell_hermit.field_sweep": "Bell Swing",
+  "gui.skyabyss.attack.geode_golem.field_rain": "Geode Rain",
+  "gui.skyabyss.attack.geode_golem.field_sweep": "Geode Swing",
+  "gui.skyabyss.attack.ox_smith.field_rain": "Spark Rain",
+  "gui.skyabyss.attack.ox_smith.field_sweep": "Hammer Swing"
 }

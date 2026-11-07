@@ -445,6 +445,24 @@ public final class TrialRoute {
         if (!back.isLoaded(f)) {
             return null;
         }
+        // 先に、台の上にもう建っている鐘を探す (前は空いた所を先に見つけると、そこへ二つ目の鐘を置き、鳴る鐘と鳴らない鐘が並んでいた。
+        // 2026-11-08 の声「巨神の最初のあつまるところ、鐘ならせない」)
+        for (int r = 1; r <= RING_SEARCH; r++) {
+            for (int dz = -r; dz <= r; dz++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+                        continue;
+                    }
+                    for (int dy = -2; dy <= 2; dy++) {
+                        BlockPos at = f.offset(dx, dy, dz);
+                        if (back.getBlockState(at).is(net.minecraft.world.level.block.Blocks.BELL)) {
+                            BELLS.put(titan, at.immutable());
+                            return at.immutable();
+                        }
+                    }
+                }
+            }
+        }
         for (int r = 2; r <= 4; r++) {
             for (int dz = -r; dz <= r; dz++) {
                 for (int dx = -r; dx <= r; dx++) {
@@ -466,6 +484,8 @@ public final class TrialRoute {
         }
         return null;
     }
+
+    static final int RING_SEARCH = 6;
 
     // 台に鐘がなければ置く (床の鐘。足もとのほうを向ける)
     static void ensureBell(ServerLevel back, String titan) {
@@ -508,11 +528,15 @@ public final class TrialRoute {
             return;
         }
         String titan = Titans.titanOfBack(back.dimension());
-        if (titan == null || !event.getPos().equals(BELLS.get(titan))) {
+        AABB box = titan == null ? null : entryBox(titan);
+        // 台の上 (と縁) の鐘ならどれでも鳴らせる (覚えた位置の鐘だけにしていたので、ほかの鐘を叩いても何も起きなかった)
+        if (titan == null || box == null || !(event.getPos().equals(BELLS.get(titan)) || box.inflate(2).contains(net.minecraft.world.phys.Vec3.atCenterOf(event.getPos())))) {
             return;
         }
         event.setCanceled(true);
-        ring(back, titan, p, back.getGameTime());
+        if (!ring(back, titan, p, back.getGameTime()) && !box.contains(p.position())) {
+            Notice.bar(p, ModText.hint("message.skyabyss.route.bell_step_in"));
+        }
     }
 
     // その背にいる順路の参加者 (順路が動いていなければ、その背にいるグループの人)

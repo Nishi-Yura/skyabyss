@@ -48,7 +48,7 @@ import net.minecraft.world.item.Item;
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen", "ending", "at_shrine");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen", "ending", "at_shrine", "stash_pages");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -229,6 +229,11 @@ public final class Condition {
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);
             case "level" -> jp.revati.skyabyss.rebirth.Rebirth.gearLevel(ctx.player()) >= GsonHelper.getAsInt(json, "min", 1);
             // 地上の巨神の祠のそばか (祠の祭司。titan/shrine/TitanShrine.PRIEST_REACH)
+            // 預かり所の開けた頁の数 (min 以上、max 以下)
+            case "stash_pages" -> {
+                int n = ctx.player().getData(jp.revati.skyabyss.facility.FacilitySetup.STASH).pages();
+                yield n >= GsonHelper.getAsInt(json, "min", 1) && n <= GsonHelper.getAsInt(json, "max", 99);
+            }
             case "at_shrine" -> jp.revati.skyabyss.titan.shrine.TitanShrine.shrineNear(ctx.player(), jp.revati.skyabyss.titan.shrine.TitanShrine.PRIEST_REACH) != null;
             // 都 (はじまりの町) の中か。土地の町の係の人が、都の名を出さないように (docs/design/45 の 5 章)
             case "in_capital" -> jp.revati.skyabyss.opening.OpeningSites.shelter(ctx.player().server)

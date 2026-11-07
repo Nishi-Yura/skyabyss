@@ -75,7 +75,13 @@
         {
           "id": "forge",
           "kind": "talk",
-          "goto": "forge"
+          "do": [
+            {
+              "type": "facility",
+              "open": "forge_full"
+            }
+          ],
+          "goto": "end"
         },
         {
           "id": "about",

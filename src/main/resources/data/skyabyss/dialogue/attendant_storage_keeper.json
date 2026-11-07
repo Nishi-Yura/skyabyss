@@ -46,6 +46,60 @@
           "goto": "end"
         },
         {
+          "id": "stash_2",
+          "kind": "talk",
+          "if": {
+            "type": "stash_pages",
+            "min": 2
+          },
+          "do": [
+            {
+              "type": "facility",
+              "open": "stash_2"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "stash_3",
+          "kind": "talk",
+          "if": {
+            "type": "stash_pages",
+            "min": 3
+          },
+          "do": [
+            {
+              "type": "facility",
+              "open": "stash_3"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "stash_4",
+          "kind": "talk",
+          "if": {
+            "type": "stash_pages",
+            "min": 4
+          },
+          "do": [
+            {
+              "type": "facility",
+              "open": "stash_4"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "stash_buy",
+          "kind": "talk",
+          "if": {
+            "type": "stash_pages",
+            "max": 3
+          },
+          "goto": "buy"
+        },
+        {
           "id": "about",
           "kind": "talk",
           "goto": "again"
@@ -54,6 +108,27 @@
           "id": "bye",
           "kind": "leave",
           "goto": "end"
+        }
+      ]
+    },
+    "buy": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "yes",
+          "kind": "talk",
+          "do": [
+            {
+              "type": "facility",
+              "open": "stash_buy"
+            }
+          ],
+          "goto": "menu"
+        },
+        {
+          "id": "no",
+          "kind": "leave",
+          "goto": "menu"
         }
       ]
     }

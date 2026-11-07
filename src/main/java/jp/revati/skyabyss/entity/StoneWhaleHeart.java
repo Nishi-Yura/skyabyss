@@ -88,11 +88,13 @@ public class StoneWhaleHeart extends HeartBoss {
     }
 
     private static final Pair[] PAIRS_TWO = {new Pair(Action.CRACK, Action.VOLLEY, 24, 64)};
-    private static final Pair[] PAIRS_THREE = {new Pair(Action.BEAM, Action.SHELL_DROP, 20, 70), new Pair(Action.CHAIN, Action.VOLLEY, 20, 62)};
+    // 段階3 は潮殻の段階3 (2026-11-08 の声「亀の第3形態がめっちゃ面白い。攻撃スパン等はこれを見習って」) に合わせ、組を三つ・割り込みを 5 割に
+    private static final Pair[] PAIRS_THREE = {new Pair(Action.BEAM, Action.SHELL_DROP, 20, 70), new Pair(Action.CHAIN, Action.VOLLEY, 20, 62),
+            new Pair(Action.CHAIN, Action.SHELL_DROP, 26, 76)};
     private static final Pair[] PAIRS_FURY = {new Pair(Action.BEAM, Action.SHELL_DROP, 20, 70), new Pair(Action.CHAIN, Action.VOLLEY, 20, 62),
             new Pair(Action.LEAP, Action.SHELL_DROP, 30, 80)};
     // 組が割り込む割合 (段階 1 / 2 / 3)。憤怒は組だけ
-    static final double[] COMBO_CHANCE = {0, 0.3, 0.45};
+    static final double[] COMBO_CHANCE = {0, 0.3, 0.5};
 
     private static final double BEAM_LENGTH = 24;
     private static final double CHAIN_LENGTH = 14;
@@ -502,21 +504,23 @@ public class StoneWhaleHeart extends HeartBoss {
         return Mth.clamp(n, 1, 4);
     }
 
+    // 段階3 は部屋じゅうを使う (潮殻の段階3 にならう。前は一人なら光線一本・鎖一本で、半歩よければ済み「微妙」だった):
+    //   光線は一人でも二本 (向かい合わせ)、鎖は一周 (どこにいても跳んで越える)、殻は真珠の雨のように足もとと周りへ
     public static int beamCount(int n) {
-        return n <= 2 ? 1 : n <= 4 ? 2 : 3;
+        return n <= 2 ? 2 : n <= 4 ? 3 : 4;
     }
 
     public static int chainCount(int n) {
-        return n <= 2 ? 1 : n <= 4 ? 2 : 3;
+        return n <= 2 ? 2 : n <= 4 ? 3 : 4;
     }
 
-    // 殻の落下: 人の足元に一つずつ (四人まで)、三人からは足元以外にも二つ
+    // 殻の落下: 人の足元に一つずつ (五人まで) と、そのまわりに人数 × 2 (最大 9)
     public static int dropTargets(int n) {
-        return Mth.clamp(n, 1, 4);
+        return Mth.clamp(n, 1, 5);
     }
 
     public static int dropExtras(int n) {
-        return n >= 3 ? 2 : 0;
+        return Math.min(9, 2 * Math.max(1, n));
     }
 
     // 技の数値 (印と当たりは同じ形。tick は 20 で 1 秒)
@@ -946,7 +950,7 @@ public class StoneWhaleHeart extends HeartBoss {
             lockedCount = beamCount(present(server));
         }
         int count = lockedCount;
-        double span = Math.toRadians(count == 3 ? 40 : 50);
+        double span = Math.toRadians(count >= 4 ? 45 : count == 3 ? 55 : 75);
         double base = Telegraph.angleOf(forward(attackYaw));
         Vec3 f = forward(attackYaw);
         Vec3 origin = position().add(0, 3.9, 0).add(f.scale(1.0));
@@ -1001,7 +1005,7 @@ public class StoneWhaleHeart extends HeartBoss {
             chainY = floorY();
             sound(server, MobSounds.STONE_HEART_CHAIN.get(), 2.5f, 1.0f);
             int count = chainCount(present(server));
-            double span = Math.PI / count;
+            double span = Math.PI * 2 / count;
             double base = Telegraph.angleOf(forward(attackYaw));
             for (int i = 0; i < count; i++) {
                 double mid = base + Math.PI * 2 * i / count;
@@ -1025,21 +1029,37 @@ public class StoneWhaleHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_GRIND.get(), 2f, 0.8f);
             int n = present(server);
-            for (Vec3 p : pickSpots(server, dropTargets(n))) {
+            java.util.List<Vec3> mains = pickSpots(server, dropTargets(n));
+            dropSpots.clear();
+            for (Vec3 p : mains) {
+                dropSpots.add(p);
                 shellDrop(server, p.x, floorAt(Mth.floor(p.x), Mth.floor(p.z)), p.z);
             }
             for (int i = 0; i < dropExtras(n); i++) {
+                // 足もとの円のまわり (3〜5 先)。人がいなければ心臓のまわり
+                Vec3 c = mains.isEmpty() ? position() : mains.get(i % mains.size());
                 double a = random.nextDouble() * Math.PI * 2;
-                double r = 4 + random.nextDouble() * 8;
-                double x = getX() + Math.cos(a) * r;
-                double z = getZ() + Math.sin(a) * r;
+                double r = mains.isEmpty() ? 4 + random.nextDouble() * 8 : 3.2 + random.nextDouble() * 2.0;
+                double x = c.x + Math.cos(a) * r;
+                double z = c.z + Math.sin(a) * r;
+                dropSpots.add(new Vec3(x, 0, z));
                 shellDrop(server, x, floorAt(Mth.floor(x), Mth.floor(z)), z);
+            }
+        }
+        // 落ちてくる殻の欠片 (最後の 0.5 秒。見た目だけ)
+        if (actionTicks >= DROP_WARN - 10 && actionTicks < DROP_WARN && actionTicks % 2 == 0) {
+            double drop = (DROP_WARN - actionTicks) / 10.0;
+            for (Vec3 p : dropSpots) {
+                double y = floorAt(Mth.floor(p.x), Mth.floor(p.z)) + 1 + drop * 9;
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), p.x, y, p.z, 3, 0.3, 0.2, 0.3, 0);
             }
         }
         if (actionTicks >= 50) {
             finish();
         }
     }
+
+    private final java.util.List<Vec3> dropSpots = new java.util.ArrayList<>();
 
     private void shellDrop(ServerLevel server, double x, double y, double z) {
         Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).look(jp.revati.skyabyss.combat.AttackLook.WHALE_SHELL_DROP).floor(y).warn(DROP_WARN).danger().owner(this).victims(this::canReach)

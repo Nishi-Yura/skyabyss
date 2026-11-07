@@ -418,5 +418,7 @@
   "message.skyabyss.moon.phase.full.sub": "月がいちばん明るい。核の脈が聞こえる",
   "message.skyabyss.moon.phase.last.sub": "光が欠けはじめ、残像が濃くなる",
   "biome.skyabyss.moon": "月の面",
-  "message.skyabyss.moon_near.seen_day": "昼の空に、白い月が浮いている。……こんなに大きく見えたことはない。表の模様まで、数えられそうだ。"
+  "message.skyabyss.moon_near.seen_day": "昼の空に、白い月が浮いている。……こんなに大きく見えたことはない。表の模様まで、数えられそうだ。",
+  "message.skyabyss.abyss_v2.wave_left": "群れ %1$s／%2$s　残り %3$s 体",
+  "message.skyabyss.abyss_v2.escort.foes_left": "敵 残り %s 体（全部倒すと先へ進める）"
 }

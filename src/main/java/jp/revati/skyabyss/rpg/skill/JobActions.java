@@ -254,21 +254,44 @@ public final class JobActions {
     }
 
     // ---------------------------------------------------------------- 凍て潮
+    // 狙った所を中心に凍らせる (2026-11-08 の声「魔法使いや呪詛師の自分中心の技、狙ったところ中心でもいいやつある」)。
+    // 見ている先の地面 (AIM_REACH まで)。空を向いていれば足もと
+    static final double AIM_REACH = 12;
+
+    static Vec3 aimedGround(ServerPlayer player, double reach) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 end = eye.add(player.getLookAngle().scale(reach));
+        var hit = player.level().clip(new net.minecraft.world.level.ClipContext(eye, end, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+            return player.position();
+        }
+        Vec3 at = hit.getLocation();
+        return new Vec3(at.x, Math.floor(at.y + 0.01), at.z);
+    }
+
+    static List<LivingEntity> foesNear(ServerPlayer player, Vec3 center, double r) {
+        AABB box = new AABB(center.x - r, center.y - 1.0, center.z - r, center.x + r, center.y + 2.5, center.z + r);
+        return player.serverLevel().getEntitiesOfClass(LivingEntity.class, box,
+                e -> SkillActions.isFoe(player, e) && e.position().distanceToSqr(center.x, e.getY(), center.z) <= r * r);
+    }
+
     static String frostTide(ServerPlayer player, int rank) {
         ServerLevel level = player.serverLevel();
         double r = SkillRules.frostRadius(rank);
         float dmg = spell(player, SkillRules.frostMultiplier(rank));
-        for (LivingEntity e : SkillActions.foesAround(player, r, 1.0, 2.0)) {
+        Vec3 center = aimedGround(player, AIM_REACH);
+        for (LivingEntity e : foesNear(player, center, r)) {
             SkillActions.hit(player, e, dmg, Skill.FROST_TIDE);
             SkillEffects.slow(e, SkillRules.FROST_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.frostTicks(rank));
             Gauges.chill(e, SkillRules.frostTicks(rank));
             level.sendParticles(ParticleTypes.SNOWFLAKE, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
         }
         for (double rr = 1.5; rr <= r; rr += 1.5) {
-            ring(level, player.position(), rr, ParticleTypes.SNOWFLAKE, (int) (rr * 8));
+            ring(level, center, rr, ParticleTypes.SNOWFLAKE, (int) (rr * 8));
         }
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8f, 0.8f);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.6f, 0.7f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8f, 0.8f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.6f, 0.7f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
     }
@@ -388,7 +411,8 @@ public final class JobActions {
     // ---------------------------------------------------------------- 灯の守り札 (呪術師)
     static String lampCharm(ServerPlayer player, int rank) {
         ServerLevel level = player.serverLevel();
-        Vec3 at = player.position();
+        // 狙った所に置く (仲間の足もとや、敵の前に。空を向いていれば足もと)
+        Vec3 at = aimedGround(player, AIM_REACH);
         // 調べ (守りの唄の型の溜まるもの): 調べ一つにつき広く (+1 ブロック) 長く (+3 秒)
         double radius = SkillRules.LAMP_RADIUS + Gauges.lampRadius(player);
         SkillEffects.zone(SkillEffects.ZoneKind.LAMP, player, at, radius, SkillRules.lampTicks(rank) + Gauges.lampTicks(player), rank);

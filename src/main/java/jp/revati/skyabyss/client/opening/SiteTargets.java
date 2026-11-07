@@ -68,6 +68,15 @@ public final class SiteTargets {
         bind("ch3/lightning_pillars/raise", "storm_ruin");
         bind("ch3/lightning_pillars/vault", "storm_ruin");
         bind("ch3/scorched_watch/clear", "ch3_scorched_watch");
+        // 店で手に入れる段 (「（市の武具屋）」など): いちばん近いその店
+        bindPos("ch1/trail_iron/armor", () -> nearestShop("outfitter"));
+        bindPos("ch2/ebb_boat/boat", () -> nearestShop("tool_merchant"));
+        bind("ch3/sky_stone/dig#0", "ch3_glass_streak_3");
+        // 四章のはじめ: 灰炉の村へ
+        bind("ch4/fire_draught/town", "town_ember");
+        bind("ch4/fire_draught/ash", "town_ember");
+        bindPos("ch4/fire_draught/brew", () -> nearestShop("apothecary"));
+        bindPos("ch3/sky_stone/dig#1", () -> nearestShop("outfitter"));
         // 空の石: 見つけた硝子の筋の数で、次の筋 (三つ見つけたら巣) を指す
         bindPos("ch3/sky_stone/trail", () -> {
             net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
@@ -76,6 +85,26 @@ public final class SiteTargets {
             BlockPos p = site("ch3_glass_streak_" + found);
             return p != null ? p : site("ch3_gleaner_field");
         });
+    }
+
+    // 店の主 (サーバーが SiteNetwork で送る。キー shop.<役>.<番号>) のうち、いまいる所にいちばん近いもの
+    @Nullable
+    public static BlockPos nearestShop(String role) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        String prefix = "shop." + role + ".";
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        for (Map.Entry<String, BlockPos> e : sites.entrySet()) {
+            if (!e.getKey().startsWith(prefix)) {
+                continue;
+            }
+            double d = mc.player == null ? 0 : e.getValue().distToCenterSqr(mc.player.position());
+            if (d < bd) {
+                bd = d;
+                best = e.getValue();
+            }
+        }
+        return best;
     }
 
     // 語り部・鯨追いなど、話す相手の居場所 (サーバーが SiteNetwork で送る。キー npc.<役の名前>)
@@ -110,7 +139,23 @@ public final class SiteTargets {
     @Nullable
     public static BlockPos npc(String entityId) {
         int c = entityId.indexOf(':');
-        return sites.get(NPC_PREFIX + (c >= 0 ? entityId.substring(c + 1) : entityId));
+        String key = NPC_PREFIX + (c >= 0 ? entityId.substring(c + 1) : entityId);
+        // 同じ役の人が何人もいれば (npc.<役>.<番号>)、いまいる所にいちばん近い人
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        if (mc.player != null && inOverworld()) {
+            for (Map.Entry<String, BlockPos> e : sites.entrySet()) {
+                if (e.getKey().startsWith(key + ".")) {
+                    double d = e.getValue().distToCenterSqr(mc.player.position());
+                    if (d < bd) {
+                        bd = d;
+                        best = e.getValue();
+                    }
+                }
+            }
+        }
+        return best != null ? best : sites.get(key);
     }
 
     @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)

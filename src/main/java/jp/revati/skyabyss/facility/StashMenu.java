@@ -27,7 +27,7 @@ public final class StashMenu extends ChestMenu {
         super(MenuType.GENERIC_9x6, id, inventory, stash, 6);
         this.keeper = keeper;
         // 預かりの枠を、預けられない品を弾く枠に差し替える (位置と番号は同じ)
-        for (int i = 0; i < StashData.SIZE; i++) {
+        for (int i = 0; i < StashData.PAGE; i++) {
             Slot old = slots.get(i);
             Slot s = new Slot(stash, old.getContainerSlot(), old.x, old.y) {
                 @Override
@@ -53,9 +53,37 @@ public final class StashMenu extends ChestMenu {
     }
 
     public static void open(ServerPlayer player, @Nullable Entity keeper) {
+        open(player, keeper, 1);
+    }
+
+    // 頁 page (1 から) を開く。まだ開けていない頁は開かない
+    public static void open(ServerPlayer player, @Nullable Entity keeper, int page) {
         StashData data = player.getData(FacilitySetup.STASH);
-        player.openMenu(new SimpleMenuProvider((id, inv, p) -> new StashMenu(id, inv, new StashContainer(data), keeper),
-                Component.translatable("gui.skyabyss.stash.title")));
+        if (page < 1 || page > data.pages()) {
+            return;
+        }
+        Component title = data.pages() > 1 ? Component.translatable("gui.skyabyss.stash.title_page", page, data.pages())
+                : Component.translatable("gui.skyabyss.stash.title");
+        player.openMenu(new SimpleMenuProvider((id, inv, p) -> new StashMenu(id, inv, new StashContainer(data, (page - 1) * StashData.PAGE), keeper), title));
+    }
+
+    // 次の頁を鐘銭で開ける。開けたら true
+    public static boolean buyPage(ServerPlayer player) {
+        StashData data = player.getData(FacilitySetup.STASH);
+        int next = data.pages() + 1;
+        if (next > StashData.PAGES) {
+            jp.revati.skyabyss.notice.Notice.hint(player, "message.skyabyss.stash.page_max");
+            return false;
+        }
+        int cost = StashData.PAGE_COST[next];
+        if (Coins.count(player) < cost || !Coins.take(player, cost)) {
+            jp.revati.skyabyss.notice.Notice.hint(player, "message.skyabyss.stash.page_poor", cost);
+            return false;
+        }
+        data.setPages(next);
+        jp.revati.skyabyss.notice.Notice.unlock(player, "message.skyabyss.stash.page_bought", next, cost);
+        player.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.2f);
+        return true;
     }
 
     @Override
@@ -66,42 +94,50 @@ public final class StashMenu extends ChestMenu {
     // StashData の枠をそのまま箱として見せる (書き換えはそのまま人の記録に残る)
     static final class StashContainer implements Container {
         private final StashData data;
+        // この頁の最初の枠の番号
+        private final int base;
 
-        StashContainer(StashData data) {
+        StashContainer(StashData data, int base) {
             this.data = data;
+            this.base = base;
         }
 
         @Override
         public int getContainerSize() {
-            return StashData.SIZE;
+            return StashData.PAGE;
         }
 
         @Override
         public boolean isEmpty() {
-            return data.items.stream().allMatch(ItemStack::isEmpty);
+            for (int i = 0; i < StashData.PAGE; i++) {
+                if (!data.items.get(base + i).isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
         public ItemStack getItem(int slot) {
-            return data.items.get(slot);
+            return data.items.get(base + slot);
         }
 
         @Override
         public ItemStack removeItem(int slot, int amount) {
-            ItemStack s = data.items.get(slot);
+            ItemStack s = data.items.get(base + slot);
             return s.isEmpty() ? ItemStack.EMPTY : s.split(amount);
         }
 
         @Override
         public ItemStack removeItemNoUpdate(int slot) {
-            ItemStack s = data.items.get(slot);
-            data.items.set(slot, ItemStack.EMPTY);
+            ItemStack s = data.items.get(base + slot);
+            data.items.set(base + slot, ItemStack.EMPTY);
             return s;
         }
 
         @Override
         public void setItem(int slot, ItemStack stack) {
-            data.items.set(slot, stack);
+            data.items.set(base + slot, stack);
         }
 
         @Override
@@ -120,8 +156,8 @@ public final class StashMenu extends ChestMenu {
 
         @Override
         public void clearContent() {
-            for (int i = 0; i < StashData.SIZE; i++) {
-                data.items.set(i, ItemStack.EMPTY);
+            for (int i = 0; i < StashData.PAGE; i++) {
+                data.items.set(base + i, ItemStack.EMPTY);
             }
         }
     }
