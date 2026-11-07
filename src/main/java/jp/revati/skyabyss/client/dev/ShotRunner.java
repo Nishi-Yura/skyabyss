@@ -1182,6 +1182,9 @@ public final class ShotRunner {
         }
         Supplier<Screen> s = switch (name.toLowerCase(Locale.ROOT)) {
             case "inventory" -> () -> new InventoryScreen(mc.player);
+            // バニラの進捗の画面 (ポーズ画面の「進捗・実績」・L キーと同じ。控え帳の「記し」へ差し替わるか)
+            case "advancements" -> () -> new net.minecraft.client.gui.screens.advancements.AdvancementsScreen(mc.player.connection.getAdvancements());
+            case "pause" -> () -> new PauseScreen(true);
             case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);
             case "travel_map" -> () -> { jp.revati.skyabyss.client.map.MapClient.open(); return mc.screen; };
             case "travel_map_voyage_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(true);
