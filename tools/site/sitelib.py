@@ -49,7 +49,7 @@ def T(ja, en=None):
 # 頁の並び (ファイル, 名前)。トップは題の字から戻る
 NAV = [
     ("world.html", "世界と物語"),
-    ("combat.html", "戦いと職"),
+    ("combat.html", "戦いとジョブ"),
     ("adventure.html", "冒険の場所"),
     ("gear.html", "装備と成長"),
     ("together.html", "仲間と暮らし"),
@@ -96,7 +96,7 @@ def header(current):
 <div class="wrap bar">
 <a class="brand" href="index.html"><img src="img/favicon.png" width="28" height="28" alt="">天と淵のあいだ</a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">メニュー</button>
-<nav class="nav" id="site-nav" aria-label="サイトの頁">%s</nav>
+<nav class="nav" id="site-nav" aria-label="サイトのページ">%s</nav>
 </div>
 </header>
 """ % links
@@ -124,7 +124,7 @@ def page(fname, title, desc, body):
 
 
 def redirect(old, new):
-    """前の頁の名前から、今の頁へ移す小さな頁 (外から張られた道を切らない)"""
+    """前のページの名前から、今のページへ移す小さなページ (外から張られた道を切らない)"""
     out = """<!doctype html>
 <html lang="ja">
 <head>
@@ -135,7 +135,7 @@ def redirect(old, new):
 <meta http-equiv="refresh" content="0; url=%(new)s">
 </head>
 <body style="background:#0a1226;color:#eaeef7;font-family:sans-serif">
-<p>この頁は <a href="%(new)s" style="color:#f3d690">%(new)s</a> へ移りました。</p>
+<p>このページは <a href="%(new)s" style="color:#f3d690">%(new)s</a> へ移りました。</p>
 </body>
 </html>
 """ % dict(site=SITE_URL, new=new)
@@ -161,7 +161,7 @@ def shot(name, cap, sizes="(max-width: 900px) 100vw, 600px"):
 def page_hero(name, alt, h1, lead, toc=None, pos=None):
     nav = ""
     if toc:
-        nav = '<div class="wrap"><nav class="toc" aria-label="この頁の中">%s</nav></div>' % "".join(
+        nav = '<div class="wrap"><nav class="toc" aria-label="このページの中">%s</nav></div>' % "".join(
             '<a href="#%s">%s</a>' % (a, n) for a, n in toc)
     return ('<div class="page-hero">%s<div class="wrap"><div><p class="eyebrow">天と淵のあいだ</p><h1>%s</h1>'
             '<p class="lead">%s</p></div></div></div>%s') % (img(name, alt, eager=True, style="object-position:%s" % pos if pos else ""), h1, lead, nav)

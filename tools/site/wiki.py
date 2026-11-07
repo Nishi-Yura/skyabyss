@@ -34,12 +34,12 @@ TREE_OF_JOB = {"warrior": "rock", "smith": "ash", "mage": "star", "archer": "bon
 
 # wiki の頁 (ファイル, 名前, 一言)
 PAGES = [
-    ("wiki-weapons.html", "武器", "職ごとの全部の武器"),
+    ("wiki-weapons.html", "武器", "ジョブごとの全部の武器"),
     ("wiki-armor.html", "防具", "一式ごとの全部の防具"),
-    ("wiki-accessories.html", "装飾品", "護符・護石・章など"),
-    ("wiki-items.html", "道具と素材", "薬・素材・魚・封の箱・大事な品"),
+    ("wiki-accessories.html", "アクセサリー", "護符・護石・章など"),
+    ("wiki-items.html", "道具と素材", "薬・素材・魚・封印の箱・大事な品"),
     ("wiki-enemies.html", "敵と主", "場所ごとの敵と主、体力と攻撃"),
-    ("wiki-skills.html", "技の木", "職ごとの木の全部の節"),
+    ("wiki-skills.html", "スキルツリー", "ジョブごとのツリーの全部のノード"),
     ("wiki-quests.html", "クエスト", "メイン・サブ・日替わり・週替わり"),
     ("wiki-endgame.html", "エンドコンテンツ", "物語のあとの遊びの全部（塔・裏ボス・巡り路・神器・秘伝など）"),
     ("wiki-shops.html", "店", "店ごとの品と値段"),
@@ -47,7 +47,7 @@ PAGES = [
     ("wiki-mounts.html", "乗り物", "見た目と値段"),
     ("wiki-titles.html", "称号", "称号と手に入れ方"),
     ("wiki-deeds.html", "記し", "この mod の進捗"),
-    ("wiki-lore.html", "伝承の書", "伝承の全部の頁（ネタばれ）"),
+    ("wiki-lore.html", "伝承の書", "伝承の全部のページ（ネタばれ）"),
 ]
 
 _search = []
@@ -121,7 +121,7 @@ def req_level(item):
 
 def job_of(item):
     for line in item["tooltip"]:
-        m = re.match(r"職: (\S+?)（", plain(line))
+        m = re.match(r"ジョブ: (\S+?)（", plain(line))
         if m:
             return m.group(1)
     return ""
@@ -134,7 +134,7 @@ def tier_rank(item):
 def filters(with_tiers=True):
     chips = "".join('<button type="button" class="f-tier" data-tier="%s" aria-pressed="false" style="--tc:#%s">%s</button>' % (
         t, TIER_RGB[t], TIER_JA[t]) for t in TIERS) if with_tiers else ""
-    return ('<div class="wiki-filter"><label for="f-text">この頁で絞る</label><input id="f-text" type="search" placeholder="名前・効き目の言葉" autocomplete="off">'
+    return ('<div class="wiki-filter"><label for="f-text">このページで絞る</label><input id="f-text" type="search" placeholder="名前・効き目の言葉" autocomplete="off">'
             '%s<span class="f-count" aria-live="polite"></span></div>') % (('<span class="f-tiers">%s</span>' % chips) if chips else "")
 
 
@@ -142,9 +142,9 @@ def filters(with_tiers=True):
 def wiki_nav(current):
     links = "".join('<a href="%s"%s>%s</a>' % (f, ' aria-current="page"' if f == current else "", n) for f, n, _ in PAGES)
     return ('<div class="wiki-bar"><div class="wrap"><div class="wiki-search"><label for="wiki-q" class="kicker">WIKI を探す</label>'
-            '<input id="wiki-q" type="search" placeholder="品・敵・技・クエストの名前" autocomplete="off" aria-controls="wiki-results">'
+            '<input id="wiki-q" type="search" placeholder="品・敵・スキル・クエストの名前" autocomplete="off" aria-controls="wiki-results">'
             '<div id="wiki-results" class="wiki-results" role="listbox" hidden></div></div>'
-            '<nav class="wiki-nav" aria-label="wiki の頁"><a href="wiki.html"%s>wiki の入口</a>%s</nav></div></div>') % (
+            '<nav class="wiki-nav" aria-label="wiki のページ"><a href="wiki.html"%s>wiki の入口</a>%s</nav></div></div>') % (
         ' aria-current="page"' if current == "wiki.html" else "", links)
 
 
@@ -152,7 +152,7 @@ def wiki_page(fname, title, lead, body, spoiler=False, count=None):
     if count is not None:
         COUNTS[fname] = count
     head_ = ('<div class="wrap wiki-head"><p class="eyebrow">天と淵のあいだ WIKI</p><h1>%s</h1><p class="lead">%s</p>%s</div>'
-             % (title, lead, '<p class="spoiler-note">この頁はネタばれを含みます。</p>' if spoiler else ""))
+             % (title, lead, '<p class="spoiler-note">このページはネタばれを含みます。</p>' if spoiler else ""))
     page(fname, "%s — 天と淵のあいだ wiki" % title, lead, wiki_nav(fname) + head_ + body + '<script src="js/wiki.js" defer></script>')
 
 
@@ -223,7 +223,7 @@ def gear_pages(items):
         k = classify(it)
         if k:
             page_ = {"weapon": "wiki-weapons.html", "armor": "wiki-armor.html", "accessory": "wiki-accessories.html"}.get(k, "wiki-items.html")
-            add_search(it["name"], {"weapon": "武器", "armor": "防具", "accessory": "装飾品"}.get(k, "品"), "%s#i-%s" % (page_, it["id"].split(":", 1)[1]))
+            add_search(it["name"], {"weapon": "武器", "armor": "防具", "accessory": "アクセサリー"}.get(k, "品"), "%s#i-%s" % (page_, it["id"].split(":", 1)[1]))
 
     # ---- 武器: 職ごと
     weapons = by.get("weapon", [])
@@ -234,7 +234,7 @@ def gear_pages(items):
     rest = [w for w in weapons if job_of(w) not in dict(JOBS).values() and job_of(w) not in [j for _, j in JOBS]]
     if rest:
         body += section("job-other", "そのほか", '<div class="tips">%s</div>' % "".join(tip_card(w) for w in rest))
-    wiki_page("wiki-weapons.html", "武器", "全部の武器 %d 本を、職ごとに必要レベルの順で。説明はゲームの中と同じ行です（特性・穴は手に入れたときに決まります）。" % len(weapons), body, count="%d 本" % len(weapons))
+    wiki_page("wiki-weapons.html", "武器", "全部の武器 %d 本を、ジョブごとに必要レベルの順で。説明はゲームの中と同じ行です（特性・穴は手に入れたときに決まります）。" % len(weapons), body, count="%d 本" % len(weapons))
 
     # ---- 防具: 一式ごと
     armor = by.get("armor", [])
@@ -261,12 +261,12 @@ def gear_pages(items):
     # ---- 装飾品
     acc = sorted(by.get("accessory", []), key=lambda a: (req_level(a), tier_rank(a), a["name"]))
     body = '<div class="wrap">%s</div>' % filters()
-    body += section("all", "装飾品（%d）" % len(acc), '<div class="tips">%s</div>' % "".join(tip_card(a) for a in acc),
-                    "装飾品は、持ち物の画面の「装飾」の枠に付けたときだけ効きます。")
-    wiki_page("wiki-accessories.html", "装飾品", "護符・護石・章・遺物など、装飾の枠に付ける品 %d 点。" % len(acc), body, count="%d 点" % len(acc))
+    body += section("all", "アクセサリー（%d）" % len(acc), '<div class="tips">%s</div>' % "".join(tip_card(a) for a in acc),
+                    "アクセサリーは、持ち物の画面の「アクセサリー」のスロットに付けたときだけ効きます。")
+    wiki_page("wiki-accessories.html", "アクセサリー", "護符・護石・章・遺物など、アクセサリースロットに付ける品 %d 点。" % len(acc), body, count="%d 点" % len(acc))
 
     # ---- 道具と素材
-    groups = [("consumable", "薬と食べ物"), ("material", "素材"), ("fish", "魚"), ("box", "封の箱"), ("other", "大事な品・道具・そのほか")]
+    groups = [("consumable", "薬と食べ物"), ("material", "素材"), ("fish", "魚"), ("box", "封印の箱"), ("other", "大事な品・道具・そのほか")]
     body = '<div class="wrap">%s</div>' % filters(False)
     for k, h in groups:
         its = sorted(by.get(k, []), key=lambda a: a["name"])
@@ -419,9 +419,9 @@ def enemies_page(mobs):
         nm = names_by_id.get(mid, mid)
         mv += '<details class="boss-moves" id="mv-%s"><summary>%s%s</summary><div>%s</div></details>' % (mid.split(":", 1)[1], mob_img(mid, 40), esc(nm), tabs)
         add_search(nm + " の技", "主の技", "wiki-enemies.html#mv-" + mid.split(":", 1)[1])
-    body += section("moves", "主の技", mv, "心臓・中ボス・裏ボス・あいだの塔の主の技と予告。設計書（今の仕様）の表をそのまま載せています。数字の tick は 1/20 秒、n は人数です。")
+    body += section("moves", "主の技", mv, "心臓・中ボス・裏ボス・あいだの塔の主の技と予兆。設計書（今の仕様）の表をそのまま載せています。数字の tick は 1/20 秒、n は人数です。")
     body += section("dungeons", "地下のダンジョンの顔ぶれ",
-                    '<div class="tablewrap"><table><thead><tr><th scope="col">ダンジョン</th><th scope="col">目安 Lv</th><th scope="col">道中の敵</th><th scope="col">中ボス</th><th scope="col">主</th></tr></thead><tbody>%s</tbody></table></div>' % dun)
+                    '<div class="tablewrap"><table><thead><tr><th scope="col">ダンジョン</th><th scope="col">推奨 Lv</th><th scope="col">道中の敵</th><th scope="col">中ボス</th><th scope="col">主</th></tr></thead><tbody>%s</tbody></table></div>' % dun)
     wiki_page("wiki-enemies.html", "敵と主", "この mod の敵 %d 種を、出る場所ごとに。敵はこの mod の敵だけです。" % total, body, count="%d 種" % total)
 
 
@@ -429,10 +429,10 @@ def enemies_page(mobs):
 def skills_page(dump_skills):
     sk = {s["id"]: s for s in dump_skills}
     stat_ja = {"strength": "筋力", "agility": "敏捷", "spirit": "精神", "vitality": "耐久"}
-    kind_ja = {"active": "使う技", "stat": "基礎", "keystone": "要", "trait": "型の要", "effect": "常に効く", "threshold": "閾値",
-               "rune": "技を変える", "rank": "技の段", "passive": "常に効く", "mutation": "変異"}
+    kind_ja = {"active": "使うスキル", "stat": "基礎", "keystone": "要", "trait": "型の要", "effect": "常に効く", "threshold": "閾値",
+               "rune": "スキルを変える", "rank": "スキルの段", "passive": "常に効く", "mutation": "変異"}
     body = ""
-    trees = [(j, n) for j, n in JOBS] + [("deep", "淵の技（転生の報い）"), ("past", "前世の技（転生の報い）")]
+    trees = [(j, n) for j, n in JOBS] + [("deep", "淵のスキル（転生の報い）"), ("past", "前世のスキル（転生の報い）")]
     toc = "".join('<a href="#tree-%s">%s</a>' % (j, n) for j, n in trees)
     body += '<div class="wrap"><nav class="toc" aria-label="木">%s</nav>%s</div>' % (toc, filters(False))
     total_nodes = 0
@@ -466,11 +466,11 @@ def skills_page(dump_skills):
                     nid, esc(names[n["id"]]), esc(names[n["id"]] + " " + eff), esc(names[n["id"]]), kind_ja.get(n.get("kind"), n.get("kind", "")),
                     n.get("cost", 1), eff, esc(req + ("（%s）" % "・".join(extra) if extra else ""))))
                 if n.get("kind") in ("active", "keystone", "trait"):
-                    add_search(names[n["id"]], "技（%s）" % jname, "wiki-skills.html#" + nid)
+                    add_search(names[n["id"]], "スキル（%s）" % jname, "wiki-skills.html#" + nid)
             inner += '<h3>%s<small>%d 節</small></h3><div class="tablewrap"><table class="nodes"><thead><tr><th scope="col">節</th><th scope="col">種類</th><th scope="col">点</th><th scope="col">効き目</th><th scope="col">前提</th></tr></thead><tbody>%s</tbody></table></div>' % (
                 esc(aname), len(ns), "".join(rows))
         body += section("tree-" + job, "%s（%d 節）" % (jname, len(nodes)), inner)
-    wiki_page("wiki-skills.html", "技の木", "職ごとの技の木の全部の節。使う技の効き目は、1 段目の数字です（段を上げると変わります）。", body, count="%d 節" % total_nodes)
+    wiki_page("wiki-skills.html", "スキルツリー", "ジョブごとのスキルツリーの全部のノード。使うスキルの効き目は、1 段目の数字です（段を上げると変わります）。", body, count="%d 節" % total_nodes)
 
 
 def node_name(job, n, sk, stat_ja):
@@ -617,7 +617,7 @@ def shops_page(names):
         if buys:
             inner += '<h3>買い取り</h3><div class="tablewrap"><table><thead><tr><th scope="col">品</th><th scope="col">いくつで</th><th scope="col">鐘銭</th></tr></thead><tbody>%s</tbody></table></div>' % "".join(buys)
         body += section("s-" + sid, name, inner)
-    wiki_page("wiki-shops.html", "店", "店ごとの品と値段（鐘銭）。職の品（「〇〇だけ」）は、その職の人にだけ並びます。", body, count="%d 軒" % len(glob.glob(os.path.join(DATA, "shop", "*.json"))))
+    wiki_page("wiki-shops.html", "店", "店ごとの品と値段（鐘銭）。ジョブの品（「〇〇だけ」）は、そのジョブの人にだけ並びます。", body, count="%d 軒" % len(glob.glob(os.path.join(DATA, "shop", "*.json"))))
 
 
 _link_page = {}
@@ -655,8 +655,8 @@ def places_page():
         add_search(nm, "見どころ", "wiki-places.html#pois")
     body += section("pois", "見どころ（%d か所）" % len(pois), '<div class="wrap-in">%s</div><div class="tablewrap"><table><thead><tr><th scope="col">見どころ</th><th scope="col">数</th><th scope="col">x, z</th></tr></thead><tbody>%s</tbody></table></div>' % (filters(False), "".join(rows)))
     dun = "".join('<tr><th scope="row">%s</th><td class="num">%d</td></tr>' % (lang("dungeon.skyabyss." + d["id"]), d["level"]) for d in dungeon_table())
-    body += section("dungeons", "地下のダンジョン", '<div class="tablewrap"><table><thead><tr><th scope="col">ダンジョン</th><th scope="col">目安 Lv</th></tr></thead><tbody>%s</tbody></table></div>' % dun,
-                    "入口は見どころの表の各ダンジョンの所です。顔ぶれは「敵と主」の頁に。")
+    body += section("dungeons", "地下のダンジョン", '<div class="tablewrap"><table><thead><tr><th scope="col">ダンジョン</th><th scope="col">推奨 Lv</th></tr></thead><tbody>%s</tbody></table></div>' % dun,
+                    "入口は見どころの表の各ダンジョンの所です。顔ぶれは「敵と主」のページに。")
     wiki_page("wiki-places.html", "場所", "大陸の町・巨神の居場所・見どころ（座標つき）・地下のダンジョン。座標は x, z（東西, 南北）です。", body, count="見どころ %d か所" % len(pois))
 
 
@@ -727,7 +727,7 @@ def lore_page():
         cards = "".join('<details class="lore" data-name="%s" data-text="%s"><summary>%s</summary><div><p>%s</p></div></details>' % (
             esc(t), esc(t), esc(t), esc(b).replace("\n", "<br>")) for _, t, b in items)
         body += section("ch-" + ch.replace(".", "-"), "%s（%d）" % (ch_ja.get(ch, ch), len(items)), cards)
-    wiki_page("wiki-lore.html", "伝承の書", "伝承の書に記される頁 %d 件。物語の核心のネタばれを含みます。" % n, body, spoiler=True, count="%d 頁" % n)
+    wiki_page("wiki-lore.html", "伝承の書", "伝承の書に記されるページ %d 件。物語の核心のネタばれを含みます。" % n, body, spoiler=True, count="%d ページ" % n)
 
 
 # ================================================================== エンドコンテンツ
@@ -751,7 +751,7 @@ def endgame_page():
             over += '<tr><th scope="row"><a href="#%s">%s</a></th><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
                 e["id"], esc(e["name"]), esc(gname), esc(e["when"]), esc(e["cadence"]), esc(e["reward"]))
     body = ('<div class="wrap"><p class="small">日替わり・週替わりは、どれも実時間です（朝 5 時で日が、月曜の朝 5 時で週が替わります。ゲームの中で寝ても替わりません）。'
-            'U のクエストログの先頭の「今日・今週」の頁に、替わるまでの時間がまとまっています。下の表の一部は設計書の表をそのまま載せています。</p></div>')
+            'U のクエストログの先頭の「今日・今週」のページに、替わるまでの時間がまとまっています。下の表の一部は設計書の表をそのまま載せています。</p></div>')
     body += section("all", "一覧（%d）" % len(EG.ENTRIES),
                     '<div class="tablewrap"><table><thead><tr><th scope="col">もの</th><th scope="col">群</th><th scope="col">始まる時</th>'
                     '<th scope="col">回数</th><th scope="col">主な報い</th></tr></thead><tbody>%s</tbody></table></div>' % over)
@@ -788,9 +788,9 @@ def _all_lang():
 # ================================================================== 入口
 def index_page(counts):
     tiles = "".join('<a class="wiki-tile" href="%s"><b>%s</b><span>%s</span><em>%s</em></a>' % (f, n, d, counts.get(f, "")) for f, n, d in PAGES)
-    body = ('<div class="wrap"><p class="small">wiki の中身は、ゲームの中身（品の説明・敵の値・技の木・クエスト・店・伝承）から作っています。'
+    body = ('<div class="wrap"><p class="small">wiki の中身は、ゲームの中身（品の説明・敵の値・スキルツリー・クエスト・店・伝承）から作っています。'
             'ゲームの版が上がるたびに作り直します（今は v%s）。体力と攻撃の数字は、画面と同じ 10 倍です。</p></div>' % VERSION)
-    body += section("cats", "頁", '<div class="wiki-tiles">%s</div>' % tiles)
+    body += section("cats", "ページ", '<div class="wiki-tiles">%s</div>' % tiles)
     wiki_page("wiki.html", "wiki", "天と淵のあいだの全部の情報。上の箱で名前から探せます。", body)
 
 
