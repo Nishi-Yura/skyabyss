@@ -141,32 +141,15 @@ public final class TideSelfTest {
             if (TideBackBuilder.inReturnGate(a.getX() + 0.5, a.getY(), a.getZ() + 0.5)) {
                 failures.add("the arrival is inside the return gate");
             }
+            // 潮門の見送りの段と到着の段はもうない (潮門は継ぎ当てで閉じた。地上へは待機場所の帰りの石。2026-11-07)
             BlockPos g = new BlockPos(jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_X, jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Y0,
                     jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Z);
-            if (!TideBackBuilder.inReturnGate(g.getX() + 0.5, g.getY(), g.getZ() + 0.5)) {
-                failures.add("the return gate mouth is not detected");
+            if (TideBackBuilder.inReturnGate(g.getX() + 0.5, g.getY(), g.getZ() + 0.5)) {
+                failures.add("the old tide gate still sends players down");
             }
-            // 見送りの段 (21 章): 段の口は人が入れる (空気か水)。いちばん下の段は階段で、その手前の段から下りられる
-            for (int y = 0; y < 2; y++) {
-                for (BlockPos c : new BlockPos[] {g.above(y), g.above(y).south(), g.above(y).east()}) {
-                    if (!back.getBlockState(c).getCollisionShape(back, c).isEmpty()) {
-                        failures.add("the return steps are blocked at " + c);
-                    }
-                }
-            }
-            // 見送りの段 (TideIslandBuilder.gate): 到着の段の西の縁から 4 段、一段ずつ海へ下りる。最初の段は (x1 - 1、床 - 1)
-            BlockPos step = new BlockPos(jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.x1() - 1,
-                    jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.floor() - 1, g.getZ());
-            if (!(back.getBlockState(step).getBlock() instanceof net.minecraft.world.level.block.StairBlock)) {
-                failures.add("the return steps have no stair at " + step + " (found " + back.getBlockState(step) + "; above " + back.getBlockState(step.above()) + ", west " + back.getBlockState(step.west()) + ")");
-            }
-            // 到着の段は平ら (到着から段の西の縁まで)
-            for (int x = a.getX(); x >= jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.x1(); x--) {
-                BlockPos f = new BlockPos(x, a.getY() - 1, a.getZ());
-                if (!back.getBlockState(f).isSolidRender(back, f) || !back.getBlockState(f.above()).isAir() || !back.getBlockState(f.above(2)).isAir()) {
-                    failures.add("the landing is not flat between the arrival and the steps at x=" + x);
-                    break;
-                }
+            BlockPos pane = new BlockPos(-100, 90, 87);
+            if (back.getBlockState(pane).is(net.minecraft.world.level.block.Blocks.SEA_LANTERN) || back.getBlockState(pane).is(net.minecraft.world.level.block.Blocks.STONE_BRICKS)) {
+                failures.add("the old tide gate frame is still standing at " + pane.toShortString());
             }
             // 島の外は海 (落ちたら泳げる)
             BlockPos sea = new BlockPos(-220, TideBackBuilder.SEA - 1, 40);

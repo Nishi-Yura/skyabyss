@@ -49,7 +49,8 @@ public final class TideBackLayout {
     // 33: 心臓の間 (殻の底) と休み場 heart を体の外 (trial/raid/InstanceArenas) へ移した
     // 34: 巨神の中は建てない (外見だけ。体・甲羅の溝の手直し・潮門の到着の段と、体の外の心臓の間)。2026-10-23
     // 35: 心臓の間の戦う床を半径 14 → 24 (HEART_GROW)。前室と休み場 heart をその分南へ (2026-11-07)
-    public static final int LAYOUT_VERSION = 35;
+    // 36: 潮門の到着の段・見送りの段・廊下を建てず、潮門の枠と光る面を継ぎ当てで閉じる (2026-11-07)
+    public static final int LAYOUT_VERSION = 36;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
 

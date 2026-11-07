@@ -1,0 +1,45 @@
+# 雷翼と潮殻の背を建てた直後 (継ぎ当ての前) の門のまわりを書き出す (tools/gen/world/build_back_seals.py が読む)
+world backseal flat
+size 1280 900
+timeout 1200
+render 14
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+waitchunks
+wait 300
+cmd tp @s 0 185 10
+waitchunks
+wait 60
+cmd execute in skyabyss:storm_back run skyabyss dev dump seal_storm -45 125 -110 45 200 120
+waitdump
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s 30 175 100 145 25
+waitchunks
+wait 40
+shot storm_gate
+cmd tp @s 25 185 -10 140 35
+wait 30
+shot storm_back_top
+hud on
+cmd gamemode creative
+cmd skyabyss dev arrive tide_back
+waitchunks
+wait 300
+cmd execute in skyabyss:tide_back run skyabyss dev dump seal_tide -130 50 50 -50 135 125
+waitdump
+chat clear
+hud off
+cmd gamemode spectator
+cmd tp @s -135 85 120 -135 20
+waitchunks
+wait 40
+shot tide_gate

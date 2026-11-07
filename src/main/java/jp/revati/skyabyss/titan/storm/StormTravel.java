@@ -155,8 +155,8 @@ public final class StormTravel {
         if (player.tickCount % 2 != 0 || (player.isCreative() && player.getAbilities().flying)) {
             return;
         }
-        // 羽根の門の口に 0.5 秒いたら、地上へ戻る (かすっただけでは戻さない)
-        boolean inGate = !coolingDown(player) && StormBackLayout.GATE_MOUTH.contains(player.position());
+        // 前の版の下り風の輪 (到着の南) はもうない: そこは待機場所の祠。地上へは帰りの石で (trial/ArrivalDeck。2026-11-07)
+        boolean inGate = false;
         int inGateTicks = inGate ? IN_GATE.merge(player.getUUID(), 2, Integer::sum) : 0;
         if (!inGate) {
             IN_GATE.remove(player.getUUID());
