@@ -259,6 +259,12 @@ public final class AbilityTreeSelfTest {
                 int got = SkillManager.runeOf(p, n.skill);
                 check(f, got == n.rune, job.id + ": the variant node " + n.id + " (" + n.skill.id + " #" + n.rune + ") did not change the skill (runeOf " + got
                         + ", knows " + d.knows(n.skill) + ", rune " + d.rune(n.skill) + ")");
+                // 置き場の番号が熟練の刻印・ほかの変化・伝説の書き換えに上書きされても、取った節の変化が効く
+                for (int other : new int[] {jp.revati.skyabyss.rpg.skill.Rune.MASTERY, n.rune == 1 ? 2 : 1, 4}) {
+                    d.runes.put(n.skill.id, other);
+                    check(f, SkillManager.runeOf(p, n.skill) == n.rune, job.id + ": the variant " + n.id + " was replaced when the stored number became " + other);
+                }
+                d.applyNodes();
                 // 型に保存して読み直しても変わらない
                 SkillManager.saveLoadout(p, 0);
                 p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
