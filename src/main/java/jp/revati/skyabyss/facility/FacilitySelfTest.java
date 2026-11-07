@@ -336,7 +336,7 @@ public final class FacilitySelfTest {
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
         check(f, Coins.count(p) == 27 && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) == 3, "bread paid and given");
-        check(f, ShopService.buy(p, toolShop, "gather_axe", 5) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
+        check(f, ShopService.buy(p, toolShop, "gather_pickaxe", 5) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
         check(f, ShopService.buy(p, tools, "nope", 1) == ShopService.Result.NO_GOOD, "unknown good");
         // 素材の値段
         check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");

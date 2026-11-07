@@ -87,5 +87,8 @@
   "message.skyabyss.party.finder.posted": "Listing posted. Anyone who joins becomes a member",
   "message.skyabyss.party.finder.not_leader": "Only the leader can post",
   "message.skyabyss.party.finder.gone": "That listing is gone",
-  "message.skyabyss.party.finder.joined": "%s joined from the finder (%s)"
+  "message.skyabyss.party.finder.joined": "%s joined from the finder (%s)",
+  "gui.skyabyss.party.quest_main": "Main: %s",
+  "gui.skyabyss.party.quest_track": "Tracking: %s",
+  "gui.skyabyss.party.quest_none": "No quest in progress"
 }

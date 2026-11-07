@@ -16,40 +16,94 @@
       "job": "archer"
     },
     {
+      "id": "starter_sword",
+      "item": "skyabyss:shrine_sword",
+      "count": 1,
+      "coins": 150
+    },
+    {
+      "id": "starter_hammer",
+      "item": "skyabyss:shrine_hammer",
+      "count": 1,
+      "coins": 150
+    },
+    {
+      "id": "starter_staff",
+      "item": "skyabyss:shrine_staff",
+      "count": 1,
+      "coins": 150
+    },
+    {
+      "id": "starter_bow",
+      "item": "skyabyss:shrine_bow",
+      "count": 1,
+      "coins": 150
+    },
+    {
+      "id": "starter_dagger",
+      "item": "skyabyss:shrine_dagger",
+      "count": 1,
+      "coins": 150
+    },
+    {
+      "id": "starter_bell_staff",
+      "item": "skyabyss:shrine_bell_staff",
+      "count": 1,
+      "coins": 150
+    },
+    {
       "id": "travel_shield",
       "item": "skyabyss:travel_shield",
       "count": 1,
       "coins": 12
     },
     {
-      "id": "ironclad_helmet",
-      "item": "skyabyss:ironclad_helmet",
+      "id": "wayfarer_helmet",
+      "item": "skyabyss:wayfarer_helmet",
       "count": 1,
-      "coins": 10
-    },
-    {
-      "id": "ironclad_chestplate",
-      "item": "skyabyss:ironclad_chestplate",
-      "count": 1,
-      "coins": 16
-    },
-    {
-      "id": "ironclad_leggings",
-      "item": "skyabyss:ironclad_leggings",
-      "count": 1,
-      "coins": 14
-    },
-    {
-      "id": "ironclad_boots",
-      "item": "skyabyss:ironclad_boots",
-      "count": 1,
-      "coins": 8
+      "coins": 30
     },
     {
       "id": "wayfarer_chestplate",
       "item": "skyabyss:wayfarer_chestplate",
       "count": 1,
-      "coins": 4
+      "coins": 45
+    },
+    {
+      "id": "wayfarer_leggings",
+      "item": "skyabyss:wayfarer_leggings",
+      "count": 1,
+      "coins": 40
+    },
+    {
+      "id": "wayfarer_boots",
+      "item": "skyabyss:wayfarer_boots",
+      "count": 1,
+      "coins": 25
+    },
+    {
+      "id": "ironclad_helmet",
+      "item": "skyabyss:ironclad_helmet",
+      "count": 1,
+      "coins": 60
+    },
+    {
+      "id": "ironclad_chestplate",
+      "item": "skyabyss:ironclad_chestplate",
+      "count": 1,
+      "coins": 90
+    },
+    {
+      "id": "ironclad_leggings",
+      "item": "skyabyss:ironclad_leggings",
+      "count": 1,
+      "coins": 80
+    },
+    {
+      "id": "ironclad_boots",
+      "item": "skyabyss:ironclad_boots",
+      "count": 1,
+      "coins": 50
     },
     {
       "id": "sky_stone_chestplate",

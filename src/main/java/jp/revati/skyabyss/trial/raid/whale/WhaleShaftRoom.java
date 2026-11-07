@@ -24,6 +24,8 @@ import org.joml.Vector3f;
 //  - 踊り場と踊り場のあいだの階段 (「登り」) は、ふだんは引っ込んでいる。骨の突起 (スイッチ) を叩くと階段が生え、しばらくして引っ込む (終わりかけは粒と音で知らせる)
 //  - スイッチは二組: 各踊り場の端にある「手元」(次の登りを出す。登りの口から遠い端) と、底の壇の上の「親台」(四つの登りを一つずつ出せる)。
 //    一人なら手元で交互に (叩く → 走る → 上る)、人数がいれば一人が壇に残って、登る人の足もとへ階段を出してやると早い
+//  - 胃液の噴き上げ (2026-11-08 の声「簡単すぎる。ブロック押すだけ」): 上っている人の足もとに赤い輪が出て (1.5 秒)、胃液が噴き上がる。
+//    輪の中にいると傷と、縦穴の真ん中へ押し出される (踊り場から落ちると胃液へ)。上ってから 2.5 秒ごと、二人目からは二つずつ
 //  - 頂 (四つ目の踊り場) に立った人が一人いれば越える
 public final class WhaleShaftRoom extends RaidRoom {
     static final int HX = 7;
@@ -33,7 +35,8 @@ public final class WhaleShaftRoom extends RaidRoom {
     static final int RISE = 5;
     static final int GROW_STEP = 3;
     // 2026-10-25 の試遊で「簡単」: 階段の出ている間を短く、胃液を速く、上り始めの猶予を短く
-    static final int EXTEND_TICKS = 180;
+    // 2026-11-08 にもう一度「簡単」: 出ている間をさらに短く、胃液の噴き上げを足した
+    static final int EXTEND_TICKS = 130;
     static final int WARN_TICKS = 60;
     static final int GRACE = 140;
     static final int RISE_TICKS = 75;
@@ -41,6 +44,15 @@ public final class WhaleShaftRoom extends RaidRoom {
     static final int DAMAGE_EVERY = 10;
     static final int TOP = FLIGHTS * RISE;
     static final String FAIL_KEY = "message.skyabyss.raid.WR4.filled";
+    // 胃液の噴き上げ: 間隔・予兆・輪の半径・傷・押し出す強さ
+    static final int GEYSER_EVERY = 50;
+    static final int GEYSER_WARN = 30;
+    static final double GEYSER_R = 1.8;
+    static final float GEYSER_DAMAGE = 6f;
+    static final double GEYSER_PUSH = 0.9;
+    // 予兆の出ている噴き上げ (位置と、噴く時刻)
+    private final java.util.List<double[]> geysers = new java.util.ArrayList<>();
+    private long nextGeyser;
 
     // 登りの始まり (最初の段の中心。原点からの相対 x, z) と上る向き
     private static final int[][] START = {{-6, 2}, {-4, -6}, {6, -4}, {4, 6}};
@@ -138,6 +150,8 @@ public final class WhaleShaftRoom extends RaidRoom {
     @Override
     public void start(RaidCtx ctx) {
         startAt = ctx.now() + GRACE;
+        nextGeyser = startAt + GEYSER_EVERY;
+        geysers.clear();
         nextDamage = 0;
         active = true;
     }
@@ -192,6 +206,7 @@ public final class WhaleShaftRoom extends RaidRoom {
                 }
             }
         }
+        geysers(ctx, now, surface);
         // 上った高さ・頂
         int t = 0;
         for (ServerPlayer p : ctx.standing()) {
@@ -207,6 +222,64 @@ public final class WhaleShaftRoom extends RaidRoom {
         }
         if (!cleared && lv >= TOP + 3) {
             ctx.fail(FAIL_KEY);
+        }
+    }
+
+    // 胃液の噴き上げ: 上っている人 (胃液の面より 2 上) の足もとを狙う
+    private void geysers(RaidCtx ctx, long now, double surface) {
+        ServerLevel level = ctx.level();
+        if (cleared || now < startAt) {
+            return;
+        }
+        if (now >= nextGeyser) {
+            nextGeyser = now + GEYSER_EVERY;
+            java.util.List<ServerPlayer> climbers = new java.util.ArrayList<>();
+            for (ServerPlayer p : ctx.standing()) {
+                if (!p.isSpectator() && ctx.cell().inner().contains(p.position()) && p.getY() > surface + 2) {
+                    climbers.add(p);
+                }
+            }
+            java.util.Collections.shuffle(climbers, new java.util.Random(ctx.rng().nextLong()));
+            int shots = climbers.size() >= 2 ? 2 : climbers.size();
+            for (int i = 0; i < shots; i++) {
+                ServerPlayer p = climbers.get(i);
+                geysers.add(new double[] {p.getX(), Math.floor(p.getY()), p.getZ(), now + GEYSER_WARN});
+                level.playSound(null, p.blockPosition(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.HOSTILE, 1.4f, 0.6f);
+            }
+        }
+        DustParticleOptions warn = new DustParticleOptions(new Vector3f(0.9f, 0.1f, 0.08f), 1.1f);
+        for (java.util.Iterator<double[]> it = geysers.iterator(); it.hasNext(); ) {
+            double[] g = it.next();
+            if (now < g[3]) {
+                if (now % 3 == 0) {
+                    for (int k = 0; k < 14; k++) {
+                        double a = Math.PI * 2 * k / 14;
+                        level.sendParticles(warn, g[0] + Math.cos(a) * GEYSER_R, g[1] + 0.1, g[2] + Math.sin(a) * GEYSER_R, 1, 0, 0, 0, 0);
+                    }
+                }
+                continue;
+            }
+            it.remove();
+            level.playSound(null, BlockPos.containing(g[0], g[1], g[2]), SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.HOSTILE, 1.3f, 0.5f);
+            level.sendParticles(ParticleTypes.FALLING_LAVA, g[0], g[1] + 0.5, g[2], 30, 0.5, 1.5, 0.5, 0.1);
+            level.sendParticles(new DustParticleOptions(new Vector3f(0.7f, 0.05f, 0.05f), 2.0f), g[0], g[1] + 1.5, g[2], 40, 0.6, 1.4, 0.6, 0.02);
+            BlockPos o = ctx.origin();
+            for (ServerPlayer p : ctx.standing()) {
+                if (p.isCreative() || p.isSpectator()) {
+                    continue;
+                }
+                double dx = p.getX() - g[0];
+                double dz = p.getZ() - g[2];
+                if (dx * dx + dz * dz <= GEYSER_R * GEYSER_R && Math.abs(p.getY() - g[1]) <= 3) {
+                    p.invulnerableTime = 0;
+                    p.hurt(level.damageSources().magic(), GEYSER_DAMAGE);
+                    double cx = o.getX() + 0.5 - p.getX();
+                    double cz = o.getZ() + 0.5 - p.getZ();
+                    double len = Math.max(0.01, Math.hypot(cx, cz));
+                    p.push(cx / len * GEYSER_PUSH, 0.45, cz / len * GEYSER_PUSH);
+                    p.hurtMarked = true;
+                }
+            }
         }
     }
 

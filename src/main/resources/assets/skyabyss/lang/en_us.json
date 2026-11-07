@@ -1481,7 +1481,7 @@
   "message.skyabyss.raid.WR3.broken": "The whale core shattered. Back to the room entrance",
   "message.skyabyss.raid.WR3.wave": "Wave %s",
   "trial.skyabyss.cell.WR4": "Climb of the Stomach Shaft",
-  "trial.skyabyss.cell.WR4.desc": "Fluid rises from the shaft floor. Strike a bone stud to grow a stair to the next landing.",
+  "trial.skyabyss.cell.WR4.desc": "Fluid rises from the shaft floor. Strike a bone stud to grow a stair to the next landing. A red ring at your feet means acid is about to burst.",
   "trial.skyabyss.cell.WR5": "Stone Sea Floor Tiles",
   "trial.skyabyss.cell.WR5.desc": "The floor tiles turn when struck. Join the whale's bones to match the pattern carved on the north wall. The shape changes every run. A balcony gives a view of everything.",
   "trial.skyabyss.cell.WR6": "The Shrinking Ring",

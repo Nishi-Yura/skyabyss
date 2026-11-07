@@ -99,6 +99,8 @@ public final class TitanEnd {
     public static void onHeartStopped(ServerLevel back, String titan, Collection<UUID> ids) {
         MinecraftServer server = back.getServer();
         Set<UUID> fought = new LinkedHashSet<>(ids);
+        // 祠から渡った順路 (周回) の人は、運び出しの先が祠 (順路の記録は TrialRuntime が消すので、その前に見る)
+        markShrineRun(back, fought);
         TitanDormancy.begin(server, titan, CARRY_AT);
         // このグループは初回を終えた (周回の道になる)
         jp.revati.skyabyss.titan.group.FirstRun.onFirstCleared(back, fought);
@@ -119,6 +121,7 @@ public final class TitanEnd {
     public static void onHeartStoppedAgain(ServerLevel back, String titan, Collection<UUID> ids) {
         MinecraftServer server = back.getServer();
         Set<UUID> fought = new LinkedHashSet<>(ids);
+        markShrineRun(back, fought);
         TitanDormancy.begin(server, titan, CARRY_AT);
         if (Titans.THUNDER_WING.equals(titan)) {
             chooseStormPeak(server.overworld());
@@ -126,8 +129,46 @@ public final class TitanEnd {
         scheduleCarry(back, titan, fought);
     }
 
+    // 祠から渡った人 (運び出しの先が祠)。運び出しで消す
+    private static final Set<UUID> SHRINE_RUN = new java.util.HashSet<>();
+
+    private static void markShrineRun(ServerLevel back, Set<UUID> fought) {
+        for (ServerPlayer p : targets(back.getServer(), back, fought)) {
+            if (jp.revati.skyabyss.trial.TrialRoute.active(back, jp.revati.skyabyss.titan.group.Groups.keyOf(p))) {
+                SHRINE_RUN.add(p.getUUID());
+            }
+        }
+    }
+
+    // 心臓の部屋に集める (2026-11-08 の声「心臓倒したら、元の世界戻るまで、ずっと心臓の部屋いるようにして」):
+    // 運ばれる人のうち、心臓の部屋 (生きている戦った人のそば 40) にいない人 (倒れて入口へ戻った人など) を、その人のそばへ。倒れている人は起こす
+    static void gatherToHeart(ServerLevel back, Set<UUID> fought) {
+        MinecraftServer server = back.getServer();
+        ServerPlayer anchor = null;
+        for (UUID id : fought) {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && p.level() == back && p.isAlive() && !p.isSpectator() && !jp.revati.skyabyss.party.Downed.isDowned(p)) {
+                anchor = p;
+                break;
+            }
+        }
+        int n = 0;
+        for (ServerPlayer p : targets(server, back, fought)) {
+            jp.revati.skyabyss.party.Downed.reviveFull(p);
+            if (anchor == null || p == anchor || p.distanceToSqr(anchor) <= 40 * 40) {
+                continue;
+            }
+            double a = n++ * 1.1;
+            p.stopRiding();
+            p.fallDistance = 0;
+            p.teleportTo(back, anchor.getX() + Math.cos(a) * 1.5, anchor.getY(), anchor.getZ() + Math.sin(a) * 1.5, p.getYRot(), 0f);
+            Notice.narrate(p, "message.skyabyss.titan_end.gathered");
+        }
+    }
+
     private static void scheduleCarry(ServerLevel back, String titan, Set<UUID> fought) {
         MinecraftServer server = back.getServer();
+        gatherToHeart(back, fought);
         long until = server.overworld().getGameTime() + CARRY_AT + 60;
         Set<UUID> carried = targetIds(server, back, fought);
         for (UUID id : carried) {
@@ -225,6 +266,15 @@ public final class TitanEnd {
         int n = 0;
         for (ServerPlayer p : list) {
             HOLDING.remove(p.getUUID());
+            // 祠から渡った人は祠へ戻す (2026-11-08 の声「祠から心臓倒したのに、巨神の下にtpされた」)
+            if (SHRINE_RUN.remove(p.getUUID()) && jp.revati.skyabyss.titan.shrine.TitanShrine.sendTo(p, titan)) {
+                jp.revati.skyabyss.titan.TitanTravel.takeBoardedFrom(p);
+                arrivalEffects(server.overworld(), titan, p.position());
+                Notice.narrate(p, "message.skyabyss.titan_end.back_to_shrine");
+                jp.revati.skyabyss.loot.reward.HeartReward.scheduleOpen(p, titan, jp.revati.skyabyss.loot.reward.HeartReward.OPEN_AFTER_CARRY, true);
+                n++;
+                continue;
+            }
             deliver(p, titan, spread(server.overworld(), landing, n));
             n++;
         }

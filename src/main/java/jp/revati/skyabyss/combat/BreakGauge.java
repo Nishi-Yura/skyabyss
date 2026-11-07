@@ -248,6 +248,31 @@ public final class BreakGauge {
         }
     }
 
+    // 崩れている主は、技の動き (振りかぶり・弾・粒) も出さない (2026-11-08 の声「スタンしてるとき、敵が攻撃使っちゃう。ダメージはこないけど」)。
+    // 主の tick を飛ばし、落ちることと、傷の点滅・無敵の時間の減りだけ進める (story/ch6/field/MomentStop と同じやり方)。死んだ主は止めない
+    @SubscribeEvent
+    static void onEntityTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Pre event) {
+        if (STATES.isEmpty() || !(event.getEntity() instanceof LivingEntity le) || le.level().isClientSide() || le instanceof Player
+                || !le.isAlive() || le.getHealth() <= 0 || !broken(le)) {
+            return;
+        }
+        event.setCanceled(true);
+        le.setOldPosAndRot();
+        if (le.invulnerableTime > 0) {
+            le.invulnerableTime--;
+        }
+        if (le.hurtTime > 0) {
+            le.hurtTime--;
+        }
+        if (!le.onGround() && !le.isNoGravity()) {
+            double vy = (le.getDeltaMovement().y - 0.08) * 0.98;
+            le.move(net.minecraft.world.entity.MoverType.SELF, new Vec3(0, vy, 0));
+            le.setDeltaMovement(0, le.onGround() ? 0 : vy, 0);
+        } else {
+            le.setDeltaMovement(Vec3.ZERO);
+        }
+    }
+
     // Telegraph.start から: この持ち主は今、技を出せない
     public static boolean silenced(Entity owner) {
         return owner instanceof LivingEntity le && !le.level().isClientSide() && broken(le);

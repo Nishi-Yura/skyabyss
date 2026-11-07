@@ -1480,7 +1480,7 @@
   "message.skyabyss.raid.WR3.broken": "鯨の核が砕けた。部屋の入口へ戻る",
   "message.skyabyss.raid.WR3.wave": "第 %s 波",
   "trial.skyabyss.cell.WR4": "胃の縦穴の上り",
-  "trial.skyabyss.cell.WR4.desc": "胃液が縦穴の底からゆっくり上がる。骨の鋲を打つと、次の踊り場への階段が少し伸びる。",
+  "trial.skyabyss.cell.WR4.desc": "胃液が縦穴の底からゆっくり上がる。骨の鋲を打つと、次の踊り場への階段が少し伸びる。足もとに赤い輪が出たら、胃液が噴き上がる。",
   "trial.skyabyss.cell.WR5": "石の海の床合わせ",
   "trial.skyabyss.cell.WR5.desc": "床の石板は叩くと回る。北の壁の見本どおりに、鯨の骨をつなげる。形は毎回違う。見張り台から見渡せる。",
   "trial.skyabyss.cell.WR6": "縮む輪",

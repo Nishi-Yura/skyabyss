@@ -99,7 +99,7 @@ public final class FacilityExtrasSelfTest {
     private static void dialogues(List<String> f) {
         Map<AttendantRole, List<String>> need = Map.of(
                 AttendantRole.TRAINING_MASTER, List.of("respec_quote", "respec_skills", "respec_skills_coins", "job_room"),
-                AttendantRole.SHRINE_PRIEST, List.of("key_offer", "key_return"),
+                AttendantRole.SHRINE_PRIEST, List.of("shrine_go", "shrine_board", "shrine_vow"),
                 AttendantRole.APOTHECARY, List.of("shop", "brew_lesson"),
                 AttendantRole.GUILD_CLERK, List.of("guild", "guild_storage"));
         need.forEach((role, list) -> {

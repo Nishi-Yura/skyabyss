@@ -87,5 +87,8 @@
   "message.skyabyss.party.finder.posted": "募集を出した。加わった人は、そのまま仲間になる",
   "message.skyabyss.party.finder.not_leader": "募集を出せるのはリーダーだけ",
   "message.skyabyss.party.finder.gone": "その募集はもうない",
-  "message.skyabyss.party.finder.joined": "%s が募集から加わった（%s）"
+  "message.skyabyss.party.finder.joined": "%s が募集から加わった（%s）",
+  "gui.skyabyss.party.quest_main": "メイン: %s",
+  "gui.skyabyss.party.quest_track": "追いかけている: %s",
+  "gui.skyabyss.party.quest_none": "進めているクエストはない"
 }

@@ -62,10 +62,6 @@
       "face": "neutral",
       "next": "menu"
     },
-    "keys": {
-      "face": "neutral",
-      "next": "menu"
-    },
     "vow": {
       "face": "neutral",
       "options": [
@@ -160,52 +156,6 @@
           "goto": "vow"
         },
         {
-          "id": "offer",
-          "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "key_offer"
-            }
-          ],
-          "goto": "end"
-        },
-        {
-          "id": "return",
-          "kind": "talk",
-          "if": {
-            "type": "stage",
-            "min": 1
-          },
-          "do": [
-            {
-              "type": "facility",
-              "open": "key_return"
-            }
-          ],
-          "goto": "end"
-        },
-        {
-          "id": "keys",
-          "kind": "talk",
-          "goto": "keys",
-          "if": {
-            "type": "in_capital"
-          }
-        },
-        {
-          "id": "keys_town",
-          "kind": "talk",
-          "goto": "keys_town",
-          "text": "dialogue.skyabyss.attendant_shrine_priest.menu.keys",
-          "if": {
-            "type": "not",
-            "of": {
-              "type": "in_capital"
-            }
-          }
-        },
-        {
           "id": "about",
           "kind": "talk",
           "goto": "again",
@@ -252,11 +202,6 @@
       "face": "neutral",
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_shrine_priest.rebirth_town"
-    },
-    "keys_town": {
-      "face": "neutral",
-      "next": "menu",
-      "text": "dialogue.skyabyss.attendant_shrine_priest.keys_town"
     },
     "shrine": {
       "face": "neutral",

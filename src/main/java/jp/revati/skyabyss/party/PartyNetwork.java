@@ -116,8 +116,10 @@ public final class PartyNetwork {
                 if (m == null) {
                     members.add(new Member(id.toString(), name, 0, 0, 0, false, false, party.isLeader(id), jp.revati.skyabyss.rebirth.Rebirths.offlineCount(server, id)));
                 } else {
+                    String[] q = quests(m);
                     members.add(new Member(id.toString(), name, Growth.get(m).level, m.getHealth(), m.getMaxHealth(), true,
-                            m.level() == player.level(), party.isLeader(id), jp.revati.skyabyss.rebirth.RebirthView.count(m)));
+                            m.level() == player.level(), party.isLeader(id), jp.revati.skyabyss.rebirth.RebirthView.count(m),
+                            q[0], Integer.parseInt(q[1]), q[2], Integer.parseInt(q[3])));
                 }
             }
         }
@@ -129,6 +131,31 @@ public final class PartyNetwork {
         }
         return new Sync(Progression.stage(player), Progression.levelCap(player), Progression.worldStage(server), next == null ? "" : next,
                 (int) Math.round(Parties.shareRate(server) * 100), members, inv == null ? "" : inv.fromName());
+    }
+
+    // その人の今のメインのクエスト (済んでいないメインのうち、いちばん前の順) と、追いかけているクエスト (メインと違うときだけ)。{main, 段, track, 段}
+    static String[] quests(ServerPlayer m) {
+        jp.revati.skyabyss.quest.QuestLog log = jp.revati.skyabyss.quest.QuestLog.of(m);
+        String main = "";
+        int mainStage = 0;
+        int best = Integer.MAX_VALUE;
+        for (java.util.Map.Entry<String, jp.revati.skyabyss.quest.QuestLog.Entry> e : log.quests().entrySet()) {
+            jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(e.getKey());
+            if (def != null && def.main() && !e.getValue().done && def.order() < best) {
+                best = def.order();
+                main = def.id();
+                mainStage = e.getValue().stage;
+            }
+        }
+        String track = log.tracked();
+        int trackStage = 0;
+        jp.revati.skyabyss.quest.QuestLog.Entry te = track.isEmpty() ? null : log.entry(track);
+        if (te == null || te.done || track.equals(main)) {
+            track = "";
+        } else {
+            trackStage = te.stage;
+        }
+        return new String[] {main, String.valueOf(mainStage), track, String.valueOf(trackStage)};
     }
 
     static void send(ServerPlayer player) {
@@ -221,9 +248,16 @@ public final class PartyNetwork {
     }
 
     // rebirths: 転生の回数 (名前の枠の色と記号に使う。docs/design/31 の C15)
-    public record Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths) {
+    // mainQuest / trackQuest: 今のメインのクエストと、追いかけているクエスト (id と段。2026-11-08 の声「パーティーの味方のいまのクエストも確認できるように」)。
+    // 文はクライアントがクエストの一覧 (QuestClient の catalog) から引く。ないときは空
+    public record Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths,
+                         String mainQuest, int mainStage, String trackQuest, int trackStage) {
         public Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader) {
             this(id, name, level, health, maxHealth, online, sameDim, leader, 0);
+        }
+
+        public Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths) {
+            this(id, name, level, health, maxHealth, online, sameDim, leader, rebirths, "", 0, "", 0);
         }
 
         static void write(FriendlyByteBuf buf, Member m) {
@@ -236,11 +270,15 @@ public final class PartyNetwork {
             buf.writeBoolean(m.sameDim);
             buf.writeBoolean(m.leader);
             buf.writeVarInt(m.rebirths);
+            buf.writeUtf(m.mainQuest, 96);
+            buf.writeVarInt(m.mainStage);
+            buf.writeUtf(m.trackQuest, 96);
+            buf.writeVarInt(m.trackStage);
         }
 
         static Member read(FriendlyByteBuf buf) {
             return new Member(buf.readUtf(64), buf.readUtf(32), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readBoolean(),
-                    buf.readBoolean(), buf.readBoolean(), buf.readVarInt());
+                    buf.readBoolean(), buf.readBoolean(), buf.readVarInt(), buf.readUtf(96), buf.readVarInt(), buf.readUtf(96), buf.readVarInt());
         }
     }
 

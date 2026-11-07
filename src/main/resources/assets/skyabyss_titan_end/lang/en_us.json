@@ -23,5 +23,7 @@
   "message.skyabyss.return_beacon.leaving": "Light closes around you and carries you to the hub.",
   "message.skyabyss.return_beacon.confirm": "Go down to the surface? Use the whistle again within 5 seconds",
   "message.skyabyss.return_beacon.descending": "With the call of the whistle, the ground falls away.",
-  "message.skyabyss.arrival.fell": "You slipped off the edge and were set back in the waiting area"
+  "message.skyabyss.arrival.fell": "You slipped off the edge and were set back in the waiting area",
+  "message.skyabyss.titan_end.gathered": "The heart has stopped. You were called back to the heart chamber with your party",
+  "message.skyabyss.titan_end.back_to_shrine": "The titan's song unravels, and you are back at the shrine"
 }
