@@ -567,15 +567,25 @@ def storm():
         v.put(cx, Y + ht, cz, "minecraft:waxed_copper_block")
         v.put(cx, Y + ht + 1, cz, "minecraft:lightning_rod[facing=up,powered=false,waterlogged=false]")
         tops.append((round(cx), Y + ht, round(cz)))
-        # 外への羽根 (尖塔の外の面から、段に下がる白い羽三枚。根元は尖塔に付ける)
+        # 外への羽根 (尖塔の外の面から、段に下がる白い羽三枚。根元は尖塔に付ける)。
+        # 段どうしは面で接する (斜めに進むときは間に一マス足す。2026-11-07「ハーフブロックがブロックに接していない」)。
+        # 先は上付きの半ブロック (上の段の下付きの半ブロックと面で合う)
         for f in range(3):
             fy = Y + 4 + f * 4
+            prev = None
             for i in range(0, 4 - f):
-                px = cx + math.cos(a) * (1 + i)
-                pz = cz + math.sin(a) * (1 + i)
-                v.put(px, fy - i, pz, "minecraft:white_concrete" if i < 3 - f else sl("polished_diorite"))
+                px = int(round(cx + math.cos(a) * (1 + i)))
+                pz = int(round(cz + math.sin(a) * (1 + i)))
+                tip = i == 3 - f
+                b = sl("polished_diorite", "top") if tip else "minecraft:white_concrete"
+                if prev is not None and prev[0] != px and prev[1] != pz:
+                    # 斜め: 前の段の横に、同じ高さの一マスを足す
+                    v.put(px, fy - i, prev[1], b)
+                    v.put(px, fy - i + 1, prev[1], sl("polished_diorite"))
+                v.put(px, fy - i, pz, b)
                 if i > 0:
                     v.put(px, fy - i + 1, pz, sl("polished_diorite"))
+                prev = (px, pz)
     # 尖塔どうしを結ぶ銅の環 (高さ Y+10。尖塔の中ほど)
     for k in range(8):
         a0, a1 = math.radians(k * 45 + 22.5), math.radians((k + 1) * 45 + 22.5)

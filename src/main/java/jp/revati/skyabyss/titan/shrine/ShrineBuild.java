@@ -30,9 +30,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 final class ShrineBuild {
     private ShrineBuild() {
     }
-
-    // 前の版 (拝殿の祠) から建て直すための版 (TitanShrine.Data の ver)
-    static final int VERSION = 2;
+    // 建て直すための版 (TitanShrine.Data の ver)。2 = 巨神ごとの祠、3 = 雷翼の羽根の段を面でつなぐ (2026-11-07「ハーフブロックが接していない」)
+    static final int VERSION = 3;
     static final int CLEAR_UP = 36;
     static final int FOOT_DOWN = 24;
     static final int PATH_MORE = 16;
