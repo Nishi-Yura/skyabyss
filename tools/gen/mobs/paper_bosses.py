@@ -24,7 +24,7 @@ SRC = ROOT / "tools/sources/paper_bosses"
 
 # 終章・六章・五章のボスと主 (四つの心臓のあと)
 # 淵の主 (lord_*) と月の主 (moon_core ほか) は、2026-11-08 の選定でボスごとの見せ方に替えた (tools/gen/mobs/boss_looks_paint.py)。ここでは塗らない
-BOSSES = ["lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder", "founder",
+BOSSES = ["lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder",
           ]
 # 心臓の番人 (heart_warden) は 2026-11-08 に「錆の門番 B 鍵持ちの騎士」で作り直した (tools/rough/lowpoly/abyss/warden_knight.py)
 # 深みの王 (king_*) は 2026-11-08 に「喪服の王」の形で作り直した (tools/rough/lowpoly/abyss/king_mourning.py)。色は形の材質のまま

@@ -1,0 +1,41 @@
+# (番人は光の中でだけ見えるので灯籠を置く。始祖は闘技場の外では消えるので、ここでは写らない)
+# 作り直した三体 (2026-11-08): 深みの王 = 喪服の王 C 冠の檻、心臓の番人 = 錆の門番 B 鍵持ちの騎士、始祖 = 雲の喪章 C 霧の巡礼
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/boss_reshape.txt -PshotsName=boss_reshape
+world boss_reshape flat
+size 1600 900
+timeout 1800
+render 8
+guiscale 2
+wait 80
+cmd skyabyss cinematic stop
+close
+cmd time set 13000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd fill -40 -61 -10 40 -61 40 minecraft:polished_blackstone
+hud off
+chat clear
+cmd effect give @s minecraft:resistance 1000000 4 true
+cmd skyabyss abyss boss king_salt 0 - 40 9
+wait 30
+cmd gamemode spectator
+cmd tp @s 0 -55 -6 0 8
+wait 60
+shot king_salt
+cmd tp @s 8 -55 -3 30 8
+wait 30
+shot king_salt_34
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd setblock 2 -60 7 minecraft:lantern
+cmd setblock -2 -60 7 minecraft:lantern
+cmd summon skyabyss:heart_warden 0 -60 10 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:founder 12 -60 10 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd tp @s 0 -56 0 0 6
+wait 60
+shot warden
+cmd tp @s 12 -57 3 0 6
+wait 40
+shot founder
+echo done
+quit

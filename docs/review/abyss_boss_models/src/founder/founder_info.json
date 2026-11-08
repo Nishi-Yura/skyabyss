@@ -1,0 +1,26 @@
+{
+ "name": "founder",
+ "tris": 3354,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [
+  "hipbell_clap"
+ ],
+ "bones": {
+  "root": 0,
+  "body": 1432,
+  "head": 632,
+  "arm_l": 162,
+  "arm_r": 162,
+  "pole": 394,
+  "shawl": 456,
+  "hipbell": 68,
+  "leg_l": 24,
+  "leg_r": 24
+ },
+ "glow": 1026,
+ "height": 46.2
+}

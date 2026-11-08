@@ -244,7 +244,7 @@
 ### 6.7 作ったもの
 - story/ch5/warden: HeartWarden（番人）・AbyssBeacons（灯籠）・WardenArena（間に入ると目覚める、倒した印、合図 abyss_heart、間が 30 秒空くと戻る）・WardenSetup（登録）。
 - 闇のたまり 2 倍は AbyssPressure.voiceScale（間の中で灯籠が全部消えているとき）。
-- 見た目: 案 B の本番モデル（client/WardenRenderer、生成 tools/rough/lowpoly/abyss/warden_model.py・tools/gen/world/gen_heart_warden.py）。絵は 2026-10-28 の選定 A 古い骨（茶色い古い染み・刻みの線・ひび。warden_paint.py）、背の棘五本と胸の前に出た肋の先六本、描く大きさ 1.35 倍（当たりの箱 1.9 × 4.3）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。動きは待ち・歩き・爪・踏み込み・吹き消し・段の変わり・被弾・死。魂の粒は添えだけ。
+- 見た目: 「錆の門番」B 鍵持ちの騎士（2026-11-08 の選定。ラフ docs/review/roughs_abyss/reshape_warden.png、形 tools/rough/lowpoly/abyss/warden_knight.py --install）。錆びた鎧の古い骨の騎士。胸当ての鍵穴の形の切れ目の奥に骨の肋と青緑に光る心臓、兜の鍵穴の覗き窓が光る、右手に背丈ほどの大鍵（頭の輪に青緑の宝石）、背に鎖の外套。骨と動きは前のまま（client/WardenRenderer、描く大きさ 1.35 倍、当たりの箱 1.9 × 4.3）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。光の中でだけ、背に青緑の輪の後光と落ちる錆の粉（client/entity/PaperCutLayer の WARDEN。闇では出さない）。
 - 開発用: `/skyabyss abyss warden wake`・`/skyabyss abyss warden reset`。自己テスト "abyss warden"。
 - 絵: 光の中だけ見える目（頭蓋の前の二つの光の切れ目）、虚の体に浮かぶ細い筋の網、肋の骨のひびの淡い青緑の光（発光マスク）。爪・踏み込みは予告が終わる瞬間（18・22 tick）に当たる形で、溜めの震えと行き過ぎがある。倒れる動きはのけぞり → 膝が折れる → 沈んで溶ける。
 - 倒したあとの場面 `abyss_warden_fallen`（12 秒。倒れる番人と心臓の台から、肋をなぞって丸天井を見上げる。一人に一度。`SectionScenes`）。報酬は深淵の装備（`AbyssGearLoot.warden`）。
@@ -504,6 +504,8 @@
 | 星のない空洞 | 天井に疎らな光 | 黒い壁・端の石煉瓦・紫水晶・光石 |
 
 ### 9.4 歪んだ王の階（5 階ごと。実装: `DepthBoss`）
+
+- **見た目（2026-11-08）**: 五つの王は同じ形「喪服の王」C 冠の檻（ラフ docs/review/roughs_abyss/reshape_king.png、形 tools/rough/lowpoly/abyss/king_mourning.py → tools/gen/abyss/gen_abyss_boss_models.py で入れる）。深い紫の天鵞絨の衣と金の縁、裾は帯に裂けて引きずる、頭を包む金の檻の冠（冠の骨で回る）、下の一対の腕が弔いの花輪を抱える。元素ごとの差し（骨 = 冠の棘と肩の肋、塩 = 結晶、雷 = 銅の針、灰 = 燠の灯し、影 = 影の糸）と光る色。周が進むと背に骨の喪の扇、胸の割れ目の光。骨と動きは衣の人型（humanoid(robe=True)）を五つとも使う。ゲームでは冠の上に二重の金の輪の後光と降る黒い花びら（PaperCutLayer の KING）。
 
 - **王の正体**: 王は、錨から漏れた鼓動の写し（骨＝岩鯨・塩＝潮殻・雷＝雷翼・灰＝余燼の拍。影は漏れた拍が前の私の形をなぞったもの）。王の階の入口のそばに前の私の手記の碑が一枚立ち（`DepthBuilder.placeNote`。文は `sign.skyabyss.depth_note_<型>`）、王が目を覚ますと心の声で一行言い切る（`message.skyabyss.depths.king.reveal.<型>`）
 

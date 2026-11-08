@@ -26,6 +26,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 //   螺鈿の月 (MOON) : 六章の月の主。背に銀の三日月、星屑がきらめく
 //   喪服の王 (KING) : 五章の深みの王。冠の上に二重の金の輪 (逆に回る)、黒い花びらが降る
 //   錆の門番 (WARDEN): 心臓の番人。背に深淵の青緑の輪 (鍵穴の後光)、錆の粉が落ちる
+//   雲の喪章 (FOUNDER): 終章の始祖 (霧の巡礼)。白い羽根が降る (後光はなし)
 // 体の大きさに合わせて半径と高さを決める。倒れているあいだは出さない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PaperCutLayer {
@@ -33,13 +34,13 @@ public final class PaperCutLayer {
     static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_ring.png");
     static final ResourceLocation CRESCENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_crescent.png");
     static final Set<String> TYPES = Set.of("lamp_eye", "last_bellkeeper",
-            "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder", "founder");
+            "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder");
     static final Set<String> MOONS = Set.of("full_keeper", "moon_core", "moon_scale", "shadow_embracer", "waning_blade");
     // 淵の主の色 (BossLook.LORD_RIB.. の順): 肋 = 骨の金白、塩 = 潮の青緑、嵐 = 紫、灰 = 熾の橙
     static final int[] LORD_RGB = {0xFFE296, 0x5AE6D2, 0xB088FF, 0xFF963C};
     static final int COUNT = 10;
 
-    public enum Style { NONE, PAPER, LORD, MOON, KING, WARDEN }
+    public enum Style { NONE, PAPER, LORD, MOON, KING, WARDEN, FOUNDER }
 
     private PaperCutLayer() {
     }
@@ -54,7 +55,13 @@ public final class PaperCutLayer {
             return Style.NONE;
         }
         if (key.getPath().equals("heart_warden")) {
-            return Style.WARDEN;
+            // 番人は光の中でだけ見える (闇の中で後光が居場所を明かさない)
+            boolean seen = e instanceof jp.revati.skyabyss.story.ch5.warden.HeartWarden w && !w.decoy()
+                    && (w.lit() || w.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING));
+            return seen ? Style.WARDEN : Style.NONE;
+        }
+        if (key.getPath().equals("founder")) {
+            return Style.FOUNDER;
         }
         if (MOONS.contains(key.getPath())) {
             return Style.MOON;
@@ -194,7 +201,7 @@ public final class PaperCutLayer {
                 continue;
             }
             Style st = style(e);
-            if (st != Style.LORD && st != Style.MOON && st != Style.KING && st != Style.WARDEN) {
+            if (st == Style.NONE || st == Style.PAPER) {
                 continue;
             }
             var r = e.getRandom();
@@ -208,6 +215,12 @@ public final class PaperCutLayer {
                     int c = lordRgb(e);
                     mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(
                             new org.joml.Vector3f(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f), 1.1f), px, py, pz, 0, 0.04, 0);
+                } else if (st == Style.FOUNDER) {
+                    // 白い羽根: 頭の上から、揺れながら落ちる (1 tick おきに一つだけ)
+                    if (i == 0) {
+                        mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.96f, 0.96f, 1f), 1.8f),
+                                px, e.getY() + h * (1.0 + r.nextDouble() * 0.5), pz, (r.nextDouble() - 0.5) * 0.04, -0.025, 0);
+                    }
                 } else if (st == Style.WARDEN) {
                     mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.45f, 0.22f, 0.12f), 0.9f), px, py, pz, 0, -0.02, 0);
                 } else if (st == Style.KING) {
