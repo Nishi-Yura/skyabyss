@@ -26,15 +26,17 @@ import net.neoforged.fml.common.EventBusSubscriber;
 //   螺鈿の月 (MOON) : 六章の月の主。背に銀の三日月、星屑がきらめく
 //   喪服の王 (KING) : 五章の深みの王。冠の上に二重の金の輪 (逆に回る)、黒い花びらが降る
 //   錆の門番 (WARDEN): 心臓の番人。背に深淵の青緑の輪 (鍵穴の後光)、錆の粉が落ちる
-//   雲の喪章 (FOUNDER): 終章の始祖 (霧の巡礼)。白い羽根が降る (後光はなし)
+//   雲の喪章 (FOUNDER): 終章の主たち (始祖・最後の鐘守・巡礼者・巻き戻す者・灯の目)。白い羽根が降る (後光はなし)
 // 体の大きさに合わせて半径と高さを決める。倒れているあいだは出さない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PaperCutLayer {
     static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/paper_cut.png");
     static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_ring.png");
     static final ResourceLocation CRESCENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_crescent.png");
-    static final Set<String> TYPES = Set.of("lamp_eye", "last_bellkeeper",
-            "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder");
+    // 切り絵 (PAPER) で描くボスは今はない (2026-11-08 にボスごとの見せ方へ替えた)。名前の組だけ残す
+    static final Set<String> TYPES = Set.of();
+    // 終章の主たち (雲の喪章。始祖と同じく白い羽根が降る)
+    static final Set<String> CLOUDS = Set.of("founder", "lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder");
     static final Set<String> MOONS = Set.of("full_keeper", "moon_core", "moon_scale", "shadow_embracer", "waning_blade");
     // 淵の主の色 (BossLook.LORD_RIB.. の順): 肋 = 骨の金白、塩 = 潮の青緑、嵐 = 紫、灰 = 熾の橙
     static final int[] LORD_RGB = {0xFFE296, 0x5AE6D2, 0xB088FF, 0xFF963C};
@@ -60,7 +62,7 @@ public final class PaperCutLayer {
                     && (w.lit() || w.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING));
             return seen ? Style.WARDEN : Style.NONE;
         }
-        if (key.getPath().equals("founder")) {
+        if (CLOUDS.contains(key.getPath())) {
             return Style.FOUNDER;
         }
         if (MOONS.contains(key.getPath())) {
