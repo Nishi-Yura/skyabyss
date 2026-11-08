@@ -508,12 +508,14 @@ def king_set(idle, walk, attack, phase, death, moves):
     return out
 
 
+# 2026-11-08 の選定で、五つの王は同じ形 (喪服の王 C 冠の檻。tools/rough/lowpoly/abyss/king_mourning.py。骨は灰の王と同じ) になった。
+# 動きも同じ衣の人型 (humanoid(robe=True))。前の雷の柱・影の這いずりの動きは使わない (関数は残す)
 def king_bone():
-    return humanoid()
+    return humanoid(robe=True)
 
 
 def king_salt():
-    return humanoid()
+    return humanoid(robe=True)
 
 
 def king_ash():
@@ -632,15 +634,15 @@ MODELS = {
     "king_salt_c0": ("king_salt", king_salt, None, {}),
     "king_salt_c1": ("king_salt", king_salt, None, {}),
     "king_salt_c2": ("king_salt", king_salt, None, {}),
-    "king_storm_c0": ("king_storm", king_storm, None, {}),
-    "king_storm_c1": ("king_storm", king_storm, None, {}),
-    "king_storm_c2": ("king_storm", king_storm, None, {}),
+    "king_storm_c0": ("king_storm", king_ash, None, {}),
+    "king_storm_c1": ("king_storm", king_ash, None, {}),
+    "king_storm_c2": ("king_storm", king_ash, None, {}),
     "king_ash_c0": ("king_ash", king_ash, "ember_keeper", {"telegraph": "telegraph", "heat": "heat", "hurt": "hurt", "death": "death"}),
     "king_ash_c1": ("king_ash", king_ash, "ember_keeper", {"telegraph": "telegraph", "heat": "heat", "hurt": "hurt", "death": "death"}),
     "king_ash_c2": ("king_ash", king_ash, "ember_keeper", {"telegraph": "telegraph", "heat": "heat", "hurt": "hurt", "death": "death"}),
-    "king_shadow_c0": ("king_shadow", king_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
-    "king_shadow_c1": ("king_shadow", king_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
-    "king_shadow_c2": ("king_shadow", king_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
+    "king_shadow_c0": ("king_shadow", king_ash, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
+    "king_shadow_c1": ("king_shadow", king_ash, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
+    "king_shadow_c2": ("king_shadow", king_ash, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
 }
 
 

@@ -64,9 +64,16 @@
       "0"
      ]
     },
-    "jaw": {
+    "crown": {
      "rotation": [
-      "math.max(0, math.sin(query.anim_time * 120 + 0) * 5)",
+      "0",
+      "query.anim_time * 30",
+      "0"
+     ]
+    },
+    "robe_f": {
+     "rotation": [
+      "math.sin(query.anim_time * 60 + 0) * 2",
       "0",
       "0"
      ]
@@ -79,78 +86,85 @@
    "bones": {
     "leg_l": {
      "rotation": [
-      "math.sin(query.anim_time * 240 + 0) * 22",
+      "math.sin(query.anim_time * 200 + 0) * 16",
       "0",
       "0"
      ],
      "position": [
       0,
-      "math.abs(math.sin(query.anim_time * 240 + 0) * 2)",
+      "math.abs(math.sin(query.anim_time * 200 + 0) * 2)",
       0
      ]
     },
     "leg_r": {
      "rotation": [
-      "math.sin(query.anim_time * 240 + 0) * 22",
+      "math.sin(query.anim_time * 200 + 0) * 16",
       "0",
       "0"
      ],
      "position": [
       0,
-      "math.abs(math.sin(query.anim_time * 240 + 0) * 2)",
+      "math.abs(math.sin(query.anim_time * 200 + 0) * 2)",
       0
      ]
     },
-    "shin_l": {
+    "robe_f": {
      "rotation": [
-      "math.max(0, math.sin(query.anim_time * 240 + 60) * 28)",
+      "math.abs(math.sin(query.anim_time * 200 + 0) * -10)",
       "0",
       "0"
      ]
     },
-    "shin_r": {
+    "robe_b": {
      "rotation": [
-      "math.max(0, math.sin(query.anim_time * 240 + 240) * 28)",
+      "math.abs(math.sin(query.anim_time * 200 + 0) * 8)",
       "0",
       "0"
+     ]
+    },
+    "crown": {
+     "rotation": [
+      "0",
+      "query.anim_time * 60",
+      "math.sin(query.anim_time * 200 + 0) * 3"
      ]
     },
     "body": {
      "rotation": [
       "0",
-      "math.sin(query.anim_time * 240 + 0) * 5",
-      "math.sin(query.anim_time * 240 + 0) * 3"
+      "math.sin(query.anim_time * 200 + 0) * 5",
+      "math.sin(query.anim_time * 200 + 0) * 3"
      ],
      "position": [
       0,
-      "math.abs(math.sin(query.anim_time * 240 + 0) * 1)*0.8",
+      "math.abs(math.sin(query.anim_time * 200 + 0) * 1)*0.8",
       0
      ]
     },
     "chest": {
      "rotation": [
       "-5",
-      "math.sin(query.anim_time * 240 + 180) * 6",
+      "math.sin(query.anim_time * 200 + 180) * 6",
       "0"
      ]
     },
     "arm_l": {
      "rotation": [
-      "math.sin(query.anim_time * 240 + 180) * 18",
+      "math.sin(query.anim_time * 200 + 180) * 18",
       "0",
       "0"
      ]
     },
     "arm_r": {
      "rotation": [
-      "math.sin(query.anim_time * 240 + 0) * 18",
+      "math.sin(query.anim_time * 200 + 0) * 18",
       "0",
       "0"
      ]
     },
     "head": {
      "rotation": [
-      "math.sin(query.anim_time * 480 + 90) * 3",
+      "math.sin(query.anim_time * 400 + 90) * 3",
       "0",
       "0"
      ]
@@ -437,27 +451,39 @@
       ]
      }
     },
-    "jaw": {
+    "crown": {
      "rotation": {
       "0.00": [
        0,
        0,
        0
       ],
-      "0.40": [
-       -36,
-       0,
-       0
-      ],
-      "1.60": [
-       -36,
-       0,
-       0
-      ],
       "2.00": [
        0,
-       0,
+       -720,
        0
+      ]
+     },
+     "scale": {
+      "0.00": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "0.40": [
+       1.25,
+       1.25,
+       1.25
+      ],
+      "1.60": [
+       1.25,
+       1.25,
+       1.25
+      ],
+      "2.00": [
+       1.0,
+       1.0,
+       1.0
       ]
      }
     }
@@ -617,60 +643,34 @@
       ]
      }
     },
-    "shin_l": {
+    "crown": {
      "rotation": {
       "0.00": [
        0,
        0,
        0
       ],
-      "0.70": [
-       -100,
+      "1.40": [
+       -30,
        0,
-       0
+       20
       ],
       "2.20": [
-       -110,
+       -60,
        0,
-       0
+       40
       ]
-     }
-    },
-    "shin_r": {
-     "rotation": {
+     },
+     "position": {
       "0.00": [
        0,
        0,
        0
       ],
-      "0.70": [
-       -94,
-       0,
-       0
-      ],
       "2.20": [
-       -116,
        0,
-       0
-      ]
-     }
-    },
-    "jaw": {
-     "rotation": {
-      "0.00": [
-       0,
-       0,
-       0
-      ],
-      "1.00": [
-       -40,
-       0,
-       0
-      ],
-      "2.20": [
-       -40,
-       0,
-       0
+       -4,
+       -6
       ]
      }
     }
@@ -1315,7 +1315,7 @@
       ]
      }
     },
-    "jaw": {
+    "crown": {
      "rotation": {
       "0.00": [
        0,
@@ -1323,8 +1323,8 @@
        0
       ],
       "2.00": [
-       -30,
        0,
+       -180,
        0
       ]
      }

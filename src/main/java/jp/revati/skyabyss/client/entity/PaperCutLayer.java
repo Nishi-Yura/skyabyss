@@ -24,6 +24,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 //   切り絵 (PAPER)  : B 切り絵の悪夢。切り抜いた紙の菱形 (生成りと桃色) を浮かせて回す (tools/gen/mobs/paper_bosses.py が体を塗る)。深みの王・番人・終章
 //   金継ぎ (LORD)   : 五章の淵の主。頭の後ろに巨神の色の輪の後光 (ゆっくり回る)、熾の粉が昇る (tools/gen/mobs/boss_looks_paint.py が体を塗る)
 //   螺鈿の月 (MOON) : 六章の月の主。背に銀の三日月、星屑がきらめく
+//   喪服の王 (KING) : 五章の深みの王。冠の上に二重の金の輪 (逆に回る)、黒い花びらが降る
+//   錆の門番 (WARDEN): 心臓の番人。背に深淵の青緑の輪 (鍵穴の後光)、錆の粉が落ちる
 // 体の大きさに合わせて半径と高さを決める。倒れているあいだは出さない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PaperCutLayer {
@@ -31,13 +33,13 @@ public final class PaperCutLayer {
     static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_ring.png");
     static final ResourceLocation CRESCENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_crescent.png");
     static final Set<String> TYPES = Set.of("lamp_eye", "last_bellkeeper",
-            "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder", "founder", "heart_warden");
+            "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder", "founder");
     static final Set<String> MOONS = Set.of("full_keeper", "moon_core", "moon_scale", "shadow_embracer", "waning_blade");
     // 淵の主の色 (BossLook.LORD_RIB.. の順): 肋 = 骨の金白、塩 = 潮の青緑、嵐 = 紫、灰 = 熾の橙
     static final int[] LORD_RGB = {0xFFE296, 0x5AE6D2, 0xB088FF, 0xFF963C};
     static final int COUNT = 10;
 
-    public enum Style { NONE, PAPER, LORD, MOON }
+    public enum Style { NONE, PAPER, LORD, MOON, KING, WARDEN }
 
     private PaperCutLayer() {
     }
@@ -45,11 +47,14 @@ public final class PaperCutLayer {
     public static Style style(LivingEntity e) {
         if (e instanceof jp.revati.skyabyss.entity.GuardMob g && g.bossLook() != 0) {
             int id = BossLook.id(g.bossLook());
-            return id >= BossLook.LORD_RIB && id <= BossLook.LORD_ASH ? Style.LORD : Style.PAPER;
+            return id >= BossLook.LORD_RIB && id <= BossLook.LORD_ASH ? Style.LORD : Style.KING;
         }
         ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(e.getType());
         if (!key.getNamespace().equals(SkyAbyss.MODID)) {
             return Style.NONE;
+        }
+        if (key.getPath().equals("heart_warden")) {
+            return Style.WARDEN;
         }
         if (MOONS.contains(key.getPath())) {
             return Style.MOON;
@@ -100,6 +105,8 @@ public final class PaperCutLayer {
                 case PAPER -> draw(pose, buf.getBuffer(RenderType.entityCutoutNoCull(TEX)), e, t);
                 case LORD -> halo(pose, buf.getBuffer(RenderType.eyes(RING)), e, t, face, cam, x, y, z, lordRgb(e), 0.86f, true);
                 case MOON -> halo(pose, buf.getBuffer(RenderType.eyes(CRESCENT)), e, t, face, cam, x, y, z, 0xDCEBFF, 0.66f, false);
+                case WARDEN -> halo(pose, buf.getBuffer(RenderType.eyes(RING)), e, t, face, cam, x, y, z, 0x5AE6D2, 0.78f, true);
+                case KING -> halo(pose, buf.getBuffer(RenderType.eyes(RING)), e, t, face, cam, x, y, z, 0xE6B85A, 1.02f, true);
                 default -> {
                 }
             }
@@ -187,7 +194,7 @@ public final class PaperCutLayer {
                 continue;
             }
             Style st = style(e);
-            if (st != Style.LORD && st != Style.MOON) {
+            if (st != Style.LORD && st != Style.MOON && st != Style.KING && st != Style.WARDEN) {
                 continue;
             }
             var r = e.getRandom();
@@ -201,6 +208,12 @@ public final class PaperCutLayer {
                     int c = lordRgb(e);
                     mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(
                             new org.joml.Vector3f(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f), 1.1f), px, py, pz, 0, 0.04, 0);
+                } else if (st == Style.WARDEN) {
+                    mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.45f, 0.22f, 0.12f), 0.9f), px, py, pz, 0, -0.02, 0);
+                } else if (st == Style.KING) {
+                    // 黒い花びら: 頭の上から、ゆっくり落ちる
+                    mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.12f, 0.03f, 0.14f), 1.6f),
+                            px, e.getY() + h * (1.1 + r.nextDouble() * 0.4), pz, 0, -0.03, 0);
                 } else {
                     mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.END_ROD, px, py, pz, 0, 0.01, 0);
                 }

@@ -1,27 +1,27 @@
 {
  "name": "king_bone_c1",
- "tris": 3678,
+ "tris": 5318,
  "atlas": [
-  512,
+  1024,
   512
  ],
  "open": 0,
  "floating": [],
  "bones": {
   "root": 0,
-  "body": 216,
-  "chest": 1382,
-  "head": 670,
-  "jaw": 44,
-  "arm_l": 114,
-  "fore_l": 452,
-  "arm_r": 114,
-  "fore_r": 306,
-  "leg_l": 38,
-  "shin_l": 152,
-  "leg_r": 38,
-  "shin_r": 152
+  "body": 188,
+  "robe_f": 366,
+  "robe_b": 342,
+  "chest": 1806,
+  "head": 424,
+  "crown": 1060,
+  "arm_l": 152,
+  "fore_l": 342,
+  "arm_r": 152,
+  "fore_r": 342,
+  "leg_l": 72,
+  "leg_r": 72
  },
- "glow": 11308,
- "height": 60.8
+ "glow": 7508,
+ "height": 60.5
 }

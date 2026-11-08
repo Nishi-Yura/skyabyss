@@ -1,0 +1,26 @@
+{
+ "name": "heart_warden",
+ "tris": 6310,
+ "atlas": [
+  512,
+  512
+ ],
+ "open": 0,
+ "floating": [
+  "rivet-12",
+  "rivet12"
+ ],
+ "bones": {
+  "root": 0,
+  "body": 646,
+  "ribs": 2686,
+  "heart": 120,
+  "head": 452,
+  "arm_l": 518,
+  "arm_r": 1104,
+  "leg_l": 392,
+  "leg_r": 392
+ },
+ "glow": 2790,
+ "height": 56.4
+}

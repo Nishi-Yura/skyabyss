@@ -1,6 +1,6 @@
 {
  "name": "king_storm_c1",
- "tris": 2186,
+ "tris": 5232,
  "atlas": [
   1024,
   512
@@ -8,13 +8,20 @@
  "open": 0,
  "floating": [],
  "bones": {
-  "root": 60,
-  "body": 876,
-  "head": 652,
-  "halo": 246,
-  "arm_l": 176,
-  "arm_r": 176
+  "root": 0,
+  "body": 188,
+  "robe_f": 366,
+  "robe_b": 342,
+  "chest": 1806,
+  "head": 424,
+  "crown": 1190,
+  "arm_l": 44,
+  "fore_l": 342,
+  "arm_r": 44,
+  "fore_r": 342,
+  "leg_l": 72,
+  "leg_r": 72
  },
- "glow": 47562,
- "height": 70.4
+ "glow": 7567,
+ "height": 60.5
 }
