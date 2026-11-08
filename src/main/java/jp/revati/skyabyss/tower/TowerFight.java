@@ -666,7 +666,7 @@ public final class TowerFight {
                     jp.revati.skyabyss.combat.TelegraphShape shape = z.kind == Zone.CIRCLE ? jp.revati.skyabyss.combat.TelegraphShape.circle(z.cx, z.cz, z.r)
                             : jp.revati.skyabyss.combat.TelegraphShape.line(z.x0, z.cz, 0, z.x1 - z.x0, (z.z1 - z.z0) / 2);
                     var b = jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(z.y).warn((int) (z.at - now)).owner(master).victims(pl -> false);
-                    (z.share ? b.safe() : b.danger()).start();
+                    (z.share ? b.goal() : b.danger()).start();
                 }
                 if ((z.at - now) % (z.at - now <= 10 ? 2 : 4) == 0) {
                     z.draw(level, rng);

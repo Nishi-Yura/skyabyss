@@ -1005,7 +1005,8 @@ public class StoneWhaleHeart extends HeartBoss {
             chainY = floorY();
             sound(server, MobSounds.STONE_HEART_CHAIN.get(), 2.5f, 1.0f);
             int count = chainCount(present(server));
-            double span = Math.PI * 2 / count;
+            // 段階 3 (と憤怒) は輪をぐるりと一周 (跳んでかわす)。段階 1・2 は半周で、鎖のあいだに逃げ場が残る
+            double span = getPhase() >= 2 ? Math.PI * 2 / count : Math.PI / count;
             double base = Telegraph.angleOf(forward(attackYaw));
             for (int i = 0; i < count; i++) {
                 double mid = base + Math.PI * 2 * i / count;

@@ -600,6 +600,17 @@ public final class WorldEvents {
                         .then(Commands.literal("end").executes(c -> {
                             leave(c.getSource().getServer().overworld());
                             return 1;
+                        }))
+                        // 見た目の確かめ: いる所の前に、封じの輪と同じ金色の「ここに立つ」印を三つ (10 秒)
+                        .then(Commands.literal("goalrings").executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            for (int i = 0; i < 3; i++) {
+                                double a = Math.PI / 2 + (i - 1) * 0.7;
+                                jp.revati.skyabyss.combat.Telegraph.in(p.serverLevel(), jp.revati.skyabyss.combat.TelegraphShape.circle(
+                                        p.getX() - Math.cos(a) * 7 * (i == 1 ? 1.3 : 1), p.getZ() - Math.sin(a) * 7 * (i == 1 ? 1.3 : 1), WorldEventFight.SEAL_RADIUS))
+                                        .floor(p.getY()).warn(0).active(200).goal().start();
+                            }
+                            return 1;
                         }))));
     }
 }

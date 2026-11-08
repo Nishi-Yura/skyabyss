@@ -336,7 +336,7 @@
   - `TideHeartRenderer.GlowLayer`（`AutoGlowingGeoLayer` の代わり）: 基のテクスチャは残し、`_glowmask` の色を `RenderType.eyes`（陰なし・足し合わせ）で重ねる。光る画素は 256 / 964 / 2192。
   - `tools/install/install_tide_heart.py` の `pearlize`: 殻と心臓の彩りの薄い画素を段階ごとの真珠の色へ寄せる（段階 1 薄紫の真珠 (230, 220, 240)、段階 2 真珠の白 (238, 230, 234)、段階 3 銀青がかった白 (222, 228, 244)）。珊瑚の赤・血管の紫・フジツボはそのまま。
   - 光る色: 段階 1・2 の核と光る部屋は青緑、段階 3 の三日月と核は白銀、水滴の輪は青みの白銀。バーの色と合わせた。
-- **ボスバー**: 右の数は体力の数「1,240/3,000」（画面の数 `Hp.whole`。持ち主が見つからないときだけ割合。`PhasedBossBar.hpText`。岩鯨・中ボス・鍛え手・雷獣のバーも同じ。2026-11-08 の声「敵のhp表記、数値にして」）。共通部品 `client/titan/PhasedBossBar`（テクスチャの名前の頭と段階の色を受け取る。岩鯨の `StoneWhaleHeartBar` は変えていない）。潮殻は `TideHeartClient.BAR`、絵は `tools/gen/world/gen_tide_heart_bar.py`。段階 1 は珊瑚の赤の縁にフジツボの粒・青緑の帯、段階 2 は真珠の白の縁に波・白い帯（`TideHeartClient.BAR` と生成の P2 の色だけ）、段階 3 は深い青の縁に銀の線と三日月・銀青の帯。境目の印は貝・真珠・水滴。
+- **ボスバー**: 体力の数「1,240/3,000」を帯の真ん中に小さく重ねる（一段目の名前・段の名と重ならないように）（画面の数 `Hp.whole`。持ち主が見つからないときだけ割合。`PhasedBossBar.hpText`。岩鯨・中ボス・鍛え手・雷獣のバーも同じ。2026-11-08 の声「敵のhp表記、数値にして」）。共通部品 `client/titan/PhasedBossBar`（テクスチャの名前の頭と段階の色を受け取る。岩鯨の `StoneWhaleHeartBar` は変えていない）。潮殻は `TideHeartClient.BAR`、絵は `tools/gen/world/gen_tide_heart_bar.py`。段階 1 は珊瑚の赤の縁にフジツボの粒・青緑の帯、段階 2 は真珠の白の縁に波・白い帯（`TideHeartClient.BAR` と生成の P2 の色だけ）、段階 3 は深い青の縁に銀の線と三日月・銀青の帯。境目の印は貝・真珠・水滴。
 - **戦いの部屋** `TideHeartArena`: 3.6節。満ち潮は床の段に水を外から内へ 1 秒で置き、6 秒満ち、0.6 秒で引く（放棄・撃破ではすぐ引く）。
 - **共通部品** `titan/BossRoom`: 5 秒の集合（戸口と前室の人も入れる）、封印、部屋の外へ出たボスを戻す、内側に誰もいなくて 3 秒で放棄、撃破の報告なしに消えたら 5 秒待ってやり直す、倒れて前室から戻った参加者を通す。ピースフルでは集合しない。
 - **撃破のあと**: 入口が開き、中央に光の柱（立つと地上へ運び出される）。`Progression.onTitanStopped(…, "tide_shell")`（雷翼の出現と乗る資格、レベル上限）。フック: クエストの合図 `tide_heart_stilled`、伝承 `chapter1/tide_heart_stilled`（潮の止まる刻。文は `skyabyss_tide`）。

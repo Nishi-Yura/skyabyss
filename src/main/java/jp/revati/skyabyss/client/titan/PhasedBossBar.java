@@ -49,9 +49,6 @@ public final class PhasedBossBar {
             Component label = roaring ? Component.translatable(style.roaringKey()) : Component.translatable(style.phaseKey() + n);
             g.drawString(mc.font, label, labelX, y + 4, roaring ? style.roaringColor() : style.label()[p], true);
         }
-        String percent = hpText(mc, boss);
-        g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
-
         int barY = y + ICON + 2;
         g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + style.frame() + "_frame_p" + n + ".png"),
                 x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);
@@ -63,6 +60,18 @@ public final class PhasedBossBar {
             g.fill(left, top, left + fill, top + TRACK_H, 0xFF000000 | style.fill()[p]);
             g.fill(left, top, left + fill, top + 1, 0xFF000000 | style.fillTop()[p]);
         }
+        drawHp(g, mc, boss, x, barY + TRACK_Y + TRACK_H / 2);
+    }
+
+    // 体力の数を、帯の真ん中に小さく重ねる (一段目の名前・段の名と重ならないように。2026-11-08 の画面で「第一段階」と数が重なっていた)
+    public static void drawHp(GuiGraphics g, Minecraft mc, BossEvent boss, int x, int midY) {
+        String text = hpText(mc, boss);
+        float scale = 0.75f;
+        g.pose().pushPose();
+        g.pose().translate(x + WIDTH / 2f - mc.font.width(text) * scale / 2f, midY - 4 * scale, 200);
+        g.pose().scale(scale, scale, 1f);
+        g.drawString(mc.font, text, 0, 0, 0xFFFFFF, true);
+        g.pose().popPose();
     }
 
     // 帯の右の数: 持ち主の体力「1,240 / 3,000」(画面の数。Hp.SHOWN 倍)。持ち主が見つからなければ割合

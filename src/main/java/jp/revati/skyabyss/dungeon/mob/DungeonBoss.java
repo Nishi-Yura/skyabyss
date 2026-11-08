@@ -59,31 +59,16 @@ public abstract class DungeonBoss extends RegionBoss {
     public static final int STUCK_LIMIT = 60;
     public static final int BLIND_LIMIT = 80;
     static final int UNSTICK_GAP = 160;
-    // 後半の場の技 (combat/FieldHazards) の間 (tick)。荒ぶると短く
+    // 後半の場の技 (combat/FieldHazards) の間 (tick)
     public static final int HAZARD_GAP = 90;
-    public static final int HAZARD_GAP_RAGE = 60;
-    // 封じ (四体の主だけ。雷の大事件の大いなるもの (endgame/WorldEventFight) と同じ流れ。2026-11-08 の声
-    // 「中ダンジョンのボスの攻撃、雷の大事件で出てくるデカい敵くらいの作り込みがいい」):
-    //   体力が SEAL_AT を切ると守りを張り (受ける傷 ×SEALED)、主の間に封じの輪が三つ出る。輪の中に立つと満ちる (一人 1 秒に SEAL_FILL)。
-    //   三つ満ちると守りが割れ、膝をつく (崩れ。KNEEL tick)。SEAL_LAST で満ちなければ守りは割れるが荒ぶる。封じのあいだは ADDS_EVERY ごとに手下が来る
-    //   体力が RAGE_AT を切ると (または封じに間に合わないと) 荒ぶる: 足が速く、場の技の間が短い
-    public static final float[] SEAL_AT = {0.66f, 0.33f};
-    public static final float SEALED = 0.1f;
-    public static final int SEAL_LAST = 45 * 20;
-    public static final double SEAL_RADIUS = 2.6;
-    public static final float SEAL_FILL = 0.25f / 20f;
-    public static final int ADDS_EVERY = 12 * 20;
-    public static final float RAGE_AT = 0.25f;
-    public static final int KNEEL = 160;
-    static final ResourceLocation RAGE_SPEED = ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "dungeon_boss_rage_speed");
+    // 解き放ち (四体の主だけ): 体力が SURGE_AT を切るたびに吠え、場の技を三つとも一度に放ち、そのあと大きな隙。
+    // 封じ・荒ぶりは雷の大事件の大いなるもの固有の仕組みなので持たない (2026-11-08 の声「封じや荒ぶりは大事件の敵固有の物だから、
+    // まるまるとってくるのは違う。ああいうくらいの攻撃だと楽しい、というだけ」)
+    public static final float[] SURGE_AT = {0.66f, 0.33f};
+    public static final int SURGE_WARN = 30;
     private final jp.revati.skyabyss.combat.FieldHazards field = new jp.revati.skyabyss.combat.FieldHazards(this, this::hazardBlock,
             (attack, ticks) -> cue(bossId(), attack, ticks), this::damage, this::attackSource, this::canHit);
-    private final List<Vec3> seals = new ArrayList<>();
-    private final List<Float> sealFill = new ArrayList<>();
-    private int sealsDone;
-    private int sealLeft;
-    private int addsWait;
-    private boolean enraged;
+    private int surges;
     private Vec3 home;
 
     protected final List<Vec3> holes = new ArrayList<>();
@@ -346,178 +331,30 @@ public abstract class DungeonBoss extends RegionBoss {
         if (home == null) {
             home = position();
         }
-        field.tick(phase2 && seals.isEmpty(), enraged ? HAZARD_GAP_RAGE : HAZARD_GAP);
+        field.tick(phase2, HAZARD_GAP);
         if (!major()) {
             return;
         }
         LivingEntity t = getTarget();
-        if (seals.isEmpty() && sealsDone < SEAL_AT.length && hp() < SEAL_AT[sealsDone] && t != null && !busy()) {
-            beginSeal();
-        }
-        if (!seals.isEmpty()) {
-            stepSeal();
-        }
-        if (!enraged && hp() < RAGE_AT) {
-            enrage();
+        if (surges < SURGE_AT.length && hp() < SURGE_AT[surges] && t != null && !busy()) {
+            surge(t);
         }
     }
 
-    // 封じと荒ぶりを持つ主か (四体の主。中ボスは場の技だけ)
+    // 解き放ち: 吠えて (予告 SURGE_WARN)、場の技を三つとも放つ。終わると大きな隙
+    void surge(LivingEntity target) {
+        surges++;
+        cooldown = Math.max(cooldown, SURGE_WARN + 40);
+        cue(bossId(), "rage", SURGE_WARN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.6f);
+        server().sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + getBbHeight() * 0.6, getZ(), 1, 0, 0, 0, 0);
+        field.all();
+        BossOpenings.open(this, BossOpenings.BIG_OPEN_TICKS + SURGE_WARN);
+    }
+
+    // 解き放ちを持つ主か (四体の主。中ボスは場の技だけ)
     protected boolean major() {
         return minionId() != null;
-    }
-
-    public boolean sealed() {
-        return !seals.isEmpty();
-    }
-
-    public boolean enraged() {
-        return enraged;
-    }
-
-    // 封じの間は、受ける傷が SEALED 倍
-    @Override
-    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
-        if (!seals.isEmpty() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-            amount *= SEALED;
-            if (level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.ENCHANTED_HIT, getX(), getY() + getBbHeight() * 0.6, getZ(), 6, 0.6, 0.6, 0.6, 0.2);
-            }
-        }
-        return super.hurt(source, amount);
-    }
-
-    void beginSeal() {
-        sealLeft = SEAL_LAST;
-        addsWait = ADDS_EVERY / 2;
-        double turn = random.nextDouble() * Math.PI * 2;
-        Vec3 c = home != null ? home : position();
-        for (int i = 0; i < 3; i++) {
-            double a = turn + i * Math.PI * 2 / 3;
-            Vec3 at = sealSpot(c, a);
-            seals.add(at);
-            sealFill.add(0f);
-        }
-        server().playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 2f, 0.6f);
-        server().sendParticles(ParticleTypes.END_ROD, getX(), getY() + getBbHeight() * 0.6, getZ(), 80, 2.0, 1.5, 2.0, 0.05);
-        cue(bossId(), "seal", 40);
-        for (ServerPlayer p : field.targetsNear()) {
-            jp.revati.skyabyss.notice.Notice.alert(p, "message.skyabyss.world_event.seal", getDisplayName());
-        }
-    }
-
-    // 輪の置き場: 主の間の真ん中から角度 a へ、立てる床のある所 (7〜11 先から近い方へ探す)
-    Vec3 sealSpot(Vec3 c, double a) {
-        for (double r = 10; r >= 4; r -= 1.5) {
-            int x = (int) Math.floor(c.x + Math.cos(a) * r);
-            int z = (int) Math.floor(c.z + Math.sin(a) * r);
-            for (int dy = 2; dy >= -3; dy--) {
-                BlockPos at = BlockPos.containing(x, c.y + dy, z);
-                if (level().getBlockState(at).getCollisionShape(level(), at).isEmpty() && level().getBlockState(at.above()).getCollisionShape(level(), at.above()).isEmpty()
-                        && !level().getBlockState(at.below()).getCollisionShape(level(), at.below()).isEmpty()) {
-                    return new Vec3(x + 0.5, at.getY(), z + 0.5);
-                }
-            }
-        }
-        return new Vec3(c.x + Math.cos(a) * 5, c.y, c.z + Math.sin(a) * 5);
-    }
-
-    void stepSeal() {
-        List<ServerPlayer> people = field.targetsNear();
-        boolean all = true;
-        for (int i = 0; i < seals.size(); i++) {
-            Vec3 s = seals.get(i);
-            float fill = sealFill.get(i);
-            if (fill < 1f) {
-                for (ServerPlayer p : people) {
-                    if (Math.hypot(p.getX() - s.x, p.getZ() - s.z) <= SEAL_RADIUS && Math.abs(p.getY() - s.y) < 4) {
-                        fill = Math.min(1f, fill + SEAL_FILL);
-                    }
-                }
-                if (fill >= 1f) {
-                    server().playSound(null, s.x, s.y, s.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 2f, 1.2f);
-                    server().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, s.x, s.y + 1, s.z, 40, 1.2, 1.0, 1.2, 0.2);
-                } else if (tickCount % 10 == 0 && fill > sealFill.get(i)) {
-                    server().playSound(null, s.x, s.y, s.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.8f + fill);
-                }
-                sealFill.set(i, fill);
-            }
-            all &= fill >= 1f;
-            if (fill < 1f && tickCount % 4 == 0) {
-                if (tickCount % 20 == 0) {
-                    Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, SEAL_RADIUS)).floor(s.y).warn(0).active(22).safe().start();
-                }
-                for (double y = 0; y < 1 + 6 * fill; y += 0.5) {
-                    server().sendParticles(ParticleTypes.END_ROD, s.x, s.y + y, s.z, 1, 0.05, 0, 0.05, 0);
-                }
-                Vec3 from = position().add(0, getBbHeight() * 0.6, 0);
-                Vec3 d = s.add(0, 1, 0).subtract(from);
-                for (int k = 1; k < 10; k++) {
-                    Vec3 q = from.add(d.scale(k / 10.0));
-                    server().sendParticles(ParticleTypes.ENCHANT, q.x, q.y, q.z, 1, 0, 0, 0, 0);
-                }
-            }
-        }
-        if (tickCount % 20 == 0) {
-            int full = 0;
-            for (float f : sealFill) {
-                full += f >= 1f ? 1 : 0;
-            }
-            for (ServerPlayer p : people) {
-                jp.revati.skyabyss.notice.Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.dungeon.seal_left", full, seals.size(), sealLeft / 20));
-            }
-        }
-        if (--addsWait <= 0) {
-            addsWait = ADDS_EVERY;
-            LivingEntity t = getTarget();
-            if (t != null) {
-                summonMinions(t);
-            }
-        }
-        if (all) {
-            endSeal(true);
-        } else if (--sealLeft <= 0) {
-            endSeal(false);
-        }
-    }
-
-    void endSeal(boolean solved) {
-        seals.clear();
-        sealFill.clear();
-        sealsDone++;
-        server().playSound(null, getX(), getY(), getZ(), SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 2.5f, 0.5f);
-        server().sendParticles(ParticleTypes.FLASH, getX(), getY() + 1, getZ(), 1, 0, 0, 0, 0);
-        if (solved) {
-            jp.revati.skyabyss.combat.BreakGauge.solved(this, KNEEL);
-            if (!jp.revati.skyabyss.combat.BreakGauge.broken(this)) {
-                jp.revati.skyabyss.combat.BreakGauge.add(this, jp.revati.skyabyss.combat.BreakGauge.size(this, jp.revati.skyabyss.combat.BreakGauge.breaks(this)));
-            }
-            for (ServerPlayer p : field.targetsNear()) {
-                jp.revati.skyabyss.notice.Notice.alert(p, "message.skyabyss.world_event.seal_broken", getDisplayName());
-            }
-        } else {
-            for (ServerPlayer p : field.targetsNear()) {
-                jp.revati.skyabyss.notice.Notice.warn(p, "message.skyabyss.world_event.seal_failed", getDisplayName());
-            }
-            enrage();
-        }
-    }
-
-    void enrage() {
-        if (enraged) {
-            return;
-        }
-        enraged = true;
-        var speed = getAttribute(Attributes.MOVEMENT_SPEED);
-        if (speed != null && !speed.hasModifier(RAGE_SPEED)) {
-            speed.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(RAGE_SPEED, 0.3,
-                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
-        }
-        server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.5f);
-        server().sendParticles(ParticleTypes.ANGRY_VILLAGER, getX(), getY() + getBbHeight(), getZ(), 12, 1.2, 0.5, 1.2, 0);
-        for (ServerPlayer p : field.targetsNear()) {
-            jp.revati.skyabyss.notice.Notice.warn(p, "message.skyabyss.world_event.rage", getDisplayName());
-        }
     }
 
     // 自己テスト: 場の技を三つとも出す

@@ -99,7 +99,7 @@ public final class StoneSeaDomain extends HeartDomain {
         BossCue.send(heart, "whale", "sea_wave", WAVE_WARN);
         wave(level, gaps, 0);
         for (double gap : gaps) {
-            tg(level, TelegraphShape.cone(cx, cz, gap, radius + 1, GAP_HALF), WAVE_WARN).safe().start();
+            tg(level, TelegraphShape.cone(cx, cz, gap, radius + 1, GAP_HALF), WAVE_WARN).goal().start();
         }
         if (n % 3 == 1) {
             wave(level, gaps, 14);

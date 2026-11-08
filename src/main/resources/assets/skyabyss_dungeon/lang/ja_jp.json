@@ -206,7 +206,6 @@
   "gui.skyabyss.attack.geode_golem.field_sweep": "晶腕の大回し",
   "gui.skyabyss.attack.ox_smith.field_rain": "火花の雨",
   "gui.skyabyss.attack.ox_smith.field_sweep": "鎚の大回し",
-  "message.skyabyss.dungeon.seal_left": "封じの輪 %s／%s（輪の中に立つと満ちる。三つ満たすと守りが割れる）残り %s 秒",
   "gui.skyabyss.attack.bone_centipede.seal": "骨の封じ",
   "gui.skyabyss.attack.bone_centipede.field_ring": "坑の崩れ環",
   "gui.skyabyss.attack.shell_octopus.seal": "潮の封じ",

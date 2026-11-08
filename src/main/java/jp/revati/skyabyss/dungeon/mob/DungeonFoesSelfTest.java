@@ -322,14 +322,12 @@ public final class DungeonFoesSelfTest {
             c.hazardsNow();
             check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= field + 3 + 2 + 1, "the second-half field attacks did not show their warnings ("
                     + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - field) + ")", f);
-            // 封じ: 守りを張ると受ける傷が減り、輪を満たすと膝をつく
-            c.beginSeal();
-            float before2 = c.getHealth();
-            c.invulnerableTime = 0;
-            c.hurt(lv.damageSources().playerAttack(p), 20f);
-            check(c.sealed() && before2 - c.getHealth() <= 20f * DungeonBoss.SEALED + 0.01f, "the seal did not shield the boss (" + (before2 - c.getHealth()) + ")", f);
-            c.endSeal(true);
-            check(!c.sealed() && jp.revati.skyabyss.combat.BreakGauge.broken(c), "filling the seals did not make the boss kneel", f);
+            // 解き放ち: 場の技を三つとも一度に予告し、大きな隙を見せる。封じ・荒ぶりは持たない (大事件の大いなるもの固有)
+            int surge = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+            c.surge(p);
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= surge + 3 + 2 + 1, "the surge did not unleash the field attacks ("
+                    + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - surge) + ")", f);
+            check(jp.revati.skyabyss.combat.BossOpenings.isOpen(c), "the surge left no opening", f);
         } finally {
             for (DungeonBoss b : made) {
                 b.discard();

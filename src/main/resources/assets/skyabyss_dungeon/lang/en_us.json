@@ -206,7 +206,6 @@
   "gui.skyabyss.attack.geode_golem.field_sweep": "Geode Swing",
   "gui.skyabyss.attack.ox_smith.field_rain": "Spark Rain",
   "gui.skyabyss.attack.ox_smith.field_sweep": "Hammer Swing",
-  "message.skyabyss.dungeon.seal_left": "Seal rings %s/%s (stand in a ring to fill it; fill all three to break the ward) %s s left",
   "gui.skyabyss.attack.bone_centipede.seal": "Bone Seal",
   "gui.skyabyss.attack.bone_centipede.field_ring": "Pit Collapse",
   "gui.skyabyss.attack.shell_octopus.seal": "Tide Seal",

@@ -66,13 +66,16 @@ public final class Telegraph {
     //   PIERCE   = 濃い赤・縁は破線。壁を抜ける技 (piercing()。領域の決まり・咆哮など)
     //   HARMLESS = 赤・縁は点 (押すだけ)
     //   SAFE     = 安全な場所の印。もう出さない (呼ぶ側はそのまま残してよい)
+    //   GOAL     = 仕掛けの「ここに立つ」場所 (goal())。金色ではっきり出す (2026-11-08 の声「封じの輪等の敵のギミックはもっと見やすくして」)
     // CUSTOM (color() で選んだ色) も赤の DANGER として出す
     public enum Style {
         CUSTOM(0xFF3030),
         DANGER(0xFF3030),
         SAFE(0x5CE8FF),
         HARMLESS(0xFF5050),
-        PIERCE(0xB0102A);
+        PIERCE(0xB0102A),
+        // 仕掛けの「ここに立つ」場所 (封じの輪・分け合う円・波の抜け道)。金色の面・高い縁の幕・光の柱で、遠くからでも見える。傷は出さない
+        GOAL(0xFFD24A);
 
         public final int rgb;
 
@@ -149,6 +152,9 @@ public final class Telegraph {
         if (hidden) {
             this.style = Style.SAFE;
             this.rgb = Style.SAFE.rgb;
+        } else if (b.style == Style.GOAL) {
+            this.style = Style.GOAL;
+            this.rgb = Style.GOAL.rgb;
         } else if (b.piercing) {
             this.style = Style.PIERCE;
             this.rgb = Style.PIERCE.rgb;
@@ -297,6 +303,13 @@ public final class Telegraph {
         public Builder safe() {
             this.style = Style.SAFE;
             this.rgb = Style.SAFE.rgb;
+            return this;
+        }
+
+        // 仕掛けの「ここに立つ」場所: 金色の面と高い縁の幕、真ん中に光の柱。傷は出さない
+        public Builder goal() {
+            this.style = Style.GOAL;
+            this.rgb = Style.GOAL.rgb;
             return this;
         }
 
@@ -561,7 +574,7 @@ public final class Telegraph {
             hit.clear();
         }
         strike(now);
-        if (age % 2 == 0 && !hidden && serverParticles()) {
+        if (age % 2 == 0 && !hidden && style != Style.GOAL && serverParticles()) {
             draw(now::outline, 1.6, 1.0, 0.0, 1.5f);
         }
         if (age - warn >= active) {
@@ -691,7 +704,7 @@ public final class Telegraph {
     }
 
     private void drawWarning() {
-        if (hidden || !serverParticles()) {
+        if (hidden || style == Style.GOAL || !serverParticles()) {
             return;
         }
         double progress = (double) age / warn;

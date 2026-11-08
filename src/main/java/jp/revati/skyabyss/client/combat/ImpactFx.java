@@ -53,7 +53,7 @@ public final class ImpactFx {
 
     // bespoke: 技の見た目 (AttackFx) が当たりの粒を描くので、ここは音と揺れだけ
     static void burst(ClientLevel level, TelegraphClient.Decal d, boolean bespoke) {
-        if (d.style == Telegraph.Style.SAFE) {
+        if (d.style == Telegraph.Style.SAFE || d.style == Telegraph.Style.GOAL) {
             return;
         }
         TelegraphShape s = d.shape;
