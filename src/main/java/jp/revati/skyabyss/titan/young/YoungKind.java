@@ -13,10 +13,10 @@ import net.minecraft.network.chat.Component;
 //   STORM (雷翼の雛)   低く飛び、稜線を渡る。陸の上がいちばん速い。海の上はふつう
 //   EMBER (余燼の仔)   地面を駆ける・溶岩を渡る・湯気を上げて水を泳ぐ。陸は速く、水は遅い
 public enum YoungKind {
-    WHALE(Titans.STONE_WHALE, "young_stone_whale", Gait.SKY, 1.0, 1.0, 4000, 20.0, 3.625, 1.0f),
-    TIDE(Titans.TIDE_SHELL, "young_tide_shell", Gait.SEA, 0.75, 1.7, 4000, 0.0, 1.0, 1.0f),
+    WHALE(Titans.STONE_WHALE, "young_stone_whale", Gait.SKY, 0.7, 0.7, 4000, 20.0, 3.625, 1.0f),
+    TIDE(Titans.TIDE_SHELL, "young_tide_shell", Gait.SEA, 1.1, 2.2, 4000, 0.0, 1.0, 1.0f),
     STORM(Titans.THUNDER_WING, "young_thunder_wing", Gait.RIDGE, 1.5, 1.05, 4000, 9.0, 2.25, 1.0f),
-    EMBER(Titans.EMBER, "young_ember", Gait.GROUND, 1.3, 0.75, 4000, 0.0, 2.5, 1.0f);
+    EMBER(Titans.EMBER, "young_ember", Gait.GROUND, 1.45, 1.0, 4000, 0.0, 2.5, 1.0f);
 
     public enum Gait { SKY, SEA, RIDGE, GROUND }
 
@@ -31,7 +31,9 @@ public enum YoungKind {
     // geo / animations / texture / lowpoly の名前 (assets/skyabyss/.../<model>)
     public final String model;
     public final Gait gait;
-    // 巡航の速さ (ブロック/tick)。陸の上と水の上 (2026-11-07 の声「鯨が強すぎて他の巨神を使わない」: どの子もどこへでも行け、得意の地形で速い)
+    // 巡航の速さ (ブロック/tick)。陸の上と水の上 (2026-11-07 の声「鯨が強すぎて他の巨神を使わない」: どの子もどこへでも行け、得意の地形で速い)。
+    // 2026-11-08 の声「鯨が強すぎるし、亀とトカゲの子供弱い」: 大陸が四つに分かれて、海も峰もまっすぐ越える鯨がさらに強くなったので、
+    // 鯨を 1.0 → 0.7、亀を陸 0.75 → 1.1・海 1.7 → 2.2、トカゲ (余燼) を陸 1.3 → 1.45 (陸はいちばん速い雷翼の雛 1.5 のすぐ下)・水 0.75 → 1.0 に
     public final double land;
     public final double water;
     // 速いほう (見積りの上限)

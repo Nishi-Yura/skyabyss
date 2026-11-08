@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ボスごとの見せ方 (2026-11-08 の選定。ラフは docs/review/roughs_boss_looks/、tools/rough/lowpoly/boss_looks/boss_looks.py)。
-B 切り絵 (tools/gen/mobs/paper_bosses.py) を全員に揃えるのをやめ、ボスごとに題を変える。形と骨と動きはそのまま、低ポリのアトラスを塗り直す:
+B 切り絵 (2026-11-08 に外した) を全員に揃えるのをやめ、ボスごとに題を変える。形と骨と動きはそのまま、低ポリのアトラスを塗り直す:
   淵の主 (lord_*)   : A 金継ぎの漆。黒漆の体、割れ目を継いだ金の筋が巨神の色に光る (灰=熾の橙、塩=潮の青緑、肋=骨の金白、嵐=紫)
   月の主 (moon_*)   : A 螺鈿の月。月の岩に、貝の内側のような虹の螺鈿。光る所は冷たい白青
   終章の主たち      : C 雲の喪章 (始祖 founder は形から作り直した。tools/rough/lowpoly/abyss/founder_pilgrim.py)。最後の鐘守・巡礼者 (目・手・月・羽)・

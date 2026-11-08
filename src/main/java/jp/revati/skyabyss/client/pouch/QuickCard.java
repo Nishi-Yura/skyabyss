@@ -15,7 +15,6 @@ import jp.revati.skyabyss.pouch.QuickPick;
 import jp.revati.skyabyss.titan.StoneWhaleEntity;
 import jp.revati.skyabyss.titan.storm.StormWingEntity;
 import jp.revati.skyabyss.titan.tide.TideShellEntity;
-import jp.revati.skyabyss.titan.tide.chapter.TideConchItem;
 import jp.revati.skyabyss.titan.storm.WeathercockItem;
 import jp.revati.skyabyss.titan.travel.TitanCallItem;
 import jp.revati.skyabyss.titan.travel.TitanKind;
@@ -122,9 +121,6 @@ public final class QuickCard {
     static QuickPick.Cand cand(PouchEntries.Entry e) {
         if (e.item() instanceof TitanCallItem call) {
             return new QuickPick.Cand(e.id(), QuickPick.Role.CALL, call.titanId());
-        }
-        if (e.item() instanceof TideConchItem) {
-            return new QuickPick.Cand(e.id(), QuickPick.Role.SEA, null);
         }
         if (e.item() instanceof WeathercockItem) {
             return new QuickPick.Cand(e.id(), QuickPick.Role.STORM, null);

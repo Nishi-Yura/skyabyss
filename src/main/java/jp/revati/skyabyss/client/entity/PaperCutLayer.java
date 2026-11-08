@@ -20,8 +20,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
-// 心臓の後のボスの見せ方 (体のまわりに足すもの)。ボスごとに題が違う (2026-11-08 の選定。ラフは docs/review/roughs_boss_looks/):
-//   切り絵 (PAPER)  : B 切り絵の悪夢。切り抜いた紙の菱形 (生成りと桃色) を浮かせて回す (tools/gen/mobs/paper_bosses.py が体を塗る)。深みの王・番人・終章
+// 心臓の後のボスの見せ方 (体のまわりに足すもの。2026-11-08 までの B 切り絵の菱形は、ボスごとの見せ方に替えて外した)。ボスごとに題が違う (2026-11-08 の選定。ラフは docs/review/roughs_boss_looks/):
 //   金継ぎ (LORD)   : 五章の淵の主。頭の後ろに巨神の色の輪の後光 (ゆっくり回る)、熾の粉が昇る (tools/gen/mobs/boss_looks_paint.py が体を塗る)
 //   螺鈿の月 (MOON) : 六章の月の主。背に銀の三日月、星屑がきらめく
 //   喪服の王 (KING) : 五章の深みの王。冠の上に二重の金の輪 (逆に回る)、黒い花びらが降る
@@ -30,19 +29,15 @@ import net.neoforged.fml.common.EventBusSubscriber;
 // 体の大きさに合わせて半径と高さを決める。倒れているあいだは出さない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PaperCutLayer {
-    static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/paper_cut.png");
     static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_ring.png");
     static final ResourceLocation CRESCENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/halo_crescent.png");
-    // 切り絵 (PAPER) で描くボスは今はない (2026-11-08 にボスごとの見せ方へ替えた)。名前の組だけ残す
-    static final Set<String> TYPES = Set.of();
     // 終章の主たち (雲の喪章。始祖と同じく白い羽根が降る)
     static final Set<String> CLOUDS = Set.of("founder", "lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder");
     static final Set<String> MOONS = Set.of("full_keeper", "moon_core", "moon_scale", "shadow_embracer", "waning_blade");
     // 淵の主の色 (BossLook.LORD_RIB.. の順): 肋 = 骨の金白、塩 = 潮の青緑、嵐 = 紫、灰 = 熾の橙
     static final int[] LORD_RGB = {0xFFE296, 0x5AE6D2, 0xB088FF, 0xFF963C};
-    static final int COUNT = 10;
 
-    public enum Style { NONE, PAPER, LORD, MOON, KING, WARDEN, FOUNDER }
+    public enum Style { NONE, LORD, MOON, KING, WARDEN, FOUNDER }
 
     private PaperCutLayer() {
     }
@@ -68,11 +63,7 @@ public final class PaperCutLayer {
         if (MOONS.contains(key.getPath())) {
             return Style.MOON;
         }
-        return TYPES.contains(key.getPath()) ? Style.PAPER : Style.NONE;
-    }
-
-    public static boolean paper(LivingEntity e) {
-        return style(e) == Style.PAPER;
+        return Style.NONE;
     }
 
     public static int lordRgbOf(LivingEntity e) {
@@ -115,7 +106,6 @@ public final class PaperCutLayer {
             pose.pushPose();
             pose.translate(x - cam.x, y - cam.y, z - cam.z);
             switch (st) {
-                case PAPER -> draw(pose, buf.getBuffer(RenderType.entityCutoutNoCull(TEX)), e, t);
                 case LORD -> halo(pose, buf, RING, e, t, face, cam, x, y, z, lordRgb(e), 0.86f, true);
                 case MOON -> halo(pose, buf, CRESCENT, e, t, face, cam, x, y, z, 0xDCEBFF, 0.66f, false);
                 case WARDEN -> halo(pose, buf, RING, e, t, face, cam, x, y, z, 0x5AE6D2, 0.78f, true);
@@ -125,30 +115,10 @@ public final class PaperCutLayer {
             }
             pose.popPose();
         }
-        buf.endBatch(RenderType.entityCutoutNoCull(TEX));
         buf.endBatch(RenderType.entityTranslucent(RING));
         buf.endBatch(RenderType.entityTranslucent(CRESCENT));
         buf.endBatch(RenderType.eyes(RING));
         buf.endBatch(RenderType.eyes(CRESCENT));
-    }
-
-    static void draw(PoseStack pose, VertexConsumer vc, LivingEntity e, float t) {
-        float w = e.getBbWidth();
-        float h = e.getBbHeight();
-        float ring = w * 0.6f + 1.4f;
-        float size = Mth.clamp(h * 0.16f, 0.5f, 1.5f);
-        for (int i = 0; i < COUNT; i++) {
-            float a = t * 0.35f + i * Mth.TWO_PI / COUNT;
-            float y = h * (0.25f + 0.75f * (0.5f + 0.5f * Mth.sin(t * 0.8f + i * 1.7f)));
-            float r = ring * (0.85f + 0.15f * Mth.sin(t * 0.6f + i));
-            pose.pushPose();
-            pose.translate(Mth.cos(a) * r, y, Mth.sin(a) * r);
-            pose.mulPose(com.mojang.math.Axis.YP.rotation(-a + t * 1.3f + i));
-            pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(12f * Mth.sin(t * 1.1f + i)));
-            float s = size * (i % 3 == 0 ? 1.35f : 1f);
-            quad(pose.last().pose(), vc, s, i % 2 == 0 ? 0f : 0.5f);
-            pose.popPose();
-        }
     }
 
     // 後光: 体の高さ at の所、カメラから見て体の向こうへ少し下げた所に、カメラを向く板。spin なら板の面の中でゆっくり回る (内側にもう一つ逆回りの輪)
@@ -205,16 +175,6 @@ public final class PaperCutLayer {
         vc.addVertex(m, -s, s, 0).setColor(r, g, b, 255).setUv(0, 0).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
     }
 
-    private static void quad(Matrix4f m, VertexConsumer vc, float s, float u0) {
-        float u1 = u0 + 0.5f;
-        int light = LightTexture.FULL_BRIGHT;
-        int ov = OverlayTexture.NO_OVERLAY;
-        vc.addVertex(m, -s, -s, 0).setColor(255, 255, 255, 255).setUv(u0, 1).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
-        vc.addVertex(m, s, -s, 0).setColor(255, 255, 255, 255).setUv(u1, 1).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
-        vc.addVertex(m, s, s, 0).setColor(255, 255, 255, 255).setUv(u1, 0).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
-        vc.addVertex(m, -s, s, 0).setColor(255, 255, 255, 255).setUv(u0, 0).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
-    }
-
     // 漂うもの: 淵の主は巨神の色の熾の粉が昇る、月の主は星屑がきらめく (2 tick に二つ)
     @SubscribeEvent
     static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
@@ -227,7 +187,7 @@ public final class PaperCutLayer {
                 continue;
             }
             Style st = style(e);
-            if (st == Style.NONE || st == Style.PAPER) {
+            if (st == Style.NONE) {
                 continue;
             }
             var r = e.getRandom();

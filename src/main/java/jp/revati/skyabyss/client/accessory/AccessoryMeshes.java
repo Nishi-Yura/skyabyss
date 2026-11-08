@@ -29,7 +29,7 @@ public final class AccessoryMeshes {
     public static final Set<String> IDS = withWild(Set.of("storm_charm", "storm_anklet", "storm_eye_feather",
             "kindling_charm", "ember_mantle", "ember_lantern", "ember_horn", "cinder_lamp",
             "resonance_charm", "moss_talisman", "stone_whale_plating",
-            "tide_chime_charm", "moontide_pearl", "tide_watching_shell",
+            "tide_chime_charm", "moontide_pearl",
             "abyss_pulse_listener", "abyss_lantern_charm", "abyss_surveyor_plumb"));
 
     // 野の装備の装飾の枠の品 (item/wild/WildGearTable.ACCESSORIES。docs/design/51 の 6 章) と封の箱 (docs/design/52)

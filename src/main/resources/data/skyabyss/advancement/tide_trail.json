@@ -2,7 +2,7 @@
   "parent": "skyabyss:salt_vault",
   "display": {
     "icon": {
-      "id": "skyabyss:tide_watching_shell"
+      "id": "skyabyss:moontide_pearl"
     },
     "title": {
       "translate": "advancement.skyabyss.tide_trail.title"

@@ -39,7 +39,8 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // 大干潮 (二章の中盤の出来事。01 の 4.2、08 の 2.8節)。巨神が現れたあと、海がいつもより遠くまで引き、浅い海底に遺跡の道が現れる。
 // 人ごとに一度ずつ (自分の大干潮)。安全に歩ける (水は膝まで。道の両側は壁で、海は元のまま。溺れず、敵も入らない)。道の先に潮の民の頁。
 //
-//   始まり   まだ自分の大干潮を迎えていない二章 (段階 1) の人が、岬の潮の杭 (Ch2Ground.STAKES) から 16 ブロック以内で潮見の貝を吹いたとき (callAtStakes。
+//   始まり   まだ自分の大干潮を迎えていない二章 (段階 1) の人が、岬の潮の杭 (Ch2Ground.STAKES) の STAKES_ARRIVE ブロック以内に来たとき (見回りごと。callAtStakes。
+//            2026-11-08 に潮見の貝を外すまでは、杭のそばで貝を吹いたときだった。
 //            2026-11-04 の決めごと c2_play = read: 前は海の近くにいると勝手に始まった)。巨神が現れていること (TideKeeper の記録。時刻では閉じない)。
 //            杭の刻みのそばの巻き貝の絵と杭の札「貝の 声で / 島は 息を吐く」、浜の碑の句「島は待つ者のもとへ寄る」が手がかり。
 //            近くで途中の大干潮があればそれを共有し (道の枠から 128 ブロック以内。ほかの人が呼んだ大干潮に、近くの二章の人も加わる)、
@@ -55,8 +56,13 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 public final class TideEbb {
     public static final String LORE_PAGE = "chapter1/ch2_ebb_page";
     public static final String LORE_PLATE = "ch2/ship_plate";
-    // 潮見の貝を吹くと大干潮が来る、杭からの距離
+    // 杭のそばと数える距離 (杭の場所を探す範囲)
     public static final int STAKES_RADIUS = 16;
+    // 杭にここまで近づくと大干潮が来る (杭の札と刻みを読める近さ)
+    public static final int STAKES_ARRIVE = 6;
+    // 杭のそばで大干潮を呼べなかった (島がまだ・道を通せない) ときの、次に試すまでの間 (tick)
+    static final int STAKES_RETRY = 200;
+    private static final java.util.Map<java.util.UUID, Long> STAKES_TRIED = new java.util.HashMap<>();
     public static final String SIGNAL_WALKED = "ch2_ebb_walked";
     public static final String QUEST = "ch2/ebb_road";
     // 大干潮が始まったとき二章の人に立てる会話の印 (クエストの start_when が見る)
@@ -573,9 +579,26 @@ public final class TideEbb {
     }
 
     // まだ自分の大干潮を迎えていない二章の人が、途中の大干潮の近くにいれば、それを迎える (見回りごと)。
-    // 新しい大干潮は、ここでは始めない (杭のそばで潮見の貝を吹いたときだけ。callAtStakes)
+    // 新しい大干潮は、岬の潮の杭に近づいた人だけが呼ぶ (callAtStakes)
     static void tryTrigger(ServerLevel level, EbbData data) {
-        tryTrigger(level, data, Players.snapshot(level.players()));
+        java.util.List<ServerPlayer> players = Players.snapshot(level.players());
+        long now = level.getGameTime();
+        for (ServerPlayer p : players) {
+            if (!eligible(p) || data.witnessed.contains(p.getUUID())) {
+                continue;
+            }
+            BlockPos stakes = stakesNear(p);
+            if (stakes == null || stakes.distSqr(p.blockPosition()) > (double) STAKES_ARRIVE * STAKES_ARRIVE) {
+                continue;
+            }
+            Long last = STAKES_TRIED.get(p.getUUID());
+            if (last != null && now - last < STAKES_RETRY) {
+                continue;
+            }
+            STAKES_TRIED.put(p.getUUID(), now);
+            callAtStakes(p);
+        }
+        tryTrigger(level, data, players);
     }
 
     static void tryTrigger(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
@@ -600,8 +623,7 @@ public final class TideEbb {
         return null;
     }
 
-    // 潮見の貝を吹いた: 杭のそばの、まだ自分の大干潮を迎えていない二章の人なら、大干潮を呼ぶ (始めたか、知らせを出したら true。
-    // false ならふつうの貝として島を呼ぶ)
+    // 杭のそばに来た、まだ自分の大干潮を迎えていない二章の人なら、大干潮を呼ぶ (始めたか、知らせを出したら true)
     public static boolean callAtStakes(ServerPlayer p) {
         ServerLevel level = p.serverLevel();
         if (level.dimension() != Level.OVERWORLD || !eligible(p)) {
