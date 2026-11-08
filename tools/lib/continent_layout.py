@@ -183,6 +183,27 @@ LAYOUTS['c1']['roads'] = LAYOUTS['c1']['roads'] + [list(map(tuple, r)) for r in 
 LAYOUTS['c1']['ferries'] = LAYOUTS['c1']['ferries'] + [[tuple(a), tuple(b)] for a, b in _frontier.FERRIES]
 LAYOUTS['c1']['frontier'] = _frontier.SPOTS
 
+# 四つの大陸 (2026-11-08 の案の頁「大陸を四つの島に」で B 広い海): 西 = 都・嵐の高地・はじまり、北 = 岩鯨の丘陵、東 = 潮の浜、南 = 灰の荒野。
+# 内海のまんなかから外の海へ、四本の海 (幅 ~150、外へ向かって広がる) を引いて陸を分ける。土地の番号は島ごとに、その島の土地だけから選ぶ。
+# straits: (通る点の並び (内海のまんなかから地図の外まで), 点ごとの半幅 (この内は必ず海。外へ STRAIT_FALL で岸へ上がる))
+# 海を渡る道は gen_continent.split_roads_at_sea が岸で切り、渡し船でつなぐ
+LAYOUTS['c1']['islands'] = {'meadow': 0, 'start': 0, 'storm': 0, 'whale': 1, 'tide': 2, 'ember': 3}
+LAYOUTS['c1']['straits'] = [
+    # 西と北 (都の北の門の先から、嵐の高地と岩鯨の丘陵のあいだを北北西へ)
+    ([(400, 30), (60, -330), (-300, -420), (-640, -760), (-740, -1150), (-800, -2200)], [30, 32, 34, 40, 60, 110]),
+    # 北と東 (内海の北東から、骨垣と灯守のあいだを東へ)
+    ([(400, 30), (750, -280), (980, -640), (1300, -920), (2200, -1060)], [30, 32, 36, 50, 110]),
+    # 東と南 (内海の南東から、潮垣と熾垣のあいだを南東へ)
+    ([(400, 30), (780, 330), (1000, 650), (1180, 900), (1500, 1150), (2200, 1600)], [30, 32, 34, 40, 60, 110]),
+    # 南と西 (内海の南西から、都の南と灰炉のあいだを西へ。はじまりの島は西の側)
+    ([(400, 30), (330, 360), (60, 620), (-450, 700), (-900, 820), (-1150, 1000), (-1280, 1300), (-1320, 2200)],
+     [30, 30, 32, 34, 36, 40, 60, 110]),
+]
+STRAIT_FALL = 80
+# 海の中の小島 (見どころ・宝を置ける)。渡し船の線にかからない所
+LAYOUTS['c1']['islets'] = [((-520, -600), 34), ((-700, -980), 28), ((1120, -790), 30), ((880, 470), 26), ((1330, 1030), 30),
+                           ((-180, 660), 26), ((-1000, 905), 30), ((-1210, 1150), 24)]
+
 LAYOUTS.update({
     'c2': dict(LAYOUT_C_BASE, **{
         'title': '案 C2　海へ開く内海',
@@ -255,6 +276,51 @@ def seg_dist(px, pz, a, b):
     return np.hypot(px - (ax + t * dx), pz - (az + t * dz))
 
 
+def strait_dist(X, Z, pts, halves):
+    """各点から海の中心の線までの距離 - その所の半幅 (負なら必ず海の内)"""
+    best = np.full(X.shape, 1e9)
+    for k in range(len(pts) - 1):
+        (ax, az), (bx, bz) = pts[k], pts[k + 1]
+        dx, dz = bx - ax, bz - az
+        u = np.clip(((X - ax) * dx + (Z - az) * dz) / (dx * dx + dz * dz), 0, 1)
+        d = np.hypot(X - (ax + u * dx), Z - (az + u * dz)) - (halves[k] + (halves[k + 1] - halves[k]) * u)
+        best = np.minimum(best, d)
+    return best
+
+
+def cut_straits(lay, seed, X, Z, field, n):
+    """四つの大陸の海 (見取り図の straits)。field を下げて海にし、島の番号 (0 西・1 北・2 東・3 南) の図を返す"""
+    # 岸を波打たせる (短い波と長い波)
+    w1 = fbm(seed + 81, octaves=4, base=10, n=n) * 120 + fbm(seed + 83, octaves=3, base=24, n=n) * 90 + fbm(seed + 85, octaves=2, base=60, n=n) * 30
+    w2 = fbm(seed + 82, octaves=4, base=10, n=n) * 120 + fbm(seed + 84, octaves=3, base=24, n=n) * 90 + fbm(seed + 86, octaves=2, base=60, n=n) * 30
+    XW, ZW = X + w1, Z + w2
+    d = np.full(X.shape, 1e9)
+    for pts, halves in lay['straits']:
+        d = np.minimum(d, strait_dist(XW, ZW, pts, halves))
+    s = np.clip(1 - np.clip(d, 0, None) / STRAIT_FALL, 0, 1)
+    field = field - 3.0 * s * s * (3 - 2 * s)
+    # 小島
+    for (cx, cz), r in lay.get('islets', []):
+        q = np.hypot(X + w1 * 0.25 - cx, Z + w2 * 0.25 - cz) / r
+        field = np.where(q < 1.6, np.maximum(field, 0.18 + 0.5 * (1 - q)), field)
+    # 島の番号: 海の中心の線 (ゆがめない) で地図を四つに分ける
+    from scipy import ndimage
+    line = np.zeros(X.shape, dtype=bool)
+    cell = (X[0, 1] - X[0, 0])
+    for pts, _ in lay['straits']:
+        line |= strait_dist(X, Z, pts, [0] * len(pts)) < cell * 0.75
+    lab, _ = ndimage.label(~line)
+    _, (ii, jj) = ndimage.distance_transform_edt(line, return_indices=True)
+    lab = lab[ii, jj]
+    isl = np.full(X.shape, -1)
+    xs = X[0]
+    for kind, (cx, cz) in lay['regions']:
+        j = int(np.argmin(abs(xs - cx)))
+        i = int(np.argmin(abs(xs - cz)))
+        isl[lab == lab[i, j]] = lay['islands'][kind]
+    return field, isl
+
+
 # out を渡すと、生成器が使う途中の値 (X, Z, field, ridge, dists) も入れて返す
 def terrain(lay, seed, n=N, out=None):
     xs = np.linspace(-HALF, HALF, n)
@@ -278,6 +344,9 @@ def terrain(lay, seed, n=N, out=None):
     field += fbm(seed + 3, octaves=5, base=5, n=n) * 0.35
     edge = np.clip((np.maximum(abs(X), abs(Z)) - 1600) / 400, 0, 1)
     field -= edge * 1.2
+    isl = None
+    if lay.get('straits'):
+        field, isl = cut_straits(lay, seed, X, Z, field, n)
     land = field > 0.18
     # 高さ: 岸からの近さ + 峰 + 揺らぎ
     height = np.clip(field - 0.18, 0, None) * 0.9 + fbm(seed + 4, octaves=6, base=8, n=n) * 0.12
@@ -298,6 +367,9 @@ def terrain(lay, seed, n=N, out=None):
     for i, (_, (cx, cz)) in enumerate(lay['regions']):
         scale = 0.55 if lay['regions'][i][0] == 'start' else 1.0
         d = np.hypot(WX * 0.6 + X * 0.4 - cx, WZ * 0.6 + Z * 0.4 - cz) / (scale if scale else 1) + border_noise[i % 3] * 260
+        if isl is not None:
+            # 島の外の土地は選ばない (土地の境が海の向こうへまたがらない)
+            d = np.where(isl == lay['islands'][lay['regions'][i][0]], d, d + 1e6)
         dists.append(d)
         m = d < best
         best[m] = d[m]
@@ -314,7 +386,7 @@ def terrain(lay, seed, n=N, out=None):
         d = np.hypot(X + warp * 0.35 - cx, Z + warp2 * 0.35 - cz) / r + sub_noise * 1.4
         subs.append((kind, (d < 1) & land))
     if out is not None:
-        out.update(X=X, Z=Z, field=field, ridge=ridge, dists=dists, subs=subs)
+        out.update(X=X, Z=Z, field=field, ridge=ridge, dists=dists, subs=subs, islands=isl)
     return land, height, region
 
 

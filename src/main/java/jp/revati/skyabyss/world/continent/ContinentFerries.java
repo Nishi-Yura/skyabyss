@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 内海の渡し船 (docs/design/40 の 3 章。地図の渡し船の線)。layout.json の ferry_docks (渡し船ごとに [都の側, 向こう岸]) に船着き場を建て、
 // 船着き場の渡し守 (town/RegionFolk の inner_ferryman) と話して「渡る」を選ぶと、もう一方の船着き場へ渡る (行き来は何度でも。
 // 2026-10-27 の声「渡し船で内海わたるとき、NPC 設置してそこから行けるように」。前は桟橋の先に立つと渡った)。部品ははじまりの島と同じ outskirts_dock (向こう岸は向きを返す)。
-// SiteData の種類は "ferry"、番号 = 渡し船の番号 × 2 + (0 = 手前の岸・1 = 向こう岸)。渡し船 0 = 内海、1 = 北西の小島 (signKey・arrivalName)
+// SiteData の種類は "ferry"、番号 = 渡し船の番号 × 2 + (0 = 手前の岸・1 = 向こう岸)。渡し船 0 = 内海、1 = 北西の小島、2 から先 = 四つの大陸のあいだの海 (signLine・arrivalName)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ContinentFerries {
     public static final String KIND = "ferry";
@@ -31,9 +31,23 @@ public final class ContinentFerries {
     private ContinentFerries() {
     }
 
-    // 渡し船ごとの名前 (番号 = 渡し船の番号 × 2 + 岸)。0 = 内海 (都の側 ↔ 汐守)、1 = 北西の小島 (風待の北の岸 ↔ 霜の小島。2026-11-06 の外れの道)
-    // 船着き場の札の鍵 (その岸から向かう先)
-    static String signKey(int index) {
+    // 渡し船ごとの名前 (番号 = 渡し船の番号 × 2 + 岸)。0 = 内海 (都の側 ↔ 汐守)、1 = 北西の小島 (風待の北の岸 ↔ 霜の小島。2026-11-06 の外れの道)、
+    // 2 から先 = 四つの大陸のあいだの海 (2026-11-08。道が海で切れた所。gen_continent.split_roads_at_sea)。
+    // 行き先の名は layout.json の ferry_names (その岸のいちばん近い都・町・外れの集落)。古い図で無ければ前の決まった名
+    static Component signLine(int index) {
+        boolean far = (index & 1) == 1;
+        String to = ContinentLayout.get().ferryName(index >> 1, far ? 0 : 1);
+        if (to != null) {
+            return Component.translatable("sign.skyabyss.ferry.to", Component.translatable(to));
+        }
+        return Component.translatable(oldSignKey(index) + ".2");
+    }
+
+    static Component signTitle(int index) {
+        return Component.translatable((index >> 1) == 1 ? "sign.skyabyss.ferry.to_isle.1" : "sign.skyabyss.ferry.to_tide.1");
+    }
+
+    private static String oldSignKey(int index) {
         boolean far = (index & 1) == 1;
         return switch (index >> 1) {
             case 1 -> far ? "sign.skyabyss.ferry.to_shore" : "sign.skyabyss.ferry.to_isle";
@@ -44,6 +58,10 @@ public final class ContinentFerries {
     // index の岸から渡って着いた先の名前
     static String arrivalName(int fromIndex) {
         boolean fromFar = (fromIndex & 1) == 1;
+        String to = ContinentLayout.get().ferryName(fromIndex >> 1, fromFar ? 0 : 1);
+        if (to != null) {
+            return to;
+        }
         return switch (fromIndex >> 1) {
             case 1 -> fromFar ? "map.skyabyss.frontier.storm_shore" : "map.skyabyss.frontier.frost_isle";
             default -> fromFar ? "signpost.skyabyss.capital" : "map.skyabyss.town.tide";
@@ -51,7 +69,11 @@ public final class ContinentFerries {
     }
 
     static String crossedKey(int fromIndex) {
-        return (fromIndex >> 1) == 1 ? "message.skyabyss.ferry.crossed_strait" : "message.skyabyss.ferry.crossed";
+        return switch (fromIndex >> 1) {
+            case 0 -> "message.skyabyss.ferry.crossed";
+            case 1 -> "message.skyabyss.ferry.crossed_strait";
+            default -> "message.skyabyss.ferry.crossed_sea";
+        };
     }
 
     public static SiteJob create(ServerLevel level, SiteData data, SiteData.Entry entry) {
@@ -68,8 +90,7 @@ public final class ContinentFerries {
             }
             BlockPos sign = job.mark("sign");
             if (sign != null && level.getBlockEntity(sign) instanceof SignBlockEntity be) {
-                String key = signKey(entry.index);
-                be.setText(new SignText().setMessage(1, Component.translatable(key + ".1")).setMessage(2, Component.translatable(key + ".2")), true);
+                be.setText(new SignText().setMessage(1, signTitle(entry.index)).setMessage(2, signLine(entry.index)), true);
                 be.setWaxed(true);
                 be.setChanged();
                 level.sendBlockUpdated(sign, be.getBlockState(), be.getBlockState(), 3);

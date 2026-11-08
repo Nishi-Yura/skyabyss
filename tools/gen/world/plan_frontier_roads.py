@@ -27,14 +27,14 @@ SEA = 62
 # 外れの置き場: (種類, 土地, 鍵, x, z)。集落 = 外れの集落 (宿・店・住人)。奥 = 奥のダンジョン (形はラフから選ぶ)
 SPOTS = [
     ('hamlet', 'whale', 'w_ne', 724, -1112), ('hamlet', 'whale', 'w_nw', -528, -1204),
-    ('hamlet', 'tide', 't_e', 1300, -652), ('hamlet', 'tide', 't_se', 1300, 848),
+    ('hamlet', 'tide', 't_e', 1300, -652), ('hamlet', 'tide', 't_se', 1420, 700),
     ('hamlet', 'ember', 'e_se', 920, 1020), ('hamlet', 'ember', 'e_n', 584, 576),
     ('hamlet', 'storm', 's_sw', -1412, 920), ('hamlet', 'storm', 's_nw', -936, -1060),
     ('deep', 'whale', 'fort', 1280, -1176), ('deep', 'tide', 'temple', 1720, 564),
     ('deep', 'storm', 'ice', -1584, -1288), ('deep', 'ember', 'lava', 1148, 1124),
 ]
 
-# 道: 通る点の並び。'@x,z' = 今の道の上の、その点に一番近い所 (つなぎ)。'#鍵' = 置き場。'!種類' = 今の見どころ (pois.json) の手前
+# 道: 通る点の並び。'@x,z' = 今の道の上の、その点に一番近い所 (つなぎ)。'~x,z' = 通る点。'>x,z' = 前の点からまっすぐ (海を渡し船で渡る所)。'#鍵' = 置き場。'!種類' = 今の見どころ (pois.json) の手前
 # 環の道は四つの弧 (北東・南東・南西・北西)。枝は行き先で止める
 LINKS = [
     # 北東の弧: 岩鯨の跡地の道 → 北東の集落 → 東の集落 → 潮殻の跡地の道
@@ -44,12 +44,13 @@ LINKS = [
     # 南西の弧: 灰炉の西の脇道 → 南西の集落 → 風待の南の脇道
     ('ring_sw', ['@-428,1120', '#s_sw', '@-1144,132']),
     # 北西の弧: 雷翼の跡地の道 → 北西の集落 (嵐) → 北西の集落 (岩鯨) → 鯨見の西の脇道
-    ('ring_nw', ['@-1280,-420', '#s_nw', '#w_nw', '@-256,-700']),
-    # 内海の南の岸の道: 都の東の船着き場の道 → 内海の南の集落 → 余燼の南東の集落
-    ('shore_s', ['@240,121', '#e_n', '#e_se']),
+    # (霜垣の砦村の東の岸から鐘見の里の西の岸へ、渡し船で北の海を渡る。'~' = 通る点、'>' = そこまでまっすぐ = 渡し船)
+    ('ring_nw', ['@-1280,-420', '#s_nw', '~-856,-1013', '>-606,-1085', '#w_nw', '@-256,-700']),
+    # 灰の荒野の北の岸の道: 余燼の南東の集落の道 → 内海の南の集落 (2026-11-08 の四つの大陸で、都の船着き場からは海の向こうになった)
+    ('shore_s', ['@900,960', '#e_n']),
     # 奥のダンジョンへの枝
     ('deep_fort', ['@1000,-1150', '#fort']),
-    ('deep_temple', ['@1300,848', '#temple']),
+    ('deep_temple', ['@1420,700', '#temple']),
     ('deep_lava', ['@920,1020', '#lava']),
     ('deep_ice', ['@-936,-1060', '#ice']),
     # 今の地下のダンジョンへの枝
@@ -61,6 +62,9 @@ LINKS = [
 
 # 水を渡る枝は、岸で切って渡し舟にする
 FERRY_LINKS = {'deep_ice'}
+# 四つの大陸のあいだの海を渡る道 (渡し船は gen_continent.split_roads_at_sea が作る) と、その海の一升の重さ
+CROSS_LINKS = {'ring_ne', 'ring_se', 'ring_sw', 'ring_nw'}
+SEA_CROSS = 30.0
 
 # 外れの集落: 道が避ける半径と、口 (道の通る所) の中心からの距離。集落の部品は半径 34 (tools/capital/frontier_hamlet.R_OUT)
 HAMLET_KEEP = 56
@@ -99,6 +103,11 @@ def main():
     cost = 1.0 + 30.0 * slope ** 2
     water = ~land
     big_water = ndimage.binary_opening(water, iterations=2)
+    # 海の中の小島 (四つの大陸のあいだ) は道を通さない (渡し船を一つで済ませる)。大きな島 (霜の小島・はじまりの島) はそのまま
+    lab, nl = ndimage.label(land)
+    if nl:
+        sizes = ndimage.sum(land, lab, range(1, nl + 1))
+        big_water |= np.isin(lab, [i + 1 for i, sz in enumerate(sizes) if sz < 300])
     cost = np.where(water, 40.0, cost)
     cost = np.where(big_water, 400.0, cost)
     cost = cost + np.where(land & (sea_dist < 24), 3.0, 0.0)
@@ -154,16 +163,14 @@ def main():
     cost = np.where(lblock, cost + 400.0, cost)
 
     # つなぎ先は今の道だけ (layout.json に外れの道がもう入っていれば、その分を除く。外れの道どうしは探した順につなぐ)
-    base = lay['roads']
-    try:
-        sys.path.insert(0, os.path.join(ROOT, 'tools', 'lib'))
-        import frontier_roads as _fr
-        import continent_layout as _cl
-        n_base = len(_cl.LAYOUTS['c1']['roads']) - len(_fr.ROADS)
-        if len(base) > n_base:
-            base = base[:n_base]
-    except Exception:
-        pass
+    # (layout.json の道は海で切ってあり、外れの道も入っているので、見取り図の今の道を曲線にして使う)
+    sys.path.insert(0, os.path.join(ROOT, 'tools', 'lib'))
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import frontier_roads as _fr
+    import continent_layout as _cl
+    from gen_continent import road_curve
+    n_base = len(_cl.LAYOUTS['c1']['roads']) - len(_fr.ROADS)
+    base = [road_curve(r) for r in _cl.LAYOUTS['c1']['roads'][:n_base]]
     roads = [np.array(r, dtype=float) for r in base]
 
     def on_road(x, z):
@@ -178,7 +185,11 @@ def main():
     spots = {s[2]: s for s in SPOTS}
     poi_at = {p['kind']: (p['x'], p['z']) for p in pois}
 
-    def astar(a, b):
+    # 四つの大陸のあいだの海を渡る環の道 (2026-11-08): 海を安くして、行き先の近くでまっすぐ渡らせる (渡った所は gen_continent が渡し船にする)。
+    # 高いままだと、遠回りして内海の口 (都の渡し場のそば) で渡っていた
+    cost_cross = np.where(big_water, SEA_CROSS, cost)
+
+    def astar(a, b, cost=cost):
         si, sj = cell(*a)
         ti, tj = cell(*b)
         INF = 1e18
@@ -225,6 +236,9 @@ def main():
         return [pts[0], pts[-1]]
 
     def resolve(tok, toward):
+        if tok[0] in '~>':
+            x, z = map(int, tok[1:].split(','))
+            return (x, z), None
         if tok.startswith('@'):
             x, z = map(int, tok[1:].split(','))
             return on_road(x, z), None
@@ -248,7 +262,12 @@ def main():
             a, _ = resolve(toks[idx], None) if prev is None else (prev, None)
             b, stop = resolve(toks[idx + 1], a)
             prev = b
-            seg = astar(a, b)
+            if toks[idx + 1].startswith('>'):
+                # 渡し船で渡る所: まっすぐ (gen_continent が海の上を切って渡し船にする)
+                L = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1]) // 8))
+                seg = [(round(a[0] + (b[0] - a[0]) * t / L), round(a[1] + (b[1] - a[1]) * t / L)) for t in range(L + 1)]
+            else:
+                seg = astar(a, b, cost_cross if name in CROSS_LINKS else cost)
             seg[0] = a
             seg[-1] = b
             pts = pts + (seg if not pts else seg[1:])

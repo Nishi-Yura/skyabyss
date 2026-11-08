@@ -31,6 +31,8 @@ public final class ContinentLayout {
     private final List<List<BlockPos>> ferries = new ArrayList<>();
     // 渡し船の両端の船着き場 ([都の側, 向こう岸])
     private final List<List<BlockPos>> ferryDocks = new ArrayList<>();
+    // 渡し船の両端の呼び名の鍵 ([手前の岸, 向こう岸]。その岸のいちばん近い都・町・外れの集落。船着き場の札と、渡った先の名)
+    private final List<String[]> ferryNames = new ArrayList<>();
     private final Map<String, BlockPos> names = new java.util.LinkedHashMap<>();
     private final Map<String, Level> levels = new java.util.LinkedHashMap<>();
     // はじまりの島の谷の場所 (gate・fire・shrine・bandits・prints_view と、足跡 prints)。古い図には無い (空)
@@ -63,6 +65,11 @@ public final class ContinentLayout {
         lines(o.getAsJsonArray("ferries"), ferries);
         if (o.has("ferry_docks")) {
             lines(o.getAsJsonArray("ferry_docks"), ferryDocks);
+        }
+        if (o.has("ferry_names")) {
+            for (JsonElement e : o.getAsJsonArray("ferry_names")) {
+                ferryNames.add(new String[] {e.getAsJsonArray().get(0).getAsString(), e.getAsJsonArray().get(1).getAsString()});
+            }
         }
         if (o.has("names")) {
             for (Map.Entry<String, JsonElement> e : o.getAsJsonObject("names").entrySet()) {
@@ -237,6 +244,12 @@ public final class ContinentLayout {
 
     public List<List<BlockPos>> ferryDocks() {
         return ferryDocks;
+    }
+
+    // 渡し船 ferry の岸 side (0 = 手前・1 = 向こう) の呼び名の鍵。無ければ null
+    @Nullable
+    public String ferryName(int ferry, int side) {
+        return ferry >= 0 && ferry < ferryNames.size() ? ferryNames.get(ferry)[side & 1] : null;
     }
 
     // はじまりの島の谷の場所 (gate・fire・shrine・bandits・prints_view)。無ければ null

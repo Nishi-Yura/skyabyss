@@ -51,7 +51,8 @@ public final class RareBeastSelfTest {
         BlockPos cap = lay.capital();
         check(f, RareBeasts.nearTown(cap.getX(), cap.getZ()) && RareBeasts.kindAt(cap.getX(), cap.getZ()) == RareBeast.Kind.HARE, "the capital is not meadow / not kept clear");
         BlockPos mid = lay.roads().get(1).get(lay.roads().get(1).size() / 2);
-        check(f, RareBeasts.alongRoad(mid.getX(), mid.getZ()) && !RareBeasts.alongRoad(mid.getX() + 300, mid.getZ() + 300), "road nearness is wrong");
+        // (道から離れた所は、北の街道の中ほどの西 300。四つの大陸で北の街道が渡し場で切れ、南東 300 は都の東の街道の上になった)
+        check(f, RareBeasts.alongRoad(mid.getX(), mid.getZ()) && !RareBeasts.alongRoad(mid.getX() - 300, mid.getZ()), "road nearness is wrong");
         run(f, server.overworld());
         f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST rare beasts FAILED: {}", m));
         if (f.isEmpty()) {
