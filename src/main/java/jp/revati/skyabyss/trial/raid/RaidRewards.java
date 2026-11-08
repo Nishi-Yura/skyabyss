@@ -227,6 +227,10 @@ public final class RaidRewards {
                 title(server, codex, id, TITLE_NOWIPE + "." + titan, p);
                 give(server, p, id, List.of(new Grant(ModItems.resonanceShard(titan), NO_WIPE_SHARDS)), replay ? REPLAY_RATE : 1.0, random);
             }
+            // 巨神のアスペクト (一つ、崩れなしならもう一つ。報いの祭壇が開く。docs/design/58)。周回でも減らない
+            if (p != null) {
+                jp.revati.skyabyss.rpg.aspect.AspectNet.grant(p, titan, noWipe);
+            }
         }
     }
 

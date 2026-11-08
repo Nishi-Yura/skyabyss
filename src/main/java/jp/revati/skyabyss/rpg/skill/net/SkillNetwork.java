@@ -115,14 +115,20 @@ public final class SkillNetwork {
                 })
                 .playToServer(SkillExtPayload.TYPE, SkillExtPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        String result = switch (payload.action()) {
-                            case SkillExtPayload.PLACE -> SkillExtOps.place(player, payload.a(), payload.b(), Skill.byId(payload.skill())).name();
-                            case SkillExtPayload.REMOVE -> SkillExtOps.remove(player, payload.a()).name();
-                            default -> "BAD";
+                        // アスペクトを枠に付ける (PLACE: skill = 品の id、a = 枠) ・外す (REMOVE: a = 枠)。docs/design/58
+                        jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult r = switch (payload.action()) {
+                            case SkillExtPayload.PLACE -> jp.revati.skyabyss.rpg.aspect.Aspects.equip(player, payload.a(), payload.skill());
+                            case SkillExtPayload.REMOVE -> jp.revati.skyabyss.rpg.aspect.Aspects.equip(player, payload.a(), "");
+                            default -> jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.LOCKED;
                         };
-                        if (!result.equals("OK")) {
+                        if (r != jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.OK) {
                             SkillManager.sync(player);
-                            Notice.bar(player, ModText.deny("message.skyabyss.skill.ext_failed." + result.toLowerCase()));
+                            String key = switch (r) {
+                                case WRONG_JOB, NOT_OWNED -> "message.skyabyss.aspect.equip_job";
+                                case FULL -> "message.skyabyss.aspect.equip_full";
+                                default -> "message.skyabyss.aspect.equip_locked";
+                            };
+                            Notice.bar(player, ModText.deny(key));
                         }
                     }
                 })

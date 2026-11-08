@@ -70,11 +70,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public final Map<String, LinkedHashSet<String>> nodes = new java.util.HashMap<>();
     // 技の変異 (A08。技の id → 変異の id)。一度選んだら外せない。転生しても残る
     public final Map<String, String> mutations = new LinkedHashMap<>();
-    // 紋 (A14)。持っている紋 (「id/段」の文字。25 まで) と、盤の穴 (最大 6。「id/段@技の id」か空)。転生しても残る
-    public final java.util.List<String> glyphBag = new java.util.ArrayList<>();
-    public final String[] glyphSockets = new String[SkillRules.GLYPH_SOCKETS];
-    // 紋をもらった試練 ("巨神|試練")。同じ試練で二度もらわない。転生で空に戻る
-    public final Set<String> glyphClaims = new LinkedHashSet<>();
+    // 巨神のアスペクト (docs/design/58。紋の盤の代わり。2026-11-09)。品ごとの集めた数 (数で Lv)、付けている枠 (最大 5。空は "")、
+    // ミシックが出ずに越えたルートの数 (8 で次は必ずミシック)。転生しても残る
+    public final Map<String, Integer> aspects = new LinkedHashMap<>();
+    public final String[] aspectSlots = new String[jp.revati.skyabyss.rpg.aspect.Aspects.MAX_SLOTS];
+    public int aspectPity;
     // 転生の回数 (サーバーが毎回入れて同期する。保存しない。淵・前世の技の出し分けと、前世の点に使う)
     public int rebirth;
     // 淵の残響の期限 (サーバーだけ)
@@ -148,7 +148,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < loadouts.length; i++) {
             loadouts[i] = new Loadout();
         }
-        Arrays.fill(glyphSockets, "");
+        Arrays.fill(aspectSlots, "");
     }
 
     public int rank(Skill skill) {
@@ -904,14 +904,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             Mutation m = Mutation.byId(e.getValue());
             return m == null || !m.skill.id.equals(e.getKey());
         });
-        glyphBag.removeIf(g -> Glyph.parse(g) == null);
-        while (glyphBag.size() > SkillRules.GLYPH_BAG_MAX) {
-            glyphBag.remove(glyphBag.size() - 1);
-        }
-        for (int i = 0; i < glyphSockets.length; i++) {
-            String g = glyphSockets[i];
-            if (g == null || (!g.isEmpty() && Glyph.parsePlaced(g) == null)) {
-                glyphSockets[i] = "";
+        aspects.keySet().removeIf(k -> jp.revati.skyabyss.rpg.aspect.Aspects.get(k) == null);
+        for (int i = 0; i < aspectSlots.length; i++) {
+            String g = aspectSlots[i];
+            if (g == null || (!g.isEmpty() && jp.revati.skyabyss.rpg.aspect.Aspects.get(g) == null)) {
+                aspectSlots[i] = "";
             }
         }
     }
@@ -1022,21 +1019,15 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         CompoundTag mu = new CompoundTag();
         mutations.forEach(mu::putString);
         tag.put("mutations", mu);
-        ListTag gb = new ListTag();
-        for (String g : glyphBag) {
-            gb.add(StringTag.valueOf(g));
+        CompoundTag as = new CompoundTag();
+        aspects.forEach(as::putInt);
+        tag.put("aspects", as);
+        ListTag sl = new ListTag();
+        for (String g : aspectSlots) {
+            sl.add(StringTag.valueOf(g == null ? "" : g));
         }
-        tag.put("glyphBag", gb);
-        ListTag gs = new ListTag();
-        for (String g : glyphSockets) {
-            gs.add(StringTag.valueOf(g));
-        }
-        tag.put("glyphSockets", gs);
-        ListTag gc = new ListTag();
-        for (String g : glyphClaims) {
-            gc.add(StringTag.valueOf(g));
-        }
-        tag.put("glyphClaims", gc);
+        tag.put("aspectSlots", sl);
+        tag.putInt("aspectPity", aspectPity);
         return tag;
     }
 
@@ -1148,19 +1139,18 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         for (String key : mu.getAllKeys()) {
             mutations.put(key, mu.getString(key));
         }
-        glyphBag.clear();
-        for (Tag t : tag.getList("glyphBag", Tag.TAG_STRING)) {
-            glyphBag.add(t.getAsString());
+        // 紋の盤 (glyphBag・glyphSockets・glyphClaims) は 2026-11-09 に消した。前の記録は読まない (頁の選定 B: 消すだけ)
+        aspects.clear();
+        CompoundTag as = tag.getCompound("aspects");
+        for (String key : as.getAllKeys()) {
+            aspects.put(key, as.getInt(key));
         }
-        Arrays.fill(glyphSockets, "");
-        ListTag gs = tag.getList("glyphSockets", Tag.TAG_STRING);
-        for (int i = 0; i < Math.min(gs.size(), glyphSockets.length); i++) {
-            glyphSockets[i] = gs.getString(i);
+        Arrays.fill(aspectSlots, "");
+        ListTag sl = tag.getList("aspectSlots", Tag.TAG_STRING);
+        for (int i = 0; i < Math.min(sl.size(), aspectSlots.length); i++) {
+            aspectSlots[i] = sl.getString(i);
         }
-        glyphClaims.clear();
-        for (Tag t : tag.getList("glyphClaims", Tag.TAG_STRING)) {
-            glyphClaims.add(t.getAsString());
-        }
+        aspectPity = tag.getInt("aspectPity");
         // レベルを知らないので、点の検めはログインのとき (SkillManager.onLogin) に行う。ここでは形だけ整える
         sanitize(50);
     }
@@ -1234,13 +1224,15 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                     buf.writeUtf(k, 64);
                     buf.writeUtf(v, 64);
                 });
-                buf.writeVarInt(d.glyphBag.size());
-                for (String g : d.glyphBag) {
-                    buf.writeUtf(g, 64);
+                buf.writeVarInt(d.aspects.size());
+                d.aspects.forEach((k, v) -> {
+                    buf.writeUtf(k, 64);
+                    buf.writeVarInt(v);
+                });
+                for (String g : d.aspectSlots) {
+                    buf.writeUtf(g == null ? "" : g, 64);
                 }
-                for (String g : d.glyphSockets) {
-                    buf.writeUtf(g, 96);
-                }
+                buf.writeVarInt(d.aspectPity);
                 buf.writeUtf(d.curJob, 32);
             },
             buf -> {
@@ -1309,11 +1301,12 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
                 int gn = buf.readVarInt();
                 for (int i = 0; i < gn; i++) {
-                    d.glyphBag.add(buf.readUtf(64));
+                    d.aspects.put(buf.readUtf(64), buf.readVarInt());
                 }
-                for (int i = 0; i < d.glyphSockets.length; i++) {
-                    d.glyphSockets[i] = buf.readUtf(96);
+                for (int i = 0; i < d.aspectSlots.length; i++) {
+                    d.aspectSlots[i] = buf.readUtf(64);
                 }
+                d.aspectPity = buf.readVarInt();
                 d.curJob = buf.readUtf(32);
                 return d;
             });

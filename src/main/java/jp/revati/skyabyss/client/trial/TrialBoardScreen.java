@@ -56,8 +56,9 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     private static final int ABYSS_W = 118;
     private static final int CRAFT_W = Golden.S89;
-    private static final int TAB_W = Golden.S55;
-    private static final int TABS = 4;
+    // 頁は五つ (いま・図鑑・誓い・報い・手引き)。札の幅は四つのときの並びと同じ長さに収める
+    private static final int TAB_W = 44;
+    private static final int TABS = 5;
     private static final int TOOL_Y = BODY.y();
     // 仲間と渡る (上の段の右。頁の札の右から板の右まで)
     private static final int GO_X = BODY.x() + TABS * (TAB_W + Golden.S3) + Golden.S5;
@@ -241,7 +242,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         Component sub = titan.copy().append("  ").append(Component.translatable("gui.skyabyss.trial.cycle", data.cycle()));
         g.drawString(font, sub, head.right() - Golden.S5 - font.width(sub), hy, argb(1f, TEAL), false);
         // 頁
-        String[] tabs = {"gui.skyabyss.trial.tab.now", "gui.skyabyss.trial.tab.codex", "gui.skyabyss.trial.tab.vow", "gui.skyabyss.trial.tab.how"};
+        String[] tabs = {"gui.skyabyss.trial.tab.now", "gui.skyabyss.trial.tab.codex", "gui.skyabyss.trial.tab.vow", "gui.skyabyss.trial.tab.rewards", "gui.skyabyss.trial.tab.how"};
         for (int t = 0; t < TABS; t++) {
             int tx = BODY.x() + t * (TAB_W + Golden.S3);
             boolean hover = mouseX >= tx && mouseX < tx + TAB_W && mouseY >= TOOL_Y && mouseY < TOOL_Y + ROW;
@@ -254,6 +255,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             case 0 -> renderNow(g, font);
             case 1 -> renderCodex(g, font);
             case 2 -> renderVows(g, font, mouseX, mouseY);
+            case 3 -> renderRewards(g, font, mouseX, mouseY);
             default -> renderHow(g, font);
         }
         // 足: 順路の記録・歌片・称号と、歌片を作る・深淵のつまみ
@@ -333,6 +335,59 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     }
 
     // 心得の頁: 祠・試練・誓い・深淵を、見出しと折り返した文で
+    // 報い: この祠から出るアスペクト (今の職の分。共通のレア・エピックと、この祠だけのミシック)。持っている Lv と、出る割合・ミシックまでの回数
+    private void renderRewards(GuiGraphics g, Font font, int mx, int my) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+        jp.revati.skyabyss.rpg.skill.SkillData d = jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player);
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(d.curJob);
+        int x0 = CONTENT.x() + Golden.S5;
+        int w = CONTENT.w() - Golden.S13;
+        int y = CONTENT.y() + 2;
+        Component head = Component.translatable("gui.skyabyss.aspect.pool_head",
+                job == null ? Component.literal("-") : Component.translatable(job.nameKey()));
+        g.drawString(font, head, x0, y, argb(1f, GOLD), false);
+        Component pity = Component.translatable("gui.skyabyss.aspect.pool_pity", Math.max(1, jp.revati.skyabyss.rpg.aspect.Aspects.PITY - d.aspectPity + 1));
+        g.drawString(font, pity, x0 + w - font.width(pity), y, argb(1f, TEAL), false);
+        y += 11;
+        for (FormattedCharSequence line : font.split(Component.translatable("gui.skyabyss.aspect.pool_rates"), w)) {
+            g.drawString(font, line, x0, y, argb(1f, DIM), false);
+            y += 10;
+        }
+        y += 3;
+        if (job == null) {
+            return;
+        }
+        java.util.List<jp.revati.skyabyss.rpg.aspect.Aspect> pool = jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, data.titan());
+        int cols = 2;
+        int cw = (w - Golden.S5) / cols;
+        int rowH = 11;
+        java.util.List<Component> tip = null;
+        for (int i = 0; i < pool.size(); i++) {
+            jp.revati.skyabyss.rpg.aspect.Aspect a = pool.get(i);
+            int cx = x0 + (i % cols) * (cw + Golden.S5);
+            int cy = y + (i / cols) * rowH;
+            if (cy + 9 > CONTENT.bottom()) {
+                break;
+            }
+            int lv = jp.revati.skyabyss.rpg.aspect.Aspects.level(d, a);
+            int color = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.rarityColor(a.rarity());
+            g.fill(cx, cy + 2, cx + 4, cy + 6, argb(1f, color));
+            Component lvText = lv > 0 ? Component.translatable("aspect.skyabyss.level", lv) : Component.translatable("aspect.skyabyss.unowned");
+            int lw = font.width(lvText);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(a.nameKey()), cx + 7, cy, cw - 12 - lw, argb(1f, lv > 0 ? color : DIM), false);
+            g.drawString(font, lvText, cx + cw - lw, cy, argb(1f, lv > 0 ? TEXT : DIM), false);
+            if (mx >= cx && mx < cx + cw && my >= cy && my < cy + rowH) {
+                tip = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTip(d, a);
+            }
+        }
+        if (tip != null) {
+            g.renderComponentTooltip(font, tip, mx, my);
+        }
+    }
+
     private void renderHow(GuiGraphics g, Font font) {
         int x0 = CONTENT.x() + Golden.S5;
         int w = CONTENT.w() - Golden.S13;

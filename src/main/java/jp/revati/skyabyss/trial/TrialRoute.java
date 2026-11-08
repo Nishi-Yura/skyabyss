@@ -287,10 +287,6 @@ public final class TrialRoute {
         if (!key.equals(keyOf(titan, draw, step)) || !CLEARED_KEYS.add(group + "|" + key)) {
             return;
         }
-        // 試練を越えた人に紋が 1 つ (同じ試練では一度だけ。docs/design/31 の A14)
-        for (ServerPlayer m : members(back, group)) {
-            jp.revati.skyabyss.rpg.skill.SkillExtOps.award(m, titan, key);
-        }
         if (raid || Titans.STONE_WHALE.equals(titan)) {
             // 試練の踏破の経験値・依頼の合図・巨神ごとの試練の合図。岩鯨は石でも部屋でもここ。
             // ほかの巨神の原型の石は各背の石の仕組みが渡すので、ここではレイドの部屋のときだけ (二重に渡さない)

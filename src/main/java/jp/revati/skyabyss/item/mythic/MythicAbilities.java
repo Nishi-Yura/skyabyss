@@ -215,6 +215,17 @@ public final class MythicAbilities {
         return echoScale;
     }
 
+    // 力を scale 倍にして run を流す (アスペクトの「もう一度」。rpg/aspect/Aspects)
+    public static void withPowerScale(double scale, Runnable run) {
+        double before = echoScale;
+        echoScale = before * scale;
+        try {
+            run.run();
+        } finally {
+            echoScale = before;
+        }
+    }
+
     // 技のマナに掛ける倍率 (落ちる月の杖: +20%)
     public static double manaScale(Player p, Skill skill) {
         return holds(p, TowerGearSetup.STAFF.get()) ? 1 + (MOON_MANA - 1) * D(p) : 1;

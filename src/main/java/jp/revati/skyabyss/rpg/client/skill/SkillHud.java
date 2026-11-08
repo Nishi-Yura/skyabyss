@@ -278,8 +278,4 @@ public final class SkillHud {
         }
     }
 
-    // 紋の絵 (icons2.png の 20〜24 番)
-    static void drawGlyph(GuiGraphics g, jp.revati.skyabyss.rpg.skill.Glyph glyph, int x, int y, int size) {
-        drawIcon(g, 120 + glyph.ordinal(), x, y, size);
-    }
 }

@@ -169,25 +169,17 @@ public final class SkillCommands {
                             SkillReset.forRebirth(target(ctx));
                             return done(ctx);
                         })))
-                        // 開発用 (A08・A14): 紋を 1 つ足す・変異を素材なしで入れる・紋を盤へ差す
-                        .then(Commands.literal("glyph").then(player().then(Commands.argument("id", StringArgumentType.word())
-                                .then(Commands.argument("level", IntegerArgumentType.integer(1, 3)).executes(ctx -> {
+                        // 開発用: アスペクトを数だけ足す (docs/design/58)・変異を素材なしで入れる
+                        .then(Commands.literal("aspect").then(player().then(Commands.argument("id", StringArgumentType.word())
+                                .then(Commands.argument("copies", IntegerArgumentType.integer(1, 11)).executes(ctx -> {
                                     ServerPlayer p = target(ctx);
-                                    Glyph g = Glyph.byId(StringArgumentType.getString(ctx, "id"));
-                                    if (g == null || !SkillExtOps.give(p, g, IntegerArgumentType.getInteger(ctx, "level"))) {
+                                    String id = StringArgumentType.getString(ctx, "id");
+                                    if (jp.revati.skyabyss.rpg.aspect.Aspects.get(id) == null) {
                                         return 0;
                                     }
+                                    SkillManager.get(p).aspects.merge(id, IntegerArgumentType.getInteger(ctx, "copies"), Integer::sum);
+                                    SkillManager.sync(p);
                                     return done(ctx);
-                                })))))
-                        .then(Commands.literal("socket").then(player().then(Commands.argument("socket", IntegerArgumentType.integer(0, 5))
-                                .then(Commands.argument("skill", StringArgumentType.word()).executes(ctx -> {
-                                    ServerPlayer p = target(ctx);
-                                    SkillData sd = SkillManager.get(p);
-                                    sd.lastCombat = Long.MIN_VALUE / 2;
-                                    SkillExtOps.GlyphResult r = SkillExtOps.place(p, IntegerArgumentType.getInteger(ctx, "socket"), 0,
-                                            Skill.byId(StringArgumentType.getString(ctx, "skill")));
-                                    ctx.getSource().sendSuccess(() -> Component.literal("socket: " + r.name()), false);
-                                    return r == SkillExtOps.GlyphResult.OK ? 1 : 0;
                                 })))))
                         .then(Commands.literal("mutate").then(player().then(Commands.argument("skill", StringArgumentType.word()).executes(ctx -> {
                             ServerPlayer p = target(ctx);

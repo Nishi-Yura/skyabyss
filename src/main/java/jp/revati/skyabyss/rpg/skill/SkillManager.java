@@ -701,6 +701,8 @@ public final class SkillManager {
         jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.onSkillCast(player);
         // 神器の大きな能力 (巻き戻し・羽の嵐)
         jp.revati.skyabyss.item.mythic.MythicAbilities.onSkillCast(player, skill, rank);
+        // 巨神のアスペクト (もう一度・待ちが戻る・次の一撃・守り・足。docs/design/58)
+        jp.revati.skyabyss.rpg.aspect.Aspects.afterCast(player, skill, rank);
         return CastResult.OK;
     }
 

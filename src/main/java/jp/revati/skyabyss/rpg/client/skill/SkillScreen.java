@@ -1779,13 +1779,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                     g.fill(x + sz - 4 - i, y + 2 + i, x + sz - 2 - i, y + 4 + i, c);
                 }
             }
-            // 紋を差している技の節には、その紋の絵 (左下)
-            if (n.skill != null && n == t.skillNode(n.skill)) {
-                jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
-                if (gi != null) {
-                    SkillHud.drawGlyph(g, gi.glyph(), x - 2, y + sz - 7, 9);
-                }
-            }
         }
         canvas.end(g);
     }
@@ -1932,9 +1925,11 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             default -> lines.add(Component.translatable(n.effectKey(key)).withColor(TEXT));
         }
         if (n.skill != null && n == t.skillNode(n.skill)) {
-            jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
-            if (gi != null) {
-                lines.add(Component.translatable("gui.skyabyss.tree.glyph_line", Component.translatable(gi.glyph().nameKey()), gi.level()).withColor(PALE));
+            // 付けているアスペクトがこの技を変えていれば、その名前 (docs/design/58)
+            for (jp.revati.skyabyss.rpg.aspect.Aspects.Worn w : jp.revati.skyabyss.rpg.aspect.Aspects.worn(net.minecraft.client.Minecraft.getInstance().player)) {
+                if (w.aspect().skill() == n.skill) {
+                    lines.add(Component.translatable(w.aspect().nameKey()).append(" ").append(Component.translatable("aspect.skyabyss.level", w.level())).withColor(PALE));
+                }
             }
             if (!skillInfoShown) {
                 changeLines(lines, n.skill);

@@ -69,7 +69,7 @@ public final class SkillSelfTest {
             check(f, !linked || (s.tier == 0) == s.requires().isEmpty(), s.id + " tier and requirements disagree");
             SkillData d = new SkillData();
             // 淵・前世の技は転生の回数
-            d.rebirth = SkillRules.GLYPH_SOCKETS * 3;
+            d.rebirth = 18;
             for (Skill r : s.requires()) {
                 // 前提の前提も覚えておく (そうでないと検めで全部戻る)
                 for (Skill q : Skill.inTree(s.tree)) {

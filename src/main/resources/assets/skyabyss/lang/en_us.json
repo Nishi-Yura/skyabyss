@@ -1227,7 +1227,7 @@
   "gui.skyabyss.skill.page_tree": "Skill trees",
   "gui.skyabyss.skill.sub_tree": "Trees",
   "gui.skyabyss.skill.sub_build": "Stances",
-  "gui.skyabyss.skill.sub_ext": "Glyph Board",
+  "gui.skyabyss.skill.sub_ext": "Aspects",
   "gui.skyabyss.skill.page_tip": "Switch between the tree page and the page for stances, chains, tags and keystones.",
   "gui.skyabyss.skill.points_tryon": "Trial pts %s",
   "gui.skyabyss.skill.bar_melee": "Melee",
