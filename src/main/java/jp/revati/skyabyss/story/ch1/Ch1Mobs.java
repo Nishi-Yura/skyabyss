@@ -56,6 +56,15 @@ public final class Ch1Mobs {
     public static final int HAULER_RING_MIN = 4;
     public static final int HAULER_RING_MAX = 9;
     public static final double HAULER_KEEP = 28;
+    // 導く骨負い (2026-11-08。issue #15「骨負いが骨の集め場へ導かない」): 集め場から LEAD_FAR より遠く HAULER_WATCH の内にいる人のそばに、
+    // 人と集め場のあいだ (人から LEAD_AHEAD 先) に一体を出す。人を見ると集め場へ逃げる (BoneHauler.fleeDestination) ので、追えば着く。
+    // 骨負いから SEEN の内に来た人には、サブクエスト「骨を負う獣」(ch1/follow_hauler) を始める。集め場に着くと済み (Sites の到着)
+    public static final double LEAD_FAR = 30;
+    public static final double LEAD_AHEAD = 14;
+    public static final double SEEN = 16;
+    public static final String HAULER_QUEST = "ch1/follow_hauler";
+    public static final String HAULER_SIGNAL = "ch1_bone_cache";
+    public static final String HAULER_LORE = "ch1/follow_hauler";
     private static final int HAULER_EVERY = 100;
 
     private Ch1Mobs() {
@@ -100,9 +109,41 @@ public final class Ch1Mobs {
             return;
         }
         ServerLevel level = server.overworld();
+        List<ServerPlayer> players = Players.snapshot(level.players());
         for (BlockPos cache : SiteSpawner.originsOf(Ch1Prep.BONE_CACHE).apply(server)) {
-            syncHauler(level, cache, Players.snapshot(level.players()));
+            syncHauler(level, cache, players);
+            noticeHaulers(level, cache, players);
         }
+    }
+
+    // 骨負いを見た人に、ついて行くクエストを始める (集め場をまだ見つけていない人だけ)
+    public static int noticeHaulers(ServerLevel level, BlockPos cache, List<ServerPlayer> players) {
+        int started = 0;
+        for (BoneHauler h : haulersAt(level, cache)) {
+            for (ServerPlayer p : players) {
+                if (p.level() == level && !p.isSpectator() && p.distanceToSqr(h) <= SEEN * SEEN
+                        && !jp.revati.skyabyss.lore.Lore.state(p).has(HAULER_LORE) && jp.revati.skyabyss.quest.Quests.start(p, HAULER_QUEST)) {
+                    jp.revati.skyabyss.notice.Notice.hint(p, "message.skyabyss.ch1.hauler.seen");
+                    started++;
+                }
+            }
+        }
+        return started;
+    }
+
+    // 骨負いを出す所: 集め場から遠い人がいれば、その人から集め場の方へ LEAD_AHEAD 先 (導く)。いなければ集め場のまわり。null なら集め場のまわり
+    @javax.annotation.Nullable
+    static ServerPlayer leadFor(BlockPos cache, List<ServerPlayer> players) {
+        ServerPlayer best = null;
+        double bestD = Double.MAX_VALUE;
+        for (ServerPlayer p : players) {
+            double d = Math.hypot(p.getX() - cache.getX(), p.getZ() - cache.getZ());
+            if (!p.isSpectator() && d > LEAD_FAR && d <= HAULER_WATCH && d < bestD && !jp.revati.skyabyss.lore.Lore.state(p).has(HAULER_LORE)) {
+                best = p;
+                bestD = d;
+            }
+        }
+        return best;
     }
 
     // 集め場のまわりの骨負いを、夕方〜夜で人が近くにいれば一体に、そうでなければ 0 にそろえる。そろえたあとの数を返す (自己テストからも)
@@ -130,20 +171,36 @@ public final class Ch1Mobs {
         if (!now.isEmpty()) {
             return 1;
         }
+        ServerPlayer lead = leadFor(cache, players);
+        if (lead != null && lead.level() == level) {
+            double dx = cache.getX() - lead.getX();
+            double dz = cache.getZ() - lead.getZ();
+            double len = Math.max(1, Math.hypot(dx, dz));
+            BlockPos at = BlockPos.containing(lead.getX() + dx / len * LEAD_AHEAD, cache.getY(), lead.getZ() + dz / len * LEAD_AHEAD);
+            if (spawnHauler(level, cache, at, 0, 3)) {
+                return 1;
+            }
+        }
         return spawnHauler(level, cache) ? 1 : 0;
     }
 
+    // 骨負いを数える範囲: 集め場から導く所まで (HAULER_WATCH) を含める
     public static List<BoneHauler> haulersAt(ServerLevel level, BlockPos cache) {
-        AABB box = new AABB(cache).inflate(HAULER_KEEP, 40, HAULER_KEEP);
+        AABB box = new AABB(cache).inflate(HAULER_WATCH + 8, 40, HAULER_WATCH + 8);
         return level.getEntitiesOfClass(BoneHauler.class, box, h -> h.isAlive() && h.getTags().contains(GuardMob.TEMP_TAG));
     }
 
     static boolean spawnHauler(ServerLevel level, BlockPos cache) {
+        return spawnHauler(level, cache, cache, HAULER_RING_MIN, HAULER_RING_MAX);
+    }
+
+    // center のまわり (rMin〜rMax) に一体。帰る先は集め場
+    static boolean spawnHauler(ServerLevel level, BlockPos cache, BlockPos center, int rMin, int rMax) {
         for (int attempt = 0; attempt < 8; attempt++) {
             double angle = level.random.nextDouble() * Math.PI * 2;
-            double r = HAULER_RING_MIN + level.random.nextDouble() * (HAULER_RING_MAX - HAULER_RING_MIN);
-            int x = cache.getX() + (int) Math.round(Math.cos(angle) * r);
-            int z = cache.getZ() + (int) Math.round(Math.sin(angle) * r);
+            double r = rMin + level.random.nextDouble() * (rMax - rMin);
+            int x = center.getX() + (int) Math.round(Math.cos(angle) * r);
+            int z = center.getZ() + (int) Math.round(Math.sin(angle) * r);
             if (!level.hasChunkAt(new BlockPos(x, cache.getY(), z))) {
                 continue;
             }

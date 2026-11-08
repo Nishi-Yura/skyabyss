@@ -526,6 +526,23 @@ public final class Ch1MobsSelfTest {
             check(Ch1Mobs.syncHauler(level, cache, List.of(near)) == 0 && Ch1Mobs.haulersAt(level, cache).isEmpty(), "daytime should send the hauler away", f);
             level.setDayTime(15000);
             check(Ch1Mobs.syncHauler(level, cache, List.of()) == 0, "no player near should give no hauler", f);
+            // 導く骨負い: 集め場から遠い人のそば (人と集め場のあいだ) に出て、見た人にクエストが始まる
+            FakePlayer far = fake(level, "u_far", SX + 6 - 38, SZ + 6);
+            ps.add(far);
+            check(Ch1Mobs.syncHauler(level, cache, List.of(far)) == 1, "a far player should get a leading hauler", f);
+            BoneHauler lead = Ch1Mobs.haulersAt(level, cache).get(0);
+            double toCache = Math.hypot(lead.getX() - cache.getX(), lead.getZ() - cache.getZ());
+            check(toCache < 50 && toCache > Ch1Mobs.HAULER_RING_MAX && lead.distanceTo(far) < Ch1Mobs.LEAD_AHEAD + 6,
+                    "the leading hauler is not between the player and the cache (to cache " + Math.round(toCache) + ", to player " + Math.round(lead.distanceTo(far)) + ")", f);
+            check(Ch1Mobs.noticeHaulers(level, cache, List.of(far)) == 1 && jp.revati.skyabyss.quest.QuestLog.of(far).entry(Ch1Mobs.HAULER_QUEST) != null,
+                    "seeing the hauler did not start the follow quest", f);
+            check(Ch1Mobs.noticeHaulers(level, cache, List.of(far)) == 0, "the follow quest started twice", f);
+            net.minecraft.world.phys.Vec3 flee = lead.fleeDestinationForTest(far);
+            check(flee != null && Math.hypot(flee.x - cache.getX(), flee.z - cache.getZ()) <= BoneHauler.AT_HOME + 1, "a scared leading hauler does not run to the cache", f);
+            jp.revati.skyabyss.quest.Quests.signal(far, Ch1Mobs.HAULER_SIGNAL);
+            check(jp.revati.skyabyss.quest.QuestLog.of(far).entry(Ch1Mobs.HAULER_QUEST) == null || jp.revati.skyabyss.quest.QuestLog.of(far).entry(Ch1Mobs.HAULER_QUEST).done,
+                    "arriving at the cache did not finish the follow quest", f);
+            lead.discard();
         } finally {
             level.setDayTime(dayBefore);
             drop(ps);

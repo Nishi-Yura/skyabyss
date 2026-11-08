@@ -86,7 +86,7 @@ public final class VowCommands {
         }
         UUID group = Groups.keyOf(p);
         Vows.Result can = Vows.canChange(p.server, group, titan);
-        boolean here = jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan);
+        boolean here = jp.revati.skyabyss.titan.shrine.TitanShrine.atShrine(p, titan);
         List<Vow> active = Vows.active(Vows.backLevel(p.server, titan), group);
         p.sendSystemMessage(ModText.title("message.skyabyss.vow.menu_head").copy().append(Component.literal(" ")).append(Progression.titanName(titan)));
         if (can != Vows.Result.OK) {
@@ -122,7 +122,7 @@ public final class VowCommands {
     // 誓いを立てる・降ろす (命令と、祠の画面の「誓い」の頁から)。祠のそばだけ。変えたらグループに一行。変えたか
     public static boolean apply(ServerPlayer p, String titan, String id, boolean add) {
         UUID group = Groups.keyOf(p);
-        if (!jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan)) {
+        if (!jp.revati.skyabyss.titan.shrine.TitanShrine.atShrine(p, titan)) {
             jp.revati.skyabyss.notice.Notice.bar(p, ModText.deny("message.skyabyss.vow.closed.shrine"));
             return false;
         }
@@ -147,7 +147,7 @@ public final class VowCommands {
     private static int clear(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         String titan = StringArgumentType.getString(ctx, "titan");
-        if (!jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan)) {
+        if (!jp.revati.skyabyss.titan.shrine.TitanShrine.atShrine(p, titan)) {
             p.sendSystemMessage(ModText.deny("message.skyabyss.vow.closed.shrine"));
             return 0;
         }

@@ -144,7 +144,7 @@ public final class ContinentPois {
                 SiteData.Entry e = entry(data, i);
                 if (e == null) {
                     // 道にかかる見どころは、道から離れる向きにずらす (2026-11-02 の声「道の上に構造物できないようにして」。かかった所だけ欠けて建っていた)
-                    BlockPos at = RoadClearance.pushAway(new BlockPos(poi.x(), 0, poi.z()), radius(poi), 2, 40);
+                    BlockPos at = RoadClearance.pushAway(new BlockPos(poi.x(), 0, poi.z()), radius(poi), 2, 60);
                     int y = ContinentMap.get().surface(at.getX(), at.getZ()) + 1;
                     // 正面 (部品は南が入口) を一番近い道へ向ける (2026-10-28 の試遊「建物の向きがおかしい」。前は番号で回していた)
                     e = data.add(KIND, i, new BlockPos(at.getX(), y, at.getZ()), faceRoad(at.getX(), at.getZ()));
@@ -282,7 +282,8 @@ public final class ContinentPois {
     static int radius(Poi poi) {
         try {
             Blueprint bp = Blueprint.get(poi.blueprint());
-            return Math.max(bp.rx1 - bp.rx0, bp.rz1 - bp.rz0) / 2 + 1 + bp.ring;
+            // 四角い部品は、回すと角が半分の幅より外へ出る。対角の半分で見る (2026-11-08 の声「道と建造物重なってる」)
+            return (int) Math.ceil(Math.hypot(bp.rx1 - bp.rx0, bp.rz1 - bp.rz0) / 2) + 1 + bp.ring;
         } catch (RuntimeException ex) {
             return 8;
         }

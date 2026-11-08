@@ -68,6 +68,7 @@ public final class SiteTargets {
         bind("main_ember/heart", TITAN_PREFIX + "ember");
         // 一章の支度の段: 骨の坑の荷・割れ殻の洞の台座 (SiteNetwork.CHAPTER_TARGETS)
         bind("ch1/trail_iron/pit", "ch1_bone_pit");
+        bind("ch1/follow_hauler/follow", "ch1_bone_cache");
         bind("ch1/trail_blade/cave", "ch1_cleft_shell_cave");
         // 二章の支度の段: 塩の蔵 (道の段も蔵を指す。標は蔵へ向かう線の上)・沖の難破船・筏の跡
         bind("ch2/salt_road/road", "ch2_salt_vault");

@@ -314,7 +314,13 @@ public final class TitanShrine {
         return null;
     }
 
-    // 祠のそばか (誓いを選べる)
+    // その祠に来ているか (祭司のまわり = 集合台から PRIEST_REACH、または碑のそば)。祠の画面の「仲間と渡る」・誓い・歌片はこれで見る
+    // (2026-11-08 の声「話しかけて、始めるボタンない」。前は碑のそばだけを見ていて、台の縁に立つ祭司のそばでは出なかった)
+    public static boolean atShrine(ServerPlayer p, String titan) {
+        return titan.equals(shrineNear(p, PRIEST_REACH)) || near(p, titan);
+    }
+
+    // 碑のそばか
     public static boolean near(ServerPlayer p, String titan) {
         BlockPos c = posOf(p.server, titan);
         return c != null && p.level().dimension() == net.minecraft.world.level.Level.OVERWORLD

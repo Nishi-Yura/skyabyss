@@ -160,7 +160,7 @@ public final class SharedChests extends SavedData {
         for (ItemStack s : template) {
             ItemStack give = s.copy();
             // 置く品 (前の版で箱に入れた松明など) は渡さず、名前にも出さない (rpg/rules/NoPlaceables)
-            if (jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(p, give)) {
+            if (give.isEmpty() || jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(p, give)) {
                 continue;
             }
             if (!first) {
@@ -173,7 +173,9 @@ public final class SharedChests extends SavedData {
             }
             jp.revati.skyabyss.quest.Quests.give(p, give);
         }
-        Notice.hint(p, "message.skyabyss.chest.took", names);
+        if (!first) {
+            Notice.hint(p, "message.skyabyss.chest.took", names);
+        }
         level.playSound(null, pos, state.getBlock() instanceof BarrelBlock ? SoundEvents.BARREL_OPEN : SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5f, 1f);
         p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         return true;

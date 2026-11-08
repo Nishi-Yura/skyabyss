@@ -245,5 +245,13 @@
   "dialogue.skyabyss.whale_chaser.ch1_c_log1": "That paper... warped by the sea. Where did you find it?",
   "dialogue.skyabyss.whale_chaser.ch1_c_log1.show": "At the back of the captain's hall",
   "dialogue.skyabyss.whale_chaser.ch1_c_log2": "That's the captain's hand. No doubt of it.\n\"The song comes from the east. It calls a name. Not mine.\"...",
-  "dialogue.skyabyss.whale_chaser.ch1_c_log3": "\"Turn the helm.\" ...That was all he said that night.\nWhose name it called, I can't say. But the song is still calling someone, somewhere.\nKeep the page. If you follow the song past the whale, more will turn up."
+  "dialogue.skyabyss.whale_chaser.ch1_c_log3": "\"Turn the helm.\" ...That was all he said that night.\nWhose name it called, I can't say. But the song is still calling someone, somewhere.\nKeep the page. If you follow the song past the whale, more will turn up.",
+  "quest.skyabyss.ch1.follow_hauler.title": "The Bone Hauler",
+  "quest.skyabyss.ch1.follow_hauler.summary": "A beast with a basket of bones hurries somewhere.",
+  "quest.skyabyss.ch1.follow_hauler.done": "The beast was carrying bones the whale had shed, and piling them here.",
+  "quest.skyabyss.ch1.follow_hauler.follow.journal": "The hauler runs when it sees people, but always in the same direction. Follow it without getting too close.",
+  "quest.skyabyss.ch1.follow_hauler.follow.cache": "Follow the bone hauler to where it goes",
+  "lore.skyabyss.ch1.follow_hauler.title": "The Hauler's Pile",
+  "lore.skyabyss.ch1.follow_hauler.body": "Bone haulers gather the fragments the whale sheds, carry them in their baskets to a hollow in the hills and pile them up. It is not a nest, and they do not eat them. They only gather.\nUnder the pile were things travellers had dropped as well.",
+  "message.skyabyss.ch1.hauler.seen": "A beast with a basket of bones hurries somewhere. Try following it"
 }

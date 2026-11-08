@@ -79,7 +79,7 @@ public final class TrialBoard {
         }
         int shards = jp.revati.skyabyss.pouch.Pouch.countAll(sp, jp.revati.skyabyss.registry.ModItems.songShard(titan));
         // 誓い (前は祠をしゃがんで右クリックしたときの話の欄の一覧。今は祠の画面の「誓い」の頁)
-        boolean atShrine = jp.revati.skyabyss.titan.shrine.TitanShrine.near(sp, titan);
+        boolean atShrine = jp.revati.skyabyss.titan.shrine.TitanShrine.atShrine(sp, titan);
         jp.revati.skyabyss.titan.vow.Vows.Result can = jp.revati.skyabyss.titan.vow.Vows.canChange(sp.server, group, titan);
         String vowClosed = can != jp.revati.skyabyss.titan.vow.Vows.Result.OK ? "message.skyabyss.vow.closed." + can.name().toLowerCase()
                 : !atShrine ? "message.skyabyss.vow.closed.shrine" : "";
@@ -98,7 +98,7 @@ public final class TrialBoard {
 
     // 歌片を作る: その巨神の素材 SHARD_MATERIALS と共鳴の欠片 SHARD_RESONANCE。祠のそばで、その巨神の心臓を止めた人だけ
     public static boolean craftShard(ServerPlayer sp, String titan) {
-        if (!Titans.hasBack(titan) || !jp.revati.skyabyss.titan.shrine.TitanShrine.near(sp, titan)
+        if (!Titans.hasBack(titan) || !jp.revati.skyabyss.titan.shrine.TitanShrine.atShrine(sp, titan)
                 || !jp.revati.skyabyss.progress.Progression.stopped(sp.server, sp.getUUID(), titan)) {
             Notice.bar(sp, ModText.deny("message.skyabyss.shrine.craft_far"));
             return false;

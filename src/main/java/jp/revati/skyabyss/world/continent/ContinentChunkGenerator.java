@@ -318,7 +318,9 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     // このチャンク (と縁 4) にかかる道の線分 {x0, z0, x1, z1}
     static List<int[]> roadSegments(int x0, int z0) {
         List<int[]> out = new java.util.ArrayList<>();
-        for (List<BlockPos> line : ContinentLayout.get().roads()) {
+        List<List<BlockPos>> all = ContinentLayout.get().roads();
+        for (int li = 0; li < all.size(); li++) {
+            List<BlockPos> line = all.get(li);
             // 島の道 (はじまりの島の中) は細いまま
             int wide = line.isEmpty() || ContinentMap.get().region(line.get(0).getX(), line.get(0).getZ()) == ContinentMap.OUTSKIRTS ? 0 : 1;
             for (int i = 0; i + 1 < line.size(); i++) {
@@ -329,7 +331,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                         || Math.max(a.getZ(), b.getZ()) < z0 - pad || Math.min(a.getZ(), b.getZ()) > z0 + 15 + pad) {
                     continue;
                 }
-                out.add(new int[] {a.getX(), a.getZ(), b.getX(), b.getZ(), wide});
+                out.add(new int[] {a.getX(), a.getZ(), b.getX(), b.getZ(), wide, li});
             }
         }
         return out;
@@ -353,19 +355,33 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         return best;
     }
 
+    // 道どうしが出会う所の丸み (2026-11-08 の声「道が上手く曲がってない」。斜めに合わさる二本の道のあいだに、草の楔がぎざぎざに残っていた)。
+    // 同じ道の中はふつうの近さ、別の道どうしは滑らかな最小 (半径 JOIN_ROUND) で合わせ、内側の角を埋める
+    static final double JOIN_ROUND = 8.0;
+
+    static double smoothMin(double a, double b, double k) {
+        double h = Math.max(k - Math.abs(a - b), 0) / k;
+        return Math.min(a, b) - h * h * k * 0.25;
+    }
+
     // 道の上面の石 (道でなければ null)。幅を少し揺らす
     static BlockState road(List<int[]> segs, int x, int z) {
         if (segs.isEmpty()) {
             return null;
         }
-        double best = 1e9;
+        // 道ごとの近さ (同じ道の線分は最小)
+        java.util.Map<Integer, Double> perLine = new java.util.HashMap<>();
         for (int[] g : segs) {
             double dx = g[2] - g[0];
             double dz = g[3] - g[1];
             double len2 = dx * dx + dz * dz;
             double u = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - g[0]) * dx + (z - g[1]) * dz) / len2));
             double d = Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)) - (g.length > 4 && g[4] == 1 ? WIDE : 0);
-            best = Math.min(best, d);
+            perLine.merge(g.length > 5 ? g[5] : -1, d, Math::min);
+        }
+        double best = 1e9;
+        for (double d : perLine.values()) {
+            best = best >= 1e8 ? d : smoothMin(best, d, JOIN_ROUND);
         }
         // 縁は少しだけ揺らす (幅 8 がほぼ保たれる)
         double d = best - ContinentMap.value(x / 23.0, z / 23.0, 0x0AD5) * 0.4;

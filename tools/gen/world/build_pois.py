@@ -252,8 +252,11 @@ def bandit_camp():
             bp.set(x, 4, z, "minecraft:spruce_planks" if abs(x + 5) < 2 and abs(z + 5) < 2 else sl("spruce", "top"))
             if max(abs(x + 5), abs(z + 5)) == 2:
                 bp.set(x, 5, z, fence("spruce"))
-    for y in range(0, 4):
+    # 梯子: 台の縁の一マスを抜いて上まで通し、裏に柱 (前は台の板の下で行き止まり、掛ける柱も無かった。2026-11-08 の声「上らせる気の無い建築」)
+    column(bp, -4, -5, 0, 3, log("dark_oak_log"))
+    for y in range(0, 5):
         bp.set(-3, y, -5, "minecraft:ladder[facing=east,waterlogged=false]")
+    bp.set(-3, 5, -5, "minecraft:air")
     bp.set(-5, 6, -5, "minecraft:red_banner[rotation=0]")
     # 天幕 3 張り (くすんだ色)
     tent(bp, 2, -6, "x", 4, "brown", 21)

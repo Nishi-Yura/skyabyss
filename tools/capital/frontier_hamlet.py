@@ -201,7 +201,9 @@ class FrontierHamlet(RegionTown):
                     for dz in (-1, 0, 1):
                         if dx * sx > 0 or dz * sz > 0:
                             v.set(cx + dx, 7, cz + dz, tip)
-                for y in range(0, 6):
+                # 梯子は台の床の高さまで通し、裏に柱 (前は台の一段下で止まり、掛ける柱も無かった。2026-11-08 の声「上らせる気の無い建築」)
+                v.fill(cx, 0, cz - sz, cx, 5, cz - sz, logy)
+                for y in range(0, 7):
                     v.set(cx, y, cz - sz * 2, 'ladder[facing=%s,waterlogged=false]' % ('north' if sz > 0 else 'south'))
                 v.set(cx, 8, cz, LANTERN)
         # 真ん中の見張りの塔 (頂に狼煙の火。遠くから見える)

@@ -441,10 +441,13 @@ public final class Dungeons {
         if (clears == 1) {
             Notice.unlock(p, "message.skyabyss.dungeon.first", Component.translatable(d.nameKey()));
             // 初めて越えた人に、そのダンジョンだけの装飾品を一つ (DungeonGear)
+            // 装飾品の無いダンジョンでは何も渡さず、知らせも出さない (2026-11-08 の声「空気を手に入れた という表記はやめて」)
             ItemStack trinket = new ItemStack(DungeonGear.item(d));
-            DungeonGear.setClears(trinket, 1);
-            Quests.give(p, trinket);
-            Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
+            if (!trinket.isEmpty()) {
+                DungeonGear.setClears(trinket, 1);
+                Quests.give(p, trinket);
+                Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
+            }
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
         }
         Quests.signal(p, "dungeon:" + d.id);

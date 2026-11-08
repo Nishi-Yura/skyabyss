@@ -355,18 +355,18 @@ public final class WhaleRaidSelfTest {
             RaidRun.Run r = run();
             WhaleShaftRoom room = (WhaleShaftRoom) r.room;
             var hud = r.lastHud;
-            check(hud != null && hud.cellId().equals("WR4") && hud.max() == 4 && hud.secMax() > 0 && !hud.objKey().isEmpty(), "WR4: the objective strip is wrong: " + hud);
+            check(hud != null && hud.cellId().equals("WR4") && hud.max() == WhaleShaftRoom.FLIGHTS && hud.secMax() > 0 && !hud.objKey().isEmpty(), "WR4: the objective strip is wrong: " + hud);
             check(r.ctx.cell().bounds().contains(player.position()), "WR4: the player is not inside the room's cell");
-            // 階段を一つ出してから全滅 → 入口に戻り、階段は引っ込む
-            room.onUse(r.ctx, player, room.masterSwitch(r.ctx, 0), false);
+            // 床のこぶで登り 0 を押さえてから全滅 → 入口に戻り、押さえは解ける
+            room.onUse(r.ctx, player, room.knob(r.ctx, 0), false);
             return true;
         });
-        STAGES.add(() -> waitFor(() -> ((WhaleShaftRoom) run().room).grown(0) == WhaleShaftRoom.RISE, 80, "WR4 flight grows"));
+        STAGES.add(() -> waitFor(() -> ((WhaleShaftRoom) run().room).holding(run().ctx, 0), 20, "WR4 flight held"));
         STAGES.add(() -> {
             RaidRun.Run r = run();
             RaidRun.wipe(r, null);
             check(r.phase == RaidRun.Phase.COUNTDOWN, "WR4: a wipe did not put the room back to the countdown");
-            check(((WhaleShaftRoom) r.room).grown(0) == 0, "WR4: a wipe did not retract the stairs");
+            check(!((WhaleShaftRoom) r.room).holding(r.ctx, 0) && ((WhaleShaftRoom) r.room).ledgesOut(0), "WR4: a wipe did not release the hold and bring the ledges out");
             check(player.position().distanceTo(Vec3.atBottomCenterOf(r.ctx.cell().rest())) < 2.5, "WR4: a wipe did not bring the player back to the room's entrance");
             return true;
         });
@@ -374,9 +374,6 @@ public final class WhaleRaidSelfTest {
         STAGES.add(() -> {
             RaidRun.Run r = run();
             WhaleShaftRoom room = (WhaleShaftRoom) r.room;
-            for (int f = 0; f < WhaleShaftRoom.FLIGHTS; f++) {
-                room.onUse(r.ctx, player, room.localSwitch(r.ctx, f), true);
-            }
             BlockPos top = room.landingSpot(r.ctx, WhaleShaftRoom.FLIGHTS);
             player.setPos(top.getX() + 0.5, top.getY(), top.getZ() + 0.5);
             return true;

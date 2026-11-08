@@ -132,6 +132,26 @@ class Cave:
         if b is not None:
             self.air[b[0]] = val
 
+    def clear(self, x0, x1, y0, y1, z0, z1):
+        """空けて、置いた物も消す (段の上の頭の高さ・足場の上など。fill_air は洞の空きの印だけで、置いた板は残っていた)"""
+        self.fill_air(x0, x1, y0, y1, z0, z1)
+        for x in range(min(x0, x1), max(x0, x1) + 1):
+            for y in range(min(y0, y1), max(y0, y1) + 1):
+                for z in range(min(z0, z1), max(z0, z1) + 1):
+                    self.blk.pop((x, y, z), None)
+                    if hasattr(self, 'mats'):
+                        self.mats.pop((x, y, z), None)
+        # 岩を削ったら、外 (何も無い所) に開いた面を石でふさぐ (地下の世界は空っぽなので、殻が無いと外が見える)
+        if hasattr(self, 'mats'):
+            for x in range(min(x0, x1) - 1, max(x0, x1) + 2):
+                for y in range(min(y0, y1) - 1, max(y0, y1) + 2):
+                    for z in range(min(z0, z1) - 1, max(z0, z1) + 2):
+                        if (x, y, z) in self.mats or (x, y, z) in self.blk:
+                            continue
+                        if self.inside(x, y, z) and self.air[self.idx(x, y, z)]:
+                            continue
+                        self.mats[(x, y, z)] = "minecraft:stone"
+
     def is_air(self, x, y, z):
         if not self.inside(x, y, z):
             return False

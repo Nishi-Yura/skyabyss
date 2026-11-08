@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 巨神の祠のまわりの順位の石 (C11) と飾り板 (C21): 立てる・光らせる・開く中身を作る (サーバー側。docs/design/32 の 3.1「祠のまわり」)。
+// 巨神の祠のまわりの飾り板 (C21。記録の画面を開く): 立てる・光らせる・開く中身を作る。順位の石 (C11) はもう立てず、前の世界の石は消す (サーバー側。docs/design/32 の 3.1「祠のまわり」)。
 // 置き場は祠の輪の外の開いた床から決まった手順で二つ選ぶ。祠 (titan/shrine/TitanShrine) が人のいるあいだ 10 秒に一度呼び、無ければ立てる
 public final class RebirthBoards {
     // 記録が更新されてから光る長さ (tick)
@@ -67,8 +67,9 @@ public final class RebirthBoards {
         if (!back.hasChunkAt(spots.stone) || !back.hasChunkAt(spots.board)) {
             return false;
         }
-        if (!back.getBlockState(spots.stone).is(RebirthSetup.STONE.get())) {
-            back.setBlock(spots.stone, RebirthSetup.STONE.get().defaultBlockState(), 3);
+        // 順位の石は立てない (2026-11-08 の声「同じ機能のブロック二ついらない」。石も板も同じ記録の画面を開いていた)。前に立てた石は消す
+        if (back.getBlockState(spots.stone).is(RebirthSetup.STONE.get())) {
+            back.setBlock(spots.stone, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
         }
         boolean fresh = isFresh(back.getServer(), titan);
         BlockState want = RebirthSetup.BOARD.get().defaultBlockState().setValue(RecordBoardBlock.FACING, spots.boardFacing).setValue(RecordBoardBlock.FRESH, fresh);

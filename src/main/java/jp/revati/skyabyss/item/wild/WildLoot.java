@@ -216,6 +216,9 @@ public final class WildLoot {
 
     // 渡す: 旅嚢か持ち物、入らなければ足もとに (その人だけが拾える)。名前の色は階級
     public static void give(ServerPlayer p, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
         GearTier tier = stack.getItem() instanceof WildGear g ? g.tier() : GearTier.UNCOMMON;
         // 装備は封の箱で (docs/design/52)。知らせは箱の名前
         stack = jp.revati.skyabyss.loot.box.LootBoxes.wrap(p.server, p.getUUID(), stack);

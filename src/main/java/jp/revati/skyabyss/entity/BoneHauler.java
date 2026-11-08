@@ -88,6 +88,12 @@ public class BoneHauler extends GuardMob {
         return awayPoint(this, scary.position(), 12);
     }
 
+    // 自己テスト用
+    @Nullable
+    public Vec3 fleeDestinationForTest(Player scary) {
+        return fleeDestination(scary);
+    }
+
     static final class FleeGoal extends Goal {
         private final BoneHauler mob;
         private Player scary;

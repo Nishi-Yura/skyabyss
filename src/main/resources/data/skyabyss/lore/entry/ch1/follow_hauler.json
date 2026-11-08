@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_whale",
+  "order": 17,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "ch1/road_shrine"
+  ]
+}

@@ -82,11 +82,17 @@ public final class PhasedBossBar {
     // (2026-11-08 の声「敵のhp表記、今%だけど、数値にして」)
     public static String hpText(net.minecraft.client.Minecraft mc, net.minecraft.world.BossEvent boss) {
         net.minecraft.world.entity.LivingEntity owner = jp.revati.skyabyss.client.BossOwners.find(mc, boss, net.minecraft.world.entity.LivingEntity.class, 160);
-        if (owner == null || owner.getMaxHealth() <= 0) {
+        Integer max = owner != null && owner.getMaxHealth() > 0 && !owner.isRemoved() ? Integer.valueOf(jp.revati.skyabyss.Hp.whole(owner.getMaxHealth())) : LAST_MAX.get(boss.getId());
+        if (max == null) {
             return Math.round(boss.getProgress() * 100) + "%";
         }
-        int max = jp.revati.skyabyss.Hp.whole(owner.getMaxHealth());
-        int now = Math.min(max, Math.round(boss.getProgress() * max));
+        LAST_MAX.put(boss.getId(), max);
+        // 倒れた主 (体が消えた・死にかけ) は 0。前は体が見つからなくなると割合 (「2%」など) に変わっていた (2026-11-08 の声)
+        boolean dead = owner == null || owner.isRemoved() || owner.isDeadOrDying();
+        int now = dead && boss.getProgress() < 0.05f ? 0 : Math.min(max, Math.round(boss.getProgress() * max));
         return String.format("%,d/%,d", now, max);
     }
+
+    // バーごとの最後に見えた最大の体力 (体が見えなくなっても数で出す)
+    private static final java.util.Map<java.util.UUID, Integer> LAST_MAX = new java.util.HashMap<>();
 }
