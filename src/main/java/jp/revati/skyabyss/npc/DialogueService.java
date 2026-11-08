@@ -35,6 +35,9 @@ public final class DialogueService {
     }
 
     private static final Map<UUID, Session> SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
+    // 入口でほかの頼みの報せが先に出て、メイン (か追っているクエスト) の話題が後回しになった人: その話題の節。報せが終わったら閉じずに続ける
+    // (2026-11-08 の声「メインクエストの話をしてくれず、サブクエか普通の会話になった」)
+    private static final Map<UUID, String> THEN_TOPIC = new java.util.concurrent.ConcurrentHashMap<>();
 
     private DialogueService() {
     }
@@ -59,6 +62,10 @@ public final class DialogueService {
         // 入口がクエストの段で決まった節 (頼みの報せ・渡し) なら、そのまま (2026-11-07 の自己テスト freequest: 影の記録の報せが本筋の話題に負けた)
         if (topic != null && (node == null || (NpcBonds.of(player).bond(role).talks > 0 && !dialogue.entryIsQuest(ctx) && !leadsTo(dialogue, node, topic.id())))) {
             node = topic;
+        }
+        THEN_TOPIC.remove(player.getUUID());
+        if (topic != null && node != null && node != topic && dialogue.entryIsQuest(ctx) && leadingTopic(player, role, dialogue)) {
+            THEN_TOPIC.put(player.getUUID(), topic.id());
         }
         if (node == null) {
             return;
@@ -178,7 +185,9 @@ public final class DialogueService {
             return;
         }
         if (index == LEAVE) {
-            close(player);
+            if (!thenTopic(player, npc, dialogue)) {
+                close(player);
+            }
             return;
         }
         if (!s.shown().contains(index) || index < 0 || index >= node.options().size()) {
@@ -197,7 +206,9 @@ public final class DialogueService {
 
     private static void go(ServerPlayer player, NpcEntity npc, Dialogue dialogue, StoryContext ctx, String target) {
         if (target.equals(Dialogue.END)) {
-            close(player);
+            if (!thenTopic(player, npc, dialogue)) {
+                close(player);
+            }
             return;
         }
         Dialogue.Node next = target.equals(Dialogue.ENTRY) ? dialogue.entryNode(ctx) : dialogue.nodes().get(target);
@@ -311,7 +322,43 @@ public final class DialogueService {
         return false;
     }
 
+    // 後回しにしたメインの話題へ続ける (まだ済んでいなければ)。続けたら true
+    private static boolean thenTopic(ServerPlayer player, NpcEntity npc, Dialogue dialogue) {
+        String id = THEN_TOPIC.remove(player.getUUID());
+        if (id == null) {
+            return false;
+        }
+        Dialogue.Node topic = questTopic(player, dialogue.role(), dialogue);
+        if (topic == null || !topic.id().equals(id)) {
+            return false;
+        }
+        enter(player, npc, dialogue, topic);
+        return true;
+    }
+
+    // 今の話題が、メインか追っているクエストのものか
+    private static boolean leadingTopic(ServerPlayer player, String role, Dialogue dialogue) {
+        Dialogue.Node n = questTopic(player, role, dialogue);
+        if (n == null) {
+            return false;
+        }
+        jp.revati.skyabyss.quest.QuestLog log = jp.revati.skyabyss.quest.QuestLog.of(player);
+        for (var e : log.quests().entrySet()) {
+            jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(e.getKey());
+            if (def == null || e.getValue().done || e.getValue().stage >= def.stages().size() || !(def.main() || e.getKey().equals(log.tracked()))) {
+                continue;
+            }
+            for (jp.revati.skyabyss.quest.QuestDef.Objective ob : def.stages().get(e.getValue().stage).objectives()) {
+                if (ob.type().equals("talk") && n.id().equals(ob.topic()) && ob.targets().contains(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void close(ServerPlayer player) {
+        THEN_TOPIC.remove(player.getUUID());
         Session s = SESSIONS.remove(player.getUUID());
         if (s != null) {
             NpcEntity npc = npcById(player, s.npcId());
@@ -324,6 +371,7 @@ public final class DialogueService {
 
     // 参加者が画面を閉じた (Esc)
     static void onClientClosed(ServerPlayer player) {
+        THEN_TOPIC.remove(player.getUUID());
         Session s = SESSIONS.remove(player.getUUID());
         if (s != null) {
             NpcEntity npc = npcById(player, s.npcId());

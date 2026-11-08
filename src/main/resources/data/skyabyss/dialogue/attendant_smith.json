@@ -31,10 +31,6 @@
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_smith.intro"
     },
-    "forge": {
-      "face": "neutral",
-      "next": "menu"
-    },
     "menu": {
       "face": "neutral",
       "options": [
