@@ -334,22 +334,25 @@ public final class TitanShrine {
     }
 
     // ---------------------------------------------------------------- 使う
-    // 右クリック: 祠の画面 (しゃがむと誓いの一覧)
+    // 碑の右クリック: 祭司へ案内するだけ (2026-11-08 の声「祠の祭祀に要素を集めて。話しかけると ui 出るようにして」)。
+    // 試練・図鑑・誓い・心得・歌片・深淵・仲間と渡る は、祭司に話しかけて開く祠の画面 (TrialBoard) に一つにまとめた
     static void open(ServerPlayer sp, String titan, boolean sneak) {
-        if (sneak) {
-            jp.revati.skyabyss.titan.vow.VowCommands.show(sp, titan);
-            return;
-        }
-        jp.revati.skyabyss.trial.TrialBoard.open(sp, titan);
-        if (!Progression.stopped(sp.server, sp.getUUID(), titan)) {
-            Notice.hint(sp, "message.skyabyss.shrine.unknown");
-        }
+        Notice.hint(sp, "message.skyabyss.shrine.ask_priest");
     }
 
-    // 歌片を持って碑に触れた: 祠の画面と、集合台の案内
+    // 歌片を持って碑に触れた: 同じく祭司へ
     static void shardTouch(ServerPlayer sp, String titan) {
         open(sp, titan, false);
-        Notice.hint(sp, "message.skyabyss.shrine.pad_hint");
+    }
+
+    // 祭司に話しかけた (AttendantEntity): 祠のそばなら祠の画面を開く。開いたか (開かなければふつうの会話)
+    public static boolean talkToPriest(ServerPlayer sp) {
+        String titan = shrineNear(sp, PRIEST_REACH);
+        if (titan == null) {
+            return false;
+        }
+        jp.revati.skyabyss.trial.TrialBoard.open(sp, titan);
+        return true;
     }
 
     // 断る理由 (null なら使える)。純粋に近い部分 (自己テストが直接呼ぶ)

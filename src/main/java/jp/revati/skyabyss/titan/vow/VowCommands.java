@@ -114,10 +114,20 @@ public final class VowCommands {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         String titan = StringArgumentType.getString(ctx, "titan");
         String id = StringArgumentType.getString(ctx, "vow");
+        boolean ok = apply(p, titan, id, add);
+        show(p, titan);
+        return ok ? 1 : 0;
+    }
+
+    // 誓いを立てる・降ろす (命令と、祠の画面の「誓い」の頁から)。祠のそばだけ。変えたらグループに一行。変えたか
+    public static boolean apply(ServerPlayer p, String titan, String id, boolean add) {
         UUID group = Groups.keyOf(p);
         if (!jp.revati.skyabyss.titan.shrine.TitanShrine.near(p, titan)) {
-            p.sendSystemMessage(ModText.deny("message.skyabyss.vow.closed.shrine"));
-            return 0;
+            jp.revati.skyabyss.notice.Notice.bar(p, ModText.deny("message.skyabyss.vow.closed.shrine"));
+            return false;
+        }
+        if (Vows.get(id) == null) {
+            return false;
         }
         Vows.Result r = add ? Vows.add(p.server, group, titan, id) : Vows.remove(p.server, group, titan, id);
         if (r == Vows.Result.OK) {
@@ -129,10 +139,9 @@ public final class VowCommands {
                 }
             }
         } else {
-            p.sendSystemMessage(ModText.deny("message.skyabyss.vow.fail." + r.name().toLowerCase()));
+            jp.revati.skyabyss.notice.Notice.bar(p, ModText.deny("message.skyabyss.vow.fail." + r.name().toLowerCase()));
         }
-        show(p, titan);
-        return r == Vows.Result.OK ? 1 : 0;
+        return r == Vows.Result.OK;
     }
 
     private static int clear(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

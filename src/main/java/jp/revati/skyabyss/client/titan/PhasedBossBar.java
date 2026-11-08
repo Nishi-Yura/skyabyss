@@ -64,7 +64,11 @@ public final class PhasedBossBar {
     }
 
     // 体力の数を、帯の真ん中に小さく重ねる (一段目の名前・段の名と重ならないように。2026-11-08 の画面で「第一段階」と数が重なっていた)
+    // 描いたバーの下の端 (崩しゲージ client/combat/BreakGaugeClient がこのすぐ下に帯を描く。バーごと、描くたびに入れ直す)
+    public static final java.util.Map<java.util.UUID, Integer> BOTTOM = new java.util.HashMap<>();
+
     public static void drawHp(GuiGraphics g, Minecraft mc, BossEvent boss, int x, int midY) {
+        BOTTOM.put(boss.getId(), midY + 10);
         String text = hpText(mc, boss);
         float scale = 0.75f;
         g.pose().pushPose();

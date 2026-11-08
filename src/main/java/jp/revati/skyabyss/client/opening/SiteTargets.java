@@ -56,6 +56,16 @@ public final class SiteTargets {
         bind("main_thunder/see", TITAN_PREFIX + "thunder_wing");
         bind("main_thunder/board", TITAN_PREFIX + "thunder_wing");
         bind("main_ember/see", TITAN_PREFIX + "ember");
+        // 試練と心臓の段も、地上ではその巨神を指す (2026-11-08 の声「巨神の心臓倒すにはその巨神に現世でピンが刺さるはず」。
+        // 前は目印が無く、頼んだ人の居場所を指していた)。背中の中では出さない (inOverworld)
+        bind("main_song/inscriptions", TITAN_PREFIX + "stone_whale");
+        bind("main_song/heart", TITAN_PREFIX + "stone_whale");
+        bind("main_tide/inscriptions", TITAN_PREFIX + "tide_shell");
+        bind("main_tide/heart", TITAN_PREFIX + "tide_shell");
+        bind("main_thunder/trials", TITAN_PREFIX + "thunder_wing");
+        bind("main_thunder/heart", TITAN_PREFIX + "thunder_wing");
+        bind("main_ember/board", TITAN_PREFIX + "ember");
+        bind("main_ember/heart", TITAN_PREFIX + "ember");
         // 一章の支度の段: 骨の坑の荷・割れ殻の洞の台座 (SiteNetwork.CHAPTER_TARGETS)
         bind("ch1/trail_iron/pit", "ch1_bone_pit");
         bind("ch1/trail_blade/cave", "ch1_cleft_shell_cave");

@@ -71,8 +71,6 @@ public final class RaidRun {
         public long lastHarass;
         public RaidHudNet.Hud lastHud;
         public boolean hudOff;
-        // 入口の碑を読むのを待っている (RaidLore.waiting)。手がかりは一度だけ
-        public boolean readAsked;
 
         Run(RaidRoom room, RaidCtx ctx, int step, boolean mid) {
             this.room = room;
@@ -285,15 +283,8 @@ public final class RaidRun {
         RaidCtx ctx = run.ctx;
         switch (run.phase) {
             case COUNTDOWN -> {
-                if (now >= run.until && !run.mid && RaidLore.waiting(ctx.players(), ctx.roomId())) {
-                    // 戸は入口の碑をだれかが読むまで開かない
-                    if (!run.readAsked) {
-                        run.readAsked = true;
-                        for (ServerPlayer p : ctx.players()) {
-                            Notice.hint(p, "message.skyabyss.raid_lore.read_to_open");
-                        }
-                    }
-                } else if (now >= run.until) {
+                // 戸は時が来れば開く (2026-11-08 の声「読まないと前の扉があかない仕様、いらない」。碑は読めば伝承に記されるだけ)
+                if (now >= run.until) {
                     run.phase = Phase.ACTIVE;
                     run.activeSince = now;
                     run.lastHarass = now;
@@ -607,10 +598,7 @@ public final class RaidRun {
     private static void sendHud(Run run, boolean done) {
         RaidRoom room = run.room;
         RaidHudNet.Hud hud;
-        if (run.phase == Phase.COUNTDOWN && run.readAsked && run.ctx.cell() != null) {
-            BlockPos t = RaidLore.tabletPos(run.ctx.cell());
-            hud = new RaidHudNet.Hud(run.ctx.roomId(), "raid.skyabyss.hud.read_tablet", List.of(), 0, 0, "", 0, 0, 0, false, true, t.getX(), t.getY(), t.getZ());
-        } else if (run.phase == Phase.COUNTDOWN) {
+        if (run.phase == Phase.COUNTDOWN) {
             hud = new RaidHudNet.Hud(run.ctx.roomId(), "raid.skyabyss.hud.ready", List.of(), 0, 0, "", 0, 0, (int) Math.max(0, run.until - run.ctx.now()), false);
         } else {
             List<String> args = new ArrayList<>();

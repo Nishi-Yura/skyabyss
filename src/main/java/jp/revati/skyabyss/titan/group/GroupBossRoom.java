@@ -403,6 +403,9 @@ public final class GroupBossRoom {
             lastInside.add(player.getUUID());
         }
         bossId = boss.getUUID();
+        // 入る人のレベルに合わせた硬さ (combat/LevelScale): 背中の巨神の章の推奨レベルより上で来たら、その分だけ受ける傷を割る
+        String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(level.dimension());
+        jp.revati.skyabyss.combat.LevelScale.apply(boss, titan == null ? -1 : jp.revati.skyabyss.combat.LevelScale.stageLevel(titan), inside);
         if (boss instanceof jp.revati.skyabyss.entity.HeartBoss heart) {
             heart.markRoomBound();
         }

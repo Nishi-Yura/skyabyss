@@ -130,28 +130,25 @@ public final class AbyssSelfTest {
     // ---- 転生での開閉・つまみ
     private static void gating(MinecraftServer server) {
         ServerLevel level = server.overworld();
-        for (int n = 0; n <= 2; n++) {
-            check(!Abyss.open(n), "abyss opened at rebirth " + n);
-        }
-        for (int n : new int[] {3, 4, 10, 20}) {
-            check(Abyss.open(n), "abyss closed at rebirth " + n);
-        }
-        check(Abyss.OPEN_AT == 3, "abyss opens at " + Abyss.OPEN_AT + " (design: 3)");
-        // 本物の人 (転生の数は RebirthView 経由)
-        check(!Abyss.open(fake(level, "r0", 0)) && !Abyss.open(fake(level, "r2", 2)), "players with 0/2 rebirths could open the abyss");
-        check(Abyss.open(fake(level, "r3", 3)) && Abyss.open(fake(level, "r9", 9)), "players with 3/9 rebirths could not open the abyss");
-        // つまみ: 入るには 3 回以上、切るのは誰でも、同じ値は変わらない
+        // 物語を終えた人 (終章の結末を見た人) だけが開ける。転生の数では開かない
+        FakePlayer r0 = fake(level, "r0", 0);
+        FakePlayer r9 = fake(level, "r9", 9);
+        check(!Abyss.open(r0) && !Abyss.open(r9), "players who have not finished the story could open the abyss");
+        FakePlayer done = fake(level, "story_done", 0);
+        done.getPersistentData().putString(jp.revati.skyabyss.story.finale.FinaleEnding.SEEN, "calm");
+        check(Abyss.open(done), "a player who saw an ending could not open the abyss");
+        done.getPersistentData().remove(jp.revati.skyabyss.story.finale.FinaleEnding.SEEN);
+        // つまみ: 入るには物語を終えた人、切るのは誰でも、同じ値は変わらない
         BackGroupData.Record r = record(level);
-        check(TrialBoard.applyToggle(r, true, 2) == TrialBoard.Toggle.LOCKED && !Abyss.on(r), "rebirth 2 turned the toggle on");
-        check(TrialBoard.applyToggle(r, true, 0) == TrialBoard.Toggle.LOCKED && !Abyss.on(r), "rebirth 0 turned the toggle on");
-        check(TrialBoard.applyToggle(r, true, 3) == TrialBoard.Toggle.CHANGED && Abyss.on(r), "rebirth 3 could not turn the toggle on");
-        check(TrialBoard.applyToggle(r, true, 3) == TrialBoard.Toggle.SAME, "turning on twice changed something");
-        check(TrialBoard.applyToggle(r, false, 0) == TrialBoard.Toggle.CHANGED && !Abyss.on(r), "an unreborn ally could not turn the abyss off");
-        check(TrialBoard.applyToggle(r, false, 0) == TrialBoard.Toggle.SAME, "turning off twice changed something");
+        check(TrialBoard.applyToggle(r, true, false) == TrialBoard.Toggle.LOCKED && !Abyss.on(r), "a player before the ending turned the toggle on");
+        check(TrialBoard.applyToggle(r, true, true) == TrialBoard.Toggle.CHANGED && Abyss.on(r), "a player after the ending could not turn the toggle on");
+        check(TrialBoard.applyToggle(r, true, true) == TrialBoard.Toggle.SAME, "turning on twice changed something");
+        check(TrialBoard.applyToggle(r, false, false) == TrialBoard.Toggle.CHANGED && !Abyss.on(r), "an ally before the ending could not turn the abyss off");
+        check(TrialBoard.applyToggle(r, false, false) == TrialBoard.Toggle.SAME, "turning off twice changed something");
         // 選んでいるグループには、未転生の仲間も入れる (状態の鍵ではない): 記録は個人の転生を見ない
         Abyss.set(r, true);
         check(Abyss.groupOn(level, r.id), "the group flag was not read back");
-        NOTES.add("gating: opens at rebirth 3, toggle is per group");
+        NOTES.add("gating: opens after the story ending, toggle is per group");
     }
 
     // ---- 修飾の段の数式

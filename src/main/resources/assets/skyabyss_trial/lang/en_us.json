@@ -379,5 +379,20 @@
   "message.skyabyss.shrine.asked": "%s asked the priest. The route begins in %s s (stay near the pad)",
   "message.skyabyss.shrine.talk_priest": "Talk to the shrine priest to start the route",
   "message.skyabyss.shrine.not_here": "Ask at a shrine",
-  "message.skyabyss.route.bell_step_in": "Step onto the platform, then ring the bell"
+  "message.skyabyss.route.bell_step_in": "Step onto the platform, then ring the bell",
+  "gui.skyabyss.trial.tab.vow": "Vows",
+  "gui.skyabyss.trial.tab.how": "Guide",
+  "gui.skyabyss.shrine.go": "Cross with party",
+  "gui.skyabyss.shrine.go_tip": "Press when the whole party stands by the pad. After a 5 second count everyone is sent to the route (needs one song shard)",
+  "gui.skyabyss.shrine.vow_head": "Vow level %s · materials %s%% (up to %s) · best %s",
+  "gui.skyabyss.shrine.vow_tip": "Click to take or lift",
+  "gui.skyabyss.shrine.how_shrine": "The shrine",
+  "gui.skyabyss.shrine.how_trial": "Trials",
+  "gui.skyabyss.shrine.how_trial_text": "Each cycle draws one trial each from walk, wit and war. The codex keeps the trials you cleared and the modifiers you found.",
+  "gui.skyabyss.shrine.how_vow": "Vows",
+  "gui.skyabyss.shrine.how_vow_text": "Vows bind a single replay. More vows make foes stronger and give more materials when the heart stops. They lock once the trials begin.",
+  "gui.skyabyss.shrine.how_abyss": "The abyss",
+  "gui.skyabyss.shrine.how_abyss_text": "Those who finished the story may choose the abyss. Trials and hearts become their heaviest. Chosen per party.",
+  "message.skyabyss.shrine.ask_priest": "Talk to the priest beside the shrine to learn about it",
+  "gui.skyabyss.shrine.how_shrine_text": "Gather the whole party by the pad and press \"Cross with party\". After a 5 second count everyone goes to the route. One song shard is needed (one person carrying it is enough)."
 }

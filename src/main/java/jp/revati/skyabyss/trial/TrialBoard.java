@@ -78,8 +78,19 @@ public final class TrialBoard {
             rows.add(new Row(d.id(), e.seen || e.cleared > 0, e.cleared, e.goals, e.mods.size(), TrialRuntime.modTotal(d)));
         }
         int shards = jp.revati.skyabyss.pouch.Pouch.countAll(sp, jp.revati.skyabyss.registry.ModItems.songShard(titan));
+        // 誓い (前は祠をしゃがんで右クリックしたときの話の欄の一覧。今は祠の画面の「誓い」の頁)
+        boolean atShrine = jp.revati.skyabyss.titan.shrine.TitanShrine.near(sp, titan);
+        jp.revati.skyabyss.titan.vow.Vows.Result can = jp.revati.skyabyss.titan.vow.Vows.canChange(sp.server, group, titan);
+        String vowClosed = can != jp.revati.skyabyss.titan.vow.Vows.Result.OK ? "message.skyabyss.vow.closed." + can.name().toLowerCase()
+                : !atShrine ? "message.skyabyss.vow.closed.shrine" : "";
+        List<jp.revati.skyabyss.titan.vow.Vow> active = jp.revati.skyabyss.titan.vow.Vows.active(back, group);
+        List<TrialBoardNet.VowLine> vows = new ArrayList<>();
+        for (jp.revati.skyabyss.titan.vow.Vow v : jp.revati.skyabyss.titan.vow.Vows.all()) {
+            vows.add(new TrialBoardNet.VowLine(v.id(), v.points(), active.contains(v)));
+        }
         return new TrialBoardNet.Open(titan, draw.cycle(), cards, shards, codex.routeClears(id, titan), codex.routeBest(id, titan), rows,
-                List.copyOf(codex.titles(id)), Abyss.open(sp), Abyss.on(r));
+                List.copyOf(codex.titles(id)), Abyss.open(sp), Abyss.on(r), atShrine, vowClosed, vows,
+                jp.revati.skyabyss.titan.group.FirstRunData.get(sp.server).vowBest(sp.getUUID(), titan));
     }
 
     public static final int SHARD_MATERIALS = 24;
@@ -111,19 +122,19 @@ public final class TrialBoard {
 
     public enum Toggle { CHANGED, SAME, LOCKED }
 
-    // つまみの決まり (純粋な部分): 入るには転生 3 回以上、切るのは誰でも。記録 r を書き換える
-    public static Toggle applyToggle(BackGroupData.Record r, boolean on, int rebirths) {
+    // つまみの決まり (純粋な部分): 入るには物語を終えた人 (allowed)、切るのは誰でも。記録 r を書き換える
+    public static Toggle applyToggle(BackGroupData.Record r, boolean on, boolean allowed) {
         if (Abyss.on(r) == on) {
             return Toggle.SAME;
         }
-        if (on && !Abyss.open(rebirths)) {
+        if (on && !allowed) {
             return Toggle.LOCKED;
         }
         Abyss.set(r, on);
         return Toggle.CHANGED;
     }
 
-    // 深淵のつまみ (グループごと)。転生 3 回以上の人だけが入れる。切るのは誰でも。変えたら動いている試練を止めて (次に入るとき引き直した修飾で組み直す)、板を開き直す
+    // 深淵のつまみ (グループごと)。物語を終えた人だけが入れる。切るのは誰でも。変えたら動いている試練を止めて (次に入るとき引き直した修飾で組み直す)、板を開き直す
     public static void toggleAbyss(ServerPlayer sp, String titan, boolean on) {
         if (!Titans.hasBack(titan)) {
             return;
@@ -134,13 +145,13 @@ public final class TrialBoard {
         }
         UUID group = Groups.keyOf(sp);
         BackGroupData.Record r = GroupProgress.of(back, group);
-        Toggle result = applyToggle(r, on, RebirthView.count(sp));
+        Toggle result = applyToggle(r, on, Abyss.open(sp));
         if (result == Toggle.SAME) {
             open(sp, titan);
             return;
         }
         if (result == Toggle.LOCKED) {
-            Notice.bar(sp, ModText.deny("message.skyabyss.abyss.locked", Abyss.OPEN_AT));
+            Notice.bar(sp, ModText.deny("message.skyabyss.abyss.locked"));
             return;
         }
         r.changed();

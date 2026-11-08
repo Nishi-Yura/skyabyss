@@ -56,6 +56,20 @@ public class AttendantEntity extends NpcEntity {
         }
     }
 
+    // 地上の巨神の祠の祭司は、話しかけると会話ではなく祠の画面 (試練・図鑑・誓い・心得・仲間と渡る) を開く
+    @Override
+    protected net.minecraft.world.InteractionResult mobInteract(net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand) {
+        if (hand == net.minecraft.world.InteractionHand.MAIN_HAND && isAlive() && attendantRole() == AttendantRole.SHRINE_PRIEST
+                && player instanceof net.minecraft.server.level.ServerPlayer sp && !sp.isSpectator()
+                && jp.revati.skyabyss.titan.shrine.TitanShrine.talkToPriest(sp)) {
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        if (level().isClientSide && hand == net.minecraft.world.InteractionHand.MAIN_HAND && attendantRole() == AttendantRole.SHRINE_PRIEST) {
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        return super.mobInteract(player, hand);
+    }
+
     public void setRole(AttendantRole role) {
         entityData.set(ROLE, role.id);
         nameByRole();

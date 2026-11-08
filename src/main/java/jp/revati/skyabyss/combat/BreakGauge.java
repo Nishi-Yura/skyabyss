@@ -257,6 +257,7 @@ public final class BreakGauge {
             return;
         }
         event.setCanceled(true);
+        refreshBars(le);
         le.setOldPosAndRot();
         if (le.invulnerableTime > 0) {
             le.invulnerableTime--;
@@ -271,6 +272,44 @@ public final class BreakGauge {
         } else {
             le.setDeltaMovement(Vec3.ZERO);
         }
+    }
+
+    // 崩れているあいだは主の tick を飛ばすので、主が自分の tick で直すボスバーの長さも止まっていた
+    // (2026-11-08 の声「スタンしたときにボスの hp が削れなくて、スタン解除された瞬間に削れる」。体力は減っていたが、バーが崩れの終わりまで動かなかった)。
+    // 主が持つボスバー (ServerBossEvent の欄) を見つけ、ここで体力の割合に合わせる。欄は型ごとに一度だけ探す
+    private static final Map<Class<?>, java.util.List<java.lang.reflect.Field>> BAR_FIELDS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    static void refreshBars(LivingEntity le) {
+        if (le.tickCount % 2 != 0 || le.getMaxHealth() <= 0) {
+            return;
+        }
+        float progress = Math.max(0f, Math.min(1f, le.getHealth() / le.getMaxHealth()));
+        for (java.lang.reflect.Field f : BAR_FIELDS.computeIfAbsent(le.getClass(), BreakGauge::barFields)) {
+            try {
+                if (f.get(le) instanceof net.minecraft.server.level.ServerBossEvent bar) {
+                    bar.setProgress(progress);
+                }
+            } catch (IllegalAccessException ignored) {
+                // 読めない欄は飛ばす
+            }
+        }
+    }
+
+    private static java.util.List<java.lang.reflect.Field> barFields(Class<?> c) {
+        java.util.List<java.lang.reflect.Field> out = new java.util.ArrayList<>();
+        for (Class<?> k = c; k != null && k != Object.class; k = k.getSuperclass()) {
+            for (java.lang.reflect.Field f : k.getDeclaredFields()) {
+                if (!java.lang.reflect.Modifier.isStatic(f.getModifiers()) && net.minecraft.world.BossEvent.class.isAssignableFrom(f.getType())) {
+                    try {
+                        f.setAccessible(true);
+                        out.add(f);
+                    } catch (RuntimeException ignored) {
+                        // モジュールの外の欄は触らない
+                    }
+                }
+            }
+        }
+        return out;
     }
 
     // Telegraph.start から: この持ち主は今、技を出せない

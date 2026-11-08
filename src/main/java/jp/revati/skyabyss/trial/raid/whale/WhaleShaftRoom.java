@@ -36,20 +36,21 @@ public final class WhaleShaftRoom extends RaidRoom {
     static final int GROW_STEP = 3;
     // 2026-10-25 の試遊で「簡単」: 階段の出ている間を短く、胃液を速く、上り始めの猶予を短く
     // 2026-11-08 にもう一度「簡単」: 出ている間をさらに短く、胃液の噴き上げを足した
-    static final int EXTEND_TICKS = 130;
-    static final int WARN_TICKS = 60;
-    static final int GRACE = 140;
-    static final int RISE_TICKS = 75;
-    static final float DAMAGE = 4f;
+    // 2026-11-08 の夜に三度目「胃の縦穴の上り、簡単すぎる」: 階段は 6.5 → 4.5 秒、猶予 7 → 4 秒、胃液は 1 段 3.75 → 2.5 秒で上がり、傷も重く
+    static final int EXTEND_TICKS = 90;
+    static final int WARN_TICKS = 40;
+    static final int GRACE = 80;
+    static final int RISE_TICKS = 50;
+    static final float DAMAGE = 6f;
     static final int DAMAGE_EVERY = 10;
     static final int TOP = FLIGHTS * RISE;
     static final String FAIL_KEY = "message.skyabyss.raid.WR4.filled";
     // 胃液の噴き上げ: 間隔・予兆・輪の半径・傷・押し出す強さ
-    static final int GEYSER_EVERY = 50;
-    static final int GEYSER_WARN = 30;
-    static final double GEYSER_R = 1.8;
-    static final float GEYSER_DAMAGE = 6f;
-    static final double GEYSER_PUSH = 0.9;
+    static final int GEYSER_EVERY = 34;
+    static final int GEYSER_WARN = 24;
+    static final double GEYSER_R = 2.0;
+    static final float GEYSER_DAMAGE = 8f;
+    static final double GEYSER_PUSH = 1.2;
     // 予兆の出ている噴き上げ (位置と、噴く時刻)
     private final java.util.List<double[]> geysers = new java.util.ArrayList<>();
     private long nextGeyser;

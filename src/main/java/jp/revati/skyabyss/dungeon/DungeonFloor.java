@@ -517,6 +517,9 @@ public final class DungeonFloor {
                 PartyScale.apply(m, Math.max(1, run.members.size()));
                 // 主の硬さ (47 の 2.6): 目安 Lv が高いほど人の傷を割る
                 PartyScale.resist(m, run.dungeon.mini ? 1.0 + Math.max(0, run.dungeon.level - 6) * 0.02 : 1.2 + (run.dungeon.level - 10) * 0.035);
+                // 入る人のレベルに合わせた硬さ (combat/LevelScale): ダンジョンの目安 Lv より上で来たら、その分だけ受ける傷を割る
+                jp.revati.skyabyss.combat.LevelScale.apply(m, run.dungeon.level,
+                        here.stream().filter(p -> p.isAlive() && !p.isSpectator()).map(p -> (net.minecraft.server.level.ServerPlayer) p).toList());
                 if (run.dungeon.mini) {
                     // 小ダンジョンの主: 名づきの大物と同じ扱い (技の名前・ボスバーの見た目)。潮の番人は床を水に沈める技を使う (ShoreWarden.named)
                     m.addTag(MiniDungeons.BOSS_TAG);
