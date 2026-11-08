@@ -113,6 +113,8 @@ def build():
                                                 ring_pts(39.2, 1.3, 1.3, 1.3, n=8, cx=px, cz=pz)], caps=(True, True)))
     F += part("pole_tip", cone(pl, "bronze", P(px, 43.0, pz), (0, 1, 0), 3.2, 0.55, sides=5, rings=2))
     F += part("pole_butt", cone(pl, "gold", P(px, 2.2, pz), (0, -1, 0), 1.6, 0.5, sides=5, rings=1))
+    # 握り: 竿の骨の支点 (手の中) に太い革巻き。腕を振っても竿が手から離れて見えない (mesh_audit の joint detach)
+    F += part("pole_grip", ellipsoid(pl, "lace", P(px, 17.6, pz), (1.0, 2.2, 1.0), segs=8, rings=4))
     for k in range(3):
         F += part(f"pole_ribbon{k}", tube(pl, "lace", [P(px + 0.4, 38.4, pz), P(px + 1.4 + k * 0.4, 34.0 - k, pz + 0.4), P(px + 1.0 + k * 0.6, 29.0 - k * 1.5, pz + 0.8)],
                                           ra=[0.25, 0.2, 0.08], sides=4, hint=(0, 0, 1), caps=(True, True)))

@@ -1,6 +1,6 @@
 {
  "name": "founder",
- "tris": 3354,
+ "tris": 3418,
  "atlas": [
   512,
   512
@@ -15,7 +15,7 @@
   "head": 632,
   "arm_l": 162,
   "arm_r": 162,
-  "pole": 394,
+  "pole": 458,
   "shawl": 456,
   "hipbell": 68,
   "leg_l": 24,
