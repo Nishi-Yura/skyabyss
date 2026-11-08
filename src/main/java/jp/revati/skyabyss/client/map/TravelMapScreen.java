@@ -575,8 +575,54 @@ public class TravelMapScreen extends Screen {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         g.enableScissor(rx0, ry0, rx1, ry1);
         g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
+        drawRoads(g, k);
         g.disableScissor();
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+
+    // 道は絵に焼かず、地形が使うのと同じ道の線 (ContinentLayout.roads。町と都の前で門へつなぎ直したもの) をここで描く
+    // (2026-11-09 の声「マップと実際の道違う所いくつかある」。絵の道は町の真ん中を通る元の線のままだった)。
+    // 縁の明るい線と濃い茶の芯。寄せると本当の道幅 (8) に近づく
+    static final int ROAD_RIM = 0xFFF6ECD2;
+    static final int ROAD_CORE = 0xFF623C20;
+
+    private void drawRoads(GuiGraphics g, double k) {
+        java.util.List<java.util.List<net.minecraft.core.BlockPos>> roads = jp.revati.skyabyss.world.continent.ContinentLayout.get().roads();
+        double outer = Math.max(3.0, 10.0 * k);
+        double inner = Math.max(1.6, 6.0 * k);
+        for (int pass = 0; pass < 2; pass++) {
+            double w = pass == 0 ? outer : inner;
+            int color = pass == 0 ? ROAD_RIM : ROAD_CORE;
+            for (java.util.List<net.minecraft.core.BlockPos> line : roads) {
+                for (int i = 0; i + 1 < line.size(); i++) {
+                    net.minecraft.core.BlockPos a = line.get(i);
+                    net.minecraft.core.BlockPos b = line.get(i + 1);
+                    double ax = cx + (a.getX() - centerX()) * k;
+                    double ay = cy + (a.getZ() - centerZ()) * k;
+                    double bx = cx + (b.getX() - centerX()) * k;
+                    double by = cy + (b.getZ() - centerZ()) * k;
+                    // 枠の外の線分は飛ばす
+                    if (Math.max(ax, bx) < rx0 - w || Math.min(ax, bx) > rx1 + w || Math.max(ay, by) < ry0 - w || Math.min(ay, by) > ry1 + w) {
+                        continue;
+                    }
+                    thickLine(g, ax, ay, bx, by, w, color);
+                }
+            }
+        }
+    }
+
+    // 太い線: 線にそって四角を置いていく (幅 w)
+    private static void thickLine(GuiGraphics g, double ax, double ay, double bx, double by, double w, int color) {
+        double len = Math.hypot(bx - ax, by - ay);
+        double step = Math.max(0.75, w / 3);
+        int n = Math.max(1, (int) Math.ceil(len / step));
+        double h = w / 2;
+        for (int i = 0; i <= n; i++) {
+            double t = i / (double) n;
+            double x = ax + (bx - ax) * t;
+            double y = ay + (by - ay) * t;
+            g.fill((int) Math.floor(x - h), (int) Math.floor(y - h), (int) Math.ceil(x + h), (int) Math.ceil(y + h), color);
+        }
     }
 
     // 町の地図: 寄せたとき、読み込んである土地を上から描いた絵を重ね、施設の係の人を名前つきの点で載せる (LocalArea)

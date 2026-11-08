@@ -1417,6 +1417,17 @@ public final class SiteJob {
     // 小さな部品を、その場の地面の高さに置く (骨の石板)。印 "sign" の世界の座標を返す
     @Nullable
     public BlockPos placeSmall(Blueprint small, int x, int z, int rotation) {
+        // 道にかかる小さな部品は道から遠ざける (2026-11-09 の声「ここ道に旅の職人がかぶってる」。荷車の傍らの轍と荷が道の上に置かれていた)
+        if (keepRoadsClear && jp.revati.skyabyss.world.continent.RoadClearance.live()) {
+            double ext = 0;
+            for (Blueprint.Cell c : small.cells) {
+                ext = Math.max(ext, Math.hypot(c.x(), c.z()));
+            }
+            int r = (int) Math.ceil(ext) + 1;
+            BlockPos moved = jp.revati.skyabyss.world.continent.RoadClearance.pushAway(new BlockPos(x, 0, z), r, 2, 32);
+            x = moved.getX();
+            z = moved.getZ();
+        }
         int g = ground(x, z);
         if (g == WET) {
             g = origin.getY();

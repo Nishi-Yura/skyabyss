@@ -57,7 +57,8 @@ public final class ContinentRegen {
     // 7 = 2026-11-08 夜 (四つの大陸: 内海から外の海へ四本の広い海を引いて、西・北・東・南の島に分ける。海を渡る道は岸で切って渡し船。docs/design/40 の 3 章)
     // 8 = 2026-11-08 夜遅く (上がれない足場を直した: 大樹の床の輪・野盗の物見の梯子・柵の砦村の物見の梯子、都の城壁の歩廊へ門のそばの段と塔の通り抜け。
     //     別の道どうしの出会いを丸く、見どころを道から対角の幅で離す。「上らせる気の無い建築」「道と建造物重なってる」「道が上手く曲がってない」)
-    public static final int VERSION = 8;
+    // 9 = 2026-11-09 (章の小さな部品 (荷車の傍らの轍と荷・旅の職人の立つ所など、SiteJob.placeSmall) を道から遠ざける。「ここ道に旅の職人がかぶってる」)
+    public static final int VERSION = 9;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)

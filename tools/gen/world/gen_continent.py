@@ -527,8 +527,8 @@ def paint_map(lay, height, biome, path):
             d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=(84, 108, 70))
         elif b == 'eroded_badlands' and rng.random() < 0.3:
             d.point((x, y), fill=(60, 40, 36))
-    # 道と渡し船
-    for road in lay['roads']:
+    # 道と渡し船。旅の地図の絵には道を焼かない (ゲームが ContinentLayout.roads の線を描く。町の前で門へつなぎ直した線と合わせるため。2026-11-09)
+    for road in (lay['roads'] if lay.get('draw_roads') else []):
         pts = [px(q) for q in (road if lay.get('curved') else road_curve(road))]
         # 2026-10-27 の声「マップもっと見やすく」: 道を太く濃く (縁の明るい線 + 濃い茶の芯)
         d.line(pts, fill=(246, 236, 210), width=7, joint='curve')
