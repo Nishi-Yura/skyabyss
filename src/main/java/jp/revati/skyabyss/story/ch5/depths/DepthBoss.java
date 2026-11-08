@@ -348,6 +348,7 @@ public final class DepthBoss {
             freeze(king, true);
         }
         BossLook.windup(king, m.ordinal() + 1, f.total);
+        decals(level, king, f, f.total);
         for (ServerPlayer p : party) {
             level.playSound(null, p.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 0.6f, 0.6f);
         }
@@ -407,57 +408,101 @@ public final class DepthBoss {
         }
     }
 
+    // 予告は床の印 (combat/Telegraph。ほかのボスと同じ赤い印。傷は resolve が出す)。2026-11-08 の声「攻撃が地味。もっと豪華に」で、赤い粉の輪から替えた
     static void drawTelegraph(ServerLevel level, LivingEntity king, Fight f, List<ServerPlayer> party) {
-        if (f.left % 2 != 0) {
-            return;
-        }
-        double prog = 1.0 - (double) f.left / f.total;
         switch (f.active) {
-            case SLAM -> {
-                double r = 4.5 + 0.3 * f.phase;
-                ring(level, f.center, r, 28);
-                fill(level, f.center, r * prog, 10, f.rng);
-            }
             case CHARGE -> {
-                for (int d = 0; d <= 14; d += 1) {
-                    for (int s = -1; s <= 1; s += 2) {
-                        Vec3 p = f.center.add(f.dir.scale(d)).add(-f.dir.z * s * 1.0, 0, f.dir.x * s * 1.0);
-                        level.sendParticles(RED_SMALL, p.x, p.y + 0.15, p.z, 1, 0, 0, 0, 0);
-                    }
-                }
                 king.setYRot((float) (Math.toDegrees(Math.atan2(-f.dir.x, f.dir.z))));
                 king.yHeadRot = king.getYRot();
             }
-            case SUMMON -> {
-                for (Vec3 p : f.points) {
-                    ring(level, p, 1.2, 10);
-                    fill(level, p, 1.2 * prog, 3, f.rng);
-                }
-            }
             case BOLTS -> {
                 if (f.left > f.total * 0.4 || f.points.isEmpty()) {
-                    // 最初の六割は人を追う。残りは位置を固める
+                    // 最初の六割は人を追う。残りは位置を固める (固めた時に印を置く)
                     f.points.clear();
                     for (ServerPlayer p : party) {
                         f.points.add(p.position());
                     }
                     f.points.addAll(f.extra);
-                }
-                for (Vec3 p : f.points) {
-                    ring(level, p, 2.2, 14);
-                    fill(level, p, 2.2 * prog, 5, f.rng);
+                    if (f.left <= f.total * 0.4 + 1) {
+                        for (Vec3 p : f.points) {
+                            mark(level, king, jp.revati.skyabyss.combat.TelegraphShape.circle(p.x, p.z, 2.2), p.y, f.left);
+                        }
+                    } else if (f.left % 4 == 0) {
+                        // 追っているあいだは、王の色の粒が人の足もとに渦を巻く
+                        for (Vec3 p : f.points) {
+                            swirl(level, king, p, 2.2, 8);
+                        }
+                    }
                 }
             }
-            case SWEEP -> {
-                ring(level, f.center, 4.0, 24);
-                ring(level, f.center, 9.5, 48);
-                for (int k = 0; k < 16; k++) {
-                    double a = f.rng.nextDouble() * Math.PI * 2;
-                    double d = 4.0 + f.rng.nextDouble() * 5.5 * prog;
-                    level.sendParticles(RED_SMALL, f.center.x + Math.cos(a) * d, f.center.y + 0.1, f.center.z + Math.sin(a) * d, 1, 0, 0, 0, 0);
-                }
+            default -> {
             }
         }
+    }
+
+    // 技の始めに床の印を置く (warn = 当たるまでの tick)
+    static void decals(ServerLevel level, LivingEntity king, Fight f, int warn) {
+        Vec3 c = f.center;
+        switch (f.active) {
+            case SLAM -> mark(level, king, jp.revati.skyabyss.combat.TelegraphShape.circle(c.x, c.z, 4.5 + 0.3 * f.phase), c.y, warn);
+            case CHARGE -> mark(level, king, jp.revati.skyabyss.combat.TelegraphShape.line(c.x, c.z, Math.atan2(f.dir.z, f.dir.x), 14, 1.2), c.y, warn);
+            case SUMMON -> {
+                for (Vec3 p : f.points) {
+                    mark(level, king, jp.revati.skyabyss.combat.TelegraphShape.circle(p.x, p.z, 1.2), p.y, warn);
+                }
+            }
+            case SWEEP -> mark(level, king, jp.revati.skyabyss.combat.TelegraphShape.ring(c.x, c.z, 4.0, 9.5), c.y, warn);
+            default -> {
+            }
+        }
+    }
+
+    static void mark(ServerLevel level, LivingEntity king, jp.revati.skyabyss.combat.TelegraphShape shape, double y, int warn) {
+        jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(y).warn(Math.max(1, warn)).danger().owner(king).start();
+    }
+
+    // 王の元素の色 (骨 = 赤、塩 = 青緑、雷 = 青白、灰 = 燠、影 = 淡い白)
+    static org.joml.Vector3f elemColor(LivingEntity king) {
+        int id = king instanceof jp.revati.skyabyss.entity.GuardMob g ? BossLook.id(g.bossLook()) : 0;
+        return switch (id) {
+            case BossLook.KING_SALT -> new org.joml.Vector3f(0.35f, 0.9f, 0.82f);
+            case BossLook.KING_STORM -> new org.joml.Vector3f(0.62f, 0.78f, 1f);
+            case BossLook.KING_ASH -> new org.joml.Vector3f(1f, 0.55f, 0.18f);
+            case BossLook.KING_SHADOW -> new org.joml.Vector3f(0.82f, 0.92f, 1f);
+            default -> new org.joml.Vector3f(0.95f, 0.22f, 0.2f);
+        };
+    }
+
+    static final org.joml.Vector3f GOLD = new org.joml.Vector3f(0.95f, 0.78f, 0.36f);
+    static final org.joml.Vector3f PETAL = new org.joml.Vector3f(0.12f, 0.03f, 0.14f);
+
+    static void swirl(ServerLevel level, LivingEntity king, Vec3 c, double r, int n) {
+        var dust = new net.minecraft.core.particles.DustParticleOptions(elemColor(king), 1.2f);
+        double t = level.getGameTime() * 0.3;
+        for (int k = 0; k < n; k++) {
+            double a = t + Math.PI * 2 * k / n;
+            level.sendParticles(dust, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0);
+        }
+    }
+
+    // 当たりの飾り: 広がる金の輪、舞い上がる黒い花びら、元素の色の柱と火花、閃光、喪の鐘の音
+    static void flourish(ServerLevel level, LivingEntity king, Vec3 c, double r) {
+        var gold = new net.minecraft.core.particles.DustParticleOptions(GOLD, 1.6f);
+        var petal = new net.minecraft.core.particles.DustParticleOptions(PETAL, 2.0f);
+        var elem = new net.minecraft.core.particles.DustParticleOptions(elemColor(king), 1.8f);
+        int n = (int) Math.min(72, 12 + r * 6);
+        for (int k = 0; k < n; k++) {
+            double a = Math.PI * 2 * k / n;
+            level.sendParticles(gold, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(gold, c.x + Math.cos(a) * r * 0.6, c.y + 0.25, c.z + Math.sin(a) * r * 0.6, 1, 0, 0, 0, 0);
+        }
+        level.sendParticles(petal, c.x, c.y + 0.6, c.z, (int) (10 + r * 4), r * 0.5, 0.6, r * 0.5, 0.02);
+        for (int h = 0; h < 10; h++) {
+            level.sendParticles(elem, c.x, c.y + 0.3 + h * 0.45, c.z, 3, 0.25, 0.05, 0.25, 0);
+        }
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.FLASH, c.x, c.y + 0.8, c.z, 1, 0, 0, 0, 0);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, c.x, c.y + 0.6, c.z, (int) (8 + r * 2), r * 0.4, 0.3, r * 0.4, 0.06);
+        level.playSound(null, BlockPos.containing(c), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 1.2f, 0.6f);
     }
 
     // ---------------------------------------------------------------- 当たり
@@ -475,7 +520,7 @@ public final class DepthBoss {
         switch (m) {
             case SLAM -> {
                 double r = 4.5 + 0.3 * f.phase;
-                ring(level, f.center, r, 40);
+                flourish(level, king, f.center, r);
                 for (ServerPlayer p : party) {
                     if (flat(p.position(), f.center) <= r && Math.abs(p.getY() - f.center.y) < 3) {
                         hurt(level, king, p, dmg);
@@ -490,6 +535,7 @@ public final class DepthBoss {
                 freeze(king, false);
                 f.active = null;
                 level.playSound(null, BlockPos.containing(f.center), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 0.8f, 1.2f);
+                flourish(level, king, f.center, 1.6);
             }
             case SUMMON -> {
                 int cap = 6 + f.phase;
@@ -507,15 +553,17 @@ public final class DepthBoss {
                         le.addTag(ADD_TAG);
                         f.adds.add(le.getUUID());
                     }
-                    ring(level, p, 1.2, 14);
+                    flourish(level, king, p, 1.2);
                 }
                 endMove(king, f);
             }
             case BOLTS -> {
                 for (Vec3 p : f.points) {
-                    ring(level, p, 2.2, 28);
-                    for (int h = 0; h < 8; h++) {
-                        level.sendParticles(RED, p.x, p.y + 0.3 + h * 0.5, p.z, 2, 0.3, 0, 0.3, 0);
+                    flourish(level, king, p, 2.2);
+                    // 降る柱: 上から元素の光が落ちる
+                    var elem = new net.minecraft.core.particles.DustParticleOptions(elemColor(king), 2.2f);
+                    for (int h = 0; h < 14; h++) {
+                        level.sendParticles(elem, p.x, p.y + 0.3 + h * 0.7, p.z, 2, 0.15, 0, 0.15, 0);
                     }
                     for (ServerPlayer pl : party) {
                         if (flat(pl.position(), p) <= 2.2 && Math.abs(pl.getY() - p.y) < 3) {
@@ -527,8 +575,8 @@ public final class DepthBoss {
                 endMove(king, f);
             }
             case SWEEP -> {
-                ring(level, f.center, 4.0, 40);
-                ring(level, f.center, 9.5, 70);
+                flourish(level, king, f.center, 4.0);
+                flourish(level, king, f.center, 9.5);
                 for (ServerPlayer p : party) {
                     double d = flat(p.position(), f.center);
                     if (d >= 4.0 && d <= 9.5 && p.getY() < f.center.y + 1.0 + 0.6) {
