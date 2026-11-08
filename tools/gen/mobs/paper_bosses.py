@@ -23,10 +23,9 @@ LP = ROOT / "src/main/resources/assets/skyabyss/textures/lowpoly"
 SRC = ROOT / "tools/sources/paper_bosses"
 
 # 終章・六章・五章のボスと主 (四つの心臓のあと)
-BOSSES = ["full_keeper", "moon_core", "moon_scale", "shadow_embracer", "waning_blade",
-          "lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder", "founder",
-          "heart_warden", "lord_ash", "lord_rib", "lord_salt", "lord_storm",
-          "king_ash", "king_bone", "king_salt", "king_shadow", "king_storm"]
+# 淵の主 (lord_*) と月の主 (moon_core ほか) は、2026-11-08 の選定でボスごとの見せ方に替えた (tools/gen/mobs/boss_looks_paint.py)。ここでは塗らない
+BOSSES = ["lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder", "founder",
+          "heart_warden", "king_ash", "king_bone", "king_salt", "king_shadow", "king_storm"]
 
 INK = np.array([14, 12, 18], float)
 INK2 = np.array([44, 40, 50], float)
