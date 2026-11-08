@@ -92,6 +92,15 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         ModGear.tooltip(stack, tooltip, tier(), "item.skyabyss." + row.id() + ".desc", false);
         jp.revati.skyabyss.dungeon.DungeonGear.tooltip(stack, tooltip);
+        AccessoryRolls.tooltip(stack, tooltip);
+    }
+
+    // 初めて持ち物に入ったとき個体差を振る (ダンジョンの装飾品は一品ものなので振らない)
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, net.minecraft.world.entity.Entity entity, int slot, boolean selected) {
+        if (!level.isClientSide && entity instanceof Player && !jp.revati.skyabyss.dungeon.DungeonGear.isTrinket(this)) {
+            AccessoryRolls.ensure(stack, level.random);
+        }
     }
 
     // ---------------------------------------------------------------- 護符を使う
@@ -102,7 +111,7 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
         }
         ServerLevel level = player.serverLevel();
         long now = level.getGameTime();
-        for (Fx f : row.fx()) {
+        for (Fx f : AccessoryRolls.apply(stack, row.fx())) {
             switch (f.kind()) {
                 case CHARM_HEAL -> {
                     player.heal((float) f.p(0));

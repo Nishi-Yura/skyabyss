@@ -40,9 +40,11 @@ ALLOW = [
     ('hamlet_', (-3, 20, -3), 'beacon fire on top of the sealed watch tower'),
     # 四章 煤の窯の跡: 崩れた窯の上 (煉瓦の壁の残り)。屋根で足場ではない
     ('ch4_soot_kiln', None, 'top of the ruined kiln'),
-    # 都と土地の町の城壁の上 (封じた塔のあいだの胸壁) と塔の頂。登れるようにするかは持ち主が決める (2026-11-08)
-    ('town_', None, 'rampart tops between sealed towers (owner decides)'),
-    ('capital', None, 'rampart tops between sealed towers (owner decides)'),
+    # 土地の町: 封じた家の陸屋根の手すり (屋上の飾り) と塔の頂。町には城壁の歩廊は無い
+    ('town_', None, 'parapets on the flat roofs of sealed houses and tower tops'),
+    # 都: 城壁の歩廊 (立つ高さ 13) は門のそばの段と塔の通り抜けで行ける (tools/capital/rampart_stairs.py)。
+    # それ以外 (北の砦 = 心臓を二つ止めると開く、その屋上、門楼の頂、屋上の手すり) は飾り
+    ('capital', lambda sample, h: abs(h - 13) > 0.01, 'gated north fort, gatehouse tops and roof parapets (not the wall walk)'),
 ]
 
 CLIMB = ('ladder', 'vine', 'scaffolding', 'twisting_vines', 'weeping_vines', 'cave_vines')
@@ -201,11 +203,13 @@ def check(path, verbose=False):
             covered = sum(1 for (x, y, z) in comp if any(top(cells.get((x, y + k, z))) > 0 for k in range(2, 10)))
             if covered >= len(comp) * 0.5:
                 continue
+        if sum(1 for n in floor_blocks if 'wool' in n or 'carpet' in n) >= len(comp) * 0.5:
+            continue
         rail = railing(cells, comp)
         chest = any((x, y, z) in chests or (x, y - 1, z) in chests for (x, y, z) in comp) or any(c in comp for c in chests)
         if rail >= 3 or chest or underground and wooden:
             sample = min(comp)
-            if any(a[0] in base and (a[1] is None or a[1] in comp) for a in ALLOW):
+            if any(a[0] in base and (a[1] is None or (a[1](sample, h) if callable(a[1]) else a[1] in comp)) for a in ALLOW):
                 continue
             why = 'chest' if chest else 'railing' if rail >= 3 else 'wooden floor underground'
             found.append((base, sample, len(comp), h, why))
