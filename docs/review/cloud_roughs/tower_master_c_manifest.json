@@ -1,0 +1,16 @@
+{
+ "id": "moon_tower_master_c",
+ "short": "あいだに座すもの C",
+ "kind": "超大型レイドの主 作り直し (54 の 2.5)",
+ "title": "あいだに座すもの 案 C「門を背負う者」— 淵から生え、あいだの門を背負う角の巨人",
+ "sheets": [
+  "moon_roughs/tower_master_c.png"
+ ],
+ "extra": "骨 19 本 (A と同じ)。光るのは胸の核・口の中・印・紫の筋・門の渦。 三角形 23864 (目安 主 9000〜15000)。埋まった部品: ragf-11-upper-1:0.5, ragf-12-torso:0.47, ragf12-upper1:0.56, chfore_l-210-3000-wrist-1:1.0, chfore_l-210-3001-wrist-1:0.66, mouthglow-jaw:0.47, tooth_l0-mask:0.69, tooth_l6-mask:0.69, const_sh_s3-spaul-1:0.59, const_sh_s4-spaul-1:0.46, const_sh_l2-spaul-1:0.5, const_sh_l3-spaul-1:0.8, hornring10-horn1:0.92, hornring11-horn1:0.76, hornring12-horn1:0.61, hornring-10-horn-1:0.89, hornring-11-horn-1:0.77, hornring-12-horn-1:0.53, crownspk0-horn-1:0.47, crownspk8-horn1:0.47, bracelet10-fore1:0.72, bracelet11-fore1:0.79, bracelet-10-fore-1:0.72, bracelet-11-fore-1:0.8。生成: tools/rough/lowpoly/moon/tower_master_c.py。三段の姿: 段が進むと肋が開き、根の柱が崩れて鎖が切れていく。",
+ "options": {
+  "a": {
+   "name": "門を背負う者 (23864 三角形)",
+   "desc": "角と口の怪物。金の肋の籠の奥の核、胴を巻く鎖、淵から伸びる根と柱、背負った門に羽。"
+  }
+ }
+}

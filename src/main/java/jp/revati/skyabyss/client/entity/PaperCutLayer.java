@@ -73,6 +73,10 @@ public final class PaperCutLayer {
         return style(e) == Style.PAPER;
     }
 
+    public static int lordRgbOf(LivingEntity e) {
+        return lordRgb(e);
+    }
+
     static int lordRgb(LivingEntity e) {
         int id = e instanceof jp.revati.skyabyss.entity.GuardMob g ? BossLook.id(g.bossLook()) : 0;
         int i = id - BossLook.LORD_RIB;

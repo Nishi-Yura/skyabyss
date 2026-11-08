@@ -99,6 +99,8 @@ public final class ImpactFx {
         if (light) {
             return;
         }
+        // 心臓の後のボスの技は、持ち主ごとの飾りを重ねる (BossImpactFx)
+        BossImpactFx.burst(level, d, cx, y0, cz, radius);
         if (bespoke) {
             if (big) {
                 shake(cx, cz, radius, size);

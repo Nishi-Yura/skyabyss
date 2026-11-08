@@ -1119,6 +1119,25 @@ public final class TowerFight {
             return dx * dx + dz * dz <= r * r;
         }
 
+        // 星の傷 (塔の主の見せ方 A。2026-11-08): 当たる所へ空から星の筋が降り、青白い輪が走る
+        void stars(ServerLevel level) {
+            var ring = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.7f, 0.82f, 1f), 1.8f);
+            double rr = kind == CIRCLE ? r : Math.max(x1 - x0, z1 - z0) * 0.5;
+            int n = (int) Math.min(48, 12 + rr * 4);
+            for (int k = 0; k < n; k++) {
+                double a = Math.PI * 2 * k / n;
+                level.sendParticles(ring, cx + Math.cos(a) * rr, y + 0.2, cz + Math.sin(a) * rr, 1, 0, 0, 0, 0);
+            }
+            int fall = (int) Math.min(16, 4 + rr);
+            for (int k = 0; k < fall; k++) {
+                double a = level.random.nextDouble() * Math.PI * 2;
+                double d = Math.sqrt(level.random.nextDouble()) * rr;
+                // 数 0 で送ると、速さの向きにまっすぐ飛ぶ (上から下へ落ちる星の筋)
+                level.sendParticles(ParticleTypes.FIREWORK, cx + Math.cos(a) * d, y + 8 + level.random.nextDouble() * 4, cz + Math.sin(a) * d, 0, 0, -1.6, 0, 1.0);
+            }
+            level.playSound(null, cx, y, cz, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_RESONATE, net.minecraft.sounds.SoundSource.HOSTILE, 1.4f, 0.6f);
+        }
+
         void draw(ServerLevel level, RandomSource rng) {
             double yy = y + 0.15;
             if (kind == CIRCLE) {
@@ -1153,6 +1172,7 @@ public final class TowerFight {
 
         void burst(ServerLevel level) {
             ParticleOptions big = color == VIOLET ? ParticleTypes.SQUID_INK : ParticleTypes.END_ROD;
+            stars(level);
             if (kind == CIRCLE) {
                 if (pillar) {
                     for (double h = 0; h < 14; h += 0.5) {

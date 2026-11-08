@@ -6,6 +6,10 @@
   下      脚はなく、黒い石の根と折れた柱と鎖の束が淵から伸びて胴を支える
   背      あいだの門を鎖で背負う。門の縁に羽が並ぶ (光輪の代わり)
 共通の骨と合図の姿は tower_master_kit.py。
+2026-11-08 の選定「A 星の傷」(docs/review/roughs_boss_looks/tower.png) と「細部のモデルもう少しこだわって」で足したもの:
+  星の傷  黒い石の胴・腕・根に、割れ目から星空がのぞく青白い筋 (star) と、筋の曲がり目に星の粒。胸と肩に星座の線
+  細部    角の金の輪の飾り、頭のまわりの細い金の棘の冠、前腕の金の腕輪、右手の指輪、肩当ての縁の金の縫い、
+          胴を巻く二本目の鎖、門の内側の星の粒と、二列目の羽
 """
 import math
 import sys
@@ -16,6 +20,29 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tower_master_kit import *  # noqa
 from tower_master_kit import _mk  # noqa
+
+# 星の傷の材質 (光る。割れ目の奥の星空: 深い青から白)
+STARC = [(70, 100, 190), (130, 170, 240), (200, 225, 255), (246, 250, 255)]
+PAL = make_pal(dict(BASE_MATS, star=(STARC, 0.9, dict(crack=0.0, noise=0.04, min=1))), glow=["void", "dawn", "star"])
+
+
+def scar(bone, name, pts, r=5.0, nodes=True):
+    """星の傷: 折れ曲がる細い光の筋。曲がり目に星の粒"""
+    f = part(name, tube(bone, "star", pts, ra=r, sides=4, hint=(0, 0, 1)))
+    if nodes:
+        for i, q in enumerate(pts[1:-1]):
+            f += part(f"{name}_n{i}", ellipsoid(bone, "star", tuple(q), (r * 2.0, r * 2.0, r * 1.4), segs=6, rings=3))
+    return f
+
+
+def constellation(bone, name, pts, r=2.6):
+    """星座: 星の粒を細い線でつなぐ"""
+    f = []
+    for i, q in enumerate(pts):
+        f += part(f"{name}_s{i}", ellipsoid(bone, "star", tuple(q), (r * 2.4, r * 2.4, r * 1.6), segs=6, rings=3))
+    for i in range(len(pts) - 1):
+        f += part(f"{name}_l{i}", tube(bone, "star", [pts[i], pts[i + 1]], ra=r * 0.55, sides=4, hint=(0, 0, 1)))
+    return f
 
 
 def tatter(bone, name, mat, top, down, width, length, n=4, twist=0.0):
@@ -129,6 +156,50 @@ def build(k):
         d = np.array([math.sin(a), math.cos(a), 0.0])
         F += part(f"feather{i}", blade("rift", "gold" if i % 2 == 0 else "robe", [c, c + d * 70 + (0, 0, 4), c + d * 130 + (0, 0, 8)],
                                        [14, 18, 0], [4, 5, 0], hint=(0, 0, 1)))
+    # ---- 星の傷 (A): 胴・根・左腕の黒い石の割れ目から星空がのぞく
+    F += scar("body", "scar_t0", [(-140, 330, -128), (-112, 290, -150), (-128, 246, -150), (-96, 200, -160), (-118, 150, -146)])
+    F += scar("body", "scar_t1", [(120, 320, -132), (146, 276, -136), (118, 236, -152), (136, 180, -146)])
+    F += scar("body", "scar_t2", [(-60, 140, -150), (-20, 110, -150), (24, 124, -152), (60, 92, -148)])
+    F += scar("body", "scar_b0", [(-110, 330, 104), (-70, 260, 116), (-100, 190, 120), (-60, 120, 114)])
+    F += scar("body", "scar_b1", [(90, 300, 108), (130, 230, 114), (100, 160, 118)])
+    F += scar("legs", "scar_r0", [(-100, 60, -128), (-70, 10, -146), (-110, -60, -134), (-80, -130, -124)])
+    F += scar("legs", "scar_r1", [(80, 70, -132), (120, 0, -140), (90, -80, -132)])
+    F += constellation("body", "const_chest", [(-40, 330, -126), (-12, 312, -150), (30, 322, -142), (52, 298, -150), (34, 276, -156)])
+    # 左の肩当て (黒い石) の上の面に星座 (肩当ての楕円 中心 (-168, 366, -10)、半径 (92, 40, 90) の上の面に置く)
+    sh = []
+    for x, z in ((-120, -40), (-150, -10), (-184, 14), (-206, 40), (-196, -50)):
+        u = ((x + 168) / 92.0) ** 2 + ((z + 10) / 90.0) ** 2
+        sh.append((x, 366 + 40 * math.sqrt(max(0.0, 1 - u)) + 3, z))
+    F += constellation("arm_l", "const_sh", sh)
+    # ---- 細部: 角の金の輪、頭の金の棘の冠、腕輪、肩の縫い、二本目の鎖
+    for s, pts in ((1, [(150, 500, -20), (226, 540, -50), (262, 580, -120)]), (-1, [(-150, 500, -20), (-226, 540, -50), (-262, 580, -120)])):
+        for j, q in enumerate(pts):
+            F += part(f"hornring{s}{j}", ellipsoid("head", "gold", q, (30 - j * 6, 12, 30 - j * 6), segs=10, rings=3))
+    for i in range(9):
+        a = math.radians(-64 + i * 16)
+        base = (math.sin(a) * 86, 470, -30 - math.cos(a) * 92)
+        F += part(f"crownspk{i}", spike("head", "gold", base, (math.sin(a) * 0.35, 1, -math.cos(a) * 0.35), 46 + (14 if i % 2 == 0 else 0), 6, sides=4, rings=2))
+        if i % 2 == 0:
+            F += part(f"crowngem{i}", ellipsoid("head", "star", (base[0] * 1.02, 478, base[2] * 1.02), (7, 7, 6), segs=6, rings=3))
+    for s, fb in ((1, "fore_r"), (-1, "fore_l")):
+        for j, t in enumerate((0.15, 0.55)):
+            px = s * (205 + 5 * t)
+            py = 118 - 214 * t
+            pz = -122 - 194 * t
+            F += part(f"bracelet{s}{j}", ellipsoid(fb, "gold", (px, py, pz), (66, 18, 66), segs=14, rings=3, rot=rot_x(-40)))
+        F += part(f"spaulrim{s}", hoop("arm_r" if s > 0 else "arm_l", "gold", 352, 94, 92, cx=s * 168, zc=-10, r=6, n=18))
+    F += chain_path("body", "wrap2", [(150, 356, -146), (80, 290, -190), (-40, 200, -192), (-150, 110, -160)], step=26, r=8, mat="gold")
+    # ---- 門の内側の星の粒と、二列目の羽
+    for i in range(36):
+        a = 2 * math.pi * i / 36 + 0.3
+        rr = 60 + (i * 47 % 220)
+        F += part(f"gatestar{i}", ellipsoid("rift", "star", (math.sin(a) * rr, 430 + math.cos(a) * rr, 296), (5 + i % 3 * 2, 5 + i % 3 * 2, 3), segs=6, rings=2))
+    for i in range(16):
+        a = 2 * math.pi * i / 16
+        c = np.array([math.sin(a) * 330, 430 + math.cos(a) * 330, 296])
+        d = np.array([math.sin(a), math.cos(a), 0.0])
+        F += part(f"feather2_{i}", blade("rift", "robe" if i % 2 == 0 else "gold", [c, c + d * 50 + (0, 0, 6), c + d * 92 + (0, 0, 10)],
+                                         [10, 13, 0], [3, 4, 0], hint=(0, 0, 1)))
     return finish(F)
 
 
