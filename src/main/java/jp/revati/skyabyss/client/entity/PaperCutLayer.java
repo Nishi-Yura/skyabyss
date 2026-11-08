@@ -116,16 +116,18 @@ public final class PaperCutLayer {
             pose.translate(x - cam.x, y - cam.y, z - cam.z);
             switch (st) {
                 case PAPER -> draw(pose, buf.getBuffer(RenderType.entityCutoutNoCull(TEX)), e, t);
-                case LORD -> halo(pose, buf.getBuffer(RenderType.eyes(RING)), e, t, face, cam, x, y, z, lordRgb(e), 0.86f, true);
-                case MOON -> halo(pose, buf.getBuffer(RenderType.eyes(CRESCENT)), e, t, face, cam, x, y, z, 0xDCEBFF, 0.66f, false);
-                case WARDEN -> halo(pose, buf.getBuffer(RenderType.eyes(RING)), e, t, face, cam, x, y, z, 0x5AE6D2, 0.78f, true);
-                case KING -> halo(pose, buf.getBuffer(RenderType.eyes(RING)), e, t, face, cam, x, y, z, 0xE6B85A, 1.02f, true);
+                case LORD -> halo(pose, buf, RING, e, t, face, cam, x, y, z, lordRgb(e), 0.86f, true);
+                case MOON -> halo(pose, buf, CRESCENT, e, t, face, cam, x, y, z, 0xDCEBFF, 0.66f, false);
+                case WARDEN -> halo(pose, buf, RING, e, t, face, cam, x, y, z, 0x5AE6D2, 0.78f, true);
+                case KING -> halo(pose, buf, RING, e, t, face, cam, x, y, z, 0xE6B85A, 1.02f, true);
                 default -> {
                 }
             }
             pose.popPose();
         }
         buf.endBatch(RenderType.entityCutoutNoCull(TEX));
+        buf.endBatch(RenderType.entityTranslucent(RING));
+        buf.endBatch(RenderType.entityTranslucent(CRESCENT));
         buf.endBatch(RenderType.eyes(RING));
         buf.endBatch(RenderType.eyes(CRESCENT));
     }
@@ -150,7 +152,8 @@ public final class PaperCutLayer {
     }
 
     // 後光: 体の高さ at の所、カメラから見て体の向こうへ少し下げた所に、カメラを向く板。spin なら板の面の中でゆっくり回る (内側にもう一つ逆回りの輪)
-    static void halo(PoseStack pose, VertexConsumer vc, LivingEntity e, float t, org.joml.Quaternionf face, net.minecraft.world.phys.Vec3 cam,
+    // 足して描く光は明るい空の前で白く飛ぶ (2026-11-08 の撮影: 昼の王の金の輪が白く見えた) ので、同じ形の暗い影を先に敷いてから光を足す
+    static void halo(PoseStack pose, net.minecraft.client.renderer.MultiBufferSource buf, ResourceLocation tex, LivingEntity e, float t, org.joml.Quaternionf face, net.minecraft.world.phys.Vec3 cam,
                      double ex, double ey, double ez, int rgb, float at, boolean spin) {
         // 淵の主の模型は当たりの箱より大きく描かれる (BossLook の型の大きさ) ので、箱より上・大きめに
         boolean big = e instanceof jp.revati.skyabyss.entity.GuardMob g && g.bossLook() != 0;
@@ -165,12 +168,29 @@ public final class PaperCutLayer {
         pose.mulPose(face);
         float pulse = 0.85f + 0.15f * Mth.sin(t * 2.2f);
         pose.mulPose(com.mojang.math.Axis.ZP.rotation(spin ? t * 0.4f : 0.35f * Mth.sin(t * 0.5f)));
+        VertexConsumer back = buf.getBuffer(RenderType.entityTranslucent(tex));
+        shade(pose.last().pose(), back, s * 1.04f, 150);
+        if (spin) {
+            org.joml.Matrix4f inner = new org.joml.Matrix4f(pose.last().pose()).rotateZ(-t * 0.9f);
+            shade(inner, back, s * 0.68f, 110);
+        }
+        VertexConsumer vc = buf.getBuffer(RenderType.eyes(tex));
         tinted(pose.last().pose(), vc, s, rgb, pulse);
         if (spin) {
             pose.mulPose(com.mojang.math.Axis.ZP.rotation(-t * 0.9f));
             tinted(pose.last().pose(), vc, s * 0.66f, rgb, pulse * 0.6f);
         }
         pose.popPose();
+    }
+
+    // 暗い影 (黒。絵の透けの形のまま)
+    private static void shade(Matrix4f m, VertexConsumer vc, float s, int alpha) {
+        int light = LightTexture.FULL_BRIGHT;
+        int ov = OverlayTexture.NO_OVERLAY;
+        vc.addVertex(m, -s, -s, -0.01f).setColor(0, 0, 0, alpha).setUv(0, 1).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
+        vc.addVertex(m, s, -s, -0.01f).setColor(0, 0, 0, alpha).setUv(1, 1).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
+        vc.addVertex(m, s, s, -0.01f).setColor(0, 0, 0, alpha).setUv(1, 0).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
+        vc.addVertex(m, -s, s, -0.01f).setColor(0, 0, 0, alpha).setUv(0, 0).setOverlay(ov).setLight(light).setNormal(0, 0, 1);
     }
 
     private static void tinted(Matrix4f m, VertexConsumer vc, float s, int rgb, float a) {
