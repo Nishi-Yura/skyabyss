@@ -60,8 +60,17 @@ public final class DialogueService {
         Dialogue.Node node = dialogue.entryNode(ctx);
         Dialogue.Node topic = questTopic(player, role, dialogue);
         // 入口がクエストの段で決まった節 (頼みの報せ・渡し) なら、そのまま (2026-11-07 の自己テスト freequest: 影の記録の報せが本筋の話題に負けた)
+        // メイン (か追っているクエスト) の話題は、話題を選ぶ節 (メニュー) を出さずにいきなり始める (2026-11-08 の声「メニューを出さずにいきなりメインの話にしたい」)
         if (topic != null && (node == null || (NpcBonds.of(player).bond(role).talks > 0 && !dialogue.entryIsQuest(ctx) && !leadsTo(dialogue, node, topic.id())))) {
             node = topic;
+        } else if (topic != null && node != topic && NpcBonds.of(player).bond(role).talks > 0 && !dialogue.entryIsQuest(ctx) && leadingTopic(player, role, dialogue)) {
+            // 入口からメニューの選択肢を経て話題へ行けるなら、その選択肢の行き先 (話の始まり) から。続き (next) だけでつながるなら入口のまま
+            Dialogue.Option branch = branchTo(dialogue, node, topic.id(), ctx);
+            if (branch != null) {
+                // 選んだのと同じに、その選択肢の結果も起こす
+                branch.actions().forEach(act -> act.run(ctx));
+                node = dialogue.nodes().get(branch.target());
+            }
         }
         THEN_TOPIC.remove(player.getUUID());
         if (topic != null && node != null && node != topic && dialogue.entryIsQuest(ctx) && leadingTopic(player, role, dialogue)) {
@@ -92,6 +101,32 @@ public final class DialogueService {
             }
         }
         enter(player, npc, dialogue, node);
+    }
+
+    // from から続き (next) をたどり、最初に選択肢のある節 (メニュー) に着いたら、target へ行ける選択肢の行き先を返す。
+    // 続きだけで target に着く・メニューから行けないなら null (入口のまま)
+    @javax.annotation.Nullable
+    static Dialogue.Option branchTo(Dialogue dialogue, Dialogue.Node from, String target, StoryContext ctx) {
+        Dialogue.Node n = from;
+        for (int step = 0; step < 8 && n != null; step++) {
+            if (n.id().equals(target)) {
+                return null;
+            }
+            if (!n.options().isEmpty()) {
+                for (Dialogue.Option o : n.options()) {
+                    if (!o.condition().test(ctx)) {
+                        continue;
+                    }
+                    Dialogue.Node to = dialogue.nodes().get(o.target());
+                    if (to != null && (o.target().equals(target) || leadsTo(dialogue, to, target))) {
+                        return o;
+                    }
+                }
+                return null;
+            }
+            n = n.next() == null ? null : dialogue.nodes().get(n.next());
+        }
+        return null;
     }
 
     // from の節から、続き (next) と選択肢の行き先をたどって target に着くか (6 歩まで。話題の並ぶ節から話題の連なりの先にある節も含む)
@@ -336,7 +371,7 @@ public final class DialogueService {
         return true;
     }
 
-    // 今の話題が、メインか追っているクエストのものか
+    // 今の話題が、追っているクエスト (ふつうはメイン) のものか
     private static boolean leadingTopic(ServerPlayer player, String role, Dialogue dialogue) {
         Dialogue.Node n = questTopic(player, role, dialogue);
         if (n == null) {
@@ -345,7 +380,8 @@ public final class DialogueService {
         jp.revati.skyabyss.quest.QuestLog log = jp.revati.skyabyss.quest.QuestLog.of(player);
         for (var e : log.quests().entrySet()) {
             jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(e.getKey());
-            if (def == null || e.getValue().done || e.getValue().stage >= def.stages().size() || !(def.main() || e.getKey().equals(log.tracked()))) {
+            // 追っているクエストだけ (メインは始めると追跡になる。サブを追跡に替えれば、メニューが出る)
+            if (def == null || e.getValue().done || e.getValue().stage >= def.stages().size() || !e.getKey().equals(log.tracked())) {
                 continue;
             }
             for (jp.revati.skyabyss.quest.QuestDef.Objective ob : def.stages().get(e.getValue().stage).objectives()) {

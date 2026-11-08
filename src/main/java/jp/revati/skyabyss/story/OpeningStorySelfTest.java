@@ -379,8 +379,8 @@ public final class OpeningStorySelfTest {
         Quests.poll(a, true);
         check(stage(a, "main_song").equals("ask_storyteller"), "seeing the shadow did not advance to ask_storyteller: " + stage(a, "main_song"), failures);
         DialogueService.open(a, st);
-        check(node(a).equals("menu") && shown(a, ST, "shadow_seen"), "after the shadow the menu should offer shadow_seen, got " + node(a), failures);
-        pick(a, ST, "shadow_seen", failures);
+        // メインを追っているので、メニューを出さずにいきなり影の話 (選択肢 shadow_seen の行き先) から (2026-11-08 の声「メニューを出さずにいきなりメインの話にしたい」)
+        check(node(a).equals("shadow1"), "after the shadow the storyteller should start the shadow story at once (shadow1), got " + node(a), failures);
         next(a);
         next(a);
         check(node(a).equals("shadow3") && stage(a, "main_song").equals("find_chaser"), "asking about the shadow did not advance to find_chaser: " + stage(a, "main_song"), failures);
