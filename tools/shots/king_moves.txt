@@ -1,0 +1,45 @@
+# 喪服の王の動き (2026-11-08): 待ち (元素の癖)、叩きつけの溜めと当たり (冠の檻が開く・裾が翻る)、手下を呼ぶ (冠が浮く)、衝撃の輪 (裾が広がる)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/king_moves.txt -PshotsName=king_moves
+world king_moves flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd skyabyss abyss boss king_shadow 0 - 40 9
+camera 7.2 -57.5 7.2 135 -2
+wait 60
+shot king_shadow_idle
+cmd kill @e[type=!minecraft:player]
+wait 20
+cmd skyabyss abyss boss king_storm 0 - 40 9
+camera 7.2 -57.5 7.2 135 -2
+wait 60
+shot king_storm_idle
+cmd skyabyss abyss bossdo slam 40
+wait 36
+shot king_slam_windup
+wait 8
+shot king_slam_strike
+wait 40
+cmd skyabyss abyss bossdo summon 40
+wait 38
+shot king_summon_windup
+wait 40
+cmd skyabyss abyss bossdo sweep 40
+wait 44
+shot king_sweep_strike
+echo done
+quit

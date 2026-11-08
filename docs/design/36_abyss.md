@@ -505,7 +505,7 @@
 
 ### 9.4 歪んだ王の階（5 階ごと。実装: `DepthBoss`）
 
-- **見た目（2026-11-08）**: 五つの王は同じ形「喪服の王」C 冠の檻（ラフ docs/review/roughs_abyss/reshape_king.png、形 tools/rough/lowpoly/abyss/king_mourning.py → tools/gen/abyss/gen_abyss_boss_models.py で入れる）。深い紫の天鵞絨の衣と金の縁、裾は帯に裂けて引きずる、頭を包む金の檻の冠（冠の骨で回る）、下の一対の腕が弔いの花輪を抱える。元素ごとの差し（骨 = 冠の棘と肩の肋、塩 = 結晶、雷 = 銅の針、灰 = 燠の灯し、影 = 影の糸）と光る色。周が進むと背に骨の喪の扇、胸の割れ目の光。骨と動きは衣の人型（humanoid(robe=True)）を五つとも使う。ゲームでは冠の上に二重の金の輪の後光と降る黒い花びら（PaperCutLayer の KING）。
+- **見た目（2026-11-08）**: 五つの王は同じ形「喪服の王」C 冠の檻（ラフ docs/review/roughs_abyss/reshape_king.png、形 tools/rough/lowpoly/abyss/king_mourning.py → tools/gen/abyss/gen_abyss_boss_models.py で入れる）。深い紫の天鵞絨の衣と金の縁、裾は帯に裂けて引きずる、頭を包む金の檻の冠（冠の骨で回る）、下の一対の腕が弔いの花輪を抱える。元素ごとの差し（骨 = 冠の棘と肩の肋、塩 = 結晶、雷 = 銅の針、灰 = 燠の灯し、影 = 影の糸）と光る色。周が進むと背に骨の喪の扇、胸の割れ目の光。骨は灰の王と同じ。動きは衣の人型（humanoid(robe=True)）に喪服の王の動き（`gen_abyss_boss_models.mourning_king`）を重ねる: 待ちは裾が波のように揺れ冠の檻が回り、元素の癖（骨 = 首を傾げて揺らす、塩 = 背筋を伸ばして動かない、雷 = 冠が速く回り頭が細かく震える、灰 = 胸が大きく息をする、影 = 低くかがみ頭を垂れて横に揺れる）。技では、叩きつけの溜めで冠の檻が開いて速く回り当たりで裾が翻る、手下を呼ぶで冠が浮いて一回り、落ちる光で冠が前へ傾く、衝撃の輪で裾が外へ広がる、突進で裾が後ろへなびく、段の変わりで冠が大きく開いて二回り。撮影 `tools/shots/king_moves.txt`。ゲームでは冠の上に二重の金の輪の後光と降る黒い花びら（PaperCutLayer の KING）。
 
 - **王の正体**: 王は、錨から漏れた鼓動の写し（骨＝岩鯨・塩＝潮殻・雷＝雷翼・灰＝余燼の拍。影は漏れた拍が前の私の形をなぞったもの）。王の階の入口のそばに前の私の手記の碑が一枚立ち（`DepthBuilder.placeNote`。文は `sign.skyabyss.depth_note_<型>`）、王が目を覚ますと心の声で一行言い切る（`message.skyabyss.depths.king.reveal.<型>`）
 
