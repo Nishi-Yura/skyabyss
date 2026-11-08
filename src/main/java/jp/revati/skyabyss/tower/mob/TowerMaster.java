@@ -48,8 +48,9 @@ public class TowerMaster extends CloudMob {
         return dmg(factor);
     }
 
+    // 床は最大体力の割合で持つ (あとで体力に倍率が掛かっても同じ所で止まる。2026-11-09 の combat/Hardness)
     public void setFloor(float hp) {
-        floor = hp;
+        floor = getMaxHealth() > 0 ? hp / getMaxHealth() : 0;
     }
 
     public boolean shielded() {
@@ -81,7 +82,7 @@ public class TowerMaster extends CloudMob {
 
     @Override
     public void setHealth(float hp) {
-        super.setHealth(isAlive() && hp > 0 ? Math.max(hp, floor) : hp);
+        super.setHealth(isAlive() && hp > 0 ? Math.max(hp, floor * getMaxHealth()) : hp);
     }
 
     @Override

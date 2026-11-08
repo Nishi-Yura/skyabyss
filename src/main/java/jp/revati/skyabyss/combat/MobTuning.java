@@ -12,11 +12,18 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
-// mod の雑魚敵の体力と攻撃を一律に下げる (2026-10-23 の試遊: 体力は今の 8 割、攻撃も少し下げる)。
+// mod の敵の体力と攻撃を一律に整える。2026-10-23 の試遊で雑魚を下げた (体力 8 割・攻撃 9 割) が、2026-11-09 の声
+// 「ソロでの敵が弱かったらパーティー組む意味ない」「攻撃力低いかも」で上げた: 雑魚は体力 1.1 倍・攻撃 1.2 倍、主 (ボスの帯・大物) は攻撃 1.3 倍
+// (入る人のレベルで固くした主は、さらにその 0.6 乗: LevelScale.attack)。
+// 防具 (鎧の値) で傷を減らすのもやめ、その分を体力に掛ける (「耐えはこのゲームから消していい。hp 増やすのだけで敵を固くする」。combat/Hardness の armor)。
 // 傷は人が受けるときだけ 1 + ATTACK 倍。ボスの帯を持つ敵と、大物 (最大体力が ShieldRules.BIG_HEALTH 以上。心臓・中ボス・主・王) は下げない。数値は各敵の作りのまま、ここで掛けるだけ
 public final class MobTuning {
-    public static final double HEALTH = -0.2;
-    public static final double ATTACK = -0.1;
+    public static final double HEALTH = 0.1;
+    public static final double ATTACK = 0.2;
+    public static final double BOSS_ATTACK = 0.3;
+    static final ResourceLocation ARMOR_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "no_armor");
+    // 防具を体力に直すときの、ふつうの一撃の大きさ
+    static final double TYPICAL_HIT = 12;
     static final ResourceLocation HEALTH_ID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "trash_health");
 
     private MobTuning() {
@@ -33,6 +40,40 @@ public final class MobTuning {
         }
         AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
         return hp != null && hp.getBaseValue() < ShieldRules.BIG_HEALTH && !hasBossBar(e.getClass());
+    }
+
+    // 人が受ける傷の倍率 (雑魚は 1 + ATTACK、主は 1 + BOSS_ATTACK とレベルの倍率)。自己テストも使う
+    public static double attackFactor(LivingEntity attacker) {
+        if (!ours(attacker)) {
+            return 1;
+        }
+        return applies(attacker) ? 1 + ATTACK : (1 + BOSS_ATTACK) * LevelScale.attack(attacker);
+    }
+
+    // mod の敵か (雑魚も主も)
+    public static boolean ours(LivingEntity e) {
+        return e instanceof Enemy && SkyAbyss.MODID.equals(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getNamespace());
+    }
+
+    // 防具 (鎧の値・鎧の強さ) を 0 にし、ふつうの一撃 (TYPICAL_HIT) で減っていた分を体力に掛ける (バニラの防具の式)
+    public static void armorToHealth(LivingEntity e) {
+        AttributeInstance armor = e.getAttribute(Attributes.ARMOR);
+        AttributeInstance tough = e.getAttribute(Attributes.ARMOR_TOUGHNESS);
+        if (armor == null || armor.hasModifier(ARMOR_ID)) {
+            return;
+        }
+        double a = armor.getValue();
+        double t = tough == null ? 0 : tough.getValue();
+        if (a <= 0) {
+            return;
+        }
+        double eff = Math.max(a / 5.0, Math.min(20.0, a - TYPICAL_HIT / (2.0 + t / 4.0)));
+        double factor = 1.0 / Math.max(0.2, 1.0 - eff / 25.0);
+        armor.addOrUpdateTransientModifier(new AttributeModifier(ARMOR_ID, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        if (tough != null) {
+            tough.addOrUpdateTransientModifier(new AttributeModifier(ARMOR_ID, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
+        Hardness.set(e, "armor", factor);
     }
 
     // 画面上のボスの帯を持つ敵 (中ボス・番人など) は雑魚ではない。帯 (ServerBossEvent) を持つ型かを型ごとに一度だけ調べる
@@ -68,6 +109,10 @@ public final class MobTuning {
         @SubscribeEvent
         static void onJoin(EntityJoinLevelEvent event) {
             if (!event.getLevel().isClientSide() && event.getEntity() instanceof LivingEntity e && e instanceof Enemy) {
+                // 防具は作りの値 (属性) なので、湧いたその場で体力に直す (同じ tick に殴られても同じ)
+                if (ours(e)) {
+                    armorToHealth(e);
+                }
                 PENDING.add(e);
             }
         }
@@ -81,8 +126,9 @@ public final class MobTuning {
                 if (e.isAlive() && applies(e)) {
                     AttributeInstance hp = e.getAttribute(Attributes.MAX_HEALTH);
                     boolean fresh = !hp.hasModifier(HEALTH_ID);
+                    boolean full = e.getHealth() >= e.getMaxHealth() - 0.01f;
                     hp.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, HEALTH, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-                    if (fresh && e.getHealth() > e.getMaxHealth()) {
+                    if (fresh && (full || e.getHealth() > e.getMaxHealth())) {
                         e.setHealth(e.getMaxHealth());
                     }
                 }
@@ -94,9 +140,10 @@ public final class MobTuning {
         @SubscribeEvent
         static void onHurt(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
             net.minecraft.world.entity.Entity by = event.getSource().getEntity();
-            if (by instanceof LivingEntity attacker && event.getEntity() instanceof net.minecraft.world.entity.player.Player && applies(attacker)) {
-                event.setAmount((float) (event.getAmount() * (1 + ATTACK)));
+            if (!(by instanceof LivingEntity attacker) || !(event.getEntity() instanceof net.minecraft.world.entity.player.Player) || !ours(attacker)) {
+                return;
             }
+            event.setAmount((float) (event.getAmount() * attackFactor(attacker)));
         }
     }
 }

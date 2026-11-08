@@ -61,7 +61,7 @@ public final class Ch1Mobs {
     // 骨負いから SEEN の内に来た人には、サブクエスト「骨を負う獣」(ch1/follow_hauler) を始める。集め場に着くと済み (Sites の到着)
     public static final double LEAD_FAR = 30;
     public static final double LEAD_AHEAD = 14;
-    public static final double SEEN = 16;
+    public static final double SEEN = 20;
     public static final String HAULER_QUEST = "ch1/follow_hauler";
     public static final String HAULER_SIGNAL = "ch1_bone_cache";
     public static final String HAULER_LORE = "ch1/follow_hauler";

@@ -643,7 +643,7 @@ public final class FinaleSelfTest {
             jp.revati.skyabyss.story.finale.mob.CloudMob h = hands.get(0);
             double want = jp.revati.skyabyss.story.finale.mob.PilgrimHand.HP * PilgrimTrial.hpScale(3);
             check(f, h.getMaxHealth() <= jp.revati.skyabyss.story.finale.mob.CloudMob.MAX_HP
-                    && Math.abs(h.getMaxHealth() / h.toughness() - want) < 1, "the trial hand's health is not the tier's (" + h.getMaxHealth() + " / " + h.toughness() + ")");
+                    && Math.abs(h.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.total(h) - want) < 1, "the trial hand's health is not the tier's (" + h.getMaxHealth() + " / " + jp.revati.skyabyss.combat.Hardness.total(h) + ")");
         }
         SeatArena.clear(cloud);
         check(f, SeatArena.tier() == 0 && SeatArena.form() == 0, "clearing the trial left its tier");

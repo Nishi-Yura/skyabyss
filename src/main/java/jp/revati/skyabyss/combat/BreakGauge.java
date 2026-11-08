@@ -256,6 +256,14 @@ public final class BreakGauge {
                 || !le.isAlive() || le.getHealth() <= 0 || !broken(le)) {
             return;
         }
+        // 段階の変わり目は崩れより先 (2026-11-09 の声「スタン中でも、形態変化を優先して」): 体力が次の段階へ入ったら崩れを解いて、主に咆哮させる
+        if (le instanceof jp.revati.skyabyss.entity.HeartBoss h && h.phaseForHealth() > h.getPhase()) {
+            State st = STATES.get(le.getUUID());
+            if (st != null) {
+                st.brokenUntil = le.level().getGameTime();
+            }
+            return;
+        }
         event.setCanceled(true);
         refreshBars(le);
         le.setOldPosAndRot();

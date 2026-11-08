@@ -60,6 +60,17 @@ public abstract class HeartBoss extends GuardMob {
     // 各心臓のボスゲージ
     protected abstract net.minecraft.server.level.ServerBossEvent heartBar();
 
+    // 今の段階と、体力の割合からあるべき段階 (崩しゲージ BreakGauge が、崩れの最中でも段階の変わり目を先にするのに使う)
+    public abstract int getPhase();
+
+    public abstract int phaseForHealth();
+
+    // 心臓の硬さ (基本 × 人数)。体力に掛ける (combat/Hardness の own)
+    public abstract float toughness();
+
+    // 一人でも手ごたえがあるように、心臓の体力をみな 1.25 倍 (2026-11-09 の声「巨神の心臓めっちゃ弱かった」)
+    public static final double HP_BONUS = 1.25;
+
     // この人をボスゲージの見ている人から外す
     protected final void dropViewer(ServerPlayer player) {
         heartBar().removePlayer(player);
@@ -238,10 +249,10 @@ public abstract class HeartBoss extends GuardMob {
         return new AbyssCtx(abyssCx(), abyssCz(), abyssFloor(), abyssRadius(), this::abyssReach, abyssFury());
     }
 
-    // 体力 ×1.2 は、受ける傷を 1/1.2 にして出す (最大体力は属性の上限 1024 に近いので増やせない。各心臓の「硬さ」の掛け算と同じ形。HeartBalance の effectiveHp)
+    // 深淵の体力 ×1.2・心臓の硬さ・一人の上乗せは、体力そのものに掛ける (tick の syncHardness。2026-11-09 に受ける傷を割るのをやめた)
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        boolean hit = super.hurt(source, isAbyss() ? amount / jp.revati.skyabyss.abyss.Abyss.HEART_HP : amount);
+        boolean hit = super.hurt(source, amount);
         // 被弾のひるみ (見た目だけ)。技の動きとは別の制御 "hurt" で、技の骨に触らない包みの骨 flinch だけを動かす
         // (tools/gen/world/polish_boss_anims.py)。だから技の溜め・当たりの形は崩れない。続けて当たっても 0.3 秒に一度
         if (hit && isAlive() && !level().isClientSide && !isIntroPlaying() && tickCount - lastFlinchTick >= 6) {
@@ -407,6 +418,12 @@ public abstract class HeartBoss extends GuardMob {
 
     // ---------------------------------------------------------------- 毎 tick
 
+    // 硬さを体力に (変わったときだけ掛け直す。割合は保つ)
+    public void syncHardness() {
+        jp.revati.skyabyss.combat.Hardness.set(this, "own", toughness() * HP_BONUS);
+        jp.revati.skyabyss.combat.Hardness.set(this, "abyss", isAbyss() ? jp.revati.skyabyss.abyss.Abyss.HEART_HP : 1.0);
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -416,6 +433,9 @@ public abstract class HeartBoss extends GuardMob {
         if (level() instanceof ServerLevel server) {
             if (!isRemoved()) {
                 LIVE.add(this);
+            }
+            if (tickCount % 10 == 1) {
+                syncHardness();
             }
             if (!isNoGravity()) {
                 // /summon の NBT 読み込みは無重力の印を消すので、毎 tick 付け直す (浮いたまま落ちない)

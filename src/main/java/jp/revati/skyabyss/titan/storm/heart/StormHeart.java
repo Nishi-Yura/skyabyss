@@ -410,6 +410,7 @@ public class StormHeart extends HeartBoss {
         return enraged;
     }
 
+    @Override
     public float toughness() {
         return toughness;
     }
@@ -434,7 +435,8 @@ public class StormHeart extends HeartBoss {
         return 0;
     }
 
-    private int phaseForHealth() {
+    @Override
+    public int phaseForHealth() {
         return phaseFor(getHealth() / getMaxHealth());
     }
 
@@ -1662,7 +1664,7 @@ public class StormHeart extends HeartBoss {
         if (split) {
             a *= SPLIT_TAKEN;
         }
-        return a / toughness;
+        return a;
     }
 
     private void updateBossBarViewers() {

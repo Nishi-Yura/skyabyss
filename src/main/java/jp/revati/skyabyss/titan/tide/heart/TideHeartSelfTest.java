@@ -216,7 +216,7 @@ public final class TideHeartSelfTest {
         check(TideHeart.phaseFor(1f) == 0 && TideHeart.phaseFor(0.67f) == 0 && TideHeart.phaseFor(0.65f) == 1
                 && TideHeart.phaseFor(0.34f) == 1 && TideHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);
         check(Math.abs(TideHeart.takenFor(1, 10, 1) - 12f) < 1e-4 && Math.abs(TideHeart.takenFor(0, 10, 1) - 10f) < 1e-4
-                && Math.abs(TideHeart.takenFor(2, TideHeart.BASE_RESIST * 1.85f * 10f, TideHeart.scaleFor(2)) - 10f) < 1e-3, "damage taken multipliers are wrong", failures);
+                && Math.abs(TideHeart.takenFor(2, 10f, TideHeart.scaleFor(2)) - 10f) < 1e-3, "damage taken multipliers are wrong (the toughness is in the max health now)", failures);
         // 咆哮: 体力を 60% にすると、咆哮 (無敵) のあと段階 2
         heart.setHealth(heart.getMaxHealth() * 0.6f);
         tickHeart(heart, 3);
@@ -231,7 +231,7 @@ public final class TideHeartSelfTest {
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        float open = 12f / heart.toughness();
+        float open = 12f;
         check(Math.abs((h0 - heart.getHealth()) - open) < 0.6f, "open shell should take 1.2x (took " + (h0 - heart.getHealth()) + ", want " + open + ")", failures);
         // 9 つの技が最後まで回る (人がいないので当たらない)
         int ran = 0;

@@ -397,6 +397,7 @@ public class EmberHeart extends HeartBoss {
         return BASE_RESIST * scaleFor(challengers);
     }
 
+    @Override
     public float toughness() {
         return toughness;
     }
@@ -427,7 +428,8 @@ public class EmberHeart extends HeartBoss {
         return 0;
     }
 
-    private int phaseForHealth() {
+    @Override
+    public int phaseForHealth() {
         return phaseFor(getHealth() / getMaxHealth());
     }
 
@@ -1716,7 +1718,7 @@ public class EmberHeart extends HeartBoss {
 
     // 受ける傷 (段階と人数で)。自己テストからも使う
     public static float takenFor(int phase, float amount, float toughness) {
-        return (phase == 1 ? amount * EXPOSED_TAKEN : amount) / toughness;
+        return phase == 1 ? amount * EXPOSED_TAKEN : amount;
     }
 
     // 手ごたえの数 (HeartBalance / 自己テスト用)。段階 1 / 2 / 3 / 憤怒。

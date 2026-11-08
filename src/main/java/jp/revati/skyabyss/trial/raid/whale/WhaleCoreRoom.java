@@ -31,14 +31,15 @@ public final class WhaleCoreRoom extends RaidRoom {
     static final int WAVES = 3;
     static final double MELEE_RANGE = 3.6;
     static final double SHOOT_RANGE = 11;
-    static final double MELEE_DPS = 0.9;
-    static final double SHOT_DPS = 0.6;
-    static final double REGEN_DPS = 1.0;
+    // 2026-11-09 の声「鯨の核を守る、もっと核の hp 削れるようにしてもいいかも」: 削れを強く、戻りを遅く
+    static final double MELEE_DPS = 1.6;
+    static final double SHOT_DPS = 1.1;
+    static final double REGEN_DPS = 0.6;
     static final int WAVE_GAP = 80;
     // 一人のときの核の削れの倍率
-    static final double SOLO_DRAIN = 0.45;
+    static final double SOLO_DRAIN = 0.7;
     // 番兵長が核を削る速さ (一秒)・人が近いと核より人を相手にする距離
-    static final double CAPTAIN_DPS = 2.5;
+    static final double CAPTAIN_DPS = 3.5;
     static final double CAPTAIN_ENGAGE = 6;
 
     private double hp = CORE_MAX;

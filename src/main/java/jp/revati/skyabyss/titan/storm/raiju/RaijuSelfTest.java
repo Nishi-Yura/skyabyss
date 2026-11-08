@@ -300,7 +300,7 @@ public final class RaijuSelfTest {
         }
         check(r.getTags().contains(TitanBackTrials.HEART_TAG) && r.getTags().contains(Raiju.TRIAL_TAG), "raiju not tagged", failures);
         check(!r.shouldBeSaved(), "raiju would be saved to disk", failures);
-        check(Math.abs(r.getMaxHealth() - Raiju.HEALTH) < 0.01, "max health is " + r.getMaxHealth(), failures);
+        check(Math.abs(r.getMaxHealth() - Raiju.HEALTH * jp.revati.skyabyss.combat.Hardness.total(r)) < 0.5, "max health is " + r.getMaxHealth() + " (want " + Raiju.HEALTH * jp.revati.skyabyss.combat.Hardness.total(r) + ")", failures);
         check(Math.abs(Raiju.scaleFor(1) - 1f) < 1e-4 && Math.abs(Raiju.scaleFor(3) - 2.2f) < 1e-4, "challenger scale is wrong", failures);
         check(Math.abs(Raiju.scaleFor(6) - 4f) < 1e-4, "party of 6 scale should be 4.0", failures);
         check(Math.abs(Raiju.takenFor(10, 2f, true) - 7.5f) < 1e-4 && Math.abs(Raiju.takenFor(10, 1f, false) - 10f) < 1e-4, "damage taken is wrong", failures);

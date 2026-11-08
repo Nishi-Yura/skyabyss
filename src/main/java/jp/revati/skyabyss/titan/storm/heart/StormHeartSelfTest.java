@@ -389,7 +389,7 @@ public final class StormHeartSelfTest {
                 && StormHeart.phaseFor(0.34f) == 1 && StormHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);
         check(Math.abs(StormHeart.takenFor(1, false, 10, 1) - 12f) < 1e-4 && Math.abs(StormHeart.takenFor(0, false, 10, 1) - 10f) < 1e-4
                 && Math.abs(StormHeart.takenFor(0, true, 10, 1) - 15f) < 1e-4
-                && Math.abs(StormHeart.takenFor(2, false, 18.5f, StormHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong", failures);
+                && Math.abs(StormHeart.takenFor(2, false, 10f, StormHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong (the toughness is in the max health now)", failures);
         check(Math.abs(heart.toughness() - StormHeart.BASE_RESIST) < 1e-4, "solo heart resist is " + heart.toughness() + " (want " + StormHeart.BASE_RESIST + ")", failures);
         // 段階の高さ: 段階 2 は 4 上がり、下の端が昇り風の上の端。段階 3 は床の 2 上
         check(Math.abs(StormHeart.heightFor(1, false) - StormHeart.heightFor(0, false) - 4.0) < 0.01
@@ -401,7 +401,7 @@ public final class StormHeartSelfTest {
         heart.invulnerableTime = 0;
         float s0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        float splitWant = 15f / heart.toughness();
+        float splitWant = 15f;
         check(Math.abs((s0 - heart.getHealth()) - splitWant) < 0.6f, "split heart should take 1.5x (took " + (s0 - heart.getHealth()) + ", want " + splitWant + ")", failures);
         tickHeart(heart, StormHeart.SPLIT_TICKS + 2);
         check(!heart.isSplit(), "split did not end", failures);
@@ -423,7 +423,7 @@ public final class StormHeartSelfTest {
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        float openWant = 12f / heart.toughness();
+        float openWant = 12f;
         check(Math.abs((h0 - heart.getHealth()) - openWant) < 0.6f, "open wings should take 1.2x (took " + (h0 - heart.getHealth()) + ", want " + openWant + ")", failures);
         // 9 つの技が最後まで回る (人がいないので当たらない)
         int ran = 0;

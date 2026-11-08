@@ -315,8 +315,9 @@ public class FounderBoss extends CloudMob {
             counter(by);
             return false;
         }
-        float scale = (float) jp.revati.skyabyss.combat.HeartBalance.partyScale(Math.max(1, FounderArena.present((ServerLevel) level()).size()));
-        float a = amount / scale * (opening > 0 ? 1.25f : 1f);
+        // 人数は体力に掛ける (2026-11-09。受ける傷を割るのをやめた)
+        jp.revati.skyabyss.combat.Hardness.set(this, "party", jp.revati.skyabyss.combat.HeartBalance.partyScale(Math.max(1, FounderArena.present((ServerLevel) level()).size())));
+        float a = amount * (opening > 0 ? 1.25f : 1f);
         if (by != null) {
             realHits++;
         }

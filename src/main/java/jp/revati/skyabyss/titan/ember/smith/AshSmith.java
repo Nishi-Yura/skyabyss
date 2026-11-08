@@ -229,6 +229,8 @@ public class AshSmith extends EmberMob {
     // ---------------------------------------------------------------- 戦いの部屋と結びつける (中ボスの間 EmberMidRoom から)
     public void bind(int challengers) {
         multiplier = scaleFor(challengers);
+        // 人数は体力に掛ける (2026-11-09。受ける傷を割るのをやめた)
+        jp.revati.skyabyss.combat.Hardness.set(this, "party", multiplier);
         addTag(TitanBackTrials.HEART_TAG);
         addTag(EmberMob.TRIAL_TAG);
         addTag(SMITH_TAG);
@@ -941,7 +943,7 @@ public class AshSmith extends EmberMob {
     // ---------------------------------------------------------------- 傷
     // 受ける傷: 参加者の人数で割る。吐いたあとの 3 秒は、後ろからの傷が 1.5 倍
     public static float takenFor(float amount, float multiplier, boolean weakFromBehind) {
-        return amount / multiplier * (weakFromBehind ? WEAK_MULT : 1f);
+        return amount * (weakFromBehind ? WEAK_MULT : 1f);
     }
 
     // 傷の出どころが体の後ろ側か (鞴のある背)

@@ -255,7 +255,8 @@ public final class AshSmithSelfTest {
                 && AshSmith.SPARK_DAMAGE == 10, "sparks: range 18, 0.8 s charge, 6 sparks, 1.0 s ring, 10", f);
         check(AshSmith.RAGE_TICKS == 30 && Math.abs(AshSmith.RAGE_SLAM_FACTOR - 0.8f) < 1e-4, "rage: 1.5 s, slam interval x0.8", f);
         check(Math.abs(AshSmith.scaleFor(1) - 1f) < 1e-4 && Math.abs(AshSmith.scaleFor(3) - 2.2f) < 1e-4, "challenger scale", f);
-        check(Math.abs(AshSmith.takenFor(10, 2f, true) - 7.5f) < 1e-4 && Math.abs(AshSmith.takenFor(10, 1f, false) - 10f) < 1e-4, "damage taken", f);
+        // 人数は最大体力に掛かる (2026-11-09)。受ける傷は後ろからの 1.5 倍だけ
+        check(Math.abs(AshSmith.takenFor(10, 2f, true) - 15f) < 1e-4 && Math.abs(AshSmith.takenFor(10, 1f, false) - 10f) < 1e-4, "damage taken", f);
         // 形: 扇と帯
         Vec3 o = new Vec3(0, 0, 0);
         Vec3 look = new Vec3(0, 0, 1);
@@ -414,7 +415,9 @@ public final class AshSmithSelfTest {
         s.invulnerableTime = 0;
         s.hurt(level.damageSources().playerAttack(other), 5f);
         check(s.getHealth() == hp, "another group hurt the smith", f);
-        check(Math.abs(s.getMaxHealth() - AshSmith.HEALTH) < 0.01, "max health " + s.getMaxHealth(), f);
+        // 最大体力 = 作りの体力 × 型ごとの硬さ × 防具の分 (2026-11-09。combat/Hardness)
+        check(Math.abs(s.getMaxHealth() - AshSmith.HEALTH * jp.revati.skyabyss.combat.Hardness.total(s)) < 0.5 && s.getMaxHealth() > AshSmith.HEALTH,
+                "max health " + s.getMaxHealth() + " (want " + AshSmith.HEALTH * jp.revati.skyabyss.combat.Hardness.total(s) + ")", f);
         check(AshSmithArena.inside(s.position()), "smith spawned outside the room at " + s.position(), f);
         clearFight(level);
     }
@@ -549,12 +552,11 @@ public final class AshSmithSelfTest {
         } finally {
             jp.revati.skyabyss.combat.BossOpenings.plantedForTest = null;
         }
-        // 受ける傷が 1.5 倍になる (防具 12 / 強靭 6 を通す前)。通したあとの値で見る。中ボスの型ごとの硬さ (PartyScale.typeResist) は防具の前に割る
-        double k = jp.revati.skyabyss.combat.PartyScale.of(s);
-        double wantFront = 10 / k * GearCurve.armorTaken(10 / k, 12, 6);
-        double wantRear = 15 / k * GearCurve.armorTaken(15 / k, 12, 6);
+        // 受ける傷が 1.5 倍になる。防具と型ごとの硬さは体力に掛かる (2026-11-09) ので、傷はそのまま
+        double wantFront = 10;
+        double wantRear = 15;
         check(Math.abs(front * 10 - wantFront) < 0.05 && Math.abs(rear * 10 - wantRear) < 0.05,
-                "rear hit should be 10 x1.5 before armor (front " + front * 10 + " want " + wantFront + ", rear " + rear * 10 + " want " + wantRear + ")", f);
+                "rear hit should be 10 x1.5 (front " + front * 10 + " want " + wantFront + ", rear " + rear * 10 + " want " + wantRear + ")", f);
         check(rear > front * 1.4, "the rear hit was not clearly bigger than the front hit", f);
         tick(s, p, AshSmith.WEAK_TICKS);
         check(!s.isWeak(), "the weak window did not end after 3 s", f);
