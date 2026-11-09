@@ -38,6 +38,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   entries: [{entity, weight, time: day|night|any, biomes: [地形の名前 …] (省くとどこでも), group: [少, 多]}]
 // 決まり: 2 秒ごとに人ごとに一度、24〜56 ブロック先の地面に試す。人のまわり 64 の中に、ここで湧かせた敵が 10 体を超えない。
 // 都と土地の町の中 (SiteGuard.inTown)・道の上 (ContinentRoads.flattened)・水の上には湧かない。人が 96 離れたら消す。保存しない (SiteSpawner の印)
+// 外れの帯 (FrontierBand) では上限 14・群れが昼も・道に野盗の見回り (道の上に出すのは見回りだけ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RegionSpawner {
     public static final String[] REGIONS = {"meadow", "island", "whale", "tide", "storm", "ember"};
@@ -226,8 +227,16 @@ public final class RegionSpawner {
 
     // 一人のまわりに一度だけ試す。湧かせた数 (群れなら複数)
     public static int trySpawn(ServerLevel level, ServerPlayer player) {
-        if (nearCount(level, player) >= NEAR_CAP) {
+        // 外れの帯 (FrontierBand) では近くの上限が多く、群れは昼も出て、道には野盗の見回りが来る
+        boolean far = FrontierBand.far(player.getX(), player.getZ());
+        if (nearCount(level, player) >= (far ? FrontierBand.NEAR_CAP : NEAR_CAP)) {
             return 0;
+        }
+        if (far) {
+            int p = patrol(level, player);
+            if (p > 0) {
+                return p;
+            }
         }
         double angle = level.random.nextDouble() * Math.PI * 2;
         double dist = MIN_DIST + level.random.nextDouble() * (MAX_DIST - MIN_DIST);
@@ -247,7 +256,7 @@ public final class RegionSpawner {
             return 0;
         }
         int n = e.min() + (e.max() > e.min() ? level.random.nextInt(e.max() - e.min() + 1) : 0);
-        boolean pack = night(level) && level.random.nextInt(1000) < PACK_CHANCE;
+        boolean pack = (night(level) || FrontierBand.far(x, z)) && level.random.nextInt(1000) < PACK_CHANCE;
         boolean packed = false;
         int made = 0;
         for (int i = 0; i < n; i++) {
@@ -272,6 +281,65 @@ public final class RegionSpawner {
             }
         }
         return made;
+    }
+
+    // ---------------------------------------------------------------- 外れの道の野盗の見回り (2〜3 体の組。人ごとに PATROL_EVERY に一度まで)
+    public static final int PATROL_EVERY = 20 * 90;
+    public static final int PATROL_ODDS = 6;
+    public static final double PATROL_ROAD = 48;
+    public static final String PATROL_TAG = "skyabyss_patrol";
+    private static final Map<UUID, Long> PATROL_NEXT = new ConcurrentHashMap<>();
+
+    static int patrol(ServerLevel level, ServerPlayer player) {
+        long now = level.getGameTime();
+        if (now < PATROL_NEXT.getOrDefault(player.getUUID(), 0L) || level.random.nextInt(PATROL_ODDS) != 0) {
+            return 0;
+        }
+        BlockPos at = roadAhead(level, player);
+        if (at == null || jp.revati.skyabyss.opening.site.SiteGuard.inTown(level, at)) {
+            return 0;
+        }
+        PATROL_NEXT.put(player.getUUID(), now + PATROL_EVERY);
+        String[] crew = level.random.nextBoolean() ? new String[] {"skyabyss:bandit", "skyabyss:bandit_archer"}
+                : new String[] {"skyabyss:bandit", "skyabyss:bandit_archer", "skyabyss:bandit"};
+        int made = 0;
+        for (int i = 0; i < crew.length; i++) {
+            BlockPos p = i == 0 ? at : ground(level, at.getX() + level.random.nextInt(5) - 2, at.getZ() + level.random.nextInt(5) - 2);
+            Mob m = p == null ? null : spawn(level, crew[i], p, player);
+            if (m != null) {
+                m.addTag(PATROL_TAG);
+                made++;
+            }
+        }
+        return made;
+    }
+
+    // 人から MIN_DIST〜PATROL_ROAD の、道の上の地面 (近くに道が無ければ null)
+    @Nullable
+    static BlockPos roadAhead(ServerLevel level, ServerPlayer player) {
+        double px = player.getX();
+        double pz = player.getZ();
+        for (List<BlockPos> line : ContinentLayout.get().roads()) {
+            for (int i = 1; i < line.size(); i++) {
+                BlockPos a = line.get(i - 1);
+                BlockPos b = line.get(i);
+                double len = Math.hypot(b.getX() - a.getX(), b.getZ() - a.getZ());
+                int steps = Math.max(1, (int) (len / 4));
+                for (int k = 0; k <= steps; k++) {
+                    double t = k / (double) steps;
+                    double x = a.getX() + (b.getX() - a.getX()) * t;
+                    double z = a.getZ() + (b.getZ() - a.getZ()) * t;
+                    double d = Math.hypot(x - px, z - pz);
+                    if (d >= MIN_DIST + 6 && d <= PATROL_ROAD && level.random.nextInt(3) == 0) {
+                        BlockPos g = ground(level, (int) Math.floor(x), (int) Math.floor(z));
+                        if (g != null) {
+                            return g;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // 群れの頭にする: 体力 ×PACK_LEAD_HEALTH と、遠くからも見える名札

@@ -40,6 +40,12 @@ public final class Hardness {
         return t.contains(name) ? t.getDouble(name) : 1.0;
     }
 
+    // 倍率を掛ける前の元の体力 (掛けていなければ今の最大体力)。自己テストが作りの数を見る
+    public static double base(LivingEntity e) {
+        var data = e.getPersistentData();
+        return data.contains(BASE) ? data.getDouble(BASE) : e.getMaxHealth();
+    }
+
     // 倍率の積
     public static double total(LivingEntity e) {
         CompoundTag t = e.getPersistentData().getCompound(FACTORS);

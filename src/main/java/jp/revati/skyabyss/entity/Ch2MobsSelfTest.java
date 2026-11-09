@@ -183,6 +183,8 @@ public final class Ch2MobsSelfTest {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("could not lock the target of " + m, e);
         }
+        // 作りの数そのものを見る (攻撃の倍率・体力の上乗せ・防具の置き換えを掛けない)
+        jp.revati.skyabyss.combat.MobTuning.untune(m);
         level.addFreshEntity(m);
         return m;
     }
@@ -282,7 +284,7 @@ public final class Ch2MobsSelfTest {
                 m.discard();
             }
         }
-        check(GrowthRewards.MOD_ENEMIES.get(Ch2Mobs.TIDEPOOL_CLAM).xp() <= 10 && GrowthRewards.MOD_ENEMIES.get(Ch2Mobs.SAND_BURROWER).xp() <= 10
+        check(GrowthRewards.MOD_ENEMIES.get(Ch2Mobs.TIDEPOOL_CLAM).xp() <= 15 && GrowthRewards.MOD_ENEMIES.get(Ch2Mobs.SAND_BURROWER).xp() <= 15
                 && GrowthRewards.MOD_ENEMIES.get(Ch2Mobs.SHORE_WARDEN).xp() <= 60, "ground mob xp is not small", f);
         check(MobSounds.TIDEPOOL_CLAM_OPEN.get() != null && MobSounds.SAND_BURROWER_BULGE.get() != null && MobSounds.SHORE_WARDEN_RING.get() != null
                 && MobSounds.DRIFT_HERMIT_SPIT.get() != null, "skill sounds", f);

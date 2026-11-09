@@ -252,12 +252,9 @@ public final class AbyssSelfTest {
                 h.tickCount++;
                 h.tick();
                 check(h.isAbyss() == on, "a heart of a group with abyss " + on + " reports abyss " + h.isAbyss());
-                // 実質の体力 ×1.2: 同じ傷 (防具を通らない魔法の傷) で削れる量が 1/1.2
-                h.invulnerableTime = 0;
-                float h0 = h.getHealth();
-                h.hurt(h.damageSources().magic(), 30f);
-                float lost = h0 - h.getHealth();
-                dealt[on ? 1 : 0] = lost;
+                // 体力 ×1.2 (2026-11-09 から最大体力に掛ける。combat/Hardness の abyss)
+                h.syncHardness();
+                dealt[on ? 1 : 0] = h.getMaxHealth();
                 if (on) {
                     check(h.abyssDamage() > 1f && h.abyssThemeId().equals("whale"), "abyss heart damage / theme");
                 }
@@ -267,7 +264,7 @@ public final class AbyssSelfTest {
                 check(tag.getBoolean("Abyss") == on, "the abyss flag was not saved");
                 h.discard();
             }
-            check(dealt[0] > 1f && Math.abs(dealt[0] / dealt[1] - Abyss.HEART_HP) < 0.02, "the same hit took " + dealt[0] + " from a normal heart and " + dealt[1] + " from an abyss heart (expected ratio " + Abyss.HEART_HP + ")");
+            check(dealt[0] > 1f && Math.abs(dealt[1] / dealt[0] - Abyss.HEART_HP) < 0.02, "max health " + dealt[0] + " for a normal heart and " + dealt[1] + " for an abyss heart (expected ratio " + Abyss.HEART_HP + ")");
             // 各心臓の 4 つが深淵の技の語・題字を持つ (日英)
             java.util.Map<String, String> ja;
             java.util.Map<String, String> en;

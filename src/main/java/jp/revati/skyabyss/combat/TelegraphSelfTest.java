@@ -337,6 +337,7 @@ public final class TelegraphSelfTest {
         c.moveTo(SX, FLOOR, SZ, yaw, 0);
         c.setPersistenceRequired();
         c.holdAttacks();
+        jp.revati.skyabyss.combat.MobTuning.untune(c);
         level.addFreshEntity(c);
         return c;
     }

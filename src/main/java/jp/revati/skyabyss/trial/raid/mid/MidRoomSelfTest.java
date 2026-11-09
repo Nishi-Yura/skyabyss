@@ -227,7 +227,7 @@ public final class MidRoomSelfTest {
                 if (boss.getHealth() >= before) {
                     return timeout(400, "a solo hit to damage the boss"); // 潮招きは潜る・守りの間 (数秒) は傷が通らない
                 }
-                check(scaleOk(boss), "the boss is not 70% of the one-player health");
+                check(scaleOk(boss), "the boss is not 70% of the one-player health (" + boss.getType().toShortString() + " max " + boss.getMaxHealth() + ", base " + jp.revati.skyabyss.combat.Hardness.base(boss) + ", factors " + boss.getPersistentData().getCompound(jp.revati.skyabyss.combat.Hardness.FACTORS) + ")");
                 stage = wiped ? 9 : 8;
                 measureAt = -1;
                 waited = 0;
@@ -433,18 +433,11 @@ public final class MidRoomSelfTest {
 
     // 一人の体力の倍率 (傷を割る倍率が 1、または体力が 1 人の基準)
     private static boolean scaleOk(Mob boss) {
-        if (boss instanceof TideBeckoner) {
-            return boss.getMaxHealth() <= TideBeckoner.HEALTH * FightBossRoom.HEALTH + 0.5f;
-        }
-        if (boss instanceof jp.revati.skyabyss.titan.storm.raiju.Raiju) {
-            return jp.revati.skyabyss.titan.storm.raiju.Raiju.scaleFor(1) == 1f;
-        }
-        if (boss instanceof jp.revati.skyabyss.titan.ember.smith.AshSmith s) {
-            return s.multiplier() <= 1.001f;
-        }
-        LivingEntity l = boss;
-        var base = l.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-        return base != null && l.getMaxHealth() <= 280 * FightBossRoom.HEALTH + 0.5f;
+        // 体力の倍率 (combat/Hardness: 防具を直した分・型ごと・人数・レベル) を掛けた体力の 7 割か
+        double full = jp.revati.skyabyss.combat.Hardness.base(boss) * jp.revati.skyabyss.combat.Hardness.total(boss)
+                * (boss.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).hasModifier(jp.revati.skyabyss.combat.MobTuning.HEALTH_ID)
+                        ? 1 + jp.revati.skyabyss.combat.MobTuning.HEALTH : 1);
+        return jp.revati.skyabyss.combat.Hardness.get(boss, "party") <= 1.001 && boss.getMaxHealth() <= full * FightBossRoom.HEALTH + 0.5f;
     }
 
     private static void teardown() {

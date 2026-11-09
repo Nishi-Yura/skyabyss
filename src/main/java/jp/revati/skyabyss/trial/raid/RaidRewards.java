@@ -230,6 +230,9 @@ public final class RaidRewards {
             // 巨神のアスペクト (一つ、崩れなしならもう一つ。報いの祭壇が開く。docs/design/58)。周回でも減らない
             if (p != null) {
                 jp.revati.skyabyss.rpg.aspect.AspectNet.grant(p, titan, noWipe);
+            } else {
+                // オフラインの仲間は次に入ったときに渡す
+                jp.revati.skyabyss.rpg.aspect.AspectPending.add(server, id, titan, noWipe);
             }
         }
     }

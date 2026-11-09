@@ -485,6 +485,14 @@ final class DeepSkillsSelfTest {
         check(f, jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).size() == 1 && jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).get(0).level() == 5, "worn aspect level");
         d.aspects.remove("nobody_has_this");
         check(f, jp.revati.skyabyss.rpg.aspect.Aspects.equip(p, 2, "nobody_has_this") == jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.NOT_OWNED, "an unowned aspect was equipped");
+        // オフラインだった人の分は、入ったときに渡す
+        jp.revati.skyabyss.rpg.aspect.AspectPending.add(server, p.getUUID(), "ember", true);
+        jp.revati.skyabyss.rpg.aspect.AspectPending.add(server, p.getUUID(), "ember", false);
+        int had = d.aspects.values().stream().mapToInt(Integer::intValue).sum();
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectPending.count(server, p.getUUID()) == 2, "pending aspects were not kept");
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectPending.deliver(p) == 2
+                && jp.revati.skyabyss.rpg.aspect.AspectPending.count(server, p.getUUID()) == 0, "pending aspects were not delivered once");
+        check(f, d.aspects.values().stream().mapToInt(Integer::intValue).sum() > had, "delivered pending aspects added nothing");
         // 別の職へ替えると効かない
         d.curJob = Job.values()[1].id;
         check(f, jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).isEmpty(), "another job's aspect stayed worn");

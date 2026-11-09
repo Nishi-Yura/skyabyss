@@ -211,7 +211,7 @@ public final class TideHeartSelfTest {
         check(!heart.shouldBeSaved(), "heart would be saved to disk", failures);
         check(!new TideBubble(TideHeartSetup.TIDE_BUBBLE.get(), back).shouldBeSaved()
                 && !new TidePearl(TideHeartSetup.TIDE_PEARL.get(), back).shouldBeSaved(), "bubble or pearl would be saved", failures);
-        check(Math.abs(heart.getMaxHealth() - TideHeart.MAX_HEALTH) < 0.01, "max health is " + heart.getMaxHealth(), failures);
+        check(Math.abs(jp.revati.skyabyss.combat.Hardness.base(heart) - TideHeart.MAX_HEALTH) < 0.01, "base max health is " + jp.revati.skyabyss.combat.Hardness.base(heart), failures);
         // 段階の境目と受ける傷
         check(TideHeart.phaseFor(1f) == 0 && TideHeart.phaseFor(0.67f) == 0 && TideHeart.phaseFor(0.65f) == 1
                 && TideHeart.phaseFor(0.34f) == 1 && TideHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);

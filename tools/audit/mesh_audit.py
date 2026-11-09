@@ -56,6 +56,9 @@ DEGEN_AREA = 1e-4
 GEO_LIMIT = 0.002    # キューブ geo の光線 2000 本のうち裏面が先に当たる割合 (0.2% = 4 本) を超えたら失敗。乱数の光線の取りこぼしを許す
 # 付け根の曲げ検査を蝶番のまわりだけで見る骨 (メッシュ名, 骨)。いまは該当なし (水路の顎は消えた)
 HINGE_ONLY = set()
+# 浮いて回る飾り (メッシュ名, 骨): 宙の粒・輪・籠の中の目・頭の上の印・杭の冠。親から離れて動くのが形なので付け根を見ない (issue #16)
+FLOATERS = {("light_swarm", "ring_t"), ("moon_core", "ring_b"), ("stray_wisp", "mote_a"), ("stray_wisp", "mote_b"), ("lamp_eye", "eye"),
+            ("tower_eye", "eye"), ("tower_master", "sigil"), ("circuit_stake", "crown")}
 SEE_LIMIT = 0.002    # 裏面透けの画素が全体の 0.2% を超えたらゲートの失敗 (重なった面の z 競合の数画素は許す)
 
 
@@ -488,7 +491,7 @@ def joint_check(bones, mesh_name):
     rng_all = anim_ranges(mesh_name)
     out = {}
     for n, b in bones.items():
-        if len(b.T) == 0 or n.startswith("smoke"):
+        if len(b.T) == 0 or n.startswith("smoke") or (mesh_name, n) in FLOATERS:
             continue  # 煙の柱は親の上に浮かせて立ち昇らせる演出なので付け根を見ない
         pn = nearest_mesh_ancestor(bones, n)
         if pn is None:

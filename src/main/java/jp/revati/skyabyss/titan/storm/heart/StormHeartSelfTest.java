@@ -384,7 +384,7 @@ public final class StormHeartSelfTest {
         checkGroups(back, heart, failures);
         check(heart.getTags().contains(TitanBackTrials.HEART_TAG) && heart.isBound(), "heart not tagged / bound", failures);
         check(!heart.shouldBeSaved(), "heart would be saved to disk", failures);
-        check(Math.abs(heart.getMaxHealth() - StormHeart.MAX_HEALTH) < 0.01, "max health is " + heart.getMaxHealth(), failures);
+        check(Math.abs(jp.revati.skyabyss.combat.Hardness.base(heart) - StormHeart.MAX_HEALTH) < 0.01, "base max health is " + jp.revati.skyabyss.combat.Hardness.base(heart), failures);
         check(StormHeart.phaseFor(1f) == 0 && StormHeart.phaseFor(0.67f) == 0 && StormHeart.phaseFor(0.65f) == 1
                 && StormHeart.phaseFor(0.34f) == 1 && StormHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);
         check(Math.abs(StormHeart.takenFor(1, false, 10, 1) - 12f) < 1e-4 && Math.abs(StormHeart.takenFor(0, false, 10, 1) - 10f) < 1e-4

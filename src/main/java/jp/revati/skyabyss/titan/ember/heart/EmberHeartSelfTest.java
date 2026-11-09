@@ -586,9 +586,10 @@ public final class EmberHeartSelfTest {
         check(EmberRooms.owner(EmberRooms.HEART) != null && EmberRooms.owner(EmberRooms.HEART).equals(EmberHeartBattle.lastGroup()),
                 "the heart chamber is not held by the fighting group", f);
         check(!new EmberAshPellet(EmberHeartSetup.ASH_PELLET.get(), back).shouldBeSaved(), "pellet would be saved", f);
-        check(Math.abs(heart.getMaxHealth() - EmberHeart.MAX_HEALTH) < 0.01, "max health is " + heart.getMaxHealth(), f);
-        check(heart.getAttributeValue(Attributes.ARMOR) == 9 && heart.getAttributeValue(Attributes.ARMOR_TOUGHNESS) == 7
-                && heart.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) == 1.0, "armor / toughness / knockback resistance are not 9 / 7 / 1.0", f);
+        check(Math.abs(jp.revati.skyabyss.combat.Hardness.base(heart) - EmberHeart.MAX_HEALTH) < 0.01, "base max health is " + jp.revati.skyabyss.combat.Hardness.base(heart), f);
+        // 防具 9・強さ 7 は体力に直してある (MobTuning.armorToHealth。2026-11-09 から防具で傷を割らない)
+        check(heart.getAttributeValue(Attributes.ARMOR) == 0 && jp.revati.skyabyss.combat.Hardness.get(heart, "armor") > 1.05
+                && heart.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) == 1.0, "armor 9 / toughness 7 were not turned into health, or knockback resistance is not 1.0", f);
         check(heart.distanceToSqr(EmberHeartArena.heartHome()) < 0.01 && heart.isNoGravity(), "heart is not floating at its home", f);
         // 咆哮: 体力を 60% にすると、咆哮 (無敵) のあと段階 2
         heart.setHealth(heart.getMaxHealth() * 0.6f);
@@ -645,9 +646,9 @@ public final class EmberHeartSelfTest {
             float t0 = two.getHealth();
             two.hurt(two.damageSources().magic(), 27f);
             // 硬さ (基本 × 人数 × 一人の上乗せ) は最大体力に掛かる。傷はそのまま (2026-11-09)
-            double wantMax = EmberHeart.MAX_HEALTH * EmberHeart.toughnessFor(3) * jp.revati.skyabyss.entity.HeartBoss.HP_BONUS;
+            double wantMax = EmberHeart.MAX_HEALTH * EmberHeart.toughnessFor(3) * jp.revati.skyabyss.entity.HeartBoss.HP_BONUS * jp.revati.skyabyss.combat.Hardness.get(two, "armor");
             check(Math.abs(two.toughness() - EmberHeart.toughnessFor(3)) < 1e-4 && Math.abs((t0 - two.getHealth()) - 27f) < 0.3f
-                    && Math.abs(two.getMaxHealth() - wantMax) < 1.0, "3 challengers should multiply the max health by 2.29 x 2.7 x 1.25 (max " + two.getMaxHealth() + ", want " + wantMax + ", took " + (t0 - two.getHealth()) + ")", f);
+                    && Math.abs(two.getMaxHealth() - wantMax) < 1.0, "3 challengers should multiply the max health by 2.29 x 2.7 x 1.25 x armor (max " + two.getMaxHealth() + ", want " + wantMax + ", took " + (t0 - two.getHealth()) + ")", f);
             EmberHeartBattle.abandon(back);
         }
         notes.add("phases 66/33 + fury 15%, roar 3 s invulnerable, exposed x1.2, abandon after 3 s");

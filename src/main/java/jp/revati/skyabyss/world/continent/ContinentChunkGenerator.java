@@ -288,10 +288,31 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     BlockState road = road(roads, x, z);
                     // 道が川を渡る所は、水面に板の橋
                     boolean bridge = road != null && top < SEA_LEVEL - 1 && biome == ContinentBiomes.RIVER;
+                    // 外れの帯の見せ場 (FrontierTerrain): 上の数段の土と、置く物 (肋骨・浮き岩・岩礁)。道の上は変えない
+                    int region = map.region(x, z);
+                    double far = road == null ? FrontierTerrain.weight(region, x, z) : 0;
                     for (int y = minY; y <= upto; y++) {
-                        BlockState st = y <= top ? (y == top && road != null && !bridge ? road : solid(x, y, z, top, sl, biome))
-                                : bridge && y == SEA_LEVEL - 1 ? BRIDGE : WATER;
+                        BlockState st;
+                        if (y <= top) {
+                            if (y == top && road != null && !bridge) {
+                                st = road;
+                            } else {
+                                BlockState f = far > 0 ? FrontierTerrain.ground(region, far, x, y, z, top, top - y, sl) : null;
+                                st = f != null ? f : solid(x, y, z, top, sl, biome);
+                            }
+                        } else {
+                            st = bridge && y == SEA_LEVEL - 1 ? BRIDGE : WATER;
+                        }
                         sections[chunk.getSectionIndex(y)].setBlockState(dx, y & 15, dz, st, false);
+                    }
+                    if (far > 0.9) {
+                        final int fdx = dx;
+                        final int fdz = dz;
+                        FrontierTerrain.column(map, x, z, top, (y0, y1, state) -> {
+                            for (int y = Math.max(minY + 1, y0); y <= Math.min(maxY - 1, y1); y++) {
+                                sections[chunk.getSectionIndex(y)].setBlockState(fdx, y & 15, fdz, state, false);
+                            }
+                        });
                     }
                 }
             }

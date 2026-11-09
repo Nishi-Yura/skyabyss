@@ -27,8 +27,8 @@ public final class XpTableSelfTest {
     public static final double TOLERANCE = 0.05;
     // 章ごとの上限のレベル {下, 上}
     static final int[][] LEVELS = {{0, 0}, {4, 12}, {12, 18}, {18, 24}, {24, 30}};
-    // 章ごとの狩りの目安の体数 (表 4-2)
-    public static final int[] HUNT_KILLS = {0, 60, 80, 100, 120};
+    // 章ごとの狩りの目安の体数 (表 4-2)。2026-11-09 に狩りの敵の経験値を上げた (GrowthRewards) ので、同じ 10% に要る体数は減った
+    public static final int[] HUNT_KILLS = {0, 29, 40, 54, 68};
     static final String[] CHAPTER_IDS = {"", "titan_whale", "titan_tide", "titan_storm", "titan_ember"};
 
     private XpTableSelfTest() {
@@ -144,6 +144,34 @@ public final class XpTableSelfTest {
         return new long[] {quest(chapter), place(chapter), boss(chapter), hunt(chapter)};
     }
 
+    // Lv 30〜50 (五章・六章・終章と、そのあとの繰り返し) に要る経験値と、一度きりの入り口 (章のクエスト) で入る分
+    static void late(List<String> f) {
+        long need = 0;
+        for (int lv = 30; lv < 50; lv++) {
+            need += GrowthRules.xpToNext(lv);
+        }
+        long story = 0;
+        long other = 0;
+        for (QuestDef def : QuestManager.all()) {
+            if (def.repeats()) {
+                continue;
+            }
+            String ch = def.chapter();
+            if ("chapter2".equals(ch) || "chapter3".equals(ch) || "finale".equals(ch)) {
+                story += jp.revati.skyabyss.guide.ChapterXpBudget.questXp(def);
+            } else if (ch == null || ch.isEmpty()) {
+                other += jp.revati.skyabyss.guide.ChapterXpBudget.questXp(def);
+            }
+        }
+        // 一度きりの章のクエストで 30〜60%。残りは繰り返し (日々・週の頼み・塔・巡り路・ダンジョン・狩り) から入る
+        double share = (double) story / need;
+        if (share < 0.30 || share > 0.60) {
+            f.add(String.format(Locale.ROOT, "Lv 30-50 story quests give %.1f%% of the need (want 30-60%%)", 100 * share));
+        }
+        SkyAbyss.LOGGER.info(String.format(Locale.ROOT, "SELFTEST xp table late Lv 30-50 need %d | story quests %d (%.1f%%) | quests without a chapter %d", need, story,
+                100.0 * story / need, other));
+    }
+
     private static void run(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         for (int c = 1; c <= 4; c++) {
@@ -165,6 +193,7 @@ public final class XpTableSelfTest {
             SkyAbyss.LOGGER.info("SELFTEST xp table ch{} small elements (ChapterXpBudget): new {} of {}", c,
                     jp.revati.skyabyss.guide.ChapterXpBudget.newXp(QuestManager.all(), c), jp.revati.skyabyss.guide.ChapterXpBudget.NEW_CAP[c]);
         }
+        late(f);
         // 上限のレベルであふれた分は貯め (上限から BANK_LEVELS レベル分まで)、上限が上がると入る
         GrowthData d = new GrowthData();
         d.level = 12;

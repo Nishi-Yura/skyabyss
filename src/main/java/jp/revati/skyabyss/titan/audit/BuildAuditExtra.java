@@ -360,6 +360,10 @@ public final class BuildAuditExtra {
         }
         BlockState u1 = g.get(p.above());
         BlockState u2 = g.get(p.above(2));
+        // 段の真上に同じ向きの階段が重なるのは屋根の段の傾き (都の城壁の上の屋根など)。通り道ではない
+        if (u1.getBlock() instanceof net.minecraft.world.level.block.StairBlock && u1.getValue(net.minecraft.world.level.block.StairBlock.FACING) == f) {
+            return;
+        }
         boolean blocked = BuildAudit.top(u1) > 0 || BuildAudit.top(u2) > 0;
         // 高い側が次の段・床でふさがるのは正常。この段そのものの頭上が塞がっていて、両隣 (低い側の頭上) は空いているときだけ
         if (blocked && BuildAudit.top(g.get(lo.above())) == 0 && BuildAudit.top(g.get(lo.above(2))) == 0 && BuildAudit.top(g.get(hi)) == 0) {

@@ -108,7 +108,7 @@ public final class CoreSelfTest {
             CoreArena.clear(moon);
             MoonCoreBoss core = CoreArena.summon(moon);
             spawned.add(core);
-            check(f, core != null && core.getMaxHealth() >= MoonCoreBoss.HP - 0.01 && core.getMaxHealth() <= 1024,
+            check(f, core != null && core.getMaxHealth() >= MoonCoreBoss.HP - 0.01 && core.getMaxHealth() <= jp.revati.skyabyss.combat.Hardness.base(core) * jp.revati.skyabyss.combat.Hardness.total(core) + 1,
                     "the core did not appear with its hp: " + (core == null ? -1 : core.getMaxHealth()));
             if (core != null) {
                 core.tick();

@@ -222,7 +222,7 @@ public final class Ch3MobsSelfTest {
     private static void registration(ServerLevel level, List<String> f, List<String> notes) {
         record Def(String id, double hp, int maxXp) {
         }
-        for (Def d : List.of(new Def(Ch3Mobs.STATIC_PUFF, 10, 10), new Def(Ch3Mobs.PEAK_FLEDGLING, 14, 10), new Def(Ch3Mobs.LIGHTNING_GLEANER, 12, 5),
+        for (Def d : List.of(new Def(Ch3Mobs.STATIC_PUFF, 10, 15), new Def(Ch3Mobs.PEAK_FLEDGLING, 14, 15), new Def(Ch3Mobs.LIGHTNING_GLEANER, 12, 5),
                 new Def(Ch3Mobs.SCORCHED_WARDEN, 190, 60))) {
             ResourceLocation key = ResourceLocation.parse(d.id());
             check(BuiltInRegistries.ENTITY_TYPE.containsKey(key), d.id() + " is not registered", f);

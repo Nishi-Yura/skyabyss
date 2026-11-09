@@ -87,8 +87,8 @@ public final class Ch4Setup {
     public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_RAKE = sound("elder_thrall_rake");
 
     // 成長の経験値 (章の経験値の枠には数えない小さな分): 熾り蟲 2、灰被りの屑 10、灰ひきずり 3、古い灰被り 80
-    public static final int XP_MITE = 2;
-    public static final int XP_HUSK = 11;
+    public static final int XP_MITE = 6;
+    public static final int XP_HUSK = 33;
     public static final int XP_DRAGGER = 3;
     public static final int XP_ELDER = 90;
 

@@ -254,6 +254,8 @@ public final class Ch1BackMobsSelfTest {
         T mob = type.create(level);
         mob.moveTo(x, y, z, yaw, 0);
         mob.setPersistenceRequired();
+        // 作りの数そのものを見る (攻撃の倍率・体力の上乗せ・防具の置き換えを掛けない)
+        jp.revati.skyabyss.combat.MobTuning.untune(mob);
         level.addFreshEntity(mob);
         return mob;
     }

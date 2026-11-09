@@ -58,7 +58,8 @@ public final class ContinentRegen {
     // 8 = 2026-11-08 夜遅く (上がれない足場を直した: 大樹の床の輪・野盗の物見の梯子・柵の砦村の物見の梯子、都の城壁の歩廊へ門のそばの段と塔の通り抜け。
     //     別の道どうしの出会いを丸く、見どころを道から対角の幅で離す。「上らせる気の無い建築」「道と建造物重なってる」「道が上手く曲がってない」)
     // 9 = 2026-11-09 (章の小さな部品 (荷車の傍らの轍と荷・旅の職人の立つ所など、SiteJob.placeSmall) を道から遠ざける。「ここ道に旅の職人がかぶってる」)
-    public static final int VERSION = 9;
+    // 10 = 2026-11-09 (外れの帯の見せ場の地形: 骨の谷の肋骨・干潟と岩礁・氷河と浮き岩・冷えた熔岩の川と灰の砂丘。world/continent/FrontierTerrain。issue #19)
+    public static final int VERSION = 10;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)

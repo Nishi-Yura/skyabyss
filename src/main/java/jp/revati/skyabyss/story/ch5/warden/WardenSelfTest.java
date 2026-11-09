@@ -69,7 +69,7 @@ public final class WardenSelfTest {
                 return;
             }
             // 硬さ (1 / TOUGH) と人数・段 (bulk) は最大体力に掛かる (2026-11-09。受ける傷を割るのをやめた)
-            check(f, Math.abs(w.getMaxHealth() - HeartWarden.BASE_HP / HeartWarden.TOUGH) < 1 && Math.abs(w.bulk() - 1) < 1e-6, "one player should face BASE_HP / TOUGH: " + w.getMaxHealth() + " bulk " + w.bulk());
+            check(f, Math.abs(w.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.get(w, "armor") - HeartWarden.BASE_HP / HeartWarden.TOUGH) < 1 && Math.abs(w.bulk() - 1) < 1e-6, "one player should face BASE_HP / TOUGH: " + w.getMaxHealth() + " bulk " + w.bulk());
             check(f, AbyssBeacons.litCount() == 0, "waking should put every lantern out");
             // 入口の闇の幕: 出ているあいだ閉じ、いなくなると開く
             WardenSeal.update(level, true);

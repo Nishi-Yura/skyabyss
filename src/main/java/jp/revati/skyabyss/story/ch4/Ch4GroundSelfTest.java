@@ -238,13 +238,13 @@ public final class Ch4GroundSelfTest {
             Quests.start(p, id);
             check(f, QuestLog.of(p).entry(id) != null, id + " did not start");
         }
-        // 火除けの薬: 1 では済まない、2 で済む。バニラの耐火のポーション・別の薬は数えない
+        // 火除けの薬: 1 では町・灰の段を飛ばさない、2 で飛ばして済む (11-08 に町へ着く段と灰ひきずりの段を前に足した)。バニラの耐火のポーション・別の薬は数えない
         p.getInventory().add(firePotion(false));
         p.getInventory().add(PotionContents.createItemStack(Items.POTION, Potions.FIRE_RESISTANCE));
         p.getInventory().add(new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.HEALING.get()));
         Quests.poll(p, true);
-        check(f, "brew".equals(DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT)) && QuestItems.count(p, FIRE, null) == 1, "one fire potion should read 1/2 ("
-                + QuestItems.count(p, FIRE, null) + ")");
+        check(f, "town".equals(DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT)) && QuestItems.count(p, FIRE, null) == 1, "one fire potion should count 1 and not skip ahead ("
+                + DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT) + ", " + QuestItems.count(p, FIRE, null) + ")");
         p.getInventory().add(firePotion(true));
         Quests.poll(p, true);
         check(f, "show".equals(DeadForgePit.stageOf(p, Ch4Ground.Q_DRAUGHT)), "two fire potions (one long) did not move the draught to the show stage");
@@ -414,6 +414,7 @@ public final class Ch4GroundSelfTest {
         mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
         mob.addTag(jp.revati.skyabyss.entity.GuardMob.TEMP_TAG);
         mob.setNoAi(true);
+        jp.revati.skyabyss.combat.MobTuning.untune(mob);
         level.addFreshEntity(mob);
         made.add(mob);
         return mob;
