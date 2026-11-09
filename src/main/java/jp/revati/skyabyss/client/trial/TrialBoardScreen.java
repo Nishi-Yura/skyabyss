@@ -360,10 +360,10 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         if (job == null) {
             return;
         }
-        // 二段の棚 (どの祠でも・この祠だけ。一段 8 品)。品は K 画面のアスペクトの頁と同じ札 (持っていない品は「？」で伏せる)
+        // 二段の棚 (どの祠でも・この祠だけ。一段 10 品)。品は K 画面のアスペクトの頁と同じ札 (持っていない品は「？」で伏せる)
         java.util.List<jp.revati.skyabyss.rpg.aspect.Aspect> pool = jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, data.titan());
         int tile = 20;
-        int per = 8;
+        int per = 10;
         int gap = Math.max(2, Math.min(Golden.S8, (w - per * tile) / (per - 1)));
         int rowW = per * tile + (per - 1) * gap;
         int tx0 = x0 + Math.max(0, (w - rowW) / 2);

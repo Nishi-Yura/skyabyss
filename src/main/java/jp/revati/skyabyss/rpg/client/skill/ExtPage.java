@@ -36,7 +36,8 @@ final class ExtPage {
     static final int[] RARITY = {0x6FA8E0, 0xB48AE6, 0xEF8A5C};
     // 段の並び (空 = どの祠でも)
     static final String[] GROUPS = {"", "stone_whale", "tide_shell", "thunder_wing", "ember"};
-    private static final int PER_ROW = 8;
+    // 一行の数 (段の中はレアの行と、エピック・レジェンドの行。どれも 6 まで)
+    private static final int PER_ROW = 6;
     // 札 (棚)・枠 (祭壇) の大きさと、祭壇の輪の半径
     private static final int TILE = 20;
     private static final int SLOT = 22;
@@ -222,7 +223,7 @@ final class ExtPage {
         int vy = rb.y() + 2 + Golden.ROW + 3;
         g.fill(rx, vy - 2, rx + rw, vy - 1, 0xFF2A2E38);
         shelf.setViewport(rx, vy, rw, rb.bottom() - 3 - vy);
-        int groupH = GROUP_HEAD + TILE + PIPS + GROUP_GAP;
+        int groupH = GROUP_HEAD + 2 * (TILE + PIPS + 1) + GROUP_GAP;
         shelf.setContentHeight(job == null ? 0 : GROUPS.length * groupH - GROUP_GAP);
         int iw = shelf.scrollable() ? shelf.width() : rw;
         int gap = Math.max(1, (iw - PER_ROW * TILE) / (PER_ROW - 1));
@@ -249,10 +250,12 @@ final class ExtPage {
                 g.drawString(font, c, tx0 + rowW - font.width(c), y + 1, DIM, false);
                 g.fill(tx0 + 8 + nw + 4, y + 5, tx0 + rowW - font.width(c) - 4, y + 6, 0xFF2A2E38);
                 int ty = y + GROUP_HEAD;
+                int[] col = new int[2];
                 for (int i = 0; i < list.size(); i++) {
                     Aspect a = list.get(i);
-                    int tx = tx0 + (i % PER_ROW) * (TILE + gap);
-                    int tyy = ty + (i / PER_ROW) * (TILE + PIPS);
+                    int row = a.rarity() == Aspect.RARE ? 0 : 1;
+                    int tx = tx0 + col[row]++ * (TILE + gap);
+                    int tyy = ty + row * (TILE + PIPS + 1);
                     int lv = Aspects.level(d, a);
                     boolean hover = inView && in(mx, my, tx, tyy, TILE, TILE);
                     tile(g, font, tx, tyy, TILE, a, lv, hover, worn.contains(a.id()));
@@ -310,7 +313,7 @@ final class ExtPage {
         }
     }
 
-    // 品の札: 地・稀さの縁 (ミシックは二重で光る)・技の絵。持っていなければ「？」
+    // 品の札: 地・稀さの縁 (レジェンドは二重で光る)・技の絵。持っていなければ「？」
     private void tile(GuiGraphics g, Font font, int x, int y, int s, Aspect a, int lv, boolean hover, boolean worn) {
         tile(g, font, x, y, s, a, lv, hover, worn, ticks);
     }
@@ -327,7 +330,7 @@ final class ExtPage {
         // 地の下半分に稀さの色を薄く
         g.fillGradient(x + 1, y + s / 2, x + s - 1, y + s - 1, alpha(col, 0), alpha(col, 70));
         Golden.outline(g, x, y, x + s, y + s, argb(col));
-        if (a.rarity() == Aspect.MYTHIC) {
+        if (a.rarity() == Aspect.LEGENDARY) {
             float pulse = 0.5f + 0.5f * (float) Math.sin(ticks * 0.15 + x * 0.1);
             Golden.outline(g, x - 1, y - 1, x + s + 1, y + s + 1, alpha(col, 70 + (int) (110 * pulse)));
         }

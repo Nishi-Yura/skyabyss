@@ -5,12 +5,12 @@ import java.util.List;
 import jp.revati.skyabyss.rpg.skill.Job;
 import jp.revati.skyabyss.rpg.skill.Skill;
 
-// 巨神のアスペクト一品 (docs/design/58)。職の使う技を一つ変える。稀さ 0 = レア・1 = エピック・2 = ミシック。
-// shrine はミシックの出る祠 (巨神の id。レア・エピックは空 = どの祠でも)。効き目は Lv 1 → 5 で lo → hi
+// 巨神のアスペクト一品 (docs/design/58)。職の使う技を一つ変える。稀さ 0 = レア・1 = エピック・2 = レジェンド (id の _m_ は前の名前ミシックの印)。
+// shrine は出る祠 (巨神の id。空 = どの祠でも。レジェンドはいつも祠ごと)。効き目は Lv 1 → 5 で lo → hi
 public record Aspect(String id, Job job, int rarity, String shrine, Skill skill, List<Fx> fx) {
     public static final int RARE = 0;
     public static final int EPIC = 1;
-    public static final int MYTHIC = 2;
+    public static final int LEGENDARY = 2;
 
     public enum Verb {
         // 技の力・待ち・マナ (SkillModifier の口)

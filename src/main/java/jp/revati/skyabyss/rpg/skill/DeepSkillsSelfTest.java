@@ -423,11 +423,11 @@ final class DeepSkillsSelfTest {
     // ---------------------------------------------------------------- アスペクト (docs/design/58)
     private static void aspects(MinecraftServer server, List<String> f) {
         // 表: 6 職 × 16 (レア 4・エピック 4・ミシック 8 = 祠ごとに 2)
-        check(f, jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size() == 240, "aspect count " + jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size());
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size() == 300, "aspect count " + jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size());
         for (Job job : Job.values()) {
-            check(f, jp.revati.skyabyss.rpg.aspect.Aspects.ofJob(job).size() == 40, "aspects of " + job);
+            check(f, jp.revati.skyabyss.rpg.aspect.Aspects.ofJob(job).size() == 50, "aspects of " + job);
             for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
-                check(f, jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, titan).size() == 16, "pool of " + job + " at " + titan);
+                check(f, jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, titan).size() == 20, "pool of " + job + " at " + titan);
             }
         }
         // Lv: 数 1/2/4/7/11 で Lv 1〜5
@@ -449,8 +449,8 @@ final class DeepSkillsSelfTest {
                 return;
             }
             check(f, a.shared() || "ember".equals(a.shrine()), "an aspect from another shrine: " + a.id());
-            check(f, a.rarity() != jp.revati.skyabyss.rpg.aspect.Aspect.MYTHIC || "ember".equals(a.shrine()), "a mythic from another shrine: " + a.id());
-            check(f, i % 9 < jp.revati.skyabyss.rpg.aspect.Aspects.PITY || a.rarity() == jp.revati.skyabyss.rpg.aspect.Aspect.MYTHIC, "pity did not give a mythic");
+            check(f, a.rarity() != jp.revati.skyabyss.rpg.aspect.Aspect.LEGENDARY || "ember".equals(a.shrine()), "a mythic from another shrine: " + a.id());
+            check(f, i % 9 < jp.revati.skyabyss.rpg.aspect.Aspects.PITY || a.rarity() == jp.revati.skyabyss.rpg.aspect.Aspect.LEGENDARY, "pity did not give a mythic");
         }
         // 渡す: 崩れなしで 2 つ。最高の数を越えない
         FakePlayer p = player(server, "aspect_test");

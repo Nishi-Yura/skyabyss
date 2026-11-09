@@ -107,8 +107,8 @@ public class AspectRevealScreen extends Screen {
         flipAt = age;
         Minecraft mc = Minecraft.getInstance();
         int rarity = a == null ? 0 : a.rarity();
-        mc.getSoundManager().play(SimpleSoundInstance.forUI(rarity == Aspect.MYTHIC ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
-                : SoundEvents.AMETHYST_BLOCK_CHIME, rarity == Aspect.MYTHIC ? 1.0f : 0.8f + 0.2f * rarity, 0.9f));
+        mc.getSoundManager().play(SimpleSoundInstance.forUI(rarity == Aspect.LEGENDARY ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
+                : SoundEvents.AMETHYST_BLOCK_CHIME, rarity == Aspect.LEGENDARY ? 1.0f : 0.8f + 0.2f * rarity, 0.9f));
     }
 
     private void advance() {

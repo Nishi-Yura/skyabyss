@@ -21,7 +21,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // アスペクトが出る (巨神の祠のルートを越えたとき。trial/raid/RaidRewards.grantRoute から) と、報いの祭壇の画面へ送る (docs/design/58)。
-//   一回のルートで 1 つ、崩れなしならもう 1 つ (頁の選定: 推奨 A)。品は今の職のもの。ミシックが 8 回出なければ次は必ずミシック
+//   一回のルートで 1 つ、崩れなしならもう 1 つ (頁の選定: 推奨 A)。品は今の職のもの。レジェンドが 8 回出なければ次は必ずレジェンド
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AspectNet {
     private static final String PROTOCOL_VERSION = "aspect-1";
@@ -74,7 +74,7 @@ public final class AspectNet {
             if (a == null) {
                 continue;
             }
-            d.aspectPity = a.rarity() == Aspect.MYTHIC ? 0 : d.aspectPity + 1;
+            d.aspectPity = a.rarity() == Aspect.LEGENDARY ? 0 : d.aspectPity + 1;
             int before = d.aspects.getOrDefault(a.id(), 0);
             // 最高 Lv の先の数は数えない (それより上は意味がない)
             int after = Math.min(Aspects.copiesFor(Aspects.MAX_LEVEL), before + 1);

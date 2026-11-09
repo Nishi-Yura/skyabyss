@@ -4,13 +4,13 @@
     python -I tools/gen/aspects/gen_aspects.py
 
 書くもの:
-  src/main/java/jp/revati/skyabyss/rpg/aspect/AspectTable.java   240 品の表 (職 6 × 40)
+  src/main/java/jp/revati/skyabyss/rpg/aspect/AspectTable.java   300 品の表 (職 6 × 50)
   src/main/resources/assets/skyabyss_aspect/lang/ja_jp.json      名前・効き目の文・画面の文
   src/main/resources/assets/skyabyss_aspect/lang/en_us.json
 
-決めごと (2026-11-09 の頁の選定): 稀さは三段。一つの職に 40:
-  どの祠でも出るレア 4・エピック 4、祠ごとのレア 3・エピック 3 (2026-11-09 の声「レアとエピック、祠につき、それぞれ職業ごとに3種類くらい増やしていい」)、
-  祠ごとのミシック 2。一つの祠で出るのは 16。
+決めごと (2026-11-09 の頁の選定): 稀さは三段 (レア・エピック・レジェンド。2026-11-09 の声で「ミシック」を「レジェンド」に)。一つの職に 50:
+  どの祠でも出るレア 5・エピック 5、祠ごとのレア 4・エピック 4 (2026-11-09 の声「レアとエピック、祠につき増やしていい」「もう少し増やしていい」)、
+  祠ごとのレジェンド 2。一つの祠で出るのは 20。id のミシックの印 (_m_) は保存のために残す。
 アスペクトは職の使う技を一つずつ変える。効き目は Lv 1 → Lv 5 で lo → hi へ伸びる。
 """
 from __future__ import annotations
@@ -43,41 +43,51 @@ SHRINES = [('stone_whale', '鯨', 'Whale'), ('tide_shell', '潮', 'Tide'), ('thu
 
 # 効き目 (Lv 1 → Lv 5)。数は割合 (0.10 = 10%)、ECHO はもう一度の力、RESET は待ちが戻る確率
 RARE = [('POWER', 0.08, 0.20, 'の研ぎ', ' Edge'), ('COOLDOWN', 0.06, 0.15, 'の早業', ' Haste'),
-        ('MANA', 0.10, 0.25, 'の倹約', ' Thrift'), ('HASTE', 0.10, 0.22, 'の追い風', ' Tailwind')]
+        ('MANA', 0.10, 0.25, 'の倹約', ' Thrift'), ('HASTE', 0.10, 0.22, 'の追い風', ' Tailwind'),
+        ('SURGE', 0.12, 0.30, 'の勢い', ' Drive')]
 EPIC = [
     ([('SURGE', 0.25, 0.60), ('POWER', 0.04, 0.10)], 'の余勢', ' Momentum'),
     ([('GUARD', 0.10, 0.25)], 'の構え', ' Stance'),
     ([('POWER', 0.10, 0.25), ('COOLDOWN', 0.03, 0.08)], 'の冴え', ' Clarity'),
     ([('GUARD', 0.06, 0.15), ('HASTE', 0.08, 0.18)], 'の身のこなし', ' Footwork'),
+    ([('MANA', 0.06, 0.15), ('COOLDOWN', 0.03, 0.08)], 'の流れ', ' Flow'),
 ]
 # 祠ごとのレア・エピック (祠の色の効き目。名前は「祠の字の<名>・技」)
 SHRINE_RARE = {
     'stone_whale': [([('GUARD', 0.06, 0.15)], 'の岩肌・', ' Rockhide: '),
                     ([('POWER', 0.05, 0.13), ('GUARD', 0.02, 0.05)], 'の骨鳴り・', ' Bonering: '),
-                    ([('MANA', 0.08, 0.20)], 'の長い息・', ' Long Breath: ')],
+                    ([('MANA', 0.08, 0.20)], 'の長い息・', ' Long Breath: '),
+                    ([('HASTE', 0.08, 0.18)], 'の地響き・', ' Rumble: ')],
     'tide_shell': [([('MANA', 0.10, 0.24)], 'の満ち・', ' Flood: '),
                    ([('HASTE', 0.10, 0.22)], 'の引き・', ' Ebb: '),
-                   ([('COOLDOWN', 0.05, 0.13)], 'の泡・', ' Foam: ')],
+                   ([('COOLDOWN', 0.05, 0.13)], 'の泡・', ' Foam: '),
+                   ([('GUARD', 0.05, 0.12)], 'の殻・', ' Shell: ')],
     'thunder_wing': [([('COOLDOWN', 0.06, 0.15)], 'の稲光・', ' Flash: '),
                      ([('HASTE', 0.12, 0.25)], 'の風切り・', ' Windcut: '),
-                     ([('POWER', 0.07, 0.18)], 'の雷鳴・', ' Thunderclap: ')],
+                     ([('POWER', 0.07, 0.18)], 'の雷鳴・', ' Thunderclap: '),
+                     ([('SURGE', 0.15, 0.38)], 'の放電・', ' Discharge: ')],
     'ember': [([('POWER', 0.08, 0.19)], 'の火種・', ' Kindling: '),
               ([('SURGE', 0.15, 0.40)], 'の火の粉・', ' Sparks: '),
-              ([('GUARD', 0.05, 0.13)], 'の灰被り・', ' Ashcloak: ')],
+              ([('GUARD', 0.05, 0.13)], 'の灰被り・', ' Ashcloak: '),
+              ([('COOLDOWN', 0.05, 0.12)], 'の炉風・', ' Bellows: ')],
 }
 SHRINE_EPIC = {
     'stone_whale': [([('GUARD', 0.08, 0.20), ('POWER', 0.04, 0.10)], 'の背の重み・', ' Weight of the Back: '),
                     ([('SURGE', 0.20, 0.50), ('GUARD', 0.04, 0.10)], 'の岩の鼓動・', ' Stone Pulse: '),
-                    ([('COOLDOWN', 0.04, 0.10), ('MANA', 0.06, 0.15)], 'の古い歩み・', ' Old Stride: ')],
+                    ([('COOLDOWN', 0.04, 0.10), ('MANA', 0.06, 0.15)], 'の古い歩み・', ' Old Stride: '),
+                    ([('POWER', 0.06, 0.15), ('GUARD', 0.05, 0.12)], 'の大地の盾・', ' Earthshield: ')],
     'tide_shell': [([('COOLDOWN', 0.05, 0.12), ('MANA', 0.06, 0.15)], 'の渦・', ' Whirl: '),
                    ([('POWER', 0.08, 0.20), ('MANA', 0.04, 0.10)], 'の大潮・', ' Spring Tide: '),
-                   ([('HASTE', 0.08, 0.18), ('SURGE', 0.15, 0.35)], 'の潮騒・', ' Surf: ')],
+                   ([('HASTE', 0.08, 0.18), ('SURGE', 0.15, 0.35)], 'の潮騒・', ' Surf: '),
+                   ([('GUARD', 0.06, 0.14), ('MANA', 0.05, 0.12)], 'の深み・', ' Depths: ')],
     'thunder_wing': [([('SURGE', 0.20, 0.50), ('HASTE', 0.06, 0.15)], 'の迅雷・', ' Swift Bolt: '),
                      ([('COOLDOWN', 0.05, 0.12), ('POWER', 0.05, 0.12)], 'の嵐の目・', ' Eye of the Storm: '),
-                     ([('POWER', 0.10, 0.24)], 'の落雷・', ' Strike: ')],
+                     ([('POWER', 0.10, 0.24)], 'の落雷・', ' Strike: '),
+                     ([('COOLDOWN', 0.05, 0.12), ('HASTE', 0.06, 0.14)], 'の疾風・', ' Gale: ')],
     'ember': [([('POWER', 0.08, 0.20), ('SURGE', 0.10, 0.25)], 'の燎原・', ' Wildfire: '),
               ([('GUARD', 0.08, 0.18), ('POWER', 0.03, 0.08)], 'の炉の守り・', ' Forge Ward: '),
-              ([('SURGE', 0.15, 0.35), ('COOLDOWN', 0.03, 0.08)], 'の余熱・', ' Afterheat: ')],
+              ([('SURGE', 0.15, 0.35), ('COOLDOWN', 0.03, 0.08)], 'の余熱・', ' Afterheat: '),
+              ([('POWER', 0.06, 0.15), ('HASTE', 0.05, 0.12)], 'の陽炎・', ' Heat Haze: ')],
 }
 
 MYTH = [
@@ -100,7 +110,7 @@ def build():
         for s, (shrine, sja, sen) in enumerate(SHRINES):
             for rarity, table, tag in ((0, SHRINE_RARE, 'r'), (1, SHRINE_EPIC, 'e')):
                 for k, (fx, ja, en) in enumerate(table[shrine]):
-                    sk = skills[(s * 3 + k + rarity * 2) % n]
+                    sk = skills[(s * 4 + k + rarity * 2) % n]
                     rows.append(dict(id='%s_%s_%s%d' % (job, tag, shrine, k + 1), job=job, rarity=rarity, shrine=shrine, skill=sk, fx=fx,
                                      ja=sja + ja + sk[1], en=sen + en + sk[2]))
             for k, (fx, ja, en) in enumerate(MYTH):
@@ -129,7 +139,7 @@ def java(rows):
 
 
 UI_JA = {
-    'aspect.skyabyss.rarity.0': 'レア', 'aspect.skyabyss.rarity.1': 'エピック', 'aspect.skyabyss.rarity.2': 'ミシック',
+    'aspect.skyabyss.rarity.0': 'レア', 'aspect.skyabyss.rarity.1': 'エピック', 'aspect.skyabyss.rarity.2': 'レジェンド',
     'aspect.skyabyss.fx.POWER': '技の力 +%s%%', 'aspect.skyabyss.fx.COOLDOWN': '技の待ち −%s%%', 'aspect.skyabyss.fx.MANA': '技のマナ −%s%%',
     'aspect.skyabyss.fx.HASTE': '使ったあと 3 秒、移動 +%s%%', 'aspect.skyabyss.fx.SURGE': '使ったあとの次の一撃 +%s%%',
     'aspect.skyabyss.fx.GUARD': '使ったあと 3 秒、受ける傷 −%s%%', 'aspect.skyabyss.fx.ECHO': '0.6 秒後にもう一度 (力 %s%%)',
@@ -144,19 +154,19 @@ UI_JA = {
     'gui.skyabyss.aspect.reveal_title': '報いの祭壇', 'gui.skyabyss.aspect.reveal_new': '新しい', 'gui.skyabyss.aspect.reveal_up': 'Lv %s → %s',
     'gui.skyabyss.aspect.reveal_hint': 'クリックで次へ・Esc で閉じる',
     'gui.skyabyss.trial.tab.rewards': '報い',
-    'gui.skyabyss.aspect.pool_head': 'この祠のアスペクト（%s）', 'gui.skyabyss.aspect.pool_rates': 'ルートを越えるたびに 1 つ（崩れなしでもう 1 つ）。レア 60%%・エピック 30%%・ミシック 10%%。ミシックが 8 回出なければ次は必ずミシック',
-    'gui.skyabyss.aspect.pool_pity': 'ミシックまであと %s 回',
+    'gui.skyabyss.aspect.pool_head': 'この祠のアスペクト（%s）', 'gui.skyabyss.aspect.pool_rates': 'ルートを越えるたびに 1 つ（崩れなしでもう 1 つ）。レア 60%%・エピック 30%%・レジェンド 10%%。レジェンドが 8 回出なければ次は必ずレジェンド',
+    'gui.skyabyss.aspect.pool_pity': 'レジェンドまであと %s 回',
     'message.skyabyss.aspect.equip_locked': 'その枠はまだ開いていない', 'message.skyabyss.aspect.equip_job': 'いまの職のアスペクトではない',
     'message.skyabyss.aspect.equip_full': '枠がいっぱい。外してから付ける',
     'gui.skyabyss.aspect.altar': 'アスペクトの祭壇', 'gui.skyabyss.aspect.empty_hint': '棚の品を押すとここに付く',
-    'gui.skyabyss.aspect.pity': 'ミシックまであと %s 回', 'gui.skyabyss.aspect.collected': '集めた %s / %s',
+    'gui.skyabyss.aspect.pity': 'レジェンドまであと %s 回', 'gui.skyabyss.aspect.collected': '集めた %s / %s',
     'gui.skyabyss.aspect.group_shared': 'どの祠でも', 'gui.skyabyss.aspect.group_shrine': '%sの祠',
     'gui.skyabyss.aspect.unknown': '？？？', 'gui.skyabyss.aspect.worn': '付けている',
     'gui.skyabyss.aspect.no_job': '職を選ぶと、その職のアスペクトが並ぶ',
     'aspect.skyabyss.applies_changed': '%sの形にも効く',
 }
 UI_EN = {
-    'aspect.skyabyss.rarity.0': 'Rare', 'aspect.skyabyss.rarity.1': 'Epic', 'aspect.skyabyss.rarity.2': 'Mythic',
+    'aspect.skyabyss.rarity.0': 'Rare', 'aspect.skyabyss.rarity.1': 'Epic', 'aspect.skyabyss.rarity.2': 'Legendary',
     'aspect.skyabyss.fx.POWER': 'Skill power +%s%%', 'aspect.skyabyss.fx.COOLDOWN': 'Skill cooldown −%s%%', 'aspect.skyabyss.fx.MANA': 'Skill mana −%s%%',
     'aspect.skyabyss.fx.HASTE': 'For 3 s after use, move +%s%%', 'aspect.skyabyss.fx.SURGE': 'Next hit after use +%s%%',
     'aspect.skyabyss.fx.GUARD': 'For 3 s after use, damage taken −%s%%', 'aspect.skyabyss.fx.ECHO': 'Fires again after 0.6 s (%s%% power)',
@@ -171,12 +181,12 @@ UI_EN = {
     'gui.skyabyss.aspect.reveal_title': 'Altar of Rewards', 'gui.skyabyss.aspect.reveal_new': 'New', 'gui.skyabyss.aspect.reveal_up': 'Lv %s → %s',
     'gui.skyabyss.aspect.reveal_hint': 'Click for next · Esc to close',
     'gui.skyabyss.trial.tab.rewards': 'Rewards',
-    'gui.skyabyss.aspect.pool_head': 'Aspects of this shrine (%s)', 'gui.skyabyss.aspect.pool_rates': 'One per cleared route (one more with no wipe). Rare 60%% · Epic 30%% · Mythic 10%%. After 8 runs without a mythic, the next is a mythic',
-    'gui.skyabyss.aspect.pool_pity': '%s more runs to a sure mythic',
+    'gui.skyabyss.aspect.pool_head': 'Aspects of this shrine (%s)', 'gui.skyabyss.aspect.pool_rates': 'One per cleared route (one more with no wipe). Rare 60%% · Epic 30%% · Legendary 10%%. After 8 runs without a legendary, the next is a legendary',
+    'gui.skyabyss.aspect.pool_pity': '%s more runs to a sure legendary',
     'message.skyabyss.aspect.equip_locked': 'That slot is not open yet', 'message.skyabyss.aspect.equip_job': 'That aspect is not for your current job',
     'message.skyabyss.aspect.equip_full': 'All slots are full. Remove one first',
     'gui.skyabyss.aspect.altar': 'Aspect Altar', 'gui.skyabyss.aspect.empty_hint': 'Click an aspect on the shelf to place it here',
-    'gui.skyabyss.aspect.pity': '%s runs to a sure mythic', 'gui.skyabyss.aspect.collected': 'Found %s / %s',
+    'gui.skyabyss.aspect.pity': '%s runs to a sure legendary', 'gui.skyabyss.aspect.collected': 'Found %s / %s',
     'gui.skyabyss.aspect.group_shared': 'Any shrine', 'gui.skyabyss.aspect.group_shrine': '%s shrine',
     'gui.skyabyss.aspect.unknown': '???', 'gui.skyabyss.aspect.worn': 'Equipped',
     'gui.skyabyss.aspect.no_job': 'Choose a job to see its aspects',
@@ -197,9 +207,9 @@ def lang(rows):
 
 def main():
     rows = build()
-    assert len(rows) == 240, len(rows)
-    assert len({r['id'] for r in rows}) == 240
-    assert len({r['ja'] for r in rows}) == 240, 'duplicate ja names'
+    assert len(rows) == 300, len(rows)
+    assert len({r['id'] for r in rows}) == 300
+    assert len({r['ja'] for r in rows}) == 300, 'duplicate ja names'
     java(rows)
     lang(rows)
     print('aspects:', len(rows))

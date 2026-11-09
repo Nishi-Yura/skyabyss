@@ -268,8 +268,8 @@ public final class Aspects {
     }
 
     // ---------------------------------------------------------------- 出る (AspectDrops が使う)
-    // 一つ引く: 稀さ (レア 60・エピック 30・ミシック 10。ミシックなしが PITY 回続いたら必ずミシック)。
-    // 品はその職のその稀さの、どの祠でも出るものとその祠のもの (ミシックはその祠のものだけ)
+    // 一つ引く: 稀さ (レア 60・エピック 30・レジェンド 10。レジェンドなしが PITY 回続いたら必ずレジェンド)。
+    // 品はその職のその稀さの、どの祠でも出るものとその祠のもの (レジェンドはその祠のものだけ)
     public static final int PITY = 8;
     static final double[] RARITY_WEIGHTS = {0.60, 0.30, 0.10};
 
@@ -277,10 +277,10 @@ public final class Aspects {
     public static Aspect roll(Job job, String shrine, int sinceMythic, RandomSource r) {
         int rarity;
         if (sinceMythic >= PITY) {
-            rarity = Aspect.MYTHIC;
+            rarity = Aspect.LEGENDARY;
         } else {
             double x = r.nextDouble();
-            rarity = x < RARITY_WEIGHTS[0] ? Aspect.RARE : x < RARITY_WEIGHTS[0] + RARITY_WEIGHTS[1] ? Aspect.EPIC : Aspect.MYTHIC;
+            rarity = x < RARITY_WEIGHTS[0] ? Aspect.RARE : x < RARITY_WEIGHTS[0] + RARITY_WEIGHTS[1] ? Aspect.EPIC : Aspect.LEGENDARY;
         }
         List<Aspect> pool = new ArrayList<>();
         for (Aspect a : AspectTable.ALL) {
@@ -291,7 +291,7 @@ public final class Aspects {
         return pool.isEmpty() ? null : pool.get(r.nextInt(pool.size()));
     }
 
-    // その祠で出るもの (祭司の画面の「報い」の頁): その職のどの祠でも出るレア・エピックと、その祠のレア・エピック・ミシック
+    // その祠で出るもの (祭司の画面の「報い」の頁): その職のどの祠でも出るレア・エピックと、その祠のレア・エピック・レジェンド
     public static List<Aspect> pool(Job job, String shrine) {
         List<Aspect> out = new ArrayList<>();
         for (Aspect a : AspectTable.ALL) {
