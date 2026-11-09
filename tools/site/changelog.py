@@ -8,6 +8,20 @@ from sitelib import REPO, T, page, sec
 def changelog():
     # 版ごとの主な変更（試遊の確かめ順と docs/review の記録から）。古い版は要点だけ残す。
     ver = [
+        ("v1.1.5", "2026-11-10", [
+            ("大陸を四つの島に分け、海を渡る道には渡し船と渡し守を置きました。外れの帯（町から遠い所は敵が強く、野盗の見回りと隠し荷）と、骨の谷・干潟・氷河・冷えた熔岩の川の地形、土地ごとのオリジナルの木が入りました。前の世界は開いたときに地上と建物の置き場をすべて作り直します（クエスト・持ち物・見つけた場所はそのまま）。",
+             "The continent is split into four islands; every sea crossing has a ferry and a ferryman. A frontier band (stronger foes far from towns, bandit patrols, hidden caches), bone valleys, tidal flats, glaciers and cooled lava rivers, and original trees per land. Older worlds rebuild the overworld and re-plan every building when opened (quests, items and found places stay)."),
+            ("巨神の祠の順路を越えると「巨神の名残」が出ます。技に付く力で、全部で 240 品。報いの祭壇で札をめくり、心臓のあとに手に入れた箱・鐘銭・素材も並びます。",
+             "Clearing a titan shrine route grants a Titan Remnant: a power attached to a skill, 240 in all across the jobs. Flip the cards at the reward altar; the boxes, bell coins and materials from the heart are shown there too."),
+            ("奥のダンジョン四つ（崩れた見張り砦・沈んだ神殿・吹雪の氷穴・熔岩の管の底）と、嵐と灰の新しい敵 6 体。心臓のあとの主の見た目を主ごとに作り直しました。",
+             "Four deep dungeons (fallen watchfort, sunken temple, blizzard ice cave, lava tube floor) and six new storm and ash foes. Each post-heart boss has its own new look."),
+            ("武器の書き換えは、その武器を持つだけで効き、スキルバーの絵と技の見た目（出どころの色と印）が変わります。",
+             "Weapon rewrites work just by holding the weapon; the skill bar icon and the skill's visuals (the source's colour and mark) change with it."),
+            ("試練: 骨玉運びに「冷える玉」と骨奪い、核を守る試練は敵が核を叩いて削るように、潮殻の心臓の領域は一巡・25 秒の賭けに。全滅すると順路は最初からです。",
+             "Trials: the bone-orb carry gets cooling orbs and a bone thief; in the core defense foes go for the core and chip it by striking; the tide heart's domain is one round with a 25-second wager. A full wipe restarts the route."),
+            ("旅の地図のピンは一人一本、パーティーの仲間にも見えます。預かり所は箱を開いたまま頁を替えられます。入りきらない文は流さずに縮めて収めます。",
+             "One map pin per player, visible to your party. The storehouse switches pages while the chest is open. Text that does not fit is shrunk to fit instead of scrolling."),
+        ]),
         ("v1.1.4", "2026-11-07", [
             ("大陸の外れができました。大陸をめぐる環の道と内海の南岸の道、外れの集落 8 か所（住人 16 人と頼み）。前の世界は開いたときに地上を作り直します（クエスト・持ち物・見つけた場所はそのまま）。",
              "The continent's frontier: a ring road around the continent, a road along the inland sea's south shore, and eight frontier hamlets (16 residents with errands). Older worlds rebuild the overworld when opened (quests, items and found places stay)."),

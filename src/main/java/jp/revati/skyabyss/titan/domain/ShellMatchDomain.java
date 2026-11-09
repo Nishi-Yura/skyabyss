@@ -287,9 +287,56 @@ public final class ShellMatchDomain extends HeartDomain {
         return out;
     }
 
+    // 短く + 時間の賭け (2026-11-10 の声「亀の巨神の心臓の領域、ちょっと退屈。長いし」):
+    // 一巡で 3 回合わせる (四人以上・深淵は二巡)。一巡は TIME_LIMIT tick まで。間に合えば心臓は長く崩れて大きく削れ、
+    // 切れたら大潮の波 (部屋の全員に TIMEOUT_DAMAGE と押し返し) が来て領域は終わる
+    public static final int MARKS = 3;
+    public static final int TIME_LIMIT = 20 * 25;
+    public static final int SOLVED_STUN = 20 * 8;
+    public static final float SOLVED_TAKEN = 2.0f;
+    public static final float TIMEOUT_DAMAGE = 16f;
+
+    @Override
+    protected int roundsFor(int party) {
+        return isAbyss() || party >= 4 ? 2 : 1;
+    }
+
+    @Override
+    protected int timeLimit() {
+        return TIME_LIMIT;
+    }
+
+    @Override
+    protected int stunLength() {
+        return SOLVED_STUN;
+    }
+
+    @Override
+    protected float stunTaken() {
+        return SOLVED_TAKEN;
+    }
+
+    @Override
+    protected void onTimeout(ServerLevel level) {
+        tell(level, "message.skyabyss.domain.shell_match.timeout");
+        level.playSound(null, cx, floorY + 2, cz, net.minecraft.sounds.SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 3f, 0.5f);
+        for (int i = 0; i < 48; i++) {
+            double a = Math.PI * 2 * i / 48;
+            level.sendParticles(ParticleTypes.SPLASH, cx + Math.cos(a) * radius * 0.7, floorY + 1, cz + Math.sin(a) * radius * 0.7, 6, 0.4, 0.6, 0.4, 0.2);
+        }
+        for (ServerPlayer p : victimsNow()) {
+            striker.accept(p, TIMEOUT_DAMAGE);
+            Vec3 away = p.position().subtract(cx, p.getY(), cz);
+            Vec3 d = away.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : away.normalize();
+            p.push(d.x * 1.2, 0.5, d.z * 1.2);
+            p.hurtMarked = true;
+        }
+    }
+
     @Override
     protected void puzzleBegin(ServerLevel level) {
-        marksNeeded = 2 + Math.min(round(), 1);
+        marksNeeded = MARKS;
+        tell(level, "message.skyabyss.domain.shell_match.limit", TIME_LIMIT / 20);
         marksDone = 0;
         shuffle = 0;
         cycle = 0;

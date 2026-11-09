@@ -155,17 +155,18 @@ public class AspectRevealScreen extends Screen {
         float ta = Mth.clamp((t - T_TITLE) / 10f, 0, 1);
         if (ta > 0) {
             g.pose().pushPose();
-            g.pose().translate(width / 2f, height / 2f - CARD_H / 2f - 40, 0);
+            g.pose().translate(width / 2f, height / 2f - CARD_H / 2f - 40 - (reveal.extras().isEmpty() ? 0 : 26), 0);
             g.pose().scale(2f, 2f, 1f);
             g.drawCenteredString(font, title, 0, 0, argb(ta, GOLD));
             g.pose().popPose();
             Component sub = Component.translatable(jp.revati.skyabyss.trial.TrialCatalog.titanKey(reveal.titan()));
-            g.drawCenteredString(font, sub, width / 2, height / 2 - CARD_H / 2 - 18, argb(ta, accent));
+            g.drawCenteredString(font, sub, width / 2, height / 2 - CARD_H / 2 - 18 - (reveal.extras().isEmpty() ? 0 : 26), argb(ta, accent));
         }
         int n = reveal.got().size();
         int total = n * CARD_W + (n - 1) * GAP;
         int x0 = (width - total) / 2;
-        int y0 = height / 2 - CARD_H / 2 + 6;
+        // 下に「ほかに手に入れたもの」を並べるときは、札を少し上へ
+        int y0 = height / 2 - CARD_H / 2 + 6 - (reveal.extras().isEmpty() ? 0 : 26);
         for (int i = 0; i < n; i++) {
             float rise = Mth.clamp((t - T_CARDS - i * 5) / 10f, 0, 1);
             if (rise <= 0) {
@@ -189,8 +190,38 @@ public class AspectRevealScreen extends Screen {
             }
             g.pose().popPose();
         }
+        int hintY = y0 + CARD_H + 18;
+        // ほかに手に入れたもの (心臓の報酬の箱・鐘銭・素材)。札を全部めくったあとに、一つずつ並ぶ
+        java.util.List<net.minecraft.world.item.ItemStack> extras = reveal.extras();
+        if (!extras.isEmpty() && flipped >= n) {
+            float since = t - Math.max(flipAt, T_CARDS) - FLIP_LEN;
+            int ey = y0 + CARD_H + 14;
+            float la = Mth.clamp(since / 8f, 0, 1);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.aspect.reveal_extras"), width / 2, ey, argb(la, GOLD));
+            ey += 13;
+            int perRow = Math.max(1, Math.min(extras.size(), (width - 40) / 22));
+            int rows = (extras.size() + perRow - 1) / perRow;
+            for (int i = 0; i < extras.size(); i++) {
+                float ia = Mth.clamp((since - 4 - i * 2) / 6f, 0, 1);
+                if (ia <= 0) {
+                    continue;
+                }
+                int row = i / perRow;
+                int inRow = Math.min(perRow, extras.size() - row * perRow);
+                int ix = width / 2 - inRow * 22 / 2 + (i % perRow) * 22 + 3;
+                int iy = ey + row * 22 + (int) ((1 - ia) * 6);
+                net.minecraft.world.item.ItemStack st = extras.get(i);
+                g.fill(ix - 2, iy - 2, ix + 18, iy + 18, argb(0.55f * ia, 0x141821));
+                g.renderItem(st, ix, iy);
+                g.renderItemDecorations(font, st, ix, iy);
+                if (ia >= 1 && mx >= ix - 2 && mx < ix + 18 && my >= iy - 2 && my < iy + 18) {
+                    g.renderTooltip(font, st, mx, my);
+                }
+            }
+            hintY = ey + rows * 22 + 6;
+        }
         if (age >= T_CARDS + 10) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.aspect.reveal_hint"), width / 2, y0 + CARD_H + 18, argb(0.8f, DIM));
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.aspect.reveal_hint"), width / 2, hintY, argb(0.8f, DIM));
         }
     }
 

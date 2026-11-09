@@ -7,33 +7,19 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
-// 枠に入らない一行を、枠の中でゆっくり横へ流して全部見せる (2026-11-09 の声「UI とかで文の最後が『...』になるときあるけど、
-// こちらからしたら何書いてるかわからないので、入る様に書いてほしい」)。前は末尾を「…」で省いていた。
-// 頭で PAUSE 秒止まり、SPEED 画素/秒で終わりまで流れ、終わりで PAUSE 秒止まって頭へ戻る。枠の外は切る (今の変換の中の座標で)。
-// 入る文はそのまま描く。行の数が決まった欄は、入りきらない行を最後の行へつないで流す (joinRest)
+// 枠に入らない一行を、枠の中に縮めて全部見せる (2026-11-09 の声「文の最後が『...』になると、何書いてるかわからない」→ 流していたが、
+// 2026-11-10 の声「動いてるけど気持ち悪い」で縮める形に)。入る文はそのまま描く。行の数が決まった欄は、入りきらない行を最後の行へつなぐ (joinRest)
 public final class Marquee {
-    static final float SPEED = 22f;
-    static final float PAUSE = 1.4f;
 
     private Marquee() {
     }
 
-    // 流す量 (0 〜 overflow 画素)
-    static float offset(int overflow) {
-        float travel = overflow / SPEED;
-        float cycle = 2 * PAUSE + 2 * travel;
-        float t = (net.minecraft.Util.getMillis() / 1000f) % cycle;
-        if (t < PAUSE) {
-            return 0;
-        }
-        if (t < PAUSE + travel) {
-            return (t - PAUSE) * SPEED;
-        }
-        if (t < 2 * PAUSE + travel) {
-            return overflow;
-        }
-        return overflow - (t - 2 * PAUSE - travel) * SPEED;
-    }
+    // 入らない文は、流さずに縮めて枠に収める (2026-11-10 の声「はいりきらない文うごいてるけど、気持ち悪い。動かなくても入るように」)。
+    // まず全体を MIN_SCALE まで小さくし (縦は枠の真ん中に)、それでも入らなければ横だけ詰める。
+    // 横を SQUASH_WARN より詰めた文は、開発の起動でログに出す (文を短くする手がかり)
+    static final float MIN_SCALE = 0.7f;
+    static final float SQUASH_WARN = 0.8f;
+    private static final java.util.Set<String> WARNED = new java.util.HashSet<>();
 
     // 描いた幅を返す (入れば文の幅、入らなければ w)
     public static int draw(GuiGraphics g, Font font, FormattedCharSequence text, int x, int y, int w, int color, boolean shadow) {
@@ -42,13 +28,23 @@ public final class Marquee {
             g.drawString(font, text, x, y, color, shadow);
             return tw;
         }
-        float off = offset(tw - w);
-        TextClip.clipPosed(g, x, y - 1, w, font.lineHeight + 2);
+        float s = Math.max(MIN_SCALE, (float) w / tw);
+        float sx = Math.min(1f, w / (tw * s));
+        if (sx < SQUASH_WARN && !net.neoforged.fml.loading.FMLEnvironment.production) {
+            StringBuilder sb = new StringBuilder();
+            text.accept((i, st, cp) -> {
+                sb.appendCodePoint(cp);
+                return true;
+            });
+            if (WARNED.add(sb.toString())) {
+                jp.revati.skyabyss.SkyAbyss.LOGGER.info("[marquee] squashed to {}% to fit {} px: {}", Math.round(s * sx * 100), w, sb);
+            }
+        }
         g.pose().pushPose();
-        g.pose().translate(-Math.round(off), 0, 0);
-        g.drawString(font, text, x, y, color, shadow);
+        g.pose().translate(x, y + font.lineHeight * (1 - s) / 2f, 0);
+        g.pose().scale(s * sx, s, 1f);
+        g.drawString(font, text, 0, 0, color, shadow);
         g.pose().popPose();
-        TextClip.unclip(g);
         return w;
     }
 

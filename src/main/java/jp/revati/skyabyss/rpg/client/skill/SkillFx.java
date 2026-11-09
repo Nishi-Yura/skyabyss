@@ -104,6 +104,10 @@ public final class SkillFx {
         public int prims;
         public int live;
         int duration;
+        // 武器の書き換えが効いた発動の色 (0 = なし。形の色をこの色へ寄せる。FxDraw.add)
+        public int tint;
+        @javax.annotation.Nullable
+        public jp.revati.skyabyss.rpg.skill.Rune rewrite;
         private final List<Step> steps = new ArrayList<>();
 
         Cast(ClientLevel level, Skill skill, Player caster, boolean self, int rank, boolean chain) {
@@ -179,11 +183,19 @@ public final class SkillFx {
         }
         Cast c = new Cast(level, skill, caster, caster == mc.player, payload.rank(), payload.chain());
         c.target = payload.target();
+        // 武器の書き換え (自分は技を覚えているかまで見る。ほかの人は手の武器で見る): 形を出どころの色に染め、出どころの印を添える
+        c.rewrite = c.self ? jp.revati.skyabyss.rpg.skill.SkillManager.legendRune(caster, skill) : jp.revati.skyabyss.rpg.skill.Rune.heldLegend(skill, caster);
+        if (c.rewrite != null) {
+            c.tint = c.rewrite.sourceColor();
+        }
         Consumer<Cast> plan = PLANS.get(skill);
         if (plan == null) {
             generic(c);
         } else {
             plan.accept(c);
+        }
+        if (c.rewrite != null) {
+            rewriteMark(c);
         }
         if (c.steps.isEmpty()) {
             return;
@@ -198,6 +210,25 @@ public final class SkillFx {
             }
         }
         CASTS.add(c);
+    }
+
+    // 書き換えの印: 足もとに出どころの色の輪が二重に広がり、狙いの先に出どころの粒 (潮 = しぶき・雷 = 火花・熾 = 炎・鯨 = 岩屑・月 = 光・神器 = 星・深淵 = 魂・逸品 = 刃の閃き)
+    static void rewriteMark(Cast c) {
+        int rgb = c.tint;
+        c.at(1, x -> FxDraw.add(x, FxDraw.Prim.ring(x.feet(), 0.8, 3.2).color(rgb).width(0.35).life(14)));
+        c.at(4, x -> FxDraw.add(x, FxDraw.Prim.ring(x.feet(), 0.6, 2.4).color(rgb).width(0.22).life(12)));
+        net.minecraft.core.particles.ParticleOptions dot = switch (c.rewrite.source()) {
+            case "tide" -> net.minecraft.core.particles.ParticleTypes.SPLASH;
+            case "storm" -> net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK;
+            case "ember" -> net.minecraft.core.particles.ParticleTypes.FLAME;
+            case "whale" -> new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                    net.minecraft.world.level.block.Blocks.DEEPSLATE.defaultBlockState());
+            case "moon" -> net.minecraft.core.particles.ParticleTypes.END_ROD;
+            case "divine" -> net.minecraft.core.particles.ParticleTypes.WAX_ON;
+            case "abyss" -> net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME;
+            default -> net.minecraft.core.particles.ParticleTypes.CRIT;
+        };
+        c.at(5, x -> burst(x, dot, x.aim(3.0), 10, 0.6, 0.08));
     }
 
     // 段取りを決めていない技の既定: 手に集まり、足もとの輪が広がり、狙いで閃く

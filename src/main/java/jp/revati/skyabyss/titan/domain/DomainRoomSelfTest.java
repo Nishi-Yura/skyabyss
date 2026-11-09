@@ -167,7 +167,7 @@ public final class DomainRoomSelfTest {
                 boolean inArena = r.arena().contains(p.x, p.y + 1, p.z);
                 if (!free || !solid || !inArena) {
                     if (bad++ < 3) {
-                        f.add(name + ": a gimmick would stand inside a wall or outside the room at " + p + " (free " + free + ", floor " + solid + ", in room " + inArena + ")");
+                        f.add(name + ": a gimmick would stand inside a wall or outside the room at " + p + " (free " + free + ", floor " + solid + " " + level.getBlockState(under) + " at " + under.toShortString() + ", in room " + inArena + ")");
                     }
                     continue;
                 }

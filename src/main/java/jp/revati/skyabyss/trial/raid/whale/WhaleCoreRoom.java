@@ -16,8 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 // 闘 WR3「鯨の核を守る」: 部屋の中央の核を、三つの波から守る。
-//  - 核の体力 (CORE_MAX) は目的の帯に出る。敵が核のそばにいるあいだ減り (剣・盾は近くで一秒に 1.2、射手は離れて 0.6)、敵がいないと少し戻る
-//  - 敵は核へ向かう (人を狙える間は人を狙う)。核が壊れたら部屋をやり直す。波は 3・4 体 (人数で増える) と、三つ目は老番兵一体だけ
+//  - 核の体力 (CORE_MAX) は目的の帯に出る。敵が核を叩く・射る一撃ごとに減り (MELEE_HIT・SHOT_HIT)、敵がいないと少し戻る
+//  - 敵は核へ向かう (人には向かわない。殴られた敵だけ RETALIATE のあいだ殴った人を相手にする)。核が壊れたら部屋をやり直す。波は 3・4 体 (人数で増える) と、三つ目は老番兵一体だけ
 //    (2026-10-25 の試遊: 骨守りが難しすぎた・三つ目に番兵長が出て、次の段の中ボスとかぶっていた)
 //  - 敵の組・出る角度・数は挑戦ごとに少し変わる
 //  - 一人のときは核の削れが SOLO_DRAIN 倍 (一人でも越えられる。docs/design/32 の 9 章)
@@ -31,10 +31,15 @@ public final class WhaleCoreRoom extends RaidRoom {
     static final int WAVES = 3;
     static final double MELEE_RANGE = 3.6;
     static final double SHOOT_RANGE = 11;
-    // 2026-11-09 の声「鯨の核を守る、もっと核の hp 削れるようにしてもいいかも」: 削れを強く、戻りを遅く
-    static final double MELEE_DPS = 1.6;
-    static final double SHOT_DPS = 1.1;
+    // 核への一撃 (2026-11-10 の声「もう少し削れるように」「近くにいたら減るのではなく、ちゃんと攻撃したら」):
+    // 剣・盾・這う者は核のそばで STRIKE_EVERY tick ごとに MELEE_HIT、射手は射程の中で SHOT_EVERY tick ごとに SHOT_HIT。敵がいないと少し戻る
+    static final double MELEE_HIT = 3.0;
+    static final int STRIKE_EVERY = 20;
+    static final double SHOT_HIT = 2.0;
+    static final int SHOT_EVERY = 30;
     static final double REGEN_DPS = 0.6;
+    // 人に殴られた敵が、その人を相手にする長さ (tick)
+    static final int RETALIATE = 80;
     static final int WAVE_GAP = 80;
     // 一人のときの核の削れの倍率
     static final double SOLO_DRAIN = 0.7;
@@ -135,11 +140,12 @@ public final class WhaleCoreRoom extends RaidRoom {
     private void pressCore(RaidCtx ctx, long now, @javax.annotation.Nullable Mob captain) {
         Vec3 core = corePos(ctx);
         double dmg = 0;
+        double captainDps = 0;
         for (Mob m : ctx.aliveMobs()) {
             if (m == captain) {
                 double d = Math.hypot(m.getX() - core.x, m.getZ() - core.z);
                 if (d <= MELEE_RANGE + 0.8) {
-                    dmg += CAPTAIN_DPS;
+                    captainDps += CAPTAIN_DPS;
                     if (now % 20 == 0) {
                         m.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
                     }
@@ -163,22 +169,39 @@ public final class WhaleCoreRoom extends RaidRoom {
             double dz = m.getZ() - core.z;
             double d = Math.sqrt(dx * dx + dz * dz);
             boolean ranged = m.getType() == jp.revati.skyabyss.registry.ModEntities.RIB_ARCHER.get();
-            if (!ranged && d <= MELEE_RANGE) {
-                dmg += MELEE_DPS;
-            } else if (ranged && d <= SHOOT_RANGE) {
-                dmg += SHOT_DPS;
-            }
-            // 狙う人がいない (遠い) 敵は核へ向かう
-            if (now % 20 == 0 && (!ranged || d > SHOOT_RANGE - 2)) {
-                var tgt = m.getTarget();
-                if (tgt == null || !tgt.isAlive() || tgt.distanceToSqr(m) > 12 * 12) {
+            // 核を目指す。人に殴られた敵だけ、RETALIATE のあいだその人を相手にする (2026-11-10 の声「核じゃなくてプレイヤーにまっすぐいくので、全然壊れない」)
+            boolean provoked = m.getLastHurtByMob() instanceof ServerPlayer && m.tickCount - m.getLastHurtByMobTimestamp() < RETALIATE;
+            if (!provoked && now % 5 == 0) {
+                if (m.getTarget() instanceof ServerPlayer) {
+                    m.setTarget(null);
+                }
+                double reach = ranged ? SHOOT_RANGE - 2 : MELEE_RANGE - 0.8;
+                if (d > reach) {
                     m.getNavigation().moveTo(core.x, ctx.origin().getY() + 1, core.z, 1.1);
+                } else {
+                    m.getNavigation().stop();
+                    m.getLookControl().setLookAt(core.x, core.y + 1, core.z);
                 }
             }
+            if (provoked) {
+                continue;
+            }
+            // 核を叩く・射る一撃ごとに削れる (近くにいるだけでは削れない。2026-11-10 の声「ちゃんと攻撃したらにして」)
+            int phase = Math.floorMod(m.getId() * 7, ranged ? SHOT_EVERY : STRIKE_EVERY);
+            if (!ranged && d <= MELEE_RANGE && now % STRIKE_EVERY == phase) {
+                m.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                strike(ctx, m.position().add(0, 1, 0), core, false);
+                dmg += MELEE_HIT;
+            } else if (ranged && d <= SHOOT_RANGE && now % SHOT_EVERY == phase) {
+                m.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                strike(ctx, m.getEyePosition(), core, true);
+                dmg += SHOT_HIT;
+            }
         }
-        if (dmg > 0) {
+        if (dmg > 0 || captainDps > 0) {
             // 一人のときは、核の削れを遅くする (一人では四方から来る敵を同時に止められない。二人からは今のまま)
-            hp -= dmg * (ctx.scale() == 1 ? SOLO_DRAIN : 1.0) / 20.0;
+            // 波の敵は一撃の量、番兵長は一秒あたりの削り
+            hp -= (dmg + captainDps / 20.0) * (ctx.scale() == 1 ? SOLO_DRAIN : 1.0);
             if (now - lastHurtFx >= 10) {
                 lastHurtFx = now;
                 ServerLevel level = ctx.level();
@@ -193,6 +216,25 @@ public final class WhaleCoreRoom extends RaidRoom {
             hp = 0;
             ctx.fail("message.skyabyss.raid.WR3.broken");
         }
+    }
+
+    // 核への一撃の見た目: 近くは骨の欠片と打つ音、射手は核まで矢の筋
+    private static void strike(RaidCtx ctx, Vec3 from, Vec3 core, boolean shot) {
+        ServerLevel level = ctx.level();
+        Vec3 hit = core.add(0, 1.5, 0);
+        if (shot) {
+            Vec3 dir = hit.subtract(from);
+            int n = (int) Math.max(4, dir.length() * 2);
+            for (int i = 0; i <= n; i++) {
+                Vec3 p = from.add(dir.scale(i / (double) n));
+                level.sendParticles(ParticleTypes.CRIT, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            }
+            level.playSound(null, from.x, from.y, from.z, SoundEvents.SKELETON_SHOOT, SoundSource.HOSTILE, 0.8f, 0.9f);
+        } else {
+            level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, 0.7f, 1.2f);
+        }
+        level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                hit.x, hit.y, hit.z, 10, 0.5, 0.5, 0.5, 0.1);
     }
 
     private Vec3 corePos(RaidCtx ctx) {

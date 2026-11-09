@@ -256,6 +256,42 @@ public enum Rune {
         return legendary() ? 300 + rewriteIndex() : skill.iconIndex();
     }
 
+    // 書き換えの出どころ (絵と技の見た目の色。tools/gen/ui/gen_rewrite_icons.py の source と同じ決め方)
+    public String source() {
+        if (!legendary()) {
+            return "";
+        }
+        for (String key : new String[] {"tide", "storm", "ember", "whale", "moon", "divine"}) {
+            if (id.startsWith(key) || weapon.startsWith(key) || weapon.contains("_" + key + "_")) {
+                return key;
+            }
+        }
+        if (weapon.startsWith("abyss") || id.startsWith("abyss")) {
+            for (String key : new String[] {"tide", "storm", "ember", "whale"}) {
+                if (weapon.contains("_" + key + "_")) {
+                    return key;
+                }
+            }
+            return "abyss";
+        }
+        return "relic";
+    }
+
+    // 出どころの色 (絵と同じ)
+    public int sourceColor() {
+        return switch (source()) {
+            case "tide" -> 0x46A0F0;
+            case "storm" -> 0xFADC5A;
+            case "ember" -> 0xFA7832;
+            case "whale" -> 0xB4A078;
+            case "moon" -> 0xC8D2EC;
+            case "divine" -> 0xFAD678;
+            case "abyss" -> 0xAA6EF0;
+            case "relic" -> 0xD2965A;
+            default -> 0;
+        };
+    }
+
     public String effectKey() {
         return nameKey() + ".effect";
     }

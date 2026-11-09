@@ -337,6 +337,22 @@ public final class ArrivalDeck {
             return;
         }
         BlockPos entry = jp.revati.skyabyss.trial.raid.InstanceArenas.heartEntry(titan);
+        // 前の起動で置いた石があれば、それを使う (場所は保存しないので、起動のたびに隣へもう一つ置いて並んでいた。2026-11-10 の声「帰りの石めっちゃ並んでる」)。
+        // 二つ目から先は消す
+        BlockPos found = null;
+        for (BlockPos q : BlockPos.betweenClosed(rest.offset(-5, -2, -5), rest.offset(5, 2, 5))) {
+            if (back.getBlockState(q).is(Blocks.LODESTONE)) {
+                if (found == null) {
+                    found = q.immutable();
+                } else {
+                    back.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                }
+            }
+        }
+        if (found != null) {
+            HEART_STONES.put(titan, found);
+            return;
+        }
         for (int r = 2; r <= 4; r++) {
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {

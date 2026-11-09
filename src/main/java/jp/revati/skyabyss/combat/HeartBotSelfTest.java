@@ -464,10 +464,12 @@ public final class HeartBotSelfTest {
             check(f, d != null && d.isAbyss(), name + ": the domain is not an abyss domain");
             if (d != null) {
                 double before = bot.taken(rig.stage());
-                check(f, d.rounds() == 3, name + ": the abyss domain has " + d.rounds() + " rounds (needs 3)");
+                // 潮殻の合わせ貝は短い (一巡、深淵・四人以上は二巡。ShellMatchDomain.roundsFor)
+                int want = d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain ? 2 : 3;
+                check(f, d.rounds() == want, name + ": the abyss domain has " + d.rounds() + " rounds (needs " + want + ")");
                 int solvedAt = solve(rig, bot, reader, level, d, f);
                 check(f, d.phase() == HeartDomain.Phase.DONE && d.solved(), name + ": a lone bot did not solve the abyss domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks, round " + (d.round() + 1) + ")");
-                check(f, solveInterludes == 2 && solveRoundsSeen == 3, name + ": the abyss domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs 3 / 2)");
+                check(f, solveInterludes == want - 1 && solveRoundsSeen == want, name + ": the abyss domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs " + want + " / " + (want - 1) + ")");
                 check(f, solveInterludeTelegraphs >= 2, name + ": the heart did not attack between abyss rounds (" + solveInterludeTelegraphs + " telegraphs)");
                 check(f, solvedAt > 0 && solvedAt < 20 * 70 * 3, name + ": the abyss domain took " + solvedAt + " ticks for one player (needs under 210 s)");
                 double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
@@ -508,9 +510,14 @@ public final class HeartBotSelfTest {
             float healthAfterDeclare = -1;
             int cues = BossCue.sentCount();
             int active = 0;
-            for (int t = 0; t < 60 + HeartDomain.DECLARE_TICKS + ACTIVE_WINDOW + 200 && active < ACTIVE_WINDOW; t++) {
+            // 制限のある領域 (潮殻の合わせ貝は一巡 25 秒) は、切れる少し前まで見る
+            int window = ACTIVE_WINDOW;
+            for (int t = 0; t < 60 + HeartDomain.DECLARE_TICKS + ACTIVE_WINDOW + 200 && active < window; t++) {
                 step(rig, bot, driver, level, t);
                 HeartDomain d = rig.domain().get();
+                if (d != null && d.limit() > 0) {
+                    window = Math.min(ACTIVE_WINDOW, d.limit() - 20);
+                }
                 if (d != null) {
                     if (d.phase() == HeartDomain.Phase.DECLARE && !sawDeclare) {
                         sawDeclare = true;
@@ -528,7 +535,7 @@ public final class HeartBotSelfTest {
             double taken = bot.taken(rig.stage()) / HeartBalance.expectedHealth(rig.stage());
             check(f, sawDeclare && d != null, name + ": the domain never declared");
             check(f, healthInDeclare > 0 && healthInDeclare == healthAfterDeclare, name + ": the heart took damage while declaring its domain");
-            check(f, d != null && d.phase() == HeartDomain.Phase.ACTIVE && active >= ACTIVE_WINDOW, name + ": the unsolved domain did not last (phase " + (d == null ? "-" : d.phase()) + ")");
+            check(f, d != null && d.phase() == HeartDomain.Phase.ACTIVE && active >= window, name + ": the unsolved domain did not last (phase " + (d == null ? "-" : d.phase()) + ")");
             if (d != null) {
                 check(f, !d.solved() && !d.broken(), name + ": an unsolved domain reports solved");
                 check(f, d.nodes().size() == d.nodeCount(), name + ": the domain has " + d.nodes().size() + " nodes (needs " + d.nodeCount() + ")");
@@ -546,6 +553,13 @@ public final class HeartBotSelfTest {
                     rig.heart().hurt(rig.heart().damageSources().generic(), 40f);
                 }
                 check(f, rig.heart().getHealth() == h0 && d.phase() == HeartDomain.Phase.ACTIVE, name + ": hitting the heart hurt it or broke the domain during the domain");
+                // 制限のある領域は、解けないまま切れると終わる (崩れない)
+                if (d.limit() > 0) {
+                    for (int t = 0; t < 60 && d.phase() == HeartDomain.Phase.ACTIVE; t++) {
+                        step(rig, bot, driver, level, t);
+                    }
+                    check(f, d.phase() == HeartDomain.Phase.DONE && !d.solved() && d.stunTicks() == 0, name + ": the timed domain did not end unsolved when time ran out (phase " + d.phase() + ")");
+                }
             }
             check(f, BossCue.sentCount() > cues, name + ": no attack names were sent during the domain");
             check(f, taken <= 0.45, name + ": a telegraph-reading bot took " + fmt(taken) + " of the expected health through the declaration and 35 s of the domain (needs <= 0.45): " + bot.where);
@@ -582,10 +596,11 @@ public final class HeartBotSelfTest {
             if (d != null) {
                 double before = bot.taken(rig.stage());
                 int solvedAt = solve(rig, bot, reader, level, d, f);
-                check(f, d.rounds() == 2, name + ": a solo domain has " + d.rounds() + " rounds (needs 2)");
+                int want = d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain ? 1 : 2;
+                check(f, d.rounds() == want, name + ": a solo domain has " + d.rounds() + " rounds (needs " + want + ")");
                 check(f, d.phase() == HeartDomain.Phase.DONE && d.solved() && d.broken(), name + ": a lone bot did not solve the domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks, round " + (d.round() + 1) + ")");
-                check(f, solveInterludes == 1 && solveRoundsSeen == 2, name + ": the domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs 2 / 1)");
-                check(f, solveInterludeTelegraphs >= 2, name + ": the heart did not attack between rounds (" + solveInterludeTelegraphs + " telegraphs)");
+                check(f, solveInterludes == want - 1 && solveRoundsSeen == want, name + ": the domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs " + want + " / " + (want - 1) + ")");
+                check(f, want < 2 || solveInterludeTelegraphs >= 2, name + ": the heart did not attack between rounds (" + solveInterludeTelegraphs + " telegraphs)");
                 check(f, solvedAt > 0 && solvedAt < 20 * 70 * 2, name + ": solving took " + solvedAt + " ticks (needs under 140 s for one player, 2 rounds)");
                 double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
                 check(f, taken <= 0.8, name + ": the solver bot took " + fmt(taken) + " of the expected health while solving (needs <= 0.8)");
