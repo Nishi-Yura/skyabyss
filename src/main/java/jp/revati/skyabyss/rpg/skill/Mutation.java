@@ -35,6 +35,11 @@ public enum Mutation {
         this.titan = titan;
     }
 
+    // 変異の絵 (icons3.png の升目。tools/gen/ui/gen_mutation_icons.py。並びはこの enum と同じ)
+    public int iconIndex() {
+        return 200 + ordinal();
+    }
+
     public String nameKey() {
         return "mutation.skyabyss." + id;
     }

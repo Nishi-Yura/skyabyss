@@ -153,6 +153,7 @@ UI_JA = {
     'gui.skyabyss.aspect.group_shared': 'どの祠でも', 'gui.skyabyss.aspect.group_shrine': '%sの祠',
     'gui.skyabyss.aspect.unknown': '？？？', 'gui.skyabyss.aspect.worn': '付けている',
     'gui.skyabyss.aspect.no_job': '職を選ぶと、その職のアスペクトが並ぶ',
+    'aspect.skyabyss.applies_changed': '%sの形にも効く',
 }
 UI_EN = {
     'aspect.skyabyss.rarity.0': 'Rare', 'aspect.skyabyss.rarity.1': 'Epic', 'aspect.skyabyss.rarity.2': 'Mythic',
@@ -179,6 +180,7 @@ UI_EN = {
     'gui.skyabyss.aspect.group_shared': 'Any shrine', 'gui.skyabyss.aspect.group_shrine': '%s shrine',
     'gui.skyabyss.aspect.unknown': '???', 'gui.skyabyss.aspect.worn': 'Equipped',
     'gui.skyabyss.aspect.no_job': 'Choose a job to see its aspects',
+    'aspect.skyabyss.applies_changed': 'Also works with %s',
 }
 
 

@@ -112,6 +112,13 @@ final class ExtPage {
         out.add(Component.translatable("aspect.skyabyss.rarity." + a.rarity()).append("  ")
                 .append(Component.translatable(lv >= Aspects.MAX_LEVEL ? "aspect.skyabyss.level_max" : "aspect.skyabyss.level", lv)).withColor(SOFT));
         out.add(Component.translatable("aspect.skyabyss.skill", Component.translatable(a.skill().nameKey())).withColor(PALE));
+        // 技が変わっていても効く (アスペクトは技そのものに付く。変異・刻印・書き換え・秘伝・木の変化のどれでも)
+        net.minecraft.world.entity.player.Player me = Minecraft.getInstance().player;
+        for (jp.revati.skyabyss.rpg.skill.SkillChanges.Change c : jp.revati.skyabyss.rpg.skill.SkillChanges.of(me, a.skill())) {
+            if (c.active()) {
+                out.add(Component.translatable("aspect.skyabyss.applies_changed", c.line()).withColor(DIM));
+            }
+        }
         for (Aspect.Fx f : a.fx()) {
             out.add(Component.translatable("aspect.skyabyss.fx." + f.verb().name(), Math.round(f.at(lv) * 100)).withColor(TEXT));
         }
@@ -325,7 +332,10 @@ final class ExtPage {
             Golden.outline(g, x - 1, y - 1, x + s + 1, y + s + 1, alpha(col, 70 + (int) (110 * pulse)));
         }
         int icon = s - 4;
-        SkillHud.drawIcon(g, a.skill().iconIndex(), x + 2, y + 2, icon);
+        // 今の形の絵 (変異していれば変異の絵)。刻印・書き換え・秘伝はその色の縁
+        net.minecraft.world.entity.player.Player me = Minecraft.getInstance().player;
+        SkillHud.drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(me, a.skill()), x + 2, y + 2, icon);
+        SkillHud.changeFrame(g, me, a.skill(), x + 2, y + 2, icon);
         if (worn) {
             // 付けている印: 左上の金の三角
             for (int i = 0; i < 5; i++) {

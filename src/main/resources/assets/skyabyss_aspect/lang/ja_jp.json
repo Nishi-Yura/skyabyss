@@ -284,5 +284,6 @@
   "gui.skyabyss.aspect.group_shrine": "%sの祠",
   "gui.skyabyss.aspect.unknown": "？？？",
   "gui.skyabyss.aspect.worn": "付けている",
-  "gui.skyabyss.aspect.no_job": "職を選ぶと、その職のアスペクトが並ぶ"
+  "gui.skyabyss.aspect.no_job": "職を選ぶと、その職のアスペクトが並ぶ",
+  "aspect.skyabyss.applies_changed": "%sの形にも効く"
 }

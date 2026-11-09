@@ -126,6 +126,19 @@ public final class SkillHud {
         g.pose().popPose();
     }
 
+    // 刻印・書き換え・秘伝が効いている技の絵に、その色の縁 (1 画素。SkillChanges.frameColor)
+    public static void changeFrame(GuiGraphics g, net.minecraft.world.entity.player.Player p, Skill s, int x, int y, int size) {
+        int c = jp.revati.skyabyss.rpg.skill.SkillChanges.frameColor(p, s);
+        if (c == 0) {
+            return;
+        }
+        int a = 0xFF000000 | c;
+        g.fill(x, y, x + size, y + 1, a);
+        g.fill(x, y + size - 1, x + size, y + size, a);
+        g.fill(x, y, x + 1, y + size, a);
+        g.fill(x + size - 1, y, x + size, y + size, a);
+    }
+
     static void diamond(GuiGraphics g, int x, int y, int c) {
         g.fill(x + 2, y, x + 3, y + 5, 0xFF101418);
         g.fill(x, y + 2, x + 5, y + 3, 0xFF101418);
@@ -212,7 +225,8 @@ public final class SkillHud {
             Skill s = d.slot(i);
             if (s != null) {
                 int rank = d.rank(s);
-                drawIcon(g, s.iconIndex(), x + 2, y + 2);
+                drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(mc.player, s), x + 2, y + 2);
+                changeFrame(g, mc.player, s, x + 2, y + 2, 16);
                 // 今その技を変えているもの (刻印・書き換え・変異・秘伝) があれば左上に色の印 (SkillChanges)
                 changeMark(g, mc.player, s, x + 1, y + 1);
                 // マナが足りない: 青黒く沈める
@@ -263,6 +277,8 @@ public final class SkillHud {
 
     // 32px の絵を 16 で描く
     static final ResourceLocation ICONS2 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons2.png");
+    // 200 以上は icons3.png (技の変異。256x64。tools/gen/ui/gen_mutation_icons.py)
+    static final ResourceLocation ICONS3 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons3.png");
 
     // 100 以上は icons2.png (淵・前世の技・木の印・紋・職の新しい技。256x192)
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
@@ -270,7 +286,10 @@ public final class SkillHud {
     }
 
     static void drawIcon(GuiGraphics g, int index, int x, int y, int size) {
-        if (index >= 100) {
+        if (index >= 200) {
+            int n = index - 200;
+            g.blit(ICONS3, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 64);
+        } else if (index >= 100) {
             int n = index - 100;
             g.blit(ICONS2, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 192);
         } else {

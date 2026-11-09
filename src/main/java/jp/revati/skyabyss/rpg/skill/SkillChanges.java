@@ -71,6 +71,22 @@ public final class SkillChanges {
         return out;
     }
 
+    // 今の形の絵 (2026-11-09 の声「スキル変化あるけど、アイコンとかも変える？」→ 案 A): 変異していれば変異の絵、ほかは元の技の絵
+    public static int icon(Player p, Skill s) {
+        Mutation m = p == null || s == null ? null : SkillExtOps.active(p, s);
+        return m != null ? m.iconIndex() : s.iconIndex();
+    }
+
+    // 絵の縁の色: 効いている刻印・書き換え・秘伝のうち一番上 (変異は絵が替わるので縁は付けない。無ければ 0)
+    public static int frameColor(Player p, Skill s) {
+        for (Change c : of(p, s)) {
+            if (c.active() && c.kind() != Kind.MUTATION) {
+                return c.kind().rgb;
+            }
+        }
+        return 0;
+    }
+
     // 帯の印の色: 効いている変化のうち一番上 (無ければ 0)
     public static int markColor(Player p, Skill s) {
         for (Change c : of(p, s)) {

@@ -284,5 +284,6 @@
   "gui.skyabyss.aspect.group_shrine": "%s shrine",
   "gui.skyabyss.aspect.unknown": "???",
   "gui.skyabyss.aspect.worn": "Equipped",
-  "gui.skyabyss.aspect.no_job": "Choose a job to see its aspects"
+  "gui.skyabyss.aspect.no_job": "Choose a job to see its aspects",
+  "aspect.skyabyss.applies_changed": "Also works with %s"
 }

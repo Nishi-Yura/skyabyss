@@ -1427,7 +1427,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 SkillHud.drawIcon(g, 44, x + 3, y + 3);
                 g.setColor(1f, 1f, 1f, 1f);
             } else if (s != null) {
-                SkillHud.drawIcon(g, s.iconIndex(), x + 3, y + 3);
+                SkillHud.drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(minecraft.player, s), x + 3, y + 3);
+                SkillHud.changeFrame(g, minecraft.player, s, x + 3, y + 3, 16);
                 SkillHud.changeMark(g, minecraft.player, s, x + 2, y + 2);
             }
             String k = SkillClientSetup.SLOT_KEYS[i].getTranslatedKeyMessage().getString();
@@ -1653,6 +1654,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 節の絵: 技の節はその技の絵、基礎は icons2 の 0〜3 (筋力・敏捷・精神・耐久)、刻印 4、常に 45、閾値 46、型の要 47 (tools/gen/ui/gen_deep_skill_assets.py)
     private static int v2Icon(AbilityNode n) {
+        // 変異の節は変異の絵
+        if (n.mutation != null) {
+            return n.mutation.iconIndex();
+        }
         return switch (n.kind) {
             case STAT -> 100 + n.stat.ordinal();
             case RUNE -> 104;
