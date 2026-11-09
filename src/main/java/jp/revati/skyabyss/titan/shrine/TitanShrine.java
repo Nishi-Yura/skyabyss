@@ -46,7 +46,7 @@ import jp.revati.skyabyss.util.Players;
 
 // 巨神の祠 (docs/design/32 の 3.1)。周回の順路の入口。巨神ごとに世界に一つ、地上に建つ。壊せない (台座 9×9 を守る)。
 //   置き場 (仮): はじまりの都 (鐘) から、その巨神の跡地の方位 岩鯨 北・潮殻 東・雷翼 西・余燼 南) へ、距離の帯の近い端。
-//     本当の置き場は、地図と地形の生成 が決まったら差し替える。心臓を初めて止めたとき (誰かが) に建てる (ensure)
+//     大陸では決まった道ばたの広場 (ContinentLairs.shrine)。心臓を初めて止めたとき、または人が近づいたとき (APPROACH) に建てる (ensure)
 //   形: 巨神ごとに別の建物 (ShrineBuild。部品 shrine_<巨神>。岩鯨 = 鯨骨の聖堂・潮殻 = 潮の神殿・雷翼 = 雷の歌の環・余燼 = 炉の門)。
 //     記録する位置 (Data.pos) は碑。広場の真ん中の集合台 (縁が光る円い壇)・共鳴の炉。まわりに順位の石と飾り板 (RebirthBoards。集合台のまわり)
 //   使い方 (Wynncraft のレイドの入口と同じ。2026-11-03 の声「始まるときに集まる場所」): 集合台に
@@ -476,6 +476,7 @@ public final class TitanShrine {
             return;
         }
         ServerLevel level = server.overworld();
+        buildOnApproach(server, level);
         for (Map.Entry<String, BlockPos> e : new ArrayList<>(Data.get(server).pos.entrySet())) {
             BlockPos c = e.getValue();
             if (!level.hasChunkAt(c)) {
@@ -505,6 +506,35 @@ public final class TitanShrine {
                 }
                 jp.revati.skyabyss.rebirth.RebirthBoards.install(level, e.getKey(), ShrineBuild.padOf(c, e.getKey()));
                 ensurePriest(level, e.getKey(), c);
+            }
+        }
+    }
+
+    // まだ建っていない祠は、人が近づいたら建てる (2026-11-09 の声「マップでは祠あるけど、実際に行ったらない」: 地図は決まった場所に出すのに、
+    // 建てるのは心臓を初めて止めたときだけだった)。使えるのは今までどおり心臓を止めた人だけ (refusal)。町などが建つ途中は待つ
+    static final int APPROACH = 160;
+
+    static void buildOnApproach(MinecraftServer server, ServerLevel level) {
+        if (level.players().isEmpty() || jp.revati.skyabyss.opening.site.SiteBuilds.busy()) {
+            return;
+        }
+        Data data = Data.get(server);
+        for (String titan : Titans.all()) {
+            if (data.pos.containsKey(titan)) {
+                continue;
+            }
+            int[] fixed = jp.revati.skyabyss.world.continent.ContinentLairs.shrine(level, titan);
+            if (fixed == null) {
+                continue;
+            }
+            for (ServerPlayer p : level.players()) {
+                double dx = p.getX() - fixed[0];
+                double dz = p.getZ() - fixed[1];
+                if (dx * dx + dz * dz < (double) APPROACH * APPROACH) {
+                    SkyAbyss.LOGGER.info("A player came near the unbuilt shrine of the {}; building it", titan);
+                    ensure(server, titan);
+                    return;
+                }
             }
         }
     }
