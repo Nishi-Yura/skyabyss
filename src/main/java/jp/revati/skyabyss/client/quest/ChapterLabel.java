@@ -91,15 +91,13 @@ public final class ChapterLabel {
         Component text = text(c);
         java.util.List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap(text.getString(), r.w() - 8, font::width));
         int maxLines = Math.max(1, (r.h() + 3) / ROWS);
-        if (lines.size() > maxLines) {
-            lines = new java.util.ArrayList<>(lines.subList(0, maxLines));
-            lines.set(maxLines - 1, font.plainSubstrByWidth(lines.get(maxLines - 1), r.w() - 8 - font.width("…")) + "…");
-        }
+        // 入りきらない行は最後の行へつないで流す (Marquee)
+        lines = new java.util.ArrayList<>(jp.revati.skyabyss.client.ui.Marquee.joinRestStrings(lines, maxLines));
         // 細い金の線 (帯の金の縁と揃える) と、小さめの字
         int alpha = ((int) (255 * a)) << 24;
         g.fill(x - 3, y, x - 2, y + lines.size() * ROWS - 3, alpha | 0xA88A3C);
         for (String line : lines) {
-            g.drawString(font, line, x + 1, y, alpha | 0xD9C48A, true);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line, x + 1, y, r.w() - 8, alpha | 0xD9C48A, true);
             y += ROWS;
         }
     }

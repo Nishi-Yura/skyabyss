@@ -901,6 +901,13 @@ public class TravelMapScreen extends Screen {
                 hits.add(hit(new int[] {at[0], at[1] - 8}, 60, List.of(Component.translatable("map.skyabyss.mark.pin", i + 1).withColor(PIN_COLOR & 0xFFFFFF),
                         MapText.where(me, pin.x() + 0.5, pin.z() + 0.5), Component.translatable("map.skyabyss.mark.pin_remove")), null));
             }
+            // パーティーの仲間のピン (水色。party/PartyPins)
+            for (jp.revati.skyabyss.party.PartyPins.Pin mp : PinMarkers.mates()) {
+                int[] at = project(mp.x() + 0.5, mp.z() + 0.5);
+                pin(g, at[0], at[1], mp.number(), at[2] == 1 ? 0.55f : 1f, PinMarkers.MATE);
+                hits.add(hit(new int[] {at[0], at[1] - 8}, 59, List.of(Component.translatable("map.skyabyss.mark.pin_mate", mp.owner(), mp.number()).withColor(PinMarkers.MATE),
+                        MapText.where(me, mp.x() + 0.5, mp.z() + 0.5)), null));
+            }
         }
         // 仲間・目的・自分 (クライアントが持っているもの)
         for (PartyLocator.Entry e : party()) {
@@ -1362,10 +1369,14 @@ public class TravelMapScreen extends Screen {
 
     // ピン: 赤い頭と細い針、頭に番号 (n = 0 なら番号なし)。針の先が (x, y)
     private void pin(GuiGraphics g, int x, int y, int n, float alpha) {
+        pin(g, x, y, n, alpha, PIN_COLOR & 0xFFFFFF);
+    }
+
+    private void pin(GuiGraphics g, int x, int y, int n, float alpha, int rgb) {
         int a = (int) (alpha * 255) << 24;
         g.fill(x, y - 6, x + 1, y + 1, a | 0x2A2018);
         g.fill(x - 4, y - 14, x + 5, y - 5, a | 0x05070A);
-        g.fill(x - 3, y - 13, x + 4, y - 6, a | PIN_COLOR & 0xFFFFFF);
+        g.fill(x - 3, y - 13, x + 4, y - 6, a | rgb);
         g.fill(x - 2, y - 12, x, y - 10, a | 0xFFB0A8);
         if (n > 0) {
             String t = String.valueOf(n);

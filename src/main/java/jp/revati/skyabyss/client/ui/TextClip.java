@@ -83,12 +83,13 @@ public final class TextClip {
         return out.getVisualOrderText();
     }
 
+    // 一行: 入らなければ枠の中で横へ流す (Marquee。前は「…」で切っていた)
     public static void line(GuiGraphics g, Font font, String text, int x, int y, int maxW, int color, boolean shadow) {
-        g.drawString(font, fit(font, text, maxW), x, y, color, shadow);
+        Marquee.draw(g, font, text, x, y, maxW, color, shadow);
     }
 
     public static void line(GuiGraphics g, Font font, Component text, int x, int y, int maxW, int color, boolean shadow) {
-        g.drawString(font, fit(font, text.getVisualOrderText(), maxW), x, y, color, shadow);
+        Marquee.draw(g, font, text, x, y, maxW, color, shadow);
     }
 
     public static int wrapped(GuiGraphics g, Font font, Component text, int x, int y, int w, int maxLines, int lineH, int color, boolean shadow) {
@@ -98,27 +99,18 @@ public final class TextClip {
     // 折り返した行を maxLines まで。超えた分は捨て、最後の行を「…」で終える。lineH: 行の高さ
     public static int lines(GuiGraphics g, Font font, List<FormattedCharSequence> all, int x, int y, int w, int maxLines, int lineH, int color,
             boolean shadow) {
-        List<FormattedCharSequence> use = new ArrayList<>(all.size() > maxLines ? all.subList(0, Math.max(0, maxLines)) : all);
-        if (all.size() > maxLines && !use.isEmpty()) {
-            use.set(use.size() - 1, cut(font, use.get(use.size() - 1), w, true));
-        }
+        // 入りきらない行は最後の行へつないで流す (Marquee)
+        List<FormattedCharSequence> use = Marquee.joinRest(all, maxLines);
         int yy = y;
         for (FormattedCharSequence l : use) {
-            g.drawString(font, fit(font, l, w), x, yy, color, shadow);
+            Marquee.draw(g, font, l, x, yy, w, color, shadow);
             yy += lineH;
         }
         return use.size();
     }
 
-    // 行の数を maxLines に収めた一覧 (描く側が自分で描くとき用)。超えたら最後の行を「…」で終える
+    // 行の数を maxLines に収めた一覧 (描く側が自分で描くとき用)。超えた分は最後の行へつなぐ (描く側は幅を超える行を Marquee で流す)
     public static List<FormattedCharSequence> limit(Font font, List<FormattedCharSequence> all, int w, int maxLines) {
-        if (all.size() <= maxLines) {
-            return all;
-        }
-        List<FormattedCharSequence> use = new ArrayList<>(all.subList(0, Math.max(0, maxLines)));
-        if (!use.isEmpty()) {
-            use.set(use.size() - 1, cut(font, use.get(use.size() - 1), w, true));
-        }
-        return use;
+        return Marquee.joinRest(all, maxLines);
     }
 }

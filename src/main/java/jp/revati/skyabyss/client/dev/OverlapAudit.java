@@ -30,6 +30,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 //   label         部品が描いた文字が、その部品の外へはみ出す
 //   widget        二つの部品が一部だけ重なる (片方がもう片方を丸ごと含むのは除く)
 //   cut           画面の範囲 (TextBounds) で文字が切られた
+//   ellipsis      末尾を「…」で省いた字 (幅に入らず省かれた)
 // ツールチップ (奥行き 400 より手前) は見ない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class OverlapAudit {
@@ -200,6 +201,10 @@ public final class OverlapAudit {
             Text a = texts.get(i);
             if (a.cut) {
                 out.add("cut         '" + clip(a.s) + "' " + a.r);
+            }
+            // 末尾を「…」で省いた字 (2026-11-09 の声「文の最後が『...』になるときあるけど、何書いてるかわからない」)
+            if (a.s.endsWith("…") || a.s.endsWith("...")) {
+                out.add("ellipsis    '" + a.s + "' " + a.r);
             }
             if (a.owner != null) {
                 Rect own = a.owner;

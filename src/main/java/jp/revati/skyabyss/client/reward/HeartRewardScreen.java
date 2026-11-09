@@ -891,7 +891,11 @@ public class HeartRewardScreen extends Screen {
         // 名前 (階級の色)
         int innerW = w - 14;
         for (FormattedCharSequence line2 : jp.revati.skyabyss.client.ui.TextClip.limit(font, jp.revati.skyabyss.client.ui.JpWrap.split(font, c.name(), innerW), innerW, 2)) {
-            TextStyle.BODY.drawCentered(g, font, line2, cx, ty, alpha, 0xFFFFFF);
+            if (font.width(line2) > innerW) {
+                jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line2, cx - innerW / 2, ty, innerW, argb(alpha, 0xFFFFFF), false);
+            } else {
+                TextStyle.BODY.drawCentered(g, font, line2, cx, ty, alpha, 0xFFFFFF);
+            }
             ty += 11;
         }
         // 階級 · 種類 (一行)
@@ -1030,7 +1034,11 @@ public class HeartRewardScreen extends Screen {
         }
         ty += 6;
         for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.TextClip.limit(font, jp.revati.skyabyss.client.ui.JpWrap.split(font, body, r[2] - 28), r[2] - 28, Math.max(1, (y + r[3] - 30 - ty) / 10))) {
-            TextStyle.BODY.drawCentered(g, font, line, cx, ty, a * 0.85f, 0xC8D0D8);
+            if (font.width(line) > r[2] - 28) {
+                jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line, cx - (r[2] - 28) / 2, ty, r[2] - 28, argb(a * 0.85f, 0xC8D0D8), false);
+            } else {
+                TextStyle.BODY.drawCentered(g, font, line, cx, ty, a * 0.85f, 0xC8D0D8);
+            }
             ty += 10;
         }
         int by = y + r[3] - 26;

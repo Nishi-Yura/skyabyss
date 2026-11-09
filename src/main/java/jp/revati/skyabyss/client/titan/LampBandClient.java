@@ -87,16 +87,14 @@ public final class LampBandClient {
         float a = quiet ? 0.45f : 1f;
         List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap(text.getString(), w - 6, font::width));
         int max = Math.max(1, (rect.h() - 2) / 10);
-        if (lines.size() > max) {
-            lines = new java.util.ArrayList<>(lines.subList(0, max));
-            lines.set(max - 1, font.plainSubstrByWidth(lines.get(max - 1), w - 6 - font.width("…")) + "…");
-        }
+        // 入りきらない行は最後の行へつないで流す (Marquee)
+        lines = new java.util.ArrayList<>(jp.revati.skyabyss.client.ui.Marquee.joinRestStrings(lines, max));
         int bottom = y + lines.size() * 10 - 2;
         g.fill(x - 3, y - 2, x + w + 3, bottom, ((int) (0x50 * a)) << 24 | 0x0A0C10);
         g.fill(x - 3, y - 2, x - 2, bottom, ((int) (255 * a)) << 24 | 0x7FD6D0);
         int ty = y + 1;
         for (String line : lines) {
-            g.drawString(font, line, x + 1, ty, ((int) (255 * a)) << 24 | 0xE9E3D4, true);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line, x + 1, ty, w - 6, ((int) (255 * a)) << 24 | 0xE9E3D4, true);
             ty += 10;
         }
     }

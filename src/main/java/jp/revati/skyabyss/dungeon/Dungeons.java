@@ -130,6 +130,24 @@ public final class Dungeons {
         return enter(p, d, false);
     }
 
+    // 組の写しの続きに加わるか (自分の写しか、同じパーティーの人の写しがある)。加わるなら深さは写しのまま
+    public static boolean joinsRun(ServerPlayer p, Dungeon d) {
+        DungeonRun mine = runOf(p);
+        if (mine != null && mine.dungeon == d && !mine.cleared) {
+            return true;
+        }
+        var party = Parties.of(p);
+        if (party == null) {
+            return false;
+        }
+        for (DungeonRun r : RUNS.values()) {
+            if (r.dungeon == d && !r.cleared && party.members.stream().anyMatch(r.members::contains)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // deep: 深く潜る (主を一度倒した人だけ。倒していなければふつうに入って知らせる)
     public static DungeonRun enter(ServerPlayer p, Dungeon d, boolean deep) {
         if (d.mini) {
@@ -605,8 +623,8 @@ public final class Dungeons {
             BlockPos gate = ContinentPois.extraOf(p.serverLevel(), d.poiKind(), "gate");
             if (gate != null && gate.distManhattan(pos) <= 1) {
                 event.setCanceled(true);
-                // しゃがんで使うと深く潜る (主を一度倒した人)
-                enter(p, d, p.isShiftKeyDown());
+                // 主を一度倒した人には「ふつうに入る / 深く潜る」を選ぶ画面 (DeepChoice。前はしゃがんで使うと深く潜った)
+                DeepChoice.use(p, d);
                 return;
             }
         }

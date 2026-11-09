@@ -1250,21 +1250,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         return legend != null && (legend.held(minecraft.player) || d.rune(s) == 4);
     }
 
-    // 狭い箱に名前を収める: 幅が足りなければ 0.7 倍まで縮め、それでも足りなければ「…」で切る (中心 cx、上端 y)
+    // 狭い箱に名前を収める (中心 cx、上端 y)。入らなければ箱の中で横へ流す (Marquee。前は「…」で切っていた)
     private void drawFit(GuiGraphics g, Component name, int cx, int y, int maxW, int color) {
-        String text = name.getString();
-        int w = font.width(text);
-        // 字は等倍だけ (docs/design/56): 縮めずに「…」で切る
-        float k = 1f;
-        if (w * k > maxW) {
-            text = font.plainSubstrByWidth(text, (int) (maxW / k) - font.width("…")) + "…";
-            w = font.width(text);
+        int w = font.width(name);
+        if (w <= maxW) {
+            g.drawString(font, name, cx - w / 2, y, color, false);
+        } else {
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, name, cx - maxW / 2, y, maxW, color, false);
         }
-        g.pose().pushPose();
-        g.pose().translate(cx - w * k / 2f, y + (1f - k) * 3.5f, 0f);
-        g.pose().scale(k, k, 1f);
-        g.drawString(font, text, 0, 0, color, false);
-        g.pose().popPose();
     }
 
     // 刻印の段を描き、下端を返す (送れる面の中の座標)

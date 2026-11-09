@@ -481,20 +481,18 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             String st = stars(def.tier());
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, kind, tx + 15, Golden.textY(ky, ROW), tw - 15 - font.width(st) - 4, argb(1f, TEAL), false);
             g.drawString(font, st, tx + tw - font.width(st), Golden.textY(ky, ROW), argb(1f, GOLD), false);
-            // 説明: 修飾の札と状態の行を残して入るだけ。入りきらなければ最後の行に「…」 (前は二行で切って、下に空きが残った)
+            // 説明: 修飾の札と状態の行を残して入るだけ。入りきらなければ最後の行を横へ流す
             int dy = ky + ROW + 2;
             int bottomRow = y + h - 2 - ROW;
             int chipsH = card.chips().isEmpty() ? ROW : card.chips().size() * 16;
             int maxLines = Math.max(2, (bottomRow - 3 - chipsH - dy) / ROW);
-            String more = "…";
-            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw - font.width(more));
-            int shown = Math.min(maxLines, dl.size());
+            // 入りきらない行は最後の行へつないで横へ流す (Marquee。前は「…」で切っていた)
+            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.Marquee.joinRest(
+                    jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw), maxLines);
+            int shown = dl.size();
             for (int l = 0; l < shown; l++) {
                 int ly = Golden.textY(dy + l * ROW, ROW);
-                g.drawString(font, dl.get(l), tx, ly, argb(1f, DIM), false);
-                if (l == shown - 1 && dl.size() > shown) {
-                    g.drawString(font, more, tx + font.width(dl.get(l)), ly, argb(1f, DIM), false);
-                }
+                jp.revati.skyabyss.client.ui.Marquee.draw(g, font, dl.get(l), tx, ly, tw, argb(1f, DIM), false);
             }
             // 修飾の札 (一つずつ一行)
             int cy = dy + shown * ROW + 3;

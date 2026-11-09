@@ -71,7 +71,7 @@ public final class ObjectiveMarker {
         event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "objective_marker"), ObjectiveMarker::render);
     }
 
-    private static boolean visible(Minecraft mc) {
+    public static boolean visible(Minecraft mc) {
         return mc.player != null && mc.level != null && mc.screen == null && !mc.options.hideGui && !mc.getDebugOverlay().showDebugScreen()
                 && Config.QUEST_ARROW.get() && !OpeningClient.awakeActive() && !CinematicClient.active();
     }
@@ -148,13 +148,16 @@ public final class ObjectiveMarker {
     }
 
     // 置き場 (画面の中: 標の中心、外: 縁の点と向き)
-    record Placement(int x, int y, boolean onScreen, float vx, float vy, float scale, String label) {
+    public record Placement(int x, int y, boolean onScreen, float vx, float vy, float scale, String label) {
+        public Placement withLabel(String l) {
+            return new Placement(x, y, onScreen, vx, vy, scale, l);
+        }
     }
 
     static final float BASE = 0.7f;
 
     // 世界の位置 pos を投影する。k = 大きさの比、hideUnder = これより近いと出さない (ブロック)。出さないなら null
-    private static Placement place(GuiGraphics g, Minecraft mc, Vec3 pos, float k, double hideUnder) {
+    public static Placement place(GuiGraphics g, Minecraft mc, Vec3 pos, float k, double hideUnder) {
         Font font = mc.font;
         Camera cam = mc.gameRenderer.getMainCamera();
         Vec3 camPos = cam.getPosition();
@@ -202,7 +205,7 @@ public final class ObjectiveMarker {
         return new Placement(Mth.clamp(edge[0], 14, w - 14), Mth.clamp(edge[1], 24, h - 36), false, vx, vy, scale, label);
     }
 
-    private static void show(GuiGraphics g, Minecraft mc, Placement p, int rgb, boolean withSide) {
+    public static void show(GuiGraphics g, Minecraft mc, Placement p, int rgb, boolean withSide) {
         Font font = mc.font;
         int w = g.guiWidth();
         int h = g.guiHeight();

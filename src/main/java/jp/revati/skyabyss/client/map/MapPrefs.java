@@ -17,7 +17,8 @@ import net.minecraft.client.Minecraft;
 // 旅の地図の手もとの設定 (2026-11-09 の声「マップに見どころも映すと、画面がいっぱいいっぱいになる。見どころのオンオフのような、
 // マップに移す要素を切り替えれるボタンをマップに用意して」「マップにピンさせる様にしてほしい」)。
 //   載せる物の組 (Layer) の入り切り: どの世界でも同じ
-//   ピン: 世界ごと (一人遊びは保存のフォルダの名前、サーバーは宛先)。最大 MAX_PINS。地図の上でホイールを押す・Shift + 左クリックで置く・消す
+//   ピン: 世界ごと (一人遊びは保存のフォルダの名前、サーバーは宛先)。最大 MAX_PINS。地図の上でホイールを押す・Shift + 左クリックで置く・消す。
+//         ふだんの画面にも標で出し、パーティーの仲間にも見せる (PinMarkers・party/PartyPins)
 // 置き場はゲームのフォルダの config/skyabyss-map.properties
 public final class MapPrefs {
     public enum Layer {
@@ -89,6 +90,7 @@ public final class MapPrefs {
         list.add(new Pin(x, z));
         PINS.put(world(), list);
         save();
+        PinMarkers.sendMine();
     }
 
     public static void remove(Pin p) {
@@ -97,6 +99,7 @@ public final class MapPrefs {
         list.remove(p);
         PINS.put(world(), list);
         save();
+        PinMarkers.sendMine();
     }
 
     // ---------------------------------------------------------------- 読み書き

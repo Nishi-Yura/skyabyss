@@ -825,6 +825,18 @@ public final class ShotRunner {
                 mc.resizeDisplay();
                 return true;
             }
+            case "pin" -> {
+                // pin <x> <z> : 旅の地図のピンを置く (pin clear で全部外す)
+                String[] args = line.args();
+                if (args.length > 0 && args[0].equals("clear")) {
+                    for (var p : new java.util.ArrayList<>(jp.revati.skyabyss.client.map.MapPrefs.pins())) {
+                        jp.revati.skyabyss.client.map.MapPrefs.remove(p);
+                    }
+                } else {
+                    jp.revati.skyabyss.client.map.MapPrefs.add(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                }
+                return true;
+            }
             case "chat" -> {
                 // chat clear : チャットの欄と右上の通知 (トースト) を消す
                 mc.gui.getChat().clearMessages(false);
@@ -1221,6 +1233,8 @@ public final class ShotRunner {
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
             case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
+            case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
+                    jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);

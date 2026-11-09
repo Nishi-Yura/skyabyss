@@ -1,0 +1,42 @@
+# 2026-11-09: ピンの標・深く潜るの画面・挑んでいる所の帯
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/pins_band.txt -PshotsName=pins_band
+world shots flat
+size 1280 720
+timeout 1800
+render 8
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode creative
+camera 0 -60 -10 0 6
+waitchunks
+hud on
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 40
+chat clear
+cmd skyabyss level set @p 40
+cmd skyabyss job choose warrior
+pin 30 -40
+pin -45 -60
+wait 20
+camera 0 -60 0 180 0
+wait 20
+shot pins_first_person
+open deep_choice
+wait 10
+shot deep_choice
+close
+cmd skyabyss dungeon enter deep_fort deep
+wait 120
+shot band_deep_fort
+cmd skyabyss dungeon floor 1
+wait 120
+shot band_floor2
+cmd skyabyss dungeon leave
+wait 40
+pin clear

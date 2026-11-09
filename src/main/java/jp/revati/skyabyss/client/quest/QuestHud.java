@@ -128,11 +128,8 @@ public final class QuestHud {
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
         g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
         g.fill(X - 3, top - 3, X - 2, top + h - 2, main ? MAIN_TITLE : TITLE);
-        String ts = title.getString();
-        if (font.width(ts) > WIDTH - 2) {
-            ts = font.plainSubstrByWidth(ts, WIDTH - 2 - font.width("…")) + "…";
-        }
-        g.drawString(font, ts, X + 1, top, main ? MAIN_TITLE : TITLE, true);
+        // 長い題は省かずに横へ流す (Marquee)
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, title.getString(), X + 1, top, WIDTH - 2, main ? MAIN_TITLE : TITLE, true);
         guide.run();
         int y = top + 12;
         for (Line l : lines) {

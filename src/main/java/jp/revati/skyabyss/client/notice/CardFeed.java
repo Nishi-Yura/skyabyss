@@ -243,22 +243,8 @@ public final class CardFeed {
     private static List<FormattedCharSequence> lines(Font font, Entry e, int w) {
         int room = Math.max(40, w - font.width(e.head.getString()) - 14 - 12);
         List<FormattedCharSequence> l = jp.revati.skyabyss.client.ui.JpWrap.split(font, e.body, room);
-        if (l.size() <= BODY_LINES) {
-            return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;
-        }
-        // 最後の行に入りきらない分は「…」で切る
-        String rest = e.body.getString();
-        List<FormattedCharSequence> out = new java.util.ArrayList<>();
-        for (int i = 0; i < BODY_LINES - 1; i++) {
-            String part = font.plainSubstrByWidth(rest, room);
-            out.add(Component.literal(part).getVisualOrderText());
-            rest = rest.substring(part.length());
-        }
-        while (rest.length() > 1 && font.width(rest + "…") > room) {
-            rest = rest.substring(0, rest.length() - 1);
-        }
-        out.add(Component.literal(rest + "…").getVisualOrderText());
-        return out;
+        // 行の数で切らない (カードは行の数だけ高くなる。2026-11-09 の声「『...』だと何書いてるかわからない」)
+        return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;
     }
 
     private static int rows(Font font, Entry e) {
@@ -268,7 +254,7 @@ public final class CardFeed {
     // 右上 (右上の板とバニラの効果のアイコンの下)
     private static HudLayout.Rect topRight(GuiGraphics g) {
         int y = 4;
-        for (HudLayout.Id id : new HudLayout.Id[] {HudLayout.Id.BOSS_DOMAIN, HudLayout.Id.VOW, HudLayout.Id.BACK_GAUGE, HudLayout.Id.PARTY_LIST}) {
+        for (HudLayout.Id id : new HudLayout.Id[] {HudLayout.Id.BOSS_DOMAIN, HudLayout.Id.CHALLENGE, HudLayout.Id.VOW, HudLayout.Id.BACK_GAUGE, HudLayout.Id.PARTY_LIST}) {
             HudLayout.Rect r = HudManager.rect(id);
             if (r != null) {
                 y = Math.max(y, r.bottom() + 3);
