@@ -33,18 +33,18 @@ final class ContinentTrees {
     // 土地ごとの {升の幅, 植える割合}。0 なら植えない
     static double[] spacing(int biome) {
         return switch (biome) {
-            case ContinentBiomes.FOREST -> new double[] {11, 0.85};
-            case ContinentBiomes.BIRCH_FOREST -> new double[] {10, 0.85};
-            case ContinentBiomes.FLOWER_FOREST -> new double[] {13, 0.75};
-            case ContinentBiomes.TAIGA -> new double[] {10, 0.85};
-            case ContinentBiomes.PINE_TAIGA -> new double[] {9, 0.9};
+            case ContinentBiomes.FOREST -> new double[] {15, 0.85};
+            case ContinentBiomes.BIRCH_FOREST -> new double[] {13, 0.85};
+            case ContinentBiomes.FLOWER_FOREST -> new double[] {16, 0.75};
+            case ContinentBiomes.TAIGA -> new double[] {13, 0.85};
+            case ContinentBiomes.PINE_TAIGA -> new double[] {12, 0.9};
             case ContinentBiomes.PLAINS -> new double[] {30, 0.4};
             case ContinentBiomes.MEADOW -> new double[] {26, 0.45};
             case ContinentBiomes.SAVANNA -> new double[] {28, 0.45};
             case ContinentBiomes.WINDSWEPT_HILLS -> new double[] {20, 0.5};
             case ContinentBiomes.GRAVELLY_HILLS -> new double[] {26, 0.3};
             case ContinentBiomes.SNOWY_SLOPES -> new double[] {22, 0.35};
-            case ContinentBiomes.SWAMP -> new double[] {14, 0.7};
+            case ContinentBiomes.SWAMP -> new double[] {17, 0.7};
             case ContinentBiomes.WOODED_BADLANDS -> new double[] {16, 0.6};
             case ContinentBiomes.BADLANDS -> new double[] {40, 0.25};
             case ContinentBiomes.DESERT -> new double[] {44, 0.18};
