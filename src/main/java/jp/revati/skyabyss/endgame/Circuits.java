@@ -332,7 +332,7 @@ public final class Circuits {
         countRun(p);
         int coins = run.marks * COINS[Math.max(0, Math.min(COINS.length - 1, run.region))];
         Coins.give(p, coins);
-        // 野営地の今の景品の表から、印 1 つにつき 1 回 (呪いの柱 1 本につき +1) 引く。引いた品は旅嚢へ、幕で一つずつ見せる
+        // 野営地の今の景品の表から、印 1 つにつき 1 回 (呪いの柱 1 本につき +1) 引く。引いた品は旅袋へ、幕で一つずつ見せる
         CircuitCamps.Camp camp = CircuitCamps.byRegion(run.region);
         List<ItemStack> got = new ArrayList<>();
         if (camp != null) {

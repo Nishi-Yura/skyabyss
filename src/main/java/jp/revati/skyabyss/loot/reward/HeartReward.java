@@ -42,7 +42,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //  - 決めるのはサーバーだけ。choicePending を倒して渡すのは claim の一箇所で、同じ人の二度目は NOT_PENDING で断る
 //  - 保存は記録の choicePending のまま (ログアウト・サーバー再起動をまたぐ)。選ぶまで消えない
 //  - 開くのは、心臓の「眠り」の場面 (titan_end_<巨神>) が終わってから (スキップでも)。場面のない二回目以降・始められなかった人は降ろされて少しあと
-//  - 「あとで」にしても、旅嚢の「遺物」・控え帳の行・/titanmemory reward から、選ぶまで開ける
+//  - 「あとで」にしても、旅袋の「遺物」・控え帳の行・/titanmemory reward から、選ぶまで開ける
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class HeartReward {
     // 場面が終わってから画面を開くまで (余韻の札と重ならないように)。場面がないときは、降ろされてから

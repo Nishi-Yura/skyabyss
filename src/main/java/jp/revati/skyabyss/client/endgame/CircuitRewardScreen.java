@@ -22,7 +22,7 @@ import net.minecraft.world.item.Items;
 
 // 巡りの報いの幕 (endgame/CircuitCamps.Reward。巡り路を終えたとき)。Wynncraft のルートランの報いの箱のように、
 // 中央の箱が揺れて、引いた品を一つずつ枠へ出す。階級が高いほど揺れが長く強く、出たときに階級の色で光る (ヒロイック・神器は音も大きい)。
-// 押す (か Space) と残りを全部出す。品はもう旅嚢に入っている (幕は見せるだけ)。Esc で閉じる。
+// 押す (か Space) と残りを全部出す。品はもう旅袋に入っている (幕は見せるだけ)。Esc で閉じる。
 // 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 枠は 34 角・9 列 (下から詰める)、箱は残りの高さの真ん中、下の段に数と手引き
 public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);

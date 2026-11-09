@@ -69,7 +69,7 @@ wait 4
 shot heart_reward_ember
 close
 cmd skyabyss dev heartreward reset
-# 「あとで」にした人の入口: 旅嚢の画面の「遺物」ボタン (選ぶまで出る)
+# 「あとで」にした人の入口: 旅袋の画面の「遺物」ボタン (選ぶまで出る)
 cmd skyabyss dev heartreward stone_whale
 waitscreen 100 HeartRewardScreen
 close

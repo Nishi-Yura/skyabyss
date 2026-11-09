@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-// 旅嚢の画面 (docs/design/22 の 9 章 A つまみ)。持ち物 / 装飾 / 旅嚢 のつまみの三つ目。
+// 旅袋の画面 (docs/design/22 の 9 章 A つまみ)。持ち物 / 装飾 / 旅袋 のつまみの三つ目。
 //   枠: 品ごとに決まった枠 (区分の名札つき)。まだ手に入れていない品は「？」、いちど手に入れて今は 0 の品は暗い影。
 //       枠の置く・取り出す・シフトクリックは PouchMenu が決める (取り出せない決まりのときは何も起きない)
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
@@ -89,6 +89,13 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         if (menu.page() == PouchConfig.Page.KEEP) {
             renderSpareBg(g, x, y);
         }
+        if (menu.page() == PouchConfig.Page.PARTS) {
+            PouchData pd = Pouch.data(minecraft.player);
+            for (int i = 0; i < PouchData.PARTS; i++) {
+                int[] at = PouchLayout.part(i);
+                g.blit(TEXTURE, x + at[0] - 1, y + at[1] - 1, 18, 18, pd.part(i).isEmpty() ? 360f : 400f, 0f, 36, 36, TEX, TEX);
+            }
+        }
         for (int i = 0; i < menu.pouchSlotCount(); i++) {
             PouchLayout.Spot spot = menu.layout().spots().get(i);
             if (spot.page() != menu.page()) {
@@ -137,7 +144,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         g.drawString(font, label, x + (w - font.width(label)) / 2, y + (h - 8) / 2, color, false);
     }
 
-    // 旅嚢の枠の鐘銭は、枠の上に数を出さない (2026-11-01「数字がすごいため見せなくていい」。数は下の説明の行と店の画面に出る)
+    // 旅袋の枠の鐘銭は、枠の上に数を出さない (2026-11-01「数字がすごいため見せなくていい」。数は下の説明の行と店の画面に出る)
     @Override
     protected void renderSlot(GuiGraphics g, net.minecraft.world.inventory.Slot slot) {
         ItemStack s = slot.getItem();
@@ -170,6 +177,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             }
             g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x(), label.y(), DIM, false);
         }
+        if (menu.page() == PouchConfig.Page.PARTS) {
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), PouchLayout.X0, PouchLayout.TOP, DIM, false);
+        }
         if (menu.spareCount() > 0 && menu.page() == PouchConfig.Page.KEEP) {
             int[] at = menu.layout().spareLabel();
             g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), at[0], at[1], DIM, false);
@@ -182,6 +192,13 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         int y1 = PouchLayout.SEPARATOR_Y + 7;
         int y2 = y1 + 11;
         PouchEntries.Entry e = hoveredEntry();
+        if (e == null && menu.page() == PouchConfig.Page.PARTS) {
+            ItemStack part = hoveredSlot != null ? hoveredSlot.getItem() : ItemStack.EMPTY;
+            Component line = part.isEmpty() ? Component.translatable("skyabyss_pouch.screen.parts_hint")
+                    : Component.empty().append(part.getHoverName()).append(" ×" + part.getCount());
+            drawWrapped(g, line, y1);
+            return;
+        }
         if (e == null) {
             boolean empty = Pouch.data(minecraft.player).isEmpty();
             Component line = Component.translatable(empty ? "skyabyss_pouch.screen.empty" : "skyabyss_pouch.screen.kept");
@@ -245,6 +262,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             g.renderTooltip(font, Component.translatable("skyabyss_pouch.page." + tab.id), mouseX, mouseY);
             return;
         }
+        if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index >= menu.pouchSlotCount() + menu.spareCount()) {
+            return;
+        }
         if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index >= menu.pouchSlotCount()) {
             g.renderTooltip(font, Component.translatable("skyabyss_pouch.screen.spare_empty"), mouseX, mouseY);
             return;
@@ -266,6 +286,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             case KEEP -> jp.revati.skyabyss.registry.ModItems.SKY_KEY_FRAGMENT.get();
             case TITAN -> jp.revati.skyabyss.registry.ModItems.STONE_WHALE_SHARD.get();
             case LAND -> jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get();
+            case PARTS -> jp.revati.skyabyss.registry.ModItems.ASPECT_CORE.get();
         };
     }
 

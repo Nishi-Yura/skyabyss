@@ -1,4 +1,4 @@
-# UI room 2: 技の画面 (説明の送り・大きい盤)、ステータスの画面 (窓に合わせて拡大)、旅嚢の輪 (札 2 / 5 / 9 枚 × GUI 2 / 3 / 4)。
+# UI room 2: 技の画面 (説明の送り・大きい盤)、ステータスの画面 (窓に合わせて拡大)、旅袋の輪 (札 2 / 5 / 9 枚 × GUI 2 / 3 / 4)。
 # ./gradlew runShots --no-daemon --offline -Pscript=tools/shots/ui_room_2.txt -PshotsName=ui_room_2
 world ui_room flat
 size 1280 720

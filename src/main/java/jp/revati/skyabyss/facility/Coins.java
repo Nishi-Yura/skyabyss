@@ -18,13 +18,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
-// 鐘銭の出入り (docs/design/35 の 4 章)。銭は持ち物の品 (旅嚢には入らない)。
+// 鐘銭の出入り (docs/design/35 の 4 章)。銭は持ち物の品 (旅袋には入らない)。
 //   手に入る: 言伝ての板の頼み (日替わり・週替わり。章が進むほど多い)、町のクエスト (報酬の品に skyabyss:bell_coin を書く)、
 //            敵の落とし物 (プレイヤーが倒した敵。章が進むほど落としやすく、多い)、店への売り (ShopService)
 //   使う: 店 (ShopService)、鍛冶師の修理 (FacilityActions)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Coins {
-    // 持てる鐘銭の上限 (旅嚢の枠。2026-10-27 の声「お金の上限 999 万」→ 2026-11-01「もっと増やしていい」で 9 億 9999 万)
+    // 持てる鐘銭の上限 (旅袋の枠。2026-10-27 の声「お金の上限 999 万」→ 2026-11-01「もっと増やしていい」で 9 億 9999 万)
     public static final int MAX = 999_999_999;
 
     private Coins() {
@@ -38,7 +38,7 @@ public final class Coins {
         return Mth.clamp(Progression.stage(player) + 1, 1, 5);
     }
 
-    // 袋 (旅嚢) と持ち物の合計
+    // 袋 (旅袋) と持ち物の合計
     public static int count(ServerPlayer player) {
         return jp.revati.skyabyss.pouch.Pouch.countAll(player, FacilitySetup.BELL_COIN.get());
     }
@@ -55,7 +55,7 @@ public final class Coins {
         return true;
     }
 
-    // 渡す (旅嚢へまとめて。入りきらない分は 99 枚ずつ持ち物か足もとへ。大きな額を 99 枚ずつ回さない)
+    // 渡す (旅袋へまとめて。入りきらない分は 99 枚ずつ持ち物か足もとへ。大きな額を 99 枚ずつ回さない)
     public static void give(ServerPlayer player, int n) {
         if (n <= 0) {
             return;

@@ -32,7 +32,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   断る・取り下げる: 相手に知らせる (いなければ次に入ったとき)
 //   品の合わせ方: 探して選んだ型 (部品のない品) は、その品なら何でも合う (付呪・名前・傷みがあってもよい。00 の 238)。
 //                 持ち物から選んだ品 (部品のある品) は、同じ部品のものだけ (選んだ通りの品が渡る)
-//   大事な品 (旅嚢の取り出せない品・守る品・クエストの印の品) は出せないし、ほしいものにもできない
+//   大事な品 (旅袋の取り出せない品・守る品・クエストの印の品) は出せないし、ほしいものにもできない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Trades {
     private Trades() {
@@ -460,7 +460,7 @@ public final class Trades {
             tell(server, applicantId, "message.skyabyss.trade.note_lacked", l.sellerName, "#" + l.id);
             return Result.APPLICANT_LACKS;
         }
-        // 鐘銭は旅嚢と持ち物の合計で払い、受け取る人の旅嚢へ (持ち物の空きを使わない。大きな額も 99 枚ずつにしない)。
+        // 鐘銭は旅袋と持ち物の合計で払い、受け取る人の旅袋へ (持ち物の空きを使わない。大きな額も 99 枚ずつにしない)。
         // 前の版の品の申し出 (鐘銭のほかの品) だけ、持ち物で入れ替える
         int coinsOwed = 0;
         List<ItemStack> goods = new ArrayList<>();
@@ -607,7 +607,7 @@ public final class Trades {
         return holds(p, templates);
     }
 
-    // 型の品がそろっているか。鐘銭は旅嚢の中も数える (2026-10-25: 鐘銭は袋にも入る)
+    // 型の品がそろっているか。鐘銭は旅袋の中も数える (2026-10-25: 鐘銭は袋にも入る)
     static boolean holds(ServerPlayer p, List<ItemStack> templates) {
         for (ItemStack t : combine(templates)) {
             int have = isCoin(t) ? jp.revati.skyabyss.facility.Coins.count(p) : count(main(p), t);

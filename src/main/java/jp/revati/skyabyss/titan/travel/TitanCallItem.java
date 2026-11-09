@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 // 巨神の背 (ダンジョン) の中で吹くと、地上へ下りる (ReturnBeacons)。吹く仕草はヤギの角笛と同じ。音は tools/gen/world/gen_titan_travel_assets.py で合成した独自の音
 public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     private final String titanId;
-    // 旅のできる巨神 (岩鯨・潮殻) の型 (記録・旅嚢の表示用)。雷翼・余燼は null
+    // 旅のできる巨神 (岩鯨・潮殻) の型 (記録・旅袋の表示用)。雷翼・余燼は null
     @Nullable
     private final Supplier<TitanKind> kind;
 
@@ -55,7 +55,7 @@ public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.Pouc
         return InteractionResultHolder.consume(stack);
     }
 
-    // 吹く (右クリックと、旅嚢の輪・短押しの共通の中身)。断られたら false
+    // 吹く (右クリックと、旅袋の輪・短押しの共通の中身)。断られたら false
     @Override
     public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
         // その巨神の背中の中で吹いたら、呼ばずに「地上へ下りる？」(もう一度で下りる)

@@ -320,7 +320,7 @@ public final class MountService {
                 return true;
             }
         }
-        // 旅嚢に入っていても持っている (Y で呼べる)
+        // 旅袋に入っていても持っている (Y で呼べる)
         return jp.revati.skyabyss.pouch.Pouch.count(player, MountSetup.WHISTLE.get()) > 0;
     }
 

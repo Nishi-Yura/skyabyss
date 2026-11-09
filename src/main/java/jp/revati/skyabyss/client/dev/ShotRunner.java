@@ -1239,7 +1239,7 @@ public final class ShotRunner {
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
-            // 旅嚢の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)
+            // 旅袋の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)
             case "pouchwheel_2" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(2);
             case "pouchwheel_5" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(5);
             case "pouchwheel_9" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(9);

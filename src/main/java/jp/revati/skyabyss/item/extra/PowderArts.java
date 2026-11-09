@@ -488,7 +488,7 @@ public final class PowderArts {
         }
     }
 
-    // 直に渡す (旅嚢か持ち物。入らなければ足もとに、その人だけが拾える)
+    // 直に渡す (旅袋か持ち物。入らなければ足もとに、その人だけが拾える)
     public static void givePowder(ServerPlayer p, ItemStack powder) {
         Component name = powder.getHoverName();
         ItemStack left = jp.revati.skyabyss.pouch.PouchRouting.give(p, powder);

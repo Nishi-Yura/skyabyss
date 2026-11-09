@@ -64,7 +64,7 @@ public class LorePageItem extends Item implements jp.revati.skyabyss.pouch.Pouch
         return read(server, source(stack), () -> stack.consume(1, player)) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
     }
 
-    // 読む (右クリックと、旅嚢の輪・短押しの共通の中身)。この出どころで新しく記せる項目がなければ false (頁は残る)
+    // 読む (右クリックと、旅袋の輪・短押しの共通の中身)。この出どころで新しく記せる項目がなければ false (頁は残る)
     @Override
     public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
         return read(player, "", consumeOne);

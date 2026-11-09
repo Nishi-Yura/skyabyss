@@ -20,5 +20,5 @@
   "skyabyss_gear.tooltip.short.accessory": "Level too low: cannot be slotted",
   "skyabyss_gear.tooltip.slot.charm": "Put in the charm slot, use with [%s]",
   "skyabyss_gear.tooltip.slot.trinket": "Works while in a trinket slot",
-  "tooltip.skyabyss.accessory_roll": "Roll %s%% (spares can be dismantled at the resonance forge)"
+  "tooltip.skyabyss.accessory_roll": "Strength %1$s%% · Tier %2$s"
 }

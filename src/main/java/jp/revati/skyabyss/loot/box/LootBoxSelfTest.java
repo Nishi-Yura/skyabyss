@@ -36,7 +36,7 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 封の箱の自己テスト (SKYABYSS_SELFTEST=1、段 "loot boxes")。docs/design/52
-//  - 品: 19 種が登録され、16 まで重なり、旅嚢の「封の箱」の区分 (袋の枠には並ばない)。絵・モデル・形のメッシュ
+//  - 品: 19 種が登録され、16 まで重なり、旅袋の「封の箱」の区分 (袋の枠には並ばない)。絵・モデル・形のメッシュ
 //  - どの箱か: 野の装備 → 階級と帯の箱、巨神の図鑑・章・ヒロイックの武器 → その巨神の箱、伝説・アーティファクト → 金の箱、
 //    深淵の装備 → 階級の箱。神器・コモン・素材は箱にならない
 //  - 表: 19 種とも出うる品があり、どれも同じ箱に戻る。巨神の箱の階級の割合 (45/45/10)、階級の箱の種類の割合 (60/25/15)、職への寄せ
@@ -117,7 +117,7 @@ public final class LootBoxSelfTest {
         check(f, jp.revati.skyabyss.facility.Buyback.sell(p, 3, 1) == 1 && p.getInventory().getItem(3).isEmpty()
                 && jp.revati.skyabyss.facility.Coins.count(p) == before + price, "selling paid the price and took the item");
         check(f, jp.revati.skyabyss.facility.Buyback.sell(p, 4, 1) == 0 && !p.getInventory().getItem(4).isEmpty(), "the divine relic was sold");
-        // 大きな額: 旅嚢へまとめて入る (上限 999,999,999)
+        // 大きな額: 旅袋へまとめて入る (上限 999,999,999)
         jp.revati.skyabyss.facility.Coins.give(p, 50_000_000);
         check(f, jp.revati.skyabyss.facility.Coins.count(p) == before + price + 50_000_000, "a large coin gift did not land in the pouch: "
                 + jp.revati.skyabyss.facility.Coins.count(p));

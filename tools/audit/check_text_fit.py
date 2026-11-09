@@ -162,7 +162,7 @@ box("record: owner line", r"skyabyss_record\.gui\.(owner|inspecting)", 128, mode
 box("record: claim button", r"skyabyss_record\.gui\.(claim|recall|choose)", 80 - 8)
 box("record: row label (item/plain)", r"skyabyss_record\.r\.[a-z_0-9]+", 100)
 box("record: row value", r"skyabyss_record\.v\.[a-z_0-9]+", 114)
-# ---- 旅嚢 (PouchScreen)
+# ---- 旅袋 (PouchScreen)
 box("pouch: buttons", r"skyabyss_pouch\.screen\.(make|cant|repair_btn|back_btn|rebuild_btn)", 44 - 6)
 box("pouch: relic button", r"skyabyss_reward\.pouch\.button", 44 - 6)
 box("pouch: rebuild hint (clipped at W-70)", r"skyabyss_pouch\.screen\.rebuild_hint", 106)

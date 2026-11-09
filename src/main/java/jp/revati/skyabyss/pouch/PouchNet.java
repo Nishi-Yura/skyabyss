@@ -17,10 +17,10 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-// 旅嚢のパケット。画面の中の操作 (置く・出す・作り直し) はメニューのクリックとボタンで済むので、ここは画面の外のものだけ。
+// 旅袋のパケット。画面の中の操作 (置く・出す・作り直し) はメニューのクリックとボタンで済むので、ここは画面の外のものだけ。
 //   Use      (持ち主 → サーバー): 輪・短押しで袋の品を使う。品が空なら「前回の道具」(サーバーが覚える)
-//   Open     (持ち主 → サーバー): キー I・つまみから旅嚢の画面を開く
-//   OpenBook (サーバー → 持ち主): 旅嚢から伝承の書を使ったとき、書の画面を開かせる
+//   Open     (持ち主 → サーバー): キー I・つまみから旅袋の画面を開く
+//   OpenBook (サーバー → 持ち主): 旅袋から伝承の書を使ったとき、書の画面を開かせる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PouchNet {
     private static final String PROTOCOL_VERSION = "pouch-4";

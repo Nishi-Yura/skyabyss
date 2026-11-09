@@ -45,6 +45,8 @@ public final class WildArmorEvents {
     static final net.minecraft.core.particles.DustParticleOptions CLOUD_GOLD = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1.0f, 0.86f, 0.5f), 1.3f);
     static final String P = SkyAbyss.MODID + ":wild_armor_";
     static final String STILL = P + "still", STILL_POS = P + "still_pos", LAST_STAND = P + "last_stand", NOOSE = P + "noose", CLOUD = P + "cloud";
+    // 装飾の固有の働きの記録 (待ち・次の一撃・水の中にいたか)
+    static final String CHAIN = P + "crit_chain", HURT_MANA = P + "hurt_mana", BURST = P + "burst", HORN = P + "horn", WET = P + "wet";
 
     // 期限つきの修飾子 (相手の防具を下げる能力など): 生き物の id・修飾子・期限
     record Expire(int entity, ResourceLocation id, long at) {
@@ -109,6 +111,9 @@ public final class WildArmorEvents {
         if (night(p)) {
             b += sum(fx, Kind.NIGHT_MANA, 0);
         }
+        if (p.isInWaterOrRain()) {
+            b += sum(fx, Kind.WET_MANA, 0);
+        }
         return b;
     }
 
@@ -126,21 +131,34 @@ public final class WildArmorEvents {
             m *= 1 + sum(fx, Kind.BURN_BONUS_SET, 0);
         }
         // 装飾の条件つきの上乗せ (会心・背水・暗がり)
+        // 会心の次の一撃 (深みの眼の護り): 前の一撃で会心が出ていれば、この一撃は必ず会心
+        boolean forced = p.getPersistentData().getBoolean(CHAIN);
+        if (forced) {
+            p.getPersistentData().remove(CHAIN);
+        }
+        boolean crit = false;
         for (Fx f : fx) {
             switch (f.kind()) {
                 case CRIT -> {
-                    if (p.getRandom().nextDouble() < f.p(0)) {
+                    if (!crit && (forced || p.getRandom().nextDouble() < f.p(0))) {
+                        crit = true;
                         m *= 1 + f.p(1);
                         if (p.level() instanceof ServerLevel sl) {
                             sl.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.3, 0.3, 0.2);
                         }
                     }
                 }
+                case AIR_STRIKE -> m *= !p.onGround() && !p.isInWater() ? 1 + f.p(0) : 1;
+                case STORM_DAMAGE -> m *= p.level().isRaining() ? 1 + f.p(0) : 1;
+                case BURNING_RAGE -> m *= p.isOnFire() ? 1 + f.p(0) : 1;
                 case BERSERK -> m *= p.getHealth() < p.getMaxHealth() * f.p(0) ? 1 + f.p(1) : 1;
                 case DARK_BONUS -> m *= p.level().getMaxLocalRawBrightness(p.blockPosition()) <= f.p(0) ? 1 + f.p(1) : 1;
                 default -> {
                 }
             }
+        }
+        if (crit) {
+            afterCrit(p, target, fx, forced);
         }
         return m;
     }
@@ -168,6 +186,28 @@ public final class WildArmorEvents {
         Fx bulwark = find(fx, Kind.BULWARK);
         if (bulwark != null) {
             m *= 1 - Math.min(bulwark.p(1), bulwark.p(0) * p.getPersistentData().getInt(STILL));
+        }
+        // 落ちて着地した (織り紐の腕輪): まわりの敵へ衝撃
+        Fx shock = find(fx, Kind.FALL_SHOCK);
+        if (shock != null && source.is(DamageTypeTags.IS_FALL)) {
+            for (LivingEntity e : foes(level, p, shock.p(0))) {
+                WildGearEvents.proc(level, p, e, (float) shock.p(1), ParticleTypes.POOF);
+            }
+            level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.GENERIC_SMALL_FALL, SoundSource.PLAYERS, 1.0f, 0.6f);
+        }
+        if (source.getEntity() instanceof LivingEntity a && a != p) {
+            // 打たれるとマナ (塩の涙の耳飾り)
+            Fx mana = find(fx, Kind.HURT_MANA);
+            if (mana != null && p instanceof ServerPlayer sp && p.getPersistentData().getLong(HURT_MANA) <= now) {
+                p.getPersistentData().putLong(HURT_MANA, now + mana.ticks(1));
+                jp.revati.skyabyss.rpg.skill.SkillManager.gainMana(sp, mana.p(0));
+            }
+            // 打たれると燃やし返す (大蛇の熾の鱗)
+            Fx ignite = find(fx, Kind.HURT_IGNITE);
+            if (ignite != null && !(a instanceof Player) && p.getRandom().nextDouble() < ignite.p(0)) {
+                a.igniteForSeconds((float) ignite.p(1));
+                level.sendParticles(ParticleTypes.FLAME, a.getX(), a.getY(0.5), a.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
+            }
         }
         // 打たれ返し (雷・塩の棘)
         if (source.getEntity() instanceof LivingEntity a && a != p && !(a instanceof Player)) {
@@ -231,12 +271,104 @@ public final class WildArmorEvents {
         if (!(event.getEntity() instanceof ServerPlayer p)) {
             return;
         }
-        Fx f = find(active(p), Kind.LAST_STAND);
+        List<Fx> all = active(p);
+        Fx f = find(all, Kind.LAST_STAND);
         long now = p.level().getGameTime();
+        halfHealth(p, all, now);
         if (f != null && p.getHealth() < p.getMaxHealth() * f.p(0) && p.getPersistentData().getLong(LAST_STAND) <= now) {
             p.getPersistentData().putLong(LAST_STAND, now + f.ticks(2));
             p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, f.ticks(1), 1, true, true));
             p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 1.0f, 0.6f);
+        }
+    }
+
+    // ---------------------------------------------------------------- 装飾の固有の働き (2026-11-10)
+    static List<LivingEntity> foes(ServerLevel level, Player p, double r) {
+        return level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(r),
+                e -> e != p && e.isAlive() && e instanceof net.minecraft.world.entity.monster.Enemy);
+    }
+
+    // 会心のあと (速さ・遅く・次の一撃)
+    static void afterCrit(Player p, LivingEntity target, List<Fx> fx, boolean forced) {
+        for (Fx f : fx) {
+            switch (f.kind()) {
+                case CRIT_RUSH -> p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, f.ticks(1), f.ticks(0), true, true));
+                case CRIT_SLOW -> target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, f.ticks(0), f.ticks(1), true, true), p);
+                case CRIT_CHAIN -> {
+                    if (!forced) {
+                        p.getPersistentData().putBoolean(CHAIN, true);
+                    }
+                }
+                default -> {
+                }
+            }
+        }
+    }
+
+    // 体力が半分を切った (隕鉄の環の衝撃・砦の骨の角笛)
+    static void halfHealth(ServerPlayer p, List<Fx> fx, long now) {
+        if (p.getHealth() >= p.getMaxHealth() / 2 || !p.isAlive()) {
+            return;
+        }
+        ServerLevel level = p.serverLevel();
+        Fx burst = find(fx, Kind.HURT_BURST);
+        if (burst != null && p.getPersistentData().getLong(BURST) <= now) {
+            p.getPersistentData().putLong(BURST, now + burst.ticks(2));
+            for (LivingEntity e : foes(level, p, burst.p(0))) {
+                WildGearEvents.proc(level, p, e, (float) burst.p(1), ParticleTypes.EXPLOSION);
+                Vec3 d = e.position().subtract(p.position()).multiply(1, 0, 1).normalize().scale(0.9);
+                e.push(d.x, 0.35, d.z);
+                e.hurtMarked = true;
+            }
+            level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.8f, 0.5f);
+        }
+        Fx horn = find(fx, Kind.HORN);
+        if (horn != null && p.getPersistentData().getLong(HORN) <= now) {
+            p.getPersistentData().putLong(HORN, now + horn.ticks(2));
+            for (Player ally : WildGearEvents.withSelf(level, p, horn.p(0))) {
+                ally.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, horn.ticks(1), 0, true, true));
+            }
+            level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(0).value(), SoundSource.PLAYERS, 1.0f, 0.8f);
+        }
+    }
+
+    // 一秒ごと: 暗がりの敵を光らせる・水から上がった
+    static void accessoryTick(ServerPlayer p, List<Fx> fx, CompoundTag pd) {
+        ServerLevel level = p.serverLevel();
+        Fx glow = find(fx, Kind.DARK_GLOW);
+        if (glow != null && level.getMaxLocalRawBrightness(p.blockPosition()) <= 6) {
+            for (LivingEntity e : foes(level, p, glow.p(0))) {
+                e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 50, 0, true, false));
+            }
+        }
+        Fx exit = find(fx, Kind.WATER_EXIT);
+        boolean wet = p.isInWater();
+        if (exit != null && !wet && pd.getBoolean(WET)) {
+            p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, exit.ticks(1), exit.ticks(0), true, true));
+            level.sendParticles(ParticleTypes.SPLASH, p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+        }
+        pd.putBoolean(WET, wet);
+    }
+
+    // 倒した (灰の砂時計の飾り・骨掘りの顎飾り)
+    @SubscribeEvent
+    static void onKill(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer p) || event.getEntity() == p) {
+            return;
+        }
+        List<Fx> fx = active(p);
+        Fx cut = find(fx, Kind.KILL_COOLDOWN);
+        if (cut != null) {
+            int t = cut.ticks(0);
+            var d = jp.revati.skyabyss.rpg.skill.SkillManager.get(p);
+            d.cooldowns.replaceAll((k, v) -> Math.max(0, v - t));
+            d.cooldowns.values().removeIf(v -> v <= 0);
+            jp.revati.skyabyss.rpg.skill.SkillManager.sync(p);
+        }
+        Fx ward = find(fx, Kind.BONE_WARD);
+        if (ward != null) {
+            p.setAbsorptionAmount((float) Math.max(p.getAbsorptionAmount(), ward.p(0)));
+            p.serverLevel().sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 1, p.getZ(), 16, 0.4, 0.5, 0.4, 0.02);
         }
     }
 
@@ -250,11 +382,17 @@ public final class WildArmorEvents {
         long now = p.level().getGameTime();
         if (p.tickCount % 20 == 9) {
             List<Fx> fx = active(p);
+            Fx moss = find(fx, Kind.MOSS_STILL);
+            double still = moss != null && pd.getInt(STILL) >= 1 ? moss.p(0) : 1;
             for (Fx f : fx) {
                 if (f.kind() == Kind.REGEN_TICK && (p.tickCount / 20) % Math.max(1, f.ticks(1) / 20) == 0 && p.getHealth() < p.getMaxHealth()) {
+                    p.heal((float) (f.p(0) * still));
+                }
+                if (f.kind() == Kind.WATER_REGEN && p.isInWater() && p.getHealth() < p.getMaxHealth()) {
                     p.heal((float) f.p(0));
                 }
             }
+            accessoryTick(p, fx, pd);
             toggle(p, Attributes.MAX_HEALTH, "max_health", sum(fx, Kind.MAX_HEALTH, 0), AttributeModifier.Operation.ADD_VALUE);
             toggle(p, Attributes.ARMOR_TOUGHNESS, "toughness", sum(fx, Kind.TOUGHNESS, 0), AttributeModifier.Operation.ADD_VALUE);
             toggle(p, jp.revati.skyabyss.rpg.Rpg.MAX_MANA, "max_mana", sum(fx, Kind.MAX_MANA, 0), AttributeModifier.Operation.ADD_VALUE);

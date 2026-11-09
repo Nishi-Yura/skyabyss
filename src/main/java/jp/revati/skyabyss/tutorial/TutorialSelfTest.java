@@ -79,7 +79,7 @@ public final class TutorialSelfTest {
         TutorialData copy = roundTrip(TutorialData.of(a));
         check(f, copy.isActive(TutorialHints.LORE_BOOK) && !copy.isDone(TutorialHints.LORE_BOOK), "an active hint must survive a save");
 
-        // 破れた頁・笛・旅嚢の品
+        // 破れた頁・笛・旅袋の品
         a.getInventory().add(new ItemStack(LoreSetup.LORE_PAGE.get()));
         a.getInventory().add(new ItemStack(jp.revati.skyabyss.titan.travel.TravelSetup.STONE_WHALE_CALL.get()));
         TutorialHints.scan(a);

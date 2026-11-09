@@ -64,7 +64,7 @@ public final class SkillLessonSelfTest {
         return s == null ? (QuestLog.of(p).entry(SkillLesson.QUEST) != null && QuestLog.of(p).entry(SkillLesson.QUEST).done ? "done" : "none") : s;
     }
 
-    // 鐘銭は旅嚢にも入る (2026-10-25) ので、袋と持ち物の両方を数える
+    // 鐘銭は旅袋にも入る (2026-10-25) ので、袋と持ち物の両方を数える
     private static int coins(FakePlayer p) {
         Item coin = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "bell_coin"));
         return jp.revati.skyabyss.pouch.Pouch.countAll(p, coin);

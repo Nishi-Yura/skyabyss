@@ -167,7 +167,7 @@ public final class PouchSelfTest {
         check(f, all.size() >= 20, "pouch entries are too few: " + all.size());
         check(f, all == PouchEntries.all(), "the entry table was rebuilt (the order must be fixed)");
         for (Category c : Category.values()) {
-            check(f, all.stream().anyMatch(e -> e.category() == c), "no entry in the category " + c);
+            check(f, c == Category.PARTS || all.stream().anyMatch(e -> e.category() == c), "no entry in the category " + c);
         }
         check(f, PouchEntries.entry(shard) != null && PouchEntries.entry(shard).category() == Category.MATERIAL && PouchEntries.entry(shard).limit() == 999,
                 "the whale scale is not a titan material with limit 999");
@@ -590,7 +590,7 @@ public final class PouchSelfTest {
         p.containerMenu = menu;
         // 枠の並び: 登録の品ごとに 1 枠、重ならず、画面の中、説明の線より上
         PouchLayout.Result layout = PouchLayout.compute(PouchEntries.enabled());
-        check(f, menu.pouchSlotCount() == PouchEntries.enabled().stream().filter(e -> PouchLayout.onGrid(e.category())).count() && menu.slots.size() == menu.pouchSlotCount(), "the menu does not have one slot per entry");
+        check(f, menu.pouchSlotCount() == PouchEntries.enabled().stream().filter(e -> PouchLayout.onGrid(e.category())).count() && menu.slots.size() == menu.pouchSlotCount() + PouchData.PARTS, "the menu does not have one slot per entry");
         check(f, layout.bottom() <= PouchLayout.SEPARATOR_Y - 2, "the pouch slots run into the info area: " + layout.bottom());
         boolean clean = true;
         for (int i = 0; i < layout.spots().size(); i++) {
@@ -673,8 +673,61 @@ public final class PouchSelfTest {
         // 枠は標準の動きを断る
         check(f, !menu.getSlot(sh).mayPlace(new ItemStack(shard)) && !menu.getSlot(sh).mayPickup(p), "the pouch slot accepts the standard moves");
         check(f, menu.quickMoveStack(p, sh).isEmpty(), "quickMoveStack moved something");
+        runParts(f, p, menu);
+        runMerge(f, p);
         Pouch.clear(p);
         p.getInventory().clearContent();
+    }
+
+    // 細工の枠 (2026-11-10): 部品つきの品は中身ごと入り、掃除で入り、同じ中身は重なり、取り出すと印がつく
+    private static void runParts(List<String> f, FakePlayer p, PouchMenu menu) {
+        Pouch.clear(p);
+        p.getInventory().clearContent();
+        ItemStack core = jp.revati.skyabyss.item.extra.GearFreedom.core(jp.revati.skyabyss.rpg.skill.Rune.values()[0]);
+        Item coreItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "socket_shard_stone"));
+        ItemStack core2 = new ItemStack(coreItem, 3);
+        ItemStack ref = core2.copy();
+        Pouch.addPart(p, new ItemStack(coreItem, 2));
+        check(f, Pouch.isPart(core) && Pouch.addPart(p, core) == 1 && core.isEmpty(), "a remnant core did not go into the parts slots");
+        p.getInventory().add(core2);
+        Pouch.sweep(p);
+        PouchData d = Pouch.data(p);
+        check(f, inv(p, coreItem) == 0 && d.part(0).getCount() == 5, "the sweep did not stack an identical part: " + d.part(0));
+        check(f, ItemStack.isSameItemSameComponents(d.part(0), ref),
+                "the part lost its contents");
+        int base = menu.pouchSlotCount() + menu.spareCount();
+        menu.setPage(PouchConfig.Page.PARTS);
+        check(f, menu.getSlot(base).getItem().getCount() == 5, "the parts slot does not show the part");
+        menu.clicked(base, 0, ClickType.QUICK_MOVE, p);
+        check(f, d.part(0).isEmpty() && inv(p, coreItem) == 5, "shift-click did not move the part to the inventory");
+        Pouch.sweep(p);
+        check(f, inv(p, coreItem) == 5, "a withdrawn part was swept back");
+        menu.setPage(PouchConfig.Page.KEEP);
+        p.getInventory().clearContent();
+        Pouch.clear(p);
+    }
+
+    // 装飾を重ねる (2026-11-10): 持ち物の同じ品一つと結晶で段が上がり、強さは高いほう、段 V で止まる
+    private static void runMerge(List<String> f, FakePlayer p) {
+        p.getInventory().clearContent();
+        net.minecraft.world.item.Item badge = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "wild_guard_badge"));
+        ItemStack held = new ItemStack(badge);
+        jp.revati.skyabyss.item.wild.AccessoryRolls.set(held, 80);
+        ItemStack dup = new ItemStack(badge);
+        jp.revati.skyabyss.item.wild.AccessoryRolls.set(dup, 120);
+        p.getInventory().add(dup);
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), 20));
+        Pouch.sweep(p);
+        check(f, jp.revati.skyabyss.forge.ForgeRules.merge(p, held), "an accessory did not merge with its duplicate");
+        check(f, jp.revati.skyabyss.item.wild.AccessoryRolls.stage(held) == 2 && jp.revati.skyabyss.item.wild.AccessoryRolls.roll(held) == 120
+                && jp.revati.skyabyss.item.wild.AccessoryRolls.effective(held) == 130 && inv(p, badge) == 0, "the merge result is wrong");
+        check(f, !jp.revati.skyabyss.forge.ForgeRules.merge(p, held), "a merge went through without a duplicate");
+        jp.revati.skyabyss.item.wild.AccessoryRolls.setStage(held, 5);
+        p.getInventory().add(new ItemStack(badge));
+        check(f, !jp.revati.skyabyss.forge.ForgeRules.canMerge(held) && !jp.revati.skyabyss.forge.ForgeRules.merge(p, held), "a tier V accessory merged again");
+        p.getInventory().clearContent();
+        Pouch.clear(p);
     }
 
     // ---------------------------------------------------------------- 使う入力 (輪・短押し・PouchUse)

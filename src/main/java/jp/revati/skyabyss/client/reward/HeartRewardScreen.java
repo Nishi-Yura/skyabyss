@@ -47,7 +47,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //   確かめ (CONFIRM): 「受け取りますか？」。受け取る / 選びなおす。入った直後の 0.5 秒は押しても効かない。Esc で戻る
 //   待ち (WAIT)   : サーバーの返事待ち。サーバーが断ったら (すでに受け取り済みなど) 理由を出して閉じる
 //   完了 (DONE)   : 選んだ品が光って「手にした」。そのあと閉じる
-//   あとで (LATER): Esc。「旅嚢の『遺物』からいつでも」。あとで選ぶ / いま選ぶ (初めの選びは「いま選ぶ」)
+//   あとで (LATER): Esc。「旅袋の『遺物』からいつでも」。あとで選ぶ / いま選ぶ (初めの選びは「いま選ぶ」)
 // 選んだ結果は必ずサーバーが決める (HeartReward.claim)。この画面は見せて、押したものを伝えるだけ。
 public class HeartRewardScreen extends Screen {
     private enum Phase {
@@ -990,7 +990,7 @@ public class HeartRewardScreen extends Screen {
             TextStyle.CAPTION.drawCentered(g, font, Component.translatable(key), cx, y, a * 0.9f, DIM);
         }
         if (phase == Phase.CHOOSE && !auto) {
-            // 旅嚢から開いたとき: 何も変わらない (自動のときと同じ)
+            // 旅袋から開いたとき: 何も変わらない (自動のときと同じ)
         }
     }
 

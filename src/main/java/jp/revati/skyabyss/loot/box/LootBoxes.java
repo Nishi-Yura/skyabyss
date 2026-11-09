@@ -290,7 +290,7 @@ public final class LootBoxes {
         return box == null ? 0 : Pouch.countAll(p, box);
     }
 
-    // n 個まで開ける: 箱を取り、品を渡し (旅嚢 → 持ち物 → 足もと)、ルーレットの帯を作る。開けた分を返す
+    // n 個まで開ける: 箱を取り、品を渡し (旅袋 → 持ち物 → 足もと)、ルーレットの帯を作る。開けた分を返す
     public static List<Opened> open(ServerPlayer p, BoxKind kind, int n) {
         List<Opened> out = new ArrayList<>();
         Item box = LootBoxSetup.item(kind);

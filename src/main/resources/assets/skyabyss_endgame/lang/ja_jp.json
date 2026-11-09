@@ -323,7 +323,7 @@
   "gui.skyabyss.reward.sub": "%s　印 %s　鐘銭 %s",
   "gui.skyabyss.reward.count": "%s / %s",
   "gui.skyabyss.reward.skip": "押すと全部見せる",
-  "gui.skyabyss.reward.done": "旅嚢に入れた。Esc で閉じる",
+  "gui.skyabyss.reward.done": "旅袋に入れた。Esc で閉じる",
   "gui.skyabyss.reward.none": "今日の報いはもうない（印は土地の点に数えた）",
   "label.skyabyss.facility.circuit_camp_whale": "巡り路の野営地",
   "label.skyabyss.facility.circuit_camp_whale.sub": "鯨見の野営地",

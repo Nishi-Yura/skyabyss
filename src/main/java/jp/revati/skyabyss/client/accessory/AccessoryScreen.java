@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 装飾の画面。真ん中に人形、左に護符の枠 (金の輪)、右に装飾の枠 2 つ、下に持ち物。
-// 画面の上に「持ち物」「装飾」「旅嚢」のつまみ (持ち物の画面にも同じ位置に出す)。
+// 画面の上に「持ち物」「装飾」「旅袋」のつまみ (持ち物の画面にも同じ位置に出す)。
 // 背景は 2 倍密度のテクスチャ (textures/gui/accessory/accessory.png、tools/gen/items/gen_accessory_assets.py の案 B)
 public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/accessory/accessory.png");
@@ -46,7 +46,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
         addTabs(this::addRenderableWidget, this, 1);
     }
 
-    // 持ち物の画面・装飾の画面・旅嚢の画面の上に、三つのつまみ (0 持ち物・1 装飾・2 旅嚢) を足す。selected = いまの画面のつまみ。
+    // 持ち物の画面・装飾の画面・旅袋の画面の上に、三つのつまみ (0 持ち物・1 装飾・2 旅袋) を足す。selected = いまの画面のつまみ。
     // 位置は画面の左端に合わせて毎回決める (レシピ本で左右に動くため)。画面の幅は三つとも 176
     // 見出しを切り替えると、画面の開き直しでマウスが画面の中央へ戻される (バニラの releaseMouse)。押した時の位置を覚え、次の画面の
     // 見出しが並ぶとき (開き直しの後) に同じ位置へ戻す
@@ -124,7 +124,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
         }
     }
 
-    // つまみ: 0 = 持ち物、1 = 装飾、2 = 旅嚢、3 = 封の箱 (docs/design/52)。選ばれたつまみは押せず、画面の縁とつながる
+    // つまみ: 0 = 持ち物、1 = 装飾、2 = 旅袋、3 = 封の箱 (docs/design/52)。選ばれたつまみは押せず、画面の縁とつながる
     static final class Tab extends AbstractButton {
         private final java.util.function.IntSupplier left;
         private final java.util.function.IntSupplier top;

@@ -131,7 +131,7 @@ def lang():
     for x in S.ACCESSORIES:
         ja[f"item.skyabyss.{x['id']}"] = x["ja"]
         en[f"item.skyabyss.{x['id']}"] = x["en"]
-        ja[f"item.skyabyss.{x['id']}.desc"] = ("護符（[H] で使う）。" if x["kind"] == "charm" else "アクセサリー。") + x["abil_ja"]
+        ja[f"item.skyabyss.{x['id']}.desc"] = ("護符（[H] で使う）。" if x["kind"] == "charm" else "装飾。") + x["abil_ja"]
         en[f"item.skyabyss.{x['id']}.desc"] = ("Charm ([H] to use). " if x["kind"] == "charm" else "Trinket. ") + x["abil_en"]
     # 物語の一行 (stories.py。GearCurveSelfTest の story が見る)
     import stories as T

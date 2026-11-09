@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 旅嚢の "NEW" の印 (docs/design/22 の 9.4): 新しく袋に入った品で、まだ画面で見ていないものに付く小さな札。
+// 旅袋の "NEW" の印 (docs/design/22 の 9.4): 新しく袋に入った品で、まだ画面で見ていないものに付く小さな札。
 // 印は持ち主ごとに保存・同期される (PouchData.fresh)。枠にカーソルを重ねる・輪や一枚札で見るとサーバーへ「見た」を送って外す。
 public final class PouchNew {
     private static final int BG = 0xFFC0392B;

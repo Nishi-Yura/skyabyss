@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 
 // 留め袋の決まりを一か所にまとめた定数 (docs/design/22_mod_pouch.md の 14 章の未決の答えが出たら、ここだけを直す)。
-//   名前          : 画面・知らせの文は lang の skyabyss_pouch.name だけ (旅嚢)。コードに名前は書かない
+//   名前          : 画面・知らせの文は lang の skyabyss_pouch.name だけ (旅袋)。コードに名前は書かない
 //   範囲 (204)    : ENABLED_CATEGORIES。小さな素材を外すなら SMALL を、書を外すなら BOOK を取る
 //   取り出し (203): WITHDRAW_CATEGORIES (取り出して渡せる区分) と、ゲームルール skyabyssPouchWithdraw (0 で全部不可)
 //   使う道具      : USE_TOOLS_IN_POUCH。笛・貝・風見鶏・書は「手に持って右クリック」で使うので、
@@ -31,6 +31,8 @@ public final class PouchConfig {
         SMALL("small"),
         // 土地の素材 (四章の灰の地・深淵の灯・月の敵が落とす、売るための素材。2026-11-10 に足した)
         LAND("land"),
+        // 細工 (名残の芯・粉・ルーン。中身ごと入れる一つずつの枠 PouchData.PARTS。袋の枠の並びには出さない)
+        PARTS("parts"),
         // 封の箱 (docs/design/52。袋の枠には並べず、四つ目のつまみ「封の箱」で見る。client/box/BoxPouchScreen)
         BOX("box");
 
@@ -41,14 +43,16 @@ public final class PouchConfig {
         }
     }
 
-    // 旅嚢の中のページ (2026-11-10 の声「ページ増やして（区分も必要であれば）」)。左の端の栞で替える。区分はどれか一つのページに
+    // 旅袋の中のページ (2026-11-10 の声「ページ増やして（区分も必要であれば）」)。左の端の栞で替える。区分はどれか一つのページに
     public enum Page {
         // 大事な物: 呼ぶ道具・鍵と心核・歌片・書
         KEEP("keep", Category.TOOL, Category.KEY, Category.BOOK),
         // 巨神の素材: 鱗片・殻片などと共鳴
         TITAN("titan", Category.MATERIAL, Category.RESONANCE),
         // 土地の素材: 小さな素材・鐘銭・土地の敵の素材
-        LAND("land", Category.SMALL, Category.LAND);
+        LAND("land", Category.SMALL, Category.LAND),
+        // 細工: 一つずつの枠 (四列 × 九)
+        PARTS("parts", Category.PARTS);
 
         public final String id;
         public final java.util.List<Category> categories;

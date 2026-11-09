@@ -14,7 +14,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
 // 心臓の遺物の選択画面のクライアント側の入口 (docs/design/30_heart_reward_ui.md)。パケットを受けて画面を開く・結果を渡す・
-// 「受け取れる遺物がある」旗 (旅嚢の「遺物」ボタン) を持つ。選ぶ決まりはすべてサーバー。
+// 「受け取れる遺物がある」旗 (旅袋の「遺物」ボタン) を持つ。選ぶ決まりはすべてサーバー。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class HeartRewardClient {
     // 受け取れる遺物がある (サーバーが State で知らせる)
@@ -86,7 +86,7 @@ public final class HeartRewardClient {
         });
     }
 
-    // 旅嚢・控え帳から: サーバーに開いてもらう
+    // 旅袋・控え帳から: サーバーに開いてもらう
     public static void request() {
         net.neoforged.neoforge.network.PacketDistributor.sendToServer(new HeartRewardNet.Request());
     }

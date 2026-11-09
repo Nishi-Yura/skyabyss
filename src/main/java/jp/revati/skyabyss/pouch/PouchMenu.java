@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-// 旅嚢の画面のメニュー (docs/design/22 の 9 章 A つまみ)。品ごとに決まった枠 (固定枠) だけを持ち、持ち物の枠は出さない。
+// 旅袋の画面のメニュー (docs/design/22 の 9 章 A つまみ)。品ごとに決まった枠 (固定枠) だけを持ち、持ち物の枠は出さない。
 // 枠の中身は袋 (PouchData) の個数を直接読む見かけ上の品で、中身の入れ替えはぜんぶこのメニューの clicked が決める (サーバーが決め、クライアントは何もしない):
 //   - カーソルに品を持って枠を左クリック = その品が袋の品なら全部入れる、右クリック = 一つ入れる (枠と違う品は入らない)
 //   - カーソルが空で枠を左クリック = 一スタック取り出す、右クリック = その半分 (取り出し可のとき。ゲームルール skyabyssPouchWithdraw が 0 なら何も起きない)
@@ -41,6 +41,10 @@ public class PouchMenu extends AbstractContainerMenu {
         }
         for (int i = 0; i < spare; i++) {
             addSlot(new PouchSlot(view, layout.spots().size() + i, layout.spare().get(i)[0], layout.spare().get(i)[1], PouchConfig.Page.KEEP));
+        }
+        for (int i = 0; i < PouchData.PARTS; i++) {
+            int[] at = PouchLayout.part(i);
+            addSlot(new PouchSlot(view, layout.spots().size() + spare + i, at[0], at[1], PouchConfig.Page.PARTS));
         }
         addDataSlot(withdrawFlag);
         addDataSlot(page);
@@ -121,8 +125,10 @@ public class PouchMenu extends AbstractContainerMenu {
         if (slotId >= layout.spots().size()) {
             if (slotId < layout.spots().size() + spare) {
                 clickedSpare(sp, slotId - layout.spots().size(), button, clickType);
-                broadcastChanges();
+            } else if (slotId < layout.spots().size() + spare + PouchData.PARTS) {
+                clickedPart(sp, slotId - layout.spots().size() - spare, button, clickType);
             }
+            broadcastChanges();
             return;
         }
         Entry entry = entryAt(slotId);
@@ -175,6 +181,40 @@ public class PouchMenu extends AbstractContainerMenu {
             }
             case QUICK_MOVE -> {
                 ItemStack out = jp.revati.skyabyss.rebirth.RebirthSpare.take(sp, index, 64);
+                if (!out.isEmpty()) {
+                    sp.getInventory().placeItemBackInInventory(out);
+                }
+            }
+            default -> {
+            }
+        }
+    }
+
+    // 細工の枠: 部品つきの品を置く (左 = 全部、右 = 1 つ)、空の手で取り出す (左 = 一山、右 = 半分)、シフト = 持ち物へ。取り出しの決まりには掛けない (自分の品)
+    private void clickedPart(ServerPlayer sp, int index, int button, ClickType clickType) {
+        ItemStack carried = getCarried();
+        switch (clickType) {
+            case PICKUP -> {
+                if (!carried.isEmpty()) {
+                    if (Pouch.isPart(carried)) {
+                        ItemStack part = carried.copyWithCount(button == 1 ? 1 : carried.getCount());
+                        int moved = Pouch.addPart(sp, part);
+                        carried.shrink(moved);
+                        if (carried.isEmpty()) {
+                            setCarried(ItemStack.EMPTY);
+                        }
+                    }
+                } else {
+                    ItemStack have = Pouch.data(sp).part(index);
+                    int want = button == 1 ? Math.max(1, have.getCount() / 2) : have.getCount();
+                    ItemStack out = Pouch.takePart(sp, index, want);
+                    if (!out.isEmpty()) {
+                        setCarried(out);
+                    }
+                }
+            }
+            case QUICK_MOVE -> {
+                ItemStack out = Pouch.takePart(sp, index, 64);
                 if (!out.isEmpty()) {
                     sp.getInventory().placeItemBackInInventory(out);
                 }
@@ -255,7 +295,7 @@ public class PouchMenu extends AbstractContainerMenu {
 
         @Override
         public int getContainerSize() {
-            return spots.size() + spare;
+            return spots.size() + spare + PouchData.PARTS;
         }
 
         @Override
@@ -265,6 +305,9 @@ public class PouchMenu extends AbstractContainerMenu {
 
         @Override
         public ItemStack getItem(int slot) {
+            if (slot >= spots.size() + spare) {
+                return Pouch.data(player).part(slot - spots.size() - spare);
+            }
             if (slot >= spots.size()) {
                 return jp.revati.skyabyss.rebirth.RebirthSpare.view(player, slot - spots.size());
             }

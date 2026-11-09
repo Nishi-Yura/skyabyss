@@ -50,7 +50,7 @@ import jp.revati.skyabyss.util.Players;
 //   形: 巨神ごとに別の建物 (ShrineBuild。部品 shrine_<巨神>。岩鯨 = 鯨骨の聖堂・潮殻 = 潮の神殿・雷翼 = 雷の歌の環・余燼 = 炉の門)。
 //     記録する位置 (Data.pos) は碑。広場の真ん中の集合台 (縁が光る円い壇)・共鳴の炉。まわりに順位の石と飾り板 (RebirthBoards。集合台のまわり)
 //   使い方 (Wynncraft のレイドの入口と同じ。2026-11-03 の声「始まるときに集まる場所」): 集合台に
-//     パーティのオンラインの全員 (一人なら一人) が立つと、GATHER_TICKS の数え下ろしのあと、台の上の誰かの歌片が一つ減り (旅嚢か持ち物。代表が払う)、
+//     パーティのオンラインの全員 (一人なら一人) が立つと、GATHER_TICKS の数え下ろしのあと、台の上の誰かの歌片が一つ減り (旅袋か持ち物。代表が払う)、
 //     雲の帳のあいだに台の上の人をその巨神の背へ運び、順路の段 1 へ (TrialRoute.start)。数えるあいだに誰かが台を降りると止まる
 //   断るとき: 心臓を止めていない人が台にいる / 台の誰も歌片を持っていない / そのグループの順路がもう動いている (台の上の人の帯に理由)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -394,7 +394,7 @@ public final class TitanShrine {
         return out;
     }
 
-    // 歌片を払える人 (旅嚢か持ち物に一つでもある。クリエイティブは払わない)
+    // 歌片を払える人 (旅袋か持ち物に一つでもある。クリエイティブは払わない)
     static boolean hasShard(ServerPlayer p, String titan) {
         return p.isCreative() || jp.revati.skyabyss.pouch.Pouch.countAll(p, ModItems.songShard(titan)) > 0;
     }

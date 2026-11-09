@@ -7,7 +7,7 @@ import jp.revati.skyabyss.pouch.PouchConfig.Category;
 import jp.revati.skyabyss.pouch.PouchConfig.Page;
 import jp.revati.skyabyss.pouch.PouchEntries.Entry;
 
-// 旅嚢の画面の枠の並び (サーバーのメニューとクライアントの画面で同じ値を使う)。ページ (PouchConfig.Page) ごとに、区分の名札つきで九列の升目に流し込む。
+// 旅袋の画面の枠の並び (サーバーのメニューとクライアントの画面で同じ値を使う)。ページ (PouchConfig.Page) ごとに、区分の名札つきで九列の升目に流し込む。
 // 小さな区分 (書など) は、前の区分の行に空きがあれば同じ行に置く (間に一列あける)。絵は tools/gen/items/gen_pouch_assets.py
 // 転生の余白の枠 (docs/design/31 の B13) は一つ目のページに置く
 public final class PouchLayout {
@@ -37,9 +37,14 @@ public final class PouchLayout {
     public record Result(List<Spot> spots, List<Label> labels, int bottom, List<int[]> spare, int[] spareLabel) {
     }
 
+    // 細工の枠 i の置き場 (x, y)。名札「細工」の下に九列
+    public static int[] part(int i) {
+        return new int[] {X0 + (i % COLS) * PITCH, TOP + 9 + (i / COLS) * PITCH};
+    }
+
     // 袋の枠に並べる区分か (封の箱は自分のつまみで見る)
     public static boolean onGrid(Category category) {
-        return category != Category.BOX;
+        return category != Category.BOX && category != Category.PARTS;
     }
 
     // 登録の並び (PouchEntries.enabled()) を流し込む。入る品が増えて下端を越えたら bottom が SEPARATOR_Y を越える (自己テストが見る)

@@ -28,7 +28,7 @@ public class MountWhistleItem extends Item implements jp.revati.skyabyss.pouch.P
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
-    // 旅嚢の輪・Y の短押しからも呼べる (手に持たなくてよい)
+    // 旅袋の輪・Y の短押しからも呼べる (手に持たなくてよい)
     @Override
     public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
         MountService.toggle(player);

@@ -73,7 +73,7 @@
   "message.skyabyss.titan_call.wrong_dimension": "この地に、%sの声は届かない",
   "message.skyabyss.titan_call.not_met": "%sは、まだあなたを知らない。まず会いに行く",
   "message.skyabyss.titan_call.sleeping": "%sは眠っている。目覚めまで、およそ %s 分",
-  "message.skyabyss.titan_call.met_hint": "呼び笛は旅嚢から吹ける。出会った巨神の笛を吹くと、その子が足もとに現れて、仲間と一緒に行き先まで運んでくれる",
+  "message.skyabyss.titan_call.met_hint": "呼び笛は旅袋から吹ける。出会った巨神の笛を吹くと、その子が足もとに現れて、仲間と一緒に行き先まで運んでくれる",
   "message.skyabyss.titan_call.met.stone_whale": "岩鯨の歌が、胸の奥でこだました。この笛で、岩鯨の仔を呼べる",
   "message.skyabyss.titan_call.met.tide_shell": "潮のざわめきが、耳の奥に残った。この貝で、潮殻の稚貝を呼べる",
   "message.skyabyss.titan_call.met.thunder_wing": "風切り羽が一枚、嵐の中から舞い落ちた。これで、雷翼の雛を呼べる",

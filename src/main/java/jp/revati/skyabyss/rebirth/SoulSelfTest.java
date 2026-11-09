@@ -487,7 +487,7 @@ public final class SoulSelfTest {
         rd.spareCount[1] = 0;
         PouchMenu menu = new PouchMenu(55, p.getInventory());
         int base = menu.pouchSlotCount();
-        check(f, menu.spareCount() == 1 && menu.slots.size() == base + 1, "the pouch menu has the wrong slot count: " + menu.slots.size() + "/" + base);
+        check(f, menu.spareCount() == 1 && menu.slots.size() == base + 1 + jp.revati.skyabyss.pouch.PouchData.PARTS, "the pouch menu has the wrong slot count: " + menu.slots.size() + "/" + base);
         menu.setCarried(new ItemStack(Items.COBBLESTONE, 10));
         menu.clicked(base, 0, ClickType.PICKUP, p);
         check(f, menu.getCarried().isEmpty() && rd.spareCount[0] == 10, "the menu did not deposit into the spare slot");

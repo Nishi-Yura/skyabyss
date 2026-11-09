@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-// 封の箱の欄 (旅嚢のつまみの四つ目。docs/design/52 の 7 章・00 の 310)。持っている封の箱を種類ごとに見る画面 (開けるのは町の封切り師)。
+// 封の箱の欄 (旅袋のつまみの四つ目。docs/design/52 の 7 章・00 の 310)。持っている封の箱を種類ごとに見る画面 (開けるのは町の封切り師)。
 // 押すと一つ (シフトで全部) 持ち物へ取り出せる (落とす・仲間に渡すため。BoxNetwork.TakeOut)。
 //   上: 巨神の箱 4 種 / 中: 階級の箱 (行 = 階級、列 = 帯 I〜V) / 下: 淵の金の箱
 public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {

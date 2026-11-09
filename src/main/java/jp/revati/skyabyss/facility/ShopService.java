@@ -32,8 +32,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 店の売り買い (docs/design/35 の 3.1・3.3、00 の 223・224)。決めるのはすべてサーバー。画面 (client/facility/ShopScreen) は
 // 並びと値段を映し、押した品の ID を返すだけ。押すたびに値段・手持ち・日の限りを調べ直し、払えなければ何もしない。
-//   買う: 鐘銭と素材 (巨神の素材など) を払う。素材は持ち物と旅嚢の両方から (QuestItems)
-//   売る: 店の買い取りの表の品を per 個ごとに鐘銭へ。印の付いた品 (クエストの品)・傷んだ品・名前を付けた品は売れない。旅嚢の中の品も売れる
+//   買う: 鐘銭と素材 (巨神の素材など) を払う。素材は持ち物と旅袋の両方から (QuestItems)
+//   売る: 店の買い取りの表の品を per 個ごとに鐘銭へ。印の付いた品 (クエストの品)・傷んだ品・名前を付けた品は売れない。旅袋の中の品も売れる
 //   店の人から 8 ブロック離れたら画面を閉じる (npc のない開き方 = コマンド・自己テストは問わない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ShopService {
@@ -294,7 +294,7 @@ public final class ShopService {
         return n;
     }
 
-    // 持ち物から先に、足りなければ旅嚢から
+    // 持ち物から先に、足りなければ旅袋から
     private static void takeSellable(ServerPlayer player, Item item, int count) {
         int left = count;
         Inventory inv = player.getInventory();
