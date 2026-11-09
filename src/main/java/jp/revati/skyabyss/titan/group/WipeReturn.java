@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 心臓の戦いで全員が倒れたら、背の休み場ではなく地上で目覚める (2026-10-28 の試遊「全員死んだら巨神の前に起きる。エンドコンテンツで行った場合は祠の前」)。
-// 物語の一度目 (FirstRun) は地上の巨神の前 (Titans.sendDown)、周回 (祠から) は祠の前 (TitanShrine.sendTo) で、周回の順路はそこで終わる。
+// 物語の一度目 (FirstRun) は地上の巨神の前 (Titans.sendDown)、周回 (祠から) は祠の前 (TitanShrine.sendTo)。どちらも順路はそこで終わる (次は最初の部屋から)。
 // 倒れた人は死の画面にいるので、起き上がって背の休み場に立ったところを運ぶ (ここで待つ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WipeReturn {
@@ -35,9 +35,8 @@ public final class WipeReturn {
             return;
         }
         boolean replay = !FirstRun.isFirstRun(back, group);
-        if (replay) {
-            jp.revati.skyabyss.trial.TrialRoute.end(back, group);
-        }
+        // 順路は終わる (物語の一度目も周回も。次に挑むときは最初の部屋から。2026-11-09 の声「レイドは死んだら最初からスタート」)
+        jp.revati.skyabyss.trial.TrialRoute.end(back, group);
         for (UUID id : fallen) {
             PENDING.put(id, new Home(titan, replay));
         }

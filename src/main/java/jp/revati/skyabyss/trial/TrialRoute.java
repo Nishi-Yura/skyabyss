@@ -49,7 +49,9 @@ import jp.revati.skyabyss.util.Players;
 //  - 途中から乗り込んだ仲間は、到着の台に着くと参加者に加わり、今の部屋へ運ばれる (rejoin)
 //  - あきらめは焚き火で提案し、全員の「はい」で成立。成立するとグループ全員が背の外へ出される (2.4)
 //  - 参加者が背に一人もいなくなって EMPTY_GRACE たつと順路は終わる (背を出る・ログアウト。復活の画面にいる参加者がいるあいだは終えない)。3 分の不在のリセットでも終わる
-//  - 背中で倒れた人は、どの巨神でも、目を覚ますと今の段の部屋の入口の休み場へ戻る (rejoinAfterDeath。全員倒れても順路は続く)
+//  - 背中で倒れた人は、どの巨神でも、目を覚ますと今の段の部屋の入口の休み場へ戻る (rejoinAfterDeath)
+//  - レイドの部屋・中ボスの間で全員が倒れると、順路は最初の部屋 (段 1) からやり直し (restartFromStart。越えた部屋の報いは二度は出ない)。
+//    心臓の戦いで全員が倒れると順路は終わり、地上へ (WipeReturn)
 //  - 記録はグループの記録の keep.trial.* (keep. なので試練のリセットでは消えない)。順路を終えるとき (心臓を止めた・あきらめ・
 //    背を出た・グループのリセット) に明示的に消す
 // 区画 (32 の 5 章) の番号は TrialSlot が割り当てる
@@ -338,6 +340,24 @@ public final class TrialRoute {
         }
         onCleared(back, group, titan, key, by);
         return "passed step " + step + " (" + key + ")";
+    }
+
+    // 全滅 (RaidRun.wipeAll): 順路を段 1 からやり直す。引いた三つ・参加者・区画はそのまま。挑戦の加護は消える (部屋を越え直すとまた選べる)
+    public static void restartFromStart(ServerLevel back, UUID group, String titan) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null || step(r) < 1) {
+            return;
+        }
+        r.putInt(STEP, 1);
+        r.remove(MID);
+        r.changed();
+        PENDING.remove(group);
+        CLEARED_KEYS.removeIf(s -> s.startsWith(group + "|"));
+        for (ServerPlayer m : members(back, group)) {
+            RouteBoons.clear(m);
+        }
+        carry(back, group, titan, 1, false);
+        SkyAbyss.LOGGER.info("Route of the {}: group {} starts over from step 1", titan, group);
     }
 
     // 中ボスを倒した (TrialMidBoss の見張りから)。中ボスの段なら心臓の前室へ

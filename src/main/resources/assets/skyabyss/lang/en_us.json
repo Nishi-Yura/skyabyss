@@ -3165,5 +3165,8 @@
   "tooltip.skyabyss.legend_rewrite_how": "  Works while held, once you pick the %s rewrite in the skill tree",
   "message.skyabyss.skill.rewrite_on": "%s became %s: %s",
   "message.skyabyss.skill.rewrite_off": "%s is back to its own form",
-  "message.skyabyss.skill.rewrite_bar": "%s → %s"
+  "message.skyabyss.skill.rewrite_bar": "%s → %s",
+  "message.skyabyss.dungeon.wipe": "Everyone fell. Back to the first floor",
+  "message.skyabyss.dungeon.woke_start": "You woke on the first floor",
+  "message.skyabyss.raid.wipe_restart": "Everyone fell. The route starts over from the first room"
 }

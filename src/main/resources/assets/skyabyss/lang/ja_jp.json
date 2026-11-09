@@ -3165,5 +3165,8 @@
   "tooltip.skyabyss.legend_rewrite_how": "  手に持ち、技の木で「%s」の書き換えを選ぶと効く",
   "message.skyabyss.skill.rewrite_on": "「%s」が「%s」に変わった: %s",
   "message.skyabyss.skill.rewrite_off": "「%s」は元の形に戻った",
-  "message.skyabyss.skill.rewrite_bar": "「%s」→「%s」"
+  "message.skyabyss.skill.rewrite_bar": "「%s」→「%s」",
+  "message.skyabyss.dungeon.wipe": "全滅した。最初の層からやり直し",
+  "message.skyabyss.dungeon.woke_start": "最初の層で目を覚ました",
+  "message.skyabyss.raid.wipe_restart": "全滅した。順路の最初の部屋からやり直し"
 }

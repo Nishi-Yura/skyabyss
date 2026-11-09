@@ -36,7 +36,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // レイドの部屋を動かす枠組み (docs/design/32 の 7 章)。順路 (TrialRoute) が段 1〜3 でレイドの部屋を運ぶとき、ここの enter が呼ばれる。
 //  - enter: 区画 (TrialSlot) の遠い島に部屋を建て (RaidRoom.build)、参加者を入口の間の休み場へ運び、準備 (3 秒) のあと戸を開けて start
-//  - 毎 tick: room.tick → 全員が倒れた (または ctx.fail) なら全滅の処理 (全員を起こして入口の間へ戻し、reset → 準備 → start)、
+//  - 毎 tick: room.tick → 全員が倒れたら全滅: 順路の最初の部屋 (段 1) からやり直し (wipeAll。2026-11-09 の声「レイドは死んだら最初からスタート」)。
+//    部屋の決まりで負けた (ctx.fail。苗が尽きた・時間切れ) ときは、その部屋だけやり直し (全員を起こして入口の間へ戻し、reset → 準備 → start)、
 //    越えたら出口の戸を開け、順路の「越えた」(onCleared) を呼ぶ (4 秒後に次の段へ運ばれる)
 //  - 目的の帯の中身 (RaidHudNet) を 10 tick ごとに部屋の人へ送る
 //  - 順路が終わると (finish) 部屋を片付ける。サーバーを再起動したら、順路の段の部屋を建て直して最初から
@@ -308,7 +309,7 @@ public final class RaidRun {
                 if (fail != null) {
                     wipe(run, fail.isEmpty() ? null : fail);
                 } else if (wiped(ctx)) {
-                    wipe(run, "message.skyabyss.raid.wipe");
+                    wipeAll(run);
                 } else if (run.room.isComplete()) {
                     complete(run);
                 }
@@ -431,7 +432,33 @@ public final class RaidRun {
         return true;
     }
 
-    // 全滅・やり直し: 全員を起こして入口の間へ戻し、部屋を戻して、準備のあと最初から
+    // 全員が倒れた: 順路の最初の部屋 (段 1) から。段 1 の部屋ならその部屋のやり直しと同じ
+    public static void wipeAll(Run run) {
+        if (run.step <= 1 && !run.mid) {
+            wipe(run, "message.skyabyss.raid.wipe");
+            return;
+        }
+        RaidCtx ctx = run.ctx;
+        int wipes = run.wipes + 1;
+        RaidRewards.onWipe(ctx.level(), ctx.group());
+        for (ServerPlayer p : ctx.players()) {
+            Downed.reviveFull(p);
+            p.setHealth(p.getMaxHealth());
+            p.removeAllEffects();
+            p.getFoodData().setFoodLevel(20);
+            Notice.warn(p, "message.skyabyss.raid.wipe_restart");
+        }
+        ctx.clearMobs();
+        SkyAbyss.LOGGER.info("Raid: everyone fell in room {} (group {}, wipe {}): the route starts over from step 1", ctx.roomId(), ctx.group(), wipes);
+        TrialRoute.restartFromStart(ctx.level(), ctx.group(), ctx.titan());
+        Run now = RUNS.get(ctx.group());
+        if (now != null) {
+            now.wipes = wipes;
+            now.ctx.assistWipes = wipes;
+        }
+    }
+
+    // 部屋のやり直し (部屋の決まりで負けた・段 1 で全滅): 全員を起こして入口の間へ戻し、部屋を戻して、準備のあと最初から
     public static void wipe(Run run, @Nullable String reasonKey) {
         RaidCtx ctx = run.ctx;
         run.wipes++;

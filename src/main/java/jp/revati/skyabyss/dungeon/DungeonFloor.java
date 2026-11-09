@@ -408,6 +408,27 @@ public final class DungeonFloor {
     }
 
     // 部屋 room に残っている敵の数 (小ダンジョンの知らせ)
+    // その人のいる (起きた) 部屋の、残りの敵の数 (挑戦の帯 trial/ChallengeBand。いちばん近い、敵の残る部屋。いなければ 0)
+    public int leftNear(ServerLevel level, ServerPlayer p) {
+        int best = 0;
+        double bd = Double.MAX_VALUE;
+        for (String room : woke) {
+            if (!terrain.has("room_" + room)) {
+                continue;
+            }
+            Vec3 c = center("room_" + room);
+            double d = p.position().distanceTo(c);
+            if (d < WAKE + 6 && Math.abs(p.getY() - c.y) < 10 && d < bd) {
+                int n = roomLeft(level, room);
+                if (n > 0) {
+                    best = n;
+                    bd = d;
+                }
+            }
+        }
+        return best;
+    }
+
     int roomLeft(ServerLevel level, String room) {
         int n = 0;
         for (var en : foeMark.entrySet()) {

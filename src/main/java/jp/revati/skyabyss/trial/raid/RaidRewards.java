@@ -128,6 +128,10 @@ public final class RaidRewards {
     public static void onRoomCleared(ServerLevel back, UUID group, String titan, String roomId, Slot slot) {
         boolean replay = !FirstRun.isFirstRun(back, group);
         BackGroupData.Record r = BackGroupData.get(back).of(group);
+        if (tokens(r).contains(roomId)) {
+            // この順路でもう越えた部屋 (全滅で最初からやり直した): 報いは二度は出ない
+            return;
+        }
         mark(r, roomId);
         if (replay) {
             mark(r, REPLAY_TOKEN);
@@ -142,6 +146,9 @@ public final class RaidRewards {
     public static void onMidCleared(ServerLevel back, UUID group, String titan) {
         boolean replay = !FirstRun.isFirstRun(back, group);
         BackGroupData.Record r = BackGroupData.get(back).of(group);
+        if (tokens(r).contains(MID_TOKEN)) {
+            return;
+        }
         mark(r, MID_TOKEN);
         if (replay) {
             mark(r, REPLAY_TOKEN);

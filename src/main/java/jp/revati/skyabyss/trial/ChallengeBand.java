@@ -83,6 +83,14 @@ public final class ChallengeBand {
             }
             int f = Math.max(0, run.floorOf(p));
             List<Tag> tags = new ArrayList<>();
+            // 今いる部屋の残りの敵 (2026-11-09 の声「残り何人とかの表記はちゃんと全部出るようになってる？」)
+            int left = run.floorOf(p) < 0 ? 0 : run.floor(f).leftNear(p.serverLevel(), p);
+            if (left > 0) {
+                tags.add(new Tag(Component.translatable("raid.skyabyss.hud.foes_left", left), 0xF07A6A));
+            }
+            if (run.wipes > 0) {
+                tags.add(new Tag(Component.translatable("hud.skyabyss.challenge.wipes", run.wipes), 0xD9779A));
+            }
             if (run.deep) {
                 tags.add(new Tag(Component.translatable("hud.skyabyss.challenge.deep"), 0xB48AE6));
             }

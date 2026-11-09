@@ -62,6 +62,8 @@ public final class MidRoomSelfTest {
     private static UUID group;
     private static String titan;
     private static boolean wiped;
+    // 二つ目の部屋で全員が倒れたら、順路は最初の部屋から (一つ目の巨神で一度だけ見る)
+    private static boolean restarted;
 
     private static boolean tick(MinecraftServer server) {
         try {
@@ -89,7 +91,7 @@ public final class MidRoomSelfTest {
         RaidRooms.DEV_DRAW.clear();
         if (FAILS.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST raid mid PASSED ({}: no separate mid-boss step; in the fight room the boss appears after the waves, single-stage at 70% health, "
-                    + "solo damage lands, each room's mechanic works on the boss, tide flood in the room + wipe back to the waves, defeat moves the route to the heart)", DONE);
+                    + "solo damage lands, each room's mechanic works on the boss, tide flood in the room + wipe back to the waves, everyone down in room 3 starts the route over from room 1, defeat moves the route to the heart)", DONE);
         } else {
             for (String f : FAILS) {
                 SkyAbyss.LOGGER.error("SELFTEST raid mid FAILED: {}", f);
@@ -185,6 +187,21 @@ public final class MidRoomSelfTest {
                 waited = 0;
             }
             case 3 -> {
+                if (!restarted) {
+                    // 闘の部屋で全員が倒れる → 順路は段 1 の部屋から (2026-11-09 の声「レイドは死んだら最初からスタート」)
+                    if (run == null || run.step != 3) {
+                        return timeout(400, "the fight room (step 3) before the restart check");
+                    }
+                    RaidRun.wipeAll(run);
+                    RaidRun.Run again = RaidRun.of(group);
+                    check(TrialRoute.step(back, group) == 1 && again != null && again.step == 1 && !again.mid && again.wipes == 1,
+                            "a wipe in room 3 did not start the route over from room 1 (step " + TrialRoute.step(back, group) + ")");
+                    check(!Downed.isDowned(player) && player.getHealth() >= player.getMaxHealth(), "the restart did not stand everyone up");
+                    restarted = true;
+                    stage = 1;
+                    waited = 0;
+                    return false;
+                }
                 // 三つ目 = 闘の部屋。中ボスの段を包んだ部屋で、準備のあと始まる
                 if (run == null || run.step != 3 || run.phase != RaidRun.Phase.ACTIVE) {
                     return timeout(400, "the fight room (step 3) to start");

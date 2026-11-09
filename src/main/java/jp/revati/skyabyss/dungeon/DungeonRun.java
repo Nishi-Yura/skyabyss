@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 // 一つの組の、一つのダンジョンの写し (docs/design/55 の 2 章)。区画 slot を使い、層ごとの DungeonFloor を持つ。
-//   checkpoint  着いた一番深い層 (倒れて起きたとき・入り直したときはここの入口へ。戻り石)
+//   checkpoint  着いた一番深い層 (仲間が立っているうちに倒れて起きたとき・入り直したときはここの入口へ。全滅すると 0 に戻る)
 //   members     入った人。あとから同じ組の人が層の門を使うと、ここに加わって checkpoint の層へ
 //   deep        深く潜る (主を一度倒した人が、しゃがんで層の門を使う。敵と主 +40%・仕掛けが速い・主の箱が一つ上。55 の 2 章)
 //   mood        その日の坑の様子 (DungeonMood。入ったときに決まる)
@@ -25,6 +25,10 @@ public final class DungeonRun {
     public int checkpoint;
     final DungeonFloor[] floors;
     public boolean cleared;
+    // 全滅の回数 (全滅すると最初の層から。Dungeons.wipe)
+    public int wipes;
+    // 全滅のとき死の画面にいた人 (起きるまで全滅の数えに入れない)
+    final java.util.Set<UUID> wipeWait = new java.util.HashSet<>();
     public final boolean deep;
     public DungeonMood mood;
     long clearedAt;
