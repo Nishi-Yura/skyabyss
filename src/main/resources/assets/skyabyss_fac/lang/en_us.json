@@ -845,6 +845,7 @@
   "dialogue.skyabyss.attendant_shrine_priest.shrine.vow": "Choose a vow",
   "dialogue.skyabyss.attendant_shrine_priest.shrine_how": "Gather your whole party near this pad, then speak to me. I count five seconds and send everyone onto the route.\nIt takes one song shard of the titan (one person carrying it is enough). If anyone steps away while I count, I stop.",
   "gui.skyabyss.stash.title_page": "Storehouse %s/%s",
+  "gui.skyabyss.stash.page_tab": "Go to stash page %s (Page Up / Page Down also work)",
   "dialogue.skyabyss.attendant_storage_keeper.menu.stash_2": "Open page 2",
   "dialogue.skyabyss.attendant_storage_keeper.menu.stash_3": "Open page 3",
   "dialogue.skyabyss.attendant_storage_keeper.menu.stash_4": "Open page 4",

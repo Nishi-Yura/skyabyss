@@ -24,6 +24,7 @@
   "subtitles.skyabyss.ember_world_turn": "大地が寝返りをうつ",
   "message.skyabyss.ember.surface.asleep": "土の匂いが熱い。どこかで、山が寝息をたてている……",
   "message.skyabyss.ember.surface.mouth_hint": "息を吸っているあいだに、口へ入ろう",
+  "message.skyabyss.ember.surface.mouth_wait": "余燼が息を吐いている。吸いはじめたら、口へ入ろう",
   "message.skyabyss.ember.surface.spat_out": "巨神の息が、あなたを吐き出した。まだ早い",
   "message.skyabyss.ember.surface.stone.given": "懐に、温かい小石が入っていた。灰の民の焼き物だ。握ると、どこかの熱が手に移る。",
   "message.skyabyss.ember.surface.stone.cold": "石は冷たい。",

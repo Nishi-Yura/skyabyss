@@ -845,6 +845,7 @@
   "dialogue.skyabyss.attendant_shrine_priest.shrine.vow": "誓いを選ぶ",
   "dialogue.skyabyss.attendant_shrine_priest.shrine_how": "パーティー全員が、この台のそばに集まってください。そろったら私に声をかけて。5 秒数えて、全員を歌でルートへ送ります。\n巨神の歌片が一つ要ります（誰か一人が持っていれば足ります）。数えているあいだに誰かが離れたら、止めます。",
   "gui.skyabyss.stash.title_page": "預かり所 %s／%s",
+  "gui.skyabyss.stash.page_tab": "預かり所 %s 頁へ（Page Up・Page Down でも替わる）",
   "dialogue.skyabyss.attendant_storage_keeper.menu.stash_2": "2頁目を開く",
   "dialogue.skyabyss.attendant_storage_keeper.menu.stash_3": "3頁目を開く",
   "dialogue.skyabyss.attendant_storage_keeper.menu.stash_4": "4頁目を開く",

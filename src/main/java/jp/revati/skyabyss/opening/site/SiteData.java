@@ -1,8 +1,10 @@
 package jp.revati.skyabyss.opening.site;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -179,6 +181,12 @@ public final class SiteData extends SavedData {
     public void setGrounds(List<Ground> list) {
         grounds.clear();
         grounds.addAll(list);
+        for (Ground g : list) {
+            Set<UUID> was = carrySeen.remove(g.chapter);
+            if (was != null) {
+                g.seen.addAll(was);
+            }
+        }
         groundsPlanned = true;
         setDirty();
     }
@@ -207,9 +215,101 @@ public final class SiteData extends SavedData {
     public ChapterPlan addPlan(String chapter, BlockPos anchor, boolean ahead) {
         ChapterPlan p = new ChapterPlan(chapter, anchor);
         p.ahead = ahead;
+        Set<UUID> was = carryPlayers.remove(chapter);
+        if (was != null) {
+            p.players.addAll(was);
+        }
         chapterPlans.add(p);
         setDirty();
         return p;
+    }
+
+    // ---------------------------------------------------------------- 大陸の作り直し (upgrade/ContinentRegen)
+    // 作り直しのあとに引き継ぐ、人ごとの記録 (跡地を見た人・章の小要素に着いた人・章の拠点の人)。置き場を決め直したら付け直す
+    private final Map<String, Set<UUID>> carrySeen = new HashMap<>();
+    private final Map<String, Set<UUID>> carryArrived = new HashMap<>();
+    private final Map<String, Set<UUID>> carryPlayers = new HashMap<>();
+
+    private static String arrivedKey(String chapter, String siteId, int index) {
+        return chapter + "|" + siteId + "|" + index;
+    }
+
+    // 置き場をすべて捨てて、新しい世界と同じに決め直させる (2026-11-09 の声「途中からのところはおかしくなるのかも。全部新しくなるようにしてほしい」)。
+    // 野営地 (はじまりの場所。スポーン地点と結びつく) だけは場所を残して建て直す。人ごとの記録は carry に移して、決め直した所へ付け直す。戻り値 = 捨てた数
+    public int clearForRegen() {
+        int n = entries.size();
+        for (Ground g : grounds) {
+            if (!g.seen.isEmpty()) {
+                carrySeen.computeIfAbsent(g.chapter, k -> new LinkedHashSet<>()).addAll(g.seen);
+            }
+        }
+        for (ChapterPlan p : chapterPlans) {
+            n += p.sites.size();
+            if (!p.players.isEmpty()) {
+                carryPlayers.computeIfAbsent(p.chapter, k -> new LinkedHashSet<>()).addAll(p.players);
+            }
+            for (Entry e : p.sites) {
+                if (!e.arrived.isEmpty()) {
+                    carryArrived.computeIfAbsent(arrivedKey(p.chapter, e.siteId, e.index), k -> new LinkedHashSet<>()).addAll(e.arrived);
+                }
+            }
+        }
+        Entry camp = first("camp");
+        entries.clear();
+        if (camp != null) {
+            camp.built = false;
+            camp.started = false;
+            entries.add(camp);
+        }
+        chapterPlans.clear();
+        grounds.clear();
+        groundsPlanned = false;
+        planned = false;
+        setDirty();
+        return n;
+    }
+
+    // 自己テスト (upgrade/UpgradeSelfTest): 作り直しで置き場を捨て、野営地を残し、記録を決め直した所へ付け直すか。保存して読み直しても残るか
+    public static List<String> regenCarryCheck(HolderLookup.Provider registries) {
+        List<String> f = new ArrayList<>();
+        UUID a = UUID.fromString("7a0b1d00-0000-4000-8000-00000000c0a1");
+        SiteData d = new SiteData();
+        d.add("camp", 0, new BlockPos(1, 70, 1), 0).built = true;
+        d.add("ferry", 0, new BlockPos(9, 64, 9), 0).built = true;
+        d.markPlanned(5, BlockPos.ZERO, false);
+        Ground g = new Ground("whale", new BlockPos(100, 70, 0));
+        g.seen.add(a);
+        d.setGrounds(List.of(g));
+        ChapterPlan p = d.addPlan("whale", new BlockPos(100, 70, 0), false);
+        p.players.add(a);
+        Entry e = new Entry("ch_hut", 2, new BlockPos(110, 70, 0), 0);
+        e.siteId = "hut";
+        e.arrived.add(a);
+        p.sites.add(e);
+        d.clearForRegen();
+        if (d.entries().size() != 1 || !d.entries().get(0).kind.equals("camp") || d.entries().get(0).built || d.planned() || d.groundsPlanned()
+                || !d.plans().isEmpty() || !d.grounds().isEmpty()) {
+            f.add("clearForRegen should keep only the camp (unbuilt) and unplan everything");
+        }
+        SiteData r = load(d.save(new CompoundTag(), registries), registries);
+        Ground g2 = new Ground("whale", new BlockPos(120, 70, 0));
+        r.setGrounds(List.of(g2));
+        ChapterPlan p2 = r.addPlan("whale", new BlockPos(120, 70, 0), false);
+        Entry e2 = new Entry("ch_hut", 2, new BlockPos(130, 70, 0), 0);
+        e2.siteId = "hut";
+        r.adoptCarried(p2, e2);
+        if (!g2.seen.contains(a) || !p2.players.contains(a) || !e2.arrived.contains(a)) {
+            f.add("regen carry lost a record across save: seen " + g2.seen.contains(a) + " players " + p2.players.contains(a) + " arrived " + e2.arrived.contains(a));
+        }
+        return f;
+    }
+
+    // 決め直した章の小要素に、前の版で着いていた人を付け直す (ChapterSites が置き場を書くとき)
+    public void adoptCarried(ChapterPlan plan, Entry e) {
+        Set<UUID> was = carryArrived.remove(arrivedKey(plan.chapter, e.siteId, e.index));
+        if (was != null) {
+            e.arrived.addAll(was);
+        }
     }
 
     // 序盤の場所と章の小要素の場所を合わせた一覧 (重なりを避けるとき用)
@@ -291,6 +391,26 @@ public final class SiteData extends SavedData {
         return spawnMoved;
     }
 
+    private static CompoundTag saveCarry(Map<String, Set<UUID>> m) {
+        CompoundTag c = new CompoundTag();
+        for (Map.Entry<String, Set<UUID>> e : m.entrySet()) {
+            ListTag l = new ListTag();
+            e.getValue().forEach(u -> l.add(StringTag.valueOf(u.toString())));
+            c.put(e.getKey(), l);
+        }
+        return c;
+    }
+
+    private static void loadCarry(CompoundTag c, Map<String, Set<UUID>> m) {
+        for (String k : c.getAllKeys()) {
+            Set<UUID> set = new LinkedHashSet<>();
+            for (Tag u : c.getList(k, Tag.TAG_STRING)) {
+                set.add(UUID.fromString(u.getAsString()));
+            }
+            m.put(k, set);
+        }
+    }
+
     static SiteData load(CompoundTag tag, HolderLookup.Provider registries) {
         SiteData d = new SiteData();
         d.planned = tag.getBoolean("planned");
@@ -340,6 +460,9 @@ public final class SiteData extends SavedData {
             d.chapterPlans.add(p);
         }
         d.groundsPlanned = tag.getBoolean("groundsPlanned");
+        loadCarry(tag.getCompound("carrySeen"), d.carrySeen);
+        loadCarry(tag.getCompound("carryArrived"), d.carryArrived);
+        loadCarry(tag.getCompound("carryPlayers"), d.carryPlayers);
         for (Tag t : tag.getList("grounds", Tag.TAG_COMPOUND)) {
             CompoundTag c = (CompoundTag) t;
             Ground g = new Ground(c.getString("chapter"), BlockPos.of(c.getLong("center")));
@@ -425,6 +548,9 @@ public final class SiteData extends SavedData {
         }
         tag.put("chapterPlans", plans);
         tag.putBoolean("groundsPlanned", groundsPlanned);
+        tag.put("carrySeen", saveCarry(carrySeen));
+        tag.put("carryArrived", saveCarry(carryArrived));
+        tag.put("carryPlayers", saveCarry(carryPlayers));
         ListTag gl = new ListTag();
         for (Ground g : grounds) {
             CompoundTag c = new CompoundTag();

@@ -891,21 +891,21 @@ public class TravelMapScreen extends Screen {
                 hits.add(hit(at, 50, lines, d.valid() ? d.id() : null));
             }
         }
-        // ピン (手もとに置いた印。番号つき)
+        // ピン (手もとに置いた印。一人一本)
         if (MapPrefs.shows(MapPrefs.Layer.PINS) && !onMoon()) {
             List<MapPrefs.Pin> pins = MapPrefs.pins();
             for (int i = 0; i < pins.size(); i++) {
                 MapPrefs.Pin pin = pins.get(i);
                 int[] at = project(pin.x() + 0.5, pin.z() + 0.5);
-                pin(g, at[0], at[1], i + 1, at[2] == 1 ? 0.55f : 1f);
-                hits.add(hit(new int[] {at[0], at[1] - 8}, 60, List.of(Component.translatable("map.skyabyss.mark.pin", i + 1).withColor(PIN_COLOR & 0xFFFFFF),
+                pin(g, at[0], at[1], 0, at[2] == 1 ? 0.55f : 1f);
+                hits.add(hit(new int[] {at[0], at[1] - 8}, 60, List.of(Component.translatable("map.skyabyss.mark.pin").withColor(PIN_COLOR & 0xFFFFFF),
                         MapText.where(me, pin.x() + 0.5, pin.z() + 0.5), Component.translatable("map.skyabyss.mark.pin_remove")), null));
             }
             // パーティーの仲間のピン (水色。party/PartyPins)
             for (jp.revati.skyabyss.party.PartyPins.Pin mp : PinMarkers.mates()) {
                 int[] at = project(mp.x() + 0.5, mp.z() + 0.5);
-                pin(g, at[0], at[1], mp.number(), at[2] == 1 ? 0.55f : 1f, PinMarkers.MATE);
-                hits.add(hit(new int[] {at[0], at[1] - 8}, 59, List.of(Component.translatable("map.skyabyss.mark.pin_mate", mp.owner(), mp.number()).withColor(PinMarkers.MATE),
+                pin(g, at[0], at[1], 0, at[2] == 1 ? 0.55f : 1f, PinMarkers.MATE);
+                hits.add(hit(new int[] {at[0], at[1] - 8}, 59, List.of(Component.translatable("map.skyabyss.mark.pin_mate", mp.owner()).withColor(PinMarkers.MATE),
                         MapText.where(me, mp.x() + 0.5, mp.z() + 0.5)), null));
             }
         }

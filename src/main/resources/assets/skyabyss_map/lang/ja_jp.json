@@ -49,7 +49,7 @@
   "gui.skyabyss.map.layer.pins": "ピン",
   "gui.skyabyss.map.layer_hide": "クリックで「%s」を隠す",
   "gui.skyabyss.map.layer_show": "クリックで「%s」を出す",
-  "map.skyabyss.mark.pin": "ピン %s",
+  "map.skyabyss.mark.pin": "ピン",
   "map.skyabyss.mark.pin_remove": "ホイール押し・Shift＋クリックで外す",
-  "map.skyabyss.mark.pin_mate": "%s のピン %s"
+  "map.skyabyss.mark.pin_mate": "%s のピン"
 }

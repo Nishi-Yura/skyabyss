@@ -49,7 +49,7 @@
   "gui.skyabyss.map.layer.pins": "Pins",
   "gui.skyabyss.map.layer_hide": "Click to hide %s",
   "gui.skyabyss.map.layer_show": "Click to show %s",
-  "map.skyabyss.mark.pin": "Pin %s",
+  "map.skyabyss.mark.pin": "Pin",
   "map.skyabyss.mark.pin_remove": "Middle-click or Shift+click to remove",
-  "map.skyabyss.mark.pin_mate": "%s's pin %s"
+  "map.skyabyss.mark.pin_mate": "%s's pin"
 }

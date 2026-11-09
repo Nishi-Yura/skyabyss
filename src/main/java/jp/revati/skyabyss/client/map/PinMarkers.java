@@ -83,10 +83,10 @@ public final class PinMarkers {
         }
         List<MapPrefs.Pin> own = MapPrefs.pins();
         for (int i = 0; i < own.size(); i++) {
-            draw(g, mc, own.get(i).x(), own.get(i).z(), OWN, String.valueOf(i + 1));
+            draw(g, mc, own.get(i).x(), own.get(i).z(), OWN, net.minecraft.network.chat.Component.translatable("map.skyabyss.mark.pin").getString());
         }
         for (PartyPins.Pin p : mates) {
-            draw(g, mc, p.x(), p.z(), MATE, p.owner() + " " + p.number());
+            draw(g, mc, p.x(), p.z(), MATE, p.owner());
         }
     }
 

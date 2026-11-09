@@ -22,10 +22,13 @@ import net.minecraft.world.item.ItemStack;
 public final class StashMenu extends ChestMenu {
     @Nullable
     private final Entity keeper;
+    // この箱の頁 (1 から)
+    private final int page;
 
-    private StashMenu(int id, Inventory inventory, Container stash, @Nullable Entity keeper) {
+    private StashMenu(int id, Inventory inventory, Container stash, @Nullable Entity keeper, int page) {
         super(MenuType.GENERIC_9x6, id, inventory, stash, 6);
         this.keeper = keeper;
+        this.page = page;
         // 預かりの枠を、預けられない品を弾く枠に差し替える (位置と番号は同じ)
         for (int i = 0; i < StashData.PAGE; i++) {
             Slot old = slots.get(i);
@@ -64,7 +67,20 @@ public final class StashMenu extends ChestMenu {
         }
         Component title = data.pages() > 1 ? Component.translatable("gui.skyabyss.stash.title_page", page, data.pages())
                 : Component.translatable("gui.skyabyss.stash.title");
-        player.openMenu(new SimpleMenuProvider((id, inv, p) -> new StashMenu(id, inv, new StashContainer(data, (page - 1) * StashData.PAGE), keeper), title));
+        player.openMenu(new SimpleMenuProvider((id, inv, p) -> new StashMenu(id, inv, new StashContainer(data, (page - 1) * StashData.PAGE), keeper, page), title));
+        // 箱を開いたまま頁を替える札 (StashPages)。一頁だけなら札は出さない
+        if (data.pages() > 1) {
+            StashPages.tell(player, page, data.pages());
+        }
+    }
+
+    int page() {
+        return page;
+    }
+
+    @Nullable
+    Entity keeper() {
+        return keeper;
     }
 
     // 次の頁を鐘銭で開ける。開けたら true

@@ -61,6 +61,8 @@ public final class UpgradeSelfTest {
         } catch (java.io.IOException e) {
             f.add("temp folder: " + e);
         }
+        // 作り直しで建て物の置き場を決め直し、見た・着いた記録は引き継ぐ (SiteData.clearForRegen)
+        f.addAll(jp.revati.skyabyss.opening.site.SiteData.regenCarryCheck(server.registryAccess()));
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a0b1d00-0000-4000-8000-00000000a9e1"), "upgrade_a"));
         p.getPersistentData().remove(PlayerUpgrade.KEY);
         PlayerUpgrade.run(p);

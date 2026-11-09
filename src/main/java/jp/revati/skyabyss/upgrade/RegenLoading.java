@@ -103,7 +103,8 @@ public final class RegenLoading {
             int got = loaded(p);
             SiteBuilds.prioritizeNear(p.blockPosition(), BUILD_NEAR);
             int near = SiteBuilds.pendingNear(p.blockPosition(), BUILD_NEAR);
-            boolean builds = near > 0 && t < BUILD_MAX;
+            // 置き場を決め直している途中 (作り直しの直後) も待つ。決まる前に放すと、まわりの建物が予約される前に終わってしまう
+            boolean builds = (near > 0 || SiteBuilds.planning()) && t < BUILD_MAX;
             boolean done = t >= MIN_TICKS && got >= total && !builds || t >= MAX_TICKS;
             PacketDistributor.sendToPlayer(p, new State(!done, done, near, Math.round(100f * got / total)));
             if (done) {

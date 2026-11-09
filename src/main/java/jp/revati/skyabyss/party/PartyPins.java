@@ -26,7 +26,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // サーバーは人ごとの今のピンを覚え (保存はしない)、2 秒ごとに、各人へ同じパーティーの仲間のピンをまとめて送る (Mates。中身が変わったときだけ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PartyPins {
-    public static final int MAX = 9;
+    // 一人一本 (client/map/MapPrefs.MAX_PINS と同じ)
+    public static final int MAX = 1;
     private static final Map<UUID, List<int[]>> PINS = new ConcurrentHashMap<>();
     private static final Map<UUID, Mates> LAST = new ConcurrentHashMap<>();
 
