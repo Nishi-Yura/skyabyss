@@ -189,6 +189,19 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm>> LAVA_WYRM = ENTITIES.register("lava_wyrm",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm::new, MobCategory.MONSTER)
                     .sized(4.0f, 5.4f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":lava_wyrm"));
+    // 奥のダンジョンの中ボス (2026-11-09 のラフで選んだ形。dungeon/mob/deep)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.BoneLancer>> BONE_LANCER = ENTITIES.register("bone_lancer",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.BoneLancer::new, MobCategory.MONSTER)
+                    .sized(2.0f, 4.6f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":bone_lancer"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.JellyPriestess>> JELLY_PRIESTESS = ENTITIES.register("jelly_priestess",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.JellyPriestess::new, MobCategory.MONSTER)
+                    .sized(3.0f, 5.0f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":jelly_priestess"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.ThunderOwl>> THUNDER_OWL = ENTITIES.register("thunder_owl",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.ThunderOwl::new, MobCategory.MONSTER)
+                    .sized(2.6f, 3.8f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":thunder_owl"));
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.LavaToad>> LAVA_TOAD = ENTITIES.register("lava_toad",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.LavaToad::new, MobCategory.MONSTER)
+                    .sized(3.4f, 2.8f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":lava_toad"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ForgeGiant>> FORGE_GIANT = ENTITIES.register("forge_giant",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ForgeGiant::new, MobCategory.MONSTER)
                     .sized(2.4f, 5.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":forge_giant"));
@@ -316,6 +329,10 @@ public final class ModEntities {
         event.put(TEMPLE_KEEPER.get(), jp.revati.skyabyss.dungeon.mob.deep.TempleKeeper.createAttributes().build());
         event.put(ICE_LORD.get(), jp.revati.skyabyss.dungeon.mob.deep.IceLord.createAttributes().build());
         event.put(LAVA_WYRM.get(), jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm.createAttributes().build());
+        event.put(BONE_LANCER.get(), jp.revati.skyabyss.dungeon.mob.deep.BoneLancer.createAttributes().build());
+        event.put(JELLY_PRIESTESS.get(), jp.revati.skyabyss.dungeon.mob.deep.JellyPriestess.createAttributes().build());
+        event.put(THUNDER_OWL.get(), jp.revati.skyabyss.dungeon.mob.deep.ThunderOwl.createAttributes().build());
+        event.put(LAVA_TOAD.get(), jp.revati.skyabyss.dungeon.mob.deep.LavaToad.createAttributes().build());
         event.put(PIT_DIGGER.get(), jp.revati.skyabyss.dungeon.mob.PitDigger.createAttributes().build());
         event.put(BONE_ROLLER.get(), jp.revati.skyabyss.dungeon.mob.BoneRoller.createAttributes().build());
         event.put(PIT_FOREMAN.get(), jp.revati.skyabyss.dungeon.mob.PitForeman.createAttributes().build());

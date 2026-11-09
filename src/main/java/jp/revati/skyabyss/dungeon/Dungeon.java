@@ -29,16 +29,16 @@ public enum Dungeon {
             Map.of("mite", "skyabyss:lava_slug", "husk", "skyabyss:bellows_imp", "dragger", "skyabyss:ash_dragger",
                     "thrall", "skyabyss:elder_thrall")),
     // ---- 奥のダンジョン (外れの帯。issue #19 の ②。tools/gen/world/dungeons_deep.py・dungeons_deep2.py) ----
-    // 層は中ダンジョンと同じ一層・二層・主の間。二層の終わりの中ボスは土地の名のある強敵 (2026-11-09 の声「ボスの前の中ボス」「1層と2層に」)
-    DEEP_FORT("deep_fort", ContinentMap.WHALE, 15, Element.STONE, "skyabyss:rock_boar", "skyabyss:fort_warlord",
+    // 層は中ダンジョンと同じ一層・二層・主の間。二層の終わりの中ボスは専用 (骨馬の槍騎兵・大海月の巫女・雷の大梟・熔岩の大蛙。2026-11-09 のラフで選んだ形)
+    DEEP_FORT("deep_fort", ContinentMap.WHALE, 15, Element.STONE, "skyabyss:bone_lancer", "skyabyss:fort_warlord",
             Map.of("bandit", "skyabyss:bandit", "archer", "skyabyss:bandit_archer", "chief", "skyabyss:bandit_chief", "dog", "skyabyss:feral_dog"), false, true),
-    DEEP_TEMPLE("deep_temple", ContinentMap.TIDE, 21, Element.TIDE, "skyabyss:tide_crab", "skyabyss:temple_keeper",
+    DEEP_TEMPLE("deep_temple", ContinentMap.TIDE, 21, Element.TIDE, "skyabyss:jelly_priestess", "skyabyss:temple_keeper",
             Map.of("thrall", "skyabyss:coral_thrall", "sailor", "skyabyss:drowned_sailor", "angler", "skyabyss:mist_angler", "warden", "skyabyss:shore_warden",
                     "jelly", "skyabyss:cave_jelly"), false, true),
-    DEEP_ICE("deep_ice", ContinentMap.STORM, 27, Element.WIND, "skyabyss:storm_ram", "skyabyss:ice_lord",
+    DEEP_ICE("deep_ice", ContinentMap.STORM, 27, Element.WIND, "skyabyss:thunder_owl", "skyabyss:ice_lord",
             Map.of("tortoise", "skyabyss:crag_tortoise", "jelly", "skyabyss:storm_jelly", "slinger", "skyabyss:bolt_slinger", "wolf", "skyabyss:thunder_wolf",
                     "warden", "skyabyss:scorched_warden"), false, true),
-    DEEP_LAVA("deep_lava", ContinentMap.EMBER, 33, Element.ASH, "skyabyss:ash_lizard", "skyabyss:lava_wyrm",
+    DEEP_LAVA("deep_lava", ContinentMap.EMBER, 33, Element.ASH, "skyabyss:lava_toad", "skyabyss:lava_wyrm",
             Map.of("scorpion", "skyabyss:basalt_scorpion", "spitter", "skyabyss:ember_spitter", "jackal", "skyabyss:ember_jackal", "whirl", "skyabyss:ash_whirl",
                     "thrall", "skyabyss:elder_thrall"), false, true),
     // ---- 小ダンジョン (章の跡地) ----

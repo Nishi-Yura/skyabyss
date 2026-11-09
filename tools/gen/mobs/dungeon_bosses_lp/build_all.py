@@ -17,7 +17,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import blp  # noqa: E402
 
-ORDER = ["bone_centipede", "shell_octopus", "crystal_lizard", "forge_giant", "fort_warlord", "temple_keeper", "ice_lord", "lava_wyrm"]
+ORDER = ["bone_centipede", "shell_octopus", "crystal_lizard", "forge_giant", "fort_warlord", "temple_keeper", "ice_lord", "lava_wyrm",
+         "bone_lancer", "jelly_priestess", "thunder_owl", "lava_toad"]
 
 
 def build_one(mid, install=True):

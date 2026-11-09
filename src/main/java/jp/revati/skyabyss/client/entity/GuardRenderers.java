@@ -105,6 +105,10 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.TEMPLE_KEEPER.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "temple_keeper", 1.7f));
         event.registerEntityRenderer(ModEntities.ICE_LORD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "ice_lord", 1.6f));
         event.registerEntityRenderer(ModEntities.LAVA_WYRM.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "lava_wyrm", 1.6f));
+        event.registerEntityRenderer(ModEntities.BONE_LANCER.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "bone_lancer", 1.4f));
+        event.registerEntityRenderer(ModEntities.JELLY_PRIESTESS.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "jelly_priestess", 1.4f));
+        event.registerEntityRenderer(ModEntities.THUNDER_OWL.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "thunder_owl", 1.4f));
+        event.registerEntityRenderer(ModEntities.LAVA_TOAD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "lava_toad", 1.4f));
         // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7)
         event.registerEntityRenderer(ModEntities.PIT_DIGGER.get(), ctx -> noTilt(ctx, "pit_digger"));
         event.registerEntityRenderer(ModEntities.BONE_ROLLER.get(), ctx -> noTilt(ctx, "bone_roller"));

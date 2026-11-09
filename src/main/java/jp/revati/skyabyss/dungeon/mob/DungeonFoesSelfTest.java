@@ -59,7 +59,12 @@ public final class DungeonFoesSelfTest {
             new Case("geode_golem", ModEntities.GEODE_GOLEM::get, 4.0, GeodeGolem.POUND_WARN, new String[] {"punch", "pound", "shards"}),
             new Case("bellows_imp", ModEntities.BELLOWS_IMP::get, 4.0, BellowsImp.WARN, new String[] {"breath", "poke"}),
             new Case("lava_slug", ModEntities.LAVA_SLUG::get, 2.2, LavaSlug.WARN, new String[] {"bite"}),
-            new Case("ox_smith", ModEntities.OX_SMITH::get, 3.0, OxSmith.BASH_WARN, new String[] {"grab", "bash", "slam"}));
+            new Case("ox_smith", ModEntities.OX_SMITH::get, 3.0, OxSmith.BASH_WARN, new String[] {"grab", "bash", "slam"}),
+            // 奥のダンジョンの中ボス (2026-11-09)
+            new Case("bone_lancer", ModEntities.BONE_LANCER::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.BoneLancer.CHARGE_WARN, new String[] {"charge", "rear", "sweep"}),
+            new Case("jelly_priestess", ModEntities.JELLY_PRIESTESS::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.JellyPriestess.RAIN_WARN, new String[] {"lash", "rain", "pulse"}),
+            new Case("thunder_owl", ModEntities.THUNDER_OWL::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.ThunderOwl.DIVE_WARN, new String[] {"dive", "gust", "strike"}),
+            new Case("lava_toad", ModEntities.LAVA_TOAD::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.LavaToad.HOP_WARN, new String[] {"hop", "erupt", "tongue"}));
 
     private DungeonFoesSelfTest() {
     }

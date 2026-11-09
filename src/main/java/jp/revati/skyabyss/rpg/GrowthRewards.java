@@ -109,6 +109,10 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bellows_imp", new Source(20, 28));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":lava_slug", new Source(18, 28));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":ox_smith", new Source(155, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_lancer", new Source(80, 16));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":jelly_priestess", new Source(110, 22));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_owl", new Source(140, 28));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":lava_toad", new Source(170, 34));
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(GrowthRewards.CAPTAIN_XP, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(GrowthRewards.HEART_XP, STONE_WHALE_LEVEL));
