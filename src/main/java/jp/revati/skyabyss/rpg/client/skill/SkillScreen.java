@@ -1743,7 +1743,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 }
             }
         }
-        java.util.List<Object[]> caps = new java.util.ArrayList<>();
         for (AbilityNode n : t.nodes()) {
             int x = v2L(n);
             int y = v2T(n);
@@ -1786,14 +1785,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             if (lessonLearn && n.kind == AbilityNode.Kind.ACTIVE && tr == SkillData.TakeResult.OK) {
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, sz, sz);
             }
-            // 下の小さな字: 基礎は +数、段は +1、まだ取っていない節は点
-            String cap = n.kind == AbilityNode.Kind.STAT ? "+" + n.amount : n.kind == AbilityNode.Kind.RANK ? "+1" : taken ? "" : n.cost + "SP";
-            if (!cap.isEmpty()) {
-                boolean prov = tryon != null && taken && !real().hasNode(tree, n.id);
-                int color = prov ? 0x7FFFA0 : taken ? GOLD : tr == SkillData.TakeResult.OK ? TEXT : DIM;
-                // 字は全部の節のあとに、暗い下敷きの上に描く (下の節や線に重なっても読める)
-                caps.add(new Object[] {cap, x + sz / 2 - font.width(cap) / 2, y + sz + (round ? 4 : 2), color});
-            }
+            // 節の下の字 (点・+数) は出さない (2026-11-09 の声「アイコンの下にある 1sp や +4 いらない」)。点と数は節の説明に出る
             // 使う技の節には右上に小さな菱形の印 (枠に置ける。丸の外の縁に)
             if (n.kind == AbilityNode.Kind.ACTIVE) {
                 int mx0 = x + sz - 1;
@@ -1816,13 +1808,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                     g.fill(x + sz - 4 - i, y + 2 + i, x + sz - 2 - i, y + 4 + i, c);
                 }
             }
-        }
-        for (Object[] c : caps) {
-            String txt = (String) c[0];
-            int cx = (int) c[1];
-            int cy = (int) c[2];
-            g.fill(cx - 1, cy - 1, cx + font.width(txt) + 1, cy + 8, 0xD00E1016);
-            g.drawString(font, txt, cx, cy, (int) c[3], false);
         }
         canvas.end(g);
     }
