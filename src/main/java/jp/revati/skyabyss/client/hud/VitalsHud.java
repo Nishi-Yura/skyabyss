@@ -55,6 +55,11 @@ public final class VitalsHud {
             event.setCanceled(true);
             return;
         }
+        // Mod の乗り物 (乗り笛の獣・巨神の子) の体力は出さない。そこには自分のマナ (2026-11-08 の声「ペットの hp 表記いらない」)
+        if (VanillaGuiLayers.VEHICLE_HEALTH.equals(name) && Minecraft.getInstance().player != null && modVehicle(Minecraft.getInstance().player)) {
+            event.setCanceled(true);
+            return;
+        }
         boolean health = VanillaGuiLayers.PLAYER_HEALTH.equals(name);
         boolean armor = VanillaGuiLayers.ARMOR_LEVEL.equals(name);
         boolean food = VanillaGuiLayers.FOOD_LEVEL.equals(name);
@@ -77,7 +82,7 @@ public final class VitalsHud {
             // 体力のある乗り物に乗っている間は、バニラが乗り物の体力をここへ描く (満腹は出ない)
             if (manaInFoodSlot()) {
                 drawMana(g, mc, p);
-            } else if (!(p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth())) {
+            } else if (!(p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth()) || modVehicle(p)) {
                 drawFood(g, mc, p);
             } else {
                 event.setCanceled(false);
@@ -132,7 +137,13 @@ public final class VitalsHud {
     public static boolean manaInFoodSlot() {
         Minecraft mc = Minecraft.getInstance();
         return NO_FOOD_BAR && styled() && rect(Id.V_FOOD) != null
-                && !(mc.player.getVehicle() instanceof LivingEntity v && v.showVehicleHealth());
+                && (!(mc.player.getVehicle() instanceof LivingEntity v && v.showVehicleHealth()) || modVehicle(mc.player));
+    }
+
+    // Mod の乗り物に乗っているか
+    static boolean modVehicle(Player p) {
+        return p.getVehicle() != null && jp.revati.skyabyss.SkyAbyss.MODID.equals(
+                net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(p.getVehicle().getType()).getNamespace());
     }
 
     private static void drawMana(GuiGraphics g, Minecraft mc, Player p) {

@@ -118,7 +118,7 @@ def walkway(cv, x0, x1, z0, z1, y, wood="spruce", rail_side=None):
     for x in range(x0, x1 + 1):
         for z in range(z0, z1 + 1):
             cv.put(x, y - 1, z, f"minecraft:{wood}_planks" if hsh(x, z, 77) < 0.8 else slab(wood, "top"))
-            cv.fill_air(x, x, y, y + 2, z, z)
+            cv.clear(x, x, y, y + 2, z, z)
     for x in (x0, x1):
         for z in (z0, z1):
             for yy in range(y - 2, y - 30, -1):
@@ -137,11 +137,13 @@ def ramp(cv, x, z0, z1, y0, wood="spruce", w=1):
     """南北の木の坂 (z0 → z1 で一つずつ上がる)"""
     step = 1 if z1 > z0 else -1
     facing = "south" if step > 0 else "north"
-    y = y0
+    # 最初の段は床の上に置く (床より高いと跳ばないと乗れない。2026-11-08 の声「上らせる気の無い建築」)
+    fy = cv.floor_y(x, z0, y0, 4)
+    y = fy if fy is not None else y0
     for z in range(z0, z1 + step, step):
         for dx in range(-w, w + 1):
             cv.put(x + dx, y, z, stair(wood, facing))
-            cv.fill_air(x + dx, x + dx, y + 1, y + 3, z, z)
+            cv.clear(x + dx, x + dx, y + 1, y + 3, z, z)
             for yy in range(y - 1, y - 20, -1):
                 if not cv.is_air(x + dx, yy, z):
                     break
@@ -267,11 +269,7 @@ def bone_pit_1():
     # 東の足場 (二段)
     walkway(cv, 9, 16, 38, 54, 4, rail_side=("x", 9))
     ramp(cv, 12, 56, 51, -1)
-    walkway(cv, 13, 17, 40, 46, 9)
-    # 一段目から二段目への坂 (北向きに上がる)
-    for z in range(52, 47, -1):
-        cv.put(15, 4 + (52 - z), z, stair("spruce", "north"))
-        cv.fill_air(15, 15, 5 + (52 - z), 7 + (52 - z), z, z)
+    # 二段目の足場は置かない (洞の天井が低く、立つ所が岩に埋まっていた。2026-11-08 の声「上らせる気の無い建築」)
     # 掘り場の道具・荷車・ずり山
     for (x, z) in ((-4, 40), (6, 36), (-2, 55), (8, 50)):
         stones(cv, x, z, -2, 1)
@@ -286,14 +284,14 @@ def bone_pit_1():
             if cv.is_air(x, y + k, z):
                 cv.put(x, y + k, z, CHAIN_Y)
         cv.put(x, y - 1, z, lantern(True))
-    chest(cv, "chest_1", 16, 9, 41, "west")
+    chest(cv, "chest_1", 16, 4, 41, "west")
     cv.mark("view_dig", -6, 2, 34)
     cv.mark("view_dig_to", 8, 2, 50)
     cv.mark("foe_a_1_footman", -2, -2, 44)
     cv.mark("foe_a_2_footman", 4, -2, 50)
     cv.mark("foe_a_3_footman", -8, -1, 52)
     cv.mark("foe_a_4_bowman", 12, 4, 44)
-    cv.mark("foe_a_5_bowman", 14, 9, 43)
+    cv.mark("foe_a_5_bowman", 14, 4, 40)
     cv.mark("foe_a_6_miner", 0, -2, 40)
     # ---- 坑道 2 と落石の罠
     frames_along(cv, t2, 4, 2, 4, lamp_every=2)
@@ -306,19 +304,23 @@ def bone_pit_1():
     walkway(cv, 9, 14, 78, 94, 5, rail_side=("x", 14))
     walkway(cv, 9, 31, 76, 79, 5, rail_side=("z", 79))
     walkway(cv, 26, 31, 76, 90, 10, rail_side=("x", 26))
+    # 手すりが足場どうしのつなぎ目をふさがないように (二つ目の手すり z 79 が一つ目の足場を横切り、三つ目の手すり x 26 が坂の上をふさいでいた)
+    cv.clear(9, 14, 5, 5, 79, 79)
+    cv.clear(26, 26, 10, 10, 76, 79)
     # 床から一段目への坂 (南の壁ぎわ、北向きに上がる)
-    yy = -1
+    yy = cv.floor_y(12, 95, -1, 4)
+    yy = -1 if yy is None else yy
     for z in range(95, 89, -1):
         for dx in (-1, 0, 1):
             cv.put(12 + dx, yy, z, stair("spruce", "north"))
-            cv.fill_air(12 + dx, 12 + dx, yy + 1, yy + 3, z, z)
+            cv.clear(12 + dx, 12 + dx, yy + 1, yy + 3, z, z)
         yy += 1
     # 一段目から二段目への坂 (東の足場へ)
     yy = 5
     for x in range(20, 26):
         for dz in (0, 1):
             cv.put(x, yy, 77 + dz, stair("spruce", "east"))
-            cv.fill_air(x, x, yy + 1, yy + 3, 77 + dz, 77 + dz)
+            cv.clear(x, x, yy + 1, yy + 3, 77 + dz, 77 + dz)
         yy += 1
     for (x, y, z) in ((20, 12, 86), (14, 12, 90), (28, 14, 84)):
         for k in range(3):
@@ -516,7 +518,9 @@ BUILDERS = {
 
 if __name__ == "__main__":
     import dungeons_more
+    import dungeons_deep
     BUILDERS.update(dungeons_more.BUILDERS)
+    BUILDERS.update(dungeons_deep.BUILDERS)
     names = sys.argv[1:] or list(BUILDERS)
     for name in names:
         for part, fn in BUILDERS[name]:
@@ -524,6 +528,7 @@ if __name__ == "__main__":
             kb, cells, runs = cv.write(OUT / f"{name}_{part}.json", NOTE)
             print(f"{name}_{part}", kb, "KB", cells, "cells", runs, "runs", len(cv.marks), "marks", flush=True)
         import dungeon_entrances as E
+        E.ENTRANCES.update(dungeons_deep._entrances())
         if name in E.ENTRANCES:
             kb, n = E.ENTRANCES[name]()
             print(f"poi_dungeon_{name}", kb, "KB", n, "blocks", flush=True)

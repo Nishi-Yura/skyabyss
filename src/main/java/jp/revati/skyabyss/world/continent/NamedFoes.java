@@ -84,12 +84,15 @@ public final class NamedFoes {
                 if (DEFS[r] == null) {
                     continue;
                 }
+                // 外れの帯の見どころを先に (2026-11-09。FrontierBand の ③)。外れに合う見どころが無い土地は前のとおり
                 search:
-                for (String kind : LAIR_KINDS) {
-                    for (ContinentPois.Poi poi : all) {
-                        if (poi.kind().equals(kind) && ContinentMap.get().region(poi.x(), poi.z()) == r) {
-                            out[r] = new BlockPos(poi.x(), 0, poi.z());
-                            break search;
+                for (boolean wantFar : new boolean[] {true, false}) {
+                    for (String kind : LAIR_KINDS) {
+                        for (ContinentPois.Poi poi : all) {
+                            if (poi.kind().equals(kind) && ContinentMap.get().region(poi.x(), poi.z()) == r && (!wantFar || FrontierBand.far(poi.x(), poi.z()))) {
+                                out[r] = new BlockPos(poi.x(), 0, poi.z());
+                                break search;
+                            }
                         }
                     }
                 }

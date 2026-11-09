@@ -4,6 +4,6 @@
   "tide_shell": {"x": 1730, "z": -250, "yaw": 180, "base": 52, "volume": "tide_shell"},
   "thunder_wing": {"x": -1180, "z": -500, "yaw": 51.3, "base": 200, "volume": "thunder_wing"},
   "ember": {"x": 492, "z": 1108, "yaw": 36.9, "base": 118, "volume": "ember_titan"},
-  "_comment_shrines": "shrines = the replay shrine of each titan (titan/shrine/TitanShrine): just north of the road from the regional town toward the site, 90-200 blocks out of town. The terrace (+-12) and the approach (x +-4, z 12..31, south) stay at least 2 blocks off the road edge and the approach ends a few blocks short of the road (2026-11-03: the old spots, 16 from the road, put the terrace corners and the torii on the road). The ground is levelled in generation (radius 7, blended over 16)",
-  "shrines": {"stone_whale": [-30, -815], "tide_shell": [1403, 114], "thunder_wing": [-1196, -293], "ember": [-145, 1149]}
+  "_comment_shrines": "shrines = the replay shrine of each titan (titan/shrine/TitanShrine): just north of the road from the regional town toward the site, 90-200 blocks out of town. The terrace (+-12) and the approach (x +-4, z 12..31, south) stay at least 2 blocks off the road edge and the approach ends a few blocks short of the road (2026-11-03: the old spots, 16 from the road, put the terrace corners and the torii on the road). The ground is levelled in generation (radius 7, blended over 16). 2026-11-08: the tide and whale shrines moved out of their towns (the town square +-71 and its ring 14 overlapped the shrine terrace; ContinentLairsSelfTest checks it)",
+  "shrines": {"stone_whale": [-236, -764], "tide_shell": [1446, 72], "thunder_wing": [-1196, -293], "ember": [-145, 1149]}
 }

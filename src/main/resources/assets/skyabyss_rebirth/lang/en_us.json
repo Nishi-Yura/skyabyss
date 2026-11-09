@@ -167,5 +167,13 @@
   "title.skyabyss_rebirth.tower_wager3": "Bearer of Three Wagers",
   "title.skyabyss_rebirth.tower_wager3.how": "Clear the Tower Between with three wagers",
   "title.skyabyss_rebirth.tower_wager3_10": "Ten Weeks Wagered",
-  "title.skyabyss_rebirth.tower_wager3_10.how": "Earn the Triple Wager mark in 10 weeks"
+  "title.skyabyss_rebirth.tower_wager3_10.how": "Earn the Triple Wager mark in 10 weeks",
+  "title.skyabyss_rebirth.dungeon_deep_fort": "Bane of the Fort King",
+  "title.skyabyss_rebirth.dungeon_deep_fort.how": "Defeat the lord of the Ruined Watch Fort for the first time",
+  "title.skyabyss_rebirth.dungeon_deep_temple": "Calmer of the Sunken Temple",
+  "title.skyabyss_rebirth.dungeon_deep_temple.how": "Defeat the lord of the Sunken Temple for the first time",
+  "title.skyabyss_rebirth.dungeon_deep_ice": "Bane of the Ice Bear",
+  "title.skyabyss_rebirth.dungeon_deep_ice.how": "Defeat the lord of the Blizzard Ice Cave for the first time",
+  "title.skyabyss_rebirth.dungeon_deep_lava": "Calmer of the Lava Wyrm",
+  "title.skyabyss_rebirth.dungeon_deep_lava.how": "Defeat the lord of the Lava Tube Pit for the first time"
 }

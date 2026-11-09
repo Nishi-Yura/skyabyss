@@ -74,8 +74,6 @@ public final class RaijuClient {
         if (label != null) {
             g.drawString(mc.font, label, x + ICON + 4 + mc.font.width(name) + 6, y + 4, raiju.isStunned() ? 0xFFE66A : 0xFF9AB4, true);
         }
-        String percent = Math.round(boss.getProgress() * 100) + "%";
-        g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
         int barY = y + ICON + 2;
         g.blit(FRAME_TEX, x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);
         float progress = Math.max(0f, Math.min(1f, boss.getProgress()));
@@ -87,6 +85,7 @@ public final class RaijuClient {
             g.fill(left, top, left + fill, top + TRACK_H, 0xFF000000 | color);
             g.fill(left, top, left + fill, top + 1, 0xFF000000 | FILL_TOP);
         }
+        jp.revati.skyabyss.client.titan.PhasedBossBar.drawHp(g, mc, boss, x, barY + TRACK_Y + TRACK_H / 2);
         g.blit(NOTCH_TEX, x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);
     }
 }

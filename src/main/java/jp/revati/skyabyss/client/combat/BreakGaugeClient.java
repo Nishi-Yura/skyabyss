@@ -24,7 +24,8 @@ import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class BreakGaugeClient {
     static final int WIDTH = 182;
-    static final int HEIGHT = 2;
+    // 太さ (2 では細すぎて読めなかった)
+    static final int HEIGHT = 3;
     static final float PULSE = 0.85f;
     static final long FLASH_MS = 450;
     // これだけ知らせが来なければ帯を消す (サーバーは 5 tick ごと)
@@ -61,8 +62,14 @@ public final class BreakGaugeClient {
         if (s == null) {
             return;
         }
-        // 次のバーの名前 (増分 - 9) のすぐ上
-        draw(event.getGuiGraphics(), event.getX(), event.getY() + event.getIncrement() - 9 - HEIGHT - 2, s, now);
+        // 描き換えたバー (PhasedBossBar.drawHp が下の端を残す) なら、その下の端のすぐ下。ほかは次のバーの名前 (増分 - 9) のすぐ上。
+        // 帯の分だけ次のバーを下げて、重ならないようにする (2026-11-08 の声「スタンゲージがボスバーに重なってとても見にくい」)
+        Integer bottom = jp.revati.skyabyss.client.titan.PhasedBossBar.BOTTOM.remove(event.getBossEvent().getId());
+        int y = bottom != null ? bottom + 3 : event.getY() + event.getIncrement() - 9 - HEIGHT - 2;
+        draw(event.getGuiGraphics(), event.getX(), y, s, now);
+        if (bottom != null) {
+            event.setIncrement(Math.max(event.getIncrement(), bottom + 3 + HEIGHT + 4 - event.getY()));
+        }
     }
 
     // 同じ名前の主が何体もいる (潮の番人など) ときは、名前が合うもののうち、残りの体力がバーの長さにいちばん近い体の帯

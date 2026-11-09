@@ -107,7 +107,7 @@ public final class MoonTrialSelfTest {
             check(f, core != null, "the core trial did not summon the core");
             if (core != null) {
                 spawned.add(core);
-                check(f, core.getMaxHealth() <= 1024 && core.getMaxHealth() >= 1000, "tier 5 core health " + core.getMaxHealth() + " should cap at 1024");
+                check(f, core.getMaxHealth() >= 1000, "tier 5 core health " + core.getMaxHealth() + " should be at least 1000 (no 1024 cap since 2026-11-09)");
             }
             p.removeTag(CoreArena.TAG);
             p.removeTag(jp.revati.skyabyss.story.ch6.field.FieldArena.TAG);

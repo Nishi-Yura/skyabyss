@@ -7,11 +7,25 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
-// 預かり所の中身 (人ごと 54 枠。docs/design/35 の 3.1、00 の 225)。どの預かり番からも同じ中身 (StashMenu)
+// 預かり所の中身 (人ごと。一頁 54 枠。docs/design/35 の 3.1、00 の 225)。どの預かり番からも同じ中身 (StashMenu)。
+// 頁は鐘銭で買い足す (2026-11-08 の声「預り所のスロットお金で増やせるようにして」。Wynncraft の銀行と同じ)。はじめは 1 頁、最大 PAGES 頁
 public final class StashData implements INBTSerializable<CompoundTag> {
-    public static final int SIZE = 54;
+    public static final int PAGE = 54;
+    public static final int PAGES = 4;
+    public static final int SIZE = PAGE * PAGES;
+    // 頁 n (2 から) を開ける値段 (鐘銭)
+    public static final int[] PAGE_COST = {0, 0, 5_000, 20_000, 60_000};
 
     final NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
+    int pages = 1;
+
+    public int pages() {
+        return pages;
+    }
+
+    public void setPages(int n) {
+        pages = Math.max(1, Math.min(PAGES, n));
+    }
 
     public NonNullList<ItemStack> items() {
         return items;
@@ -31,6 +45,7 @@ public final class StashData implements INBTSerializable<CompoundTag> {
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         ContainerHelper.saveAllItems(tag, items, provider);
+        tag.putInt("Pages", pages);
         return tag;
     }
 
@@ -40,5 +55,6 @@ public final class StashData implements INBTSerializable<CompoundTag> {
             items.set(i, ItemStack.EMPTY);
         }
         ContainerHelper.loadAllItems(tag, items, provider);
+        pages = tag.contains("Pages") ? Math.max(1, Math.min(PAGES, tag.getInt("Pages"))) : 1;
     }
 }

@@ -24,6 +24,7 @@
   "subtitles.skyabyss.ember_world_turn": "The land turns over",
   "message.skyabyss.ember.surface.asleep": "The earth smells hot. Somewhere, a mountain is breathing in its sleep...",
   "message.skyabyss.ember.surface.mouth_hint": "While it breathes in, walk into the mouth",
+  "message.skyabyss.ember.surface.mouth_wait": "The ember is breathing out. Step into the mouth once it breathes in.",
   "message.skyabyss.ember.surface.spat_out": "The titan's breath spat you out. Not yet.",
   "message.skyabyss.ember.surface.stone.given": "A warm pebble sits in your pocket, fired clay of the ash folk. Hold it, and a far heat moves into your hand.",
   "message.skyabyss.ember.surface.stone.cold": "The stone is cold.",
@@ -491,5 +492,6 @@
   "lore.skyabyss.chapter1.ember_hearth.title": "A Hearth of the Ash People",
   "lore.skyabyss.chapter1.ember_hearth.body": "A small hearth of fired stone is set into the ground. The ash had been raked together in the shape of a hand.\n\nIts mouth always faces the hill. They kept it lit not so the fire would live, but so the hill would not wake.",
   "lore.skyabyss.chapter1.ember_prev_page.title": "A Page from the Hearth",
-  "lore.skyabyss.chapter1.ember_prev_page.body": "A torn page. A short note remains in a hand that looks familiar.\n\n\"On days when the ground is warm, I do not look at the hill. I feel it would meet my eyes.\"\n\n... This handwriting resembles your own."
+  "lore.skyabyss.chapter1.ember_prev_page.body": "A torn page. A short note remains in a hand that looks familiar.\n\n\"On days when the ground is warm, I do not look at the hill. I feel it would meet my eyes.\"\n\n... This handwriting resembles your own.",
+  "message.skyabyss.ember.heart.ash_pools": "When you run hot, stand on the grey ash pools around the heart (where white ash rises) to cool down"
 }

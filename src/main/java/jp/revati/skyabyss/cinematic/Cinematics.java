@@ -107,6 +107,7 @@ public final class Cinematics {
         }
         ACTIVE.remove(player.getUUID());
         applyEffects(player, a.scene(), skipped);
+        unstickSoon(player);
     }
 
     // サーバーから打ち切る (次元の移動・時間切れ・コマンド)。クライアントへ Stop を送り、物語の効果は適用する
@@ -119,6 +120,42 @@ public final class Cinematics {
             PacketDistributor.sendToPlayer(player, new StopPayload(a.scene().id()));
         }
         applyEffects(player, a.scene(), true);
+        unstickSoon(player);
+    }
+
+    // 場面のあと (場面の効果で運ばれたあとも)、体が地面に埋まっていたら、上の空いている所へ出す。
+    // 運ぶ先の高さを、まだ読み込まれていない土地の高さで決めた場合などに、地の中で目覚めることがあった
+    static void unstickSoon(ServerPlayer player) {
+        for (int delay : new int[] {2, 20, 60}) {
+            jp.revati.skyabyss.story.ch1.Tasks.later(delay, () -> {
+                if (!player.isAlive() || player.hasDisconnected() || player.isSpectator() || ACTIVE.containsKey(player.getUUID())) {
+                    return;
+                }
+                unstick(player);
+            });
+        }
+    }
+
+    // 埋まっていたら true を返して上へ出す
+    public static boolean unstick(ServerPlayer player) {
+        net.minecraft.server.level.ServerLevel level = player.serverLevel();
+        if (level.noCollision(player, player.getBoundingBox().deflate(0.05))) {
+            return false;
+        }
+        net.minecraft.core.BlockPos base = player.blockPosition();
+        for (int dy = 1; dy <= 64; dy++) {
+            net.minecraft.core.BlockPos at = base.above(dy);
+            if (at.getY() >= level.getMaxBuildHeight() - 2) {
+                break;
+            }
+            net.minecraft.world.phys.AABB box = player.getBoundingBox().move(0, at.getY() - player.getY(), 0).deflate(0.05);
+            if (level.noCollision(player, box) && !level.getBlockState(at.below()).getCollisionShape(level, at.below()).isEmpty()) {
+                player.teleportTo(player.getX(), at.getY(), player.getZ());
+                jp.revati.skyabyss.SkyAbyss.LOGGER.info("Unstuck {} after a scene: {} -> y {}", player.getGameProfile().getName(), base, at.getY());
+                return true;
+            }
+        }
+        return false;
     }
 
     // 場面の物語の効果。スキップしても必ず適用する (見せ方だけが省かれる)
@@ -152,8 +189,10 @@ public final class Cinematics {
         // その場に留める: 地面にいる間の押し出し・歩きを止め、離れたら戻す (落ちている間は触らない)
         if (player.onGround()) {
             player.setDeltaMovement(0, Math.min(0, player.getDeltaMovement().y), 0);
+            // 戻すのは始めた所そのもの (高さも)。前は今の高さのまま元の x, z へ戻していて、段の下へ押し出されたときに
+            // 地面の中へ入ることがあった (2026-11-08 の声「たまにシネマ入った影響で地下に埋まる」)
             if (player.position().subtract(a.origin()).horizontalDistanceSqr() > HOLD_RADIUS * HOLD_RADIUS) {
-                player.teleportTo(a.origin().x, player.getY(), a.origin().z);
+                player.teleportTo(a.origin().x, a.origin().y, a.origin().z);
             }
         }
         player.setSprinting(false);

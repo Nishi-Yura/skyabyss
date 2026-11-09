@@ -43,13 +43,6 @@
           "targets": [
             "ch2/wreck_page"
           ]
-        },
-        {
-          "id": "conch",
-          "type": "collect",
-          "target": "skyabyss:tide_watching_shell",
-          "count": 1,
-          "party": false
         }
       ]
     }

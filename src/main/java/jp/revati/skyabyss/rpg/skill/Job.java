@@ -84,6 +84,10 @@ public enum Job {
         if (item instanceof jp.revati.skyabyss.item.MaterialItem) {
             return null;
         }
+        // 装飾は名前に武器の語があっても武器ではない (大熊の牙 ice_bear_fang など)
+        if (item instanceof jp.revati.skyabyss.item.wild.WildAccessoryItem) {
+            return null;
+        }
         String path = BuiltInRegistries.ITEM.getKey(item).getPath();
         // スポーンエッグは武器ではない (waning_blade_spawn_egg など)
         if (path.endsWith("_spawn_egg")) {

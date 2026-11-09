@@ -188,14 +188,10 @@ public final class RpgRulesSelfTest {
             if (p.getInventory().countItem(Items.OAK_LOG) != 0) {
                 f.add("a log was gathered by hand");
             }
+            // 丸太は斧でも採れない (2026-11-08: 使い道のない品は採らせない)
             p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STONE_AXE));
-            if (!click(p, log) || p.getInventory().countItem(Items.OAK_LOG) != 1 || !level.getBlockState(log).is(Blocks.OAK_LOG)) {
-                f.add("log gather: logs " + p.getInventory().countItem(Items.OAK_LOG) + ", block " + level.getBlockState(log));
-            }
-            // すぐ二度目は採れない
-            click(p, log);
-            if (p.getInventory().countItem(Items.OAK_LOG) != 1) {
-                f.add("the log regrow wait did not hold: " + p.getInventory().countItem(Items.OAK_LOG));
+            if (click(p, log) || p.getInventory().countItem(Items.OAK_LOG) != 0) {
+                f.add("a log was still gatherable with an axe");
             }
             // 鉄鉱石: 斧はだめ、石のつるはしなら
             click(p, ore);
@@ -206,6 +202,12 @@ public final class RpgRulesSelfTest {
             click(p, ore);
             if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) < 1 || !level.getBlockState(ore).is(Blocks.IRON_ORE)) {
                 f.add("iron ore with a stone pickaxe: raw iron " + p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) + ", block " + level.getBlockState(ore));
+            }
+            // すぐ二度目は採れない
+            int lumps = p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get());
+            click(p, ore);
+            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) != lumps) {
+                f.add("the ore regrow wait did not hold");
             }
             if (p.getMainHandItem().getDamageValue() != 0) {
                 f.add("gathering wore the pickaxe");

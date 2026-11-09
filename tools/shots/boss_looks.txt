@@ -1,0 +1,47 @@
+# ボスごとの見せ方 (2026-11-08 の選定): 淵の主 = A 金継ぎの漆 (巨神の色の輪の後光と熾の粉)、月の主 = A 螺鈿の月 (銀の三日月と星屑)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/boss_looks.txt -PshotsName=boss_looks
+world boss_looks flat
+size 1600 900
+timeout 1800
+render 8
+guiscale 2
+wait 80
+cmd skyabyss cinematic stop
+close
+cmd time set 13200
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd fill -40 -61 -10 40 -61 40 minecraft:polished_blackstone
+hud off
+chat clear
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+wait 20
+cmd tp @s 0 -54 -8 0 12
+cmd effect give @s minecraft:resistance 1000000 4 true
+cmd skyabyss abyss bossdo idle 1000
+wait 60
+cmd gamemode spectator
+cmd tp @s 0 -54 -8 0 12
+wait 40
+shot lord_ash
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd gamemode creative
+cmd skyabyss abyss boss lord_salt 0 - 40 9
+wait 20
+cmd gamemode spectator
+cmd tp @s 0 -54 -8 0 12
+wait 50
+shot lord_salt
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd summon skyabyss:moon_core 0 -60 22 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:full_keeper 14 -60 22 {NoAI:1b,PersistenceRequired:1b,Rotation:[180f,0f]}
+cmd tp @s 0 -52 4 0 8
+wait 60
+shot moon_core
+cmd tp @s 14 -56 12 0 8
+wait 40
+shot full_keeper
+echo done
+quit

@@ -10,7 +10,8 @@
     "RecipeManagerMixin",
     "AdvancementManagerMixin",
     "ItemNameMixin",
-    "AttributeShownMixin"
+    "AttributeShownMixin",
+    "MaxHealthCapMixin"
   ],
   "client": [
     "GuiGraphicsMixin",

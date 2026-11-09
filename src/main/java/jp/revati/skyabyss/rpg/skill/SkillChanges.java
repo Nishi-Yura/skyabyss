@@ -28,7 +28,11 @@ public final class SkillChanges {
         }
     }
 
-    public record Change(Kind kind, Component name, boolean active) {
+    public record Change(Kind kind, Component name, boolean active, Component effect) {
+        public Change(Kind kind, Component name, boolean active) {
+            this(kind, name, active, null);
+        }
+
         // 説明の一行: 「書き換え: 天穹の手」(効いていなければ「(その武器を持つと効く)」を添える)
         public Component line() {
             Component c = Component.translatable(kind.key, name);
@@ -47,21 +51,19 @@ public final class SkillChanges {
         SkillData d = SkillManager.get(p);
         Mutation m = SkillExtOps.active(p, s);
         if (m != null) {
-            out.add(new Change(Kind.MUTATION, Component.translatable(m.nameKey()), true));
+            out.add(new Change(Kind.MUTATION, Component.translatable(m.nameKey()), true, Component.translatable(m.nameKey() + ".effect")));
         }
         int r = d.rune(s);
         if (r >= 1 && r <= 3 && d.runeUsable(s, r)) {
             Rune rune = Rune.of(s, r);
             if (rune != null) {
-                out.add(new Change(Kind.RUNE, Component.translatable(rune.nameKey()), true));
+                out.add(new Change(Kind.RUNE, Component.translatable(rune.nameKey()), true, Component.translatable(rune.effectKey())));
             }
-        } else if (r == 4) {
-            Rune held = SkillManager.legendRune(p, s);
-            if (held != null) {
-                out.add(new Change(Kind.REWRITE, Component.translatable(held.nameKey()), true));
-            } else {
-                out.add(new Change(Kind.REWRITE, Component.translatable("gui.skyabyss.skill.change.rewrite_any"), false));
-            }
+        }
+        // 武器の書き換え (持つあいだだけ。選ぶ手間はない)
+        Rune held = SkillManager.legendRune(p, s);
+        if (held != null) {
+            out.add(new Change(Kind.REWRITE, Component.translatable(held.nameKey()), true, Component.translatable(held.effectKey())));
         }
         for (SecretArts.Held h : SecretArts.heldFor(p)) {
             if (h.art().skill == s) {
@@ -69,6 +71,30 @@ public final class SkillChanges {
             }
         }
         return out;
+    }
+
+    // 今の形の絵: 武器の書き換えが効いていれば書き換えの絵 (持ち替えるとすぐ替わる。2026-11-09 の声「武器のスキル変化もリアルタイムで右下のアイコン変わってほしい」)、
+    // 変異していれば変異の絵 (案 A)、ほかは元の技の絵
+    public static int icon(Player p, Skill s) {
+        if (p == null || s == null) {
+            return s == null ? 0 : s.iconIndex();
+        }
+        Rune held = SkillManager.legendRune(p, s);
+        if (held != null) {
+            return held.iconIndex();
+        }
+        Mutation m = SkillExtOps.active(p, s);
+        return m != null ? m.iconIndex() : s.iconIndex();
+    }
+
+    // 絵の縁の色: 効いている刻印・書き換え・秘伝のうち一番上 (変異は絵が替わるので縁は付けない。無ければ 0)
+    public static int frameColor(Player p, Skill s) {
+        for (Change c : of(p, s)) {
+            if (c.active() && c.kind() != Kind.MUTATION && c.kind() != Kind.REWRITE) {
+                return c.kind().rgb;
+            }
+        }
+        return 0;
     }
 
     // 帯の印の色: 効いている変化のうち一番上 (無ければ 0)

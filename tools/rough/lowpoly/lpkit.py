@@ -53,7 +53,69 @@ class Face:
     frame: tuple = None
 
     def tris(self):
-        return [(0, i, i + 1) for i in range(1, len(self.verts) - 1)]
+        # 凸なら扇。凹んだ多角形 (曲がった帯の断面の蓋など) は扇だと外へはみ出して裏返った三角形ができ、
+        # 外から裏面が透けて見える (2026-11-09 の監査)。そのときは耳切りで分ける
+        k = len(self.verts)
+        if k > 3 and not _convex(self.verts):
+            t = _ear_clip(self.verts)
+            if t:
+                return t
+        return [(0, i, i + 1) for i in range(1, k - 1)]
+
+
+def _plane2d(P):
+    """多角形 P を自分の面 (Newell の法線) へ射影した 2D 座標 (法線が手前 → 並びの向きは反時計回り)"""
+    n = np.zeros(3)
+    for i in range(len(P)):
+        a, b = P[i], P[(i + 1) % len(P)]
+        n += np.array([(a[1] - b[1]) * (a[2] + b[2]), (a[2] - b[2]) * (a[0] + b[0]), (a[0] - b[0]) * (a[1] + b[1])])
+    ln = np.linalg.norm(n)
+    if ln < 1e-9:
+        return None
+    n /= ln
+    h = np.array([0, 1, 0.0]) if abs(n[1]) < 0.9 else np.array([1, 0, 0.0])
+    u = np.cross(h, n)
+    u /= np.linalg.norm(u)
+    w = np.cross(n, u)
+    return [(float(np.dot(p, u)), float(np.dot(p, w))) for p in P]
+
+
+def _cr(o, a, b):
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+
+def _convex(P):
+    Q = _plane2d(P)
+    if Q is None:
+        return True
+    k = len(Q)
+    return all(_cr(Q[i - 1], Q[i], Q[(i + 1) % k]) >= -1e-6 for i in range(k))
+
+
+def _ear_clip(P):
+    Q = _plane2d(P)
+    if Q is None:
+        return None
+    idx = list(range(len(Q)))
+    tris = []
+    guard = 0
+    while len(idx) > 3 and guard < 10 * len(Q) ** 2:
+        guard += 1
+        m = len(idx)
+        for kk in range(m):
+            i0, i1, i2 = idx[(kk - 1) % m], idx[kk], idx[(kk + 1) % m]
+            if _cr(Q[i0], Q[i1], Q[i2]) <= 1e-9:
+                continue
+            if any(_cr(Q[i0], Q[i1], Q[j]) >= -1e-9 and _cr(Q[i1], Q[i2], Q[j]) >= -1e-9 and _cr(Q[i2], Q[i0], Q[j]) >= -1e-9
+                   for j in idx if j not in (i0, i1, i2)):
+                continue
+            tris.append((i0, i1, i2))
+            idx.pop(kk)
+            break
+        else:
+            return None
+    tris.append((idx[0], idx[1], idx[2]))
+    return tris
 
 
 def _dedupe(pts, eps=1e-6):
@@ -103,10 +165,20 @@ def tube(bone, mat, path, ra, rb=None, sides=4, hint=(0, 1, 0), phase=45.0, caps
 
     def rings(ph):
         out = []
+        prev = None
         for i, p in enumerate(path):
             t = nrm(path[min(i + 1, n - 1)] - path[max(i - 1, 0)])
             h = hint if abs(np.dot(nrm(hint), t)) < 0.98 else np.array([1.0, 0, 0])
             a = nrm(h - np.dot(h, t) * t)
+            if prev is not None:
+                # 前の輪の向きを今の輪の面へ移したもの (ねじれの少ない向き)。hint が筒の向きに近いと輪ごとの向きが大きく回り、
+                # 隣の輪との四角が交差して裏返る (2026-11-09: 寄居蟹の脚の膝)。30 度より回るときは移した向きを使う
+                tr = prev - np.dot(prev, t) * t
+                if np.linalg.norm(tr) > 1e-6:
+                    tr = nrm(tr)
+                    if np.dot(tr, a) < 0.866:
+                        a = tr
+            prev = a
             b = np.cross(t, a)
             ring = [p + ra[i] * math.cos(math.radians(ph + 360.0 * k / sides)) * a
                     + rb[i] * math.sin(math.radians(ph + 360.0 * k / sides)) * b for k in range(sides)]

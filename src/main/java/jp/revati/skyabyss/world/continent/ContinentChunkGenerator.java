@@ -57,7 +57,9 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     }
 
     // 生物群系の飾り (木・草・鉱石など) から、地上の溶岩の池・溶岩の湧き口・水の湧き口を抜く (RPG の野にいきなり溶岩は置かない。崖から水が垂れない。2026-10-26)
-    static final List<String> DROPPED = List.of("lake_lava", "spring_lava", "spring_water");
+    // 木 (trees_*・白樺の高い木・木の下の茂み) も抜く。木は ContinentTrees が土地ごとの形で植える (2026-11-09 の声「木は完全オリジナルに」)
+    static final List<String> DROPPED = List.of("lake_lava", "spring_lava", "spring_water", "trees_", "birch_tall", "dark_forest_vegetation",
+            "mushroom_island_vegetation", "bamboo", "fallen_");
 
     static net.minecraft.world.level.biome.BiomeGenerationSettings features(net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome) {
         net.minecraft.world.level.biome.BiomeGenerationSettings src = biome.value().getGenerationSettings();
@@ -288,10 +290,31 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                     BlockState road = road(roads, x, z);
                     // 道が川を渡る所は、水面に板の橋
                     boolean bridge = road != null && top < SEA_LEVEL - 1 && biome == ContinentBiomes.RIVER;
+                    // 外れの帯の見せ場 (FrontierTerrain): 上の数段の土と、置く物 (肋骨・浮き岩・岩礁)。道の上は変えない
+                    int region = map.region(x, z);
+                    double far = road == null ? FrontierTerrain.weight(region, x, z) : 0;
                     for (int y = minY; y <= upto; y++) {
-                        BlockState st = y <= top ? (y == top && road != null && !bridge ? road : solid(x, y, z, top, sl, biome))
-                                : bridge && y == SEA_LEVEL - 1 ? BRIDGE : WATER;
+                        BlockState st;
+                        if (y <= top) {
+                            if (y == top && road != null && !bridge) {
+                                st = road;
+                            } else {
+                                BlockState f = far > 0 ? FrontierTerrain.ground(region, far, x, y, z, top, top - y, sl) : null;
+                                st = f != null ? f : solid(x, y, z, top, sl, biome);
+                            }
+                        } else {
+                            st = bridge && y == SEA_LEVEL - 1 ? BRIDGE : WATER;
+                        }
                         sections[chunk.getSectionIndex(y)].setBlockState(dx, y & 15, dz, st, false);
+                    }
+                    if (far > 0.9) {
+                        final int fdx = dx;
+                        final int fdz = dz;
+                        FrontierTerrain.column(map, x, z, top, (y0, y1, state) -> {
+                            for (int y = Math.max(minY + 1, y0); y <= Math.min(maxY - 1, y1); y++) {
+                                sections[chunk.getSectionIndex(y)].setBlockState(fdx, y & 15, fdz, state, false);
+                            }
+                        });
                     }
                 }
             }
@@ -318,7 +341,9 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     // このチャンク (と縁 4) にかかる道の線分 {x0, z0, x1, z1}
     static List<int[]> roadSegments(int x0, int z0) {
         List<int[]> out = new java.util.ArrayList<>();
-        for (List<BlockPos> line : ContinentLayout.get().roads()) {
+        List<List<BlockPos>> all = ContinentLayout.get().roads();
+        for (int li = 0; li < all.size(); li++) {
+            List<BlockPos> line = all.get(li);
             // 島の道 (はじまりの島の中) は細いまま
             int wide = line.isEmpty() || ContinentMap.get().region(line.get(0).getX(), line.get(0).getZ()) == ContinentMap.OUTSKIRTS ? 0 : 1;
             for (int i = 0; i + 1 < line.size(); i++) {
@@ -329,7 +354,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
                         || Math.max(a.getZ(), b.getZ()) < z0 - pad || Math.min(a.getZ(), b.getZ()) > z0 + 15 + pad) {
                     continue;
                 }
-                out.add(new int[] {a.getX(), a.getZ(), b.getX(), b.getZ(), wide});
+                out.add(new int[] {a.getX(), a.getZ(), b.getX(), b.getZ(), wide, li});
             }
         }
         return out;
@@ -353,19 +378,33 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         return best;
     }
 
+    // 道どうしが出会う所の丸み (2026-11-08 の声「道が上手く曲がってない」。斜めに合わさる二本の道のあいだに、草の楔がぎざぎざに残っていた)。
+    // 同じ道の中はふつうの近さ、別の道どうしは滑らかな最小 (半径 JOIN_ROUND) で合わせ、内側の角を埋める
+    static final double JOIN_ROUND = 8.0;
+
+    static double smoothMin(double a, double b, double k) {
+        double h = Math.max(k - Math.abs(a - b), 0) / k;
+        return Math.min(a, b) - h * h * k * 0.25;
+    }
+
     // 道の上面の石 (道でなければ null)。幅を少し揺らす
     static BlockState road(List<int[]> segs, int x, int z) {
         if (segs.isEmpty()) {
             return null;
         }
-        double best = 1e9;
+        // 道ごとの近さ (同じ道の線分は最小)
+        java.util.Map<Integer, Double> perLine = new java.util.HashMap<>();
         for (int[] g : segs) {
             double dx = g[2] - g[0];
             double dz = g[3] - g[1];
             double len2 = dx * dx + dz * dz;
             double u = len2 == 0 ? 0 : Math.max(0, Math.min(1, ((x - g[0]) * dx + (z - g[1]) * dz) / len2));
             double d = Math.hypot(x - (g[0] + u * dx), z - (g[1] + u * dz)) - (g.length > 4 && g[4] == 1 ? WIDE : 0);
-            best = Math.min(best, d);
+            perLine.merge(g.length > 5 ? g[5] : -1, d, Math::min);
+        }
+        double best = 1e9;
+        for (double d : perLine.values()) {
+            best = best >= 1e8 ? d : smoothMin(best, d, JOIN_ROUND);
         }
         // 縁は少しだけ揺らす (幅 8 がほぼ保たれる)
         double d = best - ContinentMap.value(x / 23.0, z / 23.0, 0x0AD5) * 0.4;
@@ -423,6 +462,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     public void applyBiomeDecoration(net.minecraft.world.level.WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         super.applyBiomeDecoration(level, chunk, structureManager);
         ContinentScatter.decorate(level, chunk);
+        ContinentTrees.plant(level, chunk);
     }
 
     // 生まれたときの動物 (羊・牛など。生物群系のとおり。羊を連れ戻す頼みなどに要る)

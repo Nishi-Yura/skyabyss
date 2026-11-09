@@ -71,6 +71,7 @@ RIVER_SEEDS = {
 }
 RIVER_SOURCE_Y = (84, 112)
 RIVER_KEEP_OUT = 150  # 都・町・はじまりのまわり (ブロック) は削らない
+INNER_SEA_R = 560     # 四つの大陸の真ん中の内海 (ぬるい海) の半径
 
 
 def n_of(a):
@@ -326,6 +327,12 @@ def build(key=CHOSEN, seed=7):
     border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]]))) - {0}
     outer = np.isin(labels, list(border))
     inland = inner & ~outer
+    # 四つの大陸 (straits) では内海が外の海とつながるので、まんなか (見取り図の内海の中心から INNER_SEA_R) をぬるい内海のままにする。
+    # 深さは内海の 20 から、外へ 200 で外の海の 30 までなだらかに
+    if lay.get('straits'):
+        cx, cz = lay['straits'][0][0][0]
+        r = np.hypot(X - cx, Z - cz)
+        inland = inland | (inner & (r < INNER_SEA_R))
     # 小さな水 (湖) は淡水: 川と同じ土地
     small = np.zeros(y.shape, dtype=bool)
     lab_in, n_in = ndimage.label(inland)
@@ -336,6 +343,8 @@ def build(key=CHOSEN, seed=7):
                 small |= lab_in == idx
     depth = np.clip(px_from_land * SCALE / 5.0, 1, 30)
     depth = np.where(inland, np.minimum(depth, 20), depth)
+    if lay.get('straits'):
+        depth = np.minimum(depth, 20 + 10 * np.clip((r - INNER_SEA_R) / 200.0, 0, 1))
     y = np.where(land, np.maximum(y, SEA_LEVEL + 1), SEA_LEVEL - 1 - depth)
     # 川 (山のふもとから海へ。決まった種の点から坂を下る)
     y, river = carve_rivers(y, land, X, Z, lay)
@@ -518,9 +527,9 @@ def paint_map(lay, height, biome, path):
             d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=(84, 108, 70))
         elif b == 'eroded_badlands' and rng.random() < 0.3:
             d.point((x, y), fill=(60, 40, 36))
-    # 道と渡し船
-    for road in lay['roads']:
-        pts = [px(q) for q in road_curve(road)]
+    # 道と渡し船。旅の地図の絵には道を焼かない (ゲームが ContinentLayout.roads の線を描く。町の前で門へつなぎ直した線と合わせるため。2026-11-09)
+    for road in (lay['roads'] if lay.get('draw_roads') else []):
+        pts = [px(q) for q in (road if lay.get('curved') else road_curve(road))]
         # 2026-10-27 の声「マップもっと見やすく」: 道を太く濃く (縁の明るい線 + 濃い茶の芯)
         d.line(pts, fill=(246, 236, 210), width=7, joint='curve')
         d.line(pts, fill=(98, 60, 32), width=4, joint='curve')
@@ -607,7 +616,96 @@ def hand_fix_roads(out):
             out['roads'][i][end] = list(p)
 
 
-def write_layout(lay, height=None):
+# 海を渡る道は岸で切って渡し船にする (2026-11-08 の四つの大陸)。道の上を 2 ブロックごとに見て、水が SEA_RUN 以上続く所を海とみなし
+# (川の橋は切らない)、その手前 SEA_BACK で道を止め、向こう岸の SEA_BACK 先から道を続ける (続きは道の並びの末尾に足す。前の番号は変えない)。
+# 切った両端を渡し船の線にする
+SEA_RUN = 40
+SEA_BACK = 10
+
+
+def split_roads_at_sea(out, height):
+    def wet(x, z):
+        i, j = int((z + HALF) / SCALE), int((x + HALF) / SCALE)
+        return not (0 <= i < SIZE and 0 <= j < SIZE) or height[i, j] < SEA_LEVEL
+
+    def point_at(pts, cum, s):
+        k = int(np.searchsorted(cum, s, side='right')) - 1
+        k = max(0, min(k, len(pts) - 2))
+        t = (s - cum[k]) / max(cum[k + 1] - cum[k], 1e-9)
+        a, b = pts[k], pts[k + 1]
+        return [int(round(a[0] + (b[0] - a[0]) * t)), int(round(a[1] + (b[1] - a[1]) * t))]
+
+    extra = []
+    crossings = []
+    for idx, r in enumerate(out['roads']):
+        pts = [tuple(p) for p in r]
+        cum = [0.0]
+        for a, b in zip(pts, pts[1:]):
+            cum.append(cum[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+        total = cum[-1]
+        runs = []
+        start = None
+        s = 0.0
+        while s <= total:
+            x, z = point_at(pts, cum, s)
+            if wet(x, z):
+                start = s if start is None else start
+            elif start is not None:
+                if s - start >= SEA_RUN:
+                    runs.append((start, s))
+                start = None
+            s += 2.0
+        if not runs:
+            continue
+        pieces = []
+        s0 = 0.0
+        for a, b in runs:
+            piece = [list(pts[0])] if s0 == 0.0 else [point_at(pts, cum, s0)]
+            piece += [list(p) for p, c in zip(pts, cum) if s0 < c < a - SEA_BACK]
+            piece.append(point_at(pts, cum, a - SEA_BACK))
+            pieces.append(piece)
+            s0 = b + SEA_BACK
+            crossings.append([piece[-1], point_at(pts, cum, s0)])
+        last = [point_at(pts, cum, s0)] + [list(p) for p, c in zip(pts, cum) if c > s0]
+        if len(last) == 1:
+            last.append(list(pts[-1]))
+        pieces.append(last)
+        out['roads'][idx] = pieces[0]
+        extra += pieces[1:]
+        print(f'road {idx}: crosses the sea {len(runs)} time(s) at {[c for c in crossings[-len(runs):]]}')
+    out['roads'] += extra
+    out['ferries'] += crossings
+
+
+# 渡し船の両端の呼び名 (船着き場の札「〇〇へ」と、渡った先の名)。その岸と同じ島の、いちばん近い都・町・外れの集落。
+# 渡し船 1 (霜の小島) は決まった名
+def ferry_names(out, reg, lay):
+    isl_map = lay.get('islands')
+
+    def island(x, z):
+        i, j = int((z + HALF) / SCALE), int((x + HALF) / SCALE)
+        i, j = min(max(i, 0), SIZE - 1), min(max(j, 0), SIZE - 1)
+        return isl_map[REGION_IDS[reg[i, j]]] if isl_map else 0
+
+    places = [('signpost.skyabyss.capital', out['capital'])]
+    places += [('map.skyabyss.town.' + k, v) for k, v in out['towns'].items()]
+    places += [('map.skyabyss.town.hamlet_' + f['key'], [f['x'], f['z']]) for f in out.get('frontier', []) if f['kind'] == 'hamlet']
+    names = []
+    for k, f in enumerate(out['ferries']):
+        if k == 1:
+            names.append(['map.skyabyss.frontier.storm_shore', 'map.skyabyss.frontier.frost_isle'])
+            continue
+        pair = []
+        for end in (f[0], f[-1]):
+            here = island(*end)
+            best = min((p for p in places if island(*p[1]) == here), key=lambda p: math.hypot(p[1][0] - end[0], p[1][1] - end[1]),
+                       default=places[0])
+            pair.append(best[0])
+        names.append(pair)
+    out['ferry_names'] = names
+
+
+def write_layout(lay, height=None, reg=None):
     def pt(p):
         return [int(p[0]), int(p[1])]
     kinds = {'岩鯨の跡地': 'whale', '潮殻の跡地': 'tide', '雷翼の跡地': 'storm', '余燼の跡地': 'ember'}
@@ -624,8 +722,6 @@ def write_layout(lay, height=None):
         'names': {REGION_NAMES[n]: pt(p) for n, p in lay['names']},
         'levels': {k: [lv.replace('Lv ', '').replace('–', '-'), pt(p)] for k, (lv, p) in zip(LEVEL_REGIONS, lay['levels'])},
     }
-    if height is not None:
-        out['ferry_docks'] = [ferry_docks(f, height) for f in lay['ferries']]
     # 外れの置き場 (集落 hamlet・奥のダンジョン deep。tools/lib/frontier_roads.SPOTS。world/continent/ContinentLayout.frontier)
     if lay.get('frontier'):
         out['frontier'] = [{'kind': k, 'region': r, 'key': key, 'x': int(x), 'z': int(z)} for k, r, key, x, z in lay['frontier']]
@@ -636,6 +732,11 @@ def write_layout(lay, height=None):
                          'bandits': pk['bandits'], 'prints_view': pt(plan['necks'][0][0])}
     trim_road_ends(out)
     hand_fix_roads(out)
+    if height is not None:
+        split_roads_at_sea(out, height)
+        out['ferry_docks'] = [ferry_docks(f, height) for f in out['ferries']]
+        if reg is not None:
+            ferry_names(out, reg, lay)
     with open(os.path.join(OUT, 'layout.json'), 'w', encoding='utf8', newline='\n') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
@@ -647,8 +748,11 @@ def main():
     write_bin(os.path.join(OUT, 'biome.bin'), biome)
     write_bin(os.path.join(OUT, 'region.bin'), reg)
     preview(CHOSEN, height, biome)
-    write_layout(lay, height)
-    paint_map(lay, height, biome, os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'continent.png'))
+    write_layout(lay, height, reg)
+    # 地図には layout.json の道と渡し船 (海で切ったあと) を描く
+    with open(os.path.join(OUT, 'layout.json'), encoding='utf-8') as f:
+        written = json.load(f)
+    paint_map(dict(lay, roads=written['roads'], ferries=written['ferries'], curved=True), height, biome, os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'skyabyss', 'textures', 'gui', 'map', 'continent.png'))
     land = height >= SEA_LEVEL
     print(f'layout {CHOSEN}: land {land.mean() * 100:.0f}%, max Y {height.max()}, capital Y {height[SIZE // 2, int((lay["capital"][0] + HALF) / SCALE)]}')
 

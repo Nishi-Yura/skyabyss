@@ -20,8 +20,6 @@ public final class SkillReset {
         d.globalCooldown = 0;
         d.mana = -1;
         d.lastCastSlot = -1;
-        // 紋の入手の記録は空に戻る (越え直す試練でまた紋が出る)。変異・持っている紋・盤の紋は残す
-        d.glyphClaims.clear();
         d.echoUntil = 0;
         SkillManager.settleMana(player);
         SkillManager.sync(player);

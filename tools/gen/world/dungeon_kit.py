@@ -132,6 +132,26 @@ class Cave:
         if b is not None:
             self.air[b[0]] = val
 
+    def clear(self, x0, x1, y0, y1, z0, z1):
+        """空けて、置いた物も消す (段の上の頭の高さ・足場の上など。fill_air は洞の空きの印だけで、置いた板は残っていた)"""
+        self.fill_air(x0, x1, y0, y1, z0, z1)
+        for x in range(min(x0, x1), max(x0, x1) + 1):
+            for y in range(min(y0, y1), max(y0, y1) + 1):
+                for z in range(min(z0, z1), max(z0, z1) + 1):
+                    self.blk.pop((x, y, z), None)
+                    if hasattr(self, 'mats'):
+                        self.mats.pop((x, y, z), None)
+        # 岩を削ったら、外 (何も無い所) に開いた面を石でふさぐ (地下の世界は空っぽなので、殻が無いと外が見える)
+        if hasattr(self, 'mats'):
+            for x in range(min(x0, x1) - 1, max(x0, x1) + 2):
+                for y in range(min(y0, y1) - 1, max(y0, y1) + 2):
+                    for z in range(min(z0, z1) - 1, max(z0, z1) + 2):
+                        if (x, y, z) in self.mats or (x, y, z) in self.blk:
+                            continue
+                        if self.inside(x, y, z) and self.air[self.idx(x, y, z)]:
+                            continue
+                        self.mats[(x, y, z)] = "minecraft:stone"
+
     def is_air(self, x, y, z):
         if not self.inside(x, y, z):
             return False
@@ -248,6 +268,7 @@ class Cave:
             cells[(int(xs[i]) + self.x0, int(ys[i]) + self.y0, int(zs[i]) + self.z0)] = AIR
         cells.update(self.mats)
         cells.update(self.blk)
+        settle_gravity(cells)
         palette, index, runs = [], {}, []
         rows = {}
         for (x, y, z), s in cells.items():
@@ -278,6 +299,37 @@ class Cave:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         return out.stat().st_size // 1024, len(cells), len(runs)
+
+
+# 支えのない砂・砂利 (下が空き・水・草など) は、落ちない石に替える。写しを建てたあと、水の満ち引きや隣の置き換えで落ち、
+# 通り道を埋めていた (2026-11-08 の声「海の中ダンジョン、2層目の最後おかしい。砂で最後埋まってる」)
+GRAVITY = {"minecraft:sand": "minecraft:smooth_sandstone", "minecraft:red_sand": "minecraft:smooth_red_sandstone",
+           "minecraft:gravel": "minecraft:tuff", "minecraft:suspicious_sand": "minecraft:smooth_sandstone",
+           "minecraft:suspicious_gravel": "minecraft:tuff"}
+SUPPORT_NOT = ("minecraft:air", "minecraft:water", "minecraft:lava", "minecraft:light", "minecraft:kelp", "minecraft:seagrass",
+               "minecraft:cave_air")
+
+
+def _supported(below):
+    if below is None:
+        return False
+    name = below.split("[")[0]
+    if name in SUPPORT_NOT or "slab" in name and "type=top" not in below and "type=double" not in below:
+        return False
+    return not any(k in name for k in ("fence", "lantern", "torch", "button", "carpet", "coral", "pickle", "lichen", "vine", "mushroom",
+                                       "bars", "chain", "dripstone", "bud", "cluster", "cobweb", "flower", "grass", "kelp", "rod"))
+
+
+def settle_gravity(cells):
+    for _ in range(4):
+        changed = 0
+        for (x, y, z), s in list(cells.items()):
+            to = GRAVITY.get(s.split("[")[0])
+            if to and not _supported(cells.get((x, y - 1, z))):
+                cells[(x, y, z)] = to
+                changed += 1
+        if not changed:
+            break
 
 
 # ---------------------------------------------------------------- 部品

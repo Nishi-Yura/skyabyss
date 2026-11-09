@@ -3,6 +3,12 @@
   "entries": [
     {
       "if": {
+        "type": "at_shrine"
+      },
+      "node": "shrine"
+    },
+    {
+      "if": {
         "type": "all",
         "of": [
           {
@@ -53,10 +59,6 @@
       "text": "dialogue.skyabyss.attendant_shrine_priest.intro"
     },
     "rebirth": {
-      "face": "neutral",
-      "next": "menu"
-    },
-    "keys": {
       "face": "neutral",
       "next": "menu"
     },
@@ -154,52 +156,6 @@
           "goto": "vow"
         },
         {
-          "id": "offer",
-          "kind": "talk",
-          "do": [
-            {
-              "type": "facility",
-              "open": "key_offer"
-            }
-          ],
-          "goto": "end"
-        },
-        {
-          "id": "return",
-          "kind": "talk",
-          "if": {
-            "type": "stage",
-            "min": 1
-          },
-          "do": [
-            {
-              "type": "facility",
-              "open": "key_return"
-            }
-          ],
-          "goto": "end"
-        },
-        {
-          "id": "keys",
-          "kind": "talk",
-          "goto": "keys",
-          "if": {
-            "type": "in_capital"
-          }
-        },
-        {
-          "id": "keys_town",
-          "kind": "talk",
-          "goto": "keys_town",
-          "text": "dialogue.skyabyss.attendant_shrine_priest.menu.keys",
-          "if": {
-            "type": "not",
-            "of": {
-              "type": "in_capital"
-            }
-          }
-        },
-        {
           "id": "about",
           "kind": "talk",
           "goto": "again",
@@ -247,10 +203,64 @@
       "next": "menu",
       "text": "dialogue.skyabyss.attendant_shrine_priest.rebirth_town"
     },
-    "keys_town": {
+    "shrine": {
       "face": "neutral",
-      "next": "menu",
-      "text": "dialogue.skyabyss.attendant_shrine_priest.keys_town"
+      "text": "dialogue.skyabyss.attendant_shrine_priest.shrine",
+      "options": [
+        {
+          "id": "go",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.shrine.go",
+          "do": [
+            {
+              "type": "facility",
+              "open": "shrine_go"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "how",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.shrine.how",
+          "goto": "shrine_how"
+        },
+        {
+          "id": "board",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.shrine.board",
+          "do": [
+            {
+              "type": "facility",
+              "open": "shrine_board"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "vow",
+          "kind": "talk",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.shrine.vow",
+          "do": [
+            {
+              "type": "facility",
+              "open": "shrine_vow"
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "text": "dialogue.skyabyss.attendant_shrine_priest.menu.bye",
+          "goto": "end"
+        }
+      ]
+    },
+    "shrine_how": {
+      "face": "neutral",
+      "text": "dialogue.skyabyss.attendant_shrine_priest.shrine_how",
+      "next": "shrine"
     }
   }
 }

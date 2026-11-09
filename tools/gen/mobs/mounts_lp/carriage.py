@@ -69,7 +69,9 @@ def wheel(m, bone, c, r, w, spokes=8):
     m.add(bone + "_hub", ell(bone, "c_woodd", c, (w * 0.95, r * 0.22, r * 0.22), segs=8, rings=2))
     for k in range(spokes):
         a = 2 * math.pi * k / spokes
-        m.add(f"{bone}_spoke{k}", tub(bone, "c_wood", [c, c + np.array([0, (r - 1.0) * math.cos(a), (r - 1.0) * math.sin(a)])], w * 0.22, None, sides=4))
+        # 輻は轂の中から (真ん中の一点から出すと、輻どうしの蓋が溶け合って面の向きの直しが裏返る。2026-11-09)
+        d = np.array([0, math.cos(a), math.sin(a)])
+        m.add(f"{bone}_spoke{k}", tub(bone, "c_wood", [c + d * (r * 0.12), c + d * (r - 1.0)], w * 0.22, None, sides=4))
 
 
 def build():

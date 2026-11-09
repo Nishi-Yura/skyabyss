@@ -18,10 +18,18 @@ import net.minecraft.world.phys.Vec3;
 //   挟む    寄った人へ大きな右の鋏 (前の扇、予告 0.8 秒)
 //   鐘の波  背の鐘を揺すって鳴らすと、波が広がる (まわりの輪、内側 2.5 は安全、予告 1.2 秒。体力 8 割から)
 //   殻ごと突進 鐘にこもって転がり込む (前の長い帯、予告 1.1 秒)。こもっている間は受ける傷が 4 割
+//   殻回し  殻にこもって回る (まわりの円 5.5 を二度、予告 0.9 秒から 0.6 秒おき)。こもっている間は受ける傷が 4 割
+//   泡吐き  身を起こして泡を三つ吐く (人の足もとと、まわりに二つの円、予告 1.1 秒)
 public class BellHermit extends DungeonBoss {
     static final int PINCH = 1;
     static final int RING = 2;
     static final int CHARGE = 3;
+    static final int SPIN = 4;
+    static final int SPIT = 5;
+    public static final int SPIN_WARN = 18;
+    public static final int SPIT_WARN = 22;
+    private int lastSpin = -160;
+    private int lastSpit = -100;
     public static final int PINCH_WARN = 16;
     public static final double PINCH_RANGE = 5;
     public static final int RING_WARN = 24;
@@ -35,7 +43,7 @@ public class BellHermit extends DungeonBoss {
 
     public BellHermit(EntityType<? extends Monster> type, Level level) {
         super(type, level, "bell_hermit", () -> SoundEvents.TURTLE_AMBIENT_LAND, () -> SoundEvents.TURTLE_HURT, () -> SoundEvents.TURTLE_DEATH,
-                "pinch", "ring", "charge", "hurt", "death");
+                "pinch", "ring", "charge", "spin", "spit", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -50,6 +58,18 @@ public class BellHermit extends DungeonBoss {
 
     @Override
     protected void choose(LivingEntity target, double distance) {
+        if (distance < 5.5 && tickCount - lastSpin > 180) {
+            move = SPIN;
+            lastSpin = tickCount;
+            spinRings(target, "spin", SPIN_WARN, 5.5, 2, 12, 0.9f);
+            return;
+        }
+        if (distance > 5 && tickCount - lastSpit > 120) {
+            move = SPIT;
+            lastSpit = tickCount;
+            volley(target, "spit", SPIT_WARN, 2, 2.0, 0.9f, net.minecraft.world.level.block.Blocks.PRISMARINE.defaultBlockState());
+            return;
+        }
         if (hp() < 0.8f && distance < RING_OUTER && tickCount - lastRing > 240) {
             move = RING;
             lastRing = tickCount;
@@ -96,7 +116,7 @@ public class BellHermit extends DungeonBoss {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        return super.hurt(source, move == CHARGE && act > 0 ? amount * SHELL_TAKEN : amount);
+        return super.hurt(source, (move == CHARGE || move == SPIN) && act > 0 ? amount * SHELL_TAKEN : amount);
     }
 
     @Override
@@ -109,6 +129,8 @@ public class BellHermit extends DungeonBoss {
         return switch (move) {
             case PINCH -> PINCH_WARN + 10;
             case RING -> RING_WARN + 12;
+            case SPIN -> SPIN_WARN + 12 + 14;
+            case SPIT -> SPIT_WARN + 12;
             default -> CHARGE_WARN + (int) Math.ceil(CHARGE_LENGTH / 0.7) + 10;
         };
     }

@@ -198,11 +198,8 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
         // 右下に「仲間も N 人」を出すときは、そのぶん二行目を短く切る
         int secondW = line.mates() > 0 ? textW - 30 : textW;
-        String cut = font.plainSubstrByWidth(second, secondW);
-        if (cut.length() < second.length()) {
-            cut = font.plainSubstrByWidth(second, secondW - font.width("…")) + "…";
-        }
-        g.drawString(font, cut, cx0 + Golden.S8, Golden.textY(y + 2 + Golden.ROW, Golden.ROW), faint ? DIM : SOFT, false);
+        // 入らない文は横へ流す (Marquee。前は「…」で切っていた)
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, second, cx0 + Golden.S8, Golden.textY(y + 2 + Golden.ROW, Golden.ROW), secondW, faint ? DIM : SOFT, false);
         // 右: 状態 (受けられるものは釦)
         String state = switch (line.state()) {
             case Board.ACTIVE -> "gui.skyabyss.board.state.active";

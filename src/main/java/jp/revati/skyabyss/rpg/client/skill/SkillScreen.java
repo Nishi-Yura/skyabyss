@@ -794,6 +794,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         dx /= fit.scale();
         dy /= fit.scale();
         return (page == 0 && (info.mouseDragged(mx, my, button, dx, dy) || canvas.mouseDragged(mx, my, button, dx, dy)))
+                || (page == 2 && ext.drag(mx, my, button, dx, dy))
                 || super.mouseDragged(mx, my, button, dx, dy);
     }
 
@@ -801,7 +802,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     public boolean mouseReleased(double screenX, double screenY, int button) {
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
-        return info.mouseReleased(mx, my, button) || (page == 0 && canvas.mouseReleased(mx, my, button)) || super.mouseReleased(mx, my, button);
+        return info.mouseReleased(mx, my, button) || (page == 0 && canvas.mouseReleased(mx, my, button)) || (page == 2 && ext.release(mx, my, button))
+                || super.mouseReleased(mx, my, button);
     }
 
     @Override
@@ -1248,21 +1250,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         return legend != null && (legend.held(minecraft.player) || d.rune(s) == 4);
     }
 
-    // 狭い箱に名前を収める: 幅が足りなければ 0.7 倍まで縮め、それでも足りなければ「…」で切る (中心 cx、上端 y)
+    // 狭い箱に名前を収める (中心 cx、上端 y)。入らなければ箱の中で横へ流す (Marquee。前は「…」で切っていた)
     private void drawFit(GuiGraphics g, Component name, int cx, int y, int maxW, int color) {
-        String text = name.getString();
-        int w = font.width(text);
-        // 字は等倍だけ (docs/design/56): 縮めずに「…」で切る
-        float k = 1f;
-        if (w * k > maxW) {
-            text = font.plainSubstrByWidth(text, (int) (maxW / k) - font.width("…")) + "…";
-            w = font.width(text);
+        int w = font.width(name);
+        if (w <= maxW) {
+            g.drawString(font, name, cx - w / 2, y, color, false);
+        } else {
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, name, cx - maxW / 2, y, maxW, color, false);
         }
-        g.pose().pushPose();
-        g.pose().translate(cx - w * k / 2f, y + (1f - k) * 3.5f, 0f);
-        g.pose().scale(k, k, 1f);
-        g.drawString(font, text, 0, 0, color, false);
-        g.pose().popPose();
     }
 
     // 刻印の段を描き、下端を返す (送れる面の中の座標)
@@ -1320,21 +1315,21 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         if (legendRow) {
             Rune r = Rune.legendFor(s, minecraft.player);
             int ly = ry + 14;
-            boolean mine = current == 4;
-            boolean usable = available && r.held(minecraft.player);
+            // 持つだけで効く (選ばない)。効いていれば金の縁
+            boolean mine = SkillManager.legendRune(minecraft.player, s) == r;
+            boolean usable = r.held(minecraft.player);
             boolean hover = in(mx, my, x, ly, w - 4, 12) && usable;
             g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == 4 ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
             g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? 0xFF2A3A40 : hover ? 0xFF2E2A20 : 0xFF1C1A16);
             Component name = Component.translatable("gui.skyabyss.skill.rune_legend", Component.translatable(r.nameKey()));
             g.drawString(font, name, x + (w - 4 - font.width(name)) / 2, ly + 2, mine ? GOLD : usable ? 0xF2D78A : DIM, false);
-            runeRows.add(new int[] {x, ly, w - 4, 12, 4});
             if (hover) {
                 hoverRune = 4;
             }
         }
         // 見ている (選んでいる) 刻印の効果
         int shown = hoverRune != 0 ? hoverRune : current;
-        Rune shownRune = shown == 0 ? null : shown == 4 ? Rune.legendFor(s, minecraft.player) : Rune.of(s, shown);
+        Rune shownRune = shown == 0 || shown == 4 && hoverRune != 4 ? null : shown == 4 ? Rune.legendFor(s, minecraft.player) : Rune.of(s, shown);
         int ty = ry + (legendRow ? 28 : 14);
         if (shown == Rune.MASTERY) {
             for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("rune.skyabyss.mastery.effect", SkillRules.MASTERY_RUNE_LEVEL,
@@ -1425,7 +1420,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 SkillHud.drawIcon(g, 44, x + 3, y + 3);
                 g.setColor(1f, 1f, 1f, 1f);
             } else if (s != null) {
-                SkillHud.drawIcon(g, s.iconIndex(), x + 3, y + 3);
+                SkillHud.drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(minecraft.player, s), x + 3, y + 3);
+                SkillHud.changeFrame(g, minecraft.player, s, x + 3, y + 3, 16);
                 SkillHud.changeMark(g, minecraft.player, s, x + 2, y + 2);
             }
             String k = SkillClientSetup.SLOT_KEYS[i].getTranslatedKeyMessage().getString();
@@ -1651,6 +1647,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 節の絵: 技の節はその技の絵、基礎は icons2 の 0〜3 (筋力・敏捷・精神・耐久)、刻印 4、常に 45、閾値 46、型の要 47 (tools/gen/ui/gen_deep_skill_assets.py)
     private static int v2Icon(AbilityNode n) {
+        // 変異の節は変異の絵
+        if (n.mutation != null) {
+            return n.mutation.iconIndex();
+        }
         return switch (n.kind) {
             case STAT -> 100 + n.stat.ordinal();
             case RUNE -> 104;
@@ -1659,6 +1659,20 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             case TRAIT -> 147;
             default -> n.skill.iconIndex();
         };
+    }
+
+    // 丸い受け皿の節 (技の絵そのもの: 使う技・常の技・変異)
+    private static boolean v2Round(AbilityNode n) {
+        return n.kind == AbilityNode.Kind.ACTIVE || n.kind == AbilityNode.Kind.PASSIVE || n.kind == AbilityNode.Kind.MUTATION;
+    }
+
+    // 塗りつぶした丸 (半径 r、真ん中 cx, cy)
+    private static void disc(GuiGraphics g, int cx, int cy, int r, int color) {
+        for (int dy = -r; dy < r; dy++) {
+            double yy = dy + 0.5;
+            int half = (int) Math.floor(Math.sqrt(Math.max(0, r * r - yy * yy)) + 0.25);
+            g.fill(cx - half, cy + dy, cx + half, cy + dy + 1, color);
+        }
     }
 
     private static boolean v2Big(AbilityNode n) {
@@ -1730,42 +1744,50 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             SkillData.TakeResult tr = taken ? SkillData.TakeResult.TAKEN : d.canTake(tree, n, level);
             boolean reachable = tr == SkillData.TakeResult.OK || tr == SkillData.TakeResult.NO_POINTS;
             int state = taken ? 3 : reachable ? 1 : 0;
-            // 使う技の節は金の縁で囲む (ひと目で技と分かる)
-            if (n.kind == AbilityNode.Kind.ACTIVE) {
-                int rim = taken ? 0xFFF2D27A : state == 1 ? 0xFFB89650 : 0xFF6A5A3A;
-                g.fill(x - 2, y - 2, x + sz + 2, y + sz + 2, rim);
-                g.fill(x - 1, y - 1, x + sz + 1, y + sz + 1, 0xFF14121A);
-            }
-            if (v2Big(n)) {
+            // 節の形 (2026-11-09 の声「丸あるのに四角もあって見にくい」): 技の絵 (使う技・常の技・変異) は丸い受け皿、
+            // 能力値・段・刻印などの小さな節は平らな四角の板、要の節 (奥義・型の要) は今の大きな枠。縁の色は取った = 金、取れる = 明るい、まだ = 暗い
+            boolean round = v2Round(n);
+            int rimC = taken ? 0xFFF2D27A : state == 1 ? 0xFFC8B48A : 0xFF4A4640;
+            if (round) {
+                int cx = x + sz / 2;
+                int cy = y + sz / 2;
+                int r = sz / 2 + 2;
+                if (n == selectedNode) {
+                    disc(g, cx, cy, r + 2, 0xFF5FD8FF);
+                }
+                disc(g, cx, cy, r, rimC);
+                disc(g, cx, cy, r - 2, 0xFF0E1016);
+            } else if (v2Big(n)) {
                 g.blit(PANEL, x, y, sz, sz, state * 48, 376, 44, 44, 1024, 512);
             } else {
-                g.blit(SkillHud.TEXTURE, x, y, sz, sz, state * 48, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
+                g.fill(x - 1, y - 1, x + sz + 1, y + sz + 1, n == selectedNode ? 0xFF5FD8FF : rimC);
+                g.fill(x, y, x + sz, y + sz, taken ? 0xFF2A2618 : 0xFF14161D);
             }
             if (state == 0) {
                 g.setColor(0.42f, 0.42f, 0.48f, 1f);
             } else if (state == 1) {
                 g.setColor(0.72f, 0.72f, 0.78f, 1f);
             }
-            int pad = Math.max(2, sz * 3 / 22);
+            int pad = round ? 0 : v2Big(n) ? Math.max(2, sz * 3 / 22) : 1;
             SkillHud.drawIcon(g, v2Icon(n), x + pad, y + pad, sz - 2 * pad);
             g.setColor(1f, 1f, 1f, 1f);
-            if (n == selectedNode) {
+            if (n == selectedNode && v2Big(n)) {
                 g.blit(SkillHud.TEXTURE, x - 1, y - 1, sz + 2, sz + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
             }
             // 技の稽古の覚える段: 取れる使う技を光らせる
             if (lessonLearn && n.kind == AbilityNode.Kind.ACTIVE && tr == SkillData.TakeResult.OK) {
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, x, y, sz, sz);
             }
-            // 下の小さな字: 基礎は +数、段は +1、まだ取っていない節は点
-            String cap = n.kind == AbilityNode.Kind.STAT ? "+" + n.amount : n.kind == AbilityNode.Kind.RANK ? "+1" : taken ? "" : n.cost + "SP";
-            if (!cap.isEmpty()) {
-                boolean prov = tryon != null && taken && !real().hasNode(tree, n.id);
-                int color = prov ? 0x7FFFA0 : taken ? GOLD : tr == SkillData.TakeResult.OK ? TEXT : DIM;
-                g.drawString(font, cap, x + sz / 2 - font.width(cap) / 2, y + sz + (n.kind == AbilityNode.Kind.ACTIVE ? 3 : 2), color, false);
-            }
-            // 使う技の節には小さな菱形の印 (枠に置ける)
+            // 節の下の字 (点・+数) は出さない (2026-11-09 の声「アイコンの下にある 1sp や +4 いらない」)。点と数は節の説明に出る
+            // 使う技の節には右上に小さな菱形の印 (枠に置ける。丸の外の縁に)
             if (n.kind == AbilityNode.Kind.ACTIVE) {
-                g.fill(x + sz - 4, y + 1, x + sz - 1, y + 4, taken ? 0xFF9FE8FF : 0xFF4A5060);
+                int mx0 = x + sz - 1;
+                int my0 = y - 1;
+                int c = taken ? 0xFF9FE8FF : 0xFF4A5060;
+                g.fill(mx0 - 2, my0 - 1, mx0 + 3, my0 + 2, 0xFF0E1016);
+                g.fill(mx0 - 1, my0 - 2, mx0 + 2, my0 + 3, 0xFF0E1016);
+                g.fill(mx0 - 1, my0, mx0 + 2, my0 + 1, c);
+                g.fill(mx0, my0 - 1, mx0 + 1, my0 + 2, c);
             }
             // 排他の節には赤紫の点 (左上)
             if (!n.blocks.isEmpty()) {
@@ -1777,13 +1799,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 for (int i = 0; i < sz - 4; i++) {
                     g.fill(x + 2 + i, y + 2 + i, x + 4 + i, y + 4 + i, c);
                     g.fill(x + sz - 4 - i, y + 2 + i, x + sz - 2 - i, y + 4 + i, c);
-                }
-            }
-            // 紋を差している技の節には、その紋の絵 (左下)
-            if (n.skill != null && n == t.skillNode(n.skill)) {
-                jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
-                if (gi != null) {
-                    SkillHud.drawGlyph(g, gi.glyph(), x - 2, y + sz - 7, 9);
                 }
             }
         }
@@ -1870,6 +1885,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         lines.add(Component.translatable("gui.skyabyss.skill.change.head").withColor(SOFT));
         for (var c : changes) {
             lines.add(Component.literal(" ").append(c.line()).withColor(c.active() ? c.kind().rgb : DIM));
+            // 何が変わるか (2026-11-09 の声「説明もないので何がなにかわからない」)
+            if (c.effect() != null && c.active()) {
+                lines.add(Component.literal("   ").append(c.effect()).withColor(TEXT));
+            }
         }
     }
 
@@ -1932,9 +1951,11 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             default -> lines.add(Component.translatable(n.effectKey(key)).withColor(TEXT));
         }
         if (n.skill != null && n == t.skillNode(n.skill)) {
-            jp.revati.skyabyss.rpg.skill.Glyph.Item gi = jp.revati.skyabyss.rpg.skill.Glyph.centerGlyph(d, d.rebirth, n.skill);
-            if (gi != null) {
-                lines.add(Component.translatable("gui.skyabyss.tree.glyph_line", Component.translatable(gi.glyph().nameKey()), gi.level()).withColor(PALE));
+            // 付けているアスペクトがこの技を変えていれば、その名前 (docs/design/58)
+            for (jp.revati.skyabyss.rpg.aspect.Aspects.Worn w : jp.revati.skyabyss.rpg.aspect.Aspects.worn(net.minecraft.client.Minecraft.getInstance().player)) {
+                if (w.aspect().skill() == n.skill) {
+                    lines.add(Component.translatable(w.aspect().nameKey()).append(" ").append(Component.translatable("aspect.skyabyss.level", w.level())).withColor(PALE));
+                }
             }
             if (!skillInfoShown) {
                 changeLines(lines, n.skill);

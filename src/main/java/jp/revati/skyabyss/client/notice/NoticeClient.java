@@ -137,9 +137,36 @@ public final class NoticeClient {
     // 札 (右上) を続けて出すときの間隔 (ミリ秒)。同じ瞬間に重ならず、一枚ずつ読める
     public static final long CARD_GAP = 700;
 
-    // 同じ手がかりは、この遊びの間に三度まで (初めの数回だけ出す)
+    // 画面下の灰色の文を減らす (2026-11-08 の声「画面下にでる灰色の文字、色々出すぎて邪魔」):
+    //   字幕の手がかり (HINT) は、同じ文を一度だけ (目的の一行「◆」は三度まで)。前の手がかりが出ている・待っているあいだに来た手がかりは捨てる
+    //   アクションバーの灰色の手がかり (Notice.bar に ModText.hint) は、同じ文を 1 分に一度、この遊びの間に三度まで。
+    //   数を含む文 (数え下ろしなど) はそのまま
     private static final java.util.Map<String, Integer> HINT_COUNT = new java.util.HashMap<>();
-    private static final int HINT_MAX = 3;
+    private static final int HINT_MAX = 1;
+    private static final int OBJECTIVE_MAX = 3;
+    private static final java.util.Map<String, long[]> BAR_HINTS = new java.util.HashMap<>();
+    private static final long BAR_HINT_GAP = 60_000L;
+    private static final int BAR_HINT_MAX = 3;
+
+    // 字幕の列に手がかりが出ている・待っている
+    private static boolean hintBusy() {
+        NoticeQueue.Entry<Line> cur = CAPTIONS.current();
+        return CAPTIONS.waiting() > 0 || cur != null && cur.kind == Notice.Kind.HINT;
+    }
+
+    // アクションバーの灰色の手がかりを、いま出してよいか (出すなら数える)
+    static boolean barHintAllowed(String key, long now) {
+        if (key.chars().anyMatch(Character::isDigit)) {
+            return true;
+        }
+        long[] seen = BAR_HINTS.computeIfAbsent(key, k -> new long[] {Long.MIN_VALUE / 2, 0});
+        if (now - seen[0] < BAR_HINT_GAP || seen[1] >= BAR_HINT_MAX) {
+            return false;
+        }
+        seen[0] = now;
+        seen[1]++;
+        return true;
+    }
 
     public static void receive(NoticePayload payload) {
         Minecraft mc = Minecraft.getInstance();
@@ -161,7 +188,8 @@ public final class NoticeClient {
         if (kind == Notice.Kind.NARRATE) {
             return;
         }
-        if (kind == Notice.Kind.HINT && HINT_COUNT.merge(key, 1, Integer::sum) > HINT_MAX) {
+        boolean objective = key.startsWith("◆");
+        if (kind == Notice.Kind.HINT && (!objective && hintBusy() || HINT_COUNT.merge(key, 1, Integer::sum) > (objective ? OBJECTIVE_MAX : HINT_MAX))) {
             return;
         }
         double speed = Config.NOTICE_SPEED.get();
@@ -172,8 +200,12 @@ public final class NoticeClient {
                     CAPTIONS.offer(new Line(body, Component.empty()), kind, key, key.length());
                 };
                 if (kind == Notice.Kind.HINT) {
-                    // 操作の手がかり (J・K・目的の一行など) は、会話・場面のあとに、札と経験値のあとで
-                    gate(NoticeGate.P_HINT, 400, show);
+                    // 操作の手がかり (J・K・目的の一行など) は、会話・場面のあとに、札と経験値のあとで。待つあいだに別の手がかりが出たら捨てる
+                    gate(NoticeGate.P_HINT, 400, () -> {
+                        if (objective || !hintBusy()) {
+                            show.run();
+                        }
+                    });
                 } else {
                     show.run();
                 }
@@ -201,7 +233,12 @@ public final class NoticeClient {
                 CardFeed.show(head, body, accent, () -> new NoticeToast(mc.font, head, body, accent));
                 chime(mc, gain ? 1.0f : 0.8f, 0.6f);
             });
-            case ACTIONBAR -> mc.gui.setOverlayMessage(body, false);
+            case ACTIONBAR -> {
+                if (kind == Notice.Kind.BAR && Notice.kindOf(payload.text()) == Notice.Kind.HINT && !barHintAllowed(key, Util.getMillis())) {
+                    return;
+                }
+                mc.gui.setOverlayMessage(body, false);
+            }
         }
     }
 

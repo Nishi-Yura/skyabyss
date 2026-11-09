@@ -365,6 +365,18 @@ public final class DungeonFloor {
             };
             if (open) {
                 openDoor(level, door);
+            } else if (cond.startsWith("clear") && level.getGameTime() % 20 == 0) {
+                // 全滅で開く部屋: 部屋の中の人に、残りの敵の数 (2026-11-08 の声「エリアに何体敵残ってるか出してほしい」)
+                String room = cond.substring("clear".length());
+                int left = roomLeft(level, room);
+                if (left > 0 && terrain.has("room_" + room)) {
+                    Vec3 rc = center("room_" + room);
+                    for (ServerPlayer p : here) {
+                        if (Dungeons.real(p) && p.isAlive() && p.position().distanceTo(rc) < WAKE + 6 && Math.abs(p.getY() - rc.y) < 10) {
+                            Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.dungeon.room_left", left));
+                        }
+                    }
+                }
             } else if (near && cond.equals("key") && level.getGameTime() % 60 == 0) {
                 for (ServerPlayer p : here) {
                     if (Dungeons.real(p) && p.position().distanceTo(mid3) < DOOR_REACH) {
@@ -396,6 +408,27 @@ public final class DungeonFloor {
     }
 
     // 部屋 room に残っている敵の数 (小ダンジョンの知らせ)
+    // その人のいる (起きた) 部屋の、残りの敵の数 (挑戦の帯 trial/ChallengeBand。いちばん近い、敵の残る部屋。いなければ 0)
+    public int leftNear(ServerLevel level, ServerPlayer p) {
+        int best = 0;
+        double bd = Double.MAX_VALUE;
+        for (String room : woke) {
+            if (!terrain.has("room_" + room)) {
+                continue;
+            }
+            Vec3 c = center("room_" + room);
+            double d = p.position().distanceTo(c);
+            if (d < WAKE + 6 && Math.abs(p.getY() - c.y) < 10 && d < bd) {
+                int n = roomLeft(level, room);
+                if (n > 0) {
+                    best = n;
+                    bd = d;
+                }
+            }
+        }
+        return best;
+    }
+
     int roomLeft(ServerLevel level, String room) {
         int n = 0;
         for (var en : foeMark.entrySet()) {
@@ -505,6 +538,9 @@ public final class DungeonFloor {
                 PartyScale.apply(m, Math.max(1, run.members.size()));
                 // 主の硬さ (47 の 2.6): 目安 Lv が高いほど人の傷を割る
                 PartyScale.resist(m, run.dungeon.mini ? 1.0 + Math.max(0, run.dungeon.level - 6) * 0.02 : 1.2 + (run.dungeon.level - 10) * 0.035);
+                // 入る人のレベルに合わせた硬さ (combat/LevelScale): ダンジョンの目安 Lv より上で来たら、その分だけ受ける傷を割る
+                jp.revati.skyabyss.combat.LevelScale.apply(m, run.dungeon.level,
+                        here.stream().filter(p -> p.isAlive() && !p.isSpectator()).map(p -> (net.minecraft.server.level.ServerPlayer) p).toList());
                 if (run.dungeon.mini) {
                     // 小ダンジョンの主: 名づきの大物と同じ扱い (技の名前・ボスバーの見た目)。潮の番人は床を水に沈める技を使う (ShoreWarden.named)
                     m.addTag(MiniDungeons.BOSS_TAG);

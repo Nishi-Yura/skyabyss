@@ -35,6 +35,7 @@ final class HudRequests {
         // ホットバーの左右
         QuickCard.requests(mc, out);
         // 右上の板 (上から): 誓い → 背中の目盛りと目的の板 → 仲間の一覧
+        ChallengeHud.requests(mc, out);
         jp.revati.skyabyss.story.ch5.client.AbyssHud.requests(mc, out);
         VowHud.requests(mc, out);
         BackGaugeHud.requests(mc, out);

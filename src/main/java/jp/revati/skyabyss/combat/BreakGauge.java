@@ -248,6 +248,78 @@ public final class BreakGauge {
         }
     }
 
+    // 崩れている主は、技の動き (振りかぶり・弾・粒) も出さない (2026-11-08 の声「スタンしてるとき、敵が攻撃使っちゃう。ダメージはこないけど」)。
+    // 主の tick を飛ばし、落ちることと、傷の点滅・無敵の時間の減りだけ進める (story/ch6/field/MomentStop と同じやり方)。死んだ主は止めない
+    @SubscribeEvent
+    static void onEntityTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Pre event) {
+        if (STATES.isEmpty() || !(event.getEntity() instanceof LivingEntity le) || le.level().isClientSide() || le instanceof Player
+                || !le.isAlive() || le.getHealth() <= 0 || !broken(le)) {
+            return;
+        }
+        // 段階の変わり目は崩れより先 (2026-11-09 の声「スタン中でも、形態変化を優先して」): 体力が次の段階へ入ったら崩れを解いて、主に咆哮させる
+        if (le instanceof jp.revati.skyabyss.entity.HeartBoss h && h.phaseForHealth() > h.getPhase()) {
+            State st = STATES.get(le.getUUID());
+            if (st != null) {
+                st.brokenUntil = le.level().getGameTime();
+            }
+            return;
+        }
+        event.setCanceled(true);
+        refreshBars(le);
+        le.setOldPosAndRot();
+        if (le.invulnerableTime > 0) {
+            le.invulnerableTime--;
+        }
+        if (le.hurtTime > 0) {
+            le.hurtTime--;
+        }
+        if (!le.onGround() && !le.isNoGravity()) {
+            double vy = (le.getDeltaMovement().y - 0.08) * 0.98;
+            le.move(net.minecraft.world.entity.MoverType.SELF, new Vec3(0, vy, 0));
+            le.setDeltaMovement(0, le.onGround() ? 0 : vy, 0);
+        } else {
+            le.setDeltaMovement(Vec3.ZERO);
+        }
+    }
+
+    // 崩れているあいだは主の tick を飛ばすので、主が自分の tick で直すボスバーの長さも止まっていた
+    // (2026-11-08 の声「スタンしたときにボスの hp が削れなくて、スタン解除された瞬間に削れる」。体力は減っていたが、バーが崩れの終わりまで動かなかった)。
+    // 主が持つボスバー (ServerBossEvent の欄) を見つけ、ここで体力の割合に合わせる。欄は型ごとに一度だけ探す
+    private static final Map<Class<?>, java.util.List<java.lang.reflect.Field>> BAR_FIELDS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    static void refreshBars(LivingEntity le) {
+        if (le.tickCount % 2 != 0 || le.getMaxHealth() <= 0) {
+            return;
+        }
+        float progress = Math.max(0f, Math.min(1f, le.getHealth() / le.getMaxHealth()));
+        for (java.lang.reflect.Field f : BAR_FIELDS.computeIfAbsent(le.getClass(), BreakGauge::barFields)) {
+            try {
+                if (f.get(le) instanceof net.minecraft.server.level.ServerBossEvent bar) {
+                    bar.setProgress(progress);
+                }
+            } catch (IllegalAccessException ignored) {
+                // 読めない欄は飛ばす
+            }
+        }
+    }
+
+    private static java.util.List<java.lang.reflect.Field> barFields(Class<?> c) {
+        java.util.List<java.lang.reflect.Field> out = new java.util.ArrayList<>();
+        for (Class<?> k = c; k != null && k != Object.class; k = k.getSuperclass()) {
+            for (java.lang.reflect.Field f : k.getDeclaredFields()) {
+                if (!java.lang.reflect.Modifier.isStatic(f.getModifiers()) && net.minecraft.world.BossEvent.class.isAssignableFrom(f.getType())) {
+                    try {
+                        f.setAccessible(true);
+                        out.add(f);
+                    } catch (RuntimeException ignored) {
+                        // モジュールの外の欄は触らない
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     // Telegraph.start から: この持ち主は今、技を出せない
     public static boolean silenced(Entity owner) {
         return owner instanceof LivingEntity le && !le.level().isClientSide() && broken(le);

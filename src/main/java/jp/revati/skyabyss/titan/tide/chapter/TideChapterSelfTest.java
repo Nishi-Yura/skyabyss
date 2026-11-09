@@ -113,9 +113,7 @@ public final class TideChapterSelfTest {
             data(f);
             buildSea(level);
             beats(server, level, f);
-            conch(server, level, data, f);
             ebb(server, level, data, f);
-            conchRegrant(level, f);
             budget(f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch2 crashed", e);
@@ -143,7 +141,7 @@ public final class TideChapterSelfTest {
             built = false;
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch2 PASSED (3 beats only in chapter 2 and once each, conch direction/tier/request, great ebb road/safe/restored/once per player/shared by neighbours, elements, lore, quests, dialogue, sky, xp)");
+            SkyAbyss.LOGGER.info("SELFTEST ch2 PASSED (3 beats only in chapter 2 and once each, great ebb road/safe/restored/once per player/shared by neighbours, elements, lore, quests, dialogue, sky, xp)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch2 FAILED: {}", m));
         }
@@ -190,7 +188,6 @@ public final class TideChapterSelfTest {
         // 空の段はごくわずか
         ChapterSky.Stage sky = ChapterSky.stage(Chapters.TIDE);
         check(f, !sky.equals(ChapterSky.Stage.NONE) && sky.moonBias() > 0 && sky.moonBias() <= 0.05f && sky.tintStrength() <= 0.08f, "the tide sky stage should be subtle: " + sky);
-        check(f, TideChapterSetup.TIDE_WATCHING_SHELL.get() instanceof TideConchItem, "the shell item is not registered");
     }
 
     // ---------------------------------------------------------------- 人工の海
@@ -266,71 +263,6 @@ public final class TideChapterSelfTest {
         check(f, Foreshadow.next(q, Chapters.TIDE, 900000, 11000) == null, "beat 3 must not fire when the island is beyond sight distance");
         arc.reset();
         ArcData.of(q).reset();
-    }
-
-    // ---------------------------------------------------------------- 潮見の貝
-    private static void conch(MinecraftServer server, ServerLevel level, TitanWorldData data, List<String> f) {
-        // 純粋な部分: 八方位・距離の三段・次の刻まで
-        check(f, TideConchItem.compass(0, -10) == 0 && TideConchItem.compass(10, -10) == 1 && TideConchItem.compass(10, 0) == 2
-                && TideConchItem.compass(10, 10) == 3 && TideConchItem.compass(0, 10) == 4 && TideConchItem.compass(-10, 10) == 5
-                && TideConchItem.compass(-10, 0) == 6 && TideConchItem.compass(-10, -10) == 7, "compass points are wrong");
-        check(f, TideConchItem.tier(10) == 2 && TideConchItem.tier(200) == 1 && TideConchItem.tier(900) == 0, "distance tiers are wrong");
-        TideConchItem.Reading r = TideConchItem.reading(new Vec3(0, 64, 0), new Vec3(300, 64, 0), 10000, "");
-        check(f, r.found() && r.compass() == 2 && r.tier() == 1 && r.minutesToLow() == 1 && !r.lowNow(), "reading is wrong: " + r);
-        r = TideConchItem.reading(new Vec3(0, 64, 0), new Vec3(0, 64, -50), 12500, "x");
-        check(f, r.compass() == 0 && r.tier() == 2 && r.lowNow() && r.asked().equals("x"), "reading at low tide is wrong: " + r);
-        check(f, !TideConchItem.describe(r).getString().isEmpty() && !TideConchItem.describe(TideConchItem.Reading.NONE).getString().isEmpty(), "describe is empty");
-
-        FakePlayer p = fake(level, "conch");
-        p.setPos(SHORE - 6, level.getSeaLevel() + 1, Z + 64);
-        // 巨神がまだいなければ「黙っている」。いれば本物の向き (東) を返す
-        TideShellEntity titan = TideKeeper.KEEPER.current(level);
-        if (titan != null) {
-            titan.discard();
-        }
-        TideKeeper.KEEPER.releaseTicket(level);
-        data.restoreSlot(TideKeeper.SLOT, new CompoundTag(), level.registryAccess());
-        check(f, !TideConchItem.read(p).found(), "the shell should be silent when no titan has appeared");
-        titan = TideKeeper.KEEPER.spawn(level, SHORE + 100, Z + 64, null);
-        TideConchItem.Reading real = TideConchItem.read(p);
-        check(f, real.found() && real.compass() == 2 && real.tier() == 1, "the shell should point east at a near titan: " + real);
-
-        // 吹く: 刻の 1 分前から。巡航中なら頼みが通り、寄る場所を決めて向かう。一つの刻に一人
-        level.setDayTime(10000);
-        check(f, titan.saveState().getInt("Mode") == 0, "the titan should start cruising");
-        // 二章の跡地があれば、浜から遠い人の頼みは通らない (FAR)。この先の合成の海の検査は、浜に限らずに流す
-        if (jp.revati.skyabyss.titan.tide.TideBeach.restricted(server) && !jp.revati.skyabyss.titan.tide.TideBeach.near(p)) {
-            check(f, titan.request(p) == TideShellEntity.RequestResult.FAR, "far from the east beach the shell should not call the island");
-        }
-        jp.revati.skyabyss.titan.tide.TideBeach.testOff = true;
-        TideShellEntity.RequestResult first = TideConchItem.blow(p, level);
-        check(f, first == TideShellEntity.RequestResult.OK, "blowing the shell near the sea before the ebb should be accepted: " + first);
-        check(f, titan.saveState().getInt("Mode") == 1 && titan.requesterNow().equals(p.getGameProfile().getName()), "the titan should approach the caller: " + titan.saveState());
-        FakePlayer other = fake(level, "conch_other");
-        other.setPos(SHORE - 6, level.getSeaLevel() + 1, Z + 70);
-        check(f, TideConchItem.blow(other, level) == TideShellEntity.RequestResult.TAKEN, "a second caller in the same window should be refused");
-        check(f, TideConchItem.blow(p, level) == TideShellEntity.RequestResult.NOT_NOW, "the same caller cannot call twice");
-        // 保存・引き継ぎ
-        TideShellEntity second = TideKeeper.KEEPER.spawn(level, SHORE + 100, Z + 64, titan.saveState());
-        check(f, second.requesterNow().equals(p.getGameProfile().getName()), "the caller should be carried to the next instance");
-        // 刻の外では吹けない
-        level.setDayTime(6000);
-        TideShellEntity third = TideKeeper.KEEPER.spawn(level, SHORE + 100, Z + 64, null);
-        check(f, TideConchItem.blow(p, level) == TideShellEntity.RequestResult.NOT_NOW, "far from the ebb the shell cannot call the island");
-        // 海から遠いと吹けない (null)
-        p.setPos(X - 200, level.getSeaLevel() + 1, Z + 64);
-        level.setDayTime(10000);
-        check(f, TideConchItem.blow(p, level) == null, "the shell must refuse far from the sea");
-        // 一人に一つ
-        FakePlayer g = fake(level, "conch_gift");
-        g.getPersistentData().remove(TideChapter.SHELL_GIVEN);
-        check(f, TideChapter.giveShell(g) && !TideChapter.giveShell(g), "the shell is given once per player");
-        check(f, jp.revati.skyabyss.pouch.Pouch.countAll(g, TideChapterSetup.TIDE_WATCHING_SHELL.get()) == 1, "the shell is in the pouch or the inventory");
-        g.getPersistentData().remove(TideChapter.SHELL_GIVEN);
-        if (third != null) {
-            third.discard();
-        }
-        jp.revati.skyabyss.titan.tide.TideBeach.testOff = false;
     }
 
     // ---------------------------------------------------------------- 大干潮
@@ -471,53 +403,6 @@ public final class TideChapterSelfTest {
         TideEbb.end(level, d, List.of(a, b, c));
         check(f, !d.active(), "the last ebb should end");
         TideEbb.testEligible = null;
-    }
-
-    // 潮見の貝をなくした人に、語り部が新しい貝をくれる (選択肢は二章以降でどこにも持っていない人にだけ)
-    private static void conchRegrant(ServerLevel level, List<String> f) {
-        var dialogue = DialogueManager.dialogue("skyabyss:storyteller");
-        check(f, dialogue != null && dialogue.nodes().containsKey("ch2_conch_ask") && dialogue.nodes().containsKey("ch2_conch_done"), "the storyteller conch nodes are not merged");
-        if (dialogue == null) {
-            return;
-        }
-        check(f, DialogueManager.loadErrors().stream().noneMatch(e -> e.contains("ch2")), "dialogue load errors: " + DialogueManager.loadErrors());
-        // 話題の入口は墓の話題と一つ (「なくしたものがある」)。話題の枠は 13 まで
-        var menu = dialogue.nodes().get("menu");
-        check(f, menu.options().size() <= 13, "the storyteller menu should hold within 13 options");
-        var lost = dialogue.nodes().get("lost_ask");
-        check(f, lost != null, "the storyteller 'lost something' node is missing");
-        if (lost == null) {
-            return;
-        }
-        var option = lost.options().stream().filter(o -> o.id().equals("conch")).findFirst().orElse(null);
-        var yes = dialogue.nodes().get("ch2_conch_ask").options().stream().filter(o -> o.id().equals("yes")).findFirst().orElse(null);
-        check(f, option != null && yes != null, "the conch option or its yes answer is missing");
-        if (option == null || yes == null) {
-            return;
-        }
-        FakePlayer p = fake(level, "regrant");
-        p.getInventory().clearContent();
-        var ctx = jp.revati.skyabyss.quest.StoryContext.of(p);
-        var shell = TideChapterSetup.TIDE_WATCHING_SHELL.get();
-        // 段階 0 (一章の人) には出ない。持っていない二章以降の人には出る (段階の条件は人工的に外して見る)
-        check(f, !option.condition().test(ctx), "a chapter 1 player should not be offered a new conch");
-        var menuLost = menu.options().stream().filter(o -> o.id().equals("grave")).findFirst().orElse(null);
-        check(f, menuLost != null && !menuLost.condition().test(ctx), "a chapter 1 player with no grave should not see the lost-something topic");
-        check(f, option.target().equals("ch2_conch_ask"), "the conch option should lead to the storyteller's conch node");
-        check(f, yes.condition().test(ctx), "without a conch, the answer should be possible");
-        yes.actions().forEach(a -> a.run(ctx));
-        check(f, jp.revati.skyabyss.record.Keepsakes.locate(p, shell).total() == 1, "the storyteller should give one conch");
-        check(f, !yes.condition().test(ctx), "with a conch in the pack, no second conch");
-        // 手もとのどこかにあれば (箱の中でも) 数える
-        var chest = p.getEnderChestInventory();
-        check(f, !yes.condition().test(ctx) && jp.revati.skyabyss.pouch.Pouch.count(p, shell) == 1, "a conch in the pouch counts as owned");
-        jp.revati.skyabyss.pouch.Pouch.clear(p);
-        p.getInventory().clearContent();
-        chest.setItem(0, new net.minecraft.world.item.ItemStack(shell));
-        check(f, !yes.condition().test(ctx), "a conch in the ender chest counts as owned");
-        chest.setItem(0, net.minecraft.world.item.ItemStack.EMPTY);
-        check(f, yes.condition().test(ctx), "an empty ender chest and pack should allow a new conch");
-        p.getInventory().clearContent();
     }
 
     // ---------------------------------------------------------------- 経験値の枠 (小要素の経験値は 1〜1.5 レベル分まで)

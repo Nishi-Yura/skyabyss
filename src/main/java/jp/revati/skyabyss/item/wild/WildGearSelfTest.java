@@ -40,13 +40,14 @@ public final class WildGearSelfTest {
             curve(f);
             loot(server, f, notes);
             assets(f, notes);
+            rolls(f, notes);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("wild gear selftest crashed", e);
             f.add("crashed: " + e);
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST wild gear: {}", n));
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST wild gear PASSED (table, jobs, levels, curve, loot, assets)");
+            SkyAbyss.LOGGER.info("SELFTEST wild gear PASSED (table, jobs, levels, curve, loot, assets, accessory rolls)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST wild gear FAILED: {}", x));
         }
@@ -270,6 +271,40 @@ public final class WildGearSelfTest {
         }
         notes.add("weapons without a low-poly mesh: " + missingMesh);
         check(f, ja.containsKey("message.skyabyss.wild_drop") && en.containsKey("message.skyabyss.wild_drop"), "drop message missing");
+    }
+
+    // 装飾の個体差: 70〜130% に収まり、平均はほぼ 100、端は出にくい。強さの数だけ掛け、しきい値は変えない。受ける傷は −100% より下げない
+    static void rolls(List<String> f, List<String> notes) {
+        net.minecraft.util.RandomSource r = net.minecraft.util.RandomSource.create(42L);
+        int lo = 999;
+        int hi = 0;
+        long sum = 0;
+        int edges = 0;
+        int n = 4000;
+        for (int i = 0; i < n; i++) {
+            int v = AccessoryRolls.draw(r);
+            lo = Math.min(lo, v);
+            hi = Math.max(hi, v);
+            sum += v;
+            if (v >= 125 || v <= 75) {
+                edges++;
+            }
+        }
+        double mean = sum / (double) n;
+        check(f, lo >= AccessoryRolls.MIN && hi <= AccessoryRolls.MAX, "roll out of range " + lo + ".." + hi);
+        check(f, Math.abs(mean - 100) < 2, "roll mean is not near 100: " + mean);
+        check(f, edges < n * 0.12, "too many edge rolls: " + edges);
+        net.minecraft.world.item.ItemStack s = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK);
+        AccessoryRolls.set(s, 120);
+        List<WildEffect.Fx> fx = AccessoryRolls.apply(s, List.of(new WildEffect.Fx(WildEffect.Kind.BERSERK, new double[] {0.5, 0.15}),
+                new WildEffect.Fx(WildEffect.Kind.MAX_HEALTH, new double[] {6})));
+        check(f, Math.abs(fx.get(0).p(0) - 0.5) < 1e-9 && Math.abs(fx.get(0).p(1) - 0.18) < 1e-9, "berserk: threshold changed or bonus not scaled");
+        check(f, Math.abs(fx.get(1).p(0) - 7.2) < 1e-9, "max health not scaled by the roll");
+        AccessoryRolls.set(s, 130);
+        List<WildEffect.Fx> fall = AccessoryRolls.apply(s, List.of(new WildEffect.Fx(WildEffect.Kind.FALL_TAKEN, new double[] {-1})));
+        check(f, fall.get(0).p(0) >= -1.0, "fall damage taken went below -100%");
+        check(f, AccessoryRolls.roll(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK)) == 100, "an unrolled item is not 100%");
+        notes.add(String.format("accessory rolls: %d..%d, mean %.1f, edges %.1f%%", lo, hi, mean, edges * 100.0 / n));
     }
 
     private static boolean exists(String path) {

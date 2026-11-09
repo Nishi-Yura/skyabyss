@@ -259,11 +259,11 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     }
 
     // 熱の口の判定の中か (見える口は横 ±2.5、前 81〜85、舌の上から 4)。入りやすいように広げてある:
-    // 横 ±5、前 79〜90 (唇の先まで)、舌の 4 下〜舌の上 6 (舌が地面より高く浮いても、下から届く)
+    // 横 ±5、前 79〜90 (唇の先まで)、舌の 4 下〜舌の上 10 (舌が地面より高く浮いても下から届き、口の前の地面が盛り上がっていても上から届く)
     public boolean inMouth(double x, double y, double z) {
         Vec3 l = local(x, y, z);
         return Math.abs(l.x) <= MOUTH_WIDTH / 2 + 2.5 && l.z >= MOUTH_FORWARD - MOUTH_DEPTH / 2 - 2.0 && l.z <= MOUTH_FORWARD + 7.0
-                && l.y >= TONGUE_UP - 4.0 && l.y <= TONGUE_UP + MOUTH_HEIGHT + 2.0;
+                && l.y >= TONGUE_UP - 4.0 && l.y <= TONGUE_UP + MOUTH_HEIGHT + 6.0;
     }
 
     // 頭のまわり (立入禁止のうち、口の側の前 60 より先・横 ±28) に触れた人は、口が開いているあいだ口へ渡す (titan/solid が押し出す前に聞く)。
@@ -630,8 +630,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         if (tickCount % 10 == 0) {
             sleepSigns(level, now);
         }
-        if (tickCount % 40 == 0 && now == Breath.IN) {
-            mouthHint(level);
+        if (tickCount % 40 == 0) {
+            mouthHint(level, now);
         }
         if (mouthOpen()) {
             // 乗り込み口の光 (乗れる人にだけ見える。眠っているあいだは出ない)
@@ -724,25 +724,23 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         }
     }
 
-    // 口の 24 ブロック以内の人に、吸うあいだだけ 2 秒ごとに「息を吸っているあいだに、口へ」(初めて会った夜だけ)
-    private void mouthHint(ServerLevel level) {
-        long night = EmberGround.nightId(level.getDayTime());
+    // 口の 16 ブロック以内 (か息の扇の中) の、乗れる人に 2 秒ごと: 吸うあいだは「口へ入ろう」、吐くあいだは「吸いはじめるまで待つ」。
+    // 前は初めて会った夜の吸うあいだだけだったので、次からは口に立っても何も出ず、入れないのか分からなかった (2026-11-09 の声「本来入るところから入れない」)
+    private void mouthHint(ServerLevel level, Breath now) {
         Vec3 mouth = mouthCenter();
+        boolean open = now == Breath.IN || now == Breath.HOLD;
         for (ServerPlayer p : Players.snapshot(level.players())) {
-            if (p.isSpectator() || p.distanceToSqr(mouth) > 24 * 24 && !inBreathFan(p.getX(), p.getY(), p.getZ())) {
+            if (p.isSpectator() || p.distanceToSqr(mouth) > 16 * 16 && !inBreathFan(p.getX(), p.getY(), p.getZ())) {
                 continue;
             }
-            CompoundTag data = p.getPersistentData();
-            if (!data.contains(HINT_NIGHT)) {
-                data.putLong(HINT_NIGHT, night);
+            if (!jp.revati.skyabyss.titan.TitanVisibility.sees(p, jp.revati.skyabyss.progress.Titans.EMBER)
+                    || !jp.revati.skyabyss.progress.Progression.canBoard(p, jp.revati.skyabyss.progress.Titans.EMBER)) {
+                continue;
             }
-            if (data.getLong(HINT_NIGHT) == night) {
-                Notice.bar(p, ModText.hint(EmberIds.LANG_SURFACE + "mouth_hint"));
-            }
+            Notice.bar(p, ModText.hint(EmberIds.LANG_SURFACE + (open ? "mouth_hint" : "mouth_wait")));
         }
     }
 
-    static final String HINT_NIGHT = "skyabyss_ember_hint_night";
 
     private void tickSink(ServerLevel level) {
         moveTicks++;

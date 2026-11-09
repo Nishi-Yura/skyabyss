@@ -63,6 +63,8 @@ public final class ShoulderCam {
     private static Entity aimed;
     // 撮影の台本 (ShotRunner の perspective front) が前から映す視点を選んだときは、F5 の飛ばしで一人称へ戻さない
     public static boolean keepFront;
+    // カメラの今の引き (壁に寄ったあと、なめらかに戻す。寄るときはすぐ)
+    private static double distNow = -1;
 
     private ShoulderCam() {
     }
@@ -122,6 +124,7 @@ public final class ShoulderCam {
         }
         boolean now = active();
         if (now && !wasActive) {
+            distNow = -1;
             camYaw = mc.player.getYRot();
             camPitch = mc.player.getXRot();
             setYaw = camYaw;
@@ -129,6 +132,26 @@ public final class ShoulderCam {
             sideNow = side;
         }
         wasActive = now;
+    }
+
+    // 歩く向きはカメラの向き (2026-11-09 の声「3人称操作しづらい」)。体は照準の先を向くので、近い所を見ると肩のずれの分だけ体とカメラの向きがずれ、
+    // W で斜めに歩いていた。動きの入力を、体の向きからカメラの向きへ回して直す (前 f・横 l を δ = カメラ − 体 だけ回す)
+    @SubscribeEvent
+    static void onMovementInput(net.neoforged.neoforge.client.event.MovementInputUpdateEvent event) {
+        if (!active() || !(event.getEntity() instanceof LocalPlayer p) || p.isPassenger()) {
+            return;
+        }
+        net.minecraft.client.player.Input in = event.getInput();
+        float f = in.forwardImpulse;
+        float l = in.leftImpulse;
+        if (f == 0 && l == 0) {
+            return;
+        }
+        double d = Math.toRadians(Mth.wrapDegrees(camYaw - p.getYRot()));
+        double c = Math.cos(d);
+        double sn = Math.sin(d);
+        in.forwardImpulse = (float) (f * c + l * sn);
+        in.leftImpulse = (float) (-f * sn + l * c);
     }
 
     // 毎フレーム: 体を照準の先へ向ける (描画とバニラの的の拾い (pick) の前)
@@ -185,8 +208,21 @@ public final class ShoulderCam {
         Vec3 shoulder = eye.add(up.scale(UP)).add(right.scale(SIDE * sideNow));
         shoulder = clip(p, eye, shoulder);
         Vec3 back = shoulder.subtract(look.scale(dist));
-        return clip(p, shoulder, back);
+        Vec3 hit = clip(p, shoulder, back);
+        // 壁に寄るときはすぐ (壁の中を映さない)、離れたあとは少しずつ戻す (前は壁を抜けるたびに引きが跳んで目が回った)
+        double want = hit.distanceTo(shoulder);
+        long t = net.minecraft.Util.getMillis();
+        double dt = lastPlace == 0 ? 0.016 : Math.min(0.1, (t - lastPlace) / 1000.0);
+        lastPlace = t;
+        if (distNow < 0 || want < distNow) {
+            distNow = want;
+        } else {
+            distNow += (want - distNow) * Math.min(1, dt * 5);
+        }
+        return shoulder.subtract(look.scale(Math.min(distNow, dist)));
     }
+
+    private static long lastPlace;
 
     // from → to の途中にブロックがあれば、その手前 (0.2) まで
     private static Vec3 clip(LocalPlayer p, Vec3 from, Vec3 to) {

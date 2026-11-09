@@ -24,6 +24,12 @@ public class OxSmith extends DungeonBoss {
     static final int GRAB = 1;
     static final int BASH = 2;
     static final int SLAM = 3;
+    static final int HURL = 4;
+    static final int BREATH = 5;
+    public static final int HURL_WARN = 22;
+    public static final int BREATH_WARN = 18;
+    private int lastHurl = -120;
+    private int lastBreath = -160;
     public static final int GRAB_WARN = 16;
     public static final double GRAB_LENGTH = 6;
     public static final int BASH_WARN = 16;
@@ -36,7 +42,7 @@ public class OxSmith extends DungeonBoss {
 
     public OxSmith(EntityType<? extends Monster> type, Level level) {
         super(type, level, "ox_smith", () -> SoundEvents.RAVAGER_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH,
-                "grab", "bash", "slam", "hurt", "death");
+                "grab", "bash", "slam", "hurl", "breath", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -51,6 +57,20 @@ public class OxSmith extends DungeonBoss {
 
     @Override
     protected void choose(LivingEntity target, double distance) {
+        // 鉄塊投げ (2026-11-08 の作り込み): 焼けた鉄を投げる (人の足もとの大きな円と、まわりに一つ)
+        if (distance > 5 && tickCount - lastHurl > 140) {
+            move = HURL;
+            lastHurl = tickCount;
+            volley(target, "hurl", HURL_WARN, 1, 3.0, 1.2f, net.minecraft.world.level.block.Blocks.MAGMA_BLOCK.defaultBlockState());
+            return;
+        }
+        // 火の息 (2026-11-08 の作り込み): 首を振って前へ火を吹く (前の扇を二枚、少しずらして 1.5 秒焼く)
+        if (distance < 8 && tickCount - lastBreath > 200) {
+            move = BREATH;
+            lastBreath = tickCount;
+            spray(target, "breath", BREATH_WARN, 8, 50, 30, 0.35f, ParticleTypes.FLAME);
+            return;
+        }
         if (hp() < 0.6f && distance < SLAM_RADIUS && tickCount - lastSlam > 220) {
             move = SLAM;
             lastSlam = tickCount;
@@ -131,6 +151,8 @@ public class OxSmith extends DungeonBoss {
         return switch (move) {
             case GRAB -> GRAB_WARN + 22;
             case BASH -> BASH_WARN + 10;
+            case HURL -> HURL_WARN + 12;
+            case BREATH -> BREATH_WARN + 10 + 30;
             default -> SLAM_WARN + 16;
         };
     }

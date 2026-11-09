@@ -100,12 +100,14 @@ public final class Sites {
                     arrive(p, s);
                     Tasks.later(40, () -> Lore.unlock(p, Ch1Prep.ROAD_SHRINE, true));
                 }).register();
-        // 骨の集め場: 骨の山。人ごとの一度きりの抽選 (旅装の素材 + 道の固焼き 3)。TODO(P7): 骨負いがここへ導く (ch1/follow_hauler)
+        // 骨の集め場: 骨の山。人ごとの一度きりの抽選 (旅装の素材 + 道の固焼き 3)。骨負いがここへ導く (Ch1Mobs の導く骨負い・クエスト ch1/follow_hauler)
         SiteTreasure.register(Ch1Prep.BONE_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 3),
                 new SiteTreasure.Entry("skyabyss:road_hardtack", 3))));
         ChapterSites.element(Ch1Prep.BONE_CACHE, Chapters.WHALE, Ch1Prep.BONE_CACHE).atGround().dist(40, 105).arriveRadius(8).onArrive((p, s) -> {
             arrive(p, s);
+            jp.revati.skyabyss.quest.Quests.signal(p, Ch1Mobs.HAULER_SIGNAL);
+            Tasks.later(60, () -> Lore.unlock(p, Ch1Mobs.HAULER_LORE, true));
             if (!SiteTreasure.claim(p, Ch1Prep.BONE_CACHE).isEmpty()) {
                 Tasks.later(40, () -> Notice.narrate(p, "message.skyabyss.ch1.cache.found"));
             }

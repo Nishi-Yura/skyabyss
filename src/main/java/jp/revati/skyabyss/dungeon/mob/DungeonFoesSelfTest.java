@@ -59,7 +59,12 @@ public final class DungeonFoesSelfTest {
             new Case("geode_golem", ModEntities.GEODE_GOLEM::get, 4.0, GeodeGolem.POUND_WARN, new String[] {"punch", "pound", "shards"}),
             new Case("bellows_imp", ModEntities.BELLOWS_IMP::get, 4.0, BellowsImp.WARN, new String[] {"breath", "poke"}),
             new Case("lava_slug", ModEntities.LAVA_SLUG::get, 2.2, LavaSlug.WARN, new String[] {"bite"}),
-            new Case("ox_smith", ModEntities.OX_SMITH::get, 3.0, OxSmith.BASH_WARN, new String[] {"grab", "bash", "slam"}));
+            new Case("ox_smith", ModEntities.OX_SMITH::get, 3.0, OxSmith.BASH_WARN, new String[] {"grab", "bash", "slam"}),
+            // 奥のダンジョンの中ボス (2026-11-09)
+            new Case("bone_lancer", ModEntities.BONE_LANCER::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.BoneLancer.CHARGE_WARN, new String[] {"charge", "rear", "sweep"}),
+            new Case("jelly_priestess", ModEntities.JELLY_PRIESTESS::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.JellyPriestess.RAIN_WARN, new String[] {"lash", "rain", "pulse"}),
+            new Case("thunder_owl", ModEntities.THUNDER_OWL::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.ThunderOwl.DIVE_WARN, new String[] {"dive", "gust", "strike"}),
+            new Case("lava_toad", ModEntities.LAVA_TOAD::get, 8.0, jp.revati.skyabyss.dungeon.mob.deep.LavaToad.HOP_WARN, new String[] {"hop", "erupt", "tongue"}));
 
     private DungeonFoesSelfTest() {
     }
@@ -317,6 +322,17 @@ public final class DungeonFoesSelfTest {
             g.trench(p);
             check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= before + 3 + 1 + 8 + 3 + 1, "a new boss attack did not show its warning ("
                     + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - before) + ")", f);
+            // 後半の場の技: 降りそそぎ (足もと 1 + まわり 2) と回る薙ぎ (2 本)
+            int field = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+            c.hazardsNow();
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= field + 3 + 2 + 1, "the second-half field attacks did not show their warnings ("
+                    + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - field) + ")", f);
+            // 解き放ち: 場の技を三つとも一度に予告し、大きな隙を見せる。封じ・荒ぶりは持たない (大事件の大いなるもの固有)
+            int surge = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+            c.surge(p);
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= surge + 3 + 2 + 1, "the surge did not unleash the field attacks ("
+                    + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - surge) + ")", f);
+            check(jp.revati.skyabyss.combat.BossOpenings.isOpen(c), "the surge left no opening", f);
         } finally {
             for (DungeonBoss b : made) {
                 b.discard();

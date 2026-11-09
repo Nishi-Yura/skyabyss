@@ -104,7 +104,7 @@
 | 頼み・会話 | `data/skyabyss/quest/side_founder.json`、`data/skyabyss/dialogue/finale/storyteller_founder.json` |
 | 進み・入口・報酬・開発用 | `story/finale/founder/Founder`（`/skyabyss founder enter\|summon\|phase <1..3>\|verse <1..7>\|win\|seen\|wear\|reset`）、門の選び `FinaleGate` |
 | 舞台 | `story/finale/founder/FounderArena`、地形 `tools/gen/world/build_bell_inside.py` → `data/skyabyss/finale/founder.json`（`FinaleWorld` の版 8） |
-| 始祖 | `story/finale/mob/FounderBoss`（技を使った音は `SkillManager.cast` が `heardSkill` で知らせる）、形 `tools/rough/lowpoly/cloud/founder.py` → `tools/gen/finale/gen_cloud_mobs.py founder`（動きもここ） |
+| 始祖 | `story/finale/mob/FounderBoss`（技を使った音は `SkillManager.cast` が `heardSkill` で知らせる）、形は「雲の喪章」C 霧の巡礼（2026-11-08 の選定。`tools/rough/lowpoly/abyss/founder_pilgrim.py --install`。灰白の雲の体、後ろへ反って尖る長い頭巾、黒いレースの面に白く光る描いた目、裾は雲に溶け、肩から黒いレースの細帯。竿と腰の小鐘は前のまま。段の絵 _s1・_s2 も同じスクリプトが作る。降る白い羽根は `client/entity/PaperCutLayer` の FOUNDER）。動きは `tools/gen/finale/gen_cloud_mobs.py founder`（骨は前と同じ） |
 | 品と見た目 | `story/finale/founder/FounderItems`（肩掛けは人の付け足しのデータ `founder_shawl`、まわりへ同期）、体に描く `client/founder/ShawlLayer`、形と品の絵 `tools/rough/lowpoly/cloud/founder_keepsakes.py` |
 | 称号・記録 | `rebirth/RebirthTitles` の `yattsume`、J の記録の行 `founder`（`record/RecordBuilder`） |
 | 倒れても消えない印 | `util/LifeKeep`（`skyabyss_founder`・`skyabyss_founder_best`。同じ日に、月と終章の記録の取りこぼしも足した） |

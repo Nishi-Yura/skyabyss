@@ -129,6 +129,10 @@ public final class RaidRewardsSelfTest {
         RaidRewards.onRoomCleared(back, eGroup, stone, room(stone, Slot.FIGHT, 0), Slot.FIGHT);
         check(f, held(e, RaidRewards.materialOf(stone)) - em0 == RaidRewards.FIGHT_MATERIAL / 2, "a replay fight room should give half the materials");
         for (int i = 0; i < RaidRewards.REPLAY_FULL_ROOMS; i++) {
+            // 一つの順路で同じ部屋の報いは一度だけなので、周回ごとに順路の記録を新しくする
+            BackGroupData.Record er = BackGroupData.get(back).of(eGroup);
+            er.putString(RaidRewards.ROUTE, "");
+            er.changed();
             RaidRewards.onRoomCleared(back, eGroup, stone, room(stone, Slot.FIGHT, 0), Slot.FIGHT);
         }
         // 七つ目以降は四分の一 (2 x 0.25 = 0.5 の端数は確率で 0 か 1)

@@ -30,9 +30,7 @@ public class LoreToast implements Toast {
         g.drawString(font, Component.translatable("gui.skyabyss.lore.toast"), 30, 7, LoreBookScreen.TEAL, false);
         // 札の絵は一行分の高さ。長い題は「…」で切る (折り返して途中で切れるより、省略だと分かる)
         int room = width() - 36;
-        net.minecraft.network.chat.FormattedText shown = font.width(title) <= room ? title
-                : net.minecraft.network.chat.FormattedText.composite(font.substrByWidth(title, room - font.width("…")), net.minecraft.network.chat.FormattedText.of("…"));
-        g.drawString(font, Language.getInstance().getVisualOrder(shown), 30, 18, LoreBookScreen.INK, false);
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Language.getInstance().getVisualOrder(title), 30, 18, room, LoreBookScreen.INK, false);
         return timeSinceLastVisible >= DURATION * toasts.getNotificationDisplayTimeMultiplier() ? Visibility.HIDE : Visibility.SHOW;
     }
 }

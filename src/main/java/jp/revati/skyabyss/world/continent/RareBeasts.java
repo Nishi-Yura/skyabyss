@@ -99,7 +99,7 @@ public final class RareBeasts {
         return tag(p, CAUGHT).getInt(k.id);
     }
 
-    // ---------------------------------------------------------------- 出る
+    // ---------------------------------------------------------------- 出る (外れの帯の道ぞいだけ。2026-11-09 に外れへ移した。FrontierBand の ③)
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
@@ -118,7 +118,8 @@ public final class RareBeasts {
             }
             NEXT.put(p.getUUID(), now + CHECK_EVERY);
             RareBeast.Kind k = kindAt(p.getBlockX(), p.getBlockZ());
-            if (k == null || locked(p, k) || !alongRoad(p.getX(), p.getZ()) || nearTown(p.getX(), p.getZ()) || p.getRandom().nextFloat() >= CHANCE) {
+            if (k == null || locked(p, k) || !alongRoad(p.getX(), p.getZ()) || nearTown(p.getX(), p.getZ()) || !FrontierBand.far(p.getX(), p.getZ())
+                    || p.getRandom().nextFloat() >= CHANCE) {
                 continue;
             }
             if (appear(p, k) != null) {

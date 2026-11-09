@@ -49,5 +49,17 @@
   "gui.skyabyss.attack.storm_ram.butt": "頭突き",
   "gui.skyabyss.attack.ash_lizard.sweep": "尾の薙ぎ",
   "gui.skyabyss.attack.ash_lizard.bite": "噛みつき",
-  "gui.skyabyss.attack.ash_lizard.breath": "吐く"
+  "gui.skyabyss.attack.ash_lizard.breath": "吐く",
+  "entity.skyabyss.bolt_slinger": "雷石投げ",
+  "item.skyabyss.bolt_slinger_spawn_egg": "雷石投げのスポーンエッグ",
+  "entity.skyabyss.storm_jelly": "雷雲くらげ",
+  "item.skyabyss.storm_jelly_spawn_egg": "雷雲くらげのスポーンエッグ",
+  "entity.skyabyss.crag_tortoise": "峰の甲羅",
+  "item.skyabyss.crag_tortoise_spawn_egg": "峰の甲羅のスポーンエッグ",
+  "entity.skyabyss.ember_spitter": "熾吐き",
+  "item.skyabyss.ember_spitter_spawn_egg": "熾吐きのスポーンエッグ",
+  "entity.skyabyss.ash_whirl": "灰の渦",
+  "item.skyabyss.ash_whirl_spawn_egg": "灰の渦のスポーンエッグ",
+  "entity.skyabyss.basalt_scorpion": "黒石の甲殻",
+  "item.skyabyss.basalt_scorpion_spawn_egg": "黒石の甲殻のスポーンエッグ"
 }

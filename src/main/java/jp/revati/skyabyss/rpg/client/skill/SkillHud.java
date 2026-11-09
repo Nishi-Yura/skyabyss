@@ -45,11 +45,16 @@ public final class SkillHud {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.player.isSpectator()) {
             return;
         }
-        if (!anySlot(SkillManager.get(mc.player))) {
+        boolean skills = anySlot(SkillManager.get(mc.player));
+        boolean charm = !charm(mc.player).isEmpty();
+        if (!skills && !charm) {
             return;
         }
-        // 右端に構えの字の分 (11) を足す
-        int row = SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11;
+        // 右端に構えの字の分 (11) を足す。護符を付けていれば、その右に護符の枠
+        int row = skills ? SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11 : 0;
+        if (charm) {
+            row += (skills ? CHARM_GAP : 0) + SLOT;
+        }
         out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
@@ -83,6 +88,7 @@ public final class SkillHud {
         if (showMana(mc.player, d) && !jp.revati.skyabyss.client.hud.VitalsHud.manaInFoodSlot()) {
             renderMana(g, mc, d);
         }
+        renderCharm(g, mc, d, delta);
         if (anySlot(d)) {
             // 今の職の武器を持っていない間は、枠を薄く出す (使えないことが分かるように。消さない。docs/design/48 の 3 章)
             jp.revati.skyabyss.rpg.skill.Job cur = jp.revati.skyabyss.rpg.skill.Job.byId(d.curJob);
@@ -120,6 +126,19 @@ public final class SkillHud {
         g.pose().popPose();
     }
 
+    // 刻印・書き換え・秘伝が効いている技の絵に、その色の縁 (1 画素。SkillChanges.frameColor)
+    public static void changeFrame(GuiGraphics g, net.minecraft.world.entity.player.Player p, Skill s, int x, int y, int size) {
+        int c = jp.revati.skyabyss.rpg.skill.SkillChanges.frameColor(p, s);
+        if (c == 0) {
+            return;
+        }
+        int a = 0xFF000000 | c;
+        g.fill(x, y, x + size, y + 1, a);
+        g.fill(x, y + size - 1, x + size, y + size, a);
+        g.fill(x, y, x + 1, y + size, a);
+        g.fill(x + size - 1, y, x + size, y + size, a);
+    }
+
     static void diamond(GuiGraphics g, int x, int y, int c) {
         g.fill(x + 2, y, x + 3, y + 5, 0xFF101418);
         g.fill(x, y + 2, x + 5, y + 3, 0xFF101418);
@@ -148,6 +167,41 @@ public final class SkillHud {
         }
     }
 
+    // 護符の枠 (2026-11-08 の声「護符付けてもスロット表示されない。画面に」): 技の枠の右に、付けている護符の絵・使うキー・待ちの覆い
+    static final int CHARM_GAP = 4;
+
+    static net.minecraft.world.item.ItemStack charm(Player p) {
+        return jp.revati.skyabyss.item.accessory.Accessories.stack(p, jp.revati.skyabyss.item.accessory.AccessoryData.CHARM);
+    }
+
+    private static void renderCharm(GuiGraphics g, Minecraft mc, SkillData d, DeltaTracker delta) {
+        net.minecraft.world.item.ItemStack stack = charm(mc.player);
+        int[] o = slotOrigin();
+        if (stack.isEmpty() || o == null) {
+            return;
+        }
+        int x = o[0] + (anySlot(d) ? d.slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11 + CHARM_GAP : 0);
+        int y = o[1];
+        g.blit(TEXTURE, x, y, SLOT, SLOT, 468, 384, 40, 40, TEX_W, TEX_H);
+        g.renderItem(stack, x + 2, y + 2);
+        boolean ready = jp.revati.skyabyss.item.GearLevel.meets(mc.player, stack);
+        float cd = mc.player.getCooldowns().getCooldownPercent(stack.getItem(), delta.getGameTimeDeltaPartialTick(true));
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 200);
+        if (!ready) {
+            g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A3A1010);
+        } else if (cd > 0) {
+            int h = Mth.clamp(Math.round(16f * cd), 1, 16);
+            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB0101418);
+        }
+        String k = jp.revati.skyabyss.client.accessory.AccessoryClient.CHARM_KEY.getTranslatedKeyMessage().getString();
+        if (k.length() > 3) {
+            k = k.substring(0, 3);
+        }
+        g.drawString(mc.font, k, x + SLOT - 1 - mc.font.width(k), y + SLOT - 8, cd > 0 || !ready ? 0x6A707C : 0xE8D9A0, true);
+        g.pose().popPose();
+    }
+
     // 枠の置き場: HudManager が割り当てた長方形 (ホットバーの右、または左上)
     static int[] slotOrigin() {
         Rect r = HudManager.rect(Id.SKILL_SLOTS);
@@ -171,7 +225,8 @@ public final class SkillHud {
             Skill s = d.slot(i);
             if (s != null) {
                 int rank = d.rank(s);
-                drawIcon(g, s.iconIndex(), x + 2, y + 2);
+                drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(mc.player, s), x + 2, y + 2);
+                changeFrame(g, mc.player, s, x + 2, y + 2, 16);
                 // 今その技を変えているもの (刻印・書き換え・変異・秘伝) があれば左上に色の印 (SkillChanges)
                 changeMark(g, mc.player, s, x + 1, y + 1);
                 // マナが足りない: 青黒く沈める
@@ -222,6 +277,10 @@ public final class SkillHud {
 
     // 32px の絵を 16 で描く
     static final ResourceLocation ICONS2 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons2.png");
+    // 200 以上は icons3.png (技の変異。256x64。tools/gen/ui/gen_mutation_icons.py)
+    static final ResourceLocation ICONS3 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons3.png");
+    // 300 以上は icons4.png (武器の書き換え。256x256。tools/gen/ui/gen_rewrite_icons.py)
+    static final ResourceLocation ICONS4 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons4.png");
 
     // 100 以上は icons2.png (淵・前世の技・木の印・紋・職の新しい技。256x192)
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
@@ -229,7 +288,13 @@ public final class SkillHud {
     }
 
     static void drawIcon(GuiGraphics g, int index, int x, int y, int size) {
-        if (index >= 100) {
+        if (index >= 300) {
+            int n = index - 300;
+            g.blit(ICONS4, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 256);
+        } else if (index >= 200) {
+            int n = index - 200;
+            g.blit(ICONS3, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 64);
+        } else if (index >= 100) {
             int n = index - 100;
             g.blit(ICONS2, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 192);
         } else {
@@ -237,8 +302,4 @@ public final class SkillHud {
         }
     }
 
-    // 紋の絵 (icons2.png の 20〜24 番)
-    static void drawGlyph(GuiGraphics g, jp.revati.skyabyss.rpg.skill.Glyph glyph, int x, int y, int size) {
-        drawIcon(g, 120 + glyph.ordinal(), x, y, size);
-    }
 }

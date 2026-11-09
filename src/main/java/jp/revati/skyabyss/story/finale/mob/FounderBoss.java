@@ -315,8 +315,9 @@ public class FounderBoss extends CloudMob {
             counter(by);
             return false;
         }
-        float scale = (float) jp.revati.skyabyss.combat.HeartBalance.partyScale(Math.max(1, FounderArena.present((ServerLevel) level()).size()));
-        float a = amount / scale * (opening > 0 ? 1.25f : 1f);
+        // 人数は体力に掛ける (2026-11-09。受ける傷を割るのをやめた)
+        jp.revati.skyabyss.combat.Hardness.set(this, "party", jp.revati.skyabyss.combat.HeartBalance.partyScale(Math.max(1, FounderArena.present((ServerLevel) level()).size())));
+        float a = amount * (opening > 0 ? 1.25f : 1f);
         if (by != null) {
             realHits++;
         }
@@ -387,6 +388,21 @@ public class FounderBoss extends CloudMob {
             FounderArena.defeated(sl, this);
             discard();
         }
+    }
+
+    // 当たりの飾り (雲の喪章。2026-11-08 の声「攻撃が地味。もっと豪華に」): 白い羽根が舞い上がり、白い輪が走り、雲が広がり、光が昇る
+    static void plume(ServerLevel sl, double x, double y, double z, double r) {
+        var feather = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.98f, 0.98f, 1f), 2.0f);
+        var lace = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.06f, 0.05f, 0.08f), 1.4f);
+        int n = (int) Math.min(40, 10 + r * 6);
+        for (int k = 0; k < n; k++) {
+            double a = Math.PI * 2 * k / n;
+            sl.sendParticles(feather, x + Math.cos(a) * r, y + 0.2, z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+        }
+        sl.sendParticles(feather, x, y + 0.6, z, (int) (10 + r * 4), r * 0.5, 0.5, r * 0.5, 0.03);
+        sl.sendParticles(lace, x, y + 0.5, z, (int) (4 + r * 2), r * 0.4, 0.4, r * 0.4, 0.02);
+        sl.sendParticles(ParticleTypes.CLOUD, x, y + 0.3, z, (int) (6 + r * 2), r * 0.4, 0.1, r * 0.4, 0.04);
+        sl.sendParticles(ParticleTypes.END_ROD, x, y + 0.4, z, (int) (6 + r * 2), r * 0.3, 0.6, r * 0.3, 0.05);
     }
 
     // ---------------------------------------------------------------- 写し (ななつ)
@@ -766,6 +782,7 @@ public class FounderBoss extends CloudMob {
             if (t == 11 || t == 26 || t == 49) {
                 lineHit(sl, 4.4, 0.9, 1.0);
                 sl.playSound(null, blockPosition(), SoundEvents.TRIDENT_THROW.value(), SoundSource.HOSTILE, 1.0f, 1.3f);
+                plume(sl, getX() + dir.x * 4.4, getY(), getZ() + dir.z * 4.4, 1.2);
             }
             if (t >= 58) {
                 end(26);
@@ -782,6 +799,7 @@ public class FounderBoss extends CloudMob {
             }
             if (t == 17) {
                 sl.playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.4f, 0.7f);
+                plume(sl, getX() + dir.x * 2.5, getY(), getZ() + dir.z * 2.5, 3.0);
                 sl.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + dir.x * 2, getY() + 1.2, getZ() + dir.z * 2, 3, 1.2, 0.2, 1.2, 0);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     Vec3 r = p.position().subtract(position());
@@ -863,6 +881,7 @@ public class FounderBoss extends CloudMob {
                 }
                 if (t == 24) {
                     sl.playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 2.0f, 0.5f);
+                    plume(sl, getX(), getY(), getZ(), 4.0);
                 }
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     double d = p.position().subtract(position()).horizontalDistance();
@@ -900,6 +919,7 @@ public class FounderBoss extends CloudMob {
             }
             if (t == 42) {
                 sl.playSound(null, cl, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0f, 1.4f);
+                plume(sl, cl.getX() + 0.5, cl.getY(), cl.getZ() + 0.5, 3.5);
                 sl.sendParticles(ParticleTypes.FLASH, top.x, top.y + 2, top.z, 1, 0, 0, 0, 0);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     if (p.getXRot() < -15f) {
@@ -951,6 +971,7 @@ public class FounderBoss extends CloudMob {
             }
             if (t == 40) {
                 sl.playSound(null, BlockPos.containing(aim), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 1.6f);
+                plume(sl, aim.x, aim.y, aim.z, 4.5);
                 sl.sendParticles(ParticleTypes.END_ROD, aim.x, aim.y + 0.5, aim.z, 80, 2.0, 0.4, 2.0, 0.1);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     if (p.position().subtract(aim).horizontalDistance() <= 4.2) {

@@ -336,7 +336,7 @@ public final class FacilitySelfTest {
         Coins.give(p, 30);
         check(f, ShopService.buy(p, tools, "bread", 1) == ShopService.Result.OK, "buy bread");
         check(f, Coins.count(p) == 27 && p.getInventory().countItem(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get()) == 3, "bread paid and given");
-        check(f, ShopService.buy(p, toolShop, "gather_axe", 5) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
+        check(f, ShopService.buy(p, toolShop, "gather_pickaxe", 5) == ShopService.Result.NO_COINS && Coins.count(p) == 27, "cannot overspend");
         check(f, ShopService.buy(p, tools, "nope", 1) == ShopService.Result.NO_GOOD, "unknown good");
         // 素材の値段
         check(f, ShopService.buy(p, mats, "resonance", 1) == ShopService.Result.NO_MATERIALS, "material price needs materials");
@@ -414,11 +414,23 @@ public final class FacilitySelfTest {
         copy.deserializeNBT(server.registryAccess(), data.serializeNBT(server.registryAccess()));
         check(f, copy.items().get(0).is(Items.IRON_INGOT) && copy.items().get(0).getCount() == 12 && copy.items().get(53).getCount() == 40
                 && copy.count() == 2, "stash survives save");
-        check(f, StashData.SIZE == 54, "stash has 54 slots");
+        check(f, StashData.PAGE == 54 && StashData.SIZE == StashData.PAGE * StashData.PAGES, "stash has 54 slots a page");
         // 人の記録として同じ中身 (どの預かり番からも同じ)
         p.getData(FacilitySetup.STASH).items().set(5, new ItemStack(Items.APPLE));
         check(f, p.getData(FacilitySetup.STASH).items().get(5).is(Items.APPLE), "stash is per player");
         p.getData(FacilitySetup.STASH).items().set(5, ItemStack.EMPTY);
+        // 頁の買い足し (鐘銭で 2 頁目。頁の数は保存に残る)
+        StashData mine = p.getData(FacilitySetup.STASH);
+        mine.setPages(1);
+        Coins.take(p, Coins.count(p));
+        check(f, !StashMenu.buyPage(p) && mine.pages() == 1, "stash page needs coins");
+        Coins.give(p, StashData.PAGE_COST[2]);
+        check(f, StashMenu.buyPage(p) && mine.pages() == 2 && Coins.count(p) == 0, "stash page bought for coins");
+        data.setPages(3);
+        StashData copy2 = new StashData();
+        copy2.deserializeNBT(server.registryAccess(), data.serializeNBT(server.registryAccess()));
+        check(f, copy2.pages() == 3, "stash pages survive save");
+        mine.setPages(1);
     }
 
     // ---------------------------------------------------------------- 宿・修理

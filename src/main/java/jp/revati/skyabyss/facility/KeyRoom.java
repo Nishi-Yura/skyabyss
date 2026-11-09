@@ -43,6 +43,21 @@ public final class KeyRoom {
     private KeyRoom() {
     }
 
+    // 2026-11-08 の声「欠片を収める意味何？ 意味のない事項があれば消して」: 納める口 (祭司の選択肢・石に触れる) は外した。
+    // 前に納めた欠片は、入ったときに持ち主へ返す (鍵がそろう決まりは、持っている欠片で変わらず効く)
+    @EventBusSubscriber(modid = SkyAbyss.MODID)
+    public static final class GiveBackOnLogin {
+        private GiveBackOnLogin() {
+        }
+
+        @SubscribeEvent
+        static void onLogin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+            if (event.getEntity() instanceof ServerPlayer p && !offered(p).isEmpty()) {
+                giveBack(p);
+            }
+        }
+    }
+
     public static final String HOLDER = "key_room";
     // 納めるときは、鍵の間の枠から取らない (自分の枠から自分へ数え直さないため)
     private static final ThreadLocal<Boolean> OFFERING = ThreadLocal.withInitial(() -> false);

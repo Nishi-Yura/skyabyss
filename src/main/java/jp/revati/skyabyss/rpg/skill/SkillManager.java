@@ -361,42 +361,59 @@ public final class SkillManager {
     // 刻印の効き目の番号 (選んでいない・まだ開かない・極めていない技は 0)
     public static int runeOf(Player player, Skill skill) {
         SkillData d = get(player);
+        // 技の木の変化の節: その技を知っていて節を取っていれば、それがいつも効く。置き場の番号 (d.runes) は一つしかなく、
+        // 伝説の書き換え・熟練の刻印を選ぶ・古い型を読み直す・昔の刻印の画面で上書きされると、変化が元の技に戻っていた
+        // (2026-11-08 の声「雷の波動を出すやつが、普通のまっすぐ飛ぶ雷になってた」)。書き換えの上乗せは legendRune が別に見る
+        int taken = takenTreeRune(player, skill);
+        if (taken > 0 && d.knows(skill)) {
+            return taken;
+        }
+        // 武器の書き換え: 持つだけで効く (legendRune。木の変化の節を取っていれば、そちらが形で、書き換えは上乗せだけ)
+        Rune held = legendRune(player, skill);
+        if (held != null) {
+            return held.index;
+        }
         int r = d.rune(skill);
-        // 技の木の変化の節 (技の木 v3): その技を知っていて節を取っていれば効く (段を極めなくてよい。節を取ったのに黙って効かない形をなくす)
-        if (r > 0 && Rune.normal(r) && Rune.of(skill, r) != null && !Rune.of(skill, r).legendary() && d.knows(skill)
-                && treeRune(player, skill, r)) {
-            return r;
+        // 木の変化の番号なのに節が無い (古い記録の残り) ときは効かせない
+        if (r > 0 && Rune.normal(r) && hasTreeRunes(skill)) {
+            return 0;
         }
         if (r <= 0 || !d.runeUsable(skill, r)) {
             return 0;
         }
-        // 逸品の書き換えは、その武器を持つあいだだけ。番号は持っている武器の書き換えのもの (4 か 6)
+        // 前に選んでいた書き換えの番号 (古い記録): 武器を持っていなければ効かない (持っていれば上で返している)
         if (r == 4) {
-            Rune held = Rune.heldLegend(skill, player);
-            return held == null ? 0 : held.index;
+            return 0;
         }
         return Rune.valid(skill, r) && Rune.heldOf(skill, r, player) ? r : 0;
     }
 
-    // その変化が今の職の木の節として取られているか
-    private static boolean treeRune(Player player, Skill skill, int r) {
-        SkillData d = get(player);
+    // その技の取った変化の節の番号 (なければ 0)
+    public static int takenTreeRune(Player player, Skill skill) {
         jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree);
         if (tree == null) {
-            return false;
+            return 0;
         }
+        java.util.Set<String> mine = get(player).nodesOf(skill.tree);
         for (jp.revati.skyabyss.rpg.skill.tree.AbilityNode n : tree.runesOf(skill)) {
-            if (n.rune == r && d.nodesOf(skill.tree).contains(n.id)) {
-                return true;
+            if (mine.contains(n.id)) {
+                return n.rune;
             }
         }
-        return false;
+        return 0;
+    }
+
+    private static boolean hasTreeRunes(Skill skill) {
+        jp.revati.skyabyss.rpg.skill.tree.AbilityTree tree = jp.revati.skyabyss.rpg.skill.tree.AbilityTrees.of(skill.tree);
+        return tree != null && !tree.runesOf(skill).isEmpty();
     }
 
     // いま効いている伝説の書き換え (選んでいて、その武器を持っている。なければ null)
+    // 武器の書き換え: その技を知っていて、書き換えの武器を利き手に持つ (か装備に刻んだ) あいだ効く。選ぶ手間はない
+    // (2026-11-09 の声「武器持っても、スキルの右下の見た目変わらない」: 前は技の画面で書き換えを選ぶ要があり、その印は節を取るたびに
+    //  技の変化の番号を木から作り直す applyNodes で消えていた。持つだけで効くに決めた)
     public static Rune legendRune(Player player, Skill skill) {
-        SkillData d = get(player);
-        if (d.rune(skill) != 4 || !d.runeUsable(skill, 4)) {
+        if (skill == null || !get(player).knows(skill)) {
             return null;
         }
         return Rune.heldLegend(skill, player);
@@ -516,7 +533,7 @@ public final class SkillManager {
         }
         for (var e : l.runes.entrySet()) {
             Skill s = Skill.byId(e.getKey());
-            if (s != null && d.rune(s) > 0 && d.runeUsable(s, e.getValue()) && Rune.heldOf(s, e.getValue(), player)) {
+            if (s != null && !Rune.normal(e.getValue()) && d.rune(s) > 0 && d.runeUsable(s, e.getValue()) && Rune.heldOf(s, e.getValue(), player)) {
                 d.runes.put(s.id, e.getValue());
             }
         }
@@ -690,6 +707,8 @@ public final class SkillManager {
         jp.revati.skyabyss.story.finale.gear.DivineSecondEvents.onSkillCast(player);
         // 神器の大きな能力 (巻き戻し・羽の嵐)
         jp.revati.skyabyss.item.mythic.MythicAbilities.onSkillCast(player, skill, rank);
+        // 巨神のアスペクト (もう一度・待ちが戻る・次の一撃・守り・足。docs/design/58)
+        jp.revati.skyabyss.rpg.aspect.Aspects.afterCast(player, skill, rank);
         return CastResult.OK;
     }
 

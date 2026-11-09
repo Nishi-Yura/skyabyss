@@ -20,9 +20,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
-// 試練の板の画面 (docs/design/29 の 2.7・4.2)。暗い石板に画素の枠。二つの頁:
+// 祠の画面 (試練の板。docs/design/29 の 2.7・4.2)。祠の祭司に話しかけると開く。暗い石板に画素の枠。四つの頁:
 //   いまの三つ : 引いた三つの試練。枠 (歩・智・闘) の絵・名前・類・段・修飾の札。稀は金の縁、極は赤紫の縁。極のうち一つは「？」(入ってから分かる)
 //   図鑑       : その巨神の試練ごとに、済んだ回数・任意の目標の数・出会った修飾の数。まだ引いていないものは「？」。称号
+//   誓い       : 周回だけの縛り。祠のそばで、試練を進める前だけクリックで立てる / 降ろす (前は碑をしゃがんで右クリックした話の欄)
+//   心得       : 祠・試練・誓い・深淵の手引き
+// 上の段の右に「仲間と渡る」(祠のそばだけ)。下の段に順路の記録・歌片・称号と、歌片を作る・深淵のつまみ。
 // Tab で頁を替える。Esc で閉じる。見せるだけで、決めるのはサーバー
 public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final ResourceLocation ICONS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/trial/icons.png");
@@ -53,8 +56,15 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     private static final int ABYSS_W = 118;
     private static final int CRAFT_W = Golden.S89;
-    private static final int TAB_W = Golden.S55;
+    // 頁は五つ (いま・図鑑・誓い・報い・手引き)。札の幅は四つのときの並びと同じ長さに収める
+    private static final int TAB_W = 44;
+    private static final int TABS = 5;
     private static final int TOOL_Y = BODY.y();
+    // 仲間と渡る (上の段の右。頁の札の右から板の右まで)
+    private static final int GO_X = BODY.x() + TABS * (TAB_W + Golden.S3) + Golden.S5;
+    private static final int GO_W = BODY.right() - GO_X;
+    // 下の段の二行目: 歌片を作る・深淵のつまみ (右寄せ)
+    private static final int FOOT_BTN_Y = LAYOUT.foot().y() + 4 + ROW;
 
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private TrialBoardNet.Open data;
@@ -72,7 +82,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     // 試験・撮影のため
     public void selectTab(int t) {
-        tab = Mth.clamp(t, 0, 1);
+        tab = Mth.clamp(t, 0, TABS - 1);
     }
 
     @Override
@@ -87,16 +97,16 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_TAB || key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_LEFT) {
-            tab = 1 - tab;
+        if (key == GLFW.GLFW_KEY_TAB || key == GLFW.GLFW_KEY_RIGHT) {
+            tab = (tab + 1) % TABS;
             return true;
         }
-        if (key == GLFW.GLFW_KEY_1) {
-            tab = 0;
+        if (key == GLFW.GLFW_KEY_LEFT) {
+            tab = (tab + TABS - 1) % TABS;
             return true;
         }
-        if (key == GLFW.GLFW_KEY_2) {
-            tab = 1;
+        if (key >= GLFW.GLFW_KEY_1 && key < GLFW.GLFW_KEY_1 + TABS) {
+            tab = key - GLFW.GLFW_KEY_1;
             return true;
         }
         return super.keyPressed(key, scan, mods);
@@ -109,25 +119,42 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         int px = 0;
         int py = 0;
         if (button == 0 && my >= TOOL_Y && my < TOOL_Y + ROW) {
-            for (int t = 0; t < 2; t++) {
+            for (int t = 0; t < TABS; t++) {
                 int tx = BODY.x() + t * (TAB_W + Golden.S3);
                 if (mx >= tx && mx < tx + TAB_W) {
                     tab = t;
                     return true;
                 }
             }
+            // 仲間と渡る (祠のそばだけ。そろっているかはサーバーが確かめる。数え下ろしが見えるように画面を閉じる)
+            if (data.atShrine() && mx >= GO_X && mx < GO_X + GO_W) {
+                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.ShrineGo(data.titan()));
+                onClose();
+                return true;
+            }
+        }
+        if (button == 0 && my >= FOOT_BTN_Y && my < FOOT_BTN_Y + ROW) {
             // 歌片を作る (祠の炉。足りるかはサーバーが確かめる)
             int cx = BODY.right() - ABYSS_W - Golden.S5 - CRAFT_W;
             if (mx >= cx && mx < cx + CRAFT_W) {
                 net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.CraftShard(data.titan()));
                 return true;
             }
-            // 深淵のつまみ (転生 3 回以上の人だけ押せる。グループごと。サーバーが確かめる)
+            // 深淵のつまみ (物語を終えた人だけ押せる。グループごと。サーバーが確かめる)
             int ax = BODY.right() - ABYSS_W;
             if (mx >= ax && mx < ax + ABYSS_W) {
                 if (data.abyssOpen()) {
                     net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.AbyssToggle(data.titan(), !data.abyssOn()));
                 }
+                return true;
+            }
+        }
+        // 誓いの行 (選べるときだけ)
+        if (button == 0 && tab == 2 && data.vowClosed().isEmpty()) {
+            int i = vowRowAt(mx, my);
+            if (i >= 0) {
+                TrialBoardNet.VowLine v = data.vows().get(i);
+                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.VowChange(data.titan(), v.id(), !v.on()));
                 return true;
             }
         }
@@ -215,22 +242,185 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         Component sub = titan.copy().append("  ").append(Component.translatable("gui.skyabyss.trial.cycle", data.cycle()));
         g.drawString(font, sub, head.right() - Golden.S5 - font.width(sub), hy, argb(1f, TEAL), false);
         // 頁
-        String[] tabs = {"gui.skyabyss.trial.tab.now", "gui.skyabyss.trial.tab.codex"};
-        for (int t = 0; t < 2; t++) {
+        String[] tabs = {"gui.skyabyss.trial.tab.now", "gui.skyabyss.trial.tab.codex", "gui.skyabyss.trial.tab.vow", "gui.skyabyss.trial.tab.rewards", "gui.skyabyss.trial.tab.how"};
+        for (int t = 0; t < TABS; t++) {
             int tx = BODY.x() + t * (TAB_W + Golden.S3);
             boolean hover = mouseX >= tx && mouseX < tx + TAB_W && mouseY >= TOOL_Y && mouseY < TOOL_Y + ROW;
             Golden.tab(g, font, new Golden.Box(tx, TOOL_Y, TAB_W, ROW), Component.translatable(tabs[t]), tab == t, hover);
         }
-        renderAbyssToggle(g, font, BODY.right() - ABYSS_W, TOOL_Y, mouseX, mouseY);
-        renderCraft(g, font, BODY.right() - ABYSS_W - Golden.S5 - CRAFT_W, TOOL_Y, mouseX, mouseY);
-        if (tab == 0) {
-            renderNow(g, font);
-        } else {
-            renderCodex(g, font);
+        if (data.atShrine()) {
+            renderGo(g, font, mouseX, mouseY);
         }
-        // 足: 順路の記録・歌片・称号
+        switch (tab) {
+            case 0 -> renderNow(g, font);
+            case 1 -> renderCodex(g, font);
+            case 2 -> renderVows(g, font, mouseX, mouseY);
+            case 3 -> renderRewards(g, font, mouseX, mouseY);
+            default -> renderHow(g, font);
+        }
+        // 足: 順路の記録・歌片・称号と、歌片を作る・深淵のつまみ
         renderFoot(g, font);
+        renderAbyssToggle(g, font, BODY.right() - ABYSS_W, FOOT_BTN_Y, mouseX, mouseY);
+        renderCraft(g, font, BODY.right() - ABYSS_W - Golden.S5 - CRAFT_W, FOOT_BTN_Y, mouseX, mouseY);
         fit.end(g);
+    }
+
+    // 仲間と渡る (金の縁。祠の祭司の「仲間と渡る」と同じ)
+    private void renderGo(GuiGraphics g, Font font, int mx, int my) {
+        boolean hover = mx >= GO_X && mx < GO_X + GO_W && my >= TOOL_Y && my < TOOL_Y + ROW;
+        g.fill(GO_X, TOOL_Y, GO_X + GO_W, TOOL_Y + ROW, argb(1f, hover ? 0x3A3018 : 0x241E10));
+        Golden.outline(g, GO_X, TOOL_Y, GO_X + GO_W, TOOL_Y + ROW, argb(1f, GOLD));
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.shrine.go"), GO_X + GO_W / 2, Golden.textY(TOOL_Y, ROW),
+                GO_W - 4, argb(1f, hover ? 0xFFF0C0 : GOLD), false);
+        if (hover) {
+            g.renderTooltip(font, font.split(Component.translatable("gui.skyabyss.shrine.go_tip"), 200), mx, my);
+        }
+    }
+
+    // 誓いの頁: 一行目に段と素材の倍率 (選べないときは理由)、その下に誓いを一つずつ (立てているものは金)
+    private static final int VOW_TOP = CONTENT.y() + ROW + Golden.S5;
+    private static final int VOW_ROW = ROW + Golden.S5;
+    private static final int SOFT_DESC = 0xA9AEBC;
+
+    private int vowRowAt(double mx, double my) {
+        if (mx < CONTENT.x() || mx >= CONTENT.right() || my < VOW_TOP) {
+            return -1;
+        }
+        int i = (int) ((my - VOW_TOP) / VOW_ROW);
+        return i < data.vows().size() && VOW_TOP + (i + 1) * VOW_ROW <= CONTENT.bottom() ? i : -1;
+    }
+
+    private void renderVows(GuiGraphics g, Font font, int mx, int my) {
+        int x0 = CONTENT.x() + Golden.S5;
+        int level = 0;
+        for (TrialBoardNet.VowLine v : data.vows()) {
+            if (v.on()) {
+                level += v.points();
+            }
+        }
+        Component head = data.vowClosed().isEmpty()
+                ? Component.translatable("gui.skyabyss.shrine.vow_head", level, Math.round(jp.revati.skyabyss.titan.vow.Vows.multiplier(level) * 100),
+                        jp.revati.skyabyss.titan.vow.Vows.MAX_VOWS, data.vowBest())
+                : Component.translatable(data.vowClosed());
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, head, x0, Golden.textY(CONTENT.y(), ROW), CONTENT.w() - Golden.S13,
+                argb(1f, data.vowClosed().isEmpty() ? GOLD : Golden.DENY), false);
+        boolean open = data.vowClosed().isEmpty();
+        int hoverRow = open ? vowRowAt(mx, my) : -1;
+        for (int i = 0; i < data.vows().size(); i++) {
+            TrialBoardNet.VowLine v = data.vows().get(i);
+            int y = VOW_TOP + i * VOW_ROW;
+            if (y + VOW_ROW > CONTENT.bottom()) {
+                break;
+            }
+            boolean hover = i == hoverRow;
+            g.fill(CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? 0x2A2618 : hover ? 0x1E2230 : CARD));
+            Golden.outline(g, CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? GOLD : hover ? TEAL : 0x2C3846));
+            String box = v.on() ? "◆ " : "◇ ";
+            Component name = Component.literal(box).append(Component.translatable("vow.skyabyss." + v.id())).append(Component.literal("  +" + v.points()));
+            int ty = Golden.textY(y, VOW_ROW - 2);
+            g.drawString(font, name, x0, ty, argb(1f, v.on() ? GOLD : open ? TEXT : DIM), false);
+            int dx = x0 + Golden.S89 + Golden.S13;
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("vow.skyabyss." + v.id() + ".desc"), dx, ty,
+                    CONTENT.right() - Golden.S5 - dx, argb(1f, SOFT_DESC), false);
+        }
+        // 指した誓いの説明を全部 (行では「…」で切れる)。選べるときは押し方も
+        int at = vowRowAt(mx, my);
+        if (at >= 0) {
+            java.util.List<FormattedCharSequence> tip = new java.util.ArrayList<>(font.split(Component.translatable("vow.skyabyss." + data.vows().get(at).id() + ".desc"), 220));
+            if (open) {
+                tip.add(Component.translatable("gui.skyabyss.shrine.vow_tip").withStyle(st -> st.withColor(TEAL)).getVisualOrderText());
+            }
+            g.renderTooltip(font, tip, mx, my);
+        }
+    }
+
+    // 心得の頁: 祠・試練・誓い・深淵を、見出しと折り返した文で
+    // 報い: この祠から出るアスペクト (今の職の分。共通のレア・エピックと、この祠だけのミシック)。持っている Lv と、出る割合・ミシックまでの回数
+    private void renderRewards(GuiGraphics g, Font font, int mx, int my) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+        jp.revati.skyabyss.rpg.skill.SkillData d = jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player);
+        jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(d.curJob);
+        int x0 = CONTENT.x() + Golden.S5;
+        int w = CONTENT.w() - Golden.S13;
+        int y = CONTENT.y() + 2;
+        Component head = Component.translatable("gui.skyabyss.aspect.pool_head",
+                job == null ? Component.literal("-") : Component.translatable(job.nameKey()));
+        g.drawString(font, head, x0, y, argb(1f, GOLD), false);
+        Component pity = Component.translatable("gui.skyabyss.aspect.pool_pity", Math.max(1, jp.revati.skyabyss.rpg.aspect.Aspects.PITY - d.aspectPity + 1));
+        g.drawString(font, pity, x0 + w - font.width(pity), y, argb(1f, TEAL), false);
+        y += 11;
+        for (FormattedCharSequence line : font.split(Component.translatable("gui.skyabyss.aspect.pool_rates"), w)) {
+            g.drawString(font, line, x0, y, argb(1f, DIM), false);
+            y += 10;
+        }
+        y += 3;
+        if (job == null) {
+            return;
+        }
+        // 二段の棚 (どの祠でも・この祠だけ。一段 10 品)。品は K 画面のアスペクトの頁と同じ札 (持っていない品は「？」で伏せる)
+        java.util.List<jp.revati.skyabyss.rpg.aspect.Aspect> pool = jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, data.titan());
+        int tile = 20;
+        int per = 10;
+        int gap = Math.max(2, Math.min(Golden.S8, (w - per * tile) / (per - 1)));
+        int rowW = per * tile + (per - 1) * gap;
+        int tx0 = x0 + Math.max(0, (w - rowW) / 2);
+        java.util.List<Component> tip = null;
+        for (String grp : new String[] {"", data.titan()}) {
+            java.util.List<jp.revati.skyabyss.rpg.aspect.Aspect> list = new java.util.ArrayList<>();
+            for (jp.revati.skyabyss.rpg.aspect.Aspect a : pool) {
+                if (a.shrine().equals(grp)) {
+                    list.add(a);
+                }
+            }
+            list.sort(java.util.Comparator.comparingInt(jp.revati.skyabyss.rpg.aspect.Aspect::rarity));
+            if (y + 10 + tile > CONTENT.bottom()) {
+                break;
+            }
+            g.drawString(font, jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.groupName(grp), tx0, y, argb(1f, TEXT), false);
+            y += 11;
+            for (int i = 0; i < list.size(); i++) {
+                jp.revati.skyabyss.rpg.aspect.Aspect a = list.get(i);
+                int cx = tx0 + (i % per) * (tile + gap);
+                int cy = y + (i / per) * (tile + 6);
+                int lv = jp.revati.skyabyss.rpg.aspect.Aspects.level(d, a);
+                boolean hover = mx >= cx && mx < cx + tile && my >= cy && my < cy + tile;
+                jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTile(g, font, cx, cy, tile, a, lv, hover, (int) (mc.level == null ? 0 : mc.level.getGameTime()));
+                if (hover) {
+                    tip = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTip(d, a);
+                }
+            }
+            y += ((list.size() + per - 1) / per) * (tile + 6) + 3;
+        }
+        if (tip != null) {
+            g.renderComponentTooltip(font, tip, mx, my);
+        }
+    }
+
+    private void renderHow(GuiGraphics g, Font font) {
+        int x0 = CONTENT.x() + Golden.S5;
+        int w = CONTENT.w() - Golden.S13;
+        int y = CONTENT.y() + 2;
+        String[][] parts = {
+                {"gui.skyabyss.shrine.how_shrine", "gui.skyabyss.shrine.how_shrine_text"},
+                {"gui.skyabyss.shrine.how_trial", "gui.skyabyss.shrine.how_trial_text"},
+                {"gui.skyabyss.shrine.how_vow", "gui.skyabyss.shrine.how_vow_text"},
+                {"gui.skyabyss.shrine.how_abyss", "gui.skyabyss.shrine.how_abyss_text"}};
+        // 見出し (金) に続けて文 (白) を折り返す。四つが板に収まるように一続きで
+        for (String[] part : parts) {
+            Component text = Component.empty().append(Component.translatable(part[0]).withStyle(st -> st.withColor(GOLD)))
+                    .append(Component.literal("　")).append(Component.translatable(part[1]).withStyle(st -> st.withColor(TEXT)));
+            for (FormattedCharSequence line : font.split(text, w)) {
+                if (y + 9 > CONTENT.bottom()) {
+                    return;
+                }
+                g.drawString(font, line, x0, y, 0xFFFFFFFF, false);
+                y += 10;
+            }
+            y += Golden.S5;
+        }
     }
 
     // 歌片を作るボタン (祠の東の縁の共鳴の炉)
@@ -256,7 +446,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         g.fill(x, y, x + ABYSS_W, y + ROW, argb(1f, on ? 0x2A1216 : open ? 0x181014 : CARD));
         Golden.outline(g, x, y, x + ABYSS_W, y + ROW, argb(1f, line));
         String key = !open ? "gui.skyabyss.trial.abyss.locked" : on ? "gui.skyabyss.trial.abyss.on" : "gui.skyabyss.trial.abyss.off";
-        Component label = Component.translatable(key, jp.revati.skyabyss.abyss.Abyss.OPEN_AT);
+        Component label = Component.translatable(key);
         jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, label, x + ABYSS_W / 2, Golden.textY(y, ROW), ABYSS_W - 4, argb(pulse, on ? 0xFF8A90 : open ? 0xC8A0A6 : DIM), false);
         if (hover) {
             g.renderTooltip(font, Component.translatable("gui.skyabyss.trial.abyss.tip"), mx, my);
@@ -291,20 +481,18 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             String st = stars(def.tier());
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, kind, tx + 15, Golden.textY(ky, ROW), tw - 15 - font.width(st) - 4, argb(1f, TEAL), false);
             g.drawString(font, st, tx + tw - font.width(st), Golden.textY(ky, ROW), argb(1f, GOLD), false);
-            // 説明: 修飾の札と状態の行を残して入るだけ。入りきらなければ最後の行に「…」 (前は二行で切って、下に空きが残った)
+            // 説明: 修飾の札と状態の行を残して入るだけ。入りきらなければ最後の行を横へ流す
             int dy = ky + ROW + 2;
             int bottomRow = y + h - 2 - ROW;
             int chipsH = card.chips().isEmpty() ? ROW : card.chips().size() * 16;
             int maxLines = Math.max(2, (bottomRow - 3 - chipsH - dy) / ROW);
-            String more = "…";
-            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw - font.width(more));
-            int shown = Math.min(maxLines, dl.size());
+            // 入りきらない行は最後の行へつないで横へ流す (Marquee。前は「…」で切っていた)
+            List<FormattedCharSequence> dl = jp.revati.skyabyss.client.ui.Marquee.joinRest(
+                    jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(def.descKey()), tw), maxLines);
+            int shown = dl.size();
             for (int l = 0; l < shown; l++) {
                 int ly = Golden.textY(dy + l * ROW, ROW);
-                g.drawString(font, dl.get(l), tx, ly, argb(1f, DIM), false);
-                if (l == shown - 1 && dl.size() > shown) {
-                    g.drawString(font, more, tx + font.width(dl.get(l)), ly, argb(1f, DIM), false);
-                }
+                jp.revati.skyabyss.client.ui.Marquee.draw(g, font, dl.get(l), tx, ly, tw, argb(1f, DIM), false);
             }
             // 修飾の札 (一つずつ一行)
             int cy = dy + shown * ROW + 3;
@@ -381,7 +569,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         }
     }
 
-    // 下の段 (34): 一行目に順路の記録と歌片、二行目に称号と手引き
+    // 下の段 (34): 一行目に順路の記録と歌片、二行目に称号 (右に歌片を作る・深淵のつまみ)
     private void renderFoot(GuiGraphics g, Font font) {
         Golden.Box foot = LAYOUT.foot();
         int x = foot.x() + Golden.S5;
@@ -403,10 +591,9 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 titles.append(i > 0 ? "　" : "").append(Component.translatable("trial.skyabyss.title." + data.titles().get(i)));
             }
         }
-        Component help = Component.translatable("gui.skyabyss.trial.help");
-        int hw = Math.min(font.width(help), foot.w() / 2);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, titles, x, r2, foot.w() - Golden.S13 - hw - Golden.S8, argb(1f, GOLD), false);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, help, foot.right() - Golden.S5 - hw, r2, hw, argb(1f, Golden.DIM), false);
+        // 二行目の右は歌片を作る・深淵のつまみ (render が描く)。称号はその左まで
+        int buttons = ABYSS_W + Golden.S5 + CRAFT_W;
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, titles, x, r2, foot.w() - Golden.S8 - buttons - Golden.S8, argb(1f, GOLD), false);
     }
 
     @Override

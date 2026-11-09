@@ -1,0 +1,268 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.basalt_scorpion.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "tail": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 90 + 0) * 4)",
+            "0",
+            "0"
+          ]
+        },
+        "claw_l": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 60 + 0) * 4",
+            "0"
+          ]
+        },
+        "claw_r": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 60 + 180) * 4",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.basalt_scorpion.walk": {
+      "loop": true,
+      "animation_length": 0.5,
+      "bones": {
+        "leg_l1": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 720 + 0) * 18",
+            "0"
+          ]
+        },
+        "leg_l2": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 720 + 180) * 18",
+            "0"
+          ]
+        },
+        "leg_l3": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 720 + 0) * 18",
+            "0"
+          ]
+        },
+        "leg_r1": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 720 + 180) * 18",
+            "0"
+          ]
+        },
+        "leg_r2": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 720 + 0) * 18",
+            "0"
+          ]
+        },
+        "leg_r3": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 720 + 180) * 18",
+            "0"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 360 + 0) * 5)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.basalt_scorpion.guard": {
+      "animation_length": 0.5,
+      "bones": {
+        "claw_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              -30,
+              0
+            ]
+          }
+        },
+        "claw_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              30,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              -8,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    },
+    "animation.basalt_scorpion.strike": {
+      "animation_length": 1.4,
+      "bones": {
+        "tail": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.75": [
+              -12,
+              0,
+              0
+            ],
+            "0.95": [
+              35,
+              0,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.75": [
+              -4,
+              0,
+              0
+            ],
+            "0.95": [
+              8,
+              0,
+              0
+            ],
+            "1.40": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "claw_l": {
+          "rotation": [
+            0,
+            -30,
+            0
+          ]
+        },
+        "claw_r": {
+          "rotation": [
+            0,
+            30,
+            0
+          ]
+        }
+      }
+    },
+    "animation.basalt_scorpion.hurt": {
+      "animation_length": 0.3,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              -10,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.basalt_scorpion.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              0,
+              170
+            ],
+            "1.00": [
+              0,
+              0,
+              170
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -1,
+              0
+            ],
+            "1.00": [
+              0,
+              -1.5,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

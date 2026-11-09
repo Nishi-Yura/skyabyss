@@ -508,16 +508,95 @@ def king_set(idle, walk, attack, phase, death, moves):
     return out
 
 
+# 2026-11-08 の選定で、五つの王は同じ形 (喪服の王 C 冠の檻。tools/rough/lowpoly/abyss/king_mourning.py。骨は灰の王と同じ) になった。
+# 動きは衣の人型 (humanoid(robe=True)) を土台に、喪服の王の動き (mourning_king) を重ねる: 冠の檻と裾が技ごとに動き、待ちの姿に元素の癖。
+# 前の雷の柱・影の這いずりの動き (king_storm・king_shadow) は使わない (関数は残す)
+def _set(anim, name, b):
+    anim["bones"][name] = b
+
+
+def _merge(anim, name, **kw):
+    cur = dict(anim["bones"].get(name, {}))
+    cur.update({k: v for k, v in kw.items() if v is not None})
+    anim["bones"][name] = cur
+
+
+def mourning_king(elem):
+    """喪服の王の動き (2026-11-08 の声「アニメーションが凝れていない」)。
+    待ち: 裾が波のように揺れ、冠の檻がゆっくり回る。元素の癖: 骨 = 首を傾げて揺らす / 塩 = 背筋を伸ばして動かない (冠も遅い) /
+          雷 = 冠が速く回り、頭が細かく震える (帯電) / 灰 = 胸が大きく息をする / 影 = 低くかがみ、頭を垂れて横に揺れる
+    技: 叩きつけ = 溜めで冠の檻が開き (大きく) 速く回る → 振り下ろしで裾が翻る / 手下を呼ぶ = 冠が浮き上がって一回り /
+        落ちる光 = 冠が前へ傾き光を狙う / 衝撃の輪 = 回るあいだ裾が外へ広がる / 突進 = 裾が後ろへなびく / 段の変わり = 冠が大きく開いて二回り"""
+    a = humanoid(robe=True)
+    idle = a["idle"]
+    crown_speed = {"king_storm": 120, "king_salt": 10, "king_ash": 18}.get(elem, 30)
+    _set(idle, "robe_f", bone([S(0, 3, 60), "0", S(90, 1.5, 60)]))
+    _set(idle, "robe_b", bone([S(180, 3, 60), "0", S(270, 1.5, 60)]))
+    _set(idle, "crown", bone(["0", "query.anim_time * %d" % crown_speed, "0"], [0, S(0, 0.4, 60), 0],
+                             scale=["1 + %s" % S(0, 0.03, 120), "1", "1 + %s" % S(0, 0.03, 120)]))
+    if elem == "king_bone":
+        _set(idle, "head", bone([S(40, 4, 60), S(0, 6, 40), S(0, 12, 40)]))
+    elif elem == "king_salt":
+        _set(idle, "head", bone(["-6", "0", "0"]))
+        _set(idle, "chest", bone(["-4", "0", "0"], scale=scale_kf({0: 1.0, 1.5: (1.01, 1.01, 1.01), 3.0: 1.0})))
+    elif elem == "king_storm":
+        _set(idle, "head", bone(["%s + math.sin(query.anim_time * 1700) * 1.5" % S(40, 3, 60), "math.cos(query.anim_time * 1300) * 1.5", "0"]))
+        _set(idle, "fore_l", bone([S(60, 3, 60), "math.sin(query.anim_time * 1500) * 2", "0"]))
+        _set(idle, "fore_r", bone([S(240, 3, 60), "math.cos(query.anim_time * 1400) * 2", "0"]))
+    elif elem == "king_ash":
+        _set(idle, "chest", bone([S(0, 4, 60), "0", "0"], scale=scale_kf({0: 1.0, 1.5: (1.07, 1.04, 1.07), 3.0: 1.0})))
+    elif elem == "king_shadow":
+        _set(idle, "body", bone(["0", "0", S(0, 4, 50)], [0, -2.5, 0]))
+        _set(idle, "chest", bone(["-16", S(0, 6, 50), "0"]))
+        _set(idle, "head", bone(["-18", S(90, 10, 50), S(0, 8, 50)]))
+        _set(idle, "fore_l", bone(["-10", "0", "0"]))
+        _set(idle, "fore_r", bone(["-10", "0", "0"]))
+    # 技の溜めと当たりに、冠と裾を重ねる (向きは R() と同じ: x 正 = 上が後ろへ)
+    _merge(a["windup_slam"], "crown", rotation=R({0: (0, 0, 0), 2.0: (0, 540, 0)}), scale=scale_kf({0: 1.0, 1.4: 1.3, 2.0: 1.35}))
+    _merge(a["strike_slam"], "crown", rotation=R({0: (0, 0, 0), 0.8: (0, 180, 0)}), scale=scale_kf({0: 1.35, 0.3: 1.1, 0.8: 1.0}))
+    _merge(a["strike_slam"], "robe_f", rotation=R({0: (0, 0, 0), 0.12: (-34, 0, 0), 0.45: (-20, 0, 0), 0.8: (0, 0, 0)}))
+    _merge(a["strike_slam"], "robe_b", rotation=R({0: (0, 0, 0), 0.12: (34, 0, 0), 0.45: (20, 0, 0), 0.8: (0, 0, 0)}))
+    _merge(a["windup_summon"], "crown", rotation=R({0: (0, 0, 0), 2.0: (0, 360, 0)}), position=T({0: (0, 0, 0), 1.2: (0, 5, 0), 2.0: (0, 6, 0)}),
+           scale=scale_kf({0: 1.0, 2.0: 1.2}))
+    _merge(a["strike_summon"], "crown", rotation=R({0: (0, 0, 0), 0.8: (0, 120, 0)}), position=T({0: (0, 6, 0), 0.2: (0, 1, 0), 0.8: (0, 0, 0)}),
+           scale=scale_kf({0: 1.2, 0.8: 1.0}))
+    _merge(a["windup_bolts"], "crown", rotation=R({0: (0, 0, 0), 2.0: (-24, 200, 0)}))
+    _merge(a["strike_bolts"], "crown", rotation=R({0: (-24, 200, 0), 0.15: (10, 260, 0), 0.8: (0, 360, 0)}))
+    _merge(a["windup_sweep"], "robe_f", rotation=R({0: (0, 0, 0), 2.0: (-10, 0, 0)}))
+    _merge(a["windup_sweep"], "robe_b", rotation=R({0: (0, 0, 0), 2.0: (10, 0, 0)}))
+    _merge(a["strike_sweep"], "robe_f", rotation=R({0: (-10, 0, 0), 0.2: (-40, 0, 0), 0.5: (-34, 0, 0), 0.8: (0, 0, 0)}))
+    _merge(a["strike_sweep"], "robe_b", rotation=R({0: (10, 0, 0), 0.2: (40, 0, 0), 0.5: (34, 0, 0), 0.8: (0, 0, 0)}))
+    _merge(a["strike_sweep"], "crown", rotation=R({0: (0, 0, 0), 0.8: (0, -540, 0)}))
+    _merge(a["strike_charge"], "robe_f", rotation=R({0: (0, 0, 0), 0.2: (20, 0, 0), 0.8: (10, 0, 0)}))
+    _merge(a["strike_charge"], "robe_b", rotation=R({0: (0, 0, 0), 0.2: (30, 0, 0), 0.8: (16, 0, 0)}))
+    _merge(a["phase"], "crown", rotation=R({0: (0, 0, 0), 2.0: (0, 720, 0)}), scale=scale_kf({0: 1.0, 0.4: 1.45, 1.6: 1.45, 2.0: 1.0}),
+           position=T({0: (0, 0, 0), 0.4: (0, 4, 0), 1.6: (0, 4, 0), 2.0: (0, 0, 0)}))
+    _merge(a["phase"], "robe_f", rotation=R({0: (0, 0, 0), 0.4: (-24, 0, 0), 1.6: (-24, 0, 0), 2.0: (0, 0, 0)}))
+    _merge(a["phase"], "robe_b", rotation=R({0: (0, 0, 0), 0.4: (24, 0, 0), 1.6: (24, 0, 0), 2.0: (0, 0, 0)}))
+    # 体の敵の動き (予告・熱・鏡) は溜めと当たりの写しなので、上で変えた分を写し直す
+    a["telegraph"] = G.once(0.8, a["windup_slam"]["bones"])
+    a["heat"] = a["strike_slam"]
+    return a
+
+
 def king_bone():
-    return humanoid()
+    return mourning_king("king_bone")
 
 
 def king_salt():
-    return humanoid()
+    return mourning_king("king_salt")
+
+
+def king_mourning_storm():
+    return mourning_king("king_storm")
+
+
+def king_mourning_shadow():
+    return mourning_king("king_shadow")
 
 
 def king_ash():
-    return humanoid(robe=True)
+    return mourning_king("king_ash")
 
 
 def king_storm():
@@ -632,15 +711,15 @@ MODELS = {
     "king_salt_c0": ("king_salt", king_salt, None, {}),
     "king_salt_c1": ("king_salt", king_salt, None, {}),
     "king_salt_c2": ("king_salt", king_salt, None, {}),
-    "king_storm_c0": ("king_storm", king_storm, None, {}),
-    "king_storm_c1": ("king_storm", king_storm, None, {}),
-    "king_storm_c2": ("king_storm", king_storm, None, {}),
+    "king_storm_c0": ("king_storm", king_mourning_storm, None, {}),
+    "king_storm_c1": ("king_storm", king_mourning_storm, None, {}),
+    "king_storm_c2": ("king_storm", king_mourning_storm, None, {}),
     "king_ash_c0": ("king_ash", king_ash, "ember_keeper", {"telegraph": "telegraph", "heat": "heat", "hurt": "hurt", "death": "death"}),
     "king_ash_c1": ("king_ash", king_ash, "ember_keeper", {"telegraph": "telegraph", "heat": "heat", "hurt": "hurt", "death": "death"}),
     "king_ash_c2": ("king_ash", king_ash, "ember_keeper", {"telegraph": "telegraph", "heat": "heat", "hurt": "hurt", "death": "death"}),
-    "king_shadow_c0": ("king_shadow", king_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
-    "king_shadow_c1": ("king_shadow", king_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
-    "king_shadow_c2": ("king_shadow", king_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
+    "king_shadow_c0": ("king_shadow", king_mourning_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
+    "king_shadow_c1": ("king_shadow", king_mourning_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
+    "king_shadow_c2": ("king_shadow", king_mourning_shadow, "past_shadow", {"mirror": "mirror", "hurt": "hurt", "death": "death"}),
 }
 
 

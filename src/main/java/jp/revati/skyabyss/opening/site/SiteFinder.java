@@ -271,13 +271,17 @@ public final class SiteFinder {
                 int[] q = stops.get(i);
                 out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentOutskirts.KIND, i, new BlockPos(q[0], p.top(q[0], q[1]) + 1, q[1]), 0));
             }
-            // 内海の渡し船の両岸の船着き場 (向こう岸は向きを返す)
+            // 渡し船の両岸の船着き場。桟橋 (部品の +x) を向こう岸へ向ける (2026-11-08 の四つの大陸で、渡し船の向きが東西だけでなくなった)
             List<List<BlockPos>> fd = jp.revati.skyabyss.world.continent.ContinentLayout.get().ferryDocks();
             for (int i = 0; i < fd.size(); i++) {
                 for (int j = 0; j < 2 && j < fd.get(i).size(); j++) {
                     BlockPos q = fd.get(i).get(j);
+                    BlockPos o = fd.get(i).size() > 1 ? fd.get(i).get(1 - j) : q.east();
+                    int dx = o.getX() - q.getX();
+                    int dz = o.getZ() - q.getZ();
+                    int rot = Math.abs(dx) >= Math.abs(dz) ? (dx >= 0 ? 0 : 2) : (dz >= 0 ? 1 : 3);
                     out.add(new Planned(jp.revati.skyabyss.world.continent.ContinentFerries.KIND, i * 2 + j,
-                            new BlockPos(q.getX(), p.top(q.getX(), q.getZ()) + 1, q.getZ()), encode(j == 0 ? 0 : 2, false)));
+                            new BlockPos(q.getX(), p.top(q.getX(), q.getZ()) + 1, q.getZ()), encode(rot, false)));
                 }
             }
             // 船着き場 (島の道の終わり。ここから鐘の都へ渡る)

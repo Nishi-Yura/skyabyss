@@ -108,6 +108,10 @@ public final class Mechanics {
             String seen = p.getPersistentData().getString(TIPS);
             for (String[] tm : TIP_MARKS) {
                 String tip = tm[1];
+                // 案内はそのダンジョンのことだけ (2026-11-08 の声): 鯨骨の坑の一つ目の層の奥はトロッコ
+                if (tip.equals("next") && f.run.dungeon == Dungeon.BONE_PIT && f.index == 0) {
+                    tip = "next_cart";
+                }
                 if (("," + seen + ",").contains("," + tip + ",")) {
                     continue;
                 }

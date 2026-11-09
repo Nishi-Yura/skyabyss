@@ -45,7 +45,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   置き方  二章の跡地が決まっていて、その中心から 200 以内に人がいるとき、跡地の海の向き (Ground.sea) の沖 40〜120 の、水深 3〜8 の浅瀬
 //           (読み込まれたチャンクだけを見る) に、バニラの難破船の型 (minecraft:shipwreck/with_mast。なければ rightsideup_full) を世界で一度だけ置く。
 //           箱はバニラの難破船と同じ戦利品の表 (地図・宝・食料)。置いた場所は Ch2Data に残し、目的の帯の行き先 (ch2_wreck) として送る
-//   箱      船の中の箱を開けると、人ごとに一度: 潮の民の頁 (伝承 ch2/wreck_page) と、潮見の貝 (まだもらっていない人。TideChapter.giveShell)
+//   箱      船の中の箱を開けると、人ごとに一度: 潮の民の頁 (伝承 ch2/wreck_page) 
 //   見える  二章の人が船から 96 以内に初めて来たとき一行 (「沖に、傾いた船の帆柱が見える」)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Wreck {
@@ -280,10 +280,6 @@ public final class Wreck {
             Notice.narrate(p, "message.skyabyss.ch2.wreck.page");
             Tasks.later(30, () -> Lore.unlock(p, Ch2Ground.LORE_WRECK, true));
         }
-        boolean shell = TideChapter.giveShell(p);
-        if (shell) {
-            Tasks.later(60, () -> Notice.narrate(p, "message.skyabyss.ch2.wreck.shell"));
-        }
-        return page || shell;
+        return page;
     }
 }

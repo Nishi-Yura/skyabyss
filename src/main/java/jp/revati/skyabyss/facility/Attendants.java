@@ -41,6 +41,11 @@ public final class Attendants {
     // 印 spot に役 role の係の人がいるようにする。立たせた・戻したときは、その人を返す
     @Nullable
     public static AttendantEntity ensure(ServerLevel level, AttendantRole role, BlockPos spot) {
+        // 生き物が読み込まれる前に「いない」と見て二人目を立たせない (2026-11-08 の声「祭祀 2 体いる」)
+        if (!loaded(level, spot)) {
+            return find(level, role, spot);
+        }
+        dedupe(level, role, spot);
         AttendantEntity found = find(level, role, spot);
         if (found != null) {
             if (found.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5) > DRIFT * DRIFT || Math.abs(found.getY() - spot.getY()) > 1.5) {
@@ -59,6 +64,21 @@ public final class Attendants {
         level.addFreshEntity(npc);
         SkyAbyss.LOGGER.info("[facility] {} placed at {}", role.id, spot);
         return npc;
+    }
+
+    // 同じ役の人が SAME_ROLE の内に二人以上いたら、印にいちばん近い一人だけ残す。消した人数
+    public static int dedupe(ServerLevel level, AttendantRole role, BlockPos spot) {
+        List<AttendantEntity> list = new java.util.ArrayList<>(level.getEntities(FacilitySetup.ATTENDANT.get(), new AABB(spot).inflate(SAME_ROLE),
+                e -> e.isAlive() && role.id.equals(e.roleId())));
+        if (list.size() < 2) {
+            return 0;
+        }
+        list.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5)));
+        for (int i = 1; i < list.size(); i++) {
+            list.get(i).discard();
+        }
+        SkyAbyss.LOGGER.info("[facility] removed {} extra {} near {}", list.size() - 1, role.id, spot);
+        return list.size() - 1;
     }
 
     @Nullable
@@ -81,7 +101,7 @@ public final class Attendants {
     }
 
     // 印のまわり 3x3 チャンクの生き物が読み込まれているか (読み込み前に「いない」と見て二人目を立たせないため)
-    static boolean loaded(ServerLevel level, BlockPos at) {
+    public static boolean loaded(ServerLevel level, BlockPos at) {
         ChunkPos c = new ChunkPos(at);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {

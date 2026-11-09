@@ -216,7 +216,7 @@ public final class FieldSelfTest {
             // 望の灯守
             FullKeeper lord = FieldArena.summon(moon);
             spawned.add(lord);
-            check(f, lord != null && lord.getMaxHealth() >= FullKeeper.HP - 0.01 && lord.getMaxHealth() <= 1024,
+            check(f, lord != null && lord.getMaxHealth() >= FullKeeper.HP - 0.01,
                     "the keeper did not appear with its hp: " + (lord == null ? -1 : lord.getMaxHealth()));
             if (lord != null) {
                 FieldTide.setTo(moon, FieldTide.Tide.BRIGHT, 10);

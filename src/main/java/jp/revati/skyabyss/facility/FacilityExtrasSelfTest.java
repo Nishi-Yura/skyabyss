@@ -99,7 +99,7 @@ public final class FacilityExtrasSelfTest {
     private static void dialogues(List<String> f) {
         Map<AttendantRole, List<String>> need = Map.of(
                 AttendantRole.TRAINING_MASTER, List.of("respec_quote", "respec_skills", "respec_skills_coins", "job_room"),
-                AttendantRole.SHRINE_PRIEST, List.of("key_offer", "key_return"),
+                AttendantRole.SHRINE_PRIEST, List.of("shrine_go", "shrine_board", "shrine_vow"),
                 AttendantRole.APOTHECARY, List.of("shop", "brew_lesson"),
                 AttendantRole.GUILD_CLERK, List.of("guild", "guild_storage"));
         need.forEach((role, list) -> {
@@ -269,7 +269,9 @@ public final class FacilityExtrasSelfTest {
         List<MapMarks.Mark> out = new ArrayList<>();
         MapMarks.archiveMarks(p.server, List.of(), jp.revati.skyabyss.story.Chapters.of(p), out);
         for (String t : Titans.all()) {
-            boolean built = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(p.server, t) != null;
+            // 祠は建つ前から決まった場所に出す (大陸。MapMarks.archiveMarks)
+            boolean built = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(p.server, t) != null
+                    || jp.revati.skyabyss.world.continent.ContinentLairs.shrine(p.server.overworld(), t) != null;
             check(f, built == out.stream().anyMatch(m -> m.kind() == MapMarks.Kind.SHRINE && m.id().equals("shrine:" + t)), "map copy shrine " + t);
         }
         MapMarks.collect(p);

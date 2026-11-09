@@ -41,6 +41,8 @@ ALLOW = [
     ('poi_hamlet_', 'STAIR_BURIED', None, 'plaza rim at floor level (decorative band)'),
     # 都の同じ縁取り (85, 0, -101)
     ('capital', 'STAIR_BURIED', (85, 0, -101, 85, 0, -101), 'plaza rim at floor level (decorative band)'),
+    # 都の城壁の歩廊の北西の角: 角の塔の裾の段が歩廊の端で床と並ぶ (tools/capital/rampart_stairs.py で歩廊を通したあと。飾り)
+    ('capital', 'STAIR_BURIED', (-99, 12, -96, -99, 12, -96), 'corner tower plinth step at the end of the wall walk'),
     # 道ばたの祠と環状列石: 中央の台のまわりに外向きの階段を並べた裾 (段ではなく台座の面取り)
     ('poi_roadside_shrine', 'STAIR_REVERSED', (-2, 0, -1, 2, 0, 0), 'plinth bevel around the altar'),
     ('poi_stone_circle', 'STAIR_REVERSED', (-1, 0, -1, 1, 0, 1), 'plinth bevel around the centre stone'),

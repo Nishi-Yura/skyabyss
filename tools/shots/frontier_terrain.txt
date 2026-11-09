@@ -1,0 +1,53 @@
+# 2026-11-09: 外れの帯の見せ場の地形 (world/continent/FrontierTerrain) と外れの隠し荷 (FrontierCaches) を撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/frontier_terrain.txt -PshotsName=frontier_terrain
+# 場所は自己テスト "frontier band" の記録 (feature 0/1/2・lava river・tidal flat・first cache) から
+world frontierterrain continent
+size 1600 900
+timeout 3000
+render 12
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd weather clear
+cmd gamemode spectator
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+wait 60
+cmd tp @s 345 112 -1433 135 18
+waitchunks
+wait 200
+shot t01_bone_ribs
+cmd tp @s 300 104 -1478 -60 8
+waitchunks
+wait 80
+shot t02_bone_ribs_low
+cmd tp @s -810 172 -858 135 14
+waitchunks
+wait 200
+shot t03_floating_rock
+cmd tp @s 990 74 -446 135 25
+waitchunks
+wait 200
+shot t04_reef
+cmd tp @s 1512 80 -830 180 32
+waitchunks
+wait 200
+shot t05_tidal_flat
+cmd tp @s 500 96 468 135 30
+waitchunks
+wait 200
+shot t06_lava_river
+cmd tp @s 520 140 520 135 35
+waitchunks
+wait 120
+shot t07_ash_dunes_wide
+cmd tp @s 340 77 -1571 135 40
+waitchunks
+wait 200
+shot t08_cache

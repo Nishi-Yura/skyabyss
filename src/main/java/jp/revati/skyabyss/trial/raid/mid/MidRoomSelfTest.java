@@ -62,6 +62,8 @@ public final class MidRoomSelfTest {
     private static UUID group;
     private static String titan;
     private static boolean wiped;
+    // 二つ目の部屋で全員が倒れたら、順路は最初の部屋から (一つ目の巨神で一度だけ見る)
+    private static boolean restarted;
 
     private static boolean tick(MinecraftServer server) {
         try {
@@ -89,7 +91,7 @@ public final class MidRoomSelfTest {
         RaidRooms.DEV_DRAW.clear();
         if (FAILS.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST raid mid PASSED ({}: no separate mid-boss step; in the fight room the boss appears after the waves, single-stage at 70% health, "
-                    + "solo damage lands, each room's mechanic works on the boss, tide flood in the room + wipe back to the waves, defeat moves the route to the heart)", DONE);
+                    + "solo damage lands, each room's mechanic works on the boss, tide flood in the room + wipe back to the waves, everyone down in room 3 starts the route over from room 1, defeat moves the route to the heart)", DONE);
         } else {
             for (String f : FAILS) {
                 SkyAbyss.LOGGER.error("SELFTEST raid mid FAILED: {}", f);
@@ -185,6 +187,21 @@ public final class MidRoomSelfTest {
                 waited = 0;
             }
             case 3 -> {
+                if (!restarted) {
+                    // 闘の部屋で全員が倒れる → 順路は段 1 の部屋から (2026-11-09 の声「レイドは死んだら最初からスタート」)
+                    if (run == null || run.step != 3) {
+                        return timeout(400, "the fight room (step 3) before the restart check");
+                    }
+                    RaidRun.wipeAll(run);
+                    RaidRun.Run again = RaidRun.of(group);
+                    check(TrialRoute.step(back, group) == 1 && again != null && again.step == 1 && !again.mid && again.wipes == 1,
+                            "a wipe in room 3 did not start the route over from room 1 (step " + TrialRoute.step(back, group) + ")");
+                    check(!Downed.isDowned(player) && player.getHealth() >= player.getMaxHealth(), "the restart did not stand everyone up");
+                    restarted = true;
+                    stage = 1;
+                    waited = 0;
+                    return false;
+                }
                 // 三つ目 = 闘の部屋。中ボスの段を包んだ部屋で、準備のあと始まる
                 if (run == null || run.step != 3 || run.phase != RaidRun.Phase.ACTIVE) {
                     return timeout(400, "the fight room (step 3) to start");
@@ -227,7 +244,7 @@ public final class MidRoomSelfTest {
                 if (boss.getHealth() >= before) {
                     return timeout(400, "a solo hit to damage the boss"); // 潮招きは潜る・守りの間 (数秒) は傷が通らない
                 }
-                check(scaleOk(boss), "the boss is not 70% of the one-player health");
+                check(scaleOk(boss), "the boss is not 70% of the one-player health (" + boss.getType().toShortString() + " max " + boss.getMaxHealth() + ", base " + jp.revati.skyabyss.combat.Hardness.base(boss) + ", factors " + boss.getPersistentData().getCompound(jp.revati.skyabyss.combat.Hardness.FACTORS) + ")");
                 stage = wiped ? 9 : 8;
                 measureAt = -1;
                 waited = 0;
@@ -433,18 +450,11 @@ public final class MidRoomSelfTest {
 
     // 一人の体力の倍率 (傷を割る倍率が 1、または体力が 1 人の基準)
     private static boolean scaleOk(Mob boss) {
-        if (boss instanceof TideBeckoner) {
-            return boss.getMaxHealth() <= TideBeckoner.HEALTH * FightBossRoom.HEALTH + 0.5f;
-        }
-        if (boss instanceof jp.revati.skyabyss.titan.storm.raiju.Raiju) {
-            return jp.revati.skyabyss.titan.storm.raiju.Raiju.scaleFor(1) == 1f;
-        }
-        if (boss instanceof jp.revati.skyabyss.titan.ember.smith.AshSmith s) {
-            return s.multiplier() <= 1.001f;
-        }
-        LivingEntity l = boss;
-        var base = l.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-        return base != null && l.getMaxHealth() <= 280 * FightBossRoom.HEALTH + 0.5f;
+        // 体力の倍率 (combat/Hardness: 防具を直した分・型ごと・人数・レベル) を掛けた体力の 7 割か
+        double full = jp.revati.skyabyss.combat.Hardness.base(boss) * jp.revati.skyabyss.combat.Hardness.total(boss)
+                * (boss.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).hasModifier(jp.revati.skyabyss.combat.MobTuning.HEALTH_ID)
+                        ? 1 + jp.revati.skyabyss.combat.MobTuning.HEALTH : 1);
+        return jp.revati.skyabyss.combat.Hardness.get(boss, "party") <= 1.001 && boss.getMaxHealth() <= full * FightBossRoom.HEALTH + 0.5f;
     }
 
     private static void teardown() {

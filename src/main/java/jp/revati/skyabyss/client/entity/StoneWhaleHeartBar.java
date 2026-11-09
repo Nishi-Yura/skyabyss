@@ -76,8 +76,6 @@ public final class StoneWhaleHeartBar {
                 ? Component.translatable("gui.skyabyss.boss.stone_whale_heart.roaring")
                 : Component.translatable("gui.skyabyss.boss.stone_whale_heart.phase." + n);
         g.drawString(mc.font, label, labelX, y + 4, heart.isRoaring() ? 0xFF5A5A : LABEL[phase], true);
-        String percent = Math.round(boss.getProgress() * 100) + "%";
-        g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
 
         // 二段目: 枠、そのなかの帯、目盛り
         int barY = y + ICON + 2;
@@ -91,5 +89,6 @@ public final class StoneWhaleHeartBar {
             g.fill(left, top, left + fill, top + TRACK_H, 0xFF000000 | FILL[phase]);
             g.fill(left, top, left + fill, top + 1, 0xFF000000 | FILL_TOP[phase]);
         }
+        jp.revati.skyabyss.client.titan.PhasedBossBar.drawHp(g, mc, boss, x, barY + TRACK_Y + TRACK_H / 2);
     }
 }

@@ -12,6 +12,7 @@ import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -43,6 +44,10 @@ import net.minecraft.world.phys.Vec3;
 //   体力が PHASE2 を切ると、吠えて (まわりを押し返す輪。予兆つき) 手下を MINIONS 体呼び、後半に入る。
 //   後半は技の間が PHASE2_COOLDOWN 倍になり、主ごとの後半の技が加わる (phase2)。
 //   大技のあとは大きな隙 (opening: BossOpenings.open。白い火花と澄んだ音)
+// 後半の場の技 (2026-11-08 の声「亀の第3形態がめっちゃ面白い。中ダンジョンのボスもそのくらい派手だと楽しい」):
+//   潮殻の心臓の段階3 にならい、主の技に重ねて、部屋じゅうを使う技を HAZARD_GAP ごとに一つ出す (主が技の途中でも出る)。
+//   降りそそぎ (人の足もとと、まわりに二つの円。真珠の雨の形) と、回る薙ぎ (主から二本の帯がまわる。月潮の大波の形) を交互に。
+//   色と粒は主ごと (骨・潮・水晶・灰)。予告はどれも 1.5 秒以上
 public abstract class DungeonBoss extends RegionBoss {
     public static final float PHASE2 = 0.5f;
     public static final int MINIONS = 2;
@@ -54,6 +59,17 @@ public abstract class DungeonBoss extends RegionBoss {
     public static final int STUCK_LIMIT = 60;
     public static final int BLIND_LIMIT = 80;
     static final int UNSTICK_GAP = 160;
+    // 後半の場の技 (combat/FieldHazards) の間 (tick)
+    public static final int HAZARD_GAP = 90;
+    // 解き放ち (四体の主だけ): 体力が SURGE_AT を切るたびに吠え、場の技を三つとも一度に放ち、そのあと大きな隙。
+    // 封じ・荒ぶりは雷の大事件の大いなるもの固有の仕組みなので持たない (2026-11-08 の声「封じや荒ぶりは大事件の敵固有の物だから、
+    // まるまるとってくるのは違う。ああいうくらいの攻撃だと楽しい、というだけ」)
+    public static final float[] SURGE_AT = {0.66f, 0.33f};
+    public static final int SURGE_WARN = 30;
+    private final jp.revati.skyabyss.combat.FieldHazards field = new jp.revati.skyabyss.combat.FieldHazards(this, this::hazardBlock,
+            (attack, ticks) -> cue(bossId(), attack, ticks), this::damage, this::attackSource, this::canHit);
+    private int surges;
+    private Vec3 home;
 
     protected final List<Vec3> holes = new ArrayList<>();
     // 後半に入ったか
@@ -133,6 +149,107 @@ public abstract class DungeonBoss extends RegionBoss {
                     player.knockback(2.0, -away.x, -away.z);
                 })
                 .start();
+        summonMinions(target);
+    }
+
+    // ---------------------------------------------------------------- 中ボスの新しい技の部品 (2026-11-08 の声「ミニボス手抜き。動きを作ったり、攻撃要素増やしたり」)
+    // 投げ・降らせ: 人の足もとと、まわりに extra 個の円 (半径 radius、予告 warn)。当たると dmg 倍の傷と浮き
+    protected void volley(LivingEntity target, String action, int warn, int extra, double radius, float dmg,
+                          net.minecraft.world.level.block.state.BlockState look) {
+        begin(target, action);
+        cue(bossId(), action, warn);
+        List<Vec3> spots = new ArrayList<>();
+        spots.add(target.position());
+        for (int i = 0; i < extra; i++) {
+            double a = random.nextDouble() * Math.PI * 2;
+            double r = 2.5 + random.nextDouble() * 3.5;
+            spots.add(target.position().add(Math.cos(a) * r, 0, Math.sin(a) * r));
+        }
+        var opt = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, look);
+        for (Vec3 c : spots) {
+            Telegraph.in(server(), TelegraphShape.circle(c.x, c.z, radius)).floor(c.y).warn(warn).danger().owner(this).target(target)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        server.playSound(null, c.x, c.y, c.z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
+                        server.sendParticles(opt, c.x, c.y + 0.4, c.z, 24, radius * 0.4, 0.3, radius * 0.4, 0.15);
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * dmg);
+                        player.setDeltaMovement(player.getDeltaMovement().add(0, 0.5, 0));
+                        player.hurtMarked = true;
+                    })
+                    .start();
+        }
+    }
+
+    // 跳び込み: 人のいる所に円 (半径 radius、予告 warn)。落ちるときに主がそこへ移り、円の中を打つ。続けて外へ輪の衝撃 (半径 radius 〜 radius+4)
+    protected void leapAt(LivingEntity target, String action, int warn, double radius, float dmg) {
+        begin(target, action);
+        cue(bossId(), action, warn);
+        Vec3 at = target.position();
+        Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, radius)).floor(at.y).warn(warn).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onImpact(server -> {
+                    Vec3 to = freeSpotNear(target) != null && at.distanceTo(position()) > 30 ? freeSpotNear(target) : at;
+                    teleportTo(to.x, to.y, to.z);
+                    server.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.2f, 0.6f);
+                    server.sendParticles(ParticleTypes.EXPLOSION, to.x, to.y + 0.5, to.z, 4, radius * 0.3, 0.2, radius * 0.3, 0);
+                })
+                .onHit((server, player) -> {
+                    player.hurt(attackSource(), damage() * dmg);
+                    player.setDeltaMovement(player.getDeltaMovement().add(0, 0.7, 0));
+                    player.hurtMarked = true;
+                })
+                .start();
+        Telegraph.in(server(), TelegraphShape.ring(at.x, at.z, radius, radius + 4)).floor(at.y).warn(warn + 8).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onHit((server, player) -> {
+                    player.hurt(attackSource(), damage() * dmg * 0.6f);
+                    Vec3 away = player.position().subtract(at).multiply(1, 0, 1).normalize();
+                    player.knockback(1.2, -away.x, -away.z);
+                })
+                .start();
+    }
+
+    // 吹きつけ: 前の扇 (半径 range、開き halfDeg) を active tick のあいだ焼く。首を振る分、二枚を少しずらす
+    protected void spray(LivingEntity target, String action, int warn, double range, double halfDeg, int active, float dmg,
+                         net.minecraft.core.particles.ParticleOptions look) {
+        begin(target, action);
+        cue(bossId(), action, warn);
+        double base = Telegraph.angleOf(forward());
+        for (int k = -1; k <= 1; k += 2) {
+            double ang = base + Math.toRadians(halfDeg * 0.5 * k);
+            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), ang, range, Math.toRadians(halfDeg * 0.6))).floor(getY()).warn(warn + (k > 0 ? 10 : 0))
+                    .active(active).danger().owner(this).target(target).victims(this::canHit)
+                    .onImpact(server -> {
+                        for (double d = 1.5; d <= range; d += 1.2) {
+                            server.sendParticles(look, getX() + Math.cos(ang) * d, getY() + 1.0, getZ() + Math.sin(ang) * d, 4, 0.5, 0.3, 0.5, 0.02);
+                        }
+                    })
+                    .onHit((server, player) -> player.hurt(attackSource(), damage() * dmg))
+                    .start();
+        }
+    }
+
+    // 回る: 主のまわりの輪 (半径 radius) を、間を空けて times 回打つ
+    protected void spinRings(LivingEntity target, String action, int warn, double radius, int times, int gap, float dmg) {
+        begin(target, action);
+        cue(bossId(), action, warn);
+        for (int i = 0; i < times; i++) {
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), radius)).floor(getY()).warn(warn + i * gap).danger().owner(this).target(target)
+                    .victims(this::canHit)
+                    .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY() + 1.0, getZ(), 8, radius * 0.5, 0.2, radius * 0.5, 0))
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * dmg);
+                        Vec3 away = player.position().subtract(position()).multiply(1, 0, 1).normalize();
+                        player.knockback(1.0, -away.x, -away.z);
+                    })
+                    .start();
+        }
+    }
+
+    // 手下を呼ぶ (そのダンジョンの道中の敵を MINIONS 体)
+    protected void summonMinions(LivingEntity target) {
         String id = minionId();
         if (id == null) {
             return;
@@ -174,6 +291,7 @@ public abstract class DungeonBoss extends RegionBoss {
         if (unstickWait > 0) {
             unstickWait--;
         }
+        stepFight();
         LivingEntity t = getTarget();
         if (t == null || !t.isAlive() || busy() || isInvisible()) {
             stuck = 0;
@@ -203,6 +321,59 @@ public abstract class DungeonBoss extends RegionBoss {
             unstickWait = UNSTICK_GAP;
             unstick(t);
         }
+    }
+
+    // ---------------------------------------------------------------- 後半の場の技・封じ・荒ぶり
+    private void stepFight() {
+        if (level().isClientSide || isInvisible() || !isAlive()) {
+            return;
+        }
+        if (home == null) {
+            home = position();
+        }
+        field.tick(phase2, HAZARD_GAP);
+        if (!major()) {
+            return;
+        }
+        LivingEntity t = getTarget();
+        if (surges < SURGE_AT.length && hp() < SURGE_AT[surges] && t != null && !busy()) {
+            surge(t);
+        }
+    }
+
+    // 解き放ち: 吠えて (予告 SURGE_WARN)、場の技を三つとも放つ。終わると大きな隙
+    void surge(LivingEntity target) {
+        surges++;
+        cooldown = Math.max(cooldown, SURGE_WARN + 40);
+        cue(bossId(), "rage", SURGE_WARN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.6f);
+        server().sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + getBbHeight() * 0.6, getZ(), 1, 0, 0, 0, 0);
+        field.all();
+        BossOpenings.open(this, BossOpenings.BIG_OPEN_TICKS + SURGE_WARN);
+    }
+
+    // 解き放ちを持つ主か (四体の主。中ボスは場の技だけ)
+    protected boolean major() {
+        return minionId() != null;
+    }
+
+    // 自己テスト: 場の技を三つとも出す
+    void hazardsNow() {
+        field.all();
+    }
+
+    // 主ごとの色の石 (粒と予告の見た目)
+    protected net.minecraft.world.level.block.state.BlockState hazardBlock() {
+        return switch (bossId()) {
+            case "bone_centipede", "pit_foreman" -> net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState();
+            case "shell_octopus", "bell_hermit" -> net.minecraft.world.level.block.Blocks.PRISMARINE.defaultBlockState();
+            case "crystal_lizard", "geode_golem" -> net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK.defaultBlockState();
+            case "forge_giant", "ox_smith", "lava_wyrm" -> net.minecraft.world.level.block.Blocks.MAGMA_BLOCK.defaultBlockState();
+            case "fort_warlord" -> net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState();
+            case "temple_keeper" -> net.minecraft.world.level.block.Blocks.PRISMARINE.defaultBlockState();
+            case "ice_lord" -> net.minecraft.world.level.block.Blocks.PACKED_ICE.defaultBlockState();
+            default -> net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        };
     }
 
     // つっかえたとき: 人のそばの、体が収まって人の見える所へ地を蹴って移る。見つからなければ何もしない

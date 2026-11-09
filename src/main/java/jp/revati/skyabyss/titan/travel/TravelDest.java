@@ -17,7 +17,8 @@ public final class TravelDest {
             return Component.translatable("gui.skyabyss.travel.spawn");
         }
         if (dest.kind() == 4) {
-            return Component.translatable("gui.skyabyss.travel.town");
+            // 土地の町 (name = whale / tide / storm / ember)。空なら都
+            return dest.name().isEmpty() ? Component.translatable("gui.skyabyss.travel.town") : Component.translatable("map.skyabyss.town." + dest.name());
         }
         if (dest.kind() == 2) {
             return Component.translatable("progress.skyabyss.titan." + dest.name());

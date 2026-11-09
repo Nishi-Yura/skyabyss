@@ -132,7 +132,13 @@ public final class FreeQuestSelfTest {
         return n == null ? "(closed)" : n;
     }
 
+    // 頼みのメニューを見るため、追跡を外してから話す (メインを追っていると、語り部はいきなりメインの話をする)
     private static void talk(ServerPlayer p, NpcEntity npc) {
+        Quests.track(p, "");
+        talkTracked(p, npc);
+    }
+
+    private static void talkTracked(ServerPlayer p, NpcEntity npc) {
         DialogueService.open(p, npc);
         for (int i = 0; i < 3 && INTROS.contains(node(p)); i++) {
             next(p);
@@ -391,10 +397,20 @@ public final class FreeQuestSelfTest {
         check(stage(a, "sub_shadow_log").equals("watch"), "one shadow should not be enough", failures);
         Quests.signal(a, FreeQuestEvents.SHADOW_SEEN);
         check(stage(a, "sub_shadow_log").equals("tell"), "two shadows did not move on", failures);
-        talk(a, st);
+        // メインを追っていても、入口がほかの頼みの報せなら報せが先。そのあとメインの話へ続く
+        Quests.track(a, "main_song");
+        talkTracked(a, st);
         check(node(a).equals("fq_shadow_done"), "storyteller did not greet with the shadow report: " + node(a), failures);
+        // メインの話題が残っていれば、報せのあと閉じずにその話へ続く (2026-11-08 の声「メインクエストの話をしてくれず、サブクエになった」)
+        jp.revati.skyabyss.npc.Dialogue.Node mainTopic = DialogueService.questTopic(a, ST, jp.revati.skyabyss.npc.DialogueManager.dialogue(ST));
         next(a);
         check(stage(a, "sub_shadow_log").equals("done") && Lore.state(a).has("prologue/shadow_heading"), "shadow log did not finish with its lore", failures);
+        for (int i = 0; i < 6 && node(a).startsWith("fq_shadow_done"); i++) {
+            next(a);
+        }
+        check(mainTopic == null || node(a).equals(mainTopic.id()) || !stage(a, "main_song").equals("ask_storyteller"),
+                "after the shadow report the storyteller did not go on to the main quest topic " + (mainTopic == null ? "" : mainTopic.id()) + ": " + node(a), failures);
+        notes.add("after a sub-quest report: " + node(a) + " (main topic " + (mainTopic == null ? "none" : mainTopic.id()) + ")");
         check(totalXp(a) - xp0 >= 60, "shadow log paid too little xp", failures);
         DialogueService.close(a);
 

@@ -91,6 +91,8 @@ public final class TideMobSelfTest {
     private static <T extends Mob> T make(ServerLevel level, EntityType<T> type, BlockPos floor, List<Mob> made) {
         T mob = type.create(level);
         mob.moveTo(floor.getX() + 0.5, floor.getY() + 1, floor.getZ() + 0.5, 0, 0);
+        // 作りの数そのものを見る (攻撃の倍率・体力の上乗せ・防具の置き換えを掛けない)
+        jp.revati.skyabyss.combat.MobTuning.untune(mob);
         level.addFreshEntity(mob);
         made.add(mob);
         return mob;
@@ -125,9 +127,9 @@ public final class TideMobSelfTest {
         }
     }
 
-    // 経験値 (08 の 6.6節): 14 / 3 / 10、推奨レベル 18
+    // 経験値 (08 の 6.6節。磯走りは潮の土地の狩りの敵として 2026-11-09 に 7 へ。04 の 3 章): 推奨レベル 18
     private static void checkXp(List<String> failures) {
-        String[][] rows = {{"coral_thrall", "9"}, {"reef_scuttler", "2"}, {"bubble_puffer", "6"}};
+        String[][] rows = {{"coral_thrall", "9"}, {"reef_scuttler", "7"}, {"bubble_puffer", "6"}};
         for (String[] r : rows) {
             GrowthRewards.Source s = GrowthRewards.MOD_ENEMIES.get(SkyAbyss.MODID + ":" + r[0]);
             check(failures, s != null && s.xp() == Integer.parseInt(r[1]) && s.contentLevel() == 18, "xp of " + r[0] + " = " + s);

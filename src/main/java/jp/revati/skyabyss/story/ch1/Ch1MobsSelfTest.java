@@ -355,7 +355,7 @@ public final class Ch1MobsSelfTest {
             Outcome o = watch(level, b, 50, in);
             check(o.firstHurt() >= Telegraph.MIN_WARN_TICKS, "beetle hurt after only " + o.firstHurt() + " ticks", f);
             check(o.firstHurt() >= 0 && o.firstHurt() <= RockShellBeetle.WARN + 6, "beetle never hurt in time (" + o.firstHurt() + ")", f);
-            check(lost(in) >= 3.5f && lost(in) <= 4.5f, "beetle charge damage " + lost(in), f);
+            check(lost(in) >= 4.2f && lost(in) <= 5.4f, "beetle charge damage " + lost(in), f);
             check(lost(side) == 0 && lost(far) == 0 && lost(behind) == 0, "beetle hurt a player outside the line", f);
             sameShape(o, ps, start, "beetle charge", f);
             notes.add("beetle warns " + o.firstHurt() + " ticks, hits " + round(lost(in)));
@@ -426,7 +426,7 @@ public final class Ch1MobsSelfTest {
             Outcome o = watch(level, h, 36, in);
             check(o.firstHurt() >= Telegraph.MIN_WARN_TICKS, "hare spine hurt after only " + o.firstHurt() + " ticks", f);
             check(o.firstHurt() >= 0, "hare never shot (target=" + h.getTarget() + " canAttack=" + h.canAttack(in) + " los=" + h.hasLineOfSight(in) + " ground=" + h.onGround() + " downed=" + jp.revati.skyabyss.party.Downed.isDowned(in) + " guarded=" + jp.revati.skyabyss.titan.group.ReentryRules.guarded(in) + ")", f);
-            check(lost(in) >= 2.5f && lost(in) <= 3.5f, "hare spine damage " + lost(in), f);
+            check(lost(in) >= 3.0f && lost(in) <= 4.2f, "hare spine damage " + lost(in), f);
             check(in.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "hare spine should slow", f);
             check(lost(off) == 0 && lost(behind) == 0 && lost(far) == 0, "hare spine hurt a player outside the line", f);
             sameShape(o, ps, start, "hare spine", f);
@@ -526,6 +526,23 @@ public final class Ch1MobsSelfTest {
             check(Ch1Mobs.syncHauler(level, cache, List.of(near)) == 0 && Ch1Mobs.haulersAt(level, cache).isEmpty(), "daytime should send the hauler away", f);
             level.setDayTime(15000);
             check(Ch1Mobs.syncHauler(level, cache, List.of()) == 0, "no player near should give no hauler", f);
+            // 導く骨負い: 集め場から遠い人のそば (人と集め場のあいだ) に出て、見た人にクエストが始まる
+            FakePlayer far = fake(level, "u_far", SX + 6 - 38, SZ + 6);
+            ps.add(far);
+            check(Ch1Mobs.syncHauler(level, cache, List.of(far)) == 1, "a far player should get a leading hauler", f);
+            BoneHauler lead = Ch1Mobs.haulersAt(level, cache).get(0);
+            double toCache = Math.hypot(lead.getX() - cache.getX(), lead.getZ() - cache.getZ());
+            check(toCache < 50 && toCache > Ch1Mobs.HAULER_RING_MAX && lead.distanceTo(far) < Ch1Mobs.LEAD_AHEAD + 6,
+                    "the leading hauler is not between the player and the cache (to cache " + Math.round(toCache) + ", to player " + Math.round(lead.distanceTo(far)) + ")", f);
+            check(Ch1Mobs.noticeHaulers(level, cache, List.of(far)) == 1 && jp.revati.skyabyss.quest.QuestLog.of(far).entry(Ch1Mobs.HAULER_QUEST) != null,
+                    "seeing the hauler did not start the follow quest", f);
+            check(Ch1Mobs.noticeHaulers(level, cache, List.of(far)) == 0, "the follow quest started twice", f);
+            net.minecraft.world.phys.Vec3 flee = lead.fleeDestinationForTest(far);
+            check(flee != null && Math.hypot(flee.x - cache.getX(), flee.z - cache.getZ()) <= BoneHauler.AT_HOME + 1, "a scared leading hauler does not run to the cache", f);
+            jp.revati.skyabyss.quest.Quests.signal(far, Ch1Mobs.HAULER_SIGNAL);
+            check(jp.revati.skyabyss.quest.QuestLog.of(far).entry(Ch1Mobs.HAULER_QUEST) == null || jp.revati.skyabyss.quest.QuestLog.of(far).entry(Ch1Mobs.HAULER_QUEST).done,
+                    "arriving at the cache did not finish the follow quest", f);
+            lead.discard();
         } finally {
             level.setDayTime(dayBefore);
             drop(ps);
@@ -549,14 +566,14 @@ public final class Ch1MobsSelfTest {
                 ps.add(fake(level, "e_party" + i, SX + 3 + i, SZ + 12));
             }
             tick(level, e, 2);
-            check(Math.abs(e.getMaxHealth() - 140 * 2.2f) < 1f, "elder health for 3 players " + e.getMaxHealth(), f);
+            check(Math.abs(e.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.get(e, "armor") - 140 * 2.2f) < 1f, "elder health for 3 players " + e.getMaxHealth(), f);
             drop(ps);
             e.discard();
             e = elderAt(level, SX, SZ);
             FakePlayer solo = fake(level, "e_solo", SX, SZ + 12);
             ps.add(solo);
             tick(level, e, 2);
-            check(e.getMaxHealth() == 140f, "elder health for one player " + e.getMaxHealth(), f);
+            check(Math.abs(e.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.get(e, "armor") - 140f) < 0.5f, "elder health for one player " + e.getMaxHealth(), f);
             e.discard();
 
             // 正面 (+z) からの傷は半分
@@ -597,7 +614,7 @@ public final class Ch1MobsSelfTest {
             e.setTarget(in);
             Outcome o = watch(level, e, 40, in, () -> e.forceAction("SWING", in));
             check(o.firstHurt() >= Telegraph.MIN_WARN_TICKS, "elder swing hurt after only " + o.firstHurt() + " ticks", f);
-            check(lost(in) >= 6f && lost(in) <= 7.5f, "elder swing damage " + lost(in), f);
+            check(lost(in) >= 7.8f && lost(in) <= 9.75f, "elder swing damage " + lost(in), f);
             sameShape(o, ps, start, "elder swing", f);
             notes.add("elder swing warns " + o.firstHurt() + " ticks, hits " + round(lost(in)));
         } finally {
@@ -621,7 +638,7 @@ public final class Ch1MobsSelfTest {
             Outcome o = watch(level, e, 50, in, () -> e.forceAction("RUSH", target));
             check(o.firstHurt() >= Telegraph.MIN_WARN_TICKS, "elder rush hurt after only " + o.firstHurt() + " ticks", f);
             check(o.firstHurt() >= ElderSentry.RUSH_WARN - 1, "elder rush hit before the line was full (" + o.firstHurt() + ")", f);
-            check(lost(in) >= 8f && lost(in) <= 9.5f, "elder rush damage " + lost(in), f);
+            check(lost(in) >= 10.4f && lost(in) <= 12.35f, "elder rush damage " + lost(in), f);
             sameShape(o, ps, start, "elder rush", f);
             check(e.getZ() > SZ + 3, "elder should rush forward (z " + (e.getZ() - SZ) + ")", f);
             notes.add("elder rush warns " + o.firstHurt() + " ticks, hits " + round(lost(in)));
@@ -644,7 +661,7 @@ public final class Ch1MobsSelfTest {
             e.setTarget(in);
             Outcome o = watch(level, e, 50, in, () -> e.forceAction("STOMP", in));
             check(o.firstHurt() >= Telegraph.MIN_WARN_TICKS, "elder stomp hurt after only " + o.firstHurt() + " ticks", f);
-            check(lost(in) >= 7f && lost(in) <= 8.5f, "elder stomp damage " + lost(in), f);
+            check(lost(in) >= 9.1f && lost(in) <= 11.05f, "elder stomp damage " + lost(in), f);
             sameShape(o, ps, start, "elder stomp", f);
             notes.add("elder stomp warns " + o.firstHurt() + " ticks, hits " + round(lost(in)));
         } finally {

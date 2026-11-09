@@ -1,27 +1,27 @@
 {
  "name": "king_salt_c1",
- "tris": 3018,
+ "tris": 5270,
  "atlas": [
-  512,
+  1024,
   512
  ],
  "open": 0,
  "floating": [],
  "bones": {
   "root": 0,
-  "body": 112,
-  "chest": 754,
-  "head": 988,
-  "jaw": 44,
-  "arm_l": 188,
-  "fore_l": 182,
-  "arm_r": 188,
-  "fore_r": 182,
-  "leg_l": 38,
-  "shin_l": 152,
-  "leg_r": 38,
-  "shin_r": 152
+  "body": 188,
+  "robe_f": 366,
+  "robe_b": 342,
+  "chest": 1806,
+  "head": 424,
+  "crown": 1120,
+  "arm_l": 98,
+  "fore_l": 342,
+  "arm_r": 98,
+  "fore_r": 342,
+  "leg_l": 72,
+  "leg_r": 72
  },
- "glow": 7434,
- "height": 71.1
+ "glow": 6360,
+ "height": 60.5
 }

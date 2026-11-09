@@ -56,7 +56,6 @@ public final class TideChapter {
     public static final String LORE_STELE = "chapter1/ch2_beach_stele";
 
     // 潮見の貝を渡したかの印 (人の持続データ)
-    static final String SHELL_GIVEN = "skyabyss_tide_watching_shell_given";
 
     public static final String BEAT_CAIRNS = "salt_cairns";
     public static final String BEAT_CONCH = "far_conch";
@@ -93,13 +92,30 @@ public final class TideChapter {
         return Beat.Time.DAWN.matches(dayTime) || Beat.Time.DUSK.matches(dayTime);
     }
 
+    // 水辺か (足もとか、八方の range ブロック以内に海の水面)
+    static boolean nearWater(ServerLevel level, double x, double z, int range) {
+        if (TideOcean.waterAtSurface(level, x, z)) {
+            return true;
+        }
+        for (int dir = 0; dir < 8; dir++) {
+            double ax = Math.cos(Math.PI / 4 * dir);
+            double az = Math.sin(Math.PI / 4 * dir);
+            for (int s = 4; s <= range; s += 4) {
+                if (TideOcean.waterAtSurface(level, x + ax * s, z + az * s)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // 積み石の近くにいる (小要素がまだ置かれていない人は、水辺にいれば足りる)
     static boolean nearCairn(ServerPlayer p) {
         BlockPos at = p.blockPosition();
         List<ChapterSites.Site> all = new java.util.ArrayList<>(ChapterSites.sitesFor(p.server, p.getUUID(), CAIRN_A));
         all.addAll(ChapterSites.sitesFor(p.server, p.getUUID(), CAIRN_B));
         if (all.isEmpty()) {
-            return p.level() instanceof ServerLevel level && TideConchItem.nearWater(level, p.getX(), p.getZ(), (int) SHORE_NEAR);
+            return p.level() instanceof ServerLevel level && nearWater(level, p.getX(), p.getZ(), (int) SHORE_NEAR);
         }
         for (ChapterSites.Site s : all) {
             if (Math.hypot(s.pos().getX() - at.getX(), s.pos().getZ() - at.getZ()) <= CAIRN_NEAR) {
@@ -157,7 +173,7 @@ public final class TideChapter {
     }
 
     // ---------------------------------------------------------------- 小要素
-    // 漂着の荷の箱の中身 (潮見の貝は人ごとに渡すので、箱には入れない)
+    // 漂着の荷の箱の中身
     static void fillCargo(SiteJob job) {
         BlockPos chest = job.mark("chest");
         if (chest != null && job.level.getBlockEntity(chest) instanceof ChestBlockEntity be) {
@@ -167,20 +183,6 @@ public final class TideChapter {
         } else {
             SkyAbyss.LOGGER.error("Tide drift cargo: no chest at {}", chest);
         }
-    }
-
-    // 潮見の貝を一人に一つ渡す (荷に着いたとき。渡したら true。なくしたら /skyabyss tide conch で出し直せる)
-    public static boolean giveShell(ServerPlayer p) {
-        if (p.getPersistentData().getBoolean(SHELL_GIVEN)) {
-            return false;
-        }
-        p.getPersistentData().putBoolean(SHELL_GIVEN, true);
-        ItemStack shell = new ItemStack(TideChapterSetup.TIDE_WATCHING_SHELL.get());
-        jp.revati.skyabyss.pouch.PouchRouting.give(p, shell);
-        if (!shell.isEmpty()) {
-            p.drop(shell, false);
-        }
-        return true;
     }
 
     private static void registerSites() {
@@ -198,11 +200,7 @@ public final class TideChapter {
                 .post(TideChapter::fillCargo)
                 .onArrive((p, s) -> {
                     Lore.unlock(p, LORE_DRIFT, true);
-                    if (giveShell(p)) {
-                        Notice.narrate(p, "message.skyabyss.ch2.cargo.shell");
-                    } else {
-                        Notice.narrate(p, "message.skyabyss.ch2.cargo.page");
-                    }
+                    Notice.narrate(p, "message.skyabyss.ch2.cargo.page");
                     Quests.signal(p, SIGNAL_CARGO);
                 }).register();
         ChapterSites.element(STELE, Chapters.TIDE, "tide_stele").atGround().dist(60, 140).prefer(ChapterSites.Prefer.SHORE).arriveRadius(6)

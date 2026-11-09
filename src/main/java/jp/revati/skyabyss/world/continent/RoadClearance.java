@@ -131,6 +131,17 @@ public final class RoadClearance {
                 return new BlockPos(x, at.getY(), z);
             }
         }
+        // 遠ざかる向きで空きが無い (二本の道のあいだなど): 八方を近い順に探す
+        for (int s = 4; s <= maxShift; s += 4) {
+            for (int k = 0; k < 8; k++) {
+                double a = Math.PI * 2 * k / 8;
+                int x = (int) Math.round(at.getX() + Math.cos(a) * s);
+                int z = (int) Math.round(at.getZ() + Math.sin(a) * s);
+                if (!blocks(x, z, radius, margin)) {
+                    return new BlockPos(x, at.getY(), z);
+                }
+            }
+        }
         return at;
     }
 }

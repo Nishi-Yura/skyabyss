@@ -128,6 +128,10 @@ public final class RaidRewards {
     public static void onRoomCleared(ServerLevel back, UUID group, String titan, String roomId, Slot slot) {
         boolean replay = !FirstRun.isFirstRun(back, group);
         BackGroupData.Record r = BackGroupData.get(back).of(group);
+        if (tokens(r).contains(roomId)) {
+            // この順路でもう越えた部屋 (全滅で最初からやり直した): 報いは二度は出ない
+            return;
+        }
         mark(r, roomId);
         if (replay) {
             mark(r, REPLAY_TOKEN);
@@ -142,6 +146,9 @@ public final class RaidRewards {
     public static void onMidCleared(ServerLevel back, UUID group, String titan) {
         boolean replay = !FirstRun.isFirstRun(back, group);
         BackGroupData.Record r = BackGroupData.get(back).of(group);
+        if (tokens(r).contains(MID_TOKEN)) {
+            return;
+        }
         mark(r, MID_TOKEN);
         if (replay) {
             mark(r, REPLAY_TOKEN);
@@ -226,6 +233,13 @@ public final class RaidRewards {
             if (noWipe) {
                 title(server, codex, id, TITLE_NOWIPE + "." + titan, p);
                 give(server, p, id, List.of(new Grant(ModItems.resonanceShard(titan), NO_WIPE_SHARDS)), replay ? REPLAY_RATE : 1.0, random);
+            }
+            // 巨神のアスペクト (一つ、崩れなしならもう一つ。報いの祭壇が開く。docs/design/58)。周回でも減らない
+            if (p != null) {
+                jp.revati.skyabyss.rpg.aspect.AspectNet.grant(p, titan, noWipe);
+            } else {
+                // オフラインの仲間は次に入ったときに渡す
+                jp.revati.skyabyss.rpg.aspect.AspectPending.add(server, id, titan, noWipe);
             }
         }
     }

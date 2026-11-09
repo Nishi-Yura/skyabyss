@@ -19,10 +19,18 @@ import net.minecraft.world.phys.Vec3;
 //   地割り  担いだ骨の槌を振り下ろし、割れ目が前へ走る (前の長い帯、予告 1.0 秒)
 //   薙ぎ    寄った人へ槌を横に薙ぐ (前の広い扇、予告 0.8 秒)
 //   足踏み  体力が 6 割を切ると、まわりを踏み鳴らす (まわりの輪、予告 0.9 秒。当たると浮く)
+//   跳び割り 離れた人のいる所へ跳び込む (円 4.5、予告 1.15 秒。続けて外へ輪の衝撃)
+//   骨投げ  背の骨塊を投げる (人の足もとと、まわりに二つの円、予告 1.0 秒)
 public class PitForeman extends DungeonBoss {
     static final int SLAM = 1;
     static final int SWEEP = 2;
     static final int STOMP = 3;
+    static final int LEAP = 4;
+    static final int THROW = 5;
+    public static final int LEAP_WARN = 23;
+    public static final int THROW_WARN = 20;
+    private int lastLeap = -200;
+    private int lastThrow = -120;
     public static final int SLAM_WARN = 20;
     public static final double SLAM_LENGTH = 12;
     public static final int SWEEP_WARN = 16;
@@ -34,7 +42,7 @@ public class PitForeman extends DungeonBoss {
 
     public PitForeman(EntityType<? extends Monster> type, Level level) {
         super(type, level, "pit_foreman", () -> SoundEvents.RAVAGER_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH,
-                "slam", "sweep", "stomp", "hurt", "death");
+                "slam", "sweep", "stomp", "leap", "throw", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -49,6 +57,18 @@ public class PitForeman extends DungeonBoss {
 
     @Override
     protected void choose(LivingEntity target, double distance) {
+        if (distance > 7 && distance < 22 && tickCount - lastLeap > 200) {
+            move = LEAP;
+            lastLeap = tickCount;
+            leapAt(target, "leap", LEAP_WARN, 4.5, 1.3f);
+            return;
+        }
+        if (distance > 5 && tickCount - lastThrow > 140) {
+            move = THROW;
+            lastThrow = tickCount;
+            volley(target, "throw", THROW_WARN, 2, 2.2, 1.0f, Blocks.BONE_BLOCK.defaultBlockState());
+            return;
+        }
         if (hp() < 0.6f && distance < STOMP_RADIUS && tickCount - lastStomp > 200) {
             move = STOMP;
             lastStomp = tickCount;
@@ -120,6 +140,8 @@ public class PitForeman extends DungeonBoss {
         return switch (move) {
             case SLAM -> SLAM_WARN + 16;
             case SWEEP -> SWEEP_WARN + 12;
+            case LEAP -> LEAP_WARN + 18;
+            case THROW -> THROW_WARN + 12;
             default -> STOMP_WARN + 12;
         };
     }

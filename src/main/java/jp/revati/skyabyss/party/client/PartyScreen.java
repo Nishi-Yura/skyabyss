@@ -92,6 +92,12 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.leave"), b -> send(PartyNetwork.Action.LEAVE, ""))
                     .bounds(MEMBERS.right() - Golden.S5 - Golden.S55, MEMBERS.y() + 2, Golden.S55, Golden.BTN).build());
         }
+        // パーティー募集の画面 (脇の列の見出しの右)
+        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.finder.open"), b -> {
+            minecraft.setScreen(new PartyFinderScreen(this));
+            send(PartyNetwork.Action.FINDER_LIST, "");
+        }).bounds(OTHERS.right() - Golden.S5 - Golden.S34, OTHERS.y() + 2, Golden.S34, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.translatable("gui.skyabyss.party.finder.open_tip"))).build());
         // 招待できる人 (脇の列)
         inviteButtons.clear();
         if (leader && s.members().size() < 4) {
@@ -193,6 +199,15 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             }
             y += PROW;
         }
+        // 仲間の今のクエスト: 行に指を置くと、メインと追いかけているクエストを出す (2026-11-08)
+        int qy = MEMBERS.y() + ROW + Golden.S5;
+        List<Component> questTip = null;
+        for (PartyNetwork.Member m : s.members()) {
+            if (mouseX >= MEMBERS.x() && mouseX < MEMBERS.right() - 2 * Golden.S21 - Golden.S8 && mouseY >= qy && mouseY < qy + PROW && m.online()) {
+                questTip = questLines(m);
+            }
+            qy += PROW;
+        }
         // 招待できる人 (目盛りつきの送り。招待の釦はその行に合わせて動かし、枠の外の釦は隠す)
         int ox = OTHERS.x() + Golden.S8;
         g.drawString(font, Component.translatable("gui.skyabyss.party.others"), ox, Golden.textY(OTHERS.y() + 2, ROW), GOLD, false);
@@ -219,7 +234,37 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
             b.setY(oy + (PROW - Golden.BTN) / 2);
             b.visible = oy >= candPanel.y() && oy + PROW <= candPanel.y() + CAND_H;
         }
+        if (questTip != null) {
+            g.renderComponentTooltip(font, questTip, mouseX, mouseY);
+        }
         fit.end(g);
+    }
+
+    // 仲間の今のクエストの行 (題名と、今の段の最初のやること)
+    static List<Component> questLines(PartyNetwork.Member m) {
+        List<Component> out = new ArrayList<>();
+        out.add(Component.literal(m.name()).withStyle(net.minecraft.ChatFormatting.GOLD));
+        quest(out, "gui.skyabyss.party.quest_main", m.mainQuest(), m.mainStage());
+        quest(out, "gui.skyabyss.party.quest_track", m.trackQuest(), m.trackStage());
+        if (out.size() == 1) {
+            out.add(Component.translatable("gui.skyabyss.party.quest_none").withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+        return out;
+    }
+
+    private static void quest(List<Component> out, String label, String id, int stageIndex) {
+        if (id.isEmpty()) {
+            return;
+        }
+        jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.client.quest.QuestClient.quest(id);
+        if (def == null) {
+            return;
+        }
+        out.add(Component.translatable(label, Component.translatable(def.titleKey())).withStyle(net.minecraft.ChatFormatting.YELLOW));
+        if (stageIndex >= 0 && stageIndex < def.stages().size() && !def.stages().get(stageIndex).objectives().isEmpty()) {
+            jp.revati.skyabyss.quest.QuestDef.Stage st = def.stages().get(stageIndex);
+            out.add(Component.literal("  ・" + jp.revati.skyabyss.client.quest.QuestHud.objectiveText(def, st, st.objectives().get(0))).withStyle(net.minecraft.ChatFormatting.WHITE));
+        }
     }
 
     @Override

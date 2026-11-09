@@ -112,15 +112,12 @@ final class ContinentScatter {
                 }
                 int bushes = r.nextFloat() < 0.4f ? 1 + r.nextInt(3) : 0;
                 for (int i = 0; i < bushes; i++) {
-                    bush(level, r, roads, x0, z0, biome == ContinentBiomes.SAVANNA ? Blocks.ACACIA_LEAVES : Blocks.OAK_LEAVES);
+                    bush(level, r, roads, x0, z0, biome == ContinentBiomes.SAVANNA ? Blocks.ACACIA_LEAVES : Blocks.AZALEA_LEAVES);
                 }
                 if (r.nextFloat() < 0.035f) {
                     wall(level, r, roads, x0, z0);
                 }
-                // 木立 (平原に木のかたまり。野がのっぺりしないように)
-                if (r.nextFloat() < (biome == ContinentBiomes.SAVANNA ? 0.06f : 0.12f)) {
-                    grove(level, r, roads, x0, z0, biome == ContinentBiomes.SAVANNA);
-                }
+                // 木は ContinentTrees が植える (前の木立はやめた)
             }
             case ContinentBiomes.FOREST, ContinentBiomes.BIRCH_FOREST, ContinentBiomes.FLOWER_FOREST, ContinentBiomes.TAIGA, ContinentBiomes.PINE_TAIGA -> {
                 Block wood = biome == ContinentBiomes.BIRCH_FOREST ? Blocks.BIRCH_LOG
@@ -395,46 +392,21 @@ final class ContinentScatter {
                 }
             }
         }
-    }
-
-    // 木立: 3〜6 本の小さな木 (幹 4〜6 と丸い葉。サバンナはアカシア)。白樺をまぜる
-    static void grove(WorldGenLevel level, RandomSource r, List<int[]> roads, int x0, int z0, boolean savanna) {
-        int n = 3 + r.nextInt(4);
-        for (int i = 0; i < n; i++) {
-            BlockPos c = spot(level, r, roads, x0, z0, 2);
-            if (c == null || !level.getBlockState(c).is(Blocks.GRASS_BLOCK)) {
-                continue;
-            }
-            boolean birch = !savanna && r.nextFloat() < 0.3f;
-            Block log = savanna ? Blocks.ACACIA_LOG : birch ? Blocks.BIRCH_LOG : Blocks.OAK_LOG;
-            Block leaves = savanna ? Blocks.ACACIA_LEAVES : birch ? Blocks.BIRCH_LEAVES : Blocks.OAK_LEAVES;
-            tree(level, r, c.above(), log, leaves, 4 + r.nextInt(3));
-        }
-    }
-
-    static void tree(WorldGenLevel level, RandomSource r, BlockPos base, Block log, Block leaves, int h) {
-        for (int y = 0; y < h; y++) {
-            if (!free(level.getBlockState(base.above(y)))) {
-                return;
-            }
-        }
-        BlockState leaf = leaves.defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true);
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
-                for (int dy = h - 3; dy <= h; dy++) {
-                    int d = dx * dx + dz * dz + (dy - h + 1) * (dy - h + 1) * 2;
-                    if (d > 5 || d == 5 && r.nextBoolean()) {
-                        continue;
+        // 坂の下側で根が宙に浮かないよう、根の下を地面まで埋める (浮いた根の下に 1〜2 段の、くぐれないすき間ができていた)
+        int ri = (int) Math.ceil(2.8f);
+        for (int dx = -ri; dx <= ri; dx++) {
+            for (int dz = -ri; dz <= ri; dz++) {
+                if (dx * dx + dz * dz > 2.8f * 2.8f) {
+                    continue;
+                }
+                for (int dy = -3; dy > -16; dy--) {
+                    BlockPos p = c.offset(dx, dy, dz);
+                    if (!free(level.getBlockState(p))) {
+                        break;
                     }
-                    BlockPos p = base.offset(dx, dy, dz);
-                    if (free(level.getBlockState(p))) {
-                        put(level, p, leaf);
-                    }
+                    put(level, p, main.defaultBlockState());
                 }
             }
-        }
-        for (int y = 0; y < h; y++) {
-            put(level, base.above(y), log.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y));
         }
     }
 
@@ -628,7 +600,8 @@ final class ContinentScatter {
         }
         int top = (int) Math.ceil(peak);
         int ox = 5;
-        int oy = 2;
+        // 根は 4 段 (急な坂の下側でも、根の下が宙に浮かない)
+        int oy = 4;
         boolean[][][] shape = new boolean[11][top + oy + 1][11];
         int salt = r.nextInt();
         for (int i = 0; i < 11; i++) {
@@ -654,6 +627,7 @@ final class ContinentScatter {
                 }
             }
         }
+        lowGaps(level, c, shape, ox, oy, ox, true);
         build(level, r, c, shape, ox, oy, ox, rock);
     }
 
@@ -707,7 +681,75 @@ final class ContinentScatter {
                 }
             }
         }
+        // 斜面で弧の下の地面が高く、くぐれない (すき間 1〜2) アーチは置かない (2026-11-08 の声「火のバイオームのところ、高さが無く通れない場所」)
+        if (lowGaps(level, c, shape, ox, oy, ox, false)) {
+            return;
+        }
         build(level, r, c, shape, ox, oy, ox, rock);
+    }
+
+    // 岩の張り出しの下で、地面とのすき間が 1〜2 段 (人がくぐれず、這うしかない) の所があるか。fill なら、その張り出しの下を地面まで岩で埋める
+    static boolean lowGaps(WorldGenLevel level, BlockPos c, boolean[][][] shape, int ox, int oy, int oz, boolean fill) {
+        boolean low = false;
+        for (int i = 0; i < shape.length; i++) {
+            for (int k = 0; k < shape[0][0].length; k++) {
+                for (int j = 1; j < shape[0].length; j++) {
+                    if (!shape[i][j][k] || shape[i][j - 1][k]) {
+                        continue;
+                    }
+                    // 張り出しの下の空き (形の外の、置ける所) を数える
+                    int gap = 0;
+                    while (gap < 3) {
+                        int jj = j - 1 - gap;
+                        if (jj >= 0 && shape[i][jj][k]) {
+                            break;
+                        }
+                        BlockPos at = c.offset(i - ox, jj - oy, k - oz);
+                        if (!free(level.getBlockState(at))) {
+                            break;
+                        }
+                        gap++;
+                    }
+                    if (gap >= 1 && gap <= 2) {
+                        low = true;
+                        if (!fill) {
+                            return true;
+                        }
+                        for (int g = 1; g <= gap; g++) {
+                            if (j - g >= 0) {
+                                shape[i][j - g][k] = true;
+                            }
+                        }
+                    }
+                }
+                // 上向き: この岩の上の面と、先に置かれた岩 (隣の岩山やアーチ) の張り出しのあいだが 1〜2 段
+                for (int j = oy; j < shape[0].length; j++) {
+                    if (!shape[i][j][k] || j + 1 < shape[0].length && shape[i][j + 1][k]) {
+                        continue;
+                    }
+                    int gap = 0;
+                    while (gap < 3) {
+                        BlockPos at = c.offset(i - ox, j + 1 + gap - oy, k - oz);
+                        if (!free(level.getBlockState(at))) {
+                            break;
+                        }
+                        gap++;
+                    }
+                    BlockPos lid = c.offset(i - ox, j + 1 + gap - oy, k - oz);
+                    if (gap >= 1 && gap <= 2 && level.getBlockState(lid).blocksMotion() && !level.getBlockState(lid).is(net.minecraft.tags.BlockTags.LEAVES)) {
+                        low = true;
+                        if (!fill) {
+                            return true;
+                        }
+                        // 岩山は下を削る: この柱の、すき間の真下の一段を外す (上の張り出しとのあいだを 3 段以上にする)
+                        for (int g = 0; g < 3 - gap && j - g >= 0; g++) {
+                            shape[i][j - g][k] = false;
+                        }
+                    }
+                }
+            }
+        }
+        return low;
     }
 
     // 池: 楕円 (半径 2.5〜5)、深さ 1〜2。縁より一段下に水面。底は砂・粘土・砂利。縁にサトウキビ、水に睡蓮の葉 (沼は多め・縁は泥)。

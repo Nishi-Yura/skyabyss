@@ -40,8 +40,9 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 地形・道・建物の置き場所の決まりを変えたら VERSION を一つ上げる。前の版で作った大陸の世界を開くと:
 //   1. 地上を読む前 (ServerAboutToStart): 地上のチャンクの保存 (region・entities・poi) を skyabyss_backup/overworld_v<前の版> へ移す
 //      (前の作り直しの控えは消し、一つだけ残す)。地形・木・道は、新しい世界と同じに作られる
-//   2. 世界を開いたとき (ServerStarted。場所の建て直しの予約より先): 建て物の「建った」印を消し、今の設計図と置き場で建て直させる
-//      (野営地・都・町・船着き場・島・見どころ (置き場から決め直す)・章の小要素・跡地の均し・祠 (今の場所に建て直す)・沖の難破船)。
+//   2. 世界を開いたとき (ServerStarted。場所の建て直しの予約より先): 建て物の置き場をすべて捨て (野営地の場所だけ残す)、新しい世界と同じに
+//      置き場から決め直して建てさせる (都・町・船着き場・島・見どころ・外れの集落・章の跡地と小要素・祠 (今の場所に建て直す)・沖の難破船)。
+//      跡地を見た人・章の小要素に着いた人の記録は引き継ぐ (SiteData.clearForRegen)。
 //      巨神は居場所へ出し直す。地上の墓は、チャンクが読み込まれたら印のブロックを置き直す
 //   3. 入った人: 前の版の地上で、地面や壁の中にいる人は、上の空いた所へ出す
 // 版の記録は世界のフォルダの skyabyss/continent_version.txt (地上を読む前に読むので、保存のデータではなくファイル)。
@@ -51,8 +52,19 @@ public final class ContinentRegen {
     // 大陸の中身の版。1 = 2026-11-03 (地形の起伏・段丘・岩の露頭・池、祠を道から離す、鯨見の道を門で止める)、
     // 2 = 2026-11-03 夜 (祠の参道を丘の中のトンネルにしない。切り通しにする)、
     // 3 = 2026-11-04 (見どころの作り替え: 道しるべ 6・頭目の兄弟の野営・旅人の野営・場所ごとの部品。docs/design/40 の 3.3)、
-    // 4 = 2026-11-07 (半ブロックが面で接するように: 町の岩を巻く段・灯の笠・風車・門のまぐさ・僧院の屑。tools/audit/check_slabs.py)
-    public static final int VERSION = 4;
+    // 4 = 2026-11-07 (半ブロックが面で接するように: 町の岩を巻く段・灯の笠・風車・門のまぐさ・僧院の屑。tools/audit/check_slabs.py)、
+    // 5 = 2026-11-08 (潮殻と岩鯨の祠を町の外へ。町の広場と縁が祠の台地に重なっていた。「祠の位置と建物がかぶってる」)
+    // 6 = 2026-11-08 夜 (岩のアーチ・岩山の張り出しの下に、くぐれない 1〜2 段のすき間を作らない。「火のバイオームのところ、高さが無く通れない」)
+    // 7 = 2026-11-08 夜 (四つの大陸: 内海から外の海へ四本の広い海を引いて、西・北・東・南の島に分ける。海を渡る道は岸で切って渡し船。docs/design/40 の 3 章)
+    // 8 = 2026-11-08 夜遅く (上がれない足場を直した: 大樹の床の輪・野盗の物見の梯子・柵の砦村の物見の梯子、都の城壁の歩廊へ門のそばの段と塔の通り抜け。
+    //     別の道どうしの出会いを丸く、見どころを道から対角の幅で離す。「上らせる気の無い建築」「道と建造物重なってる」「道が上手く曲がってない」)
+    // 9 = 2026-11-09 (章の小さな部品 (荷車の傍らの轍と荷・旅の職人の立つ所など、SiteJob.placeSmall) を道から遠ざける。「ここ道に旅の職人がかぶってる」)
+    // 10 = 2026-11-09 (外れの帯の見せ場の地形: 骨の谷の肋骨・干潟と岩礁・氷河と浮き岩・冷えた熔岩の川と灰の砂丘。world/continent/FrontierTerrain。issue #19)
+    // 11 = 2026-11-09 (奥のダンジョン四つの入口を外れの置き場に。dungeon/Dungeon の DEEP_*、tools/gen/world/dungeons_deep.py)
+    // 12 = 2026-11-09 (木をバニラの飾りから、土地ごとのオリジナルの形の木に。間を空け、砂丘のまわりは緑の木なし。world/continent/ContinentTrees)
+    // 13 = 2026-11-09 夜 (作り直しで建て物の置き場もすべて決め直す。前の版の置き場が残り、四つの大陸の渡し船などが途中からの世界に出なかった。
+    //      「途中からのところはおかしくなるのかも。全部新しくなるようにしてほしい」)
+    public static final int VERSION = 13;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
@@ -198,24 +210,9 @@ public final class ContinentRegen {
     static void resetBuilt(MinecraftServer server) {
         ServerLevel over = server.overworld();
         SiteData data = SiteData.get(over);
-        int entries = 0;
-        // 見どころは置き場から決め直す (道から離す決まり・地面の高さが変わる)
-        for (SiteData.Entry e : new ArrayList<>(data.entries(jp.revati.skyabyss.world.continent.ContinentPois.KIND))) {
-            data.remove(e);
-        }
-        for (SiteData.Entry e : data.allEntries()) {
-            e.built = false;
-            e.started = false;
-            entries++;
-        }
-        int grounds = 0;
-        for (SiteData.Ground g : data.grounds()) {
-            if (g.shaped && !"NONE".equals(g.shape)) {
-                g.shaped = false;
-                grounds++;
-            }
-        }
-        data.setDirty();
+        // 置き場をすべて捨てて、新しい世界と同じに決め直す (このあと SiteBuilds.onServerStarted が計画からやり直す)。
+        // 前は「建った」印だけ消して前の版の置き場に建て直していたので、あとから足した物 (四つの大陸の渡し船など) が途中からの世界に出なかった
+        int entries = data.clearForRegen();
         // 祠: 建っていた巨神の分を、今の場所に建て直す (onTick。チャンクを読むので起動の直後に一つずつ)
         for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
             if (jp.revati.skyabyss.titan.shrine.TitanShrine.forget(server, titan)) {
@@ -241,8 +238,8 @@ public final class ContinentRegen {
                 GRAVES.add(g.id);
             }
         }
-        SkyAbyss.LOGGER.info("Continent regen: {} site(s) and {} ground(s) will be built again, {} shrine(s) rebuilt, {} grave mark(s) restored",
-                entries, grounds, SHRINES.size(), GRAVES.size());
+        SkyAbyss.LOGGER.info("Continent regen: {} old site(s) dropped; every place is planned and built again like a new world, {} shrine(s) rebuilt, {} grave mark(s) restored",
+                entries, SHRINES.size(), GRAVES.size());
     }
 
     // 祠の建て直しと墓の印 (1 秒ごと)
@@ -255,7 +252,8 @@ public final class ContinentRegen {
         if (server.getTickCount() % 20 != 7) {
             return;
         }
-        if (!SHRINES.isEmpty()) {
+        // 祠は、町などの建て物が建ち終わってから (先に建てると、あとの建て物が空けた所が祠を削る)
+        if (!SHRINES.isEmpty() && !jp.revati.skyabyss.opening.site.SiteBuilds.busy()) {
             String titan = SHRINES.iterator().next();
             SHRINES.remove(titan);
             try {
@@ -297,6 +295,13 @@ public final class ContinentRegen {
             return;
         }
         var tag = p.getPersistentData();
+        // 印の無い人は、この世界に初めて入った人 (新しい世界・新しい仲間)。作り直した起動でなければ、今の版を書くだけ
+        // (2026-11-09 の声「新しいワールド作ったら、大陸の新しい版を作り直していますと初めに出た」「職選べる画面出なかった」:
+        //  前は印が無いのを古い版と見て読み込み画面を出し、終わると立ち位置を動かして野営地から離していた)
+        if (!tag.contains(PLAYER_KEY) && !regenerated()) {
+            tag.putInt(PLAYER_KEY, VERSION);
+            return;
+        }
         boolean first = tag.getInt(PLAYER_KEY) < VERSION;
         // 版が上がってから初めて入った人と、この起動で作り直した世界に初めて入った人: まわりの地形と建物が揃うまで読み込み画面 (RegenLoading)
         if (continent(p.server) && (first || regenerated() && LOADED.add(p.getUUID()))) {

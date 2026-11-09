@@ -49,7 +49,9 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //            組の写しがもうあれば、その checkpoint の層へ加わる。誰でも入れる (Lv の決まりはない。目安 Lv は地図と碑に書く)
 //   続きから 着いた一番深い層を人ごとに覚え (PROGRESS)、新しく入るときは入る人の中で一番浅い層から (誰も飛ばさない)
 //   層       next に乗ると次の層へ (鯨骨の坑はトロッコ)。帰り石 (天然磁石) を右クリックすると入口の間へ
-//   倒れた   起きると checkpoint の層の入口へ (墓は作らない。写しの中の死は 11 の地上の死に入れない)
+//   倒れた   写しの中の全員が倒れた・死んだら (一人なら死んだら) 全滅: 写しを最初の層から作り直し、全員をその入口へ (wipe。
+//            2026-11-09 の声「基本ダンジョンやレイドは死んだら最初からスタート」)。仲間が立っているうちに死んだ人は、起きると今の checkpoint の層へ
+//            (墓は作らない。写しの中の死は 11 の地上の死に入れない)
 //   主       倒すと報酬 (cleared)、主の間の奥の光に入ると入口の間へ。主のあとの写しは CLEAR_END で閉じる
 //   深く潜る 主を一度倒した人が、しゃがんで層の門を使う (組の写しはその深さのまま)。敵と主の体力と傷 +40%・仕掛けが速い (Mechanics)・
 //            罠の休みが短い。主の箱は一つ上の階級で、ふつうとは別に一日一度 (2026-11-05 のダンジョンの頁 1-1)
@@ -128,6 +130,24 @@ public final class Dungeons {
     // 層の門を使った: 組の写しがあれば加わり、なければ近くの組の人と新しく始める
     public static DungeonRun enter(ServerPlayer p, Dungeon d) {
         return enter(p, d, false);
+    }
+
+    // 組の写しの続きに加わるか (自分の写しか、同じパーティーの人の写しがある)。加わるなら深さは写しのまま
+    public static boolean joinsRun(ServerPlayer p, Dungeon d) {
+        DungeonRun mine = runOf(p);
+        if (mine != null && mine.dungeon == d && !mine.cleared) {
+            return true;
+        }
+        var party = Parties.of(p);
+        if (party == null) {
+            return false;
+        }
+        for (DungeonRun r : RUNS.values()) {
+            if (r.dungeon == d && !r.cleared && party.members.stream().anyMatch(r.members::contains)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // deep: 深く潜る (主を一度倒した人だけ。倒していなければふつうに入って知らせる)
@@ -441,10 +461,13 @@ public final class Dungeons {
         if (clears == 1) {
             Notice.unlock(p, "message.skyabyss.dungeon.first", Component.translatable(d.nameKey()));
             // 初めて越えた人に、そのダンジョンだけの装飾品を一つ (DungeonGear)
+            // 装飾品の無いダンジョンでは何も渡さず、知らせも出さない (2026-11-08 の声「空気を手に入れた という表記はやめて」)
             ItemStack trinket = new ItemStack(DungeonGear.item(d));
-            DungeonGear.setClears(trinket, 1);
-            Quests.give(p, trinket);
-            Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
+            if (!trinket.isEmpty()) {
+                DungeonGear.setClears(trinket, 1);
+                Quests.give(p, trinket);
+                Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
+            }
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
         }
         Quests.signal(p, "dungeon:" + d.id);
@@ -492,6 +515,10 @@ public final class Dungeons {
                 steps(level, run, f, p, t);
             }
         }
+        if (!run.cleared && t % 10 == 0 && wiped(here, run)) {
+            wipe(level, run);
+            return;
+        }
         if (run.cleared && t - run.clearedAt > CLEAR_END) {
             for (ServerPlayer p : here) {
                 sendBack(p, run.dungeon);
@@ -503,6 +530,53 @@ public final class Dungeons {
         if (run.emptyTicks >= EMPTY_END) {
             end(run);
         }
+    }
+
+    // 写しの中の人が全員、死んだか倒れているか (一人でも立っていれば続く)
+    // 前の全滅で死の画面にいる人 (run.wipeWait) は数えない (起きるまで何度も全滅にしない)
+    static boolean wiped(List<ServerPlayer> here, DungeonRun run) {
+        boolean any = false;
+        for (ServerPlayer p : here) {
+            if (run.wipeWait.contains(p.getUUID())) {
+                continue;
+            }
+            any = true;
+            if (p.isAlive() && !jp.revati.skyabyss.party.Downed.isDowned(p)) {
+                return false;
+            }
+        }
+        return any;
+    }
+
+    // 全滅: 層をすべて作り直し (敵・鍵・扉・仕掛け・中ボス・主が最初の姿へ)、続きの記録を消して、全員を最初の層の入口へ。
+    // 死の画面にいる人は、起きたとき onRespawn が最初の層へ運ぶ
+    static void wipe(ServerLevel level, DungeonRun run) {
+        run.wipes++;
+        for (int f = 0; f < run.floors.length; f++) {
+            run.floors[f].close();
+            run.floors[f] = new DungeonFloor(run, f);
+        }
+        for (Mob m : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(
+                DungeonWorld.origin(run.dungeon, run.slot, 0)).inflate(DungeonWorld.SLOT_DX / 2.0, 200, DungeonWorld.FLOOR_DZ * 3.0),
+                m -> m.getTags().contains(run.foeTag()))) {
+            m.discard();
+        }
+        run.checkpoint = 0;
+        for (ServerPlayer p : run.online()) {
+            p.getPersistentData().putInt(PROGRESS + run.dungeon.id, 0);
+            if (real(p)) {
+                Notice.warn(p, "message.skyabyss.dungeon.wipe");
+            }
+            if (!p.isAlive()) {
+                run.wipeWait.add(p.getUUID());
+            } else if (run.floorOf(p) >= 0) {
+                jp.revati.skyabyss.party.Downed.reviveFull(p);
+                p.setHealth(p.getMaxHealth());
+                p.clearFire();
+                moveTo(p, run, 0);
+            }
+        }
+        SkyAbyss.LOGGER.info("[dungeon] run #{} {} wiped (wipe {}): back to the first floor", run.id, run.dungeon.id, run.wipes);
     }
 
     // 入口の間の層の門のそばに来た人へ、入り方を一度知らせる (寄るたびに。HINT_REST の間はくり返さない)
@@ -602,8 +676,8 @@ public final class Dungeons {
             BlockPos gate = ContinentPois.extraOf(p.serverLevel(), d.poiKind(), "gate");
             if (gate != null && gate.distManhattan(pos) <= 1) {
                 event.setCanceled(true);
-                // しゃがんで使うと深く潜る (主を一度倒した人)
-                enter(p, d, p.isShiftKeyDown());
+                // 主を一度倒した人には「ふつうに入る / 深く潜る」を選ぶ画面 (DeepChoice。前はしゃがんで使うと深く潜った)
+                DeepChoice.use(p, d);
                 return;
             }
         }
@@ -652,7 +726,7 @@ public final class Dungeons {
         }
     }
 
-    // 起きたら checkpoint の層の入口へ (写しがもう無ければ入口の間へ)
+    // 起きたら checkpoint の層の入口へ (全滅のあとは最初の層。写しがもう無ければ入口の間へ)
     @SubscribeEvent
     static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || event.isEndConquered()) {
@@ -662,10 +736,11 @@ public final class Dungeons {
         if (run == null) {
             return;
         }
+        run.wipeWait.remove(p.getUUID());
         Tasks.later(2, () -> {
             if (p.isAlive() && !p.hasDisconnected() && RUNS.containsKey(run.id)) {
                 moveTo(p, run, run.checkpoint);
-                Notice.hint(p, "message.skyabyss.dungeon.woke");
+                Notice.hint(p, run.checkpoint == 0 ? "message.skyabyss.dungeon.woke_start" : "message.skyabyss.dungeon.woke");
             }
         });
     }

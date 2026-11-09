@@ -178,9 +178,10 @@ public final class EmberApprentices extends EmberRoom {
         float hp = 60f * HEALTH_MULT[i] * (1f + 0.6f * (scale(ctx) - 1));
         var attr = m.getAttribute(Attributes.MAX_HEALTH);
         if (attr != null) {
-            attr.setBaseValue(hp);
+            // 元の体力を入れ直し、防具を直した分などの倍率は掛けたまま (combat/Hardness)
+            jp.revati.skyabyss.combat.Hardness.rebase(m, hp);
         }
-        m.setHealth(hp);
+        m.setHealth(m.getMaxHealth());
         m.setCustomName(Component.translatable("raid.skyabyss.ER6.apprentice", i + 1));
         m.setCustomNameVisible(true);
         current = m;

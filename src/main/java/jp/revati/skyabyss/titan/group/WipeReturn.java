@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 心臓の戦いで全員が倒れたら、背の休み場ではなく地上で目覚める (2026-10-28 の試遊「全員死んだら巨神の前に起きる。エンドコンテンツで行った場合は祠の前」)。
-// 物語の一度目 (FirstRun) は地上の巨神の前 (Titans.sendDown)、周回 (祠から) は祠の前 (TitanShrine.sendTo) で、周回の順路はそこで終わる。
+// 物語の一度目 (FirstRun) は地上の巨神の前 (Titans.sendDown)、周回 (祠から) は祠の前 (TitanShrine.sendTo)。どちらも順路はそこで終わる (次は最初の部屋から)。
 // 倒れた人は死の画面にいるので、起き上がって背の休み場に立ったところを運ぶ (ここで待つ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class WipeReturn {
@@ -35,9 +35,8 @@ public final class WipeReturn {
             return;
         }
         boolean replay = !FirstRun.isFirstRun(back, group);
-        if (replay) {
-            jp.revati.skyabyss.trial.TrialRoute.end(back, group);
-        }
+        // 順路は終わる (物語の一度目も周回も。次に挑むときは最初の部屋から。2026-11-09 の声「レイドは死んだら最初からスタート」)
+        jp.revati.skyabyss.trial.TrialRoute.end(back, group);
         for (UUID id : fallen) {
             PENDING.put(id, new Home(titan, replay));
         }
@@ -46,6 +45,16 @@ public final class WipeReturn {
 
     public static boolean pending(UUID id) {
         return PENDING.containsKey(id);
+    }
+
+    // 地上へ送った時刻 (server の tick)。復活のあとの背中への連れ戻し (各背の onRespawn の RespawnMove) が、送ったあとに前室へ戻さないように
+    private static final Map<UUID, Long> SENT = new HashMap<>();
+    static final int CLAIM_TICKS = 200;
+
+    // この人は全滅で地上へ帰すところ (まだ待っている、または少し前に送った)。背中へ連れ戻さない
+    public static boolean claims(UUID id, long now) {
+        Long at = SENT.get(id);
+        return PENDING.containsKey(id) || (at != null && now - at < CLAIM_TICKS);
     }
 
     @SubscribeEvent
@@ -61,6 +70,7 @@ public final class WipeReturn {
                 continue;
             }
             it.remove();
+            SENT.put(e.getKey(), (long) event.getServer().getTickCount());
             Home h = e.getValue();
             if (!(h.replay() && jp.revati.skyabyss.titan.shrine.TitanShrine.sendTo(p, h.titan()))) {
                 Titans.sendDown(p, h.titan());
@@ -72,5 +82,6 @@ public final class WipeReturn {
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {
         PENDING.clear();
+        SENT.clear();
     }
 }

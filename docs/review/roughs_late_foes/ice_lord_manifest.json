@@ -1,0 +1,26 @@
+{
+ "id": "late_ice_lord",
+ "short": "氷穴の主",
+ "kind": "奥のダンジョンの主 3案",
+ "title": "吹雪の氷穴の主 (ice_lord) — 嵐の奥のダンジョン・低ポリ 3 案",
+ "sheets": [
+  "roughs_late_foes/ice_lord.png"
+ ],
+ "extra": "骨 10 本。 三角形: A 590 / B 420 / C 226。埋まった部品の検査: A plate0-hump:0.75, ruff4-body:0.5, ruff5-body:0.5, ruff6-body:0.5, arm_l_ice0-arm_l_leg:1.0, arm_l_ice1-arm_l_leg:1.0, arm_r_ice0-arm_r_leg:1.0, arm_r_ice1-arm_r_leg:0.75, backvein0-hump:1.0, backvein1-hump:1.0, backvein2-body:0.6, backvein2-hump:0.57, backvein3-body:0.73 / B なし / C なし",
+ "options": {
+  "a": {
+   "name": "A 氷鎧の大熊 (590 三角形)",
+   "desc": "背と肩に氷の板が生えた白い大熊。立ち上がって前脚で叩く。滑る床の上の突進が作りやすく、雷翼の土地の獣の頂点に見える。"
+  },
+  "b": {
+   "name": "B 雪の巨人 (420 三角形)",
+   "desc": "長い白い毛の巨人、氷の棍棒、顔は古い骨の仮面 (目が青白く光る)。人型なので技の予告の読みやすさは一番。"
+  },
+  "c": {
+   "name": "C 氷柱の大蝙蝠 (226 三角形)",
+   "desc": "翼の膜が氷の大蝙蝠。天井から逆さに吊るされて待ち、吹き抜けを飛ぶ。空を飛ぶ主は今までにないが、近接の職は戦いにくい。"
+  }
+ },
+ "role": "主",
+ "land": "嵐"
+}

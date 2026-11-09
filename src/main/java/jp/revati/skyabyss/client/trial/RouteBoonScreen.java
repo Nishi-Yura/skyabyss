@@ -41,6 +41,13 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     private final RouteBoons.Boon[] boons;
     private final long until;
     private int hover = -1;
+    // 開いてから LOCK_MS は選べない (戦いの手のまま押してしまわないように。2026-11-10 の声「試練終わった後にすぐに選ぶ画面出ちゃうから、間違って押しちゃう」)
+    static final long LOCK_MS = 1500;
+    private final long opened = System.currentTimeMillis();
+
+    private boolean locked() {
+        return System.currentTimeMillis() - opened < LOCK_MS;
+    }
 
     // 幕の最中に届いた見せ方と、その締め切り (System.currentTimeMillis)
     private static RouteBoons.Offer deferred;
@@ -107,6 +114,9 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     private void pick(int index) {
+        if (locked()) {
+            return;
+        }
         PacketDistributor.sendToServer(new RouteBoons.Pick(index));
         onClose();
     }
@@ -166,7 +176,7 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
         Font font = Minecraft.getInstance().font;
         g.fill(0, 0, width, height, argb(0.55f, BG));
         fit.fit(width, height, W, H, 3f, 0.5f);
-        hover = cardAt(fit.x(screenX), fit.y(screenY));
+        hover = locked() ? -1 : cardAt(fit.x(screenX), fit.y(screenY));
         fit.begin(g);
         Golden.panel(g, LAYOUT.panel());
         Golden.headLine(g, LAYOUT);

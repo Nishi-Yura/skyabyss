@@ -188,9 +188,10 @@ public final class MoonTrial {
             default -> MoonCoreBoss.DMG;
         };
         m.tuneMoon(section, true, false, hp / MoonMob.SECTION_HP[section], dmg / MoonMob.SECTION_DMG[section] * dmgScale(tier));
-        double max = Math.min(1024, m.getMaxHealth() * hpScale(tier));
+        double max = m.getMaxHealth() * hpScale(tier);
         m.getAttribute(Attributes.MAX_HEALTH).setBaseValue(max);
-        m.setHealth((float) max);
+        jp.revati.skyabyss.combat.Hardness.rebase(m, max);
+        m.setHealth(m.getMaxHealth());
         m.addTag(TAG);
         m.getPersistentData().putInt(TIER, tier);
         if (m.overlaid() && m.level() instanceof ServerLevel sl) {

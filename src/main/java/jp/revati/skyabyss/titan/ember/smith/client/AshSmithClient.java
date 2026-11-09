@@ -93,8 +93,6 @@ public final class AshSmithClient {
         if (label != null) {
             g.drawString(mc.font, label, x + ICON + 4 + mc.font.width(name) + 6, y + 4, smith.isWeak() ? 0xFFF0C8 : 0xFF8A4A, true);
         }
-        String percent = Math.round(boss.getProgress() * 100) + "%";
-        g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
         int barY = y + ICON + 2;
         g.blit(FRAME_TEX, x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);
         float progress = Math.max(0f, Math.min(1f, boss.getProgress()));
@@ -106,6 +104,7 @@ public final class AshSmithClient {
             g.fill(left, top, left + fill, top + 1, 0xFF000000 | FILL_TOP);
         }
         g.blit(NOTCH_TEX, x, barY, 0, 0, WIDTH, FRAME_HEIGHT, WIDTH, FRAME_HEIGHT);
+        jp.revati.skyabyss.client.titan.PhasedBossBar.drawHp(g, mc, boss, x, barY + TRACK_Y + TRACK_H / 2);
     }
 
     // 鍛え手の描画。部屋の明るさで色が沈まないよう (08 の 19.8節): 基のテクスチャを明るくしてあり、光る所は glowmask を目の光で足す

@@ -46,7 +46,7 @@ import jp.revati.skyabyss.util.Players;
 
 // 巨神の祠 (docs/design/32 の 3.1)。周回の順路の入口。巨神ごとに世界に一つ、地上に建つ。壊せない (台座 9×9 を守る)。
 //   置き場 (仮): はじまりの都 (鐘) から、その巨神の跡地の方位 岩鯨 北・潮殻 東・雷翼 西・余燼 南) へ、距離の帯の近い端。
-//     本当の置き場は、地図と地形の生成 が決まったら差し替える。心臓を初めて止めたとき (誰かが) に建てる (ensure)
+//     大陸では決まった道ばたの広場 (ContinentLairs.shrine)。心臓を初めて止めたとき、または人が近づいたとき (APPROACH) に建てる (ensure)
 //   形: 巨神ごとに別の建物 (ShrineBuild。部品 shrine_<巨神>。岩鯨 = 鯨骨の聖堂・潮殻 = 潮の神殿・雷翼 = 雷の歌の環・余燼 = 炉の門)。
 //     記録する位置 (Data.pos) は碑。広場の真ん中の集合台 (縁が光る円い壇)・共鳴の炉。まわりに順位の石と飾り板 (RebirthBoards。集合台のまわり)
 //   使い方 (Wynncraft のレイドの入口と同じ。2026-11-03 の声「始まるときに集まる場所」): 集合台に
@@ -60,6 +60,12 @@ public final class TitanShrine {
 
     // 全員がそろってから始まるまで (5 秒)
     public static final int GATHER_TICKS = 100;
+    // 集まる所: 集合台の真ん中から横にこの内 (上下 8)。パーティのオンラインの全員がここにいないと始まらない (2026-11-07 の声「Wynncraft のように」)
+    public static final double GATHER_RANGE = 14.0;
+    // 祭司に話しかけられる祠の近さ (集合台の真ん中から)
+    public static final double PRIEST_REACH = 28.0;
+    // 祭司に「仲間と渡る」と頼んだグループ → 巨神 (数え下ろしの間だけ)
+    private static final Map<UUID, String> ASKED = new java.util.HashMap<>();
     // 雲の帳を上げるまで
     private static final int VEIL_TICKS = 30;
     // 誓いを選べる距離
@@ -118,7 +124,7 @@ public final class TitanShrine {
         ServerLevel level = server.overworld();
         if (have != null) {
             if (data.ver.getOrDefault(titan, 1) < ShrineBuild.VERSION) {
-                return rebuildOld(server, titan, have);
+                return rebuildOld(server, titan, have, data.ver.getOrDefault(titan, 1));
             }
             return have;
         }
@@ -156,10 +162,26 @@ public final class TitanShrine {
         return tablet;
     }
 
-    // 前の版の祠 (碑 = 広場の真ん中の地面の一つ上に立っていた) を、同じ真ん中に今の作りで建て直す
-    static BlockPos rebuildOld(MinecraftServer server, String titan, BlockPos oldTablet) {
-        SkyAbyss.LOGGER.info("Rebuilding the old shrine of the {} at {}", titan, oldTablet);
-        return place(server, titan, oldTablet);
+    // 前の版の祠を、今の作りで建て直す。版 1 (拝殿の祠) は碑 = 広場の真ん中の地面の一つ上。版 2 から碑は部品の印 tablet の所
+    static BlockPos rebuildOld(MinecraftServer server, String titan, BlockPos oldTablet, int oldVer) {
+        SkyAbyss.LOGGER.info("Rebuilding the old shrine of the {} at {} (version {} -> {})", titan, oldTablet, oldVer, ShrineBuild.VERSION);
+        return place(server, titan, oldVer >= 2 ? ShrineBuild.originOf(oldTablet, titan) : oldTablet);
+    }
+
+    // 地上の建て物 (町・見どころなど。SiteBuilds) が建ち終わった。そばの祠は建て直す (建て物が空けた所が祠を削っていることがある。
+    // 2026-11-07 の声「鯨の祠の建築、変」: 大陸の作り直しで祠が先に建ち、あとから建った鯨見の町が祠の西を削って土を残した)。
+    // 祠の建て直しは何度しても同じ形
+    public static void afterSite(MinecraftServer server, BlockPos site, int reach) {
+        Data data = Data.get(server);
+        for (Map.Entry<String, BlockPos> e : new java.util.ArrayList<>(data.pos.entrySet())) {
+            BlockPos t = e.getValue();
+            double dx = t.getX() - site.getX();
+            double dz = t.getZ() - site.getZ();
+            if (dx * dx + dz * dz <= (double) reach * reach) {
+                SkyAbyss.LOGGER.info("A site was built near the shrine of the {}; building the shrine again", e.getKey());
+                place(server, e.getKey(), ShrineBuild.originOf(t, e.getKey()));
+            }
+        }
     }
 
     // 集合台の真ん中の立つ所 (順位の石と飾り板の真ん中・あきらめた順路の出口)
@@ -182,7 +204,123 @@ public final class TitanShrine {
                 && ShrineBuild.onPad(p.getX(), p.getY(), p.getZ(), tablet, titan);
     }
 
-    // 祠のそばか (誓いを選べる)
+    // 集合台のまわり (横に GATHER_RANGE、上下 8) にいるか
+    public static boolean nearPad(ServerPlayer p, BlockPos tablet, String titan) {
+        if (p.level().dimension() != net.minecraft.world.level.Level.OVERWORLD || p.isSpectator() || !p.isAlive()) {
+            return false;
+        }
+        BlockPos pad = ShrineBuild.padOf(tablet, titan);
+        double dx = p.getX() - (pad.getX() + 0.5);
+        double dz = p.getZ() - (pad.getZ() + 0.5);
+        return dx * dx + dz * dz <= GATHER_RANGE * GATHER_RANGE && Math.abs(p.getY() - pad.getY()) <= 8;
+    }
+
+    // 集まっていない仲間 (オンラインで、見物でない人) の名前
+    public static List<String> missing(ServerPlayer by, BlockPos tablet, String titan) {
+        List<String> out = new ArrayList<>();
+        UUID group = Groups.keyOf(by);
+        for (ServerPlayer p : Players.snapshot(by.server.getPlayerList().getPlayers())) {
+            if (!p.isSpectator() && Groups.keyOf(p).equals(group) && !nearPad(p, tablet, titan)) {
+                out.add(p.getGameProfile().getName());
+            }
+        }
+        return out;
+    }
+
+    // その人のそばの祠 (集合台の真ん中から reach の内)。なければ null
+    @Nullable
+    public static String shrineNear(ServerPlayer p, double reach) {
+        if (p.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            return null;
+        }
+        for (Map.Entry<String, BlockPos> e : Data.get(p.server).pos.entrySet()) {
+            BlockPos pad = ShrineBuild.padOf(e.getValue(), e.getKey());
+            if (p.distanceToSqr(pad.getX() + 0.5, pad.getY(), pad.getZ() + 0.5) <= reach * reach) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
+    // 祭司に「仲間と渡る」と頼む (FacilityActions "shrine_go")。全員がそろっていれば数え下ろしを始める。始めたか
+    public static boolean ask(ServerPlayer by) {
+        String titan = shrineNear(by, PRIEST_REACH);
+        if (titan == null) {
+            Notice.bar(by, ModText.deny("message.skyabyss.shrine.not_here"));
+            return false;
+        }
+        BlockPos c = posOf(by.server, titan);
+        UUID group = Groups.keyOf(by);
+        if (ASKED.containsKey(group)) {
+            return true;
+        }
+        List<String> away = missing(by, c, titan);
+        if (!away.isEmpty()) {
+            Notice.bar(by, ModText.deny("message.skyabyss.shrine.missing", String.join("・", away)));
+            return false;
+        }
+        ServerLevel back = Titans.hasBack(titan) ? by.server.getLevel(Titans.backOf(titan)) : null;
+        List<ServerPlayer> ring = ring(by, c, titan);
+        ServerPlayer payer = by;
+        for (ServerPlayer p : ring) {
+            if (hasShard(p, titan)) {
+                payer = p;
+                break;
+            }
+        }
+        Component why = back == null ? ModText.deny("message.skyabyss.shrine.no_back")
+                : refusal(by.server, payer, titan, ring, hasShard(payer, titan), TrialRoute.active(back, group));
+        if (why != null) {
+            Notice.bar(by, why);
+            return false;
+        }
+        ASKED.put(group, titan);
+        GATHER.put(group, new long[] {by.server.getTickCount(), -1});
+        for (ServerPlayer p : ring) {
+            Notice.hint(p, "message.skyabyss.shrine.asked", by.getGameProfile().getName(), GATHER_TICKS / 20);
+        }
+        return true;
+    }
+
+    // 祠の祭司 (社の祭司と同じ役。話しかけて「仲間と渡る」)。集合台の縁の外の、立てる床に一人
+    static void ensurePriest(ServerLevel level, String titan, BlockPos tablet) {
+        BlockPos spot = priestSpot(level, titan, tablet);
+        if (spot != null) {
+            jp.revati.skyabyss.facility.Attendants.ensure(level, jp.revati.skyabyss.facility.AttendantRole.SHRINE_PRIEST, spot);
+        }
+    }
+
+    // 祭司の立つ所: 集合台の真ん中から padR + 2〜6 の輪 (碑の側を先に)。足もとが空き・頭が空き・下が固い所
+    @Nullable
+    public static BlockPos priestSpot(ServerLevel level, String titan, BlockPos tablet) {
+        BlockPos pad = ShrineBuild.padOf(tablet, titan);
+        int padR = ShrineBuild.padRadius(titan);
+        double toward = Math.atan2(tablet.getZ() - pad.getZ(), tablet.getX() - pad.getX());
+        for (int r = padR + 2; r <= padR + 6; r++) {
+            for (int k = 0; k < 16; k++) {
+                double a = toward + Math.PI / 2 + (k % 2 == 0 ? 1 : -1) * (k / 2) * (Math.PI / 8);
+                for (int dy = 1; dy >= -2; dy--) {
+                    BlockPos q = new BlockPos(pad.getX() + (int) Math.round(Math.cos(a) * r), pad.getY() + dy, pad.getZ() + (int) Math.round(Math.sin(a) * r));
+                    if (!level.hasChunkAt(q)) {
+                        return null;
+                    }
+                    if (level.getBlockState(q).isAir() && level.getBlockState(q.above()).isAir()
+                            && level.getBlockState(q.below()).isFaceSturdy(level, q.below(), net.minecraft.core.Direction.UP)) {
+                        return q;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // その祠に来ているか (祭司のまわり = 集合台から PRIEST_REACH、または碑のそば)。祠の画面の「仲間と渡る」・誓い・歌片はこれで見る
+    // (2026-11-08 の声「話しかけて、始めるボタンない」。前は碑のそばだけを見ていて、台の縁に立つ祭司のそばでは出なかった)
+    public static boolean atShrine(ServerPlayer p, String titan) {
+        return titan.equals(shrineNear(p, PRIEST_REACH)) || near(p, titan);
+    }
+
+    // 碑のそばか
     public static boolean near(ServerPlayer p, String titan) {
         BlockPos c = posOf(p.server, titan);
         return c != null && p.level().dimension() == net.minecraft.world.level.Level.OVERWORLD
@@ -202,22 +340,25 @@ public final class TitanShrine {
     }
 
     // ---------------------------------------------------------------- 使う
-    // 右クリック: 祠の画面 (しゃがむと誓いの一覧)
+    // 碑の右クリック: 祭司へ案内するだけ (2026-11-08 の声「祠の祭祀に要素を集めて。話しかけると ui 出るようにして」)。
+    // 試練・図鑑・誓い・心得・歌片・深淵・仲間と渡る は、祭司に話しかけて開く祠の画面 (TrialBoard) に一つにまとめた
     static void open(ServerPlayer sp, String titan, boolean sneak) {
-        if (sneak) {
-            jp.revati.skyabyss.titan.vow.VowCommands.show(sp, titan);
-            return;
-        }
-        jp.revati.skyabyss.trial.TrialBoard.open(sp, titan);
-        if (!Progression.stopped(sp.server, sp.getUUID(), titan)) {
-            Notice.hint(sp, "message.skyabyss.shrine.unknown");
-        }
+        Notice.hint(sp, "message.skyabyss.shrine.ask_priest");
     }
 
-    // 歌片を持って碑に触れた: 祠の画面と、集合台の案内
+    // 歌片を持って碑に触れた: 同じく祭司へ
     static void shardTouch(ServerPlayer sp, String titan) {
         open(sp, titan, false);
-        Notice.hint(sp, "message.skyabyss.shrine.pad_hint");
+    }
+
+    // 祭司に話しかけた (AttendantEntity): 祠のそばなら祠の画面を開く。開いたか (開かなければふつうの会話)
+    public static boolean talkToPriest(ServerPlayer sp) {
+        String titan = shrineNear(sp, PRIEST_REACH);
+        if (titan == null) {
+            return false;
+        }
+        jp.revati.skyabyss.trial.TrialBoard.open(sp, titan);
+        return true;
     }
 
     // 断る理由 (null なら使える)。純粋に近い部分 (自己テストが直接呼ぶ)
@@ -240,13 +381,13 @@ public final class TitanShrine {
         return null;
     }
 
-    // 集合台の上の、その人のグループのオンラインの人 (本人を先に)
+    // 集合台のまわり (GATHER_RANGE) の、その人のグループのオンラインの人 (本人を先に)
     public static List<ServerPlayer> ring(ServerPlayer by, BlockPos center, String titan) {
         List<ServerPlayer> out = new ArrayList<>();
         out.add(by);
         UUID group = Groups.keyOf(by);
         for (ServerPlayer p : Players.snapshot(by.server.getPlayerList().getPlayers())) {
-            if (p != by && Groups.keyOf(p).equals(group) && onPad(p, center, titan)) {
+            if (p != by && Groups.keyOf(p).equals(group) && nearPad(p, center, titan)) {
                 out.add(p);
             }
         }
@@ -266,6 +407,11 @@ public final class TitanShrine {
             return;
         }
         UUID group = Groups.keyOf(by);
+        List<String> away = missing(by, pos, titan);
+        if (!away.isEmpty()) {
+            Notice.bar(by, ModText.deny("message.skyabyss.shrine.missing", String.join("・", away)));
+            return;
+        }
         List<ServerPlayer> ring = ring(by, pos, titan);
         Component why = refusal(server, by, titan, ring, hasShard(by, titan), TrialRoute.active(back, group));
         if (why != null) {
@@ -330,6 +476,7 @@ public final class TitanShrine {
             return;
         }
         ServerLevel level = server.overworld();
+        buildOnApproach(server, level);
         for (Map.Entry<String, BlockPos> e : new ArrayList<>(Data.get(server).pos.entrySet())) {
             BlockPos c = e.getValue();
             if (!level.hasChunkAt(c)) {
@@ -344,8 +491,13 @@ public final class TitanShrine {
             }
             if (someone) {
                 // 前の版の祠・碑が無くなった祠 (古い世界の書き換え・コマンド) は建て直す
-                if (Data.get(server).ver.getOrDefault(e.getKey(), 1) < ShrineBuild.VERSION) {
-                    rebuildOld(server, e.getKey(), c);
+                int ver = Data.get(server).ver.getOrDefault(e.getKey(), 1);
+                if (ver < ShrineBuild.VERSION) {
+                    // 町などの建て物が建つのを待ってから (建て物の空けた所が祠を削らないように)
+                    if (jp.revati.skyabyss.opening.site.SiteBuilds.busy()) {
+                        continue;
+                    }
+                    rebuildOld(server, e.getKey(), c, ver);
                     continue;
                 }
                 if (!level.getBlockState(c).is(ModBlocks.TITAN_SHRINE.get())) {
@@ -353,77 +505,116 @@ public final class TitanShrine {
                     continue;
                 }
                 jp.revati.skyabyss.rebirth.RebirthBoards.install(level, e.getKey(), ShrineBuild.padOf(c, e.getKey()));
+                ensurePriest(level, e.getKey(), c);
             }
         }
     }
 
-    // 集合台: 台の上のグループごとに、全員がそろったら数え下ろし、0 で始める (0.5 秒ごと)
-    static void gather(MinecraftServer server, long now) {
-        ServerLevel level = server.overworld();
-        java.util.Set<UUID> seen = new java.util.HashSet<>();
-        for (Map.Entry<String, BlockPos> e : Data.get(server).pos.entrySet()) {
-            String titan = e.getKey();
-            BlockPos c = e.getValue();
-            if (!level.hasChunkAt(c)) {
+    // まだ建っていない祠は、人が近づいたら建てる (2026-11-09 の声「マップでは祠あるけど、実際に行ったらない」: 地図は決まった場所に出すのに、
+    // 建てるのは心臓を初めて止めたときだけだった)。使えるのは今までどおり心臓を止めた人だけ (refusal)。町などが建つ途中は待つ
+    static final int APPROACH = 160;
+
+    static void buildOnApproach(MinecraftServer server, ServerLevel level) {
+        if (level.players().isEmpty() || jp.revati.skyabyss.opening.site.SiteBuilds.busy()) {
+            return;
+        }
+        Data data = Data.get(server);
+        for (String titan : Titans.all()) {
+            if (data.pos.containsKey(titan)) {
                 continue;
             }
-            Map<UUID, List<ServerPlayer>> pads = new java.util.LinkedHashMap<>();
-            for (ServerPlayer p : Players.snapshot(level.players())) {
-                if (onPad(p, c, titan)) {
-                    pads.computeIfAbsent(Groups.keyOf(p), k -> new ArrayList<>()).add(p);
-                }
+            int[] fixed = jp.revati.skyabyss.world.continent.ContinentLairs.shrine(level, titan);
+            if (fixed == null) {
+                continue;
             }
-            for (Map.Entry<UUID, List<ServerPlayer>> g : pads.entrySet()) {
-                UUID group = g.getKey();
-                List<ServerPlayer> on = g.getValue();
-                int members = 0;
-                for (ServerPlayer p : Players.snapshot(server.getPlayerList().getPlayers())) {
-                    if (!p.isSpectator() && Groups.keyOf(p).equals(group)) {
-                        members++;
-                    }
-                }
-                if (on.size() < members) {
-                    for (ServerPlayer p : on) {
-                        Notice.bar(p, ModText.progress("message.skyabyss.shrine.pad_wait", on.size(), members));
-                    }
-                    continue;
-                }
-                ServerPlayer payer = on.get(0);
-                for (ServerPlayer p : on) {
-                    if (hasShard(p, titan)) {
-                        payer = p;
-                        break;
-                    }
-                }
-                ServerLevel back = Titans.hasBack(titan) ? server.getLevel(Titans.backOf(titan)) : null;
-                Component why = back == null ? ModText.deny("message.skyabyss.shrine.no_back")
-                        : refusal(server, payer, titan, on, hasShard(payer, titan), TrialRoute.active(back, group));
-                if (why != null) {
-                    for (ServerPlayer p : on) {
-                        Notice.bar(p, why);
-                    }
-                    continue;
-                }
-                seen.add(group);
-                long[] st = GATHER.computeIfAbsent(group, k -> new long[] {now, -1});
-                long left = GATHER_TICKS - (now - st[0]);
-                if (left <= 0) {
-                    seen.remove(group);
-                    activate(payer, titan, c);
-                    continue;
-                }
-                long sec = (left + 19) / 20;
-                for (ServerPlayer p : on) {
-                    Notice.bar(p, ModText.progress("message.skyabyss.shrine.pad_count", sec));
-                }
-                if (st[1] != sec) {
-                    st[1] = sec;
-                    level.playSound(null, ShrineBuild.padOf(c, titan), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 0.8f, sec == 1 ? 1.4f : 0.9f);
+            for (ServerPlayer p : level.players()) {
+                double dx = p.getX() - fixed[0];
+                double dz = p.getZ() - fixed[1];
+                if (dx * dx + dz * dz < (double) APPROACH * APPROACH) {
+                    SkyAbyss.LOGGER.info("A player came near the unbuilt shrine of the {}; building it", titan);
+                    ensure(server, titan);
+                    return;
                 }
             }
         }
-        // 台を降りた・そろわなくなったグループの数え下ろしは消す (始めたグループも)
-        GATHER.keySet().retainAll(seen);
+    }
+
+    // 数え下ろし (0.5 秒ごと): 祭司に頼んだグループ (ask) だけ。全員が集まる所にいるあいだ数え、0 で渡る。
+    // 誰かが離れた・断る理由ができたら止める。集合台に立つだけでは始まらない (祭司の案内を出す)
+    static void gather(MinecraftServer server, long now) {
+        ServerLevel level = server.overworld();
+        if (now % 60 == 3) {
+            for (Map.Entry<String, BlockPos> e : Data.get(server).pos.entrySet()) {
+                BlockPos c = e.getValue();
+                if (!level.hasChunkAt(c)) {
+                    continue;
+                }
+                for (ServerPlayer p : Players.snapshot(level.players())) {
+                    if (onPad(p, c, e.getKey()) && !ASKED.containsKey(Groups.keyOf(p))) {
+                        Notice.bar(p, ModText.progress("message.skyabyss.shrine.talk_priest"));
+                    }
+                }
+            }
+        }
+        for (Map.Entry<UUID, String> a : new ArrayList<>(ASKED.entrySet())) {
+            UUID group = a.getKey();
+            String titan = a.getValue();
+            BlockPos c = posOf(server, titan);
+            List<ServerPlayer> members = new ArrayList<>();
+            for (ServerPlayer p : Players.snapshot(server.getPlayerList().getPlayers())) {
+                if (!p.isSpectator() && Groups.keyOf(p).equals(group)) {
+                    members.add(p);
+                }
+            }
+            if (c == null || members.isEmpty()) {
+                ASKED.remove(group);
+                GATHER.remove(group);
+                continue;
+            }
+            List<String> away = missing(members.get(0), c, titan);
+            if (!away.isEmpty()) {
+                for (ServerPlayer p : members) {
+                    Notice.bar(p, ModText.deny("message.skyabyss.shrine.gather_broken", String.join("・", away)));
+                }
+                ASKED.remove(group);
+                GATHER.remove(group);
+                continue;
+            }
+            ServerPlayer payer = members.get(0);
+            for (ServerPlayer p : members) {
+                if (hasShard(p, titan)) {
+                    payer = p;
+                    break;
+                }
+            }
+            ServerLevel back = Titans.hasBack(titan) ? server.getLevel(Titans.backOf(titan)) : null;
+            Component why = back == null ? ModText.deny("message.skyabyss.shrine.no_back")
+                    : refusal(server, payer, titan, members, hasShard(payer, titan), TrialRoute.active(back, group));
+            if (why != null) {
+                for (ServerPlayer p : members) {
+                    Notice.bar(p, why);
+                }
+                ASKED.remove(group);
+                GATHER.remove(group);
+                continue;
+            }
+            long[] st = GATHER.computeIfAbsent(group, k -> new long[] {now, -1});
+            long left = GATHER_TICKS - (now - st[0]);
+            if (left <= 0) {
+                ASKED.remove(group);
+                GATHER.remove(group);
+                activate(payer, titan, c);
+                continue;
+            }
+            long sec = (left + 19) / 20;
+            for (ServerPlayer p : members) {
+                Notice.bar(p, ModText.progress("message.skyabyss.shrine.pad_count", sec));
+            }
+            if (st[1] != sec) {
+                st[1] = sec;
+                level.playSound(null, ShrineBuild.padOf(c, titan), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 0.8f, sec == 1 ? 1.4f : 0.9f);
+            }
+        }
     }
 
     // 祠は壊せない (クリエイティブは除く。広場の円を囲む箱)
@@ -445,6 +636,7 @@ public final class TitanShrine {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         GATHER.clear();
+        ASKED.clear();
         VEILS.clear();
         STOPPED = Progression::stopped;
     }

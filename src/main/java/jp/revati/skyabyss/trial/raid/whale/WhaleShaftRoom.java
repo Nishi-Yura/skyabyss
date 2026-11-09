@@ -15,129 +15,204 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3f;
 
-// 歩 WR4「胃の縦穴の上り」: 縦穴の底から、四つの踊り場を伝って頂へ上る。
-//  - 縦穴の底から胃液が、ゆっくり、一定の速さで上がってくる (泳げる水ではなく、赤い霧の層。層の下にいると傷を受ける。層の面に赤い線の粒が走る)
-//  - 踊り場と踊り場のあいだの階段 (「登り」) は、ふだんは引っ込んでいる。骨の突起 (スイッチ) を叩くと階段が生え、しばらくして引っ込む (終わりかけは粒と音で知らせる)
-//  - スイッチは二組: 各踊り場の端にある「手元」(次の登りを出す。登りの口から遠い端) と、底の壇の上の「親台」(四つの登りを一つずつ出せる)。
-//    一人なら手元で交互に (叩く → 走る → 上る)、人数がいれば一人が壇に残って、登る人の足もとへ階段を出してやると早い
-//  - 頂 (四つ目の踊り場) に立った人が一人いれば越える
+// 歩 WR4「胃の縦穴の上り」(2026-11-08 の夜に作り直し。声「胃の縦穴、部屋構成やギミックを見直した方がいいかも」。
+// 前は骨の突起を叩くと階段が生え、歩いて上るだけだった)。縦穴の壁ぞいを、五つの踊り場を伝って頂 (喉) へ跳んで上る。
+//  - ひだの棚: 踊り場と踊り場のあいだは、壁から出た一マス幅の棚が三つ (一マスあけて一段ずつ高い)。跳び移って上る
+//  - 蠕動: 胃が縮むたびに、登りごとに棚が壁へ引っ込む (CLOSED の間)。引っ込む前の WARN の間は棚が赤い肉に変わり、ぐちゃりと鳴る。
+//    となりの登りは半周ずれて縮むので、踊り場で待ってから渡る。上の登りほど縮む間隔が短い (CYCLE)。乗ったまま引っ込むと落ちる
+//  - ひだ押さえ: 踊り場 (と床) の隅の骨のこぶを叩くと、次の登りの棚が HOLD の間は引っ込まない。叩いたこぶは COOLDOWN の間は暗い。
+//    一人なら自分で、人数がいれば先に上った人が下の人のために押さえる
+//  - 胃液: 縦穴の底から一定の速さで上がる (赤い霧の層。層の下にいると傷)。頂より 3 上まで満ちたら部屋のやり直し
+//  - 胃液の噴き上げ: 棚や踊り場にいる人の足もとに赤い輪 (予告)。輪の中にいると傷と、縦穴の真ん中へ押し出される (棚から落ちる)
+//  - 頂 (五つ目の踊り場) に立った人が一人いれば越える
 public final class WhaleShaftRoom extends RaidRoom {
     static final int HX = 7;
     static final int HZ = 7;
     static final int H = 27;
-    static final int FLIGHTS = 4;
-    static final int RISE = 5;
-    static final int GROW_STEP = 3;
-    // 2026-10-25 の試遊で「簡単」: 階段の出ている間を短く、胃液を速く、上り始めの猶予を短く
-    static final int EXTEND_TICKS = 180;
-    static final int WARN_TICKS = 60;
-    static final int GRACE = 140;
-    static final int RISE_TICKS = 75;
-    static final float DAMAGE = 4f;
+    // 踊り場の数 (= 登りの数。床から踊り場 1 へが登り 0)
+    public static final int FLIGHTS = 5;
+    // 踊り場どうしの高さ
+    public static final int RISE = 4;
+    public static final int TOP = FLIGHTS * RISE;
+    // 一つの登りの棚の数 (高さ +1・+2・+3。次の踊り場が +4)
+    public static final int LEDGES = 3;
+    // 蠕動: 登りごとの一周 (上ほど短い)・引っ込んでいる間・引っ込む前の知らせ
+    static final int[] CYCLE = {84, 78, 72, 66, 60};
+    public static final int CLOSED = 26;
+    public static final int WARN = 16;
+    // ひだ押さえ: 押さえている間とこぶの休み
+    public static final int HOLD = 70;
+    public static final int COOLDOWN = 300;
+    // 胃液: 最初の猶予と一ブロック上がる間
+    static final int GRACE = 100;
+    static final int RISE_TICKS = 44;
+    static final float DAMAGE = 5f;
     static final int DAMAGE_EVERY = 10;
-    static final int TOP = FLIGHTS * RISE;
     static final String FAIL_KEY = "message.skyabyss.raid.WR4.filled";
+    // 胃液の噴き上げ: 間隔・予兆・輪の半径・傷・押し出す強さ
+    static final int GEYSER_EVERY = 70;
+    static final int GEYSER_WARN = 24;
+    static final double GEYSER_R = 1.6;
+    static final float GEYSER_DAMAGE = 6f;
+    static final double GEYSER_PUSH = 1.0;
 
-    // 登りの始まり (最初の段の中心。原点からの相対 x, z) と上る向き
-    private static final int[][] START = {{-6, 2}, {-4, -6}, {6, -4}, {4, 6}};
-    private static final int[][] DIR = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
-    // 踊り場: x0, x1, z0, z1 (原点からの相対)。y = 5 * (番号 + 1)
-    private static final int[][] LANDING = {{-7, -5, -7, -3}, {1, 7, -7, -5}, {5, 7, 1, 7}, {-7, -1, 5, 7}};
-    // 手元のスイッチ (登り f を出す。f = 0 は床、f ≥ 1 は踊り場 f の端): x, y, z (柱の足もと)
-    private static final int[][] LOCAL = {{4, 1, 5}, {-7, 6, -3}, {1, 11, -6}, {7, 16, 1}};
-    // 親台の上のスイッチ (登り f)
-    private static final int DAIS_Y = 2;
-    private static final int[][] MASTER = {{-5, 3, 6}, {-4, 3, 6}, {-3, 3, 6}, {-2, 3, 6}};
+    // 隅 (x, z の向き)。踊り場 n は隅 CORNER[n % 4] (床の登り口は隅 0)
+    private static final int[][] CORNER = {{-1, 1}, {-1, -1}, {1, -1}, {1, 1}};
 
-    private final long[] extUntil = new long[FLIGHTS];
-    private final long[] extStart = new long[FLIGHTS];
-    private final int[] grown = new int[FLIGHTS];
-    private final boolean[] warned = new boolean[FLIGHTS];
+    private static final BlockState LEDGE = Blocks.BONE_BLOCK.defaultBlockState();
+    private static final BlockState LEDGE_WARN = Blocks.NETHER_WART_BLOCK.defaultBlockState();
+    private static final BlockState LANDING = Blocks.POLISHED_ANDESITE.defaultBlockState();
+
+    private final java.util.List<double[]> geysers = new java.util.ArrayList<>();
+    private long nextGeyser;
+    // 登りごとの棚の見え方 (0 = 出ている・1 = 知らせ・2 = 引っ込んでいる)
+    private final int[] shown = new int[FLIGHTS];
+    private final long[] holdUntil = new long[FLIGHTS];
+    private final long[] knobReady = new long[FLIGHTS];
     private long startAt = Long.MAX_VALUE;
     private long nextDamage;
     private boolean active;
     private boolean cleared;
     private int tier;
+    private double lastLevel;
+    private long lastNow;
+
+    // ---- 形
+    // 踊り場 n (1〜FLIGHTS) の 3×3 の隅の範囲: x0, x1, z0, z1 (原点からの相対)
+    private static int[] landing(int n) {
+        int[] c = CORNER[n % 4];
+        int x0 = c[0] < 0 ? -6 : 4;
+        int z0 = c[1] < 0 ? -6 : 4;
+        return new int[] {x0, x0 + 2, z0, z0 + 2};
+    }
+
+    // 登り f の k 番目 (0〜LEDGES-1) の棚のマス (壁ぞいの一マス。下の登りほど奥行き 2、上の三つは 1)
+    public List<BlockPos> ledgeCells(RaidCtx ctx, int f, int k) {
+        int[] a = CORNER[f % 4];
+        int[] b = CORNER[(f + 1) % 4];
+        int y = RISE * f + 1 + k;
+        // 二つの隅が共有する壁: x が同じなら x の壁、z が同じなら z の壁
+        List<BlockPos> out = new ArrayList<>();
+        int along = (2 - 2 * k);
+        int depth = f < 2 ? 2 : 1;
+        for (int d = 0; d < depth; d++) {
+            if (a[0] == b[0]) {
+                int x = a[0] * (6 - d);
+                int z = a[1] * along;
+                out.add(ctx.origin().offset(x, y, z));
+            } else {
+                int z = a[1] * (6 - d);
+                int x = a[0] * along;
+                out.add(ctx.origin().offset(x, y, z));
+            }
+        }
+        return out;
+    }
+
+    // ひだ押さえのこぶ (登り f を押さえる。床か踊り場 f の外の隅): 柱の足もと
+    public BlockPos knob(RaidCtx ctx, int f) {
+        int[] c = CORNER[f % 4];
+        return ctx.origin().offset(c[0] * 6, RISE * f + 1, c[1] * 6);
+    }
+
+    public BlockPos landingSpot(RaidCtx ctx, int n) {
+        int[] l = landing(n);
+        int[] c = CORNER[n % 4];
+        // 隅のこぶの斜め内側 (こぶの柱を避ける)
+        return ctx.origin().offset(c[0] < 0 ? l[0] + 1 : l[1] - 1, RISE * n + 1, c[1] < 0 ? l[2] + 1 : l[3] - 1);
+    }
 
     @Override
     public void build(RaidCtx ctx) {
         ServerLevel level = ctx.level();
         RaidKit.Cell c = RaidKit.buildCell(ctx, new RaidKit.Spec(HX, HZ, H, RaidKit.BONE));
         BlockState bone = Blocks.BONE_BLOCK.defaultBlockState();
-        BlockState landing = Blocks.POLISHED_ANDESITE.defaultBlockState();
-        // 脚 (肋骨の柱) と踊り場
-        int[][] legs = {{-7, -7}, {7, -7}, {7, 7}, {-7, 7}};
-        for (int f = 0; f < FLIGHTS; f++) {
-            int y = RISE * (f + 1);
-            int[] l = LANDING[f];
-            RaidKit.fill(level, o(c, l[0], y, l[2]), o(c, l[1], y, l[3]), landing);
-            RaidKit.fill(level, o(c, legs[f][0], 1, legs[f][1]), o(c, legs[f][0], y - 1, legs[f][1]), bone);
-            RaidKit.set(level, o(c, legs[f][0], y + 1, legs[f][1]), Blocks.LANTERN.defaultBlockState());
-            // 踊り場の縁を骨で
+        for (int n = 1; n <= FLIGHTS; n++) {
+            int y = RISE * n;
+            int[] l = landing(n);
+            RaidKit.fill(level, o(c, l[0], y, l[2]), o(c, l[1], y, l[3]), LANDING);
+            // 内側の二辺を骨で縁どる
+            int[] cn = CORNER[n % 4];
+            int ex = cn[0] < 0 ? l[1] : l[0];
+            int ez = cn[1] < 0 ? l[3] : l[2];
             for (int x = l[0]; x <= l[1]; x++) {
-                RaidKit.set(level, o(c, x, y, l[2]), bone);
-                RaidKit.set(level, o(c, x, y, l[3]), bone);
+                RaidKit.set(level, o(c, x, y, ez), bone);
             }
             for (int z = l[2]; z <= l[3]; z++) {
-                RaidKit.set(level, o(c, l[0], y, z), bone);
-                RaidKit.set(level, o(c, l[1], y, z), bone);
+                RaidKit.set(level, o(c, ex, y, z), bone);
             }
+            // 踊り場の下の支え (肋骨の柱。壁の隅)
+            RaidKit.fill(level, o(c, cn[0] * 6, y - 2, cn[1] * 6), o(c, cn[0] * 6, y - 1, cn[1] * 6), bone);
         }
-        // 底の壇 (親台) と、そこへの一段
-        RaidKit.fill(level, o(c, -5, 1, 4), o(c, -2, DAIS_Y, 6), Blocks.STONE_BRICKS.defaultBlockState());
-        RaidKit.fill(level, o(c, -5, DAIS_Y, 4), o(c, -2, DAIS_Y, 6), bone);
-        RaidKit.set(level, o(c, -4, 1, 3), Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH));
         // 天井の肋骨の弧
         for (int z : new int[] {-4, 0, 4}) {
             RaidKit.fill(level, o(c, -HX, H, z), o(c, HX, H, z), bone);
             RaidKit.fill(level, o(c, -HX, H - 3, z), o(c, -HX, H, z), bone);
             RaidKit.fill(level, o(c, HX, H - 3, z), o(c, HX, H, z), bone);
         }
-        // スイッチ
-        for (int f = 0; f < FLIGHTS; f++) {
-            placeSwitch(ctx, o(c, MASTER[f][0], MASTER[f][1], MASTER[f][2]), false);
-            placeSwitch(ctx, o(c, LOCAL[f][0], LOCAL[f][1], LOCAL[f][2]), false);
-        }
-        // 飾り (docs/design/39 の 4.1): 殻の濃淡と肋骨の輪、頂の喉の光。縦穴の中に足がかりは足さない
+        // 頂の踊り場の灯り (外の隅。立つ所をふさがない)
+        int[] tc = CORNER[FLIGHTS % 4];
+        RaidKit.set(level, o(c, tc[0] * 6, TOP + 1, tc[1] * 6), Blocks.LANTERN.defaultBlockState());
         WhaleDecor.wr4(ctx, this);
         RaidKit.brightenFloor(ctx, 3);
+        for (int f = 0; f < FLIGHTS; f++) {
+            placeKnob(ctx, f, false);
+            setLedges(ctx, f, 0);
+        }
     }
 
     private static BlockPos o(RaidKit.Cell c, int x, int y, int z) {
         return c.origin().offset(x, y, z);
     }
 
-    private void placeSwitch(RaidCtx ctx, BlockPos pillar, boolean lit) {
-        RaidKit.set(ctx.level(), pillar, Blocks.BONE_BLOCK.defaultBlockState());
-        RaidKit.set(ctx.level(), pillar.above(), lit ? Blocks.SEA_LANTERN.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
+    // 隅のこぶ: 骨の柱 + 頭 (押さえている間は海のランタン、休みは暗い石、使えるときは模様の石)
+    private void placeKnob(RaidCtx ctx, int f, boolean lit) {
+        BlockPos p = knob(ctx, f);
+        RaidKit.set(ctx.level(), p, Blocks.BONE_BLOCK.defaultBlockState());
+        boolean resting = !lit && ctx.now() < knobReady[f];
+        RaidKit.set(ctx.level(), p.above(), lit ? Blocks.SEA_LANTERN.defaultBlockState()
+                : resting ? Blocks.POLISHED_BLACKSTONE.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
     }
 
-    // ---- 階段の位置
-    public List<BlockPos> stepCells(RaidCtx ctx, int f, int i) {
-        int cx = START[f][0] + (i - 1) * DIR[f][0];
-        int cz = START[f][1] + (i - 1) * DIR[f][1];
-        int y = RISE * f + i;
-        List<BlockPos> out = new ArrayList<>();
-        for (int k = -1; k <= 1; k++) {
-            out.add(ctx.origin().offset(cx + k * Math.abs(DIR[f][1]), y, cz + k * Math.abs(DIR[f][0])));
+    private void setLedges(RaidCtx ctx, int f, int state) {
+        shown[f] = state;
+        BlockState st = state == 0 ? LEDGE : state == 1 ? LEDGE_WARN : Blocks.AIR.defaultBlockState();
+        for (int k = 0; k < LEDGES; k++) {
+            for (BlockPos p : ledgeCells(ctx, f, k)) {
+                RaidKit.set(ctx.level(), p, st);
+            }
         }
-        return out;
     }
 
-    private BlockState stair(int f) {
-        // 段の向き (FACING) は高い側 = 上る向き (DIR)
-        Direction face = DIR[f][1] < 0 ? Direction.NORTH : DIR[f][1] > 0 ? Direction.SOUTH : DIR[f][0] > 0 ? Direction.EAST : Direction.WEST;
-        return Blocks.SMOOTH_QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, face);
+    // 蠕動の今の状態 (0 = 出ている・1 = 知らせ・2 = 引っ込んでいる)。始まる前・越えたあと・押さえている間は出ている
+    public int phase(RaidCtx ctx, int f) {
+        long now = ctx.now();
+        if (!active || cleared || now < startAt || now < holdUntil[f]) {
+            return 0;
+        }
+        int cyc = CYCLE[f];
+        // 隣の登りは半周ずれる。始まりは出ている側から
+        long t = Math.floorMod(now - startAt + (f % 2 == 1 ? cyc / 2 : 0), (long) cyc);
+        long open = cyc - CLOSED;
+        if (t < open - WARN) {
+            return 0;
+        }
+        return t < open ? 1 : 2;
+    }
+
+    public boolean ledgesOut(int f) {
+        return shown[f] != 2;
     }
 
     // ---- 始まり・毎 tick
     @Override
     public void start(RaidCtx ctx) {
         startAt = ctx.now() + GRACE;
+        nextGeyser = startAt + GEYSER_EVERY;
+        geysers.clear();
         nextDamage = 0;
         active = true;
     }
@@ -146,35 +221,35 @@ public final class WhaleShaftRoom extends RaidRoom {
     public void tick(RaidCtx ctx) {
         long now = ctx.now();
         ServerLevel level = ctx.level();
-        // 階段の生える・引っ込む
         for (int f = 0; f < FLIGHTS; f++) {
-            if (now < extUntil[f]) {
-                while (grown[f] < RISE && now >= extStart[f] + (long) grown[f] * GROW_STEP) {
-                    grown[f]++;
-                    for (BlockPos p : stepCells(ctx, f, grown[f])) {
-                        RaidKit.set(level, p, stair(f));
-                    }
-                    BlockPos mid = stepCells(ctx, f, grown[f]).get(1);
-                    level.playSound(null, mid, SoundEvents.BONE_BLOCK_PLACE, SoundSource.BLOCKS, 0.9f, 0.7f + 0.1f * grown[f]);
+            int ph = phase(ctx, f);
+            if (ph != shown[f]) {
+                BlockPos mid = ledgeCells(ctx, f, 1).get(0);
+                if (ph == 1) {
+                    level.playSound(null, mid, SoundEvents.SLIME_SQUISH, SoundSource.BLOCKS, 1.4f, 0.5f);
+                } else if (ph == 2) {
+                    level.playSound(null, mid, SoundEvents.HONEY_BLOCK_BREAK, SoundSource.BLOCKS, 1.3f, 0.5f);
+                } else {
+                    level.playSound(null, mid, SoundEvents.BONE_BLOCK_PLACE, SoundSource.BLOCKS, 1.0f, 0.8f);
                 }
-                if (extUntil[f] - now <= WARN_TICKS && grown[f] > 0) {
-                    if (!warned[f]) {
-                        warned[f] = true;
-                        level.playSound(null, stepCells(ctx, f, 3).get(1), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.BLOCKS, 1.2f, 0.6f);
-                    }
-                    if (now % 5 == 0) {
-                        for (int i = 1; i <= grown[f]; i++) {
-                            BlockPos p = stepCells(ctx, f, i).get(1);
-                            level.sendParticles(ParticleTypes.CRIT, p.getX() + 0.5, p.getY() + 1.2, p.getZ() + 0.5, 3, 0.6, 0.1, 0.6, 0.02);
-                        }
-                    }
+                setLedges(ctx, f, ph);
+            }
+            if (ph == 2 && now % 6 == f % 6) {
+                // 引っ込んでいる棚の口のしるし
+                for (int k = 0; k < LEDGES; k++) {
+                    BlockPos p = ledgeCells(ctx, f, k).get(0);
+                    level.sendParticles(ParticleTypes.END_ROD, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
                 }
-            } else if (grown[f] > 0) {
-                retract(ctx, f);
-            } else if (now % 40 == f * 7L % 40) {
-                // 引っ込んでいる登りの口のしるし
-                BlockPos p = stepCells(ctx, f, 1).get(1);
-                level.sendParticles(ParticleTypes.END_ROD, p.getX() + 0.5, p.getY() + 0.8, p.getZ() + 0.5, 2, 0.5, 0.2, 0.5, 0.01);
+            }
+            // こぶ: 押さえが終わった・休みが明けた
+            if (holdUntil[f] != 0 && now >= holdUntil[f]) {
+                holdUntil[f] = 0;
+                placeKnob(ctx, f, false);
+            }
+            if (knobReady[f] != 0 && now >= knobReady[f]) {
+                knobReady[f] = 0;
+                placeKnob(ctx, f, false);
+                level.playSound(null, knob(ctx, f), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, 0.7f, 1.2f);
             }
         }
         // 胃液の層
@@ -192,6 +267,7 @@ public final class WhaleShaftRoom extends RaidRoom {
                 }
             }
         }
+        geysers(ctx, now, surface);
         // 上った高さ・頂
         int t = 0;
         for (ServerPlayer p : ctx.standing()) {
@@ -203,10 +279,71 @@ public final class WhaleShaftRoom extends RaidRoom {
         tier = Math.max(0, t);
         if (!cleared && tier >= FLIGHTS) {
             cleared = true;
+            for (int f = 0; f < FLIGHTS; f++) {
+                setLedges(ctx, f, 0);
+            }
             WhaleDecor.exitLamps(ctx, true);
         }
         if (!cleared && lv >= TOP + 3) {
             ctx.fail(FAIL_KEY);
+        }
+    }
+
+    // 胃液の噴き上げ: 上っている人 (胃液の面より 2 上) の足もとを狙う
+    private void geysers(RaidCtx ctx, long now, double surface) {
+        ServerLevel level = ctx.level();
+        if (cleared || now < startAt) {
+            return;
+        }
+        if (now >= nextGeyser) {
+            nextGeyser = now + GEYSER_EVERY;
+            java.util.List<ServerPlayer> climbers = new java.util.ArrayList<>();
+            for (ServerPlayer p : ctx.standing()) {
+                if (!p.isSpectator() && ctx.cell().inner().contains(p.position()) && p.getY() > surface + 2) {
+                    climbers.add(p);
+                }
+            }
+            java.util.Collections.shuffle(climbers, new java.util.Random(ctx.rng().nextLong()));
+            int shots = climbers.size() >= 2 ? 2 : climbers.size();
+            for (int i = 0; i < shots; i++) {
+                ServerPlayer p = climbers.get(i);
+                geysers.add(new double[] {p.getX(), Math.floor(p.getY()), p.getZ(), now + GEYSER_WARN});
+                level.playSound(null, p.blockPosition(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.HOSTILE, 1.4f, 0.6f);
+            }
+        }
+        DustParticleOptions warn = new DustParticleOptions(new Vector3f(0.9f, 0.1f, 0.08f), 1.1f);
+        for (java.util.Iterator<double[]> it = geysers.iterator(); it.hasNext(); ) {
+            double[] g = it.next();
+            if (now < g[3]) {
+                if (now % 3 == 0) {
+                    for (int k = 0; k < 12; k++) {
+                        double a = Math.PI * 2 * k / 12;
+                        level.sendParticles(warn, g[0] + Math.cos(a) * GEYSER_R, g[1] + 0.1, g[2] + Math.sin(a) * GEYSER_R, 1, 0, 0, 0, 0);
+                    }
+                }
+                continue;
+            }
+            it.remove();
+            level.playSound(null, BlockPos.containing(g[0], g[1], g[2]), SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.HOSTILE, 1.3f, 0.5f);
+            level.sendParticles(ParticleTypes.FALLING_LAVA, g[0], g[1] + 0.5, g[2], 30, 0.5, 1.5, 0.5, 0.1);
+            level.sendParticles(new DustParticleOptions(new Vector3f(0.7f, 0.05f, 0.05f), 2.0f), g[0], g[1] + 1.5, g[2], 40, 0.6, 1.4, 0.6, 0.02);
+            BlockPos o = ctx.origin();
+            for (ServerPlayer p : ctx.standing()) {
+                if (p.isCreative() || p.isSpectator()) {
+                    continue;
+                }
+                double dx = p.getX() - g[0];
+                double dz = p.getZ() - g[2];
+                if (dx * dx + dz * dz <= GEYSER_R * GEYSER_R && Math.abs(p.getY() - g[1]) <= 3) {
+                    p.invulnerableTime = 0;
+                    p.hurt(level.damageSources().magic(), GEYSER_DAMAGE);
+                    double cx = o.getX() + 0.5 - p.getX();
+                    double cz = o.getZ() + 0.5 - p.getZ();
+                    double len = Math.max(0.01, Math.hypot(cx, cz));
+                    p.push(cx / len * GEYSER_PUSH, 0.45, cz / len * GEYSER_PUSH);
+                    p.hurtMarked = true;
+                }
+            }
         }
     }
 
@@ -216,7 +353,6 @@ public final class WhaleShaftRoom extends RaidRoom {
         DustParticleOptions red = new DustParticleOptions(new Vector3f(0.78f, 0.06f, 0.06f), 1.6f);
         DustParticleOptions dark = new DustParticleOptions(new Vector3f(0.45f, 0.02f, 0.05f), 1.2f);
         if (now % 2 == 0) {
-            // 面の上の細い赤い線 (壁ぞい)
             for (int k = -HX; k <= HX; k++) {
                 level.sendParticles(red, o.getX() + k + 0.5, surface + 0.1, o.getZ() - HZ + 0.1, 1, 0, 0, 0, 0);
                 level.sendParticles(red, o.getX() + k + 0.5, surface + 0.1, o.getZ() + HZ + 0.9, 1, 0, 0, 0, 0);
@@ -224,13 +360,11 @@ public final class WhaleShaftRoom extends RaidRoom {
                 level.sendParticles(red, o.getX() + HX + 0.9, surface + 0.1, o.getZ() + k + 0.5, 1, 0, 0, 0, 0);
             }
         }
-        // 面ぜんたいの霧
         for (int n = 0; n < 6; n++) {
             double x = o.getX() - HX + ctx.rng().nextDouble() * (2 * HX + 1);
             double z = o.getZ() - HZ + ctx.rng().nextDouble() * (2 * HZ + 1);
             level.sendParticles(dark, x, surface + 0.05, z, 1, 0.3, 0.05, 0.3, 0);
         }
-        // 層の下 (胃液の中) のしずく
         if (now % 6 == 0) {
             double x = o.getX() - HX + ctx.rng().nextDouble() * (2 * HX + 1);
             double z = o.getZ() - HZ + ctx.rng().nextDouble() * (2 * HZ + 1);
@@ -238,52 +372,37 @@ public final class WhaleShaftRoom extends RaidRoom {
         }
     }
 
-    private void retract(RaidCtx ctx, int f) {
-        for (int i = RISE; i >= 1; i--) {
-            for (BlockPos p : stepCells(ctx, f, i)) {
-                if (ctx.level().getBlockState(p).getBlock() instanceof StairBlock) {
-                    RaidKit.set(ctx.level(), p, Blocks.AIR.defaultBlockState());
-                }
-            }
-        }
-        ctx.level().playSound(null, stepCells(ctx, f, 3).get(1), SoundEvents.BONE_BLOCK_BREAK, SoundSource.BLOCKS, 1.0f, 0.6f);
-        grown[f] = 0;
-        warned[f] = false;
-        extUntil[f] = 0;
-    }
-
-    // ---- 入力
+    // ---- 入力: 隅のこぶを叩くと、その登りを押さえる
     @Override
     public boolean onUse(RaidCtx ctx, ServerPlayer player, BlockPos pos, boolean attack) {
         for (int f = 0; f < FLIGHTS; f++) {
-            for (int[] s : new int[][] {MASTER[f], LOCAL[f]}) {
-                BlockPos pillar = ctx.origin().offset(s[0], s[1], s[2]);
-                if (pos.equals(pillar) || pos.equals(pillar.above())) {
-                    strikeFlight(ctx, f);
-                    BlockPos pp = pillar;
-                    ctx.level().sendParticles(ParticleTypes.CRIT, pp.getX() + 0.5, pp.getY() + 1.5, pp.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
-                    ctx.level().playSound(null, pp, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.BLOCKS, 1.0f, 0.5f + 0.15f * f);
-                    return true;
-                }
+            BlockPos k = knob(ctx, f);
+            if (pos.equals(k) || pos.equals(k.above())) {
+                hold(ctx, f);
+                return true;
             }
         }
         return false;
     }
 
-    // 登り f (0〜3) を出す・延ばす (試験用に公開)
-    public void strikeFlight(RaidCtx ctx, int f) {
+    // 登り f を押さえる。休みのあいだは鈍い音だけ。押さえたか
+    public boolean hold(RaidCtx ctx, int f) {
         long now = ctx.now();
-        if (now >= extUntil[f] && grown[f] == 0) {
-            extStart[f] = now;
+        BlockPos k = knob(ctx, f);
+        if (now < knobReady[f]) {
+            ctx.level().playSound(null, k, SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.BLOCKS, 0.8f, 0.5f);
+            return false;
         }
-        extUntil[f] = now + (long) RISE * GROW_STEP + EXTEND_TICKS;
-        warned[f] = false;
-        lightSwitches(ctx, f, true);
+        holdUntil[f] = now + HOLD;
+        knobReady[f] = now + COOLDOWN;
+        placeKnob(ctx, f, true);
+        ctx.level().sendParticles(ParticleTypes.CRIT, k.getX() + 0.5, k.getY() + 1.5, k.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+        ctx.level().playSound(null, k, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.BLOCKS, 1.0f, 0.5f + 0.12f * f);
+        return true;
     }
 
-    private void lightSwitches(RaidCtx ctx, int f, boolean lit) {
-        placeSwitch(ctx, ctx.origin().offset(MASTER[f][0], MASTER[f][1], MASTER[f][2]), lit);
-        placeSwitch(ctx, ctx.origin().offset(LOCAL[f][0], LOCAL[f][1], LOCAL[f][2]), lit);
+    public boolean holding(RaidCtx ctx, int f) {
+        return ctx.now() < holdUntil[f];
     }
 
     // 胃液の層の高さ (床の上のブロック数)
@@ -302,14 +421,17 @@ public final class WhaleShaftRoom extends RaidRoom {
     @Override
     public void reset(RaidCtx ctx) {
         WhaleDecor.exitLamps(ctx, false);
-        for (int f = 0; f < FLIGHTS; f++) {
-            retract(ctx, f);
-            lightSwitches(ctx, f, false);
-        }
         active = false;
         startAt = Long.MAX_VALUE;
         cleared = false;
         tier = 0;
+        geysers.clear();
+        for (int f = 0; f < FLIGHTS; f++) {
+            holdUntil[f] = 0;
+            knobReady[f] = 0;
+            placeKnob(ctx, f, false);
+            setLedges(ctx, f, 0);
+        }
     }
 
     @Override
@@ -337,8 +459,6 @@ public final class WhaleShaftRoom extends RaidRoom {
         return "raid.skyabyss.WR4.fluid";
     }
 
-    private double lastLevel;
-
     @Override
     public int secondary() {
         return (int) Math.min(TOP, Math.floor(lastLevel));
@@ -354,31 +474,15 @@ public final class WhaleShaftRoom extends RaidRoom {
         return active && startAt != Long.MAX_VALUE ? (int) Math.max(0, startAt + (long) (TOP + 1) * RISE_TICKS - lastNow) : -1;
     }
 
-    private long lastNow;
-
     // ---- 試験用
-    public Direction ascend(int f) {
-        return Direction.fromDelta(DIR[f][0], 0, DIR[f][1]);
-    }
-
-    public int grown(int f) {
-        return grown[f];
-    }
-
     public int tier() {
         return tier;
     }
 
-    public BlockPos masterSwitch(RaidCtx ctx, int f) {
-        return ctx.origin().offset(MASTER[f][0], MASTER[f][1], MASTER[f][2]);
-    }
-
-    public BlockPos localSwitch(RaidCtx ctx, int f) {
-        return ctx.origin().offset(LOCAL[f][0], LOCAL[f][1], LOCAL[f][2]);
-    }
-
-    public BlockPos landingSpot(RaidCtx ctx, int n) {
-        int[] l = LANDING[n - 1];
-        return ctx.origin().offset((l[0] + l[1]) / 2, RISE * n + 1, (l[2] + l[3]) / 2);
+    // 登り f の上る向き (床の隅から次の隅へ)
+    public Direction ascend(int f) {
+        int[] a = CORNER[f % 4];
+        int[] b = CORNER[(f + 1) % 4];
+        return Direction.fromDelta(Integer.signum(b[0] - a[0]), 0, Integer.signum(b[1] - a[1]));
     }
 }

@@ -178,7 +178,7 @@ public final class PouchSelfTest {
                 "the call whistle is not a hand-used tool entry");
         check(f, PouchConfig.USE_TOOLS_IN_POUCH && PouchEntries.entry(call) != null, "hand-used tools must be pouch entries now that the wheel exists");
         check(f, PouchConfig.ENABLED_DEFAULT && PouchConfig.WITHDRAW_DEFAULT == 0, "the pouch must default to on with withdraw off");
-        for (Item usable : new Item[]{call, jp.revati.skyabyss.titan.tide.chapter.TideChapterSetup.TIDE_WATCHING_SHELL.get(),
+        for (Item usable : new Item[]{call,
                 jp.revati.skyabyss.titan.storm.StormSetup.WEATHERCOCK.get(), jp.revati.skyabyss.lore.LoreSetup.LORE_BOOK.get(),
                 jp.revati.skyabyss.lore.LoreSetup.LORE_PAGE.get()}) {
             check(f, usable instanceof PouchUsable && PouchEntries.entry(usable) != null, "a hand-used item is not a usable pouch entry: " + usable);
@@ -676,7 +676,7 @@ public final class PouchSelfTest {
     // ---------------------------------------------------------------- 使う入力 (輪・短押し・PouchUse)
     private static void runUse(MinecraftServer server, List<String> f, ServerLevel level) {
         Item cock = jp.revati.skyabyss.titan.storm.StormSetup.WEATHERCOCK.get();
-        Item conch = jp.revati.skyabyss.titan.tide.chapter.TideChapterSetup.TIDE_WATCHING_SHELL.get();
+        Item conch = jp.revati.skyabyss.lore.LoreSetup.LORE_BOOK.get();
         Item page = jp.revati.skyabyss.lore.LoreSetup.LORE_PAGE.get();
         Item shard = ModItems.STONE_WHALE_SHARD.get();
         FakePlayer p = player(level, "[pouch_use]");

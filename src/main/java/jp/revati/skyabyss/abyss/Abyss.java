@@ -9,23 +9,19 @@ import net.minecraft.world.entity.player.Player;
 
 // 深淵 (docs/design/31 の B04・29 の 2.5・各心臓の設計書の「深淵」の節)。極の上の修飾の段と、深淵の心臓。
 // 守ること: 数字の標準だけを上げる / 一人で解ける / 時間や状態で閉じない / 全部予告 (Telegraph) が見える。
-// 転生の回数は RebirthView.count だけを読む。選ぶのはグループごと (試練の板のつまみ)。選べるのは転生 3 回以上の人だけだが、
+// 選ぶのはグループごと (試練の板のつまみ)。選べるのは物語を最後まで終えた人 (終章の結末を一つ見た人) だけだが、
 // 入ったあとは誰が遊んでもよい (未転生の仲間も一緒に遊べる。報酬は全員に入る)。
 public final class Abyss {
     private Abyss() {
     }
 
     // ---------------------------------------------------------------- 開く条件・グループの印
-    public static final int OPEN_AT = 3;
+    // 2026-11-08 の声「巨神の祠の深淵はストーリー全クリすればできるようにして」: 前は転生 3 回から。今は終章の結末を一つでも見たら
     // グループの記録 (keep なので試練のリセットでは消えない)。1 = 深淵を選んでいる
     public static final String FLAG = "keep.trial.abyss";
 
-    public static boolean open(int rebirths) {
-        return rebirths >= OPEN_AT;
-    }
-
     public static boolean open(Player player) {
-        return open(RebirthView.count(player));
+        return player instanceof net.minecraft.server.level.ServerPlayer sp && !jp.revati.skyabyss.story.finale.FinaleEnding.seen(sp).isEmpty();
     }
 
     public static boolean on(BackGroupData.Record r) {

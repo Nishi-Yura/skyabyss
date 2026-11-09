@@ -38,7 +38,8 @@ public final class HelpCommands {
             new String[] {"/skyabyss_look clear", "look"},
             new String[] {"/skyabyss_arts", "arts"},
             new String[] {"/skyabyss_tower menu", "tower"},
-            new String[] {"/skyabyss_circuit leave", "circuit"});
+            new String[] {"/skyabyss_circuit leave", "circuit"},
+            new String[] {"/stuck", "stuck"});
 
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {

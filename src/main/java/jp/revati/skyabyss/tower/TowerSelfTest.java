@@ -130,7 +130,7 @@ public final class TowerSelfTest {
         }
         check(f, Math.abs(TowerFight.masterHp(1) - TowerMaster.HP) < 1 && Math.abs(TowerFight.masterHp(12) - TowerMaster.HP * (1 + 0.85 * 11)) < 1
                 && Math.abs(TowerFight.masterHp(20) - TowerFight.masterHp(12)) < 1, "the master's HP does not follow the squad size");
-        check(f, Math.abs(m.getMaxHealth() * (1 / m.toughness()) - TowerFight.masterHp(1)) < 2, "the master was not tuned to its HP");
+        check(f, Math.abs(m.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.total(m) - TowerFight.masterHp(1)) < 2, "the master was not tuned to its HP (" + m.getMaxHealth() + " / " + jp.revati.skyabyss.combat.Hardness.total(m) + ")");
         check(f, !m.hurt(level.damageSources().generic(), 50), "the master can be hurt while it wakes");
         long now = level.getGameTime();
         fg.start = now - TowerFight.INTRO - 1;

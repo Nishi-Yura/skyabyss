@@ -252,7 +252,7 @@ public final class RiftSelfTest {
             // 残月の剣守
             WaningBlade lord = RiftArena.summon(moon);
             spawned.add(lord);
-            check(f, lord != null && lord.getMaxHealth() >= WaningBlade.HP - 0.01 && lord.getMaxHealth() <= 1024,
+            check(f, lord != null && lord.getMaxHealth() >= WaningBlade.HP - 0.01,
                     "the waning blade did not appear with its hp: " + (lord == null ? -1 : lord.getMaxHealth()));
             if (lord != null) {
                 List<WaningBlade> ghosts = moon.getEntitiesOfClass(WaningBlade.class, RiftArena.box(), e -> e.isAlive() && e.echo());

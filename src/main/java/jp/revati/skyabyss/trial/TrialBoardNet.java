@@ -85,10 +85,44 @@ public final class TrialBoardNet {
         }
     }
 
-    // abyssOpen = この人は深淵を選べる (転生 3 回以上)。abyssOn = このグループは深淵を選んでいる
+    // 仲間と渡る (クライアント → サーバー。祠の祭司の画面の釦。TitanShrine.ask と同じ)
+    public record ShrineGo(String titan) implements CustomPacketPayload {
+        public static final Type<ShrineGo> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "shrine_go"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ShrineGo> STREAM_CODEC = StreamCodec.of(
+                (buf, t) -> buf.writeUtf(t.titan, 32), buf -> new ShrineGo(buf.readUtf(32)));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // 誓いを立てる・降ろす (クライアント → サーバー。祠の画面の「誓い」の頁。add = 立てる)
+    public record VowChange(String titan, String vow, boolean add) implements CustomPacketPayload {
+        public static final Type<VowChange> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "shrine_vow"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, VowChange> STREAM_CODEC = StreamCodec.of(
+                (buf, t) -> {
+                    buf.writeUtf(t.titan, 32);
+                    buf.writeUtf(t.vow, 32);
+                    buf.writeBoolean(t.add);
+                }, buf -> new VowChange(buf.readUtf(32), buf.readUtf(32), buf.readBoolean()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // 誓いの一行 (id から名前と説明の鍵を作る: vow.skyabyss.<id>)
+    public record VowLine(String id, int points, boolean on) {
+    }
+
+    // abyssOpen = この人は深淵を選べる (物語を終えた人)。abyssOn = このグループは深淵を選んでいる
+    // atShrine = 祠のそば (祭司から開いた。仲間と渡る釦を出す)。vowClosed = 誓いを選べない理由の鍵 (空なら選べる)。vowBest = これまでの最高の段
     // shards = 持っている歌片の数 (順路の鍵)。routeClears = この人がこの巨神の順路を越えた回数、routeBest = 最速 (tick。0 = まだ)
     public record Open(String titan, int cycle, List<Card> cards, int shards, int routeClears, long routeBest, List<Row> codex,
-            List<String> titles, boolean abyssOpen, boolean abyssOn) implements CustomPacketPayload {
+            List<String> titles, boolean abyssOpen, boolean abyssOn, boolean atShrine, String vowClosed, List<VowLine> vows, int vowBest)
+            implements CustomPacketPayload {
         public static final Type<Open> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "trial_board_open"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Open> STREAM_CODEC = StreamCodec.of(Open::encode, Open::decode);
 
@@ -128,6 +162,15 @@ public final class TrialBoardNet {
             }
             buf.writeBoolean(o.abyssOpen);
             buf.writeBoolean(o.abyssOn);
+            buf.writeBoolean(o.atShrine);
+            buf.writeUtf(o.vowClosed, 96);
+            buf.writeVarInt(o.vows.size());
+            for (VowLine v : o.vows) {
+                buf.writeUtf(v.id, 32);
+                buf.writeVarInt(v.points);
+                buf.writeBoolean(v.on);
+            }
+            buf.writeVarInt(o.vowBest);
         }
 
         private static Open decode(RegistryFriendlyByteBuf buf) {
@@ -159,8 +202,17 @@ public final class TrialBoardNet {
             for (int i = 0; i < t; i++) {
                 titles.add(buf.readUtf(48));
             }
-            return new Open(titan, cycle, List.copyOf(cards), shards, routeClears, routeBest, List.copyOf(codex), List.copyOf(titles), buf.readBoolean(),
-                    buf.readBoolean());
+            boolean abyssOpen = buf.readBoolean();
+            boolean abyssOn = buf.readBoolean();
+            boolean atShrine = buf.readBoolean();
+            String vowClosed = buf.readUtf(96);
+            int nv = buf.readVarInt();
+            List<VowLine> vows = new ArrayList<>();
+            for (int i = 0; i < nv; i++) {
+                vows.add(new VowLine(buf.readUtf(32), buf.readVarInt(), buf.readBoolean()));
+            }
+            return new Open(titan, cycle, List.copyOf(cards), shards, routeClears, routeBest, List.copyOf(codex), List.copyOf(titles), abyssOpen,
+                    abyssOn, atShrine, vowClosed, List.copyOf(vows), buf.readVarInt());
         }
 
         @Override
@@ -182,6 +234,19 @@ public final class TrialBoardNet {
                 .playToServer(CraftShard.TYPE, CraftShard.STREAM_CODEC, (p, ctx) -> {
                     if (ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp) {
                         ctx.enqueueWork(() -> TrialBoard.craftShard(sp, p.titan()));
+                    }
+                })
+                .playToServer(ShrineGo.TYPE, ShrineGo.STREAM_CODEC, (p, ctx) -> {
+                    if (ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        ctx.enqueueWork(() -> jp.revati.skyabyss.titan.shrine.TitanShrine.ask(sp));
+                    }
+                })
+                .playToServer(VowChange.TYPE, VowChange.STREAM_CODEC, (p, ctx) -> {
+                    if (ctx.player() instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        ctx.enqueueWork(() -> {
+                            jp.revati.skyabyss.titan.vow.VowCommands.apply(sp, p.titan(), p.vow(), p.add());
+                            TrialBoard.open(sp, p.titan());
+                        });
                     }
                 });
     }

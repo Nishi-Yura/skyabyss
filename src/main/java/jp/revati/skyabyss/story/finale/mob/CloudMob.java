@@ -13,7 +13,8 @@ public abstract class CloudMob extends AbyssMobB {
     // 成長の経験値の推奨の段 (終章。月の区画 4 = 58 の上)
     public static final int CLOUD_LEVEL = 60;
     static final double LOST_Y = 20;
-    public static final double MAX_HP = 1024;
+    // 体力の上限は上げた (mixin/MaxHealthCapMixin)。決めた体力をそのまま持つ (受ける傷は割らない)
+    public static final double MAX_HP = 10_000_000;
     private double cloudDmg;
     private float toughness = 1f;
 
@@ -26,7 +27,8 @@ public abstract class CloudMob extends AbyssMobB {
         double shown = Math.min(hp, MAX_HP);
         tune(form, shown, dmg);
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(shown);
-        setHealth((float) shown);
+        jp.revati.skyabyss.combat.Hardness.rebase(this, shown);
+        setHealth(getMaxHealth());
         cloudDmg = dmg;
         toughness = (float) (shown / hp);
     }

@@ -30,8 +30,11 @@ import net.minecraft.world.level.levelgen.Heightmap;
 final class ShrineBuild {
     private ShrineBuild() {
     }
-    // 建て直すための版 (TitanShrine.Data の ver)。2 = 巨神ごとの祠、3 = 雷翼の羽根の段を面でつなぐ (2026-11-07「ハーフブロックが接していない」)
-    static final int VERSION = 3;
+    // 建て直すための版 (TitanShrine.Data の ver)。2 = 巨神ごとの祠、3 = 雷翼の羽根の段を面でつなぐ (2026-11-07「ハーフブロックが接していない」)、
+    // 4 = 町に削られた祠を建て直す (2026-11-07「鯨の祠の建築、変」)、5 = まわりの地面をなじませる (2026-11-08「あんまりなじんでない」)
+    static final int VERSION = 5;
+    // なじませる帯の幅 (広場の円の外へ)
+    static final int SKIRT = 10;
     static final int CLEAR_UP = 36;
     static final int FOOT_DOWN = 24;
     static final int PATH_MORE = 16;
@@ -52,6 +55,11 @@ final class ShrineBuild {
     private static BlockPos mark(Blueprint bp, String name) {
         int[] m = bp.marks.get(name);
         return new BlockPos(m[0], m[1], m[2]);
+    }
+
+    // 集合台の半径
+    static int padRadius(String titan) {
+        return layout(titan).padR();
     }
 
     // 碑の位置 → 部品の原点 (広場の真ん中、地面の一つ上)
@@ -143,6 +151,8 @@ final class ShrineBuild {
         }
         // 参道の続き (地面まで)
         n += extendPath(level, origin, l, foot, roads);
+        // まわりの地面 (広場の円の空いた所と、その外の帯) を、祠の床の高さから自然の地面へなだらかにつなぐ
+        n += skirt(level, origin, l, lowest.keySet(), roads);
         for (BlockPos p : shaped) {
             BlockState s = level.getBlockState(p);
             BlockState fixed = s;
@@ -156,6 +166,93 @@ final class ShrineBuild {
         }
         SkyAbyss.LOGGER.info("Built the {} shrine at {}: {} blocks", titan, origin.toShortString(), n);
         return n;
+    }
+
+    // なじませる: 祠の部品のない列だけ。広場の円 (r) の内は床の一つ下 (y-1) の平らな地面、外の帯 (r〜r+SKIRT) は
+    // 床の一つ下から、その列の自然の地面の高さへ近づける (なめらかに)。上に余る自然のブロック (土・石・草・雪・木と葉) は外し、
+    // 足りない所は土で埋めて上を草にする (前に雪があった列は雪を一枚)。参道の帯・道 (縁を含む) には触れない
+    private static int skirt(ServerLevel level, BlockPos origin, Layout l, java.util.Set<Long> footprint, boolean roads) {
+        int r = l.radius() + 3;
+        int outer = r + SKIRT;
+        int floorY = origin.getY() - 1;
+        int n = 0;
+        for (int dx = -outer; dx <= outer; dx++) {
+            for (int dz = -outer; dz <= outer; dz++) {
+                double d = Math.sqrt(dx * dx + dz * dz);
+                if (d > outer) {
+                    continue;
+                }
+                int x = origin.getX() + dx;
+                int z = origin.getZ() + dz;
+                if (footprint.contains(BlockPos.asLong(x, 0, z))) {
+                    continue;
+                }
+                if (Math.abs(dx) <= l.pathHalf() + 2 && dz > 0 && dz <= l.pathEnd() + PATH_MORE + 2) {
+                    continue;
+                }
+                if (roads && jp.revati.skyabyss.world.continent.ContinentChunkGenerator.roadAt(x, z) != null) {
+                    continue;
+                }
+                // 列の今の地面 (自然のブロックの一番上)
+                int top = groundTop(level, x, z, floorY + 40, floorY - 30);
+                boolean snowy = level.getBlockState(new BlockPos(x, top + 1, z)).is(Blocks.SNOW) || level.getBlockState(new BlockPos(x, top, z)).is(Blocks.SNOW_BLOCK);
+                int target;
+                if (d <= r) {
+                    target = floorY;
+                } else {
+                    double t = (d - r) / SKIRT;
+                    t = t * t * (3 - 2 * t);
+                    target = (int) Math.round(floorY + (top - floorY) * t);
+                }
+                if (target == top && d > r) {
+                    continue;
+                }
+                // 上を外す (自然のブロックだけ)
+                for (int y = target + 1; y <= Math.max(top, target) + 24; y++) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    BlockState st = level.getBlockState(p);
+                    if (!st.isAir() && natural(st)) {
+                        level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+                        n++;
+                    }
+                }
+                // 埋める (下が空き・水・草花のあいだ。8 段まで)
+                for (int y = target, k = 0; k < 8; y--, k++) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    BlockState st = level.getBlockState(p);
+                    if (y < target && !st.isAir() && !st.canBeReplaced()) {
+                        break;
+                    }
+                    level.setBlock(p, y == target ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.DIRT.defaultBlockState(), 2);
+                    n++;
+                }
+                if (snowy) {
+                    level.setBlock(new BlockPos(x, target + 1, z), Blocks.SNOW.defaultBlockState(), 2);
+                }
+            }
+        }
+        return n;
+    }
+
+    // 地形の一番上の自然のブロック (from から下へ to まで)。なければ to
+    private static int groundTop(ServerLevel level, int x, int z, int from, int to) {
+        for (int y = from; y > to; y--) {
+            BlockState st = level.getBlockState(new BlockPos(x, y, z));
+            if (!st.isAir() && natural(st) && !st.is(net.minecraft.tags.BlockTags.LEAVES) && !st.is(net.minecraft.tags.BlockTags.LOGS)
+                    && !st.is(Blocks.SNOW) && st.getFluidState().isEmpty() && !st.canBeReplaced()) {
+                return y;
+            }
+        }
+        return to;
+    }
+
+    // 外してよい自然のブロック (大陸の地形と木と草花)
+    private static boolean natural(BlockState st) {
+        return st.is(net.minecraft.tags.BlockTags.DIRT) || st.is(Blocks.GRASS_BLOCK) || st.is(Blocks.STONE) || st.is(Blocks.ANDESITE) || st.is(Blocks.DIORITE)
+                || st.is(Blocks.GRANITE) || st.is(Blocks.TUFF) || st.is(Blocks.GRAVEL) || st.is(Blocks.SAND) || st.is(Blocks.SNOW) || st.is(Blocks.SNOW_BLOCK)
+                || st.is(Blocks.COARSE_DIRT) || st.is(Blocks.PODZOL) || st.is(Blocks.DIRT_PATH)
+                || st.is(net.minecraft.tags.BlockTags.LEAVES) || st.is(net.minecraft.tags.BlockTags.LOGS) || st.is(net.minecraft.tags.BlockTags.FLOWERS)
+                || st.is(Blocks.SHORT_GRASS) || st.is(Blocks.TALL_GRASS) || st.is(Blocks.FERN) || st.is(Blocks.LARGE_FERN) || st.is(Blocks.SWEET_BERRY_BUSH) || st.is(Blocks.DEAD_BUSH);
     }
 
     private static int footing(ServerLevel level, BlockPos from, BlockState foot) {

@@ -15,7 +15,9 @@ public final class MountStats {
     public static final String[] KEYS = {"speed", "jump", "seats"};
     public static final int[] ROW_KIND = {SPEED, JUMP, SEATS};
     // 種類ごとの段の数 (体力は前の段の数。返す額を数えるためだけ)
-    private static final int[] TIER_COUNT = {8, 5, 5, 5};
+    // 人数は 2 段 (2026-11-08 の声「2人しか乗れないのに、強化6人まで見えてたら見にくい」「6人乗れるやつは人数強化2なら6人」):
+    // 段 1 で 2 人 (どの見た目も)、段 2 で幌の荷車だけ 6 人
+    private static final int[] TIER_COUNT = {8, 5, 5, 2};
     public static final int MAX_TIERS = 8;
     public static final double FIXED_HEALTH = 60;
 
@@ -24,7 +26,7 @@ public final class MountStats {
             {25, 50, 85, 130, 200, 300, 420, 600},
             {18, 36, 60, 95, 150},
             {18, 36, 60, 95, 150},
-            {80, 220, 500, 800, 1200},
+            {200, 3000},
     };
     // 段 0〜n の値。速さは馬の中ほどから、段 5 で馬の最上位 (0.35)、段 8 で 0.44 (2026-11-02 の声「速さはもう少し速く」)。跳びは馬の下から上
     private static final double[] SPEED_VALUE = {0.20, 0.23, 0.26, 0.29, 0.32, 0.35, 0.38, 0.41, 0.44};
@@ -46,9 +48,15 @@ public final class MountStats {
         return SPEED_VALUE[clamp(SPEED, tier)];
     }
 
-    // 乗れる人数 (持ち主を入れて。見た目の最大は掛けない)
+    // 乗れる人数 (持ち主を入れて)。段 0 = 1 人、段 1 = 2 人、段 2 = 荷車なら 6 人 (ほかは 2 人のまま)
     public static int seats(int tier) {
-        return 1 + clamp(SEATS, tier);
+        return seats(tier, MountLook.CARRIAGE);
+    }
+
+    public static int seats(int tier, MountLook look) {
+        int t = clamp(SEATS, tier);
+        int n = t == 0 ? 1 : t == 1 ? 2 : look.maxSeats;
+        return Math.min(look.maxSeats, n);
     }
 
     public static double jump(int tier) {

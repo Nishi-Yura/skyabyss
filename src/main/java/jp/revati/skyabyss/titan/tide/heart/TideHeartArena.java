@@ -32,7 +32,8 @@ public final class TideHeartArena {
     public static final int FLOOR = 51;
     public static final int RADIUS = 14 + jp.revati.skyabyss.titan.tide.back.TideBackLayout.HEART_GROW;
     // 天井の高さ: 床の上の空気が 12 段 (床 51 〜 62)。広い技 (大波・輪) と心臓 (高さ 6.3) が収まる。ボス部屋は 12 以上
-    public static final int CEILING = 63;
+    // 2026-11-08: 心臓を 2 倍 (高さ 12.6) にしたので、天井を 63 から 70 へ (床の上の空気 19 段)
+    public static final int CEILING = 70;
     // 溝 (床の外周、1 段低い水)
     static final double GROOVE_IN = RADIUS - 1.5;
     static final double GROOVE_OUT = RADIUS - 0.5;

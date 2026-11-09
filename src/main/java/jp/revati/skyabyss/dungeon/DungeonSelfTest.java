@@ -172,6 +172,21 @@ public final class DungeonSelfTest {
             if (c != null) {
                 runs.add(c);
                 check(f, c.checkpoint == 1, "a player with progress did not start on level 2");
+                // 全滅: 最初の層から (層は作り直し、続きの記録も 0)。立っている人がいれば全滅ではない
+                check(f, !Dungeons.wiped(List.of(p), c), "a standing player counted as a wipe");
+                DungeonFloor old0 = c.floor(0);
+                c.floor(0).woke.add("a");
+                Dungeons.wipe(level, c);
+                check(f, c.checkpoint == 0 && c.wipes == 1 && c.floor(0) != old0 && c.floor(0).woke.isEmpty() && c.floor(1).poured < 0,
+                        "a wipe did not rebuild the run from the first floor (checkpoint " + c.checkpoint + ")");
+                p.getPersistentData().putInt(Dungeons.PROGRESS + d.id, 0);
+                // 起きた部屋に敵が残っていれば、帯に「敵 残り n」
+                Dungeons.moveTo(p, c, 0);
+                Vec3 rw = c.markCenter(0, "room_a");
+                p.moveTo(rw.x, rw.y, rw.z, 0f, 0f);
+                c.floor(0).wakeRooms(level, List.of(p));
+                int near = c.floor(0).leftNear(level, p);
+                check(f, near > 0 && near == c.floor(0).roomLeft(level, "a"), "the room count for the band is wrong (" + near + ")");
             }
             p.getPersistentData().remove(Dungeons.PROGRESS + d.id);
             p.getPersistentData().remove(Dungeons.CLEARS + d.id);
@@ -265,7 +280,7 @@ public final class DungeonSelfTest {
             return;
         }
         runs.add(run);
-        for (int k = 0; k < Dungeon.FLOORS.length; k++) {
+        for (int k = 0; k < d.floors().length; k++) {
             Dungeons.moveTo(p, run, k);
             DungeonFloor fl = run.floor(k);
             check(f, fl.ready() && run.floorOf(p) == k, d.terrain(k) + ": the level was not poured / entered");
@@ -307,8 +322,8 @@ public final class DungeonSelfTest {
                 }
             }
         }
-        DungeonFloor fb = run.floor(Dungeon.BOSS_FLOOR);
-        Vec3 bc = run.markCenter(Dungeon.BOSS_FLOOR, "boss");
+        DungeonFloor fb = run.floor(d.bossFloor());
+        Vec3 bc = run.markCenter(d.bossFloor(), "boss");
         p.moveTo(bc.x, bc.y, bc.z + 6, 0f, 0f);
         fb.bossTick(level, level.getGameTime(), List.of(p));
         var boss = fb.boss == null ? null : level.getEntity(fb.boss);
@@ -481,7 +496,7 @@ public final class DungeonSelfTest {
             }
         }
         check(f, jp.revati.skyabyss.world.continent.ContinentPois.placeOf(d.poiKind()) != null, d.poiKind() + " is not in pois.json");
-        for (int k = 0; k < Dungeon.FLOORS.length; k++) {
+        for (int k = 0; k < d.floors().length; k++) {
             TowerTerrain t;
             try {
                 t = DungeonWorld.terrain(d, k);
@@ -489,7 +504,7 @@ public final class DungeonSelfTest {
                 f.add(d.terrain(k) + " cannot be read: " + ex.getMessage());
                 continue;
             }
-            List<String> need = k == Dungeon.BOSS_FLOOR ? List.of("entry", "boss", "exit") : List.of("entry", "leave", "cp", "next");
+            List<String> need = k == d.bossFloor() ? List.of("entry", "boss", "exit") : List.of("entry", "leave", "cp", "next");
             for (String m : need) {
                 check(f, t.has(m), d.terrain(k) + " lacks mark " + m);
             }

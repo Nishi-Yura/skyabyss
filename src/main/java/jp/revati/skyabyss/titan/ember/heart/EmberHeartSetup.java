@@ -22,7 +22,7 @@ public final class EmberHeartSetup {
     // 判定は 4.5 x 6.3 (迫力のため、前の 3 x 4.2 の 1.5 倍)。模型は描画で 3 倍 (殻の幅は約 4.5 ブロック。火の粉は判定の外まで上る)
     public static final DeferredHolder<EntityType<?>, EntityType<EmberHeart>> EMBER_HEART = ENTITIES.register(EmberIds.EMBER_HEART,
             () -> EntityType.Builder.<EmberHeart>of(EmberHeart::new, MobCategory.MONSTER)
-                    .sized(4.5f, 6.3f)
+                    .sized(9.0f, 12.6f)
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":" + EmberIds.EMBER_HEART));

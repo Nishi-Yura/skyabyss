@@ -1,0 +1,34 @@
+# 余燼の巨神の火山の部分 (2026-11-08 の声「火の巨神の山の部分のモデルが離れてる」)。地上で眠らせて、近景と中景の LOD で横から
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ember_volcano.txt -PshotsName=ember_volcano2
+world ember_volc_b continent
+size 1600 900
+timeout 3000
+render 16
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd effect give @s resistance 99999 4 true
+cmd tp @s -300 120 1180
+waitchunks 300
+wait 200
+cmd skyabyss titan rest ember here
+wait 300
+hud off
+chat clear
+cmd gamemode spectator
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] run tp @s ~80 ~30 ~ 90 10
+waitchunks 100
+wait 80
+shot near_side
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] run tp @s ~150 ~50 ~ 90 12
+wait 60
+shot mid_side
+cmd execute as @s at @e[type=skyabyss:ember_titan,limit=1,sort=nearest] run tp @s ~60 ~70 ~60 135 35
+wait 60
+shot near_top

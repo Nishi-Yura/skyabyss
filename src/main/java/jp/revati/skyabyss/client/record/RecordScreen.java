@@ -449,15 +449,15 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             owner = jp.revati.skyabyss.rebirth.RebirthText.symbols(rebirths, jp.revati.skyabyss.client.rebirth.RebirthClient.timeMs(),
                     jp.revati.skyabyss.client.rebirth.RebirthClient.still()).append(" ").append(owner);
         }
-        FormattedCharSequence o = ellipsize(owner, LW - 8);
-        int ow = font.width(o);
+        FormattedCharSequence o = owner.getVisualOrderText();
+        int ow = Math.min(font.width(o), LW - 8);
         if (rebirths > 0) {
             jp.revati.skyabyss.client.rebirth.RebirthClient.drawFrame(g, cx - ow / 2 - 4, top + 17, ow + 8, 11, rebirths);
         }
         if (!snapshot.self()) {
             // 管理者がほかの人を見ているときは、えんじの帯で
             RIBBON.draw(g, cx - ow / 2 - 6, top + 18, ow + 16, 10);
-            g.drawString(font, o, cx - ow / 2, top + 19, PAPER, false);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, o, cx - ow / 2, top + 19, ow, PAPER, false);
         } else {
             g.drawString(font, o, cx - ow / 2, top + 19, FADED, false);
         }
@@ -502,8 +502,12 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
                 g.fill(x0, y + CHIP_H - 1, x1, y + CHIP_H, TEAL);
             }
             int color = on ? TITLE : c.mark() == RecordSnapshot.MARK_LOCKED ? FADED : hover ? INK : 0xFF5E5040;
-            FormattedCharSequence label = ellipsize(c.title(), x1 - x0 - 3);
-            g.drawString(font, label, x0 + (x1 - x0 - font.width(label)) / 2 + 1, y + 2, color, false);
+            FormattedCharSequence label = c.title().getVisualOrderText();
+            if (font.width(label) > x1 - x0 - 3) {
+                jp.revati.skyabyss.client.ui.Marquee.draw(g, font, label, x0 + 2, y + 2, x1 - x0 - 3, color, false);
+            } else {
+                g.drawString(font, label, x0 + (x1 - x0 - font.width(label)) / 2 + 1, y + 2, color, false);
+            }
             if (!on && hasChangedIn(c.id())) {
                 MARK_CHANGED.draw(g, x1 - 7, y - 3);
             }
@@ -572,18 +576,18 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             }
             int tx = x + 19;
             int room = LW - 19 - 12;
-            g.drawString(font, ellipsize(r.label(), room), tx, y + 3, INK, false);
-            g.drawString(font, ellipsize(r.value(), room), tx, y + 16, valueColor, false);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, r.label(), tx, y + 3, room, INK, false);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, r.value(), tx, y + 16, room, valueColor, false);
             Sprite m = markSprite(r.mark());
             if (m != null) {
                 m.draw(g, x + LW - 11, y + 9);
             }
         } else {
             int bar = r.bar() >= 0 ? 1 : 0;
-            FormattedCharSequence value = ellipsize(r.value(), LW / 2);
-            int vw = font.width(value);
-            g.drawString(font, ellipsize(r.label(), LW - vw - 8), x, y + 2, INK, false);
-            g.drawString(font, value, x + LW - 4 - vw, y + 2, valueColor, false);
+            FormattedCharSequence value = r.value().getVisualOrderText();
+            int vw = Math.min(font.width(value), LW / 2);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, r.label(), x, y + 2, LW - vw - 8, INK, false);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, value, x + LW - 4 - vw, y + 2, vw, valueColor, false);
             if (bar > 0) {
                 g.fill(x, y + 11, x + LW - 4, y + 12, 0x30000000);
                 g.fill(x, y + 11, x + Math.round((LW - 4) * Mth.clamp(r.bar(), 0f, 1f)), y + 12, TEAL);
@@ -603,9 +607,9 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             g.renderItem(row.icon(), x, top + 6);
             tx += 19;
         }
-        g.drawString(font, ellipsize(row.label(), RW - (tx - x)), tx, top + 11, TITLE, false);
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, row.label(), tx, top + 11, RW - (tx - x), TITLE, false);
         boolean isChanged = changed.containsKey(page() + "/" + row.key());
-        g.drawString(font, ellipsize(row.value(), RW - 10), x, top + BODY_TOP, isChanged ? AMBER : markColor(row.mark()), false);
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, row.value(), x, top + BODY_TOP, RW - 10, isChanged ? AMBER : markColor(row.mark()), false);
         if (isChanged) {
             MARK_CHANGED.draw(g, x + RW - 8, top + BODY_TOP);
         }
@@ -648,14 +652,6 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             });
             g.drawString(font, label, bx + (80 - font.width(label)) / 2, by + 3, TITLE, false);
         }
-    }
-
-    private FormattedCharSequence ellipsize(Component text, int width) {
-        if (font.width(text) <= width) {
-            return text.getVisualOrderText();
-        }
-        FormattedText cut = font.substrByWidth(text, Math.max(0, width - font.width("…")));
-        return Language.getInstance().getVisualOrder(FormattedText.composite(cut, FormattedText.of("…")));
     }
 
     // ---------------------------------------------------------------- 操作

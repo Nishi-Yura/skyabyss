@@ -29,6 +29,43 @@
   },
   "stages": [
     {
+      "id": "town",
+      "skip_if": {
+        "type": "item",
+        "item": "skyabyss:fire_ward_draught",
+        "count": 2
+      },
+      "xp": 40,
+      "objectives": [
+        {
+          "id": "arrive",
+          "type": "condition",
+          "if": {
+            "type": "in_town",
+            "town": "ember"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ash",
+      "skip_if": {
+        "type": "item",
+        "item": "skyabyss:fire_ward_draught",
+        "count": 2
+      },
+      "xp": 80,
+      "objectives": [
+        {
+          "id": "draggers",
+          "type": "kill",
+          "target": "skyabyss:ash_dragger",
+          "count": 3,
+          "party": false
+        }
+      ]
+    },
+    {
       "id": "brew",
       "xp": 120,
       "objectives": [

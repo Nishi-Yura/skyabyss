@@ -10,10 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.quest.Quests;
-import jp.revati.skyabyss.titan.end.BoardGlow;
-import jp.revati.skyabyss.titan.end.TitanEndNetwork;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.travel.LandingFinder;
 import jp.revati.skyabyss.titan.travel.TravelNetwork;
@@ -55,16 +52,18 @@ public final class YoungTrip {
     public static final int COUNTDOWN_PARTY = 300;
     public static final int COUNTDOWN_MAX = 600;
     public static final double PARTY_RADIUS = 64;
-    public static final int OFFER_LIMIT = 20 * 150;
-    public static final int OFFER_IDLE = 20 * 12;
     public static final int OFFER_IDLE_PLAIN = 20 * 4;
     // ---- 雲の帳
     public static final double VEIL_DISTANCE = 700;
     public static final double VEIL_EXIT = 200;
     public static final int CRUISE_BEFORE_VEIL = 180;
+    // 帳の前に飛ぶ長さ (tick)。帳は道のりの真ん中を縮めるが、遅い子ほど長く飛ぶ (縮める割合 VEIL_SQUEEZE)。速さの差が所要時間に出る
+    static final double VEIL_SQUEEZE = 5.0;
+
+    public static int cruiseTicks(double distance, double speed) {
+        return (int) Mth.clamp((distance - VEIL_EXIT) / Math.max(0.3, speed) / VEIL_SQUEEZE, 100, 900);
+    }
     public static final int VEIL_FADE = 20;
-    // 降りる輪 (成体の乗り込み口)
-    public static final double RING_RADIUS = 4.5;
     // 行き先の近くで、止まる所を決め直す距離
     private static final double SETTLE_DISTANCE = 170;
     private static final TicketType<ChunkPos> TICKET = TicketType.create("skyabyss_young", Comparator.comparingLong(ChunkPos::toLong), 300);
@@ -85,6 +84,8 @@ public final class YoungTrip {
     @Nullable
     private Vec3 roughTarget;
     private double startDistance;
+    // 帳の前に飛ぶ tick (cruiseTicks。出発のときに道のりの速さから決める)
+    private int cruiseTicks = CRUISE_BEFORE_VEIL;
     private YoungMotion motion;
     private int veilStage;
     private int veilTicks;
@@ -287,6 +288,8 @@ public final class YoungTrip {
     private void origin(ServerLevel level) {
         startDistance = Math.hypot(dest.x() + 0.5 - e.getX(), dest.z() + 0.5 - e.getZ());
         BlockPos dp = new BlockPos(dest.x(), dest.y(), dest.z());
+        cruiseTicks = cruiseTicks(startDistance, YoungReach.routeSpeed(level, e.kind, e.position(), dp)
+                * jp.revati.skyabyss.rebirth.Rebirth.youngSpeed(level.getServer(), e.owner()));
         roughTarget = null;
         pad = null;
         padSettled = false;
@@ -377,7 +380,7 @@ public final class YoungTrip {
 
     // 雲の帳。戻り値 true = この tick の動きは帳が受け持った
     private boolean tickVeil(ServerLevel level, List<ServerPlayer> riders, double dist) {
-        if (veilStage == 0 && !veilDone && startDistance > VEIL_DISTANCE && carryTicks >= CRUISE_BEFORE_VEIL && dist > VEIL_EXIT + 160) {
+        if (veilStage == 0 && !veilDone && startDistance > VEIL_DISTANCE && carryTicks >= cruiseTicks && dist > VEIL_EXIT + 160) {
             startVeil(level, riders, false);
         }
         if (veilStage == 0) {
@@ -544,20 +547,10 @@ public final class YoungTrip {
 
     // ---------------------------------------------------------------- 着いたあと
 
+    // 着いたあとは降りるのを待って溶ける。成体が行き先でも、子は背へ入れない (乗り込みは巨神の本来の乗り口から。2026-11-09 の声「その場所に tp のやつ出るのやめて」)
     private void tickOffer(ServerLevel level, List<ServerPlayer> riders) {
-        boolean titan = dest != null && dest.id().startsWith("t:");
-        String titanId = titan ? dest.id().substring(2) : "";
-        int near = 0;
-        if (titan) {
-            YoungOffers.tick(this, level, titanId, riders);
-            near = YoungOffers.waiting(this, level);
-        }
-        boolean idle = riders.isEmpty() && near == 0;
-        offerIdle = idle ? offerIdle + 1 : 0;
-        int limit = titan ? OFFER_IDLE : OFFER_IDLE_PLAIN;
-        if (offerIdle >= limit) {
-            dissolve("done", riders);
-        } else if (phaseTicks > (titan ? OFFER_LIMIT : 20 * 45)) {
+        offerIdle = riders.isEmpty() ? offerIdle + 1 : 0;
+        if (offerIdle >= OFFER_IDLE_PLAIN || phaseTicks > 20 * 45) {
             dissolve("done", riders);
         }
     }
@@ -699,22 +692,6 @@ public final class YoungTrip {
 
     private SoundEvent dissolveSound() {
         return YoungCarriers.callSound(e.kind);
-    }
-
-    // ---------------------------------------------------------------- 光の輪 (YoungOffers が使う)
-
-    Vec3 ringCentre() {
-        return e.position();
-    }
-
-    TitanEndNetwork.Beam beam(String titan) {
-        Vec3 c = ringCentre();
-        return new TitanEndNetwork.Beam("young_" + titan, BoardGlow.colour(titan), c.x, c.y + 1.2, c.z, (float) RING_RADIUS, 1.6f, (float) RING_RADIUS, 0f,
-                c.y, c.y + BoardGlow.MIN_BEAM, 1.0f, BoardGlow.BEAM_TTL);
-    }
-
-    boolean titanEligible(ServerPlayer p, String titan) {
-        return Progression.canBoard(p, titan);
     }
 
     int dissolveCode() {

@@ -6,7 +6,7 @@ import java.util.List;
 
 import net.minecraft.world.entity.player.Player;
 
-// 橋・淵・前世の技・紋の盤の「数字の口」(docs/design/31 の A09・A14・B08・B09)。SkillBuild が最初から数に入れる (SkillModifier として)。
+// 橋・淵・前世の技・巨神のアスペクト (rpg/aspect。紋の盤の代わり) の「数字の口」(docs/design/31 の A09・A14・B08・B09)。SkillBuild が最初から数に入れる (SkillModifier として)。
 // 変異 (A08) は数字を変えず形だけ変える (MutationActions)。ここの足しはすべて SkillBuild の上限 (力 +100%・待ち −40%〜+50%・マナ ±50%) の内側に入る。
 // 回復・無敵は作らない
 final class SkillExt implements SkillModifier {
@@ -61,7 +61,7 @@ final class SkillExt implements SkillModifier {
     @Override
     public double power(Player player, Skill skill) {
         SkillData d = SkillManager.get(player);
-        double v = Glyph.sum(d, d.rebirth, skill, Glyph.Effect.POWER);
+        double v = jp.revati.skyabyss.rpg.aspect.Aspects.power(player, skill);
         int mirror = d.rank(Skill.DEEP_MIRROR);
         if (mirror > 0 && distinctTags(player) >= SkillRules.MIRROR_TAGS) {
             v += SkillRules.mirrorPower(mirror);
@@ -79,19 +79,18 @@ final class SkillExt implements SkillModifier {
     @Override
     public double cooldown(Player player, Skill skill) {
         SkillData d = SkillManager.get(player);
-        return Glyph.sum(d, d.rebirth, skill, Glyph.Effect.COOLDOWN) + (d.knows(Skill.SOUL_THREAD) ? SkillRules.THREAD_COOLDOWN : 0);
+        return jp.revati.skyabyss.rpg.aspect.Aspects.cooldown(player, skill) + (d.knows(Skill.SOUL_THREAD) ? SkillRules.THREAD_COOLDOWN : 0);
     }
 
     @Override
     public double manaCost(Player player, Skill skill) {
-        SkillData d = SkillManager.get(player);
-        return Glyph.sum(d, d.rebirth, skill, Glyph.Effect.MANA);
+        return jp.revati.skyabyss.rpg.aspect.Aspects.mana(player, skill);
     }
 
     @Override
     public int extraTags(Player player, SkillTag tag) {
         SkillData d = SkillManager.get(player);
-        int n = Glyph.extraTags(d, d.rebirth, tag);
+        int n = 0;
         if (tithed(d).contains(tag)) {
             n++;
         }

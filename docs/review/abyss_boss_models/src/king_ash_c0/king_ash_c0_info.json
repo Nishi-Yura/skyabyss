@@ -1,27 +1,27 @@
 {
  "name": "king_ash_c0",
- "tris": 2596,
+ "tris": 4672,
  "atlas": [
   512,
   512
  ],
- "open": 0,
+ "open": 16,
  "floating": [],
  "bones": {
   "root": 0,
-  "body": 186,
-  "robe_f": 76,
-  "robe_b": 76,
-  "chest": 444,
-  "head": 240,
-  "crown": 846,
+  "body": 188,
+  "robe_f": 322,
+  "robe_b": 322,
+  "chest": 1398,
+  "head": 424,
+  "crown": 1102,
   "arm_l": 44,
-  "fore_l": 318,
+  "fore_l": 342,
   "arm_r": 44,
-  "fore_r": 178,
+  "fore_r": 342,
   "leg_l": 72,
   "leg_r": 72
  },
- "glow": 7587,
- "height": 53.1
+ "glow": 6173,
+ "height": 56.0
 }

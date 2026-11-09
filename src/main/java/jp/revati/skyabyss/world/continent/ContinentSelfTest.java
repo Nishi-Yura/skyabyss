@@ -20,7 +20,105 @@ public final class ContinentSelfTest {
     }
 
     public static List<Step> steps() {
-        return List.of(Step.once("continent", ContinentSelfTest::run));
+        return List.of(Step.once("continent", ContinentSelfTest::run), Step.once("continent overhangs", ContinentSelfTest::overhangs));
+    }
+
+    // 岩のアーチ・岩山の張り出しの下に、くぐれない 1〜2 段のすき間がない (2026-11-08 の声「火のバイオームのところ、高さが無く通れない場所」)。
+    // 大陸の世界でだけ: アーチの出る土地 (灰の荒野・荒れ地・砂漠・丘) のチャンクを作り、岩の下が 1〜2 段の空きで、その下が地面の所を数える
+    private static void overhangs(MinecraftServer server) {
+        List<String> f = new ArrayList<>();
+        ServerLevel level = server.overworld();
+        if (!(level.getChunkSource().getGenerator() instanceof ContinentChunkGenerator)) {
+            SkyAbyss.LOGGER.info("SELFTEST continent overhangs PASSED (skipped: not a continent world)");
+            return;
+        }
+        ContinentMap map = ContinentMap.get();
+        java.util.Set<net.minecraft.world.level.block.Block> rocks = new java.util.HashSet<>();
+        for (ContinentScatter.Rock r : new ContinentScatter.Rock[] {ContinentScatter.ASH_ROCK}) {
+            rocks.add(r.top());
+        }
+        rocks.add(Blocks.BASALT);
+        rocks.add(Blocks.BLACKSTONE);
+        rocks.add(Blocks.TUFF);
+        int chunks = 0;
+        int overhangCols = 0;
+        int low = 0;
+        String first = null;
+        java.util.Map<String, Integer> survey = new java.util.TreeMap<>();
+        java.util.Map<String, String> surveyAt = new java.util.HashMap<>();
+        for (int x = -1900; x <= 1900 && chunks < 400; x += 32) {
+            for (int z = -1900; z <= 1900 && chunks < 400; z += 32) {
+                if (map.biome(x, z) != ContinentBiomes.ERODED_BADLANDS) {
+                    continue;
+                }
+                chunks++;
+                net.minecraft.world.level.chunk.ChunkAccess chunk = level.getChunk(x >> 4, z >> 4);
+                for (int dx = 0; dx < 16; dx++) {
+                    for (int dz = 0; dz < 16; dz++) {
+                        int bx = (x & ~15) + dx;
+                        int bz = (z & ~15) + dz;
+                        int top = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, dx, dz);
+                        for (int y = top; y > top - 14; y--) {
+                            BlockPos p = new BlockPos(bx, y, bz);
+                            if (!rocks.contains(level.getBlockState(p).getBlock()) || !level.getBlockState(p.below()).isAir()) {
+                                continue;
+                            }
+                            overhangCols++;
+                            int gap = 0;
+                            while (gap < 3 && level.getBlockState(p.below(1 + gap)).isAir()) {
+                                gap++;
+                            }
+                            if (gap <= 2 && level.getBlockState(p.below(1 + gap)).blocksMotion()) {
+                                low++;
+                                if (first == null) {
+                                    first = p.toShortString();
+                                }
+                                if (low <= 6) {
+                                    StringBuilder col = new StringBuilder();
+                                    for (int yy = 4; yy >= -5; yy--) {
+                                        col.append(yy).append('=').append(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(p.above(yy)).getBlock()).getPath()).append(' ');
+                                    }
+                                    SkyAbyss.LOGGER.info("SELFTEST continent overhangs column at {} biome {} map surface {}: {}", p.toShortString(), map.biome(bx, bz), map.surface(bx, bz), col);
+                                }
+                            }
+                        }
+                        // 調べ (失敗にはしない): 岩に限らず、固い塊の下に 1〜2 段の空きがあり、その下が地面の所を、ブロックごとに数える
+                        for (int y = top; y > top - 14; y--) {
+                            BlockPos p = new BlockPos(bx, y, bz);
+                            net.minecraft.world.level.block.state.BlockState st = level.getBlockState(p);
+                            if (!st.blocksMotion() || st.is(net.minecraft.tags.BlockTags.LEAVES) || st.is(net.minecraft.tags.BlockTags.LOGS) || !level.getBlockState(p.below()).isAir()) {
+                                continue;
+                            }
+                            int gap = 0;
+                            while (gap < 3 && level.getBlockState(p.below(1 + gap)).isAir()) {
+                                gap++;
+                            }
+                            if (gap <= 2 && level.getBlockState(p.below(1 + gap)).blocksMotion()) {
+                                String key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(st.getBlock()).getPath();
+                                survey.merge(key, 1, Integer::sum);
+                                surveyAt.putIfAbsent(key, p.toShortString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (var e : survey.entrySet()) {
+            SkyAbyss.LOGGER.info("SELFTEST continent overhangs survey: {} x{} (first at {})", e.getKey(), e.getValue(), surveyAt.get(e.getKey()));
+        }
+        if (chunks < 10) {
+            f.add("too few ash-waste chunks sampled: " + chunks);
+        }
+        if (low > 0) {
+            f.add(low + " rock overhangs with a 1-2 block gap over the ground (first at " + first + ")");
+        }
+        if (f.isEmpty()) {
+            SkyAbyss.LOGGER.info("SELFTEST continent overhangs PASSED ({} ash-waste chunks, {} rock undersides, none 1-2 blocks over the ground)", chunks, overhangCols);
+        } else {
+            for (String s : f) {
+                SkyAbyss.LOGGER.error("SELFTEST continent overhangs FAILED: {}", s);
+            }
+        }
     }
 
     private static void run(MinecraftServer server) {

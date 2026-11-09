@@ -1,0 +1,27 @@
+# 心臓の後のボスを「B 切り絵の悪夢」に塗り直した見た目 (tools/gen/mobs/paper_bosses.py・client/entity/PaperCutLayer)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_bosses.txt -PshotsName=paper_bosses
+world paper_bosses_c flat
+size 1600 900
+timeout 1800
+render 8
+guiscale 2
+wait 80
+cmd skyabyss cinematic stop
+close
+cmd gamemode spectator
+cmd time set 18000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+chat clear
+cmd summon skyabyss:full_keeper 0 -60 10 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:waning_blade 12 -60 10 {NoAI:1b,Rotation:[180f,0f]}
+cmd tp @s 0 -57.5 3 0 8
+wait 60
+shot keeper_close
+cmd tp @s 12 -57.5 4 0 8
+wait 40
+shot blade_close
+cmd tp @s 6 -56 -6 0 10
+wait 40
+shot both

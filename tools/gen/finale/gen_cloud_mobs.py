@@ -834,7 +834,12 @@ SOUNDS = {
 
 
 def sounds():
-    wjson(os.path.join(AF, "sounds.json"), {k: {"subtitle": "subtitles.skyabyss_finale." + k, "sounds": v} for k, v in SOUNDS.items()})
+    # 今ある行 (ほかの生成器が書いた終章の主・敵の声) は残して足す。前は丸ごと書き直して、雲海の敵 16 体の声 48 行を二度消していた
+    path = os.path.join(AF, "sounds.json")
+    cur = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+    for k, v in SOUNDS.items():
+        cur[k] = {"subtitle": "subtitles.skyabyss_finale." + k, "sounds": v}
+    wjson(path, cur)
 
 
 def main():

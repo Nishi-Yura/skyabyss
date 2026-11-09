@@ -23,5 +23,7 @@
   "message.skyabyss.return_beacon.leaving": "光に包まれ、真ん中へ運ばれていく。",
   "message.skyabyss.return_beacon.confirm": "地上へ下りる？ 5 秒以内にもう一度笛を使うと下りる",
   "message.skyabyss.return_beacon.descending": "笛の音とともに、足もとが遠のいていく。",
-  "message.skyabyss.arrival.fell": "足を踏み外した。待機場所へ戻された。"
+  "message.skyabyss.arrival.fell": "足を踏み外した。待機場所へ戻された。",
+  "message.skyabyss.titan_end.gathered": "心臓の鼓動が止まった。仲間のいる心臓の部屋へ呼び戻された",
+  "message.skyabyss.titan_end.back_to_shrine": "巨神の歌がほどけ、祠へ戻ってきた"
 }

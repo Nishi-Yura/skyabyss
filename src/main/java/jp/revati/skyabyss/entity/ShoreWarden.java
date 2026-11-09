@@ -136,7 +136,7 @@ public class ShoreWarden extends GroundFoe {
         float scale = StoneWhaleHeart.scaleFor(Math.min(n, jp.revati.skyabyss.party.Parties.MAX_MEMBERS));
         AttributeInstance health = getAttribute(Attributes.MAX_HEALTH);
         if (health != null && scale > 1f) {
-            health.setBaseValue(Math.min(1024, health.getBaseValue() * scale));
+            health.setBaseValue(health.getBaseValue() * scale);
             setHealth(getMaxHealth());
         }
     }

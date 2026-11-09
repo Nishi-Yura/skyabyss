@@ -31,6 +31,8 @@ public class EmberMouthEntity extends Entity implements jp.revati.skyabyss.titan
 
     @Nullable
     private UUID titanId;
+    // 口に立って渡らなかった人をログに書いた時刻 (書きすぎない)
+    private static final java.util.Map<UUID, Long> LOGGED = new java.util.HashMap<>();
 
     public EmberMouthEntity(EntityType<? extends EmberMouthEntity> type, Level level) {
         super(type, level);
@@ -62,14 +64,26 @@ public class EmberMouthEntity extends Entity implements jp.revati.skyabyss.titan
             discard();
             return;
         }
-        if (tickCount % 2 != 0 || !titan.mouthOpen()) {
+        if (tickCount % 2 != 0) {
             return;
         }
-        AABB around = getBoundingBox().inflate(9.0);
+        AABB around = getBoundingBox().inflate(12.0);
         for (ServerPlayer player : level().getEntitiesOfClass(ServerPlayer.class, around)) {
-            if (!player.isSpectator() && titan.inMouth(player.getX(), player.getY(), player.getZ())
-                    && jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.EMBER)) {
-                EmberTravel.boardFromMouth(player, titan);
+            if (player.isSpectator() || !titan.inMouth(player.getX(), player.getY(), player.getZ())) {
+                continue;
+            }
+            boolean sees = jp.revati.skyabyss.titan.TitanVisibility.sees(player, jp.revati.skyabyss.progress.Titans.EMBER);
+            boolean took = sees && titan.mouthOpen() && EmberTravel.boardFromMouth(player, titan);
+            if (!took) {
+                // 口の中に立っても渡らなかった理由を残す (試遊のログで分かるように。人ごとに 10 秒に一度)
+                Long last = LOGGED.get(player.getUUID());
+                long now = level().getGameTime();
+                if (last == null || now - last >= 200) {
+                    LOGGED.put(player.getUUID(), now);
+                    jp.revati.skyabyss.SkyAbyss.LOGGER.info("Ember mouth: {} stands in the mouth but was not taken in (sees {}, open {}, cooling {}, may board {})",
+                            player.getGameProfile().getName(), sees, titan.mouthOpen(), EmberTravel.PASSAGE.coolingDown(player),
+                            jp.revati.skyabyss.progress.Progression.canBoard(player, jp.revati.skyabyss.progress.Titans.EMBER));
+                }
             }
         }
     }

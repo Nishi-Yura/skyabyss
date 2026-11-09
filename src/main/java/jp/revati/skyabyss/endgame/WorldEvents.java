@@ -197,6 +197,14 @@ public final class WorldEvents {
                 }
             } else if (near != null && e.stage == Event.HERALD && (WorldEventFight.heraldLeft(level, e) == 0 || now >= e.heraldUntil)) {
                 spawnBoss(level, e, near);
+            } else if (e.stage == Event.HERALD && now % 20 == 0) {
+                // 前触れの残り (2026-11-08 の声「エリアに何体敵残ってるか出してほしい」)
+                int left = WorldEventFight.heraldLeft(level, e);
+                for (ServerPlayer p : level.players()) {
+                    if (!p.isSpectator() && Math.hypot(p.getX() - e.spot.getX(), p.getZ() - e.spot.getZ()) <= SPAWN_NEAR) {
+                        Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.world_event.herald_left", left));
+                    }
+                }
             }
         } else if (boss instanceof Mob m && m.isAlive()) {
             if (Math.hypot(m.getX() - e.spot.getX(), m.getZ() - e.spot.getZ()) > LEASH) {
@@ -591,6 +599,17 @@ public final class WorldEvents {
                         }))
                         .then(Commands.literal("end").executes(c -> {
                             leave(c.getSource().getServer().overworld());
+                            return 1;
+                        }))
+                        // 見た目の確かめ: いる所の前に、封じの輪と同じ金色の「ここに立つ」印を三つ (10 秒)
+                        .then(Commands.literal("goalrings").executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            for (int i = 0; i < 3; i++) {
+                                double a = Math.PI / 2 + (i - 1) * 0.7;
+                                jp.revati.skyabyss.combat.Telegraph.in(p.serverLevel(), jp.revati.skyabyss.combat.TelegraphShape.circle(
+                                        p.getX() - Math.cos(a) * 7 * (i == 1 ? 1.3 : 1), p.getZ() - Math.sin(a) * 7 * (i == 1 ? 1.3 : 1), WorldEventFight.SEAL_RADIUS))
+                                        .floor(p.getY()).warn(0).active(200).goal().start();
+                            }
                             return 1;
                         }))));
     }

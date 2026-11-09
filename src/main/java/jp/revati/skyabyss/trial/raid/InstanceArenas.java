@@ -143,7 +143,8 @@ public final class InstanceArenas {
     public static boolean heartBuilt(ServerLevel level, String titan) {
         BlockPos in = heartEntry(titan);
         // 立つ所と頭は通れればよい (雷翼の間は頭の高さに見えない光のブロックを散らしてある)
-        return in != null && !level.getBlockState(in.below()).isAir() && level.getBlockState(in).getCollisionShape(level, in).isEmpty()
+        // 足もとは固い床 (海の世界の潮殻の背では、建つ前は水。水は空気でないので「建っている」と見ていた)
+        return in != null && !level.getBlockState(in.below()).getCollisionShape(level, in.below()).isEmpty() && level.getBlockState(in).getCollisionShape(level, in).isEmpty()
                 && level.getBlockState(in.above()).getCollisionShape(level, in.above()).isEmpty();
     }
 

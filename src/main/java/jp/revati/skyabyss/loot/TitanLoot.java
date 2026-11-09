@@ -491,6 +491,8 @@ public final class TitanLoot {
     public static int handOver(MinecraftServer server, UUID uuid, @Nullable ServerPlayer player, List<ItemStack> items, int xp) {
         // 装備は封の箱に替えて渡す (docs/design/52。交換・初回の選択などは LootBoxes.direct の中で呼ぶ)
         items = jp.revati.skyabyss.loot.box.LootBoxes.wrapAll(server, uuid, items);
+        // 報いの祭壇に「ほかに手に入れたもの」として並べる控え
+        RewardTally.record(uuid, server.getTickCount(), items);
         if (!canReceive(player)) {
             TitanMemoryData.Pending pending = memory(server).pending(uuid);
             items.forEach(s -> pending.items.add(s.copy()));

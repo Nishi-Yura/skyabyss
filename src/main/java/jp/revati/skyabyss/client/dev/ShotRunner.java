@@ -710,6 +710,14 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "acccharm" -> {
+                // acccharm <護符の id> : 自分のクライアントの護符の枠 (0 番) に品を入れる (画面の護符の枠の確認用)。引数なし = 空にする
+                jp.revati.skyabyss.item.accessory.AccessoryData data = mc.player.getData(jp.revati.skyabyss.item.accessory.AccessorySetup.DATA);
+                data.items.set(0, line.args().length == 0 ? net.minecraft.world.item.ItemStack.EMPTY
+                        : new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                                ResourceLocation.fromNamespaceAndPath("skyabyss", line.arg(0)))));
+                return true;
+            }
             case "watcher" -> {
                 // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
                 if (first) {
@@ -815,6 +823,18 @@ public final class ShotRunner {
             case "guiscale" -> {
                 mc.options.guiScale().set(line.intArg(0));
                 mc.resizeDisplay();
+                return true;
+            }
+            case "pin" -> {
+                // pin <x> <z> : 旅の地図のピンを置く (pin clear で全部外す)
+                String[] args = line.args();
+                if (args.length > 0 && args[0].equals("clear")) {
+                    for (var p : new java.util.ArrayList<>(jp.revati.skyabyss.client.map.MapPrefs.pins())) {
+                        jp.revati.skyabyss.client.map.MapPrefs.remove(p);
+                    }
+                } else {
+                    jp.revati.skyabyss.client.map.MapPrefs.add(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                }
                 return true;
             }
             case "chat" -> {
@@ -1211,6 +1231,10 @@ public final class ShotRunner {
             case "skills_ext" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().extPage(0, jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
+            // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
+            case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
+            case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
+                    jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);

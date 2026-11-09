@@ -1,0 +1,29 @@
+# 火の心臓の戦いの中: 灰溜まりの白い灰と、ボスの帯の体力の数 (2026-11-09 の声)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ember_heart_fight.txt -PshotsName=ember_heart_fight
+world heart_rooms2 continent
+size 1600 900
+timeout 5000
+render 8
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd difficulty normal
+cmd skyabyss play boss ember
+wait 1800
+cmd skyabyss cinematic stop
+close
+cmd effect give @s minecraft:resistance 600 4 true
+cmd effect give @s minecraft:night_vision 600 0 true
+cmd gamemode adventure
+cmd execute in skyabyss:ember_back run tp @s 4352 52 4086 0 20
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 100
+shot fight_bar
+cmd execute in skyabyss:ember_back run tp @s 4348 52 4086 30 35
+wait 40
+shot fight_pools

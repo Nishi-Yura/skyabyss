@@ -479,6 +479,7 @@ public final class Ch3GroundSelfTest {
         if (e instanceof Mob mob) {
             mob.moveTo(base.getX() + 1.5, base.getY(), base.getZ() + 1.5, 0, 0);
             mob.addTag(jp.revati.skyabyss.entity.GuardMob.TEMP_TAG);
+            jp.revati.skyabyss.combat.MobTuning.untune(mob);
             level.addFreshEntity(mob);
             // 場所の印は入れたあとに付ける (印つきで入ってくる個体は、保存から戻ったものとして SiteSpawner が消す)
             mob.addTag(SiteSpawner.TAG);

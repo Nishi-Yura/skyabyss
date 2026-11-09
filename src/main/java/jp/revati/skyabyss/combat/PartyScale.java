@@ -35,12 +35,8 @@ public final class PartyScale {
 
     // 人数を決めて書く (1 人なら何もしない)
     public static void apply(LivingEntity boss, int players) {
-        double k = HeartBalance.partyScale(players);
-        if (k > 1) {
-            boss.getPersistentData().putDouble(KEY, k);
-        } else {
-            boss.getPersistentData().remove(KEY);
-        }
+        // 2026-11-09: 受ける傷を割るのをやめ、体力に掛ける (combat/Hardness)
+        Hardness.set(boss, "party", HeartBalance.partyScale(players));
     }
 
     // 主のまわり radius の内にいる人 (観戦者を除く) の数で書く。棲み家に現れる名のある敵など、舞台の一覧がない所用
@@ -56,11 +52,7 @@ public final class PartyScale {
 
     // 硬さを書く (1 なら消す)
     public static void resist(LivingEntity boss, double k) {
-        if (k > 1) {
-            boss.getPersistentData().putDouble(RESIST, k);
-        } else {
-            boss.getPersistentData().remove(RESIST);
-        }
+        Hardness.set(boss, "resist", k);
     }
 
     // 型ごとの硬さ (なければ 1)
@@ -71,26 +63,23 @@ public final class PartyScale {
 
     // 書いてある倍率 (人数 × 硬さ × 型ごとの硬さ。なければ 1)
     public static double of(LivingEntity e) {
-        double k = e.getPersistentData().getDouble(KEY);
-        double r = e.getPersistentData().getDouble(RESIST);
-        return (k > 1 ? k : 1) * (r > 1 ? r : 1) * typeResist(e);
+        return Hardness.get(e, "party") * Hardness.get(e, "resist") * Hardness.get(e, "type");
     }
 
-    // 自己テスト用: 人数と硬さを外して素の傷を見る
+    // 自己テスト用: 人数と硬さを外して素の体力を見る
     public static void clearForTest(LivingEntity e) {
-        e.getPersistentData().remove(KEY);
-        e.getPersistentData().remove(RESIST);
+        Hardness.set(e, "party", 1);
+        Hardness.set(e, "resist", 1);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
-    static void onIncoming(LivingIncomingDamageEvent event) {
-        LivingEntity target = event.getEntity();
-        if (target.level().isClientSide() || target instanceof Player || !(event.getSource().getEntity() instanceof Player)) {
-            return;
-        }
-        double k = of(target);
-        if (k > 1) {
-            event.setAmount((float) (event.getAmount() / k));
+    // 型ごとの硬さは、湧いたときに体力へ掛ける
+    @SubscribeEvent
+    static void onJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof LivingEntity e && !(e instanceof Player)) {
+            double t = typeResist(e);
+            if (t > 1) {
+                Hardness.set(e, "type", t);
+            }
         }
     }
 }

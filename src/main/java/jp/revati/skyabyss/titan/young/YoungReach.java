@@ -35,20 +35,15 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
-// 子の行き先 (海図の一覧) と、巨神ごとの得意による「届くか」の判定 (docs/design/28 の 4 章)。
-// 行き先: はじまりの地・覚えた碑・出会った巨神 (今いる場所)。眠っている巨神と、まだ姿を見せていない巨神は選べない (理由を添える)。
-// 届くか (判定は生地形の biome だけで行い、チャンクを作らない):
-//   WHALE: どこへでも
-//   STORM: 陸の行き先だけ。海の上は渡らない (160 ブロック以上続く海の上は飛べない)
-//   EMBER: 陸の道が続く行き先だけ (深い水・海は渡らない。川は渡る)
-//   TIDE : 海のある所の行き先 (行き先から 1024 ブロック以内に海がある)。陸は始めと終わりを短く転がるだけ
+// 子の行き先 (海図の一覧) と、巨神ごとの得意 (docs/design/28 の 3.1)。
+// 行き先: はじまりの地・都・覚えた碑・出会った巨神 (今いる場所)・心臓を止めた巨神の祠。
+// 眠っている巨神・まだ姿を見せていない巨神・心臓を止めた巨神 (その人にとってはもう死んでいる。行くのは祠) は選べない (理由を添える)。
+// どの子もどこへでも行く (2026-11-07 の声「鯨が強すぎて他の巨神を使わない・他の巨神は移動できなさすぎる」)。断るのは:
+//   STORM・EMBER: 行き先が海の上 (降りられない)。遠すぎる (4000 より先) はどの子も
+// 違いは速さ (YoungKind.land / water)。道のりの海の割合から所要時間を見積もり、海図に出す。速い子を選ぶのが得意の使い分け
 public final class YoungReach {
     // これより近い行き先へは運ばない
     public static final double MIN_DISTANCE = 64;
-    // 海の上を飛べない長さ (雷翼の雛)
-    private static final double STORM_SEA_LIMIT = 160;
-    // 水の上を渡れない長さ (余燼の仔)
-    private static final double EMBER_WATER_LIMIT = 64;
     private static final int SEA_SEARCH = 1024;
     private static final int SEA_STEP = 32;
 
@@ -109,9 +104,24 @@ public final class YoungReach {
         jp.revati.skyabyss.opening.OpeningSites.shelter(player.server).ifPresent(town -> list.add(build(level, kind, origin, "town", "", "", town, 4, true, bond)));
         TravelWorldData world = TravelWorldData.get(player.server);
         TravelState state = Voyages.state(player);
+        // 行ったことのある土地の町 (2026-11-09 の声「巨神の行ける場所減った？」: 町は都しか選べなかった)
+        int visited = player.getPersistentData().getInt("skyabyss_towns_visited");
+        String[][] towns = {{"whale", "" + jp.revati.skyabyss.world.continent.ContinentMap.WHALE}, {"tide", "" + jp.revati.skyabyss.world.continent.ContinentMap.TIDE},
+                {"storm", "" + jp.revati.skyabyss.world.continent.ContinentMap.STORM}, {"ember", "" + jp.revati.skyabyss.world.continent.ContinentMap.EMBER}};
+        for (String[] t : towns) {
+            BlockPos at = (visited & (1 << Integer.parseInt(t[1]))) != 0 ? jp.revati.skyabyss.world.continent.ContinentLayout.get().town(t[0]) : null;
+            if (at != null) {
+                BlockPos ground = new BlockPos(at.getX(), Math.max(at.getY(), level.getSeaLevel() + 1), at.getZ());
+                list.add(build(level, kind, origin, "town:" + t[0], t[0], "", ground, 4, true, bond));
+            }
+        }
+        // 覚えた碑。大陸を作り直して碑の記録が無くなったもの (前の版の場所) は出さない (選べない行き先が並ぶだけになっていた)
         for (BlockPos pos : state.waymarks) {
             TravelWorldData.Waymark mark = world.waymark(pos);
-            list.add(build(level, kind, origin, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null, bond));
+            if (mark == null) {
+                continue;
+            }
+            list.add(build(level, kind, origin, "w" + pos.asLong(), mark.name(), mark.biome(), pos, 1, true, bond));
         }
         for (String titan : Titans.all()) {
             if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan)) {
@@ -119,7 +129,10 @@ public final class YoungReach {
             }
             Vec3 at = adultPos(level, titan);
             String lock = "";
-            if (TitanDormancy.isResting(player.server, titan)) {
+            if (jp.revati.skyabyss.progress.Progression.stopped(player.server, player.getUUID(), titan)) {
+                // 心臓を止めた巨神は、その人にとってはもう死んでいる (2026-11-07 の声)。会いに行くのは祠 (下の s:)
+                lock = "stopped";
+            } else if (TitanDormancy.isResting(player.server, titan)) {
                 lock = "sleeping";
             } else if (at == null) {
                 lock = "absent";
@@ -146,23 +159,26 @@ public final class YoungReach {
         double distance = Math.hypot(pos.getX() + 0.5 - origin.x, pos.getZ() + 0.5 - origin.z);
         String lock = valid && distance >= MIN_DISTANCE ? refuse(level, kind, origin, pos) : "";
         return new TravelNetwork.Dest(id, name, biome, pos.getX(), pos.getY(), pos.getZ(), dkind, valid && lock.isEmpty(),
-                estimateSeconds(kind, distance, bond), lock);
+                estimateTicks(distance, routeSpeed(level, kind, origin, pos) * bond) / 20, lock);
     }
 
-    // 運ぶのにかかるおおよその秒数 (画面に出す)
+    // 運ぶのにかかるおおよその秒数 (画面に出す)。speed = 道のりの平均の速さ
     public static int estimateSeconds(YoungKind kind, double distance) {
-        return estimateSeconds(kind, distance, 1.0);
+        return estimateTicks(distance, kind.speed) / 20;
     }
 
     public static int estimateSeconds(YoungKind kind, double distance, double bond) {
-        double speed = kind.speed * bond;
+        return estimateTicks(distance, kind.speed * bond) / 20;
+    }
+
+    public static int estimateTicks(double distance, double speed) {
         double ticks = 160 /* 出発の待ち */ + 40 /* 舞い上がる */ + 120 /* 降りる */;
         if (distance > YoungTrip.VEIL_DISTANCE) {
-            ticks += YoungTrip.CRUISE_BEFORE_VEIL + YoungTrip.VEIL_FADE * 2 + YoungTrip.VEIL_EXIT / speed * 1.2;
+            ticks += YoungTrip.cruiseTicks(distance, speed) + YoungTrip.VEIL_FADE * 2 + YoungTrip.VEIL_EXIT / speed * 1.2;
         } else {
             ticks += distance / speed * 1.2;
         }
-        return (int) Math.round(ticks / 20.0);
+        return (int) Math.round(ticks);
     }
 
     public static Component destName(@Nullable TravelNetwork.Dest dest) {
@@ -182,50 +198,41 @@ public final class YoungReach {
             return "too_far";
         }
         switch (kind.gait) {
-            case SKY -> {
-                return "";
-            }
             case RIDGE -> {
-                if (sea(level, dest.getX(), dest.getZ())) {
-                    return "no_land";
-                }
-                return seaRun(level, from, dest, STORM_SEA_LIMIT) ? "open_sea" : "";
+                return sea(level, dest.getX(), dest.getZ()) ? "no_land" : "";
             }
             case GROUND -> {
-                if (sea(level, dest.getX(), dest.getZ()) || seaRun(level, from, dest, EMBER_WATER_LIMIT)) {
-                    return "water";
-                }
+                return sea(level, dest.getX(), dest.getZ()) ? "water" : "";
+            }
+            default -> {
                 return "";
             }
-            case SEA -> {
-                return seaNear(level, dest) == null ? "no_sea" : "";
+        }
+    }
+
+    // 道のりの海の割合 (0〜1。32 ブロックごとの biome。チャンクを作らない)
+    public static double seaShare(ServerLevel level, Vec3 from, BlockPos to) {
+        double d = Math.hypot(to.getX() - from.x, to.getZ() - from.z);
+        int n = Math.max(1, (int) (d / 32));
+        int wet = 0;
+        for (int i = 1; i <= n; i++) {
+            double t = (double) i / n;
+            if (sea(level, Mth.lerp(t, from.x, to.getX()), Mth.lerp(t, from.z, to.getZ()))) {
+                wet++;
             }
         }
-        return "";
+        return (double) wet / n;
+    }
+
+    // 道のりでの平均の速さ (ブロック/tick。陸と海の割合で重みを付けた調和平均)
+    public static double routeSpeed(ServerLevel level, YoungKind kind, Vec3 from, BlockPos to) {
+        double w = seaShare(level, from, to);
+        return 1.0 / (w / kind.water + (1 - w) / kind.land);
     }
 
     private static boolean sea(ServerLevel level, double x, double z) {
         Holder<Biome> b = level.getUncachedNoiseBiome(QuartPos.fromBlock(Mth.floor(x)), QuartPos.fromBlock(level.getSeaLevel() - 4), QuartPos.fromBlock(Mth.floor(z)));
         return b.is(BiomeTags.IS_OCEAN);
-    }
-
-    // 二点のあいだに、limit ブロック以上続く海があるか (32 ブロックごとの biome)
-    private static boolean seaRun(ServerLevel level, Vec3 from, BlockPos to, double limit) {
-        double d = Math.hypot(to.getX() - from.x, to.getZ() - from.z);
-        int n = Math.max(1, (int) (d / 32));
-        int run = 0;
-        for (int i = 1; i < n; i++) {
-            double t = (double) i / n;
-            if (sea(level, Mth.lerp(t, from.x, to.getX()), Mth.lerp(t, from.z, to.getZ()))) {
-                run++;
-                if (run * 32.0 >= limit) {
-                    return true;
-                }
-            } else {
-                run = 0;
-            }
-        }
-        return false;
     }
 
     // 行き先にいちばん近い海 (地形を作らない)。dest が海ならそこ。見つからなければ null

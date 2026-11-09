@@ -209,7 +209,7 @@ public final class WorldEventFight {
             all &= s.full();
             // 輪 (満ちたものは見せない)。満ちた分だけ光の柱が高い
             if (!s.full()) {
-                Telegraph.in(level, TelegraphShape.circle(s.pos.x, s.pos.z, SEAL_RADIUS)).floor(s.pos.y).warn(0).active(22).safe().start();
+                Telegraph.in(level, TelegraphShape.circle(s.pos.x, s.pos.z, SEAL_RADIUS)).floor(s.pos.y).warn(0).active(22).goal().start();
                 double h = 1 + 6 * s.fill;
                 for (double y = 0; y < h; y += 0.5) {
                     level.sendParticles(ParticleTypes.END_ROD, s.pos.x, s.pos.y + y, s.pos.z, 1, 0.05, 0, 0.05, 0);

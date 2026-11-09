@@ -54,7 +54,7 @@
   "mount.skyabyss.look.sky_ray": "空鱏",
   "mount.skyabyss.look.sky_ray.desc": "雲海を泳ぐ大きなエイ。乗ると見ている向きへ飛ぶ（跳びのキーで羽ばたく）。",
   "mount.skyabyss.look.carriage": "幌の荷車",
-  "mount.skyabyss.look.carriage.desc": "角の荷獣二頭が引く四つ輪の荷車。御者台と、幌の下の腰掛けに六人まで乗れる。",
+  "mount.skyabyss.look.carriage.desc": "角の荷獣二頭が引く四つ輪の荷車。人数の強化を 2 段にすると、御者台と幌の下の腰掛けに六人まで乗れる（ほかの乗り物は二人まで）。",
   "gui.skyabyss.mount.locked.ch6": "五章で並ぶ",
   "gui.skyabyss.mount.locked.ch7": "月へ渡ると並ぶ",
   "gui.skyabyss.mount.locked.ch8": "終章のあとで並ぶ",
@@ -79,5 +79,6 @@
   "message.skyabyss.mount.bond.3": "%s との絆が深まった（III）。鞍に飾りの房がつく",
   "message.skyabyss.mount.name_locked": "名前を付けられるのは、絆 II（乗った距離 20 km）になってから",
   "message.skyabyss.mount.named": "乗り物の名前を「%s」にした",
-  "message.skyabyss.mount.name_cleared": "乗り物の名前を外した"
+  "message.skyabyss.mount.name_cleared": "乗り物の名前を外した",
+  "mount.skyabyss.stat.seats_now": "人数%s"
 }

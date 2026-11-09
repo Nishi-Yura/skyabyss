@@ -88,22 +88,18 @@ public final class WhaleSolo {
         best.hurt(p.damageSources().playerAttack(p), 7f);
     }
 
-    // WR4: 今の踊り場の手元の突起を叩き、階段が伸びきったら次の踊り場へ上る
+    // WR4: 今の踊り場で次の登りの棚が出ている間に渡る。引っ込んでいたら隅のこぶで押さえる
     private static void shaft(RaidCtx ctx, WhaleShaftRoom room, ServerPlayer p, int t) {
         int f = room.tier();
         if (f >= WhaleShaftRoom.FLIGHTS || t % 10 != 0) {
             return;
         }
-        if (room.grown(f) >= WhaleShaftRoom.RISE) {
+        if (room.phase(ctx, f) == 0) {
             RaidSolo.put(p, room.landingSpot(ctx, f + 1));
             return;
         }
-        if (f > 0) {
-            RaidSolo.put(p, room.landingSpot(ctx, f));
-        }
-        if (t % 40 == 0) {
-            // 床の手元の突起は歩いて行って叩く (use がそばへ移す)
-            RaidSolo.use(ctx, room, p, room.localSwitch(ctx, f), true);
+        if (!room.holding(ctx, f)) {
+            RaidSolo.use(ctx, room, p, room.knob(ctx, f), true);
         }
     }
 

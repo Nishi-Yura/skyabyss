@@ -54,7 +54,7 @@
   "mount.skyabyss.look.sky_ray": "Sky Ray",
   "mount.skyabyss.look.sky_ray.desc": "A great ray that swims the cloud sea. It flies where you look (jump to flap).",
   "mount.skyabyss.look.carriage": "Covered Wagon",
-  "mount.skyabyss.look.carriage.desc": "A four-wheeled wagon drawn by two horn beasts. Up to six ride: the driver's bench and the benches under the hood.",
+  "mount.skyabyss.look.carriage.desc": "A four-wheeled wagon drawn by two horned beasts. With the seats upgrade at tier 2, six can ride on the driver's bench and under the hood (other mounts carry two).",
   "gui.skyabyss.mount.locked.ch6": "Unlocks in ch. 5",
   "gui.skyabyss.mount.locked.ch7": "Unlocks on the moon",
   "gui.skyabyss.mount.locked.ch8": "After the finale",
@@ -79,5 +79,6 @@
   "message.skyabyss.mount.bond.3": "Your bond with %s deepened (III): tassels on the saddle",
   "message.skyabyss.mount.name_locked": "You can name your mount from bond II (20 km ridden)",
   "message.skyabyss.mount.named": "Named your mount \"%s\"",
-  "message.skyabyss.mount.name_cleared": "Removed your mount's name"
+  "message.skyabyss.mount.name_cleared": "Removed your mount's name",
+  "mount.skyabyss.stat.seats_now": "Seats %s"
 }

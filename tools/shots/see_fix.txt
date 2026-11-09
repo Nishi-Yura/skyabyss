@@ -1,0 +1,40 @@
+# 2026-11-09: 裏面の透けを直したモデル (凹んだ多角形の耳切り・袖の向き・筒のねじれ) の見た目の確かめ
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/see_fix.txt -PshotsName=see_fix
+world shots flat
+size 1280 720
+timeout 1800
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode creative
+camera 0 -60 -10 0 6
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 40
+chat clear
+cmd summon skyabyss:storyteller -2 -60 0 {NoAI:1b,Rotation:[160f,0f]}
+cmd summon skyabyss:bone_mortar 2.5 -60 0 {NoAI:1b,Rotation:[200f,0f]}
+camera 0 -58.8 -5 0 12
+wait 40
+shot story_mortar
+camera 0 -59.6 -3.4 0 4
+wait 20
+shot story_mortar_low
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:bell_hermit -3 -60 0 {NoAI:1b,Rotation:[150f,0f]}
+cmd summon skyabyss:horn_beetle 3 -60 0 {NoAI:1b,Rotation:[210f,0f]}
+camera 0 -58.6 -7 0 10
+wait 40
+shot hermit_beetle
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:rewinder 0 -60 1 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:waning_blade 4 -60 1 {NoAI:1b,Rotation:[200f,0f]}
+camera 1.5 -57.4 -7 0 6
+wait 40
+shot rewinder_blade

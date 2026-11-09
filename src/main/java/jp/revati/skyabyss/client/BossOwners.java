@@ -36,13 +36,18 @@ public final class BossOwners {
         if (hit != null && hit.tick == tick && hit.levelId == levelId && Objects.equals(hit.name, name)) {
             return (T) hit.owner;
         }
-        T found = mc.level.getEntitiesOfClass(type, mc.player.getBoundingBox().inflate(radius), e -> e.isAlive() && e.getDisplayName().getString().equals(name))
+        T found = mc.level.getEntitiesOfClass(type, mc.player.getBoundingBox().inflate(radius), e -> e.isAlive() && sameName(e.getDisplayName().getString(), name))
                 .stream().min(Comparator.comparingDouble(e -> e.distanceToSqr(mc.player))).orElse(null);
         if (CACHE.size() > 64) {
             CACHE.clear();
         }
         CACHE.put(key, new Hit(tick, levelId, name, found));
         return found;
+    }
+
+    // 帯の名前が「深淵の〜」「封じ 2/3」などで包まれていても、中にその名があれば持ち主とみなす (包むと持ち主が見つからず、バニラの帯に戻っていた)
+    static boolean sameName(String entity, String bar) {
+        return bar.equals(entity) || (!entity.isEmpty() && bar.contains(entity));
     }
 
     // この体が、いま画面上のボスの帯の持ち主か (直前の数 tick に見つかった持ち主。頭の上の帯と二重に出さないため)

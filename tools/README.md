@@ -52,6 +52,7 @@ python tools/install/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly
 ## モデルの透けの検査と修理・心臓の演出
 
 - **水密性の検査 (`python tools/audit/mesh_audit.py`)**: 低ポリのメッシュ (`assets/skyabyss/lowpoly/**`) を骨ごとに、開いた辺・向きの食い違い・逆法線・つぶれた三角形・裏面透け (外からの光線の最初の当たりが裏面)・親子の付け根 (埋まりが足りない・離れる。アニメの最大回転で曲げて見る) を数え、`docs/review/mesh_audit_report.md` に悪い順で書く。キューブの geo の透けとブロックモデルの欠けた面・宙に浮く部品も見る。**ゲートは `python tools/audit/mesh_audit.py --check`** (数秒。開いた辺・向き違い・逆法線・ブロックの欠けが 1 つでもあれば終了コード 1。`--full` で裏面透け (全体の 0.2% 超で失敗)、`--joints` で付け根も失敗にする)。`--selftest` は検査器自身の自己テストと、入っている全メッシュの `--check`。
+- **関節を沈める (`python -I tools/audit/sink_joints.py [メッシュ名 …] [--dry]`)**: 監査で付け根が離れる・浅い子の骨の、支点側 3 割の頂点を支点の方へ少しずつ動かし、休めの姿勢でもアニメの最大の回転でも親に埋まるまで沈める (部品の長さの 45% まで。玉は足さない)。沈めた骨はメッシュの `skyabyss_sunk` に書く。生成器で作り直したら、もう一度流す。浮いて回る飾り (宙の粒・輪・籠の中の目など) は `mesh_audit.FLOATERS` で付け根を見ない。
 - **水密にする (`python tools/lib/mesh_close.py --all`)**: 生成スクリプトは見える面だけを書くので、書き出したメッシュは縁が開いている。`tools/lib/mesh_close.py` が、開いた縁の輪を蓋で塞ぎ (蓋は内側へ少し引っ込めた扇。貼りつく面と同じ平面で z が競らない)、向きの食い違い・逆法線を直し、子の骨の回転軸 (pivot) に袖 (`collar`: 根元の輪の断面のまま細めた筒を親の中へ延ばす。輪がない閉じた部品は親へ向いた端の面を取り `extrude_root` で押し出す) を足す。`install_lowpoly*.py` ・`tools/install/install_armor_lowpoly.py` ・`tools/install/install_whale_road_assets.py` は書き出すときに自動で通す (書き出し直しても水密のまま)。巨神は蓋の頂点の始まり (`cap_vertex_start`) を JSON に残し、読み込み側 (`LowPolyMesh`) が蓋の面を暗く出す。ブロックモデルの外へ向いた欠け面は `python tools/once/fix_block_faces.py` が足す。
 - 関節の見た目の確認 (休め / 動作の最大付近。モブを目の前の決まった位置に出し、体の高さに合わせて構える): `python -I tools/gen/shots/gen_joints_shots.py` → `./gradlew runShots --no-daemon -Pscript=tools/shots/joints.txt` → `python -I tools/sheets/joints_sheet.py` で `docs/review/previews/joints_sheet.png`。付け根が抜ける・浅い骨は `mesh_close.fix_joints` が付け根の頂点を親の中へ沈めて直す (新しい面は足さない)。
 - 直す前 / 直した後の接写の比べ表: `python tools/sheets/watertight_sheet.py` → `docs/review/previews/watertight_sheet.png` (関節をアニメの最大回転まで曲げ、裏面が見える所を紫で塗る)
@@ -206,6 +207,7 @@ PYTHONPATH=tools/lib python tools/audit/check_generators.py --list          # �
 ```
 python tools/audit/check_lang_keys.py     # コード・データの文字列リテラルの翻訳キーが ja_jp / en_us にあるか (LangSelfTest (4) と同じ規則。偽陽性の許可リストは両方に同じ内容)
 python tools/audit/check_band_width.py    # 目的の帯の文が幅 230 px に入るか (ObjectiveBandSelfTest と同じ字幅表。目印の付く目的は距離の札の分を引く)
+python tools/audit/check_reach.py         # 設計図と地下の階 (dungeon/*.json) の、上がれない足場 (手すり・箱・地下の木の床)。許す例は ALLOW に理由つきで
 python tools/audit/check_stairs.py        # 設計図 (data/skyabyss/opening/*.json) の階段: 床の逆さ・逆向き・並びの食い違い・1 段より高い段・埋まった段・戸口の段・屋根の抜け・角の抜け。--sbd <書き出し> で Java で建てる物 (祠は SKYABYSS_DUMP=shrine_<巨神>) も。都は town.py が同じ規則の fix() で直してから書く
 python tools/audit/check_light.py        # 都の街路・広場・階段の明るさ (夜の一番暗い見え方。ブロックの明るさが 4 未満の所を数える)。town.py の street_light が、中心の暗い所の近くの壁に魂の松明・柱の灯りを足す (道はふさがない)
 ```

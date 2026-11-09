@@ -1110,6 +1110,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "通り道の全員を突き、3 回に 1 度、足もとから骨が噴く。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "最大体力 ",
             "c": "8FDB8F"
           },
@@ -1335,6 +1345,16 @@
           {
             "t": "噛みつき",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "二連が三連になり、背後のダメージが出血に変わる（3 秒）。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -2456,13 +2476,13 @@
     },
     {
       "id": "skyabyss:aspect_core",
-      "name": "アスペクトの芯",
+      "name": "名残の芯",
       "class": "jp.revati.skyabyss.item.extra.GearFreedomItems$AspectCore",
       "stack": 1,
       "tooltip": [
         [
           {
-            "t": "アスペクトの芯",
+            "t": "名残の芯",
             "c": "FF55FF"
           }
         ],
@@ -2811,6 +2831,90 @@
       ]
     },
     {
+      "id": "skyabyss:bolt_slinger_spawn_egg",
+      "name": "雷石投げのスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "雷石投げのスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:storm_jelly_spawn_egg",
+      "name": "雷雲くらげのスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "雷雲くらげのスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:crag_tortoise_spawn_egg",
+      "name": "峰の甲羅のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "峰の甲羅のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:ember_spitter_spawn_egg",
+      "name": "熾吐きのスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "熾吐きのスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:ash_whirl_spawn_egg",
+      "name": "灰の渦のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "灰の渦のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:basalt_scorpion_spawn_egg",
+      "name": "黒石の甲殻のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "黒石の甲殻のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
       "id": "skyabyss:thunder_wolf_spawn_egg",
       "name": "雷狼のスポーンエッグ",
       "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
@@ -2875,6 +2979,118 @@
         [
           {
             "t": "背晶の大蜥蜴のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:fort_warlord_spawn_egg",
+      "name": "骨鎧の野盗王のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "骨鎧の野盗王のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:temple_keeper_spawn_egg",
+      "name": "珊瑚に呑まれた祭司のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "珊瑚に呑まれた祭司のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:ice_lord_spawn_egg",
+      "name": "氷鎧の大熊のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "氷鎧の大熊のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:lava_wyrm_spawn_egg",
+      "name": "熔岩の大蛇のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "熔岩の大蛇のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:bone_lancer_spawn_egg",
+      "name": "骨馬の槍騎兵のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "骨馬の槍騎兵のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:jelly_priestess_spawn_egg",
+      "name": "大海月の巫女のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "大海月の巫女のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:thunder_owl_spawn_egg",
+      "name": "雷の大梟のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "雷の大梟のスポーンエッグ",
+            "c": "FFFFFF"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:lava_toad_spawn_egg",
+      "name": "熔岩の大蛙のスポーンエッグ",
+      "class": "net.neoforged.neoforge.common.DeferredSpawnEggItem",
+      "stack": 64,
+      "tooltip": [
+        [
+          {
+            "t": "熔岩の大蛙のスポーンエッグ",
             "c": "FFFFFF"
           }
         ]
@@ -3743,26 +3959,6 @@
           {
             "t": "巨神の碑",
             "c": "FFFFFF"
-          }
-        ]
-      ]
-    },
-    {
-      "id": "skyabyss:tide_watching_shell",
-      "name": "潮見の貝",
-      "class": "jp.revati.skyabyss.titan.tide.chapter.TideConchItem",
-      "stack": 1,
-      "tooltip": [
-        [
-          {
-            "t": "潮見の貝",
-            "c": "FFFF55"
-          }
-        ],
-        [
-          {
-            "t": "手に持つと、潮殻の巨神のいる向きと遠さ、次の干潮までの時間が画面の下に出る",
-            "c": "AAAAAA"
           }
         ]
       ]
@@ -5211,6 +5407,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "当てた敵を 1 秒、動けなくする（大きな相手は 0.5 秒）。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "近接ダメージ ",
             "c": "8FDB8F"
           },
@@ -5462,6 +5668,16 @@
           {
             "t": "銛打ち",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "敵を引くのではなく、銛で結ぶ。結ばれた敵が動くと近くの仲間も引かれる。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -7527,6 +7743,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "跳んだ元の場所と着地点が雷の輪で結ばれ、間の敵に ×0.8。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "体力吸収 ",
             "c": "8FDB8F"
           },
@@ -7778,6 +8004,16 @@
           {
             "t": "鉤寄せ",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "引いた敵を 1 か所へ寄せる（群れが固まる）。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -9102,6 +9338,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "熾火が 8 秒、敵が熾火の中にいる間、攻撃力 −10%。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "クールダウン ",
             "c": "8FDB8F"
           },
@@ -9335,6 +9581,16 @@
           {
             "t": "火移し",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "仲間 2 人まで同時に焼き入れできる。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -9635,6 +9891,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "振った扇が 1.2 秒後にもう一度裂け、残っていた敵へ ×0.6 の遅れた刃が走る。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "防御 ",
             "c": "8FDB8F"
           },
@@ -9872,6 +10138,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "割られずに残った守りは、唄の終わりに体力へ沈む。いちばん傷ついた仲間には、その合計の半分も届く。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "マナ回復 ",
             "c": "8FDB8F"
           },
@@ -10037,6 +10313,16 @@
           {
             "t": "天落とし",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "矢の止まった所へ、0.8 秒後に雷の柱が落ちる (半径 2.5・攻撃力の ×0.9)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -10274,6 +10560,16 @@
           {
             "t": "這う灰",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "灰をかぶった敵の、まわり 4 ブロックの敵へ、2 秒おきに灰が移る (3 度まで)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -13625,6 +13921,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "回し斬りの 1.5 秒後、同じところで残像がもう一度回る (まわり 3.5 に攻撃力の ×0.5)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "攻撃速度 ",
             "c": "8FDB8F"
           },
@@ -13840,6 +14146,16 @@
           {
             "t": "満月の火花",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "火花のあと、満月の輪が広がる (まわり 5 に攻撃力の ×0.4、押す)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -14063,6 +14379,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "狙ったところが新月の影に沈む (まわり 4 に呪文の ×0.3、3 秒ひどく遅く)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "マナ回復 ",
             "c": "8FDB8F"
           },
@@ -14228,6 +14554,16 @@
           {
             "t": "星落ちの足止め",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "狙った敵へ 0.8 秒後に星が落ちる (まわり 2.5 に攻撃力の ×0.5)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -14451,6 +14787,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "二連牙の 0.5 秒後、影が前にいちばん近い敵をもう一度刺す (攻撃力の ×0.6)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "攻撃速度 ",
             "c": "8FDB8F"
           },
@@ -14666,6 +15012,16 @@
           {
             "t": "月暈の印",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "印をつけたところに月暈が 4 秒残り、まわり 6 の仲間を毎秒癒す (呪文の ×0.15)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -15020,6 +15376,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "斬った先へ、0.6 秒後に光の手が叩きつける (まわり 3 に攻撃力の ×0.8、浮かす)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "体力吸収 ",
             "c": "8FDB8F"
           },
@@ -15229,6 +15595,16 @@
           {
             "t": "七つ鐘の波",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "打ったところから鐘の波が三重に広がる (半径 6 まで、攻撃力の ×0.5。さらに 2 秒鈍らせる)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -15446,6 +15822,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "落ちた所に光の筋が 2 秒回り、筋の中の敵を焼く (呪文の力の ×0.18 ずつ)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "移動速度 ",
             "c": "8FDB8F"
           },
@@ -15605,6 +15991,16 @@
           {
             "t": "落ち羽の雨",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "射った筋に沿って、少しあとに羽根が降る (8 か所、攻撃力の ×0.3)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -15822,6 +16218,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "1 秒後に、同じ道筋を踏み込みの残像がもう一度走る (道筋の敵に攻撃力の ×0.6)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "体力吸収 ",
             "c": "8FDB8F"
           },
@@ -16031,6 +16437,16 @@
           {
             "t": "約束の円",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "歌った所に 6 秒、半径 4 の盾の円ができる。円の中の仲間が受けるダメージは ×0.6。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -48627,6 +49043,362 @@
       ]
     },
     {
+      "id": "skyabyss:fort_bone_horn",
+      "name": "砦の骨の角笛",
+      "class": "jp.revati.skyabyss.item.wild.WildAccessoryItem",
+      "stack": 1,
+      "tier": "rare",
+      "tooltip": [
+        [
+          {
+            "t": "砦の骨の角笛",
+            "c": "5AA9FF"
+          }
+        ],
+        [
+          {
+            "t": "レア",
+            "c": "5AA9FF"
+          },
+          {
+            "t": " · ",
+            "c": "555555"
+          },
+          {
+            "t": "地下のダンジョンの品",
+            "c": "AAAAAA"
+          }
+        ],
+        [
+          {
+            "t": "必要 Lv ",
+            "c": "9AA0B0"
+          },
+          {
+            "t": "15",
+            "c": "9AA0B0"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリースロットに付けているあいだ効く",
+            "c": "00AAAA"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリー。体力 +16、5% でダメージ +50%",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "「野盗王が手下を呼んだ角笛。岩鯨の骨でできている」",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "育ち ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "I",
+            "c": "E8C27A"
+          },
+          {
+            "t": "（効き目 ×",
+            "c": "E8C27A"
+          },
+          {
+            "t": "1.0",
+            "c": "E8C27A"
+          },
+          {
+            "t": "）・次まで あと ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "4",
+            "c": "E8C27A"
+          },
+          {
+            "t": " 回",
+            "c": "E8C27A"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:temple_coral_bell",
+      "name": "祭司の珊瑚の鈴",
+      "class": "jp.revati.skyabyss.item.wild.WildAccessoryItem",
+      "stack": 1,
+      "tier": "epic",
+      "tooltip": [
+        [
+          {
+            "t": "祭司の珊瑚の鈴",
+            "c": "B98CFF"
+          }
+        ],
+        [
+          {
+            "t": "エピック",
+            "c": "B98CFF"
+          },
+          {
+            "t": " · ",
+            "c": "555555"
+          },
+          {
+            "t": "地下のダンジョンの品",
+            "c": "AAAAAA"
+          }
+        ],
+        [
+          {
+            "t": "必要 Lv ",
+            "c": "9AA0B0"
+          },
+          {
+            "t": "21",
+            "c": "9AA0B0"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリースロットに付けているあいだ効く",
+            "c": "00AAAA"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリー。マナ +14、技の待ち −3%、水の中で息が長い",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "「沈んだ神殿で潮を呼んだ鈴。振ると遠い波の音がする」",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "育ち ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "I",
+            "c": "E8C27A"
+          },
+          {
+            "t": "（効き目 ×",
+            "c": "E8C27A"
+          },
+          {
+            "t": "1.0",
+            "c": "E8C27A"
+          },
+          {
+            "t": "）・次まで あと ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "4",
+            "c": "E8C27A"
+          },
+          {
+            "t": " 回",
+            "c": "E8C27A"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:ice_bear_fang",
+      "name": "大熊の氷の牙",
+      "class": "jp.revati.skyabyss.item.wild.WildAccessoryItem",
+      "stack": 1,
+      "tier": "epic",
+      "tooltip": [
+        [
+          {
+            "t": "大熊の氷の牙",
+            "c": "B98CFF"
+          }
+        ],
+        [
+          {
+            "t": "エピック",
+            "c": "B98CFF"
+          },
+          {
+            "t": " · ",
+            "c": "555555"
+          },
+          {
+            "t": "地下のダンジョンの品",
+            "c": "AAAAAA"
+          }
+        ],
+        [
+          {
+            "t": "必要 Lv ",
+            "c": "9AA0B0"
+          },
+          {
+            "t": "27",
+            "c": "9AA0B0"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリースロットに付けているあいだ効く",
+            "c": "00AAAA"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリー。7% でダメージ +60%、足 +4%",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "「氷鎧の大熊の牙。氷の留め具は溶けない」",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "育ち ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "I",
+            "c": "E8C27A"
+          },
+          {
+            "t": "（効き目 ×",
+            "c": "E8C27A"
+          },
+          {
+            "t": "1.0",
+            "c": "E8C27A"
+          },
+          {
+            "t": "）・次まで あと ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "4",
+            "c": "E8C27A"
+          },
+          {
+            "t": " 回",
+            "c": "E8C27A"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "skyabyss:wyrm_ember_scale",
+      "name": "大蛇の熾の鱗",
+      "class": "jp.revati.skyabyss.item.wild.WildAccessoryItem",
+      "stack": 1,
+      "tier": "epic",
+      "tooltip": [
+        [
+          {
+            "t": "大蛇の熾の鱗",
+            "c": "B98CFF"
+          }
+        ],
+        [
+          {
+            "t": "エピック",
+            "c": "B98CFF"
+          },
+          {
+            "t": " · ",
+            "c": "555555"
+          },
+          {
+            "t": "地下のダンジョンの品",
+            "c": "AAAAAA"
+          }
+        ],
+        [
+          {
+            "t": "必要 Lv ",
+            "c": "9AA0B0"
+          },
+          {
+            "t": "33",
+            "c": "9AA0B0"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリースロットに付けているあいだ効く",
+            "c": "00AAAA"
+          }
+        ],
+        [
+          {
+            "t": "アクセサリー。体力 +30、火のダメージ −40%",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "「熔岩の大蛇の鱗。継ぎ目の熾はまだ温かい」",
+            "c": "AAAAAA",
+            "i": true
+          }
+        ],
+        [
+          {
+            "t": "育ち ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "I",
+            "c": "E8C27A"
+          },
+          {
+            "t": "（効き目 ×",
+            "c": "E8C27A"
+          },
+          {
+            "t": "1.0",
+            "c": "E8C27A"
+          },
+          {
+            "t": "）・次まで あと ",
+            "c": "E8C27A"
+          },
+          {
+            "t": "4",
+            "c": "E8C27A"
+          },
+          {
+            "t": " 回",
+            "c": "E8C27A"
+          }
+        ]
+      ]
+    },
+    {
       "id": "skyabyss:box_stone_whale",
       "name": "岩鯨の封印の箱",
       "class": "jp.revati.skyabyss.loot.box.SealedBoxItem",
@@ -54427,6 +55199,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "0.8 秒後、足もとから岩の棘の輪が広がり、敵を打ち上げる (半径 5・×0.7)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "近接ダメージ ",
             "c": "8FDB8F"
           },
@@ -54646,6 +55428,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "跳んだ元に岩の身代わりが残り、1 秒後に砕けてまわりを打つ (半径 3・×0.8)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "スキルの威力 ",
             "c": "8FDB8F"
           },
@@ -54811,6 +55603,16 @@
           {
             "t": "鯨骨の檻",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "罠のまわりに鯨骨の檻が立ち、近くの敵を 2 秒縛る (半径 4・×0.3)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -55034,6 +55836,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "突き終わりに地を打ち、まわりの敵を打ち上げる (半径 2.5・×0.6)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "スキルの威力 ",
             "c": "8FDB8F"
           },
@@ -55249,6 +56061,16 @@
           {
             "t": "岩唄",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "唄の届く仲間に、5 秒の岩の守り (受けるダメージが減る。半径 6)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -55472,6 +56294,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "突進の終わりに潮の壁が立ち、前の敵を押し返して 3 秒鈍らせる (前 4・攻撃力の ×0.5)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "近接ダメージ ",
             "c": "8FDB8F"
           },
@@ -55687,6 +56519,16 @@
           {
             "t": "潮の槌",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "打った所から潮が湧き、近くの仲間を癒す (半径 5・攻撃力の ×0.5)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -55910,6 +56752,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "1 秒後、潮がもう一度押し寄せる (前 7・呪力の ×0.6・押し返し)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "スキルの威力 ",
             "c": "8FDB8F"
           },
@@ -56075,6 +56927,16 @@
           {
             "t": "潮の驟雨",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "雨の真ん中へ敵を寄せ、3 秒ひどく鈍らせる (半径 5)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -56298,6 +57160,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "霧の中にいる仲間が、4 秒のあいだ毎秒少し癒える (半径 4・攻撃力の ×0.15)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "マナ吸収 ",
             "c": "8FDB8F"
           },
@@ -56513,6 +57385,16 @@
           {
             "t": "雷断ち",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "斬った扇の中の、近い敵三体へ雷が落ちる (攻撃力の ×0.6)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -56736,6 +57618,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "撒いた灰に雷がこもり、2 秒ごとに中の敵一体を打つ (3 度・×0.5)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "マナ吸収 ",
             "c": "8FDB8F"
           },
@@ -56951,6 +57843,16 @@
           {
             "t": "連なる雷",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "雷の矢が当たった敵から、近くの二体へ雷が跳ぶ (呪力の ×0.5)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -57174,6 +58076,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "跳び退いた元に雷の印が残り、1 秒後に落ちる (半径 2.5・×0.9)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "体力吸収 ",
             "c": "8FDB8F"
           },
@@ -57389,6 +58301,16 @@
           {
             "t": "雷の呪印",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "印の付いた敵へ 3 秒後に雷が落ち、近くの二体へ跳ぶ (×0.8・×0.4)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -57612,6 +58534,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "薙いだまわりが 3 秒燃え、中の敵を毎秒焼く (半径 3.5・×0.2・火)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "体力吸収 ",
             "c": "8FDB8F"
           },
@@ -57831,6 +58763,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "熾の玉が着いた所で三つに割れ、まわりで弾ける (×0.4 ずつ・火)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "最大体力 ",
             "c": "8FDB8F"
           },
@@ -57996,6 +58938,16 @@
           {
             "t": "火跡跳び",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "跳んだ元で火が弾ける (半径 3・攻撃力の ×0.7・火)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -58219,6 +59171,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "裂いた敵が 4 秒燃え、1 秒後に燃える裂き目がもう一度刻む (×0.4)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "体力吸収 ",
             "c": "8FDB8F"
           },
@@ -58434,6 +59396,16 @@
           {
             "t": "熾の灯",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "灯のまわりの敵が、5 秒のあいだ毎秒焼ける (半径 4・×0.2・火)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -59180,6 +60152,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "鍛えのあと鯨の唄が響き、まわり 6 の仲間に 5 秒の岩の守りを与える。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "クールダウン ",
             "c": "8FDB8F"
           },
@@ -59399,6 +60381,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "雷の矢が当たった所へ 1 秒後に石が落ち、まわり 2.5 の敵を打ち上げる (呪力 ×0.6)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "スキルの威力 ",
             "c": "8FDB8F"
           },
@@ -59564,6 +60556,16 @@
           {
             "t": "肋の貫き",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "見ている先の線の上の敵を、鯨骨が下から突き上げる (攻撃力の ×0.4)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -59805,6 +60807,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "守りの唄が深く鳴り、まわり 5 の敵を 2 秒縛る。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "防御 ",
             "c": "8FDB8F"
           },
@@ -60020,6 +61032,16 @@
           {
             "t": "潮の踏み",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "踏んだ所に潮が湧き、まわり 5 の仲間を癒す (攻撃力の ×0.4)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -60261,6 +61283,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "着いた所に真珠の泡が 3 秒残り、まわり 4 の仲間が毎秒癒える。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "マナ吸収 ",
             "c": "8FDB8F"
           },
@@ -60426,6 +61458,16 @@
           {
             "t": "珊瑚の罠",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "罠のまわり 4 の敵を真ん中へ寄せ、3 秒鈍らせる。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -60667,6 +61709,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "灯のまわり 4 の仲間が 5 秒のあいだ毎秒癒える。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "スキルの威力 ",
             "c": "8FDB8F"
           },
@@ -60900,6 +61952,16 @@
           {
             "t": "雷床",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "打った所のまわりの三体へ雷が落ちる (攻撃力の ×0.5)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -61141,6 +62203,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "押し寄せる潮に雷が混じり、前の三体を打つ (呪力 ×0.4)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "移動速度 ",
             "c": "8FDB8F"
           },
@@ -61306,6 +62378,16 @@
           {
             "t": "疾風の驟雨",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "落ちた所の敵を外へ吹き飛ばし、自分は 3 秒速くなる。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -61547,6 +62629,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "引き寄せた 1 秒後、まわり 4 の敵へ雷が落ちる (呪力 ×0.5)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "移動速度 ",
             "c": "8FDB8F"
           },
@@ -61762,6 +62854,16 @@
           {
             "t": "熾の突進",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "駆けた道に熾が残り、触れた敵が 3 秒燃える (攻撃力の ×0.3)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -61985,6 +63087,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "霧が熱い灰になり、まわり 4 の敵が 4 秒燃える。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "近接ダメージ ",
             "c": "8FDB8F"
           },
@@ -62204,6 +63316,16 @@
         ],
         [
           {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "元の場所が炉のように弾け、まわり 3 の敵を燃やす (呪力 ×0.6)。",
+            "c": "E6E2D6"
+          }
+        ],
+        [
+          {
             "t": "最大体力 ",
             "c": "8FDB8F"
           },
@@ -62369,6 +63491,16 @@
           {
             "t": "火の粉の矢",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "当たった敵とまわり 2.5 の敵が 4 秒燃える (攻撃力の ×0.3)。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -62588,6 +63720,16 @@
           {
             "t": "香の巡り",
             "c": "F2D78A"
+          }
+        ],
+        [
+          {
+            "t": "  ",
+            "c": "E6E2D6"
+          },
+          {
+            "t": "香の煙がまわり 6 の仲間を包み、8 秒の火の守りと少しの癒しを与える。",
+            "c": "E6E2D6"
           }
         ],
         [
@@ -71636,8 +72778,8 @@
       "id": "skyabyss:stone_whale_heart",
       "name": "岩鯨の心臓",
       "category": "monster",
-      "width": 5.1,
-      "height": 6.3,
+      "width": 10.2,
+      "height": 12.6,
       "class": "jp.revati.skyabyss.entity.StoneWhaleHeart",
       "living": true,
       "stats": {
@@ -72002,6 +73144,114 @@
       }
     },
     {
+      "id": "skyabyss:bolt_slinger",
+      "name": "雷石投げ",
+      "category": "monster",
+      "width": 0.7,
+      "height": 1.9,
+      "class": "jp.revati.skyabyss.entity.foe.late.BoltSlinger",
+      "living": true,
+      "stats": {
+        "generic.max_health": 18.0,
+        "generic.attack_damage": 5.0,
+        "generic.armor": 0.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.24,
+        "generic.knockback_resistance": 0.0,
+        "generic.follow_range": 28.0
+      }
+    },
+    {
+      "id": "skyabyss:storm_jelly",
+      "name": "雷雲くらげ",
+      "category": "monster",
+      "width": 1.2,
+      "height": 3.2,
+      "class": "jp.revati.skyabyss.entity.foe.late.StormJelly",
+      "living": true,
+      "stats": {
+        "generic.max_health": 26.0,
+        "generic.attack_damage": 5.0,
+        "generic.armor": 0.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.17,
+        "generic.knockback_resistance": 0.4,
+        "generic.follow_range": 22.0
+      }
+    },
+    {
+      "id": "skyabyss:crag_tortoise",
+      "name": "峰の甲羅",
+      "category": "monster",
+      "width": 1.4,
+      "height": 1.2,
+      "class": "jp.revati.skyabyss.entity.foe.late.CragTortoise",
+      "living": true,
+      "stats": {
+        "generic.max_health": 38.0,
+        "generic.attack_damage": 6.0,
+        "generic.armor": 0.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.16,
+        "generic.knockback_resistance": 0.8,
+        "generic.follow_range": 20.0
+      }
+    },
+    {
+      "id": "skyabyss:ember_spitter",
+      "name": "熾吐き",
+      "category": "monster",
+      "width": 1.0,
+      "height": 1.0,
+      "class": "jp.revati.skyabyss.entity.foe.late.EmberSpitter",
+      "living": true,
+      "stats": {
+        "generic.max_health": 20.0,
+        "generic.attack_damage": 6.0,
+        "generic.armor": 0.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.2,
+        "generic.knockback_resistance": 0.0,
+        "generic.follow_range": 28.0
+      }
+    },
+    {
+      "id": "skyabyss:ash_whirl",
+      "name": "灰の渦",
+      "category": "monster",
+      "width": 1.0,
+      "height": 2.4,
+      "class": "jp.revati.skyabyss.entity.foe.late.AshWhirl",
+      "living": true,
+      "stats": {
+        "generic.max_health": 30.0,
+        "generic.attack_damage": 6.0,
+        "generic.armor": 0.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.19,
+        "generic.knockback_resistance": 0.5,
+        "generic.follow_range": 22.0
+      }
+    },
+    {
+      "id": "skyabyss:basalt_scorpion",
+      "name": "黒石の甲殻",
+      "category": "monster",
+      "width": 1.3,
+      "height": 0.9,
+      "class": "jp.revati.skyabyss.entity.foe.late.BasaltScorpion",
+      "living": true,
+      "stats": {
+        "generic.max_health": 50.0,
+        "generic.attack_damage": 7.0,
+        "generic.armor": 0.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.22,
+        "generic.knockback_resistance": 0.7,
+        "generic.follow_range": 22.0
+      }
+    },
+    {
       "id": "skyabyss:thunder_wolf",
       "name": "雷狼",
       "category": "monster",
@@ -72089,6 +73339,150 @@
         "generic.movement_speed": 0.24,
         "generic.knockback_resistance": 1.0,
         "generic.follow_range": 40.0
+      }
+    },
+    {
+      "id": "skyabyss:fort_warlord",
+      "name": "骨鎧の野盗王",
+      "category": "monster",
+      "width": 2.3,
+      "height": 5.6,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.FortWarlord",
+      "living": true,
+      "stats": {
+        "generic.max_health": 560.0,
+        "generic.attack_damage": 14.0,
+        "generic.armor": 8.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.24,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 40.0
+      }
+    },
+    {
+      "id": "skyabyss:temple_keeper",
+      "name": "珊瑚に呑まれた祭司",
+      "category": "monster",
+      "width": 2.3,
+      "height": 5.8,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.TempleKeeper",
+      "living": true,
+      "stats": {
+        "generic.max_health": 720.0,
+        "generic.attack_damage": 16.0,
+        "generic.armor": 8.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.21,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 40.0
+      }
+    },
+    {
+      "id": "skyabyss:ice_lord",
+      "name": "氷鎧の大熊",
+      "category": "monster",
+      "width": 4.0,
+      "height": 4.4,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.IceLord",
+      "living": true,
+      "stats": {
+        "generic.max_health": 880.0,
+        "generic.attack_damage": 19.0,
+        "generic.armor": 10.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.23,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 40.0
+      }
+    },
+    {
+      "id": "skyabyss:lava_wyrm",
+      "name": "熔岩の大蛇",
+      "category": "monster",
+      "width": 4.0,
+      "height": 5.4,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm",
+      "living": true,
+      "stats": {
+        "generic.max_health": 1040.0,
+        "generic.attack_damage": 22.0,
+        "generic.armor": 12.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.2,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 40.0
+      }
+    },
+    {
+      "id": "skyabyss:bone_lancer",
+      "name": "骨馬の槍騎兵",
+      "category": "monster",
+      "width": 2.0,
+      "height": 4.6,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.BoneLancer",
+      "living": true,
+      "stats": {
+        "generic.max_health": 150.0,
+        "generic.attack_damage": 9.0,
+        "generic.armor": 6.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.28,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 32.0
+      }
+    },
+    {
+      "id": "skyabyss:jelly_priestess",
+      "name": "大海月の巫女",
+      "category": "monster",
+      "width": 3.0,
+      "height": 5.0,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.JellyPriestess",
+      "living": true,
+      "stats": {
+        "generic.max_health": 170.0,
+        "generic.attack_damage": 10.0,
+        "generic.armor": 4.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.18,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 32.0
+      }
+    },
+    {
+      "id": "skyabyss:thunder_owl",
+      "name": "雷の大梟",
+      "category": "monster",
+      "width": 2.6,
+      "height": 3.8,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.ThunderOwl",
+      "living": true,
+      "stats": {
+        "generic.max_health": 180.0,
+        "generic.attack_damage": 11.0,
+        "generic.armor": 4.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.26,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 32.0
+      }
+    },
+    {
+      "id": "skyabyss:lava_toad",
+      "name": "熔岩の大蛙",
+      "category": "monster",
+      "width": 3.4,
+      "height": 2.8,
+      "class": "jp.revati.skyabyss.dungeon.mob.deep.LavaToad",
+      "living": true,
+      "stats": {
+        "generic.max_health": 200.0,
+        "generic.attack_damage": 12.0,
+        "generic.armor": 8.0,
+        "generic.armor_toughness": 0.0,
+        "generic.movement_speed": 0.24,
+        "generic.knockback_resistance": 1.0,
+        "generic.follow_range": 32.0
       }
     },
     {
@@ -72942,8 +74336,8 @@
       "id": "skyabyss:tide_heart",
       "name": "潮殻の心臓",
       "category": "monster",
-      "width": 4.5,
-      "height": 6.3,
+      "width": 9.0,
+      "height": 12.6,
       "class": "jp.revati.skyabyss.titan.tide.heart.TideHeart",
       "living": true,
       "stats": {
@@ -72978,8 +74372,8 @@
       "id": "skyabyss:thunder_wing_heart",
       "name": "雷翼の心臓",
       "category": "monster",
-      "width": 4.5,
-      "height": 6.0,
+      "width": 9.0,
+      "height": 12.0,
       "class": "jp.revati.skyabyss.titan.storm.heart.StormHeart",
       "living": true,
       "stats": {
@@ -74231,8 +75625,8 @@
       "id": "skyabyss:ember_heart",
       "name": "余燼の心臓",
       "category": "monster",
-      "width": 4.5,
-      "height": 6.3,
+      "width": 9.0,
+      "height": 12.6,
       "class": "jp.revati.skyabyss.titan.ember.heart.EmberHeart",
       "living": true,
       "stats": {
@@ -74796,8 +76190,8 @@
       "icon": 128,
       "rebirth_at": 0,
       "effect": [
-        "自分のまわり 5 ブロックに冷たい潮が広がる。敵に魔法のダメージ 100 と、3 秒の鈍足 50%（大きな相手は半分）。",
-        "自分のまわり 6 ブロックに冷たい潮が広がる。敵に魔法のダメージ 130 と、4 秒の鈍足 50%（大きな相手は半分）。"
+        "狙った地面のまわり 5 ブロックに冷たい潮が広がる。敵に魔法のダメージ 100 と、3 秒の鈍足 50%（大きな相手は半分）。",
+        "狙った地面のまわり 6 ブロックに冷たい潮が広がる。敵に魔法のダメージ 130 と、4 秒の鈍足 50%（大きな相手は半分）。"
       ]
     },
     {
@@ -74861,8 +76255,8 @@
       "icon": 134,
       "rebirth_at": 0,
       "effect": [
-        "足もとに灯を置く（4 ブロック、8 秒）。そばの自分と仲間の護りの体力を、2 秒ごとに 20 点まで満たす。",
-        "足もとに灯を置く（4 ブロック、10 秒）。そばの自分と仲間の護りの体力を、2 秒ごとに 30 点まで満たす。"
+        "狙った地面に灯を置く（4 ブロック、8 秒）。そばの自分と仲間の護りの体力を、2 秒ごとに 20 点まで満たす。",
+        "狙った地面に灯を置く（4 ブロック、10 秒）。そばの自分と仲間の護りの体力を、2 秒ごとに 30 点まで満たす。"
       ]
     },
     {

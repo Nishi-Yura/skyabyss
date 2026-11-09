@@ -6,7 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-// 持ち主 → サーバー: 紋を盤の穴へ差す (PLACE=a:socket・b:bag・skill)、紋を外す (REMOVE=a:socket)。サーバーで検める。変異は木の節 (SkillNodePayload)
+// 持ち主 → サーバー: アスペクトを枠に付ける (PLACE=skill:品の id・a:枠)、外す (REMOVE=a:枠)。サーバーで検める (rpg/aspect/Aspects.equip)
 public record SkillExtPayload(int action, String skill, int a, int b) implements CustomPacketPayload {
     public static final int PLACE = 1;
     public static final int REMOVE = 2;

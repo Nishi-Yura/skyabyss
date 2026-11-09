@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""地下のダンジョンの主の低ポリモデルを作って入れる (docs/design/55 の 1 章の形)。
+"""地下のダンジョンの主の低ポリモデルを作って入れる (docs/design/55 の 1 章の形と、7 章の奥のダンジョンの主 4 体)。
 
     python -X utf8 -I tools/gen/mobs/dungeon_bosses_lp/build_all.py [id ...] [--no-install]
 
@@ -17,7 +17,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import blp  # noqa: E402
 
-ORDER = ["bone_centipede", "shell_octopus", "crystal_lizard", "forge_giant"]
+ORDER = ["bone_centipede", "shell_octopus", "crystal_lizard", "forge_giant", "fort_warlord", "temple_keeper", "ice_lord", "lava_wyrm",
+         "bone_lancer", "jelly_priestess", "thunder_owl", "lava_toad"]
 
 
 def build_one(mid, install=True):

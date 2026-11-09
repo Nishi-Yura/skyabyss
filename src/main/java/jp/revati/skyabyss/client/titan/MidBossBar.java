@@ -62,8 +62,6 @@ public final class MidBossBar {
     private static void draw(GuiGraphics g, Minecraft mc, Look look, BossEvent boss, int x, int y) {
         g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + look.icon() + "_icon.png"), x, y, 0, 0, ICON, ICON, ICON, ICON);
         g.drawString(mc.font, boss.getName(), x + ICON + 4, y + 4, 0xFFFFFF, true);
-        String percent = Math.round(boss.getProgress() * 100) + "%";
-        g.drawString(mc.font, percent, x + WIDTH - mc.font.width(percent), y + 4, 0xFFFFFF, true);
         int by = y + ICON + 2;
         // 板: 青緑の縁 + 暗い石 + 帯
         g.fill(x, by, x + WIDTH, by + BAR_H, 0xFF2E5552);
@@ -75,6 +73,7 @@ public final class MidBossBar {
             g.fill(x + 2, by + 2, x + 2 + fill, by + BAR_H - 2, 0xFF000000 | look.fill());
             g.fill(x + 2, by + 2, x + 2 + fill, by + 3, 0xFF000000 | look.top());
         }
+        jp.revati.skyabyss.client.titan.PhasedBossBar.drawHp(g, mc, boss, x, by + BAR_H / 2);
         // 目盛り: 十分の一ごとに細い線
         for (int i = 1; i < 10; i++) {
             int tx = x + 2 + track * i / 10;

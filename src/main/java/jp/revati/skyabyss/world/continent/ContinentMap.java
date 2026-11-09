@@ -405,7 +405,8 @@ public final class ContinentMap {
         double amp = Math.min(1.0, g / 3.0) * (1.2 + 1.8 * Math.max(0.0, Math.min(1.0, (g - 3.0) / 12.0)));
         // 段丘の所では弱める (段の平らな面に細かな穴が開かない。崖の縁は段丘が作る)
         amp *= 1.0 - 0.75 * k;
-        return h + amp * detail(x, z);
+        // 外れの帯の見せ場の地形 (干潟・灰の砂丘・熔岩の川の窪み。FrontierTerrain)
+        return FrontierTerrain.height(region(x, z), x, z, h + amp * detail(x, z));
     }
 
     // 土地の番号 (近い升)

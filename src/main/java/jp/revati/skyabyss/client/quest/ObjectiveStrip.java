@@ -214,16 +214,8 @@ public final class ObjectiveStrip {
     }
 
     private static java.util.List<String> wrap0(Font font, String text, int width, int maxLines) {
-        java.util.List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap("◆ " + text, width, font::width));
-        if (lines.size() > maxLines) {
-            lines = new java.util.ArrayList<>(lines.subList(0, maxLines));
-            String last = lines.get(maxLines - 1);
-            while (font.width(last + "…") > width && last.length() > 1) {
-                last = last.substring(0, last.length() - 1);
-            }
-            lines.set(maxLines - 1, last + "…");
-        }
-        return lines;
+        // 行の数で切らない (2026-11-09 の声「文の最後が『...』になると何書いてるかわからない」)。帯は文の行の数だけ高くなる
+        return new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap("◆ " + text, width, font::width));
     }
 
     // HUD の要求: 左上の帯 (成長の表示の下)。描画 (render) と同じ条件で出す。

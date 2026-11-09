@@ -26,7 +26,6 @@ public final class LifeKeep {
             "skyabyss_ferried",                       // はじまりの島から渡し船で都へ渡った (ContinentOutskirts)
             "skyabyss_town_tour",                     // 町めぐりの進み (TownTour)
             "skyabyss_warm_stone_given",              // 暖石を渡した (WarmStoneItem)
-            "skyabyss_tide_watching_shell_given",     // 潮見の殻を渡した (TideChapter)
             "skyabyss_shrine_pair",                   // 祠の対の札を見せた (CapitalShrine)
             "skyabyss_ch2_stakes_read",               // 二章の杭を読んだ (Ch2Ground)
             "skyabyss_ch4_stone_echo",                // 四章の温石の台でイサナの言葉を出した (DeadForgePit)

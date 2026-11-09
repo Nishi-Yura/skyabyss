@@ -909,18 +909,10 @@ public final class SkillRules {
 
     public static final double THREAD_COOLDOWN = -0.10;
 
-    // 紋の盤 (A14): 穴は最初 3、転生 1 回ごとに 1 つ開いて最大 6。持てる紋は 24。
-    // 紋の効きは盤の合計で、力 +20%・マナ −10%・待ち −20% が上限 (全部足した上限でも心臓 15 秒・番兵長 5 秒の下限を割らない)
-    public static final int GLYPH_SOCKETS = 6;
-    public static final int GLYPH_SOCKETS_BASE = 3;
-    public static final int GLYPH_BAG_MAX = 24;
-    public static final double GLYPH_POWER_CAP = 0.20;
-    public static final double GLYPH_MANA_CAP = 0.10;
-    public static final double GLYPH_COOLDOWN_CAP = 0.20;
-
-    public static int glyphSockets(int rebirth) {
-        return Math.min(GLYPH_SOCKETS, GLYPH_SOCKETS_BASE + Math.max(0, rebirth));
-    }
+    // 巨神のアスペクト (rpg/aspect。紋の盤の代わり。2026-11-09): 一つの技にかかる力とマナのいちばん大きな足し (Lv 5 のエピック「冴え」とミシックを重ねたとき)。
+    // 強さの見積もり (DeepSkillsSelfTest の均し) が使う。全部の上限は SkillBuild の力 +100%・マナ ±50%
+    public static final double ASPECT_POWER_MAX = 0.35;
+    public static final double ASPECT_MANA_MAX = 0.25;
 
     private SkillRules() {
     }

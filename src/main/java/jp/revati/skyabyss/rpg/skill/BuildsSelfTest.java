@@ -86,6 +86,14 @@ final class BuildsSelfTest {
         check(f, SkillManager.chooseRune(p, Skill.LUNGE, 4) == SkillManager.RuneResult.OK && SkillManager.runeOf(p, Skill.LUNGE) == 4, "the legendary rune was not chosen");
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
         check(f, d.rune(Skill.LUNGE) == 4 && SkillManager.runeOf(p, Skill.LUNGE) == 0, "the legendary rune still worked without the weapon");
+        // 書き換えは持つだけで効く (選ばなくても。節を取って選びの印が消えても。2026-11-09)
+        d.runes.remove(Skill.LUNGE.id);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("captain_pike"));
+        check(f, SkillManager.runeOf(p, Skill.LUNGE) == 4 && SkillManager.legendRune(p, Skill.LUNGE) != null
+                && SkillChanges.icon(p, Skill.LUNGE) == SkillManager.legendRune(p, Skill.LUNGE).iconIndex(), "holding the rewrite weapon did not rewrite the skill and its icon");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+        check(f, SkillManager.runeOf(p, Skill.LUNGE) == 0 && SkillChanges.icon(p, Skill.LUNGE) == Skill.LUNGE.iconIndex(), "the rewrite stayed after putting the weapon away");
+        d.runes.put(Skill.LUNGE.id, 4);
         // 技の側: 火床は熾火が 8 秒で弱らせる、火移しは仲間 2 人まで (一人でも通る)
         SkillManager.forceRank(p, Skill.EMBER_HAMMER, 2);
         SkillManager.forceRank(p, Skill.TEMPER, 3);

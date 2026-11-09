@@ -42,6 +42,7 @@ public final class PartyNetwork {
     static void register(RegisterPayloadHandlersEvent event) {
         event.registrar(PROTOCOL_VERSION)
                 .playToClient(Sync.TYPE, Sync.STREAM_CODEC, (payload, context) -> PartyClient.receive(payload))
+                .playToClient(Finder.TYPE, Finder.STREAM_CODEC, (payload, context) -> jp.revati.skyabyss.party.client.PartyFinderScreen.receive(payload))
                 .playToServer(Action.TYPE, Action.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         handle(player, payload);
@@ -115,8 +116,10 @@ public final class PartyNetwork {
                 if (m == null) {
                     members.add(new Member(id.toString(), name, 0, 0, 0, false, false, party.isLeader(id), jp.revati.skyabyss.rebirth.Rebirths.offlineCount(server, id)));
                 } else {
+                    String[] q = quests(m);
                     members.add(new Member(id.toString(), name, Growth.get(m).level, m.getHealth(), m.getMaxHealth(), true,
-                            m.level() == player.level(), party.isLeader(id), jp.revati.skyabyss.rebirth.RebirthView.count(m)));
+                            m.level() == player.level(), party.isLeader(id), jp.revati.skyabyss.rebirth.RebirthView.count(m),
+                            q[0], Integer.parseInt(q[1]), q[2], Integer.parseInt(q[3])));
                 }
             }
         }
@@ -128,6 +131,31 @@ public final class PartyNetwork {
         }
         return new Sync(Progression.stage(player), Progression.levelCap(player), Progression.worldStage(server), next == null ? "" : next,
                 (int) Math.round(Parties.shareRate(server) * 100), members, inv == null ? "" : inv.fromName());
+    }
+
+    // その人の今のメインのクエスト (済んでいないメインのうち、いちばん前の順) と、追いかけているクエスト (メインと違うときだけ)。{main, 段, track, 段}
+    static String[] quests(ServerPlayer m) {
+        jp.revati.skyabyss.quest.QuestLog log = jp.revati.skyabyss.quest.QuestLog.of(m);
+        String main = "";
+        int mainStage = 0;
+        int best = Integer.MAX_VALUE;
+        for (java.util.Map.Entry<String, jp.revati.skyabyss.quest.QuestLog.Entry> e : log.quests().entrySet()) {
+            jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(e.getKey());
+            if (def != null && def.main() && !e.getValue().done && def.order() < best) {
+                best = def.order();
+                main = def.id();
+                mainStage = e.getValue().stage;
+            }
+        }
+        String track = log.tracked();
+        int trackStage = 0;
+        jp.revati.skyabyss.quest.QuestLog.Entry te = track.isEmpty() ? null : log.entry(track);
+        if (te == null || te.done || track.equals(main)) {
+            track = "";
+        } else {
+            trackStage = te.stage;
+        }
+        return new String[] {main, String.valueOf(mainStage), track, String.valueOf(trackStage)};
     }
 
     static void send(ServerPlayer player) {
@@ -148,6 +176,12 @@ public final class PartyNetwork {
                 }
             }
             case Action.ACCEPT -> Parties.accept(player);
+            // パーティー募集 (PartyFinder)。どの操作のあとも、今の一覧を送り返す
+            case Action.FINDER_LIST -> {
+            }
+            case Action.FINDER_POST -> PartyFinder.post(player, action.name());
+            case Action.FINDER_CLOSE -> PartyFinder.close(player);
+            case Action.FINDER_JOIN -> PartyFinder.join(player, action.name());
             case Action.DECLINE -> Parties.decline(player);
             case Action.LEAVE -> Parties.leave(player);
             case Action.KICK, Action.PROMOTE -> {
@@ -165,12 +199,65 @@ public final class PartyNetwork {
             }
         }
         syncSoon(player);
+        if (action.op() >= Action.FINDER_LIST) {
+            sendFinder(player);
+        }
+    }
+
+    // 募集の一覧を送る
+    public static void sendFinder(ServerPlayer player) {
+        if (player.connection == null) {
+            return;
+        }
+        PartyData.Party party = Parties.of(player);
+        PartyFinder.Listing mine = PartyFinder.of(player.getUUID());
+        boolean canPost = party == null || party.isLeader(player.getUUID());
+        PacketDistributor.sendToPlayer(player, new Finder(PartyFinder.rows(player), mine == null ? "" : mine.goal(), canPost, party != null));
+    }
+
+    // 募集の一覧 (サーバー → 人)。myGoal = 自分の募集の目的 (出していなければ空)。canPost = リーダーか一人。inParty = パーティーにいる (加われない)
+    public record Finder(List<PartyFinder.Row> rows, String myGoal, boolean canPost, boolean inParty) implements CustomPacketPayload {
+        public static final Type<Finder> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "party_finder"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Finder> STREAM_CODEC = StreamCodec.of(
+                (buf, f) -> {
+                    buf.writeVarInt(f.rows.size());
+                    for (PartyFinder.Row r : f.rows) {
+                        buf.writeUtf(r.leaderName(), 32);
+                        buf.writeUtf(r.goal(), 32);
+                        buf.writeVarInt(r.members());
+                        buf.writeVarInt(r.avgLevel());
+                        buf.writeBoolean(r.mine());
+                    }
+                    buf.writeUtf(f.myGoal, 32);
+                    buf.writeBoolean(f.canPost);
+                    buf.writeBoolean(f.inParty);
+                },
+                buf -> {
+                    int n = Math.min(buf.readVarInt(), 64);
+                    List<PartyFinder.Row> rows = new ArrayList<>();
+                    for (int i = 0; i < n; i++) {
+                        rows.add(new PartyFinder.Row(buf.readUtf(32), buf.readUtf(32), buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
+                    }
+                    return new Finder(rows, buf.readUtf(32), buf.readBoolean(), buf.readBoolean());
+                });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
     }
 
     // rebirths: 転生の回数 (名前の枠の色と記号に使う。docs/design/31 の C15)
-    public record Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths) {
+    // mainQuest / trackQuest: 今のメインのクエストと、追いかけているクエスト (id と段。2026-11-08 の声「パーティーの味方のいまのクエストも確認できるように」)。
+    // 文はクライアントがクエストの一覧 (QuestClient の catalog) から引く。ないときは空
+    public record Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths,
+                         String mainQuest, int mainStage, String trackQuest, int trackStage) {
         public Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader) {
             this(id, name, level, health, maxHealth, online, sameDim, leader, 0);
+        }
+
+        public Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths) {
+            this(id, name, level, health, maxHealth, online, sameDim, leader, rebirths, "", 0, "", 0);
         }
 
         static void write(FriendlyByteBuf buf, Member m) {
@@ -183,11 +270,15 @@ public final class PartyNetwork {
             buf.writeBoolean(m.sameDim);
             buf.writeBoolean(m.leader);
             buf.writeVarInt(m.rebirths);
+            buf.writeUtf(m.mainQuest, 96);
+            buf.writeVarInt(m.mainStage);
+            buf.writeUtf(m.trackQuest, 96);
+            buf.writeVarInt(m.trackStage);
         }
 
         static Member read(FriendlyByteBuf buf) {
             return new Member(buf.readUtf(64), buf.readUtf(32), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readBoolean(),
-                    buf.readBoolean(), buf.readBoolean(), buf.readVarInt());
+                    buf.readBoolean(), buf.readBoolean(), buf.readVarInt(), buf.readUtf(96), buf.readVarInt(), buf.readUtf(96), buf.readVarInt());
         }
     }
 
@@ -232,6 +323,11 @@ public final class PartyNetwork {
         public static final int LEAVE = 3;
         public static final int KICK = 4;
         public static final int PROMOTE = 5;
+        // パーティー募集: 一覧を求める・出す (name = 目的)・やめる・加わる (name = 募集した人)
+        public static final int FINDER_LIST = 6;
+        public static final int FINDER_POST = 7;
+        public static final int FINDER_CLOSE = 8;
+        public static final int FINDER_JOIN = 9;
         public static final Type<Action> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "party_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Action> STREAM_CODEC = StreamCodec.of(
                 (buf, a) -> {

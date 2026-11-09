@@ -49,6 +49,8 @@ public final class EmberHeartArena {
     public static final int RADIUS = EmberBackLayout.HEART_RADIUS;
     // 台と区画の輪 (2026-11-07 に間を広げたとき、台を 4 → 6、区画の外の端を半径 - 1 に)
     public static final int PLATFORM_R = 6;
+    // 灰溜まりの真ん中 (心臓の真ん中から)。台 (PLATFORM_R) の内に収まる
+    public static final int[][] ASH_POOLS = {{4, 0}, {-4, 0}, {0, 4}, {0, -4}};
     public static final int SECTION_R = RADIUS - 1;
     public static final int BOTTOM = EmberBackLayout.HEART.minY();
     public static final int CEILING = EmberBackLayout.HEART.maxY();
@@ -355,6 +357,16 @@ public final class EmberHeartArena {
         for (BlockPos l : lampCells) {
             level.setBlock(l, lamp, flags);
         }
+        // 灰溜まり (2026-11-08 の声「炎の心臓のボス、ボス部屋で熱さませるようにして」): 沈まない真ん中の台の四方に、熱を冷ます灰色の灰 (EmberHeat の ASH) を 3x3 ずつ
+        BlockState ash = Blocks.GRAY_WOOL.defaultBlockState();
+        for (int[] c : ASH_POOLS) {
+            for (int ax = -1; ax <= 1; ax++) {
+                for (int az = -1; az <= 1; az++) {
+                    level.setBlock(new BlockPos(CX + c[0] + ax, FLOOR, CZ + c[1] + az), ash, flags);
+                }
+            }
+        }
+        POOL_HINTED.clear();
         // 入口の壁の 1 枚 (前室とのあいだ) は、開いた既定の扉 (戦うグループにだけ閉じる)
         GroupGates.place(level, gate(), true);
         // 大広間の内側 (欄干と天井) を開け直す
@@ -432,8 +444,34 @@ public final class EmberHeartArena {
         return level.getEntitiesOfClass(ServerPlayer.class, arena(), p -> p.isAlive() && !p.isSpectator() && !p.isCreative());
     }
 
+    // 灰溜まりの手がかりを出した人 (間を建て直すと消える)
+    private static final java.util.Set<java.util.UUID> POOL_HINTED = new java.util.HashSet<>();
+
+    // 灰溜まりを目立たせる (2026-11-09 の声「心臓のへやで冷ます場所作ってって言ったのに、出来てない」: 暗い床の灰色で、あると気づけなかった)。
+    // 冷たい白い灰が立ちのぼり、熱が 50 を超えた人には一度だけ場所を知らせる
+    static void poolTick(ServerLevel level) {
+        if (level.getGameTime() % 6 != 0) {
+            return;
+        }
+        for (int[] c : ASH_POOLS) {
+            double x = CX + c[0] + 0.5;
+            double z = CZ + c[1] + 0.5;
+            level.sendParticles(ParticleTypes.WHITE_ASH, x, SURFACE + 0.3, z, 10, 0.9, 0.4, 0.9, 0.01);
+            level.sendParticles(ParticleTypes.SNOWFLAKE, x, SURFACE + 0.2, z, 2, 0.8, 0.1, 0.8, 0.02);
+        }
+        if (level.getGameTime() % 20 != 0) {
+            return;
+        }
+        for (ServerPlayer p : players(level)) {
+            if (jp.revati.skyabyss.titan.ember.back.EmberHeat.get(p) >= jp.revati.skyabyss.titan.ember.back.EmberHeat.FLUSHED && POOL_HINTED.add(p.getUUID())) {
+                jp.revati.skyabyss.notice.Notice.hint(p, EmberIds.LANG_HEART + "ash_pools");
+            }
+        }
+    }
+
     // 毎 tick (EmberHeartBattle から)。割れた床の予告の粒と、沈み・戻り、落ちた人の救い上げ
     static void tick(ServerLevel level, @Nullable EmberHeart heart) {
+        poolTick(level);
         for (int k = 0; k < SECTIONS; k++) {
             if (state[k] == 1) {
                 timer[k]--;

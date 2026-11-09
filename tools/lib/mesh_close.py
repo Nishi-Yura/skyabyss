@@ -143,6 +143,16 @@ def ear_clip(P):
     return tris
 
 
+def _loop_convex(P, nm):
+    """平らな輪 P が (法線 nm から見て) 凸か"""
+    n = len(P)
+    for i in range(n):
+        a, b, c = P[i - 1], P[i], P[(i + 1) % n]
+        if np.dot(np.cross(b - a, c - b), nm) < -1e-6:
+            return False
+    return True
+
+
 def triangulate_loop(P, centroid):
     """輪 P の蓋。戻り値 (追加頂点 [(x,y,z)], 三角形 (P の添字 or n = 追加頂点))。三角形の辺の向きは P の並びに沿う。
     蓋は重心の扇で、頂点は輪の面から内側へ少し引っ込める (平らな蓋は、貼りついた隣の面と同じ平面に重なって z が競り、ちらつくため)。
@@ -156,6 +166,11 @@ def triangulate_loop(P, centroid):
         nm = nm / ln
         dev = float(np.abs((P - ctr) @ nm).max())
         if dev <= 0.2 * max(ext, 1e-9):
+            # 凹んだ輪 (曲がった帯の切り口など) は重心の扇だと外へはみ出して裏返る (外から裏面が透ける)。耳切りで塞ぐ
+            if not _loop_convex(P, nm):
+                t = ear_clip(P)
+                if t:
+                    return [], t
             apex = ctr - nm * min(max(0.12, 0.08 * ext), 0.4)
             return [tuple(apex)], [(k, (k + 1) % n, n) for k in range(n)]
     apex = ctr + (centroid - ctr) * 0.2
@@ -448,7 +463,13 @@ def collar(bones, name, refs, loop=None):
         cand.append(ps + dirn * depth)
         cand.append(ps + (pc - ps) / max(float(np.linalg.norm(pc - ps)), 1e-9) * depth)
     best_q = None
+    # 袖は子の体の外へ (輪から子の中心と逆の側へ) 延ばす。子の中を通る袖は体を突き抜けて裏返る
+    # (2026-11-09: 語り部の長靴は底が開いていて、底の輪から上へ伸びた袖が長靴を貫いていた)
+    out_dir = ctr - Va.mean(0)
+    out_len = float(np.linalg.norm(out_dir))
     for target in cand:
+        if out_len > 1e-6 and float(np.dot(target - ctr, out_dir)) < -0.25 * out_len * float(np.linalg.norm(target - ctr)):
+            continue
         for f in (1.0, 0.8, 0.6):
             for taper in (0.85, 0.7, 0.55):
                 tg = ctr + (target - ctr) * f
@@ -832,6 +853,23 @@ def repair_file(path, pairs=False):
     return changed
 
 
+class _B:
+    def __init__(self, V, T):
+        self.V, self.T = V, T
+
+
+def _see_of(bone):
+    """骨一本を蓋で閉じたときの裏面透けの画素数 (袖の良し悪しを比べるため)"""
+    V, UV, T = bone
+    if len(T) == 0:
+        return 0
+    T1, _ = fix_orientation(V, T)
+    V1, UV1, T1, _ = close_bone(V, UV, T1, V.mean(0))
+    T1, _ = fix_orientation(V1, T1)
+    d = ma.see_through({"b": _B(np.asarray(V1, float), np.asarray(T1, int))}, max_pix=4000)
+    return int(d.get("b", 0))
+
+
 def close_mesh(data, with_collar=True):
     """メッシュ JSON (dict) を水密にして返す。戻り値 (dict, 統計)。"""
     bones = {n: [np.array(b.get("vertices", []), float).reshape(-1, 3), np.array(b.get("uvs", []), float).reshape(-1, 2),
@@ -872,6 +910,10 @@ def close_mesh(data, with_collar=True):
                 stats["collars"] += 1
             elif root_buried(view, n, refs) < 0.25 and extrude_root(view, n, refs):
                 stats["collars"] += 1
+            # 袖・延ばしで裏面の透けが増えたら付けない (2026-11-09: 外れた輪から延びた袖が腕や長靴を貫いて裏返っていた)
+            if view[n] is not bones[n] and _see_of(view[n]) > _see_of(bones[n]) + 4:
+                stats["collars"] -= 1
+                continue
             bones[n] = view[n]
     # 段 C: 仕上げ
     capstart = {}

@@ -97,6 +97,15 @@ public final class ContinentLairsSelfTest {
             if (y < ContinentChunkGenerator.SEA_LEVEL) {
                 f.add(t + ": the shrine pad is under the sea");
             }
+            // 祠の台地と参道 (x ±30、z -31..+38) が、土地の町の敷地 (±71 と縁 14) に重ならない (2026-11-08 の声「祠の位置と建物がかぶってる」)
+            for (String region : List.of("whale", "tide", "storm", "ember")) {
+                net.minecraft.core.BlockPos town = ContinentLayout.get().town(region);
+                boolean apart = town == null || c[0] + 30 < town.getX() - 85 || c[0] - 30 > town.getX() + 85 || c[1] + 38 < town.getZ() - 85
+                        || c[1] - 31 > town.getZ() + 85;
+                if (!apart) {
+                    f.add(t + ": the shrine overlaps the " + region + " town");
+                }
+            }
             // 台地 (±12) と参道 (x ±4、南へ z 12..31) が道の縁から 1 以上離れる (2026-11-03 の声「まだ道の上に建造物が立つ」。前は台地の角と鳥居が道にかかった)
             double worst = 1e9;
             for (int dx = -12; dx <= 12; dx++) {

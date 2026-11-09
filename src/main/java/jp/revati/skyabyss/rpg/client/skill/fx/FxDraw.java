@@ -222,12 +222,29 @@ public final class FxDraw {
     }
 
     // 形を一つ足す。上限を超えるときは捨てる (false)。cast の上限は SkillFx.Cast.prims で数える
+    // 元の色の明るさを残して、色味を tint へ寄せる (8 割)
+    static int tint(int rgb, int tint) {
+        int r = rgb >> 16 & 255, g = rgb >> 8 & 255, b = rgb & 255;
+        float lum = (0.3f * r + 0.59f * g + 0.11f * b) / 255f;
+        int tr = tint >> 16 & 255, tg = tint >> 8 & 255, tb = tint & 255;
+        float tl = Math.max(0.2f, (0.3f * tr + 0.59f * tg + 0.11f * tb) / 255f);
+        float k = Math.min(1.6f, lum / tl);
+        int nr = (int) Math.min(255, r * 0.2f + tr * k * 0.8f);
+        int ng = (int) Math.min(255, g * 0.2f + tg * k * 0.8f);
+        int nb = (int) Math.min(255, b * 0.2f + tb * k * 0.8f);
+        return nr << 16 | ng << 8 | nb;
+    }
+
     public static boolean add(SkillFx.Cast c, Prim p) {
         if (c.live >= SkillFx.CAST_PRIMS || PRIMS.size() >= MAX_PRIMS) {
             return false;
         }
         p.birth = c.level.getGameTime();
         p.owner = c;
+        // 武器の書き換えが効いた発動は、形を書き換えの出どころの色に染める (明るさは元の形のまま)
+        if (c.tint != 0) {
+            p.rgb = tint(p.rgb, c.tint);
+        }
         PRIMS.add(p);
         c.prims++;
         c.live++;

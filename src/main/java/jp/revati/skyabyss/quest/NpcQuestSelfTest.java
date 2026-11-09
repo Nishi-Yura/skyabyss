@@ -684,6 +684,8 @@ public final class NpcQuestSelfTest {
         Lore.unlock(b, "prologue/shadow", false);
         Quests.poll(b, true);
         check(stage(b, "main_song").equals("ask_storyteller"), "seeing the shadow did not start the main quest", failures);
+        // メインを追っていれば話はいきなり始まる。ここはメニューの選択肢を見るので、追跡を外す
+        Quests.track(b, "");
         // 初めて話すなら shadow_first (序盤の語り、OpeningStorySelfTest)。ここは二度目の訪れ (話題を選ぶ節) を見る
         NpcBonds.of(b).bond(ST).flags().add("met");
         DialogueService.open(b, st);

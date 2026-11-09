@@ -141,6 +141,10 @@ public class HeartWarden extends Monster implements GeoEntity {
         bulk = tier.hp() * (1 + 0.6 * Math.max(0, players - 1));
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(BASE_HP);
         setHealth((float) BASE_HP);
+        // 硬さ (TOUGH) と人数・段 (bulk) は体力に掛ける (2026-11-09。受ける傷を割るのをやめた)
+        jp.revati.skyabyss.combat.Hardness.rebase(this, BASE_HP);
+        jp.revati.skyabyss.combat.Hardness.set(this, "own", bulk / TOUGH);
+        setHealth(getMaxHealth());
     }
 
     private double bulk = 1;
@@ -174,7 +178,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             }
             return true;
         }
-        float a = (float) (amount * share() * TOUGH / bulk);
+        float a = amount * share();
         lastHitAt = life;
         if (snuffing >= 0) {
             snuffDamage += a;

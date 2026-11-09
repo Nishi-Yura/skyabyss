@@ -37,12 +37,20 @@ public final class HeartBalanceSelfTest {
             for (Supplier<Profile> s : hearts()) {
                 check(f, s.get());
             }
+            // 入る人のレベルに合わせた硬さ (LevelScale): 推奨と同じレベルなら 1、下なら 1 のまま、上ほど大きく、上限で止まる
+            double same = LevelScale.factor(12, 12);
+            double low = LevelScale.factor(30, 12);
+            double up = LevelScale.factor(12, 30);
+            double top = LevelScale.factor(12, 50);
+            if (Math.abs(same - 1) > 1e-6 || Math.abs(low - 1) > 1e-6 || !(up > 1.4 && up < top) || top > LevelScale.MAX + 1e-6) {
+                f.add("level scale is off: same " + same + " low " + low + " up " + up + " top " + top);
+            }
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("heart balance selftest crashed", e);
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST heart balance PASSED (fight length 1/2/4/6 players, heavy hit share, failed dodges, damage budget, cadence)");
+            SkyAbyss.LOGGER.info("SELFTEST heart balance PASSED (fight length 1/2/4/6 players, heavy hit share, failed dodges, damage budget, cadence, level scale)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST heart balance FAILED: {}", x));
         }

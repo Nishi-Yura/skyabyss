@@ -103,6 +103,8 @@ public final class EmberMobSelfTest {
     private static <T extends Mob> T make(ServerLevel level, EntityType<T> type, double x, double z, List<Mob> made) {
         T mob = type.create(level);
         mob.moveTo(x, FLOOR + 1, z, 0, 0);
+        // 作りの数そのものを見る (攻撃の倍率・体力の上乗せ・防具の置き換えを掛けない)
+        jp.revati.skyabyss.combat.MobTuning.untune(mob);
         level.addFreshEntity(mob);
         made.add(mob);
         return mob;

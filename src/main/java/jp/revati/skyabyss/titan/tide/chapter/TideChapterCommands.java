@@ -17,7 +17,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 二章のテスト用コマンド (OP)。
-// /skyabyss tide conch        : 潮見の貝を出す (なくしたとき。渡した印は変えない)
 // /skyabyss tide ebb start    : 今いる所の近くで大干潮を始める (時刻・章・巨神を問わない。途中の道と重なるなら何もしない)
 // /skyabyss tide ebb end      : 途中の大干潮を終える (水を戻す)
 // /skyabyss tide ebb reset    : 大干潮の記録 (途中のもの・迎えた人) を消す (道の床は海の底に残る)
@@ -37,20 +36,10 @@ public final class TideChapterCommands {
 
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(op(SkyAbyss.MODID).then(op("tide")
-                .then(op("conch").executes(TideChapterCommands::conch))
                 .then(op("ebb")
                         .then(op("start").executes(ctx -> ebb(ctx, "start")))
                         .then(op("end").executes(ctx -> ebb(ctx, "end")))
                         .then(op("reset").executes(ctx -> ebb(ctx, "reset"))))));
-    }
-
-    private static int conch(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ItemStack shell = new ItemStack(TideChapterSetup.TIDE_WATCHING_SHELL.get());
-        if (!player.getInventory().add(shell)) {
-            player.drop(shell, false);
-        }
-        return 1;
     }
 
     private static int ebb(CommandContext<CommandSourceStack> ctx, String what) throws CommandSyntaxException {

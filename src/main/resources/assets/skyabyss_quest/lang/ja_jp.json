@@ -203,6 +203,7 @@
   "quest.skyabyss.clock.tower.free": "まだ入れる",
   "quest.skyabyss.clock.tower.closed": "まだ開いていない（終章の結末を選ぶと開く）",
   "quest.skyabyss.clock.dungeon.status.4": "%1$s は%2$s・%3$s は%4$s・%5$s は%6$s・%7$s は%8$s",
+  "quest.skyabyss.clock.dungeon.status.8": "%1$s は%2$s・%3$s は%4$s・%5$s は%6$s・%7$s は%8$s・%9$s は%10$s・%11$s は%12$s・%13$s は%14$s・%15$s は%16$s",
   "quest.skyabyss.clock.fish_order.status": "今日 %1$s / %2$s の土地・今週 %3$s / %4$s の土地で納めた",
   "quest.skyabyss.clock.fish_week.none": "今週はまだ釣っていない",
   "quest.skyabyss.clock.fish_week.status": "今週の自分の一番: %1$s %2$s cm",

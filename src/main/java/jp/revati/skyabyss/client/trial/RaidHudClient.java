@@ -69,6 +69,9 @@ public final class RaidHudClient {
         if (h.secMax() > 0) {
             sb.append("  ").append(Component.translatable(h.secKey()).getString()).append(' ').append(h.sec()).append('/').append(h.secMax());
         }
+        if (h.foes() > 0) {
+            sb.append("  ").append(Component.translatable("raid.skyabyss.hud.foes_left", h.foes()).getString());
+        }
         if (h.timer() >= 0) {
             int s = (h.timer() + 19) / 20;
             sb.append("  ").append(s / 60).append(':').append(String.format("%02d", s % 60));

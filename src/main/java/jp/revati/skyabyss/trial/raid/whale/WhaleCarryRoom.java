@@ -36,6 +36,8 @@ import net.minecraft.world.phys.Vec3;
 //  - 持つ (持ち物に入る) と遅くなり、跳べない。一人が一つまで。敵は持っている人を狙う
 //  - 落とした・倒れた骨玉は元の場所へ戻る。台座の近くで持っていると、置いたことになる (台座の窪みが灯る)
 //  - 一人でも運べるが、手分けして同時に運ぶと早い (敵の目が分かれる)。骨玉の場所・遮りの柱・敵の出る所は、挑戦ごとに少し変わる
+//  - 骨玉は持つと冷えていき、COOL tick で手から落ちて元の場所へ戻る (寄り道はできない)
+//  - 骨奪い (一体。THIEF_AFTER のあとに出る): 骨玉を持つ人に触れると叩き落として抱え、人から逃げる。倒すとその場に落とす。逃げきられると元の場所へ
 public final class WhaleCarryRoom extends RaidRoom {
     static final int HX = 16;
     static final int HZ = 16;
@@ -49,6 +51,13 @@ public final class WhaleCarryRoom extends RaidRoom {
     static final int[] SOCKET_X = {-3, 0, 3};
     // 戻すまでの、置かれた場所に落ちている長さ
     static final int LINGER = 50;
+    // 冷える玉 (2026-11-10 の声「骨玉運び楽すぎる。ギミック入れたり、1 体くらい敵追加して」): 持ってから COOL tick で冷えきって手から落ち、元の場所へ戻る
+    static final int COOL = 20 * 15;
+    // 骨奪い: 一回の挑戦に一体。骨玉を持つ人に触れると玉を叩き落として抱え、人から逃げる。倒すとその場に落とす。抱えて THIEF_HOLD tick で玉は元の場所へ
+    static final int THIEF_AFTER = 20 * 6;
+    static final int THIEF_HOLD = 20 * 12;
+    static final double THIEF_REACH = 1.8;
+    static final String THIEF_TAG = "skyabyss_bone_thief";
 
     private final BlockPos[] home = new BlockPos[ORBS];
     private final boolean[] delivered = new boolean[ORBS];
@@ -57,6 +66,15 @@ public final class WhaleCarryRoom extends RaidRoom {
     private int count;
     private long nextSpawn;
     private boolean started;
+    // 骨玉ごとの、持たれてからの tick (持っていなければ 0)
+    private final int[] held = new int[ORBS];
+    @Nullable
+    private Mob thief;
+    private boolean thiefOut;
+    private long thiefAt;
+    private int stolen = -1;
+    private int stolenTicks;
+    private long thiefCooldown;
 
     @Override
     public void build(RaidCtx ctx) {
@@ -116,6 +134,7 @@ public final class WhaleCarryRoom extends RaidRoom {
     @Override
     public void start(RaidCtx ctx) {
         started = true;
+        thiefAt = ctx.now() + THIEF_AFTER;
         for (int i = 0; i < ORBS; i++) {
             if (!delivered[i]) {
                 spawnOrb(ctx, i);
@@ -148,6 +167,21 @@ public final class WhaleCarryRoom extends RaidRoom {
                 }
                 has = true;
                 located[idx] = true;
+                // 冷える: 持っているあいだ数え、冷えきったら手から落ちて元の場所へ
+                held[idx]++;
+                int left = COOL - held[idx];
+                if (left <= 0) {
+                    p.getInventory().setItem(slot, ItemStack.EMPTY);
+                    located[idx] = false;
+                    has = false;
+                    held[idx] = 0;
+                    jp.revati.skyabyss.notice.Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.WR1.cooled"));
+                    level.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1f, 0.6f);
+                } else if (held[idx] % 20 == 0) {
+                    jp.revati.skyabyss.notice.Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.WR1.cooling", (left + 19) / 20)
+                            .withColor(left <= 100 ? 0xE0605A : 0x9FD8E8));
+                    level.sendParticles(left <= 100 ? ParticleTypes.SNOWFLAKE : ParticleTypes.END_ROD, p.getX(), p.getY() + 2.2, p.getZ(), 3, 0.2, 0.1, 0.2, 0.01);
+                }
             }
             applyCarry(p, has && !down);
             if (has && !down) {
@@ -156,6 +190,24 @@ public final class WhaleCarryRoom extends RaidRoom {
         }
         carried = !carriers.isEmpty();
         nextOrb = null;
+        // 骨奪いが抱えている骨玉は、床にも人の手にもない (どこにもない骨玉として作り直さない)
+        if (stolen >= 0) {
+            located[stolen] = true;
+        }
+        tickThief(ctx, carriers, located);
+        for (int i = 0; i < ORBS; i++) {
+            boolean inHand = false;
+            for (ServerPlayer p : carriers) {
+                for (int slot = 0; slot < p.getInventory().getContainerSize(); slot++) {
+                    if (orbIndex(p.getInventory().getItem(slot)) == i) {
+                        inHand = true;
+                    }
+                }
+            }
+            if (!inHand) {
+                held[i] = 0;
+            }
+        }
         // 床の骨玉: 元の場所から離れて落ちたまま LINGER たつと戻る
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, ctx.cell().inner().inflate(2))) {
             int idx = orbIndex(e.getItem());
@@ -209,6 +261,9 @@ public final class WhaleCarryRoom extends RaidRoom {
         // 敵: 骨玉を持つ人を狙う。ときどき湧く
         if (ctx.now() % 10 == 0 && !carriers.isEmpty()) {
             for (Mob m : ctx.aliveMobs()) {
+                if (m == thief) {
+                    continue;
+                }
                 ServerPlayer best = null;
                 for (ServerPlayer p : carriers) {
                     if (best == null || p.distanceToSqr(m) < best.distanceToSqr(m)) {
@@ -242,6 +297,11 @@ public final class WhaleCarryRoom extends RaidRoom {
         }
         count = 0;
         started = false;
+        java.util.Arrays.fill(held, 0);
+        thief = null;
+        thiefOut = false;
+        stolen = -1;
+        stolenTicks = 0;
         for (int sx : SOCKET_X) {
             RaidKit.set(ctx.level(), ctx.origin().offset(sx, 1, ALTAR_Z), Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
         }
@@ -368,6 +428,132 @@ public final class WhaleCarryRoom extends RaidRoom {
         }
         int r = ctx.rng().nextInt(5);
         ctx.spawnGuard(r == 0 ? "archer" : r == 1 ? "crawler" : "sentinel", at);
+    }
+
+    // ---- 骨奪い
+    private void tickThief(RaidCtx ctx, List<ServerPlayer> carriers, boolean[] located) {
+        ServerLevel level = ctx.level();
+        long now = ctx.now();
+        if (!thiefOut && started && count < ORBS && now >= thiefAt) {
+            thiefOut = true;
+            BlockPos at = RaidKit.randomSpot(ctx, 3);
+            thief = ctx.spawnGuard("crawler", at);
+            if (thief != null) {
+                thief.setCustomName(net.minecraft.network.chat.Component.translatable("entity.skyabyss.bone_thief"));
+                thief.setCustomNameVisible(true);
+                thief.addTag(THIEF_TAG);
+                thief.setGlowingTag(true);
+                var speed = thief.getAttribute(Attributes.MOVEMENT_SPEED);
+                if (speed != null) {
+                    speed.setBaseValue(speed.getBaseValue() * 1.35);
+                }
+                for (ServerPlayer p : ctx.players()) {
+                    jp.revati.skyabyss.notice.Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.WR1.thief"));
+                }
+                level.playSound(null, at, SoundEvents.SKELETON_AMBIENT, SoundSource.HOSTILE, 1.2f, 1.5f);
+            }
+        }
+        if (thief == null) {
+            return;
+        }
+        if (!thief.isAlive() || thief.isRemoved()) {
+            // 倒した: 抱えていた骨玉をその場に落とす (拾い直せる)
+            if (stolen >= 0) {
+                dropAt(ctx, stolen, thief.position());
+                stolen = -1;
+            }
+            thief = null;
+            return;
+        }
+        if (stolen >= 0) {
+            // 抱えて逃げる: いちばん近い人から離れる向きへ
+            stolenTicks++;
+            located[stolen] = true;
+            thief.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(ModItems.RAID_BONE_ORB.get()));
+            if (now % 10 == 0) {
+                ServerPlayer near = null;
+                for (ServerPlayer p : ctx.standing()) {
+                    if (near == null || p.distanceToSqr(thief) < near.distanceToSqr(thief)) {
+                        near = p;
+                    }
+                }
+                thief.setTarget(null);
+                if (near != null) {
+                    Vec3 away = thief.position().subtract(near.position()).multiply(1, 0, 1);
+                    Vec3 to = thief.position().add(away.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : away.normalize().scale(6));
+                    double lx = Math.max(-HX + 2, Math.min(HX - 2, to.x - ctx.origin().getX()));
+                    double lz = Math.max(-HZ + 2, Math.min(HZ - 2, to.z - ctx.origin().getZ()));
+                    thief.getNavigation().moveTo(ctx.origin().getX() + lx, ctx.origin().getY() + 1, ctx.origin().getZ() + lz, 1.2);
+                }
+                level.sendParticles(ParticleTypes.END_ROD, thief.getX(), thief.getY() + 1.2, thief.getZ(), 2, 0.2, 0.2, 0.2, 0.01);
+            }
+            if (stolenTicks >= THIEF_HOLD) {
+                // 抱えたまま逃げきった: 骨玉は元の場所へ
+                int idx = stolen;
+                stolen = -1;
+                thief.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                located[idx] = false;
+                returned(ctx, idx);
+                thiefCooldown = now + 100;
+            }
+            return;
+        }
+        thief.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        // 骨玉を持つ人を狙い、触れたら叩き落として抱える
+        ServerPlayer best = null;
+        for (ServerPlayer p : carriers) {
+            if (best == null || p.distanceToSqr(thief) < best.distanceToSqr(thief)) {
+                best = p;
+            }
+        }
+        if (best == null) {
+            return;
+        }
+        if (now % 10 == 0) {
+            thief.setTarget(best);
+            thief.getNavigation().moveTo(best, 1.25);
+        }
+        if (now >= thiefCooldown && best.distanceTo(thief) <= THIEF_REACH) {
+            for (int slot = 0; slot < best.getInventory().getContainerSize(); slot++) {
+                int idx = orbIndex(best.getInventory().getItem(slot));
+                if (idx >= 0 && idx < ORBS && !delivered[idx]) {
+                    best.getInventory().setItem(slot, ItemStack.EMPTY);
+                    applyCarry(best, false);
+                    held[idx] = 0;
+                    stolen = idx;
+                    stolenTicks = 0;
+                    thief.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                    jp.revati.skyabyss.notice.Notice.bar(best, net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.WR1.stolen"));
+                    level.playSound(null, best.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.HOSTILE, 1f, 0.5f);
+                    break;
+                }
+            }
+        }
+    }
+
+    // 骨玉を床に落とす (骨奪いを倒したとき)
+    private void dropAt(RaidCtx ctx, int idx, Vec3 at) {
+        ItemStack st = new ItemStack(ModItems.RAID_BONE_ORB.get());
+        CompoundTag tag = new CompoundTag();
+        tag.putInt(ORB_TAG, idx);
+        st.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        ItemEntity e = new ItemEntity(ctx.level(), at.x, at.y + 0.3, at.z, st);
+        e.setUnlimitedLifetime();
+        e.setInvulnerable(true);
+        e.setGlowingTag(true);
+        e.setPickUpDelay(10);
+        ctx.level().addFreshEntity(e);
+        lingering[idx] = 0;
+    }
+
+    // 試験用: 骨奪いと、抱えている骨玉
+    @Nullable
+    public Mob thief() {
+        return thief;
+    }
+
+    public int stolen() {
+        return stolen;
     }
 
     private boolean nearPillar(RaidCtx ctx, BlockPos p, int margin) {

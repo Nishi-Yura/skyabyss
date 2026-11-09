@@ -24,6 +24,7 @@
   "subtitles.skyabyss.ember_world_turn": "大地が寝返りをうつ",
   "message.skyabyss.ember.surface.asleep": "土の匂いが熱い。どこかで、山が寝息をたてている……",
   "message.skyabyss.ember.surface.mouth_hint": "息を吸っているあいだに、口へ入ろう",
+  "message.skyabyss.ember.surface.mouth_wait": "余燼が息を吐いている。吸いはじめたら、口へ入ろう",
   "message.skyabyss.ember.surface.spat_out": "巨神の息が、あなたを吐き出した。まだ早い",
   "message.skyabyss.ember.surface.stone.given": "懐に、温かい小石が入っていた。灰の民の焼き物だ。握ると、どこかの熱が手に移る。",
   "message.skyabyss.ember.surface.stone.cold": "石は冷たい。",
@@ -491,5 +492,6 @@
   "lore.skyabyss.chapter1.ember_hearth.title": "灰の民の炉跡",
   "lore.skyabyss.chapter1.ember_hearth.body": "地面に、焼き締めた石で小さな炉が組んである。灰は、手のかたちに掻き寄せられていた。\n\n炉の口は、いつも丘のほうを向いている。火を絶やさないためではなく、丘を起こさないために焚いていたのだろう。",
   "lore.skyabyss.chapter1.ember_prev_page.title": "炉跡のページ",
-  "lore.skyabyss.chapter1.ember_prev_page.body": "破れたページ。見覚えのある字で、短い覚え書きが残っている。\n\n「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」\n\n……この字は、自分のものに似ている。"
+  "lore.skyabyss.chapter1.ember_prev_page.body": "破れたページ。見覚えのある字で、短い覚え書きが残っている。\n\n「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」\n\n……この字は、自分のものに似ている。",
+  "message.skyabyss.ember.heart.ash_pools": "熱いときは、心臓のまわりの灰色の灰溜まり（白い灰が立つ所）に立つと冷める"
 }

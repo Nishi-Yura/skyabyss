@@ -186,6 +186,18 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.MOSS_DEAD, 0x3E5A2A, 0xA8F082, new Item.Properties()));
     public static final DeferredItem<Item> MIST_ANGLER_EGG = ITEMS.register("mist_angler_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.MIST_ANGLER, 0x54523A, 0x78F0D2, new Item.Properties()));
+    public static final DeferredItem<Item> BOLT_SLINGER_EGG = ITEMS.register("bolt_slinger_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BOLT_SLINGER, 0x5A5E6A, 0x9AD2FF, new Item.Properties()));
+    public static final DeferredItem<Item> STORM_JELLY_EGG = ITEMS.register("storm_jelly_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.STORM_JELLY, 0x6C7690, 0xC8ECFF, new Item.Properties()));
+    public static final DeferredItem<Item> CRAG_TORTOISE_EGG = ITEMS.register("crag_tortoise_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CRAG_TORTOISE, 0x55585E, 0xEEF2F8, new Item.Properties()));
+    public static final DeferredItem<Item> EMBER_SPITTER_EGG = ITEMS.register("ember_spitter_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.EMBER_SPITTER, 0x261C1E, 0xFF9228, new Item.Properties()));
+    public static final DeferredItem<Item> ASH_WHIRL_EGG = ITEMS.register("ash_whirl_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ASH_WHIRL, 0x786250, 0xFF9228, new Item.Properties()));
+    public static final DeferredItem<Item> BASALT_SCORPION_EGG = ITEMS.register("basalt_scorpion_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BASALT_SCORPION, 0x2C2A34, 0xFF9228, new Item.Properties()));
     public static final DeferredItem<Item> THUNDER_WOLF_EGG = ITEMS.register("thunder_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.THUNDER_WOLF, 0x3E4862, 0x8CD2FF, new Item.Properties()));
     public static final DeferredItem<Item> EMBER_JACKAL_EGG = ITEMS.register("ember_jackal_spawn_egg",
@@ -196,6 +208,22 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.SHELL_OCTOPUS, 0xC8A070, 0x8C3A48, new Item.Properties()));
     public static final DeferredItem<Item> CRYSTAL_LIZARD_EGG = ITEMS.register("crystal_lizard_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.CRYSTAL_LIZARD, 0x2E3448, 0x8CC8FF, new Item.Properties()));
+    public static final DeferredItem<Item> FORT_WARLORD_EGG = ITEMS.register("fort_warlord_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.FORT_WARLORD, 0x6E5038, 0xE6DCC4, new Item.Properties()));
+    public static final DeferredItem<Item> TEMPLE_KEEPER_EGG = ITEMS.register("temple_keeper_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.TEMPLE_KEEPER, 0x2E4A52, 0xE87068, new Item.Properties()));
+    public static final DeferredItem<Item> ICE_LORD_EGG = ITEMS.register("ice_lord_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ICE_LORD, 0xD8DEE8, 0x8AC8F0, new Item.Properties()));
+    public static final DeferredItem<Item> LAVA_WYRM_EGG = ITEMS.register("lava_wyrm_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.LAVA_WYRM, 0x18141E, 0xFF8C28, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_LANCER_EGG = ITEMS.register("bone_lancer_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_LANCER, 0xD8D0B8, 0x6A2420, new Item.Properties()));
+    public static final DeferredItem<Item> JELLY_PRIESTESS_EGG = ITEMS.register("jelly_priestess_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.JELLY_PRIESTESS, 0x6496C8, 0x96F4F0, new Item.Properties()));
+    public static final DeferredItem<Item> THUNDER_OWL_EGG = ITEMS.register("thunder_owl_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.THUNDER_OWL, 0x46506E, 0xB4DCFF, new Item.Properties()));
+    public static final DeferredItem<Item> LAVA_TOAD_EGG = ITEMS.register("lava_toad_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.LAVA_TOAD, 0x503C28, 0xFFAA40, new Item.Properties()));
     public static final DeferredItem<Item> FORGE_GIANT_EGG = ITEMS.register("forge_giant_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.FORGE_GIANT, 0x262224, 0xF08C30, new Item.Properties()));
     public static final DeferredItem<Item> PIT_DIGGER_EGG = ITEMS.register("pit_digger_spawn_egg",

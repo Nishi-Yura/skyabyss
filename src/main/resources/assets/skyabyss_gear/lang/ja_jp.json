@@ -19,5 +19,6 @@
   "skyabyss_gear.tooltip.short.weapon": "レベルが足りず、振っても力と効果が出ない",
   "skyabyss_gear.tooltip.short.accessory": "レベルが足りず、スロットに付けられない",
   "skyabyss_gear.tooltip.slot.charm": "護符スロットに付けて [%s] で使う",
-  "skyabyss_gear.tooltip.slot.trinket": "アクセサリースロットに付けているあいだ効く"
+  "skyabyss_gear.tooltip.slot.trinket": "アクセサリースロットに付けているあいだ効く",
+  "tooltip.skyabyss.accessory_roll": "個体の強さ %s%%（余った品は共鳴の炉で分解できる）"
 }

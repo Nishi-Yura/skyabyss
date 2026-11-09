@@ -85,8 +85,9 @@ public final class LoreSelfTest {
         // 都の町のクエストと裏通りの頼み (35 の 3.3・3.5) の 9 項目も足した
         // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
         // 六章 (chapter3「月」) は 2026-10-31 に中身が入った (記憶の断片 12・見る者・月の核・記念の札 5)
-        if (early < 12 || early > 180) {
-            failures.add("prologue + chapters 1-6 should have 12-180 entries, found " + early);
+        // 2026-11-09 に 180 を越えた (章の小さな頁が増えた) ので 220 まで
+        if (early < 12 || early > 220) {
+            failures.add("prologue + chapters 1-6 should have 12-220 entries, found " + early);
         }
         if (unlockable != early) {
             failures.add("only the prologue, chapters 1-6 and the finale may be written (" + unlockable + " unlockable)");

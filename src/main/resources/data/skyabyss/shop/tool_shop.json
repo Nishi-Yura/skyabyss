@@ -22,22 +22,10 @@
       "chapter": 2
     },
     {
-      "id": "gather_axe",
-      "item": "skyabyss:gather_axe",
-      "count": 1,
-      "coins": 6
-    },
-    {
       "id": "gather_pickaxe",
       "item": "skyabyss:gather_pickaxe",
       "count": 1,
       "coins": 8
-    },
-    {
-      "id": "gather_shovel",
-      "item": "skyabyss:gather_shovel",
-      "count": 1,
-      "coins": 4
     },
     {
       "id": "fishing_rod",

@@ -222,7 +222,7 @@ public final class Ch3MobsSelfTest {
     private static void registration(ServerLevel level, List<String> f, List<String> notes) {
         record Def(String id, double hp, int maxXp) {
         }
-        for (Def d : List.of(new Def(Ch3Mobs.STATIC_PUFF, 10, 10), new Def(Ch3Mobs.PEAK_FLEDGLING, 14, 10), new Def(Ch3Mobs.LIGHTNING_GLEANER, 12, 5),
+        for (Def d : List.of(new Def(Ch3Mobs.STATIC_PUFF, 10, 15), new Def(Ch3Mobs.PEAK_FLEDGLING, 14, 15), new Def(Ch3Mobs.LIGHTNING_GLEANER, 12, 5),
                 new Def(Ch3Mobs.SCORCHED_WARDEN, 190, 60))) {
             ResourceLocation key = ResourceLocation.parse(d.id());
             check(BuiltInRegistries.ENTITY_TYPE.containsKey(key), d.id() + " is not registered", f);
@@ -309,7 +309,7 @@ public final class Ch3MobsSelfTest {
             }
             check(first >= StaticPuff.CHARGE_TICKS - 2 && first >= Telegraph.MIN_WARN_TICKS, "the puff discharged after only " + first + " ticks (charge 4 s)", f);
             check(bristled, "the puff never showed its charge", f);
-            check(Math.abs(lost(a) - StaticPuff.DISCHARGE_DAMAGE) < 0.6f && lost(b) > 0 && lost(b) < lost(a), "the discharge did not chain across the pair (" + lost(a) + ", " + lost(b) + ")", f);
+            check(Math.abs(lost(a) - StaticPuff.DISCHARGE_DAMAGE * jp.revati.skyabyss.combat.MobTuning.attackFactor(p)) < 0.6f && lost(b) > 0 && lost(b) < lost(a), "the discharge did not chain across the pair (" + lost(a) + ", " + lost(b) + ")", f);
             check(lost(far) == 0, "the discharge reached the far player", f);
             check(p.getCharge() < 0.01f, "the puff kept its charge after discharging", f);
             notes.add("puff " + first + " ticks, " + Math.round(lost(a) * 10) / 10f + "/" + Math.round(lost(b) * 10) / 10f);
@@ -357,7 +357,7 @@ public final class Ch3MobsSelfTest {
             Telegraph.record(null);
             check(lineAt >= PeakFledgling.RISE_TICKS - 1, "the line came before the fledgling rose (" + lineAt + ")", f);
             check(first > 0 && first - lineAt + 1 >= Telegraph.MIN_WARN_TICKS, "the dive hit " + (first - lineAt + 1) + " ticks after the line (needs 0.8 s)", f);
-            check(Math.abs(lost(on) - PeakFledgling.DIVE_DAMAGE) < 0.6f && lost(off) == 0, "the dive hit on " + lost(on) + " / off " + lost(off), f);
+            check(Math.abs(lost(on) - PeakFledgling.DIVE_DAMAGE * jp.revati.skyabyss.combat.MobTuning.attackFactor(b)) < 0.6f && lost(off) == 0, "the dive hit on " + lost(on) + " / off " + lost(off), f);
             check(!shapes.isEmpty() && shapes.get(0).contains(on.getX(), on.getZ()) && !shapes.get(0).contains(off.getX(), off.getZ()), "the line shape does not match the hits", f);
             check(b.state() != PeakFledgling.STAGGER, "the fledgling staggered after a hit", f);
             notes.add("fledgling line " + lineAt + ", hit " + first);
@@ -432,14 +432,14 @@ public final class Ch3MobsSelfTest {
                 ps.add(fake(level, "w_party" + i, SX + 3 + i, SZ + 12));
             }
             tick(level, w, 2);
-            check(Math.abs(w.getMaxHealth() - 190 * 2.2f) < 1f, "warden health for 3 players " + w.getMaxHealth(), f);
+            check(Math.abs(w.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.get(w, "armor") - 190 * 2.2f) < 1f, "warden health for 3 players " + w.getMaxHealth(), f);
             drop(ps);
             w.discard();
             w = wardenAt(level, SX + 0.5, SZ + 0.5);
             FakePlayer solo = fake(level, "w_solo", SX + 0.5, SZ + 14);
             ps.add(solo);
             tick(level, w, 2);
-            check(w.getMaxHealth() == 190f, "warden health for one player " + w.getMaxHealth(), f);
+            check(Math.abs(w.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.get(w, "armor") - 190f) < 0.5f, "warden health for one player " + w.getMaxHealth(), f);
             check(w.diveAllowed(), "the scorched warden waits for a storm beat to dive", f);
             // ふだんは硬く、柱の雷のあとはよく通る
             // 鎧を通す傷で比べる (羽守の鎧 9 を倍率から外す)
@@ -490,7 +490,7 @@ public final class Ch3MobsSelfTest {
                 }
             }
             check(first >= 20 && first >= ScorchedWarden.LEAP_TICKS, "the leap hit after " + first + " ticks (needs 1 s)", f);
-            check(Math.abs(lost(target) - ScorchedWarden.LEAP_DAMAGE) < 0.6f && lost(aside) == 0, "leap damage target " + lost(target) + " / aside " + lost(aside), f);
+            check(Math.abs(lost(target) - ScorchedWarden.LEAP_DAMAGE * jp.revati.skyabyss.combat.MobTuning.attackFactor(w)) < 0.6f && lost(aside) == 0, "leap damage target " + lost(target) + " / aside " + lost(aside), f);
             check(w.position().distanceTo(new net.minecraft.world.phys.Vec3(SX + 0.5, FLOOR, SZ + 7.5)) < 1.5, "the warden did not land on the ring (" + w.position() + ")", f);
             notes.add("warden leap " + first);
         } finally {

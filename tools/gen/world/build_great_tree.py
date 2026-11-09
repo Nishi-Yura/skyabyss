@@ -196,6 +196,15 @@ def in_hut(x, z, pad=0):
     return HUT[0] - pad <= x <= HUT[1] + pad and HUT[2] - pad <= z <= HUT[3] + pad
 
 
+# 床の上の足と頭の高さに出た枝・傾いた幹は切る (床の輪が途中でふさがり、南の半分へ行けなかった。2026-11-08 の声「上らせる気の無い建築」)
+for x, z in deck:
+    if in_hut(x, z):
+        continue
+    for y in (D + 1, D + 2):
+        if is_wood(get(x, y, z)):
+            cells[(x, y, z)] = AIR
+
+
 # 支え: 幹から床の縁へ斜めに六本
 for k in range(6):
     a = math.radians(k * 60 + 15)

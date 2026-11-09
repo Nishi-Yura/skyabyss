@@ -106,6 +106,37 @@ public final class TelegraphRenderer {
 
     // ---- 1 つの印の描き分け ----
 
+    // 仕掛けの「ここに立つ」場所: 金色の面 (ゆっくり脈打つ)、白金の縁と高い幕、縁を回る明るい筋、真ん中の光の柱。
+    // 赤い技の印と見分けがつくよう、色も形 (幕が高い・柱が立つ) も変える
+    private static void drawGoal(Painter p, TelegraphClient.Decal d, float t, boolean hc) {
+        TelegraphShape shape = d.shape;
+        int gold = Telegraph.Style.GOAL.rgb;
+        float life = d.warn + Math.max(d.active, 1);
+        float fade = Math.min(1f, Math.min(t / 4f, Math.max(0f, (life + 6 - t) / 6f)));
+        if (fade <= 0f) {
+            return;
+        }
+        float pulse = 0.5f + 0.5f * (float) Math.sin(t * 0.25f);
+        p.pattern = Pattern.SOLID;
+        p.centerX = shape.centerX();
+        p.centerZ = shape.centerZ();
+        p.faces(g -> TelegraphGeometry.area(shape, g), gold, (hc ? 0.5f : 0.38f) + 0.12f * pulse * fade);
+        // 内側にもう一つ、明るい面 (中心へ寄るほど明るい)
+        p.faces(g -> TelegraphGeometry.fill(shape, 0.55f, g), mix(gold, 0xFFFFFF, 0.45f), (hc ? 0.4f : 0.3f) * fade);
+        // 縁: 太い実線と、高い幕 (遠くから見える壁)
+        p.lines(g -> TelegraphGeometry.outline(shape, g), mix(gold, 0xFFFFFF, 0.35f), fade, hc ? 0.45f : 0.34f, 0f);
+        p.lines(g -> TelegraphGeometry.outline(shape, g), mix(gold, 0xFFFFFF, 0.7f), 0.85f * fade, hc ? 0.24f : 0.18f, (hc ? 3.2f : 2.6f) * (0.85f + 0.15f * pulse));
+        // 真ん中の光の柱 (細い四角の帯を縦に)
+        double cx = shape.centerX();
+        double cz = shape.centerZ();
+        double w = 0.18;
+        p.lines(g -> TelegraphGeometry.outline(TelegraphShape.circle(cx, cz, w), g), 0xFFFFFF, 0.9f * fade, 0.3f, 7.5f);
+        // 縁の破線の明るい筋 (脈打つ。どこが輪か、明滅で目に入る)
+        p.pattern = Pattern.DASH;
+        p.lines(g -> TelegraphGeometry.outline(shape, g), 0xFFFFFF, (0.4f + 0.6f * pulse) * fade, hc ? 0.3f : 0.22f, 0.8f);
+        p.pattern = Pattern.SOLID;
+    }
+
     private static void drawDecal(Painter p, TelegraphClient.Decal d, float t, boolean hc) {
         TelegraphShape shape = d.shape;
         Telegraph.Style style = d.style;
@@ -114,6 +145,10 @@ public final class TelegraphRenderer {
         float curtain = hc ? 1.7f : 1.1f;
         // 安全な場所の印は出さない (2026-10-22: 印は赤だけ)
         if (style == Telegraph.Style.SAFE) {
+            return;
+        }
+        if (style == Telegraph.Style.GOAL) {
+            drawGoal(p, d, t, hc);
             return;
         }
         float wm = style == Telegraph.Style.DANGER ? 0.1f : 0.3f;

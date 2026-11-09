@@ -121,7 +121,7 @@ def legs(cfg):
     F = []
     for nm in ("legL", "legR"):
         s = side_of(nm)
-        F += fbox(nm, "boot", (s * 1.6, 1.1, -2.2), (2.8, 2.2, 4.4), taper=(0.85, 0.8), cut=0.35, caps=(False, True))
+        F += fbox(nm, "boot", (s * 1.6, 1.1, -2.2), (2.8, 2.2, 4.4), taper=(0.85, 0.8), cut=0.35, caps=(True, False))  # 底を塞ぎ、上 (脚の付け根) を開ける (2026-11-09: 底が開いていると襟が底から上へ伸びて裏返った)
     return F
 
 

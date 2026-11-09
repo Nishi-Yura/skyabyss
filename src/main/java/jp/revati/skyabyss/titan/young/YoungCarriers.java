@@ -253,11 +253,11 @@ public final class YoungCarriers {
             if (water == null) {
                 water = YoungReach.waterNear(level, player.blockPosition(), 64);
             }
-            if (water == null) {
-                return null;
+            if (water != null) {
+                double h0 = YoungMotion.height(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, water.getX() + 0.5, water.getZ() + 0.5);
+                return new Vec3(water.getX() + 0.5, Double.isNaN(h0) ? level.getSeaLevel() - 0.35 : h0 - 0.35, water.getZ() + 0.5);
             }
-            double h = YoungMotion.height(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, water.getX() + 0.5, water.getZ() + 0.5);
-            return new Vec3(water.getX() + 0.5, Double.isNaN(h) ? level.getSeaLevel() - 0.35 : h - 0.35, water.getZ() + 0.5);
+            // 水がなければ陸に出る (転がって進む。2026-11-07 からどこへでも行く)
         }
         float yaw = player.getYRot() * Mth.DEG_TO_RAD;
         double fx = -Mth.sin(yaw);

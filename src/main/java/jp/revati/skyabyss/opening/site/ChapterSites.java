@@ -901,6 +901,7 @@ public final class ChapterSites {
                 e.maxDist = el != null && (el.placement() == Placement.ROAD || el.placement() == Placement.ROAD_FILL) && t.ground() ? ROAD_MAX_DIST
                         : ChapterPlanner.MAX_DIST;
                 e.radius = p.radius();
+                data.adoptCarried(plan, e);
                 plan.sites.add(e);
             }
             data.setDirty();

@@ -168,7 +168,7 @@ public final class WhaleRaid2SelfTest {
             }
             teardown();
             if (FAILS.isEmpty()) {
-                SkyAbyss.LOGGER.info("SELFTEST raid whale 2 PASSED (WR4-WR6 registered and drawn either way per slot; shaft stairs/fluid/switches, floor tile pattern vs mural, "
+                SkyAbyss.LOGGER.info("SELFTEST raid whale 2 PASSED (WR4-WR6 registered and drawn either way per slot; shaft ledges/peristalsis/knobs/fluid, floor tile pattern vs mural, "
                         + "shrinking ring/outside damage/waves; each solved by script, HUD strip, reset back to the built state)");
             } else {
                 FAILS.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST raid whale 2 FAILED: {}", f));
@@ -292,6 +292,8 @@ public final class WhaleRaid2SelfTest {
     }
 
     // ---- WR4
+    private static long heldAt;
+
     private static WhaleShaftRoom shaftRoom() {
         return (WhaleShaftRoom) room;
     }
@@ -301,23 +303,23 @@ public final class WhaleRaid2SelfTest {
             startRoom("WR4", 0, 0, 4242L);
             WhaleShaftRoom r = shaftRoom();
             check(!r.isComplete(), "WR4: complete before it started");
-            for (int f = 0; f < 4; f++) {
-                for (int i = 1; i <= 5; i++) {
-                    for (BlockPos p : r.stepCells(ctx, f, i)) {
-                        check(level.getBlockState(p).isAir(), "WR4: step f" + f + " i" + i + " is not retracted at the start (" + p.toShortString() + ")");
+            for (int f = 0; f < WhaleShaftRoom.FLIGHTS; f++) {
+                // 棚は始まる前は出ていて、一マスあけて一段ずつ高い。最初の棚は前の踊り場 (床) から一段、最後の棚から次の踊り場へ一段
+                for (int k = 0; k < WhaleShaftRoom.LEDGES; k++) {
+                    for (BlockPos p : r.ledgeCells(ctx, f, k)) {
+                        check(level.getBlockState(p).is(Blocks.BONE_BLOCK), "WR4: ledge f" + f + " k" + k + " is not out at the start (" + p.toShortString() + ")");
+                        check(level.getBlockState(p.above()).isAir() && level.getBlockState(p.above(2)).isAir(), "WR4: ledge f" + f + " k" + k + " has no head room");
                     }
                 }
-                // 階段の形: 最後の段は次の踊り場と同じ高さでつながり、最初の段の後ろは足場
-                BlockPos top = r.stepCells(ctx, f, 5).get(1);
-                BlockPos beyond = top.relative(r.ascend(f));
-                check(!level.getBlockState(beyond).isAir() && top.getY() == beyond.getY(), "WR4: flight " + f + " does not meet the landing (" + beyond.toShortString() + " is "
-                        + level.getBlockState(beyond).getBlock() + ")");
-                BlockPos first = r.stepCells(ctx, f, 1).get(1);
-                BlockPos behind = first.relative(r.ascend(f).getOpposite()).below();
-                check(!level.getBlockState(behind).isAir(), "WR4: flight " + f + " has nothing to step from (" + behind.toShortString() + ")");
-                check(level.getBlockState(r.masterSwitch(ctx, f)).is(Blocks.BONE_BLOCK) && level.getBlockState(r.localSwitch(ctx, f)).is(Blocks.BONE_BLOCK), "WR4: switch pillar " + f + " missing");
+                BlockPos a = r.ledgeCells(ctx, f, 0).get(0);
+                BlockPos b = r.ledgeCells(ctx, f, 1).get(0);
+                check(b.getY() == a.getY() + 1 && a.distManhattan(b) == 3, "WR4: flight " + f + " ledges are not one gap and one step apart");
+                BlockPos land = r.landingSpot(ctx, f + 1);
+                check(land.getY() - 1 == r.ledgeCells(ctx, f, WhaleShaftRoom.LEDGES - 1).get(0).getY() + 1, "WR4: flight " + f + " last ledge is not one step below landing " + (f + 1));
+                check(level.getBlockState(r.knob(ctx, f)).is(Blocks.BONE_BLOCK), "WR4: knob " + f + " missing");
+                check(level.getBlockState(r.knob(ctx, f).below()).isSolid(), "WR4: knob " + f + " stands on nothing");
             }
-            for (int n = 1; n <= 4; n++) {
+            for (int n = 1; n <= WhaleShaftRoom.FLIGHTS; n++) {
                 BlockPos at = r.landingSpot(ctx, n);
                 check(level.getBlockState(at.below()).isSolid() && level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir(), "WR4: landing " + n + " cannot be stood on");
             }
@@ -343,9 +345,7 @@ public final class WhaleRaid2SelfTest {
         STAGES.add(() -> {
             WhaleShaftRoom r = shaftRoom();
             check(r.fluidLevel(ctx) > 0 && r.fluidLevel(ctx) < 3, "WR4: the fluid is not rising slowly (" + r.fluidLevel(ctx) + ")");
-            // 目的の帯
-            check(r.objectiveKey().startsWith(KEY_HEAD + "WR4") && r.counterMax() == 4 && r.secondaryMax() > 0 && !r.secondaryKey().isEmpty(), "WR4: HUD values are empty");
-            // 高いところ (踊り場 3) は無事。傷を受けない
+            check(r.objectiveKey().startsWith(KEY_HEAD + "WR4") && r.counterMax() == WhaleShaftRoom.FLIGHTS && r.secondaryMax() > 0 && !r.secondaryKey().isEmpty(), "WR4: HUD values are empty");
             put(p1, r.landingSpot(ctx, 3));
             healAll();
             return true;
@@ -353,69 +353,67 @@ public final class WhaleRaid2SelfTest {
         STAGES.add(() -> waitFor(() -> shaftRoom().tier() == 3, 20, "WR4 tier 3 reached"));
         STAGES.add(() -> {
             check(p1.getHealth() >= p1.getMaxHealth(), "WR4: the player above the fluid was hurt");
-            WhaleShaftRoom r = shaftRoom();
-            // 親台のスイッチ (二人目が壇に残る) と手元のスイッチ (一人) で登りを出す
-            put(p1, r.landingSpot(ctx, 1));
+            put(p1, shaftRoom().landingSpot(ctx, 1));
             healAll();
-            check(room.onUse(ctx, p2, r.masterSwitch(ctx, 0), false), "WR4: the master switch did not respond");
-            check(!room.onUse(ctx, p2, ctx.origin().offset(1, 1, 1), false), "WR4: a plain floor block responded as a switch");
             return true;
         });
-        STAGES.add(() -> waitFor(() -> shaftRoom().grown(0) == 5, 60, "WR4 flight 0 grows"));
+        // 蠕動: 棚は赤い肉 (知らせ) になってから引っ込み、また出る
+        STAGES.add(() -> waitFor(() -> shaftRoom().phase(ctx, 1) == 1, 200, "WR4 flight 1 warns"));
+        STAGES.add(() -> {
+            check(level.getBlockState(shaftRoom().ledgeCells(ctx, 1, 0).get(0)).is(Blocks.NETHER_WART_BLOCK), "WR4: the warned ledge did not turn red");
+            return true;
+        });
+        STAGES.add(() -> waitFor(() -> !shaftRoom().ledgesOut(1), WhaleShaftRoom.WARN + 10, "WR4 flight 1 retracts"));
         STAGES.add(() -> {
             WhaleShaftRoom r = shaftRoom();
-            for (int i = 1; i <= 5; i++) {
-                for (BlockPos p : r.stepCells(ctx, 0, i)) {
-                    check(level.getBlockState(p).getBlock() instanceof StairBlock, "WR4: flight 0 step " + i + " did not appear");
+            for (int k = 0; k < WhaleShaftRoom.LEDGES; k++) {
+                for (BlockPos p : r.ledgeCells(ctx, 1, k)) {
+                    check(level.getBlockState(p).isAir(), "WR4: flight 1 ledge " + k + " did not retract");
                 }
             }
-            check(level.getBlockState(r.masterSwitch(ctx, 0).above()).is(Blocks.SEA_LANTERN), "WR4: the struck switch is not lit");
-            // 残りの三つ: 踊り場の手元のスイッチ (一人で交互に)
-            for (int f = 1; f < 4; f++) {
-                put(p1, r.landingSpot(ctx, f));
-                check(room.onUse(ctx, p1, r.localSwitch(ctx, f), true), "WR4: the local switch " + f + " did not respond");
-            }
-            return true;
-        });
-        STAGES.add(() -> waitFor(() -> shaftRoom().grown(1) == 5 && shaftRoom().grown(2) == 5 && shaftRoom().grown(3) == 5, 80, "WR4 flights 1-3 grow"));
-        STAGES.add(() -> {
             snap("WR4b");
             return true;
         });
-        // 引っ込む (終わりかけの知らせのあと)
-        STAGES.add(() -> waitFor(() -> shaftRoom().grown(0) == 0, WhaleShaftRoom.EXTEND_TICKS + 100, "WR4 flight 0 retracts again"));
+        STAGES.add(() -> waitFor(() -> shaftRoom().ledgesOut(1), WhaleShaftRoom.CLOSED + 10, "WR4 flight 1 comes back"));
+        // ひだ押さえ: こぶを叩くと引っ込まない。休みの間は効かない。床のブロックはこぶではない
         STAGES.add(() -> {
             WhaleShaftRoom r = shaftRoom();
-            for (int i = 1; i <= 5; i++) {
-                for (BlockPos p : r.stepCells(ctx, 0, i)) {
-                    check(level.getBlockState(p).isAir(), "WR4: flight 0 step " + i + " did not retract");
-                }
+            check(room.onUse(ctx, p1, r.knob(ctx, 1), true) && r.holding(ctx, 1), "WR4: the knob did not hold flight 1");
+            check(level.getBlockState(r.knob(ctx, 1).above()).is(Blocks.SEA_LANTERN), "WR4: the held knob is not lit");
+            check(!room.onUse(ctx, p2, ctx.origin().offset(1, 1, 1), false), "WR4: a plain floor block responded as a knob");
+            check(!r.hold(ctx, 1), "WR4: the knob held again during its rest");
+            heldAt = ctx.now();
+            return true;
+        });
+        STAGES.add(() -> {
+            WhaleShaftRoom r = shaftRoom();
+            if (r.holding(ctx, 1)) {
+                check(r.ledgesOut(1), "WR4: a held flight retracted");
+                return false;
             }
-            // 頂へ: 踊り場 1 → 2 → 3 → 4。途中の高さが帯の数に出る
+            check(ctx.now() - heldAt >= WhaleShaftRoom.HOLD - 2, "WR4: the hold ended early");
+            return true;
+        });
+        STAGES.add(() -> {
+            WhaleShaftRoom r = shaftRoom();
             put(p1, r.landingSpot(ctx, 2));
             return true;
         });
         STAGES.add(() -> waitFor(() -> shaftRoom().tier() == 2 && shaftRoom().counter() == 2, 20, "WR4 counter shows 2"));
         STAGES.add(() -> {
-            WhaleShaftRoom r = shaftRoom();
-            check(!r.isComplete(), "WR4: complete before the top");
-            put(p1, r.landingSpot(ctx, 4));
+            check(!shaftRoom().isComplete(), "WR4: complete before the top");
+            put(p1, shaftRoom().landingSpot(ctx, WhaleShaftRoom.FLIGHTS));
             return true;
         });
         STAGES.add(() -> waitFor(() -> room.isComplete(), 20, "WR4 complete at the top"));
-        // リセット: 階段・灯り・胃液が build 直後へ
+        // リセット: 棚は出て、こぶは暗くなく、胃液は 0
         STAGES.add(() -> {
             WhaleShaftRoom r = shaftRoom();
             room.reset(ctx);
-            check(!room.isComplete() && r.grown(1) == 0 && r.fluidLevel(ctx) == 0 && r.tier() == 0, "WR4: reset did not restore the room state");
-            for (int f = 0; f < 4; f++) {
-                for (int i = 1; i <= 5; i++) {
-                    for (BlockPos p : r.stepCells(ctx, f, i)) {
-                        check(level.getBlockState(p).isAir(), "WR4: step f" + f + " i" + i + " is still there after the reset");
-                    }
-                }
-                check(level.getBlockState(r.masterSwitch(ctx, f).above()).is(Blocks.CHISELED_STONE_BRICKS) && level.getBlockState(r.localSwitch(ctx, f).above()).is(Blocks.CHISELED_STONE_BRICKS),
-                        "WR4: switch " + f + " is still lit after the reset");
+            check(!room.isComplete() && r.fluidLevel(ctx) == 0 && r.tier() == 0 && !r.holding(ctx, 1), "WR4: reset did not restore the room state");
+            for (int f = 0; f < WhaleShaftRoom.FLIGHTS; f++) {
+                check(r.ledgesOut(f) && level.getBlockState(r.ledgeCells(ctx, f, 0).get(0)).is(Blocks.BONE_BLOCK), "WR4: flight " + f + " ledges are not out after the reset");
+                check(level.getBlockState(r.knob(ctx, f).above()).is(Blocks.CHISELED_STONE_BRICKS), "WR4: knob " + f + " is not ready after the reset");
             }
             room.start(ctx);
             return true;

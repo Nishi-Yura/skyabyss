@@ -51,11 +51,10 @@ public final class Gathering {
     private Gathering() {
     }
 
-    // そのブロックの戻りの時間。採れないブロックは 0
+    // そのブロックの戻りの時間。採れないブロックは 0。
+    // 2026-11-08 の声「土や木をとれるけど、なにこれ」: 使い道のない品 (丸太・土・石・砂・砂利・粘土・花・きのこ・かぼちゃなど) は採れなくした。
+    // 残すのは、Mod の素材になる鉱石・紫水晶・実った麦と、頼みに使う黒曜石だけ
     static int regrow(BlockState s) {
-        if (s.is(BlockTags.LOGS)) {
-            return WOOD;
-        }
         if (s.is(Blocks.DIAMOND_ORE) || s.is(Blocks.DEEPSLATE_DIAMOND_ORE) || s.is(Blocks.EMERALD_ORE) || s.is(Blocks.DEEPSLATE_EMERALD_ORE)
                 || s.is(Blocks.ANCIENT_DEBRIS) || s.is(Blocks.OBSIDIAN)) {
             return RARE;
@@ -63,15 +62,10 @@ public final class Gathering {
         if (s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) {
             return ORE;
         }
-        if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.BASE_STONE_NETHER) || s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY)
-                || s.is(Blocks.DIRT) || s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.COBBLESTONE) || s.is(Blocks.MAGMA_BLOCK)) {
-            return STONE;
-        }
         if (s.getBlock() instanceof CropBlock crop) {
             return crop.isMaxAge(s) ? PLANT : 0;
         }
-        if (s.is(BlockTags.SMALL_FLOWERS) || s.is(BlockTags.TALL_FLOWERS) || s.is(Blocks.BROWN_MUSHROOM) || s.is(Blocks.RED_MUSHROOM)
-                || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.PUMPKIN) || s.is(Blocks.MELON) || s.is(Blocks.AMETHYST_CLUSTER) || s.is(Blocks.COBWEB)) {
+        if (s.is(Blocks.AMETHYST_CLUSTER)) {
             return PLANT;
         }
         return 0;

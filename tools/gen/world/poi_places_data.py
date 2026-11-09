@@ -23,12 +23,12 @@ GONE = [
 
 # ---------------------------------------------------------------- 道しるべ (都の四つの門の外・岩鯨の町から背への分かれ道・内海の向こう岸)
 WAYPOSTS = {
-    105: ("gate_north", ["鯨見の町 690m", "岩鯨の丘陵", "推奨 Lv 4-12", "鐘の都 150m"],
-          ["Whalewatch 690m", "Whale Hills", "Lv 4-12", "Bell City 150m"]),
+    105: ("gate_north", ["渡し場 230m", "舟で岩鯨の丘陵へ", "推奨 Lv 4-12", "鐘の都 150m"],
+          ["Ferry 230m", "To Whale Hills", "Lv 4-12", "Bell City 150m"]),
     109: ("gate_west", ["風待の里 590m", "嵐の高地", "推奨 Lv 18-24", "鐘の都 150m"],
           ["Windwait 590m", "Storm Heights", "Lv 18-24", "Bell City 150m"]),
-    113: ("gate_south", ["灰炉の村 970m", "灰の荒野", "推奨 Lv 24-30", "鐘の都 150m"],
-          ["Ashforge 970m", "Ash Wilds", "Lv 24-30", "Bell City 150m"]),
+    113: ("gate_south", ["渡し場 480m", "舟で灰の荒野へ", "推奨 Lv 24-30", "鐘の都 150m"],
+          ["Ferry 480m", "To Ash Wilds", "Lv 24-30", "Bell City 150m"]),
     108: ("whale_back", ["岩鯨の跡地 270m", "巨神の背へ", "推奨 Lv 4-12", "鯨見の町 60m"],
           ["Whale Site 270m", "Titan's back", "Lv 4-12", "Whalewatch 60m"]),
 }

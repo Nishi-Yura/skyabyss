@@ -20,7 +20,7 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 橋 (A09)・変異 (A08)・紋の盤 (A14)・前世の技 (B08)・淵 (B09) の自己テスト。BuildsSelfTest.run の最後から呼ぶ。docs/design/31
+// 橋 (A09)・変異 (A08)・前世の技 (B08)・淵 (B09)・巨神のアスペクト (58) の自己テスト。BuildsSelfTest.run の最後から呼ぶ。docs/design/31
 final class DeepSkillsSelfTest {
     private DeepSkillsSelfTest() {
     }
@@ -36,10 +36,10 @@ final class DeepSkillsSelfTest {
         migration(f);
         FakePlayer p = player(server, "deep_test");
         rebirth(p, f);
-        glyphs(server, p, f);
         mutations(server, f);
         casts(server, f);
         balance(f);
+        aspects(server, f);
     }
 
     private static FakePlayer player(MinecraftServer server, String name) {
@@ -92,18 +92,11 @@ final class DeepSkillsSelfTest {
                 check(f, SkillRules.manaCost(s, 1) > 0 && SkillRules.cooldownTicks(s, 1) > 0, "active skill without cost: " + s.id);
             }
         }
-        // 紋: 5 種で穴 3〜6。6 つ以上は数えない
-        check(f, Glyph.values().length == 5 && SkillRules.glyphSockets(0) == 3 && SkillRules.glyphSockets(3) == 6 && SkillRules.glyphSockets(20) == 6,
-                "glyph socket counts are wrong");
         check(f, Mutation.values().length == 10, "mutation count");
         for (Mutation m : Mutation.values()) {
             check(f, m.skill.active && !m.coreItem().equals(net.minecraft.world.item.Items.AIR) && !m.shardItem().equals(net.minecraft.world.item.Items.AIR),
                     "mutation " + m.id + " has no skill or material");
         }
-        // 紋の符号化
-        Glyph.Placed placed = Glyph.parsePlaced(new Glyph.Placed(new Glyph.Item(Glyph.TIDE, 2), Skill.EBB_TIDE).code());
-        check(f, placed != null && placed.item().glyph() == Glyph.TIDE && placed.item().level() == 2 && placed.center() == Skill.EBB_TIDE, "glyph code round trip");
-        check(f, Glyph.parse("rock/9") == null && Glyph.parse("nope/1") == null && Glyph.parsePlaced("rock/1@nothing") == null, "bad glyph codes were accepted");
     }
 
     // ---------------------------------------------------------------- 保存の移し (版 3 → 4)
@@ -116,32 +109,31 @@ final class DeepSkillsSelfTest {
         // 版 3 の記録: 新しい欄が丸ごと無い
         tag.putInt("v", 3);
         tag.remove("mutations");
-        tag.remove("glyphBag");
-        tag.remove("glyphSockets");
-        tag.remove("glyphClaims");
+        tag.remove("aspects");
+        tag.remove("aspectSlots");
         SkillData loaded = new SkillData();
         loaded.deserializeNBT(null, tag);
         check(f, loaded.version == SkillData.VERSION && SkillData.VERSION == 4, "the record was not migrated to version 4: " + loaded.version);
         check(f, loaded.rank(Skill.TITAN_CLEAVE) == 2 && loaded.rank(Skill.LUNGE) == 1 && loaded.masteryXp(Skill.TITAN_CLEAVE) == 20, "version 3 skills were lost");
-        check(f, loaded.mutations.isEmpty() && loaded.glyphBag.isEmpty() && loaded.glyphClaims.isEmpty(), "new fields did not start empty");
-        for (String s : loaded.glyphSockets) {
-            check(f, s != null && s.isEmpty(), "a socket did not start empty");
+        check(f, loaded.mutations.isEmpty() && loaded.aspects.isEmpty(), "new fields did not start empty");
+        for (String s : loaded.aspectSlots) {
+            check(f, s != null && s.isEmpty(), "an aspect slot did not start empty");
         }
         // 新しい欄が往復する。壊れた値は落ちる
         loaded.mutations.put("wind_rend", "rend_blade");
         loaded.mutations.put("lunge", "rend_blade");
         loaded.mutations.put("nothing", "x");
-        loaded.glyphBag.add("rock/2");
-        loaded.glyphBag.add("garbage");
-        loaded.glyphSockets[1] = "ash/3@titan_cleave";
-        loaded.glyphSockets[2] = "ash/3@nothing";
-        loaded.glyphClaims.add("ember|a");
+        loaded.aspects.put("warrior_r1", 3);
+        loaded.aspects.put("garbage", 2);
+        loaded.aspectSlots[1] = "warrior_r1";
+        loaded.aspectSlots[2] = "nothing";
+        loaded.aspectPity = 5;
         SkillData again = new SkillData();
         again.deserializeNBT(null, loaded.serializeNBT(null));
         check(f, again.mutations.size() == 1 && "rend_blade".equals(again.mutations.get("wind_rend")), "mutations did not survive the round trip");
-        check(f, again.glyphBag.equals(List.of("rock/2")), "the glyph bag did not survive the round trip: " + again.glyphBag);
-        check(f, "ash/3@titan_cleave".equals(again.glyphSockets[1]) && again.glyphSockets[2].isEmpty(), "sockets did not survive the round trip");
-        check(f, again.glyphClaims.contains("ember|a"), "glyph claims were lost");
+        again.sanitizeExt();
+        check(f, again.aspects.size() == 1 && again.aspects.get("warrior_r1") == 3, "aspects did not survive the round trip: " + again.aspects);
+        check(f, "warrior_r1".equals(again.aspectSlots[1]) && again.aspectSlots[2].isEmpty() && again.aspectPity == 5, "aspect slots did not survive the round trip");
     }
 
     // ---------------------------------------------------------------- 転生 (B08・B09)
@@ -205,101 +197,6 @@ final class DeepSkillsSelfTest {
         setRebirth(p, 4);
         SkillManager.forceRank(p, Skill.MEMORY_EDGE, 2);
         check(f, Math.abs(SkillRules.memoryPower(2, 4) - 0.04) < 1e-9, "memory edge scaling is wrong");
-        setRebirth(p, 0);
-    }
-
-    // ---------------------------------------------------------------- 紋 (A14)
-    private static void glyphs(MinecraftServer server, FakePlayer p, List<String> f) {
-        SkillData d = SkillManager.get(p);
-        SkillManager.forgetAll(p);
-        d.glyphBag.clear();
-        java.util.Arrays.fill(d.glyphSockets, "");
-        d.glyphClaims.clear();
-        d.lastCombat = Long.MIN_VALUE / 2;
-        setRebirth(p, 0);
-        d.bonusPoints = 80;
-        SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
-        SkillManager.forceRank(p, Skill.ROCK_CALL, 2);
-        SkillManager.forceRank(p, Skill.LUNGE, 1);
-        // 穴は転生 0 で 3 つ。4 つ目は閉じている
-        check(f, SkillExtOps.give(p, Glyph.ROCK, 1) && SkillExtOps.give(p, Glyph.ASH, 3) && SkillExtOps.give(p, Glyph.TIDE, 2) && SkillExtOps.give(p, Glyph.WIND, 1), "glyphs were not given");
-        check(f, SkillExtOps.place(p, 3, 0, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.CLOSED, "a closed socket took a glyph");
-        check(f, SkillExtOps.place(p, 9, 0, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.BAD_SOCKET, "a bad socket was accepted");
-        check(f, SkillExtOps.place(p, 0, 9, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.BAD_ITEM, "a bad bag index was accepted");
-        check(f, SkillExtOps.place(p, 0, 0, Skill.WIND_REND) == SkillExtOps.GlyphResult.BAD_SKILL, "an unknown center skill was accepted");
-        d.lastCombat = p.level().getGameTime();
-        check(f, SkillExtOps.place(p, 0, 0, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.NOT_QUIET, "a glyph was placed in combat");
-        d.lastCombat = Long.MIN_VALUE / 2;
-        double base = SkillBuild.skillPower(p, Skill.TITAN_CLEAVE);
-        double baseNeighbor = SkillBuild.skillPower(p, Skill.ROCK_CALL);
-        // 岩の紋 (段 1): 中心 +8%、隣 +4%。巨神斬りの隣は岩呼び (前提の線)
-        check(f, SkillExtOps.place(p, 0, 0, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.OK && d.glyphBag.size() == 3, "the rock glyph was not placed");
-        // 中心 +8%、隣 +4% (紋のタグの +1% は 48 で消えた)
-        check(f, Math.abs(SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) - base - 0.08) < 1e-9, "center power is wrong: " + (SkillBuild.skillPower(p, Skill.TITAN_CLEAVE) - base));
-        check(f, Math.abs(SkillBuild.skillPower(p, Skill.ROCK_CALL) - baseNeighbor - 0.04) < 1e-9, "neighbor power is wrong: " + (SkillBuild.skillPower(p, Skill.ROCK_CALL) - baseNeighbor));
-        check(f, Glyph.neighbors(Skill.TITAN_CLEAVE).contains(Skill.ROCK_CALL) && !Glyph.neighbors(Skill.TITAN_CLEAVE).contains(Skill.LUNGE), "neighbors are wrong");
-        // 差した紋は、そのタグを +1 数える (岩の紋 → 岩のタグ)
-        int rockTags = SkillBuild.tagCount(p, SkillTag.ROCK);
-        check(f, rockTags == 2 + 1, "a glyph did not add its tag: " + rockTags);
-        // 同じ穴へ別の紋: 前の紋は持ち物へ戻る
-        check(f, SkillExtOps.place(p, 0, 0, Skill.TITAN_CLEAVE) == SkillExtOps.GlyphResult.OK && d.glyphBag.size() == 3 && d.glyphBag.contains("rock/1"), "swapping a glyph lost one");
-        // 灰の紋 (段 3 は 18%) と潮の紋 (マナ) と風の紋 (待ち)
-        SkillExtOps.remove(p, 0);
-        d.glyphBag.clear();
-        SkillExtOps.give(p, Glyph.ASH, 3);
-        SkillExtOps.give(p, Glyph.ASH, 3);
-        SkillExtOps.give(p, Glyph.TIDE, 3);
-        SkillExtOps.give(p, Glyph.WIND, 3);
-        SkillExtOps.place(p, 0, 0, Skill.TITAN_CLEAVE);
-        SkillExtOps.place(p, 1, 0, Skill.TITAN_CLEAVE);
-        check(f, Math.abs(Glyph.sum(d, d.rebirth, Skill.TITAN_CLEAVE, Glyph.Effect.POWER) - SkillRules.GLYPH_POWER_CAP) < 1e-9, "the glyph power cap did not hold: "
-                + Glyph.sum(d, d.rebirth, Skill.TITAN_CLEAVE, Glyph.Effect.POWER));
-        SkillExtOps.place(p, 2, 0, Skill.TITAN_CLEAVE);
-        int manaBase = SkillRules.manaCost(Skill.TITAN_CLEAVE, 3);
-        int manaNow = SkillManager.manaCostFor(p, Skill.TITAN_CLEAVE);
-        check(f, manaNow < manaBase && manaNow >= Math.round(manaBase * (1 - SkillRules.GLYPH_MANA_CAP)) - 1, "glyph mana is wrong: " + manaNow + " vs " + manaBase);
-        // 転生で穴が開く: 3 → 6 (見えるのは 6 つまで)
-        setRebirth(p, 3);
-        SkillExtOps.place(p, 3, 0, Skill.LUNGE);
-        check(f, SkillRules.glyphSockets(d.rebirth) == 6 && !Glyph.parsePlaced(d.glyphSockets[3]).code().isEmpty(), "a socket did not open with rebirth");
-        // 転生の数が減ると、閉じた穴の紋は効かない (外れはしない)
-        double withFour = Glyph.sum(d, 3, Skill.LUNGE, Glyph.Effect.COOLDOWN);
-        setRebirth(p, 0);
-        check(f, Glyph.sum(d, 0, Skill.LUNGE, Glyph.Effect.COOLDOWN) >= withFour && d.glyphSockets[3].length() > 0, "a closed socket still worked");
-        // 外す: 持ち物へ戻る。満杯なら外せない
-        d.glyphBag.clear();
-        check(f, SkillExtOps.remove(p, 0) == SkillExtOps.GlyphResult.OK && d.glyphBag.size() == 1 && d.glyphSockets[0].isEmpty(), "a glyph was not removed");
-        check(f, SkillExtOps.remove(p, 0) == SkillExtOps.GlyphResult.BAD_ITEM, "an empty socket was removed");
-        while (d.glyphBag.size() < SkillRules.GLYPH_BAG_MAX) {
-            d.glyphBag.add("bone/1");
-        }
-        check(f, !SkillExtOps.give(p, Glyph.BONE, 1) && SkillExtOps.remove(p, 1) == SkillExtOps.GlyphResult.BAG_FULL, "the bag overflowed");
-        // 試練の紋: 同じ試練で一度だけ。満杯なら受け取らない。段は転生で上がる
-        d.glyphBag.clear();
-        d.glyphClaims.clear();
-        check(f, SkillExtOps.award(p, "ember", "gate") && d.glyphBag.size() == 1, "a trial did not drop a glyph");
-        check(f, !SkillExtOps.award(p, "ember", "gate") && d.glyphBag.size() == 1, "the same trial dropped twice");
-        check(f, SkillExtOps.award(p, "ember", "second") && d.glyphBag.size() == 2, "a second trial did not drop");
-        setRebirth(p, 5);
-        d.glyphBag.clear();
-        SkillExtOps.award(p, "stone_whale", "third");
-        check(f, Glyph.parse(d.glyphBag.get(0)).level() == 3, "the glyph level did not rise with rebirths");
-        while (d.glyphBag.size() < SkillRules.GLYPH_BAG_MAX) {
-            d.glyphBag.add("bone/1");
-        }
-        int claims = d.glyphClaims.size();
-        check(f, !SkillExtOps.award(p, "tide_shell", "full") && d.glyphClaims.size() == claims, "a full bag still claimed a trial");
-        // 転生: 紋の入手の記録は空に戻るが、持っている紋と盤の紋と変異は残る
-        d.mutations.put("lunge", "lunge_surge");
-        String socket0 = d.glyphSockets[0];
-        int bag = d.glyphBag.size();
-        d.echoUntil = 99999;
-        SkillReset.forRebirth(p);
-        check(f, d.glyphClaims.isEmpty() && d.glyphBag.size() == bag && d.glyphSockets[0].equals(socket0) && d.mutations.containsKey("lunge") && d.echoUntil == 0,
-                "the rebirth reset kept or lost the wrong glyph data");
-        d.mutations.clear();
-        d.glyphBag.clear();
-        java.util.Arrays.fill(d.glyphSockets, "");
         setRebirth(p, 0);
     }
 
@@ -504,22 +401,104 @@ final class DeepSkillsSelfTest {
         double regen = SkillRules.regenPerSecond(20 + GrowthRules.bonusMana(20), false);
         double skillDps = regen * BuildsSelfTest.perMana(Skill.TITAN_CLEAVE, 3);
         double general = SkillRules.KEY_GLASS_DAMAGE + SkillRules.KEY_DANCE_DAMAGE + 0.25;
-        // 技の力: 木の節・熟練の刻印 + 紋 + 淵の残響・鏡・誓い + 記憶の刃 (技の力の合計は +100% で頭打ち)
-        double skillPart = 0.15 + SkillRules.MASTERY_RUNE_POWER + SkillRules.GLYPH_POWER_CAP
+        // 技の力: 木の節・熟練の刻印 + アスペクト + 淵の残響・鏡・誓い + 記憶の刃 (技の力の合計は +100% で頭打ち)
+        double skillPart = 0.15 + SkillRules.MASTERY_RUNE_POWER + SkillRules.ASPECT_POWER_MAX
                 + SkillRules.echoPower(2) + SkillRules.mirrorPower(3) + SkillRules.OATH_DEEP_POWER + SkillRules.memoryPower(2, 6);
         skillPart = Math.min(SkillRules.POWER_CAP, skillPart);
         double regenBoost = 1 + SkillRules.OATH_DEEP_REGEN;
-        for (double mana : new double[] {1 + SkillRules.KEY_ASH_MANA_COST - SkillRules.GLYPH_MANA_CAP, 1 - SkillRules.GLYPH_MANA_CAP}) {
+        for (double mana : new double[] {1 + SkillRules.KEY_ASH_MANA_COST - SkillRules.ASPECT_MANA_MAX, 1 - SkillRules.ASPECT_MANA_MAX}) {
             double gen = mana < 1 ? general - SkillRules.KEY_ASH_DAMAGE : general;
             double maxDps = basic * (1 + gen) + skillDps * regenBoost / mana * (1 + gen) * (1 + skillPart);
             double heart = 450 / (8 * maxDps);
             double captain = 150 / (8 * maxDps);
-            check(f, heart >= 15 && captain >= 5, "the strongest build with glyphs / deep / past kills too fast: heart " + heart + " s, captain " + captain + " s");
+            check(f, heart >= 15 && captain >= 5, "the strongest build with aspects / deep / past kills too fast: heart " + heart + " s, captain " + captain + " s");
             SkyAbyss.LOGGER.info("[selftest] deep skills balance (strongest build, mana x{}): heart {} s, captain {} s", mana, Math.round(heart * 10) / 10.0, Math.round(captain * 10) / 10.0);
         }
         // 基準の心臓 26 秒・番兵長 9 秒は変えない (新しい技はふつうの回し方を強くしない)
         double heartBase = 450 / (8 * (basic + skillDps));
         double captainBase = 150 / (8 * (basic + skillDps));
         check(f, heartBase >= 20 && heartBase <= 40 && captainBase >= 6 && captainBase <= 14, "baseline kill times moved: " + heartBase + " / " + captainBase);
+    }
+
+    // ---------------------------------------------------------------- アスペクト (docs/design/58)
+    private static void aspects(MinecraftServer server, List<String> f) {
+        // 表: 6 職 × 16 (レア 4・エピック 4・ミシック 8 = 祠ごとに 2)
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size() == 300, "aspect count " + jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size());
+        for (Job job : Job.values()) {
+            check(f, jp.revati.skyabyss.rpg.aspect.Aspects.ofJob(job).size() == 50, "aspects of " + job);
+            for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+                check(f, jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, titan).size() == 20, "pool of " + job + " at " + titan);
+            }
+        }
+        // Lv: 数 1/2/4/7/11 で Lv 1〜5
+        int[] copies = {0, 1, 2, 3, 4, 6, 7, 10, 11, 40};
+        int[] want = {0, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+        for (int i = 0; i < copies.length; i++) {
+            check(f, jp.revati.skyabyss.rpg.aspect.Aspects.levelOf(copies[i]) == want[i], "aspect level of " + copies[i] + " copies");
+        }
+        // 枠: Lv 20/30/40/50 で 1〜4、転生 3 回で 5
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.slots(19, 0) == 0 && jp.revati.skyabyss.rpg.aspect.Aspects.slots(20, 0) == 1
+                && jp.revati.skyabyss.rpg.aspect.Aspects.slots(50, 2) == 4 && jp.revati.skyabyss.rpg.aspect.Aspects.slots(50, 3) == 5
+                && jp.revati.skyabyss.rpg.aspect.Aspects.slots(40, 3) == 3, "aspect slots by level/rebirth");
+        // 引き: ミシックはその祠だけ。8 回出なければ必ずミシック
+        net.minecraft.util.RandomSource r = net.minecraft.util.RandomSource.create(7);
+        for (int i = 0; i < 400; i++) {
+            jp.revati.skyabyss.rpg.aspect.Aspect a = jp.revati.skyabyss.rpg.aspect.Aspects.roll(Job.values()[i % Job.values().length], "ember", i % 9, r);
+            check(f, a != null, "roll gave nothing");
+            if (a == null) {
+                return;
+            }
+            check(f, a.shared() || "ember".equals(a.shrine()), "an aspect from another shrine: " + a.id());
+            check(f, a.rarity() != jp.revati.skyabyss.rpg.aspect.Aspect.LEGENDARY || "ember".equals(a.shrine()), "a mythic from another shrine: " + a.id());
+            check(f, i % 9 < jp.revati.skyabyss.rpg.aspect.Aspects.PITY || a.rarity() == jp.revati.skyabyss.rpg.aspect.Aspect.LEGENDARY, "pity did not give a mythic");
+        }
+        // 渡す: 崩れなしで 2 つ。最高の数を越えない
+        FakePlayer p = player(server, "aspect_test");
+        SkillData d = SkillManager.get(p);
+        Job job = Job.values()[0];
+        d.curJob = job.id;
+        d.aspects.clear();
+        d.aspectPity = 0;
+        java.util.Arrays.fill(d.aspectSlots, "");
+        List<jp.revati.skyabyss.rpg.aspect.AspectNet.Got> got = jp.revati.skyabyss.rpg.aspect.AspectNet.grant(p, "stone_whale", true);
+        check(f, got.size() == 2, "a no-wipe route gave " + got.size() + " aspects");
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectNet.grant(p, "stone_whale", false).size() == 1, "a route with wipes did not give one aspect");
+        jp.revati.skyabyss.rpg.aspect.Aspect first = jp.revati.skyabyss.rpg.aspect.Aspects.ofJob(job).get(0);
+        d.aspects.put(first.id(), 11);
+        d.aspectPity = 99;
+        for (int i = 0; i < 30; i++) {
+            jp.revati.skyabyss.rpg.aspect.AspectNet.grant(p, "stone_whale", false);
+        }
+        for (int v : d.aspects.values()) {
+            check(f, v <= 11, "aspect copies went past the max: " + v);
+        }
+        // 付ける: 枠が開いていなければ断る。持っていなければ断る。付けた技の力が上がる
+        Growth.get(p).level = 10;
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.equip(p, 0, first.id()) == jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.LOCKED, "a locked slot took an aspect");
+        Growth.get(p).level = 50;
+        double before = jp.revati.skyabyss.rpg.aspect.Aspects.power(p, first.skill());
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.equip(p, 0, first.id()) == jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.OK, "equipping an owned aspect failed");
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.equip(p, 1, first.id()) == jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.OK
+                && d.aspectSlots[0].isEmpty() && first.id().equals(d.aspectSlots[1]), "the same aspect sat in two slots");
+        double after = jp.revati.skyabyss.rpg.aspect.Aspects.power(p, first.skill()) + jp.revati.skyabyss.rpg.aspect.Aspects.cooldown(p, first.skill()) * -1
+                + jp.revati.skyabyss.rpg.aspect.Aspects.mana(p, first.skill()) * -1;
+        check(f, first.fx().isEmpty() || after != before || jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).size() == 1, "a worn aspect changed nothing");
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).size() == 1 && jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).get(0).level() == 5, "worn aspect level");
+        d.aspects.remove("nobody_has_this");
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.equip(p, 2, "nobody_has_this") == jp.revati.skyabyss.rpg.aspect.Aspects.EquipResult.NOT_OWNED, "an unowned aspect was equipped");
+        // オフラインだった人の分は、入ったときに渡す
+        jp.revati.skyabyss.rpg.aspect.AspectPending.add(server, p.getUUID(), "ember", true);
+        jp.revati.skyabyss.rpg.aspect.AspectPending.add(server, p.getUUID(), "ember", false);
+        int had = d.aspects.values().stream().mapToInt(Integer::intValue).sum();
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectPending.count(server, p.getUUID()) == 2, "pending aspects were not kept");
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectPending.deliver(p) == 2
+                && jp.revati.skyabyss.rpg.aspect.AspectPending.count(server, p.getUUID()) == 0, "pending aspects were not delivered once");
+        check(f, d.aspects.values().stream().mapToInt(Integer::intValue).sum() > had, "delivered pending aspects added nothing");
+        // 別の職へ替えると効かない
+        d.curJob = Job.values()[1].id;
+        check(f, jp.revati.skyabyss.rpg.aspect.Aspects.worn(p).isEmpty(), "another job's aspect stayed worn");
+        d.curJob = job.id;
+        d.aspects.clear();
+        java.util.Arrays.fill(d.aspectSlots, "");
     }
 }

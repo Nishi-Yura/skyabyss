@@ -513,6 +513,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("continent roads", jp.revati.skyabyss.world.continent.ContinentRoadsSelfTest::runSelfTest));
         // 外れの集落 (8 か所の部品と印・道が中を通らない・建てた所の守り・起きる所・寝台・場所の名と曲・口から道までの小道)。SKYABYSS_SELFTEST_ONLY="frontier hamlets"
         steps.add(Step.once("frontier hamlets", jp.revati.skyabyss.world.continent.FrontierHamletsSelfTest::runSelfTest));
+        steps.add(Step.once("frontier band", jp.revati.skyabyss.world.continent.FrontierBandSelfTest::runSelfTest));
         // 倒れたあとは行ったことのある町の休み場だけ。SKYABYSS_SELFTEST_ONLY="continent respawn"
         steps.add(Step.once("continent respawn", jp.revati.skyabyss.world.continent.ContinentRespawnSelfTest::runSelfTest));
         // 逃げる獣 (型と動き・出る所・硬さ・報い・締め出し)。SKYABYSS_SELFTEST_ONLY="rare beasts"

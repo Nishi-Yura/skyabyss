@@ -190,8 +190,44 @@ public abstract class HeartDomain {
 
     // 領域を解いた直後の傷の倍率
     public float takenMultiplier() {
-        return stun > 0 ? STUN_TAKEN : 1f;
+        return stun > 0 ? stunTaken() : 1f;
     }
+
+    // ---- 部屋ごとに替えられる決まり (既定は共通の値)
+    // 巡の数
+    protected int roundsFor(int party) {
+        return roundsFor(abyss, party);
+    }
+
+    // 一巡の制限 (tick。0 = なし)。切れたら onTimeout のあと、解けずに終わる
+    protected int timeLimit() {
+        return 0;
+    }
+
+    // 時間切れ (部屋ごとの罰。既定は何もしない)
+    protected void onTimeout(ServerLevel level) {
+    }
+
+    // 解いたあとの隙の長さと、そのあいだに受ける傷の倍率
+    protected int stunLength() {
+        return STUN_TICKS;
+    }
+
+    protected float stunTaken() {
+        return STUN_TAKEN;
+    }
+
+    // 一巡の制限 (tick。0 = なし。試験・画面用)
+    public int limit() {
+        return timeLimit();
+    }
+
+    // この巡の残り (tick。制限がなければ -1)
+    public int timeLeft() {
+        return timeLimit() <= 0 || interlude > 0 ? -1 : Math.max(0, timeLimit() - roundTicks);
+    }
+
+    private int roundTicks;
 
     public int stunTicks() {
         return stun;
@@ -264,7 +300,8 @@ public abstract class HeartDomain {
                 phase = Phase.ACTIVE;
                 ticks = 0;
                 round = 0;
-                rounds = roundsFor(abyss, inRoom().size());
+                rounds = roundsFor(inRoom().size());
+                roundTicks = 0;
                 spawnNodes(level);
                 puzzleBegin(level);
                 announce(level, "message.skyabyss.domain." + id + ".goal");
@@ -285,6 +322,7 @@ public abstract class HeartDomain {
                     startRound(level);
                 }
             } else {
+                roundTicks++;
                 rule(level, ticks);
                 if (ticks % 20 == 0) {
                     keepNodes(level);
@@ -318,6 +356,9 @@ public abstract class HeartDomain {
                 } else {
                     end(level, true);
                 }
+            } else if (interlude == 0 && timeLimit() > 0 && roundTicks >= timeLimit()) {
+                onTimeout(level);
+                end(level, false);
             } else if (ticks >= SAFETY_TICKS) {
                 end(level, false);
             }
@@ -347,6 +388,7 @@ public abstract class HeartDomain {
     }
 
     private void startRound(ServerLevel level) {
+        roundTicks = 0;
         spawnNodes(level);
         puzzleBegin(level);
         lastSolved = -1;
@@ -369,7 +411,7 @@ public abstract class HeartDomain {
         Telegraph.cancelAll(heart);
         removeNodes(level);
         if (shattered) {
-            stun = STUN_TICKS;
+            stun = stunLength();
             // 主ごとの仕掛けを解いた: 崩しゲージが半分溜まり、大きな隙 (docs/design/47 の 2.1)
             if (heart instanceof net.minecraft.world.entity.LivingEntity le) {
                 jp.revati.skyabyss.combat.BreakGauge.solved(le);

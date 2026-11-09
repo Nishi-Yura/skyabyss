@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 // 並びは登録順で固定 (新しい品は区分の最後に足す)。守る品の一覧 (Keepsakes.guardedItems: 欠片・天の鍵・心核・呼び笛) と同じ登録から作る。
 //
 // 2.2 に照らして確かめた結果 (実装の確認):
-//   手に持たないと使えない (use で右クリック。needsHand): 呼び笛・呼び貝 (TitanCallItem)、潮見の貝 (TideConchItem)、風見鶏 (WeathercockItem、
+//   手に持たないと使えない (use で右クリック。needsHand): 呼び笛・呼び貝 (TitanCallItem)、風見鶏 (WeathercockItem、
 //     手に持つと帯に状況も出る)、伝承の書 (LoreBookItem)、破れた頁 (LorePageItem。読むと消え、頁ごとに出どころの印を持つ)。
 //     袋から使う入力 (P6) ができるまで袋へは入れない (PouchConfig.USE_TOOLS_IN_POUCH)。
 //   持たなくてよい: 天の鍵の欠片・天の鍵 (扉も仕掛けも鍵の品を要求しない。手に持つと足もとで脈を打つ演出だけが画面にある)、心核、共鳴の結晶・欠片、素材。
@@ -113,7 +113,6 @@ public final class PouchEntries {
                 add(list, item, Category.TOOL, 1, true, false);
             }
         }
-        add(list, jp.revati.skyabyss.titan.tide.chapter.TideChapterSetup.TIDE_WATCHING_SHELL.get(), Category.TOOL, 1, true, false);
         add(list, jp.revati.skyabyss.titan.storm.StormSetup.WEATHERCOCK.get(), Category.TOOL, 1, true, false);
         // 鍵と心核
         add(list, fragment, Category.KEY, 4, false, true);

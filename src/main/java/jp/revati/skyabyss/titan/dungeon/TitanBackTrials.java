@@ -1167,6 +1167,10 @@ public final class TitanBackTrials {
                 }
                 // 背中へは復活が済んでから移す (util/RespawnMove)。順路の途中なら、どの巨神でも今の部屋の入口の休み場へ (TrialRoute.rejoinAfterDeath)
                 jp.revati.skyabyss.util.RespawnMove.after(player, back, () -> {
+                    // 心臓の戦いの全滅で地上へ帰す人は、背中へ連れ戻さない (WipeReturn が先に地上へ送ったあとに、ここで前室へ戻していた。2026-11-09 の声)
+                    if (jp.revati.skyabyss.titan.group.WipeReturn.claims(player.getUUID(), player.server.getTickCount())) {
+                        return;
+                    }
                     REVIVING.add(player.getUUID());
                     try {
                         player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);

@@ -27,7 +27,7 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 //    GeckoLib の AutoGlowingGeoLayer は光る画素を基から抜いて面の陰を受けさせるので、明るい面と同じ色に沈む
 public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
     // 模型は段階 1 で約 27 単位 (1.7 ブロック) の幅。判定箱 (4.5 x 6) に合わせて 3 倍 (前の 2 倍の 1.5 倍。迫力のため)
-    private static final float SCALE = 3.0f;
+    private static final float SCALE = 6.0f;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
 
     public StormHeartRenderer(EntityRendererProvider.Context context) {
         // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo と自前の発光層に戻る

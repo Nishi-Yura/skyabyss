@@ -1,0 +1,22 @@
+{
+  "category": "sub",
+  "chapter": "titan_whale",
+  "order": 42,
+  "stages": [
+    {
+      "id": "follow",
+      "objectives": [
+        {
+          "id": "cache",
+          "type": "signal",
+          "target": "ch1_bone_cache",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 0
+  }
+}

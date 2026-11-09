@@ -108,7 +108,12 @@ public class TravelMapScreen extends Screen {
         this.sheet = sheet;
         // 海図は遠くまで行くので世界の縮尺から
         this.view = chart != null ? FAR : onMoon() ? MOON_NEAR : NEAR;
+        // 町の中で開いたら、町の地図 (LocalArea) が見えるところまで寄せる
+        if (chart == null && !onMoon() && LocalArea.inTown(Minecraft.getInstance())) {
+            this.view = LocalArea.TOWN_VIEW;
+        }
         this.target = view;
+        LocalArea.rebuild(Minecraft.getInstance());
         pickDefault();
     }
 
@@ -333,7 +338,7 @@ public class TravelMapScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (button == 0 && radius > 0 && inMap(mx, my)) {
+        if (button == 0 && radius > 0 && inMap(mx, my) && !inLayerPanel((int) mx, (int) my)) {
             double k = view / radius;
             panX -= dx * k;
             panZ -= dy * k;
@@ -408,15 +413,23 @@ public class TravelMapScreen extends Screen {
         drawContinent(g);
         drawTown(g, p);
         List<Hit> hits = new ArrayList<>();
+        drawLocal(g, hits);
         drawMarks(g, p, hits, mouseX, mouseY);
         drawCompass(g, p);
         drawHeader(g, p, mouseX, mouseY);
+        drawLayers(g, p, mouseX, mouseY, hits);
         if (chart != null) {
             drawList(g, p, mouseX, mouseY);
             drawButtons(g, p, mouseX, mouseY);
         }
         Hit hover = nearest(hits, mouseX, mouseY);
-        if (!(chart != null && mouseX >= listX - 4)) {
+        if (layerAt(mouseX, mouseY) != null || inLayerPanel(mouseX, mouseY)) {
+            MapPrefs.Layer l = layerAt(mouseX, mouseY);
+            if (l != null) {
+                g.renderTooltip(font, Component.translatable(MapPrefs.shows(l) ? "gui.skyabyss.map.layer_hide" : "gui.skyabyss.map.layer_show",
+                        Component.translatable(l.key())), mouseX, mouseY);
+            }
+        } else if (!(chart != null && mouseX >= listX - 4)) {
             if (hover != null) {
                 g.renderTooltip(font, hover.lines(), mouseX, mouseY);
             } else if (inMap(mouseX, mouseY)) {
@@ -569,6 +582,86 @@ public class TravelMapScreen extends Screen {
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         g.enableScissor(rx0, ry0, rx1, ry1);
         g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
+        if (MapPrefs.shows(MapPrefs.Layer.ROADS)) {
+            drawRoads(g, k);
+        }
+        g.disableScissor();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+
+    // 道は絵に焼かず、地形が使うのと同じ道の線 (ContinentLayout.roads。町と都の前で門へつなぎ直したもの) をここで描く
+    // (2026-11-09 の声「マップと実際の道違う所いくつかある」。絵の道は町の真ん中を通る元の線のままだった)。
+    // 縁の明るい線と濃い茶の芯。寄せると本当の道幅 (8) に近づく
+    static final int ROAD_RIM = 0xFFF6ECD2;
+    static final int ROAD_CORE = 0xFF623C20;
+
+    private void drawRoads(GuiGraphics g, double k) {
+        java.util.List<java.util.List<net.minecraft.core.BlockPos>> roads = jp.revati.skyabyss.world.continent.ContinentLayout.get().roads();
+        double outer = Math.max(3.0, 10.0 * k);
+        double inner = Math.max(1.6, 6.0 * k);
+        for (int pass = 0; pass < 2; pass++) {
+            double w = pass == 0 ? outer : inner;
+            int color = pass == 0 ? ROAD_RIM : ROAD_CORE;
+            for (java.util.List<net.minecraft.core.BlockPos> line : roads) {
+                for (int i = 0; i + 1 < line.size(); i++) {
+                    net.minecraft.core.BlockPos a = line.get(i);
+                    net.minecraft.core.BlockPos b = line.get(i + 1);
+                    double ax = cx + (a.getX() - centerX()) * k;
+                    double ay = cy + (a.getZ() - centerZ()) * k;
+                    double bx = cx + (b.getX() - centerX()) * k;
+                    double by = cy + (b.getZ() - centerZ()) * k;
+                    // 枠の外の線分は飛ばす
+                    if (Math.max(ax, bx) < rx0 - w || Math.min(ax, bx) > rx1 + w || Math.max(ay, by) < ry0 - w || Math.min(ay, by) > ry1 + w) {
+                        continue;
+                    }
+                    thickLine(g, ax, ay, bx, by, w, color);
+                }
+            }
+        }
+    }
+
+    // 太い線: 線にそって四角を置いていく (幅 w)
+    private static void thickLine(GuiGraphics g, double ax, double ay, double bx, double by, double w, int color) {
+        double len = Math.hypot(bx - ax, by - ay);
+        double step = Math.max(0.75, w / 3);
+        int n = Math.max(1, (int) Math.ceil(len / step));
+        double h = w / 2;
+        for (int i = 0; i <= n; i++) {
+            double t = i / (double) n;
+            double x = ax + (bx - ax) * t;
+            double y = ay + (by - ay) * t;
+            g.fill((int) Math.floor(x - h), (int) Math.floor(y - h), (int) Math.ceil(x + h), (int) Math.ceil(y + h), color);
+        }
+    }
+
+    // 町の地図: 寄せたとき、読み込んである土地を上から描いた絵を重ね、施設の係の人を名前つきの点で載せる (LocalArea)
+    private void drawLocal(GuiGraphics g, List<Hit> hits) {
+        net.minecraft.resources.ResourceLocation tex = LocalArea.id();
+        if (tex == null || view > LocalArea.SHOW_BELOW || onMoon() || radius <= 0 || self() == null) {
+            return;
+        }
+        double k = radius / view;
+        int x0 = cx + (int) Math.round((LocalArea.originX() - centerX()) * k);
+        int y0 = cy + (int) Math.round((LocalArea.originZ() - centerZ()) * k);
+        int size = (int) Math.round(LocalArea.R * 2 * k);
+        // 寄せるほど濃く (大陸の絵から町の絵へ移る)
+        float a = (float) Mth.clamp((LocalArea.SHOW_BELOW - view) / 80.0, 0, 1);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.enableScissor(rx0, ry0, rx1, ry1);
+        g.setColor(1f, 1f, 1f, a);
+        g.blit(tex, x0, y0, size, size, 0, 0, LocalArea.R * 2, LocalArea.R * 2, LocalArea.R * 2, LocalArea.R * 2);
+        g.setColor(1f, 1f, 1f, 1f);
+        if (a > 0.5f) {
+            for (LocalArea.Keeper kp : LocalArea.keepers(Minecraft.getInstance())) {
+                int[] at = project(kp.x(), kp.z());
+                if (at[2] == 1) {
+                    continue;
+                }
+                g.fill(at[0] - 2, at[1] - 2, at[0] + 3, at[1] + 3, 0xFF2A2018);
+                g.fill(at[0] - 1, at[1] - 1, at[0] + 2, at[1] + 2, 0xFFF2D27A);
+                hits.add(hit(at, 0, List.of(kp.name()), null));
+            }
+        }
         g.disableScissor();
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }
@@ -686,7 +779,7 @@ public class TravelMapScreen extends Screen {
         g.drawString(font, sc, minusX() - 6 - font.width(sc), fy + 10, p.text(), shadow);
         Component foot = sheet == null ? Component.translatable("gui.skyabyss.map.waiting")
                 : !onGround() ? Component.translatable("gui.skyabyss.map.elsewhere") : Component.translatable("gui.skyabyss.map.hint");
-        g.drawString(font, foot, fx + 14, fy + fh - 14, style() == Config.MapStyle.PARCHMENT ? p.dim() : p.text(), shadow);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, foot, fx + 14, fy + fh - 14, fw - 28, style() == Config.MapStyle.PARCHMENT ? p.dim() : p.text(), shadow);
     }
 
     private void zoomButton(GuiGraphics g, Palette p, int x, int y, boolean plus, int mouseX, int mouseY) {
@@ -723,6 +816,10 @@ public class TravelMapScreen extends Screen {
         for (MapMarks.Mark m : ordered) {
             if (chart != null && (m.kind() == MapMarks.Kind.WAYMARK || m.kind() == MapMarks.Kind.TITAN || m.kind() == MapMarks.Kind.SPAWN)) {
                 // 海図の行き先として描く (下)
+                continue;
+            }
+            // 切った組の印は出さない (左下の組の札)
+            if (!MapPrefs.shows(MapPrefs.layerOf(m))) {
                 continue;
             }
             int[] at = project(m.x(), m.z());
@@ -792,6 +889,24 @@ public class TravelMapScreen extends Screen {
                 lines.add(MapText.where(me, d.x() + 0.5, d.z() + 0.5));
                 lines.add(destDetail(d));
                 hits.add(hit(at, 50, lines, d.valid() ? d.id() : null));
+            }
+        }
+        // ピン (手もとに置いた印。一人一本)
+        if (MapPrefs.shows(MapPrefs.Layer.PINS) && !onMoon()) {
+            List<MapPrefs.Pin> pins = MapPrefs.pins();
+            for (int i = 0; i < pins.size(); i++) {
+                MapPrefs.Pin pin = pins.get(i);
+                int[] at = project(pin.x() + 0.5, pin.z() + 0.5);
+                pin(g, at[0], at[1], 0, at[2] == 1 ? 0.55f : 1f);
+                hits.add(hit(new int[] {at[0], at[1] - 8}, 60, List.of(Component.translatable("map.skyabyss.mark.pin").withColor(PIN_COLOR & 0xFFFFFF),
+                        MapText.where(me, pin.x() + 0.5, pin.z() + 0.5), Component.translatable("map.skyabyss.mark.pin_remove")), null));
+            }
+            // パーティーの仲間のピン (水色。party/PartyPins)
+            for (jp.revati.skyabyss.party.PartyPins.Pin mp : PinMarkers.mates()) {
+                int[] at = project(mp.x() + 0.5, mp.z() + 0.5);
+                pin(g, at[0], at[1], 0, at[2] == 1 ? 0.55f : 1f, PinMarkers.MATE);
+                hits.add(hit(new int[] {at[0], at[1] - 8}, 59, List.of(Component.translatable("map.skyabyss.mark.pin_mate", mp.owner()).withColor(PinMarkers.MATE),
+                        MapText.where(me, mp.x() + 0.5, mp.z() + 0.5)), null));
             }
         }
         // 仲間・目的・自分 (クライアントが持っているもの)
@@ -1085,6 +1200,23 @@ public class TravelMapScreen extends Screen {
             zoomBy(1, cx, cy);
             return true;
         }
+        if (button == 0) {
+            MapPrefs.Layer l = layerAt(mouseX, mouseY);
+            if (l != null) {
+                MapPrefs.toggle(l);
+                click(MapPrefs.shows(l) ? 1.2f : 0.9f);
+                return true;
+            }
+            if (inLayerPanel(mouseX, mouseY)) {
+                return true;
+            }
+        }
+        // ピン: ホイールを押す・Shift + 左クリック。ピンの上なら消す
+        if (radius > 0 && inMap(mx, my) && !onMoon() && (button == 2 || button == 0 && hasShiftDown())
+                && !(chart != null && mouseX >= listX - 4)) {
+            togglePin(mouseX, mouseY);
+            return true;
+        }
         if (button == 1 && radius > 0 && inMap(mx, my)) {
             panX = 0;
             panZ = 0;
@@ -1148,6 +1280,132 @@ public class TravelMapScreen extends Screen {
             return true;
         }
         return super.mouseClicked(mx, my, button);
+    }
+
+    // ---------------------------------------------------------------- 載せる物の組 (左下) とピン
+    static final int PIN_COLOR = 0xFFE8564A;
+    private static final int LAYER_ROW = 12;
+    private static final int LAYER_W = 84;
+
+    private int layerX() {
+        return rx0 + 4;
+    }
+
+    private int layerY() {
+        return ry1 - 4 - MapPrefs.Layer.values().length * LAYER_ROW - 13;
+    }
+
+    private boolean inLayerPanel(int mx, int my) {
+        return radius > 0 && !onMoon() && inside(mx, my, layerX(), layerY(), LAYER_W, 13 + MapPrefs.Layer.values().length * LAYER_ROW + 2);
+    }
+
+    @Nullable
+    private MapPrefs.Layer layerAt(int mx, int my) {
+        if (radius <= 0 || onMoon()) {
+            return null;
+        }
+        int y0 = layerY() + 13;
+        for (MapPrefs.Layer l : MapPrefs.Layer.values()) {
+            if (inside(mx, my, layerX() + 2, y0 + l.ordinal() * LAYER_ROW, LAYER_W - 4, LAYER_ROW)) {
+                return l;
+            }
+        }
+        return null;
+    }
+
+    // 左下の札: 組ごとに、入り切りの印・絵・名前。切った組は暗く
+    private void drawLayers(GuiGraphics g, Palette p, int mouseX, int mouseY, List<Hit> hits) {
+        if (radius <= 0 || onMoon()) {
+            return;
+        }
+        int x = layerX();
+        int y = layerY();
+        int h = 13 + MapPrefs.Layer.values().length * LAYER_ROW + 2;
+        g.fill(x, y, x + LAYER_W, y + h, 0xC00A0D12);
+        outlineRect(g, x, y, LAYER_W, h, (p.ring() & 0xFFFFFF) | 0xFF000000);
+        g.fill(x + 1, y + 1, x + LAYER_W - 1, y + 12, 0x60000000);
+        g.drawString(font, Component.translatable("gui.skyabyss.map.layers"), x + 4, y + 3, p.accent(), false);
+        for (MapPrefs.Layer l : MapPrefs.Layer.values()) {
+            int ry = y + 13 + l.ordinal() * LAYER_ROW;
+            boolean on = MapPrefs.shows(l);
+            boolean hover = inside(mouseX, mouseY, x + 2, ry, LAYER_W - 4, LAYER_ROW);
+            if (hover) {
+                g.fill(x + 2, ry, x + LAYER_W - 2, ry + LAYER_ROW, 0x40FFFFFF);
+            }
+            // 入り切りの小さな四角
+            int bx = x + 4;
+            int by = ry + 3;
+            g.fill(bx, by, bx + 6, by + 6, 0xFF05070A);
+            g.fill(bx + 1, by + 1, bx + 5, by + 5, on ? p.accent() : 0xFF2A2E36);
+            // 組の絵 (小さく)
+            int ix = x + 17;
+            int iy = ry + LAYER_ROW / 2;
+            g.pose().pushPose();
+            g.pose().translate(ix, iy, 0);
+            g.pose().scale(0.6f, 0.6f, 1f);
+            if (l == MapPrefs.Layer.PINS) {
+                pin(g, 0, 7, 0, on ? 1f : 0.4f);
+            } else if (l == MapPrefs.Layer.ROADS) {
+                g.fill(-7, -2, 8, 2, on ? ROAD_RIM : 0x60F6ECD2);
+                g.fill(-7, -1, 8, 1, on ? ROAD_CORE : 0x60623C20);
+            } else {
+                sprite(g, layerSprite(l), 0, 0, 0, on ? 1f : 0.4f);
+            }
+            g.pose().popPose();
+            g.drawString(font, Component.translatable(l.key()), x + 25, ry + 2, on ? p.text() : p.dim(), false);
+        }
+    }
+
+    private static int layerSprite(MapPrefs.Layer l) {
+        return switch (l) {
+            case TOWNS -> S_TOWN;
+            case SIGHTS -> S_POI_TOWER;
+            case SHRINES -> S_SHRINE;
+            case FOES -> S_FOE;
+            case CIRCUITS -> S_CAMP;
+            default -> S_WAYMARK;
+        };
+    }
+
+    // ピン: 赤い頭と細い針、頭に番号 (n = 0 なら番号なし)。針の先が (x, y)
+    private void pin(GuiGraphics g, int x, int y, int n, float alpha) {
+        pin(g, x, y, n, alpha, PIN_COLOR & 0xFFFFFF);
+    }
+
+    private void pin(GuiGraphics g, int x, int y, int n, float alpha, int rgb) {
+        int a = (int) (alpha * 255) << 24;
+        g.fill(x, y - 6, x + 1, y + 1, a | 0x2A2018);
+        g.fill(x - 4, y - 14, x + 5, y - 5, a | 0x05070A);
+        g.fill(x - 3, y - 13, x + 4, y - 6, a | rgb);
+        g.fill(x - 2, y - 12, x, y - 10, a | 0xFFB0A8);
+        if (n > 0) {
+            String t = String.valueOf(n);
+            g.pose().pushPose();
+            g.pose().translate(x + 0.5f, y - 12.5f, 0);
+            g.pose().scale(0.75f, 0.75f, 1f);
+            g.drawString(font, t, -font.width(t) / 2, 0, a | 0xFFFFFF, false);
+            g.pose().popPose();
+        }
+    }
+
+    // 指した所にピンを置く (近くのピンの上なら消す)
+    private void togglePin(int mouseX, int mouseY) {
+        for (MapPrefs.Pin pin : MapPrefs.pins()) {
+            int[] at = project(pin.x() + 0.5, pin.z() + 0.5);
+            if (Math.hypot(at[0] - mouseX, at[1] - 8 - mouseY) < 9) {
+                MapPrefs.remove(pin);
+                click(0.8f);
+                return;
+            }
+        }
+        double k = radius / view;
+        int x = (int) Math.floor(centerX() + (mouseX - cx) / k);
+        int z = (int) Math.floor(centerZ() + (mouseY - cy) / k);
+        MapPrefs.add(x, z);
+        if (!MapPrefs.shows(MapPrefs.Layer.PINS)) {
+            MapPrefs.toggle(MapPrefs.Layer.PINS);
+        }
+        click(1.4f);
     }
 
     private void click(float pitch) {

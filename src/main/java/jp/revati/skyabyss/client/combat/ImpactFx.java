@@ -53,7 +53,7 @@ public final class ImpactFx {
 
     // bespoke: 技の見た目 (AttackFx) が当たりの粒を描くので、ここは音と揺れだけ
     static void burst(ClientLevel level, TelegraphClient.Decal d, boolean bespoke) {
-        if (d.style == Telegraph.Style.SAFE) {
+        if (d.style == Telegraph.Style.SAFE || d.style == Telegraph.Style.GOAL) {
             return;
         }
         TelegraphShape s = d.shape;
@@ -99,6 +99,8 @@ public final class ImpactFx {
         if (light) {
             return;
         }
+        // 心臓の後のボスの技は、持ち主ごとの飾りを重ねる (BossImpactFx)
+        BossImpactFx.burst(level, d, cx, y0, cz, radius);
         if (bespoke) {
             if (big) {
                 shake(cx, cz, radius, size);

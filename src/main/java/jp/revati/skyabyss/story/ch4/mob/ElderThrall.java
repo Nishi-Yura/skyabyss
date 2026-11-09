@@ -152,7 +152,7 @@ public class ElderThrall extends AshThrall {
         float scale = StoneWhaleHeart.scaleFor(Math.min(n, jp.revati.skyabyss.party.Parties.MAX_MEMBERS));
         AttributeInstance health = getAttribute(Attributes.MAX_HEALTH);
         if (health != null && scale > 1f) {
-            health.setBaseValue(Math.min(1024, HEALTH * scale));
+            health.setBaseValue(HEALTH * scale);
             setHealth(getMaxHealth());
         }
     }

@@ -317,6 +317,10 @@ public final class SiteBuilds {
             SkyAbyss.LOGGER.info("Built the opening site {}: {} blocks in {} ticks ({} ms of work)", job.label(), job.placedCount, job.ticks,
                     job.workNanos / 1_000_000L);
             SiteNetwork.broadcast(event.getServer());
+            if (job.origin != null && event.getServer().overworld() != null) {
+                // 建て物の空けた所が祠を削っていたら、祠を建て直す (町は半径 90 ほど、祠は 25 ほど)
+                jp.revati.skyabyss.titan.shrine.TitanShrine.afterSite(event.getServer(), job.origin, 140);
+            }
         }
     }
 

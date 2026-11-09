@@ -132,7 +132,7 @@ public final class Ch2GroundSelfTest {
             forceVault(server.overworld(), false);
         }
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch2 ground PASSED (salt vault rooms/throat/barrels/door/pads/clear, salt road marks, wreck chests/page/shell, "
+            SkyAbyss.LOGGER.info("SELFTEST ch2 ground PASSED (salt vault rooms/throat/barrels/door/pads/clear, salt road marks, wreck chests/page, "
                     + "salt_road + ebb_boat to ch2_ready, drift trail, artisan spot, report memory, stakes, xp budget, texts)");
         } else {
             F.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch2 ground FAILED: {}", m));
@@ -373,16 +373,13 @@ public final class Ch2GroundSelfTest {
         FakePlayer p = fake(server, "wreck");
         try {
             Lore.lock(p, Ch2Ground.LORE_WRECK);
-            p.getPersistentData().remove("skyabyss_tide_watching_shell_given");
             p.getInventory().clearContent();
             check(Wreck.openChest(p), "the wreck chest gave nothing the first time");
             Tasks.flush();
             check(Lore.state(p).has(Ch2Ground.LORE_WRECK), "the wreck chest did not record the tide people's page");
-            check(QuestItems.count(p, "skyabyss:tide_watching_shell", null) == 1, "the wreck chest did not hand over the tide-watching shell");
-            check(!Wreck.openChest(p), "the wreck chest gave its page or shell twice");
+            check(!Wreck.openChest(p), "the wreck chest gave its page twice");
         } finally {
             Lore.lock(p, Ch2Ground.LORE_WRECK);
-            p.getPersistentData().remove("skyabyss_tide_watching_shell_given");
             p.getInventory().clearContent();
         }
     }
@@ -399,7 +396,6 @@ public final class Ch2GroundSelfTest {
             lore.forEach(id -> Lore.lock(p, id));
             p.getPersistentData().remove(SaltVault.SEEN);
             p.getPersistentData().remove(SaltVault.COUNTED);
-            p.getPersistentData().remove("skyabyss_tide_watching_shell_given");
             p.getPersistentData().remove("skyabyss_ch2_stakes_read");
             SiteProgressData.get(server).forgetTreasure(p.getUUID(), Ch2Ground.RAFT_TREASURE);
             progress.clearPersonal(p.getUUID(), "stone_whale");

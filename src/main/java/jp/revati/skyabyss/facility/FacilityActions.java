@@ -50,7 +50,7 @@ import net.minecraft.world.level.block.BedBlock;
 public final class FacilityActions {
     public static final java.util.Set<String> OPENS = java.util.Set.of("shop", "stash", "inn_rest", "rumor", "perch", "map", "guild",
             "guild_storage", "respec_quote", "respec_skills", "respec_skills_coins", "job_room",
-            "key_offer", "key_return", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board", "powder", "dungeon_mood", "fish_order");
+            "key_offer", "key_return", "stash_2", "stash_3", "stash_4", "stash_buy", "forge_full", "records", "brew_lesson", "trade", "mount_shop", "guide", "boxes", "buyback", "tower_desk", "tower_shop", "tower_records", "secret_arts", "circuit", "circuit_start", "journal", "look", "fishing_board", "powder", "dungeon_mood", "fish_order", "shrine_go", "shrine_board", "shrine_vow");
 
     private FacilityActions() {
     }
@@ -67,9 +67,36 @@ public final class FacilityActions {
                 }
             }
             case "stash" -> StashMenu.open(player, npc);
+            // 買い足した頁 (StashData.PAGES)
+            case "stash_2" -> StashMenu.open(player, npc, 2);
+            case "stash_3" -> StashMenu.open(player, npc, 3);
+            case "stash_4" -> StashMenu.open(player, npc, 4);
+            case "stash_buy" -> StashMenu.buyPage(player);
+            // 鍛冶師の「炉のこと」: どの町の鍛冶師からも、共鳴の炉の画面 (鍛える・粉・交換) をそのまま開く
+            case "forge_full" -> {
+                if (npc != null) {
+                    player.openMenu(new net.minecraft.world.SimpleMenuProvider((id, inv, pl) -> new jp.revati.skyabyss.forge.ResonanceForgeMenu(id, inv,
+                            net.minecraft.world.inventory.ContainerLevelAccess.create(player.level(), npc.blockPosition()), npc, false),
+                            net.minecraft.network.chat.Component.translatable("block.skyabyss.resonance_forge")));
+                }
+            }
             case "inn_rest" -> innRest(player, npc);
             case "rumor" -> rumor(player);
             case "perch" -> perchCall(player);
+            // 地上の巨神の祠の祭司 (titan/shrine/TitanShrine): 仲間と順路へ渡る・祠の記録・誓い
+            case "shrine_go" -> jp.revati.skyabyss.titan.shrine.TitanShrine.ask(player);
+            case "shrine_board" -> {
+                String t = jp.revati.skyabyss.titan.shrine.TitanShrine.shrineNear(player, jp.revati.skyabyss.titan.shrine.TitanShrine.PRIEST_REACH);
+                if (t != null) {
+                    jp.revati.skyabyss.trial.TrialBoard.open(player, t);
+                }
+            }
+            case "shrine_vow" -> {
+                String t = jp.revati.skyabyss.titan.shrine.TitanShrine.shrineNear(player, jp.revati.skyabyss.titan.shrine.TitanShrine.PRIEST_REACH);
+                if (t != null) {
+                    jp.revati.skyabyss.titan.vow.VowCommands.show(player, t);
+                }
+            }
             case "map" -> ShopService.send(player, new FacilityNetwork.OpenMap());
             case "guild" -> GuildService.open(player, npc);
             case "guild_storage" -> jp.revati.skyabyss.facility.guild.GuildStorage.open(player, npc);
@@ -140,24 +167,16 @@ public final class FacilityActions {
         return best;
     }
 
-    // 宿を寝る場所に決めた人が起きる (復活する) とき、町の真ん中 (鐘のそば) に立たせる。宿の寝台に決めていなければ null
+    // 宿を寝る場所に決めた人が起きる (復活する) とき、その町の真ん中に立たせる。宿の寝台に決めていなければ null。
+    // 都は鐘のそば、土地の町と外れの集落は井戸の脇の休み場 ("rest")。2026-11-08 の声「全部の街、宿登録したら、その町の真ん中に出るようにして」
+    // (前は都の宿だけで、土地の町の宿では宿の寝台で起きていた)
     @Nullable
     public static net.minecraft.world.phys.Vec3 plazaSpotFor(ServerPlayer player) {
         BlockPos home = player.getRespawnPosition();
         if (home == null || player.getRespawnDimension() != Level.OVERWORLD) {
             return null;
         }
-        boolean inn = false;
-        for (BlockPos b : OpeningSites.shelterExtras(player.server, Attendants.INN_BED).values()) {
-            if (b.distSqr(home) <= 9) {
-                inn = true;
-                break;
-            }
-        }
-        if (!inn) {
-            return null;
-        }
-        BlockPos centre = OpeningSites.bell(player.server).orElse(OpeningSites.shelter(player.server).orElse(null));
+        BlockPos centre = innCentre(player.server, home);
         if (centre == null) {
             return null;
         }
@@ -178,6 +197,27 @@ public final class FacilityActions {
             }
         }
         return net.minecraft.world.phys.Vec3.atBottomCenterOf(centre.above());
+    }
+
+    // 寝台 home がどこかの宿のものなら、その町の真ん中。宿のものでなければ null
+    @Nullable
+    public static BlockPos innCentre(net.minecraft.server.MinecraftServer server, BlockPos home) {
+        for (BlockPos b : OpeningSites.shelterExtras(server, Attendants.INN_BED).values()) {
+            if (b.distSqr(home) <= 9) {
+                return OpeningSites.bell(server).orElse(OpeningSites.shelter(server).orElse(null));
+            }
+        }
+        jp.revati.skyabyss.opening.site.SiteData data = jp.revati.skyabyss.opening.site.SiteData.get(server.overworld());
+        for (String kind : new String[] {jp.revati.skyabyss.world.continent.ContinentTowns.KIND, jp.revati.skyabyss.world.continent.FrontierHamlets.KIND}) {
+            for (jp.revati.skyabyss.opening.site.SiteData.Entry e : data.entries(kind)) {
+                BlockPos b = e.extra(Attendants.INN_BED);
+                if (e.built && b != null && b.distSqr(home) <= 9) {
+                    BlockPos rest = e.extra("rest");
+                    return rest != null ? rest : e.pos;
+                }
+            }
+        }
+        return null;
     }
 
     public static boolean innRest(ServerPlayer player, @Nullable NpcEntity npc) {

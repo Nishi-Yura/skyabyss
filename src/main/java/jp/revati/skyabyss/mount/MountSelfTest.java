@@ -151,7 +151,8 @@ public final class MountSelfTest {
         check(f, MountStats.speed(MountStats.tiers(MountStats.SPEED)) > MountStats.speed(5) && MountStats.speed(5) > MountStats.speed(0)
                 && MountStats.jump(5) > MountStats.jump(0), "stats rise (speed beyond the old tier 5)");
         // 店の行は速さ・跳び・人数 (体力は無い)。人数ははじめ 1、段ごとに +1
-        check(f, java.util.Arrays.asList(MountStats.KEYS).equals(List.of("speed", "jump", "seats")) && MountStats.seats(0) == 1 && MountStats.seats(MountStats.tiers(MountStats.SEATS)) == 6,
+        check(f, java.util.Arrays.asList(MountStats.KEYS).equals(List.of("speed", "jump", "seats")) && MountStats.seats(0) == 1 && MountStats.seats(MountStats.tiers(MountStats.SEATS)) == 6
+                && MountStats.tiers(MountStats.SEATS) == 2 && MountStats.seats(2, MountLook.HORN_BEAST) == 2 && MountStats.seats(1, MountLook.CARRIAGE) == 2,
                 "the shop rows are not speed / jump / seats, or seats do not start at one");
         check(f, MountStats.healthRefund(5) == 18 + 36 + 60 + 95 + 150 && MountStats.healthRefund(0) == 0, "no health tiers; refund of old ones");
     }
