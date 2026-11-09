@@ -5,6 +5,7 @@
 
     python -X utf8 tools/audit/check_dungeon_reach.py src/main/resources/data/skyabyss/dungeon/*.json
 """
+import json, sys
 from collections import deque
 SOLIDS = ('stairs',)  # stairs walkable-ish; treat as passable for feet? treat as solid floor too
 def load(p):
