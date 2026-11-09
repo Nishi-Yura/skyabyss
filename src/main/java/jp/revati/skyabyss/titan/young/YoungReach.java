@@ -104,9 +104,24 @@ public final class YoungReach {
         jp.revati.skyabyss.opening.OpeningSites.shelter(player.server).ifPresent(town -> list.add(build(level, kind, origin, "town", "", "", town, 4, true, bond)));
         TravelWorldData world = TravelWorldData.get(player.server);
         TravelState state = Voyages.state(player);
+        // 行ったことのある土地の町 (2026-11-09 の声「巨神の行ける場所減った？」: 町は都しか選べなかった)
+        int visited = player.getPersistentData().getInt("skyabyss_towns_visited");
+        String[][] towns = {{"whale", "" + jp.revati.skyabyss.world.continent.ContinentMap.WHALE}, {"tide", "" + jp.revati.skyabyss.world.continent.ContinentMap.TIDE},
+                {"storm", "" + jp.revati.skyabyss.world.continent.ContinentMap.STORM}, {"ember", "" + jp.revati.skyabyss.world.continent.ContinentMap.EMBER}};
+        for (String[] t : towns) {
+            BlockPos at = (visited & (1 << Integer.parseInt(t[1]))) != 0 ? jp.revati.skyabyss.world.continent.ContinentLayout.get().town(t[0]) : null;
+            if (at != null) {
+                BlockPos ground = new BlockPos(at.getX(), Math.max(at.getY(), level.getSeaLevel() + 1), at.getZ());
+                list.add(build(level, kind, origin, "town:" + t[0], t[0], "", ground, 4, true, bond));
+            }
+        }
+        // 覚えた碑。大陸を作り直して碑の記録が無くなったもの (前の版の場所) は出さない (選べない行き先が並ぶだけになっていた)
         for (BlockPos pos : state.waymarks) {
             TravelWorldData.Waymark mark = world.waymark(pos);
-            list.add(build(level, kind, origin, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null, bond));
+            if (mark == null) {
+                continue;
+            }
+            list.add(build(level, kind, origin, "w" + pos.asLong(), mark.name(), mark.biome(), pos, 1, true, bond));
         }
         for (String titan : Titans.all()) {
             if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan)) {

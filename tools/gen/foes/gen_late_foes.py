@@ -70,7 +70,7 @@ def bone(rotation=None, position=None):
 
 
 def hurt_death(p, body, fall=90, axis="z"):
-    hurt = {body: bone(kf({0: (0, 0, 0), 0.08: (-10, 0, 0), 0.3: (0, 0, 0)}))}
+    hurt = {body: bone(kf({0: (0, 0, 0), 0.08: (10, 0, 0), 0.3: (0, 0, 0)}))}
     v = (0, 0, fall) if axis == "z" else (fall, 0, 0)
     death = {body: bone(kf({0: (0, 0, 0), 0.6: v, 1.0: v}), kf({0: (0, 0, 0), 0.6: (0, -1, 0), 1.0: (0, -1.5, 0)}, False))}
     return {p + "hurt": once(0.3, hurt), p + "death": once(1.0, death, True)}
@@ -195,12 +195,13 @@ def warlord():
     p = "animation.fort_warlord."
     idle = {"body": bone(position=["0", S(0, 0.2, 90), "0"]), "head": bone(["0", S(0, 6, 60), "0"]), "arm_r": bone(mrot(S(0, 3, 90)))}
     walk = {"leg_l": bone(mrot(S(0, 24, 400))), "leg_r": bone(mrot(S(180, 24, 400))), "arm_l": bone(mrot(S(180, 16, 400))), "arm_r": bone(mrot(S(0, 10, 400)))}
+    # 腕の x は負 = 前へ上がる (2026-11-09 の声「アニメーションの方向もおかしい」: 前は振りかぶりが背中側へ回っていた)
     sweep = {"body": bone(kf({0: (0, 0, 0), 0.8: (0, 40, 0), 1.0: (0, -45, 0), 1.4: (0, 0, 0)})),
-             "arm_r": bone(kf({0: (0, 0, 0), 0.8: (90, 0, 60), 1.0: (90, 0, -40), 1.4: (0, 0, 0)}))}
+             "arm_r": bone(kf({0: (0, 0, 0), 0.8: (-80, 0, 55), 1.0: (-80, 0, -50), 1.4: (0, 0, 0)}))}
     leap = {"body": bone(kf({0: (0, 0, 0), 0.6: (10, 0, 0), 1.0: (-15, 0, 0), 1.4: (0, 0, 0)}), kf({0: (0, 0, 0), 0.6: (0, -1.5, 0), 0.9: (0, 6, 0), 1.0: (0, 0, 0)}, False)),
-            "arm_r": bone(kf({0: (0, 0, 0), 0.6: (160, 0, 0), 1.0: (-30, 0, 0), 1.4: (0, 0, 0)})),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.6: (-160, 0, 0), 1.0: (-30, 0, 0), 1.4: (0, 0, 0)})),
             "leg_l": bone(kf({0: (0, 0, 0), 0.6: (40, 0, 0), 1.0: (0, 0, 0)})), "leg_r": bone(kf({0: (0, 0, 0), 0.6: (40, 0, 0), 1.0: (0, 0, 0)}))}
-    charge = {"body": bone(kf({0: (0, 0, 0), 0.9: (-15, 0, 0), 1.3: (-20, 0, 0), 1.6: (0, 0, 0)})), "arm_r": bone(kf({0: (0, 0, 0), 0.9: (60, 0, 30), 1.6: (0, 0, 0)})),
+    charge = {"body": bone(kf({0: (0, 0, 0), 0.9: (-15, 0, 0), 1.3: (-20, 0, 0), 1.6: (0, 0, 0)})), "arm_r": bone(kf({0: (0, 0, 0), 0.9: (-60, 0, 30), 1.6: (0, 0, 0)})),
               "leg_l": bone(kf({0: (0, 0, 0), 1.0: (-40, 0, 0), 1.2: (40, 0, 0), 1.4: (-40, 0, 0), 1.6: (0, 0, 0)})),
               "leg_r": bone(kf({0: (0, 0, 0), 1.0: (40, 0, 0), 1.2: (-40, 0, 0), 1.4: (40, 0, 0), 1.6: (0, 0, 0)}))}
     out = {p + "idle": loop(3.0, idle), p + "walk": loop(0.9, walk), p + "sweep": once(1.4, sweep), p + "leap": once(1.4, leap), p + "charge": once(1.6, charge)}
@@ -250,9 +251,16 @@ def wyrm():
     return out
 
 
-BOSS_CHOICE = {"fort_warlord": "a", "temple_keeper": "a", "ice_lord": "a", "lava_wyrm": "a"}
+# 奥のダンジョンの主 4 体は 2026-11-09 に tools/gen/mobs/dungeon_bosses_lp で作り直した (ここでは入れない)
+BOSS_CHOICE = {}
 
 ANIMS = {"fort_warlord": warlord, "temple_keeper": keeper, "ice_lord": icebear, "lava_wyrm": wyrm, "bolt_slinger": slinger, "storm_jelly": jelly, "crag_tortoise": tortoise, "ember_spitter": spitter, "ash_whirl": whirl, "basalt_scorpion": scorpion}
+
+
+def install_anims(mobs):
+    """動きだけ書き直す (形は入れ直さない。入れたあとの関節の沈めや三角の直しを消さないため)"""
+    for mob in mobs:
+        wjson(os.path.join(A, "animations", "entity", mob + ".animation.json"), {"format_version": "1.8.0", "animations": ANIMS[mob]()})
 
 
 def install():
@@ -269,5 +277,9 @@ def install():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[1] == "anims":
+        install_anims(sys.argv[2:])
+        print("anims")
+        raise SystemExit
     install()
     print("done")

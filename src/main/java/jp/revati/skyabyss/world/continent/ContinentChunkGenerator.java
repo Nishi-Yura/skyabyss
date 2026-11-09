@@ -57,7 +57,9 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     }
 
     // 生物群系の飾り (木・草・鉱石など) から、地上の溶岩の池・溶岩の湧き口・水の湧き口を抜く (RPG の野にいきなり溶岩は置かない。崖から水が垂れない。2026-10-26)
-    static final List<String> DROPPED = List.of("lake_lava", "spring_lava", "spring_water");
+    // 木 (trees_*・白樺の高い木・木の下の茂み) も抜く。木は ContinentTrees が土地ごとの形で植える (2026-11-09 の声「木は完全オリジナルに」)
+    static final List<String> DROPPED = List.of("lake_lava", "spring_lava", "spring_water", "trees_", "birch_tall", "dark_forest_vegetation",
+            "mushroom_island_vegetation", "bamboo", "fallen_");
 
     static net.minecraft.world.level.biome.BiomeGenerationSettings features(net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome) {
         net.minecraft.world.level.biome.BiomeGenerationSettings src = biome.value().getGenerationSettings();
@@ -460,6 +462,7 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     public void applyBiomeDecoration(net.minecraft.world.level.WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         super.applyBiomeDecoration(level, chunk, structureManager);
         ContinentScatter.decorate(level, chunk);
+        ContinentTrees.plant(level, chunk);
     }
 
     // 生まれたときの動物 (羊・牛など。生物群系のとおり。羊を連れ戻す頼みなどに要る)

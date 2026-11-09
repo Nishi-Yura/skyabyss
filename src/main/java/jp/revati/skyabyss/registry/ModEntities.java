@@ -176,19 +176,19 @@ public final class ModEntities {
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.FortWarlord>> FORT_WARLORD = ENTITIES.register("fort_warlord",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.FortWarlord::new, MobCategory.MONSTER)
-                    .sized(1.4f, 3.3f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":fort_warlord"));
+                    .sized(2.3f, 5.6f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":fort_warlord"));
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.TempleKeeper>> TEMPLE_KEEPER = ENTITIES.register("temple_keeper",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.TempleKeeper::new, MobCategory.MONSTER)
-                    .sized(1.4f, 3.4f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":temple_keeper"));
+                    .sized(2.3f, 5.8f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":temple_keeper"));
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.IceLord>> ICE_LORD = ENTITIES.register("ice_lord",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.IceLord::new, MobCategory.MONSTER)
-                    .sized(2.6f, 2.8f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":ice_lord"));
+                    .sized(4.0f, 4.4f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":ice_lord"));
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm>> LAVA_WYRM = ENTITIES.register("lava_wyrm",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm::new, MobCategory.MONSTER)
-                    .sized(2.6f, 3.4f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":lava_wyrm"));
+                    .sized(4.0f, 5.4f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":lava_wyrm"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ForgeGiant>> FORGE_GIANT = ENTITIES.register("forge_giant",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ForgeGiant::new, MobCategory.MONSTER)
                     .sized(2.4f, 5.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":forge_giant"));

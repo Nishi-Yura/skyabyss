@@ -67,6 +67,32 @@ public final class UpgradeSelfTest {
         if (PlayerUpgrade.version(p) != PlayerUpgrade.CURRENT || PlayerUpgrade.run(p) != 0) {
             f.add("player data version " + PlayerUpgrade.version(p) + " != " + PlayerUpgrade.CURRENT + " or ran twice");
         }
+        // 古い品を今の決まりへ (item/ItemRefresh): 振っていない野の装飾は振る、今の表にない特性はそろえ直す、二度目は何もしない
+        net.minecraft.util.RandomSource rr = net.minecraft.util.RandomSource.create(9);
+        ItemStack acc = null;
+        ItemStack gear = null;
+        for (net.minecraft.world.item.Item it : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+            if (acc == null && it instanceof jp.revati.skyabyss.item.wild.WildAccessoryItem && !jp.revati.skyabyss.dungeon.DungeonGear.isTrinket(it)) {
+                acc = new ItemStack(it);
+            }
+            if (gear == null && jp.revati.skyabyss.item.affix.AffixRules.eligible(new ItemStack(it))) {
+                gear = new ItemStack(it);
+            }
+        }
+        if (acc == null || !jp.revati.skyabyss.item.ItemRefresh.refresh(acc, rr) || !jp.revati.skyabyss.item.wild.AccessoryRolls.rolled(acc)
+                || jp.revati.skyabyss.item.ItemRefresh.refresh(acc, rr)) {
+            f.add("item refresh: an unrolled accessory was not rolled once");
+        }
+        if (gear != null) {
+            gear.set(jp.revati.skyabyss.registry.ModDataComponents.AFFIXES.get(), List.of(new jp.revati.skyabyss.item.affix.Affix("no_such_affix", 1.0)));
+            if (!jp.revati.skyabyss.item.ItemRefresh.refresh(gear, rr)
+                    || !jp.revati.skyabyss.item.affix.AffixRules.valid(gear, jp.revati.skyabyss.item.affix.AffixRules.affixes(gear))
+                    || jp.revati.skyabyss.item.ItemRefresh.refresh(gear, rr)) {
+                f.add("item refresh: old affixes were not brought to the current rules: " + jp.revati.skyabyss.item.affix.AffixRules.affixes(gear));
+            }
+        } else {
+            f.add("item refresh: no affix gear found");
+        }
         // 置く品
         for (ItemStack s : List.of(new ItemStack(Items.TORCH), new ItemStack(Items.ITEM_FRAME), new ItemStack(Items.OAK_BOAT), new ItemStack(Items.WHITE_WOOL))) {
             if (!NoPlaceables.placeable(s)) {

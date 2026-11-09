@@ -360,28 +360,39 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         if (job == null) {
             return;
         }
+        // 二段の棚 (どの祠でも・この祠だけ。一段 8 品)。品は K 画面のアスペクトの頁と同じ札 (持っていない品は「？」で伏せる)
         java.util.List<jp.revati.skyabyss.rpg.aspect.Aspect> pool = jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, data.titan());
-        int cols = 2;
-        int cw = (w - Golden.S5) / cols;
-        int rowH = 11;
+        int tile = 20;
+        int per = 8;
+        int gap = Math.max(2, Math.min(Golden.S8, (w - per * tile) / (per - 1)));
+        int rowW = per * tile + (per - 1) * gap;
+        int tx0 = x0 + Math.max(0, (w - rowW) / 2);
         java.util.List<Component> tip = null;
-        for (int i = 0; i < pool.size(); i++) {
-            jp.revati.skyabyss.rpg.aspect.Aspect a = pool.get(i);
-            int cx = x0 + (i % cols) * (cw + Golden.S5);
-            int cy = y + (i / cols) * rowH;
-            if (cy + 9 > CONTENT.bottom()) {
+        for (String grp : new String[] {"", data.titan()}) {
+            java.util.List<jp.revati.skyabyss.rpg.aspect.Aspect> list = new java.util.ArrayList<>();
+            for (jp.revati.skyabyss.rpg.aspect.Aspect a : pool) {
+                if (a.shrine().equals(grp)) {
+                    list.add(a);
+                }
+            }
+            list.sort(java.util.Comparator.comparingInt(jp.revati.skyabyss.rpg.aspect.Aspect::rarity));
+            if (y + 10 + tile > CONTENT.bottom()) {
                 break;
             }
-            int lv = jp.revati.skyabyss.rpg.aspect.Aspects.level(d, a);
-            int color = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.rarityColor(a.rarity());
-            g.fill(cx, cy + 2, cx + 4, cy + 6, argb(1f, color));
-            Component lvText = lv > 0 ? Component.translatable("aspect.skyabyss.level", lv) : Component.translatable("aspect.skyabyss.unowned");
-            int lw = font.width(lvText);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(a.nameKey()), cx + 7, cy, cw - 12 - lw, argb(1f, lv > 0 ? color : DIM), false);
-            g.drawString(font, lvText, cx + cw - lw, cy, argb(1f, lv > 0 ? TEXT : DIM), false);
-            if (mx >= cx && mx < cx + cw && my >= cy && my < cy + rowH) {
-                tip = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTip(d, a);
+            g.drawString(font, jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.groupName(grp), tx0, y, argb(1f, TEXT), false);
+            y += 11;
+            for (int i = 0; i < list.size(); i++) {
+                jp.revati.skyabyss.rpg.aspect.Aspect a = list.get(i);
+                int cx = tx0 + (i % per) * (tile + gap);
+                int cy = y + (i / per) * (tile + 6);
+                int lv = jp.revati.skyabyss.rpg.aspect.Aspects.level(d, a);
+                boolean hover = mx >= cx && mx < cx + tile && my >= cy && my < cy + tile;
+                jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTile(g, font, cx, cy, tile, a, lv, hover, (int) (mc.level == null ? 0 : mc.level.getGameTime()));
+                if (hover) {
+                    tip = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTip(d, a);
+                }
             }
+            y += ((list.size() + per - 1) / per) * (tile + 6) + 3;
         }
         if (tip != null) {
             g.renderComponentTooltip(font, tip, mx, my);

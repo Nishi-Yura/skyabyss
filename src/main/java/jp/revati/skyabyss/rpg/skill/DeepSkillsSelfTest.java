@@ -423,11 +423,11 @@ final class DeepSkillsSelfTest {
     // ---------------------------------------------------------------- アスペクト (docs/design/58)
     private static void aspects(MinecraftServer server, List<String> f) {
         // 表: 6 職 × 16 (レア 4・エピック 4・ミシック 8 = 祠ごとに 2)
-        check(f, jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size() == 96, "aspect count " + jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size());
+        check(f, jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size() == 240, "aspect count " + jp.revati.skyabyss.rpg.aspect.AspectTable.ALL.size());
         for (Job job : Job.values()) {
-            check(f, jp.revati.skyabyss.rpg.aspect.Aspects.ofJob(job).size() == 16, "aspects of " + job);
+            check(f, jp.revati.skyabyss.rpg.aspect.Aspects.ofJob(job).size() == 40, "aspects of " + job);
             for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
-                check(f, jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, titan).size() == 10, "pool of " + job + " at " + titan);
+                check(f, jp.revati.skyabyss.rpg.aspect.Aspects.pool(job, titan).size() == 16, "pool of " + job + " at " + titan);
             }
         }
         // Lv: 数 1/2/4/7/11 で Lv 1〜5
@@ -448,6 +448,7 @@ final class DeepSkillsSelfTest {
             if (a == null) {
                 return;
             }
+            check(f, a.shared() || "ember".equals(a.shrine()), "an aspect from another shrine: " + a.id());
             check(f, a.rarity() != jp.revati.skyabyss.rpg.aspect.Aspect.MYTHIC || "ember".equals(a.shrine()), "a mythic from another shrine: " + a.id());
             check(f, i % 9 < jp.revati.skyabyss.rpg.aspect.Aspects.PITY || a.rarity() == jp.revati.skyabyss.rpg.aspect.Aspect.MYTHIC, "pity did not give a mythic");
         }

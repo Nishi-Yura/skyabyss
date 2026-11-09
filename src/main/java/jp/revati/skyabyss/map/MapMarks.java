@@ -330,8 +330,14 @@ public final class MapMarks {
                 }
             }
         }
+        // 祠は建つ前から決まった場所に出す (2026-11-09 の声「マップから祠きえた？」: 建った記録だけを見ていたので、
+        // 新しい世界や作り直したあとは、祠が建つまで地図に出なかった)
         for (String titan : Titans.all()) {
             BlockPos at = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(server, titan);
+            if (at == null) {
+                int[] fixed = jp.revati.skyabyss.world.continent.ContinentLairs.shrine(server.overworld(), titan);
+                at = fixed == null ? null : new BlockPos(fixed[0], 0, fixed[1]);
+            }
             if (at != null) {
                 out.add(new Mark(Kind.SHRINE, "shrine:" + titan, titan, "", at.getX(), at.getZ(), false, TravelDest.titanColor(titan)));
             }

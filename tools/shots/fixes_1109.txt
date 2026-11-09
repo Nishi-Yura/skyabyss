@@ -1,0 +1,61 @@
+# 2026-11-09 夕方の声の直し: アスペクトの祭壇と棚・祠の報いの頁・募集の画面・旅の地図の組とピン・奥のダンジョンの主 (作り直したモデルと大きさ)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/fixes_1109.txt -PshotsName=fixes_1109
+world shots flat
+size 1280 720
+timeout 1800
+render 8
+clouds off
+guiscale 3
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode creative
+camera 0 -60 -10 0 6
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 40
+chat clear
+cmd skyabyss level set @p 50
+cmd skyabyss job choose warrior
+cmd skyabyss skill aspect @p warrior_r1 11
+cmd skyabyss skill aspect @p warrior_e2 4
+cmd skyabyss skill aspect @p warrior_r_stone_whale1 2
+cmd skyabyss skill aspect @p warrior_e_tide_shell3 1
+cmd skyabyss skill aspect @p warrior_m_ember1 7
+cmd skyabyss skill aspect @p warrior_m_stone_whale2 1
+wait 20
+open skills_ext
+wait 10
+shot aspects
+close
+wait 2
+open party_finder
+wait 10
+shot party_finder
+close
+wait 2
+open travel_map
+wait 10
+shot travel_map
+close
+wait 2
+cmd summon skyabyss:fort_warlord -5 -60 4 {NoAI:1b,Rotation:[165f,0f]}
+cmd summon skyabyss:temple_keeper 5 -60 4 {NoAI:1b,Rotation:[195f,0f]}
+camera 0 -56 -10 0 8
+wait 40
+shot boss_people
+cmd kill @e[type=!minecraft:player]
+cmd summon skyabyss:ice_lord -6 -60 6 {NoAI:1b,Rotation:[150f,0f]}
+cmd summon skyabyss:lava_wyrm 6 -60 6 {NoAI:1b,Rotation:[200f,0f]}
+camera 0 -55 -12 0 8
+wait 40
+shot boss_beasts
+cmd kill @e[type=!minecraft:player]
+open skills_ext
+wait 10
+shot aspects_owned
+close

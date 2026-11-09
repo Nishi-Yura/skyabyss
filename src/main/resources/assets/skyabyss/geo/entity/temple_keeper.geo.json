@@ -1,1 +1,227 @@
-{"format_version":"1.12.0","minecraft:geometry":[{"description":{"identifier":"geometry.temple_keeper_lowpoly_debug","texture_width":64,"texture_height":64,"visible_bounds_width":4,"visible_bounds_height":4,"visible_bounds_offset":[0,1.5,0]},"bones":[{"name":"root","pivot":[0.0,0.0,0.0]},{"name":"body","pivot":[0.0,15.0,0.0],"parent":"root","cubes":[{"origin":[-7.9466,0.6,-8.49],"size":[16.2099,35.198,16.4806],"uv":[0,0]}]},{"name":"head","pivot":[0.0,36.0,0.0],"parent":"body","cubes":[{"origin":[-4.2848,30.5378,-4.4139],"size":[8.9561,17.1403,8.9743],"uv":[0,0]}]},{"name":"arm_l","pivot":[7.5,31.5,0.0],"parent":"body","cubes":[{"origin":[4.6388,15.75,-4.0902],"size":[7.2695,16.9227,6.1072],"uv":[0,0]}]},{"name":"arm_r","pivot":[-7.5,31.5,0.0],"parent":"body","cubes":[{"origin":[-11.8987,15.75,-4.0902],"size":[7.2272,16.9815,6.1072],"uv":[0,0]}]},{"name":"weapon","pivot":[-9.0,18.0,-1.5],"parent":"arm_r","cubes":[{"origin":[-12.6133,3.0,-2.1014],"size":[6.6266,40.5,1.2681],"uv":[0,0]}]},{"name":"offhand","pivot":[9.0,18.0,-1.5],"parent":"arm_l"},{"name":"tail","pivot":[0.0,9.0,3.0],"parent":"body","cubes":[{"origin":[-8.4036,0.3,-8.6669],"size":[17.0705,2.1,17.0705],"uv":[0,0]}]}]}]}
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.temple_keeper",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 6,
+    "visible_bounds_height": 6,
+    "visible_bounds_offset": [
+     0,
+     2.0,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      20.0,
+      0.0
+     ],
+     "parent": "root"
+    },
+    {
+     "name": "robe",
+     "pivot": [
+      0.0,
+      20.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -13.3,
+        0.6,
+        -12.113
+       ],
+       "size": [
+        26.6,
+        22.4,
+        24.226
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "torso",
+     "pivot": [
+      0.0,
+      24.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -12.064,
+        22.0,
+        -8.312
+       ],
+       "size": [
+        27.246,
+        31.523,
+        22.037
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      41.0,
+      -1.0
+     ],
+     "parent": "torso",
+     "cubes": [
+      {
+       "origin": [
+        -5.239,
+        39.2,
+        -6.36
+       ],
+       "size": [
+        10.478,
+        16.278,
+        10.86
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_l",
+     "pivot": [
+      9.0,
+      38.0,
+      0.0
+     ],
+     "parent": "torso",
+     "cubes": [
+      {
+       "origin": [
+        -13.714,
+        27.654,
+        -4.838
+       ],
+       "size": [
+        7.053,
+        11.075,
+        7.284
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "fore_l",
+     "pivot": [
+      11.0,
+      28.5,
+      -2.0
+     ],
+     "parent": "arm_l",
+     "cubes": [
+      {
+       "origin": [
+        -15.7,
+        14.076,
+        -8.6
+       ],
+       "size": [
+        9.4,
+        14.424,
+        9.6
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_r",
+     "pivot": [
+      -9.0,
+      38.0,
+      0.0
+     ],
+     "parent": "torso",
+     "cubes": [
+      {
+       "origin": [
+        6.661,
+        27.654,
+        -4.838
+       ],
+       "size": [
+        7.053,
+        11.075,
+        7.284
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "fore_r",
+     "pivot": [
+      -11.0,
+      28.5,
+      -2.0
+     ],
+     "parent": "arm_r",
+     "cubes": [
+      {
+       "origin": [
+        6.3,
+        3.477,
+        -13.194
+       ],
+       "size": [
+        9.4,
+        42.961,
+        14.194
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

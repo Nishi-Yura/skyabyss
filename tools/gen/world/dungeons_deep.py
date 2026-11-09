@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """奥のダンジョン四つ (issue #19 の ②。2026-11-06 の頁「大陸の外れ」の m_far_dungeons = a、主の形は 2026-11-09 の頁で A)。
-一層と主の間 (data/skyabyss/dungeon/<id>_<1|boss>.json) と、外れの置き場の入口 (opening/poi_dungeon_<id>.json)。build_dungeons.py から呼ぶ。
+一層・二層・主の間 (data/skyabyss/dungeon/<id>_<1|2|boss>.json。二層は dungeons_deep2.py) と、外れの置き場の入口 (opening/poi_dungeon_<id>.json)。build_dungeons.py から呼ぶ。
 
   python -X utf8 tools/gen/world/build_dungeons.py deep_fort deep_temple deep_ice deep_lava
 
@@ -439,11 +439,19 @@ def lava_boss():
     return cv
 
 
+def _floor2(name):
+    def build():
+        import dungeons_deep2
+        return dungeons_deep2.FLOORS2[name]()
+    return build
+
+
+# 層は一層・二層 (中ボスの間で終わる。dungeons_deep2.py)・主の間 (2026-11-09 の声「1層と2層にしてほしい」「ボスの前の中ボス」)
 BUILDERS = {
-    "deep_fort": [("1", deep_fort_1), ("boss", deep_fort_boss)],
-    "deep_temple": [("1", temple_1), ("boss", temple_boss)],
-    "deep_ice": [("1", ice_1), ("boss", ice_boss)],
-    "deep_lava": [("1", lava_1), ("boss", lava_boss)],
+    "deep_fort": [("1", deep_fort_1), ("2", _floor2("deep_fort")), ("boss", deep_fort_boss)],
+    "deep_temple": [("1", temple_1), ("2", _floor2("deep_temple")), ("boss", temple_boss)],
+    "deep_ice": [("1", ice_1), ("2", _floor2("deep_ice")), ("boss", ice_boss)],
+    "deep_lava": [("1", lava_1), ("2", _floor2("deep_lava")), ("boss", lava_boss)],
 }
 
 

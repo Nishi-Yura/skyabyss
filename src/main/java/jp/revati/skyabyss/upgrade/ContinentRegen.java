@@ -60,7 +60,8 @@ public final class ContinentRegen {
     // 9 = 2026-11-09 (章の小さな部品 (荷車の傍らの轍と荷・旅の職人の立つ所など、SiteJob.placeSmall) を道から遠ざける。「ここ道に旅の職人がかぶってる」)
     // 10 = 2026-11-09 (外れの帯の見せ場の地形: 骨の谷の肋骨・干潟と岩礁・氷河と浮き岩・冷えた熔岩の川と灰の砂丘。world/continent/FrontierTerrain。issue #19)
     // 11 = 2026-11-09 (奥のダンジョン四つの入口を外れの置き場に。dungeon/Dungeon の DEEP_*、tools/gen/world/dungeons_deep.py)
-    public static final int VERSION = 11;
+    // 12 = 2026-11-09 (木をバニラの飾りから、土地ごとのオリジナルの形の木に。間を空け、砂丘のまわりは緑の木なし。world/continent/ContinentTrees)
+    public static final int VERSION = 12;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
@@ -306,6 +307,13 @@ public final class ContinentRegen {
             return;
         }
         var tag = p.getPersistentData();
+        // 印の無い人は、この世界に初めて入った人 (新しい世界・新しい仲間)。作り直した起動でなければ、今の版を書くだけ
+        // (2026-11-09 の声「新しいワールド作ったら、大陸の新しい版を作り直していますと初めに出た」「職選べる画面出なかった」:
+        //  前は印が無いのを古い版と見て読み込み画面を出し、終わると立ち位置を動かして野営地から離していた)
+        if (!tag.contains(PLAYER_KEY) && !regenerated()) {
+            tag.putInt(PLAYER_KEY, VERSION);
+            return;
+        }
         boolean first = tag.getInt(PLAYER_KEY) < VERSION;
         // 版が上がってから初めて入った人と、この起動で作り直した世界に初めて入った人: まわりの地形と建物が揃うまで読み込み画面 (RegenLoading)
         if (continent(p.server) && (first || regenerated() && LOADED.add(p.getUUID()))) {

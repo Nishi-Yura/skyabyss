@@ -17,7 +17,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 // 段は何度流しても同じ結果になるように書く。新しい段を足すとき: CURRENT を一つ上げ、STEPS の終わりに足す (docs/release.md)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PlayerUpgrade {
-    public static final int CURRENT = 2;
+    public static final int CURRENT = 3;
     public static final String KEY = "skyabyss_data_version";
 
     public record Step(int version, String name, Consumer<ServerPlayer> run) {
@@ -43,6 +43,13 @@ public final class PlayerUpgrade {
                     jp.revati.skyabyss.facility.Coins.give(p, refund);
                     jp.revati.skyabyss.notice.Notice.hint(p, "message.skyabyss.mount.health_refund", refund);
                     SkyAbyss.LOGGER.info("Player upgrade: refunded {} bell coin(s) of mount health tiers to {}", refund, p.getGameProfile().getName());
+                }
+            }),
+            // 1.1.5: 古い品を今の決まりへ (野の装飾の個体差・特性の表・穴の数。持ち物・エンダーチェスト・倉庫。item/ItemRefresh)
+            new Step(3, "refresh items to the current rules", p -> {
+                int n = jp.revati.skyabyss.item.ItemRefresh.refreshAll(p);
+                if (n > 0) {
+                    SkyAbyss.LOGGER.info("Player upgrade: refreshed {} item(s) of {} to the current rules", n, p.getGameProfile().getName());
                 }
             }));
 

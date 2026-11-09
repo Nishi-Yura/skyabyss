@@ -25,8 +25,11 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
     private static final int PROW = Golden.S21;
 
     private static final Golden.Layout LAYOUT = Golden.Layout.large(0);
-    private static final Golden.Box MINE = LAYOUT.body().top(Golden.S34);
-    private static final Golden.Box LIST = LAYOUT.body().afterTop(Golden.S34);
+    // 自分の募集の欄: 一行目に今の募集、二行目にパーティーの中かどうか、その下に釦 (2026-11-09 の声「募集UI、文字の上にボタンある」:
+    // 前は欄が 34 で、二行目の文と釦が重なっていた)
+    private static final int MINE_H = 2 + 2 * ROW + Golden.S3 + Golden.BTN + Golden.S5;
+    private static final Golden.Box MINE = LAYOUT.body().top(MINE_H);
+    private static final Golden.Box LIST = LAYOUT.body().afterTop(MINE_H);
     private static final int LIST_Y = LIST.y() + ROW + Golden.S5;
     private static final int LIST_H = LIST.bottom() - 2 - LIST_Y;
 

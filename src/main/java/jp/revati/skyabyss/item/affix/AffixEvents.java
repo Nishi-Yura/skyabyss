@@ -213,9 +213,8 @@ public final class AffixEvents {
         Inventory inventory = player.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
-            boolean rolled = AffixRules.ensureRolled(stack, player.getRandom());
-            // 穴・世代の刻み (古いセーブの装備も、手にしたときに一度だけ穴を抽選する。item/extra/GearFreedom)
-            rolled |= jp.revati.skyabyss.item.extra.GearFreedom.ensure(stack, player.getRandom());
+            // 特性・穴・野の装飾の個体差を今の決まりへ (古いセーブの品も、持ち物に入れば。item/ItemRefresh)
+            boolean rolled = jp.revati.skyabyss.item.ItemRefresh.refresh(stack, player.getRandom());
             if (rolled) {
                 inventory.setChanged();
             }

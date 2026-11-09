@@ -794,6 +794,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         dx /= fit.scale();
         dy /= fit.scale();
         return (page == 0 && (info.mouseDragged(mx, my, button, dx, dy) || canvas.mouseDragged(mx, my, button, dx, dy)))
+                || (page == 2 && ext.drag(mx, my, button, dx, dy))
                 || super.mouseDragged(mx, my, button, dx, dy);
     }
 
@@ -801,7 +802,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     public boolean mouseReleased(double screenX, double screenY, int button) {
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
-        return info.mouseReleased(mx, my, button) || (page == 0 && canvas.mouseReleased(mx, my, button)) || super.mouseReleased(mx, my, button);
+        return info.mouseReleased(mx, my, button) || (page == 0 && canvas.mouseReleased(mx, my, button)) || (page == 2 && ext.release(mx, my, button))
+                || super.mouseReleased(mx, my, button);
     }
 
     @Override

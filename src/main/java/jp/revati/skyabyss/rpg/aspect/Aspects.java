@@ -154,8 +154,9 @@ public final class Aspects {
     }
 
     // ---------------------------------------------------------------- 技の数字の口 (rpg/skill/SkillExt から)
+    // 一つの技への力とマナは、重ねても見積もりの上限まで (SkillRules.ASPECT_POWER_MAX・ASPECT_MANA_MAX)
     public static double power(Player p, Skill skill) {
-        return sum(p, skill, Aspect.Verb.POWER);
+        return Math.min(jp.revati.skyabyss.rpg.skill.SkillRules.ASPECT_POWER_MAX, sum(p, skill, Aspect.Verb.POWER));
     }
 
     public static double cooldown(Player p, Skill skill) {
@@ -163,7 +164,7 @@ public final class Aspects {
     }
 
     public static double mana(Player p, Skill skill) {
-        return -sum(p, skill, Aspect.Verb.MANA);
+        return -Math.min(jp.revati.skyabyss.rpg.skill.SkillRules.ASPECT_MANA_MAX, sum(p, skill, Aspect.Verb.MANA));
     }
 
     // ---------------------------------------------------------------- 技を使ったあと (SkillManager.cast から)
@@ -267,7 +268,8 @@ public final class Aspects {
     }
 
     // ---------------------------------------------------------------- 出る (AspectDrops が使う)
-    // 一つ引く: 稀さ (レア 60・エピック 30・ミシック 10。ミシックなしが PITY 回続いたら必ずミシック)。品はその職のその稀さから (ミシックはその祠の)
+    // 一つ引く: 稀さ (レア 60・エピック 30・ミシック 10。ミシックなしが PITY 回続いたら必ずミシック)。
+    // 品はその職のその稀さの、どの祠でも出るものとその祠のもの (ミシックはその祠のものだけ)
     public static final int PITY = 8;
     static final double[] RARITY_WEIGHTS = {0.60, 0.30, 0.10};
 
@@ -282,14 +284,14 @@ public final class Aspects {
         }
         List<Aspect> pool = new ArrayList<>();
         for (Aspect a : AspectTable.ALL) {
-            if (a.job() == job && a.rarity() == rarity && (rarity != Aspect.MYTHIC || a.shrine().equals(shrine))) {
+            if (a.job() == job && a.rarity() == rarity && (a.shared() || a.shrine().equals(shrine))) {
                 pool.add(a);
             }
         }
         return pool.isEmpty() ? null : pool.get(r.nextInt(pool.size()));
     }
 
-    // その祠で出るもの (祭司の画面の「報い」の頁): その職のレア・エピックと、その祠のミシック
+    // その祠で出るもの (祭司の画面の「報い」の頁): その職のどの祠でも出るレア・エピックと、その祠のレア・エピック・ミシック
     public static List<Aspect> pool(Job job, String shrine) {
         List<Aspect> out = new ArrayList<>();
         for (Aspect a : AspectTable.ALL) {
