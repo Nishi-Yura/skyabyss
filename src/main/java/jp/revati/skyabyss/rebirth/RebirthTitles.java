@@ -90,7 +90,7 @@ public final class RebirthTitles {
         add("angler_all", f -> f.marks.contains("fish:all"));
         add("angler_champion", f -> f.marks.contains("fish:champion"));
         // 地下のダンジョン (dungeon/Dungeons.marks): 主を初めて倒した (docs/design/55 の 2 章)
-        for (String d : new String[] {"bone_pit", "tide_cave", "storm_hollow", "molten_mine"}) {
+        for (String d : new String[] {"bone_pit", "tide_cave", "storm_hollow", "molten_mine", "deep_fort", "deep_temple", "deep_ice", "deep_lava"}) {
             add("dungeon_" + d, f -> f.marks.contains("dungeon:" + d));
         }
     }

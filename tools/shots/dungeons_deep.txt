@@ -1,0 +1,122 @@
+# 2026-11-09: 奥のダンジョン四つ (issue #19 の ②。tools/gen/world/dungeons_deep.py): 外れの入口・一層の見どころ・主の間と主
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/dungeons_deep.txt -PshotsName=dungeons_deep
+world dungeons_deep continent
+size 1600 900
+timeout 7200
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode creative
+hud off
+chat clear
+# ---- deep_fort
+cmd tp @s 1280 190 -1150 180 30
+waitchunks 600
+wait 900
+cmd time set 6000
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd skyabyss dungeon mouth deep_fort
+waitchunks 300
+wait 80
+shot fort_mouth
+cmd skyabyss dungeon enter deep_fort
+wait 80
+cmd gamemode spectator
+cmd skyabyss dungeon goto view_court view_court_to
+wait 60
+shot fort_court
+cmd gamemode creative
+cmd skyabyss dungeon floor 1
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+cmd skyabyss dungeon boss
+wait 120
+shot fort_boss
+cmd gamemode creative
+cmd skyabyss dungeon leave
+wait 60
+# ---- deep_temple
+cmd tp @s 1720 190 590 180 30
+waitchunks 600
+wait 600
+cmd skyabyss dungeon mouth deep_temple
+waitchunks 300
+wait 80
+shot temple_mouth
+cmd skyabyss dungeon enter deep_temple
+wait 80
+cmd gamemode spectator
+cmd skyabyss dungeon goto entry room_a
+wait 60
+shot temple_hall
+cmd gamemode creative
+cmd skyabyss dungeon floor 1
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+cmd skyabyss dungeon boss
+wait 120
+shot temple_boss
+cmd gamemode creative
+cmd skyabyss dungeon leave
+wait 60
+# ---- deep_ice
+cmd tp @s -1584 190 -1262 180 30
+waitchunks 600
+wait 600
+cmd skyabyss dungeon mouth deep_ice
+waitchunks 300
+wait 80
+shot ice_mouth
+cmd skyabyss dungeon enter deep_ice
+wait 80
+cmd gamemode spectator
+cmd skyabyss dungeon goto entry room_a
+wait 60
+shot ice_hollow
+cmd gamemode creative
+cmd skyabyss dungeon floor 1
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+cmd skyabyss dungeon boss
+wait 120
+shot ice_boss
+cmd gamemode creative
+cmd skyabyss dungeon leave
+wait 60
+# ---- deep_lava
+cmd tp @s 1148 190 1150 180 30
+waitchunks 600
+wait 600
+cmd skyabyss dungeon mouth deep_lava
+waitchunks 300
+wait 80
+shot lava_mouth
+cmd skyabyss dungeon enter deep_lava
+wait 80
+cmd gamemode spectator
+cmd skyabyss dungeon goto entry room_a
+wait 60
+shot lava_tube
+cmd gamemode creative
+cmd skyabyss dungeon floor 1
+wait 60
+cmd skyabyss dungeon goto view_lair view_lair_to
+wait 160
+cmd gamemode spectator
+cmd skyabyss dungeon boss
+wait 120
+shot lava_boss

@@ -28,6 +28,18 @@ public enum Dungeon {
     MOLTEN_MINE("molten_mine", ContinentMap.EMBER, 28, Element.ASH, "skyabyss:ox_smith", "skyabyss:forge_giant",
             Map.of("mite", "skyabyss:lava_slug", "husk", "skyabyss:bellows_imp", "dragger", "skyabyss:ash_dragger",
                     "thrall", "skyabyss:elder_thrall")),
+    // ---- 奥のダンジョン (外れの帯。一層と主の間。issue #19 の ②。tools/gen/world/dungeons_deep.py) ----
+    DEEP_FORT("deep_fort", ContinentMap.WHALE, 15, Element.STONE, null, "skyabyss:fort_warlord",
+            Map.of("bandit", "skyabyss:bandit", "archer", "skyabyss:bandit_archer", "chief", "skyabyss:bandit_chief", "dog", "skyabyss:feral_dog"), false, true),
+    DEEP_TEMPLE("deep_temple", ContinentMap.TIDE, 21, Element.TIDE, null, "skyabyss:temple_keeper",
+            Map.of("thrall", "skyabyss:coral_thrall", "sailor", "skyabyss:drowned_sailor", "angler", "skyabyss:mist_angler", "warden", "skyabyss:shore_warden",
+                    "jelly", "skyabyss:cave_jelly"), false, true),
+    DEEP_ICE("deep_ice", ContinentMap.STORM, 27, Element.WIND, null, "skyabyss:ice_lord",
+            Map.of("tortoise", "skyabyss:crag_tortoise", "jelly", "skyabyss:storm_jelly", "slinger", "skyabyss:bolt_slinger", "wolf", "skyabyss:thunder_wolf",
+                    "warden", "skyabyss:scorched_warden"), false, true),
+    DEEP_LAVA("deep_lava", ContinentMap.EMBER, 33, Element.ASH, null, "skyabyss:lava_wyrm",
+            Map.of("scorpion", "skyabyss:basalt_scorpion", "spitter", "skyabyss:ember_spitter", "jackal", "skyabyss:ember_jackal", "whirl", "skyabyss:ash_whirl",
+                    "thrall", "skyabyss:elder_thrall"), false, true),
     // ---- 小ダンジョン (章の跡地) ----
     MINI_BONE_PIT("ch1_bone_pit", ContinentMap.WHALE, 6, Element.STONE, null, "skyabyss:pit_foreman",
             Map.of("crawler", "skyabyss:moss_crawler", "beetle", "skyabyss:rock_shell_beetle", "archer", "skyabyss:rib_archer",
@@ -61,12 +73,19 @@ public enum Dungeon {
     public final String boss;
     public final Map<String, String> foes;
     public final boolean mini;
+    // 奥のダンジョン (一層と主の間。入口は外れの帯の見どころ。報いは中ダンジョンと同じ)
+    public final boolean deep;
 
     Dungeon(String id, int region, int level, Element element, String midBoss, String boss, Map<String, String> foes) {
-        this(id, region, level, element, midBoss, boss, foes, false);
+        this(id, region, level, element, midBoss, boss, foes, false, false);
     }
 
     Dungeon(String id, int region, int level, Element element, String midBoss, String boss, Map<String, String> foes, boolean mini) {
+        this(id, region, level, element, midBoss, boss, foes, mini, false);
+    }
+
+    Dungeon(String id, int region, int level, Element element, String midBoss, String boss, Map<String, String> foes, boolean mini, boolean deep) {
+        this.deep = deep;
         this.id = id;
         this.region = region;
         this.level = level;
@@ -78,7 +97,7 @@ public enum Dungeon {
     }
 
     public String[] floors() {
-        return mini ? MINI_FLOORS : FLOORS;
+        return mini || deep ? MINI_FLOORS : FLOORS;
     }
 
     public int bossFloor() {

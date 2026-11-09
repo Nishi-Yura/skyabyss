@@ -100,6 +100,10 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.SHELL_OCTOPUS.get(), ShellOctopusRenderer::new);
         event.registerEntityRenderer(ModEntities.CRYSTAL_LIZARD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "crystal_lizard", 1.7f));
         event.registerEntityRenderer(ModEntities.FORGE_GIANT.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "forge_giant", 1.6f));
+        event.registerEntityRenderer(ModEntities.FORT_WARLORD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "fort_warlord", 1.0f));
+        event.registerEntityRenderer(ModEntities.TEMPLE_KEEPER.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "temple_keeper", 1.0f));
+        event.registerEntityRenderer(ModEntities.ICE_LORD.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "ice_lord", 1.0f));
+        event.registerEntityRenderer(ModEntities.LAVA_WYRM.get(), ctx -> new jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<>(ctx, "lava_wyrm", 1.0f));
         // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7)
         event.registerEntityRenderer(ModEntities.PIT_DIGGER.get(), ctx -> noTilt(ctx, "pit_digger"));
         event.registerEntityRenderer(ModEntities.BONE_ROLLER.get(), ctx -> noTilt(ctx, "bone_roller"));

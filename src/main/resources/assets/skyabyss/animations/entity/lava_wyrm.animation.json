@@ -1,0 +1,302 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.lava_wyrm.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "neck": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 60 + 0) * 6)",
+            "-(math.sin(query.anim_time * 45 + 90) * 8)",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 60 + 45) * 5)",
+            "0",
+            "0"
+          ]
+        },
+        "seg1": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 6",
+            "0"
+          ]
+        },
+        "seg2": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 60) * 6",
+            "0"
+          ]
+        },
+        "seg3": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 120) * 6",
+            "0"
+          ]
+        },
+        "seg4": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 180) * 6",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.lava_wyrm.walk": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "neck": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 60 + 0) * 6)",
+            "-(math.sin(query.anim_time * 45 + 90) * 8)",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 60 + 45) * 5)",
+            "0",
+            "0"
+          ]
+        },
+        "seg1": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 6",
+            "0"
+          ]
+        },
+        "seg2": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 60) * 6",
+            "0"
+          ]
+        },
+        "seg3": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 120) * 6",
+            "0"
+          ]
+        },
+        "seg4": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 180) * 6",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.lava_wyrm.bite": {
+      "animation_length": 1.0,
+      "bones": {
+        "neck": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              -25,
+              0,
+              0
+            ],
+            "0.70": [
+              30,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "jaw": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              40,
+              0,
+              0
+            ],
+            "0.70": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.lava_wyrm.breath": {
+      "animation_length": 2.0,
+      "bones": {
+        "neck": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              -30,
+              0,
+              0
+            ],
+            "1.30": [
+              10,
+              0,
+              0
+            ],
+            "2.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "jaw": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              0,
+              0,
+              0
+            ],
+            "1.30": [
+              45,
+              0,
+              0
+            ],
+            "1.80": [
+              45,
+              0,
+              0
+            ],
+            "2.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.lava_wyrm.dive": {
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -30,
+              0
+            ],
+            "2.60": [
+              0,
+              -30,
+              0
+            ],
+            "3.00": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.lava_wyrm.hurt": {
+      "animation_length": 0.3,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              10,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.lava_wyrm.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              0,
+              60
+            ],
+            "1.00": [
+              0,
+              0,
+              60
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -1,
+              0
+            ],
+            "1.00": [
+              0,
+              -1.5,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

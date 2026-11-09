@@ -167,5 +167,13 @@
   "title.skyabyss_rebirth.tower_wager3": "三つの賭けを越えた者",
   "title.skyabyss_rebirth.tower_wager3.how": "賭けを三つ付けてあいだの塔を越える",
   "title.skyabyss_rebirth.tower_wager3_10": "十の週を賭けた者",
-  "title.skyabyss_rebirth.tower_wager3_10.how": "重ね賭けの印を 10 週ぶん得る"
+  "title.skyabyss_rebirth.tower_wager3_10.how": "重ね賭けの印を 10 週ぶん得る",
+  "title.skyabyss_rebirth.dungeon_deep_fort": "砦の野盗王を倒した者",
+  "title.skyabyss_rebirth.dungeon_deep_fort.how": "崩れた見張りの砦の主を初めて倒す",
+  "title.skyabyss_rebirth.dungeon_deep_temple": "沈んだ神殿を鎮めた者",
+  "title.skyabyss_rebirth.dungeon_deep_temple.how": "沈んだ神殿の主を初めて倒す",
+  "title.skyabyss_rebirth.dungeon_deep_ice": "氷穴の大熊を倒した者",
+  "title.skyabyss_rebirth.dungeon_deep_ice.how": "吹雪の氷穴の主を初めて倒す",
+  "title.skyabyss_rebirth.dungeon_deep_lava": "熔岩の大蛇を鎮めた者",
+  "title.skyabyss_rebirth.dungeon_deep_lava.how": "熔岩の管の坑の主を初めて倒す"
 }

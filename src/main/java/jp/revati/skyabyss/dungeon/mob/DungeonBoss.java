@@ -368,7 +368,10 @@ public abstract class DungeonBoss extends RegionBoss {
             case "bone_centipede", "pit_foreman" -> net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState();
             case "shell_octopus", "bell_hermit" -> net.minecraft.world.level.block.Blocks.PRISMARINE.defaultBlockState();
             case "crystal_lizard", "geode_golem" -> net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK.defaultBlockState();
-            case "forge_giant", "ox_smith" -> net.minecraft.world.level.block.Blocks.MAGMA_BLOCK.defaultBlockState();
+            case "forge_giant", "ox_smith", "lava_wyrm" -> net.minecraft.world.level.block.Blocks.MAGMA_BLOCK.defaultBlockState();
+            case "fort_warlord" -> net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState();
+            case "temple_keeper" -> net.minecraft.world.level.block.Blocks.PRISMARINE.defaultBlockState();
+            case "ice_lord" -> net.minecraft.world.level.block.Blocks.PACKED_ICE.defaultBlockState();
             default -> net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
         };
     }

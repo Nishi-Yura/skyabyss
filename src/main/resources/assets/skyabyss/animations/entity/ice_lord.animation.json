@@ -1,0 +1,359 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.ice_lord.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "head": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 60 + 0) * 8",
+            "0"
+          ]
+        },
+        "body": {
+          "position": [
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 0.2",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.ice_lord.walk": {
+      "loop": true,
+      "animation_length": 1.2,
+      "bones": {
+        "arm_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 300 + 0) * 20)",
+            "0",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 300 + 180) * 20)",
+            "0",
+            "0"
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 300 + 180) * 20)",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 300 + 0) * 20)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.ice_lord.swipe": {
+      "animation_length": 1.1,
+      "bones": {
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -60,
+              0,
+              40
+            ],
+            "0.80": [
+              30,
+              0,
+              -40
+            ],
+            "1.10": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -20,
+              0
+            ],
+            "0.80": [
+              0,
+              25,
+              0
+            ],
+            "1.10": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.ice_lord.roar": {
+      "animation_length": 1.8,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              -35,
+              0,
+              0
+            ],
+            "1.40": [
+              -35,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              -20,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "jaw": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              35,
+              0,
+              0
+            ],
+            "1.40": [
+              35,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              60,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.80": [
+              60,
+              0,
+              0
+            ],
+            "1.80": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.ice_lord.charge": {
+      "animation_length": 1.6,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              8,
+              0,
+              0
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "1.00": [
+              15,
+              0,
+              0
+            ],
+            "1.60": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 600 + 0) * 30)",
+            "0",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 600 + 180) * 30)",
+            "0",
+            "0"
+          ]
+        },
+        "leg_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 600 + 180) * 30)",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 600 + 0) * 30)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.ice_lord.hurt": {
+      "animation_length": 0.3,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              10,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.ice_lord.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              0,
+              100
+            ],
+            "1.00": [
+              0,
+              0,
+              100
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -1,
+              0
+            ],
+            "1.00": [
+              0,
+              -1.5,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

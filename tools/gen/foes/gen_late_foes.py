@@ -190,11 +190,73 @@ def scorpion():
     return out
 
 
-ANIMS = {"bolt_slinger": slinger, "storm_jelly": jelly, "crag_tortoise": tortoise, "ember_spitter": spitter, "ash_whirl": whirl, "basalt_scorpion": scorpion}
+# ---------------------------------------------------------------- 奥のダンジョンの主 (issue #19 の ②。頁で全部 A)
+def warlord():
+    p = "animation.fort_warlord."
+    idle = {"body": bone(position=["0", S(0, 0.2, 90), "0"]), "head": bone(["0", S(0, 6, 60), "0"]), "arm_r": bone(mrot(S(0, 3, 90)))}
+    walk = {"leg_l": bone(mrot(S(0, 24, 400))), "leg_r": bone(mrot(S(180, 24, 400))), "arm_l": bone(mrot(S(180, 16, 400))), "arm_r": bone(mrot(S(0, 10, 400)))}
+    sweep = {"body": bone(kf({0: (0, 0, 0), 0.8: (0, 40, 0), 1.0: (0, -45, 0), 1.4: (0, 0, 0)})),
+             "arm_r": bone(kf({0: (0, 0, 0), 0.8: (90, 0, 60), 1.0: (90, 0, -40), 1.4: (0, 0, 0)}))}
+    leap = {"body": bone(kf({0: (0, 0, 0), 0.6: (10, 0, 0), 1.0: (-15, 0, 0), 1.4: (0, 0, 0)}), kf({0: (0, 0, 0), 0.6: (0, -1.5, 0), 0.9: (0, 6, 0), 1.0: (0, 0, 0)}, False)),
+            "arm_r": bone(kf({0: (0, 0, 0), 0.6: (160, 0, 0), 1.0: (-30, 0, 0), 1.4: (0, 0, 0)})),
+            "leg_l": bone(kf({0: (0, 0, 0), 0.6: (40, 0, 0), 1.0: (0, 0, 0)})), "leg_r": bone(kf({0: (0, 0, 0), 0.6: (40, 0, 0), 1.0: (0, 0, 0)}))}
+    charge = {"body": bone(kf({0: (0, 0, 0), 0.9: (-15, 0, 0), 1.3: (-20, 0, 0), 1.6: (0, 0, 0)})), "arm_r": bone(kf({0: (0, 0, 0), 0.9: (60, 0, 30), 1.6: (0, 0, 0)})),
+              "leg_l": bone(kf({0: (0, 0, 0), 1.0: (-40, 0, 0), 1.2: (40, 0, 0), 1.4: (-40, 0, 0), 1.6: (0, 0, 0)})),
+              "leg_r": bone(kf({0: (0, 0, 0), 1.0: (40, 0, 0), 1.2: (-40, 0, 0), 1.4: (40, 0, 0), 1.6: (0, 0, 0)}))}
+    out = {p + "idle": loop(3.0, idle), p + "walk": loop(0.9, walk), p + "sweep": once(1.4, sweep), p + "leap": once(1.4, leap), p + "charge": once(1.6, charge)}
+    out.update(hurt_death(p, "body", 90, "x"))
+    return out
+
+
+def keeper():
+    p = "animation.temple_keeper."
+    idle = {"body": bone(position=["0", S(0, 0.4, 60), "0"]), "arm_l": bone(mrot(S(0, 4, 60))), "arm_r": bone(mrot(S(90, 4, 60)))}
+    walk = dict(idle)
+    thrust = {"arm_r": bone(kf({0: (0, 0, 0), 0.7: (60, 0, 10), 0.85: (-70, 0, 0), 1.2: (0, 0, 0)})), "body": bone(kf({0: (0, 0, 0), 0.85: (-12, 0, 0), 1.2: (0, 0, 0)}))}
+    whirl = {"arm_l": bone(kf({0: (0, 0, 0), 1.0: (-150, 0, 20), 1.6: (0, 0, 0)})), "arm_r": bone(kf({0: (0, 0, 0), 1.0: (-150, 0, -20), 1.6: (0, 0, 0)})),
+             "head": bone(kf({0: (0, 0, 0), 1.0: (20, 0, 0), 1.6: (0, 0, 0)}))}
+    flood = {"body": bone(kf({0: (0, 0, 0), 1.2: (0, 360, 0), 1.6: (0, 360, 0)})), "arm_l": bone(rot(-90, 0, 40)), "arm_r": bone(rot(-90, 0, -40))}
+    out = {p + "idle": loop(4.0, idle), p + "walk": loop(4.0, walk), p + "thrust": once(1.2, thrust), p + "whirl": once(1.6, whirl), p + "flood": once(1.6, flood)}
+    out.update(hurt_death(p, "body", 90, "x"))
+    return out
+
+
+def icebear():
+    p = "animation.ice_lord."
+    idle = {"head": bone(["0", S(0, 8, 60), "0"]), "body": bone(position=["0", S(0, 0.2, 90), "0"])}
+    walk = {"arm_l": bone(mrot(S(0, 20, 300))), "arm_r": bone(mrot(S(180, 20, 300))), "leg_l": bone(mrot(S(180, 20, 300))), "leg_r": bone(mrot(S(0, 20, 300)))}
+    swipe = {"arm_r": bone(kf({0: (0, 0, 0), 0.6: (60, 0, 40), 0.8: (-30, 0, -40), 1.1: (0, 0, 0)})), "body": bone(kf({0: (0, 0, 0), 0.6: (0, 20, 0), 0.8: (0, -25, 0), 1.1: (0, 0, 0)}))}
+    roar = {"body": bone(kf({0: (0, 0, 0), 0.8: (35, 0, 0), 1.4: (35, 0, 0), 1.8: (0, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 0.8: (20, 0, 0), 1.8: (0, 0, 0)})),
+            "jaw": bone(kf({0: (0, 0, 0), 0.8: (-35, 0, 0), 1.4: (-35, 0, 0), 1.8: (0, 0, 0)})),
+            "arm_l": bone(kf({0: (0, 0, 0), 0.8: (-60, 0, 0), 1.8: (0, 0, 0)})), "arm_r": bone(kf({0: (0, 0, 0), 0.8: (-60, 0, 0), 1.8: (0, 0, 0)}))}
+    charge = {"body": bone(kf({0: (0, 0, 0), 1.0: (-8, 0, 0), 1.6: (0, 0, 0)})), "head": bone(kf({0: (0, 0, 0), 1.0: (-15, 0, 0), 1.6: (0, 0, 0)}))}
+    charge.update({b: bone(mrot(S(ph, 30, 600))) for b, ph in (("arm_l", 0), ("arm_r", 180), ("leg_l", 180), ("leg_r", 0))})
+    out = {p + "idle": loop(4.0, idle), p + "walk": loop(1.2, walk), p + "swipe": once(1.1, swipe), p + "roar": once(1.8, roar), p + "charge": once(1.6, charge)}
+    out.update(hurt_death(p, "body", 100))
+    return out
+
+
+def wyrm():
+    p = "animation.lava_wyrm."
+    idle = {"neck": bone(mrot(S(0, 6, 60), S(90, 8, 45))), "head": bone(mrot(S(45, 5, 60)))}
+    for i, b in enumerate(("seg1", "seg2", "seg3", "seg4")):
+        idle[b] = bone(["0", S(i * 60, 6, 90), "0"])
+    walk = dict(idle)
+    bite = {"neck": bone(kf({0: (0, 0, 0), 0.5: (25, 0, 0), 0.7: (-30, 0, 0), 1.0: (0, 0, 0)})), "jaw": bone(kf({0: (0, 0, 0), 0.5: (-40, 0, 0), 0.7: (0, 0, 0)}))}
+    breath = {"neck": bone(kf({0: (0, 0, 0), 1.0: (30, 0, 0), 1.3: (-10, 0, 0), 2.0: (0, 0, 0)})), "jaw": bone(kf({0: (0, 0, 0), 1.0: (0, 0, 0), 1.3: (-45, 0, 0), 1.8: (-45, 0, 0), 2.0: (0, 0, 0)}))}
+    dive = {"body": bone(position=kf({0: (0, 0, 0), 0.6: (0, -30, 0), 2.6: (0, -30, 0), 3.0: (0, 0, 0)}, False))}
+    out = {p + "idle": loop(4.0, idle), p + "walk": loop(4.0, walk), p + "bite": once(1.0, bite), p + "breath": once(2.0, breath), p + "dive": once(3.0, dive)}
+    out.update(hurt_death(p, "body", 60))
+    return out
+
+
+BOSS_CHOICE = {"fort_warlord": "a", "temple_keeper": "a", "ice_lord": "a", "lava_wyrm": "a"}
+
+ANIMS = {"fort_warlord": warlord, "temple_keeper": keeper, "ice_lord": icebear, "lava_wyrm": wyrm, "bolt_slinger": slinger, "storm_jelly": jelly, "crag_tortoise": tortoise, "ember_spitter": spitter, "ash_whirl": whirl, "basalt_scorpion": scorpion}
 
 
 def install():
-    for mob, k in CHOICE.items():
+    for mob, k in {**CHOICE, **BOSS_CHOICE}.items():
         d = "%s/%s/%s/%s_%s_" % (R, mob, k, mob, k)
         cmd = [sys.executable, os.path.join(ROOT, "tools", "install", "install_lowpoly.py"), mob, "--mesh", d + "mesh.json", "--atlas", d + "atlas.png",
                "--glow", d + "glowmask.png"]

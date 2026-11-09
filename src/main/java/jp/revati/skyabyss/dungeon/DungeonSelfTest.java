@@ -265,7 +265,7 @@ public final class DungeonSelfTest {
             return;
         }
         runs.add(run);
-        for (int k = 0; k < Dungeon.FLOORS.length; k++) {
+        for (int k = 0; k < d.floors().length; k++) {
             Dungeons.moveTo(p, run, k);
             DungeonFloor fl = run.floor(k);
             check(f, fl.ready() && run.floorOf(p) == k, d.terrain(k) + ": the level was not poured / entered");
@@ -307,8 +307,8 @@ public final class DungeonSelfTest {
                 }
             }
         }
-        DungeonFloor fb = run.floor(Dungeon.BOSS_FLOOR);
-        Vec3 bc = run.markCenter(Dungeon.BOSS_FLOOR, "boss");
+        DungeonFloor fb = run.floor(d.bossFloor());
+        Vec3 bc = run.markCenter(d.bossFloor(), "boss");
         p.moveTo(bc.x, bc.y, bc.z + 6, 0f, 0f);
         fb.bossTick(level, level.getGameTime(), List.of(p));
         var boss = fb.boss == null ? null : level.getEntity(fb.boss);
@@ -423,6 +423,9 @@ public final class DungeonSelfTest {
         java.util.Map<String, String> ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
         java.util.Map<String, String> en = jp.revati.skyabyss.SignFit.lang("en_us");
         for (Dungeon d : Dungeon.mids()) {
+            if (d.deep) {
+                continue;
+            }
             var item = DungeonGear.item(d);
             String id = BuiltInRegistries.ITEM.getKey(item).getPath();
             check(f, item instanceof jp.revati.skyabyss.item.wild.WildAccessoryItem a && !a.row().charm() && !a.row().fx().isEmpty() && a.row().mount() != null
@@ -481,7 +484,7 @@ public final class DungeonSelfTest {
             }
         }
         check(f, jp.revati.skyabyss.world.continent.ContinentPois.placeOf(d.poiKind()) != null, d.poiKind() + " is not in pois.json");
-        for (int k = 0; k < Dungeon.FLOORS.length; k++) {
+        for (int k = 0; k < d.floors().length; k++) {
             TowerTerrain t;
             try {
                 t = DungeonWorld.terrain(d, k);
@@ -489,7 +492,7 @@ public final class DungeonSelfTest {
                 f.add(d.terrain(k) + " cannot be read: " + ex.getMessage());
                 continue;
             }
-            List<String> need = k == Dungeon.BOSS_FLOOR ? List.of("entry", "boss", "exit") : List.of("entry", "leave", "cp", "next");
+            List<String> need = k == d.bossFloor() ? List.of("entry", "boss", "exit") : List.of("entry", "leave", "cp", "next");
             for (String m : need) {
                 check(f, t.has(m), d.terrain(k) + " lacks mark " + m);
             }

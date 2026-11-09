@@ -518,7 +518,9 @@ BUILDERS = {
 
 if __name__ == "__main__":
     import dungeons_more
+    import dungeons_deep
     BUILDERS.update(dungeons_more.BUILDERS)
+    BUILDERS.update(dungeons_deep.BUILDERS)
     names = sys.argv[1:] or list(BUILDERS)
     for name in names:
         for part, fn in BUILDERS[name]:
@@ -526,6 +528,7 @@ if __name__ == "__main__":
             kb, cells, runs = cv.write(OUT / f"{name}_{part}.json", NOTE)
             print(f"{name}_{part}", kb, "KB", cells, "cells", runs, "runs", len(cv.marks), "marks", flush=True)
         import dungeon_entrances as E
+        E.ENTRANCES.update(dungeons_deep._entrances())
         if name in E.ENTRANCES:
             kb, n = E.ENTRANCES[name]()
             print(f"poi_dungeon_{name}", kb, "KB", n, "blocks", flush=True)

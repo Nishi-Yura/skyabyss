@@ -59,8 +59,10 @@ public final class DungeonGear {
         ITEMS.register(bus);
     }
 
+    // そのダンジョンだけの装飾品 (奥のダンジョンなど、無いときは空気)
     public static Item item(Dungeon d) {
-        return ITEM_OF.get(BY_DUNGEON.get(d)).get();
+        DeferredItem<Item> it = BY_DUNGEON.containsKey(d) ? ITEM_OF.get(BY_DUNGEON.get(d)) : null;
+        return it == null ? net.minecraft.world.item.Items.AIR : it.get();
     }
 
     // ---------------------------------------------------------------- 育つ (2026-11-05 のダンジョンの頁 1-2)
@@ -126,6 +128,9 @@ public final class DungeonGear {
     // そのダンジョンの装飾品 (装飾の枠を先に、なければ持ち物) に数を足す。段が上がったら知らせる
     public static void grow(net.minecraft.server.level.ServerPlayer p, Dungeon d, int n) {
         Item want = item(d);
+        if (want == net.minecraft.world.item.Items.AIR) {
+            return;
+        }
         net.minecraft.world.item.ItemStack found = net.minecraft.world.item.ItemStack.EMPTY;
         boolean worn = false;
         for (int i = 0; i < jp.revati.skyabyss.item.accessory.AccessoryData.SIZE && found.isEmpty(); i++) {
