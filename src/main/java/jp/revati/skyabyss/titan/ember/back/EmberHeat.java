@@ -231,7 +231,9 @@ public final class EmberHeat {
         } else if (h < SCORCHING) {
             SCORCHED.remove(id);
         }
-        if (SCORCHED.contains(id) && player.tickCount % 20 == 0
+        // 火除けの薬 (火炎耐性) を飲んでいるあいだは焦げの傷を受けない (熱は半分の速さでたまる。2026-11-09 の声「火除けの薬を飲んでるのに、やけどダメージ食らう」。
+        // 薬の説明は「火と熱に焼かれない」)
+        if (SCORCHED.contains(id) && player.tickCount % 20 == 0 && !player.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE)
                 && player.level().getDifficulty() != net.minecraft.world.Difficulty.PEACEFUL) {
             var types = player.serverLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE);
             player.hurt(new net.minecraft.world.damagesource.DamageSource(types.getHolderOrThrow(EmberIds.HEAT)), SCORCH_DAMAGE);

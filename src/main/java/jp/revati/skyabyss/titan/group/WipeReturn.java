@@ -47,6 +47,16 @@ public final class WipeReturn {
         return PENDING.containsKey(id);
     }
 
+    // 地上へ送った時刻 (server の tick)。復活のあとの背中への連れ戻し (各背の onRespawn の RespawnMove) が、送ったあとに前室へ戻さないように
+    private static final Map<UUID, Long> SENT = new HashMap<>();
+    static final int CLAIM_TICKS = 200;
+
+    // この人は全滅で地上へ帰すところ (まだ待っている、または少し前に送った)。背中へ連れ戻さない
+    public static boolean claims(UUID id, long now) {
+        Long at = SENT.get(id);
+        return PENDING.containsKey(id) || (at != null && now - at < CLAIM_TICKS);
+    }
+
     @SubscribeEvent
     static void onTick(ServerTickEvent.Post event) {
         if (PENDING.isEmpty() || event.getServer().getTickCount() % 5 != 0) {
@@ -60,6 +70,7 @@ public final class WipeReturn {
                 continue;
             }
             it.remove();
+            SENT.put(e.getKey(), (long) event.getServer().getTickCount());
             Home h = e.getValue();
             if (!(h.replay() && jp.revati.skyabyss.titan.shrine.TitanShrine.sendTo(p, h.titan()))) {
                 Titans.sendDown(p, h.titan());
@@ -71,5 +82,6 @@ public final class WipeReturn {
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {
         PENDING.clear();
+        SENT.clear();
     }
 }

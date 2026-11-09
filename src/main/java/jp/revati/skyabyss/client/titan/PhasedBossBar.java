@@ -82,6 +82,9 @@ public final class PhasedBossBar {
     // (2026-11-08 の声「敵のhp表記、今%だけど、数値にして」)
     public static String hpText(net.minecraft.client.Minecraft mc, net.minecraft.world.BossEvent boss) {
         net.minecraft.world.entity.LivingEntity owner = jp.revati.skyabyss.client.BossOwners.find(mc, boss, net.minecraft.world.entity.LivingEntity.class, 160);
+        if (owner == null) {
+            owner = byRatio(mc, boss);
+        }
         Integer max = owner != null && owner.getMaxHealth() > 0 && !owner.isRemoved() ? Integer.valueOf(jp.revati.skyabyss.Hp.whole(owner.getMaxHealth())) : LAST_MAX.get(boss.getId());
         if (max == null) {
             return Math.round(boss.getProgress() * 100) + "%";
@@ -91,6 +94,23 @@ public final class PhasedBossBar {
         boolean dead = owner == null || owner.isRemoved() || owner.isDeadOrDying();
         int now = dead && boss.getProgress() < 0.05f ? 0 : Math.min(max, Math.round(boss.getProgress() * max));
         return String.format("%,d/%,d", now, max);
+    }
+
+    // 名前で見つからない持ち主 (帯の名が体の名と違う: 巨神の心臓・段の名の帯など。2026-11-09 の声「ボスのhp表記がまだ%のやついる」):
+    // 近く (160) の、人でない生き物のうち、体力の割合が帯と同じもの。いくつもあれば最大の体力が一番大きいもの (満タンの雑魚より主)
+    static net.minecraft.world.entity.LivingEntity byRatio(Minecraft mc, BossEvent boss) {
+        if (mc.level == null || mc.player == null) {
+            return null;
+        }
+        float want = boss.getProgress();
+        net.minecraft.world.entity.LivingEntity best = null;
+        for (net.minecraft.world.entity.LivingEntity e : mc.level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, mc.player.getBoundingBox().inflate(160),
+                e -> !(e instanceof net.minecraft.world.entity.player.Player) && e.isAlive() && e.getMaxHealth() >= 40)) {
+            if (Math.abs(e.getHealth() / e.getMaxHealth() - want) < 0.004f && (best == null || e.getMaxHealth() > best.getMaxHealth())) {
+                best = e;
+            }
+        }
+        return best;
     }
 
     // バーごとの最後に見えた最大の体力 (体が見えなくなっても数で出す)

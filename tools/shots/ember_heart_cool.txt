@@ -1,0 +1,28 @@
+# 火の心臓の間の灰溜まり (冷ます所) を見る (2026-11-09 の声「火の巨神の心臓のへやで冷ます場所作ってって言ったのに、出来てない」)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ember_heart_cool.txt -PshotsName=ember_heart_cool
+world heart_rooms2 continent
+size 1600 900
+timeout 5000
+render 8
+guiscale 2
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd difficulty peaceful
+cmd skyabyss play boss ember
+wait 1800
+cmd skyabyss cinematic stop
+close
+wait 200
+shot ember_fight_view
+cmd gamemode spectator
+hud off
+cmd effect give @s minecraft:night_vision 600 0 true
+cmd execute at @s positioned 4352 51 4096 run tp @s ~ ~16 ~ 0 89
+wait 40
+shot ember_top
+cmd execute at @s positioned 4352 51 4096 run tp @s ~-14 ~6 ~-14 -45 25
+wait 30
+shot ember_side
