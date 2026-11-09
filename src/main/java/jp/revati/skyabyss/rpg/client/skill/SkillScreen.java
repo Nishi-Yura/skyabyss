@@ -1668,6 +1668,20 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         };
     }
 
+    // 丸い受け皿の節 (技の絵そのもの: 使う技・常の技・変異)
+    private static boolean v2Round(AbilityNode n) {
+        return n.kind == AbilityNode.Kind.ACTIVE || n.kind == AbilityNode.Kind.PASSIVE || n.kind == AbilityNode.Kind.MUTATION;
+    }
+
+    // 塗りつぶした丸 (半径 r、真ん中 cx, cy)
+    private static void disc(GuiGraphics g, int cx, int cy, int r, int color) {
+        for (int dy = -r; dy < r; dy++) {
+            double yy = dy + 0.5;
+            int half = (int) Math.floor(Math.sqrt(Math.max(0, r * r - yy * yy)) + 0.25);
+            g.fill(cx - half, cy + dy, cx + half, cy + dy + 1, color);
+        }
+    }
+
     private static boolean v2Big(AbilityNode n) {
         return n.kind == AbilityNode.Kind.KEYSTONE || n.kind == AbilityNode.Kind.TRAIT;
     }
@@ -1729,6 +1743,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 }
             }
         }
+        java.util.List<Object[]> caps = new java.util.ArrayList<>();
         for (AbilityNode n : t.nodes()) {
             int x = v2L(n);
             int y = v2T(n);
@@ -1737,26 +1752,34 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             SkillData.TakeResult tr = taken ? SkillData.TakeResult.TAKEN : d.canTake(tree, n, level);
             boolean reachable = tr == SkillData.TakeResult.OK || tr == SkillData.TakeResult.NO_POINTS;
             int state = taken ? 3 : reachable ? 1 : 0;
-            // 使う技の節は金の縁で囲む (ひと目で技と分かる)
-            if (n.kind == AbilityNode.Kind.ACTIVE) {
-                int rim = taken ? 0xFFF2D27A : state == 1 ? 0xFFB89650 : 0xFF6A5A3A;
-                g.fill(x - 2, y - 2, x + sz + 2, y + sz + 2, rim);
-                g.fill(x - 1, y - 1, x + sz + 1, y + sz + 1, 0xFF14121A);
-            }
-            if (v2Big(n)) {
+            // 節の形 (2026-11-09 の声「丸あるのに四角もあって見にくい」): 技の絵 (使う技・常の技・変異) は丸い受け皿、
+            // 能力値・段・刻印などの小さな節は平らな四角の板、要の節 (奥義・型の要) は今の大きな枠。縁の色は取った = 金、取れる = 明るい、まだ = 暗い
+            boolean round = v2Round(n);
+            int rimC = taken ? 0xFFF2D27A : state == 1 ? 0xFFC8B48A : 0xFF4A4640;
+            if (round) {
+                int cx = x + sz / 2;
+                int cy = y + sz / 2;
+                int r = sz / 2 + 2;
+                if (n == selectedNode) {
+                    disc(g, cx, cy, r + 2, 0xFF5FD8FF);
+                }
+                disc(g, cx, cy, r, rimC);
+                disc(g, cx, cy, r - 2, 0xFF0E1016);
+            } else if (v2Big(n)) {
                 g.blit(PANEL, x, y, sz, sz, state * 48, 376, 44, 44, 1024, 512);
             } else {
-                g.blit(SkillHud.TEXTURE, x, y, sz, sz, state * 48, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
+                g.fill(x - 1, y - 1, x + sz + 1, y + sz + 1, n == selectedNode ? 0xFF5FD8FF : rimC);
+                g.fill(x, y, x + sz, y + sz, taken ? 0xFF2A2618 : 0xFF14161D);
             }
             if (state == 0) {
                 g.setColor(0.42f, 0.42f, 0.48f, 1f);
             } else if (state == 1) {
                 g.setColor(0.72f, 0.72f, 0.78f, 1f);
             }
-            int pad = Math.max(2, sz * 3 / 22);
+            int pad = round ? 0 : v2Big(n) ? Math.max(2, sz * 3 / 22) : 1;
             SkillHud.drawIcon(g, v2Icon(n), x + pad, y + pad, sz - 2 * pad);
             g.setColor(1f, 1f, 1f, 1f);
-            if (n == selectedNode) {
+            if (n == selectedNode && v2Big(n)) {
                 g.blit(SkillHud.TEXTURE, x - 1, y - 1, sz + 2, sz + 2, 192, 384, 48, 48, SkillHud.TEX_W, SkillHud.TEX_H);
             }
             // 技の稽古の覚える段: 取れる使う技を光らせる
@@ -1768,11 +1791,18 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             if (!cap.isEmpty()) {
                 boolean prov = tryon != null && taken && !real().hasNode(tree, n.id);
                 int color = prov ? 0x7FFFA0 : taken ? GOLD : tr == SkillData.TakeResult.OK ? TEXT : DIM;
-                g.drawString(font, cap, x + sz / 2 - font.width(cap) / 2, y + sz + (n.kind == AbilityNode.Kind.ACTIVE ? 3 : 2), color, false);
+                // 字は全部の節のあとに、暗い下敷きの上に描く (下の節や線に重なっても読める)
+                caps.add(new Object[] {cap, x + sz / 2 - font.width(cap) / 2, y + sz + (round ? 4 : 2), color});
             }
-            // 使う技の節には小さな菱形の印 (枠に置ける)
+            // 使う技の節には右上に小さな菱形の印 (枠に置ける。丸の外の縁に)
             if (n.kind == AbilityNode.Kind.ACTIVE) {
-                g.fill(x + sz - 4, y + 1, x + sz - 1, y + 4, taken ? 0xFF9FE8FF : 0xFF4A5060);
+                int mx0 = x + sz - 1;
+                int my0 = y - 1;
+                int c = taken ? 0xFF9FE8FF : 0xFF4A5060;
+                g.fill(mx0 - 2, my0 - 1, mx0 + 3, my0 + 2, 0xFF0E1016);
+                g.fill(mx0 - 1, my0 - 2, mx0 + 2, my0 + 3, 0xFF0E1016);
+                g.fill(mx0 - 1, my0, mx0 + 2, my0 + 1, c);
+                g.fill(mx0, my0 - 1, mx0 + 1, my0 + 2, c);
             }
             // 排他の節には赤紫の点 (左上)
             if (!n.blocks.isEmpty()) {
@@ -1786,6 +1816,13 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                     g.fill(x + sz - 4 - i, y + 2 + i, x + sz - 2 - i, y + 4 + i, c);
                 }
             }
+        }
+        for (Object[] c : caps) {
+            String txt = (String) c[0];
+            int cx = (int) c[1];
+            int cy = (int) c[2];
+            g.fill(cx - 1, cy - 1, cx + font.width(txt) + 1, cy + 8, 0xD00E1016);
+            g.drawString(font, txt, cx, cy, (int) c[3], false);
         }
         canvas.end(g);
     }
