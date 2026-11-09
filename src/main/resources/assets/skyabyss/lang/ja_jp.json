@@ -3162,7 +3162,7 @@
   "sign.skyabyss.poi_note.south_moss_shrine.3": "苔が",
   "sign.skyabyss.poi_note.south_moss_shrine.4": "雷を吸う",
   "raid.skyabyss.hud.foes_left": "敵 残り %s",
-  "tooltip.skyabyss.legend_rewrite_how": "  手に持ち、技の木で「%s」の書き換えを選ぶと効く",
+  "tooltip.skyabyss.legend_rewrite_how": "  手に持つと「%s」が変わる（その技を覚えていれば）",
   "message.skyabyss.skill.rewrite_on": "「%s」が「%s」に変わった: %s",
   "message.skyabyss.skill.rewrite_off": "「%s」は元の形に戻った",
   "message.skyabyss.skill.rewrite_bar": "「%s」→「%s」",

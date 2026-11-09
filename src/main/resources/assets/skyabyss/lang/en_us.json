@@ -3162,7 +3162,7 @@
   "sign.skyabyss.poi_note.south_moss_shrine.3": "The moss",
   "sign.skyabyss.poi_note.south_moss_shrine.4": "drinks lightning",
   "raid.skyabyss.hud.foes_left": "%s foes left",
-  "tooltip.skyabyss.legend_rewrite_how": "  Works while held, once you pick the %s rewrite in the skill tree",
+  "tooltip.skyabyss.legend_rewrite_how": "  Changes %s while held (if you know the skill)",
   "message.skyabyss.skill.rewrite_on": "%s became %s: %s",
   "message.skyabyss.skill.rewrite_off": "%s is back to its own form",
   "message.skyabyss.skill.rewrite_bar": "%s → %s",

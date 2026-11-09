@@ -59,13 +59,11 @@ public final class SkillChanges {
             if (rune != null) {
                 out.add(new Change(Kind.RUNE, Component.translatable(rune.nameKey()), true, Component.translatable(rune.effectKey())));
             }
-        } else if (r == 4) {
-            Rune held = SkillManager.legendRune(p, s);
-            if (held != null) {
-                out.add(new Change(Kind.REWRITE, Component.translatable(held.nameKey()), true, Component.translatable(held.effectKey())));
-            } else {
-                out.add(new Change(Kind.REWRITE, Component.translatable("gui.skyabyss.skill.change.rewrite_any"), false));
-            }
+        }
+        // 武器の書き換え (持つあいだだけ。選ぶ手間はない)
+        Rune held = SkillManager.legendRune(p, s);
+        if (held != null) {
+            out.add(new Change(Kind.REWRITE, Component.translatable(held.nameKey()), true, Component.translatable(held.effectKey())));
         }
         for (SecretArts.Held h : SecretArts.heldFor(p)) {
             if (h.art().skill == s) {

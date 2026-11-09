@@ -368,6 +368,11 @@ public final class SkillManager {
         if (taken > 0 && d.knows(skill)) {
             return taken;
         }
+        // 武器の書き換え: 持つだけで効く (legendRune。木の変化の節を取っていれば、そちらが形で、書き換えは上乗せだけ)
+        Rune held = legendRune(player, skill);
+        if (held != null) {
+            return held.index;
+        }
         int r = d.rune(skill);
         // 木の変化の番号なのに節が無い (古い記録の残り) ときは効かせない
         if (r > 0 && Rune.normal(r) && hasTreeRunes(skill)) {
@@ -376,10 +381,9 @@ public final class SkillManager {
         if (r <= 0 || !d.runeUsable(skill, r)) {
             return 0;
         }
-        // 逸品の書き換えは、その武器を持つあいだだけ。番号は持っている武器の書き換えのもの (4 か 6)
+        // 前に選んでいた書き換えの番号 (古い記録): 武器を持っていなければ効かない (持っていれば上で返している)
         if (r == 4) {
-            Rune held = Rune.heldLegend(skill, player);
-            return held == null ? 0 : held.index;
+            return 0;
         }
         return Rune.valid(skill, r) && Rune.heldOf(skill, r, player) ? r : 0;
     }
@@ -405,9 +409,11 @@ public final class SkillManager {
     }
 
     // いま効いている伝説の書き換え (選んでいて、その武器を持っている。なければ null)
+    // 武器の書き換え: その技を知っていて、書き換えの武器を利き手に持つ (か装備に刻んだ) あいだ効く。選ぶ手間はない
+    // (2026-11-09 の声「武器持っても、スキルの右下の見た目変わらない」: 前は技の画面で書き換えを選ぶ要があり、その印は節を取るたびに
+    //  技の変化の番号を木から作り直す applyNodes で消えていた。持つだけで効くに決めた)
     public static Rune legendRune(Player player, Skill skill) {
-        SkillData d = get(player);
-        if (d.rune(skill) != 4 || !d.runeUsable(skill, 4)) {
+        if (skill == null || !get(player).knows(skill)) {
             return null;
         }
         return Rune.heldLegend(skill, player);
