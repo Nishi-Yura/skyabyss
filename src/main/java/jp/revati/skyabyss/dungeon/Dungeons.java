@@ -466,7 +466,7 @@ public final class Dungeons {
             if (!trinket.isEmpty()) {
                 DungeonGear.setClears(trinket, 1);
                 Quests.give(p, trinket);
-                Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
+                Notice.gainItem(p, trinket, jp.revati.skyabyss.ModText.progress("message.skyabyss.dungeon.trinket", trinket.getHoverName()));
             }
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
         }

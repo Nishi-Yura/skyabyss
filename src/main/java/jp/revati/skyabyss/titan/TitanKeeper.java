@@ -249,6 +249,16 @@ public abstract class TitanKeeper<T extends Entity> {
             return;
         }
         // 本物が読み込まれていない
+        // 大陸の居場所が変わった (作り直しで居場所を決め直した) のに、最後にいた所の記録が前の居場所のまま。
+        // 読み込まれないあいだは誰も呼び直さないので、背から降ろす所 (leave) が前の居場所になっていた (2026-11-10 の声)。居場所へ出し直す
+        jp.revati.skyabyss.world.continent.ContinentLairs.Lair lair = lair(level);
+        if (lair != null && slot.hasLast && !someoneAboard && !resting(level) && !busy()
+                && Math.hypot(slot.lastX - lair.x(), slot.lastZ - lair.z()) > 48) {
+            SkyAbyss.LOGGER.info("The {} was remembered at its old place ({}, {}); moving it to its lair ({}, {})", logName,
+                    (int) slot.lastX, (int) slot.lastZ, (int) lair.x(), (int) lair.z());
+            relocate(level, slot, null, null, now);
+            return;
+        }
         ServerPlayer near = slot.hasLast ? nearestEligible(level, slot.lastX, slot.lastZ, NEAR) : null;
         if (slot.hasLast && (near != null || someoneAboard)) {
             // 最後にいた所を読み込み直す

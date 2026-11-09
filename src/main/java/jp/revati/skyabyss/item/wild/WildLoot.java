@@ -230,7 +230,7 @@ public final class WildLoot {
             e.setPickUpDelay(10);
             p.level().addFreshEntity(e);
         }
-        Notice.gain(p, Component.translatable("message.skyabyss.wild_drop", name));
+        Notice.gainItem(p, stack, Component.translatable("message.skyabyss.wild_drop", name));
         ServerLevel level = p.serverLevel();
         level.playSound(null, p.getX(), p.getY(), p.getZ(), tier.atLeast(GearTier.HEROIC) ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
                 : tier.atLeast(GearTier.EPIC) ? SoundEvents.PLAYER_LEVELUP : SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.7f, tier.atLeast(GearTier.EPIC) ? 1.2f : 1.0f);

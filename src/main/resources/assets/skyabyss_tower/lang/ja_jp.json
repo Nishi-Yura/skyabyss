@@ -185,7 +185,7 @@
   "dialogue.skyabyss.attendant_tower_keeper.rules": "入れるのは一日一度。朝の五つで塔は組み替わる。橋の先の主を倒せば欠片と鐘銭、運がよければ塔の箱。週の賭けを背負えば欠片が増える。月が橋を渡りきれば、それまでじゃ。",
   "gui.skyabyss.skill.change.head": "いまの変化:",
   "gui.skyabyss.skill.change.rune": "刻印: %s",
-  "gui.skyabyss.skill.change.rewrite": "書き換え: %s",
+  "gui.skyabyss.skill.change.rewrite": "追加効果: %s",
   "gui.skyabyss.skill.change.rewrite_any": "逸品・伝説・神器",
   "gui.skyabyss.skill.change.mutation": "変異: %s",
   "gui.skyabyss.skill.change.secret": "秘伝: %s",

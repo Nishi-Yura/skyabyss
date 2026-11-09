@@ -1915,7 +1915,6 @@
   "gui.skyabyss.tree.threshold_on": "Active now",
   "gui.skyabyss.tree.rune_line": "Changes how %s works. Only one variant per skill (taking it locks the other variants and what follows them)",
   "gui.skyabyss.tree.rank_line": "+1 rank of %s. Next rank:",
-  "gui.skyabyss.tree.requires": "Connected node above (any one): %s",
   "gui.skyabyss.tree.excludes": "Taking this seals: %s",
   "gui.skyabyss.tree.arch_points": "Unlocks after spending %1$s SP in this archetype (now %2$s)",
   "gui.skyabyss.tree.actives": "Active skills %1$s / %2$s",

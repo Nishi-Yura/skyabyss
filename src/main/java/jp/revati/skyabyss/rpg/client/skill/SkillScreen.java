@@ -1961,21 +1961,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 changeLines(lines, n.skill);
             }
         }
-        if (!n.requires.isEmpty()) {
-            MutableComponent names = Component.empty();
-            for (int i = 0; i < n.requires.size(); i++) {
-                AbilityNode r = t.node(n.requires.get(i));
-                if (i > 0) {
-                    names.append(Component.translatable("gui.skyabyss.skill.or"));
-                }
-                names.append(r == null ? Component.literal(n.requires.get(i)) : Component.translatable(r.nameKey(key)));
-            }
-            boolean met = false;
-            for (String r : n.requires) {
-                met |= d.hasNode(tree, r);
-            }
-            lines.add(Component.translatable("gui.skyabyss.tree.requires", names).withColor(met ? SOFT : DENY));
-        }
+        // 前のノードは木の線で見えるので、札には書かない (2026-11-10)
         if (!n.blocks.isEmpty()) {
             MutableComponent names = Component.empty();
             for (int i = 0; i < n.blocks.size(); i++) {

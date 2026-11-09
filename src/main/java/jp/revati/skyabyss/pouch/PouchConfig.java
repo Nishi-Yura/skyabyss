@@ -29,6 +29,8 @@ public final class PouchConfig {
         MATERIAL("material"),
         // 小さな素材 (鱗粉・泡袋・火の粉の粉・燠の殻・潮干しの貝)
         SMALL("small"),
+        // 土地の素材 (四章の灰の地・深淵の灯・月の敵が落とす、売るための素材。2026-11-10 に足した)
+        LAND("land"),
         // 封の箱 (docs/design/52。袋の枠には並べず、四つ目のつまみ「封の箱」で見る。client/box/BoxPouchScreen)
         BOX("box");
 
@@ -39,11 +41,38 @@ public final class PouchConfig {
         }
     }
 
+    // 旅嚢の中のページ (2026-11-10 の声「ページ増やして（区分も必要であれば）」)。左の端の栞で替える。区分はどれか一つのページに
+    public enum Page {
+        // 大事な物: 呼ぶ道具・鍵と心核・歌片・書
+        KEEP("keep", Category.TOOL, Category.KEY, Category.BOOK),
+        // 巨神の素材: 鱗片・殻片などと共鳴
+        TITAN("titan", Category.MATERIAL, Category.RESONANCE),
+        // 土地の素材: 小さな素材・鐘銭・土地の敵の素材
+        LAND("land", Category.SMALL, Category.LAND);
+
+        public final String id;
+        public final java.util.List<Category> categories;
+
+        Page(String id, Category... categories) {
+            this.id = id;
+            this.categories = java.util.List.of(categories);
+        }
+
+        public static Page of(Category c) {
+            for (Page p : values()) {
+                if (p.categories.contains(c)) {
+                    return p;
+                }
+            }
+            return KEEP;
+        }
+    }
+
     // 袋に入れる区分 (22 の 14 章 204 の推奨: 鍵・心核・笛・書・巨神の素材 + 小さな素材。食べ物は持ち物のまま)
     public static final Set<Category> ENABLED_CATEGORIES = EnumSet.allOf(Category.class);
 
     // 取り出して持ち物へ出せる区分 (203 の推奨: 素材と共鳴だけ。鍵・心核・笛・欠片・書は出せない)
-    public static final Set<Category> WITHDRAW_CATEGORIES = EnumSet.of(Category.RESONANCE, Category.MATERIAL, Category.SMALL);
+    public static final Set<Category> WITHDRAW_CATEGORIES = EnumSet.of(Category.RESONANCE, Category.MATERIAL, Category.SMALL, Category.LAND);
 
     // 手に持たないと使えない道具 (笛・貝・風見鶏・書・頁) を袋へ入れるか。使う入力 (P6) ができたら true にする
     public static final boolean USE_TOOLS_IN_POUCH = true;

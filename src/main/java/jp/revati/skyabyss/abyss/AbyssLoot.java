@@ -85,7 +85,7 @@ public final class AbyssLoot {
             ItemStack legend = ItemStack.EMPTY;
             Roll roll = new Roll(null, false, false);
             TitanLoot.handOver(server, p.getUUID(), p, items, 0);
-            Notice.gain(p, TitanLoot.rewardLine(items));
+            Notice.gainItems(p, items, TitanLoot.rewardLine(items));
             if (!legend.isEmpty()) {
                 Notice.alert(p, "message.skyabyss.abyss.legend_new", TitanLoot.itemLink(legend));
             } else if (roll.dropped()) {

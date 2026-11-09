@@ -120,7 +120,7 @@ public final class Pouch {
         if (first && !(player instanceof FakePlayer)) {
             // 墓からまとめて取り戻すあいだは、品ごとの知らせを出さない (左に並びすぎた。2026-10-21 の試遊)
             if (!quiet) {
-                Notice.gain(player, "skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription());
+                Notice.gainItem(player, new net.minecraft.world.item.ItemStack(e.item()), jp.revati.skyabyss.ModText.progress("skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription()));
             }
             Beats.fire(player, "pouch:" + e.id().getPath());
         }

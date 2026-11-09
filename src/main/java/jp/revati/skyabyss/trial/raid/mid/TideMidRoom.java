@@ -351,7 +351,7 @@ public final class TideMidRoom extends MidRoom implements TideBeckoner.Flats {
                 jp.revati.skyabyss.quest.Quests.signal(p, SIGNAL);
                 Notice.unlock(p, "message.skyabyss.tide.beckoner_defeated");
                 if (!items.isEmpty()) {
-                    Notice.send(p, TitanLoot.rewardLine(items));
+                    Notice.gainItems(p, items, TitanLoot.rewardLine(items));
                 }
                 TitanLoot.tellHeld(p, held);
             }

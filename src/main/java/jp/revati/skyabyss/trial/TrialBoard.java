@@ -115,7 +115,7 @@ public final class TrialBoard {
             jp.revati.skyabyss.pouch.Pouch.take(sp, res, SHARD_RESONANCE);
         }
         jp.revati.skyabyss.pouch.PouchRouting.placeBack(sp, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)));
-        Notice.gain(sp, ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
+        Notice.gainItem(sp, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)), ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
         open(sp, titan);
         return true;
     }

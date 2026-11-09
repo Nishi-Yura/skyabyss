@@ -242,6 +242,27 @@ public final class NoticeClient {
         }
     }
 
+    // 手に入れた品: 記録 (とチャットの設定) には文を、画面には品の絵だけを並べる
+    public static void receiveItems(jp.revati.skyabyss.notice.GainItemsPayload payload) {
+        Minecraft mc = Minecraft.getInstance();
+        Component text = Notice.plain(payload.text());
+        NoticeLog.add(Notice.Kind.GAIN, text);
+        Config.NotifyMode mode = Config.NOTIFY_MODE.get();
+        if (mode != Config.NotifyMode.TOAST) {
+            mc.gui.getChat().addMessage(text);
+            if (mode == Config.NotifyMode.CHAT) {
+                return;
+            }
+        }
+        java.util.List<net.minecraft.world.item.ItemStack> items = payload.items();
+        gate(NoticeGate.P_CARD, CARD_GAP, () -> {
+            Component head = Component.translatable("gui.skyabyss.notice.head.gain");
+            Component body = Notice.body(payload.text());
+            CardFeed.showItems(items, () -> new NoticeToast(mc.font, head, body, 0xF2C14E));
+            chime(mc, 1.0f, 0.6f);
+        });
+    }
+
     // 記録・チャットに残す文: 場所・章の札は題と副題を並べ、余韻は見出しと一言を並べる
     private static Component fullText(NoticePayload payload) {
         Notice.Kind kind = payload.kind();

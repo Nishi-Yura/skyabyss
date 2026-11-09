@@ -75,7 +75,7 @@ public final class LegendLoot {
         boolean boxed = jp.revati.skyabyss.loot.box.LootBoxes.wouldBox(legend);
         TitanLoot.handOver(p.getServer(), p.getUUID(), p, items, 0);
         if (boxed) {
-            Notice.gain(p, TitanLoot.rewardLine(items));
+            Notice.gainItems(p, items, TitanLoot.rewardLine(items));
         } else {
             Notice.alert(p, "message.skyabyss.abyss.legend_new", TitanLoot.itemLink(legend));
         }

@@ -24,6 +24,8 @@ public class PouchMenu extends AbstractContainerMenu {
     private final PouchLayout.Result layout;
     // 取り出せるか (サーバー → クライアント。ゲームルールはクライアントにないので 1 つの値で送る)
     private final DataSlot withdrawFlag = DataSlot.standalone();
+    // 開いているページ (PouchConfig.Page の番号)。画面の左の栞で替える (clickMenuButton)。見えないページの枠は働かない
+    private final DataSlot page = DataSlot.standalone();
     // 転生の余白の枠の数 (開いたときの回数で決める。docs/design/31 の B13)。枠の番号は区分の枠のあとに続く
     private final int spare;
 
@@ -35,12 +37,13 @@ public class PouchMenu extends AbstractContainerMenu {
         Container view = new View(player, layout.spots(), spare);
         for (int i = 0; i < layout.spots().size(); i++) {
             PouchLayout.Spot spot = layout.spots().get(i);
-            addSlot(new PouchSlot(view, i, spot.x(), spot.y()));
+            addSlot(new PouchSlot(view, i, spot.x(), spot.y(), spot.page()));
         }
         for (int i = 0; i < spare; i++) {
-            addSlot(new PouchSlot(view, layout.spots().size() + i, layout.spare().get(i)[0], layout.spare().get(i)[1]));
+            addSlot(new PouchSlot(view, layout.spots().size() + i, layout.spare().get(i)[0], layout.spare().get(i)[1], PouchConfig.Page.KEEP));
         }
         addDataSlot(withdrawFlag);
+        addDataSlot(page);
         refreshFlag();
     }
 
@@ -59,6 +62,27 @@ public class PouchMenu extends AbstractContainerMenu {
     // 余白の枠の数 (画面が枠を描くため)
     public int spareCount() {
         return spare;
+    }
+
+    public PouchConfig.Page page() {
+        PouchConfig.Page[] all = PouchConfig.Page.values();
+        int i = page.get();
+        return i >= 0 && i < all.length ? all[i] : PouchConfig.Page.KEEP;
+    }
+
+    // クライアントでも先に替える (返事を待たずに画面が替わる)
+    public void setPage(PouchConfig.Page p) {
+        page.set(p.ordinal());
+    }
+
+    // 栞を押した (クライアントの handleInventoryButtonClick から)。id = ページの番号
+    @Override
+    public boolean clickMenuButton(Player p, int id) {
+        if (id >= 0 && id < PouchConfig.Page.values().length) {
+            page.set(id);
+            return true;
+        }
+        return false;
     }
 
     // 画面が枠を「取り出せる」と見せてよいか (サーバーの決まりを写した値)
@@ -88,6 +112,10 @@ public class PouchMenu extends AbstractContainerMenu {
             return;
         }
         if (!(p instanceof ServerPlayer sp)) {
+            return;
+        }
+        if (slotId < slots.size() && !slots.get(slotId).isActive()) {
+            // ほかのページの枠
             return;
         }
         if (slotId >= layout.spots().size()) {
@@ -185,8 +213,16 @@ public class PouchMenu extends AbstractContainerMenu {
 
     // 枠: 見かけの品を映すだけ。置く・取るは clicked が決めるので、標準の動きは全部断る
     private final class PouchSlot extends Slot {
-        PouchSlot(Container container, int index, int x, int y) {
+        private final PouchConfig.Page on;
+
+        PouchSlot(Container container, int index, int x, int y, PouchConfig.Page on) {
             super(container, index, x, y);
+            this.on = on;
+        }
+
+        @Override
+        public boolean isActive() {
+            return on == page();
         }
 
         @Override

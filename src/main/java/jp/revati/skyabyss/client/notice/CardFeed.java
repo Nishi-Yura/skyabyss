@@ -33,7 +33,14 @@ public final class CardFeed {
     private CardFeed() {
     }
 
-    private record Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon) {
+    private record Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon, List<net.minecraft.world.item.ItemStack> items) {
+        Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon) {
+            this(head, body, accent, at, icon, List.of());
+        }
+
+        boolean iconsOnly() {
+            return !items.isEmpty();
+        }
     }
 
     private static final List<Entry> FEED = new ArrayList<>();
@@ -69,6 +76,37 @@ public final class CardFeed {
                 }
             }
         }
+    }
+
+    // 手に入れた品: 左の列は品の絵 (と数) だけを一列に (文は知らせの記録に残る)。右上・右下の札の置き場では今までの札
+    public static void showItems(List<net.minecraft.world.item.ItemStack> items, Supplier<Toast> toast) {
+        Minecraft mc = Minecraft.getInstance();
+        switch (place()) {
+            case TOP_RIGHT, BOTTOM_RIGHT -> mc.getToasts().addToast(toast.get());
+            case COMPACT, LEFT_FEED -> {
+                synchronized (FEED) {
+                    FEED.add(new Entry(Component.empty(), Component.empty(), 0xF2C14E, net.minecraft.Util.getMillis(), net.minecraft.world.item.ItemStack.EMPTY, List.copyOf(items)));
+                    while (FEED.size() > FEED_MAX) {
+                        FEED.remove(0);
+                    }
+                }
+            }
+        }
+    }
+
+    // 絵の列の一行に入る数と、札の高さ
+    private static final int ICON_PITCH = 18;
+
+    private static int perRow(int w) {
+        return Math.max(1, (w - 4) / ICON_PITCH);
+    }
+
+    private static int height(Font font, Entry e, int w) {
+        if (e.iconsOnly()) {
+            int rows = (e.items.size() + perRow(w) - 1) / perRow(w);
+            return rows * ICON_PITCH + 2;
+        }
+        return lines(font, e, w).size() * 10 + 2;
     }
 
     // 進捗 (バニラ・mod の進捗の札の代わり)
@@ -149,7 +187,7 @@ public final class CardFeed {
         int used = 0;
         int from = shown.size();
         while (from > 0) {
-            int hh = lines(font, shown.get(from - 1), Math.min(rect.w(), capW)).size() * 10 + 2;
+            int hh = height(font, shown.get(from - 1), Math.min(rect.w(), capW));
             if (used + hh > rect.h()) {
                 break;
             }
@@ -166,7 +204,7 @@ public final class CardFeed {
             used = 0;
             from = shown.size();
             while (from > 0) {
-                int hh = lines(font, shown.get(from - 1), rect.w()).size() * 10 + 2;
+                int hh = height(font, shown.get(from - 1), rect.w());
                 if (used + hh > rect.h()) {
                     break;
                 }
@@ -183,7 +221,7 @@ public final class CardFeed {
             synchronized (FEED) {
                 for (int i = 0; i < FEED.size(); i++) {
                     Entry e = FEED.get(i);
-                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt, e.icon));
+                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt, e.icon, e.items));
                 }
             }
             return;
@@ -203,6 +241,28 @@ public final class CardFeed {
             int x = rect.x();
             // 出てくるときに左から少し滑る
             int slide = age < 180 ? (int) ((1f - age / 180f) * 8) : 0;
+            if (e.iconsOnly()) {
+                int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
+                int per = Math.min(perRow(ew), e.items.size());
+                int rows = (e.items.size() + perRow(ew) - 1) / perRow(ew);
+                int bw = per * ICON_PITCH + 4;
+                int hh = rows * ICON_PITCH + 1;
+                g.fill(x - slide, y, x + bw - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
+                g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
+                if (alpha > 160) {
+                    for (int i = 0; i < e.items.size(); i++) {
+                        int ix = x + 3 - slide + (i % perRow(ew)) * ICON_PITCH;
+                        int iy = y + 1 + (i / perRow(ew)) * ICON_PITCH;
+                        net.minecraft.world.item.ItemStack st = e.items.get(i);
+                        g.renderItem(st, ix, iy);
+                        if (st.getCount() > 1) {
+                            g.renderItemDecorations(font, st, ix, iy, compact(st.getCount()));
+                        }
+                    }
+                }
+                y += hh + 1;
+                continue;
+            }
             String head = e.head.getString();
             int iw = 12;
             int hw = font.width(head) + iw;
@@ -245,6 +305,14 @@ public final class CardFeed {
         List<FormattedCharSequence> l = jp.revati.skyabyss.client.ui.JpWrap.split(font, e.body, room);
         // 行の数で切らない (カードは行の数だけ高くなる。2026-11-09 の声「『...』だと何書いてるかわからない」)
         return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;
+    }
+
+    // 枠の上の数: 1 万以上は「1.2万」の形で短く
+    private static String compact(int n) {
+        if (n >= 10000) {
+            return (n / 1000) / 10.0 + "万";
+        }
+        return Integer.toString(n);
     }
 
     private static int rows(Font font, Entry e) {

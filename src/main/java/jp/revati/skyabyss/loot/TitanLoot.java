@@ -386,7 +386,7 @@ public final class TitanLoot {
                 Notice.unlock(player, "message.skyabyss.fragment_received");
             }
             Notice.gain(player, "message.skyabyss.boss_reward");
-            Notice.gain(player, rewardLine(items));
+            Notice.gainItems(player, items, rewardLine(items));
             announcePieces(level, player, r, roll);
             if (roll.guaranteed() != null) {
                 Notice.gain(player, "message.skyabyss.memory_guarantee");
@@ -414,7 +414,7 @@ public final class TitanLoot {
                 continue;
             }
             Notice.gain(player, "message.skyabyss.mid_boss_reward");
-            Notice.gain(player, rewardLine(roll.items()));
+            Notice.gainItems(player, roll.items(), rewardLine(roll.items()));
             announcePieces(level, player, r, roll);
             tellHeld(player, held);
         }
@@ -561,7 +561,7 @@ public final class TitanLoot {
         }
         Notice.unlock(player, "message.skyabyss.reward_delivered");
         if (!given.isEmpty()) {
-            Notice.gain(player, rewardLine(given));
+            Notice.gainItems(player, given, rewardLine(given));
         }
         tellHeld(player, held);
     }

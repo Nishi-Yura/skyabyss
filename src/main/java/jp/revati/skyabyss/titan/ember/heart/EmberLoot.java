@@ -212,7 +212,7 @@ public final class EmberLoot {
                 }
             }
             Notice.narrate(player, EmberIds.LANG_HEART + "reward");
-            Notice.gain(player, TitanLoot.rewardLine(items));
+            Notice.gainItems(player, items, TitanLoot.rewardLine(items));
             announce(level, player, r, roll, items);
             if (roll.guaranteed() != null) {
                 Notice.narrate(player, "message.skyabyss.memory_guarantee");

@@ -191,7 +191,8 @@ public final class PouchSelfTest {
             check(f, PouchEntries.any(out) == null, "an item that must stay in the inventory is a pouch entry: " + out);
         }
         for (PouchEntries.Entry e : all) {
-            check(f, e.withdrawable() == (e.category() == Category.RESONANCE || e.category() == Category.MATERIAL || e.category() == Category.SMALL),
+            check(f, e.withdrawable() == (e.category() == Category.RESONANCE || e.category() == Category.MATERIAL || e.category() == Category.SMALL
+                    || e.category() == Category.LAND),
                     "withdraw category wrong for " + e.id());
         }
 
@@ -572,6 +573,8 @@ public final class PouchSelfTest {
     private static int slotOf(PouchMenu menu, Item item) {
         for (int i = 0; i < menu.pouchSlotCount(); i++) {
             if (menu.entryAt(i).item() == item) {
+                // 枠は開いているページでだけ働くので、その品のページを開く
+                menu.setPage(menu.layout().spots().get(i).page());
                 return i;
             }
         }
@@ -596,7 +599,7 @@ public final class PouchSelfTest {
                     && menu.getSlot(i).x == a.x() && menu.getSlot(i).y == a.y();
             for (int j = i + 1; j < layout.spots().size(); j++) {
                 PouchLayout.Spot b = layout.spots().get(j);
-                clean &= Math.abs(a.x() - b.x()) >= 18 || Math.abs(a.y() - b.y()) >= 18;
+                clean &= a.page() != b.page() || Math.abs(a.x() - b.x()) >= 18 || Math.abs(a.y() - b.y()) >= 18;
             }
         }
         check(f, clean, "the pouch slot positions overlap or leave the panel");
@@ -604,6 +607,7 @@ public final class PouchSelfTest {
         int sh = slotOf(menu, shard);
         int cr = slotOf(menu, crystal);
         int co = slotOf(menu, core);
+        menu.setPage(PouchConfig.Page.TITAN);
         check(f, sh >= 0 && cr >= 0 && co >= 0, "the slots for scale/crystal/core are missing");
         // 枠は見かけの品を映す (個数 0 は空、999 まで)
         check(f, menu.getSlot(sh).getItem().isEmpty(), "an empty pouch slot is not empty");

@@ -176,7 +176,7 @@ public final class SoulSelfTest {
         check(f, layout.spare().size() == 3 && layout.spare().get(2)[0] + 18 <= PouchLayout.W - PouchLayout.X0 + 2, "the spare slots leave the panel");
         for (var sp : layout.spare()) {
             for (var spot : layout.spots()) {
-                check(f, Math.abs(spot.x() - sp[0]) >= 18 || Math.abs(spot.y() - sp[1]) >= 18, "a spare slot overlaps a pouch slot at " + sp[0] + "," + sp[1]);
+                check(f, spot.page() != jp.revati.skyabyss.pouch.PouchConfig.Page.KEEP || Math.abs(spot.x() - sp[0]) >= 18 || Math.abs(spot.y() - sp[1]) >= 18, "a spare slot overlaps a pouch slot at " + sp[0] + "," + sp[1]);
             }
         }
         check(f, RebirthEvents.isWhalePedestal(new BlockPos(0, 104, -35)) && !RebirthEvents.isWhalePedestal(new BlockPos(1, 104, -35)), "the altar block is wrong");

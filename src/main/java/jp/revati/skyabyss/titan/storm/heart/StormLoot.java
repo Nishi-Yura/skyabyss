@@ -235,7 +235,7 @@ public final class StormLoot {
                 Notice.unlock(player, "message.skyabyss.fragment_received");
             }
             Notice.narrate(player, "message.skyabyss.storm_heart.reward");
-            Notice.gain(player, TitanLoot.rewardLine(items));
+            Notice.gainItems(player, items, TitanLoot.rewardLine(items));
             announce(level, player, r, roll, items);
             if (roll.guaranteed() != null) {
                 Notice.narrate(player, "message.skyabyss.memory_guarantee");

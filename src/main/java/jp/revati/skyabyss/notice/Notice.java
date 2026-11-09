@@ -120,6 +120,38 @@ public final class Notice {
         send(p, Kind.GAIN, text);
     }
 
+    // 手に入れた品: 左の列には品の絵 (と数) だけを並べる。text は知らせの記録・チャットに残す文
+    public static void gainItems(Player p, java.util.List<net.minecraft.world.item.ItemStack> items, Component text) {
+        java.util.Map<net.minecraft.world.item.Item, net.minecraft.world.item.ItemStack> merged = new java.util.LinkedHashMap<>();
+        for (net.minecraft.world.item.ItemStack s : items) {
+            if (s.isEmpty()) {
+                continue;
+            }
+            net.minecraft.world.item.ItemStack have = merged.get(s.getItem());
+            if (have == null) {
+                merged.put(s.getItem(), s.copy());
+            } else {
+                have.grow(s.getCount());
+            }
+        }
+        if (merged.isEmpty()) {
+            gain(p, text);
+            return;
+        }
+        if (!(p instanceof ServerPlayer sp) || p instanceof FakePlayer || sp.connection == null) {
+            return;
+        }
+        java.util.List<net.minecraft.world.item.ItemStack> list = new java.util.ArrayList<>(merged.values());
+        if (list.size() > 64) {
+            list = list.subList(0, 64);
+        }
+        PacketDistributor.sendToPlayer(sp, new GainItemsPayload(java.util.List.copyOf(list), text));
+    }
+
+    public static void gainItem(Player p, net.minecraft.world.item.ItemStack item, Component text) {
+        gainItems(p, java.util.List.of(item), text);
+    }
+
     public static void unlock(Player p, String key, Object... args) {
         send(p, Kind.UNLOCK, ModText.progress(key, args));
     }
