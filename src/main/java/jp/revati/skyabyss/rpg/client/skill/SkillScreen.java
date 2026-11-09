@@ -1885,6 +1885,10 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         lines.add(Component.translatable("gui.skyabyss.skill.change.head").withColor(SOFT));
         for (var c : changes) {
             lines.add(Component.literal(" ").append(c.line()).withColor(c.active() ? c.kind().rgb : DIM));
+            // 何が変わるか (2026-11-09 の声「説明もないので何がなにかわからない」)
+            if (c.effect() != null && c.active()) {
+                lines.add(Component.literal("   ").append(c.effect()).withColor(TEXT));
+            }
         }
     }
 

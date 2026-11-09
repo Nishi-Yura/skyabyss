@@ -61,6 +61,11 @@ public final class SkillClient {
                 event.getToolTip().add(net.minecraft.network.chat.Component.translatable("tooltip.skyabyss.legend_rewrite",
                         net.minecraft.network.chat.Component.translatable(r.skillNameKey()), net.minecraft.network.chat.Component.translatable(r.nameKey()))
                         .withColor(0xF2D78A));
+                // 書き換えで何が変わるか と、効く条件
+                event.getToolTip().add(net.minecraft.network.chat.Component.literal("  ").append(net.minecraft.network.chat.Component.translatable(r.effectKey()))
+                        .withColor(0xE6E2D6));
+                event.getToolTip().add(net.minecraft.network.chat.Component.translatable("tooltip.skyabyss.legend_rewrite_how",
+                        net.minecraft.network.chat.Component.translatable(r.skillNameKey())).withColor(0x8E96A6));
                 return;
             }
         }

@@ -91,7 +91,19 @@ public final class PinMarkers {
     }
 
     private static void draw(GuiGraphics g, Minecraft mc, int x, int z, int rgb, String name) {
-        double y = mc.level.hasChunk(x >> 4, z >> 4) ? mc.level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) + 1.5 : mc.player.getY() + 1.5;
+        // 高さ: 読み込んだ地面の上。読み込んでいない (遠い) 所は大陸の図の地面の高さ (2026-11-09 の声「赤ピンの場所、めっちゃ下」:
+        // 遠いチャンクは空のチャンクとして返り、高さが世界の底になっていた)
+        double y = Double.NaN;
+        if (mc.level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+            int h = mc.level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+            if (h > mc.level.getMinBuildHeight() + 1) {
+                y = h + 1.5;
+            }
+        }
+        if (Double.isNaN(y)) {
+            jp.revati.skyabyss.world.continent.ContinentMap map = jp.revati.skyabyss.world.continent.ContinentMap.get();
+            y = map.inside(x, z) ? Math.max(map.surface(x, z), jp.revati.skyabyss.world.continent.ContinentChunkGenerator.SEA_LEVEL) + 1.5 : mc.player.getY() + 1.5;
+        }
         ObjectiveMarker.Placement p = ObjectiveMarker.place(g, mc, new Vec3(x + 0.5, y, z + 0.5), 0.6f, 3.0);
         if (p != null) {
             ObjectiveMarker.show(g, mc, p.withLabel(name + "  " + p.label()), rgb, false);

@@ -3161,5 +3161,9 @@
   "sign.skyabyss.poi_note.south_moss_shrine.2": "here",
   "sign.skyabyss.poi_note.south_moss_shrine.3": "The moss",
   "sign.skyabyss.poi_note.south_moss_shrine.4": "drinks lightning",
-  "raid.skyabyss.hud.foes_left": "%s foes left"
+  "raid.skyabyss.hud.foes_left": "%s foes left",
+  "tooltip.skyabyss.legend_rewrite_how": "  Works while held, once you pick the %s rewrite in the skill tree",
+  "message.skyabyss.skill.rewrite_on": "%s became %s: %s",
+  "message.skyabyss.skill.rewrite_off": "%s is back to its own form",
+  "message.skyabyss.skill.rewrite_bar": "%s → %s"
 }

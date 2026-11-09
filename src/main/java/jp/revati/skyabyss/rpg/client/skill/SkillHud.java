@@ -279,6 +279,8 @@ public final class SkillHud {
     static final ResourceLocation ICONS2 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons2.png");
     // 200 以上は icons3.png (技の変異。256x64。tools/gen/ui/gen_mutation_icons.py)
     static final ResourceLocation ICONS3 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons3.png");
+    // 300 以上は icons4.png (武器の書き換え。256x256。tools/gen/ui/gen_rewrite_icons.py)
+    static final ResourceLocation ICONS4 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons4.png");
 
     // 100 以上は icons2.png (淵・前世の技・木の印・紋・職の新しい技。256x192)
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
@@ -286,7 +288,10 @@ public final class SkillHud {
     }
 
     static void drawIcon(GuiGraphics g, int index, int x, int y, int size) {
-        if (index >= 200) {
+        if (index >= 300) {
+            int n = index - 300;
+            g.blit(ICONS4, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 256);
+        } else if (index >= 200) {
             int n = index - 200;
             g.blit(ICONS3, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 64);
         } else if (index >= 100) {

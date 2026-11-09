@@ -234,6 +234,28 @@ public enum Rune {
         return (legendary() ? "legend.skyabyss." : "rune.skyabyss.") + id;
     }
 
+    // 書き換えの並びの中の番号 (書き換えでなければ -1)。絵の升目の順 (tools/gen/ui/gen_rewrite_icons.py)
+    public int rewriteIndex() {
+        if (!legendary()) {
+            return -1;
+        }
+        int n = 0;
+        for (Rune r : values()) {
+            if (r == this) {
+                return n;
+            }
+            if (r.legendary()) {
+                n++;
+            }
+        }
+        return -1;
+    }
+
+    // 書き換えの絵 (icons4.png。元の技の絵を出どころの色に塗り直し、右下に出どころの印)。書き換えでなければ元の技の絵
+    public int iconIndex() {
+        return legendary() ? 300 + rewriteIndex() : skill.iconIndex();
+    }
+
     public String effectKey() {
         return nameKey() + ".effect";
     }
