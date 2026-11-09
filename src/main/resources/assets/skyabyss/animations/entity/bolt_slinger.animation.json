@@ -1,0 +1,290 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.bolt_slinger.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "position": [
+            "0",
+            "math.sin(query.anim_time * 120 + 0) * 0.15",
+            "0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time * 90 + 0) * 6",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 120 + 0) * 4)",
+            "0",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.bolt_slinger.walk": {
+      "loop": true,
+      "animation_length": 0.6666666666666666,
+      "bones": {
+        "leg_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 540 + 0) * 26)",
+            "0",
+            "0"
+          ]
+        },
+        "leg_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 540 + 180) * 26)",
+            "0",
+            "0"
+          ]
+        },
+        "arm_l": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 540 + 180) * 18)",
+            "0",
+            "0"
+          ]
+        },
+        "arm_r": {
+          "rotation": [
+            "-(math.sin(query.anim_time * 540 + 0) * 14)",
+            "0",
+            "0"
+          ]
+        },
+        "body": {
+          "position": [
+            "0",
+            "math.abs(math.sin(query.anim_time * 540 + 0) * 0.25)",
+            "0"
+          ]
+        }
+      }
+    },
+    "animation.bolt_slinger.throw": {
+      "animation_length": 1.2,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -25,
+              0
+            ],
+            "0.90": [
+              8,
+              20,
+              0
+            ],
+            "1.20": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -150,
+              0,
+              20
+            ],
+            "0.85": [
+              60,
+              0,
+              0
+            ],
+            "1.20": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "arm_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              40,
+              0,
+              -20
+            ],
+            "1.20": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.bolt_slinger.hop": {
+      "animation_length": 0.5,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              -14,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.20": [
+              0,
+              3,
+              2
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "leg_l": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.20": [
+              -30,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "leg_r": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.20": [
+              20,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.bolt_slinger.hurt": {
+      "animation_length": 0.3,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              10,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.bolt_slinger.death": {
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              -90,
+              0,
+              0
+            ],
+            "1.00": [
+              -90,
+              0,
+              0
+            ]
+          },
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.60": [
+              0,
+              -1,
+              0
+            ],
+            "1.00": [
+              0,
+              -1.5,
+              0
+            ]
+          }
+        }
+      },
+      "loop": "hold_on_last_frame"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+# 2026-11-09: 嵐と灰の土地に足した敵 6 種 (issue #20。entity/foe/late) を、平らな世界に並べて撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/late_foes.txt -PshotsName=late_foes
+world latefoes flat
+size 1600 900
+timeout 1500
+render 8
+clouds off
+guiscale 2
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+cmd tp @s 0 -58 0
+waitchunks
+cmd summon skyabyss:bolt_slinger 0 -60 6 {NoAI:1b,Rotation:[150f,0f]}
+cmd summon skyabyss:storm_jelly 5 -60 6 {NoAI:1b,Rotation:[160f,0f]}
+cmd summon skyabyss:crag_tortoise 10 -60 6 {NoAI:1b,Rotation:[150f,0f]}
+cmd summon skyabyss:ember_spitter 0 -60 18 {NoAI:1b,Rotation:[150f,0f]}
+cmd summon skyabyss:ash_whirl 5 -60 18 {NoAI:1b,Rotation:[160f,0f]}
+cmd summon skyabyss:basalt_scorpion 10 -60 18 {NoAI:1b,Rotation:[150f,0f]}
+wait 40
+cmd tp @s 5 -56 -4 0 18
+wait 60
+shot f01_storm_row
+cmd tp @s 5 -56 8 0 18
+wait 60
+shot f02_ember_row
+cmd tp @s -2 -58.5 1.5 -20 6
+wait 40
+shot f03_slinger_close
+cmd tp @s 9 -58.5 2 -20 8
+wait 40
+shot f04_tortoise_close
+cmd tp @s 4 -57 11 0 10
+wait 40
+shot f05_whirl_close
+cmd tp @s 9 -58.5 14 -20 8
+wait 40
+shot f06_scorpion_close

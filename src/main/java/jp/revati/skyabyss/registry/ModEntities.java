@@ -132,6 +132,30 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.MistAngler>> MIST_ANGLER = ENTITIES.register("mist_angler",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.MistAngler::new, MobCategory.MONSTER)
                     .sized(0.7f, 2.0f).clientTrackingRange(8).build(SkyAbyss.MODID + ":mist_angler"));
+    // 嵐と灰の土地に足した敵 (issue #20。entity/foe/late)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.late.BoltSlinger>> BOLT_SLINGER = ENTITIES.register("bolt_slinger",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.late.BoltSlinger::new, MobCategory.MONSTER)
+                    .sized(0.7f, 1.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bolt_slinger"));
+    // 嵐と灰の土地に足した敵 (issue #20。entity/foe/late)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.late.StormJelly>> STORM_JELLY = ENTITIES.register("storm_jelly",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.late.StormJelly::new, MobCategory.MONSTER)
+                    .sized(1.2f, 3.2f).clientTrackingRange(8).build(SkyAbyss.MODID + ":storm_jelly"));
+    // 嵐と灰の土地に足した敵 (issue #20。entity/foe/late)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.late.CragTortoise>> CRAG_TORTOISE = ENTITIES.register("crag_tortoise",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.late.CragTortoise::new, MobCategory.MONSTER)
+                    .sized(1.4f, 1.2f).clientTrackingRange(8).build(SkyAbyss.MODID + ":crag_tortoise"));
+    // 嵐と灰の土地に足した敵 (issue #20。entity/foe/late)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.late.EmberSpitter>> EMBER_SPITTER = ENTITIES.register("ember_spitter",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.late.EmberSpitter::new, MobCategory.MONSTER)
+                    .sized(1.0f, 1.0f).clientTrackingRange(8).build(SkyAbyss.MODID + ":ember_spitter"));
+    // 嵐と灰の土地に足した敵 (issue #20。entity/foe/late)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.late.AshWhirl>> ASH_WHIRL = ENTITIES.register("ash_whirl",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.late.AshWhirl::new, MobCategory.MONSTER)
+                    .sized(1.0f, 2.4f).clientTrackingRange(8).build(SkyAbyss.MODID + ":ash_whirl"));
+    // 嵐と灰の土地に足した敵 (issue #20。entity/foe/late)
+    public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.late.BasaltScorpion>> BASALT_SCORPION = ENTITIES.register("basalt_scorpion",
+            () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.late.BasaltScorpion::new, MobCategory.MONSTER)
+                    .sized(1.3f, 0.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":basalt_scorpion"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.entity.foe.ThunderWolf>> THUNDER_WOLF = ENTITIES.register("thunder_wolf",
             () -> EntityType.Builder.of(jp.revati.skyabyss.entity.foe.ThunderWolf::new, MobCategory.MONSTER)
                     .sized(0.9f, 1.1f).eyeHeight(0.9f).clientTrackingRange(8).build(SkyAbyss.MODID + ":thunder_wolf"));
@@ -257,6 +281,12 @@ public final class ModEntities {
         event.put(MOSS_DEAD.get(), jp.revati.skyabyss.entity.foe.MossDead.createAttributes().build());
         event.put(MIST_ANGLER.get(), jp.revati.skyabyss.entity.foe.MistAngler.createAttributes().build());
         event.put(THUNDER_WOLF.get(), jp.revati.skyabyss.entity.foe.ThunderWolf.createAttributes().build());
+        event.put(BOLT_SLINGER.get(), jp.revati.skyabyss.entity.foe.late.BoltSlinger.createAttributes().build());
+        event.put(STORM_JELLY.get(), jp.revati.skyabyss.entity.foe.late.StormJelly.createAttributes().build());
+        event.put(CRAG_TORTOISE.get(), jp.revati.skyabyss.entity.foe.late.CragTortoise.createAttributes().build());
+        event.put(EMBER_SPITTER.get(), jp.revati.skyabyss.entity.foe.late.EmberSpitter.createAttributes().build());
+        event.put(ASH_WHIRL.get(), jp.revati.skyabyss.entity.foe.late.AshWhirl.createAttributes().build());
+        event.put(BASALT_SCORPION.get(), jp.revati.skyabyss.entity.foe.late.BasaltScorpion.createAttributes().build());
         event.put(EMBER_JACKAL.get(), jp.revati.skyabyss.entity.foe.EmberJackal.createAttributes().build());
         event.put(ROCK_BOAR.get(), jp.revati.skyabyss.entity.foe.RockBoar.createAttributes().build());
         event.put(TIDE_CRAB.get(), jp.revati.skyabyss.entity.foe.TideCrab.createAttributes().build());

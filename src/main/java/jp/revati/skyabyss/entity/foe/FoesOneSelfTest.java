@@ -45,7 +45,8 @@ public final class FoesOneSelfTest {
     private static final int FLOOR = 200;
     private static final float HEALTH = 1000f;
     static final String[] IDS = {"bandit", "bandit_archer", "bandit_chief", "bone_footman", "bone_bowman", "bone_standard", "grain_rat", "stray_wisp",
-        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf", "ember_jackal", "rock_boar", "tide_crab", "storm_ram", "ash_lizard"};
+        "feral_dog", "moss_dead", "mist_angler", "thunder_wolf", "ember_jackal", "rock_boar", "tide_crab", "storm_ram", "ash_lizard",
+        "bolt_slinger", "storm_jelly", "crag_tortoise", "ember_spitter", "ash_whirl", "basalt_scorpion"};
 
     private FoesOneSelfTest() {
     }
@@ -89,6 +90,7 @@ public final class FoesOneSelfTest {
             registration(f);
             attacks(level, f);
             shield(level, f);
+            lateGuards(level, f);
             banner(level, f);
             shout(level, f);
             howls(level, f);
@@ -196,7 +198,16 @@ public final class FoesOneSelfTest {
                 new Case("rock_boar", ModEntities.ROCK_BOAR::get, 8.0, RockBoar.CHARGE_WARN),
                 new Case("tide_crab", ModEntities.TIDE_CRAB::get, 4.0, TideCrab.SLAM_WARN),
                 new Case("storm_ram", ModEntities.STORM_RAM::get, 8.0, StormRam.CHARGE_WARN),
-                new Case("ash_lizard", ModEntities.ASH_LIZARD::get, 6.0, AshLizard.BREATH_WARN));
+                new Case("ash_lizard", ModEntities.ASH_LIZARD::get, 6.0, AshLizard.BREATH_WARN),
+                // 嵐と灰の土地に足した敵 (issue #20)
+                new Case("bolt_slinger", ModEntities.BOLT_SLINGER::get, 10.0, jp.revati.skyabyss.entity.foe.late.BoltSlinger.WARN),
+                new Case("storm_jelly", ModEntities.STORM_JELLY::get, 3.0, jp.revati.skyabyss.entity.foe.late.StormJelly.WARN),
+                new Case("crag_tortoise", ModEntities.CRAG_TORTOISE::get, 3.5,
+                        jp.revati.skyabyss.entity.foe.late.CragTortoise.GUARD_WARN + jp.revati.skyabyss.entity.foe.late.CragTortoise.RAM_WARN),
+                new Case("ember_spitter", ModEntities.EMBER_SPITTER::get, 12.0, jp.revati.skyabyss.entity.foe.late.EmberSpitter.WARN),
+                new Case("ash_whirl", ModEntities.ASH_WHIRL::get, 3.0, jp.revati.skyabyss.entity.foe.late.AshWhirl.WARN),
+                new Case("basalt_scorpion", ModEntities.BASALT_SCORPION::get, 3.0,
+                        jp.revati.skyabyss.entity.foe.late.BasaltScorpion.GUARD_WARN + jp.revati.skyabyss.entity.foe.late.BasaltScorpion.STRIKE_WARN));
         for (Case c : cases) {
             ContinentFoe m = spawn(lv, c.type().get(), SX, SZ, 0f);
             FakePlayer in = fake(lv, c.name() + "_in", SX, SZ + c.dist());
@@ -244,6 +255,47 @@ public final class FoesOneSelfTest {
         m.discard();
         front.discard();
         back.discard();
+    }
+
+    // 峰の甲羅・黒石の甲殻: 構えているあいだ前からの傷は 3 割、横・後ろはそのまま。雷雲くらげ・灰の渦は技のあと柔らかい
+    private static void lateGuards(ServerLevel lv, List<String> f) {
+        for (var type : List.<java.util.function.Supplier<EntityType<? extends jp.revati.skyabyss.entity.foe.late.LateFoe>>>of(
+                ModEntities.CRAG_TORTOISE::get, ModEntities.BASALT_SCORPION::get)) {
+            jp.revati.skyabyss.entity.foe.late.LateFoe m = spawn(lv, type.get(), SX, SZ, 0f);
+            jp.revati.skyabyss.combat.MobTuning.untune(m);
+            FakePlayer front = fake(lv, "lg_front", SX, SZ + 3);
+            FakePlayer back = fake(lv, "lg_back", SX, SZ - 3);
+            m.setTarget(front);
+            for (int i = 0; i < 4 && !m.guarding(); i++) {
+                tick(lv, m, 1);
+            }
+            m.setYRot(0f);
+            m.setYBodyRot(0f);
+            float hp = m.getHealth();
+            m.invulnerableTime = 0;
+            m.hurt(lv.damageSources().playerAttack(front), 10f);
+            float fromFront = hp - m.getHealth();
+            m.setHealth(hp);
+            m.invulnerableTime = 0;
+            m.hurt(lv.damageSources().playerAttack(back), 10f);
+            float fromBack = hp - m.getHealth();
+            check(m.guarding() && fromBack > 9f && Math.abs(fromFront - 3f) < 0.3f,
+                    m.getType().toShortString() + " guard: guarding " + m.guarding() + ", front " + fromFront + " vs back " + fromBack, f);
+            m.discard();
+            front.discard();
+            back.discard();
+        }
+        jp.revati.skyabyss.entity.foe.late.StormJelly j = spawn(lv, ModEntities.STORM_JELLY.get(), SX, SZ, 0f);
+        jp.revati.skyabyss.combat.MobTuning.untune(j);
+        FakePlayer p = fake(lv, "lg_jelly", SX, SZ + 3);
+        j.setTarget(p);
+        tick(lv, j, jp.revati.skyabyss.entity.foe.late.StormJelly.END + 3);
+        float hp = j.getHealth();
+        j.invulnerableTime = 0;
+        j.hurt(lv.damageSources().playerAttack(p), 10f);
+        check(j.soft() && Math.abs((hp - j.getHealth()) - 13f) < 0.3f, "storm jelly is not soft after its burst (" + j.soft() + ", took " + (hp - j.getHealth()) + ")", f);
+        j.discard();
+        p.discard();
     }
 
     // ---------------------------------------------------------------- 旗の守り

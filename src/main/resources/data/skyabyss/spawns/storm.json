@@ -45,6 +45,33 @@
         2,
         3
       ]
+    },
+    {
+      "entity": "skyabyss:bolt_slinger",
+      "weight": 3,
+      "time": "day",
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "entity": "skyabyss:storm_jelly",
+      "weight": 3,
+      "time": "any",
+      "group": [
+        1,
+        1
+      ]
+    },
+    {
+      "entity": "skyabyss:crag_tortoise",
+      "weight": 2,
+      "time": "day",
+      "group": [
+        1,
+        1
+      ]
     }
   ]
 }

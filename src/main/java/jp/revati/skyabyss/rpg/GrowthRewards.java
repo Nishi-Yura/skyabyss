@@ -84,6 +84,13 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":mist_angler", new Source(30, 18));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wolf", new Source(29, 24));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":ember_jackal", new Source(33, 30));
+        // 嵐と灰の土地に足した敵 (issue #20。土地の平均「推奨 Lv × 0.6 + 2」に合わせた。04 の 3 章)
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bolt_slinger", new Source(20, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":storm_jelly", new Source(22, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":crag_tortoise", new Source(30, 24));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ember_spitter", new Source(24, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_whirl", new Source(28, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":basalt_scorpion", new Source(36, 30));
         // 名のある敵 (主。章の経験値の 15% の中)
         MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_boar", new Source(30, 12));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":tide_crab", new Source(60, 18));

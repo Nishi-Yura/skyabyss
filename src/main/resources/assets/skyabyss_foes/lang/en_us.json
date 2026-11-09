@@ -49,5 +49,17 @@
   "gui.skyabyss.attack.storm_ram.butt": "Headbutt",
   "gui.skyabyss.attack.ash_lizard.sweep": "Tail Sweep",
   "gui.skyabyss.attack.ash_lizard.bite": "Bite",
-  "gui.skyabyss.attack.ash_lizard.breath": "Spit Fire"
+  "gui.skyabyss.attack.ash_lizard.breath": "Spit Fire",
+  "entity.skyabyss.bolt_slinger": "Bolt Slinger",
+  "item.skyabyss.bolt_slinger_spawn_egg": "Bolt Slinger Spawn Egg",
+  "entity.skyabyss.storm_jelly": "Storm Jelly",
+  "item.skyabyss.storm_jelly_spawn_egg": "Storm Jelly Spawn Egg",
+  "entity.skyabyss.crag_tortoise": "Crag Tortoise",
+  "item.skyabyss.crag_tortoise_spawn_egg": "Crag Tortoise Spawn Egg",
+  "entity.skyabyss.ember_spitter": "Ember Spitter",
+  "item.skyabyss.ember_spitter_spawn_egg": "Ember Spitter Spawn Egg",
+  "entity.skyabyss.ash_whirl": "Ash Whirl",
+  "item.skyabyss.ash_whirl_spawn_egg": "Ash Whirl Spawn Egg",
+  "entity.skyabyss.basalt_scorpion": "Basalt Scorpion",
+  "item.skyabyss.basalt_scorpion_spawn_egg": "Basalt Scorpion Spawn Egg"
 }
