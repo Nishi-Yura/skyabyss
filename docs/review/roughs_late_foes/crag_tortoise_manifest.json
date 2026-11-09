@@ -6,10 +6,10 @@
  "sheets": [
   "roughs_late_foes/crag_tortoise.png"
  ],
- "extra": "骨 8 本 (root > body > head / leg_fl / leg_fr / leg_bl / leg_br / tail)。 三角形: A 407 / B 423 / C 574。埋まった部品の検査: A crystal0-cap:0.5 / B なし / C なし",
+ "extra": "骨 8 本 (root > body > head / leg_fl / leg_fr / leg_bl / leg_br / tail)。 三角形: A 743 / B 423 / C 574。埋まった部品の検査: A crystal0-cap:0.5, leg_fl_scale-leg_fl:0.6, leg_fr_scale-leg_fr:0.55, leg_bl_scale-leg_bl:0.6, leg_br_scale-leg_br:0.6 / B なし / C なし",
  "options": {
   "a": {
-   "name": "A 峰の甲羅亀 (407 三角形)",
+   "name": "A 峰の甲羅亀 (743 三角形)",
    "desc": "甲羅が三段の岩の峰で、頂に雪と青白い水晶。嵐の高地の山がそのまま歩いている見た目。籠ると小さな峰に見える。"
   },
   "b": {

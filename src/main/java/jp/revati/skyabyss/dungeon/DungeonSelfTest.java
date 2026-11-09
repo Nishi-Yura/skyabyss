@@ -423,9 +423,6 @@ public final class DungeonSelfTest {
         java.util.Map<String, String> ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
         java.util.Map<String, String> en = jp.revati.skyabyss.SignFit.lang("en_us");
         for (Dungeon d : Dungeon.mids()) {
-            if (d.deep) {
-                continue;
-            }
             var item = DungeonGear.item(d);
             String id = BuiltInRegistries.ITEM.getKey(item).getPath();
             check(f, item instanceof jp.revati.skyabyss.item.wild.WildAccessoryItem a && !a.row().charm() && !a.row().fx().isEmpty() && a.row().mount() != null

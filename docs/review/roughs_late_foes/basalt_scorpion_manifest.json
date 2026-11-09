@@ -6,10 +6,10 @@
  "sheets": [
   "roughs_late_foes/basalt_scorpion.png"
  ],
- "extra": "骨 13 本 (root > body > head / claw_l / claw_r / tail > sting / 脚 6)。 三角形: A 408 / B 432 / C 424。埋まった部品の検査: A なし / B なし / C なし",
+ "extra": "骨 13 本 (root > body > head / claw_l / claw_r / tail > sting / 脚 6)。 三角形: A 520 / B 432 / C 424。埋まった部品の検査: A なし / B なし / C なし",
  "options": {
   "a": {
-   "name": "A 黒石の蠍 (408 三角形)",
+   "name": "A 黒石の蠍 (520 三角形)",
    "desc": "黒石の板の大きな蠍。鋏を閉じると前を塞ぐ盾になり、尾の熾の針が上から突く。構えと突きの両方が一番読みやすい。"
   },
   "b": {

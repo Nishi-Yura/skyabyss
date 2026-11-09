@@ -76,6 +76,12 @@ def deep_fort_1():
     cv.tunnel([(0, 0, 4), (0, 1, 14), (0, 2, 22)], 2.4, 4.6, seed=12)
     cv.room(0, 56, 30, 30, 26, 2, seed=13, wall_h=10)
     cv.paint(fort_theme(5011))
+    # 坂道から中庭への口 (洞の縁の段差 2 を均す)
+    for x in range(-3, 4):
+        for z in range(22, 31):
+            cv.put(x, 1, z, "minecraft:coarse_dirt")
+            for y in range(2, 6):
+                cv.put(x, y, z, AIR)
     D.common_marks(cv)
     # 砦: 外壁 (高さ 7、歩廊は 7 の上)。正面 (南、z = 30) に崩れた門
     fort_wall(cv, -20, 20, 32, 80, 7)
@@ -95,6 +101,12 @@ def deep_fort_1():
     # 中庭 → 歩廊への石段 (東西に一つずつ。段の下は詰める)
     stair_run(cv, 15, 70, 2, 7, "north", -1)
     stair_run(cv, -16, 70, 2, 7, "north", -1)
+    # 段の頂 (z 64、高さ 8) から歩廊 (x = ±18) へ渡す板
+    for sx in (17, -17):
+        for z in range(63, 66):
+            cv.put(sx, 8, z, "minecraft:spruce_planks")
+            cv.put(sx, 9, z, AIR)
+            cv.put(sx, 10, z, AIR)
     cv.mark("room_a", 0, 2, 52)
     for n, (x, z, kind) in enumerate(((-8, 44, "bandit"), (8, 46, "bandit"), (-4, 60, "dog"), (6, 62, "dog"), (0, 66, "bandit"),
                                       (-18, 40, "archer"), (18, 42, "archer")), 1):
@@ -279,6 +291,17 @@ def ice_theme(seed):
     return {"wall": wall, "floor": floor, "ceil": ceil}
 
 
+def ice_spire(cv, x, y, z, h):
+    """氷柱の林の一本 (固めた氷の太い根もと、青氷の芯、先は白い雪の氷)"""
+    for k in range(h):
+        r = max(0, int(round((h - k) / h * 2.0)))
+        for dx in range(-r, r + 1):
+            for dz in range(-r, r + 1):
+                if abs(dx) + abs(dz) <= r:
+                    m = "minecraft:blue_ice" if dx == 0 and dz == 0 and k < h * 0.8 else "minecraft:packed_ice" if k < h * 0.75 else "minecraft:snow_block"
+                    cv.put(x + dx, y + k, z + dz, m)
+
+
 def ice_finish(cv, seed):
     cv.lights(7, 12, seed + 2, height=4)
     icicles = ["minecraft:pointed_dripstone[thickness=tip,vertical_direction=down,waterlogged=false]"]
@@ -335,7 +358,7 @@ def ice_boss():
     cv.paint(ice_theme(7031))
     for k in range(9):
         a = math.radians(200 + k * 18)
-        D.spire(cv, int(round(15 * math.cos(a))), 0, int(round(14 * math.sin(a))), 6 + k % 3)
+        ice_spire(cv, int(round(15 * math.cos(a))), 0, int(round(14 * math.sin(a))), 6 + k % 3)
     cv.mark("entry", 0, 0, 22)
     cv.mark("cp", 0, 0, 22)
     cv.mark("boss", 0, 0, -3)
@@ -424,6 +447,16 @@ BUILDERS = {
 }
 
 
+def ice_hall_decor(c, cv):
+    """入口の間の飾り: 氷柱の林と、雪をかぶった荷"""
+    import dungeon_entrances as E
+    for (x, z, h) in ((-12, -44, 6), (12, -54, 7), (-10, -56, 5)):
+        ice_spire(cv, x, E.HALL_FLOOR, z, h)
+    for (x, z) in ((12, -44), (12, -45)):
+        c.cells[(x, E.HALL_FLOOR, z)] = "minecraft:barrel[facing=up,open=false]"
+    c.cells[(12, E.HALL_FLOOR + 1, -44)] = "minecraft:snow[layers=2]"
+
+
 def _entrances():
     import dungeon_entrances as E
     fort_layers = [(1, ["minecraft:grass_block", "minecraft:coarse_dirt", "minecraft:moss_block"]), (4, ["minecraft:stone", "minecraft:andesite", "minecraft:mossy_cobblestone"]),
@@ -452,7 +485,7 @@ def _entrances():
                                        E.themed_mouth(ice_layers, [("minecraft:snow_block", 3), ("minecraft:packed_ice", 2), ("minecraft:gravel", 1)],
                                                       "minecraft:stripped_spruce_log[axis=y]", "minecraft:stripped_spruce_log[axis=x]", "minecraft:packed_ice", 2701),
                                        E.themed_hall("minecraft:packed_ice", "minecraft:polished_deepslate", "minecraft:calcite", True,
-                                                     "minecraft:calcite", E.storm_hall_decor), "stone_brick", "minecraft:polished_deepslate"),
+                                                     "minecraft:calcite", ice_hall_decor), "stone_brick", "minecraft:polished_deepslate"),
         "deep_lava": lambda: E.entrance("deep_lava", D.ember_theme(2800), 2800,
                                         E.themed_mouth(lava_layers, [("minecraft:blackstone", 3), ("minecraft:basalt[axis=y]", 2), ("minecraft:magma_block", 1)],
                                                        "minecraft:dark_oak_log[axis=y]", "minecraft:dark_oak_log[axis=x]", "minecraft:polished_blackstone_bricks", 2801),

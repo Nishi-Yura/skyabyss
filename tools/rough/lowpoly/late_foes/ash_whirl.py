@@ -74,8 +74,25 @@ def build_c(k):
     return F, [eye_at(-0.8, 24.6, -3.3, 0.45), eye_at(0.8, 24.6, -3.3, 0.45)]
 
 
+def detail(F):
+    # 細部: 壺の口縁と取っ手・帯の模様・灰の粒・面の割れ目の熾
+    F += part("rim", tube("ring0", "clay", [(0, 10.9, 0), (0, 11.4, 0)], ra=[2.9, 2.9], sides=10, hint=(1, 0, 0)))
+    for s in (1, -1):
+        F += part(f"handle{s}", tube("ring0", "clay", [(s * 3.6, 8.4, 0), (s * 4.8, 7.4, 0), (s * 4.4, 5.6, 0), (s * 3.8, 5.0, 0)], ra=[0.4, 0.4, 0.4, 0.4], sides=5, hint=(0, 0, 1)))
+    for i, y in enumerate((4.2, 7.6)):
+        F += part(f"band{i}", tube("ring0", "soot", [(0, y, 0), (0, y + 0.4, 0)], ra=[4.25 - abs(y - 6) * 0.1, 4.25 - abs(y - 6) * 0.1], sides=10, hint=(1, 0, 0)))
+    for i in range(10):
+        a = math.radians(i * 37)
+        F += part(f"mote{i}", ellipsoid("ring2", "ash", (5.6 * math.cos(a), 16 + (i % 4) * 2.4, 5.6 * math.sin(a)), (0.4, 0.4, 0.4), segs=4, rings=1))
+    F += part("maskcrack", box("mask", "ember", (0.6, 24.4, -3.35), (0.3, 1.8, 0.2)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "c":
+        F = detail(F)
+    return F, eyes
 
 
 POSES = {

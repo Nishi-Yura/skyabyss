@@ -81,8 +81,25 @@ def build_c(k):
     return F, [eye_at(-3.4, 42.2, -4.4, 0.8), eye_at(3.4, 42.2, -4.4, 0.8)]
 
 
+def detail(F):
+    # 細部: 傘の縁の房 (下向きの小さな雲の舌)・触手の光る節・傘の上の小さな稲妻
+    for i in range(14):
+        a = math.radians(i * 360 / 14)
+        F += part(f"frill{i}", spike("bell", "snow", (5.4 * math.cos(a), 39.6, 5.4 * math.sin(a)), (0.2 * math.cos(a), -1, 0.2 * math.sin(a)), 1.6, 0.6, sides=4, rings=1))
+    for i in range(6):
+        a = math.radians(i * 60 + 30)
+        for j, y in enumerate((33.0, 29.0)):
+            F += part(f"bead{i}{j}", ellipsoid(f"t{i}", "volt", (3.4 * math.cos(a), y, 3.4 * math.sin(a)), (0.45, 0.45, 0.45), segs=5, rings=1))
+    for i, (x, z) in enumerate(((2.0, 1.0), (-1.6, -1.2), (0.4, 2.2))):
+        F += part(f"zap{i}", tube("bell", "volt", [(x, 46.0, z), (x + 0.6, 47.2, z), (x - 0.2, 47.8, z), (x + 0.4, 49.0, z)], ra=[0.25, 0.22, 0.2, 0.05], sides=4, hint=(1, 0, 0)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        F = detail(F)
+    return F, eyes
 
 
 POSES = {

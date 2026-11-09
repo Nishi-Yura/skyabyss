@@ -76,8 +76,26 @@ def build_c(k):
     return F, [eye_at(-1.4, 7.4, -7.8, 0.5), eye_at(1.4, 7.4, -7.8, 0.5)]
 
 
+def detail(F):
+    # 細部: 背のいぼ (煤) の群れ・指の爪・喉のしわ・目の上の瘤
+    for i in range(10):
+        a = math.radians(i * 36)
+        F += part(f"wart{i}", ellipsoid("body", "ash", (3.6 * math.cos(a), 9.8 + 0.6 * math.sin(a * 2), 0.6 + 3.8 * math.sin(a)), (0.5, 0.35, 0.5), segs=5, rings=1))
+    for b, sx, sz in (("leg_fl", 1, -1), ("leg_fr", -1, -1), ("leg_bl", 1, 1), ("leg_br", -1, 1)):
+        x0 = sx * (6.4 if sz > 0 else 4.8)
+        for j in range(3):
+            F += part(f"{b}_toe{j}", spike(b, "soot", (x0 + (j - 1) * 0.6, 0.4, sz * (5.6 if sz > 0 else 5.4) - 1.2), (0, -0.1, -1), 1.0, 0.25, sides=3, rings=1))
+    for i in range(3):
+        F += part(f"throat{i}", tube("jaw", "rust", [(-2.6, 6.2 - i * 0.3, -4.2 - i * 0.6), (0, 5.8 - i * 0.3, -4.8 - i * 0.6), (2.6, 6.2 - i * 0.3, -4.2 - i * 0.6)],
+                                   ra=[0.2, 0.25, 0.2], sides=4, hint=(0, 0, 1)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        F = detail(F)
+    return F, eyes
 
 
 POSES = {

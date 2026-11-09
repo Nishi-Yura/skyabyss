@@ -6,10 +6,10 @@
  "sheets": [
   "roughs_late_foes/temple_keeper.png"
  ],
- "extra": "骨 8 本。 三角形: A 342 / B 494 / C 502。埋まった部品の検査: A なし / B なし / C fin0-coil:1.0, fin1-coil:1.0, fin2-coil:1.0, fin3-coil:0.75, fin4-coil:0.5",
+ "extra": "骨 8 本。 三角形: A 526 / B 494 / C 502。埋まった部品の検査: A なし / B なし / C fin0-coil:1.0, fin1-coil:1.0, fin2-coil:1.0, fin3-coil:0.75, fin4-coil:0.5",
  "options": {
   "a": {
-   "name": "A 珊瑚に呑まれた祭司 (342 三角形)",
+   "name": "A 珊瑚に呑まれた祭司 (526 三角形)",
    "desc": "長衣の祭司の亡骸に珊瑚と貝が生え、三叉の槍を持つ。裾は光る潮に溶ける。神殿の『昔の祭司』の物語に一番合う。"
   },
   "b": {

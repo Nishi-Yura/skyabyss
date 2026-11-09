@@ -14,7 +14,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 地下のダンジョンの装飾品 4 品 (docs/design/55 の 5 章、形は 00 の 368〜371)。主を初めて倒した人に一つ (Dungeons.reward)。
+// 地下のダンジョンと奥のダンジョンの装飾品 8 品 (docs/design/55 の 5 章、形は 00 の 368〜371)。主を初めて倒した人に一つ (Dungeons.reward)。
 // 品の動き (装飾の枠・必要 Lv・効き目・説明) は野の装備の装飾 (WildAccessoryItem) と同じ。ただし野の装備の表 (WildGearTable) には入れない
 // (敵の落とし物・封の箱から出ない、ダンジョンだけの品)。メッシュと絵は tools/rough/lowpoly/accessories/dungeon_final.py
 public final class DungeonGear {
@@ -34,11 +34,21 @@ public final class DungeonGear {
             // 背晶の欠片: 技の待ち −4%、雷の傷 −20%
             row("storm_crystal_shard", GearTier.EPIC, 22, HIP_L, fx(WildEffect.Kind.COOLDOWN, 0.04), fx(WildEffect.Kind.LIGHTNING_TAKEN, -0.2)),
             // 炉の熾: 体力 +24、火の傷 −30%
-            row("mine_forge_ember", GearTier.EPIC, 28, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 2.4), fx(WildEffect.Kind.FIRE_TAKEN, -0.3)));
+            row("mine_forge_ember", GearTier.EPIC, 28, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 2.4), fx(WildEffect.Kind.FIRE_TAKEN, -0.3)),
+            // ---- 奥のダンジョン (55 の 7 章。tools/rough/lowpoly/accessories/deep_trinkets.py)
+            // 砦の骨の角笛: 体力 +16、5% で傷 +50%
+            row("fort_bone_horn", GearTier.RARE, 15, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 1.6), fx(WildEffect.Kind.CRIT, 0.05, 0.5)),
+            // 祭司の珊瑚の鈴: マナ +14、技の待ち −3%、水の中で息が長い
+            row("temple_coral_bell", GearTier.EPIC, 21, HIP_R, fx(WildEffect.Kind.MAX_MANA, 14), fx(WildEffect.Kind.COOLDOWN, 0.03), fx(WildEffect.Kind.BREATH, 1)),
+            // 大熊の氷の牙: 7% で傷 +60%、足 +4%
+            row("ice_bear_fang", GearTier.EPIC, 27, CHEST, fx(WildEffect.Kind.CRIT, 0.07, 0.6), fx(WildEffect.Kind.MOVE_SPEED, 0.04)),
+            // 大蛇の熾の鱗: 体力 +30、火のダメージ −40%
+            row("wyrm_ember_scale", GearTier.EPIC, 33, HIP_L, fx(WildEffect.Kind.MAX_HEALTH, 3.0), fx(WildEffect.Kind.FIRE_TAKEN, -0.4)));
 
     // ダンジョン → 品の id
     static final Map<Dungeon, String> BY_DUNGEON = Map.of(Dungeon.BONE_PIT, "pit_jaw_pendant", Dungeon.TIDE_CAVE, "tide_spiral_shell",
-            Dungeon.STORM_HOLLOW, "storm_crystal_shard", Dungeon.MOLTEN_MINE, "mine_forge_ember");
+            Dungeon.STORM_HOLLOW, "storm_crystal_shard", Dungeon.MOLTEN_MINE, "mine_forge_ember", Dungeon.DEEP_FORT, "fort_bone_horn",
+            Dungeon.DEEP_TEMPLE, "temple_coral_bell", Dungeon.DEEP_ICE, "ice_bear_fang", Dungeon.DEEP_LAVA, "wyrm_ember_scale");
     static final Map<String, DeferredItem<Item>> ITEM_OF = new java.util.HashMap<>();
 
     private DungeonGear() {

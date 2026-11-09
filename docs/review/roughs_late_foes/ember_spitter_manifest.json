@@ -6,10 +6,10 @@
  "sheets": [
   "roughs_late_foes/ember_spitter.png"
  ],
- "extra": "骨 10 本 (root > body > head > jaw / sac / 脚 4 / tail)。 三角形: A 422 / B 346 / C 290。埋まった部品の検査: A なし / B なし / C なし",
+ "extra": "骨 10 本 (root > body > head > jaw / sac / 脚 4 / tail)。 三角形: A 606 / B 346 / C 290。埋まった部品の検査: A wart8-head:0.55 / B なし / C なし",
  "options": {
   "a": {
-   "name": "A 熾のヒキガエル (422 三角形)",
+   "name": "A 熾のヒキガエル (606 三角形)",
    "desc": "煤色の大きな蛙。頬の袋が熾で光って膨らむのが予告。背にいぼの熾。ずんぐりして遠くからでも形が読める。"
   },
   "b": {

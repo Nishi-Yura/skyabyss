@@ -203,6 +203,7 @@
   "quest.skyabyss.clock.tower.free": "not yet entered",
   "quest.skyabyss.clock.tower.closed": "Not open yet (opens after choosing a finale ending)",
   "quest.skyabyss.clock.dungeon.status.4": "%1$s: %2$s · %3$s: %4$s · %5$s: %6$s · %7$s: %8$s",
+  "quest.skyabyss.clock.dungeon.status.8": "%1$s: %2$s · %3$s: %4$s · %5$s: %6$s · %7$s: %8$s · %9$s: %10$s · %11$s: %12$s · %13$s: %14$s · %15$s: %16$s",
   "quest.skyabyss.clock.fish_order.status": "Delivered today in %1$s / %2$s lands · this week in %3$s / %4$s lands",
   "quest.skyabyss.clock.fish_week.none": "No catch this week yet",
   "quest.skyabyss.clock.fish_week.status": "Your best this week: %1$s %2$s cm",

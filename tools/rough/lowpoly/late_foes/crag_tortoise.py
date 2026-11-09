@@ -96,8 +96,28 @@ def build_c(k):
     return F, [eye_at(-1.8, 7.2, -10.5, 0.6), eye_at(1.8, 7.2, -10.5, 0.6)]
 
 
+def detail(F):
+    # 細部: 段の縁の雪の帯・小さな水晶の群れ・脚の鱗・爪・首のしわ
+    for i, (y, r) in enumerate(((9.6, 6.6), (12.6, 5.0))):
+        for k in range(10):
+            a = math.radians(k * 36 + i * 18)
+            F += part(f"snow{i}{k}", ellipsoid("body", "snow", (r * math.cos(a), y, 0.3 * i + r * 1.18 * math.sin(a)), (1.0, 0.35, 0.9), segs=5, rings=1))
+    for i, (x, z) in enumerate(((3.4, -2.6), (-3.6, 2.2), (2.6, 4.0))):
+        F += part(f"cry{i}", spike("body", "volt", (x, 10.6, z), (x * 0.1, 1, z * 0.1), 1.8, 0.45, sides=4, rings=1))
+    for b, sx, sz in (("leg_fl", 1, -1), ("leg_fr", -1, -1), ("leg_bl", 1, 1), ("leg_br", -1, 1)):
+        for j in range(3):
+            F += part(f"{b}_nail{j}", spike(b, "dark", (sx * 6.4 + (j - 1) * 0.6, 0.5, sz * 5.6 - 1.4), (0, -0.2, -1), 0.8, 0.25, sides=3, rings=1))
+        F += part(f"{b}_scale", ellipsoid(b, "crag", (sx * 6.2, 3.4, sz * 5.4), (1.0, 0.6, 1.0), segs=5, rings=1))
+    for i in range(3):
+        F += part(f"neckfold{i}", tube("head", "skin", [(-1.8, 7.0, -6.6 - i * 0.8), (0, 6.2, -6.8 - i * 0.8), (1.8, 7.0, -6.6 - i * 0.8)], ra=[0.25, 0.3, 0.25], sides=4, hint=(0, 0, 1)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        F = detail(F)
+    return F, eyes
 
 
 POSES = {

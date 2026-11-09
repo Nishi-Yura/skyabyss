@@ -5,6 +5,8 @@ A 骨鎧の野盗王: 岩鯨の骨を打ち付けた鎧、骨の兜、片刃の�
 B 肋骨の盾の大男: 背の高い大男が岩鯨の肋骨を盾にし、丸太の大槌
 C 鉄仮面の弩手長: 鉄の仮面と厚い外套、重い連弩 (遠くから撃つ主。寄ると短剣)
 """
+import math
+
 from lf import *  # noqa: F401,F403
 from lf import box, run, part, mat, eye_at, storm, biped, grow, HUMAN_BONES, rows_std
 
@@ -75,8 +77,29 @@ def build_c(k):
     return F, []
 
 
+def detail(F):
+    # 細部: 腰の頭骨の飾りと袋・鉈の刃の欠け・骨鎧の鋲・兜の角・肩布
+    for i, x in enumerate((-2.6, 2.8)):
+        F += part(f"skull{i}", ellipsoid("body", "bone", (x, 12.6, -2.9), (0.8, 0.9, 0.7), segs=6, rings=2))
+        F += part(f"socket{i}", box("body", "dark", (x, 12.8, -3.6), (0.8, 0.3, 0.2)))
+    F += part("pouch2", box("body", "leather", (-3.4, 12.2, -1.4), (1.8, 2.0, 1.4), taper=(0.9, 0.8)))
+    for i, (x, y) in enumerate(((-2.2, 20.6), (2.2, 20.6), (-2.2, 16.6), (2.2, 16.6))):
+        F += part(f"rivet{i}", ellipsoid("body", "iron", (x, y, -3.5), (0.35, 0.35, 0.25), segs=4, rings=1))
+    for s in (1, -1):
+        F += part(f"helmhorn{s}", spike("head", "bone", (s * 2.2, 28.4, 0.2), (s * 0.8, 0.8, 0.2), 2.4, 0.5, sides=4, rings=2, bend=(0, 0.6, 0)))
+        F += part(f"mantle{s}", box("body", "cloth", (s * 5.4, 19.6, 1.0), (2.6, 3.4, 0.4), taper=(0.8, 1.0)))
+    for i, y in enumerate((1.0, 4.0, 7.0)):
+        F += part(f"nick{i}", box("weapon", "dark", (-6.2, y, -2.6), (1.1, 0.6, 0.6)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        extra = detail([])
+        grow(extra, {}, K)
+        F += extra
+    return F, eyes
 
 
 POSES = {"idle": {},

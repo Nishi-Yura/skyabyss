@@ -85,7 +85,7 @@ def manifest_entry(spec, results, out_png_rel):
             "sheets": [out_png_rel], "extra": extra, "options": opts, "role": spec.get("role", ""), "land": spec.get("land", "")}
 
 
-def run(spec, build, pal, bones, poses, hint=128):
+def run(spec, build, pal, bones, poses, hint=256):
     OUT.mkdir(parents=True, exist_ok=True)
     results = []
     for k in "abc":

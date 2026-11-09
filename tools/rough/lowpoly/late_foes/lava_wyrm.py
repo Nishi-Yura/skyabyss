@@ -80,8 +80,27 @@ def build_c(k):
     return F, []
 
 
+def detail(F):
+    # 細部: 背の稜の鱗の列・腹の板・顎の牙・目の上の角・尾の先の熾
+    pts = [(0, 1.0, 22.0), (2.0, 1.4, 16.0), (-1.6, 2.0, 10.0), (0.6, 3.0, 4.0), (0, 6.0, -1.0), (0, 12.0, -5.0)]
+    bones_ = ["seg4", "seg3", "seg2", "seg1", "body", "neck"]
+    for i, (p, b) in enumerate(zip(pts, bones_)):
+        F += part(f"dorsal{i}", spike(b, "basalt", (p[0], p[1] + 1.6 + i * 0.35, p[2]), (0, 1, 0.4), 1.4, 0.45, sides=4, rings=1))
+        F += part(f"belly{i}", ellipsoid(b, "rust", (p[0], p[1] - 1.2 - i * 0.2, p[2]), (1.2 + i * 0.25, 0.4, 1.0), segs=5, rings=1))
+    for s in (1, -1):
+        F += part(f"fang{s}", spike("jaw", "basalt", (s * 1.4, 18.6, -13.4), (0, -1, -0.3), 1.4, 0.35, sides=3, rings=1))
+        F += part(f"brow{s}", spike("head", "obsid", (s * 1.6, 21.8, -10.6), (s * 0.4, 1, -0.4), 1.4, 0.4, sides=4, rings=1))
+    F += part("tailember", ellipsoid("seg4", "ember", (0, 1.0, 23.0), (0.8, 0.6, 1.0), segs=5, rings=1))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        extra = detail([])
+        grow(extra, {}, K)
+        F += extra
+    return F, eyes
 
 
 POSES = {"idle": {}, "breath": {"neck": (-20, 0, 0), "head": (-14, 0, 0), "jaw": (35, 0, 0), "arm_l": (-90, 0, 20), "arm_r": (-90, 0, -20)},

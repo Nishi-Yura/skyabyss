@@ -6,10 +6,10 @@
  "sheets": [
   "roughs_late_foes/bolt_slinger.png"
  ],
- "extra": "骨 8 本 (root > body > head / arm_l / arm_r > stone / leg_l / leg_r)。 三角形: A 580 / B 526 / C 530。埋まった部品の検査: A なし / B なし / C なし",
+ "extra": "骨 8 本 (root > body > head / arm_l / arm_r > stone / leg_l / leg_r)。 三角形: A 786 / B 526 / C 530。埋まった部品の検査: A hem2-torso:0.75, hem3-torso:0.75 / B なし / C なし",
  "options": {
   "a": {
-   "name": "A 岩角の投石手 (580 三角形)",
+   "name": "A 岩角の投石手 (786 三角形)",
    "desc": "巻いた角の山羊の頭の二足。灰の毛の外套と腰の石の袋、右手の投石紐に光る雷石。獣の脚で跳び退く。高地の狩人らしく、雷狼の群れの「後ろの射手」と読める。"
   },
   "b": {

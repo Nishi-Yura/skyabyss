@@ -90,8 +90,29 @@ def build_c(k):
     return F, [eye_at(-2.6, 7.6, -7.4, 0.5), eye_at(2.6, 7.6, -7.4, 0.5)]
 
 
+def detail(F):
+    # 細部: 板の稜の棘・鋏の歯・脚の関節の棘・尾の節の輪
+    for i in range(4):
+        z = -3.6 + i * 2.6
+        F += part(f"ridge{i}", spike("body", "obsid", (0, 7.6, z), (0, 1, 0.3), 1.4, 0.4, sides=4, rings=1))
+        for s in (1, -1):
+            F += part(f"edge{i}{s}", spike("body", "obsid", (s * (4.0 - 0.3 * i), 5.6, z), (s, 0.3, 0), 1.0, 0.3, sides=3, rings=1))
+    for sx, b in ((1, "claw_l"), (-1, "claw_r")):
+        for j in range(3):
+            F += part(f"{b}_tooth{j}", spike(b, "basalt", (sx * (2.4 + 0.6 * j), 5.0, -12.6 + j * 0.3), (-sx, 0, 0), 0.8, 0.22, sides=3, rings=1))
+    for i, (y, z) in enumerate(((7.6, 6.6), (10.4, 8.4), (13.2, 8.2))):
+        F += part(f"tailring{i}", tube("tail", "obsid", [(0, y, z - 0.3), (0, y + 0.3, z + 0.3)], ra=[1.5 - 0.15 * i, 1.5 - 0.15 * i], sides=6, hint=(1, 0, 0)))
+    for i, z in ((1, -2.6), (2, 0.4), (3, 3.4)):
+        for sx, side in ((1, "l"), (-1, "r")):
+            F += part(f"knee{side}{i}", spike(f"leg_{side}{i}", "obsid", (sx * 6.4, 5.6, z), (sx * 0.3, 1, 0), 0.9, 0.25, sides=3, rings=1))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        F = detail(F)
+    return F, eyes
 
 
 POSES = {

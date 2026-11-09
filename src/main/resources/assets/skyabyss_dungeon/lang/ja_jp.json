@@ -296,5 +296,17 @@
   "dungeon.skyabyss.deep_lava": "熔岩の管の坑",
   "dungeon.skyabyss.deep_lava.floor0": "一層　熔岩の管",
   "dungeon.skyabyss.deep_lava.floor1": "管の主",
-  "map.skyabyss.poi.dungeon_deep_lava": "熔岩の管の坑"
+  "map.skyabyss.poi.dungeon_deep_lava": "熔岩の管の坑",
+  "item.skyabyss.fort_bone_horn": "砦の骨の角笛",
+  "item.skyabyss.fort_bone_horn.desc": "アクセサリー。体力 +16、5% でダメージ +50%",
+  "item.skyabyss.fort_bone_horn.story": "「野盗王が手下を呼んだ角笛。岩鯨の骨でできている」",
+  "item.skyabyss.temple_coral_bell": "祭司の珊瑚の鈴",
+  "item.skyabyss.temple_coral_bell.desc": "アクセサリー。マナ +14、技の待ち −3%、水の中で息が長い",
+  "item.skyabyss.temple_coral_bell.story": "「沈んだ神殿で潮を呼んだ鈴。振ると遠い波の音がする」",
+  "item.skyabyss.ice_bear_fang": "大熊の氷の牙",
+  "item.skyabyss.ice_bear_fang.desc": "アクセサリー。7% でダメージ +60%、足 +4%",
+  "item.skyabyss.ice_bear_fang.story": "「氷鎧の大熊の牙。氷の留め具は溶けない」",
+  "item.skyabyss.wyrm_ember_scale": "大蛇の熾の鱗",
+  "item.skyabyss.wyrm_ember_scale.desc": "アクセサリー。体力 +30、火のダメージ −40%",
+  "item.skyabyss.wyrm_ember_scale.story": "「熔岩の大蛇の鱗。継ぎ目の熾はまだ温かい」"
 }

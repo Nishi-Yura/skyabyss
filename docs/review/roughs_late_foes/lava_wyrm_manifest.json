@@ -6,10 +6,10 @@
  "sheets": [
   "roughs_late_foes/lava_wyrm.png"
  ],
- "extra": "骨 11 本。 三角形: A 330 / B 672 / C 404。埋まった部品の検査: A throat-body5:0.48, crest4-body3:0.75 / B なし / C なし",
+ "extra": "骨 11 本。 三角形: A 438 / B 672 / C 404。埋まった部品の検査: A throat-body5:0.48, crest4-body3:0.75, dorsal4-body4:0.75, belly4-body3:0.55, dorsal5-body5:1.0, belly5-body4:0.8 / B なし / C なし",
  "options": {
   "a": {
-   "name": "A 熔岩の大蛇 (330 三角形)",
+   "name": "A 熔岩の大蛇 (438 三角形)",
    "desc": "黒石の鱗の大蛇。鱗の継ぎ目と喉が熾で光る。床の熔岩から上体を出して吐き、潜っては飛び出す。熔岩の管の主として一番まっすぐ。"
   },
   "b": {

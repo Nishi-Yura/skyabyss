@@ -296,5 +296,17 @@
   "dungeon.skyabyss.deep_lava": "Lava Tube Pit",
   "dungeon.skyabyss.deep_lava.floor0": "Floor 1 - Lava Tube",
   "dungeon.skyabyss.deep_lava.floor1": "Tube Lord",
-  "map.skyabyss.poi.dungeon_deep_lava": "Lava Tube Pit"
+  "map.skyabyss.poi.dungeon_deep_lava": "Lava Tube Pit",
+  "item.skyabyss.fort_bone_horn": "Fort Bone Horn",
+  "item.skyabyss.fort_bone_horn.desc": "Accessory. Health +16, 5% chance of +50% damage",
+  "item.skyabyss.fort_bone_horn.story": "\"The bandit king's horn, carved from stone-whale bone.\"",
+  "item.skyabyss.temple_coral_bell": "Priest's Coral Bell",
+  "item.skyabyss.temple_coral_bell.desc": "Accessory. Mana +14, skill cooldowns -3%, longer breath underwater",
+  "item.skyabyss.temple_coral_bell.story": "\"The sunken temple's tide bell. It rings with distant waves.\"",
+  "item.skyabyss.ice_bear_fang": "Ice Bear Fang",
+  "item.skyabyss.ice_bear_fang.desc": "Accessory. 7% chance of +60% damage, speed +4%",
+  "item.skyabyss.ice_bear_fang.story": "\"A fang of the ice-mailed bear. Its ice clasp never melts.\"",
+  "item.skyabyss.wyrm_ember_scale": "Wyrm Ember Scale",
+  "item.skyabyss.wyrm_ember_scale.desc": "Accessory. Health +30, fire damage -40%",
+  "item.skyabyss.wyrm_ember_scale.story": "\"A scale of the lava wyrm. The embers in its seams are still warm.\""
 }

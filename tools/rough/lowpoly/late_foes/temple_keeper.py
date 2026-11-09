@@ -88,8 +88,29 @@ def build_c(k):
     return F, [eye_at(-1.6 * K, 24.2 * K, -5.6 * K, 0.6 * K), eye_at(1.6 * K, 24.2 * K, -5.6 * K, 0.6 * K)]
 
 
+def detail(F):
+    # 細部: 長衣の裾の藤壺・胸の貝の首飾り・袖の破れの房・珊瑚の小枝・頭巾の貝
+    for i in range(8):
+        a = math.radians(i * 45 + 10)
+        F += part(f"barnacle{i}", ellipsoid("body", "shell", (4.8 * math.cos(a), 2.4 + (i % 3) * 1.2, 4.8 * math.sin(a)), (0.6, 0.5, 0.6), segs=5, rings=1))
+    for i in range(5):
+        a = math.radians(200 + i * 35)
+        F += part(f"neckshell{i}", ellipsoid("body", "shell", (2.4 * math.cos(a), 21.4 - abs(i - 2) * 0.5, -2.6 + 0.4 * math.sin(a)), (0.45, 0.45, 0.3), segs=5, rings=1))
+    for sx, b in ((1, "arm_l"), (-1, "arm_r")):
+        for j in range(3):
+            F += part(f"{b}_rag{j}", spike(b, "robe", (sx * (5.6 + j * 0.3), 12.8, -0.6 + j * 0.6), (0, -1, 0), 1.8, 0.4, sides=3, rings=1))
+    for i, (p, d) in enumerate((((-2.6, 18.0, -2.8), (-0.4, 1, -0.6)), ((2.2, 8.0, -4.2), (0.6, 0.4, -1)), ((0, 25.0, 2.2), (0, 1, 0.5)))):
+        F += part(f"twig{i}", spike("body" if i < 2 else "head", "coral", p, d, 1.8, 0.4, sides=4, rings=2, bend=(0, 0.4, 0)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        extra = detail([])
+        grow(extra, {}, K)
+        F += extra
+    return F, eyes
 
 
 POSES = {"idle": {}, "thrust": {"body": (-10, 0, 0), "arm_r": (-80, 0, 0), "head": (-10, 0, 0)},

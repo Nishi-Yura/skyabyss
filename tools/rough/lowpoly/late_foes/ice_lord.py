@@ -92,8 +92,29 @@ def build_c(k):
     return F, [eye_at(-1.0 * K, 21.6 * K, -3.4 * K, 0.5 * K), eye_at(1.0 * K, 21.6 * K, -3.4 * K, 0.5 * K)]
 
 
+def detail(F):
+    # 細部: 首まわりの毛の房・肩の氷の小板・爪の数・背の氷の筋
+    for i in range(10):
+        a = math.radians(180 + i * 18)
+        F += part(f"ruff{i}", spike("head", "fur", (3.2 * math.cos(a), 14.6 + 1.6 * math.sin(a), -7.6), (math.cos(a), math.sin(a) * 0.6, 0.4), 1.6, 0.6, sides=4, rings=1))
+    for sx, b in ((1, "arm_l"), (-1, "arm_r")):
+        for j in range(2):
+            F += part(f"{b}_ice{j}", spike(b, "ice", (sx * 5.6, 12.6 - j * 2.4, -4.4), (sx * 0.8, 0.6, -0.2), 1.6, 0.5, sides=4, rings=1))
+    for i in range(5):
+        F += part(f"backvein{i}", box("back", "volt", (0, 16.6 - i * 0.2, -4.0 + i * 2.0), (0.4, 0.3, 1.2)))
+    for sx, b in ((1, "leg_l"), (-1, "leg_r")):
+        for j in range(3):
+            F += part(f"{b}_claw{j}", spike(b, "ice", (sx * 4.6 + (j - 1) * 0.8, 0.7, 2.0), (0, -0.3, -1), 1.0, 0.3, sides=3, rings=1))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        extra = detail([])
+        grow(extra, {}, K)
+        F += extra
+    return F, eyes
 
 
 POSES = {"idle": {}, "sweep": {"body": (0, 25, 0), "arm_r": (-60, 0, -40), "head": (-10, 0, 0)},

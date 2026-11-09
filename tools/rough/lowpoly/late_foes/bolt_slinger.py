@@ -126,8 +126,31 @@ def build_c(k):
     return F, [eye_at(-0.9, 22.6, -5.6, 0.5), eye_at(0.9, 22.6, -5.6, 0.5)]
 
 
+def detail(F):
+    # 細部 (2026-11-09 の質上げ): 肩の毛の房・角の節・腰の石の袋の紐と房・蹄の割れ目・鼻輪・外套の裾の房
+    for sx in (1, -1):
+        for i, (dy, dz) in enumerate(((0.6, -0.4), (0.0, 0.8), (-0.6, 1.6))):
+            F += part(f"tuft{sx}{i}", spike("body", "cloud", (sx * 4.6, 21.2 + dy, dz), (sx * 0.8, 0.5, 0.3), 1.6, 0.6, sides=4, rings=1))
+        for j in range(3):
+            t = 0.25 + j * 0.22
+            F += part(f"hornring{sx}{j}", tube("head", "horn", [(sx * (1.2 + 2.0 * t), 26.8 + 1.4 * t, -1.0 + 1.2 * t), (sx * (1.3 + 2.0 * t), 27.0 + 1.4 * t, -0.9 + 1.2 * t)],
+                                             ra=[0.85 - 0.25 * t, 0.8 - 0.25 * t], sides=6, hint=(0, 0, 1)))
+        F += part(f"hoofsplit{sx}", box(("leg_l" if sx > 0 else "leg_r"), "dark", (sx * 2.2, 0.8, -2.2), (0.3, 1.4, 0.6)))
+    F += part("noseRing", tube("head", "volt", [(-0.6, 23.6, -5.2), (0, 23.2, -5.5), (0.6, 23.6, -5.2)], ra=[0.18, 0.18, 0.18], sides=4, hint=(0, 0, 1)))
+    for i, x in enumerate((2.6, 3.2, 3.8)):
+        F += part(f"pouchstone{i}", ellipsoid("body", "crag", (x, 13.8, -2.1), (0.45, 0.4, 0.4), segs=5, rings=1))
+    for i in range(6):
+        a = math.radians(200 + i * 28)
+        F += part(f"hem{i}", spike("body", "fur", (4.6 * math.cos(a), 14.6, 1.6 + 2.2 * math.sin(a) * 0.5), (0, -1, 0.2), 1.8, 0.5, sides=4, rings=1))
+    F += part("stonebelt", tube("body", "leather", [(-3.6, 21.0, -2.2), (0, 16.4, -3.2), (3.6, 13.0, -2.0)], ra=[0.3, 0.3, 0.3], sides=4, hint=(0, 0, 1)))
+    return F
+
+
 def build(k):
-    return {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    F, eyes = {"a": build_a, "b": build_b, "c": build_c}[k](k)
+    if k == "a":
+        F = detail(F)
+    return F, eyes
 
 
 POSES = {

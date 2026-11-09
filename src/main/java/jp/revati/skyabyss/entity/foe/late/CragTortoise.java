@@ -32,7 +32,7 @@ public class CragTortoise extends LateFoe {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, 45)
+                .add(Attributes.MAX_HEALTH, 38)
                 .add(Attributes.ATTACK_DAMAGE, 6)
                 .add(Attributes.MOVEMENT_SPEED, 0.16)
                 .add(Attributes.FOLLOW_RANGE, 20)
