@@ -242,12 +242,12 @@ public final class Towers {
         rollBox(p, false);
         if (p.getRandom().nextFloat() < jp.revati.skyabyss.tower.gear.TowerGear.SCROLL_CHANCE) {
             jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SECRET_SCROLL.get()));
-            Notice.gain(p, "message.skyabyss.tower.scroll");
+            Notice.gainLog(p, "message.skyabyss.tower.scroll");
         }
         int shards = (int) Math.round(jp.revati.skyabyss.tower.gear.TowerGear.SHARDS_PER_CLEAR * TowerWagers.shardScale(run == null ? java.util.Set.of() : run.wagers));
         jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(), shards));
         jp.revati.skyabyss.facility.Coins.give(p, jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
-        Notice.gain(p, "message.skyabyss.tower.reward", shards,
+        Notice.gainLog(p, "message.skyabyss.tower.reward", shards,
                 jp.revati.skyabyss.tower.gear.TowerGear.COINS_PER_CLEAR);
     }
 
@@ -302,7 +302,7 @@ public final class Towers {
         net.minecraft.world.item.Item box = jp.revati.skyabyss.loot.box.LootBoxSetup.item(jp.revati.skyabyss.loot.box.BoxKind.byId("box_tower"));
         if (box != null) {
             jp.revati.skyabyss.quest.Quests.give(p, new net.minecraft.world.item.ItemStack(box));
-            Notice.gain(p, "message.skyabyss.tower.box");
+            Notice.gainLog(p, "message.skyabyss.tower.box");
         }
         return true;
     }

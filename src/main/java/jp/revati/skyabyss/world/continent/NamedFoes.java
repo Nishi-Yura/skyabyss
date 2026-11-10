@@ -298,7 +298,7 @@ public final class NamedFoes {
             jp.revati.skyabyss.facility.Coins.give(p, d.coins());
             jp.revati.skyabyss.advancement.Beats.fire(p, "named:any");
             jp.revati.skyabyss.advancement.Beats.fire(p, "named:" + RegionSpawner.REGIONS[region]);
-            Notice.gain(p, "message.skyabyss.named.down", e.getDisplayName(), d.coins());
+            Notice.gainLog(p, "message.skyabyss.named.down", e.getDisplayName(), d.coins());
             jp.revati.skyabyss.endgame.RegionPoints.add(p, region, 1);
         }
     }

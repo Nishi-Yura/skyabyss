@@ -367,7 +367,7 @@ public final class LootBoxes {
         }
         // 品の名は画面のルーレットが見せる (知らせの欄に先に出すと当たりが分かってしまう)。画面のない開け方 (自己テストなど) だけ一行
         if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && !BoxService.viewing(p)) {
-            Notice.gain(p, Component.translatable("message.skyabyss.box.opened", new ItemStack(LootBoxSetup.item(kind)).getHoverName(),
+            Notice.gainLog(p, Component.translatable("message.skyabyss.box.opened", new ItemStack(LootBoxSetup.item(kind)).getHoverName(),
                     ComponentUtils.formatList(names, Component.literal(" "))));
         }
         // ヒロイック以上: 頭の上に小さな光 (近くの人にも見える。チャットには出さない)

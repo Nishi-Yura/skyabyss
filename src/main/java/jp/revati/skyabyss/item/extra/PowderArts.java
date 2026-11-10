@@ -498,7 +498,7 @@ public final class PowderArts {
             e.setPickUpDelay(10);
             p.level().addFreshEntity(e);
         }
-        jp.revati.skyabyss.notice.Notice.gain(p, Component.translatable("message.skyabyss.powder.named", name));
+        jp.revati.skyabyss.notice.Notice.gainLog(p, Component.translatable("message.skyabyss.powder.named", name));
         p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.2f);
     }
 

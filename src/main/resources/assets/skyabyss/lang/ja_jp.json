@@ -776,7 +776,7 @@
   "commands.skyabyss.chapter1.set": "%s の「巨神の背に乗った」を %s にした",
   "subtitles.skyabyss.peak_scrape": "遠くで岩が擦れる",
   "subtitles.skyabyss.sky_eye_presence": "雲の上の気配",
-  "gui.skyabyss.notice.head.gain": "獲得",
+  "gui.skyabyss.notice.head.gain": "達成",
   "gui.skyabyss.notice.head.unlock": "進展",
   "gui.skyabyss.notice.log": "知らせの記録",
   "gui.skyabyss.notice.log_empty": "まだ何も流れていない",
@@ -3173,5 +3173,16 @@
   "raid.skyabyss.hud.foes_left": "敵 残り %s",
   "message.skyabyss.dungeon.wipe": "全滅した。最初の層からやり直し",
   "message.skyabyss.dungeon.woke_start": "最初の層で目を覚ました",
-  "message.skyabyss.raid.wipe_restart": "全滅した。順路の最初の部屋からやり直し"
+  "message.skyabyss.raid.wipe_restart": "全滅した。順路の最初の部屋からやり直し",
+  "gui.skyabyss.gear.hp": "体力",
+  "gui.skyabyss.gear.mana": "マナ",
+  "gui.skyabyss.gear.xp": "経験",
+  "gui.skyabyss.gear.attack": "攻撃",
+  "gui.skyabyss.gear.armor": "守り",
+  "gui.skyabyss.gear.bag": "袋",
+  "gui.skyabyss.gear.hand": "手もと",
+  "gui.skyabyss.gear.skills": "スキル",
+  "hud.skyabyss.challenge.herald": "前触れの群れ",
+  "hud.skyabyss.challenge.abyss_pack": "深淵の群れ",
+  "hud.skyabyss.challenge.wave": "群れ %1$s／%2$s"
 }

@@ -202,7 +202,7 @@ public final class WorldEvents {
                 int left = WorldEventFight.heraldLeft(level, e);
                 for (ServerPlayer p : level.players()) {
                     if (!p.isSpectator() && Math.hypot(p.getX() - e.spot.getX(), p.getZ() - e.spot.getZ()) <= SPAWN_NEAR) {
-                        Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.world_event.herald_left", left));
+                        jp.revati.skyabyss.trial.ChallengeBand.foes(p, Component.translatable("hud.skyabyss.challenge.herald"), Component.empty(), left);
                     }
                 }
             }
@@ -549,7 +549,7 @@ public final class WorldEvents {
                 Circuits.giveBox(p, BoxKind.rarity(tier, band));
             }
             RegionPoints.add(p, e.region, 4);
-            Notice.gain(p, "message.skyabyss.world_event.down", name, pct, coins, boxes);
+            Notice.gainLog(p, "message.skyabyss.world_event.down", name, pct, coins, boxes);
             paid.add(p);
         }
         return paid;

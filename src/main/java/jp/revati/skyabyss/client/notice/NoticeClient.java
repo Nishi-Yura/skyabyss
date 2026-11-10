@@ -255,6 +255,10 @@ public final class NoticeClient {
             }
         }
         java.util.List<net.minecraft.world.item.ItemStack> items = payload.items();
+        // 品の無い知らせ (Notice.gainLog) は記録だけ
+        if (items.isEmpty()) {
+            return;
+        }
         gate(NoticeGate.P_CARD, CARD_GAP, () -> {
             Component head = Component.translatable("gui.skyabyss.notice.head.gain");
             Component body = Notice.body(payload.text());

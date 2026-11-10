@@ -109,7 +109,7 @@ public final class AbyssMarks {
         }
         Quests.signalWithParty(level, List.of(p), SIGNAL_MARK + key);
         int n = count(p, layer);
-        Notice.gain(p, Component.translatable("message.skyabyss.abyss_v2.mark_got", Component.translatable("abyss_v2.skyabyss.mark." + key), n));
+        Notice.gainLog(p, Component.translatable("message.skyabyss.abyss_v2.mark_got", Component.translatable("abyss_v2.skyabyss.mark." + key), n));
         for (ServerPlayer mate : Parties.onlineMembers(p.server, Parties.of(p))) {
             if (mate != p) {
                 Notice.hint(mate, "message.skyabyss.abyss_v2.mark_mate", p.getDisplayName(), Component.translatable("abyss_v2.skyabyss.mark." + key));

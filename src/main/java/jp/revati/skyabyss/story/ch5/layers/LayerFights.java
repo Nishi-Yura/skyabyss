@@ -137,7 +137,8 @@ public final class LayerFights {
         // 残りの敵の数 (全部倒すと次の波。2026-11-08 の声「何体残ってるか出して」)
         if (left > 0 && now % 20 == 0) {
             for (ServerPlayer p : inside) {
-                p.displayClientMessage(Component.translatable("message.skyabyss.abyss_v2.wave_left", run.wave + 1, NEST_WAVES[k].length, left), true);
+                jp.revati.skyabyss.trial.ChallengeBand.foes(p, Component.translatable("hud.skyabyss.challenge.abyss_pack"),
+                        Component.translatable("hud.skyabyss.challenge.wave", run.wave + 1, NEST_WAVES[k].length), left);
             }
         }
         if (left > 0 || now < run.nextAt) {

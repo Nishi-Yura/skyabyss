@@ -352,7 +352,7 @@
   "item.skyabyss.wild_fulgurite_necklace": "雷管石の首飾り",
   "item.skyabyss.wild_fulgurite_necklace.desc": "装飾。雷のダメージ −30%、打たれると 10% で雷を返す",
   "item.skyabyss.wild_ash_hourglass_charm": "灰の砂時計の飾り",
-  "item.skyabyss.wild_ash_hourglass_charm.desc": "装飾。クールダウン −8%。敵を倒すと技の待ちが 1 秒縮む",
+  "item.skyabyss.wild_ash_hourglass_charm.desc": "装飾。クールダウン −8%。敵を倒すとクールダウンが 1 秒縮む",
   "item.skyabyss.wild_deep_eye_charm": "深みの眼の護り",
   "item.skyabyss.wild_deep_eye_charm.desc": "装飾。会心 12%（×1.6）。会心の次の一撃も会心",
   "item.skyabyss.wild_meteor_ring": "隕鉄の環",

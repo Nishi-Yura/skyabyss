@@ -324,7 +324,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         recess(g, x, y, LIST);
         recess(g, x, y, INFO);
         if (kinds.isEmpty()) {
-            lines(g, List.of(Component.translatable("skyabyss_box.screen.none")), x + INFO.x() + Golden.S8, y + INFO.y() + Golden.S5, INFO.w() - 2 * Golden.S8, y + INFO.bottom(), DIM);
+            Golden.empty(g, font, new Golden.Box(x + INFO.x(), y + INFO.y(), INFO.w(), INFO.h()), Component.translatable("skyabyss_box.screen.none"));
             return;
         }
         int cs = Golden.S21;

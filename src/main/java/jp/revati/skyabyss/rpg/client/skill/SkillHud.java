@@ -284,7 +284,7 @@ public final class SkillHud {
     static final ResourceLocation ICONS4 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons4.png");
 
     // 100 以上は icons2.png (淵・前世の技・木の印・紋・職の新しい技。256x192)
-    static void drawIcon(GuiGraphics g, int index, int x, int y) {
+    public static void drawIcon(GuiGraphics g, int index, int x, int y) {
         drawIcon(g, index, x, y, 16);
     }
 

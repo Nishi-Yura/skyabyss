@@ -449,13 +449,13 @@ public final class Dungeons {
         Quests.give(p, new ItemStack(ModItems.socketShard(d.element).get(), mood == DungeonMood.SWARM ? 3 : 2));
         Notice.place(p, Component.translatable("message.skyabyss.dungeon.clear_title"), Component.translatable(d.nameKey()));
         p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1f, 1f);
-        Notice.gain(p, "message.skyabyss.dungeon.reward", xp, coins);
+        Notice.gainLog(p, "message.skyabyss.dungeon.reward", xp, coins);
         if (box) {
             BoxKind kind = BoxKind.rarity(boxTier(d, deep), (d.level - 1) / 10 + 1);
             var item = kind == null ? null : LootBoxSetup.item(kind);
             if (item != null) {
                 Quests.give(p, new ItemStack(item));
-                Notice.gain(p, "message.skyabyss.dungeon.box");
+                Notice.gainLog(p, "message.skyabyss.dungeon.box");
             }
         }
         if (clears == 1) {

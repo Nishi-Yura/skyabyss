@@ -567,7 +567,7 @@ public final class SkillActions {
         return null;
     }
 
-    private static final java.util.Map<java.util.UUID, Integer> BONE_COUNT = new java.util.HashMap<>();
+    private static final java.util.Map<java.util.UUID, Integer> BONE_COUNT = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.HashMap<>());
 
     private static double distanceToSegment(Vec3 p, Vec3 a, Vec3 b) {
         double ax = b.x - a.x;

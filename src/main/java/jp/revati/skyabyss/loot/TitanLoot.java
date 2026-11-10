@@ -365,7 +365,7 @@ public final class TitanLoot {
             } else if (canReceive(player) && jp.revati.skyabyss.record.Keepsakes.fragmentMissing(player)) {
                 // 受け取ったのにどこにも見当たらない欠片は、鼓動のそばで再び見つかる (11 の 4章)
                 items.add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
-                Notice.gain(player, "skyabyss_record.guard.fragment_restored");
+                Notice.gainLog(player, "skyabyss_record.guard.fragment_restored");
             }
             Roll roll = rollHeart(r, level.random);
             items.addAll(roll.items());
@@ -385,7 +385,7 @@ public final class TitanLoot {
             if (fragment) {
                 Notice.unlock(player, "message.skyabyss.fragment_received");
             }
-            Notice.gain(player, "message.skyabyss.boss_reward");
+            Notice.gainLog(player, "message.skyabyss.boss_reward");
             Notice.gainItems(player, items, rewardLine(items));
             announcePieces(level, player, r, roll);
             if (roll.guaranteed() != null) {

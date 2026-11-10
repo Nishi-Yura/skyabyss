@@ -26,7 +26,7 @@ public final class Ch1Trails {
     // 岩鯨を呼んでよい時刻 (人の UUID → ゲームの総 tick)。三本そろった合図から CALL_DELAY あと (最後の会話と札を読む間)。
     // 保存しない: 入り直した人・再起動のあとは、もう呼んでよいものとする
     static final long CALL_DELAY = 600L;
-    private static final java.util.Map<java.util.UUID, Long> CALL_AT = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.Map<java.util.UUID, Long> CALL_AT = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.concurrent.ConcurrentHashMap<>());
     // 自己テストが差し替える口 (本番はパーティの誰かが三本を済ませたか)
     static java.util.function.Predicate<ServerPlayer> prepared = p -> PrepQuests.groupAtLeast(p, 1, 3);
 
@@ -78,9 +78,12 @@ public final class Ch1Trails {
 
     static void giveMark(ServerPlayer player) {
         ItemStack stack = mark();
+        if (player instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+            jp.revati.skyabyss.notice.GainFeed.note(gainTo, stack);
+        }
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
         }
-        Notice.gain(player, "message.skyabyss.ch1.trail.mark");
+        Notice.gainLog(player, "message.skyabyss.ch1.trail.mark");
     }
 }

@@ -347,7 +347,7 @@ public final class Circuits {
                 }
             }
         }
-        Notice.gain(p, "message.skyabyss.circuit.reward", coins, got.size());
+        Notice.gainLog(p, "message.skyabyss.circuit.reward", coins, got.size());
         int pulledCoins = 0;
         for (ItemStack s : got) {
             if (s.is(jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get())) {

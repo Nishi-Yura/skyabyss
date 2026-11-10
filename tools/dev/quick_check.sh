@@ -23,6 +23,7 @@ if [ "${1:-}" != "--no-java" ]; then
 fi
 [ -f tools/audit/check_resources.py ] && run check_resources python -I tools/audit/check_resources.py
 [ -f tools/audit/check_lang_keys.py ] && run check_lang_keys python -I tools/audit/check_lang_keys.py
+[ -f tools/audit/check_ui_terms.py ] && run check_ui_terms python -I tools/audit/check_ui_terms.py
 [ -f tools/audit/mesh_audit.py ] && run mesh_audit python -I tools/audit/mesh_audit.py --check
 [ -f tools/audit/check_generators.py ] && run check_generators python tools/audit/check_generators.py
 [ -f tools/audit/check_text_fit.py ] && run check_text_fit python tools/audit/check_text_fit.py

@@ -543,6 +543,8 @@ public final class Quests {
         if (jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(player, stack)) {
             return;
         }
+        // 手に入れた品は左の列に絵で (notice/GainFeed)
+        jp.revati.skyabyss.notice.GainFeed.note(player, stack);
         // 留め袋に入る品は袋へ (docs/design/22 の 4.1)
         jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
         if (!stack.isEmpty()) {

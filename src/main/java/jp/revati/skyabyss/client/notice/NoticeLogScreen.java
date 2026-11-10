@@ -95,7 +95,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
         List<Row> rows = rows(font, list.width() - TIME_W);
         list.setContentHeight(rows.size() * ROW_H);
         if (rows.isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.notice.log_empty"), BODY.x() + Golden.S8, Golden.textY(BODY.y() + 2, ROW_H), SOFT, false);
+            Golden.empty(g, font, BODY, Component.translatable("gui.skyabyss.notice.log_empty"));
         }
         list.begin(g);
         for (int i = 0; i < rows.size(); i++) {

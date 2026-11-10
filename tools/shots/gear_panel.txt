@@ -1,0 +1,43 @@
+# 持ち物と装飾の画面 (client/inventory/GearPanel) の確かめ。bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/gear_panel.txt -PshotsName=gear_panel
+world gear_panel flat
+size 1920 1080
+timeout 600
+render 6
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd gamemode survival
+cmd skyabyss level set @p 32
+cmd skyabyss job choose mage
+cmd give @s skyabyss:storm_staff
+cmd give @s skyabyss:dried_fish 12
+cmd give @s skyabyss:antidote 3
+cmd give @s skyabyss:iron_lump 20
+cmd give @s skyabyss:storm_charm
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s armor.head with skyabyss:ember_helmet
+cmd item replace entity @s weapon.offhand with skyabyss:dried_fish 2
+hud on
+waitchunks
+chat clear
+wait 60
+open inventory
+wait 10
+overlap inventory_g4
+shot inventory_g4
+close
+wait 5
+openacc
+wait 20
+overlap accessory_g4
+shot accessory_g4
+close
+guiscale 3
+window 1280 720
+wait 10
+open inventory
+wait 10
+overlap inventory_1280_g3
+shot inventory_1280_g3
+close

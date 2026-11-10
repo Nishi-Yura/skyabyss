@@ -61,13 +61,17 @@ public final class Coins {
             return;
         }
         ItemStack all = new ItemStack(FacilitySetup.BELL_COIN.get(), n);
-        jp.revati.skyabyss.pouch.Pouch.add(player, all);
-        int left = all.getCount();
-        while (left > 0) {
-            int k = Math.min(left, 99);
-            Quests.give(player, new ItemStack(FacilitySetup.BELL_COIN.get(), k));
-            left -= k;
-        }
+        // 左の列には銭の絵と枚数を一度だけ (notice/GainFeed)
+        jp.revati.skyabyss.notice.GainFeed.note(player, all);
+        jp.revati.skyabyss.notice.GainFeed.quietly(() -> {
+            jp.revati.skyabyss.pouch.Pouch.add(player, all);
+            int left = all.getCount();
+            while (left > 0) {
+                int k = Math.min(left, 99);
+                Quests.give(player, new ItemStack(FacilitySetup.BELL_COIN.get(), k));
+                left -= k;
+            }
+        });
     }
 
     // ---------------------------------------------------------------- 頼みの報酬
@@ -88,7 +92,7 @@ public final class Coins {
         int n = errandReward(def, chapter(player));
         if (n > 0) {
             give(player, n);
-            Notice.gain(player, "message.skyabyss.facility.coins_gained", n);
+            Notice.gainLog(player, "message.skyabyss.facility.coins_gained", n);
             // 言伝ての板の頼みは、その土地の名声にも (endgame/RegionFame。週の頼みは多め)
             int region = jp.revati.skyabyss.world.continent.ContinentMap.get().region(player.getBlockX(), player.getBlockZ());
             if (region != jp.revati.skyabyss.world.continent.ContinentMap.OUTSKIRTS) {

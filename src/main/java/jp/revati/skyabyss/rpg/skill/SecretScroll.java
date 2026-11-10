@@ -33,7 +33,7 @@ public class SecretScroll extends Item {
                         Component.translatable("skill.skyabyss." + a.skill.id));
             } else {
                 jp.revati.skyabyss.quest.Quests.give(sp, new ItemStack(jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(), SecretArts.OVER_SHARDS));
-                Notice.gain(sp, "message.skyabyss.secret.over", SecretArts.name(a, SecretArts.MAX_TIER), SecretArts.OVER_SHARDS);
+                Notice.gainLog(sp, "message.skyabyss.secret.over", SecretArts.name(a, SecretArts.MAX_TIER), SecretArts.OVER_SHARDS);
             }
             level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 0.8f);
             if (!sp.getAbilities().instabuild) {

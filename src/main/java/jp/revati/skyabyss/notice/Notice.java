@@ -142,10 +142,27 @@ public final class Notice {
             return;
         }
         java.util.List<net.minecraft.world.item.ItemStack> list = new java.util.ArrayList<>(merged.values());
+        // 同じ tick のまとめ (GainFeed) に入っている品は、まとめが絵を出す
+        if (GainFeed.covers(sp, list)) {
+            return;
+        }
+        GainFeed.sent(sp, list);
         if (list.size() > 64) {
             list = list.subList(0, 64);
         }
         PacketDistributor.sendToPlayer(sp, new GainItemsPayload(java.util.List.copyOf(list), text));
+    }
+
+    // 品を手に入れた文: 知らせの記録 (とチャットの設定) にだけ残す。左の列には出さない (品の絵は GainFeed が出す。
+    // 2026-11-10 の声「？？を獲得したの左の表記はすべて消して」)
+    public static void gainLog(Player p, String key, Object... args) {
+        gainLog(p, ModText.progress(key, args));
+    }
+
+    public static void gainLog(Player p, Component text) {
+        if (p instanceof ServerPlayer sp && !(p instanceof FakePlayer) && sp.connection != null) {
+            PacketDistributor.sendToPlayer(sp, new GainItemsPayload(java.util.List.of(), text));
+        }
     }
 
     public static void gainItem(Player p, net.minecraft.world.item.ItemStack item, Component text) {

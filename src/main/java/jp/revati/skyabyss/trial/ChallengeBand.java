@@ -35,6 +35,16 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ChallengeBand {
     private static final Map<UUID, Band> LAST = new ConcurrentHashMap<>();
+    // ダンジョンとルートの外で「残りの敵」を出す場面 (大事件の前触れ・深淵の群れ)。その場面が 1 秒ごとに foes で知らせ、途切れたら消える
+    private static final Map<UUID, Foes> FOES = new ConcurrentHashMap<>();
+
+    private record Foes(Component title, Component sub, int left, int tick) {
+    }
+
+    // 残りの敵の数は右上のこの帯にだけ出す (2026-11-10 の声「残りの敵数はすべて右上のみに。画面下の文字はいらない」)
+    public static void foes(ServerPlayer p, Component title, Component sub, int left) {
+        FOES.put(p.getUUID(), new Foes(title, sub, left, p.server.getTickCount()));
+    }
 
     private ChallengeBand() {
     }
@@ -72,6 +82,7 @@ public final class ChallengeBand {
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST.remove(event.getEntity().getUUID());
+        FOES.remove(event.getEntity().getUUID());
     }
 
     // その人の今の帯 (自己テストからも)
@@ -115,6 +126,14 @@ public final class ChallengeBand {
             Component sub = raid.lastHud == null || raid.lastHud.cellId().isEmpty() ? Component.empty()
                     : Component.translatable("trial.skyabyss.cell." + raid.lastHud.cellId());
             return new Band(Component.translatable("hud.skyabyss.challenge.route", jp.revati.skyabyss.progress.Progression.titanName(raid.ctx.titan())), sub, tags);
+        }
+        Foes f = FOES.get(p.getUUID());
+        if (f != null) {
+            if (p.server.getTickCount() - f.tick() > 30 || f.left() <= 0) {
+                FOES.remove(p.getUUID());
+            } else {
+                return new Band(f.title(), f.sub(), List.of(new Tag(Component.translatable("raid.skyabyss.hud.foes_left", f.left()), 0xF07A6A)));
+            }
         }
         return Band.OFF;
     }

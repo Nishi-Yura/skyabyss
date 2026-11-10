@@ -199,7 +199,7 @@ public final class DivineGear {
             return false;
         }
         Quests.give(p, new ItemStack(box));
-        Notice.gain(p, "message.skyabyss.divine.box");
+        Notice.gainLog(p, "message.skyabyss.divine.box");
         return true;
     }
 

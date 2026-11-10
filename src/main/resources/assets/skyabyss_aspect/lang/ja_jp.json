@@ -303,7 +303,7 @@
   "aspect.skyabyss.rarity.1": "エピック",
   "aspect.skyabyss.rarity.2": "レジェンド",
   "aspect.skyabyss.fx.POWER": "技の力 +%s%%",
-  "aspect.skyabyss.fx.COOLDOWN": "技の待ち −%s%%",
+  "aspect.skyabyss.fx.COOLDOWN": "クールダウン −%s%%",
   "aspect.skyabyss.fx.MANA": "技のマナ −%s%%",
   "aspect.skyabyss.fx.HASTE": "使ったあと 3 秒、移動 +%s%%",
   "aspect.skyabyss.fx.SURGE": "使ったあとの次の一撃 +%s%%",

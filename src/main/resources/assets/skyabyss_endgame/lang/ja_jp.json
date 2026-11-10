@@ -421,6 +421,5 @@
   "message.skyabyss.world_event.seal_failed": "輪が満ちる前に、%sが守りを破った。荒ぶっている",
   "message.skyabyss.world_event.rage": "%sが荒ぶっている。場の攻撃が速くなる",
   "gui.skyabyss.world_event.bar_seal": "%s ─ 封じの輪 %s/%s",
-  "gui.skyabyss.world_event.bar_rage": "%s ─ 荒ぶり",
-  "message.skyabyss.world_event.herald_left": "前触れの群れ: 残り %s 体（全部倒すと大いなるものが現れる）"
+  "gui.skyabyss.world_event.bar_rage": "%s ─ 荒ぶり"
 }

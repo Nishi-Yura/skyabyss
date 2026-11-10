@@ -159,6 +159,18 @@ overlap chat_1920_g4
 shot chat_1920_g4
 close
 wait 2
+open jp.revati.skyabyss.client.box.BoxPouchScreen
+wait 8
+overlap BoxPouchScreen_1920_g4
+shot BoxPouchScreen_1920_g4
+close
+wait 2
+openacc
+wait 12
+overlap accessory_1920_g4
+shot accessory_1920_g4
+close
+wait 2
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12
@@ -458,6 +470,18 @@ overlap chat_1920_g2
 shot chat_1920_g2
 close
 wait 2
+open jp.revati.skyabyss.client.box.BoxPouchScreen
+wait 8
+overlap BoxPouchScreen_1920_g2
+shot BoxPouchScreen_1920_g2
+close
+wait 2
+openacc
+wait 12
+overlap accessory_1920_g2
+shot accessory_1920_g2
+close
+wait 2
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12
@@ -755,6 +779,18 @@ open chat
 wait 8
 overlap chat_1280_g3
 shot chat_1280_g3
+close
+wait 2
+open jp.revati.skyabyss.client.box.BoxPouchScreen
+wait 8
+overlap BoxPouchScreen_1280_g3
+shot BoxPouchScreen_1280_g3
+close
+wait 2
+openacc
+wait 12
+overlap accessory_1280_g3
+shot accessory_1280_g3
 close
 wait 2
 cmd skyabyss cinematic stop

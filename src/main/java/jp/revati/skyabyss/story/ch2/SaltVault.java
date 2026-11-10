@@ -716,6 +716,9 @@ public final class SaltVault {
         level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
         level.playSound(null, at, SoundEvents.BARREL_CLOSE, SoundSource.BLOCKS, 0.8f, 0.7f);
         ItemStack stack = token();
+        if (p instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+            jp.revati.skyabyss.notice.GainFeed.note(gainTo, stack);
+        }
         if (!p.getInventory().add(stack)) {
             level.setBlock(at, Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP), 3);
             return false;

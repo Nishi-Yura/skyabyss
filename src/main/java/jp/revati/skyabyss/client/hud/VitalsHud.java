@@ -25,7 +25,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 // 設定 styledVitals が false なら何もせずバニラのまま。馬などの乗り物の体力・ジャンプ・経験値はバニラのまま
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class VitalsHud {
-    private static final int EDGE = 0xFFC9A85C;
+    private static final int EDGE = 0xFF05070F;
     private static final int SLAB = 0xD00A0E1E;
     private static final int TROUGH = 0xFF05070F;
 
@@ -80,11 +80,10 @@ public final class VitalsHud {
             drawArmor(g, mc, p);
         } else if (food) {
             // 体力のある乗り物に乗っている間は、バニラが乗り物の体力をここへ描く (満腹は出ない)
+            // おなかは空かない (rpg/NoHunger) ので、満腹度の所はマナの帯。バニラの乗り物の体力が出る間だけバニラに任せる
             if (manaInFoodSlot()) {
                 drawMana(g, mc, p);
-            } else if (!(p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth()) || modVehicle(p)) {
-                drawFood(g, mc, p);
-            } else {
+            } else if (p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth() && !modVehicle(p)) {
                 event.setCanceled(false);
             }
         } else {
@@ -132,13 +131,11 @@ public final class VitalsHud {
         }
     }
 
-    static final boolean NO_FOOD_BAR = true;
-
     // おなかは空かないので、満腹度の場所 (体力の右) にマナの帯を置く (2026-10-23 の試遊)。
     // 体力のある乗り物に乗っている間はバニラが乗り物の体力をここへ描くので、マナは技の枠の上 (SkillHud) に戻す
     public static boolean manaInFoodSlot() {
         Minecraft mc = Minecraft.getInstance();
-        return NO_FOOD_BAR && styled() && rect(Id.V_FOOD) != null
+        return styled() && rect(Id.V_FOOD) != null
                 && (!(mc.player.getVehicle() instanceof LivingEntity v && v.showVehicleHealth()) || modVehicle(mc.player));
     }
 
@@ -210,29 +207,6 @@ public final class VitalsHud {
             return;
         }
         BandHud.armorTab(g, mc.font, r, armor, () -> drawIcon(g, SHIELD, r.x() + 4, r.y() + 3, 0xFFC4D0D8));
-    }
-
-    private static void drawFood(GuiGraphics g, Minecraft mc, Player p) {
-        Rect r = rect(Id.V_FOOD);
-        // おなかは空かない (rpg/NoHunger)。満腹度の帯は出さない
-        if (r == null || NO_FOOD_BAR) {
-            return;
-        }
-        var fd = p.getFoodData();
-        int level = fd.getFoodLevel();
-        int color = p.hasEffect(MobEffects.HUNGER) ? 0xFF7C8A3C : 0xFFD59A3A;
-        if (level <= 6) {
-            float k = 0.7f + 0.3f * (float) Math.sin(p.tickCount * 0.35f);
-            color = scale(color, k);
-        }
-        bar(g, mc.font, r, APPLE, 0xFFE8B04C, level / 20f, color, String.valueOf(level), 0xFFF4EEE6, false);
-        // 隠れた満腹度: 帯の下辺に淡い線
-        float sat = Math.min(level, fd.getSaturationLevel());
-        if (sat > 0f) {
-            int inner = r.w() - 2 - 12;
-            int len = Math.max(1, Math.round(inner * sat / 20f));
-            g.fill(r.x() + 12 + 1, r.bottom() - 2, r.x() + 12 + 1 + len, r.bottom() - 1, 0xCCFFF1C8);
-        }
     }
 
     private static void drawAir(GuiGraphics g, Minecraft mc, Player p) {
@@ -308,7 +282,5 @@ public final class VitalsHud {
 
     private static final String[] HEART = {".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."};
     private static final String[] SHIELD = {"#######", "#######", "#######", ".#####.", "..###..", "...#..."};
-    private static final String[] APPLE = {"...#...", ".#####.", "#######", "#######", ".#####.", "..#.#.."};
     private static final String[] DROP = {"...#...", "..###..", ".#####.", "#######", "#######", ".#####."};
-    private static final String[] BUBBLE = {".###.", "#...#", "#...#", "#...#", ".###."};
 }

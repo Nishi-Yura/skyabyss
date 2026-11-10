@@ -115,10 +115,13 @@ public final class AbyssRelics {
         if (r != null && !f.getBoolean(GOT + r.id())) {
             f.putBoolean(GOT + r.id(), true);
             ItemStack s = new ItemStack(r.item().get());
+            if (p instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+                jp.revati.skyabyss.notice.GainFeed.note(gainTo, s);
+            }
             if (!p.getInventory().add(s)) {
                 p.drop(s, false);
             }
-            Notice.gain(p, "message.skyabyss.abyss.relic.got", s.getHoverName());
+            Notice.gainLog(p, "message.skyabyss.abyss.relic.got", s.getHoverName());
         }
         if (allMourned(f, layer, n) && Lore.unlock(p, LORE_ALL, true)) {
             Notice.narrate(p, "message.skyabyss.abyss.relic.all");

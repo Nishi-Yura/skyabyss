@@ -776,7 +776,7 @@
   "commands.skyabyss.chapter1.set": "Set 'boarded a titan' of %s to %s",
   "subtitles.skyabyss.peak_scrape": "Rock grinds in the distance",
   "subtitles.skyabyss.sky_eye_presence": "Something above the clouds",
-  "gui.skyabyss.notice.head.gain": "Obtained",
+  "gui.skyabyss.notice.head.gain": "Done",
   "gui.skyabyss.notice.head.unlock": "Progress",
   "gui.skyabyss.notice.log": "Notice Log",
   "gui.skyabyss.notice.log_empty": "Nothing has passed yet",
@@ -3173,5 +3173,16 @@
   "raid.skyabyss.hud.foes_left": "%s foes left",
   "message.skyabyss.dungeon.wipe": "Everyone fell. Back to the first floor",
   "message.skyabyss.dungeon.woke_start": "You woke on the first floor",
-  "message.skyabyss.raid.wipe_restart": "Everyone fell. The route starts over from the first room"
+  "message.skyabyss.raid.wipe_restart": "Everyone fell. The route starts over from the first room",
+  "gui.skyabyss.gear.hp": "HP",
+  "gui.skyabyss.gear.mana": "Mana",
+  "gui.skyabyss.gear.xp": "XP",
+  "gui.skyabyss.gear.attack": "Attack",
+  "gui.skyabyss.gear.armor": "Armor",
+  "gui.skyabyss.gear.bag": "Bag",
+  "gui.skyabyss.gear.hand": "Hotbar",
+  "gui.skyabyss.gear.skills": "Skills",
+  "hud.skyabyss.challenge.herald": "Herald pack",
+  "hud.skyabyss.challenge.abyss_pack": "Abyss pack",
+  "hud.skyabyss.challenge.wave": "Wave %1$s/%2$s"
 }

@@ -1091,6 +1091,9 @@ public final class TitanBackTrials {
         tag.remove(TAG_KEPT_EXTRA);
         for (Tag t : extra.getList("Items", Tag.TAG_COMPOUND)) {
             ItemStack.parse(player.registryAccess(), t).ifPresent(stack -> {
+                if (player instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+                    jp.revati.skyabyss.notice.GainFeed.note(gainTo, stack);
+                }
                 if (!player.getInventory().add(stack) && !stack.isEmpty()) {
                     player.drop(stack, false);
                 }

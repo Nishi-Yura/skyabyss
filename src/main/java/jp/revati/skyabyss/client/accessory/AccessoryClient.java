@@ -14,7 +14,6 @@ import jp.revati.skyabyss.item.accessory.AccessorySetup;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +26,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -63,14 +61,6 @@ public final class AccessoryClient {
             if (mc.player != null && mc.screen == null) {
                 PacketDistributor.sendToServer(new AccessorySetup.UseCharmPayload());
             }
-        }
-    }
-
-    // 持ち物の画面 (サバイバル) の上に、つまみを三つ。創造モードの持ち物の画面は形が違うので足さない
-    @SubscribeEvent
-    static void onScreenInit(ScreenEvent.Init.Post event) {
-        if (event.getScreen() instanceof InventoryScreen screen) {
-            AccessoryScreen.addTabs(event::addListener, screen, 0);
         }
     }
 

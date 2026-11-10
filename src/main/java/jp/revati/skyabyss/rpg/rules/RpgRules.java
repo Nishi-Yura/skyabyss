@@ -70,7 +70,7 @@ public final class RpgRules {
         }
     }
 
-    private static final java.util.Map<java.util.UUID, Long> LAST_CLICK = new java.util.HashMap<>();
+    private static final java.util.Map<java.util.UUID, Long> LAST_CLICK = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.HashMap<>());
 
     @SubscribeEvent
     static void registerPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {

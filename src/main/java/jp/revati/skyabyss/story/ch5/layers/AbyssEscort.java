@@ -661,7 +661,7 @@ public final class AbyssEscort {
                 int left = alive(level, run.mobs);
                 if (left > 0 && now % 20 == 0) {
                     for (ServerPlayer p : party) {
-                        p.displayClientMessage(Component.translatable(NS + "foes_left", left), true);
+                        jp.revati.skyabyss.trial.ChallengeBand.foes(p, Component.translatable("hud.skyabyss.challenge.abyss_pack"), Component.empty(), left);
                     }
                 }
                 if (left == 0 && run.wave < 2) {

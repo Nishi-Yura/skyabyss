@@ -470,7 +470,7 @@ X("wild_mimic_heart_charm", "charm", "heroic", 39, "abyss_upper", [("CHARM_HEART
 X("wild_fulgurite_necklace", "trinket", "rare", 42, "abyss_lower", [("LIGHTNING_TAKEN", -0.3), ("THORN_BOLT", 0.10, 5)],
   "雷管石の首飾り", "Fulgurite Necklace", "雷のダメージ −30%、打たれると 10% で雷を返す", "-30% lightning damage taken; 10% chance to return lightning when hit", mount=CHEST)
 X("wild_ash_hourglass_charm", "trinket", "epic", 44, "abyss_lower", [("COOLDOWN", 0.08), ("KILL_COOLDOWN", 20)],
-  "灰の砂時計の飾り", "Ash Hourglass Pendant", "クールダウン −8%。敵を倒すと技の待ちが 1 秒縮む", "-8% skill cooldowns; each kill shortens skill cooldowns by 1s", mount=HIP_R)
+  "灰の砂時計の飾り", "Ash Hourglass Pendant", "クールダウン −8%。敵を倒すとクールダウンが 1 秒縮む", "-8% skill cooldowns; each kill shortens skill cooldowns by 1s", mount=HIP_R)
 X("wild_deep_eye_charm", "trinket", "epic", 46, "abyss_lower", [("CRIT", 0.12, 0.6), ("CRIT_CHAIN", 1)],
   "深みの眼の護り", "Deep Eye Ward", "会心 12%（×1.6）。会心の次の一撃も会心", "12% critical chance (x1.6); the hit after a critical is also critical", mount=CHEST)
 X("wild_meteor_ring", "trinket", "heroic", 48, "moon", [("MAX_HEALTH", 6), ("TOUGHNESS", 2), ("GRIT", 0.05, 0.10), ("HURT_BURST", 4, 6, 1200)],
