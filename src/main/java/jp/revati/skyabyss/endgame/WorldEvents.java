@@ -543,13 +543,21 @@ public final class WorldEvents {
             int pct = Math.round(en.getValue() / total * 100);
             Coins.give(p, coins);
             int boxes = en.getKey().equals(top) ? 2 : 1;
+            List<net.minecraft.world.item.ItemStack> got = new ArrayList<>();
             for (int i = 0; i < boxes; i++) {
                 int r = p.getRandom().nextInt(100);
                 GearTier tier = r < 65 ? GearTier.RARE : r < 93 ? GearTier.EPIC : GearTier.HEROIC;
-                Circuits.giveBox(p, BoxKind.rarity(tier, band));
+                BoxKind kind = BoxKind.rarity(tier, band);
+                Circuits.giveBox(p, kind);
+                var item = kind == null ? null : jp.revati.skyabyss.loot.box.LootBoxSetup.item(kind);
+                if (item != null) {
+                    got.add(new net.minecraft.world.item.ItemStack(item));
+                }
             }
             RegionPoints.add(p, e.region, 4);
-            Notice.gainLog(p, "message.skyabyss.world_event.down", name, pct, coins, boxes);
+            // 報いが見えるように: 左の列に箱の絵、真ん中に鎮めた一行 (2026-11-11 の声「大事件の報酬って、お金だけ？」。箱は旅袋の封印の箱へ入るので気づきにくかった)
+            Notice.gainItems(p, got, jp.revati.skyabyss.ModText.progress("message.skyabyss.world_event.down", name, pct, coins, boxes));
+            Notice.levelUp(p, "message.skyabyss.world_event.down", name, pct, coins, boxes);
             paid.add(p);
         }
         return paid;

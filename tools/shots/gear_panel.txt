@@ -28,7 +28,7 @@ overlap inventory_g4
 shot inventory_g4
 close
 wait 5
-openacc
+open inventory
 wait 20
 overlap accessory_g4
 shot accessory_g4

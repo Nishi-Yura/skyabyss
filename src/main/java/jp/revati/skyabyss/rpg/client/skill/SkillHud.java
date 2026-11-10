@@ -55,8 +55,8 @@ public final class SkillHud {
         if (charm) {
             row += (skills ? CHARM_GAP : 0) + SLOT;
         }
-        // 下の一枚の帯 (BandHud) の中では、持ち物の枠と同じ高さに並ぶ (下から 3)
-        out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, jp.revati.skyabyss.client.hud.BandHud.on() ? 3 : 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
+        // ホットバーの右に、手もとの枠と同じ高さで並ぶ (下から 1。地の枠は BandHud)
+        out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
     static boolean anySlot(SkillData d) {
@@ -271,7 +271,7 @@ public final class SkillHud {
             }
             g.pose().pushPose();
             g.pose().translate(0, 0, 200);
-            g.drawString(font, k, x + SLOT - 1 - font.width(k), y + SLOT - 8, s == null ? 0x7682A6 : 0xB8B8C8, true);
+            jp.revati.skyabyss.client.hud.BandHud.outlined(g, font, k, x + SLOT - 2 - font.width(k), y + SLOT - 9, s == null ? 0xFFA4ACC8 : 0xFFFFF4D8);
             g.pose().popPose();
         }
     }

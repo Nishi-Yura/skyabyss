@@ -95,16 +95,17 @@ public final class CardFeed {
     }
 
     // 絵の列の一行に入る数と、札の高さ
-    private static final int ICON_PITCH = 18;
+    // 一つの品 = 18 角の枠 (暗い地とレア度の色の縁)。あいだ 2
+    private static final int ICON_PITCH = 20;
 
     private static int perRow(int w) {
-        return Math.max(1, (w - 4) / ICON_PITCH);
+        return Math.max(1, (w - 6) / ICON_PITCH);
     }
 
     private static int height(Font font, Entry e, int w) {
         if (e.iconsOnly()) {
             int rows = (e.items.size() + perRow(w) - 1) / perRow(w);
-            return rows * ICON_PITCH + 2;
+            return rows * ICON_PITCH + 3;
         }
         return lines(font, e, w).size() * 10 + 2;
     }
@@ -242,21 +243,24 @@ public final class CardFeed {
             // 出てくるときに左から少し滑る
             int slide = age < 180 ? (int) ((1f - age / 180f) * 8) : 0;
             if (e.iconsOnly()) {
+                // 品の絵の列 (2026-11-11 の声「少しわかりづらい」): 品ごとに枠 (暗い地・レア度の色の縁)、左に金の印。
+                // 地の帯は敷かない (景色の上で枠だけがはっきり見える)
                 int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
-                int per = Math.min(perRow(ew), e.items.size());
                 int rows = (e.items.size() + perRow(ew) - 1) / perRow(ew);
-                int bw = per * ICON_PITCH + 4;
-                int hh = rows * ICON_PITCH + 1;
-                g.fill(x - slide, y, x + bw - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0E1E);
-                g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
-                if (alpha > 160) {
-                    for (int i = 0; i < e.items.size(); i++) {
-                        int ix = x + 3 - slide + (i % perRow(ew)) * ICON_PITCH;
-                        int iy = y + 1 + (i / perRow(ew)) * ICON_PITCH;
-                        net.minecraft.world.item.ItemStack st = e.items.get(i);
-                        g.renderItem(st, ix, iy);
+                int hh = rows * ICON_PITCH + 2;
+                g.fill(x - slide, y + 1, x + 2 - slide, y + hh - 1, alpha << 24 | e.accent);
+                for (int i = 0; i < e.items.size(); i++) {
+                    int bx = x + 4 - slide + (i % perRow(ew)) * ICON_PITCH;
+                    int by = y + 1 + (i / perRow(ew)) * ICON_PITCH;
+                    net.minecraft.world.item.ItemStack st = e.items.get(i);
+                    jp.revati.skyabyss.item.GearTier tier = jp.revati.skyabyss.client.ui.GearTierFrames.tierOf(st);
+                    int edge = tier != null ? tier.rgb() : 0x6A78A8;
+                    g.fill(bx, by, bx + 18, by + 18, ((int) (alpha * 0.85f)) << 24 | 0x0A0E1E);
+                    jp.revati.skyabyss.client.ui.Golden.outline(g, bx, by, bx + 18, by + 18, alpha << 24 | edge);
+                    if (alpha > 120) {
+                        g.renderItem(st, bx + 1, by + 1);
                         if (st.getCount() > 1) {
-                            g.renderItemDecorations(font, st, ix, iy, compact(st.getCount()));
+                            g.renderItemDecorations(font, st, bx + 1, by + 1, compact(st.getCount()));
                         }
                     }
                 }

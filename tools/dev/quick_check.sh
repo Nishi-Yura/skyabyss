@@ -29,6 +29,7 @@ fi
 [ -f tools/audit/check_text_fit.py ] && run check_text_fit python tools/audit/check_text_fit.py
 [ -f tools/audit/check_dungeon_mouths.py ] && run check_dungeon_mouths python -I tools/audit/check_dungeon_mouths.py
 [ -f tools/audit/check_reach.py ] && run check_reach python -I tools/audit/check_reach.py
+[ -f tools/audit/dungeon_paths.py ] && run dungeon_paths python -I tools/audit/dungeon_paths.py
 for f in tools/audit/check_stairs*.py tools/audit/stairs*.py; do
   [ -f "$f" ] && run "$(basename "$f" .py)" python "$f"
 done

@@ -102,7 +102,7 @@ public final class JobWeaponLock {
         }
     }
 
-    private static void tell(Player p) {
+    public static void tell(Player p) {
         if (!(p instanceof ServerPlayer sp)) {
             return;
         }

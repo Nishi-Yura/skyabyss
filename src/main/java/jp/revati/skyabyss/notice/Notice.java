@@ -135,7 +135,10 @@ public final class Notice {
             }
         }
         if (merged.isEmpty()) {
-            gain(p, text);
+            // 品が空 (渡したあとの空の山など): 左の列にも達成の札にも出さず、記録にだけ。空気の名前なら記録にも残さない (2026-11-11 の声)
+            if (!mentionsAir(text)) {
+                gainLog(p, text);
+            }
             return;
         }
         if (!(p instanceof ServerPlayer sp) || p instanceof FakePlayer || sp.connection == null) {
@@ -160,6 +163,9 @@ public final class Notice {
     }
 
     public static void gainLog(Player p, Component text) {
+        if (mentionsAir(text)) {
+            return;
+        }
         if (p instanceof ServerPlayer sp && !(p instanceof FakePlayer) && sp.connection != null) {
             PacketDistributor.sendToPlayer(sp, new GainItemsPayload(java.util.List.of(), text));
         }
@@ -231,6 +237,33 @@ public final class Notice {
         if (!(p instanceof ServerPlayer sp) || p instanceof FakePlayer || sp.connection == null) {
             return;
         }
+        // 「空気を手に入れた」は出さない (空の品の名前が入った知らせ。2026-11-08・11-11 の声)
+        if (payload.kind() == Kind.GAIN && mentionsAir(payload.text())) {
+            return;
+        }
         PacketDistributor.sendToPlayer(sp, payload);
+    }
+
+    // 文の中に空の品 (空気) の名前があるか。品の名前は翻訳の鍵のまま入っているので、鍵を見る
+    public static boolean mentionsAir(Component text) {
+        if (text == null) {
+            return false;
+        }
+        if (text.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t) {
+            if ("block.minecraft.air".equals(t.getKey())) {
+                return true;
+            }
+            for (Object arg : t.getArgs()) {
+                if (arg instanceof Component c && mentionsAir(c)) {
+                    return true;
+                }
+            }
+        }
+        for (Component sib : text.getSiblings()) {
+            if (mentionsAir(sib)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -15,27 +15,29 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-// 旅袋の画面 (docs/design/22 の 9 章 A つまみ・56 の 4 章)。持ち物 / 装飾 / 旅袋 / 封印の箱 のつまみの三つ目。持ち物と同じ大きい板で、
-//   左の欄: ページの栞 (大事な物・巨神の素材・土地の素材・細工) と、重ねた品の説明 (名前・数・使い方)、心臓の遺物の釦
-//   右の欄: 品ごとに決まった枠 (区分の名札つき)。まだ手に入れていない品は「？」、いちど手に入れて今は 0 の品は暗い影。
+// 旅袋の画面 (docs/design/22 の 9 章 A つまみ・56 の 4 章)。持ち物 / 旅袋 / 封印の箱 のつまみの二つ目。持ち物と同じ組み方 (client/inventory/GearPanel) で、
+//   左の板: ページの栞 (大事な物・巨神の素材・土地の素材・細工)
+//   真ん中の板 (幅 176・高さ 200): 品ごとに決まった枠 (区分の名札つき)。まだ手に入れていない品は「？」、いちど手に入れて今は 0 の品は暗い影。
 //       枠の置く・取り出す・シフトクリックは PouchMenu が決める (取り出せない決まりのときは何も起きない)
-// 枠の並び (pouch/PouchLayout) は幅 176 の升目のまま使い、右の欄の中へ DX・DY だけずらして置く
+//   右の板: 重ねた品の説明 (名前・数・使い方)、心臓の遺物の釦
+// 枠の並び (pouch/PouchLayout) は幅 176 の升目のまま、真ん中の板に置く
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int TEXT = 0xFF000000 | Golden.TEXT;
     private static final int DIM = 0xFF000000 | Golden.SOFT;
     private static final int GOLD = 0xFF000000 | Golden.GOLD;
     private static final int OK = 0xFF000000 | Golden.PALE;
-    private static final Golden.Box LEFT = GearPanel.LEFT;
-    private static final Golden.Box RIGHT = GearPanel.RIGHT;
-    // 升目 (PouchLayout の座標) を右の欄の中へ
-    private static final int DX = RIGHT.x() + (RIGHT.w() - PouchLayout.COLS * PouchLayout.PITCH) / 2 - PouchLayout.X0;
-    private static final int DY = RIGHT.y() + 6 - PouchLayout.TOP;
-    // 左の欄: 栞の行、説明の始まり、遺物の釦
+    static final int CORE_H = PouchLayout.H;
+    private static final Golden.Box LEFT = GearPanel.left(CORE_H);
+    private static final Golden.Box RIGHT = GearPanel.right(CORE_H);
+    // 升目 (PouchLayout の座標) を真ん中の板へ
+    private static final int DX = GearPanel.CORE_X;
+    private static final int DY = GearPanel.CORE_Y;
+    // 左の板: 栞の行。右の板: 説明、遺物の釦
     private static final int BOOK_H = 21;
-    private static final int INFO_X = LEFT.x() + 6;
-    private static final int INFO_W = LEFT.w() - 12;
-    private static final int INFO_Y = LEFT.y() + 5 + 4 * (BOOK_H + 1) + 8;
-    private static final Golden.Box RELIC = new Golden.Box(LEFT.x() + 6, LEFT.bottom() - 6 - Golden.BTN, LEFT.w() - 12, Golden.BTN);
+    private static final int INFO_X = RIGHT.x() + GearPanel.PAD;
+    private static final int INFO_W = RIGHT.w() - 2 * GearPanel.PAD;
+    private static final int INFO_Y = RIGHT.y() + GearPanel.PAD + 1;
+    private static final Golden.Box RELIC = new Golden.Box(RIGHT.x() + GearPanel.PAD, RIGHT.bottom() - GearPanel.PAD - Golden.BTN, RIGHT.w() - 2 * GearPanel.PAD, Golden.BTN);
 
     public PouchScreen(PouchMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -54,7 +56,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             menu.slots.get(i).x = at[0] + DX;
             menu.slots.get(i).y = at[1] + DY;
         }
-        GearPanel.addTabs(this::addRenderableWidget, () -> leftPos, () -> topPos, 2);
+        GearPanel.addTabs(this::addRenderableWidget, () -> leftPos, () -> topPos, 1);
     }
 
     // ---------------------------------------------------------------- 描く
@@ -96,15 +98,12 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         int y = topPos;
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
-        Golden.frame(g, font, GearPanel.layout(), title);
-        Golden.recess(g, LEFT);
-        Golden.recess(g, RIGHT);
+        GearPanel.panels(g, CORE_H);
         g.pose().popPose();
         if (minecraft == null || minecraft.player == null) {
             return;
         }
         renderBookmarks(g, x, y, mouseX, mouseY);
-        Golden.rule(g, x + LEFT.x() + 6, x + LEFT.right() - 6, y + INFO_Y - 5);
         if (jp.revati.skyabyss.client.reward.HeartRewardClient.pending()) {
             // 心臓の遺物: 金の釦 (ゆっくり点る)
             Golden.Box b = new Golden.Box(x + RELIC.x(), y + RELIC.y(), RELIC.w(), RELIC.h());
@@ -227,7 +226,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             return;
         }
         Component count = Component.translatable("skyabyss_pouch.screen.count", n, e.limit());
-        int y = wrap(g, e.item().getDescription(), y1, 2, n > 0 ? GOLD : DIM);
+        int y = wrap(g, e.item().getDescription(), y1, 3, n > 0 ? GOLD : DIM);
         g.drawString(font, count, INFO_X, y, n > 0 ? TEXT : DIM, false);
         y += Golden.ROW;
         Component hint;
@@ -242,7 +241,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         } else {
             hint = Component.translatable("skyabyss_pouch.screen.kept");
         }
-        y = wrap(g, hint, y, 2, color);
+        y = wrap(g, hint, y, 4, color);
         if (n > 0 && e.item() instanceof PouchUsable) {
             wrap(g, Component.translatable(QuickCard.isPinned(e.id()) ? "skyabyss_pouch.screen.unpin" : "skyabyss_pouch.screen.pin"), y, 2, DIM);
         }
@@ -259,7 +258,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     }
 
     private void drawWrapped(GuiGraphics g, Component line, int y) {
-        wrap(g, line, y, 5, DIM);
+        wrap(g, line, y, 9, DIM);
     }
 
     private PouchEntries.Entry hoveredEntry() {
@@ -306,7 +305,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     }
 
     private static Golden.Box bookmark(PouchConfig.Page p) {
-        return new Golden.Box(LEFT.x() + 3, LEFT.y() + 4 + p.ordinal() * (BOOK_H + 1), LEFT.w() - 6, BOOK_H);
+        return new Golden.Box(LEFT.x() + 4, LEFT.y() + 6 + p.ordinal() * (BOOK_H + 1), LEFT.w() - 8, BOOK_H);
     }
 
     private PouchConfig.Page bookmarkAt(int mouseX, int mouseY) {
@@ -390,6 +389,6 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
 
     @Override
     public int[] textBounds() {
-        return new int[] {leftPos, topPos, imageWidth, imageHeight};
+        return new int[] {leftPos, topPos, imageWidth, GearPanel.CORE_Y + CORE_H};
     }
 }

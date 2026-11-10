@@ -187,6 +187,8 @@ def deep_ice_2():
     cv.tunnel([(0, 0, 48), (0, 0, 62)], 2.2, 4.0, seed=19)
     cv.room(0, 82, 12, 10, 8, 12, seed=15, wall_h=6)
     cv.tunnel([(0, 12, 92), (0, 12, 98)], 2.2, 4.2, seed=16)
+    # 棚から舞台へ抜ける所 (前は z 99〜102 に岩と氷が残り、行き止まりだった。2026-11-11)
+    cv.tunnel([(0, 12, 96), (0, 12, 106)], 2.2, 4.2, seed=20)
     cv.room(0, 112, 16, 13, 12, 12, seed=17, wall_h=8)
     cv.tunnel([(0, 12, 124), (0, 12, 131)], 1.6, 3.8, seed=18)
     cv.paint(F.ice_theme(7021))
@@ -204,16 +206,8 @@ def deep_ice_2():
         for x in range(-4, 5):
             if not cv.is_air(x, y, 72):
                 cv.mats[(x, y, 72)] = "minecraft:blue_ice" if (x + y) % 3 else "minecraft:packed_ice"
-    for k in range(12):
-        a = math.radians(-90 + k * 30)
-        x = int(round(5 * math.cos(a)))
-        z = 64 + int(round(5 * math.sin(a)))
-        facing = ["east", "south", "west", "north"][int(((k * 30) % 360) // 90)]
-        for yy in range(0, k):
-            cv.put(x, yy, z, "minecraft:snow_block")
-        cv.put(x, k, z, stair("stone_brick", facing))
-        for yy in range(k + 1, k + 4):
-            cv.put(x, yy, z, AIR)
+    # 12 段 (壁ぎわの輪の上を、2 マスごとに 1 段。dungeon_kit.spiral_stair)
+    K.spiral_stair(cv, 0, 64, 5, 0, 12)
     for x in range(-3, 4):
         for z in range(68, 74):
             cv.put(x, 11, z, "minecraft:packed_ice")
@@ -230,6 +224,9 @@ def deep_ice_2():
             if 0.35 < d < 0.6 and (x, 11, z) in cv.mats:
                 cv.mats[(x, 11, z)] = "minecraft:blue_ice"
     for k in range(7):
+        if k == 3:
+            # 266 度の柱は舞台の入口 (棚から来る道) の真ん中に立ってしまうので立てない (2026-11-11)
+            continue
         a = math.radians(200 + k * 22)
         F.ice_spire(cv, int(round(14 * math.cos(a))), 12, 112 + int(round(11 * math.sin(a))), 5 + k % 3)
     cv.mark("room_mid", 0, 12, 110)

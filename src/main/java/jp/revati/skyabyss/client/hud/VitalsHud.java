@@ -73,6 +73,10 @@ public final class VitalsHud {
             return;
         }
         event.setCanceled(true);
+        // 場面のあいだは出さない (下の帯と同じ)
+        if (jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+            return;
+        }
         GuiGraphics g = event.getGuiGraphics();
         if (health) {
             drawHealth(g, mc, p);
@@ -122,12 +126,10 @@ public final class VitalsHud {
         String text = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(hp) - 1e-4) + "/" + (int) Math.ceil(jp.revati.skyabyss.Hp.shown(max) - 1e-4);
         bar(g, mc.font, r, HEART, 0xFFE0606C, hp / max, color, text, 0xFFF4EEE6, p.hurtTime > 0 || p.invulnerableTime > 10);
         if (absorb > 0) {
-            // 吸収: 帯の上辺に金の線 (最大の体力に対する割合)。数字は体力の数字の左
-            int inner = r.w() - 2 - 12;
-            int len = Math.max(1, Math.min(inner, Math.round(inner * Math.min(1f, p.getAbsorptionAmount() / max))));
-            g.fill(r.x() + 12 + 1, r.y() + 1, r.x() + 12 + 1 + len, r.y() + 2, 0xFFE9C46A);
-            String ab = "+" + absorb;
-            g.drawString(mc.font, ab, r.x() + r.w() - 3 - mc.font.width(text) - 3 - mc.font.width(ab), r.y() + 1, 0xFFE9C46A, true);
+            // 吸収: 帯のすぐ上の金の細線 (最大の体力に対する割合)。数は出さない (数字が重なって読めなかった。2026-11-11)
+            int len = Math.max(2, Math.min(r.w(), Math.round(r.w() * Math.min(1f, p.getAbsorptionAmount() / max))));
+            g.fill(r.x(), r.y() - 3, r.x() + len, r.y() - 1, 0xFF05070F);
+            g.fill(r.x() + 1, r.y() - 2, r.x() + len - 1, r.y() - 1, 0xFFE9C46A);
         }
     }
 
@@ -238,7 +240,8 @@ public final class VitalsHud {
                 g.fill(bx, r.y() + 1, bx + fill, r.y() + 2, scale(color, 1.25f));
             }
         });
-        g.drawString(font, text, r.right() - 3 - font.width(text), r.y() + 1, textColor, true);
+        // 数は黒の縁取り (どの色の帯の上でも読めるように)
+        BandHud.outlined(g, font, text, r.right() - 3 - font.width(text), r.y() + 1, textColor);
     }
 
     private static int scale(int argb, float k) {

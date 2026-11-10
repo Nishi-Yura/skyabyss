@@ -131,6 +131,11 @@ public final class StaffBolts {
         if (!p.isAlive() || p.isSpectator() || Job.of(p.getMainHandItem()) != Job.MAGE) {
             return null;
         }
+        // 魔法使いでなければ杖は使えない (2026-11-11 の声「杖が他のジョブでも使えてしまう」。rpg/skill/JobWeaponLock)
+        if (jp.revati.skyabyss.rpg.skill.JobWeaponLock.wrongJob(p, p.getMainHandItem()) != null) {
+            jp.revati.skyabyss.rpg.skill.JobWeaponLock.tell(p);
+            return null;
+        }
         long now = p.level().getGameTime();
         Long last = LAST.get(p.getUUID());
         if (last != null && now - last < MIN_GAP) {

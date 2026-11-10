@@ -29,6 +29,7 @@ public final class StaffBoltClient {
         if (Job.of(mc.player.getMainHandItem()) != Job.MAGE) {
             return;
         }
+        // ほかの職の人は撃てない (サーバーも止めて知らせる。ここでは振りの空打ちだけ止めずに合図を送る)
         if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.ENTITY) {
             return;
         }

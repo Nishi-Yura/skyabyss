@@ -910,8 +910,8 @@ public final class ShotRunner {
                 return true;
             }
             case "openacc" -> {
-                // openacc : 装飾の画面を開く (つまみを押したのと同じ)
-                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new jp.revati.skyabyss.item.accessory.AccessorySetup.OpenPayload());
+                // openacc : 持ち物の画面を開く (装飾の枠は持ち物の画面の中。前の装飾の画面はなくなった)
+                mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
                 return true;
             }
             case "trail" -> {
