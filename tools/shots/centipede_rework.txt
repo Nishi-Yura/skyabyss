@@ -1,0 +1,50 @@
+# 骨掘りの大百足の作り込み (2026-11-11): 待ち・噛む・三連の叩きつけ・突き上げ・咆哮と、口の寄り
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/centipede_rework.txt -PshotsName=centipede_rework
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+hud off
+lowpoly on
+fov 60
+cmd summon skyabyss:bone_centipede 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld -7.5 -56.5 11.5 -140 10
+waitchunks
+wait 120
+shot cr_idle
+cmd skyabyss dev anim @e[tag=m] bite
+wait 13
+shot cr_bite_strike
+wait 40
+cmd skyabyss dev anim @e[tag=m] combo
+wait 39
+shot cr_combo_rear
+wait 3
+shot cr_combo_slam
+wait 60
+cmd skyabyss dev anim @e[tag=m] erupt
+wait 8
+shot cr_erupt_tall
+wait 60
+cmd skyabyss dev anim @e[tag=m] scream
+wait 10
+shot cr_scream
+wait 40
+camera minecraft:overworld 0 -55.3 9.5 180 6
+wait 10
+shot cr_face_closed
+cmd skyabyss dev anim @e[tag=m] roar
+wait 11
+shot cr_face_open
+wait 40
+cmd skyabyss dev anim @e[tag=m] death
+wait 60
+camera minecraft:overworld -7.5 -56.5 11.5 -140 10
+wait 5
+shot cr_death

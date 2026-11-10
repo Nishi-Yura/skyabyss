@@ -26,12 +26,18 @@ import net.minecraft.world.phys.Vec3;
 //   雷の走り  背晶から床へ十字の四本の雷の帯 (予告 1.1 秒)。後半は斜めの十字が続く
 //   放電のあとは力が抜けて大きな隙。後半 (体力半分から) は突進が二度続く。晶の目玉を 2 体呼ぶ
 //   主の間の結晶 (印 crystal_*) に人が技を当てて満たすと、大蜥蜴の溜まりが抜ける (Mechanics から drain)
+// 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」。骨掘りの大百足と同じ方向):
+//   雷の息    のけぞって喉を光らせ (予告 1.0 秒)、首を左から右へ振って前の二枚の扇を 0.75 秒焼く。寄った人へ
+//   跳びかかり 深く沈んで跳び上がり、人のいた所の円へ落ちる (予告 1.2 秒)、続けて外への輪の衝撃。離れた人へ
+//   登場は床を割って爪が掛かり、頭が這い出て辺りを嗅ぎ、体を引き抜いて土を払い、立ち上がって吠える (intro)。後半に入るときも吠える (scream)
 public class CrystalLizard extends DungeonBoss {
     static final int BITE = 1;
     static final int TAIL = 2;
     static final int DASH = 3;
     static final int CHARGE_UP = 4;
     static final int BOLTS = 5;
+    static final int BREATH = 6;
+    static final int POUNCE = 7;
     public static final int BOLTS_WARN = 22;
     public static final double BOLTS_LENGTH = 15;
     public static final int BITE_WARN = 14;
@@ -42,6 +48,12 @@ public class CrystalLizard extends DungeonBoss {
     public static final double DASH_LENGTH = 16;
     public static final int CHARGE_WARN = 32;
     public static final int CHARGE_MAX = 5;
+    public static final int BREATH_WARN = 20;
+    public static final int BREATH_ACTIVE = 15;
+    public static final double BREATH_RANGE = 9;
+    public static final int POUNCE_WARN = 24;
+    private int lastBreath = -200;
+    private int lastPounce = -300;
     private int charge;
     private int lastDash = -200;
     private int lastBolts = -200;
@@ -49,7 +61,7 @@ public class CrystalLizard extends DungeonBoss {
 
     public CrystalLizard(EntityType<? extends Monster> type, Level level) {
         super(type, level, "crystal_lizard", () -> SoundEvents.HOGLIN_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH,
-                "bite", "tail", "dash", "charge_up", "discharge", "hurt", "death");
+                "bite", "tail", "dash", "charge_up", "discharge", "breath", "pounce", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -85,6 +97,21 @@ public class CrystalLizard extends DungeonBoss {
         Vec3 f = forward();
         if (tickCount - lastBolts > 200 && distance < BOLTS_LENGTH) {
             bolts(target);
+            charge++;
+            return;
+        }
+        if (distance > 8 && distance < 22 && tickCount - lastPounce > 240) {
+            move = POUNCE;
+            lastPounce = tickCount;
+            leapAt(target, "pounce", POUNCE_WARN, 3.6, 1.3f);
+            charge++;
+            return;
+        }
+        if (distance <= BREATH_RANGE - 1 && tickCount - lastBreath > 220 && random.nextFloat() < 0.5f) {
+            move = BREATH;
+            lastBreath = tickCount;
+            spray(target, "breath", BREATH_WARN, BREATH_RANGE, 50, BREATH_ACTIVE, 0.9f, ParticleTypes.ELECTRIC_SPARK);
+            server().playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 2f, 0.5f);
             charge++;
             return;
         }
@@ -190,6 +217,28 @@ public class CrystalLizard extends DungeonBoss {
         }
     }
 
+    // 登場: 爪が掛かり、頭が這い出て、体を引き抜き、立ち上がって吠える (アニメ intro 5.0 秒)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 100;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 68;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
+    }
+
     @Override
     protected String bossId() {
         return "crystal_lizard";
@@ -207,6 +256,8 @@ public class CrystalLizard extends DungeonBoss {
             case TAIL -> TAIL_WARN + 12;
             case DASH -> DASH_WARN + (int) Math.ceil(DASH_LENGTH / 0.85) + 12;
             case BOLTS -> BOLTS_WARN + (phase2 ? 14 : 0) + 12;
+            case BREATH -> BREATH_WARN + 10 + BREATH_ACTIVE + 12;
+            case POUNCE -> POUNCE_WARN + 22;
             default -> CHARGE_WARN + 20;
         };
     }

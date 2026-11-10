@@ -160,3 +160,23 @@ def sheet(m, atlas, glow, gaits, name, info, poses=()):
         cv.paste(im, (x, yy + 24))
     REVIEW.mkdir(parents=True, exist_ok=True)
     cv.save(REVIEW / f"{name}_sheet.png")
+
+
+def scale_pose(pose, k):
+    """姿勢の回し・移しを k 倍 (溜め・行き過ぎの誇張)"""
+    return {b: {ch: tuple(v * k for v in vec) for ch, vec in chans.items()} for b, chans in pose.items()}
+
+
+def punch(frames, hit, k_wind=1.12, k_over=1.15, over_dt=0.08):
+    """一度だけの動きに緩急を足す (2026-11-11 の作り込み)。frames[hit] が打つ瞬間。
+    その前の溜めの姿を誇張した「震え」を打つ直前に、打つ姿を誇張した「行き過ぎ」を直後に入れる。打つ時刻は変えない"""
+    fr = sorted(frames, key=lambda f: f[0])
+    tw, pw = fr[hit - 1]
+    ti, pi = fr[hit]
+    out = list(fr)
+    if ti - tw > 0.1:
+        out.append((round(tw + (ti - tw) * 0.55, 4), scale_pose(pw, k_wind)))
+    nxt = fr[hit + 1][0] if hit + 1 < len(fr) else ti + 1.0
+    if nxt - ti > over_dt + 0.03:
+        out.append((round(ti + over_dt, 4), scale_pose(pi, k_over)))
+    return sorted(out, key=lambda f: f[0])

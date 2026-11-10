@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.combat.BossCue;
+import jp.revati.skyabyss.combat.BossIntro;
 import jp.revati.skyabyss.combat.BossOpenings;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
@@ -97,6 +98,169 @@ public abstract class DungeonBoss extends RegionBoss {
     public void setHoles(List<Vec3> list) {
         holes.clear();
         holes.addAll(list);
+    }
+
+    // ---------------------------------------------------------------- 登場 (2026-11-11 の声「最初の登場のアニメーションや、画面にボスの名前表示がない」)
+    // 人 (偽の人は数えない) が INTRO_WAKE まで寄ると一度だけ: 主は地の下に隠れ (見えず・傷を受けず・動かない)、画面に「〜が這い出る」と
+    // INTRO_RISE tick の数え下ろし、地鳴りと土煙。数え終わると姿を見せて登場の動き (introAnim) と名前の札 (combat/BossIntro)。
+    // 動きが終わる (introLength) と戦いが始まる。済んだかは保存する (読み込み直しで繰り返さない)
+    public static final double INTRO_WAKE = 22;
+    // これより近くに本物の人がいれば、登場までは地の下に潜んで待つ
+    public static final double INTRO_LURK = 64;
+    public static final int INTRO_RISE = 60;
+    public static final int INTRO_CARD = 90;
+    private int introTick = -1;
+    private boolean introDone;
+
+    // 登場の動き (主ごとに替える)。既定は吠える
+    protected String introAnim() {
+        return "roar";
+    }
+
+    // 登場の動きの長さ (tick)
+    protected int introLength() {
+        return 32;
+    }
+
+    // 登場の動きのうち、体が地から抜けきって吠える tick (名前の札と大きな土煙はここ)。既定は出た瞬間
+    protected int introCardAt() {
+        return 0;
+    }
+
+    public boolean introRunning() {
+        return introTick >= 0;
+    }
+
+    // 試験・やり直し用: 登場を済んだことにする
+    public void skipIntro() {
+        if (introTick >= 0) {
+            endIntro();
+        }
+        introDone = true;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (level().isClientSide || introDone || !isAlive()) {
+            return;
+        }
+        if (introTick < 0) {
+            // 本物の人 (偽の人・見物の人は数えない) が近いか。近くに誰もいない (自己テストの偽の人だけ) なら何もしない
+            double nearest = Double.MAX_VALUE;
+            for (ServerPlayer p : server().players()) {
+                if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && !p.isSpectator() && p.isAlive()) {
+                    nearest = Math.min(nearest, p.distanceToSqr(this));
+                }
+            }
+            if (nearest < INTRO_WAKE * INTRO_WAKE) {
+                startIntro();
+            } else if (nearest < INTRO_LURK * INTRO_LURK) {
+                // まだ遠い: 地の下に潜んで待つ (立ったまま見えていて、寄ると消えて出直すのを防ぐ)
+                if (!isInvisible() || !isNoAi()) {
+                    setInvisible(true);
+                    setNoAi(true);
+                    getNavigation().stop();
+                }
+            }
+            return;
+        }
+        introTick++;
+        setDeltaMovement(0, getDeltaMovement().y, 0);
+        if (introTick < INTRO_RISE) {
+            // 地鳴り: 足もとの土と骨が跳ね、低い音がだんだん大きく
+            if (introTick % 4 == 0) {
+                float k = introTick / (float) INTRO_RISE;
+                server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                        getX(), getY() + 0.2, getZ(), (int) (10 + 30 * k), 1.2 + 1.5 * k, 0.1, 1.2 + 1.5 * k, 0.15);
+            }
+            if (introTick % 20 == 0) {
+                server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_DIG, SoundSource.HOSTILE, 1.6f + introTick / 40f, 0.5f);
+            }
+            return;
+        }
+        if (introTick == INTRO_RISE) {
+            setInvisible(false);
+            // いちばん近い人の方を向いて出る
+            ServerPlayer face = null;
+            for (ServerPlayer p : server().players()) {
+                if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && !p.isSpectator() && p.isAlive()
+                        && (face == null || p.distanceToSqr(this) < face.distanceToSqr(this))) {
+                    face = p;
+                }
+            }
+            if (face != null) {
+                float yaw = (float) (net.minecraft.util.Mth.atan2(face.getZ() - getZ(), face.getX() - getX()) * 57.2957763671875) - 90f;
+                setYRot(yaw);
+                setYBodyRot(yaw);
+                setYHeadRot(yaw);
+            }
+            playAction(introAnim());
+            // 床が割れる
+            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                    getX(), getY() + 0.6, getZ(), 60, 1.4, 0.5, 1.4, 0.2);
+            server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 2.0f, 0.7f);
+        }
+        int out = INTRO_RISE + introCardAt();
+        if (introTick > INTRO_RISE && introTick < out && introTick % 3 == 0) {
+            // 這い出る間: 体のまわりから土と骨が噴き、掘る音
+            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                    getX(), getY() + 0.3, getZ(), 18, 1.6, 0.4, 1.6, 0.18);
+            if (introTick % 12 == 0) {
+                server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 1.8f, 0.5f);
+            }
+        }
+        if (introTick == out) {
+            // 体が抜けきって吠える: 名前の札
+            BossIntro.send(this, BossIntro.NAME, bossId(), INTRO_CARD);
+            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                    getX(), getY() + 1.0, getZ(), 120, 2.0, 1.2, 2.0, 0.25);
+            server().sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 1.5, 0.3, 1.5, 0);
+            server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.5f);
+            return;
+        }
+        if (introTick <= out) {
+            return;
+        }
+        if (introTick >= INTRO_RISE + introLength()) {
+            endIntro();
+            introDone = true;
+        }
+    }
+
+    private void startIntro() {
+        introTick = 0;
+        setNoAi(true);
+        setInvisible(true);
+        setInvulnerable(true);
+        getNavigation().stop();
+        BossIntro.send(this, BossIntro.RISE, bossId(), INTRO_RISE);
+    }
+
+    private void endIntro() {
+        introTick = -1;
+        setNoAi(false);
+        setInvisible(false);
+        setInvulnerable(false);
+        cooldown = Math.max(cooldown, 10);
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("skyabyss_intro_done", introDone || introTick >= 0);
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        introDone = tag.getBoolean("skyabyss_intro_done");
+        if (introDone && isNoAi() && isInvisible()) {
+            // 登場の途中で保存されたもの: 戦える姿へ戻す
+            setNoAi(false);
+            setInvisible(false);
+            setInvulnerable(false);
+        }
     }
 
     @Override

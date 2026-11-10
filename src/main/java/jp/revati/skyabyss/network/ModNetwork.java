@@ -32,6 +32,8 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.cancel(payload.id()))
                 .playToClient(jp.revati.skyabyss.combat.BossCue.Payload.TYPE, jp.revati.skyabyss.combat.BossCue.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.BossCueClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.combat.BossIntro.Payload.TYPE, jp.revati.skyabyss.combat.BossIntro.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.titan.BossIntroClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.titan.dungeon.LampBand.Payload.TYPE, jp.revati.skyabyss.titan.dungeon.LampBand.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.LampBandClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.weapon.StrikePayload.TYPE, jp.revati.skyabyss.weapon.StrikePayload.STREAM_CODEC,

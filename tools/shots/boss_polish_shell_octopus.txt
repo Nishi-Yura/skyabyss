@@ -1,0 +1,62 @@
+# ダンジョンの主の作り込みの確かめ: shell_octopus (tools/gen/shots/gen_boss_polish_shots.py が書く)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+lowpoly on
+fov 60
+hud on
+chat clear
+cmd tp @s 0 -60 40 180 0
+waitchunks
+wait 60
+cmd gamemode creative
+cmd tp @s -7 -60 19.0 -160 -10
+wait 10
+cmd skyabyss cinematic stop
+close
+wait 10
+cmd summon skyabyss:shell_octopus 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b,Tags:["m"]}
+wait 30
+shot shell_octopus_intro_count
+wait 50
+shot shell_octopus_intro_rise
+wait 40
+shot shell_octopus_intro_card
+wait 100
+shot shell_octopus_intro_after
+cmd gamemode spectator
+hud off
+cmd kill @e[type=skyabyss:shell_octopus]
+cmd summon skyabyss:shell_octopus 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld -9 -56 13 -145 12
+wait 40
+cmd skyabyss dev anim @e[tag=m] slam
+wait 13
+shot shell_octopus_slam
+wait 60
+cmd skyabyss dev anim @e[tag=m] grab
+wait 22
+shot shell_octopus_grab
+wait 60
+cmd skyabyss dev anim @e[tag=m] plunge
+wait 14
+shot shell_octopus_plunge
+wait 60
+cmd skyabyss dev anim @e[tag=m] whirl
+wait 34
+shot shell_octopus_whirl
+wait 60
+cmd skyabyss dev anim @e[tag=m] scream
+wait 8
+shot shell_octopus_scream
+wait 60

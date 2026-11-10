@@ -29,6 +29,10 @@ import net.minecraft.world.phys.Vec3;
 //   渦        まわりの輪 (内 4・外 12) で人を引き寄せ、続けて足もとの輪を叩く (予告 1.1 秒 → 0.7 秒)。輪の外か内へ逃げる
 //   殻ごもりから出た直後は大きな隙。後半 (体力半分から) は叩きつけが三本になり、墨が二度降る。腕が減るほど技が速い。洞の水母を 2 体呼ぶ
 //   腕を切る  体力が 8・6・4・2 割を切るたびに腕が一本落ちる (両端から)。腕は見えなくなり、攻め手が減る (55 の 1 章「腕を一本ずつ切る」)
+// 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」。骨掘りの大百足と同じ方向):
+//   掴み噛み  真ん中の腕を突き出す前の帯 (予告 0.8 秒)。当たると殻の前へ引き寄せられて足が鈍り、続けて嘴の扇 (予告 0.6 秒) で噛む。引かれたらすぐ横へ抜ける
+//   腕の林    腕を全部床へ突き刺し (1.0 秒)、人ごとの足もとから腕が三度突き上がる (円、予告 1.1 秒、0.7 秒おき)。引き抜いたあとは大きな隙
+//   登場は殻が床を割って迫り上がり、腕が一本ずつ解けて床を叩き、腕を広げて嘴を全開に吠える (intro)。後半に入るときも吠える (scream)
 public class ShellOctopus extends DungeonBoss {
     static final EntityDataAccessor<Integer> ARMS = SynchedEntityData.defineId(ShellOctopus.class, EntityDataSerializers.INT);
     static final int SLAM = 1;
@@ -36,6 +40,8 @@ public class ShellOctopus extends DungeonBoss {
     static final int INK = 3;
     static final int WITHDRAW = 4;
     static final int WHIRL = 5;
+    static final int GRAB = 6;
+    static final int PLUNGE = 7;
     public static final int WHIRL_WARN = 22;
     public static final int WHIRL_SLAM = 14;
     public static final int SLAM_WARN = 16;
@@ -44,6 +50,16 @@ public class ShellOctopus extends DungeonBoss {
     public static final double SWEEP_RANGE = 8;
     public static final int INK_WARN = 24;
     public static final int WITHDRAW_TICKS = 100;
+    public static final int GRAB_WARN = 16;
+    public static final int GRAB_BITE = 28;
+    public static final double GRAB_LENGTH = 11;
+    // 腕の林: 突き刺すまで PLUNGE_DOWN、突き上げは三度 (PLUNGE_GAP おき、予告 PLUNGE_WARN)
+    public static final int PLUNGE_DOWN = 20;
+    public static final int PLUNGE_GAP = 14;
+    public static final int PLUNGE_WARN = 22;
+    public static final int PLUNGE_TICKS = PLUNGE_DOWN + PLUNGE_GAP * 2 + PLUNGE_WARN + 22;
+    private int lastGrab = -200;
+    private int lastPlunge = -300;
     // 腕の落ちる順 (骨 arm<k>。真ん中の 2 は最後まで残す)
     public static final int[] CUT_ORDER = {4, 0, 3, 1};
     private int lastSweep = -200;
@@ -53,7 +69,7 @@ public class ShellOctopus extends DungeonBoss {
 
     public ShellOctopus(EntityType<? extends Monster> type, Level level) {
         super(type, level, "shell_octopus", () -> SoundEvents.SQUID_AMBIENT, () -> SoundEvents.SQUID_HURT, () -> SoundEvents.ELDER_GUARDIAN_DEATH,
-                "slam", "sweep", "ink", "withdraw", "unwithdraw", "hurt", "death");
+                "slam", "slam3", "sweep", "whirl", "ink", "grab", "plunge", "unplunge", "withdraw", "unwithdraw", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -113,6 +129,14 @@ public class ShellOctopus extends DungeonBoss {
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.SHULKER_CLOSE, SoundSource.HOSTILE, 2f, 0.5f);
             return;
         }
+        if (tickCount - lastPlunge > (phase2 ? 280 : 380) && distance > 5) {
+            plunge(target);
+            return;
+        }
+        if (tickCount - lastGrab > 200 && distance > 4 && distance <= GRAB_LENGTH && random.nextFloat() < 0.6f) {
+            grab(target);
+            return;
+        }
         if (tickCount - lastWhirl > 220 && distance > 4 && distance < 12) {
             whirl(target);
             return;
@@ -141,7 +165,7 @@ public class ShellOctopus extends DungeonBoss {
         }
         if (distance <= SLAM_LENGTH + 1) {
             move = SLAM;
-            begin(target, "slam");
+            begin(target, phase2 ? "slam3" : "slam");
             cue("shell_octopus", "slam", SLAM_WARN);
             double a = Telegraph.angleOf(forward());
             slamLine(target, a, SLAM_WARN, 1.15f);
@@ -157,7 +181,7 @@ public class ShellOctopus extends DungeonBoss {
     void whirl(LivingEntity target) {
         move = WHIRL;
         lastWhirl = tickCount;
-        begin(target, "sweep");
+        begin(target, "whirl");
         cue("shell_octopus", "whirl", WHIRL_WARN);
         Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), 4, 12))
                 .floor(getY()).warn(WHIRL_WARN).danger().owner(this).target(target)
@@ -170,6 +194,81 @@ public class ShellOctopus extends DungeonBoss {
                     player.hurtMarked = true;
                 })
                 .start();
+    }
+
+    // 掴み噛み: 腕を突き出す前の帯。当たった人は殻の前へ引かれ、足が鈍る。噛みの扇は during で
+    void grab(LivingEntity target) {
+        move = GRAB;
+        lastGrab = tickCount;
+        begin(target, "grab");
+        cue("shell_octopus", "grab", GRAB_BITE);
+        Vec3 f = forward();
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), GRAB_LENGTH, 1.3))
+                .floor(getY()).warn(GRAB_WARN).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onImpact(server -> server.playSound(null, getX(), getY(), getZ(), SoundEvents.SLIME_ATTACK, SoundSource.HOSTILE, 1.8f, 0.5f))
+                .onHit((server, player) -> {
+                    player.hurt(attackSource(), damage() * 0.5f);
+                    Vec3 front = position().add(f.scale(3.2));
+                    Vec3 pull = front.subtract(player.position()).multiply(1, 0, 1);
+                    player.setDeltaMovement(pull.x * 0.32, 0.25, pull.z * 0.32);
+                    player.hurtMarked = true;
+                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 14, 3));
+                })
+                .start();
+    }
+
+    // 腕の林: 腕を床へ突き刺し、人ごとの足もとから三度突き上げる
+    void plunge(LivingEntity target) {
+        move = PLUNGE;
+        lastPlunge = tickCount;
+        begin(target, "plunge");
+        cue("shell_octopus", "plunge", PLUNGE_DOWN + PLUNGE_WARN);
+        server().playSound(null, getX(), getY(), getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 1.4f, 0.6f);
+    }
+
+    private void tentacles(LivingEntity target) {
+        for (ServerPlayer p : server().getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(28), this::canHit)) {
+            Vec3 s = p.position();
+            Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.4))
+                    .floor(s.y).warn(PLUNGE_WARN).danger().owner(this).target(target)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        for (int i = 0; i < 6; i++) {
+                            server.sendParticles(ParticleTypes.SQUID_INK, s.x, s.y + 0.5 + i * 0.6, s.z, 8, 0.35, 0.2, 0.35, 0.02);
+                        }
+                        server.sendParticles(ParticleTypes.SPLASH, s.x, s.y + 0.4, s.z, 40, 1.0, 0.4, 1.0, 0.2);
+                        server.playSound(null, s.x, s.y, s.z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.4f, 0.5f);
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * 0.8f);
+                        player.setDeltaMovement(player.getDeltaMovement().add(0, 0.85, 0));
+                        player.hurtMarked = true;
+                    })
+                    .start();
+        }
+    }
+
+    // 登場: 殻が迫り上がり、腕が解け、吠える (アニメ intro 5.0 秒)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 100;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 66;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
     }
 
     void slamLine(LivingEntity target, double angle, int warn, float k) {
@@ -207,6 +306,33 @@ public class ShellOctopus extends DungeonBoss {
     @Override
     protected void during(int tick) {
         super.during(tick);
+        if (move == GRAB && tick == GRAB_WARN) {
+            // 引き寄せた所へ嘴の扇
+            LivingEntity t = getTarget();
+            Vec3 f = forward();
+            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), 5.5, Math.toRadians(70)))
+                    .floor(getY()).warn(GRAB_BITE - GRAB_WARN).danger().owner(this).target(t)
+                    .victims(this::canHit)
+                    .onImpact(server -> server.playSound(null, getX(), getY(), getZ(), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.HOSTILE, 1.8f, 0.5f))
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * 1.4f);
+                        player.knockback(1.0, -f.x, -f.z);
+                    })
+                    .start();
+        }
+        if (move == PLUNGE) {
+            LivingEntity t = getTarget();
+            if (t != null && (tick == PLUNGE_DOWN || tick == PLUNGE_DOWN + PLUNGE_GAP || tick == PLUNGE_DOWN + PLUNGE_GAP * 2)) {
+                tentacles(t);
+            }
+            if (tick == PLUNGE_DOWN) {
+                server().sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.3, getZ(), 80, 4, 0.3, 4, 0.2);
+                server().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 2f, 0.4f);
+            }
+            if (tick == PLUNGE_TICKS - 16) {
+                playAction("unplunge");
+            }
+        }
         if (move == WHIRL && tick == WHIRL_WARN + 4) {
             LivingEntity t = getTarget();
             cue("shell_octopus", "slam", WHIRL_SLAM);
@@ -268,6 +394,8 @@ public class ShellOctopus extends DungeonBoss {
             case SWEEP -> SWEEP_WARN + 12;
             case INK -> phase2 ? INK_WARN * 2 + 2 : INK_WARN + 6;
             case WHIRL -> WHIRL_WARN + 4 + WHIRL_SLAM + 10;
+            case GRAB -> GRAB_BITE + 14;
+            case PLUNGE -> PLUNGE_TICKS;
             default -> WITHDRAW_TICKS;
         };
     }
@@ -275,7 +403,7 @@ public class ShellOctopus extends DungeonBoss {
     @Override
     protected void finish() {
         // 殻から出た直後は大きな隙。腕が減るほど荒れて、次の技までが短い
-        if (move == WITHDRAW) {
+        if (move == WITHDRAW || move == PLUNGE) {
             opening();
         }
         cooldown = Math.max(8, (move == WITHDRAW ? 24 : 18 + random.nextInt(10)) - (5 - arms()) * 2);

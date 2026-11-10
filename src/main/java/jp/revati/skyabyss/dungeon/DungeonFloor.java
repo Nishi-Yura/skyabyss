@@ -545,7 +545,8 @@ public final class DungeonFloor {
                 m.setPersistenceRequired();
                 bar = new ServerBossEvent(m.getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
                 for (ServerPlayer p : here) {
-                    if (Dungeons.real(p)) {
+                    // ダンジョンの主 (DungeonBoss) は登場の数え下ろしと名前の札を自分で出す
+                    if (Dungeons.real(p) && !(m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss)) {
                         Notice.alert(p, "message.skyabyss.dungeon.boss_appear", m.getDisplayName());
                     }
                 }

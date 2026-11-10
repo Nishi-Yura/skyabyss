@@ -27,7 +27,7 @@ public class ThunderOwl extends DungeonBoss {
 
     public ThunderOwl(EntityType<? extends Monster> type, Level level) {
         super(type, level, "thunder_owl", () -> SoundEvents.PARROT_AMBIENT, () -> SoundEvents.PARROT_HURT, () -> SoundEvents.PARROT_DEATH,
-                "dive", "gust", "strike", "hurt", "death");
+                "dive", "gust", "strike", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -38,6 +38,28 @@ public class ThunderOwl extends DungeonBoss {
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.FOLLOW_RANGE, 32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    // 登場の動きと後半の咆哮 (2026-11-11 の声「他のボスたちもこの方向性で」。アニメ intro / scream)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 76;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 46;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
     }
 
     @Override

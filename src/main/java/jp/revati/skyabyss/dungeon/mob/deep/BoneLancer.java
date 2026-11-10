@@ -31,7 +31,7 @@ public class BoneLancer extends DungeonBoss {
 
     public BoneLancer(EntityType<? extends Monster> type, Level level) {
         super(type, level, "bone_lancer", () -> SoundEvents.SKELETON_HORSE_AMBIENT, () -> SoundEvents.SKELETON_HORSE_HURT, () -> SoundEvents.SKELETON_HORSE_DEATH,
-                "charge", "rear", "sweep", "hurt", "death");
+                "charge", "rear", "sweep", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -42,6 +42,28 @@ public class BoneLancer extends DungeonBoss {
                 .add(Attributes.MOVEMENT_SPEED, 0.28)
                 .add(Attributes.FOLLOW_RANGE, 32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    // 登場の動きと後半の咆哮 (2026-11-11 の声「他のボスたちもこの方向性で」。アニメ intro / scream)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 76;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 48;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
     }
 
     @Override

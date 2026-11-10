@@ -25,6 +25,10 @@ import net.minecraft.world.phys.Vec3;
 //   熔けた溝    後半: 鎚で床を裂き、前へ熔けた溝を引く。溝はしばらく燃え続ける (4 秒。立つと 1 秒ごとに焼ける)
 //   炉の噴き上げのあとは、背の炉が開いて大きな隙。後半 (体力半分から) は熔岩の蛞蝓を 2 体呼ぶ
 //   炉の噴き上げ 体力が 6 割を切ると、前かがみになって背の炉から火を噴き上げ、人ごとの落ちる火の輪 (予告 1.4 秒)
+// 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」。骨掘りの大百足と同じ方向):
+//   跳び叩き  深く沈んで鎚を掲げて跳び、人のいた所の円へ叩きつける (予告 1.3 秒)、続けて外への輪の衝撃。離れた人へ。着地のあとに隙
+//   火の息    のけぞって下あごを外し (予告 1.0 秒)、首を左から右へ振って前の二枚の扇を 0.8 秒焼く。寄った人へ
+//   登場は鎚を握った腕が床を割って突き出し、這い出て片膝をつき、立つと背の炉の扉が弾けて吠える (intro)。後半に入るときも吠える (scream)
 public class ForgeGiant extends DungeonBoss {
     static final int HAMMER = 1;
     static final int SWEEP = 2;
@@ -32,6 +36,8 @@ public class ForgeGiant extends DungeonBoss {
     static final int BLAST = 4;
     static final int COMBO = 5;
     static final int TRENCH = 6;
+    static final int LEAP = 7;
+    static final int BREATH = 8;
     public static final int COMBO_WARN = 18;
     public static final int TRENCH_WARN = 20;
     public static final double TRENCH_LENGTH = 15;
@@ -43,6 +49,12 @@ public class ForgeGiant extends DungeonBoss {
     public static final double STOMP_OUTER = 9;
     public static final double STOMP_INNER = 3.5;
     public static final int BLAST_WARN = 28;
+    public static final int LEAP_WARN = 26;
+    public static final int BREATH_WARN = 20;
+    public static final int BREATH_ACTIVE = 16;
+    public static final double BREATH_RANGE = 9;
+    private int lastLeap = -300;
+    private int lastBreath = -200;
     private int lastStomp = -200;
     private int lastBlast = -300;
     private int lastCombo = -200;
@@ -50,7 +62,7 @@ public class ForgeGiant extends DungeonBoss {
 
     public ForgeGiant(EntityType<? extends Monster> type, Level level) {
         super(type, level, "forge_giant", () -> SoundEvents.IRON_GOLEM_STEP, () -> SoundEvents.IRON_GOLEM_HURT, () -> SoundEvents.IRON_GOLEM_DEATH,
-                "hammer", "sweep", "stomp", "blast", "hurt", "death");
+                "hammer", "combo", "sweep", "stomp", "trench", "blast", "leap", "breath", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -77,6 +89,19 @@ public class ForgeGiant extends DungeonBoss {
         }
         if (phase2 && distance > 6 && distance <= TRENCH_LENGTH && tickCount - lastTrench > 260) {
             trench(target);
+            return;
+        }
+        if (distance > 8 && distance < 22 && tickCount - lastLeap > 260) {
+            move = LEAP;
+            lastLeap = tickCount;
+            leapAt(target, "leap", LEAP_WARN, 4.0, 1.4f);
+            return;
+        }
+        if (distance <= BREATH_RANGE - 1 && tickCount - lastBreath > 240 && random.nextFloat() < 0.45f) {
+            move = BREATH;
+            lastBreath = tickCount;
+            spray(target, "breath", BREATH_WARN, BREATH_RANGE, 50, BREATH_ACTIVE, 0.9f, ParticleTypes.FLAME);
+            server().playSound(null, getX(), getY(), getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 2f, 0.4f);
             return;
         }
         if (distance <= 11 && tickCount - lastCombo > 220 && random.nextFloat() < 0.5f) {
@@ -138,7 +163,7 @@ public class ForgeGiant extends DungeonBoss {
     void combo(LivingEntity target) {
         move = COMBO;
         lastCombo = tickCount;
-        begin(target, "hammer");
+        begin(target, "combo");
         cue("forge_giant", "combo", COMBO_WARN);
         Vec3 f = target.position().subtract(position()).multiply(1, 0, 1).normalize();
         for (int k = 0; k < 3; k++) {
@@ -159,7 +184,7 @@ public class ForgeGiant extends DungeonBoss {
     void trench(LivingEntity target) {
         move = TRENCH;
         lastTrench = tickCount;
-        begin(target, "sweep");
+        begin(target, "trench");
         cue("forge_giant", "trench", TRENCH_WARN);
         double a = Telegraph.angleOf(target.position().subtract(position()));
         Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, TRENCH_LENGTH, 1.3))
@@ -209,6 +234,28 @@ public class ForgeGiant extends DungeonBoss {
         }
     }
 
+    // 登場: 腕が床を割り、這い出て、扉が弾けて吠える (アニメ intro 5.0 秒)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 100;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 66;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
+    }
+
     @Override
     protected void during(int tick) {
         super.during(tick);
@@ -238,6 +285,8 @@ public class ForgeGiant extends DungeonBoss {
             case STOMP -> STOMP_WARN + 10;
             case COMBO -> COMBO_WARN + 16 + 12;
             case TRENCH -> TRENCH_WARN + 14;
+            case LEAP -> LEAP_WARN + 26;
+            case BREATH -> BREATH_WARN + 10 + BREATH_ACTIVE + 12;
             default -> BLAST_WARN + 10;
         };
     }

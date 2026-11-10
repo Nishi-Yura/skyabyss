@@ -31,7 +31,7 @@ public class LavaToad extends DungeonBoss {
 
     public LavaToad(EntityType<? extends Monster> type, Level level) {
         super(type, level, "lava_toad", () -> SoundEvents.FROG_AMBIENT, () -> SoundEvents.FROG_HURT, () -> SoundEvents.FROG_DEATH,
-                "hop", "erupt", "tongue", "hurt", "death");
+                "hop", "erupt", "tongue", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -42,6 +42,28 @@ public class LavaToad extends DungeonBoss {
                 .add(Attributes.MOVEMENT_SPEED, 0.24)
                 .add(Attributes.FOLLOW_RANGE, 32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    // 登場の動きと後半の咆哮 (2026-11-11 の声「他のボスたちもこの方向性で」。アニメ intro / scream)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 72;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 44;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
     }
 
     @Override
