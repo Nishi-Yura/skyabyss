@@ -7,8 +7,6 @@ import jp.revati.skyabyss.item.accessory.AccessoryData;
 import jp.revati.skyabyss.item.accessory.AccessoryMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
@@ -19,15 +17,10 @@ import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 装飾の画面。持ち物の画面と同じ大きい板 (client/inventory/GearPanel) で、人形の右の 3 枠 (上が護符、下の二つが装飾) が動かせる。
-// 防具と逆手は見るだけ。つまみ (持ち物・装飾・旅袋・封の箱) は見出しの帯の左。
-// 旅袋と封の箱の画面は前の寸法 (幅 176) のままで、そちらのつまみは画面の上に載る (下の Tab)
+// 防具と逆手は見るだけ。つまみ (持ち物・装飾・旅袋・封印の箱) は見出しの帯の左 (四つの画面とも同じ板・同じ位置)
 public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/accessory/accessory.png");
     static final int TEX = 512;
-    static final int W = 176;
-    static final int TAB_W = 41;
-    public static final int TAB_H = 16;
-    static final int TABS = 4;
     private static final EquipmentSlot[] WORN = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.OFFHAND};
 
     public AccessoryScreen(AccessoryMenu menu, Inventory inventory, Component title) {
@@ -55,19 +48,6 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
             }
         }
         GearPanel.addTabs(this::addRenderableWidget, () -> leftPos, () -> topPos, 1);
-    }
-
-    // 旅袋・封の箱の画面 (幅 176) の上に載るつまみ。selected = いまの画面のつまみ。位置は画面の左端に合わせて毎回決める
-    public static void addTabs(java.util.function.Consumer<AbstractButton> add, AbstractContainerScreen<?> screen, int selected) {
-        addTabs(add, screen::getGuiLeft, screen::getGuiTop, selected);
-    }
-
-    // 入れ物でない画面 (封の箱の欄 client/box/BoxPouchScreen) からも。left / top = 画面の左上
-    public static void addTabs(java.util.function.Consumer<AbstractButton> add, java.util.function.IntSupplier left, java.util.function.IntSupplier top, int selected) {
-        restoreCursor();
-        for (int i = 0; i < TABS; i++) {
-            add.accept(new Tab(left, top, i, i == selected));
-        }
     }
 
     // つまみの名前: 0 = 持ち物、1 = 装飾、2 = 旅袋、3 = 封の箱 (docs/design/52)
@@ -149,55 +129,6 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
         // 護符の枠 (いちばん上) の左に、使うキー
         Component key = Component.translatable("skyabyss_gear.screen.charm_key", AccessoryClient.CHARM_KEY.getTranslatedKeyMessage());
         g.drawString(font, key, GearPanel.RIGHT.right() - 8 - font.width(key), GearPanel.RIGHT.bottom() - 8 - 10, Golden.DIM, false);
-    }
-
-    // 旅袋・封の箱の画面の上に載るつまみ。選ばれたつまみは押せない
-    static final class Tab extends AbstractButton {
-        private final java.util.function.IntSupplier left;
-        private final java.util.function.IntSupplier top;
-        private final int which;
-        private final boolean selected;
-
-        Tab(java.util.function.IntSupplier left, java.util.function.IntSupplier top, int which, boolean selected) {
-            super(0, 0, TAB_W, TAB_H, tabName(which));
-            this.left = left;
-            this.top = top;
-            this.which = which;
-            this.selected = selected;
-        }
-
-        private void place() {
-            setX(left.getAsInt() + W - (TABS - which) * (TAB_W + 2) - 2);
-            setY(top.getAsInt() - TAB_H + 2);
-        }
-
-        @Override
-        public void onPress() {
-            if (!selected) {
-                go(which);
-            }
-        }
-
-        @Override
-        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            place();
-            g.pose().pushPose();
-            g.pose().translate(0, 0, selected ? 50 : 0);
-            Golden.hudFrame(g, getX(), getY(), getX() + TAB_W, getY() + TAB_H);
-            Golden.tab(g, Minecraft.getInstance().font, new Golden.Box(getX() + 2, getY() + 2, TAB_W - 4, TAB_H - 4), getMessage(), selected, isHoveredOrFocused());
-            g.pose().popPose();
-        }
-
-        @Override
-        public boolean isMouseOver(double mouseX, double mouseY) {
-            place();
-            return super.isMouseOver(mouseX, mouseY);
-        }
-
-        @Override
-        protected void updateWidgetNarration(NarrationElementOutput output) {
-            defaultButtonNarrationText(output);
-        }
     }
 
     @Override

@@ -25,6 +25,7 @@
     "StringSplitterMixin",
     "BossHealthOverlayAccessor",
     "AbstractWidgetAuditMixin",
+    "GlassButtonMixin",
     "CameraShoulderMixin",
     "MouseHandlerShoulderMixin",
     "CinematicHidePlayersMixin"

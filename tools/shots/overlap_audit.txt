@@ -171,6 +171,18 @@ overlap accessory_1920_g4
 shot accessory_1920_g4
 close
 wait 2
+key skyabyss_pouch.key.open
+wait 12
+overlap pouch_1920_g4
+shot pouch_1920_g4
+close
+wait 2
+cmd skyabyss_forge open
+wait 12
+overlap forge_1920_g4
+shot forge_1920_g4
+close
+wait 2
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12
@@ -482,6 +494,18 @@ overlap accessory_1920_g2
 shot accessory_1920_g2
 close
 wait 2
+key skyabyss_pouch.key.open
+wait 12
+overlap pouch_1920_g2
+shot pouch_1920_g2
+close
+wait 2
+cmd skyabyss_forge open
+wait 12
+overlap forge_1920_g2
+shot forge_1920_g2
+close
+wait 2
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12
@@ -791,6 +815,18 @@ openacc
 wait 12
 overlap accessory_1280_g3
 shot accessory_1280_g3
+close
+wait 2
+key skyabyss_pouch.key.open
+wait 12
+overlap pouch_1280_g3
+shot pouch_1280_g3
+close
+wait 2
+cmd skyabyss_forge open
+wait 12
+overlap forge_1280_g3
+shot forge_1280_g3
 close
 wait 2
 cmd skyabyss cinematic stop

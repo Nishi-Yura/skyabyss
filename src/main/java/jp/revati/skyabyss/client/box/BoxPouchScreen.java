@@ -2,8 +2,8 @@ package jp.revati.skyabyss.client.box;
 
 import java.util.List;
 
-import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.accessory.AccessoryScreen;
+import jp.revati.skyabyss.client.inventory.GearPanel;
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.loot.box.BoxKind;
 import jp.revati.skyabyss.loot.box.LootBoxSetup;
@@ -12,18 +12,21 @@ import jp.revati.skyabyss.pouch.Pouch;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 封の箱の欄 (旅袋のつまみの四つ目。docs/design/52 の 7 章・00 の 310)。持っている封の箱を種類ごとに見る画面 (開けるのは町の封切り師)。
 // 押すと一つ (シフトで全部) 持ち物へ取り出せる (落とす・仲間に渡すため。BoxNetwork.TakeOut)。
-//   上: 巨神の箱 4 種 / 中: 階級の箱 (行 = 階級、列 = 帯 I〜V) / 下: 淵の金の箱
+//   右の欄: 上に巨神の箱 4 種、中に階級の箱 (行 = 階級、列 = 帯 I〜V)、下に淵の金の箱・塔の箱・雲上の箱
+//   左の欄: 重ねた箱の名前と数、手引き。持ち物と同じ大きい板 (client/inventory/GearPanel。docs/design/56 の 4 章)
 public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
-    static final int TEX = 512;
-    static final int W = 176, H = 200;
-    static final int GOLD = 0xFFE9C46A, TEXT = 0xFFD8DCE6, DIM = 0xFFA4ACC8;
+    static final int W = GearPanel.W, H = GearPanel.H;
+    static final int GOLD = 0xFF000000 | Golden.GOLD, TEXT = 0xFF000000 | Golden.TEXT, DIM = 0xFF000000 | Golden.SOFT;
+    private static final Golden.Box LEFT = GearPanel.LEFT;
+    private static final Golden.Box RIGHT = GearPanel.RIGHT;
+    // 升目 (幅 160 ほど・上端 19) を右の欄の中へ
+    private static final int DX = RIGHT.x() + (RIGHT.w() - 160) / 2 - 8;
+    private static final int DY = RIGHT.y() + 6 - 19;
     static final int X0 = 8, PITCH = 18, BAND_X = 74;
     static final String[] NUMERALS = {"I", "II", "III", "IV", "V"};
     static final GearTier[] TIERS = {GearTier.UNCOMMON, GearTier.RARE, GearTier.EPIC, GearTier.HEROIC};
@@ -56,12 +59,12 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
     }
 
     private int top() {
-        return (height - H) / 2 + AccessoryScreen.TAB_H / 2;
+        return (height - H) / 2;
     }
 
     @Override
     protected void init() {
-        AccessoryScreen.addTabs(this::addRenderableWidget, this::left, this::top, 3);
+        GearPanel.addTabs(this::addRenderableWidget, this::left, this::top, 3);
     }
 
     @Override
@@ -82,11 +85,16 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
-        int x = left(), y = top();
-        g.blit(TEXTURE, x, y, W, H, 0, 0, W * 2, H * 2, TEX, TEX);
-        g.drawString(font, title, x + 8, y + 5, GOLD, false);
-        g.drawString(font, Component.translatable("skyabyss_box.pouch.titan"), x + X0, y + 19, DIM, false);
-        g.drawString(font, Component.translatable("skyabyss_box.pouch.rarity"), x + X0, y + 52, DIM, false);
+        int px = left(), py = top();
+        g.pose().pushPose();
+        g.pose().translate(px, py, 0);
+        Golden.frame(g, font, GearPanel.layout(), title);
+        Golden.recess(g, LEFT);
+        Golden.recess(g, RIGHT);
+        g.pose().popPose();
+        int x = px + DX, y = py + DY;
+        g.drawString(font, Component.translatable("skyabyss_box.pouch.titan"), x + X0, y + 19, Golden.PALE, false);
+        g.drawString(font, Component.translatable("skyabyss_box.pouch.rarity"), x + X0, y + 52, Golden.PALE, false);
         for (int b = 0; b < 5; b++) {
             String n = NUMERALS[b];
             g.drawString(font, n, x + BAND_X + b * PITCH + (16 - font.width(n)) / 2, y + 58, DIM, false);
@@ -98,10 +106,13 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
         for (Spot s : spots) {
             int n = count(s.kind());
             int sx = x + s.x(), sy = y + s.y();
-            g.blit(TEXTURE, sx - 1, sy - 1, 18, 18, n > 0 ? 400f : 360f, 0f, 36, 36, TEX, TEX);
+            Golden.slot(g, sx - 1, sy - 1, 18);
+            if (n > 0) {
+                Golden.outline(g, sx - 1, sy - 1, sx + 17, sy + 17, 0xFF5A8FC0);
+            }
             g.renderItem(stack(s.kind()), sx, sy);
             if (n <= 0) {
-                g.fill(sx, sy, sx + 16, sy + 16, 0xC8141820);
+                g.fill(sx, sy, sx + 16, sy + 16, 0xC80A0E1E);
             } else {
                 String t = n > 999 ? "999+" : String.valueOf(n);
                 g.pose().pushPose();
@@ -110,23 +121,28 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
                 g.pose().popPose();
             }
         }
-        renderInfo(g, x, y, hovered(mouseX, mouseY));
+        renderInfo(g, px, py, hovered(mouseX, mouseY));
     }
 
-    private void renderInfo(GuiGraphics g, int x, int y, Spot s) {
-        int y1 = y + 167;
-        if (s == null) {
-            jp.revati.skyabyss.client.ui.TextClip.wrapped(g, font, Component.translatable("skyabyss_box.pouch.hint"), x + 12, y1, W - 24, 3, 10, DIM, false);
-            return;
+    // 左の欄: 重ねた箱の名前と数。重ねていなければ手引き
+    private void renderInfo(GuiGraphics g, int px, int py, Spot s) {
+        int x = px + LEFT.x() + 6;
+        int y = py + LEFT.y() + 6;
+        int w = LEFT.w() - 12;
+        Component text = s == null ? Component.translatable("skyabyss_box.pouch.hint") : stack(s.kind()).getHoverName();
+        int color = s == null ? DIM : 0xFF000000 | SealedBoxItem.color(s.kind());
+        for (var line : font.split(text, w)) {
+            g.drawString(font, line, x, y, color, false);
+            y += Golden.ROW;
         }
-        int n = count(s.kind());
-        Component c = Component.translatable("skyabyss_box.screen.count", n);
-        jp.revati.skyabyss.client.ui.TextClip.line(g, font, stack(s.kind()).getHoverName(), x + 12, y1, W - 30 - font.width(c), 0xFF000000 | SealedBoxItem.color(s.kind()), false);
-        g.drawString(font, c, x + W - 12 - font.width(c), y1, n > 0 ? TEXT : DIM, false);
+        if (s != null) {
+            int n = count(s.kind());
+            g.drawString(font, Component.translatable("skyabyss_box.screen.count", n), x, y, n > 0 ? TEXT : DIM, false);
+        }
     }
 
     private Spot hovered(int mx, int my) {
-        int x = left(), y = top();
+        int x = left() + DX, y = top() + DY;
         for (Spot s : spots) {
             if (mx >= x + s.x() - 1 && mx < x + s.x() + 17 && my >= y + s.y() - 1 && my < y + s.y() + 17) {
                 return s;
@@ -167,6 +183,6 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public int[] textBounds() {
-        return new int[] {left(), top() - AccessoryScreen.TAB_H, W, H + AccessoryScreen.TAB_H};
+        return new int[] {left(), top(), W, H};
     }
 }

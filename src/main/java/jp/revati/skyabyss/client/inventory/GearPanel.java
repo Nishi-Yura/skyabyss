@@ -53,6 +53,11 @@ public final class GearPanel {
     private GearPanel() {
     }
 
+    // 板の区切り (旅袋・封印の箱など、同じ板を使う画面のために)
+    public static Golden.Layout layout() {
+        return L;
+    }
+
     public static int armorY(int i) {
         return COL_Y + i * COL_PITCH;
     }
@@ -178,7 +183,9 @@ public final class GearPanel {
     public static void addTabs(Consumer<AbstractButton> add, IntSupplier left, IntSupplier top, int selected) {
         AccessoryScreen.restoreCursor();
         for (int i = 0; i < 4; i++) {
-            add.accept(new Tab(left, top, i, i == selected));
+            Tab tab = new Tab(left, top, i, i == selected);
+            tab.place();
+            add.accept(tab);
         }
     }
 

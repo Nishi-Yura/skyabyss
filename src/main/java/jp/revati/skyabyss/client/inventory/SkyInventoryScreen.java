@@ -48,7 +48,9 @@ public class SkyInventoryScreen extends AbstractContainerScreen<InventoryMenu> i
         super.init();
         place();
         GearPanel.addTabs(this::addRenderableWidget, () -> leftPos, () -> topPos, 0);
-        addRenderableWidget(new ProfileButton());
+        ProfileButton profile = new ProfileButton();
+        profile.place();
+        addRenderableWidget(profile);
     }
 
     // 枠の置き場: 0 できる物・1〜4 クラフト (外へ)、5〜8 防具、9〜35 袋、36〜44 手もと、45 逆手

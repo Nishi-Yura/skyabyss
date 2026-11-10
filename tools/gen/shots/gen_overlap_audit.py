@@ -36,6 +36,9 @@ def main():
             L += ["open " + o, "wait 8", "overlap %s_%s" % (name, tag), "shot %s_%s" % (name, tag), "close", "wait 2"]
         # 装飾の画面はサーバーが開く (つまみを押したのと同じ)
         L += ["openacc", "wait 12", "overlap accessory_%s" % tag, "shot accessory_%s" % tag, "close", "wait 2"]
+        # 旅袋 (キー) と共鳴の炉 (コマンド) もサーバーが開く
+        L += ["key skyabyss_pouch.key.open", "wait 12", "overlap pouch_%s" % tag, "shot pouch_%s" % tag, "close", "wait 2"]
+        L += ["cmd skyabyss_forge open", "wait 12", "overlap forge_%s" % tag, "shot forge_%s" % tag, "close", "wait 2"]
         for name, c in CMDS:
             L += ["cmd skyabyss cinematic stop", "cmd " + c, "wait 12", "overlap %s_%s" % (name, tag), "shot %s_%s" % (name, tag), "close", "wait 2"]
     io.open(ROOT / "tools/shots/overlap_audit.txt", "w", encoding="utf-8", newline="\n").write("\n".join(L) + "\n")

@@ -3184,5 +3184,6 @@
   "gui.skyabyss.gear.skills": "Skills",
   "hud.skyabyss.challenge.herald": "Herald pack",
   "hud.skyabyss.challenge.abyss_pack": "Abyss pack",
-  "hud.skyabyss.challenge.wave": "Wave %1$s/%2$s"
+  "hud.skyabyss.challenge.wave": "Wave %1$s/%2$s",
+  "gui.skyabyss.chest.inside": "Contents"
 }
