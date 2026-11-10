@@ -32,15 +32,15 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int SHEET_W = 256;
     private static final int SHEET_H = 96;
 
-    private static final int BG = 0x07090E;
-    private static final int PANEL = 0x10131A;
-    private static final int CARD = 0x171B25;
-    private static final int GOLD = 0xF2C14E;
-    private static final int TEAL = 0x7FD6D0;
+    private static final int BG = 0x05070F;
+    private static final int PANEL = 0x0C1022;
+    private static final int CARD = 0x101630;
+    private static final int GOLD = 0xE9C46A;
+    private static final int TEAL = 0x8FD0FF;
     private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x8C98A4;
+    private static final int DIM = 0x9AA4C4;
     private static final int GOOD = 0x7BD66B;
-    private static final int RARE = 0xF2C14E;
+    private static final int RARE = 0xE9C46A;
     private static final int EXTREME = 0xC25BD6;
     private static final int COMMON = 0x4A6A72;
     private static final int ABYSS = 0xD8343C;
@@ -280,7 +280,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     // 誓いの頁: 一行目に段と素材の倍率 (選べないときは理由)、その下に誓いを一つずつ (立てているものは金)
     private static final int VOW_TOP = CONTENT.y() + ROW + Golden.S5;
     private static final int VOW_ROW = ROW + Golden.S5;
-    private static final int SOFT_DESC = 0xA9AEBC;
+    private static final int SOFT_DESC = 0xB4BBD6;
 
     private int vowRowAt(double mx, double my) {
         if (mx < CONTENT.x() || mx >= CONTENT.right() || my < VOW_TOP) {
@@ -553,7 +553,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 if (r.modsTotal() > 0) {
                     int bx = x0 + 252;
                     int bw = Golden.S34 + Golden.S8;
-                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0A0C12);
+                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0A0E1E);
                     g.fill(bx, y + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), y + 8, argb(1f, TEAL));
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 3, ty, argb(1f, DIM), false);
                 }

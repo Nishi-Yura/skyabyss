@@ -239,7 +239,7 @@ public class TradeScreen extends Screen {
     // ---------------------------------------------------------------- 描く
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
+        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
     }
 
     // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)
@@ -391,7 +391,7 @@ public class TradeScreen extends Screen {
     // 行の中の小さな釦 (高さ 13)
     private void button(GuiGraphics g, int x, int y, int w, Component label, int bg, int fg, int mx, int my, Runnable run) {
         boolean hv = mx >= x && mx < x + w && my >= y && my < y + BTN;
-        g.fill(x, y, x + w, y + BTN, hv ? 0xFF2A5E6A : bg);
+        g.fill(x, y, x + w, y + BTN, hv ? 0xFF364064 : bg);
         Golden.outline(g, x, y, x + w, y + BTN, FacilityUi.LINE);
         g.drawString(font, label, x + (w - font.width(label)) / 2, Golden.textY(y, BTN), fg, false);
         hit(x, y, w, BTN, run, null);
@@ -442,7 +442,7 @@ public class TradeScreen extends Screen {
             if (r.applied()) {
                 g.drawString(font, Component.translatable("gui.skyabyss.trade.applied"), bx, Golden.textY(by, BTN), Golden.GOLD, false);
             } else {
-                button(g, bx, by, BUY_W, Component.translatable("gui.skyabyss.trade.apply"), 0xFF1E3A40, r.canPay() ? Golden.TEXT : FacilityUi.LACK, mx, my,
+                button(g, bx, by, BUY_W, Component.translatable("gui.skyabyss.trade.apply"), 0xFF1A2448, r.canPay() ? Golden.TEXT : FacilityUi.LACK, mx, my,
                         () -> send(TradeNetwork.Action.simple("apply", r.id(), "")));
                 button(g, bx + BUY_W + Golden.S3, by, BID_W, Component.translatable("gui.skyabyss.trade.counter"), 0xFF22262E, Golden.SOFT, mx, my, () -> {
                     offerFor = r.id();
@@ -537,7 +537,7 @@ public class TradeScreen extends Screen {
                         stack(g, s.copyWithCount(rest), sx, sy, mx, my);
                     } else {
                         stack(g, s, sx, sy, mx, my);
-                        g.fill(sx, sy, sx + 17, sy + 17, 0xA0101418);
+                        g.fill(sx, sy, sx + 17, sy + 17, 0xA00A0E1E);
                     }
                     if (!ok) {
                         g.fill(sx, sy, sx + 17, sy + 17, 0x90401020);
@@ -661,7 +661,7 @@ public class TradeScreen extends Screen {
             int okx = ax + aw - 32;
             FitText.draw(g, font, Component.literal(a.name() + "  " + state), ax + 7, Golden.textY(ry, ROW), okx - Golden.S5 - ax - 7, col, false);
             stacks(g, a.offer(), ax + 7, ry + ROW - 2, 17, 5, mx, my);
-            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, a.online() ? 0xFF1E3A40 : 0xFF1A1E24);
+            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, a.online() ? 0xFF1A2448 : 0xFF1A1E24);
             g.drawString(font, "✔", okx + 4, Golden.textY(ry, ROW), a.online() ? Golden.TEAL : Golden.DIM, false);
             hit(okx, ry + 1, 15, ROW - 2, () -> send(TradeNetwork.Action.simple("accept", sel.row().id(), a.who().toString())), null);
             int nox = okx + 17;

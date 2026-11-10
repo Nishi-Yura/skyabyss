@@ -59,7 +59,7 @@ public final class PouchNew {
         g.pose().translate(0, 0, 300);
         for (int d = -3; d <= 3; d++) {
             int half = 3 - Math.abs(d);
-            g.fill(cx - half - 1, cy + d, cx + half + 2, cy + d + 1, 0xFF0A0C10);
+            g.fill(cx - half - 1, cy + d, cx + half + 2, cy + d + 1, 0xFF0A0E1E);
         }
         for (int d = -2; d <= 2; d++) {
             int half = 2 - Math.abs(d);

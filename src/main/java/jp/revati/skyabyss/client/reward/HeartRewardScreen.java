@@ -54,13 +54,13 @@ public class HeartRewardScreen extends Screen {
         REVEAL, CHOOSE, CONFIRM, WAIT, DONE, LATER
     }
 
-    private static final int BG = 0x07090E;
-    private static final int PANEL = 0x10131A;
-    private static final int CARD = 0x171B25;
-    private static final int GOLD = 0xF2C14E;
-    private static final int TEAL = 0x7FD6D0;
+    private static final int BG = 0x05070F;
+    private static final int PANEL = 0x0C1022;
+    private static final int CARD = 0x101630;
+    private static final int GOLD = 0xE9C46A;
+    private static final int TEAL = 0x8FD0FF;
     private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x8C98A4;
+    private static final int DIM = 0x9AA4C4;
     private static final int GOOD = 0x7BD66B;
     private static final int BAD = 0xE0505A;
     private static final int GAP = 8;
@@ -870,7 +870,7 @@ public class HeartRewardScreen extends Screen {
         int iconX = cx - iconPx / 2;
         int iconY = cy + (compact ? 0 : 2);
         int m = compact ? 3 : 5;
-        g.fill(iconX - m, iconY - m, iconX + iconPx + m, iconY + iconPx + m, argb(alpha * 0.55f, 0x0A0C12));
+        g.fill(iconX - m, iconY - m, iconX + iconPx + m, iconY + iconPx + m, argb(alpha * 0.55f, 0x0A0E1E));
         g.renderOutline(iconX - m, iconY - m, iconPx + 2 * m, iconPx + 2 * m, argb(alpha * 0.9f, darker(c.tierColor(), 0.7f)));
         g.fill(iconX - m, iconY + iconPx + m - 1, iconX + iconPx + m, iconY + iconPx + m, argb(alpha, c.tierColor()));
         if (alpha > 0.45f) {
@@ -915,7 +915,7 @@ public class HeartRewardScreen extends Screen {
                 if (ty + 10 > y + h - 4) {
                     break;
                 }
-                g.drawString(font, line2, x + 7, ty, argb(alpha * 0.8f, 0x8C98A4), false);
+                g.drawString(font, line2, x + 7, ty, argb(alpha * 0.8f, 0x9AA4C4), false);
                 ty += 10;
             }
         }
@@ -1054,9 +1054,9 @@ public class HeartRewardScreen extends Screen {
         float k = locked ? 0.5f : 1f;
         g.fill(x, y, x + w, y + 18, argb(a, 0x03050A));
         g.fill(x + 1, y + 1, x + w - 1, y + 17, argb(a * k, on ? color : darker(color, 0.5f)));
-        g.fill(x + 2, y + 2, x + w - 2, y + 16, argb(a, on ? darker(color, 0.28f) : 0x1B202B));
+        g.fill(x + 2, y + 2, x + w - 2, y + 16, argb(a, on ? darker(color, 0.28f) : 0x141A34));
         int tw = font.width(label);
-        g.drawString(font, label, x + (w - tw) / 2, y + 5, argb(a * k, on ? 0xFFFFFF : 0xA9AEBC), false);
+        g.drawString(font, label, x + (w - tw) / 2, y + 5, argb(a * k, on ? 0xFFFFFF : 0xB4BBD6), false);
     }
 
     private void renderWait(GuiGraphics g, float t) {

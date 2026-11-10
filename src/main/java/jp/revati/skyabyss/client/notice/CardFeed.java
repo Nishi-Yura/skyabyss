@@ -85,7 +85,7 @@ public final class CardFeed {
             case TOP_RIGHT, BOTTOM_RIGHT -> mc.getToasts().addToast(toast.get());
             case COMPACT, LEFT_FEED -> {
                 synchronized (FEED) {
-                    FEED.add(new Entry(Component.empty(), Component.empty(), 0xF2C14E, net.minecraft.Util.getMillis(), net.minecraft.world.item.ItemStack.EMPTY, List.copyOf(items)));
+                    FEED.add(new Entry(Component.empty(), Component.empty(), 0xE9C46A, net.minecraft.Util.getMillis(), net.minecraft.world.item.ItemStack.EMPTY, List.copyOf(items)));
                     while (FEED.size() > FEED_MAX) {
                         FEED.remove(0);
                     }
@@ -111,7 +111,7 @@ public final class CardFeed {
 
     // 進捗 (バニラ・mod の進捗の札の代わり)
     public static void advancement(Component title, boolean challenge, net.minecraft.world.item.ItemStack icon) {
-        int accent = challenge ? 0xB58AE0 : 0xF2C14E;
+        int accent = challenge ? 0xB58AE0 : 0xE9C46A;
         Component head = Component.translatable(challenge ? "gui.skyabyss.card.challenge" : "gui.skyabyss.card.advancement");
         // ほかの札と同じく、会話・場面の最中は溜めて閉じたあとに (NoticeGate)。出るときに音 (挑戦はバニラの挑戦の音、ふつうは小さな鐘)
         NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, NoticeClient.CARD_GAP, () -> {
@@ -247,7 +247,7 @@ public final class CardFeed {
                 int rows = (e.items.size() + perRow(ew) - 1) / perRow(ew);
                 int bw = per * ICON_PITCH + 4;
                 int hh = rows * ICON_PITCH + 1;
-                g.fill(x - slide, y, x + bw - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
+                g.fill(x - slide, y, x + bw - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0E1E);
                 g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
                 if (alpha > 160) {
                     for (int i = 0; i < e.items.size(); i++) {
@@ -269,7 +269,7 @@ public final class CardFeed {
             int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
             List<FormattedCharSequence> lines = lines(font, e, ew);
             int hh = lines.size() * 10 + 1;
-            g.fill(x - slide, y, x + ew - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
+            g.fill(x - slide, y, x + ew - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0E1E);
             g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
             // 小さな絵 (品を 10 px に縮めて)。品が無ければ種類の色の菱形
             if (!e.icon.isEmpty() && alpha > 160) {
@@ -285,7 +285,7 @@ public final class CardFeed {
                 g.fill(cx - 1, cy - 3, cx + 1, cy + 4, col);
                 g.fill(cx - 2, cy - 2, cx + 2, cy + 3, col);
                 g.fill(cx - 3, cy - 1, cx + 3, cy + 2, col);
-                g.fill(cx - 1, cy - 1, cx + 1, cy + 2, alpha << 24 | 0x0A0C10);
+                g.fill(cx - 1, cy - 1, cx + 1, cy + 2, alpha << 24 | 0x0A0E1E);
             }
             g.drawString(font, head, x + 4 + iw - slide, y + 2, alpha << 24 | e.accent, true);
             int ly = y + 2;

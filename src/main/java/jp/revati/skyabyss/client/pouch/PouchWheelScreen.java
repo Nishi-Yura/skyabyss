@@ -27,9 +27,9 @@ public class PouchWheelScreen extends Screen {
     private static final int PLATE_MIN = 18;
     // 中心のこの半径の中は「選ばない」
     private static final int DEAD = 16;
-    private static final int GOLD = 0xFFF2C14E;
+    private static final int GOLD = 0xFFE9C46A;
     private static final int TEXT = 0xFFD8DCE6;
-    private static final int DIM = 0xFF9AA0B0;
+    private static final int DIM = 0xFFA4ACC8;
 
     private final List<PouchEntries.Entry> items;
     private int selected = -1;

@@ -146,7 +146,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
             g.drawString(font, wrapped.get(i), LIST.x() + Golden.S8, Golden.textY(y, LINE_H), Golden.TEXT, false);
         }
         panel.end(g);
-        panel.drawBar(g, 0xFF17302F, 0x887FD6D0);
+        panel.drawBar(g, 0xFF141C3A, 0x888FD0FF);
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mx, my, partialTick);
         }

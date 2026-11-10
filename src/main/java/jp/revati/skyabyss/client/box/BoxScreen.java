@@ -42,7 +42,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
     static final int SUM_COLS = 13;
     static final int RC = Golden.S34;
     static final int ROW = Golden.ROW;
-    static final int GOLD = 0xFFF2C14E, TEXT = 0xFFD8DCE6, DIM = 0xFF9AA0B0, LINE = 0xFF3A4252;
+    static final int GOLD = 0xFFE9C46A, TEXT = 0xFFD8DCE6, DIM = 0xFFA4ACC8, LINE = 0xFF3A4252;
     static final float SINGLE_MS = 3800f, BATCH_MS = 1100f;
 
     enum Mode {
@@ -335,8 +335,8 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             }
             boolean sel = i == selected;
             int col = boxColor(kinds.get(i));
-            g.fill(cx, cy, cx + cs, cy + cs, sel ? col : 0xFF0A0D14);
-            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, sel ? 0xFF262B38 : 0xFF1B202B);
+            g.fill(cx, cy, cx + cs, cy + cs, sel ? col : 0xFF0A0E1E);
+            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, sel ? 0xFF262B38 : 0xFF141A34);
             g.fill(cx + 1, cy + cs - 2, cx + cs - 1, cy + cs - 1, col);
             item(g, boxStack(kinds.get(i)), cx + 2, cy + 2, 1);
             String n = String.valueOf(counts.get(i));
@@ -394,7 +394,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             int ixi = Math.round(ix);
             ItemStack s = reel.get(i);
             int col = 0xFF000000 | tier(s).rgb();
-            g.fill(ixi + 1, bandY + 4, ixi + RC - 1, bandY + bandH - 4, 0xFF1B202B);
+            g.fill(ixi + 1, bandY + 4, ixi + RC - 1, bandY + bandH - 4, 0xFF141A34);
             g.fill(ixi + 1, bandY + bandH - 6, ixi + RC - 1, bandY + bandH - 4, col);
             item(g, s, ixi + 1, bandY + 4, 2);
         }
@@ -443,7 +443,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         int by = y + body.y();
         int box = Golden.S55;
         g.fill(bx, by, bx + box, by + box, col);
-        g.fill(bx + 1, by + 1, bx + box - 1, by + box - 1, 0xFF0A0D14);
+        g.fill(bx + 1, by + 1, bx + box - 1, by + box - 1, 0xFF0A0E1E);
         g.fill(bx + 1, by + box - 3, bx + box - 1, by + box - 1, col);
         item(g, win, bx + 4, by + 3, 3);
         List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(minecraft, win));
@@ -459,8 +459,8 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             int cx = sumX(x, i), cy = sumY(y, i);
             ItemStack s = result.gear().get(i);
             int col = 0xFF000000 | tier(s).rgb();
-            g.fill(cx, cy, cx + cs, cy + cs, 0xFF0A0D14);
-            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, 0xFF1B202B);
+            g.fill(cx, cy, cx + cs, cy + cs, 0xFF0A0E1E);
+            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, 0xFF141A34);
             g.fill(cx + 1, cy + cs - 2, cx + cs - 1, cy + cs - 1, col);
             item(g, s, cx + 2, cy + 2, 1);
         }

@@ -153,11 +153,11 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
         g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), sx, Golden.textY(y, Golden.ROW), GOLD, false);
         float fraction = max ? 1f : (float) d.xp / Math.max(1, d.xpNeed());
-        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF343A48);
-        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0C0E13);
+        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF364064);
+        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0A0E1E);
         int fill = Mth.clamp(Math.round((BAR_W - 2) * fraction), 0, BAR_W - 2);
         if (fill > 0) {
-            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFF7FD6D0 : 0xFFE0B040);
+            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFF8FD0FF : 0xFFE0B040);
         }
         Component xpText = max ? Component.translatable("gui.skyabyss.growth.max")
                 : Component.translatable("gui.skyabyss.growth.xp", d.xp, d.xpNeed());

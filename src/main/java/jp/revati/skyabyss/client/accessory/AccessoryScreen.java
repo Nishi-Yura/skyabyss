@@ -30,8 +30,8 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
     private static final int DOLL_X1 = 118;
     private static final int DOLL_Y1 = 78;
     private static final int TEXT = 0xFFD8DCE6;
-    private static final int DIM = 0xFF9AA0B0;
-    private static final int GOLD = 0xFFF2C14E;
+    private static final int DIM = 0xFFA4ACC8;
+    private static final int GOLD = 0xFFE9C46A;
 
     public AccessoryScreen(AccessoryMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -174,7 +174,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
             // 絵のつまみは幅 48 (96 画素) で描いてあるので、四つ並ぶ幅へ縮める
             g.blit(TEXTURE, getX(), getY(), TAB_W, TAB_H, state * 100, 340, 96, TAB_H * 2, TEX, TEX);
             var font = Minecraft.getInstance().font;
-            int color = selected ? 0xF2C14E : isHoveredOrFocused() ? 0xE6E2D6 : 0xA9AEBC;
+            int color = selected ? 0xE9C46A : isHoveredOrFocused() ? 0xECE8DC : 0xB4BBD6;
             g.drawString(font, getMessage(), getX() + (TAB_W - font.width(getMessage())) / 2, getY() + 5, color, false);
             g.pose().popPose();
         }

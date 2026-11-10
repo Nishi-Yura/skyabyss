@@ -66,11 +66,11 @@ public final class ProfileCard extends AbstractButton {
         int x = getX();
         int y = getY();
         g.fill(x, y, x + W, y + H, hover ? 0xFF2A303C : 0xFF1C2029);
-        g.renderOutline(x, y, W, H, hover ? 0xFFE2D9C2 : 0xFF6E6654);
-        g.fill(x + 1, y + 1, x + W - 1, y + 2, hover ? 0xFFC4BAA0 : 0xFF8F8670);
+        g.renderOutline(x, y, W, H, hover ? 0xFFECE8DC : 0xFF8A7440);
+        g.fill(x + 1, y + 1, x + W - 1, y + 2, hover ? 0xFFC9A85C : 0xFF8F8670);
         var font = Minecraft.getInstance().font;
-        FitText.drawCentered(g, font, getMessage(), x + W / 2, y + 9, W - 6, hover ? 0xF2C14E : 0xE6E2D6, false);
-        g.fill(x + 10, y + 20, x + W - 10, y + 21, 0xFF2A5E6A);
+        FitText.drawCentered(g, font, getMessage(), x + W / 2, y + 9, W - 6, hover ? 0xE9C46A : 0xECE8DC, false);
+        g.fill(x + 10, y + 20, x + W - 10, y + 21, 0xFF364064);
         Minecraft mc = Minecraft.getInstance();
         Component title = mc.player == null ? null : TitleTagClient.text(mc.player);
         FitText.drawCentered(g, font, title != null ? title : Component.translatable("gui.skyabyss.profile.card_no_title"), x + W / 2, y + 26, W - 6,

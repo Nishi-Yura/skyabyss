@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 OPENS = ["inventory", "travel_map", "lore", "quests", "growth", "journey", "profile", "skills", "skills_node:cheap_thunder_bolt", "skills_build",
-         "skills_tryon", "skills_deep", "skills_past", "skills_ext", "job_choice", "party", "rebirth", "wheel", "notices", "grave",
+         "skills_tryon", "skills_deep", "skills_past", "skills_ext", "job_choice", "party", "rebirth", "wheel", "notices",
          "pouchwheel_9", "tower_desk", "chat"]
 CMDS = [("shop_" + s, "skyabyss facility shop " + s) for s in ["apothecary", "food_shop", "material_shop", "outfit_shop", "smithy", "tool_shop", "tower",
                                                                  "black_market"]]

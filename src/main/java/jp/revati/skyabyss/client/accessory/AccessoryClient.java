@@ -40,7 +40,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class AccessoryClient {
     public static final KeyMapping CHARM_KEY = new KeyMapping("skyabyss_gear.key.charm", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.CHARM, "key.categories.skyabyss");
-    private static final int OK = 0x9AA0B0;
+    private static final int OK = 0xA4ACC8;
     private static final int SHORT = 0xE0505A;
 
     private AccessoryClient() {

@@ -55,7 +55,8 @@ public final class SkillHud {
         if (charm) {
             row += (skills ? CHARM_GAP : 0) + SLOT;
         }
-        out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
+        // 下の一枚の帯 (BandHud) の中では、持ち物の枠と同じ高さに並ぶ (下から 3)
+        out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, jp.revati.skyabyss.client.hud.BandHud.on() ? 3 : 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
     static boolean anySlot(SkillData d) {
@@ -140,9 +141,9 @@ public final class SkillHud {
     }
 
     static void diamond(GuiGraphics g, int x, int y, int c) {
-        g.fill(x + 2, y, x + 3, y + 5, 0xFF101418);
-        g.fill(x, y + 2, x + 5, y + 3, 0xFF101418);
-        g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF101418);
+        g.fill(x + 2, y, x + 3, y + 5, 0xFF0A0E1E);
+        g.fill(x, y + 2, x + 5, y + 3, 0xFF0A0E1E);
+        g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF0A0E1E);
         g.fill(x + 2, y + 1, x + 3, y + 4, c);
         g.fill(x + 1, y + 2, x + 4, y + 3, c);
     }
@@ -182,7 +183,7 @@ public final class SkillHud {
         }
         int x = o[0] + (anySlot(d) ? d.slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11 + CHARM_GAP : 0);
         int y = o[1];
-        g.blit(TEXTURE, x, y, SLOT, SLOT, 468, 384, 40, 40, TEX_W, TEX_H);
+        jp.revati.skyabyss.client.ui.Golden.slot(g, x, y, SLOT);
         g.renderItem(stack, x + 2, y + 2);
         boolean ready = jp.revati.skyabyss.item.GearLevel.meets(mc.player, stack);
         float cd = mc.player.getCooldowns().getCooldownPercent(stack.getItem(), delta.getGameTimeDeltaPartialTick(true));
@@ -192,13 +193,13 @@ public final class SkillHud {
             g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A3A1010);
         } else if (cd > 0) {
             int h = Mth.clamp(Math.round(16f * cd), 1, 16);
-            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB0101418);
+            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB00A0E1E);
         }
         String k = jp.revati.skyabyss.client.accessory.AccessoryClient.CHARM_KEY.getTranslatedKeyMessage().getString();
         if (k.length() > 3) {
             k = k.substring(0, 3);
         }
-        g.drawString(mc.font, k, x + SLOT - 1 - mc.font.width(k), y + SLOT - 8, cd > 0 || !ready ? 0x6A707C : 0xE8D9A0, true);
+        g.drawString(mc.font, k, x + SLOT - 1 - mc.font.width(k), y + SLOT - 8, cd > 0 || !ready ? 0x7682A6 : 0xE8D9A0, true);
         g.pose().popPose();
     }
 
@@ -221,7 +222,7 @@ public final class SkillHud {
         for (int i = 0; i < d.slotCount(); i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);
             int y = o[1];
-            g.blit(TEXTURE, x, y, SLOT, SLOT, 468, 384, 40, 40, TEX_W, TEX_H);
+            jp.revati.skyabyss.client.ui.Golden.slot(g, x, y, SLOT);
             Skill s = d.slot(i);
             if (s != null) {
                 int rank = d.rank(s);
@@ -240,11 +241,11 @@ public final class SkillHud {
                 int total = SkillManager.cooldownFor(mc.player, s);
                 if (left > 0) {
                     int h = Mth.clamp(Math.round(16f * left / total), 1, 16);
-                    g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB0101418);
+                    g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB00A0E1E);
                     String sec = String.valueOf((left + 19) / 20);
-                    g.drawString(font, sec, x + 10 - font.width(sec) / 2, y + 6, 0xE6E2D6, true);
+                    g.drawString(font, sec, x + 10 - font.width(sec) / 2, y + 6, 0xECE8DC, true);
                 } else if (d.globalCooldown > 0) {
-                    g.fill(x + 2, y + 2, x + 18, y + 18, 0x50101418);
+                    g.fill(x + 2, y + 2, x + 18, y + 18, 0x500A0E1E);
                 }
             }
             // 光る: 使えた (白く)・使えなかった (赤紫の縁)
@@ -270,7 +271,7 @@ public final class SkillHud {
             }
             g.pose().pushPose();
             g.pose().translate(0, 0, 200);
-            g.drawString(font, k, x + SLOT - 1 - font.width(k), y + SLOT - 8, s == null ? 0x6A707C : 0xB8B8C8, true);
+            g.drawString(font, k, x + SLOT - 1 - font.width(k), y + SLOT - 8, s == null ? 0x7682A6 : 0xB8B8C8, true);
             g.pose().popPose();
         }
     }

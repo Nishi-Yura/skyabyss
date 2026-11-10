@@ -41,7 +41,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     private static final Golden.Box PAGE = LAYOUT.body().major(false);
     private static final int ROW_H = Golden.ROW;
     private static final int LINE_H = Golden.ROW;
-    private static final int EDGE_IN = 0xFF17302F;
+    private static final int EDGE_IN = 0xFF141C3A;
     private static final int TEAL = 0xFF000000 | Golden.TEAL;
     private static final int GOLD = 0xFF000000 | Golden.GOLD;
     private static final int TEXT = 0xFF000000 | Golden.TEXT;
@@ -466,7 +466,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             }
         }
         listPanel.end(g);
-        listPanel.drawBar(g, EDGE_IN, 0x887FD6D0);
+        listPanel.drawBar(g, EDGE_IN, 0x888FD0FF);
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         int bx = bodyLeft();
@@ -485,7 +485,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 g.drawString(font, l.text(), bx + l.indent(), Golden.textY(y, LINE_H), l.color(), false);
             }
             bodyPanel.end(g);
-            bodyPanel.drawBar(g, EDGE_IN, 0x887FD6D0);
+            bodyPanel.drawBar(g, EDGE_IN, 0x888FD0FF);
         }
     }
 

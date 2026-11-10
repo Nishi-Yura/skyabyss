@@ -100,8 +100,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
     static final int SUB_X = HEAD.right() - 2 * SUB_W - Golden.S3;
     static final int SUB_Y = HEAD.y() + 4;
 
-    static final int TITLE = 0x9FE8FF;
-    static final int TEXT = 0xE6E2D6;
+    static final int TITLE = 0x8FD0FF;
+    static final int TEXT = 0xECE8DC;
     static final int SOFT = Golden.SOFT;
     static final int GOLD = Golden.GOLD;
     static final int PALE = Golden.PALE;
@@ -441,7 +441,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             boolean on = page == index;
             int edge = on ? 0xFF000000 | GOLD : isHovered() ? 0xFF6A7A8A : 0xFF3A4452;
             g.fill(getX(), getY(), getX() + width, getY() + height, edge);
-            g.fill(getX() + 1, getY() + 1, getX() + width - 1, getY() + height - 1, on ? 0xFF2A3A40 : 0xFF161A22);
+            g.fill(getX() + 1, getY() + 1, getX() + width - 1, getY() + height - 1, on ? 0xFF222C52 : 0xFF161A22);
             drawFit(g, getMessage(), getX() + width / 2, getY() + 3, width - 6, on ? GOLD : SOFT);
         }
 
@@ -926,7 +926,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         int w = Math.min(font.width(text) + 2 * Golden.S5, BOARD_VW);
         g.pose().pushPose();
         g.pose().translate(0, 0, 150);
-        g.fill(x, y, x + w, y + LH, 0xFF0C0E13);
+        g.fill(x, y, x + w, y + LH, 0xFF0A0E1E);
         jp.revati.skyabyss.client.dev.OverlapAudit.cover(g, x, y, x + w, y + LH);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, text, x + Golden.S5, Golden.textY(y, LH), BOARD_VW - 2 * Golden.S5, color, false);
         g.pose().popPose();
@@ -939,7 +939,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         g.pose().pushPose();
         g.pose().translate(0, 0, 150);
         // 不透明 (下の節の「+4」「2SP」が透けて字に重ならないように)
-        g.fill(x, y, x + BOARD_VW, y + LH, 0xFF0C0E13);
+        g.fill(x, y, x + BOARD_VW, y + LH, 0xFF0A0E1E);
         jp.revati.skyabyss.client.dev.OverlapAudit.cover(g, x, y, x + BOARD_VW, y + LH);
         int w = Math.min(font.width(text), BOARD_VW - 2 * Golden.S5);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, text, x + (BOARD_VW - w) / 2, Golden.textY(y, LH), BOARD_VW - 2 * Golden.S5, color, false);
@@ -957,7 +957,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             int x = treeTabX(i);
             int y = treeTabY();
             boolean on = t == tree;
-            Golden.outline(g, x - 2, y - 2, x + TREE_TAB + 2, y + TREE_TAB + 2, on ? 0xFF000000 | GOLD : 0xFF343A48);
+            Golden.outline(g, x - 2, y - 2, x + TREE_TAB + 2, y + TREE_TAB + 2, on ? 0xFF000000 | GOLD : 0xFF364064);
             if (!on) {
                 g.setColor(0.7f, 0.7f, 0.76f, 1f);
             }
@@ -1056,7 +1056,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             }
             // 能動の技には小さな菱形の印 (枠に置ける)。刻印を選んでいれば金
             if (s.active) {
-                int dot = d.rune(s) > 0 ? 0xFFF2C14E : rank > 0 ? 0xFF9FE8FF : 0xFF4A5060;
+                int dot = d.rune(s) > 0 ? 0xFFE9C46A : rank > 0 ? 0xFF8FD0FF : 0xFF4A5680;
                 g.fill(x + NODE - 4, y + 1, x + NODE - 1, y + 4, dot);
             }
         }
@@ -1144,7 +1144,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.cost", mana, SkillRules.fmtSeconds(cooldown))
                     .withColor(0x9FB8FF), w));
         } else if (rank > 0) {
-            lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.passive_active").withColor(0x9FE8FF), w));
+            lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.passive_active").withColor(0x8FD0FF), w));
         }
         // 今の段の効果 (まだ覚えていなければ段 1 の効果)。次の段は「習得」のボタンに重ねると出る
         List<FormattedCharSequence> body = new ArrayList<>();
@@ -1281,8 +1281,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             int rx = x + i * (cell + 2);
             boolean mine = current == r.index;
             boolean hover = in(mx, my, rx, ry, cell, 12) && available;
-            int bg = mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22;
-            int edge = mine ? 0xFF000000 | GOLD : runeArmed == r.index ? 0xFF000000 | DENY : available ? 0xFF4A5A6A : 0xFF2A2E38;
+            int bg = mine ? 0xFF222C52 : hover ? 0xFF222B36 : 0xFF161A22;
+            int edge = mine ? 0xFF000000 | GOLD : runeArmed == r.index ? 0xFF000000 | DENY : available ? 0xFF4A5A6A : 0xFF222A48;
             g.fill(rx, ry, rx + cell, ry + 12, edge);
             g.fill(rx + 1, ry + 1, rx + cell - 1, ry + 11, bg);
             Component name = Component.translatable(r.nameKey());
@@ -1299,8 +1299,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             boolean usable = d.runeUsable(s, Rune.MASTERY);
             boolean mine = current == Rune.MASTERY;
             boolean hover = in(mx, my, rx, ry, cell, 12);
-            int bg = mine ? 0xFF2A3A40 : hover && usable ? 0xFF222B36 : 0xFF161A22;
-            int edge = mine ? 0xFF000000 | GOLD : runeArmed == Rune.MASTERY ? 0xFF000000 | DENY : usable ? 0xFF6A8F5A : 0xFF2A2E38;
+            int bg = mine ? 0xFF222C52 : hover && usable ? 0xFF222B36 : 0xFF161A22;
+            int edge = mine ? 0xFF000000 | GOLD : runeArmed == Rune.MASTERY ? 0xFF000000 | DENY : usable ? 0xFF6A8F5A : 0xFF222A48;
             g.fill(rx, ry, rx + cell, ry + 12, edge);
             g.fill(rx + 1, ry + 1, rx + cell - 1, ry + 11, bg);
             Component name = Component.translatable("rune.skyabyss.mastery");
@@ -1319,8 +1319,8 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             boolean mine = SkillManager.legendRune(minecraft.player, s) == r;
             boolean usable = r.held(minecraft.player);
             boolean hover = in(mx, my, x, ly, w - 4, 12) && usable;
-            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == 4 ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
-            g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? 0xFF2A3A40 : hover ? 0xFF2E2A20 : 0xFF1C1A16);
+            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == 4 ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF222A48);
+            g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? 0xFF222C52 : hover ? 0xFF2E2A20 : 0xFF1C1A16);
             Component name = Component.translatable("gui.skyabyss.skill.rune_legend", Component.translatable(r.nameKey()));
             g.drawString(font, name, x + (w - 4 - font.width(name)) / 2, ly + 2, mine ? GOLD : usable ? 0xF2D78A : DIM, false);
             if (hover) {
@@ -1783,7 +1783,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             if (n.kind == AbilityNode.Kind.ACTIVE) {
                 int mx0 = x + sz - 1;
                 int my0 = y - 1;
-                int c = taken ? 0xFF9FE8FF : 0xFF4A5060;
+                int c = taken ? 0xFF8FD0FF : 0xFF4A5680;
                 g.fill(mx0 - 2, my0 - 1, mx0 + 3, my0 + 2, 0xFF0E1016);
                 g.fill(mx0 - 1, my0 - 2, mx0 + 2, my0 + 3, 0xFF0E1016);
                 g.fill(mx0 - 1, my0, mx0 + 2, my0 + 1, c);

@@ -27,11 +27,11 @@ import net.minecraft.world.item.Items;
 public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
     private static final int BG = 0x05070A;
-    private static final int PANEL = 0x10131A;
-    private static final int CARD = 0x171B25;
-    private static final int GOLD = 0xF2C14E;
-    private static final int TEAL = 0x7FD6D0;
-    private static final int DIM = 0x8C98A4;
+    private static final int PANEL = 0x0C1022;
+    private static final int CARD = 0x101630;
+    private static final int GOLD = 0xE9C46A;
+    private static final int TEAL = 0x8FD0FF;
+    private static final int DIM = 0x9AA4C4;
 
     private static final int W = Golden.L_W;
     private static final int H = Golden.L_H;

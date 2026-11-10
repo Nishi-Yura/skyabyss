@@ -28,12 +28,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 操作: クリック / 数字キー / ↑↓ と Enter・Space。本文の途中でクリックすると全文を出す。Esc で立ち去る
 public class DialogueScreen extends Screen {
     private static final int TEXT = 0xFFE9E3D4;
-    private static final int NAME = 0xFF7FD6D0;
+    private static final int NAME = 0xFF8FD0FF;
     private static final int SOFT = 0xFF9A9AAE;
-    private static final int GOLD = 0xFFF2C14E;
+    private static final int GOLD = 0xFFE9C46A;
     private static final int PANEL = 0xF2101318;
-    private static final int EDGE = 0xFF2E5552;
-    private static final int EDGE_IN = 0xFF17302F;
+    private static final int EDGE = 0xFFC9A85C;
+    private static final int EDGE_IN = 0xFF141C3A;
     private static final int HOVER = 0x402E8F88;
     // 行は 13 (docs/design/56)
     private static final int LINE_H = jp.revati.skyabyss.client.ui.Golden.ROW;
@@ -218,7 +218,7 @@ public class DialogueScreen extends Screen {
         // 顔
         int fx = cx + jp.revati.skyabyss.client.ui.Golden.S8;
         int fy = cy + jp.revati.skyabyss.client.ui.Golden.S8;
-        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0A0C10);
+        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0A0E1E);
         // 画面の画素に合わせた整数倍 (facePx 画素 = 絵の 1 画素)。GUI 単位に直した倍率で拡大する
         float k = facePx / (float) Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
         g.pose().pushPose();
@@ -288,7 +288,7 @@ public class DialogueScreen extends Screen {
             }
         }
         body.end(g);
-        body.drawBar(g, EDGE_IN, 0x887FD6D0);
+        body.drawBar(g, EDGE_IN, 0x888FD0FF);
         // 続き (欄の外の右下に出す)
         if (fullyShown() && more) {
             long t = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();

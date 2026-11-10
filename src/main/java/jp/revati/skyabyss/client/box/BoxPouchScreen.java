@@ -23,7 +23,7 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
     static final int TEX = 512;
     static final int W = 176, H = 200;
-    static final int GOLD = 0xFFF2C14E, TEXT = 0xFFD8DCE6, DIM = 0xFF9AA0B0;
+    static final int GOLD = 0xFFE9C46A, TEXT = 0xFFD8DCE6, DIM = 0xFFA4ACC8;
     static final int X0 = 8, PITCH = 18, BAND_X = 74;
     static final String[] NUMERALS = {"I", "II", "III", "IV", "V"};
     static final GearTier[] TIERS = {GearTier.UNCOMMON, GearTier.RARE, GearTier.EPIC, GearTier.HEROIC};

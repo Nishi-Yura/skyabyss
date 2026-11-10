@@ -1,0 +1,206 @@
+<title>見直しと新UI案 11/10</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 組み方: 夜空の上の一本の縦の流れ。案は横に並ぶ絵と、その下の選ぶ札 */
+:root{
+  color-scheme:dark;
+  --bg:#0d1122; --panel:#151b33; --panel2:#1c2444; --line:#2e3964; --fg:#ece8dc; --soft:#a4acc8; --dim:#7682a6;
+  --gold:#e9c46a; --sky:#8fd0ff; --rose:#e87c9a; --ok:#7fd6a0;
+  --title:"Zen Antique","Yu Mincho",serif; --body:"Zen Kaku Gothic New","Yu Gothic UI","Meiryo",sans-serif; --pix:"DotGothic16","MS Gothic",monospace;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+  color-scheme:light;
+  --bg:#f3f1ea; --panel:#ffffff; --panel2:#ebe8de; --line:#cfc9b8; --fg:#1d2136; --soft:#4d5674; --dim:#7a8098;
+  --gold:#8a6410; --sky:#1f6fa8; --rose:#b23a5e; --ok:#1f7a4a; } }
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f3f1ea; --panel:#ffffff; --panel2:#ebe8de; --line:#cfc9b8; --fg:#1d2136; --soft:#4d5674; --dim:#7a8098;
+  --gold:#8a6410; --sky:#1f6fa8; --rose:#b23a5e; --ok:#1f7a4a; }
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.75}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:44px}
+h1{font-family:var(--title);font-weight:400;font-size:clamp(26px,5vw,38px);margin:0;line-height:1.3;text-wrap:balance}
+h2{font-family:var(--title);font-weight:400;font-size:24px;margin:0;color:var(--gold);text-wrap:balance}
+h3{font-size:16px;margin:0;font-weight:700}
+p{margin:0;max-width:70ch}
+.lead{color:var(--soft)}
+section{display:flex;flex-direction:column;gap:16px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--pix);font-size:14px;color:var(--soft)}
+.facts b{color:var(--fg);font-weight:400}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.opt{background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.opt .txt{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.opt img{display:block;width:100%;height:auto;image-rendering:auto;cursor:zoom-in;border-bottom:1px solid var(--line)}
+.tag{font-family:var(--pix);font-size:13px;color:var(--sky)}
+.rec{font-family:var(--pix);font-size:12px;color:var(--bg);background:var(--gold);padding:0 6px;margin-left:8px}
+.small{font-size:13.5px;color:var(--soft)}
+.wide{background:var(--panel);border:1px solid var(--line)}
+.wide img{display:block;width:100%;cursor:zoom-in}
+.wide .txt{padding:10px 14px}
+.card{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:14px;display:flex;flex-direction:column;gap:10px}
+.card .q{font-weight:700}
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.picks button{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);padding:6px 12px;cursor:pointer;text-align:left}
+.picks button:hover{border-color:var(--sky)}
+.picks button:focus-visible, textarea:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.picks button[aria-pressed="true"]{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--panel);border:1px solid var(--line);padding:6px 8px;min-height:38px;width:100%;box-sizing:border-box;resize:vertical}
+.state{font-family:var(--pix);font-size:12px;color:var(--dim)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-family:var(--pix);font-weight:400;color:var(--dim);font-size:13px}
+td.n{font-family:var(--pix);color:var(--dim);white-space:nowrap}
+.sev{font-family:var(--pix);font-size:12px;padding:0 6px;white-space:nowrap;border:1px solid currentColor}
+.s1{color:var(--rose)} .s2{color:var(--gold)} .s3{color:var(--dim)}
+td .picks button{padding:2px 8px;font-size:13px}
+code{font-family:var(--pix);font-size:13px;color:var(--sky)}
+ul{margin:0;padding-left:20px;max-width:72ch}
+#zoom{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:zoom-out;z-index:20;padding:12px}
+#zoom img{max-width:100%;max-height:100%;image-rendering:pixelated}
+</style>
+
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:12px">
+  <div class="tag">天と淵のあいだ ・ 1.1.5 のあと（4a8aa9430）</div>
+  <h1>見直しの結果と、新しい UI の案</h1>
+  <p class="lead">mod を一通り調べて、おかしい所・直す所・足すとよい所を下の表にまとめました。UI は基盤の絵柄を 3 案、体力・マナ・持ち物を合体させた HUD を 3 案、ラフで出しています。選んだ答えはこのページに残り、こちらで読んで作り始めます。</p>
+  <div class="facts">
+    <span>Java <b>2,009 ファイル・42 万行</b></span><span>検査一式 <b>9 つとも通過</b></span><span>重なり検査 <b>45 画面 × 3 倍率</b></span><span>通信の受け口 <b>82 のうち 12 を読んだ</b></span>
+  </div>
+  <p class="small">調べ方の限り: 42 万行を全部は読んでいません。機械の検査・全画面の撮影・決まった形の検索・要所の読み込みで見ています。遊んだ手ざわりと、全段の自己テスト（約 20 分）は今回は見ていません。</p>
+</header>
+
+<section>
+  <h2>1. UI の基盤の絵柄</h2>
+  <p>今は「暗い石の板に骨の縁と青緑の玉」です。画面を並べると、どれも暗い地に淡い小さな字で沈んで見え、持ち物と預かり所だけはバニラの寸法と絵柄パック頼みで別物になっています（下の「今の画面」）。寸法の決まり（板 356×220、余白 3・5・8・13・21、行 13、等倍の字）はそのまま使い、絵柄だけを替える案です。どの案も縁と地はコードで描くので、絵柄パックを外しても崩れません。</p>
+  <div class="opts">
+    <div class="opt"><img src="img/quest_A.webp" alt="案 A のクエストログ"><img src="img/inv_A.webp" alt="案 A の持ち物"><img src="img/hud1_A.webp" alt="案 A の HUD">
+      <div class="txt"><h3>A　夜空の硝子<span class="rec">推奨</span></h3><p class="small">藍の半透明の板に金の細い線、角に小さな菱形、見出しの帯に星。選んだ行は空色の地と金の印。サイトの夜空と同じ世界で、後ろの景色が少し透けるので重くなりません。字は生成りで対比がいちばん取れます。</p></div></div>
+    <div class="opt"><img src="img/quest_B.webp" alt="案 B のクエストログ"><img src="img/inv_B.webp" alt="案 B の持ち物"><img src="img/hud1_B.webp" alt="案 B の HUD">
+      <div class="txt"><h3>B　切り紙</h3><p class="small">墨の板に生成りの紙の見出し、桃色の下敷きがずれて重なる。心臓のあとの主（切り紙の絵柄）とそろいます。いちばん個性が強い一方、桃色が体力の色と重なり、長く見る画面では強すぎるかもしれません。</p></div></div>
+    <div class="opt"><img src="img/quest_C.webp" alt="案 C のクエストログ"><img src="img/inv_C.webp" alt="案 C の持ち物"><img src="img/hud1_C.webp" alt="案 C の HUD">
+      <div class="txt"><h3>C　旅の手帳</h3><p class="small">紙の地に墨の字、青緑の判と朱の印。伝承の書と地図がもう紙なので、全部が一冊の手帳になります。明るい地は夜や洞窟でまぶしく、品のレア度の色が紙の上で弱くなります。</p></div></div>
+  </div>
+  <div class="card" data-card="ui_base"><div class="q">基盤の絵柄はどれにしますか</div>
+    <div class="picks"><button data-v="A">A 夜空の硝子（推奨）</button><button data-v="B">B 切り紙</button><button data-v="C">C 旅の手帳</button><button data-v="other">ほかの方向</button></div>
+    <textarea id="note_ui_base" placeholder="直したい所、混ぜたい所（例: A の地に B の見出し）"></textarea><div class="state"></div></div>
+</section>
+
+<section>
+  <h2>2. 体力・マナ・持ち物の合体 HUD</h2>
+  <p>今は体力・守り・マナ・型の溜め・ホットバー・スキルの枠・護符・旅袋の札が別々の部品で、縁の色も太さも違います。下の 3 案はどれも一つの枠にまとめ、経験値は枠の下の辺の細い線、Lv は小さな札にしています（左上の Lv と経験値の帯は消えます）。絵は案 A の絵柄で描いていますが、1 で選んだ絵柄で作ります。</p>
+  <div class="opts">
+    <div class="opt"><img src="img/hud1_A.webp" alt="HUD 案 1"><div class="txt"><h3>1　一枚の帯<span class="rec">推奨</span></h3><p class="small">ホットバーの上に 体力｜Lv｜マナ の段が載り、スキルの枠が右に続く。数字が帯の中で読め、型の溜めはスキルの上。高さ 39 で、どの GUI 倍率にも入ります。</p></div></div>
+    <div class="opt"><img src="img/hud2_A.webp" alt="HUD 案 2"><div class="txt"><h3>2　両翼の玉</h3><p class="small">体力の玉とマナの玉がホットバーをはさむ。いちばん RPG らしい見た目。数字は玉の中に 4 桁までで、吸収・毒・凍えの色分けや守りの置き場が苦しくなります。横幅も広め。</p></div></div>
+    <div class="opt"><img src="img/hud3_A.webp" alt="HUD 案 3"><div class="txt"><h3>3　一列</h3><p class="small">持ち物 9 とスキル 4 が一本の列。体力は持ち物の上、マナはスキルの上に載る（マナはスキルのもの、という意味がそのまま形になる）。最大値も書ける。左右対称ではなくなります。</p></div></div>
+  </div>
+  <div class="wide"><img src="img/now_hud.webp" alt="今の HUD"><div class="txt small">今の HUD（1920×1080・GUI 4）。守りの帯、体力、マナ、スキルの枠、旅袋の札が別々に置かれています。</div></div>
+  <div class="card" data-card="ui_hud"><div class="q">HUD の形はどれにしますか</div>
+    <div class="picks"><button data-v="1">1 一枚の帯（推奨）</button><button data-v="2">2 両翼の玉</button><button data-v="3">3 一列</button><button data-v="other">ほかの形</button></div>
+    <textarea id="note_ui_hud" placeholder="例: 1 の形で両端だけ玉に、守りの数も出したい"></textarea><div class="state"></div></div>
+</section>
+
+<section>
+  <h2>3. 持ち物の画面</h2>
+  <p>1 の絵の二枚目が合体した持ち物の画面です。大きい板（356×220）一枚に、左が自分（装備 4・装飾 4・体力・マナ・経験値・攻撃などの数）、右が袋 27・手もと 9・スキル 4。つまみ（持ち物・装飾・旅袋・封の箱）は見出しの帯に入ります。今はバニラの寸法（176×166）のままで、ほかの画面の半分の大きさです。</p>
+  <div class="opts">
+    <div class="opt"><img src="img/now_inv.webp" alt="今の持ち物"><div class="txt small">今の持ち物。小さい板に、プロフィールの札とレシピ本の釦が並ぶ。</div></div>
+    <div class="opt"><img src="img/inv_A.webp" alt="合体した持ち物"><div class="txt small">合体した持ち物（案 A の絵柄）。</div></div>
+  </div>
+  <div class="card" data-card="ui_inv"><div class="q">持ち物の画面を大きい板に作り直しますか</div>
+    <div class="picks"><button data-v="A">A 作り直す（推奨）</button><button data-v="B">B 寸法は今のまま、絵柄だけ替える</button></div>
+    <textarea id="note_ui_inv" placeholder="左の欄に出したい数など"></textarea><div class="state"></div></div>
+  <div class="card" data-card="ui_scope"><div class="q">新しい絵柄をどこまで入れますか</div>
+    <p class="small">A は板の画面ぜんぶ・持ち物の仲間（装飾・旅袋・預かり所・共鳴の炉）・HUD・ツールチップ・会話の帯・知らせの札・ボスバーの縁。伝承の書と地図は紙のまま。B は HUD と持ち物だけ先に入れて、遊んで確かめてから残りへ。</p>
+    <div class="picks"><button data-v="A">A ぜんぶ一度に（推奨）</button><button data-v="B">B HUD と持ち物を先に</button></div>
+    <textarea id="note_ui_scope" placeholder=""></textarea><div class="state"></div></div>
+</section>
+
+<section>
+  <h2>4. おかしい所・直す所</h2>
+  <p class="small">「直す」を押した行をまとめて直します。押していない行は触りません。</p>
+  <div class="tblwrap"><table id="fixes"><thead><tr><th>#</th><th>重さ</th><th>見つけたこと</th><th>どう直すか</th><th>答え</th></tr></thead><tbody></tbody></table></div>
+  <div class="card" data-card="fix_all"><div class="q">まとめて答える</div>
+    <div class="picks"><button data-v="all">表の全部を直す（推奨）</button><button data-v="rows">行ごとの答えどおり</button></div>
+    <textarea id="note_fix_all" placeholder=""></textarea><div class="state"></div></div>
+</section>
+
+<section>
+  <h2>5. 足すとよい所</h2>
+  <p class="small">磨きの期間なので、新しい仕組みは入れていません。今あるものを良くする案だけです。</p>
+  <div class="tblwrap"><table id="adds"><thead><tr><th>#</th><th>案</th><th>理由</th><th>答え</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section>
+  <h2>6. 問題がなかった所</h2>
+  <ul>
+    <li>検査一式（コンパイル・資源の参照・言葉の鍵・メッシュ 1,043 個の水密・生成物のずれ・字のはみ出し・ダンジョンの口・上がれない足場・階段）は全部通過。</li>
+    <li>重なり検査は 45 画面を GUI 4・2・3 で開いて、字と部品の重なり 0。町の案内の 6 件は、つまみの置き場が (0,0) と出ていて検査側の読み違いに見えます（行 3 で確かめます）。</li>
+    <li>サーバーが受け取る通信は、店・預かり所・祠・巡り路・ダンジョンの入口・控え帳など 12 か所を読み、どれも距離・開いている画面・回数を確かめていました。残り 70 は読んでいません。</li>
+    <li>空の catch、TODO の置き去りは見つかりませんでした。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>今の画面の一覧</h2>
+  <p class="small">今日撮った 45 画面（1920×1080・GUI 4）。押すと大きくなります。</p>
+  <div class="wide"><img src="img/sheet0.webp" alt="今の画面の一覧 1"></div>
+  <div class="wide"><img src="img/sheet1.webp" alt="今の画面の一覧 2"></div>
+</section>
+</div>
+<div id="zoom" hidden><img alt=""></div>
+
+<script>
+const FIXES=[
+ ["s1","持ち物の画面にバニラのレシピ本の釦が残っている（クラフトは無いのに押せる）。","釦を消す。3 で作り直すなら一緒に無くなる。"],
+ ["s1","「封の箱」と「封印の箱」が混ざっている。ゲームの文で 封の箱 45 か所・封印の箱 31 か所（品の名前とつまみは「封印の箱」、設計書は「封の箱」）。","どちらかにそろえる。設計書と多いほうに合わせて「封の箱」を推奨。"],
+ ["s2","重なり検査の台本が、消した「墓」の画面を開こうとして 19 画面目で止まっていた（今回直して流した）。さらに、祠・試練の板・会話・共鳴の炉・装飾・旅袋・心臓の報酬・報いの祭壇などは台本に入っていない。","抜けている画面を台本に足し、町の案内の読み違いを直す。台本の直しは未コミット。"],
+ ["s2","持ち物と預かり所は絵柄をリソースパックに頼っていて、外すと白い板に暗いつまみと暗い札が載る。","新しい基盤ではコードで描く（1・3 の案に含む）。"],
+ ["s2","淡い灰の小さい字が暗い地で沈む画面が多い（封切り師・釣りの記録・知らせ・店の下の手引き）。中身が空のときに大きな空きだけが出る画面もある。","新しい基盤で字の色の対比を上げ、空のときの一行（何をすると埋まるか）を真ん中に出す。"],
+ ["s2","作り終えた issue が開いたまま（#19 外れの残り・#20 奥の敵の種類・#21 狩りの経験値）。#16 モデルの透けは本当に残っている。","#19〜21 を閉じる。#16 は残す。"],
+ ["s2","設計書 56 に、11-09 に消した「技の紋の盤」の行が残り、つまみの名前も今の「スキル」と違う。","56 を今の形に直す（新 UI を入れるとき全体を書き直す）。"],
+ ["s3","使わなくなったコードが残っている: 引退の印つき 4 か所（雷の柱・塩の蔵の地下・潮の島の帰りの門・心臓の初回の選び）、満腹度の帯、開発用の切り替え。","消す。自己テストで確かめる。"],
+ ["s3","プレイヤーごとの表のうち 28 か所が、抜けたあとも消えない（手がかりを出したかの覚えなど。一人ぶんは小さい）。","抜けたときに消す共通の口を一つ作って登録する。"],
+ ["s3","バニラの隠れた欄を名前で直接読む所が 20 種ある（生まれ直しの無敵の時間が 13 か所など）。Minecraft の版が上がると黙って効かなくなる。","アクセス変換（accesstransformer）にまとめ、同じ読み方は一か所に。"],
+ ["s3","本番の jar（85 MB）に自己テスト 7.4 万行と開発用 4,800 行が入っている。リポジトリは .git が 2.5 GB、レビュー用の絵が 231 MB。","害は小さい。jar から外すかは判断が要る（外すと本番の形で自己テストを流せなくなる）。今は触らないのを推奨。"],
+ ["s3","絵と言葉の置き場が 75 個の名前空間に分かれていて、言葉の置き換えの漏れのもとになっている（行 2 がその例）。","置き場は動かさず、古い言葉を全部の置き場から探す検査を検査一式に足す。"],
+ ["s3","サイトに古い呼び名が残る（旅嚢 5 ファイル・アクセサリー 21 ファイル）。1.1.5 の時点の中身なので今は正しい。","次の版を出すときに wiki を作り直せば消える。出す手順に確かめを足す。"]
+];
+const ADDS=[
+ ["持ち物の画面に体力・マナ・攻撃・守り・会心・銭を出す","今は J の画面を開かないと自分の数が見えない。3 の合体の絵に入れてある。"],
+ ["空の画面に「何をすると埋まるか」の一行","封切り師・釣りの記録・パーティなどが、初めての人には真っ暗な板に見える。"],
+ ["HUD の合体に合わせて、守り・吸収・毒・凍え・息の置き場を一つの枠の中に決める","今は守りが体力の上、息がマナの上に別の帯で出る。"],
+ ["検査一式に「古い言葉」と「重なり検査の台本が最後まで流れるか」を足す","今回の 2 と 3 は、検査があれば前に見つかっていた。"],
+ ["ツールチップの縁を新しい絵柄に、レア度の色は縁でなく名前と下の線で","今は品ごとに縁の色が変わり、板の縁とそろわない。"]
+];
+const tb=document.querySelector("#fixes tbody");
+FIXES.forEach((f,i)=>{const id="fix_"+(i+1);const tr=document.createElement("tr");
+ const sev={s1:"先に",s2:"次に",s3:"小さい"}[f[0]];
+ tr.innerHTML='<td class="n">'+(i+1)+'</td><td><span class="sev '+f[0]+'">'+sev+'</span></td><td></td><td></td><td><div class="picks" data-card="'+id+'"><button data-v="fix">直す</button><button data-v="skip">そのまま</button></div></td>';
+ tr.children[2].textContent=f[1];tr.children[3].textContent=f[2];tb.appendChild(tr);});
+const ta=document.querySelector("#adds tbody");
+ADDS.forEach((a,i)=>{const id="add_"+(i+1);const tr=document.createElement("tr");
+ tr.innerHTML='<td class="n">'+(i+1)+'</td><td></td><td></td><td><div class="picks" data-card="'+id+'"><button data-v="yes">やる</button><button data-v="no">やらない</button></div></td>';
+ tr.children[1].textContent=a[0];tr.children[2].textContent=a[1];ta.appendChild(tr);});
+
+const zoom=document.getElementById("zoom");
+document.querySelectorAll(".opt img,.wide img").forEach(im=>im.addEventListener("click",()=>{zoom.firstElementChild.src=im.src;zoom.hidden=false;}));
+zoom.addEventListener("click",()=>{zoom.hidden=true;});
+
+const state={};let db=null;
+function paint(id){const s=state[id]||{};
+ document.querySelectorAll('[data-card="'+id+'"]').forEach(card=>{
+  card.querySelectorAll("button[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===s.pick)));
+  const st=card.querySelector(".state");if(st){st.textContent=s.pick?("保存済み: "+s.pick+(s.at?"（"+new Date(s.at).toLocaleString("ja-JP")+"）":"")):(db?"まだ選んでいません":"保存先につながっていません（選んでも残りません）");}
+  const t=document.getElementById("note_"+id);if(t&&document.activeElement!==t&&typeof s.note==="string")t.value=s.note;});}
+function paintAll(){document.querySelectorAll("[data-card]").forEach(c=>paint(c.dataset.card));}
+async function save(id,patch){state[id]=Object.assign({},state[id],patch,{at:Date.now()});paint(id);
+ if(!db)return;try{await db.collection("choices").doc(id).set(state[id]);}catch(e){const st=document.querySelector('[data-card="'+id+'"] .state');if(st)st.textContent="保存できませんでした: "+(e&&e.code||"");}}
+document.addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(!b)return;const card=b.closest("[data-card]");if(card)save(card.dataset.card,{pick:b.dataset.v});});
+document.querySelectorAll("textarea[id^=note_]").forEach(t=>t.addEventListener("change",()=>save(t.id.slice(5),{note:t.value})));
+paintAll();
+(async()=>{try{db=await window.claude.use("db");}catch(e){db=null;}
+ paintAll();if(!db)return;
+ db.collection("choices").onSnapshot(snap=>{snap.docs.forEach(d=>{state[d.id]=d.data()||{};});paintAll();},()=>{});})();
+</script>

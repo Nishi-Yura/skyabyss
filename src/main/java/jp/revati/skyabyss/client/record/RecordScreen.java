@@ -74,7 +74,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     // 墨の色 (伝承の書と同じ)
     static final int INK = 0xFF3B2A1C;
     static final int FADED = 0xFF8E7B5E;
-    static final int TEAL = 0xFF1D6E69;
+    static final int TEAL = 0xFF2E4A86;
     static final int TITLE = 0xFF184F55;
     static final int AMBER = 0xFFA06A0E;
     static final int LOST = 0xFF8A2A3C;
@@ -497,7 +497,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             int x1 = chipX(i + 1, n) - 1;
             boolean on = c.id().equals(current);
             boolean hover = !on && mouseX >= x0 && mouseX < x1 && mouseY >= y && mouseY < y + CHIP_H;
-            g.fill(x0, y, x1, y + CHIP_H, on ? 0x501D6E69 : hover ? 0x30000000 : 0x18000000);
+            g.fill(x0, y, x1, y + CHIP_H, on ? 0x502E4A86 : hover ? 0x30000000 : 0x18000000);
             if (on) {
                 g.fill(x0, y + CHIP_H - 1, x1, y + CHIP_H, TEAL);
             }
@@ -546,7 +546,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean inside = mouseY >= Math.max(y, top + listTop()) && mouseY < Math.min(y + rowHeight(r), top + LIST_BOTTOM);
         if (r.kind() == Kind.HEADER) {
             g.drawString(font, r.label(), x, y + 3, TEAL, false);
-            g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x401D6E69);
+            g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x402E4A86);
             return hover;
         }
         boolean rowHover = inside && mouseX >= x - 2 && mouseX < x + LW;

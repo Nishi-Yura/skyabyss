@@ -23,9 +23,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
     static final int TEX = 512;
     private static final int TEXT = 0xFFD8DCE6;
-    private static final int DIM = 0xFF9AA0B0;
-    private static final int GOLD = 0xFFF2C14E;
-    private static final int OK = 0xFF7FD6D0;
+    private static final int DIM = 0xFFA4ACC8;
+    private static final int GOLD = 0xFFE9C46A;
+    private static final int OK = 0xFF8FD0FF;
     // 心臓の遺物のボタン (受け取れる遺物があるときだけ。右上)
     private static final int BTN_W = 44;
     private static final int BTN_H = 12;
@@ -109,8 +109,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             g.blit(TEXTURE, x + spot.x() - 1, y + spot.y() - 1, 18, 18, u, 0f, 36, 36, TEX, TEX);
             if (usable && QuickCard.isPinned(e.id())) {
                 // 札に置いた印 (角の金の点)
-                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x() + 2, y + spot.y(), 0xFFF2C14E);
-                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x(), y + spot.y() + 2, 0xFFF2C14E);
+                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x() + 2, y + spot.y(), 0xFFE9C46A);
+                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x(), y + spot.y() + 2, 0xFFE9C46A);
             }
             if (n <= 0) {
                 if (seen(e)) {
@@ -140,7 +140,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     // ボタンの絵 (pouch.png の 44x16 を、指定の大きさへ)。state 0 押せる / 1 重ねた / 2 押せない
     private void drawButton(GuiGraphics g, int x, int y, int w, int h, int state, Component label) {
         g.blit(TEXTURE, x, y, w, h, state * 100f, 420f, 88, 32, TEX, TEX);
-        int color = state == 2 ? 0xFF6A7080 : state == 1 ? 0xFFE6E2D6 : 0xFFA9AEBC;
+        int color = state == 2 ? 0xFF6A7080 : state == 1 ? 0xFFECE8DC : 0xFFB4BBD6;
         g.drawString(font, label, x + (w - font.width(label)) / 2, y + (h - 8) / 2, color, false);
     }
 
@@ -166,7 +166,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             boolean relicHover = hit(mx, my, RELIC_X, RELIC_Y, BTN_W, BTN_H);
             drawButton(g, RELIC_X, RELIC_Y, BTN_W, BTN_H, relicHover ? 1 : 0, Component.translatable("skyabyss_reward.pouch.button"));
             int glow = 0x40 + (int) (0x50 * (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 300.0)));
-            g.renderOutline(RELIC_X - 1, RELIC_Y - 1, BTN_W + 2, BTN_H + 2, (glow << 24) | 0xF2C14E);
+            g.renderOutline(RELIC_X - 1, RELIC_Y - 1, BTN_W + 2, BTN_H + 2, (glow << 24) | 0xE9C46A);
         }
         if (minecraft == null || minecraft.player == null) {
             return;
@@ -319,13 +319,13 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             int by = y + BOOK_TOP + p.ordinal() * (BOOK_H + 2);
             int right = x + (on ? 2 : 0);
             g.fill(bx, by, right, by + BOOK_H, on ? 0xFF3A4152 : 0xFF232733);
-            g.renderOutline(bx, by, right - bx, BOOK_H, on ? 0xFFC9A55A : 0xFF4A5060);
+            g.renderOutline(bx, by, right - bx, BOOK_H, on ? 0xFFC9A55A : 0xFF4A5680);
             if (on) {
-                g.fill(bx + 1, by + 1, bx + 3, by + BOOK_H - 1, 0xFFF2C14E);
+                g.fill(bx + 1, by + 1, bx + 3, by + BOOK_H - 1, 0xFFE9C46A);
             }
             g.renderItem(new ItemStack(bookmarkIcon(p)), bx + (on ? 5 : 3), by + 3);
             if (pageFresh(p)) {
-                g.fill(bx + 2, by + 2, bx + 5, by + 5, 0xFF7FD6D0);
+                g.fill(bx + 2, by + 2, bx + 5, by + 5, 0xFF8FD0FF);
             }
         }
     }

@@ -53,7 +53,7 @@ public final class QuickCard {
     // 入れ替わりの強調 (ms) と、名前を出している間
     private static final long HIGHLIGHT_MS = 1600;
     private static final long NAME_MS = 2600;
-    private static final int GOLD = 0xF2C14E;
+    private static final int GOLD = 0xE9C46A;
     // 見回りの間隔 (tick) と、巨神・乗り場・嵐を探す範囲
     private static final int SCAN_INTERVAL = 10;
     private static final double TITAN_RANGE = 128;

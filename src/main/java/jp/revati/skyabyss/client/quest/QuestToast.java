@@ -39,9 +39,9 @@ public class QuestToast implements Toast {
         int w = width();
         int h = height();
         g.fill(0, 0, w, h, 0xF0121619);
-        g.renderOutline(0, 0, w, h, 0xFF2E5552);
-        g.fill(2, 2, 4, h - 2, main ? 0xFFF2C14E : 0xFF7FD6D0);
-        g.drawString(font, head, 10, 7, main ? 0xFFF2C14E : 0xFF7FD6D0, false);
+        g.renderOutline(0, 0, w, h, 0xFFC9A85C);
+        g.fill(2, 2, 4, h - 2, main ? 0xFFE9C46A : 0xFF8FD0FF);
+        g.drawString(font, head, 10, 7, main ? 0xFFE9C46A : 0xFF8FD0FF, false);
         int y = 18;
         for (FormattedCharSequence line : lines) {
             g.drawString(font, line, 10, y, 0xFFE9E3D4, false);

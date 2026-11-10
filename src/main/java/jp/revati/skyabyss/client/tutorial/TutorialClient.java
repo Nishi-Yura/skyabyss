@@ -245,10 +245,10 @@ public final class TutorialClient {
             int x0 = cx - tw / 2 - 14;
             int x1 = cx + tw / 2 + 14;
             float a = l.alpha * (l.done ? 1f : pulse);
-            g.fill(x0, y - 2, x1, y + 11, ((int) (a * 0x99) << 24) | 0x0A0E12);
-            g.fill(x0, y - 2, x0 + 1, y + 11, ((int) (a * 0xC0) << 24) | (l.done ? 0x7FD6D0 : 0xE0B84C));
+            g.fill(x0, y - 2, x1, y + 11, ((int) (a * 0x99) << 24) | 0x0A0E1E);
+            g.fill(x0, y - 2, x0 + 1, y + 11, ((int) (a * 0xC0) << 24) | (l.done ? 0x8FD0FF : 0xE0B84C));
             String mark = l.done ? "✔" : "◆";
-            g.drawString(mc.font, mark, x0 + 5, y, ((int) (a * 255) << 24) | (l.done ? 0x7FD6D0 : 0xE0B84C), true);
+            g.drawString(mc.font, mark, x0 + 5, y, ((int) (a * 255) << 24) | (l.done ? 0x8FD0FF : 0xE0B84C), true);
             // 入らない文は札の中で横へ流す (Marquee。前は「…」で切っていた)
             jp.revati.skyabyss.client.ui.Marquee.draw(g, mc.font, shown, cx - tw / 2 + 2, y, tw, ((int) (Mth.clamp(a, 0.05f, 1f) * 255) << 24) | 0xFFFFFF, true);
             y += 13;

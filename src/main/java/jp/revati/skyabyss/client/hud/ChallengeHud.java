@@ -101,7 +101,7 @@ public final class ChallengeHud {
         }
         Font font = mc.font;
         int y = r.y();
-        g.drawString(font, b.title(), r.right() - font.width(b.title()), y, 0xF2C14E, true);
+        g.drawString(font, b.title(), r.right() - font.width(b.title()), y, 0xE9C46A, true);
         y += 11;
         if (!b.sub().getString().isEmpty()) {
             g.drawString(font, b.sub(), r.right() - font.width(b.sub()), y, 0xE9E3D4, true);
@@ -115,7 +115,7 @@ public final class ChallengeHud {
             int x = r.right() - w;
             for (int i = 0; i < row.size(); i++) {
                 if (i > 0) {
-                    g.drawString(font, "・", x, y, 0xA9AEBC, true);
+                    g.drawString(font, "・", x, y, 0xB4BBD6, true);
                     x += font.width("・");
                 }
                 g.drawString(font, row.get(i).text(), x, y, 0xFF000000 | row.get(i).rgb(), true);

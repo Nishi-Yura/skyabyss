@@ -221,7 +221,7 @@ public final class GearTooltip {
             String body = attr.value().toValueComponent(m.operation(), Math.abs(v), net.minecraft.world.item.TooltipFlag.NORMAL).getString();
             num = base ? body : (v >= 0 ? "+" : "−") + body;
             int color = base ? 0xE9E3D4 : v >= 0 ? 0x8FDB8F : 0xE07A7A;
-            MutableComponent text = Component.translatable(attr.value().getDescriptionId()).withColor(0xA9AEBC)
+            MutableComponent text = Component.translatable(attr.value().getDescriptionId()).withColor(0xB4BBD6)
                     .append(Component.literal("  " + num).withColor(color));
             out.add(row(iconOf(attr), text, wrap));
         }

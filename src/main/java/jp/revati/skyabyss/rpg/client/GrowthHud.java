@@ -31,8 +31,8 @@ public final class GrowthHud {
     static final int BAR_W = 64;
     static final int BAR_H = 5;
 
-    static final int TEXT = 0x9FE8FF;
-    static final int GOLD = 0xF2C14E;
+    static final int TEXT = 0x8FD0FF;
+    static final int GOLD = 0xE9C46A;
     static final int SOFT = 0xB8B8C8;
 
     private GrowthHud() {
@@ -63,7 +63,10 @@ public final class GrowthHud {
         }
         Request status = Request.of(Id.STATUS_TL, Region.TOP_LEFT, STATUS_W, STATUS_H);
         Request popups = Request.of(Id.POPUPS_TL, Region.TOP_LEFT, POPUPS_W, POPUPS_H);
-        if (jp.revati.skyabyss.Config.GROWTH_HUD_POSITION.get() == jp.revati.skyabyss.Config.GrowthHudPosition.XP_BAR) {
+        // 下の一枚の帯 (BandHud) が Lv と経験値を持つ間は、左上には得た経験値の列だけ
+        if (jp.revati.skyabyss.client.hud.BandHud.on()) {
+            out.add(popups);
+        } else if (jp.revati.skyabyss.Config.GROWTH_HUD_POSITION.get() == jp.revati.skyabyss.Config.GrowthHudPosition.XP_BAR) {
             int n = GrowthClient.POPUPS.size();
             out.add(Request.side(Id.GROWTH_BAR, Side.LEFT, STATUS_W, BOTTOM_H + (n > 0 ? n * 10 + 1 : 0), BOTTOM_BASELINE, status, popups));
         } else {
@@ -99,7 +102,9 @@ public final class GrowthHud {
             return;
         }
         int[] o = origin();
-        if (o != null) {
+        if (jp.revati.skyabyss.client.hud.BandHud.on()) {
+            renderPopups(g, mc, 0, 0, false);
+        } else if (o != null) {
             renderStatus(g, mc, o, HudManager.placed(Id.GROWTH_BAR));
         }
         renderLevelUp(g, mc, delta);
@@ -107,7 +112,7 @@ public final class GrowthHud {
 
     // いまの職 (職の間で選んだ職。SkillData は持ち主へ送られている)
     @org.jetbrains.annotations.Nullable
-    static jp.revati.skyabyss.rpg.skill.Job masteryJob(Minecraft mc) {
+    public static jp.revati.skyabyss.rpg.skill.Job masteryJob(Minecraft mc) {
         String cur = jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player).curJob;
         return cur == null || cur.isEmpty() ? null : jp.revati.skyabyss.rpg.skill.Job.byId(cur);
     }
@@ -142,12 +147,17 @@ public final class GrowthHud {
             int a = (int) (GrowthClient.barFlash / 12f * 0x70);
             g.fill(x + 1, by + 1, x + 1 + fill, by + 4, (a << 24) | 0xFFFFFF);
         }
-        // 得た経験値: 左上では専用の列 (バーの下) に、経験値バーの左では Lv の上へ積む
+        renderPopups(g, mc, x, o[1], bottom);
+    }
+
+    // 得た経験値: 左上では専用の列 (バーの下) に、経験値バーの左では Lv の上へ積む
+    private static void renderPopups(GuiGraphics g, Minecraft mc, int x, int top, boolean bottom) {
+        Font font = mc.font;
         Rect pu = HudManager.rect(Id.POPUPS_TL);
         if (!bottom && pu == null) {
             return;
         }
-        int y = bottom ? o[1] - 11 : pu.y();
+        int y = bottom ? top - 11 : pu.y();
         int px = bottom ? x : pu.x() + 3;
         int rows = 0;
         for (GrowthClient.Popup p : GrowthClient.POPUPS) {
@@ -192,7 +202,7 @@ public final class GrowthHud {
         g.drawCenteredString(font, head, cx, y, (a << 24) | TEXT);
         // 線は時間とともに左右へ伸びる
         int half = (int) (Math.min(1f, t / 20f) * 60);
-        int lineColor = ((int) (a * 0.7f) << 24) | 0x7FD6D0;
+        int lineColor = ((int) (a * 0.7f) << 24) | 0x8FD0FF;
         g.fill(cx - half, y + 11, cx + half, y + 12, lineColor);
         g.pose().pushPose();
         g.pose().translate(cx, y + 15, 0);

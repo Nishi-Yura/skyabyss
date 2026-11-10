@@ -51,7 +51,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
     private static final int TEXT = 0xFFD8DCE6;
     private static final int DIM = 0xFF7A8090;
-    private static final int OK = 0xFF9FE8FF;
+    private static final int OK = 0xFF8FD0FF;
     private static final int LACK = 0xFFD9779A;
     private static final int GOLD = 0xFFF2B53A;
     private static final int INFO_X = 72;
@@ -716,8 +716,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }
         int x = leftPos - PART_W;
         g.fill(x, topPos, leftPos - 1, topPos + H, 0xE01A1E28);
-        g.renderOutline(x, topPos, PART_W - 1, H, 0xFF4A5060);
-        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), x + 3, topPos + 3, 0xFF9AA0B0, false);
+        g.renderOutline(x, topPos, PART_W - 1, H, 0xFF4A5680);
+        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), x + 3, topPos + 3, 0xFFA4ACC8, false);
         jp.revati.skyabyss.pouch.PouchData d = jp.revati.skyabyss.pouch.Pouch.data(minecraft.player);
         int hover = partAt(mouseX, mouseY);
         for (int k = 0; k < parts.size(); k++) {
@@ -727,7 +727,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 break;
             }
             ItemStack s = d.part(parts.get(k));
-            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? 0x60F2C14E : 0x40000000);
+            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? 0x60E9C46A : 0x40000000);
             g.renderItem(s, px, py);
             g.renderItemDecorations(font, s, px, py);
         }

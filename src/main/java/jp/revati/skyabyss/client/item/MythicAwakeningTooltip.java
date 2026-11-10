@@ -14,9 +14,9 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 // 神器の目覚めのツールチップ (item/mythic/MythicAwakening。docs/design/03 の 13.5): 名前のすぐ下に、真名 (段 3)・段と次までの数・効き
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class MythicAwakeningTooltip {
-    static final int GOLD = 0xF2C14E;
-    static final int TEAL = 0x7FD6D0;
-    static final int SOFT = 0xA9AEBC;
+    static final int GOLD = 0xE9C46A;
+    static final int TEAL = 0x8FD0FF;
+    static final int SOFT = 0xB4BBD6;
 
     private MythicAwakeningTooltip() {
     }

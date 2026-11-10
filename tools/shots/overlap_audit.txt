@@ -141,12 +141,6 @@ overlap notices_1920_g4
 shot notices_1920_g4
 close
 wait 2
-open grave
-wait 8
-overlap grave_1920_g4
-shot grave_1920_g4
-close
-wait 2
 open pouchwheel_9
 wait 8
 overlap pouchwheel_9_1920_g4
@@ -446,12 +440,6 @@ overlap notices_1920_g2
 shot notices_1920_g2
 close
 wait 2
-open grave
-wait 8
-overlap grave_1920_g2
-shot grave_1920_g2
-close
-wait 2
 open pouchwheel_9
 wait 8
 overlap pouchwheel_9_1920_g2
@@ -749,12 +737,6 @@ open notices
 wait 8
 overlap notices_1280_g3
 shot notices_1280_g3
-close
-wait 2
-open grave
-wait 8
-overlap grave_1280_g3
-shot grave_1280_g3
 close
 wait 2
 open pouchwheel_9
