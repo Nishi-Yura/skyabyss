@@ -480,7 +480,7 @@ public final class ObjectiveStrip {
         java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 5 - extra) / 10));
         int bottom = y + lines.size() * 10 + extra + 1;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
-        int bg = ((int) ((0x50 + glow * 0x50) * a)) << 24 | 0x0A0E1E;
+        int bg = ((int) ((0x78 + glow * 0x48) * a)) << 24 | 0x0A0E1E;
         g.fill(x - 3, y - 2, x + w + 3, bottom, bg);
         int accent = ((int) (255 * a)) << 24 | 0xE9C46A;
         g.fill(x - 3, y - 2, x - 2, bottom, accent);

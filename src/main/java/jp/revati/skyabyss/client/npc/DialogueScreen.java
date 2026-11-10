@@ -34,7 +34,7 @@ public class DialogueScreen extends Screen {
     private static final int PANEL = 0xF2101318;
     private static final int EDGE = 0xFFC9A85C;
     private static final int EDGE_IN = 0xFF141C3A;
-    private static final int HOVER = 0x402E8F88;
+    private static final int HOVER = 0x308FD0FF;
     // 行は 13 (docs/design/56)
     private static final int LINE_H = jp.revati.skyabyss.client.ui.Golden.ROW;
     private static final int OPTION_H = 13;
@@ -328,7 +328,7 @@ public class DialogueScreen extends Screen {
         for (int i = 1; i <= 4; i++) {
             sb.append(i <= tier ? "◆" : "◇");
         }
-        g.drawCenteredString(font, sb.toString(), cx, y, 0xFF5FB8B0);
+        g.drawCenteredString(font, sb.toString(), cx, y, 0xFF8FD0FF);
     }
 
     private int optionAt(double mx, double my) {

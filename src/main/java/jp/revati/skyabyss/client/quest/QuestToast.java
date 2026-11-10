@@ -38,8 +38,8 @@ public class QuestToast implements Toast {
         Font font = toasts.getMinecraft().font;
         int w = width();
         int h = height();
-        g.fill(0, 0, w, h, 0xF0121619);
-        g.renderOutline(0, 0, w, h, 0xFFC9A85C);
+        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, 0, 0, w, h);
+
         g.fill(2, 2, 4, h - 2, main ? 0xFFE9C46A : 0xFF8FD0FF);
         g.drawString(font, head, 10, 7, main ? 0xFFE9C46A : 0xFF8FD0FF, false);
         int y = 18;

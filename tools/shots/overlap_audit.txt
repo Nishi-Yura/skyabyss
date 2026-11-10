@@ -165,6 +165,12 @@ overlap BoxPouchScreen_1920_g4
 shot BoxPouchScreen_1920_g4
 close
 wait 2
+open party_finder
+wait 8
+overlap party_finder_1920_g4
+shot party_finder_1920_g4
+close
+wait 2
 openacc
 wait 12
 overlap accessory_1920_g4
@@ -183,6 +189,15 @@ overlap forge_1920_g4
 shot forge_1920_g4
 close
 wait 2
+cmd execute at @s run summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[180f,0f],PersistenceRequired:1b}
+wait 5
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 12
+overlap dialogue_1920_g4
+shot dialogue_1920_g4
+close
+wait 2
+cmd kill @e[type=skyabyss:attendant]
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12
@@ -488,6 +503,12 @@ overlap BoxPouchScreen_1920_g2
 shot BoxPouchScreen_1920_g2
 close
 wait 2
+open party_finder
+wait 8
+overlap party_finder_1920_g2
+shot party_finder_1920_g2
+close
+wait 2
 openacc
 wait 12
 overlap accessory_1920_g2
@@ -506,6 +527,15 @@ overlap forge_1920_g2
 shot forge_1920_g2
 close
 wait 2
+cmd execute at @s run summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[180f,0f],PersistenceRequired:1b}
+wait 5
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 12
+overlap dialogue_1920_g2
+shot dialogue_1920_g2
+close
+wait 2
+cmd kill @e[type=skyabyss:attendant]
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12
@@ -811,6 +841,12 @@ overlap BoxPouchScreen_1280_g3
 shot BoxPouchScreen_1280_g3
 close
 wait 2
+open party_finder
+wait 8
+overlap party_finder_1280_g3
+shot party_finder_1280_g3
+close
+wait 2
 openacc
 wait 12
 overlap accessory_1280_g3
@@ -829,6 +865,15 @@ overlap forge_1280_g3
 shot forge_1280_g3
 close
 wait 2
+cmd execute at @s run summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[180f,0f],PersistenceRequired:1b}
+wait 5
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 12
+overlap dialogue_1280_g3
+shot dialogue_1280_g3
+close
+wait 2
+cmd kill @e[type=skyabyss:attendant]
 cmd skyabyss cinematic stop
 cmd skyabyss facility shop apothecary
 wait 12

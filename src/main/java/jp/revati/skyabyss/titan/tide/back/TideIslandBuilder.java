@@ -132,12 +132,10 @@ public final class TideIslandBuilder {
     }
 
     // ---------------------------------------------------------------- 潮門 (モデルの左後ろの門)、到着の段、見送りの段、潮門の廊下
-    static final boolean RETURN_GATE = false;
-
     // 地上へ戻る見送りの段 (いちばん下の段とその先の水) に入っているか
     public static boolean inReturnGate(double x, double y, double z) {
         // 潮門の見送りの段はもうない (地上へは待機場所の帰りの石で。trial/ArrivalDeck。2026-11-07)
-        return RETURN_GATE && x >= GATE_X - 1 && x < GATE_X + 2 && z >= GATE_Z && z < GATE_Z + 2 && y >= GATE_Y0 - 0.5 && y < GATE_Y1;
+        return false;
     }
 
     private static int surface(int x, int z) {

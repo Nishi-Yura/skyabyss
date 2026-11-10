@@ -280,7 +280,8 @@ public final class QuickCard {
         long age = Util.getMillis() - changedAt;
         float glow = age < HIGHLIGHT_MS ? 1f - age / (float) HIGHLIGHT_MS : 0f;
 
-        g.blitSprite(leftSide ? SPRITE_LEFT : SPRITE_RIGHT, spriteX, spriteY, SPRITE_W, SPRITE_H);
+        // 枠は下の一枚の帯 (client/hud/BandHud) と同じ絵柄
+        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, itemX - 3, h - 23, itemX + 19, h - 1);
         if (glow > 0f) {
             int a = (int) (glow * 150) << 24;
             // 縁にそった金の線 (ホットバーの絵に合わせた細い角ばった枠)

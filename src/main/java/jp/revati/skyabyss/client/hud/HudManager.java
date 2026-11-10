@@ -214,32 +214,17 @@ public final class HudManager {
         RECENT_CHAT.add(new long[] {now, Math.max(1, lines)});
     }
 
-    private static java.lang.reflect.Field trimmedField;
-    private static boolean trimmedBroken;
-
-    // チャットのいま出ている (200 tick 以内の) 行数。数えられなければ fallback
+    // チャットのいま出ている (200 tick 以内の) 行数 (欄はアクセス変換で開けてある。META-INF/accesstransformer.cfg)
     private static int shownChatLines(Minecraft mc, int fallback) {
-        if (trimmedBroken) {
-            return fallback;
-        }
-        try {
-            if (trimmedField == null) {
-                trimmedField = net.minecraft.client.gui.components.ChatComponent.class.getDeclaredField("trimmedMessages");
-                trimmedField.setAccessible(true);
+        int ticks = mc.gui.getGuiTicks();
+        int n = 0;
+        for (net.minecraft.client.GuiMessage.Line line : mc.gui.getChat().trimmedMessages) {
+            if (ticks - line.addedTime() >= 200) {
+                break;
             }
-            int ticks = mc.gui.getGuiTicks();
-            int n = 0;
-            for (Object o : (java.util.List<?>) trimmedField.get(mc.gui.getChat())) {
-                if (ticks - ((net.minecraft.client.GuiMessage.Line) o).addedTime() >= 200) {
-                    break;
-                }
-                n++;
-            }
-            return Math.max(1, n);
-        } catch (ReflectiveOperationException | RuntimeException e) {
-            trimmedBroken = true;
-            return fallback;
+            n++;
         }
+        return Math.max(1, n);
     }
 
     // 直近 10 秒のチャットの (時刻, 行数)
@@ -277,32 +262,10 @@ public final class HudManager {
         }
     }
 
-    // アクションバー (画面下の一行) が出ているときの文の幅。出ていなければ 0。Gui の持つ文を読む (読めなければ 0)
-    private static java.lang.reflect.Field overlayField;
-    private static java.lang.reflect.Field overlayTimeField;
-    private static boolean overlayBroken;
-
+    // アクションバー (画面下の一行) が出ているときの文の幅。出ていなければ 0 (欄はアクセス変換で開けてある)
     private static int overlayWidth(Minecraft mc) {
-        if (overlayBroken) {
-            return 0;
-        }
-        try {
-            if (overlayField == null) {
-                overlayField = net.minecraft.client.gui.Gui.class.getDeclaredField("overlayMessageString");
-                overlayField.setAccessible(true);
-                overlayTimeField = net.minecraft.client.gui.Gui.class.getDeclaredField("overlayMessageTime");
-                overlayTimeField.setAccessible(true);
-            }
-            Object text = overlayField.get(mc.gui);
-            int time = overlayTimeField.getInt(mc.gui);
-            if (text instanceof net.minecraft.network.chat.Component c && time > 0) {
-                return Math.min(mc.font.width(c), 400);
-            }
-            return 0;
-        } catch (ReflectiveOperationException | RuntimeException e) {
-            overlayBroken = true;
-            return 0;
-        }
+        net.minecraft.network.chat.Component text = mc.gui.overlayMessageString;
+        return text != null && mc.gui.overlayMessageTime > 0 ? Math.min(mc.font.width(text), 400) : 0;
     }
 
     static Scene scene(Minecraft mc, int w, int h) {

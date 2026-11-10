@@ -164,8 +164,7 @@ public final class SaltVault {
     }
 
     public static final String SIGNAL_DOOR = "ch2_salt_door";
-    // 前の版の地下の仕掛け (潮の喉・塩樽・白い戸・出口の縦穴) はもう動かさない (2026-11-07。dungeon/MiniDungeons)
-    public static final boolean RETIRED_UNDERGROUND = true;
+    // 前の版の地下の仕掛け (潮の喉・塩樽・白い戸・出口の縦穴) はもう動かさない (2026-11-07。dungeon/MiniDungeons)。見回りは道の標だけ
     static final String BARREL_HINT = "skyabyss_ch2_salt_barrel_hint";
 
     // 戸が開いているか (読み込まれていない所は開いていないとみなす)
@@ -845,37 +844,6 @@ public final class SaltVault {
             }
         }
         // 潮の喉・塩樽・坑口の手当ては前の版の地下のもの。地下は小ダンジョンの写しへ移り、地上の口は埋めた (dungeon/MiniDungeons)
-        if (RETIRED_UNDERGROUND) {
-            roadTick(server, level, players);
-            return;
-        }
-        if (t % 40 == 7) {
-            mendOld(server, level);
-            for (Vault v : vaults(server)) {
-                if (!level.isLoaded(v.pos()) || !anyNear(players, v.pos(), ACTIVE)) {
-                    continue;
-                }
-                boolean wet = wantFlooded(level, v);
-                if (setSump(level, v, wet)) {
-                    BlockPos mouth = v.mark("mouth");
-                    for (ServerPlayer p : players) {
-                        if (mouth != null && p.distanceToSqr(mouth.getX(), mouth.getY(), mouth.getZ()) < 40 * 40) {
-                            Notice.hint(p, wet ? "message.skyabyss.ch2.vault.wet" : "message.skyabyss.ch2.vault.dry");
-                        }
-                    }
-                }
-                tidyBarrels(level, v, players);
-                // 塩樽の間に初めて入った人に、樽の運び方を一度だけ
-                BlockPos room = v.mark("room2");
-                for (ServerPlayer p : players) {
-                    if (room != null && !p.isSpectator() && !p.getPersistentData().getBoolean(BARREL_HINT)
-                            && p.distanceToSqr(room.getX() + 0.5, room.getY() + 0.5, room.getZ() + 0.5) < 8 * 8 && !doorOpen(level, v)) {
-                        p.getPersistentData().putBoolean(BARREL_HINT, true);
-                        Notice.hint(p, "message.skyabyss.ch2.vault.barrels");
-                    }
-                }
-            }
-        }
         roadTick(server, level, players);
     }
 
