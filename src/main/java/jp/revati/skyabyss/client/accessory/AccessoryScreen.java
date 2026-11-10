@@ -148,7 +148,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         // 護符の枠 (いちばん上) の左に、使うキー
         Component key = Component.translatable("skyabyss_gear.screen.charm_key", AccessoryClient.CHARM_KEY.getTranslatedKeyMessage());
-        g.drawString(font, key, GearPanel.RIGHT.x() + 8, GearPanel.RIGHT.bottom() - 8 - 10, Golden.DIM, false);
+        g.drawString(font, key, GearPanel.RIGHT.right() - 8 - font.width(key), GearPanel.RIGHT.bottom() - 8 - 10, Golden.DIM, false);
     }
 
     // 旅袋・封の箱の画面の上に載るつまみ。選ばれたつまみは押せない

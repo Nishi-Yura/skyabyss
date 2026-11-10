@@ -138,7 +138,7 @@ public final class GearPanel {
         }
         g.pose().popPose();
         // 人形 (画面の座標で)
-        InventoryScreen.renderEntityInInventoryFollowsMouse(g, px + ARMOR_X + 21, py + COL_Y, px + ACC_X - 5, py + armorY(4) + 16, 38, 0.0625f,
+        InventoryScreen.renderEntityInInventoryFollowsMouse(g, px + ARMOR_X + 21, py + COL_Y, px + ACC_X - 5, py + armorY(4) + 16, 34, 0.0625f,
                 mouseX, mouseY, p);
     }
 

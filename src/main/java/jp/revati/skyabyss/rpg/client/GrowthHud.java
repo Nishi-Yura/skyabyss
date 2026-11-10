@@ -65,7 +65,7 @@ public final class GrowthHud {
         Request popups = Request.of(Id.POPUPS_TL, Region.TOP_LEFT, POPUPS_W, POPUPS_H);
         // 下の一枚の帯 (BandHud) が Lv と経験値を持つ間は、左上には得た経験値の列だけ
         if (jp.revati.skyabyss.client.hud.BandHud.on()) {
-            out.add(popups);
+            // 得た経験値は帯のすぐ上に出す (左上は空ける)
         } else if (jp.revati.skyabyss.Config.GROWTH_HUD_POSITION.get() == jp.revati.skyabyss.Config.GrowthHudPosition.XP_BAR) {
             int n = GrowthClient.POPUPS.size();
             out.add(Request.side(Id.GROWTH_BAR, Side.LEFT, STATUS_W, BOTTOM_H + (n > 0 ? n * 10 + 1 : 0), BOTTOM_BASELINE, status, popups));
@@ -103,7 +103,7 @@ public final class GrowthHud {
         }
         int[] o = origin();
         if (jp.revati.skyabyss.client.hud.BandHud.on()) {
-            renderPopups(g, mc, 0, 0, false);
+            renderBandPopups(g, mc);
         } else if (o != null) {
             renderStatus(g, mc, o, HudManager.placed(Id.GROWTH_BAR));
         }
@@ -148,6 +148,26 @@ public final class GrowthHud {
             g.fill(x + 1, by + 1, x + 1 + fill, by + 4, (a << 24) | 0xFFFFFF);
         }
         renderPopups(g, mc, x, o[1], bottom);
+    }
+
+    // 下の一枚の帯 (BandHud) の間: 得た経験値は Lv の札の真上に、新しい二つだけ (持ち物の名前の行は空ける)
+    private static void renderBandPopups(GuiGraphics g, Minecraft mc) {
+        Rect hb = HudManager.result().vanilla.get(Id.V_HOTBAR);
+        if (hb == null || GrowthClient.POPUPS.isEmpty()) {
+            return;
+        }
+        Font font = mc.font;
+        int cx = hb.x() + hb.w() / 2;
+        int n = GrowthClient.POPUPS.size();
+        for (int i = 0; i < Math.min(2, n); i++) {
+            GrowthClient.Popup p = GrowthClient.POPUPS.get(n - 1 - i);
+            float left = 1f - (float) p.age / GrowthClient.POPUP_TICKS;
+            int alpha = Mth.clamp((int) (Math.min(1f, left * 3f) * 255), 8, 255);
+            Component line = p.reason.isEmpty() ? Component.literal("+" + p.amount)
+                    : Component.literal("+" + p.amount + " ").append(Component.translatable(p.reason));
+            int y = hb.bottom() - 48 - i * 22;
+            g.drawString(font, line, cx - font.width(line) / 2, y, (alpha << 24) | (p.reason.isEmpty() ? SOFT : TEXT), true);
+        }
     }
 
     // 得た経験値: 左上では専用の列 (バーの下) に、経験値バーの左では Lv の上へ積む
