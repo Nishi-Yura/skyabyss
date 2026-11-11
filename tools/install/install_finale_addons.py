@@ -31,6 +31,10 @@ fb = importlib.util.module_from_spec(spec_)
 spec_.loader.exec_module(fb)
 bs = fb.bs
 from PIL import Image  # noqa: E402
+# 書き出す前の仕上げ (足した部品の向きの食い違い・開いた縁を直す。mesh_close.tidy_bones)。install_boss_split.py も使う
+_spec_mc = importlib.util.spec_from_file_location("mesh_close", ROOT / "tools/lib/mesh_close.py")
+mc = importlib.util.module_from_spec(_spec_mc)
+_spec_mc.loader.exec_module(mc)
 
 A = ROOT / "src/main/resources/assets/skyabyss"
 BASE = ROOT / "tools/sources/finale_addons_base"
@@ -319,6 +323,7 @@ def install(stem, pick, glow_ramp=None, base_dir=None):
     data["triangle_count"] = sum(len(b["triangles"]) for b in data["bones"].values())
     data["texture_size"] = [NW, NH]
     data["note_finale"] = f"{label} (tools/install/install_finale_addons.py)"
+    mc.tidy_bones(data)
     (A / f"lowpoly/{stem}.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     # 骨組みへ揺れの骨を足す
     for gp in gpaths:

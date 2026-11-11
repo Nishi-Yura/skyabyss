@@ -59,6 +59,30 @@ PICKS = {"lord_rib": 2, "lord_salt": 0, "lord_storm": 1, "lord_ash": 0,
          "king_bone": 1, "king_salt": 0, "king_storm": 1, "king_ash": 1, "king_shadow": 0}
 
 
+def whole_parts(faces, head_from):
+    """つながった面 (頂点を 0.01 で溶接して辺を共有する面) の群れごとに、頂点の高さの平均で head / body を決める。戻り値 {id(面): 骨}"""
+    par = list(range(len(faces)))
+
+    def find(x):
+        while par[x] != x:
+            par[x] = par[par[x]]
+            x = par[x]
+        return x
+    owner = {}
+    for i, f in enumerate(faces):
+        for p in f.verts:
+            k = tuple(np.round(np.asarray(p, float) / 0.01).astype(int))
+            j = owner.setdefault(k, i)
+            if j != i:
+                par[find(i)] = find(j)
+    ys = {}
+    for i, f in enumerate(faces):
+        s = ys.setdefault(find(i), [0.0, 0])
+        s[0] += float(np.asarray(f.verts, float)[:, 1].sum())
+        s[1] += len(f.verts)
+    return {id(f): ("head" if ys[find(i)][0] / ys[find(i)][1] >= head_from else "body") for i, f in enumerate(faces)}
+
+
 def keep(stem, tex):
     BASE.mkdir(parents=True, exist_ok=True)
     for f in (A / f"lowpoly/{stem}.json", A / f"textures/lowpoly/{tex}.png", A / f"textures/lowpoly/{tex}_glowmask.png"):
@@ -154,9 +178,12 @@ def install(stem, opt_lord=None, opt_king=None):
             face_bone[id(f)] = gb
     for gb, (parent, pv) in new_bones.items():
         data["bones"][gb] = {"parent": parent, "pivot": pv, "vertices": [], "uvs": [], "triangles": [], "triangle_count": 0}
+    # 頭か体かは、つながった部品ごとに決める (面ごとに高さで分けると、境の高さをまたぐ部品が二つの骨に切れて、
+    # 首が回ると切り口が開いていた。2026-11-11 の監査)
+    side = whole_parts(addf, head_from)
     added = 0
     for f in addf:
-        bone = "head" if f.verts.mean(0)[1] >= head_from else "body"
+        bone = side[id(f)]
         if id(f) in face_bone:
             bone = new_bones[face_bone[id(f)]][0]
         Rm, t = xf(bone)
@@ -180,6 +207,7 @@ def install(stem, opt_lord=None, opt_king=None):
     data["triangle_count"] = sum(len(b["triangles"]) for b in data["bones"].values())
     data["texture_size"] = [NW, NH]
     data["note_split"] = f"{label} (tools/install/install_boss_split.py)"
+    fi.mc.tidy_bones(data)
     (A / f"lowpoly/{stem}.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     # 揺れの骨を骨組みへ (元の写しから) と、王のアニメへ (三つの周で同じ名前の骨)
     for gname in (f"{stem}_lowpoly.geo.json", f"{stem}_lowpoly_debug.geo.json"):
