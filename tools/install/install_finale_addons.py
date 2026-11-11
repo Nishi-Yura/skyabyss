@@ -85,6 +85,10 @@ MOTION = {
     "tide_beckoner": [
         dict(re=r"^sail$", bone="sw_sail", kind="sway", amp=(5, 3), freq=45),
     ],
+    # 残りのボス (2026-11-11)
+    "lord_rib": [
+        dict(re=r"^(?:st|l[gft])(\d)", bone="sw_lamp{0}", kind="sway", amp=(12, 10), freq=110),
+    ],
 }
 
 
@@ -143,9 +147,11 @@ def keep(stem, tex):
     files = [A / f"lowpoly/{stem}.json"] + geo_paths(stem)
     for suf in suffixes(tex):
         files += [A / f"textures/lowpoly/{tex}{suf}.png", A / f"textures/lowpoly/{tex}{suf}_glowmask.png"]
+    first = not (BASE / f"{stem}.json").exists()
     for f in files:
         dst = BASE / f.name
-        if f.exists() and not dst.exists():
+        # 元を写すのは初めて流した時だけ (あとから、入れた結果の光の型などを元として写さない)
+        if f.exists() and not dst.exists() and (first or not f.name.endswith("_glowmask.png")):
             shutil.copy2(f, dst)
 
 

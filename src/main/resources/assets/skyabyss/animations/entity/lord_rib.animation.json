@@ -70,6 +70,76 @@
       "0",
       "0"
      ]
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -160,6 +230,76 @@
       "math.sin(query.anim_time * 514 + 90) * 3",
       "0",
       "0"
+     ]
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
      ]
     }
    }
@@ -268,6 +408,76 @@
        0
       ]
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -924,6 +1134,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -1683,6 +1963,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -1928,6 +2278,76 @@
        0
       ]
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -2187,6 +2607,76 @@
        1.1
       ]
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    },
    "loop": "hold_on_last_frame"
@@ -2638,6 +3128,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -3127,6 +3687,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -3575,6 +4205,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -4062,6 +4762,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -4574,6 +5344,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   },
@@ -5093,6 +5933,76 @@
        "easing": "easeInOutSine"
       }
      }
+    },
+    "sw_lamp0": {
+     "rotation": [
+      "math.sin(query.anim_time * 94 + 0) * 12",
+      0,
+      "math.sin(query.anim_time * 78 + 70) * 10"
+     ]
+    },
+    "sw_lamp1": {
+     "rotation": [
+      "math.sin(query.anim_time * 117 + 71) * 12",
+      0,
+      "math.sin(query.anim_time * 97 + 141) * 10"
+     ]
+    },
+    "sw_lamp2": {
+     "rotation": [
+      "math.sin(query.anim_time * 107 + 142) * 12",
+      0,
+      "math.sin(query.anim_time * 89 + 212) * 10"
+     ]
+    },
+    "sw_lamp3": {
+     "rotation": [
+      "math.sin(query.anim_time * 97 + 213) * 12",
+      0,
+      "math.sin(query.anim_time * 80 + 283) * 10"
+     ]
+    },
+    "sw_lamp4": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 284) * 12",
+      0,
+      "math.sin(query.anim_time * 100 + 354) * 10"
+     ]
+    },
+    "sw_lamp5": {
+     "rotation": [
+      "math.sin(query.anim_time * 110 + 355) * 12",
+      0,
+      "math.sin(query.anim_time * 91 + 65) * 10"
+     ]
+    },
+    "sw_lamp6": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 66) * 12",
+      0,
+      "math.sin(query.anim_time * 83 + 136) * 10"
+     ]
+    },
+    "sw_lamp7": {
+     "rotation": [
+      "math.sin(query.anim_time * 123 + 137) * 12",
+      0,
+      "math.sin(query.anim_time * 102 + 207) * 10"
+     ]
+    },
+    "sw_lamp8": {
+     "rotation": [
+      "math.sin(query.anim_time * 113 + 208) * 12",
+      0,
+      "math.sin(query.anim_time * 94 + 278) * 10"
+     ]
+    },
+    "sw_lamp9": {
+     "rotation": [
+      "math.sin(query.anim_time * 103 + 279) * 12",
+      0,
+      "math.sin(query.anim_time * 86 + 349) * 10"
+     ]
     }
    }
   }

@@ -42,7 +42,7 @@ bandit_archer	0	0	1006
 bandit_chief	0	0	906	
 basalt_scorpion	0	0	796	
 bell_hare	0	0	1136	
-bell_hermit	0	0	688	
+bell_hermit	0	0	4920	
 bell_mourner	0	0	1612	
 bellows_imp	0	0	666	
 bolt_slinger	0	0	1094	
@@ -98,7 +98,7 @@ forge_giant	0	0	3162
 fort_warlord	0	0	3848	
 founder	0	0	6146	
 full_keeper	0	0	9096	
-geode_golem	0	0	828	
+geode_golem	0	0	2766	
 grain_rat	0	0	1134	
 heart_warden	0	0	8566	
 heartbeat_mimic	0	0	1062	
@@ -131,9 +131,9 @@ lava_wyrm	0	0	3692
 light_swarm	0	0	1528	
 lightning_gleaner	0	0	568	
 lord_ash	0	0	4318	
-lord_rib	0	0	4398	
-lord_salt	0	0	3094	
-lord_storm	0	0	3674	
+lord_rib	0	0	6738	
+lord_salt	0	0	5294	
+lord_storm	0	0	5666	
 mirror_bearer	0	0	1674	
 mist_angler	0	0	1030	
 mist_bird	0	0	1374	
@@ -298,7 +298,7 @@ npc_trade_keeper	0	0	1872
 npc_trade_keeper_prop_l	0	0	118	
 npc_training_master	0	0	1646	
 npc_training_master_prop_r	0	0	68	
-ox_smith	0	0	984	
+ox_smith	0	0	9414	
 past_shadow	0	0	950	
 peak_fledgling	0	0	548	
 pearl_otter	0	0	1156	
@@ -307,7 +307,7 @@ pilgrim_hand	0	0	2126
 pilgrim_moon	0	0	3426	
 pilgrim_plume	0	0	8418	
 pit_digger	0	0	744	
-pit_foreman	0	0	1012	
+pit_foreman	0	0	3852	
 plume_warden	0	0	1450	
 prop_ash_ball	0	0	172	
 prop_bone_shard	0	0	56	

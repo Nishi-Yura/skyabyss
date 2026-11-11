@@ -602,3 +602,10 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - **前に入れた足し部品の仕上げ**: 淵の王（install_boss_split.py。部品の分け目を増やし、雷の王の雷の尾 5・灰の王の煤の外套 12・影の王の裾 14・骨の王の肋の裳裾 10 を揺れる骨に）、心臓の番人の鍵の後光・灯り喰いの主の燠の腹・四つの心臓の目（tools/install/fine_rerun.py が分け目を増やしてから前の道具を流し直す）。王の技の動き（king_moves.py）を流し直したら install_boss_split.py も流し直す。
 - 出る間に AI を止めた主は、出きったら出る前の AI の有無に戻す（自己テストや撮影で AI を止めた主を動かさない）。
 - **登場**: combat/BossEmerge.stage（出方 → 出きったら名前の札と顔のアップ。見る人がいなければ何もしない）。終章 = 鐘守 落ちる・戻し手 噴き上がる・灯守の目 育つ・羽 空から・手 札だけ（雲から自分でせり上がる）・目 開く・月 落ちる・初代 せり上がる。月 = 核 育つ・月秤 噴き上がる・灯守 空から・剣守 落ちる・影抱き せり上がる。章の道中 = BossEmerge.chapter（小ダンジョンの主は近づいて呼ばれた時、中ボスは中の間が始まった時）と firstSight（焼けた羽守は人が初めて近づいた時に札だけ）。肩書きは skyabyss_dungeon の言葉の gui.skyabyss.boss_intro.sub.<名前>。
+
+## 残りのボスの作り込み（2026-11-11）
+
+ラフ tools/rough/lowpoly/mid_lord_bosses/build.py（確かめの絵に後ろ斜めの段）、入れる道具 tools/install/install_mid_addons.py（元は tools/sources/mid_addons_base/）。
+坑の頭 = 背の鉱石の籠と光る晶・負い紐、鐘の隠者 = 殻の上のイソギンチャクの群れとヒトデ、晶洞の巨像 = 肩と背から突き出す晶の群れ、牛の鍛冶 = 背に負った金床と焼けた延べ棒・鎖、
+肋の主 = 肋から吊った灯の籠（揺れる）、白殻の主 = 足の縁の光る粘液と口の雫、鼓動まねの主 = 体の表の三角形をたどって這う血管の網と光る脈（口のまわりは避ける）。
+層の主は install_boss_split.py の塗り直しのあとが元: あちらを流し直したら mid_addons_base/lord_* を消してから流し直す。中ボス 4 体と塔の主の技も heart_moves.py で緩急を付けた。塔の主は grow で現れて名前の札と顔のアップ。

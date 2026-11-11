@@ -378,26 +378,46 @@ def ls_c(m, R):
 # ---------------------------------------------------------------- 鼓動まねの主 (心臓の体・六本脚)
 def lm_a(m, R):
     """A 体を覆う血管の網: 心臓の体の表を太い血管が網のように這い、脈が光る"""
+    # 体の表の三角形をたどって這わせる (方向から表の点を探すと、張り出した帯に引っかかって籠のように浮いた。2026-11-11)
     rng = np.random.default_rng(251)
+    F = [f for f in R.faces if f.bone == "body"]
+    C = np.array([f.verts.mean(0) for f in F])
+    N = []
+    for f in F:
+        n = np.cross(f.verts[1] - f.verts[0], f.verts[2] - f.verts[0])
+        N.append(n / max(1e-9, np.linalg.norm(n)))
+    N = np.array(N)
     lo, hi, c = R.box("body")
-    for k in range(12):
-        u = rng.uniform(0, math.tau)
-        pts = []
-        for j in range(6):
-            t = j / 5
-            d = nrm(V3([math.cos(u + t * 0.5), 0.7 - t * 1.3, math.sin(u + t * 0.5)]))
-            q = surf(R, "body", d, at=c)
-            pts.append(q + d * 0.05)
-        # 間を細かく: 隣の点のあいだも表に寄せる
-        fine = []
-        for j in range(5):
-            for t in (0.0, 0.5):
-                q = pts[j] + (pts[j + 1] - pts[j]) * t
-                d = nrm(q - c)
-                fine.append(surf(R, "body", d, at=c) + d * 0.05)
-        fine.append(pts[-1])
-        m.add(f"vn{k}", b.tub("body", "vein", fine, [0.75 - 0.05 * i for i in range(len(fine))], None, sides=5))
-        m.add(f"pl{k}", b.ell("body", "glow", pts[2] + nrm(pts[2] - c) * 0.4, (0.4, 0.4, 0.4), segs=6, rings=2))
+    out = ((C - c) * N).sum(1) > 0
+    # 口 (heart の骨のまわり) は避け、体のまわりに均して這わせる
+    mouth = R.box("heart")[2]
+    out &= np.linalg.norm(C - mouth, axis=1) > 8.5
+    tops = np.nonzero(out & (C[:, 1] > c[1] + (hi[1] - c[1]) * 0.3))[0]
+    az = np.arctan2(C[tops, 2] - c[2], C[tops, 0] - c[0])
+    for k in range(24):
+        want = k / 24 * math.tau - math.pi
+        da = np.abs((az - want + math.pi) % math.tau - math.pi)
+        i0 = int(tops[np.argmin(da + rng.uniform(0, 0.2, len(da)))])
+        path = [i0]
+        drift = rng.uniform(-0.5, 0.5)
+        for _ in range(18):
+            cur = path[-1]
+            d = C - C[cur]
+            dist = np.linalg.norm(d, axis=1)
+            ok = out & (dist > 1.0) & (dist < 3.6) & (d[:, 1] < -0.1)
+            ok[path] = False
+            cand = np.nonzero(ok)[0]
+            if not len(cand):
+                break
+            side = np.cross(N[cur], (0, 1, 0))
+            score = -d[cand, 1] + drift * (d[cand] @ side) + rng.uniform(0, 0.6, len(cand))
+            path.append(int(cand[np.argmax(score)]))
+        if len(path) < 4:
+            continue
+        pts = [C[q] + N[q] * 0.3 for q in path]
+        m.add(f"vn{k}", b.tub("body", "vein", pts, [0.9 - 0.55 * t / (len(pts) - 1) for t in range(len(pts))], None, sides=5))
+        mid = path[len(path) // 3]
+        m.add(f"pl{k}", b.ell("body", "glow", C[mid] + N[mid] * 0.6, (0.45, 0.45, 0.45), segs=6, rings=2))
 
 
 def lm_b(m, R):
