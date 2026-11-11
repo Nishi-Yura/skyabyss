@@ -39,7 +39,15 @@ public final class AttackProps {
             "sk_archer_c_rise", "sk_archer_c_shot", "sk_mage_a_rise", "sk_mage_a_shot", "sk_mage_b_rise",
             "sk_mage_b_shot", "sk_mage_c_rise", "sk_mage_c_shot", "sk_deep_rise", "sk_past_rise",
             // 通常攻撃の形 (段ごと 0〜4): 魔法使いの魔弾 (combat/StaffBolts) と呪術師の呪印 (combat/HexMarks)。tools/gen/mobs/attack_props/build_basic_props.py
-            "sk_bolt_0", "sk_bolt_1", "sk_bolt_2", "sk_bolt_3", "sk_bolt_4", "sk_hex_0", "sk_hex_1", "sk_hex_2", "sk_hex_3", "sk_hex_4"};
+            "sk_bolt_0", "sk_bolt_1", "sk_bolt_2", "sk_bolt_3", "sk_bolt_4", "sk_hex_0", "sk_hex_1", "sk_hex_2", "sk_hex_3", "sk_hex_4",
+            // 技の型・粉の属性・技の変化・熟練・神器の大きな能力 (tools/gen/mobs/attack_props/build_skill_kit.py。rpg/skill/SkillProps・item/mythic/MythicAbilities)
+            "sk_warrior_slash", "sk_warrior_wave", "sk_warrior_aura", "sk_warrior_zone", "sk_assassin_slash", "sk_assassin_wave", "sk_assassin_aura",
+            "sk_assassin_zone", "sk_shaman_slash", "sk_shaman_wave", "sk_shaman_aura", "sk_shaman_zone", "sk_smith_slash", "sk_smith_wave",
+            "sk_smith_aura", "sk_smith_zone", "sk_archer_slash", "sk_archer_wave", "sk_archer_aura", "sk_archer_zone", "sk_mage_slash",
+            "sk_mage_wave", "sk_mage_aura", "sk_mage_zone", "sk_el_stone", "sk_el_wind", "sk_el_tide", "sk_el_ash", "sk_el_bone", "sk_ch_rune",
+            "sk_ch_rewrite", "sk_ch_mutation", "sk_ch_secret", "sk_mastery_3", "sk_mastery_5", "my_sky_hand", "my_warden", "my_balance",
+            "my_big_bell", "my_melt", "my_pull", "my_life_lamp", "my_gaze", "my_new_moon", "my_feather", "my_mist", "my_eye_arrow", "my_rewind",
+            "my_moth", "my_chase_mark", "my_promise", "my_silence", "my_clap"};
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<AttackProp>>> TYPES = new LinkedHashMap<>();
 

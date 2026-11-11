@@ -240,6 +240,7 @@ public final class HexMarks {
         ServerPlayer p = m.owner;
         eruptFx(m.level, m.at, m.tier, m.shot);
         models(m);
+        jp.revati.skyabyss.rpg.skill.SkillProps.elementMark(m.owner, m.at, 0.9f, 12);
         if (!p.isAlive() || p.getMainHandItem().getItem() != m.item) {
             return;
         }

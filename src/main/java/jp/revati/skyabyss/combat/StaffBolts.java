@@ -267,6 +267,7 @@ public final class StaffBolts {
                 b.pos = at;
                 strike(b, foe);
                 impactFx(b.level, at, b.dir, LOOKS[b.tier], b.tier, b.shot);
+                jp.revati.skyabyss.rpg.skill.SkillProps.elementMark(owner, foe.position(), 0.7f, 10);
                 if (b.model != null) {
                     b.model.discard();
                 }
