@@ -185,7 +185,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             g.drawString(font, Component.translatable(stat.nameKey()), r.x() + Golden.S34, Golden.textY(r.y() + 4, Golden.ROW), TEXT, false);
             String v = String.valueOf(value);
             g.drawString(font, v, r.right() - Golden.S8 - font.width(v), Golden.textY(r.y() + 4, Golden.ROW), value > 0 ? GOLD : TEXT, false);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, effect(stat, value), r.x() + Golden.S34, Golden.textY(r.y() + 4 + Golden.ROW, Golden.ROW),
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, effect(stat, value, d.level), r.x() + Golden.S34, Golden.textY(r.y() + 4 + Golden.ROW, Golden.ROW),
                     r.w() - Golden.S34 - Golden.S8, SOFT, false);
         }
 
@@ -201,15 +201,17 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     }
 
     // ステータスの効果の一行
-    static Component effect(Stat stat, int value) {
+    static Component effect(Stat stat, int value, int level) {
         return switch (stat) {
             case STRENGTH -> Component.translatable("gui.skyabyss.growth.effect.strength", pct(GrowthRules.meleeMultiplier(value)));
             case AGILITY -> Component.translatable("gui.skyabyss.growth.effect.agility",
                     pct(GrowthRules.moveMultiplier(value)), pct(GrowthRules.projectileMultiplier(value)));
             case SPIRIT -> Component.translatable("gui.skyabyss.growth.effect.spirit",
                     (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(value)));
-            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality",
-                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value)));
+            // レベルで増えた体力も足す (RecordBuilder.effect と同じ)
+            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality_level",
+                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value) + GrowthRules.levelHealth(level)),
+                    jp.revati.skyabyss.Hp.of(GrowthRules.levelHealth(level)));
         };
     }
 

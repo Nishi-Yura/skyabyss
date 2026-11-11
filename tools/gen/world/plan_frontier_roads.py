@@ -56,7 +56,7 @@ LINKS = [
     # 今の地下のダンジョンへの枝
     ('dun_bone', ['@60,-798', '!dungeon_bone_pit']),
     ('dun_tide', ['@1426,-112', '!dungeon_tide_cave']),
-    ('dun_storm', ['@-1244,-282', '!dungeon_storm_hollow']),
+    ('dun_storm', ['@-1244,-282', '!dungeon_storm_hollow']),  # 2026-11-11: 口を雷翼の祠 (-1196,-293) から離して西の平らな所へ
     ('dun_molten', ['@240,1220', '!dungeon_molten_mine']),
 ]
 

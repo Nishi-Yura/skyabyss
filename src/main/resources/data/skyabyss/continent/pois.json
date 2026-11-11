@@ -122,7 +122,7 @@
   {"kind": "gone", "x": 1396, "z": -43},
   {"kind": "dungeon_bone_pit", "x": 60, "z": -798},
   {"kind": "dungeon_tide_cave", "x": 1426, "z": -112},
-  {"kind": "dungeon_storm_hollow", "x": -1244, "z": -282},
+  {"kind": "dungeon_storm_hollow", "x": -1308, "z": -266},
   {"kind": "dungeon_molten_mine", "x": 240, "z": 1220},
   {"kind": "dungeon_deep_fort", "x": 1280, "z": -1176},
   {"kind": "dungeon_deep_temple", "x": 1720, "z": 564},

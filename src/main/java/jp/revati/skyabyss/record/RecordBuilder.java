@@ -669,7 +669,7 @@ public final class RecordBuilder {
             int v = d.stat(stat);
             rows.add(value("stat." + stat.id, Component.translatable(stat.nameKey()), Component.literal(String.valueOf(v)),
                     v >= GrowthRules.STAT_CAP ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
-                    List.of(effect(stat, v), Component.translatable("gui.skyabyss.growth.desc." + stat.id),
+                    List.of(effect(stat, v, d.level), Component.translatable("gui.skyabyss.growth.desc." + stat.id),
                             Component.translatable("gui.skyabyss.growth.cap", GrowthRules.STAT_CAP))));
         }
         rows.add(header("skills"));
@@ -710,13 +710,16 @@ public final class RecordBuilder {
     }
 
     // ステータス画面 (GrowthScreen.effect) と同じ文
-    static Component effect(Stat stat, int value) {
+    // 耐久の行は、レベルで増えた体力も足して出す (2026-11-11「耐久は、レベルアップで HP 増えるから、それを適用して」)
+    static Component effect(Stat stat, int value, int level) {
         return switch (stat) {
             case STRENGTH -> Component.translatable("gui.skyabyss.growth.effect.strength", pct(GrowthRules.meleeMultiplier(value)));
             case AGILITY -> Component.translatable("gui.skyabyss.growth.effect.agility",
                     pct(GrowthRules.moveMultiplier(value)), pct(GrowthRules.projectileMultiplier(value)));
             case SPIRIT -> Component.translatable("gui.skyabyss.growth.effect.spirit", (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(value)));
-            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality", jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value)));
+            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality_level",
+                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value) + GrowthRules.levelHealth(level)),
+                    jp.revati.skyabyss.Hp.of(GrowthRules.levelHealth(level)));
         };
     }
 

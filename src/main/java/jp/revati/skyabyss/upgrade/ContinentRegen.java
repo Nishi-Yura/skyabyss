@@ -64,7 +64,9 @@ public final class ContinentRegen {
     // 12 = 2026-11-09 (木をバニラの飾りから、土地ごとのオリジナルの形の木に。間を空け、砂丘のまわりは緑の木なし。world/continent/ContinentTrees)
     // 13 = 2026-11-09 夜 (作り直しで建て物の置き場もすべて決め直す。前の版の置き場が残り、四つの大陸の渡し船などが途中からの世界に出なかった。
     //      「途中からのところはおかしくなるのかも。全部新しくなるようにしてほしい」)
-    public static final int VERSION = 13;
+    // 14 = 2026-11-11 (雷の土地の中ダンジョン (風穴) の口を、雷翼の祠のすぐ脇から西の平らな所へ (-1308,-266)。枝道も引き直し。
+    //      「雷のところ、中ダンジョンの入り口の場所がおかしい」。ContinentLairsSelfTest が祠と見どころの間をたしかめる)
+    public static final int VERSION = 14;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
