@@ -59,6 +59,12 @@ STYLES = {
     "scorched_warden": dict(antic=0.2, deep=0.1, snap=0.04, stop=0.06, over=0.14, follow=0.2, lag=0.03),
     "tide_beckoner": dict(antic=0.26, deep=0.12, snap=0.09, stop=0.12, over=0.1, follow=0.16, lag=0.02, bounce=True),
     "raiju": dict(antic=0.2, deep=0.12, snap=0.04, stop=0.06, over=0.14, follow=0.22, lag=0.03, twitch=True),
+    # ダンジョンの中ボス・塔の主
+    "pit_foreman": dict(antic=0.28, deep=0.12, snap=0.07, stop=0.1, over=0.12, follow=0.18, lag=0.03, bounce=True),
+    "bell_hermit": dict(antic=0.22, deep=0.1, snap=0.06, stop=0.08, over=0.12, follow=0.2, lag=0.02),
+    "geode_golem": dict(antic=0.3, deep=0.14, snap=0.09, stop=0.14, over=0.1, follow=0.16, lag=0.02, bounce=True),
+    "ox_smith": dict(antic=0.3, deep=0.12, snap=0.07, stop=0.12, over=0.12, follow=0.18, lag=0.03),
+    "tower_master": dict(antic=0.26, deep=0.12, snap=0.08, stop=0.1, over=0.1, follow=0.22, lag=0.03),
 }
 
 

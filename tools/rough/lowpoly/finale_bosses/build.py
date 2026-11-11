@@ -634,6 +634,9 @@ def parts(fn, R, glow):
     return m.F, atlas, gl
 
 
+VIEWS = ((180, 6), (215, 14))
+
+
 def sheet(name, title, cols):
     F = bs.voxel.font
     allV = np.concatenate([np.concatenate([f.verts for f in c[1]]) for c in cols])
@@ -641,7 +644,7 @@ def sheet(name, title, cols):
     c = (lo + hi) / 2
     Rf = float(np.max(hi - lo)) / 2
     PW, PH = 340, 380
-    cv = Image.new("RGB", (20 + len(cols) * (PW + 10), 110 + 2 * (PH + 10)), (16, 16, 22))
+    cv = Image.new("RGB", (20 + len(cols) * (PW + 10), 110 + len(VIEWS) * (PH + 10)), (16, 16, 22))
     d = ImageDraw.Draw(cv)
     d.text((20, 14), f"{title} — 作り込みのラフ (左が今)", font=F(26), fill=(236, 232, 218))
     for i, (label, faces, at, g, note, ntri) in enumerate(cols):
@@ -649,7 +652,7 @@ def sheet(name, title, cols):
         d.text((x, 50), f"{label}  (+{ntri})" if ntri else label, font=F(18), fill=(150, 232, 255))
         d.text((x, 76), note, font=F(13), fill=(176, 176, 192))
         a2, g2 = bs.square(at, g)
-        for j, (yaw, pitch) in enumerate(((180, 6), (215, 14))):
+        for j, (yaw, pitch) in enumerate(VIEWS):
             im = bs.render(faces, a2[..., :3], g2, yaw, pitch, (PW, PH), c, PW * 0.46 / Rf)
             bgi = Image.new("RGBA", (PW, PH), (40, 40, 52, 255))
             bgi.alpha_composite(im)

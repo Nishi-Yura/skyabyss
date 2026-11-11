@@ -77,10 +77,26 @@ def install(stem, opt_lord=None, opt_king=None):
     glow = np.array(Image.open(gp).convert("RGBA"))[..., 3] > 0 if gp.exists() else np.zeros(img.shape[:2], bool)
     if opt_lord is not None:
         _, body, metal, light, _ = opt_lord
-        out = bs.recolor(img, glow, bs.PAL[body], bs.PAL[metal], bs.PAL[light])
+        # 元の絵の細かい明るさの粒が、塗り直すと白い点のまだらになっていた (2026-11-11)。光らない所は 3×3 の中央値でならしてから塗る
+        sm = img.copy()
+        solid = img[..., 3] > 0
+        # ひとつだけぽつんと光る画素 (まわり 8 つに光る画素が 2 つ未満) は光らせない (体中の白い点に見えていた)
+        nb = sum(np.roll(np.roll(glow, dy, 0), dx, 1).astype(int) for dy in (-1, 0, 1) for dx in (-1, 0, 1)) - glow.astype(int)
+        glow = glow & (nb >= 2)
+        stack = []
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                stack.append(np.roll(np.roll(img[..., :3].astype(np.int16), dy, 0), dx, 1))
+                stack[-1] = np.where((np.roll(np.roll(solid, dy, 0), dx, 1))[..., None], stack[-1], img[..., :3].astype(np.int16))
+        med = np.median(np.stack(stack), axis=0).astype(np.uint8)
+        keep_px = glow | ~solid
+        sm[..., :3] = np.where(keep_px[..., None], img[..., :3], med)
+        out = bs.recolor(sm, glow, bs.PAL[body], bs.PAL[metal], bs.PAL[light])
         Image.fromarray(out, "RGBA").save(A / f"textures/lowpoly/{tex}.png")
         if gp.exists():
-            shutil.copy2(gp, A / f"textures/lowpoly/{tex}_glowmask.png")
+            gm = np.zeros(img.shape[:2] + (4,), np.uint8)
+            gm[glow] = (255, 255, 255, 255)
+            Image.fromarray(gm, "RGBA").save(A / f"textures/lowpoly/{tex}_glowmask.png")
         (A / f"lowpoly/{stem}.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
         return 0
     label, body, metal, light, drop, fn = opt_king

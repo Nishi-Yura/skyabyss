@@ -131,21 +131,6 @@
   "animation.lord_storm.strike_bolts",
   "animation.lord_storm.strike_sweep"
  ],
- "tower_master": [
-  "animation.tower_master.rake",
-  "animation.tower_master.flense",
-  "animation.tower_master.clap",
-  "animation.tower_master.breath",
-  "animation.tower_master.sigil",
-  "animation.tower_master.beams",
-  "animation.tower_master.stars",
-  "animation.tower_master.arrows",
-  "animation.tower_master.roar",
-  "animation.tower_master.stoke",
-  "animation.tower_master.palm",
-  "animation.tower_master.moon",
-  "animation.tower_master.bow"
- ],
  "moon_leaper": [
   "animation.moon_leaper.leap"
  ]

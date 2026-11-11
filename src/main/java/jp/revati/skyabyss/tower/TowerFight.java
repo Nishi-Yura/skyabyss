@@ -151,6 +151,8 @@ public final class TowerFight {
         m.setShielded(true);
         m.setFloor(m.getMaxHealth() * floorFrac(0));
         level.addFreshEntity(m);
+        // 登場: 裂け目の前に結晶のように育ち、名前の札と顔のアップ (combat/BossEmerge)
+        jp.revati.skyabyss.combat.BossEmerge.stage(m, "grow", 56, "tower_master");
         // 硬さ 2.0: 四人で 15〜20 分 (54 の 2.3)。隙の決まりが入って 0.3 倍で削り切る形でなくなったぶん (47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.resist(m, 1.82);
         master = m;
