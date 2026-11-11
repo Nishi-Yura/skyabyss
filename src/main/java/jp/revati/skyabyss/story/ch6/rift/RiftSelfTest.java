@@ -99,6 +99,8 @@ public final class RiftSelfTest {
             for (String k : new String[] {"camp_plate", "door_plate_a", "door_plate_b"}) {
                 check(f, moon.getBlockState(MoonRift.mark(k)).is(RiftBlocks.ECHO_PLATE.get()), "plate missing at " + k);
             }
+            // 門は見回り (RiftTicker) が持つ: 一度見回らせて、板が踏まれていなければ格子が閉まっていること
+            RiftTicker.plates(moon);
             check(f, moon.getBlockState(MoonRift.mark("door_gate")).is(Blocks.IRON_BARS), "the door bars are missing");
             check(f, moon.getBlockState(MoonRift.mark("rift_gate")).is(ValleyBlocks.STAR_GATE.get()), "the waning gate is missing");
             check(f, moon.getBlockState(MoonRift.mark("arena_back")).is(ValleyBlocks.STAR_GATE.get()), "the arena return gate is missing");

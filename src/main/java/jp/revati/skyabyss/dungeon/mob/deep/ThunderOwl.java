@@ -92,7 +92,8 @@ public class ThunderOwl extends DungeonBoss {
             server().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, net.minecraft.sounds.SoundSource.HOSTILE, 1.0f, 1.4f);
             return;
         }
-        if (distance < 8) {
+        // 羽ばたきの風は 7.5 まで: 届かない所の獲物には撃たない (撃つと空振りのあいだ飛びかかりが遅れていた)
+        if (distance < 7.0) {
             move = GUST;
             spray(target, "gust", GUST_WARN, 7.5, 70, 10, 0.45f, ParticleTypes.ELECTRIC_SPARK);
         }
