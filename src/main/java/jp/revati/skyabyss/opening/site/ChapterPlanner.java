@@ -130,15 +130,26 @@ final class ChapterPlanner {
         return lastResort(g, base, angle, r, obs);
     }
 
+    // 最後の手段の、断った理由の数 (見つからなかったときにログへ。障害物・水・段差)
+    static final java.util.concurrent.atomic.AtomicInteger LAST_BLOCKED = new java.util.concurrent.atomic.AtomicInteger();
+    static final java.util.concurrent.atomic.AtomicInteger LAST_WET = new java.util.concurrent.atomic.AtomicInteger();
+    static final java.util.concurrent.atomic.AtomicInteger LAST_STEEP = new java.util.concurrent.atomic.AtomicInteger();
+    // 最後の手段の、遠い方の端 (2026-11-12: 嵐の跡地の高地で避雷の塔の跡・風見・碑が置けず、嵐の章の「風の印」が終わらなかった。
+    // 一度見つからない要素はその計画では二度と探さないので、ここで 220 まで広げる)
+    static final int LAST_MAX_DIST = 220;
+
     @Nullable
     static BlockPos lastResort(Ground g, BlockPos base, double angle, Req r, List<Obstacle> obs) {
         int[] st = STAGES[STAGES.length - 1];
         int mid = (Math.max(MIN_DIST, r.minDist()) + Math.min(MAX_DIST, r.maxDist())) / 2;
         List<Integer> dists = new ArrayList<>();
-        for (int d = MIN_DIST; d <= MAX_DIST; d += 5) {
+        for (int d = MIN_DIST; d <= LAST_MAX_DIST; d += 5) {
             dists.add(d);
         }
         dists.sort(Comparator.comparingInt(d -> Math.abs(d - mid)));
+        int blocked = 0;
+        int wet = 0;
+        int steep = 0;
         for (int d : dists) {
             for (int k = 0; k < 72; k++) {
                 int off = ((k + 1) / 2) * 5 * (k % 2 == 1 ? 1 : -1);
@@ -146,14 +157,23 @@ final class ChapterPlanner {
                 int x = base.getX() + (int) Math.round(Math.cos(a) * d);
                 int z = base.getZ() + (int) Math.round(Math.sin(a) * d);
                 if (blocked(x, z, r.radius(), obs, 2)) {
+                    blocked++;
                     continue;
                 }
                 Area ar = SiteFinder.area(g, x, z, r.half(), r.half(), st[0], false, false);
                 if (ar.ok()) {
                     return new BlockPos(x, ar.median() + 1, z);
                 }
+                if (ar.count() == 0) {
+                    wet++;
+                } else {
+                    steep++;
+                }
             }
         }
+        LAST_BLOCKED.set(blocked);
+        LAST_WET.set(wet);
+        LAST_STEEP.set(steep);
         return null;
     }
 
