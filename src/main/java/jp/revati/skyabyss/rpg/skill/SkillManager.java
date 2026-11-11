@@ -699,6 +699,8 @@ public final class SkillManager {
             Skill fx = SkillActions.fxSkill != null ? SkillActions.fxSkill : skill;
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), fx.id, rank, false, SkillActions.fxTarget));
         }
+        // 自分の技の形 (模型が床から突き出る・飛ぶ・降る。rpg/skill/SkillProps)
+        SkillProps.onCast(player, SkillActions.fxSkill != null ? SkillActions.fxSkill : skill, rank, SkillActions.fxTarget);
         SkillActions.fxTarget = null;
         SkillActions.fxSkill = null;
         // 鐘の内の初代の空見は、技の音を聞く (docs/design/53 の 5.1)

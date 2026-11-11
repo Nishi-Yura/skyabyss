@@ -1,0 +1,18 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.prop_sk_assassin_c_shot.idle": {
+   "loop": true,
+   "animation_length": 1.6,
+   "bones": {
+    "body": {
+     "rotation": [
+      "4.000*math.sin(query.anim_time*225.0000)",
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

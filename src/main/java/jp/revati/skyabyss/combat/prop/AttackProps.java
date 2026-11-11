@@ -29,7 +29,15 @@ public final class AttackProps {
             // 2026-11-12: 野の敵の技 (矢・矢の雨・風の刃・胞子・鬼火)
             "arrow", "arrow_volley", "wind_blade", "spore", "wisp_orb", "net", "whirlwind",
             // 月と雲の主の技 (光の柱・羽根・秤の錘)
-            "light_pillar", "feather", "weight"};
+            "light_pillar", "feather", "weight",
+            // 自分の技の形 (rpg/skill/SkillProps。職ごとに三つの案 a/b/c、tools/gen/mobs/attack_props/build_skill_props.py)
+            "sk_warrior_a_rise", "sk_warrior_b_rise", "sk_warrior_c_rise", "sk_assassin_a_rise", "sk_assassin_a_shot",
+            "sk_assassin_b_rise", "sk_assassin_b_shot", "sk_assassin_c_rise", "sk_assassin_c_shot", "sk_shaman_a_rise",
+            "sk_shaman_a_shot", "sk_shaman_b_rise", "sk_shaman_b_shot", "sk_shaman_c_rise", "sk_shaman_c_shot",
+            "sk_smith_a_rise", "sk_smith_a_shot", "sk_smith_b_rise", "sk_smith_b_shot", "sk_smith_c_rise",
+            "sk_smith_c_shot", "sk_archer_a_rise", "sk_archer_a_shot", "sk_archer_b_rise", "sk_archer_b_shot",
+            "sk_archer_c_rise", "sk_archer_c_shot", "sk_mage_a_rise", "sk_mage_a_shot", "sk_mage_b_rise",
+            "sk_mage_b_shot", "sk_mage_c_rise", "sk_mage_c_shot", "sk_deep_rise", "sk_past_rise"};
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<AttackProp>>> TYPES = new LinkedHashMap<>();
 
