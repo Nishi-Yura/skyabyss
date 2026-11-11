@@ -115,6 +115,14 @@ public final class HexMarkSelfTest {
             // 魔弾の段
             check(f, StaffBolts.tier(1) == 0 && StaffBolts.tier(9) == 0 && StaffBolts.tier(10) == 1 && StaffBolts.tier(29) == 2
                     && StaffBolts.tier(40) == 4 && StaffBolts.tier(50) == 4 && StaffBolts.LOOKS.length == 5, "the staff bolt look tiers are wrong");
+            check(f, HexMarks.tier(9) == 0 && HexMarks.tier(10) == 1 && HexMarks.tier(50) == 4 && HexMarks.LOOKS.length == 5, "the hex mark look tiers are wrong");
+            // どの段・どの番の演出でも落ちない
+            for (int t = 0; t < HexMarks.LOOKS.length; t++) {
+                for (int s = 0; s < 3; s++) {
+                    HexMarks.markFx(level, a.position(), s, t);
+                    HexMarks.eruptFx(level, a.position(), t, s);
+                }
+            }
         } catch (RuntimeException ex) {
             SkyAbyss.LOGGER.error("SELFTEST hex mark crashed", ex);
             f.add("crashed: " + ex);
@@ -132,7 +140,7 @@ public final class HexMarkSelfTest {
             p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST hex mark PASSED (a charged bell staff places a hex mark 10 blocks ahead that erupts on both foes inside it and spends mana; none without charge, at the sky, or from a sword; staff bolt looks change every 10 levels)");
+            SkyAbyss.LOGGER.info("SELFTEST hex mark PASSED (a charged bell staff places a hex mark 10 blocks ahead that erupts on both foes inside it and spends mana; none without charge, at the sky, or from a sword; hex mark and staff bolt looks change every 10 levels)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST hex mark FAILED: {}", m));
         }

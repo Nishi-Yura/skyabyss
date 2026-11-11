@@ -49,6 +49,9 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   - 遅れ: DELAY tick で噴き上がる。その時に印の中 (横 RADIUS・上 HEIGHT) にいる敵、最大 MAX_TARGETS 体に、撃った時の溜めのまま近接の一撃と同じ傷
 //     (combat/MeleeHits を通す)。動く敵には外れうる (置いて当てる術)。会心は起こさない。撃った時と持ち物が変わっていたら当たらない
 //   - 演出: 撃つ = 鈴の音と手元の潮の粉。印 = 潮の青緑の輪と、内で回る三角の呪の線 (遅れのあいだ縮む)。噴く = 足もとから魂の火と黒紫の粉の柱・低い鈴と牙の音
+// 見た目は少しずつ変わる (2026-11-11 の声「呪術師の遠距離攻撃も見た目かわっていく？」→「変えるようにして」。魔弾 StaffBolts と同じ作り):
+//   - 段 (レベル 10 ごと。Look): 三角の印 → 二重の輪 (逆に回る) → 五芒の印 → 鈴の紋 (四方の小さな輪) → 渦の紋 (三本の腕)。色も段ごと
+//   - 一発ごと (三発で一巡): 噴き方が 柱 → 外へ広がる波 → 縁から突き上げる牙 と替わり、鈴の高さも替わる
 // 手元は client/weapon/StaffBoltClient が左クリックを見て、この合図 (Cast) を送る (溜めが足りるときだけ)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class HexMarks {
@@ -64,6 +67,8 @@ public final class HexMarks {
     static final DustParticleOptions CURSE = new DustParticleOptions(new Vector3f(0.45f, 0.18f, 0.62f), 1.0f);
     static final DustParticleOptions PALE = new DustParticleOptions(new Vector3f(0.70f, 1.00f, 0.88f), 0.6f);
 
+    // 一発ごとの番 (三発で一巡)
+    private static final Map<UUID, Integer> SHOT = PlayerMaps.track(new HashMap<>());
     private static final Map<UUID, Long> LAST = PlayerMaps.track(new HashMap<>());
     private static final Map<UUID, Long> MANA_HINT = PlayerMaps.track(new HashMap<>());
     private static final List<Mark> MARKS = new ArrayList<>();
@@ -75,11 +80,15 @@ public final class HexMarks {
         final Vec3 at;
         final int ticker;
         final Item item;
+        final int tier;
+        final int shot;
         int age;
         final List<LivingEntity> hits = new ArrayList<>();
         boolean done;
 
-        Mark(ServerPlayer owner, Vec3 at, int ticker, Item item) {
+        Mark(ServerPlayer owner, Vec3 at, int ticker, Item item, int tier, int shot) {
+            this.tier = tier;
+            this.shot = shot;
             this.owner = owner;
             this.level = owner.serverLevel();
             this.at = at;
@@ -172,9 +181,11 @@ public final class HexMarks {
         }
         LAST.put(p.getUUID(), now);
         SkillManager.setMana(p, SkillManager.get(p).mana - cost);
-        Mark m = new Mark(p, at, p.attackStrengthTicker, p.getMainHandItem().getItem());
+        int shot = SHOT.merge(p.getUUID(), 1, (a, one) -> (a + one) % 3);
+        int tier = tier(jp.revati.skyabyss.rpg.Growth.get(p).level);
+        Mark m = new Mark(p, at, p.attackStrengthTicker, p.getMainHandItem().getItem(), tier, shot);
         MARKS.add(m);
-        castFx(m.level, p, at);
+        castFx(m.level, p, at, m.tier, m.shot);
         p.resetAttackStrengthTicker();
         return m;
     }
@@ -203,7 +214,7 @@ public final class HexMarks {
         }
         m.age++;
         if (m.age < DELAY) {
-            markFx(m.level, m.at, m.age);
+            markFx(m.level, m.at, m.age, m.tier);
             return;
         }
         erupt(m);
@@ -213,7 +224,7 @@ public final class HexMarks {
     // 噴き上がる: 印の中の敵 (近い順に MAX_TARGETS 体) に傷
     static void erupt(Mark m) {
         ServerPlayer p = m.owner;
-        eruptFx(m.level, m.at);
+        eruptFx(m.level, m.at, m.tier, m.shot);
         if (!p.isAlive() || p.getMainHandItem().getItem() != m.item) {
             return;
         }
@@ -238,36 +249,84 @@ public final class HexMarks {
     }
 
     // ---------------------------------------------------------------- 演出
-    static void castFx(ServerLevel level, ServerPlayer p, Vec3 at) {
-        Vec3 hand = p.getEyePosition().add(p.getViewVector(1f).scale(0.9)).add(0, -0.35, 0);
-        level.sendParticles(PALE, hand.x, hand.y, hand.z, 4, 0.08, 0.08, 0.08, 0);
-        level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.35f, 1.8f);
-        level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 0.5f, 1.6f);
-        markFx(level, at, 0);
+    // 段ごとの色 (輪・呪の線・噴くときの粉)
+    record Look(DustParticleOptions ring, DustParticleOptions line, DustParticleOptions burst) {
     }
 
-    // 浮いた印: 外の輪と、内で回る三角。遅れのあいだに少しずつ縮む
-    static void markFx(ServerLevel level, Vec3 at, int age) {
+    static DustParticleOptions dust(float r, float g, float b, float size) {
+        return new DustParticleOptions(new Vector3f(r, g, b), size);
+    }
+
+    static final Look[] LOOKS = {
+        // 0 三角の印 (Lv 1〜9): 潮の青緑の輪と黒紫の三角
+        new Look(TIDE, CURSE, CURSE),
+        // 1 二重の輪 (Lv 10〜19): 海の緑と藍の、逆に回る二つの輪
+        new Look(dust(0.25f, 0.75f, 0.55f, 0.9f), dust(0.25f, 0.25f, 0.70f, 1.0f), dust(0.30f, 0.30f, 0.80f, 1.0f)),
+        // 2 五芒の印 (Lv 20〜29): 淡い金の輪と紫の星
+        new Look(dust(0.95f, 0.85f, 0.55f, 0.9f), dust(0.62f, 0.25f, 0.80f, 1.0f), dust(0.75f, 0.40f, 0.90f, 1.0f)),
+        // 3 鈴の紋 (Lv 30〜39): 青銅の輪と、四方の小さな鈴の輪
+        new Look(dust(0.80f, 0.55f, 0.30f, 0.9f), dust(0.35f, 0.85f, 0.75f, 0.9f), dust(0.85f, 0.65f, 0.35f, 1.0f)),
+        // 4 渦の紋 (Lv 40〜): 深い青の輪と、三本の黒紫の渦の腕と白い芯
+        new Look(dust(0.20f, 0.35f, 0.85f, 1.0f), dust(0.30f, 0.08f, 0.40f, 1.1f), dust(0.90f, 0.95f, 1.00f, 0.9f)),
+    };
+
+    // レベルの段 (10 ごと。0〜4)
+    public static int tier(int level) {
+        return Math.max(0, Math.min(LOOKS.length - 1, level / 10));
+    }
+
+    // 撃つ鈴の高さ (一発ごとに替わる)
+    static final float[] PITCH = {1.8f, 1.6f, 2.0f};
+
+    static void castFx(ServerLevel level, ServerPlayer p, Vec3 at, int tier, int shot) {
+        Vec3 hand = p.getEyePosition().add(p.getViewVector(1f).scale(0.9)).add(0, -0.35, 0);
+        level.sendParticles(PALE, hand.x, hand.y, hand.z, 4, 0.08, 0.08, 0.08, 0);
+        level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.35f, PITCH[shot]);
+        level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 0.5f, 1.6f);
+        markFx(level, at, 0, tier);
+    }
+
+    // 浮いた印: 外の輪と、段ごとの内の紋。遅れのあいだに少しずつ縮む
+    static void markFx(ServerLevel level, Vec3 at, int age, int tier) {
+        Look look = LOOKS[tier];
         double y = at.y + 0.08;
         double shrink = 1.0 - 0.25 * age / (double) DELAY;
         double r = RADIUS * shrink;
         if (age % 2 == 0) {
-            for (int k = 0; k < 16; k++) {
-                double a = Math.toRadians(k * 22.5 + age * 6);
-                level.sendParticles(TIDE, at.x + Math.cos(a) * r, y, at.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
-            }
+            circle(level, at.x, y, at.z, r, 16, look.ring(), age * 6);
         }
-        // 三角の呪の線 (回る)
         double spin = Math.toRadians(age * 18);
-        double ri = r * 0.75;
-        for (int k = 0; k < 3; k++) {
-            double a0 = spin + k * Math.PI * 2 / 3;
-            double a1 = spin + (k + 1) * Math.PI * 2 / 3;
-            for (int j = 0; j <= 3; j++) {
-                double t = j / 3.0;
-                double x = Math.cos(a0) * ri * (1 - t) + Math.cos(a1) * ri * t;
-                double z = Math.sin(a0) * ri * (1 - t) + Math.sin(a1) * ri * t;
-                level.sendParticles(CURSE, at.x + x, y, at.z + z, 1, 0, 0, 0, 0);
+        switch (tier) {
+            case 1 -> {
+                // 二重の輪: 内の輪は逆へ回る
+                circle(level, at.x, y, at.z, r * 0.6, 10, look.line(), -age * 24);
+            }
+            case 2 -> {
+                // 五芒の印: 星の線 (頂点を一つ飛ばしに結ぶ)
+                polygon(level, at, y, r * 0.8, 5, 2, spin, look.line());
+            }
+            case 3 -> {
+                // 鈴の紋: 四方に小さな鈴の輪、真ん中に一つ
+                for (int k = 0; k < 4; k++) {
+                    double a = spin + k * Math.PI / 2;
+                    circle(level, at.x + Math.cos(a) * r * 0.6, y, at.z + Math.sin(a) * r * 0.6, 0.22, 5, look.line(), age * 30);
+                }
+                circle(level, at.x, y, at.z, 0.3, 6, look.ring(), -age * 30);
+            }
+            case 4 -> {
+                // 渦の紋: 三本の腕が内へ巻き込む
+                for (int arm = 0; arm < 3; arm++) {
+                    for (int j = 0; j < 5; j++) {
+                        double a = spin + arm * Math.PI * 2 / 3 + j * 0.45;
+                        double rr = r * (0.85 - j * 0.16);
+                        level.sendParticles(look.line(), at.x + Math.cos(a) * rr, y, at.z + Math.sin(a) * rr, 1, 0, 0, 0, 0);
+                    }
+                }
+                level.sendParticles(look.burst(), at.x, y + 0.05, at.z, 1, 0, 0, 0, 0);
+            }
+            default -> {
+                // 三角の印 (回る)
+                polygon(level, at, y, r * 0.75, 3, 1, spin, look.line());
             }
         }
         if (age == DELAY - 2) {
@@ -275,19 +334,72 @@ public final class HexMarks {
         }
     }
 
-    static void eruptFx(ServerLevel level, Vec3 at) {
-        for (int k = 0; k < 10; k++) {
-            double a = Math.toRadians(k * 36);
-            double rr = RADIUS * 0.55;
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x + Math.cos(a) * rr, at.y + 0.1, at.z + Math.sin(a) * rr, 0, 0, 1, 0, 0.12);
+    // 噴く: 一発ごとに形が替わる (柱 → 外へ広がる波 → 下から突き上げる牙)。色は段のもの
+    static void eruptFx(ServerLevel level, Vec3 at, int tier, int shot) {
+        Look look = LOOKS[tier];
+        switch (shot) {
+            case 1 -> {
+                // 波: 地面を三重の輪が外へ走る
+                for (int w = 1; w <= 3; w++) {
+                    circle(level, at.x, at.y + 0.15, at.z, RADIUS * w / 3.0, 8 + w * 4, w == 3 ? look.ring() : look.burst(), w * 20);
+                }
+                for (int k = 0; k < 8; k++) {
+                    double a = Math.toRadians(k * 45);
+                    level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x, at.y + 0.15, at.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.18);
+                }
+                level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
+            }
+            case 2 -> {
+                // 牙: 印の縁の五か所から、短い柱が突き上がる
+                for (int k = 0; k < 5; k++) {
+                    double a = Math.toRadians(k * 72 + 18);
+                    double x = at.x + Math.cos(a) * RADIUS * 0.6;
+                    double z = at.z + Math.sin(a) * RADIUS * 0.6;
+                    for (int j = 0; j < 4; j++) {
+                        level.sendParticles(j == 3 ? look.ring() : look.burst(), x, at.y + 0.2 + j * 0.3, z, 1, 0.03, 0, 0.03, 0);
+                    }
+                    level.sendParticles(ParticleTypes.CRIT, x, at.y + 0.3, z, 2, 0.05, 0.3, 0.05, 0.05);
+                }
+                level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 0.8f, 0.95f);
+            }
+            default -> {
+                // 柱: 足もとから魂の火と粉の柱
+                for (int k = 0; k < 10; k++) {
+                    double a = Math.toRadians(k * 36);
+                    double rr = RADIUS * 0.55;
+                    level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x + Math.cos(a) * rr, at.y + 0.1, at.z + Math.sin(a) * rr, 0, 0, 1, 0, 0.12);
+                }
+                for (int j = 0; j < 6; j++) {
+                    level.sendParticles(look.burst(), at.x, at.y + 0.3 + j * 0.4, at.z, 3, 0.25, 0.1, 0.25, 0);
+                }
+                level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 0.7f, 1.25f);
+            }
         }
-        for (int j = 0; j < 6; j++) {
-            level.sendParticles(CURSE, at.x, at.y + 0.3 + j * 0.4, at.z, 3, 0.25, 0.1, 0.25, 0);
-        }
-        level.sendParticles(TIDE, at.x, at.y + 0.2, at.z, 14, RADIUS * 0.5, 0.1, RADIUS * 0.5, 0);
+        level.sendParticles(look.ring(), at.x, at.y + 0.2, at.z, 14, RADIUS * 0.5, 0.1, RADIUS * 0.5, 0);
         level.sendParticles(ParticleTypes.SCULK_SOUL, at.x, at.y + 0.4, at.z, 3, 0.3, 0.2, 0.3, 0.02);
-        level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 0.7f, 1.25f);
-        level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.35f, 0.7f);
+        level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.35f, PITCH[shot] - 1.1f);
+    }
+
+    // 地面に平らな輪 (n 点、phase 度ずらす)
+    static void circle(ServerLevel level, double cx, double y, double cz, double r, int n, DustParticleOptions dust, double phase) {
+        for (int k = 0; k < n; k++) {
+            double a = Math.toRadians(phase + k * 360.0 / n);
+            level.sendParticles(dust, cx + Math.cos(a) * r, y, cz + Math.sin(a) * r, 1, 0, 0, 0, 0);
+        }
+    }
+
+    // 地面に平らな多角形 (n 頂点を step 飛ばしに結ぶ。step 1 = 多角形、5 と 2 = 五芒星)
+    static void polygon(ServerLevel level, Vec3 at, double y, double r, int n, int step, double spin, DustParticleOptions dust) {
+        for (int k = 0; k < n; k++) {
+            double a0 = spin + k * Math.PI * 2 / n;
+            double a1 = spin + (k + step) * Math.PI * 2 / n;
+            for (int j = 0; j <= 3; j++) {
+                double t = j / 3.0;
+                double x = Math.cos(a0) * r * (1 - t) + Math.cos(a1) * r * t;
+                double z = Math.sin(a0) * r * (1 - t) + Math.sin(a1) * r * t;
+                level.sendParticles(dust, at.x + x, y, at.z + z, 1, 0, 0, 0, 0);
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 自己テスト用
