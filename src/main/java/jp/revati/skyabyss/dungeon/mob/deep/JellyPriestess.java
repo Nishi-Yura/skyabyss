@@ -65,6 +65,11 @@ public class JellyPriestess extends DungeonBoss {
     }
 
     @Override
+    protected String entrance() {
+        return "sky";
+    }
+
+    @Override
     protected String bossId() {
         return "jelly_priestess";
     }

@@ -63,6 +63,11 @@ public class ThunderOwl extends DungeonBoss {
     }
 
     @Override
+    protected String entrance() {
+        return "sky";
+    }
+
+    @Override
     protected String bossId() {
         return "thunder_owl";
     }

@@ -139,6 +139,8 @@ public final class LordMoves {
             case UNDER -> {
                 for (ServerPlayer p : in) {
                     Vec3 c = p.position();
+                    // 技の形: 足もとから層の属性の棘 (雷は雷の柱) が突き出る
+                    jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li), lord, new Vec3(c.x, y, c.z), (float) (Math.random() * 360), (float) Math.max(0.8, a.size() / 2.2), 14, warn);
                     tele(level, TelegraphShape.circle(c.x, c.z, a.size()), y, warn, lord, hit, lvl -> impact(lvl, f, lord, a, c.x, y, c.z, a.size()));
                 }
             }
@@ -158,6 +160,12 @@ public final class LordMoves {
                     }
                     int w = warn + (k % 3) * 6;
                     double fx = x, fz = z;
+                    // 技の形: 空から層の属性の塊が落ちる (雷は打つ瞬間に雷の柱)
+                    if (f.li == 2) {
+                        jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "lightning", lord, new Vec3(x, y, z), 0f, (float) Math.max(0.8, a.size() / 2.2), 5, w);
+                    } else {
+                        jp.revati.skyabyss.combat.prop.AttackProps.fall(level, jp.revati.skyabyss.combat.prop.AttackProps.abyssFall(f.li), lord, new Vec3(x, y, z), w, 14, 14f, (float) Math.max(0.9, a.size() / 2.0), 14);
+                    }
                     tele(level, TelegraphShape.circle(x, z, a.size()), y, w, lord, hit, lvl -> impact(lvl, f, lord, a, fx, y, fz, a.size()));
                 }
             }
@@ -179,6 +187,7 @@ public final class LordMoves {
                 for (int k = 0; k < n; k++) {
                     double d = 2.5 + k * 3.2;
                     double x = o.x + Math.cos(ang) * d, z = o.z + Math.sin(ang) * d;
+                    jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li), lord, new Vec3(x, y, z), k * 61f, (float) Math.max(0.8, a.size() / 2.0), 16, warn + k * 5);
                     tele(level, TelegraphShape.circle(x, z, a.size()), y, warn + k * 5, lord, hit, lvl -> {
                         impact(lvl, f, lord, a, x, y, z, a.size());
                         pillar(lvl, x, y, z);
@@ -225,6 +234,14 @@ public final class LordMoves {
 
     static void lineFx(ServerLevel lvl, AbyssLords.Fight f, LivingEntity lord, Attack a, Vec3 o, double ang, double len, double y) {
         LordAnim.strike(lord, "attack_" + a.anim());
+        // 技の形: 帯に沿って層の属性の棘が走る (小さく、間をあけて)
+        if (a.kind() != Kind.CHARGE) {
+            int n = 0;
+            for (double d = 2.5; d < len && n < 8; d += 3.2, n++) {
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(lvl, jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li), lord, new Vec3(o.x + Math.cos(ang) * d, y, o.z + Math.sin(ang) * d), (float) Math.toDegrees(ang) + n * 47f,
+                        f.li == 2 ? 0.7f : 0.55f, f.li == 2 ? 5 : 12);
+            }
+        }
         for (double d = 1; d <= len; d += 1.2) {
             element(lvl, f.li, o.x + Math.cos(ang) * d, y + 0.4, o.z + Math.sin(ang) * d, 3, 0.3);
         }
@@ -236,6 +253,12 @@ public final class LordMoves {
 
     static void ringFx(ServerLevel lvl, AbyssLords.Fight f, LivingEntity lord, Attack a, Vec3 o, double y) {
         LordAnim.strike(lord, "attack_" + a.anim());
+        // 技の形: 輪に沿って層の属性の棘が突き出る
+        for (int k = 0; k < 10; k++) {
+            double t = k * Math.PI / 5 + 0.2;
+            double r = (a.size() + a.size2()) / 2;
+            jp.revati.skyabyss.combat.prop.AttackProps.rise(lvl, jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li), lord, new Vec3(o.x + Math.cos(t) * r, y, o.z + Math.sin(t) * r), (float) Math.toDegrees(t), 0.7f, f.li == 2 ? 5 : 14);
+        }
         for (int k = 0; k < 36; k++) {
             double t = k * Math.PI / 18;
             double r = (a.size() + a.size2()) / 2;

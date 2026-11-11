@@ -167,6 +167,11 @@ public class GeodeGolem extends DungeonBoss {
     }
 
     @Override
+    protected boolean midBoss() {
+        return true;
+    }
+
+    @Override
     protected String bossId() {
         return "geode_golem";
     }

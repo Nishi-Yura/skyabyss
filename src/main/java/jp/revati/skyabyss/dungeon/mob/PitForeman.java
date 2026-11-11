@@ -131,6 +131,11 @@ public class PitForeman extends DungeonBoss {
     }
 
     @Override
+    protected boolean midBoss() {
+        return true;
+    }
+
+    @Override
     protected String bossId() {
         return "pit_foreman";
     }

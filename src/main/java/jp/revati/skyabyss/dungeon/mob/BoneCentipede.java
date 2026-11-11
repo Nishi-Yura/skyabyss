@@ -148,6 +148,9 @@ public class BoneCentipede extends DungeonBoss {
         double base = Telegraph.angleOf(target.position().subtract(position()));
         for (int k = -1; k <= 1; k++) {
             double a = base + k * 0.42;
+            Vec3 mouth = position().add(forward().scale(3.0)).add(0, 3.4, 0);
+            jp.revati.skyabyss.combat.prop.AttackProps.toss(server(), "bone_shard", this, mouth, position().add(Math.cos(a) * SPIT_LENGTH, 0.4, Math.sin(a) * SPIT_LENGTH),
+                    SPIT_WARN + Math.abs(k) * 4, 10, 1.5f, 1.4f, 8);
             Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, SPIT_LENGTH, 0.9))
                     .floor(getY()).warn(SPIT_WARN + Math.abs(k) * 4).danger().owner(this).target(target)
                     .victims(this::canHit)
@@ -196,6 +199,7 @@ public class BoneCentipede extends DungeonBoss {
             spots.add(position().add(Math.cos(a) * (6 + random.nextDouble() * 8), 0, Math.sin(a) * (6 + random.nextDouble() * 8)));
         }
         for (Vec3 s : spots) {
+            jp.revati.skyabyss.combat.prop.AttackProps.fall(server(), "rock", this, new Vec3(s.x, getY(), s.z), ROCKS_WARN, 14, 14f, 1.4f, 16);
             Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.6))
                     .floor(getY()).warn(ROCKS_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
@@ -315,6 +319,11 @@ public class BoneCentipede extends DungeonBoss {
             setInvulnerable(false);
             server().sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), getY() + 1, getZ(), 50, 1.4, 0.8, 1.4, 0.15);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 1.4f, 1.3f);
+            // 床を割って出る: まわりに骨の棘が突き出る
+            for (int k = 0; k < 6; k++) {
+                double a = k * Math.PI / 3 + 0.2;
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(server(), "bone_spike", this, position().add(Math.cos(a) * 3.2, 0, Math.sin(a) * 3.2), (float) Math.toDegrees(a), 0.8f, 18);
+            }
             if (erupt) {
                 // 縦に跳び出して吠え、人へ向き直って前へ倒れ込む
                 move = ERUPT;

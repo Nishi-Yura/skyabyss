@@ -35,7 +35,16 @@ public final class PaperCutLayer {
     static final Set<String> CLOUDS = Set.of("founder", "lamp_eye", "last_bellkeeper", "pilgrim_eye", "pilgrim_hand", "pilgrim_moon", "pilgrim_plume", "rewinder");
     static final Set<String> MOONS = Set.of("full_keeper", "moon_core", "moon_scale", "shadow_embracer", "waning_blade");
     // 淵の主の色 (BossLook.LORD_RIB.. の順): 肋 = 骨の金白、塩 = 潮の青緑、嵐 = 紫、灰 = 熾の橙
-    static final int[] LORD_RGB = {0xFFE296, 0x5AE6D2, 0xB088FF, 0xFF963C};
+    static final int[] LORD_RGB = {0xFF5040, 0x5AE6D2, 0xB088FF, 0xFF963C};
+    // 深みの王の輪の色 (2026-11-11 の見た目の分け直し。骨 = 赤、塩 = 潮の青緑、雷 = 青、灰 = 熾の橙、影 = 白)。五体とも金の同じ輪だったのをやめる
+    static final int[] KING_RGB = {0xFF4A3A, 0x5AE6D2, 0x6AB4FF, 0xFF8A2A, 0xE6E6F5};
+    static final float[][] KING_PETAL = {{0.35f, 0.04f, 0.05f}, {0.80f, 0.86f, 0.84f}, {0.40f, 0.60f, 0.95f}, {0.20f, 0.18f, 0.16f}, {0.04f, 0.03f, 0.07f}};
+
+    static int kingIndex(LivingEntity e) {
+        int id = e instanceof jp.revati.skyabyss.entity.GuardMob g ? BossLook.id(g.bossLook()) : 0;
+        int i = id - BossLook.KING_BONE;
+        return i >= 0 && i < KING_RGB.length ? i : 0;
+    }
 
     public enum Style { NONE, LORD, MOON, KING, WARDEN, FOUNDER }
 
@@ -92,7 +101,9 @@ public final class PaperCutLayer {
         PoseStack pose = event.getPoseStack();
         net.minecraft.client.renderer.MultiBufferSource.BufferSource buf = mc.renderBuffers().bufferSource();
         for (net.minecraft.world.entity.Entity ent : mc.level.entitiesForRendering()) {
-            if (!(ent instanceof LivingEntity e) || e.distanceToSqr(cam) > 96 * 96 || e.isDeadOrDying() || e.isInvisible()) {
+            // 地の中から這い出る間 (combat/BossEmerge) は輪を出さない (体が抜けきってから)
+            if (!(ent instanceof LivingEntity e) || e.distanceToSqr(cam) > 96 * 96 || e.isDeadOrDying() || e.isInvisible()
+                    || jp.revati.skyabyss.client.titan.BossEmergeClient.active(e)) {
                 continue;
             }
             Style st = style(e);
@@ -109,7 +120,7 @@ public final class PaperCutLayer {
                 case LORD -> halo(pose, buf, RING, e, t, face, cam, x, y, z, lordRgb(e), 0.86f, true);
                 case MOON -> halo(pose, buf, CRESCENT, e, t, face, cam, x, y, z, 0xDCEBFF, 0.66f, false);
                 case WARDEN -> halo(pose, buf, RING, e, t, face, cam, x, y, z, 0x5AE6D2, 0.78f, true);
-                case KING -> halo(pose, buf, RING, e, t, face, cam, x, y, z, 0xE6B85A, 1.02f, true);
+                case KING -> halo(pose, buf, RING, e, t, face, cam, x, y, z, KING_RGB[kingIndex(e)], 1.02f, true);
                 default -> {
                 }
             }
@@ -183,7 +194,8 @@ public final class PaperCutLayer {
             return;
         }
         for (net.minecraft.world.entity.Entity ent : mc.level.entitiesForRendering()) {
-            if (!(ent instanceof LivingEntity e) || e.distanceToSqr(mc.player) > 64 * 64 || e.isDeadOrDying() || e.isInvisible()) {
+            if (!(ent instanceof LivingEntity e) || e.distanceToSqr(mc.player) > 64 * 64 || e.isDeadOrDying() || e.isInvisible()
+                    || jp.revati.skyabyss.client.titan.BossEmergeClient.active(e)) {
                 continue;
             }
             Style st = style(e);
@@ -211,7 +223,8 @@ public final class PaperCutLayer {
                     mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.45f, 0.22f, 0.12f), 0.9f), px, py, pz, 0, -0.02, 0);
                 } else if (st == Style.KING) {
                     // 黒い花びら: 頭の上から、ゆっくり落ちる
-                    mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.12f, 0.03f, 0.14f), 1.6f),
+                    float[] pc = KING_PETAL[kingIndex(e)];
+                    mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(pc[0], pc[1], pc[2]), 1.6f),
                             px, e.getY() + h * (1.1 + r.nextDouble() * 0.4), pz, 0, -0.03, 0);
                 } else {
                     mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.END_ROD, px, py, pz, 0, 0.01, 0);

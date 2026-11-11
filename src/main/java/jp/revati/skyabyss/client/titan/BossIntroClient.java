@@ -36,9 +36,18 @@ public final class BossIntroClient {
     }
 
     public static void receive(BossIntro.Payload p) {
+        if (p.phase() == jp.revati.skyabyss.combat.BossEmerge.EMERGE) {
+            // 地の中から這い出る (札は出さない。出きったら NAME が来る)
+            BossEmergeClient.start(p.entity(), p.boss(), p.ticks());
+            return;
+        }
         phase = p.phase();
         name = p.name();
         boss = p.boss();
+        given = p.sub();
+        if (p.phase() == BossIntro.NAME && p.entity() >= 0) {
+            BossCloseUp.start(p.entity(), p.ticks());
+        }
         ticks = Math.max(1, p.ticks());
         start = now();
     }
@@ -81,7 +90,12 @@ public final class BossIntroClient {
         return I18n.exists(own) ? Component.translatable(own) : Component.translatable("gui.skyabyss.boss_intro.rise", name);
     }
 
+    private static Component given = Component.empty();
+
     private static Component subLine() {
+        if (!given.getString().isEmpty()) {
+            return given;
+        }
         String own = "gui.skyabyss.boss_intro.sub." + boss;
         return Component.translatable(I18n.exists(own) ? own : "gui.skyabyss.boss_intro.sub");
     }

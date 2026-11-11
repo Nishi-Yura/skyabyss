@@ -544,6 +544,10 @@ public final class DungeonFloor {
                 }
                 m.setPersistenceRequired();
                 bar = new ServerBossEvent(m.getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+                if (run.dungeon.mini && !(m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss)) {
+                    // 小ダンジョンの主 (老いた歩哨・潮の番人・古い灰被り): 出方と、名前の札と顔のアップ (combat/BossEmerge)
+                    jp.revati.skyabyss.combat.BossEmerge.chapter(m);
+                }
                 for (ServerPlayer p : here) {
                     // ダンジョンの主 (DungeonBoss) は登場の数え下ろしと名前の札を自分で出す
                     if (Dungeons.real(p) && !(m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss)) {

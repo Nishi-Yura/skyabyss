@@ -3185,5 +3185,21 @@
   "hud.skyabyss.challenge.herald": "前触れの群れ",
   "hud.skyabyss.challenge.abyss_pack": "深淵の群れ",
   "hud.skyabyss.challenge.wave": "群れ %1$s／%2$s",
-  "gui.skyabyss.chest.inside": "中身"
+  "gui.skyabyss.chest.inside": "中身",
+  "entity.skyabyss.prop_bone_spike": "技の形: bone_spike",
+  "entity.skyabyss.prop_rock": "技の形: rock",
+  "entity.skyabyss.prop_bone_shard": "技の形: bone_shard",
+  "entity.skyabyss.prop_tentacle": "技の形: tentacle",
+  "entity.skyabyss.prop_ink_blob": "技の形: ink_blob",
+  "entity.skyabyss.prop_crystal_spike": "技の形: crystal_spike",
+  "entity.skyabyss.prop_fireball": "技の形: fireball",
+  "entity.skyabyss.prop_lava_pillar": "技の形: lava_pillar",
+  "entity.skyabyss.prop_ice_spike": "技の形: ice_spike",
+  "entity.skyabyss.prop_icicle": "技の形: icicle",
+  "entity.skyabyss.prop_water_spout": "技の形: water_spout",
+  "entity.skyabyss.prop_coral_spear": "技の形: coral_spear",
+  "entity.skyabyss.prop_lightning": "技の形: lightning",
+  "entity.skyabyss.prop_ash_ball": "技の形: ash_ball",
+  "entity.skyabyss.prop_shell_spike": "技の形: shell_spike",
+  "entity.skyabyss.prop_pearl": "技の形: pearl"
 }

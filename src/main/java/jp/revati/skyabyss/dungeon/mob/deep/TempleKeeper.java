@@ -119,6 +119,8 @@ public class TempleKeeper extends DungeonBoss {
             for (int k = 0; k < 3; k++) {
                 double a = ang[k];
                 double len = THRUST_LENGTH + (k == 2 ? 2.5 : 0);
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(server(), "coral_spear", this, position().add(0, 2.2, 0), position().add(Math.cos(a) * len, 1.0, Math.sin(a) * len),
+                        PIERCE_HIT1 + PIERCE_GAP * k, 6, 0.4f, 1.3f, 4);
                 Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, len, 0.8))
                         .floor(getY()).warn(PIERCE_HIT1 + PIERCE_GAP * k).danger().owner(this).target(target)
                         .victims(this::canHit)
@@ -145,7 +147,10 @@ public class TempleKeeper extends DungeonBoss {
                 Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 3.2))
                         .floor(getY()).warn(WHIRL_WARN).danger().owner(this).target(target)
                         .victims(this::canHit)
-                        .onImpact(server -> server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, s.x, getY() + 0.3, s.z, 40, 1.2, 0.6, 1.2, 0.1))
+                        .onImpact(server -> {
+                            jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "water_spout", this, new Vec3(s.x, getY(), s.z), random.nextFloat() * 360f, 0.9f, 18);
+                            server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, s.x, getY() + 0.3, s.z, 40, 1.2, 0.6, 1.2, 0.1);
+                        })
                         .onHit((server, player) -> {
                             player.hurt(attackSource(), damage() * 0.8f);
                             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1), this);
@@ -188,6 +193,11 @@ public class TempleKeeper extends DungeonBoss {
     protected void enterPhase2(LivingEntity target) {
         playAction("scream");
         super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "unfold";
     }
 
     @Override

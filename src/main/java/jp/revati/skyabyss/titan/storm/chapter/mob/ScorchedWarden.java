@@ -149,6 +149,10 @@ public class ScorchedWarden extends FeatherWarden {
     // ---------------------------------------------------------------- 毎 tick
     @Override
     public void aiStep() {
+        // 塔の頂で待つ: 人が初めて近づいたら名前の札と顔のアップ (combat/BossEmerge)
+        if (!level().isClientSide) {
+            jp.revati.skyabyss.combat.BossEmerge.firstSight(this, 14);
+        }
         super.aiStep();
         if (level().isClientSide) {
             if (isExposed() && random.nextFloat() < 0.4f) {

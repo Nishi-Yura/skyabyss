@@ -229,6 +229,8 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
         }
         String stem = "animation." + jp.revati.skyabyss.abyss.boss.BossLook.animStem(look) + ".";
         AnimationController<GuardMob> c = state.getController();
+        // ふだんは 3 tick かけて姿をつなぐ。溜め → 当たりだけは混ぜずに一気に振る (当たりの最初の姿 = 溜めの終わりの姿)
+        c.transitionLength(3);
         if (isDeadOrDying()) {
             return state.setAndContinue(bossAnim(stem + "death", 1));
         }
@@ -268,6 +270,7 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
         if ((act & (1 << 16)) == 0) {
             return state.setAndContinue(bossAnim(stem + "windup_" + move, 1));
         }
+        c.transitionLength(0);
         return state.setAndContinue(bossAnim(stem + "strike_" + move, 2));
     }
 

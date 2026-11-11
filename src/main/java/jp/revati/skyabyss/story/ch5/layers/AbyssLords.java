@@ -60,6 +60,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   倒れる時 (層の色の大きな粒・音・「〜を倒した」の札・下りの鎖の光の柱 10 秒)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssLords {
+    // 地の中から這い出る長さ (combat/BossEmerge)
+    static final int EMERGE_TICKS = 44;
     public static final String TAG = "skyabyss_lord";
     public static final String COPY_TAG = "skyabyss_lord_copy";
     static final String[] MOB = {"rib_guard", "white_shell_keeper", "heartbeat_mimic", "lamp_eater"};
@@ -319,15 +321,20 @@ public final class AbyssLords {
         f.lord = le.getUUID();
         f.started = now;
         // 名乗り (3 秒): 咆哮のバー、名の札。そのあと技、仕掛けは 6 秒後から
-        f.roarUntil = now + 60;
-        f.nextMove = now + 70;
-        f.nextMech = now + 120;
+        // 地の中から這い出る (combat/BossEmerge) 間は技を出さない
+        f.roarUntil = now + 60 + EMERGE_TICKS;
+        f.nextMove = now + 70 + EMERGE_TICKS;
+        f.nextMech = now + 120 + EMERGE_TICKS;
         LordAnim.phase(le, 0);
         FIGHTS.put(layer, f);
         level.playSound(null, at, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 1.6f, 0.8f);
         LordMoves.element(level, li, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 80, 2);
+        // 名乗り: 這い出きったら、ダンジョンの主・心臓と同じ大きな名前の札 (二つ名を肩書きに) と顔のアップ
+        final LivingEntity lordE = le;
+        jp.revati.skyabyss.combat.BossEmerge.start(le, new String[] {"lord_rib", "drop", "lord_storm", "thread"}[li], EMERGE_TICKS, in,
+                () -> jp.revati.skyabyss.combat.BossIntro.card(in, Component.translatable("abyss_v2.skyabyss.lord." + layer),
+                        Component.translatable("message.skyabyss.abyss_v3.lord." + layer + ".epithet"), 90, lordE));
         for (ServerPlayer p : in) {
-            Notice.place(p, Component.translatable("abyss_v2.skyabyss.lord." + layer), Component.translatable("message.skyabyss.abyss_v3.lord." + layer + ".epithet"));
             Notice.alert(p, "message.skyabyss.abyss_v2.lord_wake." + layer);
             LayerFights.later(level.getServer(), 60, () -> Notice.narrate(p, "message.skyabyss.abyss_v2.lord_teach." + layer));
         }

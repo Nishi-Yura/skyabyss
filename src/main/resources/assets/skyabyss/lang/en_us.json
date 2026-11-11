@@ -3185,5 +3185,21 @@
   "hud.skyabyss.challenge.herald": "Herald pack",
   "hud.skyabyss.challenge.abyss_pack": "Abyss pack",
   "hud.skyabyss.challenge.wave": "Wave %1$s/%2$s",
-  "gui.skyabyss.chest.inside": "Contents"
+  "gui.skyabyss.chest.inside": "Contents",
+  "entity.skyabyss.prop_bone_spike": "Attack shape: bone_spike",
+  "entity.skyabyss.prop_rock": "Attack shape: rock",
+  "entity.skyabyss.prop_bone_shard": "Attack shape: bone_shard",
+  "entity.skyabyss.prop_tentacle": "Attack shape: tentacle",
+  "entity.skyabyss.prop_ink_blob": "Attack shape: ink_blob",
+  "entity.skyabyss.prop_crystal_spike": "Attack shape: crystal_spike",
+  "entity.skyabyss.prop_fireball": "Attack shape: fireball",
+  "entity.skyabyss.prop_lava_pillar": "Attack shape: lava_pillar",
+  "entity.skyabyss.prop_ice_spike": "Attack shape: ice_spike",
+  "entity.skyabyss.prop_icicle": "Attack shape: icicle",
+  "entity.skyabyss.prop_water_spout": "Attack shape: water_spout",
+  "entity.skyabyss.prop_coral_spear": "Attack shape: coral_spear",
+  "entity.skyabyss.prop_lightning": "Attack shape: lightning",
+  "entity.skyabyss.prop_ash_ball": "Attack shape: ash_ball",
+  "entity.skyabyss.prop_shell_spike": "Attack shape: shell_spike",
+  "entity.skyabyss.prop_pearl": "Attack shape: pearl"
 }

@@ -113,6 +113,16 @@ public abstract class DungeonBoss extends RegionBoss {
     private boolean introDone;
 
     // 登場の動き (主ごとに替える)。既定は吠える
+    // ダンジョンの中ボス (坑の頭・鐘の隠者・晶洞の巨像・牛の鍛冶) は true: 名前の札は出すが、顔のアップはしない
+    protected boolean midBoss() {
+        return false;
+    }
+
+    // 出方 (combat/BossEmerge の style)。"dig" = 地を掘って這い出る (いつもの)。ほかは姿を見せる時から名前の札まで、その出方で現れる
+    protected String entrance() {
+        return "dig";
+    }
+
     protected String introAnim() {
         return "roar";
     }
@@ -168,6 +178,9 @@ public abstract class DungeonBoss extends RegionBoss {
         introTick++;
         setDeltaMovement(0, getDeltaMovement().y, 0);
         if (introTick < INTRO_RISE) {
+            if (!"dig".equals(entrance())) {
+                return;
+            }
             // 地鳴り: 足もとの土と骨が跳ね、低い音がだんだん大きく
             if (introTick % 4 == 0) {
                 float k = introTick / (float) INTRO_RISE;
@@ -196,13 +209,16 @@ public abstract class DungeonBoss extends RegionBoss {
                 setYHeadRot(yaw);
             }
             playAction(introAnim());
+            if (!"dig".equals(entrance())) {
+                jp.revati.skyabyss.combat.BossEmerge.visual(this, entrance(), Math.max(20, introCardAt()));
+            }
             // 床が割れる
             server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
                     getX(), getY() + 0.6, getZ(), 60, 1.4, 0.5, 1.4, 0.2);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 2.0f, 0.7f);
         }
         int out = INTRO_RISE + introCardAt();
-        if (introTick > INTRO_RISE && introTick < out && introTick % 3 == 0) {
+        if (introTick > INTRO_RISE && introTick < out && introTick % 3 == 0 && "dig".equals(entrance())) {
             // 這い出る間: 体のまわりから土と骨が噴き、掘る音
             server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
                     getX(), getY() + 0.3, getZ(), 18, 1.6, 0.4, 1.6, 0.18);
@@ -212,7 +228,7 @@ public abstract class DungeonBoss extends RegionBoss {
         }
         if (introTick == out) {
             // 体が抜けきって吠える: 名前の札
-            BossIntro.send(this, BossIntro.NAME, bossId(), INTRO_CARD);
+            BossIntro.send(this, BossIntro.NAME, bossId(), INTRO_CARD, !midBoss());
             server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
                     getX(), getY() + 1.0, getZ(), 120, 2.0, 1.2, 2.0, 0.25);
             server().sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 1.5, 0.3, 1.5, 0);
@@ -330,10 +346,25 @@ public abstract class DungeonBoss extends RegionBoss {
             spots.add(target.position().add(Math.cos(a) * r, 0, Math.sin(a) * r));
         }
         var opt = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, look);
+        // 技の形 (combat/prop): 投げる技は主の口元から弧を描いて飛び、降らせる技は空から落ち、噴き上げる技・雷は打つ瞬間に床から出る
+        boolean toss = action.equals("spit") || action.equals("hurl") || action.equals("throw");
+        boolean rise = action.equals("erupt") || action.equals("strike");
+        String kind = action.equals("strike") ? "lightning" : rise ? jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(look)
+                : toss ? jp.revati.skyabyss.combat.prop.AttackProps.tossKind(look) : jp.revati.skyabyss.combat.prop.AttackProps.fallKind(look);
+        Vec3 mouth = position().add(forward().scale(getBbWidth() * 0.6)).add(0, getBbHeight() * 0.7, 0);
         for (Vec3 c : spots) {
+            if (toss) {
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(server(), kind, this, mouth, c, warn, Math.min(warn, 16), 4f, 1.2f, 14);
+            } else if (!rise) {
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(server(), kind, this, c, warn, 14, 11f, 1.3f, 14);
+            }
             Telegraph.in(server(), TelegraphShape.circle(c.x, c.z, radius)).floor(c.y).warn(warn).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
+                        if (rise) {
+                            jp.revati.skyabyss.combat.prop.AttackProps.rise(server, kind, this, c, random.nextFloat() * 360f, kind.equals("lightning") ? 1.0f : 0.9f,
+                                    kind.equals("lightning") ? 6 : 18);
+                        }
                         server.playSound(null, c.x, c.y, c.z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
                         server.sendParticles(opt, c.x, c.y + 0.4, c.z, 24, radius * 0.4, 0.3, radius * 0.4, 0.15);
                     })

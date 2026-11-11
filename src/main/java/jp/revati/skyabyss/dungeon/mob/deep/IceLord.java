@@ -85,6 +85,7 @@ public class IceLord extends DungeonBoss {
                 spots.add(position().add(Math.cos(a) * (4 + random.nextDouble() * 9), 0, Math.sin(a) * (4 + random.nextDouble() * 9)));
             }
             for (Vec3 s : spots) {
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(server(), "icicle", this, new Vec3(s.x, getY(), s.z), ICICLE_WARN, 12, 14f, 1.4f, 16);
                 Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.5))
                         .floor(getY()).warn(ICICLE_WARN).danger().owner(this).target(target)
                         .victims(this::canHit)
@@ -129,6 +130,7 @@ public class IceLord extends DungeonBoss {
                         .floor(getY()).warn(SLAM_WARN + k * 3).danger().owner(this).target(target)
                         .victims(this::canHit)
                         .onImpact(server -> {
+                            jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "ice_spike", this, new Vec3(c.x, getY(), c.z), random.nextFloat() * 360f, 0.75f, 16);
                             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PACKED_ICE.defaultBlockState()), c.x, getY() + 0.8, c.z, 24, 0.6, 0.9, 0.6, 0.12);
                             server.playSound(null, c.x, getY(), c.z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.2f, 0.5f);
                         })
@@ -203,6 +205,11 @@ public class IceLord extends DungeonBoss {
     protected void enterPhase2(LivingEntity target) {
         playAction("scream");
         super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "grow";
     }
 
     @Override

@@ -1,0 +1,127 @@
+# 淵の王の技の動き (tools/gen/anim/king_moves.py) のコマ: 予備動作・溜め・当たり直後・止め・余韻
+world king_anim flat
+size 960 720
+timeout 3000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_bone 0 - 40 9
+camera -1.5 -57.0 13.0 190 -2
+wait 50
+cmd skyabyss abyss bossdo slam 40
+wait 7
+shot bone_slam_1antic
+wait 30
+shot bone_slam_2coil
+wait 3
+cmd skyabyss abyss bossdo strike_slam
+wait 1
+shot bone_slam_3snap
+wait 1
+shot bone_slam_4stop
+wait 8
+shot bone_slam_5follow
+wait 7
+shot bone_slam_6settle
+wait 20
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_salt 0 - 40 9
+camera -1.5 -57.0 13.0 190 -2
+wait 50
+cmd skyabyss abyss bossdo charge 40
+wait 7
+shot salt_charge_1antic
+wait 30
+shot salt_charge_2coil
+wait 3
+cmd skyabyss abyss bossdo strike_charge
+wait 1
+shot salt_charge_3snap
+wait 1
+shot salt_charge_4stop
+wait 8
+shot salt_charge_5follow
+wait 7
+shot salt_charge_6settle
+wait 20
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_storm 0 - 40 9
+camera -1.5 -57.0 13.0 190 -2
+wait 50
+cmd skyabyss abyss bossdo bolts 40
+wait 7
+shot storm_bolts_1antic
+wait 30
+shot storm_bolts_2coil
+wait 3
+cmd skyabyss abyss bossdo strike_bolts
+wait 1
+shot storm_bolts_3snap
+wait 1
+shot storm_bolts_4stop
+wait 8
+shot storm_bolts_5follow
+wait 7
+shot storm_bolts_6settle
+wait 20
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_ash 0 - 40 9
+camera -1.5 -57.0 13.0 190 -2
+wait 50
+cmd skyabyss abyss bossdo slam 40
+wait 7
+shot ash_slam_1antic
+wait 30
+shot ash_slam_2coil
+wait 3
+cmd skyabyss abyss bossdo strike_slam
+wait 1
+shot ash_slam_3snap
+wait 1
+shot ash_slam_4stop
+wait 8
+shot ash_slam_5follow
+wait 7
+shot ash_slam_6settle
+wait 20
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_shadow 0 - 40 9
+camera -1.5 -57.0 13.0 190 -2
+wait 50
+cmd skyabyss abyss bossdo sweep 40
+wait 7
+shot shadow_sweep_1antic
+wait 30
+shot shadow_sweep_2coil
+wait 3
+cmd skyabyss abyss bossdo strike_sweep
+wait 1
+shot shadow_sweep_3snap
+wait 1
+shot shadow_sweep_4stop
+wait 8
+shot shadow_sweep_5follow
+wait 7
+shot shadow_sweep_6settle
+wait 20
+echo done
+quit

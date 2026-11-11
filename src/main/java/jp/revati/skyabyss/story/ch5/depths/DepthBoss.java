@@ -48,6 +48,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   予告の長さは 1.5〜2 秒。深く行くほど短くはなるが、1.2 秒を切らない。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class DepthBoss {
+    // 黒い淵からせり上がる長さ (combat/BossEmerge)
+    static final int EMERGE_TICKS = 56;
     public static final String KING_TAG = "skyabyss_depth_king";
     public static final String ADD_TAG = "skyabyss_depth_add";
     private static final DustParticleOptions RED = new DustParticleOptions(new Vector3f(1f, 0.1f, 0.1f), 1.3f);
@@ -163,6 +165,18 @@ public final class DepthBoss {
         }
     }
 
+    // 王ごとの出方 (combat/BossEmerge): 骨 = 黒い淵からせり上がる、塩 = 結晶のように育つ、雷 = 空から回りながら降りる、
+    // 灰 = 火と一緒に噴き上がる、影 = 紙が開くように広がる
+    public static String entrance(String king) {
+        return switch (king) {
+            case "salt" -> "grow";
+            case "storm" -> "sky";
+            case "ember" -> "erupt";
+            case "shadow" -> "unfold";
+            default -> "king";
+        };
+    }
+
     // 広間に人が踏み入ったとき、一度だけ王を呼ぶ
     static void start(ServerLevel level, DepthBuilder.Inst i, List<ServerPlayer> party) {
         if (i.boss != null || i.bossDeadAt >= 0) {
@@ -203,9 +217,13 @@ public final class DepthBoss {
         }
         Fight f = new Fight(king.getUUID(), i.floor, def, name, i.seed ^ 0xB055);
         i.boss = f;
+        // 黒い淵からせり上がり (combat/BossEmerge)、出きったら名前の札と顔のアップ。せり上がる間は技を出さない
+        f.cooldown += EMERGE_TICKS;
+        List<ServerPlayer> watch = List.copyOf(party);
+        jp.revati.skyabyss.combat.BossEmerge.start(king, entrance(def.id()), EMERGE_TICKS, watch,
+                () -> jp.revati.skyabyss.combat.BossIntro.card(watch, name, Component.translatable("gui.skyabyss.boss_intro.sub.depth_king"), 90, king));
         for (ServerPlayer p : party) {
             f.bar.addPlayer(p);
-            Notice.alert(p, "message.skyabyss.depths.king.appear", name);
             // 王の正体を一行で (心の声)
             Notice.narrate(p, "message.skyabyss.depths.king.reveal." + def.id());
             Notice.objective(p, "message.skyabyss.depths.obj.king", name);
@@ -459,6 +477,46 @@ public final class DepthBoss {
 
     static void mark(ServerLevel level, LivingEntity king, jp.revati.skyabyss.combat.TelegraphShape shape, double y, int warn) {
         jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(y).warn(Math.max(1, warn)).danger().owner(king).start();
+        // 技の形: 王の属性で、円には空から塊が落ちるか (雷は雷の柱)、輪・叩きつけには棘が突き出る
+        int el = elemIndex(king);
+        if (shape instanceof jp.revati.skyabyss.combat.TelegraphShape.Circle c) {
+            Vec3 at = new Vec3(c.cx(), y, c.cz());
+            if (c.r() >= 4) {
+                for (int k = 0; k < 8; k++) {
+                    double t = k * Math.PI / 4 + 0.3;
+                    jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(el), king, at.add(Math.cos(t) * c.r() * 0.8, 0, Math.sin(t) * c.r() * 0.8), (float) Math.toDegrees(t), 0.7f, 14, warn);
+                }
+            } else if (c.r() >= 2 && el != 2) {
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(level, jp.revati.skyabyss.combat.prop.AttackProps.abyssFall(el), king, at, Math.max(2, warn), 14, 14f, 1.2f, 14);
+            } else {
+                jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, el == 2 ? "lightning" : jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(el), king, at, 0f, c.r() >= 2 ? 1.0f : 0.6f, el == 2 ? 5 : 14, warn);
+            }
+        } else if (shape instanceof jp.revati.skyabyss.combat.TelegraphShape.Ring r) {
+            for (int k = 0; k < 10; k++) {
+                double t = k * Math.PI / 5 + 0.2;
+                double rr = (r.inner() + r.outer()) / 2;
+                jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(el), king, new Vec3(r.cx() + Math.cos(t) * rr, y, r.cz() + Math.sin(t) * rr), (float) Math.toDegrees(t), 0.7f,
+                        el == 2 ? 5 : 14, warn);
+            }
+        }
+    }
+
+    // 王の属性の番号 (0 骨 / 1 塩 / 2 雷 / 3 灰 / 4 影。combat/prop の形を選ぶ)
+    static int elemIndex(LivingEntity king) {
+        int id = king instanceof jp.revati.skyabyss.entity.GuardMob g ? BossLook.id(g.bossLook()) : 0;
+        if (id == BossLook.KING_SALT) {
+            return 1;
+        }
+        if (id == BossLook.KING_STORM) {
+            return 2;
+        }
+        if (id == BossLook.KING_ASH) {
+            return 3;
+        }
+        if (id == BossLook.KING_SHADOW) {
+            return 4;
+        }
+        return 0;
     }
 
     // 王の元素の色 (骨 = 赤、塩 = 青緑、雷 = 青白、灰 = 燠、影 = 淡い白)

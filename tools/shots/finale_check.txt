@@ -1,0 +1,103 @@
+# 終章の 8 体 (雲の塗りの直し + 選んだ作り込み) のゲーム内の姿
+world finale_check flat
+size 960 720
+timeout 3000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd fill -10 200 -10 10 200 10 minecraft:smooth_quartz
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:founder 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot founder_front
+camera 9 206 9 135 6
+wait 5
+shot founder_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:last_bellkeeper 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot last_bellkeeper_front
+camera 9 206 9 135 6
+wait 5
+shot last_bellkeeper_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:lamp_eye 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot lamp_eye_front
+camera 9 206 9 135 6
+wait 5
+shot lamp_eye_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:rewinder 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot rewinder_front
+camera 9 206 9 135 6
+wait 5
+shot rewinder_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:pilgrim_plume 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot pilgrim_plume_front
+camera 9 206 9 135 6
+wait 5
+shot pilgrim_plume_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:pilgrim_hand 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot pilgrim_hand_front
+camera 9 206 9 135 6
+wait 5
+shot pilgrim_hand_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:pilgrim_eye 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot pilgrim_eye_front
+camera 9 206 9 135 6
+wait 5
+shot pilgrim_eye_side
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd summon skyabyss:pilgrim_moon 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 0.5 206 14 180 6
+wait 30
+shot pilgrim_moon_front
+camera 9 206 9 135 6
+wait 5
+shot pilgrim_moon_side
+echo done
+quit

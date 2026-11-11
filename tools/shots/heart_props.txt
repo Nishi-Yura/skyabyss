@@ -1,0 +1,53 @@
+# 岩鯨の心臓: 登場の名前の札と、技の形 (石の棘・殻の落下)。人は傷を受けない (抵抗 255)
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/heart_props.txt -PshotsName=heart_props
+world shots flat
+size 1280 720
+timeout 1200
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+lowpoly on
+fov 70
+hud on
+chat clear
+cmd tp @s 0 -60 40 180 0
+waitchunks
+wait 60
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd gamemode survival
+cmd effect give @s minecraft:resistance 99999 255 true
+cmd effect give @s minecraft:regeneration 99999 255 true
+cmd tp @s 0 -60 16 180 -14
+wait 10
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+close
+wait 140
+cmd skyabyss cinematic stop
+close
+cmd tp @s 0 -60 16 180 -14
+wait 10
+cmd summon skyabyss:stone_whale_heart 0 -53 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 50
+shot hp_intro
+wait 6
+shot hp_card
+wait 60
+shot hp_fight1
+wait 30
+shot hp_fight2
+wait 30
+shot hp_fight3
+wait 30
+shot hp_fight4
+wait 30
+shot hp_fight5
+wait 30
+shot hp_fight6

@@ -1,0 +1,72 @@
+# 光る所・透明の確かめ (2026-11-11): 夜に、層の主・王・番人・心臓を正面から
+world glow_check flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set 18000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+lowpoly on
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_rib 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot gc_lord_rib
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 30
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_salt 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot gc_lord_salt
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 30
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_storm 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot gc_lord_storm
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 30
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot gc_lord_ash
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 30
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_bone 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot gc_king_bone
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 30
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot gc_king_ash
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 30
+cmd summon skyabyss:stone_whale_heart 0.5 -52 -8 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+camera 0.5 -51 10 180 4
+wait 120
+shot gc_whale_heart

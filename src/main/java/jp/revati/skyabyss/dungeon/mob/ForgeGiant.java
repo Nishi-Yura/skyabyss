@@ -191,6 +191,9 @@ public class ForgeGiant extends DungeonBoss {
                 .floor(getY()).warn(TRENCH_WARN).active(80).repeatEvery(20).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> {
+                    for (int i = 3; i < TRENCH_LENGTH; i += 3) {
+                        jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "lava_pillar", this, position().add(Math.cos(a) * i, 0, Math.sin(a) * i), i * 47f, 0.45f + i * 0.02f, 20);
+                    }
                     for (int i = 1; i < TRENCH_LENGTH; i += 2) {
                         server.sendParticles(ParticleTypes.LAVA, getX() + Math.cos(a) * i, getY() + 0.2, getZ() + Math.sin(a) * i, 3, 0.4, 0.1, 0.4, 0.05);
                     }
@@ -218,6 +221,7 @@ public class ForgeGiant extends DungeonBoss {
             spots.add(position().add(Math.cos(a) * (5 + random.nextDouble() * 9), 0, Math.sin(a) * (5 + random.nextDouble() * 9)));
         }
         for (Vec3 s : spots) {
+            jp.revati.skyabyss.combat.prop.AttackProps.toss(server(), "fireball", this, position().add(0, 5.5, 0).add(forward().scale(-1.5)), new Vec3(s.x, getY(), s.z), BLAST_WARN, 20, 12f, 1.3f, 12);
             Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.8))
                     .floor(getY()).warn(BLAST_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)

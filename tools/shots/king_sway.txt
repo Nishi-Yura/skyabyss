@@ -1,0 +1,55 @@
+# 王の垂れる部品の揺れ (雷の尾・灰の外套・影の裾) の確かめ
+world king_sway flat
+size 960 720
+timeout 3000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd skyabyss abyss boss king_storm 0 - 40 9
+camera 2 -57.0 9 160 6
+wait 40
+shot storm_a
+wait 7
+shot storm_b
+wait 7
+shot storm_c
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd skyabyss abyss boss king_ash 0 - 40 9
+camera 2 -57.0 9 160 6
+wait 40
+shot ash_a
+wait 7
+shot ash_b
+wait 7
+shot ash_c
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+wait 5
+cmd skyabyss abyss boss king_shadow 0 - 40 9
+camera 2 -57.0 9 160 6
+wait 40
+shot shadow_a
+wait 7
+shot shadow_b
+wait 7
+shot shadow_c
+echo done
+quit

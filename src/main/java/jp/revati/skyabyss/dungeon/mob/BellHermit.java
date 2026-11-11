@@ -120,6 +120,11 @@ public class BellHermit extends DungeonBoss {
     }
 
     @Override
+    protected boolean midBoss() {
+        return true;
+    }
+
+    @Override
     protected String bossId() {
         return "bell_hermit";
     }

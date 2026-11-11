@@ -142,6 +142,11 @@ public class OxSmith extends DungeonBoss {
     }
 
     @Override
+    protected boolean midBoss() {
+        return true;
+    }
+
+    @Override
     protected String bossId() {
         return "ox_smith";
     }

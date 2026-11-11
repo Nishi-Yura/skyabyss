@@ -89,6 +89,7 @@ public class LavaWyrm extends DungeonBoss {
                         .floor(getY()).warn(DIVE_WARN + k * 10).danger().owner(this).target(target)
                         .victims(this::canHit)
                         .onImpact(server -> {
+                            jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "lava_pillar", this, new Vec3(s.x, getY(), s.z), random.nextFloat() * 360f, 1.1f, 18);
                             server.sendParticles(ParticleTypes.LAVA, s.x, getY() + 0.4, s.z, 40, 1.2, 0.6, 1.2, 0.15);
                             server.playSound(null, s.x, getY(), s.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.2f, 0.6f);
                         })
@@ -187,6 +188,11 @@ public class LavaWyrm extends DungeonBoss {
     protected void enterPhase2(LivingEntity target) {
         playAction("scream");
         super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "erupt";
     }
 
     @Override

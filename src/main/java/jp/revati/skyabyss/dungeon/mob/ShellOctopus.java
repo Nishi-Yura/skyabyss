@@ -234,6 +234,7 @@ public class ShellOctopus extends DungeonBoss {
                     .floor(s.y).warn(PLUNGE_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
+                        jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "tentacle", this, s, random.nextFloat() * 360f, 1.0f, 16);
                         for (int i = 0; i < 6; i++) {
                             server.sendParticles(ParticleTypes.SQUID_INK, s.x, s.y + 0.5 + i * 0.6, s.z, 8, 0.35, 0.2, 0.35, 0.02);
                         }
@@ -291,6 +292,7 @@ public class ShellOctopus extends DungeonBoss {
         cue("shell_octopus", "ink", INK_WARN);
         for (ServerPlayer p : server().getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(28), this::canHit)) {
             Vec3 s = p.position();
+            jp.revati.skyabyss.combat.prop.AttackProps.toss(server(), "ink_blob", this, position().add(forward().scale(2.5)).add(0, 2.4, 0), s, INK_WARN, 16, 6f, 1.4f, 10);
             Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 3.0))
                     .floor(s.y).warn(INK_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)

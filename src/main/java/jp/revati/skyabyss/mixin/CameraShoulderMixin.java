@@ -24,6 +24,10 @@ public abstract class CameraShoulderMixin implements ShoulderCam.CameraAccess {
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void skyabyss$shoulder(BlockGetter level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick, CallbackInfo ci) {
+        // ボスの登場の顔のアップ (client/titan/BossCloseUp) は、一人称・三人称どちらでもカメラを置き換える
+        if (jp.revati.skyabyss.client.titan.BossCloseUp.place((net.minecraft.client.Camera) (Object) this, this, entity, partialTick)) {
+            return;
+        }
         if (detached && !thirdPersonReverse && ShoulderCam.active()) {
             ShoulderCam.place((Camera) (Object) this, this, entity, partialTick);
         }

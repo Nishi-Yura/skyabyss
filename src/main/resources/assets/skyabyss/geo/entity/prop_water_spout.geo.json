@@ -1,0 +1,83 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_water_spout",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -9.659,
+        -8.0,
+        -9.659
+       ],
+       "size": [
+        19.319,
+        34.352,
+        19.319
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "t1",
+     "pivot": [
+      0.0,
+      24.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -7.675,
+        21.472,
+        -7.974
+       ],
+       "size": [
+        14.549,
+        31.128,
+        15.147
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

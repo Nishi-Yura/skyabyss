@@ -373,6 +373,8 @@ public final class Telegraph {
                 return t;
             }
             ACTIVE.computeIfAbsent(level, l -> new ArrayList<>()).add(t);
+            // 技の形 (combat/prop): look から、空から落ちる・弧を描いて飛ぶ姿を出す
+            jp.revati.skyabyss.combat.prop.AttackProps.lookStart(level, t.look, shape, floor, warn, owner);
             if (sound != null) {
                 level.playSound(null, shape.centerX(), floor + 1, shape.centerZ(), sound, SoundSource.HOSTILE, soundVolume, soundPitch);
             }
@@ -557,6 +559,8 @@ public final class Telegraph {
             if (onImpact != null) {
                 onImpact.accept(level);
             }
+            // 技の形 (combat/prop): look から、床から突き出る姿・雷の柱を出す
+            jp.revati.skyabyss.combat.prop.AttackProps.lookImpact(level, look, shape, floor, owner);
             if (active == 0) {
                 strike(shape.at(1.0));
                 done = true;

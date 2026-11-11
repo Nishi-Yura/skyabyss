@@ -1,0 +1,47 @@
+world finale_stage_check
+size 1280 720
+timeout 3000
+render 12
+cmd gamemode spectator
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 300
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss cloudsea enter
+wait 200
+cmd tp @s 0 90 -120
+waitchunks 200
+cmd kill @e[type=!minecraft:player,distance=..80]
+camera 0 106 -184 180 2
+cmd gamemode creative
+cmd effect give @s minecraft:resistance 99999 255 true
+wait 40
+cmd skyabyss cloudsea lord
+wait 8
+shot b1_drop_high
+wait 20
+shot b2_drop_fall
+wait 14
+shot b3_landed
+wait 12
+shot b4_card_closeup
+wait 20
+shot b5_closeup_hold
+wait 60
+shot b6_back
+camera 4 107 -186 200 4
+cmd effect give @e[type=skyabyss:last_bellkeeper] minecraft:slowness 9999 9 true
+cmd skyabyss dev anim @e[type=skyabyss:last_bellkeeper] slam
+wait 10
+shot b7_slam_wind
+wait 10
+shot b8_slam_snap
+wait 6
+shot b9_slam_follow
+wait 20
+shot b10_bells
+echo done
+quit

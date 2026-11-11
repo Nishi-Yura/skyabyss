@@ -167,6 +167,10 @@ public class CrystalLizard extends DungeonBoss {
                         .floor(getY()).warn(BOLTS_WARN + set * 14).danger().owner(this).target(target)
                         .victims(this::canHit)
                         .onImpact(server -> {
+                            for (int i = 3; i < BOLTS_LENGTH; i += 4) {
+                                jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "crystal_spike", this, position().add(Math.cos(a) * i, 0, Math.sin(a) * i), (float) Math.toDegrees(a) + i * 37,
+                                        0.55f + i * 0.02f, 14);
+                            }
                             for (int i = 2; i < BOLTS_LENGTH; i += 3) {
                                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Math.cos(a) * i, getY() + 0.4, getZ() + Math.sin(a) * i, 6, 0.3, 0.3, 0.3, 0.2);
                             }
@@ -196,6 +200,7 @@ public class CrystalLizard extends DungeonBoss {
                     .floor(getY()).warn(CHARGE_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
+                        jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "lightning", this, new Vec3(s.x, getY(), s.z), random.nextFloat() * 360f, r > 4 ? 1.4f : 1.0f, 6);
                         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, s.x, getY() + 1, s.z, 80, r * 0.4, 1.2, r * 0.4, 0.4);
                         server.playSound(null, s.x, getY(), s.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.4f, 1.2f);
                     })

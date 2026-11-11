@@ -1,0 +1,56 @@
+# 終章の主の揺れ・回り・技の緩急の確かめ
+world finale_motion flat
+size 960 720
+timeout 3000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd fill -10 200 -10 10 200 10 minecraft:smooth_quartz
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd summon skyabyss:rewinder 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 6 206 -7 40 14
+wait 30
+shot r1_gears_a
+wait 10
+shot r2_gears_b
+cmd skyabyss dev anim @e[type=skyabyss:rewinder] slam
+wait 12
+shot r3_slam_wind
+wait 6
+shot r4_slam_more
+wait 4
+shot r5_slam_hit
+wait 8
+shot r6_follow
+wait 40
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd summon skyabyss:founder 0 201 0 {Rotation:[0f,0f],NoAI:1b,PersistenceRequired:1b}
+camera 3 203.5 -4.5 35 8
+wait 30
+shot f1_bells_a
+wait 6
+shot f2_bells_b
+wait 6
+shot f3_bells_c
+cmd skyabyss dev anim @e[type=skyabyss:founder] sweep
+wait 8
+shot f4_sweep_a
+wait 6
+shot f5_sweep_b
+wait 6
+shot f6_sweep_c
+echo done
+quit

@@ -1,0 +1,110 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_tentacle",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -8.922,
+        -8.0,
+        -9.127
+       ],
+       "size": [
+        18.875,
+        24.674,
+        18.983
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "t1",
+     "pivot": [
+      0.0,
+      16.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -6.934,
+        5.196,
+        -8.071
+       ],
+       "size": [
+        12.634,
+        29.289,
+        13.794
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "t2",
+     "pivot": [
+      1.5,
+      32.0,
+      -1.0
+     ],
+     "parent": "t1",
+     "cubes": [
+      {
+       "origin": [
+        -6.882,
+        25.354,
+        -6.486
+       ],
+       "size": [
+        8.942,
+        19.166,
+        12.92
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

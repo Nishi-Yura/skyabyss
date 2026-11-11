@@ -181,6 +181,11 @@ public class FortWarlord extends DungeonBoss {
     }
 
     @Override
+    protected String entrance() {
+        return "drop";
+    }
+
+    @Override
     protected String bossId() {
         return "fort_warlord";
     }
