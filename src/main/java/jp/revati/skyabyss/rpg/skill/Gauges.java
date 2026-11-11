@@ -336,6 +336,9 @@ public final class Gauges {
             }
             case CLEAVER -> {
                 if (skill == Skill.TITAN_CLEAVE) {
+                    if (s.value > 0) {
+                        prop(player.serverLevel(), player, "gx_cleaver", ahead(player, 2.5), 0.7f + 0.1f * (float) s.value, 14);
+                    }
                     set(player, 0);
                 }
             }
@@ -356,11 +359,20 @@ public final class Gauges {
             }
             case FIRE -> {
                 if (skill == Skill.EMBER_ORB) {
+                    if (s.value > 0) {
+                        prop(player.serverLevel(), player, "gx_fire", ahead(player, 1.6), 0.5f + 0.1f * (float) s.value, 12);
+                    }
                     set(player, 0);
                 }
             }
             case PIERCE -> {
                 if (skill == Skill.CLOUD_PIERCE) {
+                    if (s.value > 0) {
+                        float size = 1.2f + 0.2f * (float) s.value;
+                        Vec3 lift = new Vec3(0, 0.25 * size, 0);
+                        Vec3 eye = player.getEyePosition().subtract(lift);
+                        jp.revati.skyabyss.combat.prop.AttackProps.fly(player.serverLevel(), "gx_pierce", player, eye, eye.add(player.getLookAngle().scale(22)), 8, size);
+                    }
                     set(player, 0);
                 }
             }
@@ -377,6 +389,9 @@ public final class Gauges {
             }
             case WARD -> {
                 if (skill == Skill.LAMP_CHARM) {
+                    if (s.value > 0) {
+                        prop(player.serverLevel(), player, "gx_ward", player.position(), (float) Math.min(3.0, 1.0 + 0.6 * s.value), 40);
+                    }
                     set(player, 0);
                 } else if (skill == Skill.WARD_SONG || skill == Skill.CYCLE_SONG) {
                     add(player, 1);
@@ -462,6 +477,7 @@ public final class Gauges {
                         busy = false;
                     }
                     burst(player.serverLevel(), target, ParticleTypes.WITCH, 20);
+                    prop(player.serverLevel(), player, "gx_shadow", target.position(), Math.max(0.7f, target.getBbWidth() * 0.9f), 14);
                     player.serverLevel().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.4f);
                 }
             }
@@ -509,6 +525,7 @@ public final class Gauges {
                 busy = false;
             }
             burst(player.serverLevel(), target, ParticleTypes.SOUL_FIRE_FLAME, 24);
+            prop(player.serverLevel(), player, "gx_curse", target.position(), Math.max(0.7f, target.getBbWidth() * 0.9f), 16);
             player.serverLevel().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 0.9f, 0.8f);
             // まわりの一体へ印が一つ移る
             LivingEntity next = null;
@@ -548,6 +565,7 @@ public final class Gauges {
         if (s != null && s.kind == Kind.LONE && full(player)) {
             set(player, 0);
             player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0f, 0.7f);
+            prop(player.serverLevel(), player, "gx_lone", ahead(player, 1.6), 1.0f, 12);
             send(player, false);
             return LONE_STRIKE;
         }
@@ -571,6 +589,7 @@ public final class Gauges {
                 s.boostUntil = now + TEMPER_BOOST;
                 set(player, 0);
                 burst(player.serverLevel(), player, ParticleTypes.FLAME, 30);
+                prop(player.serverLevel(), player, "gx_temper", ahead(player, 1.2), 1.0f, 16);
                 player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.7f, 1.4f);
             }
         }
@@ -716,6 +735,7 @@ public final class Gauges {
         }
         level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.6, 0.1, 0.6, 0);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0f, 0.5f);
+        prop(level, player, "gx_smash", player.position(), (float) (SMASH_RADIUS * 0.6), 16);
     }
 
     // 炉開き (熾火の槌): 前に火の柱が三本立つ
@@ -732,6 +752,7 @@ public final class Gauges {
                     level.sendParticles(ParticleTypes.FLAME, c.x, c.y + y * 0.6, c.z, 6, 0.3, 0.2, 0.3, 0.02);
                 }
                 level.sendParticles(ParticleTypes.LAVA, c.x, c.y + 0.3, c.z, 3, 0.3, 0.1, 0.3, 0);
+                jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "gx_forge", player, c, level.random.nextFloat() * 360f, 1.0f, 16, (i - 1) * 2);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(c, c).inflate(1.8, 2.5, 1.8),
                         e -> SkillActions.isFoe(player, e))) {
                     if (!struck.contains(e)) {
@@ -756,6 +777,7 @@ public final class Gauges {
                 if (SkillEffects.ashed(e)) {
                     SkillActions.hit(player, e, amount, Skill.SPARK_BURST);
                     burst(player.serverLevel(), e, ParticleTypes.FLAME, 14);
+                    prop(player.serverLevel(), player, "gx_ash", e.position(), Math.max(0.7f, e.getBbWidth() * 0.9f), 12);
                 }
             }
         } finally {
@@ -772,6 +794,7 @@ public final class Gauges {
                 e -> e != from && SkillActions.isFoe(player, e));
         near.sort((a, b) -> Double.compare(a.distanceToSqr(from), b.distanceToSqr(from)));
         Vec3 a = from.position().add(0, from.getBbHeight() * 0.6, 0);
+        prop(level, player, "gx_thunder", from.position(), 0.9f, 12);
         busy = true;
         try {
             for (int i = 0; i < Math.min(THUNDER_CHAIN_COUNT, near.size()); i++) {
@@ -781,6 +804,7 @@ public final class Gauges {
                     Vec3 p = a.lerp(b, k / 8.0);
                     level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
                 }
+                prop(level, player, "gx_thunder", e.position(), 0.7f, 10);
                 SkillActions.hit(player, e, amount, Skill.THUNDER_BOLT);
             }
         } finally {
@@ -802,6 +826,7 @@ public final class Gauges {
             SkillEffects.bind(target, FREEZE_TICKS);
         }
         burst(player.serverLevel(), target, ParticleTypes.SNOWFLAKE, 20);
+        prop(player.serverLevel(), player, "gx_freeze", target.position(), Math.max(0.6f, target.getBbWidth() * 0.8f), (int) Math.min(60, FREEZE_TICKS));
         player.serverLevel().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 0.8f, 1.6f);
     }
 
@@ -848,6 +873,7 @@ public final class Gauges {
                 }
                 z.spent = true;
                 level.sendParticles(ParticleTypes.EXPLOSION, z.center.x, z.center.y + 0.3, z.center.z, 1, 0, 0, 0, 0);
+                prop(level, player, "gx_trap", z.center, 1.2f, 12);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(z.center, z.center).inflate(2.5, 1.5, 2.5),
                         e -> SkillActions.isFoe(player, e))) {
                     SkillActions.hit(player, e, amount, Skill.BONE_TRAP);
@@ -876,6 +902,7 @@ public final class Gauges {
                 for (int k = 0; k < 6; k++) {
                     level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 6 - k, at.z, 1, 0.02, 0.1, 0.02, 0);
                 }
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(level, SkillProps.kind(SkillTree.BONE, "rise"), player, at, 2, 2, 5f, 0.6f, 8);
                 if (!foes.isEmpty()) {
                     busy = true;
                     try {
@@ -916,6 +943,12 @@ public final class Gauges {
             SkillActions.ring(level, ParticleTypes.BUBBLE_POP, player.position(), r, (int) (r * 6), 0.5);
         }
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.2f, 0.6f);
+        // 満ち潮の形: 四方へ外向きに砕ける大波
+        for (int k = 0; k < 4; k++) {
+            double a = k * Math.PI / 2 + Math.toRadians(player.getYRot());
+            Vec3 d = new Vec3(-Math.sin(a), 0, Math.cos(a));
+            jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "gx_tide", player, player.position().add(d.scale(2.0)), (float) Math.toDegrees(Math.atan2(-d.x, d.z)), 0.9f, 14, 0);
+        }
     }
 
     // 勢い (鯨尾の振り回し): 攻撃の速さと足が、勢いの数だけ上がる
@@ -939,6 +972,16 @@ public final class Gauges {
         if (amount > 0) {
             a.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
+    }
+
+    // ---------------------------------------------------------------- 放つときの形 (2026-11-12。prop_gx_<型>、tools/gen/mobs/attack_props/build_skill_kit2.py)
+    private static void prop(ServerLevel level, ServerPlayer player, String kind, Vec3 at, float size, int linger) {
+        jp.revati.skyabyss.combat.prop.AttackProps.here(level, kind, player, at, size, linger);
+    }
+
+    // 人の前 (水平) へ d
+    private static Vec3 ahead(ServerPlayer player, double d) {
+        return player.position().add(SkillActions.flatLook(player).scale(d));
     }
 
     // ---------------------------------------------------------------- 小物

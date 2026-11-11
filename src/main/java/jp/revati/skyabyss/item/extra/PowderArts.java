@@ -40,6 +40,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
+// 形 (2026-11-12): 武器の粉の技は出るときに模型が出る (地割れ pa_quake・つむじ pa_whirl・引き潮 pa_ebb・熾の印 pa_brand と爆ぜる pa_brand_burst・骨の呪い pa_curse)。
 // 巨神の粉の技と、土地の敵が落とす粉 (docs/design/41 の 3。2026-11-05 の粉と炉の頁 1-1・1-5)。
 //   粉の技は、一つの装備で同じ粉の段の和が Powder.WEIGHT_FOR_ART 以上のとき働く。強さは段の和で伸びる (4 で ×1、8 で ×1.5、12 で ×2)。
 //   武器: 4 回当てるごとに一度 (近接は満ちた一撃だけ数える。矢・技の当たりも数える)。出るときに粉の色の粒と音、傷の数字も粉の色
@@ -205,6 +206,7 @@ public final class PowderArts {
                     level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLESTONE.defaultBlockState()), v.getX(), v.getY() + 0.1, v.getZ(), 6, 0.25, 0.05, 0.25, 0);
                 }
                 ring(level, c, QUAKE_RADIUS, new DustParticleOptions(color(e), 1.0f), 24);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_quake", p, c, (float) (QUAKE_RADIUS * 0.8), 12);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.DEEPSLATE_BREAK, SoundSource.PLAYERS, 1.2f, 0.6f);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35f, 0.5f);
             }
@@ -225,6 +227,7 @@ public final class PowderArts {
                     level.sendParticles(ParticleTypes.CLOUD, c.x + Math.cos(a) * r, c.y + 0.2 + i * 0.07, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0.01);
                 }
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.7f, 1.6f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_whirl", p, c, 1.2f, 20);
             }
             case TIDE -> {
                 List<ServerPlayer> near = new ArrayList<>();
@@ -242,18 +245,21 @@ public final class PowderArts {
                 }
                 level.sendParticles(ParticleTypes.BUBBLE_POP, c.x, c.y + target.getBbHeight() * 0.6, c.z, 16, 0.3, 0.3, 0.3, 0.05);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_SPLASH, SoundSource.PLAYERS, 0.5f, 1.3f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_ebb", p, p.position(), 1.0f, 16);
             }
             case ASH -> {
                 target.igniteForSeconds(BRAND_TICKS / 20f);
                 BRANDS.put(target, new Brand(p, level.getGameTime() + BRAND_TICKS, (float) (base(p) * BRAND_DAMAGE * s)));
                 level.sendParticles(ParticleTypes.FLAME, c.x, c.y + target.getBbHeight() * 0.6, c.z, 16, 0.25, 0.4, 0.25, 0.02);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6f, 1.2f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_brand", p, c, Math.max(0.6f, target.getBbWidth() * 0.9f), BRAND_TICKS);
             }
             case BONE -> {
                 CURSES.put(target, new Curse(level.getGameTime() + CURSE_TICKS, 1 + CURSE_TAKEN * s));
                 level.sendParticles(ParticleTypes.SCULK_SOUL, c.x, c.y + target.getBbHeight() * 0.8, c.z, 10, 0.3, 0.3, 0.3, 0.02);
                 level.sendParticles(new DustParticleOptions(color(e), 1.2f), c.x, c.y + target.getBbHeight() * 0.5, c.z, 14, 0.35, 0.5, 0.35, 0);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 0.6f, 0.5f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_curse", p, c, Math.max(0.6f, target.getBbWidth() * 0.9f), 30);
             }
         }
         // どの技にも、粉の色の小さな輪
@@ -425,6 +431,7 @@ public final class PowderArts {
         level.sendParticles(ParticleTypes.FLAME, c.x, c.y + v.getBbHeight() * 0.5, c.z, 30, 0.6, 0.5, 0.6, 0.06);
         ring(level, c, BRAND_RADIUS, new DustParticleOptions(color(Element.ASH), 1.4f), 20);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.7f, 0.7f);
+        jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_brand_burst", b.owner(), c, (float) (BRAND_RADIUS * 0.6), 12);
     }
 
     // 熾の印の残り (自己テスト)

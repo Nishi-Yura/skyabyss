@@ -47,7 +47,12 @@ public final class AttackProps {
             "sk_mage_wave", "sk_mage_aura", "sk_mage_zone", "sk_el_stone", "sk_el_wind", "sk_el_tide", "sk_el_ash", "sk_el_bone", "sk_ch_rune",
             "sk_ch_rewrite", "sk_ch_mutation", "sk_ch_secret", "sk_mastery_3", "sk_mastery_5", "my_sky_hand", "my_warden", "my_balance",
             "my_big_bell", "my_melt", "my_pull", "my_life_lamp", "my_gaze", "my_new_moon", "my_feather", "my_mist", "my_eye_arrow", "my_rewind",
-            "my_moth", "my_chase_mark", "my_promise", "my_silence", "my_clap"};
+            "my_moth", "my_chase_mark", "my_promise", "my_silence", "my_clap",
+            // 粉の技・伝説の書き換え・型の溜まるものの放ち (tools/gen/mobs/attack_props/build_skill_kit2.py。rpg/skill/BurstProps)
+            "pa_quake", "pa_whirl", "pa_ebb", "pa_brand", "pa_brand_burst", "pa_curse", "lg_whale_rise", "lg_whale_wave", "lg_whale_fall",
+            "lg_tide_rise", "lg_tide_wave", "lg_storm_rise", "lg_storm_wave", "lg_ember_rise", "lg_ember_wave", "lg_moon_rise", "lg_moon_wave",
+            "lg_moon_fall", "lg_light_rise", "lg_light_wave", "gx_smash", "gx_cleaver", "gx_forge", "gx_temper", "gx_ash", "gx_thunder", "gx_fire",
+            "gx_freeze", "gx_pierce", "gx_trap", "gx_shadow", "gx_lone", "gx_ward", "gx_tide", "gx_curse"};
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<AttackProp>>> TYPES = new LinkedHashMap<>();
 
@@ -309,5 +314,10 @@ public final class AttackProps {
         p.setup(AttackProp.TOSS, from, to, 0, Math.max(1, flight), 0, size, 0f, yaw);
         spawn(level, p);
         return p;
+    }
+
+    // その場に突き出す (向きはばらばら)。粉の技・伝説の書き換え・型の放ちが使う
+    public static void here(ServerLevel level, String kind, @Nullable Entity owner, Vec3 at, float size, int linger) {
+        riseLater(level, kind, owner, at, level.random.nextFloat() * 360f, size, linger, 0);
     }
 }

@@ -189,7 +189,11 @@
   - **型・印・神器の模型**: `tools/gen/mobs/attack_props/build_skill_kit.py`、絵は `docs/review/skill_props/kit_roles.png`・`kit_marks.png`・`kit_mythic.png`。
   - **大きさ**: 三人称の背中から読めるよう、敵の技の形より大きく（突き出る形 ×1.5・飛ぶ形 ×1.3）。
   - **通常攻撃**（2026-11-12）: 魔法使いの魔弾は、段（レベル 10 ごと）の形 `prop_sk_bolt_<段>`（星の粒・双子星・彗星・三日月・星座）が弾と一緒に飛び、当たると消える（`AttackProps.fly`、大きさ 1.5）。呪術師の呪印は、噴くときに段の形 `prop_sk_hex_<段>`（三角の牙・二重の輪の潮柱・五芒の杭・鈴の柱・渦の三本腕）が突き出る。置き方は一発ごとの噴き方に合わせる（柱 = 真ん中に一本、波 = 真ん中と外の輪に五本、牙 = 縁に四本）。模型は `tools/gen/mobs/attack_props/build_basic_props.py`、絵は `docs/review/skill_props/basic.png`、撮影は `tools/shots/basic_props.txt`。
-  - **まだ付けていない**: 型の模型は選んだ案の作りだけ（ほかの案に替えたら型も作り直す）。
+  - **粉の技・伝説の書き換え・型の放ち**（2026-11-12。声「上の3つを作る」）: 粒だけだった三つにも形を出す（`tools/gen/mobs/attack_props/build_skill_kit2.py`、絵は `docs/review/skill_props/kit2_powder.png`・`kit2_legend.png`・`kit2_gauge.png`。置くのは `AttackProps.here`）。
+    - 粉の技（`PowderArts`）: 地割れ = 割れ上がる岩の輪 `pa_quake`・つむじ = 二本の風の帯 `pa_whirl`・引き潮 = 噴いて降る水 `pa_ebb`・熾の印 = 足もとの赤熱の輪 `pa_brand`（印のあいだ残る）と爆ぜ `pa_brand_burst`・骨の呪い = 閉じる肋骨の籠 `pa_curse`。
+    - 伝説の書き換え（`LegendRewrites`、約 50）: 巨神の系統の形 `lg_<whale|tide|storm|ember|moon|light>_<rise|wave>` と `lg_whale_fall`・`lg_moon_fall`。水の壁は横一列の潮殻の尖塔（`propLine`）、雷はどれも `bolt()` が雷の形を落とす。神器の手・羽根・巻き戻しは大きな能力の形（`my_*`）。
+    - 型の放ち（`Gauges`）: 岩砕き・大鉈・炉開き（三本）・鍛えの極み・灰を燃やす・帯電の跳ね・熾火の花・凍え・狙いの貫き（飛ぶ）・罠のはぜ・影の爆ぜ・孤りの一撃・調べの守り・満ち潮（四方へ砕ける）・呪いの爆ぜ（`gx_*`）。空の矢筒は一本ごとに骨の矢が降る。勢い（鯨尾）と舞は放つ瞬間がないので形はない。
+  - **まだ付けていない**: 型の模型は選んだ案の作りだけ（ほかの案に替えたら型も作り直す）。秘伝と防具の粉の技は粒だけ。
   - 確かめ: 台本 `tools/shots/skill_props.txt`（職ごとの技を三人称で撮る。前提の技も覚えさせる）。
 
 技の動きの緩急（溜めの震えと行き過ぎ）は、生成の道具を持つ主は `blp.punch`、出来上がったアニメしかない主（心臓 4 体・番人・深みの王と淵の主・月・始祖・塔の主・雷獣）は `tools/gen/anim/punch_anims.py` で足した（かけた名前は `tools/gen/anim/punched.json`。アニメを書き直す道具を流したら、その名前を消してからかけ直す）。
