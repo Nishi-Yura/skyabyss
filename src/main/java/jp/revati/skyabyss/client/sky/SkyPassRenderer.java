@@ -48,7 +48,7 @@ public final class SkyPassRenderer {
     // 地点の影の濃さ (0〜1)。画素ごとの影も、昔の地面の板も、ここから引く
     static float shadowAt(SkyPass pass, double x, double z, double age) {
         if (testCircle != null) {
-            double t = Mth.clamp(0.5 - (Math.hypot(x - testCircle[0], z - testCircle[1]) - testCircle[2]) / 10.0, 0.0, 1.0);
+            double t = Mth.clamp(0.5 - (Math.sqrt((x - testCircle[0]) * (x - testCircle[0]) + (z - testCircle[1]) * (z - testCircle[1])) - testCircle[2]) / 10.0, 0.0, 1.0);
             return (float) (t * t * (3.0 - 2.0 * t));
         }
         return pass.shadow(x, z, age);
@@ -330,7 +330,7 @@ public final class SkyPassRenderer {
                     continue;
                 }
                 any = true;
-                double near = Math.hypot(x - cx, z - cz);
+                double near = Math.sqrt((x - cx) * (x - cx) + (z - cz) * (z - cz));
                 float lit = glow * (float) Mth.clamp(1.0 - near / 220.0, 0.0, 1.0);
                 // 姿の近くの雲は、上の影を受けて暗く沈む (光をさえぎられる)
                 float dim = 1f - 0.55f * (float) Mth.clamp(1.0 - near / 170.0, 0.0, 1.0);
@@ -359,7 +359,7 @@ public final class SkyPassRenderer {
         // 姿の近くでは、雲が姿から押しのけられるように外へ流れる (雲の模様を中心から遠ざける向きにずらす)
         double ox = x - cx;
         double oz = z - cz;
-        double near = Math.hypot(ox, oz);
+        double near = Math.sqrt(ox * ox + oz * oz);
         double push = 38.0 * Math.exp(-near / 90.0);
         double sx = near > 1.0 ? ox / near * push : 0.0;
         double sz = near > 1.0 ? oz / near * push : 0.0;
@@ -372,7 +372,8 @@ public final class SkyPassRenderer {
 
     // 描画距離の端に向かって薄くし、空との境目を目立たなくする
     private static float distanceFade(double dx, double dz, float range) {
-        double d = Math.hypot(dx, dz) / range;
+        // Math.hypot は遅い (画面の格子で毎フレーム何万回も呼ぶ)。値の差は最後の桁の丸めだけ
+        double d = Math.sqrt(dx * dx + dz * dz) / range;
         return (float) Mth.clamp((1.0 - d) / 0.4, 0.0, 1.0);
     }
 
