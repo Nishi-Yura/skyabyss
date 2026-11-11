@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -74,7 +75,7 @@ public class PitForeman extends DungeonBoss {
             lastStomp = tickCount;
             begin(target, "stomp");
             cue("pit_foreman", "stomp", STOMP_WARN);
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), STOMP_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), STOMP_RADIUS)).prop(PropFx.ring("bone_spike", 8))
                     .floor(getY()).warn(STOMP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
@@ -113,7 +114,7 @@ public class PitForeman extends DungeonBoss {
         move = SLAM;
         begin(target, "slam");
         cue("pit_foreman", "slam", SLAM_WARN);
-        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), SLAM_LENGTH, 1.3))
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), SLAM_LENGTH, 1.3)).prop(PropFx.along("bone_spike"))
                 .floor(getY()).warn(SLAM_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> {

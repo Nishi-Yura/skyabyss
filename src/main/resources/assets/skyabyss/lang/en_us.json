@@ -3203,5 +3203,15 @@
   "entity.skyabyss.prop_lightning": "Attack shape: lightning",
   "entity.skyabyss.prop_ash_ball": "Attack shape: ash_ball",
   "entity.skyabyss.prop_shell_spike": "Attack shape: shell_spike",
-  "entity.skyabyss.prop_pearl": "Attack shape: pearl"
+  "entity.skyabyss.prop_pearl": "Attack shape: pearl",
+  "entity.skyabyss.prop_arrow": "Attack shape: arrow",
+  "entity.skyabyss.prop_arrow_volley": "Attack shape: arrow_volley",
+  "entity.skyabyss.prop_wind_blade": "Attack shape: wind_blade",
+  "entity.skyabyss.prop_spore": "Attack shape: spore",
+  "entity.skyabyss.prop_wisp_orb": "Attack shape: wisp_orb",
+  "entity.skyabyss.prop_net": "Attack shape: net",
+  "entity.skyabyss.prop_whirlwind": "Attack shape: whirlwind",
+  "entity.skyabyss.prop_light_pillar": "Attack shape: light_pillar",
+  "entity.skyabyss.prop_feather": "Attack shape: feather",
+  "entity.skyabyss.prop_weight": "Attack shape: weight"
 }

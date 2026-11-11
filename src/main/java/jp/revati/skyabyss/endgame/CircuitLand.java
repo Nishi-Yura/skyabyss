@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.endgame;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -351,7 +352,7 @@ public final class CircuitLand {
         double sz = fire.getZ() + 0.5 - Math.sin(angle) * len / 2;
         float dmg = (float) Circuits.stakeDamage(run);
         Vec3 push = new Vec3(Math.cos(angle), 0, Math.sin(angle)).scale(0.9);
-        Telegraph.in(level, TelegraphShape.line(sx, sz, angle, len, 1.8)).floor(fire.getY()).warn(WIND_WARN).danger()
+        Telegraph.in(level, TelegraphShape.line(sx, sz, angle, len, 1.8)).prop(PropFx.shots("wind_blade", 2)).floor(fire.getY()).warn(WIND_WARN).danger()
                 .startSound(SoundEvents.ELYTRA_FLYING, 0.5f, 0.6f)
                 .victims(p -> run.members.contains(p.getUUID()))
                 .onImpact(server -> {

@@ -294,6 +294,13 @@ public class PilgrimPlume extends CloudMob {
         // 羽ばたき: 床に扇の光 (BEAT_TELL) → 風
         private void beat(ServerLevel sl) {
             Vec3 base = new Vec3(getX(), getY() - HOVER, getZ());
+            if (t == 1) {
+                // 技の形: 扇の三方へ風の刃が飛ぶ (打つ瞬間に縁へ着く)
+                for (int k = -1; k <= 1; k++) {
+                    Vec3 to = base.add(dir.yRot((float) Math.toRadians(BEAT_HALF * 0.7 * k)).scale(BEAT_R)).add(0, 0.8, 0);
+                    jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "wind_blade", PilgrimPlume.this, position().add(0, 0.5, 0), to, BEAT_TELL - 1, Math.min(BEAT_TELL - 1, 10), 0.6f, 1.2f, 4);
+                }
+            }
             if (t < BEAT_TELL) {
                 if (t % 3 == 0) {
                     for (double d = 2; d <= BEAT_R; d += 1.5) {
@@ -333,6 +340,12 @@ public class PilgrimPlume extends CloudMob {
 
         // 羽の雨: 光の円 (RAIN_TELL) → 羽根が落ちる
         private void rain(ServerLevel sl) {
+            if (t == 1) {
+                // 技の形: 光の円へ羽根が降る (打つ瞬間に刺さる)
+                for (Vec3 s : spots) {
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "feather", PilgrimPlume.this, s, RAIN_TELL - 1, 12, 14f, 1.0f, 12);
+                }
+            }
             if (t < RAIN_TELL) {
                 if (t % 3 == 0) {
                     for (Vec3 s : spots) {
@@ -394,6 +407,10 @@ public class PilgrimPlume extends CloudMob {
                     }
                 }
                 return;
+            }
+            if (t == MARK_LOCK + 1) {
+                // 技の形: 所が決まったら、金の輪へ大きな羽の槍が落ちる
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "feather", PilgrimPlume.this, markAt, MARK_TELL - MARK_LOCK - 1, 10, 18f, 2.2f, 16);
             }
             if (t == MARK_TELL) {
                 playSound(CloudMobsSetup.WING_PLUNGE.get(), 2.0f, 1.0f);

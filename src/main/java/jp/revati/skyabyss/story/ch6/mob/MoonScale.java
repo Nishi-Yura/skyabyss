@@ -459,6 +459,10 @@ public class MoonScale extends MoonMob {
                     spots.add(getTarget().position());
                 }
                 playSound(MoonMobsSetup.SCALE_THROW.get(), 1.5f, 0.9f);
+                // 技の形: 影の円へ秤の錘が落ちてくる (t 26 で着く)
+                for (Vec3 s : spots) {
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "weight", MoonScale.this, s, 25, 14, 14f, 1.3f, 8);
+                }
             }
             if (t <= 26 && t % 2 == 0) {
                 for (Vec3 s : spots) {

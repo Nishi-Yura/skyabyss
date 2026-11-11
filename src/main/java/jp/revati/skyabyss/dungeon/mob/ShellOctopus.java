@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.notice.Notice;
@@ -183,7 +184,7 @@ public class ShellOctopus extends DungeonBoss {
         lastWhirl = tickCount;
         begin(target, "whirl");
         cue("shell_octopus", "whirl", WHIRL_WARN);
-        Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), 4, 12))
+        Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), 4, 12)).prop(PropFx.ring("water_spout", 8))
                 .floor(getY()).warn(WHIRL_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, getX(), getY() + 0.5, getZ(), 80, 5, 0.3, 5, 0.2))
@@ -351,7 +352,7 @@ public class ShellOctopus extends DungeonBoss {
             if (t != null) {
                 for (ServerPlayer p : server().getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(28), this::canHit)) {
                     Vec3 s = p.position();
-                    Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 3.0))
+                    Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 3.0)).prop(PropFx.toss("ink_blob"))
                             .floor(s.y).warn(INK_WARN - 4).danger().owner(this).target(t)
                             .victims(this::canHit)
                             .onImpact(server -> server.sendParticles(ParticleTypes.SQUID_INK, s.x, s.y + 1, s.z, 60, 1.4, 0.8, 1.4, 0.02))

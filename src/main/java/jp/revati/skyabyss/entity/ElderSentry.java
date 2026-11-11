@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.ArrayList;
@@ -347,7 +348,7 @@ public class ElderSentry extends GroundFoe {
     private void startStomp(LivingEntity target) {
         double cx = getX();
         double cz = getZ();
-        Telegraph.in((ServerLevel) level(), TelegraphShape.circle(cx, cz, STOMP_RADIUS))
+        Telegraph.in((ServerLevel) level(), TelegraphShape.circle(cx, cz, STOMP_RADIUS)).prop(PropFx.ring("bone_spike", 8))
                 .floor(floorY()).warn(STOMP_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.ELDER_SENTRY_CHARGE.get(), 1.2f, 0.6f)
                 .victims(this::canHit)

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.ArrayList;
@@ -598,7 +599,7 @@ public class TideBeckoner extends TideMob {
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(m.x, m.z, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), ground, BREATH_WINDUP, D).target(aim)
+                tg(server, TelegraphShape.line(m.x, m.z, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), ground, BREATH_WINDUP, D).prop(PropFx.shots("pearl", 1)).target(aim)
                         .onImpact(s -> {
                             if (sounds) {
                                 s.playSound(null, m.x, m.y, m.z, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_POP.get(), SoundSource.HOSTILE, 1.2f, 1f);
@@ -623,7 +624,7 @@ public class TideBeckoner extends TideMob {
         double ground = groundY(position());
         double cx = getX();
         double cz = getZ();
-        tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, D)
+        tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, D).prop(PropFx.ring("shell_spike", 10))
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), ROAR_DAMAGE);
                     Vec3 away = p.position().subtract(position()).multiply(1, 0, 1);
@@ -720,7 +721,7 @@ public class TideBeckoner extends TideMob {
             double fx = gx;
             double fz = gz;
             double fy = gy;
-            tg(server, TelegraphShape.circle(gx, gz, GEYSER_RADIUS), gy, warn, D)
+            tg(server, TelegraphShape.circle(gx, gz, GEYSER_RADIUS), gy, warn, D).prop(PropFx.rise("water_spout"))
                     .onImpact(s -> {
                         s.playSound(null, fx, fy, fz, net.minecraft.sounds.SoundEvents.SAND_BREAK, SoundSource.HOSTILE, 1.6f, 0.7f);
                         s.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.SAND.defaultBlockState()),

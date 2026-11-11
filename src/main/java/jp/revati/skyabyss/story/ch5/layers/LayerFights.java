@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch5.layers;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -225,7 +226,7 @@ public final class LayerFights {
             case 0 -> {
                 warn = 26;
                 LordAnim.windup(boss, "attack_elite_slam", warn);
-                Telegraph.in(level, TelegraphShape.circle(bx, bz, 3.8)).floor(y).warn(warn).danger().owner(boss)
+                Telegraph.in(level, TelegraphShape.circle(bx, bz, 3.8)).prop(PropFx.ring(jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(li), 8)).floor(y).warn(warn).danger().owner(boss)
                         .onImpact(lvl -> {
                             LordAnim.strike(boss, "attack_elite_slam");
                             LordMoves.element(lvl, li, bx, y + 0.3, bz, 30, 2);
@@ -249,7 +250,7 @@ public final class LayerFights {
                 LordAnim.windup(boss, "attack_elite_spit", warn);
                 for (ServerPlayer p : inside) {
                     double px = p.getX(), pz = p.getZ();
-                    Telegraph.in(level, TelegraphShape.circle(px, pz, 2.2)).floor(p.getY()).warn(warn).danger().owner(boss)
+                    Telegraph.in(level, TelegraphShape.circle(px, pz, 2.2)).prop(PropFx.toss(jp.revati.skyabyss.combat.prop.AttackProps.abyssFall(li))).floor(p.getY()).warn(warn).danger().owner(boss)
                             .onImpact(lvl -> {
                                 LordAnim.strike(boss, "attack_elite_spit");
                                 LordMoves.element(lvl, li, px, p.getY() + 0.3, pz, 16, 1);

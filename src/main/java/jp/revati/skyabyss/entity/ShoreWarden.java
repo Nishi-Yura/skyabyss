@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -264,7 +265,7 @@ public class ShoreWarden extends GroundFoe {
         double cz = target.getZ();
         int floorY = BlockPos.containing(target.getX(), target.getY() + 0.01, target.getZ()).getY();
         double y = target.getY();
-        Telegraph.in((ServerLevel) level(), TelegraphShape.circle(cx, cz, RING_RADIUS))
+        Telegraph.in((ServerLevel) level(), TelegraphShape.circle(cx, cz, RING_RADIUS)).prop(PropFx.rise("water_spout"))
                 .floor(y).warn(RING_WARN).color(RING_COLOR).owner(this).target(target)
                 .startSound(MobSounds.SHORE_WARDEN_RING.get(), 1.4f, 1.0f)
                 .victims(this::canHit)

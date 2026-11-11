@@ -667,7 +667,9 @@ public final class TowerFight {
                     z.decal = true;
                     jp.revati.skyabyss.combat.TelegraphShape shape = z.kind == Zone.CIRCLE ? jp.revati.skyabyss.combat.TelegraphShape.circle(z.cx, z.cz, z.r)
                             : jp.revati.skyabyss.combat.TelegraphShape.line(z.x0, z.cz, 0, z.x1 - z.x0, (z.z1 - z.z0) / 2);
-                    var b = jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(z.y).warn((int) (z.at - now)).owner(master).victims(pl -> false);
+                    var b = jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(z.y).warn((int) (z.at - now)).owner(master).victims(pl -> false)
+                            // 技の形: 傷の円には床から晶の棘 (分け合う円・横切る帯には出さない)
+                            .prop(z.kind == Zone.CIRCLE && !z.share ? jp.revati.skyabyss.combat.prop.PropFx.rise("crystal_spike") : null);
                     (z.share ? b.goal() : b.danger()).start();
                 }
                 if ((z.at - now) % (z.at - now <= 10 ? 2 : 4) == 0) {

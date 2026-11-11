@@ -60,6 +60,17 @@ public final class AbyssAttacks {
         };
     }
 
+    // 技の形 (combat/prop/PropFx): 骨の放射 → 帯に沿う骨の棘、渦の輪 → 輪の水柱、雷の柱 → 雷、熾の雨 → 落ちる火の玉
+    private static jp.revati.skyabyss.combat.prop.PropFx propOf(String theme, TelegraphShape shape) {
+        return switch (theme) {
+            case "tide" -> jp.revati.skyabyss.combat.prop.PropFx.ring("water_spout", 10);
+            case "storm" -> jp.revati.skyabyss.combat.prop.PropFx.rise("lightning");
+            case "ember" -> jp.revati.skyabyss.combat.prop.PropFx.fall("fireball");
+            default -> shape instanceof TelegraphShape.Line ? jp.revati.skyabyss.combat.prop.PropFx.along("bone_spike")
+                    : jp.revati.skyabyss.combat.prop.PropFx.rise("bone_spike");
+        };
+    }
+
     private static float damage(HeartBoss heart) {
         return Abyss.ATTACK_DAMAGE * heart.abyssDamage();
     }
@@ -79,7 +90,8 @@ public final class AbyssAttacks {
         lastShapes++;
         Telegraph.Builder b = Telegraph.in(server, shape).floor(c.floorY()).warn(warn).danger().owner(heart).victims(c.victims()).jumpClear(jumpClear)
                 .onImpact(s -> AbyssFx.burst(s, hitX, c.floorY(), hitZ))
-                .onHit((s, p) -> p.hurt(heart.attackSource(), damage(heart)));
+                .onHit((s, p) -> p.hurt(heart.attackSource(), damage(heart)))
+                .prop(propOf(heart.abyssThemeId(), shape));
         if (sound) {
             b.startSound(soundOf(heart.abyssThemeId()), 2.2f, 0.6f);
         }

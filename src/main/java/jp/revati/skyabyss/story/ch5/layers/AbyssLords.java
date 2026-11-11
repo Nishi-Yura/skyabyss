@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch5.layers;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -266,7 +267,7 @@ public final class AbyssLords {
         LordMoves.element(level, f.li, lord.getX(), lord.getY() + 1, lord.getZ(), 60, 2.5);
         double y = LordMoves.floorY(f, lord);
         double lx = lord.getX(), lz = lord.getZ();
-        Telegraph.in(level, TelegraphShape.circle(lx, lz, 7)).floor(y).warn(30).danger().owner(lord)
+        Telegraph.in(level, TelegraphShape.circle(lx, lz, 7)).prop(PropFx.ring(jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li), 10)).floor(y).warn(30).danger().owner(lord)
                 .onImpact(lvl -> LordMoves.element(lvl, f.li, lx, y + 0.3, lz, 80, 4))
                 .onHit((lvl, p) -> {
                     p.hurt(lvl.damageSources().mobAttack(lord), 6f);
@@ -464,7 +465,7 @@ public final class AbyssLords {
             e.discard();
             event.setCanceled(true);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1f, 1.4f);
-            Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.8)).floor(at.y).warn(18).danger().owner(null)
+            Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.8)).prop(PropFx.rise("tentacle")).floor(at.y).warn(18).danger().owner(null)
                     .onHit((lvl, p) -> p.hurt(lvl.damageSources().magic(), 5f)).start();
             return;
         }
@@ -587,7 +588,7 @@ public final class AbyssLords {
         flash(f, "objective.skyabyss.abyss_v2.flash_guard_lamp", now, 80);
         level.playSound(null, m, SoundEvents.WARDEN_SNIFF, SoundSource.HOSTILE, 1.4f, 0.8f);
         LordAnim.windup(lord, "attack_snuff", 50);
-        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 2.6)).floor(c.y).warn(50).danger().owner(lord)
+        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 2.6)).prop(PropFx.rise(jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li))).floor(c.y).warn(50).danger().owner(lord)
                 .onImpact(lvl -> {
                     BossLook.strike(lord, BossLook.SNUFF);
                     boolean guarded = false;
@@ -621,7 +622,7 @@ public final class AbyssLords {
     public static void crush(ServerLevel level, List<ServerPlayer> targets, @Nullable LivingEntity owner, float hit) {
         for (ServerPlayer t : targets) {
             Vec3 c = t.position();
-            Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 3.2)).floor(c.y).warn(32).danger().owner(owner)
+            Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 3.2)).prop(PropFx.fall("rock").size(1.3f)).floor(c.y).warn(32).danger().owner(owner)
                     .onImpact(lvl -> lvl.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.8f, 0.4f))
                     .onHit((lvl, p) -> {
                         boolean light = AbyssArts.weightRelief(p) >= 0.3;
@@ -715,7 +716,7 @@ public final class AbyssLords {
         }
         level.playSound(null, lord.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.4f, 0.7f);
         LordAnim.windup(lord, "attack_roar", 45);
-        Telegraph.in(level, TelegraphShape.ring(c.getX() + 0.5, c.getZ() + 0.5, Layers.ARENA_R - 2.5, Layers.ARENA_R)).floor(c.getY()).warn(45).danger().owner(lord)
+        Telegraph.in(level, TelegraphShape.ring(c.getX() + 0.5, c.getZ() + 0.5, Layers.ARENA_R - 2.5, Layers.ARENA_R)).prop(PropFx.ring("lava_pillar", 16)).floor(c.getY()).warn(45).danger().owner(lord)
                 .onImpact(lvl -> {
                     BossLook.strike(lord, BossLook.ROAR);
                     darkWave(lvl, f, Vec3.atBottomCenterOf(c), inArena(lvl, f.layer));

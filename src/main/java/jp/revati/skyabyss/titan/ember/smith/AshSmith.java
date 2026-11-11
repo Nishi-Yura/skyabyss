@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.smith;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.util.Players;
 
 import jp.revati.skyabyss.notice.Notice;
@@ -598,7 +599,7 @@ public class AshSmith extends EmberMob {
         if (lead) {
             sound(server, EmberSmithSetup.INHALE.get(), 1.2f, 2.0f);
         }
-        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), VENT_DELAY, D)
+        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), VENT_DELAY, D).prop(PropFx.along("lava_pillar").size(0.6f))
                 .onImpact(s -> {
                     sound(s, EmberSmithSetup.BLAST.get(), lead ? 2.5f : 1.2f, 0.9f);
                     for (double t = 0.8; t <= SLAM_LENGTH; t += 0.6) {
@@ -671,7 +672,7 @@ public class AshSmith extends EmberMob {
         for (Vec3 d : dirs) {
             boolean first = lead;
             lead = false;
-            tg(server, TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(d.x, d.z), BREATH_LENGTH, Math.toRadians(BREATH_HALF_ANGLE)), BREATH_INHALE, D)
+            tg(server, TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(d.x, d.z), BREATH_LENGTH, Math.toRadians(BREATH_HALF_ANGLE)), BREATH_INHALE, D).prop(PropFx.shots("ash_ball", 3))
                     .onImpact(s -> {
                         if (first) {
                             sound(s, EmberSmithSetup.BLAST.get(), 3.5f, 1f);
@@ -819,7 +820,7 @@ public class AshSmith extends EmberMob {
     private void startSpark(ServerLevel server, double x, double z, int index) {
         double y = floorY();
         sparks.add(new Spark(new Vec3(x, y, z), index * SPARK_GAP));
-        tg(server, TelegraphShape.circle(x, z, SPARK_RADIUS), SPARK_WARN + index * SPARK_GAP, D)
+        tg(server, TelegraphShape.circle(x, z, SPARK_RADIUS), SPARK_WARN + index * SPARK_GAP, D).prop(PropFx.toss("fireball").size(0.6f))
                 .onImpact(s -> {
                     warn(s, ParticleTypes.LAVA, x, y + 0.2, z, 14, 0.5, 0.2, 0.5, 0.1);
                     warn(s, ParticleTypes.FLAME, x, y + 0.2, z, 18, 0.5, 0.3, 0.5, 0.08);

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -488,7 +489,7 @@ public final class DungeonFloor {
             case "brine" -> Blocks.PRISMARINE.defaultBlockState();
             default -> Blocks.COBBLED_DEEPSLATE.defaultBlockState();
         };
-        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, r)).floor(c.y).warn(TRAP_WARN).danger()
+        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, r)).prop(kind.equals("rocks") ? PropFx.fall("rock") : PropFx.rise(switch (kind) { case "spikes" -> "bone_spike"; case "steam" -> "lava_pillar"; case "spark" -> "crystal_spike"; case "brine" -> "water_spout"; default -> "rock"; })).floor(c.y).warn(TRAP_WARN).danger()
                 .startSound(kind.equals("spark") ? SoundEvents.LIGHTNING_BOLT_THUNDER : SoundEvents.GRAVEL_BREAK, 0.8f, kind.equals("spark") ? 1.8f : 0.6f)
                 .victims(p -> !p.isSpectator())
                 .onImpact(server -> {

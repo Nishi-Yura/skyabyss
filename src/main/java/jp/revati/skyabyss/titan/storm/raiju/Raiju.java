@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.util.Players;
 
 import jp.revati.skyabyss.notice.Notice;
@@ -660,7 +661,7 @@ public class Raiju extends GuardMob {
         }
         double t = trim(len);
         double angle = Telegraph.angleOf(b.x - a.x, b.z - a.z);
-        tg(server, TelegraphShape.line(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t, angle, len * (1 - 2 * t), halfWidth), RAIL_WARN + 1, style)
+        tg(server, TelegraphShape.line(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t, angle, len * (1 - 2 * t), halfWidth), RAIL_WARN + 1, style).prop(PropFx.along("lightning").size(0.6f))
                 .onHit((s, player) -> {
                     if (hit.add(player.getUUID())) {
                         player.hurt(attackSource(), damage);
@@ -726,7 +727,7 @@ public class Raiju extends GuardMob {
         }
         for (int i = 0; i < pounceEchoes(n); i++) {
             Vec3 at = spots.get(i);
-            tg(server, TelegraphShape.circle(at.x, at.z, ECHO_RADIUS), total, D)
+            tg(server, TelegraphShape.circle(at.x, at.z, ECHO_RADIUS), total, D).prop(PropFx.rise("lightning"))
                     .onImpact(s -> StormStrike.bolt(s, new Vec3(at.x, floorY() + 14, at.z), new Vec3(at.x, floorY(), at.z)))
                     .onHit((s, player) -> {
                         if (hit.add(player.getUUID())) {
@@ -802,7 +803,7 @@ public class Raiju extends GuardMob {
         for (int i = 0; i < shocks; i++) {
             double a = i < others.size() ? Telegraph.angleOf(others.get(i).getX() - getX(), others.get(i).getZ() - getZ())
                     : angle + Math.PI * 2 * (i + 1) / (shocks + 1);
-            tg(server, TelegraphShape.line(getX(), getZ(), a, CLAW_SHOCK_LENGTH, 1.0), CLAW_WARN, D).target(i < others.size() ? others.get(i) : null)
+            tg(server, TelegraphShape.line(getX(), getZ(), a, CLAW_SHOCK_LENGTH, 1.0), CLAW_WARN, D).prop(PropFx.along("lightning").size(0.5f)).target(i < others.size() ? others.get(i) : null)
                     .onHit((s, player) -> player.hurt(attackSource(), CLAW_SHOCK_DAMAGE))
                     .start();
         }
@@ -859,7 +860,7 @@ public class Raiju extends GuardMob {
             rodPos = null;
         }
         final BlockPos toRod = rodPos;
-        Telegraph.Builder b = tg(server, TelegraphShape.circle(at.x, at.z, StormStrike.RADIUS), RING_WARN, D)
+        Telegraph.Builder b = tg(server, TelegraphShape.circle(at.x, at.z, StormStrike.RADIUS), RING_WARN, D).prop(PropFx.rise("lightning"))
                 .onImpact(s -> {
                     if (toRod != null) {
                         Vec3 tip = new Vec3(toRod.getX() + 0.5, toRod.getY() + StormRods.HEIGHT, toRod.getZ() + 0.5);

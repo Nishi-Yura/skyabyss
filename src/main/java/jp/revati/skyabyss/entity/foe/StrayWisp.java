@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -109,7 +110,7 @@ public class StrayWisp extends ContinentFoe {
             if (t != null && t.isAlive() && distanceTo(t) <= START_RANGE && hasLineOfSight(t)) {
                 begin(t, "pulse");
                 double floor = t.getY();
-                Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RADIUS))
+                Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RADIUS)).prop(PropFx.ring("wisp_orb", 5).size(0.45f))
                         .floor(floor).warn(WARN).danger().owner(this).target(t)
                         .startSound(MobSounds.STRAY_WISP_PULSE.get(), 0.9f, 1f)
                         .victims(this::canHit)

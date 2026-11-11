@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -319,7 +320,7 @@ public abstract class DungeonBoss extends RegionBoss {
         cue(bossId(), "rage", RAGE_WARN);
         server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.55f);
         server().sendParticles(ParticleTypes.ANGRY_VILLAGER, getX(), getY() + getBbHeight(), getZ(), 10, getBbWidth() * 0.4, 0.4, getBbWidth() * 0.4, 0);
-        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RAGE_RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RAGE_RADIUS)).prop(PropFx.ring(spikeProp(), 10))
                 .floor(getY()).warn(RAGE_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 6, RAGE_RADIUS * 0.3, 0.2, RAGE_RADIUS * 0.3, 0))
@@ -377,6 +378,34 @@ public abstract class DungeonBoss extends RegionBoss {
         }
     }
 
+    // 技の形 (combat/prop/PropFx) の、この主のダンジョンの属性の突き出る物 (骨・貝・晶・氷・熔岩)
+    protected String spikeProp() {
+        String id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(getType()).toString();
+        for (jp.revati.skyabyss.dungeon.Dungeon d : jp.revati.skyabyss.dungeon.Dungeon.values()) {
+            if (id.equals(d.boss) || id.equals(d.midBoss)) {
+                return switch (d.element) {
+                    case TIDE -> "shell_spike";
+                    case WIND -> d.id.contains("ice") ? "ice_spike" : "crystal_spike";
+                    case ASH -> "lava_pillar";
+                    default -> "bone_spike";
+                };
+            }
+        }
+        return "bone_spike";
+    }
+
+    // 吹きつけ (spray) の飛ぶ物: 火 → 火の玉、雷 → 風の刃 (梟) か晶の棘、墨 (海月の触手の鞭) → なし (触手は体の技)
+    @javax.annotation.Nullable
+    protected PropFx sprayProp(net.minecraft.core.particles.ParticleOptions look) {
+        if (look == ParticleTypes.FLAME || look == ParticleTypes.SOUL_FIRE_FLAME) {
+            return PropFx.shots("fireball", 3).size(0.6f);
+        }
+        if (look == ParticleTypes.ELECTRIC_SPARK) {
+            return bossId().contains("owl") ? PropFx.shots("wind_blade", 3) : PropFx.shots("crystal_spike", 3).size(0.6f);
+        }
+        return null;
+    }
+
     // 跳び込み: 人のいる所に円 (半径 radius、予告 warn)。落ちるときに主がそこへ移り、円の中を打つ。続けて外へ輪の衝撃 (半径 radius 〜 radius+4)
     protected void leapAt(LivingEntity target, String action, int warn, double radius, float dmg) {
         begin(target, action);
@@ -396,7 +425,7 @@ public abstract class DungeonBoss extends RegionBoss {
                     player.hurtMarked = true;
                 })
                 .start();
-        Telegraph.in(server(), TelegraphShape.ring(at.x, at.z, radius, radius + 4)).floor(at.y).warn(warn + 8).danger().owner(this).target(target)
+        Telegraph.in(server(), TelegraphShape.ring(at.x, at.z, radius, radius + 4)).prop(PropFx.ring(spikeProp(), 10)).floor(at.y).warn(warn + 8).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * dmg * 0.6f);
@@ -414,7 +443,7 @@ public abstract class DungeonBoss extends RegionBoss {
         double base = Telegraph.angleOf(forward());
         for (int k = -1; k <= 1; k += 2) {
             double ang = base + Math.toRadians(halfDeg * 0.5 * k);
-            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), ang, range, Math.toRadians(halfDeg * 0.6))).floor(getY()).warn(warn + (k > 0 ? 10 : 0))
+            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), ang, range, Math.toRadians(halfDeg * 0.6))).prop(sprayProp(look)).floor(getY()).warn(warn + (k > 0 ? 10 : 0))
                     .active(active).danger().owner(this).target(target).victims(this::canHit)
                     .onImpact(server -> {
                         for (double d = 1.5; d <= range; d += 1.2) {

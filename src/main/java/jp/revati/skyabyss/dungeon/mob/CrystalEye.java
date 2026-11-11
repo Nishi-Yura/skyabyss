@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,7 +41,7 @@ public class CrystalEye extends DungeonFloater {
         }
         begin(target, "gaze");
         Vec3 at = target.position();
-        Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, RADIUS)).prop(PropFx.rise("lightning"))
                 .floor(at.y).warn(WARN).danger().owner(this).target(target)
                 .startSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 1.4f)
                 .victims(this::canHit)

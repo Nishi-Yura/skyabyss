@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe.late;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -51,7 +52,7 @@ public class StormJelly extends LateFoe {
         begin(target, "charge");
         double x = getX();
         double z = getZ();
-        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS)).prop(PropFx.ring("lightning", 6).size(0.6f))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.STRAY_WISP_PULSE.get(), 1.2f, 0.6f)
                 .victims(this::canHit)

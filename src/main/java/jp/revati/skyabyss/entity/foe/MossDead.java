@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -55,7 +56,7 @@ public class MossDead extends ContinentFoe {
             spores = true;
             lastSpores = tickCount;
             begin(target, "spores");
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SPORE_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SPORE_RADIUS)).prop(PropFx.scatter("spore", 4))
                     .floor(getY()).warn(SPORE_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.MOSS_DEAD_SPORES.get(), 1.0f, 1.0f)
                     .victims(this::canHit)

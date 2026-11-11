@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob.deep;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,7 +110,7 @@ public class LavaWyrm extends DungeonBoss {
             begin(target, "breath");
             cue("lava_wyrm", "breath", BREATH_WARN);
             double a = Telegraph.angleOf(target.position().subtract(position()));
-            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), a, BREATH_RANGE, Math.toRadians(60)))
+            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), a, BREATH_RANGE, Math.toRadians(60))).prop(PropFx.shots("fireball", 3))
                     .floor(getY()).warn(BREATH_WARN).active(60).repeatEvery(20).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {

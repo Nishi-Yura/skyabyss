@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -257,7 +258,7 @@ public class ElderSentinel extends GuardMob {
             faceTarget(getTarget());
             double cx = getX();
             double cz = getZ();
-            Telegraph.in(server, TelegraphShape.circle(cx, cz, STOMP_RADIUS))
+            Telegraph.in(server, TelegraphShape.circle(cx, cz, STOMP_RADIUS)).prop(PropFx.ring("bone_spike", 8))
                     .floor(getY()).warn(STOMP_WARN).danger().owner(this)
                     .target(getTarget())
                     .victims(this::canHit)

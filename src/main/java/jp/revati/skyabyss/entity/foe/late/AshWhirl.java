@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe.late;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -54,7 +55,7 @@ public class AshWhirl extends LateFoe {
         begin(target, "spin");
         double x = getX();
         double z = getZ();
-        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS)).prop(PropFx.rise("whirlwind"))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.MOSS_DEAD_SPORES.get(), 1.2f, 0.7f)
                 .victims(this::canHit)

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch5.warden;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -269,7 +270,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             return;
         }
         double d = dmg();
-        Telegraph.in(level, TelegraphShape.circle(heart.getX() + 0.5, heart.getZ() + 0.5, RING_RADIUS)).floor(heart.getY()).warn(RING_WARN).danger().owner(this)
+        Telegraph.in(level, TelegraphShape.circle(heart.getX() + 0.5, heart.getZ() + 0.5, RING_RADIUS)).prop(PropFx.ring("tentacle", 8).size(0.8f)).floor(heart.getY()).warn(RING_WARN).danger().owner(this)
                 .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), (float) d)).start();
     }
 
@@ -558,9 +559,9 @@ public class HeartWarden extends Monster implements GeoEntity {
         double x = getX();
         double z = getZ();
         double y = getY();
-        Telegraph.in(level, TelegraphShape.ring(x, z, 2, 5.5)).floor(y).warn(24).danger().owner(this)
+        Telegraph.in(level, TelegraphShape.ring(x, z, 2, 5.5)).prop(PropFx.ring("tentacle", 8).size(0.7f)).floor(y).warn(24).danger().owner(this)
                 .onImpact(lvl -> lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.4f)).onHit(hit(1.0)).start();
-        Telegraph.in(level, TelegraphShape.ring(x, z, 5.5, 9.5)).floor(y).warn(38).danger().owner(this)
+        Telegraph.in(level, TelegraphShape.ring(x, z, 5.5, 9.5)).prop(PropFx.ring("tentacle", 12).size(0.8f)).floor(y).warn(38).danger().owner(this)
                 .onImpact(lvl -> {
                     lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.3f);
                     lvl.sendParticles(ParticleTypes.SONIC_BOOM, x, y + 1, z, 1, 0, 0, 0, 0);

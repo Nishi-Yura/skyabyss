@@ -51,7 +51,7 @@ public final class MoonMobRenderers {
         event.registerEntityRenderer(MoonMobsSetup.SHADE_STRIDER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.ShadeStrider.ID, 0.7f));
         event.registerEntityRenderer(MoonMobsSetup.MIRROR_BEARER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.MirrorBearer.ID, 0.7f));
         event.registerEntityRenderer(MoonMobsSetup.FULL_KEEPER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.FullKeeper.ID, 1.1f, 1.1f));
-        event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.field.FieldBlocks.FALLING_LIGHT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+        event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.field.FieldBlocks.FALLING_LIGHT.get(), FallingLightRenderer::new);
         event.registerEntityRenderer(MoonMobsSetup.RIFT_WING.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftWing.ID, 0.0f));
         event.registerEntityRenderer(MoonMobsSetup.RIFT_ARMOR.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftArmor.ID, 0.5f));
         event.registerEntityRenderer(MoonMobsSetup.RIFT_SERPENT.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftSerpent.ID, 0.6f));

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe.late;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -52,7 +53,7 @@ public class EmberSpitter extends LateFoe {
         if (distance < 4) {
             puffing = true;
             begin(target, "puff");
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), PUFF_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), PUFF_RADIUS)).prop(PropFx.ring("ash_ball", 5).size(0.45f))
                     .floor(getY()).warn(PUFF_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.6, getZ(), 40, 1.2, 0.4, 1.2, 0.02))
@@ -68,7 +69,7 @@ public class EmberSpitter extends LateFoe {
         double x = target.getX();
         double z = target.getZ();
         double y = target.getY();
-        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS)).prop(PropFx.toss("fireball").size(0.8f))
                 .floor(y).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.MOSS_CRAWLER_AMBIENT.get(), 1.0f, 0.6f)
                 .victims(this::canHit)

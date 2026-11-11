@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.trial.raid.storm;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -336,7 +337,7 @@ public final class FeatherCarry extends RaidRoom {
         UUID who = carrier.getUUID();
         int gen = generation;
         pending = true;
-        Telegraph.in(level, TelegraphShape.circle(cx, cz, STRIKE_R))
+        Telegraph.in(level, TelegraphShape.circle(cx, cz, STRIKE_R)).prop(PropFx.rise("lightning"))
                 .floor(carrier.getY()).warn(WARN).danger().target(carrier)
                 .startSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 0.6f, 1.6f)
                 .victims(p -> false)

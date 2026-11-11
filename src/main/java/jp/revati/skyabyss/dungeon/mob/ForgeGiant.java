@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,7 +114,7 @@ public class ForgeGiant extends DungeonBoss {
             lastStomp = tickCount;
             begin(target, "stomp");
             cue("forge_giant", "stomp", STOMP_WARN);
-            Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), STOMP_INNER, STOMP_OUTER))
+            Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), STOMP_INNER, STOMP_OUTER)).prop(PropFx.ring("lava_pillar", 10))
                     .floor(getY()).warn(STOMP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {

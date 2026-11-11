@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.foe.ContinentFoe;
@@ -49,7 +50,7 @@ public class HornBeetle extends ContinentFoe {
         }
         begin(target, "bolt");
         Vec3 f = forward();
-        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), LENGTH, HALF_WIDTH))
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), LENGTH, HALF_WIDTH)).prop(PropFx.along("lightning").size(0.55f))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(SoundEvents.BEACON_POWER_SELECT, 0.6f, 1.8f)
                 .victims(this::canHit)

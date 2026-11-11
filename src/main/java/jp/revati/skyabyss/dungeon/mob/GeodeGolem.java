@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,7 +88,7 @@ public class GeodeGolem extends DungeonBoss {
             lastPound = tickCount;
             begin(target, "pound");
             cue("geode_golem", "pound", POUND_WARN);
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), POUND_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), POUND_RADIUS)).prop(PropFx.ring("crystal_spike", 8))
                     .floor(getY()).warn(POUND_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
@@ -136,7 +137,7 @@ public class GeodeGolem extends DungeonBoss {
             spots.add(position().add(Math.cos(a) * (5 + random.nextDouble() * 7), 0, Math.sin(a) * (5 + random.nextDouble() * 7)));
         }
         for (Vec3 s : spots) {
-            Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.4))
+            Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.4)).prop(PropFx.fall("crystal_spike").size(0.9f))
                     .floor(getY()).warn(SHARDS_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {

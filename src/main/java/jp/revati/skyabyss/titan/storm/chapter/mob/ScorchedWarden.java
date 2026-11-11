@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.chapter.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.combat.BossCue;
@@ -205,7 +206,7 @@ public class ScorchedWarden extends FeatherWarden {
         getNavigation().stop();
         double cx = getX();
         double cz = getZ();
-        Telegraph.in((ServerLevel) level(), TelegraphShape.circle(cx, cz, RING_RADIUS))
+        Telegraph.in((ServerLevel) level(), TelegraphShape.circle(cx, cz, RING_RADIUS)).prop(PropFx.ring("lightning", 8).size(0.6f))
                 .floor(getY()).warn(RING_WARN).danger().owner(this)
                 .startSound(Ch3Mobs.WARDEN_RING.get(), 1.2f, 1.0f)
                 .victims(p -> fair(p) && canAttack(p))

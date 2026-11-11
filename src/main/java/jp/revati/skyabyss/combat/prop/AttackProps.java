@@ -25,7 +25,11 @@ public final class AttackProps {
     // 種類 (模型の名前 prop_<種類>)
     public static final String[] KINDS = {
             "bone_spike", "rock", "bone_shard", "tentacle", "ink_blob", "crystal_spike", "fireball", "lava_pillar",
-            "ice_spike", "icicle", "water_spout", "coral_spear", "lightning", "ash_ball", "shell_spike", "pearl"};
+            "ice_spike", "icicle", "water_spout", "coral_spear", "lightning", "ash_ball", "shell_spike", "pearl",
+            // 2026-11-12: 野の敵の技 (矢・矢の雨・風の刃・胞子・鬼火)
+            "arrow", "arrow_volley", "wind_blade", "spore", "wisp_orb", "net", "whirlwind",
+            // 月と雲の主の技 (光の柱・羽根・秤の錘)
+            "light_pillar", "feather", "weight"};
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<AttackProp>>> TYPES = new LinkedHashMap<>();
 

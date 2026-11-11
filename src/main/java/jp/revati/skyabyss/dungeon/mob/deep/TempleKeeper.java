@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob.deep;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class TempleKeeper extends DungeonBoss {
             lastFlood = tickCount;
             begin(target, "flood");
             cue("temple_keeper", "flood", FLOOD_WARN);
-            Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), FLOOD_INNER, FLOOD_OUTER))
+            Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), FLOOD_INNER, FLOOD_OUTER)).prop(PropFx.ring("water_spout", 12))
                     .floor(getY()).warn(FLOOD_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
@@ -93,7 +94,7 @@ public class TempleKeeper extends DungeonBoss {
             cue("temple_keeper", "gaze", GAZE_WARN);
             Vec3 f = forward();
             double a = Telegraph.angleOf(f);
-            Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, GAZE_LENGTH, 1.3))
+            Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, GAZE_LENGTH, 1.3)).prop(PropFx.along("water_spout").size(0.6f))
                     .floor(getY()).warn(GAZE_WARN).active(GAZE_ACTIVE).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {

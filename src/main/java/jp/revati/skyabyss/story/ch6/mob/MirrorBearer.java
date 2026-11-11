@@ -181,6 +181,10 @@ public class MirrorBearer extends MoonMob {
                     sl.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
             }
+            if (aim == TELL - 4) {
+                // 技の形: 鏡から光の珠が線の先へ走る (打つ瞬間に着く)
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "pearl", MirrorBearer.this, beamFrom, beamFrom.add(beamDir.scale(BEAM)), 4, 4, 0f, 0.6f, 2);
+            }
             if (aim == TELL) {
                 playAction("beam");
                 playSound(MoonMobsSetup.BEARER_BEAM.get(), 1.4f, 1.0f);
