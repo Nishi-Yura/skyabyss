@@ -295,6 +295,10 @@ public class LastBellkeeper extends CloudMob {
             }
             if (t == WAVE_TELL + 2) {
                 playSound(CloudMobsSetup.KEEPER_WAVE.get(), 2.5f, 0.7f);
+                // 技の形: 広がる鐘の波の頭に、床から小さな光の柱が順に立つ
+                jp.revati.skyabyss.combat.prop.PropFx.motion(sl, "light_pillar", 0.32f,
+                        new jp.revati.skyabyss.combat.TelegraphShape.Wave(c.x, c.z, 1.0, WAVE_MAX, 0.8, new double[0], 0),
+                        floorY(), (int) Math.round(WAVE_MAX / WAVE_STEP), LastBellkeeper.this);
             }
             double r = (t - WAVE_TELL - 2) * WAVE_STEP;
             if (r < 0) {

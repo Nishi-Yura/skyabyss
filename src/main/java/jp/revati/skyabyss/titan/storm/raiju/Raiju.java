@@ -742,7 +742,7 @@ public class Raiju extends GuardMob {
             double gapHalf = Math.toRadians(26);
             int active = (int) Math.ceil((POUNCE_RING_REACH - POUNCE_RADIUS) / 0.45);
             for (int i = 0; i < (n >= 3 ? 2 : 1); i++) {
-                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, D)
+                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, D).prop(PropFx.ring("crystal_spike", 1))
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> player.hurt(attackSource(), POUNCE_RING_DAMAGE))
                         .start();

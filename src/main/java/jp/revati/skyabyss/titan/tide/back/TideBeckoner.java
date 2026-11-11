@@ -373,7 +373,7 @@ public class TideBeckoner extends TideMob {
     // 床を走る輪 (跳べば当たらない。安全な筋は何もない)
     private void ripple(ServerLevel server, double cx, double cz, double floor, double r0, double r1, int warn, double[] gaps, float damage) {
         int active = (int) Math.ceil((r1 - r0) / 0.55);
-        tg(server, TelegraphShape.wave(cx, cz, r0, r1, 0.9, gaps, LANE_HALF), floor, warn, D).active(active).jumpClear(0.9)
+        tg(server, TelegraphShape.wave(cx, cz, r0, r1, 0.9, gaps, LANE_HALF), floor, warn, D).prop(PropFx.ring("water_spout", 1)).active(active).jumpClear(0.9)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), damage);
                     Vec3 away = p.position().subtract(cx, floor, cz).multiply(1, 0, 1);

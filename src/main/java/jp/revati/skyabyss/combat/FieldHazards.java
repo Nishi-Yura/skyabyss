@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.combat;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -164,7 +165,7 @@ public final class FieldHazards {
         for (int i = 0; i < 2; i++) {
             double start = base + Math.PI * i;
             boolean first = i == 0;
-            Telegraph.in(level, TelegraphShape.sweep(cx, cz, start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).floor(cy).warn(SWEEP_WARN)
+            Telegraph.in(level, TelegraphShape.sweep(cx, cz, start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).prop(PropFx.along(jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(block.get()))).floor(cy).warn(SWEEP_WARN)
                     .active(SWEEP_ACTIVE).danger().owner(mob).victims(canHit::test)
                     .onImpact(s -> {
                         if (first) {

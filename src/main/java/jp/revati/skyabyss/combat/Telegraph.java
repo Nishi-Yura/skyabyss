@@ -576,7 +576,11 @@ public final class Telegraph {
                 onImpact.accept(level);
             }
             // 技の形 (combat/prop): look から、床から突き出る姿・雷の柱を出す
-            if (prop != null) {
+            if (shape instanceof TelegraphShape.Wave || shape instanceof TelegraphShape.Sweep) {
+                // 動く予告: 輪の頭・帯の腕が通る所へ順に突き出す (prop の種類、なければ見た目の属性から)
+                jp.revati.skyabyss.combat.prop.PropFx.motion(level, prop != null ? prop.kind() : jp.revati.skyabyss.combat.prop.PropFx.motionKind(look),
+                        prop != null ? prop.size() : 0f, shape, floor, active, owner);
+            } else if (prop != null) {
                 jp.revati.skyabyss.combat.prop.PropFx.impact(level, prop, shape, floor, owner);
             } else {
                 jp.revati.skyabyss.combat.prop.AttackProps.lookImpact(level, look, shape, floor, owner);

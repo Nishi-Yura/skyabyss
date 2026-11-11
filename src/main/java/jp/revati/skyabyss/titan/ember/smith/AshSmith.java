@@ -582,7 +582,7 @@ public class AshSmith extends EmberMob {
             for (double gap : gaps) {
                 tg(server, TelegraphShape.cone(impact.x, impact.z, gap, RING_MAX + 1, RING_LANE_HALF), SLAM_WINDUP, S).start();
             }
-            tg(server, TelegraphShape.wave(impact.x, impact.z, RING_START, RING_MAX, 0.9, gaps, RING_LANE_HALF), SLAM_WINDUP, D)
+            tg(server, TelegraphShape.wave(impact.x, impact.z, RING_START, RING_MAX, 0.9, gaps, RING_LANE_HALF), SLAM_WINDUP, D).prop(PropFx.ring("lava_pillar", 1))
                     .active((int) Math.ceil((RING_MAX - RING_START) / RING_SPEED)).jumpClear(0.6)
                     .onHit((s, p) -> hurtPlayer(p, attackSource(), RING_DAMAGE, "ring"))
                     .start();

@@ -164,6 +164,72 @@ public record PropFx(Mode mode, String kind, float size, int count, int linger) 
         }
     }
 
+    // ---------------------------------------------------------------- 動く予告 (広がる輪 Wave・振り回す帯 Sweep)
+    // 打つ瞬間から active tick のあいだに、輪の頭・帯の腕が通る所へ順に突き出す (riseLater)。輪の安全な筋 (gaps) には出さない。
+    // kind = null なら何もしない。size 0 = 輪の厚さ・帯の幅から
+    public static void motion(ServerLevel level, @Nullable String kind, float size, TelegraphShape shape, double floor, int active, @Nullable Entity owner) {
+        if (kind == null) {
+            return;
+        }
+        int span = Math.max(8, active);
+        int budget = 110;
+        if (shape instanceof TelegraphShape.Wave w) {
+            float sz = size > 0 ? size : (float) Mth.clamp(w.halfThickness() * 0.75, 0.45, 0.9);
+            int steps = Math.max(2, (int) Math.ceil((w.r1() - w.r0()) / 3.0));
+            for (int k = 0; k <= steps && budget > 0; k++) {
+                double r = w.r0() + (w.r1() - w.r0()) * k / steps;
+                int n = (int) Mth.clamp(Math.round(2 * Math.PI * r / 3.2), 5, 20);
+                double off = level.random.nextDouble() * Math.PI * 2 / n;
+                int delay = (int) Math.round(span * (double) k / steps);
+                for (int i = 0; i < n && budget > 0; i++) {
+                    double a = off + i * Math.PI * 2 / n;
+                    if (inGap(w.gaps(), w.gapHalf(), a)) {
+                        continue;
+                    }
+                    Vec3 at = new Vec3(w.cx() + Math.cos(a) * r, floor, w.cz() + Math.sin(a) * r);
+                    AttackProps.riseLater(level, kind, owner, at, (float) Math.toDegrees(a) + 90f, sz * (0.85f + 0.3f * level.random.nextFloat()), 6, delay);
+                    budget--;
+                }
+            }
+        } else if (shape instanceof TelegraphShape.Sweep sw) {
+            float sz = size > 0 ? size : (float) Mth.clamp(sw.halfWidth() * 0.6, 0.45, 0.9);
+            int steps = (int) Mth.clamp(Math.round(Math.abs(sw.span()) / Math.toRadians(14)), 3, 12);
+            for (int k = 0; k <= steps && budget > 0; k++) {
+                double a = sw.start() + sw.span() * k / steps;
+                int delay = (int) Math.round(span * (double) k / steps);
+                for (double d = 2.0; d <= sw.length() && budget > 0; d += 2.6) {
+                    Vec3 at = new Vec3(sw.x() + Math.cos(a) * d, floor, sw.z() + Math.sin(a) * d);
+                    AttackProps.riseLater(level, kind, owner, at, (float) Math.toDegrees(a) + k * 37f, sz * (0.85f + 0.3f * level.random.nextFloat()), 6, delay);
+                    budget--;
+                }
+            }
+        }
+    }
+
+    static boolean inGap(double[] gaps, double gapHalf, double a) {
+        for (double g : gaps) {
+            double d = Math.abs(Mth.wrapDegrees(Math.toDegrees(a - g)));
+            if (Math.toRadians(d) <= gapHalf) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 動く予告の、見た目 (AttackLook) の属性からの形 (石 → 骨の棘、水 → 水の柱、雷 → 晶の棘、余燼 → 熔岩の柱)。見た目が無ければ null
+    @Nullable
+    public static String motionKind(@Nullable jp.revati.skyabyss.combat.AttackLook look) {
+        if (look == null || look == jp.revati.skyabyss.combat.AttackLook.NONE) {
+            return null;
+        }
+        return switch (look.element) {
+            case WATER -> "water_spout";
+            case STORM -> "crystal_spike";
+            case EMBER -> "lava_pillar";
+            default -> "bone_spike";
+        };
+    }
+
     // ---------------------------------------------------------------- 形の測り
     static Vec3 center(TelegraphShape s, double floor) {
         return new Vec3(s.centerX(), floor, s.centerZ());
