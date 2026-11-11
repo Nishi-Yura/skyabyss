@@ -321,6 +321,8 @@ public final class SelfTestRunner {
         // 心臓の登場と倒れる演出・高さの固定 (四つの心臓の共通部分 HeartBoss)
         steps.add(Step.once("heart_cinematic (load)", jp.revati.skyabyss.entity.HeartCinematicSelfTest::load));
         steps.add(Step.once("heart_cinematic", 20, jp.revati.skyabyss.entity.HeartCinematicSelfTest::runSelfTest));
+        // 顔のアップの間は主を止める (BossIntro.hold)。SKYABYSS_SELFTEST_ONLY="boss hold"
+        steps.addAll(jp.revati.skyabyss.combat.BossHoldSelfTest.steps());
         // 心臓四体は「一方向に回り続けるだけ」では倒せない (回る人形は負け、予告を読む人形は生き残る) と、心臓の領域・技の名前。SKYABYSS_SELFTEST_ONLY="heart bots"
         steps.add(Step.once("heart bots (load)", jp.revati.skyabyss.combat.HeartBotSelfTest::load));
         steps.add(Step.once("heart bots", 40, jp.revati.skyabyss.combat.HeartBotSelfTest::runSelfTest));

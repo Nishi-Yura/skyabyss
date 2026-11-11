@@ -32,6 +32,9 @@ public final class BossCloseUp {
     private static int length;
     private static int age = -1;
     private static float hurtAt;
+    // 撮り始めの主の足もとと向き。アップの間はこれに固定して撮る (主が少しでも動いてもカメラは揺れない。2026-11-11 の声)
+    private static Vec3 anchor;
+    private static float anchorYaw;
 
     private BossCloseUp() {
     }
@@ -42,8 +45,9 @@ public final class BossCloseUp {
             return;
         }
         entityId = entity;
-        length = Mth.clamp(ticks - 20, IN + OUT + 10, MAX);
+        length = jp.revati.skyabyss.combat.BossIntro.closeUpLength(ticks);
         age = 0;
+        anchor = null;
         hurtAt = mc.player.hurtTime;
     }
 
@@ -98,6 +102,11 @@ public final class BossCloseUp {
         if (boss == null) {
             return false;
         }
+        if (anchor == null) {
+            anchor = boss.getPosition(partial);
+            anchorYaw = boss instanceof LivingEntity al ? Mth.rotLerp(partial, al.yBodyRotO, al.yBodyRot) : boss.getYRot();
+        }
+        Vec3 base = anchor;
         float t = age + partial;
         float in = Mth.clamp(t / IN, 0f, 1f);
         float out = Mth.clamp((length - t) / OUT, 0f, 1f);
@@ -106,21 +115,21 @@ public final class BossCloseUp {
         // 主の見た目の大きさ (描くときの倍率。当たりの箱より大きく描く主が多い) と、顔の高さ・前の向き
         float vs = mc.getEntityRenderDispatcher().getRenderer(boss) instanceof jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<?> r ? r.visualScale() : 1f;
         double vh = boss.getBbHeight() * Math.max(1f, vs * 0.75f);
-        Vec3 face = boss.getPosition(partial).add(0, vh * 0.82, 0);
+        Vec3 face = base.add(0, vh * 0.82, 0);
         Vec3 head = headPoint(mc, boss, vs);
         // 前の向き (yaw の正面) は下で決めるので、頭の置き場は主の向きで回してから足す
-        float byaw = boss instanceof LivingEntity bl ? Mth.rotLerp(partial, bl.yBodyRotO, bl.yBodyRot) : boss.getYRot();
+        float byaw = anchorYaw;
         if (head != null) {
             double c = Math.cos(Math.toRadians(byaw)), sn = Math.sin(Math.toRadians(byaw));
             // 模型の前は -Z。描くときに 180 - yaw 回すので、世界では (x, z) → 回した向き
             double wx = -head.x * c - (-head.z) * sn;
             double wz = -head.x * sn + (-head.z) * c;
-            face = boss.getPosition(partial).add(wx, head.y, wz);
+            face = base.add(wx, head.y, wz);
         }
-        float yaw = boss instanceof LivingEntity le ? Mth.rotLerp(partial, le.yBodyRotO, le.yBodyRot) : boss.getYRot();
+        float yaw = anchorYaw;
         // 主の顔が人の側を向いていないときは、人のいる側から撮る
         Vec3 fwd = Vec3.directionFromRotation(0, yaw);
-        Vec3 toViewer = viewer.getPosition(partial).subtract(boss.getPosition(partial)).multiply(1, 0, 1);
+        Vec3 toViewer = viewer.getPosition(partial).subtract(base).multiply(1, 0, 1);
         if (toViewer.lengthSqr() > 1e-4 && fwd.dot(toViewer.normalize()) < -0.2) {
             fwd = toViewer.normalize();
         }
