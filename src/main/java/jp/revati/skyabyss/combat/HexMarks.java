@@ -50,6 +50,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //     (combat/MeleeHits を通す)。会心は起こさない。撃った時と持ち物が変わっていたら当たらない
 //   - 敵を狙って置いた印は、遅れのあいだその敵の足もとについていく (2026-11-11 の声「呪術師弱すぎるかも。雑魚敵に最初めっちゃ苦戦する」:
 //     走って寄ってくる雑魚から印が外れていた)。地面に置いた印は動かない (置いて待つ術はそのまま)
+//   - 模型: 噴くとき、段の形 (prop_sk_hex_<段>) が床から突き出る。置き方は一発ごとの噴き方に合わせる (models)
 //   - 演出: 撃つ = 鈴の音と手元の潮の粉。印 = 潮の青緑の輪と、内で回る三角の呪の線 (遅れのあいだ縮む)。噴く = 足もとから魂の火と黒紫の粉の柱・低い鈴と牙の音
 // 見た目は少しずつ変わる (2026-11-11 の声「呪術師の遠距離攻撃も見た目かわっていく？」→「変えるようにして」。魔弾 StaffBolts と同じ作り):
 //   - 段 (レベル 10 ごと。Look): 三角の印 → 二重の輪 (逆に回る) → 五芒の印 → 鈴の紋 (四方の小さな輪) → 渦の紋 (三本の腕)。色も段ごと
@@ -238,6 +239,7 @@ public final class HexMarks {
     static void erupt(Mark m) {
         ServerPlayer p = m.owner;
         eruptFx(m.level, m.at, m.tier, m.shot);
+        models(m);
         if (!p.isAlive() || p.getMainHandItem().getItem() != m.item) {
             return;
         }
@@ -258,6 +260,30 @@ public final class HexMarks {
         } finally {
             p.attackStrengthTicker = ticker;
             p.fallDistance = fall;
+        }
+    }
+
+    // 噴く形 (prop_sk_hex_<段>)。一発ごとの噴き方に合わせて置く: 柱 = 真ん中に一本、波 = 真ん中と、少し遅れて外の輪に五本、牙 = 縁に四本
+    static void models(Mark m) {
+        String kind = "sk_hex_" + m.tier;
+        float yaw = m.level.random.nextFloat() * 360f;
+        switch (m.shot) {
+            case 1 -> {
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(m.level, kind, m.owner, m.at, yaw, 0.7f, 12);
+                for (int k = 0; k < 5; k++) {
+                    double a = Math.toRadians(yaw + k * 72);
+                    Vec3 q = m.at.add(Math.cos(a) * RADIUS * 0.75, 0, Math.sin(a) * RADIUS * 0.75);
+                    jp.revati.skyabyss.combat.prop.AttackProps.riseLater(m.level, kind, m.owner, q, yaw + k * 72, 0.5f, 10, 2);
+                }
+            }
+            case 2 -> {
+                for (int k = 0; k < 4; k++) {
+                    double a = Math.toRadians(yaw + k * 90);
+                    Vec3 q = m.at.add(Math.cos(a) * RADIUS * 0.85, 0, Math.sin(a) * RADIUS * 0.85);
+                    jp.revati.skyabyss.combat.prop.AttackProps.rise(m.level, kind, m.owner, q, yaw + k * 90, 0.6f, 12);
+                }
+            }
+            default -> jp.revati.skyabyss.combat.prop.AttackProps.rise(m.level, kind, m.owner, m.at, yaw, 1.0f, 14);
         }
     }
 

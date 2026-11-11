@@ -37,7 +37,9 @@ public final class AttackProps {
             "sk_smith_a_rise", "sk_smith_a_shot", "sk_smith_b_rise", "sk_smith_b_shot", "sk_smith_c_rise",
             "sk_smith_c_shot", "sk_archer_a_rise", "sk_archer_a_shot", "sk_archer_b_rise", "sk_archer_b_shot",
             "sk_archer_c_rise", "sk_archer_c_shot", "sk_mage_a_rise", "sk_mage_a_shot", "sk_mage_b_rise",
-            "sk_mage_b_shot", "sk_mage_c_rise", "sk_mage_c_shot", "sk_deep_rise", "sk_past_rise"};
+            "sk_mage_b_shot", "sk_mage_c_rise", "sk_mage_c_shot", "sk_deep_rise", "sk_past_rise",
+            // 通常攻撃の形 (段ごと 0〜4): 魔法使いの魔弾 (combat/StaffBolts) と呪術師の呪印 (combat/HexMarks)。tools/gen/mobs/attack_props/build_basic_props.py
+            "sk_bolt_0", "sk_bolt_1", "sk_bolt_2", "sk_bolt_3", "sk_bolt_4", "sk_hex_0", "sk_hex_1", "sk_hex_2", "sk_hex_3", "sk_hex_4"};
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<AttackProp>>> TYPES = new LinkedHashMap<>();
 
@@ -285,5 +287,19 @@ public final class AttackProps {
         float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
         p.setup(AttackProp.TOSS, from, to, warn - ft, ft, linger, size, arc, yaw);
         spawn(level, p);
+    }
+
+    // まっすぐ飛ぶ (弧なし)。すぐ見え、flight tick で to に着いて消える。途中で当たったら呼んだ側が discard する (魔弾)
+    @Nullable
+    public static AttackProp fly(ServerLevel level, String kind, @Nullable Entity owner, Vec3 from, Vec3 to, int flight, float size) {
+        AttackProp p = make(level, kind, owner);
+        if (p == null) {
+            return null;
+        }
+        Vec3 d = to.subtract(from);
+        float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
+        p.setup(AttackProp.TOSS, from, to, 0, Math.max(1, flight), 0, size, 0f, yaw);
+        spawn(level, p);
+        return p;
     }
 }

@@ -48,6 +48,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   - 飛ぶ: SPEED ブロック / tick で RANGE まで (着くまで少しかかる)。壁で消える。最初に触れた敵に当たる (当たりの太さ FAT)
 //   - 傷: 当たった時に、撃った時の溜めのまま近接の一撃と同じ傷 (combat/MeleeHits を通す: 同じ敵を殴れる間・武器の効き目)。
 //         跳んで撃っても会心にならない (落ちている間の会心はここでは起こさない)。撃った時と持ち物が変わっていたら当たらない
+//   - 模型: 段の形 (prop_sk_bolt_<段>、combat/prop/AttackProps.fly) が弾と一緒に飛ぶ。敵に当たったら消え、壁・届く所では着いて消える
 //   - 演出: 撃つ = 杖の先 (目から 1.3 先) に小さな光の輪と火花・澄んだ鐘の音。飛ぶ = 粉の光の芯と回る輪・後ろに金の粉の尾 (離れてから光の粒)。
 //            当たる = 六つの方向へ光の筋と火花が散る星形と砕ける音。届かず消える = 小さくほどける。一人称で画面を覆わないよう、大きな粒は目の前に出さない
 // 見た目は少しずつ変わる (2026-11-11 の声「魔法使いの通常の攻撃の見た目も少しづつ変わった方がいいと思う。あきない」):
@@ -118,6 +119,9 @@ public final class StaffBolts {
         int age;
         @Nullable
         Entity hit;
+        // 飛ぶ模型 (prop_sk_bolt_<段>)。当たって止まったら消す
+        @Nullable
+        Entity model;
         boolean done;
 
         Bolt(ServerPlayer owner, Vec3 pos, Vec3 dir, int ticker, Item item, int tier, int shot) {
@@ -196,10 +200,25 @@ public final class StaffBolts {
         int shot = SHOT.merge(p.getUUID(), 1, (a, one) -> (a + one) % 3);
         Bolt b = new Bolt(p, tip, look, p.attackStrengthTicker, p.getMainHandItem().getItem(), tier(jp.revati.skyabyss.rpg.Growth.get(p).level), shot);
         BOLTS.add(b);
+        b.model = model(b);
         castFx(b.level, tip, look, LOOKS[b.tier], b.shot);
         // 撃つと溜めは空になる (振りと同じ)
         p.resetAttackStrengthTicker();
         return b;
+    }
+
+    // 飛ぶ模型の大きさ (芯は模型の 0.25 ブロックの高さ。描く側の傾きの軸)
+    static final float MODEL_SIZE = 1.5f;
+
+    // 飛ぶ模型 (段の形)。壁か届く所までまっすぐ、弾と同じ速さで飛ぶ。敵に当たって止まったら step が消す
+    @Nullable
+    static Entity model(Bolt b) {
+        Vec3 end = b.pos.add(b.dir.scale(SPEED * LIFE));
+        HitResult wall = b.level.clip(new ClipContext(b.pos, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, b.owner));
+        Vec3 to = wall.getType() == HitResult.Type.MISS ? end : wall.getLocation();
+        int flight = Math.max(1, (int) Math.round(to.distanceTo(b.pos) / SPEED));
+        Vec3 lift = new Vec3(0, 0.25 * MODEL_SIZE, 0);
+        return jp.revati.skyabyss.combat.prop.AttackProps.fly(b.level, "sk_bolt_" + b.tier, b.owner, b.pos.subtract(lift), to.subtract(lift), flight, MODEL_SIZE);
     }
 
     // 杖の先 (目の前、利き手の側へ少し、少し下)
@@ -232,6 +251,9 @@ public final class StaffBolts {
     static void step(Bolt b) {
         ServerPlayer owner = b.owner;
         if (owner.isRemoved() || owner.level() != b.level) {
+            if (b.model != null) {
+                b.model.discard();
+            }
             b.done = true;
             return;
         }
@@ -245,6 +267,9 @@ public final class StaffBolts {
                 b.pos = at;
                 strike(b, foe);
                 impactFx(b.level, at, b.dir, LOOKS[b.tier], b.tier, b.shot);
+                if (b.model != null) {
+                    b.model.discard();
+                }
                 b.done = true;
                 return;
             }

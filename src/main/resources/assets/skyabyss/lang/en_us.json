@@ -3248,5 +3248,15 @@
   "entity.skyabyss.prop_sk_mage_c_rise": "Skill shape: sk_mage_c_rise",
   "entity.skyabyss.prop_sk_mage_c_shot": "Skill shape: sk_mage_c_shot",
   "entity.skyabyss.prop_sk_deep_rise": "Skill shape: sk_deep_rise",
-  "entity.skyabyss.prop_sk_past_rise": "Skill shape: sk_past_rise"
+  "entity.skyabyss.prop_sk_past_rise": "Skill shape: sk_past_rise",
+  "entity.skyabyss.prop_sk_bolt_0": "Skill shape: sk_bolt_0",
+  "entity.skyabyss.prop_sk_bolt_1": "Skill shape: sk_bolt_1",
+  "entity.skyabyss.prop_sk_bolt_2": "Skill shape: sk_bolt_2",
+  "entity.skyabyss.prop_sk_bolt_3": "Skill shape: sk_bolt_3",
+  "entity.skyabyss.prop_sk_bolt_4": "Skill shape: sk_bolt_4",
+  "entity.skyabyss.prop_sk_hex_0": "Skill shape: sk_hex_0",
+  "entity.skyabyss.prop_sk_hex_1": "Skill shape: sk_hex_1",
+  "entity.skyabyss.prop_sk_hex_2": "Skill shape: sk_hex_2",
+  "entity.skyabyss.prop_sk_hex_3": "Skill shape: sk_hex_3",
+  "entity.skyabyss.prop_sk_hex_4": "Skill shape: sk_hex_4"
 }

@@ -3248,5 +3248,15 @@
   "entity.skyabyss.prop_sk_mage_c_rise": "技の形: sk_mage_c_rise",
   "entity.skyabyss.prop_sk_mage_c_shot": "技の形: sk_mage_c_shot",
   "entity.skyabyss.prop_sk_deep_rise": "技の形: sk_deep_rise",
-  "entity.skyabyss.prop_sk_past_rise": "技の形: sk_past_rise"
+  "entity.skyabyss.prop_sk_past_rise": "技の形: sk_past_rise",
+  "entity.skyabyss.prop_sk_bolt_0": "技の形: sk_bolt_0",
+  "entity.skyabyss.prop_sk_bolt_1": "技の形: sk_bolt_1",
+  "entity.skyabyss.prop_sk_bolt_2": "技の形: sk_bolt_2",
+  "entity.skyabyss.prop_sk_bolt_3": "技の形: sk_bolt_3",
+  "entity.skyabyss.prop_sk_bolt_4": "技の形: sk_bolt_4",
+  "entity.skyabyss.prop_sk_hex_0": "技の形: sk_hex_0",
+  "entity.skyabyss.prop_sk_hex_1": "技の形: sk_hex_1",
+  "entity.skyabyss.prop_sk_hex_2": "技の形: sk_hex_2",
+  "entity.skyabyss.prop_sk_hex_3": "技の形: sk_hex_3",
+  "entity.skyabyss.prop_sk_hex_4": "技の形: sk_hex_4"
 }
