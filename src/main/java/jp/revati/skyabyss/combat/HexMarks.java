@@ -47,7 +47,9 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   - 狙い: 目から RANGE までの先。敵を指していればその足もと、地面を指していればそこ。空を指していれば DROP まで下の地面。何もなければ出ない
 //   - 溜め・マナ・連打よけは魔弾と同じ (READY 以上・最大マナの 4%・MIN_GAP)。撃つと溜めは空になる
 //   - 遅れ: DELAY tick で噴き上がる。その時に印の中 (横 RADIUS・上 HEIGHT) にいる敵、最大 MAX_TARGETS 体に、撃った時の溜めのまま近接の一撃と同じ傷
-//     (combat/MeleeHits を通す)。動く敵には外れうる (置いて当てる術)。会心は起こさない。撃った時と持ち物が変わっていたら当たらない
+//     (combat/MeleeHits を通す)。会心は起こさない。撃った時と持ち物が変わっていたら当たらない
+//   - 敵を狙って置いた印は、遅れのあいだその敵の足もとについていく (2026-11-11 の声「呪術師弱すぎるかも。雑魚敵に最初めっちゃ苦戦する」:
+//     走って寄ってくる雑魚から印が外れていた)。地面に置いた印は動かない (置いて待つ術はそのまま)
 //   - 演出: 撃つ = 鈴の音と手元の潮の粉。印 = 潮の青緑の輪と、内で回る三角の呪の線 (遅れのあいだ縮む)。噴く = 足もとから魂の火と黒紫の粉の柱・低い鈴と牙の音
 // 見た目は少しずつ変わる (2026-11-11 の声「呪術師の遠距離攻撃も見た目かわっていく？」→「変えるようにして」。魔弾 StaffBolts と同じ作り):
 //   - 段 (レベル 10 ごと。Look): 三角の印 → 二重の輪 (逆に回る) → 五芒の印 → 鈴の紋 (四方の小さな輪) → 渦の紋 (三本の腕)。色も段ごと
@@ -72,12 +74,17 @@ public final class HexMarks {
     private static final Map<UUID, Long> LAST = PlayerMaps.track(new HashMap<>());
     private static final Map<UUID, Long> MANA_HINT = PlayerMaps.track(new HashMap<>());
     private static final List<Mark> MARKS = new ArrayList<>();
+    // aim が敵を指したとき、その敵 (cast がすぐ読む)
+    private static final Map<UUID, LivingEntity> AIMED = PlayerMaps.track(new HashMap<>());
 
     // 浮いている呪印
     static final class Mark {
         final ServerPlayer owner;
         final ServerLevel level;
-        final Vec3 at;
+        Vec3 at;
+        // 狙った敵 (地面に置いたときは null)。遅れのあいだ印がついていく
+        @Nullable
+        LivingEntity foe;
         final int ticker;
         final Item item;
         final int tier;
@@ -131,8 +138,10 @@ public final class HexMarks {
         EntityHitResult ent = ProjectileUtil.getEntityHitResult(p.level(), p, eye, reach, new AABB(eye, reach).inflate(1.0),
                 e -> e instanceof LivingEntity le && SkillActions.isFoe(p, le), 0.3f);
         if (ent != null) {
+            AIMED.put(p.getUUID(), (LivingEntity) ent.getEntity());
             return ent.getEntity().position();
         }
+        AIMED.remove(p.getUUID());
         Vec3 from = block.getType() == HitResult.Type.MISS ? end
                 : block.getLocation().add(block.getDirection().getStepX() * 0.05, block.getDirection().getStepY() * 0.05, block.getDirection().getStepZ() * 0.05);
         // 下へ地面を探す (壁を指したら、その前の床)
@@ -184,6 +193,7 @@ public final class HexMarks {
         int shot = SHOT.merge(p.getUUID(), 1, (a, one) -> (a + one) % 3);
         int tier = tier(jp.revati.skyabyss.rpg.Growth.get(p).level);
         Mark m = new Mark(p, at, p.attackStrengthTicker, p.getMainHandItem().getItem(), tier, shot);
+        m.foe = AIMED.remove(p.getUUID());
         MARKS.add(m);
         castFx(m.level, p, at, m.tier, m.shot);
         p.resetAttackStrengthTicker();
@@ -213,6 +223,9 @@ public final class HexMarks {
             return;
         }
         m.age++;
+        if (m.foe != null && m.foe.isAlive() && m.foe.level() == m.level) {
+            m.at = m.foe.position();
+        }
         if (m.age < DELAY) {
             markFx(m.level, m.at, m.age, m.tier);
             return;
@@ -409,6 +422,11 @@ public final class HexMarks {
 
     // 置いて、噴き上がるまで進める。当たった敵 (置けなければ fired = false)
     static List<LivingEntity> castAndErupt(ServerPlayer p, boolean[] fired) {
+        return castAndErupt(p, fired, null);
+    }
+
+    // midway: 遅れの半ばに一度だけ走らせる (狙った敵が動くかを確かめる)
+    static List<LivingEntity> castAndErupt(ServerPlayer p, boolean[] fired, @Nullable Runnable midway) {
         Mark m = cast(p);
         fired[0] = m != null;
         if (m == null) {
@@ -416,6 +434,9 @@ public final class HexMarks {
         }
         MARKS.remove(m);
         for (int i = 0; i <= DELAY + 1 && !m.done; i++) {
+            if (i == DELAY / 2 && midway != null) {
+                midway.run();
+            }
             step(m);
         }
         return m.hits;

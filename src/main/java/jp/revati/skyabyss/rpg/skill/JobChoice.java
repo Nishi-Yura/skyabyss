@@ -28,11 +28,11 @@ public final class JobChoice {
     public static final String KEY = "skyabyss_first_job";
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
-    // 杖: 攻撃力 5、速さ 1.2 / 鈴杖: 攻撃力 4、速さ 1.4 / 短剣: 攻撃力 4、速さ 2.0 (攻撃力 = 1 + 2 + 品ごとの値)
+    // 杖: 攻撃力 5、速さ 1.2 / 鈴杖: 攻撃力 5、速さ 1.4 (2026-11-11 に 4 から。呪印は遅れて噴くぶん、魔弾より一撃を重く) / 短剣: 攻撃力 4、速さ 2.0 (攻撃力 = 1 + 2 + 品ごとの値)
     public static final DeferredItem<Item> STAFF = ITEMS.register("shrine_staff",
             () -> new StarterWeaponItem(new Item.Properties(), 2, 1.2f, "item.skyabyss.shrine_staff.desc"));
     public static final DeferredItem<Item> BELL_STAFF = ITEMS.register("shrine_bell_staff",
-            () -> new StarterWeaponItem(new Item.Properties(), 1, 1.4f, "item.skyabyss.shrine_bell_staff.desc"));
+            () -> new StarterWeaponItem(new Item.Properties(), 2, 1.4f, "item.skyabyss.shrine_bell_staff.desc"));
     public static final DeferredItem<Item> DAGGER = ITEMS.register("shrine_dagger",
             () -> new StarterWeaponItem(new Item.Properties(), 1, 2.0f, "item.skyabyss.shrine_dagger.desc"));
     // 剣: 攻撃力 5、速さ 1.6 / 鎚: 攻撃力 8、速さ 1.0 (どちらも 1 秒あたり 8。一章のエピックの武器を上回らない) / 弓: 矢の傷はふつうの弓と同じ

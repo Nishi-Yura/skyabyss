@@ -94,6 +94,14 @@ public final class HexMarkSelfTest {
             MeleeHits.forget(p);
             hits = HexMarks.castAndErupt(p, fired);
             check(f, fired[0] && hits.contains(a) && !hits.contains(b), "the hex mark hit a foe far from the mark");
+            // 狙った敵が遅れのあいだに動いても、印はついていく (2026-11-11「呪術師弱すぎる。雑魚に苦戦する」)
+            final Mob runner = a;
+            p.attackStrengthTicker = 100;
+            HexMarks.forgetForTest(p);
+            MeleeHits.forget(p);
+            hits = HexMarks.castAndErupt(p, fired, () -> runner.moveTo(base.getX() - 4.5, base.getY(), base.getZ() + 8.5, 180f, 0f));
+            check(f, fired[0] && hits.contains(a), "the hex mark did not follow the foe it was aimed at");
+            a.moveTo(base.getX() + 0.5, base.getY(), base.getZ() + 10.5, 180f, 0f);
             // 溜めが空なら置かない
             p.attackStrengthTicker = 0;
             HexMarks.forgetForTest(p);
