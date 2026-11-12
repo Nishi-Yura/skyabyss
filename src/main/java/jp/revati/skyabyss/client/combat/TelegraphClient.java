@@ -69,7 +69,7 @@ public final class TelegraphClient {
         }
 
         int lifetime() {
-            return warn + Math.max(0, active) + FLASH_TICKS;
+            return warn + Math.max(0, active) + Math.max(FLASH_TICKS, AreaFx.after(look));
         }
 
         // 点の床の高さ (歩ける床が無ければ NaN)。粒用。面と線は TelegraphGround の列を使って描く

@@ -1,0 +1,74 @@
+# 範囲攻撃の模型 (client/combat/AreaFx): 円・帯・扇が予告の形どおりに埋まるか、打った直後に消えるか、広がる輪・振り回す帯 (2026-11-13)
+# 留まる長さを延ばして撮る (打ってから 0.5 秒で消えるので): SKYABYSS_AREA_HOLD=40 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/area_props.txt -PshotsName=area_props
+world area_props flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doMobSpawning false
+cmd fill -24 -61 -24 24 -61 24 minecraft:smooth_basalt
+lowpoly on
+fov 70
+cmd gamemode spectator
+hud off
+cmd tp @s 0 -45 17 180 48
+waitchunks
+wait 200
+cmd title @s clear
+cmd tp @s 0 -45 17 180 48
+cmd kill @e[type=!minecraft:player,distance=..60]
+# ---- 石 (岩鯨): 円・帯・扇
+cmd skyabyss dev area whale_spike circle -9 -60 0 4 30
+cmd skyabyss dev area whale_crack line -3 -60 -6 12 30
+cmd skyabyss dev area whale_sweep cone 2 -60 3 8 30
+wait 20
+shot stone_warn
+wait 12
+shot stone_hit
+wait 3
+shot stone_full
+wait 50
+# ---- 潮
+cmd skyabyss dev area tide_spear circle -9 -60 0 4 30
+cmd skyabyss dev area tide_breath line -3 -60 -6 12 30
+cmd skyabyss dev area tide_whirl cone 2 -60 3 8 30
+wait 34
+shot water_full
+wait 50
+# ---- 雷
+cmd skyabyss dev area storm_bolt circle -9 -60 0 4 30
+cmd skyabyss dev area storm_chain line -3 -60 -6 12 30
+cmd skyabyss dev area storm_downdraft cone 2 -60 3 8 30
+wait 34
+shot storm_full
+wait 50
+# ---- 熾
+cmd skyabyss dev area ember_blaze circle -9 -60 0 4 30
+cmd skyabyss dev area ember_breath line -3 -60 -6 12 30
+cmd skyabyss dev area ember_crack cone 2 -60 3 8 30
+wait 34
+shot ember_full
+wait 50
+# ---- 広い円 (領域の大きさ) と、動く形 (広がる輪・振り回す帯)
+cmd skyabyss dev area domain_stone_spike circle 0 -60 0 9 30
+wait 34
+shot stone_wide
+wait 50
+cmd skyabyss dev area whale_leap_wave wave 0 -60 0 14 20
+wait 30
+shot wave_mid
+wait 12
+shot wave_late
+wait 50
+cmd skyabyss dev area whale_beam sweep 0 -60 0 14 20
+wait 30
+shot sweep_mid
+wait 12
+shot sweep_late
+wait 20

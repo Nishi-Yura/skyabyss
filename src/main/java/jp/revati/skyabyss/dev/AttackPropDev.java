@@ -48,5 +48,39 @@ public final class AttackPropDev {
                                             Vec3Argument.getVec3(ctx, "to"), IntegerArgumentType.getInteger(ctx, "warn"), 40, 4f, 1.4f, 200);
                                     return 1;
                                 })))))))));
+        // 範囲の模型 (client/combat/AreaFx) を撮る: 見た目 (AttackLook の名前) と形で、誰も傷つけない予告を出す
+        //   /skyabyss dev area <見た目> <形 circle|line|cone|wave|sweep> <x> <y> <z> <大きさ> <予告 tick>
+        event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
+                .then(Commands.literal("dev").then(Commands.literal("area").then(Commands.argument("look", StringArgumentType.word())
+                        .then(Commands.argument("shape", StringArgumentType.word()).then(Commands.argument("at", Vec3Argument.vec3())
+                                .then(Commands.argument("size", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(0.5, 40))
+                                        .then(Commands.argument("warn", IntegerArgumentType.integer(2, 400)).executes(ctx -> {
+                                            ServerLevel lv = ctx.getSource().getLevel();
+                                            Vec3 at = Vec3Argument.getVec3(ctx, "at");
+                                            double s = com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "size");
+                                            int warn = IntegerArgumentType.getInteger(ctx, "warn");
+                                            jp.revati.skyabyss.combat.AttackLook look;
+                                            try {
+                                                look = jp.revati.skyabyss.combat.AttackLook.valueOf(StringArgumentType.getString(ctx, "look").toUpperCase(java.util.Locale.ROOT));
+                                            } catch (IllegalArgumentException e) {
+                                                return 0;
+                                            }
+                                            int active = 0;
+                                            jp.revati.skyabyss.combat.TelegraphShape shape = switch (StringArgumentType.getString(ctx, "shape")) {
+                                                case "line" -> jp.revati.skyabyss.combat.TelegraphShape.line(at.x, at.z, 0, s, Math.max(1.0, s / 6));
+                                                case "cone" -> jp.revati.skyabyss.combat.TelegraphShape.cone(at.x, at.z, 0, s, Math.toRadians(35));
+                                                case "wave" -> {
+                                                    active = 30;
+                                                    yield jp.revati.skyabyss.combat.TelegraphShape.wave(at.x, at.z, 2, s, 0.9, new double[] {Math.PI / 2}, Math.toRadians(14));
+                                                }
+                                                case "sweep" -> {
+                                                    active = 30;
+                                                    yield jp.revati.skyabyss.combat.TelegraphShape.sweep(at.x, at.z, -Math.PI / 3, Math.PI * 2 / 3, s, 1.1);
+                                                }
+                                                default -> jp.revati.skyabyss.combat.TelegraphShape.circle(at.x, at.z, s);
+                                            };
+                                            jp.revati.skyabyss.combat.Telegraph.in(lv, shape).floor(at.y).warn(warn).active(active).look(look).victims(p -> false).start();
+                                            return 1;
+                                        })))))))));
     }
 }

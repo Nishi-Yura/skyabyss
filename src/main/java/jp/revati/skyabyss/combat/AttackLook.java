@@ -118,6 +118,15 @@ public enum AttackLook {
         this.weight = weight;
     }
 
+    // 打つ瞬間に、予告の形を埋める範囲の模型 (client/combat/AreaFx) を出すか。咆哮 (押し返すだけ) と、自前の弾が飛ぶ技 (撃ち出す帯・熾の粒) は出さない。
+    // 出す技は、床から一本だけ突き出る形・帯に間をあけて並ぶ形 (combat/prop/AttackProps.lookImpact・PropFx.motion) を出さない
+    public boolean area() {
+        if (this == NONE || name().endsWith("_ROAR")) {
+            return false;
+        }
+        return travel != Travel.SHOTS && this != EMBER_PELLET;
+    }
+
     public static AttackLook byId(int id) {
         AttackLook[] all = values();
         return id >= 0 && id < all.length ? all[id] : NONE;

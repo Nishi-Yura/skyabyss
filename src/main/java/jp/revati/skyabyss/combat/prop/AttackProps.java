@@ -177,7 +177,8 @@ public final class AttackProps {
                 case EMBER -> "fireball";
                 default -> "rock";
             };
-            fall(level, kind, owner, c, warn, 14, 16f, sizeOf(shape), 14);
+            // 範囲の模型 (client/combat/AreaFx) が出る技は、落ちた物を残さない (着いたら範囲の模型に入れ替わる)
+            fall(level, kind, owner, c, warn, 14, 16f, sizeOf(shape), look.area() ? 1 : 14);
         } else if (look.travel == jp.revati.skyabyss.combat.AttackLook.Travel.ARC && owner != null && el != jp.revati.skyabyss.combat.AttackLook.Element.STORM) {
             String kind = switch (el) {
                 case EMBER -> "ash_ball";
@@ -185,7 +186,7 @@ public final class AttackProps {
                 default -> "rock";
             };
             Vec3 from = owner.position().add(0, owner.getBbHeight() * 0.7, 0);
-            toss(level, kind, owner, from, c, warn, Math.min(warn, 20), 8f, Math.min(1.6f, sizeOf(shape)), 10);
+            toss(level, kind, owner, from, c, warn, Math.min(warn, 20), 8f, Math.min(1.6f, sizeOf(shape)), look.area() ? 1 : 10);
         }
     }
 
@@ -196,6 +197,10 @@ public final class AttackProps {
         }
         if (shape instanceof jp.revati.skyabyss.combat.TelegraphShape.Line l) {
             // 裂け目の技 (Impact.FISSURE) は帯に沿って棘が突き出る。光線の技 (Travel.BEAM) は帯に沿って属性の跡が残る (小さく、間をあけて)
+            // 範囲の模型 (client/combat/AreaFx) が帯を埋める技は、間をあけた棘を出さない
+            if (look.area()) {
+                return;
+            }
             boolean fissure = look.impact == jp.revati.skyabyss.combat.AttackLook.Impact.FISSURE;
             boolean beam = look.travel == jp.revati.skyabyss.combat.AttackLook.Travel.BEAM;
             if (!fissure && !beam) {
@@ -224,8 +229,8 @@ public final class AttackProps {
         var el = look.element;
         boolean storm = el == jp.revati.skyabyss.combat.AttackLook.Element.STORM;
         if (look.travel == jp.revati.skyabyss.combat.AttackLook.Travel.BOLT || (storm && look.travel == jp.revati.skyabyss.combat.AttackLook.Travel.FALL)) {
-            rise(level, "lightning", owner, c, level.random.nextFloat() * 360f, Math.min(1.6f, sizeOf(shape)), 6);
-        } else if (look.impact == jp.revati.skyabyss.combat.AttackLook.Impact.COLUMN) {
+            rise(level, "lightning", owner, c, level.random.nextFloat() * 360f, Math.min(1.6f, sizeOf(shape)), look.area() ? 3 : 6);
+        } else if (look.impact == jp.revati.skyabyss.combat.AttackLook.Impact.COLUMN && !look.area()) {
             String kind = switch (el) {
                 case WATER -> "shell_spike";
                 case STORM -> "crystal_spike";
