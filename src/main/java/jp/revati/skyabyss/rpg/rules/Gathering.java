@@ -26,22 +26,15 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
-// 採集 (docs/design/40 の 2 章)。アドベンチャーではブロックを壊せないので、決まったブロックを右クリックすると、
-// 壊さずに、壊したときと同じ品 (手の道具で掘った分) が手に入る。同じ所は人ごとにしばらく採れない (戻りの時間)。
-//   木 (丸太)・石と土・砂・砂利・粘土・鉱石・実った作物・花・きのこ・溶岩の塊・黒曜石・紫水晶。
-//   道具ごと (2026-10-27 の声「関連したツールでとれるように」): 丸太は斧、石・鉱石・黒曜石・溶岩の塊・紫水晶はつるはし、
-//   土・砂・砂利・粘土はシャベル。作物・花・きのこは素手でよい。採った物は市の素材屋が買い取る (使い道 = 鐘銭)。
-//   置く品で、売れず頼みにも使わないもの (花・きのこ・丸石以外の石など) は採れない (rpg/rules/NoPlaceables。2026-11-02「置く系のアイテムは手に入らないように」)
-//   都の中・巨神の背・深淵では採れない (作った物は採らせない)。サバイバルの人は今までどおり壊す
+// 採集 (docs/design/40 の 2 章)。アドベンチャーではブロックを壊せないので、実った作物を右クリックすると、
+// 壊さずに、刈ったときと同じ品 (mod の素材に替えたもの) が手に入る。同じ所は人ごとにしばらく採れない (戻りの時間)。道具は要らない。
+//   前は木・土・石・鉱石・黒曜石・紫水晶も道具で採れたが、2026-11-08 に使い道のない品をやめ、2026-11-12 に道具ごと鉱石もやめた
+//   (声「つるはしも消す」。鉱石の素材と黒曜石は市の素材屋で買える)。都の中・巨神の背・深淵では採れない。サバイバルの人は今までどおり壊す
 //   水は、空のバケツで水源を見て右クリックすると汲める (水は減らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Gathering {
     // 戻りの時間 (tick)
-    static final int WOOD = 20 * 20;
-    static final int STONE = 20 * 4;
-    static final int ORE = 20 * 60;
     static final int PLANT = 20 * 45;
-    static final int RARE = 20 * 180;
     static final int MAX_ENTRIES = 4096;
 
     // 人ごと。ログアウトで消える (PlayerMaps。2026-11-02 の監査: 消えずに溜まっていた)
@@ -51,37 +44,12 @@ public final class Gathering {
     }
 
     // そのブロックの戻りの時間。採れないブロックは 0。
-    // 2026-11-08 の声「土や木をとれるけど、なにこれ」: 使い道のない品 (丸太・土・石・砂・砂利・粘土・花・きのこ・かぼちゃなど) は採れなくした。
-    // 残すのは、Mod の素材になる鉱石・紫水晶・実った麦と、頼みに使う黒曜石だけ
+    // 2026-11-12: 道具をすべて消した (声「つるはしも消す」)。鉱石・黒曜石・紫水晶は採らない (素材と黒曜石は市の素材屋で買える)。残るのは実った作物 (素手)
     static int regrow(BlockState s) {
-        if (s.is(Blocks.DIAMOND_ORE) || s.is(Blocks.DEEPSLATE_DIAMOND_ORE) || s.is(Blocks.EMERALD_ORE) || s.is(Blocks.DEEPSLATE_EMERALD_ORE)
-                || s.is(Blocks.ANCIENT_DEBRIS) || s.is(Blocks.OBSIDIAN)) {
-            return RARE;
-        }
-        if (s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) {
-            return ORE;
-        }
         if (s.getBlock() instanceof CropBlock crop) {
             return crop.isMaxAge(s) ? PLANT : 0;
         }
-        if (s.is(Blocks.AMETHYST_CLUSTER)) {
-            return PLANT;
-        }
         return 0;
-    }
-
-    // そのブロックに要る道具 (null = 素手でよい)。採れるのは鉱石・紫水晶・黒曜石 (つるはし) と実った作物 (素手) だけ
-    // (2026-11-12: 木・土を採らなくなったので、斧とシャベルの品ごと消した)
-    @javax.annotation.Nullable
-    static net.minecraft.tags.TagKey<net.minecraft.world.item.Item> toolFor(BlockState s) {
-        if (s.getBlock() instanceof CropBlock) {
-            return null;
-        }
-        return net.minecraft.tags.ItemTags.PICKAXES;
-    }
-
-    static String toolKey(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag) {
-        return "pickaxe";
     }
 
     // 採った品: ブロックの品はそのまま、バニラの素材は mod の素材へ (置き換えの第 3 段。2026-10-27)、それ以外 (種・野菜など) は出さない
@@ -123,15 +91,6 @@ public final class Gathering {
         }
         event.setCanceled(true);
         ItemStack tool = player.getMainHandItem();
-        var need = toolFor(state);
-        if (need != null && !tool.is(need)) {
-            Notice.bar(player, jp.revati.skyabyss.ModText.deny("message.skyabyss.gather.need." + toolKey(need)));
-            return;
-        }
-        if (state.requiresCorrectToolForDrops() && !tool.isCorrectToolForDrops(state)) {
-            Notice.bar(player, jp.revati.skyabyss.ModText.deny("message.skyabyss.gather.tool"));
-            return;
-        }
         long now = level.getGameTime();
         Map<Long, Long> mine = READY.computeIfAbsent(player.getUUID(), k -> new HashMap<>());
         Long ready = mine.get(pos.asLong());

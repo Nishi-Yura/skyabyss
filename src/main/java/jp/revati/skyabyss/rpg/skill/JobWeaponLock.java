@@ -57,7 +57,7 @@ public final class JobWeaponLock {
     public static void selfTest(net.minecraft.server.MinecraftServer server) {
         java.util.List<String> f = new java.util.ArrayList<>();
         ItemStack bow = new ItemStack(net.minecraft.world.item.Items.BOW);
-        ItemStack axe = new ItemStack(BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "gather_pickaxe")));
+        ItemStack axe = new ItemStack(BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "fishing_rod")));
         ItemStack hammer = new ItemStack(BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_hammer")));
         if (wrongJob(Job.WARRIOR, bow) != Job.ARCHER || wrongJob(Job.ARCHER, bow) != null) {
             f.add("a bow should be locked for a warrior and free for an archer");
@@ -66,7 +66,7 @@ public final class JobWeaponLock {
             f.add("a smith hammer should be locked for a mage and free for a smith (" + Job.of(hammer) + ")");
         }
         if (axe.isEmpty() || wrongJob(Job.MAGE, axe) != null) {
-            f.add("the gathering pickaxe should never be locked");
+            f.add("the fishing rod should never be locked");
         }
         // 名前に「rod」が入る素材は杖ではない (熾火の棒は灰の荒野の素材。店は職の品を今の職の人にだけ並べるので、杖と見ると魔法使いにしか売られない)
         for (String id : java.util.List.of("ember_rod", "fishing_rod")) {
