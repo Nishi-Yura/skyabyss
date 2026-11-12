@@ -20,8 +20,7 @@ sys.path[:0] = [str(ROOT / "tools/install"), str(ROOT / "tools/lib"), str(ROOT /
 import install_job_weapons as IJ  # noqa: E402
 import install_armor_one as IA  # noqa: E402
 
-HELD = {"travel_shield": ("a", "coral_shield"), "gather_axe": ("a", "ember_war_axe"), "gather_pickaxe": ("a", "ember_war_axe"),
-        "gather_shovel": ("a", "ember_war_axe")}
+HELD = {"travel_shield": ("a", "coral_shield"), "gather_pickaxe": ("a", "ember_war_axe")}
 # 初めの旅装と鉄張りの旅装は 2026-10-28 の作り直しの選定 (outfit_two の start2_a 旅の外套・iron2_a 鎖帷子と陣羽織)
 ARMOR = {"wayfarer": "start2_a", "ironclad": "iron2_a", "sky_stone": "sky_c"}
 

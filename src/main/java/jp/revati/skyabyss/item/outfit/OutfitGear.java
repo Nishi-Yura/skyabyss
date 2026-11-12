@@ -11,12 +11,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.bus.api.IEventBus;
@@ -63,15 +61,12 @@ public final class OutfitGear {
 
     public static final DeferredItem<Item> TRAVEL_SHIELD = ITEMS.register("travel_shield",
             () -> new OutfitShieldItem(new Item.Properties().durability(336)));
-    public static final DeferredItem<Item> GATHER_AXE = ITEMS.register("gather_axe",
-            () -> new AxeItem(Tiers.IRON, new Item.Properties().attributes(AxeItem.createAttributes(Tiers.IRON, 5.0f, -3.1f))));
     public static final DeferredItem<Item> GATHER_PICKAXE = ITEMS.register("gather_pickaxe",
             () -> new PickaxeItem(Tiers.IRON, new Item.Properties().attributes(DiggerItem.createAttributes(Tiers.IRON, 1.0f, -2.8f))));
-    public static final DeferredItem<Item> GATHER_SHOVEL = ITEMS.register("gather_shovel",
-            () -> new ShovelItem(Tiers.IRON, new Item.Properties().attributes(ShovelItem.createAttributes(Tiers.IRON, 1.5f, -3.0f))));
+    // 伐り斧・土掘りは 2026-11-12 に消した (11-08 に木・土の採集をやめて使い道がなくなった。声「斧とシャベルを消す」)
 
     // 店・クエスト・初めの持ち物が名前で引く (shop/*.json の item もこの ID)
-    public static final List<String> IDS = List.of("travel_shield", "gather_axe", "gather_pickaxe", "gather_shovel",
+    public static final List<String> IDS = List.of("travel_shield", "gather_pickaxe",
             "wayfarer_helmet", "wayfarer_chestplate", "wayfarer_leggings", "wayfarer_boots",
             "ironclad_helmet", "ironclad_chestplate", "ironclad_leggings", "ironclad_boots", "sky_stone_chestplate");
 

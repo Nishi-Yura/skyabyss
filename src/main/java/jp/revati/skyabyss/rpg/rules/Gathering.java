@@ -13,7 +13,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
@@ -71,27 +70,18 @@ public final class Gathering {
         return 0;
     }
 
-    // そのブロックに要る道具 (null = 素手でよい)
+    // そのブロックに要る道具 (null = 素手でよい)。採れるのは鉱石・紫水晶・黒曜石 (つるはし) と実った作物 (素手) だけ
+    // (2026-11-12: 木・土を採らなくなったので、斧とシャベルの品ごと消した)
     @javax.annotation.Nullable
     static net.minecraft.tags.TagKey<net.minecraft.world.item.Item> toolFor(BlockState s) {
-        if (s.is(BlockTags.LOGS)) {
-            return net.minecraft.tags.ItemTags.AXES;
-        }
-        if (s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.DIRT) || s.is(Blocks.GRASS_BLOCK)) {
-            return net.minecraft.tags.ItemTags.SHOVELS;
-        }
-        if (s.getBlock() instanceof CropBlock || s.is(BlockTags.SMALL_FLOWERS) || s.is(BlockTags.TALL_FLOWERS) || s.is(Blocks.BROWN_MUSHROOM)
-                || s.is(Blocks.RED_MUSHROOM) || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.COBWEB)) {
+        if (s.getBlock() instanceof CropBlock) {
             return null;
-        }
-        if (s.is(Blocks.PUMPKIN) || s.is(Blocks.MELON)) {
-            return net.minecraft.tags.ItemTags.AXES;
         }
         return net.minecraft.tags.ItemTags.PICKAXES;
     }
 
     static String toolKey(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag) {
-        return tag == net.minecraft.tags.ItemTags.AXES ? "axe" : tag == net.minecraft.tags.ItemTags.SHOVELS ? "shovel" : "pickaxe";
+        return "pickaxe";
     }
 
     // 採った品: ブロックの品はそのまま、バニラの素材は mod の素材へ (置き換えの第 3 段。2026-10-27)、それ以外 (種・野菜など) は出さない

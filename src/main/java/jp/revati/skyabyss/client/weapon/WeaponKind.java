@@ -78,7 +78,7 @@ public enum WeaponKind {
             Map.entry("ember_cinder_blade", GREATSWORD), Map.entry("ember_ash_knife", FANG), Map.entry("ember_kiln_staff", POKER),
             Map.entry("ember_censer_bell_staff", POKER),
             // 市の採集の道具 (item/outfit。振りの動きは持たない。持ち方と描き方だけ)
-            Map.entry("gather_axe", AXE), Map.entry("gather_pickaxe", HAMMER), Map.entry("gather_shovel", HAMMER),
+            Map.entry("gather_pickaxe", HAMMER),
             // イサナの祖父の風見鶏 (雷翼を指す道具。杖のように持つ)
             Map.entry("weathercock", POKER),
             // 六章「月」の武器 (story/ch6/gear。弓は WeaponClient が BowExtension で登録する)
