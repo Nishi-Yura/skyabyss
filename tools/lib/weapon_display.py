@@ -165,6 +165,24 @@ def left_of(d, item=None):
     return m
 
 
+# 鉤や腕が片側へ張り出した呪術師の杖。一人称でそのまま持つと張り出しが画面の外 (右) へ向き、鈴が見切れる。
+# y を半回転して内向きにする (右手 [-8,180,45]、左手 [-8,180,-45]。祠の鈴杖は install_starter_weapons.py が同じ値を書く)。11-13
+# 雷鈴の杖 (storm_thunder_bell_staff) は入れない (半回転すると手前へ寄って画面の下へ沈む)。代わりに FP_LIFT で持ち上げる
+FP_INWARD = ("shrine_bell_staff", "ember_censer_bell_staff", "tide_surf_bell_staff", "whale_deep_bell_staff",
+             "whale_bell_staff", "wild_calming_censer", "wild_mourning_bell_staff")
+
+
+# 一人称で握りが低く、頭が画面の下へ沈む杖 (一人称の translation の y を足す)
+FP_LIFT = {"storm_thunder_bell_staff": 3.5}
+
+
+def inward(display):
+    out = copy.deepcopy(display)
+    for key, z in (("firstperson_righthand", 45.0), ("firstperson_lefthand", -45.0)):
+        out[key]["rotation"] = [out[key]["rotation"][0], 180.0, z]
+    return out
+
+
 def display_for(item: str, current: dict) -> dict:
     """item の display。表にない武器 (弓・盾など) は今のまま。表にあるものは tp/fp を差し替え、そのほかのキーは今のものを残す。"""
     if item not in HELD:
@@ -179,6 +197,14 @@ def display_for(item: str, current: dict) -> dict:
     out["firstperson_lefthand"] = left_of(out["firstperson_righthand"], item)
     for k, v in COMMON.items():
         out.setdefault(k, copy.deepcopy(v))
+    return adjust_fp(item, out)
+
+
+def adjust_fp(item, display):
+    out = inward(display) if item in FP_INWARD else copy.deepcopy(display)
+    if item in FP_LIFT:
+        for key in ("firstperson_righthand", "firstperson_lefthand"):
+            out[key]["translation"][1] = round(1.3 + FP_LIFT[item], 3)
     return out
 
 
@@ -208,6 +234,15 @@ def shield_display(name, current):
 def main():
     check = "--check" in sys.argv
     bad = []
+    for name in (n for n in (*FP_INWARD, *FP_LIFT) if n not in HELD):
+        path = MODELS / f"{name}.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        new = adjust_fp(name, data["base"]["display"])
+        if new != data["base"]["display"]:
+            bad.append(name)
+            if not check:
+                data["base"]["display"] = new
+                path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for name in SHIELD_FP:
         path = MODELS / f"{name}.json"
         data = json.loads(path.read_text(encoding="utf-8"))
