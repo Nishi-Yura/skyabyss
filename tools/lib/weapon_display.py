@@ -165,21 +165,26 @@ def left_of(d, item=None):
     return m
 
 
-# 鉤や腕が片側へ張り出した呪術師の杖。一人称でそのまま持つと張り出しが画面の外 (右) へ向き、鈴が見切れる。
-# y を半回転して内向きにする (右手 [-8,180,45]、左手 [-8,180,-45]。祠の鈴杖は install_starter_weapons.py が同じ値を書く)。11-13
-# 雷鈴の杖 (storm_thunder_bell_staff) は入れない (半回転すると手前へ寄って画面の下へ沈む)。代わりに FP_LIFT で持ち上げる
-FP_INWARD = ("shrine_bell_staff", "ember_censer_bell_staff", "tide_surf_bell_staff", "whale_deep_bell_staff",
-             "whale_bell_staff", "wild_calming_censer", "wild_mourning_bell_staff")
-
-
+# 鉤や腕が片側へ張り出した呪術師の杖。そのまま持つと張り出し (鉤と鈴) が体の外 (一人称では画面の右の外) を向く。
+# 羊飼いの杖のように張り出しを前へ向ける: 一人称・三人称とも y を 90 度回す (右手 +90、左手 -90)。11-13
+# 祠の鈴杖は install_starter_weapons.py が同じ値を書く
+HEAD_FORWARD = ("shrine_bell_staff", "ember_censer_bell_staff", "tide_surf_bell_staff", "whale_deep_bell_staff",
+                "whale_bell_staff", "wild_calming_censer", "wild_mourning_bell_staff", "storm_thunder_bell_staff", "ember_censer")
 # 一人称で握りが低く、頭が画面の下へ沈む杖 (一人称の translation の y を足す)
-FP_LIFT = {"storm_thunder_bell_staff": 3.5}
+FP_LIFT = {"storm_thunder_bell_staff": 1.5}
 
 
-def inward(display):
+def adjust_fp(item, display):
     out = copy.deepcopy(display)
-    for key, z in (("firstperson_righthand", 45.0), ("firstperson_lefthand", -45.0)):
-        out[key]["rotation"] = [out[key]["rotation"][0], 180.0, z]
+    if item in HEAD_FORWARD:
+        y = 90.0
+        for hand in ("firstperson", "thirdperson"):
+            r, l = out[hand + "_righthand"], out[hand + "_lefthand"]
+            r["rotation"] = [r["rotation"][0], y, abs(r["rotation"][2])]
+            l["rotation"] = [l["rotation"][0], -y, -abs(l["rotation"][2])]
+    if item in FP_LIFT:
+        for key in ("firstperson_righthand", "firstperson_lefthand"):
+            out[key]["translation"][1] = round(1.3 + FP_LIFT[item], 3)
     return out
 
 
@@ -198,14 +203,6 @@ def display_for(item: str, current: dict) -> dict:
     for k, v in COMMON.items():
         out.setdefault(k, copy.deepcopy(v))
     return adjust_fp(item, out)
-
-
-def adjust_fp(item, display):
-    out = inward(display) if item in FP_INWARD else copy.deepcopy(display)
-    if item in FP_LIFT:
-        for key in ("firstperson_righthand", "firstperson_lefthand"):
-            out[key]["translation"][1] = round(1.3 + FP_LIFT[item], 3)
-    return out
 
 
 # 盾 (coral_shield = ふだん、coral_shield_blocking = 構えている間)。一人称だけ作り直す (大きさ・位置)。左手は x の移動を逆にしただけ
@@ -234,7 +231,7 @@ def shield_display(name, current):
 def main():
     check = "--check" in sys.argv
     bad = []
-    for name in (n for n in (*FP_INWARD, *FP_LIFT) if n not in HELD):
+    for name in (n for n in (*HEAD_FORWARD, *FP_LIFT) if n not in HELD):
         path = MODELS / f"{name}.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         new = adjust_fp(name, data["base"]["display"])
