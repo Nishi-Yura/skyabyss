@@ -61,17 +61,22 @@ def bolt_zig(m, name, mat, top, bottom, n=5, amp=2.6, w=1.1):
 
 # ================================================================ 粉の技
 def pa_quake(m):
-    # 地割れ: 外へ傾いて割れ上がる岩の板の輪と、割れ目の筋
+    # 地割れ: 外へ傾いて割れ上がる岩の板の輪 (二枚ずつ重なる)、間に跳ねる石、割れ目の光る筋 (2026-11-12 作り込み)
     def slab(m, nm, a, x, z):
         out = P(math.cos(a), 0, math.sin(a))
-        m.add(nm, tub("body", "granite", [P(x, -6, z), P(x, 2, z) + out * 2.0, P(x, 6, z) + out * 3.4], [3.4, 2.8, 1.2], None, sides=4, phase=30))
+        side = P(-math.sin(a), 0, math.cos(a))
+        m.add(nm, tub("body", "granite", [P(x, -6, z), P(x, 2, z) + out * 2.0, P(x, 7, z) + out * 3.6], [3.6, 3.0, 1.0], [1.4, 1.2, 0.5], hint=tuple(side), sides=4, phase=45))
+        m.add(nm + "b", tub("body", "granite", [P(x, -6, z) + side * 2.6, P(x, 0, z) + side * 2.8 + out * 1.6, P(x, 3.6, z) + side * 3.0 + out * 2.6], [2.4, 2.0, 0.6],
+                            [1.0, 0.9, 0.4], hint=tuple(side), sides=4, phase=45))
+        m.add(nm + "s", ell("body", "granite", tuple(P(x, 9.6, z) + out * 4.6), (0.9, 0.8, 0.9), segs=5, rings=1))
     ring_wave(m, 9, slab)
     for k in range(6):
         a = k / 6 * math.tau
         m.add(f"crack{k}", tub("body", "sigil", [P(math.cos(a) * 3, 0.8, math.sin(a) * 3), P(math.cos(a + 0.2) * 9, 0.8, math.sin(a + 0.2) * 9),
                                                  P(math.cos(a) * 14, 0.8, math.sin(a) * 14)], [0.5, 0.4, 0.2], None, hint=(0, 1, 0), sides=4))
+        m.add(f"branch{k}", tub("body", "sigil", [P(math.cos(a + 0.2) * 9, 0.8, math.sin(a + 0.2) * 9), P(math.cos(a + 0.5) * 12, 0.8, math.sin(a + 0.5) * 12)],
+                                  [0.3, 0.12], None, hint=(0, 1, 0), sides=4))
     base_debris(m, "granite", 14, seed=71)
-
 
 def pa_whirl(m):
     # つむじ: 下が細く上が広がる二本の風の帯と、巻き上がる葉
@@ -166,12 +171,28 @@ def lg_whale_wave(m):
 
 
 def lg_whale_fall(m):
-    # 岩鯨の星: 骨の背を持つ深い岩の塊 (落ちる)
-    m.add("rock", ell("body", "deeps", (0, 8, 0), (7, 6, 7), segs=7, rings=3, ry=20))
+    # 岩鯨の星 (落ちる): 骨の背と肋の弧を持つ深い岩の塊、割れ目の光、後ろへ引く岩屑 (2026-11-12 作り込み)
+    m.add("rock", ell("body", "deeps", (0, 8, 0), (7, 6, 7), segs=10, rings=4, ry=20))
+    rng = np.random.default_rng(7)
+    for k in range(8):
+        d = rng.normal(size=3)
+        d = d / np.linalg.norm(d)
+        side = np.cross(d, P(0.2, 1, 0.3))
+        side = side / max(1e-6, np.linalg.norm(side))
+        c = P(0, 8, 0)
+        m.add(f"facet{k}", tub("body", "deeps", [c + d * 5.2 - side * 2.2, c + d * 6.6, c + d * 5.2 + side * 2.2], [2.2, 2.8, 2.0], [1.1, 1.4, 1.0], hint=tuple(d), sides=4,
+                               phase=45))
+    for k in range(5):
+        m.add(f"ridge{k}", cone("body", "bone", (-6.0 + k * 3, 13 - abs(k - 2) * 0.8, 0), (0, 1, 0.3), 5.0 - abs(k - 2) * 0.9, 1.4, sides=5, rings=2, bend=(0, 0, 1.2)))
+    for s in (1, -1):
+        for k in range(3):
+            m.add(f"rib{s}{k}", tub("body", "bone", [P(-3 + k * 3, 12.6, s * 1.0), P(-3 + k * 3, 9.6, s * 6.4), P(-3 + k * 3, 5.0, s * 6.6)], [0.6, 0.55, 0.3], None, sides=5))
     for k in range(4):
-        m.add(f"ridge{k}", cone("body", "bone", (-4.5 + k * 3, 13, 0), (0, 1, 0), 4.5 - abs(k - 1.5), 1.4, sides=4, rings=1))
-    m.add("glint", ell("body", "sigil", (0, 8, -6.4), (1.6, 1.6, 0.6), segs=6, rings=1))
-
+        a = k / 4 * math.tau + 0.5
+        m.add(f"vein{k}", tub("body", "sigil", [P(math.cos(a) * 4.0, 5.0, math.sin(a) * 4.0 - 0.0), P(math.cos(a) * 6.4, 8.0, math.sin(a) * 6.4)], [0.25, 0.15], None, sides=4))
+    m.add("glint", ell("body", "sigil", (0, 8, -6.4), (1.6, 1.6, 0.6), segs=8, rings=2))
+    for k in range(5):
+        m.add(f"debris{k}", ell("body", "deeps", ((k - 2) * 2.2, 16 + k * 2.4, (k % 2) * 1.6), (1.2 - k * 0.12,) * 3, segs=5, rings=1))
 
 def lg_tide_rise(m):
     # 潮殻: 巻き貝の殻の尖塔と、巻きつく水
@@ -302,21 +323,49 @@ def lg_light_wave(m):
 
 # ================================================================ 型の溜まるものの放ち
 def gx_smash(m):
-    # 岩砕き: 盾の守り手のまわりに落ちる大岩の輪
+    # 岩砕き: 盾の守り手のまわりに落ちる大岩の輪。割れ面の多い岩、刺さった衝撃の棘、青緑の割れ目 (2026-11-12 作り込み)
     def boulder(m, nm, a, x, z):
-        m.add(nm, ell("body", "granite", (x, 3, z), (4.2, 4.8, 4.2), segs=6, rings=2, ry=math.degrees(a) * 2))
+        c = P(x, 3.4, z)
+        m.add(nm, ell("body", "granite", tuple(c), (3.8, 4.2, 3.8), segs=7, rings=3, ry=math.degrees(a) * 2))
+        for j in range(4):
+            d = P(math.cos(a + j * 1.6), 0.5 + 0.2 * (j % 2), math.sin(a + j * 1.6))
+            d = d / np.linalg.norm(d)
+            side = np.cross(d, P(0, 1, 0.01))
+            side = side / max(1e-6, np.linalg.norm(side))
+            m.add(f"{nm}f{j}", tub("body", "granite", [c + d * 3.2 - side * 1.6, c + d * 4.4, c + d * 3.2 + side * 1.6], [1.8, 2.2, 1.6], [0.9, 1.1, 0.8], hint=tuple(d),
+                                   sides=4, phase=45))
+        out = P(math.cos(a), 0, math.sin(a))
+        m.add(nm + "c", tub("body", "sigil", [c + out * 3.9 + P(0, 2.0, 0), c + out * 4.2, c + out * 3.9 + P(0, -2.2, 0)], [0.25, 0.3, 0.2], None, sides=4))
+        for j in range(3):
+            aa = a + (j - 1) * 0.5
+            m.add(f"{nm}sp{j}", cone("body", "granite", tuple(P(math.cos(aa) * 13.5, -2, math.sin(aa) * 13.5)), (math.cos(aa) * 0.5, 1, math.sin(aa) * 0.5), 4.0, 1.0,
+                                      sides=4))
     ring_wave(m, 7, boulder)
     base_debris(m, "granite", 14, seed=91)
 
-
 def gx_cleaver(m):
-    # 巨神の大鉈: 地に打ち込まれた幻の大鉈の刃
+    # 巨神の大鉈: 地に打ち込まれた幻の大鉈。刃の溝と刻み、刃こぼれ、柄の巻きと石突、地の割れ (2026-11-12 作り込み)
     m.add("blade", tub("body", "steel", [P(0, -2, 0), P(0, 16, 0), P(0, 30, 0)], [10.0, 11.5, 11.0], [1.2, 1.4, 1.6], hint=(1, 0, 0), sides=4, phase=0))
+    m.add("fuller", tub("body", "granite", [P(-6, 26, -1.5), P(6, 26, -1.5)], [0.6, 0.6], None, hint=(0, 1, 0), sides=4))
+    for k in range(5):
+        x = -8 + k * 4
+        m.add(f"rune{k}", tub("body", "sigil", [P(x, 20, -1.55), P(x + 1.0, 23.4, -1.55)], [0.25, 0.2], None, hint=(0, 0, 1), sides=4))
     m.add("edge", tub("body", "sigil", [P(-11, 6, -1.2), P(0, 0.5, -1.2), P(11, 6, -1.2)], [0.6, 0.6, 0.6], None, hint=(0, 0, 1), sides=4))
+    for k, x in enumerate((-7.0, 3.0)):
+        m.add(f"nick{k}", cone("body", "granite", (x, 2.4 + abs(x) * 0.3, 0), (0, 1, 0), 2.2, 1.0, sides=4))
     m.add("back", tub("body", "granite", [P(-10, 30, 0), P(10, 30, 0)], [2.0, 2.0], None, hint=(0, 1, 0), sides=6))
-    m.add("haft", tub("body", "totem", [P(8, 30, 0), P(14, 44, 0)], [1.4, 1.2], None, sides=6))
-    sig_loop(m, 12)
-
+    for k in range(4):
+        m.add(f"spine{k}", cone("body", "granite", (-8 + k * 5, 31.6, 0), (0, 1, 0), 2.4, 0.8, sides=4))
+    m.add("haft", tub("body", "totem", [P(8, 30, 0), P(14, 44, 0)], [1.4, 1.2], None, sides=8))
+    for k in range(4):
+        t = 0.45 + k * 0.12
+        m.add(f"wrap{k}", tub("body", "goldl", [P(8 + 6 * t, 30 + 14 * t, 0), P(8 + 6 * (t + 0.05), 30 + 14 * (t + 0.05), 0)], [1.55, 1.55], None, sides=8))
+    m.add("pommel", ell("body", "goldl", (14.4, 45.0, 0), (1.8, 1.6, 1.8), segs=8, rings=2))
+    for k in range(6):
+        a = k / 6 * math.tau + 0.3
+        m.add(f"rift{k}", tub("body", "sigil", [P(math.cos(a) * 3, 0.6, math.sin(a) * 3), P(math.cos(a + 0.3) * 8, 0.6, math.sin(a + 0.3) * 8),
+                                                P(math.cos(a) * 12, 0.6, math.sin(a) * 12)], [0.4, 0.3, 0.12], None, hint=(0, 1, 0), sides=4))
+    base_debris(m, "granite", 12, seed=93)
 
 def gx_forge(m):
     # 炉開き: 鉄の輪で締めた火の柱

@@ -83,44 +83,79 @@ def p_bone_spike(m):
 
 
 def p_rock(m):
+    # 投げ岩 (TOSS・FALL): 割れ面の多い岩塊。割れ目に土、片側に苔、刺さった骨の欠片 (2026-11-12 作り込み)
     rng = np.random.default_rng(3)
-    m.add("core", ell("body", "rock", (0, 9, 0), (9.0, 8.0, 8.6), segs=10, rings=4), core=True)
-    for k in range(7):
+    c = np.array([0, 9, 0])
+    m.add("core", ell("body", "rock", c, (8.4, 7.4, 8.0), segs=8, rings=3, ry=17), core=True)
+    for k in range(12):
         d = nrm(rng.normal(size=3))
-        m.add(f"lump{k}", ell("body", "rock", np.array([0, 9, 0]) + d * 6.5, (4.2, 3.6, 4.0), segs=7, rings=2, ry=rng.uniform(0, 180)))
+        side = nrm(np.cross(d, [0.3, 1, 0.2]))
+        m.add(f"facet{k}", tub("body", "rock" if k % 3 else "basalt", [c + d * 5.4 - side * 2.6, c + d * 7.4, c + d * 5.4 + side * 2.6], [2.6, 3.4, 2.4],
+                               [1.6, 2.2, 1.4], hint=tuple(d), sides=4, phase=45))
+    for k in range(5):
+        d = nrm(rng.normal(size=3))
+        m.add(f"crack{k}", tub("body", "basalt", [c + d * 7.6, c + nrm(d + rng.normal(size=3) * 0.4) * 8.0], [0.5, 0.3], None, sides=4))
+    m.add("moss", ell("body", "moss", c + np.array([1.5, 6.6, -1.0]), (5.0, 1.6, 4.4), segs=8, rings=2, ry=30))
     for k in range(4):
-        m.add(f"bonebit{k}", cone("body", "bone", np.array([0, 9, 0]) + nrm(rng.normal(size=3)) * 7, nrm(rng.normal(size=3)), 4.0, 1.0, sides=4))
-
+        d = nrm(rng.normal(size=3))
+        m.add(f"bonebit{k}", cone("body", "bone", c + d * 7.0, nrm(d + rng.normal(size=3) * 0.3), 4.4, 1.0, sides=5, rings=2))
+    for k in range(5):
+        d = nrm(rng.normal(size=3))
+        m.add(f"pebble{k}", ell("body", "rock", c + d * 9.2, (1.2, 1.0, 1.1), segs=5, rings=1))
 
 def p_bone_shard(m):
-    m.add("shard", cone("body", "bone", (0, 3, 6), (0, 0, -1), 16, 2.8, sides=5, rings=3, bend=(0, 0.8, 0)))
+    # 骨の欠片 (TOSS): 前 (-Z) へ飛ぶ鋸の歯の骨の槍。髄の筋、根元の割れ、返し (2026-11-12 作り込み)
+    m.add("shard", cone("body", "bone", (0, 3, 6), (0, 0, -1), 16, 2.8, sides=6, rings=4, bend=(0, 0.8, 0)))
+    m.add("butt", ell("body", "bone", (0, 3, 6.6), (2.9, 2.9, 1.6), segs=7, rings=2))
+    for k in range(4):
+        m.add(f"split{k}", cone("body", "bone", (math.cos(k * 1.6) * 1.8, 3 + math.sin(k * 1.6) * 1.8, 7.0), (math.cos(k * 1.6) * 0.4, math.sin(k * 1.6) * 0.4, 1), 2.4, 0.6, sides=4))
+    m.add("marrow", tub("body", "suck", [np.array(p) for p in ((0, 4.6, 4.0), (0, 4.1, -2.0), (0, 3.6, -6.0))], [0.5, 0.4, 0.15], None, sides=4))
     for s in (1, -1):
+        for k in range(4):
+            z = 3.6 - k * 2.6
+            m.add(f"tooth{s}{k}", cone("body", "bone", (s * (2.4 - k * 0.45), 3, z), (s * 0.7, 0, 0.6), 2.0 - k * 0.3, 0.55, sides=4))
         m.add(f"barb{s}", cone("body", "bone", (s * 1.2, 3, 2), (s * 0.6, 0.2, -1), 6, 1.0, sides=4))
 
-
 def p_tentacle(m):
+    # 触手 (RISE): 床から反り上がる腕。表の吸盤の二列、背の棘の列、先の巻き (2026-11-12 作り込み)
     m.bone("t1", "body", (0, 16, 0))
     m.bone("t2", "t1", (1.5, 32, -1))
-    pts = [(0, -8, 0), (0, 6, 0), (1.0, 16, -1.0), (3.0, 26, -2.4), (4.0, 34, -1.6), (2.6, 41, 2.0), (-1.6, 44, 6.0)]
-    rad = [7.0, 6.2, 5.2, 4.2, 3.2, 2.0, 0.6]
-    m.add("tb", tub("body", "oct", [np.array(p) for p in pts[:3]], rad[:3], None, sides=8))
-    m.add("tm", tub("t1", "oct", [np.array(p) for p in pts[1:5]], rad[1:5], None, sides=8))
-    m.add("tt", tub("t2", "oct", [np.array(p) for p in pts[3:]], rad[3:], None, sides=7))
-    for i in range(1, 6):
+    pts = [(0, -8, 0), (0, 6, 0), (1.0, 16, -1.0), (3.0, 26, -2.4), (4.0, 34, -1.6), (2.6, 41, 2.0), (-1.6, 44, 6.0), (-3.6, 42, 8.4)]
+    rad = [7.0, 6.2, 5.2, 4.2, 3.2, 2.0, 0.9, 0.3]
+    m.add("tb", tub("body", "oct", [np.array(p) for p in pts[:3]], rad[:3], None, sides=10))
+    m.add("tm", tub("t1", "oct", [np.array(p) for p in pts[1:5]], rad[1:5], None, sides=10))
+    m.add("tt", tub("t2", "oct", [np.array(p) for p in pts[3:]], rad[3:], None, sides=8))
+    for i in range(1, 7):
         b = "body" if i < 2 else ("t1" if i < 4 else "t2")
-        p = np.array(pts[i]) + np.array([0, 0, -rad[i] * 0.8])
-        m.add(f"suck{i}", ell(b, "suck", p, (rad[i] * 0.4, rad[i] * 0.4, 0.5), segs=7, rings=1))
-        m.add(f"hook{i}", cone(b, "bone", p + np.array([0, 0, -0.3]), (0, -0.3, -1), rad[i] * 0.5, rad[i] * 0.14, sides=4))
-    base_debris(m, "rock", 8, seed=2)
-
+        p0, p1 = np.array(pts[i]), np.array(pts[i + 1])
+        for t in (0.0, 0.5):
+            p = p0 + (p1 - p0) * t
+            r = rad[i] + (rad[i + 1] - rad[i]) * t
+            for s in (-1, 1):
+                q = p + np.array([s * r * 0.35, 0, -r * 0.82])
+                m.add(f"suck{i}{t}{s}", ell(b, "suck", q, (r * 0.24, r * 0.24, 0.4), segs=8, rings=1))
+                m.add(f"rim{i}{t}{s}", ell(b, "oct", q + np.array([0, 0, 0.15]), (r * 0.3, r * 0.3, 0.3), segs=8, rings=1))
+        m.add(f"spine{i}", cone(b, "bone", p0 + np.array([0, 0, rad[i] * 0.85]), (0, 0.3, 1), rad[i] * 0.55, rad[i] * 0.18, sides=4))
+    base_debris(m, "rock", 9, seed=2)
+    m.add("splash", ell("body", "ink", (0, 0.5, 0), (9.0, 0.6, 9.0), segs=12, rings=1))
 
 def p_ink_blob(m):
-    m.add("blob", ell("body", "ink", (0, 4, 0), (5.6, 5.0, 6.4), segs=10, rings=4), core=True)
-    for k in range(5):
-        a = k / 5 * math.tau
-        m.add(f"drop{k}", ell("body", "ink", (math.cos(a) * 3.6, 2.0, math.sin(a) * 3.6 + 4.0), (1.6, 1.4, 2.6), segs=6, rings=2))
-    m.add("tail", cone("body", "ink", (0, 4, 4), (0, 0, 1), 10, 3.4, sides=7, rings=2))
-
+    # 墨の塊 (TOSS): 前 (-Z) へ飛ぶ墨。芯のまわりを巻く墨の筋、後ろへ引く三本の尾、飛び散る滴 (2026-11-12 作り込み)
+    m.add("blob", ell("body", "ink", (0, 4, -1.0), (5.0, 4.6, 5.6), segs=12, rings=5), core=True)
+    m.add("sheen", ell("body", "suck", (-1.6, 6.4, -4.6), (1.4, 1.0, 0.6), segs=6, rings=1))
+    for k in range(3):
+        a = k / 3 * math.tau + 0.4
+        pts = [np.array([math.cos(a) * 3.0, 4 + math.sin(a) * 3.0, 1.0]), np.array([math.cos(a + 0.5) * 3.6, 4 + math.sin(a + 0.5) * 3.4, 6.0]),
+               np.array([math.cos(a + 1.0) * 2.4, 4 + math.sin(a + 1.0) * 2.4, 11.0]), np.array([math.cos(a + 1.4) * 1.0, 4 + math.sin(a + 1.4) * 1.0, 15.0])]
+        m.add(f"tail{k}", tub("body", "ink", pts, [2.4, 1.8, 1.0, 0.2], None, sides=6))
+    for k in range(4):
+        a = k / 4 * math.tau
+        pts = [np.array([math.cos(a + t * 2.6) * (5.2 - t), 4 + math.sin(a + t * 2.6) * (4.8 - t), -3 + t * 7]) for t in np.linspace(0, 1, 6)]
+        m.add(f"swirl{k}", tub("body", "oct", pts, [0.5, 0.6, 0.6, 0.5, 0.4, 0.2], None, sides=4))
+    rng = np.random.default_rng(5)
+    for k in range(7):
+        d = nrm(rng.normal(size=3) + np.array([0, 0, 0.6]))
+        m.add(f"drop{k}", ell("body", "ink", np.array([0, 4, 2]) + d * 8.0, (0.9, 0.9, 1.4), segs=6, rings=2))
 
 def p_crystal_spike(m):
     for k, (x, z, h, r, lx, lz) in enumerate(((0, 0, 40, 4.4, 0, 0), (5, 2, 26, 3.0, 0.4, 0.1), (-4, 3, 22, 2.6, -0.4, 0.2), (1, -5, 18, 2.4, 0.1, -0.4))):
@@ -171,15 +206,31 @@ def p_icicle(m):
 
 
 def p_water_spout(m):
+    # 水柱 (RISE): 床から噴き上がる水。柱に巻く二本の水の帯、上で砕けて冠になり、滴が落ちる (2026-11-12 作り込み)
     m.bone("t1", "body", (0, 24, 0))
-    m.add("col", tub("body", "water", [np.array(p) for p in ((0, -8, 0), (0, 12, 0), (1.0, 26, 0))], [7.6, 6.0, 5.2], None, sides=10))
-    m.add("top", tub("t1", "water", [np.array(p) for p in ((0.8, 22, 0), (-0.6, 38, 0.6), (0.4, 50, -0.4))], [5.6, 6.4, 7.6], None, sides=10, caps=(True, True)))
-    m.add("crown", ell("t1", "foam", (0.4, 50, -0.4), (8.4, 2.6, 8.4), segs=10, rings=2))
-    for k in range(3):
-        y = 10 + k * 13
-        m.add(f"swirl{k}", ell("body" if y < 24 else "t1", "foam", (0, y, 0), (6.8 - k * 0.2, 1.0, 6.8 - k * 0.2), segs=10, rings=1, rz=12 * (-1) ** k))
-    m.add("ring", ell("body", "foam", (0, 1, 0), (10, 1.4, 10), segs=12, rings=1))
-
+    m.add("col", tub("body", "water", [np.array(p) for p in ((0, -8, 0), (0, 12, 0), (1.0, 26, 0))], [7.6, 6.0, 5.2], None, sides=12))
+    m.add("top", tub("t1", "water", [np.array(p) for p in ((0.8, 22, 0), (-0.6, 38, 0.6), (0.4, 50, -0.4))], [5.6, 6.4, 7.6], None, sides=12, caps=(True, True)))
+    m.add("crown", ell("t1", "foam", (0.4, 50, -0.4), (8.4, 2.6, 8.4), segs=12, rings=2))
+    for k in range(10):
+        a = k / 10 * math.tau
+        m.add(f"crest{k}", cone("t1", "foam", (math.cos(a) * 8.0, 50.5, math.sin(a) * 8.0), (math.cos(a), 0.9, math.sin(a)), 4.0, 1.4, sides=5, rings=2,
+                                 bend=(math.cos(a) * 2, -1.6, math.sin(a) * 2)))
+    for s in range(2):
+        pts = [np.array([math.cos(t * 7 + s * math.pi) * (7.0 - t * 0.6), -2 + t * 50, math.sin(t * 7 + s * math.pi) * (7.0 - t * 0.6)]) for t in np.linspace(0, 1, 16)]
+        lo = [p for p in pts if p[1] < 24]
+        hi = [p for p in pts if p[1] >= 22]
+        m.add(f"band_lo{s}", tub("body", "foam", lo, [1.0] * len(lo), None, sides=5))
+        m.add(f"band_hi{s}", tub("t1", "foam", hi, [1.0] * len(hi), None, sides=5))
+    rng = np.random.default_rng(12)
+    for k in range(8):
+        a = rng.uniform(0, math.tau)
+        r = rng.uniform(9, 13)
+        y = rng.uniform(30, 48)
+        m.add(f"drop{k}", ell("t1", "water", (math.cos(a) * r, y, math.sin(a) * r), (0.8, 1.2, 0.8), segs=6, rings=2))
+    m.add("ring", ell("body", "foam", (0, 1, 0), (10, 1.4, 10), segs=14, rings=1))
+    for k in range(8):
+        a = k / 8 * math.tau + 0.2
+        m.add(f"splash{k}", cone("body", "foam", (math.cos(a) * 9.0, 0.5, math.sin(a) * 9.0), (math.cos(a), 1.2, math.sin(a)), 3.4, 1.2, sides=5))
 
 def p_coral_spear(m):
     m.add("shaft", tub("body", "coral", [np.array(p) for p in ((0, 3, 12), (0, 3, -6))], [1.0, 1.0], None, sides=6))
@@ -205,13 +256,23 @@ def p_lightning(m):
 
 
 def p_ash_ball(m):
-    m.add("core", ell("body", "ash", (0, 6, 0), (5.6, 5.4, 5.6), segs=10, rings=3), core=True)
+    # 灰の玉 (TOSS): 前 (-Z) へ飛ぶ。灰の殻が割れて中の熾が光り、後ろへ火の舌と灰の尾を引く (2026-11-12 作り込み)
+    c = np.array([0, 6, 0])
+    m.add("core", ell("body", "magma", c, (4.6, 4.4, 4.6), segs=10, rings=4), core=True)
     rng = np.random.default_rng(10)
-    for k in range(9):
+    for k in range(10):
         d = nrm(rng.normal(size=3))
-        m.add(f"ember{k}", ell("body", "magma", np.array([0, 6, 0]) + d * 5.0, (1.2, 1.2, 1.2), segs=5, rings=1))
-    m.add("trail", cone("body", "ash", (0, 6, 4), (0, 0, 1), 9, 3.6, sides=6, rings=2))
-
+        side = nrm(np.cross(d, [0.2, 1, 0.3]))
+        m.add(f"plate{k}", tub("body", "ash" if k % 3 else "basalt", [c + d * 4.6 - side * 1.9, c + d * 5.4, c + d * 4.6 + side * 1.9], [2.0, 2.6, 1.8],
+                               [0.7, 0.9, 0.6], hint=tuple(d), sides=4, phase=45))
+    for k in range(5):
+        a = k / 5 * math.tau
+        m.add(f"flame{k}", cone("body", "magma", c + np.array([math.cos(a) * 2.6, math.sin(a) * 2.6, 3.4]), (math.cos(a) * 0.4, math.sin(a) * 0.4, 1), 6.0 - k % 2 * 1.6,
+                                 1.3, sides=5, rings=2))
+    m.add("trail", cone("body", "ash", (0, 6, 4.6), (0, 0, 1), 11, 3.4, sides=7, rings=3, bend=(0, 1.0, 0)))
+    for k in range(6):
+        d = nrm(rng.normal(size=3) + np.array([0, 0, 1.0]))
+        m.add(f"ember{k}", ell("body", "magma", c + d * 8.0, (0.8, 0.8, 0.8), segs=5, rings=1))
 
 def p_shell_spike(m):
     for k, (x, z, h, r) in enumerate(((0, 0, 36, 5.0), (5, 3, 22, 3.4), (-4, -3, 18, 3.0))):
@@ -319,25 +380,30 @@ def p_net(m):
 
 
 def p_whirlwind(m):
-    # 灰の旋風 (RISE): 下が細く上が広がる渦の漏斗。帯を重ねて少しずつずらし、熾の粒が混じる
+    # 灰の旋風 (RISE): 下が細く上が広がる漏斗に、巻き上がる三本の風の帯、吸い上げた岩と熾 (2026-11-12 作り込み)
     m.bone("t1", "body", (0, 20, 0))
-    m.add("funnel_lo", tub("body", "ash", [np.array(p) for p in ((0, -4, 0), (0.6, 10, 0.4), (0, 22, 0))], [2.2, 3.8, 6.0], None, sides=10))
-    m.add("funnel_hi", tub("t1", "ash", [np.array(p) for p in ((0, 20, 0), (-0.8, 34, -0.4), (0, 46, 0))], [5.8, 8.6, 11.0], None, sides=12,
+    m.add("funnel_lo", tub("body", "ash", [np.array(p) for p in ((0, -4, 0), (0.6, 10, 0.4), (0, 22, 0))], [2.2, 3.8, 6.0], None, sides=12))
+    m.add("funnel_hi", tub("t1", "ash", [np.array(p) for p in ((0, 20, 0), (-0.8, 34, -0.4), (0, 46, 0))], [5.8, 8.6, 11.0], None, sides=14,
                            caps=(True, True)))
-    for k in range(9):
-        y = 1 + k * 5.2
-        r = 2.6 + y * 0.19 + 0.8
-        b = "body" if y < 20 else "t1"
-        m.add(f"band{k}", ell(b, "wind", (math.sin(k * 1.3) * 0.8, y, math.cos(k * 1.3) * 0.8), (r, 1.5, r * 0.92), segs=11, rings=1, rz=10 * (-1) ** k,
-                               ry=k * 37))
+    for s in range(3):
+        pts = [np.array([math.cos(t * 9 + s * 2.09) * (3.4 + t * 46 * 0.21), -2 + t * 48, math.sin(t * 9 + s * 2.09) * (3.4 + t * 46 * 0.21)]) for t in np.linspace(0, 1, 18)]
+        lo = [p for p in pts if p[1] < 22]
+        hi = [p for p in pts if p[1] >= 20]
+        rlo = [1.0 + p[1] * 0.03 for p in lo]
+        rhi = [1.0 + p[1] * 0.03 for p in hi]
+        m.add(f"rib_lo{s}", tub("body", "wind", lo, rlo, [0.4] * len(lo), hint=(0, 1, 0), sides=4))
+        m.add(f"rib_hi{s}", tub("t1", "wind", hi, rhi, [0.4] * len(hi), hint=(0, 1, 0), sides=4))
     rng = np.random.default_rng(16)
-    for k in range(10):
+    for k in range(12):
         y = rng.uniform(4, 44)
         a = rng.uniform(0, math.tau)
-        r = 2.6 + y * 0.19
-        m.add(f"cinder{k}", ell("body" if y < 20 else "t1", "magma", (math.cos(a) * r, y, math.sin(a) * r), (0.9, 0.9, 0.9), segs=4, rings=1))
-    base_debris(m, "ash", 7, seed=17)
-
+        r = 3.6 + y * 0.21
+        b = "body" if y < 20 else "t1"
+        if k % 3 == 0:
+            m.add(f"stone{k}", ell(b, "rock", (math.cos(a) * r, y, math.sin(a) * r), (1.6, 1.2, 1.4), segs=6, rings=2, ry=k * 40))
+        else:
+            m.add(f"cinder{k}", ell(b, "magma", (math.cos(a) * r, y, math.sin(a) * r), (0.9, 0.9, 0.9), segs=5, rings=1))
+    base_debris(m, "ash", 8, seed=17)
 
 def p_light_pillar(m):
     # 光の柱 (RISE): 空から床へ刺さる白金の柱。床に金の輪、柱のまわりに浮く三つの輪
@@ -369,16 +435,23 @@ def p_feather(m):
 
 
 def p_weight(m):
-    # 秤の錘 (FALL): 月の銀の分銅。上に輪、胴に満ち欠けの刻み。床に割れた欠片
-    m.add("body_", tub("body", "iron", [np.array(p) for p in ((0, 0, 0), (0, 10, 0), (0, 16, 0))], [9.0, 8.2, 5.2], None, sides=10, caps=(True, True)), core=True)
-    m.add("neck", tub("body", "iron", [np.array(p) for p in ((0, 15, 0), (0, 19, 0))], [3.0, 3.0], None, sides=8))
-    m.add("ring", ell("body", "gold", (0, 22, 0), (4.4, 3.4, 1.2), segs=12, rings=1))
-    for k in range(4):
-        a = k / 4 * math.tau + 0.4
-        m.add(f"phase{k}", ell("body", "pearl", (math.cos(a) * 8.6, 6, math.sin(a) * 8.6), (2.0, 2.0, 0.8), segs=8, rings=1, ry=-math.degrees(a) + 90))
-    m.add("band", ell("body", "gold", (0, 10.5, 0), (8.6, 0.9, 8.6), segs=14, rings=1))
+    # 秤の錘 (FALL): 月の銀の分銅。面取りの胴、金の帯に満ち欠けの八つの刻み、鋲、太い輪と鎖の切れ端。床に割れた欠片 (2026-11-12 作り込み)
+    m.add("body_", tub("body", "iron", [np.array(p) for p in ((0, 0, 0), (0, 2, 0), (0, 10, 0), (0, 16, 0))], [8.4, 9.0, 8.2, 5.2], None, sides=12,
+                       caps=(True, True)), core=True)
+    m.add("foot", tub("body", "gold", [np.array(p) for p in ((0, -0.2, 0), (0, 1.2, 0))], [9.2, 9.2], None, sides=12))
+    m.add("neck", tub("body", "iron", [np.array(p) for p in ((0, 15, 0), (0, 19, 0))], [3.0, 3.4], None, sides=10))
+    m.add("ring", tub("body", "gold", [np.array([math.cos(t) * 4.2, 22.6 + math.sin(t) * 3.4, 0]) for t in np.linspace(0, math.tau, 17)], [0.9] * 17, None, sides=6))
+    for k in range(3):
+        m.add(f"link{k}", tub("body", "iron", [np.array([math.cos(t) * 1.2 + 1.8 + k * 1.6, 27.0 + k * 1.4 + math.sin(t) * 1.6, (k % 2) * 0.6]) for t in np.linspace(0, math.tau, 9)],
+                               [0.35] * 9, None, sides=4))
+    m.add("band", tub("body", "gold", [np.array(p) for p in ((0, 9.4, 0), (0, 11.4, 0))], [8.6, 8.4], None, sides=12))
+    for k in range(8):
+        a = k / 8 * math.tau
+        r = 8.65
+        fill = abs(math.cos(a / 2))
+        m.add(f"phase{k}", ell("body", "pearl", (math.cos(a) * r, 5.6, math.sin(a) * r), (1.6 * (0.4 + 0.6 * fill), 1.6, 0.6), segs=8, rings=1, ry=-math.degrees(a) + 90))
+        m.add(f"rivet{k}", ell("body", "gold", (math.cos(a + 0.39) * 8.4, 13.4, math.sin(a + 0.39) * 8.4), (0.6, 0.6, 0.6), segs=6, rings=1))
     base_debris(m, "rock", 11, seed=18)
-
 
 BUILDERS = {"bone_spike": p_bone_spike, "rock": p_rock, "bone_shard": p_bone_shard, "tentacle": p_tentacle, "ink_blob": p_ink_blob,
             "crystal_spike": p_crystal_spike, "fireball": p_fireball, "lava_pillar": p_lava_pillar, "ice_spike": p_ice_spike, "icicle": p_icicle,

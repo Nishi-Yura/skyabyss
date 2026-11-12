@@ -95,13 +95,19 @@ def ring_of(m, name, n, r, fn, phase=0.0):
 
 # ================================================================ 粉の属性 (添える小さな印。半径 6 ほど)
 def el_stone(m):
+    # 岩の粉の印: 割れて立つ花崗岩の楔の輪 (面の多い板)、根元の割れ目、青緑の芯
     for k in range(5):
         a = k / 5 * math.tau + 0.4
         r = 3 + (k % 2) * 2
         h = 7 + (k * 3) % 5
-        m.add(f"r{k}", cone("body", "granite", (math.cos(a) * r, -4, math.sin(a) * r), (math.cos(a) * 0.3, 1, math.sin(a) * 0.3), h + 4, 2.0, sides=4, rings=1))
+        out = P(math.cos(a), 0, math.sin(a))
+        side = P(-math.sin(a), 0, math.cos(a))
+        base = out * r + P(0, -4, 0)
+        m.add(f"r{k}", tub("body", "granite", [base - side * 1.4, base + out * 0.6 + P(0, h * 0.6, 0), base + out * 1.4 + P(0, h + 3, 0)], [2.2, 1.8, 0.3], [1.0, 0.8, 0.2],
+                           hint=tuple(out), sides=4, phase=45))
+        m.add(f"chip{k}", ell("body", "granite", tuple(out * (r + 2.4) + P(0, 0.4, 0)), (0.9, 0.6, 0.8), segs=5, rings=1, ry=k * 50))
+        m.add(f"crack{k}", tub("body", "sigil", [P(0, 0.5, 0), out * (r * 0.6) + P(0, 0.5, 0) + side * 0.6, out * r + P(0, 0.5, 0)], [0.3, 0.25, 0.15], None, hint=(0, 1, 0), sides=4))
     m.add("dot", ell("body", "sigil", (0, 0.6, 0), (1.2, 0.5, 1.2), segs=6, rings=1))
-
 
 def el_wind(m):
     pts, rad = [], []
@@ -298,13 +304,20 @@ def my_life_lamp(m):
 
 
 def my_gaze(m):
-    # 凝視 (敵の上): 雲の瞼を開いた大きな眼
-    m.add("lid_t", ell("body", "scroll", (0, 12.5, 0), (9, 4.0, 3.8), segs=12, rings=3))
-    m.add("eye", ell("body", "pearl", (0, 9, -0.6), (6, 3.6, 3.0), segs=10, rings=2))
-    m.add("iris", ell("body", "sigil", (0, 9, -3.2), (2.6, 2.6, 0.8), segs=10, rings=1))
-    m.add("pupil", ell("body", "night", (0, 9, -3.8), (1.0, 1.8, 0.4), segs=6, rings=1))
-    m.add("lid_b", ell("body", "scroll", (0, 5.4, 0), (8, 2.6, 3.4), segs=12, rings=3))
-
+    # 凝視 (敵の上): 雲のまぶたが開いた大きな眼。まつげの棘、虹彩の輪、まわりを回る小さな雲 (2026-11-12 作り込み)
+    m.add("lid_t", ell("body", "scroll", (0, 12.6, 0.4), (9.4, 3.6, 4.0), segs=14, rings=4))
+    m.add("lid_b", ell("body", "scroll", (0, 5.2, 0.4), (8.4, 2.4, 3.6), segs=14, rings=3))
+    m.add("eye", ell("body", "pearl", (0, 9, -0.6), (6.4, 3.8, 3.2), segs=12, rings=4))
+    m.add("iris", ell("body", "sigil", (0, 9, -3.2), (2.8, 2.8, 0.8), segs=12, rings=2))
+    m.add("iris_ring", tub("body", "goldl", [P(math.cos(t) * 2.9, 9 + math.sin(t) * 2.9, -3.5) for t in np.linspace(0, math.tau, 15)], [0.25] * 15, None, sides=4))
+    m.add("pupil", ell("body", "night", (0, 9, -3.9), (0.9, 2.0, 0.4), segs=8, rings=1))
+    m.add("glint", ell("body", "light", (-1.0, 10.2, -4.1), (0.5, 0.5, 0.2), segs=6, rings=1))
+    for k in range(9):
+        x = -6.4 + k * 1.6
+        m.add(f"lash{k}", cone("body", "night", (x, 11.6 - abs(x) * 0.18, -2.8), (x * 0.05, 1, -0.6), 2.4 - abs(k - 4) * 0.15, 0.3, sides=4))
+    for k in range(5):
+        a = k / 5 * math.tau
+        m.add(f"cloud{k}", ell("body", "scroll", (math.cos(a) * 11.6, 9 + math.sin(a) * 6.0, 1.6), (2.4, 1.6, 1.8), segs=8, rings=2))
 
 def my_new_moon(m):
     # 新しい月 (落ちる): 白金の三日月の重なり
@@ -332,15 +345,23 @@ def my_feather(m):
 
 
 def my_mist(m):
-    # 霞隠れ (突き出る): 霞から首を上げる霞鳥 (細い首と翼の霞)
-    m.add("mist", ell("body", "wind", (0, 2, 0), (10, 2.6, 10), segs=12, rings=2))
-    m.add("neck", tub("body", "windp", [P(0, 2, 0), P(1, 10, 0), P(0, 18, -2), P(0, 20, -5)], [2.4, 1.6, 1.2, 1.0], None, sides=6))
-    m.add("head", ell("body", "windp", (0, 20.5, -5.5), (1.8, 1.6, 2.4), segs=6, rings=2))
+    # 霞隠れ (突き出る): 霞の渦から首を上げる霞鳥。羽根の段の翼、尾羽、霞の筋 (2026-11-12 作り込み)
+    m.add("mist", ell("body", "wind", (0, 2, 0), (10, 2.4, 10), segs=14, rings=2))
+    for k in range(3):
+        pts = [P(math.cos(t + k * 2.1) * (9 - t), 2.6 + t * 1.2, math.sin(t + k * 2.1) * (9 - t)) for t in np.linspace(0, 4.0, 9)]
+        m.add(f"swirl{k}", tub("body", "windp", pts, [0.6, 0.6, 0.55, 0.5, 0.45, 0.4, 0.3, 0.2, 0.1], None, sides=4))
+    m.add("body_", ell("body", "windp", (0, 8, 0.6), (3.0, 3.4, 4.4), segs=10, rings=3))
+    m.add("neck", tub("body", "windp", [P(0, 10, -1.6), P(0.6, 14, -2.4), P(0, 18, -3.4), P(0, 20, -5)], [1.9, 1.5, 1.2, 1.0], None, sides=8))
+    m.add("head", ell("body", "windp", (0, 20.5, -5.5), (1.8, 1.6, 2.4), segs=8, rings=3))
+    m.add("crest", cone("body", "windp", (0, 21.8, -4.6), (0, 0.6, 1), 3.4, 0.6, sides=4))
     m.add("beak", cone("body", "gold", (0, 20.3, -7.6), (0, -0.1, -1), 4, 0.8, sides=4, rings=1))
-    m.add("eye", ell("body", "sigil", (1.4, 21, -6.2), (0.5, 0.5, 0.5), segs=4, rings=1))
     for s in (1, -1):
-        m.add(f"wing{s}", ell("body", "wind", (s * 7, 8, 1), (6, 1.4, 3.6), segs=6, rings=1, rz=s * 30))
-
+        m.add(f"eye{s}", ell("body", "sigil", (s * 1.4, 21, -6.2), (0.5, 0.5, 0.5), segs=4, rings=1))
+        for k in range(4):
+            m.add(f"wing{s}{k}", ell("body", "wind" if k % 2 else "windp", (s * (4.6 + k * 2.2), 10.4 + k * 1.4, 1.0 + k * 0.6), (3.4 - k * 0.3, 0.8, 2.2 - k * 0.2), segs=8,
+                                     rings=1, rz=s * (24 + k * 6)))
+    for k in range(3):
+        m.add(f"tail{k}", ell("body", "windp", ((k - 1) * 1.2, 6.4, 5.6), (0.8, 0.4, 3.0), segs=6, rings=1, ry=(k - 1) * 18))
 
 def my_eye_arrow(m):
     # 凝視の矢 (刺さる): 眼の紋を持つ金の矢が地に刺さる
@@ -368,18 +389,26 @@ def my_rewind(m):
 
 
 def my_moth(m):
-    # 灯の粉 (弾ける): 翅を開いた灯蛾と、こぼれる金の粉
-    m.add("body_", ell("body", "moth", (0, 12, 0), (1.4, 1.4, 4.4), segs=6, rings=2))
+    # 灯の粉 (弾ける): 翅を開いた灯蛾。翅の脈と縁、目玉の紋、毛の胸、こぼれる金の粉 (2026-11-12 作り込み)
+    m.add("thorax", ell("body", "moth", (0, 12, -1.6), (1.8, 1.7, 2.0), segs=8, rings=3))
+    m.add("abdomen", tub("body", "moth", [P(0, 12, 0), P(0, 11.6, 3.0), P(0, 11.2, 5.6)], [1.5, 1.3, 0.5], None, sides=8))
+    m.add("head", ell("body", "moth", (0, 12.4, -3.8), (1.2, 1.1, 1.0), segs=8, rings=2))
     for s in (1, -1):
-        m.add(f"fw{s}", ell("body", "moth", (s * 5.5, 13, -1.4), (5.2, 0.5, 3.6), segs=8, rings=1, ry=s * 20))
-        m.add(f"hw{s}", ell("body", "moth", (s * 4.4, 12, 3.0), (3.6, 0.5, 2.6), segs=8, rings=1, ry=-s * 20))
-        m.add(f"eye{s}", ell("body", "lantern", (s * 6.5, 13.6, -1.6), (1.6, 0.4, 1.6), segs=8, rings=1))
-        m.add(f"ant{s}", tub("body", "moth", [P(s * 0.6, 12.5, -4.2), P(s * 2.4, 14.5, -7)], [0.3, 0.2], None, sides=4))
-    for k in range(6):
-        a = k * 1.05
-        m.add(f"dust{k}", ell("body", "lantern", (math.cos(a) * 4, 2 + k * 1.4, math.sin(a) * 4), (0.6, 0.6, 0.6), segs=4, rings=1))
+        m.add(f"fw{s}", ell("body", "moth", (s * 5.8, 13, -1.4), (5.4, 0.45, 3.8), segs=12, rings=2, ry=s * 20))
+        m.add(f"hw{s}", ell("body", "moth", (s * 4.4, 12, 3.0), (3.8, 0.45, 2.8), segs=10, rings=2, ry=-s * 20))
+        m.add(f"edge{s}", tub("body", "goldl", [P(s * 1.6, 13.4, -3.0), P(s * 6.0, 13.5, -5.0), P(s * 10.4, 13.4, -3.0), P(s * 10.8, 13.3, -0.6)], [0.22] * 4, None,
+                               sides=4))
+        for k in range(3):
+            m.add(f"vein{s}{k}", tub("body", "goldl", [P(s * 1.6, 13.45, -1.2), P(s * (4.0 + k * 2.0), 13.5, -2.6 + k * 1.2)], [0.1, 0.08], None, sides=3))
+        m.add(f"eye{s}", ell("body", "lantern", (s * 6.5, 13.6, -1.6), (1.6, 0.4, 1.6), segs=10, rings=1))
+        m.add(f"eyec{s}", ell("body", "night", (s * 6.5, 13.85, -1.6), (0.6, 0.2, 0.6), segs=8, rings=1))
+        m.add(f"ant{s}", tub("body", "moth", [P(s * 0.5, 12.8, -4.4), P(s * 1.6, 14.2, -6.0), P(s * 2.6, 14.6, -7.2)], [0.25, 0.2, 0.12], None, sides=4))
+        for k in range(4):
+            m.add(f"barb{s}{k}", cone("body", "moth", (s * (0.9 + k * 0.5), 13.9 + k * 0.2, -5.0 - k * 0.6), (s, 0.3, 0), 0.8, 0.08, sides=3))
+    for k in range(9):
+        a = k * 0.85
+        m.add(f"dust{k}", ell("body", "lantern", (math.cos(a) * (3 + k * 0.3), 2 + k * 1.0, math.sin(a) * (3 + k * 0.3)), (0.5, 0.5, 0.5), segs=5, rings=1))
     m.add("dot", ell("body", "sigil", (0, 0.6, 0), (1.4, 0.5, 1.4), segs=6, rings=1))
-
 
 def my_chase_mark(m):
     # 追う印 (印): 赤い菱の印が浮き、下に爪の輪
