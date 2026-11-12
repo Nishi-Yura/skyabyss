@@ -1,0 +1,64 @@
+# 作り直した攻撃の形 16 個 (2026-11-12) を床から出した姿・投げた姿で撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/props_v2.txt -PshotsName=props_v2
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+hud off
+lowpoly on
+fov 60
+cmd kill @e[type=!minecraft:player,distance=..80]
+camera minecraft:overworld 0 -55 18 180 14
+waitchunks
+wait 40
+cmd skyabyss dev prop rock rise -12 -60 0
+cmd skyabyss dev prop bone_shard rise -8 -60 0
+cmd skyabyss dev prop tentacle rise -4 -60 0
+cmd skyabyss dev prop ink_blob rise 0 -60 0
+cmd skyabyss dev prop water_spout rise 4 -60 0
+cmd skyabyss dev prop ash_ball rise 8 -60 0
+cmd skyabyss dev prop whirlwind rise 12 -60 0
+cmd skyabyss dev prop weight rise 0 -60 -8
+wait 30
+shot foe_props
+camera minecraft:overworld -6 -57 8 200 12
+wait 5
+shot foe_props_left
+camera minecraft:overworld 6 -57 8 160 12
+wait 5
+shot foe_props_right
+cmd kill @e[type=!minecraft:player,distance=..80]
+camera minecraft:overworld 0 -55 18 180 14
+cmd skyabyss dev prop sk_el_stone rise -12 -60 0
+cmd skyabyss dev prop my_gaze rise -8 -60 0
+cmd skyabyss dev prop my_mist rise -4 -60 0
+cmd skyabyss dev prop my_moth rise 0 -60 0
+cmd skyabyss dev prop gx_smash rise 4 -60 0
+cmd skyabyss dev prop gx_cleaver rise 8 -60 0
+cmd skyabyss dev prop pa_quake rise 12 -60 0
+cmd skyabyss dev prop lg_whale_fall rise 0 -60 -9
+wait 30
+shot own_props
+camera minecraft:overworld -6 -57 8 200 12
+wait 5
+shot own_props_left
+camera minecraft:overworld 6 -57 8 160 12
+wait 5
+shot own_props_right
+cmd kill @e[type=!minecraft:player,distance=..80]
+camera minecraft:overworld 0 -55 18 180 14
+cmd skyabyss dev prop rock toss -12 -57 -4 12 -60 -4 60
+cmd skyabyss dev prop bone_shard toss -12 -57 0 12 -60 0 60
+cmd skyabyss dev prop ink_blob toss -12 -57 4 12 -60 4 60
+cmd skyabyss dev prop ash_ball toss -12 -57 8 12 -60 8 60
+wait 40
+shot props_toss

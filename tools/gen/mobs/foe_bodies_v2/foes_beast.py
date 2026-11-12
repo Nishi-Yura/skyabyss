@@ -76,17 +76,17 @@ def storm_ram():
     # 胴: 厚い毛の塊 (丸めた胴の上に、房を段に重ねる)
     m.add("torso", ell("body", "wool", (0, 21.0, 0.0), (7.4, 7.6, 12.0), segs=16, rings=7), core=True)
     rng = np.random.default_rng(11)
-    for i in range(30):
+    for i in range(22):
         a = (i * 137.5 + 11) * math.pi / 180
         bb = ((i * 61 + 33) % 180 - 90) * math.pi / 180 * 0.75
         x, y, z = 6.9 * math.cos(bb) * math.cos(a), 20.0 + 7.0 * math.sin(bb), 11.2 * math.cos(bb) * math.sin(a)
         r = 2.6 * (0.8 + 0.4 * ((i * 7) % 5) / 4)
-        m.add(f"tuft{i}", ell("body", "wool" if i % 4 else "woold", (x, y, z), (r, r * 1.25, r), segs=9, rings=3))
+        m.add(f"tuft{i}", ell("body", "wool" if i % 4 else "woold", (x, y, z), (r * 1.12, r * 1.35, r * 1.12), segs=8, rings=2))
     # 房の垂れ (脇腹と胸の毛先。先が霜で白い)
     for sx in (1, -1):
         for i, z in enumerate((-8.4, -4.6, -0.8, 3.0, 6.8)):
             top = P(sx * 6.4, 16.6, z)
-            m.add(f"lock{sx}{i}", tub("body", "wool", [top, top + P(sx * 0.6, -3.2, 0.2), top + P(sx * 0.4, -5.6, 0.6)], [1.7, 1.3, 0.5], None, sides=8))
+            m.add(f"lock{sx}{i}", tub("body", "wool", [top, top + P(sx * 0.6, -3.2, 0.2), top + P(sx * 0.4, -5.6, 0.6)], [1.7, 1.3, 0.5], None, sides=6))
             m.add(f"frost{sx}{i}", cone("body", "frost", tuple(top + P(sx * 0.4, -5.2, 0.6)), (0, -1, 0.1), 1.0, 0.5, sides=6, rings=1))
     for i, (x, z) in enumerate(((-2.4, -11.6), (0, -12.2), (2.4, -11.6))):
         m.add(f"chest_lock{i}", tub("body", "wool", [P(x, 18.0, z), P(x * 1.1, 14.0, z - 0.2), P(x * 1.1, 11.6, z + 0.4)], [1.6, 1.2, 0.4], None, sides=8))
@@ -111,20 +111,20 @@ def storm_ram():
     # 巻いた角: 輪の畝 (年輪) と外側の稲妻の筋
     for sx in (1, -1):
         pts, ra = [], []
-        n = 26
+        n = 18
         for i in range(n):
             t = i / (n - 1)
             a = t * 1.45 * 2 * math.pi
             r = 7.0 * (1 - 0.5 * t)
             pts.append(P(sx * (3.2 + 5.6 * t), 25.0 + r * math.cos(a), -8.0 + r * math.sin(a)))
             ra.append(3.0 * (1 - 0.8 * t) + 0.3)
-        m.add(f"horn{sx}", tub("head", "horn", pts, ra, None, sides=10, hint=(1, 0, 0)))
+        m.add(f"horn{sx}", tub("head", "horn", pts, ra, None, sides=8, hint=(1, 0, 0)))
         for i in range(2, n - 3, 3):
             d = nrm(pts[i + 1] - pts[i - 1])
-            m.add(f"ridge{sx}{i}", tub("head", "hornd", [pts[i] - d * 0.18, pts[i] + d * 0.18], [ra[i] * 1.07, ra[i] * 1.07], None, sides=10, hint=(1, 0, 0)))
-        vein = [p + P(sx * r_ * 0.86, 0, 0) for p, r_ in zip(pts[2:22], ra[2:22])]
+            m.add(f"ridge{sx}{i}", tub("head", "hornd", [pts[i] - d * 0.18, pts[i] + d * 0.18], [ra[i] * 1.07, ra[i] * 1.07], None, sides=8, hint=(1, 0, 0)))
+        vein = [p + P(sx * r_ * 0.86, 0, 0) for p, r_ in zip(pts[1:15], ra[1:15])]
         zig = [v + P(0, 0.45 * (1 if k % 2 else -1), 0) for k, v in enumerate(vein)]
-        m.add(f"vein{sx}", tub("head", "glow_blue", zig, [0.42] * len(zig), None, sides=5, hint=(0, 1, 0)))
+        m.add(f"vein{sx}", tub("head", "glow_blue", zig, [0.42] * len(zig), None, sides=4, hint=(0, 1, 0)))
     # 脚: 膝まで毛、下は黒く細い。蹴爪の毛、割れた黒い蹄
     for sx, fb, hb in ((1, "fore_l", "hind_l"), (-1, "fore_r", "hind_r")):
         taper_limb(m, f"foreup{sx}", fb, "wool", [(sx * 4.0, 17.0, -8.0), (sx * 4.1, 13.0, -8.2), (sx * 4.2, 9.0, -8.4)], [3.0, 2.7, 2.2])

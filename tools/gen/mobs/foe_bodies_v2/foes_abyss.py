@@ -56,7 +56,7 @@ def salt_husk():
     husk_body(m, "salt", "saltd")
     m.add("skull", ell("head", "salt", (0, 24.9, 0.0), (1.95, 2.35, 2.05), segs=14, rings=5))
     m.add("jaw", ell("head", "salt", (0, 23.1, -0.6), (1.45, 0.9, 1.35), segs=10, rings=3))
-    m.add("face_crack", tub("head", "hollow", [P(0.4, 26.8, -1.6), P(-0.2, 25.6, -2.0), P(0.3, 24.4, -2.05), P(-0.1, 23.2, -1.8)], [0.12, 0.2, 0.16, 0.1], None, sides=5))
+    m.add("face_crack", tub("head", "hollow", [P(0.4, 26.7, -1.45), P(-0.2, 25.6, -1.85), P(0.3, 24.4, -1.9), P(-0.1, 23.3, -1.65)], [0.07, 0.11, 0.09, 0.06], None, sides=5))
     for s in (-1, 1):
         m.add(f"socket{s}", ell("head", "hollow", (s * 0.7, 24.7, -1.85), (0.5, 0.32, 0.3), segs=8, rings=2))
         eye(m, "head", (s * 0.7, 24.7, -1.95), 0.18, (0, 0, -1), (160, 220, 255), glow=False)
@@ -65,10 +65,10 @@ def salt_husk():
     rim = [P(-0.6, 19.8, -2.45), P(0.6, 19.4, -2.6), P(1.6, 18.0, -2.55), P(1.5, 16.2, -2.5), P(0.4, 15.4, -2.5), P(-0.8, 16.4, -2.5), P(-1.0, 18.4, -2.5), P(-0.6, 19.8, -2.45)]
     m.add("hole_rim", tub("body", "saltc", rim, [0.32] * len(rim), None, sides=5))
     for k, (p0, p1, p2) in enumerate((((1.6, 18.0), (2.8, 19.4), (3.4, 21.0)), ((0.4, 15.4), (-0.6, 13.6), (-1.6, 12.4)), ((-1.0, 18.4), (-2.4, 19.0), (-3.2, 20.4)))):
-        pts = [P(x, y, -2.3 - 0.1 * (2 - i)) for i, (x, y) in enumerate((p0, p1, p2))]
-        m.add(f"crack{k}", tub("body", "hollow", pts, [0.2, 0.14, 0.08], None, sides=4))
+        pts = [P(x, y, -2.15 - 0.08 * (2 - i)) for i, (x, y) in enumerate((p0, p1, p2))]
+        m.add(f"crack{k}", tub("body", "hollow", pts, [0.13, 0.09, 0.05], None, sides=4))
     for b, s in (("arm_l", -1), ("arm_r", 1)):
-        m.add(f"{b}_crack", tub(b, "hollow", [P(s * 5.5, 19.8, -1.1), P(s * 5.0, 18.2, -1.4), P(s * 5.4, 16.4, -1.1)], [0.1, 0.15, 0.08], None, sides=4))
+        m.add(f"{b}_crack", tub(b, "hollow", [P(s * 5.5, 19.8, -1.1), P(s * 5.0, 18.2, -1.4), P(s * 5.4, 16.4, -1.1)], [0.07, 0.1, 0.05], None, sides=4))
     # 塩の殻のかさぶた (肩・腰・膝) と小さな結晶
     rng = np.random.default_rng(12)
     for k, (b, c) in enumerate((("body", (3.3, 22.0, 0.8)), ("body", (-2.8, 21.4, 1.2)), ("body", (2.4, 13.2, -1.4)), ("body", (-1.6, 12.0, 1.6)),
