@@ -1,0 +1,51 @@
+# 敵の体の作り直し 13 体 (2026-11-12、案 A 作り込み) をゲームで確かめる
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foe_bodies_v2.txt -PshotsName=foe_bodies_v2
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+waitchunks
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:drowned_sailor -9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:ember_keeper -6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:ash_striker -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit_archer 3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit_chief 6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:salt_husk 9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:rib_guard -9 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:lightning_idol -6 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:static_puff -3 -59 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:tidepool_clam 0 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:ash_whirl 3 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:storm_ram 7 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd skyabyss cinematic stop
+wait 60
+camera minecraft:overworld 0 -58.0 9.0 180 8
+wait 30
+shot row1_front
+camera minecraft:overworld -4.5 -58.4 4.0 180 8
+wait 20
+shot row1_left
+camera minecraft:overworld 4.5 -58.4 4.0 180 8
+wait 20
+shot row1_right
+camera minecraft:overworld 0 -58.0 -15.0 0 8
+wait 20
+shot row1_back
+camera minecraft:overworld -4.5 -58.0 -2.0 180 8
+wait 20
+shot row2_left
+camera minecraft:overworld 4 -57.5 -2.0 180 8
+wait 20
+shot row2_right
