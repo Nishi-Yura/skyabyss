@@ -1,0 +1,60 @@
+# 呪術師の杖の向き確認 (11-13)
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier common
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot shrine_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot shrine_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot tide_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot tide_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot shrine_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot shrine_staff_front
