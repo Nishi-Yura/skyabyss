@@ -902,7 +902,7 @@ public final class Gauges {
                 for (int k = 0; k < 6; k++) {
                     level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 6 - k, at.z, 1, 0.02, 0.1, 0.02, 0);
                 }
-                jp.revati.skyabyss.combat.prop.AttackProps.fall(level, SkillProps.kind(SkillTree.BONE, "rise"), player, at, 2, 2, 5f, 0.6f, 8);
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(level, "ss_sky_rain_fall", player, at, 2, 2, 5f, 0.8f, 8);
                 if (!foes.isEmpty()) {
                     busy = true;
                     try {

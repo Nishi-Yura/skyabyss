@@ -5,11 +5,7 @@
 
     python -X utf8 -I tools/gen/mobs/attack_props/build_skill_kit.py [種類 ...] [--no-install]
 
-  攻撃の型 (職ごと。選んだ案の作りで) sk_<職>_<型>
-      slash  斬撃の弧: 前へ飛ぶ三日月 (前 = -Z、芯は y=4)。近接の技の振り
-      wave   衝撃の輪: 床から輪に突き出る (半径 16 = 1 ブロック。大きさ = 半径)。範囲の技
-      aura   身にまとう: 足もとから立つ輪 (半径 12)。強化・守り・癒し
-      zone   床に残る陣: 平たい円 (半径 16)。罠・場・呪い
+  (職ごとの型 sk_<職>_<slash|wave|aura|zone> は 2026-11-12 に技ごとの形 build_skill_each.py へ替えて外した)
   粉の属性 (武器の粉の技が働くとき、形に添える小さな印) sk_el_<stone|wind|tide|ash|bone>
   技の変化 (刻印・書き換え・変異・秘伝のとき、技の芯に添える) sk_ch_<rune|rewrite|mutation|secret>
   やり込み (技の熟練の段) sk_mastery_3 (青緑の細い棘の輪)・sk_mastery_5 (金と青緑の冠)
@@ -95,300 +91,6 @@ def ring_of(m, name, n, r, fn, phase=0.0):
     for k in range(n):
         a = phase + k / n * math.tau
         fn(m, f"{name}{k}", a, math.cos(a) * r, math.sin(a) * r)
-
-
-# ================================================================ 戦士 (岩守り・花崗岩の石柱の作り)
-def warrior_slash(m):
-    # 石の刃の弧: 角ばった花崗岩の欠片を連ねた三日月、外縁に青緑の刻み
-    for k, p in enumerate(arc_pts(16, -70, 70, 9)):
-        t = k / 8
-        s = 1.2 + 2.4 * math.sin(math.pi * t)
-        m.add(f"shard{k}", ell("body", "granite", tuple(p), (s, s * 0.7, s * 1.3), segs=4, rings=1, ry=math.degrees(math.atan2(p[0], -p[2])) + 45))
-    crescent(m, "edge", "sigil", 18.5, 120, 0.6, n=11)
-
-
-def warrior_wave(m):
-    # 割れて立つ石板の輪: 外へ傾いた花崗岩の板が輪に突き出る
-    def slab(m, nm, a, x, z):
-        out = P(math.cos(a), 0.0, math.sin(a))
-        m.add(nm, tub("body", "granite", [P(x, -6, z), P(x, 2, z) + out * 2.4, P(x, 7, z) + out * 4.0], [2.8, 2.2, 0.6], None, sides=4, phase=45))
-    ring_of(m, "slab", 10, 16, slab)
-    sig_loop(m, 16, 0.4)
-    base_debris(m, "granite", 13, seed=61)
-
-
-def warrior_aura(m):
-    # 守りの石: 足もとを囲む三つの立ち石に青緑の刻み帯、低い光の輪
-    def stone(m, nm, a, x, z):
-        m.add(nm, tub("body", "granite", [P(x, -6, z), P(x, 20, z)], [3.0, 2.2], None, sides=4, phase=45, caps=(True, True)))
-        m.add(nm + "_cap", cone("body", "granite", (x, 20, z), (0, 1, 0), 4, 2.2, sides=4, rings=1))
-        m.add(nm + "_band", ell("body", "sigil", (x, 13, z), (3.2, 0.6, 3.2), segs=4, rings=1, ry=45))
-    ring_of(m, "stone", 3, 12, stone, phase=math.pi / 2)
-    sig_loop(m, 12, 0.5)
-    loop(m, "halo", "sigil", 10, 24, 0.35)
-
-
-def warrior_zone(m):
-    # 刻んだ石の円: 平たい花崗岩の盤に割れ目と青緑の刻み線
-    m.add("disc", ell("body", "granite", (0, 0.5, 0), (16, 1.6, 16), segs=10, rings=1, ry=18))
-    for k in range(5):
-        a = k / 5 * math.tau
-        m.add(f"crack{k}", tub("body", "sigil", [P(math.cos(a) * 3, 2.1, math.sin(a) * 3), P(math.cos(a + 0.3) * 9, 2.1, math.sin(a + 0.3) * 9),
-                                                 P(math.cos(a + 0.1) * 14, 2.1, math.sin(a + 0.1) * 14)], [0.6, 0.5, 0.3], None, hint=(0, 1, 0), sides=4))
-    m.add("core", ell("body", "sigil", (0, 2.2, 0), (2.4, 0.6, 2.4), segs=6, rings=1))
-    base_debris(m, "granite", 15, seed=62)
-
-
-# ================================================================ 暗殺者 (風読み・風の大鎌の作り)
-def assassin_slash(m):
-    # 風の刃の弧: 薄い白い三日月が二枚 (少しずらして重ねない)、外縁に青緑
-    crescent(m, "blade", "windp", 15, 130, 1.8, n=13, edge="sigil")
-    crescent(m, "blade2", "wind", 10, 100, 1.0, n=9, y=CY + 2.5)
-
-
-def assassin_wave(m):
-    # 渦の刃の輪: 外へ反った三日月の刃が輪に立つ
-    def blade(m, nm, a, x, z):
-        tang = P(-math.sin(a), 0, math.cos(a))
-        out = P(math.cos(a), 0, math.sin(a))
-        base = P(x, -6, z)
-        pts = [base, base + P(0, 6, 0) + tang * 2.4, base + P(0, 11, 0) + tang * 4 + out * 2.4, base + P(0, 14, 0) + tang * 3.4 + out * 4.6]
-        m.add(nm, tub("body", "windp", pts, [2.6, 2.0, 1.2, 0.2], None, hint=tuple(out), sides=4))
-    ring_of(m, "blade", 8, 16, blade)
-    sig_loop(m, 16, 0.4)
-
-
-def assassin_aura(m):
-    # 身を包む風: 足もとから螺旋に昇る三本の細い風の帯
-    for k in range(3):
-        pts, rad = [], []
-        for j in range(9):
-            t = j / 8
-            a = k / 3 * math.tau + t * 4.0
-            r = 12 - t * 4
-            pts.append(P(math.cos(a) * r, -4 + t * 30, math.sin(a) * r))
-            rad.append(1.4 * (1 - t) + 0.3)
-        m.add(f"ribbon{k}", tub("body", "windp", pts, rad, None, sides=4))
-    sig_loop(m, 12, 0.5)
-
-
-def assassin_zone(m):
-    # 風の陣: 平たい渦巻きの羽根 (四枚の曲がった刃) と芯
-    m.add("disc", ell("body", "wind", (0, 0.4, 0), (15, 0.8, 15), segs=16, rings=1))
-    for k in range(4):
-        pts = []
-        for j in range(7):
-            t = j / 6
-            a = k / 4 * math.tau + t * 1.8
-            r = 2 + t * 13
-            pts.append(P(math.cos(a) * r, 1.6, math.sin(a) * r))
-        m.add(f"vane{k}", tub("body", "sigil" if k % 2 == 0 else "windp", pts, [1.2, 1.4, 1.4, 1.2, 1.0, 0.7, 0.3], None, hint=(0, 1, 0), sides=4))
-    m.add("core", ell("body", "sigil", (0, 1.8, 0), (2.2, 0.8, 2.2), segs=6, rings=1))
-
-
-# ================================================================ 呪術師 (潮歌い・鯨の霊の作り)
-def shaman_slash(m):
-    # 潮の弧: 前へ砕ける水の三日月と泡の縁
-    crescent(m, "wave", "seaw", 14, 120, 2.6, n=13)
-    for k, p in enumerate(arc_pts(16.4, -54, 54, 7)):
-        m.add(f"foam{k}", ell("body", "foam", tuple(p + P(0, 1.2, 0)), (1.5, 1.2, 1.5), segs=6, rings=2))
-    crescent(m, "edge", "sigil", 11.5, 90, 0.5, n=9)
-
-
-def shaman_wave(m):
-    # 潮の輪: 床から立つ水の壁の輪、上で泡が砕ける
-    n = 14
-    for k in range(n):
-        a = k / n * math.tau
-        x, z = math.cos(a) * 16, math.sin(a) * 16
-        out = P(math.cos(a), 0, math.sin(a))
-        m.add(f"crest{k}", tub("body", "seaw", [P(x, -6, z), P(x, 3, z) + out * 1.4, P(x, 8, z) + out * 3.0], [2.6, 2.0, 0.8], None, sides=5))
-        if k % 2 == 0:
-            m.add(f"foam{k}", ell("body", "foam", tuple(P(x, 8, z) + out * 3.3), (1.8, 1.2, 1.8), segs=6, rings=2))
-    sig_loop(m, 16, 0.4)
-
-
-def shaman_aura(m):
-    # 潮の霊: 足もとを回る三匹の小さな水の鯨と、昇る泡
-    for k in range(3):
-        a = k / 3 * math.tau
-        x, z = math.cos(a) * 12, math.sin(a) * 12
-        tang = math.degrees(math.atan2(-math.sin(a), math.cos(a)))
-        y = 8 + k * 6
-        m.add(f"whale{k}", ell("body", "seaw", (x, y, z), (3.4, 3.0, 6.4), segs=8, rings=3, ry=tang))
-        tx, tz = x + math.sin(a) * 6.2, z - math.cos(a) * 6.2
-        m.add(f"tail{k}", ell("body", "water", (tx, y + 0.4, tz), (3.6, 0.8, 1.6), segs=6, rings=1, ry=tang))
-        m.add(f"eye{k}", ell("body", "sigil", (x - math.sin(a) * 4.6, y + 1.0, z + math.cos(a) * 4.6), (0.6, 0.6, 0.6), segs=4, rings=1))
-    for k in range(6):
-        a = k * 1.3
-        m.add(f"bub{k}", ell("body", "foam", (math.cos(a) * 5, 4 + k * 5, math.sin(a) * 5), (1.0, 1.0, 1.0), segs=6, rings=2))
-    sig_loop(m, 12, 0.5)
-
-
-def shaman_zone(m):
-    # 潮だまりの陣: 平たい水の円、縁に四本の小さな彫り杭、さざ波の輪
-    m.add("pool", ell("body", "water", (0, 0.4, 0), (16, 0.9, 16), segs=18, rings=1))
-    for k, r in enumerate((6.0, 11.0)):
-        loop(m, f"ripple{k}", "foam", r, 1.4 + k * 0.1, 0.35)
-    for k in range(4):
-        a = k / 4 * math.tau + math.pi / 4
-        x, z = math.cos(a) * 14.5, math.sin(a) * 14.5
-        m.add(f"stake{k}", tub("body", "totem", [P(x, -2, z), P(x, 9, z)], [1.4, 1.1], None, sides=6, caps=(True, True)))
-        m.add(f"seye{k}", ell("body", "sigil", (x, 7, z), (1.2, 0.8, 1.2), segs=6, rings=1))
-    m.add("core", ell("body", "sigil", (0, 1.6, 0), (2.2, 0.6, 2.2), segs=6, rings=1))
-
-
-# ================================================================ 鍛冶師 (灰の鍛え人・大鎚と歯車の作り)
-def smith_slash(m):
-    # 熱い鉄の弧: 赤熱した鉄の三日月と、散る火花の粒
-    crescent(m, "iron", "ironhot", 14, 120, 2.4, n=13)
-    crescent(m, "back", "iron", 11.6, 100, 1.4, n=9)
-    for k, p in enumerate(arc_pts(17.5, -50, 50, 5)):
-        m.add(f"spark{k}", ell("body", "lantern", tuple(p), (0.8, 0.8, 0.8), segs=4, rings=1))
-    crescent(m, "edge", "sigil", 16.4, 80, 0.4, n=7)
-
-
-def gear(m, name, mat, c, r, teeth, th, axis="y"):
-    """平たい歯車 (axis 方向に厚み th)"""
-    if axis == "y":
-        m.add(name, ell("body", mat, c, (r, th, r), segs=max(10, teeth * 2), rings=1))
-    else:
-        m.add(name, ell("body", mat, c, (r, r, th), segs=max(10, teeth * 2), rings=1))
-    for k in range(teeth):
-        a = k / teeth * math.tau
-        if axis == "y":
-            p = (c[0] + math.cos(a) * (r + 0.9), c[1], c[2] + math.sin(a) * (r + 0.9))
-            m.add(f"{name}_t{k}", ell("body", mat, p, (1.3, th * 0.9, 1.3), segs=4, rings=1, ry=-math.degrees(a) + 45))
-        else:
-            p = (c[0] + math.cos(a) * (r + 0.9), c[1] + math.sin(a) * (r + 0.9), c[2])
-            m.add(f"{name}_t{k}", ell("body", mat, p, (1.3, 1.3, th * 0.9), segs=4, rings=1, rz=math.degrees(a) + 45))
-
-
-def smith_wave(m):
-    # 歯車の輪: 床から立つ大きな歯車の歯が輪に突き上がる (歯の先は赤熱)
-    def tooth(m, nm, a, x, z):
-        m.add(nm, tub("body", "bronze", [P(x, -6, z), P(x, 5, z)], [2.8, 2.2], None, sides=4, phase=math.degrees(a) + 45, caps=(True, True)))
-        m.add(nm + "_hot", ell("body", "ironhot", (x, 5.6, z), (2.2, 1.0, 2.2), segs=4, rings=1, ry=-math.degrees(a) + 45))
-    ring_of(m, "tooth", 12, 16, tooth)
-    sig_loop(m, 16, 0.4)
-    base_debris(m, "iron", 13, seed=63)
-
-
-def smith_aura(m):
-    # 熾の守り: 体のまわりに立つ三つの回る歯車 (縦) と、足もとの赤熱した鉄の輪
-    for k in range(3):
-        a = k / 3 * math.tau + math.pi / 2
-        x, z = math.cos(a) * 12, math.sin(a) * 12
-        gear(m, f"g{k}", "bronze", (x, 12 + k * 4, z), 4.0, 8, 0.9, axis="z")
-        m.add(f"hub{k}", ell("body", "sigil", (x, 12 + k * 4, z), (1.2, 1.2, 1.3), segs=6, rings=1))
-    loop(m, "ring", "ironhot", 12, 0.8, 0.6)
-    sig_loop(m, 9, 0.5)
-
-
-def smith_zone(m):
-    # 炉の床: 割れた鉄の盤に赤熱した継ぎ目と、真ん中の歯車
-    m.add("plate", ell("body", "iron", (0, 0.5, 0), (16, 1.4, 16), segs=8, rings=1, ry=22.5))
-    for k in range(6):
-        a = k / 6 * math.tau
-        m.add(f"seam{k}", tub("body", "ironhot", [P(math.cos(a) * 4, 2.0, math.sin(a) * 4), P(math.cos(a + 0.2) * 10, 2.0, math.sin(a + 0.2) * 10),
-                                                  P(math.cos(a) * 15, 2.0, math.sin(a) * 15)], [0.7, 0.6, 0.3], None, hint=(0, 1, 0), sides=4))
-    gear(m, "gear", "bronze", (0, 2.2, 0), 3.4, 8, 0.6)
-    m.add("core", ell("body", "sigil", (0, 2.8, 0), (1.4, 0.5, 1.4), segs=6, rings=1))
-
-
-# ================================================================ 弓使い (骨の射手・骨の矢の作り)
-def archer_slash(m):
-    # 骨の弧: 肋骨のように曲がった骨の刃と、三本の小さな骨の棘
-    crescent(m, "rib", "bone", 14, 120, 2.0, n=13)
-    for k, p in enumerate(arc_pts(14, -40, 40, 3)):
-        d = p / max(1e-6, np.linalg.norm(p[[0, 2]]))
-        m.add(f"spur{k}", cone("body", "bone", tuple(p), (d[0], 0.15, d[2]), 5, 1.0, sides=4, rings=1))
-    crescent(m, "edge", "sigil", 11.8, 90, 0.45, n=9)
-
-
-def archer_wave(m):
-    # 矢の輪: 外へ傾いて床に刺さった大きな骨の矢の輪 (矢羽は青緑)
-    def arrow(m, nm, a, x, z):
-        out = P(math.cos(a), 0, math.sin(a))
-        tip = P(x, -6, z)
-        tail_ = tip + P(0, 14, 0) + out * 5
-        m.add(nm, tub("body", "bone", [tip, tail_], [0.9, 0.9], None, sides=5))
-        m.add(nm + "_h", cone("body", "bone", tuple(tip + P(0, 2, 0) + out * 0.5), (0, -1, 0), 4, 1.8, sides=4, rings=1))
-        for s in (1, -1):
-            side = P(-math.sin(a), 0, math.cos(a)) * s
-            m.add(nm + f"_f{s}", ell("body", "sigil", tuple(tail_ - P(0, 2.5, 0) - out * 0.7 + side * 1.2), (0.4, 2.6, 1.4), segs=4, rings=1,
-                                     ry=-math.degrees(a)))
-    ring_of(m, "arrow", 9, 16, arrow)
-    sig_loop(m, 16, 0.4)
-
-
-def archer_aura(m):
-    # 矢筒の輪: 足もとのまわりに浮かぶ上向きの骨の矢、低い輪
-    for k in range(6):
-        a = k / 6 * math.tau
-        x, z = math.cos(a) * 12, math.sin(a) * 12
-        y0 = 4 + (k % 2) * 4
-        m.add(f"a{k}", tub("body", "bone", [P(x, y0, z), P(x, y0 + 16, z)], [0.7, 0.7], None, sides=5))
-        m.add(f"h{k}", cone("body", "bone", (x, y0 + 16, z), (0, 1, 0), 3.5, 1.4, sides=4, rings=1))
-        m.add(f"f{k}", ell("body", "sigil", (x, y0 + 1.5, z), (1.4, 2.2, 0.4), segs=4, rings=1, ry=-math.degrees(a)))
-    sig_loop(m, 12, 0.5)
-
-
-def archer_zone(m):
-    # 骨の顎の陣: 平たい輪に内へ倒れた骨の歯、真ん中に青緑の芯
-    m.add("ring", ell("body", "bone", (0, 0.8, 0), (16, 1.4, 16), segs=16, rings=1))
-    m.add("floor", ell("body", "rock", (0, 0.2, 0), (14.5, 0.6, 14.5), segs=14, rings=1))
-    for k in range(10):
-        a = k / 10 * math.tau
-        x, z = math.cos(a) * 14, math.sin(a) * 14
-        m.add(f"tooth{k}", cone("body", "bone", (x, 1.4, z), (-math.cos(a), 0.9, -math.sin(a)), 7, 1.6, sides=4, rings=1))
-    m.add("core", ell("body", "sigil", (0, 1.2, 0), (2.4, 0.6, 2.4), segs=6, rings=1))
-
-
-# ================================================================ 魔法使い (星読み・星の晶と彗星の作り)
-def mage_slash(m):
-    # 星の弧: 星色の三日月に、五つの小さな星の晶
-    crescent(m, "arc", "star", 14, 120, 1.8, n=13)
-    for k, p in enumerate(arc_pts(14, -48, 48, 5)):
-        m.add(f"st{k}", ell("body", "rune", tuple(p), (1.6, 1.6, 1.6), segs=4, rings=2, ry=45))
-    crescent(m, "edge", "sigil", 16.4, 100, 0.4, n=9)
-
-
-def mage_wave(m):
-    # 星の晶の輪: 外へ傾いた星色の晶が輪に突き出る
-    def crystal(m, nm, a, x, z):
-        out = P(math.cos(a), 0, math.sin(a))
-        m.add(nm, cone("body", "star", (x, -6, z), tuple(P(0, 1, 0) + out * 0.35), 13, 2.2, sides=6, rings=2))
-    ring_of(m, "cry", 11, 16, crystal)
-    sig_loop(m, 16, 0.4)
-    base_debris(m, "rune", 13, seed=64)
-
-
-def mage_aura(m):
-    # 星の巡り: 体のまわりを回る三つの星と、星座の細い輪
-    for k in range(3):
-        a = k / 3 * math.tau
-        x, z = math.cos(a) * 12, math.sin(a) * 12
-        y = 10 + k * 6
-        m.add(f"star{k}", ell("body", "star", (x, y, z), (2.2, 2.2, 2.2), segs=4, rings=2, ry=45))
-        for j, d in enumerate(((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0))):
-            m.add(f"ray{k}_{j}", cone("body", "star", (x + d[0] * 1.8, y + d[1] * 1.8, z), d, 2.4, 0.6, sides=4, rings=1))
-    loop(m, "orbit", "rune", 12, 16, 0.35)
-    sig_loop(m, 12, 0.5)
-
-
-def mage_zone(m):
-    # 星図の陣: 平たい藍の円に星を結ぶ線と、縁の小さな晶
-    m.add("disc", ell("body", "rune", (0, 0.4, 0), (16, 0.8, 16), segs=18, rings=1))
-    pts = [P(math.cos(k * 2.2) * (5 + 7 * ((k * 37) % 10) / 10), 1.6, math.sin(k * 2.2) * (5 + 7 * ((k * 37) % 10) / 10)) for k in range(6)]
-    for k in range(6):
-        m.add(f"s{k}", ell("body", "star", tuple(pts[k]), (1.4, 0.8, 1.4), segs=4, rings=1, ry=45))
-        if k:
-            m.add(f"l{k}", tub("body", "goldl", [pts[k - 1], pts[k]], [0.3, 0.3], None, hint=(0, 1, 0), sides=4))
-    for k in range(8):
-        a = k / 8 * math.tau
-        m.add(f"c{k}", cone("body", "star", (math.cos(a) * 15, 0.8, math.sin(a) * 15), (0, 1, 0), 4, 1.0, sides=4, rings=1))
-    m.add("core", ell("body", "sigil", (0, 1.6, 0), (2.0, 0.6, 2.0), segs=6, rings=1))
 
 
 # ================================================================ 粉の属性 (添える小さな印。半径 6 ほど)
@@ -726,9 +428,6 @@ def my_clap(m):
 
 
 BUILDERS = {}
-for job in ("warrior", "assassin", "shaman", "smith", "archer", "mage"):
-    for role in ("slash", "wave", "aura", "zone"):
-        BUILDERS[f"sk_{job}_{role}"] = globals()[f"{job}_{role}"]
 for el in ("stone", "wind", "tide", "ash", "bone"):
     BUILDERS[f"sk_el_{el}"] = globals()[f"el_{el}"]
 for ch in ("rune", "rewrite", "mutation", "secret"):
@@ -739,7 +438,7 @@ MYTHIC = ("sky_hand", "warden", "balance", "big_bell", "melt", "pull", "life_lam
           "chase_mark", "promise", "silence", "clap")
 for k in MYTHIC:
     BUILDERS[f"my_{k}"] = globals()[f"my_{k}"]
-FLYING = {k for k in BUILDERS if k.endswith("_slash")} | {"my_feather"}
+FLYING = {"my_feather"}
 
 
 def build(kind):
@@ -754,7 +453,7 @@ def build(kind):
 
 def idle(kind, m):
     g = Gait("idle", 1.6)
-    if kind.endswith("_aura") or kind in ("sk_ch_rune", "sk_mastery_5", "my_pull", "my_gaze"):
+    if kind in ("sk_ch_rune", "sk_mastery_5", "my_pull", "my_gaze"):
         g.rot("body", None, W(0).s(25, 1, 0, "t"), None)
     elif kind in FLYING:
         g.rot("body", W(0).s(3, 1, 0, "t"))
@@ -763,8 +462,7 @@ def idle(kind, m):
     return g
 
 
-GROUPS = {"roles": [k for k in BUILDERS if k.split("_")[-1] in ("slash", "wave", "aura", "zone")],
-          "marks": [k for k in BUILDERS if k.startswith(("sk_el_", "sk_ch_", "sk_mastery"))],
+GROUPS = { "marks": [k for k in BUILDERS if k.startswith(("sk_el_", "sk_ch_", "sk_mastery"))],
           "mythic": [f"my_{k}" for k in MYTHIC]}
 
 
@@ -788,7 +486,7 @@ def main():
         keys = [k for k in keys if k in tiles]
         if not keys:
             continue
-        cols = 4 if gname == "roles" else 6
+        cols = 6
         rows = (len(keys) + cols - 1) // cols
         cv = Image.new("RGB", (cols * 310 + 10, rows * 334 + 10), (16, 16, 22))
         d = ImageDraw.Draw(cv)

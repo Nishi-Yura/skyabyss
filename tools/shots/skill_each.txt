@@ -1,0 +1,320 @@
+# 技ごとの専用の形 (rpg/skill/SkillProps・prop_ss_<技>。2026-11-12): 43 個を一つずつ床に出して、人の後ろから撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_each.txt -PshotsName=skill_each
+world skill_each flat
+size 1280 720
+timeout 2400
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode creative
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+perspective back
+fov 60
+
+# ---- titan_cleave
+cmd tp @s 0.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_titan_cleave rise 0.5 -60 5.5
+wait 14
+shot titan_cleave
+
+# ---- whale_sweep
+cmd tp @s 24.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_whale_sweep rise 24.5 -60 5.5
+wait 14
+shot whale_sweep
+
+# ---- shield_bash
+cmd tp @s 48.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_shield_bash rise 48.5 -60 5.5
+wait 14
+shot shield_bash
+
+# ---- bone_swing
+cmd tp @s 72.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_bone_swing rise 72.5 -60 5.5
+wait 14
+shot bone_swing
+
+# ---- spin_cut
+cmd tp @s 96.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_spin_cut rise 96.5 -60 5.5
+wait 14
+shot spin_cut
+
+# ---- wind_rend_fly
+cmd tp @s 120.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_wind_rend_fly rise 120.5 -60 5.5
+wait 14
+shot wind_rend_fly
+
+# ---- twin_fang
+cmd tp @s 144.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_twin_fang rise 144.5 -60 5.5
+wait 14
+shot twin_fang
+
+# ---- ember_hammer
+cmd tp @s 168.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_ember_hammer rise 168.5 -60 5.5
+wait 14
+shot ember_hammer
+
+# ---- forge_stomp
+cmd tp @s 192.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_forge_stomp rise 192.5 -60 5.5
+wait 14
+shot forge_stomp
+
+# ---- spark_burst
+cmd tp @s 216.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_spark_burst rise 216.5 -60 5.5
+wait 14
+shot spark_burst
+
+# ---- cloud_pierce_fly
+cmd tp @s 240.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_cloud_pierce_fly rise 240.5 -60 5.5
+wait 14
+shot cloud_pierce_fly
+
+# ---- sky_rain
+cmd tp @s 264.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_sky_rain rise 264.5 -60 5.5
+wait 14
+shot sky_rain
+
+# ---- sky_rain_fall
+cmd tp @s 288.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_sky_rain_fall rise 288.5 -60 5.5
+wait 14
+shot sky_rain_fall
+
+# ---- thunder_bolt_fly
+cmd tp @s 312.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_thunder_bolt_fly rise 312.5 -60 5.5
+wait 14
+shot thunder_bolt_fly
+
+# ---- thunder_bolt
+cmd tp @s 336.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_thunder_bolt rise 336.5 -60 5.5
+wait 14
+shot thunder_bolt
+
+# ---- ember_orb_fly
+cmd tp @s 360.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_ember_orb_fly rise 360.5 -60 5.5
+wait 14
+shot ember_orb_fly
+
+# ---- ember_orb
+cmd tp @s 384.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_ember_orb rise 384.5 -60 5.5
+wait 14
+shot ember_orb
+
+# ---- frost_tide
+cmd tp @s 408.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_frost_tide rise 408.5 -60 5.5
+wait 14
+shot frost_tide
+
+# ---- stardust
+cmd tp @s 432.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_stardust rise 432.5 -60 5.5
+wait 14
+shot stardust
+
+# ---- stardust_fall
+cmd tp @s 456.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_stardust_fall rise 456.5 -60 5.5
+wait 14
+shot stardust_fall
+
+# ---- deep_pull
+cmd tp @s 480.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_deep_pull rise 480.5 -60 5.5
+wait 14
+shot deep_pull
+
+# ---- deep_maw
+cmd tp @s 504.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_deep_maw rise 504.5 -60 5.5
+wait 14
+shot deep_maw
+
+# ---- echo_strike
+cmd tp @s 528.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_echo_strike rise 528.5 -60 5.5
+wait 14
+shot echo_strike
+
+# ---- grave_bell_fall
+cmd tp @s 552.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_grave_bell_fall rise 552.5 -60 5.5
+wait 14
+shot grave_bell_fall
+
+# ---- final_light
+cmd tp @s 576.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_final_light rise 576.5 -60 5.5
+wait 14
+shot final_light
+
+# ---- ward_song
+cmd tp @s 600.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_ward_song rise 600.5 -60 5.5
+wait 14
+shot ward_song
+
+# ---- cycle_song
+cmd tp @s 624.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_cycle_song rise 624.5 -60 5.5
+wait 14
+shot cycle_song
+
+# ---- lamp_charm
+cmd tp @s 648.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_lamp_charm rise 648.5 -60 5.5
+wait 14
+shot lamp_charm
+
+# ---- mist_veil
+cmd tp @s 672.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_mist_veil rise 672.5 -60 5.5
+wait 14
+shot mist_veil
+
+# ---- temper
+cmd tp @s 696.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_temper rise 696.5 -60 5.5
+wait 14
+shot temper
+
+# ---- deep_echo
+cmd tp @s 720.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_deep_echo rise 720.5 -60 5.5
+wait 14
+shot deep_echo
+
+# ---- rock_call
+cmd tp @s 744.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_rock_call rise 744.5 -60 5.5
+wait 14
+shot rock_call
+
+# ---- ebb_tide
+cmd tp @s 768.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_ebb_tide rise 768.5 -60 5.5
+wait 14
+shot ebb_tide
+
+# ---- curse_mark
+cmd tp @s 792.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_curse_mark rise 792.5 -60 5.5
+wait 14
+shot curse_mark
+
+# ---- ash_scatter
+cmd tp @s 816.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_ash_scatter rise 816.5 -60 5.5
+wait 14
+shot ash_scatter
+
+# ---- bone_trap
+cmd tp @s 840.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_bone_trap rise 840.5 -60 5.5
+wait 14
+shot bone_trap
+
+# ---- snare_shot_fly
+cmd tp @s 864.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_snare_shot_fly rise 864.5 -60 5.5
+wait 14
+shot snare_shot_fly
+
+# ---- snare_shot
+cmd tp @s 888.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_snare_shot rise 888.5 -60 5.5
+wait 14
+shot snare_shot
+
+# ---- shield_rush
+cmd tp @s 912.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_shield_rush rise 912.5 -60 5.5
+wait 14
+shot shield_rush
+
+# ---- lunge
+cmd tp @s 936.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_lunge rise 936.5 -60 5.5
+wait 14
+shot lunge
+
+# ---- backstep
+cmd tp @s 960.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_backstep rise 960.5 -60 5.5
+wait 14
+shot backstep
+
+# ---- archer_leap
+cmd tp @s 984.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_archer_leap rise 984.5 -60 5.5
+wait 14
+shot archer_leap
+
+# ---- blink
+cmd tp @s 1008.5 -60 0.5 0 15
+wait 10
+cmd skyabyss dev prop ss_blink rise 1008.5 -60 5.5
+wait 14
+shot blink

@@ -30,21 +30,19 @@ public final class AttackProps {
             "arrow", "arrow_volley", "wind_blade", "spore", "wisp_orb", "net", "whirlwind",
             // 月と雲の主の技 (光の柱・羽根・秤の錘)
             "light_pillar", "feather", "weight",
-            // 自分の技の形 (rpg/skill/SkillProps。職ごとに三つの案 a/b/c、tools/gen/mobs/attack_props/build_skill_props.py)
-            "sk_warrior_a_rise", "sk_warrior_b_rise", "sk_warrior_c_rise", "sk_assassin_a_rise", "sk_assassin_a_shot",
-            "sk_assassin_b_rise", "sk_assassin_b_shot", "sk_assassin_c_rise", "sk_assassin_c_shot", "sk_shaman_a_rise",
-            "sk_shaman_a_shot", "sk_shaman_b_rise", "sk_shaman_b_shot", "sk_shaman_c_rise", "sk_shaman_c_shot",
-            "sk_smith_a_rise", "sk_smith_a_shot", "sk_smith_b_rise", "sk_smith_b_shot", "sk_smith_c_rise",
-            "sk_smith_c_shot", "sk_archer_a_rise", "sk_archer_a_shot", "sk_archer_b_rise", "sk_archer_b_shot",
-            "sk_archer_c_rise", "sk_archer_c_shot", "sk_mage_a_rise", "sk_mage_a_shot", "sk_mage_b_rise",
-            "sk_mage_b_shot", "sk_mage_c_rise", "sk_mage_c_shot", "sk_deep_rise", "sk_past_rise",
+            // 自分の技の形 (rpg/skill/SkillProps。技ごとに一つ、tools/gen/mobs/attack_props/build_skill_each.py)
+            "ss_titan_cleave", "ss_whale_sweep", "ss_shield_bash", "ss_bone_swing", "ss_spin_cut", "ss_wind_rend_fly",
+            "ss_twin_fang", "ss_ember_hammer", "ss_forge_stomp", "ss_spark_burst", "ss_cloud_pierce_fly", "ss_sky_rain",
+            "ss_sky_rain_fall", "ss_thunder_bolt_fly", "ss_thunder_bolt", "ss_ember_orb_fly", "ss_ember_orb", "ss_frost_tide",
+            "ss_stardust", "ss_stardust_fall", "ss_deep_pull", "ss_deep_maw", "ss_echo_strike", "ss_grave_bell_fall",
+            "ss_final_light", "ss_ward_song", "ss_cycle_song", "ss_lamp_charm", "ss_mist_veil", "ss_temper",
+            "ss_deep_echo", "ss_rock_call", "ss_ebb_tide", "ss_curse_mark", "ss_ash_scatter", "ss_bone_trap",
+            "ss_snare_shot_fly", "ss_snare_shot", "ss_shield_rush", "ss_lunge", "ss_backstep", "ss_archer_leap",
+            "ss_blink",
             // 通常攻撃の形 (段ごと 0〜4): 魔法使いの魔弾 (combat/StaffBolts) と呪術師の呪印 (combat/HexMarks)。tools/gen/mobs/attack_props/build_basic_props.py
             "sk_bolt_0", "sk_bolt_1", "sk_bolt_2", "sk_bolt_3", "sk_bolt_4", "sk_hex_0", "sk_hex_1", "sk_hex_2", "sk_hex_3", "sk_hex_4",
-            // 技の型・粉の属性・技の変化・熟練・神器の大きな能力 (tools/gen/mobs/attack_props/build_skill_kit.py。rpg/skill/SkillProps・item/mythic/MythicAbilities)
-            "sk_warrior_slash", "sk_warrior_wave", "sk_warrior_aura", "sk_warrior_zone", "sk_assassin_slash", "sk_assassin_wave", "sk_assassin_aura",
-            "sk_assassin_zone", "sk_shaman_slash", "sk_shaman_wave", "sk_shaman_aura", "sk_shaman_zone", "sk_smith_slash", "sk_smith_wave",
-            "sk_smith_aura", "sk_smith_zone", "sk_archer_slash", "sk_archer_wave", "sk_archer_aura", "sk_archer_zone", "sk_mage_slash",
-            "sk_mage_wave", "sk_mage_aura", "sk_mage_zone", "sk_el_stone", "sk_el_wind", "sk_el_tide", "sk_el_ash", "sk_el_bone", "sk_ch_rune",
+            // 粉の属性・技の変化・熟練・神器の大きな能力 (tools/gen/mobs/attack_props/build_skill_kit.py。rpg/skill/SkillProps・item/mythic/MythicAbilities)
+            "sk_el_stone", "sk_el_wind", "sk_el_tide", "sk_el_ash", "sk_el_bone", "sk_ch_rune",
             "sk_ch_rewrite", "sk_ch_mutation", "sk_ch_secret", "sk_mastery_3", "sk_mastery_5", "my_sky_hand", "my_warden", "my_balance",
             "my_big_bell", "my_melt", "my_pull", "my_life_lamp", "my_gaze", "my_new_moon", "my_feather", "my_mist", "my_eye_arrow", "my_rewind",
             "my_moth", "my_chase_mark", "my_promise", "my_silence", "my_clap",
