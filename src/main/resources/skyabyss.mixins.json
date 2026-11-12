@@ -29,7 +29,8 @@
     "GlassButtonMixin",
     "CameraShoulderMixin",
     "MouseHandlerShoulderMixin",
-    "CinematicHidePlayersMixin"
+    "CinematicHidePlayersMixin",
+    "EntityFlameMixin"
   ],
   "injectors": {
     "defaultRequire": 1

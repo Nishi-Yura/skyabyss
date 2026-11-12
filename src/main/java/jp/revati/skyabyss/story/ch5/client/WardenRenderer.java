@@ -65,6 +65,6 @@ public final class WardenRenderer extends LowPolyGeoRenderer<HeartWarden> {
         if (!w.lit()) {
             return Color.ofRGB(26, 26, 32);
         }
-        return Color.ofRGB(255, 255, 255);
+        return jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer.heated(w, partialTick, Color.ofRGB(255, 255, 255));
     }
 }

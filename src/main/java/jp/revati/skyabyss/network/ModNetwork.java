@@ -42,6 +42,8 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.weapon.ChargeRing.receiveMiss())
                 .playToClient(jp.revati.skyabyss.combat.BreakGauge.Payload.TYPE, jp.revati.skyabyss.combat.BreakGauge.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.combat.BreakGaugeClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.combat.FoeStatus.Payload.TYPE, jp.revati.skyabyss.combat.FoeStatus.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.hud.FoeStatusClient.receive(payload))
                 .playBidirectional(jp.revati.skyabyss.weapon.InspectPayload.TYPE, jp.revati.skyabyss.weapon.InspectPayload.STREAM_CODEC,
                         new net.neoforged.neoforge.network.handling.DirectionalPayloadHandler<>(
                                 (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveInspect(payload),

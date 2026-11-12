@@ -78,11 +78,31 @@ public final class EnemyHealthBars {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         boolean any = false;
+        ICON_AT.clear();
         for (LivingEntity e : list) {
             any |= draw(buf, mc, e, pose, cam, left, up, partial);
         }
         if (any) {
             BufferUploader.drawWithShader(buf.buildOrThrow());
+        }
+        // 状態のアイコン (帯の真上に横一列。FoeStatusClient)
+        if (!ICON_AT.isEmpty()) {
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            RenderSystem.setShaderTexture(0, FoeStatusClient.ICONS);
+            BufferBuilder ib = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            for (IconRow row : ICON_AT) {
+                int n = row.icons().size();
+                float step = ICON_SIZE + ICON_GAP;
+                float x0 = -(n * step - ICON_GAP) / 2f;
+                for (int i = 0; i < n; i++) {
+                    FoeStatusClient.Shown sh = row.icons().get(i);
+                    float x = x0 + i * step;
+                    int a = Math.round(255 * sh.alpha());
+                    iconQuad(ib, pose, cam, left, up, row.c(), row.s(), x, ICON_Y, x + ICON_SIZE, ICON_Y + ICON_SIZE, 0.008f,
+                            FoeStatusClient.uOf(sh.kind()), FoeStatusClient.uEnd(sh.kind()), a << 24 | 0xFFFFFF);
+                }
+            }
+            BufferUploader.drawWithShader(ib.buildOrThrow());
         }
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
@@ -125,7 +145,40 @@ public final class EnemyHealthBars {
         }
         int rgb = frac > 0.5f ? 0xD8404A : frac > 0.25f ? 0xE07A34 : 0xF0C040;
         quad(buf, pose, cam, left, up, c, s, -hw, 0, -hw + WIDTH * frac, HEIGHT, 0.006f, alpha << 24 | rgb);
+        java.util.List<FoeStatusClient.Shown> icons = FoeStatusClient.of(e, partial);
+        if (!icons.isEmpty()) {
+            ICON_AT.add(new IconRow(c, s, icons));
+        }
         return true;
+    }
+
+    // 状態のアイコンの大きさと、帯からの高さ (帯の大きさ s を掛ける前のブロック単位)
+    static final float ICON_SIZE = 0.2f;
+    static final float ICON_GAP = 0.03f;
+    static final float ICON_Y = HEIGHT + 0.07f;
+
+    private record IconRow(Vec3 c, float s, java.util.List<FoeStatusClient.Shown> icons) {
+    }
+
+    private static final java.util.List<IconRow> ICON_AT = new java.util.ArrayList<>();
+
+    private static void iconQuad(BufferBuilder buf, Matrix4f pose, Vec3 cam, Vector3f left, Vector3f up, Vec3 c, float s,
+            float x0, float y0, float x1, float y1, float z, float u0, float u1, int argb) {
+        double dx = cam.x - c.x, dy = cam.y - c.y, dz = cam.z - c.z;
+        double len = Math.max(1e-4, Math.sqrt(dx * dx + dy * dy + dz * dz));
+        float ox = (float) (dx / len) * z, oy = (float) (dy / len) * z, oz = (float) (dz / len) * z;
+        texCorner(buf, pose, cam, left, up, c, s, x0, y0, ox, oy, oz, u0, 1f, argb);
+        texCorner(buf, pose, cam, left, up, c, s, x1, y0, ox, oy, oz, u1, 1f, argb);
+        texCorner(buf, pose, cam, left, up, c, s, x1, y1, ox, oy, oz, u1, 0f, argb);
+        texCorner(buf, pose, cam, left, up, c, s, x0, y1, ox, oy, oz, u0, 0f, argb);
+    }
+
+    private static void texCorner(BufferBuilder buf, Matrix4f pose, Vec3 cam, Vector3f left, Vector3f up, Vec3 c, float s,
+            float x, float y, float ox, float oy, float oz, float u, float v, int argb) {
+        float px = (float) (c.x - cam.x) - left.x * x * s + up.x * y * s + ox;
+        float py = (float) (c.y - cam.y) - left.y * x * s + up.y * y * s + oy;
+        float pz = (float) (c.z - cam.z) - left.z * x * s + up.z * y * s + oz;
+        buf.addVertex(pose, px, py, pz).setUv(u, v).setColor(argb);
     }
 
     // z はカメラ向きの手前 (ずれの層)。left は画面の左向きなので x は引く

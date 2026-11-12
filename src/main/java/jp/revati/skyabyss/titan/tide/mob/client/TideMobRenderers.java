@@ -83,6 +83,11 @@ public final class TideMobRenderers {
         protected float getDeathMaxRotation(T animatable) {
             return 0f;
         }
+
+        @Override
+        public software.bernie.geckolib.util.Color getRenderColor(T animatable, float partialTick, int packedLight) {
+            return jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer.heated(animatable, partialTick, super.getRenderColor(animatable, partialTick, packedLight));
+        }
     }
 
     // ---------------------------------------------------------------- 珊瑚憑き

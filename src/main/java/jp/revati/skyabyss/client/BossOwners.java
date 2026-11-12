@@ -50,6 +50,21 @@ public final class BossOwners {
         return bar.equals(entity) || (!entity.isEmpty() && bar.contains(entity));
     }
 
+    // 帯の持ち主と分かった体 (体の id → 見つけた tick)。どの描き手の帯でも、帯ごとに client/hud/FoeStatusClient が入れる
+    // (前は名前で探す描き手の持ち主だけが分かり、割合で探す主や、自前で描く心臓などの頭の上に帯が二重に出ていた。2026-11-12 の声)
+    private static final Map<Integer, Long> CLAIMED = new HashMap<>();
+
+    public static void claim(LivingEntity e) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        if (CLAIMED.size() > 64) {
+            CLAIMED.clear();
+        }
+        CLAIMED.put(e.getId(), mc.level.getGameTime());
+    }
+
     // この体が、いま画面上のボスの帯の持ち主か (直前の数 tick に見つかった持ち主。頭の上の帯と二重に出さないため)
     public static boolean owns(LivingEntity e) {
         Minecraft mc = Minecraft.getInstance();
@@ -57,6 +72,10 @@ public final class BossOwners {
             return false;
         }
         long tick = mc.level.getGameTime();
+        Long claimed = CLAIMED.get(e.getId());
+        if (claimed != null && tick - claimed <= 5 && tick >= claimed) {
+            return true;
+        }
         for (Hit hit : CACHE.values()) {
             if (hit.owner == e && tick - hit.tick <= 5) {
                 return true;

@@ -164,10 +164,25 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     // 深淵の心臓は暗い紫に染める (docs/design/31 の B04。心臓四体はどれもこの描画を通る)
     @Override
     public software.bernie.geckolib.util.Color getRenderColor(T animatable, float partialTick, int packedLight) {
-        if (animatable instanceof jp.revati.skyabyss.entity.HeartBoss heart && heart.isAbyss()) {
-            return software.bernie.geckolib.util.Color.ofRGB(112, 88, 148);
+        software.bernie.geckolib.util.Color base = animatable instanceof jp.revati.skyabyss.entity.HeartBoss heart && heart.isAbyss()
+                ? software.bernie.geckolib.util.Color.ofRGB(112, 88, 148) : super.getRenderColor(animatable, partialTick, packedLight);
+        return heated(animatable, partialTick, base);
+    }
+
+    // 燃えている敵は体が熱で橙に脈打つ (バニラの炎の板の代わり。client/hud/FoeStatusClient)。ほかの色の掛け算に重ねる
+    public static software.bernie.geckolib.util.Color heated(Entity e, float partialTick, software.bernie.geckolib.util.Color base) {
+        if (!(e instanceof net.minecraft.world.entity.LivingEntity le) || !jp.revati.skyabyss.client.hud.FoeStatusClient.isFoe(e)) {
+            return base;
         }
-        return super.getRenderColor(animatable, partialTick, packedLight);
+        int h = jp.revati.skyabyss.client.hud.FoeStatusClient.heat(le, partialTick);
+        if (h == 0xFFFFFFFF) {
+            return base;
+        }
+        int c = base.argbInt();
+        int r = ((c >> 16) & 255) * ((h >> 16) & 255) / 255;
+        int g = ((c >> 8) & 255) * ((h >> 8) & 255) / 255;
+        int b = (c & 255) * (h & 255) / 255;
+        return software.bernie.geckolib.util.Color.ofARGB((c >>> 24) & 255, r, g, b);
     }
 
     @Override
