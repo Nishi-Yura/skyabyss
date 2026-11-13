@@ -1166,8 +1166,11 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.type_line", Component.translatable(type.nameKey()),
                     Component.translatable(s.typeKey())).withColor(has ? PALE : SOFT), w));
         }
-        // 足りない条件 (赤紫)
-        if (rank < limit) {
+        // 足りない条件 (赤紫)。技の木 v2 では段も前提も節で取るので、ここ (前の段を一つずつ覚える形の名残) は出さない。
+        // 節ごとの点・前提・取ったかは下の v2 の行が出す (2026-11-13: 取った節の説明に「スキルポイントが足りない」と出ていた)
+        if (v2() != null) {
+            // 何も足さない
+        } else if (rank < limit) {
             if (level < s.minLevel && Job.ofTree(s.tree) == null) {
                 body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_level", s.minLevel).withColor(DENY), w));
             }
