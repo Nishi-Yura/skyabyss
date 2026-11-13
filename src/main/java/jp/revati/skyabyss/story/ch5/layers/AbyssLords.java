@@ -267,7 +267,8 @@ public final class AbyssLords {
         LordMoves.element(level, f.li, lord.getX(), lord.getY() + 1, lord.getZ(), 60, 2.5);
         double y = LordMoves.floorY(f, lord);
         double lx = lord.getX(), lz = lord.getZ();
-        Telegraph.in(level, TelegraphShape.circle(lx, lz, 7)).prop(PropFx.ring(jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li), 10)).floor(y).warn(30).danger().owner(lord)
+        // 段の変わり目の咆哮は押し返すだけなので、攻撃の形 (淵の棘の輪) は出さない
+        Telegraph.in(level, TelegraphShape.circle(lx, lz, 7)).floor(y).warn(30).danger().owner(lord)
                 .onImpact(lvl -> LordMoves.element(lvl, f.li, lx, y + 0.3, lz, 80, 4))
                 .onHit((lvl, p) -> {
                     p.hurt(lvl.damageSources().mobAttack(lord), 6f);

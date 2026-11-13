@@ -380,7 +380,8 @@ public class WhaleboneCaptain extends GuardMob {
         if (actionTicks == 1) {
             roared = true;
             lockedYaw = getYRot();
-            Telegraph.in((ServerLevel) level(), TelegraphShape.circle(getX(), getZ(), ROAR_RADIUS)).prop(PropFx.ring("bone_spike", 10))
+            // 咆哮は吹き飛ばすだけなので、攻撃の形 (棘の輪) は出さない
+            Telegraph.in((ServerLevel) level(), TelegraphShape.circle(getX(), getZ(), ROAR_RADIUS))
                     .floor(floorY()).warn(ROAR_WARN).danger().owner(this)
                     .victims(this::canHit)
                     .onImpact(server -> {

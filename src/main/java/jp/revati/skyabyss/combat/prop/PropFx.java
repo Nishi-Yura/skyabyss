@@ -216,10 +216,11 @@ public record PropFx(Mode mode, String kind, float size, int count, int linger) 
         return false;
     }
 
-    // 動く予告の、見た目 (AttackLook) の属性からの形 (石 → 骨の棘、水 → 水の柱、雷 → 晶の棘、余燼 → 熔岩の柱)。見た目が無ければ null
+    // 動く予告の、見た目 (AttackLook) の属性からの形 (石 → 骨の棘、水 → 水の柱、雷 → 晶の棘、余燼 → 熔岩の柱)。見た目が無ければ null。
+    // 咆哮 (*_ROAR) は押し返すだけなので、攻撃の形は出さない (2026-11-13 の声「咆哮に攻撃のモデル使ったらだめじゃない？飛ぶだけだから」)
     @Nullable
     public static String motionKind(@Nullable jp.revati.skyabyss.combat.AttackLook look) {
-        if (look == null || look == jp.revati.skyabyss.combat.AttackLook.NONE) {
+        if (look == null || look == jp.revati.skyabyss.combat.AttackLook.NONE || look.roar()) {
             return null;
         }
         return switch (look.element) {

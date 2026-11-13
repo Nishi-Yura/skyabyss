@@ -624,7 +624,8 @@ public class TideBeckoner extends TideMob {
         double ground = groundY(position());
         double cx = getX();
         double cz = getZ();
-        tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, D).prop(PropFx.ring("shell_spike", 10))
+        // 咆哮の円は押し返すだけなので、攻撃の形 (殻の棘の輪) は出さない。跳び越える輪 (ripple) は攻撃なので形が出る
+        tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, D)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), ROAR_DAMAGE);
                     Vec3 away = p.position().subtract(position()).multiply(1, 0, 1);
