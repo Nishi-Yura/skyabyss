@@ -535,7 +535,7 @@ shot sky_rain_a
 wait 6
 shot sky_rain_b
 wait 20
-# ---- archer archer_leap
+# ---- archer bow_spirit
 cmd tp @s 0.5 -60 0.5 0 0
 cmd skyabyss cinematic stop
 cmd skyabyss job choose archer
@@ -543,8 +543,8 @@ cmd item replace entity @s weapon.mainhand with minecraft:bow
 cmd skyabyss skill forget @s
 cmd skyabyss skill learn @s far_shot 1
 cmd skyabyss skill learn @s hawk_eye 1
-cmd skyabyss skill learn @s archer_leap 3
-cmd skyabyss skill slot @s 1 archer_leap
+cmd skyabyss skill learn @s bow_spirit 2
+cmd skyabyss skill slot @s 1 bow_spirit
 cmd skyabyss skill cooldowns @s
 cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
 cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
@@ -552,9 +552,9 @@ wait 10
 cmd skyabyss skill mana @s full
 cmd skyabyss skill cast @s 1
 wait 5
-shot archer_leap_a
+shot bow_spirit_a
 wait 6
-shot archer_leap_b
+shot bow_spirit_b
 wait 20
 # ---- archer snare_shot
 cmd tp @s 0.5 -60 0.5 0 0

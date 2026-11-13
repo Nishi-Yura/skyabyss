@@ -305,12 +305,12 @@ cmd skyabyss dev prop ss_backstep rise 960.5 -60 5.5
 wait 14
 shot backstep
 
-# ---- archer_leap
+# ---- bow_spirit (呼んだ霊は持ち主についていく。ここは置いて形だけ)
 cmd tp @s 984.5 -60 0.5 0 15
 wait 10
-cmd skyabyss dev prop ss_archer_leap rise 984.5 -60 5.5
+cmd skyabyss dev prop bow_spirit rise 984.5 -60 5.5
 wait 14
-shot archer_leap
+shot bow_spirit
 
 # ---- blink
 cmd tp @s 1008.5 -60 0.5 0 15

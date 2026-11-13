@@ -424,14 +424,6 @@ def ss_sky_rain_fall(m):
         m.add(f"fl{s}", tub("body", "sigil", [P(0, 24, 0), P(s * 2.6, 27, 0), P(s * 2.4, 21, 0)], [0.35, 0.45, 0.3], None, hint=(0, 0, 1), sides=4))
 
 
-def ss_archer_leap(m):
-    # 移動 (後ろへ跳ぶ): 弓を構えた形の残像と、骨の羽根の筋
-    ghost_trail(m, "g", "bone", n=2, z0=-12, step=-22, streak="feath")
-    for k in range(4):
-        m.add(f"feather{k}", ell("body", "feath", (-6 + k * 4, 3 + k, 2), (0.8, 0.5, 4.0), segs=6, rings=2, ry=-20 + k * 13))
-    sig_loop(m, 6)
-
-
 def ss_snare_shot_fly(m):
     # 弱体の矢 (飛ぶ): 紫の縄を引く骨の矢、鏃は輪縄
     m.add("shaft", tub("body", "bone", [P(0, CY, 12), P(0, CY, -8)], [0.8, 0.8], None, sides=6))
@@ -605,7 +597,7 @@ ATTACK = ["titan_cleave", "whale_sweep", "shield_bash", "bone_swing", "spin_cut"
           "stardust_fall", "deep_pull", "deep_maw", "echo_strike", "grave_bell_fall", "final_light"]
 BUFF = ["ward_song", "cycle_song", "lamp_charm", "mist_veil", "temper", "deep_echo"]
 DEBUFF = ["rock_call", "ebb_tide", "curse_mark", "ash_scatter", "bone_trap", "snare_shot_fly", "snare_shot"]
-MOVE = ["shield_rush", "lunge", "backstep", "archer_leap", "blink"]
+MOVE = ["shield_rush", "lunge", "backstep", "blink"]  # 弓の番の弓霊は build_bow_spirit.py
 ALL = ATTACK + BUFF + DEBUFF + MOVE
 GROUPS = {"attack": ATTACK, "buff": BUFF, "debuff": DEBUFF, "move": MOVE}
 LABEL = {"attack": "攻撃", "buff": "強化", "debuff": "弱体", "move": "移動"}

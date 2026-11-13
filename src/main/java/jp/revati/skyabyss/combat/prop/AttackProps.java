@@ -37,7 +37,7 @@ public final class AttackProps {
             "ss_stardust", "ss_stardust_fall", "ss_deep_pull", "ss_deep_maw", "ss_echo_strike", "ss_grave_bell_fall",
             "ss_final_light", "ss_ward_song", "ss_cycle_song", "ss_lamp_charm", "ss_mist_veil", "ss_temper",
             "ss_deep_echo", "ss_rock_call", "ss_ebb_tide", "ss_curse_mark", "ss_ash_scatter", "ss_bone_trap",
-            "ss_snare_shot_fly", "ss_snare_shot", "ss_shield_rush", "ss_lunge", "ss_backstep", "ss_archer_leap",
+            "ss_snare_shot_fly", "ss_snare_shot", "ss_shield_rush", "ss_lunge", "ss_backstep", "bow_spirit", "bow_spirit_fly",
             "ss_blink",
             // 通常攻撃の形 (段ごと 0〜4): 魔法使いの魔弾 (combat/StaffBolts) と呪術師の呪印 (combat/HexMarks)。tools/gen/mobs/attack_props/build_basic_props.py
             "sk_bolt_0", "sk_bolt_1", "sk_bolt_2", "sk_bolt_3", "sk_bolt_4", "sk_hex_0", "sk_hex_1", "sk_hex_2", "sk_hex_3", "sk_hex_4",
@@ -315,6 +315,18 @@ public final class AttackProps {
         Vec3 d = to.subtract(from);
         float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
         p.setup(AttackProp.TOSS, from, to, 0, Math.max(1, flight), 0, size, 0f, yaw);
+        spawn(level, p);
+        return p;
+    }
+
+    // 持ち主についていく (番の弓霊)。slot 体目 / count 体。life tick で消える。消すのは呼んだ側でもよい
+    @Nullable
+    public static AttackProp follow(ServerLevel level, String kind, Entity owner, int slot, int count, int life, float size) {
+        AttackProp p = make(level, kind, owner);
+        if (p == null) {
+            return null;
+        }
+        p.setup(AttackProp.FOLLOW, new Vec3(owner.getId(), slot, count), owner.position(), 0, 1, life, size, 0f, owner.getYRot());
         spawn(level, p);
         return p;
     }

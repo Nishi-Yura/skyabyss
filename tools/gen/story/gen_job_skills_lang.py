@@ -49,9 +49,6 @@ KV = {
     'skill.skyabyss.shield_rush.flavor': ('岩は、転がり出すと止まらない。', 'Once a rock starts rolling, it does not stop.'),
     'skill.skyabyss.shield_rush.effect': ('見ている先 %1$s ブロック以内の敵の手前まで一気に詰め、攻撃力の %2$s%% で打つ。地に足が着いているときだけ。足場のない所へは出ない。',
                                           'Close in on a foe you look at within %1$s blocks and strike for %2$s%% of your attack damage. Only on solid ground; never steps off a ledge.'),
-    'skill.skyabyss.archer_leap': ('射手の跳び退き', "Archer's Leap"),
-    'skill.skyabyss.archer_leap.flavor': ('射手の間合いは、いつも一歩遠い。', "An archer's distance is always one step farther."),
-    'skill.skyabyss.archer_leap.effect': ('後ろへ軽く跳ぶ。地に足が着いていて、%1$s ブロック以内に敵がいるときだけ。', 'Hop backwards. Only on solid ground with a foe within %1$s blocks.'),
     # ---- 断り
     'message.skyabyss.skill.blink_blocked': ('跳べる場所がない', 'No room to blink'),
 }

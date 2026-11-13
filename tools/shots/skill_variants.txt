@@ -209,14 +209,14 @@ cmd skyabyss skill forget @s
 cmd skyabyss skill points @s 100
 cmd skyabyss skill node @s cloud_pierce
 cmd skyabyss skill node @s agi_1
-cmd skyabyss skill node @s archer_leap
+cmd skyabyss skill node @s bow_spirit
 cmd skyabyss skill node @s str_2
 cmd skyabyss skill node @s agi_4
 cmd skyabyss skill node @s cloud_pierce_2
 cmd skyabyss skill node @s agi_9
 cmd skyabyss skill node @s sharp_tip
 cmd skyabyss skill node @s cloud_pierce_3
-cmd skyabyss skill node @s archer_leap_2
+cmd skyabyss skill node @s bow_spirit_2
 cmd skyabyss skill node @s snare_pierce
 cmd skyabyss skill slot @s 1 cloud_pierce
 cmd skyabyss skill cooldowns @s

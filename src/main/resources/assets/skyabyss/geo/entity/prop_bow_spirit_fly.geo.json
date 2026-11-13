@@ -3,7 +3,7 @@
  "minecraft:geometry": [
   {
    "description": {
-    "identifier": "geometry.prop_ss_archer_leap",
+    "identifier": "geometry.prop_bow_spirit_fly",
     "texture_width": 16,
     "texture_height": 16,
     "visible_bounds_width": 4,
@@ -27,21 +27,21 @@
      "name": "body",
      "pivot": [
       0.0,
-      0.0,
+      4.0,
       0.0
      ],
      "parent": "root",
      "cubes": [
       {
        "origin": [
-        -7.304,
-        -0.354,
-        -42.81
+        -1.566,
+        3.144,
+        -8.0
        ],
        "size": [
-        14.656,
-        30.072,
-        49.128
+        3.131,
+        1.712,
+        21.0
        ],
        "uv": [
         0,

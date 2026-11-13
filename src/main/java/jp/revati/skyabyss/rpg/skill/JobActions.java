@@ -398,6 +398,17 @@ public final class JobActions {
         SkillActions.lastTarget = target;
         SkillEvents.mark(target, SkillRules.curseBonus(rank), level.getGameTime(), ticks, player);
         SkillEffects.timedMod(target, Attributes.ATTACK_DAMAGE, "curse_mark", -SkillRules.CURSE_WEAKEN, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, ticks);
+        // 付けた時の傷と、印のあいだの呪い蝕み (1 秒ごと)
+        SkillActions.hit(player, target, spell(player, SkillRules.CURSE_HIT), Skill.CURSE_MARK);
+        float rot = spell(player, SkillRules.CURSE_ROT);
+        for (int k = 1; k <= ticks / SkillRules.SECOND; k++) {
+            SkillEffects.later(level, k * SkillRules.SECOND, () -> {
+                if (target.isAlive() && player.isAlive() && target.level() == level) {
+                    SkillActions.hit(player, target, rot, Skill.CURSE_MARK);
+                    level.sendParticles(ParticleTypes.WITCH, target.getX(), target.getY() + target.getBbHeight() * 0.7, target.getZ(), 3, 0.25, 0.3, 0.25, 0.0);
+                }
+            });
+        }
         // 呪いの重ね (呪いの型の溜まるもの)
         Gauges.onCurse(player, target, rank, ticks);
         line(level, player.getEyePosition().subtract(0, 0.3, 0), stop[0], ParticleTypes.WITCH, 0.6);
@@ -444,6 +455,15 @@ public final class JobActions {
             SkillEffects.absorb(p, amount, SkillRules.LAMP_PULSE + 40, false);
         }
         ServerLevel level = owner.serverLevel();
+        // 輪の中の敵を灯が焼く (守りと同じ 2 秒ごと)
+        if (owner.isAlive()) {
+            float dmg = (float) (spell(owner, SkillRules.lampDamage(rank)) * scale);
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius, 2.5, radius),
+                    e -> e.isAlive() && SkillActions.isFoe(owner, e) && e.position().distanceToSqr(center) <= r2)) {
+                SkillActions.hit(owner, e, dmg, Skill.LAMP_CHARM);
+                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
+            }
+        }
         level.sendParticles(ParticleTypes.GLOW, center.x, center.y + 0.8, center.z, 6, 0.2, 0.3, 0.2, 0.01);
         ring(level, center, radius, ParticleTypes.END_ROD, (int) (radius * 7));
     }

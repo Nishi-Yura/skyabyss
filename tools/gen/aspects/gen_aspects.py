@@ -33,7 +33,7 @@ JOBS = OrderedDict([
     ('mage', [('THUNDER_BOLT', '雷の矢', 'Thunder Bolt'), ('EMBER_ORB', '熾火の玉', 'Ember Orb'), ('FROST_TIDE', '凍て潮', 'Frost Tide'),
               ('BLINK', '転移', 'Blink'), ('STARDUST', '星屑', 'Stardust')]),
     ('archer', [('CLOUD_PIERCE', '雲穿ち', 'Cloud Pierce'), ('BONE_TRAP', '骨の罠', 'Bone Trap'), ('SKY_RAIN', '天の驟雨', 'Sky Rain'),
-                ('ARCHER_LEAP', '射手の跳び退き', 'Archer Leap'), ('SNARE_SHOT', '足止めの矢', 'Snare Shot')]),
+                ('BOW_SPIRIT', '番の弓霊', 'Bow Spirits'), ('SNARE_SHOT', '足止めの矢', 'Snare Shot')]),
     ('assassin', [('LUNGE', '踏み込み', 'Lunge'), ('BACKSTEP', '跳び退き', 'Backstep'), ('WIND_REND', '風裂き', 'Wind Rend'),
                   ('MIST_VEIL', '霧隠れ', 'Mist Veil'), ('TWIN_FANG', '二連牙', 'Twin Fangs')]),
     ('shaman', [('WARD_SONG', '守りの唄', 'Ward Song'), ('EBB_TIDE', '引き潮', 'Ebb Tide'), ('CYCLE_SONG', '巡りの唄', 'Cycle Song'),

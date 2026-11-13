@@ -94,8 +94,8 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(9) == 9 && SkillRules.pointsForLevel(10) == 10 && SkillRules.pointsForLevel(12) == 12
                 && SkillRules.pointsForLevel(15) == 15 && SkillRules.pointsForLevel(21) == 21 && SkillRules.pointsForLevel(33) == 33
                 && SkillRules.pointsForLevel(50) == 50, "skill points per level are wrong");
-        // 6 職の木 42 本 + 木 v2 で足した 7 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)。刻印は 91 + 技の木 v3 の変化 31 で 122
-        check(f, Skill.values().length == 61 && Rune.values().length == 122, "skill / rune counts are wrong (" + Skill.values().length + " / " + Rune.values().length + ")");
+        // 6 職の木 42 本 + 木 v2 で足した 7 本 + 淵 6 + 前世 6 (旅人の木と橋は 43 で削った)。刻印は 91 + 技の木 v3 の変化 30 で 121 (2026-11-13 に置き矢を消した)
+        check(f, Skill.values().length == 61 && Rune.values().length == 121, "skill / rune counts are wrong (" + Skill.values().length + " / " + Rune.values().length + ")");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
@@ -355,6 +355,26 @@ public final class SkillSelfTest {
         r = SkillManager.cast(p, 2);
         check(f, r == SkillManager.CastResult.OK && SkillActions.pendingRains() == rains + 1 && Math.abs(pd.mana - (20 - SkillRules.manaCost(Skill.SKY_RAIN, 1))) < 1e-4,
                 "sky rain was not scheduled (" + r + ", mana " + pd.mana + ")");
+        SkillActions.clear();
+
+        // 番の弓霊: 弓を持って使うと霊が 1 体 (木の節なし) 呼ばれ、もう一度呼ぶと前の霊と入れ替わる。弓がなければ何も払わない
+        SkillManager.forceRank(p, Skill.BOW_SPIRIT, 1);
+        SkillManager.setSlot(p, 2, Skill.BOW_SPIRIT);
+        pd.mana = 20;
+        pd.globalCooldown = 0;
+        r = SkillManager.cast(p, 2);
+        check(f, r == SkillManager.CastResult.OK && BowSpirits.alive(p.getUUID()) == 1
+                && Math.abs(pd.mana - (20 - SkillRules.manaCost(Skill.BOW_SPIRIT, 1))) < 1e-4, "bow spirits were not called (" + r + ", " + BowSpirits.alive(p.getUUID()) + ")");
+        check(f, SkillRules.bowScale(6f) == 1.0 && SkillRules.bowScale(14.4f) > 2.39, "bow scale for skill arrows is wrong");
+        BowSpirits.dismiss(p.getUUID());
+        p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        pd.cooldowns.clear();
+        pd.mana = 20;
+        pd.globalCooldown = 0;
+        check(f, SkillManager.cast(p, 2) == SkillManager.CastResult.FAILED && pd.mana == 20 && BowSpirits.alive(p.getUUID()) == 0,
+                "bow spirits without a bow were not refused for free");
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+        SkillManager.setSlot(p, 2, null);
         SkillActions.clear();
 
         // 鷹の目の印と遠矢は数値で (矢の飛ぶ時間を待たない)。返し刃の窓

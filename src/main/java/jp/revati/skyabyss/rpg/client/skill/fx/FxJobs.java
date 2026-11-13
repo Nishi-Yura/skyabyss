@@ -43,9 +43,6 @@ public final class FxJobs {
         if (plans.containsKey(Skill.LUNGE)) {
             plans.put(Skill.SHIELD_RUSH, plans.get(Skill.LUNGE));
         }
-        if (plans.containsKey(Skill.BACKSTEP)) {
-            plans.put(Skill.ARCHER_LEAP, plans.get(Skill.BACKSTEP));
-        }
     }
 
     // 雷の矢 [放ち 0 (手元の閃きと、狙いへ折れ曲がる稲妻) / 当たり 1 (当たりの火花) / 残り 10]

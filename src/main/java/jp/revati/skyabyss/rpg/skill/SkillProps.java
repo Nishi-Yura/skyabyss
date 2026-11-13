@@ -143,7 +143,9 @@ public final class SkillProps {
                     c.fall("sky_rain_fall", t.add(Math.cos(a) * d, 0, Math.sin(a) * d), 10 + k * 10, 1.0f);
                 }
             }
-            case ARCHER_LEAP -> c.put("archer_leap", c.foot(), 1.0f, 10, 0, 180f);
+            // 呼んだ弓の霊そのものが形 (BowSpirits が prop_bow_spirit を出す)
+            case BOW_SPIRIT -> {
+            }
             case SNARE_SHOT -> {
                 Vec3 t = c.targetOr(12.0);
                 c.fly("snare_shot_fly", t.add(0, 1, 0), 3, 1.2f, 0f, 0);

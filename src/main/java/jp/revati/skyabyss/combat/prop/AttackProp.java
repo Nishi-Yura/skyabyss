@@ -27,11 +27,13 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 //   RISE  床から一気に突き出て (RISE_IN tick、少し行き過ぎる)、留まり、最後に沈んで消える
 //   FALL  delay tick は見えず、そのあと空 (height ブロック上) から落ちて、ちょうど予告の打つ瞬間に着く。着いたら留まって消える
 //   TOSS  from から to へ、arc の高さの弧を描いて flight tick で飛ぶ。着いたら留まって消える (飛ぶ間は進む向きを向く)
+//   FOLLOW 持ち主 (FROM の x = 持ち主の id、y = 何体目、z = 何体いるか) の肩のまわりに浮いてついて行き、linger tick で消える (番の弓霊。rpg/skill/BowSpirits)
 // 位置は両側で同じ式で決める (送るのは最初の値だけ)。保存しない。見えるのは持ち主と同じグループの人だけ (GroupOwned)
 public class AttackProp extends Entity implements GeoEntity, jp.revati.skyabyss.titan.group.GroupOwned {
     public static final int RISE = 0;
     public static final int FALL = 1;
     public static final int TOSS = 2;
+    public static final int FOLLOW = 3;
     public static final int RISE_IN = 4;
     public static final int SINK = 6;
 
@@ -101,6 +103,9 @@ public class AttackProp extends Entity implements GeoEntity, jp.revati.skyabyss.
 
     public int life() {
         int m = mode();
+        if (m == FOLLOW) {
+            return entityData.get(LINGER);
+        }
         return entityData.get(DELAY) + (m == RISE ? 0 : entityData.get(TRAVEL)) + entityData.get(LINGER) + (m == RISE ? SINK : 0);
     }
 
@@ -112,6 +117,10 @@ public class AttackProp extends Entity implements GeoEntity, jp.revati.skyabyss.
         float t = age - entityData.get(DELAY);
         int travel = entityData.get(TRAVEL);
         float h = entityData.get(HEIGHT);
+        if (m == FOLLOW) {
+            Entity o = level().getEntity((int) from.x);
+            return o == null ? position() : follow(o, (int) from.y, (int) from.z, age);
+        }
         if (m == FALL) {
             float u = Mth.clamp(t / travel, 0f, 1f);
             return to.add(0, h * (1 - u * u), 0);
@@ -122,6 +131,22 @@ public class AttackProp extends Entity implements GeoEntity, jp.revati.skyabyss.
             return p.add(0, h * 4 * u * (1 - u), 0);
         }
         return to;
+    }
+
+    // 持ち主の肩のまわりの浮かぶ位置 (持ち主の向きで回す。左右と後ろ上。ゆっくり上下する)
+    public static Vec3 follow(Entity owner, int slot, int count, float age) {
+        double[][] at = count <= 1 ? new double[][] {{0.85, 0.25, -0.35}}
+                : count == 2 ? new double[][] {{0.9, 0.2, -0.35}, {-0.9, 0.2, -0.35}}
+                : new double[][] {{1.0, 0.1, -0.3}, {-1.0, 0.1, -0.3}, {0, 0.75, -0.7}};
+        double[] o = at[Mth.clamp(slot, 0, at.length - 1)];
+        double yaw = Math.toRadians(owner.getYRot());
+        double fx = -Math.sin(yaw);
+        double fz = Math.cos(yaw);
+        // 右 = 前を時計回りに 90 度
+        double rx = -fz;
+        double rz = fx;
+        double bob = 0.12 * Math.sin(age * 0.12 + slot * 2.1);
+        return new Vec3(owner.getX() + rx * o[0] + fx * o[2], owner.getY() + owner.getBbHeight() * 0.85 + o[1] + bob, owner.getZ() + rz * o[0] + fz * o[2]);
     }
 
     // RISE の床からの出方 (0 = 床の下に隠れる、1 = 出きり)。描く側が掛ける
@@ -173,6 +198,12 @@ public class AttackProp extends Entity implements GeoEntity, jp.revati.skyabyss.
         super.tick();
         Vec3 p = at(tickCount);
         setPos(p.x, p.y, p.z);
+        if (mode() == FOLLOW) {
+            Entity o = level().getEntity((int) new Vec3(entityData.get(FROM)).x);
+            if (o != null) {
+                setYRot(o.getYRot());
+            }
+        }
         if (!level().isClientSide && tickCount > life() + 2) {
             discard();
         }

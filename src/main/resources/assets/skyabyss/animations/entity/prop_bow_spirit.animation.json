@@ -1,0 +1,18 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.prop_bow_spirit.idle": {
+   "loop": true,
+   "animation_length": 2.0,
+   "bones": {
+    "body": {
+     "rotation": [
+      "4.000*math.sin(query.anim_time*180.0000)",
+      "6.000*math.sin(query.anim_time*180.0000+0.2)",
+      0
+     ]
+    }
+   }
+  }
+ }
+}
