@@ -201,7 +201,7 @@ public final class WeaponClient {
             pose.mulPose(Axis.YP.rotationDegrees(i * 35.3f));
             pose.mulPose(Axis.ZP.rotationDegrees(i * -9.785f));
             float f5 = stack.getUseDuration(player) - (player.getUseItemRemainingTicks() - partialTick + 1.0f);
-            float f6 = f5 / 20.0f;
+            float f6 = jp.revati.skyabyss.combat.BowDraw.pull(f5);
             float pull = f6;
             f6 = (f6 * f6 + f6 * 2.0f) / 3.0f;
             if (f6 > 1.0f) {

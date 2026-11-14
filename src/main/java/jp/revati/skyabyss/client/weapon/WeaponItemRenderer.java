@@ -214,7 +214,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (e == null || !e.isUsingItem() || !e.getUseItem().is(stack.getItem())) {
             return -1;
         }
-        float pull = (stack.getUseDuration(e) - e.getUseItemRemainingTicks()) / 20f;
+        float pull = jp.revati.skyabyss.combat.BowDraw.pull(stack.getUseDuration(e) - e.getUseItemRemainingTicks());
         return pull >= 0.9f ? 2 : pull >= 0.65f ? 1 : 0;
     }
 

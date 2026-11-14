@@ -12,7 +12,8 @@
     "ItemNameMixin",
     "AttributeShownMixin",
     "MaxHealthCapMixin",
-    "InventoryMenuAccessoryMixin"
+    "InventoryMenuAccessoryMixin",
+    "BowPowerMixin"
   ],
   "client": [
     "GuiGraphicsMixin",
