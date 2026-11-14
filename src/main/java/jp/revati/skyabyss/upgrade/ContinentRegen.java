@@ -66,7 +66,9 @@ public final class ContinentRegen {
     //      「途中からのところはおかしくなるのかも。全部新しくなるようにしてほしい」)
     // 14 = 2026-11-11 (雷の土地の中ダンジョン (風穴) の口を、雷翼の祠のすぐ脇から西の平らな所へ (-1308,-266)。枝道も引き直し。
     //      「雷のところ、中ダンジョンの入り口の場所がおかしい」。ContinentLairsSelfTest が祠と見どころの間をたしかめる)
-    public static final int VERSION = 14;
+    // 15 = 2026-11-15 (章の跡地のまわりの道を、跡地から 40 (生成の平らな所と同じ) の外からならす。前は 48 で、雷翼の跡地の脇の環の道に
+    //      2 段の段が 2 か所あった。全段の自己テスト continent roads)
+    public static final int VERSION = 15;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)
