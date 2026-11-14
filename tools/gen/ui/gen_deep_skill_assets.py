@@ -561,6 +561,28 @@ TREE_ICONS = [
 ]
 
 
+# 番の弓霊は、弓使いのほかの技 (雲穿ち・骨の罠・天の驟雨。icons.png) と同じ「骨の縁の丸い地」の絵にする (2026-11-15 の声「ほかのアイコンと同じデザインに」)。
+# 形は gen_builds_assets の Pen で描き、骨の射手の木の地の色 (4) で塗る
+def bow_spirit_disc():
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import gen_builds_assets as gb
+    from gen_skill_assets import m_arrow
+
+    def m_bow_spirit(p):
+        # 骨の弓 (左) と、肩のそばに浮かぶ霊 (青白い炎の頭巾と角のある骨の半面)。霊から放たれる矢
+        p.arc((4, 5, 18, 27), 100, 260, "hilt", 3)
+        p.line([(10, 7), (10, 25)], "fx2", 1)
+        p.poly([(17, 17), (16, 11), (18, 6), (20, 8), (22, 3), (25, 8), (28, 11), (27, 16), (22, 18)], "fx")
+        p.poly([(18, 9), (26, 9), (25, 13), (19, 13)], "blade")
+        p.line([(18, 9), (16, 6)], "edge", 1)
+        p.line([(26, 9), (28, 6)], "edge", 1)
+        p.dot((20, 11), "mass")
+        p.dot((24, 11), "mass")
+        m_arrow(p, (8, 21), (28, 21), 3, fletch=True)
+    return gb.icon(m_bow_spirit, 4)
+
+
 def sheet():
     img = Image.new("RGBA", (256, 192), (0, 0, 0, 0))
     for n, (fn, a, b) in enumerate(ICONS):
@@ -574,6 +596,9 @@ def sheet():
         img.paste(g, ((n % 8) * 32, (n // 8) * 32))
     for k, (fn, a, b) in enumerate(JOB_ICONS):
         n = 25 + k
+        if fn is bow_spirit:
+            img.paste(bow_spirit_disc(), ((n % 8) * 32, (n // 8) * 32))
+            continue
         m = medallion(a, b, disc=(28, 30, 58) if a == S else (30, 36, 48))
         fn(m)
         img.paste(m, ((n % 8) * 32, (n // 8) * 32))
