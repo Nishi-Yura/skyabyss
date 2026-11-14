@@ -1175,6 +1175,27 @@ public final class ShotRunner {
     }
 
     // 開ける画面の名前。足りなければ、画面のクラスの完全な名前 (引数なしで作れるもの) でもよい
+    // 祠の画面・試練の板の見本 (岩鯨。札は図鑑の試練から 3 枚、一枚は深淵の印つき。誓いは登録の全部)
+    private static jp.revati.skyabyss.trial.TrialBoardNet.Open trialDemo(boolean shrine) {
+        String titan = jp.revati.skyabyss.progress.Titans.STONE_WHALE;
+        java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.Card> cards = new java.util.ArrayList<>();
+        java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.Row> rows = new java.util.ArrayList<>();
+        int i = 0;
+        for (jp.revati.skyabyss.trial.Trial.Def d : jp.revati.skyabyss.trial.TrialCatalog.of(titan)) {
+            java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.Chip> chips = i == 2
+                    ? java.util.List.of(new jp.revati.skyabyss.trial.TrialBoardNet.Chip("abyss", "", false, jp.revati.skyabyss.trial.Trial.Rarity.ABYSS.ordinal()))
+                    : java.util.List.of();
+            cards.add(new jp.revati.skyabyss.trial.TrialBoardNet.Card(d.id(), Math.min(i, 3), false, chips, i == 0, i % 4));
+            rows.add(new jp.revati.skyabyss.trial.TrialBoardNet.Row(d.id(), true, i, i, i, 3));
+            i++;
+        }
+        java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.VowLine> vows = new java.util.ArrayList<>();
+        for (jp.revati.skyabyss.titan.vow.Vow v : jp.revati.skyabyss.titan.vow.Vows.all()) {
+            vows.add(new jp.revati.skyabyss.trial.TrialBoardNet.VowLine(v.id(), v.points(), vows.size() % 2 == 0));
+        }
+        return new jp.revati.skyabyss.trial.TrialBoardNet.Open(titan, 2, cards, 7, 4, 1_234_000L, rows, java.util.List.of(), true, false, shrine, "", vows, 12);
+    }
+
     private static Screen screen(Minecraft mc, String name) {
         // creative_<つまみの名前>: クリエイティブの欄をその Mod のつまみで開く (main / weapons / gear / eggs / blocks)
         if (name.toLowerCase(Locale.ROOT).startsWith("creative_")) {
@@ -1233,6 +1254,16 @@ public final class ShotRunner {
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
             case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
+            // 祠の画面・背の試練の板・心臓の報酬を見本の中身で (ふだんはサーバーが大陸の世界で送る。重なり検査のため)
+            case "shrine_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true));
+            case "trial_board_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(false));
+            case "heart_reward_demo" -> () -> {
+                java.util.List<net.minecraft.world.item.ItemStack> stacks = new java.util.ArrayList<>();
+                for (String id : jp.revati.skyabyss.loot.reward.HeartReward.options(jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
+                    jp.revati.skyabyss.item.TitanGearSet.item(id).ifPresent(item -> stacks.add(new net.minecraft.world.item.ItemStack(item)));
+                }
+                return new jp.revati.skyabyss.client.reward.HeartRewardScreen(jp.revati.skyabyss.progress.Titans.STONE_WHALE, stacks, 1, false);
+            };
             case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
                     jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく

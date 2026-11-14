@@ -42,10 +42,10 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int TAB_H = 14;
     private static final int[] TAB_X = {3, 40, 77, 114};
     private static final int CARD_W = 136;
-    private static final int CARD_H = 31;
+    private static final int CARD_H = 30;
     // 再鍛造の候補の札 (頁のボタンの下から)
-    private static final int CARD_Y = 51;
-    private static final int CARD_STEP = 31;
+    private static final int CARD_Y = 55;
+    private static final int CARD_STEP = 30;
     private static final int EXCHANGE_Y = 62;
     private static final int EXCHANGE_STEP = 24;
 
@@ -65,12 +65,13 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         REFORGE, EXTRACT, IMPRINT
     }
 
-    private static final int SUB_Y = 20;
+    // つまみ (4〜18) の下に 4 あけて頁の釦を置く (2026-11-15 の見直し。前は 20 でつまみに触れていた)
+    private static final int SUB_Y = 22;
     // 粉のつまみ: 穴の行
     private static final int SOCKET_ROW_Y = 34;
     private static final int SOCKET_ROW_STEP = 13;
-    private static final int ART_Y = 76;
-    private static final int POWDER_BUTTON_Y = 124;
+    private static final int ART_Y = 72;
+    private static final int POWDER_BUTTON_Y = 121;
     private static Sub lastSub = Sub.REFORGE;
     private Sub sub = lastSub;
     private final Button[] subButtons = new Button[3];
@@ -115,6 +116,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     @Override
     protected void init() {
         super.init();
+        // 左の細工の板 (幅 PART_W) も入れた三枚をまとめて真ん中に置く。細工の有無で真ん中の板が動かず、狭い画面 (GUI 3 の 427) でも
+        // 細工の板が左の端からはみ出さない (2026-11-15 の見直し)
+        leftPos = (width - imageWidth - PANEL_GAP - PART_W) / 2 + PANEL_GAP + PART_W;
         int sx = leftPos + SIDE_X;
         enhanceButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.enhance"),
                 b -> press(ForgeRules.canMerge(menu.gear()) ? ResonanceForgeMenu.BUTTON_MERGE : ResonanceForgeMenu.BUTTON_ENHANCE))
@@ -128,7 +132,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             }
         }).bounds(sx + 10, topPos + 138, 60, 16).build());
         trialButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.trial"), b -> press(ResonanceForgeMenu.BUTTON_TRIAL))
-                .bounds(sx + 96, topPos + 35, 46, 14).build());
+                .bounds(sx + 96, topPos + 38, 46, 14).build());
         confirmButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.pick"), b -> {
             if (selected >= 0) {
                 press(ResonanceForgeMenu.BUTTON_PICK + selected);
@@ -534,7 +538,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 hint = Component.translatable(ex.gems().size() >= ex.sockets() ? "gui.skyabyss.forge.insert_full" : "gui.skyabyss.forge.insert_dup");
                 color = LACK;
             }
-            drawWrapped(g, hint, x, 104, 132, 2, color);
+            drawWrapped(g, hint, x, 101, 132, 2, color);
         }
         // 合わせる (材料の枠の粉)
         Component combine;
@@ -750,8 +754,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         List<List<Affix>> offers = AffixRules.offers(gear);
         int have = ForgeRules.count(minecraft.player, ModItems.RESONANCE_CRYSTAL.get());
         boolean enough = minecraft.player.isCreative() || have >= AffixRules.TRIAL_CRYSTALS;
-        g.drawString(font, Component.translatable("gui.skyabyss.forge.trials", offers.size(), AffixRules.MAX_TRIALS), x, 36, TEXT, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.forge.crystals_short", have), x + 46, 36, enough ? OK : LACK, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.forge.trials", offers.size(), AffixRules.MAX_TRIALS), x, 41, TEXT, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.forge.crystals_short", have), x + 46, 41, enough ? OK : LACK, false);
         for (int i = 0; i < AffixRules.MAX_TRIALS; i++) {
             int cx = SIDE_X + 8 + 8;
             int cy = CARD_Y + i * CARD_STEP + 3;

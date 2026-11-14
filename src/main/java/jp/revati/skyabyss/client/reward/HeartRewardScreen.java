@@ -885,8 +885,16 @@ public class HeartRewardScreen extends Screen {
         if (c.owned()) {
             Component tag = Component.translatable("skyabyss_reward.tag.owned");
             int tw = font.width(tag) + 6;
-            g.fill(x + w - tw - 5, y + 5, x + w - 5, y + 16, argb(alpha, 0x5A2430));
-            g.drawString(font, tag, x + w - tw - 2, y + 7, argb(alpha, 0xFFB0B8), false);
+            int tx = x + w - tw - 5;
+            int tagY = y + 5;
+            if (tx < iconX + iconPx + m + 2) {
+                // 札が狭くて右上では絵の枠に重なる (GUI 3 の 427 幅など): 絵の下の真ん中に置き、名前を一行下げる (2026-11-15 の重なり検査)
+                tx = cx - tw / 2;
+                tagY = ty - 2;
+                ty += 13;
+            }
+            g.fill(tx, tagY, tx + tw, tagY + 11, argb(alpha, 0x5A2430));
+            g.drawString(font, tag, tx + 3, tagY + 2, argb(alpha, 0xFFB0B8), false);
         }
         // 名前 (階級の色)
         int innerW = w - 14;

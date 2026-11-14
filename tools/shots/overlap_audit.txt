@@ -171,6 +171,24 @@ overlap party_finder_1920_g4
 shot party_finder_1920_g4
 close
 wait 2
+open shrine_demo
+wait 8
+overlap shrine_demo_1920_g4
+shot shrine_demo_1920_g4
+close
+wait 2
+open trial_board_demo
+wait 8
+overlap trial_board_demo_1920_g4
+shot trial_board_demo_1920_g4
+close
+wait 2
+open heart_reward_demo
+wait 8
+overlap heart_reward_demo_1920_g4
+shot heart_reward_demo_1920_g4
+close
+wait 2
 openacc
 wait 12
 overlap accessory_1920_g4
@@ -509,6 +527,24 @@ overlap party_finder_1920_g2
 shot party_finder_1920_g2
 close
 wait 2
+open shrine_demo
+wait 8
+overlap shrine_demo_1920_g2
+shot shrine_demo_1920_g2
+close
+wait 2
+open trial_board_demo
+wait 8
+overlap trial_board_demo_1920_g2
+shot trial_board_demo_1920_g2
+close
+wait 2
+open heart_reward_demo
+wait 8
+overlap heart_reward_demo_1920_g2
+shot heart_reward_demo_1920_g2
+close
+wait 2
 openacc
 wait 12
 overlap accessory_1920_g2
@@ -845,6 +881,24 @@ open party_finder
 wait 8
 overlap party_finder_1280_g3
 shot party_finder_1280_g3
+close
+wait 2
+open shrine_demo
+wait 8
+overlap shrine_demo_1280_g3
+shot shrine_demo_1280_g3
+close
+wait 2
+open trial_board_demo
+wait 8
+overlap trial_board_demo_1280_g3
+shot trial_board_demo_1280_g3
+close
+wait 2
+open heart_reward_demo
+wait 8
+overlap heart_reward_demo_1280_g3
+shot heart_reward_demo_1280_g3
 close
 wait 2
 openacc

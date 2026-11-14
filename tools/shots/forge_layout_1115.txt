@@ -1,0 +1,65 @@
+# 2026-11-15: 共鳴の炉の四つのつまみの中の並び (見直し 5) と、祠・試練の板・心臓の報酬の見本の画面 (見直し 6) の重なり
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/forge_layout_1115.txt -PshotsName=forge_layout_1115
+# 画面 (1280x720・guiscale 3 = 427x240): 炉の真ん中の板の左上 (73, 37)。つまみ 強化 (273,48)・粉 (310,48)・再鍛造 (347,48)・交換 (384,48)、再鍛造の「試す」(372,82)
+world forge1115 flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 30
+cmd skyabyss job choose mage
+cmd clear @p
+cmd item replace entity @p weapon.mainhand with skyabyss:whalebone_greatsword
+cmd item replace entity @p weapon.offhand with skyabyss:socket_shard_stone[minecraft:custom_data={powder_tier:4}] 4
+cmd give @p skyabyss:resonance_crystal 12
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 50
+
+cmd skyabyss_forge open
+wait 20
+overlap f1_enhance
+shot f1_enhance
+click 310 48
+wait 10
+overlap f2_powder
+shot f2_powder
+click 347 48
+wait 10
+click 372 82
+wait 20
+overlap f3_reforge
+shot f3_reforge
+click 384 48
+wait 10
+overlap f4_exchange
+shot f4_exchange
+close
+wait 5
+
+open shrine_demo
+wait 10
+overlap d1_shrine
+shot d1_shrine
+close
+wait 3
+open trial_board_demo
+wait 10
+overlap d2_trial_board
+shot d2_trial_board
+close
+wait 3
+open heart_reward_demo
+wait 80
+overlap d3_heart_reward
+shot d3_heart_reward
+close

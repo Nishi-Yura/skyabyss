@@ -9,7 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 OPENS = ["inventory", "travel_map", "lore", "quests", "growth", "journey", "profile", "skills", "skills_node:cheap_thunder_bolt", "skills_build",
          "skills_tryon", "skills_deep", "skills_past", "skills_ext", "job_choice", "party", "rebirth", "wheel", "notices",
-         "pouchwheel_9", "tower_desk", "chat", "jp.revati.skyabyss.client.box.BoxPouchScreen", "party_finder"]
+         "pouchwheel_9", "tower_desk", "chat", "jp.revati.skyabyss.client.box.BoxPouchScreen", "party_finder",
+         "shrine_demo", "trial_board_demo", "heart_reward_demo"]
 CMDS = [("shop_" + s, "skyabyss facility shop " + s) for s in ["apothecary", "food_shop", "material_shop", "outfit_shop", "smithy", "tool_shop", "tower",
                                                                  "black_market"]]
 # guide は町の場面 (CinematicScreen) を始めることがあるので最後に。働きのあとは場面を止める
