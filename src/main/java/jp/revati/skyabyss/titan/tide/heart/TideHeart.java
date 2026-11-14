@@ -147,10 +147,10 @@ public class TideHeart extends HeartBoss {
     // 大潮の安全な筋
     @Nullable
     private double[] springGaps;
-    // 回り続けへの追い技 (combat/HeartPursuit) と、体力が半分を切ったときの領域「合わせ貝」(titan/domain/ShellMatchDomain)
+    // 回り続けへの追い技 (combat/HeartPursuit) と、体力が半分を切ったときの領域「満ち引き」(titan/domain/EbbFlowDomain)
     private final jp.revati.skyabyss.combat.HeartPursuit pursuit;
     @Nullable
-    private jp.revati.skyabyss.titan.domain.ShellMatchDomain domain;
+    private jp.revati.skyabyss.titan.domain.EbbFlowDomain domain;
     public static final float DOMAIN_AT = 0.5f;
     // 試験・開発用: 領域を展開しない (憤怒までの技だけを見たいとき)
     private boolean domainEnabled = true;
@@ -179,11 +179,11 @@ public class TideHeart extends HeartBoss {
     }
 
     @Nullable
-    public jp.revati.skyabyss.titan.domain.ShellMatchDomain domain() {
+    public jp.revati.skyabyss.titan.domain.EbbFlowDomain domain() {
         return domain;
     }
 
-    // 領域「合わせ貝」を始める (体力が半分を切ったとき一度だけ。試験・開発用にも)
+    // 領域「満ち引き」を始める (体力が半分を切ったとき一度だけ。試験・開発用にも)
     public void startDomain(ServerLevel server) {
         if (domain != null) {
             return;
@@ -191,8 +191,8 @@ public class TideHeart extends HeartBoss {
         double cx = isBound() ? TideHeartArena.CX + 0.5 : getX();
         double cz = isBound() ? TideHeartArena.CZ + 0.5 : getZ();
         double radius = isBound() ? TideHeartArena.RADIUS - 0.5 : 12;
-        domain = new jp.revati.skyabyss.titan.domain.ShellMatchDomain(this, cx, cz, floorY(), radius, this::canReach, this::strike,
-                () -> reachable(server, 40));
+        domain = new jp.revati.skyabyss.titan.domain.EbbFlowDomain(this, cx, cz, floorY(), radius, this::canReach, this::strike,
+                () -> reachable(server, 40), isBound(), (p, warn) -> pursuit.strafe().aim(p, warn));
         domain.begin(server);
     }
 

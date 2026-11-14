@@ -73,7 +73,10 @@ public enum AttackLook {
     DOMAIN_SHELL_SWEEP(Element.WATER, Windup.CREEP, Travel.SWEEP, Impact.NONE, Linger.FOAM, 1f),
     DOMAIN_THUNDER_LINE(Element.STORM, Windup.FLICKER, Travel.BEAM, Impact.PIERCE, Linger.STATIC, 1f),
     DOMAIN_THUNDER_ROD(Element.STORM, Windup.GATHER, Travel.BOLT, Impact.FLASH, Linger.STATIC, 1.1f),
-    DOMAIN_HEARTH_HEAT(Element.EMBER, Windup.RISE, Travel.NONE, Impact.BURST, Linger.SMOLDER, 1f);
+    DOMAIN_HEARTH_HEAT(Element.EMBER, Windup.RISE, Travel.NONE, Impact.BURST, Linger.SMOLDER, 1f),
+    // 潮殻の領域「満ち引き」(2026-11-15): 足もとの渦潮・島のしぶき・外へ広がる引き波
+    DOMAIN_TIDE_WHIRL(Element.WATER, Windup.CREEP, Travel.NONE, Impact.COLUMN, Linger.FOAM, 1f),
+    DOMAIN_TIDE_WAVE(Element.WATER, Windup.NONE, Travel.WAVE, Impact.RING, Linger.FOAM, 1.1f);
 
     public enum Element {
         STONE, WATER, STORM, EMBER

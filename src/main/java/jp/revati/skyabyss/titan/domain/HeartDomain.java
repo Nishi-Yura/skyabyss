@@ -51,7 +51,7 @@ import org.joml.Vector3f;
 //     手がかり (光る柱・音・一行) は出し続け、間違えても傷は受けない (決まりの傷は領域の決まりの予告だけ)
 //  3. 解いた: 予告は全部消え、領域は砕け、心臓は STUN_TICKS (5 秒) のあいだ傷を 1.5 倍受ける。
 //     人がいなくなれば心臓ごと最初に戻る。安全網として SAFETY_TICKS (6 分) で静かに終わる。
-// 領域は部屋ごとの subclass (StoneSeaDomain / ShellMatchDomain / ThunderCageDomain / HearthCoreDomain) が rule() と仕掛けを書く。
+// 領域は部屋ごとの subclass (StoneSeaDomain / EbbFlowDomain / ThunderCageDomain / HearthCoreDomain) が rule() と仕掛けを書く。
 // 画面の側は client/titan/domain/DomainClient (題字・色・床の紋・仕掛けの進み)。
 public abstract class HeartDomain {
     public static final int DECLARE_TICKS = 80;

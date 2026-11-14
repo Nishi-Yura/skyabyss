@@ -1469,8 +1469,6 @@
   "trial.skyabyss.cell.WR3": "鯨の核を守る",
   "trial.skyabyss.cell.WR3.desc": "部屋の中央の核を、三つの波から守る。核の体力が尽きると、部屋は最初からやり直しになる。",
   "raid.skyabyss.WR1.carry": "光る骨玉を三つ、北の台座へ運ぼう（光の柱が行き先。持つと遅くなり、跳べない）",
-  "message.skyabyss.domain.shell_match.timeout": "間に合わなかった。大潮が押し寄せ、貝は口を開いたまま沈んでいく",
-  "message.skyabyss.domain.shell_match.limit": "%s 秒のうちに印を合わせきれば、心臓は大きく崩れる",
   "message.skyabyss.raid.WR1.cooling": "骨玉が冷えていく……あと %s 秒",
   "message.skyabyss.raid.WR1.cooled": "骨玉が冷えきって、手から落ちた。元の場所へ戻っていく",
   "message.skyabyss.raid.WR1.thief": "骨奪いが這い出てきた。骨玉を持つ者を狙っている",

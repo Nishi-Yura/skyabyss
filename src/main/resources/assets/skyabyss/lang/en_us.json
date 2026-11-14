@@ -1470,8 +1470,6 @@
   "trial.skyabyss.cell.WR3": "Guard the Whale Core",
   "trial.skyabyss.cell.WR3.desc": "Defend the core at the room's centre through three waves. If its health runs out, the room starts over.",
   "raid.skyabyss.WR1.carry": "Carry the three glowing bone orbs to the north altar (slow and no jumping while carrying; follow the light pillar)",
-  "message.skyabyss.domain.shell_match.timeout": "Too late. The great tide crashes in, and the shells sink open-mouthed",
-  "message.skyabyss.domain.shell_match.limit": "Match every mark within %s s and the heart will break wide open",
   "message.skyabyss.raid.WR1.cooling": "The bone orb is cooling... %s s left",
   "message.skyabyss.raid.WR1.cooled": "The orb went cold and slipped away, back to where it lay",
   "message.skyabyss.raid.WR1.thief": "A bone thief crawls out. It wants whoever holds an orb",
