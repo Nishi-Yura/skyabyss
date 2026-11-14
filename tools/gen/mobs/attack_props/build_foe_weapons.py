@@ -290,6 +290,15 @@ def build(name):
     return m
 
 
+def _tidy(data):
+    """書き出す前の仕上げ: 開いた縁・向きの食い違いがある骨だけ向きをそろえて蓋で塞ぐ (tools/lib/mesh_close.tidy_bones。2026-11-15 の監査)"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("mesh_close", Path(__file__).resolve().parents[3] / "lib/mesh_close.py")
+    mc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mc)
+    mc.tidy_bones(data)
+
+
 def install(name, m, size, atlas, glow):
     """今のメッシュの見出し・骨の名前・親・pivot を残して、形と絵を入れ替える"""
     path = LOWPOLY / (name + ".json")
@@ -321,6 +330,7 @@ def install(name, m, size, atlas, glow):
             if bn != bone and b.get("uvs"):
                 b["uvs"] = [[0.5 / atlas.shape[1], 0.5 / atlas.shape[0]] for _ in b["uvs"]]
         atlas[0:2, 0:2] = (60, 52, 44, 255)
+    _tidy(old)
     path.write_bytes(json.dumps(old, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
     Image.fromarray(atlas).save(TEXLP / (name + ".png"))
     gp = TEXLP / (name + "_glow.png")

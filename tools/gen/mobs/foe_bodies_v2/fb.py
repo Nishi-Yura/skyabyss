@@ -151,6 +151,15 @@ def stage_tex(atlas, glow, rgb, k_dark, vein_thr, seed=0):
     return a, g
 
 
+def _tidy(data):
+    """書き出す前の仕上げ: 開いた縁・向きの食い違いがある骨だけ向きをそろえて蓋で塞ぐ (tools/lib/mesh_close.tidy_bones。2026-11-15 の監査)"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("mesh_close", Path(__file__).resolve().parents[3] / "lib/mesh_close.py")
+    mc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mc)
+    mc.tidy_bones(data)
+
+
 def install(name, m, size, atlas, glow, stages=None):
     """骨の名前・親・pivot と見出しを残して、各骨の頂点・UV・三角形と絵を入れ替える。
     stages = {接尾辞: (atlas, glow)} は同じ UV の段の絵 (textures/lowpoly/<名前><接尾辞>.png)"""
@@ -179,6 +188,7 @@ def install(name, m, size, atlas, glow, stages=None):
         old["glowmask"] = f"{name}_glowmask.png"
     else:
         old.pop("glowmask", None)
+    _tidy(old)
     path.write_bytes(json.dumps(old, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
     for suf, (a, g) in [("", (atlas, glow))] + list((stages or {}).items()):
         Image.fromarray(a, "RGBA").save(TEXLP / f"{name}{suf}.png")

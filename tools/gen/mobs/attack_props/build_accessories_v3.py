@@ -655,6 +655,15 @@ def build(iid, center, ext):
     return m
 
 
+def _tidy(data):
+    """書き出す前の仕上げ: 開いた縁・向きの食い違いがある骨だけ向きをそろえて蓋で塞ぐ (tools/lib/mesh_close.tidy_bones。2026-11-15 の監査)"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("mesh_close", Path(__file__).resolve().parents[3] / "lib/mesh_close.py")
+    mc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mc)
+    mc.tidy_bones(data)
+
+
 def install(path, d, m, size, atlas, glow):
     work = KT.ROOT / "build/accessories_v3" / path.parent.name
     work.mkdir(parents=True, exist_ok=True)
@@ -671,6 +680,7 @@ def install(path, d, m, size, atlas, glow):
         if k in mesh:
             d[k] = mesh[k]
     d["skyabyss_closed"] = True
+    _tidy(d)
     path.write_bytes(json.dumps(d, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
     tex = TEX / (d["texture"] + ".png")
     tex.parent.mkdir(parents=True, exist_ok=True)
