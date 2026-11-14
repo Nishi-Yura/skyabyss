@@ -357,13 +357,26 @@ public final class ObjectiveStrip {
         if (any == null && provider != null) {
             any = provider.apply(def.id() + "/giver");
         }
-        if (any == null && def.giver() != null && !def.giver().isEmpty()) {
+        // 頼んだ人の居場所は、品を渡しに戻る段 (turn_in) だけ。場所の決まっていない段 (支度・あちこちで集める・空を見るなど) で
+        // 頼んだ人を指すと、帯の文と関係のない所 (都の語り部・鯨見のイサナ) を指していた (2026-11-15「ピンが全く違う場所を指す」)
+        if (any == null && def.giver() != null && !def.giver().isEmpty() && returnsToGiver(stage, entry)) {
             any = SiteTargets.npc(def.giver());
         }
         if (any == null) {
             return Resolved.NONE;
         }
         return overworld ? new Resolved(any, false) : new Resolved(null, true);
+    }
+
+    // まだ済んでいない目的に、頼んだ人へ品を渡す目的 (turn_in) があるか
+    static boolean returnsToGiver(QuestDef.Stage stage, QuestLog.Entry entry) {
+        for (int i = 0; i < stage.objectives().size(); i++) {
+            QuestDef.Objective ob = stage.objectives().get(i);
+            if (ob.type().equals("turn_in") && entry.progress(i) < ob.count()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static final double FOE_NEAR = 96;

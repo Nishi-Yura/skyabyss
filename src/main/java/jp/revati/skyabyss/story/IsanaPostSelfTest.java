@@ -51,6 +51,11 @@ public final class IsanaPostSelfTest {
             Quests.setStage(p, "main_tide", "prepare");
             check(f, IsanaPost.post(p) == IsanaPost.Post.HARBOR, "past the rumor stage (or after skipping it) she is at the harbor");
             check(f, IsanaPost.visibleTo(harbor, p) && !IsanaPost.visibleTo(hut, p) && !IsanaPost.visibleTo(town, p), "at the harbor stage only the harbor Isana is shown");
+            // 目印: 港の立つ所が決まる前でも鯨見を指さない (立つ所か、汐守の町の真ん中)。2026-11-15「ピンが全く違う場所を指す」
+            net.minecraft.core.BlockPos aim = IsanaPost.target(server, p);
+            net.minecraft.core.BlockPos tideTown = jp.revati.skyabyss.world.continent.ContinentLayout.get().town("tide");
+            check(f, aim != null && (tideTown == null || aim.distSqr(tideTown) < 400 * 400),
+                    "at the harbor stage the marker should point at the harbor or the tide town, got " + aim);
             pd.markPersonal(p.getUUID(), "tide_shell");
             check(f, IsanaPost.post(p) == IsanaPost.Post.HARBOR, "after the tide shell's heart she waits at the harbor for the talk");
             flags.add(IsanaPost.FLAG_DONE);
