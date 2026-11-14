@@ -10,7 +10,7 @@ import math
 import numpy as np
 
 from blp import *  # noqa: F401,F403
-from blp import keys, eye
+from blp import keys, eye, punch
 
 SKIN = [(36, 26, 20), (58, 42, 30), (84, 62, 42), (112, 86, 58)]
 BELLY = [(150, 70, 30), (196, 110, 44), (230, 150, 70), (248, 196, 120)]
@@ -107,6 +107,31 @@ def build():
     return m
 
 
+
+def _merge(*poses):
+    out = {}
+    for p in poses:
+        for b, ch in p.items():
+            out.setdefault(b, {}).update(ch)
+    return out
+
+
+def _shake(base, bones, amp, t0, t1, step=0.07, axis=1):
+    out = []
+    t, k = t0, 0
+    while t <= t1 + 1e-6:
+        p = _merge(base)
+        for b in bones:
+            r = list(p.get(b, {}).get("rot", (0, 0, 0)))
+            r[axis] += amp if k % 2 == 0 else -amp
+            p.setdefault(b, {})["rot"] = tuple(r)
+        out.append((round(t, 3), p))
+        t += step
+        k += 1
+    return out
+
+# 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」): 技の動きに溜めの震えと行き過ぎ (blp.punch)、登場 (intro) と後半の咆哮 (scream) を足した
+
 def gaits():
     g = []
     idle = Gait("idle", 2.6)
@@ -127,13 +152,19 @@ def gaits():
     jump = {"body": {"pos": (0, 10, -4), "rot": (-16, 0, 0)}, "leg_l": {"rot": (60, 0, 0)}, "leg_r": {"rot": (60, 0, 0)}, "arm_l": {"rot": (-50, 0, 0)},
             "arm_r": {"rot": (-50, 0, 0)}}
     slam = {"body": {"pos": (0, -2, 0), "rot": (6, 0, 0)}, "arm_l": {"rot": (-20, 0, 20)}, "arm_r": {"rot": (-20, 0, -20)}}
-    g.append(keys("hop", 1.6, [(0.0, rest), (0.7, crouch), (0.95, jump), (1.1, slam), (1.25, slam), (1.6, rest)]))
+    g.append(keys("hop", 1.6, punch([(0.0, rest), (0.7, crouch), (0.95, jump), (1.1, slam), (1.25, slam), (1.6, rest)], 3)))
     puff = {"body": {"pos": (0, 1, 0)}, "jaw": {"rot": (10, 0, 0)}, "vents": {"pos": (0, 1.5, 0)}}
     blast = {"body": {"pos": (0, -1, 0)}, "vents": {"pos": (0, -0.5, 0)}, "head": {"rot": (-14, 0, 0)}, "jaw": {"rot": (24, 0, 0)}}
-    g.append(keys("erupt", 1.6, [(0.0, rest), (0.8, puff), (1.0, blast), (1.2, puff), (1.6, rest)]))
+    g.append(keys("erupt", 1.6, punch([(0.0, rest), (0.8, puff), (1.0, blast), (1.2, puff), (1.6, rest)], 2)))
     aim = {"head": {"rot": (6, 0, 0)}, "jaw": {"rot": (8, 0, 0)}, "body": {"rot": (6, 0, 0)}}
     lash = {"head": {"rot": (4, 0, 0)}, "jaw": {"rot": (34, 0, 0)}, "tongue": {"pos": (0, -1, -7), "rot": (10, 0, 0)}}
-    g.append(keys("tongue", 1.4, [(0.0, rest), (0.7, aim), (0.85, lash), (1.0, lash), (1.2, aim), (1.4, rest)]))
+    g.append(keys("tongue", 1.4, punch([(0.0, rest), (0.7, aim), (0.85, lash), (1.0, lash), (1.2, aim), (1.4, rest)], 2)))
+    # 登場 (3.6 秒): 熔岩の床から背の噴き口が覗き、身を沈めて跳び出し、どすんと着地して喉を膨らませ、口を開いて吠える (名前の札 2.20 秒 = introCardAt 44)
+    roar_ = _merge(blast, {"jaw": {"rot": (36, 0, 0)}, "head": {"rot": (-20, 0, 0)}})
+    g.append(keys("intro", 3.6, [(0.0, _merge(crouch, {"root": {"pos": (0, -40, 0)}})), (0.8, _merge(crouch, {"root": {"pos": (0, -24, 0)}})),
+                                 (1.25, _merge(jump, {"root": {"pos": (0, 4, 0)}})), (1.55, slam), (1.75, puff), (2.2, roar_)] +
+                  _shake(roar_, ["head"], 4, 2.26, 2.9) + [(3.1, puff), (3.6, rest)]))
+    g.append(keys("scream", 1.6, [(0.0, rest), (0.3, roar_)] + _shake(roar_, ["head"], 4, 0.36, 1.04) + [(1.2, puff), (1.6, rest)]))
     g.append(keys("hurt", 0.3, [(0.0, rest), (0.1, {"body": {"rot": (-6, 0, 6)}, "head": {"rot": (-10, 0, 0)}}), (0.3, rest)]))
     flop = {"body": {"pos": (0, -4, 0), "rot": (0, 0, 170)}, "leg_l": {"rot": (-30, 0, 30)}, "leg_r": {"rot": (-30, 0, -30)}, "arm_l": {"rot": (-40, 0, 20)},
             "arm_r": {"rot": (-40, 0, -20)}, "jaw": {"rot": (20, 0, 0)}}
@@ -141,5 +172,5 @@ def gaits():
     return g
 
 
-POSES = [("idle", 0.0), ("walk", 0.3), ("hop", 0.7), ("hop", 0.95), ("erupt", 1.0), ("tongue", 0.85), ("hurt", 0.1), ("death", 2.0)]
+POSES = [("idle", 0.0), ("walk", 0.3), ("hop", 0.7), ("hop", 0.95), ("erupt", 1.0), ("tongue", 0.85), ("hurt", 0.1), ("death", 2.0), ("intro", 1.25), ("intro", 2.2), ("scream", 0.5)]
 BOUNDS = (7, 5)

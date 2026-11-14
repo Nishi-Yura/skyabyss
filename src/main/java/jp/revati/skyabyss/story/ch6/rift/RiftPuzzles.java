@@ -72,6 +72,9 @@ public final class RiftPuzzles {
         if (has) {
             return;
         }
+        if (p instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+            jp.revati.skyabyss.notice.GainFeed.note(gainTo, stack);
+        }
         if (!p.getInventory().add(stack)) {
             p.drop(stack, false);
         }

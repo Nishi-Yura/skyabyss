@@ -60,10 +60,6 @@ public final class TreeVariants {
     static final double THROWN_TRAP_RANGE = 12;
     static final double GREAT_TRAP_RADIUS = 2.0;
     public static final double GREAT_TRAP_BIND = 1.5;
-    // 射手の跳び退き
-    static final int PARTING_ARROWS = 3;
-    static final double PARTING_RANGE = 10;
-    static final double PARTING_DAMAGE = 0.5;
     // 雷の矢
     static final int BRANCH_TARGETS = 2;
     static final double BRANCH_SCALE = 0.7;
@@ -146,11 +142,6 @@ public final class TreeVariants {
             case SHIELD_RUSH -> {
                 if (r == 1) {
                     TreeActions.shieldBash(player, rank);
-                }
-            }
-            case ARCHER_LEAP -> {
-                if (r == 1) {
-                    partingArrows(player, from);
                 }
             }
             case LAMP_CHARM -> {
@@ -381,26 +372,6 @@ public final class TreeVariants {
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillActions.sound(player, Skills.SOUND_BACKSTEP.get(), 0.7f, 0.5f);
         return null;
-    }
-
-    // ---------------------------------------------------------------- 射手の跳び退き: 置き矢 (跳んだ元の場所から、近くの敵へ矢を 3 本)
-    private static void partingArrows(ServerPlayer player, Vec3 from) {
-        ServerLevel level = player.serverLevel();
-        List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, new AABB(from, from).inflate(PARTING_RANGE, 3, PARTING_RANGE),
-                e -> SkillActions.isFoe(player, e));
-        near.sort(java.util.Comparator.comparingDouble(e -> e.position().distanceToSqr(from)));
-        float dmg = SkillActions.attackDamage(player) * (float) PARTING_DAMAGE;
-        for (int i = 0; i < Math.min(PARTING_ARROWS, near.size()); i++) {
-            LivingEntity e = near.get(i);
-            int delay = 2 + i * 3;
-            SkillEffects.later(level, delay, () -> {
-                if (e.isAlive() && player.isAlive()) {
-                    SkillActions.hit(player, e, dmg, Skill.ARCHER_LEAP);
-                    level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.2, 0.2, 0.2, 0.1);
-                    level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.ARROW_HIT, SoundSource.PLAYERS, 0.6f, 1.2f);
-                }
-            });
-        }
     }
 
     // ---------------------------------------------------------------- 雷の矢: 枝雷 (はじめから近くの 2 体へ跳ねる・一度 ×0.7)・重い雷 (跳ねない・×1.4)

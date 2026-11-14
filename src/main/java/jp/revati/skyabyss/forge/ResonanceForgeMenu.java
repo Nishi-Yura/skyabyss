@@ -38,6 +38,8 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     // 確定: 今のまま (3)、候補 0〜2 (4〜6)
     public static final int BUTTON_KEEP = 3;
     public static final int BUTTON_PICK = 4;
+    // 装飾を重ねる (持ち物の同じ品一つ + 結晶)
+    public static final int BUTTON_MERGE = 9;
     // 交換: 専用の逸品 0〜2 (10〜12)
     public static final int BUTTON_EXCHANGE = 10;
     // 交換のボタン: BUTTON_EXCHANGE + 巨神の番号 (TitanGearSets の並び) × EXCHANGE_STRIDE + 専用の逸品の番号
@@ -51,6 +53,8 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_REMOVE = 104;
     // 粉を合わせる (材料の枠の同じ段の粉三つ → 一つ上の段一つ)。外す (BUTTON_REMOVE + 穴の番号 0〜2) と重ならないように
     public static final int BUTTON_COMBINE = 108;
+    // 旅袋の細工の枠 i (0〜35) の品を材料の枠へ (200 + i。2026-11-10 の選び p_parts)
+    public static final int BUTTON_PART = 200;
     // 町の鍛冶師のそばで開いた「粉だけ」の画面で、鍛冶師から離れてよい距離
     public static final double ANCHOR_RANGE = 8;
     public static final int GEAR_X = 44;
@@ -216,6 +220,9 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
+        if (id >= BUTTON_PART && id < BUTTON_PART + jp.revati.skyabyss.pouch.PouchData.PARTS) {
+            return partToMaterial(player, id - BUTTON_PART);
+        }
         if (powderOnly() && !powderButton(id)) {
             return false;
         }
@@ -265,6 +272,15 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             }
             gear.setChanged();
             reforgeEffects(true);
+            return true;
+        }
+        if (id == BUTTON_MERGE) {
+            if (!ForgeRules.merge(player, stack)) {
+                return false;
+            }
+            gear.setChanged();
+            effects(player, true, jp.revati.skyabyss.item.wild.AccessoryRolls.stage(stack) * 2);
+            fireForge(player, "merge");
             return true;
         }
         if (id == BUTTON_ENHANCE) {
@@ -374,6 +390,32 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     }
 
     // 分解で戻る素材は、留め袋に入る品なら袋へ (22 の 8.3)
+    // 細工の枠の品を材料の枠へ。材料の枠にあった品は旅袋 (入らなければ持ち物) へ戻す。
+    // 材料の枠の品は「取り出し済み」の印を付けない (画面を閉じて持ち物へ戻ったら、掃除が旅袋へ戻す)
+    private boolean partToMaterial(Player player, int index) {
+        if (!(player instanceof ServerPlayer sp)) {
+            return false;
+        }
+        ItemStack part = jp.revati.skyabyss.pouch.Pouch.data(sp).part(index);
+        if (part.isEmpty()) {
+            return false;
+        }
+        ItemStack old = material.getItem(0);
+        if (!old.isEmpty()) {
+            jp.revati.skyabyss.pouch.Pouch.addPart(sp, old);
+            if (!old.isEmpty()) {
+                sp.getInventory().placeItemBackInInventory(old);
+            }
+            material.setItem(0, ItemStack.EMPTY);
+        }
+        ItemStack out = jp.revati.skyabyss.pouch.Pouch.takePart(sp, index, part.getCount());
+        out.remove(jp.revati.skyabyss.pouch.PouchSetup.LOAN.get());
+        material.setItem(0, out);
+        material.setChanged();
+        sp.playNotifySound(net.minecraft.sounds.SoundEvents.BUNDLE_REMOVE_ONE, net.minecraft.sounds.SoundSource.PLAYERS, 0.7f, 1.0f);
+        return true;
+    }
+
     private static void placeBack(Player player, ItemStack stack) {
         if (player instanceof ServerPlayer server) {
             jp.revati.skyabyss.pouch.PouchRouting.placeBack(server, stack);

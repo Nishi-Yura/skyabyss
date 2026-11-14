@@ -323,6 +323,13 @@ public class PilgrimMoon extends CloudMob {
         // 満ち欠けの刃: 扇の光 → 薙ぐ。同じ扇が ECHO 後にもう一度
         private void sweep(ServerLevel sl) {
             Vec3 f = floor();
+            if (t == 1) {
+                // 技の形: 満ち欠けの刃が三枚、扇の縁へ飛ぶ
+                for (int k = -1; k <= 1; k++) {
+                    Vec3 to = f.add(dir.yRot((float) Math.toRadians(SWEEP_HALF * 0.7 * k)).scale(SWEEP_R)).add(0, 0.8, 0);
+                    jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "wind_blade", PilgrimMoon.this, position(), to, SWEEP_TELL - 1, Math.min(SWEEP_TELL - 1, 12), 2f, 1.6f, 4);
+                }
+            }
             if (t < SWEEP_TELL) {
                 if (t % 3 == 0) {
                     for (double d = 2; d <= SWEEP_R; d += 1.5) {
@@ -384,6 +391,10 @@ public class PilgrimMoon extends CloudMob {
                     }
                 }
                 toldFall = true;
+            }
+            if (t == 2) {
+                // 技の形: 床の真ん中へ、大きな月の珠が落ちてくる
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "pearl", PilgrimMoon.this, f, FALL_TELL - 2, 40, 40f, 8f, 20);
             }
             if (t < FALL_TELL) {
                 if (t % 4 == 0) {

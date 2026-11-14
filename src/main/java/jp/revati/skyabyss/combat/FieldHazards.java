@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.combat;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -121,6 +122,7 @@ public final class FieldHazards {
             double x = c.x;
             double z = c.z;
             double y = c.y;
+            jp.revati.skyabyss.combat.prop.AttackProps.fall(level, jp.revati.skyabyss.combat.prop.AttackProps.fallKind(b), mob, c, RAIN_WARN, 14, 12f, 1.3f, 14);
             Telegraph.in(level, TelegraphShape.circle(x, z, RAIN_RADIUS)).floor(y).warn(RAIN_WARN).danger().owner(mob).victims(canHit::test)
                     .onImpact(s -> {
                         s.playSound(null, x, y, z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.7f);
@@ -163,7 +165,7 @@ public final class FieldHazards {
         for (int i = 0; i < 2; i++) {
             double start = base + Math.PI * i;
             boolean first = i == 0;
-            Telegraph.in(level, TelegraphShape.sweep(cx, cz, start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).floor(cy).warn(SWEEP_WARN)
+            Telegraph.in(level, TelegraphShape.sweep(cx, cz, start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).prop(PropFx.along(jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(block.get()))).floor(cy).warn(SWEEP_WARN)
                     .active(SWEEP_ACTIVE).danger().owner(mob).victims(canHit::test)
                     .onImpact(s -> {
                         if (first) {
@@ -193,6 +195,13 @@ public final class FieldHazards {
         double cy = mob.getY();
         Telegraph.in(level, TelegraphShape.ring(cx, cz, RING_IN, RING_OUT)).floor(cy).warn(RING_WARN).danger().owner(mob).victims(canHit::test)
                 .onImpact(s -> {
+                    String spike = jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(block.get());
+                    for (int k = 0; k < 10; k++) {
+                        double a = k * Math.PI * 2 / 10 + 0.3;
+                        double r = (RING_IN + RING_OUT) / 2 + (k % 2 == 0 ? -0.8 : 0.8);
+                        jp.revati.skyabyss.combat.prop.AttackProps.rise(s, spike, mob, new Vec3(cx + Math.cos(a) * r, cy, cz + Math.sin(a) * r),
+                                (float) Math.toDegrees(a), 0.8f + (k % 3) * 0.15f, 16);
+                    }
                     s.playSound(null, cx, cy, cz, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 0.6f);
                     for (int k = 0; k < 24; k++) {
                         double a = k * Math.PI * 2 / 24;

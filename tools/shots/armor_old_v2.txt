@@ -1,0 +1,38 @@
+# 古い防具 7 組の作り直し (2026-11-12、C 大きな輪郭 + A の細部) をゲームで確かめる
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/armor_old_v2.txt -PshotsName=armor_old_v2
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+waitchunks
+cmd skyabyss cinematic stop
+chat clear
+cmd summon armor_stand -6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}]}
+cmd summon armor_stand -4 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}]}
+cmd summon armor_stand -2 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+cmd summon armor_stand 2 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}]}
+cmd summon armor_stand 4 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}]}
+cmd summon armor_stand 6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{},{},{id:"skyabyss:sky_stone_chestplate",count:1},{}]}
+cmd skyabyss cinematic stop
+wait 60
+camera minecraft:overworld 0 -58.6 7.0 180 6
+wait 30
+shot front
+camera minecraft:overworld 0 -58.6 -7.0 0 6
+wait 20
+shot back
+camera minecraft:overworld -4 -59.0 3.0 180 6
+wait 20
+shot left_close
+camera minecraft:overworld 3 -59.0 3.0 180 6
+wait 20
+shot right_close

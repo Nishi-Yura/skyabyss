@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -69,7 +70,7 @@ public class BoneBowman extends BoneSoldier {
         double tx = target.getX();
         double tz = target.getZ();
         double ty = target.getY();
-        Telegraph.in(server(), TelegraphShape.circle(tx, tz, SHOOT_RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(tx, tz, SHOOT_RADIUS)).prop(PropFx.fall("arrow_volley"))
                 .floor(ty).warn(SHOOT_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_ARCHER_DRAW.get(), 0.8f, 0.7f)
                 .victims(this::canHit)

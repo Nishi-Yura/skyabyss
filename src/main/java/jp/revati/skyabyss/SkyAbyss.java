@@ -92,6 +92,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.tutorial.TutorialSetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
+        jp.revati.skyabyss.combat.prop.AttackProps.register(modEventBus);
         // 雷翼の心臓 (第三の巨神の最終ボス・音)。登録は titan.storm.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.storm.heart.StormHeartSetup.register(modEventBus);
         // 潮殻の背の本番 (潮鳴り石、潮の真珠、群れの巣、潮招き)
@@ -165,9 +166,6 @@ public class SkyAbyss {
 
         // クエストの見え方 (章の札・NPC の頭の印・更新の音)。docs/design/18 の 3.5 節
         jp.revati.skyabyss.quest.QuestUx.register(modEventBus);
-
-        // 心臓の遺物の選択画面 (眠りの場面が終わったら開く)。docs/design/30_heart_reward_ui.md
-        jp.revati.skyabyss.loot.reward.HeartReward.register();
 
         // 転生の見せ方 (色の段・記号・名札・称号・背中の飾り・順位の石・飾り板)。docs/design/31
         jp.revati.skyabyss.rebirth.RebirthSetup.register(modEventBus, modContainer);

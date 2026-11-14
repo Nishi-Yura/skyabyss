@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch4.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -209,7 +210,7 @@ public class ElderThrall extends AshThrall {
 
     // 一つの亀裂 (円の予告 1.5 秒 → 噴く)。開発コマンドの撮影は、人のいない所にも出す
     public void crackAt(ServerLevel server, double cx, double y, double cz) {
-        Telegraph.in(server, TelegraphShape.circle(cx, cz, CRACK_RADIUS)).floor(y).warn(CRACK_WARN).color(CRACK_COLOR).owner(this)
+        Telegraph.in(server, TelegraphShape.circle(cx, cz, CRACK_RADIUS)).prop(PropFx.rise("lava_pillar")).floor(y).warn(CRACK_WARN).color(CRACK_COLOR).owner(this)
                 .victims(this::canHit)
                 .onImpact(lvl -> {
                     lvl.playSound(null, cx, y, cz, Ch4Setup.ELDER_BURST.get(), SoundSource.HOSTILE, 1.2f, 1.0f);
@@ -238,7 +239,7 @@ public class ElderThrall extends AshThrall {
         for (ServerPlayer p : roomPlayers()) {
             Notice.narrate(p, "message.skyabyss.ch4g.pit.wave");
         }
-        Telegraph.in(server, TelegraphShape.ring(cx, cz, WAVE_INNER, WAVE_OUTER)).floor(y).warn(WAVE_WARN).danger().owner(this)
+        Telegraph.in(server, TelegraphShape.ring(cx, cz, WAVE_INNER, WAVE_OUTER)).prop(PropFx.ring("lava_pillar", 10)).floor(y).warn(WAVE_WARN).danger().owner(this)
                 .startSound(Ch4Setup.ELDER_WAVE.get(), 1.4f, 1.0f)
                 .victims(this::canHit)
                 .onImpact(lvl -> lvl.sendParticles(ParticleTypes.FLAME, cx, y + 0.4, cz, 60, WAVE_OUTER * 0.5, 0.2, WAVE_OUTER * 0.5, 0.08))

@@ -1,0 +1,83 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_whirlwind",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -8.433,
+        -4.111,
+        -9.271
+       ],
+       "size": [
+        18.425,
+        26.464,
+        17.973
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "t1",
+     "pivot": [
+      0.0,
+      20.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -13.293,
+        19.629,
+        -13.439
+       ],
+       "size": [
+        25.85,
+        27.922,
+        26.212
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

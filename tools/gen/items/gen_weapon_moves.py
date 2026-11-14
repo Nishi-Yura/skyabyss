@@ -671,7 +671,21 @@ for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の�
                             ("tower_pull_hammer", "smith_hammer", "引き合いの鎚: 振りかぶって打ち下ろす"),
                             ("tower_moon_staff", "abyss_bell_staff", "落ちる月の杖: 掲げて溜め、地を突く"),
                             ("tower_sigil_dagger", "waterway_fang", "追う印の短剣: 右上から左下へ、返して X、突き抜ける"),
-                            ("tower_clap_bell_staff", "abyss_bell_staff", "合掌の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす")):
+                            ("tower_clap_bell_staff", "abyss_bell_staff", "合掌の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            # 英雄の武器 (WeaponKind にあるのに動きが無く、構えなしで横倒しに持っていた。11-13)
+                            ("whale_choir_hammer", "smith_hammer", "鯨唄の鎚: 振りかぶって打ち下ろす"),
+                            ("whale_star_staff", "abyss_bell_staff", "鯨星の杖: 掲げて溜め、地を突く"),
+                            ("whale_deep_bell_staff", "abyss_bell_staff", "深鳴りの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("tide_reef_hammer", "smith_hammer", "潮礁の鎚: 振りかぶって打ち下ろす"),
+                            ("tide_pearl_staff", "abyss_bell_staff", "潮月の真珠杖: 掲げて溜め、地を突く"),
+                            ("tide_surf_bell_staff", "abyss_bell_staff", "潮騒の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("storm_anvil_hammer", "smith_hammer", "雷床の鎚: 振りかぶって打ち下ろす"),
+                            ("storm_cloud_staff", "abyss_bell_staff", "雷雲の杖: 掲げて溜め、地を突く"),
+                            ("storm_thunder_bell_staff", "abyss_bell_staff", "雷鈴の杖: 掲げて溜め、地を突いて鐘を鳴らす"),
+                            ("ember_cinder_blade", "whalebone_greatsword", "熾の大刃: 大きく薙ぎ、振り下ろす"),
+                            ("ember_ash_knife", "waterway_fang", "灰の小刀: 右上から左下へ、返して X、突き抜ける"),
+                            ("ember_kiln_staff", "abyss_bell_staff", "炉心の杖: 掲げて溜め、地を突く"),
+                            ("ember_censer_bell_staff", "abyss_bell_staff", "香炉の鈴杖: 掲げて溜め、地を突いて鐘を鳴らす")):
     W[_item] = _copy.deepcopy(W[_src])
     W[_item]["item"] = _item
     W[_item]["label"] = _label

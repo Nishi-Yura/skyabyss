@@ -17,7 +17,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 // ギルドの倉庫 (docs/design/35 の 6.5)。ギルドごとに 54 枠 (GuildData.Guild.storage)。組合の受付の書記から、ギルドの画面の「倉庫」で開く。
-//   預けるのは誰でも (預かり所と同じく、旅嚢の大事な品と守る品は預けられない = StashMenu.allowed)
+//   預けるのは誰でも (預かり所と同じく、旅袋の大事な品と守る品は預けられない = StashMenu.allowed)
 //   取り出すのは、長が決めた位から (takeRank: 誰でも / 副長から / 長だけ)。取り出せない人には、枠の品をつかめないようにする
 //   何人かが同時に開いても、中身は一つ (同じ枠の並びを見る)
 public final class GuildStorage extends ChestMenu {

@@ -154,7 +154,7 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
                     jp.revati.skyabyss.party.Parties.MAX_MEMBERS, r.avgLevel()), ox + nameW + goalW + 2 * Golden.S5, ty, Golden.S55, SOFT, false);
         }
         panel.end(g);
-        panel.drawBar(g, 0x30FFFFFF, 0x90F2C14E);
+        panel.drawBar(g, 0x30FFFFFF, 0x90E9C46A);
         for (int i = 0; i < joinButtons.size(); i++) {
             Button b = joinButtons.get(i);
             int oy = panel.top() + i * PROW;

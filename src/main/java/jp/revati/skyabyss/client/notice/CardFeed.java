@@ -33,7 +33,14 @@ public final class CardFeed {
     private CardFeed() {
     }
 
-    private record Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon) {
+    private record Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon, List<net.minecraft.world.item.ItemStack> items) {
+        Entry(Component head, Component body, int accent, long at, net.minecraft.world.item.ItemStack icon) {
+            this(head, body, accent, at, icon, List.of());
+        }
+
+        boolean iconsOnly() {
+            return !items.isEmpty();
+        }
     }
 
     private static final List<Entry> FEED = new ArrayList<>();
@@ -71,9 +78,41 @@ public final class CardFeed {
         }
     }
 
+    // 手に入れた品: 左の列は品の絵 (と数) だけを一列に (文は知らせの記録に残る)。右上・右下の札の置き場では今までの札
+    public static void showItems(List<net.minecraft.world.item.ItemStack> items, Supplier<Toast> toast) {
+        Minecraft mc = Minecraft.getInstance();
+        switch (place()) {
+            case TOP_RIGHT, BOTTOM_RIGHT -> mc.getToasts().addToast(toast.get());
+            case COMPACT, LEFT_FEED -> {
+                synchronized (FEED) {
+                    FEED.add(new Entry(Component.empty(), Component.empty(), 0xE9C46A, net.minecraft.Util.getMillis(), net.minecraft.world.item.ItemStack.EMPTY, List.copyOf(items)));
+                    while (FEED.size() > FEED_MAX) {
+                        FEED.remove(0);
+                    }
+                }
+            }
+        }
+    }
+
+    // 絵の列の一行に入る数と、札の高さ
+    // 一つの品 = 18 角の枠 (暗い地とレア度の色の縁)。あいだ 2
+    private static final int ICON_PITCH = 20;
+
+    private static int perRow(int w) {
+        return Math.max(1, (w - 6) / ICON_PITCH);
+    }
+
+    private static int height(Font font, Entry e, int w) {
+        if (e.iconsOnly()) {
+            int rows = (e.items.size() + perRow(w) - 1) / perRow(w);
+            return rows * ICON_PITCH + 3;
+        }
+        return lines(font, e, w).size() * 10 + 2;
+    }
+
     // 進捗 (バニラ・mod の進捗の札の代わり)
     public static void advancement(Component title, boolean challenge, net.minecraft.world.item.ItemStack icon) {
-        int accent = challenge ? 0xB58AE0 : 0xF2C14E;
+        int accent = challenge ? 0xB58AE0 : 0xE9C46A;
         Component head = Component.translatable(challenge ? "gui.skyabyss.card.challenge" : "gui.skyabyss.card.advancement");
         // ほかの札と同じく、会話・場面の最中は溜めて閉じたあとに (NoticeGate)。出るときに音 (挑戦はバニラの挑戦の音、ふつうは小さな鐘)
         NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, NoticeClient.CARD_GAP, () -> {
@@ -149,7 +188,7 @@ public final class CardFeed {
         int used = 0;
         int from = shown.size();
         while (from > 0) {
-            int hh = lines(font, shown.get(from - 1), Math.min(rect.w(), capW)).size() * 10 + 2;
+            int hh = height(font, shown.get(from - 1), Math.min(rect.w(), capW));
             if (used + hh > rect.h()) {
                 break;
             }
@@ -166,7 +205,7 @@ public final class CardFeed {
             used = 0;
             from = shown.size();
             while (from > 0) {
-                int hh = lines(font, shown.get(from - 1), rect.w()).size() * 10 + 2;
+                int hh = height(font, shown.get(from - 1), rect.w());
                 if (used + hh > rect.h()) {
                     break;
                 }
@@ -183,7 +222,7 @@ public final class CardFeed {
             synchronized (FEED) {
                 for (int i = 0; i < FEED.size(); i++) {
                     Entry e = FEED.get(i);
-                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt, e.icon));
+                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt, e.icon, e.items));
                 }
             }
             return;
@@ -203,13 +242,38 @@ public final class CardFeed {
             int x = rect.x();
             // 出てくるときに左から少し滑る
             int slide = age < 180 ? (int) ((1f - age / 180f) * 8) : 0;
+            if (e.iconsOnly()) {
+                // 品の絵の列 (2026-11-11 の声「少しわかりづらい」): 品ごとに枠 (暗い地・レア度の色の縁)、左に金の印。
+                // 地の帯は敷かない (景色の上で枠だけがはっきり見える)
+                int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
+                int rows = (e.items.size() + perRow(ew) - 1) / perRow(ew);
+                int hh = rows * ICON_PITCH + 2;
+                g.fill(x - slide, y + 1, x + 2 - slide, y + hh - 1, alpha << 24 | e.accent);
+                for (int i = 0; i < e.items.size(); i++) {
+                    int bx = x + 4 - slide + (i % perRow(ew)) * ICON_PITCH;
+                    int by = y + 1 + (i / perRow(ew)) * ICON_PITCH;
+                    net.minecraft.world.item.ItemStack st = e.items.get(i);
+                    jp.revati.skyabyss.item.GearTier tier = jp.revati.skyabyss.client.ui.GearTierFrames.tierOf(st);
+                    int edge = tier != null ? tier.rgb() : 0x6A78A8;
+                    g.fill(bx, by, bx + 18, by + 18, ((int) (alpha * 0.85f)) << 24 | 0x0A0E1E);
+                    jp.revati.skyabyss.client.ui.Golden.outline(g, bx, by, bx + 18, by + 18, alpha << 24 | edge);
+                    if (alpha > 120) {
+                        g.renderItem(st, bx + 1, by + 1);
+                        if (st.getCount() > 1) {
+                            g.renderItemDecorations(font, st, bx + 1, by + 1, compact(st.getCount()));
+                        }
+                    }
+                }
+                y += hh + 1;
+                continue;
+            }
             String head = e.head.getString();
             int iw = 12;
             int hw = font.width(head) + iw;
             int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
             List<FormattedCharSequence> lines = lines(font, e, ew);
             int hh = lines.size() * 10 + 1;
-            g.fill(x - slide, y, x + ew - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
+            g.fill(x - slide, y, x + ew - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0E1E);
             g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
             // 小さな絵 (品を 10 px に縮めて)。品が無ければ種類の色の菱形
             if (!e.icon.isEmpty() && alpha > 160) {
@@ -225,7 +289,7 @@ public final class CardFeed {
                 g.fill(cx - 1, cy - 3, cx + 1, cy + 4, col);
                 g.fill(cx - 2, cy - 2, cx + 2, cy + 3, col);
                 g.fill(cx - 3, cy - 1, cx + 3, cy + 2, col);
-                g.fill(cx - 1, cy - 1, cx + 1, cy + 2, alpha << 24 | 0x0A0C10);
+                g.fill(cx - 1, cy - 1, cx + 1, cy + 2, alpha << 24 | 0x0A0E1E);
             }
             g.drawString(font, head, x + 4 + iw - slide, y + 2, alpha << 24 | e.accent, true);
             int ly = y + 2;
@@ -245,6 +309,14 @@ public final class CardFeed {
         List<FormattedCharSequence> l = jp.revati.skyabyss.client.ui.JpWrap.split(font, e.body, room);
         // 行の数で切らない (カードは行の数だけ高くなる。2026-11-09 の声「『...』だと何書いてるかわからない」)
         return l.isEmpty() ? List.of(FormattedCharSequence.EMPTY) : l;
+    }
+
+    // 枠の上の数: 1 万以上は「1.2万」の形で短く
+    private static String compact(int n) {
+        if (n >= 10000) {
+            return (n / 1000) / 10.0 + "万";
+        }
+        return Integer.toString(n);
     }
 
     private static int rows(Font font, Entry e) {

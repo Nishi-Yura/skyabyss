@@ -69,6 +69,8 @@ public final class TrialRoute {
     public static final String START = "keep.trial.start";
     // 中ボスの段 (3.5) にいる
     public static final String MID = "keep.trial.mid";
+    // 地上の祠から始めた順路 (巨神に上って始めたのではない)。全滅・あきらめのどちらでも、出口はその祠
+    public static final String FROM_SHRINE = "keep.trial.from_shrine";
     // 越えてから次へ運ぶまで (29 の 4.6 の 4 秒)
     public static final int CARRY_DELAY = 80;
     // 台の鐘を鳴らしてから始まるまでの数え下ろし (5 秒。鐘は全員が台にそろってから鳴らせる)
@@ -184,9 +186,16 @@ public final class TrialRoute {
         r.remove(PARTY);
         r.remove(START);
         r.remove(MID);
+        r.remove(FROM_SHRINE);
         r.remove(TrialSlot.SLOT);
         r.remove(RaidRewards.ROUTE);
         r.remove(RaidRewards.WIPES);
+    }
+
+    // そのグループの今の順路は、地上の祠から始めたか
+    public static boolean fromShrine(ServerLevel back, UUID group) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        return r != null && r.flag(FROM_SHRINE);
     }
 
     // 順路を終える (心臓を止めた・あきらめ・背を出た・グループのリセット)。記録とメモリの待ちを消す
@@ -241,6 +250,7 @@ public final class TrialRoute {
         }
         r.putString(PARTY, String.join(",", who));
         r.putLong(START, back.getGameTime());
+        r.setFlag(FROM_SHRINE, soon);
         // 区画の番号を取る (部屋は運ぶときに RaidRun がそこへ建てる。docs/design/32 の 5 章)
         TrialSlot.assign(back, r);
         r.changed();
@@ -1020,7 +1030,7 @@ public final class TrialRoute {
     // 順路を終え、その背にいるグループ全員を背の外へ出す (初回は地上の巨神の影の下 = Titans.sendDown、周回は祠)
     public static int abandon(ServerLevel back, UUID group, String titan) {
         List<ServerPlayer> all = present(back, group);
-        boolean replay = !FirstRun.isFirstRun(back, group);
+        boolean replay = !FirstRun.isFirstRun(back, group) || fromShrine(back, group);
         end(back, group);
         for (ServerPlayer m : all) {
             Notice.hint(m, "message.skyabyss.route.abandoned");

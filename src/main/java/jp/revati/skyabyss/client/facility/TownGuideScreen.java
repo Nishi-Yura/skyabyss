@@ -88,7 +88,7 @@ public class TownGuideScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
+        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class TownGuideScreen extends Screen {
                 if (l.head) {
                     // 見出し: 色の札と種類の名前、下に細い線
                     g.fill(rows.x() + 2, y + 4, rows.x() + 8, y + 10, c);
-                    g.renderOutline(rows.x() + 1, y + 3, 8, 8, 0xFF0A0C12);
+                    g.renderOutline(rows.x() + 1, y + 3, 8, 8, 0xFF0A0E1E);
                     g.drawString(font, Component.translatable("gui.skyabyss.town_guide.group." + l.group.id), rows.x() + 13, Golden.textY(y, lh), c, false);
                     g.fill(rows.x() + 2, y + lh - 1, right - 2, y + lh, (c & 0x00FFFFFF) | 0x50000000);
                 } else {
@@ -126,11 +126,11 @@ public class TownGuideScreen extends Screen {
                     boolean hover = mx >= rows.x() && mx < right && my >= Math.max(y, rows.y()) && my < Math.min(y + lh, rows.y() + rows.height());
                     boolean on = e.id().equals(current);
                     if (hover || on) {
-                        g.fill(rows.x() + 1, y, right - 1, y + lh - 1, on ? 0xFF243440 : FacilityUi.ROW_HOVER);
+                        g.fill(rows.x() + 1, y, right - 1, y + lh - 1, on ? 0xFF222C52 : FacilityUi.ROW_HOVER);
                     }
                     // 灯りの印 (小さな菱形の灯)
                     int lx = rows.x() + 6;
-                    g.fill(lx - 1, y + 3, lx + 2, y + 10, 0xFF0A0C12);
+                    g.fill(lx - 1, y + 3, lx + 2, y + 10, 0xFF0A0E1E);
                     g.fill(lx, y + 4, lx + 1, y + 9, c);
                     g.fill(lx - 2, y + 5, lx + 3, y + 8, c);
                     g.fill(lx - 3, y + 6, lx + 4, y + 7, (c & 0x00FFFFFF) | 0x80000000);
@@ -159,7 +159,7 @@ public class TownGuideScreen extends Screen {
             y += lh;
         }
         rows.end(g);
-        rows.drawBar(g, 0xFF0A0C12, FacilityUi.TEAL);
+        rows.drawBar(g, 0xFF0A0E1E, FacilityUi.TEAL);
         // 釦 (下の段)
         int by = buttonY();
         Golden.Box foot = LAYOUT.foot();

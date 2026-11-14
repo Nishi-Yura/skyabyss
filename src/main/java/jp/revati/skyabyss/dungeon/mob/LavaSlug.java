@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -54,7 +55,7 @@ public class LavaSlug extends ContinentFoe {
             lastTrail = position();
             Vec3 at = lastTrail;
             trail.add(new long[] {Double.doubleToLongBits(at.x), Double.doubleToLongBits(at.y), Double.doubleToLongBits(at.z), tickCount + WARN + TRAIL_TICKS});
-            Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, TRAIL_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, TRAIL_RADIUS)).prop(PropFx.rise("lava_pillar").size(0.4f).linger(10))
                     .floor(at.y).warn(WARN).active(TRAIL_TICKS).repeatEvery(10).danger().owner(this)
                     .victims(this::canHit)
                     .onHit((server, player) -> {

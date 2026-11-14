@@ -19,10 +19,14 @@ import net.minecraft.world.phys.Vec3;
 //   跳び叩き  身を沈めて跳び、狙った人の足もとの円へ叩きつける (予告 1.2 秒。着地の場所へ移る)
 //   突進      身を低くして前へまっすぐ走る (予告 1.1 秒、前の帯 10)
 //   後半 (体力半分から) は角笛で野盗を呼ぶ (DungeonBoss の手下)
+// 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」。骨掘りの大百足と同じ方向):
+//   三連      寄った人へ、右から斬る扇 → 向き直って左から斬る扇 → 跳ねて振りかぶり前の帯へ叩きつけ (0.7・1.2・1.9 秒)。最後のあとに隙
+//   登場は砦の上から跳び降りて深く着地し、鉈を引きずって歩み、天へ吠える (intro)。後半は角笛を吹くように吠える (scream)
 public class FortWarlord extends DungeonBoss {
     static final int SWEEP = 1;
     static final int LEAP = 2;
     static final int CHARGE = 3;
+    static final int COMBO = 4;
     public static final int SWEEP_WARN = 18;
     public static final double SWEEP_RANGE = 6.5;
     public static final int LEAP_WARN = 24;
@@ -31,10 +35,14 @@ public class FortWarlord extends DungeonBoss {
     public static final double CHARGE_LENGTH = 10;
     private int lastLeap = -200;
     private int lastCharge = -200;
+    public static final int COMBO_HIT1 = 14;
+    public static final int COMBO_HIT2 = 24;
+    public static final int COMBO_HIT3 = 38;
+    private int lastCombo = -200;
 
     public FortWarlord(EntityType<? extends Monster> type, Level level) {
         super(type, level, "fort_warlord", () -> SoundEvents.VINDICATOR_AMBIENT, () -> SoundEvents.VINDICATOR_HURT, () -> SoundEvents.VINDICATOR_DEATH,
-                "sweep", "leap", "charge", "hurt", "death");
+                "sweep", "combo", "leap", "charge", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -85,6 +93,14 @@ public class FortWarlord extends DungeonBoss {
                     .start();
             return;
         }
+        if (distance <= SWEEP_RANGE && tickCount - lastCombo > (phase2 ? 140 : 200) && random.nextFloat() < 0.55f) {
+            move = COMBO;
+            lastCombo = tickCount;
+            begin(target, "combo");
+            cue("fort_warlord", "combo", COMBO_HIT3);
+            slash(target, COMBO_HIT1);
+            return;
+        }
         if (distance <= SWEEP_RANGE) {
             move = SWEEP;
             begin(target, "sweep");
@@ -97,6 +113,76 @@ public class FortWarlord extends DungeonBoss {
                     .onHit((server, player) -> player.hurt(attackSource(), damage()))
                     .start();
         }
+    }
+
+    private void slash(LivingEntity target, int warn) {
+        Vec3 f = forward();
+        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, Math.toRadians(110)))
+                .floor(getY()).warn(warn).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 2, getY() + 1.2, getZ() + f.z * 2, 5, 1.4, 0.2, 1.4, 0))
+                .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.8f))
+                .start();
+    }
+
+    @Override
+    protected void during(int tick) {
+        super.during(tick);
+        if (move != COMBO) {
+            return;
+        }
+        LivingEntity t = getTarget();
+        if (t == null || !t.isAlive()) {
+            return;
+        }
+        if (tick == COMBO_HIT1) {
+            lockYawToward(t);
+            slash(t, COMBO_HIT2 - COMBO_HIT1);
+        } else if (tick == COMBO_HIT2) {
+            lockYawToward(t);
+            Vec3 f = forward();
+            double a = Telegraph.angleOf(f);
+            Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, 9, 1.6))
+                    .floor(getY()).warn(COMBO_HIT3 - COMBO_HIT2).danger().owner(this).target(t)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX() + f.x * 4, getY() + 0.3, getZ() + f.z * 4, 20, 1.4, 0.2, 1.4, 0.03);
+                        server.playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.4f, 0.5f);
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), damage() * 1.3f);
+                        player.setDeltaMovement(player.getDeltaMovement().add(0, 0.6, 0));
+                        player.hurtMarked = true;
+                    })
+                    .start();
+        }
+    }
+
+    // 登場: 砦の上から跳び降り、鉈を引きずり、吠える (アニメ intro 4.6 秒)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 92;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 58;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "drop";
     }
 
     @Override
@@ -114,13 +200,14 @@ public class FortWarlord extends DungeonBoss {
         return switch (move) {
             case LEAP -> LEAP_WARN + 12;
             case CHARGE -> CHARGE_WARN + 14;
+            case COMBO -> COMBO_HIT3 + 14;
             default -> SWEEP_WARN + 12;
         };
     }
 
     @Override
     protected void finish() {
-        if (move == LEAP) {
+        if (move == LEAP || move == COMBO) {
             // 着地のあとは鉈が地に食い込んで隙
             opening();
         }

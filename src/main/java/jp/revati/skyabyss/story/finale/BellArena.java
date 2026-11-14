@@ -86,6 +86,8 @@ public final class BellArena {
         e.tuneCloud(1, LastBellkeeper.HP, LastBellkeeper.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場: 空から落ちてきて、名前の札と顔のアップ (combat/BossEmerge)
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "drop", 44, "last_bellkeeper");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.8);

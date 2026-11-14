@@ -17,7 +17,7 @@
   "item.skyabyss.coral_harpoon": "珊瑚憑きの銛",
   "item.skyabyss.coral_harpoon.desc": "突いた敵の足もとから珊瑚が生え、しばらく動けなくする",
   "item.skyabyss.moontide_pearl": "月潮の真珠",
-  "item.skyabyss.moontide_pearl.desc": "アクセサリースロットに付けていると、ダメージを大きく受けたとき泡の盾が身を包む（一度包むと90秒は眠る）。",
+  "item.skyabyss.moontide_pearl.desc": "装飾の枠に付けていると、ダメージを大きく受けたとき泡の盾が身を包む（一度包むと90秒は眠る）。",
   "item.skyabyss.tide_shell_core": "潮殻の心核",
   "item.skyabyss.tide_shell_core.desc": "潮殻の心臓から取れた、潮の一片。いつか伝説の装備の材料になる",
   "gui.skyabyss.forge.exchange_titan": "%s ▸",

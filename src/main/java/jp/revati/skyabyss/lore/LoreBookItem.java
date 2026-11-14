@@ -33,7 +33,7 @@ public class LoreBookItem extends Item implements jp.revati.skyabyss.pouch.Pouch
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
-    // 旅嚢の輪から開く: 記録を送り、持ち主の画面に書を開かせる (右クリックはクライアントで直接開く)
+    // 旅袋の輪から開く: 記録を送り、持ち主の画面に書を開かせる (右クリックはクライアントで直接開く)
     @Override
     public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
         Lore.sync(player);

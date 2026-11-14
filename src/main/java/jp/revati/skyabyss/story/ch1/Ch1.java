@@ -85,6 +85,7 @@ public final class Ch1 {
         event.enqueueWork(() -> {
             LORE_XP.forEach(GrowthRewards.LORE_XP::putIfAbsent);
             Sites.register();
+            IronTrail.registerTargets();
         });
     }
 

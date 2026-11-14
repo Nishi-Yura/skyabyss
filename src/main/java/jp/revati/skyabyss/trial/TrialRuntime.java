@@ -68,7 +68,7 @@ public final class TrialRuntime {
                 String titan = Titans.titanOfBack(back.dimension());
                 if (p != null && titan != null) {
                     jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, new ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)));
-                    Notice.gain(p, ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
+                    Notice.gainItem(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)), ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
                 }
             }
             if (heartCounted.add(epoch)) {

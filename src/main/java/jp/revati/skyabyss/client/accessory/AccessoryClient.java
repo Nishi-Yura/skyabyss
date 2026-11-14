@@ -14,7 +14,6 @@ import jp.revati.skyabyss.item.accessory.AccessorySetup;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -26,29 +25,22 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 装飾の枠と必要レベルのクライアント側:
-//  - 装飾の画面をメニューに結びつける。持ち物の画面の上に「持ち物」「装飾」のつまみを足す
+//  - 装飾の枠は持ち物の画面の中 (item/accessory/AccessorySlots・client/inventory/SkyInventoryScreen)
 //  - H キーで護符の枠の品を使う (バニラ・このModのほかのキー J/K/U/B/O/R/G/V/Z とぶつからない)
 //  - 装備のツールチップに必要レベルを常に出す (足りないときは赤で、何が起きるかも)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AccessoryClient {
     public static final KeyMapping CHARM_KEY = new KeyMapping("skyabyss_gear.key.charm", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.CHARM, "key.categories.skyabyss");
-    private static final int OK = 0x9AA0B0;
+    private static final int OK = 0xA4ACC8;
     private static final int SHORT = 0xE0505A;
 
     private AccessoryClient() {
-    }
-
-    @SubscribeEvent
-    static void onScreens(RegisterMenuScreensEvent event) {
-        event.register(AccessorySetup.MENU.get(), AccessoryScreen::new);
     }
 
     @SubscribeEvent
@@ -63,14 +55,6 @@ public final class AccessoryClient {
             if (mc.player != null && mc.screen == null) {
                 PacketDistributor.sendToServer(new AccessorySetup.UseCharmPayload());
             }
-        }
-    }
-
-    // 持ち物の画面 (サバイバル) の上に、つまみを三つ。創造モードの持ち物の画面は形が違うので足さない
-    @SubscribeEvent
-    static void onScreenInit(ScreenEvent.Init.Post event) {
-        if (event.getScreen() instanceof InventoryScreen screen) {
-            AccessoryScreen.addTabs(event::addListener, screen, 0);
         }
     }
 

@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-// 旅嚢の輪: 使える道具を円に並べ、マウスの向きで選び、キーを離すと使う (docs/design/22 の 10 章 B)。
+// 旅袋の輪: 使える道具を円に並べ、マウスの向きで選び、キーを離すと使う (docs/design/22 の 10 章 B)。
 // 中心で離すか Esc で取りやめ。札をクリックしてもすぐ使える。ゲームは止めない (マルチでも同じ)
 public class PouchWheelScreen extends Screen {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
@@ -27,9 +27,9 @@ public class PouchWheelScreen extends Screen {
     private static final int PLATE_MIN = 18;
     // 中心のこの半径の中は「選ばない」
     private static final int DEAD = 16;
-    private static final int GOLD = 0xFFF2C14E;
+    private static final int GOLD = 0xFFE9C46A;
     private static final int TEXT = 0xFFD8DCE6;
-    private static final int DIM = 0xFF9AA0B0;
+    private static final int DIM = 0xFFA4ACC8;
 
     private final List<PouchEntries.Entry> items;
     private int selected = -1;

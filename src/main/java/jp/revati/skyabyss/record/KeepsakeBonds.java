@@ -425,7 +425,7 @@ public final class KeepsakeBonds {
             data.setLastClears(player.getUUID(), titan, r.clears);
             if (last >= 0 && r.clears > last && r.fragment && missing(player, Kind.FRAGMENT) > 0) {
                 int given = reissue(player, Kind.FRAGMENT);
-                Notice.gain(player, "skyabyss_record.bond.heart_restored", given);
+                Notice.gainLog(player, "skyabyss_record.bond.heart_restored", given);
             }
         }
     }
@@ -439,7 +439,7 @@ public final class KeepsakeBonds {
             return RecallResult.NOTHING_MISSING;
         }
         int given = reissue(player, kind);
-        Notice.gain(player, "skyabyss_record.bond.recalled_" + kind.id, given);
+        Notice.gainLog(player, "skyabyss_record.bond.recalled_" + kind.id, given);
         player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 4, player.getZ(), 24, 0.3, 2.0, 0.3, 0.0);
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 0.8f);
         return RecallResult.RECALLED;

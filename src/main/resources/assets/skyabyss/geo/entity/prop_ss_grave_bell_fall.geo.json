@@ -1,0 +1,56 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_ss_grave_bell_fall",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -13.714,
+        0.514,
+        -13.043
+       ],
+       "size": [
+        27.428,
+        26.486,
+        26.085
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+# ボスの登場 (2026-11-11): 数え下ろし・地の下から跳び出す・名前の札 (骨掘りの大百足)
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/boss_intro.txt -PshotsName=boss_intro
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+lowpoly on
+fov 60
+hud on
+chat clear
+cmd tp @s 0 -60 40 180 0
+waitchunks
+wait 60
+cmd gamemode creative
+cmd tp @s -8 -60 19 -157 -8
+wait 20
+cmd kill @e[type=skyabyss:bone_centipede]
+cmd skyabyss cinematic stop
+close
+wait 10
+cmd summon skyabyss:bone_centipede 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b,Tags:["m"]}
+wait 25
+shot bi_count_3
+wait 25
+shot bi_count_2
+wait 18
+shot bi_crack
+wait 10
+shot bi_head
+wait 18
+shot bi_neck
+wait 16
+shot bi_body
+wait 14
+shot bi_scream_card
+wait 30
+shot bi_glare
+wait 30
+shot bi_after

@@ -138,7 +138,7 @@ public final class SkillLesson {
                     Item coin = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "bell_coin"));
                     if (coin != Items.AIR) {
                         Quests.give(player, new ItemStack(coin, REWARD_COINS));
-                        Notice.gain(player, "message.skyabyss.lesson.reward");
+                        Notice.gainLog(player, "message.skyabyss.lesson.reward");
                     }
                 }
             }

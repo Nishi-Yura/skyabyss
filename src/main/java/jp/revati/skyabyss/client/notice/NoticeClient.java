@@ -229,7 +229,7 @@ public final class NoticeClient {
             case TOAST -> gate(NoticeGate.P_CARD, CARD_GAP, () -> {
                 boolean gain = kind == Notice.Kind.GAIN;
                 Component head = Component.translatable(gain ? "gui.skyabyss.notice.head.gain" : "gui.skyabyss.notice.head.unlock");
-                int accent = gain ? 0xF2C14E : 0x7FD6D0;
+                int accent = gain ? 0xE9C46A : 0x8FD0FF;
                 CardFeed.show(head, body, accent, () -> new NoticeToast(mc.font, head, body, accent));
                 chime(mc, gain ? 1.0f : 0.8f, 0.6f);
             });
@@ -240,6 +240,31 @@ public final class NoticeClient {
                 mc.gui.setOverlayMessage(body, false);
             }
         }
+    }
+
+    // 手に入れた品: 記録 (とチャットの設定) には文を、画面には品の絵だけを並べる
+    public static void receiveItems(jp.revati.skyabyss.notice.GainItemsPayload payload) {
+        Minecraft mc = Minecraft.getInstance();
+        Component text = Notice.plain(payload.text());
+        NoticeLog.add(Notice.Kind.GAIN, text);
+        Config.NotifyMode mode = Config.NOTIFY_MODE.get();
+        if (mode != Config.NotifyMode.TOAST) {
+            mc.gui.getChat().addMessage(text);
+            if (mode == Config.NotifyMode.CHAT) {
+                return;
+            }
+        }
+        java.util.List<net.minecraft.world.item.ItemStack> items = payload.items();
+        // 品の無い知らせ (Notice.gainLog) は記録だけ
+        if (items.isEmpty()) {
+            return;
+        }
+        gate(NoticeGate.P_CARD, CARD_GAP, () -> {
+            Component head = Component.translatable("gui.skyabyss.notice.head.gain");
+            Component body = Notice.body(payload.text());
+            CardFeed.showItems(items, () -> new NoticeToast(mc.font, head, body, 0xE9C46A));
+            chime(mc, 1.0f, 0.6f);
+        });
     }
 
     // 記録・チャットに残す文: 場所・章の札は題と副題を並べ、余韻は見出しと一言を並べる
@@ -505,9 +530,9 @@ public final class NoticeClient {
         int x0 = r.x();
         int x1 = r.right();
         // 帯は両端に向かって薄くなるように二段に重ねる
-        g.fill(x0 + 10, top - 5, x1 - 10, bottom + 4, ((int) (a * 0x88) << 24) | 0x0A0E12);
-        g.fill(x0, top - 3, x1, bottom + 2, ((int) (a * 0x50) << 24) | 0x0A0E12);
-        int lineColor = ((int) (a * 0xB0) << 24) | (e.kind == Notice.Kind.HINT ? 0x8C8CA0 : 0x7FD6D0);
+        g.fill(x0 + 10, top - 5, x1 - 10, bottom + 4, ((int) (a * 0x88) << 24) | 0x0A0E1E);
+        g.fill(x0, top - 3, x1, bottom + 2, ((int) (a * 0x50) << 24) | 0x0A0E1E);
+        int lineColor = ((int) (a * 0xB0) << 24) | (e.kind == Notice.Kind.HINT ? 0x8C8CA0 : 0x8FD0FF);
         g.fill(x0 + 18, top - 5, x1 - 18, top - 4, lineColor);
         g.fill(x0 + 18, bottom + 3, x1 - 18, bottom + 4, lineColor);
         int y = top;
@@ -533,8 +558,8 @@ public final class NoticeClient {
         int y = r.y() + 6;
         float grow = Math.min(1f, e.age() / 350f);
         int half = (int) ((p.textW / 2 + 14) * grow);
-        int lineColor = ((int) (a * 0xB0) << 24) | 0xF2C14E;
-        g.fill(cx - half - 6, y - 6, cx + half + 6, y + p.lines.size() * 11 + 4, ((int) (a * 0x80) << 24) | 0x0A0E12);
+        int lineColor = ((int) (a * 0xB0) << 24) | 0xE9C46A;
+        g.fill(cx - half - 6, y - 6, cx + half + 6, y + p.lines.size() * 11 + 4, ((int) (a * 0x80) << 24) | 0x0A0E1E);
         g.fill(cx - half, y - 4, cx + half, y - 3, lineColor);
         for (FormattedCharSequence l : p.lines) {
             g.drawString(font, l, cx - font.width(l) / 2, y, alphaOf(a) | 0xFFFFFF, true);
@@ -567,7 +592,7 @@ public final class NoticeClient {
         int blockH = (int) (p.lines.size() * 11 * scale);
         // 両側の細い線 (出るときに左右へ伸びる)
         int half = (int) (Math.min(1f, e.age() / 500f) * (blockW / 2 + 24));
-        int lineColor = ((int) (a * 0x90) << 24) | (place ? 0xF2C14E : 0xB8923A);
+        int lineColor = ((int) (a * 0x90) << 24) | (place ? 0xE9C46A : 0xB8923A);
         int ly = y + blockH + 4;
         g.fill(cx - half, ly, cx + half, ly + 1, lineColor);
         g.pose().pushPose();
@@ -587,8 +612,8 @@ public final class NoticeClient {
                 sw = Math.max(sw, font.width(l));
             }
             int bh = p.subLines.size() * 11;
-            g.fill(cx - sw / 2 - 10, sy - 4, cx + sw / 2 + 10, sy + bh + 3, ((int) (a * 0xA0) << 24) | 0x0A0E12);
-            g.fill(cx - sw / 2 - 18, sy - 2, cx + sw / 2 + 18, sy + bh + 1, ((int) (a * 0x60) << 24) | 0x0A0E12);
+            g.fill(cx - sw / 2 - 10, sy - 4, cx + sw / 2 + 10, sy + bh + 3, ((int) (a * 0xA0) << 24) | 0x0A0E1E);
+            g.fill(cx - sw / 2 - 18, sy - 2, cx + sw / 2 + 18, sy + bh + 1, ((int) (a * 0x60) << 24) | 0x0A0E1E);
         }
         for (FormattedCharSequence l : p.subLines) {
             g.drawString(font, l, cx - font.width(l) / 2, sy, alphaOf(a) | 0xFFFFFF, true);
@@ -666,9 +691,9 @@ public final class NoticeClient {
         int y1 = y + CARD_H;
         // 板: 暗い石板 + 金の外枠 + 青緑の内枠 + 四隅の金の L と、上下の辺の中央の菱形
         g.fill(x0, y0, x1, y1, ((int) (a * 0xC0) << 24) | 0x07090C);
-        int gold = ((int) (a * 0xE0) << 24) | 0xF2C14E;
+        int gold = ((int) (a * 0xE0) << 24) | 0xE9C46A;
         int dim = ((int) (a * 0xA0) << 24) | 0xB8923A;
-        int teal = ((int) (a * 0x90) << 24) | 0x2E5552;
+        int teal = ((int) (a * 0x90) << 24) | 0xC9A85C;
         g.fill(x0, y0, x1, y0 + 1, dim);
         g.fill(x0, y1 - 1, x1, y1, dim);
         g.fill(x0, y0, x0 + 1, y1, dim);
@@ -715,7 +740,7 @@ public final class NoticeClient {
                 g.pose().pushPose();
                 g.pose().translate(nx + off * ns, ny + (1f - t) * 6f, 0);
                 g.pose().scale(ns, ns, 1f);
-                g.drawString(font, ch, 0, 0, (Mth.clamp((int) (a * t * 255), 4, 255) << 24) | 0xF2C14E, true);
+                g.drawString(font, ch, 0, 0, (Mth.clamp((int) (a * t * 255), 4, 255) << 24) | 0xE9C46A, true);
                 g.pose().popPose();
             }
             off += font.width(ch);
@@ -725,7 +750,7 @@ public final class NoticeClient {
         // 区切り線: 題名が現れきるころ、中央から左右へ
         float t3 = smooth((age - nameEnd + 300) / 600f);
         int arm = (int) (t3 * (w / 2 - 22));
-        g.fill(cx - arm, y0 + 52, cx + arm, y0 + 53, ((int) (a * 0xC0) << 24) | 0xF2C14E);
+        g.fill(cx - arm, y0 + 52, cx + arm, y0 + 53, ((int) (a * 0xC0) << 24) | 0xE9C46A);
         // 副題
         float t4 = smooth((age - nameEnd - 100) / 700f);
         if (!sub.getString().isEmpty() && t4 > 0f) {
@@ -770,8 +795,8 @@ public final class NoticeClient {
             return;
         }
         float mainScale = p.scale;
-        int textColor = title ? 0xF2C14E : 0xE9E3D4;
-        int lineColor = ((int) (a * 0x90) << 24) | 0xF2C14E;
+        int textColor = title ? 0xE9C46A : 0xE9E3D4;
+        int lineColor = ((int) (a * 0x90) << 24) | 0xE9C46A;
         int half = (int) (Math.min(1f, e.age() / 600f) * ((int) (p.textW * mainScale) / 2 + 30));
         Component sub = e.value.extra();
         int by = y;

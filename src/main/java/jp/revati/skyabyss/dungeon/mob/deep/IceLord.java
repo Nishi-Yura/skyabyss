@@ -26,21 +26,31 @@ import net.minecraft.world.phys.Vec3;
 //   薙ぎ払い  前脚で前の扇を薙ぐ (予告 0.8 秒)
 //   氷柱落とし 立ち上がって吠え、天井から人ごとの足もとと、まわりに氷柱の円 (予告 1.2 秒): 傷 + 鈍足
 //   突進      滑る床を前へまっすぐ突っ込む (予告 1.1 秒、前の帯 13)
+// 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」。骨掘りの大百足と同じ方向):
+//   二連の薙ぎ 右前脚の扇 (0.8 秒) → 体を返して左前脚の扇 (1.3 秒)。寄った人へ
+//   叩きつけ  立ち上がって両前脚を掲げ、床へ叩きつける (予告 1.2 秒)。前へ氷の棘の円が五つ、少しずつ遅れて走る。叩いたあとに隙
+//   登場は雪の床を割って背の氷柱が突き出し、頭が出て唸り、体を引き上げて雪を払い、立ち上がって吠える (intro)。後半も立って吠える (scream)
 public class IceLord extends DungeonBoss {
     static final int SWIPE = 1;
     static final int ICICLES = 2;
     static final int CHARGE = 3;
+    static final int MAUL = 4;
+    static final int SLAM = 5;
     public static final int SWIPE_WARN = 16;
     public static final double SWIPE_RANGE = 6;
     public static final int ICICLE_WARN = 24;
     public static final int CHARGE_WARN = 22;
     public static final double CHARGE_LENGTH = 13;
+    public static final int MAUL_HIT2 = 26;
+    public static final int SLAM_WARN = 24;
+    private int lastMaul = -200;
+    private int lastSlam = -300;
     private int lastIcicles = -200;
     private int lastCharge = -200;
 
     public IceLord(EntityType<? extends Monster> type, Level level) {
         super(type, level, "ice_lord", () -> SoundEvents.POLAR_BEAR_AMBIENT, () -> SoundEvents.POLAR_BEAR_HURT, () -> SoundEvents.POLAR_BEAR_DEATH,
-                "swipe", "roar", "charge", "hurt", "death");
+                "swipe", "maul", "roar", "slam", "charge", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -75,6 +85,7 @@ public class IceLord extends DungeonBoss {
                 spots.add(position().add(Math.cos(a) * (4 + random.nextDouble() * 9), 0, Math.sin(a) * (4 + random.nextDouble() * 9)));
             }
             for (Vec3 s : spots) {
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(server(), "icicle", this, new Vec3(s.x, getY(), s.z), ICICLE_WARN, 12, 14f, 1.4f, 16);
                 Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.5))
                         .floor(getY()).warn(ICICLE_WARN).danger().owner(this).target(target)
                         .victims(this::canHit)
@@ -107,6 +118,39 @@ public class IceLord extends DungeonBoss {
                     .start();
             return;
         }
+        if (distance <= 14 && tickCount - lastSlam > 260) {
+            move = SLAM;
+            lastSlam = tickCount;
+            begin(target, "slam");
+            cue("ice_lord", "slam", SLAM_WARN);
+            Vec3 f = target.position().subtract(position()).multiply(1, 0, 1).normalize();
+            for (int k = 0; k < 5; k++) {
+                Vec3 c = position().add(f.scale(3.0 + k * 2.6));
+                Telegraph.in(server(), TelegraphShape.circle(c.x, c.z, 2.0))
+                        .floor(getY()).warn(SLAM_WARN + k * 3).danger().owner(this).target(target)
+                        .victims(this::canHit)
+                        .onImpact(server -> {
+                            jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "ice_spike", this, new Vec3(c.x, getY(), c.z), random.nextFloat() * 360f, 0.75f, 16);
+                            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PACKED_ICE.defaultBlockState()), c.x, getY() + 0.8, c.z, 24, 0.6, 0.9, 0.6, 0.12);
+                            server.playSound(null, c.x, getY(), c.z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.2f, 0.5f);
+                        })
+                        .onHit((server, player) -> {
+                            player.hurt(attackSource(), damage() * 1.0f);
+                            player.setDeltaMovement(player.getDeltaMovement().add(0, 0.7, 0));
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
+            return;
+        }
+        if (distance <= SWIPE_RANGE && tickCount - lastMaul > 180 && random.nextFloat() < 0.5f) {
+            move = MAUL;
+            lastMaul = tickCount;
+            begin(target, "maul");
+            cue("ice_lord", "maul", MAUL_HIT2);
+            claw(target, SWIPE_WARN);
+            return;
+        }
         if (distance <= SWIPE_RANGE) {
             move = SWIPE;
             begin(target, "swipe");
@@ -118,6 +162,54 @@ public class IceLord extends DungeonBoss {
                     .onHit((server, player) -> player.hurt(attackSource(), damage()))
                     .start();
         }
+    }
+
+    private void claw(LivingEntity target, int warn) {
+        Vec3 f = forward();
+        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWIPE_RANGE, Math.toRadians(110)))
+                .floor(getY()).warn(warn).danger().owner(this).target(target)
+                .victims(this::canHit)
+                .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.85f))
+                .start();
+    }
+
+    @Override
+    protected void during(int tick) {
+        super.during(tick);
+        if (move == MAUL && tick == SWIPE_WARN) {
+            LivingEntity t = getTarget();
+            if (t != null && t.isAlive()) {
+                lockYawToward(t);
+                claw(t, MAUL_HIT2 - SWIPE_WARN);
+            }
+        }
+    }
+
+    // 登場: 雪の床を割って這い出て、立ち上がって吠える (アニメ intro 4.8 秒)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 96;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 64;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "grow";
     }
 
     @Override
@@ -135,13 +227,15 @@ public class IceLord extends DungeonBoss {
         return switch (move) {
             case ICICLES -> ICICLE_WARN + 12;
             case CHARGE -> CHARGE_WARN + 16;
+            case MAUL -> MAUL_HIT2 + 12;
+            case SLAM -> SLAM_WARN + 12 + 14;
             default -> SWIPE_WARN + 10;
         };
     }
 
     @Override
     protected void finish() {
-        if (move == CHARGE) {
+        if (move == CHARGE || move == SLAM) {
             // 突っ込んだあとは滑って止まる (隙)
             opening();
         }

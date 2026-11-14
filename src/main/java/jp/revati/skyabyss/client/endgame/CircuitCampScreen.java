@@ -23,13 +23,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //   板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 景品は 34 角の枠 7 x 2、下の段に今日の残りと「歩き出す」(89)
 public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final int BG = 0x07090E;
-    private static final int PANEL = 0x10131A;
-    private static final int CARD = 0x171B25;
-    private static final int GOLD = 0xF2C14E;
-    private static final int TEAL = 0x7FD6D0;
+    private static final int BG = 0x05070F;
+    private static final int PANEL = 0x0C1022;
+    private static final int CARD = 0x101630;
+    private static final int GOLD = 0xE9C46A;
+    private static final int TEAL = 0x8FD0FF;
     private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x8C98A4;
+    private static final int DIM = 0x9AA4C4;
 
     private static final int W = Golden.L_W;
     private static final int H = Golden.L_H;
@@ -72,7 +72,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
     }
 
     static int tierRgb(ItemStack s) {
-        return s.getItem() instanceof ModGear g ? g.tier().rgb() : 0x8C98A4;
+        return s.getItem() instanceof ModGear g ? g.tier().rgb() : 0x9AA4C4;
     }
 
     static Component time(int seconds) {
@@ -174,7 +174,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
                 argb(1f, view.runsLeft() > 0 ? TEAL : DIM), false);
         // 歩き出す (歩いているあいだは、やめる)
         boolean on = mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H;
-        g.fill(btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, on ? 0xFF2A2618 : 0xFF171B25);
+        g.fill(btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, on ? 0xFF2A2618 : 0xFF101630);
         Golden.outline(g, btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, argb(1f, on ? GOLD : 0x8A6E2C));
         Component b = Component.translatable(view.running() ? "gui.skyabyss.camp.stop" : "gui.skyabyss.camp.start");
         g.drawString(font, b, btnX() + BTN_W / 2 - font.width(b) / 2, Golden.textY(btnY(), BTN_H), argb(1f, GOLD), false);

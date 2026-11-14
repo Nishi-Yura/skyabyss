@@ -54,7 +54,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 public final class FreeQuestSelfTest {
     private static final String ST = NpcSetup.STORYTELLER_ID;
     private static final String WC = NpcSetup.WHALE_CHASER_ID;
-    private static final Set<String> INTROS = Set.of("first", "c_first", "deja_vu", "deja_vu_song", "c_deja");
+    private static final Set<String> INTROS = Set.of("first", "c_first");
     // 四章・五章の板の頼み (余燼の夜回り・熾の鼓動、深淵の見回り・荷)。序章〜一章の頼みの決まり (段階 1 までに開く) の外なので数えず、
     // laterBoard が別に見る: 章の段階で開く・倒す相手が本当に湧く (章の地上のひとり歩き・場所の湧き台・深淵の湧きの表・心臓)
     static final Set<String> LATER_BOARD = Set.of("daily_ash_watch", "weekly_ember_heart", "daily_abyss_rounds", "weekly_abyss_haul");

@@ -28,22 +28,22 @@ public final class DungeonGear {
 
     public static final List<WildGearTypes.Accessory> ROWS = List.of(
             // 骨掘りの顎飾り: 6% で傷 +50%、受ける傷 −3% (体力が半分未満で −6%)
-            row("pit_jaw_pendant", GearTier.RARE, 10, CHEST, fx(WildEffect.Kind.CRIT, 0.06, 0.5), fx(WildEffect.Kind.GRIT, 0.03, 0.06)),
+            row("pit_jaw_pendant", GearTier.RARE, 10, CHEST, fx(WildEffect.Kind.CRIT, 0.06, 0.5), fx(WildEffect.Kind.GRIT, 0.03, 0.06), fx(WildEffect.Kind.BONE_WARD, 2, 100)),
             // 殻負いの螺貝: マナ +10、水の中で息が長い、泳ぎ +20%
-            row("tide_spiral_shell", GearTier.RARE, 16, HIP_R, fx(WildEffect.Kind.MAX_MANA, 10), fx(WildEffect.Kind.BREATH, 1), fx(WildEffect.Kind.SWIM, 0.2)),
+            row("tide_spiral_shell", GearTier.RARE, 16, HIP_R, fx(WildEffect.Kind.MAX_MANA, 10), fx(WildEffect.Kind.BREATH, 1), fx(WildEffect.Kind.SWIM, 0.2), fx(WildEffect.Kind.WET_MANA, 0.3)),
             // 背晶の欠片: 技の待ち −4%、雷の傷 −20%
-            row("storm_crystal_shard", GearTier.EPIC, 22, HIP_L, fx(WildEffect.Kind.COOLDOWN, 0.04), fx(WildEffect.Kind.LIGHTNING_TAKEN, -0.2)),
+            row("storm_crystal_shard", GearTier.EPIC, 22, HIP_L, fx(WildEffect.Kind.COOLDOWN, 0.04), fx(WildEffect.Kind.LIGHTNING_TAKEN, -0.2), fx(WildEffect.Kind.STORM_DAMAGE, 0.12)),
             // 炉の熾: 体力 +24、火の傷 −30%
-            row("mine_forge_ember", GearTier.EPIC, 28, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 2.4), fx(WildEffect.Kind.FIRE_TAKEN, -0.3)),
+            row("mine_forge_ember", GearTier.EPIC, 28, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 2.4), fx(WildEffect.Kind.FIRE_TAKEN, -0.3), fx(WildEffect.Kind.BURNING_RAGE, 0.15)),
             // ---- 奥のダンジョン (55 の 7 章。tools/rough/lowpoly/accessories/deep_trinkets.py)
             // 砦の骨の角笛: 体力 +16、5% で傷 +50%
-            row("fort_bone_horn", GearTier.RARE, 15, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 1.6), fx(WildEffect.Kind.CRIT, 0.05, 0.5)),
+            row("fort_bone_horn", GearTier.RARE, 15, BELT_BACK, fx(WildEffect.Kind.MAX_HEALTH, 1.6), fx(WildEffect.Kind.CRIT, 0.05, 0.5), fx(WildEffect.Kind.HORN, 8, 100, 1200)),
             // 祭司の珊瑚の鈴: マナ +14、技の待ち −3%、水の中で息が長い
-            row("temple_coral_bell", GearTier.EPIC, 21, HIP_R, fx(WildEffect.Kind.MAX_MANA, 14), fx(WildEffect.Kind.COOLDOWN, 0.03), fx(WildEffect.Kind.BREATH, 1)),
+            row("temple_coral_bell", GearTier.EPIC, 21, HIP_R, fx(WildEffect.Kind.MAX_MANA, 14), fx(WildEffect.Kind.COOLDOWN, 0.03), fx(WildEffect.Kind.BREATH, 1), fx(WildEffect.Kind.WATER_REGEN, 1)),
             // 大熊の氷の牙: 7% で傷 +60%、足 +4%
-            row("ice_bear_fang", GearTier.EPIC, 27, CHEST, fx(WildEffect.Kind.CRIT, 0.07, 0.6), fx(WildEffect.Kind.MOVE_SPEED, 0.04)),
+            row("ice_bear_fang", GearTier.EPIC, 27, CHEST, fx(WildEffect.Kind.CRIT, 0.07, 0.6), fx(WildEffect.Kind.MOVE_SPEED, 0.04), fx(WildEffect.Kind.CRIT_SLOW, 40, 1)),
             // 大蛇の熾の鱗: 体力 +30、火のダメージ −40%
-            row("wyrm_ember_scale", GearTier.EPIC, 33, HIP_L, fx(WildEffect.Kind.MAX_HEALTH, 3.0), fx(WildEffect.Kind.FIRE_TAKEN, -0.4)));
+            row("wyrm_ember_scale", GearTier.EPIC, 33, HIP_L, fx(WildEffect.Kind.MAX_HEALTH, 3.0), fx(WildEffect.Kind.FIRE_TAKEN, -0.4), fx(WildEffect.Kind.HURT_IGNITE, 0.25, 4)));
 
     // ダンジョン → 品の id
     static final Map<Dungeon, String> BY_DUNGEON = Map.of(Dungeon.BONE_PIT, "pit_jaw_pendant", Dungeon.TIDE_CAVE, "tide_spiral_shell",
@@ -80,6 +80,21 @@ public final class DungeonGear {
     public static final String GROW_KEY = "skyabyss_trinket_clears";
     public static final int[] GROW_STEPS = {5, 15};
     public static final double[] GROW_SCALE = {1.0, 1.25, 1.5};
+
+    // その装飾品の土地の巨神 (強化・分解の素材。2026-11-10: 由来が「dungeon」で岩鯨の鱗片に落ちていた)
+    public static String originTitan(String id) {
+        for (Map.Entry<Dungeon, String> e : BY_DUNGEON.entrySet()) {
+            if (e.getValue().equals(id)) {
+                return switch (e.getKey().region) {
+                    case jp.revati.skyabyss.world.continent.ContinentMap.TIDE -> "tide_shell";
+                    case jp.revati.skyabyss.world.continent.ContinentMap.STORM -> "thunder_wing";
+                    case jp.revati.skyabyss.world.continent.ContinentMap.EMBER -> "ember";
+                    default -> "stone_whale";
+                };
+            }
+        }
+        return "stone_whale";
+    }
 
     public static boolean isTrinket(Item item) {
         for (Dungeon d : Dungeon.mids()) {
@@ -127,8 +142,11 @@ public final class DungeonGear {
         List<WildEffect.Fx> out = new java.util.ArrayList<>(fx.size());
         for (WildEffect.Fx f : fx) {
             double[] p = f.p().clone();
-            for (int i = 0; i < p.length; i++) {
-                p[i] *= k;
+            // 伸びるのは強さの数だけ (広さ・長さ・待ちは伸ばさない。2026-11-10)
+            for (int i : jp.revati.skyabyss.item.wild.AccessoryRolls.strength(f.kind())) {
+                if (i < p.length) {
+                    p[i] *= k;
+                }
             }
             out.add(new WildEffect.Fx(f.kind(), p));
         }

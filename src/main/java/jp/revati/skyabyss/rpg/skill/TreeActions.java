@@ -186,7 +186,7 @@ final class TreeActions {
         if (target == null) {
             return "message.skyabyss.skill.no_target";
         }
-        float damage = (float) (SkillRules.pierceDamage(rank) * SkillRules.SNARE_MULTIPLIER);
+        float damage = (float) (SkillRules.pierceDamage(rank) * SkillRules.SNARE_MULTIPLIER * SkillRules.bowScale(SkillActions.attackDamage(player)));
         if (SkillActions.hit(player, target, damage, Skill.SNARE_SHOT)) {
             SkillEffects.slow(target, SkillRules.SNARE_SLOW * (SkillActions.isLarge(target) ? 0.5 : 1.0), SkillRules.snareTicks(rank));
         }

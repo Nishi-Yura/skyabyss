@@ -560,7 +560,6 @@ Telegraph.in(level, TelegraphShape.circle(x, z, 4))   // 形
   - 3 以上: 図鑑の装備の確率がすべて 2 倍（ソフト天井）。
   - 5: 図鑑にまだない品を一つ必ず受け取る（ハード天井）。すべて埋まっていれば共鳴の欠片 10 個。
   - 図鑑が埋まるまでは、新しい品の出ない撃破は 4 回までしか続かない。
-- **初回クリア**: 心臓を初めて倒した人は、専用の逸品三つから一つを選べる（`/titanmemory choose`。選ぶまでは `/titanmemory` で再表示）。記憶は戻さない。
 - 天の鍵の欠片の使い道は 14（4 体の欠片で天の鍵になる）。欠片は大事な品として守られる（11）。
 - 心臓を倒すと、岩鯨の呼び笛（巨神での移動）が解放される（09）。
 
@@ -690,7 +689,7 @@ Telegraph.in(level, TelegraphShape.circle(x, z, 4))   // 形
 | `titan reset` | そのグループの試練（順路・心臓の戦い）だけを最初に戻す（7.1 と同じ） |
 | `titan rebuild` | 体と心臓の間を建て直し、進み具合も最初に戻す。天の鍵の欠片を受け取った人の記録は残る |
 
-- 報酬の天井: `/titanmemory`（誰でも）、`/titanmemory choose <装備>`、`/titanmemory claim`、`/skyabyss memory set <人> <0-5>`・`/skyabyss memory clear <人>`（OP）。03 の 2.4。
+- 報酬の天井: `/titanmemory`（誰でも）、`/titanmemory claim`、`/skyabyss memory set <人> <0-5>`・`/skyabyss memory clear <人>`（OP）。03 の 2.4。
 - 空の通過の `/skyabyss pass`・`/skyabyss next` は別の機能。巨神での移動は `/skyabyss travel`（09）。
 
 ### 9.2 自己テスト（`SKYABYSS_SELFTEST`）
@@ -725,3 +724,7 @@ Telegraph.in(level, TelegraphShape.circle(x, z, 4))   // 形
 
 - 00 の 109: 起動時の建設時間（体の中を建てなくなったので仕上げはほぼ無く、残りは体を置く時間。32 の 5.3）。
 - 夜の見直し T5: 背中で経験値の玉を落とさず預かる扱いの追認（01 の「バニラを置き換えない」の例外）。
+
+## 心臓の眼の群れ（四つの心臓すべて）
+
+2026-11-11 の作り込み（ラフ C を四つとも採用）。殻・芯の外の面に大小の目が開き、まわりへ血の筋が走る。正面に大きな一つ目。段が進むほど目が増える（段1: 5、段2: 8、段3: 11）。目はぶつかった面の骨に付くので、殻の板が開けば一緒に動く。目の色は心臓ごと（岩鯨は琥珀、潮殻は青白、雷翼は雷の青、余燼は橙）。入れる道具は `tools/install/install_heart_eyes.py`（元の模型は `tools/sources/heart_eyes_base/` に写してあり、流し直してもかけ重ならない）。ラフは `tools/rough/lowpoly/heart_horror/build.py`。

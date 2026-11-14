@@ -388,6 +388,8 @@ public class ShadowEmbracer extends MoonMob {
         private void toss(ServerLevel sl, LivingEntity tg) {
             if (t == 1) {
                 spot = tg.position();
+                // 技の形: 影の円へ影の塊が弧を描いて落ちる (t 20 で着く)
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "ink_blob", ShadowEmbracer.this, position().add(0, getBbHeight() * 0.8, 0), spot, 19, 12, 5f, 1.4f, 10);
             }
             if (spot != null && t <= 20 && t % 2 == 0) {
                 for (int i = 0; i < 14; i++) {

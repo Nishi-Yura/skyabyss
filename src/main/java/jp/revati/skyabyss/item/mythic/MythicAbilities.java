@@ -63,6 +63,7 @@ import org.joml.Vector3f;
 //   弓使い 巡礼の羽弓「羽の嵐」/ 霞鳥の弓「霞隠れ」/ 側の目の弓「凝視の矢」
 //   暗殺者 巻き戻りの短剣「巻き戻し」/ 灯蛾の短剣「灯の粉」/ 追う印の短剣「追う印」
 //   呪術師 約束の鈴杖「約束」/ 鐘守の鈴杖「沈黙の鐘」/ 合掌の鈴杖「合掌」
+// 形 (2026-11-12): どの能力も、出る瞬間に専用の模型 (prop_my_<名前>) が突き出る・落ちる・飛ぶ (下の「大きな能力の形」)。
 // 目覚め (MythicAwakening): 段 1 から大きな能力の芯の数値に B (1.15、段 3 で 1.30)、段 2 から欠点に D (0.5) を掛ける。
 // 数値はこの class の定数。技からは onSkillCast (SkillManager.cast)・manaScale / cooldownExtra / payWithLife (SkillManager)・
 // noPierce (SkillActions.pierce)・powerScale (SkillEffects.damagePower) を呼ぶ
@@ -260,6 +261,9 @@ public final class MythicAbilities {
         p.setHealth(p.getHealth() - cost);
         p.serverLevel().sendParticles(RED, p.getX(), p.getY() + 1.2, p.getZ(), 12, 0.3, 0.4, 0.3, 0);
         p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.8f, 1.2f);
+        if (propReady(p, "life_lamp", p.serverLevel().getGameTime(), 30)) {
+            prop(p.serverLevel(), p, "life_lamp", ahead(p, 1.0), 1.0f, 20);
+        }
         return true;
     }
 
@@ -280,6 +284,7 @@ public final class MythicAbilities {
                 try {
                     SkillActions.perform(p, skill, rank);
                     level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.getX(), p.getY() + 1, p.getZ(), 20, 0.4, 0.6, 0.4, 0.05);
+                    prop(level, p, "rewind", p.position(), 1.3f, 16);
                     level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.6f, 1.6f);
                 } finally {
                     echoScale = 1;
@@ -298,6 +303,9 @@ public final class MythicAbilities {
                     SkillEffects.later(level, 2 + i, () -> {
                         if (target.isAlive() && target.level() == level) {
                             line(level, p.getEyePosition(), target.position().add(0, target.getBbHeight() * 0.6, 0), ParticleTypes.END_ROD, 6);
+                            Vec3 lift = new Vec3(0, 0.25 * 1.4, 0);
+                            jp.revati.skyabyss.combat.prop.AttackProps.fly(level, "my_feather", p, p.getEyePosition().subtract(lift),
+                                    target.position().add(0, target.getBbHeight() * 0.6, 0).subtract(lift), 3, 1.4f);
                             extra(level, p, target, dmg);
                         }
                     });
@@ -345,6 +353,9 @@ public final class MythicAbilities {
                         }
                         SkillManager.gainMana(keeper, share * 0.5 * B(keeper));
                         line(level, keeper.position().add(0, 1, 0), victim.position().add(0, 1, 0), ParticleTypes.END_ROD, 8);
+                        if (propReady(keeper, "promise", now, 20)) {
+                            prop(level, keeper, "promise", victim.position(), 0.9f, 14);
+                        }
                         break;
                     }
                 }
@@ -389,6 +400,7 @@ public final class MythicAbilities {
                 m *= amount / Math.max(0.01f, amount - (float) s.oath);
                 s.oath = 0;
                 level.sendParticles(GOLD, target.getX(), target.getY(0.6), target.getZ(), 20, 0.4, 0.4, 0.4, 0);
+                prop(level, p, "warden", target.position(), 1.3f, 14);
             }
         } else if (holds(p, TowerGearSetup.SWORD.get())) {
             if (p.getHealth() > p.getMaxHealth() * 0.5f) {
@@ -407,6 +419,9 @@ public final class MythicAbilities {
                 int stacks = melt == null ? 0 : (int) Math.max(0, melt[0] - (now - melt[1]) / MELT_DECAY);
                 MELT.put(target, new long[] {Math.min(MELT_MAX, stacks + 1), now, Math.round(MELT_STEP * B(p) * 10000)});
                 level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 2, 0.3, 0.3, 0.3, 0);
+                if (propReady(p, "melt", now, 20)) {
+                    prop(level, p, "melt", target.position(), 0.8f, 12);
+                }
             }
         } else if (holds(p, TowerGearSetup.HAMMER.get())) {
             if (melee && ++s.pulls >= PULL_EVERY) {
@@ -438,6 +453,9 @@ public final class MythicAbilities {
             }
         } else if (arrowFrom(direct, p, DivineGearSetup.MIST.get())) {
             MISTS.add(new Mist(level, target.position(), p.getUUID(), now + MIST_TICKS));
+            if (propReady(p, "mist", now, 30)) {
+                prop(level, p, "mist", target.position(), 1.0f, 30);
+            }
             level.sendParticles(MIST, target.getX(), target.getY() + 0.5, target.getZ(), 30, 1.2, 0.4, 1.2, 0);
             if (inOwnMist(level, p, now)) {
                 m *= 1 + (MIST_ARROW - 1) * arrowB(direct);
@@ -447,6 +465,9 @@ public final class MythicAbilities {
             s.eyeTarget = target.getId();
             m *= 1 + EYE_STEP * arrowB(direct) * (s.eyeCount - 1);
             level.sendParticles(GOLD, target.getX(), target.getY(0.6), target.getZ(), 2 + s.eyeCount, 0.3, 0.3, 0.3, 0);
+            if (propReady(p, "eye_arrow", now, 10)) {
+                prop(level, p, "eye_arrow", target.position(), 0.6f + 0.1f * s.eyeCount, 12);
+            }
         }
         // ---- 暗殺者
         else if (holds(p, DivineGearSetup.MOTH.get())) {
@@ -458,6 +479,7 @@ public final class MythicAbilities {
                         DUST.remove(target);
                         target.removeEffect(MobEffects.GLOWING);
                         level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10 + dust * 4, 0.3, 0.4, 0.3, 0.15);
+                        prop(level, p, "moth", target.position(), 0.8f + 0.1f * dust, 14);
                     } else {
                         DUST.put(target, 1);
                     }
@@ -474,6 +496,7 @@ public final class MythicAbilities {
                 s.sigil = target.getId();
                 target.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 60, 0, true, false));
                 level.sendParticles(RED, target.getX(), target.getY() + 0.1, target.getZ(), 16, 0.6, 0, 0.6, 0);
+                prop(level, p, "chase_mark", target.position(), 1.0f, 24);
                 marked = target;
             }
             m *= marked == target ? 1 + (SIGIL_ON - 1) * B(p) : 1 - (1 - SIGIL_OFF) * D(p);
@@ -518,6 +541,9 @@ public final class MythicAbilities {
                 inner = false;
             }
             level.sendParticles(VIOLET, p.getX(), p.getY() + 1, p.getZ(), 4, 0.3, 0.4, 0.3, 0);
+            if (propReady(p, "balance", level.getGameTime(), 40)) {
+                prop(level, p, "balance", ahead(p, -1.2), 1.0f, 16);
+            }
         }
     }
 
@@ -546,6 +572,7 @@ public final class MythicAbilities {
                     SkillManager.sync(p);
                     p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0f, 0.6f);
                     p.serverLevel().sendParticles(RED, p.getX(), p.getY() + 1, p.getZ(), 20, 0.4, 0.6, 0.4, 0);
+                    prop(p.serverLevel(), p, "chase_mark", p.position(), 0.8f, 16);
                 }
             }
         }
@@ -594,6 +621,8 @@ public final class MythicAbilities {
                     s.gaze = Math.min(GAZE_MAX, s.gaze + 0.5);
                     if (s.gaze >= 1 && p.tickCount % 20 == 0) {
                         line(level, p.getEyePosition(), seen.position().add(0, seen.getBbHeight() * 0.6, 0), ParticleTypes.WAX_ON, 4 + (int) s.gaze);
+                        // 雲の瞼の眼が、見ている敵の頭の上に開く (段ごとに少し大きく)
+                        prop(level, p, "gaze", seen.position().add(0, seen.getBbHeight() + 0.4, 0), 0.5f + 0.08f * (float) Math.floor(s.gaze), 18);
                     }
                 }
             }
@@ -654,6 +683,12 @@ public final class MythicAbilities {
     static void skyHands(ServerLevel level, ServerPlayer p, Vec3 at, int hands) {
         float dmg = attack(p) * (float) (SKY_HAND * B(p) * hands);
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 6, at.z, 12 * hands, 0.6, 0.8, 0.6, 0.02);
+        // 天の手の形: 溜めた数の手が、相手のまわりへ落ちる
+        for (int i = 0; i < hands; i++) {
+            double a = i * Math.PI * 2 / hands;
+            double r = hands == 1 ? 0 : 1.6;
+            jp.revati.skyabyss.combat.prop.AttackProps.fall(level, "my_sky_hand", p, at.add(Math.cos(a) * r, 0, Math.sin(a) * r), 8, 6, 7f, 1.4f, 10);
+        }
         SkillEffects.later(level, 8, () -> {
             level.sendParticles(ParticleTypes.FLASH, at.x, at.y + 0.5, at.z, 1, 0, 0, 0, 0);
             level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.2, at.z, 10 + hands * 6, 1.4, 0.1, 1.4, 0.05);
@@ -667,6 +702,8 @@ public final class MythicAbilities {
     // 七つ鐘: 大鐘 (まわり 6 に攻撃力の 300%。小さな敵は 2 秒縛り、大きな相手は鈍る)
     static void bigBell(ServerLevel level, ServerPlayer p, LivingEntity at) {
         float dmg = attack(p) * (float) (BELL_MULT * B(p));
+        // 大鐘の形が相手の上から落ちる
+        jp.revati.skyabyss.combat.prop.AttackProps.fall(level, "my_big_bell", p, at.position(), 3, 3, 6f, 2.0f, 14);
         for (int i = 0; i < 36; i++) {
             double a = i / 36.0 * Math.PI * 2;
             level.sendParticles(ParticleTypes.WAX_ON, at.getX() + Math.cos(a) * BELL_RADIUS, at.getY() + 0.3, at.getZ() + Math.sin(a) * BELL_RADIUS, 1, 0, 0, 0, 0);
@@ -699,6 +736,7 @@ public final class MythicAbilities {
             extra(level, p, e, dmg);
         }
         level.sendParticles(VIOLET, p.getX(), p.getY() + 0.2, p.getZ(), 50, PULL_RADIUS * 0.5, 0.1, PULL_RADIUS * 0.5, 0);
+        prop(level, p, "pull", p.position(), (float) (PULL_RADIUS * 0.45), 16);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.6f, 0.5f);
     }
 
@@ -706,6 +744,7 @@ public final class MythicAbilities {
     static void newMoon(ServerLevel level, ServerPlayer p, Vec3 at) {
         float dmg = attack(p) * (float) (MOON_MULT * B(p));
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 7, at.z, 16, 0.3, 0.6, 0.3, 0.01);
+        jp.revati.skyabyss.combat.prop.AttackProps.fall(level, "my_new_moon", p, at, 10, 8, 7f, 1.8f, 10);
         SkillEffects.later(level, 10, () -> {
             level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.5, at.z, 40, MOON_RADIUS * 0.5, 0.3, MOON_RADIUS * 0.5, 0.06);
             level.sendParticles(GOLD, at.x, at.y + 0.3, at.z, 30, MOON_RADIUS * 0.5, 0.1, MOON_RADIUS * 0.5, 0);
@@ -730,6 +769,7 @@ public final class MythicAbilities {
         }
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0f, 1.6f);
         level.sendParticles(GOLD, p.getX(), p.getY() + 0.3, p.getZ(), 30, KEEPER_RADIUS * 0.4, 0.1, KEEPER_RADIUS * 0.4, 0);
+        prop(level, p, "silence", ahead(p, 1.5), 1.3f, 18);
     }
 
     // 合掌: まわり 8 の仲間 (自分も) の体力を 3 割戻し、6 秒 受ける傷 −20%
@@ -749,6 +789,7 @@ public final class MythicAbilities {
             inner = false;
         }
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0f, 1.6f);
+        prop(level, p, "clap", ahead(p, 1.2), 1.2f, 20);
     }
 
     // ---------------------------------------------------------------- 小物
@@ -792,8 +833,35 @@ public final class MythicAbilities {
         return DUST.getOrDefault(e, 0);
     }
 
+    // ---------------------------------------------------------------- 大きな能力の形 (2026-11-12。prop_my_<名前>、tools/gen/mobs/attack_props/build_skill_kit.py)
+    // 続けて起きる能力 (当てるたびの溶け・凝視の段など) は、人と種類ごとに gap tick に一度だけ出す
+    private static final Map<String, Long> PROP_LAST = new HashMap<>();
+
+    static boolean propReady(ServerPlayer p, String kind, long now, int gap) {
+        String key = p.getUUID() + kind;
+        Long last = PROP_LAST.get(key);
+        if (last != null && now - last < gap && now >= last) {
+            return false;
+        }
+        PROP_LAST.put(key, now);
+        return true;
+    }
+
+    // 床から突き出る形
+    static void prop(ServerLevel level, ServerPlayer p, String kind, Vec3 at, float size, int linger) {
+        jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "my_" + kind, p, at, p.getYRot() + 180f, size, linger, 0);
+    }
+
+    // 人の前 (水平) へ d
+    static Vec3 ahead(ServerPlayer p, double d) {
+        Vec3 f = p.getLookAngle().multiply(1, 0, 1);
+        f = f.lengthSqr() < 1e-4 ? new Vec3(0, 0, 1) : f.normalize();
+        return p.position().add(f.scale(d));
+    }
+
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {
+        PROP_LAST.clear();
         STATES.clear();
         MELT.clear();
         DUST.clear();

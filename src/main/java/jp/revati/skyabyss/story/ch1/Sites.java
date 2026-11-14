@@ -160,10 +160,9 @@ public final class Sites {
         int slot = 0;
         box.setItem(slot++, new ItemStack(jp.revati.skyabyss.item.outfit.ConsumableGear.TOWN_BREAD.get(), 1 + level.random.nextInt(2)));
         if (gear) {
-            ItemStack low = switch (level.random.nextInt(4)) {
+            ItemStack low = switch (level.random.nextInt(3)) {
                 case 0 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_LEGGINGS.get());
                 case 1 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_HELMET.get());
-                case 2 -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.GATHER_PICKAXE.get());
                 default -> new ItemStack(jp.revati.skyabyss.item.outfit.OutfitGear.WAYFARER_BOOTS.get());
             };
             box.setItem(slot++, low);

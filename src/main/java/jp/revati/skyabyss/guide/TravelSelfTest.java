@@ -275,7 +275,7 @@ public final class TravelSelfTest {
             check(f, jp.revati.skyabyss.facility.MadeToOrder.find(other) != null, other + " cannot be had in town");
         }
         madeChapter(f, 1, jp.revati.skyabyss.story.ch1.Ch1Prep.MADE);
-        // 序盤の素材 (岩殻片・骨片) は旅嚢の品 (誂えは旅嚢の中の分も払いに使う)。鉄・革・砥石は袋の品ではない
+        // 序盤の素材 (岩殻片・骨片) は旅袋の品 (誂えは旅袋の中の分も払いに使う)。鉄・革・砥石は袋の品ではない
         for (Item mat : List.of(GuideSetup.ROCK_SHELL_SCRAP.get(), GuideSetup.BONE_CHIP.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) != null, mat + " is not a pouch item");
         }

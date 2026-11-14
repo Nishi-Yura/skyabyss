@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.trial.raid.storm;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -262,7 +263,7 @@ public final class ColumnChase extends RaidRoom {
         double az = colZ;
         double ang = aim;
         int gen = generation;
-        Telegraph t = Telegraph.in(level, TelegraphShape.line(ax, az, ang, BEAM_LENGTH, BEAM_HALF))
+        Telegraph t = Telegraph.in(level, TelegraphShape.line(ax, az, ang, BEAM_LENGTH, BEAM_HALF)).prop(PropFx.along("lightning").size(0.6f))
                 .floor(ctx.origin().getY() + 1).warn(WARN).danger()
                 .startSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f, 1.7f)
                 .onImpact(lvl -> {

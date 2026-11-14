@@ -1,0 +1,56 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_ss_wind_rend_fly",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      4.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -10.73,
+        -4.146,
+        -7.718
+       ],
+       "size": [
+        21.459,
+        16.292,
+        7.908
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

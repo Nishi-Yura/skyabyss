@@ -287,7 +287,7 @@ public final class OpeningDirector {
 
     static boolean metIsana(ServerPlayer player) {
         NpcBonds.Bond bond = NpcBonds.of(player).bonds().get(NpcSetup.WHALE_CHASER_ID);
-        return bond != null && (bond.talks() > 0 || bond.flags().contains("met") || bond.echoes().contains("met"));
+        return bond != null && (bond.talks() > 0 || bond.flags().contains("met"));
     }
 
     // メインのクエストの今の段の ID。始まっていなければ空、終わっていれば "done"
@@ -593,6 +593,9 @@ public final class OpeningDirector {
 
         private void giveShadowPage() {
             ItemStack page = LorePageItem.of("shadow");
+            if (player instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+                jp.revati.skyabyss.notice.GainFeed.note(gainTo, page);
+            }
             if (!player.getInventory().add(page)) {
                 player.drop(page, false);
             }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -347,7 +348,7 @@ public class WhaleboneCaptain extends GuardMob {
             }
             boolean first = true;
             for (Vec3 p : spots) {
-                var builder = Telegraph.in(server, TelegraphShape.circle(p.x, p.z, ERUPT_RADIUS))
+                var builder = Telegraph.in(server, TelegraphShape.circle(p.x, p.z, ERUPT_RADIUS)).prop(PropFx.rise("bone_spike"))
                         .floor(p.y).warn(ERUPT_WARN).danger().owner(this)
                         .victims(this::canHit)
                         .onImpact(s -> {
@@ -379,6 +380,7 @@ public class WhaleboneCaptain extends GuardMob {
         if (actionTicks == 1) {
             roared = true;
             lockedYaw = getYRot();
+            // 咆哮は吹き飛ばすだけなので、攻撃の形 (棘の輪) は出さない
             Telegraph.in((ServerLevel) level(), TelegraphShape.circle(getX(), getZ(), ROAR_RADIUS))
                     .floor(floorY()).warn(ROAR_WARN).danger().owner(this)
                     .victims(this::canHit)

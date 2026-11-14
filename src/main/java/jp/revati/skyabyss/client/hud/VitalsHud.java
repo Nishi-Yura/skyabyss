@@ -25,9 +25,9 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 // 設定 styledVitals が false なら何もせずバニラのまま。馬などの乗り物の体力・ジャンプ・経験値はバニラのまま
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class VitalsHud {
-    private static final int EDGE = 0xFF2E5552;
-    private static final int SLAB = 0xD00A0C10;
-    private static final int TROUGH = 0xFF14181E;
+    private static final int EDGE = 0xFF05070F;
+    private static final int SLAB = 0xD00A0E1E;
+    private static final int TROUGH = 0xFF05070F;
 
     private VitalsHud() {
     }
@@ -73,6 +73,10 @@ public final class VitalsHud {
             return;
         }
         event.setCanceled(true);
+        // 場面のあいだは出さない (下の帯と同じ)
+        if (jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+            return;
+        }
         GuiGraphics g = event.getGuiGraphics();
         if (health) {
             drawHealth(g, mc, p);
@@ -80,11 +84,10 @@ public final class VitalsHud {
             drawArmor(g, mc, p);
         } else if (food) {
             // 体力のある乗り物に乗っている間は、バニラが乗り物の体力をここへ描く (満腹は出ない)
+            // おなかは空かない (rpg/NoHunger) ので、満腹度の所はマナの帯。バニラの乗り物の体力が出る間だけバニラに任せる
             if (manaInFoodSlot()) {
                 drawMana(g, mc, p);
-            } else if (!(p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth()) || modVehicle(p)) {
-                drawFood(g, mc, p);
-            } else {
+            } else if (p.getVehicle() instanceof LivingEntity v && v.showVehicleHealth() && !modVehicle(p)) {
                 event.setCanceled(false);
             }
         } else {
@@ -92,8 +95,10 @@ public final class VitalsHud {
         }
     }
 
+    // 置き場: 下の一枚の帯 (BandHud) の中。帯を出していなければバニラの置き場
     private static Rect rect(Id id) {
-        return HudManager.result().vanilla.get(id);
+        Rect band = BandHud.rect(id);
+        return band != null ? band : HudManager.result().vanilla.get(id);
     }
 
     private static void drawHealth(GuiGraphics g, Minecraft mc, Player p) {
@@ -103,7 +108,7 @@ public final class VitalsHud {
         }
         float max = Math.max(1f, p.getMaxHealth());
         float hp = Mth.clamp(p.getHealth(), 0f, max);
-        int color = 0xFFC8505A;
+        int color = 0xFFD45864;
         if (p.hasEffect(MobEffects.POISON)) {
             color = 0xFF8CAA3C;
         } else if (p.hasEffect(MobEffects.WITHER)) {
@@ -121,22 +126,18 @@ public final class VitalsHud {
         String text = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(hp) - 1e-4) + "/" + (int) Math.ceil(jp.revati.skyabyss.Hp.shown(max) - 1e-4);
         bar(g, mc.font, r, HEART, 0xFFE0606C, hp / max, color, text, 0xFFF4EEE6, p.hurtTime > 0 || p.invulnerableTime > 10);
         if (absorb > 0) {
-            // 吸収: 帯の上辺に金の線 (最大の体力に対する割合)。数字は体力の数字の左
-            int inner = r.w() - 2 - 12;
-            int len = Math.max(1, Math.min(inner, Math.round(inner * Math.min(1f, p.getAbsorptionAmount() / max))));
-            g.fill(r.x() + 12 + 1, r.y() + 1, r.x() + 12 + 1 + len, r.y() + 2, 0xFFF2C14E);
-            String ab = "+" + absorb;
-            g.drawString(mc.font, ab, r.x() + r.w() - 3 - mc.font.width(text) - 3 - mc.font.width(ab), r.y() + 1, 0xFFF2C14E, true);
+            // 吸収: 帯のすぐ上の金の細線 (最大の体力に対する割合)。数は出さない (数字が重なって読めなかった。2026-11-11)
+            int len = Math.max(2, Math.min(r.w(), Math.round(r.w() * Math.min(1f, p.getAbsorptionAmount() / max))));
+            g.fill(r.x(), r.y() - 3, r.x() + len, r.y() - 1, 0xFF05070F);
+            g.fill(r.x() + 1, r.y() - 2, r.x() + len - 1, r.y() - 1, 0xFFE9C46A);
         }
     }
-
-    static final boolean NO_FOOD_BAR = true;
 
     // おなかは空かないので、満腹度の場所 (体力の右) にマナの帯を置く (2026-10-23 の試遊)。
     // 体力のある乗り物に乗っている間はバニラが乗り物の体力をここへ描くので、マナは技の枠の上 (SkillHud) に戻す
     public static boolean manaInFoodSlot() {
         Minecraft mc = Minecraft.getInstance();
-        return NO_FOOD_BAR && styled() && rect(Id.V_FOOD) != null
+        return styled() && rect(Id.V_FOOD) != null
                 && (!(mc.player.getVehicle() instanceof LivingEntity v && v.showVehicleHealth()) || modVehicle(mc.player));
     }
 
@@ -169,9 +170,10 @@ public final class VitalsHud {
         }
         int value = Mth.clamp(jp.revati.skyabyss.rpg.client.skill.SkillClient.gaugeValue, 0, k.max);
         boolean full = value >= k.max;
-        int y0 = r.y() - 5;
-        int x0 = r.x() + 12;
-        int w = r.w() - 12 - 1;
+        int[] box = BandHud.gaugeBox(r);
+        int y0 = box[1];
+        int x0 = box[0];
+        int w = box[2];
         int color = k.color;
         if (full) {
             color = scale(color, 0.85f + 0.3f * (float) Math.sin(p.tickCount * 0.5f));
@@ -189,7 +191,7 @@ public final class VitalsHud {
                 int cell = Math.max(1, (w - gap * (k.max - 1)) / k.max);
                 for (int i = 0; i < k.max; i++) {
                     int cx = x0 + i * (cell + gap);
-                    g.fill(cx, y0, Math.min(x0 + w, cx + cell), y0 + 3, i < value ? fc : 0xFF22282F);
+                    g.fill(cx, y0, Math.min(x0 + w, cx + cell), y0 + 3, i < value ? fc : 0xFF1C2444);
                 }
             } else {
                 int fill = Math.round(w * value / (float) k.max);
@@ -198,10 +200,6 @@ public final class VitalsHud {
                 }
             }
         });
-        // 型の名 (左の小さな絵の所)。帯の高さに収まらないので、満ちたときだけ印を描く
-        if (full) {
-            g.fill(r.x() + 3, y0, r.x() + 9, y0 + 3, fc);
-        }
     }
 
     private static void drawArmor(GuiGraphics g, Minecraft mc, Player p) {
@@ -210,30 +208,7 @@ public final class VitalsHud {
         if (armor <= 0 || r == null) {
             return;
         }
-        bar(g, mc.font, r, SHIELD, 0xFFC4D0D8, Math.min(1f, armor / 20f), 0xFF8A9AA6, String.valueOf(armor), 0xFFF4F6F8, false);
-    }
-
-    private static void drawFood(GuiGraphics g, Minecraft mc, Player p) {
-        Rect r = rect(Id.V_FOOD);
-        // おなかは空かない (rpg/NoHunger)。満腹度の帯は出さない
-        if (r == null || NO_FOOD_BAR) {
-            return;
-        }
-        var fd = p.getFoodData();
-        int level = fd.getFoodLevel();
-        int color = p.hasEffect(MobEffects.HUNGER) ? 0xFF7C8A3C : 0xFFD59A3A;
-        if (level <= 6) {
-            float k = 0.7f + 0.3f * (float) Math.sin(p.tickCount * 0.35f);
-            color = scale(color, k);
-        }
-        bar(g, mc.font, r, APPLE, 0xFFE8B04C, level / 20f, color, String.valueOf(level), 0xFFF4EEE6, false);
-        // 隠れた満腹度: 帯の下辺に淡い線
-        float sat = Math.min(level, fd.getSaturationLevel());
-        if (sat > 0f) {
-            int inner = r.w() - 2 - 12;
-            int len = Math.max(1, Math.round(inner * sat / 20f));
-            g.fill(r.x() + 12 + 1, r.bottom() - 2, r.x() + 12 + 1 + len, r.bottom() - 1, 0xCCFFF1C8);
-        }
+        BandHud.armorTab(g, mc.font, r, armor, () -> drawIcon(g, SHIELD, r.x() + 4, r.y() + 3, 0xFFC4D0D8));
     }
 
     private static void drawAir(GuiGraphics g, Minecraft mc, Player p) {
@@ -245,14 +220,14 @@ public final class VitalsHud {
         }
         String text = (int) Math.ceil(air / 20f) + "s";
         int color = air < max / 4 ? 0xFFD66A6A : 0xFF58B4D2;
-        bar(g, mc.font, r, BUBBLE, 0xFFBFE8F4, air / (float) max, color, text, 0xFFF4F6F8, false);
+        BandHud.airTab(g, mc.font, r, air / (float) max, color, text);
     }
 
     // 帯の一本: 暗い石板 + 青緑の縁、左に小さな絵、中に割合の色、右に数字
     private static void bar(GuiGraphics g, Font font, Rect r, String[] icon, int iconColor, float frac, int color, String text, int textColor, boolean flash) {
         // 塗りだけ先に一度に送り、字はそのあと上に (fill ごとに描き出さない。出る絵は同じ)
         g.drawManaged(() -> {
-            g.fill(r.x(), r.y(), r.right(), r.bottom(), flash ? 0xFFE9E3D4 : EDGE);
+            g.fill(r.x(), r.y(), r.right(), r.bottom(), flash ? 0xFFE9E3D4 : 0xFF05070F);
             g.fill(r.x() + 1, r.y() + 1, r.right() - 1, r.bottom() - 1, SLAB);
             drawIcon(g, icon, r.x() + 3, r.y() + (r.h() - icon.length) / 2, iconColor);
             int bx = r.x() + 12;
@@ -265,7 +240,8 @@ public final class VitalsHud {
                 g.fill(bx, r.y() + 1, bx + fill, r.y() + 2, scale(color, 1.25f));
             }
         });
-        g.drawString(font, text, r.right() - 3 - font.width(text), r.y() + 1, textColor, true);
+        // 数は黒の縁取り (どの色の帯の上でも読めるように)
+        BandHud.outlined(g, font, text, r.right() - 3 - font.width(text), r.y() + 1, textColor);
     }
 
     private static int scale(int argb, float k) {
@@ -309,7 +285,5 @@ public final class VitalsHud {
 
     private static final String[] HEART = {".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."};
     private static final String[] SHIELD = {"#######", "#######", "#######", ".#####.", "..###..", "...#..."};
-    private static final String[] APPLE = {"...#...", ".#####.", "#######", "#######", ".#####.", "..#.#.."};
     private static final String[] DROP = {"...#...", "..###..", ".#####.", "#######", "#######", ".#####."};
-    private static final String[] BUBBLE = {".###.", "#...#", "#...#", "#...#", ".###."};
 }

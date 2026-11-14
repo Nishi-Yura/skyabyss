@@ -27,9 +27,9 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 旅嚢のクライアント側 (docs/design/22 の 10 章):
+// 旅袋のクライアント側 (docs/design/22 の 10 章):
 //   キー Y (既定): 長押し (0.2 秒以上) で輪を開き、向きで選んで離すと使う。短く押すと前回の道具をすぐ使う。道具が一つだけなら輪を出さずに使う
-//   キー I (既定): 旅嚢の画面を開く
+//   キー I (既定): 旅袋の画面を開く
 // 使う処理はサーバーが決める (PouchNet.Use → PouchUsable.usePouch。右クリックと同じ中身)。ここは輪の絵と選ぶだけ
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PouchClient {
@@ -132,7 +132,7 @@ public final class PouchClient {
         mc.gui.setOverlayMessage(Component.translatable("skyabyss_pouch.wheel.none"), false);
     }
 
-    // 輪で選んだ道具: 使って、札に置く (自動より優先。旅嚢の画面で右クリックしてはずす)
+    // 輪で選んだ道具: 使って、札に置く (自動より優先。旅袋の画面で右クリックしてはずす)
     static void useFromWheel(ResourceLocation id) {
         QuickCard.pin(id);
         use(id);

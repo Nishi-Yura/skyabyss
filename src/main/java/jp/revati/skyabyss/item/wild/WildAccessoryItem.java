@@ -49,6 +49,12 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
         return row.region();
     }
 
+    // 地下のダンジョンの装飾品は、そのダンジョンの土地の巨神 (強化・分解の素材)
+    @Override
+    public String dungeon() {
+        return "dungeon".equals(row.region()) ? jp.revati.skyabyss.dungeon.DungeonGear.originTitan(row.id()) : WildGear.super.dungeon();
+    }
+
     @Override
     public int wildLevel() {
         return row.level();

@@ -1,0 +1,36 @@
+# 足した部品の確かめ (番人 C 鍵の後光・灯り喰いの主 B 燠の腹)。昼と夜
+world addon_check flat
+size 1280 720
+timeout 1200
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+lowpoly on
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+camera -7.2 -58.5 -6.2 -40 -4
+wait 50
+shot ac_lord_ash_day
+cmd time set 18000
+wait 10
+shot ac_lord_ash_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+cmd time set 6000
+cmd summon skyabyss:heart_warden 0.5 -60 0.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Rotation:[0f,0f],active_effects:[{id:"minecraft:glowing",duration:99999,show_particles:0b}]}
+camera 0.5 -56.5 -8 0 4
+wait 60
+shot ac_warden_day
+camera 0.5 -55 9 180 6
+wait 5
+shot ac_warden_side

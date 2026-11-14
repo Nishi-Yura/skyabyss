@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.foe.ContinentFoe;
@@ -49,7 +50,7 @@ public class DrownedSailor extends ContinentFoe {
         begin(target, "throw");
         Vec3 f = forward();
         double length = Math.min(MAX_RANGE + 1, distance + 3);
-        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), length, HALF_WIDTH))
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), length, HALF_WIDTH)).prop(PropFx.shots("coral_spear", 1))
                 .floor(target.getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(SoundEvents.TRIDENT_RIPTIDE_1.value(), 0.7f, 1.2f)
                 .victims(this::clearShot)

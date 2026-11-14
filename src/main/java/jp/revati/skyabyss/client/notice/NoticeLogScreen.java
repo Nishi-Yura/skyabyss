@@ -19,7 +19,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
     private static final Golden.Box BODY = LAYOUT.body();
     private static final int ROW_H = Golden.ROW;
     private static final int TIME_W = Golden.S34;
-    private static final int EDGE_IN = 0xFF17302F;
+    private static final int EDGE_IN = 0xFF141C3A;
     private static final int TEAL = 0xFF000000 | Golden.TEAL;
     private static final int SOFT = 0xFF000000 | Golden.SOFT;
     private final ScrollPanel list = new ScrollPanel(ROW_H * 3);
@@ -34,10 +34,10 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
 
     private static int colorOf(Notice.Kind kind) {
         return switch (kind) {
-            case NARRATE -> 0xFF7FD6D0;
+            case NARRATE -> 0xFF8FD0FF;
             case HINT -> 0xFFB8B8C8;
-            case LEVEL_UP, GAIN, PLACE, ALERT -> 0xFFF2C14E;
-            default -> 0xFF9FE8FF;
+            case LEVEL_UP, GAIN, PLACE, ALERT -> 0xFFE9C46A;
+            default -> 0xFF8FD0FF;
         };
     }
 
@@ -95,7 +95,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
         List<Row> rows = rows(font, list.width() - TIME_W);
         list.setContentHeight(rows.size() * ROW_H);
         if (rows.isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.notice.log_empty"), BODY.x() + Golden.S8, Golden.textY(BODY.y() + 2, ROW_H), SOFT, false);
+            Golden.empty(g, font, BODY, Component.translatable("gui.skyabyss.notice.log_empty"));
         }
         list.begin(g);
         for (int i = 0; i < rows.size(); i++) {
@@ -109,7 +109,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
             g.drawString(font, r.text(), list.x() + TIME_W, ty, r.color(), false);
         }
         list.end(g);
-        list.drawBar(g, EDGE_IN, 0x887FD6D0);
+        list.drawBar(g, EDGE_IN, 0x888FD0FF);
         Golden.Box foot = LAYOUT.foot();
         g.drawString(font, Component.translatable("gui.skyabyss.notice.log_hint"), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()), 0xFF000000 | Golden.DIM, false);
         fit.end(g);

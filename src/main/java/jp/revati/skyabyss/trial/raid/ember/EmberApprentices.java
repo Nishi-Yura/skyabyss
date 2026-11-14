@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.trial.raid.ember;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -249,7 +250,7 @@ public final class EmberApprentices extends EmberRoom {
                     ServerPlayer p0 = ps.get(k % ps.size());
                     double x = p0.getX();
                     double z = p0.getZ();
-                    Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, 1.8)).floor(fy).warn(MOVE_WARN + 4 * k).danger()
+                    Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, 1.8)).prop(PropFx.toss("fireball").size(0.6f)).floor(fy).warn(MOVE_WARN + 4 * k).danger()
                             .onImpact(l -> l.sendParticles(ParticleTypes.LAVA, x, fy + 0.2, z, 8, 0.6, 0.1, 0.6, 0.1))
                             .onHit((l, p) -> {
                                 if (gen == generation) {
@@ -259,7 +260,7 @@ public final class EmberApprentices extends EmberRoom {
                 }
             }
             case BREATH -> {
-                Telegraph.in(ctx.level(), new TelegraphShape.Cone(m.getX(), m.getZ(), Telegraph.angleOf(d.x, d.z), 9, Math.toRadians(32))).floor(fy)
+                Telegraph.in(ctx.level(), new TelegraphShape.Cone(m.getX(), m.getZ(), Telegraph.angleOf(d.x, d.z), 9, Math.toRadians(32))).prop(PropFx.shots("fireball", 3).size(0.6f)).floor(fy)
                         .warn(MOVE_WARN + 8).danger()
                         .onImpact(l -> l.playSound(null, m.blockPosition(), SoundEvents.BLAZE_BURN, SoundSource.HOSTILE, 1.2f, 0.6f))
                         .onHit((l, p) -> {
@@ -272,7 +273,7 @@ public final class EmberApprentices extends EmberRoom {
             default -> {
                 double x = m.getX();
                 double z = m.getZ();
-                Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, 4.5)).floor(fy).warn(MOVE_WARN + 4).danger()
+                Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, 4.5)).prop(PropFx.rise("lava_pillar")).floor(fy).warn(MOVE_WARN + 4).danger()
                         .onImpact(l -> {
                             l.playSound(null, m.blockPosition(), SoundEvents.LAVA_EXTINGUISH, SoundSource.HOSTILE, 1.4f, 0.6f);
                             l.sendParticles(ParticleTypes.CLOUD, x, fy + 0.3, z, 30, 2.0, 0.1, 2.0, 0.05);

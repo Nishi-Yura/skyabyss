@@ -32,9 +32,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // Esc で旅の記録へ戻る。中身は開いたときにサーバーへ頼む (Request → Snapshot)。
 // 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 敵の並びは脇の列 (左)、頁は主の列 (右)、下の段に動かし方
 public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int BG = 0x07090E;
-    private static final int GOLD = 0xF2C14E;
-    private static final int TEAL = 0x7FD6D0;
+    private static final int BG = 0x05070F;
+    private static final int GOLD = 0xE9C46A;
+    private static final int TEAL = 0x8FD0FF;
     private static final int TEXT = 0xE6E8EE;
     private static final int DIM = jp.revati.skyabyss.client.ui.Golden.SOFT;
     private static final int FAINT = jp.revati.skyabyss.client.ui.Golden.DIM;

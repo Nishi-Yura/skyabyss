@@ -19,14 +19,12 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.party.PartyData;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.story.ch1.Tasks;
-import jp.revati.skyabyss.titan.StoneWhaleEntity;
 import jp.revati.skyabyss.titan.TitanWorldData;
 import jp.revati.skyabyss.titan.WhaleKeeper;
 import jp.revati.skyabyss.titan.ember.EmberKeeper;
 import jp.revati.skyabyss.titan.ember.EmberTitanEntity;
 import jp.revati.skyabyss.titan.storm.StormKeeper;
 import jp.revati.skyabyss.titan.storm.StormPerch;
-import jp.revati.skyabyss.titan.storm.StormWingEntity;
 import jp.revati.skyabyss.titan.tide.TideKeeper;
 import jp.revati.skyabyss.titan.tide.TideOcean;
 import jp.revati.skyabyss.titan.tide.TideShellEntity;
@@ -275,7 +273,6 @@ public final class TitanEnd {
                 jp.revati.skyabyss.titan.TitanTravel.takeBoardedFrom(p);
                 arrivalEffects(server.overworld(), titan, p.position());
                 Notice.narrate(p, "message.skyabyss.titan_end.back_to_shrine");
-                jp.revati.skyabyss.loot.reward.HeartReward.scheduleOpen(p, titan, jp.revati.skyabyss.loot.reward.HeartReward.OPEN_AFTER_CARRY, true);
                 n++;
                 continue;
             }
@@ -327,8 +324,6 @@ public final class TitanEnd {
                 Notice.narrate(player, "message.skyabyss.titan_end.again." + titan);
             }
         });
-        // 場面のない降ろし (二回目から・始められなかった) では、少しあとに遺物の選択画面。場面があるときは、場面の終わりに開く (HeartReward.register)
-        jp.revati.skyabyss.loot.reward.HeartReward.scheduleOpen(player, titan, jp.revati.skyabyss.loot.reward.HeartReward.OPEN_AFTER_CARRY, true);
     }
 
     // 巨神が吐く息: 降ろされた所の粒と音 (巨神ごと)

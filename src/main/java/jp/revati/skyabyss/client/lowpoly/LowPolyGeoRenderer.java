@@ -59,10 +59,58 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         return true;
     }
 
+    // 描く大きさ (withScale の高さの倍率)。ボスの顔のアップ (client/titan/BossCloseUp) が見た目の顔の高さを求めるのに使う
+    public float visualScale() {
+        return scaleHeight;
+    }
+
+    // 今の主の低ポリのメッシュ (無ければ null)
+    @Nullable
+    public LowPolyMesh meshOf(T entity) {
+        return LowPolyMeshes.get(meshName.apply(entity));
+    }
+
+    private static final java.util.Map<LowPolyMesh, Float> TOPS = new java.util.WeakHashMap<>();
+
+    // 模型のいちばん高い点 (ブロック単位、足もとから)
+    static float meshTop(LowPolyMesh mesh) {
+        return TOPS.computeIfAbsent(mesh, m -> {
+            float top = 0f;
+            for (LowPolyMesh.Bone b : m.bones.values()) {
+                for (int i = 1; i < b.pos.length; i += 3) {
+                    top = Math.max(top, b.pos[i]);
+                }
+            }
+            return top;
+        });
+    }
+
     // 体の大きさの属性 (Attributes.SCALE。深みの王など) を、模型にもかける
     @Override
     public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         float s = entity instanceof net.minecraft.world.entity.LivingEntity le ? le.getScale() : 1f;
+        // 地の中から這い出る間 (combat/BossEmerge): 床の下へ沈め、主ごとに回す・前のめりにする
+        // 呼ぶ側が先に縮めていることがある (層の主・王の作りの大きさを戻す BossRender.undoAuthorScale)。沈める深さは世界のブロックで、
+        // 描く模型の高さ (当たりの箱より大きく描く主が多い) と当たりの箱の高い方
+        float outer = poseStack.last().pose().getScale(new org.joml.Vector3f()).y;
+        float[] em = null;
+        if (jp.revati.skyabyss.client.titan.BossEmergeClient.active(entity)) {
+            LowPolyMesh mesh = meshOf(entity);
+            float h = Math.max(entity.getBbHeight(), mesh == null ? 0f : meshTop(mesh) * scaleHeight * s * outer);
+            em = jp.revati.skyabyss.client.titan.BossEmergeClient.pose(entity, h);
+        }
+        if (em != null) {
+            float yaw = entity instanceof net.minecraft.world.entity.LivingEntity l2 ? net.minecraft.util.Mth.rotLerp(partialTick, l2.yBodyRotO, l2.yBodyRot) : entity.getYRot();
+            poseStack.pushPose();
+            poseStack.translate(0, -em[0] / Math.max(1e-3f, outer), 0);
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-yaw + em[1]));
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-em[2]));
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(yaw));
+            poseStack.scale(s * em[3], s * em[4], s * em[3]);
+            super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            poseStack.popPose();
+            return;
+        }
         if (s == 1f) {
             super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             return;
@@ -116,10 +164,25 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     // 深淵の心臓は暗い紫に染める (docs/design/31 の B04。心臓四体はどれもこの描画を通る)
     @Override
     public software.bernie.geckolib.util.Color getRenderColor(T animatable, float partialTick, int packedLight) {
-        if (animatable instanceof jp.revati.skyabyss.entity.HeartBoss heart && heart.isAbyss()) {
-            return software.bernie.geckolib.util.Color.ofRGB(112, 88, 148);
+        software.bernie.geckolib.util.Color base = animatable instanceof jp.revati.skyabyss.entity.HeartBoss heart && heart.isAbyss()
+                ? software.bernie.geckolib.util.Color.ofRGB(112, 88, 148) : super.getRenderColor(animatable, partialTick, packedLight);
+        return heated(animatable, partialTick, base);
+    }
+
+    // 燃えている敵は体が熱で橙に脈打つ (バニラの炎の板の代わり。client/hud/FoeStatusClient)。ほかの色の掛け算に重ねる
+    public static software.bernie.geckolib.util.Color heated(Entity e, float partialTick, software.bernie.geckolib.util.Color base) {
+        if (!(e instanceof net.minecraft.world.entity.LivingEntity le) || !jp.revati.skyabyss.client.hud.FoeStatusClient.isFoe(e)) {
+            return base;
         }
-        return super.getRenderColor(animatable, partialTick, packedLight);
+        int h = jp.revati.skyabyss.client.hud.FoeStatusClient.heat(le, partialTick);
+        if (h == 0xFFFFFFFF) {
+            return base;
+        }
+        int c = base.argbInt();
+        int r = ((c >> 16) & 255) * ((h >> 16) & 255) / 255;
+        int g = ((c >> 8) & 255) * ((h >> 8) & 255) / 255;
+        int b = (c & 255) * (h & 255) / 255;
+        return software.bernie.geckolib.util.Color.ofARGB((c >>> 24) & 255, r, g, b);
     }
 
     @Override
@@ -170,6 +233,15 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
             this.enabled = enabled;
         }
 
+        // GeckoLib の AutoGlowingTexture は使わない (元の絵の光る画素を透明にするため)。光る画素だけの別の絵を、光る描き方で重ねる (LowPolyGlowTexture)
+        @Override
+        protected RenderType getRenderType(T animatable, @Nullable MultiBufferSource bufferSource) {
+            ResourceLocation tex = getTextureResource(animatable);
+            ResourceLocation maskLoc = MASK_OF.computeIfAbsent(tex, t -> t.withPath(p -> p.endsWith(".png") ? p.substring(0, p.length() - 4) + "_glowmask.png" : p));
+            ResourceLocation glow = LowPolyGlowTexture.of(tex, maskLoc);
+            return glow == null ? null : RenderType.entityTranslucentEmissive(glow);
+        }
+
         @Override
         public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, @Nullable RenderType renderType, MultiBufferSource bufferSource,
                            @Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
@@ -188,9 +260,7 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
                 try {
                     // 眠る巨神 (DormantTitan) は、光が揺らぎながら消える
                     float factor = animatable instanceof jp.revati.skyabyss.titan.end.DormantTitan d ? d.glowFactor(partialTick) : 1f;
-                    if (factor >= 0.999f) {
-                        super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
-                    } else if (factor > 0.003f) {
+                    if (factor > 0.003f) {
                         RenderType glow = getRenderType(animatable, bufferSource);
                         if (glow != null) {
                             int v = net.minecraft.util.Mth.clamp(Math.round(factor * 255f), 0, 255);

@@ -63,7 +63,7 @@ public final class SkillClient {
                         .withColor(0xF2D78A));
                 // 書き換えで何が変わるか (効く条件のような当たり前の説明は書かない。2026-11-10 の声「雰囲気壊しちゃう」)
                 event.getToolTip().add(net.minecraft.network.chat.Component.literal("  ").append(net.minecraft.network.chat.Component.translatable(r.effectKey()))
-                        .withColor(0xE6E2D6));
+                        .withColor(0xECE8DC));
                 return;
             }
         }

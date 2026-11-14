@@ -1,0 +1,50 @@
+# 技の形 (combat/prop): 床から突き出る・空から落ちる・飛ぶ姿を並べて撮る
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/attack_props.txt -PshotsName=attack_props
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+hud off
+lowpoly on
+fov 60
+cmd kill @e[type=!minecraft:player,distance=..80]
+camera minecraft:overworld 0 -55 22 180 14
+waitchunks
+wait 40
+cmd skyabyss dev prop bone_spike rise -12 -60 0
+cmd skyabyss dev prop tentacle rise -8 -60 0
+cmd skyabyss dev prop crystal_spike rise -4 -60 0
+cmd skyabyss dev prop lava_pillar rise 0 -60 0
+cmd skyabyss dev prop ice_spike rise 4 -60 0
+cmd skyabyss dev prop water_spout rise 8 -60 0
+cmd skyabyss dev prop shell_spike rise 12 -60 0
+cmd skyabyss dev prop lightning rise 0 -60 -8
+wait 2
+shot props_rise_mid
+wait 20
+shot props_rise
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd skyabyss dev prop rock fall -9 -60 0 40
+cmd skyabyss dev prop icicle fall -3 -60 0 40
+cmd skyabyss dev prop fireball fall 3 -60 0 40
+cmd skyabyss dev prop pearl fall 9 -60 0 40
+wait 34
+shot props_falling
+wait 20
+shot props_landed
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd skyabyss dev prop bone_shard toss -12 -57 -4 12 -60 -4 60
+cmd skyabyss dev prop ink_blob toss -12 -57 0 12 -60 0 60
+cmd skyabyss dev prop coral_spear toss -12 -57 4 12 -60 4 60
+cmd skyabyss dev prop ash_ball toss -12 -57 8 12 -60 8 60
+wait 40
+shot props_toss

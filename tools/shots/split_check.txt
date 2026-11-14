@@ -1,0 +1,182 @@
+# 光る所・透明の確かめ (2026-11-11): 夜に、層の主・王・番人・心臓を正面から
+world split_check flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set 6000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+hud off
+lowpoly on
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_rib 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_rib_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_rib 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_rib_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_salt 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_salt_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_salt 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_salt_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_storm 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_storm_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_storm 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_storm_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_ash_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss lord_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_lord_ash_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_bone 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_bone_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_bone 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_bone_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_salt 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_salt_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_salt 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_salt_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_storm 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_storm_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_storm 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_storm_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_ash_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_ash 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_ash_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 6000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_shadow 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_shadow_day
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+cmd time set 18000
+camera 0.5 -59 9.5 180 -6
+wait 10
+cmd skyabyss abyss boss king_shadow 0 - 40 9
+camera 7.2 -58.5 7.2 135 -4
+wait 50
+shot sc_king_shadow_night
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20

@@ -1,0 +1,36 @@
+# 下の一枚の帯 (client/hud/BandHud) の確かめ。bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/band_hud.txt -PshotsName=band_hud
+world band_hud flat
+size 1920 1080
+timeout 900
+render 6
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 32
+cmd skyabyss job choose mage
+cmd give @s skyabyss:storm_staff
+cmd give @s skyabyss:dried_fish 12
+cmd give @s skyabyss:antidote 3
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 1500
+shot band_g4
+cmd effect give @s minecraft:absorption 60 1 true
+cmd effect give @s minecraft:poison 20 0 true
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s weapon.offhand with skyabyss:dried_fish 2
+wait 30
+shot band_g4_states
+guiscale 3
+window 1280 720
+wait 10
+shot band_1280_g3
+guiscale 2
+window 1920 1080
+wait 10
+shot band_g2

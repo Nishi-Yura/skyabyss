@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.trial.raid.ember;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,7 +134,7 @@ abstract class EmberRoom extends RaidRoom {
     // 赤だけの予告の円。warn tick のあと、円の中の人へ onHit。リセットをまたいだら黙って捨てる
     void redCircle(RaidCtx ctx, double x, double z, double r, int warn, Telegraph.Hit hit) {
         final int gen = generation;
-        Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, r)).floor(ctx.origin().getY() + 1).warn(warn).danger()
+        Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, r)).prop(PropFx.rise("lava_pillar").size(0.8f)).floor(ctx.origin().getY() + 1).warn(warn).danger()
                 .onHit((lvl, p) -> {
                     if (gen == generation) {
                         hit.hit(lvl, p);

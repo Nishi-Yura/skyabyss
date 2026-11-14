@@ -1,0 +1,88 @@
+# 装飾品の作り直し (2026-11-12、案 A 細工) を、体に付けた姿 (前から) と手に持った姿で撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/accessories_v3.txt -PshotsName=accessories_v3
+world shots flat
+size 1280 720
+timeout 1800
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+waitchunks
+cmd skyabyss cinematic stop
+hud off
+wait 300
+cmd skyabyss cinematic stop
+chat clear
+accequip
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_charm
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot storm_charm_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_mantle
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot ember_mantle_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:resonance_charm
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot resonance_charm_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:stone_whale_plating
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot stone_whale_plating_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot moontide_pearl_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_wolf_tooth_necklace
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot wild_wolf_tooth_necklace_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_weave_bracelet
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot wild_weave_bracelet_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_crab_backplate
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot wild_crab_backplate_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ramhorn_bugle
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot wild_ramhorn_bugle_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_anklet
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot storm_anklet_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:pit_jaw_pendant
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot pit_jaw_pendant_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:ice_bear_fang
+perspective front
+bodyyaw 25
+wait 10
+chat clear
+shot ice_bear_fang_tp

@@ -49,6 +49,8 @@ public final class MiniDungeons {
     public static final String BOSS_TAG = "skyabyss_mini_boss";
     // 前の版の地下を埋めた印 (SiteData の要素の extra)
     static final String SEALED = "mini_sealed_v1";
+    // 埋めた地下を地形へ戻した印 (2026-11-12 の声「跡地の門の元々のやつ、いらない」。斜面では埋めた部屋と階段が石レンガの箱として地上へ突き出ていた)
+    static final String GROUND = "mini_ground_v1";
     static final int CHECK_EVERY = 100;
     static final double NEAR = 64;
 
@@ -271,7 +273,13 @@ public final class MiniDungeons {
                 if (gate == null || !over.isLoaded(gate) || players.stream().noneMatch(p -> p.distanceToSqr(Vec3.atCenterOf(gate)) < NEAR * NEAR)) {
                     continue;
                 }
-                if (e.extra(SEALED) == null && !tower(d)) {
+                if (!tower(d) && jp.revati.skyabyss.world.continent.ContinentLairs.continent(over)) {
+                    if (e.extra(GROUND) == null && restore(over, e, d) >= 0) {
+                        e.extra(GROUND, BlockPos.ZERO);
+                        e.extra(SEALED, BlockPos.ZERO);
+                        dirty = true;
+                    }
+                } else if (e.extra(SEALED) == null && !tower(d)) {
                     seal(over, e, d);
                     e.extra(SEALED, BlockPos.ZERO);
                     dirty = true;
@@ -333,6 +341,66 @@ public final class MiniDungeons {
             }
         }
         SkyAbyss.LOGGER.info("Mini dungeon {}: sealed the old underground of the site at {} ({} cells)", d.id, e.pos.toShortString(), n);
+        return n;
+    }
+
+    // 大陸の世界: 前の版の地下 (部品の y <= -1 の全部。部屋・階段・壁・埋めた石) を、生まれたままの地形に置き直す。
+    // 均した台 (部品の範囲 + 輪) の下は台の高さを上面にした土と石、外は大陸の地面 (地面より上は空気か水)。出口の縦穴の埋め石も。
+    // 置き直した数。辺りのチャンクがまだなければ -1 (何もしない)
+    public static int restore(ServerLevel over, SiteData.Entry e, Dungeon d) {
+        Blueprint bp = Blueprint.get(e.blueprint.isEmpty() ? d.id : e.blueprint);
+        if (bp == null) {
+            return 0;
+        }
+        int rot = SiteFinder.rot(e.yaw);
+        boolean mirror = SiteFinder.mirror(e.yaw);
+        int pad = e.pos.getY() - 1;
+        Map<BlockPos, Integer> tops = new HashMap<>();
+        for (Blueprint.Cell c : bp.cells) {
+            if (c.y() > -1) {
+                continue;
+            }
+            BlockPos at = Blueprint.transform(c.x(), c.y(), c.z(), rot, mirror, e.pos);
+            if (!over.isLoaded(at)) {
+                return -1;
+            }
+            boolean inPad = c.x() >= bp.rx0 - bp.ring && c.x() <= bp.rx1 + bp.ring && c.z() >= bp.rz0 - bp.ring && c.z() <= bp.rz1 + bp.ring;
+            tops.put(at, inPad ? Math.max(pad, jp.revati.skyabyss.world.continent.ContinentMap.get().surface(at.getX(), at.getZ())) : Integer.MIN_VALUE);
+        }
+        BlockState fill = plug(d);
+        int[] exit = bp.marks.get("exit");
+        if (exit != null) {
+            BlockPos base = Blueprint.transform(exit[0], exit[1], exit[2], rot, mirror, e.pos);
+            for (int i = 0; i < 18; i++) {
+                BlockPos q = base.above(i);
+                if (over.isLoaded(q) && over.getBlockState(q).is(fill.getBlock())) {
+                    tops.putIfAbsent(q, Integer.MIN_VALUE);
+                }
+            }
+        }
+        int n = 0;
+        for (Map.Entry<BlockPos, Integer> t : tops.entrySet()) {
+            BlockPos at = t.getKey();
+            int top = t.getValue() == Integer.MIN_VALUE ? jp.revati.skyabyss.world.continent.ContinentMap.get().surface(at.getX(), at.getZ()) : t.getValue();
+            BlockState want = jp.revati.skyabyss.world.continent.ContinentChunkGenerator.naturalAt(at.getX(), at.getY(), at.getZ(), top);
+            BlockState now = over.getBlockState(at);
+            if (now.equals(want)) {
+                continue;
+            }
+            // 地上の部品 (y >= 0) の下の空き (地面より上でも) は残す: 建物が浮かないよう、台の外でも上に部品のある所は土で支える
+            if (want.isAir() || !want.getFluidState().isEmpty()) {
+                BlockState above = over.getBlockState(at.above());
+                if (!above.isAir() && above.getFluidState().isEmpty() && !tops.containsKey(at.above()) && at.getY() == e.pos.getY() - 1) {
+                    want = jp.revati.skyabyss.world.continent.ContinentChunkGenerator.naturalAt(at.getX(), at.getY(), at.getZ(), at.getY());
+                }
+            }
+            if (now.hasBlockEntity()) {
+                over.removeBlockEntity(at);
+            }
+            over.setBlock(at, want, 2 | 16);
+            n++;
+        }
+        SkyAbyss.LOGGER.info("Mini dungeon {}: put the old underground of the site at {} back to the land ({} of {} cells)", d.id, e.pos.toShortString(), n, tops.size());
         return n;
     }
 

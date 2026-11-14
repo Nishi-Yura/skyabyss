@@ -193,24 +193,25 @@ public final class RpgRulesSelfTest {
             if (click(p, log) || p.getInventory().countItem(Items.OAK_LOG) != 0) {
                 f.add("a log was still gatherable with an axe");
             }
-            // 鉄鉱石: 斧はだめ、石のつるはしなら
-            click(p, ore);
-            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) != 0) {
-                f.add("iron ore gave raw iron by hand");
-            }
+            // 鉄鉱石: 道具があっても採れない (2026-11-12 に鉱石の採集をやめた)
             p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STONE_PICKAXE));
             click(p, ore);
-            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) < 1 || !level.getBlockState(ore).is(Blocks.IRON_ORE)) {
-                f.add("iron ore with a stone pickaxe: raw iron " + p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) + ", block " + level.getBlockState(ore));
+            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) != 0 || !level.getBlockState(ore).is(Blocks.IRON_ORE)) {
+                f.add("iron ore was still gatherable");
             }
-            // すぐ二度目は採れない
-            int lumps = p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get());
-            click(p, ore);
-            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.IRON_LUMP.get()) != lumps) {
-                f.add("the ore regrow wait did not hold");
+            // 実った麦は素手で採れ、すぐ二度目は採れない
+            BlockPos crop = c.north(2);
+            level.setBlockAndUpdate(crop.below(), Blocks.FARMLAND.defaultBlockState());
+            level.setBlockAndUpdate(crop, ((net.minecraft.world.level.block.CropBlock) Blocks.WHEAT).getStateForAge(7));
+            p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            click(p, crop);
+            int sheaves = p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.WHEAT_SHEAF.get());
+            if (sheaves < 1) {
+                f.add("ripe wheat was not gathered by hand");
             }
-            if (p.getMainHandItem().getDamageValue() != 0) {
-                f.add("gathering wore the pickaxe");
+            click(p, crop);
+            if (p.getInventory().countItem(jp.revati.skyabyss.item.outfit.MaterialGear.WHEAT_SHEAF.get()) != sheaves) {
+                f.add("the crop regrow wait did not hold");
             }
             // 作った物は採れない
             if (click(p, plank) || p.getInventory().countItem(Items.OAK_PLANKS) != 0) {
@@ -244,7 +245,7 @@ public final class RpgRulesSelfTest {
             }
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST rpg rules PASSED (shared chests: each person takes a copy with a personal 20-min wait, empty chests stay plain; rules registered, keep on death by default, no experience orbs from slain foes, log/ore gathering with tool check and regrow, no gathering of crafted blocks, bucket fill keeps the source, fake players left alone)");
+            SkyAbyss.LOGGER.info("SELFTEST rpg rules PASSED (shared chests: each person takes a copy with a personal 20-min wait, empty chests stay plain; rules registered, keep on death by default, no experience orbs from slain foes, crop gathering by hand with regrow, no logs or ores, no gathering of crafted blocks, bucket fill keeps the source, fake players left alone)");
         } else {
             for (String s : f) {
                 SkyAbyss.LOGGER.error("SELFTEST rpg rules FAILED: {}", s);

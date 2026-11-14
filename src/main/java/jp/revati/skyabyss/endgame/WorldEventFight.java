@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.endgame;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -301,7 +302,7 @@ public final class WorldEventFight {
                         Vec3 a0 = c.add(side.scale(gap + half * 1.5));
                         double len = 14;
                         double angle = Telegraph.angleOf(side.scale(half));
-                        Telegraph.in(level, TelegraphShape.line(a0.x, a0.z, angle, len, 1.4))
+                        Telegraph.in(level, TelegraphShape.line(a0.x, a0.z, angle, len, 1.4)).prop(PropFx.along("water_spout").size(0.6f))
                                 .floor(y).warn(30 + k * 12).danger().owner(boss).target(t)
                                 .onImpact(server -> server.sendParticles(ParticleTypes.SPLASH, a0.x, y + 0.5, a0.z, 30, 3, 0.3, 3, 0.2))
                                 .onHit((server, player) -> {
@@ -317,7 +318,7 @@ public final class WorldEventFight {
                 for (ServerPlayer p : people) {
                     for (int k = 0; k < 2; k++) {
                         Vec3 at = p.position().add((level.random.nextDouble() - 0.5) * 3, 0, (level.random.nextDouble() - 0.5) * 3);
-                        Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.4))
+                        Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.4)).prop(PropFx.rise("lightning"))
                                 .floor(y).warn(26 + k * 16).danger().owner(boss).target(p)
                                 .onImpact(server -> {
                                     net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(server);
@@ -334,7 +335,7 @@ public final class WorldEventFight {
             }
             case ContinentMap.EMBER -> {
                 // 噴き上げ: 大いなるもののまわりの輪 (内は安全) と、人ごとの火の柱
-                Telegraph.in(level, TelegraphShape.ring(boss.getX(), boss.getZ(), 4, 12))
+                Telegraph.in(level, TelegraphShape.ring(boss.getX(), boss.getZ(), 4, 12)).prop(PropFx.ring("lava_pillar", 12))
                         .floor(y).warn(34).danger().owner(boss)
                         .onImpact(server -> server.sendParticles(ParticleTypes.LAVA, boss.getX(), y + 0.5, boss.getZ(), 60, 6, 0.4, 6, 0.1))
                         .onHit((server, player) -> {
@@ -344,7 +345,7 @@ public final class WorldEventFight {
                         .start();
                 for (ServerPlayer p : people) {
                     Vec3 at = p.position();
-                    Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.2))
+                    Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.2)).prop(PropFx.rise("lava_pillar"))
                             .floor(y).warn(46).danger().owner(boss).target(p)
                             .onImpact(server -> server.sendParticles(ParticleTypes.FLAME, at.x, y + 1, at.z, 40, 0.6, 1.5, 0.6, 0.05))
                             .onHit((server, player) -> {
@@ -369,7 +370,7 @@ public final class WorldEventFight {
                 int k = 0;
                 for (Vec3 s : spots) {
                     int warn = 30 + (k++ % 3) * 8;
-                    Telegraph.in(level, TelegraphShape.circle(s.x, s.z, 2.6))
+                    Telegraph.in(level, TelegraphShape.circle(s.x, s.z, 2.6)).prop(PropFx.fall("rock"))
                             .floor(y).warn(warn).danger().owner(boss)
                             .onImpact(server -> {
                                 server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), s.x, y + 4, s.z, 40, 1.0, 1.5, 1.0, 0.1);

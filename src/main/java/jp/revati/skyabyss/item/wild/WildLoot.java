@@ -30,7 +30,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 // 野の装備の落とし物 (docs/design/51 の 3 章)。敵を倒したとき、倒した人と、そばにいる同じ組の人ごとに抽選し、当たった品をその人に直接渡す
-// (旅嚢か持ち物。入らなければ足もとに、その人だけが拾える)。ほかの人の当たりで自分の確率は減らない。
+// (旅袋か持ち物。入らなければ足もとに、その人だけが拾える)。ほかの人の当たりで自分の確率は減らない。
 //  - 土地の敵 (大陸): 土地ごとの帯と階級の確率 (REGIONS)
 //  - 名のある強敵・主 (層の主・月の区画の主・雲の島の主。BossFooting.planted): 人ごとに初めて倒したとき帯のレアかエピックを必ず、二度目から 12%。ヒロイックは 3%
 //  - 深淵: 骨と塩の層 = 帯 IV、雷と灰の層と深み = 帯 V。月 = 帯 V と Lv 48 のヒロイック。雲海 = 帯 V と Lv 50 のヒロイック
@@ -214,7 +214,7 @@ public final class WildLoot {
         return id == null || id.isEmpty() ? null : Job.byId(id);
     }
 
-    // 渡す: 旅嚢か持ち物、入らなければ足もとに (その人だけが拾える)。名前の色は階級
+    // 渡す: 旅袋か持ち物、入らなければ足もとに (その人だけが拾える)。名前の色は階級
     public static void give(ServerPlayer p, ItemStack stack) {
         if (stack.isEmpty()) {
             return;
@@ -230,7 +230,7 @@ public final class WildLoot {
             e.setPickUpDelay(10);
             p.level().addFreshEntity(e);
         }
-        Notice.gain(p, Component.translatable("message.skyabyss.wild_drop", name));
+        Notice.gainItem(p, stack, Component.translatable("message.skyabyss.wild_drop", name));
         ServerLevel level = p.serverLevel();
         level.playSound(null, p.getX(), p.getY(), p.getZ(), tier.atLeast(GearTier.HEROIC) ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
                 : tier.atLeast(GearTier.EPIC) ? SoundEvents.PLAYER_LEVELUP : SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.7f, tier.atLeast(GearTier.EPIC) ? 1.2f : 1.0f);

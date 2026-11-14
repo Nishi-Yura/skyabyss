@@ -1,0 +1,211 @@
+# いろいろな出方 (combat/BossEmerge) のコマ: 王・主・ダンジョンの主
+world entrance_check flat
+size 960 720
+timeout 3000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 15.0 190 -8
+cmd skyabyss abyss boss king_salt 0 emerge 56 9
+wait 11
+shot king_salt_1
+wait 11
+shot king_salt_2
+wait 11
+shot king_salt_3
+wait 11
+shot king_salt_4
+wait 15
+shot king_salt_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 15.0 190 -8
+cmd skyabyss abyss boss king_storm 0 emerge 56 9
+wait 11
+shot king_storm_1
+wait 11
+shot king_storm_2
+wait 11
+shot king_storm_3
+wait 11
+shot king_storm_4
+wait 15
+shot king_storm_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 15.0 190 -8
+cmd skyabyss abyss boss king_ember 0 emerge 56 9
+wait 11
+shot king_ember_1
+wait 11
+shot king_ember_2
+wait 11
+shot king_ember_3
+wait 11
+shot king_ember_4
+wait 15
+shot king_ember_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 15.0 190 -8
+cmd skyabyss abyss boss king_shadow 0 emerge 56 9
+wait 11
+shot king_shadow_1
+wait 11
+shot king_shadow_2
+wait 11
+shot king_shadow_3
+wait 11
+shot king_shadow_4
+wait 15
+shot king_shadow_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 15.0 190 -8
+cmd skyabyss abyss boss lord_salt 0 emerge 44 9
+wait 8
+shot lord_salt_1
+wait 8
+shot lord_salt_2
+wait 8
+shot lord_salt_3
+wait 8
+shot lord_salt_4
+wait 12
+shot lord_salt_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 15.0 190 -8
+cmd skyabyss abyss boss lord_ash 0 emerge 44 9
+wait 8
+shot lord_ash_1
+wait 8
+shot lord_ash_2
+wait 8
+shot lord_ash_3
+wait 8
+shot lord_ash_4
+wait 12
+shot lord_ash_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd gamemode creative
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd tp @s -4 -60 20 -170 -12
+wait 10
+cmd summon skyabyss:thunder_owl 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 64
+shot d_thunder_owl_1
+wait 8
+shot d_thunder_owl_2
+wait 8
+shot d_thunder_owl_3
+wait 10
+shot d_thunder_owl_4
+wait 70
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd tp @s -4 -60 20 -170 -12
+wait 10
+cmd summon skyabyss:jelly_priestess 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 64
+shot d_jelly_priestess_1
+wait 8
+shot d_jelly_priestess_2
+wait 8
+shot d_jelly_priestess_3
+wait 10
+shot d_jelly_priestess_4
+wait 70
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd tp @s -4 -60 20 -170 -12
+wait 10
+cmd summon skyabyss:ice_lord 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 64
+shot d_ice_lord_1
+wait 8
+shot d_ice_lord_2
+wait 8
+shot d_ice_lord_3
+wait 10
+shot d_ice_lord_4
+wait 70
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd tp @s -4 -60 20 -170 -12
+wait 10
+cmd summon skyabyss:fort_warlord 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 64
+shot d_fort_warlord_1
+wait 8
+shot d_fort_warlord_2
+wait 8
+shot d_fort_warlord_3
+wait 10
+shot d_fort_warlord_4
+wait 70
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd tp @s -4 -60 20 -170 -12
+wait 10
+cmd summon skyabyss:lava_wyrm 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 64
+shot d_lava_wyrm_1
+wait 8
+shot d_lava_wyrm_2
+wait 8
+shot d_lava_wyrm_3
+wait 10
+shot d_lava_wyrm_4
+wait 70
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd tp @s -4 -60 20 -170 -12
+wait 10
+cmd summon skyabyss:temple_keeper 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 64
+shot d_temple_keeper_1
+wait 8
+shot d_temple_keeper_2
+wait 8
+shot d_temple_keeper_3
+wait 10
+shot d_temple_keeper_4
+wait 70
+echo done
+quit

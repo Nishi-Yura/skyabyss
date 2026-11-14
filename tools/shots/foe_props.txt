@@ -1,0 +1,282 @@
+# 敵の技の形 (combat/prop/PropFx。2026-11-12): 野・ダンジョンの敵が人を狙って技を出すところを横から撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foe_props.txt -PshotsName=foe_props
+world foe_props flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doMobSpawning false
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+hud off
+lowpoly on
+fov 60
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+cmd effect give @s minecraft:regeneration infinite 255 true
+camera minecraft:overworld 14 -52 4 90 28
+waitchunks
+wait 40
+# ---- bandit_archer
+cmd summon skyabyss:bandit_archer 0 -60 10
+wait 30
+wait 12
+shot bandit_archer_0
+wait 12
+shot bandit_archer_1
+wait 12
+shot bandit_archer_2
+wait 12
+shot bandit_archer_3
+wait 30
+shot bandit_archer_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- bone_bowman
+cmd summon skyabyss:bone_bowman 0 -60 12
+wait 30
+wait 12
+shot bone_bowman_0
+wait 12
+shot bone_bowman_1
+wait 12
+shot bone_bowman_2
+wait 12
+shot bone_bowman_3
+wait 30
+shot bone_bowman_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- moss_dead
+cmd summon skyabyss:moss_dead 0 -60 3
+wait 30
+wait 12
+shot moss_dead_0
+wait 12
+shot moss_dead_1
+wait 12
+shot moss_dead_2
+wait 12
+shot moss_dead_3
+wait 30
+shot moss_dead_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- rock_boar
+cmd summon skyabyss:rock_boar 0 -60 3
+wait 30
+wait 12
+shot rock_boar_0
+wait 12
+shot rock_boar_1
+wait 12
+shot rock_boar_2
+wait 12
+shot rock_boar_3
+wait 30
+shot rock_boar_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- storm_ram
+cmd summon skyabyss:storm_ram 0 -60 4
+wait 30
+wait 12
+shot storm_ram_0
+wait 12
+shot storm_ram_1
+wait 12
+shot storm_ram_2
+wait 12
+shot storm_ram_3
+wait 30
+shot storm_ram_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- ash_whirl
+cmd summon skyabyss:ash_whirl 0 -60 3
+wait 30
+wait 12
+shot ash_whirl_0
+wait 12
+shot ash_whirl_1
+wait 12
+shot ash_whirl_2
+wait 12
+shot ash_whirl_3
+wait 30
+shot ash_whirl_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- mist_angler
+cmd summon skyabyss:mist_angler 0 -60 9
+wait 30
+wait 12
+shot mist_angler_0
+wait 12
+shot mist_angler_1
+wait 12
+shot mist_angler_2
+wait 12
+shot mist_angler_3
+wait 30
+shot mist_angler_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- ember_spitter
+cmd summon skyabyss:ember_spitter 0 -60 12
+wait 30
+wait 12
+shot ember_spitter_0
+wait 12
+shot ember_spitter_1
+wait 12
+shot ember_spitter_2
+wait 12
+shot ember_spitter_3
+wait 30
+shot ember_spitter_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- bolt_slinger
+cmd summon skyabyss:bolt_slinger 0 -60 11
+wait 30
+wait 12
+shot bolt_slinger_0
+wait 12
+shot bolt_slinger_1
+wait 12
+shot bolt_slinger_2
+wait 12
+shot bolt_slinger_3
+wait 30
+shot bolt_slinger_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- storm_jelly
+cmd summon skyabyss:storm_jelly 0 -60 3
+wait 30
+wait 12
+shot storm_jelly_0
+wait 12
+shot storm_jelly_1
+wait 12
+shot storm_jelly_2
+wait 12
+shot storm_jelly_3
+wait 30
+shot storm_jelly_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- tide_crab
+cmd summon skyabyss:tide_crab 0 -60 5
+wait 30
+wait 12
+shot tide_crab_0
+wait 12
+shot tide_crab_1
+wait 12
+shot tide_crab_2
+wait 12
+shot tide_crab_3
+wait 30
+shot tide_crab_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- ash_lizard
+cmd summon skyabyss:ash_lizard 0 -60 6
+wait 30
+wait 12
+shot ash_lizard_0
+wait 12
+shot ash_lizard_1
+wait 12
+shot ash_lizard_2
+wait 12
+shot ash_lizard_3
+wait 30
+shot ash_lizard_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- crystal_eye
+cmd summon skyabyss:crystal_eye 0 -60 7
+wait 30
+wait 12
+shot crystal_eye_0
+wait 12
+shot crystal_eye_1
+wait 12
+shot crystal_eye_2
+wait 12
+shot crystal_eye_3
+wait 30
+shot crystal_eye_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- drowned_sailor
+cmd summon skyabyss:drowned_sailor 0 -60 8
+wait 30
+wait 12
+shot drowned_sailor_0
+wait 12
+shot drowned_sailor_1
+wait 12
+shot drowned_sailor_2
+wait 12
+shot drowned_sailor_3
+wait 30
+shot drowned_sailor_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- geode_golem
+cmd summon skyabyss:geode_golem 0 -60 4
+wait 30
+wait 12
+shot geode_golem_0
+wait 12
+shot geode_golem_1
+wait 12
+shot geode_golem_2
+wait 12
+shot geode_golem_3
+wait 30
+shot geode_golem_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10
+# ---- pit_foreman
+cmd summon skyabyss:pit_foreman 0 -60 4
+wait 30
+wait 12
+shot pit_foreman_0
+wait 12
+shot pit_foreman_1
+wait 12
+shot pit_foreman_2
+wait 12
+shot pit_foreman_3
+wait 30
+shot pit_foreman_4
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd tp @s 0 -60 0 0 0
+wait 10

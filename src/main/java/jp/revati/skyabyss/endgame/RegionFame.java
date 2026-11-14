@@ -84,7 +84,7 @@ public final class RegionFame {
             Coins.give(p, coins);
             int band = jp.revati.skyabyss.item.wild.WildGearTypes.band(Circuits.TOP_LEVEL[region]);
             Circuits.giveBox(p, BoxKind.rarity(t >= 4 ? GearTier.EPIC : GearTier.RARE, band));
-            Notice.gain(p, "message.skyabyss.fame.gift", coins);
+            Notice.gainLog(p, "message.skyabyss.fame.gift", coins);
             if (DISCOUNT[t] > DISCOUNT[t - 1]) {
                 Notice.hint(p, "message.skyabyss.fame.discount", landName(region), DISCOUNT[t]);
             }
@@ -167,7 +167,7 @@ public final class RegionFame {
         p.getPersistentData().putInt(JOURNAL_DONE, p.getPersistentData().getInt(JOURNAL_DONE) | (1 << region));
         Notice.unlock(p, "message.skyabyss.journal.done", landName(region));
         Coins.give(p, JOURNAL_COINS);
-        Notice.gain(p, "message.skyabyss.journal.gift", JOURNAL_COINS, JOURNAL_FAME);
+        Notice.gainLog(p, "message.skyabyss.journal.gift", JOURNAL_COINS, JOURNAL_FAME);
         RegionPoints.add(p, region, JOURNAL_FAME);
         jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
     }

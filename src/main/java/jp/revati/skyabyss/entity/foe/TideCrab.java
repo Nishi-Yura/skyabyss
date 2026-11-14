@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -49,7 +50,7 @@ public class TideCrab extends RegionBoss {
             begin(target, "spray");
             cue("tide_crab", "spray", SPRAY_WARN);
             Vec3 f = forward();
-            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SPRAY_RANGE, Math.toRadians(35)))
+            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SPRAY_RANGE, Math.toRadians(35))).prop(PropFx.shots("pearl", 3).size(0.7f))
                     .floor(getY()).warn(SPRAY_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.TIDE_CRAB_SPRAY.get(), 1.4f, 1.0f)
                     .victims(this::canHit)

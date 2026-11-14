@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.trial.raid.storm;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -354,7 +355,7 @@ public final class ChargeChain extends RaidRoom {
         ServerLevel level = ctx.level();
         double cx = m.getX();
         double cz = m.getZ();
-        Telegraph.in(level, TelegraphShape.circle(cx, cz, OVERLOAD_R))
+        Telegraph.in(level, TelegraphShape.circle(cx, cz, OVERLOAD_R)).prop(PropFx.ring("lightning", 6).size(0.6f))
                 .floor(m.getY()).warn(26).danger().owner(m)
                 .startSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f, 1.8f)
                 .onImpact(lvl -> {

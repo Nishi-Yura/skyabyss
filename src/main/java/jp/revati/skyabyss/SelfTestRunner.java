@@ -197,8 +197,6 @@ public final class SelfTestRunner {
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("gear freedom", jp.revati.skyabyss.item.extra.GearFreedomSelfTest::runSelfTest));
-        // 心臓の遺物の選択 (四体・一度だけ・入り直し・二人・あとで・場面の終わり)。docs/design/30_heart_reward_ui.md。SKYABYSS_SELFTEST_ONLY="heart reward"
-        steps.addAll(jp.revati.skyabyss.loot.reward.HeartRewardSelfTest.steps());
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
         steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
         steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));
@@ -321,6 +319,8 @@ public final class SelfTestRunner {
         // 心臓の登場と倒れる演出・高さの固定 (四つの心臓の共通部分 HeartBoss)
         steps.add(Step.once("heart_cinematic (load)", jp.revati.skyabyss.entity.HeartCinematicSelfTest::load));
         steps.add(Step.once("heart_cinematic", 20, jp.revati.skyabyss.entity.HeartCinematicSelfTest::runSelfTest));
+        // 顔のアップの間は主を止める (BossIntro.hold)。SKYABYSS_SELFTEST_ONLY="boss hold"
+        steps.addAll(jp.revati.skyabyss.combat.BossHoldSelfTest.steps());
         // 心臓四体は「一方向に回り続けるだけ」では倒せない (回る人形は負け、予告を読む人形は生き残る) と、心臓の領域・技の名前。SKYABYSS_SELFTEST_ONLY="heart bots"
         steps.add(Step.once("heart bots (load)", jp.revati.skyabyss.combat.HeartBotSelfTest::load));
         steps.add(Step.once("heart bots", 40, jp.revati.skyabyss.combat.HeartBotSelfTest::runSelfTest));
@@ -501,6 +501,7 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.combat.MeleeHitsSelfTest.steps());
         // 魔法使いの魔弾 (左クリックで遠くの敵へ。2026-11-06)
         steps.addAll(jp.revati.skyabyss.combat.StaffBoltSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.combat.HexMarkSelfTest.steps());
         // 倒すまでの時間 (土地の敵を、その土地の目安のレベルの武器の満ちた一撃で)。SKYABYSS_SELFTEST_ONLY="ttk audit"
         steps.addAll(jp.revati.skyabyss.combat.TtkAuditSelfTest.steps());
         // 完全な RPG の決まり (採集・水汲み・倒れたときの既定)。docs/design/40。SKYABYSS_SELFTEST_ONLY="rpg rules"

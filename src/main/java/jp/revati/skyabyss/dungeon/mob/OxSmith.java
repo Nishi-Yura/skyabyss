@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,7 +77,7 @@ public class OxSmith extends DungeonBoss {
             lastSlam = tickCount;
             begin(target, "slam");
             cue("ox_smith", "slam", SLAM_WARN);
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SLAM_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SLAM_RADIUS)).prop(PropFx.ring("lava_pillar", 8))
                     .floor(getY()).warn(SLAM_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
@@ -139,6 +140,11 @@ public class OxSmith extends DungeonBoss {
             }
         }
         return super.hurt(source, amount);
+    }
+
+    @Override
+    protected boolean midBoss() {
+        return true;
     }
 
     @Override

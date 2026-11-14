@@ -1,0 +1,56 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_lg_whale_fall",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -7.331,
+        -0.585,
+        -6.885
+       ],
+       "size": [
+        14.663,
+        26.905,
+        13.77
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

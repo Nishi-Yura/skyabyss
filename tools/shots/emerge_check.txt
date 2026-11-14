@@ -1,0 +1,124 @@
+# 地の中から這い出る (combat/BossEmerge) のコマ: 出る途中 4 枚と出きった所
+world emerge_check flat
+size 960 720
+timeout 3000
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 13.0 190 -2
+cmd skyabyss abyss boss king_bone 0 emerge 56 9
+wait 11
+shot king_bone_1
+wait 11
+shot king_bone_2
+wait 11
+shot king_bone_3
+wait 11
+shot king_bone_4
+wait 15
+shot king_bone_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 13.0 190 -2
+cmd skyabyss abyss boss king_storm 0 emerge 56 9
+wait 11
+shot king_storm_1
+wait 11
+shot king_storm_2
+wait 11
+shot king_storm_3
+wait 11
+shot king_storm_4
+wait 15
+shot king_storm_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 13.0 190 -2
+cmd skyabyss abyss boss lord_rib 0 emerge 44 9
+wait 8
+shot lord_rib_1
+wait 8
+shot lord_rib_2
+wait 8
+shot lord_rib_3
+wait 8
+shot lord_rib_4
+wait 12
+shot lord_rib_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 13.0 190 -2
+cmd skyabyss abyss boss lord_salt 0 emerge 44 9
+wait 8
+shot lord_salt_1
+wait 8
+shot lord_salt_2
+wait 8
+shot lord_salt_3
+wait 8
+shot lord_salt_4
+wait 12
+shot lord_salt_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 13.0 190 -2
+cmd skyabyss abyss boss lord_storm 0 emerge 44 9
+wait 8
+shot lord_storm_1
+wait 8
+shot lord_storm_2
+wait 8
+shot lord_storm_3
+wait 8
+shot lord_storm_4
+wait 12
+shot lord_storm_5
+wait 20
+cmd tp @e[type=!minecraft:player] 0 -300 0
+cmd kill @e[type=!minecraft:player]
+cmd fill -8 -61 -8 8 -61 8 minecraft:deepslate_tiles
+wait 10
+camera -1.5 -57.0 13.0 190 -2
+cmd skyabyss abyss boss lord_ash 0 emerge 44 9
+wait 8
+shot lord_ash_1
+wait 8
+shot lord_ash_2
+wait 8
+shot lord_ash_3
+wait 8
+shot lord_ash_4
+wait 12
+shot lord_ash_5
+wait 20
+echo done
+quit

@@ -76,6 +76,8 @@ public final class ForgeArena {
         e.tuneCloud(1, Rewinder.HP, Rewinder.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場 (combat/BossEmerge): 出方と、名前の札と顔のアップ
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "erupt", 44, "rewinder");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.64);

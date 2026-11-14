@@ -132,6 +132,9 @@ public final class Telegraph {
     private final Set<UUID> notified = new HashSet<>();
     private final boolean decal;
     private final AttackLook look;
+    // 技の形 (combat/prop/PropFx)。あれば look からの形より先
+    @Nullable
+    private final jp.revati.skyabyss.combat.prop.PropFx prop;
     private static int decalsSent;
     private final int id = created++;
     private int age;
@@ -168,6 +171,7 @@ public final class Telegraph {
         this.onImpact = b.onImpact;
         this.onHit = b.onHit;
         this.look = hidden ? AttackLook.NONE : b.look;
+        this.prop = hidden ? null : b.prop;
         this.decal = !hidden && b.shape.kind() != TelegraphShape.KIND_NONE;
         if (b.onHit != null) {
             damagingCreated++;
@@ -239,6 +243,8 @@ public final class Telegraph {
         private float soundVolume = 2f;
         private float soundPitch = 1f;
         private AttackLook look = AttackLook.NONE;
+        @Nullable
+        private jp.revati.skyabyss.combat.prop.PropFx prop;
 
         private Builder(ServerLevel level, TelegraphShape shape) {
             this.level = level;
@@ -350,6 +356,12 @@ public final class Telegraph {
         }
 
         // 技の見た目の言葉 (AttackLook)。床の印に足す粒だけ (判定は変えない)
+        // 技の形 (模型)。予告の形に合わせて出る (combat/prop/PropFx)
+        public Builder prop(@Nullable jp.revati.skyabyss.combat.prop.PropFx prop) {
+            this.prop = prop;
+            return this;
+        }
+
         public Builder look(AttackLook look) {
             this.look = look == null ? AttackLook.NONE : look;
             return this;
@@ -373,6 +385,12 @@ public final class Telegraph {
                 return t;
             }
             ACTIVE.computeIfAbsent(level, l -> new ArrayList<>()).add(t);
+            // 技の形 (combat/prop): look から、空から落ちる・弧を描いて飛ぶ姿を出す
+            if (t.prop != null) {
+                jp.revati.skyabyss.combat.prop.PropFx.start(level, t.prop, shape, floor, t.warn, owner);
+            } else {
+                jp.revati.skyabyss.combat.prop.AttackProps.lookStart(level, t.look, shape, floor, t.warn, owner);
+            }
             if (sound != null) {
                 level.playSound(null, shape.centerX(), floor + 1, shape.centerZ(), sound, SoundSource.HOSTILE, soundVolume, soundPitch);
             }
@@ -556,6 +574,17 @@ public final class Telegraph {
         if (age == warn) {
             if (onImpact != null) {
                 onImpact.accept(level);
+            }
+            // 技の形 (combat/prop): look から、床から突き出る姿・雷の柱を出す
+            if (shape instanceof TelegraphShape.Wave || shape instanceof TelegraphShape.Sweep) {
+                // 動く予告: 輪の頭・帯の腕が通る所へ順に突き出す (prop の種類、なければ見た目の属性から)
+                // 範囲の模型 (client/combat/AreaFx) が輪・帯を埋める技は、間をあけた棘を出さない
+                jp.revati.skyabyss.combat.prop.PropFx.motion(level, prop != null ? prop.kind() : (look != null && look.area() ? null : jp.revati.skyabyss.combat.prop.PropFx.motionKind(look)),
+                        prop != null ? prop.size() : 0f, shape, floor, active, owner);
+            } else if (prop != null) {
+                jp.revati.skyabyss.combat.prop.PropFx.impact(level, prop, shape, floor, owner);
+            } else {
+                jp.revati.skyabyss.combat.prop.AttackProps.lookImpact(level, look, shape, floor, owner);
             }
             if (active == 0) {
                 strike(shape.at(1.0));

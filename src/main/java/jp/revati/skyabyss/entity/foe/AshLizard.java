@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -86,7 +87,7 @@ public class AshLizard extends RegionBoss {
         begin(target, "breath");
         cue("ash_lizard", "breath", BREATH_WARN);
         Vec3 f = forward();
-        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(30)))
+        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(30))).prop(PropFx.shots("ash_ball", 3))
                 .floor(getY()).warn(BREATH_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.ASH_LIZARD_BREATH.get(), 1.4f, 1.0f)
                 .victims(this::canHit)

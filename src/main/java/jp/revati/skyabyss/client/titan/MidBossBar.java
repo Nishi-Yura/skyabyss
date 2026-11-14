@@ -64,8 +64,8 @@ public final class MidBossBar {
         g.drawString(mc.font, boss.getName(), x + ICON + 4, y + 4, 0xFFFFFF, true);
         int by = y + ICON + 2;
         // 板: 青緑の縁 + 暗い石 + 帯
-        g.fill(x, by, x + WIDTH, by + BAR_H, 0xFF2E5552);
-        g.fill(x + 1, by + 1, x + WIDTH - 1, by + BAR_H - 1, 0xFF0A0C10);
+        g.fill(x, by, x + WIDTH, by + BAR_H, 0xFFC9A85C);
+        g.fill(x + 1, by + 1, x + WIDTH - 1, by + BAR_H - 1, 0xFF0A0E1E);
         float p = Math.max(0f, Math.min(1f, boss.getProgress()));
         int track = WIDTH - 4;
         int fill = Math.round(track * p);

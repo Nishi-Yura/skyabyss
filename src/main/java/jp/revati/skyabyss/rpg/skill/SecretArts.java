@@ -76,7 +76,7 @@ public final class SecretArts {
         SPLIT_ARROWS("split_arrows", Skill.CLOUD_PIERCE, Job.ARCHER),
         LINKED_TRAP("linked_trap", Skill.BONE_TRAP, Job.ARCHER),
         LINGERING_RAIN("lingering_rain", Skill.SKY_RAIN, Job.ARCHER),
-        HAWK_LANDING("hawk_landing", Skill.ARCHER_LEAP, Job.ARCHER),
+        HAWK_LANDING("hawk_landing", Skill.BOW_SPIRIT, Job.ARCHER),
         // 魔法使い
         CHAIN_BOLT("chain_bolt", Skill.THUNDER_BOLT, Job.MAGE),
         EMBER_GROUND("ember_ground", Skill.EMBER_ORB, Job.MAGE),

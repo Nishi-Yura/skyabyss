@@ -1,0 +1,67 @@
+# 淵の王 5 体の新しい頭 (2026-11-11, tools/rough/lowpoly/king_heads/heads.py) のゲーム内の確かめ
+world king_heads flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+lowpoly on
+hud off
+chat clear
+camera 0.5 -59 9.5 180 -6
+waitchunks 300
+wait 100
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_bone 0 - 40 9
+camera 0.5 -56.5 7.5 180 -8
+wait 60
+shot bone_front
+camera 6.0 -56.0 5.5 135 -6
+wait 10
+shot bone_side
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_salt 0 - 40 9
+camera 0.5 -56.5 7.5 180 -8
+wait 60
+shot salt_front
+camera 6.0 -56.0 5.5 135 -6
+wait 10
+shot salt_side
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_storm 0 - 40 9
+camera 0.5 -56.5 7.5 180 -8
+wait 60
+shot storm_front
+camera 6.0 -56.0 5.5 135 -6
+wait 10
+shot storm_side
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_ash 0 - 40 9
+camera 0.5 -56.5 7.5 180 -8
+wait 60
+shot ash_front
+camera 6.0 -56.0 5.5 135 -6
+wait 10
+shot ash_side
+cmd kill @e[type=!minecraft:player]
+wait 10
+cmd skyabyss abyss boss king_shadow 0 - 40 9
+camera 0.5 -56.5 7.5 180 -8
+wait 60
+shot shadow_front
+camera 6.0 -56.0 5.5 135 -6
+wait 10
+shot shadow_side
+echo done
+quit

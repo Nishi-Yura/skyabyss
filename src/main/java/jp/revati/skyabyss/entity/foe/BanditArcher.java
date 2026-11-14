@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -47,7 +48,7 @@ public class BanditArcher extends ContinentFoe {
         }
         begin(target, "shoot");
         Vec3 f = forward();
-        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), LENGTH, HALF_WIDTH))
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), LENGTH, HALF_WIDTH)).prop(PropFx.shots("arrow", 1))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_ARCHER_DRAW.get(), 1.0f, 1.0f)
                 .victims(this::clearShot)

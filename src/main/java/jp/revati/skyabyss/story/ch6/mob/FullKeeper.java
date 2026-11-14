@@ -255,6 +255,11 @@ public class FullKeeper extends MoonMob {
         }
         if (release == RELEASE_TELL) {
             playSound(MoonMobsSetup.KEEPER_RELEASE.get(), 2.5f, 0.8f);
+            // 技の形: 主のまわりに光の柱が八本立ち、波が広がる
+            for (int i = 0; i < 8; i++) {
+                double a = i / 8.0 * Math.PI * 2;
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", this, new Vec3(getX() + Math.cos(a) * 4, c.y - 0.5, getZ() + Math.sin(a) * 4), i * 45f, 0.7f, 14);
+            }
             for (int i = 0; i < 60; i++) {
                 double a = i / 60.0 * Math.PI * 2;
                 sl.sendParticles(ParticleTypes.END_ROD, o.x, o.y, o.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.9);

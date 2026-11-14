@@ -50,7 +50,7 @@ public final class PouchSetup {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> LOAN = COMPONENTS.registerComponentType("pouch_loan",
             builder -> builder.persistent(Codec.unit(Unit.INSTANCE)).networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
-    // 旅嚢の画面 (持ち物 / 装飾 / 旅嚢 のつまみの三つ目)
+    // 旅袋の画面 (持ち物 / 装飾 / 旅袋 のつまみの三つ目)
     public static final DeferredHolder<MenuType<?>, MenuType<PouchMenu>> MENU = MENUS.register("pouch",
             () -> IMenuTypeExtension.create((id, inventory, buf) -> new PouchMenu(id, inventory)));
 

@@ -1,0 +1,259 @@
+# 作り直した敵の体 13 体 (2026-11-12) が動く姿 (歩き・技・倒れ) を横から撮る。灰の打ち手が消えないよう高さ 120 の台の上
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foe_moves_v2.txt -PshotsName=foe_moves_v2
+world foe_moves flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doMobSpawning false
+cmd fill -20 119 -20 20 119 20 minecraft:smooth_basalt
+hud off
+lowpoly on
+fov 60
+cmd tp @s 0 120 0 0 0
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+cmd effect give @s minecraft:regeneration infinite 255 true
+camera minecraft:overworld 13 127 5 90 26
+waitchunks
+wait 40
+# ---- drowned_sailor
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:drowned_sailor 0 120 8
+wait 30
+shot drowned_sailor_0
+wait 14
+shot drowned_sailor_1
+wait 14
+shot drowned_sailor_2
+wait 14
+shot drowned_sailor_3
+wait 30
+shot drowned_sailor_4
+cmd kill @e[type=skyabyss:drowned_sailor]
+wait 12
+shot drowned_sailor_death
+wait 20
+# ---- ember_keeper
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:ember_keeper 0 120 6
+wait 30
+shot ember_keeper_0
+wait 14
+shot ember_keeper_1
+wait 14
+shot ember_keeper_2
+wait 14
+shot ember_keeper_3
+wait 30
+shot ember_keeper_4
+cmd kill @e[type=skyabyss:ember_keeper]
+wait 12
+shot ember_keeper_death
+wait 20
+# ---- ash_striker
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:ash_striker 0 120 6
+wait 30
+shot ash_striker_0
+wait 14
+shot ash_striker_1
+wait 14
+shot ash_striker_2
+wait 14
+shot ash_striker_3
+wait 30
+shot ash_striker_4
+cmd kill @e[type=skyabyss:ash_striker]
+wait 12
+shot ash_striker_death
+wait 20
+# ---- bandit
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:bandit 0 120 7
+wait 30
+shot bandit_0
+wait 14
+shot bandit_1
+wait 14
+shot bandit_2
+wait 14
+shot bandit_3
+wait 30
+shot bandit_4
+cmd kill @e[type=skyabyss:bandit]
+wait 12
+shot bandit_death
+wait 20
+# ---- bandit_archer
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:bandit_archer 0 120 10
+wait 30
+shot bandit_archer_0
+wait 14
+shot bandit_archer_1
+wait 14
+shot bandit_archer_2
+wait 14
+shot bandit_archer_3
+wait 30
+shot bandit_archer_4
+cmd kill @e[type=skyabyss:bandit_archer]
+wait 12
+shot bandit_archer_death
+wait 20
+# ---- bandit_chief
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:bandit_chief 0 120 7
+wait 30
+shot bandit_chief_0
+wait 14
+shot bandit_chief_1
+wait 14
+shot bandit_chief_2
+wait 14
+shot bandit_chief_3
+wait 30
+shot bandit_chief_4
+cmd kill @e[type=skyabyss:bandit_chief]
+wait 12
+shot bandit_chief_death
+wait 20
+# ---- salt_husk
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:salt_husk 0 120 4
+wait 30
+shot salt_husk_0
+wait 14
+shot salt_husk_1
+wait 14
+shot salt_husk_2
+wait 14
+shot salt_husk_3
+wait 30
+shot salt_husk_4
+cmd kill @e[type=skyabyss:salt_husk]
+wait 12
+shot salt_husk_death
+wait 20
+# ---- rib_guard
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:rib_guard 0 120 5
+wait 30
+shot rib_guard_0
+wait 14
+shot rib_guard_1
+wait 14
+shot rib_guard_2
+wait 14
+shot rib_guard_3
+wait 30
+shot rib_guard_4
+cmd kill @e[type=skyabyss:rib_guard]
+wait 12
+shot rib_guard_death
+wait 20
+# ---- lightning_idol
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:lightning_idol 0 120 7
+wait 30
+shot lightning_idol_0
+wait 14
+shot lightning_idol_1
+wait 14
+shot lightning_idol_2
+wait 14
+shot lightning_idol_3
+wait 30
+shot lightning_idol_4
+cmd kill @e[type=skyabyss:lightning_idol]
+wait 12
+shot lightning_idol_death
+wait 20
+# ---- static_puff
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:static_puff 0 120 5
+wait 30
+shot static_puff_0
+wait 14
+shot static_puff_1
+wait 14
+shot static_puff_2
+wait 14
+shot static_puff_3
+wait 30
+shot static_puff_4
+cmd kill @e[type=skyabyss:static_puff]
+wait 12
+shot static_puff_death
+wait 20
+# ---- tidepool_clam
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:tidepool_clam 0 120 3
+wait 30
+shot tidepool_clam_0
+wait 14
+shot tidepool_clam_1
+wait 14
+shot tidepool_clam_2
+wait 14
+shot tidepool_clam_3
+wait 30
+shot tidepool_clam_4
+cmd kill @e[type=skyabyss:tidepool_clam]
+wait 12
+shot tidepool_clam_death
+wait 20
+# ---- ash_whirl
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:ash_whirl 0 120 4
+wait 30
+shot ash_whirl_0
+wait 14
+shot ash_whirl_1
+wait 14
+shot ash_whirl_2
+wait 14
+shot ash_whirl_3
+wait 30
+shot ash_whirl_4
+cmd kill @e[type=skyabyss:ash_whirl]
+wait 12
+shot ash_whirl_death
+wait 20
+# ---- storm_ram
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd tp @s 0 120 0 0 0
+cmd summon skyabyss:storm_ram 0 120 6
+wait 30
+shot storm_ram_0
+wait 14
+shot storm_ram_1
+wait 14
+shot storm_ram_2
+wait 14
+shot storm_ram_3
+wait 30
+shot storm_ram_4
+cmd kill @e[type=skyabyss:storm_ram]
+wait 12
+shot storm_ram_death
+wait 20

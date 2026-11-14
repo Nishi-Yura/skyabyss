@@ -1,0 +1,61 @@
+# 旅袋・封印の箱・預かり所・共鳴の炉 (大きい板) の確かめ。
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ui_glass_family.txt -PshotsName=ui_glass_family
+world ui_glass_family flat
+size 1920 1080
+timeout 900
+render 6
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 32
+cmd skyabyss job choose mage
+cmd skyabyss facility coins 500
+cmd give @s skyabyss:dried_fish 12
+cmd give @s skyabyss:iron_lump 20
+cmd give @s skyabyss:box_rare_1 3
+cmd item replace entity @p weapon.mainhand with skyabyss:whalebone_greatsword
+hud on
+waitchunks
+chat clear
+wait 60
+cmd skyabyss cinematic stop
+key skyabyss_pouch.key.open
+wait 20
+overlap pouch_g4
+shot pouch_g4
+close
+wait 5
+open jp.revati.skyabyss.client.box.BoxPouchScreen
+wait 10
+overlap boxpouch_g4
+shot boxpouch_g4
+close
+wait 5
+cmd skyabyss facility act stash
+wait 20
+overlap stash_g4
+shot stash_g4
+close
+wait 5
+cmd skyabyss_forge open
+wait 20
+overlap forge_g4
+shot forge_g4
+close
+guiscale 3
+window 1280 720
+wait 10
+key skyabyss_pouch.key.open
+wait 20
+overlap pouch_1280_g3
+shot pouch_1280_g3
+close
+cmd skyabyss_forge open
+wait 20
+overlap forge_1280_g3
+shot forge_1280_g3
+close

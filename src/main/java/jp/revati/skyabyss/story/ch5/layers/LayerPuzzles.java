@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch5.layers;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -354,7 +355,7 @@ public final class LayerPuzzles {
         int s = pattern[(int) ((now / HALL_BEAT) % pattern.length)];
         Vec3 c = va.add(vb.subtract(va).scale(s / 2.0));
         double r = va.distanceTo(vb) / 6.0 + 0.5;
-        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, r)).floor(c.y).warn(HALL_WARN).danger().owner(null)
+        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, r)).prop(PropFx.rise("lightning")).floor(c.y).warn(HALL_WARN).danger().owner(null)
                 .onImpact(lvl -> {
                     LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(lvl);
                     if (bolt != null) {

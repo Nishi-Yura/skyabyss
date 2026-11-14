@@ -67,6 +67,8 @@ public final class FieldArena {
         e.tuneMoon(2, full, false, FullKeeper.HP / MoonMob.SECTION_HP[2], FullKeeper.DMG / MoonMob.SECTION_DMG[2]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場 (combat/BossEmerge): 出方と、名前の札と顔のアップ
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "sky", 44, "full_keeper");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
         jp.revati.skyabyss.combat.PartyScale.resist(e, 2.89);

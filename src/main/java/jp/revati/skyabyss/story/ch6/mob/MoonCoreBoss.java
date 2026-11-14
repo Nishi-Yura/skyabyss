@@ -412,6 +412,10 @@ public class MoonCoreBoss extends MoonMob {
         drop++;
         Vec3 c = MoonCore.mark("arena_center").getBottomCenter();
         List<Vec3> safe = CoreArena.safeSpots(sl);
+        if (drop == 1) {
+            // 技の形: 床の真ん中へ大きな満月の珠が落ちてくる (予告の終わりに着く)
+            jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "pearl", this, c, DROP_TELL - 1, 40, 30f, 8f, 20);
+        }
         if (drop < DROP_TELL) {
             if (drop % 4 == 0) {
                 DustParticleOptions red = new DustParticleOptions(new Vector3f(0.9f, 0.15f, 0.15f), 1.6f);

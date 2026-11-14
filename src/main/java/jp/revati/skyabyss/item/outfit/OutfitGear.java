@@ -11,13 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -26,7 +21,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 市の武具屋・道具屋の品 (2026-10-27 の声「ブロック以外はすべて mod で追加したアイテムで」)。バニラの盾・斧・つるはし・シャベル・
 // 革と鉄の防具・ダイヤの胸当ての代わり。形と絵は tools/install/install_outfit.py (選定: 盾 A・道具 A・初めの旅装 B・鉄張り A・空石 C)。
 //   旅の盾      ShieldItem (バニラの盾と同じ構え)。見た目は低ポリ (client/weapon。珊瑚の盾と同じ描き方)
-//   伐り斧・鶴嘴・土掘り  鉄の段の斧・つるはし・シャベル (採集の道具。rpg/rules/Gathering がタグ minecraft:axes / pickaxes / shovels で見る)
+//   採集の道具 (伐り斧・鶴嘴・土掘り) は 2026-11-12 に消した (採るのは実った作物だけで、素手でよい)
 //   初めの旅装 (wayfarer)    革の防具の数値 (1/3/2/1)。島で初めに着ている (RpgRules.starterKit)
 //   鉄張りの旅装 (ironclad)  鉄の防具の数値 (2/6/5/2)。一章の支度で武具屋で買う
 //   空石の胸当て (sky_stone) ダイヤの胸当ての数値 (8、強靭 2)。三章の支度「空の石」
@@ -63,15 +58,10 @@ public final class OutfitGear {
 
     public static final DeferredItem<Item> TRAVEL_SHIELD = ITEMS.register("travel_shield",
             () -> new OutfitShieldItem(new Item.Properties().durability(336)));
-    public static final DeferredItem<Item> GATHER_AXE = ITEMS.register("gather_axe",
-            () -> new AxeItem(Tiers.IRON, new Item.Properties().attributes(AxeItem.createAttributes(Tiers.IRON, 5.0f, -3.1f))));
-    public static final DeferredItem<Item> GATHER_PICKAXE = ITEMS.register("gather_pickaxe",
-            () -> new PickaxeItem(Tiers.IRON, new Item.Properties().attributes(DiggerItem.createAttributes(Tiers.IRON, 1.0f, -2.8f))));
-    public static final DeferredItem<Item> GATHER_SHOVEL = ITEMS.register("gather_shovel",
-            () -> new ShovelItem(Tiers.IRON, new Item.Properties().attributes(ShovelItem.createAttributes(Tiers.IRON, 1.5f, -3.0f))));
+    // 採集の道具 (伐り斧・鶴嘴・土掘り) は 2026-11-12 に消した (11-08 に木・土の採集をやめ、鉱石の素材も市で買えるので使い道がなかった)
 
     // 店・クエスト・初めの持ち物が名前で引く (shop/*.json の item もこの ID)
-    public static final List<String> IDS = List.of("travel_shield", "gather_axe", "gather_pickaxe", "gather_shovel",
+    public static final List<String> IDS = List.of("travel_shield",
             "wayfarer_helmet", "wayfarer_chestplate", "wayfarer_leggings", "wayfarer_boots",
             "ironclad_helmet", "ironclad_chestplate", "ironclad_leggings", "ironclad_boots", "sky_stone_chestplate");
 

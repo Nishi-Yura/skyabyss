@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -307,7 +308,7 @@ public final class DungeonFloor {
         if (e.getTags().contains(Dungeons.KEY_TAG) && !keyTaken && ++keyKills >= keyNeed) {
             keyTaken = true;
             for (ServerPlayer p : run.present()) {
-                Notice.gain(p, "message.skyabyss.dungeon.key");
+                Notice.gainLog(p, "message.skyabyss.dungeon.key");
             }
             level.playSound(null, e.blockPosition(), SoundEvents.CHAIN_BREAK, SoundSource.HOSTILE, 1f, 1.2f);
         }
@@ -365,18 +366,6 @@ public final class DungeonFloor {
             };
             if (open) {
                 openDoor(level, door);
-            } else if (cond.startsWith("clear") && level.getGameTime() % 20 == 0) {
-                // 全滅で開く部屋: 部屋の中の人に、残りの敵の数 (2026-11-08 の声「エリアに何体敵残ってるか出してほしい」)
-                String room = cond.substring("clear".length());
-                int left = roomLeft(level, room);
-                if (left > 0 && terrain.has("room_" + room)) {
-                    Vec3 rc = center("room_" + room);
-                    for (ServerPlayer p : here) {
-                        if (Dungeons.real(p) && p.isAlive() && p.position().distanceTo(rc) < WAKE + 6 && Math.abs(p.getY() - rc.y) < 10) {
-                            Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.dungeon.room_left", left));
-                        }
-                    }
-                }
             } else if (near && cond.equals("key") && level.getGameTime() % 60 == 0) {
                 for (ServerPlayer p : here) {
                     if (Dungeons.real(p) && p.position().distanceTo(mid3) < DOOR_REACH) {
@@ -500,7 +489,7 @@ public final class DungeonFloor {
             case "brine" -> Blocks.PRISMARINE.defaultBlockState();
             default -> Blocks.COBBLED_DEEPSLATE.defaultBlockState();
         };
-        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, r)).floor(c.y).warn(TRAP_WARN).danger()
+        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, r)).prop(kind.equals("rocks") ? PropFx.fall("rock") : PropFx.rise(switch (kind) { case "spikes" -> "bone_spike"; case "steam" -> "lava_pillar"; case "spark" -> "crystal_spike"; case "brine" -> "water_spout"; default -> "rock"; })).floor(c.y).warn(TRAP_WARN).danger()
                 .startSound(kind.equals("spark") ? SoundEvents.LIGHTNING_BOLT_THUNDER : SoundEvents.GRAVEL_BREAK, 0.8f, kind.equals("spark") ? 1.8f : 0.6f)
                 .victims(p -> !p.isSpectator())
                 .onImpact(server -> {
@@ -556,8 +545,13 @@ public final class DungeonFloor {
                 }
                 m.setPersistenceRequired();
                 bar = new ServerBossEvent(m.getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+                if (run.dungeon.mini && !(m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss)) {
+                    // 小ダンジョンの主 (老いた歩哨・潮の番人・古い灰被り): 出方と、名前の札と顔のアップ (combat/BossEmerge)
+                    jp.revati.skyabyss.combat.BossEmerge.chapter(m);
+                }
                 for (ServerPlayer p : here) {
-                    if (Dungeons.real(p)) {
+                    // ダンジョンの主 (DungeonBoss) は登場の数え下ろしと名前の札を自分で出す
+                    if (Dungeons.real(p) && !(m instanceof jp.revati.skyabyss.dungeon.mob.DungeonBoss)) {
                         Notice.alert(p, "message.skyabyss.dungeon.boss_appear", m.getDisplayName());
                     }
                 }

@@ -120,6 +120,61 @@ public final class Notice {
         send(p, Kind.GAIN, text);
     }
 
+    // 手に入れた品: 左の列には品の絵 (と数) だけを並べる。text は知らせの記録・チャットに残す文
+    public static void gainItems(Player p, java.util.List<net.minecraft.world.item.ItemStack> items, Component text) {
+        java.util.Map<net.minecraft.world.item.Item, net.minecraft.world.item.ItemStack> merged = new java.util.LinkedHashMap<>();
+        for (net.minecraft.world.item.ItemStack s : items) {
+            if (s.isEmpty()) {
+                continue;
+            }
+            net.minecraft.world.item.ItemStack have = merged.get(s.getItem());
+            if (have == null) {
+                merged.put(s.getItem(), s.copy());
+            } else {
+                have.grow(s.getCount());
+            }
+        }
+        if (merged.isEmpty()) {
+            // 品が空 (渡したあとの空の山など): 左の列にも達成の札にも出さず、記録にだけ。空気の名前なら記録にも残さない (2026-11-11 の声)
+            if (!mentionsAir(text)) {
+                gainLog(p, text);
+            }
+            return;
+        }
+        if (!(p instanceof ServerPlayer sp) || p instanceof FakePlayer || sp.connection == null) {
+            return;
+        }
+        java.util.List<net.minecraft.world.item.ItemStack> list = new java.util.ArrayList<>(merged.values());
+        // 同じ tick のまとめ (GainFeed) に入っている品は、まとめが絵を出す
+        if (GainFeed.covers(sp, list)) {
+            return;
+        }
+        GainFeed.sent(sp, list);
+        if (list.size() > 64) {
+            list = list.subList(0, 64);
+        }
+        PacketDistributor.sendToPlayer(sp, new GainItemsPayload(java.util.List.copyOf(list), text));
+    }
+
+    // 品を手に入れた文: 知らせの記録 (とチャットの設定) にだけ残す。左の列には出さない (品の絵は GainFeed が出す。
+    // 2026-11-10 の声「？？を獲得したの左の表記はすべて消して」)
+    public static void gainLog(Player p, String key, Object... args) {
+        gainLog(p, ModText.progress(key, args));
+    }
+
+    public static void gainLog(Player p, Component text) {
+        if (mentionsAir(text)) {
+            return;
+        }
+        if (p instanceof ServerPlayer sp && !(p instanceof FakePlayer) && sp.connection != null) {
+            PacketDistributor.sendToPlayer(sp, new GainItemsPayload(java.util.List.of(), text));
+        }
+    }
+
+    public static void gainItem(Player p, net.minecraft.world.item.ItemStack item, Component text) {
+        gainItems(p, java.util.List.of(item), text);
+    }
+
     public static void unlock(Player p, String key, Object... args) {
         send(p, Kind.UNLOCK, ModText.progress(key, args));
     }
@@ -182,6 +237,33 @@ public final class Notice {
         if (!(p instanceof ServerPlayer sp) || p instanceof FakePlayer || sp.connection == null) {
             return;
         }
+        // 「空気を手に入れた」は出さない (空の品の名前が入った知らせ。2026-11-08・11-11 の声)
+        if (payload.kind() == Kind.GAIN && mentionsAir(payload.text())) {
+            return;
+        }
         PacketDistributor.sendToPlayer(sp, payload);
+    }
+
+    // 文の中に空の品 (空気) の名前があるか。品の名前は翻訳の鍵のまま入っているので、鍵を見る
+    public static boolean mentionsAir(Component text) {
+        if (text == null) {
+            return false;
+        }
+        if (text.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t) {
+            if ("block.minecraft.air".equals(t.getKey())) {
+                return true;
+            }
+            for (Object arg : t.getArgs()) {
+                if (arg instanceof Component c && mentionsAir(c)) {
+                    return true;
+                }
+            }
+        }
+        for (Component sib : text.getSiblings()) {
+            if (mentionsAir(sib)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

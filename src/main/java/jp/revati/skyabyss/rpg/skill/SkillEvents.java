@@ -222,6 +222,12 @@ public final class SkillEvents {
     // 岩呼び: 狙いを引いた敵の攻撃を受けても、押されにくい (ノックバック 0.5 倍)
     @SubscribeEvent
     static void onKnockBack(LivingKnockBackEvent event) {
+        // 続けて刻む技 (呪い蝕み・灯の焼き・番の弓霊の矢) は押さない (毎秒押されて、仲間の近接から逃げていくため)
+        Skill dealing = SkillActions.dealing();
+        if (dealing == Skill.CURSE_MARK || dealing == Skill.LAMP_CHARM || dealing == Skill.BOW_SPIRIT) {
+            event.setCanceled(true);
+            return;
+        }
         if (event.getEntity() instanceof ServerPlayer player && SkillManager.get(player).knows(Skill.ROCK_CALL)
                 && SkillEffects.taunting(player, 7)) {
             event.setStrength((float) (event.getStrength() * SkillRules.ROCK_CALL_KNOCKBACK));

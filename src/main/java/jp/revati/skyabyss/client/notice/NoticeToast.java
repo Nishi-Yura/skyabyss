@@ -42,8 +42,8 @@ public class NoticeToast implements Toast {
     public Visibility render(GuiGraphics g, ToastComponent toasts, long timeSinceLastVisible) {
         jp.revati.skyabyss.client.hud.HudManager.noteToast(g, height());
         Font font = toasts.getMinecraft().font;
-        g.fill(0, 0, WIDTH, height, 0xF0121619);
-        g.renderOutline(0, 0, WIDTH, height, 0xFF2E5552);
+        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, 0, 0, WIDTH, height);
+
         g.fill(2, 2, 4, height - 2, 0xFF000000 | accent);
         g.drawString(font, head, 10, 7, 0xFF000000 | accent, false);
         int y = 19;

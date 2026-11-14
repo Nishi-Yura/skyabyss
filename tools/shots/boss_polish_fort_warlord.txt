@@ -1,0 +1,64 @@
+# ダンジョンの主の作り込みの確かめ: fort_warlord (tools/gen/shots/gen_boss_polish_shots.py が書く)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+lowpoly on
+fov 60
+hud on
+chat clear
+cmd tp @s 0 -60 40 180 0
+waitchunks
+wait 60
+cmd kill @e[type=skyabyss:fort_warlord]
+cmd gamemode creative
+cmd tp @s -7 -60 19.0 -160 -10
+wait 10
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+close
+wait 140
+cmd skyabyss cinematic stop
+close
+cmd tp @s -7 -60 19.0 -160 -10
+wait 10
+cmd summon skyabyss:fort_warlord 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b,Tags:["m"]}
+wait 30
+shot fort_warlord_intro_count
+wait 60
+shot fort_warlord_intro_rise
+wait 46
+shot fort_warlord_intro_card
+wait 90
+shot fort_warlord_intro_after
+cmd gamemode spectator
+hud off
+cmd kill @e[type=skyabyss:fort_warlord]
+cmd summon skyabyss:fort_warlord 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld -9 -56 13 -145 12
+wait 40
+cmd skyabyss dev anim @e[tag=m] combo
+wait 36
+shot fort_warlord_combo
+wait 60
+cmd skyabyss dev anim @e[tag=m] leap
+wait 20
+shot fort_warlord_leap
+wait 60
+cmd skyabyss dev anim @e[tag=m] sweep
+wait 16
+shot fort_warlord_sweep
+wait 60
+cmd skyabyss dev anim @e[tag=m] scream
+wait 9
+shot fort_warlord_scream
+wait 60

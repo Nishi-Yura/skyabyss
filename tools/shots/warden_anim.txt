@@ -1,0 +1,65 @@
+world warden_anim flat
+size 1280 720
+timeout 3600
+render 12
+clouds off
+
+wait 80
+cmd skyabyss cinematic stop
+cmd gamemode spectator
+hud off
+cmd skyabyss abyss enter
+wait 40
+cmd skyabyss abyss build
+wait 900
+cmd effect give @s minecraft:night_vision 100000 0 true
+wait 60
+cmd skyabyss abyss warden wake
+wait 40
+cmd skyabyss abyss dev dark
+cmd execute as @e[type=skyabyss:heart_warden,limit=1] at @s run tp @a ~ ~1 ~4.5 facing entity @s eyes
+wait 30
+
+# ---- 光の外 (闇): 体は描かず、胸の心臓の骨だけがほのかに見える
+shot w_dark
+cmd effect give @e[type=skyabyss:heart_warden] minecraft:glowing 100000 0 true
+wait 10
+shot w_outline_only
+cmd effect clear @e[type=skyabyss:heart_warden] minecraft:glowing
+wait 10
+
+# ---- 光の中 (灯りの術): 体を全部描く。待機の姿
+cmd skyabyss abyss dev lamp
+cmd skyabyss abyss dev lamp
+wait 30
+cmd execute as @e[type=skyabyss:heart_warden,limit=1] at @s run tp @a ^1.5 ^1 ^6 facing entity @s eyes
+wait 10
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden] slam
+wait 8
+shot slam_1antic
+wait 15
+shot slam_2coil
+wait 4
+shot slam_3snap
+wait 2
+shot slam_4hit
+wait 3
+shot slam_5stop
+wait 6
+shot slam_6follow
+wait 40
+cmd skyabyss dev anim @e[type=skyabyss:heart_warden] claw
+wait 6
+shot claw_1antic
+wait 8
+shot claw_2coil
+wait 3
+shot claw_3snap
+wait 1
+shot claw_4hit
+wait 3
+shot claw_5stop
+wait 4
+shot claw_6follow
+echo done
+quit

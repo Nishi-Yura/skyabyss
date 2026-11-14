@@ -373,12 +373,16 @@ def shield_rush(i):
     dot(i, 21, 12, WHITE)
 
 
-def archer_leap(i):
+def bow_spirit(i):
+    # 番の弓霊 (2026-11-13。射手の跳び退きの升目を使う): 宙に浮く骨の弓と、つがえた矢、まわりの霊の灯
     b = TAG["bone"]
-    put(i, [(5, 16), (13, 9), (13, 13), (24, 13), (24, 19), (13, 19), (13, 23)], rgba(b))
-    for k, x in enumerate((26, 28)):
-        line(i, [(x, 12 + k), (x, 20 - k)], rgba(b, 180 - k * 60))
-    dot(i, 8, 16, WHITE)
+    line(i, [(14, 6), (11, 10), (10, 16), (11, 22), (14, 26)], rgba(shade(b, 0.7)), w=2)
+    line(i, [(12, 6), (9, 10), (8, 16), (9, 22), (12, 26)], rgba(b), w=2)
+    line(i, [(14, 7), (14, 25)], rgba(WHITE, 150))
+    line(i, [(14, 16), (24, 16)], rgba(b), w=2)
+    put(i, [(23, 13), (27, 16), (23, 19)], rgba(WHITE))
+    for x, y, a in ((20, 9, 255), (24, 23, 200), (17, 24, 140)):
+        dot(i, x, y, rgba(WHITE, a))
 
 
 # ---------------------------------------------------------------- 紋
@@ -466,7 +470,7 @@ GLYPHS = [glyph(t) for t in ("rock", "wind", "tide", "ash", "bone")]
 JOB_ICONS = [
     (thunder_bolt, S, SD), (star_reading, S, SD), (ember_orb, S, SD), (frost_tide, S, SD), (blink, S, SD), (star_oath, S, SD),
     (forge_stomp, TAG["ash"], TAG["ash"]), (mist_veil, TAG["wind"], TAG["wind"]), (curse_mark, TAG["tide"], TAG["tide"]),
-    (lamp_charm, TAG["tide"], TAG["tide"]), (shield_rush, TAG["rock"], TAG["rock"]), (archer_leap, TAG["bone"], TAG["bone"]),
+    (lamp_charm, TAG["tide"], TAG["tide"]), (shield_rush, TAG["rock"], TAG["rock"]), (bow_spirit, TAG["bone"], TAG["bone"]),
     # 37〜43: 木 v2 で足した技 (docs/design/48)
     (shield_bash, TAG["rock"], TAG["rock"]), (bone_swing, TAG["rock"], TAG["bone"]), (spin_cut, TAG["rock"], TAG["rock"]),
     (twin_fang, TAG["wind"], TAG["wind"]), (spark_burst, TAG["ash"], TAG["ash"]), (snare_shot, TAG["bone"], TAG["bone"]), (stardust, S, SD),

@@ -98,7 +98,7 @@ public final class PhasedBossBar {
 
     // 名前で見つからない持ち主 (帯の名が体の名と違う: 巨神の心臓・段の名の帯など。2026-11-09 の声「ボスのhp表記がまだ%のやついる」):
     // 近く (160) の、人でない生き物のうち、体力の割合が帯と同じもの。いくつもあれば最大の体力が一番大きいもの (満タンの雑魚より主)
-    static net.minecraft.world.entity.LivingEntity byRatio(Minecraft mc, BossEvent boss) {
+    public static net.minecraft.world.entity.LivingEntity byRatio(Minecraft mc, BossEvent boss) {
         if (mc.level == null || mc.player == null) {
             return null;
         }

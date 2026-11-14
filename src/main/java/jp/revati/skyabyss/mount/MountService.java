@@ -39,7 +39,7 @@ public final class MountService {
     // 乗っている人の、最後に数えた所
     private static final Map<UUID, Vec3> LAST = new HashMap<>();
     // 駆け寄っている乗り物 (持ち主 → 呼んだ時)。道が見つからなくても毎 tick 持ち主の方へ進め、RUN_MAX で着かなければそばへ移す
-    private static final Map<UUID, Long> APPROACH = new HashMap<>();
+    private static final Map<UUID, Long> APPROACH = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
     static final int RUN_MAX = 100;
     static final double RUN_STOP = 2.6;
 
@@ -307,6 +307,9 @@ public final class MountService {
             return false;
         }
         ItemStack stack = new ItemStack(MountSetup.WHISTLE.get());
+        if (player instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+            jp.revati.skyabyss.notice.GainFeed.note(gainTo, stack);
+        }
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
         }
@@ -320,7 +323,7 @@ public final class MountService {
                 return true;
             }
         }
-        // 旅嚢に入っていても持っている (Y で呼べる)
+        // 旅袋に入っていても持っている (Y で呼べる)
         return jp.revati.skyabyss.pouch.Pouch.count(player, MountSetup.WHISTLE.get()) > 0;
     }
 

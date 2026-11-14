@@ -187,6 +187,10 @@ public final class SeatArena {
                         h.tuneCloud(1, PilgrimHand.HP * PilgrimTrial.hpScale(tier), PilgrimHand.DMG * PilgrimTrial.dmgScale(tier));
                         h.addTag(TAG);
                         level.addFreshEntity(h);
+                        if (side.equals("e")) {
+                            // 手は雲から自分でせり上がる。名前の札と顔のアップだけ (一度)
+                            jp.revati.skyabyss.combat.BossEmerge.stage(h, null, 0, "pilgrim");
+                        }
                         jp.revati.skyabyss.combat.PartyScale.apply(h, present(level).size());
                         jp.revati.skyabyss.combat.PartyScale.resist(h, 1.5);
                         level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 60, 2.0, 2.0, 2.0, 0.05);
@@ -203,6 +207,8 @@ public final class SeatArena {
                     e.tuneCloud(1, PilgrimEye.HP * PilgrimTrial.hpScale(tier), PilgrimEye.DMG * PilgrimTrial.dmgScale(tier));
                     e.addTag(TAG);
                     level.addFreshEntity(e);
+                    // 雲の瞼が紙のように開いて現れる
+                    jp.revati.skyabyss.combat.BossEmerge.stage(e, "unfold", 44, "pilgrim");
                     jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
                     jp.revati.skyabyss.combat.PartyScale.resist(e, 1.5);
                     e.playAction("call");
@@ -219,6 +225,8 @@ public final class SeatArena {
                     m.tuneCloud(1, PilgrimMoon.HP * PilgrimTrial.hpScale(tier), PilgrimMoon.DMG * PilgrimTrial.dmgScale(tier));
                     m.addTag(TAG);
                     level.addFreshEntity(m);
+                    // 月が空から落ちてくる
+                    jp.revati.skyabyss.combat.BossEmerge.stage(m, "drop", 44, "pilgrim");
                     jp.revati.skyabyss.combat.PartyScale.apply(m, present(level).size());
                     jp.revati.skyabyss.combat.PartyScale.resist(m, 1.5);
                     m.playAction("call");

@@ -56,6 +56,9 @@ public final class FieldPuzzles {
         MomentStop.learn(p);
         if (!MoonHourglassItem.carries(p)) {
             ItemStack glass = new ItemStack(FieldBlocks.MOON_HOURGLASS.get());
+            if (p instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+                jp.revati.skyabyss.notice.GainFeed.note(gainTo, glass);
+            }
             if (!p.getInventory().add(glass)) {
                 p.drop(glass, false);
             }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch5.warden;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -269,7 +270,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             return;
         }
         double d = dmg();
-        Telegraph.in(level, TelegraphShape.circle(heart.getX() + 0.5, heart.getZ() + 0.5, RING_RADIUS)).floor(heart.getY()).warn(RING_WARN).danger().owner(this)
+        Telegraph.in(level, TelegraphShape.circle(heart.getX() + 0.5, heart.getZ() + 0.5, RING_RADIUS)).prop(PropFx.ring("tentacle", 8).size(0.8f)).floor(heart.getY()).warn(RING_WARN).danger().owner(this)
                 .onHit((lvl, p) -> p.hurt(damageSources().mobAttack(this), (float) d)).start();
     }
 
@@ -524,6 +525,11 @@ public class HeartWarden extends Monster implements GeoEntity {
         double y = getY();
         Telegraph.in(level, TelegraphShape.circle(x, z, 3.5)).floor(y).warn(28).danger().owner(this)
                 .onImpact(lvl -> boom(lvl, x, y, z, 3.5)).onHit(hit(1.6)).start();
+        // 技の形: 叩きつけた所のまわりに肋の棘が突き出る
+        for (int k = 0; k < 6; k++) {
+            double sa = k * Math.PI / 3 + 0.4;
+            jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "bone_spike", this, new net.minecraft.world.phys.Vec3(x + Math.cos(sa) * 3.0, y, z + Math.sin(sa) * 3.0), (float) Math.toDegrees(sa), 0.8f, 14, 28);
+        }
         getNavigation().stop();
         playAction("slam");
     }
@@ -536,6 +542,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             double r = 2.5 + k * 2.2;
             double x = getX() + Math.cos(ang) * r;
             double z = getZ() + Math.sin(ang) * r;
+            jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "bone_spike", this, new net.minecraft.world.phys.Vec3(x, y, z), k * 53f, 0.75f + k * 0.04f, 14, 20 + k * 4);
             Telegraph.in(level, TelegraphShape.circle(x, z, 1.8)).floor(y).warn(20 + k * 4).danger().owner(this)
                     .onImpact(lvl -> {
                         lvl.playSound(null, x, y, z, SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.4f, 0.5f);
@@ -552,9 +559,9 @@ public class HeartWarden extends Monster implements GeoEntity {
         double x = getX();
         double z = getZ();
         double y = getY();
-        Telegraph.in(level, TelegraphShape.ring(x, z, 2, 5.5)).floor(y).warn(24).danger().owner(this)
+        Telegraph.in(level, TelegraphShape.ring(x, z, 2, 5.5)).prop(PropFx.ring("tentacle", 8).size(0.7f)).floor(y).warn(24).danger().owner(this)
                 .onImpact(lvl -> lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.4f)).onHit(hit(1.0)).start();
-        Telegraph.in(level, TelegraphShape.ring(x, z, 5.5, 9.5)).floor(y).warn(38).danger().owner(this)
+        Telegraph.in(level, TelegraphShape.ring(x, z, 5.5, 9.5)).prop(PropFx.ring("tentacle", 12).size(0.8f)).floor(y).warn(38).danger().owner(this)
                 .onImpact(lvl -> {
                     lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.3f);
                     lvl.sendParticles(ParticleTypes.SONIC_BOOM, x, y + 1, z, 1, 0, 0, 0, 0);

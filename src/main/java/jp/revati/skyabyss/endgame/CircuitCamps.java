@@ -64,7 +64,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   景品    野営地ごとの品の表 (その土地の巨神の品・その土地の目安の帯の階級の品 (レア・エピック・ヒロイック)・神器 (塔と雲上の品)・
 //           旅の支え (回復の薬・その土地の糧・鐘銭))。PERIOD_DAYS ごとに表を引き直す (野営地と期の番号で決まる。誰が見ても同じ)。
 //           アンコモンと伝説は入れない (2026-11-06 の声「ミシックおいて。逆に伝説なくして。アンコモンなくして、回復とか食べ物、金銭もおいてほしい」)
-//   引き    終わると、印 1 つにつき 1 回 (呪いの柱 1 本につき +1)、表から引く。重み WEIGHTS と SUPPLY_WEIGHT (神器は 0.1%)。引いた品は旅嚢へ入れ、
+//   引き    終わると、印 1 つにつき 1 回 (呪いの柱 1 本につき +1)、表から引く。重み WEIGHTS と SUPPLY_WEIGHT (神器は 0.1%)。引いた品は旅袋へ入れ、
 //           画面の幕 (client/endgame/CircuitRewardScreen) で一つずつ見せる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class CircuitCamps {

@@ -59,6 +59,8 @@ public final class TowerFight {
     // 目覚めまでの間 (20 秒)。2026-11-02 の声「急に始まりすぎ」「ギミックがよくわからない」: 主の名を出し、予告・落ちる月・側の目・癒しの輪を
     // 一つずつ知らせ、3・2・1 を数えてから動く (前は 5 秒で動き出した)
     public static final int INTRO = 400;
+    // 登場の札と顔のアップを出す時 (目覚めの始まりから)
+    static final int INTRO_CARD = 80;
     static final int REST = 50;
     // 落ちる月が北の広場から南の端まで渡りきる tick
     public static final int MOON_TICKS = 1800;
@@ -151,6 +153,8 @@ public final class TowerFight {
         m.setShielded(true);
         m.setFloor(m.getMaxHealth() * floorFrac(0));
         level.addFreshEntity(m);
+        // 登場: 裂け目の前に結晶のように育ち、名前の札と顔のアップ (combat/BossEmerge)
+        jp.revati.skyabyss.combat.BossEmerge.stage(m, "grow", 56, "tower_master");
         // 硬さ 2.0: 四人で 15〜20 分 (54 の 2.3)。隙の決まりが入って 0.3 倍で削り切る形でなくなったぶん (47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.resist(m, 1.82);
         master = m;
@@ -203,9 +207,12 @@ public final class TowerFight {
         long since = now - start;
         // 目覚め
         if (since < INTRO) {
-            if (since == 20) {
+            // 入ったときの所の題 (あいだの塔) が消え、主の体が人の画面に届いてから (入って 1 秒では体がまだ届かず、顔のアップがすぐ終わっていた)
+            if (since == INTRO_CARD) {
+                // ほかの主と同じ登場の札 (上下の黒い帯・名前・肩書き) と顔のアップ (2026-11-12 の声「最初のカメラやボスの名前」)
+                jp.revati.skyabyss.combat.BossIntro.card(here, Component.translatable("entity.skyabyss.tower_master"),
+                        Component.translatable("message.skyabyss.tower.intro_sub"), 110, master);
                 for (ServerPlayer p : here) {
-                    Notice.place(p, Component.translatable("entity.skyabyss.tower_master"), Component.translatable("message.skyabyss.tower.intro_sub"));
                     Notice.alert(p, "message.skyabyss.tower.intro");
                 }
             }
@@ -215,16 +222,16 @@ public final class TowerFight {
                     Notice.hint(p, "message.skyabyss.tower.stance_now", Component.translatable(run.stance.nameKey()), Component.translatable(run.stance.descKey()));
                 }
             }
-            if (since == 40) {
+            if (since == INTRO_CARD + 16) {
                 master.playAction("roar");
                 sound(level, master.chest(), CloudMobsSetup.PILGRIM_ROAR.get(), 6f, 0.6f);
             }
             // 側の目の知らせ (tip3) に合わせて、身を伏せて両腕を橋の左右の台へ広げる
-            if (since == 220) {
+            if (since == 250) {
                 master.playAction("bow");
             }
-            // 仕掛けの知らせ (一つずつ)
-            int tip = since == 100 ? 1 : since == 160 ? 2 : since == 220 ? 3 : since == 280 ? 4 : 0;
+            // 仕掛けの知らせ (一つずつ。顔のアップ (札の 80〜160) が終わってから)
+            int tip = since == 170 ? 1 : since == 210 ? 2 : since == 250 ? 3 : since == 290 ? 4 : 0;
             if (tip > 0) {
                 for (ServerPlayer p : here) {
                     Notice.hint(p, "message.skyabyss.tower.tip" + tip);
@@ -665,7 +672,9 @@ public final class TowerFight {
                     z.decal = true;
                     jp.revati.skyabyss.combat.TelegraphShape shape = z.kind == Zone.CIRCLE ? jp.revati.skyabyss.combat.TelegraphShape.circle(z.cx, z.cz, z.r)
                             : jp.revati.skyabyss.combat.TelegraphShape.line(z.x0, z.cz, 0, z.x1 - z.x0, (z.z1 - z.z0) / 2);
-                    var b = jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(z.y).warn((int) (z.at - now)).owner(master).victims(pl -> false);
+                    var b = jp.revati.skyabyss.combat.Telegraph.in(level, shape).floor(z.y).warn((int) (z.at - now)).owner(master).victims(pl -> false)
+                            // 技の形: 傷の円には床から晶の棘 (分け合う円・横切る帯には出さない)
+                            .prop(z.kind == Zone.CIRCLE && !z.share ? jp.revati.skyabyss.combat.prop.PropFx.rise("crystal_spike") : null);
                     (z.share ? b.goal() : b.danger()).start();
                 }
                 if ((z.at - now) % (z.at - now <= 10 ? 2 : 4) == 0) {

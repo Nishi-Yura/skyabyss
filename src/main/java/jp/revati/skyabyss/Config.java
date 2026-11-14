@@ -140,7 +140,7 @@ public final class Config {
             .defineEnum("mapStyle", MapStyle.SLATE);
 
     public static final ModConfigSpec.BooleanValue HIDE_HELP_TOASTS = CLIENT_BUILDER
-            .comment("バニラのレシピ・操作説明の札を出さないか (true = 出さない。レシピは旅嚢の作り方の帯と本で見られる)")
+            .comment("バニラのレシピ・操作説明の札を出さないか (true = 出さない。レシピは旅袋の作り方の帯と本で見られる)")
             .define("hideHelpToasts", true);
 
     public static final ModConfigSpec.BooleanValue UI_SKIN_INSTALLED = CLIENT_BUILDER
@@ -237,11 +237,11 @@ public final class Config {
             .define("damageNumbers", true);
 
     public static final ModConfigSpec.BooleanValue POUCH_QUICK_CARD = CLIENT_BUILDER
-            .comment("ホットバーの左に、旅嚢の短押しで使う道具の札 (場面に合わせて自動で入れ替わる) を出すか (false = 出さない。短押しは前回の道具)")
+            .comment("ホットバーの左に、旅袋の短押しで使う道具の札 (場面に合わせて自動で入れ替わる) を出すか (false = 出さない。短押しは前回の道具)")
             .define("pouchQuickCard", true);
 
     public static final ModConfigSpec.ConfigValue<String> POUCH_QUICK_PIN = CLIENT_BUILDER
-            .comment("札に置いた道具の名前 (空 = 自動)。旅嚢の画面で右クリックして置く／はずす。輪で選んだ道具も置かれる")
+            .comment("札に置いた道具の名前 (空 = 自動)。旅袋の画面で右クリックして置く／はずす。輪で選んだ道具も置かれる")
             .define("pouchQuickPin", "");
 
     // 技の予告の見せ方 (client/combat/TelegraphRenderer): DECAL = 床に満ちる面と縁 (既定)、PARTICLES = 点線の粒、BOTH = 両方

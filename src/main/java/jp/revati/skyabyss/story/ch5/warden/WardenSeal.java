@@ -39,7 +39,9 @@ final class WardenSeal {
             set(level, base, DARK);
             level.playSound(null, base, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1.2f, 0.5f);
             sealed = true;
-        } else if (!fight && (sealed || level.getBlockState(base).is(Blocks.BLACK_CONCRETE))) {
+        } else if (!fight && level.isLoaded(base) && (sealed || level.getBlockState(base).is(Blocks.BLACK_CONCRETE))) {
+            // 入口のチャンクが読み込まれていないときは見ない (誰もいない深淵で 10 tick ごとにチャンクを読み込ませていた)。
+            // 開けるのは、だれかが近づいて読み込まれたとき
             set(level, base, Blocks.AIR.defaultBlockState());
             level.playSound(null, base, SoundEvents.SCULK_BLOCK_BREAK, SoundSource.BLOCKS, 1.0f, 0.6f);
             sealed = false;

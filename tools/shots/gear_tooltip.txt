@@ -1,0 +1,47 @@
+# 2026-11-10: 武器と防具のツールチップ (アイコンつきの見た目)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/gear_tooltip.txt -PshotsName=gear_tooltip
+world geartip flat
+size 1280 720
+timeout 900
+render 6
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd give @s skyabyss:wild_ramhorn_greatsword
+cmd give @s skyabyss:wild_oldsoldier_chestplate
+cmd give @s skyabyss:wild_fluff_staff
+wait 40
+open inventory
+wait 20
+hover slot 36
+wait 10
+shot a_weapon
+hover slot 37
+wait 10
+shot b_armor
+hover slot 38
+wait 10
+shot c_staff
+close
+wait 10
+cmd give @s skyabyss:stone_whale_shard 12
+cmd give @s skyabyss:resonance_crystal 3
+cmd give @s skyabyss:bone_chip 20
+cmd give @s skyabyss:soot_iron 5
+cmd give @s skyabyss:moon_dust 7
+cmd give @s skyabyss:sky_key_fragment 2
+wait 40
+key skyabyss_pouch.key.open
+wait 20
+shot d_pouch_keep
+click 220 133
+wait 10
+shot e_pouch_titan
+click 220 157
+wait 10
+hover 220 157
+wait 5
+shot f_pouch_land
+quit

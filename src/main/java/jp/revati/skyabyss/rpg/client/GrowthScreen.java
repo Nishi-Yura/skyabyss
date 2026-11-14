@@ -153,11 +153,11 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
         g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), sx, Golden.textY(y, Golden.ROW), GOLD, false);
         float fraction = max ? 1f : (float) d.xp / Math.max(1, d.xpNeed());
-        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF343A48);
-        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0C0E13);
+        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF364064);
+        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0A0E1E);
         int fill = Mth.clamp(Math.round((BAR_W - 2) * fraction), 0, BAR_W - 2);
         if (fill > 0) {
-            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFF7FD6D0 : 0xFFE0B040);
+            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFF8FD0FF : 0xFFE0B040);
         }
         Component xpText = max ? Component.translatable("gui.skyabyss.growth.max")
                 : Component.translatable("gui.skyabyss.growth.xp", d.xp, d.xpNeed());
@@ -185,31 +185,25 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             g.drawString(font, Component.translatable(stat.nameKey()), r.x() + Golden.S34, Golden.textY(r.y() + 4, Golden.ROW), TEXT, false);
             String v = String.valueOf(value);
             g.drawString(font, v, r.right() - Golden.S8 - font.width(v), Golden.textY(r.y() + 4, Golden.ROW), value > 0 ? GOLD : TEXT, false);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, effect(stat, value), r.x() + Golden.S34, Golden.textY(r.y() + 4 + Golden.ROW, Golden.ROW),
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, effect(stat, value, d.level), r.x() + Golden.S34, Golden.textY(r.y() + 4 + Golden.ROW, Golden.ROW),
                     r.w() - Golden.S34 - Golden.S8, SOFT, false);
-        }
-
-        // 記憶の断片 (脇の列の下の端)。効果を作るまで渡さないので、持っていないときは出さない (00 の 384。いつも 0 の欄は何の数か分からなかった)
-        if (d.fragmentCount() > 0) {
-            int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
-            Golden.rule(g, sx, sx + sw, fy - Golden.S3);
-            Component frag = Component.translatable("gui.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, frag, sx, Golden.textY(fy, Golden.ROW), sw, LORE, false);
         }
 
         renderHover(g, d, mouseX, mouseY);
     }
 
     // ステータスの効果の一行
-    static Component effect(Stat stat, int value) {
+    static Component effect(Stat stat, int value, int level) {
         return switch (stat) {
             case STRENGTH -> Component.translatable("gui.skyabyss.growth.effect.strength", pct(GrowthRules.meleeMultiplier(value)));
             case AGILITY -> Component.translatable("gui.skyabyss.growth.effect.agility",
                     pct(GrowthRules.moveMultiplier(value)), pct(GrowthRules.projectileMultiplier(value)));
             case SPIRIT -> Component.translatable("gui.skyabyss.growth.effect.spirit",
                     (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(value)));
-            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality",
-                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value)));
+            // レベルで増えた体力も足す (RecordBuilder.effect と同じ)
+            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality_level",
+                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value) + GrowthRules.levelHealth(level)),
+                    jp.revati.skyabyss.Hp.of(GrowthRules.levelHealth(level)));
         };
     }
 
@@ -217,7 +211,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         return String.format("%.1f", v * 100);
     }
 
-    // 名前に重ねると説明、断片の行に重ねると中身、バーに重ねると合計の経験値
+    // 名前に重ねると説明、バーに重ねると合計の経験値
     private void renderHover(GuiGraphics g, GrowthData d, int mouseX, int mouseY) {
         for (Stat stat : Stat.values()) {
             if (statRow(stat.ordinal()).contains(mouseX, mouseY)) {
@@ -228,14 +222,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                 tip(lines);
                 return;
             }
-        }
-        int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
-        if (d.fragmentCount() > 0 && mouseX >= SIDE.x() && mouseX < SIDE.right() && mouseY >= fy && mouseY < fy + Golden.ROW) {
-            List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.fragments_desc"), 200));
-            d.fragments.forEach((id, n) -> lines.add(Component.translatable(jp.revati.skyabyss.rpg.MemoryFragments.nameKey(id))
-                    .append(" ×" + n).withColor(LORE).getVisualOrderText()));
-            tip(lines);
-            return;
         }
         if (mouseX >= BAR_X && mouseX < BAR_X + BAR_W && mouseY >= BAR_Y - Golden.ROW && mouseY < BAR_Y + BAR_H + Golden.ROW) {
             tip(List.of(Component.translatable("gui.skyabyss.growth.lifetime", d.lifetimeXp(),

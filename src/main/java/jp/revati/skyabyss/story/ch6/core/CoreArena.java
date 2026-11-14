@@ -89,6 +89,8 @@ public final class CoreArena {
         e.tuneMoon(3, full, false, MoonCoreBoss.HP / MoonMob.SECTION_HP[3], MoonCoreBoss.DMG / MoonMob.SECTION_DMG[3]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場 (combat/BossEmerge): 出方と、名前の札と顔のアップ
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "grow", 44, "moon_core");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, players(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.94);

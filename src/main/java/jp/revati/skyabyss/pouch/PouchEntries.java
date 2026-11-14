@@ -140,7 +140,7 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_SHELL_SHARD.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.item.storm.StormGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
-        // 序盤の背中の素材 (岩殻片・護り糸)。誂えの材料も旅嚢の中から払える。登録の末尾に足して既存の枠の位置を動かさない
+        // 序盤の背中の素材 (岩殻片・護り糸)。誂えの材料も旅袋の中から払える。登録の末尾に足して既存の枠の位置を動かさない
         add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_SCRAP.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_THREAD.get(), Category.MATERIAL, 999, false, false);
         // 小さな素材
@@ -153,16 +153,37 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
         // 鐘銭も袋へ (2026-10-25 の試遊。支払いは袋と持ち物の両方から: Coins)。共鳴の列に足すと袋の枠が一行あふれるので、小さな素材の列の端に
-        // 上限は Coins.MAX (999,999,999。2026-11-01)。旅嚢の枠の上には数を出さない (PouchScreen.renderSlot)
+        // 上限は Coins.MAX (999,999,999。2026-11-01)。旅袋の枠の上には数を出さない (PouchScreen.renderSlot)
         add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.SMALL, jp.revati.skyabyss.facility.Coins.MAX, false, false);
         // 乗り笛 (Y の短押しで呼ぶ・帰す)。登録の末尾に足して既存の枠の位置を動かさない。区分は鍵の列 (使う道具の列に足すと袋の枠が一行あふれる)
         add(list, jp.revati.skyabyss.mount.MountSetup.WHISTLE.get(), Category.KEY, 1, true, false);
+        // 2026-11-10: 後の章の素材 (深淵・月・終章・塔) と、土地の敵の素材。ページを分けて入るようにした (PouchConfig.Page)
+        // 深淵の敵の素材 (骨のかけら・塩の結晶・雷の銅片) は深みの商人の交換 (持ち物の品を見る) に使うので入れない
+        add(list, jp.revati.skyabyss.abyss.gear.AbyssGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.tower.gear.TowerGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.abyss.gear.AbyssGearSetup.RESONANCE_SHARD.get(), Category.RESONANCE, 999, false, false);
+        add(list, jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.RESONANCE_SHARD.get(), Category.RESONANCE, 999, false, false);
+        add(list, jp.revati.skyabyss.abyss.gear.AbyssGearSetup.CORE.get(), Category.KEY, 99, false, false);
+        add(list, jp.revati.skyabyss.story.ch6.gear.MoonGearSetup.CORE.get(), Category.KEY, 99, false, false);
+        add(list, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get(), Category.KEY, 99, false, false);
+        for (String id : LAND_ITEMS) {
+            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, id));
+            if (item != net.minecraft.world.item.Items.AIR) {
+                add(list, item, Category.LAND, 999, false, false);
+            }
+        }
         // 封の箱 (19 種。docs/design/52)。袋の枠の並び (PouchLayout) には出さない
         for (var box : jp.revati.skyabyss.loot.box.LootBoxSetup.BOX_ITEMS.values()) {
             add(list, box.get(), Category.BOX, 999, false, false);
         }
         return list;
     }
+
+    // 土地の敵の素材 (売るだけの品。店の買い取りは旅袋の中も見る)
+    private static final String[] LAND_ITEMS = {"soot_iron", "ash_hemp", "ash_ward_thread", "lamp_ash", "soot_clump", "rope_knot", "echo_shard",
+            "pulse_membrane", "star_shard", "moon_dust", "crescent_shell", "shadow_thread"};
 
     // 心核か (図鑑の頁がない巨神も装備の表の心核で数える。Keepsakes.coreItems)
     private static boolean isCore(Item item) {

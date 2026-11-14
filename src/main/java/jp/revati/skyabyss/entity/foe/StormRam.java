@@ -1,12 +1,12 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -59,22 +59,14 @@ public class StormRam extends RegionBoss {
             double cx = getX();
             double cz = getZ();
             double y = getY();
-            Telegraph.in(server(), TelegraphShape.ring(cx, cz, RING_IN, RING_OUT))
+            Telegraph.in(server(), TelegraphShape.ring(cx, cz, RING_IN, RING_OUT)).prop(PropFx.ring("lightning", 6).size(0.7f))
                     .floor(y).warn(REAR_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, cx, y, cz, MobSounds.STORM_RAM_STOMP.get(), SoundSource.HOSTILE, 1.6f, 1f);
-                        for (int i = 0; i < 6; i++) {
-                            double a = i * Math.PI / 3 + random.nextDouble() * 0.4;
-                            double r = (RING_IN + RING_OUT) / 2;
-                            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
-                            if (bolt != null) {
-                                bolt.moveTo(cx + Math.cos(a) * r, y, cz + Math.sin(a) * r);
-                                bolt.setVisualOnly(true);
-                                server.addFreshEntity(bolt);
-                            }
-                        }
-                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, y + 0.3, cz, 80, RING_OUT * 0.5, 0.2, RING_OUT * 0.5, 0.3);
+                        // 輪の雷は技の形 (prop lightning)。雷鳴だけ鳴らす
+                        server.playSound(null, cx, y, cz, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.6f, 1.0f);
+                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, y + 0.3, cz, 50, RING_OUT * 0.5, 0.2, RING_OUT * 0.5, 0.3);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.3f))
                     .start();

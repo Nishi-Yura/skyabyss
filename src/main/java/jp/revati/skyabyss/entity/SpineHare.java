@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.combat.Telegraph;
@@ -99,7 +100,7 @@ public class SpineHare extends GroundFoe {
         playAction("shoot");
         Vec3 f = forward();
         double angle = Telegraph.angleOf(f.x, f.z);
-        Telegraph.in((ServerLevel) level(), TelegraphShape.line(getX(), getZ(), angle, LINE_LENGTH, LINE_HALF_WIDTH))
+        Telegraph.in((ServerLevel) level(), TelegraphShape.line(getX(), getZ(), angle, LINE_LENGTH, LINE_HALF_WIDTH)).prop(PropFx.shots("bone_shard", 1))
                 .floor(getY()).warn(WARN).danger().owner(this)
                 .target(target)
                 .startSound(MobSounds.SPINE_HARE_RAISE.get(), 1.0f, 1.0f)

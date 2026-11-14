@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -7,6 +8,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.combat.BossCue;
+import jp.revati.skyabyss.combat.BossIntro;
 import jp.revati.skyabyss.combat.BossOpenings;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
@@ -99,6 +101,185 @@ public abstract class DungeonBoss extends RegionBoss {
         holes.addAll(list);
     }
 
+    // ---------------------------------------------------------------- 登場 (2026-11-11 の声「最初の登場のアニメーションや、画面にボスの名前表示がない」)
+    // 人 (偽の人は数えない) が INTRO_WAKE まで寄ると一度だけ: 主は地の下に隠れ (見えず・傷を受けず・動かない)、画面に「〜が這い出る」と
+    // INTRO_RISE tick の数え下ろし、地鳴りと土煙。数え終わると姿を見せて登場の動き (introAnim) と名前の札 (combat/BossIntro)。
+    // 動きが終わる (introLength) と戦いが始まる。済んだかは保存する (読み込み直しで繰り返さない)
+    public static final double INTRO_WAKE = 22;
+    // これより近くに本物の人がいれば、登場までは地の下に潜んで待つ
+    public static final double INTRO_LURK = 64;
+    public static final int INTRO_RISE = 60;
+    public static final int INTRO_CARD = 90;
+    private int introTick = -1;
+    private boolean introDone;
+
+    // 登場の動き (主ごとに替える)。既定は吠える
+    // ダンジョンの中ボス (坑の頭・鐘の隠者・晶洞の巨像・牛の鍛冶) は true: 名前の札は出すが、顔のアップはしない
+    protected boolean midBoss() {
+        return false;
+    }
+
+    // 出方 (combat/BossEmerge の style)。"dig" = 地を掘って這い出る (いつもの)。ほかは姿を見せる時から名前の札まで、その出方で現れる
+    protected String entrance() {
+        return "dig";
+    }
+
+    protected String introAnim() {
+        return "roar";
+    }
+
+    // 登場の動きの長さ (tick)
+    protected int introLength() {
+        return 32;
+    }
+
+    // 登場の動きのうち、体が地から抜けきって吠える tick (名前の札と大きな土煙はここ)。既定は出た瞬間
+    protected int introCardAt() {
+        return 0;
+    }
+
+    public boolean introRunning() {
+        return introTick >= 0;
+    }
+
+    // 試験・やり直し用: 登場を済んだことにする
+    public void skipIntro() {
+        if (introTick >= 0) {
+            endIntro();
+        }
+        introDone = true;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (level().isClientSide || introDone || !isAlive()) {
+            return;
+        }
+        if (introTick < 0) {
+            // 本物の人 (偽の人・見物の人は数えない) が近いか。近くに誰もいない (自己テストの偽の人だけ) なら何もしない
+            double nearest = Double.MAX_VALUE;
+            for (ServerPlayer p : server().players()) {
+                if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && !p.isSpectator() && p.isAlive()) {
+                    nearest = Math.min(nearest, p.distanceToSqr(this));
+                }
+            }
+            if (nearest < INTRO_WAKE * INTRO_WAKE) {
+                startIntro();
+            } else if (nearest < INTRO_LURK * INTRO_LURK) {
+                // まだ遠い: 地の下に潜んで待つ (立ったまま見えていて、寄ると消えて出直すのを防ぐ)
+                if (!isInvisible() || !isNoAi()) {
+                    setInvisible(true);
+                    setNoAi(true);
+                    getNavigation().stop();
+                }
+            }
+            return;
+        }
+        introTick++;
+        setDeltaMovement(0, getDeltaMovement().y, 0);
+        if (introTick < INTRO_RISE) {
+            if (!"dig".equals(entrance())) {
+                return;
+            }
+            // 地鳴り: 足もとの土と骨が跳ね、低い音がだんだん大きく
+            if (introTick % 4 == 0) {
+                float k = introTick / (float) INTRO_RISE;
+                server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                        getX(), getY() + 0.2, getZ(), (int) (10 + 30 * k), 1.2 + 1.5 * k, 0.1, 1.2 + 1.5 * k, 0.15);
+            }
+            if (introTick % 20 == 0) {
+                server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_DIG, SoundSource.HOSTILE, 1.6f + introTick / 40f, 0.5f);
+            }
+            return;
+        }
+        if (introTick == INTRO_RISE) {
+            setInvisible(false);
+            // いちばん近い人の方を向いて出る
+            ServerPlayer face = null;
+            for (ServerPlayer p : server().players()) {
+                if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && !p.isSpectator() && p.isAlive()
+                        && (face == null || p.distanceToSqr(this) < face.distanceToSqr(this))) {
+                    face = p;
+                }
+            }
+            if (face != null) {
+                float yaw = (float) (net.minecraft.util.Mth.atan2(face.getZ() - getZ(), face.getX() - getX()) * 57.2957763671875) - 90f;
+                setYRot(yaw);
+                setYBodyRot(yaw);
+                setYHeadRot(yaw);
+            }
+            playAction(introAnim());
+            if (!"dig".equals(entrance())) {
+                jp.revati.skyabyss.combat.BossEmerge.visual(this, entrance(), Math.max(20, introCardAt()));
+            }
+            // 床が割れる
+            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                    getX(), getY() + 0.6, getZ(), 60, 1.4, 0.5, 1.4, 0.2);
+            server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 2.0f, 0.7f);
+        }
+        int out = INTRO_RISE + introCardAt();
+        if (introTick > INTRO_RISE && introTick < out && introTick % 3 == 0 && "dig".equals(entrance())) {
+            // 這い出る間: 体のまわりから土と骨が噴き、掘る音
+            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                    getX(), getY() + 0.3, getZ(), 18, 1.6, 0.4, 1.6, 0.18);
+            if (introTick % 12 == 0) {
+                server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 1.8f, 0.5f);
+            }
+        }
+        if (introTick == out) {
+            // 体が抜けきって吠える: 名前の札
+            BossIntro.send(this, BossIntro.NAME, bossId(), INTRO_CARD, !midBoss());
+            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                    getX(), getY() + 1.0, getZ(), 120, 2.0, 1.2, 2.0, 0.25);
+            server().sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 1.5, 0.3, 1.5, 0);
+            server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.5f);
+            return;
+        }
+        if (introTick <= out) {
+            return;
+        }
+        if (introTick >= INTRO_RISE + introLength()) {
+            endIntro();
+            introDone = true;
+        }
+    }
+
+    private void startIntro() {
+        introTick = 0;
+        setNoAi(true);
+        setInvisible(true);
+        setInvulnerable(true);
+        getNavigation().stop();
+        BossIntro.send(this, BossIntro.RISE, bossId(), INTRO_RISE);
+    }
+
+    private void endIntro() {
+        introTick = -1;
+        setNoAi(false);
+        setInvisible(false);
+        setInvulnerable(false);
+        cooldown = Math.max(cooldown, 10);
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("skyabyss_intro_done", introDone || introTick >= 0);
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        introDone = tag.getBoolean("skyabyss_intro_done");
+        if (introDone && isNoAi() && isInvisible()) {
+            // 登場の途中で保存されたもの: 戦える姿へ戻す
+            setNoAi(false);
+            setInvisible(false);
+            setInvulnerable(false);
+        }
+    }
+
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false;
@@ -139,7 +320,7 @@ public abstract class DungeonBoss extends RegionBoss {
         cue(bossId(), "rage", RAGE_WARN);
         server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.55f);
         server().sendParticles(ParticleTypes.ANGRY_VILLAGER, getX(), getY() + getBbHeight(), getZ(), 10, getBbWidth() * 0.4, 0.4, getBbWidth() * 0.4, 0);
-        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RAGE_RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RAGE_RADIUS)).prop(PropFx.ring(spikeProp(), 10))
                 .floor(getY()).warn(RAGE_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 6, RAGE_RADIUS * 0.3, 0.2, RAGE_RADIUS * 0.3, 0))
@@ -166,10 +347,25 @@ public abstract class DungeonBoss extends RegionBoss {
             spots.add(target.position().add(Math.cos(a) * r, 0, Math.sin(a) * r));
         }
         var opt = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, look);
+        // 技の形 (combat/prop): 投げる技は主の口元から弧を描いて飛び、降らせる技は空から落ち、噴き上げる技・雷は打つ瞬間に床から出る
+        boolean toss = action.equals("spit") || action.equals("hurl") || action.equals("throw");
+        boolean rise = action.equals("erupt") || action.equals("strike");
+        String kind = action.equals("strike") ? "lightning" : rise ? jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(look)
+                : toss ? jp.revati.skyabyss.combat.prop.AttackProps.tossKind(look) : jp.revati.skyabyss.combat.prop.AttackProps.fallKind(look);
+        Vec3 mouth = position().add(forward().scale(getBbWidth() * 0.6)).add(0, getBbHeight() * 0.7, 0);
         for (Vec3 c : spots) {
+            if (toss) {
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(server(), kind, this, mouth, c, warn, Math.min(warn, 16), 4f, 1.2f, 14);
+            } else if (!rise) {
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(server(), kind, this, c, warn, 14, 11f, 1.3f, 14);
+            }
             Telegraph.in(server(), TelegraphShape.circle(c.x, c.z, radius)).floor(c.y).warn(warn).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
+                        if (rise) {
+                            jp.revati.skyabyss.combat.prop.AttackProps.rise(server, kind, this, c, random.nextFloat() * 360f, kind.equals("lightning") ? 1.0f : 0.9f,
+                                    kind.equals("lightning") ? 6 : 18);
+                        }
                         server.playSound(null, c.x, c.y, c.z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
                         server.sendParticles(opt, c.x, c.y + 0.4, c.z, 24, radius * 0.4, 0.3, radius * 0.4, 0.15);
                     })
@@ -180,6 +376,34 @@ public abstract class DungeonBoss extends RegionBoss {
                     })
                     .start();
         }
+    }
+
+    // 技の形 (combat/prop/PropFx) の、この主のダンジョンの属性の突き出る物 (骨・貝・晶・氷・熔岩)
+    protected String spikeProp() {
+        String id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(getType()).toString();
+        for (jp.revati.skyabyss.dungeon.Dungeon d : jp.revati.skyabyss.dungeon.Dungeon.values()) {
+            if (id.equals(d.boss) || id.equals(d.midBoss)) {
+                return switch (d.element) {
+                    case TIDE -> "shell_spike";
+                    case WIND -> d.id.contains("ice") ? "ice_spike" : "crystal_spike";
+                    case ASH -> "lava_pillar";
+                    default -> "bone_spike";
+                };
+            }
+        }
+        return "bone_spike";
+    }
+
+    // 吹きつけ (spray) の飛ぶ物: 火 → 火の玉、雷 → 風の刃 (梟) か晶の棘、墨 (海月の触手の鞭) → なし (触手は体の技)
+    @javax.annotation.Nullable
+    protected PropFx sprayProp(net.minecraft.core.particles.ParticleOptions look) {
+        if (look == ParticleTypes.FLAME || look == ParticleTypes.SOUL_FIRE_FLAME) {
+            return PropFx.shots("fireball", 3).size(0.6f);
+        }
+        if (look == ParticleTypes.ELECTRIC_SPARK) {
+            return bossId().contains("owl") ? PropFx.shots("wind_blade", 3) : PropFx.shots("crystal_spike", 3).size(0.6f);
+        }
+        return null;
     }
 
     // 跳び込み: 人のいる所に円 (半径 radius、予告 warn)。落ちるときに主がそこへ移り、円の中を打つ。続けて外へ輪の衝撃 (半径 radius 〜 radius+4)
@@ -201,7 +425,7 @@ public abstract class DungeonBoss extends RegionBoss {
                     player.hurtMarked = true;
                 })
                 .start();
-        Telegraph.in(server(), TelegraphShape.ring(at.x, at.z, radius, radius + 4)).floor(at.y).warn(warn + 8).danger().owner(this).target(target)
+        Telegraph.in(server(), TelegraphShape.ring(at.x, at.z, radius, radius + 4)).prop(PropFx.ring(spikeProp(), 10)).floor(at.y).warn(warn + 8).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * dmg * 0.6f);
@@ -219,7 +443,7 @@ public abstract class DungeonBoss extends RegionBoss {
         double base = Telegraph.angleOf(forward());
         for (int k = -1; k <= 1; k += 2) {
             double ang = base + Math.toRadians(halfDeg * 0.5 * k);
-            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), ang, range, Math.toRadians(halfDeg * 0.6))).floor(getY()).warn(warn + (k > 0 ? 10 : 0))
+            Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), ang, range, Math.toRadians(halfDeg * 0.6))).prop(sprayProp(look)).floor(getY()).warn(warn + (k > 0 ? 10 : 0))
                     .active(active).danger().owner(this).target(target).victims(this::canHit)
                     .onImpact(server -> {
                         for (double d = 1.5; d <= range; d += 1.2) {

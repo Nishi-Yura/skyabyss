@@ -1,0 +1,171 @@
+# 呪術師の杖の向き確認 (11-13)
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier common
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot shrine_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot shrine_bell_staff_front
+bodyyaw 90
+wait 10
+shot shrine_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot ember_censer_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot ember_censer_bell_staff_front
+bodyyaw 90
+wait 10
+shot ember_censer_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_surf_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot tide_surf_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot tide_surf_bell_staff_front
+bodyyaw 90
+wait 10
+shot tide_surf_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_deep_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot whale_deep_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot whale_deep_bell_staff_front
+bodyyaw 90
+wait 10
+shot whale_deep_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot whale_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot whale_bell_staff_front
+bodyyaw 90
+wait 10
+shot whale_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_calming_censer
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot wild_calming_censer_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_calming_censer_front
+bodyyaw 90
+wait 10
+shot wild_calming_censer_side
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mourning_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot wild_mourning_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_mourning_bell_staff_front
+bodyyaw 90
+wait 10
+shot wild_mourning_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_thunder_bell_staff
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot storm_thunder_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot storm_thunder_bell_staff_front
+bodyyaw 90
+wait 10
+shot storm_thunder_bell_staff_side
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer
+perspective first
+bodyyaw 0
+hud on
+close
+wait 10
+chat clear
+shot ember_censer_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot ember_censer_front
+bodyyaw 90
+wait 10
+shot ember_censer_side

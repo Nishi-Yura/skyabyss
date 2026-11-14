@@ -62,6 +62,61 @@ public final class ForgeRules {
                 : new int[]{0, tier.dismantleValue + refund, crystals};
     }
 
+    // ---------------------------------------------------------------- 装飾を重ねる (2026-11-10 の選び a_grow)
+    // 野の装飾 (地下のダンジョンの装飾品は倒した数で育つので除く) を、持ち物の同じ品一つと共鳴の結晶 (今の段の数) で一段上げる。
+    // 強さは二つのうち高いほうを残す
+    public static boolean canMerge(ItemStack stack) {
+        return stack.getItem() instanceof jp.revati.skyabyss.item.wild.WildAccessoryItem
+                && !jp.revati.skyabyss.dungeon.DungeonGear.isTrinket(stack.getItem())
+                && jp.revati.skyabyss.item.wild.AccessoryRolls.stage(stack) < jp.revati.skyabyss.item.wild.AccessoryRolls.MAX_STAGE;
+    }
+
+    public static int mergeCrystals(ItemStack stack) {
+        return jp.revati.skyabyss.item.wild.AccessoryRolls.stage(stack);
+    }
+
+    // 重ねに使う持ち物の同じ品 (段がいちばん低く、強さがいちばん低いもの)。なければ -1
+    public static int mergePartner(Player player, ItemStack stack) {
+        Inventory inv = player.getInventory();
+        int best = -1;
+        int bestKey = Integer.MAX_VALUE;
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            if (s == stack || s.isEmpty() || !s.is(stack.getItem())) {
+                continue;
+            }
+            int key = jp.revati.skyabyss.item.wild.AccessoryRolls.stage(s) * 1000 + jp.revati.skyabyss.item.wild.AccessoryRolls.roll(s);
+            if (key < bestKey) {
+                bestKey = key;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    public static boolean mergeReady(Player player, ItemStack stack) {
+        return canMerge(stack) && mergePartner(player, stack) >= 0
+                && (player.isCreative() || count(player, ModItems.RESONANCE_CRYSTAL.get()) >= mergeCrystals(stack));
+    }
+
+    // 重ねる。できたら true
+    public static boolean merge(Player player, ItemStack stack) {
+        if (!mergeReady(player, stack)) {
+            return false;
+        }
+        int slot = mergePartner(player, stack);
+        ItemStack other = player.getInventory().getItem(slot);
+        int roll = Math.max(jp.revati.skyabyss.item.wild.AccessoryRolls.roll(stack), jp.revati.skyabyss.item.wild.AccessoryRolls.roll(other));
+        if (!player.isCreative()) {
+            remove(player, ModItems.RESONANCE_CRYSTAL.get(), mergeCrystals(stack));
+        }
+        other.shrink(1);
+        player.getInventory().setChanged();
+        jp.revati.skyabyss.item.wild.AccessoryRolls.set(stack, roll);
+        jp.revati.skyabyss.item.wild.AccessoryRolls.setStage(stack, jp.revati.skyabyss.item.wild.AccessoryRolls.stage(stack) + 1);
+        return true;
+    }
+
     // ---------------------------------------------------------------- 再鍛造
 
     public static Cost trialCost() {

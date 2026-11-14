@@ -77,7 +77,7 @@ public class MountShopScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
+        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
     }
 
     private int lookY() {
@@ -174,7 +174,7 @@ public class MountShopScreen extends Screen {
         boolean canName = view.bond() >= 2;
         int ww = canName ? rw - NAME_W - 4 : rw;
         boolean hw = mouseX >= rx && mouseX < rx + ww && mouseY >= wy && mouseY < wy + Golden.BTN;
-        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF2A5E6A : 0xFF243440);
+        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF364064 : 0xFF222C52);
         g.renderOutline(rx, wy, ww, Golden.BTN, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
         TextClip.line(g, font, Component.translatable(view.whistle() ? "gui.skyabyss.mount.whistle_have" : "gui.skyabyss.mount.whistle_get"),
                 rx + Golden.S5, Golden.textY(wy, Golden.BTN), ww - 2 * Golden.S5, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
@@ -182,7 +182,7 @@ public class MountShopScreen extends Screen {
         if (canName) {
             int nx = rx + rw - NAME_W;
             boolean hn = mouseX >= nx && mouseX < nx + NAME_W && mouseY >= wy && mouseY < wy + Golden.BTN;
-            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF2A5E6A : 0xFF243440);
+            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF364064 : 0xFF222C52);
             g.renderOutline(nx, wy, NAME_W, Golden.BTN, FacilityUi.TEAL);
             TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.name_button"), nx + 4, Golden.textY(wy, Golden.BTN), NAME_W - 8, 0xFFFFFFFF, false);
         }
@@ -249,7 +249,7 @@ public class MountShopScreen extends Screen {
         }
         int price = MountStats.price(MountStats.ROW_KIND[kind], tier + 1);
         boolean hover = statHit(kind, mx, my);
-        g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF2A5E6A : 0xFF1C222C);
+        g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF364064 : 0xFF141A34);
         g.renderOutline(bx, y + 1, bw, STAT_H - 2, hover ? FacilityUi.TEAL : FacilityUi.LINE);
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), bx + 1, y + 2);
         g.drawString(font, Integer.toString(price), bx + 19, Golden.textY(y, STAT_H), view.coins() >= price ? FacilityUi.GOLD : FacilityUi.LACK, false);

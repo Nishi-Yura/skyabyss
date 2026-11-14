@@ -1,0 +1,53 @@
+# 敵の状態のアイコン (頭の上の帯の上・ボスの帯の名前の右) と、炎の板の代わりの燃え方 (熱の色・火の粉) を撮る (2026-11-12)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/foe_status.txt -PshotsName=foe_status
+world foe_status flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doMobSpawning false
+cmd fill -20 119 -20 20 119 20 minecraft:smooth_basalt
+lowpoly on
+fov 60
+cmd tp @s 0 120 0 0 0
+cmd gamemode creative
+camera minecraft:overworld 0 122.5 -1 0 12
+waitchunks
+wait 40
+cmd kill @e[type=!minecraft:player,distance=..60]
+# 燃えて鈍って毒の船乗り (左)・強化された嵐の羊 (右)・出血して弱った船乗り (真ん中の奥)
+cmd summon skyabyss:drowned_sailor -2.5 120 6 {NoAI:1b,Fire:2000s,Rotation:[180f,0f]}
+cmd summon skyabyss:storm_ram 2.5 120 6 {NoAI:1b,Rotation:[180f,0f]}
+cmd summon skyabyss:drowned_sailor 0 120 10 {NoAI:1b,Rotation:[180f,0f],Tags:["bleed"]}
+cmd effect give @e[type=skyabyss:drowned_sailor,tag=!bleed] minecraft:slowness 60 1
+cmd effect give @e[type=skyabyss:drowned_sailor,tag=!bleed] minecraft:poison 60 0
+cmd effect give @e[type=skyabyss:storm_ram] minecraft:strength 60 0
+cmd effect give @e[type=skyabyss:storm_ram] minecraft:resistance 60 0
+cmd effect give @e[type=skyabyss:storm_ram] minecraft:speed 3 0
+cmd effect give @e[tag=bleed] skyabyss:bleeding 60 0
+cmd effect give @e[tag=bleed] minecraft:weakness 60 0
+wait 40
+shot foes_wide
+camera minecraft:overworld -1.5 121.5 3 10 8
+wait 5
+shot burning_close
+camera minecraft:overworld 2 121.5 3.5 -10 6
+wait 5
+shot buffed_close
+# ボス (鯨骨の隊長。帯は AI が動いているときに出るので NoAI にしない。創造の人は狙わない): 燃えて鈍る。帯の名前の右にアイコン、頭の上に帯は出ない
+cmd kill @e[type=!minecraft:player,distance=..60]
+cmd summon skyabyss:whalebone_captain 0 120 10 {Fire:2000s,Rotation:[180f,0f]}
+cmd effect give @e[type=skyabyss:whalebone_captain] minecraft:slowness 60 1
+cmd effect give @e[type=skyabyss:whalebone_captain] minecraft:weakness 4 0
+camera minecraft:overworld 0 123 -2 0 14
+wait 60
+shot boss_bar_icons
+wait 60
+shot boss_bar_icons_later
+cmd kill @e[type=!minecraft:player,distance=..60]

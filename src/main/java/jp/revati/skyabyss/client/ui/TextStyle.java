@@ -16,9 +16,9 @@ import net.minecraft.util.Mth;
 //   CAPTION : 注記・手がかり・案内 (等倍、灰色)
 public enum TextStyle {
     TITLE(2.2f, 0xF2E6C8, 0x54D6CE),
-    HEADING(1.5f, 0xF2C14E, 0xB8923A),
-    BODY(1.0f, 0xEEF4F0, 0x7FD6D0),
-    CAPTION(1.0f, 0x8C98A4, 0x4A5560);
+    HEADING(1.5f, 0xE9C46A, 0xB8923A),
+    BODY(1.0f, 0xEEF4F0, 0x8FD0FF),
+    CAPTION(1.0f, 0x9AA4C4, 0x4A5560);
 
     public static final int LINE = 11;
 

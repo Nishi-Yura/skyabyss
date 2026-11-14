@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.foe.ContinentFoe;
@@ -64,7 +65,7 @@ public class BellowsImp extends ContinentFoe {
         }
         move = BREATH;
         begin(target, "breath");
-        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(32)))
+        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(32))).prop(PropFx.shots("fireball", 3).size(0.6f))
                 .floor(getY()).warn(WARN).active(20).repeatEvery(10).danger().owner(this).target(target)
                 .startSound(SoundEvents.FIRECHARGE_USE, 0.8f, 0.7f)
                 .victims(this::canHit)

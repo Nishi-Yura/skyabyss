@@ -513,7 +513,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             boolean sel = selArm == arm.ordinal();
             int color = 0xFF000000 | arm.color;
             g.fill(getX(), getY(), getX() + 18, getY() + 18, sel ? 0xFF26303D : isHoveredOrFocused() ? 0xFF1F2733 : 0xFF141922);
-            g.renderOutline(getX(), getY(), 18, 18, sel ? 0xFFF2C14E : isHoveredOrFocused() ? 0xFFE6E2D6 : color & 0xFF8A8A8A | 0xFF303030);
+            g.renderOutline(getX(), getY(), 18, 18, sel ? 0xFFE9C46A : isHoveredOrFocused() ? 0xFFECE8DC : color & 0xFF8A8A8A | 0xFF303030);
             Component name = getMessage();
             g.drawString(font, name, getX() + (18 - font.width(name)) / 2, getY() + 5, color, false);
         }
@@ -548,7 +548,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             Boon boon = offer.get(index);
             boolean sel = selBoon == index;
             g.fill(getX(), getY(), getX() + width, getY() + height, sel ? 0xFF2A3342 : isHoveredOrFocused() ? 0xFF222A37 : 0xFF161B24);
-            g.renderOutline(getX(), getY(), width, height, sel ? 0xFFF2C14E : 0xFF303846);
+            g.renderOutline(getX(), getY(), width, height, sel ? 0xFFE9C46A : 0xFF303846);
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.nameKey()).getString()), getX() + 4,
                     Golden.textY(getY(), ROW), width - 6, sel ? GOLD : TEXT, false);
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.descKey()).getString()), getX() + 4,

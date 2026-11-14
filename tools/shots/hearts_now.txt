@@ -1,0 +1,36 @@
+# 心臓 4 体の今の姿 (作り込みの前の確かめ)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode spectator
+cmd fill -40 -61 -40 40 -61 40 minecraft:smooth_basalt destroy
+hud off
+lowpoly on
+fov 60
+cmd kill @e[type=!minecraft:player,distance=..120]
+waitchunks
+cmd summon skyabyss:stone_whale_heart 0 -52 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+wait 120
+camera minecraft:overworld 0 -50 16 180 4
+wait 5
+shot hn_whale
+cmd kill @e[type=!minecraft:player,distance=..120]
+cmd summon skyabyss:tide_heart 0 -52 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+wait 120
+shot hn_tide
+cmd kill @e[type=!minecraft:player,distance=..120]
+cmd summon skyabyss:thunder_wing_heart 0 -52 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+wait 120
+shot hn_storm
+cmd kill @e[type=!minecraft:player,distance=..120]
+cmd summon skyabyss:ember_heart 0 -52 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+wait 120
+shot hn_ember

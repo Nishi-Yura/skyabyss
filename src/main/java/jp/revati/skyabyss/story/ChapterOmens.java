@@ -38,7 +38,7 @@ public final class ChapterOmens {
     static final String NEXT = "skyabyss_omen_next";
     static final String LIFE_SEEN = "skyabyss_life_seen_";
     static final double HOSTILE_NEAR = 16;
-    private static final Map<UUID, Long> BELL_AT = new HashMap<>();
+    private static final Map<UUID, Long> BELL_AT = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
 
     private ChapterOmens() {
     }

@@ -77,6 +77,8 @@ public final class PromiseArena {
         e.tuneCloud(1, PilgrimPlume.HP, PilgrimPlume.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場 (combat/BossEmerge): 出方と、名前の札と顔のアップ
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "sky", 44, "pilgrim_plume");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.48);

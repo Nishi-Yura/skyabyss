@@ -1,0 +1,43 @@
+# 2026-11-10: 装飾の固有の働き・段 (ツールチップ)、旅袋の細工のページ、共鳴の炉の左の細工の列
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/accessory_parts.txt -PshotsName=accessory_parts
+world accparts flat
+size 1280 720
+timeout 900
+render 6
+guiscale 2
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd gamemode adventure
+cmd give @s skyabyss:wild_wolf_tooth_necklace
+cmd give @s skyabyss:socket_shard_stone 6
+cmd give @s skyabyss:socket_shard_tide 3
+cmd give @s skyabyss:aspect_core
+cmd give @s skyabyss:resonance_crystal 5
+wait 60
+open inventory
+wait 20
+hover slot 37
+wait 10
+shot a_necklace_tooltip
+close
+wait 5
+key skyabyss_pouch.key.open
+wait 20
+click 220 181
+wait 10
+shot b_pouch_parts
+close
+wait 5
+cmd setblock ~ ~ ~2 skyabyss:resonance_forge
+look 0 35
+wait 10
+use
+wait 3
+stopuse
+wait 20
+shot c_forge_parts
+hover 124 120
+wait 5
+shot d_forge_parts_hover
+quit

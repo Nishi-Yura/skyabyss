@@ -174,7 +174,7 @@ public final class SharedChests extends SavedData {
             jp.revati.skyabyss.quest.Quests.give(p, give);
         }
         if (!first) {
-            Notice.hint(p, "message.skyabyss.chest.took", names);
+            Notice.gainLog(p, "message.skyabyss.chest.took", names);
         }
         level.playSound(null, pos, state.getBlock() instanceof BarrelBlock ? SoundEvents.BARREL_OPEN : SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5f, 1f);
         p.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);

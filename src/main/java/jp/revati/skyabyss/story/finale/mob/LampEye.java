@@ -324,6 +324,8 @@ public class LampEye extends CloudMob {
                     sl.sendParticles(ParticleTypes.END_ROD, q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.01);
                 }
                 if (seen) {
+                    // 技の形: 見据えた人へ光の柱
+                    jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", LampEye.this, mark.position(), random.nextFloat() * 360f, 1.0f, 12);
                     strike(mark, dmg(1.6));
                     Vec3 away = new Vec3(to.x - from.x, 0, to.z - from.z).normalize();
                     mark.push(away.x * 0.8, 0.3, away.z * 0.8);
@@ -345,6 +347,12 @@ public class LampEye extends CloudMob {
 
         // 灯の雨: 足もとの光の円 (RAIN_TELL) → 光が落ちる
         private void rain(ServerLevel sl) {
+            if (t == 1) {
+                // 技の形: 光の円へ光の珠が落ちてくる (打つ瞬間に着く)
+                for (Vec3 s : spots) {
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "pearl", LampEye.this, s, RAIN_TELL - 1, 12, 14f, 0.9f, 10);
+                }
+            }
             if (t < RAIN_TELL) {
                 if (t % 3 == 0) {
                     for (Vec3 s : spots) {

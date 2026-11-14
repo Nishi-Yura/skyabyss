@@ -32,7 +32,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 鉄の跡をたどる (一章の支度の段「鉄の跡」の最初の段 track。2026-11-04 の声「その頼みにしかない遊び (謎解き・追跡・潜入) を入れる」。追跡)。
-// 鯨見の町から骨の坑 (ch1_bone_pit) へ、前の旅人の鉄くずが三つ落ちている。目印の矢印は出さない。
+// 鯨見の町から骨の坑 (ch1_bone_pit) へ、前の旅人の鉄くずが三つ落ちている。世界に矢印は出さない (帯の目印は次の鉄くず。TARGET)。
 //   - 鉄くず: 町の外 (EDGE) から坑までの道のりの FRACTIONS の所 (左右に互い違いに ZIG ずらす。畑・水・道・建物の上ならそばの自然の地面へ)。
 //     打ち捨てられた欠けた金床と、ほどけた鎖 (まわりの草は刈る)。近づくと (GLINT) 錆色の光の粒が昇る
 //   - 鉄靴の跡: 鉄くずから次の鉄くず (最後は坑) のほうへ、PRINT_STEP おきに PRINTS 個、草や土を粗い土に (足跡の向きが次を指す)
@@ -63,6 +63,33 @@ public final class IronTrail {
     private static final java.util.Map<java.util.UUID, Long> NO_TRAIL = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.HashMap<>());
 
     private IronTrail() {
+    }
+
+    // クエストの標 (2026-11-11 の声「鉄くずをたどろう、イサナにずっとピンが立ってて、どこ行けばいいかわからない」:
+    // 段 track に標がなく、頼んだ人を指していた)。鉄くず 3 つ (TARGET + 番号)。クライアントは見つけた数で次の一つを指す (SiteTargets)
+    public static final String TARGET = "ch1_iron_scrap_";
+
+    static void registerTargets() {
+        for (int i = 0; i < FRACTIONS.length; i++) {
+            final int k = i;
+            jp.revati.skyabyss.opening.site.SiteNetwork.EXTRA_TARGETS.put(TARGET + i, server -> spotAt(server, k));
+        }
+    }
+
+    // i 番目の鉄くずの場所。建っていればその位置、まだなら坑の高さで
+    @Nullable
+    static BlockPos spotAt(MinecraftServer server, int i) {
+        for (SiteData.Entry x : SiteData.get(server.overworld()).entries(KIND)) {
+            if (x.index == i && x.built) {
+                return x.pos;
+            }
+        }
+        List<BlockPos> spots = spots(server);
+        BlockPos pit = pit(server, ContinentLayout.get().town("whale"));
+        if (i >= spots.size() || pit == null) {
+            return null;
+        }
+        return new BlockPos(spots.get(i).getX(), pit.getY(), spots.get(i).getZ());
     }
 
     // 町と坑のあいだの鉄くずの置き場 (高さは 0。建てるときに地面を見る)。町か坑がなければ空

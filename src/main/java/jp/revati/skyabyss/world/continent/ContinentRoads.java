@@ -180,7 +180,9 @@ final class ContinentRoads {
                 return true;
             }
             BlockPos s = lay.site(t);
-            if (s != null && Math.hypot(x - s.getX(), z - s.getZ()) < 48) {
+            // 跡地の平らな所は gen_continent の FLAT_SITE の内側 40 まで (48 にしていたため、40〜48 の傾きの上の道がならされず、
+            // 雷翼の跡地の脇の環の道に 2 段の段ができていた。2026-11-15 の全段の自己テスト)
+            if (s != null && Math.hypot(x - s.getX(), z - s.getZ()) < 40) {
                 return true;
             }
         }

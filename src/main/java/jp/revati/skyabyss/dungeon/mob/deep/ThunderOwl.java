@@ -27,7 +27,7 @@ public class ThunderOwl extends DungeonBoss {
 
     public ThunderOwl(EntityType<? extends Monster> type, Level level) {
         super(type, level, "thunder_owl", () -> SoundEvents.PARROT_AMBIENT, () -> SoundEvents.PARROT_HURT, () -> SoundEvents.PARROT_DEATH,
-                "dive", "gust", "strike", "hurt", "death");
+                "dive", "gust", "strike", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -38,6 +38,33 @@ public class ThunderOwl extends DungeonBoss {
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.FOLLOW_RANGE, 32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    // 登場の動きと後半の咆哮 (2026-11-11 の声「他のボスたちもこの方向性で」。アニメ intro / scream)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 76;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 46;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "sky";
     }
 
     @Override
@@ -65,7 +92,8 @@ public class ThunderOwl extends DungeonBoss {
             server().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, net.minecraft.sounds.SoundSource.HOSTILE, 1.0f, 1.4f);
             return;
         }
-        if (distance < 8) {
+        // 羽ばたきの風は 7.5 まで: 届かない所の獲物には撃たない (撃つと空振りのあいだ飛びかかりが遅れていた)
+        if (distance < 7.0) {
             move = GUST;
             spray(target, "gust", GUST_WARN, 7.5, 70, 10, 0.45f, ParticleTypes.ELECTRIC_SPARK);
         }

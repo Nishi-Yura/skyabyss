@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.ArrayList;
@@ -155,7 +156,8 @@ public class BoneMortar extends GuardMob {
             for (Vec3[] shell : shells) {
                 double h = 3.0 + shell[0].distanceTo(shell[1]) * 0.18;
                 Vec3 p = shell[0].lerp(shell[1], t).add(0, 4 * h * t * (1 - t), 0);
-                trail(server, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), p, 5, 0.12, 0.12, 0.12, 0.0);
+                // 飛ぶ骨の塊は技の形 (prop rock)。粒は尾だけ
+                trail(server, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), p, 2, 0.12, 0.12, 0.12, 0.0);
             }
         }
         if (ticks >= WARN + 8) {
@@ -201,7 +203,7 @@ public class BoneMortar extends GuardMob {
         for (Vec3 spot : spots) {
             Vec3 land = spot;
             shells.add(new Vec3[] {position(), land});
-            var builder = Telegraph.in(server, TelegraphShape.circle(land.x, land.z, RADIUS))
+            var builder = Telegraph.in(server, TelegraphShape.circle(land.x, land.z, RADIUS)).prop(PropFx.toss("rock").size(0.9f))
                     .floor(land.y).warn(WARN).danger().owner(this)
                     .victims(this::canHit)
                     .onImpact(s -> impact(s, land))

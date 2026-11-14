@@ -11,7 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 魔法使いの魔弾 (combat/StaffBolts) の手元: 杖を持って、手の届く敵を指していない左クリックで、溜めが足りていれば撃つ合図を送る。
+// 魔法使いの魔弾 (combat/StaffBolts) と呪術師の呪印 (combat/HexMarks) の手元: 杖を持って、手の届く敵を指していない左クリックで、溜めが足りていれば撃つ合図を送る。
 // 手の届く敵を指しているときは、今までどおり杖で打つ (バニラの一撃 → weapon/WeaponStrikes)。押し続けても、続けて撃てる間より早くは送らない
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class StaffBoltClient {
@@ -26,9 +26,12 @@ public final class StaffBoltClient {
         if (!event.isAttack() || mc.player == null || mc.level == null || mc.player.isSpectator() || mc.screen != null) {
             return;
         }
-        if (Job.of(mc.player.getMainHandItem()) != Job.MAGE) {
+        // 魔法使いは魔弾、呪術師は狙った所の呪印 (combat/HexMarks)
+        Job job = Job.of(mc.player.getMainHandItem());
+        if (job != Job.MAGE && job != Job.SHAMAN) {
             return;
         }
+        // ほかの職の人は撃てない (サーバーも止めて知らせる。ここでは振りの空打ちだけ止めずに合図を送る)
         if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.ENTITY) {
             return;
         }
@@ -41,6 +44,10 @@ public final class StaffBoltClient {
             return;
         }
         lastSent = now;
-        PacketDistributor.sendToServer(new StaffBolts.Cast());
+        if (job == Job.SHAMAN) {
+            PacketDistributor.sendToServer(new jp.revati.skyabyss.combat.HexMarks.Cast());
+        } else {
+            PacketDistributor.sendToServer(new StaffBolts.Cast());
+        }
     }
 }

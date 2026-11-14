@@ -915,7 +915,8 @@ public final class ChapterSites {
             for (String id : t.ids()) {
                 Element el = ELEMENTS.get(id);
                 if (!got.contains(id) && (el == null || el.placement() != Placement.ROAD_FILL)) {
-                    SkyAbyss.LOGGER.warn("Chapter sites: no spot found for {} ({} at {})", id, t.chapter(), t.anchor());
+                    SkyAbyss.LOGGER.warn("Chapter sites: no spot found for {} ({} at {}; last search refused {} blocked, {} wet, {} steep)", id, t.chapter(),
+                            t.anchor(), ChapterPlanner.LAST_BLOCKED.get(), ChapterPlanner.LAST_WET.get(), ChapterPlanner.LAST_STEEP.get());
                 }
             }
         }

@@ -106,26 +106,6 @@
       ]
     },
     {
-      "node": "ch1a_deja",
-      "if": [
-        {
-          "type": "loop",
-          "min": 1
-        },
-        {
-          "type": "remembers",
-          "flag": "met"
-        },
-        {
-          "type": "not",
-          "of": {
-            "type": "flag",
-            "flag": "met"
-          }
-        }
-      ]
-    },
-    {
       "node": "ch1a_first",
       "if": {
         "type": "not",
@@ -156,10 +136,6 @@
         }
       ],
       "next": "ch1t_blade_tell"
-    },
-    "ch1a_deja": {
-      "face": "grave",
-      "next": "a_menu"
     },
     "ch1t_blade_show": {
       "face": "grave",

@@ -149,7 +149,40 @@ public final class HeartPursuit {
     }
 
     private Telegraph.Builder tg(ServerLevel level, TelegraphShape shape, int warn) {
-        return Telegraph.in(level, shape).floor(floorY.getAsDouble()).warn(warn).danger().owner(heart).victims(victims).reach(theme.reach());
+        return Telegraph.in(level, shape).floor(floorY.getAsDouble()).warn(warn).danger().owner(heart).victims(victims).reach(theme.reach())
+                .prop(propOf(shape));
+    }
+
+    // 技の形 (combat/prop/PropFx): 先読みの円 → 心臓の属性の棘、行く手の扇 → 属性の弾、追い薙ぎ → 腕の通る所の棘
+    @javax.annotation.Nullable
+    private jp.revati.skyabyss.combat.prop.PropFx propOf(TelegraphShape shape) {
+        String k = theme.bossKey();
+        if (shape instanceof TelegraphShape.Circle) {
+            return jp.revati.skyabyss.combat.prop.PropFx.rise(switch (k) {
+                case "tide" -> "shell_spike";
+                case "storm" -> "lightning";
+                case "ember" -> "lava_pillar";
+                default -> "bone_spike";
+            });
+        }
+        if (shape instanceof TelegraphShape.Sweep) {
+            // 追い薙ぎ: 腕が通る所に属性の棘 (PropFx.motion)
+            return jp.revati.skyabyss.combat.prop.PropFx.along(switch (k) {
+                case "tide" -> "shell_spike";
+                case "storm" -> "crystal_spike";
+                case "ember" -> "lava_pillar";
+                default -> "bone_spike";
+            });
+        }
+        if (shape instanceof TelegraphShape.Cone) {
+            return jp.revati.skyabyss.combat.prop.PropFx.shots(switch (k) {
+                case "tide" -> "coral_spear";
+                case "storm" -> "wind_blade";
+                case "ember" -> "fireball";
+                default -> "bone_shard";
+            }, 3);
+        }
+        return null;
     }
 
     private void cue(String key, int warn) {

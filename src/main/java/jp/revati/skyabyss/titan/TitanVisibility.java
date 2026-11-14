@@ -152,9 +152,6 @@ public final class TitanVisibility {
     // ---------------------------------------------------------------- 送り直し
     // バニラは、実体か人が区画をまたいだときにしか broadcastToPlayer を見直さない。止まって待つ巨神 (鎖を下ろした岩鯨・潮門を開けた潮殻など) は
     // 区画をまたがないので、心臓を止めた・パーティを抜けた人にも送られたままになる。1 秒ごとに、見え方を受ける実体を全員について見直す
-    private static java.lang.reflect.Field entityMapField;
-    private static java.lang.reflect.Method updatePlayerMethod;
-    private static boolean reflectFailed;
     // サーバーにいる、見え方を受ける実体 (巨神は種類ごとに一体なので、数は少ない)
     private static final java.util.Set<net.minecraft.world.entity.Entity> HIDDEN = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
@@ -181,55 +178,29 @@ public final class TitanVisibility {
 
     // 見え方を受ける実体の送り先を、今の判定に合わせる。見直した実体の数 (自己テスト)
     public static int resync(ServerLevel level) {
-        if (reflectFailed || level.players().isEmpty()) {
+        if (level.players().isEmpty()) {
             return 0;
         }
-        try {
-            if (entityMapField == null) {
-                entityMapField = net.minecraft.server.level.ChunkMap.class.getDeclaredField("entityMap");
-                entityMapField.setAccessible(true);
+        // 実体の送り先の表 (ChunkMap.entityMap と TrackedEntity) はアクセス変換で開けてある (META-INF/accesstransformer.cfg)
+        var map = level.getChunkSource().chunkMap.entityMap;
+        int n = 0;
+        for (net.minecraft.world.entity.Entity e : java.util.List.copyOf(HIDDEN)) {
+            var tracked = e.level() == level && !e.isRemoved() ? map.get(e.getId()) : null;
+            if (tracked == null) {
+                continue;
             }
-            Map<?, ?> map = (Map<?, ?>) entityMapField.get(level.getChunkSource().chunkMap);
-            int n = 0;
-            for (net.minecraft.world.entity.Entity e : java.util.List.copyOf(HIDDEN)) {
-                Object tracked = e.level() == level && !e.isRemoved() ? map.get(e.getId()) : null;
-                if (tracked == null) {
-                    continue;
-                }
-                if (updatePlayerMethod == null) {
-                    updatePlayerMethod = tracked.getClass().getDeclaredMethod("updatePlayer", ServerPlayer.class);
-                    updatePlayerMethod.setAccessible(true);
-                }
-                for (ServerPlayer p : Players.snapshot(level.players())) {
-                    updatePlayerMethod.invoke(tracked, p);
-                }
-                n++;
+            for (ServerPlayer p : Players.snapshot(level.players())) {
+                tracked.updatePlayer(p);
             }
-            return n;
-        } catch (ReflectiveOperationException | RuntimeException ex) {
-            reflectFailed = true;
-            SkyAbyss.LOGGER.warn("Titan visibility resync is off (could not reach the entity tracker): {}", ex.toString());
-            return 0;
+            n++;
         }
+        return n;
     }
 
     // 自己テスト: その人に、その実体が送られているか
     public static boolean sentTo(ServerLevel level, net.minecraft.world.entity.Entity e, ServerPlayer p) {
-        try {
-            if (entityMapField == null) {
-                entityMapField = net.minecraft.server.level.ChunkMap.class.getDeclaredField("entityMap");
-                entityMapField.setAccessible(true);
-            }
-            Object tracked = ((Map<?, ?>) entityMapField.get(level.getChunkSource().chunkMap)).get(e.getId());
-            if (tracked == null) {
-                return false;
-            }
-            java.lang.reflect.Field seen = tracked.getClass().getDeclaredField("seenBy");
-            seen.setAccessible(true);
-            return ((java.util.Set<?>) seen.get(tracked)).contains(p.connection);
-        } catch (ReflectiveOperationException | RuntimeException ex) {
-            return false;
-        }
+        var tracked = level.getChunkSource().chunkMap.entityMap.get(e.getId());
+        return tracked != null && tracked.seenBy.contains(p.connection);
     }
 
     @SubscribeEvent

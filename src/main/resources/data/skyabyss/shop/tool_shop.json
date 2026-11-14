@@ -22,12 +22,6 @@
       "chapter": 2
     },
     {
-      "id": "gather_pickaxe",
-      "item": "skyabyss:gather_pickaxe",
-      "count": 1,
-      "coins": 8
-    },
-    {
       "id": "fishing_rod",
       "item": "skyabyss:fishing_rod",
       "count": 1,

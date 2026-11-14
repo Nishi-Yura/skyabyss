@@ -72,9 +72,9 @@ public enum Skill {
     MIST_VEIL("mist_veil", SkillTree.WIND, Kind.ACTIVE, 2, 2, 1, "foresight"),
     CURSE_MARK("curse_mark", SkillTree.TIDE, Kind.ACTIVE, 2, 2, 0, "ebb_tide"),
     LAMP_CHARM("lamp_charm", SkillTree.TIDE, Kind.ACTIVE, 2, 2, 1, "ripple"),
-    // 戦士・弓使いの 4 つ目は、風読みの踏み込み・跳び退きと同じ動き (刻印は付かない)
+    // 戦士の 4 つ目は、風読みの踏み込みと同じ動き。弓使いの 4 つ目は、勝手に射る弓の霊を呼ぶ (2026-11-13。射手の跳び退きと入れ替え)
     SHIELD_RUSH("shield_rush", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 1, "stone_stance"),
-    ARCHER_LEAP("archer_leap", SkillTree.BONE, Kind.ACTIVE, 2, 2, 1, "hawk_eye"),
+    BOW_SPIRIT("bow_spirit", SkillTree.BONE, Kind.ACTIVE, 2, 2, 1, "hawk_eye"),
     // 技の木 v2 (docs/design/48) で足した使う技 (4 本の枠から選ぶための増やし)。絵は icons2.png の 37 番から
     SHIELD_BASH("shield_bash", SkillTree.ROCK, Kind.ACTIVE, 2, 1, 2, "titan_cleave"),
     BONE_SWING("bone_swing", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 0, "titan_cleave"),

@@ -119,6 +119,8 @@ public final class FounderArena {
         e.tuneCloud(1, FounderBoss.HP, FounderBoss.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場: 鐘の内の床から静かにせり上がり、名前の札と顔のアップ (combat/BossEmerge)
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "king", 56, "founder");
         e.playAction("call");
         level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 60, 0.6, 1.2, 0.6, 0.04);
         level.playSound(null, at, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0f, 0.5f);

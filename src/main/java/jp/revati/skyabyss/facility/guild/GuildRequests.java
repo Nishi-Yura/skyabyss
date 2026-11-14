@@ -184,7 +184,7 @@ public final class GuildRequests {
     static void reward(ServerPlayer p, GuildData.Guild g) {
         Coins.give(p, REWARD_COINS);
         Quests.give(p, new ItemStack(mod("resonance_shard"), REWARD_SHARDS));
-        Notice.gain(p, "message.skyabyss.guild.req_reward", REWARD_COINS, REWARD_SHARDS);
+        Notice.gainLog(p, "message.skyabyss.guild.req_reward", REWARD_COINS, REWARD_SHARDS);
     }
 
     // 狩る頼み: ギルドの人が敵を倒した

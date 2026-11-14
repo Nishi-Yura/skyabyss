@@ -322,6 +322,10 @@ public final class DungeonFoesSelfTest {
             g.trench(p);
             check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= before + 3 + 1 + 8 + 3 + 1, "a new boss attack did not show its warning ("
                     + (jp.revati.skyabyss.combat.Telegraph.activeCount(lv) - before) + ")", f);
+            // 大百足の三連咬み (2026-11-11): 一つ目の扇を予告し、二つ目と叩きつけは技の途中で人へ向き直って出す
+            int combo = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
+            c.combo(p);
+            check(jp.revati.skyabyss.combat.Telegraph.activeCount(lv) >= combo + 1, "the centipede triple bite showed no warning", f);
             // 後半の場の技: 降りそそぎ (足もと 1 + まわり 2) と回る薙ぎ (2 本)
             int field = jp.revati.skyabyss.combat.Telegraph.activeCount(lv);
             c.hazardsNow();

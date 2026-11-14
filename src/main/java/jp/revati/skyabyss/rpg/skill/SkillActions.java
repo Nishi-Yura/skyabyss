@@ -148,7 +148,8 @@ public final class SkillActions {
             case ROCK_CALL -> rockCall(player, rank);
             case WHALE_SWEEP -> sweep(player, rank);
             case LUNGE, SHIELD_RUSH -> lunge(player, rank);
-            case BACKSTEP, ARCHER_LEAP -> backstep(player, rank);
+            case BACKSTEP -> backstep(player, rank);
+            case BOW_SPIRIT -> BowSpirits.summon(player, rank);
             case WIND_REND -> rend(player, rank);
             case WARD_SONG -> wardSong(player, rank);
             case EBB_TIDE -> ebbTide(player, rank);
@@ -567,7 +568,7 @@ public final class SkillActions {
         return null;
     }
 
-    private static final java.util.Map<java.util.UUID, Integer> BONE_COUNT = new java.util.HashMap<>();
+    private static final java.util.Map<java.util.UUID, Integer> BONE_COUNT = jp.revati.skyabyss.util.PlayerMaps.track(new java.util.HashMap<>());
 
     private static double distanceToSegment(Vec3 p, Vec3 a, Vec3 b) {
         double ax = b.x - a.x;
@@ -846,8 +847,11 @@ public final class SkillActions {
             return "message.skyabyss.skill.no_target";
         }
         int slowTicks = SkillRules.ebbSlowTicks(rank);
+        float ebbDamage = JobActions.spell(player, SkillRules.ebbDamage(rank));
         for (LivingEntity e : foes) {
             boolean large = isLarge(e);
+            // 傷を先に (傷の押し返しが、このあとの引き寄せを打ち消さないよう)
+            hit(player, e, ebbDamage, Skill.EBB_TIDE);
             Vec3 to = new Vec3(origin.x - e.getX(), 0, origin.z - e.getZ());
             double len = Math.max(0.3, to.length());
             Vec3 unit = to.scale(1.0 / len);
@@ -1139,7 +1143,7 @@ public final class SkillActions {
         }
         AbstractArrow arrow = arrowItem.createArrow(level, ammo.copyWithCount(1), player, weapon);
         arrow.setNoGravity(true);
-        arrow.setBaseDamage(SkillRules.pierceBaseDamage(rank) * damageScale);
+        arrow.setBaseDamage(SkillRules.pierceBaseDamage(rank) * damageScale * SkillRules.bowScale(attackDamage(player)));
         arrow.setCritArrow(false);
         arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
         arrow.addTag(PIERCE_TAG);
@@ -1211,7 +1215,7 @@ public final class SkillActions {
             }
         }
         int agility = Growth.get(player).stat(GrowthRules.Stat.AGILITY);
-        double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility));
+        double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility)) * SkillRules.bowScale(attackDamage(player));
         // 変化: 狭い雨 (半径 ×0.5・降る回数 ×1.5)、長雨 (降る回数 ×2・一度の傷 ×0.5)
         int rr = rune(player, Skill.SKY_RAIN);
         double radius = rr == 1 ? SkillRules.RAIN_RADIUS * 0.5 : SkillRules.RAIN_RADIUS;
@@ -1231,6 +1235,7 @@ public final class SkillActions {
     public static void tick(MinecraftServer server) {
         SkillEffects.tick(server);
         JobActions.tick(server);
+        BowSpirits.tick(server);
         for (Iterator<TrackedArrow> it = ARROWS.iterator(); it.hasNext();) {
             TrackedArrow t = it.next();
             AbstractArrow a = t.arrow();
@@ -1313,6 +1318,7 @@ public final class SkillActions {
         RAINS.clear();
         SkillEffects.clear();
         JobActions.clear();
+        BowSpirits.clear();
     }
 
     // 自己テスト用: 降っている途中の驟雨の数
