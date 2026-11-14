@@ -369,13 +369,6 @@ public final class ShotRunner {
             case "wait" -> {
                 return stepTicks + 1 >= line.intArg(0);
             }
-            case "heartreward" -> {
-                // heartreward <focus N|confirm|later|done> : 心臓の遺物の選択画面を、その見せ場まで進める (確かめ用。選ぶ決まりはサーバー)
-                if (mc.screen instanceof jp.revati.skyabyss.client.reward.HeartRewardScreen screen) {
-                    screen.devPhase(line.arg(0), line.rest().contains(" ") ? Integer.parseInt(line.arg(1)) : 0);
-                }
-                return true;
-            }
             case "echo" -> {
                 return true;
             }
@@ -1254,16 +1247,9 @@ public final class ShotRunner {
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
             case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
-            // 祠の画面・背の試練の板・心臓の報酬を見本の中身で (ふだんはサーバーが大陸の世界で送る。重なり検査のため)
+            // 祠の画面・背の試練の板を見本の中身で (ふだんはサーバーが大陸の世界で送る。重なり検査のため)
             case "shrine_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true));
             case "trial_board_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(false));
-            case "heart_reward_demo" -> () -> {
-                java.util.List<net.minecraft.world.item.ItemStack> stacks = new java.util.ArrayList<>();
-                for (String id : jp.revati.skyabyss.loot.reward.HeartReward.options(jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
-                    jp.revati.skyabyss.item.TitanGearSet.item(id).ifPresent(item -> stacks.add(new net.minecraft.world.item.ItemStack(item)));
-                }
-                return new jp.revati.skyabyss.client.reward.HeartRewardScreen(jp.revati.skyabyss.progress.Titans.STONE_WHALE, stacks, 1, false);
-            };
             case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
                     jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく

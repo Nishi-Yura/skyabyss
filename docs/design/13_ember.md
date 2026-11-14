@@ -596,7 +596,7 @@
 | 灰の礫 | `EmberAshPellet` |
 | 熾の底 | `EmberHeartArena` |
 | 戦い（GroupBossRoom の Host、集合・封印・放棄・撃破、光の柱、撃破の記録） | `EmberHeartBattle` |
-| 報酬（個人抽選・天井・図鑑・巨神ごとの記録・初回の選択・四つ目の欠片・経験値・クエストと伝承の合図） | `EmberLoot` |
+| 報酬（個人抽選・天井・図鑑・巨神ごとの記録・四つ目の欠片・経験値・クエストと伝承の合図） | `EmberLoot` |
 | 登録（心臓・礫・音 14・経験値の一行） | `EmberHeartSetup`（`SkyAbyss` に一行、`GrowthRewards.MOD_ENEMIES` に一行） |
 | パケット（引き寄せ・画面写し・灰の帳・凍え。版 `ember-heart-1`） | `EmberHeartNetwork` |
 | 描画・ボスバー・灰の帳と凍えの画面 | `client/EmberHeartRenderer`・`client/EmberHeartClient` |
@@ -990,7 +990,7 @@
 | ブロック | `ash_forge`・`forge_bellows`・`ash_anvil`・`quench_trough`、`cinder_lamp` |
 | 地上の品 | `warm_stone`（温石） |
 | 素材 | `ember_shard`・`ember_core`・`spark_dust`・`cinder_husk`・`ember_horn`（熾火の角杯） |
-| 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯）。初回の選択は後ろの 3 つ |
+| 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯） |
 | 休み場 | 部屋ごとの入口の休み場（`RaidKit`）、中ボスの間の休み場、`heart` |
 | 碑文 | `lore_ember_west`・`_east`・`_south`、`lore_raid_ember_chain`・`_valve`・`_pupil` |
 | 伝承 | 12.3 |
@@ -1035,7 +1035,7 @@
 | `/skyabyss embermob spawn <thrall\|moth\|roller\|mix> [数]` / `ignite` / `clear` | 敵を湧かせる（自分のまわり 4〜7 ブロック。保存されない。moth は数を省くと 3〜6 体、mix は灰被り 1・蛾の群れ・燠虫 1）/ まわり 16 ブロックの灰被りの殻を割る / まわり 64 ブロックの余燼の敵を消す |
 | `/skyabyss emberheart go\|start\|phase <1-3>\|action <技>\|sink <0-5>\|win\|reset\|rebuild\|status\|shot <人> <名前>` | 心臓の確かめ（`action` は breath・pulse・orb・floor・gale・pellet・chill・embers・fading・veil・roar）。`go` は前室へ |
 | `/skyabyss dev emberforce <対象> <技> [人数]` | 開発用（本番の jar には入らない）。心臓（BREATH・PULSE・ORB・FLOOR・GALE・PELLET・EMBERS・FADING・VEIL・ROAR）と鍛え手（SLAM・COLD_SLAM・BREATH・SPARKS）の技を、部屋の外（平らな世界）でも一つ出す。人数は部屋にいる人数を多いことにする（18 章） |
-| `/titanmemory ember` | 初回の選択（誰でも） |
+| `/titanmemory ember` | 余燼の記憶と図鑑を見る（誰でも） |
 
 ### 14.1 自己テスト
 

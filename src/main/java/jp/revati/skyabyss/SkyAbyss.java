@@ -167,9 +167,6 @@ public class SkyAbyss {
         // クエストの見え方 (章の札・NPC の頭の印・更新の音)。docs/design/18 の 3.5 節
         jp.revati.skyabyss.quest.QuestUx.register(modEventBus);
 
-        // 心臓の遺物の選択画面 (眠りの場面が終わったら開く)。docs/design/30_heart_reward_ui.md
-        jp.revati.skyabyss.loot.reward.HeartReward.register();
-
         // 転生の見せ方 (色の段・記号・名札・称号・背中の飾り・順位の石・飾り板)。docs/design/31
         jp.revati.skyabyss.rebirth.RebirthSetup.register(modEventBus, modContainer);
 

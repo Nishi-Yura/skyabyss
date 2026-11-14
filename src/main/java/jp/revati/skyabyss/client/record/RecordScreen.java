@@ -21,9 +21,7 @@ import jp.revati.skyabyss.rpg.client.skill.TextWrap;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -733,9 +731,6 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         } else if (row.action() == RecordSnapshot.ACTION_RECORDS) {
             // 試練の記録の画面はサーバーが開かせる
             PacketDistributor.sendToServer(new RecordNetwork.OpenTrials());
-        } else if (row.action() == RecordSnapshot.ACTION_CHOOSE && minecraft.player != null) {
-            // 遺物の選択画面 (サーバーが開かせる。docs/design/30)
-            jp.revati.skyabyss.client.reward.HeartRewardClient.request();
         }
     }
 

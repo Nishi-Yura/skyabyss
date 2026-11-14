@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -33,7 +32,6 @@ import jp.revati.skyabyss.titan.ember.lore.EmberLore;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -194,7 +192,6 @@ public final class EmberLoot {
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (!unmade.isEmpty()) {
                 SkyAbyss.LOGGER.info("Ember heart reward for {} skipped items that are not made yet: {}", uuid, unmade);
@@ -221,9 +218,6 @@ public final class EmberLoot {
             }
             Notice.gain(player, TitanLoot.memoryLine(r));
             TitanLoot.tellHeld(player, held);
-            if (first) {
-                offerChoice(player, r);
-            }
         }
     }
 
@@ -276,20 +270,13 @@ public final class EmberLoot {
         }
     }
 
-    // 初回の選択: 画面 (loot/reward/HeartReward) が眠りの場面のあとに開く。ここは案内の一行だけ
-    private static void offerChoice(ServerPlayer player, TitanMemoryData.Record r) {
-        jp.revati.skyabyss.loot.reward.HeartReward.announce(player, TITAN);
-    }
-
     // ---------------------------------------------------------------- コマンド
     // /titanmemory ember              : 余燼の記憶と図鑑 (誰でも)
-    // /titanmemory ember choose <品>  : 初回の選択
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("titanmemory")
-                .then(Commands.literal("ember").executes(EmberLoot::status)
-                        .then(Commands.literal("choose").then(Commands.argument("item", StringArgumentType.greedyString()).executes(EmberLoot::choose)))));
+                .then(Commands.literal("ember").executes(EmberLoot::status)));
     }
 
     private static TitanMemoryData.Record record(ServerPlayer player) {
@@ -316,20 +303,6 @@ public final class EmberLoot {
             owned.append("  ");
         }
         player.sendSystemMessage(owned);
-        if (r.choicePending) {
-            offerChoice(player, r);
-        }
-        return 1;
-    }
-
-    private static int choose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        String choice = StringArgumentType.getString(ctx, "item").trim();
-        // 決まりは画面と同じ一箇所 (HeartReward.claim)
-        if (jp.revati.skyabyss.loot.reward.HeartReward.claim(player, TITAN, choice) != jp.revati.skyabyss.loot.reward.HeartReward.Result.OK) {
-            Notice.warn(player, "message.skyabyss.first_clear_none");
-            return 0;
-        }
         return 1;
     }
 

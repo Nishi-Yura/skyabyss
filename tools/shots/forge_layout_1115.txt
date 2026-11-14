@@ -1,4 +1,4 @@
-# 2026-11-15: 共鳴の炉の四つのつまみの中の並び (見直し 5) と、祠・試練の板・心臓の報酬の見本の画面 (見直し 6) の重なり
+# 2026-11-15: 共鳴の炉の四つのつまみの中の並び (見直し 5) と、祠・試練の板の見本の画面 (見直し 6) の重なり
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/forge_layout_1115.txt -PshotsName=forge_layout_1115
 # 画面 (1280x720・guiscale 3 = 427x240): 炉の真ん中の板の左上 (73, 37)。つまみ 強化 (273,48)・粉 (310,48)・再鍛造 (347,48)・交換 (384,48)、再鍛造の「試す」(372,82)
 world forge1115 flat
@@ -58,8 +58,3 @@ overlap d2_trial_board
 shot d2_trial_board
 close
 wait 3
-open heart_reward_demo
-wait 80
-overlap d3_heart_reward
-shot d3_heart_reward
-close

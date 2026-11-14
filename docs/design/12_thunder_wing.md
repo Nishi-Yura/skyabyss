@@ -682,7 +682,7 @@ ID は `chapter1/*`。自動で記すものは条件が項目の JSON（`data/sk
 | 段階のバー | `client/titan/PhasedBossBar` | 心臓（テクスチャの頭 `storm_heart`、段階 3）。雷獣は 10 段のバー |
 | 看板の幅の検査 | `SignFit`、`SignFitClient` | 雷翼の lang も読む |
 | 封印・共鳴石 | `SealedGateBlock`、`ResonanceStoneBlock` | 心臓の間の大門・巣の口。見た目の種類「風鳴り石」 |
-| 報酬 | `TitanLoot`（部品）、`StormLoot` | 図鑑・天井・初回の選択・預かり |
+| 報酬 | `TitanLoot`（部品）、`StormLoot` | 図鑑・天井・預かり |
 | 進行 | `Progression.onTitanStopped`、`Progression.titanOfBack`、`ProgressRules` | 心臓の撃破で `"thunder_wing"` |
 | 試練の敵の印 | `GuardMob` | 3 種の敵の親（保存しない、`warn` で予告の粒） |
 | 預かり・休み場 | `TitanBackTrials.keepBelongings` | 順路の休み場（7.3） |

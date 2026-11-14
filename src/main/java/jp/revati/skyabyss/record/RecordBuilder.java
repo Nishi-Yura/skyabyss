@@ -222,29 +222,6 @@ public final class RecordBuilder {
 
         rows.add(header("rights"));
         TitanMemoryData.Record r = memory(p);
-        for (String titan : Titans.all()) {
-            if (TitanPages.page(titan) == null || !revealed(p, titan)) {
-                continue;
-            }
-            TitanMemoryData.Record tr = memory(p, titan);
-            Component choiceValue;
-            int choiceMark;
-            if (tr.choicePending) {
-                choiceValue = t("v.choice_ready");
-                choiceMark = RecordSnapshot.MARK_ATTENTION;
-            } else if (tr.firstCleared) {
-                choiceValue = t("v.choice_done");
-                choiceMark = RecordSnapshot.MARK_SAFE;
-            } else {
-                choiceValue = t("v.choice_locked");
-                choiceMark = RecordSnapshot.MARK_LOCKED;
-            }
-            // 岩鯨の行は前からの名前 (choice) のまま。選ぶボタンは、選べる遺物のある巨神ぜんぶ (遺物の選択画面を開く。docs/design/30)
-            boolean whale = titan.equals(TitanLoot.STONE_WHALE);
-            rows.add(new Row(whale ? "choice" : "choice." + titan, Kind.VALUE, ItemStack.EMPTY, t("r.choice_of", Progression.titanName(titan)),
-                    choiceValue, choiceMark, -1, List.of(t(whale ? "d.choice" : "d.choice_other", Progression.titanName(titan))),
-                    self && tr.choicePending && !jp.revati.skyabyss.loot.reward.HeartReward.options(titan).isEmpty() ? RecordSnapshot.ACTION_CHOOSE : RecordSnapshot.ACTION_NONE));
-        }
         ForgeRules.ExchangeState exchange = TitanLoot.exchangeState(r.clears > 0 ? r : null);
         int exchangeMark = switch (exchange) {
             case READY -> RecordSnapshot.MARK_ATTENTION;

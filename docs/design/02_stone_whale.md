@@ -560,7 +560,6 @@ Telegraph.in(level, TelegraphShape.circle(x, z, 4))   // 形
   - 3 以上: 図鑑の装備の確率がすべて 2 倍（ソフト天井）。
   - 5: 図鑑にまだない品を一つ必ず受け取る（ハード天井）。すべて埋まっていれば共鳴の欠片 10 個。
   - 図鑑が埋まるまでは、新しい品の出ない撃破は 4 回までしか続かない。
-- **初回クリア**: 心臓を初めて倒した人は、専用の逸品三つから一つを選べる（`/titanmemory choose`。選ぶまでは `/titanmemory` で再表示）。記憶は戻さない。
 - 天の鍵の欠片の使い道は 14（4 体の欠片で天の鍵になる）。欠片は大事な品として守られる（11）。
 - 心臓を倒すと、岩鯨の呼び笛（巨神での移動）が解放される（09）。
 
@@ -690,7 +689,7 @@ Telegraph.in(level, TelegraphShape.circle(x, z, 4))   // 形
 | `titan reset` | そのグループの試練（順路・心臓の戦い）だけを最初に戻す（7.1 と同じ） |
 | `titan rebuild` | 体と心臓の間を建て直し、進み具合も最初に戻す。天の鍵の欠片を受け取った人の記録は残る |
 
-- 報酬の天井: `/titanmemory`（誰でも）、`/titanmemory choose <装備>`、`/titanmemory claim`、`/skyabyss memory set <人> <0-5>`・`/skyabyss memory clear <人>`（OP）。03 の 2.4。
+- 報酬の天井: `/titanmemory`（誰でも）、`/titanmemory claim`、`/skyabyss memory set <人> <0-5>`・`/skyabyss memory clear <人>`（OP）。03 の 2.4。
 - 空の通過の `/skyabyss pass`・`/skyabyss next` は別の機能。巨神での移動は `/skyabyss travel`（09）。
 
 ### 9.2 自己テスト（`SKYABYSS_SELFTEST`）

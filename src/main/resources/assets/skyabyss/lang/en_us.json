@@ -527,7 +527,6 @@
   "message.skyabyss.legendary_other": "%s obtained exclusive %s",
   "message.skyabyss.first_clear": "First clear. The whale offers you one memory — choose",
   "message.skyabyss.first_clear_hint": "Click a name to receive it (/titanmemory to see the choice again)",
-  "message.skyabyss.first_clear_none": "There is no first-clear reward to choose",
   "message.skyabyss.memory_title_stone_whale": "── Titan's Memory: Stone Whale ──",
   "message.skyabyss.memory_clears": "Heart kills %s · Collection %s/%s",
   "message.skyabyss.reward_list": "Received: %s",

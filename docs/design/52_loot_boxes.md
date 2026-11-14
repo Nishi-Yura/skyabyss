@@ -59,7 +59,7 @@
 | `TitanLoot.handOver`（巨神の心臓・中ボス・道中・深淵の層の主と番人・月の区画の主と核・伝説の機会・試練の報酬） | 並びの中の装備を箱に替え、並びも書き換える（呼び手の知らせが箱の名を言う）。預かり（倒れていた人・オフライン）も箱で |
 | `WildLoot.give`（野の敵・名のある強敵・層と区画の主・雲の島の主） | 箱に替えて渡す。知らせ・音・光は品の階級のまま |
 | 敵の落とし物（`LivingDropsEvent`、一番後） | ほかの仕組みが落とした装備を、倒した人の箱に替える。倒した人がいなければ落とさない |
-| 包まない | 交換（炉・共鳴の欠片。`GearExchange`・`TitanLoot.exchange`）、初回の選択（`HeartReward`）、野営の返却（`CampBlocks`）は `LootBoxes.direct` の中で。深淵の層の主・月の区画の主の初回の部位（物語の報酬）は `LootBoxes.keepDirect` |
+| 包まない | 交換（炉・共鳴の欠片。`GearExchange`・`TitanLoot.exchange`）、野営の返却（`CampBlocks`）は `LootBoxes.direct` の中で。深淵の層の主・月の区画の主の初回の部位（物語の報酬）は `LootBoxes.keepDirect` |
 
 - 一回の撃破で落ちる箱の数は、今まで落ちていた装備の数と同じ。
 - 箱の渡し方は品と同じ: 旅袋 → 持ち物 → 足もと（その人だけが拾える）。

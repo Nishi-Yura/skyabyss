@@ -35,13 +35,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -377,7 +374,6 @@ public final class TitanLoot {
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (player == null) {
                 continue;
@@ -395,9 +391,6 @@ public final class TitanLoot {
             }
             Notice.gain(player, memoryLine(r));
             tellHeld(player, held);
-            if (first) {
-                offerChoice(player);
-            }
         }
     }
 
@@ -651,14 +644,8 @@ public final class TitanLoot {
         return line;
     }
 
-    // 初回クリアの選択報酬: 画面 (loot/reward/HeartReward) が眠りの場面のあとに開く。ここは案内の一行だけ
-    private static void offerChoice(ServerPlayer player) {
-        jp.revati.skyabyss.loot.reward.HeartReward.announce(player, STONE_WHALE);
-    }
-
     // ---------------------------------------------------------------- コマンド
     // /titanmemory                 : 自分の巨神の記憶と図鑑を見る (誰でも)
-    // /titanmemory choose <装備>    : 初回クリアの報酬を選ぶ (チャットの名前を押すと走る)
     // /titanmemory claim           : 預かっている報酬を受け取る
     // /skyabyss memory set <人> <n> : 記憶のカウンタを変える (管理者・テスト用)
     // /skyabyss memory clear <人>   : 記録を消す (管理者・テスト用。天の鍵の欠片の記録は残す)
@@ -670,8 +657,7 @@ public final class TitanLoot {
                 .then(Commands.literal("claim").executes(ctx -> {
                     deliver(ctx.getSource().getPlayerOrException(), false);
                     return 1;
-                }))
-                .then(Commands.literal("choose").then(Commands.argument("item", ResourceLocationArgument.id()).executes(TitanLoot::choose))));
+                })));
         dispatcher.register(Commands.literal(SkyAbyss.MODID)
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("memory")
@@ -689,7 +675,6 @@ public final class TitanLoot {
                             r.clears = 0;
                             r.owned.clear();
                             r.firstCleared = false;
-                            r.choicePending = false;
                             ctx.getSource().sendSuccess(() -> memoryLine(r), true);
                             return 1;
                         })))));
@@ -723,20 +708,6 @@ public final class TitanLoot {
         }
         if (memory(player.server).hasPending(player.getUUID())) {
             player.sendSystemMessage(ModText.hint("message.skyabyss.reward_pending"));
-        }
-        if (r.choicePending) {
-            offerChoice(player);
-        }
-        return 1;
-    }
-
-    private static int choose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceLocation choice = ResourceLocationArgument.getId(ctx, "item");
-        // 決まりは画面と同じ一箇所 (HeartReward.claim)
-        if (jp.revati.skyabyss.loot.reward.HeartReward.claim(player, STONE_WHALE, choice.toString()) != jp.revati.skyabyss.loot.reward.HeartReward.Result.OK) {
-            Notice.warn(player, "message.skyabyss.first_clear_none");
-            return 0;
         }
         return 1;
     }

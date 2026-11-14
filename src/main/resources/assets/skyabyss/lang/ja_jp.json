@@ -527,7 +527,6 @@
   "message.skyabyss.legendary_other": "%s が専用の逸品 %s を手にした",
   "message.skyabyss.first_clear": "初めての踏破。岩鯨が、ひとつの記憶を差し出している。ひとつ選ぼう",
   "message.skyabyss.first_clear_hint": "名前を押すと受け取れる（受け取るまでは /titanmemory でもう一度出せる）",
-  "message.skyabyss.first_clear_none": "選べる初回の報酬はありません",
   "message.skyabyss.memory_title_stone_whale": "── 巨神の記憶: 岩鯨 ──",
   "message.skyabyss.memory_clears": "心臓の撃破 %s回 · 図鑑 %s/%s",
   "message.skyabyss.reward_list": "受け取ったもの: %s",

@@ -18,7 +18,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 // 潮殻の心臓の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide_heart PASSED / FAILED (サーバーを止めるのは TitanBackSelfTest)。
@@ -318,7 +317,7 @@ public final class TideHeartSelfTest {
         boolean worldBefore = ProgressData.get(server).worldStopped(TideLoot.TITAN);
         TideLoot.onHeartDefeat(back, List.of(), List.of(fake));
         TitanMemoryData.Record rec = memory.peek(fake, TideLoot.TITAN);
-        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending == jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR, "defeat record is wrong", failures);
+        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared, "defeat record is wrong", failures);
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null, "tide defeat wrote to the stone whale record", failures);
         check(memory.hasPending(fake), "rewards for an absent player were not held", failures);
         TitanMemoryData.Pending held = memory.takePending(fake);
