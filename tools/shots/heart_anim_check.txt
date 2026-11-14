@@ -1,0 +1,424 @@
+# 四つの心臓の技を技ごとに 4 こま (6・16・26・38 tick)。tools/gen/shots/gen_heart_anim_check.py が書く
+world heartanim flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss playtest skip opening
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt
+hud off
+camera minecraft:overworld 0.5 -50 40 180 6
+waitchunks
+wait 260
+cmd skyabyss cinematic stop
+wait 30
+
+# ---- stone_whale_heart
+cmd kill @e[type=!minecraft:player,distance=..80]
+wait 5
+cmd summon skyabyss:stone_whale_heart 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -50 40 180 6
+wait 140
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 6
+shot stone_whale_heart_thrust_0
+wait 10
+shot stone_whale_heart_thrust_1
+wait 10
+shot stone_whale_heart_thrust_2
+wait 12
+shot stone_whale_heart_thrust_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] SWEEP
+wait 6
+shot stone_whale_heart_sweep_0
+wait 10
+shot stone_whale_heart_sweep_1
+wait 10
+shot stone_whale_heart_sweep_2
+wait 12
+shot stone_whale_heart_sweep_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] LEAP
+wait 6
+shot stone_whale_heart_leap_0
+wait 10
+shot stone_whale_heart_leap_1
+wait 10
+shot stone_whale_heart_leap_2
+wait 12
+shot stone_whale_heart_leap_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] CRACK
+wait 6
+shot stone_whale_heart_crack_0
+wait 10
+shot stone_whale_heart_crack_1
+wait 10
+shot stone_whale_heart_crack_2
+wait 12
+shot stone_whale_heart_crack_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] RECLOSE
+wait 6
+shot stone_whale_heart_reclose_0
+wait 10
+shot stone_whale_heart_reclose_1
+wait 10
+shot stone_whale_heart_reclose_2
+wait 12
+shot stone_whale_heart_reclose_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] VOLLEY
+wait 6
+shot stone_whale_heart_volley_0
+wait 10
+shot stone_whale_heart_volley_1
+wait 10
+shot stone_whale_heart_volley_2
+wait 12
+shot stone_whale_heart_volley_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BEAM
+wait 6
+shot stone_whale_heart_beam_0
+wait 10
+shot stone_whale_heart_beam_1
+wait 10
+shot stone_whale_heart_beam_2
+wait 12
+shot stone_whale_heart_beam_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] CHAIN
+wait 6
+shot stone_whale_heart_chain_0
+wait 10
+shot stone_whale_heart_chain_1
+wait 10
+shot stone_whale_heart_chain_2
+wait 12
+shot stone_whale_heart_chain_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] SHELL_DROP
+wait 6
+shot stone_whale_heart_shell_drop_0
+wait 10
+shot stone_whale_heart_shell_drop_1
+wait 10
+shot stone_whale_heart_shell_drop_2
+wait 12
+shot stone_whale_heart_shell_drop_3
+wait 70
+
+# ---- tide_heart
+cmd kill @e[type=!minecraft:player,distance=..80]
+wait 5
+cmd summon skyabyss:tide_heart 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -50 40 180 6
+wait 140
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] BREATH
+wait 6
+shot tide_heart_breath_0
+wait 10
+shot tide_heart_breath_1
+wait 10
+shot tide_heart_breath_2
+wait 12
+shot tide_heart_breath_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] SHELL_STRIKE
+wait 6
+shot tide_heart_shell_strike_0
+wait 10
+shot tide_heart_shell_strike_1
+wait 10
+shot tide_heart_shell_strike_2
+wait 12
+shot tide_heart_shell_strike_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] WHIRL
+wait 6
+shot tide_heart_whirl_0
+wait 10
+shot tide_heart_whirl_1
+wait 10
+shot tide_heart_whirl_2
+wait 12
+shot tide_heart_whirl_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] FLOOD
+wait 6
+shot tide_heart_flood_0
+wait 10
+shot tide_heart_flood_1
+wait 10
+shot tide_heart_flood_2
+wait 12
+shot tide_heart_flood_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] BUBBLE
+wait 6
+shot tide_heart_bubble_0
+wait 10
+shot tide_heart_bubble_1
+wait 10
+shot tide_heart_bubble_2
+wait 12
+shot tide_heart_bubble_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] PEARL
+wait 6
+shot tide_heart_pearl_0
+wait 10
+shot tide_heart_pearl_1
+wait 10
+shot tide_heart_pearl_2
+wait 12
+shot tide_heart_pearl_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] EBB
+wait 6
+shot tide_heart_ebb_0
+wait 10
+shot tide_heart_ebb_1
+wait 10
+shot tide_heart_ebb_2
+wait 12
+shot tide_heart_ebb_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] MOON_WAVE
+wait 6
+shot tide_heart_moon_wave_0
+wait 10
+shot tide_heart_moon_wave_1
+wait 10
+shot tide_heart_moon_wave_2
+wait 12
+shot tide_heart_moon_wave_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] PEARL_RAIN
+wait 6
+shot tide_heart_pearl_rain_0
+wait 10
+shot tide_heart_pearl_rain_1
+wait 10
+shot tide_heart_pearl_rain_2
+wait 12
+shot tide_heart_pearl_rain_3
+wait 70
+
+# ---- thunder_wing_heart
+cmd kill @e[type=!minecraft:player,distance=..80]
+wait 5
+cmd summon skyabyss:thunder_wing_heart 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -50 40 180 6
+wait 140
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] SUMMON
+wait 6
+shot thunder_wing_heart_summon_0
+wait 10
+shot thunder_wing_heart_summon_1
+wait 10
+shot thunder_wing_heart_summon_2
+wait 12
+shot thunder_wing_heart_summon_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] BLADE
+wait 6
+shot thunder_wing_heart_blade_0
+wait 10
+shot thunder_wing_heart_blade_1
+wait 10
+shot thunder_wing_heart_blade_2
+wait 12
+shot thunder_wing_heart_blade_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] CHAIN
+wait 6
+shot thunder_wing_heart_chain_0
+wait 10
+shot thunder_wing_heart_chain_1
+wait 10
+shot thunder_wing_heart_chain_2
+wait 12
+shot thunder_wing_heart_chain_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] WINGBEAT
+wait 6
+shot thunder_wing_heart_wingbeat_0
+wait 10
+shot thunder_wing_heart_wingbeat_1
+wait 10
+shot thunder_wing_heart_wingbeat_2
+wait 12
+shot thunder_wing_heart_wingbeat_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] CHARGE
+wait 6
+shot thunder_wing_heart_charge_0
+wait 10
+shot thunder_wing_heart_charge_1
+wait 10
+shot thunder_wing_heart_charge_2
+wait 12
+shot thunder_wing_heart_charge_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] FEATHER
+wait 6
+shot thunder_wing_heart_feather_0
+wait 10
+shot thunder_wing_heart_feather_1
+wait 10
+shot thunder_wing_heart_feather_2
+wait 12
+shot thunder_wing_heart_feather_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] FLASH
+wait 6
+shot thunder_wing_heart_flash_0
+wait 10
+shot thunder_wing_heart_flash_1
+wait 10
+shot thunder_wing_heart_flash_2
+wait 12
+shot thunder_wing_heart_flash_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] WEB
+wait 6
+shot thunder_wing_heart_web_0
+wait 10
+shot thunder_wing_heart_web_1
+wait 10
+shot thunder_wing_heart_web_2
+wait 12
+shot thunder_wing_heart_web_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] BARRAGE
+wait 6
+shot thunder_wing_heart_barrage_0
+wait 10
+shot thunder_wing_heart_barrage_1
+wait 10
+shot thunder_wing_heart_barrage_2
+wait 12
+shot thunder_wing_heart_barrage_3
+wait 70
+
+# ---- ember_heart
+cmd kill @e[type=!minecraft:player,distance=..80]
+wait 5
+cmd summon skyabyss:ember_heart 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -50 40 180 6
+wait 140
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] BREATH
+wait 6
+shot ember_heart_breath_0
+wait 10
+shot ember_heart_breath_1
+wait 10
+shot ember_heart_breath_2
+wait 12
+shot ember_heart_breath_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] PULSE
+wait 6
+shot ember_heart_pulse_0
+wait 10
+shot ember_heart_pulse_1
+wait 10
+shot ember_heart_pulse_2
+wait 12
+shot ember_heart_pulse_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] ORB
+wait 6
+shot ember_heart_orb_0
+wait 10
+shot ember_heart_orb_1
+wait 10
+shot ember_heart_orb_2
+wait 12
+shot ember_heart_orb_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] FLOOR
+wait 6
+shot ember_heart_floor_0
+wait 10
+shot ember_heart_floor_1
+wait 10
+shot ember_heart_floor_2
+wait 12
+shot ember_heart_floor_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] GALE
+wait 6
+shot ember_heart_gale_0
+wait 10
+shot ember_heart_gale_1
+wait 10
+shot ember_heart_gale_2
+wait 12
+shot ember_heart_gale_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] PELLET
+wait 6
+shot ember_heart_pellet_0
+wait 10
+shot ember_heart_pellet_1
+wait 10
+shot ember_heart_pellet_2
+wait 12
+shot ember_heart_pellet_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] CHILL
+wait 6
+shot ember_heart_chill_0
+wait 10
+shot ember_heart_chill_1
+wait 10
+shot ember_heart_chill_2
+wait 12
+shot ember_heart_chill_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] EMBERS
+wait 6
+shot ember_heart_embers_0
+wait 10
+shot ember_heart_embers_1
+wait 10
+shot ember_heart_embers_2
+wait 12
+shot ember_heart_embers_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] FADING
+wait 6
+shot ember_heart_fading_0
+wait 10
+shot ember_heart_fading_1
+wait 10
+shot ember_heart_fading_2
+wait 12
+shot ember_heart_fading_3
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] VEIL
+wait 6
+shot ember_heart_veil_0
+wait 10
+shot ember_heart_veil_1
+wait 10
+shot ember_heart_veil_2
+wait 12
+shot ember_heart_veil_3
+wait 70

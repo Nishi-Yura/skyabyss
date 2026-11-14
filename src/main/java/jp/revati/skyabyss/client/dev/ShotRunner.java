@@ -958,6 +958,11 @@ public final class ShotRunner {
                 mc.setScreen(null);
                 return true;
             }
+            case "hitboxaudit" -> {
+                // hitboxaudit <ファイル名> : mod の生き物の当たり判定と描く体の大きさを比べて、撮影のフォルダに書く (client/dev/HitboxAudit)
+                say("  " + HitboxAudit.write(out.resolve(line.arg(0))));
+                return true;
+            }
             case "overlap" -> {
                 // overlap <名前> : 今の画面の文字と部品の重なりを調べ、撮影のフォルダの overlap.txt に書く (client/dev/OverlapAudit)
                 if (first) {
