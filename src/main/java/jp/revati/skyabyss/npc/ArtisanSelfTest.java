@@ -271,7 +271,6 @@ public final class ArtisanSelfTest {
     private static void resetBond(FakePlayer p) {
         NpcBonds.Bond bond = NpcBonds.of(p).bond(ROLE);
         bond.flags().clear();
-        bond.echoes().clear();
         Affinity.set(p, ROLE, 0);
     }
 

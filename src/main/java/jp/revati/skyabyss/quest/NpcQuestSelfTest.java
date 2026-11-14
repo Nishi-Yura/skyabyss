@@ -25,7 +25,6 @@ import jp.revati.skyabyss.npc.DialogueService;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcEntity;
 import jp.revati.skyabyss.npc.NpcSetup;
-import jp.revati.skyabyss.npc.WorldLoop;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.rpg.Growth;
 import net.minecraft.core.BlockPos;
@@ -39,7 +38,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
@@ -60,14 +58,11 @@ public final class NpcQuestSelfTest {
     public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
-        int loopBefore = WorldLoop.count(server);
         try {
             run(server, failures, notes);
         } catch (RuntimeException e) {
             failures.add("exception: " + e);
             SkyAbyss.LOGGER.error("SELFTEST npc exception", e);
-        } finally {
-            WorldLoop.set(server, loopBefore);
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST npc: {}", n));
         if (failures.isEmpty()) {
@@ -638,7 +633,6 @@ public final class NpcQuestSelfTest {
                                   List<String> failures, List<String> notes) {
         String ST = NpcSetup.STORYTELLER_ID;
         String WC = NpcSetup.WHALE_CHASER_ID;
-        WorldLoop.set(server, 0);
         FakePlayer a = player(level, 1, at);
         FakePlayer b = player(level, 2, at);
         Growth.get(a).discoveries.clear();
@@ -846,27 +840,6 @@ public final class NpcQuestSelfTest {
         check(stage(a, "sub_song").equals("done") && QuestItems.count(a, "skyabyss:resonance_shard", null) >= 2, "sub_song did not finish with resonance shards", failures);
         DialogueService.close(a);
         notes.add("side quests: shards (collect → give → spyglass) and song (4 sayings → report → clock)");
-
-        // ループ: このループの印が「覚えているような記憶」へ移り、入口が変わる
-        WorldLoop.set(server, 0);
-        WorldLoop.advance(server);
-        check(WorldLoop.catchUp(a) && WorldLoop.catchUp(b), "players did not catch up with the loop", failures);
-        check(!WorldLoop.catchUp(a), "catching up twice should do nothing", failures);
-        check(NpcBonds.of(a).bond(ST).echoes().contains("song_heard") && NpcBonds.of(a).bond(ST).flags().isEmpty()
-                && Affinity.get(a, ST) == 0, "the loop did not move flags into memories", failures);
-        DialogueService.open(a, st);
-        check(node(a).equals("deja_vu_song"), "after a loop, a song listener should get deja_vu_song, got " + node(a), failures);
-        DialogueService.close(a);
-        // 職人を指す一言はループごとに一度 (印が記憶へ移ったので、もう一度出る)。ここでは済ませておく
-        NpcBonds.of(a).bond(ST).flags().add("ch1p_pointer_told");
-        DialogueService.open(a, st);
-        check(node(a).equals("menu"), "the deja vu should happen once per loop, got " + node(a), failures);
-        DialogueService.close(a);
-        DialogueService.open(b, st);
-        check(node(b).equals("deja_vu"), "after a loop, someone who only met her should get deja_vu, got " + node(b), failures);
-        DialogueService.close(b);
-        WorldLoop.set(server, 0);
-        notes.add("loop: flags became memories, deja vu lines chosen by what was remembered");
 
         // 保存: プレイヤーのデータに書かれ、読み戻すと同じ。死んだら引き継ぐ
         CompoundTag saved = a.serializeAttachments(server.registryAccess());

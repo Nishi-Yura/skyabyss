@@ -189,14 +189,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                     r.w() - Golden.S34 - Golden.S8, SOFT, false);
         }
 
-        // 記憶の断片 (脇の列の下の端)。効果を作るまで渡さないので、持っていないときは出さない (00 の 384。いつも 0 の欄は何の数か分からなかった)
-        if (d.fragmentCount() > 0) {
-            int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
-            Golden.rule(g, sx, sx + sw, fy - Golden.S3);
-            Component frag = Component.translatable("gui.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, frag, sx, Golden.textY(fy, Golden.ROW), sw, LORE, false);
-        }
-
         renderHover(g, d, mouseX, mouseY);
     }
 
@@ -219,7 +211,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         return String.format("%.1f", v * 100);
     }
 
-    // 名前に重ねると説明、断片の行に重ねると中身、バーに重ねると合計の経験値
+    // 名前に重ねると説明、バーに重ねると合計の経験値
     private void renderHover(GuiGraphics g, GrowthData d, int mouseX, int mouseY) {
         for (Stat stat : Stat.values()) {
             if (statRow(stat.ordinal()).contains(mouseX, mouseY)) {
@@ -230,14 +222,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                 tip(lines);
                 return;
             }
-        }
-        int fy = SIDE.bottom() - Golden.S5 - Golden.ROW;
-        if (d.fragmentCount() > 0 && mouseX >= SIDE.x() && mouseX < SIDE.right() && mouseY >= fy && mouseY < fy + Golden.ROW) {
-            List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.fragments_desc"), 200));
-            d.fragments.forEach((id, n) -> lines.add(Component.translatable(jp.revati.skyabyss.rpg.MemoryFragments.nameKey(id))
-                    .append(" ×" + n).withColor(LORE).getVisualOrderText()));
-            tip(lines);
-            return;
         }
         if (mouseX >= BAR_X && mouseX < BAR_X + BAR_W && mouseY >= BAR_Y - Golden.ROW && mouseY < BAR_Y + BAR_H + Golden.ROW) {
             tip(List.of(Component.translatable("gui.skyabyss.growth.lifetime", d.lifetimeXp(),

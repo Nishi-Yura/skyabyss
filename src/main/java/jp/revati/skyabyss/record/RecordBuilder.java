@@ -19,7 +19,6 @@ import jp.revati.skyabyss.lore.LoreState;
 import jp.revati.skyabyss.npc.Affinity;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
-import jp.revati.skyabyss.npc.WorldLoop;
 import jp.revati.skyabyss.progress.ProgressRules;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.progress.Titans;
@@ -34,7 +33,6 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
-import jp.revati.skyabyss.rpg.MemoryFragments;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.readiness.BoardReadiness;
@@ -699,13 +697,6 @@ public final class RecordBuilder {
             }
         }
         rows.add(value("respecs", t("r.respecs"), t("v.times", s.respecs), RecordSnapshot.MARK_NONE, List.of(t("d.respecs"))));
-        rows.add(header("fragments"));
-        List<Component> fragLines = new ArrayList<>();
-        fragLines.add(Component.translatable("gui.skyabyss.growth.fragments_desc"));
-        for (Map.Entry<String, Integer> e : d.fragments.entrySet()) {
-            fragLines.add(t("d.list_item", Component.translatable(MemoryFragments.nameKey(e.getKey())), e.getValue()));
-        }
-        rows.add(value("fragments", t("r.fragments"), t("v.of", d.fragmentCount(), d.fragmentCapacity), RecordSnapshot.MARK_NONE, fragLines));
         return rows;
     }
 
@@ -803,7 +794,6 @@ public final class RecordBuilder {
                     List.of(t("d.lore_chapter"))));
         }
         rows.add(header("world"));
-        rows.add(value("loop", t("r.loop"), t("v.times", WorldLoop.count(p.server)), RecordSnapshot.MARK_NONE, List.of(t("d.loop"))));
         return rows;
     }
 
