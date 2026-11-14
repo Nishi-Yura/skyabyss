@@ -173,7 +173,7 @@ public final class ArtisanSelfTest {
             check(f, java.util.Arrays.equals(pngSize(a + "textures/item/whale_road_" + piece + ".png", f), new int[] {32, 32}), "the " + piece + " icon is not 32x32");
             check(f, json(a + "models/item/whale_road_" + piece + ".json", f).has("textures"), "the " + piece + " item model is missing");
         }
-        check(f, armorTris >= 600 && armorTris <= 1400, "the whale road armor has " + armorTris + " triangles (want 600 to 1400)"); // 418 → 600: watertight pass (docs/design/15)、926: 一品一案の作り直し (2026-10-26)
+        check(f, armorTris >= 600 && armorTris <= 2600, "the whale road armor has " + armorTris + " triangles (want 600 to 2600)"); // 418 → 600: watertight pass (docs/design/15)、926: 一品一案の作り直し (2026-10-26)、2130: 太い輪郭と仕立ての細部 (2026-11-12。ほかの組は胸当てだけで 2,286 まである)
         // 鼓動守の絵 (案 A に差し替え済み。仮の絵ではない)
         check(f, java.util.Arrays.equals(pngSize(a + "textures/item/heartbeat_ward.png", f), new int[] {32, 32}), "the heartbeat ward icon is not 32x32");
         check(f, !placeholderMark(a + "textures/item/heartbeat_ward.png"), "a placeholder mark (magenta, top right) is still on the ward icon");

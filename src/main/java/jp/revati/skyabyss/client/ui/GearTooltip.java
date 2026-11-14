@@ -139,7 +139,7 @@ public final class GearTooltip {
                 sockets.add(row(SOCKET_FULL, rest(c), wrap));
             } else if ("gear.skyabyss.socket_empty".equals(key)) {
                 sockets.add(row(SOCKET_EMPTY, Component.translatable("gear.skyabyss.socket_empty_short").withStyle(c.getStyle()), wrap));
-            } else if (key != null && key.startsWith("gear.skyabyss.powder_art")) {
+            } else if ("gear.skyabyss.powder_art_on".equals(key) || "gear.skyabyss.powder_art_off".equals(key)) {
                 sockets.add(e);
             } else if ("gui.skyabyss.job.tooltip".equals(key)) {
                 reqs.add(row(JOB, c, wrap));
