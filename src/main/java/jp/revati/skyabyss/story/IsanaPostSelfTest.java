@@ -45,11 +45,20 @@ public final class IsanaPostSelfTest {
             check(f, IsanaPost.post(p) == IsanaPost.Post.TOWN, "chapter 2 before the tide quest: still in the whale town");
             Quests.start(p, "main_tide");
             check(f, IsanaPost.post(p) == IsanaPost.Post.TOWN, "during the rumor stage she is still in the whale town");
+            // 巨神の見え方: 二章に入っただけでは潮殻は見えない。頼み main_tide が「見る」段に来てから (2026-11-15)
+            check(f, !jp.revati.skyabyss.titan.TitanVisibility.reached(p, jp.revati.skyabyss.progress.Titans.TIDE_SHELL),
+                    "the tide shell was shown at the rumor stage, before the quest reached it");
             flags.add(IsanaPost.FLAG_TOLD);
             check(f, IsanaPost.post(p) == IsanaPost.Post.HARBOR, "after she says she will go ahead, she is at the harbor");
             flags.remove(IsanaPost.FLAG_TOLD);
             Quests.setStage(p, "main_tide", "prepare");
             check(f, IsanaPost.post(p) == IsanaPost.Post.HARBOR, "past the rumor stage (or after skipping it) she is at the harbor");
+            check(f, !jp.revati.skyabyss.titan.TitanVisibility.reached(p, jp.revati.skyabyss.progress.Titans.TIDE_SHELL),
+                    "the tide shell was shown at the prepare stage");
+            Quests.setStage(p, "main_tide", "see");
+            check(f, jp.revati.skyabyss.titan.TitanVisibility.reached(p, jp.revati.skyabyss.progress.Titans.TIDE_SHELL),
+                    "the tide shell was hidden at the see stage");
+            Quests.setStage(p, "main_tide", "prepare");
             check(f, IsanaPost.visibleTo(harbor, p) && !IsanaPost.visibleTo(hut, p) && !IsanaPost.visibleTo(town, p), "at the harbor stage only the harbor Isana is shown");
             // 目印: 港の立つ所が決まる前でも鯨見を指さない (立つ所か、汐守の町の真ん中)。2026-11-15「ピンが全く違う場所を指す」
             net.minecraft.core.BlockPos aim = IsanaPost.target(server, p);

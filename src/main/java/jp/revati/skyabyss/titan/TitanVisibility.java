@@ -79,13 +79,46 @@ public final class TitanVisibility {
     public static java.util.function.BiPredicate<UUID, String> REACHED_OVERRIDE;
 
     // 物語がその巨神の章まで来ているか (序章の人は岩鯨の章に来ていない)
-    static boolean reached(ServerPlayer sp, String titan) {
+    public static boolean reached(ServerPlayer sp, String titan) {
         if (REACHED_OVERRIDE != null) {
             return REACHED_OVERRIDE.test(sp.getUUID(), titan);
         }
         jp.revati.skyabyss.story.Chapters need = jp.revati.skyabyss.story.Chapters.forTitan(titan);
-        return need == null || jp.revati.skyabyss.story.Chapters.of(sp).ordinal() >= need.ordinal();
+        if (need == null) {
+            return true;
+        }
+        int chapter = jp.revati.skyabyss.story.Chapters.of(sp).ordinal();
+        if (chapter < need.ordinal()) {
+            return false;
+        }
+        // 章に入っただけでは見せない: その巨神のメインの頼みが「見る」段 (岩鯨は see_whale、ほかは see) まで来てから
+        // (2026-11-15 の声「その章のクエストが巨神のところまで行ってないのに、見えてしまっている」。前の巨神の心臓を止めた瞬間に次の巨神が見えていた)。
+        // 頼みの記録がない人 (古いセーブで、もう先の章にいる人) は章だけで決める
+        String quest = SEE_QUEST.get(titan);
+        jp.revati.skyabyss.quest.QuestLog.Entry e = quest == null ? null : jp.revati.skyabyss.quest.QuestLog.of(sp).entry(quest);
+        if (e == null) {
+            return quest == null || chapter > need.ordinal();
+        }
+        if (e.done) {
+            return true;
+        }
+        jp.revati.skyabyss.quest.QuestDef def = jp.revati.skyabyss.quest.QuestManager.quest(quest);
+        if (def == null) {
+            return true;
+        }
+        String see = titan.equals(jp.revati.skyabyss.progress.Titans.STONE_WHALE) ? "see_whale" : "see";
+        for (int i = 0; i < def.stages().size(); i++) {
+            if (def.stages().get(i).id().equals(see)) {
+                return e.stage >= i;
+            }
+        }
+        return true;
     }
+
+    // 巨神ごとの、その巨神を「見る」段のあるメインの頼み
+    static final Map<String, String> SEE_QUEST = Map.of(jp.revati.skyabyss.progress.Titans.STONE_WHALE, "main_song",
+            jp.revati.skyabyss.progress.Titans.TIDE_SHELL, "main_tide", jp.revati.skyabyss.progress.Titans.THUNDER_WING, "main_thunder",
+            jp.revati.skyabyss.progress.Titans.EMBER, "main_ember");
 
     // 自分の章の巨神として見えるか (章まで来ていて、心臓をまだ止めていない)
     static boolean own(ServerPlayer sp, String titan) {
