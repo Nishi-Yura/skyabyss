@@ -416,8 +416,8 @@ def main():
     N = len(P)
     size = sf["size"] * rng.uniform(0.85, 1.15, N)
 
-    # 輪郭のけば (表面から少し浮いた小さい点。ガウスの点のにじんだ縁の代わり。頭は少なめ)
-    k = rng.random(N) < np.where(sf["size"] < (a.h + a.hh) * 0.7, 0.025, 0.07)
+    # 輪郭のけば (表面から少し浮いた小さい点) は使わない (2026-11-16「体の周りにブロックが浮いてるのいらない」)。枠だけ残す
+    k = np.zeros(N, bool)
     fz = dict(P=P[k] + n[k] * rng.uniform(0.25, 1.1, k.sum())[:, None], size=size[k] * 0.6, col=col[k] * 0.8, A=A[k], B=B[k], W=W[k],
               flags=flags[k] & S.F_GLOW, n=n[k])
     # にじみ (光る点の一部に、柔らかい大きな丸を足し算で。点の細かさに合わせて間引く)
