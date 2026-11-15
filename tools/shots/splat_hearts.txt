@@ -1,0 +1,75 @@
+# 手彫りの心臓 (tools/gen/splat/resculpt.py の手彫りの層)
+world splathearts flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 260
+cmd skyabyss cinematic stop
+close
+cmd time set 18000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+fov 60
+hud off
+chat clear
+cmd tp @s 0 -55 14 180 0
+waitchunks
+wait 20
+cmd kill @e[type=!player]
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Rotation:[0f,0f]}
+wait 260
+cmd skyabyss cinematic stop
+close
+camera minecraft:overworld 0 -55 13 180 8
+wait 40
+shot stone_whale_heart_night
+cmd time set 6000
+wait 20
+shot stone_whale_heart_day
+cmd time set 18000
+wait 10
+cmd kill @e[type=!player]
+cmd summon skyabyss:tide_heart 0 -59 0 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Rotation:[0f,0f]}
+wait 260
+cmd skyabyss cinematic stop
+close
+camera minecraft:overworld 0 -55 13 180 8
+wait 40
+shot tide_heart_night
+cmd time set 6000
+wait 20
+shot tide_heart_day
+cmd time set 18000
+wait 10
+cmd kill @e[type=!player]
+cmd summon skyabyss:thunder_wing_heart 0 -59 0 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Rotation:[0f,0f]}
+wait 260
+cmd skyabyss cinematic stop
+close
+camera minecraft:overworld 0 -55 13 180 8
+wait 40
+shot thunder_wing_heart_night
+cmd time set 6000
+wait 20
+shot thunder_wing_heart_day
+cmd time set 18000
+wait 10
+cmd kill @e[type=!player]
+cmd summon skyabyss:ember_heart 0 -59 0 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b,Rotation:[0f,0f]}
+wait 260
+cmd skyabyss cinematic stop
+close
+camera minecraft:overworld 0 -55 13 180 8
+wait 40
+shot ember_heart_night
+cmd time set 6000
+wait 20
+shot ember_heart_day
+cmd time set 18000
+wait 10
+quit

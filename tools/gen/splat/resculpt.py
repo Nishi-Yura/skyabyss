@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """ボスの彫り直し: 低ポリのメッシュを中身の詰まった立体 (距離の場) に作り直し、点の模型として仕上げる。
 
-1. メッシュの全部の三角形で、格子の各点の「巻き数」(下から上へ通り抜けた面の向きの和) を数え、中か外かを決める
-   (部品が重なっていても、どれかの中なら中)。距離の場は中・外それぞれの距離変換の差。少しぼかして角と継ぎ目を丸める。
+1. 骨ごとに、その骨の三角形で格子の各点の「巻き数」(下から上へ通り抜けた面の向きの和) を数え、中か外かを決める
+   (部品が重なっていても、どれかの中なら中)。骨ごとに別の塊にするのは、部品がアニメで離れても点が散らないため。距離の場は中・外それぞれの距離変換の差。少しぼかして角と継ぎ目を丸める。
 2. 表面を横切る格子の点を表面へ寄せて点にする (tools/gen/splat/splat_lib.py の竜と同じ)。
 3. 色はメッシュの面に細かく撒いた点 (uv つき) の一番近いものから絵を引く。光る画素 (発光マスク) は光る点。
 4. 陰は竜と同じ: 主光・空の明るさ・窪みの暗さ (距離の場で)・尾根の明るさ・谷の暗さを、5 段の明るさにディザで落とす。
-5. 骨は一番近い面の骨。親子の骨の継ぎ目の近くは二本の骨に重みを分ける。
+5. 点はその塊の骨だけに付ける (継ぎ目は GeckoLib の部品の重なりで埋まる)。
 書き出しは assets/skyabyss/splat/<名前>.bin (あれば SplatGen の自動変換より優先される)。
 
 使い方:
@@ -28,6 +28,7 @@ from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import splat_lib as S  # noqa: E402
+import hand_detail as HD  # noqa: E402
 
 ASSETS = S.ROOT / "src/main/resources/assets/skyabyss"
 # 彫り直すボス (手彫りの lava_wyrm は除く)。巨神は大きすぎるので自動変換のまま
@@ -126,28 +127,42 @@ def sample_surface(V, T, Bi, UV, h, rng):
     return P, U, Bi[idx], N
 
 
-def resculpt(name, preview=False, h_div=170.0, max_points=70000):
-    t0 = time.time()
-    m = load_mesh(name)
-    V, T = m["V"], m["T"]
-    rng = np.random.default_rng(abs(hash(name)) % (2 ** 31))
-    lo0, hi0 = V.min(0), V.max(0)
-    maxdim = (hi0 - lo0).max()
-    h = maxdim / h_div
-    # 面積から点の数を見積もり、多すぎれば格子を粗く
-    A, Bv, C = V[T[:, 0]], V[T[:, 1]], V[T[:, 2]]
-    area = 0.5 * np.linalg.norm(np.cross(Bv - A, C - A), axis=1).sum() * 0.75
-    if area / (h * h) > max_points:
-        h = math.sqrt(area / max_points)
+def _bone_points(V, T, Bi, UV, bone, h, rng, hand, tex, glow, name, bones):
+    """骨一本ぶんの三角形 (T) を中身の詰まった塊にして、表面の点を作る。戻り: 点・法線・陰をつけた色・光るか (透明な所は除いた)"""
+    used = np.unique(T)
+    lo0, hi0 = V[used].min(0), V[used].max(0)
     pad = 4 * h
     lo = lo0 - pad
     shape = np.ceil((hi0 + pad - lo) / h).astype(int) + 1
     wind = winding_grid(V, T, lo, shape, h)
     inside = wind > 0
+    if not inside.any():
+        return None
     D = (distance_transform_edt(~inside) - distance_transform_edt(inside)) * h
     D = D + 0.5 * h * (D < 0)  # 境目を面の上へ (中の点は半分ずれている)
     D = gaussian_filter(D.astype(np.float32), 0.8)
-    sc = S.Sculpt(name, m["bones"], h=h)
+    # 色の引き当て: この骨の面に撒いた点 (uv つき) の一番近いもの
+    SP, SU, SB, SN = sample_surface(V, T, Bi, UV, h * 0.5, rng)
+    tree = cKDTree(SP)
+
+    def color_at(Q, near=None):
+        if near is None:
+            near = tree.query(Q)[1]
+        th, tw = tex.shape[:2]
+        u = np.clip((SU[near, 0] * tw).astype(int), 0, tw - 1)
+        v = np.clip((SU[near, 1] * th).astype(int), 0, th - 1)
+        c = tex[v, u, :3].astype(float)
+        lt = np.zeros(len(Q), bool)
+        if glow is not None:
+            gh, gw = glow.shape[:2]
+            gu = np.clip((SU[near, 0] * gw).astype(int), 0, gw - 1)
+            gv = np.clip((SU[near, 1] * gh).astype(int), 0, gh - 1)
+            gp = glow[gv, gu]
+            lt = (gp[:, 3] > 16) & (gp[:, :3].sum(1) > 0)
+        return c, lt, tex[v, u, 3]
+    if hand is not None:
+        D = HD.displace(D, lo, h, lambda Q: color_at(Q)[:2], hand)
+    sc = S.Sculpt(name, bones, h=h)
     sc.D, sc.lo, sc.shape = D, lo, shape
     # 表面の点
     ins = D < 0
@@ -160,46 +175,14 @@ def resculpt(name, preview=False, h_div=170.0, max_points=70000):
         c[:-1] |= diff
     cross &= np.abs(D) < h * 1.2
     ijk = np.argwhere(cross)
+    if len(ijk) == 0:
+        return None
     P = ijk * h + lo + rng.uniform(-0.35, 0.35, ijk.shape) * h
     for _ in range(3):
         n = sc.grad(P)
         P = P - n * sc.sample(P)[:, None]
     n = sc.grad(P)
-    # 色・骨: 面に撒いた点の一番近いもの
-    SP, SU, SB, SN = sample_surface(V, T, m["B"], m["UV"], h * 0.5, rng)
-    tree = cKDTree(SP)
-    dist, nn = tree.query(P, k=8)
-    near = nn[:, 0]
-    tex = load_img(ASSETS / "textures/lowpoly" / (m["tex"] + ".png"))
-    glow = load_img(ASSETS / "textures/lowpoly" / (m["tex"] + "_glowmask.png"))
-    if glow is None:
-        glow = load_img(ASSETS / "textures/lowpoly" / (m["tex"] + "_glow.png"))
-    th, tw = tex.shape[:2]
-    u = np.clip((SU[near, 0] * tw).astype(int), 0, tw - 1)
-    v = np.clip((SU[near, 1] * th).astype(int), 0, th - 1)
-    col = tex[v, u, :3].astype(float)
-    alpha = tex[v, u, 3]
-    lit = np.zeros(len(P), bool)
-    if glow is not None:
-        gh, gw = glow.shape[:2]
-        gu = np.clip((SU[near, 0] * gw).astype(int), 0, gw - 1)
-        gv = np.clip((SU[near, 1] * gh).astype(int), 0, gh - 1)
-        gp = glow[gv, gu]
-        lit = (gp[:, 3] > 16) & (gp[:, :3].sum(1) > 0)
-    # 骨と継ぎ目の重み (親子の骨だけ混ぜる)
-    bones = m["bones"]
-    bi = {b: i for i, b in enumerate(bones)}
-    par = np.array([bi.get(m["parents"].get(b)) if m["parents"].get(b) in bi else -1 for b in bones])
-    A_ = SB[near]
-    Bb = A_.copy()
-    W = np.ones(len(P))
-    for k in range(1, 8):
-        other = SB[nn[:, k]]
-        related = (other != A_) & ((par[A_] == other) | (par[other] == A_)) & (Bb == A_)
-        wo = 0.5 * np.clip(1 - dist[:, k] / (2.0 * h), 0, 1)
-        sel = related & (wo > 0)
-        Bb[sel] = other[sel]
-        W[sel] = 1 - wo[sel]
+    col, lit, alpha = color_at(P)
     # 陰
     key = np.array([0.35, 0.9, -0.55])
     key /= np.linalg.norm(key)
@@ -213,39 +196,81 @@ def resculpt(name, preview=False, h_div=170.0, max_points=70000):
     rim = np.clip(1 - np.abs(n[:, 1]) - 0.35, 0, 1)[:, None] * (lum < 0.3)[:, None]
     col = col + lift * np.array([110, 112, 130]) + rim * np.array([26, 30, 42])
     lap = sc.curvature(P)
+    shine = np.zeros(len(P), bool)
+    if hand is not None:
+        col, shine = HD.paint(P, n, col, lit, h, lap)
     ridge = (lap > 2.4 / max(h * 4, 1.0)) & (lam > 0.2)
     valley = lap < -1.2 / max(h * 4, 1.0)
-    dither = S.BAYER4[(ijk[:, 0] + ijk[:, 2]) % 4, ijk[:, 1] % 4]
+    # ディザの升目は模型全体で揃える (原点の格子)
+    g = np.floor(P / h).astype(int)
+    dither = S.BAYER4[(g[:, 0] + g[:, 2]) % 4, g[:, 1] % 4]
     f = np.clip(L * (len(LEVELS) - 2) + (dither - 0.5) * 0.9, 0, len(LEVELS) - 2)
     lv = LEVELS[np.rint(f).astype(int)]
     lv = np.where(ridge, np.minimum(lv + 0.12, LEVELS[-1]), lv)
     lv = np.where(valley, lv * 0.7, lv)
     shaded = np.where(lit[:, None], col, np.clip(col * lv[:, None], 0, 255))
+    # 照り (濡れた肉・目): 白に寄せる
+    shaded = np.where(shine[:, None], shaded * 0.35 + np.array([255, 248, 240]) * 0.65, shaded)
     keep = alpha >= 128
-    P, n, shaded, A_, Bb, W, lit = P[keep], n[keep], shaded[keep], A_[keep], Bb[keep], W[keep], lit[keep]
+    return P[keep], n[keep], shaded[keep], lit[keep]
+
+
+def resculpt(name, preview=False, h_div=170.0, max_points=70000, hand=None):
+    """骨ごとに別の塊として彫る (部品が離れて動いても点が散らない)。骨の継ぎ目は GeckoLib の部品の重なりで埋まる"""
+    t0 = time.time()
+    m = load_mesh(name)
+    V, T, Bi, UV = m["V"], m["T"], m["B"], m["UV"]
+    rng = np.random.default_rng(abs(hash(name)) % (2 ** 31))
+    lo0, hi0 = V.min(0), V.max(0)
+    h = (hi0 - lo0).max() / h_div
+    # 面積から点の数を見積もり、多すぎれば格子を粗く
+    A, Bv, C = V[T[:, 0]], V[T[:, 1]], V[T[:, 2]]
+    area = 0.5 * np.linalg.norm(np.cross(Bv - A, C - A), axis=1).sum() * 0.75
+    if area / (h * h) > max_points:
+        h = math.sqrt(area / max_points)
+    tex = load_img(ASSETS / "textures/lowpoly" / (m["tex"] + ".png"))
+    glow = load_img(ASSETS / "textures/lowpoly" / (m["tex"] + "_glowmask.png"))
+    if glow is None:
+        glow = load_img(ASSETS / "textures/lowpoly" / (m["tex"] + "_glow.png"))
+    bones = m["bones"]
+    parts = []
+    for b in np.unique(Bi):
+        sel = Bi == b
+        r = _bone_points(V, T[sel], Bi[sel], UV, b, h, rng, hand, tex, glow, name, bones)
+        if r is not None and len(r[0]):
+            parts.append((b,) + r)
+    P = np.concatenate([p[1] for p in parts])
+    n = np.concatenate([p[2] for p in parts])
+    shaded = np.concatenate([p[3] for p in parts])
+    lit = np.concatenate([p[4] for p in parts])
+    A_ = np.concatenate([np.full(len(p[1]), p[0]) for p in parts])
     N = len(P)
     size = h * 1.45 * rng.uniform(0.88, 1.12, N)
     flags = np.where(lit, S.F_GLOW, 0).astype(np.int32)
     # にじみ (光る点の一部に柔らかい丸)
     g = np.nonzero(lit)[0]
-    gi = g[rng.random(len(g)) < 0.12]
+    # 光る点が多い模型ほど間引く (全部で 400 個ほど。重なると白く飛ぶ)
+    gi = g[rng.random(len(g)) < min(0.12, 400.0 / max(1, len(g)))]
     hP = P[gi] + n[gi] * h
     allP = np.concatenate([P, hP])
-    allS = np.concatenate([size, rng.uniform(5, 8, len(gi)) * h])
-    allC = np.concatenate([shaded, shaded[gi] * 0.09])
+    allS = np.concatenate([size, rng.uniform(3.5, 5.5, len(gi)) * h])
+    allC = np.concatenate([shaded, shaded[gi] * 0.07])
     allA = np.concatenate([A_, A_[gi]])
-    allB = np.concatenate([Bb, Bb[gi]])
-    allW = np.concatenate([W, W[gi]])
+    allW = np.ones(len(allP))
     allF = np.concatenate([flags, np.full(len(gi), S.F_HALO)])
     allN = np.concatenate([n, np.zeros((len(gi), 3))])
     out = ASSETS / "splat" / (name + ".bin")
-    S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allB, allW, allF, N=allN)
-    print(f"{name}: {N} splats (+{len(gi)} halo) h={h:.2f} grid {tuple(shape)} {time.time() - t0:.1f}s")
+    S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allA, allW, allF, N=allN)
+    print(f"{name}: {N} splats (+{len(gi)} halo) h={h:.2f} {len(parts)} parts {time.time() - t0:.1f}s")
     if preview:
         pv = S.ROOT / "docs/review/splat_bosses" / (name + ".png")
         pv.parent.mkdir(parents=True, exist_ok=True)
         S.preview(allP, allS, allC, allF, pv, yaw_list=(200, 150, 90), px=520)
     return out
+
+
+# 手彫りの層の強さ (1 = 標準。0 = その材質は彫らない)
+HAND = {f"{t}_heart_p{p}": {"stone": 1.0, "flesh": 1.0, "pale": 1.0} for t in ("stone_whale", "tide", "storm", "ember") for p in (1, 2, 3)}
 
 
 def main():
@@ -259,7 +284,7 @@ def main():
         if not (ASSETS / "lowpoly" / (nm + ".json")).exists():
             print("skip (no mesh)", nm)
             continue
-        resculpt(nm, a.preview)
+        resculpt(nm, a.preview, hand=HAND.get(nm))
 
 
 if __name__ == "__main__":
