@@ -152,7 +152,7 @@ public final class EmberHeartBattle {
             level.addFreshEntity(heart);
             lastGroup = group;
             EmberBackTrials.soundTo(level, group, home, EmberHeartSetup.ROAR.get(), 2.5f, 1.1f);
-            EmberBackTrials.particlesTo(level, group, ParticleTypes.FLAME, home.x, home.y + 2, home.z, 120, 2.0, 1.5, 2.0, 0.2);
+            EmberBackTrials.particlesTo(level, group, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), home.x, home.y + 2, home.z, 24, 2.0, 1.5, 2.0, 0.2);
             broadcast(level, group, ModText.battle(EmberIds.LANG_HEART + "begin"));
             EmberHeart.logBorn(challengers.size());
             return heart;
@@ -307,9 +307,9 @@ public final class EmberHeartBattle {
     // 撃破のあと (部屋の持ち主が倒したグループのとき): 中央の台に光の柱 (立つと広間へ)
     private static void tickAfterDefeat(ServerLevel level, UUID group) {
         Vec3 c = EmberHeartArena.heartHome();
-        EmberBackTrials.particlesTo(level, group, ParticleTypes.ASH, c.x, EmberHeartArena.SURFACE + 1 + (level.getGameTime() % 12), c.z, 4, 0.5, 0.3, 0.5,
+        EmberBackTrials.particlesTo(level, group, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, EmberHeartArena.SURFACE + 1 + (level.getGameTime() % 12), c.z, 4, 0.5, 0.3, 0.5,
                 0.01);
-        EmberBackTrials.particlesTo(level, group, ParticleTypes.END_ROD, c.x, EmberHeartArena.SURFACE + (level.getGameTime() % 12), c.z, 2, 0.2, 0.2, 0.2,
+        EmberBackTrials.particlesTo(level, group, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, EmberHeartArena.SURFACE + (level.getGameTime() % 12), c.z, 2, 0.2, 0.2, 0.2,
                 0.01);
         for (ServerPlayer player : Groups.alive(level, group)) {
             if (Math.abs(player.getX() - c.x) < 1.2 && Math.abs(player.getZ() - c.z) < 1.2
@@ -455,5 +455,10 @@ public final class EmberHeartBattle {
     static void registerHooks() {
         EmberHeartArena.registerRoom();
         EmberBackRooms.onReset("heart", (level, sleeping) -> reawaken(level));
+    }
+
+    // 攻撃の粒は mod の熾の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

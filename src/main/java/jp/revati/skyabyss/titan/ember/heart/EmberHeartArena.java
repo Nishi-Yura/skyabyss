@@ -456,8 +456,8 @@ public final class EmberHeartArena {
         for (int[] c : ASH_POOLS) {
             double x = CX + c[0] + 0.5;
             double z = CZ + c[1] + 0.5;
-            level.sendParticles(ParticleTypes.WHITE_ASH, x, SURFACE + 0.3, z, 10, 0.9, 0.4, 0.9, 0.01);
-            level.sendParticles(ParticleTypes.SNOWFLAKE, x, SURFACE + 0.2, z, 2, 0.8, 0.1, 0.8, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, SURFACE + 0.3, z, 10, 0.9, 0.4, 0.9, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, SURFACE + 0.2, z, 2, 0.8, 0.1, 0.8, 0.02);
         }
         if (level.getGameTime() % 20 != 0) {
             return;
@@ -492,10 +492,10 @@ public final class EmberHeartArena {
                     for (int i = 0; i < 4; i++) {
                         double a = level.random.nextDouble() * Math.PI * 2;
                         double r = 3 + level.random.nextDouble() * 7;
-                        level.sendParticles(ParticleTypes.LAVA, CX + 0.5 + Math.cos(Math.toRadians(sectorAngle(k)) + a * 0.2) * r,
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), CX + 0.5 + Math.cos(Math.toRadians(sectorAngle(k)) + a * 0.2) * r,
                                 SURFACE + 0.2, CZ + 0.5 + Math.sin(Math.toRadians(sectorAngle(k)) + a * 0.2) * r, 1, 0.1, 0, 0.1, 0);
                     }
-                    level.sendParticles(ParticleTypes.LAVA, c.x, SURFACE + 0.5, c.z, 2, 3, 0.1, 3, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, SURFACE + 0.5, c.z, 2, 3, 0.1, 3, 0);
                 }
                 if (timer[k] <= 0) {
                     restore(level, k);
@@ -512,10 +512,10 @@ public final class EmberHeartArena {
         DustParticleOptions red = new DustParticleOptions(new Vector3f(1f, 0.25f, 0.1f), 1.5f);
         for (int i = 0; i < 14; i++) {
             BlockPos b = blocks.get(level.random.nextInt(blocks.size()));
-            warn(level, red, b.getX() + 0.5, SURFACE + 0.15, b.getZ() + 0.5, 1, 0.3, 0.05, 0.3, 0);
+            warn(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.getX() + 0.5, SURFACE + 0.15, b.getZ() + 0.5, 1, 0.3, 0.05, 0.3, 0);
         }
         BlockPos b = blocks.get(level.random.nextInt(blocks.size()));
-        warn(level, ParticleTypes.LAVA, b.getX() + 0.5, SURFACE + 0.2, b.getZ() + 0.5, 1, 0.2, 0, 0.2, 0);
+        warn(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), b.getX() + 0.5, SURFACE + 0.2, b.getZ() + 0.5, 1, 0.2, 0, 0.2, 0);
     }
 
     // 予告の粒は「制限を無視する」印を付けて送る (パーティクル「最小」の設定でも描かれる)
@@ -523,7 +523,7 @@ public final class EmberHeartArena {
             double dx, double dy, double dz, double speed) {
         for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(x, y, z) < 64 * 64) {
-                level.sendParticles(player, particle, true, x, y, z, count, dx, dy, dz, speed);
+                level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x, y, z, count, dx, dy, dz, speed);
             }
         }
     }
@@ -536,7 +536,7 @@ public final class EmberHeartArena {
         }
         Vec3 c = sectorCenter(k);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.LAVA_EXTINGUISH, SoundSource.HOSTILE, 2.0f, 0.5f);
-        level.sendParticles(ParticleTypes.LAVA, c.x, SURFACE + 0.5, c.z, 40, 4, 0.3, 4, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, SURFACE + 0.5, c.z, 24, 4, 0.3, 4, 0);
         // 沈んだとき、その扇に立っていた人は呑まれる
         for (ServerPlayer player : players(level)) {
             if (sectorAt(player.getX(), player.getZ()) == k && player.getY() < SURFACE + 1.0) {
@@ -553,7 +553,7 @@ public final class EmberHeartArena {
         timer[k] = 0;
         Vec3 c = sectorCenter(k);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.LAVA_EXTINGUISH, SoundSource.HOSTILE, 1.4f, 1.1f);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, c.x, SURFACE + 0.5, c.z, 30, 4, 0.2, 4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, SURFACE + 0.5, c.z, 24, 4, 0.2, 4, 0.02);
     }
 
     // すべて元に戻す (放棄・撃破・段階 3 に入る・やり直し)
@@ -592,8 +592,8 @@ public final class EmberHeartArena {
         player.hurt(source(level, EmberIds.ENGULFED, by), ENGULF_DAMAGE);
         EmberHeat.add(player, ENGULF_HEAT, EmberHeat.Reason.ENGULFED);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT_ON_FIRE, SoundSource.PLAYERS, 1.2f, 0.8f);
-        level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.5, player.getZ(), 14, 0.4, 0.4, 0.4, 0);
-        level.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 0.5, player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.getX(), player.getY() + 0.5, player.getZ(), 14, 0.4, 0.4, 0.4, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 0.5, player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
     }
 
     public static DamageSource source(ServerLevel level, net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> type,
@@ -684,7 +684,7 @@ public final class EmberHeartArena {
     static void open(ServerLevel level, UUID group) {
         if (GroupGates.open(level, group, gate())) {
             for (BlockPos p : gate()) {
-                jp.revati.skyabyss.titan.ember.back.EmberBackTrials.particlesTo(level, group, ParticleTypes.SMALL_FLAME, p.getX() + 0.5, p.getY() + 0.5,
+                jp.revati.skyabyss.titan.ember.back.EmberBackTrials.particlesTo(level, group, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + 0.5, p.getY() + 0.5,
                         p.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.01);
             }
         }
@@ -744,5 +744,10 @@ public final class EmberHeartArena {
 
     static void registerRoom() {
         EmberBackRooms.register("heart", EmberHeartArena::buildRoom);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

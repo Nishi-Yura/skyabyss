@@ -256,7 +256,7 @@ public class EmberHeart extends HeartBoss {
         this.setNoGravity(true);
         this.setPersistenceRequired();
         this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
-                new jp.revati.skyabyss.combat.HeartPursuit.Theme("ember", PULSE_DAMAGE, ParticleTypes.FLAME, SoundEvents.BLAZE_SHOOT, 1.2f),
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("ember", PULSE_DAMAGE, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), SoundEvents.BLAZE_SHOOT, 1.2f),
                 this::canReach, this::strike,
                 () -> level() instanceof ServerLevel s ? reachable(s, 40) : List.<ServerPlayer>of(),
                 () -> isBound() ? new Vec3(EmberHeartArena.CX + 0.5, getY(), EmberHeartArena.CZ + 0.5) : position(),
@@ -771,8 +771,8 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             entityData.set(DATA_ROARING, true);
             sound(server, EmberHeartSetup.ROAR.get(), 3f, 1f);
-            server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 40, 1.6, 1.4, 1.6, 0);
-            server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 60, 1.6, 1.4, 1.6, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), coreY(), getZ(), 24, 1.6, 1.4, 1.6, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 24, 1.6, 1.4, 1.6, 0.1);
             // 押し返す輪 (傷はない)。広がる範囲は、始めの 1.1 秒だけ床に描く
             tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, 18, 1.0, new double[0], 0), ROAR_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.EMBER_ROAR)
                     .active((int) Math.ceil((18 - 2.5) / 0.8))
@@ -785,12 +785,7 @@ public class EmberHeart extends HeartBoss {
                     .start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
-            if (enrageRoar) {
-                // 憤怒: 消えかけた火が最後に燃え上がる (赤い粒と炎)
-                warn(server, dust(0xFF3A1A, 1.5f), getX(), coreY(), getZ(), 8, 1.3, 1.3, 1.3, 0.05);
-                warn(server, ParticleTypes.FLAME, getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.08);
-            }
-            warn(server, dust(getPhase() == 0 ? 0xFFB040 : 0xE8E0D8, 1.3f), getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.05);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.05);
         }
         if (actionTicks >= ROAR_TICKS && enrageRoar) {
             entityData.set(DATA_ROARING, false);
@@ -799,8 +794,8 @@ public class EmberHeart extends HeartBoss {
             bossBar.setColor(BossEvent.BossBarColor.RED);
             sound(server, SoundEvents.BLAZE_SHOOT, 3f, 0.5f);
             sound(server, EmberHeartSetup.BEAT.get(), 3f, 1.3f);
-            server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 50, 1.8, 1.6, 1.8, 0);
-            server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 90, 1.8, 1.6, 1.8, 0.15);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), coreY(), getZ(), 24, 1.8, 1.6, 1.8, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 24, 1.8, 1.6, 1.8, 0.15);
             nextBeat = tickCount + 10;
             finish();
             cooldown = ENRAGE_COOLDOWN;
@@ -811,7 +806,7 @@ public class EmberHeart extends HeartBoss {
             int next = Math.min(PHASE_COUNT - 1, getPhase() + 1);
             entityData.set(DATA_PHASE, next);
             sound(server, SoundEvents.BEACON_ACTIVATE, 2.5f, next == 2 ? 0.7f : 1.4f);
-            server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 60, 1.8, 1.6, 1.8, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 24, 1.8, 1.6, 1.8, 0.1);
             if (next == 1) {
                 floorTimer = 80;
             } else if (next == 2) {
@@ -1000,10 +995,6 @@ public class EmberHeart extends HeartBoss {
                                 sound(s, SoundEvents.BLAZE_SHOOT, 2f, 0.6f);
                             }
                             double fy = floorY();
-                            for (double d = 2; d <= BREATH_LENGTH; d += 2.0) {
-                                s.sendParticles(ParticleTypes.FLAME, getX() + dx * d, fy + 0.8, getZ() + dz * d, 6, 0.8, 0.4, 0.8, 0.05);
-                                s.sendParticles(ParticleTypes.SMOKE, getX() + dx * d, fy + 1.2, getZ() + dz * d, 2, 0.6, 0.4, 0.6, 0.02);
-                            }
                         })
                         .onHit((s, player) -> {
                             strike(player, BREATH_DAMAGE);
@@ -1035,7 +1026,6 @@ public class EmberHeart extends HeartBoss {
                         .onImpact(s -> {
                             if (lead) {
                                 sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.0f, 1.3f);
-                                s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.1);
                             }
                         })
                         .onHit((s, player) -> {
@@ -1049,7 +1039,7 @@ public class EmberHeart extends HeartBoss {
             }
         }
         if (actionTicks < 20 && actionTicks % 3 == 0) {
-            warn(server, dust(0xFFE8A0, 1.6f), getX(), coreY(), getZ(), 4, 0.8, 0.8, 0.8, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 4, 0.8, 0.8, 0.8, 0.02);
         }
         if (actionTicks >= 40) {
             finish();
@@ -1075,7 +1065,7 @@ public class EmberHeart extends HeartBoss {
             }
         }
         if (actionTicks < 30 && actionTicks % 3 == 0) {
-            warn(server, dust(0xFFA030, 1.1f), getX(), coreY() + 0.5, getZ(), 6, 0.9, 0.9, 0.9, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY() + 0.5, getZ(), 6, 0.9, 0.9, 0.9, 0.02);
         }
         if (actionTicks >= 40) {
             finish();
@@ -1092,9 +1082,6 @@ public class EmberHeart extends HeartBoss {
             if (isBound()) {
                 crackSectors(server, floorCracks(present(server)));
             }
-        }
-        if (actionTicks < 40 && actionTicks % 4 == 0) {
-            warn(server, dust(0xFF5018, 1.4f), getX(), coreY(), getZ(), 6, 1.0, 1.0, 1.0, 0.03);
         }
         if (actionTicks >= 44) {
             finish();
@@ -1134,14 +1121,11 @@ public class EmberHeart extends HeartBoss {
                 continue;
             }
             sent++;
-            server.sendParticles(ParticleTypes.LAVA, x, fy + 0.3, z, 1, 0.2, 0.1, 0.2, 0);
-            server.sendParticles(ParticleTypes.FLAME, x, fy + 0.3, z, 2, 0.2, 0.6, 0.2, 0.08);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, fy + 0.3, z, 1, 0.2, 0.1, 0.2, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, fy + 0.3, z, 2, 0.2, 0.6, 0.2, 0.08);
         }
         int[] edge = {0};
         shape.outline((x, z) -> {
-            if (edge[0]++ % 3 == 0) {
-                server.sendParticles(ParticleTypes.LARGE_SMOKE, x, fy + 0.4, z, 1, 0.1, 0.2, 0.1, 0.02);
-            }
         }, 1.2);
     }
 
@@ -1164,7 +1148,6 @@ public class EmberHeart extends HeartBoss {
             tg(server, TelegraphShape.circle(getX(), getZ(), GALE_RADIUS), GALE_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_GALE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.6f, 0.7f);
-                        s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 100, 3.0, 0.5, 3.0, 0.2);
                     })
                     .onHit((s, player) -> {
                         Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
@@ -1187,13 +1170,6 @@ public class EmberHeart extends HeartBoss {
                         .start();
             }
         }
-        if (actionTicks < 70 && actionTicks % 2 == 0) {
-            for (int k = 0; k < 16; k++) {
-                double a = Math.toRadians(k * 22.5 + actionTicks * 3);
-                double r = 14 - ((actionTicks * 0.45 + k * 1.3) % 12);
-                warn(server, dust(0xFFB060, 1.2f), getX() + Math.cos(a) * r, fy + 0.4 + (k % 3) * 0.4, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
-            }
-        }
         if (actionTicks >= 30 && actionTicks < 70 && actionTicks % 2 == 0) {
             for (ServerPlayer player : reachable(server, 22)) {
                 pull(player, GALE_PULL);
@@ -1211,7 +1187,7 @@ public class EmberHeart extends HeartBoss {
             sound(server, EmberHeartSetup.PELLET.get(), 2f, 1f);
         }
         if (actionTicks < 20 && actionTicks % 2 == 0) {
-            warn(server, dust(0x303030, 1.5f), getX(), coreY(), getZ(), 8, 1.2, 1.2, 1.2, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 8, 1.2, 1.2, 1.2, 0.02);
         }
         if (actionTicks == 20) {
             List<Vec3> targets = spots(server, pelletCount(present(server)), 2.5, 6);
@@ -1343,9 +1319,6 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.EMBERS.get(), 2f, 1f);
         }
-        if (actionTicks < 20 && actionTicks % 2 == 0) {
-            warn(server, dust(0xFF9040, 1.2f), getX(), coreY(), getZ(), 6, 0.6, 0.6, 0.6, 0.05);
-        }
         if (actionTicks == 20) {
             placeEmbers(server);
         }
@@ -1382,14 +1355,14 @@ public class EmberHeart extends HeartBoss {
         for (Vec3 at : spots) {
             embers.add(new Ember(at.x, at.z, tickCount, tickCount + EMBER_TICKS));
             EmberHeartArena.emberLight(server, at.x, at.z, true);
-            server.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.3, at.z, 20, 0.6, 0.2, 0.6, 0.03);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.3, at.z, 20, 0.6, 0.2, 0.6, 0.03);
         }
         // 心臓から火の粉が飛ぶ (見た目)
         for (Vec3 at : spots) {
             Vec3 from = new Vec3(getX(), coreY(), getZ());
             for (int i = 1; i <= 8; i++) {
                 Vec3 p = from.add(at.subtract(from).scale(i / 8.0));
-                warn(server, ParticleTypes.FLAME, p.x, p.y + Math.sin(i / 8.0 * Math.PI) * 1.5, p.z, 1, 0.05, 0.05, 0.05, 0);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + Math.sin(i / 8.0 * Math.PI) * 1.5, p.z, 1, 0.05, 0.05, 0.05, 0);
             }
         }
     }
@@ -1438,7 +1411,6 @@ public class EmberHeart extends HeartBoss {
             tg(server, TelegraphShape.circle(getX(), getZ(), FADING_RADIUS), FADING_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_FADING)
                     .onImpact(s -> {
                         sound(s, SoundEvents.WARDEN_HEARTBEAT, 3f, 0.5f);
-                        s.sendParticles(ParticleTypes.ASH, getX(), floorY() + 0.5, getZ(), 120, 4.0, 0.5, 4.0, 0.1);
                     })
                     .onHit((s, player) -> {
                         Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
@@ -1462,7 +1434,7 @@ public class EmberHeart extends HeartBoss {
             }
         }
         if (actionTicks < 40 && actionTicks % 4 == 0) {
-            warn(server, dust(0x9A9088, 1.2f), getX(), coreY(), getZ(), 4, 1.0, 1.0, 1.0, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreY(), getZ(), 4, 1.0, 1.0, 1.0, 0.02);
         }
         if (actionTicks == 52) {
             for (ServerPlayer player : reachable(server, 40)) {
@@ -1492,10 +1464,6 @@ public class EmberHeart extends HeartBoss {
                         .onImpact(s -> {
                             s.playSound(null, getX(), floorY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, lead ? 2.5f : 2.0f, 0.5f);
                             double fy = floorY();
-                            for (double d = 3; d <= FORGE_RANGE; d += 2.5) {
-                                s.sendParticles(ParticleTypes.FLAME, getX() + dx * d, fy + 0.4, getZ() + dz * d, 8, 1.2, 0.2, 1.2, 0.05);
-                                s.sendParticles(ParticleTypes.LAVA, getX() + dx * d, fy + 0.5, getZ() + dz * d, 1, 0.8, 0.1, 0.8, 0);
-                            }
                         })
                         .onHit((s, player) -> {
                             strike(player, FORGE_DAMAGE);
@@ -1507,7 +1475,6 @@ public class EmberHeart extends HeartBoss {
             tg(server, TelegraphShape.circle(getX(), getZ(), FORGE_CORE_RADIUS), FORGE_CORE_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_FORGE_CORE)
                     .onImpact(s -> {
                         sound(s, SoundEvents.ANVIL_LAND, 3f, 0.4f);
-                        s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 80, 2.5, 0.4, 2.5, 0.12);
                     })
                     .onHit((s, player) -> {
                         Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
@@ -1516,9 +1483,6 @@ public class EmberHeart extends HeartBoss {
                         player.hurtMarked = true;
                     })
                     .start();
-        }
-        if (actionTicks < 70 && actionTicks % 3 == 0) {
-            warn(server, dust(0xFF5A20, 1.4f), getX(), coreY(), getZ(), 6, 1.0, 1.0, 1.0, 0.04);
         }
         if (actionTicks >= FORGE_TICKS) {
             finish();
@@ -1548,7 +1512,7 @@ public class EmberHeart extends HeartBoss {
         for (int i = 0; i < count; i++) {
             double a = random.nextDouble() * Math.PI * 2;
             double r = Math.sqrt(random.nextDouble()) * 14;
-            warn(server, random.nextBoolean() ? ParticleTypes.ASH : ParticleTypes.WHITE_ASH,
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX() + Math.cos(a) * r, EmberHeartArena.CEILING - 1 - random.nextDouble() * 3, getZ() + Math.sin(a) * r, 2, 0.3, 0.2, 0.3, 0.02);
         }
     }
@@ -1574,8 +1538,8 @@ public class EmberHeart extends HeartBoss {
         for (Orb o : orbs) {
             if (tickCount >= o.impactAt() - 10) {
                 double drop = (o.impactAt() - tickCount) / 10.0;
-                warn(server, ParticleTypes.FLAME, o.x(), fy + 1 + drop * 8, o.z(), 3, 0.1, 0.2, 0.1, 0);
-                warn(server, ParticleTypes.LAVA, o.x(), fy + 1 + drop * 8, o.z(), 1, 0.1, 0.1, 0.1, 0);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.x(), fy + 1 + drop * 8, o.z(), 3, 0.1, 0.2, 0.1, 0);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), o.x(), fy + 1 + drop * 8, o.z(), 1, 0.1, 0.1, 0.1, 0);
             }
         }
     }
@@ -1584,8 +1548,8 @@ public class EmberHeart extends HeartBoss {
     private void impactOrb(ServerLevel server, double x, double z) {
         double fy = floorY();
         server.playSound(null, x, fy, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 1.5f);
-        server.sendParticles(ParticleTypes.FLAME, x, fy + 0.4, z, 40, 1.0, 0.2, 1.0, 0.1);
-        server.sendParticles(ParticleTypes.LAVA, x, fy + 0.6, z, 14, 0.8, 0.2, 0.8, 0);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, fy + 0.4, z, 24, 1.0, 0.2, 1.0, 0.1);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, fy + 0.6, z, 14, 0.8, 0.2, 0.8, 0);
         blazes.add(new Blaze(x, z, tickCount + 80));
         EmberHeartArena.emberLight(server, x, z, true);
         blazeBurn(server, x, z, BLAZE_BURNS);
@@ -1617,13 +1581,6 @@ public class EmberHeart extends HeartBoss {
                 EmberHeartArena.emberLight(server, b.x(), b.z(), false);
                 continue;
             }
-            if (tickCount % 3 == 0) {
-                for (int i = 0; i < 4; i++) {
-                    double a = random.nextDouble() * Math.PI * 2;
-                    double r = Math.sqrt(random.nextDouble()) * 2.0;
-                    warn(server, ParticleTypes.FLAME, b.x() + Math.cos(a) * r, fy + 0.15, b.z() + Math.sin(a) * r, 1, 0, 0.05, 0, 0.01);
-                }
-            }
             remaining.add(b);
         }
         blazes.clear();
@@ -1648,19 +1605,15 @@ public class EmberHeart extends HeartBoss {
                 tg(server, TelegraphShape.circle(e.x(), e.z(), EMBER_RADIUS), EMBER_BURST_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.EMBER_EMBERS)
                         .onHit((s, player) -> {
                             burn(s, player, EMBER_BURN_DAMAGE);
-                            s.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.3, 0.2, 0.3, 0.05);
+                            s.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.3, 0.2, 0.3, 0.05);
                         })
                         .start();
             }
             if (tickCount % 2 == 0) {
-                warn(server, ParticleTypes.FLAME, e.x() + Mth.nextDouble(random, -1.5, 1.5), fy + 0.15, e.z() + Mth.nextDouble(random, -1.5, 1.5), 1, 0, 0.05, 0, 0.01);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.x() + Mth.nextDouble(random, -1.5, 1.5), fy + 0.15, e.z() + Mth.nextDouble(random, -1.5, 1.5), 1, 0, 0.05, 0, 0.01);
             }
             if (tickCount % 4 == 0) {
-                for (int a = 0; a < 360; a += 30) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(0xFFA040, 1.1f), e.x() + Math.cos(rad) * EMBER_RADIUS, fy + 0.15, e.z() + Math.sin(rad) * EMBER_RADIUS, 1, 0, 0, 0, 0);
-                }
-                warn(server, ParticleTypes.SMALL_FLAME, e.x(), fy + 1.0, e.z(), 1, 0.3, 0.5, 0.3, 0.02);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.x(), fy + 1.0, e.z(), 1, 0.3, 0.5, 0.3, 0.02);
             }
             if (tickCount % 20 == 0) {
                 for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class,
@@ -1697,14 +1650,14 @@ public class EmberHeart extends HeartBoss {
         if (isRoaring()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.6f);
-                server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 6, 0.8, 0.8, 0.8, 0);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), coreY(), getZ(), 6, 0.8, 0.8, 0.8, 0);
             }
             return false;
         }
         if (domain != null && domain.invulnerable()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.6f);
-                server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 6, 0.8, 0.8, 0.8, 0);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), coreY(), getZ(), 6, 0.8, 0.8, 0.8, 0);
             }
             return false;
         }
@@ -1847,8 +1800,8 @@ public class EmberHeart extends HeartBoss {
         }
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), EmberHeartSetup.DEATH.get(), SoundSource.HOSTILE, 3f, 1f);
-            server.sendParticles(ParticleTypes.ASH, getX(), coreY(), getZ(), 160, 1.5, 1.6, 1.5, 0.1);
-            server.sendParticles(ParticleTypes.SMOKE, getX(), coreY(), getZ(), 60, 1.5, 1.5, 1.5, 0.05);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), coreY(), getZ(), 24, 1.5, 1.6, 1.5, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), coreY(), getZ(), 24, 1.5, 1.5, 1.5, 0.05);
             clearHazards(server);
             clearChill(server);
         }
@@ -1880,22 +1833,22 @@ public class EmberHeart extends HeartBoss {
         for (int k = 0; k < thumps.length; k++) {
             if (tick == thumps[k]) {
                 sound(server, EmberHeartSetup.BEAT.get(), 2.5f, 0.6f + 0.1f * k);
-                server.sendParticles(ParticleTypes.LAVA, getX(), cy, getZ(), 4 + 2 * k, 0.8, 0.6, 0.8, 0);
-                server.sendParticles(ParticleTypes.FLAME, getX(), cy, getZ(), 8 + 4 * k, 0.9, 0.7, 0.9, 0.02);
-                server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy + 0.5, getZ(), 4, 0.7, 0.4, 0.7, 0.02);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 4 + 2 * k, 0.8, 0.6, 0.8, 0);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 8 + 4 * k, 0.9, 0.7, 0.9, 0.02);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), cy + 0.5, getZ(), 4, 0.7, 0.4, 0.7, 0.02);
             }
         }
         if (tick < 50 && tick % 5 == 0) {
-            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 6, 1.2, 1.0, 1.2, 0.02);
-            server.sendParticles(ParticleTypes.SMOKE, getX(), cy - 0.5, getZ(), 3, 0.8, 0.5, 0.8, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 6, 1.2, 1.0, 1.2, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), cy - 0.5, getZ(), 3, 0.8, 0.5, 0.8, 0.02);
         }
         if (tick == 50) {
             sound(server, SoundEvents.FIRECHARGE_USE, 3f, 0.6f);
             sound(server, SoundEvents.LAVA_POP, 3f, 0.6f);
-            server.sendParticles(ParticleTypes.LAVA, getX(), cy, getZ(), 40, 1.0, 1.0, 1.0, 0);
-            server.sendParticles(ParticleTypes.FLAME, getX(), cy, getZ(), 60, 1.2, 1.2, 1.2, 0.12);
-            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 80, 1.6, 1.4, 1.6, 0.05);
-            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy, getZ(), 30, 1.2, 1.2, 1.2, 0.06);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 24, 1.0, 1.0, 1.0, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 1.2, 1.2, 1.2, 0.12);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 24, 1.6, 1.4, 1.6, 0.05);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), cy, getZ(), 24, 1.2, 1.2, 1.2, 0.06);
         }
         if (tick == 58) {
             sound(server, EmberHeartSetup.ROAR.get(), 3f, 1.1f);
@@ -1913,14 +1866,14 @@ public class EmberHeart extends HeartBoss {
             sound(server, EmberHeartSetup.BEAT.get(), 2.5f, tick == 18 ? 0.8f : (tick == 40 ? 0.7f : 0.55f));
         }
         if (tick % 4 == 0 && tick < 90) {
-            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 3, 1.2, 1.2, 1.2, 0.01);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 3, 1.2, 1.2, 1.2, 0.01);
         }
         if (tick == 36 || tick == 60) {
             sound(server, SoundEvents.FIRE_EXTINGUISH, 2f, 0.8f);
-            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy, getZ(), 20, 1.2, 1.0, 1.2, 0.03);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), cy, getZ(), 20, 1.2, 1.0, 1.2, 0.03);
         }
         if (tick >= 56 && tick <= 86 && tick % 3 == 0) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BASALT.defaultBlockState()),
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX() + Mth.nextDouble(random, -1.5, 1.5), cy - 0.5, getZ() + Mth.nextDouble(random, -1.5, 1.5), 8, 0.4, 0.3, 0.4, 0.1);
         }
         if (tick == 56) {
@@ -1928,13 +1881,13 @@ public class EmberHeart extends HeartBoss {
         }
         if (tick == 74) {
             sound(server, SoundEvents.LAVA_POP, 3f, 0.8f);
-            server.sendParticles(ParticleTypes.FLAME, getX(), cy, getZ(), 40, 0.8, 0.8, 0.8, 0.1);
-            server.sendParticles(ParticleTypes.LAVA, getX(), cy, getZ(), 20, 0.8, 0.8, 0.8, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 0.8, 0.8, 0.8, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 20, 0.8, 0.8, 0.8, 0);
         }
         if (tick == 88) {
             sound(server, SoundEvents.FIRE_EXTINGUISH, 3f, 0.6f);
-            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 200, 2.0, 1.8, 2.0, 0.05);
-            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy, getZ(), 40, 1.5, 1.2, 1.5, 0.04);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 24, 2.0, 1.8, 2.0, 0.05);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), cy, getZ(), 24, 1.5, 1.2, 1.5, 0.04);
         }
     }
 
@@ -1986,26 +1939,22 @@ public class EmberHeart extends HeartBoss {
         int phase = getPhase();
         if (phase == 0) {
             if (random.nextFloat() < 0.2f) {
-                level().addParticle(ParticleTypes.FLAME, getX() + Mth.nextDouble(random, -1.8, 1.8), cy + Mth.nextDouble(random, 0.5, 3),
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -1.8, 1.8), cy + Mth.nextDouble(random, 0.5, 3),
                         getZ() + Mth.nextDouble(random, -1.8, 1.8), 0, 0.03, 0);
             }
         } else if (phase == 1) {
             if (random.nextFloat() < 0.4f) {
-                level().addParticle(dust(0xFFE070, 1.0f), getX() + Mth.nextDouble(random, -2.4, 2.4), cy + Mth.nextDouble(random, -1.5, 3),
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -2.4, 2.4), cy + Mth.nextDouble(random, -1.5, 3),
                         getZ() + Mth.nextDouble(random, -2.4, 2.4), 0, 0.03, 0);
             }
             if (random.nextFloat() < 0.25f) {
-                level().addParticle(ParticleTypes.DRIPPING_LAVA, getX() + Mth.nextDouble(random, -2.7, 2.7), cy - 0.8,
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX() + Mth.nextDouble(random, -2.7, 2.7), cy - 0.8,
                         getZ() + Mth.nextDouble(random, -2.7, 2.7), 0, 0, 0);
             }
         } else {
             if (random.nextFloat() < 0.5f) {
-                level().addParticle(ParticleTypes.ASH, getX() + Mth.nextDouble(random, -3.3, 3.3), cy + Mth.nextDouble(random, -2.4, 3.6),
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX() + Mth.nextDouble(random, -3.3, 3.3), cy + Mth.nextDouble(random, -2.4, 3.6),
                         getZ() + Mth.nextDouble(random, -3.3, 3.3), 0, -0.01, 0);
-            }
-            if (random.nextFloat() < 0.18f) {
-                level().addParticle(dust(0xE04020, 0.9f), getX() + Mth.nextDouble(random, -1.5, 1.5), cy + Mth.nextDouble(random, 0, 3),
-                        getZ() + Mth.nextDouble(random, -1.5, 1.5), 0, 0.03, 0);
             }
         }
     }
@@ -2013,5 +1962,10 @@ public class EmberHeart extends HeartBoss {
     // 画面の外へ出たことがないよう、ログ用
     static void logBorn(int challengers) {
         SkyAbyss.LOGGER.info("The heart of the embers woke with {} challenger(s)", challengers);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

@@ -99,15 +99,15 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
         super.tick();
         if (!(level() instanceof ServerLevel server)) {
             if (random.nextFloat() < 0.5f) {
-                level().addParticle(ParticleTypes.ASH, getX(), getY() + 0.3, getZ(), 0, 0.02, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(), 0, 0.02, 0);
             }
             if (random.nextFloat() < 0.25f) {
-                level().addParticle(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.3, getZ(), 0, 0.01, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 0, 0.01, 0);
             }
             // 尾を引く煙と熾 (動いた向きの後ろへ)
             if (tickCount % 2 == 0) {
-                level().addParticle(ParticleTypes.SMOKE, xo, yo + 0.3, zo, 0, 0.02, 0);
-                level().addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1f, 0.55f, 0.18f), 0.9f), xo, yo + 0.3, zo, 0, 0, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), xo, yo + 0.3, zo, 0, 0.02, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), xo, yo + 0.3, zo, 0, 0, 0);
             }
             return;
         }
@@ -121,14 +121,14 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
         Vec3 at = from.lerp(to, t * t * (3 - 2 * t)).add(0, Math.sin(t * Math.PI) * 1.6, 0);
         setPos(at.x, at.y, at.z);
         if (tickCount % 3 == 0) {
-            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 0.3, getZ(), 2, 0.2, 0.2, 0.2, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(), 2, 0.2, 0.2, 0.2, 0.02);
         }
     }
 
     private void pop(ServerLevel server) {
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 0.9f, 1.5f);
-        server.sendParticles(ParticleTypes.ASH, getX(), getY() + 0.3, getZ(), 14, 0.3, 0.3, 0.3, 0.05);
-        server.sendParticles(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.3, getZ(), 6, 0.2, 0.2, 0.2, 0.03);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(), 14, 0.3, 0.3, 0.3, 0.05);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 6, 0.2, 0.2, 0.2, 0.03);
         discard();
     }
 
@@ -165,5 +165,10 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

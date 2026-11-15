@@ -92,7 +92,7 @@ public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group
         super.tick();
         if (!(level() instanceof ServerLevel server)) {
             if (random.nextFloat() < 0.6f) {
-                level().addParticle(ParticleTypes.BUBBLE_POP, getX() + (random.nextDouble() - 0.5) * 1.4, getY() + random.nextDouble() * 2.4,
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX() + (random.nextDouble() - 0.5) * 1.4, getY() + random.nextDouble() * 2.4,
                         getZ() + (random.nextDouble() - 0.5) * 1.4, 0, 0.02, 0);
             }
             return;
@@ -119,14 +119,14 @@ public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group
             player.hurt(source, TideHeart.BUBBLE_DAMAGE_PER_SECOND);
         }
         if (tickCount % 4 == 0) {
-            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), getY() + 1.2, getZ(), 3, 0.6, 0.9, 0.6, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1.2, getZ(), 3, 0.6, 0.9, 0.6, 0.02);
         }
     }
 
     private void pop(ServerLevel server, @Nullable ServerPlayer player) {
         server.playSound(null, getX(), getY() + 1, getZ(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.HOSTILE, 2f, 0.8f);
-        server.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 1.2, getZ(), 30, 0.6, 0.8, 0.6, 0.2);
-        server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), getY() + 1.2, getZ(), 20, 0.6, 0.8, 0.6, 0.1);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1.2, getZ(), 24, 0.6, 0.8, 0.6, 0.2);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1.2, getZ(), 20, 0.6, 0.8, 0.6, 0.1);
         if (player != null) {
             player.fallDistance = 0;
             player.removeEffect(MobEffects.LEVITATION);
@@ -175,5 +175,10 @@ public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

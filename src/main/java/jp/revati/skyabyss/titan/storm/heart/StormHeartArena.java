@@ -390,7 +390,7 @@ public final class StormHeartArena {
         if (GroupGates.release(level, group, gate())) {
             for (ServerPlayer player : Groups.online(level, group)) {
                 for (BlockPos p : gate()) {
-                    level.sendParticles(player, ParticleTypes.ELECTRIC_SPARK, false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+                    level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
                 }
             }
         }
@@ -403,5 +403,10 @@ public final class StormHeartArena {
 
     static void resetState() {
         java.util.Arrays.fill(CHARGE, 0);
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -86,14 +86,14 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
         super.tick();
         if (!(level() instanceof ServerLevel server)) {
             if (random.nextFloat() < 0.5f) {
-                level().addParticle(ParticleTypes.END_ROD, getX(), getY() + 0.3, getZ(), 0, 0, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 0, 0, 0);
             }
             // 真珠の光の尾と、はじける泡
             if (tickCount % 2 == 0) {
-                level().addParticle(ParticleTypes.GLOW, xo, yo + 0.3, zo, 0, 0.01, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), xo, yo + 0.3, zo, 0, 0.01, 0);
             }
             if (random.nextFloat() < 0.2f) {
-                level().addParticle(ParticleTypes.BUBBLE_POP, getX(), getY() + 0.3, getZ(), 0, 0.03, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.3, getZ(), 0, 0.03, 0);
             }
             return;
         }
@@ -103,7 +103,7 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
             if (tickCount - lockedAt >= TideHeart.PEARL_WARN + 1) {
                 pop(server);
             } else if (tickCount % 3 == 0) {
-                server.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.3, getZ(), 2, 0.25, 0.25, 0.25, 0.01);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 2, 0.25, 0.25, 0.25, 0.01);
             }
             return;
         }
@@ -145,7 +145,7 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
 
     private void pop(ServerLevel server) {
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.2f, 1.6f);
-        server.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.3, getZ(), 12, 0.3, 0.3, 0.3, 0.05);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 12, 0.3, 0.3, 0.3, 0.05);
         discard();
     }
 
@@ -182,5 +182,10 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

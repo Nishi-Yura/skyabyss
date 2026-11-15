@@ -158,7 +158,7 @@ public final class StormHeartBattle {
             for (ServerPlayer p : Groups.online(level, group)) {
                 if (p.distanceToSqr(c) < 48 * 48) {
                     p.playNotifySound(StormHeartSetup.ROAR.get(), SoundSource.HOSTILE, 2.5f, 1.1f);
-                    level.sendParticles(p, ParticleTypes.ELECTRIC_SPARK, false, c.x, y + 2, c.z, 120, 2.0, 1.5, 2.0, 0.3);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, c.x, y + 2, c.z, 24, 2.0, 1.5, 2.0, 0.3);
                 }
             }
             broadcast(level, group, ModText.battle("message.skyabyss.storm_heart.begin"));
@@ -322,8 +322,8 @@ public final class StormHeartBattle {
             UUID g = Groups.keyOf(player);
             if (shown.add(g)) {
                 for (ServerPlayer mate : Groups.online(level, g)) {
-                    level.sendParticles(mate, ParticleTypes.END_ROD, false, c.x, StormHeartArena.FLOOR + (level.getGameTime() % 12), c.z, 3, 0.25, 0.2, 0.25, 0.02);
-                    level.sendParticles(mate, ParticleTypes.ELECTRIC_SPARK, false, c.x, StormHeartArena.FLOOR + 1, c.z, 2, 0.4, 0.3, 0.4, 0.02);
+                    level.sendParticles(mate, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, c.x, StormHeartArena.FLOOR + (level.getGameTime() % 12), c.z, 3, 0.25, 0.2, 0.25, 0.02);
+                    level.sendParticles(mate, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, c.x, StormHeartArena.FLOOR + 1, c.z, 2, 0.4, 0.3, 0.4, 0.02);
                 }
             }
             if (Math.abs(player.getX() - c.x) < 1.2 && Math.abs(player.getZ() - c.z) < 1.2
@@ -463,5 +463,10 @@ public final class StormHeartBattle {
         ROOMS.clear();
         RoomLocks.release(ROOM);
         StormHeartArena.resetState();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

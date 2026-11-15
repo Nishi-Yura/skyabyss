@@ -2,7 +2,7 @@
 """攻撃と技の粒の絵 (docs/design/59 の 2 章): 7 属性 x 3 種 x 4 枚、ドット 8x8、2 色 (地色と光の色)。
 
 使い方: python -I tools/gen/ui/gen_fx_particles.py [--style a|b|c] [--sheet]
-  --style  絵の案 (a = 欠けた石の素朴なドット / b = 鋭い幾何 / c = 丸く柔らか)。既定 a
+  --style  絵の案 (a = 欠けた石の素朴なドット。2026-11-15 に選ばれ、手で描いた清書 / b = 鋭い幾何 / c = 丸く柔らか。b・c は選ばれなかったラフ)。既定 a
   --sheet  docs/review/fx_particles/<style>.png に見比べの台紙 (8 倍) も書く
 書くもの: src/main/resources/assets/skyabyss/textures/particle/fx/<属性>_<種類>_<n>.png と
           src/main/resources/assets/skyabyss/particles/fx_<属性>_<種類>.json
@@ -41,55 +41,45 @@ def blank():
 
 
 # ---------------------------------------------------------------- a: 欠けた石の素朴なドット
-def a_shard(r):
+# 案 a (2026-11-15 に選ばれた形) の清書: 手で描いた 4 枚ずつ。B = 地色、L = 光の色、. = 透明
+A_SHARD = [
+    ["........", "........", "...LL...", "..LBBB..", "..BBBB..", "...BB...", "........", "........"],
+    ["........", "..L.....", "..LBB...", "..BBBB..", "...BBB..", "....B...", "........", "........"],
+    ["........", "........", "..LLL...", ".LBBBB..", "..BBBBB.", "....BB..", "........", "........"],
+    ["........", "....L...", "...LBB..", "...BBB..", "..BBBB..", "..BB....", "........", "........"],
+]
+A_GLOW = [
+    ["........", "........", "........", "...L....", "..LLL...", "...L....", "........", "........"],
+    ["........", "...B....", "...L....", ".BLLLB..", "...L....", "...B....", "........", "........"],
+    ["...B....", "...L....", "...L....", "BLLLLLB.", "...L....", "...L....", "...B....", "........"],
+    ["........", ".B...B..", "..L.L...", "...L....", "..L.L...", ".B...B..", "........", "........"],
+]
+A_SMOKE = [
+    ["........", "........", "..BBB...", ".BLLBB..", ".BLBBB..", ".BBBBB..", "..BBB...", "........"],
+    ["........", "..BBB...", ".BLLBBB.", "BLLBBBB.", "BBBBBBB.", ".BBBBB..", "..BBB...", "........"],
+    ["........", ".....BB.", "..BBBLLB", ".BLLBBBB", ".BLBBBB.", ".BBBBB..", "..BBB...", "........"],
+    ["........", "........", "...BB...", "..BLBB..", ".BBBBBB.", "..BBBB..", "...B....", "........"],
+]
+
+
+def drawn(rows):
     g = blank()
-    w, h = r.choice([(4, 3), (3, 4), (5, 3), (4, 4)])
-    x0, y0 = (N - w) // 2, (N - h) // 2
-    for y in range(h):
-        for x in range(w):
-            g[y0 + y][x0 + x] = B
-    # 角を欠く
-    for _ in range(r.randint(1, 3)):
-        cx, cy = r.choice([(x0, y0), (x0 + w - 1, y0), (x0, y0 + h - 1), (x0 + w - 1, y0 + h - 1)])
-        g[cy][cx] = 0
-    # 光の縁 (上と左)
-    for x in range(x0, x0 + w):
-        if g[y0][x]:
-            g[y0][x] = L
-            break
-    for y in range(y0, y0 + h):
-        if g[y][x0]:
-            g[y][x0] = L
-            break
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            g[y][x] = {"B": B, "L": L}.get(ch, 0)
     return g
+
+
+def a_shard(r, i=0):
+    return drawn(A_SHARD[i])
 
 
 def a_glow(r, i):
-    g = blank()
-    c = 3 + (i % 2)
-    arm = [1, 2, 3, 2][i]
-    for d in range(-arm, arm + 1):
-        g[c][c + d] = B if abs(d) == arm else L
-        g[c + d][c] = B if abs(d) == arm else L
-    g[c][c] = L
-    return g
+    return drawn(A_GLOW[i])
 
 
 def a_smoke(r, i):
-    g = blank()
-    rad = [2.6, 3.0, 3.4, 2.8][i]
-    cx = cy = 3.5
-    for y in range(N):
-        for x in range(N):
-            d = math.hypot(x - cx, y - cy)
-            if d <= rad:
-                g[y][x] = B
-            if d <= rad - 1.4 and x + y < 7:
-                g[y][x] = L
-    for _ in range(i + 1):
-        x, y = r.randrange(N), r.randrange(N)
-        g[y][x] = 0
-    return g
+    return drawn(A_SMOKE[i])
 
 
 # ---------------------------------------------------------------- b: 鋭い幾何
@@ -191,7 +181,7 @@ def c_smoke(r, i):
 def make(style, kind, i, seed):
     r = random.Random(seed)
     if style == "a":
-        return {"shard": lambda: a_shard(r), "glow": lambda: a_glow(r, i), "smoke": lambda: a_smoke(r, i)}[kind]()
+        return {"shard": lambda: a_shard(r, i), "glow": lambda: a_glow(r, i), "smoke": lambda: a_smoke(r, i)}[kind]()
     if style == "b":
         return {"shard": lambda: b_shard(r, i), "glow": lambda: b_glow(r, i), "smoke": lambda: b_smoke(r, i)}[kind]()
     return {"shard": lambda: c_shard(r, i), "glow": lambda: c_glow(r, i), "smoke": lambda: c_smoke(r, i)}[kind]()
