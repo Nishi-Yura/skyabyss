@@ -145,8 +145,8 @@ public class BoneMortar extends GuardMob {
             playAction("fire");
             Vec3 muzzle = muzzle();
             playTo(server, Ch1BackSounds.MORTAR_FIRE.get(), 2f, 0.95f + random.nextFloat() * 0.1f);
-            trail(server, ParticleTypes.CAMPFIRE_COSY_SMOKE, muzzle, 6, 0.15, 0.1, 0.15, 0.01);
-            trail(server, ParticleTypes.POOF, muzzle, 6, 0.2, 0.2, 0.2, 0.05);
+            trail(server, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), muzzle, 6, 0.15, 0.1, 0.15, 0.01);
+            trail(server, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), muzzle, 6, 0.2, 0.2, 0.2, 0.05);
             for (Vec3[] shell : shells) {
                 shell[0] = muzzle;
             }
@@ -157,7 +157,7 @@ public class BoneMortar extends GuardMob {
                 double h = 3.0 + shell[0].distanceTo(shell[1]) * 0.18;
                 Vec3 p = shell[0].lerp(shell[1], t).add(0, 4 * h * t * (1 - t), 0);
                 // 飛ぶ骨の塊は技の形 (prop rock)。粒は尾だけ
-                trail(server, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), p, 2, 0.12, 0.12, 0.12, 0.0);
+                trail(server, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p, 2, 0.12, 0.12, 0.12, 0.0);
             }
         }
         if (ticks >= WARN + 8) {
@@ -224,17 +224,12 @@ public class BoneMortar extends GuardMob {
 
     private void impact(ServerLevel server, Vec3 at) {
         server.playSound(null, at.x, at.y, at.z, Ch1BackSounds.MORTAR_LAND.get(), SoundSource.HOSTILE, 2f, 0.95f + random.nextFloat() * 0.1f);
-        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y + 0.4, at.z, 40, 0.8, 0.3, 0.8, 0.2);
-        server.sendParticles(ParticleTypes.POOF, at.x, at.y + 0.2, at.z, 10, 0.8, 0.1, 0.8, 0.04);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.x, at.y + 0.4, at.z, 24, 0.8, 0.3, 0.8, 0.2);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y + 0.2, at.z, 10, 0.8, 0.1, 0.8, 0.04);
     }
 
     // 飛行の粒は同じグループの人にだけ
     private void trail(ServerLevel server, ParticleOptions particle, Vec3 at, int count, double dx, double dy, double dz, double speed) {
-        for (ServerPlayer player : Players.snapshot(server.players())) {
-            if (player.distanceToSqr(at) < 64 * 64 && GroupOwned.visibleTo(this, player)) {
-                server.sendParticles(player, particle, true, at.x, at.y, at.z, count, dx, dy, dz, speed);
-            }
-        }
     }
 
     private void playTo(ServerLevel server, SoundEvent sound, float volume, float pitch) {
@@ -263,7 +258,7 @@ public class BoneMortar extends GuardMob {
         super.die(source);
         Telegraph.cancelAll(this);
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), getY() + 1, getZ(), 40, 0.7, 0.6, 0.7, 0.15);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 1, getZ(), 24, 0.7, 0.6, 0.7, 0.15);
         }
     }
 
@@ -296,5 +291,10 @@ public class BoneMortar extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

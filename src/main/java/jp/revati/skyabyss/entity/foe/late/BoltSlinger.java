@@ -65,7 +65,6 @@ public class BoltSlinger extends LateFoe {
                 .floor(y).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.SPINE_HARE_SHOOT.get(), 1.0f, 0.8f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + 0.3, z, 40, RADIUS * 0.4, 0.3, RADIUS * 0.4, 0.2))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1), this);

@@ -196,7 +196,6 @@ public class TidepoolClam extends GroundFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, cx, getY(), cz, MobSounds.TIDEPOOL_CLAM_SNAP.get(), SoundSource.HOSTILE, 1.2f, 1.0f);
-                    server.sendParticles(ParticleTypes.SPLASH, cx, getY() + 0.4, cz, 12, 0.5, 0.1, 0.5, 0.05);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), PINCH_DAMAGE);

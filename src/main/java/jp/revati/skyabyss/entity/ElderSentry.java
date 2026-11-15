@@ -240,7 +240,6 @@ public class ElderSentry extends GroundFoe {
                 .floor(floorY()).warn(SWING_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.ELDER_SENTRY_SWING.get(), 1.0f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 1.6, getY() + 1.2, getZ() + f.z * 1.6, 2, 0.6, 0.2, 0.6, 0))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), (float) getAttributeValue(Attributes.ATTACK_DAMAGE));
                     player.knockback(0.8, -f.x, -f.z);
@@ -262,7 +261,6 @@ public class ElderSentry extends GroundFoe {
                 .floor(floorY()).warn(RUSH_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.ELDER_SENTRY_CHARGE.get(), 1.4f, 0.9f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.POOF, getX() + f.x, getY() + 0.2, getZ() + f.z, 8, 0.5, 0.1, 0.5, 0.03))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), RUSH_DAMAGE);
                     player.knockback(1.4, -f.x, -f.z);
@@ -325,7 +323,7 @@ public class ElderSentry extends GroundFoe {
         archer.finalizeSpawn(server, server.getCurrentDifficultyAt(BlockPos.containing(at)), MobSpawnType.MOB_SUMMONED, null);
         if (server.addFreshEntity(archer)) {
             summons.add(archer.getUUID());
-            server.sendParticles(ParticleTypes.POOF, at.x, getY() + 0.5, at.z, 10, 0.3, 0.5, 0.3, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, getY() + 0.5, at.z, 10, 0.3, 0.5, 0.3, 0.02);
             if (getTarget() != null) {
                 archer.setTarget(getTarget());
             }
@@ -354,7 +352,6 @@ public class ElderSentry extends GroundFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, cx, getY(), cz, MobSounds.ELDER_SENTRY_STOMP.get(), SoundSource.HOSTILE, 2f, 0.9f);
-                    server.sendParticles(ParticleTypes.POOF, cx, getY() + 0.1, cz, 24, STOMP_RADIUS * 0.5, 0.1, STOMP_RADIUS * 0.5, 0.04);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), STOMP_DAMAGE);
@@ -411,7 +408,7 @@ public class ElderSentry extends GroundFoe {
             for (UUID id : summons) {
                 Entity e = server.getEntity(id);
                 if (e != null) {
-                    server.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 0.8, e.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
+                    server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + 0.8, e.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
                     e.discard();
                 }
             }
@@ -479,5 +476,10 @@ public class ElderSentry extends GroundFoe {
     @Override
     protected void playStepSound(BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.ELDER_SENTRY_STEP.get(), 0.4f);
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

@@ -176,7 +176,7 @@ public class AshThrall extends EmberMob {
             float left = Math.max(0f, shell() - toShell);
             entityData.set(SHELL, left);
             if (level() instanceof ServerLevel server) {
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()),
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         getX(), getY() + 1.4, getZ(), 8, 0.3, 0.5, 0.3, 0.05);
             }
             if (left <= 0f && isAlive()) {
@@ -216,9 +216,9 @@ public class AshThrall extends EmberMob {
         playAction("shell_break");
         onIgnite();
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()),
-                    getX(), getY() + 1.2, getZ(), 40, 0.4, 0.8, 0.4, 0.15);
-            server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 1.4, getZ(), 6, 0.3, 0.5, 0.3, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 1.2, getZ(), 24, 0.4, 0.8, 0.4, 0.15);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 1.4, getZ(), 6, 0.3, 0.5, 0.3, 0.1);
             server.playSound(null, getX(), getY(), getZ(), EmberMobSetup.THRALL_SHELL_BREAK.get(), SoundSource.HOSTILE, 1.2f, 1f);
             server.playSound(null, getX(), getY(), getZ(), EmberMobSetup.THRALL_IGNITE.get(), SoundSource.HOSTILE, 1f, 1f);
         }
@@ -230,7 +230,7 @@ public class AshThrall extends EmberMob {
         if (level().isClientSide) {
             if (isFlared() && random.nextInt(3) == 0) {
                 // 燃え上がった体から上る火の粉 (見た目だけ)
-                level().addParticle(random.nextInt(4) == 0 ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME,
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW),
                         getRandomX(0.5), getY() + 0.4 + random.nextDouble() * 1.8, getRandomZ(0.5), 0, 0.03, 0);
             }
             return;
@@ -248,9 +248,9 @@ public class AshThrall extends EmberMob {
             credit = p;
         }
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 1.0, getZ(), 20, 0.3, 0.6, 0.3, 0.02);
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()),
-                    getX(), getY() + 0.6, getZ(), 30, 0.4, 0.4, 0.4, 0.05);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1.0, getZ(), 20, 0.3, 0.6, 0.3, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 0.6, getZ(), 24, 0.4, 0.4, 0.4, 0.05);
         }
         if (credit != null) {
             setLastHurtByPlayer(credit);
@@ -355,7 +355,7 @@ public class AshThrall extends EmberMob {
                     }
                     if (mob.level() instanceof ServerLevel server) {
                         Vec3 f = Vec3.directionFromRotation(0, mob.getYRot()).scale(2.0);
-                        server.sendParticles(ParticleTypes.LAVA, mob.getX() + f.x, mob.getY() + 0.2, mob.getZ() + f.z, 3, 0.3, 0.1, 0.3, 0);
+                        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), mob.getX() + f.x, mob.getY() + 0.2, mob.getZ() + f.z, 3, 0.3, 0.1, 0.3, 0);
                         server.playSound(null, mob.getX(), mob.getY(), mob.getZ(), net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP,
                                 SoundSource.HOSTILE, 0.8f, 0.6f + mob.getRandom().nextFloat() * 0.15f);
                     }
@@ -409,5 +409,10 @@ public class AshThrall extends EmberMob {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.ASH_THRALL_STEP.get(), 0.3f);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

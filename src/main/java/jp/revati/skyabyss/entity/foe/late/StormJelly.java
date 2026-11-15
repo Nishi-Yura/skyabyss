@@ -58,7 +58,6 @@ public class StormJelly extends LateFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     playAction("burst");
-                    server.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, getY() + 2.5, z, 80, RADIUS * 0.4, 1.2, RADIUS * 0.4, 0.3);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());

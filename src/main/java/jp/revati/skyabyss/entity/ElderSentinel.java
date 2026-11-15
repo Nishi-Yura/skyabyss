@@ -226,8 +226,6 @@ public class ElderSentinel extends GuardMob {
                     .target(target)
                     .startSound(Ch1BackSounds.ELDER_RUSH.get(), 1.8f, 1.0f)
                     .victims(this::canHit)
-                    .onImpact(s -> s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
-                            getX(), getY() + 0.3, getZ(), 20, 0.5, 0.2, 0.5, 0.1))
                     .onHit((s, player) -> {
                         player.hurt(attackSource(), RUSH_DAMAGE);
                         player.setDeltaMovement(player.getDeltaMovement().add(dir.x * 1.2, 0.45, dir.z * 1.2));
@@ -241,10 +239,6 @@ public class ElderSentinel extends GuardMob {
             int remaining = RUSH_WARN - actionTicks + 1;
             Vec3 delta = new Vec3(dashEnd.x - getX(), 0, dashEnd.z - getZ()).scale(1.0 / remaining);
             move(MoverType.SELF, new Vec3(delta.x, -0.1, delta.z));
-            if (actionTicks % 3 == 0) {
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
-                        getX(), getY() + 0.2, getZ(), 6, 0.4, 0.1, 0.4, 0.05);
-            }
         }
         if (actionTicks >= RUSH_WARN + RUSH_RECOVER) {
             rushCooldown = 110;
@@ -264,15 +258,6 @@ public class ElderSentinel extends GuardMob {
                     .victims(this::canHit)
                     .onImpact(s -> {
                         playTo(s, Ch1BackSounds.ELDER_STOMP.get(), 2.2f, 0.95f + random.nextFloat() * 0.1f);
-                        for (int ring = 1; ring <= 3; ring++) {
-                            double r = STOMP_RADIUS * ring / 3.0;
-                            int points = 8 + ring * 6;
-                            for (int i = 0; i < points; i++) {
-                                double a = Math.PI * 2 * i / points;
-                                s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
-                                        cx + Math.cos(a) * r, getY() + 0.1, cz + Math.sin(a) * r, 1, 0.1, 0.05, 0.1, 0.05);
-                            }
-                        }
                     })
                     .onHit((s, player) -> {
                         player.hurt(attackSource(), STOMP_DAMAGE);
@@ -313,7 +298,6 @@ public class ElderSentinel extends GuardMob {
                 Telegraph.in(server, TelegraphShape.circle(spot.getX() + 0.5, spot.getZ() + 0.5, FLUTE_SPOT_RADIUS))
                         .floor(spot.getY()).warn(FLUTE_WARN).harmless().owner(this)
                         .onImpact(s -> {
-                            s.sendParticles(ParticleTypes.SOUL, spot.getX() + 0.5, spot.getY() + 0.6, spot.getZ() + 0.5, 14, 0.3, 0.6, 0.3, 0.03);
                             TitanBackTrials.spawnSummon(s, "archer", spot, groupId(), this);
                         })
                         .start();
@@ -322,7 +306,7 @@ public class ElderSentinel extends GuardMob {
         holdYaw();
         // 笛の音に合わせて、頭のまわりに音符の粒
         if (actionTicks % 4 == 0) {
-            server.sendParticles(ParticleTypes.NOTE, getX(), getY() + 3.1, getZ(), 1, 0.4, 0.2, 0.4, 1.0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 3.1, getZ(), 1, 0.4, 0.2, 0.4, 1.0);
         }
         if (actionTicks == FLUTE_WARN) {
             // 近くの味方 (番兵・射手・砲手) が速くなる
@@ -375,8 +359,8 @@ public class ElderSentinel extends GuardMob {
         super.die(source);
         Telegraph.cancelAll(this);
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
-                    getX(), getY() + 1.5, getZ(), 60, 0.7, 1.1, 0.7, 0.15);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 1.5, getZ(), 24, 0.7, 1.1, 0.7, 0.15);
         }
     }
 
@@ -414,5 +398,10 @@ public class ElderSentinel extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

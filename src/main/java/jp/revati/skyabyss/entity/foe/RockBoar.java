@@ -63,8 +63,6 @@ public class RockBoar extends RegionBoss {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, getX(), getY(), getZ(), MobSounds.ROCK_BOAR_QUAKE.get(), SoundSource.HOSTILE, 1.6f, 1f);
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLED_DEEPSLATE.defaultBlockState()), getX(), getY() + 3.0, getZ(),
-                                60, QUAKE_RADIUS * 0.4, 0.8, QUAKE_RADIUS * 0.4, 0.1);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.9f))
                     .start();

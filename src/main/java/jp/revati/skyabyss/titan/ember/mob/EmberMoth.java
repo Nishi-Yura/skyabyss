@@ -207,7 +207,7 @@ public class EmberMoth extends EmberMob {
         EmberHeat.add(p, TOUCH_HEAT, EmberHeat.Reason.MOTH);
         playAction("attack");
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.SMALL_FLAME, p.getX(), p.getY() + 1.0, p.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.0, p.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
         }
     }
 
@@ -225,8 +225,8 @@ public class EmberMoth extends EmberMob {
 
     // 死ぬと火の粉が散る: 3 ブロック以内の人に熱 +4
     void sparks(ServerLevel server) {
-        server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.3, getZ(), 5, 0.3, 0.2, 0.3, 0.05);
-        server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.3, getZ(), 14, 0.5, 0.3, 0.5, 0.06);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(), 5, 0.3, 0.2, 0.3, 0.05);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 14, 0.5, 0.3, 0.5, 0.06);
         sparkPlayers(server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(SPARK_RADIUS), p -> GroupOwned.mayTarget(this, p)), position());
     }
 
@@ -251,7 +251,7 @@ public class EmberMoth extends EmberMob {
         if (level().isClientSide) {
             // 腹の熾から落ちる小さな火の粉 (見た目だけ)
             if (random.nextInt(6) == 0) {
-                level().addParticle(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.3, getZ(), 0, -0.02, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 0, -0.02, 0);
             }
         }
     }
@@ -359,4 +359,9 @@ public class EmberMoth extends EmberMob {
     protected void playStepSound(BlockPos pos, BlockState state) {
     }
 
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
+    }
 }

@@ -54,9 +54,6 @@ public class BanditArcher extends ContinentFoe {
                 .victims(this::clearShot)
                 .onImpact(server -> {
                     server.playSound(null, getX(), getY(), getZ(), MobSounds.BANDIT_ARCHER_SHOOT.get(), SoundSource.HOSTILE, 1f, 0.9f + random.nextFloat() * 0.2f);
-                    for (double d = 1; d <= LENGTH; d += 0.8) {
-                        server.sendParticles(ParticleTypes.CRIT, getX() + f.x * d, getY() + 1.3, getZ() + f.z * d, 1, 0.02, 0.02, 0.02, 0);
-                    }
                     setDeltaMovement(-f.x * 0.5, 0.38, -f.z * 0.5);
                     hasImpulse = true;
                 })

@@ -107,9 +107,6 @@ public class SpineHare extends GroundFoe {
                 .victims(this::clearShot)
                 .onImpact(server -> {
                     server.playSound(null, getX(), getY(), getZ(), MobSounds.SPINE_HARE_SHOOT.get(), SoundSource.HOSTILE, 1f, 0.9f + random.nextFloat() * 0.2f);
-                    for (double d = 0.8; d <= LINE_LENGTH; d += 0.7) {
-                        server.sendParticles(ParticleTypes.CRIT, getX() + f.x * d, getY() + 0.7, getZ() + f.z * d, 1, 0.02, 0.02, 0.02, 0);
-                    }
                     setDeltaMovement(-f.x * 0.45, 0.42, -f.z * 0.45);
                     hasImpulse = true;
                 })

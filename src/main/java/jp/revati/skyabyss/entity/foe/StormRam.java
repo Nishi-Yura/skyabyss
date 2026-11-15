@@ -66,7 +66,6 @@ public class StormRam extends RegionBoss {
                         server.playSound(null, cx, y, cz, MobSounds.STORM_RAM_STOMP.get(), SoundSource.HOSTILE, 1.6f, 1f);
                         // 輪の雷は技の形 (prop lightning)。雷鳴だけ鳴らす
                         server.playSound(null, cx, y, cz, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.6f, 1.0f);
-                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, y + 0.3, cz, 50, RING_OUT * 0.5, 0.2, RING_OUT * 0.5, 0.3);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.3f))
                     .start();

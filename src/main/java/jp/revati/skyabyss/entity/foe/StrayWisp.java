@@ -115,7 +115,6 @@ public class StrayWisp extends ContinentFoe {
                         .startSound(MobSounds.STRAY_WISP_PULSE.get(), 0.9f, 1f)
                         .victims(this::canHit)
                         .onImpact(server -> {
-                            server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 1.1, getZ(), 24, 0.6, 0.6, 0.6, 0.06);
                             server.playSound(null, getX(), getY(), getZ(), MobSounds.STRAY_WISP_PULSE.get(), SoundSource.HOSTILE, 1f, 0.6f);
                         })
                         .onHit((server, player) -> {

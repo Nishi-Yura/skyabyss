@@ -55,9 +55,6 @@ public class TideCrab extends RegionBoss {
                     .startSound(MobSounds.TIDE_CRAB_SPRAY.get(), 1.4f, 1.0f)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        for (double d = 1; d <= SPRAY_RANGE; d += 1) {
-                            server.sendParticles(ParticleTypes.BUBBLE_POP, getX() + f.x * d, getY() + 0.8, getZ() + f.z * d, 6, d * 0.25, 0.3, d * 0.25, 0.05);
-                        }
                     })
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.5f);
@@ -79,7 +76,6 @@ public class TideCrab extends RegionBoss {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, getX() + f.x * 4, getY(), getZ() + f.z * 4, MobSounds.TIDE_CRAB_SLAM.get(), SoundSource.HOSTILE, 1.5f, 1f);
-                    server.sendParticles(ParticleTypes.SPLASH, getX() + f.x * 4, getY() + 0.3, getZ() + f.z * 4, 40, 1.0, 0.2, 1.0, 0.1);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 1.2f);

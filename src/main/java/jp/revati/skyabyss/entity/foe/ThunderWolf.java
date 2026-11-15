@@ -43,7 +43,6 @@ public class ThunderWolf extends PackBeast {
                 .onImpact(server -> {
                     // 雷は技の形 (prop lightning)。雷鳴だけ鳴らす
                     server.playSound(null, x, y, z, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT, net.minecraft.sounds.SoundSource.HOSTILE, 1.4f, 1.1f);
-                    server.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + 0.3, z, 30, STRIKE_RADIUS * 0.4, 0.2, STRIKE_RADIUS * 0.4, 0.2);
                 })
                 .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.3f))
                 .start();
@@ -51,10 +50,15 @@ public class ThunderWolf extends PackBeast {
 
     @Override
     protected void howlPeak(LivingEntity target) {
-        server().sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.2, getZ(), 12, 0.4, 0.4, 0.4, 0.1);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 12, 0.4, 0.4, 0.4, 0.1);
     }
 
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

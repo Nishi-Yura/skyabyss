@@ -72,10 +72,8 @@ public class BoneStandard extends BoneSoldier {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, getX(), getY(), getZ(), MobSounds.BONE_STANDARD_PLANT.get(), SoundSource.HOSTILE, 1.4f, 1f);
-                        server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 0.1, getZ(), 30, WARD_RADIUS * 0.4, 0.05, WARD_RADIUS * 0.4, 0.01);
                         for (BoneSoldier s : level().getEntitiesOfClass(BoneSoldier.class, getBoundingBox().inflate(WARD_RADIUS), e -> e != this && e.isAlive())) {
                             s.ward();
-                            server.sendParticles(ParticleTypes.SOUL, s.getX(), s.getY() + 1.0, s.getZ(), 6, 0.25, 0.5, 0.25, 0.02);
                         }
                     })
                     .onHit((server, player) -> {
@@ -99,7 +97,6 @@ public class BoneStandard extends BoneSoldier {
                 .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_SWING.get(), 1.2f, 0.6f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 1.9, getY() + 1.2, getZ() + f.z * 1.9, 3, 0.8, 0.1, 0.8, 0))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.knockback(0.7, -f.x, -f.z);

@@ -157,7 +157,7 @@ public class ScorchedWarden extends FeatherWarden {
         super.aiStep();
         if (level().isClientSide) {
             if (isExposed() && random.nextFloat() < 0.4f) {
-                level().addParticle(ParticleTypes.ELECTRIC_SPARK, getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0.05, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0.05, 0);
             }
             return;
         }
@@ -212,10 +212,6 @@ public class ScorchedWarden extends FeatherWarden {
                 .victims(p -> fair(p) && canAttack(p))
                 .onImpact(server -> {
                     server.playSound(null, cx, getY(), cz, Ch3Mobs.WARDEN_RING_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.0f);
-                    for (int i = 0; i < 20; i++) {
-                        double a = Math.PI * 2 * i / 20;
-                        warn(server, ParticleTypes.ELECTRIC_SPARK, cx + Math.cos(a) * RING_RADIUS, getY() + 0.3, cz + Math.sin(a) * RING_RADIUS, 2, 0.05, 0.2, 0.05, 0.05);
-                    }
                 })
                 .onHit((server, player) -> player.hurt(server.damageSources().lightningBolt(), RING_DAMAGE))
                 .start();
@@ -238,7 +234,6 @@ public class ScorchedWarden extends FeatherWarden {
                 .victims(p -> fair(p) && canAttack(p))
                 .onImpact(server -> {
                     server.playSound(null, at.x, at.y, at.z, Ch3Mobs.WARDEN_LAND.get(), SoundSource.HOSTILE, 1.4f, 0.9f);
-                    warn(server, ParticleTypes.CLOUD, at.x, at.y + 0.1, at.z, 20, 0.8, 0.05, 0.8, 0.05);
                 })
                 .onHit((server, player) -> player.hurt(attackSource(), LEAP_DAMAGE))
                 .start();
@@ -358,5 +353,10 @@ public class ScorchedWarden extends FeatherWarden {
     @Override
     protected SoundEvent getDeathSound() {
         return Ch3Mobs.WARDEN_DEATH.get();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -220,8 +220,8 @@ public class CinderRoller extends EmberMob {
         setMode(Mode.DIZZY);
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), EmberMobSetup.ROLLER_BONK.get(), SoundSource.HOSTILE, 1.2f, 1f);
-            server.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.5, getZ(), 12, 0.3, 0.3, 0.3, 0.2);
-            server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.4, getZ(), 4, 0.2, 0.2, 0.2, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.5, getZ(), 12, 0.3, 0.3, 0.3, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.4, getZ(), 4, 0.2, 0.2, 0.2, 0);
         }
     }
 
@@ -235,7 +235,7 @@ public class CinderRoller extends EmberMob {
         if (level().isClientSide) {
             if (mode() == Mode.DIZZY && tickCount % 4 == 0) {
                 // 目が回る: 頭の上の星の代わりに、腹から火の粉
-                level().addParticle(ParticleTypes.SMALL_FLAME, getRandomX(0.4), getY() + 0.6, getRandomZ(0.4), 0, 0.04, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getRandomX(0.4), getY() + 0.6, getRandomZ(0.4), 0, 0.04, 0);
             }
             return;
         }
@@ -311,7 +311,7 @@ public class CinderRoller extends EmberMob {
         int i = 0;
         for (Trail t : trail) {
             if ((i++ + tickCount) % 3 == 0) {
-                server.sendParticles(ParticleTypes.SMALL_FLAME, t.pos().x, t.pos().y + 0.05, t.pos().z, 1, 0.2, 0.0, 0.2, 0.005);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), t.pos().x, t.pos().y + 0.05, t.pos().z, 1, 0.2, 0.0, 0.2, 0.005);
             }
         }
         for (Player p : Players.snapshot(server.players())) {
@@ -416,5 +416,10 @@ public class CinderRoller extends EmberMob {
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         playSound(net.minecraft.sounds.SoundEvents.SILVERFISH_STEP, 0.3f, 0.6f);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

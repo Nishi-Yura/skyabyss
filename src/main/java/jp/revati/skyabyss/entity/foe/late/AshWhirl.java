@@ -61,8 +61,6 @@ public class AshWhirl extends LateFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     playAction("burst");
-                    server.sendParticles(ParticleTypes.LARGE_SMOKE, x, getY() + 1.0, z, 90, RADIUS * 0.4, 1.0, RADIUS * 0.4, 0.04);
-                    server.sendParticles(ParticleTypes.FLAME, x, getY() + 0.8, z, 20, 0.6, 0.6, 0.6, 0.02);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
@@ -77,9 +75,6 @@ public class AshWhirl extends LateFoe {
     protected void during(int tick) {
         if (tick >= WARN || !(level() instanceof net.minecraft.server.level.ServerLevel server)) {
             return;
-        }
-        if (tick % 4 == 0) {
-            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 1.2, getZ(), 30, RADIUS * 0.45, 0.8, RADIUS * 0.45, 0.02);
         }
         for (ServerPlayer p : server.players()) {
             double dx = getX() - p.getX();

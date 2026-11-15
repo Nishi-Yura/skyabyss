@@ -67,7 +67,6 @@ public class CragTortoise extends LateFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     setDeltaMovement(f.x * 0.9, 0.1, f.z * 0.9);
-                    server.sendParticles(ParticleTypes.CLOUD, getX() + f.x * 2, getY() + 0.4, getZ() + f.z * 2, 20, 0.6, 0.2, 0.6, 0.05);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());

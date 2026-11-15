@@ -56,7 +56,6 @@ public class MistAngler extends ContinentFoe {
                     .floor(getY()).warn(SWAY_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.MIST_ANGLER_SWAY.get(), 1.2f, 1.0f)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.6, getZ(), 70, SWAY_RADIUS * 0.4, 0.5, SWAY_RADIUS * 0.4, 0.01))
                     .onHit((server, player) -> player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 50, 0), this))
                     .start();
             return;
@@ -73,7 +72,6 @@ public class MistAngler extends ContinentFoe {
                 .floor(y).warn(NET_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.MIST_ANGLER_NET.get(), 1.0f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SPLASH, x, y + 0.3, z, 40, NET_RADIUS * 0.4, 0.2, NET_RADIUS * 0.4, 0.05))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 0.6f);
                     player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2), this);

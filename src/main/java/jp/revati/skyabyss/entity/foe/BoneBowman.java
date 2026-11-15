@@ -76,8 +76,6 @@ public class BoneBowman extends BoneSoldier {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, getX(), getY(), getZ(), MobSounds.BONE_BOWMAN_SHOOT.get(), SoundSource.HOSTILE, 1f, 0.9f + random.nextFloat() * 0.2f);
-                    server.sendParticles(ParticleTypes.CRIT, tx, ty + 2.5, tz, 14, 0.6, 1.2, 0.6, 0.02);
-                    server.sendParticles(ParticleTypes.POOF, tx, ty + 0.1, tz, 6, 0.6, 0.05, 0.6, 0.01);
                 })
                 .onHit((server, player) -> player.hurt(attackSource(), damage()))
                 .start();

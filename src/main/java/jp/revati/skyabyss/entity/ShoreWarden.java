@@ -250,7 +250,6 @@ public class ShoreWarden extends GroundFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, getX(), getY(), getZ(), MobSounds.SHORE_WARDEN_THRUST.get(), SoundSource.HOSTILE, 1.6f, 1.0f);
-                    server.sendParticles(ParticleTypes.SPLASH, getX() + f.x * 2.5, getY() + 0.3, getZ() + f.z * 2.5, 16, 0.6, 0.1, 0.6, 0.1);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), THRUST_DAMAGE);
@@ -271,8 +270,6 @@ public class ShoreWarden extends GroundFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, cx, y, cz, MobSounds.SHORE_WARDEN_FLOOD.get(), SoundSource.HOSTILE, 1.6f, 1.0f);
-                    server.sendParticles(ParticleTypes.SPLASH, cx, y + 0.3, cz, 40, RING_RADIUS * 0.5, 0.2, RING_RADIUS * 0.5, 0.2);
-                    server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, cx, y + 0.2, cz, 20, RING_RADIUS * 0.4, 0.1, RING_RADIUS * 0.4, 0.05);
                     if (isAlive() && named()) {
                         floods.add(ShoreFlood.flood(server, cx, floorY, cz, RING_RADIUS, FLOOD_TICKS));
                     }

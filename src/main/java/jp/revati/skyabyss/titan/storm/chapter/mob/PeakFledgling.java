@@ -187,7 +187,7 @@ public class PeakFledgling extends GroundFoe {
                 setDeltaMovement(Vec3.ZERO);
                 holdYaw();
                 if (level() instanceof ServerLevel server) {
-                    warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.4, getZ(), 2, 0.2, 0.2, 0.2, 0.02);
+                    warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.4, getZ(), 2, 0.2, 0.2, 0.2, 0.02);
                 }
                 if (phase >= DASH_TICKS || horizontalCollision) {
                     land();
@@ -264,7 +264,7 @@ public class PeakFledgling extends GroundFoe {
             setState(STAGGER);
             level().playSound(null, getX(), getY(), getZ(), Ch3Mobs.FLEDGLING_THUD.get(), SoundSource.HOSTILE, 1.0f, 1.0f);
             if (level() instanceof ServerLevel server) {
-                warn(server, ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 8, 0.3, 0.05, 0.3, 0.02);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.2, getZ(), 8, 0.3, 0.05, 0.3, 0.02);
             }
         }
     }
@@ -372,5 +372,10 @@ public class PeakFledgling extends GroundFoe {
     @Override
     protected SoundEvent getDeathSound() {
         return Ch3Mobs.FLEDGLING_DEATH.get();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

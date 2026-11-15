@@ -155,7 +155,7 @@ public class ReefScuttler extends TideMob {
         setDeltaMovement(getDeltaMovement().x * 0.3, 0.3, getDeltaMovement().z * 0.3);
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), TideMobSetup.SCUTTLER_FLIP.get(), SoundSource.HOSTILE, 1f, 1f);
-            server.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.4, getZ(), 10, 0.3, 0.2, 0.3, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.4, getZ(), 10, 0.3, 0.2, 0.3, 0.2);
         }
     }
 
@@ -218,5 +218,10 @@ public class ReefScuttler extends TideMob {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         playSound(TideMobSetup.SCUTTLER_STEP.get(), 0.25f, 1f + random.nextFloat() * 0.3f);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }
