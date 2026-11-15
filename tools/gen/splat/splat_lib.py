@@ -240,11 +240,15 @@ class Sculpt:
         cross &= np.abs(D) < self.h * 1.2
         ijk = np.argwhere(cross)
         rng = np.random.default_rng(seed)
-        P = ijk * self.h + self.lo + rng.uniform(-0.35, 0.35, ijk.shape) * self.h
+        P0 = ijk * self.h + self.lo + rng.uniform(-0.35, 0.35, ijk.shape) * self.h
+        P = P0.copy()
         for _ in range(3):
             n = self.grad(P)
             P = P - n * self.sample(P)[:, None]
         n = self.grad(P)
+        # 寄せたときに飛んだ点 (勾配がほぼ 0 の所) と、表面に乗らなかった点は捨てる
+        ok = (np.linalg.norm(P - P0, axis=1) < 2.0 * self.h) & (np.abs(self.sample(P)) < 0.5 * self.h)
+        P, n, ijk = P[ok], n[ok], ijk[ok]
         # 部品は格子の最寄りの点から取る
         q = np.clip(np.rint((P - self.lo) / self.h).astype(int), 0, self.shape - 1)
         pid1 = self.i1[q[:, 0], q[:, 1], q[:, 2]]

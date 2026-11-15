@@ -145,7 +145,7 @@ def _mount_add(self, pid, faces, core=False):
     return out
 
 
-def load_design(path):
+def load_design(path, func="build"):
     """生成スクリプトを読み、差し替えた道具で build() を流して Mount を返す"""
     path = Path(path).resolve()
     sys.path.insert(0, str(path.parent))
@@ -168,7 +168,7 @@ def load_design(path):
         return out
     mlp.Mount.faces_of = faces_of
     # 生成スクリプトの中で名前で取り込んだ ell/tub/cone は mlp の関数で、mlp の ellipsoid/tube を引く (差し替え済み)
-    m = mod.build()
+    m = getattr(mod, func)()
     # 乗り物: 鞍は体の面に沿って作るので、体を作ったあと (元の多角形の形で) 足す
     if getattr(m, "saddle_kw", None) is not None:
         import mlp as _mlp
@@ -445,9 +445,9 @@ def paint_eyes(m, P, n, bone_of, col, glow):
     return col, glow
 
 
-def build_cloud(path, name=None, h=None, preview=False):
+def build_cloud(path, name=None, h=None, preview=False, func="build"):
     t0 = time.time()
-    m = load_design(path)
+    m = load_design(path, func)
     name = name or m.id
     pal = getattr(m, "pal", None) or {"mats": {}}
     glow_mats = list(pal.get("glow_mats", []))
@@ -459,7 +459,9 @@ def build_cloud(path, name=None, h=None, preview=False):
     if not h:
         ext = allv.max(0) - allv.min(0)
         area = 2 * (ext[0] * ext[1] + ext[1] * ext[2] + ext[0] * ext[2])
-        h = max(0.18, min(maxdim / 150.0, (area / 90000.0) ** 0.5))
+        # 点の数の目安: ボス・乗り物は 9 万、普通の敵 (小さい模型) は 5 万 (群れで出るので軽く)
+        budget = 90000.0 if maxdim > 40 else 50000.0
+        h = max(0.18, min(maxdim / 150.0, (area / budget) ** 0.5), (area / (budget * 1.6)) ** 0.5)
     rng = np.random.default_rng(abs(hash(name)) % (2 ** 31))
     chunks = sculpt(m, h, glow_mats, rng)
     Ps, ns, cols, flagsL, As = [], [], [], [], []
@@ -507,8 +509,9 @@ def main():
     ap.add_argument("--name")
     ap.add_argument("--h", type=float)
     ap.add_argument("--preview", action="store_true")
+    ap.add_argument("--func", default="build", help="一つのファイルに何体もある生成スクリプトの、作る関数の名前")
     a = ap.parse_args()
-    build_cloud(a.path, a.name, a.h, a.preview)
+    build_cloud(a.path, a.name, a.h, a.preview, a.func)
 
 
 if __name__ == "__main__":
