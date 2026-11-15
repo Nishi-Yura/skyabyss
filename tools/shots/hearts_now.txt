@@ -13,7 +13,6 @@ cmd weather clear
 cmd gamemode spectator
 cmd fill -40 -61 -40 40 -61 40 minecraft:smooth_basalt destroy
 hud off
-lowpoly on
 fov 60
 cmd kill @e[type=!minecraft:player,distance=..120]
 waitchunks

@@ -3,7 +3,6 @@ package jp.revati.skyabyss.client.npc;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMeshes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -62,7 +61,7 @@ public final class NpcModels {
         @Override
         public void renderForBone(PoseStack poseStack, T animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
                                   VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            if (!LowPoly.enabled || !bone.getName().startsWith("prop_") || animatable.isInvisible()) {
+            if (!bone.getName().startsWith("prop_") || animatable.isInvisible()) {
                 return;
             }
             String base = meshBase.apply(animatable);
@@ -76,11 +75,8 @@ public final class NpcModels {
             poseStack.pushPose();
             // 骨の回転まで掛かっている。原点を骨の pivot へ移すだけ (持ち物の頂点は受け口の pivot からの相対)
             RenderUtil.translateToPivotPoint(poseStack, bone);
-            int white = 0xFFFFFFFF;
-            LowPoly.drawAll(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), mesh, packedLight, packedOverlay, white);
-            if (mesh.glowMask != null) {
-                LowPoly.drawAll(poseStack, bufferSource.getBuffer(RenderType.entityTranslucentEmissive(mesh.glowMask)), mesh, 0xF000F0, packedOverlay, white);
-            }
+            // 点の模型 (client/splat。光る画素は光る点になるので、光の重ね描きは要らない)
+            jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, null, poseStack.last().pose(), bufferSource, packedLight, packedOverlay, 0xFFFFFFFF);
             poseStack.popPose();
         }
     }

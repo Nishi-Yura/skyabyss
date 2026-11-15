@@ -39,16 +39,12 @@ camera 0 -58 14 180 5
 hud off
 perspective first
 wait 40
-weaponmesh on
 wait 20
 perf 160 stands20_on
-weaponmesh off
 wait 20
 perf 160 stands20_off
-weaponmesh on
 wait 20
 perf 160 stands20_on
-weaponmesh off
 wait 20
 perf 160 stands20_off
 shot perf_stands

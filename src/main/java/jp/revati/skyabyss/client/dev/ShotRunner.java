@@ -594,25 +594,9 @@ public final class ShotRunner {
                 }
                 return false;
             }
-            case "lowpoly" -> {
-                // lowpoly on|off|debug|nodebug : 低ポリ描画の切り替え (off = 元のキューブ。debug = 骨の箱を半透明の赤で重ねる)
-                switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
-                    case "on" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = true;
-                    case "off" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = false;
-                    case "debug" -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = true;
-                    case "armoroff" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = false;
-                    case "armoron" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = true;
-                    default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
-                }
-                return true;
-            }
             case "splat" -> {
-                // splat on|off : 点の模型 (client/splat) の切り替え。splat cpu|gpu : 描き方 (比べと計測用)
-                switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
-                    case "cpu" -> jp.revati.skyabyss.client.splat.SplatGpu.enabled = false;
-                    case "gpu" -> jp.revati.skyabyss.client.splat.SplatGpu.enabled = true;
-                    default -> jp.revati.skyabyss.client.splat.SplatClouds.enabled = !line.arg(0).equalsIgnoreCase("off");
-                }
+                // splat cpu|gpu : 点の模型 (client/splat) の描き方 (比べと計測用)
+                jp.revati.skyabyss.client.splat.SplatGpu.enabled = !line.arg(0).equalsIgnoreCase("cpu");
                 return true;
             }
             case "skycircle" -> {
@@ -684,11 +668,6 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedLevel = line.arg(0).equalsIgnoreCase("auto") ? -1 : line.intArg(0);
                 return true;
             }
-            case "weaponmesh" -> {
-                // weaponmesh on|off : プレイヤーの武器を低ポリ (on) / 元のボクセル (off) で描く
-                jp.revati.skyabyss.client.lowpoly.LowPoly.weaponMeshes = !line.arg(0).equalsIgnoreCase("off");
-                return true;
-            }
             case "weapontier" -> {
                 // weapontier common|rare|legend|off : 武器のメッシュの階級を固定する (品の階級を使うのは off)
                 jp.revati.skyabyss.client.weapon.WeaponItemRenderer.setTier(line.arg(0));
@@ -698,16 +677,6 @@ public final class ShotRunner {
                 // acctier common|rare|legend|off : 装飾品のメッシュの階級を固定する (品の階級を使うのは off)
                 String t = line.arg(0).toLowerCase(java.util.Locale.ROOT);
                 jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryTier = t.equals("off") ? null : t;
-                return true;
-            }
-            case "accmesh" -> {
-                // accmesh on|off : 装飾品を低ポリ (on) / 元の平絵 (off) で描く (手・地面・額縁)
-                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryMeshes = !line.arg(0).equalsIgnoreCase("off");
-                return true;
-            }
-            case "accworn" -> {
-                // accworn on|off : 体に付けた装飾の描画 (AccessoryWornLayer) の入り切り
-                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryWorn = !line.arg(0).equalsIgnoreCase("off");
                 return true;
             }
             case "accequip" -> {

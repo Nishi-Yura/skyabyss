@@ -59,7 +59,6 @@ cmd tp @s -560 200 40 -100 0
 waitchunks 600
 cmd summon skyabyss:stone_whale -700 200 60 {Rotation:[90f,0f],Mode:2,RestTicks:999999}
 wait 120
-lowpoly on
 cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^100 ^-20 ^-20 facing ^0 ^25 ^0
 waitchunks 300
 wait 60

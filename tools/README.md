@@ -47,7 +47,7 @@
 python tools/install/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/bone_sentinel_shield_mesh.json:docs/review/lowpoly_roughs/bone_sentinel_shield_atlas.png:bone_sentinel_shield:socket_off
 ```
 
-`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。骨の休めの回転・親・pivot は元の geo から写す（メッシュ JSON に書いてあればそちら）。4 体 (番兵長・苔這い・射手・心臓) は `python tools/install/install_lowpoly_five.py` で一度に入る。確認の台本は `python tools/gen/shots/gen_lowpoly_five_shots.py` が `tools/shots/lp_<名>.txt` に書く。雷翼の背の 5 体と珊瑚憑きは `python tools/install/install_lowpoly_storm.py`、確認の台本は `python tools/gen/shots/gen_lowpoly_storm_shots.py`、比較シートは `python tools/sheets/lowpoly_storm_sheets.py`。余燼の背の敵・心臓・鍛え手、語り部・イサナ・見る者は `python tools/install/install_lowpoly_ember_npc.py`、確認の台本は `python tools/gen/shots/gen_lowpoly_ember_npc_shots.py`、比較シートは `python tools/sheets/lowpoly_ember_npc_sheets.py` (15 の 9.6)。
+`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) を書く。元の geo・アニメは触らない。メッシュはゲームの中では描かず、点の模型 (`client/splat/SplatGen`) の元になる (`docs/design/15_high_poly.md` の「点の模型」)。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。仕様は `docs/design/15_high_poly.md` の 9 章。骨の休めの回転・親・pivot は元の geo から写す（メッシュ JSON に書いてあればそちら。元のキューブの geo は `tools/sources/geo_cube/`、`python tools/dev/cube_geo.py back` で一時的に戻せる）。4 体 (番兵長・苔這い・射手・心臓) は `python tools/install/install_lowpoly_five.py`、雷翼の背の 5 体と珊瑚憑きは `python tools/install/install_lowpoly_storm.py`、余燼の背の敵・心臓・鍛え手、語り部・イサナ・見る者は `python tools/install/install_lowpoly_ember_npc.py` で入る (15 の 9.6)。
 
 ## モデルの透けの検査と修理・心臓の演出
 
@@ -154,7 +154,7 @@ python tools/gen/shots/gen_accessory_lp_shots.py [thunder|ember|whale|tide]  # �
 python tools/sheets/accessory_lp_sheet.py [巨神]                       # docs/review/previews/acc_lp_<巨神>.png (コンタクトシート)
 ```
 
-台本の手順 `acctier common|rare|legend|off` (階級を固定)、`accmesh on|off` (低ポリ / 平絵)、`accworn on|off` (体に付けた姿の入り切り)、`accequip <id> [<id>]` (自分のクライアントの装飾の枠に品を入れる。見た目だけ)。元の平絵のモデルは `models/item_flat/` に退避してある (`LowPoly.accessoryMeshes = false` の戻り先)。ラフの形は `tools/rough/lowpoly/accessories/{thunder,ember,whale,tide}.py` (A 案)。`tools/gen/items/gen_accessory_assets.py` 以外で models/item/<id>.json を書き直す生成スクリプトを動かしたら `tools/install/install_lowpoly_accessories.py` を流し直す。燠の灯 (ブロック) の持ち物欄の絵は `tools/rough/lowpoly/accessories/cinder_sprite.py`。
+台本の手順 `acctier common|rare|legend|off` (階級を固定)、`accequip <id> [<id>]` (自分のクライアントの装飾の枠に品を入れる。見た目だけ)。元の平絵のモデルは `models/item_flat/` にある (メッシュの無い品だけの受け皿)。ラフの形は `tools/rough/lowpoly/accessories/{thunder,ember,whale,tide}.py` (A 案)。`tools/gen/items/gen_accessory_assets.py` 以外で models/item/<id>.json を書き直す生成スクリプトを動かしたら `tools/install/install_lowpoly_accessories.py` を流し直す。燠の灯 (ブロック) の持ち物欄の絵は `tools/rough/lowpoly/accessories/cinder_sprite.py`。
 
 ### 武器の低ポリメッシュ (手・地面・額縁。15 の 4.6.2)
 
@@ -166,7 +166,7 @@ python tools/gen/shots/gen_weapon_lp_shots.py [id ...]   # 台本 tools/shots/we
 python tools/sheets/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_<id>.png (コンタクトシート) ほか
 ```
 
-台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用。品の階級は一つに決まっているので、その段のメッシュが無い品は品の階級で描く)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`tools/gen/items/gen_ember_items.py` `tools/install/install_storm_gear.py` `tools/install/install_tide_gear.py` `tools/gen/items/gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `tools/install/install_lowpoly_weapons.py` と `tools/lib/weapon_display.py` を流す。
+台本の手順 `weapontier common|rare|legend|off` (メッシュの階級を固定。開発用。品の階級は一つに決まっているので、その段のメッシュが無い品は品の階級で描く)。元のボクセル版の models/item/*.json は `models/item_voxel/` にある (メッシュの無い品だけの受け皿)。`tools/gen/items/gen_ember_items.py` `tools/install/install_storm_gear.py` `tools/install/install_tide_gear.py` `tools/gen/items/gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `tools/install/install_lowpoly_weapons.py` と `tools/lib/weapon_display.py` を流す。
 
 ### マルチの確かめ (専用サーバー + 二人)
 `run/server.properties` に `online-mode=false`・`server-port=25666`・`enable-rcon=true`・`rcon.port=25766`・`rcon.password=test`・新しい `level-name`・`level-seed=4242`、`run/eula.txt` に `eula=true`。`./gradlew runServer` で起動し、台本の頭の `server localhost:25666` で専用サーバーへ入るクライアントを `./gradlew runShots -Pscript=tools/shots/mp_alice.txt -PshotsUser=Alice`、`mp_bob.txt -PshotsUser=Bob` で動かす (Alice が入ってから Bob を起動)。台本の `waitfile <ファイル>` は外 (`signal` か手) がファイルを置くまで待つ。サーバーへの命令は `python tools/dev/rcon.py "<命令>"` (OP の権限。`skyabyss cinematic play <場面> Bob` など)。

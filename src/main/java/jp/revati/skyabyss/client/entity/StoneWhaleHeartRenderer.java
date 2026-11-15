@@ -11,7 +11,7 @@ public class StoneWhaleHeartRenderer extends LowPolyGeoRenderer<StoneWhaleHeart>
     private static final float SCALE = 7.5f;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
 
     public StoneWhaleHeartRenderer(EntityRendererProvider.Context context) {
-        // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
+        // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。発光層は LowPolyGeoRenderer が持つ
         super(context, new StoneWhaleHeartModel(), StoneWhaleHeartModel::meshName, SCALE);
     }
 

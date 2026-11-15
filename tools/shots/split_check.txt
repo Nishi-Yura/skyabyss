@@ -13,7 +13,6 @@ cmd time set 6000
 cmd gamerule doDaylightCycle false
 cmd gamerule doMobSpawning false
 hud off
-lowpoly on
 chat clear
 camera 0.5 -59 9.5 180 -6
 waitchunks 300

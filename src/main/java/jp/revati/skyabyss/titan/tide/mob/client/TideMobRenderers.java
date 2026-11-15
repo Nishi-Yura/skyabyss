@@ -8,12 +8,9 @@ import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
-import jp.revati.skyabyss.titan.tide.mob.BubblePuffer;
 import jp.revati.skyabyss.titan.tide.mob.BubbleShot;
 import jp.revati.skyabyss.titan.tide.mob.CoralThrall;
-import jp.revati.skyabyss.titan.tide.mob.ReefScuttler;
 import jp.revati.skyabyss.titan.tide.mob.TideMob;
 import jp.revati.skyabyss.titan.tide.mob.TideMobSetup;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -29,10 +26,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import org.joml.Matrix4f;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.GeoRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 潮殻の背の敵の描画。GeckoLib のモデル (geo/entity/<名前>) と、目・海硝子を暗闇で光らせる層。
@@ -54,7 +48,7 @@ public final class TideMobRenderers {
         event.registerEntityRenderer(TideMobSetup.BUBBLE_SHOT.get(), BubbleRenderer::new);
     }
 
-    // 低ポリのメッシュ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo に戻る。死ぬときは横に倒れない
+    // 低ポリのメッシュ (client/lowpoly)。死ぬときは横に倒れない
     static <T extends TideMob> LowPolyGeoRenderer<T> lowPoly(EntityRendererProvider.Context ctx, String name, float shadow) {
         return new LowPolyGeoRenderer<T>(ctx, name, 1.0f) {
             {
@@ -68,33 +62,11 @@ public final class TideMobRenderers {
         };
     }
 
-    static class MobRenderer<T extends TideMob> extends GeoEntityRenderer<T> {
-        MobRenderer(EntityRendererProvider.Context ctx, String name, float shadow) {
-            this(ctx, new DefaultedEntityGeoModel<T>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), true), shadow);
-        }
-
-        MobRenderer(EntityRendererProvider.Context ctx, DefaultedEntityGeoModel<T> model, float shadow) {
-            super(ctx, model);
-            addRenderLayer(new AutoGlowingGeoLayer<>(this));
-            this.shadowRadius = shadow;
-        }
-
-        @Override
-        protected float getDeathMaxRotation(T animatable) {
-            return 0f;
-        }
-
-        @Override
-        public software.bernie.geckolib.util.Color getRenderColor(T animatable, float partialTick, int packedLight) {
-            return jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer.heated(animatable, partialTick, super.getRenderColor(animatable, partialTick, packedLight));
-        }
-    }
 
     // ---------------------------------------------------------------- 珊瑚憑き
 
-    // 低ポリ (client/lowpoly): 像のときは白い石のアトラス (textures/lowpoly/coral_thrall_statue.png)。LowPoly.enabled = false で元のキューブに戻る
+    // 低ポリ (client/lowpoly): 像のときは白い石のアトラス (textures/lowpoly/coral_thrall_statue.png)。
     static final class ThrallModel extends LowPolyGeoRenderer.Model<CoralThrall> {
-        private static final ResourceLocation STATUE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/coral_thrall_statue.png");
         private static final ResourceLocation STATUE_LOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/coral_thrall_statue.png");
 
         ThrallModel() {
@@ -103,8 +75,8 @@ public final class TideMobRenderers {
 
         @Override
         public ResourceLocation getTextureResource(CoralThrall thrall) {
-            if (thrall.isStatue() && !LowPoly.debug) {
-                return LowPoly.enabled ? STATUE_LOW : LowPoly.cubeOr(STATUE, STATUE_LOW);
+            if (thrall.isStatue()) {
+                return STATUE_LOW;
             }
             return super.getTextureResource(thrall);
         }
@@ -114,9 +86,6 @@ public final class TideMobRenderers {
         ThrallRenderer(EntityRendererProvider.Context ctx) {
             super(ctx, new ThrallModel(), t -> "coral_thrall", 1.0f);
             this.shadowRadius = 0.4f;
-            addRenderLayer(new Either<>(this, CoralThrall::isStatue,
-                    new GearLayer<>(this, "socket_main", "coral_spear_statue", mob -> "idle").activeWhen(() -> !LowPoly.enabled),
-                    new GearLayer<>(this, "socket_main", "coral_spear", mob -> "idle").activeWhen(() -> !LowPoly.enabled)));
             addRenderLayer(new Either<CoralThrall>(this, CoralThrall::isStatue,
                     GearLayer.lowPoly(this, "socket_main", "coral_spear_statue"),
                     GearLayer.lowPoly(this, "socket_main", "coral_spear")));

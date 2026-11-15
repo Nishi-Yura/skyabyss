@@ -147,14 +147,8 @@ public final class AshSmithSelfTest {
                 "/assets/skyabyss/textures/lowpoly/ash_smith_glow.png",
                 "/assets/skyabyss/textures/lowpoly/ash_smith_glow_white.png",
                 "/assets/skyabyss/animations/entity/ash_smith.animation.json",
-                "/assets/skyabyss/geo/gear/smith_hammer.geo.json",
-                "/assets/skyabyss/textures/gear/smith_hammer.png",
-                "/assets/skyabyss/textures/gear/smith_hammer_glowmask.png",
-                "/assets/skyabyss/animations/gear/smith_hammer.animation.json",
-                "/assets/skyabyss/geo/gear/smith_tongs.geo.json",
-                "/assets/skyabyss/textures/gear/smith_tongs.png",
-                "/assets/skyabyss/textures/gear/smith_tongs_glowmask.png",
-                "/assets/skyabyss/animations/gear/smith_tongs.animation.json",
+                "/assets/skyabyss/lowpoly/smith_hammer.json",
+                "/assets/skyabyss/lowpoly/smith_tongs.json",
                 "/assets/skyabyss/textures/gui/boss/ash_smith_frame.png",
                 "/assets/skyabyss/textures/gui/boss/ash_smith_notches.png",
                 "/assets/skyabyss/textures/gui/boss/ash_smith_icon.png"));
@@ -174,8 +168,6 @@ public final class AshSmithSelfTest {
         for (String b : new String[] {"socket_main", "socket_off", "bellows_l", "bellows_r", "apron", "head", "arm_r", "arm_l", "forearm_r", "forearm_l"}) {
             check(java.util.regex.Pattern.compile("\"name\"\\s*:\\s*\"" + b + "\"").matcher(geo).find(), "bone missing: " + b, f);
         }
-        // 大鎚と火箸は別のモデル (体に焼き込まれていない)
-        check(!text("/assets/skyabyss/geo/gear/smith_hammer.geo.json").contains("socket_main"), "the hammer model contains a socket", f);
         // sounds.json に 7 つの音と字幕
         String sounds = text("/assets/skyabyss/sounds.json");
         for (String s : EmberSmithSetup.SOUND_NAMES) {

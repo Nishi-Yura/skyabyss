@@ -14,7 +14,6 @@ cmd weather clear
 cmd gamerule doDaylightCycle false
 cmd gamemode spectator
 cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
-lowpoly on
 fov 60
 hud off
 chat clear

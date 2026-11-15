@@ -9,8 +9,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
-import jp.revati.skyabyss.client.lowpoly.LowPolyGlowTexture;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMeshes;
 import jp.revati.skyabyss.combat.AttackLook;
@@ -18,11 +16,9 @@ import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -91,7 +87,7 @@ public final class AreaFx {
     // ---------------------------------------------------------------- 描く
     @SubscribeEvent
     static void onStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES || !LowPoly.enabled) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -149,13 +145,8 @@ public final class AreaFx {
                 float s = k.scale;
                 // 出る瞬間は少し縦に伸び、沈むときは縦に縮む
                 pose.scale(s, s * (0.55f + 0.45f * h), s);
-                RenderType body = RenderType.entityCutoutNoCull(mesh.texture);
-                LowPoly.drawAll(pose, builder(builders, body), mesh, light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
-                ResourceLocation glow = glowOf(mesh);
-                if (glow != null) {
-                    RenderType g = RenderType.entityTranslucentEmissive(glow);
-                    LowPoly.drawAll(pose, builder(builders, g), mesh, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
-                }
+                // 点の模型 (client/splat)
+                jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, null, pose.last().pose(), null, light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
                 pose.popPose();
             }
         }
@@ -194,18 +185,6 @@ public final class AreaFx {
             out *= Mth.clamp(1f - (since - hold) / SINK, 0f, 1f);
         }
         return out;
-    }
-
-    private static final Map<ResourceLocation, ResourceLocation> GLOW = new HashMap<>();
-
-    private static ResourceLocation glowOf(LowPolyMesh mesh) {
-        if (GLOW.containsKey(mesh.texture)) {
-            return GLOW.get(mesh.texture);
-        }
-        ResourceLocation mask = mesh.texture.withPath(p -> p.substring(0, p.length() - 4) + "_glowmask.png");
-        ResourceLocation g = Minecraft.getInstance().getResourceManager().getResource(mask).isPresent() ? LowPolyGlowTexture.of(mesh.texture, mask) : null;
-        GLOW.put(mesh.texture, g);
-        return g;
     }
 
     // ---------------------------------------------------------------- 置く所

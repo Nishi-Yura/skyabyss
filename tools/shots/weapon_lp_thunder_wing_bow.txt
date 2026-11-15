@@ -135,7 +135,6 @@ wait 10
 chat clear
 shot thunder_wing_bow_tp_legend_p10
 weapontier off
-weaponmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
 perspective first
 hud on
@@ -149,7 +148,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot thunder_wing_bow_tp_voxel
-weaponmesh on
 weapontier legend
 cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow[skyabyss:enhance=10]
 perspective first

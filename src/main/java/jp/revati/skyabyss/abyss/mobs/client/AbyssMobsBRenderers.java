@@ -10,7 +10,6 @@ import jp.revati.skyabyss.abyss.mobs.AbyssMobB;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup;
 import jp.revati.skyabyss.abyss.mobs.AshTrail;
 import jp.revati.skyabyss.abyss.mobs.CeilingWalker;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -26,7 +25,6 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 //   天井歩き: 天井にいるときは逆さに描く (体の上が天井に付く)。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AbyssMobsBRenderers {
-    private static final ResourceLocation DEBUG = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");
     private static final String[] STAGE_SUFFIX = {"", "_s1", "_s2"};
     private static final String[] TRAIL_BONES = {"root", "body", "head", "leg_l1", "leg_r1", "leg_l2", "leg_r2", "arm_l", "arm_r", "prints"};
 
@@ -54,13 +52,11 @@ public final class AbyssMobsBRenderers {
     static final class Model<T extends AbyssMobB> extends LowPolyGeoRenderer.Model<T> {
         private final String name;
         private final ResourceLocation anim;
-        private final ResourceLocation entityTexture;
 
         Model(String name) {
             super(name);
             this.name = name;
             this.anim = id("animations/entity/" + name + ".animation.json");
-            this.entityTexture = id("textures/entity/" + name + ".png");
         }
 
         @Override
@@ -80,16 +76,10 @@ public final class AbyssMobsBRenderers {
         public ResourceLocation getTextureResource(T mob) {
             int look = BossRender.look(mob);
             if (look != 0) {
-                return LowPoly.debug ? DEBUG : BossRender.texture(look);
+                return BossRender.texture(look);
             }
             ResourceLocation low = id("textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage() - 1))] + ".png");
-            if (LowPoly.enabled) {
-                if (LowPoly.debug) {
-                    return DEBUG;
-                }
-                return low;
-            }
-            return LowPoly.cubeOr(entityTexture, low);
+            return low;
         }
     }
 

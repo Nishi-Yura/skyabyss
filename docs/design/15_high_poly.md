@@ -110,7 +110,7 @@
 
 ### 4.1 巨神本体（近 <64 ブロック、中 <160、遠 それ以上の 3 段 LOD）
 
-> **今の描画は低ポリのメッシュ**（9.6 の「巨神本体」）。岩鯨は案 C「皮が岩になる鯨」、潮殻は案 B「段になった珊瑚礁の島」、雷翼は案 A「嵐の大鷲」、余燼は案 C「皮が岩になる火蜥蜴」。LOD の切り替えの距離（近 <64 / 80 / 120 / 96、中 <160 / 160 / 240 / 192、遠はそれ以上。軸までの距離）はそのままで、近・中・遠それぞれが別のメッシュ。**以下の表と説明は、`LowPoly.enabled = false` のときに出る箱版（戻し先）の数字と作り方。**
+> **今の描画は低ポリのメッシュ**（9.6 の「巨神本体」）。岩鯨は案 C「皮が岩になる鯨」、潮殻は案 B「段になった珊瑚礁の島」、雷翼は案 A「嵐の大鷲」、余燼は案 C「皮が岩になる火蜥蜴」。LOD の切り替えの距離（近 <64 / 80 / 120 / 96、中 <160 / 160 / 240 / 192、遠はそれ以上。軸までの距離）はそのままで、近・中・遠それぞれが別のメッシュ。**
 
 | モデル | 近 箱 / 面 | 中 箱 | 遠 箱 | テクスチャ | 近景に足したもの |
 | --- | --- | --- | --- | --- | --- |
@@ -130,7 +130,7 @@
 
 ### 4.2 心臓（最終ボス。段階 1 / 2 / 3 で別の geo。上限 6,000）
 
-> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は箱のモデル（`LowPoly.enabled = false` で出る姿）の数字。
+> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は元の箱のモデル（geo は `tools/sources/geo_cube/` に保管）の数字。
 
 | 心臓 | 面（段階 1 / 2 / 3） | 採用 | 中身 | 生成元（入力） |
 | --- | --- | --- | --- | --- |
@@ -160,7 +160,7 @@
 
 ### 4.3 中ボス（上限 8,000）
 
-> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は箱のモデル（`LowPoly.enabled = false` で出る姿）の数字。
+> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は元の箱のモデル（geo は `tools/sources/geo_cube/` に保管）の数字。
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 足したもの |
 | --- | --- | --- | --- | --- |
@@ -178,7 +178,7 @@
 
 ### 4.4 敵（上限 1,500。たまに出る敵は 2,500）
 
-> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は箱のモデル（`LowPoly.enabled = false` で出る姿）の数字。
+> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は元の箱のモデル（geo は `tools/sources/geo_cube/` に保管）の数字。
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 中身 |
 | --- | --- | --- | --- | --- |
@@ -211,8 +211,8 @@
 | イサナ whale_chaser | 690 / 2,362 | 9 | 今の geo が正本（A つば広帽の旅人。入れた道具は消した） | 滑らか版。頭は 1 つの丸い塊で、顔は表面に描く（太い眉・目・口）。つば広の帽子は頭にかぶさる殻、マフラー、ボタンつきのコート、手袋、ブーツ、背負い袋（丸めた地図）。`hair`・`hood2` の骨は箱なしの空 |
 | 見る者 watcher | 226 / 1,290 | 7 | データを直接直す（生成スクリプトはない） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
 
-- 語り部・イサナ・見る者は低ポリのメッシュ（9.6）。下の滑らか版の記述は、`LowPoly.enabled = false` のときの箱の描画の話になる。
-- 語り部とイサナの滑らか版（顔が頭の塊に収まる作り）は、`LowPoly.enabled = false` の箱の描画として assets に残る。比較シートは `docs/review/smooth_npc_roughs/{storyteller,whale_chaser}.png`、ゲーム内は `docs/review/previews/smooth_*.png`（台本 `tools/shots/smooth_npcs.txt`）。`tools/install/install_smooth_npcs.py` は入力のラフ（9.6）を消したので回らない。以下の `hp_npc.py` の記述は見る者にだけ当てはまる。
+- 語り部・イサナ・見る者は低ポリのメッシュ（9.6）。下の滑らか版の記述は、保管してある元の geo の話になる。
+- 語り部とイサナの滑らか版（顔が頭の塊に収まる作り）の geo は `tools/sources/geo_cube/` に保管（ゲームでは使わない）。比較シートは `docs/review/smooth_npc_roughs/{storyteller,whale_chaser}.png`。`tools/install/install_smooth_npcs.py` は入力のラフ（9.6）を消したので回らない。以下の `hp_npc.py` の記述は見る者にだけ当てはまる。
 - 作り方は `tools/rough/hp_npc.py`（`python tools/rough/hp_npc.py` でシート、`--install C` でゲームの assets へ）。NPC は発光層なし。小道具 `band`（巻き帯）・`vstrips`/`hstrips`（襞と縫い目）・`round_one`（小さな箱の 0.25 面取り）は `hp_npc.py` の中にあり、他でも写して使える。`add_box(safe=True)` が落とした数: 語り部 32、イサナ 43、見る者 11。
 - 語り部とイサナの顔のアイコン（`gui/face`）は絵なのでそのまま。
 - `npc.py`（ラフ）の geo 出力は古い箱のままなので、**再生成すると取り込みが戻る**。geo を再生成するときは先に `hp_npc.py --install C` を後ろに回す。
@@ -275,7 +275,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - 置き方: item モデルの原点は block の角で、メッシュは x = 0, z = 0 が中心なので +0.5 ブロック（元の item モデルの 8）。`LowPolyMesh` は geo 向けに x を反転して焼くので、描くとき `scale(-1, 1, 1)` で戻す。元のボクセルは盾以外すべて z 軸まわり -45 度（中心 8,8,8）に傾けていて、display はその前提の値なので、メッシュ（刃を立てて作ってある）も同じだけ傾ける（盾は傾けない）。y の高さと握りは元のまま
 - アセット: `lowpoly/items/<id>/<段>[_pullN].json`、`textures/lowpoly/items/<id>/<段>[_pullN][_plus5|_plus10]_atlas.png`（光る画像は `..._atlas_glow.png` = `*_glowmask.png` の白い画素にアトラスの色を載せたもの）。入れ方は `python tools/install/install_lowpoly_weapons.py`（入力 `docs/review/lowpoly_roughs/weapons_final/<id>/`。何度でも流せる）。base の書き換えと、元のボクセルの `models/item_voxel/` への退避も同じスクリプト
 - 弓の引き: 一人称は自分、三人称は `RenderLivingEvent` の間だけ入れる生き物（`WeaponItemRenderer.holder`）から取る（モデルを替えずに段だけ変える）
-- スイッチ: `LowPoly.weaponMeshes`（既定 true）。false で元のボクセル（`models/item_voxel/<名>.json`。`ModelEvent.RegisterAdditional` で読む）を同じ置き方で描く。そのため `item_voxel/` と `textures/item/3d/` は消さない。台本は `weaponmesh on|off`、階級を固定して撮るのは `weapontier common|rare|legend|off`（開発用）
+- メッシュの無い品だけ、元のボクセル（`models/item_voxel/<名>.json`。`ModelEvent.RegisterAdditional` で読む）を同じ置き方で描く。階級を固定して撮るのは `weapontier common|rare|legend|off`（開発用）
 
 確かめ（`python tools/gen/shots/gen_weapon_lp_shots.py` → `python tools/run/run_weapon_lp_shots.py -j 3` → `python tools/sheets/weapon_lp_sheet.py`。絵は `docs/review/previews/weapon_lp_<id>.png` がコンタクトシート、`_draw`・`_block`・`_world` が弓の引き・盾の構え・地面と額縁）:
 
@@ -314,7 +314,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - 防具立て（armor stand）は装飾の枠を持たないので、付けた姿は出ない
 - 燠の灯（ブロック）: 置いたブロックはキューブのモデル（`block/cinder_lamp{,_hanging}`）のまま。非立方体のブロック描画は専用のブロックエンティティが要り、1 灯のために重いので入れない。持つ・落とす・額縁・頭は低ポリのメッシュ
 - アセット: `lowpoly/items/<id>/<段>.json`、`textures/lowpoly/items/<id>/<段>_atlas.png`（光る画像は `_atlas_glow.png`）。形のラフは `tools/rough/lowpoly/accessories/{thunder,ember,whale,tide}.py`、書き出しは `build_final.py`（出力 `docs/review/lowpoly_roughs/accessories_final/`）、入れ方は `python tools/install/install_lowpoly_accessories.py`（何度でも。元の平絵は `models/item_flat/` へ退避）
-- スイッチ（戻しの旗）: `LowPoly.accessoryMeshes`（既定 true。false で平絵、`item_flat/` を同じ置き方で描く）、`LowPoly.accessoryWorn`（既定 true。false で体に描かない）。台本は `accmesh on|off`、`accworn on|off`、`acctier common|rare|legend|off`、`accequip <id> [<id>]`
+- メッシュの無い品だけ平絵（`item_flat/`）を同じ置き方で描く。台本は `acctier common|rare|legend|off`、`accequip <id> [<id>]`
 
 確かめ（`python tools/gen/shots/gen_accessory_lp_shots.py` → `./gradlew runShots -Pscript=tools/shots/acc_lp_<巨神>.txt` → `python tools/sheets/accessory_lp_sheet.py`。絵は `docs/review/previews/acc_lp_<巨神>.png`）。
 
@@ -373,7 +373,6 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 | `assets/skyabyss/lowpoly/<name>.json` | メッシュ（下の形式） |
 | `assets/skyabyss/textures/lowpoly/<name>.png` | アトラス（32 画素/ブロック = `texels_per_unit` 2）。`<name>_glowmask.png` があれば光る画素（目）。光る画素 0 のマスクは置かない（GeckoLib が落ちる） |
 | `assets/skyabyss/geo/entity/<name>_lowpoly.geo.json` | 骨だけの geo（cube なし。メッシュの骨名・pivot と同じ） |
-| `assets/skyabyss/geo/entity/<name>_lowpoly_debug.geo.json` | 骨ごとにメッシュにぴったりの箱を 1 つ持つ geo（重ね合わせの確認用） |
 | `assets/skyabyss/animations/entity/<name>.animation.json` | 元のものをそのまま使う（骨名が同じなので変わらない） |
 
 メッシュ JSON: `{format_version:1, units:"1/16 block, y up, front = -Z", texture, texture_size:[w,h], texels_per_unit, bones:{<骨名>:{parent, pivot:[x,y,z], vertices:[[x,y,z]..], uvs:[[u,v]..], triangles:[[i,j,k]..]}}}`
@@ -388,7 +387,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - `LowPolyGeoRenderer`（`GeoEntityRenderer` の派生）が `renderCubesOfBone` を差し替え、cube の代わりにその骨のメッシュを GeckoLib が渡す buffer へ流す。骨のポーズは GeckoLib がかけ終えた PoseStack をそのまま使うので、向き・アニメ・被弾の赤・死に方・明るさ・発光層（`AutoGlowingGeoLayer`、マスクがあるときだけ）は cube のモデルと同じ。毎フレームは頂点の座標変換だけ（頂点 1 つあたり行列 1 回、法線は面ごとに 1 回）
 - テクスチャは `textures/lowpoly/<name>.png`、描画型は GeckoLib の `entityCutoutNoCull`（最近傍）
 - 受け口: `GearLayer.lowPoly(renderer, "socket_off", "<meshName>")`（`LowPolyGearLayer`）が受け口の骨のポーズでメッシュを描く。アイテム・geo を描く元の `GearLayer` は他のモブのためにそのまま動く
-- **スイッチ**: `LowPoly.enabled`（既定 true）。false にすると低ポリ対応のモブは元の cube の geo・テクスチャ・`GearLayer` に戻る。モブごとには `GuardRenderers` の登録の行を `LowPolyGeoRenderer` から `geo(...)` へ戻せば元に戻る。台本では `lowpoly on|off|debug|nodebug`
+- **描画**: メッシュはゲームの中では描かない。どのモデルも、このメッシュから作る点の模型（「点の模型」の節）で描く。元の cube の geo とテクスチャは `tools/sources/geo_cube/` に保管
 
 ### 9.3 予算
 
@@ -434,16 +433,16 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 - **動く部品のある武器**（弓の弦）: 複数の骨のメッシュは、骨だけの `geo/gear/<名>_lowpoly.geo.json` と元の `animations/gear/<名>.animation.json` で動かす（`GearLayer.lowPolyAnimated`）。動く武器の発光には未対応
 - **武器の光る画素**: マスク（白）に元のアトラスの色を載せた `textures/lowpoly/<名>_glow.png` を焼く（`LowPolyMeshes` はこれを探す）
 - **光る画素 0 のマスクは入れない**（GeckoLib が落ちる）。段階ごとのモブは `LowPolyGeoRenderer` に GeoModel と「メッシュ名の関数」を渡す（心臓は `StoneWhaleHeartModel.meshName`）
-- 元の箱の描画は、5 体とも `LowPoly.enabled = false` で出る。動きの確認用に `/skyabyss dev anim` は GuardMob 以外の GeckoLib のモブにも効く
+- 動きの確認用に `/skyabyss dev anim` は GuardMob 以外の GeckoLib のモブにも効く
 
 確かめ（台本 `tools/shots/lp_<名>.txt`、`tools/gen/shots/gen_lowpoly_five_shots.py` が書く。絵は `docs/review/previews/lp_*.png`）: 待機の前・斜め・横・後ろ、顔、番兵長の薙ぎ払い・叩きつけ・咆哮、射手の構えと弦、苔這いの飛びかかり・被弾・死、水路の顎の噛みつき、心臓の段階 1〜3 と登場・倒れる。動きは同じ姿勢の箱版（`cubes_*`）と並べて見た。負荷（1280x720、垂直同期なし、苔這い 20 + 射手 10 の 30 体、`tools/shots/lp_perf.txt`）: 低ポリ 6.5〜7.4 ms/frame、箱 22.1〜24.5 ms/frame（約 3.3 倍速い）。
 
-潮殻の背の 4 体は `python tools/install/install_lowpoly_tide.py` で一度に入る（珊瑚憑きは下の雷翼の背のスクリプトで入る）。磯走り・泡吹きは `TideMobRenderers.lowPoly()`、潮招きは `TideBackClient.BeckonerRenderer`、心臓は `TideHeartRenderer`。どれも `LowPoly.enabled = false` で元の箱に戻る。確かめの台本は `python tools/gen/shots/gen_lowpoly_tide_shots.py` が `tools/shots/lp_tide_{scuttler,puffer,beckoner,heart}.txt` に書く（心臓の段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が自分で吠えて進むのを待って撮る）。絵は `docs/review/previews/lp_tide_*`（箱版は `cubes_tide_*`、モブごとの比較シートは `lp_tide_<名>_sheet.png`、心臓の登場・倒れるは `lp_tide_heart_cinematic_sheet.png`。`python tools/sheets/lowpoly_tide_sheets.py`）。負荷（`tools/shots/lp_tide_perf.txt`、磯走り 15 + 泡吹き 10 + 潮招き 2 = 27 体、1280x720、垂直同期なし）: 低ポリ 5.1〜5.6 ms/frame、箱 15.5〜16.8 ms/frame（約 3 倍速い）。
+潮殻の背の 4 体は `python tools/install/install_lowpoly_tide.py` で一度に入る（珊瑚憑きは下の雷翼の背のスクリプトで入る）。磯走り・泡吹きは `TideMobRenderers.lowPoly()`、潮招きは `TideBackClient.BeckonerRenderer`、心臓は `TideHeartRenderer`。確かめの台本は `python tools/gen/shots/gen_lowpoly_tide_shots.py` が `tools/shots/lp_tide_{scuttler,puffer,beckoner,heart}.txt` に書く（心臓の段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が自分で吠えて進むのを待って撮る）。絵は `docs/review/previews/lp_tide_*`（箱版は `cubes_tide_*`、モブごとの比較シートは `lp_tide_<名>_sheet.png`、心臓の登場・倒れるは `lp_tide_heart_cinematic_sheet.png`。`python tools/sheets/lowpoly_tide_sheets.py`）。負荷（`tools/shots/lp_tide_perf.txt`、磯走り 15 + 泡吹き 10 + 潮招き 2 = 27 体、1280x720、垂直同期なし）: 低ポリ 5.1〜5.6 ms/frame、箱 15.5〜16.8 ms/frame（約 3 倍速い）。
 
-雷翼の背の 5 体と珊瑚憑きは `python tools/install/install_lowpoly_storm.py` で一度に入る（珊瑚憑き・羽守・雷蛾・雷乞い・雷獣・心臓の段階 1〜3）。描画は羽守・雷蛾・雷乞いが `StormMobRenderers.MobRenderer`（`LowPolyGeoRenderer` の派生。鉤槍・杖は `GearLayer.lowPoly`、元の `GearLayer` は `activeWhen(!LowPoly.enabled)`）、珊瑚憑きが `TideMobRenderers.ThrallRenderer`（像のときは `LowPolyGeoRenderer.Model` を継いだ `ThrallModel` が白い石のアトラスを返し、骨 `statue_coral` を見せ、像の銛 `coral_spear_statue` に替える）、雷獣が `RaijuRenderer`（頭を向けない `Model("raiju", false)`）、心臓が `StormHeartRenderer`。どれも `LowPoly.enabled = false` で元の箱に戻る。
+雷翼の背の 5 体と珊瑚憑きは `python tools/install/install_lowpoly_storm.py` で一度に入る（珊瑚憑き・羽守・雷蛾・雷乞い・雷獣・心臓の段階 1〜3）。描画は羽守・雷蛾・雷乞いが `StormMobRenderers.MobRenderer`（`LowPolyGeoRenderer` の派生。鉤槍・杖は `GearLayer.lowPoly`、元の `GearLayer` は `activeWhen`）、珊瑚憑きが `TideMobRenderers.ThrallRenderer`（像のときは `LowPolyGeoRenderer.Model` を継いだ `ThrallModel` が白い石のアトラスを返し、骨 `statue_coral` を見せ、像の銛 `coral_spear_statue` に替える）、雷獣が `RaijuRenderer`（頭を向けない `Model("raiju", false)`）、心臓が `StormHeartRenderer`。
 
 - **雷蛾の帯電の光**: 箱の `static_moth_charge.png` は UV が違うので、低ポリでは翅の面のアトラスを明るくした `textures/lowpoly/static_moth_charge.png` を `ChargeLayer` が足す（スクリプトが焼く）。
-- **雷獣**: 低ポリでは `LowPolyGeoRenderer` の発光層（`autoGlow()` = `LowPoly.enabled`）、箱のときは自前の `GlowLayer`。
+- **雷獣**: 光る画素は点の模型の光る点になる（光の重ね描きの層は無い）。
 - **雷翼の心臓の発光**: `AutoGlowingGeoLayer` は光る画素に面の陰をかけるため、核・稲妻が灰青に沈んだ（実測で本来の色の 0.6 倍）。心臓は低ポリでも箱と同じく目の光で足す（`StormHeartRenderer.GlowLayer`、`autoGlow()` = false）。足す絵は、アトラスの光る画素の色（0.8 倍）だけを載せた `textures/lowpoly/storm_heart_pN_glow.png`。段階 2・3 は、白飛びした光と、石の殻（`heart`・`vessel`）にばらまかれた 1 画素の光が点に見えるので、インストール先のコピーで殻の骨の光る画素を消し、白・ほぼ白の光る色を氷色（186,220,250 など）に和らげてある。ラフの入力は触らない。ゲームでは段階 3 の核は淡い氷色の六角、稲妻は青い線で読める。
 - **確かめ**: 台本は `python tools/gen/shots/gen_lowpoly_storm_shots.py` が `tools/shots/lp_storm_{warden,moth,moth_charged,supplicant,raiju,heart_p1,heart_p2,heart_p3,perf}.txt` と `lp_coral_thrall.txt` に書く（心臓は段階ごとに別の台本。段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が吠えて進むのを待ち、そのあと NoAI にして原点へ戻して撮る。珊瑚憑きの像は `tidemob tide high` で潮を満ちに止めてから）。比較シートは `python tools/sheets/lowpoly_storm_sheets.py` が `docs/review/previews/lp_storm_<名>_sheet.png`・`lp_coral_thrall_sheet.png` に書く（上が低ポリ、下が箱）。負荷（`tools/shots/lp_storm_perf.txt`、羽守 8 + 雷蛾 8 + 雷乞い 8 + 雷獣 2 = 26 体、1280x720、垂直同期なし、他の作業と並行）: 低ポリ 6.4〜7.3 ms/frame、箱 19.8〜22.8 ms/frame（約 3 倍速い）。
 - 雷蛾の帯電の明るさは、台本（`lp_storm_moth_charged`）では動く蛾が画面からはずれ、明るい翅を確かに撮れていない（箱版との並べも未確認）。
@@ -458,7 +457,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 | 余燼 ember_titan | C 皮が岩になる火蜥蜴 | 5,414 / 1,426 / 373 | 13 | 同上 | `lp_ember_titan/c/` |
 
 - テクセル密度は近 2 / 中 1 / 遠 0.5（1 単位あたり）。段ごとに別のモデル名で入れる: 近 `<名>`、中 `<名>_mid`、遠 `<名>_far`（元の箱の geo `geo/entity/<名>{,_mid,_far}.geo.json` と同じ名前なので、骨・pivot・休めの回転は 3 段とも元と一致する。入れるときの警告は 0）。`lowpoly/<名>*.json`、`textures/lowpoly/<名>*.png`（`_glowmask.png` は光る画素があるときだけ）、`geo/entity/<名>*_lowpoly{,_debug}.geo.json`。
-- 描画: 4 体とも `LowPolyGeoRenderer` の派生（岩鯨 `client/titan/StoneWhaleRenderer`、潮殻 `TideShellRenderer`、雷翼 `StormWingRenderer`、余燼 `EmberTitanRenderer`）。段の選び方（カメラから体の軸までの距離）は `LowPolyLodModel`（`client/lowpoly/`。`lod()` が 0 近・1 中・2 遠を返す）が決める。段ごとにモデル名・geo・アトラス・メッシュが替わる（心臓の段階と同じ仕組み）。`LowPoly.enabled = false` で、元の箱の geo・`textures/entity/<名>.png`・自動の発光層に戻る。岩鯨の鎖の描画（`render`）、4 体の向き（`applyRotations`）は触っていない。
+- 描画: 4 体とも `LowPolyGeoRenderer` の派生（岩鯨 `client/titan/StoneWhaleRenderer`、潮殻 `TideShellRenderer`、雷翼 `StormWingRenderer`、余燼 `EmberTitanRenderer`）。段の選び方（カメラから体の軸までの距離）は `LowPolyLodModel`（`client/lowpoly/`。`lod()` が 0 近・1 中・2 遠を返す）が決める。段ごとにモデル名・geo・アトラス・メッシュが替わる（心臓の段階と同じ仕組み）。岩鯨の鎖の描画（`render`）、4 体の向き（`applyRotations`）は触っていない。
 - 発光: 岩鯨・潮殻・雷翼は `LowPolyGeoRenderer` の `autoGlow`（目・刻文・稲妻の筋・潮門・手首の瘤。マスクのある段だけ）。余燼は光の強さを巨神の様子で変える `DimmableGlowLayer`（`autoGlow()` を false にして、箱・低ポリのどちらにも足す）。
 - 背のディメンション（ブロックの複製）は案の形に合わせてある。
 - **当たり・乗り場との整合**（`python tools/audit/titan_align_check.py` が、メッシュ・箱の geo に対して座席の面の高さ・鎖の取り付け・潮門・口を測る）:
@@ -486,11 +485,11 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 | 燠虫 cinder_roller | B 熔皮の棘玉 | 550 | 37 | `lp_cinder_roller/b/`（丸まっている間の脚・触角・尾肢・節の間の膜の骨隠しは、箱のときからの `RollerRenderer.preRender`。そのまま効く） |
 | 鍛え手 ash_smith | A 玄武の鍛冶王 | 1,517 + 大鎚 104 + 火箸 124 | 15 | `lp_ash_smith/a/`（大鎚 `smith_hammer` は `socket_main`、火箸 `smith_tongs` は `socket_off`） |
 | 余燼の心臓 ember_heart | C 黒曜の鱗 | 1,570 / 1,567 / 1,661（段階 1 / 2 / 3） | 13 | `lp_ember_heart/c/p1..p3`（`ember_heart_pN`） |
-| 語り部 storyteller | A | 714 | 11 | `lp_storyteller/a/`（滑らかなボクセル版の geo は `LowPoly.enabled = false` の箱の描画として assets に残る） |
+| 語り部 storyteller | A | 714 | 11 | `lp_storyteller/a/`（滑らかなボクセル版の geo は `tools/sources/geo_cube/` に保管） |
 | イサナ whale_chaser | A | 736 | 11 | `lp_isana/a/` |
 | 見る者 watcher | A | 300 | 7 | `lp_watcher/a/`（半透明のまま。単層のメッシュ） |
 
-- **描画**: 敵 3 種は `EmberMobRenderers.MobRenderer`（`LowPolyGeoRenderer` の派生。発光は `LowPolyGeoRenderer` の `AutoGlowingGeoLayer`）、灰被りは `ThrallModel` が燃え上がりのときだけ `textures/lowpoly/ash_thrall_flared.png` を返す（火掻き棒は `GearLayer.lowPoly(.., "socket_main", "ash_poker")`、箱の `GearLayer` は `activeWhen(!LowPoly.enabled)`）。心臓は `EmberHeartRenderer`、鍛え手は `AshSmithClient.SmithRenderer`（大鎚・火箸は `GearLayer.lowPoly`）、NPC は `NpcRenderer`（`LowPolyGeoRenderer.Model` を継ぎ、頭が相手を向く処理はそのまま）、見る者は `WatcherRenderer`。どれも `LowPoly.enabled = false` で元の箱の geo・テクスチャ・`GearLayer` に戻る。
+- **描画**: 敵 3 種は `EmberMobRenderers.MobRenderer`（`LowPolyGeoRenderer` の派生）、灰被りは `ThrallModel` が燃え上がりのときだけ `textures/lowpoly/ash_thrall_flared.png` を返す（火掻き棒は `GearLayer.lowPoly(.., "socket_main", "ash_poker")`）。心臓は `EmberHeartRenderer`、鍛え手は `AshSmithClient.SmithRenderer`（大鎚・火箸は `GearLayer.lowPoly`）、NPC は `NpcRenderer`（`LowPolyGeoRenderer.Model` を継ぎ、頭が相手を向く処理はそのまま）、見る者は `WatcherRenderer`。どれも点の模型で描き、光る画素は光る点になる。
 - **発光**: 心臓と鍛え手は `autoGlow()` = false。`AutoGlowingGeoLayer` は光る画素に面の陰をかけるので、暗い部屋で沈む（箱のときと同じ理由）。スクリプトが焼く `textures/lowpoly/ember_heart_pN_glow.png`・`ash_smith_glow.png`・`ash_smith_glow_white.png`（鞴が白く光る間・怒りの白い光。アトラスの光る画素の色だけを黒の上に置き、1 画素に足す強さは 0.7〜0.8 倍）を、箱のときと同じ `RenderType.eyes`（陰なし・足し合わせ）の層で重ねる。段階 2 の「白熱」は箱では黄が飛んでいたが、メッシュでは核の形が読める。
 - **見る者**: `WatcherRenderer` は `LowPolyGeoRenderer` の派生で、半透明の描画（`entityTranslucent`）と「薄れる」濃さ、目のにじみ（glint）は箱のときのまま。目の座標は、低ポリの geo には cube が無いので、メッシュの骨 `eyes` の頂点の平均（焼いたあとの座標）から取る。目の光は `textures/lowpoly/watcher_glow.png`（アトラスの光る画素の色を黒の上に）。台本用に `ShotRunner` に `watcher x y z yaw`（足元の位置・体の向き。消えずに立つ。`WatcherClient.placeForShot`）を足した。
 - **確かめ**: 台本は `python tools/gen/shots/gen_lowpoly_ember_npc_shots.py` が `tools/shots/lp_ember_{thrall,moth,roller,smith,heart_p1,heart_p2,heart_p3,perf}.txt`・`lp_npc.txt`・`lp_watcher.txt` に書く（新しい世界は最初の約 360 tick が開幕の字幕なので、最初の絵の前に 330 tick 待つ。心臓の段階 2・3 は体力を下げた AI ありの心臓が吠えて進むのを待つ。燠虫の丸まりは、AI の燠虫と生存者の人が 3〜14 ブロックにいると丸まる）。比較シートは `python tools/sheets/lowpoly_ember_npc_sheets.py` が `docs/review/previews/lp_ember_{thrall,moth,roller,smith,heart,heart_cinematic}_sheet.png`・`lp_npc_{storyteller,isana}_sheet.png`・`lp_watcher_sheet.png` に書く（上がメッシュ、下が箱）。見る者の夜の 14・40 ブロックは暗いので、シートでは明るさを 3 倍にしてある（元の絵は `run/shots/lp_watcher/` に出る）。
@@ -552,7 +551,7 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 
 ## 光る所の描き方（光る層の絵）
 
-低ポリの模型の光る所は、発光マスク（`<絵>_glowmask.png`）の光る画素だけに元の色を置いた絵をゲームの中で作り（`client/lowpoly/LowPolyGlowTexture`）、光る描き方で上から重ねる。元の絵は触らない。GeckoLib の AutoGlowingTexture は光る画素を元の絵から消して（透明にして）別の絵へ移すので、光る層が描かれない時（番人の闇・眠る巨神・光を切った時）にその所が透明になり、光りもしなかった（2026-11-11 の声「画像にはあるのにマイクラ内では透明」「画像では光っているが光っていない」）。
+低ポリの模型の光る所は、発光マスク（`<絵>_glowmask.png`、品は `<絵>_glow.png`）の光る画素。点の模型を作るときにその画素の点を光る点にする（明るさは世界の光によらず最大。眠る巨神・見る者の目・番人の心臓は `LowPolyGeoRenderer.splatGlow` で強さを変える）。元の絵は触らない。
 
 - 絵の透明（切り抜き）の確かめ: `tools/audit/lowpoly_texture_audit.py`（三角形が絵の透明な所を指していないか、発光マスクの大きさが絵と同じか）。
 - 選んだラフの足す部品の入れ方: 心臓の眼は `tools/install/install_heart_eyes.py`、番人の鍵の後光・灯り喰いの主の燠の腹は `tools/install/install_boss_addons.py`（元の模型は `tools/sources/heart_eyes_base/`・`tools/sources/boss_addon_base/`）。
@@ -610,14 +609,17 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install/install_
 肋の主 = 肋から吊った灯の籠（揺れる）、白殻の主 = 足の縁の光る粘液と口の雫、鼓動まねの主 = 体の表の三角形をたどって這う血管の網と光る脈（口のまわりは避ける）。
 層の主は install_boss_split.py の塗り直しのあとが元: あちらを流し直したら mid_addons_base/lord_* を消してから流し直す。中ボス 4 体と塔の主の技も heart_moves.py で緩急を付けた。塔の主は grow で現れて名前の札と顔のアップ。
 
-## 点の模型（スプラット。試作は熔岩の大蛇）
+## 点の模型（スプラット）
 
-ピクセルアートのガウシアンスプラットの見た目。ポリゴンの代わりに、色つきの小さな四角い点を数万個重ねて形を作る。試作は熔岩の大蛇 `lava_wyrm` だけ。
+ピクセルアートのガウシアンスプラットの見た目。ポリゴンの代わりに、色つきの小さな四角い点を重ねて形を作る。**ゲームの中のモデルは全部これで描く**（体のモブ・ボス・巨神・NPC・防具・武器・装飾品・持ち物・攻撃の形・乗り物）。
 
-- **作り方**: `python -I tools/gen/splat/lava_wyrm.py`（共通の道具は `tools/gen/splat/splat_lib.py`）。形は距離の関数（SDF）の部品を滑らかにつないで彫り、削る部品（目の窪み・鼻の穴）も使う。表面に点を撒き、陰（主光・空の明るさ・窪みの暗さ・尾根の明るさ）と模様を焼き込んで、色の段にディザで落とす。体は格子 0.42、頭と襟巻は 0.24（1/16 ブロック）。書き出しは `assets/skyabyss/splat/<名前>.bin`（形式 SPL2: 位置・大きさ・色・骨二本と重み・印・法線）、下見は `docs/review/splat_pilot/`。
-- **骨とアニメ**: 骨・アニメは低ポリ版と同じ（名前もメッシュと同じ）。点ごとに骨二本と重みを持ち、継ぎ目でも折れずに曲がる。頭と下あごは混ぜない（口が開くと伸びるため）。
-- **点の種類**: 表面（不透明。表面から浮いた点は置かない）、光る点（明るさ一定）、にじみ・火の粉（足し算の柔らかい丸。火の粉は時間で昇る）。
-- **描画**: `LowPolyGeoRenderer` が、`splat/<メッシュ名>.bin` のあるモブだけ骨のポーズを集め、`renderFinal` でまとめて描く（`client/splat/`）。不透明の点は模型ごとに一度だけ VBO に入れ、シェーダー `shaders/core/splat.*` が骨の行列（最大 16 本）でポーズを付け、カメラへ向け、裏向きの点を捨てる。にじみと火の粉だけは CPU で描く。シェーダーが読めないときや骨が 16 本を超えるときは、CPU の描き方に戻る（遠いほど間引く）。
-- **重さ**: 大蛇 1 体（約 7.3 万点）の CPU 側の時間は、GPU で約 0.12 ms、CPU の描き方で約 5 ms。
-- **切り替え**: `SplatClouds.enabled`（点の模型の入り切り）、`SplatGpu.enabled`（GPU / CPU）。台本では `splat on|off|gpu|cpu`。撮影の台本は `tools/shots/splat_pilot.txt`（低ポリとの比べ・姿勢・重さ）と `tools/shots/splat_fight.txt`（戦闘中・被弾・倒れ）。
+- **二通りの作り方**
+  - **自動（ほとんど全部）**: 低ポリのメッシュ（`lowpoly/<名前>.json` と `textures/lowpoly/` の絵）から、ゲームの中でその場で作る（`client/splat/SplatGen`）。面に一様に点を撒き（間隔はモデルの大きさの 1/140。下限 0.45/16 ブロック、点は 6 万まで。巨神は 40 万まで細かく）、絵の色を取り、透明な画素は捨て、発光マスクの画素は光る点にする。陰は升目のまわりで均した法線で焼き、4 段の明るさにディザで落とす。巨神は下ほど暗く。体のモブは親と子の骨の継ぎ目の点を骨二本に分けて混ぜる。武器の強化の段（+5・+10）は絵だけを替えて別に作る。作るのは裏のスレッドで、出来るまでの数フレームは描かない。60 秒使わなかった模型は捨てる。
+  - **手彫り（ボス）**: `tools/gen/splat/<名前>.py` で、距離の関数（SDF）の部品を滑らかにつないで彫り、削る部品（目の窪み・鼻の穴）も使う。陰（主光・空の明るさ・窪みの暗さ・尾根の明るさ）と模様を焼き込み、色の段にディザで落とす。頭など見せ所だけ格子を細かくする。書き出しは `assets/skyabyss/splat/<名前>.bin`（形式 SPL2: 位置・大きさ・色・骨二本と重み・印・法線）で、あれば自動より優先。今は熔岩の大蛇 `lava_wyrm`（`python -I tools/gen/splat/lava_wyrm.py`、下見は `docs/review/splat_pilot/`）。
+- **骨とアニメ**: 骨・アニメは低ポリ版と同じ（名前もメッシュと同じ）。手彫りは頭と下あごを混ぜない（口が開くと伸びるため）。
+- **点の種類**: 表面（不透明。表面から浮いた点は置かない）、光る点（明るさ一定）、にじみ・火の粉（足し算の柔らかい丸。手彫りだけ。火の粉は時間で昇る）。
+- **描画**（`client/splat/`）: 体のモブは `LowPolyGeoRenderer` が骨のポーズを集め、`renderFinal` でまとめて描く。防具・品・持ち物・攻撃の形などは、メッシュを描いていた所から `SplatDraw.mesh` で骨ごとに描く。不透明の点は模型ごとに一度だけ GPU のバッファに入れ（点一つ 36 バイト、点一つが一つのインスタンス）、シェーダー `shaders/core/splat.*` が骨の行列（最大 16 本。超える模型は骨ごとに）でポーズを付け、カメラへ向け、裏向きの点を捨てる。遠いほど点を間引いて大きくする（24 ブロックから。下限 15%）。GUI（持ち物の画面の人形など）は画面の絵と同じ流れに乗せるため CPU で描く。シェーダーが読めないときも CPU で描く。
+- **重さ**: CPU 側の時間は、体のモブ 1 体あたり約 0.1〜0.25 ms（GPU）。CPU の描き方では大蛇 1 体で約 5 ms。
+- **切り替え**: `SplatGpu.enabled`（GPU / CPU）。台本では `splat gpu|cpu`。撮影の台本は `tools/shots/splat_pilot.txt`（大蛇・姿勢・GPU/CPU の重さ）、`splat_fight.txt`（戦闘中・被弾・倒れ）、`splat_all_sample.txt`・`splat_all_sample2.txt`（敵・NPC・防具・一人称の武器・落ちた品・持ち物の画面）、`splat_gui_helm.txt`（持ち物の画面の兜）。
+- **無くしたもの**: 光の重ね描きの層（光る点が自分で光る）、武器の輝き（foil）と神器の脈打つ光、元のキューブへの切り替え、骨ごとの箱のデバッグ表示。
 - **未確認**: シェーダー Mod（Iris など）との相性。点は独自のシェーダーで直に描くので、影の描画などに映らないおそれがある。

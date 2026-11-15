@@ -144,7 +144,7 @@ def gen_perf():
     L.append('camera minecraft:overworld 0 -57 9 180 22')
     L.append('waitchunks')
     L.append('wait 40')
-    for label, cmd in (('lowpoly_legend', None), ('lowpoly_rare', 'armortier rare'), ('cubes', 'lowpoly armoroff')):
+    for label, cmd in (('lowpoly_legend', None), ('lowpoly_rare', 'armortier rare')):
         if cmd:
             L.append(cmd)
         L.append('wait 20')

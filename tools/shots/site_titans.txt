@@ -23,7 +23,6 @@ cmd skyabyss progress grant @p tide_shell
 cmd skyabyss progress grant @p thunder_wing
 hud off
 chat clear
-lowpoly on
 
 # ---- 岩鯨
 cmd tp @s 230 200 -880 180 0

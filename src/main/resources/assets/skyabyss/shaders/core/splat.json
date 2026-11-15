@@ -111,26 +111,6 @@
    ]
   },
   {
-   "name": "CamLeft",
-   "type": "float",
-   "count": 3,
-   "values": [
-    1,
-    0,
-    0
-   ]
-  },
-  {
-   "name": "CamUp",
-   "type": "float",
-   "count": 3,
-   "values": [
-    0,
-    1,
-    0
-   ]
-  },
-  {
    "name": "LightUV",
    "type": "float",
    "count": 2,
@@ -532,6 +512,30 @@
     0,
     0,
     0,
+    1.0
+   ]
+  },
+  {
+   "name": "ForceBone",
+   "type": "int",
+   "count": 1,
+   "values": [
+    -1
+   ]
+  },
+  {
+   "name": "Grow",
+   "type": "float",
+   "count": 1,
+   "values": [
+    1.0
+   ]
+  },
+  {
+   "name": "GlowFade",
+   "type": "float",
+   "count": 1,
+   "values": [
     1.0
    ]
   }

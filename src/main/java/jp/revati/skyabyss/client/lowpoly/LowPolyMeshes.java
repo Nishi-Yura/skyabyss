@@ -70,8 +70,5 @@ public final class LowPolyMeshes extends SimplePreparableReloadListener<Map<Stri
     protected void apply(Map<String, LowPolyMesh> loaded, ResourceManager manager, ProfilerFiller profiler) {
         meshes = loaded;
         LowPolyArmor.clearCache();
-        LowPolyGlow.clear();
-        LowPolyGlowTexture.clear();
-        LowPoly.clearCubeCache();
     }
 }

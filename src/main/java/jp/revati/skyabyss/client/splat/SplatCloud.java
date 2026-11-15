@@ -6,9 +6,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-// 点の模型 (ピクセルアートのスプラット。試作は熔岩の大蛇)。assets/skyabyss/splat/<名前>.bin を読んだもの。
-// 作るのは tools/gen/splat/ (splat_lib.py の write_bin が形式の元)。点は GeckoLib の骨の二本に重みで結ばれ、骨のポーズで動く (SplatDraw)。
-// 座標は読み込みのときに描画空間 (x 反転、1/16 ブロック → ブロック) へ直しておく。点は乱数の順に並んでいるので、先頭から何割かだけ描けば一様に間引ける
+// 点の模型 (ピクセルアートのスプラット)。手で彫ったもの (assets/skyabyss/splat/<名前>.bin、tools/gen/splat/) と、
+// 低ポリのメッシュからその場で作ったもの (SplatGen) の両方がこの形になる。
+// 座標は描画の空間 (x 反転、ブロック)。不透明の点は骨 A の番号順に並べ、骨ごとの範囲 (boneStart / boneCount) を持つ。
+// 骨の中の点は乱数の順なので、範囲の先頭から何割かだけ描けば一様に間引ける (遠くの間引き)
 public final class SplatCloud {
     public static final int F_GLOW = 1;
     public static final int F_HALO = 2;
@@ -17,10 +18,13 @@ public final class SplatCloud {
     public final String name;
     public final String[] bones;
     private final Map<String, Integer> boneIndex = new HashMap<>();
-    // 不透明の点 (表面・けば・光る点) と、足し算の点 (にじみ・火の粉) に分けて持つ
+    // 不透明の点 (表面・光る点) と、足し算の点 (にじみ・火の粉) に分けて持つ
     public final Part solid;
     public final Part additive;
     public final int total;
+    // 不透明の点のうち骨 i (骨 A) の点の範囲
+    public final int[] boneStart;
+    public final int[] boneCount;
 
     public static final class Part {
         public final int n;
@@ -38,7 +42,7 @@ public final class SplatCloud {
         public final byte[] ny;
         public final byte[] nz;
 
-        Part(int n) {
+        public Part(int n) {
             this.n = n;
             x = new float[n];
             y = new float[n];
@@ -53,15 +57,47 @@ public final class SplatCloud {
             ny = new byte[n];
             nz = new byte[n];
         }
+
+        void copy(int from, Part to, int k) {
+            to.x[k] = x[from];
+            to.y[k] = y[from];
+            to.z[k] = z[from];
+            to.size[k] = size[from];
+            to.argb[k] = argb[from];
+            to.boneA[k] = boneA[from];
+            to.boneB[k] = boneB[from];
+            to.weightA[k] = weightA[from];
+            to.flags[k] = flags[from];
+            to.nx[k] = nx[from];
+            to.ny[k] = ny[from];
+            to.nz[k] = nz[from];
+        }
     }
 
-    private SplatCloud(String name, String[] bones, Part solid, Part additive) {
+    // solid は骨 A の順に並べ直す (同じ骨の中の順は保つ)
+    public SplatCloud(String name, String[] bones, Part solid, Part additive) {
         this.name = name;
         this.bones = bones;
         for (int i = 0; i < bones.length; i++) {
             boneIndex.put(bones[i], i);
         }
-        this.solid = solid;
+        int nb = bones.length;
+        boneStart = new int[nb];
+        boneCount = new int[nb];
+        for (int i = 0; i < solid.n; i++) {
+            boneCount[solid.boneA[i] & 255]++;
+        }
+        int acc = 0;
+        for (int b = 0; b < nb; b++) {
+            boneStart[b] = acc;
+            acc += boneCount[b];
+        }
+        Part sorted = new Part(solid.n);
+        int[] fill = boneStart.clone();
+        for (int i = 0; i < solid.n; i++) {
+            solid.copy(i, sorted, fill[solid.boneA[i] & 255]++);
+        }
+        this.solid = sorted;
         this.additive = additive;
         this.total = solid.n + additive.n;
     }
@@ -86,28 +122,25 @@ public final class SplatCloud {
             bones[i] = d.readUTF();
         }
         int n = d.readInt();
-        float[] x = new float[n], y = new float[n], z = new float[n], s = new float[n];
-        int[] c = new int[n];
-        byte[] a = new byte[n], b = new byte[n], w = new byte[n], f = new byte[n];
-        byte[] qx = new byte[n], qy = new byte[n], qz = new byte[n];
+        Part all = new Part(n);
         int add = 0;
         for (int i = 0; i < n; i++) {
-            x[i] = -d.readFloat() / 16f;
-            y[i] = d.readFloat() / 16f;
-            z[i] = d.readFloat() / 16f;
-            s[i] = d.readFloat() / 16f;
-            c[i] = d.readInt();
-            a[i] = d.readByte();
-            b[i] = d.readByte();
-            w[i] = d.readByte();
-            f[i] = d.readByte();
+            all.x[i] = -d.readFloat() / 16f;
+            all.y[i] = d.readFloat() / 16f;
+            all.z[i] = d.readFloat() / 16f;
+            all.size[i] = d.readFloat() / 16f;
+            all.argb[i] = d.readInt();
+            all.boneA[i] = d.readByte();
+            all.boneB[i] = d.readByte();
+            all.weightA[i] = (d.readByte() & 255) / 255f;
+            all.flags[i] = d.readByte();
             if (normals) {
                 // 描画の空間は x を反転している
-                qx[i] = (byte) -d.readByte();
-                qy[i] = d.readByte();
-                qz[i] = d.readByte();
+                all.nx[i] = (byte) -d.readByte();
+                all.ny[i] = d.readByte();
+                all.nz[i] = d.readByte();
             }
-            if ((f[i] & (F_HALO | F_EMBER)) != 0) {
+            if ((all.flags[i] & (F_HALO | F_EMBER)) != 0) {
                 add++;
             }
         }
@@ -116,21 +149,11 @@ public final class SplatCloud {
         int si = 0;
         int ai = 0;
         for (int i = 0; i < n; i++) {
-            boolean isAdd = (f[i] & (F_HALO | F_EMBER)) != 0;
-            Part p = isAdd ? additive : solid;
-            int k = isAdd ? ai++ : si++;
-            p.x[k] = x[i];
-            p.y[k] = y[i];
-            p.z[k] = z[i];
-            p.size[k] = s[i];
-            p.argb[k] = c[i];
-            p.boneA[k] = a[i];
-            p.boneB[k] = b[i];
-            p.weightA[k] = (w[i] & 255) / 255f;
-            p.flags[k] = f[i];
-            p.nx[k] = qx[i];
-            p.ny[k] = qy[i];
-            p.nz[k] = qz[i];
+            if ((all.flags[i] & (F_HALO | F_EMBER)) != 0) {
+                all.copy(i, additive, ai++);
+            } else {
+                all.copy(i, solid, si++);
+            }
         }
         return new SplatCloud(name, bones, solid, additive);
     }

@@ -13,7 +13,6 @@ cmd time set 6000
 cmd weather clear
 cmd gamemode spectator
 cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
-lowpoly on
 fov 90
 hud on
 chat clear

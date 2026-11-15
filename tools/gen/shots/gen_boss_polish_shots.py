@@ -17,7 +17,7 @@ def script(boss, poses, dist=19.0):
     L = [f"# ダンジョンの主の作り込みの確かめ: {boss} (tools/gen/shots/gen_boss_polish_shots.py が書く)",
          "world shots flat", "size 1280 720", "timeout 900", "render 8", "clouds off", "wait 40", "cmd skyabyss playtest skip opening", "wait 60",
          "cmd skyabyss cinematic stop", "cmd time set 6000", "cmd weather clear", "cmd gamemode spectator",
-         "cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy", "lowpoly on", "fov 60", "hud on", "chat clear",
+         "cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy", "fov 60", "hud on", "chat clear",
          "cmd tp @s 0 -60 40 180 0", "waitchunks", "wait 60",
          f"cmd kill @e[type=skyabyss:{boss}]",
          "cmd gamemode creative", f"cmd tp @s -7 -60 {dist:.1f} -160 -10", "wait 10",

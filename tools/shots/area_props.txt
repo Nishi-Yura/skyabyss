@@ -13,7 +13,6 @@ cmd time set 6000
 cmd weather clear
 cmd gamerule doMobSpawning false
 cmd fill -24 -61 -24 24 -61 24 minecraft:smooth_basalt
-lowpoly on
 fov 70
 cmd gamemode spectator
 hud off

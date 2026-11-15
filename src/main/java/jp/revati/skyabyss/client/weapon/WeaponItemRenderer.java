@@ -37,14 +37,13 @@ import net.neoforged.neoforge.client.event.RenderLivingEvent;
 // 品の item モデル (models/item/<id>.json) は base が builtin/entity (display は持ち方の表のまま)、gui は 32x32 の絵 (perspectives)。
 // base のときだけここが呼ばれる (IClientItemExtensions#getCustomRenderer)。メッシュは階級 (common / rare / legend) で選び、
 // アトラスと光る画像は強化 (+0〜4 / +5〜9 / +10) で選ぶ。光る画素は entityTranslucentEmissive でもう一度描く。
-// `LowPoly.weaponMeshes = false` なら元のボクセルのモデル (models/item_voxel/<名>.json) を同じ置き方で描く。
+// メッシュの無い品だけ、元のボクセルのモデル (models/item_voxel/<名>.json) を同じ置き方で描く。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static final String[] VOXEL_MODELS = {"whalebone_greatsword", "captain_pike", "waterway_fang", "tide_shell_trident", "coral_harpoon",
             "tidecaller_claw", "coral_shield", "thunder_wing_bow", "thunder_wing_bow_pulling_0", "thunder_wing_bow_pulling_1", "thunder_wing_bow_pulling_2",
             "warden_glaive", "raiju_claw", "ember_war_axe", "smith_hammer", "thrall_poker"};
     private static final int WHITE = 0xFFFFFFFF;
-    private static final int FULL_BRIGHT = 0xF000F0;
 
     private static WeaponItemRenderer instance;
     // 三人称で今描いている生き物 (弓の引き絵を決めるため)。RenderLivingEvent の Pre/Post の間だけ入る。一人称は自分
@@ -70,13 +69,11 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         ItemStack shown = lookItem == null ? stack : new ItemStack(lookItem);
         String id = BuiltInRegistries.ITEM.getKey(shown.getItem()).getPath();
         int stage = pullStage(stack, context);
-        if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
-            String tier = tierName(shown, id);
-            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tier + (stage >= 0 ? "_pull" + stage : ""));
-            if (mesh != null) {
-                renderMesh(mesh, id, tier, level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
-                return;
-            }
+        String tier = tierName(shown, id);
+        LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tier + (stage >= 0 ? "_pull" + stage : ""));
+        if (mesh != null) {
+            renderMesh(mesh, id, tier, level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
+            return;
         }
         renderVoxel(id, stage, shown, pose, buffers, light, overlay);
     }
@@ -138,22 +135,10 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
             pose.scale(grow, grow, grow);
         }
         // 輝き (foil: エンチャント・品の foil): 本体のメッシュを glint の描画型へもう一度流す (バニラの item と同じ getFoilBuffer。UV はアトラスのまま)
-        VertexConsumer body = foil ? ItemRenderer.getFoilBuffer(buffers, RenderType.entityCutoutNoCull(tex[0]), true, true) : buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0]));
-        LowPoly.drawAll(pose, body, mesh, light, overlay, WHITE);
-        if (tex[1] != null) {
-            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
-            if (mythic) {
-                // 神器: 光る画素をもう一度、脈打つ濃さで重ねる
-                int a = (int) (40 + 150 * mythicPulse());
-                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
-            }
-        }
-        // 動きの間だけ: 光る画素をもう一度重ねて強め (GLOW)、刃の軌跡の帯を引く (TRAIL)
+        // 点の模型 (client/splat)。強化の段の絵で塗る。光る画素は光る点になる
+        jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, tex[0], null, pose.last().pose(), buffers, light, overlay, WHITE);
+        // 動きの間だけ: 刃の軌跡の帯を引く (TRAIL)
         float[] fx = effects(context);
-        if (fx[1] > 0.02f && tex[1] != null) {
-            int a = Math.min(255, (int) (fx[1] * 255f));
-            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
-        }
         WeaponTrail.draw(pose, buffers, mesh, id, context.firstPerson() ? -1 : holder == null ? -2 : holder.getId(), !context.firstPerson(), fx[0]);
         pose.popPose();
     }

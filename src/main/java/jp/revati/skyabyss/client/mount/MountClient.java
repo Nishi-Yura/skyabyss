@@ -14,7 +14,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import java.util.EnumMap;
 import java.util.Map;
 
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.mount.MountLook;
 import software.bernie.geckolib.animation.AnimationState;
@@ -92,16 +91,14 @@ public final class MountClient {
         }
     }
 
-    // 低ポリのときは骨だけの geo と低ポリのアトラス、切ったときは骨ごとの箱の geo。アニメは見た目ごと (骨が違う)
+    // 骨だけの geo と低ポリのアトラス (点の模型の元)。アニメは見た目ごと (骨が違う)
     static final class MountModel extends GeoModel<MountEntity> {
-        private static final ResourceLocation DEBUG_TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");
         private static final Map<MountLook, ResourceLocation[]> RES = new EnumMap<>(MountLook.class);
 
         private static ResourceLocation[] res(MountLook look) {
             return RES.computeIfAbsent(look, l -> new ResourceLocation[] {
-                    rl("geo/entity/" + l.model() + ".geo.json"), rl("geo/entity/" + l.model() + "_lowpoly.geo.json"),
-                    rl("geo/entity/" + l.model() + "_lowpoly_debug.geo.json"), rl("textures/entity/" + l.model() + ".png"),
-                    rl("textures/lowpoly/" + l.model() + ".png"), rl("animations/entity/" + l.model() + ".animation.json")});
+                    rl("geo/entity/" + l.model() + "_lowpoly.geo.json"), rl("textures/lowpoly/" + l.model() + ".png"),
+                    rl("animations/entity/" + l.model() + ".animation.json")});
         }
 
         private static ResourceLocation rl(String path) {
@@ -110,19 +107,17 @@ public final class MountClient {
 
         @Override
         public ResourceLocation getModelResource(MountEntity e) {
-            ResourceLocation[] r = res(e.look());
-            return LowPoly.enabled ? (LowPoly.debug ? r[2] : r[1]) : LowPoly.cubeOr(r[0], r[1]);
+            return res(e.look())[0];
         }
 
         @Override
         public ResourceLocation getTextureResource(MountEntity e) {
-            ResourceLocation[] r = res(e.look());
-            return LowPoly.enabled ? (LowPoly.debug ? DEBUG_TEXTURE : r[4]) : LowPoly.cubeOr(r[3], r[4]);
+            return res(e.look())[1];
         }
 
         @Override
         public ResourceLocation getAnimationResource(MountEntity e) {
-            return res(e.look())[5];
+            return res(e.look())[2];
         }
 
         // 脚の運び (歩き・駆け) は時間でなく歩いた距離で進める: 速さが変わっても足が滑らない

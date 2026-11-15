@@ -1,10 +1,8 @@
 package jp.revati.skyabyss.titan.tide.client;
 
-import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.tide.TideShellEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -20,7 +18,7 @@ public class TideShellRenderer extends LowPolyGeoRenderer<TideShellEntity> {
         this(context, new LodModel());
     }
 
-    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
+    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。発光層は LowPolyGeoRenderer が持つ
     private TideShellRenderer(EntityRendererProvider.Context context, LodModel model) {
         super(context, model, model::meshName, SCALE);
         this.shadowRadius = 0f;

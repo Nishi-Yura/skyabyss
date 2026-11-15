@@ -14,7 +14,6 @@ cmd weather clear
 cmd gamemode spectator
 cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
 hud off
-lowpoly on
 fov 60
 cmd kill @e[type=!minecraft:player,distance=..80]
 camera minecraft:overworld 0 -55 22 180 14
