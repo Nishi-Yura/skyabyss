@@ -1,0 +1,118 @@
+<title>攻撃の粒の絵</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 選定の帳面: 部分ごとに見比べの絵と A/B/C。選んだ案は水色、推奨に印。ゲームの夜に合わせた暗い地 */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b; --rec:#b07a10;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --rec:#e8c06a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --rec:#e8c06a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 80px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,3.4vw,32px);margin:0 0 6px;letter-spacing:.04em}
+h2{font-family:var(--display);font-weight:400;font-size:21px;margin:0}
+.intro{color:var(--muted);max-width:74ch;margin:0 0 6px}
+.save{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+section{display:grid;gap:10px;padding:18px 0;border-top:1px solid var(--line)}
+.desc{margin:0;max-width:80ch}
+.sheet{overflow-x:auto;border:1px solid var(--line);background:#0e0e14}
+.sheet img{display:block;width:100%;height:auto;min-width:620px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;border:0;margin:0;padding:0}
+.opt{position:relative;display:flex;gap:6px;align-items:flex-start;padding:6px 10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:13px;max-width:100%}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .tag{font-weight:700;flex:none}
+.opt .rec{color:var(--rec);font-size:11px;flex:none;padding-top:1px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opt:has(input:checked) .rec{color:var(--accent-ink)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:6px 8px;resize:vertical}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+button.b{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.b:hover,button.b:focus-visible{border-color:var(--accent);outline:none}
+.caveat{font-size:13px;color:var(--muted);margin:0}
+</style>
+
+<div class="wrap">
+  <h1>攻撃の粒の絵 3 案</h1>
+  <p class="intro">攻撃の見せ方の決まり (段ごとに係は一つ・粒は mod の粒だけ・数の上限) で、岩鯨の心臓を作り直しました。粒の絵を 3 案作ったので、一つ選んでください。選ぶと自動で保存されます。</p>
+  <p class="save" id="save">読み込み中…</p>
+  <div class="tools"><button class="b" id="fillrec" type="button">未回答をすべて「推奨」にする</button></div>
+  <main id="main"></main>
+</div>
+
+<script>
+(() => {
+  const PARTS = [
+    {id:'sprite', title:'攻撃の粒の絵', imgs:[['closeup.jpg','ゲームの中で目の前に出したところ。行 = 属性 (石・水・雷・熾・深淵・月・紙)、左 = 破片・中 = 光の粒・右 = 煙'],['sprites.png','絵そのもの (8 倍)。上から 案 A・B・C、それぞれ 7 属性 x (破片 4 枚・光の粒 4 枚・煙 4 枚)'],['pilot_a.jpg','岩鯨の心臓の技に入れたところ (案 A。溜め・当たり・あと)。粒は決まりどおり少なく、主役は床の印・光・模型']],
+     desc:'攻撃と技の粒を、バニラの粒から mod の粒 (7 属性 x 破片・光の粒・煙) に置き換えます (設計書 59)。ドット 8x8、属性ごとに地色と光の色の 2 色。どの形にするかを選んでください。決まった絵で、ほかの心臓・主・敵・技へ広げます。',
+     opts:[['A','欠けた石の素朴なドット。破片は不ぞろいな塊、光は十字のきらめき、煙は丸い煙'],['B','鋭い幾何。破片は三角や菱形、光は菱形、煙は菱形の輪郭'],['C','丸く柔らか。破片は小石、光はにじむ丸、煙はふんわりした塊']], rec:0},
+  ];
+  const main = document.getElementById('main');
+  const saveEl = document.getElementById('save');
+  const answers = {};
+  const timers = {};
+  let db = null;
+  function el(t, c, s){const e=document.createElement(t); if(c) e.className=c; if(s!=null) e.textContent=s; return e;}
+  PARTS.forEach(p => {
+    const sec = el('section'); sec.id = p.id;
+    sec.appendChild(el('h2', null, p.title));
+    sec.appendChild(el('p', 'desc', p.desc));
+    if (p.caveat) sec.appendChild(el('p', 'caveat', p.caveat));
+    p.imgs.forEach(([src, cap]) => {
+      sec.appendChild(el('p', 'caveat', cap));
+      const box = el('div', 'sheet'); const img = el('img'); img.src = src; img.alt = cap; img.loading = 'lazy'; box.appendChild(img); sec.appendChild(box);
+    });
+    const fs = el('fieldset', 'opts');
+    p.opts.forEach(([k, txt], i) => {
+      const lab = el('label', 'opt'); const inp = el('input'); inp.type='radio'; inp.name=p.id; inp.value=k; inp.id=p.id+'-'+k; lab.htmlFor=inp.id;
+      lab.appendChild(inp); lab.appendChild(el('span','tag','案 '+k)); lab.appendChild(el('span',null,txt));
+      if (i === p.rec) lab.appendChild(el('span','rec','推奨'));
+      inp.addEventListener('change', () => { answers[p.id] = Object.assign(answers[p.id]||{}, {option:k}); save(p.id); });
+      fs.appendChild(lab);
+    });
+    sec.appendChild(fs);
+    const note = el('textarea','note'); note.rows=1; note.id=p.id+'-note'; note.placeholder='メモ（任意）'; note.setAttribute('aria-label', p.title+' のメモ');
+    note.addEventListener('input', () => { answers[p.id]=Object.assign(answers[p.id]||{}, {note:note.value}); clearTimeout(timers[p.id]); timers[p.id]=setTimeout(()=>save(p.id),800); });
+    sec.appendChild(note);
+    main.appendChild(sec);
+  });
+  async function save(id){
+    if (!db) { saveEl.textContent='この表示では保存できません（サインインして開いてください）'; return; }
+    const a = answers[id]||{}; saveEl.textContent='保存中…';
+    try { await db.doc('answers/'+id).set({option:a.option||'', note:a.note||'', at:Date.now()}); saveEl.textContent='保存しました'; }
+    catch(e){ saveEl.textContent='保存できませんでした。もう一度選び直してください'; }
+  }
+  document.getElementById('fillrec').addEventListener('click', async () => {
+    let n = 0;
+    for (const p of PARTS) {
+      if (!(answers[p.id] && answers[p.id].option)) {
+        const k = p.opts[p.rec][0]; answers[p.id]=Object.assign(answers[p.id]||{}, {option:k});
+        const r = document.getElementById(p.id+'-'+k); if (r) r.checked = true; await save(p.id); n++;
+      }
+    }
+    saveEl.textContent = n ? n+' 件を「推奨」で保存しました' : '未回答はありません';
+  });
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent='この表示では保存できません（サインインして開いてください）'; return; }
+    try {
+      const snap = await db.collection('answers').get(); const docs = snap.docs || snap;
+      for (const d of docs) { const data = typeof d.data==='function' ? d.data() : d.data; if(!data) continue;
+        answers[d.id]={option:data.option||'', note:data.note||''};
+        if (data.option){ const r=document.getElementById(d.id+'-'+data.option); if(r) r.checked=true; }
+        const n=document.getElementById(d.id+'-note'); if(n && data.note) n.value=data.note; }
+      saveEl.textContent='選ぶと自動で保存されます';
+    } catch(e){ saveEl.textContent='前回の回答を読み込めませんでした'; }
+  })();
+})();
+</script>
