@@ -104,6 +104,8 @@ public final class DomainClient {
                 r.remaining = 0;
                 r.theme = theme(p.id());
                 run = r;
+                // 宣言のあいだ、部屋の上に裂け目が開き、終わりに広がって溶ける (client/fx/RiftFx)
+                jp.revati.skyabyss.client.fx.RiftFx.domain(p.id(), p.cx(), p.cz(), p.floor(), p.radius(), p.a());
             }
             case DomainPayload.PROGRESS -> {
                 if (run != null && run.ended == 0) {

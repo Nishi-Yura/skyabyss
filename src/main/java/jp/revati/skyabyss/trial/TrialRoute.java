@@ -85,7 +85,11 @@ public final class TrialRoute {
     // 順路を越えた (心臓を止めた) ときのクエストの合図 (自由なモードの依頼「順路を越える」)
     public static final String QUEST_SIGNAL = "route_cleared";
 
-    private record Pending(UUID group, String titan, int step, boolean mid, long due) {
+    // riftAt: 裂け目を送った時刻 (0 = まだ)。本物の人がいれば、裂け目が画面を覆ってから運ぶ (fx/RiftPayload)
+    private record Pending(UUID group, String titan, int step, boolean mid, long due, long riftAt) {
+        Pending(UUID group, String titan, int step, boolean mid, long due) {
+            this(group, titan, step, mid, due, 0L);
+        }
     }
 
     private record Abandon(UUID group, String titan, UUID by, Set<UUID> yes, long until) {
@@ -744,6 +748,17 @@ public final class TrialRoute {
                 }
                 continue;
             }
+            // 裂け目が目の前に開き、画面を覆いきってから運ぶ (2026-11-15 の光の表現。試験の偽の人だけなら待たない)
+            if (jp.revati.skyabyss.fx.RiftPayload.anyReal(who)) {
+                if (p.riftAt() == 0L) {
+                    jp.revati.skyabyss.fx.RiftPayload.send(who, jp.revati.skyabyss.fx.RiftPayload.themeOf(p.titan()));
+                    PENDING.put(p.group(), new Pending(p.group(), p.titan(), p.step(), p.mid(), p.due(), now));
+                    continue;
+                }
+                if (now < p.riftAt() + jp.revati.skyabyss.fx.RiftPayload.LEAD) {
+                    continue;
+                }
+            }
             PENDING.remove(p.group());
             carry(back, p.group(), p.titan(), p.step(), p.mid());
         }
@@ -1125,7 +1140,7 @@ public final class TrialRoute {
     // 待ちの時刻を今にする (自己テスト)
     public static void flushPending() {
         for (Pending p : new ArrayList<>(PENDING.values())) {
-            PENDING.put(p.group(), new Pending(p.group(), p.titan(), p.step(), p.mid(), 0));
+            PENDING.put(p.group(), new Pending(p.group(), p.titan(), p.step(), p.mid(), 0, p.riftAt()));
         }
         // 加護を選ぶ待ちも切る (偽の人は選ばないので。運びのあと、サーバーの見回りが一つ目に決める)
         RouteBoons.expireForTest();

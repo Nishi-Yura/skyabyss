@@ -49,6 +49,8 @@ public final class ModNetwork {
                                 (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveInspect(payload),
                                 (payload, context) -> jp.revati.skyabyss.weapon.InspectPayload.relay(context.player())))
                 .playToClient(jp.revati.skyabyss.titan.domain.DomainPayload.TYPE, jp.revati.skyabyss.titan.domain.DomainPayload.STREAM_CODEC,
-                        (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload));
+                        (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.fx.RiftPayload.TYPE, jp.revati.skyabyss.fx.RiftPayload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.fx.RiftFx.receive(payload));
     }
 }

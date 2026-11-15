@@ -155,12 +155,12 @@ public final class AttackFx {
 
     // ---------------------------------------------------------------- 形の点
 
-    private static double ground(TelegraphClient.Decal d, double x, double z) {
+    static double ground(TelegraphClient.Decal d, double x, double z) {
         double y = d.ground(x, z);
         return Double.isNaN(y) ? d.floor : y;
     }
 
-    private static double[] center(TelegraphShape s) {
+    static double[] center(TelegraphShape s) {
         double[] b = s.bounds();
         if (s.kind() == TelegraphShape.KIND_CIRCLE || s.kind() == TelegraphShape.KIND_RING || s.kind() == TelegraphShape.KIND_WAVE) {
             return new double[] {s.centerX(), s.centerZ()};
@@ -168,7 +168,7 @@ public final class AttackFx {
         return new double[] {(b[0] + b[2]) / 2, (b[1] + b[3]) / 2};
     }
 
-    private static double halfSize(TelegraphShape s) {
+    static double halfSize(TelegraphShape s) {
         double[] b = s.bounds();
         return Math.max(0.8, Math.max(b[2] - b[0], b[3] - b[1]) / 2);
     }
@@ -186,7 +186,7 @@ public final class AttackFx {
         return null;
     }
 
-    private static List<double[]> outline(TelegraphShape s, int max) {
+    static List<double[]> outline(TelegraphShape s, int max) {
         List<double[]> pts = new ArrayList<>();
         double spacing = Math.max(0.5, halfSize(s) * 2 * Math.PI / Math.max(8, max * 2));
         s.outline((x, z) -> pts.add(new double[] {x, z}), spacing);
@@ -212,7 +212,7 @@ public final class AttackFx {
     }
 
     // 技の元 (主の体の中ほど)。主が見えなければ形の中心の少し上
-    private static double[] source(ClientLevel level, TelegraphClient.Decal d) {
+    static double[] source(ClientLevel level, TelegraphClient.Decal d) {
         Entity e = d.owner >= 0 ? level.getEntity(d.owner) : null;
         if (e != null) {
             return new double[] {e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ()};
@@ -222,7 +222,7 @@ public final class AttackFx {
     }
 
     // 帯・扇の「先」 (運びの終わり)
-    private static double[][] axis(ClientLevel level, TelegraphClient.Decal d) {
+    static double[][] axis(ClientLevel level, TelegraphClient.Decal d) {
         double[] p = d.shape.params();
         int k = d.shape.kind();
         if (k == TelegraphShape.KIND_LINE || k == TelegraphShape.KIND_CONE) {

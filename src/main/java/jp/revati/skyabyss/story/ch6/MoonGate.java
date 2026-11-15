@@ -93,6 +93,12 @@ public final class MoonGate {
                 }
             });
         }
+        // 光の柱の終わりに、空が縦に裂けて月の夜がのぞき、覆ったところで渡る (2026-11-15 の光の表現。fx/RiftPayload)
+        Tasks.later(Math.max(0, BEAM_TICKS - jp.revati.skyabyss.fx.RiftPayload.LEAD), () -> {
+            if (p.isAlive() && !p.hasDisconnected()) {
+                jp.revati.skyabyss.fx.RiftPayload.send(p, jp.revati.skyabyss.fx.RiftPayload.MOON);
+            }
+        });
         Tasks.later(BEAM_TICKS, () -> {
             if (p.isAlive() && !p.hasDisconnected() && MoonWorld.enter(p)) {
                 Quests.signal(p, SIGNAL);

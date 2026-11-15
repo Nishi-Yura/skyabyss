@@ -39,6 +39,24 @@ public final class BreakGaugeClient {
     private BreakGaugeClient() {
     }
 
+    // 崩れの残り (0 = 崩れていない、1 = 崩れた直後)。核の光が強まる (client/fx/CoreGlowFx)
+    public static float broken(int entityId) {
+        Shown s = SHOWN.get(entityId);
+        if (s == null || System.currentTimeMillis() - s.at() > STALE_MS) {
+            return 0f;
+        }
+        return Mth.clamp(s.broken(), 0f, 1f);
+    }
+
+    // 満ちる具合 (0..1)
+    public static float fill(int entityId) {
+        Shown s = SHOWN.get(entityId);
+        if (s == null || System.currentTimeMillis() - s.at() > STALE_MS) {
+            return 0f;
+        }
+        return Mth.clamp(s.fill(), 0f, 1f);
+    }
+
     public static void receive(BreakGauge.Payload p) {
         long now = System.currentTimeMillis();
         if (p.fill() < 0) {

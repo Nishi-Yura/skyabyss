@@ -360,6 +360,22 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.titan.MarkerArt.shotCommand(line.rest());
                 return true;
             }
+            case "lightfx" -> {
+                // lightfx <rift|beam|ring|glow|orbit|all> <a|b|c> : 光の表現の案を切り替える (選定用。client/fx/LightStyles)
+                jp.revati.skyabyss.client.fx.LightStyles.set(line.arg(0), line.arg(1));
+                return true;
+            }
+            case "rift" -> {
+                // rift pass <theme> / rift world <theme> x y z [高さ] [宣言 tick] / rift clear / rift freeze <tick|off> (client/fx/RiftFx)
+                jp.revati.skyabyss.client.fx.RiftFx.shotCommand(line.rest());
+                return true;
+            }
+            case "lightring" -> {
+                // lightring x y z <半径> <色 16 進> : 当たりの光の輪を一つ (client/combat/AttackLightFx)
+                jp.revati.skyabyss.client.combat.AttackLightFx.testRing(Double.parseDouble(line.arg(0)), Double.parseDouble(line.arg(1)),
+                        Double.parseDouble(line.arg(2)), Double.parseDouble(line.arg(3)), Integer.parseInt(line.arg(4), 16));
+                return true;
+            }
             case "stareffect" -> {
                 // stareffect <current|a|b|c>: 星が欠ける見せ方を、設定を書き換えずに切り替える (選定用)
                 jp.revati.skyabyss.client.opening.StarEffect.override =

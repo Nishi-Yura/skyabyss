@@ -202,11 +202,30 @@ public final class AbyssGate {
 
     // くぐった人を深淵へ (move が偽なら合図だけ。自己テスト用)
     static void passThrough(ServerPlayer p, boolean move) {
+        if (move && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            // 門の闇が縦に裂け、向こうに深淵がのぞき、広がって覆ってから渡る (2026-11-15 の光の表現。fx/RiftPayload)
+            UUID id = p.getUUID();
+            if (!PASSING.add(id)) {
+                return;
+            }
+            Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_ENTER);
+            jp.revati.skyabyss.fx.RiftPayload.send(p, jp.revati.skyabyss.fx.RiftPayload.ABYSS);
+            later(p.server, jp.revati.skyabyss.fx.RiftPayload.LEAD, () -> {
+                PASSING.remove(id);
+                if (p.isAlive() && !p.hasDisconnected()) {
+                    AbyssWorld.enter(p);
+                }
+            });
+            return;
+        }
         Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_ENTER);
         if (move) {
             AbyssWorld.enter(p);
         }
     }
+
+    // 裂け目が開いて渡るのを待っている人 (門の列に立つあいだ、毎 tick 渡り直さないように)
+    private static final Set<UUID> PASSING = new HashSet<>();
 
     // 門の前の大広間の側への向き (格子の列から離れる向き)。門の印が無ければ null (story/IsanaPost の五章の立つ所)
     @Nullable

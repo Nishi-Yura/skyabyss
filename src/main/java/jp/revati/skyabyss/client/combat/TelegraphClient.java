@@ -186,6 +186,7 @@ public final class TelegraphClient {
                 boolean bespoke = d.look.impact != jp.revati.skyabyss.combat.AttackLook.Impact.NONE;
                 ImpactFx.burst(level, d, bespoke);
                 AttackFx.impact(level, d);
+                AttackLightFx.impact(level, d);
             }
             AttackFx.tick(level, d, (int) t);
             if (t > d.lifetime()) {

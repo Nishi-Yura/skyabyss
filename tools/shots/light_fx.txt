@@ -1,0 +1,493 @@
+# 光の表現の選定用の絵。生成: tools/gen/shots/gen_light_fx_shots.py
+world lightfx flat
+size 1280 720
+timeout 3000
+render 8
+clouds off
+cmd time set midnight
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd effect give Dev minecraft:saturation 1000000 1 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -3 -45 15 3 -45 20 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+camera minecraft:overworld 0.5 -60 14.5 180 -6
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+hud off
+wait 20
+camera minecraft:overworld 0.5 -60 14.5 180 -6
+hud off
+wait 10
+chat clear
+# ---- 1. 場の裂け目
+lightfx rift a
+rift freeze 60
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_stone_whale_a
+rift freeze 60
+rift world tide_shell 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_tide_shell_a
+rift freeze 60
+rift world thunder_wing 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_thunder_wing_a
+rift freeze 60
+rift world ember 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_ember_a
+rift freeze 60
+rift world abyss 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_abyss_a
+rift freeze 60
+rift world moon 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_moon_a
+rift freeze 14
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_open_a
+rift freeze 74
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_burst_a
+lightfx rift b
+rift freeze 60
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_stone_whale_b
+rift freeze 60
+rift world tide_shell 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_tide_shell_b
+rift freeze 60
+rift world thunder_wing 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_thunder_wing_b
+rift freeze 60
+rift world ember 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_ember_b
+rift freeze 60
+rift world abyss 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_abyss_b
+rift freeze 60
+rift world moon 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_moon_b
+rift freeze 14
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_open_b
+rift freeze 74
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_burst_b
+lightfx rift c
+rift freeze 60
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_stone_whale_c
+rift freeze 60
+rift world tide_shell 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_tide_shell_c
+rift freeze 60
+rift world thunder_wing 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_thunder_wing_c
+rift freeze 60
+rift world ember 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_ember_c
+rift freeze 60
+rift world abyss 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_abyss_c
+rift freeze 60
+rift world moon 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_moon_c
+rift freeze 14
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_open_c
+rift freeze 74
+rift world stone_whale 0.5 -53.5 0.5 10 80
+wait 3
+shot rift_burst_c
+rift clear
+# ---- 2. 渡る裂け目
+lightfx rift a
+rift freeze 12
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_a_12
+rift freeze 19
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_a_19
+rift freeze 24
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_a_24
+rift freeze 32
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_a_32
+rift freeze 47
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_a_47
+rift freeze 19
+rift pass tide_shell
+wait 3
+shot pass_tide_shell_a_19
+rift freeze 32
+rift pass tide_shell
+wait 3
+shot pass_tide_shell_a_32
+rift freeze 19
+rift pass thunder_wing
+wait 3
+shot pass_thunder_wing_a_19
+rift freeze 32
+rift pass thunder_wing
+wait 3
+shot pass_thunder_wing_a_32
+rift freeze 19
+rift pass ember
+wait 3
+shot pass_ember_a_19
+rift freeze 32
+rift pass ember
+wait 3
+shot pass_ember_a_32
+rift freeze 19
+rift pass abyss
+wait 3
+shot pass_abyss_a_19
+rift freeze 32
+rift pass abyss
+wait 3
+shot pass_abyss_a_32
+rift freeze 19
+rift pass moon
+wait 3
+shot pass_moon_a_19
+rift freeze 32
+rift pass moon
+wait 3
+shot pass_moon_a_32
+lightfx rift b
+rift freeze 12
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_b_12
+rift freeze 19
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_b_19
+rift freeze 24
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_b_24
+rift freeze 32
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_b_32
+rift freeze 47
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_b_47
+lightfx rift c
+rift freeze 12
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_c_12
+rift freeze 19
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_c_19
+rift freeze 24
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_c_24
+rift freeze 32
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_c_32
+rift freeze 47
+rift pass stone_whale
+wait 3
+shot pass_stone_whale_c_47
+rift freeze off
+rift clear
+# ---- 3. 当たりの輪
+lightfx ring a
+lightring 0.5 -59.88 0.5 8 bfe6cc
+wait 2
+shot ring_a_early
+wait 30
+lightring 0.5 -59.88 0.5 8 bfe6cc
+wait 5
+shot ring_a_mid
+wait 30
+lightfx ring b
+lightring 0.5 -59.88 0.5 8 bfe6cc
+wait 2
+shot ring_b_early
+wait 30
+lightring 0.5 -59.88 0.5 8 bfe6cc
+wait 5
+shot ring_b_mid
+wait 30
+lightfx ring c
+lightring 0.5 -59.88 0.5 8 bfe6cc
+wait 2
+shot ring_c_early
+wait 30
+lightring 0.5 -59.88 0.5 8 bfe6cc
+wait 5
+shot ring_c_mid
+wait 30
+# ---- 4. 心臓
+camera minecraft:overworld 0.5 -44 17.5 180 36
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+hud off
+camera minecraft:overworld 0.5 -44 17.5 180 36
+wait 110
+lightfx all a
+wait 2
+shot core_whale_a
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 12
+shot whale_thrust_gather_a
+wait 11
+shot whale_thrust_fire_a
+wait 4
+shot whale_thrust_after_a
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BEAM
+wait 20
+shot whale_beam_gather_a
+wait 32
+shot whale_beam_fire_a
+wait 4
+shot whale_beam_after_a
+wait 70
+lightfx all b
+wait 2
+shot core_whale_b
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 12
+shot whale_thrust_gather_b
+wait 11
+shot whale_thrust_fire_b
+wait 4
+shot whale_thrust_after_b
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BEAM
+wait 20
+shot whale_beam_gather_b
+wait 32
+shot whale_beam_fire_b
+wait 4
+shot whale_beam_after_b
+wait 70
+lightfx all c
+wait 2
+shot core_whale_c
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 12
+shot whale_thrust_gather_c
+wait 11
+shot whale_thrust_fire_c
+wait 4
+shot whale_thrust_after_c
+wait 70
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BEAM
+wait 20
+shot whale_beam_gather_c
+wait 32
+shot whale_beam_fire_c
+wait 4
+shot whale_beam_after_c
+wait 70
+cmd kill @e[type=skyabyss:stone_whale_heart]
+wait 120
+cmd skyabyss cinematic stop
+hud off
+chat clear
+cmd summon skyabyss:ember_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+hud off
+camera minecraft:overworld 0.5 -44 17.5 180 36
+wait 110
+lightfx all a
+wait 2
+shot core_ember_a
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] BREATH
+wait 12
+shot ember_breath_gather_a
+wait 11
+shot ember_breath_fire_a
+wait 4
+shot ember_breath_after_a
+wait 70
+lightfx all b
+wait 2
+shot core_ember_b
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] BREATH
+wait 12
+shot ember_breath_gather_b
+wait 11
+shot ember_breath_fire_b
+wait 4
+shot ember_breath_after_b
+wait 70
+lightfx all c
+wait 2
+shot core_ember_c
+cmd skyabyss dev force @e[type=skyabyss:ember_heart,limit=1] BREATH
+wait 12
+shot ember_breath_gather_c
+wait 11
+shot ember_breath_fire_c
+wait 4
+shot ember_breath_after_c
+wait 70
+cmd kill @e[type=skyabyss:ember_heart]
+wait 120
+cmd skyabyss cinematic stop
+hud off
+chat clear
+# ---- 5. 領域の始まり
+lightfx all a
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+hud off
+camera minecraft:overworld 0.5 -60 22.5 180 -14
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN
+wait 20
+shot domain_open
+wait 24
+shot domain_wide
+wait 14
+shot domain_burst
+hud on
+wait 4
+shot domain_hud
+hud off
+cmd kill @e[type=skyabyss:stone_whale_heart]
+wait 120
+cmd skyabyss cinematic stop
+hud off
+# ---- 6. 軌道
+camera minecraft:overworld 0.5 -60 10.5 180 -4
+lightfx orbit a
+cmd summon skyabyss:waning_blade 0.5 -60 0.5 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 40
+cmd skyabyss cinematic stop
+hud off
+camera minecraft:overworld 0.5 -60 10.5 180 -4
+wait 12
+shot orbit_a_00
+wait 12
+shot orbit_a_01
+wait 12
+shot orbit_a_02
+wait 12
+shot orbit_a_03
+wait 12
+shot orbit_a_04
+wait 12
+shot orbit_a_05
+wait 12
+shot orbit_a_06
+wait 12
+shot orbit_a_07
+wait 12
+shot orbit_a_08
+wait 12
+shot orbit_a_09
+cmd kill @e[type=skyabyss:waning_blade]
+wait 40
+cmd skyabyss cinematic stop
+hud off
+chat clear
+lightfx orbit b
+cmd summon skyabyss:waning_blade 0.5 -60 0.5 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 40
+cmd skyabyss cinematic stop
+hud off
+camera minecraft:overworld 0.5 -60 10.5 180 -4
+wait 12
+shot orbit_b_00
+wait 12
+shot orbit_b_01
+wait 12
+shot orbit_b_02
+wait 12
+shot orbit_b_03
+wait 12
+shot orbit_b_04
+wait 12
+shot orbit_b_05
+wait 12
+shot orbit_b_06
+wait 12
+shot orbit_b_07
+wait 12
+shot orbit_b_08
+wait 12
+shot orbit_b_09
+cmd kill @e[type=skyabyss:waning_blade]
+wait 40
+cmd skyabyss cinematic stop
+hud off
+chat clear
+lightfx orbit c
+cmd summon skyabyss:waning_blade 0.5 -60 0.5 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 40
+cmd skyabyss cinematic stop
+hud off
+camera minecraft:overworld 0.5 -60 10.5 180 -4
+wait 12
+shot orbit_c_00
+wait 12
+shot orbit_c_01
+wait 12
+shot orbit_c_02
+wait 12
+shot orbit_c_03
+wait 12
+shot orbit_c_04
+wait 12
+shot orbit_c_05
+wait 12
+shot orbit_c_06
+wait 12
+shot orbit_c_07
+wait 12
+shot orbit_c_08
+wait 12
+shot orbit_c_09
+cmd kill @e[type=skyabyss:waning_blade]
+wait 40
+cmd skyabyss cinematic stop
+hud off
+chat clear
+quit

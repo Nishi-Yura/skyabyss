@@ -132,6 +132,10 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
 
     @Override
     public void renderCubesOfBone(PoseStack poseStack, GeoBone bone, VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
+        // 心臓の核の骨の位置を光へ知らせる (client/fx/CoreGlowFx)
+        if (animatable != null && !glowPass && jp.revati.skyabyss.client.fx.CoreGlowFx.wants(animatable)) {
+            jp.revati.skyabyss.client.fx.CoreGlowFx.track(animatable, bone.getName(), bone.getPivotX(), bone.getPivotY(), bone.getPivotZ(), poseStack.last().pose());
+        }
         LowPolyMesh mesh = LowPoly.enabled && animatable != null ? LowPolyMeshes.get(meshName.apply(animatable)) : null;
         LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
         if (meshBone == null) {
