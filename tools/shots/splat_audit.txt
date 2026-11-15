@@ -1,0 +1,62 @@
+# 見直し: 疑わしい模型を近くで
+world splataudit flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_stone destroy
+fov 60
+hud off
+chat clear
+cmd tp @s 0 -60 8 180 0
+waitchunks
+wait 20
+cmd kill @e[type=!player]
+cmd summon skyabyss:lamp_eater -5.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bone_flute -3.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bone_picker -1.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:charged_moth 1.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:scorched_bird 3.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:white_shell_keeper 5.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd gamemode spectator
+camera minecraft:overworld 0 -59.0 3.2 180 28
+wait 60
+shot small_mobs
+camera minecraft:overworld -4.5 -59.3 1.9 180 30
+wait 20
+shot lamp_eater_close
+cmd time set 18000
+wait 20
+shot small_mobs_night
+cmd time set 6000
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd tp @s 0 -60 12 180 0
+wait 10
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mimic_heart_charm
+hud on
+wait 30
+perspective front
+wait 30
+shot thunder_armor_front
+perspective first
+wait 20
+shot mimic_charm_hand
+open inventory
+wait 30
+shot inventory
+close
+quit

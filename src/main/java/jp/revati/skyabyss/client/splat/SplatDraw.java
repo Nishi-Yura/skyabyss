@@ -20,6 +20,8 @@ public final class SplatDraw {
     private static final ResourceLocation SOLID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/splat/solid.png");
     private static final ResourceLocation SOFT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/splat/soft.png");
     private static final float CULL_COS2 = SplatGpu.CULL_COS * SplatGpu.CULL_COS;
+    // GUI で一つの模型に描く点の上限
+    private static final float GUI_POINTS = 5000f;
 
     private final SplatCloud cloud;
     private final Matrix4f[] mats;
@@ -115,7 +117,8 @@ public final class SplatDraw {
         if (SplatGpu.ready() && (source == null || !gui())) {
             SplatGpu.drawRigid(cloud, bone, pose, light, overlay, tint);
         } else if (source != null) {
-            float frac = SplatGpu.fraction(pose);
+            // GUI の小さな絵 (持ち物の欄など) は点を間引く (CPU で描くので、欄が並ぶと重い)
+            float frac = gui() ? Math.min(1f, GUI_POINTS / (float) Math.max(1, cloud.solid.n)) : SplatGpu.fraction(pose);
             VertexConsumer buf = source.getBuffer(RenderType.entityCutoutNoCull(SOLID));
             if (bone >= 0) {
                 cpu(buf, cloud.solid, cloud.boneStart[bone], cloud.boneCount[bone], frac, null, null, pose, light, overlay, tint, false, 0f);

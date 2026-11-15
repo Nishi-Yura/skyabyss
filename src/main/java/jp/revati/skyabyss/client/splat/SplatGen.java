@@ -22,6 +22,9 @@ import net.minecraft.server.packs.resources.ResourceManager;
 // 間隔 h は模型の大きさの 1/140 (細かすぎる・点が多すぎるときは広げる)。tools/gen/splat/ の手彫りと同じ見た目の決まり
 public final class SplatGen {
     private static final int MAX_POINTS = 60_000;
+    private static final int MAX_POINTS_SOCKET = 14_000;
+    // 色を引く uv は三角形の中心へこの割合だけ寄せる (絵の詰め方の縁の黒い画素を拾わない)
+    private static final float UV_INSET = 0.12f;
     // 巨神は一体だけで大きく見えるので、点の上限を上げる
     private static final int MAX_POINTS_TITAN = 400_000;
     private static final float[] LEVELS = {0.58f, 0.72f, 0.86f, 1.0f};
@@ -109,10 +112,11 @@ public final class SplatGen {
         }
         float maxDim = Math.max(maxX - minX, Math.max(maxY - minY, maxZ - minZ));
         boolean titan = mesh.name.matches("(stone_whale|tide_shell|thunder_wing|ember_titan)(_mid|_far)?");
-        int cap = titan ? MAX_POINTS_TITAN : MAX_POINTS;
+        // 品・持ち物 (受け口のメッシュ) は小さく、画面に何個も並ぶので点を少なめに
+        int cap = titan ? MAX_POINTS_TITAN : mesh.socket ? MAX_POINTS_SOCKET : MAX_POINTS;
         // 巨神は上限の点の数まで細かく (大きさの割合で決めると粗すぎる)、ほかは大きさの 1/140
-        float h = titan ? (float) Math.sqrt(area / cap) : Math.max(0.45f / 16f, Math.min(0.5f, maxDim / 140f));
-        h = Math.max(0.45f / 16f, h);
+        // 小さい模型 (品・小さい敵) も手に持つと大きく映るので、間隔は大きさの 1/140 (下限 0.1/16 ブロック)
+        float h = titan ? (float) Math.sqrt(area / cap) : Math.max(0.1f / 16f, Math.min(0.5f, maxDim / 140f));
         if (area / (h * h) > cap) {
             h = (float) Math.sqrt(area / cap);
         }
@@ -148,8 +152,9 @@ public final class SplatGen {
                         for (int c = 0; c < 3; c++) {
                             v[c] = w0 * p[q * 12 + i0 * 3 + c] + r1 * p[q * 12 + i1 * 3 + c] + r2 * p[q * 12 + i2 * 3 + c];
                         }
-                        v[3] = w0 * uv[q * 8 + i0 * 2] + r1 * uv[q * 8 + i1 * 2] + r2 * uv[q * 8 + i2 * 2];
-                        v[4] = w0 * uv[q * 8 + i0 * 2 + 1] + r1 * uv[q * 8 + i1 * 2 + 1] + r2 * uv[q * 8 + i2 * 2 + 1];
+                        float c0 = w0 * (1f - UV_INSET) + UV_INSET / 3f, c1 = r1 * (1f - UV_INSET) + UV_INSET / 3f, c2 = r2 * (1f - UV_INSET) + UV_INSET / 3f;
+                        v[3] = c0 * uv[q * 8 + i0 * 2] + c1 * uv[q * 8 + i1 * 2] + c2 * uv[q * 8 + i2 * 2];
+                        v[4] = c0 * uv[q * 8 + i0 * 2 + 1] + c1 * uv[q * 8 + i1 * 2 + 1] + c2 * uv[q * 8 + i2 * 2 + 1];
                         v[5] = bone.nrm[q * 3];
                         v[6] = bone.nrm[q * 3 + 1];
                         v[7] = bone.nrm[q * 3 + 2];
