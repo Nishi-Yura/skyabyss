@@ -230,6 +230,10 @@ def convert(path):
             m = re.match(r"^(\s*)(?:for|if) \(.*\) \{\s*$", ls[a])
             if not m:
                 continue
+            # 条件の中で関数を呼ぶ if は残す (if (hit(...)) のように条件そのものが働く。2026-11-15 に裂きの当たりを消してしまった)
+            cond = ls[a][ls[a].index("(") + 1:ls[a].rindex(")")]
+            if ls[a].lstrip().startswith("if") and re.search(r"(?!Math)\w+\(", re.sub(r"(?:equals|nextFloat|nextDouble|distanceToSqr|has|closerThan|contains|isAlive|getGameTime)\(", "", cond)):
+                continue
             ind = m.group(1)
             b = a + 1
             while b < len(ls) and not re.match("^" + re.escape(ind) + r"\}", ls[b]):

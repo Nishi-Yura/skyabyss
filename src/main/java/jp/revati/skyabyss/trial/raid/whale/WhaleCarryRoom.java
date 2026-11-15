@@ -180,7 +180,7 @@ public final class WhaleCarryRoom extends RaidRoom {
                 } else if (held[idx] % 20 == 0) {
                     jp.revati.skyabyss.notice.Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.WR1.cooling", (left + 19) / 20)
                             .withColor(left <= 100 ? 0xE0605A : 0x9FD8E8));
-                    level.sendParticles(left <= 100 ? ParticleTypes.SNOWFLAKE : ParticleTypes.END_ROD, p.getX(), p.getY() + 2.2, p.getZ(), 3, 0.2, 0.1, 0.2, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 2.2, p.getZ(), 3, 0.2, 0.1, 0.2, 0.01);
                 }
             }
             applyCarry(p, has && !down);
@@ -384,7 +384,7 @@ public final class WhaleCarryRoom extends RaidRoom {
         e.setPickUpDelay(10);
         ctx.level().addFreshEntity(e);
         lingering[idx] = 0;
-        ctx.level().sendParticles(ParticleTypes.END_ROD, h.getX() + 0.5, h.getY() + 0.8, h.getZ() + 0.5, 12, 0.3, 0.5, 0.3, 0.02);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), h.getX() + 0.5, h.getY() + 0.8, h.getZ() + 0.5, 12, 0.3, 0.5, 0.3, 0.02);
     }
 
     private void returned(RaidCtx ctx, int idx) {
@@ -403,7 +403,7 @@ public final class WhaleCarryRoom extends RaidRoom {
             WhaleDecor.exitLamps(ctx, true);
         }
         ctx.level().playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.6f + 0.2f * count);
-        ctx.level().sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.04);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.04);
     }
 
     private void spawnFoe(RaidCtx ctx) {
@@ -485,7 +485,7 @@ public final class WhaleCarryRoom extends RaidRoom {
                     double lz = Math.max(-HZ + 2, Math.min(HZ - 2, to.z - ctx.origin().getZ()));
                     thief.getNavigation().moveTo(ctx.origin().getX() + lx, ctx.origin().getY() + 1, ctx.origin().getZ() + lz, 1.2);
                 }
-                level.sendParticles(ParticleTypes.END_ROD, thief.getX(), thief.getY() + 1.2, thief.getZ(), 2, 0.2, 0.2, 0.2, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), thief.getX(), thief.getY() + 1.2, thief.getZ(), 2, 0.2, 0.2, 0.2, 0.01);
             }
             if (stolenTicks >= THIEF_HOLD) {
                 // 抱えたまま逃げきった: 骨玉は元の場所へ
@@ -600,5 +600,10 @@ public final class WhaleCarryRoom extends RaidRoom {
 
     public BlockPos altar(RaidCtx ctx) {
         return ctx.origin().offset(0, 1, ALTAR_Z);
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

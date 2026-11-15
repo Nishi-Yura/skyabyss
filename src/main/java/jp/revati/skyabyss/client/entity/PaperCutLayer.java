@@ -227,7 +227,7 @@ public final class PaperCutLayer {
                     mc.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(pc[0], pc[1], pc[2]), 1.6f),
                             px, e.getY() + h * (1.1 + r.nextDouble() * 0.4), pz, 0, -0.03, 0);
                 } else {
-                    mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.END_ROD, px, py, pz, 0, 0.01, 0);
+                    mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), px, py, pz, 0, 0.01, 0);
                 }
             }
         }

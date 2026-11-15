@@ -155,11 +155,11 @@ public class FallingLight extends Entity implements software.bernie.geckolib.ani
                 int n = 18;
                 for (int i = 0; i < n; i++) {
                     double a = i / (double) n * Math.PI * 2 + age * 0.05;
-                    sl.sendParticles(ParticleTypes.END_ROD, getX() + Math.cos(a) * RADIUS, groundY + 0.1, getZ() + Math.sin(a) * RADIUS, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * RADIUS, groundY + 0.1, getZ() + Math.sin(a) * RADIUS, 1, 0, 0, 0, 0);
                 }
             }
             if (age % 2 == 0) {
-                sl.sendParticles(ParticleTypes.END_ROD, getX(), getY(), getZ(), 1, 0.25 + age * 0.01, 0.25 + age * 0.01, 0.25 + age * 0.01, 0.0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY(), getZ(), 1, 0.25 + age * 0.01, 0.25 + age * 0.01, 0.25 + age * 0.01, 0.0);
             }
             return;
         }
@@ -174,8 +174,8 @@ public class FallingLight extends Entity implements software.bernie.geckolib.ani
             return;
         }
         setPos(next);
-        sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.6, getZ(), 1, 0.2, 0.6, 0.2, 0.0);
-        sl.sendParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.6, getZ(), 1, 0.2, 0.6, 0.2, 0.0);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY(), getZ(), 1, 0, 0, 0, 0);
     }
 
     private void tickShot(ServerLevel sl) {
@@ -198,21 +198,20 @@ public class FallingLight extends Entity implements software.bernie.geckolib.ani
 
     private void trail(ServerLevel sl) {
         if (look() == 1) {
-            sl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.FALLING_DUST,
-                    net.minecraft.world.level.block.Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()), getX(), getY(), getZ(), 2, 0.12, 0.12, 0.12, 0.0);
-            sl.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY(), getZ(), 1, 0.1, 0.1, 0.1, 0.0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY(), getZ(), 2, 0.12, 0.12, 0.12, 0.0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY(), getZ(), 1, 0.1, 0.1, 0.1, 0.0);
         } else if (look() == 2) {
             Vec3 v = getDeltaMovement().normalize();
             Vec3 side = new Vec3(-v.z, 0, v.x);
             for (int i = -3; i <= 3; i += 2) {
                 Vec3 p = position().add(side.scale(i * 0.35)).add(v.scale(-Math.abs(i) * 0.15));
-                sl.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
             }
             if (age % 3 == 0) {
-                sl.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY(), getZ(), 1, 0, 0, 0, 0);
             }
         } else {
-            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY(), getZ(), 1, 0.15, 0.15, 0.15, 0.0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY(), getZ(), 1, 0.15, 0.15, 0.15, 0.0);
         }
     }
 
@@ -220,12 +219,11 @@ public class FallingLight extends Entity implements software.bernie.geckolib.ani
     private void burst(ServerLevel sl, Vec3 c) {
         double r = shot ? 1.5 : RADIUS;
         if (look() == 1) {
-            sl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.FALLING_DUST,
-                    net.minecraft.world.level.block.Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()), c.x, c.y + 0.3, c.z, 24, 0.5, 0.4, 0.5, 0.0);
-            sl.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.3, c.z, 6, 0.3, 0.2, 0.3, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.3, c.z, 24, 0.5, 0.4, 0.5, 0.0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.3, c.z, 6, 0.3, 0.2, 0.3, 0.02);
         } else {
-            sl.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 0.3, c.z, 30, r * 0.4, 0.4, r * 0.4, 0.12);
-            sl.sendParticles(ParticleTypes.FLASH, c.x, c.y + 0.3, c.z, 1, 0, 0, 0, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.3, c.z, 24, r * 0.4, 0.4, r * 0.4, 0.12);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.3, c.z, 1, 0, 0, 0, 0);
         }
         sl.playSound(null, c.x, c.y, c.z, FieldBlocks.LIGHT_IMPACT.get(), SoundSource.HOSTILE, 1.0f, shot ? 1.4f : 1.0f);
         if (!shot) {
@@ -254,5 +252,10 @@ public class FallingLight extends Entity implements software.bernie.geckolib.ani
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

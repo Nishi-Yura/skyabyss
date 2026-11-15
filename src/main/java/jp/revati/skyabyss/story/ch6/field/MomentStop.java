@@ -92,7 +92,7 @@ public final class MomentStop {
             int k = 16 + ring * 10;
             for (int i = 0; i < k; i++) {
                 double a = i / (double) k * Math.PI * 2;
-                level.sendParticles(ParticleTypes.END_ROD, p.getX() + Math.cos(a) * r, p.getY() + 0.2 + ring * 0.3, p.getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + Math.cos(a) * r, p.getY() + 0.2 + ring * 0.3, p.getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
             }
         }
         return n;
@@ -155,7 +155,7 @@ public final class MomentStop {
         }
         event.setCanceled(true);
         if (e.level() instanceof ServerLevel sl && (e.level().getGameTime() + e.getId()) % 6 == 0) {
-            sl.sendParticles(ParticleTypes.END_ROD, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 2, e.getBbWidth() * 0.5, e.getBbHeight() * 0.3,
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 2, e.getBbWidth() * 0.5, e.getBbHeight() * 0.3,
                     e.getBbWidth() * 0.5, 0.0);
         }
     }
@@ -188,5 +188,10 @@ public final class MomentStop {
     // 自己テスト用
     public static boolean anyFrozenNear(ServerLevel level, BlockPos at, double r) {
         return level.getEntities((Entity) null, new AABB(at).inflate(r), MomentStop::frozen).size() > 0;
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

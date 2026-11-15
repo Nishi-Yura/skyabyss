@@ -316,7 +316,7 @@ public final class FeatherCarry extends RaidRoom {
         }
         BlockPos at = ctx.origin().offset(PERCH_X, 3, PERCH_Z[k]);
         ctx.level().playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.6f + 0.2f * count);
-        ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 26, 0.3, 0.5, 0.3, 0.08);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 24, 0.3, 0.5, 0.3, 0.08);
     }
 
     // 試験用: 羽 idx を、空いている最初の台へ置いたことにする
@@ -434,7 +434,7 @@ public final class FeatherCarry extends RaidRoom {
                 double x = ctx.origin().getX() + ctx.rng().nextInt(2 * HX - 1) - HX + 0.5;
                 double z = ctx.origin().getZ() + ctx.rng().nextInt(2 * HZ - 1) - HZ + 0.5;
                 double y = ctx.origin().getY() + 1 + ctx.rng().nextInt(3);
-                level.sendParticles(ParticleTypes.CLOUD, x, y, z, 0, 0, 0, dir * 0.5, 1.0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y, z, 0, 0, 0, dir * 0.5, 1.0);
             }
         }
         for (ServerPlayer p : ctx.players()) {
@@ -566,7 +566,7 @@ public final class FeatherCarry extends RaidRoom {
         e.setPickUpDelay(10);
         ctx.level().addFreshEntity(e);
         lingering[idx] = 0;
-        ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, h.getX() + 0.5, h.getY() + 0.8, h.getZ() + 0.5, 14, 0.3, 0.5, 0.3, 0.05);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), h.getX() + 0.5, h.getY() + 0.8, h.getZ() + 0.5, 14, 0.3, 0.5, 0.3, 0.05);
     }
 
     private void spawnCharm(RaidCtx ctx, int i) {
@@ -661,5 +661,10 @@ public final class FeatherCarry extends RaidRoom {
 
     public boolean delivered(int i) {
         return delivered[i];
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

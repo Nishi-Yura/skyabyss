@@ -78,7 +78,7 @@ public final class TideRaid {
     static final ParticleOptions RED = dust(1f, 0.1f, 0.1f, 1.2f);
 
     static void puff(ServerLevel level, ParticleOptions p, double x, double y, double z, int n, double dx, double dy, double dz, double speed) {
-        level.sendParticles(p, x, y, z, n, dx, dy, dz, speed);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, n, dx, dy, dz, speed);
     }
 
     static boolean solid(ServerLevel level, BlockPos p) {
@@ -98,5 +98,10 @@ public final class TideRaid {
             }
         }
         return best;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

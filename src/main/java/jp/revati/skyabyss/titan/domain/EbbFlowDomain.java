@@ -105,7 +105,7 @@ public final class EbbFlowDomain extends HeartDomain {
             double r = radius * (1 - t / (double) DECLARE_TICKS);
             for (int i = 0; i < 18; i++) {
                 double a = Math.PI * 2 * i / 18 - t * 0.04;
-                level.sendParticles(ParticleTypes.SPLASH, cx + Math.cos(a) * r, floorY + 0.3, cz + Math.sin(a) * r, 2, 0.2, 0.05, 0.2, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), cx + Math.cos(a) * r, floorY + 0.3, cz + Math.sin(a) * r, 2, 0.2, 0.05, 0.2, 0.05);
             }
         }
     }
@@ -212,10 +212,6 @@ public final class EbbFlowDomain extends HeartDomain {
         tg(level, TelegraphShape.circle(x, z, WHIRL_RADIUS), warn).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_TIDE_WHIRL)
                 .onImpact(s -> {
                     s.playSound(null, x, floorY, z, SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, SoundSource.HOSTILE, 1.6f, 0.8f);
-                    for (int i = 0; i < 14; i++) {
-                        double a = Math.PI * 2 * i / 14;
-                        s.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, x + Math.cos(a) * 1.6, floorY + 0.4, z + Math.sin(a) * 1.6, 3, 0.2, 0.3, 0.2, 0.1);
-                    }
                 })
                 .onHit((s, p) -> {
                     striker.accept(p, damage);
@@ -236,7 +232,6 @@ public final class EbbFlowDomain extends HeartDomain {
         tg(level, TelegraphShape.circle(x, z, SPRAY_RADIUS), SPRAY_WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_SHELL_SLAM)
                 .onImpact(s -> {
                     s.playSound(null, x, floorY + 2, z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.6f, 0.9f);
-                    s.sendParticles(ParticleTypes.SPLASH, x, floorY + 2.6, z, 40, 1.2, 0.4, 1.2, 0.2);
                 })
                 .onHit((s, p) -> striker.accept(p, SPRAY_DAMAGE))
                 .start();
@@ -277,7 +272,7 @@ public final class EbbFlowDomain extends HeartDomain {
     protected void ambient(ServerLevel level, int t) {
         double a = heart.getRandom().nextDouble() * Math.PI * 2;
         double r = heart.getRandom().nextDouble() * radius;
-        level.sendParticles(flood ? ParticleTypes.BUBBLE : ParticleTypes.FALLING_WATER, cx + Math.cos(a) * r, floorY + (flood ? 0.6 : 2.5),
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), cx + Math.cos(a) * r, floorY + (flood ? 0.6 : 2.5),
                 cz + Math.sin(a) * r, 3, 0.4, 0.1, 0.4, 0.02);
     }
 
@@ -286,9 +281,6 @@ public final class EbbFlowDomain extends HeartDomain {
         drain(level);
         level.playSound(null, cx, floorY + 2, cz, shattered ? SoundEvents.GENERIC_EXPLODE.value() : SoundEvents.AMBIENT_UNDERWATER_EXIT,
                 SoundSource.HOSTILE, shattered ? 1.6f : 2.5f, shattered ? 0.9f : 0.7f);
-        if (shattered) {
-            level.sendParticles(ParticleTypes.SPLASH, cx, floorY + 2, cz, 80, 4, 1, 4, 0.3);
-        }
     }
 
     @Override
@@ -329,7 +321,7 @@ public final class EbbFlowDomain extends HeartDomain {
         node.done = true;
         node.flash = 14;
         node.flashRgb = 0x66E08A;
-        burst(level, node, ParticleTypes.SPLASH, 30, 0.6, 0.2);
+        burst(level, node, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 30, 0.6, 0.2);
         tone(level, node.pos, SoundEvents.BUCKET_EMPTY, 1.6f, 0.7f + 0.15f * solvedCount());
         tell(level, "message.skyabyss.domain.ebb_flow.step", solvedCount(), NODES);
         return true;

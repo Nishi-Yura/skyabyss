@@ -149,7 +149,7 @@ public final class FoeStatusClient {
                 double x = e.getX() + Math.cos(a) * hw;
                 double z = e.getZ() + Math.sin(a) * hw;
                 double y = box.minY + r.nextDouble() * e.getBbHeight() * 0.8;
-                mc.level.addParticle(ParticleTypes.SMALL_FLAME, x, y, z, Math.cos(a) * 0.01, 0.01 + r.nextDouble() * 0.02, Math.sin(a) * 0.01);
+                mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, Math.cos(a) * 0.01, 0.01 + r.nextDouble() * 0.02, Math.sin(a) * 0.01);
             }
         }
     }

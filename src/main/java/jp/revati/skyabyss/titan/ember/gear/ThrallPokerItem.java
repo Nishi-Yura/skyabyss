@@ -60,14 +60,19 @@ public class ThrallPokerItem extends EmberWeaponItem {
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             boolean set = addAsh(target, stacksNeeded(stack));
-            level.sendParticles(ParticleTypes.WHITE_ASH, target.getX(), target.getY(0.7), target.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.7), target.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
             if (set) {
                 EmberGearEvents.brittle(target, attacker);
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TUFF.defaultBlockState()),
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         target.getX(), target.getY(0.5), target.getZ(), 24, 0.35, 0.5, 0.35, 0.1);
                 level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.TUFF_BREAK, SoundSource.PLAYERS, 1.0f, 0.7f);
             }
         }
         return super.hurtEnemy(stack, target, attacker);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

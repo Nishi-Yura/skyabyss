@@ -333,9 +333,9 @@ public final class CircuitCamps {
     static void beam(ServerPlayer p, BlockPos at) {
         ServerLevel level = p.serverLevel();
         for (int y = 3; y < 46; y += 3) {
-            level.sendParticles(p, ParticleTypes.END_ROD, true, at.getX() + 0.5, at.getY() + y, at.getZ() + 0.5, 1, 0.05, 0.6, 0.05, 0.0);
+            level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, at.getX() + 0.5, at.getY() + y, at.getZ() + 0.5, 1, 0.05, 0.6, 0.05, 0.0);
         }
-        level.sendParticles(p, ParticleTypes.WAX_ON, true, at.getX() + 0.5, at.getY() + 46, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.0);
+        level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, at.getX() + 0.5, at.getY() + 46, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.0);
     }
 
     // ---------------------------------------------------------------- 建てる

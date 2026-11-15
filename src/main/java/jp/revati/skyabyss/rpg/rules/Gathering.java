@@ -119,7 +119,7 @@ public final class Gathering {
         player.swing(InteractionHand.MAIN_HAND, true);
         var sound = state.getSoundType(level, pos, player);
         level.playSound(null, pos, sound.getBreakSound(), SoundSource.BLOCKS, sound.getVolume(), sound.getPitch() * 0.9f);
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
     }
 
     // 水を汲む: アドベンチャーではバケツが使えない (置く権利がない)。空のバケツで水源を見ていれば、水は減らさずに水入りにする

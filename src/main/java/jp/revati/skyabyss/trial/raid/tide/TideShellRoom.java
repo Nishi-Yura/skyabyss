@@ -121,7 +121,7 @@ public final class TideShellRoom extends RaidRoom {
             for (int i = 0; i < state.length; i++) {
                 if (state[i] != Shell.CLOSED) {
                     float[] rgb = TONE_RGB[tone[i]];
-                    ctx.level().sendParticles(TideRaid.dust(rgb[0], rgb[1], rgb[2], 1f), ctx.origin().getX() + cx[i] + 0.5, ctx.origin().getY() + 3.4,
+                    ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ctx.origin().getX() + cx[i] + 0.5, ctx.origin().getY() + 3.4,
                             ctx.origin().getZ() + cz[i] + 0.5, 2, 0.25, 0.15, 0.25, 0);
                 }
             }
@@ -159,7 +159,7 @@ public final class TideShellRoom extends RaidRoom {
             for (int k = 0; k < 2; k++) {
                 int s = k == 0 ? i : -1;
                 if (s >= 0) {
-                    level.sendParticles(ParticleTypes.HAPPY_VILLAGER, ctx.origin().getX() + cx[s] + 0.5, ctx.origin().getY() + 3.5, ctx.origin().getZ() + cz[s] + 0.5, 6, 0.3, 0.2, 0.3, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ctx.origin().getX() + cx[s] + 0.5, ctx.origin().getY() + 3.5, ctx.origin().getZ() + cz[s] + 0.5, 6, 0.3, 0.2, 0.3, 0);
                 }
             }
             ctx.say(Component.translatable("message.skyabyss.raid.TR2.match", Component.translatable("raid.skyabyss.TR2.tone." + tone[i])));
@@ -189,9 +189,9 @@ public final class TideShellRoom extends RaidRoom {
         int points = t + 3;
         for (int k = 0; k < points; k++) {
             double a = Math.PI * 2 * k / points;
-            level.sendParticles(TideRaid.dust(rgb[0], rgb[1], rgb[2], 1.6f), x + Math.cos(a) * 0.9, y + 0.2, z + Math.sin(a) * 0.9, 2, 0.04, 0.04, 0.04, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x + Math.cos(a) * 0.9, y + 0.2, z + Math.sin(a) * 0.9, 2, 0.04, 0.04, 0.04, 0);
         }
-        level.sendParticles(ParticleTypes.NOTE, x, y + 0.8, z, 1, 0.1, 0.1, 0.1, 1.0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.8, z, 1, 0.1, 0.1, 0.1, 1.0);
         ctx.say(Component.translatable("message.skyabyss.raid.TR2.tone", Component.translatable("raid.skyabyss.TR2.tone." + t)));
     }
 
@@ -293,5 +293,10 @@ public final class TideShellRoom extends RaidRoom {
 
     public int pairs() {
         return pairs;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

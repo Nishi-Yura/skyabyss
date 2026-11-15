@@ -36,9 +36,14 @@ public class LampSwordItem extends AbyssGearWeaponItem {
                     e.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, true, false));
                 }
             }
-            level.sendParticles(ParticleTypes.WAX_OFF, target.getX(), target.getY(0.6), target.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 1.4f);
         }
         return super.hurtEnemy(stack, target, attacker);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

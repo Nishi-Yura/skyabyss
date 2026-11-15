@@ -128,7 +128,7 @@ public final class SeatArena {
             g.addTag(ALLY_TAG);
             g.addTag(TAG);
             level.addFreshEntity(g);
-            level.sendParticles(ParticleTypes.END_ROD, p.getX() + 0.5, p.getY() + 1, p.getZ() + 0.5, 40, 0.4, 1.0, 0.4, 0.06);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + 0.5, p.getY() + 1, p.getZ() + 0.5, 24, 0.4, 1.0, 0.4, 0.06);
         }
         level.playSound(null, c, CloudMobsSetup.SELF_JOIN.get(), SoundSource.NEUTRAL, 2.0f, 0.9f);
     }
@@ -193,7 +193,7 @@ public final class SeatArena {
                         }
                         jp.revati.skyabyss.combat.PartyScale.apply(h, present(level).size());
                         jp.revati.skyabyss.combat.PartyScale.resist(h, 1.5);
-                        level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 60, 2.0, 2.0, 2.0, 0.05);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 24, 2.0, 2.0, 2.0, 0.05);
                     }
                 }
                 level.playSound(null, c, CloudMobsSetup.HAND_RISE.get(), SoundSource.HOSTILE, 3.0f, 0.9f);
@@ -213,7 +213,7 @@ public final class SeatArena {
                     jp.revati.skyabyss.combat.PartyScale.resist(e, 1.5);
                     e.playAction("call");
                 }
-                level.sendParticles(ParticleTypes.CLOUD, c.getX() + 0.5, c.getY() + 6, c.getZ() + 0.5, 120, 4.0, 2.0, 4.0, 0.08);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.getX() + 0.5, c.getY() + 6, c.getZ() + 0.5, 24, 4.0, 2.0, 4.0, 0.08);
                 level.playSound(null, c, CloudMobsSetup.EYE_OPEN.get(), SoundSource.HOSTILE, 3.0f, 0.8f);
             }
             case 3 -> {
@@ -351,7 +351,7 @@ public final class SeatArena {
         form = 4;
         jp.revati.skyabyss.story.ch1.Tasks.later(400, () -> {
             for (TownGuestEntity g : allies(level)) {
-                level.sendParticles(ParticleTypes.END_ROD, g.getX(), g.getY() + 1, g.getZ(), 30, 0.4, 1.0, 0.4, 0.06);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g.getX(), g.getY() + 1, g.getZ(), 24, 0.4, 1.0, 0.4, 0.06);
                 g.discard();
             }
             if (form == 4) {
@@ -374,5 +374,10 @@ public final class SeatArena {
         nextAt = -1;
         empty = 0;
         ringAt = 0;
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

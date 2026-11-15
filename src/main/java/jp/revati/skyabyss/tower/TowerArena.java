@@ -60,7 +60,7 @@ public final class TowerArena {
                     p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 40, 2, true, false));
                 }
             }
-            level.sendParticles(GOLD, heal.x, heal.y + 0.1, heal.z, 8, 1.5, 0, 1.5, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), heal.x, heal.y + 0.1, heal.z, 8, 1.5, 0, 1.5, 0);
         }
         // 落ちた人
         int fy = TowerWorld.ARENA_Y;
@@ -73,7 +73,7 @@ public final class TowerArena {
                 if (!p.isCreative()) {
                     p.setHealth(Math.max(1f, p.getHealth() - p.getMaxHealth() * 0.2f));
                 }
-                level.sendParticles(ParticleTypes.END_ROD, e.x, e.y + 1, e.z, 20, 0.4, 0.8, 0.4, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.x, e.y + 1, e.z, 20, 0.4, 0.8, 0.4, 0.02);
                 Notice.hint(p, "message.skyabyss.tower.fell");
             }
         }
@@ -87,5 +87,10 @@ public final class TowerArena {
     void close() {
         timer.removeAllPlayers();
         fight.close();
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

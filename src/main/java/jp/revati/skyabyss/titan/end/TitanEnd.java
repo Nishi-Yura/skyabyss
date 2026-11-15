@@ -200,7 +200,7 @@ public final class TitanEnd {
                 continue;
             }
             back.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.AMBIENT, 1.4f, 0.5f);
-            back.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, p.getX(), p.getY() + 0.2, p.getZ(), 6, 3, 0.1, 3, 0.002);
+            back.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.2, p.getZ(), 6, 3, 0.1, 3, 0.002);
             Notice.narrate(p, "message.skyabyss.titan_end.tremble." + titan);
         }
     }
@@ -332,15 +332,15 @@ public final class TitanEnd {
             case Titans.TIDE_SHELL -> ParticleTypes.SPLASH;
             case Titans.THUNDER_WING -> ParticleTypes.CLOUD;
             case Titans.EMBER -> ParticleTypes.WHITE_ASH;
-            default -> ParticleTypes.CLOUD;
+            default -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE);
         };
-        level.sendParticles(puff, at.x, at.y + 0.6, at.z, 60, 1.6, 0.6, 1.6, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.6, at.z, 24, 1.6, 0.6, 1.6, 0.05);
         if (Titans.TIDE_SHELL.equals(titan)) {
-            level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y + 0.3, at.z, 24, 1.2, 0.3, 1.2, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y + 0.3, at.z, 24, 1.2, 0.3, 1.2, 0.02);
         } else if (Titans.EMBER.equals(titan)) {
-            level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.3, at.z, 10, 1.2, 0.3, 1.2, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.3, at.z, 10, 1.2, 0.3, 1.2, 0.01);
         } else if (Titans.THUNDER_WING.equals(titan)) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 1.0, at.z, 12, 1.0, 0.8, 1.0, 0.1);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 1.0, at.z, 12, 1.0, 0.8, 1.0, 0.1);
         }
         SoundEvent sound = SoundEvents.BREEZE_WIND_CHARGE_BURST.value();
         level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, 1.2f, 0.7f);

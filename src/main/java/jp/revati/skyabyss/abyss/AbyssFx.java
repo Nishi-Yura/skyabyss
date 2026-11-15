@@ -18,20 +18,25 @@ public final class AbyssFx {
 
     public static void aura(ServerLevel server, HeartBoss heart, String theme) {
         Vec3 core = heart.focusPoint();
-        server.sendParticles(ParticleTypes.REVERSE_PORTAL, core.x, core.y, core.z, 5, 1.8, 1.4, 1.8, 0.03);
-        server.sendParticles(DUST, core.x, core.y - 0.5, core.z, 3, 2.2, 1.6, 2.2, 0.0);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), core.x, core.y, core.z, 5, 1.8, 1.4, 1.8, 0.03);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), core.x, core.y - 0.5, core.z, 3, 2.2, 1.6, 2.2, 0.0);
         ParticleOptions extra = switch (theme) {
             case "tide" -> ParticleTypes.SQUID_INK;
             case "storm" -> ParticleTypes.ELECTRIC_SPARK;
             case "ember" -> ParticleTypes.SOUL_FIRE_FLAME;
-            default -> ParticleTypes.SQUID_INK;
+            default -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         };
-        server.sendParticles(extra, core.x, core.y, core.z, 2, 1.6, 1.2, 1.6, 0.02);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), core.x, core.y, core.z, 2, 1.6, 1.2, 1.6, 0.02);
     }
 
     // 技の落ちる点の粒 (予告が満ちて当たる瞬間)
     public static void burst(ServerLevel server, double x, double y, double z) {
-        server.sendParticles(ParticleTypes.REVERSE_PORTAL, x, y + 0.6, z, 14, 0.5, 0.6, 0.5, 0.12);
-        server.sendParticles(DUST, x, y + 0.4, z, 10, 0.6, 0.5, 0.6, 0.0);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.6, z, 14, 0.5, 0.6, 0.5, 0.12);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.4, z, 10, 0.6, 0.5, 0.6, 0.0);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

@@ -83,7 +83,7 @@ public final class PromiseArena {
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.48);
         e.playAction("call");
-        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 6, at.getZ() + 0.5, 120, 2.0, 4.0, 2.0, 0.06);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 6, at.getZ() + 0.5, 24, 2.0, 4.0, 2.0, 0.06);
         level.playSound(null, at, CloudMobsSetup.WING_ROAR.get(), SoundSource.HOSTILE, 2.0f, 0.9f);
         empty = 0;
         return e;
@@ -98,7 +98,7 @@ public final class PromiseArena {
             CloudMob m = put(level, CloudMobsSetup.FALLEN_PLUME.get(), at);
             if (m != null) {
                 m.addTag(TAG);
-                level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 16, 0.4, 0.8, 0.4, 0.04);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 16, 0.4, 0.8, 0.4, 0.04);
             }
         }
     }
@@ -195,5 +195,10 @@ public final class PromiseArena {
         }
         level.addFreshEntity(m);
         return m;
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

@@ -270,9 +270,9 @@ public final class ReturnBeacons {
         int n = 14;
         for (int i = 0; i < n; i++) {
             double a = Math.PI * 2 * i / n + progress * 3;
-            level.sendParticles(dust, foot.x + Math.cos(a) * r, foot.y + 0.15, foot.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), foot.x + Math.cos(a) * r, foot.y + 0.15, foot.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
-        level.sendParticles(ParticleTypes.END_ROD, foot.x, foot.y + 0.4 + progress, foot.z, 1, 0.2, 0.1, 0.2, 0.01);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), foot.x, foot.y + 0.4 + progress, foot.z, 1, 0.2, 0.1, 0.2, 0.01);
     }
 
     @SubscribeEvent

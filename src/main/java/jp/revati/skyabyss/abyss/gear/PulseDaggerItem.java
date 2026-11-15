@@ -60,8 +60,13 @@ public class PulseDaggerItem extends AbyssGearWeaponItem {
         target.invulnerableTime = 0;
         target.hurt(source, damage);
         attacker.heal(AbyssGear.DAGGER_HEAL);
-        level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY(0.6), target.getZ(), 4, 0.2, 0.2, 0.2, 0.1);
-        level.sendParticles(ParticleTypes.SCULK_SOUL, target.getX(), target.getY(0.5), target.getZ(), 6, 0.3, 0.3, 0.3, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY(0.6), target.getZ(), 4, 0.2, 0.2, 0.2, 0.1);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.5), target.getZ(), 6, 0.3, 0.3, 0.3, 0.02);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.0f, 1.3f);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

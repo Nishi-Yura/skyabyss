@@ -81,7 +81,7 @@ public final class MoonGearItems {
             if (!level.isClientSide && level instanceof ServerLevel sl) {
                 player.getPersistentData().putLong(MoonGearEvents.TEAR, sl.getGameTime() + MoonGear.TEAR_TICKS);
                 player.getCooldowns().addCooldown(this, MoonGear.TEAR_COOLDOWN);
-                sl.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 30, 0.5, 0.9, 0.5, 0.04);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 24, 0.5, 0.9, 0.5, 0.04);
                 sl.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0f, 1.4f);
                 if (!player.getAbilities().instabuild) {
                     stack.shrink(1);
@@ -105,5 +105,10 @@ public final class MoonGearItems {
     // 品が使える (必要 Lv に届く) か
     static boolean usable(Player p, ItemStack stack) {
         return stack.getItem() instanceof ModGear && GearLevel.meets(p, stack);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

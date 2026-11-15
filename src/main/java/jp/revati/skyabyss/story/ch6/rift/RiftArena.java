@@ -86,7 +86,7 @@ public final class RiftArena {
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.94);
         e.playAction("roar");
         WaningBlade.spawnEcho(level, e, WaningBlade.DELAY);
-        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 80, 1.0, 2.0, 1.0, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 24, 1.0, 2.0, 1.0, 0.05);
         level.playSound(null, at, MoonMobsSetup.BLADE_ROAR.get(), SoundSource.HOSTILE, 2.0f, 0.8f);
         empty = 0;
         return e;
@@ -126,7 +126,7 @@ public final class RiftArena {
                         CRUMBLED_WAS.add(st);
                         level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
                         if (dy == 0 && (dx + dz) % 3 == 0) {
-                            level.sendParticles(ParticleTypes.CLOUD, p.getX() + 0.5, p.getY() + 1, p.getZ() + 0.5, 2, 0.3, 0.2, 0.3, 0.02);
+                            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX() + 0.5, p.getY() + 1, p.getZ() + 0.5, 2, 0.3, 0.2, 0.3, 0.02);
                         }
                     }
                 }
@@ -186,5 +186,10 @@ public final class RiftArena {
         for (ServerPlayer p : present) {
             Notice.narrate(p, "message.skyabyss.moon.blade_down");
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

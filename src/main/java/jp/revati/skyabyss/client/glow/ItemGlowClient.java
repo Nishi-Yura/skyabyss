@@ -89,7 +89,7 @@ public final class ItemGlowClient {
                 board.addPlayerToTeam(item.getScoreboardName(), want);
             }
             if (puff && !item.onGround()) {
-                mc.level.addParticle(ParticleTypes.END_ROD, item.getX(), item.getY() + 0.2, item.getZ(), 0, 0.02, 0);
+                mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), item.getX(), item.getY() + 0.2, item.getZ(), 0, 0.02, 0);
             }
         }
     }

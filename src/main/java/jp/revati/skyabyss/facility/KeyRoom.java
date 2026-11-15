@@ -176,7 +176,7 @@ public final class KeyRoom {
         d.setDirty();
         player.containerMenu.broadcastChanges();
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 0.7f + 0.1f * set.size());
-        player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
+        player.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.2, player.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
         if (tell) {
             Notice.hint(player, set.size() >= Titans.all().size() ? "message.skyabyss.keyroom.all" : "message.skyabyss.keyroom.offered",
                     Progression.titanName(titan), set.size());

@@ -314,7 +314,7 @@ public final class KeepsakeBonds {
     // 前の代の品は砂になる
     private static void crumble(ServerPlayer player, ItemStack stack) {
         Notice.hint(player, "skyabyss_record.bond.crumbled", stack.getHoverName());
-        player.serverLevel().sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.5, 0.4, 0.02);
+        player.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.getX(), player.getY() + 1, player.getZ(), 24, 0.4, 0.5, 0.4, 0.02);
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.SAND_BREAK, SoundSource.PLAYERS, 0.8f, 0.7f);
         SkyAbyss.LOGGER.info("[record] a stale {} (owner {}) crumbled near {}", BuiltInRegistries.ITEM.getKey(stack.getItem()), owner(stack),
                 player.getGameProfile().getName());
@@ -440,7 +440,7 @@ public final class KeepsakeBonds {
         }
         int given = reissue(player, kind);
         Notice.gainLog(player, "skyabyss_record.bond.recalled_" + kind.id, given);
-        player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 4, player.getZ(), 24, 0.3, 2.0, 0.3, 0.0);
+        player.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 4, player.getZ(), 24, 0.3, 2.0, 0.3, 0.0);
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 0.8f);
         return RecallResult.RECALLED;
     }

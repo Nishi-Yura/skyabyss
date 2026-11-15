@@ -116,7 +116,7 @@ public final class TitanTravel {
         player.hurtMarked = true;
         player.fallDistance = 0;
         if (lift.ticks() % 6 == 0) {
-            player.serverLevel().sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.CHAIN.defaultBlockState()),
+            player.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     player.getX(), player.getY() + 1, player.getZ(), 4, 0.3, 0.3, 0.3, 0.05);
         }
         if (lift.ticks() % 20 == 0) {

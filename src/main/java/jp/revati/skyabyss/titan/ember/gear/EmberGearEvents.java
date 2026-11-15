@@ -125,8 +125,8 @@ public final class EmberGearEvents {
         Vec3 start = attacker.position();
         for (double d = 0.8; d <= length; d += 0.5) {
             Vec3 p = start.add(dir.scale(d));
-            level.sendParticles(ParticleTypes.LAVA, p.x, p.y + 0.1, p.z, 1, 0.1, 0.02, 0.1, 0);
-            level.sendParticles(ParticleTypes.SMOKE, p.x, p.y + 0.1, p.z, 2, 0.15, 0.02, 0.15, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.x, p.y + 0.1, p.z, 1, 0.1, 0.02, 0.1, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y + 0.1, p.z, 2, 0.15, 0.02, 0.15, 0.01);
         }
         level.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.BASALT_BREAK, SoundSource.PLAYERS, 1.0f, 0.6f);
         CRACKS.add(new Crack(level, attacker, target, start, dir, length, damage, level.getGameTime() + EmberGear.HAMMER_CRACK_DELAY));
@@ -153,8 +153,8 @@ public final class EmberGearEvents {
         }
         for (double d = 0.8; d <= length; d += 0.5) {
             Vec3 p = start.add(dir.scale(d));
-            level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 0.2, p.z, 4, 0.15, 0.3, 0.15, 0.04);
-            level.sendParticles(ParticleTypes.LARGE_SMOKE, p.x, p.y + 0.4, p.z, 1, 0.1, 0.2, 0.1, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.2, p.z, 4, 0.15, 0.3, 0.15, 0.04);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y + 0.4, p.z, 1, 0.1, 0.2, 0.1, 0.02);
         }
         level.playSound(null, start.x, start.y, start.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0f, 0.5f);
         return hit;
@@ -233,9 +233,9 @@ public final class EmberGearEvents {
             }
             smolder(e, EmberGear.LANTERN_BURN_TICKS);
         }
-        level.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 1, player.getZ(), 80, 1.2, 0.8, 1.2, 0.08);
-        level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 1, player.getZ(), 12, 0.8, 0.6, 0.8, 0);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 24, 1.2, 0.8, 1.2, 0.08);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.getX(), player.getY() + 1, player.getZ(), 12, 0.8, 0.6, 0.8, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.2f, 0.5f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8f, 0.7f);
         return hit;
@@ -301,5 +301,10 @@ public final class EmberGearEvents {
     // 自己テスト用: 噴く前の亀裂の数
     static int pendingCracks() {
         return CRACKS.size();
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

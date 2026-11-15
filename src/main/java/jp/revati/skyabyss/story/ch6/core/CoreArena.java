@@ -95,7 +95,7 @@ public final class CoreArena {
         jp.revati.skyabyss.combat.PartyScale.apply(e, players(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.94);
         e.playAction("roar");
-        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 120, 2.0, 2.0, 2.0, 0.08);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 24, 2.0, 2.0, 2.0, 0.08);
         level.playSound(null, at, MoonMobsSetup.CORE_ROAR.get(), SoundSource.HOSTILE, 3.0f, 0.7f);
         empty = 0;
         return e;
@@ -119,7 +119,7 @@ public final class CoreArena {
             g.setHome(at);
             g.addTag(TAG);
             level.addFreshEntity(g);
-            level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 40, 0.4, 1.0, 0.4, 0.06);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 24, 0.4, 1.0, 0.4, 0.06);
         }
         level.playSound(null, c, MoonMobsSetup.CORE_ALLIES.get(), SoundSource.NEUTRAL, 2.0f, 1.0f);
     }
@@ -164,7 +164,7 @@ public final class CoreArena {
         // 四人は光に還る (少し間を置いて)
         Tasks.later(60, () -> {
             for (TownGuestEntity g : allyList(level)) {
-                level.sendParticles(ParticleTypes.END_ROD, g.getX(), g.getY() + 1, g.getZ(), 60, 0.4, 1.2, 0.4, 0.08);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g.getX(), g.getY() + 1, g.getZ(), 24, 0.4, 1.2, 0.4, 0.08);
                 g.discard();
             }
         });
@@ -178,5 +178,10 @@ public final class CoreArena {
                 }
             });
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

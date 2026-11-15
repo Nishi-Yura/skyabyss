@@ -338,8 +338,8 @@ public final class Ch4Ground {
             return false;
         }
         int y = p.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, c.getX(), c.getZ());
-        p.serverLevel().sendParticles(p, ParticleTypes.LAVA, true, c.getX() + 0.5, y + 1, c.getZ() + 0.5, 30, 6, 1, 6, 0);
-        p.serverLevel().sendParticles(p, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, c.getX() + 0.5, y + 2, c.getZ() + 0.5, 12, 4, 2, 4, 0.01);
+        p.serverLevel().sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), true, c.getX() + 0.5, y + 1, c.getZ() + 0.5, 24, 6, 1, 6, 0);
+        p.serverLevel().sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.getX() + 0.5, y + 2, c.getZ() + 0.5, 12, 4, 2, 4, 0.01);
         Tasks.later(40, () -> Notice.narrate(p, "message.skyabyss.ch4g.watch.night"));
         return true;
     }
@@ -419,8 +419,8 @@ public final class Ch4Ground {
             Notice.narrate(player, "message.skyabyss.ch4g.pit.stand_cold");
             return false;
         }
-        level.sendParticles(ParticleTypes.SMALL_FLAME, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 12, 1.5, 0.4, 1.5, 0.01);
-        level.sendParticles(ParticleTypes.WHITE_ASH, at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 20, 2.0, 0.8, 2.0, 0.01);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 12, 1.5, 0.4, 1.5, 0.01);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 20, 2.0, 0.8, 2.0, 0.01);
         level.playSound(null, at, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.4f, 0.8f);
         player.playNotifySound(EmberTitanSetup.FAR_BEAT.get(), SoundSource.AMBIENT, 0.6f, 1.2f);
         Notice.narrate(player, "message.skyabyss.ch4g.rocks.stone");
@@ -444,5 +444,10 @@ public final class Ch4Ground {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         DeadForgePit.forget();
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

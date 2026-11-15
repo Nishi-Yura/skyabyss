@@ -70,11 +70,16 @@ public class SinkingAnchorItem extends AbyssGearWeaponItem {
         }
         for (int i = 0; i < 24; i++) {
             double a = Math.PI * 2 * i / 24;
-            level.sendParticles(ParticleTypes.SCULK_SOUL, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, -0.02, 0, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, -0.02, 0, 0.01);
         }
-        level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y + 0.5, c.z, 20, r * 0.4, 0.2, r * 0.4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.5, c.z, 20, r * 0.4, 0.2, r * 0.4, 0.02);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.2f, 0.5f);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 0.6f);
         return hit;
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

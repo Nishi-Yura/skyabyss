@@ -365,8 +365,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(this) < 300 * 300) {
                     double y = level.getSeaLevel() + 0.5;
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.BUBBLE_POP, true, getX(), y, getZ(), 30, 28, 0.3, 28, 0.02);
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.SPLASH, true, getX(), y, getZ(), 20, 30, 0.2, 30, 0.1);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, getX(), y, getZ(), 24, 28, 0.3, 28, 0.02);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, getX(), y, getZ(), 20, 30, 0.2, 30, 0.1);
                 }
             }
         }
@@ -1195,5 +1195,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

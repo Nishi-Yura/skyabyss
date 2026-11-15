@@ -59,11 +59,11 @@ public class RestHearthBlock extends Block {
                 case STORM -> ParticleTypes.ELECTRIC_SPARK;
                 case EMBER -> ParticleTypes.FLAME;
             };
-            level.addParticle(spark, pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.4, pos.getY() + 0.6,
+            level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.4, pos.getY() + 0.6,
                     pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.4, 0, 0.04, 0);
         }
         if (random.nextInt(14) == 0) {
-            level.addAlwaysVisibleParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5,
+            level.addAlwaysVisibleParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5,
                     0, 0.07, 0);
         }
     }

@@ -79,6 +79,6 @@ public class GraveBlock extends Block {
         double x = pos.getX() + 0.35 + random.nextDouble() * 0.3;
         double y = pos.getY() + 0.6 + random.nextDouble() * 0.3;
         double z = pos.getZ() + 0.35 + random.nextDouble() * 0.3;
-        level.addParticle(ParticleTypes.END_ROD, x, y, z, 0, 0.012, 0);
+        level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, 0, 0.012, 0);
     }
 }

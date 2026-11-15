@@ -197,9 +197,9 @@ public final class BreakGauge {
             double y = boss.getY() + boss.getBbHeight() * 0.6;
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(boss) < 96 * 96) {
-                    level.sendParticles(p, ParticleTypes.END_ROD, true, boss.getX(), y, boss.getZ(), 40, boss.getBbWidth() * 0.5,
+                    level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, boss.getX(), y, boss.getZ(), 24, boss.getBbWidth() * 0.5,
                             boss.getBbHeight() * 0.3, boss.getBbWidth() * 0.5, 0.25);
-                    level.sendParticles(p, ParticleTypes.CRIT, true, boss.getX(), y, boss.getZ(), 30, boss.getBbWidth() * 0.4,
+                    level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, boss.getX(), y, boss.getZ(), 24, boss.getBbWidth() * 0.4,
                             boss.getBbHeight() * 0.3, boss.getBbWidth() * 0.4, 0.5);
                 }
             }
@@ -215,7 +215,7 @@ public final class BreakGauge {
         Vec3 v = boss.getDeltaMovement();
         boss.setDeltaMovement(0, v.y, 0);
         if (boss.tickCount % 10 == 0 && boss.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.CRIT, boss.getX(), boss.getY() + boss.getBbHeight() + 0.3, boss.getZ(), 4,
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), boss.getX(), boss.getY() + boss.getBbHeight() + 0.3, boss.getZ(), 4,
                     boss.getBbWidth() * 0.3, 0.1, boss.getBbWidth() * 0.3, 0.05);
         }
     }

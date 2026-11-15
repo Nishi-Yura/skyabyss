@@ -778,7 +778,7 @@ public final class SaltVault {
         dropTokens(p);
         ServerLevel level = p.serverLevel();
         level.playSound(null, p.blockPosition(), SoundEvents.WOOD_BREAK, SoundSource.PLAYERS, 1.0f, 0.8f);
-        level.sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 1, p.getZ(), 30, 0.5, 0.4, 0.5, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 1, p.getZ(), 24, 0.5, 0.4, 0.5, 0.02);
         Notice.hint(p, "message.skyabyss.ch2.vault.broke");
     }
 
@@ -792,7 +792,7 @@ public final class SaltVault {
         }
         level.playSound(null, centre, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.0f, 0.6f);
         level.playSound(null, centre, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 1.0f, 0.8f);
-        level.sendParticles(ParticleTypes.WHITE_ASH, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 60, 0.4, 1.0, 1.0, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 24, 0.4, 1.0, 1.0, 0.02);
         for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 32 * 32) {
                 Notice.narrate(p, "message.skyabyss.ch2.vault.door");
@@ -1021,5 +1021,10 @@ public final class SaltVault {
 
     static void log(String msg) {
         SkyAbyss.LOGGER.info("[ch2 vault] {}", msg);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

@@ -41,7 +41,7 @@ public final class StoryClient {
         }
         held++;
         if (held % 40 == 0) {
-            player.level().addParticle(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 0, -0.08, 0);
+            player.level().addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 0, -0.08, 0);
         }
         if (held % PERIOD == 60 && !(mc.screen instanceof SkyKeyScene)) {
             mc.getSoundManager().play(new SimpleSoundInstance(SoundEvent.createVariableRangeEvent(DEEP_BEAT), SoundSource.AMBIENT, 0.35f, 1f,

@@ -438,7 +438,7 @@ public final class TitanBackTrials {
             owned.setGroupId(group);
         }
         level.addFreshEntity(mob);
-        sendParticlesTo(level, group, ParticleTypes.SOUL, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 20, 0.4, 0.8, 0.4, 0.02);
+        sendParticlesTo(level, group, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 20, 0.4, 0.8, 0.4, 0.02);
         if (group == null) {
             level.playSound(null, pos, SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.5f, 0.6f);
         } else {
@@ -453,12 +453,12 @@ public final class TitanBackTrials {
         // 区画の写しのセルの決まりの中 (TrialFrame) では、写しの座標に出す
         net.minecraft.world.phys.Vec3 at = jp.revati.skyabyss.trial.TrialFrame.current().world(new net.minecraft.world.phys.Vec3(x, y, z));
         if (group == null) {
-            level.sendParticles(particle, at.x, at.y, at.z, count, dx, dy, dz, speed);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, count, dx, dy, dz, speed);
             return;
         }
         for (ServerPlayer player : Groups.online(level, group)) {
             if (player.distanceToSqr(x, y, z) < 64 * 64) {
-                level.sendParticles(player, particle, false, at.x, at.y, at.z, count, dx, dy, dz, speed);
+                level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, at.x, at.y, at.z, count, dx, dy, dz, speed);
             }
         }
     }
@@ -737,7 +737,7 @@ public final class TitanBackTrials {
     private static void tickHeartPillar(ServerLevel level, UUID group) {
         double px = HEART_CX + 0.5;
         double pz = HEART_CZ + 0.5;
-        sendParticlesTo(level, group, ParticleTypes.END_ROD, px, FLOOR + 1 + (level.getGameTime() % 12), pz, 3, 0.25, 0.2, 0.25, 0.02);
+        sendParticlesTo(level, group, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), px, FLOOR + 1 + (level.getGameTime() % 12), pz, 3, 0.25, 0.2, 0.25, 0.02);
         for (ServerPlayer player : Groups.online(level, group)) {
             if (player.isAlive() && Math.abs(player.getX() - px) < 1.2 && Math.abs(player.getZ() - pz) < 1.2
                     && player.getY() > FLOOR && player.getY() < FLOOR + 12) {
@@ -1221,5 +1221,10 @@ public final class TitanBackTrials {
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area.aabb().inflate(20))) {
             Notice.send(player, message);
         }
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

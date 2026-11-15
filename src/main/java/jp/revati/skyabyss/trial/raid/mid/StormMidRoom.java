@@ -128,7 +128,7 @@ public final class StormMidRoom extends MidRoom {
             bolt.moveTo(top.x, top.y, top.z);
             level.addFreshEntity(bolt);
         }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y + 1, top.z, 80, 1.0, 1.0, 1.0, 0.4);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), top.x, top.y + 1, top.z, 24, 1.0, 1.0, 1.0, 0.4);
         WhaleMidRoom.say(ctx, "raid.skyabyss.SRM.begin");
         return ctx.adopt(raiju);
     }

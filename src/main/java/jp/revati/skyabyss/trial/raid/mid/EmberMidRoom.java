@@ -83,7 +83,7 @@ public final class EmberMidRoom extends MidRoom {
         if (!level.addFreshEntity(smith)) {
             return null;
         }
-        level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 1.5, at.z, 40, 1.0, 1.2, 1.0, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 1.5, at.z, 24, 1.0, 1.2, 1.0, 0.05);
         WhaleMidRoom.say(ctx, "raid.skyabyss.ERM.begin");
         return ctx.adopt(smith);
     }

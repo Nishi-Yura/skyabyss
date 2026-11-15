@@ -126,7 +126,6 @@ public final class FieldHazards {
             Telegraph.in(level, TelegraphShape.circle(x, z, RAIN_RADIUS)).floor(y).warn(RAIN_WARN).danger().owner(mob).victims(canHit::test)
                     .onImpact(s -> {
                         s.playSound(null, x, y, z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.7f);
-                        s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, b), x, y + 0.4, z, 30, 1.0, 0.3, 1.0, 0.15);
                     })
                     .onHit((s, player) -> {
                         player.hurt(source.get(), damage.get() * 0.8f);
@@ -146,10 +145,7 @@ public final class FieldHazards {
         }
         if (rainTicks >= RAIN_WARN - 10 && rainTicks % 2 == 0) {
             double drop = (RAIN_WARN - rainTicks) / 10.0;
-            BlockParticleOption opt = new BlockParticleOption(ParticleTypes.BLOCK, block.get());
-            for (Vec3 c : rainSpots) {
-                level.sendParticles(opt, c.x, c.y + 1 + drop * 9, c.z, 3, 0.3, 0.2, 0.3, 0);
-            }
+            net.minecraft.core.particles.SimpleParticleType opt = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         }
     }
 
@@ -158,7 +154,7 @@ public final class FieldHazards {
         level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 1.6f, 0.8f);
         double base = mob.getRandom().nextDouble() * Math.PI * 2;
         double span = Math.toRadians(100);
-        BlockParticleOption opt = new BlockParticleOption(ParticleTypes.BLOCK, block.get());
+        net.minecraft.core.particles.SimpleParticleType opt = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         double cx = mob.getX();
         double cz = mob.getZ();
         double cy = mob.getY();
@@ -170,9 +166,6 @@ public final class FieldHazards {
                     .onImpact(s -> {
                         if (first) {
                             s.playSound(null, cx, cy, cz, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.4f, 1.2f);
-                        }
-                        for (double d = 2; d <= SWEEP_LENGTH; d += 1.5) {
-                            s.sendParticles(opt, cx + Math.cos(start) * d, cy + 0.6, cz + Math.sin(start) * d, 4, 0.3, 0.3, 0.3, 0.1);
                         }
                     })
                     .onHit((s, player) -> {
@@ -189,7 +182,7 @@ public final class FieldHazards {
     void ring(ServerLevel level) {
         cue.send("field_ring", RING_WARN);
         level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.4f, 0.7f);
-        BlockParticleOption opt = new BlockParticleOption(ParticleTypes.BLOCK, block.get());
+        net.minecraft.core.particles.SimpleParticleType opt = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         double cx = mob.getX();
         double cz = mob.getZ();
         double cy = mob.getY();
@@ -203,11 +196,6 @@ public final class FieldHazards {
                                 (float) Math.toDegrees(a), 0.8f + (k % 3) * 0.15f, 16);
                     }
                     s.playSound(null, cx, cy, cz, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 0.6f);
-                    for (int k = 0; k < 24; k++) {
-                        double a = k * Math.PI * 2 / 24;
-                        double r = (RING_IN + RING_OUT) / 2;
-                        s.sendParticles(opt, cx + Math.cos(a) * r, cy + 0.4, cz + Math.sin(a) * r, 8, 1.2, 0.6, 1.2, 0.2);
-                    }
                 })
                 .onHit((s, player) -> {
                     player.hurt(source.get(), damage.get());

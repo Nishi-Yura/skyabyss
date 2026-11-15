@@ -189,7 +189,7 @@ public final class EmberApprentices extends EmberRoom {
         spawned++;
         nextMove = t + 50;
         moveIndex = 0;
-        particles(ctx, ParticleTypes.LAVA, m.getX(), m.getY() + 1, m.getZ(), 20, 0.6, 0.2);
+        particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), m.getX(), m.getY() + 1, m.getZ(), 20, 0.6, 0.2);
         ctx.level().playSound(null, m.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 1.2f, 0.5f);
         bar(ctx, Component.translatable("raid.skyabyss.ER6.enter", i + 1, COUNT));
         if (bossFollows && i + 1 == count()) {
@@ -251,7 +251,7 @@ public final class EmberApprentices extends EmberRoom {
                     double x = p0.getX();
                     double z = p0.getZ();
                     Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, 1.8)).prop(PropFx.toss("fireball").size(0.6f)).floor(fy).warn(MOVE_WARN + 4 * k).danger()
-                            .onImpact(l -> l.sendParticles(ParticleTypes.LAVA, x, fy + 0.2, z, 8, 0.6, 0.1, 0.6, 0.1))
+                            .onImpact(l -> l.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, fy + 0.2, z, 8, 0.6, 0.1, 0.6, 0.1))
                             .onHit((l, p) -> {
                                 if (gen == generation) {
                                     hurt(ctx, p, m, SPARK_DAMAGE);
@@ -276,7 +276,6 @@ public final class EmberApprentices extends EmberRoom {
                 Telegraph.in(ctx.level(), new TelegraphShape.Circle(x, z, 4.5)).prop(PropFx.rise("lava_pillar")).floor(fy).warn(MOVE_WARN + 4).danger()
                         .onImpact(l -> {
                             l.playSound(null, m.blockPosition(), SoundEvents.LAVA_EXTINGUISH, SoundSource.HOSTILE, 1.4f, 0.6f);
-                            l.sendParticles(ParticleTypes.CLOUD, x, fy + 0.3, z, 30, 2.0, 0.1, 2.0, 0.05);
                         })
                         .onHit((l, p) -> {
                             if (gen == generation) {
@@ -318,7 +317,7 @@ public final class EmberApprentices extends EmberRoom {
                 if (!bossFollows) {
                     opened(ctx);
                 }
-                particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
                 return;
             }
             nextSpawn = t + GAP;
@@ -364,7 +363,7 @@ public final class EmberApprentices extends EmberRoom {
         defeated = COUNT;
         lamps(ctx);
         opened(ctx);
-        particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
+        particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), ctx.origin().getX() + 0.5, ctx.origin().getY() + 3, ctx.origin().getZ() + 0.5, 30, 1.5, 0.2);
     }
 
     @Override

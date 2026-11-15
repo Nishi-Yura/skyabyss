@@ -148,7 +148,7 @@ public final class StarLamps {
     static void ring(ServerLevel level, Vec3 c, double r, int n) {
         for (int i = 0; i < n; i++) {
             double a = i / (double) n * Math.PI * 2 + level.getGameTime() * 0.02;
-            level.sendParticles(ParticleTypes.END_ROD, c.x + Math.cos(a) * r, c.y - 0.3, c.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0.0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y - 0.3, c.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0.0);
         }
     }
 
@@ -161,5 +161,10 @@ public final class StarLamps {
                 fade(level, l);
             }
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

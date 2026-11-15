@@ -79,7 +79,7 @@ public final class EmberTravel {
         ON_PLAIN.remove(player.getUUID());
         if (player.level() instanceof ServerLevel from) {
             from.playSound(null, player.getX(), player.getY(), player.getZ(), EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.5f, 1.0f);
-            from.sendParticles(ParticleTypes.WHITE_ASH, player.getX(), player.getY() + 1, player.getZ(), 40, 0.8, 0.8, 0.8, 0.05);
+            from.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1, player.getZ(), 24, 0.8, 0.8, 0.8, 0.05);
         }
         EmberSurfaceNetwork.send(player, new EmberSurfaceNetwork.Plunge(30));
         Vec3 at = arrival(back);
@@ -273,5 +273,10 @@ public final class EmberTravel {
     // 自己テスト用
     static int plainTicks(UUID id) {
         return ON_PLAIN.getOrDefault(id, 0);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

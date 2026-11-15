@@ -45,7 +45,7 @@ public final class DepthTraps {
         if (p.tickCount % 20 == 0) {
             for (Trap t : i.plan.traps()) {
                 if (!i.trapsUsed.contains(key(t)) && Math.abs(t.x() - tx) + Math.abs(t.z() - tz) <= 8) {
-                    level.sendParticles(HINT, i.ox + t.x() + 0.5, DepthPlan.FLOOR_Y + 1.2, i.oz + t.z() + 0.5, 2, 0.25, 0.1, 0.25, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), i.ox + t.x() + 0.5, DepthPlan.FLOOR_Y + 1.2, i.oz + t.z() + 0.5, 2, 0.25, 0.1, 0.25, 0);
                 }
             }
         }
@@ -84,7 +84,7 @@ public final class DepthTraps {
         i.trapsUsed.add(key(t));
         BlockPos floor = i.pos(t.x(), DepthFloorBuild.FLOOR_YI, t.z());
         level.setBlock(floor, Blocks.POLISHED_BLACKSTONE.defaultBlockState(), 3);
-        level.sendParticles(HINT, floor.getX() + 0.5, floor.getY() + 1.2, floor.getZ() + 0.5, 24, 0.4, 0.3, 0.4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), floor.getX() + 0.5, floor.getY() + 1.2, floor.getZ() + 0.5, 24, 0.4, 0.3, 0.4, 0.02);
         float dmg = (float) Math.min(10, 3 + 0.15 * i.floor);
         String key = "message.skyabyss.depths.trap." + t.kind().name().toLowerCase(java.util.Locale.ROOT);
         switch (t.kind()) {
@@ -140,5 +140,10 @@ public final class DepthTraps {
         v.setOffers(DepthLoot.offers(i.floor));
         v.addTag(MERCHANT_TAG);
         level.addFreshEntity(v);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

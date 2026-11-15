@@ -433,7 +433,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, -4, 0);
-                        level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
                     }
                 }
             }
@@ -446,7 +446,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, 14, 0);
-                        level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
                     }
                 }
             }
@@ -1026,5 +1026,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

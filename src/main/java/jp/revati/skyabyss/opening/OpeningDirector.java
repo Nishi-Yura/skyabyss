@@ -510,7 +510,7 @@ public final class OpeningDirector {
             // 帳面を拾う = 伝承の書を手に入れる (最初の頁「忘れないうちに書け」が記される)
             Lore.unlock(player, Lore.BOOK_ENTRY, true);
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.7f);
-            level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
         }
 
         @Override
@@ -585,7 +585,7 @@ public final class OpeningDirector {
             item.setTarget(player.getUUID());
             item.getPersistentData().putUUID(PAGE_OWNER_TAG, player.getUUID());
             level.addFreshEntity(item);
-            level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.01);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.9f);
             PAGES.put(player.getUUID(), item.getUUID());
             Notice.narrate(player, "message.skyabyss.beats.page_falls");

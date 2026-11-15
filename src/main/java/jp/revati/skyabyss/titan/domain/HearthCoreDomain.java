@@ -62,7 +62,7 @@ public final class HearthCoreDomain extends HeartDomain {
             for (int i = 0; i < 16; i++) {
                 double a = Math.PI * 2 * i / 16 + t * 0.05;
                 double r = radius * (t / (double) DECLARE_TICKS);
-                level.sendParticles(ParticleTypes.FLAME, cx + Math.cos(a) * r, floorY + 0.4, cz + Math.sin(a) * r, 1, 0.1, 0.2, 0.1, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * r, floorY + 0.4, cz + Math.sin(a) * r, 1, 0.1, 0.2, 0.1, 0.02);
             }
         }
     }
@@ -110,10 +110,6 @@ public final class HearthCoreDomain extends HeartDomain {
                 .active(ACTIVE).repeatEvery(REPEAT)
                 .onImpact(s -> {
                     s.playSound(null, cx, floorY, cz, SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 0.9f, 0.7f);
-                    for (int i = 0; i < 12; i++) {
-                        double a = Math.PI * 2 * i / 12;
-                        s.sendParticles(ParticleTypes.FLAME, cx + Math.cos(a) * rr, floorY + 0.4, cz + Math.sin(a) * rr, 3, 0.4, 0.2, 0.4, 0.04);
-                    }
                 })
                 .onHit((s, p) -> {
                     striker.accept(p, DAMAGE);
@@ -126,17 +122,14 @@ public final class HearthCoreDomain extends HeartDomain {
     protected void ambient(ServerLevel level, int t) {
         double a = heart.getRandom().nextDouble() * Math.PI * 2;
         double r = heart.getRandom().nextDouble() * radius;
-        level.sendParticles(ParticleTypes.SMALL_FLAME, cx + Math.cos(a) * r, floorY + 0.3, cz + Math.sin(a) * r, 2, 0.3, 0.1, 0.3, 0.01);
-        level.sendParticles(ParticleTypes.ASH, cx + Math.cos(a) * r, floorY + 2.5, cz + Math.sin(a) * r, 6, 1.5, 1.0, 1.5, 0.0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * r, floorY + 0.3, cz + Math.sin(a) * r, 2, 0.3, 0.1, 0.3, 0.01);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), cx + Math.cos(a) * r, floorY + 2.5, cz + Math.sin(a) * r, 6, 1.5, 1.0, 1.5, 0.0);
     }
 
     @Override
     protected void onEnd(ServerLevel level, boolean shattered) {
         level.playSound(null, cx, floorY + 2, cz, shattered ? SoundEvents.GENERIC_EXPLODE.value() : SoundEvents.FIRE_EXTINGUISH,
                 SoundSource.HOSTILE, shattered ? 1.8f : 2.5f, shattered ? 0.8f : 0.7f);
-        if (shattered) {
-            level.sendParticles(ParticleTypes.LAVA, cx, floorY + 2, cz, 50, 3, 1, 3, 0.2);
-        }
     }
 
     // ---------------------------------------------------------------- 仕掛け: 熾の核 (三つ)
@@ -182,14 +175,14 @@ public final class HearthCoreDomain extends HeartDomain {
             if (near > 0) {
                 n.state = Math.min(quench(), n.state + Math.min(near, 3));
                 if (t % 5 == 0) {
-                    burst(level, n, ParticleTypes.CLOUD, 6, 0.4, 0.05);
+                    burst(level, n, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 6, 0.4, 0.05);
                     tone(level, n.pos, SoundEvents.FIRE_EXTINGUISH, 0.6f, 1.2f);
                 }
                 if (n.state >= quench()) {
                     n.done = true;
                     n.flash = 14;
                     n.flashRgb = 0x66E08A;
-                    burst(level, n, ParticleTypes.LARGE_SMOKE, 30, 0.6, 0.1);
+                    burst(level, n, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 30, 0.6, 0.1);
                     tone(level, n.pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, 2.5f, 0.8f);
                     tell(level, "message.skyabyss.domain.hearth_core.step", solvedCount(), NODES);
                 }

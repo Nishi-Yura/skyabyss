@@ -384,7 +384,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             world.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, big ? 0.8f : 1.5f);
             world.playSound(null, pos, SoundEvents.SMITHING_TABLE_USE, SoundSource.BLOCKS, 0.7f, 1.2f);
             if (world instanceof ServerLevel server) {
-                server.sendParticles(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, big ? 24 : 12, 0.25, 0.3, 0.25, 0.5);
+                server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, big ? 24 : 12, 0.25, 0.3, 0.25, 0.5);
             }
         });
     }
@@ -442,7 +442,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
                 world.playSound(null, pos, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.BLOCKS, 1f, 0.9f);
             }
             if (world instanceof ServerLevel server) {
-                server.sendParticles(enhanced ? ParticleTypes.END_ROD : ParticleTypes.REVERSE_PORTAL,
+                server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW),
                         pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, enhanced ? 16 : 24, 0.25, 0.3, 0.25, 0.03);
             }
         });
@@ -457,7 +457,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
                 world.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1f, 1.4f);
             }
             if (world instanceof ServerLevel server) {
-                server.sendParticles(confirmed ? ParticleTypes.END_ROD : ParticleTypes.ENCHANT,
+                server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW),
                         pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, confirmed ? 12 : 20, 0.25, 0.3, 0.25, 0.4);
             }
         });
@@ -468,7 +468,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             world.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.4f, 0.6f);
             world.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.6f, 1.2f);
             if (world instanceof ServerLevel server) {
-                server.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 30, 0.3, 0.5, 0.3, 0.05);
+                server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 24, 0.3, 0.5, 0.3, 0.05);
             }
         });
     }

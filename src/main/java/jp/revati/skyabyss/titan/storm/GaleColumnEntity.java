@@ -111,7 +111,7 @@ public class GaleColumnEntity extends Entity implements jp.revati.skyabyss.titan
                     new jp.revati.skyabyss.titan.end.BoardGlow.Shape(new Vec3(baseX, baseY + 1.5, baseZ), (float) ENTRY_RADIUS, 2.5f, (float) ENTRY_RADIUS, 0f, baseY, top, 1.4f));
         }
         if (tickCount % 10 == 0) {
-            StormFx.ring(level, ParticleTypes.CLOUD, new Vec3(baseX, baseY + 0.5, baseZ), RADIUS, 8);
+            StormFx.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), new Vec3(baseX, baseY + 0.5, baseZ), RADIUS, 8);
             level.playSound(null, baseX, baseY, baseZ, StormSetup.GALE.get(), SoundSource.AMBIENT, 1.2f, 0.9f + random.nextFloat() * 0.2f);
         }
         Set<UUID> inside = new HashSet<>();

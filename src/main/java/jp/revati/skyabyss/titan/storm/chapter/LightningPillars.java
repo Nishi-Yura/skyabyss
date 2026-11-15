@@ -169,7 +169,7 @@ public final class LightningPillars {
         if (c != null) {
             level.playSound(null, c, SoundEvents.COPPER_DOOR_OPEN, SoundSource.BLOCKS, 1.2f, 0.5f);
             level.playSound(null, c, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, 0.6f);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 40, 1.0, 1.2, 0.3, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 24, 1.0, 1.2, 0.3, 0.05);
         }
         return true;
     }
@@ -183,7 +183,7 @@ public final class LightningPillars {
         bolt.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5);
         bolt.setVisualOnly(true);
         level.addFreshEntity(bolt);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 0.6, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.08);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.6, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.08);
     }
 
     // ---------------------------------------------------------------- 見回り (StormChapter の tick から EVERY ごとに)
@@ -300,5 +300,10 @@ public final class LightningPillars {
     static void forget() {
         LAST_MASK.clear();
         LAST_SAMPLE.clear();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

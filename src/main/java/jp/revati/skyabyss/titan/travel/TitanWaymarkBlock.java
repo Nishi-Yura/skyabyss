@@ -111,7 +111,7 @@ public class TitanWaymarkBlock extends HorizontalDirectionalBlock {
         switch (state.addWaymark(pos)) {
             case ADDED -> {
                 level.playSound(null, pos, TravelSetup.WAYMARK_SOUND.get(), SoundSource.BLOCKS, 1f, 1f);
-                level.sendParticles(ParticleTypes.GLOW, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 12, 0.3, 0.4, 0.3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 12, 0.3, 0.4, 0.3, 0.02);
                 Notice.unlock(player, "message.skyabyss.travel.waymark.added",
                         mark.name().isEmpty() ? Voyages.waymarkName(mark.biome()) : net.minecraft.network.chat.Component.literal(mark.name()),
                         state.waymarks.size(), TravelState.MAX_WAYMARKS);
@@ -133,7 +133,7 @@ public class TitanWaymarkBlock extends HorizontalDirectionalBlock {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (random.nextInt(4) == 0) {
-            level.addParticle(ParticleTypes.GLOW, pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 0.5 + random.nextDouble() * 0.5,
+            level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 0.5 + random.nextDouble() * 0.5,
                     pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0, 0.01, 0);
         }
     }

@@ -184,7 +184,7 @@ public final class WorldEventFight {
             e.seals.add(new Seal(at));
         }
         level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 2f, 0.6f);
-        level.sendParticles(ParticleTypes.END_ROD, boss.getX(), boss.getY() + boss.getBbHeight() * 0.6, boss.getZ(), 80, 2.0, 1.5, 2.0, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), boss.getX(), boss.getY() + boss.getBbHeight() * 0.6, boss.getZ(), 24, 2.0, 1.5, 2.0, 0.05);
         for (ServerPlayer p : nearby(level, e.spot)) {
             Notice.alert(p, "message.skyabyss.world_event.seal", boss.getDisplayName());
         }
@@ -200,7 +200,7 @@ public final class WorldEventFight {
                         s.fill = Math.min(1f, s.fill + FILL);
                         if (s.full()) {
                             level.playSound(null, s.pos.x, s.pos.y, s.pos.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 2f, 1.2f);
-                            level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, s.pos.x, s.pos.y + 1, s.pos.z, 40, 1.2, 1.0, 1.2, 0.2);
+                            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.pos.x, s.pos.y + 1, s.pos.z, 24, 1.2, 1.0, 1.2, 0.2);
                         } else {
                             level.playSound(null, s.pos.x, s.pos.y, s.pos.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.8f + s.fill);
                         }
@@ -213,7 +213,7 @@ public final class WorldEventFight {
                 Telegraph.in(level, TelegraphShape.circle(s.pos.x, s.pos.z, SEAL_RADIUS)).floor(s.pos.y).warn(0).active(22).goal().start();
                 double h = 1 + 6 * s.fill;
                 for (double y = 0; y < h; y += 0.5) {
-                    level.sendParticles(ParticleTypes.END_ROD, s.pos.x, s.pos.y + y, s.pos.z, 1, 0.05, 0, 0.05, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.pos.x, s.pos.y + y, s.pos.z, 1, 0.05, 0, 0.05, 0);
                 }
             }
         }
@@ -224,7 +224,7 @@ public final class WorldEventFight {
                 Vec3 d = s.pos.add(0, 1, 0).subtract(from);
                 for (int i = 1; i < 12; i++) {
                     Vec3 q = from.add(d.scale(i / 12.0));
-                    level.sendParticles(ParticleTypes.ENCHANT, q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                 }
             }
         }
@@ -243,7 +243,7 @@ public final class WorldEventFight {
         e.seals.clear();
         e.sealsDone++;
         level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 2.5f, 0.5f);
-        level.sendParticles(ParticleTypes.FLASH, boss.getX(), boss.getY() + 1, boss.getZ(), 1, 0, 0, 0, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), boss.getX(), boss.getY() + 1, boss.getZ(), 1, 0, 0, 0, 0);
         if (solved) {
             // 膝をつく: 隙を開け、崩しのゲージを満たしきる
             BreakGauge.solved(boss, KNEEL_TICKS);
@@ -272,7 +272,7 @@ public final class WorldEventFight {
         e.enraged = true;
         WorldEvents.modifier(boss.getAttribute(Attributes.MOVEMENT_SPEED), RAGE_SPEED, 0.3);
         level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.5f);
-        level.sendParticles(ParticleTypes.ANGRY_VILLAGER, boss.getX(), boss.getY() + boss.getBbHeight(), boss.getZ(), 12, 1.2, 0.5, 1.2, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), boss.getX(), boss.getY() + boss.getBbHeight(), boss.getZ(), 12, 1.2, 0.5, 1.2, 0);
         for (ServerPlayer p : nearby(level, e.spot)) {
             Notice.warn(p, "message.skyabyss.world_event.rage", boss.getDisplayName());
         }
@@ -304,7 +304,7 @@ public final class WorldEventFight {
                         double angle = Telegraph.angleOf(side.scale(half));
                         Telegraph.in(level, TelegraphShape.line(a0.x, a0.z, angle, len, 1.4)).prop(PropFx.along("water_spout").size(0.6f))
                                 .floor(y).warn(30 + k * 12).danger().owner(boss).target(t)
-                                .onImpact(server -> server.sendParticles(ParticleTypes.SPLASH, a0.x, y + 0.5, a0.z, 30, 3, 0.3, 3, 0.2))
+                                .onImpact(server -> server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), a0.x, y + 0.5, a0.z, 30, 3, 0.3, 3, 0.2))
                                 .onHit((server, player) -> {
                                     player.hurt(src, dmg);
                                     player.knockback(1.0, -dir.x, -dir.z);
@@ -337,7 +337,7 @@ public final class WorldEventFight {
                 // 噴き上げ: 大いなるもののまわりの輪 (内は安全) と、人ごとの火の柱
                 Telegraph.in(level, TelegraphShape.ring(boss.getX(), boss.getZ(), 4, 12)).prop(PropFx.ring("lava_pillar", 12))
                         .floor(y).warn(34).danger().owner(boss)
-                        .onImpact(server -> server.sendParticles(ParticleTypes.LAVA, boss.getX(), y + 0.5, boss.getZ(), 60, 6, 0.4, 6, 0.1))
+                        .onImpact(server -> server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), boss.getX(), y + 0.5, boss.getZ(), 60, 6, 0.4, 6, 0.1))
                         .onHit((server, player) -> {
                             player.hurt(src, dmg);
                             player.igniteForSeconds(3);
@@ -347,7 +347,7 @@ public final class WorldEventFight {
                     Vec3 at = p.position();
                     Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.2)).prop(PropFx.rise("lava_pillar"))
                             .floor(y).warn(46).danger().owner(boss).target(p)
-                            .onImpact(server -> server.sendParticles(ParticleTypes.FLAME, at.x, y + 1, at.z, 40, 0.6, 1.5, 0.6, 0.05))
+                            .onImpact(server -> server.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, y + 1, at.z, 40, 0.6, 1.5, 0.6, 0.05))
                             .onHit((server, player) -> {
                                 player.hurt(src, dmg * 0.8f);
                                 player.igniteForSeconds(3);
@@ -373,7 +373,6 @@ public final class WorldEventFight {
                     Telegraph.in(level, TelegraphShape.circle(s.x, s.z, 2.6)).prop(PropFx.fall("rock"))
                             .floor(y).warn(warn).danger().owner(boss)
                             .onImpact(server -> {
-                                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), s.x, y + 4, s.z, 40, 1.0, 1.5, 1.0, 0.1);
                                 server.playSound(null, s.x, y, s.z, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
                             })
                             .onHit((server, player) -> player.hurt(src, dmg))

@@ -1261,7 +1261,5 @@ public class StoneWhaleHeart extends HeartBoss {
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide && random.nextFloat() < 0.2f) {
-        }
     }
 }

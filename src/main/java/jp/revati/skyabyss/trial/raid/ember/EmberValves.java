@@ -188,7 +188,7 @@ public final class EmberValves extends EmberRoom {
         }
         if (ctx.now() % 8 == 0) {
             for (int i = 0; i < 4; i++) {
-                particles(ctx, ParticleTypes.SMALL_FLAME, ctx.origin().getX() + VX[i] + 0.5, ctx.origin().getY() + needle[i] + 1.5, ctx.origin().getZ() - HZ + 1.1, 1, 0.1, 0.0);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ctx.origin().getX() + VX[i] + 0.5, ctx.origin().getY() + needle[i] + 1.5, ctx.origin().getZ() - HZ + 1.1, 1, 0.1, 0.0);
             }
         }
     }
@@ -217,12 +217,12 @@ public final class EmberValves extends EmberRoom {
         BlockPos w = ctx.local(VX[i], 3, VALVE_Z);
         ctx.level().playSound(null, w, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1f, 0.6f + 0.1f * needle[i]);
         ctx.level().playSound(null, w, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.6f, 0.8f);
-        particles(ctx, ParticleTypes.SMOKE, w.getX() + 0.5, w.getY() + 1, w.getZ() + 0.5, 6, 0.3, 0.02);
+        particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), w.getX() + 0.5, w.getY() + 1, w.getZ() + 0.5, 6, 0.3, 0.02);
         if (equal()) {
             done = true;
             opened(ctx);
             for (int k = 0; k < 4; k++) {
-                particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + VX[k] + 0.5, ctx.origin().getY() + needle[k] + 1.5, ctx.origin().getZ() - HZ + 1.5, 8, 0.4, 0.1);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), ctx.origin().getX() + VX[k] + 0.5, ctx.origin().getY() + needle[k] + 1.5, ctx.origin().getZ() - HZ + 1.5, 8, 0.4, 0.1);
             }
             ctx.level().playSound(null, ctx.local(0, 2, -HZ), SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.5f, 0.7f);
             bar(ctx, Component.translatable("raid.skyabyss.ER5.done"));

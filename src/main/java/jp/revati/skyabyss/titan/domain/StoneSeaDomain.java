@@ -64,7 +64,7 @@ public final class StoneSeaDomain extends HeartDomain {
             double r = (t / (double) DECLARE_TICKS) * radius;
             for (int i = 0; i < 28; i++) {
                 double a = Math.PI * 2 * i / 28;
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         cx + Math.cos(a) * r, floorY + 0.3, cz + Math.sin(a) * r, 2, 0.2, 0.2, 0.2, 0.05);
             }
         }
@@ -122,7 +122,6 @@ public final class StoneSeaDomain extends HeartDomain {
                 .active(active).jumpClear(0.9)
                 .onImpact(s -> {
                     s.playSound(null, cx, floorY + 1, cz, MobSounds.STONE_HEART_SHOCKWAVE.get(), SoundSource.HOSTILE, 2.2f, 0.9f);
-                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), cx, floorY + 0.5, cz, 50, 2.0, 0.4, 2.0, 0.2);
                 })
                 .onHit((s, p) -> striker.accept(p, WAVE_DAMAGE))
                 .start();
@@ -132,7 +131,6 @@ public final class StoneSeaDomain extends HeartDomain {
         tg(level, TelegraphShape.circle(x, z, SPIKE_RADIUS), SPIKE_WARN).look(jp.revati.skyabyss.combat.AttackLook.DOMAIN_STONE_SPIKE)
                 .onImpact(s -> {
                     s.playSound(null, x, floorY, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.3f, 1.0f);
-                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, floorY + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);
                 })
                 .onHit((s, p) -> striker.accept(p, SPIKE_DAMAGE))
                 .start();
@@ -142,7 +140,7 @@ public final class StoneSeaDomain extends HeartDomain {
     protected void ambient(ServerLevel level, int t) {
         double a = heart.getRandom().nextDouble() * Math.PI * 2;
         double r = heart.getRandom().nextDouble() * radius;
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.MOSSY_STONE_BRICKS.defaultBlockState()),
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                 cx + Math.cos(a) * r, floorY + 0.4, cz + Math.sin(a) * r, 3, 0.4, 0.3, 0.4, 0.02);
     }
 
@@ -150,9 +148,6 @@ public final class StoneSeaDomain extends HeartDomain {
     protected void onEnd(ServerLevel level, boolean shattered) {
         level.playSound(null, cx, floorY + 2, cz, shattered ? MobSounds.STONE_HEART_PLATE_LOCK.get() : MobSounds.STONE_HEART_PHASE.get(),
                 SoundSource.HOSTILE, 3f, shattered ? 0.7f : 1f);
-        if (shattered) {
-            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), cx, floorY + 3, cz, 80, 2.5, 1.5, 2.5, 0.3);
-        }
     }
 
     // ---------------------------------------------------------------- 仕掛け: 共鳴する骨 (三本)
@@ -253,7 +248,7 @@ public final class StoneSeaDomain extends HeartDomain {
                 p.playNotifySound(SoundEvents.NOTE_BLOCK_BELL.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, PITCH[n.index]);
             }
         }
-        burst(level, n, show ? ParticleTypes.END_ROD : ParticleTypes.NOTE, show ? 14 : 6, 0.25, show ? 0.05 : 0.3);
+        burst(level, n, show ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), show ? 14 : 6, 0.25, show ? 0.05 : 0.3);
         column(level, n, show ? 0xFFD76A : 0x66E08A, 1.6f, 8);
     }
 
@@ -299,7 +294,7 @@ public final class StoneSeaDomain extends HeartDomain {
             node.flash = 16;
             node.flashRgb = 0xE0402A;
             tone(level, node.pos, SoundEvents.NOTE_BLOCK_BASS.value(), 2.0f, 0.5f);
-            burst(level, node, ParticleTypes.SMOKE, 10, 0.3, 0.02);
+            burst(level, node, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 10, 0.3, 0.02);
             tell(level, "message.skyabyss.domain.stone_sea.wrong");
             // 旋律をすぐ見せ直す
             showStart = -1;

@@ -66,9 +66,9 @@ public final class EmberRising {
             p.playNotifySound(EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 1.5f, 0.5f);
             // 丘が持ち上がる: 地面の土が舞い上がる (粒だけ)
             if (!ground.isAir()) {
-                level.sendParticles(p, new BlockParticleOption(ParticleTypes.BLOCK, ground), true, c.x, groundY + 0.5, c.z, 160, 28, 1.5, 28, 0.15);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), true, c.x, groundY + 0.5, c.z, 24, 28, 1.5, 28, 0.15);
             }
-            level.sendParticles(p, ParticleTypes.LARGE_SMOKE, true, c.x, groundY + 1, c.z, 40, 24, 2, 24, 0.03);
+            level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, groundY + 1, c.z, 24, 24, 2, 24, 0.03);
             if (Chapters.of(p) == Chapters.EMBER && Progression.stage(p) == Chapters.EMBER.stage()) {
                 Notice.narrate(p, LINE_RISE);
                 told.add(p);
@@ -78,5 +78,10 @@ public final class EmberRising {
             }
         }
         return told;
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

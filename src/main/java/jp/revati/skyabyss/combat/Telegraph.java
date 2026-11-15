@@ -791,7 +791,7 @@ public final class Telegraph {
         double y = floor + 0.1 + lift;
         painter.paint((x, z) -> {
             for (ServerPlayer p : viewers) {
-                level.sendParticles(p, dust, true, x, y, z, 1, 0, 0, 0, 0);
+                level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x, y, z, 1, 0, 0, 0, 0);
             }
         }, step);
     }

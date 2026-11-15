@@ -241,7 +241,7 @@ public final class TideSaplingRoom extends RaidRoom {
             for (int s = 0; s < SAPLINGS; s++) {
                 if (biters[s] > 0 && hp[s] > 0) {
                     hp[s] = Math.max(0, hp[s] - biters[s]);
-                    level.sendParticles(TideRaid.RED, ctx.origin().getX() + AT[s][0] + 0.5, ctx.origin().getY() + 2.5, ctx.origin().getZ() + AT[s][1] + 0.5, 8, 0.4, 0.5, 0.4, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ctx.origin().getX() + AT[s][0] + 0.5, ctx.origin().getY() + 2.5, ctx.origin().getZ() + AT[s][1] + 0.5, 8, 0.4, 0.5, 0.4, 0);
                     level.playSound(null, ctx.origin().offset(AT[s][0], 2, AT[s][1]), SoundEvents.GENERIC_EAT, SoundSource.HOSTILE, 1f, 0.7f);
                     showSapling(ctx, s);
                     if (hp[s] == 0) {
@@ -280,7 +280,7 @@ public final class TideSaplingRoom extends RaidRoom {
         boolean puffer = wave >= 1 && spawnedInWave % 4 == 3;
         spawnedInWave++;
         ServerLevel level = ctx.level();
-        level.sendParticles(ParticleTypes.POOF, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.02);
         TideRaid.spawn(ctx, puffer ? TideMobSetup.BUBBLE_PUFFER.get() : TideMobSetup.REEF_SCUTTLER.get(), at.above(puffer ? 1 : 0));
     }
 
@@ -310,7 +310,7 @@ public final class TideSaplingRoom extends RaidRoom {
             RaidKit.set(level, p, Blocks.WATER.defaultBlockState());
         }
         if (floodRows % 3 == 0) {
-            level.sendParticles(ParticleTypes.SPLASH, ctx.origin().getX() + 0.5, ctx.origin().getY() + 1.6, ctx.origin().getZ() + z + 0.5, 40, HX * 0.6, 0.2, 0.3, 0.1);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), ctx.origin().getX() + 0.5, ctx.origin().getY() + 1.6, ctx.origin().getZ() + z + 0.5, 24, HX * 0.6, 0.2, 0.3, 0.1);
         }
         floodRows++;
     }
@@ -336,7 +336,7 @@ public final class TideSaplingRoom extends RaidRoom {
         drowned.clear();
         if (floodRows >= 0) {
             level.playSound(null, ctx.origin().offset(0, 2, 0), SoundEvents.AMBIENT_UNDERWATER_EXIT, SoundSource.HOSTILE, 2f, 0.8f);
-            level.sendParticles(ParticleTypes.SPLASH, ctx.origin().getX() + 0.5, ctx.origin().getY() + 1.4, ctx.origin().getZ() + 0.5, 120, HX * 0.6, 0.2, FLOOD_Z * 0.6, 0.1);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), ctx.origin().getX() + 0.5, ctx.origin().getY() + 1.4, ctx.origin().getZ() + 0.5, 24, HX * 0.6, 0.2, FLOOD_Z * 0.6, 0.1);
             if (wave + 1 < WAVES) {
                 ctx.say(Component.translatable("message.skyabyss.raid.TR3.ebb"));
             }
@@ -514,5 +514,10 @@ public final class TideSaplingRoom extends RaidRoom {
     public void damage(RaidCtx ctx, int s, int amount) {
         hp[s] = Math.max(0, hp[s] - amount);
         showSapling(ctx, s);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

@@ -372,7 +372,7 @@ public final class LootBoxes {
         }
         // ヒロイック以上: 頭の上に小さな光 (近くの人にも見える。チャットには出さない)
         if (best.atLeast(GearTier.HEROIC)) {
-            p.serverLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, p.getX(), p.getY() + 2.4, p.getZ(), 24, 0.25, 0.2, 0.25, 0.08);
+            p.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 2.4, p.getZ(), 24, 0.25, 0.2, 0.25, 0.08);
         }
     }
 

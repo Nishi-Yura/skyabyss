@@ -203,14 +203,14 @@ public final class BossEmerge {
             case "drop", "thread" -> {
                 // 落ちてくる所の床に影、上から灰がこぼれる
                 if (age % 3 == 0) {
-                    level.sendParticles(ParticleTypes.SMOKE, x, y + 0.1, z, 8, w * (1.2 - p), 0.02, w * (1.2 - p), 0.0);
-                    level.sendParticles(ParticleTypes.ASH, x, top, z, 6, w * 0.6, 0.5, w * 0.6, 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.1, z, 8, w * (1.2 - p), 0.02, w * (1.2 - p), 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, top, z, 6, w * 0.6, 0.5, w * 0.6, 0.0);
                 }
                 if ("thread".equals(r.style()) && age % 2 == 0) {
                     // 天井から主の背へ下がる白い糸 (糸が切れる時まで)
                     double from = y + le.getBbHeight() * 2.6 * (1 - p * 0.6);
                     for (double yy = from; yy < from + 12; yy += 0.6) {
-                        level.sendParticles(ParticleTypes.END_ROD, x, yy, z, 1, 0.02, 0.0, 0.02, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, yy, z, 1, 0.02, 0.0, 0.02, 0.0);
                     }
                 }
                 if ("thread".equals(r.style()) && age % 8 == 0) {
@@ -219,7 +219,7 @@ public final class BossEmerge {
             }
             case "sky" -> {
                 if (age % 3 == 0) {
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + le.getBbHeight() * 2.2 * (1 - p) + 1, z, 16, w, 1.0, w, 0.2);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + le.getBbHeight() * 2.2 * (1 - p) + 1, z, 16, w, 1.0, w, 0.2);
                 }
                 if (age % 15 == 0) {
                     level.playSound(null, x, y, z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.HOSTILE, 0.8f, 1.4f);
@@ -227,8 +227,8 @@ public final class BossEmerge {
             }
             case "grow" -> {
                 if (age % 2 == 0) {
-                    level.sendParticles(ParticleTypes.END_ROD, x, y + 0.6, z, 6, w * p, 1.0 * p + 0.2, w * p, 0.02);
-                    level.sendParticles(ParticleTypes.SNOWFLAKE, x, y + 0.4, z, 8, w, 0.4, w, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.6, z, 6, w * p, 1.0 * p + 0.2, w * p, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.4, z, 8, w, 0.4, w, 0.02);
                 }
                 if (age % 6 == 0) {
                     level.playSound(null, x, y, z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.HOSTILE, 2.0f, 0.5f + p);
@@ -236,7 +236,7 @@ public final class BossEmerge {
             }
             case "unfold" -> {
                 if (age % 2 == 0) {
-                    level.sendParticles(ParticleTypes.WHITE_ASH, x, y + 0.5 + p * le.getBbHeight(), z, 18, w, 0.3, w, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.5 + p * le.getBbHeight(), z, 18, w, 0.3, w, 0.02);
                 }
                 if (age % 7 == 0) {
                     level.playSound(null, x, y, z, SoundEvents.BOOK_PAGE_TURN, SoundSource.HOSTILE, 2.5f, 0.6f);
@@ -255,7 +255,7 @@ public final class BossEmerge {
         if (floor.isAir()) {
             floor = Blocks.DEEPSLATE.defaultBlockState();
         }
-        BlockParticleOption dust = new BlockParticleOption(ParticleTypes.BLOCK, floor);
+        net.minecraft.core.particles.SimpleParticleType dust = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         double w = le.getBbWidth() * 0.7 + 0.8;
         double x = le.getX(), y = le.getY() + 0.15, z = le.getZ();
         if (age < burst && !ground(r.style())) {
@@ -263,30 +263,30 @@ public final class BossEmerge {
         } else if (age < burst) {
             // 地鳴り: 土が跳ね、低い音がだんだん大きく
             if (age % 2 == 0) {
-                level.sendParticles(dust, x, y, z, (int) (6 + 22 * p), w, 0.1, w, 0.12);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, (int) (6 + 22 * p), w, 0.1, w, 0.12);
             }
             switch (r.style()) {
                 case "king" -> {
                     if (age % 3 == 0) {
-                        level.sendParticles(ParticleTypes.SQUID_INK, x, y + 0.2, z, 10, w * 0.9, 0.05, w * 0.9, 0.02);
-                        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 0.4, z, 4, w * 0.6, 0.2, w * 0.6, 0.01);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, y + 0.2, z, 10, w * 0.9, 0.05, w * 0.9, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.4, z, 4, w * 0.6, 0.2, w * 0.6, 0.01);
                     }
                 }
                 case "lord_storm" -> {
                     // 地の下の鼓動: 三度、土が輪に跳ねる
                     if (age == Math.round(r.ticks() * 0.15f) || age == Math.round(r.ticks() * 0.3f) || age == Math.round(r.ticks() * 0.45f)) {
-                        level.sendParticles(dust, x, y, z, 50, w * 1.2, 0.3, w * 1.2, 0.25);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, 24, w * 1.2, 0.3, w * 1.2, 0.25);
                         level.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 2.5f, 0.6f);
                     }
                 }
                 case "lord_salt" -> {
                     if (age % 3 == 0) {
-                        level.sendParticles(ParticleTypes.WHITE_ASH, x, y + 0.3, z, 14, w, 0.3, w, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.3, z, 14, w, 0.3, w, 0.02);
                     }
                 }
                 case "lord_ash" -> {
                     if (age % 3 == 0) {
-                        level.sendParticles(ParticleTypes.SMOKE, x, y + 0.3, z, 8, w, 0.2, w, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.3, z, 8, w, 0.2, w, 0.02);
                     }
                 }
                 default -> {
@@ -297,27 +297,27 @@ public final class BossEmerge {
             }
             if ("lord_rib".equals(r.style()) && (age == Math.round(r.ticks() * 0.15f) || age == Math.round(r.ticks() * 0.42f) || age == Math.round(r.ticks() * 0.68f))) {
                 // 這い上がる一段ごとに骨が鳴る
-                level.sendParticles(dust, x, y + 0.4, z, 40, w, 0.4, w, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.4, z, 24, w, 0.4, w, 0.2);
                 level.playSound(null, x, y, z, SoundEvents.SKELETON_STEP, SoundSource.HOSTILE, 2.5f, 0.5f);
             }
         } else if (age == burst) {
             // 抜けきる: 床が割れて噴く
-            level.sendParticles(dust, x, y + 0.6, z, 140, w * 1.1, 0.8, w * 1.1, 0.3);
-            level.sendParticles(ParticleTypes.EXPLOSION, x, y + 0.4, z, 3, w * 0.6, 0.2, w * 0.6, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.6, z, 24, w * 1.1, 0.8, w * 1.1, 0.3);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.4, z, 3, w * 0.6, 0.2, w * 0.6, 0);
             level.playSound(null, x, y, z, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 2.5f, "king".equals(r.style()) ? 0.5f : 0.7f);
             switch (r.style()) {
                 case "sky" -> level.playSound(null, x, y, z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 1.6f, 1.2f);
                 case "grow" -> level.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 2.5f, 0.6f);
                 case "erupt" -> {
-                    level.sendParticles(ParticleTypes.LAVA, x, y + 0.5, z, 30, w, 0.5, w, 0.3);
-                    level.sendParticles(ParticleTypes.FLAME, x, y + 0.5, z, 60, w, 1.0, w, 0.08);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, y + 0.5, z, 24, w, 0.5, w, 0.3);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.5, z, 24, w, 1.0, w, 0.08);
                 }
                 case "unfold" -> level.sendParticles(ParticleTypes.WHITE_ASH, x, y + 1.5, z, 120, w, 1.5, w, 0.05);
                 default -> {
                 }
             }
         } else if (age % 3 == 0) {
-            level.sendParticles(dust, x, y + 0.2, z, 10, w, 0.2, w, 0.1);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.2, z, 10, w, 0.2, w, 0.1);
         }
     }
 }

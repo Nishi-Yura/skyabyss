@@ -222,13 +222,13 @@ public final class TideMoonRoom extends RaidRoom {
         if (!done && ctx.now() % 20 == 0) {
             for (int k = 0; k < DIALS; k++) {
                 if (phase[k] == correct(k)) {
-                    ctx.level().sendParticles(ParticleTypes.GLOW, origin.getX() + dialX(k) + 0.5, origin.getY() + 3.8, origin.getZ() + dialZ(k) + 0.5, 3, 1.6, 0.2, 0.3, 0.0);
+                    ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), origin.getX() + dialX(k) + 0.5, origin.getY() + 3.8, origin.getZ() + dialZ(k) + 0.5, 3, 1.6, 0.2, 0.3, 0.0);
                 }
             }
         }
         if (done && ctx.now() % 10 == 0) {
             for (int k = 0; k < DIALS; k++) {
-                ctx.level().sendParticles(ParticleTypes.END_ROD, origin.getX() + dialX(k) + 0.5, origin.getY() + 4.5, origin.getZ() + dialZ(k) + 0.5, 2, 0.5, 0.2, 0.1, 0.01);
+                ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), origin.getX() + dialX(k) + 0.5, origin.getY() + 4.5, origin.getZ() + dialZ(k) + 0.5, 2, 0.5, 0.2, 0.1, 0.01);
             }
         }
     }
@@ -356,5 +356,10 @@ public final class TideMoonRoom extends RaidRoom {
 
     public int first() {
         return first;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

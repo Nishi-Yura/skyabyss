@@ -336,7 +336,7 @@ public class Raiju extends GuardMob {
 
     private void tickStunned(ServerLevel server) {
         if (tickCount % 4 == 0) {
-            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.8, getZ(), 6, 0.9, 0.4, 0.9, 0.08);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.8, getZ(), 6, 0.9, 0.4, 0.9, 0.08);
         }
         if (--stunTicks > 0) {
             return;
@@ -600,7 +600,7 @@ public class Raiju extends GuardMob {
                 railLine(server, a, b, actionTick < RAIL_WARN / 2 ? 1.0f : 1.6f);
             }
             if (actionTick % 4 == 0) {
-                warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.2, getZ(), 8, 0.6, 0.6, 0.6, 0.1);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 8, 0.6, 0.6, 0.6, 0.1);
             }
             return;
         }
@@ -620,8 +620,8 @@ public class Raiju extends GuardMob {
         Vec3 now = position();
         for (double t = 0; t <= 1; t += 0.12) {
             Vec3 p = before.lerp(now, t);
-            warn(server, ParticleTypes.END_ROD, p.x, p.y + 0.9, p.z, 2, 0.15, 0.15, 0.15, 0.01);
-            warn(server, ParticleTypes.ELECTRIC_SPARK, p.x, p.y + 0.9, p.z, 3, 0.3, 0.3, 0.3, 0.05);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.9, p.z, 2, 0.15, 0.15, 0.15, 0.01);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.9, p.z, 3, 0.3, 0.3, 0.3, 0.05);
         }
         if (done) {
             setInvisible(false);
@@ -644,7 +644,7 @@ public class Raiju extends GuardMob {
         int n = Math.max(6, (int) (len * 2.5));
         for (int i = 0; i <= n; i++) {
             Vec3 p = a.lerp(b, i / (double) n);
-            warn(server, blue, p.x, p.y + 0.8, p.z, 1, 0.05, 0.05, 0.05, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.8, p.z, 1, 0.05, 0.05, 0.05, 0);
         }
     }
 
@@ -693,7 +693,7 @@ public class Raiju extends GuardMob {
                 .onHit((s, player) -> {
                     if (hit.add(player.getUUID())) {
                         player.hurt(attackSource(), damage);
-                        s.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(), 20, 0.3, 0.6, 0.3, 0.2);
+                        s.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 20, 0.3, 0.6, 0.3, 0.2);
                     }
                 })
                 .start();
@@ -721,8 +721,8 @@ public class Raiju extends GuardMob {
         stunTicks = STUN_TICKS;
         playAction("stun_fall");
         sound(server, RaijuSetup.STUN.get(), 3f, 1f);
-        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, site.floor() + 1, at.z, 60, 1.2, 0.8, 1.2, 0.3);
-        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, site.floor() + 0.5, at.z, 20, 1.0, 0.3, 1.0, 0.02);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, site.floor() + 1, at.z, 24, 1.2, 0.8, 1.2, 0.3);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, site.floor() + 0.5, at.z, 20, 1.0, 0.3, 1.0, 0.02);
         broadcast(server, ModText.battle("message.skyabyss.raiju.stunned"));
         SkyAbyss.LOGGER.debug("Raiju fell off grounded rod {}", i);
     }
@@ -785,9 +785,6 @@ public class Raiju extends GuardMob {
                 holdOnRod();
             }
             face(aim);
-            if (actionTick % 3 == 0) {
-                warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.8, getZ(), 4, 0.8, 0.3, 0.8, 0.05);
-            }
             return;
         }
         if (actionTick == windup) {
@@ -800,7 +797,7 @@ public class Raiju extends GuardMob {
         if (done) {
             land(position());
             playAction("pounce_land");
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.2, getZ(), 30, 1.2, 0.1, 1.2, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.2, getZ(), 24, 1.2, 0.1, 1.2, 0.2);
             if (fromRod) {
                 groundTimer = GROUND_TICKS;
             }
@@ -844,8 +841,8 @@ public class Raiju extends GuardMob {
         if (actionTick == 17 || actionTick == 27 || actionTick == 37) {
             Vec3 look = Vec3.directionFromRotation(0, getYRot());
             Vec3 tip = position().add(look.scale(1.8));
-            warn(server, ParticleTypes.SWEEP_ATTACK, tip.x, getY() + 1.0, tip.z, 1, 0, 0, 0, 0);
-            warn(server, ParticleTypes.ELECTRIC_SPARK, tip.x, getY() + 1.0, tip.z, 10, 0.6, 0.4, 0.6, 0.1);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), tip.x, getY() + 1.0, tip.z, 1, 0, 0, 0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), tip.x, getY() + 1.0, tip.z, 10, 0.6, 0.4, 0.6, 0.1);
         }
         if (actionTick >= CLAW_TICKS) {
             clawCooldown = 30;
@@ -860,7 +857,7 @@ public class Raiju extends GuardMob {
             holdOnRod();
         }
         if (actionTick % 4 == 0) {
-            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.5, getZ(), 20, 1.5, 1, 1.5, 0.2);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.5, getZ(), 20, 1.5, 1, 1.5, 0.2);
         }
         if (actionTick < ROAR_TICKS) {
             return;
@@ -1078,7 +1075,7 @@ public class Raiju extends GuardMob {
         double y = site != null ? site.floor() + 0.1 : at.y + 0.1;
         for (int i = 0; i < 18; i++) {
             double a = i * Math.PI * 2 / 18;
-            warn(server, dust, at.x + Math.cos(a) * r, y, at.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + Math.cos(a) * r, y, at.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
     }
 
@@ -1226,5 +1223,10 @@ public class Raiju extends GuardMob {
     @Override
     protected float getSoundVolume() {
         return 2.2f;
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

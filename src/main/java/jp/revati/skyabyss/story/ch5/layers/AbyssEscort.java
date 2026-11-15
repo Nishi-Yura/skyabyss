@@ -598,7 +598,7 @@ public final class AbyssEscort {
                 e.addTag(LayerFights.TAG);
                 e.addTag(TAG);
                 run.mobs.add(e.getUUID());
-                level.sendParticles(ParticleTypes.LARGE_SMOKE, e.getX(), e.getY() + 0.5, e.getZ(), 8, 0.3, 0.4, 0.3, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + 0.5, e.getZ(), 8, 0.3, 0.4, 0.3, 0.01);
             }
         }
         run.wave++;
@@ -628,7 +628,7 @@ public final class AbyssEscort {
             double d = m.position().distanceTo(at);
             if (d < 1.9) {
                 run.endurance -= DRAIN;
-                level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, at.x, at.y + 1.2, at.z, 2, 0.2, 0.2, 0.2, 0.1);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.x, at.y + 1.2, at.z, 2, 0.2, 0.2, 0.2, 0.1);
                 if (npc != null && now % 20 == 0) {
                     level.playSound(null, npc.blockPosition(), SoundEvents.PLAYER_HURT, SoundSource.NEUTRAL, 0.6f, 0.8f);
                 }
@@ -771,7 +771,7 @@ public final class AbyssEscort {
         run.triggered = false;
         Entity npc = npc(level, run);
         if (npc != null) {
-            level.sendParticles(ParticleTypes.POOF, npc.getX(), npc.getY() + 1, npc.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), npc.getX(), npc.getY() + 1, npc.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
         }
     }
 
@@ -779,7 +779,7 @@ public final class AbyssEscort {
         for (UUID u : run.mobs) {
             Entity e = level.getEntity(u);
             if (e != null) {
-                level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 0.5, e.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + 0.5, e.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
                 e.discard();
             }
         }
@@ -850,11 +850,11 @@ public final class AbyssEscort {
         Vec3 f = run.nodes.get(Math.max(0, Math.min(run.nodes.size() - 1, (int) Math.floor(run.front))));
         if (now % 2 == 0) {
             if (salt) {
-                level.sendParticles(ParticleTypes.CLOUD, f.x, f.y + 0.4, f.z, 6, 1.0, 0.3, 1.0, 0.02);
-                level.sendParticles(ParticleTypes.WHITE_ASH, f.x, f.y + 1.5, f.z, 20, 1.2, 1.2, 1.2, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), f.x, f.y + 0.4, f.z, 6, 1.0, 0.3, 1.0, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), f.x, f.y + 1.5, f.z, 20, 1.2, 1.2, 1.2, 0.02);
             } else {
-                level.sendParticles(ParticleTypes.LARGE_SMOKE, f.x, f.y + 1, f.z, 10, 1.0, 1.0, 1.0, 0.01);
-                level.sendParticles(ParticleTypes.SQUID_INK, f.x, f.y + 1, f.z, 6, 0.8, 0.8, 0.8, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), f.x, f.y + 1, f.z, 10, 1.0, 1.0, 1.0, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), f.x, f.y + 1, f.z, 6, 0.8, 0.8, 0.8, 0.01);
             }
         }
         if (now % 20 == 0) {
@@ -920,7 +920,7 @@ public final class AbyssEscort {
                 level.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             }
         }
-        level.sendParticles(ParticleTypes.CLOUD, c.getX() + 0.5, c.getY(), c.getZ() + 0.5, 4, 0.8, 0.1, 0.8, 0.01);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.getX() + 0.5, c.getY(), c.getZ() + 0.5, 4, 0.8, 0.1, 0.8, 0.01);
     }
 
     // 灰の闇の波: 道すじの上の灯りを喰う。あとで戻す
@@ -931,7 +931,7 @@ public final class AbyssEscort {
             if (st.is(Blocks.SOUL_LANTERN) || st.is(Blocks.LANTERN)) {
                 run.saved.putIfAbsent(q.immutable(), st);
                 level.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-                level.sendParticles(ParticleTypes.SMOKE, q.getX() + 0.5, q.getY() + 0.5, q.getZ() + 0.5, 8, 0.2, 0.2, 0.2, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.getX() + 0.5, q.getY() + 0.5, q.getZ() + 0.5, 8, 0.2, 0.2, 0.2, 0.01);
             }
         }
     }
@@ -1015,7 +1015,7 @@ public final class AbyssEscort {
         }
         Entity npc = npc(level, run);
         if (npc != null) {
-            level.sendParticles(ParticleTypes.CLOUD, npc.getX(), npc.getY() + 1, npc.getZ(), 16, 0.4, 0.8, 0.4, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), npc.getX(), npc.getY() + 1, npc.getZ(), 16, 0.4, 0.8, 0.4, 0.02);
             if (home) {
                 say(level, run, "home." + run.layer);
             }
@@ -1127,7 +1127,7 @@ public final class AbyssEscort {
             level.setBlock(at, st.setValue(CampfireBlock.LIT, on), Block.UPDATE_ALL);
             if (on) {
                 level.playSound(null, at, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1f, 0.7f);
-                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.getX() + 0.5, at.getY() + 0.8, at.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.8, at.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.02);
             }
         }
     }
@@ -1258,5 +1258,10 @@ public final class AbyssEscort {
 
     public static double front(Run run) {
         return run.front;
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

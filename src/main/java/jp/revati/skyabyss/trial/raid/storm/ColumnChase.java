@@ -250,7 +250,7 @@ public final class ColumnChase extends RaidRoom {
         }
         BlockPos at = ctx.origin().offset(keyRel[i][0], 2, keyRel[i][1]);
         ctx.level().playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.3f, 0.6f + 0.25f * count);
-        ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.08);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.08);
         if (!isComplete()) {
             ctx.say(Component.translatable("message.skyabyss.raid.SR4.key", count, KEYS));
         }
@@ -287,17 +287,8 @@ public final class ColumnChase extends RaidRoom {
     // 柱の見た目: 床から天井近くまでの光の粒と、足もとの雲
     private void effects(ServerLevel level, RaidCtx ctx) {
         double y0 = ctx.origin().getY() + 1;
-        if (age % 2 == 0) {
-            for (int k = 0; k < 7; k++) {
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, colX + (level.random.nextDouble() - 0.5) * 0.5, y0 + k * 1.1, colZ + (level.random.nextDouble() - 0.5) * 0.5, 1, 0.1, 0.1, 0.1, 0.02);
-            }
-            level.sendParticles(ParticleTypes.CLOUD, colX, y0 + 0.2, colZ, 2, 0.4, 0.1, 0.4, 0.01);
-        }
         if (age % 12 == 0) {
             level.playSound(null, BlockPos.containing(colX, y0, colZ), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 0.25f, 2.0f);
-        }
-        if (phase == Phase.CHARGE && age % 3 == 0) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, colX, y0 + 1.5, colZ, 8, 0.6, 1.2, 0.6, 0.12);
         }
     }
 
@@ -393,5 +384,10 @@ public final class ColumnChase extends RaidRoom {
 
     public boolean taken(int i) {
         return taken[i];
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

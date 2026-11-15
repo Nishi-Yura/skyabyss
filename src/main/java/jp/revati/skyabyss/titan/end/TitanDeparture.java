@@ -31,14 +31,14 @@ public final class TitanDeparture {
             case Titans.TIDE_SHELL -> ParticleTypes.SPLASH;
             case Titans.THUNDER_WING -> ParticleTypes.ELECTRIC_SPARK;
             case Titans.EMBER -> ParticleTypes.LARGE_SMOKE;
-            default -> ParticleTypes.CLOUD;
+            default -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE);
         };
         double x = titan.getX();
         double y = titan.getY() + titan.getBbHeight() * 0.5;
         double z = titan.getZ();
         for (ServerPlayer p : jp.revati.skyabyss.util.Players.snapshot(level.players())) {
             if (p.distanceToSqr(x, p.getY(), z) < TELL_RANGE * TELL_RANGE) {
-                level.sendParticles(p, puff, true, x, y, z, 80, 14, 4, 14, 0.15);
+                level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x, y, z, 24, 14, 4, 14, 0.15);
                 if (!p.isSpectator()) {
                     Notice.narrate(p, "message.skyabyss.titan_end.departed." + id);
                 }

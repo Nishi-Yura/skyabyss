@@ -123,7 +123,7 @@ public final class MoonGearEvents {
         if (target instanceof Player p && p.getPersistentData().getLong(TEAR) > level.getGameTime() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             p.getPersistentData().remove(TEAR);
             event.setCanceled(true);
-            level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 20, 0.5, 0.8, 0.5, 0.08);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 20, 0.5, 0.8, 0.5, 0.08);
             level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0f, 1.5f);
             return;
         }
@@ -140,7 +140,7 @@ public final class MoonGearEvents {
                     && arrow.getWeaponItem().getItem() == MoonGearSetup.STARFALL_BOW.get()) {
                 STARS.add(new Star(level.getGameTime() + MoonGear.STARFALL_TICKS, target.position(), (float) (event.getAmount() * MoonGear.STARFALL_SHARE),
                         player.getId()));
-                level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + 6, target.getZ(), 6, 0.2, 0.4, 0.2, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + 6, target.getZ(), 6, 0.2, 0.4, 0.2, 0.01);
             }
         }
         if (m != 1) {
@@ -171,8 +171,8 @@ public final class MoonGearEvents {
                 e.push(d.x * 0.8, 0.3, d.z * 0.8);
                 e.hurtMarked = true;
             }
-            level.sendParticles(ParticleTypes.FLASH, target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
-            level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.2), target.getZ(), 24, 1.2, 0.1, 1.2, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.2), target.getZ(), 24, 1.2, 0.1, 1.2, 0.05);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.6f);
             return 1 + MoonGear.FULL_HAMMER_BLOW;
         }
@@ -180,7 +180,7 @@ public final class MoonGearEvents {
             boolean bound = target.getPersistentData().getLong(NEW_BIND) > now;
             target.getPersistentData().putLong(NEW_BIND, now + MoonGear.NEW_STAFF_BIND_TICKS);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, MoonGear.NEW_STAFF_BIND_TICKS, 1, true, false));
-            level.sendParticles(ParticleTypes.SQUID_INK, target.getX(), target.getY(0.1), target.getZ(), 6, 0.4, 0.05, 0.4, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY(0.1), target.getZ(), 6, 0.4, 0.05, 0.4, 0.01);
             return bound ? 1 + MoonGear.NEW_STAFF_BOUND : 1;
         }
         if (hand.getItem() == MoonGearSetup.UMBRA_DAGGER.get()) {
@@ -191,7 +191,7 @@ public final class MoonGearEvents {
                 ECHOES.add(new Echo(now + 4, target.getId(), dmg, player.getId(), false));
             }
             target.getPersistentData().putInt(UMBRA, n);
-            level.sendParticles(ParticleTypes.SMOKE, target.getX(), target.getY(0.5), target.getZ(), 3 + 3 * n, 0.2, 0.3, 0.2, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.5), target.getZ(), 3 + 3 * n, 0.2, 0.3, 0.2, 0.01);
             return 1;
         }
         if (hand.getItem() == MoonGearSetup.HALO_BELL.get()) {
@@ -202,7 +202,7 @@ public final class MoonGearEvents {
                 }
             }
             player.getPersistentData().putLong(HALO, now + MoonGear.HALO_TICKS);
-            level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 2.2, player.getZ(), 8, 0.6, 0.05, 0.6, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 2.2, player.getZ(), 8, 0.6, 0.05, 0.6, 0.01);
             return 1 + MoonGear.HALO_BONUS;
         }
         if (hand.getItem() == MoonGearSetup.HAMMER.get()) {
@@ -213,15 +213,15 @@ public final class MoonGearEvents {
             player.getPersistentData().putBoolean(STAFF_TIDE, !ebb);
             if (ebb) {
                 player.heal((float) (amount * MoonGear.STAFF_EBB_HEAL));
-                level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 1, player.getZ(), 4, 0.3, 0.4, 0.3, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1, player.getZ(), 4, 0.3, 0.4, 0.3, 0.02);
                 return 1;
             }
-            level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.6), target.getZ(), 6, 0.3, 0.3, 0.3, 0.03);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 6, 0.3, 0.3, 0.3, 0.03);
             return 1 + MoonGear.STAFF_SWELL;
         }
         if (hand.getItem() == MoonGearSetup.DAGGER.get()) {
             if (fromBehind(target, player.position())) {
-                level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 8, 0.2, 0.3, 0.2, 0.1);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 8, 0.2, 0.3, 0.2, 0.1);
                 return 1 + MoonGear.DAGGER_BACK;
             }
             return 1;
@@ -278,7 +278,7 @@ public final class MoonGearEvents {
             }
             target.invulnerableTime = 0;
             target.hurt(player.damageSources().indirectMagic(target, player), e.damage());
-            level.sendParticles(e.arrow() ? ParticleTypes.END_ROD : ParticleTypes.SWEEP_ATTACK, target.getX(), target.getY(0.6), target.getZ(),
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(),
                     e.arrow() ? 10 : 1, 0.2, 0.3, 0.2, 0.05);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.PLAYERS, 0.9f, e.arrow() ? 1.6f : 0.8f);
         }
@@ -311,8 +311,8 @@ public final class MoonGearEvents {
             e.hurt(player.damageSources().indirectMagic(e, player), damage);
             hit++;
         }
-        level.sendParticles(ParticleTypes.FIREWORK, pos.x, pos.y + 0.3, pos.z, 20, 0.8, 0.2, 0.8, 0.05);
-        level.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y + 3, pos.z, 12, 0.1, 1.5, 0.1, 0.0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.x, pos.y + 0.3, pos.z, 20, 0.8, 0.2, 0.8, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.x, pos.y + 3, pos.z, 12, 0.1, 1.5, 0.1, 0.0);
         level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0f, 1.2f);
         return hit;
     }
@@ -352,5 +352,10 @@ public final class MoonGearEvents {
         } else if (current == null || current.amount() != amount) {
             instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE));
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

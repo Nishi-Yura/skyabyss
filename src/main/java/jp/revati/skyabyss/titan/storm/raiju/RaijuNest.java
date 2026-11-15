@@ -170,7 +170,7 @@ public final class RaijuNest {
         show(site, i, true);
         BlockPos top = site.rodTop(i);
         level.playSound(null, rod, RaijuSetup.GROUND.get(), SoundSource.BLOCKS, 1.4f, 1f);
-        level.sendParticles(ParticleTypes.SMOKE, top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, 12, 0.2, 0.3, 0.2, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, 12, 0.2, 0.3, 0.2, 0.02);
         if (player != null) {
             Notice.bar(player, ModText.progress("message.skyabyss.raiju.grounded", GROUND_TICKS / 20));
         }
@@ -209,7 +209,7 @@ public final class RaijuNest {
                 }
             }
             if (!g && level.getGameTime() % 20 == i * 3 % 20) {
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.getX() + 0.5, top.getY() + 0.9, top.getZ() + 0.5, 3, 0.15, 0.2, 0.15, 0.05);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), top.getX() + 0.5, top.getY() + 0.9, top.getZ() + 0.5, 3, 0.15, 0.2, 0.15, 0.05);
             }
         }
     }
@@ -222,5 +222,10 @@ public final class RaijuNest {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         clearState();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

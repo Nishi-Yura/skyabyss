@@ -51,11 +51,11 @@ public final class RoomPlay {
     }
 
     public enum Theme {
-        BONE(Blocks.CRACKED_DEEPSLATE_BRICKS, Blocks.BONE_BLOCK, Blocks.BONE_BLOCK, SoundEvents.SKELETON_HURT, ParticleTypes.SOUL),
-        TIDE(Blocks.PRISMARINE_BRICKS, Blocks.SEA_LANTERN, Blocks.DARK_PRISMARINE, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, ParticleTypes.BUBBLE_POP),
+        BONE(Blocks.CRACKED_DEEPSLATE_BRICKS, Blocks.BONE_BLOCK, Blocks.BONE_BLOCK, SoundEvents.SKELETON_HURT, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE)),
+        TIDE(Blocks.PRISMARINE_BRICKS, Blocks.SEA_LANTERN, Blocks.DARK_PRISMARINE, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE)),
         STORM(Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_OXIDIZED_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER, SoundEvents.LIGHTNING_BOLT_IMPACT,
-                ParticleTypes.ELECTRIC_SPARK),
-        EMBER(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, Blocks.SHROOMLIGHT, Blocks.BLACKSTONE, SoundEvents.BLAZE_SHOOT, ParticleTypes.SMALL_FLAME);
+                jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW)),
+        EMBER(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, Blocks.SHROOMLIGHT, Blocks.BLACKSTONE, SoundEvents.BLAZE_SHOOT, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
 
         public final Block ring;
         public final Block accent;
@@ -606,7 +606,7 @@ public final class RoomPlay {
             }
             if (now % 20 < STEP) {
                 BlockPos sp = jp.revati.skyabyss.trial.TrialFrame.shift(t.at);
-                level.sendParticles(room.theme().spark, sp.getX() + 0.5, sp.getY() + 1.1, sp.getZ() + 0.5, 2, 0.9, 0.05, 0.9, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), sp.getX() + 0.5, sp.getY() + 1.1, sp.getZ() + 0.5, 2, 0.9, 0.05, 0.9, 0.01);
             }
             if (anyoneOn(level, t, s, players, foes)) {
                 t.standing += STEP;
@@ -684,8 +684,8 @@ public final class RoomPlay {
         LOG.add(new Event(t.at.toShortString(), t.index, kind, started, started + WARN_TICKS));
         level.playSound(null, cx, floor, cz, kind == Kind.CRUMBLE ? SoundEvents.GENERIC_EXPLODE.value() : theme.sound, SoundSource.HOSTILE, 1.2f,
                 kind == Kind.CRUMBLE ? 0.9f : 1.2f);
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, floorState), cx, floor + 0.2, cz, 40, 1.1, 0.2, 1.1, 0.12);
-        level.sendParticles(theme.spark, cx, floor + 0.5, cz, 24, 1.0, 0.6, 1.0, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), cx, floor + 0.2, cz, 24, 1.1, 0.2, 1.1, 0.12);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, floor + 0.5, cz, 24, 1.0, 0.6, 1.0, 0.05);
         AABB zone = new AABB(cx - TRAP_R, floor - 1.5, cz - TRAP_R, cx + TRAP_R, floor + 2.5, cz + TRAP_R);
         for (Mob m : level.getEntitiesOfClass(Mob.class, zone, m -> m.isAlive() && m instanceof Enemy
                 && (Groups.keyOf(m) == null || group.equals(Groups.keyOf(m))))) {

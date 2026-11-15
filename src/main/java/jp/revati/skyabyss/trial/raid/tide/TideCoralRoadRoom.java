@@ -269,7 +269,7 @@ public final class TideCoralRoadRoom extends RaidRoom {
                 p.hurt(ctx.level().damageSources().magic(), CRUSH_DAMAGE);
             }
             crushes++;
-            ctx.level().sendParticles(TideRaid.dust(1f, 0.45f, 0.7f, 1.4f), p.getX(), p.getY() + 1, p.getZ() - 0.5, 12, 0.4, 0.6, 0.2, 0);
+            ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ() - 0.5, 12, 0.4, 0.6, 0.2, 0);
             ctx.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.2f, 0.5f);
             if (ctx.now() - lastCrushSay > 100) {
                 lastCrushSay = ctx.now();
@@ -296,8 +296,8 @@ public final class TideCoralRoadRoom extends RaidRoom {
             for (int b = 0; b < CURRENT_Z.length; b++) {
                 double z = oz + CURRENT_Z[b][0] + ctx.rng().nextDouble() * (CURRENT_Z[b][1] - CURRENT_Z[b][0] + 1);
                 double x = origin.getX() + (ctx.rng().nextDouble() * 2 - 1) * (HX - 1);
-                ctx.level().sendParticles(ParticleTypes.SPLASH, x, origin.getY() + 1.1, z, 0, currentDir[b] * 0.6, 0.05, 0, 1.0);
-                ctx.level().sendParticles(TideRaid.dust(0.55f, 0.85f, 1f, 1.0f), x, origin.getY() + 1.15, z, 2, 0.6, 0.05, 0.3, 0);
+                ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, origin.getY() + 1.1, z, 0, currentDir[b] * 0.6, 0.05, 0, 1.0);
+                ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, origin.getY() + 1.15, z, 2, 0.6, 0.05, 0.3, 0);
             }
         }
     }
@@ -345,7 +345,7 @@ public final class TideCoralRoadRoom extends RaidRoom {
                 }
                 if (ctx.now() % 8 == 0 && want > 0 && shown[r][l] < 3) {
                     int x = columnX(r, l, Math.min(2, Math.max(shown[r][l], want - 1)));
-                    level.sendParticles(TideRaid.dust(1f, 0.6f, 0.85f, 1.1f), origin.getX() + x + 0.5, origin.getY() + 2.2, origin.getZ() + ROW_Z[r] + 1.0, 3, 0.25, 0.8, 0.5, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), origin.getX() + x + 0.5, origin.getY() + 2.2, origin.getZ() + ROW_Z[r] + 1.0, 3, 0.25, 0.8, 0.5, 0);
                 }
             }
         }
@@ -466,5 +466,10 @@ public final class TideCoralRoadRoom extends RaidRoom {
 
     public int rowZ(int row) {
         return ROW_Z[row];
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

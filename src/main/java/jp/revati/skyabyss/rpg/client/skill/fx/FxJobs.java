@@ -67,7 +67,7 @@ public final class FxJobs {
         Vec3 hand = c.hand();
         c.at(0, x -> {
             FxDraw.add(x, Prim.arc(hand, x.right, new Vec3(0, 1, 0), 0.5, 0, Math.PI * 2).color(EMBER).width(0.25).life(8).ease(Ease.OUT).glow(0.6));
-            SkillFx.burst(x, ParticleTypes.FLAME, hand, 6, 0.15, 0.02);
+            SkillFx.burst(x, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), hand, 6, 0.15, 0.02);
         });
         c.at(2, x -> {
             FxDraw.add(x, Prim.line(hand, x.aim(6)).color(EMBER).width(0.35).life(10).ease(Ease.OUT).trail(0.6).glow(0.5));

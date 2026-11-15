@@ -180,7 +180,7 @@ public final class IronTrail {
             for (ServerPlayer p : trackers) {
                 double d = Math.sqrt(p.distanceToSqr(at.getX() + 0.5, at.getY(), at.getZ() + 0.5));
                 if (d <= GLINT) {
-                    level.sendParticles(p, new DustParticleOptions(new Vector3f(0.78f, 0.42f, 0.18f), 2.0f), true,
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true,
                             at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 10, 0.2, 1.1, 0.2, 0.0);
                 }
                 if (d <= FIND) {
@@ -386,5 +386,10 @@ public final class IronTrail {
                             p.teleportTo(level, g.getX() + 0.5, g.getY(), g.getZ() + 0.5, 0f, 12f);
                             return 1;
                         }))));
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

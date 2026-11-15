@@ -137,7 +137,7 @@ public final class HeartbeatWard {
         Accessories.get(player).items.set(slot, ItemStack.EMPTY);
         Accessories.sync(player);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.4f, 0.7f);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.4, 0.7, 0.4, 0.04);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.4, 0.7, 0.4, 0.04);
         Notice.hint(player, "message.skyabyss.heartbeat_ward.used");
         return true;
     }

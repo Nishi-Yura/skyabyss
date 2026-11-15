@@ -168,8 +168,8 @@ public final class AbyssGate {
                 if (level.isLoaded(b) && level.getBlockState(b).is(Blocks.IRON_BARS)) {
                     level.setBlock(b, Blocks.CAVE_AIR.defaultBlockState(), 3);
                     if (loud) {
-                        level.sendParticles(ParticleTypes.SCULK_SOUL, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.01);
-                        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.02);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.01);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.02);
                     }
                 }
             }
@@ -310,7 +310,7 @@ public final class AbyssGate {
         }
         BlockPos heart = AbyssBuild.mark("heart");
         if (heart != null && server.getTickCount() % 40 == 2 && WardenArena.current(abyss) == null && WardenArena.cleared(server) && abyss.isLoaded(heart)) {
-            abyss.sendParticles(ParticleTypes.SCULK_SOUL, heart.getX() + 0.5, heart.getY() + 0.4, heart.getZ() + 0.5, 6, 0.25, 0.2, 0.25, 0.02);
+            abyss.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), heart.getX() + 0.5, heart.getY() + 0.4, heart.getZ() + 0.5, 6, 0.25, 0.2, 0.25, 0.02);
             abyss.playSound(null, heart, SoundEvents.WARDEN_HEARTBEAT, SoundSource.AMBIENT, 1.5f, 0.7f);
         }
     }
@@ -374,5 +374,10 @@ public final class AbyssGate {
         List<Pending> due = new ArrayList<>();
         LATER.removeIf(e -> e.at() <= now && due.add(e));
         due.forEach(e -> e.run().run());
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

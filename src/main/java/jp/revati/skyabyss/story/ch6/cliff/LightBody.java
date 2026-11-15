@@ -78,7 +78,7 @@ public final class LightBody {
         p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), CliffBlocks.LIGHT_BODY.get(), SoundSource.PLAYERS, 0.7f, 1.3f);
         for (int i = 0; i < 12; i++) {
             double a = i / 12.0 * Math.PI * 2;
-            p.serverLevel().sendParticles(ParticleTypes.END_ROD, p.getX() + Math.cos(a) * 0.6, p.getY(), p.getZ() + Math.sin(a) * 0.6, 1, 0, 0, 0, 0.01);
+            p.serverLevel().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + Math.cos(a) * 0.6, p.getY(), p.getZ() + Math.sin(a) * 0.6, 1, 0, 0, 0, 0.01);
         }
     }
 
@@ -111,5 +111,10 @@ public final class LightBody {
                         }
                     });
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

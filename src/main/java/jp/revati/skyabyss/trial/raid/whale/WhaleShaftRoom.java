@@ -238,7 +238,7 @@ public final class WhaleShaftRoom extends RaidRoom {
                 // 引っ込んでいる棚の口のしるし
                 for (int k = 0; k < LEDGES; k++) {
                     BlockPos p = ledgeCells(ctx, f, k).get(0);
-                    level.sendParticles(ParticleTypes.END_ROD, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
                 }
             }
             // こぶ: 押さえが終わった・休みが明けた
@@ -318,15 +318,15 @@ public final class WhaleShaftRoom extends RaidRoom {
                 if (now % 3 == 0) {
                     for (int k = 0; k < 12; k++) {
                         double a = Math.PI * 2 * k / 12;
-                        level.sendParticles(warn, g[0] + Math.cos(a) * GEYSER_R, g[1] + 0.1, g[2] + Math.sin(a) * GEYSER_R, 1, 0, 0, 0, 0);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g[0] + Math.cos(a) * GEYSER_R, g[1] + 0.1, g[2] + Math.sin(a) * GEYSER_R, 1, 0, 0, 0, 0);
                     }
                 }
                 continue;
             }
             it.remove();
             level.playSound(null, BlockPos.containing(g[0], g[1], g[2]), SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.HOSTILE, 1.3f, 0.5f);
-            level.sendParticles(ParticleTypes.FALLING_LAVA, g[0], g[1] + 0.5, g[2], 30, 0.5, 1.5, 0.5, 0.1);
-            level.sendParticles(new DustParticleOptions(new Vector3f(0.7f, 0.05f, 0.05f), 2.0f), g[0], g[1] + 1.5, g[2], 40, 0.6, 1.4, 0.6, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), g[0], g[1] + 0.5, g[2], 24, 0.5, 1.5, 0.5, 0.1);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g[0], g[1] + 1.5, g[2], 24, 0.6, 1.4, 0.6, 0.02);
             BlockPos o = ctx.origin();
             for (ServerPlayer p : ctx.standing()) {
                 if (p.isCreative() || p.isSpectator()) {
@@ -354,21 +354,21 @@ public final class WhaleShaftRoom extends RaidRoom {
         DustParticleOptions dark = new DustParticleOptions(new Vector3f(0.45f, 0.02f, 0.05f), 1.2f);
         if (now % 2 == 0) {
             for (int k = -HX; k <= HX; k++) {
-                level.sendParticles(red, o.getX() + k + 0.5, surface + 0.1, o.getZ() - HZ + 0.1, 1, 0, 0, 0, 0);
-                level.sendParticles(red, o.getX() + k + 0.5, surface + 0.1, o.getZ() + HZ + 0.9, 1, 0, 0, 0, 0);
-                level.sendParticles(red, o.getX() - HX + 0.1, surface + 0.1, o.getZ() + k + 0.5, 1, 0, 0, 0, 0);
-                level.sendParticles(red, o.getX() + HX + 0.9, surface + 0.1, o.getZ() + k + 0.5, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.getX() + k + 0.5, surface + 0.1, o.getZ() - HZ + 0.1, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.getX() + k + 0.5, surface + 0.1, o.getZ() + HZ + 0.9, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.getX() - HX + 0.1, surface + 0.1, o.getZ() + k + 0.5, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.getX() + HX + 0.9, surface + 0.1, o.getZ() + k + 0.5, 1, 0, 0, 0, 0);
             }
         }
         for (int n = 0; n < 6; n++) {
             double x = o.getX() - HX + ctx.rng().nextDouble() * (2 * HX + 1);
             double z = o.getZ() - HZ + ctx.rng().nextDouble() * (2 * HZ + 1);
-            level.sendParticles(dark, x, surface + 0.05, z, 1, 0.3, 0.05, 0.3, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, surface + 0.05, z, 1, 0.3, 0.05, 0.3, 0);
         }
         if (now % 6 == 0) {
             double x = o.getX() - HX + ctx.rng().nextDouble() * (2 * HX + 1);
             double z = o.getZ() - HZ + ctx.rng().nextDouble() * (2 * HZ + 1);
-            level.sendParticles(ParticleTypes.DRIPPING_LAVA, x, surface - 0.2, z, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, surface - 0.2, z, 1, 0, 0, 0, 0);
         }
     }
 
@@ -396,7 +396,7 @@ public final class WhaleShaftRoom extends RaidRoom {
         holdUntil[f] = now + HOLD;
         knobReady[f] = now + COOLDOWN;
         placeKnob(ctx, f, true);
-        ctx.level().sendParticles(ParticleTypes.CRIT, k.getX() + 0.5, k.getY() + 1.5, k.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), k.getX() + 0.5, k.getY() + 1.5, k.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
         ctx.level().playSound(null, k, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.BLOCKS, 1.0f, 0.5f + 0.12f * f);
         return true;
     }
@@ -484,5 +484,10 @@ public final class WhaleShaftRoom extends RaidRoom {
         int[] a = CORNER[f % 4];
         int[] b = CORNER[(f + 1) % 4];
         return Direction.fromDelta(Integer.signum(b[0] - a[0]), 0, Integer.signum(b[1] - a[1]));
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

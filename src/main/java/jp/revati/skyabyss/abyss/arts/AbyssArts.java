@@ -235,7 +235,7 @@ public final class AbyssArts {
             e.addEffect(new MobEffectInstance(MobEffects.GLOWING, AbyssArt.LIGHT_GLOW_TICKS, 0, false, false));
         }
         p.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, AbyssArt.LIGHT_NIGHT_VISION_TICKS, 0, false, false));
-        level.sendParticles(ParticleTypes.END_ROD, c.x, c.y, c.z, 14, 0.3, 0.3, 0.3, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 14, 0.3, 0.3, 0.3, 0.02);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9f, 1.4f);
         Notice.bar(p, Component.translatable("message.skyabyss.art.light_placed"));
     }
@@ -245,7 +245,7 @@ public final class AbyssArts {
         long now = p.level().getGameTime();
         RELIEF.put(p.getUUID(), new Relief(now + AbyssArt.WEIGHT_LIFE_SECONDS[r] * 20L, AbyssArt.WEIGHT_RELIEF[r]));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8f, 0.7f);
-        ((ServerLevel) p.level()).sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.2, p.getZ(), 16, 0.4, 0.1, 0.4, 0.02);
+        ((ServerLevel) p.level()).sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.2, p.getZ(), 16, 0.4, 0.1, 0.4, 0.02);
         Notice.bar(p, Component.translatable("message.skyabyss.art.weight_on", (int) Math.round(AbyssArt.WEIGHT_RELIEF[r] * 100)));
     }
 
@@ -355,5 +355,10 @@ public final class AbyssArts {
         RELIEF.clear();
         COOLDOWN.clear();
         AbyssLight.clear();
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

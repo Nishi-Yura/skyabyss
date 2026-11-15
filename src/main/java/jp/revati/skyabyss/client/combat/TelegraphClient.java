@@ -210,7 +210,7 @@ public final class TelegraphClient {
         TelegraphShape.PointSink sink = (x, z) -> {
             double y = d.ground(x, z);
             if (!Double.isNaN(y)) {
-                level.addParticle(dust, x, y + 0.1, z, 0, 0, 0);
+                level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.1, z, 0, 0, 0);
             }
         };
         current.outline(sink, spacing);

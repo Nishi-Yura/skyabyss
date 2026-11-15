@@ -242,8 +242,7 @@ public final class EmberHeat {
         // 火照りの光 (ほかの人から見える粒)
         if (h >= FLUSHED) {
             int n = h >= SCORCHING ? 4 : 2;
-            player.serverLevel().sendParticles(h >= SCORCHING ? net.minecraft.core.particles.ParticleTypes.FLAME
-                    : net.minecraft.core.particles.ParticleTypes.SMALL_FLAME, player.getX(), player.getY() + 1.0, player.getZ(), n, 0.3, 0.5, 0.3, 0.005);
+            player.serverLevel().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), n, 0.3, 0.5, 0.3, 0.005);
         }
     }
 
@@ -333,5 +332,10 @@ public final class EmberHeat {
         WARNED.clear();
         HEAT.clear();
         SENT.clear();
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

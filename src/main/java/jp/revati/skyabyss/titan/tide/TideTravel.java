@@ -80,7 +80,7 @@ public final class TideTravel {
         ADRIFT.remove(player.getUUID());
         if (player.level() instanceof ServerLevel from) {
             from.playSound(null, player.getX(), player.getY(), player.getZ(), TideSetup.GATE.get(), SoundSource.PLAYERS, 1.5f, 1.0f);
-            from.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 0.5, player.getZ(), 40, 0.8, 0.6, 0.8, 0.2);
+            from.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 0.5, player.getZ(), 24, 0.8, 0.6, 0.8, 0.2);
         }
         BlockPos arrival = TideBackBuilder.arrival();
         player.fallDistance = 0;
@@ -293,5 +293,10 @@ public final class TideTravel {
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
         Notice.place(player, ModText.title(title), ModText.subtitle(subtitle));
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

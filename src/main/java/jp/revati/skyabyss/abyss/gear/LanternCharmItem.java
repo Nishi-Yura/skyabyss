@@ -82,10 +82,10 @@ public class LanternCharmItem extends Item implements ModGear, Accessory {
         player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, AbyssGear.CHARM_NIGHT_VISION_TICKS, 0, true, false, true));
         for (int i = 0; i < 40; i++) {
             double a = Math.PI * 2 * i / 40;
-            level.sendParticles(ParticleTypes.SMALL_FLAME, player.getX() + Math.cos(a) * 1.4, player.getY() + 1.0, player.getZ() + Math.sin(a) * 1.4,
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX() + Math.cos(a) * 1.4, player.getY() + 1.0, player.getZ() + Math.sin(a) * 1.4,
                     0, Math.cos(a), 0.05, Math.sin(a), 0.25);
         }
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.6, player.getZ(), 24, 0.3, 0.4, 0.3, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.6, player.getZ(), 24, 0.3, 0.4, 0.3, 0.05);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8f, 1.2f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 1.6f);
         player.getCooldowns().addCooldown(this, AbyssGear.CHARM_COOLDOWN);
@@ -125,5 +125,10 @@ public class LanternCharmItem extends Item implements ModGear, Accessory {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         ModGear.tooltip(stack, tooltip, tier(), "item.skyabyss.abyss_lantern_charm.desc", false);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

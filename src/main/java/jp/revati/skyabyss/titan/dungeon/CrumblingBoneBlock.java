@@ -111,7 +111,7 @@ public class CrumblingBoneBlock extends Block {
                 level.setBlock(pos, state.setValue(STAGE, Stage.GONE), Block.UPDATE_CLIENTS);
                 level.scheduleTick(pos, this, RESTORE_TICKS);
                 level.playSound(null, pos, SoundEvents.BONE_BLOCK_BREAK, SoundSource.BLOCKS, 1.4f, 0.7f);
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 24, 0.3, 0.3, 0.3, 0.1);
             }
             case GONE -> {
@@ -141,5 +141,10 @@ public class CrumblingBoneBlock extends Block {
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return state.getValue(STAGE) == Stage.GONE ? RenderShape.INVISIBLE : RenderShape.MODEL;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

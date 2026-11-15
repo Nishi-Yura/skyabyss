@@ -565,8 +565,6 @@ public class AshSmith extends EmberMob {
                     if (lead) {
                         sound(s, EmberSmithSetup.SLAM.get(), 3.5f, cold ? 0.6f : 0.75f);
                     }
-                    warn(s, ParticleTypes.EXPLOSION, impact.x, impact.y + 0.2, impact.z, 1, 0, 0, 0, 0);
-                    warn(s, ParticleTypes.POOF, impact.x, impact.y + 0.2, impact.z, 24, 1.2, 0.1, 1.2, 0.08);
                     if (!cold) {
                         crackStrip(s, origin, dir, angle, lead);
                     }
@@ -592,21 +590,12 @@ public class AshSmith extends EmberMob {
     // 打った帯に亀裂が走り、1.2 秒後にその帯から噴く (噴く帯も予告で、白い線としゅうという音)
     private void crackStrip(ServerLevel server, Vec3 origin, Vec3 dir, double angle, boolean lead) {
         Vec3 side = new Vec3(-dir.z, 0, dir.x);
-        for (double t = 0.8; t <= SLAM_LENGTH; t += 0.55) {
-            Vec3 c = origin.add(dir.scale(t)).add(side.scale(Math.sin(t * 2.3) * 0.5));
-            warn(server, ParticleTypes.END_ROD, c.x, origin.y + 0.15, c.z, 1, 0.02, 0, 0.02, 0);
-        }
         if (lead) {
             sound(server, EmberSmithSetup.INHALE.get(), 1.2f, 2.0f);
         }
         tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), VENT_DELAY, D).prop(PropFx.along("lava_pillar").size(0.6f))
                 .onImpact(s -> {
                     sound(s, EmberSmithSetup.BLAST.get(), lead ? 2.5f : 1.2f, 0.9f);
-                    for (double t = 0.8; t <= SLAM_LENGTH; t += 0.6) {
-                        Vec3 c = origin.add(dir.scale(t));
-                        warn(s, ParticleTypes.FLAME, c.x, origin.y + 0.3, c.z, 4, SLAM_HALF_WIDTH * 0.5, 0.2, SLAM_HALF_WIDTH * 0.5, 0.12);
-                        warn(s, ParticleTypes.LAVA, c.x, origin.y + 0.3, c.z, 1, 0.5, 0.1, 0.5, 0.0);
-                    }
                 })
                 .onHit((s, p) -> {
                     hurtPlayer(p, damage(EmberIds.HEAT_BURST, this), VENT_DAMAGE, "vent");
@@ -617,14 +606,6 @@ public class AshSmith extends EmberMob {
 
     private void tickSlam(ServerLevel server) {
         if (actionTick < SLAM_WINDUP) {
-            if (actionTick % 4 == 0) {
-                // 鎚の影: 帯の上を暗い煙で
-                for (int i = 0; i < 4; i++) {
-                    double t = 1 + random.nextDouble() * (SLAM_LENGTH - 1);
-                    Vec3 p = slamOrigin.add(aimDir.scale(t));
-                    warn(server, ParticleTypes.LARGE_SMOKE, p.x, p.y + 0.1, p.z, 2, SLAM_HALF_WIDTH * 0.6, 0.05, SLAM_HALF_WIDTH * 0.6, 0.0);
-                }
-            }
             return;
         }
         if (actionTick == SLAM_WINDUP && slamCold) {
@@ -677,12 +658,6 @@ public class AshSmith extends EmberMob {
                         if (first) {
                             sound(s, EmberSmithSetup.BLAST.get(), 3.5f, 1f);
                         }
-                        for (int i = 0; i < 30; i++) {
-                            double a = Math.toRadians((random.nextDouble() - 0.5) * 2 * BREATH_HALF_ANGLE);
-                            double r = 1.5 + random.nextDouble() * (BREATH_LENGTH - 1.5);
-                            Vec3 q = position().add(rotateY(d, a).scale(r)).add(0, 1.0 + random.nextDouble(), 0);
-                            warn(s, i % 3 == 0 ? ParticleTypes.FLAME : ParticleTypes.LARGE_SMOKE, q.x, q.y, q.z, 2, 0.2, 0.2, 0.2, 0.02);
-                        }
                     })
                     .onHit((s, p) -> {
                         hurtPlayer(p, attackSource(), BREATH_DAMAGE, "breath");
@@ -698,18 +673,6 @@ public class AshSmith extends EmberMob {
 
     private void tickBreath(ServerLevel server) {
         if (actionTick < BREATH_INHALE) {
-            if (actionTick % 3 == 0) {
-                Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
-                // 吸いこむ粒: 前から体の背へ
-                for (int i = 0; i < 6; i++) {
-                    double d = 3 + random.nextDouble() * 5;
-                    double a = Math.toRadians((random.nextDouble() - 0.5) * 70);
-                    Vec3 dir = rotateY(look, a);
-                    Vec3 p = position().add(dir.scale(d)).add(0, 1.2 + random.nextDouble() * 2, 0);
-                    Vec3 v = position().add(0, 2.2, 0).subtract(p).scale(0.12);
-                    warn(server, ParticleTypes.CLOUD, p.x, p.y, p.z, 0, v.x, v.y, v.z, 1.0);
-                }
-            }
             return;
         }
         if (actionTick == BREATH_INHALE) {
@@ -767,7 +730,7 @@ public class AshSmith extends EmberMob {
             entityData.set(COLD, true);
             server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.HOSTILE, 3f, 0.7f);
             sound(server, EmberSmithSetup.BLAST.get(), 2f, 0.5f);
-            warn(server, ParticleTypes.CLOUD, trough.getX() + 0.5, trough.getY() + 2.0, trough.getZ() + 0.5, 60, 1.4, 0.8, 1.4, 0.1);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), trough.getX() + 0.5, trough.getY() + 2.0, trough.getZ() + 0.5, 24, 1.4, 0.8, 1.4, 0.1);
         }
         if (actionTick >= QUENCH_DUNK) {
             quenchCooldown = QUENCH_COOLDOWN;
@@ -784,7 +747,7 @@ public class AshSmith extends EmberMob {
         if (actionTick < SPARKS_CHARGE) {
             if (actionTick % 3 == 0) {
                 Vec3 hand = handPos();
-                warn(server, ParticleTypes.LAVA, hand.x, hand.y, hand.z, 2, 0.2, 0.2, 0.2, 0.0);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), hand.x, hand.y, hand.z, 2, 0.2, 0.2, 0.2, 0.0);
             }
             return;
         }
@@ -822,8 +785,6 @@ public class AshSmith extends EmberMob {
         sparks.add(new Spark(new Vec3(x, y, z), index * SPARK_GAP));
         tg(server, TelegraphShape.circle(x, z, SPARK_RADIUS), SPARK_WARN + index * SPARK_GAP, D).prop(PropFx.toss("fireball").size(0.6f))
                 .onImpact(s -> {
-                    warn(s, ParticleTypes.LAVA, x, y + 0.2, z, 14, 0.5, 0.2, 0.5, 0.1);
-                    warn(s, ParticleTypes.FLAME, x, y + 0.2, z, 18, 0.5, 0.3, 0.5, 0.08);
                     s.playSound(null, x, y, z, SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 1.5f, 0.8f);
                 })
                 .onHit((s, p) -> hurtPlayer(p, attackSource(), SPARK_DAMAGE, "spark"))
@@ -838,9 +799,6 @@ public class AshSmith extends EmberMob {
 
     // ---- 怒り
     private void tickRage(ServerLevel server) {
-        if (actionTick % 4 == 0) {
-            warn(server, ParticleTypes.FLAME, getX(), getY() + 2.4, getZ(), 10, 0.8, 0.8, 0.8, 0.05);
-        }
         if (actionTick == RAGE_TICKS / 2) {
             AshSmithArena.buildFurnace(server, true, shift);
             server.playSound(null, AshSmithArena.FURNACE_DOOR.minX() + shift.getX(), AshSmithArena.FLOOR + shift.getY() + 2, AshSmithArena.FURNACE_DOOR.minZ() + shift.getZ(),
@@ -856,7 +814,6 @@ public class AshSmith extends EmberMob {
                 thrall.setPersistenceRequired();
                 thrall.setGroupId(groupId());
                 server.addFreshEntity(thrall);
-                warn(server, ParticleTypes.FLAME, at.x, at.y + 1, at.z, 20, 0.4, 0.8, 0.4, 0.05);
             }
         }
         if (actionTick >= RAGE_TICKS) {
@@ -892,7 +849,7 @@ public class AshSmith extends EmberMob {
     private void sparkArc(ServerLevel server, Vec3 from, Vec3 to) {
         for (double t = 0; t <= 1; t += 0.06) {
             Vec3 p = from.lerp(to, t).add(0, 4.0 * t * (1 - t) * 3.5, 0);
-            warn(server, ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
         }
     }
 
@@ -908,7 +865,7 @@ public class AshSmith extends EmberMob {
                 continue;
             }
             double y = AshSmithArena.FLOOR + shift.getY() + 1.0 + random.nextDouble() * 4.0;
-            warn(server, ParticleTypes.CLOUD, x, y, z, 1, 0.5, 0.4, 0.5, 0.01);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y, z, 1, 0.5, 0.4, 0.5, 0.01);
         }
     }
 
@@ -1053,5 +1010,10 @@ public class AshSmith extends EmberMob {
     @Override
     protected float getSoundVolume() {
         return 2.0f;
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

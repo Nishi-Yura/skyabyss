@@ -192,7 +192,7 @@ public final class LayerPuzzles {
             d.setOpen("hid_bone");
             AbyssMarks.clearBox(level, "hid_bone", null);
             level.playSound(null, c, SoundEvents.DEEPSLATE_BRICKS_BREAK, SoundSource.BLOCKS, 1.5f, 0.6f);
-            level.sendParticles(ParticleTypes.END_ROD, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 30, 1, 1, 1, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 24, 1, 1, 1, 0.02);
             near(level, c, 16, "message.skyabyss.abyss_v2.hidden_open");
         }
     }
@@ -216,7 +216,7 @@ public final class LayerPuzzles {
             }
             if (AbyssArts.weightRelief(p) >= RELIEF_HOLD) {
                 if (now % 10 == 0) {
-                    level.sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 0.1, p.getZ(), 4, 0.3, 0, 0.3, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.1, p.getZ(), 4, 0.3, 0, 0.3, 0);
                 }
                 continue;
             }
@@ -233,7 +233,7 @@ public final class LayerPuzzles {
                 if (Layers.inBox("brittle_salt", q) && level.getBlockState(q).is(Blocks.WHITE_CONCRETE)) {
                     level.setBlock(q, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
                     CRACKED.put(q.immutable(), now + BRITTLE_BACK);
-                    level.sendParticles(ParticleTypes.CLOUD, q.getX() + 0.5, q.getY() + 0.5, q.getZ() + 0.5, 3, 0.3, 0.1, 0.3, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.getX() + 0.5, q.getY() + 0.5, q.getZ() + 0.5, 3, 0.3, 0.1, 0.3, 0.01);
                 }
             }
             level.playSound(null, e.getKey(), SoundEvents.CALCITE_BREAK, SoundSource.BLOCKS, 1.4f, 0.5f);
@@ -264,7 +264,7 @@ public final class LayerPuzzles {
             p.hurtMarked = true;
             p.fallDistance = 0;
             if (level.getGameTime() % 6 == 0) {
-                level.sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY(), p.getZ(), 6, 0.4, 0.4, 0.4, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY(), p.getZ(), 6, 0.4, 0.4, 0.4, 0.02);
             }
         }
     }
@@ -278,7 +278,7 @@ public final class LayerPuzzles {
         for (ServerPlayer p : List.copyOf(level.players())) {
             Long until = SAW_DOOR.get(p.getUUID());
             if (until != null && until > now) {
-                level.sendParticles(p, ParticleTypes.HEART, true, door.getX() + 0.5, door.getY() + 0.4, door.getZ() + 0.5, 1, 0.4, 0.5, 0.4, 0);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, door.getX() + 0.5, door.getY() + 0.4, door.getZ() + 0.5, 1, 0.4, 0.5, 0.4, 0);
                 if (now % 20 == 0) {
                     p.playNotifySound(SoundEvents.WARDEN_HEARTBEAT, SoundSource.AMBIENT, 1.2f, 1f);
                 }
@@ -389,11 +389,6 @@ public final class LayerPuzzles {
             if (!Layers.inBox("maze_ash", p.blockPosition()) && !p.blockPosition().closerThan(in, 4)) {
                 continue;
             }
-            for (BlockPos q : trail) {
-                if (q.closerThan(p.blockPosition(), 14) && AbyssLight.lampAt(level, q) >= 4) {
-                    level.sendParticles(p, ParticleTypes.SMALL_FLAME, true, q.getX() + 0.5, q.getY() + 0.1, q.getZ() + 0.5, 1, 0.15, 0, 0.15, 0);
-                }
-            }
         }
     }
 
@@ -467,7 +462,7 @@ public final class LayerPuzzles {
                     // 三つの台 (光・重さ・鼓動) のうち、満ちたものの上に光
                     BlockPos ped = sealPedestal(k);
                     if (ped != null) {
-                        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, ped.getX() + 0.5, ped.getY() + 1.2, ped.getZ() + 0.5, 3, 0.15, 0.2, 0.15, 0.01);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ped.getX() + 0.5, ped.getY() + 1.2, ped.getZ() + 0.5, 3, 0.15, 0.2, 0.15, 0.01);
                     }
                 }
             }
@@ -574,5 +569,10 @@ public final class LayerPuzzles {
         HINTED.clear();
         resetSeal();
         mazeTrail = null;
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

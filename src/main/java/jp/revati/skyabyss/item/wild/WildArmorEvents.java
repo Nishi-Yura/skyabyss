@@ -144,7 +144,7 @@ public final class WildArmorEvents {
                         crit = true;
                         m *= 1 + f.p(1);
                         if (p.level() instanceof ServerLevel sl) {
-                            sl.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.3, 0.3, 0.2);
+                            sl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.3, 0.3, 0.2);
                         }
                     }
                 }
@@ -191,7 +191,7 @@ public final class WildArmorEvents {
         Fx shock = find(fx, Kind.FALL_SHOCK);
         if (shock != null && source.is(DamageTypeTags.IS_FALL)) {
             for (LivingEntity e : foes(level, p, shock.p(0))) {
-                WildGearEvents.proc(level, p, e, (float) shock.p(1), ParticleTypes.POOF);
+                WildGearEvents.proc(level, p, e, (float) shock.p(1), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
             }
             level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.GENERIC_SMALL_FALL, SoundSource.PLAYERS, 1.0f, 0.6f);
         }
@@ -206,7 +206,7 @@ public final class WildArmorEvents {
             Fx ignite = find(fx, Kind.HURT_IGNITE);
             if (ignite != null && !(a instanceof Player) && p.getRandom().nextDouble() < ignite.p(0)) {
                 a.igniteForSeconds((float) ignite.p(1));
-                level.sendParticles(ParticleTypes.FLAME, a.getX(), a.getY(0.5), a.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.getX(), a.getY(0.5), a.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
             }
         }
         // 打たれ返し (雷・塩の棘)
@@ -217,7 +217,7 @@ public final class WildArmorEvents {
                     if (k == Kind.THORN_BOLT) {
                         WildGearEvents.bolt(level, a.position());
                     }
-                    WildGearEvents.proc(level, p, a, (float) f.p(1), k == Kind.THORN_BOLT ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.WHITE_ASH);
+                    WildGearEvents.proc(level, p, a, (float) f.p(1), k == Kind.THORN_BOLT ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                 }
             }
         }
@@ -262,7 +262,7 @@ public final class WildArmorEvents {
         p.push(back.x, 0.55, back.z);
         p.hurtMarked = true;
         ServerLevel level = p.serverLevel();
-        level.sendParticles(ParticleTypes.SOUL, p.getX(), p.getY() + 1.6, p.getZ(), 16, 0.2, 0.6, 0.2, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 1.6, p.getZ(), 16, 0.2, 0.6, 0.2, 0.02);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.LEASH_KNOT_BREAK, SoundSource.PLAYERS, 1.0f, 0.7f);
     }
 
@@ -315,7 +315,7 @@ public final class WildArmorEvents {
         if (burst != null && p.getPersistentData().getLong(BURST) <= now) {
             p.getPersistentData().putLong(BURST, now + burst.ticks(2));
             for (LivingEntity e : foes(level, p, burst.p(0))) {
-                WildGearEvents.proc(level, p, e, (float) burst.p(1), ParticleTypes.EXPLOSION);
+                WildGearEvents.proc(level, p, e, (float) burst.p(1), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                 Vec3 d = e.position().subtract(p.position()).multiply(1, 0, 1).normalize().scale(0.9);
                 e.push(d.x, 0.35, d.z);
                 e.hurtMarked = true;
@@ -345,7 +345,7 @@ public final class WildArmorEvents {
         boolean wet = p.isInWater();
         if (exit != null && !wet && pd.getBoolean(WET)) {
             p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, exit.ticks(1), exit.ticks(0), true, true));
-            level.sendParticles(ParticleTypes.SPLASH, p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
         }
         pd.putBoolean(WET, wet);
     }
@@ -368,7 +368,7 @@ public final class WildArmorEvents {
         Fx ward = find(fx, Kind.BONE_WARD);
         if (ward != null) {
             p.setAbsorptionAmount((float) Math.max(p.getAbsorptionAmount(), ward.p(0)));
-            p.serverLevel().sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 1, p.getZ(), 16, 0.4, 0.5, 0.4, 0.02);
+            p.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 1, p.getZ(), 16, 0.4, 0.5, 0.4, 0.02);
         }
     }
 
@@ -414,7 +414,7 @@ public final class WildArmorEvents {
                 for (Player ally : WildGearEvents.withSelf(level, p, 8)) {
                     ally.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 260, 0, true, false));
                 }
-                level.sendParticles(ParticleTypes.SMALL_FLAME, p.getX(), p.getY() + 2.3, p.getZ(), 2, 0.1, 0.05, 0.1, 0.0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 2.3, p.getZ(), 2, 0.1, 0.05, 0.1, 0.0);
             }
             // 雲の守り
             if (cloud != null && now - pd.getLong(CLOUD) >= cloud.p(0)) {
@@ -423,10 +423,10 @@ public final class WildArmorEvents {
                 // 白と金の光の輪 (2026-11-01: バニラの雲の粒は消えぎわに暗くなり、地面の上で黒い欠けに見えた)
                 for (int i = 0; i < 16; i++) {
                     double ang = i / 16.0 * Math.PI * 2;
-                    level.sendParticles(i % 4 == 0 ? CLOUD_GOLD : CLOUD_WHITE, p.getX() + Math.cos(ang) * 0.8, p.getY() + 0.9, p.getZ() + Math.sin(ang) * 0.8,
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + Math.cos(ang) * 0.8, p.getY() + 0.9, p.getZ() + Math.sin(ang) * 0.8,
                             1, 0, 0.15, 0, 0);
                 }
-                level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1.2, p.getZ(), 4, 0.3, 0.4, 0.3, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.2, p.getZ(), 4, 0.3, 0.4, 0.3, 0.01);
             }
             // 砦: 止まっている秒
             Vec3 at = p.position();

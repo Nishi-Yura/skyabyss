@@ -416,6 +416,8 @@ public final class SkillActions {
                     break;
                 }
                 float amount = base * (float) jp.revati.skyabyss.abyss.Abyss.ECHO_SCALE * (isLarge(e) ? (float) SkillRules.CLEAVE_LARGE_BONUS : 1f);
+                // 当たりの火花はクライアントの FX が描く (サーバーの粒は出さない)
+                hit(player, e, amount, Skill.TITAN_CLEAVE);
             }
             // 裂け目の筋 (扇の中心線)
             for (int i = 0; i <= 12; i++) {

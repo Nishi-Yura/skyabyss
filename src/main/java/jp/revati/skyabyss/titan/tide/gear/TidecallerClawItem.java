@@ -81,10 +81,15 @@ public class TidecallerClawItem extends TideWeaponItem {
         }
         for (double d = 0.8; d <= length; d += 0.5) {
             Vec3 p = start.add(look.scale(d));
-            level.sendParticles(ParticleTypes.SPLASH, p.x, p.y + 0.15, p.z, 4, 0.25, 0.05, 0.25, 0.1);
-            level.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, p.x, p.y + 0.1, p.z, 1, 0.2, 0.05, 0.2, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y + 0.15, p.z, 4, 0.25, 0.05, 0.25, 0.1);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y + 0.1, p.z, 1, 0.2, 0.05, 0.2, 0.05);
         }
         level.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.0f, 0.7f);
         level.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.TRIDENT_RIPTIDE_1, SoundSource.PLAYERS, 0.6f, 1.3f);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

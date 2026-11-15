@@ -312,7 +312,7 @@ public final class ChargeChain extends RaidRoom {
             // 湧いたあと、光るまでの間をばらつかせる
             charge.put(m, ctx.rng().nextInt(FULL / 2));
             ServerLevel level = ctx.level();
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, m.getX(), m.getY() + 0.5, m.getZ(), 16, 0.4, 0.6, 0.4, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.getX(), m.getY() + 0.5, m.getZ(), 16, 0.4, 0.6, 0.4, 0.05);
         }
     }
 
@@ -345,7 +345,7 @@ public final class ChargeChain extends RaidRoom {
     private void visual(ServerLevel level, Mob m, int c) {
         float f = Math.min(1f, c / (float) FULL);
         if (f >= 0.3f && (c % Math.max(2, (int) (10 - 8 * f))) == 0) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, m.getX(), m.getY() + m.getBbHeight() * 0.6, m.getZ(), 1 + (int) (3 * f), m.getBbWidth() * 0.5, m.getBbHeight() * 0.4,
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.getX(), m.getY() + m.getBbHeight() * 0.6, m.getZ(), 1 + (int) (3 * f), m.getBbWidth() * 0.5, m.getBbHeight() * 0.4,
                     m.getBbWidth() * 0.5, 0.03);
         }
     }
@@ -387,7 +387,6 @@ public final class ChargeChain extends RaidRoom {
                 // 雷獣は雷では傷つかないので、跳んだ雷は雷でない傷 (柱を渡っている間は当たらない)
                 m.invulnerableTime = 0;
                 m.hurt(level.damageSources().magic(), CHAIN_DAMAGE * BOSS_FACTOR);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 30, 0.6, 0.8, 0.6, 0.2);
             } else {
                 m.hurt(level.damageSources().lightningBolt(), CHAIN_DAMAGE * (m == elite ? ELITE_FACTOR : 1f));
             }
@@ -402,7 +401,7 @@ public final class ChargeChain extends RaidRoom {
         int n = Math.max(2, (int) (a.distanceTo(b) * 3));
         for (int i = 0; i <= n; i++) {
             double t = i / (double) n;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t, 1, 0.05, 0.05, 0.05, 0.0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t, 1, 0.05, 0.05, 0.05, 0.0);
         }
     }
 
@@ -431,5 +430,10 @@ public final class ChargeChain extends RaidRoom {
 
     public boolean eliteSpawned() {
         return eliteSpawned;
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

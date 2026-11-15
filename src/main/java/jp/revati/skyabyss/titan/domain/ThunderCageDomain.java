@@ -59,7 +59,7 @@ public final class ThunderCageDomain extends HeartDomain {
             for (int i = 0; i < 6; i++) {
                 double a = heart.getRandom().nextDouble() * Math.PI * 2;
                 double r = heart.getRandom().nextDouble() * radius;
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx + Math.cos(a) * r, floorY + 1 + heart.getRandom().nextDouble() * 6, cz + Math.sin(a) * r, 4, 0.3, 0.6, 0.3, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * r, floorY + 1 + heart.getRandom().nextDouble() * 6, cz + Math.sin(a) * r, 4, 0.3, 0.6, 0.3, 0.2);
             }
         }
     }
@@ -114,9 +114,6 @@ public final class ThunderCageDomain extends HeartDomain {
                         if (sounds) {
                             s.playSound(null, cx, floorY + 3, cz, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.6f, 1.4f);
                         }
-                        for (double u = 0; u <= length; u += 3.5) {
-                            s.sendParticles(ParticleTypes.ELECTRIC_SPARK, sx + tx * u, floorY + 1.5, sz + tz * u, 4, 0.2, 1.2, 0.2, 0.15);
-                        }
                     })
                     .onHit((s, p) -> striker.accept(p, DAMAGE))
                     .start();
@@ -127,7 +124,7 @@ public final class ThunderCageDomain extends HeartDomain {
     protected void ambient(ServerLevel level, int t) {
         double a = heart.getRandom().nextDouble() * Math.PI * 2;
         double r = heart.getRandom().nextDouble() * radius;
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx + Math.cos(a) * r, floorY + 0.5 + heart.getRandom().nextDouble() * 5, cz + Math.sin(a) * r, 2, 0.3, 0.5, 0.3, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * r, floorY + 0.5 + heart.getRandom().nextDouble() * 5, cz + Math.sin(a) * r, 2, 0.3, 0.5, 0.3, 0.05);
     }
 
     @Override
@@ -135,7 +132,7 @@ public final class ThunderCageDomain extends HeartDomain {
         level.playSound(null, cx, floorY + 3, cz, shattered ? SoundEvents.LIGHTNING_BOLT_IMPACT : SoundEvents.BEACON_DEACTIVATE,
                 SoundSource.HOSTILE, 3f, shattered ? 1.2f : 1.4f);
         if (shattered) {
-            level.sendParticles(ParticleTypes.END_ROD, cx, floorY + 3, cz, 100, 3, 1.5, 3, 0.4);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, floorY + 3, cz, 24, 3, 1.5, 3, 0.4);
         }
     }
 
@@ -241,8 +238,8 @@ public final class ThunderCageDomain extends HeartDomain {
         }
         int k = t - chargeStart;
         if (k % 8 == 0) {
-            burst(level, n, ParticleTypes.ELECTRIC_SPARK, 6 + k / 12, 0.4, 0.3);
-            ring(level, n.pos, ROD_RADIUS, k > chargeTicks() - TELE_WARN ? ParticleTypes.CRIT : ParticleTypes.ELECTRIC_SPARK, 12);
+            burst(level, n, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 6 + k / 12, 0.4, 0.3);
+            ring(level, n.pos, ROD_RADIUS, k > chargeTicks() - TELE_WARN ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 12);
         }
         if (k % 20 == 0) {
             tone(level, n.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f + k / 200f, 1.8f);
@@ -262,7 +259,7 @@ public final class ThunderCageDomain extends HeartDomain {
             readyAt = t + fast(RESET);
             n.flash = 16;
             n.flashRgb = 0xE0402A;
-            burst(level, n, ParticleTypes.FLASH, 1, 0.1, 0);
+            burst(level, n, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 1, 0.1, 0);
             tell(level, "message.skyabyss.domain.thunder_cage.spent");
         }
     }
@@ -284,7 +281,7 @@ public final class ThunderCageDomain extends HeartDomain {
             stage++;
             readyAt = ticks() + fast(GAP);
             tone(level, node.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 1.6f, 1.4f);
-            burst(level, node, ParticleTypes.ELECTRIC_SPARK, 40, 0.6, 0.5);
+            burst(level, node, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 40, 0.6, 0.5);
             tell(level, "message.skyabyss.domain.thunder_cage.grounded", stage, NODES);
         } else {
             tone(level, node.pos, SoundEvents.NOTE_BLOCK_HAT.value(), 1.0f, 0.8f);

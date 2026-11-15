@@ -192,11 +192,11 @@ public final class DungeonFloor {
         if (t % 40 == 0 && !here.isEmpty()) {
             if (terrain.has("cp")) {
                 Vec3 c = center("cp");
-                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, c.x, c.y + 0.4, c.z, 2, 0.15, 0.1, 0.15, 0.005);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.4, c.z, 2, 0.15, 0.1, 0.15, 0.005);
             }
             if (terrain.has("leave")) {
                 Vec3 c = center("leave");
-                level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 1.2, c.z, 2, 0.2, 0.3, 0.2, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 1.2, c.z, 2, 0.2, 0.3, 0.2, 0.01);
             }
         }
     }
@@ -335,7 +335,7 @@ public final class DungeonFloor {
         if (level.getBlockEntity(at) instanceof ChestBlockEntity chest) {
             DungeonLoot.fill(chest, run.dungeon, 1, level.random);
         }
-        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.03);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.03);
         level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.4f, 1.0f);
         for (ServerPlayer p : run.present()) {
             if (Dungeons.real(p)) {
@@ -438,7 +438,7 @@ public final class DungeonFloor {
         for (BlockPos q : BlockPos.betweenClosed(a, b)) {
             if (level.getBlockState(q).is(Blocks.IRON_BARS)) {
                 level.setBlock(q, Blocks.AIR.defaultBlockState(), 3);
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.IRON_BARS.defaultBlockState()), q.getX() + 0.5, q.getY() + 0.5, q.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), q.getX() + 0.5, q.getY() + 0.5, q.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
             }
         }
         level.playSound(null, a, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.4f, 0.7f);
@@ -493,13 +493,6 @@ public final class DungeonFloor {
                 .startSound(kind.equals("spark") ? SoundEvents.LIGHTNING_BOLT_THUNDER : SoundEvents.GRAVEL_BREAK, 0.8f, kind.equals("spark") ? 1.8f : 0.6f)
                 .victims(p -> !p.isSpectator())
                 .onImpact(server -> {
-                    server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, block), c.x, c.y + (kind.equals("rocks") ? 3.5 : 0.6), c.z, 50, r * 0.4, 0.8, r * 0.4, 0.1);
-                    if (kind.equals("steam")) {
-                        server.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.4, c.z, 30, r * 0.4, 0.6, r * 0.4, 0.05);
-                    }
-                    if (kind.equals("spark")) {
-                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, c.x, c.y + 0.8, c.z, 40, r * 0.4, 0.6, r * 0.4, 0.2);
-                    }
                     server.playSound(null, c.x, c.y, c.z, kind.equals("rocks") ? SoundEvents.DRIPSTONE_BLOCK_BREAK : SoundEvents.BONE_BLOCK_BREAK, SoundSource.BLOCKS, 1.4f, 0.7f);
                 })
                 .onHit((server, player) -> player.hurt(level.damageSources().generic(), player.getMaxHealth() * TRAP_HURT))
@@ -510,11 +503,6 @@ public final class DungeonFloor {
     void bossTick(ServerLevel level, long t, List<ServerPlayer> here) {
         if (bossDown) {
             // 帰りの光
-            if (t % 5 == 0 && terrain.has("exit")) {
-                Vec3 c = center("exit");
-                level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 0.2, c.z, 6, 0.4, 1.6, 0.4, 0.02);
-                level.sendParticles(ParticleTypes.GLOW, c.x, c.y + 1.0, c.z, 3, 0.6, 1.0, 0.6, 0.0);
-            }
             return;
         }
         Vec3 c = center("boss");

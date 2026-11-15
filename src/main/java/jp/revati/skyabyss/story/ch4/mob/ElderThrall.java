@@ -214,8 +214,6 @@ public class ElderThrall extends AshThrall {
                 .victims(this::canHit)
                 .onImpact(lvl -> {
                     lvl.playSound(null, cx, y, cz, Ch4Setup.ELDER_BURST.get(), SoundSource.HOSTILE, 1.2f, 1.0f);
-                    lvl.sendParticles(ParticleTypes.LAVA, cx, y + 0.2, cz, 8, CRACK_RADIUS * 0.4, 0.1, CRACK_RADIUS * 0.4, 0.1);
-                    lvl.sendParticles(ParticleTypes.FLAME, cx, y + 0.3, cz, 24, CRACK_RADIUS * 0.4, 0.4, CRACK_RADIUS * 0.4, 0.05);
                 })
                 .onHit((lvl, player) -> {
                     player.hurt(attackSource(), CRACK_DAMAGE);
@@ -242,7 +240,7 @@ public class ElderThrall extends AshThrall {
         Telegraph.in(server, TelegraphShape.ring(cx, cz, WAVE_INNER, WAVE_OUTER)).prop(PropFx.ring("lava_pillar", 10)).floor(y).warn(WAVE_WARN).danger().owner(this)
                 .startSound(Ch4Setup.ELDER_WAVE.get(), 1.4f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(lvl -> lvl.sendParticles(ParticleTypes.FLAME, cx, y + 0.4, cz, 60, WAVE_OUTER * 0.5, 0.2, WAVE_OUTER * 0.5, 0.08))
+                .onImpact(lvl -> lvl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + 0.4, cz, 60, WAVE_OUTER * 0.5, 0.2, WAVE_OUTER * 0.5, 0.08))
                 .onHit((lvl, player) -> {
                     player.hurt(attackSource(), WAVE_DAMAGE);
                     Vec3 away = player.position().subtract(cx, y, cz).multiply(1, 0, 1).normalize();
@@ -329,7 +327,6 @@ public class ElderThrall extends AshThrall {
                         .victims(mob::canHit)
                         .onImpact(lvl -> {
                             lvl.playSound(null, cx, mob.getY(), cz, net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.2f, 0.5f);
-                            lvl.sendParticles(ParticleTypes.LAVA, cx + Math.cos(angle) * 2.5, mob.getY() + 0.2, cz + Math.sin(angle) * 2.5, 5, 0.5, 0.1, 0.5, 0);
                         })
                         .onHit((lvl, player) -> player.hurt(mob.attackSource(), RAKE_DAMAGE))
                         .start();

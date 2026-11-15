@@ -235,7 +235,7 @@ public final class WildLoot {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), tier.atLeast(GearTier.HEROIC) ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE
                 : tier.atLeast(GearTier.EPIC) ? SoundEvents.PLAYER_LEVELUP : SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.7f, tier.atLeast(GearTier.EPIC) ? 1.2f : 1.0f);
         if (tier.atLeast(GearTier.RARE)) {
-            level.sendParticles(tier.atLeast(GearTier.HEROIC) ? ParticleTypes.TOTEM_OF_UNDYING : ParticleTypes.END_ROD, p.getX(), p.getY() + 1.2, p.getZ(),
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.2, p.getZ(),
                     tier.atLeast(GearTier.HEROIC) ? 40 : 12, 0.4, 0.8, 0.4, 0.05);
         }
     }

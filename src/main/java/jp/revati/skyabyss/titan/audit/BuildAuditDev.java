@@ -139,15 +139,15 @@ public final class BuildAuditDev {
             if (f.pos().distSqr(viewer.blockPosition()) > 200 * 200) {
                 continue;
             }
-            var particle = f.kind().startsWith("STAIR") ? ParticleTypes.FLAME
-                    : f.kind().startsWith("ATTACH") || f.kind().startsWith("GATE") || f.kind().startsWith("DOOR") ? ParticleTypes.SOUL_FIRE_FLAME
-                    : f.kind().startsWith("FLOAT") ? ParticleTypes.END_ROD
-                    : f.kind().startsWith("FLUID") ? ParticleTypes.SPLASH
-                    : f.kind().startsWith("LIGHT") ? ParticleTypes.SMOKE : ParticleTypes.HAPPY_VILLAGER;
+            var particle = f.kind().startsWith("STAIR") ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW)
+                    : f.kind().startsWith("ATTACH") || f.kind().startsWith("GATE") || f.kind().startsWith("DOOR") ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW)
+                    : f.kind().startsWith("FLOAT") ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW)
+                    : f.kind().startsWith("FLUID") ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE)
+                    : f.kind().startsWith("LIGHT") ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
             double x = f.pos().getX() + 0.5;
             double z = f.pos().getZ() + 0.5;
             for (int i = 0; i < 4; i++) {
-                viewLevel.sendParticles(viewer, particle, true, x, f.pos().getY() + 0.5 + i * 0.6, z, 2, 0.15, 0.1, 0.15, 0.0);
+                viewLevel.sendParticles(viewer, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x, f.pos().getY() + 0.5 + i * 0.6, z, 2, 0.15, 0.1, 0.15, 0.0);
             }
         }
     }

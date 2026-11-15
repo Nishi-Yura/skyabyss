@@ -261,7 +261,7 @@ public final class RiftTicker {
                 continue;
             }
             if (StarLamps.inLight(level, at.getCenter())) {
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.02);
                 continue;
             }
             String tag = POOL_TAG + i;
@@ -364,5 +364,10 @@ public final class RiftTicker {
         e.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, -90f, 0f);
         e.setHome(at);
         level.addFreshEntity(e);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

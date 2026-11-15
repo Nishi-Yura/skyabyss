@@ -243,7 +243,7 @@ public final class TitanSolids {
             for (int i = 0; i <= steps; i++) {
                 Vec3 p = before.lerp(now, (double) i / steps);
                 if (blocked(volume, corridors, toLocal(titan, p), true)) {
-                    level.sendParticles(ParticleTypes.POOF, p.x, p.y, p.z, 4, 0.1, 0.1, 0.1, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y, p.z, 4, 0.1, 0.1, 0.1, 0.02);
                     projectile.discard();
                     return;
                 }
