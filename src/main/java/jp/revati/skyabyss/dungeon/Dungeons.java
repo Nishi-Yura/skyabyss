@@ -745,7 +745,8 @@ public final class Dungeons {
         });
     }
 
-    // 入り直したとき: 写しが続いていれば checkpoint の層へ、終わっていれば入口の間へ
+    // 入り直したとき: 入る前の所 (入口の間。小さなダンジョンは入った門のそば) へ戻す (2026-11-15 の声「ダンジョンに入っているときに
+    // ワールドから抜けると、再度参加したときは入る前のところでスポーンするように」)。続きは層の門から
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || !DungeonWorld.in(p)) {
@@ -755,10 +756,9 @@ public final class Dungeons {
         DungeonWorld.Place at = DungeonWorld.place(p.blockPosition());
         Dungeon d = run != null ? run.dungeon : at != null ? at.dungeon() : Dungeon.BONE_PIT;
         Tasks.later(10, () -> {
-            if (run != null && RUNS.containsKey(run.id)) {
-                moveTo(p, run, run.checkpoint);
-            } else {
+            if (!p.hasDisconnected() && DungeonWorld.in(p)) {
                 sendBack(p, d);
+                Notice.hint(p, "message.skyabyss.dungeon.left");
             }
         });
     }

@@ -441,6 +441,8 @@ public final class TitanShrine {
             p.stopRiding();
             p.teleportTo(back, arrival.getX() + 0.5, arrival.getY() + 1, arrival.getZ() + 0.5, p.getYRot(), 0f);
             p.fallDistance = 0;
+            // 背で抜けて入り直したら祠へ戻すための印 (trial/RouteSafety)
+            jp.revati.skyabyss.trial.RouteSafety.markShrine(p, titan);
             jp.revati.skyabyss.lore.Lore.unlock(p, loreId(titan), true);
         }
         // 区画の写しは帳のあいだに tick ごとに少しずつ (一 tick に止まらない)。段 1 の写しが済んだら運ばれる
