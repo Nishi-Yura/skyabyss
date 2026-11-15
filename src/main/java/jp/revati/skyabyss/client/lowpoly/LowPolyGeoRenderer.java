@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.splat.SplatCloud;
+import jp.revati.skyabyss.client.splat.SplatClouds;
+import jp.revati.skyabyss.client.splat.SplatDraw;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -127,6 +130,12 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         if (bufferSource != null) {
             currentSource = bufferSource;
         }
+        if (!isReRender) {
+            activeSplat = splatFor(animatable);
+            if (activeSplat != null) {
+                activeSplat.begin();
+            }
+        }
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 
@@ -135,6 +144,13 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         // 心臓の核の骨の位置を光へ知らせる (client/fx/CoreGlowFx)
         if (animatable != null && !glowPass && jp.revati.skyabyss.client.fx.CoreGlowFx.wants(animatable)) {
             jp.revati.skyabyss.client.fx.CoreGlowFx.track(animatable, bone.getName(), bone.getPivotX(), bone.getPivotY(), bone.getPivotZ(), poseStack.last().pose());
+        }
+        // 点の模型があるモブ: 骨のポーズだけ集め、描くのは renderFinal でまとめて (SplatDraw)
+        if (activeSplat != null) {
+            if (!glowPass && !bone.isHidden()) {
+                activeSplat.capture(bone.getName(), poseStack.last().pose(), packedLight, packedOverlay, colour);
+            }
+            return;
         }
         LowPolyMesh mesh = LowPoly.enabled && animatable != null ? LowPolyMeshes.get(meshName.apply(animatable)) : null;
         LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
@@ -155,6 +171,38 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         // 巨神の焼き込みの陰 (下ほど暗い) は、光る層の重ね描きでは掛けない
         boolean[] only = GLOW_SKIP && glowPass && glowMask != null && !LowPoly.debug ? LowPolyGlow.quads(meshBone, glowMask) : null;
         LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, 0f, !glowPass, only);
+    }
+
+    // 点の模型 (client/splat。docs/review/splat_pilot): 今描いている主の点の描き手 (無ければ null)。点の模型ごとに一つ作って使い回す
+    private SplatDraw activeSplat;
+    private final Map<String, SplatDraw> splatDraws = new HashMap<>();
+
+    @Nullable
+    private SplatDraw splatFor(T animatable) {
+        if (animatable == null || !LowPoly.enabled || LowPoly.debug) {
+            return null;
+        }
+        SplatCloud cloud = SplatClouds.get(meshName.apply(animatable));
+        if (cloud == null) {
+            return null;
+        }
+        SplatDraw d = splatDraws.get(cloud.name);
+        if (d == null || d.cloud() != cloud) {
+            d = new SplatDraw(cloud);
+            splatDraws.put(cloud.name, d);
+        }
+        return d;
+    }
+
+    @Override
+    public void renderFinal(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, float partialTick,
+                            int packedLight, int packedOverlay, int colour) {
+        if (activeSplat != null) {
+            SplatDraw d = activeSplat;
+            activeSplat = null;
+            d.flush(bufferSource, partialTick);
+        }
+        super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, colour);
     }
 
     // 重ね描き中の発光マスクの画像 (その骨の quad のうち光る画素に掛かる所だけを流す。LowPolyGlow)
@@ -250,6 +298,10 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, @Nullable RenderType renderType, MultiBufferSource bufferSource,
                            @Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
             if (!enabled.getAsBoolean()) {
+                return;
+            }
+            // 点の模型は自分で光る点を描くので、発光の重ね描きは要らない
+            if (getRenderer() instanceof LowPolyGeoRenderer<?> r0 && r0.activeSplat != null) {
                 return;
             }
             ResourceLocation tex = getTextureResource(animatable);

@@ -1,0 +1,110 @@
+# 点の模型の試作 (熔岩の大蛇) の比べ: 同じ角度で splat on / off (tools/gen/splat/lava_wyrm.py)
+world splatpilot flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+lowpoly on
+fov 60
+hud off
+chat clear
+cmd tp @s 0 -60 40 180 0
+waitchunks
+wait 40
+cmd kill @e[type=skyabyss:lava_wyrm]
+cmd summon skyabyss:lava_wyrm 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+wait 60
+camera minecraft:overworld -6 -57 12 -155 14
+wait 20
+splat on
+wait 6
+shot day_front_on
+splat off
+wait 6
+shot day_front_off
+camera minecraft:overworld 12 -57 3 100 12
+wait 20
+splat on
+wait 6
+shot day_side_on
+splat off
+wait 6
+shot day_side_off
+camera minecraft:overworld -3 -55.5 6 -160 16
+wait 20
+splat on
+wait 6
+shot day_close_on
+splat off
+wait 6
+shot day_close_off
+cmd time set 18000
+wait 30
+camera minecraft:overworld -6 -57 12 -155 14
+wait 20
+splat on
+wait 6
+shot night_front_on
+splat off
+wait 6
+shot night_front_off
+camera minecraft:overworld 12 -57 3 100 12
+wait 20
+splat on
+wait 6
+shot night_side_on
+splat off
+wait 6
+shot night_side_off
+camera minecraft:overworld -3 -55.5 6 -160 16
+wait 20
+splat on
+wait 6
+shot night_close_on
+splat off
+wait 6
+shot night_close_off
+cmd time set 6000
+splat on
+camera minecraft:overworld -9 -56 13 -145 12
+wait 20
+cmd skyabyss dev anim @e[tag=m] lunge
+wait 15
+shot pose_lunge
+wait 60
+cmd skyabyss dev anim @e[tag=m] breath
+wait 26
+shot pose_breath
+wait 60
+cmd skyabyss dev anim @e[tag=m] lash
+wait 16
+shot pose_lash
+wait 60
+cmd skyabyss dev anim @e[tag=m] scream
+wait 9
+shot pose_scream
+wait 60
+# 重さの比べ (Prof の窓は 600 フレーム)
+camera minecraft:overworld -6 -57 12 -155 14
+splat gpu
+shot gpu_front
+echo PERF gpu begin
+wait 500
+echo PERF gpu end
+splat cpu
+shot cpu_front
+echo PERF cpu begin
+wait 500
+echo PERF cpu end
+splat gpu
+quit

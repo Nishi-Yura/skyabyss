@@ -606,6 +606,15 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "splat" -> {
+                // splat on|off : 点の模型 (client/splat) の切り替え。splat cpu|gpu : 描き方 (比べと計測用)
+                switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
+                    case "cpu" -> jp.revati.skyabyss.client.splat.SplatGpu.enabled = false;
+                    case "gpu" -> jp.revati.skyabyss.client.splat.SplatGpu.enabled = true;
+                    default -> jp.revati.skyabyss.client.splat.SplatClouds.enabled = !line.arg(0).equalsIgnoreCase("off");
+                }
+                return true;
+            }
             case "skycircle" -> {
                 // skycircle <x> <z> <半径> | off : 空の影の形を、決まった円 (縁は 10 ブロックでぼやける) にする。skypass で影を置いたあとに使う
                 jp.revati.skyabyss.client.sky.SkyPassRenderer.testCircle = line.arg(0).equalsIgnoreCase("off") ? null
