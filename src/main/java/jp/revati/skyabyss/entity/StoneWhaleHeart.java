@@ -146,7 +146,7 @@ public class StoneWhaleHeart extends HeartBoss {
         this.setNoGravity(true);
         this.setPersistenceRequired();
         this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
-                new jp.revati.skyabyss.combat.HeartPursuit.Theme("whale", 20f, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("whale", 20f, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         MobSounds.STONE_HEART_SLAM.get(), 1.6f),
                 this::canReach, this::strike,
                 () -> level() instanceof ServerLevel s ? nearbyPlayers(s, 40) : List.<ServerPlayer>of(),
@@ -443,6 +443,11 @@ public class StoneWhaleHeart extends HeartBoss {
         setYRot((float) (Mth.atan2(-dx, dz) * 180 / Math.PI));
     }
 
+    // 攻撃の粒は mod の石の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
+    }
+
     // 色つきの粒 (0xRRGGBB と大きさ)
     private static DustParticleOptions dust(int rgb, float scale) {
         return new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), scale);
@@ -683,8 +688,8 @@ public class StoneWhaleHeart extends HeartBoss {
         if (actionTicks == 1) {
             setRoaring(true);
             sound(server, MobSounds.STONE_HEART_ROAR.get(), 3f, 1.0f);
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
-                    getX(), coreHeight(), getZ(), 60, 1.5, 1.2, 1.5, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), coreHeight(), getZ(), 24, 1.5, 1.2, 1.5, 0.2);
             tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.WHALE_ROAR)
                     .onImpact(s -> sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f))
                     .onHit((s, player) -> {
@@ -694,12 +699,6 @@ public class StoneWhaleHeart extends HeartBoss {
                     .start();
             // 広がる輪 (見た目だけ)
             tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, H).look(jp.revati.skyabyss.combat.AttackLook.WHALE_ROAR).active(30).start();
-        }
-        if (actionTicks % 4 == 0 && actionTicks < 56) {
-            if (enrageRoar) {
-                warn(server, dust(0xFF3A2A, 1.4f), getX(), coreHeight(), getZ(), 8, 1.2, 1.2, 1.2, 0.05);
-            }
-            warn(server, dust(0x9CFBFF, 1.2f), getX(), coreHeight(), getZ(), 6, 1.0, 1.0, 1.0, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             setRoaring(false);
@@ -742,7 +741,6 @@ public class StoneWhaleHeart extends HeartBoss {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 1.0f);
                             }
-                            s.sendParticles(ParticleTypes.CRIT, getX() + dx * 4, getY() + 1.5, getZ() + dz * 4, 24, 1.2, 0.8, 1.2, 0.3);
                         })
                         .onHit((s, player) -> {
                             strike(player, THRUST_DAMAGE);
@@ -793,7 +791,6 @@ public class StoneWhaleHeart extends HeartBoss {
         Telegraph.in(server, TelegraphShape.circle(x, z, SPIKE_RADIUS)).look(jp.revati.skyabyss.combat.AttackLook.WHALE_SPIKE).floor(y).warn(SPIKE_WARN).danger().owner(this).victims(this::canReach)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.0f);
-                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, y + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);
                 })
                 .onHit((s, player) -> {
                     strike(player, SPIKE_DAMAGE);
@@ -814,8 +811,6 @@ public class StoneWhaleHeart extends HeartBoss {
             tg(server, TelegraphShape.circle(getX(), getZ(), LEAP_CORE), LEAP_WARN, D).look(jp.revati.skyabyss.combat.AttackLook.WHALE_LEAP)
                     .onImpact(s -> {
                         sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 0.85f);
-                        s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
-                                getX(), floorY() + 0.5, getZ(), 50, 2.0, 0.4, 2.0, 0.2);
                     })
                     .onHit((s, player) -> strike(player, LEAP_CORE_DAMAGE))
                     .start();
@@ -864,13 +859,6 @@ public class StoneWhaleHeart extends HeartBoss {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_FLAME_BURST.get(), 2.5f, 1.0f);
                             }
-                            for (double d = 0; d <= length; d += 1.8) {
-                                double x = getX() + dx * (2 + d);
-                                double z = getZ() + dz * (2 + d);
-                                double y = floorAt(Mth.floor(x), Mth.floor(z));
-                                s.sendParticles(ParticleTypes.FLAME, x, y + 0.3, z, 6, 0.4, 0.5, 0.4, 0.05);
-                                s.sendParticles(ParticleTypes.LAVA, x, y + 0.3, z, 1, 0.3, 0.2, 0.3, 0);
-                            }
                         })
                         .onHit((s, player) -> {
                             strike(player, CRACK_DAMAGE);
@@ -889,14 +877,9 @@ public class StoneWhaleHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_CHAIN.get(), 2f, 0.8f);
         }
-        if (actionTicks < 30 && actionTicks % 3 == 0) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
-                    getX() + random.nextGaussian() * 1.5, getY() + 1.5 + random.nextGaussian(), getZ() + random.nextGaussian() * 1.5,
-                    2, 0.1, 0.1, 0.1, 0.05);
-        }
         if (actionTicks == 30) {
             sound(server, MobSounds.STONE_HEART_PLATE_LOCK.get(), 2.5f, 1.0f);
-            warn(server, dust(0xFFB347, 1.4f), getX(), coreHeight(), getZ(), 60, 1.8, 1.8, 1.8, 0.1);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreHeight(), getZ(), 24, 1.8, 1.8, 1.8, 0.1);
             weakTicks = 20;
         }
         if (actionTicks >= 40) {
@@ -922,13 +905,6 @@ public class StoneWhaleHeart extends HeartBoss {
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_VOLLEY_SHOT.get(), 2.5f, 1.0f);
-                            }
-                            for (double d = 1.5; d <= 30; d += 1.3) {
-                                s.sendParticles(ParticleTypes.END_ROD, getX() + dx * d, floorY() + 1.0 + (y0 - floorY() - 1.0) * (1 - d / 30), getZ() + dz * d, 1, 0.05, 0.05, 0.05, 0.01);
-                                if (((int) (d / 1.3)) % 3 == 0) {
-                                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                                            getX() + dx * d, floorY() + 1.0, getZ() + dz * d, 4, 0.2, 0.2, 0.2, 0.1);
-                                }
                             }
                         })
                         .onHit((s, player) -> {
@@ -976,25 +952,7 @@ public class StoneWhaleHeart extends HeartBoss {
                         .start();
             }
         }
-        if (actionTicks < BEAM_WARN) {
-            if (actionTicks % 2 == 0) {
-                double r = 2.6 * (1 - actionTicks / (double) BEAM_WARN) + 0.3;
-                for (int a = 0; a < 360; a += 45) {
-                    double rad = Math.toRadians(a + actionTicks * 6);
-                    warn(server, dust(0xFF3A2A, 1.0f),
-                            origin.x + Math.cos(rad) * r, origin.y + Math.sin(rad) * r, origin.z, 1, 0, 0, 0, 0);
-                }
-            }
-        } else if (actionTicks <= BEAM_WARN + BEAM_ACTIVE) {
-            // 光線の芯 (いまの向き)
-            double p = (actionTicks - BEAM_WARN) / (double) BEAM_ACTIVE;
-            for (int i = 0; i < count; i++) {
-                double angle = base + Math.PI * 2 * i / count - span / 2 + span * p;
-                for (double d = 1; d <= beamLength; d += 1.6) {
-                    warn(server, dust(0xFF3A2A, 1.4f), origin.x + Math.cos(angle) * d, origin.y, origin.z + Math.sin(angle) * d, 1, 0.05, 0.05, 0.05, 0);
-                }
-            }
-        }
+        // 溜め・光線の見た目は光 (client/combat/AttackLightFx) の係 (docs/design/59)
         if (actionTicks >= BEAM_WARN + BEAM_ACTIVE + 2) {
             finish();
         }
@@ -1049,14 +1007,6 @@ public class StoneWhaleHeart extends HeartBoss {
                 shellDrop(server, x, floorAt(Mth.floor(x), Mth.floor(z)), z);
             }
         }
-        // 落ちてくる殻の欠片 (最後の 0.5 秒。見た目だけ)
-        if (actionTicks >= DROP_WARN - 10 && actionTicks < DROP_WARN && actionTicks % 2 == 0) {
-            double drop = (DROP_WARN - actionTicks) / 10.0;
-            for (Vec3 p : dropSpots) {
-                double y = floorAt(Mth.floor(p.x), Mth.floor(p.z)) + 1 + drop * 9;
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), p.x, y, p.z, 3, 0.3, 0.2, 0.3, 0);
-            }
-        }
         if (actionTicks >= 50) {
             finish();
         }
@@ -1068,7 +1018,6 @@ public class StoneWhaleHeart extends HeartBoss {
         Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).look(jp.revati.skyabyss.combat.AttackLook.WHALE_SHELL_DROP).floor(y).warn(DROP_WARN).danger().owner(this).victims(this::canReach)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, MobSounds.STONE_HEART_SLAM.get(), SoundSource.HOSTILE, 2.5f, 0.9f);
-                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), x, y + 0.5, z, 50, 1.4, 0.6, 1.4, 0.25);
                 })
                 .onHit((s, player) -> {
                     strike(player, DROP_DAMAGE);
@@ -1084,14 +1033,14 @@ public class StoneWhaleHeart extends HeartBoss {
         if (isRoaring()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), MobSounds.STONE_HEART_GUARD.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
-                server.sendParticles(ParticleTypes.CRIT, getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
             }
             return false;
         }
         if (domain != null && domain.invulnerable()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), MobSounds.STONE_HEART_GUARD.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
-                server.sendParticles(ParticleTypes.CRIT, getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
             }
             return false;
         }
@@ -1177,9 +1126,9 @@ public class StoneWhaleHeart extends HeartBoss {
             domain.abort(server);
         }
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX(), coreHeight(), getZ(), 120, 1.2, 1.5, 1.2, 0.2);
-            warn(server, dust(0x7FF4FF, 1.5f), getX(), coreHeight(), getZ(), 80, 1.5, 1.5, 1.5, 0.1);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreHeight(), getZ(), 24, 1.5, 1.5, 1.5, 0.1);
         }
     }
 
@@ -1206,7 +1155,7 @@ public class StoneWhaleHeart extends HeartBoss {
         if (tick < 56 && tick % 3 == 0) {
             double a = random.nextDouble() * Math.PI * 2;
             double r = 2 + random.nextDouble() * 3.5;
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX() + Math.cos(a) * r, fy + 0.2, getZ() + Math.sin(a) * r, 8, 0.3, 0.2, 0.3, 0.15);
             if (tick % 9 == 0) {
                 server.playSound(null, getX() + Math.cos(a) * r, fy, getZ() + Math.sin(a) * r, MobSounds.STONE_HEART_PLATE_LOCK.get(), SoundSource.HOSTILE, 1.2f, 0.7f);
@@ -1216,7 +1165,7 @@ public class StoneWhaleHeart extends HeartBoss {
             sound(server, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 0.8f);
             for (int k = 0; k < 24; k++) {
                 double a = k * Math.PI / 12;
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         getX() + Math.cos(a) * 3.5, fy + 0.3, getZ() + Math.sin(a) * 3.5, 5, 0.2, 0.3, 0.2, 0.25);
             }
         }
@@ -1226,13 +1175,13 @@ public class StoneWhaleHeart extends HeartBoss {
             double px = getX() + Math.cos(a) * 2.6;
             double pz = getZ() + Math.sin(a) * 2.6;
             server.playSound(null, px, fy + 2, pz, MobSounds.STONE_HEART_PLATE_LOCK.get(), SoundSource.HOSTILE, 1.4f, 0.8f + 0.04f * i);
-            server.sendParticles(ParticleTypes.CRIT, px, fy + 2.0, pz, 6, 0.3, 0.8, 0.3, 0.1);
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), px, fy + 1.0, pz, 10, 0.3, 0.5, 0.3, 0.15);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), px, fy + 2.0, pz, 6, 0.3, 0.8, 0.3, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), px, fy + 1.0, pz, 10, 0.3, 0.5, 0.3, 0.15);
         }
         if (tick == 70) {
             sound(server, MobSounds.STONE_HEART_RESONANCE.get(), 3f, 1.0f);
-            warn(server, dust(0x7FF4FF, 1.5f), getX(), coreHeight(), getZ(), 60, 1.5, 1.5, 1.5, 0.1);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), coreHeight(), getZ(), 30, 1.2, 1.2, 1.2, 0.08);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreHeight(), getZ(), 24, 1.5, 1.5, 1.5, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), coreHeight(), getZ(), 24, 1.2, 1.2, 1.2, 0.08);
         }
     }
 
@@ -1245,7 +1194,7 @@ public class StoneWhaleHeart extends HeartBoss {
             sound(server, MobSounds.STONE_HEART_PLATE_FALL.get(), 2.5f, 0.9f + 0.05f * (tick / 14));
             for (int k = 0; k < 8; k++) {
                 double a = k * Math.PI / 4 + tick;
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, k % 2 == 0 ? Blocks.STONE_BRICKS.defaultBlockState() : Blocks.BONE_BLOCK.defaultBlockState()),
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         getX() + Math.cos(a) * 3, fy + 0.8, getZ() + Math.sin(a) * 3, 10, 0.4, 0.5, 0.4, 0.2);
             }
         }
@@ -1258,17 +1207,17 @@ public class StoneWhaleHeart extends HeartBoss {
         if (tick >= 60 && tick <= 86 && tick % 2 == 0) {
             double a = tick * 0.5;
             double r = 4.0 * (1 - (tick - 60) / 26.0) + 0.5;
-            warn(server, dust(0x7FF4FF, 1.2f), getX() + Math.cos(a) * r, cy + Math.sin(a * 0.7) * 0.8, getZ() + Math.sin(a) * r, 4, 0.1, 0.1, 0.1, 0);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 2, 0.4, 0.4, 0.4, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * r, cy + Math.sin(a * 0.7) * 0.8, getZ() + Math.sin(a) * r, 4, 0.1, 0.1, 0.1, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 2, 0.4, 0.4, 0.4, 0.02);
         }
         if (tick == 88) {
             sound(server, MobSounds.STONE_HEART_CORE_SHATTER.get(), 3f, 1.0f);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 100, 0.3, 0.3, 0.3, 0.35);
-            warn(server, dust(0x7FF4FF, 1.8f), getX(), cy, getZ(), 80, 1.0, 1.0, 1.0, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 0.3, 0.3, 0.3, 0.35);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 1.0, 1.0, 1.0, 0.2);
         }
         if (tick == 92) {
             sound(server, MobSounds.STONE_HEART_SHARD.get(), 2.5f, 0.9f);
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), cy, getZ(), 60, 1.0, 1.0, 1.0, 0.3);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), cy, getZ(), 24, 1.0, 1.0, 1.0, 0.3);
         }
     }
 
@@ -1313,9 +1262,6 @@ public class StoneWhaleHeart extends HeartBoss {
     public void tick() {
         super.tick();
         if (level().isClientSide && random.nextFloat() < 0.2f) {
-            level().addParticle(dust(0x7FF4FF, 1.0f),
-                    getX() + Mth.nextDouble(random, -0.8, 0.8), coreHeight() + Mth.nextDouble(random, -1.2, 1.2),
-                    getZ() + Mth.nextDouble(random, -0.5, 0.5), 0, 0.02, 0);
         }
     }
 }

@@ -1,7 +1,7 @@
 # 領域の空と核の光の確かめ (2026-11-15 の声: 天井が低くて裂け目が見切れる・背景で周りを覆う・核はずっと光らない)
 # 天井の低い閉じた部屋 (床の上 10 段) の中で、岩鯨の心臓に領域を宣言させ、広がりを時刻ごとに撮る。最後に崩して核の光
 # ./gradlew runShots -Pscript=tools/shots/light_fx_room.txt
-world lightfx_room6 flat
+world lightfx_room9 flat
 size 1280 720
 timeout 900
 render 8
@@ -22,6 +22,27 @@ cmd fill -20 -54 -24 -16 -52 -24 minecraft:glowstone
 cmd fill 16 -54 -24 20 -52 -24 minecraft:glowstone
 cmd fill -24 -54 -2 -24 -52 2 minecraft:glowstone
 cmd fill 24 -54 -2 24 -52 2 minecraft:glowstone
+cmd fill -23 -50 -18 -17 -49 -17 minecraft:dark_oak_planks
+cmd fill 17 -50 -18 23 -50 -17 minecraft:dark_oak_planks
+cmd fill -23 -48 -18 -14 -48 -17 minecraft:dark_oak_planks
+cmd fill 14 -48 -18 23 -48 -17 minecraft:dark_oak_planks
+cmd fill -23 -50 -10 -17 -49 -9 minecraft:dark_oak_planks
+cmd fill 17 -50 -10 23 -50 -9 minecraft:dark_oak_planks
+cmd fill -23 -48 -10 -14 -48 -9 minecraft:dark_oak_planks
+cmd fill 14 -48 -10 23 -48 -9 minecraft:dark_oak_planks
+cmd fill -23 -50 -2 -17 -49 -1 minecraft:dark_oak_planks
+cmd fill 17 -50 -2 23 -50 -1 minecraft:dark_oak_planks
+cmd fill -23 -48 -2 -14 -48 -1 minecraft:dark_oak_planks
+cmd fill 14 -48 -2 23 -48 -1 minecraft:dark_oak_planks
+cmd fill -23 -50 6 -17 -49 7 minecraft:dark_oak_planks
+cmd fill 17 -50 6 23 -50 7 minecraft:dark_oak_planks
+cmd fill -23 -48 6 -14 -48 7 minecraft:dark_oak_planks
+cmd fill 14 -48 6 23 -48 7 minecraft:dark_oak_planks
+cmd fill -23 -50 14 -17 -49 15 minecraft:dark_oak_planks
+cmd fill 17 -50 14 23 -50 15 minecraft:dark_oak_planks
+cmd fill -23 -48 14 -14 -48 15 minecraft:dark_oak_planks
+cmd fill 14 -48 14 23 -48 15 minecraft:dark_oak_planks
+cmd fill 9 -60 -9 10 -47 -8 minecraft:stone_bricks
 camera minecraft:overworld 0.5 -60 20.5 180 -16
 waitchunks
 wait 20

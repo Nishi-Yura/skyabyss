@@ -59,6 +59,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.lore.LoreSetup.register(modEventBus);
         // 技 (スキル・マナ・技の枠)。登録は rpg.skill パッケージにまとめてある
         jp.revati.skyabyss.rpg.skill.Skills.register(modEventBus);
+        jp.revati.skyabyss.fx.FxParticles.register(modEventBus);
         jp.revati.skyabyss.abyss.arts.AbyssArts.register(modEventBus);
         // 深淵の心臓の番人 (docs/design/36 の 6)
         jp.revati.skyabyss.story.ch5.warden.WardenSetup.register(modEventBus);

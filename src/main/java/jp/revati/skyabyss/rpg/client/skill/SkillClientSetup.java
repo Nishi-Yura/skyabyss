@@ -55,5 +55,7 @@ public final class SkillClientSetup {
         event.registerSpriteSet(Skills.RUNE_SPARK.get(), SkillParticles.RuneSparkProvider::new);
         event.registerSpriteSet(Skills.SKY_MOTE.get(), SkillParticles.SkyMoteProvider::new);
         event.registerSpriteSet(Skills.STORM_FEATHER.get(), jp.revati.skyabyss.client.combat.StormFeatherParticle.Provider::new);
+        // 攻撃と技の粒 (docs/design/59)
+        jp.revati.skyabyss.client.fx.FxParticle.register(event);
     }
 }

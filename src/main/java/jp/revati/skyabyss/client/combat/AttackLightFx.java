@@ -87,6 +87,14 @@ public final class AttackLightFx {
 
     // 当たった瞬間 (TelegraphClient から 1 回)
     static void impact(ClientLevel level, TelegraphClient.Decal d) {
+        if (d.look != AttackLook.NONE && d.look.travel == AttackLook.Travel.BOLT) {
+            TelegraphShape bs = d.shape.at(1.0);
+            double[] bc = AttackFx.center(bs);
+            BOLTS.add(new Bolt(bc[0], AttackFx.ground(d, bc[0], bc[1]), bc[1], elementRgb(d.look.element), level.getGameTime(), d.id * 31L));
+            if (BOLTS.size() > 16) {
+                BOLTS.remove(0);
+            }
+        }
         int rgb;
         if (d.look != AttackLook.NONE) {
             if (d.look.roar()) {
@@ -117,6 +125,50 @@ public final class AttackLightFx {
         }
     }
 
+    static boolean atSource(AttackLook.Windup w) {
+        return w == AttackLook.Windup.GATHER || w == AttackLook.Windup.ORBIT || w == AttackLook.Windup.SPIRAL || w == AttackLook.Windup.FLICKER;
+    }
+
+    // ---------------------------------------------------------------- 空からの稲妻 (運びが BOLT の技。光の帯で描く)
+    private record Bolt(double x, double y, double z, int rgb, double start, long seed) {
+    }
+
+    private static final List<Bolt> BOLTS = new ArrayList<>();
+    static final float BOLT_TICKS = 9f;
+
+    private static void bolts(BufferBuilder b, List<Runnable> soft, Matrix4f m, Vec3 cam, Camera camera, double now) {
+        BOLTS.removeIf(bo -> now - bo.start() > BOLT_TICKS);
+        for (Bolt bo : BOLTS) {
+            double age = now - bo.start();
+            float a = (float) Math.pow(1 - age / BOLT_TICKS, 1.5);
+            // 2 tick ごとに少し形が変わる
+            java.util.Random r = new java.util.Random(bo.seed() + (long) (age / 2));
+            int n = 10;
+            Vec3[] pts = new Vec3[n];
+            double px = bo.x();
+            double pz = bo.z();
+            for (int i = 0; i < n; i++) {
+                double f = (double) i / (n - 1);
+                double y = bo.y() + 16 * (1 - f);
+                if (i > 0 && i < n - 1) {
+                    px += (r.nextDouble() - 0.5) * 1.6;
+                    pz += (r.nextDouble() - 0.5) * 1.6;
+                    px += (bo.x() - px) * 0.3;
+                    pz += (bo.z() - pz) * 0.3;
+                } else {
+                    px = bo.x();
+                    pz = bo.z();
+                }
+                pts[i] = rel(px, y, pz, cam);
+            }
+            LightDraw.ribbon(b, m, pts, 1.6f, bo.rgb(), 0.5f * a);
+            LightDraw.ribbon(b, m, pts, 0.35f, 0xFFFFFF, 0.95f * a);
+            Vec3 foot = rel(bo.x(), bo.y() + 0.3, bo.z(), cam);
+            float fa = a;
+            soft.add(() -> LightDraw.sprite(current, m, camera, foot, 3.5f, LightDraw.whiten(bo.rgb(), 0.4f), 0.8f * fa));
+        }
+    }
+
     // 月の主の技の合図 (fx/OrbitCuePayload): 主の番号 -> {始まりの時刻, 放つまでの tick}
     private static final java.util.Map<Integer, double[]> CUES = new java.util.HashMap<>();
 
@@ -130,6 +182,7 @@ public final class AttackLightFx {
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         CUES.clear();
+        BOLTS.clear();
         RINGS.clear();
     }
 
@@ -151,7 +204,7 @@ public final class AttackLightFx {
         Matrix4f m = event.getPoseStack().last().pose();
         RINGS.removeIf(r -> now - r.start() > RING_TICKS + 8);
         CUES.values().removeIf(c -> now - c[0] > c[1] + 10);
-        boolean any = !RINGS.isEmpty() || !CUES.isEmpty();
+        boolean any = !RINGS.isEmpty() || !CUES.isEmpty() || !BOLTS.isEmpty();
         for (TelegraphClient.Decal d : TelegraphClient.decals()) {
             if (d.look != AttackLook.NONE || d.owner >= 0) {
                 any = true;
@@ -178,7 +231,8 @@ public final class AttackLightFx {
                 } else if (look.travel == AttackLook.Travel.SWEEP) {
                     sweep(level, band, m, cam, d, t, rgb);
                 }
-                if (look.windup == AttackLook.Windup.GATHER && t < d.warn) {
+                // 溜めは光の係 (docs/design/59)。技の元に集まる溜め (集まる・回る・渦・またたき) はどれもここで光らせる
+                if (atSource(look.windup) && t < d.warn) {
                     gather(level, band, soft, streak, m, cam, camera, d, t, rgb);
                 }
             }
@@ -204,6 +258,7 @@ public final class AttackLightFx {
         for (Ring r : RINGS) {
             ring(band, soft, m, cam, camera, r, now);
         }
+        bolts(band, soft, m, cam, camera, now);
         LightDraw.end(band, LightDraw.BAND, true);
         if (!streak.isEmpty()) {
             BufferBuilder sb = LightDraw.begin();
