@@ -342,27 +342,64 @@ def ramp_pick(ramp, L, dither):
 
 
 # ---------------------------------------------------------------- 書き出し
-def write_bin(path, bones, P, size, rgba, A, B, W, flags, N=None, seed=11):
-    """形式 SPL2 (ビッグエンディアン): 骨の数・骨の名前 (UTF)・点の数・点ごとに x y z 大きさ (float)・ARGB (int)・骨 A・骨 B・A の重み (0..255)・印・
-    法線 x y z (符号つき byte、x127。0,0,0 = 向きなし = 裏を向いても間引かない)。
-    点は乱数で並べ替えて書く (先頭から何割かだけ描けば、全体が一様に間引かれる = 遠くの間引き)"""
-    rng = np.random.default_rng(seed)
-    order = rng.permutation(len(P))
+def write_bin3(path, bones, P, size, rgba, A, B, W, flags, N=None, step=None):
+    """形式 SPL3 (小さい形式)。"SPL3" のあとを zlib で圧縮: 骨の数・骨の名前・点の数・原点 (float 3)・刻み (float)・大きさの最大 (float)、
+    そのあと項目ごとの列 (位置は刻みの整数を並び順の差で int32 (zigzag の varint)、大きさ u8、色 r g b、骨 A・骨 B・重み・印 u8、法線 int8 x3)。
+    点は骨・位置の順に並べて書く (圧縮が効く)。遠くの間引きのための乱数の並べ替えは、読むとき (SplatCloud) にする"""
+    import zlib
+    P = np.asarray(P, float)
+    lo = P.min(0)
+    if step is None:
+        step = float(np.median(size)) / 10.0
+    q = np.rint((P - lo) / step).astype(np.int64)
+    order = np.lexsort((q[:, 2], q[:, 1], q[:, 0], np.asarray(A)))
+    q = q[order]
+    smax = float(np.max(size))
+    out = bytearray()
+
+    def u32(v):
+        out.extend(struct.pack(">I", v))
+
+    def f32(v):
+        out.extend(struct.pack(">f", v))
+    u32(len(bones))
+    for b in bones:
+        e = b.encode("utf-8")
+        out.extend(struct.pack(">H", len(e)) + e)
+    u32(len(P))
+    for v in lo:
+        f32(float(v))
+    f32(step)
+    f32(smax)
+
+    def varints(arr):
+        d = np.diff(np.concatenate([[0], arr]))
+        z = (d << 1) ^ (d >> 63)
+        buf = bytearray()
+        for v in z.tolist():
+            while v >= 0x80:
+                buf.append((v & 0x7F) | 0x80)
+                v >>= 7
+            buf.append(v)
+        return buf
+    for k in range(3):
+        out.extend(varints(q[:, k]))
+    out.extend(np.clip(np.rint(np.asarray(size)[order] / smax * 255), 1, 255).astype(np.uint8).tobytes())
+    c = np.asarray(rgba, np.int64)[order]
+    for sh in (16, 8, 0):
+        out.extend(((c >> sh) & 255).astype(np.uint8).tobytes())
+    out.extend(np.asarray(A, np.uint8)[order].tobytes())
+    out.extend(np.asarray(B, np.uint8)[order].tobytes())
+    out.extend(np.clip(np.rint(np.asarray(W)[order] * 255), 0, 255).astype(np.uint8).tobytes())
+    out.extend(np.asarray(flags, np.uint8)[order].tobytes())
+    Nq = np.zeros((len(P), 3), int) if N is None else np.clip(np.rint(np.asarray(N) * 127), -127, 127).astype(int)
+    for k in range(3):
+        out.extend(Nq[order, k].astype(np.int8).tobytes())
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "wb") as fo:
-        fo.write(b"SPL2")
-        fo.write(struct.pack(">i", len(bones)))
-        for b in bones:
-            e = b.encode("utf-8")
-            fo.write(struct.pack(">H", len(e)) + e)
-        fo.write(struct.pack(">i", len(P)))
-        buf = bytearray()
-        Nq = np.zeros((len(P), 3), int) if N is None else np.clip(np.rint(np.asarray(N) * 127), -127, 127).astype(int)
-        for i in order:
-            buf += struct.pack(">ffffiBBBBbbb", float(P[i, 0]), float(P[i, 1]), float(P[i, 2]), float(size[i]), int(rgba[i]) - (1 << 32) if rgba[i] >= (1 << 31) else int(rgba[i]),
-                               int(A[i]), int(B[i]), int(round(W[i] * 255)), int(flags[i]), int(Nq[i, 0]), int(Nq[i, 1]), int(Nq[i, 2]))
-        fo.write(buf)
+        fo.write(b"SPL3")
+        fo.write(zlib.compress(bytes(out), 9))
     return path
 
 

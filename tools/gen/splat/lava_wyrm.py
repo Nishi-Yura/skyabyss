@@ -436,7 +436,7 @@ def main():
     base = dict(P=P, size=size, col=col, A=A, B=B, W=W, flags=flags, n=n)
     allv = {key: np.concatenate([d[key] for d in (base, fz, hz, em)]) for key in base}
     out = S.ROOT / "src/main/resources/assets/skyabyss/splat/lava_wyrm.bin"
-    S.write_bin(out, BONES, allv["P"], allv["size"], S.argb(allv["col"]), allv["A"], allv["B"], allv["W"], allv["flags"], N=allv["n"])
+    S.write_bin3(out, BONES, allv["P"], allv["size"], S.argb(allv["col"]), allv["A"], allv["B"], allv["W"], allv["flags"], N=allv["n"])
     print(f"wrote {out} total {len(allv['P'])} (fuzz {len(fz['P'])}, halo {len(gi)}, embers {len(ei)}, glow {len(g)}) {out.stat().st_size // 1024} KB "
           f"in {time.time() - t0:.1f}s")
     if not a.no_preview:
