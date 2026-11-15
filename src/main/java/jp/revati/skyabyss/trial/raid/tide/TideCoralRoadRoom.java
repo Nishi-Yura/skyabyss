@@ -8,6 +8,7 @@ import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -19,8 +20,9 @@ import net.minecraft.world.phys.AABB;
 // 歩 TR4「伸びる珊瑚の道」: 広間を三枚の珊瑚の壁が横切る。壁には四つの戸 (幅 3) があり、戸は珊瑚の枝が伸びて閉じ、引いて開く。周期は戸ごとにずれていて、
 // どの壁でも、いつも少なくとも一つは開いている。渡るには、開いている戸を読んで通る。
 //  - 予告: 閉じる少し前に、床に桃色の絨毯が戸の端から順に敷かれる (伸びる向きが分かる)。そのあと同じ順に枝が伸びて塞ぐ。引くときは逆の順
-//  - 戸の中に人が立っていると、その柱は伸びない (閉じるのが遅れる)。仲間が戸に立って押さえれば、ほかの人が通れる
-//  - 水・落とし穴・ダメージはない。渡った壁の数が目的の数。全員が最後の壁を越えれば越える
+//  - 柱は人がいても伸びる。伸びる柱に挟まると、壁の手前 (南) へ押し戻されて傷を受ける
+//  - 壁と壁のあいだの床には潮の流れ (青い帯) があり、立つ人を東か西へ押し流す。開いた戸の前で待っていると流されるので、戸を読んで駆け抜ける
+//  - 渡った壁の数が目的の数。全員が最後の壁を越えれば越える
 public final class TideCoralRoadRoom extends RaidRoom {
     static final int HX = 13;
     static final int HZ = 15;
@@ -40,6 +42,12 @@ public final class TideCoralRoadRoom extends RaidRoom {
     static final BlockState GROWTH_A = Blocks.PINK_CONCRETE.defaultBlockState();
     static final BlockState GROWTH_B = Blocks.MAGENTA_CONCRETE.defaultBlockState();
     static final BlockState SIGN = Blocks.PINK_CARPET.defaultBlockState();
+    // 挟まったときの傷と、潮の流れ (一 tick ごとに足す速さ。地面の摩擦と釣り合って、およそ毎秒 1.8 ブロック流される)
+    static final float CRUSH_DAMAGE = 6f;
+    static final double CURRENT_PUSH = 0.045;
+    // 潮の流れの帯 (原点からの z。壁と壁のあいだの四列ずつ)
+    static final int[][] CURRENT_Z = {{3, 6}, {-5, -2}};
+    static final BlockState CURRENT_FLOOR = Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA.defaultBlockState();
 
     private RaidCtx ctxRef;
     private BlockPos origin;
@@ -47,8 +55,11 @@ public final class TideCoralRoadRoom extends RaidRoom {
     private final int[][] dirSign = new int[ROWS][LANES];
     private final int[][] shown = new int[ROWS][LANES];
     private final int[][] carpets = new int[ROWS][LANES];
+    private final int[] currentDir = new int[CURRENT_Z.length];
     private long t0;
     private boolean done;
+    private int crushes;
+    private long lastCrushSay = -1000;
 
     @Override
     public void build(RaidCtx ctx) {
@@ -100,6 +111,10 @@ public final class TideCoralRoadRoom extends RaidRoom {
             int h = 1 + ctx.rng().nextInt(3);
             RaidKit.fill(level, origin.offset(side * (HX - 1), 1, z), origin.offset(side * (HX - 1), h, z), dead[ctx.rng().nextInt(dead.length)]);
         }
+        // 潮の流れの帯: 向き (東か西) は挑戦ごとに。床の模様の向きが流れの向き
+        for (int b = 0; b < CURRENT_Z.length; b++) {
+            currentDir[b] = ctx.rng().nextBoolean() ? 1 : -1;
+        }
         // 出口の前の印 (越えた先)
         RaidKit.fill(level, origin.offset(-2, 0, -HZ + 1), origin.offset(2, 0, -HZ + 1), Blocks.CHISELED_SANDSTONE.defaultBlockState());
         dress(ctx);
@@ -119,6 +134,9 @@ public final class TideCoralRoadRoom extends RaidRoom {
                 d.keep(cx - 1, 1, ROW_Z[r] - 2, cx + 1, GATE_H + 1, ROW_Z[r] + 3);
             }
         }
+        for (int[] band : CURRENT_Z) {
+            d.keep(-HX, 0, band[0], HX, 3, band[1]);
+        }
         d.keep(-8, 1, -HZ, 8, H, -HZ + 1);
         d.shell(2);
         // 戸の梁の要石
@@ -135,6 +153,15 @@ public final class TideCoralRoadRoom extends RaidRoom {
         d.coralArch(6, H - 1, 2);
         d.hiddenLights(11, 4, true).ceilingCoral(10, 2, H - 2, 3).wallBranches(8, 5, 2).shards(4);
         d.finish();
+        // 潮の流れの帯の床 (飾りのあとで塗る。帯の上には飾りを置かない)
+        for (int b = 0; b < CURRENT_Z.length; b++) {
+            net.minecraft.core.Direction face = currentDir[b] > 0 ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.WEST;
+            for (int z = CURRENT_Z[b][0]; z <= CURRENT_Z[b][1]; z++) {
+                for (int x = -HX + 1; x <= HX - 1; x++) {
+                    RaidKit.set(ctx.level(), origin.offset(x, 0, z), CURRENT_FLOOR.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, face));
+                }
+            }
+        }
     }
 
     private static boolean nearRow(int z) {
@@ -223,16 +250,56 @@ public final class TideCoralRoadRoom extends RaidRoom {
         return Math.min(3, (p - WARN_AT) / STEP + 1);
     }
 
-    private boolean occupied(int r, int l, int k, List<ServerPlayer> players) {
+    // 伸びる柱に挟まった人: 壁の手前 (南) へ押し戻し、傷を与える
+    private void crush(RaidCtx ctx, int r, int l, int k, List<ServerPlayer> players) {
         int x = columnX(r, l, k);
         AABB box = new AABB(origin.getX() + x, origin.getY() + 1, origin.getZ() + ROW_Z[r], origin.getX() + x + 1, origin.getY() + GATE_H + 1,
-                origin.getZ() + ROW_Z[r] + 2).inflate(0.3, 0, 0.3);
+                origin.getZ() + ROW_Z[r] + 2).inflate(0.2, 0, 0.0);
         for (ServerPlayer p : players) {
-            if (p.getBoundingBox().intersects(box)) {
-                return true;
+            if (p.isSpectator() || !p.getBoundingBox().intersects(box)) {
+                continue;
+            }
+            double bx = p.getX();
+            p.setPos(bx, origin.getY() + 1, origin.getZ() + ROW_Z[r] + 2.7);
+            p.teleportTo(bx, origin.getY() + 1, origin.getZ() + ROW_Z[r] + 2.7);
+            p.setDeltaMovement(0, 0.25, 0.35);
+            p.hurtMarked = true;
+            if (!p.isCreative()) {
+                p.invulnerableTime = 0;
+                p.hurt(ctx.level().damageSources().magic(), CRUSH_DAMAGE);
+            }
+            crushes++;
+            ctx.level().sendParticles(TideRaid.dust(1f, 0.45f, 0.7f, 1.4f), p.getX(), p.getY() + 1, p.getZ() - 0.5, 12, 0.4, 0.6, 0.2, 0);
+            ctx.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.2f, 0.5f);
+            if (ctx.now() - lastCrushSay > 100) {
+                lastCrushSay = ctx.now();
+                ctx.say(net.minecraft.network.chat.Component.translatable("message.skyabyss.raid.TR4.crushed"));
             }
         }
-        return false;
+    }
+
+    // 潮の流れ: 帯の上に立つ人を東か西へ押す (跳んでいても押す)。流れの粒も帯の上を流れる向きへ
+    private void currents(RaidCtx ctx, List<ServerPlayer> players) {
+        double oz = origin.getZ();
+        for (ServerPlayer p : players) {
+            if (p.isSpectator() || p.getY() > origin.getY() + 3) {
+                continue;
+            }
+            for (int b = 0; b < CURRENT_Z.length; b++) {
+                if (p.getZ() >= oz + CURRENT_Z[b][0] && p.getZ() < oz + CURRENT_Z[b][1] + 1) {
+                    p.push(CURRENT_PUSH * currentDir[b], 0, 0);
+                    p.hurtMarked = true;
+                }
+            }
+        }
+        if (ctx.now() % 4 == 0) {
+            for (int b = 0; b < CURRENT_Z.length; b++) {
+                double z = oz + CURRENT_Z[b][0] + ctx.rng().nextDouble() * (CURRENT_Z[b][1] - CURRENT_Z[b][0] + 1);
+                double x = origin.getX() + (ctx.rng().nextDouble() * 2 - 1) * (HX - 1);
+                ctx.level().sendParticles(ParticleTypes.SPLASH, x, origin.getY() + 1.1, z, 0, currentDir[b] * 0.6, 0.05, 0, 1.0);
+                ctx.level().sendParticles(TideRaid.dust(0.55f, 0.85f, 1f, 1.0f), x, origin.getY() + 1.15, z, 2, 0.6, 0.05, 0.3, 0);
+            }
+        }
     }
 
     @Override
@@ -245,8 +312,9 @@ public final class TideCoralRoadRoom extends RaidRoom {
                 int p = phaseOf(r, l, el);
                 int target = targetColumns(p);
                 int before = shown[r][l];
-                // 伸びる (人が立つ柱は待つ)・引く
-                while (shown[r][l] < target && !occupied(r, l, shown[r][l], players)) {
+                // 伸びる (挟まった人は押し戻される)・引く
+                while (shown[r][l] < target) {
+                    crush(ctx, r, l, shown[r][l], players);
                     setColumn(ctx, r, l, shown[r][l], GROWTH_A);
                     shown[r][l]++;
                 }
@@ -281,6 +349,7 @@ public final class TideCoralRoadRoom extends RaidRoom {
                 }
             }
         }
+        currents(ctx, players);
         if (!done) {
             List<ServerPlayer> standing = ctx.standing();
             if (!standing.isEmpty()) {
@@ -354,6 +423,14 @@ public final class TideCoralRoadRoom extends RaidRoom {
             }
         }
         return n;
+    }
+
+    public int crushes() {
+        return crushes;
+    }
+
+    public int currentDir(int band) {
+        return currentDir[band];
     }
 
     public int shownColumns(int row, int lane) {

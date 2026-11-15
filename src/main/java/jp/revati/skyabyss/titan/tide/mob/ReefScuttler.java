@@ -51,6 +51,13 @@ public class ReefScuttler extends TideMob {
     static final double PACK_RADIUS = 10;
     static final int BITE_INTERVAL = 28;
 
+    // 潮に乗っている (潮殻の TR3 の満ち潮): 水の中でも鈍らない
+    private boolean tideRider;
+
+    public void rideTide(boolean on) {
+        tideRider = on;
+    }
+
     public ReefScuttler(EntityType<? extends Monster> type, Level level) {
         super(type, level, "reef_scuttler", "attack");
         this.xpReward = 3;
@@ -118,7 +125,7 @@ public class ReefScuttler extends TideMob {
             }
             // 水の中では鈍る
             AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
-            boolean wet = isInWater();
+            boolean wet = isInWater() && !tideRider;
             if (speed != null && wet != speed.hasModifier(WADING)) {
                 if (wet) {
                     speed.addTransientModifier(new AttributeModifier(WADING, WATER_SLOW, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));

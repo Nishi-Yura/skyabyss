@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 広間の床には六つの「月の石」の台があり、叩く・使うと満ち欠けの形が変わる (使う = 次の形、叩く = 前の形)。壁画と同じ順に、点の数が同じ番号の台へ同じ月を並べる。
 //  - 月の形は六つ: 新月・三日月・上弦・満月・下弦・欠けた月 (欠けの輪)。壁画は北の壁に 1・2・3 番、南の壁に 4・5・6 番 (どちらも見る人から見て左から右)
 //  - 暦の順 (どの月から始まり、満ちる向きか欠ける向きか) は挑戦ごとに変わる。壁画を読まないと分からない
-//  - 合っている台の数は目的の帯に出る (どの台かは教えない)。一人が壁画を読み、一人が台を回すと早い
+//  - 合っている台は、台の両端が淡く光る (真珠の光) ので、一つずつ確かめながら合わせられる。合っている台の数は目的の帯にも出る
 //  - 水・敵・ダメージはない
 public final class TideMoonRoom extends RaidRoom {
     static final int HX = 13;
@@ -33,6 +33,9 @@ public final class TideMoonRoom extends RaidRoom {
 
     static final BlockState LIT = Blocks.SEA_LANTERN.defaultBlockState();
     static final BlockState DARK = Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+    // 合っている台の両端の光
+    static final BlockState GLOW = Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
+    static final BlockState BASE = Blocks.PRISMARINE_BRICKS.defaultBlockState();
 
     private BlockPos origin;
     private final int[] start = new int[DIALS];
@@ -186,6 +189,12 @@ public final class TideMoonRoom extends RaidRoom {
             RaidKit.set(ctx.level(), origin.offset(cx + (c - 2), 2, cz), st);
             RaidKit.set(ctx.level(), origin.offset(cx + (c - 2), 3, cz), st);
         }
+        // 台の両端 (番号の点のない奥の二列) が、合っているときだけ淡く光る
+        BlockState end = phase[k] == correct(k) ? GLOW : BASE;
+        for (int s = -3; s <= 3; s += 6) {
+            RaidKit.set(ctx.level(), origin.offset(cx + s, 1, cz), end);
+            RaidKit.set(ctx.level(), origin.offset(cx + s, 1, cz - 1), end);
+        }
     }
 
     @Override
@@ -210,6 +219,13 @@ public final class TideMoonRoom extends RaidRoom {
 
     @Override
     public void tick(RaidCtx ctx) {
+        if (!done && ctx.now() % 20 == 0) {
+            for (int k = 0; k < DIALS; k++) {
+                if (phase[k] == correct(k)) {
+                    ctx.level().sendParticles(ParticleTypes.GLOW, origin.getX() + dialX(k) + 0.5, origin.getY() + 3.8, origin.getZ() + dialZ(k) + 0.5, 3, 1.6, 0.2, 0.3, 0.0);
+                }
+            }
+        }
         if (done && ctx.now() % 10 == 0) {
             for (int k = 0; k < DIALS; k++) {
                 ctx.level().sendParticles(ParticleTypes.END_ROD, origin.getX() + dialX(k) + 0.5, origin.getY() + 4.5, origin.getZ() + dialZ(k) + 0.5, 2, 0.5, 0.2, 0.1, 0.01);
@@ -248,6 +264,9 @@ public final class TideMoonRoom extends RaidRoom {
         phase[k] = (phase[k] + by) % PHASES;
         drawDial(ctx, k);
         ctx.level().playSound(null, origin.offset(dialX(k), 2, dialZ(k)), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, 1.4f, 0.6f + 0.2f * phase[k]);
+        if (phase[k] == correct(k)) {
+            ctx.level().playSound(null, origin.offset(dialX(k), 2, dialZ(k)), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.2f, 1.4f);
+        }
         for (int i = 0; i < DIALS; i++) {
             if (phase[i] != correct(i)) {
                 return;
@@ -299,6 +318,11 @@ public final class TideMoonRoom extends RaidRoom {
 
     public int startOf(int k) {
         return start[k];
+    }
+
+    // 台の端が光っているか (世界のブロックから読む)
+    public boolean glowing(RaidCtx ctx, int k) {
+        return ctx.level().getBlockState(origin.offset(dialX(k) + 3, 1, dialZ(k))).is(GLOW.getBlock());
     }
 
     public BlockPos dialPos(int k) {
