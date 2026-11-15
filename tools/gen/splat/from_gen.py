@@ -38,17 +38,62 @@ class Part:
     def __init__(self, bone, mat, kind, data):
         self.bone, self.mat, self.kind, self.data = bone, mat, kind, data
         self.part = None
+        self.ref = np.zeros(3)
+        self.loc = None
+
+    # 設計が部品を写して動かす (荷車の獣など): verts を足すと部品ごと動く
+    @property
+    def verts(self):
+        return np.zeros((1, 3))
+
+    @verts.setter
+    def verts(self, v):
+        off = np.asarray(v, float).reshape(-1, 3)[0]
+        if self.kind == "ell":
+            c, r, R = self.data
+            self.data = (c + off, r, R)
+        elif self.kind == "chain":
+            self.data = ([np.asarray(p, float) + off for p in self.data[0]], self.data[1])
+        else:
+            import copy as _copy
+            new = []
+            for f in self.data:
+                g = _copy.copy(f)
+                g.verts = np.asarray(f.verts, float) + off
+                g.ref = np.asarray(f.ref, float) + off
+                new.append(g)
+            self.data = new
 
     # 形の道具が返す面の並びのふりをする
     def __iter__(self):
         return iter([self])
 
+    def polys(self):
+        """この部品の多角形の面 (設計の中で面を調べる処理用。光線・高さの測り)"""
+        if self.kind == "mesh":
+            return self.data
+        if self.kind == "ell":
+            return list(_ORIG["ell"](self.bone, self.mat, self.data[0], self.data[1], segs=12, rings=6, rot=self.data[2]))
+        return list(_ORIG["tube"](self.bone, self.mat, self.data[0], self.data[1], sides=8, caps=(True, True)))
+
+    def tris(self):
+        raise AttributeError("use polys()")
+
+
+_ORIG = {}
+_PATCHED = []
+
+
+def _patch_off():
+    for mod, name, fn in _PATCHED:
+        setattr(mod, name, fn)
+
 
 def _patch(modules):
     """形の道具 (ellipsoid・tube) を、滑らかな部品を返すものに差し替える"""
     import lpkit
-    orig_ell = lpkit.ellipsoid
-    orig_tube = lpkit.tube
+    orig_ell = _ORIG.setdefault("ell", lpkit.ellipsoid)
+    orig_tube = _ORIG.setdefault("tube", lpkit.tube)
 
     def ellipsoid(bone, mat, center, radii, segs=8, rings=3, rot=None, phase=None, deform=None):
         if deform is not None:
@@ -70,8 +115,10 @@ def _patch(modules):
 
     for mod in modules:
         if hasattr(mod, "ellipsoid"):
+            _PATCHED.append((mod, "ellipsoid", getattr(mod, "ellipsoid")))
             mod.ellipsoid = ellipsoid
         if hasattr(mod, "tube"):
+            _PATCHED.append((mod, "tube", getattr(mod, "tube")))
             mod.tube = tube
 
 
@@ -112,8 +159,33 @@ def load_design(path):
     _patch(mods)
     import mlp
     mlp.Mount.add = _mount_add
+
+    def faces_of(self, parts):
+        out = []
+        for f in self.F:
+            if getattr(f, "part", None) in parts:
+                out += f.polys() if isinstance(f, Part) else [f]
+        return out
+    mlp.Mount.faces_of = faces_of
     # 生成スクリプトの中で名前で取り込んだ ell/tub/cone は mlp の関数で、mlp の ellipsoid/tube を引く (差し替え済み)
-    return mod.build()
+    m = mod.build()
+    # 乗り物: 鞍は体の面に沿って作るので、体を作ったあと (元の多角形の形で) 足す
+    if getattr(m, "saddle_kw", None) is not None:
+        import mlp as _mlp
+        _patch_off()
+        tmp_F = []
+        for p in m.F:
+            if isinstance(p, Part):
+                for f in p.polys():
+                    f.part = p.part
+                    tmp_F.append(f)
+        saved = m.F
+        m.F = tmp_F
+        n0 = len(m.F)
+        _mlp.saddle(m, **dict(m.saddle_kw))
+        extra = m.F[n0:]
+        m.F = saved + extra
+    return m
 
 
 # ---------------------------------------------------------------- 距離の関数
@@ -156,11 +228,39 @@ def sdf_mesh(faces, h):
             tris.append((v[a], v[b], c if False else v[c]))
     V = np.array([p for t in tris for p in t])
     T = np.arange(len(V)).reshape(-1, 3)
+    # 開いた面 (縁のある幌・膜) は中と外が決まらないので、面からの距離で厚み h*1.5 の殻にする
+    key = {}
+    for t in T:
+        for a_, b_ in ((0, 1), (1, 2), (2, 0)):
+            pa, pb = tuple(np.round(V[t[a_]], 3)), tuple(np.round(V[t[b_]], 3))
+            k_ = (min(pa, pb), max(pa, pb))
+            key[k_] = key.get(k_, 0) + 1
+    if sum(1 for c in key.values() if c == 1) > 0.05 * len(key):
+        from scipy.spatial import cKDTree as _T
+        A_, B_, C_ = V[T[:, 0]], V[T[:, 1]], V[T[:, 2]]
+        area = 0.5 * np.linalg.norm(np.cross(B_ - A_, C_ - A_), axis=1)
+        n_ = np.maximum(1, np.ceil(area / (h * h * 0.15))).astype(int)
+        idx = np.repeat(np.arange(len(T)), n_)
+        rr = np.random.default_rng(1).random((len(idx), 2))
+        f_ = rr.sum(1) > 1
+        rr[f_] = 1 - rr[f_]
+        SP = A_[idx] + rr[:, :1] * (B_[idx] - A_[idx]) + rr[:, 1:] * (C_[idx] - A_[idx])
+        tree = _T(SP)
+        th = h * 0.75
+
+        def fs(P):
+            return tree.query(P)[0] - th
+        return fs, (V.min(0) - th, V.max(0) + th)
     lo = V.min(0) - 3 * h
     hi = V.max(0) + 3 * h
     shape = np.ceil((hi - lo) / h).astype(int) + 1
-    wind = RS.winding_grid(V, T, lo, shape, h)
-    inside = wind != 0
+    # 光線を 3 つの向きで通し、2 つ以上が「中」なら中 (向きによって面とすれすれになり数え違うのを防ぐ)
+    votes = np.zeros(tuple(shape), np.int8)
+    for perm in ((0, 1, 2), (1, 2, 0), (2, 0, 1)):
+        w = RS.winding_grid(V[:, perm], T, lo[list(perm)], shape[list(perm)], h) != 0
+        inv = np.argsort(perm)
+        votes += np.transpose(w, inv).astype(np.int8)
+    inside = votes >= 2
     if not inside.any():
         return None
     D = (distance_transform_edt(~inside) - distance_transform_edt(inside)) * h + 0.5 * h * inside
@@ -177,7 +277,12 @@ def part_sdf(p, h):
         return sdf_ell(*p.data)
     if p.kind == "chain":
         return sdf_chain(*p.data)
-    return sdf_mesh(p.data, h)
+    # 多角形の部品は細かい格子で作り、彫る格子 (間隔 h) の目からこぼれないよう、薄い所を h*0.55 だけ太らせる (幌・膜・板)
+    r = sdf_mesh(p.data, h * 0.4)
+    if r is None:
+        return None
+    f0, box = r
+    return (lambda P: f0(P) - 0.55 * h), (box[0] - h, box[1] + h)
 
 
 def part_size(p):
