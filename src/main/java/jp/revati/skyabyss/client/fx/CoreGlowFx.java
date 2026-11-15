@@ -164,27 +164,12 @@ public final class CoreGlowFx {
         LightDraw.sprite(b, m, camera, c, s * (2.6f + 0.3f * beat), rgb, 0.28f * a);
         LightDraw.sprite(b, m, camera, c, s * (1.1f + 0.15f * beat), hot, 0.55f * a);
         LightDraw.sprite(b, m, camera, c, s * 0.38f, 0xFFFFFF, Math.min(1f, 0.6f * a + 0.3f * broken));
-        char style = LightStyles.glow;
-        if (style == 'B') {
-            // 十字の光の筋 (ゆっくり回る)
-            float roll = (float) (t * 0.01);
-            float len = s * (3.4f + 1.2f * beat + 2.5f * broken);
-            LightDraw.sprite(b, m, camera, c, len, s * 0.16f, roll, hot, 0.7f * a);
-            LightDraw.sprite(b, m, camera, c, len, s * 0.16f, roll + Mth.HALF_PI, hot, 0.7f * a);
-            LightDraw.sprite(b, m, camera, c, len * 0.55f, s * 0.1f, roll + Mth.HALF_PI * 0.5f, hot, 0.4f * a);
-            LightDraw.sprite(b, m, camera, c, len * 0.55f, s * 0.1f, roll - Mth.HALF_PI * 0.5f, hot, 0.4f * a);
-        } else if (style == 'C') {
-            // 核のまわりを回る光の粒
-            Vector3f left = camera.getLeftVector();
-            Vector3f up = camera.getUpVector();
-            for (int k = 0; k < 6; k++) {
-                double th = t * (0.07 + 0.01 * k) + k * Math.PI / 3;
-                double r = s * (0.95 + 0.25 * Math.sin(t * 0.05 + k));
-                double tilt = Math.sin(th * 0.5 + k) * 0.5;
-                Vec3 q = c.add(left.x() * Math.cos(th) * r, left.y() * Math.cos(th) * r + up.y() * Math.sin(th) * r * 0.45 + tilt, left.z() * Math.cos(th) * r)
-                        .add(up.x() * Math.sin(th) * r * 0.45, 0, up.z() * Math.sin(th) * r * 0.45);
-                LightDraw.sprite(b, m, camera, q, s * 0.32f, hot, 0.85f * a);
-            }
-        }
+        // 十字の光の筋 (ゆっくり回る。崩れている間は長く伸びる。2026-11-15 の選定 B)
+        float roll = (float) (t * 0.01);
+        float len = s * (3.4f + 1.2f * beat + 2.5f * broken);
+        LightDraw.sprite(b, m, camera, c, len, s * 0.16f, roll, hot, 0.7f * a);
+        LightDraw.sprite(b, m, camera, c, len, s * 0.16f, roll + Mth.HALF_PI, hot, 0.7f * a);
+        LightDraw.sprite(b, m, camera, c, len * 0.55f, s * 0.1f, roll + Mth.HALF_PI * 0.5f, hot, 0.4f * a);
+        LightDraw.sprite(b, m, camera, c, len * 0.55f, s * 0.1f, roll - Mth.HALF_PI * 0.5f, hot, 0.4f * a);
     }
 }

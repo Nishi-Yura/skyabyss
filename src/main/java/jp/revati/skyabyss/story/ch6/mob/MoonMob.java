@@ -26,6 +26,18 @@ public abstract class MoonMob extends AbyssMobB {
         super(type, level, prefix, actions);
     }
 
+    // 技でない動作 (軌道の線を出さない)
+    private static final java.util.Set<String> NOT_ATTACKS = java.util.Set.of("hurt", "roar", "kneel", "death", "idle", "walk", "spawn", "grow", "intro", "rest", "rise", "flinch");
+
+    // 技の動作を始めたら、まわりの人に軌道の線の合図 (fx/OrbitCuePayload。月の主は床の予告を使わないので)
+    @Override
+    public void playAction(String name) {
+        super.playAction(name);
+        if (!level().isClientSide && !NOT_ATTACKS.contains(name)) {
+            jp.revati.skyabyss.fx.OrbitCuePayload.send(this, jp.revati.skyabyss.fx.OrbitCuePayload.TICKS);
+        }
+    }
+
     // 湧いたときに一度。section は区画 (0〜3)、phase は区画の位相 (合えば強い)
     public void tuneMoon(int section, boolean matched, boolean clone, double hp, double dmg) {
         int form = clone ? 3 : matched ? 2 : 1;

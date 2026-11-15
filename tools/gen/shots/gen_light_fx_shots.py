@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-# 光の表現 (2026-11-15 の選定: 裂け目・光線と溜め・当たりの輪・核の光・軌道) の A/B/C を撮る台本を書く。
+# 光の表現 (2026-11-15: 裂け目・光線と溜め・当たりの輪・核の光・軌道) を撮る台本を書く。
 #   python -I tools/gen/shots/gen_light_fx_shots.py
 #   ./gradlew runShots --no-daemon -Pscript=tools/shots/light_fx.txt
 #   python -I tools/sheets/light_fx_sheet.py  -> docs/review/light_fx/*.png
 import os
 
 THEMES = ["stone_whale", "tide_shell", "thunder_wing", "ember", "abyss", "moon"]
-STYLES = ["a", "b", "c"]
+# 2026-11-15 に案が決まった (裂け目 B・光線 A・輪 B・核の光 B・軌道 C)。案の切り替えは消したので、決まった見た目を "f" の名で撮る
+STYLES = ["f"]
 L = []
 a = L.append
 
@@ -58,7 +59,7 @@ a("rift clear")
 a("# ---- 2. 渡る裂け目")
 for st in STYLES:
     a("lightfx rift " + st)
-    for th in (["stone_whale"] if st != "a" else ["stone_whale", "tide_shell", "thunder_wing", "ember", "abyss", "moon"]):
+    for th in (["stone_whale"] if st != "f" else ["stone_whale", "tide_shell", "thunder_wing", "ember", "abyss", "moon"]):
         for age in ([12, 19, 24, 32, 47] if th == "stone_whale" else [19, 32]):
             a("rift freeze %d" % age)
             a("rift pass %s" % th)
@@ -125,15 +126,15 @@ a("cmd kill @e[type=skyabyss:stone_whale_heart]")
 a("wait 120")
 a("cmd skyabyss cinematic stop")
 
-# ---- 6. 軌道 (月の主)。技は自分で選ぶので、続けて撮る
+# ---- 6. 軌道 (月の主)。技は自分で選ぶので、続けて撮る。心臓の倒れる場面 (光の柱など) から離れた所で
 a("# ---- 6. 軌道")
-a("camera minecraft:overworld 0.5 -60 10.5 180 -4")
+a("camera minecraft:overworld 80.5 -60 13.5 180 -4")
 for st in STYLES:
     a("lightfx orbit " + st)
-    a("cmd summon skyabyss:waning_blade 0.5 -60 0.5 {PersistenceRequired:1b,Rotation:[0f,0f]}")
+    a("cmd summon skyabyss:waning_blade 80.5 -60 0.5 {PersistenceRequired:1b,Rotation:[0f,0f]}")
     a("wait 40")
     a("cmd skyabyss cinematic stop")
-    a("camera minecraft:overworld 0.5 -60 10.5 180 -4")
+    a("camera minecraft:overworld 80.5 -60 13.5 180 -4")
     for i in range(10):
         a("wait 12")
         a("shot orbit_%s_%02d" % (st, i))
@@ -143,6 +144,7 @@ for st in STYLES:
     a("chat clear")
 a("quit")
 
+L = [x for x in L if not x.startswith("lightfx ")]
 # 場面が終わると HUD が戻るので、止めるたびに隠し直す
 L2 = []
 for x in L:

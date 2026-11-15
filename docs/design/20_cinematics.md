@@ -219,3 +219,16 @@
 - 絵の作り方: `tools/story/pixel/`（`pxkit.py` = 描く道具。ゲームの低ポリの形を小さく描き、一枚 10 色ほどの表に網目で落とす。`opening.py`・`opening_more.py` = 開幕の 9 枚。`install_reels.py` = ゲームへ入れる）。選んだ頁 https://claude.ai/artifact/N55M3A1Hwh8127tLLPqggq
 - 章の変わり目: 一〜四章の題字の前に 5 枚ずつ（前の章で何が起きたか → 次の巨神 → なぜ行くのか）。`ChapterCards` が題字を出す代わりに `chapter_<章の ID>` を流し、見終わると題字（`StoryReels.onDone`）。絵は `tools/story/pixel/chapters.py`（部品は `parts.py`）。命令で見直したときは題字を出さない。頁 https://claude.ai/artifact/PY2HadDQ291LSqozdhC16X
 
+
+## 空間の裂け目と光の表現
+
+足し合わせの光だけで描く（シェーダーや追加のライブラリは使わない。共通の描き方は `client/fx/LightDraw`、絵はゲームの中で作る）。色は巨神ごとの色で、縁と中身は巨神の形の言葉に合わせる。
+
+- **裂け目**（`client/fx/RiftFx`）: 縦に細い光の線が走り、太り、向こうにその場所の内側の空がのぞく。縁は割れ目（ぎざぎざの縁・内側のもう一本の縁・上下の先から走るひび・縁から飛ぶ光の欠片）。内側の空: 岩鯨 = 光る鉱脈の闇、潮殻 = 水面越しの光、雷翼 = 雷雲と閃き、余燼 = 昇る熾、深淵 = 底のない闇に骨色の光、月 = 銀の星。
+  - 領域の始まり: 宣言のあいだ心臓の体の上（部屋の天井の下）に開き、宣言の終わりに広がって溶ける。空は替えない。
+  - 渡るとき: 順路の部屋から次へ運ばれるとき・深淵の門・月の門。目の前に開いて画面を覆い（`fx/RiftPayload.LEAD` = 26 tick）、覆った中で運ばれ、まぶたが閉じるように細くなって新しい場所が見える。運ぶ側はその間だけ待つ（試験の偽の人だけなら待たない）。
+- **光線と溜め**（`client/combat/AttackLightFx`）: 溜めが GATHER の技は、予告のあいだ光の筋が体の外から技の元へ吸い込まれ、元が明るくなる。運びが BEAM の技は放つと芯の白い光の帯（6 tick 満ちて 8 tick で薄れる。床から出る範囲の模型の上を通す）。振り回しは元から先端への帯と通った跡の弧。
+- **当たりの輪**: 心臓・領域の技と心臓のあとの主の技が当たった瞬間、床を走って広がる二重の輪と、床が一瞬明るむ光。
+- **核の光**（`client/fx/CoreGlowFx`）: 心臓の核の骨を追うにじみと、ゆっくり回る十字の光の筋。鼓動に合わせて脈打ち、崩れている間は大きく白く伸びる。殻の外までにじむ（ブロックの壁の向こうでは描かない）。
+- **軌道の線**: 月の主（技の動作の始まりを `fx/OrbitCuePayload` で知らせる）と塔の主（予告から）の足もとに、三本の輪が向きを違えて回る。弧の進む先が明るく、放つ瞬間に外へ散る。
+- 撮影: `python -I tools/gen/shots/gen_light_fx_shots.py` → `./gradlew runShots -Pscript=tools/shots/light_fx.txt` → `python -I tools/sheets/light_fx_sheet.py`（`docs/review/light_fx/final.png`）。台本の `rift pass|world|freeze|clear` と `lightring` で単独に出せる。選んだ頁 https://claude.ai/artifact/JFtcddTCNNwteFqGSq51Uh

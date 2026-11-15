@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.PaperCutLayer;
 import jp.revati.skyabyss.client.fx.LightDraw;
-import jp.revati.skyabyss.client.fx.LightStyles;
 import jp.revati.skyabyss.combat.AttackLook;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.client.Camera;
@@ -80,7 +79,7 @@ public final class AttackLightFx {
     }
 
     // ---------------------------------------------------------------- 当たりの輪
-    private record Ring(double x, double y, double z, double radius, int rgb, double start, char style) {
+    private record Ring(double x, double y, double z, double radius, int rgb, double start) {
     }
 
     private static final List<Ring> RINGS = new ArrayList<>();
@@ -107,19 +106,30 @@ public final class AttackLightFx {
         if (RINGS.size() > 24) {
             RINGS.remove(0);
         }
-        RINGS.add(new Ring(c[0], y + 0.12, c[1], Math.min(r, 18), rgb, level.getGameTime(), LightStyles.ring));
+        RINGS.add(new Ring(c[0], y + 0.12, c[1], Math.min(r, 18), rgb, level.getGameTime()));
     }
 
     // 撮影: その場に輪を一つ
     public static void testRing(double x, double y, double z, double radius, int rgb) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null) {
-            RINGS.add(new Ring(x, y, z, radius, rgb, mc.level.getGameTime(), LightStyles.ring));
+            RINGS.add(new Ring(x, y, z, radius, rgb, mc.level.getGameTime()));
+        }
+    }
+
+    // 月の主の技の合図 (fx/OrbitCuePayload): 主の番号 -> {始まりの時刻, 放つまでの tick}
+    private static final java.util.Map<Integer, double[]> CUES = new java.util.HashMap<>();
+
+    public static void cue(jp.revati.skyabyss.fx.OrbitCuePayload p) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            CUES.put(p.entityId(), new double[] {mc.level.getGameTime(), p.ticks()});
         }
     }
 
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        CUES.clear();
         RINGS.clear();
     }
 
@@ -140,7 +150,8 @@ public final class AttackLightFx {
         Camera camera = event.getCamera();
         Matrix4f m = event.getPoseStack().last().pose();
         RINGS.removeIf(r -> now - r.start() > RING_TICKS + 8);
-        boolean any = !RINGS.isEmpty();
+        CUES.values().removeIf(c -> now - c[0] > c[1] + 10);
+        boolean any = !RINGS.isEmpty() || !CUES.isEmpty();
         for (TelegraphClient.Decal d : TelegraphClient.decals()) {
             if (d.look != AttackLook.NONE || d.owner >= 0) {
                 any = true;
@@ -175,8 +186,19 @@ public final class AttackLightFx {
                 Entity e = level.getEntity(d.owner);
                 if (e != null && orbits(e) && t < d.warn + 8) {
                     orbited.add(d.owner);
-                    orbit(level, band, soft, m, cam, camera, e, d, t, bossRgb(level, d.owner), partial);
+                    orbit(level, band, soft, m, cam, camera, e, d.warn, t, bossRgb(level, d.owner), partial);
                 }
+            }
+        }
+        // 月の主の技の合図 (予告を使わない主)
+        for (var en : CUES.entrySet()) {
+            if (orbited.contains(en.getKey())) {
+                continue;
+            }
+            Entity e = level.getEntity(en.getKey());
+            double t = now - en.getValue()[0];
+            if (e != null && t >= 0 && t < en.getValue()[1] + 8) {
+                orbit(level, band, soft, m, cam, camera, e, (int) en.getValue()[1], t, bossRgb(level, en.getKey()), partial);
             }
         }
         for (Ring r : RINGS) {
@@ -241,19 +263,6 @@ public final class AttackLightFx {
         LightDraw.ribbon(b, m, pts, 3.4f * w, rgb, 0.45f * a * flick);
         LightDraw.ribbon(b, m, pts, 1.3f * w, LightDraw.whiten(rgb, 0.35f), 0.8f * a);
         LightDraw.ribbon(b, m, pts, 0.42f * w, 0xFFFFFF, 0.95f * a);
-        char style = LightStyles.beam;
-        if (style == 'B') {
-            helix(b, m, pts, t, rgb, a, w);
-        } else if (style == 'C') {
-            Vec3[] p = pts;
-            soft.add(() -> {
-                for (int k = 0; k < 4; k++) {
-                    double ph = (t * 0.09 + k / 4.0) % 1.0;
-                    Vec3 q = along(p, ph);
-                    LightDraw.sprite(current, m, camera, q, 2.4f * w, LightDraw.whiten(rgb, 0.5f), 0.9f * a);
-                }
-            });
-        }
         // 元と先のにじみ (元は体の表の、カメラ側)
         Vec3 s0 = surface(pts[0], bodyRadius(level, d));
         Vec3 s1 = pts[pts.length - 1];
@@ -298,30 +307,6 @@ public final class AttackLightFx {
         int i = Mth.clamp((int) f, 0, p.length - 2);
         double k = f - i;
         return p[i].add(p[i + 1].subtract(p[i]).scale(k));
-    }
-
-    // B: 帯に巻きつく二本の細い光
-    private static void helix(BufferBuilder b, Matrix4f m, Vec3[] pts, double t, int rgb, float a, float w) {
-        Vec3 dir = pts[pts.length - 1].subtract(pts[0]);
-        double len = dir.length();
-        if (len < 0.5) {
-            return;
-        }
-        Vec3 f = dir.scale(1 / len);
-        Vec3 p1 = f.cross(new Vec3(0, 1, 0));
-        p1 = p1.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : p1.normalize();
-        Vec3 p2 = f.cross(p1).normalize();
-        int n = Math.max(24, (int) (len * 4));
-        for (int k = 0; k < 2; k++) {
-            Vec3[] h = new Vec3[n];
-            for (int i = 0; i < n; i++) {
-                double u = (double) i / (n - 1);
-                double th = u * len * 1.1 - t * 0.45 + k * Math.PI;
-                double r = 0.55 * w * Mth.clamp(u * 6, 0, 1);
-                h[i] = along(pts, u).add(p1.scale(Math.cos(th) * r)).add(p2.scale(Math.sin(th) * r));
-            }
-            LightDraw.ribbon(b, m, h, 0.22f * w, LightDraw.whiten(rgb, 0.45f), 0.85f * a);
-        }
     }
 
     // ---- 振り回し: 元から今の先端への帯と、通った跡の弧
@@ -376,7 +361,6 @@ public final class AttackLightFx {
         // 主の体の外から吸い込まれる (体の中の筋は殻に隠れるので、体の半径より外だけ)
         double body = bodyRadius(level, d);
         Vec3 face = surface(src, body);
-        char style = LightStyles.beam;
         int n = 8 + (int) (14 * p);
         float fade = (float) Mth.clamp((d.warn - t) / 3.0, 0, 1);
         streak.add(() -> {
@@ -385,9 +369,6 @@ public final class AttackLightFx {
                 double period = 12 + r.nextDouble() * 8;
                 double ph = ((t + r.nextDouble() * period) / period) % 1.0;
                 double a0 = r.nextDouble() * Math.PI * 2;
-                if (style == 'B') {
-                    a0 += ph * 1.8;
-                }
                 double el = (r.nextDouble() - 0.4) * 1.1;
                 double R = body + 0.6 + 6.0 * Math.pow(1 - ph, 1.4);
                 Vec3 dir = new Vec3(Math.cos(a0) * Math.cos(el), Math.sin(el), Math.sin(a0) * Math.cos(el));
@@ -397,11 +378,6 @@ public final class AttackLightFx {
                 LightDraw.ribbon(current, m, new Vec3[] {tail, head}, 0.38f + 0.18f * (float) p, LightDraw.whiten(rgb, 0.3f), a);
             }
         });
-        if (style == 'C') {
-            double R = body + 0.6 + 4.5 * (1 - p);
-            LightDraw.orbit(b, m, src, R, new Vec3(1, 0, 0), new Vec3(0, 0, 1), 0.3f, rgb, (0.3f + 0.6f * (float) p) * fade, 0f, (float) (Math.PI * 2));
-            LightDraw.orbit(b, m, src, R * 0.7, new Vec3(1, 0, 0), new Vec3(0, 1, 0), 0.18f, LightDraw.whiten(rgb, 0.4f), (0.2f + 0.5f * (float) p) * fade, 0f, (float) (Math.PI * 2));
-        }
         soft.add(() -> {
             float pulse = 0.85f + 0.15f * Mth.sin((float) t * 0.9f);
             LightDraw.sprite(current, m, camera, face, (float) (1.0 + 3.2 * p) * pulse, rgb, (0.35f + 0.6f * (float) p) * fade);
@@ -411,7 +387,7 @@ public final class AttackLightFx {
 
     // ---- 当たりの輪
     private static void ring(BufferBuilder b, List<Runnable> soft, Matrix4f m, Vec3 cam, Camera camera, Ring r, double now) {
-        for (int pass = 0; pass < (r.style() == 'B' ? 2 : 1); pass++) {
+        for (int pass = 0; pass < 2; pass++) {
             double age = now - r.start() - pass * 5;
             if (age < 0 || age > RING_TICKS) {
                 continue;
@@ -424,9 +400,6 @@ public final class AttackLightFx {
             Vec3 c = rel(r.x(), r.y(), r.z(), cam);
             LightDraw.groundRing(b, m, c, rad, w * 2.4, r.rgb(), 0.45f * a);
             LightDraw.groundRing(b, m, c, rad, w, LightDraw.whiten(r.rgb(), 0.45f), 0.95f * a);
-            if (r.style() == 'C' && pass == 0) {
-                wall(b, m, c, rad, Math.min(3.2, 0.8 + r.radius() * 0.25) * (1 - k * 0.5), r.rgb(), 0.6f * a);
-            }
         }
         double age = now - r.start();
         if (age >= 0 && age < 6) {
@@ -438,34 +411,17 @@ public final class AttackLightFx {
         }
     }
 
-    // C: 輪の上に立ち上がる光の幕 (下が明るく上へ薄れる)
-    private static void wall(BufferBuilder b, Matrix4f m, Vec3 c, double r, double h, int rgb, float a) {
-        int n = Mth.clamp((int) (r * 6), 24, 128);
-        for (int i = 0; i < n; i++) {
-            double a0 = Math.PI * 2 * i / n;
-            double a1 = Math.PI * 2 * (i + 1) / n;
-            double x0 = c.x + Math.cos(a0) * r;
-            double z0 = c.z + Math.sin(a0) * r;
-            double x1 = c.x + Math.cos(a1) * r;
-            double z1 = c.z + Math.sin(a1) * r;
-            LightDraw.v(b, m, x0, c.y, z0, 0f, 0.5f, rgb, a);
-            LightDraw.v(b, m, x1, c.y, z1, 1f, 0.5f, rgb, a);
-            LightDraw.v(b, m, x1, c.y + h, z1, 1f, 1f, rgb, a);
-            LightDraw.v(b, m, x0, c.y + h, z0, 0f, 1f, rgb, a);
-        }
-    }
-
     // ---- 軌道: 月の主・塔の主のまわり
     private static void orbit(ClientLevel level, BufferBuilder b, List<Runnable> soft, Matrix4f m, Vec3 cam, Camera camera, Entity e,
-                              TelegraphClient.Decal d, double t, int rgb, float partial) {
+                              int warn, double t, int rgb, float partial) {
         if (rgb < 0) {
             rgb = 0xDCE8FF;
         }
         double ex = Mth.lerp(partial, e.xo, e.getX());
         double ey = Mth.lerp(partial, e.yo, e.getY());
         double ez = Mth.lerp(partial, e.zo, e.getZ());
-        double p = Mth.clamp(t / Math.max(1, d.warn), 0, 1);
-        double release = t >= d.warn ? Mth.clamp((t - d.warn) / 8.0, 0, 1) : 0;
+        double p = Mth.clamp(t / Math.max(1, warn), 0, 1);
+        double release = t >= warn ? Mth.clamp((t - warn) / 8.0, 0, 1) : 0;
         float a = (float) ((0.35 + 0.65 * Math.min(1, p * 2)) * (1 - release));
         if (a <= 0.01f) {
             return;
@@ -475,35 +431,27 @@ public final class AttackLightFx {
         double R = baseR * (1 - 0.3 * p) * (1 + 1.5 * release);
         double spin = t * 0.05;
         int col = rgb;
-        if (LightStyles.orbit == 'C') {
-            Vec3 c = rel(ex, ey + 0.12, ez, cam);
-            for (int k = 0; k < 3; k++) {
-                double rr = R * (1.2 + 0.75 * k);
-                double rot = spin * (k % 2 == 0 ? 1 : -1.3) + k;
-                LightDraw.orbit(b, m, c, rr, new Vec3(1, 0, 0), new Vec3(0, 0, 1), 0.22f, k == 0 ? LightDraw.whiten(col, 0.4f) : col, 0.85f * a,
-                        (float) rot, (float) (rot + Math.PI * 1.35));
-            }
-            return;
-        }
-        Vec3 c = rel(ex, ey + e.getBbHeight() * 0.55, ez, cam);
-        double[] tilts = {0.35, -0.6, 1.2};
+        // 足もとに重なって回る三本の輪 (2026-11-15 の選定 C)。弧の進む先が明るく、尾が薄れる (回る向きが読める)
+        Vec3 c = rel(ex, ey + 0.12, ez, cam);
         for (int k = 0; k < 3; k++) {
-            double yaw = spin * (1 + 0.3 * k) + k * 2.1;
-            double tilt = tilts[k];
-            Vec3 ax = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
-            Vec3 side = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw));
-            Vec3 ay = side.scale(Math.cos(tilt)).add(0, Math.sin(tilt), 0);
-            double rr = R * (1 + 0.18 * k);
-            LightDraw.orbit(b, m, c, rr, ax, ay, 0.16f, k == 0 ? LightDraw.whiten(col, 0.5f) : col, 0.9f * a, 0f, (float) (Math.PI * 2));
-            if (LightStyles.orbit == 'B') {
-                double th = t * (0.16 + 0.04 * k) + k * 2;
-                Vec3 q = c.add(ax.scale(Math.cos(th) * rr)).add(ay.scale(Math.sin(th) * rr));
-                float fa = a;
-                soft.add(() -> {
-                    LightDraw.sprite(current, m, camera, q, 1.4f, LightDraw.whiten(col, 0.6f), 0.95f * fa);
-                    LightDraw.sprite(current, m, camera, q, 0.5f, 0xFFFFFF, fa);
-                });
+            double rr = R * (1.2 + 0.75 * k);
+            double dir = k % 2 == 0 ? 1 : -1.3;
+            double rot = spin * dir + k;
+            double span = Math.PI * 1.35;
+            int n = 64;
+            Vec3[] pts = new Vec3[n + 1];
+            float[] al = new float[n + 1];
+            for (int i = 0; i <= n; i++) {
+                double u = (double) i / n;
+                // 進む向きの先 (u = 1) が頭
+                double th = dir > 0 ? rot + span * u : rot + span * (1 - u);
+                pts[i] = c.add(Math.cos(th) * rr, 0, Math.sin(th) * rr);
+                al[i] = (float) Math.pow(u, 1.6) * Mth.clamp((float) ((1 - u) * 18), 0f, 1f);
             }
+            LightDraw.ribbon(b, m, pts, 0.24f, k == 0 ? LightDraw.whiten(col, 0.4f) : col, 0.9f * a, al);
+            Vec3 head = pts[n - 1];
+            float fa = a;
+            soft.add(() -> LightDraw.sprite(current, m, camera, head, 0.9f, LightDraw.whiten(col, 0.6f), 0.8f * fa));
         }
     }
 }

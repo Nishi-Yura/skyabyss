@@ -51,6 +51,8 @@ public final class ModNetwork {
                 .playToClient(jp.revati.skyabyss.titan.domain.DomainPayload.TYPE, jp.revati.skyabyss.titan.domain.DomainPayload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.fx.RiftPayload.TYPE, jp.revati.skyabyss.fx.RiftPayload.STREAM_CODEC,
-                        (payload, context) -> jp.revati.skyabyss.client.fx.RiftFx.receive(payload));
+                        (payload, context) -> jp.revati.skyabyss.client.fx.RiftFx.receive(payload))
+                .playToClient(jp.revati.skyabyss.fx.OrbitCuePayload.TYPE, jp.revati.skyabyss.fx.OrbitCuePayload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.combat.AttackLightFx.cue(payload));
     }
 }

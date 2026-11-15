@@ -117,6 +117,8 @@ public final class RiftFx {
     }
 
     private static final List<Rift> RIFTS = new ArrayList<>();
+    // 撮影: 動きを止める時刻 (tick。0 未満 = 止めない)
+    static float freezeAge = -1f;
     // 渡る裂け目の時刻 (tick): 0〜10 線が走る / 10〜20 太る / 20〜26 迫って覆う / 26〜40 覆ったまま (ここで運ばれる) / 40〜54 閉じて見える
     static final float OPEN = 10;
     static final float WIDEN = 20;
@@ -130,7 +132,7 @@ public final class RiftFx {
     }
 
     private static double age(Rift r, double t) {
-        return LightStyles.freezeAge >= 0 ? LightStyles.freezeAge : t - r.start;
+        return freezeAge >= 0 ? freezeAge : t - r.start;
     }
 
     // 渡る: 目の前 3.2 ブロックに開く
@@ -209,28 +211,18 @@ public final class RiftFx {
         }
         long flickerStep = (long) (t / 2);
         java.util.Random fl = new java.util.Random(r.seed ^ flickerStep * 31);
-        char style = LightStyles.rift;
         for (int i = 0; i < n; i++) {
             boolean right = i < perSide;
             int k = right ? i : i - perSide;
             // y: 右は上 (+1) から下 (-1)、左は下から上
             double s = (k + 0.5) / perSide;
             double yy = right ? 1 - 2 * s : -1 + 2 * s;
-            double w;
-            if (style == 'B') {
-                // 割れ目: 菱形にぎざぎざ (止まった刻み + 2 tick ごとの小さな震え)
-                double base = Math.pow(Math.max(0, 1 - Math.abs(yy)), 0.95);
-                double j = jag[i] * 0.34 * r.theme.jag * Math.sqrt(base) + (fl.nextDouble() - 0.5) * 0.08 * base;
-                w = base * (1 + j);
-            } else {
-                // A・C: なめらかな水滴形の膨らみ。縁はゆっくり揺れる
-                double base = Math.pow(Math.max(0, 1 - yy * yy), 0.78);
-                double wob = 0.05 * Math.sin(yy * 6.5 + t * 0.16 + (right ? 0 : 1.7)) + 0.03 * Math.sin(yy * 13 - t * 0.23);
-                w = base * (1 + wob * (0.4 + r.theme.jag * 0.6));
-            }
-            if (r.theme.flicker && style != 'B') {
-                w *= 1 + (fl.nextDouble() - 0.5) * 0.06;
-            }
+            // 割れ目: 菱形にぎざぎざ。刻みの深さは巨神ごと (潮殻は浅く、雷翼は深い)。止まった刻み + 2 tick ごとの小さな震え。
+            // 刻みは一つおきに強く、先の近くは浅くして、尖った先が細く伸びて見えるように
+            double base = Math.pow(Math.max(0, 1 - Math.abs(yy)), 0.95);
+            double notch = (i % 2 == 0 ? 1.0 : 0.55) * jag[i];
+            double j = notch * 0.34 * r.theme.jag * Math.sqrt(base) + (fl.nextDouble() - 0.5) * 0.07 * base;
+            double w = base * (1 + j);
             pts[i][0] = (right ? 1 : -1) * w * halfW;
             pts[i][1] = yy * halfH;
         }
@@ -248,7 +240,7 @@ public final class RiftFx {
             return;
         }
         double t = now(event.getPartialTick().getGameTimeDeltaPartialTick(false));
-        RIFTS.removeIf(r -> LightStyles.freezeAge < 0 && t - r.start > r.end());
+        RIFTS.removeIf(r -> freezeAge < 0 && t - r.start > r.end());
         Vec3 cam = event.getCamera().getPosition();
         Matrix4f m = event.getPoseStack().last().pose();
         for (Rift r : RIFTS) {
@@ -336,18 +328,18 @@ public final class RiftFx {
         LightDraw.ribbon(b, m, loop, (float) (1.5 * scaleW), th.glow, 0.55f * alpha * flick);
         LightDraw.ribbon(b, m, loop, (float) (0.42 * scaleW), LightDraw.whiten(th.edge, 0.35f), 0.95f * alpha * flick);
         LightDraw.ribbon(b, m, loop, (float) (0.12 * scaleW), 0xFFFFFF, 0.9f * alpha);
-        char style = LightStyles.rift;
-        if (style == 'B') {
-            cracks(b, m, r, t, rel, right, up, halfW, halfH, scaleW, alpha);
-        } else if (style == 'C') {
-            swirl(b, m, r, t, rel, right, up, o, scaleW, alpha);
+        // 内側にもう一本、暗めの縁 (裂けた面が二重にめくれて見える。奥行き)
+        Vec3[] inner = new Vec3[loop.length];
+        for (int i = 0; i < loop.length; i++) {
+            Vec3 q = loop[i].subtract(rel);
+            inner[i] = rel.add(q.x * 0.86, q.y * 0.95, q.z * 0.86);
         }
+        LightDraw.ribbon(b, m, inner, (float) (0.5 * scaleW), th.glow, 0.32f * alpha * flick);
+        cracks(b, m, r, t, rel, right, up, halfW, halfH, scaleW, alpha);
         LightDraw.end(b, LightDraw.BAND, true);
-        if (style == 'B') {
-            b = LightDraw.begin();
-            shards(b, m, r, t, rel, right, up, o, scaleW, alpha);
-            LightDraw.end(b, LightDraw.STREAK, true);
-        }
+        b = LightDraw.begin();
+        shards(b, m, r, t, rel, right, up, o, scaleW, alpha);
+        LightDraw.end(b, LightDraw.STREAK, true);
         // 4. 上下の先の小さなにじみ (丸く見えないよう小さく薄く。縦に長い光にする)
         b = LightDraw.begin();
         var camObj = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -415,7 +407,7 @@ public final class RiftFx {
         return p;
     }
 
-    // B: 上下の先から伸びるひび (ぎざぎざの細い光)
+    // 上下の先から伸びるひび (ぎざぎざの細い光)
     private static void cracks(BufferBuilder b, Matrix4f m, Rift r, double t, Vec3 c, Vec3 right, Vec3 up, double hw, double hh, double sw, float alpha) {
         java.util.Random rnd = new java.util.Random(r.seed * 17);
         for (int k = 0; k < 4; k++) {
@@ -438,7 +430,7 @@ public final class RiftFx {
         }
     }
 
-    // B: 縁から外へ飛ぶ光の欠片
+    // 縁から外へ飛ぶ光の欠片
     private static void shards(BufferBuilder b, Matrix4f m, Rift r, double t, Vec3 c, Vec3 right, Vec3 up, double[][] o, double sw, float alpha) {
         var cam = Minecraft.getInstance().gameRenderer.getMainCamera();
         int n = 18;
@@ -455,24 +447,6 @@ public final class RiftFx {
             float a = (float) (Math.sin(ph * Math.PI)) * 0.9f * alpha;
             float roll = (float) Math.atan2(oy, ox);
             LightDraw.sprite(b, m, cam, p, (float) (0.7 * sw), (float) (0.16 * sw), roll, LightDraw.whiten(r.theme.edge, 0.2f), a);
-        }
-    }
-
-    // C: 縁の外を回る三本の光の帯
-    private static void swirl(BufferBuilder b, Matrix4f m, Rift r, double t, Vec3 c, Vec3 right, Vec3 up, double[][] o, double sw, float alpha) {
-        int n = o.length;
-        for (int k = 0; k < 3; k++) {
-            double grow = 1.12 + 0.1 * k;
-            Vec3[] p = new Vec3[n + 1];
-            float[] al = new float[n + 1];
-            for (int i = 0; i <= n; i++) {
-                double[] q = o[i % n];
-                p[i] = c.add(right.scale(q[0] * grow + Math.signum(q[0]) * 0.15 * k)).add(up.scale(q[1] * (1.04 + 0.04 * k)));
-                double s = (double) i / n;
-                double w = Math.cos(Math.PI * 2 * (s - t * (0.012 + 0.004 * k) - k / 3.0));
-                al[i] = (float) Math.max(0, w * w * w);
-            }
-            LightDraw.ribbon(b, m, p, (float) ((0.6 - 0.12 * k) * sw), k == 0 ? LightDraw.whiten(r.theme.edge, 0.2f) : r.theme.glow, 0.8f * alpha, al);
         }
     }
 
@@ -575,7 +549,7 @@ public final class RiftFx {
             case "world" -> place(a[1], Double.parseDouble(a[2]), Double.parseDouble(a[3]), Double.parseDouble(a[4]),
                     a.length > 5 ? Double.parseDouble(a[5]) : 10, a.length > 6 ? Integer.parseInt(a[6]) : 80);
             case "clear" -> clear();
-            case "freeze" -> LightStyles.freezeAge = a.length < 2 || a[1].equals("off") ? -1f : Float.parseFloat(a[1]);
+            case "freeze" -> freezeAge = a.length < 2 || a[1].equals("off") ? -1f : Float.parseFloat(a[1]);
             default -> {
             }
         }
