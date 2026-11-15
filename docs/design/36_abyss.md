@@ -244,7 +244,7 @@
 ### 6.7 作ったもの
 - story/ch5/warden: HeartWarden（番人）・AbyssBeacons（灯籠）・WardenArena（間に入ると目覚める、倒した印、合図 abyss_heart、間が 30 秒空くと戻る）・WardenSetup（登録）。
 - 闇のたまり 2 倍は AbyssPressure.voiceScale（間の中で灯籠が全部消えているとき）。
-- 見た目: 「錆の門番」B 鍵持ちの騎士（2026-11-08 の選定。ラフ docs/review/roughs_abyss/reshape_warden.png、形 tools/rough/lowpoly/abyss/warden_knight.py --install）。錆びた鎧の古い骨の騎士。胸当ての鍵穴の形の切れ目の奥に骨の肋と青緑に光る心臓、兜の鍵穴の覗き窓が光る、右手に背丈ほどの大鍵（頭の輪に青緑の宝石）、背に鎖の外套。骨と動きは前のまま（client/WardenRenderer、描く大きさ 1.35 倍、当たりの箱 1.9 × 4.3）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。光の中でだけ、背に青緑の輪の後光と落ちる錆の粉（client/entity/PaperCutLayer の WARDEN。闇では出さない）。
+- 見た目: 「錆の門番」B 鍵持ちの騎士（2026-11-08 の選定。ラフ docs/review/roughs_abyss/reshape_warden.png、形 tools/rough/lowpoly/abyss/warden_knight.py --install）。錆びた鎧の古い骨の騎士。胸当ての鍵穴の形の切れ目の奥に骨の肋と青緑に光る心臓、兜の鍵穴の覗き窓が光る、右手に背丈ほどの大鍵（頭の輪に青緑の宝石）、背に鎖の外套。骨と動きは前のまま（client/WardenRenderer、描く大きさ 1.35 倍、当たりの箱 1.9 × 5.6。目の高さは 3.66）。光の中は全部、輪郭だけ（鼓動の術）は体を黒く沈めて光る縁、闇では胸の心臓だけ暗く。写しは暗い色で鼓動の光なし。光の中でだけ、背に青緑の輪の後光と落ちる錆の粉（client/entity/PaperCutLayer の WARDEN。闇では出さない）。
 - 開発用: `/skyabyss abyss warden wake`・`/skyabyss abyss warden reset`。自己テスト "abyss warden"。
 - 絵: 光の中だけ見える目（頭蓋の前の二つの光の切れ目）、虚の体に浮かぶ細い筋の網、肋の骨のひびの淡い青緑の光（発光マスク）。爪・踏み込みは予告が終わる瞬間（18・22 tick）に当たる形で、溜めの震えと行き過ぎがある。倒れる動きはのけぞり → 膝が折れる → 沈んで溶ける。
 - 倒したあとの場面 `abyss_warden_fallen`（12 秒。倒れる番人と心臓の台から、肋をなぞって丸天井を見上げる。一人に一度。`SectionScenes`）。報酬は深淵の装備（`AbyssGearLoot.warden`）。

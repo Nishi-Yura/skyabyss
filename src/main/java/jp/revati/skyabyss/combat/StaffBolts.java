@@ -263,7 +263,7 @@ public final class StaffBolts {
             Vec3 to = wall.getType() == HitResult.Type.MISS ? next : wall.getLocation();
             LivingEntity foe = firstFoe(b, b.pos, to);
             if (foe != null) {
-                Vec3 at = foe.getBoundingBox().clip(b.pos, to).orElse(foe.getBoundingBox().getCenter());
+                Vec3 at = jp.revati.skyabyss.entity.LongBody.clip(foe, b.pos, to, FAT).orElse(foe.getBoundingBox().getCenter());
                 b.pos = at;
                 strike(b, foe);
                 impactFx(b.level, at, b.dir, LOOKS[b.tier], b.tier, b.shot);
@@ -293,8 +293,16 @@ public final class StaffBolts {
     static LivingEntity firstFoe(Bolt b, Vec3 from, Vec3 to) {
         LivingEntity best = null;
         double bd = Double.MAX_VALUE;
-        for (LivingEntity e : b.level.getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(FAT + 1.0), e -> SkillActions.isFoe(b.owner, e))) {
-            var hit = e.getBoundingBox().inflate(FAT).clip(from, to);
+        AABB area = new AABB(from, to).inflate(FAT + 1.0);
+        // 体の長い主は、本体の箱が探す箱の外でも、部品 (entity/BodyPart) が線のそばにあれば拾う
+        java.util.List<LivingEntity> near = new java.util.ArrayList<>(b.level.getEntitiesOfClass(LivingEntity.class, area, e -> SkillActions.isFoe(b.owner, e)));
+        for (LivingEntity e : jp.revati.skyabyss.entity.LongBody.ownersNear(b.level, area)) {
+            if (!near.contains(e) && SkillActions.isFoe(b.owner, e)) {
+                near.add(e);
+            }
+        }
+        for (LivingEntity e : near) {
+            var hit = jp.revati.skyabyss.entity.LongBody.clip(e, from, to, FAT);
             if (hit.isPresent()) {
                 double d = hit.get().distanceToSqr(from);
                 if (d < bd) {

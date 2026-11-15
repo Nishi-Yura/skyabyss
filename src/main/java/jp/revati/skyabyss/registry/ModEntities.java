@@ -166,13 +166,13 @@ public final class ModEntities {
     // 地下のダンジョンの主 (docs/design/55。dungeon/DungeonFloor が主の間に湧かせる)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.BoneCentipede>> BONE_CENTIPEDE = ENTITIES.register("bone_centipede",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.BoneCentipede::new, MobCategory.MONSTER)
-                    .sized(3.6f, 3.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":bone_centipede"));
+                    .sized(3.6f, 4.2f).eyeHeight(2.55f).clientTrackingRange(12).build(SkyAbyss.MODID + ":bone_centipede"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ShellOctopus>> SHELL_OCTOPUS = ENTITIES.register("shell_octopus",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ShellOctopus::new, MobCategory.MONSTER)
-                    .sized(3.2f, 2.8f).clientTrackingRange(12).build(SkyAbyss.MODID + ":shell_octopus"));
+                    .sized(3.2f, 4.0f).eyeHeight(2.38f).clientTrackingRange(12).build(SkyAbyss.MODID + ":shell_octopus"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.CrystalLizard>> CRYSTAL_LIZARD = ENTITIES.register("crystal_lizard",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.CrystalLizard::new, MobCategory.MONSTER)
-                    .sized(3.0f, 2.4f).clientTrackingRange(12).build(SkyAbyss.MODID + ":crystal_lizard"));
+                    .sized(3.0f, 3.4f).eyeHeight(2.04f).clientTrackingRange(12).build(SkyAbyss.MODID + ":crystal_lizard"));
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.FortWarlord>> FORT_WARLORD = ENTITIES.register("fort_warlord",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.FortWarlord::new, MobCategory.MONSTER)
@@ -180,11 +180,11 @@ public final class ModEntities {
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.TempleKeeper>> TEMPLE_KEEPER = ENTITIES.register("temple_keeper",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.TempleKeeper::new, MobCategory.MONSTER)
-                    .sized(2.3f, 5.8f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":temple_keeper"));
+                    .sized(2.3f, 6.4f).eyeHeight(4.93f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":temple_keeper"));
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.IceLord>> ICE_LORD = ENTITIES.register("ice_lord",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.IceLord::new, MobCategory.MONSTER)
-                    .sized(4.0f, 4.4f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":ice_lord"));
+                    .sized(4.0f, 5.8f).eyeHeight(3.74f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":ice_lord"));
     // 奥のダンジョンの主 (issue #19 の ②。dungeon/mob/deep)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm>> LAVA_WYRM = ENTITIES.register("lava_wyrm",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.deep.LavaWyrm::new, MobCategory.MONSTER)
@@ -204,7 +204,7 @@ public final class ModEntities {
                     .sized(3.4f, 2.8f).fireImmune().clientTrackingRange(12).build(SkyAbyss.MODID + ":lava_toad"));
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.ForgeGiant>> FORGE_GIANT = ENTITIES.register("forge_giant",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.ForgeGiant::new, MobCategory.MONSTER)
-                    .sized(2.4f, 5.0f).clientTrackingRange(12).build(SkyAbyss.MODID + ":forge_giant"));
+                    .sized(2.4f, 8.0f).eyeHeight(4.25f).clientTrackingRange(12).build(SkyAbyss.MODID + ":forge_giant"));
     // 地下のダンジョン専用の敵と中ボス (docs/design/55 の 4 の 7。dungeon/DungeonFloor が部屋に湧かせる)
     public static final DeferredHolder<EntityType<?>, EntityType<jp.revati.skyabyss.dungeon.mob.PitDigger>> PIT_DIGGER = ENTITIES.register("pit_digger",
             () -> EntityType.Builder.of(jp.revati.skyabyss.dungeon.mob.PitDigger::new, MobCategory.MONSTER)

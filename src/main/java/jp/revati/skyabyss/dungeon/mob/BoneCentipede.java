@@ -71,6 +71,34 @@ public class BoneCentipede extends DungeonBoss {
     public BoneCentipede(EntityType<? extends Monster> type, Level level) {
         super(type, level, "bone_centipede", () -> SoundEvents.SILVERFISH_AMBIENT, () -> SoundEvents.SILVERFISH_HURT, () -> SoundEvents.RAVAGER_DEATH,
                 "bite", "combo", "sweep", "spit", "burrow", "emerge", "erupt", "roar", "scream", "intro", "hurt", "death");
+        body.reserveIds(this::setId);
+    }
+
+    // 体に沿った当たりの部品 (entity/LongBody)。頭から尾まで 17 ブロック (前 7.3・後ろ 9.9)。本体の箱 (四角) の外の頭・尾にも、杖や弓が当たる
+    private final jp.revati.skyabyss.entity.LongBody body = jp.revati.skyabyss.entity.LongBody.of(this, new double[][] {{3.4, 0, 3.0, 4.0}, {6.0, 0, 3.0, 4.0}, {-3.4, 0, 3.0, 4.0}, {-6.2, 0, 3.0, 4.0}, {-8.6, 0, 3.0, 4.0}});
+
+    @Override
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    @Override
+    public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
+        return body.parts();
+    }
+
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (body != null) {
+            body.setIds(id);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        body.follow();
     }
 
     public static AttributeSupplier.Builder createAttributes() {

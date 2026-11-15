@@ -31,6 +31,34 @@ public class AshLizard extends RegionBoss {
 
     public AshLizard(EntityType<? extends Monster> type, Level level) {
         super(type, level, "ash_lizard", MobSounds.ASH_LIZARD_AMBIENT, MobSounds.ASH_LIZARD_HURT, MobSounds.ASH_LIZARD_DEATH, "breath", "sweep", "bite", "hurt", "death");
+        body.reserveIds(this::setId);
+    }
+
+    // 体に沿った当たりの部品 (entity/LongBody)。鼻先から尾まで 6.5 ブロック (前 2.6・後ろ 3.9)。本体の箱 (四角) の外の頭・尾にも、杖や弓が当たる
+    private final jp.revati.skyabyss.entity.LongBody body = jp.revati.skyabyss.entity.LongBody.of(this, new double[][] {{1.8, 0, 1.6, 1.4}, {-1.8, 0, 1.6, 1.4}, {-3.2, 0, 1.4, 1.4}});
+
+    @Override
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    @Override
+    public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
+        return body.parts();
+    }
+
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (body != null) {
+            body.setIds(id);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        body.follow();
     }
 
     public static AttributeSupplier.Builder createAttributes() {

@@ -62,6 +62,34 @@ public class CrystalLizard extends DungeonBoss {
     public CrystalLizard(EntityType<? extends Monster> type, Level level) {
         super(type, level, "crystal_lizard", () -> SoundEvents.HOGLIN_AMBIENT, () -> SoundEvents.RAVAGER_HURT, () -> SoundEvents.RAVAGER_DEATH,
                 "bite", "tail", "dash", "charge_up", "discharge", "breath", "pounce", "intro", "scream", "hurt", "death");
+        body.reserveIds(this::setId);
+    }
+
+    // 体に沿った当たりの部品 (entity/LongBody)。鼻先から尾まで 12.7 ブロック (前 5.3・後ろ 7.5)。本体の箱 (四角) の外の頭・尾にも、杖や弓が当たる
+    private final jp.revati.skyabyss.entity.LongBody body = jp.revati.skyabyss.entity.LongBody.of(this, new double[][] {{3.6, 0, 2.6, 2.8}, {-3.3, 0, 2.6, 2.8}, {-5.8, 0, 2.6, 2.8}});
+
+    @Override
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    @Override
+    public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
+        return body.parts();
+    }
+
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (body != null) {
+            body.setIds(id);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        body.follow();
     }
 
     public static AttributeSupplier.Builder createAttributes() {

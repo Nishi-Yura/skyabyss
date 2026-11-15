@@ -108,6 +108,7 @@ public final class DungeonFoesSelfTest {
             sides(level, f);
             unstick(level, f);
             phases(level, f);
+            bodyParts(level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST dungeon foes crashed", e);
             f.add("crashed: " + e);
@@ -120,7 +121,7 @@ public final class DungeonFoesSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST dungeon foes PASSED (12 dungeon foes and mid bosses registered with eggs/xp/meshes/animations; the four dungeon tables use them; "
-                    + "every telegraph covers its target, hits after the warning and spares a player outside; ox smith shield 0.35x from the front, geode golem chest 1.5x / back 0.6x; every boss steps up one block and a boss behind a wall moves to a clear spot beside the player)");
+                    + "every telegraph covers its target, hits after the warning and spares a player outside; ox smith shield 0.35x from the front, geode golem chest 1.5x / back 0.6x; every boss steps up one block and a boss behind a wall moves to a clear spot beside the player; long bosses' body parts follow the body, pass hits to it and catch a staff bolt line at the tail)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST dungeon foes FAILED: {}", m));
         }
@@ -290,6 +291,34 @@ public final class DungeonFoesSelfTest {
             }
         }
         p.discard();
+    }
+
+    // 体の長い主の当たりの部品 (2026-11-15。entity/BodyPart): 部品が体の向きに沿って並び、部品への傷は本体へ渡り、尾だけを通る線にも当たる
+    private static void bodyParts(ServerLevel lv, List<String> f) {
+        BoneCentipede c = spawn(lv, jp.revati.skyabyss.registry.ModEntities.BONE_CENTIPEDE.get(), SX - 4.5, SZ + 0.5, -90f);
+        try {
+            c.setYBodyRot(-90f);
+            c.tick();
+            c.yBodyRot = -90f;
+            check(c.isMultipartEntity() && c.getParts().length == 5, "the centipede has no body parts", f);
+            check(lv.getPartEntities().containsAll(java.util.List.of(c.getParts())), "the centipede's parts are not in the level", f);
+            // 体の向き -90 (東向き): 前 = +x。尾 (前 -8.6) は本体の 8 ブロック西
+            net.neoforged.neoforge.entity.PartEntity<?> tail = c.getParts()[4];
+            check(Math.abs(tail.getX() - (c.getX() - 8.6)) < 0.8 && Math.abs(tail.getZ() - c.getZ()) < 0.8,
+                    "the tail part is not behind the body (" + tail.position() + " vs " + c.position() + ")", f);
+            float hp = c.getHealth();
+            tail.hurt(lv.damageSources().magic(), 5f);
+            check(c.getHealth() < hp, "a hit on the tail part did not hurt the centipede", f);
+            // 尾だけを南北に通る線 (本体の箱には触れない)
+            net.minecraft.world.phys.Vec3 from = new net.minecraft.world.phys.Vec3(tail.getX(), c.getY() + 1.5, c.getZ() - 6);
+            net.minecraft.world.phys.Vec3 to = new net.minecraft.world.phys.Vec3(tail.getX(), c.getY() + 1.5, c.getZ() + 6);
+            check(c.getBoundingBox().clip(from, to).isEmpty(), "the test line touches the main box", f);
+            check(jp.revati.skyabyss.entity.LongBody.clip(c, from, to, 0).isPresent(), "a line through the tail missed the centipede", f);
+            check(jp.revati.skyabyss.entity.LongBody.ownersNear(lv, new net.minecraft.world.phys.AABB(from, to).inflate(0.5)).contains(c), "the tail part does not lead back to the centipede", f);
+            check(jp.revati.skyabyss.entity.LongBody.owner(tail) == c, "the part's owner is not the centipede", f);
+        } finally {
+            c.discard();
+        }
     }
 
     // 後半 (2026-11-07): 四体の主は体力半分で後半に入り、手下を 2 体呼ぶ。新しい技 (骨の礫・渦・雷の走り・三連打ち・熔けた溝) は予兆を出す

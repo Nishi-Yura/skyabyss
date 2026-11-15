@@ -87,14 +87,31 @@ public final class HitboxAudit {
             float s = lp.visualScale() * le.getScale();
             float visW = Math.max(maxX - minX, maxZ - minZ) * s;
             float visH = (maxY - minY) * s;
-            float rw = e.getBbWidth() / Math.max(0.01f, visW);
-            float rh = e.getBbHeight() / Math.max(0.01f, visH);
+            // 体の長い主: 当たりの幅は、本体の箱と部品 (entity/BodyPart) を合わせた前後・左右の広がり
+            float bbW = e.getBbWidth();
+            float bbH = e.getBbHeight();
+            if (e.isMultipartEntity() && e.getParts() != null) {
+                double f0 = -bbW / 2.0, f1 = bbW / 2.0, s0 = -bbW / 2.0, s1 = bbW / 2.0;
+                for (net.neoforged.neoforge.entity.PartEntity<?> part : e.getParts()) {
+                    if (part instanceof jp.revati.skyabyss.entity.BodyPart bp) {
+                        double w = bp.getBbWidth() / 2.0;
+                        f0 = Math.min(f0, bp.forward() - w);
+                        f1 = Math.max(f1, bp.forward() + w);
+                        s0 = Math.min(s0, bp.side() - w);
+                        s1 = Math.max(s1, bp.side() + w);
+                        bbH = Math.max(bbH, bp.getBbHeight());
+                    }
+                }
+                bbW = (float) Math.max(f1 - f0, s1 - s0);
+            }
+            float rw = bbW / Math.max(0.01f, visW);
+            float rh = bbH / Math.max(0.01f, visH);
             // 描く体の上下 (足もとからのブロック) と、そのうち当たりの箱の高さに入っている割合
             float lowY = minY * s;
             float highY = maxY * s;
-            float inside = Math.max(0f, Math.min(highY, e.getBbHeight()) - Math.max(lowY, 0f)) / Math.max(0.01f, highY - lowY);
+            float inside = Math.max(0f, Math.min(highY, bbH) - Math.max(lowY, 0f)) / Math.max(0.01f, highY - lowY);
             String note = inside < 0.6f ? "ずれ" : (rw < 0.6f || rh < 0.6f) ? "小さい" : (rw > 1.6f || rh > 1.6f) ? "大きい" : "";
-            rows.add(new Row(id.getPath(), e.getBbWidth(), e.getBbHeight(), visW, visH, lowY, highY, note));
+            rows.add(new Row(id.getPath() + (e.isMultipartEntity() ? "+parts" : ""), bbW, bbH, visW, visH, lowY, highY, note));
             e.discard();
         }
         rows.sort((a, b) -> Float.compare(b.visH * b.visW, a.visH * a.visW));

@@ -180,7 +180,8 @@ public final class MeleeHits {
             return;
         }
         event.setCanceled(true);
-        attack(p, event.getTarget());
+        // 体の長い主の部品を叩いたら、本体を叩いたことにする (entity/BodyPart)
+        attack(p, jp.revati.skyabyss.entity.LongBody.owner(event.getTarget()));
     }
 
     // 一撃の中で起きた、その人の傷に溜めの強さを掛ける (ほかの決まりの増減のあと)
