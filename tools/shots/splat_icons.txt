@@ -15,10 +15,10 @@ cmd skyabyss level set @p 50
 cmd tp @s 0 -60 8 180 0
 wait 20
 hud on
-cmd item replace entity @s hotbar.0 with skyabyss:cinder_lamp
-cmd item replace entity @s hotbar.1 with skyabyss:ember_horn
+cmd item replace entity @s hotbar.0 with skyabyss:abyss_bell_staff
+cmd item replace entity @s hotbar.1 with skyabyss:storm_eye_feather
 cmd item replace entity @s hotbar.2 with skyabyss:moontide_pearl
-cmd item replace entity @s hotbar.3 with skyabyss:storm_charm
+cmd item replace entity @s hotbar.3 with skyabyss:ember_mantle
 cmd item replace entity @s hotbar.4 with skyabyss:wild_mimic_heart_charm
 cmd item replace entity @s hotbar.5 with skyabyss:tide_chime_charm
 cmd item replace entity @s hotbar.6 with skyabyss:pit_jaw_pendant

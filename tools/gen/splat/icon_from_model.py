@@ -3,7 +3,8 @@
 「3D の模型が正しい、欄の絵を模型に合わせる」(docs/design/15 の「点の模型」・memory の model quality bar)。
 
 メッシュを正射影で 4 倍の大きさに描き (奥行きの比べ・絵の色・点の模型と同じ 4 段の陰)、32x32 へ縮めて (いちばん多い色)、
-色の段を整え、1 画素の暗い縁取りを付ける。向きは少し斜め上からの正面 (装飾品が立体に見える向き)。
+上と左の縁を明るく・下と右の縁を暗く (光る画素は除く) して、1 画素の暗い縁取りを付ける。
+向きは少し斜め上からの正面が基本で、細い・薄い品は欄をよく埋める向き (斜め 45 度・上から など) を選ぶ (VIEWS)。
 
   python -I tools/gen/splat/icon_from_model.py <id> ...       # 書き出し
   python -I tools/gen/splat/icon_from_model.py --list          # MISMATCH の全部
@@ -41,7 +42,7 @@ def mesh_of(iid):
     return None, None
 
 
-def render(iid, yaw=200.0, pitch=22.0):
+def render(iid, yaw=200.0, pitch=22.0, roll=0.0):
     d, tier = mesh_of(iid)
     tex_name = d.get("texture", "").split(":")[-1]
     tex_name = tex_name[:-4] if tex_name.endswith(".png") else tex_name
@@ -68,7 +69,9 @@ def render(iid, yaw=200.0, pitch=22.0):
     a, b_ = math.radians(yaw), math.radians(pitch)
     R1 = np.array([[math.cos(a), 0, math.sin(a)], [0, 1, 0], [-math.sin(a), 0, math.cos(a)]])
     R2 = np.array([[1, 0, 0], [0, math.cos(b_), -math.sin(b_)], [0, math.sin(b_), math.cos(b_)]])
-    Q = Tr.reshape(-1, 3) @ R1.T @ R2.T
+    rr = math.radians(roll)
+    R3 = np.array([[math.cos(rr), -math.sin(rr), 0], [math.sin(rr), math.cos(rr), 0], [0, 0, 1]])
+    Q = Tr.reshape(-1, 3) @ R1.T @ R2.T @ R3.T
     lo, hi = Q.min(0), Q.max(0)
     span = (hi - lo)[:2].max()
     pad = 2.0 / OUT
@@ -79,7 +82,7 @@ def render(iid, yaw=200.0, pitch=22.0):
     Z = Q[:, 2]
     P2 = np.stack([X, Y, Z], 1).reshape(-1, 3, 3)
     # 面の法線 (陰用。視線の空間)
-    N = np.cross(Tr[:, 1] - Tr[:, 0], Tr[:, 2] - Tr[:, 0]) @ R1.T @ R2.T
+    N = np.cross(Tr[:, 1] - Tr[:, 0], Tr[:, 2] - Tr[:, 0]) @ R1.T @ R2.T @ R3.T
     N /= np.maximum(np.linalg.norm(N, axis=1, keepdims=True), 1e-9)
     img = np.zeros((BIG, BIG, 4))
     zb = np.full((BIG, BIG), -1e9)
@@ -130,8 +133,12 @@ def render(iid, yaw=200.0, pitch=22.0):
         rgb = col[yy, xx, :3].astype(float)
         rgb = np.where(lit[:, None], rgb, np.clip(rgb * lv, 0, 255))
         img[gy, gx, :3] = rgb
-        img[gy, gx, 3] = 255
-    return img, tier
+        img[gy, gx, 3] = np.where(lit, 254, 255)
+    return img, tier, glowmask_of(img)
+
+
+def glowmask_of(img):
+    return None
 
 
 def downsample(img):
@@ -148,8 +155,55 @@ def downsample(img):
             keys, inv, cnt = np.unique(q[:, 0] * 10000 + q[:, 1] * 100 + q[:, 2], return_inverse=True, return_counts=True)
             sel = inv == np.argmax(cnt)
             out[y, x, :3] = np.clip(op[sel, :3].mean(0), 0, 255).astype(np.uint8)
-            out[y, x, 3] = 255
+            out[y, x, 3] = 254 if (op[sel, 3] == 254).mean() > 0.5 else 255
     return out
+
+
+# 試す向き (yaw, pitch, roll)。最初が基本 (少し斜め上からの正面)。細い・薄い品は、欄をよく埋める向きを選ぶ
+VIEWS = ((200, 22, 0), (200, 22, -45), (180, 0, -45), (200, 40, -30), (200, 55, 0))
+
+
+# 品ごとの向きの決め打ち (目で選んだ。2026-11-16): 杖は武器と同じ斜め、細い羽は斜め、離れた肩当ては斜め上から
+VIEW_OF = {"abyss_bell_staff": (200, 22, -45), "storm_eye_feather": (110, 15, -45), "ember_mantle": (200, 40, -30), "cinder_lamp": (200, 22, 0)}
+
+
+def best_icon(iid):
+    """向きを変えて描き、欄を埋める画素がいちばん多い向き (基本の向きがその半分以上なら基本) を選ぶ"""
+    if iid in VIEW_OF:
+        big, tier, _ = render(iid, *VIEW_OF[iid])
+        return downsample(big), tier, VIEW_OF[iid]
+    tries = []
+    for v in VIEWS:
+        big, tier, _ = render(iid, *v)
+        small = downsample(big)
+        tries.append(((small[..., 3] > 0).sum(), v, small, tier))
+    base = tries[0][0]
+    best = max(tries, key=lambda t: t[0])
+    # 上から見下ろすと形が分からなくなる品が多いので、基本の向きが半分も埋めないときだけ替える
+    pick = tries[0] if base >= 0.5 * best[0] else best
+    return pick[2], pick[3], pick[1]
+
+
+def shade_edges(icon):
+    """上と左が透明な画素を明るく (光の縁)、下と右が透明な画素を暗く (陰の縁)。光る画素は触らない"""
+    a = icon[..., 3] > 0
+    res = icon.copy()
+    H, W = a.shape
+    for y in range(H):
+        for x in range(W):
+            if not a[y, x] or icon[y, x, 3] == 254:
+                continue
+            up = y == 0 or not a[y - 1, x]
+            left = x == 0 or not a[y, x - 1]
+            down = y == H - 1 or not a[y + 1, x]
+            right = x == W - 1 or not a[y, x + 1]
+            c = icon[y, x, :3].astype(float)
+            if up or left:
+                c = c + (255 - c) * 0.28
+            elif down or right:
+                c = c * 0.78
+            res[y, x, :3] = np.clip(c, 0, 255).astype(np.uint8)
+    return res
 
 
 def outline(icon):
@@ -181,8 +235,9 @@ def main():
         if mesh_of(iid)[0] is None:
             print("skip (no mesh)", iid)
             continue
-        big, tier = render(iid)
-        icon = outline(downsample(big))
+        small, tier, view = best_icon(iid)
+        icon = outline(shade_edges(small))
+        icon[..., 3] = np.where(icon[..., 3] > 0, 255, 0)
         path = ASSETS / "textures/item" / (iid + ".png")
         old = Image.open(path).convert("RGBA") if path.exists() else Image.new("RGBA", (OUT, OUT))
         t = Image.new("RGBA", (OUT * 2 + 2, OUT), (40, 38, 48, 255))
@@ -191,7 +246,7 @@ def main():
         cmp_tiles.append(t)
         if not a.dry:
             Image.fromarray(icon).save(path)
-        print(iid, tier)
+        print(iid, tier, view)
     if cmp_tiles:
         cols = 6
         rows = (len(cmp_tiles) + cols - 1) // cols
