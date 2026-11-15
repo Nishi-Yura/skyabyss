@@ -27,7 +27,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 // 心臓の核の光 (2026-11-15 の光の表現の選定 6)。核の骨 (動く骨の位置をそのまま追う) のまわりに、柔らかくにじむ光を重ねる。
-// 鼓動に合わせて脈打ち、崩れている間 (崩しゲージが割れた = 傷が大きく通る時) は大きく白く燃え立つ。「狙う所」がひと目でわかる。
+// 崩れている間 (崩しゲージが割れた = 傷が大きく通る時) だけ光り、鼓動に合わせて脈打つ。「今が狙い時」がひと目でわかる。ふだんは光らない。
 // 骨の位置は LowPolyGeoRenderer が骨を描くときに知らせる (track)。殻の内側に隠れないよう、光はカメラ側へ殻の厚みだけ寄せる。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class CoreGlowFx {
@@ -141,6 +141,12 @@ public final class CoreGlowFx {
     }
 
     private static void draw(BufferBuilder b, Matrix4f m, Camera camera, Vec3 cam, Entity e, Vec3 at, double t) {
+        // 崩れている間だけ (2026-11-15 の声「ずっと心臓の中心光ってるのいらない」)。崩れの終わりに薄れて消える
+        float broken = BreakGaugeClient.broken(e.getId());
+        if (broken <= 0f) {
+            return;
+        }
+        float show = (float) Mth.smoothstep(Math.min(1f, broken * 5f));
         // ブロックの壁の向こうなら描かない (奥行きを見ないため)
         Vec3 eye = cam;
         var hit = e.level().clip(new net.minecraft.world.level.ClipContext(eye, at, net.minecraft.world.level.ClipContext.Block.VISUAL,
@@ -150,8 +156,7 @@ public final class CoreGlowFx {
             return;
         }
         int rgb = rgbOf(e);
-        float broken = BreakGaugeClient.broken(e.getId());
-        float dying = e instanceof HeartBoss h && !h.isAlive() ? 0.4f : 1f;
+        float dying = (e instanceof HeartBoss h && !h.isAlive() ? 0.4f : 1f) * show;
         Vec3 rel = at.subtract(cam);
         double dist = rel.length();
         // 殻の厚みだけカメラ側へ (近すぎるときは寄せない)

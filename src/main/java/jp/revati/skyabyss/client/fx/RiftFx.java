@@ -176,11 +176,15 @@ public final class RiftFx {
                 }
             }
         }
+        // 天井が低くても小さくしすぎない (奥行きを見ずに描くので天井に切られない。はみ出した所は部屋を覆う空に溶ける)
         double h = Mth.clamp(radius * 0.75, 7, 15);
-        h = Math.max(4, Math.min(h, ceiling - 1.0 - base));
+        h = Math.max(6, Math.min(h, ceiling - 1.0 - base + 4));
         double y = base + h * 0.5;
+        String theme = themeOfDomain(domainId);
         RIFTS.removeIf(r -> !r.pass);
-        RIFTS.add(new Rift(themeOfDomain(domainId), now(0), new Vec3(cx, y, cz), h, h * 0.3, Math.max(30, declare), false));
+        RIFTS.add(new Rift(theme, now(0), new Vec3(cx, y, cz), h, h * 0.3, Math.max(30, declare), false));
+        // 宣言の終わりに、裂け目の向こうの空が部屋の壁と天井を覆っていく
+        DomainSkyFx.start(theme, cx, cz, floor, radius, Math.max(30, declare), new Vec3(cx, y, cz), now(0));
     }
 
     // 撮影: 場に好きな大きさの裂け目を置く
@@ -191,6 +195,7 @@ public final class RiftFx {
 
     public static void clear() {
         RIFTS.clear();
+        DomainSkyFx.clear();
     }
 
     @SubscribeEvent
@@ -286,6 +291,8 @@ public final class RiftFx {
         if (halfH < 0.02) {
             return;
         }
+        // 領域の裂け目は天井や壁に切られないよう奥行きを見ない (部屋は裂け目の空で覆われていく。DomainSkyFx)。渡る裂け目は見る
+        boolean depth = r.pass;
         // 縦に立ち、横はいつもカメラへ向く
         Vec3 rel = r.at.subtract(cam);
         Vec3 toCam = new Vec3(-rel.x, 0, -rel.z);
@@ -305,26 +312,27 @@ public final class RiftFx {
         // 1. 奥の闇 (通常の重ね)
         BufferBuilder b = LightDraw.begin();
         fan(b, m, rel, pts, null, 0, 0, 0, th.base, 0.97f * alpha);
-        LightDraw.endAlpha(b, LightDraw.BAND, true);
+        LightDraw.endAlpha(b, LightDraw.BAND, depth);
         // 2. 内側の空の層 (足し合わせ)
         for (Layer L : th.layers) {
             b = LightDraw.begin();
             double ou = t * L.du() + px * L.parallax() / 4.0;
             double ov = t * L.dv() - py * L.parallax() / 4.0;
             fan(b, m, rel, pts, o, L.scale() * 4.0, ou, ov, L.rgb(), L.alpha() * alpha * (L.tex() == LightDraw.CLOUD ? 1f : flick));
-            LightDraw.end(b, L.tex(), true);
+            LightDraw.end(b, L.tex(), depth);
         }
         // 雷翼: 内側の閃き
         if (th.flicker && flick > 1.15f) {
             b = LightDraw.begin();
             Vec3[] bolt = bolt(r, t, rel, right, up, halfW, halfH);
             LightDraw.ribbon(b, m, bolt, 0.35f, LightDraw.whiten(th.edge, 0.4f), 0.9f * alpha);
-            LightDraw.end(b, LightDraw.BAND, true);
+            LightDraw.end(b, LightDraw.BAND, depth);
         }
         // 3. 縁
         b = LightDraw.begin();
         Vec3[] loop = close(pts);
-        double scaleW = Math.max(0.6, Math.min(2.2, halfH * 0.12));
+        // 縁の太さは裂け目のもとの高さで決める (宣言の終わりに広がっても縁が太い光の輪にならないように)
+        double scaleW = Math.max(0.6, Math.min(2.2, Math.min(halfH, r.height * 0.5) * 0.12));
         LightDraw.ribbon(b, m, loop, (float) (1.5 * scaleW), th.glow, 0.55f * alpha * flick);
         LightDraw.ribbon(b, m, loop, (float) (0.42 * scaleW), LightDraw.whiten(th.edge, 0.35f), 0.95f * alpha * flick);
         LightDraw.ribbon(b, m, loop, (float) (0.12 * scaleW), 0xFFFFFF, 0.9f * alpha);
@@ -336,16 +344,16 @@ public final class RiftFx {
         }
         LightDraw.ribbon(b, m, inner, (float) (0.5 * scaleW), th.glow, 0.32f * alpha * flick);
         cracks(b, m, r, t, rel, right, up, halfW, halfH, scaleW, alpha);
-        LightDraw.end(b, LightDraw.BAND, true);
+        LightDraw.end(b, LightDraw.BAND, depth);
         b = LightDraw.begin();
         shards(b, m, r, t, rel, right, up, o, scaleW, alpha);
-        LightDraw.end(b, LightDraw.STREAK, true);
+        LightDraw.end(b, LightDraw.STREAK, depth);
         // 4. 上下の先の小さなにじみ (丸く見えないよう小さく薄く。縦に長い光にする)
         b = LightDraw.begin();
         var camObj = Minecraft.getInstance().gameRenderer.getMainCamera();
         LightDraw.sprite(b, m, camObj, rel.add(up.scale(halfH)), (float) (0.7 * scaleW), (float) (2.4 * scaleW), 0f, th.glow, 0.5f * alpha);
         LightDraw.sprite(b, m, camObj, rel.add(up.scale(-halfH)), (float) (0.7 * scaleW), (float) (2.4 * scaleW), 0f, th.glow, 0.5f * alpha);
-        LightDraw.end(b, LightDraw.SOFT, true);
+        LightDraw.end(b, LightDraw.SOFT, depth);
     }
 
     static float flicker(Rift r, double t) {

@@ -147,6 +147,11 @@ public final class DomainClient {
         return run != null;
     }
 
+    // 領域の空 (client/fx/DomainSkyFx) が見る: -1 = 領域なし、0 = 続いている、1 = 時間切れ、2 = 砕かれた
+    public static int state() {
+        return run == null ? -1 : run.ended;
+    }
+
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         run = null;
