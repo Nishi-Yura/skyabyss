@@ -1,0 +1,35 @@
+# 描き直した欄の絵と、手に持った模型の比べ
+world splaticons flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd tp @s 0 -60 8 180 0
+wait 20
+hud on
+cmd item replace entity @s hotbar.0 with skyabyss:cinder_lamp
+cmd item replace entity @s hotbar.1 with skyabyss:ember_horn
+cmd item replace entity @s hotbar.2 with skyabyss:moontide_pearl
+cmd item replace entity @s hotbar.3 with skyabyss:storm_charm
+cmd item replace entity @s hotbar.4 with skyabyss:wild_mimic_heart_charm
+cmd item replace entity @s hotbar.5 with skyabyss:tide_chime_charm
+cmd item replace entity @s hotbar.6 with skyabyss:pit_jaw_pendant
+cmd item replace entity @s hotbar.7 with skyabyss:resonance_charm
+cmd item replace entity @s hotbar.8 with skyabyss:wyrm_ember_scale
+wait 20
+open inventory
+wait 30
+shot inventory
+close
+cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
+wait 20
+shot hand_pearl
+quit
