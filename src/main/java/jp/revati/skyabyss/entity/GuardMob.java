@@ -87,6 +87,10 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
 
     // 攻撃などの動作アニメーションを流す (サーバー側で呼ぶ)
     public void playAction(String name) {
+        // 名前のない動作は流さない (null を送ると GeckoLib の通信が組めず、つないでいる人が切断される。2026-11-15 撮影で咆哮を命令で出したとき)
+        if (name == null) {
+            return;
+        }
         triggerAnim("action", name);
         if (!name.equals("hurt") && guardsAgainstHurt(name)) {
             lastActionTick = tickCount;

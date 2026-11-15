@@ -33,7 +33,7 @@ public abstract class MoonMob extends AbyssMobB {
     @Override
     public void playAction(String name) {
         super.playAction(name);
-        if (!level().isClientSide && !NOT_ATTACKS.contains(name)) {
+        if (name != null && !level().isClientSide && !NOT_ATTACKS.contains(name)) {
             jp.revati.skyabyss.fx.OrbitCuePayload.send(this, jp.revati.skyabyss.fx.OrbitCuePayload.TICKS);
         }
     }

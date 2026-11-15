@@ -699,6 +699,10 @@ public class HeartWarden extends Monster implements GeoEntity {
 
     // 動き: 歩きと待機は自動で切り替え、技と被弾・死は playAction でサーバーから流す (全員の画面に同期される)
     public void playAction(String name) {
+        // 名前のない動作は流さない (null を送ると通信が組めず、つないでいる人が切断される)
+        if (name == null) {
+            return;
+        }
         triggerAnim("action", name);
         // 技の動きが終わる tick (動きの長さ。claw 1.3・lunge 1.6・snuff 3.0・phase 2.0 秒、新しい技は Move.ticks)
         int len = switch (name) {
