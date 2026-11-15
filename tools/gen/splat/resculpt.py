@@ -215,7 +215,7 @@ def _bone_points(V, T, Bi, UV, bone, h, rng, hand, tex, glow, name, bones):
     return P[keep], n[keep], shaded[keep], lit[keep]
 
 
-def resculpt(name, preview=False, h_div=170.0, max_points=70000, hand=None):
+def resculpt(name, preview=False, h_div=170.0, max_points=70000, hand=None, out_name=None):
     """骨ごとに別の塊として彫る (部品が離れて動いても点が散らない)。骨の継ぎ目は GeckoLib の部品の重なりで埋まる"""
     t0 = time.time()
     m = load_mesh(name)
@@ -259,9 +259,9 @@ def resculpt(name, preview=False, h_div=170.0, max_points=70000, hand=None):
     allW = np.ones(len(allP))
     allF = np.concatenate([flags, np.full(len(gi), S.F_HALO)])
     allN = np.concatenate([n, np.zeros((len(gi), 3))])
-    out = ASSETS / "splat" / (name + ".bin")
+    out = ASSETS / "splat" / ((out_name or name) + ".bin")
     S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allA, allW, allF, N=allN)
-    print(f"{name}: {N} splats (+{len(gi)} halo) h={h:.2f} {len(parts)} parts {time.time() - t0:.1f}s")
+    print(f"{out_name or name}: {N} splats (+{len(gi)} halo) h={h:.2f} {len(parts)} parts {time.time() - t0:.1f}s")
     if preview:
         pv = S.ROOT / "docs/review/splat_bosses" / (name + ".png")
         pv.parent.mkdir(parents=True, exist_ok=True)
@@ -273,12 +273,28 @@ def resculpt(name, preview=False, h_div=170.0, max_points=70000, hand=None):
 HAND = {f"{t}_heart_p{p}": {"stone": 1.0, "flesh": 1.0, "pale": 1.0} for t in ("stone_whale", "tide", "storm", "ember") for p in (1, 2, 3)}
 
 
+# 巨神: 近い段のメッシュ (いちばん細かい) から、近・中・遠の 3 段の点の数で書く (骨は 3 段とも同じ)
+TITANS = ("stone_whale", "tide_shell", "thunder_wing", "ember_titan")
+TITAN_LODS = (("", 220000), ("_mid", 80000), ("_far", 30000))
+TITAN_HAND = {"stone": 1.0, "flesh": 1.0, "pale": 1.0}
+
+
+def titans(names, preview):
+    for t in names:
+        for suffix, pts in TITAN_LODS:
+            resculpt(t, preview and suffix == "", h_div=1e9, max_points=pts, hand=TITAN_HAND, out_name=t + suffix)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("names", nargs="*")
     ap.add_argument("--bosses", action="store_true")
+    ap.add_argument("--titans", nargs="*", help="巨神 (名前を省くと 4 体とも)")
     ap.add_argument("--preview", action="store_true")
     a = ap.parse_args()
+    if a.titans is not None:
+        titans(a.titans or TITANS, a.preview)
+        return
     names = BOSSES if a.bosses else a.names
     for nm in names:
         if not (ASSETS / "lowpoly" / (nm + ".json")).exists():
