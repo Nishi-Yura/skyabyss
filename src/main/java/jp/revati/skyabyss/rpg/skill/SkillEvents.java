@@ -157,7 +157,7 @@ public final class SkillEvents {
                 arrow.setBaseDamage(arrow.getBaseDamage() * (1 + SkillRules.STILL_BONUS));
                 d.stillTicks = 0;
                 if (shooter.level() instanceof ServerLevel level) {
-                    level.sendParticles(ParticleTypes.END_ROD, shooter.getX(), shooter.getEyeY(), shooter.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), shooter.getX(), shooter.getEyeY(), shooter.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
                 }
             }
         }
@@ -312,7 +312,7 @@ public final class SkillEvents {
                 amount *= (float) (1 + SkillRules.riposteBonus(d.rank(Skill.RIPOSTE)));
                 d.riposteUntil = 0;
                 if (victim.level() instanceof ServerLevel level) {
-                    level.sendParticles(Skills.RUNE_SPARK.get(), victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(),
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(),
                             10, 0.3, 0.3, 0.3, 0.06);
                     level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), Skills.SOUND_RIPOSTE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
                 }
@@ -418,7 +418,7 @@ public final class SkillEvents {
                     SkillActions.hitPlain(attackerPlayer, victim, extra, Skill.TEMPER);
                     victim.setRemainingFireTicks(Math.max(victim.getRemainingFireTicks(), SkillRules.TEMPER_BURN_TICKS));
                     if (victim.level() instanceof ServerLevel level) {
-                        level.sendParticles(ParticleTypes.FLAME, victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), 6, 0.25, 0.25, 0.25, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), 6, 0.25, 0.25, 0.25, 0.02);
                     }
                 }
             }
@@ -439,7 +439,7 @@ public final class SkillEvents {
                 Vec3 b = next.position().add(0, next.getBbHeight() * 0.6, 0);
                 for (int i = 0; i <= 8; i++) {
                     Vec3 p = a.lerp(b, i / 8.0);
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
                 }
             }
         }

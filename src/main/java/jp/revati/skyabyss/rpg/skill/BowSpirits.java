@@ -84,7 +84,7 @@ public final class BowSpirits {
                 // 一体目はすぐ、あとは少しずつずらして射る
                 f.spirits.add(new Spirit(p, i, n, now + 6 + i * (SkillRules.SPIRIT_SHOT_GAP / Math.max(1, n))));
                 Vec3 at = p.position();
-                level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.03);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.03);
             }
         }
         FLOCKS.put(player.getUUID(), f);
@@ -117,7 +117,7 @@ public final class BowSpirits {
             if (owner == null || !owner.isAlive() || owner.level() != f.level || now >= f.until) {
                 for (Spirit s : f.spirits) {
                     Vec3 at = s.prop.position();
-                    f.level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 5, 0.15, 0.15, 0.15, 0.02);
+                    f.level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 5, 0.15, 0.15, 0.15, 0.02);
                     s.prop.discard();
                 }
                 it.remove();
@@ -149,7 +149,7 @@ public final class BowSpirits {
         SkillEffects.later(level, flight, () -> {
             if (target.isAlive() && owner.isAlive() && target.level() == level) {
                 SkillActions.hit(owner, target, dmg, Skill.BOW_SPIRIT);
-                level.sendParticles(ParticleTypes.CRIT, to.x, to.y, to.z, 5, 0.15, 0.15, 0.15, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), to.x, to.y, to.z, 5, 0.15, 0.15, 0.15, 0.1);
             }
         });
     }

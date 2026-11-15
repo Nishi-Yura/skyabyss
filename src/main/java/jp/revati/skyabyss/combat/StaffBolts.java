@@ -341,7 +341,7 @@ public final class StaffBolts {
     static void castFx(ServerLevel level, Vec3 at, Vec3 dir, Look look, int shot) {
         // 杖の先に小さな光の輪と火花 (大きな光の粒は目の前で画面を覆うので使わない)
         ring(level, at, dir, 0.22, 8, look.ring(), shot * 15);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.06, 0.06, 0.06, 0.03);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 3, 0.06, 0.06, 0.06, 0.03);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.55f, PITCH[shot] + 0.2f);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, PITCH[shot]);
     }
@@ -356,59 +356,59 @@ public final class StaffBolts {
                 for (int k = 0; k < 2; k++) {
                     double t = a + k * Math.PI;
                     Vec3 q = c.add(axes[0].scale(Math.cos(t) * 0.17)).add(axes[1].scale(Math.sin(t) * 0.17));
-                    level.sendParticles(k == 0 ? look.core() : look.halo(), q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                 }
             }
             case 2 -> {
                 // 彗星: 大きな芯と、後ろへ長く引く尾
-                level.sendParticles(look.core(), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0, 0, 0, 0);
                 for (int k = 1; k <= 4; k++) {
                     Vec3 q = c.subtract(dir.scale(0.22 * k));
-                    level.sendParticles(k <= 2 ? look.halo() : look.tail(), q.x, q.y, q.z, 1, 0.02 * k, 0.02 * k, 0.02 * k, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.02 * k, 0.02 * k, 0.02 * k, 0);
                 }
             }
             case 3 -> {
                 // 三日月: 160 度の弧がゆっくり回る
-                level.sendParticles(look.halo(), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0, 0, 0, 0);
                 double base = Math.toRadians(beat * 12);
                 for (int k = 0; k < 6; k++) {
                     double t = base + Math.toRadians(-80 + k * 32);
                     double r = 0.26 - Math.abs(k - 2.5) * 0.015;
                     Vec3 q = c.add(axes[0].scale(Math.cos(t) * r)).add(axes[1].scale(Math.sin(t) * r));
-                    level.sendParticles(look.core(), q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                 }
             }
             case 4 -> {
                 // 星座: 芯と三つの衛星、芯から衛星へ細い線
-                level.sendParticles(look.core(), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0, 0, 0, 0);
                 double base = Math.toRadians(beat * 25);
                 for (int k = 0; k < 3; k++) {
                     double t = base + k * Math.PI * 2 / 3;
                     Vec3 d = axes[0].scale(Math.cos(t)).add(axes[1].scale(Math.sin(t)));
                     Vec3 q = c.add(d.scale(0.34));
-                    level.sendParticles(look.halo(), q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                     if (beat % 2 == 0) {
                         Vec3 m = c.add(d.scale(0.17));
-                        level.sendParticles(look.tail(), m.x, m.y, m.z, 1, 0, 0, 0, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.x, m.y, m.z, 1, 0, 0, 0, 0);
                     }
                 }
             }
             default -> {
                 // 星の粒: 粉の光の芯と回る輪 (四つの点。歩みごとに 37 度ずつ回る)
-                level.sendParticles(look.core(), c.x, c.y, c.z, 1, 0, 0, 0, 0);
-                level.sendParticles(look.halo(), to.x, to.y, to.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), to.x, to.y, to.z, 1, 0, 0, 0, 0);
                 ring(level, c, dir, 0.18, 4, look.ring(), beat * 37);
             }
         }
         // 少し離れてから、光の粒を一つ足す
         if (beat >= 3) {
-            level.sendParticles(ParticleTypes.END_ROD, c.x, c.y, c.z, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0, 0, 0, 0);
         }
         // 尾の粉 (後ろへ少しこぼれる)
         Vec3 back = from.subtract(dir.scale(0.25));
-        level.sendParticles(look.tail(), back.x, back.y, back.z, 2, 0.05, 0.05, 0.05, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), back.x, back.y, back.z, 2, 0.05, 0.05, 0.05, 0);
         if (beat % 3 == 0) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, back.x, back.y, back.z, 1, 0.04, 0.04, 0.04, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), back.x, back.y, back.z, 1, 0.04, 0.04, 0.04, 0.02);
         }
     }
 
@@ -423,9 +423,9 @@ public final class StaffBolts {
                     Vec3 d = axes[0].scale(Math.cos(a)).add(axes[1].scale(Math.sin(a)));
                     for (int j = 1; j <= 4; j++) {
                         Vec3 q = at.add(d.scale(0.15 * j));
-                        level.sendParticles(j == 4 ? look.tail() : look.ring(), q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                     }
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 0, d.x, d.y, d.z, 0.4);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 0, d.x, d.y, d.z, 0.4);
                 }
             }
             case 2 -> {
@@ -435,10 +435,10 @@ public final class StaffBolts {
                         double a = Math.toRadians(arm * 180 + j * 38);
                         double r = 0.08 + j * 0.07;
                         Vec3 q = at.add(axes[0].scale(Math.cos(a) * r)).add(axes[1].scale(Math.sin(a) * r));
-                        level.sendParticles(j >= 5 ? look.tail() : look.ring(), q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                     }
                 }
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.15);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.15);
             }
             default -> {
                 // 六芒の星: 弾の向きに垂直な面の六方向へ火花が散る
@@ -447,29 +447,29 @@ public final class StaffBolts {
                     Vec3 d = axes[0].scale(Math.cos(a)).add(axes[1].scale(Math.sin(a)));
                     for (int j = 1; j <= 3; j++) {
                         Vec3 q = at.add(d.scale(0.16 * j));
-                        level.sendParticles(j == 3 ? look.tail() : look.ring(), q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                     }
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 0, d.x, d.y, d.z, 0.35);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 0, d.x, d.y, d.z, 0.35);
                 }
             }
         }
-        level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 1, 0, 0, 0, 0);
         ring(level, at, dir, 0.4, 12, look.ring(), shot * 15);
         // 星座の段は、外にもう一つ大きな輪
         if (tier >= 4) {
             ring(level, at, dir, 0.62, 16, look.halo(), 0);
         }
-        level.sendParticles(ParticleTypes.ENCHANTED_HIT, at.x, at.y, at.z, 6, 0.15, 0.15, 0.15, 0.12);
-        level.sendParticles(look.tail(), at.x, at.y, at.z, 8, 0.25, 0.25, 0.25, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 6, 0.15, 0.15, 0.15, 0.12);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 8, 0.25, 0.25, 0.25, 0);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 0.8f, PITCH[shot] - 0.05f);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 2.0f);
     }
 
     static void fizzleFx(ServerLevel level, Vec3 at, boolean wall, Look look) {
-        level.sendParticles(look.halo(), at.x, at.y, at.z, 5, 0.12, 0.12, 0.12, 0);
-        level.sendParticles(look.ring(), at.x, at.y, at.z, 3, 0.08, 0.08, 0.08, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 5, 0.12, 0.12, 0.12, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 3, 0.08, 0.08, 0.08, 0);
         if (wall) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.1);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.1);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_STEP, SoundSource.PLAYERS, 0.6f, 1.6f);
         }
     }
@@ -480,7 +480,7 @@ public final class StaffBolts {
         for (int k = 0; k < n; k++) {
             double a = Math.toRadians(phase + k * 360.0 / n);
             Vec3 p = c.add(axes[0].scale(Math.cos(a) * r)).add(axes[1].scale(Math.sin(a) * r));
-            level.sendParticles(dust, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
         }
     }
 

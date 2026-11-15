@@ -125,7 +125,7 @@ public final class KeystoneEffects {
         if (direct == attacker && MeleeHits.fullHit(attacker) && has(attacker, SkillKeystone.GLASS_BLADE) && BreakGauge.behind(victim, attacker)) {
             m *= GLASS_BACK;
             if (victim.level() instanceof ServerLevel level) {
-                level.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), 8, 0.2, 0.2, 0.2, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), 8, 0.2, 0.2, 0.2, 0.2);
             }
         }
         // 孤高の弦: 頭への矢
@@ -150,7 +150,7 @@ public final class KeystoneEffects {
         if (hex > 0 && !(victim instanceof Player)) {
             HEX.put(victim.getUUID(), new Hex(victim.level().getGameTime() + HEX_TICKS, hex));
             if (victim.level() instanceof ServerLevel level) {
-                level.sendParticles(ParticleTypes.WITCH, victim.getX(), victim.getY() + victim.getBbHeight() + 0.2, victim.getZ(), 4, 0.2, 0.1, 0.2, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), victim.getX(), victim.getY() + victim.getBbHeight() + 0.2, victim.getZ(), 4, 0.2, 0.1, 0.2, 0.01);
             }
         }
     }
@@ -169,7 +169,7 @@ public final class KeystoneEffects {
             return;
         }
         float dmg = (float) Math.min(SUN_CAP, dead.getMaxHealth() * share);
-        level.sendParticles(ParticleTypes.FLAME, dead.getX(), dead.getY() + dead.getBbHeight() * 0.5, dead.getZ(), 24, SUN_RANGE * 0.3, 0.3, SUN_RANGE * 0.3, 0.08);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), dead.getX(), dead.getY() + dead.getBbHeight() * 0.5, dead.getZ(), 24, SUN_RANGE * 0.3, 0.3, SUN_RANGE * 0.3, 0.08);
         level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.7f, 1.3f);
         bursting = true;
         try {
@@ -195,7 +195,7 @@ public final class KeystoneEffects {
                 LivingEntity target = near.get(level.random.nextInt(near.size()));
                 float dmg = (float) (storm * (STORM_BASE + STORM_PER_LEVEL * Growth.get(player).level));
                 target.hurt(level.damageSources().indirectMagic(player, player), dmg);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 30, 0.2, 1.5, 0.2, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 24, 0.2, 1.5, 0.2, 0.05);
                 level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, 1.4f);
             }
         }

@@ -320,7 +320,7 @@ public final class HexMarks {
 
     static void castFx(ServerLevel level, ServerPlayer p, Vec3 at, int tier, int shot) {
         Vec3 hand = p.getEyePosition().add(p.getViewVector(1f).scale(0.9)).add(0, -0.35, 0);
-        level.sendParticles(PALE, hand.x, hand.y, hand.z, 4, 0.08, 0.08, 0.08, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), hand.x, hand.y, hand.z, 4, 0.08, 0.08, 0.08, 0);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.35f, PITCH[shot]);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 0.5f, 1.6f);
         markFx(level, at, 0, tier);
@@ -359,10 +359,10 @@ public final class HexMarks {
                     for (int j = 0; j < 5; j++) {
                         double a = spin + arm * Math.PI * 2 / 3 + j * 0.45;
                         double rr = r * (0.85 - j * 0.16);
-                        level.sendParticles(look.line(), at.x + Math.cos(a) * rr, y, at.z + Math.sin(a) * rr, 1, 0, 0, 0, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + Math.cos(a) * rr, y, at.z + Math.sin(a) * rr, 1, 0, 0, 0, 0);
                     }
                 }
-                level.sendParticles(look.burst(), at.x, y + 0.05, at.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, y + 0.05, at.z, 1, 0, 0, 0, 0);
             }
             default -> {
                 // 三角の印 (回る)
@@ -370,7 +370,7 @@ public final class HexMarks {
             }
         }
         if (age == DELAY - 2) {
-            level.sendParticles(ParticleTypes.WITCH, at.x, y + 0.2, at.z, 6, r * 0.4, 0.05, r * 0.4, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, y + 0.2, at.z, 6, r * 0.4, 0.05, r * 0.4, 0);
         }
     }
 
@@ -385,7 +385,7 @@ public final class HexMarks {
                 }
                 for (int k = 0; k < 8; k++) {
                     double a = Math.toRadians(k * 45);
-                    level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x, at.y + 0.15, at.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.18);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.15, at.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.18);
                 }
                 level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
             }
@@ -396,9 +396,9 @@ public final class HexMarks {
                     double x = at.x + Math.cos(a) * RADIUS * 0.6;
                     double z = at.z + Math.sin(a) * RADIUS * 0.6;
                     for (int j = 0; j < 4; j++) {
-                        level.sendParticles(j == 3 ? look.ring() : look.burst(), x, at.y + 0.2 + j * 0.3, z, 1, 0.03, 0, 0.03, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, at.y + 0.2 + j * 0.3, z, 1, 0.03, 0, 0.03, 0);
                     }
-                    level.sendParticles(ParticleTypes.CRIT, x, at.y + 0.3, z, 2, 0.05, 0.3, 0.05, 0.05);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, at.y + 0.3, z, 2, 0.05, 0.3, 0.05, 0.05);
                 }
                 level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 0.8f, 0.95f);
             }
@@ -407,16 +407,16 @@ public final class HexMarks {
                 for (int k = 0; k < 10; k++) {
                     double a = Math.toRadians(k * 36);
                     double rr = RADIUS * 0.55;
-                    level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x + Math.cos(a) * rr, at.y + 0.1, at.z + Math.sin(a) * rr, 0, 0, 1, 0, 0.12);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + Math.cos(a) * rr, at.y + 0.1, at.z + Math.sin(a) * rr, 0, 0, 1, 0, 0.12);
                 }
                 for (int j = 0; j < 6; j++) {
-                    level.sendParticles(look.burst(), at.x, at.y + 0.3 + j * 0.4, at.z, 3, 0.25, 0.1, 0.25, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.3 + j * 0.4, at.z, 3, 0.25, 0.1, 0.25, 0);
                 }
                 level.playSound(null, at.x, at.y, at.z, SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 0.7f, 1.25f);
             }
         }
-        level.sendParticles(look.ring(), at.x, at.y + 0.2, at.z, 14, RADIUS * 0.5, 0.1, RADIUS * 0.5, 0);
-        level.sendParticles(ParticleTypes.SCULK_SOUL, at.x, at.y + 0.4, at.z, 3, 0.3, 0.2, 0.3, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.2, at.z, 14, RADIUS * 0.5, 0.1, RADIUS * 0.5, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y + 0.4, at.z, 3, 0.3, 0.2, 0.3, 0.02);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.35f, PITCH[shot] - 1.1f);
     }
 
@@ -424,7 +424,7 @@ public final class HexMarks {
     static void circle(ServerLevel level, double cx, double y, double cz, double r, int n, DustParticleOptions dust, double phase) {
         for (int k = 0; k < n; k++) {
             double a = Math.toRadians(phase + k * 360.0 / n);
-            level.sendParticles(dust, cx + Math.cos(a) * r, y, cz + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * r, y, cz + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
     }
 
@@ -437,7 +437,7 @@ public final class HexMarks {
                 double t = j / 3.0;
                 double x = Math.cos(a0) * r * (1 - t) + Math.cos(a1) * r * t;
                 double z = Math.sin(a0) * r * (1 - t) + Math.sin(a1) * r * t;
-                level.sendParticles(dust, at.x + x, y, at.z + z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + x, y, at.z + z, 1, 0, 0, 0, 0);
             }
         }
     }

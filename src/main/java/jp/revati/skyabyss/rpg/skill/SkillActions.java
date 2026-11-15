@@ -308,13 +308,13 @@ public final class SkillActions {
     }
 
     static void particle(ServerLevel level, ParticleOptions p, Vec3 at, int count, double spread, double speed) {
-        level.sendParticles(p, at.x, at.y, at.z, count, spread, spread, spread, speed);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, count, spread, spread, spread, speed);
     }
 
     static void ring(ServerLevel level, ParticleOptions p, Vec3 center, double radius, int n, double lift) {
         for (int i = 0; i < n; i++) {
             double a = Math.PI * 2 * i / n;
-            level.sendParticles(p, center.x + Math.cos(a) * radius, center.y + lift, center.z + Math.sin(a) * radius, 1, 0.03, 0.03, 0.03, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x + Math.cos(a) * radius, center.y + lift, center.z + Math.sin(a) * radius, 1, 0.03, 0.03, 0.03, 0.0);
         }
     }
 
@@ -385,7 +385,7 @@ public final class SkillActions {
                 double t = 0.8 + i * 0.5;
                 for (int s = -1; s <= 1; s += 2) {
                     Vec3 p = origin.add(dir.scale(t)).add(side.scale(s * 0.6));
-                    level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y + 0.2, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.2, p.z, 1, 0.05, 0.05, 0.05, 0.0);
                 }
             }
         }
@@ -416,14 +416,11 @@ public final class SkillActions {
                     break;
                 }
                 float amount = base * (float) jp.revati.skyabyss.abyss.Abyss.ECHO_SCALE * (isLarge(e) ? (float) SkillRules.CLEAVE_LARGE_BONUS : 1f);
-                if (hit(player, e, amount, Skill.TITAN_CLEAVE)) {
-                    // 当たりの火花はクライアントの FX が描く (サーバーの紫の粒は出さない)
-                }
             }
             // 裂け目の筋 (扇の中心線)
             for (int i = 0; i <= 12; i++) {
                 Vec3 p = origin.add(dir.scale(0.8 + i * 0.35)).add(0, 0.3, 0);
-                level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y, p.z, 2, 0.05, 0.1, 0.05, 0.04);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 2, 0.05, 0.1, 0.05, 0.04);
             }
             level.playSound(null, origin.x, origin.y, origin.z, net.minecraft.sounds.SoundEvents.WARDEN_SONIC_BOOM, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.4f);
         });
@@ -552,7 +549,7 @@ public final class SkillActions {
                         hit(player, e, attackDamage(player) * (float) SkillRules.BONE_SCALE, Skill.LUNGE);
                     }
                 }
-                ring(level, new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState()),
+                ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         reached, SkillRules.BONE_RADIUS * 0.6, 14, 0.2);
             }
         }
@@ -677,10 +674,10 @@ public final class SkillActions {
                 int steps = (int) Math.ceil(origin.distanceTo(land) / 0.5);
                 for (int i = 0; i <= steps; i++) {
                     Vec3 p = origin.lerp(land, i / (double) Math.max(1, steps)).add(0, 0.6, 0);
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 2, 0.1, 0.2, 0.1, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 2, 0.1, 0.2, 0.1, 0.02);
                 }
-                ring(level, ParticleTypes.ELECTRIC_SPARK, origin, 1.0, 12, 0.3);
-                ring(level, ParticleTypes.ELECTRIC_SPARK, land, 1.0, 12, 0.3);
+                ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), origin, 1.0, 12, 0.3);
+                ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), land, 1.0, 12, 0.3);
             });
         } else if (rune == 1) {
             SkillManager.get(player).returnFireUntil = level.getGameTime() + SkillRules.RETURN_FIRE_TICKS;
@@ -768,7 +765,7 @@ public final class SkillActions {
     private static void slash(ServerLevel level, ServerPlayer player, LivingEntity foe, boolean back) {
         // 斬りの筋はクライアントの SkillFx が描く。ここは当たりの小さな火花だけ (背後なら印の色)
         Vec3 c = foe.position().add(0, foe.getBbHeight() * 0.6, 0);
-        level.sendParticles(back ? Skills.RUNE_SPARK.get() : Skills.SKY_MOTE.get(), c.x, c.y, c.z, 1, 0.1, 0.1, 0.1, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0.1, 0.1, 0.1, 0.02);
     }
 
     // ---------------------------------------------------------------- 潮歌い
@@ -804,8 +801,8 @@ public final class SkillActions {
                     if (left > 0f) {
                         pool += left;
                         t.heal(left);
-                        level.sendParticles(ParticleTypes.HEART, t.getX(), t.getY() + 1.9, t.getZ(), 2, 0.3, 0.2, 0.3, 0.0);
-                        level.sendParticles(jp.revati.skyabyss.abyss.AbyssFx.DUST, t.getX(), t.getY() + 1.0, t.getZ(), 6, 0.4, 0.5, 0.4, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), t.getX(), t.getY() + 1.9, t.getZ(), 2, 0.3, 0.2, 0.3, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), t.getX(), t.getY() + 1.0, t.getZ(), 6, 0.4, 0.5, 0.4, 0.0);
                     }
                 }
             }
@@ -872,7 +869,7 @@ public final class SkillActions {
                 e.hurtMarked = true;
             }
             SkillEffects.slow(e, 0.30, slowTicks);
-            level.sendParticles(Skills.SKY_MOTE.get(), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 1, 0.15, 0.15, 0.15, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 1, 0.15, 0.15, 0.15, 0.02);
         }
         if (rune == 2) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin.add(dir.scale(1.5)), SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
@@ -913,12 +910,12 @@ public final class SkillActions {
                     double len = Math.max(0.3, to.length());
                     e.setDeltaMovement(to.scale(Mth.clamp(len * 0.2, 0.2, 0.7) / len).add(0, 0.1, 0));
                     e.hurtMarked = true;
-                    level.sendParticles(Skills.SKY_MOTE.get(), e.getX(), e.getY() + 0.8, e.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + 0.8, e.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
                 }
             }
             tieStep(player, level, tied, now, steps - 1);
         });
-        level.sendParticles(Skills.SKY_MOTE.get(), tied.getX(), tied.getY() + tied.getBbHeight() * 0.6, tied.getZ(), 4, 0.25, 0.25, 0.25, 0.0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), tied.getX(), tied.getY() + tied.getBbHeight() * 0.6, tied.getZ(), 4, 0.25, 0.25, 0.25, 0.0);
     }
 
     // 巡りの唄: 近くの仲間のマナの回復を数秒、速める (自分は半分)
@@ -1064,7 +1061,7 @@ public final class SkillActions {
         ServerLevel level = player.serverLevel();
         for (LivingEntity e : foes) {
             SkillEffects.ashFall(e, SkillRules.ashScatterTicks(rank));
-            level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
         }
         if (rune(player, Skill.ASH_SCATTER) == 4) {
             abyssCreepingAsh(player, level, rank);
@@ -1091,8 +1088,8 @@ public final class SkillActions {
                     for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, from.getBoundingBox().inflate(jp.revati.skyabyss.abyss.Abyss.ASH_RADIUS, 2, jp.revati.skyabyss.abyss.Abyss.ASH_RADIUS),
                             f -> isFoe(player, f) && !SkillEffects.ashed(f))) {
                         SkillEffects.ashFall(e, SkillRules.ashScatterTicks(rank));
-                        level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 14, 0.35, 0.4, 0.35, 0.02);
-                        level.sendParticles(jp.revati.skyabyss.abyss.AbyssFx.DUST, e.getX(), e.getY() + 0.5, e.getZ(), 6, 0.3, 0.3, 0.3, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 14, 0.35, 0.4, 0.35, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + 0.5, e.getZ(), 6, 0.3, 0.3, 0.3, 0.0);
                     }
                 }
             });
@@ -1249,7 +1246,7 @@ public final class SkillActions {
             boolean stuck = age > 2 && a.position().distanceToSqr(a.xo, a.yo, a.zo) < 1e-4;
             if (age > t.lifetime() || stuck) {
                 if (a.level() instanceof ServerLevel l) {
-                    l.sendParticles(Skills.SKY_MOTE.get(), a.getX(), a.getY(), a.getZ(), 6, 0.15, 0.15, 0.15, 0.02);
+                    l.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.getX(), a.getY(), a.getZ(), 6, 0.15, 0.15, 0.15, 0.02);
                 }
                 abyssSkyFall(a);
                 a.discard();
@@ -1257,7 +1254,7 @@ public final class SkillActions {
                 continue;
             }
             if (a.level() instanceof ServerLevel l) {
-                l.sendParticles(Skills.SKY_MOTE.get(), a.getX(), a.getY(), a.getZ(), 1, 0.02, 0.02, 0.02, 0.0);
+                l.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.getX(), a.getY(), a.getZ(), 1, 0.02, 0.02, 0.02, 0.0);
             }
         }
         for (Iterator<Rain> it = RAINS.iterator(); it.hasNext();) {
@@ -1276,7 +1273,7 @@ public final class SkillActions {
                     double dz = e.getZ() - r.center.z;
                     if (dx * dx + dz * dz <= r.radius * r.radius + e.getBbWidth()) {
                         if (hit(caster, e, (float) r.damage, Skill.SKY_RAIN)) {
-                            r.level.sendParticles(Skills.RUNE_SPARK.get(), e.getX(), e.getY() + e.getBbHeight() * 0.7, e.getZ(), 1, 0.2, 0.2, 0.2, 0.05);
+                            r.level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.7, e.getZ(), 1, 0.2, 0.2, 0.2, 0.05);
                         }
                     }
                 }
@@ -1306,9 +1303,9 @@ public final class SkillActions {
                 }
             }
             for (int k = 0; k < 16; k++) {
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + k * 0.4, at.z, 3, 0.15, 0.05, 0.15, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + k * 0.4, at.z, 3, 0.15, 0.05, 0.15, 0.02);
             }
-            level.sendParticles(jp.revati.skyabyss.abyss.AbyssFx.DUST, at.x, at.y + 0.3, at.z, 14, 0.8, 0.3, 0.8, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.3, at.z, 14, 0.8, 0.3, 0.8, 0.0);
             level.playSound(null, at.x, at.y, at.z, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.5f);
         });
     }

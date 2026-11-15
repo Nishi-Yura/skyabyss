@@ -476,7 +476,7 @@ public final class Gauges {
                     } finally {
                         busy = false;
                     }
-                    burst(player.serverLevel(), target, ParticleTypes.WITCH, 20);
+                    burst(player.serverLevel(), target, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 20);
                     prop(player.serverLevel(), player, "gx_shadow", target.position(), Math.max(0.7f, target.getBbWidth() * 0.9f), 14);
                     player.serverLevel().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.4f);
                 }
@@ -524,7 +524,7 @@ public final class Gauges {
             } finally {
                 busy = false;
             }
-            burst(player.serverLevel(), target, ParticleTypes.SOUL_FIRE_FLAME, 24);
+            burst(player.serverLevel(), target, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 24);
             prop(player.serverLevel(), player, "gx_curse", target.position(), Math.max(0.7f, target.getBbWidth() * 0.9f), 16);
             player.serverLevel().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 0.9f, 0.8f);
             // まわりの一体へ印が一つ移る
@@ -588,7 +588,7 @@ public final class Gauges {
                 d.temperUntil = now + SkillRules.TEMPER_TICKS;
                 s.boostUntil = now + TEMPER_BOOST;
                 set(player, 0);
-                burst(player.serverLevel(), player, ParticleTypes.FLAME, 30);
+                burst(player.serverLevel(), player, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 30);
                 prop(player.serverLevel(), player, "gx_temper", ahead(player, 1.2), 1.0f, 16);
                 player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.7f, 1.4f);
             }
@@ -731,9 +731,9 @@ public final class Gauges {
             busy = false;
         }
         for (double r = 1; r <= SMASH_RADIUS; r += 1) {
-            SkillActions.ring(level, ParticleTypes.CAMPFIRE_COSY_SMOKE, player.position(), r, (int) (r * 8), 0.1);
+            SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.position(), r, (int) (r * 8), 0.1);
         }
-        level.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.6, 0.1, 0.6, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.6, 0.1, 0.6, 0);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0f, 0.5f);
         prop(level, player, "gx_smash", player.position(), (float) (SMASH_RADIUS * 0.6), 16);
     }
@@ -749,9 +749,9 @@ public final class Gauges {
             for (int i = 1; i <= 3; i++) {
                 Vec3 c = player.position().add(dir.scale(i * 2.0));
                 for (int y = 0; y < 5; y++) {
-                    level.sendParticles(ParticleTypes.FLAME, c.x, c.y + y * 0.6, c.z, 6, 0.3, 0.2, 0.3, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + y * 0.6, c.z, 6, 0.3, 0.2, 0.3, 0.02);
                 }
-                level.sendParticles(ParticleTypes.LAVA, c.x, c.y + 0.3, c.z, 3, 0.3, 0.1, 0.3, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.3, c.z, 3, 0.3, 0.1, 0.3, 0);
                 jp.revati.skyabyss.combat.prop.AttackProps.riseLater(level, "gx_forge", player, c, level.random.nextFloat() * 360f, 1.0f, 16, (i - 1) * 2);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(c, c).inflate(1.8, 2.5, 1.8),
                         e -> SkillActions.isFoe(player, e))) {
@@ -776,7 +776,7 @@ public final class Gauges {
             for (LivingEntity e : SkillActions.foesAround(player, SkillRules.SPARK_RADIUS + 1, 1.0, 2.0)) {
                 if (SkillEffects.ashed(e)) {
                     SkillActions.hit(player, e, amount, Skill.SPARK_BURST);
-                    burst(player.serverLevel(), e, ParticleTypes.FLAME, 14);
+                    burst(player.serverLevel(), e, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 14);
                     prop(player.serverLevel(), player, "gx_ash", e.position(), Math.max(0.7f, e.getBbWidth() * 0.9f), 12);
                 }
             }
@@ -802,7 +802,7 @@ public final class Gauges {
                 Vec3 b = e.position().add(0, e.getBbHeight() * 0.6, 0);
                 for (int k = 0; k <= 8; k++) {
                     Vec3 p = a.lerp(b, k / 8.0);
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
                 }
                 prop(level, player, "gx_thunder", e.position(), 0.7f, 10);
                 SkillActions.hit(player, e, amount, Skill.THUNDER_BOLT);
@@ -825,7 +825,7 @@ public final class Gauges {
         } else {
             SkillEffects.bind(target, FREEZE_TICKS);
         }
-        burst(player.serverLevel(), target, ParticleTypes.SNOWFLAKE, 20);
+        burst(player.serverLevel(), target, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 20);
         prop(player.serverLevel(), player, "gx_freeze", target.position(), Math.max(0.6f, target.getBbWidth() * 0.8f), (int) Math.min(60, FREEZE_TICKS));
         player.serverLevel().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 0.8f, 1.6f);
     }
@@ -848,7 +848,7 @@ public final class Gauges {
                 if (now % 20 == 0) {
                     for (int k = 0; k <= 10; k++) {
                         Vec3 p = a.lerp(b, k / 10.0);
-                        level.sendParticles(ParticleTypes.WHITE_ASH, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
                     }
                 }
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(a, b).inflate(1.0),
@@ -872,7 +872,7 @@ public final class Gauges {
                     continue;
                 }
                 z.spent = true;
-                level.sendParticles(ParticleTypes.EXPLOSION, z.center.x, z.center.y + 0.3, z.center.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), z.center.x, z.center.y + 0.3, z.center.z, 1, 0, 0, 0, 0);
                 prop(level, player, "gx_trap", z.center, 1.2f, 12);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(z.center, z.center).inflate(2.5, 1.5, 2.5),
                         e -> SkillActions.isFoe(player, e))) {
@@ -900,7 +900,7 @@ public final class Gauges {
                 Vec3 at = foes.isEmpty() ? center.add((level.random.nextDouble() - 0.5) * r * 2, 0, (level.random.nextDouble() - 0.5) * r * 2)
                         : foes.get(level.random.nextInt(foes.size())).position();
                 for (int k = 0; k < 6; k++) {
-                    level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 6 - k, at.z, 1, 0.02, 0.1, 0.02, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 6 - k, at.z, 1, 0.02, 0.1, 0.02, 0);
                 }
                 jp.revati.skyabyss.combat.prop.AttackProps.fall(level, "ss_sky_rain_fall", player, at, 2, 2, 5f, 0.8f, 8);
                 if (!foes.isEmpty()) {
@@ -939,8 +939,8 @@ public final class Gauges {
             busy = false;
         }
         for (double r = 1.5; r <= TIDE_WAVE_RADIUS; r += 1.5) {
-            SkillActions.ring(level, ParticleTypes.SPLASH, player.position(), r, (int) (r * 10), 0.2);
-            SkillActions.ring(level, ParticleTypes.BUBBLE_POP, player.position(), r, (int) (r * 6), 0.5);
+            SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.position(), r, (int) (r * 10), 0.2);
+            SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.position(), r, (int) (r * 6), 0.5);
         }
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.2f, 0.6f);
         // 満ち潮の形: 四方へ外向きに砕ける大波
@@ -986,7 +986,7 @@ public final class Gauges {
 
     // ---------------------------------------------------------------- 小物
     private static void burst(ServerLevel level, LivingEntity e, net.minecraft.core.particles.ParticleOptions p, int n) {
-        level.sendParticles(p, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), n, 0.35, 0.4, 0.35, 0.03);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), n, 0.35, 0.4, 0.35, 0.03);
     }
 
     private static double segmentDistance(Vec3 p, Vec3 a, Vec3 b) {

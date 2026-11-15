@@ -354,21 +354,21 @@ public final class SecretArts {
                 for (LivingEntity e : LegendRewrites.cone(p, p.position(), f, 4.0, 60)) {
                     hit(p, e, weapon(p) * 0.4 * k, s);
                 }
-                LegendRewrites.ring(level, p.position().add(f.scale(2)), 1.5, ParticleTypes.SWEEP_ATTACK, 3);
+                LegendRewrites.ring(level, p.position().add(f.scale(2)), 1.5, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 3);
             });
             case QUAKE_CALL -> {
                 Vec3 c = LegendRewrites.aimPoint(p, 8);
                 for (LivingEntity e : LegendRewrites.around(p, c, 4)) {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * (1 + t), 2), p);
                 }
-                level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, c.x, c.y + 0.2, c.z, 12, 2, 0.1, 2, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.2, c.z, 12, 2, 0.1, 2, 0.01);
             }
             case WHALE_WHIRL -> {
                 for (LivingEntity e : LegendRewrites.around(p, p.position(), 5)) {
                     LegendRewrites.push(e, e.position().add(e.position().subtract(p.position())), 0.8);
                     hit(p, e, weapon(p) * 0.3 * k, s);
                 }
-                LegendRewrites.ring(level, p.position(), 5, ParticleTypes.SPLASH, 30);
+                LegendRewrites.ring(level, p.position(), 5, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 30);
             }
             case BLADE_STORM -> {
                 int n = t >= 3 ? 2 : 1;
@@ -377,7 +377,7 @@ public final class SecretArts {
                         for (LivingEntity e : LegendRewrites.around(p, p.position(), 3.5)) {
                             hit(p, e, weapon(p) * 0.35, s);
                         }
-                        LegendRewrites.ring(level, p.position(), 3.0, ParticleTypes.SWEEP_ATTACK, 8);
+                        LegendRewrites.ring(level, p.position(), 3.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 8);
                     });
                 }
             }
@@ -385,13 +385,13 @@ public final class SecretArts {
                 for (LivingEntity e : LegendRewrites.around(p, from, 3)) {
                     hit(p, e, weapon(p) * 0.5 * k, s);
                 }
-                level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y + 0.8, from.z, 30, 1.2, 0.6, 1.2, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), from.x, from.y + 0.8, from.z, 24, 1.2, 0.6, 1.2, 0.05);
             });
             case CALTROPS -> {
                 int secs = 2 + t;
                 for (int i = 1; i <= secs; i++) {
                     SkillEffects.later(level, 20 * i, () -> {
-                        LegendRewrites.ring(level, from, 2.5, ParticleTypes.CRIT, 12);
+                        LegendRewrites.ring(level, from, 2.5, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 12);
                         for (LivingEntity e : LegendRewrites.around(p, from, 2.5)) {
                             e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 25, 1), p);
                             hit(p, e, weapon(p) * 0.2, s);
@@ -405,7 +405,7 @@ public final class SecretArts {
                 int n = 1 + t;
                 for (int i = 0; i < n && !near.isEmpty(); i++) {
                     LivingEntity e = near.get(i % near.size());
-                    LegendRewrites.line(level, p.position().add(0, 1, 0), e.position().add(0, 1, 0), ParticleTypes.SWEEP_ATTACK);
+                    LegendRewrites.line(level, p.position().add(0, 1, 0), e.position().add(0, 1, 0), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                     hit(p, e, weapon(p) * 0.3, s);
                 }
             }
@@ -415,20 +415,20 @@ public final class SecretArts {
                 if (!near.isEmpty()) {
                     LivingEntity e = near.get(0);
                     SkillEffects.later(level, 6, () -> hit(p, e, weapon(p) * 0.4 * k, s));
-                    level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY(0.6), e.getZ(), 10, 0.3, 0.3, 0.3, 0.1);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY(0.6), e.getZ(), 10, 0.3, 0.3, 0.3, 0.1);
                 }
             }
             case WARD_ECHO -> SkillEffects.later(level, 40, () -> {
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, p.getBoundingBox().inflate(6), ServerPlayer::isAlive)) {
                     ally.heal(1f + t);
-                    level.sendParticles(ParticleTypes.HEART, ally.getX(), ally.getY() + 2, ally.getZ(), 2, 0.3, 0.1, 0.3, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ally.getX(), ally.getY() + 2, ally.getZ(), 2, 0.3, 0.1, 0.3, 0);
                 }
             });
             case MAELSTROM -> {
                 Vec3 c = LegendRewrites.aimPoint(p, 8);
                 for (int i = 1; i <= 3; i++) {
                     SkillEffects.later(level, 20 * i, () -> {
-                        LegendRewrites.ring(level, c, 3, ParticleTypes.SPLASH, 20);
+                        LegendRewrites.ring(level, c, 3, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 20);
                         for (LivingEntity e : LegendRewrites.around(p, c, 3.5)) {
                             LegendRewrites.push(e, e.position().add(e.position().subtract(c)), 0.4);
                             hit(p, e, JobActions.spell(p, 0.1 + 0.05 * t), s);
@@ -442,13 +442,13 @@ public final class SecretArts {
                     LivingEntity e = near.get(i);
                     e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 0), p);
                     hit(p, e, JobActions.spell(p, 0.3), s);
-                    level.sendParticles(ParticleTypes.WITCH, e.getX(), e.getY(0.8), e.getZ(), 10, 0.3, 0.4, 0.3, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY(0.8), e.getZ(), 10, 0.3, 0.4, 0.3, 0);
                 }
             }
             case LAMP_BLESSING -> {
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, p.getBoundingBox().inflate(6), ServerPlayer::isAlive)) {
                     ally.setAbsorptionAmount(Math.max(ally.getAbsorptionAmount(), 1f + t));
-                    level.sendParticles(ParticleTypes.END_ROD, ally.getX(), ally.getY() + 1.2, ally.getZ(), 6, 0.3, 0.5, 0.3, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ally.getX(), ally.getY() + 1.2, ally.getZ(), 6, 0.3, 0.5, 0.3, 0.01);
                 }
             }
             case AFTERHEAT -> {
@@ -456,7 +456,7 @@ public final class SecretArts {
                     e.igniteForSeconds(1 + t);
                     hit(p, e, weapon(p) * 0.2, s);
                 }
-                LegendRewrites.ring(level, p.position(), 4, ParticleTypes.FLAME, 24);
+                LegendRewrites.ring(level, p.position(), 4, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 24);
             }
             case DOUBLE_HAMMER -> {
                 Vec3 c = LegendRewrites.aimPoint(p, 5);
@@ -464,7 +464,7 @@ public final class SecretArts {
                     for (LivingEntity e : LegendRewrites.around(p, c, 3)) {
                         hit(p, e, weapon(p) * 0.4 * k, s);
                     }
-                    level.sendParticles(ParticleTypes.LAVA, c.x, c.y + 0.3, c.z, 10, 1, 0.2, 1, 0.1);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.3, c.z, 10, 1, 0.2, 1, 0.1);
                     level.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.6f, 0.8f);
                 });
             }
@@ -473,14 +473,14 @@ public final class SecretArts {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * (2 + t), 1), p);
                     e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * (2 + t), 0), p);
                 }
-                level.sendParticles(ParticleTypes.ASH, p.getX(), p.getY() + 1, p.getZ(), 80, 3, 1, 3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.getX(), p.getY() + 1, p.getZ(), 24, 3, 1, 3, 0.02);
             }
             case FORGE_PULSE -> {
                 int n = t >= 2 ? 3 : 2;
                 double m = 0.2 + 0.05 * t;
                 for (int i = 1; i <= n; i++) {
                     SkillEffects.later(level, 10 * i, () -> {
-                        LegendRewrites.ring(level, p.position(), 4, ParticleTypes.FLAME, 20);
+                        LegendRewrites.ring(level, p.position(), 4, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 20);
                         for (LivingEntity e : LegendRewrites.around(p, p.position(), 4)) {
                             hit(p, e, weapon(p) * m, s);
                         }
@@ -492,7 +492,7 @@ public final class SecretArts {
                 List<LivingEntity> near = LegendRewrites.around(p, c, 8);
                 for (int i = 0; i < Math.min(1 + t, near.size()); i++) {
                     LivingEntity e = near.get(i);
-                    LegendRewrites.line(level, c.add(0, 1, 0), e.position().add(0, 1, 0), ParticleTypes.CRIT);
+                    LegendRewrites.line(level, c.add(0, 1, 0), e.position().add(0, 1, 0), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                     hit(p, e, weapon(p) * 0.3, s);
                 }
             }
@@ -503,7 +503,7 @@ public final class SecretArts {
                         e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 2), p);
                         hit(p, e, weapon(p) * 0.3 * k, s);
                     }
-                    LegendRewrites.ring(level, c, 3, ParticleTypes.CRIT, 16);
+                    LegendRewrites.ring(level, c, 3, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 16);
                 });
             }
             case LINGERING_RAIN -> {
@@ -511,7 +511,7 @@ public final class SecretArts {
                 for (int i = 1; i <= 1 + t; i++) {
                     SkillEffects.later(level, 20 * i + 40, () -> {
                         List<LivingEntity> in = LegendRewrites.around(p, c, 5);
-                        level.sendParticles(ParticleTypes.CRIT, c.x, c.y + 4, c.z, 16, 3, 1, 3, 0.1);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 4, c.z, 16, 3, 1, 3, 0.1);
                         if (!in.isEmpty()) {
                             hit(p, in.get(p.getRandom().nextInt(in.size())), weapon(p) * 0.2, s);
                         }
@@ -523,7 +523,7 @@ public final class SecretArts {
                     hit(p, e, weapon(p) * 0.4 * k, s);
                 }
                 p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 60, 0, true, false));
-                LegendRewrites.ring(level, p.position(), 3, ParticleTypes.CLOUD, 16);
+                LegendRewrites.ring(level, p.position(), 3, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 16);
             });
             case CHAIN_BOLT -> {
                 LivingEntity first = LegendRewrites.aimFoe(p, SkillRules.BOLT_RANGE);
@@ -534,7 +534,7 @@ public final class SecretArts {
                     Vec3 prev = first.position().add(0, first.getBbHeight() * 0.6, 0);
                     for (LivingEntity e : next.subList(0, Math.min(t, next.size()))) {
                         Vec3 b = e.position().add(0, e.getBbHeight() * 0.6, 0);
-                        LegendRewrites.line(level, prev, b, ParticleTypes.ELECTRIC_SPARK);
+                        LegendRewrites.line(level, prev, b, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                         hit(p, e, JobActions.spell(p, 0.4), s);
                         prev = b;
                     }
@@ -544,7 +544,7 @@ public final class SecretArts {
                 Vec3 c = LegendRewrites.aimPoint(p, 16);
                 for (int i = 1; i <= 3; i++) {
                     SkillEffects.later(level, 20 * i, () -> {
-                        LegendRewrites.ring(level, c, 2.5, ParticleTypes.FLAME, 16);
+                        LegendRewrites.ring(level, c, 2.5, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 16);
                         for (LivingEntity e : LegendRewrites.around(p, c, 2.5)) {
                             hit(p, e, JobActions.spell(p, 0.1 + 0.05 * t), s);
                         }
@@ -556,14 +556,14 @@ public final class SecretArts {
                 for (LivingEntity e : LegendRewrites.around(p, p.position(), 6)) {
                     e.getPersistentData().putLong(FROST, until);
                     e.getPersistentData().putDouble(FROST_AMT, 0.10 + 0.05 * t);
-                    level.sendParticles(ParticleTypes.SNOWFLAKE, e.getX(), e.getY(0.6), e.getZ(), 6, 0.3, 0.4, 0.3, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY(0.6), e.getZ(), 6, 0.3, 0.4, 0.3, 0.01);
                 }
             }
             case STAR_TRAIL -> SkillEffects.later(level, 20, () -> {
                 for (LivingEntity e : LegendRewrites.around(p, from, 3)) {
                     hit(p, e, JobActions.spell(p, 0.5 * k), s);
                 }
-                level.sendParticles(ParticleTypes.END_ROD, from.x, from.y + 1, from.z, 30, 1, 0.8, 1, 0.08);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x, from.y + 1, from.z, 24, 1, 0.8, 1, 0.08);
             });
             default -> {
             }

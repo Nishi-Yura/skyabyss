@@ -32,8 +32,46 @@ SMOKE_T = {"CLOUD", "SMOKE", "LARGE_SMOKE", "POOF", "SPLASH", "BUBBLE", "BUBBLE_
 FX = "jp.revati.skyabyss.fx.FxParticles"
 
 
-def fx_expr(kind):
+def fx_expr(kind, texpr=None):
+    if ELEMENT == "AUTO" and texpr is not None:
+        return "%s.type(%s.Element.%s, %s.Kind.%s)" % (FX, FX, auto_element(texpr), FX, kind)
     return "fx(%s.Kind.%s)" % (FX, kind)
+
+
+# AUTO (プレイヤーの技): 元の粒が表していたものから属性を選ぶ (技ごとの色の言葉を残す)
+AUTO_T = {
+    "EMBER": {"FLAME", "SMALL_FLAME", "LAVA", "FALLING_LAVA", "DRIPPING_LAVA", "LANDING_LAVA", "CAMPFIRE_COSY_SMOKE", "CAMPFIRE_SIGNAL_SMOKE", "LARGE_SMOKE",
+              "SMOKE", "ASH", "WAX_ON", "WAX_OFF", "EXPLOSION", "EXPLOSION_EMITTER"},
+    "STORM": {"ELECTRIC_SPARK", "WITCH", "DRAGON_BREATH", "INSTANT_EFFECT", "EFFECT", "ENTITY_EFFECT"},
+    "MOON": {"END_ROD", "FIREWORK", "FLASH", "GLOW", "ENCHANT", "TOTEM_OF_UNDYING", "WHITE_ASH", "HAPPY_VILLAGER", "NOTE", "HEART", "ENCHANTED_HIT"},
+    "WATER": {"SPLASH", "BUBBLE", "BUBBLE_POP", "BUBBLE_COLUMN_UP", "SNOWFLAKE", "DRIPPING_WATER", "FALLING_WATER", "RAIN", "DOLPHIN", "NAUTILUS",
+              "GLOW_SQUID_INK", "ITEM_SNOWBALL"},
+    "ABYSS": {"SOUL", "SOUL_FIRE_FLAME", "SCULK_SOUL", "SCULK_CHARGE_POP", "SQUID_INK", "PORTAL", "REVERSE_PORTAL", "SMOKE_NORMAL", "DAMAGE_INDICATOR"},
+}
+
+
+def auto_element(expr):
+    m = re.search(r"dust\(0x([0-9A-Fa-f]{6})|Vector3f\(([0-9.]+)f?, ([0-9.]+)f?, ([0-9.]+)f?\)", expr)
+    if m:
+        if m.group(1):
+            v = int(m.group(1), 16)
+            r, g, b = (v >> 16) / 255, ((v >> 8) & 0xFF) / 255, (v & 0xFF) / 255
+        else:
+            r, g, b = float(m.group(2)), float(m.group(3)), float(m.group(4))
+        mx, mn = max(r, g, b), min(r, g, b)
+        if mx - mn < 0.12:
+            return "MOON" if mx > 0.75 else "STONE"
+        if r >= g and r >= b:
+            return "EMBER"
+        if b >= r and b >= g:
+            return "STORM" if r > g + 0.1 else "WATER"
+        return "STONE"
+    n = re.search(r"ParticleTypes\.([A-Z_]+)", expr)
+    if n:
+        for el, names in AUTO_T.items():
+            if n.group(1) in names:
+                return el
+    return "STONE"
 
 
 def kind_of(expr):
@@ -162,7 +200,7 @@ def convert(path):
         kind = kind_of(texpr)
         new_args = list(args)
         lead = re.match(r"\s*", new_args[tix]).group(0)
-        new_args[tix] = lead + fx_expr(kind)
+        new_args[tix] = lead + fx_expr(kind, texpr)
         cix = 6 if per_player else tix + 4
         if "sendParticles" in body or is_warn:
             if len(new_args) > cix:
@@ -207,7 +245,7 @@ def convert(path):
                 text = "\n".join(ls)
                 changed = True
                 break
-    if "fx(" + FX in text and "private static net.minecraft.core.particles.SimpleParticleType fx(" not in text:
+    if ELEMENT != "AUTO" and "fx(" + FX in text and "private static net.minecraft.core.particles.SimpleParticleType fx(" not in text:
         helper = ("    // 攻撃の粒は mod の %s の粒だけ (docs/design/59 の 2 章)\n"
                   "    private static net.minecraft.core.particles.SimpleParticleType fx(%s.Kind kind) {\n"
                   "        return %s.type(%s.Element.%s, kind);\n"

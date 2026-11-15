@@ -174,7 +174,7 @@ final class TreeActions {
                 e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), SkillRules.SPARK_BURN));
             }
         }
-        SkillActions.ring(level, net.minecraft.core.particles.ParticleTypes.LAVA, player.position(), SkillRules.SPARK_RADIUS * 0.6, 10, 0.4);
+        SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.position(), SkillRules.SPARK_RADIUS * 0.6, 10, 0.4);
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillActions.sound(player, net.minecraft.sounds.SoundEvents.ANVIL_LAND, 0.6f, 1.6f);
         return null;
@@ -207,10 +207,10 @@ final class TreeActions {
             }
             if (SkillActions.hit(player, e, damage, Skill.STARDUST)) {
                 e.knockback(SkillRules.DUST_PUSH, -dx, -dz);
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, e.getX(), e.getY() + e.getBbHeight() + 0.5, e.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() + 0.5, e.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
             }
         }
-        SkillActions.ring(level, net.minecraft.core.particles.ParticleTypes.END_ROD, player.position(), SkillRules.DUST_RADIUS * 0.7, 16, 1.6);
+        SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.position(), SkillRules.DUST_RADIUS * 0.7, 16, 1.6);
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillActions.sound(player, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME, 1.0f, 0.8f);
         return null;
