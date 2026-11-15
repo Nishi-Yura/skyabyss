@@ -893,9 +893,6 @@ public final class Dungeons {
         return start(server, d, squad, deep);
     }
 
-    public static void rewardForTest(ServerPlayer p, Dungeon d, boolean deep, DungeonMood mood) {
-        reward(p, d, deep, mood);
-    }
 
     public static void endForTest(DungeonRun run) {
         end(run);

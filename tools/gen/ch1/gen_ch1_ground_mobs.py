@@ -6,7 +6,6 @@
 入力: docs/review/ch1_roughs/<id>/a/<id>_a_{mesh.json,atlas.png,glowmask.png}  (選ばれた A 案。ラフの作り方は tools/rough/lowpoly/ch1/)
 出力 (すべて src/main/resources/assets/skyabyss/ の下):
   lowpoly/<id>.json, textures/lowpoly/<id>(.png|_glowmask.png), geo/entity/<id>_lowpoly(.geo|_debug.geo).json   (tools/install/install_lowpoly.py)
-  geo/entity/<id>.geo.json + textures/entity/<id>.png   LowPoly.enabled = false のときの箱の代用 (デバッグ箱)
   animations/entity/<id>.animation.json                 このファイルで作る (回転は「ラフの回転 = 数学の向き」で書き、GeckoLib の符号 (x, y を反転) に直して出す)
   sounds.json の行 (既存の音源に高さを付けた別名) と字幕、lang、歩哨の割符の絵
 
@@ -351,13 +350,8 @@ def install():
         d = os.path.join(R, mob, "a", mob + "_a_")
         subprocess.check_call([sys.executable, os.path.join(ROOT, "tools", "install/install_lowpoly.py"), mob, "--mesh", d + "mesh.json", "--atlas", d + "atlas.png",
                                "--glow", d + "glowmask.png"], cwd=ROOT)
-        # LowPoly.enabled = false のときの代用 (デバッグ箱 + アトラスそのまま)
-        shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
         os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
-        shutil.copyfile(os.path.join(A, "textures", "lowpoly", mob + ".png"), os.path.join(A, "textures", "entity", mob + ".png"))
         gm = os.path.join(A, "textures", "lowpoly", mob + "_glowmask.png")
-        if os.path.exists(gm):
-            shutil.copyfile(gm, os.path.join(A, "textures", "entity", mob + "_glowmask.png"))
 
 
 def main():

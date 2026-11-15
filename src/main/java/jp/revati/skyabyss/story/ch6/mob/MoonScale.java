@@ -15,8 +15,6 @@ import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.ch6.cliff.CliffBlocks;
 import jp.revati.skyabyss.story.ch6.cliff.MoonCliff;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -92,9 +90,6 @@ public class MoonScale extends MoonMob {
         return toppleFor > 0;
     }
 
-    public boolean tilting() {
-        return tiltFor > 0;
-    }
 
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
@@ -271,9 +266,6 @@ public class MoonScale extends MoonMob {
         }
     }
 
-    public int landedWeights() {
-        return landed.size();
-    }
 
     // 錘が落ちた所: 人の側の皿の上なら残す。二つになったら主が崩れる
     void weightLands(ServerLevel sl, Vec3 at) {

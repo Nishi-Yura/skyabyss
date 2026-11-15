@@ -136,15 +136,6 @@ public final class Trades {
         return n;
     }
 
-    // 持ち物に型の品が全部そろっているか
-    public static boolean hasAll(List<ItemStack> inv, List<ItemStack> templates) {
-        for (ItemStack t : combine(templates)) {
-            if (count(inv, t) < t.getCount()) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     // 取ったうえで入れたとき、入りきるか (持ち物の写しで試す)
     static boolean fits(List<ItemStack> inv, List<ItemStack> remove, List<ItemStack> add) {

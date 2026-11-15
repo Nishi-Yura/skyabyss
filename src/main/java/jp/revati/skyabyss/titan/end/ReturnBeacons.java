@@ -16,7 +16,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -249,9 +248,6 @@ public final class ReturnBeacons {
         return true;
     }
 
-    public static boolean isAsking(UUID player) {
-        return ASKED.containsKey(player);
-    }
 
     private static void sendBeam(ServerPlayer player, Beacon b) {
         double dx = player.getX() - b.foot().x;

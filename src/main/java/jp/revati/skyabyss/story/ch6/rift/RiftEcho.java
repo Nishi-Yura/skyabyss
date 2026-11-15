@@ -11,7 +11,6 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch6.MoonWorld;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -46,10 +45,6 @@ public final class RiftEcho {
     private RiftEcho() {
     }
 
-    public static boolean recording(ServerPlayer p) {
-        Take t = TAKES.get(p.getUUID());
-        return t != null && t.recording;
-    }
 
     public static boolean waiting(ServerPlayer p) {
         Take t = TAKES.get(p.getUUID());

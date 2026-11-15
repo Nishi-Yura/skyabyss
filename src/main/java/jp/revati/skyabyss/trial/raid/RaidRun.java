@@ -650,12 +650,6 @@ public final class RaidRun {
         }
     }
 
-    // 最後に送った中身 (自己テスト・撮影用)
-    @Nullable
-    public static RaidHudNet.Hud lastHud(UUID group) {
-        Run run = RUNS.get(group);
-        return run == null ? null : run.lastHud;
-    }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {

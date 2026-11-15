@@ -102,9 +102,6 @@ public final class HudManager {
         return Math.round(toastEased);
     }
 
-    public static int lastBossBottom() {
-        return bossBottom;
-    }
 
     // 画面の外の矢印 (仲間・墓の標) の置き場: 向き (vx, vy) の縁の点。板の上は避けて縁を伝う
     public static int[] edgePoint(double vx, double vy) {

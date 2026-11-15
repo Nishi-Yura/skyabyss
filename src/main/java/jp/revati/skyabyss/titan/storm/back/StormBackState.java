@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.saveddata.SavedData;
 
 // 雷翼の背の「背中そのもの」の状態 (storm_back のディメンションに保存。全員で一つ)。
@@ -69,8 +68,5 @@ public class StormBackState extends SavedData {
         setDirty();
     }
 
-    public int westRoute() {
-        return westRoute;
-    }
 
 }

@@ -20,7 +20,6 @@ import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -222,10 +221,6 @@ public abstract class HeartDomain {
         return timeLimit();
     }
 
-    // この巡の残り (tick。制限がなければ -1)
-    public int timeLeft() {
-        return timeLimit() <= 0 || interlude > 0 ? -1 : Math.max(0, timeLimit() - roundTicks);
-    }
 
     private int roundTicks;
 
@@ -490,10 +485,6 @@ public abstract class HeartDomain {
     // 領域が解けたか
     protected abstract boolean complete();
 
-    // 仕掛けの一行の手がかりの鍵 (gui の hud の二行目)
-    public String goalKey() {
-        return "gui.skyabyss.domain." + id + ".goal";
-    }
 
     // 試験・event から: 仕掛け index を player が叩いた
     public boolean strikeNode(ServerLevel level, int index, ServerPlayer player) {

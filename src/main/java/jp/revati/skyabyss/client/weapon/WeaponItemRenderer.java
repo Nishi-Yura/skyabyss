@@ -100,10 +100,6 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         return stack.getItem() instanceof ModGear g && g.tier() == GearTier.MYTHIC;
     }
 
-    // 神器の光の脈 (0〜1。約 2.6 秒で一巡)
-    public static float mythicPulse() {
-        return 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() / 420.0);
-    }
 
     private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, boolean mythic, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         ResourceLocation[] tex = variant(mesh.texture, level);

@@ -45,19 +45,6 @@ public class EmberTitanRenderer extends LowPolyGeoRenderer<EmberTitanEntity> {
         super.render(titan, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 
-    // 光る画素の強さ (0〜1)。glowmask の色にかける (光る描き方は足し合わせなので、色を下げると暗くなる)
-    static float glowStrength(EmberTitanEntity titan) {
-        return switch (titan.syncedMode()) {
-            case SWIM, APPROACH -> 0.45f;
-            case RISE, SINK -> 0.75f;
-            case SLEEP -> switch (titan.syncedBreath()) {
-                case IN -> 0.9f;
-                case HOLD -> 1.0f;
-                case OUT -> 0.85f;
-                case PAUSE -> 0.8f;
-            };
-        };
-    }
 
 
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (鼻先から尾の先までの線分) までの距離で選ぶ

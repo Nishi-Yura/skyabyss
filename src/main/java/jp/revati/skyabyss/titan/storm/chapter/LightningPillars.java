@@ -22,7 +22,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
 import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -111,35 +110,7 @@ public final class LightningPillars {
         return e.extra("pedestal" + k);
     }
 
-    // 針の立っている台 (ビット k = 台 k)。旧い跡は、立っている針の数だけ下から埋める
-    public static int mask(ServerLevel level, SiteData.Entry e) {
-        if (modern(e)) {
-            int m = 0;
-            for (int k = 0; k < STANDS; k++) {
-                BlockPos at = stand(e, k);
-                if (at != null && level.isLoaded(at) && level.getBlockState(at).is(Blocks.LIGHTNING_ROD)) {
-                    m |= 1 << k;
-                }
-            }
-            return m;
-        }
-        int n = legacyRods(level, e).size();
-        return (1 << Math.min(STANDS, n)) - 1;
-    }
 
-    static List<BlockPos> legacyRods(ServerLevel level, SiteData.Entry e) {
-        List<BlockPos> out = new ArrayList<>();
-        BlockPos o = e.pos;
-        for (BlockPos q : BlockPos.betweenClosed(o.offset(-LEGACY_REACH, -3, -LEGACY_REACH), o.offset(LEGACY_REACH, 8, LEGACY_REACH))) {
-            if (q.getX() == o.getX() && q.getZ() == o.getZ()) {
-                continue; // 跡に残っている柱の針
-            }
-            if (level.isLoaded(q) && level.getBlockState(q).is(Blocks.LIGHTNING_ROD)) {
-                out.add(q.immutable());
-            }
-        }
-        return out;
-    }
 
     public static boolean doorOpen(ServerLevel level, SiteData.Entry e) {
         if (!modern(e)) {

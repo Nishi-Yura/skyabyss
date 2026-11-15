@@ -187,10 +187,6 @@ public final class Telegraph {
         damagingCreated = 0;
     }
 
-    // 試験用: 床の印のパケットを送った数 (人 × 予告)
-    public static int decalsSent() {
-        return decalsSent;
-    }
 
     public static int damagingCreated() {
         return damagingCreated;

@@ -12,16 +12,13 @@ import jp.revati.skyabyss.rpg.skill.Job;
 import jp.revati.skyabyss.rpg.skill.Mutation;
 import jp.revati.skyabyss.rpg.skill.Rune;
 import jp.revati.skyabyss.rpg.skill.Skill;
-import jp.revati.skyabyss.rpg.skill.SkillBuild;
 import jp.revati.skyabyss.rpg.skill.SkillData;
-import jp.revati.skyabyss.rpg.skill.SkillKeystone;
 import jp.revati.skyabyss.rpg.skill.SkillTag;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 import jp.revati.skyabyss.rpg.skill.Skills;
 import jp.revati.skyabyss.rpg.skill.WeaponType;
-import jp.revati.skyabyss.rpg.skill.net.SkillKeystonePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillLearnPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillNodePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillTryonPayload;
@@ -1074,14 +1071,6 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
-    private static void diag(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
-        int steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-        for (int i = 0; i <= steps; i++) {
-            int x = x0 + (x1 - x0) * i / Math.max(1, steps);
-            int y = y0 + (y1 - y0) * i / Math.max(1, steps);
-            g.fill(x, y, x + 1, y + 1, 0xFF000000 | color);
-        }
-    }
 
     private static void line(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
         g.fill(Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1) + 1, Math.max(y0, y1) + 1, 0xFF000000 | color);

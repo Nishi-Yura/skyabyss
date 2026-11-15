@@ -6,7 +6,6 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.TridentItem;
 
@@ -101,7 +100,4 @@ public enum WeaponType {
         return of(player.getMainHandItem().getItem()) == type;
     }
 
-    public static boolean isHeld(ItemStack stack, WeaponType type) {
-        return !stack.isEmpty() && of(stack.getItem()) == type;
-    }
 }

@@ -3,7 +3,6 @@ package jp.revati.skyabyss.story.ch6.mob;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.story.ch6.field.FieldTide;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -70,9 +69,6 @@ public class MirrorBearer extends MoonMob {
         return hidden;
     }
 
-    public boolean aiming() {
-        return aim >= 0;
-    }
 
     // 叩いた者が前 (鏡と頭の側) にいるか
     boolean fromFront(DamageSource source) {

@@ -181,10 +181,6 @@ public final class SharedChests extends SavedData {
         return true;
     }
 
-    // 自己テスト向け
-    public boolean hasTemplate(ServerLevel level, BlockPos pos) {
-        return templates.containsKey(key(level, pos));
-    }
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {

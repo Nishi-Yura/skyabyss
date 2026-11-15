@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -88,10 +86,6 @@ public final class FieldHazards {
         }
     }
 
-    // 主のまわりの、当たりうる人
-    public List<ServerPlayer> targetsNear() {
-        return mob.level() instanceof ServerLevel level ? targets(level) : List.of();
-    }
 
     List<ServerPlayer> targets(ServerLevel level) {
         List<ServerPlayer> out = new ArrayList<>(level.getPlayers(p -> p.isAlive() && !p.isSpectator() && !p.isCreative() && p.distanceToSqr(mob) < 28 * 28 && canHit.test(p)));

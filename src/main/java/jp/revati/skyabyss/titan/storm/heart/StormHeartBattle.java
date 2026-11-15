@@ -22,7 +22,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormBackTrials;
 import jp.revati.skyabyss.titan.storm.back.StormProgress;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -443,11 +442,6 @@ public final class StormHeartBattle {
         jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, ids);
     }
 
-    // 心臓が倒れたグループ (自己テスト用): 心臓の持ち主
-    @Nullable
-    static UUID groupOf(StormHeart heart) {
-        return ((GroupOwned) heart).groupId();
-    }
 
     // 試練で湧いた心臓は保存しないが、古いものが残っていれば読み込みのときに消す
     @SubscribeEvent

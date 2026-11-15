@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
@@ -74,10 +73,6 @@ public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group
         return !level.getEntitiesOfClass(TideBubble.class, player.getBoundingBox().inflate(2), b -> player.getUUID().equals(b.trapped)).isEmpty();
     }
 
-    @Nullable
-    public UUID trappedPlayer() {
-        return trapped;
-    }
 
     public float health() {
         return health;

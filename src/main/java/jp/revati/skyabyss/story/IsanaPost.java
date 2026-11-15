@@ -145,9 +145,6 @@ public final class IsanaPost {
         return e != null && !e.done && def != null && e.stage < def.stages().size() && def.stages().get(e.stage).id().equals(stageId);
     }
 
-    public static boolean atHarbor(ServerPlayer p) {
-        return post(p) == Post.HARBOR;
-    }
 
     // NPC の居場所 (印のない鯨追いは鯨見)
     public static Post postOf(NpcEntity npc) {

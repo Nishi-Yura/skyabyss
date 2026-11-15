@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.travel.LandingFinder;
 import jp.revati.skyabyss.titan.travel.TravelNetwork;
@@ -111,9 +110,6 @@ public final class YoungTrip {
         return dest;
     }
 
-    public boolean departed() {
-        return phase == Phase.CARRY || phase == Phase.LAND;
-    }
 
     private void setPhase(Phase next) {
         phase = next;

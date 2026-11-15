@@ -40,7 +40,6 @@ import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.material.FluidState;
 
 // 建築の監査の広い検査 (BuildAudit.scan から呼ばれる。docs/design/08 の「建築の監査」の飾り・浮き・流体の章)。
@@ -466,7 +465,4 @@ public final class BuildAuditExtra {
         }
     }
 
-    static boolean isSlabTop(BlockState s) {
-        return s.hasProperty(BlockStateProperties.SLAB_TYPE) && s.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.TOP;
-    }
 }

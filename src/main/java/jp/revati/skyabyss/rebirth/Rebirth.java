@@ -17,7 +17,6 @@ import jp.revati.skyabyss.rpg.Rpg;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -118,9 +117,6 @@ public final class Rebirth {
         return Growth.get(player).rebirths;
     }
 
-    public static boolean isRebirthed(Player player) {
-        return count(player) > 0;
-    }
 
     // 装備・クエストの要求レベルに使うレベル。転生した人は、レベルを 1 から上げ直している間も 50 として扱う (できることが減らない)
     public static int gearLevel(Player player) {

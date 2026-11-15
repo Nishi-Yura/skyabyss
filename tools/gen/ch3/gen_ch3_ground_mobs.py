@@ -7,7 +7,6 @@
       焼けた羽守は鉤槍の別メッシュ <id>_<案>_spear_{mesh.json,atlas.png} も (受け口 socket_main、名前 scorched_glaive)
 出力 (すべて src/main/resources/assets/skyabyss/ の下):
   lowpoly/<id>.json, textures/lowpoly/<id>(.png|_glowmask.png), geo/entity/<id>_lowpoly(.geo|_debug.geo).json   (tools/install/install_lowpoly.py)
-  geo/entity/<id>.geo.json + textures/entity/<id>.png   LowPoly.enabled = false のときの箱の代用 (デバッグ箱)
   animations/entity/<id>.animation.json                 このファイルで作る (焼けた羽守は羽守の動きを写して技を足す)
   sounds.json の行 (既存の音の出来事 (type event) の別名。末尾の一つの塊)、字幕と名前は assets/skyabyss_ch3mob/lang/
   models/item/<id>_spawn_egg.json
@@ -286,12 +285,8 @@ def install():
         if mob == "scorched_warden":
             cmd += ["--gear", d + "spear_mesh.json:" + d + "spear_atlas.png:scorched_glaive:socket_main"]
         subprocess.check_call(cmd, cwd=ROOT)
-        shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
         os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
-        shutil.copyfile(os.path.join(A, "textures", "lowpoly", mob + ".png"), os.path.join(A, "textures", "entity", mob + ".png"))
         gm = os.path.join(A, "textures", "lowpoly", mob + "_glowmask.png")
-        if os.path.exists(gm):
-            shutil.copyfile(gm, os.path.join(A, "textures", "entity", mob + "_glowmask.png"))
         wjson(os.path.join(A, "models", "item", mob + "_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
 
 

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.opening.site.Blueprint;
@@ -322,13 +321,4 @@ final class ShrineBuild {
         return dx * dx + dz * dz <= rr * rr && Math.abs(y - pad.getY()) <= 2;
     }
 
-    @Nullable
-    static String titanOfTablet(java.util.Map<String, BlockPos> pos, BlockPos p) {
-        for (Map.Entry<String, BlockPos> e : pos.entrySet()) {
-            if (e.getValue().equals(p)) {
-                return e.getKey();
-            }
-        }
-        return null;
-    }
 }

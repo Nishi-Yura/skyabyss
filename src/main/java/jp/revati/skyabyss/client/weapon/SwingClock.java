@@ -204,10 +204,6 @@ public final class SwingClock {
         }
     }
 
-    static boolean inspecting(int entityId) {
-        State st = STATES.get(entityId);
-        return st != null && st.inspect >= 0;
-    }
 
     // 描画中の補間 (腕の構えの変換は補間を受け取らないので、ゲーム全体のものを使う)
     static float partial() {

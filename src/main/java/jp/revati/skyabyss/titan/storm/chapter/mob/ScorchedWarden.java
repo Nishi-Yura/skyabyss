@@ -12,7 +12,6 @@ import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.storm.chapter.Ch3Mobs;
 import jp.revati.skyabyss.titan.storm.mob.FeatherWarden;
 import jp.revati.skyabyss.util.Players;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -103,9 +102,6 @@ public class ScorchedWarden extends FeatherWarden {
         return entityData.get(EXPOSED);
     }
 
-    public Vec3 leapTarget() {
-        return leapTo;
-    }
 
     // 地上には嵐の拍がないので、突撃はいつでも
     @Override

@@ -20,10 +20,8 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.guide.HeartbeatWard;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.titan.TitanBacks;
 import jp.revati.skyabyss.titan.group.GroupBossRoom;
 import jp.revati.skyabyss.titan.group.ReentryRules;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -289,10 +287,6 @@ public final class Downed {
         return was || timeout;
     }
 
-    // 倒れてから死んだ人か (一度取り出すと消える)
-    public static boolean takeDownDeath(UUID id) {
-        return DOWN_DEATH.remove(id);
-    }
 
     // ---------------------------------------------------------------- 毎 tick
     @SubscribeEvent

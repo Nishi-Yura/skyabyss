@@ -150,9 +150,6 @@ public final class GroupBossRoom {
         return wardUsed.add(player);
     }
 
-    public boolean wardUsed(UUID player) {
-        return wardUsed.contains(player);
-    }
 
     public final UUID group;
     private boolean active;
@@ -211,9 +208,6 @@ public final class GroupBossRoom {
         return falls;
     }
 
-    public int challengers() {
-        return challengers;
-    }
 
     private List<ServerPlayer> mine(ServerLevel level, Host host) {
         return host.playersInside(level).stream().filter(p -> Groups.isMember(p, group)).toList();

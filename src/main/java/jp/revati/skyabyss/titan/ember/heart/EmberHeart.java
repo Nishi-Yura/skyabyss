@@ -5,7 +5,6 @@ import jp.revati.skyabyss.util.Players;
 import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,8 +24,6 @@ import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.lore.EmberLore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -51,7 +48,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -367,9 +363,6 @@ public class EmberHeart extends HeartBoss {
         return out;
     }
 
-    public int blazeCount() {
-        return blazes.size();
-    }
 
     public int veilTicks() {
         return veilLeft;

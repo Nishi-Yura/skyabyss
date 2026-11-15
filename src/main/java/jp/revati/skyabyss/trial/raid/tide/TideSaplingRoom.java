@@ -10,7 +10,6 @@ import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -468,10 +467,6 @@ public final class TideSaplingRoom extends RaidRoom {
         return sb.toString();
     }
 
-    // 試験用
-    public int saplingHp(int s) {
-        return hp[s];
-    }
 
     public int wave() {
         return wave;

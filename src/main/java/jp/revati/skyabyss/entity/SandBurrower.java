@@ -8,8 +8,6 @@ import jp.revati.skyabyss.story.ch2.Ch2Mobs;
 import jp.revati.skyabyss.titan.tide.TideOcean;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -123,10 +121,6 @@ public class SandBurrower extends GroundFoe {
         return ChapterMobSpawner.isLive(getUUID());
     }
 
-    // いま出てこられるか (潮に縛られない個体はいつでも)
-    public boolean mayEmerge() {
-        return !bound() || lowTide();
-    }
 
     private boolean lowTide() {
         return tideOverride != null ? tideOverride : TideOcean.isLowTide(level().getDayTime());

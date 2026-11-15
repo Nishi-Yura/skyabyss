@@ -145,9 +145,6 @@ public abstract class TitanKeeper<T extends Entity> {
         return TitanWorldData.get(overworld).slot(slotId);
     }
 
-    public String slotId() {
-        return slotId;
-    }
 
     // 本物の巨神 (読み込まれているときだけ)
     @Nullable

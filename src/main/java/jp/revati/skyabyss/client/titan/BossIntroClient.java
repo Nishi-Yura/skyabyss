@@ -52,10 +52,6 @@ public final class BossIntroClient {
         start = now();
     }
 
-    // 試験・撮影用: 今なにを出しているか (-1 = なし)
-    public static int showing() {
-        return phase;
-    }
 
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {

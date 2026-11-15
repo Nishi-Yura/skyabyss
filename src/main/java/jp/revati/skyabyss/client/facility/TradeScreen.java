@@ -754,8 +754,4 @@ public class TradeScreen extends Screen {
         return true;
     }
 
-    // 撮影・試し用
-    public void showTab(int t) {
-        setTab(Math.max(0, Math.min(4, t)));
-    }
 }

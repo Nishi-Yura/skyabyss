@@ -10,7 +10,6 @@ import jp.revati.skyabyss.item.accessory.Accessories;
 import jp.revati.skyabyss.story.ch6.MoonWorld;
 import jp.revati.skyabyss.story.ch6.mob.MoonMob;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -317,9 +316,6 @@ public final class MoonGearEvents {
         return hit;
     }
 
-    public static int pendingEchoes() {
-        return ECHOES.size();
-    }
 
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {

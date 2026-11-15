@@ -16,7 +16,6 @@ import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
 import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.forge.ForgeRules;
-import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.readiness.Readiness;
 import jp.revati.skyabyss.rpg.Growth;
@@ -34,15 +33,12 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 旅装・砥石・糧と薬 (P5。一章の分) の自己テスト。段: "travel gear"。
@@ -344,20 +340,7 @@ public final class TravelSelfTest {
         a.getInventory().clearContent();
     }
 
-    private static void fillHelmet(AbstractContainerMenu menu) {
-        Item scrap = GuideSetup.ROCK_SHELL_SCRAP.get();
-        menu.getSlot(1).set(new ItemStack(scrap));
-        menu.getSlot(2).set(new ItemStack(scrap));
-        menu.getSlot(3).set(new ItemStack(scrap));
-        menu.getSlot(4).set(new ItemStack(Items.IRON_INGOT));
-        menu.getSlot(6).set(new ItemStack(Items.IRON_INGOT));
-    }
 
-    private static void clearGrid(AbstractContainerMenu menu) {
-        for (int i = 1; i <= 9; i++) {
-            menu.getSlot(i).set(ItemStack.EMPTY);
-        }
-    }
 
     // ---------------------------------------------------------------- 旅装を一式作ると合図 (任意。どの段も読まないが、合図は残す)
     private static void gearSignal(List<String> f, FakePlayer a) {

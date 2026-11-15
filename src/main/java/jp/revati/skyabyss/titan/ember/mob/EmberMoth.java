@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
-import jp.revati.skyabyss.util.Players;
 
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import java.util.ArrayList;
@@ -11,12 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -28,9 +23,7 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -187,13 +180,7 @@ public class EmberMoth extends EmberMob {
         return best;
     }
 
-    public Vec3 lure() {
-        return lure;
-    }
 
-    public Player lurePlayer() {
-        return lurePlayer;
-    }
 
     // ---------------------------------------------------------------- 触れる・散る
 

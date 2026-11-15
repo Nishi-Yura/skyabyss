@@ -7,7 +7,6 @@ import org.joml.Vector3f;
 import jp.revati.skyabyss.entity.GuardMob;
 import jp.revati.skyabyss.entity.MobVoices;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -42,7 +41,6 @@ public class AbyssMob extends GuardMob {
     public static final EntityDataAccessor<Integer> STAGE = SynchedEntityData.defineId(AbyssMob.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Boolean> OPEN = SynchedEntityData.defineId(AbyssMob.class, EntityDataSerializers.BOOLEAN);
     private static final DustParticleOptions RED = new DustParticleOptions(new Vector3f(1f, 0.12f, 0.12f), 1.0f);
-    private static final DustParticleOptions DARK = new DustParticleOptions(new Vector3f(0.07f, 0.05f, 0.05f), 1.4f);
     private static final DustParticleOptions CHALK = new DustParticleOptions(new Vector3f(0.9f, 0.95f, 1f), 0.8f);
 
     private final AbyssMobKind kind;
@@ -136,10 +134,6 @@ public class AbyssMob extends GuardMob {
         return entityData.get(STAGE);
     }
 
-    // 湧いた高さ (体力と傷はこの高さで決まる)
-    public double spawnY() {
-        return spawnY;
-    }
 
     // 湧くときに一度だけ決める (段と湧いた高さ。体力・攻撃を AbyssScaling の数字どおりにする)
     public void setStage(int form, double y) {

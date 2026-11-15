@@ -97,10 +97,6 @@ public final class TitanWorldData extends SavedData {
         return whale.id;
     }
 
-    // 巨神での移動 (titan.travel) が、読み込まれていない岩鯨を呼び寄せるときに使う
-    public boolean hasSpawned() {
-        return whale.spawned;
-    }
 
     public CompoundTag lastState() {
         return whale.state.copy();

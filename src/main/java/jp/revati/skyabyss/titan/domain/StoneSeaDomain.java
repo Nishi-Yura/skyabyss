@@ -6,13 +6,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import jp.revati.skyabyss.combat.BossCue;
-import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -49,9 +45,6 @@ public final class StoneSeaDomain extends HeartDomain {
         this.gapBase = heart.getRandom().nextDouble() * Math.PI * 2;
     }
 
-    public double[] lastGaps() {
-        return lastGaps;
-    }
 
     @Override
     protected void onDeclare(ServerLevel level) {

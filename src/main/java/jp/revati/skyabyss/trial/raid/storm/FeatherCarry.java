@@ -16,7 +16,6 @@ import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +33,6 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // 歩 SR1「避雷の羽運び」: 風の吹く銅の甲板の西で光る雷羽 (三枚) を拾い、東の止まり木へ運ぶ。
@@ -613,9 +611,6 @@ public final class FeatherCarry extends RaidRoom {
         return plates;
     }
 
-    public AABB perchBox(RaidCtx ctx) {
-        return new AABB(ctx.origin()).inflate(HX, 4, HZ);
-    }
 
     // 行き先の印: 運んでいる間は空いている止まり木 (運び手にいちばん近い台)、誰も運んでいなければ、まだ届けていない羽の場所
     @Override
@@ -654,10 +649,6 @@ public final class FeatherCarry extends RaidRoom {
         return null;
     }
 
-    // 一人の台本用: 雷の予告が出ているか (赤い輪が見えている)
-    public boolean strikePending() {
-        return pending;
-    }
 
     public boolean delivered(int i) {
         return delivered[i];

@@ -69,10 +69,6 @@ public final class StormProgress {
         return Trial.byId(record.getString(SLEEPING));
     }
 
-    @Nullable
-    public Trial lastSleeping() {
-        return Trial.byId(record.getString(LAST_SLEEPING));
-    }
 
     // 眠る試練をコマンドで決める (今の周に効かせる)
     public void setSleeping(@Nullable Trial t) {

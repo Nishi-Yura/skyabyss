@@ -23,7 +23,6 @@ import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
 import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -433,19 +432,6 @@ public final class AbyssLords {
         }
     }
 
-    // 開発用・自己テスト: 今の主をすぐ倒したことにする
-    public static boolean defeatNow(ServerLevel level, String layer) {
-        Fight f = FIGHTS.get(layer);
-        if (f == null) {
-            return false;
-        }
-        Entity e = level.getEntity(f.lord);
-        defeat(level, f);
-        if (e != null) {
-            e.discard();
-        }
-        return true;
-    }
 
     public static void resetForTest(ServerLevel level) {
         for (Fight f : List.copyOf(FIGHTS.values())) {

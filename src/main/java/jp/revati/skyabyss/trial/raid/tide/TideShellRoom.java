@@ -8,7 +8,6 @@ import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -275,25 +274,16 @@ public final class TideShellRoom extends RaidRoom {
         return tone[i];
     }
 
-    public boolean isMatched(int i) {
-        return state[i] == Shell.MATCHED;
-    }
 
     public boolean isOpen(int i) {
         return state[i] != Shell.CLOSED;
     }
 
-    public BlockPos shellPos(RaidCtx ctx, int i) {
-        return ctx.origin().offset(cx[i], 3, cz[i]);
-    }
 
     public int mistakes() {
         return mistakes;
     }
 
-    public int pairs() {
-        return pairs;
-    }
 
     // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
     private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {

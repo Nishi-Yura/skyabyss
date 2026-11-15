@@ -185,9 +185,6 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         return List.of(chainTop(0, 0, 0, yaw), chainAnchor(0, 0, 0, yaw));
     }
 
-    public boolean isHeadChain() {
-        return entityData.get(HEAD_CHAIN);
-    }
 
     // 向き yaw の岩鯨の、(横, 上, 前) の点の中心からの位置。横は左が + (chainTop と同じ回し方)
     public static Vec3 offset(float yaw, double side, double up, double forward) {
@@ -851,9 +848,6 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         approachTicks = 0;
     }
 
-    public boolean isCalled() {
-        return called;
-    }
 
     // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
     private boolean anchored;

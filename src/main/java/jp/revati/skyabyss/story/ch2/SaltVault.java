@@ -25,14 +25,12 @@ import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.Chapters;
-import jp.revati.skyabyss.story.ch1.Tasks;
 import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.titan.tide.TideOcean;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -52,7 +50,6 @@ import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -372,27 +369,6 @@ public final class SaltVault {
         return true;
     }
 
-    // 前の版で建った蔵の坑口を一度だけ手当てする
-    static void mendOld(MinecraftServer server, ServerLevel level) {
-        boolean dirty = false;
-        for (SiteData.Entry e : entries(server)) {
-            if (e.extra(MOUTH_FIX) != null) {
-                continue;
-            }
-            Vault v = new Vault(e.pos, e.yaw);
-            if (!loaded(level, v)) {
-                continue;
-            }
-            int n = clearMouth(level, v);
-            decorate(level, v);
-            e.extra(MOUTH_FIX, BlockPos.ZERO);
-            dirty = true;
-            SkyAbyss.LOGGER.info("Salt vault at {}: mouth mended ({} cells)", e.pos, n);
-        }
-        if (dirty) {
-            SiteData.get(level).setDirty();
-        }
-    }
 
     // 碑の文を刻み、出口の縦穴の口を地表まで延ばす (開発コマンドの蔵にも)
     public static void decorate(ServerLevel level, Vault v) {
@@ -569,10 +545,6 @@ public final class SaltVault {
         return !TideOcean.isLowTide(level.getDayTime());
     }
 
-    static boolean wantFlooded(ServerLevel level, Vault v) {
-        Boolean f = FORCE.get(v.pos().asLong());
-        return f != null ? f : flooded(level);
-    }
 
     // 喉の中身のセル (部品で空気か梯子の所)。部品の座標
     private static List<int[]> sumpCells;
@@ -847,14 +819,6 @@ public final class SaltVault {
         roadTick(server, level, players);
     }
 
-    static boolean anyNear(List<ServerPlayer> players, BlockPos at, double r) {
-        for (ServerPlayer p : players) {
-            if (!p.isSpectator() && Math.hypot(p.getX() - at.getX(), p.getZ() - at.getZ()) <= r) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     // 塩の道の標: 読み込まれたら建て、二章の人が近くに来たら一行と合図
     static void roadTick(MinecraftServer server, ServerLevel level, List<ServerPlayer> players) {

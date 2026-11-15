@@ -954,10 +954,6 @@ public final class TideBuild {
         WATCH.add(new Watch(level, probe, eyes));
     }
 
-    // 試験用: 見張っている出口の数
-    public static int watched() {
-        return WATCH.size();
-    }
 
     @EventBusSubscriber(modid = SkyAbyss.MODID)
     static final class Events {

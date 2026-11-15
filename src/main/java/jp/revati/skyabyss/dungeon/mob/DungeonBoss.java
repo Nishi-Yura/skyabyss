@@ -14,7 +14,6 @@ import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -138,9 +137,6 @@ public abstract class DungeonBoss extends RegionBoss {
         return 0;
     }
 
-    public boolean introRunning() {
-        return introTick >= 0;
-    }
 
     // 試験・やり直し用: 登場を済んだことにする
     public void skipIntro() {
@@ -635,10 +631,6 @@ public abstract class DungeonBoss extends RegionBoss {
         return null;
     }
 
-    // 自己テスト用: つっかえの数え
-    public int stuckTicks() {
-        return stuck;
-    }
 
     // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
     private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {

@@ -23,9 +23,7 @@ import jp.revati.skyabyss.titan.tide.mob.TideMobSetup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -313,23 +311,6 @@ public final class VowSelfTest {
         }
     }
 
-    // skyabyss_vow の ja・en の lang に、そのキーがあるか
-    private static boolean hasLang(String key) {
-        try {
-            var assets = net.neoforged.fml.ModList.get().getModFileById(SkyAbyss.MODID).getFile().findResource("assets", "skyabyss_vow", "lang");
-            for (String name : List.of("ja_jp.json", "en_us.json")) {
-                try (var reader = java.nio.file.Files.newBufferedReader(assets.resolve(name), java.nio.charset.StandardCharsets.UTF_8)) {
-                    var json = com.google.gson.JsonParser.parseReader(reader).getAsJsonObject();
-                    if (!json.has(key) || json.get(key).getAsString().isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        } catch (java.io.IOException | RuntimeException e) {
-            return false;
-        }
-    }
 
     // ---------------------------------------------------------------- 居座りの早じまい
 

@@ -33,9 +33,6 @@ public final class AbyssAttacks {
         return lastKind;
     }
 
-    public static int lastShapes() {
-        return lastShapes;
-    }
 
     public static void launch(HeartBoss heart, ServerLevel server, List<ServerPlayer> players) {
         HeartBoss.AbyssCtx c = heart.abyssCtx();

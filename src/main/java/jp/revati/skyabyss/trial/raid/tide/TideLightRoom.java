@@ -11,7 +11,6 @@ import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -480,9 +479,6 @@ public final class TideLightRoom extends RaidRoom {
         return last != null && last.hit();
     }
 
-    public int litTicks() {
-        return lit;
-    }
 
     // 経路の台の一覧 (格子の添字 {i, j})
     public List<int[]> pathNodes() {

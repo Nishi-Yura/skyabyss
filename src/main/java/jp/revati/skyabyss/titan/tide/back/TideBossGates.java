@@ -29,10 +29,6 @@ public final class TideBossGates {
     private TideBossGates() {
     }
 
-    // 干潟の口 (潮招きの戦い): トンネルの北の端 (z MOUTH_Z)。開口は x -2〜2、床 66 の上 3 段
-    public static void flats(ServerLevel level) {
-        BossGate.build(level, new BossGate.Spec(new BlockPos(0, TUNNEL_FLOOR, MOUTH_Z), Direction.NORTH).half(MOUTH_HALF).height(3).court(9, 6, 15), PALETTE);
-    }
 
     // 殻の底 (心臓の間) の入口: 前室の北の端 (z -15)。開口は x -1〜1、床 (床のブロックは floorY - 1) の上 3 段。前室から広い前庭へ
     public static void heart(ServerLevel level, int x, int floorY, int gateZ) {

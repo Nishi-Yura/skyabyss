@@ -7,7 +7,6 @@
 入力: docs/review/warden_model/heart_warden_{mesh.json,atlas.png,glowmask.png}
 出力 (assets/skyabyss/ の下):
   lowpoly/heart_warden.json, textures/lowpoly/heart_warden(.png|_glowmask.png), geo/entity/heart_warden_lowpoly(_debug).geo.json   (tools/install/install_lowpoly.py)
-  geo/entity/heart_warden.geo.json + textures/entity/heart_warden.png    LowPoly.enabled = false のときの箱の代用 (デバッグの箱を写す)
   animations/entity/heart_warden.animation.json                          idle・walk・claw・lunge・snuff・phase・hurt・death
 
 動きの決まり (ゲームの数字は変えない。HeartWarden の予告と同じ長さ):
@@ -155,9 +154,6 @@ def install():
     tex = os.path.join(A, "textures", "lowpoly")
     ent = os.path.join(A, "textures", "entity")
     os.makedirs(ent, exist_ok=True)
-    # 箱の代用 (LowPoly.enabled = false)
-    shutil.copyfile(os.path.join(A, "geo", "entity", NAME + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", NAME + ".geo.json"))
-    shutil.copyfile(os.path.join(tex, NAME + ".png"), os.path.join(ent, NAME + ".png"))
     anim_path = os.path.join(A, "animations", "entity", NAME + ".animation.json")
     os.makedirs(os.path.dirname(anim_path), exist_ok=True)
     with open(anim_path, "w", encoding="utf-8", newline="\n") as f:

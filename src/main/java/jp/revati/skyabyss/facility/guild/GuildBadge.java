@@ -51,7 +51,4 @@ public record GuildBadge(String guild, String tag, int color, int accent, String
         return GuildData.textColor(accent);
     }
 
-    public static DyeColor dye(int id) {
-        return DyeColor.byId(id);
-    }
 }

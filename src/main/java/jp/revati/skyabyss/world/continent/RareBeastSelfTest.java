@@ -26,7 +26,7 @@ public final class RareBeastSelfTest {
         for (RareBeast.Kind k : RareBeast.Kind.values()) {
             check(f, RareBeasts.type(k) != null, k.id + ": no entity type");
             String a = "/assets/skyabyss/";
-            check(f, exists(a + "lowpoly/" + k.id + ".json") && exists(a + "geo/entity/" + k.id + "_lowpoly.geo.json") && exists(a + "textures/entity/" + k.id + ".png"),
+            check(f, exists(a + "lowpoly/" + k.id + ".json") && exists(a + "geo/entity/" + k.id + "_lowpoly.geo.json") && exists(a + "textures/lowpoly/" + k.id + ".png"),
                     k.id + ": model files missing");
             String anims = read(a + "animations/entity/" + k.id + ".animation.json");
             List<String> need = new ArrayList<>(List.of("idle", "walk", "run", "hurt", "death"));

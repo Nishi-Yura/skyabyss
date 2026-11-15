@@ -124,10 +124,6 @@ public final class Golden {
             return new Box(x, y + h - hh, w, hh);
         }
 
-        // 左から ww を取ったあと (あいだ GAP) の残り
-        public Box afterLeft(int ww) {
-            return new Box(x + ww + GAP, y, w - ww - GAP, h);
-        }
 
         // 上から hh を取ったあと (あいだ GAP) の残り
         public Box afterTop(int hh) {
@@ -146,15 +142,7 @@ public final class Golden {
             return left ? new Box(x, y, n, h) : new Box(x + w - n, y, n, h);
         }
 
-        // 縦に分けたときの上の主 (0.618) と下の脇 (0.382)
-        public Box majorTop() {
-            return new Box(x, y, w, Golden.major(h));
-        }
 
-        public Box minorBottom() {
-            int n = Golden.minor(h);
-            return new Box(x, y + h - n, w, n);
-        }
 
         // i 番目の行 (高さ rowH、上から pad あけて)
         public Box row(int i, int rowH, int pad) {

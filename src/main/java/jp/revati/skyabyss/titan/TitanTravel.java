@@ -14,8 +14,6 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackBuilder;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -28,7 +26,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -172,14 +169,6 @@ public final class TitanTravel {
         board(player, whale.getUUID());
     }
 
-    // 巨神の子が着いた輪から入る (岩鯨の体がどこにいても入れる)。乗れなければ false
-    public static boolean boardFromYoung(ServerPlayer player) {
-        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, "stone_whale")) {
-            return false;
-        }
-        board(player, (UUID) null);
-        return true;
-    }
 
     // whaleId: どの岩鯨か。岩鯨は一体だけなので今は使わない (前は skyabyss_titan に書いていたが、読む所がなく消した)
     private static void board(ServerPlayer player, UUID whaleId) {

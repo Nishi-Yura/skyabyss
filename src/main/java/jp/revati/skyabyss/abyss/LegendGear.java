@@ -82,9 +82,6 @@ public final class LegendGear {
         return LEGENDS.stream().map(d -> d.getId().toString()).toList();
     }
 
-    public static List<DeferredItem<Item>> ch5() {
-        return CH5;
-    }
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

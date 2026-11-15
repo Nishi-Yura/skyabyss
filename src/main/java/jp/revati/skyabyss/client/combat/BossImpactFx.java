@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.client.combat;
 
-import org.joml.Vector3f;
 
 import jp.revati.skyabyss.client.entity.PaperCutLayer;
 import jp.revati.skyabyss.fx.FxParticles;
@@ -56,8 +55,4 @@ public final class BossImpactFx {
         return true;
     }
 
-    static Vector3f lordColor(LivingEntity e) {
-        int rgb = PaperCutLayer.lordRgbOf(e);
-        return new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f);
-    }
 }

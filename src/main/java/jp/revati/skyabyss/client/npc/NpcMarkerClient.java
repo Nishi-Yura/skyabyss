@@ -88,14 +88,7 @@ public final class NpcMarkerClient {
         return MARKERS.size();
     }
 
-    public static Marker markerOf(int id) {
-        return MARKERS.getOrDefault(id, Marker.NONE);
-    }
 
-    // 開発用 (撮影・自己テスト): 受け取ったものとして印を置く
-    public static void putForTest(int id, Marker marker) {
-        MARKERS.put(id, marker);
-    }
 
     static boolean visible(Minecraft mc) {
         return mc.player != null && mc.level != null && mc.screen == null && !mc.options.hideGui && Config.NPC_MARKERS.get()

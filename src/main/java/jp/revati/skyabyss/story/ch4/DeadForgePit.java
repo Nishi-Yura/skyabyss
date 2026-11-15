@@ -22,7 +22,6 @@ import jp.revati.skyabyss.story.ch1.Tasks;
 import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.titan.ember.EmberTitanSetup;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -222,10 +221,6 @@ public final class DeadForgePit {
         level.playSound(null, at, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
     }
 
-    public static boolean warmNow(ServerLevel level, BlockPos at) {
-        Long until = WARM.get(at.asLong());
-        return until != null && until > level.getGameTime();
-    }
 
     // range の内の温まっている台 (なければ null)。熾り蟲が寄る先
     @Nullable

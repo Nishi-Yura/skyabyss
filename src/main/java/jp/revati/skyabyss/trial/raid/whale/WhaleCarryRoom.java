@@ -13,7 +13,6 @@ import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -546,15 +545,7 @@ public final class WhaleCarryRoom extends RaidRoom {
         lingering[idx] = 0;
     }
 
-    // 試験用: 骨奪いと、抱えている骨玉
-    @Nullable
-    public Mob thief() {
-        return thief;
-    }
 
-    public int stolen() {
-        return stolen;
-    }
 
     private boolean nearPillar(RaidCtx ctx, BlockPos p, int margin) {
         double lx = p.getX() + 0.5 - ctx.origin().getX();

@@ -17,7 +17,6 @@ import jp.revati.skyabyss.tower.gear.TowerGearSetup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -303,11 +302,6 @@ public final class MythicAwakening {
         return null;
     }
 
-    // 自己テスト用
-    static CompoundTag tagOf(ItemStack s) {
-        CustomData d = s.get(DataComponents.CUSTOM_DATA);
-        return d == null ? new CompoundTag() : d.copyTag();
-    }
 
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {

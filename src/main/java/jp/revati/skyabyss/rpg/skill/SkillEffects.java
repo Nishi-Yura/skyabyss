@@ -10,7 +10,6 @@ import java.util.WeakHashMap;
 
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -24,10 +23,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 技が残す「時間のある効き目」をまとめて持つ (サーバーだけ。保存しない)。
 //   - 期限つきの修飾子 (鈍足・灰かぶり・見切り・連れ風・逃げ足)
@@ -557,10 +554,6 @@ public final class SkillEffects {
         return hasTimed(e, "slow");
     }
 
-    // 偽のプレイヤーは tick されないので、自己テストの手伝い
-    public static boolean isFake(Player p) {
-        return p instanceof FakePlayer;
-    }
 
     // 使っていない import を避けるための小さな窓口 (効果の見た目)
     static void glow(LivingEntity e, int ticks, LivingEntity source) {

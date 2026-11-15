@@ -353,12 +353,6 @@ public final class GrowthRewards {
         }
     }
 
-    // ---------------------------------------------------------------- 試練の踏破 (順路の段を越えたとき TrialRoute.onCleared から)
-    // 越えた試練の参加者に渡し、同じ背中にいない仲間にも分け前。数字は各背の TRIAL_XP と推奨レベル (P2-1)。
-    // 岩鯨は石でもレイドの部屋でもここ。潮殻・雷翼・余燼の原型の石は自分で渡すので、ここへ来るのはレイドの部屋を越えたときだけ
-    public static void onWhaleTrialCleared(ServerLevel level, List<ServerPlayer> near) {
-        onRouteTrialCleared(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, near, null);
-    }
 
     // titan は進行の名前 (stone_whale / tide_shell / thunder_wing / ember)。signal はその巨神の試練の合図 (storm_trial_west など。無ければ null)
     public static void onRouteTrialCleared(ServerLevel level, String titan, List<ServerPlayer> near, @Nullable String signal) {

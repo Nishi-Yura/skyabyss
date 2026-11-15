@@ -3,9 +3,7 @@ package jp.revati.skyabyss.titan.storm.raiju;
 import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
 import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import jp.revati.skyabyss.notice.Notice;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +14,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -82,13 +79,6 @@ public final class RaijuNest {
             return rodBase(i).above(ROD_TOP);
         }
 
-        public List<BlockPos> rodTops() {
-            List<BlockPos> out = new ArrayList<>();
-            for (int i = 0; i < RODS; i++) {
-                out.add(rodTop(i));
-            }
-            return out;
-        }
 
         // 栓 (レバー): 柱の根元の 1 上の、横どなり (背中の担当が置いた所)。見つからなければ中心へ一番近い横
         public BlockPos plug(int i) {

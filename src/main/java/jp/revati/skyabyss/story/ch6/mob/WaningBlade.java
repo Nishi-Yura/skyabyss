@@ -2,7 +2,6 @@ package jp.revati.skyabyss.story.ch6.mob;
 
 import java.util.ArrayDeque;
 import java.util.EnumSet;
-import java.util.Iterator;
 
 import jp.revati.skyabyss.combat.BossCue;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +12,6 @@ import jp.revati.skyabyss.story.ch6.field.FallingLight;
 import jp.revati.skyabyss.story.ch6.rift.MoonRift;
 import jp.revati.skyabyss.story.ch6.rift.RiftArena;
 import jp.revati.skyabyss.story.ch6.valley.StarLamps;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -266,19 +264,6 @@ public class WaningBlade extends MoonMob {
         }
     }
 
-    // 主の記録の、time 以前で一番新しいもの
-    @Nullable
-    public Frame frameAt(long time) {
-        Frame best = null;
-        for (Iterator<Frame> it = history.descendingIterator(); it.hasNext();) {
-            Frame fr = it.next();
-            if (fr.time() <= time) {
-                best = fr;
-                break;
-            }
-        }
-        return best;
-    }
 
     private void tickEcho(ServerLevel sl) {
         if (!(sl.getEntity(masterId) instanceof WaningBlade master) || !master.isAlive()) {

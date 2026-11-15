@@ -98,10 +98,6 @@ public final class EmberLore {
         return PENDING.contains(id);
     }
 
-    // 碑文の看板の鍵 (B が背中に置く。伝承の自己テストが「置かれる看板」として数える)
-    public static List<String> inscriptionSigns() {
-        return EmberIds.INSCRIPTIONS.stream().map(EmberLore::sign).toList();
-    }
 
     private static Map<String, String> ordered(String... kv) {
         Map<String, String> m = new LinkedHashMap<>();

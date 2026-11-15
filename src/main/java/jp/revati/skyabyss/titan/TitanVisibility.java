@@ -230,11 +230,6 @@ public final class TitanVisibility {
         return n;
     }
 
-    // 自己テスト: その人に、その実体が送られているか
-    public static boolean sentTo(ServerLevel level, net.minecraft.world.entity.Entity e, ServerPlayer p) {
-        var tracked = level.getChunkSource().chunkMap.entityMap.get(e.getId());
-        return tracked != null && tracked.seenBy.contains(p.connection);
-    }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {

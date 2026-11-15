@@ -49,10 +49,6 @@ public final class SiteHatches {
         HATCHES.add(new Hatch(site, at, null, null));
     }
 
-    // 部品の座標 (x, y, z) の戸。部品のその所の形を、戸がないときに置く (部品は初めて使うときに読む)
-    public static void registerCell(String site, int x, int y, int z) {
-        HATCHES.add(new Hatch(site, (level, e) -> Blueprint.transform(x, y, z, SiteFinder.rot(e.yaw), SiteFinder.mirror(e.yaw), e.pos), null, new int[] {x, y, z}));
-    }
 
     @Nullable
     static BlockState cellState(String site, int[] c) {
@@ -157,15 +153,4 @@ public final class SiteHatches {
         return true;
     }
 
-    // 自己テスト: その場所の戸を今すぐ見回る。変えた数
-    public static int mendNow(ServerLevel level) {
-        int n = 0;
-        List<ServerPlayer> players = Players.snapshot(level.players());
-        for (Spot s : spots(level)) {
-            if (mend(level, s, players)) {
-                n++;
-            }
-        }
-        return n;
-    }
 }

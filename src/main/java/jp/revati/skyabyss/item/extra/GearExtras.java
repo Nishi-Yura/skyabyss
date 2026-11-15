@@ -56,7 +56,4 @@ public record GearExtras(int sockets, List<Gem> gems, String aspect, boolean hol
         return new GearExtras(sockets, gems, aspect, hollow, gen, stamp, List.copyOf(t));
     }
 
-    public int traitSlots() {
-        return generation / GENERATIONS_PER_TRAIT;
-    }
 }

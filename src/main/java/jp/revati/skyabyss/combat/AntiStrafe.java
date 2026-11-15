@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -122,20 +121,6 @@ public final class AntiStrafe {
         return t == null || t.streak < STRAFE_TICKS ? 0 : t.dir;
     }
 
-    // 一番長く回り続けている人 (回っている人がいなければ null)
-    @Nullable
-    public Player strafer(Collection<? extends Player> players, int minStreak) {
-        Player best = null;
-        int bestStreak = minStreak - 1;
-        for (Player p : players) {
-            int s = streak(p);
-            if (s > bestStreak) {
-                bestStreak = s;
-                best = p;
-            }
-        }
-        return best;
-    }
 
     // ticks 後にいる所 (回っているなら、同じ半径のまま回り続けた先。そうでなければ今の足もと)
     public Vec3 predict(Player p, int ticks) {
@@ -165,9 +150,4 @@ public final class AntiStrafe {
         return Math.atan2(v.z - cz, v.x - cx);
     }
 
-    // 回る速さ (ラジアン / tick。符号つき)。回っていなければ 0
-    public double omega(Player p) {
-        Track t = tracks.get(p.getUUID());
-        return t == null || t.streak < STRAFE_TICKS ? 0 : t.omega;
-    }
 }

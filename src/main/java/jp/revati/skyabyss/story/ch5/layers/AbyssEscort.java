@@ -24,7 +24,6 @@ import jp.revati.skyabyss.story.ch5.AbyssWorld;
 import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -208,9 +207,6 @@ public final class AbyssEscort {
         return false;
     }
 
-    public static boolean escorted(ServerPlayer p, String layer) {
-        return LayerData.get(p.server).has(p.getUUID(), "escort:" + layer) || Layers.pastMarks(p, layer);
-    }
 
     // 送り出せる人: 段が <層>_marks で、まだ送っていない
     public static boolean needs(ServerPlayer p, String layer) {

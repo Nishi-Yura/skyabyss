@@ -27,7 +27,6 @@ import net.minecraft.world.item.FlintAndSteelItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -464,7 +463,4 @@ public final class SiteGuard {
         sitesStamp = Long.MIN_VALUE;
     }
 
-    static boolean levelAccessorInCapital(LevelAccessor l, BlockPos p) {
-        return l instanceof Level level && inTown(level, p);
-    }
 }

@@ -661,8 +661,4 @@ public final class FxDraw {
         }
     }
 
-    // 直近のフレームで描いた板の数 (計測用・Prof と併用)
-    public static int lastFrameQuads() {
-        return lastFrameQuads;
-    }
 }

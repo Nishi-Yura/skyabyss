@@ -10,7 +10,6 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.opening.OpeningSites;
 import jp.revati.skyabyss.opening.site.Blueprint;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -142,10 +141,6 @@ public final class SongChamber {
         return Ch1Data.get(level.getServer().overworld()).chamber == 2;
     }
 
-    // 戸を開ける (世界に一度)。鐘が応えたとき SongStones.answer から呼ぶ
-    public static void onBellAnswered(ServerLevel level) {
-        open(level);
-    }
 
     static boolean open(ServerLevel level) {
         Ch1Data data = Ch1Data.get(level.getServer().overworld());

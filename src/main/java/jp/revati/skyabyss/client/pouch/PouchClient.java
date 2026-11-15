@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -144,11 +143,6 @@ public final class PouchClient {
         PacketDistributor.sendToServer(new PouchNet.Use(Optional.of(id)));
     }
 
-    // 前回使った道具 (初回の手引きが「短押しで使える」かを決めるのに読む)
-    @Nullable
-    public static ResourceLocation lastUsed() {
-        return last;
-    }
 
     @Nullable
     static ResourceLocation last() {

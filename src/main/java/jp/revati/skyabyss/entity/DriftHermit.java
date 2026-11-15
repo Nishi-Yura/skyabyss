@@ -13,7 +13,6 @@ import jp.revati.skyabyss.story.ch2.Ch2Mobs;
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -100,9 +99,6 @@ public class DriftHermit extends GuardMob {
         return ahead;
     }
 
-    public void setAhead(@Nullable UUID id) {
-        this.ahead = id;
-    }
 
     @Override
     protected void registerGoals() {

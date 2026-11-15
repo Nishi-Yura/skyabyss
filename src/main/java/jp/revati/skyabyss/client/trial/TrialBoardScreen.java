@@ -5,7 +5,6 @@ import java.util.List;
 import org.lwjgl.glfw.GLFW;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.ui.TextStyle;
 import jp.revati.skyabyss.trial.Trial;
 import jp.revati.skyabyss.trial.TrialBoardNet;
 import jp.revati.skyabyss.trial.TrialCatalog;
@@ -33,7 +32,6 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int SHEET_H = 96;
 
     private static final int BG = 0x05070F;
-    private static final int PANEL = 0x0C1022;
     private static final int CARD = 0x101630;
     private static final int GOLD = 0xE9C46A;
     private static final int TEAL = 0x8FD0FF;
@@ -80,10 +78,6 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         this.data = open;
     }
 
-    // 試験・撮影のため
-    public void selectTab(int t) {
-        tab = Mth.clamp(t, 0, TABS - 1);
-    }
 
     @Override
     public boolean isPauseScreen() {

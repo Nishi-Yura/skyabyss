@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.combat.Telegraph;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
@@ -139,9 +138,6 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 1.4f, 1.3f);
     }
 
-    public boolean isLocked() {
-        return lockedAt >= 0;
-    }
 
     private void pop(ServerLevel server) {
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.2f, 1.6f);

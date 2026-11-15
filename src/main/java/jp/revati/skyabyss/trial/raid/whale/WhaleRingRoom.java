@@ -10,9 +10,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -344,9 +342,6 @@ public final class WhaleRingRoom extends RaidRoom {
         startAt -= ticks;
     }
 
-    public long shrinkStart() {
-        return startAt;
-    }
 
     public boolean outside(RaidCtx ctx, double x, double z) {
         return dist(ctx, x, z) > radius;

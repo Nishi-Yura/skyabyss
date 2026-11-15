@@ -3,7 +3,6 @@ package jp.revati.skyabyss.opening;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +16,6 @@ import jp.revati.skyabyss.lore.LorePageItem;
 import jp.revati.skyabyss.lore.LoreSetup;
 import jp.revati.skyabyss.lore.LoreState;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.npc.NpcSpawner;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
 import jp.revati.skyabyss.opening.OpeningLogic.Env;
@@ -33,7 +31,6 @@ import jp.revati.skyabyss.sky.SkyEventData;
 import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.sky.SkyPass;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
@@ -395,11 +392,6 @@ public final class OpeningDirector {
         }
     }
 
-    // ---------------------------------------------------------------- 岩鯨
-    // 岩鯨を迎えられる人 (影・歌・イサナを済ませた人) がオーバーワールドにいるか
-    public static boolean anyoneReady(ServerLevel level) {
-        return readyPlayer(level) != null;
-    }
 
     // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (仲間が済ませていてもよい)
     @Nullable
@@ -729,7 +721,4 @@ public final class OpeningDirector {
         state(player).reset();
     }
 
-    public static List<OpeningBeat> doneList(ServerPlayer player) {
-        return List.copyOf(state(player).doneBeats());
-    }
 }

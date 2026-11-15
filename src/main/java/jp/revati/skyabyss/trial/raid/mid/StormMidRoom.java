@@ -16,7 +16,6 @@ import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -161,10 +160,6 @@ public final class StormMidRoom extends MidRoom {
         return true;
     }
 
-    // 栓を引く (自己テスト用。人がいなくても)
-    public boolean pullForTest(RaidCtx ctx, int i) {
-        return RaijuNest.pull(site(ctx), i, null);
-    }
 
     @Override
     protected void resetFixtures(RaidCtx ctx) {

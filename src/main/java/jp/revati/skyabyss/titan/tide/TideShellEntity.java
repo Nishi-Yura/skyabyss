@@ -201,9 +201,6 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return entityData.get(MODE) == Mode.REST.ordinal() && entityData.get(REST) < 0;
     }
 
-    public boolean isApproaching() {
-        return entityData.get(MODE) == Mode.APPROACH.ordinal();
-    }
 
     // 潮門を開けておく残り tick (テスト用)
     public int stayLeft() {
@@ -816,11 +813,6 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         groundNow = jp.revati.skyabyss.titan.TitanGround.anyUnloaded(level, volume, getX(), getZ(), getYRot(), 3.0) ? Math.max(groundNow, fresh) : fresh;
     }
 
-    // 試験用: 今の位置・向きで体が地形にめり込まない最低の高さ (間引かずに測る)
-    public double groundRequiredY() {
-        return jp.revati.skyabyss.titan.TitanGround.requiredY((ServerLevel) level(), jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
-                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot());
-    }
 
     private double horizontalDistanceTo(double x, double z) {
         return Math.hypot(x - getX(), z - getZ());
@@ -856,10 +848,6 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return RequestResult.OK;
     }
 
-    // この刻に呼んだ人の名前 (いなければ空)
-    public String requesterNow() {
-        return requestWindow == TideOcean.windowId(level().getDayTime()) ? requesterName : "";
-    }
 
     // 呼び貝 (titan.travel.TitanCalls): 干満・昼夜に関わらず、その人にいちばん近い浅瀬へ寄って、20 分 (TitanStay) 潮門を開ける。
     // 遠くにいるときは、休む場所から 90〜140 ブロックの沖から歩いてくる。休む場所がなければ false

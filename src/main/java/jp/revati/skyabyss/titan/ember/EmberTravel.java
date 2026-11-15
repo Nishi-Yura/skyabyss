@@ -13,7 +13,6 @@ import jp.revati.skyabyss.titan.TitanGate;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -270,10 +269,6 @@ public final class EmberTravel {
         Notice.place(player, ModText.title(title), ModText.subtitle(subtitle));
     }
 
-    // 自己テスト用
-    static int plainTicks(UUID id) {
-        return ON_PLAIN.getOrDefault(id, 0);
-    }
 
     // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
     private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {

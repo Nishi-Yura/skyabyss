@@ -9,8 +9,6 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch6.MoonWorld;
 import jp.revati.skyabyss.story.ch6.mob.FullKeeper;
 import jp.revati.skyabyss.town.TownGuestEntity;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -185,10 +183,6 @@ public final class MomentStop {
         }
     }
 
-    // 自己テスト用
-    public static boolean anyFrozenNear(ServerLevel level, BlockPos at, double r) {
-        return level.getEntities((Entity) null, new AABB(at).inflate(r), MomentStop::frozen).size() > 0;
-    }
 
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
     private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {

@@ -7,7 +7,6 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.glow.ItemGlow;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.scores.PlayerTeam;
@@ -48,9 +47,6 @@ public final class ItemGlowClient {
         });
     }
 
-    public static boolean isGlowing(int entityId) {
-        return TRACKED.containsKey(entityId);
-    }
 
     private static void release(Minecraft mc, int id) {
         if (mc.level != null && mc.level.getEntity(id) instanceof ItemEntity item) {
