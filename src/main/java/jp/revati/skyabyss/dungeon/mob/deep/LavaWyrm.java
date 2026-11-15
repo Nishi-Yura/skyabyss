@@ -91,7 +91,6 @@ public class LavaWyrm extends DungeonBoss {
                         .victims(this::canHit)
                         .onImpact(server -> {
                             jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "lava_pillar", this, new Vec3(s.x, getY(), s.z), random.nextFloat() * 360f, 1.1f, 18);
-                            server.sendParticles(ParticleTypes.LAVA, s.x, getY() + 0.4, s.z, 40, 1.2, 0.6, 1.2, 0.15);
                             server.playSound(null, s.x, getY(), s.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.2f, 0.6f);
                         })
                         .onHit((server, player) -> {
@@ -114,9 +113,6 @@ public class LavaWyrm extends DungeonBoss {
                     .floor(getY()).warn(BREATH_WARN).active(60).repeatEvery(20).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        for (int i = 2; i < BREATH_RANGE; i += 2) {
-                            server.sendParticles(ParticleTypes.FLAME, getX() + Math.cos(a) * i, getY() + 0.4, getZ() + Math.sin(a) * i, 8, i * 0.2, 0.2, i * 0.2, 0.02);
-                        }
                     })
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.5f);
@@ -147,7 +143,6 @@ public class LavaWyrm extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), 3, 9))
                     .floor(getY()).warn(LASH_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.3, getZ(), 40, 4, 0.1, 4, 0.1))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.9f);
                         Vec3 away = player.position().subtract(position()).multiply(1, 0, 1).normalize();

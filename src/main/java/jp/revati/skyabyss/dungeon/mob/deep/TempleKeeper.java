@@ -77,7 +77,6 @@ public class TempleKeeper extends DungeonBoss {
                     .floor(getY()).warn(FLOOD_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.4, getZ(), 200, FLOOD_OUTER * 0.45, 0.3, FLOOD_OUTER * 0.45, 0.2);
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 2f, 0.6f);
                     })
                     .onHit((server, player) -> {
@@ -98,9 +97,6 @@ public class TempleKeeper extends DungeonBoss {
                     .floor(getY()).warn(GAZE_WARN).active(GAZE_ACTIVE).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        for (double d = 1.5; d < GAZE_LENGTH; d += 1.0) {
-                            server.sendParticles(ParticleTypes.GLOW, getX() + Math.cos(a) * d, getY() + 2.4, getZ() + Math.sin(a) * d, 3, 0.2, 0.2, 0.2, 0.01);
-                        }
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2f, 0.5f);
                     })
                     .onHit((server, player) -> {
@@ -125,7 +121,6 @@ public class TempleKeeper extends DungeonBoss {
                 Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, len, 0.8))
                         .floor(getY()).warn(PIERCE_HIT1 + PIERCE_GAP * k).danger().owner(this).target(target)
                         .victims(this::canHit)
-                        .onImpact(server -> server.sendParticles(ParticleTypes.CRIT, getX() + Math.cos(a) * 4, getY() + 1.2, getZ() + Math.sin(a) * 4, 8, 1.0, 0.2, 1.0, 0.1))
                         .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.9f))
                         .start();
             }
@@ -150,7 +145,6 @@ public class TempleKeeper extends DungeonBoss {
                         .victims(this::canHit)
                         .onImpact(server -> {
                             jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "water_spout", this, new Vec3(s.x, getY(), s.z), random.nextFloat() * 360f, 0.9f, 18);
-                            server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, s.x, getY() + 0.3, s.z, 40, 1.2, 0.6, 1.2, 0.1);
                         })
                         .onHit((server, player) -> {
                             player.hurt(attackSource(), damage() * 0.8f);
@@ -168,7 +162,6 @@ public class TempleKeeper extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), THRUST_LENGTH, 0.8))
                     .floor(getY()).warn(THRUST_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.CRIT, getX() + f.x * 4, getY() + 1.2, getZ() + f.z * 4, 10, 1.2, 0.2, 1.2, 0.1))
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.2f))
                     .start();
         }

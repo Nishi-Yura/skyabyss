@@ -303,7 +303,7 @@ public class HeartWarden extends Monster implements GeoEntity {
         double h = getBbHeight();
         double a = random.nextDouble() * Math.PI * 2;
         double r = getBbWidth() * 0.45;
-        level.sendParticles(ParticleTypes.SOUL, getX() + Math.cos(a) * r, getY() + h * (0.35 + random.nextDouble() * 0.4), getZ() + Math.sin(a) * r, 1, 0, 0.03, 0, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX() + Math.cos(a) * r, getY() + h * (0.35 + random.nextDouble() * 0.4), getZ() + Math.sin(a) * r, 1, 0, 0.03, 0, 0);
     }
 
     private void updateBar(ServerLevel level) {
@@ -504,8 +504,8 @@ public class HeartWarden extends Monster implements GeoEntity {
 
     private void boom(ServerLevel level, double x, double y, double z, double r) {
         level.playSound(null, x, y, z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 1.6f, 0.6f);
-        level.sendParticles(ParticleTypes.SCULK_SOUL, x, y + 0.3, z, (int) (8 + r * 4), r * 0.4, 0.2, r * 0.4, 0.02);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 0.2, z, (int) (6 + r * 3), r * 0.4, 0.1, r * 0.4, 0.01);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.3, z, (int) (8 + r * 4), r * 0.4, 0.2, r * 0.4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.2, z, (int) (6 + r * 3), r * 0.4, 0.1, r * 0.4, 0.01);
     }
 
     // 回し払い: 自分のまわりの円。腕を広げて一回り
@@ -546,8 +546,6 @@ public class HeartWarden extends Monster implements GeoEntity {
             Telegraph.in(level, TelegraphShape.circle(x, z, 1.8)).floor(y).warn(20 + k * 4).danger().owner(this)
                     .onImpact(lvl -> {
                         lvl.playSound(null, x, y, z, SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.4f, 0.5f);
-                        lvl.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
-                                net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState()), x, y + 0.6, z, 16, 0.4, 0.6, 0.4, 0.1);
                     }).onHit(hit(0.9)).start();
         }
         getNavigation().stop();
@@ -564,7 +562,6 @@ public class HeartWarden extends Monster implements GeoEntity {
         Telegraph.in(level, TelegraphShape.ring(x, z, 5.5, 9.5)).prop(PropFx.ring("tentacle", 12).size(0.8f)).floor(y).warn(38).danger().owner(this)
                 .onImpact(lvl -> {
                     lvl.playSound(null, x, y, z, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3f, 0.3f);
-                    lvl.sendParticles(ParticleTypes.SONIC_BOOM, x, y + 1, z, 1, 0, 0, 0, 0);
                 }).onHit(hit(1.0)).start();
         getNavigation().stop();
         playAction("pulse");
@@ -578,9 +575,7 @@ public class HeartWarden extends Monster implements GeoEntity {
             double x = t.getX() + Math.cos(a) * 4.5;
             double z = t.getZ() + Math.sin(a) * 4.5;
             double face = Telegraph.angleOf(t.getX() - x, t.getZ() - z);
-            level.sendParticles(ParticleTypes.SCULK_SOUL, x, t.getY() + 1, z, 20, 0.3, 0.8, 0.3, 0.01);
-            Telegraph.in(level, TelegraphShape.cone(x, z, face, 6, Math.toRadians(40))).floor(t.getY()).warn(26).danger().owner(this)
-                    .onImpact(lvl -> lvl.sendParticles(ParticleTypes.SWEEP_ATTACK, x, t.getY() + 1, z, 3, 0.5, 0.3, 0.5, 0)).onHit(hit(1.0)).start();
+            Telegraph.in(level, TelegraphShape.cone(x, z, face, 6, Math.toRadians(40))).floor(t.getY()).warn(26).danger().owner(this).onHit(hit(1.0)).start();
         }
         playAction("pincer");
     }
@@ -591,7 +586,7 @@ public class HeartWarden extends Monster implements GeoEntity {
         double z = t.getZ();
         double y = t.getY();
         addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.INVISIBILITY, 26, 0, false, false));
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 1, getZ(), 30, 0.6, 1, 0.6, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1, getZ(), 24, 0.6, 1, 0.6, 0.02);
         Telegraph.in(level, TelegraphShape.circle(x, z, 3)).floor(y).warn(26).danger().owner(this)
                 .onImpact(lvl -> {
                     teleportTo(x, y, z);
@@ -743,5 +738,10 @@ public class HeartWarden extends Monster implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

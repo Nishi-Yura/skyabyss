@@ -45,7 +45,6 @@ public class CaveJelly extends DungeonFloater {
                 .floor(floor).warn(WARN).danger().owner(this).target(target)
                 .startSound(SoundEvents.SQUID_SQUIRT, 0.8f, 1.4f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.GLOW, getX(), getY() + 0.8, getZ(), 24, 1.2, 0.8, 1.2, 0.02))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), this);

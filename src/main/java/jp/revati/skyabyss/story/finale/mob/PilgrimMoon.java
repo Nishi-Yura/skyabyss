@@ -135,7 +135,7 @@ public class PilgrimMoon extends CloudMob {
             AbyssBossBars.roar(bar, false);
         }
         if (tickCount % 10 == 0) {
-            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 3.2, getZ(), 2, 1.4, 1.4, 1.4, 0.01);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 3.2, getZ(), 2, 1.4, 1.4, 1.4, 0.01);
         }
         float hp = getHealth() / getMaxHealth();
         int want = hp <= 0.30f ? 2 : hp <= 0.60f ? 1 : 0;
@@ -281,11 +281,11 @@ public class PilgrimMoon extends CloudMob {
                 if (t % 2 == 0) {
                     for (int i = 0; i < 28; i++) {
                         double a = i / 28.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.END_ROD, f.x + Math.cos(a) * r, f.y + 0.3, f.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x + Math.cos(a) * r, f.y + 0.3, f.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
                     }
                     for (int i = 0; i < 12; i++) {
                         double a = i / 12.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.WAX_ON, f.x + Math.cos(a) * BURST_R, f.y + 0.15, f.z + Math.sin(a) * BURST_R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x + Math.cos(a) * BURST_R, f.y + 0.15, f.z + Math.sin(a) * BURST_R, 1, 0, 0, 0, 0);
                     }
                 }
                 for (ServerPlayer p : SeatArena.present(sl)) {
@@ -307,8 +307,8 @@ public class PilgrimMoon extends CloudMob {
             }
             if (t == PULL_TELL) {
                 playSound(CloudMobsSetup.MOON_PULL.get(), 2.4f, 1.0f);
-                sl.sendParticles(ParticleTypes.FLASH, f.x, f.y + 1, f.z, 1, 0, 0, 0, 0);
-                sl.sendParticles(ParticleTypes.END_ROD, f.x, f.y + 1, f.z, 60, BURST_R * 0.5, 0.5, BURST_R * 0.5, 0.15);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x, f.y + 1, f.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x, f.y + 1, f.z, 24, BURST_R * 0.5, 0.5, BURST_R * 0.5, 0.15);
                 for (ServerPlayer p : SeatArena.present(sl)) {
                     if (p.position().subtract(f).horizontalDistance() <= BURST_R + 0.3 && Math.abs(p.getY() - f.y) < 3) {
                         strike(p, dmg(1.5));
@@ -337,7 +337,7 @@ public class PilgrimMoon extends CloudMob {
                         for (int i = 0; i <= n; i++) {
                             double a = Math.toRadians(-SWEEP_HALF + 2 * SWEEP_HALF * i / n);
                             Vec3 q = f.add(dir.yRot((float) a).scale(d));
-                            sl.sendParticles(ParticleTypes.WAX_ON, q.x, q.y + 0.15, q.z, 1, 0, 0, 0, 0);
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y + 0.15, q.z, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -347,7 +347,7 @@ public class PilgrimMoon extends CloudMob {
                 playSound(CloudMobsSetup.MOON_SWEEP.get(), 2.4f, 0.8f);
                 for (double d = 2; d <= SWEEP_R; d += 1.5) {
                     Vec3 q = f.add(dir.scale(d));
-                    sl.sendParticles(ParticleTypes.SWEEP_ATTACK, q.x, q.y + 1, q.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.x, q.y + 1, q.z, 1, 0, 0, 0, 0);
                 }
                 for (ServerPlayer p : SeatArena.present(sl)) {
                     if (inSweep(dir, p.position())) {
@@ -401,13 +401,13 @@ public class PilgrimMoon extends CloudMob {
                     for (int i = 0; i < 50; i++) {
                         double a = random.nextDouble() * Math.PI * 2;
                         double d = Math.sqrt(random.nextDouble()) * 16;
-                        sl.sendParticles(ParticleTypes.SQUID_INK, f.x + Math.cos(a) * d, f.y + 0.3, f.z + Math.sin(a) * d, 1, 0, 0.05, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), f.x + Math.cos(a) * d, f.y + 0.3, f.z + Math.sin(a) * d, 1, 0, 0.05, 0, 0);
                     }
                     TownGuestEntity valley = PromiseIsle.active(sl, 1);
                     if (valley != null) {
                         for (int i = 0; i < 24; i++) {
                             double a = i / 24.0 * Math.PI * 2;
-                            sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, valley.getX() + Math.cos(a) * PromiseIsle.SHIELD_R, valley.getY() + 0.3,
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), valley.getX() + Math.cos(a) * PromiseIsle.SHIELD_R, valley.getY() + 0.3,
                                     valley.getZ() + Math.sin(a) * PromiseIsle.SHIELD_R, 1, 0, 0.05, 0, 0);
                         }
                     }
@@ -416,8 +416,8 @@ public class PilgrimMoon extends CloudMob {
             }
             if (t == FALL_TELL) {
                 playSound(CloudMobsSetup.MOON_FALL.get(), 2.6f, 0.9f);
-                sl.sendParticles(ParticleTypes.FLASH, f.x, f.y + 2, f.z, 3, 4, 1, 4, 0);
-                sl.sendParticles(ParticleTypes.END_ROD, f.x, f.y + 3, f.z, 160, 8, 2, 8, 0.12);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x, f.y + 2, f.z, 3, 4, 1, 4, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x, f.y + 3, f.z, 24, 8, 2, 8, 0.12);
                 for (ServerPlayer p : SeatArena.present(sl)) {
                     if (!PromiseIsle.shielded(p)) {
                         strike(p, dmg(3.0));
@@ -433,5 +433,10 @@ public class PilgrimMoon extends CloudMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

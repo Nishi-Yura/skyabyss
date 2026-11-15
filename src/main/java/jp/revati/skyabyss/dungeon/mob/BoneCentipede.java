@@ -142,7 +142,6 @@ public class BoneCentipede extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SWEEP_RADIUS))
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY() + 1, getZ(), 12, SWEEP_RADIUS * 0.4, 0.3, SWEEP_RADIUS * 0.4, 0))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.85f);
                         Vec3 away = player.position().subtract(position()).normalize();
@@ -182,8 +181,6 @@ public class BoneCentipede extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), a, SPIT_LENGTH, 0.9))
                     .floor(getY()).warn(SPIT_WARN + Math.abs(k) * 4).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                            getX() + Math.cos(a) * SPIT_LENGTH * 0.6, getY() + 0.6, getZ() + Math.sin(a) * SPIT_LENGTH * 0.6, 30, 2.5, 0.3, 2.5, 0.1))
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.8f))
                     .start();
         }
@@ -232,7 +229,6 @@ public class BoneCentipede extends DungeonBoss {
                     .floor(getY()).warn(ROCKS_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), s.x, getY() + 5, s.z, 40, 1.0, 1.5, 1.0, 0.1);
                         server.playSound(null, s.x, getY(), s.z, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.9f))
@@ -270,10 +266,6 @@ public class BoneCentipede extends DungeonBoss {
                 .floor(getY()).warn(warn).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> {
-                    for (double d = 2; d <= length; d += 1.5) {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                                getX() + Math.cos(a) * d, getY() + 0.3, getZ() + Math.sin(a) * d, 10, 1.0, 0.2, 1.0, 0.12);
-                    }
                     server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.3f, 0.55f);
                 })
                 .onHit((server, player) -> {
@@ -314,7 +306,7 @@ public class BoneCentipede extends DungeonBoss {
             // 床の下へ: 見えず、傷を受けない。掘り穴 (なければ人の足もと) へ移る
             setInvisible(true);
             setInvulnerable(true);
-            server().sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COARSE_DIRT.defaultBlockState()), getX(), getY() + 0.5, getZ(), 60, 1.5, 0.4, 1.5, 0.1);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.5, getZ(), 24, 1.5, 0.4, 1.5, 0.1);
             if (!erupt && !holes.isEmpty() && target != null) {
                 // 人から遠すぎず近すぎない穴
                 Vec3 best = holes.get(random.nextInt(holes.size()));
@@ -345,7 +337,7 @@ public class BoneCentipede extends DungeonBoss {
         if (tick == BURROW_DOWN + BURROW_HIDDEN) {
             setInvisible(false);
             setInvulnerable(false);
-            server().sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), getY() + 1, getZ(), 50, 1.4, 0.8, 1.4, 0.15);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 1, getZ(), 24, 1.4, 0.8, 1.4, 0.15);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 1.4f, 1.3f);
             // 床を割って出る: まわりに骨の棘が突き出る
             for (int k = 0; k < 6; k++) {
@@ -441,5 +433,10 @@ public class BoneCentipede extends DungeonBoss {
             default -> 16 + random.nextInt(12);
         };
         super.finish();
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

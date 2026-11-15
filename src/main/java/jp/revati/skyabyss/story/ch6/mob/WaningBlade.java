@@ -214,7 +214,7 @@ public class WaningBlade extends MoonMob {
         jp.revati.skyabyss.combat.BreakGauge.solved(this, STAGGER_TICKS);
         playAction("kneel");
         playSound(MoonMobsSetup.BLADE_STAGGER.get(), 2.0f, 0.8f);
-        sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2, getZ(), 40, 0.8, 1.2, 0.8, 0.12);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 2, getZ(), 24, 0.8, 1.2, 0.8, 0.12);
         if (!toldStagger) {
             toldStagger = true;
             for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(24), e -> e.isAlive())) {
@@ -316,7 +316,7 @@ public class WaningBlade extends MoonMob {
             hiddenFor = LIGHT_GONE;
             entityData.set(HIDDEN, true);
             setInvisible(true);
-            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2, getZ(), 30, 0.5, 1.2, 0.5, 0.05);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 2, getZ(), 24, 0.5, 1.2, 0.5, 0.05);
             playSound(MoonMobsSetup.BLADE_ECHO_FADE.get(), 1.5f, 1.0f);
         }
     }
@@ -356,13 +356,13 @@ public class WaningBlade extends MoonMob {
                 for (int i = -5; i <= 5; i++) {
                     Vec3 d = fwd.yRot((float) Math.toRadians(i * 15));
                     Vec3 p = position().add(d.scale(4.5));
-                    sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y + 0.15, p.z, 2, 0.05, 0, 0.05, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.15, p.z, 2, 0.05, 0, 0.05, 0);
                 }
             }
             case "thrust" -> {
                 for (int i = 1; i <= 12; i++) {
                     Vec3 p = position().add(fwd.scale(i));
-                    sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y + 0.15, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.15, p.z, 1, 0, 0, 0, 0);
                 }
             }
             default -> {
@@ -380,7 +380,7 @@ public class WaningBlade extends MoonMob {
                 for (int i = -5; i <= 5; i++) {
                     Vec3 d = fwd.yRot((float) Math.toRadians(i * 15));
                     Vec3 p = position().add(d.scale(3.0)).add(0, 1.2, 0);
-                    sl.sendParticles(ParticleTypes.SWEEP_ATTACK, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
                 for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(5.0), e -> e.isAlive() && e != this)) {
                     if (!inArc(e.position(), fwd, 4.8, -0.26)) {
@@ -395,7 +395,7 @@ public class WaningBlade extends MoonMob {
                 Vec3 b = position().add(fwd.scale(2.5));
                 for (int i = 0; i <= 10; i++) {
                     Vec3 p = a.add(b.subtract(a).scale(i / 10.0)).add(0, 1.2, 0);
-                    sl.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
                 for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(8.0), e -> e.isAlive() && e != this)) {
                     if (distToSegment(e.position(), a, b) <= 1.3) {
@@ -561,5 +561,10 @@ public class WaningBlade extends MoonMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

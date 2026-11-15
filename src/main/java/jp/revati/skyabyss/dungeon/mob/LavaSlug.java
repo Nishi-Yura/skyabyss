@@ -70,7 +70,7 @@ public class LavaSlug extends ContinentFoe {
         }
         if (tickCount % 4 == 0) {
             for (long[] t : trail) {
-                server().sendParticles(ParticleTypes.FLAME, Double.longBitsToDouble(t[0]), Double.longBitsToDouble(t[1]) + 0.1, Double.longBitsToDouble(t[2]),
+                server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), Double.longBitsToDouble(t[0]), Double.longBitsToDouble(t[1]) + 0.1, Double.longBitsToDouble(t[2]),
                         2, TRAIL_RADIUS * 0.5, 0.05, TRAIL_RADIUS * 0.5, 0.01);
             }
         }
@@ -86,7 +86,6 @@ public class LavaSlug extends ContinentFoe {
         Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BITE_RANGE + 0.6, Math.toRadians(50)))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.LAVA, getX() + f.x * 1.6, getY() + 0.4, getZ() + f.z * 1.6, 6, 0.3, 0.1, 0.3, 0.02))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), 40));
@@ -102,5 +101,10 @@ public class LavaSlug extends ContinentFoe {
     @Override
     protected void finish() {
         cooldown = 24 + random.nextInt(16);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

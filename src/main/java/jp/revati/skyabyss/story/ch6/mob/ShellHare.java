@@ -132,7 +132,7 @@ public class ShellHare extends MoonMob {
             if (t >= 10 && t % 2 == 0) {
                 for (int i = 0; i < 16; i++) {
                     double a = i / 16.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SQUID_INK, spot.x + Math.cos(a) * SLAM_RADIUS, spot.y + 0.1, spot.z + Math.sin(a) * SLAM_RADIUS, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x + Math.cos(a) * SLAM_RADIUS, spot.y + 0.1, spot.z + Math.sin(a) * SLAM_RADIUS, 1, 0, 0, 0, 0);
                 }
             }
             if (t == SLAM_UP) {
@@ -149,8 +149,8 @@ public class ShellHare extends MoonMob {
 
         private void land(ServerLevel sl) {
             playSound(MoonMobsSetup.HARE_SLAM.get(), 1.2f, 0.9f);
-            sl.sendParticles(ParticleTypes.EXPLOSION, spot.x, spot.y + 0.2, spot.z, 1, 0, 0, 0, 0);
-            sl.sendParticles(ParticleTypes.CLOUD, spot.x, spot.y + 0.2, spot.z, 14, SLAM_RADIUS * 0.5, 0.1, SLAM_RADIUS * 0.5, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.2, spot.z, 1, 0, 0, 0, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.2, spot.z, 14, SLAM_RADIUS * 0.5, 0.1, SLAM_RADIUS * 0.5, 0.02);
             for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, new AABB(spot, spot).inflate(SLAM_RADIUS, 2, SLAM_RADIUS),
                     e -> e instanceof Player && e.isAlive())) {
                 if (e.position().distanceTo(spot) <= SLAM_RADIUS + 0.3) {
@@ -172,5 +172,10 @@ public class ShellHare extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.CRESCENT_SHELL.get(), 0.35, 1, 1);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

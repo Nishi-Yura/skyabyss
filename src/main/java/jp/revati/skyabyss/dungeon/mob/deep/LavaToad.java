@@ -98,7 +98,6 @@ public class LavaToad extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), TONGUE_LENGTH, 0.9))
                     .floor(getY()).warn(TONGUE_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.FLAME, getX() + f.x * 3, getY() + 1.0, getZ() + f.z * 3, 12, 1.2, 0.2, 1.2, 0.02))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.8f);
                         player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), 40));

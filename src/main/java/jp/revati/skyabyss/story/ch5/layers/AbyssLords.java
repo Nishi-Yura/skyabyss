@@ -394,7 +394,7 @@ public final class AbyssLords {
         BlockPos chain = AbyssBuild.mark("descend_" + f.layer);
         if (chain != null) {
             for (int k = 0; k < 10; k++) {
-                LayerFights.later(level.getServer(), k * 20, () -> level.sendParticles(ParticleTypes.END_ROD, chain.getX() + 0.5, chain.getY() + 1.5, chain.getZ() + 0.5,
+                LayerFights.later(level.getServer(), k * 20, () -> level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), chain.getX() + 0.5, chain.getY() + 1.5, chain.getZ() + 0.5,
                         24, 0.25, 4, 0.25, 0.01));
             }
         }
@@ -429,7 +429,7 @@ public final class AbyssLords {
         BlockPos dsc = AbyssBuild.mark("descend_" + f.layer);
         if (dsc != null) {
             level.playSound(null, dsc, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 2f, 0.6f);
-            level.sendParticles(ParticleTypes.SOUL, dsc.getX() + 0.5, dsc.getY() + 2, dsc.getZ() + 0.5, 30, 0.4, 2, 0.4, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), dsc.getX() + 0.5, dsc.getY() + 2, dsc.getZ() + 0.5, 24, 0.4, 2, 0.4, 0.02);
         }
     }
 
@@ -481,7 +481,7 @@ public final class AbyssLords {
             if (f.roarUntil > now) {
                 // 名乗り・咆哮の間は刃が通らない
                 event.setCanceled(true);
-                level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.4, 0.4, 0.4, 0.1);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.4, 0.4, 0.4, 0.1);
                 return;
             }
             // 一度の当たりで段を越えない (段の境で止める。咆哮を飛ばさない)
@@ -498,7 +498,7 @@ public final class AbyssLords {
             }
             if (dim) {
                 event.setAmount(event.getAmount() * DIM);
-                level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
                 if (event.getSource().getEntity() instanceof ServerPlayer p && now % 40 < 20) {
                     p.displayClientMessage(Component.translatable("message.skyabyss.abyss_v2.lord_dim." + f.layer), true);
                 }
@@ -647,7 +647,6 @@ public final class AbyssLords {
                 Long h = HEARD.get(p.getUUID());
                 if (h != null && now - h < 400) {
                     lord.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));
-                    level.sendParticles(p, ParticleTypes.HEART, true, lord.getX(), lord.getY() + lord.getBbHeight() + 0.4, lord.getZ(), 2, 0.3, 0.2, 0.3, 0);
                 }
             }
         }
@@ -740,5 +739,10 @@ public final class AbyssLords {
             p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 160, 0, false, false));
         }
         level.playSound(null, center.x, center.y, center.z, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 2f, 0.5f);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

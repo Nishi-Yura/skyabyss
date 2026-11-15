@@ -185,7 +185,7 @@ public abstract class DungeonBoss extends RegionBoss {
             // 地鳴り: 足もとの土と骨が跳ね、低い音がだんだん大きく
             if (introTick % 4 == 0) {
                 float k = introTick / (float) INTRO_RISE;
-                server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+                server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         getX(), getY() + 0.2, getZ(), (int) (10 + 30 * k), 1.2 + 1.5 * k, 0.1, 1.2 + 1.5 * k, 0.15);
             }
             if (introTick % 20 == 0) {
@@ -214,14 +214,14 @@ public abstract class DungeonBoss extends RegionBoss {
                 jp.revati.skyabyss.combat.BossEmerge.visual(this, entrance(), Math.max(20, introCardAt()));
             }
             // 床が割れる
-            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
-                    getX(), getY() + 0.6, getZ(), 60, 1.4, 0.5, 1.4, 0.2);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 0.6, getZ(), 24, 1.4, 0.5, 1.4, 0.2);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 2.0f, 0.7f);
         }
         int out = INTRO_RISE + introCardAt();
         if (introTick > INTRO_RISE && introTick < out && introTick % 3 == 0 && "dig".equals(entrance())) {
             // 這い出る間: 体のまわりから土と骨が噴き、掘る音
-            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX(), getY() + 0.3, getZ(), 18, 1.6, 0.4, 1.6, 0.18);
             if (introTick % 12 == 0) {
                 server().playSound(null, getX(), getY(), getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 1.8f, 0.5f);
@@ -230,9 +230,9 @@ public abstract class DungeonBoss extends RegionBoss {
         if (introTick == out) {
             // 体が抜けきって吠える: 名前の札
             BossIntro.send(this, BossIntro.NAME, bossId(), INTRO_CARD, !midBoss());
-            server().sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, hazardBlock()),
-                    getX(), getY() + 1.0, getZ(), 120, 2.0, 1.2, 2.0, 0.25);
-            server().sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 1.5, 0.3, 1.5, 0);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 1.0, getZ(), 24, 2.0, 1.2, 2.0, 0.25);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.5, getZ(), 4, 1.5, 0.3, 1.5, 0);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.5f);
             return;
         }
@@ -319,11 +319,10 @@ public abstract class DungeonBoss extends RegionBoss {
         cooldown = Math.max(cooldown, RAGE_WARN + 16);
         cue(bossId(), "rage", RAGE_WARN);
         server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.55f);
-        server().sendParticles(ParticleTypes.ANGRY_VILLAGER, getX(), getY() + getBbHeight(), getZ(), 10, getBbWidth() * 0.4, 0.4, getBbWidth() * 0.4, 0);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + getBbHeight(), getZ(), 10, getBbWidth() * 0.4, 0.4, getBbWidth() * 0.4, 0);
         Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RAGE_RADIUS)).prop(PropFx.ring(spikeProp(), 10))
                 .floor(getY()).warn(RAGE_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 6, RAGE_RADIUS * 0.3, 0.2, RAGE_RADIUS * 0.3, 0))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 0.5f);
                     Vec3 away = player.position().subtract(position()).normalize();
@@ -367,7 +366,6 @@ public abstract class DungeonBoss extends RegionBoss {
                                     kind.equals("lightning") ? 6 : 18);
                         }
                         server.playSound(null, c.x, c.y, c.z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.6f);
-                        server.sendParticles(opt, c.x, c.y + 0.4, c.z, 24, radius * 0.4, 0.3, radius * 0.4, 0.15);
                     })
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * dmg);
@@ -417,7 +415,6 @@ public abstract class DungeonBoss extends RegionBoss {
                     Vec3 to = freeSpotNear(target) != null && at.distanceTo(position()) > 30 ? freeSpotNear(target) : at;
                     teleportTo(to.x, to.y, to.z);
                     server.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.2f, 0.6f);
-                    server.sendParticles(ParticleTypes.EXPLOSION, to.x, to.y + 0.5, to.z, 4, radius * 0.3, 0.2, radius * 0.3, 0);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * dmg);
@@ -446,9 +443,6 @@ public abstract class DungeonBoss extends RegionBoss {
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), ang, range, Math.toRadians(halfDeg * 0.6))).prop(sprayProp(look)).floor(getY()).warn(warn + (k > 0 ? 10 : 0))
                     .active(active).danger().owner(this).target(target).victims(this::canHit)
                     .onImpact(server -> {
-                        for (double d = 1.5; d <= range; d += 1.2) {
-                            server.sendParticles(look, getX() + Math.cos(ang) * d, getY() + 1.0, getZ() + Math.sin(ang) * d, 4, 0.5, 0.3, 0.5, 0.02);
-                        }
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * dmg))
                     .start();
@@ -462,7 +456,6 @@ public abstract class DungeonBoss extends RegionBoss {
         for (int i = 0; i < times; i++) {
             Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), radius)).floor(getY()).warn(warn + i * gap).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY() + 1.0, getZ(), 8, radius * 0.5, 0.2, radius * 0.5, 0))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * dmg);
                         Vec3 away = player.position().subtract(position()).multiply(1, 0, 1).normalize();
@@ -491,7 +484,6 @@ public abstract class DungeonBoss extends RegionBoss {
                 m.addTag("skyabyss_boss_minion");
                 if (server().addFreshEntity(m)) {
                     m.setTarget(target);
-                    server().sendParticles(ParticleTypes.POOF, m.getX(), m.getY() + 0.5, m.getZ(), 16, 0.5, 0.5, 0.5, 0.05);
                 }
             }
         }
@@ -571,7 +563,7 @@ public abstract class DungeonBoss extends RegionBoss {
         cooldown = Math.max(cooldown, SURGE_WARN + 40);
         cue(bossId(), "rage", SURGE_WARN);
         server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.5f, 0.6f);
-        server().sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + getBbHeight() * 0.6, getZ(), 1, 0, 0, 0, 0);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + getBbHeight() * 0.6, getZ(), 1, 0, 0, 0, 0);
         field.all();
         BossOpenings.open(this, BossOpenings.BIG_OPEN_TICKS + SURGE_WARN);
     }
@@ -606,11 +598,11 @@ public abstract class DungeonBoss extends RegionBoss {
         if (to == null) {
             return;
         }
-        server().sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY() + 0.5, getZ(), 12, getBbWidth() * 0.4, 0.3, getBbWidth() * 0.4, 0.02);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.5, getZ(), 12, getBbWidth() * 0.4, 0.3, getBbWidth() * 0.4, 0.02);
         server().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_STEP, SoundSource.HOSTILE, 1.6f, 0.6f);
         teleportTo(to.x, to.y, to.z);
         getNavigation().stop();
-        server().sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, to.x, to.y + 0.5, to.z, 16, getBbWidth() * 0.4, 0.3, getBbWidth() * 0.4, 0.02);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), to.x, to.y + 0.5, to.z, 16, getBbWidth() * 0.4, 0.3, getBbWidth() * 0.4, 0.02);
         server().playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.8f, 0.7f);
     }
 
@@ -646,5 +638,10 @@ public abstract class DungeonBoss extends RegionBoss {
     // 自己テスト用: つっかえの数え
     public int stuckTicks() {
         return stuck;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

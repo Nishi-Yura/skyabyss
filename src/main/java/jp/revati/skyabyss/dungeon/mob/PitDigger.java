@@ -54,8 +54,6 @@ public class PitDigger extends ContinentFoe {
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(SoundEvents.SKELETON_STEP, 0.8f, 0.6f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                        getX() + f.x * 2.2, getY() + 0.2, getZ() + f.z * 2.2, 14, 0.4, 0.1, 0.4, 0.1))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.knockback(0.5, -f.x, -f.z);

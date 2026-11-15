@@ -55,9 +55,6 @@ public class HornBeetle extends ContinentFoe {
                 .startSound(SoundEvents.BEACON_POWER_SELECT, 0.6f, 1.8f)
                 .victims(this::canHit)
                 .onImpact(server -> {
-                    for (int i = 1; i <= LENGTH; i++) {
-                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + f.x * i, getY() + 0.7, getZ() + f.z * i, 3, 0.1, 0.2, 0.1, 0.05);
-                    }
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 1.2f);
@@ -68,10 +65,6 @@ public class HornBeetle extends ContinentFoe {
 
     @Override
     protected void during(int tick) {
-        if (tick < WARN && tick % 3 == 0) {
-            Vec3 f = forward();
-            server().sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + f.x * 1.1, getY() + 0.9, getZ() + f.z * 1.1, 2, 0.1, 0.15, 0.1, 0.02);
-        }
     }
 
     @Override

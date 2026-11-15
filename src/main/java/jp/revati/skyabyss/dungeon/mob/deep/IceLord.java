@@ -90,7 +90,6 @@ public class IceLord extends DungeonBoss {
                         .floor(getY()).warn(ICICLE_WARN).danger().owner(this).target(target)
                         .victims(this::canHit)
                         .onImpact(server -> {
-                            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PACKED_ICE.defaultBlockState()), s.x, getY() + 0.5, s.z, 30, 0.8, 0.5, 0.8, 0.1);
                             server.playSound(null, s.x, getY(), s.z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.2f, 0.7f);
                         })
                         .onHit((server, player) -> {
@@ -131,7 +130,6 @@ public class IceLord extends DungeonBoss {
                         .victims(this::canHit)
                         .onImpact(server -> {
                             jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "ice_spike", this, new Vec3(c.x, getY(), c.z), random.nextFloat() * 360f, 0.75f, 16);
-                            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.PACKED_ICE.defaultBlockState()), c.x, getY() + 0.8, c.z, 24, 0.6, 0.9, 0.6, 0.12);
                             server.playSound(null, c.x, getY(), c.z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.2f, 0.5f);
                         })
                         .onHit((server, player) -> {

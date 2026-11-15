@@ -140,7 +140,7 @@ public class ShadowEmbracer extends MoonMob {
             playAction("frozen");
             playSound(MoonMobsSetup.EMBRACER_FROZEN.get(), 1.5f, 0.9f);
             if (level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2.5, getZ(), 40, 0.8, 1.5, 0.8, 0.05);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 2.5, getZ(), 24, 0.8, 1.5, 0.8, 0.05);
             }
         }
         // 段
@@ -206,7 +206,7 @@ public class ShadowEmbracer extends MoonMob {
             s.tuneMoon(0, false, true, ShadowStitcher.HP * 0.6, ShadowStitcher.DMG);
             s.addTag(jp.revati.skyabyss.story.ch6.valley.ValleyArena.TAG);
             sl.addFreshEntity(s);
-            sl.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 1, at.z, 30, 0.4, 1.0, 0.4, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.x, at.y + 1, at.z, 24, 0.4, 1.0, 0.4, 0.02);
         }
     }
 
@@ -219,7 +219,7 @@ public class ShadowEmbracer extends MoonMob {
             }
             p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 30, 2, true, false));
             p.hurt(damageSources().mobAttack(this), dmg(0.25));
-            sl.sendParticles(ParticleTypes.SQUID_INK, p.getX(), p.getY() + 0.2, p.getZ(), 14, 0.4, 0.1, 0.4, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.getX(), p.getY() + 0.2, p.getZ(), 14, 0.4, 0.1, 0.4, 0.02);
         }
     }
 
@@ -351,8 +351,8 @@ public class ShadowEmbracer extends MoonMob {
             if (t > 18 && spot != null) {
                 // 床を走る影 (予告)
                 Vec3 p = position().lerp(spot, Math.min(1.0, (t - 18) / 30.0));
-                sl.sendParticles(ParticleTypes.SQUID_INK, p.x, spot.y + 0.1, p.z, 6, 0.5, 0.0, 0.5, 0.01);
-                sl.sendParticles(ParticleTypes.LARGE_SMOKE, p.x, spot.y + 0.1, p.z, 2, 0.4, 0.0, 0.4, 0.0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.x, spot.y + 0.1, p.z, 6, 0.5, 0.0, 0.5, 0.01);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, spot.y + 0.1, p.z, 2, 0.4, 0.0, 0.4, 0.0);
             }
             if (t == 48 && spot != null) {
                 teleportTo(spot.x, spot.y, spot.z);
@@ -394,14 +394,14 @@ public class ShadowEmbracer extends MoonMob {
             if (spot != null && t <= 20 && t % 2 == 0) {
                 for (int i = 0; i < 14; i++) {
                     double a = i / 14.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SQUID_INK, spot.x + Math.cos(a) * 2.0, spot.y + 0.1, spot.z + Math.sin(a) * 2.0, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x + Math.cos(a) * 2.0, spot.y + 0.1, spot.z + Math.sin(a) * 2.0, 1, 0, 0, 0, 0);
                 }
             }
             if (t == 12) {
                 playSound(MoonMobsSetup.EMBRACER_THROW.get(), 1.5f, 0.9f);
             }
             if (t == 20 && spot != null) {
-                sl.sendParticles(ParticleTypes.LARGE_SMOKE, spot.x, spot.y + 0.5, spot.z, 30, 0.8, 0.5, 0.8, 0.02);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.5, spot.z, 24, 0.8, 0.5, 0.8, 0.02);
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(spot, spot).inflate(2.2, 2, 2.2), e -> e.isAlive())) {
                     if (p.position().distanceTo(spot) <= 2.3) {
                         strike(p, dmg(1.1));
@@ -427,7 +427,7 @@ public class ShadowEmbracer extends MoonMob {
                 int n = (int) (r * 6) + 6;
                 for (int i = 0; i < n; i++) {
                     double a = i / (double) n * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SQUID_INK, spot.x + Math.cos(a) * r, spot.y + 0.15, spot.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x + Math.cos(a) * r, spot.y + 0.15, spot.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0);
                 }
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(spot, spot).inflate(r + 1, 2, r + 1), e -> e.isAlive() && e.onGround())) {
                     double d = p.position().subtract(spot).horizontalDistance();
@@ -472,5 +472,10 @@ public class ShadowEmbracer extends MoonMob {
     // 倒れたとき近くの人 (主の間の内) を数える
     public List<ServerPlayer> witnesses() {
         return level() instanceof ServerLevel sl ? sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(30), e -> e.isAlive()) : List.of();
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

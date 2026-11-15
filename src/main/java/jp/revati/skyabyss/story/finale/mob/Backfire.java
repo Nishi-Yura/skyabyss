@@ -88,7 +88,7 @@ public class Backfire extends CloudMob {
         setDeltaMovement(v);
         hasImpulse = true;
         if (tickCount % 6 == 0 && level() instanceof ServerLevel sl) {
-            sl.sendParticles(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.3, getZ(), 1, 0.15, 0.1, 0.15, 0.01);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 1, 0.15, 0.1, 0.15, 0.01);
         }
     }
 
@@ -150,7 +150,7 @@ public class Backfire extends CloudMob {
                 if (t % 3 == 0) {
                     for (int i = 0; i < 14; i++) {
                         double a = i / 14.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.SMALL_FLAME, spot.x + Math.cos(a) * R, spot.y + 0.15, spot.z + Math.sin(a) * R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x + Math.cos(a) * R, spot.y + 0.15, spot.z + Math.sin(a) * R, 1, 0, 0, 0, 0);
                     }
                 }
                 return;
@@ -160,9 +160,9 @@ public class Backfire extends CloudMob {
                 Vec3 from = position().add(0, 0.6, 0);
                 for (int i = 0; i <= 10; i++) {
                     Vec3 q = from.lerp(spot, i / 10.0).add(0, Math.sin(i / 10.0 * Math.PI) * 1.5, 0);
-                    sl.sendParticles(ParticleTypes.FLAME, q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.01);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.01);
                 }
-                sl.sendParticles(ParticleTypes.FLAME, spot.x, spot.y + 0.3, spot.z, 20, R * 0.5, 0.2, R * 0.5, 0.03);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x, spot.y + 0.3, spot.z, 20, R * 0.5, 0.2, R * 0.5, 0.03);
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, new net.minecraft.world.phys.AABB(spot, spot).inflate(R + 0.5, 2, R + 0.5),
                         e -> e.isAlive() && !e.isSpectator())) {
                     if (p.position().subtract(spot).horizontalDistance() <= R + 0.3) {
@@ -178,5 +178,10 @@ public class Backfire extends CloudMob {
             t = -1;
             cooldown = 70;
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

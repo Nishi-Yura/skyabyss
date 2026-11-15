@@ -196,7 +196,7 @@ public class MoonCoreBoss extends MoonMob {
         if (staggerFor > 0) {
             staggerFor--;
             if (staggerFor % 5 == 0) {
-                sl.sendParticles(ParticleTypes.END_ROD, orb().x, orb().y, orb().z, 6, 0.8, 0.8, 0.8, 0.05);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), orb().x, orb().y, orb().z, 6, 0.8, 0.8, 0.8, 0.05);
             }
             return;
         }
@@ -258,7 +258,7 @@ public class MoonCoreBoss extends MoonMob {
         while (shards.size() > shardCount()) {
             Entity e = sl.getEntity(shards.remove(shards.size() - 1));
             if (e != null) {
-                sl.sendParticles(ParticleTypes.CLOUD, e.getX(), e.getY() + 1.5, e.getZ(), 30, 0.8, 1.5, 0.8, 0.05);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + 1.5, e.getZ(), 24, 0.8, 1.5, 0.8, 0.05);
                 e.discard();
             }
         }
@@ -298,7 +298,7 @@ public class MoonCoreBoss extends MoonMob {
                 if (sweep % 3 == 0) {
                     for (double a : shardAngles()) {
                         Vec3 p = position().add(Math.cos(Math.toRadians(a)) * r, 1.5, Math.sin(Math.toRadians(a)) * r);
-                        sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y, p.z, 4, 0.4, 1.2, 0.4, 0.02);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 4, 0.4, 1.2, 0.4, 0.02);
                     }
                 }
             } else {
@@ -355,7 +355,7 @@ public class MoonCoreBoss extends MoonMob {
             int n = 24;
             for (int i = 0; i < n; i++) {
                 double a = i / (double) n * Math.PI * 2 + rewind * 0.05;
-                sl.sendParticles(ParticleTypes.END_ROD, getX() + Math.cos(a) * r, orb().y, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * r, orb().y, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
             }
         }
         float lost = rewindHp - getHealth();
@@ -366,7 +366,7 @@ public class MoonCoreBoss extends MoonMob {
             jp.revati.skyabyss.combat.BreakGauge.solved(this, STAGGER_TICKS);
             playAction("stagger");
             playSound(MoonMobsSetup.CORE_BREAK.get(), 2.5f, 0.8f);
-            sl.sendParticles(ParticleTypes.FLASH, orb().x, orb().y, orb().z, 2, 0, 0, 0, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), orb().x, orb().y, orb().z, 2, 0, 0, 0, 0);
             if (!toldBreak) {
                 toldBreak = true;
                 for (ServerPlayer p : CoreArena.players(sl)) {
@@ -380,7 +380,7 @@ public class MoonCoreBoss extends MoonMob {
             if (getHealth() < rewindHp) {
                 setHealth(rewindHp);
                 playSound(MoonMobsSetup.CORE_REWIND.get(), 2.5f, 1.0f);
-                sl.sendParticles(ParticleTypes.REVERSE_PORTAL, orb().x, orb().y, orb().z, 60, 1.2, 1.2, 1.2, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), orb().x, orb().y, orb().z, 24, 1.2, 1.2, 1.2, 0.1);
             }
         }
     }
@@ -426,20 +426,20 @@ public class MoonCoreBoss extends MoonMob {
                     if (inSafe(p, safe)) {
                         continue;
                     }
-                    sl.sendParticles(red, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
                 DustParticleOptions blue = new DustParticleOptions(new Vector3f(0.6f, 0.85f, 1.0f), 1.2f);
                 for (Vec3 s : safe) {
                     for (int i = 0; i < 20; i++) {
                         double a = i / 20.0 * Math.PI * 2;
-                        sl.sendParticles(blue, s.x + Math.cos(a) * SAFE_R, s.y + 0.15, s.z + Math.sin(a) * SAFE_R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x + Math.cos(a) * SAFE_R, s.y + 0.15, s.z + Math.sin(a) * SAFE_R, 1, 0, 0, 0, 0);
                     }
                 }
                 // 頭の上に大きな満月の影 (粒の円)
                 for (int i = 0; i < 40; i++) {
                     double a = i / 40.0 * Math.PI * 2;
                     double rr = 6 + 6.0 * drop / DROP_TELL;
-                    sl.sendParticles(ParticleTypes.END_ROD, c.x + Math.cos(a) * rr, c.y + 22 - 12.0 * drop / DROP_TELL, c.z + Math.sin(a) * rr, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * rr, c.y + 22 - 12.0 * drop / DROP_TELL, c.z + Math.sin(a) * rr, 1, 0, 0, 0, 0);
                 }
             }
             return;
@@ -448,8 +448,8 @@ public class MoonCoreBoss extends MoonMob {
         jp.revati.skyabyss.combat.BossOpenings.moveEnded(this);
         stopTriggeredAnim("action", "drop");
         playSound(MoonMobsSetup.CORE_DROP.get(), 4.0f, 0.6f);
-        sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 2, c.z, 3, 6, 1, 6, 0);
-        sl.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 1, c.z, 200, 10, 1.5, 10, 0.2);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 2, c.z, 3, 6, 1, 6, 0);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 1, c.z, 24, 10, 1.5, 10, 0.2);
         for (ServerPlayer p : CoreArena.players(sl)) {
             if (!inSafe(p.position(), safe)) {
                 strike(p, dmg(3.0));
@@ -489,7 +489,7 @@ public class MoonCoreBoss extends MoonMob {
                     Notice.narrate(sp, "message.skyabyss.moon.core_shield");
                 }
                 Vec3 m = src.position().add(position()).scale(0.5);
-                sl.sendParticles(ParticleTypes.CRIT, m.x, m.y + 1.5, m.z, 8, 0.3, 0.3, 0.3, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.x, m.y + 1.5, m.z, 8, 0.3, 0.3, 0.3, 0.1);
             }
             return false;
         }
@@ -515,5 +515,10 @@ public class MoonCoreBoss extends MoonMob {
     public void remove(RemovalReason reason) {
         super.remove(reason);
         bar.removeAllPlayers();
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

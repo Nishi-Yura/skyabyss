@@ -46,9 +46,6 @@ public class CrystalEye extends DungeonFloater {
                 .startSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1f, 1.4f)
                 .victims(this::canHit)
                 .onImpact(server -> {
-                    for (int i = 0; i < 10; i++) {
-                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + i * 0.6, at.z, 4, 0.15, 0.2, 0.15, 0.02);
-                    }
                     server.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 0.8f, 1.4f);
                 })
                 .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.2f))

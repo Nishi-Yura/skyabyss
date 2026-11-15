@@ -118,7 +118,7 @@ public class CeilingWalker extends AbyssMobB {
             dropTell = -1;
         }
         if (dropTell >= 0) {
-            sl.sendParticles(ParticleTypes.DRIPPING_LAVA, getX(), getY() + getBbHeight(), getZ(), 1, 0.2, 0, 0.2, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + getBbHeight(), getZ(), 1, 0.2, 0, 0.2, 0);
             if (--dropTell < 0) {
                 drop(sl);
             }
@@ -146,7 +146,7 @@ public class CeilingWalker extends AbyssMobB {
         setNoGravity(false);
         playAction("drop");
         playSound(AbyssMobsBSetup.CEILING_DROP.get(), 1.0f, 1.0f);
-        sl.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.5, getZ(), 8, 0.4, 0.2, 0.4, 0.02);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.5, getZ(), 8, 0.4, 0.2, 0.4, 0.02);
         setDeltaMovement(0, -0.3, 0);
     }
 
@@ -187,5 +187,10 @@ public class CeilingWalker extends AbyssMobB {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.SOOT_CLUMP.get(), 0.4, 1, 1);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

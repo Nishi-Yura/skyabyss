@@ -111,7 +111,7 @@ public class CrystalLizard extends DungeonBoss {
     public void drain() {
         charge = 0;
         if (!level().isClientSide) {
-            server().sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 2, getZ(), 60, 1.6, 1.0, 1.6, 0.3);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 2, getZ(), 24, 1.6, 1.0, 1.6, 0.3);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 2f, 0.7f);
         }
     }
@@ -199,9 +199,6 @@ public class CrystalLizard extends DungeonBoss {
                                 jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "crystal_spike", this, position().add(Math.cos(a) * i, 0, Math.sin(a) * i), (float) Math.toDegrees(a) + i * 37,
                                         0.55f + i * 0.02f, 14);
                             }
-                            for (int i = 2; i < BOLTS_LENGTH; i += 3) {
-                                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Math.cos(a) * i, getY() + 0.4, getZ() + Math.sin(a) * i, 6, 0.3, 0.3, 0.3, 0.2);
-                            }
                         })
                         .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.85f))
                         .start();
@@ -229,7 +226,6 @@ public class CrystalLizard extends DungeonBoss {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "lightning", this, new Vec3(s.x, getY(), s.z), random.nextFloat() * 360f, r > 4 ? 1.4f : 1.0f, 6);
-                        server.sendParticles(ParticleTypes.ELECTRIC_SPARK, s.x, getY() + 1, s.z, 80, r * 0.4, 1.2, r * 0.4, 0.4);
                         server.playSound(null, s.x, getY(), s.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.4f, 1.2f);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.0f))
@@ -241,9 +237,6 @@ public class CrystalLizard extends DungeonBoss {
     protected void during(int tick) {
         super.during(tick);
         if (move == CHARGE_UP) {
-            if (tick % 4 == 0) {
-                server().sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 2.6, getZ(), 6, 1.2, 0.5, 1.6, 0.1);
-            }
             if (tick == CHARGE_WARN) {
                 playAction("discharge");
             }
@@ -314,5 +307,10 @@ public class CrystalLizard extends DungeonBoss {
         }
         cooldown = move == CHARGE_UP || move == DASH ? 30 : 14 + random.nextInt(10);
         super.finish();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

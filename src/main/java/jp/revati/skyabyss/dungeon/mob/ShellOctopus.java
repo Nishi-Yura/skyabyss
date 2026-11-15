@@ -137,7 +137,7 @@ public class ShellOctopus extends DungeonBoss {
             int left = Math.max(1, Math.min(5, (int) Math.ceil(hp() * 5 - 1e-4)));
             if (left < arms()) {
                 entityData.set(ARMS, left);
-                server().sendParticles(ParticleTypes.SQUID_INK, getX(), getY() + 1.2, getZ(), 40, 1.2, 0.6, 1.2, 0.05);
+                server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 1.2, getZ(), 24, 1.2, 0.6, 1.2, 0.05);
                 server().playSound(null, getX(), getY(), getZ(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.6f, 0.5f);
                 for (ServerPlayer p : server().getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(32), ServerPlayer::isAlive)) {
                     Notice.hint(p, "message.skyabyss.dungeon.octopus_arm", arms());
@@ -183,7 +183,6 @@ public class ShellOctopus extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, Math.toRadians(130)))
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SPLASH, getX() + f.x * 4, getY() + 0.5, getZ() + f.z * 4, 40, 3, 0.3, 3, 0.1))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.9f);
                         Vec3 away = player.position().subtract(position()).normalize();
@@ -215,7 +214,6 @@ public class ShellOctopus extends DungeonBoss {
         Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), 4, 12)).prop(PropFx.ring("water_spout", 8))
                 .floor(getY()).warn(WHIRL_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, getX(), getY() + 0.5, getZ(), 80, 5, 0.3, 5, 0.2))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 0.4f);
                     Vec3 in = position().subtract(player.position()).normalize();
@@ -264,10 +262,6 @@ public class ShellOctopus extends DungeonBoss {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "tentacle", this, s, random.nextFloat() * 360f, 1.0f, 16);
-                        for (int i = 0; i < 6; i++) {
-                            server.sendParticles(ParticleTypes.SQUID_INK, s.x, s.y + 0.5 + i * 0.6, s.z, 8, 0.35, 0.2, 0.35, 0.02);
-                        }
-                        server.sendParticles(ParticleTypes.SPLASH, s.x, s.y + 0.4, s.z, 40, 1.0, 0.4, 1.0, 0.2);
                         server.playSound(null, s.x, s.y, s.z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.4f, 0.5f);
                     })
                     .onHit((server, player) -> {
@@ -307,7 +301,6 @@ public class ShellOctopus extends DungeonBoss {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     Vec3 tip = position().add(Math.cos(angle) * SLAM_LENGTH * 0.7, 0, Math.sin(angle) * SLAM_LENGTH * 0.7);
-                    server.sendParticles(ParticleTypes.SPLASH, tip.x, getY() + 0.3, tip.z, 50, 1.2, 0.2, 1.2, 0.2);
                     server.playSound(null, tip.x, getY(), tip.z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.6f, 0.6f);
                 })
                 .onHit((server, player) -> player.hurt(attackSource(), damage() * k))
@@ -325,7 +318,6 @@ public class ShellOctopus extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 3.0))
                     .floor(s.y).warn(INK_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SQUID_INK, s.x, s.y + 1, s.z, 60, 1.4, 0.8, 1.4, 0.02))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.5f);
                         player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
@@ -357,7 +349,6 @@ public class ShellOctopus extends DungeonBoss {
                 tentacles(t);
             }
             if (tick == PLUNGE_DOWN) {
-                server().sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.3, getZ(), 80, 4, 0.3, 4, 0.2);
                 server().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 2f, 0.4f);
             }
             if (tick == PLUNGE_TICKS - 16) {
@@ -370,7 +361,6 @@ public class ShellOctopus extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), 5))
                     .floor(getY()).warn(WHIRL_SLAM).danger().owner(this).target(t)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.3, getZ(), 80, 2.5, 0.2, 2.5, 0.2))
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.1f))
                     .start();
         }
@@ -383,7 +373,6 @@ public class ShellOctopus extends DungeonBoss {
                     Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 3.0)).prop(PropFx.toss("ink_blob"))
                             .floor(s.y).warn(INK_WARN - 4).danger().owner(this).target(t)
                             .victims(this::canHit)
-                            .onImpact(server -> server.sendParticles(ParticleTypes.SQUID_INK, s.x, s.y + 1, s.z, 60, 1.4, 0.8, 1.4, 0.02))
                             .onHit((server, player) -> {
                                 player.hurt(attackSource(), damage() * 0.5f);
                                 player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
@@ -439,5 +428,10 @@ public class ShellOctopus extends DungeonBoss {
         }
         cooldown = Math.max(8, (move == WITHDRAW ? 24 : 18 + random.nextInt(10)) - (5 - arms()) * 2);
         super.finish();
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

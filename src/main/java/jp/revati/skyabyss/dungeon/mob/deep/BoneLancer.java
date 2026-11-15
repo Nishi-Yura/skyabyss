@@ -97,7 +97,6 @@ public class BoneLancer extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, Math.toRadians(75)))
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 2, getY() + 1.6, getZ() + f.z * 2, 3, 1, 0.2, 1, 0))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage());
                         player.knockback(1.2, -f.x, -f.z);

@@ -16,8 +16,11 @@ import io
 import re
 import sys
 
-ELEMENT = sys.argv[1].upper()
-FILES = sys.argv[2:]
+# --drop-impact: 当たりの粒をクライアント (ImpactFx・BossImpactFx) が一層出す主は、見た目のない予告の当たりの粒も消す
+DROP_IMPACT = "--drop-impact" in sys.argv
+ARGS = [a for a in sys.argv[1:] if a != "--drop-impact"]
+ELEMENT = ARGS[0].upper()
+FILES = ARGS[1:]
 
 SHARD_T = {"BLOCK", "ITEM", "LAVA", "FALLING_LAVA", "FALLING_WATER", "FALLING_DUST", "DRIPPING_LAVA", "SQUID_INK", "ASH", "ITEM_SNOWBALL",
            "DRIPPING_WATER", "FALLING_OBSIDIAN_TEAR", "LANDING_LAVA", "DAMAGE_INDICATOR"}
@@ -103,7 +106,7 @@ def in_look_impact(lines, i):
         if depth < 0 and ".onImpact(" in code:
             # その予告に look があるか (onImpact の行か、その上の数行)
             ctx = "\n".join(lines[max(0, j - 4):j + 1])
-            return ".look(" in ctx
+            return DROP_IMPACT or ".look(" in ctx
     return False
 
 

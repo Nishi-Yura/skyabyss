@@ -81,7 +81,7 @@ public class BellowsImp extends ContinentFoe {
         if (move == BREATH && tick >= WARN && tick < WARN + 20 && tick % 2 == 0) {
             Vec3 f = forward();
             for (int i = 1; i <= 5; i++) {
-                server().sendParticles(ParticleTypes.FLAME, getX() + f.x * i, getY() + 0.9 - i * 0.08, getZ() + f.z * i, 3, 0.15 * i, 0.1, 0.15 * i, 0.01);
+                server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + f.x * i, getY() + 0.9 - i * 0.08, getZ() + f.z * i, 3, 0.15 * i, 0.1, 0.15 * i, 0.01);
             }
         }
     }
@@ -95,5 +95,10 @@ public class BellowsImp extends ContinentFoe {
     protected void finish() {
         cooldown = move == BREATH ? 46 + random.nextInt(20) : 18 + random.nextInt(12);
         move = 0;
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

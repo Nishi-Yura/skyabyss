@@ -412,7 +412,7 @@ public final class TowerFight {
             case "exhort" -> {
                 master.playAction("roar");
                 sound(level, master.chest(), CloudMobsSetup.KEEPER_SILENCE.get(), 5f, 0.6f);
-                level.sendParticles(VIOLET, master.chest().x, master.chest().y, master.chest().z + 4, 60, 8, 6, 2, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), master.chest().x, master.chest().y, master.chest().z + 4, 24, 8, 6, 2, 0);
                 laters.add(new Later(now + 30, () -> exhort(level)));
                 len = 52;
             }
@@ -452,7 +452,7 @@ public final class TowerFight {
                     if (a != null) {
                         a.addTag(PHLEGM_TAG);
                         adds.add(a);
-                        level.sendParticles(VIOLET, a.getX(), a.getY() + 1, a.getZ(), 20, 0.4, 0.8, 0.4, 0);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.getX(), a.getY() + 1, a.getZ(), 20, 0.4, 0.8, 0.4, 0);
                     }
                 }
                 len = 40;
@@ -485,7 +485,7 @@ public final class TowerFight {
                 tell(p, "exhort");
             }
         }
-        far(level, ParticleTypes.SONIC_BOOM, master.getX(), master.getY() + 2, master.getZ() + 16, 6, 8, 0.5, 2, 0);
+        far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), master.getX(), master.getY() + 2, master.getZ() + 16, 6, 8, 0.5, 2, 0);
     }
 
     // ---------------------------------------------------------------- 70%: 天と淵の群れと、主を癒す繋ぎ手
@@ -498,7 +498,7 @@ public final class TowerFight {
             Mob a = add(level, type, rel(-5 + rng.nextDouble() * 10, 1, -20 + rng.nextDouble() * 50), i % 2 == 0 ? 120 : 160, i % 2 == 0 ? 14 : 16);
             if (a != null) {
                 adds.add(a);
-                level.sendParticles(i % 2 == 0 ? GOLD : VIOLET, a.getX(), a.getY() + 1, a.getZ(), 20, 0.4, 0.8, 0.4, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.getX(), a.getY() + 1, a.getZ(), 20, 0.4, 0.8, 0.4, 0);
             }
         }
         raiseBinders(level);
@@ -522,7 +522,7 @@ public final class TowerFight {
                 // 動かず技も出さないので、構え (×0.3) は掛けない
                 b.addTag(jp.revati.skyabyss.combat.BossOpenings.NO_GUARD_TAG);
                 binders.add(b);
-                level.sendParticles(BIND, b.getX(), b.getY() + 1, b.getZ(), 30, 0.5, 1.0, 0.5, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.getX(), b.getY() + 1, b.getZ(), 24, 0.5, 1.0, 0.5, 0);
             }
         }
     }
@@ -544,7 +544,7 @@ public final class TowerFight {
                 double d = from.distanceTo(dst);
                 for (double s = 0; s < d; s += 1.5) {
                     Vec3 q = from.lerp(dst, s / d);
-                    level.sendParticles(BIND, q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                 }
             }
         }
@@ -617,8 +617,8 @@ public final class TowerFight {
         moon.setPos(at.x, at.y, z);
         moon.setSize(1.0 + prog * 1.2);
         if (now % 5 == 0) {
-            level.sendParticles(GOLD, at.x, at.y + 3 * (1 + prog), z - 2, 6, 2, 2, 0.5, 0);
-            level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.2, z - 3, 3, 3, 0, 0.5, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 3 * (1 + prog), z - 2, 6, 2, 2, 0.5, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.2, z - 3, 3, 3, 0, 0.5, 0.01);
         }
         if (now % 20 == 0) {
             double r = 3 + 2.5 * prog;
@@ -640,7 +640,7 @@ public final class TowerFight {
                 Vec3 d = to.subtract(from);
                 for (int i = 0; i < 12; i++) {
                     Vec3 q = from.add(d.scale(i / 12.0));
-                    level.sendParticles(ParticleTypes.END_ROD, q.x, q.y, q.z, 1, 0.1, 0.1, 0.1, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.1, 0.1, 0.1, 0.01);
                 }
                 sound(level, from, SoundEvents.BLAZE_SHOOT, 3f, 0.6f);
             }
@@ -682,8 +682,8 @@ public final class TowerFight {
                 }
                 if (z.fall && z.at - now <= 8) {
                     double h = (z.at - now) / 8.0 * 24;
-                    level.sendParticles(ParticleTypes.END_ROD, z.cx, z.y + h, z.cz, 3, 0.15, 0.6, 0.15, 0.01);
-                    level.sendParticles(z.color, z.cx, z.y + h + 1.5, z.cz, 6, 0.3, 1.2, 0.3, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), z.cx, z.y + h, z.cz, 3, 0.15, 0.6, 0.15, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), z.cx, z.y + h + 1.5, z.cz, 6, 0.3, 1.2, 0.3, 0);
                 }
                 continue;
             }
@@ -717,7 +717,7 @@ public final class TowerFight {
                 for (int i = 0; i <= 18; i++) {
                     Vec3 q = from.add(to.subtract(from).scale(i / 18.0));
                     double spread = 0.4 + 2.0 * i / 18.0;
-                    far(level, ParticleTypes.SOUL_FIRE_FLAME, q.x, q.y, q.z, 4, spread, spread * 0.4, spread, 0.02);
+                    far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 4, spread, spread * 0.4, spread, 0.02);
                     far(level, VIOLET, q.x, q.y, q.z, 3, spread, spread * 0.4, spread, 0);
                 }
             }
@@ -746,7 +746,7 @@ public final class TowerFight {
             if (now % 3 == 0) {
                 for (int i = 0; i < 14; i++) {
                     double a = i / 14.0 * Math.PI * 2 + now * 0.05;
-                    level.sendParticles(RED, c.x + Math.cos(a) * 2.2, c.y + 0.15, c.z + Math.sin(a) * 2.2, 1, 0, 0, 0, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * 2.2, c.y + 0.15, c.z + Math.sin(a) * 2.2, 1, 0, 0, 0, 0);
                 }
             }
             if (now >= c.from && now % 10 == 0 && len < 2.2 && !Downed.isDowned(p)) {
@@ -803,7 +803,7 @@ public final class TowerFight {
                     int k = (int) Math.max(4, from.distanceTo(to) * (1.0 - (e.strikeAt - now) / 30.0) * 2 + 4);
                     for (int i = 0; i <= k; i++) {
                         Vec3 q = from.lerp(to, i / (double) k);
-                        level.sendParticles(ParticleTypes.WAX_ON, q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                     }
                 }
                 continue;
@@ -813,7 +813,7 @@ public final class TowerFight {
             double dist = from.distanceTo(end);
             for (double s = 0; s <= dist; s += 0.6) {
                 Vec3 q = from.lerp(end, s / Math.max(0.01, dist));
-                level.sendParticles(ParticleTypes.END_ROD, q.x, q.y, q.z, 1, 0.03, 0.03, 0.03, 0.005);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.03, 0.03, 0.03, 0.005);
             }
             sound(level, from, CloudMobsSetup.EYE_BEAM.get(), 2.5f, e.big ? 0.7f : 1.1f);
             if (seen && !Downed.isDowned(p)) {
@@ -859,8 +859,8 @@ public final class TowerFight {
         laters.add(new Later(now + 80, () -> sound(level, rift(), SoundEvents.PORTAL_TRIGGER, 8f, 0.5f)));
         laters.add(new Later(now + 160, () -> {
             Vec3 r = rift();
-            far(level, ParticleTypes.FLASH, r.x, r.y, r.z, 3, 2, 2, 2, 0);
-            far(level, ParticleTypes.END_ROD, r.x, r.y, r.z, 240, 4, 4, 4, 0.6);
+            far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), r.x, r.y, r.z, 3, 2, 2, 2, 0);
+            far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), r.x, r.y, r.z, 24, 4, 4, 4, 0.6);
             far(level, WHITE, r.x, r.y, r.z, 120, 10, 10, 3, 0);
             sound(level, r, SoundEvents.BEACON_DEACTIVATE, 8f, 0.5f);
             sound(level, r, SoundEvents.TOTEM_USE, 6f, 0.7f);
@@ -873,7 +873,7 @@ public final class TowerFight {
                 for (int s = -1; s <= 1; s += 2) {
                     Vec3 b = rel(s * 7.5, 1, z);
                     for (int y = 0; y < 10; y++) {
-                        far(level, ParticleTypes.END_ROD, b.x, b.y + y, b.z, 2, 0.08, 0.3, 0.08, 0.01);
+                        far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.x, b.y + y, b.z, 2, 0.08, 0.3, 0.08, 0.01);
                     }
                     far(level, GOLD, b.x, b.y + 5, b.z, 30, 0.4, 4, 0.4, 0);
                 }
@@ -912,7 +912,7 @@ public final class TowerFight {
                 double y = body.y + (rng.nextDouble() - 0.5) * 30;
                 double z = body.z + (rng.nextDouble() - 0.5) * 14;
                 far(level, i % 2 == 0 ? GOLD : VIOLET, x, y, z, 4, 0.4, 0.4, 0.4, 0);
-                far(level, ParticleTypes.END_ROD, x, y, z, 1, 0.2, 0.2, 0.2, 0.05);
+                far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, 1, 0.2, 0.2, 0.2, 0.05);
             }
         }
         // 門: 2.5 秒で開き始め、5.5 秒で最大 (半径 23。形の門の縁は 1.3 倍で 24)、8 秒で閉じる
@@ -924,7 +924,7 @@ public final class TowerFight {
                 double a = 2 * Math.PI * i / n + t * 0.05;
                 far(level, VIOLET, c.x + Math.sin(a) * r, c.y + Math.cos(a) * r, c.z, 1, 0.1, 0.1, 0.1, 0);
             }
-            far(level, ParticleTypes.PORTAL, c.x, c.y, c.z, 30, r * 0.4, r * 0.4, 0.5, 0.3);
+            far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y, c.z, 30, r * 0.4, r * 0.4, 0.5, 0.3);
         }
         // 光が門へ吸われる (体の点から門の真ん中へ向かう速さを持たせる)
         if (t >= 70 && t <= 155 && t % 3 == 0) {
@@ -932,8 +932,8 @@ public final class TowerFight {
             for (int i = 0; i < 8; i++) {
                 Vec3 from = body.add((rng.nextDouble() - 0.5) * 24, (rng.nextDouble() - 0.5) * 26, (rng.nextDouble() - 0.5) * 10);
                 Vec3 d = c.subtract(from).normalize();
-                far(level, ParticleTypes.END_ROD, from.x, from.y, from.z, 0, d.x, d.y, d.z, 1.2);
-                far(level, ParticleTypes.REVERSE_PORTAL, from.x, from.y, from.z, 0, d.x, d.y, d.z, 0.9);
+                far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x, from.y, from.z, 0, d.x, d.y, d.z, 1.2);
+                far(level, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x, from.y, from.z, 0, d.x, d.y, d.z, 0.9);
             }
         }
     }
@@ -948,7 +948,7 @@ public final class TowerFight {
     // 越えた場面のあいだ、人の体は元の所にいてカメラだけが動くので、場面の光もこれで送る
     static void far(ServerLevel level, ParticleOptions type, double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
         for (ServerPlayer p : level.players()) {
-            level.sendParticles(p, type, true, x, y, z, count, dx, dy, dz, speed);
+            level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x, y, z, count, dx, dy, dz, speed);
         }
     }
 
@@ -1135,14 +1135,14 @@ public final class TowerFight {
             int n = (int) Math.min(48, 12 + rr * 4);
             for (int k = 0; k < n; k++) {
                 double a = Math.PI * 2 * k / n;
-                level.sendParticles(ring, cx + Math.cos(a) * rr, y + 0.2, cz + Math.sin(a) * rr, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * rr, y + 0.2, cz + Math.sin(a) * rr, 1, 0, 0, 0, 0);
             }
             int fall = (int) Math.min(16, 4 + rr);
             for (int k = 0; k < fall; k++) {
                 double a = level.random.nextDouble() * Math.PI * 2;
                 double d = Math.sqrt(level.random.nextDouble()) * rr;
                 // 数 0 で送ると、速さの向きにまっすぐ飛ぶ (上から下へ落ちる星の筋)
-                level.sendParticles(ParticleTypes.FIREWORK, cx + Math.cos(a) * d, y + 8 + level.random.nextDouble() * 4, cz + Math.sin(a) * d, 0, 0, -1.6, 0, 1.0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * d, y + 8 + level.random.nextDouble() * 4, cz + Math.sin(a) * d, 0, 0, -1.6, 0, 1.0);
             }
             level.playSound(null, cx, y, cz, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_RESONATE, net.minecraft.sounds.SoundSource.HOSTILE, 1.4f, 0.6f);
         }
@@ -1153,47 +1153,47 @@ public final class TowerFight {
                 int k = (int) Math.max(14, r * 6);
                 for (int i = 0; i < k; i++) {
                     double a = i / (double) k * Math.PI * 2;
-                    level.sendParticles(color, cx + Math.cos(a) * r, yy, cz + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * r, yy, cz + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
                 for (int i = 0; i < (int) (r * 1.5); i++) {
                     double a = rng.nextDouble() * Math.PI * 2;
                     double d = Math.sqrt(rng.nextDouble()) * r;
-                    level.sendParticles(color, cx + Math.cos(a) * d, yy, cz + Math.sin(a) * d, 1, 0, 0, 0, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx + Math.cos(a) * d, yy, cz + Math.sin(a) * d, 1, 0, 0, 0, 0);
                 }
                 if (pillar) {
-                    level.sendParticles(ParticleTypes.END_ROD, cx, yy + 0.5, cz, 2, 0.3, 0.3, 0.3, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, yy + 0.5, cz, 2, 0.3, 0.3, 0.3, 0.01);
                 }
                 return;
             }
             for (double x = x0; x <= x1; x += 1.2) {
-                level.sendParticles(color, x, yy, z0, 1, 0, 0, 0, 0);
-                level.sendParticles(color, x, yy, z1, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, yy, z0, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, yy, z1, 1, 0, 0, 0, 0);
             }
             for (double z = z0; z <= z1; z += 1.2) {
-                level.sendParticles(color, x0, yy, z, 1, 0, 0, 0, 0);
-                level.sendParticles(color, x1, yy, z, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x0, yy, z, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x1, yy, z, 1, 0, 0, 0, 0);
             }
             int fill = (int) Math.min(40, (x1 - x0) * (z1 - z0) / 12);
             for (int i = 0; i < fill; i++) {
-                level.sendParticles(color, x0 + rng.nextDouble() * (x1 - x0), yy, z0 + rng.nextDouble() * (z1 - z0), 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x0 + rng.nextDouble() * (x1 - x0), yy, z0 + rng.nextDouble() * (z1 - z0), 1, 0, 0, 0, 0);
             }
         }
 
         void burst(ServerLevel level) {
-            ParticleOptions big = color == VIOLET ? ParticleTypes.SQUID_INK : ParticleTypes.END_ROD;
+            ParticleOptions big = color == VIOLET ? fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD) : fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
             stars(level);
             if (kind == CIRCLE) {
                 if (pillar) {
                     for (double h = 0; h < 14; h += 0.5) {
-                        level.sendParticles(ParticleTypes.END_ROD, cx, y + h, cz, 2, 0.4, 0.1, 0.4, 0.01);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + h, cz, 2, 0.4, 0.1, 0.4, 0.01);
                     }
                 }
-                level.sendParticles(big, cx, y + 0.5, cz, (int) (r * 10), r * 0.5, 0.4, r * 0.5, 0.05);
-                level.sendParticles(color, cx, y + 0.8, cz, (int) (r * 12), r * 0.5, 0.6, r * 0.5, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + 0.5, cz, (int) (r * 10), r * 0.5, 0.4, r * 0.5, 0.05);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + 0.8, cz, (int) (r * 12), r * 0.5, 0.6, r * 0.5, 0);
                 return;
             }
-            level.sendParticles(big, cx, y + 0.5, cz, 80, (x1 - x0) * 0.35, 0.4, (z1 - z0) * 0.35, 0.05);
-            level.sendParticles(color, cx, y + 0.8, cz, 120, (x1 - x0) * 0.35, 0.6, (z1 - z0) * 0.35, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + 0.5, cz, 24, (x1 - x0) * 0.35, 0.4, (z1 - z0) * 0.35, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + 0.8, cz, 24, (x1 - x0) * 0.35, 0.6, (z1 - z0) * 0.35, 0);
         }
     }
 
@@ -1232,5 +1232,10 @@ public final class TowerFight {
                 }
             }
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

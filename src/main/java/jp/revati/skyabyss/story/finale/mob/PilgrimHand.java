@@ -165,7 +165,7 @@ public class PilgrimHand extends CloudMob {
             case "slam" -> slam(sl);
             case "stuck" -> {
                 if (t % 10 == 0) {
-                    sl.sendParticles(ParticleTypes.WAX_OFF, getX(), getY() + 1.5, getZ(), 6, 1.2, 1.0, 1.2, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.5, getZ(), 6, 1.2, 1.0, 1.2, 0.02);
                 }
                 if (t >= STUCK) {
                     move = "rise";
@@ -216,7 +216,7 @@ public class PilgrimHand extends CloudMob {
                 for (Vec3 s : slamSpots()) {
                     for (int i = 0; i < 20; i++) {
                         double a = i / 20.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.WAX_ON, s.x + Math.cos(a) * SLAM_R, s.y + 0.15, s.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x + Math.cos(a) * SLAM_R, s.y + 0.15, s.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
                     }
                 }
             }
@@ -225,7 +225,7 @@ public class PilgrimHand extends CloudMob {
         setPos(spot.x, spot.y, spot.z);
         playSound(CloudMobsSetup.HAND_SLAM.get(), 2.4f, 1.0f);
         for (Vec3 s : slamSpots()) {
-            sl.sendParticles(ParticleTypes.CLOUD, s.x, s.y + 0.4, s.z, 40, SLAM_R * 0.5, 0.3, SLAM_R * 0.5, 0.08);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), s.x, s.y + 0.4, s.z, 24, SLAM_R * 0.5, 0.3, SLAM_R * 0.5, 0.08);
             for (ServerPlayer p : SeatArena.present(sl)) {
                 if (p.position().subtract(s).horizontalDistance() <= SLAM_R + 0.3 && Math.abs(p.getY() - s.y) < 2.5) {
                     strike(p, dmg(1.4));
@@ -254,7 +254,7 @@ public class PilgrimHand extends CloudMob {
                 for (double d = 8; d <= 16; d += 2) {
                     for (double a = -SCRAPE_HALF; a <= SCRAPE_HALF; a += 8) {
                         double r = angle + Math.toRadians(a);
-                        sl.sendParticles(ParticleTypes.WAX_ON, c.getX() + 0.5 + Math.cos(r) * d, c.getY() + 1.15, c.getZ() + 0.5 + Math.sin(r) * d, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5 + Math.cos(r) * d, c.getY() + 1.15, c.getZ() + 0.5 + Math.sin(r) * d, 1, 0, 0, 0, 0);
                     }
                 }
             }
@@ -265,7 +265,7 @@ public class PilgrimHand extends CloudMob {
             int n = BellIsle.silence(sl, BlockPos.containing(mid), 12);
             for (double a = -SCRAPE_HALF; a <= SCRAPE_HALF; a += 6) {
                 double r = angle + Math.toRadians(a);
-                sl.sendParticles(ParticleTypes.CLOUD, c.getX() + 0.5 + Math.cos(r) * 12, c.getY() + 1.3, c.getZ() + 0.5 + Math.sin(r) * 12, 3, 1.5, 0.2, 1.5, 0.03);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.getX() + 0.5 + Math.cos(r) * 12, c.getY() + 1.3, c.getZ() + 0.5 + Math.sin(r) * 12, 3, 1.5, 0.2, 1.5, 0.03);
             }
             for (ServerPlayer p : SeatArena.present(sl)) {
                 Vec3 to = new Vec3(p.getX() - (c.getX() + 0.5), 0, p.getZ() - (c.getZ() + 0.5));
@@ -314,5 +314,10 @@ public class PilgrimHand extends CloudMob {
     public void remove(RemovalReason reason) {
         super.remove(reason);
         bar.removeAllPlayers();
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

@@ -126,13 +126,13 @@ public class PlumeWarden extends CloudMob {
                     Vec3 side = new Vec3(-dir.z, 0, dir.x);
                     for (double d = 1.0; d <= SPEED * DASH + 1; d += 0.8) {
                         Vec3 q = position().add(dir.scale(d));
-                        sl.sendParticles(ParticleTypes.WAX_ON, q.x, q.y + 0.12, q.z, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y + 0.12, q.z, 1, 0, 0, 0, 0);
                     }
                     Vec3 tip = position().add(dir.scale(SPEED * DASH + 1));
                     for (int s = -1; s <= 1; s += 2) {
                         for (double d = 0.4; d <= 1.6; d += 0.4) {
                             Vec3 q = tip.subtract(dir.scale(d)).add(side.scale(s * d));
-                            sl.sendParticles(ParticleTypes.WAX_ON, q.x, q.y + 0.12, q.z, 1, 0, 0, 0, 0);
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y + 0.12, q.z, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -144,7 +144,7 @@ public class PlumeWarden extends CloudMob {
             if (t < TELL + DASH && groundAhead(dir) && !horizontalCollision) {
                 setDeltaMovement(dir.x * SPEED, getDeltaMovement().y, dir.z * SPEED);
                 hasImpulse = true;
-                sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.3, getZ(), 2, 0.2, 0.1, 0.2, 0.01);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.3, getZ(), 2, 0.2, 0.1, 0.2, 0.01);
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(0.9, 0.5, 0.9), e -> e.isAlive() && !e.isSpectator())) {
                     if (!hit.add(p.getUUID())) {
                         continue;
@@ -173,5 +173,10 @@ public class PlumeWarden extends CloudMob {
             t = -1;
             getNavigation().stop();
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

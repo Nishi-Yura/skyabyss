@@ -77,7 +77,7 @@ public class DustCrawler extends MoonMob {
         super.tick();
         // 潜って進むと砂が盛り上がる (見る人への予告)
         if (!level().isClientSide && buried() && getDeltaMovement().horizontalDistanceSqr() > 0.001 && tickCount % 3 == 0 && level() instanceof ServerLevel sl) {
-            sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()), getX(), getY() + 0.1, getZ(),
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.1, getZ(),
                     4, 0.35, 0.05, 0.35, 0.02);
             if (tickCount % 12 == 0) {
                 playSound(MoonMobsSetup.CRAWLER_DIG.get(), 0.5f, 0.9f + random.nextFloat() * 0.2f);
@@ -126,7 +126,7 @@ public class DustCrawler extends MoonMob {
             if (wind >= 0) {
                 getNavigation().stop();
                 if (level() instanceof ServerLevel sl) {
-                    sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()), getX(), getY() + 0.3, getZ(),
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(),
                             6, 0.3, 0.3, 0.3, 0.1);
                 }
                 if (--wind < 0) {
@@ -196,5 +196,10 @@ public class DustCrawler extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.4, 1, 2);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

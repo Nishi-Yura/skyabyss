@@ -269,7 +269,7 @@ public final class LordMoves {
 
     static void pillar(ServerLevel lvl, double x, double y, double z) {
         for (int k = 0; k < 6; k++) {
-            lvl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.CALCITE.defaultBlockState()), x, y + k * 0.5, z, 6, 0.3, 0.2, 0.3, 0.05);
+            lvl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, y + k * 0.5, z, 6, 0.3, 0.2, 0.3, 0.05);
         }
     }
 
@@ -282,30 +282,16 @@ public final class LordMoves {
         }
     }
 
-    // 層の色の粒 (骨 = 魂の火と骨、塩 = 白い粉としぶき、雷 = 火花、灰 = 炎と煙)
+    // 層の粒 (docs/design/59): 層の巨神の属性の mod の粒。骨 = 石、塩 = 水、雷 = 雷、灰 = 熾。光の粒と破片
     static void element(ServerLevel lvl, int li, double x, double y, double z, int n, double spread) {
-        ParticleOptions a;
-        ParticleOptions b;
-        switch (li) {
-            case 0 -> {
-                a = ParticleTypes.SOUL_FIRE_FLAME;
-                b = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState());
-            }
-            case 1 -> {
-                a = ParticleTypes.WHITE_ASH;
-                b = ParticleTypes.SPLASH;
-            }
-            case 2 -> {
-                a = ParticleTypes.ELECTRIC_SPARK;
-                b = ParticleTypes.END_ROD;
-            }
-            default -> {
-                a = ParticleTypes.FLAME;
-                b = ParticleTypes.LARGE_SMOKE;
-            }
-        }
-        lvl.sendParticles(a, x, y, z, n, spread, 0.3, spread, 0.03);
-        lvl.sendParticles(b, x, y, z, Math.max(2, n / 2), spread, 0.3, spread, 0.02);
+        jp.revati.skyabyss.fx.FxParticles.Element el = switch (li) {
+            case 0 -> jp.revati.skyabyss.fx.FxParticles.Element.STONE;
+            case 1 -> jp.revati.skyabyss.fx.FxParticles.Element.WATER;
+            case 2 -> jp.revati.skyabyss.fx.FxParticles.Element.STORM;
+            default -> jp.revati.skyabyss.fx.FxParticles.Element.EMBER;
+        };
+        lvl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(el, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, Math.min(24, n), spread, 0.3, spread, 0.03);
+        lvl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(el, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, y, z, Math.min(24, Math.max(2, n / 2)), spread, 0.3, spread, 0.02);
     }
 
     static SoundEvent windSound(int li) {
@@ -366,5 +352,10 @@ public final class LordMoves {
             }
         }
         return best;
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

@@ -68,7 +68,6 @@ public class FortWarlord extends DungeonBoss {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         teleportTo(at.x, at.y, at.z);
-                        server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.3, at.z, 30, 1.4, 0.2, 1.4, 0.03);
                         server.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.4f, 0.6f);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.2f))
@@ -109,7 +108,6 @@ public class FortWarlord extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, Math.toRadians(130)))
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 2, getY() + 1.2, getZ() + f.z * 2, 6, 1.5, 0.2, 1.5, 0))
                     .onHit((server, player) -> player.hurt(attackSource(), damage()))
                     .start();
         }
@@ -120,7 +118,6 @@ public class FortWarlord extends DungeonBoss {
         Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, Math.toRadians(110)))
                 .floor(getY()).warn(warn).danger().owner(this).target(target)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 2, getY() + 1.2, getZ() + f.z * 2, 5, 1.4, 0.2, 1.4, 0))
                 .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.8f))
                 .start();
     }
@@ -146,7 +143,6 @@ public class FortWarlord extends DungeonBoss {
                     .floor(getY()).warn(COMBO_HIT3 - COMBO_HIT2).danger().owner(this).target(t)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX() + f.x * 4, getY() + 0.3, getZ() + f.z * 4, 20, 1.4, 0.2, 1.4, 0.03);
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.4f, 0.5f);
                     })
                     .onHit((server, player) -> {

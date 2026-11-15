@@ -56,9 +56,6 @@ public class DrownedSailor extends ContinentFoe {
                 .victims(this::clearShot)
                 .onImpact(server -> {
                     server.playSound(null, getX(), getY(), getZ(), SoundEvents.TRIDENT_THROW.value(), net.minecraft.sounds.SoundSource.HOSTILE, 1f, 0.9f);
-                    for (int i = 1; i < length; i += 2) {
-                        server.sendParticles(ParticleTypes.BUBBLE_POP, getX() + f.x * i, getY() + 1.2, getZ() + f.z * i, 2, 0.05, 0.05, 0.05, 0.01);
-                    }
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());

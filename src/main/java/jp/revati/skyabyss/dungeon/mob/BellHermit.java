@@ -82,7 +82,6 @@ public class BellHermit extends DungeonBoss {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 2f, 0.6f);
-                        server.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.3, getZ(), 120, RING_OUTER * 0.5, 0.1, RING_OUTER * 0.5, 0.2);
                     })
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage());

@@ -118,7 +118,6 @@ public class ForgeGiant extends DungeonBoss {
                     .floor(getY()).warn(STOMP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.3, getZ(), 40, STOMP_OUTER * 0.4, 0.1, STOMP_OUTER * 0.4, 0.1);
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 0.6f);
                     })
                     .onHit((server, player) -> {
@@ -137,7 +136,6 @@ public class ForgeGiant extends DungeonBoss {
                     .floor(getY()).warn(HAMMER_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.FLAME, c.x, getY() + 0.3, c.z, 50, 1.6, 0.2, 1.6, 0.08);
                         server.playSound(null, c.x, getY(), c.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.6f, 0.5f);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 1.35f))
@@ -173,7 +171,6 @@ public class ForgeGiant extends DungeonBoss {
                     .floor(getY()).warn(COMBO_WARN + k * 8).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.FLAME, c.x, getY() + 0.3, c.z, 40, 1.2, 0.2, 1.2, 0.08);
                         server.playSound(null, c.x, getY(), c.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.4f, 0.6f);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.95f))
@@ -194,9 +191,6 @@ public class ForgeGiant extends DungeonBoss {
                 .onImpact(server -> {
                     for (int i = 3; i < TRENCH_LENGTH; i += 3) {
                         jp.revati.skyabyss.combat.prop.AttackProps.rise(server, "lava_pillar", this, position().add(Math.cos(a) * i, 0, Math.sin(a) * i), i * 47f, 0.45f + i * 0.02f, 20);
-                    }
-                    for (int i = 1; i < TRENCH_LENGTH; i += 2) {
-                        server.sendParticles(ParticleTypes.LAVA, getX() + Math.cos(a) * i, getY() + 0.2, getZ() + Math.sin(a) * i, 3, 0.4, 0.1, 0.4, 0.05);
                     }
                     server.playSound(null, getX(), getY(), getZ(), SoundEvents.LAVA_POP, SoundSource.HOSTILE, 2f, 0.6f);
                 })
@@ -227,8 +221,6 @@ public class ForgeGiant extends DungeonBoss {
                     .floor(getY()).warn(BLAST_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.LAVA, s.x, getY() + 0.5, s.z, 24, 1.0, 0.4, 1.0, 0.1);
-                        server.sendParticles(ParticleTypes.LARGE_SMOKE, s.x, getY() + 1, s.z, 12, 0.8, 0.6, 0.8, 0.02);
                         server.playSound(null, s.x, getY(), s.z, SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 1.2f, 0.7f);
                     })
                     .onHit((server, player) -> {
@@ -267,8 +259,8 @@ public class ForgeGiant extends DungeonBoss {
         if (move == BLAST && tick % 3 == 0) {
             // 背の炉の煙突から火の粉
             Vec3 back = position().add(forward().scale(-1.6));
-            server().sendParticles(ParticleTypes.FLAME, back.x, getY() + 4.6, back.z, 6, 0.3, 0.4, 0.3, 0.05);
-            server().sendParticles(ParticleTypes.LARGE_SMOKE, back.x, getY() + 5.0, back.z, 3, 0.3, 0.5, 0.3, 0.02);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), back.x, getY() + 4.6, back.z, 6, 0.3, 0.4, 0.3, 0.05);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), back.x, getY() + 5.0, back.z, 3, 0.3, 0.5, 0.3, 0.02);
         }
     }
 
@@ -304,5 +296,10 @@ public class ForgeGiant extends DungeonBoss {
         }
         cooldown = move == HAMMER || move == BLAST || move == COMBO ? 28 : 16 + random.nextInt(10);
         super.finish();
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

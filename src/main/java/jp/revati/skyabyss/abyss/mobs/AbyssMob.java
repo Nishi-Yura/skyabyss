@@ -322,7 +322,7 @@ public class AbyssMob extends GuardMob {
         awake = true;
         playAction("wake");
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE, 2.0f, 0.5f);
-        server.sendParticles(ParticleTypes.POOF, getX(), getY() + 1, getZ(), 12, 0.3, 0.6, 0.3, 0.05);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1, getZ(), 12, 0.3, 0.6, 0.3, 0.05);
     }
 
     // ---------------------------------------------------------------- 潮だまりの手: 動かず、予告の輪の中の人を縛る
@@ -356,7 +356,7 @@ public class AbyssMob extends GuardMob {
         Vec3 want = p.position().add(Math.sin(t / 7.0) * 2.2, 1.4 + Math.sin(t / 5.0) * 0.5, Math.cos(t / 7.0) * 2.2);
         moveToward(want, 0.25);
         if (tickCount % 3 == 0) {
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.2, getZ(), 1, 0.2, 0.2, 0.2, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.2, getZ(), 1, 0.2, 0.2, 0.2, 0.02);
         }
         if (touchCooldown == 0 && distanceTo(p) <= 1.2) {
             touchCooldown = 20;
@@ -384,7 +384,7 @@ public class AbyssMob extends GuardMob {
                         }
                     }
                 }
-                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, divePoint.x, divePoint.y + 0.5, divePoint.z, 30, 0.6, 1.0, 0.6, 0.3);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), divePoint.x, divePoint.y + 0.5, divePoint.z, 24, 0.6, 1.0, 0.6, 0.3);
                 server.playSound(null, divePoint.x, divePoint.y, divePoint.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 1.6f, 1.3f);
             }
         } else if (--cool <= 0 && p != null && p.distanceTo(this) <= 16) {
@@ -424,7 +424,7 @@ public class AbyssMob extends GuardMob {
         if (diveStage == 1) {
             if (warn > 0) {
                 warn--;
-                server.sendParticles(DARK, divePoint.x, divePoint.y + 0.05, divePoint.z, 3, 0.5, 0.0, 0.5, 0.0);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), divePoint.x, divePoint.y + 0.05, divePoint.z, 3, 0.5, 0.0, 0.5, 0.0);
                 if (warn == 0) {
                     diveStage = 2;
                     diveLeft = 40;
@@ -453,7 +453,7 @@ public class AbyssMob extends GuardMob {
                 double dot = front.dot(toward.normalize());
                 a = (float) (a * AbyssMobStats.shieldKeep(dot));
                 if (AbyssMobStats.inFrontOfShield(dot) && level() instanceof ServerLevel s) {
-                    s.sendParticles(ParticleTypes.CRIT, getX(), getY() + 1.2, getZ(), 4, 0.2, 0.2, 0.2, 0.05);
+                    s.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 4, 0.2, 0.2, 0.2, 0.05);
                 }
             }
         }
@@ -490,7 +490,7 @@ public class AbyssMob extends GuardMob {
     private void ringAround(ServerLevel server, Vec3 c, double r, DustParticleOptions dust, int n) {
         for (int i = 0; i < n; i++) {
             double a = (Math.PI * 2 * i) / n + tickCount * 0.1;
-            server.sendParticles(dust, c.x + Math.cos(a) * r, c.y, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
     }
 
@@ -521,4 +521,9 @@ public class AbyssMob extends GuardMob {
         });
     }
 
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
+    }
 }

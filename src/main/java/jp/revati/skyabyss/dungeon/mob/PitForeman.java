@@ -79,8 +79,6 @@ public class PitForeman extends DungeonBoss {
                     .floor(getY()).warn(STOMP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), getY() + 0.2, getZ(),
-                                60, STOMP_RADIUS * 0.4, 0.1, STOMP_RADIUS * 0.4, 0.15);
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.8f, 0.6f);
                     })
                     .onHit((server, player) -> {
@@ -100,7 +98,6 @@ public class PitForeman extends DungeonBoss {
             Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), SWEEP_RANGE, Math.toRadians(70)))
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 3, getY() + 1.2, getZ() + f.z * 3, 6, 1.4, 0.2, 1.4, 0))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.9f);
                         player.knockback(1.0, -f.x, -f.z);
@@ -118,10 +115,6 @@ public class PitForeman extends DungeonBoss {
                 .floor(getY()).warn(SLAM_WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
                 .onImpact(server -> {
-                    for (int i = 1; i <= SLAM_LENGTH; i += 2) {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DRIPSTONE_BLOCK.defaultBlockState()),
-                                getX() + f.x * i, getY() + 0.2, getZ() + f.z * i, 8, 0.4, 0.1, 0.4, 0.1);
-                    }
                     server.playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.2f, 0.5f);
                 })
                 .onHit((server, player) -> {

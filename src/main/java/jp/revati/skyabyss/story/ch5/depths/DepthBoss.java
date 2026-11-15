@@ -414,7 +414,7 @@ public final class DepthBoss {
     static void ring(ServerLevel level, Vec3 c, double r, int n) {
         for (int k = 0; k < n; k++) {
             double a = Math.PI * 2 * k / n;
-            level.sendParticles(RED, c.x + Math.cos(a) * r, c.y + 0.15, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y + 0.15, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
     }
 
@@ -422,7 +422,7 @@ public final class DepthBoss {
         for (int k = 0; k < n; k++) {
             double a = rng.nextDouble() * Math.PI * 2;
             double d = Math.sqrt(rng.nextDouble()) * r;
-            level.sendParticles(RED_SMALL, c.x + Math.cos(a) * d, c.y + 0.1, c.z + Math.sin(a) * d, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * d, c.y + 0.1, c.z + Math.sin(a) * d, 1, 0, 0, 0, 0);
         }
     }
 
@@ -539,7 +539,7 @@ public final class DepthBoss {
         double t = level.getGameTime() * 0.3;
         for (int k = 0; k < n; k++) {
             double a = t + Math.PI * 2 * k / n;
-            level.sendParticles(dust, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, 0.05, 0, 0);
         }
     }
 
@@ -551,15 +551,15 @@ public final class DepthBoss {
         int n = (int) Math.min(72, 12 + r * 6);
         for (int k = 0; k < n; k++) {
             double a = Math.PI * 2 * k / n;
-            level.sendParticles(gold, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
-            level.sendParticles(gold, c.x + Math.cos(a) * r * 0.6, c.y + 0.25, c.z + Math.sin(a) * r * 0.6, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r * 0.6, c.y + 0.25, c.z + Math.sin(a) * r * 0.6, 1, 0, 0, 0, 0);
         }
-        level.sendParticles(petal, c.x, c.y + 0.6, c.z, (int) (10 + r * 4), r * 0.5, 0.6, r * 0.5, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.6, c.z, (int) (10 + r * 4), r * 0.5, 0.6, r * 0.5, 0.02);
         for (int h = 0; h < 10; h++) {
-            level.sendParticles(elem, c.x, c.y + 0.3 + h * 0.45, c.z, 3, 0.25, 0.05, 0.25, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.3 + h * 0.45, c.z, 3, 0.25, 0.05, 0.25, 0);
         }
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.FLASH, c.x, c.y + 0.8, c.z, 1, 0, 0, 0, 0);
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, c.x, c.y + 0.6, c.z, (int) (8 + r * 2), r * 0.4, 0.3, r * 0.4, 0.06);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.8, c.z, 1, 0, 0, 0, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.6, c.z, (int) (8 + r * 2), r * 0.4, 0.3, r * 0.4, 0.06);
         level.playSound(null, BlockPos.containing(c), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 1.2f, 0.6f);
     }
 
@@ -621,7 +621,7 @@ public final class DepthBoss {
                     // 降る柱: 上から元素の光が落ちる
                     var elem = new net.minecraft.core.particles.DustParticleOptions(elemColor(king), 2.2f);
                     for (int h = 0; h < 14; h++) {
-                        level.sendParticles(elem, p.x, p.y + 0.3 + h * 0.7, p.z, 2, 0.15, 0, 0.15, 0);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.3 + h * 0.7, p.z, 2, 0.15, 0, 0.15, 0);
                     }
                     for (ServerPlayer pl : party) {
                         if (flat(pl.position(), p) <= 2.2 && Math.abs(pl.getY() - p.y) < 3) {
@@ -657,7 +657,7 @@ public final class DepthBoss {
         f.dash--;
         king.setDeltaMovement(f.dir.x * 1.2, king.getDeltaMovement().y, f.dir.z * 1.2);
         king.hurtMarked = true;
-        level.sendParticles(RED_SMALL, king.getX(), king.getY() + 0.5, king.getZ(), 4, 0.5, 0.4, 0.5, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), king.getX(), king.getY() + 0.5, king.getZ(), 4, 0.5, 0.4, 0.5, 0);
         if (!f.dashHit) {
             for (ServerPlayer p : party) {
                 if (p.position().distanceTo(king.position()) < 2.3 * king.getScale()) {
@@ -731,5 +731,10 @@ public final class DepthBoss {
                 level.setBlock(i.pos(s.x() + dx, DepthFloorBuild.FLOOR_YI, s.z() + dz), Blocks.AIR.defaultBlockState(), 3);
             }
         }
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

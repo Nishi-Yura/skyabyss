@@ -198,7 +198,7 @@ public class ShadowStitcher extends MoonMob {
                 Vec3 b = t.position().add(0, 1.0, 0);
                 for (int k = 1; k < 8; k++) {
                     Vec3 p = a.lerp(b, k / 8.0 * (1 - wind / (double) REACH_TELL));
-                    sl.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
                 }
             }
             if (--wind < 0) {
@@ -223,5 +223,10 @@ public class ShadowStitcher extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.SHADOW_THREAD.get(), 0.45, 1, 2);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }
