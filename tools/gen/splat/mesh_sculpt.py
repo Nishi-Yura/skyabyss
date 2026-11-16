@@ -80,7 +80,7 @@ def load(name):
 PAPER = set("pilgrim_eye pilgrim_hand pilgrim_moon pilgrim_plume tower_eye tower_master tower_moon moon_core mirror_bearer full_keeper last_bellkeeper rift_serpent".split())
 
 
-def sculpt_mesh(name, preview=False, budget=90000.0):
+def sculpt_mesh(name, preview=False, budget=90000.0, out_name=None):
     paper = name in PAPER
     t0 = time.time()
     d, img, glow = load(name)
@@ -92,9 +92,7 @@ def sculpt_mesh(name, preview=False, budget=90000.0):
         V = np.array(b["vertices"], float).reshape(-1, 3)
         T = np.array(b["triangles"], int).reshape(-1, 3)
         uv = np.array(b["uvs"], float).reshape(-1, 2)
-        cs = b.get("cap_vertex_start")
-        if cs is not None and len(T):
-            T = T[(T < cs).all(1)]
+        # 塞ぎの面 (cap_vertex_start 以降) も使う: 部品を閉じた形にするための面で、捨てると槍の柄などがまるごと抜ける
         if len(T) == 0:
             continue
         if (uv > 1.0001).any():
@@ -196,11 +194,11 @@ def sculpt_mesh(name, preview=False, budget=90000.0):
     allA = np.concatenate([A, A[gi]])
     allF = np.concatenate([flags, np.full(len(gi), S.F_HALO)])
     allN = np.concatenate([n, np.zeros((len(gi), 3))])
-    out = ASSETS / "splat" / (name + ".bin")
+    out = ASSETS / "splat" / ((out_name or name) + ".bin")
     S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allA, np.ones(len(allP)), allF, N=allN)
-    print(f"{name}: {N} splats (+{len(gi)} halo) h={h:.2f} {time.time() - t0:.1f}s")
+    print(f"{out_name or name}: {N} splats (+{len(gi)} halo) h={h:.2f} {time.time() - t0:.1f}s")
     if preview:
-        pv = S.ROOT / "docs/review/splat_handsculpt" / (name + ".png")
+        pv = S.ROOT / "docs/review/splat_handsculpt" / ((out_name or name) + ".png")
         pv.parent.mkdir(parents=True, exist_ok=True)
         S.preview(allP, allS, allC, allF, pv, yaw_list=(200, 150, 90), px=600)
 
@@ -215,9 +213,14 @@ def main():
     ap.add_argument("names", nargs="+")
     ap.add_argument("--preview", action="store_true")
     ap.add_argument("--budget", type=float, default=90000.0)
+    ap.add_argument("--titan", action="store_true", help="巨神: 近い段のメッシュから近・中・遠の 3 段を書く")
     a = ap.parse_args()
     for nm in a.names:
-        sculpt_mesh(nm, a.preview, a.budget)
+        if a.titan:
+            for suffix, pts in (("", 220000.0), ("_mid", 80000.0), ("_far", 30000.0)):
+                sculpt_mesh(nm, a.preview and suffix == "", pts, out_name=nm + suffix)
+        else:
+            sculpt_mesh(nm, a.preview, a.budget)
 
 
 if __name__ == "__main__":
