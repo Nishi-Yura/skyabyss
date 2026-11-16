@@ -16,7 +16,6 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import splat_lib as S  # noqa: E402
-import view_bin  # noqa: E402
 
 ASSETS = S.ROOT / "src/main/resources/assets/skyabyss"
 OUT = S.ROOT / "docs/review/splat_audit"
@@ -110,8 +109,9 @@ def main():
     for k, nm in enumerate(names):
         binp = ASSETS / "splat" / (nm + ".bin")
         if binp.exists():
-            P, size, rgb, flags = view_bin.read3(binp)
-            pts = (P, size, rgb, flags)
+            d = S.read_bin(binp)
+            P = d["P"]
+            pts = (P, d["size"], d["rgb"].astype(float), d["flags"].astype(int))
             st = dict(name=nm, points=len(P), source="bin")
         else:
             pts, st = auto_points(nm, rng)

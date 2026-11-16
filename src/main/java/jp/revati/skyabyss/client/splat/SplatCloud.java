@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-// 点の模型 (ピクセルアートのスプラット)。手で彫った・彫り直したもの (assets/skyabyss/splat/<名前>.bin、形式 SPL3、tools/gen/splat/) と、
+// 点の模型 (ピクセルアートのスプラット)。手で彫った・彫り直したもの (assets/skyabyss/splat/<名前>.bin、形式 SPL4、tools/gen/splat/) と、
 // 低ポリのメッシュからその場で作ったもの (SplatGen) の両方がこの形になる。
 // 座標は描画の空間 (x 反転、ブロック)。不透明の点は骨 A の番号順に並べ、骨ごとの範囲 (boneStart / boneCount) を持つ。
 // 骨の中の点は乱数の順なので、範囲の先頭から何割かだけ描けば一様に間引ける (遠くの間引き)
@@ -108,9 +108,9 @@ public final class SplatCloud {
         return i == null ? -1 : i;
     }
 
-    // SPL3 (tools/gen/splat/splat_lib.py の write_bin3): 圧縮した中身。点は骨・位置の順に並んでいるので、読んだあと乱数で並べ替える
-    // (同じ名前ならいつも同じ順。骨ごとの範囲の先頭から何割かを描けば一様に間引ける)
-    private static SplatCloud readSpl3(String name, DataInputStream d) throws IOException {
+    // SPL4 (tools/gen/splat/splat_lib.py の write_bin): 圧縮した中身。色は使っている色の一覧と点ごとの番号、法線は八面体の u8 2 つ。
+    // 点は骨・位置の順に並んでいるので、読んだあと乱数で並べ替える (同じ名前ならいつも同じ順。骨ごとの範囲の先頭から何割かを描けば一様に間引ける)
+    private static SplatCloud readSpl4(String name, DataInputStream d) throws IOException {
         int nb = d.readInt();
         String[] bones = new String[nb];
         for (int i = 0; i < nb; i++) {
@@ -136,8 +136,13 @@ public final class SplatCloud {
                 q[k][i] = acc;
             }
         }
-        byte[] size = col(d, n), r = col(d, n), g = col(d, n), bl = col(d, n), a = col(d, n), bb = col(d, n), w = col(d, n), f = col(d, n);
-        byte[] nx = col(d, n), ny = col(d, n), nz = col(d, n);
+        byte[] size = col(d, n);
+        int npal = d.readInt();
+        byte[] pr = col(d, npal), pg = col(d, npal), pb = col(d, npal);
+        byte[] lo8 = col(d, n);
+        byte[] hi8 = npal > 256 ? col(d, n) : null;
+        byte[] a = col(d, n), bb = col(d, n), w = col(d, n), f = col(d, n);
+        byte[] ou = col(d, n), ov = col(d, n);
         Part all = new Part(n);
         int add = 0;
         for (int i = 0; i < n; i++) {
@@ -145,15 +150,25 @@ public final class SplatCloud {
             all.y[i] = (ly + q[1][i] * step) / 16f;
             all.z[i] = (lz + q[2][i] * step) / 16f;
             all.size[i] = (size[i] & 255) / 255f * smax / 16f;
-            all.argb[i] = 0xFF000000 | ((r[i] & 255) << 16) | ((g[i] & 255) << 8) | (bl[i] & 255);
+            int pi = (lo8[i] & 255) | (hi8 == null ? 0 : (hi8[i] & 255) << 8);
+            all.argb[i] = 0xFF000000 | ((pr[pi] & 255) << 16) | ((pg[pi] & 255) << 8) | (pb[pi] & 255);
             all.boneA[i] = a[i];
             all.boneB[i] = bb[i];
             all.weightA[i] = (w[i] & 255) / 255f;
             all.flags[i] = f[i];
-            // 描画の空間は x を反転している
-            all.nx[i] = (byte) -nx[i];
-            all.ny[i] = ny[i];
-            all.nz[i] = nz[i];
+            // 法線: 八面体の 2 つの u8 から (splat_lib.oct_decode と同じ)。(0, 0) は法線なし。描画の空間は x を反転している
+            int iu = ou[i] & 255, iv = ov[i] & 255;
+            if ((iu | iv) != 0) {
+                float ex = iu / 255f * 2f - 1f, ey = iv / 255f * 2f - 1f;
+                float ez = 1f - Math.abs(ex) - Math.abs(ey);
+                float t = Math.max(-ez, 0f);
+                ex -= (ex >= 0f ? 1f : -1f) * t;
+                ey -= (ey >= 0f ? 1f : -1f) * t;
+                float len = (float) Math.sqrt(ex * ex + ey * ey + ez * ez);
+                all.nx[i] = (byte) -Math.round(ex / len * 127f);
+                all.ny[i] = (byte) Math.round(ey / len * 127f);
+                all.nz[i] = (byte) Math.round(ez / len * 127f);
+            }
             if ((f[i] & (F_HALO | F_EMBER)) != 0) {
                 add++;
             }
@@ -195,9 +210,9 @@ public final class SplatCloud {
         DataInputStream d = new DataInputStream(new java.io.BufferedInputStream(in));
         byte[] magic = new byte[4];
         d.readFully(magic);
-        if (magic[0] == 'S' && magic[1] == 'P' && magic[2] == 'L' && magic[3] == '3') {
-            return readSpl3(name, new DataInputStream(new java.io.BufferedInputStream(new java.util.zip.InflaterInputStream(d))));
+        if (magic[0] == 'S' && magic[1] == 'P' && magic[2] == 'L' && magic[3] == '4') {
+            return readSpl4(name, new DataInputStream(new java.io.BufferedInputStream(new java.util.zip.InflaterInputStream(d))));
         }
-        throw new IOException(name + ": not a SPL3 file");
+        throw new IOException(name + ": not a SPL4 file");
     }
 }

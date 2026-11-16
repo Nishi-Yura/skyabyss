@@ -494,7 +494,7 @@ def build_cloud(path, name=None, h=None, preview=False, func="build"):
     allF = np.concatenate([flags, np.full(len(gi), S.F_HALO)])
     allN = np.concatenate([n, np.zeros((len(gi), 3))])
     out = ASSETS / "splat" / (name + ".bin")
-    S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allA, np.ones(len(allP)), allF, N=allN)
+    S.write_bin(out, bones, allP, allS, S.argb(allC), allA, allA, np.ones(len(allP)), allF, N=allN)
     print(f"{name}: {N} splats (+{len(gi)} halo) h={h:.2f} {len(chunks)} bones {time.time() - t0:.1f}s")
     if preview:
         pv = S.ROOT / "docs/review/splat_handsculpt" / (name + ".png")

@@ -346,38 +346,56 @@ def ramp_pick(ramp, L, dither):
 
 
 # ---------------------------------------------------------------- 書き出し
-def write_bin3(path, bones, P, size, rgba, A, B, W, flags, N=None, step=None):
-    """形式 SPL3 (小さい形式)。"SPL3" のあとを zlib で圧縮: 骨の数・骨の名前・点の数・原点 (float 3)・刻み (float)・大きさの最大 (float)、
-    そのあと項目ごとの列 (位置は刻みの整数を並び順の差で int32 (zigzag の varint)、大きさ u8、色 r g b、骨 A・骨 B・重み・印 u8、法線 int8 x3)。
-    点は骨・位置の順に並べて書く (圧縮が効く)。遠くの間引きのための乱数の並べ替えは、読むとき (SplatCloud) にする"""
-    import zlib
-    P = np.asarray(P, float)
-    lo = P.min(0)
-    if step is None:
-        step = float(np.median(size)) / 10.0
-    q = np.rint((P - lo) / step).astype(np.int64)
-    order = np.lexsort((q[:, 2], q[:, 1], q[:, 0], np.asarray(A)))
-    q = q[order]
-    smax = float(np.max(size))
+def oct_encode(N):
+    """法線を八面体の 2 つの u8 に (誤差 1 度以下)。(0, 0) は「法線なし」(長さ 0) に取っておく
+    (八面体の四隅はどれも真下 (0, 0, -1) なので、真下は (255, 255) で書く)"""
+    N = np.asarray(N, float)
+    s = np.abs(N).sum(1, keepdims=True)
+    zero = s[:, 0] < 1e-9
+    n = N / np.where(s < 1e-9, 1, s)
+    x, y = n[:, 0], n[:, 1]
+    neg = n[:, 2] < 0
+    sx = np.where(x >= 0, 1.0, -1.0)
+    sy = np.where(y >= 0, 1.0, -1.0)
+    x2 = np.where(neg, (1 - np.abs(y)) * sx, x)
+    y2 = np.where(neg, (1 - np.abs(x)) * sy, y)
+    u = np.rint((x2 * 0.5 + 0.5) * 255).astype(np.int64)
+    v = np.rint((y2 * 0.5 + 0.5) * 255).astype(np.int64)
+    corner = (u == 0) & (v == 0)
+    u[corner] = 255
+    v[corner] = 255
+    u[zero] = 0
+    v[zero] = 0
+    return u, v
+
+
+def oct_decode(u, v):
+    """oct_encode の逆 (読む側 SplatCloud.readSpl4 と同じ計算)。戻り: 単位ベクトル ((0, 0) は長さ 0)"""
+    x = np.asarray(u, float) / 255 * 2 - 1
+    y = np.asarray(v, float) / 255 * 2 - 1
+    z = 1 - np.abs(x) - np.abs(y)
+    t = np.clip(-z, 0, None)
+    x = x - np.where(x >= 0, 1.0, -1.0) * t
+    y = y - np.where(y >= 0, 1.0, -1.0) * t
+    n = np.stack([x, y, z], 1)
+    n = n / np.linalg.norm(n, axis=1, keepdims=True)
+    n[(np.asarray(u) == 0) & (np.asarray(v) == 0)] = 0
+    return n
+
+
+def pack4(bones, lo, step, smax, q, size8, rgb, A, B, W8, flags, octu, octv):
+    """形式 SPL4 の中身 (圧縮前)。並びはそのまま書く (並べ替えは write_bin がする)"""
+    n = len(q)
     out = bytearray()
-
-    def u32(v):
-        out.extend(struct.pack(">I", v))
-
-    def f32(v):
-        out.extend(struct.pack(">f", v))
-    u32(len(bones))
+    out.extend(struct.pack(">I", len(bones)))
     for b in bones:
         e = b.encode("utf-8")
         out.extend(struct.pack(">H", len(e)) + e)
-    u32(len(P))
-    for v in lo:
-        f32(float(v))
-    f32(step)
-    f32(smax)
+    out.extend(struct.pack(">I", n))
+    out.extend(struct.pack(">fffff", float(lo[0]), float(lo[1]), float(lo[2]), float(step), float(smax)))
 
     def varints(arr):
-        d = np.diff(np.concatenate([[0], arr]))
+        d = np.diff(np.concatenate([[0], np.asarray(arr, np.int64)]))
         z = (d << 1) ^ (d >> 63)
         buf = bytearray()
         for v in z.tolist():
@@ -388,23 +406,115 @@ def write_bin3(path, bones, P, size, rgba, A, B, W, flags, N=None, step=None):
         return buf
     for k in range(3):
         out.extend(varints(q[:, k]))
-    out.extend(np.clip(np.rint(np.asarray(size)[order] / smax * 255), 1, 255).astype(np.uint8).tobytes())
-    c = np.asarray(rgba, np.int64)[order]
+    out.extend(np.asarray(size8, np.uint8).tobytes())
+    # 色: 使っている色の一覧 (多い順) と、点ごとの番号 (一覧が 256 色を超えるときは下位・上位の 2 列)
+    rgb = np.asarray(rgb, np.int64)
+    key = (rgb[:, 0] << 16) | (rgb[:, 1] << 8) | rgb[:, 2]
+    pal, inv = np.unique(key, return_inverse=True)
+    inv = inv.reshape(-1)
+    rank = np.argsort(-np.bincount(inv), kind="stable")
+    remap = np.empty_like(rank)
+    remap[rank] = np.arange(len(rank))
+    idx = remap[inv]
+    pal = pal[rank]
+    out.extend(struct.pack(">I", len(pal)))
     for sh in (16, 8, 0):
-        out.extend(((c >> sh) & 255).astype(np.uint8).tobytes())
-    out.extend(np.asarray(A, np.uint8)[order].tobytes())
-    out.extend(np.asarray(B, np.uint8)[order].tobytes())
-    out.extend(np.clip(np.rint(np.asarray(W)[order] * 255), 0, 255).astype(np.uint8).tobytes())
-    out.extend(np.asarray(flags, np.uint8)[order].tobytes())
-    Nq = np.zeros((len(P), 3), int) if N is None else np.clip(np.rint(np.asarray(N) * 127), -127, 127).astype(int)
-    for k in range(3):
-        out.extend(Nq[order, k].astype(np.int8).tobytes())
+        out.extend(((pal >> sh) & 255).astype(np.uint8).tobytes())
+    out.extend((idx & 255).astype(np.uint8).tobytes())
+    if len(pal) > 256:
+        out.extend((idx >> 8).astype(np.uint8).tobytes())
+    for col in (A, B, W8, flags, octu, octv):
+        out.extend(np.asarray(col, np.uint8).tobytes())
+    return bytes(out)
+
+
+def save4(path, body):
+    import zlib
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "wb") as fo:
-        fo.write(b"SPL3")
-        fo.write(zlib.compress(bytes(out), 9))
+        fo.write(b"SPL4")
+        fo.write(zlib.compress(body, 9))
     return path
+
+
+def write_bin(path, bones, P, size, rgba, A, B, W, flags, N=None, step=None):
+    """形式 SPL4。"SPL4" のあとを zlib で圧縮: 骨の数・骨の名前・点の数・原点 (float 3)・刻み (float)・大きさの最大 (float)、
+    そのあと項目ごとの列: 位置 (刻みの整数を並び順の差で zigzag の varint、x・y・z)、大きさ u8、
+    色 (一覧の数 u32・一覧の r 列・g 列・b 列・点ごとの番号 u8 (一覧が 256 色を超えるときは上位の u8 列も))、
+    骨 A・骨 B・重み・印 u8、法線 (八面体の u8 2 列。(0, 0) は法線なし)。
+    点は骨・位置の順に並べて書く (圧縮が効く)。遠くの間引きのための乱数の並べ替えは、読むとき (SplatCloud) にする"""
+    P = np.asarray(P, float)
+    lo = P.min(0)
+    if step is None:
+        step = float(np.median(size)) / 10.0
+    q = np.rint((P - lo) / step).astype(np.int64)
+    order = np.lexsort((q[:, 2], q[:, 1], q[:, 0], np.asarray(A)))
+    smax = float(np.max(size))
+    c = np.asarray(rgba, np.int64)[order]
+    rgb = np.stack([(c >> 16) & 255, (c >> 8) & 255, c & 255], 1)
+    Nn = np.zeros((len(P), 3)) if N is None else np.asarray(N, float)
+    u, v = oct_encode(Nn[order])
+    body = pack4(bones, lo, step, smax, q[order],
+                 np.clip(np.rint(np.asarray(size)[order] / smax * 255), 1, 255),
+                 rgb, np.asarray(A)[order], np.asarray(B)[order],
+                 np.clip(np.rint(np.asarray(W)[order] * 255), 0, 255), np.asarray(flags)[order], u, v)
+    return save4(path, body)
+
+
+def read_bin(path):
+    """SPL4 を読む。戻り: dict (bones, lo, step, smax, q, size8, rgb, A, B, W8, flags, octu, octv, P, size, N)"""
+    import zlib
+    raw = Path(path).read_bytes()
+    assert raw[:4] == b"SPL4", path
+    b = zlib.decompress(raw[4:])
+    o = 0
+    nb = struct.unpack_from(">I", b, o)[0]
+    o += 4
+    bones = []
+    for _ in range(nb):
+        ln = struct.unpack_from(">H", b, o)[0]
+        bones.append(b[o + 2:o + 2 + ln].decode("utf-8"))
+        o += 2 + ln
+    n = struct.unpack_from(">I", b, o)[0]
+    o += 4
+    lx, ly, lz, step, smax = struct.unpack_from(">fffff", b, o)
+    o += 20
+    q = np.zeros((n, 3), np.int64)
+    for k in range(3):
+        acc = 0
+        for i in range(n):
+            v = 0
+            sh = 0
+            while True:
+                c = b[o]
+                o += 1
+                v |= (c & 0x7F) << sh
+                sh += 7
+                if not c & 0x80:
+                    break
+            acc += (v >> 1) ^ -(v & 1)
+            q[i, k] = acc
+
+    def col(m):
+        nonlocal o
+        a = np.frombuffer(b, np.uint8, count=m, offset=o)
+        o += m
+        return a
+    d = {"bones": bones, "lo": np.array([lx, ly, lz]), "step": step, "smax": smax, "q": q, "size8": col(n)}
+    npal = struct.unpack_from(">I", b, o)[0]
+    o += 4
+    pal = np.stack([col(npal), col(npal), col(npal)], 1)
+    idx = col(n).astype(np.int64)
+    if npal > 256:
+        idx = idx | (col(n).astype(np.int64) << 8)
+    d["rgb"] = pal[idx]
+    for k in ("A", "B", "W8", "flags", "octu", "octv"):
+        d[k] = col(n)
+    d["P"] = d["lo"] + q * step
+    d["size"] = d["size8"] / 255 * smax
+    d["N"] = oct_decode(d["octu"], d["octv"])
+    return d
 
 
 def argb(col, a=255):

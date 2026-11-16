@@ -260,7 +260,7 @@ def resculpt(name, preview=False, h_div=170.0, max_points=70000, hand=None, out_
     allF = np.concatenate([flags, np.full(len(gi), S.F_HALO)])
     allN = np.concatenate([n, np.zeros((len(gi), 3))])
     out = ASSETS / "splat" / ((out_name or name) + ".bin")
-    S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allA, allW, allF, N=allN)
+    S.write_bin(out, bones, allP, allS, S.argb(allC), allA, allA, allW, allF, N=allN)
     print(f"{out_name or name}: {N} splats (+{len(gi)} halo) h={h:.2f} {len(parts)} parts {time.time() - t0:.1f}s")
     if preview:
         pv = S.ROOT / "docs/review/splat_bosses" / (name + ".png")

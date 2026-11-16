@@ -195,7 +195,7 @@ def sculpt_mesh(name, preview=False, budget=90000.0, out_name=None):
     allF = np.concatenate([flags, np.full(len(gi), S.F_HALO)])
     allN = np.concatenate([n, np.zeros((len(gi), 3))])
     out = ASSETS / "splat" / ((out_name or name) + ".bin")
-    S.write_bin3(out, bones, allP, allS, S.argb(allC), allA, allA, np.ones(len(allP)), allF, N=allN)
+    S.write_bin(out, bones, allP, allS, S.argb(allC), allA, allA, np.ones(len(allP)), allF, N=allN)
     print(f"{out_name or name}: {N} splats (+{len(gi)} halo) h={h:.2f} {time.time() - t0:.1f}s")
     if preview:
         pv = S.ROOT / "docs/review/splat_handsculpt" / ((out_name or name) + ".png")
