@@ -279,7 +279,7 @@
   "status": "todo"
  },
  "coral_harpoon": {
-  "series": "other",
+  "series": "tide",
   "kind": "spear",
   "tier": "legend",
   "level": null,
@@ -288,7 +288,7 @@
   "status": "todo"
  },
  "coral_shield": {
-  "series": "other",
+  "series": "tide",
   "kind": "shield",
   "tier": "rare",
   "level": null,
@@ -411,7 +411,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "ember_bow": {
   "series": "ember",
@@ -420,7 +420,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "ember_censer": {
   "series": "ember",
@@ -456,7 +456,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "ember_flare_bow": {
   "series": "ember",
@@ -465,7 +465,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "ember_greatsword": {
   "series": "ember",
@@ -501,7 +501,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "moon_crescent_dagger": {
   "series": "moon",
@@ -612,13 +612,13 @@
   "status": "todo"
  },
  "raiju_claw": {
-  "series": "other",
+  "series": "storm",
   "kind": "claw",
   "tier": "legend",
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "shrine_bell_staff": {
   "series": "shrine",
@@ -690,7 +690,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "storm_bell_staff": {
   "series": "storm",
@@ -699,7 +699,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "storm_cloud_staff": {
   "series": "storm",
@@ -708,7 +708,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "storm_dagger": {
   "series": "storm",
@@ -717,7 +717,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "storm_gale_bow": {
   "series": "storm",
@@ -735,7 +735,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "storm_staff": {
   "series": "storm",
@@ -744,7 +744,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "storm_sword": {
   "series": "storm",
@@ -762,7 +762,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "thrall_poker": {
   "series": "other",
@@ -774,13 +774,13 @@
   "status": "todo"
  },
  "thunder_wing_bow": {
-  "series": "other",
+  "series": "storm",
   "kind": "bow",
   "tier": "rare",
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "tide_bell_staff": {
   "series": "tide",
@@ -789,7 +789,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tide_bow": {
   "series": "tide",
@@ -816,7 +816,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tide_hammer": {
   "series": "tide",
@@ -834,7 +834,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tide_reef_hammer": {
   "series": "tide",
@@ -843,7 +843,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tide_shell_trident": {
   "series": "tide",
@@ -861,7 +861,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tide_surf_bell_staff": {
   "series": "tide",
@@ -870,16 +870,16 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tidecaller_claw": {
-  "series": "other",
+  "series": "tide",
   "kind": "claw",
   "tier": "legend",
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tower_balance_sword": {
   "series": "tower",
@@ -954,13 +954,13 @@
   "status": "todo"
  },
  "waterway_fang": {
-  "series": "other",
+  "series": "tide",
   "kind": "fang",
   "tier": "legend",
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_bell_staff": {
   "series": "whale",
@@ -1044,7 +1044,7 @@
   "status": "done"
  },
  "whalebone_greatsword": {
-  "series": "other",
+  "series": "whale",
   "kind": "greatsword",
   "tier": "rare",
   "level": null,

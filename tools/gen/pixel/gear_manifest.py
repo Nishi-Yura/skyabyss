@@ -42,7 +42,14 @@ ROLE_OF_KIND = {"sword": "gear-warrior", "greatsword": "gear-warrior", "spear": 
                 "fang": "gear-assassin", "claw": "gear-assassin", "bell": "gear-shaman", "totem": "gear-shaman"}
 
 
+# 名前の頭でわからない品のシリーズ（前の模型の色と、出てくる章で決めた）
+SERIES_OF = {"whalebone_greatsword": "whale", "thunder_wing_bow": "storm", "raiju_claw": "storm", "coral_harpoon": "tide",
+             "coral_shield": "tide", "tidecaller_claw": "tide", "waterway_fang": "tide"}
+
+
 def series_of(i):
+    if i in SERIES_OF:
+        return SERIES_OF[i]
     for p in ("abyss", "divine", "moon", "tower", "ember", "storm", "tide", "whale", "shrine"):
         if i.startswith(p + "_"):
             return p
