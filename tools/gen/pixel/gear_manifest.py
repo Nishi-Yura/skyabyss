@@ -77,6 +77,8 @@ def main():
         row["bow"] = row["kind"] == "bow"
         done = (A / "lowpoly/look/a" / f"{i}.json").exists()
         row["status"] = "done" if done else old.get(i, {}).get("status", "todo")
+        # 出来の段: none（まだ）/ script（スクリプトの形と塗り）/ bb（Blockbench で置き直して描き込み）/ polished（ブラッシュアップ済み・参照の水準）
+        row["craft"] = old.get(i, {}).get("craft") or ("script" if done else "none")
         rows[i] = row
     OUT.write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     # 人が読む表
@@ -84,15 +86,15 @@ def main():
     for i, r in rows.items():
         by.setdefault(r["series"], []).append((i, r))
     lines = ["# 武器の作り直しの台帳（x32・look a）", "", "tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest.json。", "",
-             f"全 {len(rows)} 品、済み {sum(r['status'] == 'done' for r in rows.values())}。", ""]
+             f"全 {len(rows)} 品。出来: " + "、".join(f"{k} {sum(r['craft'] == k for r in rows.values())}" for k in ("polished", "bb", "script", "none")) + "。", ""]
     for s in sorted(by):
         items = by[s]
         lines.append(f"## {s}（{len(items)}、済み {sum(r['status'] == 'done' for _, r in items)}）")
         lines.append("")
-        lines.append("| id | 種類 | 階級 | 担当 | 状態 |")
+        lines.append("| id | 種類 | 階級 | 担当 | 出来 |")
         lines.append("| --- | --- | --- | --- | --- |")
         for i, r in items:
-            lines.append(f"| {i} | {r['kind']} | {r['tier']} | {r['role']} | {r['status']} |")
+            lines.append(f"| {i} | {r['kind']} | {r['tier']} | {r['role']} | {r['craft']} |")
         lines.append("")
     MD.write_text("\n".join(lines), encoding="utf-8")
     print(len(rows), "weapons;", {s: len(v) for s, v in sorted(by.items())})
