@@ -610,9 +610,9 @@ W["abyss_pulse_dagger"] = weapon(
 
 # 島の祠の始めの武器 (docs/design/43 の 4 節)。杖と鈴杖は深淵の鈴杖、短剣は水路の牙の動きを借りる (名前の一行だけ替える)
 import copy as _copy  # noqa: E402
-for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "宿り木の杖: 掲げて溜め、地を突いて星の石を光らせる"),
+for _item, _src, _label in (("shrine_staff", "abyss_bell_staff", "祠の杖: 掲げて溜め、地を突いて星の石を光らせる"),
                             ("shrine_bell_staff", "abyss_bell_staff", "祠の鈴杖: 掲げて溜め、地を突いて鈴を鳴らす"),
-                            ("shrine_dagger", "waterway_fang", "宿り木の短剣: 右上から左下へ、返して X、突き抜ける"),
+                            ("shrine_dagger", "waterway_fang", "祠の短剣: 右上から左下へ、返して X、突き抜ける"),
                             ("whale_staff", "abyss_bell_staff", "鯨骨の星杖: 掲げて溜め、地を突いて石を光らせる"),
                             ("whale_bell_staff", "abyss_bell_staff", "鯨歌いの鈴杖: 掲げて溜め、地を突いて鐘を鳴らす"),
                             ("tide_staff", "abyss_bell_staff", "潮殻の真珠杖: 掲げて溜め、地を突いて真珠を光らせる"),

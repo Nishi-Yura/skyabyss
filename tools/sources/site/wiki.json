@@ -38646,14 +38646,14 @@
     },
     {
       "id": "skyabyss:shrine_staff",
-      "name": "宿り木の杖",
+      "name": "祠の杖",
       "class": "jp.revati.skyabyss.rpg.skill.StarterWeaponItem",
       "stack": 1,
       "tier": "common",
       "tooltip": [
         [
           {
-            "t": "宿り木の杖",
+            "t": "祠の杖",
             "c": "E4E4E4"
           }
         ],
@@ -38872,14 +38872,14 @@
     },
     {
       "id": "skyabyss:shrine_dagger",
-      "name": "宿り木の短剣",
+      "name": "祠の短剣",
       "class": "jp.revati.skyabyss.rpg.skill.StarterWeaponItem",
       "stack": 1,
       "tier": "common",
       "tooltip": [
         [
           {
-            "t": "宿り木の短剣",
+            "t": "祠の短剣",
             "c": "E4E4E4"
           }
         ],

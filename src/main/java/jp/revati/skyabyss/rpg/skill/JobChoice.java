@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 野営地のそばに来ると選ぶ画面が開き、選ぶとその職の始めの武器を受け取って、職の木の幹の技を一つ取る (Lv 1 の 1 点)。
 // 職の間 (訓練場の師範の「職を替える」) は同じ画面を替えるために開く。職は持ち替えでは替わらない。木の取り方は職ごとに残る。
 // 選んだ職は人の永続データの KEY (倒れても残る。util/LifeKeep)。
-// 始めの武器はどれも祠の品 (祠の剣・祠の鎚・宿り木の杖・祠の弓・宿り木の短剣・祠の鈴杖)
+// 始めの武器はどれも祠の品 (祠の剣・祠の鎚・祠の杖・祠の弓・祠の短剣・祠の鈴杖)
 public final class JobChoice {
     public static final String KEY = "skyabyss_first_job";
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
