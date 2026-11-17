@@ -74,6 +74,14 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
         if (bone.isHidden() || reRendering) {
             return;
         }
+        // 試作 (client/look/GearLook): 立方体の模型があればそれを描く
+        LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(jp.revati.skyabyss.client.look.GearLook.armor, "armor/" + set + "/" + LowPolyArmor.pieceName(currentSlot));
+        if (cube != null) {
+            if (cube.bones.containsKey(bone.getName())) {
+                jp.revati.skyabyss.client.look.GearLookDraw.mesh(cube, bone.getName(), poseStack, splatSource, packedLight, packedOverlay);
+            }
+            return;
+        }
         LowPolyMesh mesh = LowPolyMeshes.get(LowPolyArmor.meshName(set, currentSlot, currentStack));
         if (mesh != null && mesh.bones.containsKey(bone.getName())) {
             jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, LowPolyArmor.atlas(set, currentSlot, currentStack), bone.getName(), poseStack.last().pose(), splatSource,

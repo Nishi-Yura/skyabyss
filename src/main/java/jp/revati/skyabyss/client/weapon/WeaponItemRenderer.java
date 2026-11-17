@@ -72,6 +72,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         String tier = tierName(shown, id);
         LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tier + (stage >= 0 ? "_pull" + stage : ""));
         if (mesh != null) {
+            cubeStage = stage >= 0 ? "_pull" + stage : "";
             renderMesh(mesh, id, tier, level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
             return;
         }
@@ -79,6 +80,9 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     // ---------------------------------------------------------------- メッシュ
+
+    // 試作 (client/look/GearLook): 弓の引きの段 ("_pull0" など。引いていなければ "")
+    private static String cubeStage = "";
 
     // 今の軌跡の濃さと光の強まり ([0] = 軌跡、[1] = 光)。手 (一人称) は WeaponClient が入れた値、三人称は持っている人の今の動き、それ以外 (地面・額縁・画面) は 0
     private static float[] effects(ItemDisplayContext context) {
@@ -132,14 +136,50 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
         // 輝き (foil: エンチャント・品の foil): 本体のメッシュを glint の描画型へもう一度流す (バニラの item と同じ getFoilBuffer。UV はアトラスのまま)
         // 点の模型 (client/splat)。強化の段の絵で塗る。光る画素は光る点になる
-        jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, tex[0], null, pose.last().pose(), buffers, light, overlay, WHITE);
+        char look = jp.revati.skyabyss.client.look.GearLook.weapon;
+        LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id + cubeStage);
+        if (cube == null && !cubeStage.isEmpty()) {
+            cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id);
+        }
+        if (cube != null) {
+            // 試作: 立方体の模型 (client/look/GearLook)。一人称もそのままの大きさ (面のまま描くと点の模型より手前に大きく見える)
+            // 弓は弓腕の端から端まで 1.8 ブロックあり、一人称ではバニラの弓の倍に見えるので、引いていない間だけ握りを中心に縮める (2026-11-18「弓近すぎない？」)
+            if (context.firstPerson() && id.endsWith("bow") && cubeStage.isEmpty()) {
+                pose.translate(-0.375f, 0.47f, 0f);   // 握り (x32 の 12, 15。メッシュは x を反転して焼いてある)
+                pose.scale(0.62f, 0.62f, 0.62f);
+                pose.translate(0.375f, -0.47f, 0f);
+            }
+            // 手は原点より柄の向きに 1/4 ブロック上を握る (2026-11-18 の撮影で 6 品とも、手が鍔・輪の高さにあった)。
+            // 立方体の模型は握りの真ん中を原点に作るので、その分だけ模型を上げて、握りを手に合わせる (三人称だけ。一人称の置き場所は前のままで合う)
+            if (!context.firstPerson()) {
+                // 弓は握りが原点より上 (弦の真ん中の高さ) にあるので上げない (撮って手の高さに合うのを確かめた)。
+                // 弓の腹の向き (模型の +x。メッシュは x を反転して焼いてある) へ前に出す (2026-11-18「弓のみもう少し前」)
+                if (id.endsWith("bow")) {
+                    pose.translate(-0.2f, 0f, 0f);
+                    // 引いていない間は、握りを中心に弓を斜めに倒して持つ (2026-11-18「弓の向き下なんじゃない？」→ 4 案から B)
+                    if (cubeStage.isEmpty()) {
+                        pose.translate(-0.375f, 0.47f, 0f);
+                        pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(BOW_REST_TILT));
+                        pose.translate(0.375f, -0.47f, 0f);
+                    }
+                } else {
+                    pose.translate(0f, 0.25f, 0f);
+                }
+            }
+            jp.revati.skyabyss.client.look.GearLookDraw.mesh(cube, null, pose, buffers, light, overlay);
+        } else {
+            jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, tex[0], null, pose.last().pose(), buffers, light, overlay, WHITE);
+        }
         // 動きの間だけ: 刃の軌跡の帯を引く (TRAIL)
         float[] fx = effects(context);
         WeaponTrail.draw(pose, buffers, mesh, id, context.firstPerson() ? -1 : holder == null ? -2 : holder.getId(), !context.firstPerson(), fx[0]);
         pose.popPose();
     }
 
-    // 刃を +x に作ってある品 (宿り木の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
+    // 三人称で引いていない弓を倒す角度 (度)。上の端が後ろ上、下の端が前下へ斜めに倒れる (2026-11-18 に 4 案を撮って B を選んだ)
+    static final float BOW_REST_TILT = 65f;
+
+    // 刃を +x に作ってある品 (祠の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
     static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger",
             "wild_tusk_axe", "wild_conductor_axe", "wild_snowsplitter_axe", "wild_blasting_axe", "wild_molten_axe");
 

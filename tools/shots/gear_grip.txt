@@ -1,0 +1,161 @@
+# 祠のシリーズ 6 品の握りの位置を確かめる（手元を大きく。表・横・裏・一人称）
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_grip.txt -PshotsName=gear_grip
+world gear_look flat
+size 1920 1080
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+close
+wait 30
+chat clear
+shot fp_shrine_staff
+hud off
+perspective front
+fov 40
+cmd tp @s 0.5 -60 0.5 -40 25
+wait 20
+shot front_shrine_staff
+cmd tp @s 0.5 -60 0.5 -100 25
+wait 20
+shot side_shrine_staff
+perspective back
+cmd tp @s 0.5 -60 0.5 140 25
+wait 20
+shot back_shrine_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+close
+wait 30
+chat clear
+shot fp_shrine_sword
+hud off
+perspective front
+fov 40
+cmd tp @s 0.5 -60 0.5 -40 25
+wait 20
+shot front_shrine_sword
+cmd tp @s 0.5 -60 0.5 -100 25
+wait 20
+shot side_shrine_sword
+perspective back
+cmd tp @s 0.5 -60 0.5 140 25
+wait 20
+shot back_shrine_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bow
+close
+wait 30
+chat clear
+shot fp_shrine_bow
+hud off
+perspective front
+fov 40
+cmd tp @s 0.5 -60 0.5 -40 25
+wait 20
+shot front_shrine_bow
+cmd tp @s 0.5 -60 0.5 -100 25
+wait 20
+shot side_shrine_bow
+perspective back
+cmd tp @s 0.5 -60 0.5 140 25
+wait 20
+shot back_shrine_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+close
+wait 30
+chat clear
+shot fp_shrine_dagger
+hud off
+perspective front
+fov 40
+cmd tp @s 0.5 -60 0.5 -40 25
+wait 20
+shot front_shrine_dagger
+cmd tp @s 0.5 -60 0.5 -100 25
+wait 20
+shot side_shrine_dagger
+perspective back
+cmd tp @s 0.5 -60 0.5 140 25
+wait 20
+shot back_shrine_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+close
+wait 30
+chat clear
+shot fp_shrine_bell_staff
+hud off
+perspective front
+fov 40
+cmd tp @s 0.5 -60 0.5 -40 25
+wait 20
+shot front_shrine_bell_staff
+cmd tp @s 0.5 -60 0.5 -100 25
+wait 20
+shot side_shrine_bell_staff
+perspective back
+cmd tp @s 0.5 -60 0.5 140 25
+wait 20
+shot back_shrine_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+close
+wait 30
+chat clear
+shot fp_shrine_hammer
+hud off
+perspective front
+fov 40
+cmd tp @s 0.5 -60 0.5 -40 25
+wait 20
+shot front_shrine_hammer
+cmd tp @s 0.5 -60 0.5 -100 25
+wait 20
+shot side_shrine_hammer
+perspective back
+cmd tp @s 0.5 -60 0.5 140 25
+wait 20
+shot back_shrine_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0

@@ -281,6 +281,10 @@ public final class SkillFx {
 
     // 手元の一粒
     public static boolean put(Cast c, ParticleOptions p, double x, double y, double z, double vx, double vy, double vz) {
+        // 試作 (client/look/GearLook): 技の絵札の案のあいだは、独自の光の粒を出さない
+        if (jp.revati.skyabyss.client.look.GearLook.skill != '0') {
+            return false;
+        }
         Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         double dx = x - cam.x;
         double dy = y - cam.y;

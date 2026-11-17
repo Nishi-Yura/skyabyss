@@ -668,6 +668,13 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedLevel = line.arg(0).equalsIgnoreCase("auto") ? -1 : line.intArg(0);
                 return true;
             }
+            case "gearlook" -> {
+                // gearlook weapon|armor|skill|all 0|a|b|c : 自分の武器・防具・技の見せ方の試作 (client/look/GearLook)
+                if (!jp.revati.skyabyss.client.look.GearLook.set(line.arg(0), line.arg(1))) {
+                    throw new IllegalArgumentException("gearlook: " + line.arg(0) + " " + line.arg(1));
+                }
+                return true;
+            }
             case "weapontier" -> {
                 // weapontier common|rare|legend|off : 武器のメッシュの階級を固定する (品の階級を使うのは off)
                 jp.revati.skyabyss.client.weapon.WeaponItemRenderer.setTier(line.arg(0));
