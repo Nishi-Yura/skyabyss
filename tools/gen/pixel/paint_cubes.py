@@ -125,6 +125,16 @@ def build(spec_path, out_path):
     mod = importlib.util.module_from_spec(spec)
     mod.seg = seg
     spec.loader.exec_module(mod)
+    saved = dict(RAMPS)
+    RAMPS.update(getattr(mod, "RAMPS", {}))  # シリーズの色（その品の形の決まりに RAMPS = {...} を書く。共通の色の名前を上書きしてもよい）
+    try:
+        _build(mod, out_path)
+    finally:
+        RAMPS.clear()
+        RAMPS.update(saved)
+
+
+def _build(mod, out_path):
     if hasattr(mod, "VARIANTS"):           # 1 つの形の決まりから何個も書く（弓の引きの段）
         import os
         for name, parts in mod.VARIANTS.items():
@@ -133,18 +143,20 @@ def build(spec_path, out_path):
     write(mod.NAME, mod.PARTS, out_path)
 
 
-def paint_blade(face, w, h, top, nx):
+def paint_blade(face, w, h, top, nx, mat="steel", y0=10.0, y1=54.0):
     """メッシュの刃の面の絵。濃淡は面ごとではなく世界の高さで決める（面の継ぎ目に帯が出ない）。
     top = 絵の一番上の行の高さ、nx = 面の向きの左右（+ は右向き = 陰）。
     - 平らな面: 鍔の近くは暗く、先へ行くほど明るい。左の縁に 1 画素の光（稜線）、右の縁に 1 画素の陰
     - 斜めの面（刃の縁）: 左を向く面は明るく、右を向く面は暗い。刃の線が白く光る
     - 斜めの光の筋を 1 本（剣の決まった絵と同じ、左下から右上へ）"""
-    ramp = RAMPS["steel"]
+    ramp = RAMPS[mat]
     img = Image.new("RGBA", (w, h))
     bevel = w <= 3
+    span = max(1e-6, y1 - y0)
     for y in range(h):
         wy = top - y
-        g = -1 if wy < 20 else (0 if wy < 38 else 1)
+        f = (wy - y0) / span                  # 刃の根元 0 → 先 1
+        g = -1 if f < 10 / 44 else (0 if f < 28 / 44 else 1)
         for x in range(w):
             if bevel:
                 t = (4 if nx < 0 else 2) + g
@@ -156,7 +168,7 @@ def paint_blade(face, w, h, top, nx):
                     t += 1
                 if x == w - 1:
                     t -= 1
-                d = (x - (w - 1) / 2) + (wy - 30) * 0.5
+                d = (x - (w - 1) / 2) + (y0 + span * 20 / 44 - wy) * -0.5
                 if 0 <= d < 1.2 and 0 < x < w - 1:
                     t += 2
                 hsh = (x * 7 + int(wy) * 13) % 19      # まばらな粒（打った跡と擦れ）
@@ -201,20 +213,28 @@ def mesh_element(p, place):
         a = int(np.argmax(np.abs(n)))
         face = [("east", "west"), ("up", "down"), ("south", "north")][a][0 if n[a] > 0 else 1]
         if kind == "blade":
-            img = paint_blade(face, w, h, float((Q @ e2).max()), float(n[0]))
+            img = paint_blade(face, w, h, float((Q @ e2).max()), float(n[0]), mat, float(P[:, 1].min()), float(P[:, 1].max()))
         else:
             img = paint_face(mat, face, w, h, kind)
         ux, uy = place(img)
         faces[f"f{fi}"] = {"uv": {keys[i]: [round(ux + uv[j, 0], 4), round(uy + uv[j, 1], 4)] for j, i in enumerate(idx)},
                            "vertices": [keys[i] for i in idx], "texture": 0}
-    return {"name": name, "type": "mesh", "uuid": str(uuid.uuid4()), "export": True, "visibility": True, "locked": False,
+    return {"name": name, "type": "mesh", "uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, "mesh/" + name + "/" + str(len(verts)))), "export": True, "visibility": True, "locked": False,
             "render_order": "default", "allow_mirror_modeling": True, "color": 0, "origin": [0, 0, 0], "rotation": [0, 0, 0],
             "vertices": {k: list(map(float, v)) for k, v in zip(keys, verts)}, "faces": faces}
 
 
-def write(NAME, parts, out_path):
-    """parts: (名前, 素材, from, to, 塗り方, 回転(任意), 原点(任意))"""
-    W = 128
+def write(NAME, parts, out_path, W=128):
+    """parts: (名前, 素材, from, to, 塗り方, 回転(任意), 原点(任意))。絵が 128 に入りきらなければ 256 で描き直す"""
+    try:
+        return _write(NAME, parts, out_path, W)
+    except AssertionError:
+        if W >= 512:
+            raise
+        return write(NAME, parts, out_path, W * 2)
+
+
+def _write(NAME, parts, out_path, W):
     atlas = Image.new("RGBA", (W, W))
     x = y = rowh = 0
     elements = []
@@ -244,7 +264,7 @@ def write(NAME, parts, out_path):
             faces[face] = {"uv": [ux, uy, ux + w, uy + h], "texture": 0}
         elements.append({"name": name, "box_uv": False, "render_order": "default", "locked": False, "export": True,
                          "scope": 0, "allow_mirror_modeling": True, "from": frm, "to": to, "autouv": 0, "color": 0,
-                         "rotation": rot, "origin": origin, "faces": faces, "type": "cube", "uuid": str(uuid.uuid4())})
+                         "rotation": rot, "origin": origin, "faces": faces, "type": "cube", "uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, NAME + "/" + name))})
     assert y + rowh <= W, "atlas full"
     buf = io.BytesIO()
     atlas.save(buf, "PNG")

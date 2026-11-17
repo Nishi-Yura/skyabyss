@@ -6,6 +6,7 @@
 透明な画素は描かない（葉・星の板・炎の切り抜き）。光る画素は陰を付けない。
 
   python -I tools/gen/pixel/look_lineup.py out.png shrine_staff shrine_sword ...
+  python -I tools/gen/pixel/look_lineup.py out.png old:whale_hammer=前 whale_hammer=新   （old: で前の模型）
 """
 import json
 import math
@@ -24,12 +25,23 @@ LIGHT = np.array([0.35, 0.8, 0.5]) / np.linalg.norm([0.35, 0.8, 0.5])
 
 
 def load(id_):
-    j = json.loads((A / "lowpoly/look/a" / f"{id_}.json").read_text(encoding="utf-8"))
+    """id の頭に "old:" を付けると、前の模型 (lowpoly/items/<id>/<段>.json。段は一番上のもの) を読む"""
+    if id_.startswith("old:"):
+        d = A / "lowpoly/items" / id_[4:]
+        f = sorted(q for q in d.glob("*.json") if "_pull" not in q.stem)[-1]
+        j = json.loads(f.read_text(encoding="utf-8"))
+    else:
+        j = json.loads((A / "lowpoly/look/a" / f"{id_}.json").read_text(encoding="utf-8"))
     tex = np.asarray(Image.open(A / "textures/lowpoly" / f"{j['texture']}.png").convert("RGBA")).astype(float)
     gp = A / "textures/lowpoly" / f"{j['texture']}_glow.png"
     glow = np.asarray(Image.open(gp).convert("RGBA"))[..., 3] > 0 if gp.exists() else np.zeros(tex.shape[:2], bool)
-    b = j["bones"]["root"]
-    return np.array(b["vertices"], float), np.array(b["uvs"], float), np.array(b["triangles"], int), tex, glow
+    V, UV, T = [], [], []
+    for b in j["bones"].values():                 # 骨が一つでも複数でも、全部まとめて描く
+        n0 = len(V)
+        V += b["vertices"]
+        UV += b["uvs"]
+        T += [[n0 + a, n0 + c, n0 + d] for a, c, d in b["triangles"]]
+    return np.array(V, float), np.array(UV, float), np.array(T, int), tex, glow
 
 
 def rot(yaw, pitch):
@@ -41,6 +53,7 @@ def rot(yaw, pitch):
 
 def render(id_, yaw_deg, pitch_deg=12):
     V, UV, T, tex, glow = load(id_)
+    two_sided = id_.startswith("old:")           # 前の模型は面の向きがそろっていないので両面で描く
     R = rot(math.radians(yaw_deg), math.radians(pitch_deg))
     P = V @ R.T                                   # 見る向きへ回す（カメラは +z から -z を見る）
     img = np.zeros((CELL_H, CELL_W, 4), float)
@@ -51,7 +64,9 @@ def render(id_, yaw_deg, pitch_deg=12):
     for a, b, c in T:
         x0, y0, x1, y1, x2, y2 = sx[a], sy[a], sx[b], sy[b], sx[c], sy[c]
         area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0)
-        if area >= -1e-9:                         # 画面は y が下向きなので、表の面は負になる
+        if area >= -1e-9 and not two_sided:       # 画面は y が下向きなので、表の面は負になる
+            continue
+        if abs(area) < 1e-9:
             continue
         n = np.cross(P[b] - P[a], P[c] - P[a])
         n /= (np.linalg.norm(n) + 1e-12)

@@ -119,7 +119,10 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         pose.scale(-1f, 1f, 1f);
         // 刃の向きが逆に作ってあるメッシュは、柄の軸で半回転 (2026-10-29 の試遊「短剣や斧、持ち方逆」: 一人称で刃が後ろを向いていた)。
         // 鎚はどれも打つ面を +x に作ってあり、持ち方を借りた戦斧 (刃が -x) と逆なので、まとめて半回転 (2026-11-01「ハンマー、全体的に前後ろ逆かも」)
-        if (EDGE_FLIP.contains(id) || faceFlip(id)) {
+        // 手で組んだ模型 (look a) は種類で決める: 片刃の武器は刃・打つ面を +x に作る決まり (docs/design/60 の 1.2) なので、いつも半回転
+        char look = jp.revati.skyabyss.client.look.GearLook.weapon;
+        boolean hasCube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id) != null;
+        if (hasCube ? singleEdge(id) : (EDGE_FLIP.contains(id) || faceFlip(id))) {
             pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
         }
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
@@ -136,15 +139,14 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         }
         // 輝き (foil: エンチャント・品の foil): 本体のメッシュを glint の描画型へもう一度流す (バニラの item と同じ getFoilBuffer。UV はアトラスのまま)
         // 点の模型 (client/splat)。強化の段の絵で塗る。光る画素は光る点になる
-        char look = jp.revati.skyabyss.client.look.GearLook.weapon;
         LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id + cubeStage);
         if (cube == null && !cubeStage.isEmpty()) {
             cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id);
         }
         if (cube != null) {
             // 試作: 立方体の模型 (client/look/GearLook)。一人称もそのままの大きさ (面のまま描くと点の模型より手前に大きく見える)
-            // 弓は弓腕の端から端まで 1.8 ブロックあり、一人称ではバニラの弓の倍に見えるので、引いていない間だけ握りを中心に縮める (2026-11-18「弓近すぎない？」)
-            if (context.firstPerson() && id.endsWith("bow") && cubeStage.isEmpty()) {
+            // 弓は弓腕の端から端まで 1.8 ブロックあり、一人称ではバニラの弓の倍に見えるので、握りを中心に縮める (2026-11-18「弓近すぎない？」。引いている間も同じ大きさ)
+            if (context.firstPerson() && id.endsWith("bow")) {
                 pose.translate(-0.375f, 0.47f, 0f);   // 握り (x32 の 12, 15。メッシュは x を反転して焼いてある)
                 pose.scale(0.62f, 0.62f, 0.62f);
                 pose.translate(0.375f, -0.47f, 0f);
@@ -182,6 +184,16 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
     // 刃を +x に作ってある品 (祠の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
     static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger",
             "wild_tusk_axe", "wild_conductor_axe", "wild_snowsplitter_axe", "wild_blasting_axe", "wild_molten_axe");
+
+    // 片刃の武器 (刃・打つ面が片側だけにある)。名前で見分ける (tools/gen/pixel/gear_manifest.py の種類と同じ語)
+    static boolean singleEdge(String id) {
+        for (String w : new String[] {"dagger", "knife", "fang", "claw", "sickle", "axe", "scythe", "hammer", "maul", "mace", "anchor"}) {
+            if (id.contains(w)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // 打つ面が +x の鎚 (武器の種類が鎚のもの。採集の道具は除く)
     static boolean faceFlip(String id) {

@@ -143,14 +143,27 @@ def main(path):
 
     texname = OUT + "/" + name
     (ASSETS / "textures/lowpoly" / OUT).mkdir(parents=True, exist_ok=True)
-    img.save(ASSETS / "textures/lowpoly" / (texname + ".png"))
-    glow.save(ASSETS / "textures/lowpoly" / (texname + "_glow.png"))
+    save(img, ASSETS / "textures/lowpoly" / (texname + ".png"))
+    save(glow, ASSETS / "textures/lowpoly" / (texname + "_glow.png"))
     doc = {"format_version": 1, "name": name, "units": "1/16 block", "uv": "normalized, origin top-left (v down)",
            "texture": texname, "texture_size": [img.width, img.height],
            "note": "Made by hand in Blockbench (tools/models/%s%s.bbmodel), written by tools/gen/pixel/bb_import.py" % ("x32/" if scale != 1.0 else "", name),
            "bones": {"root": {"pivot": [0, 0, 0], "vertices": V, "uvs": UV, "triangles": T, "triangle_count": len(T)}}}
     (ASSETS / "lowpoly" / OUT / (name + ".json")).write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
     print(name, len(T), "tris")
+
+
+def save(img, path):
+    """Windows では、書いた直後のファイルを書き直すと開けないことがある（見張りのソフトが掴んでいる）。少し待って何度か試す"""
+    import time
+    for k in range(8):
+        try:
+            img.save(path)
+            return
+        except OSError:
+            if k == 7:
+                raise
+            time.sleep(0.25 * (k + 1))
 
 
 if __name__ == "__main__":
