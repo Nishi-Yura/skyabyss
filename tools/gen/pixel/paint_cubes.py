@@ -16,6 +16,7 @@ import io
 import json
 import sys
 import uuid
+from pathlib import Path
 
 from PIL import Image
 
@@ -126,6 +127,11 @@ def build(spec_path, out_path):
     mod.seg = seg
     spec.loader.exec_module(mod)
     saved = dict(RAMPS)
+    if hasattr(mod, "SERIES"):              # シリーズの色（tools/models/x32/series/<名>.py の RAMPS）。シリーズの品は全部これで塗る
+        sp = Path(spec_path).resolve().parent / "series" / f"{mod.SERIES}.py"
+        ns = {}
+        exec(sp.read_text(encoding="utf-8"), ns)
+        RAMPS.update(ns["RAMPS"])
     RAMPS.update(getattr(mod, "RAMPS", {}))  # シリーズの色（その品の形の決まりに RAMPS = {...} を書く。共通の色の名前を上書きしてもよい）
     try:
         _build(mod, out_path)

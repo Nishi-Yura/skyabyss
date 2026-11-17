@@ -2,7 +2,7 @@
 
 tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest.json。
 
-全 219 品、済み 6。
+全 219 品、済み 20。
 
 ## abyss（30、済み 0）
 
@@ -89,7 +89,7 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | moon_waning_blade | greatsword | legend | gear-warrior | todo |
 | moon_waning_bow | bow | rare | gear-archer | todo |
 
-## other（12、済み 0）
+## other（12、済み 1）
 
 | id | 種類 | 階級 | 担当 | 状態 |
 | --- | --- | --- | --- | --- |
@@ -104,7 +104,7 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | travel_shield | shield | common | gear-warrior | todo |
 | warden_glaive | glaive | legend | gear-warrior | todo |
 | waterway_fang | fang | legend | gear-assassin | todo |
-| whalebone_greatsword | greatsword | rare | gear-warrior | todo |
+| whalebone_greatsword | greatsword | rare | gear-warrior | done |
 
 ## shrine（6、済み 6）
 
@@ -117,7 +117,7 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | shrine_staff | staff | common | gear-mage | done |
 | shrine_sword | sword | common | gear-warrior | done |
 
-## storm（9、済み 0）
+## storm（9、済み 1）
 
 | id | 種類 | 階級 | 担当 | 状態 |
 | --- | --- | --- | --- | --- |
@@ -125,21 +125,21 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | storm_bell_staff | bell | rare | gear-shaman | todo |
 | storm_cloud_staff | staff | legend | gear-mage | todo |
 | storm_dagger | dagger | rare | gear-assassin | todo |
-| storm_gale_bow | bow | legend | gear-archer | todo |
+| storm_gale_bow | bow | legend | gear-archer | done |
 | storm_hammer | hammer | rare | gear-smith | todo |
 | storm_staff | staff | rare | gear-mage | todo |
 | storm_sword | sword | rare | gear-warrior | todo |
 | storm_thunder_bell_staff | bell | legend | gear-shaman | todo |
 
-## tide（10、済み 0）
+## tide（10、済み 3）
 
 | id | 種類 | 階級 | 担当 | 状態 |
 | --- | --- | --- | --- | --- |
 | tide_bell_staff | bell | rare | gear-shaman | todo |
-| tide_bow | bow | rare | gear-archer | todo |
-| tide_coral_bow | bow | legend | gear-archer | todo |
+| tide_bow | bow | rare | gear-archer | done |
+| tide_coral_bow | bow | legend | gear-archer | done |
 | tide_dagger | dagger | rare | gear-assassin | todo |
-| tide_hammer | hammer | rare | gear-smith | todo |
+| tide_hammer | hammer | rare | gear-smith | done |
 | tide_pearl_staff | staff | legend | gear-mage | todo |
 | tide_reef_hammer | hammer | legend | gear-smith | todo |
 | tide_shell_trident | spear | rare | gear-warrior | todo |
@@ -157,19 +157,19 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | tower_pull_hammer | hammer | legend | gear-smith | todo |
 | tower_sigil_dagger | dagger | legend | gear-assassin | todo |
 
-## whale（9、済み 0）
+## whale（9、済み 9）
 
 | id | 種類 | 階級 | 担当 | 状態 |
 | --- | --- | --- | --- | --- |
-| whale_bell_staff | bell | rare | gear-shaman | todo |
-| whale_bow | bow | rare | gear-archer | todo |
-| whale_choir_hammer | hammer | legend | gear-smith | todo |
-| whale_dagger | dagger | rare | gear-assassin | todo |
-| whale_deep_bell_staff | bell | legend | gear-shaman | todo |
-| whale_hammer | hammer | rare | gear-smith | todo |
-| whale_rib_longbow | bow | legend | gear-archer | todo |
-| whale_staff | staff | rare | gear-mage | todo |
-| whale_star_staff | staff | legend | gear-mage | todo |
+| whale_bell_staff | bell | rare | gear-shaman | done |
+| whale_bow | bow | rare | gear-archer | done |
+| whale_choir_hammer | hammer | legend | gear-smith | done |
+| whale_dagger | dagger | rare | gear-assassin | done |
+| whale_deep_bell_staff | bell | legend | gear-shaman | done |
+| whale_hammer | hammer | rare | gear-smith | done |
+| whale_rib_longbow | bow | legend | gear-archer | done |
+| whale_staff | staff | rare | gear-mage | done |
+| whale_star_staff | staff | legend | gear-mage | done |
 
 ## wild_abyss_lower（18、済み 0）
 

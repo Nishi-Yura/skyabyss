@@ -726,7 +726,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "storm_hammer": {
   "series": "storm",
@@ -798,7 +798,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "tide_coral_bow": {
   "series": "tide",
@@ -807,7 +807,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "tide_dagger": {
   "series": "tide",
@@ -825,7 +825,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "tide_pearl_staff": {
   "series": "tide",
@@ -969,7 +969,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_bow": {
   "series": "whale",
@@ -978,7 +978,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "whale_choir_hammer": {
   "series": "whale",
@@ -987,7 +987,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_dagger": {
   "series": "whale",
@@ -996,7 +996,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_deep_bell_staff": {
   "series": "whale",
@@ -1005,7 +1005,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_hammer": {
   "series": "whale",
@@ -1014,7 +1014,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_rib_longbow": {
   "series": "whale",
@@ -1023,7 +1023,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo"
+  "status": "done"
  },
  "whale_staff": {
   "series": "whale",
@@ -1032,7 +1032,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whale_star_staff": {
   "series": "whale",
@@ -1041,7 +1041,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "whalebone_greatsword": {
   "series": "other",
@@ -1050,7 +1050,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo"
+  "status": "done"
  },
  "wild_abyss_mace": {
   "series": "wild_abyss_lower",
