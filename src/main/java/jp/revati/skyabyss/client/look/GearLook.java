@@ -1,12 +1,12 @@
 package jp.revati.skyabyss.client.look;
 
-// 自分の武器・防具・技の見せ方の試作 (2026-11-17「邪魔にならないがかっこよく見栄えのいいベストな表現」)。'0' = 今の描き方 (点の模型)。
-// 5 回目から: 手で打ったドット絵 (tools/gen/pixel/art/*.txt) を部分ごとの厚みで立体に起こした模型 (tools/gen/pixel/pixel_extrude.py が lowpoly/look/a/ に書く)。
-//   a = その模型。作り直しは武器から (祠の始めの武器 6 本、嵐の剣、鯨骨の杖、巨神断ち)
+// 自分の武器・防具・技の見せ方 (2026-11-17「邪魔にならないがかっこよく見栄えのいいベストな表現」)。'0' = 前の描き方 (点の模型)。
+// a = 手で組んだ 2 倍の細かさ (1/32 ブロック) の模型 (tools/models/x32/*_parts.py → tools/gen/pixel/paint_cubes.py → bb_import.py が lowpoly/look/a/ に書く)。
+//   武器は 2026-11-18 から a が既定 (祠の始めの武器 6 本が決まった)。a の模型が無い品は前の描き方のまま
 // 立方体の模型が無い品は今のまま。技の案のあいだは、独自の光の形と粒 (FxDraw・SkillFx) を出さない
 // 台本では `gearlook weapon|armor|skill|all 0|a|b|c`
 public final class GearLook {
-    public static volatile char weapon = '0';
+    public static volatile char weapon = 'a';
     public static volatile char armor = '0';
     public static volatile char skill = '0';
 
