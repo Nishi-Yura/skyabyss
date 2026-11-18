@@ -986,7 +986,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "tower_clap_bell_staff": {
@@ -996,7 +996,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "tower_eye_bow": {
@@ -1006,7 +1006,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "tower_moon_staff": {
@@ -1016,7 +1016,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "tower_pull_hammer": {
@@ -1026,7 +1026,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "tower_sigil_dagger": {
@@ -1036,7 +1036,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "travel_shield": {

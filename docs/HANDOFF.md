@@ -116,7 +116,8 @@
   - 一覧: docs/review/moon_bb_sheet.png・moon_ingame.png
 - 神器 12 品（2026-11-19 夜、divine_bold.py。白い石・金・朝の光、形は docs/design/50 の 4.5 の説明どおり）。一覧 docs/review/divine_bb_sheet.png・divine_ingame.png
   - 夜通しの流れ（ユーザー就寝中「すべての武器完成させて」）: 設計 → preview → Blockbench に読み込み（スクリプト）→ 筆 3 回（brush.py が設計の UV から座標を選ぶ: 主の明るい上縁・差し色の明るい縁・主の下縁の影）→ 書き出し → mstep.sh done → series_check.sh（持ち方・manifest・撮影・一覧）。
-- 次: 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
+- 塔 6 品（tower_bold.py。塔の石・古い真鍮・印の青白。天秤の大剣・引き合いの鎚・落ちる月の杖・追う印の短剣・合掌の鈴杖・側の目の弓）。一覧 docs/review/tower_bb_sheet.png・tower_ingame.png
+- 次: 深淵 → その他 → 野。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）

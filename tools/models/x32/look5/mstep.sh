@@ -15,6 +15,13 @@ write_bbmodel(json.load(open('$3.json')), '$3_base.png', '$3.bbmodel', '$3', (la
   python -I $R/tools/models/x32/look5/brush.py $2 $3 > brush_$3.txt
   cat brush_$3.txt
 else
+  python -I -c "
+import json,base64,io,sys
+from PIL import Image
+d=json.load(open('out_$2.bbmodel',encoding='utf-8')); t=d['textures'][0]
+im=Image.open(io.BytesIO(base64.b64decode(t['source'].split(',',1)[1])))
+r=(d['resolution']['width'],d['resolution']['height']); uv=(t.get('uv_width',r[0]),t.get('uv_height',r[1]))
+if im.size!=uv or im.size!=r: sys.exit('SIZE MISMATCH img %s res %s uv %s'%(im.size,r,uv))"
   python -I $R/tools/models/x32/look5/ungeo.py out_$2.bbmodel $2.bbmodel
   cd $R
   case $2 in *bow) python -I tools/models/x32/look5/install_bow.py "$S/out_$2.bbmodel" $2 "$S" | tail -1 ;; *) python -I tools/models/x32/look5/install.py "$S/out_$2.bbmodel" $2 | tail -1 ;; esac
