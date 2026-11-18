@@ -457,7 +457,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_bow": {
   "series": "ember",
@@ -477,7 +477,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_censer_bell_staff": {
   "series": "ember",
@@ -487,7 +487,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_cinder_blade": {
   "series": "ember",
@@ -496,8 +496,8 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
-  "craft": "none"
+  "status": "done",
+  "craft": "look5"
  },
  "ember_dagger": {
   "series": "ember",
@@ -507,7 +507,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_flare_bow": {
   "series": "ember",
@@ -526,8 +526,8 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
-  "craft": "none"
+  "status": "done",
+  "craft": "look5"
  },
  "ember_kiln_staff": {
   "series": "ember",
@@ -537,7 +537,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_staff": {
   "series": "ember",
@@ -547,7 +547,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_war_axe": {
   "series": "ember",
@@ -557,7 +557,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "moon_crescent_dagger": {
   "series": "moon",

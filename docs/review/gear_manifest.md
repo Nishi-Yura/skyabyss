@@ -2,7 +2,7 @@
 
 tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest.json。
 
-全 219 品。出来: polished 6、bb 0、script 9、none 169。
+全 219 品。出来: polished 6、bb 0、script 2、none 167。
 
 ## abyss（30、済み 0）
 
@@ -56,21 +56,21 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | divine_sky_sword | sword | legend | gear-warrior | none |
 | divine_warden_blade | greatsword | legend | gear-warrior | none |
 
-## ember（11、済み 9）
+## ember（11、済み 11）
 
 | id | 種類 | 階級 | 担当 | 出来 |
 | --- | --- | --- | --- | --- |
-| ember_ash_knife | dagger | legend | gear-assassin | script |
+| ember_ash_knife | dagger | legend | gear-assassin | look5 |
 | ember_bow | bow | rare | gear-archer | script |
-| ember_censer | bell | rare | gear-shaman | script |
-| ember_censer_bell_staff | bell | legend | gear-shaman | script |
-| ember_cinder_blade | greatsword | legend | gear-warrior | none |
-| ember_dagger | dagger | rare | gear-assassin | script |
+| ember_censer | bell | rare | gear-shaman | look5 |
+| ember_censer_bell_staff | bell | legend | gear-shaman | look5 |
+| ember_cinder_blade | greatsword | legend | gear-warrior | look5 |
+| ember_dagger | dagger | rare | gear-assassin | look5 |
 | ember_flare_bow | bow | legend | gear-archer | script |
-| ember_greatsword | greatsword | rare | gear-warrior | none |
-| ember_kiln_staff | staff | legend | gear-mage | script |
-| ember_staff | staff | rare | gear-mage | script |
-| ember_war_axe | axe | rare | gear-smith | script |
+| ember_greatsword | greatsword | rare | gear-warrior | look5 |
+| ember_kiln_staff | staff | legend | gear-mage | look5 |
+| ember_staff | staff | rare | gear-mage | look5 |
+| ember_war_axe | axe | rare | gear-smith | look5 |
 
 ## moon（12、済み 0）
 
