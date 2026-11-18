@@ -687,7 +687,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "shrine_bell_staff": {
   "series": "shrine",
@@ -767,7 +767,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_bell_staff": {
   "series": "storm",
@@ -777,7 +777,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_cloud_staff": {
   "series": "storm",
@@ -787,7 +787,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_dagger": {
   "series": "storm",
@@ -797,7 +797,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_gale_bow": {
   "series": "storm",
@@ -807,7 +807,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_hammer": {
   "series": "storm",
@@ -817,7 +817,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_staff": {
   "series": "storm",
@@ -827,7 +827,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "storm_sword": {
   "series": "storm",
@@ -847,7 +847,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "thrall_poker": {
   "series": "other",
@@ -867,7 +867,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "tide_bell_staff": {
   "series": "tide",

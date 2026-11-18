@@ -63,7 +63,14 @@
   - 光の置き場所を型にしない。柄頭の先・弓の握りの宝石・刃の中央の線・鐘の舌を既定にせず、品ごとにモチーフから選ぶ（同じシリーズで同じ場所は 2 回まで、光なしの品があってもよい）。
   - 形は他のシリーズから借りない。柄・柄頭・弓腕・弓の握り・鈴はシリーズごとに設計する（共有してよいのは lib.py の塗りの規則だけ）。握りの中心 (12, 15) だけは持ち方のため残す。
   - 潮はこの決まりで組み直した（1ff0f5840、一覧 `docs/review/tide_glow_bb_sheet.png`・`tide_glow_ingame.png`）。鯨は形を残して光だけ動かした（whale_series.py の grip(butt='none')・bell(clapper=False)・bow_grip(gems=False)）。
-- 次: 嵐 → 火 → 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
+- 嵐 10 品（storm_bold.py。色は嵐雲の紫紺、差し色は銅、光は稲妻の黄）
+  - 雷石の鎚・積乱雲の金床の鎚・羽根の杖・渦雲の杖・風見の鈴杖・雷鈴の鈴杖（短冊）・稲妻の短剣・雷獣の爪・雷翼の弓・疾風の弓
+  - シリーズの形: 柄の下の銅の二股、柄の房結び＋羽 2 枚、弓は房と羽を握りに垂らす。
+  - 光の置き場所: 金床の鎚は稲妻の鎖、渦雲の杖は火花の玉、雷鈴は短冊、短剣は火花 3 つ、爪は爪の間の放電、疾風の弓は弦そのもの。
+  - 光なし: 雷石の鎚・羽根の杖・風見の鈴杖・雷翼の弓。
+  - 一覧: `docs/review/storm_glow_bb_sheet.png`・`storm_glow_ingame.png`
+  - storm_sword は look/a の模型がないので扱いを確かめる。
+- 次: 火 → 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）

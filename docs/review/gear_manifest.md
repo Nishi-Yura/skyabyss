@@ -2,7 +2,7 @@
 
 tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest.json。
 
-全 219 品。出来: polished 7、bb 14、script 25、none 173。
+全 219 品。出来: polished 6、bb 0、script 9、none 173。
 
 ## abyss（30、済み 0）
 
@@ -114,17 +114,17 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 
 | id | 種類 | 階級 | 担当 | 出来 |
 | --- | --- | --- | --- | --- |
-| raiju_claw | claw | legend | gear-assassin | script |
-| storm_anvil_hammer | hammer | legend | gear-smith | script |
-| storm_bell_staff | bell | rare | gear-shaman | script |
-| storm_cloud_staff | staff | legend | gear-mage | script |
-| storm_dagger | dagger | rare | gear-assassin | script |
-| storm_gale_bow | bow | legend | gear-archer | script |
-| storm_hammer | hammer | rare | gear-smith | script |
-| storm_staff | staff | rare | gear-mage | script |
+| raiju_claw | claw | legend | gear-assassin | look5 |
+| storm_anvil_hammer | hammer | legend | gear-smith | look5 |
+| storm_bell_staff | bell | rare | gear-shaman | look5 |
+| storm_cloud_staff | staff | legend | gear-mage | look5 |
+| storm_dagger | dagger | rare | gear-assassin | look5 |
+| storm_gale_bow | bow | legend | gear-archer | look5 |
+| storm_hammer | hammer | rare | gear-smith | look5 |
+| storm_staff | staff | rare | gear-mage | look5 |
 | storm_sword | sword | rare | gear-warrior | none |
-| storm_thunder_bell_staff | bell | legend | gear-shaman | script |
-| thunder_wing_bow | bow | rare | gear-archer | script |
+| storm_thunder_bell_staff | bell | legend | gear-shaman | look5 |
+| thunder_wing_bow | bow | rare | gear-archer | look5 |
 
 ## tide（14、済み 11）
 
@@ -132,18 +132,18 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | --- | --- | --- | --- | --- |
 | coral_harpoon | spear | legend | gear-warrior | none |
 | coral_shield | shield | rare | gear-warrior | none |
-| tide_bell_staff | bell | rare | gear-shaman | bb |
-| tide_bow | bow | rare | gear-archer | script |
-| tide_coral_bow | bow | legend | gear-archer | script |
-| tide_dagger | dagger | rare | gear-assassin | script |
-| tide_hammer | hammer | rare | gear-smith | bb |
-| tide_pearl_staff | staff | legend | gear-mage | bb |
-| tide_reef_hammer | hammer | legend | gear-smith | bb |
+| tide_bell_staff | bell | rare | gear-shaman | look5 |
+| tide_bow | bow | rare | gear-archer | look5 |
+| tide_coral_bow | bow | legend | gear-archer | look5 |
+| tide_dagger | dagger | rare | gear-assassin | look5 |
+| tide_hammer | hammer | rare | gear-smith | look5 |
+| tide_pearl_staff | staff | legend | gear-mage | look5 |
+| tide_reef_hammer | hammer | legend | gear-smith | look5 |
 | tide_shell_trident | spear | rare | gear-warrior | none |
-| tide_staff | staff | rare | gear-mage | bb |
-| tide_surf_bell_staff | bell | legend | gear-shaman | script |
-| tidecaller_claw | claw | legend | gear-assassin | script |
-| waterway_fang | fang | legend | gear-assassin | script |
+| tide_staff | staff | rare | gear-mage | look5 |
+| tide_surf_bell_staff | bell | legend | gear-shaman | look5 |
+| tidecaller_claw | claw | legend | gear-assassin | look5 |
+| waterway_fang | fang | legend | gear-assassin | look5 |
 
 ## tower（6、済み 0）
 
@@ -160,16 +160,16 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 
 | id | 種類 | 階級 | 担当 | 出来 |
 | --- | --- | --- | --- | --- |
-| whale_bell_staff | bell | rare | gear-shaman | bb |
-| whale_bow | bow | rare | gear-archer | bb |
-| whale_choir_hammer | hammer | legend | gear-smith | bb |
-| whale_dagger | dagger | rare | gear-assassin | bb |
-| whale_deep_bell_staff | bell | legend | gear-shaman | bb |
-| whale_hammer | hammer | rare | gear-smith | polished |
-| whale_rib_longbow | bow | legend | gear-archer | bb |
-| whale_staff | staff | rare | gear-mage | bb |
-| whale_star_staff | staff | legend | gear-mage | bb |
-| whalebone_greatsword | greatsword | rare | gear-warrior | bb |
+| whale_bell_staff | bell | rare | gear-shaman | look5 |
+| whale_bow | bow | rare | gear-archer | look5 |
+| whale_choir_hammer | hammer | legend | gear-smith | look5 |
+| whale_dagger | dagger | rare | gear-assassin | look5 |
+| whale_deep_bell_staff | bell | legend | gear-shaman | look5 |
+| whale_hammer | hammer | rare | gear-smith | look5 |
+| whale_rib_longbow | bow | legend | gear-archer | look5 |
+| whale_staff | staff | rare | gear-mage | look5 |
+| whale_star_staff | staff | legend | gear-mage | look5 |
+| whalebone_greatsword | greatsword | rare | gear-warrior | look5 |
 
 ## wild_abyss_lower（18、済み 0）
 
