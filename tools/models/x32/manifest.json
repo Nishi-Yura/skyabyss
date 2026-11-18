@@ -1436,7 +1436,7 @@
   "level": 16,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_crater_longbow": {
@@ -1486,7 +1486,7 @@
   "level": 16,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_eaglet_longbow": {
@@ -1556,7 +1556,7 @@
   "level": 16,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_fortress_greatsword": {
@@ -1616,7 +1616,7 @@
   "level": 12,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_hanged_longbow": {
@@ -1636,7 +1636,7 @@
   "level": 16,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_hourglass_staff": {
@@ -1736,7 +1736,7 @@
   "level": 16,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_meteor_greatsword": {
@@ -1806,7 +1806,7 @@
   "level": 16,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_oar_blade": {
@@ -1816,7 +1816,7 @@
   "level": 12,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_peak_totem": {
@@ -1996,7 +1996,7 @@
   "level": 12,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_shell_claw": {
@@ -2016,7 +2016,7 @@
   "level": 12,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_shore_dagger": {
@@ -2026,7 +2026,7 @@
   "level": 12,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_skylark_bow": {
@@ -2136,7 +2136,7 @@
   "level": 12,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_tusk_axe": {

@@ -120,7 +120,8 @@
 - 深淵 30 本: Blockbench で組み直し＋筆 3 回（abyss_bold.py）。docs/review/abyss_bb_sheet.png・abyss_ingame.png。
 - その他 5 本（鉾・鍛冶の大鎚・火かき棒・薙刀・旅の盾）: other_bold.py、品ごとに色 1 系統。docs/review/other_*.png。
 - 野・牧草地 7 本: wild_meadow_bold.py（灰茶の樫＋麦わら＋蛍の光）。docs/review/wild_meadow_*.png。
-- 次: 野の残り（海岸・丘・高地・荒れ地・雲・月・深淵上・深淵下）。シリーズごとにコミット（main には入れない）。
+- 野・海岸 12 本: wild_coast_bold.py（青灰の流木＋綱＋夜光虫）。docs/review/wild_coast_*.png。
+- 次: 野の残り（丘・高地・荒れ地・雲・月・深淵上・深淵下）。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）
