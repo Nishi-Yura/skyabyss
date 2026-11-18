@@ -67,7 +67,6 @@ public class BanditChief extends ContinentFoe {
                 .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_SWING.get(), 1.2f, 0.7f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 1.8, getY() + 1.1, getZ() + f.z * 1.8, 3, 0.8, 0.1, 0.8, 0))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.knockback(0.8, -f.x, -f.z);
@@ -88,9 +87,7 @@ public class BanditChief extends ContinentFoe {
         if (shouting && tick == SHOUT_AT) {
             for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(SHOUT_RADIUS), BanditChief::crew)) {
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 120, 1), this);
-                server().sendParticles(ParticleTypes.ANGRY_VILLAGER, e.getX(), e.getY() + e.getBbHeight() + 0.3, e.getZ(), 2, 0.2, 0.1, 0.2, 0);
             }
-            server().sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 16, 1.2, 0.05, 1.2, 0.04);
         }
     }
 

@@ -43,8 +43,7 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
     public static final int ACTION_NONE = 0;
     // 預かっている報酬を受け取る (本人だけ)
     public static final int ACTION_CLAIM = 1;
-    // 初回の選択報酬をチャットで選ぶ (/titanmemory を走らせて画面を閉じる。本人だけ)
-    public static final int ACTION_CHOOSE = 2;
+    // 2 は使っていない (心臓の遺物の選択を開いていた)
     // なくした天の鍵の欠片・天の鍵を呼び戻す (KeepsakeBonds.recall。本人だけ)
     public static final int ACTION_RECALL_FRAGMENT = 3;
     public static final int ACTION_RECALL_KEY = 4;

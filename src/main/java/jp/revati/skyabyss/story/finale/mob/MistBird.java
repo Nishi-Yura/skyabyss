@@ -166,9 +166,9 @@ public class MistBird extends CloudMob {
                 if (t % 2 == 0) {
                     for (int i = 0; i < 18; i++) {
                         double a = i / 18.0 * Math.PI * 2;
-                        sl.sendParticles(SHADOW, spot.x + Math.cos(a) * CIRCLE, spot.y + 0.1, spot.z + Math.sin(a) * CIRCLE, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x + Math.cos(a) * CIRCLE, spot.y + 0.1, spot.z + Math.sin(a) * CIRCLE, 1, 0, 0, 0, 0);
                     }
-                    sl.sendParticles(SHADOW, spot.x, spot.y + 0.1, spot.z, 4, CIRCLE * 0.4, 0, CIRCLE * 0.4, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x, spot.y + 0.1, spot.z, 4, CIRCLE * 0.4, 0, CIRCLE * 0.4, 0);
                 }
                 setDeltaMovement(Vec3.ZERO);
                 getLookControl().setLookAt(spot.x, spot.y, spot.z);
@@ -184,7 +184,7 @@ public class MistBird extends CloudMob {
             hasImpulse = true;
             if (to.length() < 1.2 || t == TELL + DIVE) {
                 // 円に着いた: 円の内の人に傷と押し戻し
-                sl.sendParticles(ParticleTypes.CLOUD, spot.x, spot.y + 0.3, spot.z, 18, CIRCLE * 0.5, 0.2, CIRCLE * 0.5, 0.05);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.3, spot.z, 18, CIRCLE * 0.5, 0.2, CIRCLE * 0.5, 0.05);
                 for (Player p : sl.getEntitiesOfClass(Player.class, new net.minecraft.world.phys.AABB(spot, spot).inflate(CIRCLE + 0.3, 1.6, CIRCLE + 0.3),
                         e -> e.isAlive() && !e.isSpectator())) {
                     if (p.position().subtract(spot).horizontalDistance() <= CIRCLE + 0.3 && hit.add(p.getId())) {
@@ -206,5 +206,10 @@ public class MistBird extends CloudMob {
             diving = 0;
             setDeltaMovement(getDeltaMovement().scale(0.2).add(0, 0.4, 0));
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

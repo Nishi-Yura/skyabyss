@@ -1,0 +1,83 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.prop_light_pillar",
+    "texture_width": 16,
+    "texture_height": 16,
+    "visible_bounds_width": 4,
+    "visible_bounds_height": 8,
+    "visible_bounds_offset": [
+     0,
+     2.6666666666666665,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -14.993,
+        -4.0,
+        -14.993
+       ],
+       "size": [
+        29.985,
+        34.0,
+        29.985
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "t1",
+     "pivot": [
+      0.0,
+      30.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -6.8,
+        28.0,
+        -6.63
+       ],
+       "size": [
+        13.6,
+        62.0,
+        13.259
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

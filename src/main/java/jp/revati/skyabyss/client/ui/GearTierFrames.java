@@ -50,16 +50,6 @@ public final class GearTierFrames {
         g.fill(x + 15, y + 1, x + 16, y + 15, edge);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
-    static void onTooltipColor(RenderTooltipEvent.Color event) {
-        GearTier tier = tierOf(event.getItemStack());
-        if (tier == null) {
-            return;
-        }
-        event.setBorderStart(0xFF000000 | tier.rgb());
-        event.setBorderEnd(0xFF000000 | dark(tier.rgb()));
-    }
-
     @SubscribeEvent
     static void onContainerBackground(ContainerScreenEvent.Render.Background event) {
         AbstractContainerScreen<?> screen = event.getContainerScreen();

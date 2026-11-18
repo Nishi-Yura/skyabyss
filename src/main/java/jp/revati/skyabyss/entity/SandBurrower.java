@@ -8,8 +8,6 @@ import jp.revati.skyabyss.story.ch2.Ch2Mobs;
 import jp.revati.skyabyss.titan.tide.TideOcean;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -123,10 +121,6 @@ public class SandBurrower extends GroundFoe {
         return ChapterMobSpawner.isLive(getUUID());
     }
 
-    // いま出てこられるか (潮に縛られない個体はいつでも)
-    public boolean mayEmerge() {
-        return !bound() || lowTide();
-    }
 
     private boolean lowTide() {
         return tideOverride != null ? tideOverride : TideOcean.isLowTide(level().getDayTime());
@@ -242,7 +236,7 @@ public class SandBurrower extends GroundFoe {
             if (state.isAir()) {
                 state = Blocks.SAND.defaultBlockState();
             }
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), getX(), getY() + 0.1, getZ(), count, spread, 0.05, spread, 0.08);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.1, getZ(), count, spread, 0.05, spread, 0.08);
         }
     }
 
@@ -402,5 +396,10 @@ public class SandBurrower extends GroundFoe {
         if (!isBuried()) {
             modStep(MobSounds.SAND_BURROWER_STEP.get(), 0.3f);
         }
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

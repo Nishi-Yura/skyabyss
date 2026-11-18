@@ -178,7 +178,7 @@ public final class GleanerNest {
                 for (ServerPlayer p : trackers) {
                     double d = Math.sqrt(p.distanceToSqr(at.getX() + 0.5, at.getY(), at.getZ() + 0.5));
                     if (d <= GLINT) {
-                        level.sendParticles(p, new DustParticleOptions(nest ? new Vector3f(0.95f, 0.78f, 0.3f) : new Vector3f(0.55f, 0.8f, 1.0f), 1.6f), true,
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true,
                                 at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 8, 0.25, 0.9, 0.25, 0.0);
                     }
                     if (!nest && d <= FIND) {
@@ -437,5 +437,10 @@ public final class GleanerNest {
                             p.teleportTo(level, g.getX() + 0.5, g.getY(), g.getZ() + 0.5, 0f, 12f);
                             return 1;
                         }))));
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

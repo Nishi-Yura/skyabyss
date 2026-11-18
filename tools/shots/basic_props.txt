@@ -1,0 +1,196 @@
+# 通常攻撃の形 (2026-11-12): 魔弾 (prop_sk_bolt_<段>) と呪印 (prop_sk_hex_<段>) を段ごとに撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/basic_props.txt -PshotsName=basic_props
+world basic_props flat
+size 1280 720
+timeout 2400
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+perspective back
+fov 60
+# ---- mage bolt tier 0
+cmd skyabyss level set @p 1
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+key key.attack
+wait 3
+shot bolt0_fly
+wait 3
+shot bolt0_near
+wait 20
+# ---- mage bolt tier 1
+cmd skyabyss level set @p 10
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+key key.attack
+wait 3
+shot bolt1_fly
+wait 3
+shot bolt1_near
+wait 20
+# ---- mage bolt tier 2
+cmd skyabyss level set @p 20
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+key key.attack
+wait 3
+shot bolt2_fly
+wait 3
+shot bolt2_near
+wait 20
+# ---- mage bolt tier 3
+cmd skyabyss level set @p 30
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+key key.attack
+wait 3
+shot bolt3_fly
+wait 3
+shot bolt3_near
+wait 20
+# ---- mage bolt tier 4
+cmd skyabyss level set @p 40
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+key key.attack
+wait 3
+shot bolt4_fly
+wait 3
+shot bolt4_near
+wait 20
+# ---- shaman hex tier 0
+cmd skyabyss level set @p 1
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex0_s0
+wait 30
+# ---- shaman hex tier 1
+cmd skyabyss level set @p 10
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex1_s0
+wait 30
+# ---- shaman hex tier 2
+cmd skyabyss level set @p 20
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex2_s0
+wait 30
+# ---- shaman hex tier 3
+cmd skyabyss level set @p 30
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex3_s0
+wait 30
+# ---- shaman hex tier 4
+cmd skyabyss level set @p 40
+cmd tp @s 0.5 -60 0.5 0 8
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:5000f,attributes:[{id:"minecraft:max_health",base:5000.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex4_s0
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex4_s1
+wait 30
+cmd skyabyss skill mana @s full
+key key.attack
+wait 11
+shot hex4_s2
+wait 30
+quit

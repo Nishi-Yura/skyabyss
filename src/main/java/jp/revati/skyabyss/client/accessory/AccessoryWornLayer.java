@@ -78,7 +78,7 @@ public final class AccessoryWornLayer extends RenderLayer<AbstractClientPlayer, 
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!LowPoly.accessoryWorn || player.isInvisible() || player.isSpectator()) {
+        if (player.isInvisible() || player.isSpectator()) {
             return;
         }
         AccessoryData data = player.getData(AccessorySetup.DATA);

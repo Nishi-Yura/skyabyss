@@ -69,7 +69,7 @@ def main():
             img.paste(im, (20 + i * 366, 50))
         d.text((20 + i * 366, 244), cap, font=f(12), fill=DIM)
     d.text((20, 266), "ページの見出しを上の帯の右に 3 つ並べ (いまのページは金の縁)、ページ送りのボタンをやめた。木のつまみは木の数で詰める。紋の盤は下の列を上げた。", font=f(12), fill=INK)
-    d.text((20, 288), "キーの既定: 構え . / 技の枠 R G V Z , / 護符 H / 控え帳 B / 状態 J / 技 K / クエスト U / 旅嚢 I・使う Y / 仲間 O / 合図 M / 知らせ N / 道しるべ ;  (重なり 0、バニラとも重ならない)", font=f(12), fill=GOLD)
+    d.text((20, 288), "キーの既定: 構え . / 技の枠 R G V Z , / 護符 H / 控え帳 B / 状態 J / 技 K / クエスト U / 旅袋 I・使う Y / 仲間 O / 合図 M / 知らせ N / 道しるべ ;  (重なり 0、バニラとも重ならない)", font=f(12), fill=GOLD)
     rest = Image.new("RGB", (1100, 760), BG)
     d = ImageDraw.Draw(rest)
     # --- 標
@@ -101,7 +101,7 @@ def main():
     rows = [
         ("天職の画面「あとで」ボタン (幅 104)", "Later (choose from the K screen)", "Later"),
         ("天職の決定ボタン (幅 70)", "Press again to decide", "Press again / もう一度押す"),
-        ("旅嚢の札の説明 (152 で切れていた)", "Right-click: take off the card (back to automatic)", "Right-click: unpin"),
+        ("旅袋の札の説明 (152 で切れていた)", "Right-click: take off the card (back to automatic)", "Right-click: unpin"),
         ("記録帳の値 (114 で切れていた)", "見つけた ... / 全 ... （終えた ...）", "見つけた ... / 全 ..."),
         ("クエスト帳の鍵つきの行 (112)", "After stilling the thunder wing's heart", "After thunder wing"),
         ("報酬の札の必要レベル (カード幅)", "Requires Lv 99 (now Lv 99)", "Needs Lv 99 (you: 99)"),

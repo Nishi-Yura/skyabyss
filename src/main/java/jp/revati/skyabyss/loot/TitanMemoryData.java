@@ -33,9 +33,8 @@ public class TitanMemoryData extends SavedData {
         public final Set<String> owned = new LinkedHashSet<>();
         // 天の鍵の欠片を受け取ったか (一人一つ)
         public boolean fragment;
-        // 初回クリアを済ませたか / 初回の選択報酬をまだ受け取っていないか
+        // 初回クリアを済ませたか
         public boolean firstCleared;
-        public boolean choicePending;
         // 共鳴の欠片での交換: 最後に交換したときの撃破数 (心臓を倒すごとに一度。0 = まだ一度もしていない) と、交換した回数
         public int lastExchangeClears;
         public int exchanges;
@@ -50,7 +49,6 @@ public class TitanMemoryData extends SavedData {
             }
             tag.put("owned", list);
             tag.putBoolean("firstCleared", firstCleared);
-            tag.putBoolean("choicePending", choicePending);
             tag.putBoolean("fragment", fragment);
             tag.putInt("lastExchangeClears", lastExchangeClears);
             tag.putInt("exchanges", exchanges);
@@ -65,7 +63,6 @@ public class TitanMemoryData extends SavedData {
                 r.owned.add(t.getAsString());
             }
             r.firstCleared = tag.getBoolean("firstCleared");
-            r.choicePending = tag.getBoolean("choicePending");
             r.fragment = tag.getBoolean("fragment");
             // 第1段階のセーブにはない項目 (なければ 0 = まだ交換していない)
             r.lastExchangeClears = tag.getInt("lastExchangeClears");

@@ -56,11 +56,11 @@ public final class StormRaid {
     }
 
     static void sparks(ServerLevel level, Vec3 at, int count, double spread) {
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, count, spread, spread, spread, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, count, spread, spread, spread, 0.05);
     }
 
     static void particle(ServerLevel level, ParticleOptions p, Vec3 at, int count, double spread) {
-        level.sendParticles(p, at.x, at.y, at.z, count, spread, spread, spread, 0.01);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, count, spread, spread, spread, 0.01);
     }
 
     static void zap(ServerLevel level, BlockPos at, float vol, float pitch) {
@@ -85,5 +85,10 @@ public final class StormRaid {
 
     static void set(ServerLevel level, int x, int y, int z, BlockState st) {
         RaidKit.set(level, new BlockPos(x, y, z), st);
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -57,13 +58,11 @@ public class RockBoar extends RegionBoss {
             lastQuake = tickCount;
             begin(target, "quake");
             cue("rock_boar", "quake", QUAKE_WARN);
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), QUAKE_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), QUAKE_RADIUS)).prop(PropFx.rain("rock", 4))
                     .floor(getY()).warn(QUAKE_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, getX(), getY(), getZ(), MobSounds.ROCK_BOAR_QUAKE.get(), SoundSource.HOSTILE, 1.6f, 1f);
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLED_DEEPSLATE.defaultBlockState()), getX(), getY() + 3.0, getZ(),
-                                60, QUAKE_RADIUS * 0.4, 0.8, QUAKE_RADIUS * 0.4, 0.1);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.9f))
                     .start();

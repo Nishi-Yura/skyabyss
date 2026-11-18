@@ -129,7 +129,12 @@ public final class EmberAftermath {
     static void end(ServerPlayer player, ServerLevel level) {
         player.playNotifySound(EmberTitanSetup.FAR_BEAT.get(), SoundSource.AMBIENT, 1.0f, 0.9f);
         EmberSurfaceNetwork.send(player, new EmberSurfaceNetwork.Tremor(50, 0.2f));
-        level.sendParticles(player, ParticleTypes.WHITE_ASH, false, player.getX(), player.getY() + 0.1, player.getZ(), 20, 1.5, 0.0, 1.5, 0.0);
+        level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), false, player.getX(), player.getY() + 0.1, player.getZ(), 20, 1.5, 0.0, 1.5, 0.0);
         Notice.narrate(player, LINE_END);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

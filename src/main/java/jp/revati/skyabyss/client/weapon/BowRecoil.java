@@ -74,7 +74,7 @@ public final class BowRecoil {
                 s.fixed = mv == null ? 0 : mv.fixedDuration;
             } else if (s.wasDrawing && s.drawTicks >= 3) {
                 s.releasedAt = level.getGameTime();
-                s.power = Math.min(1f, s.drawTicks / 20f);
+                s.power = Math.min(1f, jp.revati.skyabyss.combat.BowDraw.pull(s.drawTicks));
             }
             s.wasDrawing = drawing;
         }

@@ -29,7 +29,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 初回の手引き (docs/design/18 の 12 章)。「品・出来事 → 始まる → 画面の隅に操作の案内が出続ける → した → できた」を一つの仕組みにしたもの。
-//   登録 (Hint): ID・始まる品 (持っていたら始まる。旅嚢の中も数える)。品でなければ出来事で start を呼ぶ。済みの出来事は done を呼ぶ
+//   登録 (Hint): ID・始まる品 (持っていたら始まる。旅袋の中も数える)。品でなければ出来事で start を呼ぶ。済みの出来事は done を呼ぶ
 //   サーバーは「今出ている手引きの ID」だけを持ち主に送る。文面と実際のキー名はクライアントが今のキー設定から作る (client/tutorial)
 //   記録は人ごと (TutorialData。保存・死んでも引き継ぐ)。済んだものは二度と出ない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -38,7 +38,7 @@ public final class TutorialHints {
     // 持ち物の見回りの間隔 (tick)
     public static final int CHECK_TICKS = 20;
 
-    // item: 持っていたら (持ち物・旅嚢) 始まる品 (なければ出来事で始まる)
+    // item: 持っていたら (持ち物・旅袋) 始まる品 (なければ出来事で始まる)
     public record Hint(String id, @Nullable Predicate<Item> item) {
     }
 
@@ -147,7 +147,7 @@ public final class TutorialHints {
         return false;
     }
 
-    // 旅嚢に何か入った (旅嚢が有効なとき)
+    // 旅袋に何か入った (旅袋が有効なとき)
     private static boolean holdsPouchItem(ServerPlayer player) {
         if (!PouchConfig.enabled(player.server)) {
             return false;

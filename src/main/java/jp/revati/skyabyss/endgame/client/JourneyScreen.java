@@ -52,7 +52,7 @@ public class JourneyScreen extends Screen {
     static final int GOLD = Golden.GOLD;
     static final int TEAL = Golden.TEAL;
     // 土地の印の色 (都の鐘・岩鯨の岩・潮殻の潮・雷翼の雷・余燼の熾)
-    static final int[] LAND_RGB = {0xD8C27A, 0, 0xB8A27E, 0x7FD6D0, 0x9FB8FF, 0xFF9A5A};
+    static final int[] LAND_RGB = {0xD8C27A, 0, 0xB8A27E, 0x8FD0FF, 0x9FB8FF, 0xFF9A5A};
 
     @Nullable
     private static CompoundTag data;
@@ -221,11 +221,11 @@ public class JourneyScreen extends Screen {
 
     // 細い帯 (高さ 3。満ちれば水色)
     private static void bar(GuiGraphics g, int x, int y, int w, float frac, boolean full) {
-        g.fill(x, y, x + w, y + 3, 0xFF343A48);
-        g.fill(x + 1, y + 1, x + w - 1, y + 2, 0xFF0C0E13);
+        g.fill(x, y, x + w, y + 3, 0xFF364064);
+        g.fill(x + 1, y + 1, x + w - 1, y + 2, 0xFF0A0E1E);
         int fill = Math.max(0, Math.min(w - 2, Math.round((w - 2) * frac)));
         if (fill > 0) {
-            g.fill(x + 1, y + 1, x + 1 + fill, y + 2, full ? 0xFF7FD6D0 : 0xFFE0B040);
+            g.fill(x + 1, y + 1, x + 1 + fill, y + 2, full ? 0xFF8FD0FF : 0xFFE0B040);
         }
     }
 

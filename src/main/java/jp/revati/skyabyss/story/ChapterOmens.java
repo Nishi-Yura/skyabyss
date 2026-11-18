@@ -38,7 +38,7 @@ public final class ChapterOmens {
     static final String NEXT = "skyabyss_omen_next";
     static final String LIFE_SEEN = "skyabyss_life_seen_";
     static final double HOSTILE_NEAR = 16;
-    private static final Map<UUID, Long> BELL_AT = new HashMap<>();
+    private static final Map<UUID, Long> BELL_AT = jp.revati.skyabyss.util.PlayerMaps.track(new HashMap<>());
 
     private ChapterOmens() {
     }
@@ -137,7 +137,7 @@ public final class ChapterOmens {
             double x = p.getX() + (level.random.nextDouble() - 0.5) * 14;
             double y = p.getY() + 0.5 + level.random.nextDouble() * 4;
             double z = p.getZ() + (level.random.nextDouble() - 0.5) * 14;
-            level.sendParticles(p, particle, false, x, y, z, 1, 0.1, 0.1, 0.1, speed);
+            level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, x, y, z, 1, 0.1, 0.1, 0.1, speed);
         }
     }
 }

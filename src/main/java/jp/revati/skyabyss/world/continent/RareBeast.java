@@ -268,7 +268,7 @@ public class RareBeast extends PathfinderMob implements GeoEntity {
             setYRot((float) Math.toDegrees(Math.atan2(-d.x, d.z)));
             yBodyRot = getYRot();
             if (fleeTicks % 5 == 0) {
-                level.sendParticles(ParticleTypes.BUBBLE, getX(), getY() + 0.3, getZ(), 3, 0.2, 0.1, 0.2, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.3, getZ(), 3, 0.2, 0.1, 0.2, 0.02);
             }
             return;
         }
@@ -318,7 +318,7 @@ public class RareBeast extends PathfinderMob implements GeoEntity {
         }
         if (fleeTicks % 3 == 0) {
             Vec3 back = Vec3.directionFromRotation(0, yBodyRot).scale(-0.7);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + back.x, getY() + 0.7, getZ() + back.z, 2, 0.15, 0.2, 0.15, 0.05);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + back.x, getY() + 0.7, getZ() + back.z, 2, 0.15, 0.2, 0.15, 0.05);
         }
     }
 
@@ -328,7 +328,7 @@ public class RareBeast extends PathfinderMob implements GeoEntity {
             getNavigation().stop();
             setDeltaMovement(0, getDeltaMovement().y, 0);
             if (++digTicks % 4 == 0) {
-                level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.2, getZ(), 4, 0.3, 0.1, 0.3, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.2, getZ(), 4, 0.3, 0.1, 0.3, 0.01);
             }
             if (digTicks >= DIG_TICKS) {
                 Vec3 g = position().add(away(p, (random.nextDouble() - 0.5) * 70).scale(10 + random.nextInt(5)));
@@ -340,8 +340,8 @@ public class RareBeast extends PathfinderMob implements GeoEntity {
                 teleportTo(g.x, y, g.z);
                 setState(EMERGE);
                 digTicks = 0;
-                level.sendParticles(ParticleTypes.LAVA, g.x, y + 0.2, g.z, 6, 0.4, 0.1, 0.4, 0.01);
-                level.sendParticles(ParticleTypes.LARGE_SMOKE, g.x, y + 0.2, g.z, 10, 0.4, 0.2, 0.4, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), g.x, y + 0.2, g.z, 6, 0.4, 0.1, 0.4, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), g.x, y + 0.2, g.z, 10, 0.4, 0.2, 0.4, 0.02);
                 level.playSound(null, g.x, y, g.z, SoundEvents.GRAVEL_BREAK, SoundSource.NEUTRAL, 1f, 0.7f);
             }
             return;
@@ -367,7 +367,7 @@ public class RareBeast extends PathfinderMob implements GeoEntity {
 
     // 消える。escape = 逃げ切った (出した人の締め出し)。黙って去るときは締め出さない
     void leave(ServerLevel level, boolean escape) {
-        level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.4, getZ(), 12, 0.3, 0.3, 0.3, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.4, getZ(), 12, 0.3, 0.3, 0.3, 0.02);
         if (escape) {
             escaped = true;
             RareBeasts.onEscaped(this);

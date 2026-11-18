@@ -22,7 +22,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
 import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,8 +53,6 @@ public final class LightningPillars {
     public static final double SAMPLE_NEAR = 32;
     public static final int SAMPLE_EVERY = 1200;
     static final int EVERY = 20;
-    // 台を数える仕掛けはもう動かさない (見本の柱の雷だけ残す)
-    public static final boolean RETIRED = true;
     // 旧い跡で針を探す範囲
     static final int LEGACY_REACH = 8;
 
@@ -113,35 +110,7 @@ public final class LightningPillars {
         return e.extra("pedestal" + k);
     }
 
-    // 針の立っている台 (ビット k = 台 k)。旧い跡は、立っている針の数だけ下から埋める
-    public static int mask(ServerLevel level, SiteData.Entry e) {
-        if (modern(e)) {
-            int m = 0;
-            for (int k = 0; k < STANDS; k++) {
-                BlockPos at = stand(e, k);
-                if (at != null && level.isLoaded(at) && level.getBlockState(at).is(Blocks.LIGHTNING_ROD)) {
-                    m |= 1 << k;
-                }
-            }
-            return m;
-        }
-        int n = legacyRods(level, e).size();
-        return (1 << Math.min(STANDS, n)) - 1;
-    }
 
-    static List<BlockPos> legacyRods(ServerLevel level, SiteData.Entry e) {
-        List<BlockPos> out = new ArrayList<>();
-        BlockPos o = e.pos;
-        for (BlockPos q : BlockPos.betweenClosed(o.offset(-LEGACY_REACH, -3, -LEGACY_REACH), o.offset(LEGACY_REACH, 8, LEGACY_REACH))) {
-            if (q.getX() == o.getX() && q.getZ() == o.getZ()) {
-                continue; // 跡に残っている柱の針
-            }
-            if (level.isLoaded(q) && level.getBlockState(q).is(Blocks.LIGHTNING_ROD)) {
-                out.add(q.immutable());
-            }
-        }
-        return out;
-    }
 
     public static boolean doorOpen(ServerLevel level, SiteData.Entry e) {
         if (!modern(e)) {
@@ -171,7 +140,7 @@ public final class LightningPillars {
         if (c != null) {
             level.playSound(null, c, SoundEvents.COPPER_DOOR_OPEN, SoundSource.BLOCKS, 1.2f, 0.5f);
             level.playSound(null, c, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, 0.6f);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 40, 1.0, 1.2, 0.3, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 24, 1.0, 1.2, 0.3, 0.05);
         }
         return true;
     }
@@ -185,7 +154,7 @@ public final class LightningPillars {
         bolt.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5);
         bolt.setVisualOnly(true);
         level.addFreshEntity(bolt);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 0.6, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.08);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.6, at.getZ() + 0.5, 24, 0.3, 0.6, 0.3, 0.08);
     }
 
     // ---------------------------------------------------------------- 見回り (StormChapter の tick から EVERY ごとに)
@@ -202,28 +171,6 @@ public final class LightningPillars {
             }
             sample(level, e, now);
             // 台の針・銅の戸・石の箱は前の版の仕掛け。2026-11-07 から支度の段は塔の跡の小ダンジョンを越えること (dungeon/MiniDungeons。site_clear:storm_ruin)
-            if (RETIRED) {
-                continue;
-            }
-            int m = mask(level, e);
-            long key = e.pos.asLong();
-            int before = LAST_MASK.getOrDefault(key, m);
-            LAST_MASK.put(key, m);
-            int fresh = m & ~before;
-            List<ServerPlayer> close = near(level, e.pos, NEAR);
-            for (int k = 0; k < STANDS; k++) {
-                if ((fresh & (1 << k)) != 0) {
-                    BlockPos at = modern(e) ? stand(e, k) : null;
-                    strike(level, at != null ? at : e.pos);
-                    close.forEach(p -> Notice.narrate(p, "message.skyabyss.ch3g.ruin.strike"));
-                }
-            }
-            if (m == (1 << STANDS) - 1 && modern(e) && openDoor(level, e)) {
-                close.forEach(p -> Notice.hint(p, "message.skyabyss.ch3g.ruin.open"));
-            }
-            for (ServerPlayer p : close) {
-                credit(p, level, e, m);
-            }
         }
     }
 
@@ -324,5 +271,10 @@ public final class LightningPillars {
     static void forget() {
         LAST_MASK.clear();
         LAST_SAMPLE.clear();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

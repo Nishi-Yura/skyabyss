@@ -68,7 +68,7 @@ public final class ValleyPuzzles {
             Notice.narrate(p, "message.skyabyss.moon.pool.again");
         }
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.2f, 1.2f);
-        level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 30, 0.6, 0.6, 0.6, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 24, 0.6, 0.6, 0.6, 0.05);
         Quests.signal(p, POOL);
     }
 
@@ -85,7 +85,7 @@ public final class ValleyPuzzles {
             return;
         }
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.5f, 0.6f);
-        level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 40, 0.3, 1.2, 0.3, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 24, 0.3, 1.2, 0.3, 0.04);
         Notice.narrate(p, "message.skyabyss.moon.shard." + site);
         Quests.signal(p, SHARD + site);
         if (site.equals("mirror")) {
@@ -128,12 +128,12 @@ public final class ValleyPuzzles {
             BlockPos m = MoonValley.mark("mirror_" + i);
             for (int k = 0; k <= 10; k++) {
                 double t = k / 10.0;
-                level.sendParticles(ParticleTypes.END_ROD, m.getX() + 0.5 + (center.getX() - m.getX()) * t, m.getY() + 0.8 + (center.getY() - m.getY()) * t,
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.getX() + 0.5 + (center.getX() - m.getX()) * t, m.getY() + 0.8 + (center.getY() - m.getY()) * t,
                         m.getZ() + 0.5 + (center.getZ() - m.getZ()) * t, 2, 0.05, 0.05, 0.05, 0.0);
             }
         }
         for (int y = 0; y < 30; y += 2) {
-            level.sendParticles(ParticleTypes.END_ROD, center.getX() + 0.5, center.getY() + 1 + y, center.getZ() + 0.5, 2, 0.1, 0.5, 0.1, 0.0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.getX() + 0.5, center.getY() + 1 + y, center.getZ() + 0.5, 2, 0.1, 0.5, 0.1, 0.0);
         }
     }
 
@@ -161,7 +161,7 @@ public final class ValleyPuzzles {
             return;
         }
         level.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 1.2f, 1.4f);
-        level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 0.4, 0.8, 0.4, 0.05);
         if (up) {
             BlockPos to = MoonValley.mark("arena_entry");
             p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0f, 0f);
@@ -204,5 +204,10 @@ public final class ValleyPuzzles {
 
     static List<String> sites() {
         return List.of("bridge", "mirror", "hole");
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

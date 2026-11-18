@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story.ch5.layers;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,6 @@ import jp.revati.skyabyss.story.ch5.AbyssBuild;
 import jp.revati.skyabyss.story.ch5.AbyssWorld;
 import jp.revati.skyabyss.util.PlayerMaps;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -60,6 +60,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   倒れる時 (層の色の大きな粒・音・「〜を倒した」の札・下りの鎖の光の柱 10 秒)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AbyssLords {
+    // 地の中から這い出る長さ (combat/BossEmerge)
+    static final int EMERGE_TICKS = 44;
     public static final String TAG = "skyabyss_lord";
     public static final String COPY_TAG = "skyabyss_lord_copy";
     static final String[] MOB = {"rib_guard", "white_shell_keeper", "heartbeat_mimic", "lamp_eater"};
@@ -264,6 +266,7 @@ public final class AbyssLords {
         LordMoves.element(level, f.li, lord.getX(), lord.getY() + 1, lord.getZ(), 60, 2.5);
         double y = LordMoves.floorY(f, lord);
         double lx = lord.getX(), lz = lord.getZ();
+        // 段の変わり目の咆哮は押し返すだけなので、攻撃の形 (淵の棘の輪) は出さない
         Telegraph.in(level, TelegraphShape.circle(lx, lz, 7)).floor(y).warn(30).danger().owner(lord)
                 .onImpact(lvl -> LordMoves.element(lvl, f.li, lx, y + 0.3, lz, 80, 4))
                 .onHit((lvl, p) -> {
@@ -319,15 +322,20 @@ public final class AbyssLords {
         f.lord = le.getUUID();
         f.started = now;
         // 名乗り (3 秒): 咆哮のバー、名の札。そのあと技、仕掛けは 6 秒後から
-        f.roarUntil = now + 60;
-        f.nextMove = now + 70;
-        f.nextMech = now + 120;
+        // 地の中から這い出る (combat/BossEmerge) 間は技を出さない
+        f.roarUntil = now + 60 + EMERGE_TICKS;
+        f.nextMove = now + 70 + EMERGE_TICKS;
+        f.nextMech = now + 120 + EMERGE_TICKS;
         LordAnim.phase(le, 0);
         FIGHTS.put(layer, f);
         level.playSound(null, at, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 1.6f, 0.8f);
         LordMoves.element(level, li, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 80, 2);
+        // 名乗り: 這い出きったら、ダンジョンの主・心臓と同じ大きな名前の札 (二つ名を肩書きに) と顔のアップ
+        final LivingEntity lordE = le;
+        jp.revati.skyabyss.combat.BossEmerge.start(le, new String[] {"lord_rib", "drop", "lord_storm", "thread"}[li], EMERGE_TICKS, in,
+                () -> jp.revati.skyabyss.combat.BossIntro.card(in, Component.translatable("abyss_v2.skyabyss.lord." + layer),
+                        Component.translatable("message.skyabyss.abyss_v3.lord." + layer + ".epithet"), 90, lordE));
         for (ServerPlayer p : in) {
-            Notice.place(p, Component.translatable("abyss_v2.skyabyss.lord." + layer), Component.translatable("message.skyabyss.abyss_v3.lord." + layer + ".epithet"));
             Notice.alert(p, "message.skyabyss.abyss_v2.lord_wake." + layer);
             LayerFights.later(level.getServer(), 60, () -> Notice.narrate(p, "message.skyabyss.abyss_v2.lord_teach." + layer));
         }
@@ -385,7 +393,7 @@ public final class AbyssLords {
         BlockPos chain = AbyssBuild.mark("descend_" + f.layer);
         if (chain != null) {
             for (int k = 0; k < 10; k++) {
-                LayerFights.later(level.getServer(), k * 20, () -> level.sendParticles(ParticleTypes.END_ROD, chain.getX() + 0.5, chain.getY() + 1.5, chain.getZ() + 0.5,
+                LayerFights.later(level.getServer(), k * 20, () -> level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), chain.getX() + 0.5, chain.getY() + 1.5, chain.getZ() + 0.5,
                         24, 0.25, 4, 0.25, 0.01));
             }
         }
@@ -420,23 +428,10 @@ public final class AbyssLords {
         BlockPos dsc = AbyssBuild.mark("descend_" + f.layer);
         if (dsc != null) {
             level.playSound(null, dsc, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 2f, 0.6f);
-            level.sendParticles(ParticleTypes.SOUL, dsc.getX() + 0.5, dsc.getY() + 2, dsc.getZ() + 0.5, 30, 0.4, 2, 0.4, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), dsc.getX() + 0.5, dsc.getY() + 2, dsc.getZ() + 0.5, 24, 0.4, 2, 0.4, 0.02);
         }
     }
 
-    // 開発用・自己テスト: 今の主をすぐ倒したことにする
-    public static boolean defeatNow(ServerLevel level, String layer) {
-        Fight f = FIGHTS.get(layer);
-        if (f == null) {
-            return false;
-        }
-        Entity e = level.getEntity(f.lord);
-        defeat(level, f);
-        if (e != null) {
-            e.discard();
-        }
-        return true;
-    }
 
     public static void resetForTest(ServerLevel level) {
         for (Fight f : List.copyOf(FIGHTS.values())) {
@@ -457,7 +452,7 @@ public final class AbyssLords {
             e.discard();
             event.setCanceled(true);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1f, 1.4f);
-            Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.8)).floor(at.y).warn(18).danger().owner(null)
+            Telegraph.in(level, TelegraphShape.circle(at.x, at.z, 2.8)).prop(PropFx.rise("tentacle")).floor(at.y).warn(18).danger().owner(null)
                     .onHit((lvl, p) -> p.hurt(lvl.damageSources().magic(), 5f)).start();
             return;
         }
@@ -472,7 +467,7 @@ public final class AbyssLords {
             if (f.roarUntil > now) {
                 // 名乗り・咆哮の間は刃が通らない
                 event.setCanceled(true);
-                level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.4, 0.4, 0.4, 0.1);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.4, 0.4, 0.4, 0.1);
                 return;
             }
             // 一度の当たりで段を越えない (段の境で止める。咆哮を飛ばさない)
@@ -489,7 +484,7 @@ public final class AbyssLords {
             }
             if (dim) {
                 event.setAmount(event.getAmount() * DIM);
-                level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
                 if (event.getSource().getEntity() instanceof ServerPlayer p && now % 40 < 20) {
                     p.displayClientMessage(Component.translatable("message.skyabyss.abyss_v2.lord_dim." + f.layer), true);
                 }
@@ -580,7 +575,7 @@ public final class AbyssLords {
         flash(f, "objective.skyabyss.abyss_v2.flash_guard_lamp", now, 80);
         level.playSound(null, m, SoundEvents.WARDEN_SNIFF, SoundSource.HOSTILE, 1.4f, 0.8f);
         LordAnim.windup(lord, "attack_snuff", 50);
-        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 2.6)).floor(c.y).warn(50).danger().owner(lord)
+        Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 2.6)).prop(PropFx.rise(jp.revati.skyabyss.combat.prop.AttackProps.abyssSpike(f.li))).floor(c.y).warn(50).danger().owner(lord)
                 .onImpact(lvl -> {
                     BossLook.strike(lord, BossLook.SNUFF);
                     boolean guarded = false;
@@ -614,7 +609,7 @@ public final class AbyssLords {
     public static void crush(ServerLevel level, List<ServerPlayer> targets, @Nullable LivingEntity owner, float hit) {
         for (ServerPlayer t : targets) {
             Vec3 c = t.position();
-            Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 3.2)).floor(c.y).warn(32).danger().owner(owner)
+            Telegraph.in(level, TelegraphShape.circle(c.x, c.z, 3.2)).prop(PropFx.fall("rock").size(1.3f)).floor(c.y).warn(32).danger().owner(owner)
                     .onImpact(lvl -> lvl.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.8f, 0.4f))
                     .onHit((lvl, p) -> {
                         boolean light = AbyssArts.weightRelief(p) >= 0.3;
@@ -638,7 +633,6 @@ public final class AbyssLords {
                 Long h = HEARD.get(p.getUUID());
                 if (h != null && now - h < 400) {
                     lord.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));
-                    level.sendParticles(p, ParticleTypes.HEART, true, lord.getX(), lord.getY() + lord.getBbHeight() + 0.4, lord.getZ(), 2, 0.3, 0.2, 0.3, 0);
                 }
             }
         }
@@ -708,7 +702,7 @@ public final class AbyssLords {
         }
         level.playSound(null, lord.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.4f, 0.7f);
         LordAnim.windup(lord, "attack_roar", 45);
-        Telegraph.in(level, TelegraphShape.ring(c.getX() + 0.5, c.getZ() + 0.5, Layers.ARENA_R - 2.5, Layers.ARENA_R)).floor(c.getY()).warn(45).danger().owner(lord)
+        Telegraph.in(level, TelegraphShape.ring(c.getX() + 0.5, c.getZ() + 0.5, Layers.ARENA_R - 2.5, Layers.ARENA_R)).prop(PropFx.ring("lava_pillar", 16)).floor(c.getY()).warn(45).danger().owner(lord)
                 .onImpact(lvl -> {
                     BossLook.strike(lord, BossLook.ROAR);
                     darkWave(lvl, f, Vec3.atBottomCenterOf(c), inArena(lvl, f.layer));
@@ -731,5 +725,10 @@ public final class AbyssLords {
             p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 160, 0, false, false));
         }
         level.playSound(null, center.x, center.y, center.z, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 2f, 0.5f);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

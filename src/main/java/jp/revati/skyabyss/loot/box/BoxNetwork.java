@@ -15,7 +15,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 封切り師の画面の通信 (docs/design/52 の 6 章)。サーバー → 画面: 持っている箱 (View)・開けた結果とルーレットの帯 (Result)・閉じろ (Close)。
-// 画面 → サーバー: 開ける (Open)・閉じた (Closed)・旅嚢の箱の欄から取り出す (TakeOut)
+// 画面 → サーバー: 開ける (Open)・閉じた (Closed)・旅袋の箱の欄から取り出す (TakeOut)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class BoxNetwork {
     private static final String PROTOCOL_VERSION = "box-1";
@@ -51,7 +51,7 @@ public final class BoxNetwork {
                 });
     }
 
-    // 旅嚢の箱の欄から箱を持ち物へ取り出す (一つ / 全部)。持ち物から落とせる・仲間に渡せる (2026-11-06 の声「封の箱、ドロップできるように」)
+    // 旅袋の箱の欄から箱を持ち物へ取り出す (一つ / 全部)。持ち物から落とせる・仲間に渡せる (2026-11-06 の声「封の箱、ドロップできるように」)
     public record TakeOut(String kind, boolean all) implements CustomPacketPayload {
         public static final Type<TakeOut> TYPE = typeOf("box_take_out");
         public static final StreamCodec<RegistryFriendlyByteBuf, TakeOut> STREAM_CODEC = StreamCodec.composite(
@@ -65,7 +65,7 @@ public final class BoxNetwork {
         }
     }
 
-    // 持っている箱の種類と数 (旅嚢と持ち物の合計。並びは BoxKind.ALL の順)
+    // 持っている箱の種類と数 (旅袋と持ち物の合計。並びは BoxKind.ALL の順)
     public record View(List<String> kinds, List<Integer> counts) implements CustomPacketPayload {
         public static final Type<View> TYPE = typeOf("box_view");
         public static final StreamCodec<RegistryFriendlyByteBuf, View> STREAM_CODEC = StreamCodec.composite(

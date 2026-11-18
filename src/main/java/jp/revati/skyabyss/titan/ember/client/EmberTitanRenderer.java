@@ -1,23 +1,16 @@
 package jp.revati.skyabyss.titan.ember.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.ember.EmberTitanEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.client.lowpoly.LowPolyLodModel;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
 // 余燼の巨神の描画 (13 の 2.7節)。モデルを 8 倍に拡大し (近景・中景・遠景の 3 段、潮殻と同じ作り)、溶岩の割れ目・目・口の奥・火口を光らせる。
 // 光の強さは巨神の様子で変える: 潜っているあいだは弱く、眠っているあいだは強く、息を止める 2 秒は口の奥まで最も強い。
@@ -29,18 +22,13 @@ public class EmberTitanRenderer extends LowPolyGeoRenderer<EmberTitanEntity> {
         this(context, new LodModel());
     }
 
-    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。
+    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。
     // 光の強さを巨神の様子で変えるので、LowPolyGeoRenderer の発光層は使わず自前の DimmableGlowLayer をどちらの描画でも足す
     private EmberTitanRenderer(EntityRendererProvider.Context context, LodModel model) {
         super(context, model, model::meshName, SCALE);
-        addRenderLayer(new DimmableGlowLayer(this));
         this.shadowRadius = 0f;
     }
 
-    @Override
-    protected boolean autoGlow() {
-        return false;
-    }
 
     // GeckoLib 4.9.3 は LivingEntity でないエンティティの向きを描画に使わない (いつも南を向く。潮殻の 17.8節)。エンティティの yaw で回す
     @Override
@@ -57,38 +45,7 @@ public class EmberTitanRenderer extends LowPolyGeoRenderer<EmberTitanEntity> {
         super.render(titan, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 
-    // 光る画素の強さ (0〜1)。glowmask の色にかける (光る描き方は足し合わせなので、色を下げると暗くなる)
-    static float glowStrength(EmberTitanEntity titan) {
-        return switch (titan.syncedMode()) {
-            case SWIM, APPROACH -> 0.45f;
-            case RISE, SINK -> 0.75f;
-            case SLEEP -> switch (titan.syncedBreath()) {
-                case IN -> 0.9f;
-                case HOLD -> 1.0f;
-                case OUT -> 0.85f;
-                case PAUSE -> 0.8f;
-            };
-        };
-    }
 
-    private static final class DimmableGlowLayer extends AutoGlowingGeoLayer<EmberTitanEntity> {
-        DimmableGlowLayer(EmberTitanRenderer renderer) {
-            super(renderer);
-        }
-
-        @Override
-        public void render(PoseStack poseStack, EmberTitanEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
-                           MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            RenderType glow = getRenderType(animatable, bufferSource);
-            if (glow == null) {
-                return;
-            }
-            int v = Mth.clamp(Math.round(glowStrength(animatable) * animatable.glowFactor(partialTick) * 255f), 0, 255);
-            int colour = 0xFF000000 | (v << 16) | (v << 8) | v;
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, glow, bufferSource.getBuffer(glow), partialTick,
-                    LightTexture.FULL_BRIGHT, packedOverlay, colour);
-        }
-    }
 
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (鼻先から尾の先までの線分) までの距離で選ぶ
     private static final class LodModel extends LowPolyLodModel<EmberTitanEntity> {

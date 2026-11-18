@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMeshes;
 import jp.revati.skyabyss.item.outfit.MaterialGear;
@@ -13,7 +12,6 @@ import net.minecraft.client.model.BoatModel;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -69,7 +67,7 @@ public final class SkiffClient {
             if (hurt > 0.0F) {
                 pose.mulPose(Axis.XP.rotationDegrees(Mth.sin(hurt) * hurt * damage / 10.0F * boat.getHurtDir()));
             }
-            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), mesh, light, OverlayTexture.NO_OVERLAY, WHITE);
+            jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, null, pose.last().pose(), buffers, light, OverlayTexture.NO_OVERLAY, WHITE);
             pose.popPose();
         }
     }

@@ -464,8 +464,7 @@ public final class HeartBotSelfTest {
             check(f, d != null && d.isAbyss(), name + ": the domain is not an abyss domain");
             if (d != null) {
                 double before = bot.taken(rig.stage());
-                // 潮殻の合わせ貝は短い (一巡、深淵・四人以上は二巡。ShellMatchDomain.roundsFor)
-                int want = d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain ? 2 : 3;
+                int want = 3;
                 check(f, d.rounds() == want, name + ": the abyss domain has " + d.rounds() + " rounds (needs " + want + ")");
                 int solvedAt = solve(rig, bot, reader, level, d, f);
                 check(f, d.phase() == HeartDomain.Phase.DONE && d.solved(), name + ": a lone bot did not solve the abyss domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks, round " + (d.round() + 1) + ")");
@@ -596,7 +595,7 @@ public final class HeartBotSelfTest {
             if (d != null) {
                 double before = bot.taken(rig.stage());
                 int solvedAt = solve(rig, bot, reader, level, d, f);
-                int want = d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain ? 1 : 2;
+                int want = 2;
                 check(f, d.rounds() == want, name + ": a solo domain has " + d.rounds() + " rounds (needs " + want + ")");
                 check(f, d.phase() == HeartDomain.Phase.DONE && d.solved() && d.broken(), name + ": a lone bot did not solve the domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks, round " + (d.round() + 1) + ")");
                 check(f, solveInterludes == want - 1 && solveRoundsSeen == want, name + ": the domain went through " + solveRoundsSeen + " rounds / " + solveInterludes + " breaks (needs " + want + " / " + (want - 1) + ")");
@@ -693,17 +692,25 @@ public final class HeartBotSelfTest {
                         at[0] = np;
                     }
                 }
-            } else if (d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain r) {
-                // いまの印の板を、近い順ではなく並びの順に叩く (叩きおえると印が配りなおされる)
-                for (int idx : r.pending()) {
-                    HeartDomain.Node n = r.nodes().get(idx);
-                    if (t - lastAct[0] >= legTicks(at[0], n.pos)) {
-                        bot.moveTo(n.pos.x + 1, n.pos.y, n.pos.z);
-                        r.strikeNode(level, idx, bot);
-                        lastAct[0] = t;
-                        at[0] = n.pos;
-                        break;
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.EbbFlowDomain e) {
+                // 満ち引き: 引き潮のあいだに、抜けていない栓へ近い順に歩いて叩く (満ち潮のあいだは次の栓のそばで待つ)
+                HeartDomain.Node next = null;
+                double best = Double.MAX_VALUE;
+                for (HeartDomain.Node n : e.nodes()) {
+                    if (!n.done && n.pos.distanceTo(at[0]) < best) {
+                        best = n.pos.distanceTo(at[0]);
+                        next = n;
                     }
+                }
+                if (next != null && t - lastAct[0] >= legTicks(at[0], next.pos)) {
+                    bot.moveTo(next.pos.x + 1, next.pos.y, next.pos.z);
+                    lastAct[0] = t;
+                    at[0] = next.pos;
+                    if (!e.flooding()) {
+                        e.strikeNode(level, next.index, bot);
+                    }
+                } else if (next != null && !e.flooding() && at[0].equals(next.pos)) {
+                    e.strikeNode(level, next.index, bot);
                 }
             } else if (d instanceof jp.revati.skyabyss.titan.domain.ThunderCageDomain c) {
                 int rod = c.charging();
@@ -793,40 +800,28 @@ public final class HeartBotSelfTest {
                     step(rig, bot, driver, level, t);
                 }
                 check(f, d.phase() == HeartDomain.Phase.ACTIVE, name + ": a wrong pattern ended the domain");
-            } else if (d instanceof jp.revati.skyabyss.titan.domain.ShellMatchDomain r) {
-                int[] counts = new int[jp.revati.skyabyss.titan.domain.ShellMatchDomain.MARK_KINDS];
-                for (int i = 0; i < r.nodes().size(); i++) {
-                    counts[r.markOf(i)]++;
-                }
-                for (int c : counts) {
-                    check(f, c == jp.revati.skyabyss.titan.domain.ShellMatchDomain.PER_MARK, name + ": the marks are not dealt evenly");
-                }
-                check(f, r.currentMark() >= 0 && r.pending().size() == jp.revati.skyabyss.titan.domain.ShellMatchDomain.PER_MARK, name + ": no mark is asked for");
-                check(f, jp.revati.skyabyss.titan.domain.ShellMatchDomain.PANELS == 12 && r.iconId() != null && level.getEntity(r.iconId()) != null, name + ": the mark icon above the heart is missing");
-                int good = r.pending().get(0);
-                int bad = -1;
-                for (int i = 0; i < r.nodes().size(); i++) {
-                    if (r.markOf(i) != r.currentMark()) {
-                        bad = i;
-                        break;
-                    }
-                }
-                r.strikeNode(level, good, bot);
-                check(f, r.nodes().get(good).done && r.pending().size() == 2, name + ": a matching panel did not light");
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.EbbFlowDomain e) {
+                // 満ち潮のあいだは栓が抜けない (傷もない)。引き潮で抜ける。引き潮が終わると抜いた栓は押し戻される
+                check(f, e.flooding(), name + ": the domain did not start with the flood");
                 float hp = bot.getHealth();
-                r.strikeNode(level, bad, bot);
-                check(f, r.nodes().stream().noneMatch(n -> n.done) && r.pending().size() == 3, name + ": a wrong panel did not put the lit ones out");
-                check(f, HeartDomain.lastTell().endsWith(".wrong") && bot.getHealth() == hp, name + ": a wrong panel gave no fail feedback or hurt");
-                int before = r.currentMark();
-                for (int idx : new java.util.ArrayList<>(r.pending())) {
-                    r.strikeNode(level, idx, bot);
+                e.strikeNode(level, 0, bot);
+                check(f, e.solvedCount() == 0 && bot.getHealth() == hp, name + ": a plug came out (or hurt) during the flood");
+                e.skipTide(level);
+                check(f, !e.flooding() && e.ebbs() == 1, name + ": the tide did not ebb");
+                e.strikeNode(level, 0, bot);
+                e.strikeNode(level, 1, bot);
+                check(f, e.solvedCount() == 2, name + ": plugs did not come out during the ebb (" + e.solvedCount() + ")");
+                e.skipTide(level);
+                check(f, e.flooding() && e.solvedCount() == 0 && HeartDomain.lastTell().endsWith(".pushed"), name + ": the flood did not push the plugs back");
+                check(f, d.phase() == HeartDomain.Phase.ACTIVE, name + ": a missed ebb ended the domain");
+                e.skipTide(level);
+                for (int i = 0; i < 3; i++) {
+                    e.strikeNode(level, i, bot);
                 }
-                check(f, r.marksDone() == 1 && r.shuffling(), name + ": three matching panels did not complete the mark (" + r.marksDone() + ")");
-                for (int t = 0; t < jp.revati.skyabyss.titan.domain.ShellMatchDomain.SHUFFLE_DELAY + 6; t++) {
-                    step(rig, bot, driver, level, t);
+                for (int tk = 0; tk < 4; tk++) {
+                    step(rig, bot, driver, level, tk);
                 }
-                check(f, !r.shuffling() && r.pending().size() == 3 && r.currentMark() != before && r.nodes().stream().noneMatch(n -> n.done)
-                        && d.phase() == HeartDomain.Phase.ACTIVE, name + ": the panels were not dealt again after a mark");
+                check(f, d.round() == 1 || d.phase() == HeartDomain.Phase.DONE, name + ": three plugs in one ebb did not clear the round");
             } else if (d instanceof jp.revati.skyabyss.titan.domain.ThunderCageDomain c) {
                 int guard = 0;
                 while (c.charging() < 0 && guard++ < 300) {

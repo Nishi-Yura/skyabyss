@@ -255,7 +255,7 @@ public final class EmberForgeDefense extends EmberRoom {
                 if (!bossFollows) {
                     opened(ctx);
                 }
-                particles(ctx, ParticleTypes.LAVA, fx, forge.getY() + 5, fz, 30, 1.0, 0.2);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), fx, forge.getY() + 5, fz, 30, 1.0, 0.2);
                 ctx.level().playSound(null, forge, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.5f, 0.6f);
             }
         }
@@ -314,7 +314,7 @@ public final class EmberForgeDefense extends EmberRoom {
             int every = scale(ctx) <= 1 ? SOLO_DOUSE_EVERY : 20;
             if (t % every == m.getId() % every && flat(m.position(), fx, fz) <= DOUSE_RANGE && Math.abs(m.getY() - forge.getY()) < 7) {
                 hp = Math.max(0, hp - (m == smith ? SMITH_DOUSE : douseRate(m)));
-                particles(ctx, ParticleTypes.SMOKE, fx, forge.getY() + 4, fz, 10, 0.8, 0.03);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), fx, forge.getY() + 4, fz, 10, 0.8, 0.03);
                 ctx.level().playSound(null, forge, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8f, 0.7f);
             }
             for (int i = 0; i < 4; i++) {
@@ -339,7 +339,7 @@ public final class EmberForgeDefense extends EmberRoom {
             BlockPos c = ctx.local(BRAZIERS[i][0], 0, BRAZIERS[i][1]);
             if (lit[i]) {
                 if (t % 6 == 0) {
-                    particles(ctx, ParticleTypes.FLAME, c.getX() + 0.5, c.getY() + 4.2, c.getZ() + 0.5, 2, 0.15, 0.01);
+                    particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 4.2, c.getZ() + 0.5, 2, 0.15, 0.01);
                 }
                 continue;
             }

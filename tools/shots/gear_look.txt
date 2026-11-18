@@ -1,0 +1,449 @@
+# 自分の武器・防具・技の見せ方の試作 (client/look/GearLook) を、今 (0) と a で同じ場面で撮る (5 回目: ドット絵を押し出した模型の試作)
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_look.txt -PshotsName=gear_look
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+mainhand right
+# ======== 0
+gearlook all 0
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd kill @e[type=!player]
+wait 40
+hud on
+perspective first
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+close
+wait 30
+chat clear
+shot 0_fp_whalebone_greatsword
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+close
+wait 30
+chat clear
+shot 0_fp_whale_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff
+close
+wait 30
+chat clear
+shot 0_fp_whale_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bow
+close
+wait 30
+chat clear
+shot 0_fp_tide_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+close
+wait 30
+chat clear
+shot 0_fp_smith_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+close
+wait 30
+chat clear
+shot 0_fp_storm_sword
+perspective back
+wait 20
+chat clear
+shot 0_back_sword
+hud off
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+wait 20
+perspective front
+fov 22
+wait 6
+chat clear
+shot 0_armor_front_stone_whale
+perspective back
+fov 70
+wait 6
+shot 0_armor_back_stone_whale
+cmd item replace entity @s armor.head with skyabyss:tide_shell_helmet
+cmd item replace entity @s armor.chest with skyabyss:tide_shell_chestplate
+cmd item replace entity @s armor.legs with skyabyss:tide_shell_leggings
+cmd item replace entity @s armor.feet with skyabyss:tide_shell_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+wait 20
+perspective front
+fov 22
+wait 6
+chat clear
+shot 0_armor_front_tide_shell
+perspective back
+fov 70
+wait 6
+shot 0_armor_back_tide_shell
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+wait 20
+perspective front
+fov 22
+wait 6
+chat clear
+shot 0_armor_front_thunder_wing
+perspective back
+fov 70
+wait 6
+shot 0_armor_back_thunder_wing
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+hud on
+perspective back
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s titan_cleave 3
+cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot 0_skill_titan_cleave_a
+wait 6
+shot 0_skill_titan_cleave_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s ember_heart 1
+cmd skyabyss skill learn @s forge_memory 1
+cmd skyabyss skill learn @s forge_stomp 3
+cmd skyabyss skill slot @s 1 forge_stomp
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot 0_skill_forge_stomp_a
+wait 6
+shot 0_skill_forge_stomp_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s thunder_bolt 3
+cmd skyabyss skill slot @s 1 thunder_bolt
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot 0_skill_thunder_bolt_a
+wait 6
+shot 0_skill_thunder_bolt_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s ward_song 3
+cmd skyabyss skill slot @s 1 ward_song
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot 0_skill_ward_song_a
+wait 6
+shot 0_skill_ward_song_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s star_reading 1
+cmd skyabyss skill learn @s frost_tide 3
+cmd skyabyss skill slot @s 1 frost_tide
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot 0_skill_frost_tide_a
+wait 6
+shot 0_skill_frost_tide_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s cloud_pierce 1
+cmd skyabyss skill learn @s bone_trap 1
+cmd skyabyss skill learn @s far_shot 1
+cmd skyabyss skill learn @s hawk_eye 1
+cmd skyabyss skill learn @s sky_rain 3
+cmd skyabyss skill slot @s 1 sky_rain
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot 0_skill_sky_rain_a
+wait 6
+shot 0_skill_sky_rain_b
+wait 20
+# ======== a
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd kill @e[type=!player]
+wait 40
+hud on
+perspective first
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+close
+wait 30
+chat clear
+shot a_fp_whalebone_greatsword
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+close
+wait 30
+chat clear
+shot a_fp_whale_dagger
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff
+close
+wait 30
+chat clear
+shot a_fp_whale_staff
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bow
+close
+wait 30
+chat clear
+shot a_fp_tide_bow
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+close
+wait 30
+chat clear
+shot a_fp_smith_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+close
+wait 30
+chat clear
+shot a_fp_storm_sword
+perspective back
+wait 20
+chat clear
+shot a_back_sword
+hud off
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+wait 20
+perspective front
+fov 22
+wait 6
+chat clear
+shot a_armor_front_stone_whale
+perspective back
+fov 70
+wait 6
+shot a_armor_back_stone_whale
+cmd item replace entity @s armor.head with skyabyss:tide_shell_helmet
+cmd item replace entity @s armor.chest with skyabyss:tide_shell_chestplate
+cmd item replace entity @s armor.legs with skyabyss:tide_shell_leggings
+cmd item replace entity @s armor.feet with skyabyss:tide_shell_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+wait 20
+perspective front
+fov 22
+wait 6
+chat clear
+shot a_armor_front_tide_shell
+perspective back
+fov 70
+wait 6
+shot a_armor_back_tide_shell
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_sword
+wait 20
+perspective front
+fov 22
+wait 6
+chat clear
+shot a_armor_front_thunder_wing
+perspective back
+fov 70
+wait 6
+shot a_armor_back_thunder_wing
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+hud on
+perspective back
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s titan_cleave 3
+cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot a_skill_titan_cleave_a
+wait 6
+shot a_skill_titan_cleave_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s ember_heart 1
+cmd skyabyss skill learn @s forge_memory 1
+cmd skyabyss skill learn @s forge_stomp 3
+cmd skyabyss skill slot @s 1 forge_stomp
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot a_skill_forge_stomp_a
+wait 6
+shot a_skill_forge_stomp_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s thunder_bolt 3
+cmd skyabyss skill slot @s 1 thunder_bolt
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot a_skill_thunder_bolt_a
+wait 6
+shot a_skill_thunder_bolt_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s ward_song 3
+cmd skyabyss skill slot @s 1 ward_song
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot a_skill_ward_song_a
+wait 6
+shot a_skill_ward_song_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s star_reading 1
+cmd skyabyss skill learn @s frost_tide 3
+cmd skyabyss skill slot @s 1 frost_tide
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot a_skill_frost_tide_a
+wait 6
+shot a_skill_frost_tide_b
+wait 20
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s cloud_pierce 1
+cmd skyabyss skill learn @s bone_trap 1
+cmd skyabyss skill learn @s far_shot 1
+cmd skyabyss skill learn @s hawk_eye 1
+cmd skyabyss skill learn @s sky_rain 3
+cmd skyabyss skill slot @s 1 sky_rain
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot a_skill_sky_rain_a
+wait 6
+shot a_skill_sky_rain_b
+wait 20

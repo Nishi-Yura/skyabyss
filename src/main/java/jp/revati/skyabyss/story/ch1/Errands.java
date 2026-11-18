@@ -91,9 +91,14 @@ public final class Errands {
             double px = x - dz * side;
             double pz = z + dx * side;
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(px), (int) Math.floor(pz));
-            level.sendParticles(player, HOLLOW, true, px, y + 0.06, pz, 4, 0.12, 0.0, 0.18, 0.0);
+            level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, px, y + 0.06, pz, 4, 0.12, 0.0, 0.18, 0.0);
             drawn++;
         }
         return drawn;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

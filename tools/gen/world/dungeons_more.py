@@ -207,6 +207,8 @@ def tide_cave_2():
     cv.mark("view_wreck", 14, 8, -12)
     cv.mark("view_wreck_to", -10, 0, 2)
     box_mark(cv, "tide_1", -2, 2, -3, 0, 20, 33)
+    # 抜け道の出口: 底 (立つ高さ -3) から中ボスの洞の床 (0) へ上がる段。前は 3 段の壁で、引き潮のあいだ登れなかった (2026-11-11)
+    K.step_run(cv, -2, 2, 30, 1, -3, 0, "prismarine_brick", "minecraft:prismarine_bricks")
     cv.mark("room_mid", 0, 0, 48)
     cv.mark("foe_mid_1_mid", 0, 0, 50)
     for (x, z) in ((-8, 42), (8, 54), (-6, 56)):

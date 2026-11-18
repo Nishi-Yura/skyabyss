@@ -7,7 +7,6 @@ import org.joml.Vector3f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.StoneWhaleEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -33,7 +32,7 @@ public class StoneWhaleRenderer extends LowPolyGeoRenderer<StoneWhaleEntity> {
         this(context, new LodModel());
     }
 
-    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
+    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。発光層は LowPolyGeoRenderer が持つ
     private StoneWhaleRenderer(EntityRendererProvider.Context context, LodModel model) {
         super(context, model, model::meshName, SCALE);
         this.shadowRadius = 0f;

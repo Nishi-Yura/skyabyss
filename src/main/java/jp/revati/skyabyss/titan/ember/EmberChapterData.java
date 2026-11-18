@@ -21,9 +21,6 @@ public final class EmberChapterData extends SavedData {
         return risen;
     }
 
-    public long risenDay() {
-        return risenDay;
-    }
 
     // 初めての浮上を記録する。初めてなら true (二度目からは false)
     public boolean markRisen(long day) {

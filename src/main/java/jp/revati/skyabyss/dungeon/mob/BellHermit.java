@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,12 +77,11 @@ public class BellHermit extends DungeonBoss {
             begin(target, "ring");
             cue("bell_hermit", "ring", RING_WARN);
             server().playSound(null, getX(), getY(), getZ(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 2f, 0.5f);
-            Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), RING_INNER, RING_OUTER))
+            Telegraph.in(server(), TelegraphShape.ring(getX(), getZ(), RING_INNER, RING_OUTER)).prop(PropFx.ring("shell_spike", 10))
                     .floor(getY()).warn(RING_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 2f, 0.6f);
-                        server.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.3, getZ(), 120, RING_OUTER * 0.5, 0.1, RING_OUTER * 0.5, 0.2);
                     })
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage());
@@ -117,6 +117,11 @@ public class BellHermit extends DungeonBoss {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         return super.hurt(source, (move == CHARGE || move == SPIN) && act > 0 ? amount * SHELL_TAKEN : amount);
+    }
+
+    @Override
+    protected boolean midBoss() {
+        return true;
     }
 
     @Override

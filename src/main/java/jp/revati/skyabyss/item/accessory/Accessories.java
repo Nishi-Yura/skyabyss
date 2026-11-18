@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -154,11 +153,6 @@ public final class Accessories {
 
     private static int cooldownTicks(ItemStack charm) {
         return charm.getItem() instanceof Accessory a ? a.cooldownTicks() : 20 * 60;
-    }
-
-    public static void openMenu(ServerPlayer player) {
-        player.openMenu(new SimpleMenuProvider((id, inventory, p) -> new AccessoryMenu(id, inventory),
-                Component.translatable("skyabyss_gear.screen.title")));
     }
 
     // ---------------------------------------------------------------- 前のセーブ: 持ち物の装飾品を一度だけ枠へ

@@ -18,7 +18,6 @@ cmd gamerule doWeatherCycle false
 cmd gamemode spectator
 hud off
 chat clear
-lowpoly on
 
 # ---- 土地の町 (鯨見・汐守)
 cmd tp @s -30 135 -680 0 0

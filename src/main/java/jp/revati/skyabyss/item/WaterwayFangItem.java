@@ -47,7 +47,7 @@ public class WaterwayFangItem extends SwordItem implements ModGear {
         boolean awakened = ModGear.awakened(stack);
         target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, awakened ? 60 : 40, awakened ? 1 : 0), attacker);
         if (attacker.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.DRIPPING_WATER, target.getX(), target.getY(0.6), target.getZ(), 8, 0.3, 0.3, 0.3, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY(0.6), target.getZ(), 8, 0.3, 0.3, 0.3, 0);
         }
         return super.hurtEnemy(stack, target, attacker);
     }

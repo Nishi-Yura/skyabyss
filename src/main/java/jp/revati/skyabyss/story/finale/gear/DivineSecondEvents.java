@@ -154,7 +154,7 @@ public final class DivineSecondEvents {
                 e.hurtMarked = true;
             }
             level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.2f, 0.8f);
-            level.sendParticles(DAWN, p.getX(), p.getY() + 1, p.getZ(), 24, 1.5, 0.6, 1.5, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 1.5, 0.6, 1.5, 0);
         }
         if (full(p, DivineGear.MISTWALKER) && pd.getLong(MIST_CD) <= now) {
             pd.putLong(MIST_CD, now + DivineGear.MISTWALKER_COOLDOWN);
@@ -162,7 +162,7 @@ public final class DivineSecondEvents {
             for (Mob m : level.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(16), q -> q.getTarget() == p)) {
                 m.setTarget(null);
             }
-            level.sendParticles(SKY, p.getX(), p.getY() + 1, p.getZ(), 40, 0.8, 0.9, 0.8, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 0.8, 0.9, 0.8, 0);
         }
     }
 
@@ -187,5 +187,10 @@ public final class DivineSecondEvents {
         } else if (!on && has) {
             inst.removeModifier(id);
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

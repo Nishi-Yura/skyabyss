@@ -1,0 +1,25 @@
+{
+ "tide_heart": [
+  "ebb@5.05",
+  "pearl_rain@1.63",
+  "moon_wave@2.53",
+  "flood@1.48",
+  "shell_strike@0.80",
+  "breath@1.58"
+ ],
+ "storm_heart": [
+  "web@1.65",
+  "feather@1.10",
+  "chain@1.27",
+  "flash@2.05",
+  "charge@1.40",
+  "summon@1.25"
+ ],
+ "ember_heart": [
+  "veil@1.55",
+  "floor@2.13",
+  "breath@1.51",
+  "orb@1.48",
+  "embers@1.13"
+ ]
+}

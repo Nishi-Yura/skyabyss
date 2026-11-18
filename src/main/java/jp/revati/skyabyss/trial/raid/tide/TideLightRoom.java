@@ -11,7 +11,6 @@ import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -392,12 +391,12 @@ public final class TideLightRoom extends RaidRoom {
                 int n = Math.max(1, (int) (len / 0.8));
                 for (int s = 0; s < n; s++) {
                     double u = (double) s / n;
-                    level.sendParticles(TideRaid.dust(0.75f, 1f, 1f, 0.9f), origin.getX() + 0.5 + a[0] + (b[0] - a[0]) * u, origin.getY() + BEAM_Y,
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), origin.getX() + 0.5 + a[0] + (b[0] - a[0]) * u, origin.getY() + BEAM_Y,
                             origin.getZ() + 0.5 + a[1] + (b[1] - a[1]) * u, 1, 0.02, 0.02, 0.02, 0);
                 }
             }
             double[] end = pts.get(pts.size() - 1);
-            level.sendParticles(last.hit() ? ParticleTypes.END_ROD : ParticleTypes.SMOKE, origin.getX() + 0.5 + end[0], origin.getY() + BEAM_Y, origin.getZ() + 0.5 + end[1], 2, 0.1, 0.1, 0.1, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), origin.getX() + 0.5 + end[0], origin.getY() + BEAM_Y, origin.getZ() + 0.5 + end[1], 2, 0.1, 0.1, 0.1, 0.01);
         }
         if (!done && now >= nextSpawn) {
             nextSpawn = now + 300;
@@ -480,9 +479,6 @@ public final class TideLightRoom extends RaidRoom {
         return last != null && last.hit();
     }
 
-    public int litTicks() {
-        return lit;
-    }
 
     // 経路の台の一覧 (格子の添字 {i, j})
     public List<int[]> pathNodes() {
@@ -531,5 +527,10 @@ public final class TideLightRoom extends RaidRoom {
 
     public int emitterColumn() {
         return emitterI;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

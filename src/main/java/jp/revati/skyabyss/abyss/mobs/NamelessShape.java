@@ -131,7 +131,7 @@ public class NamelessShape extends AbyssMobB {
                 Vec3 from = mob.position().add(0, 1.2, 0);
                 for (int i = 1; i <= 4; i++) {
                     Vec3 p = from.lerp(aim, i / 4.0);
-                    level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
                 if (--wind < 0) {
                     fire(t, from);
@@ -156,7 +156,12 @@ public class NamelessShape extends AbyssMobB {
             if (closest.distanceTo(to) <= HIT_WIDTH) {
                 mob.strike(t, mob.dmg());
             }
-            ((ServerLevel) mob.level()).sendParticles(ParticleTypes.SONIC_BOOM, aim.x, aim.y, aim.z, 1, 0, 0, 0, 0);
+            ((ServerLevel) mob.level()).sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), aim.x, aim.y, aim.z, 1, 0, 0, 0, 0);
         }
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

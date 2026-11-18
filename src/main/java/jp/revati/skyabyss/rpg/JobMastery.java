@@ -125,24 +125,24 @@ public final class JobMastery {
         double z = p.getZ();
         DustParticleOptions dust = new DustParticleOptions(color(job), 0.8f + 0.06f * t);
         if (t <= 3) {
-            level.sendParticles(dust, x, y + 0.4, z, 3 + 2 * t, 0.35, 0.25, 0.35, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.4, z, 3 + 2 * t, 0.35, 0.25, 0.35, 0.0);
             return;
         }
         int ring = 10 + 2 * t;
         double r = 0.9 + 0.05 * t;
         for (int i = 0; i < ring; i++) {
             double a = Math.PI * 2 * i / ring;
-            level.sendParticles(dust, x + Math.cos(a) * r, y, z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x + Math.cos(a) * r, y, z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
         if (t >= 7) {
-            level.sendParticles(dust, x, y + 0.6, z, 6 + t, 0.25, 0.6, 0.25, 0.0);
-            level.sendParticles(ParticleTypes.END_ROD, x, y + 0.3, z, t - 5, 0.3, 0.3, 0.3, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.6, z, 6 + t, 0.25, 0.6, 0.25, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.3, z, t - 5, 0.3, 0.3, 0.3, 0.02);
         }
         if (t >= TIERS) {
             double top = p.getY() + p.getBbHeight() + 0.35;
             for (int i = 0; i < 8; i++) {
                 double a = Math.PI * 2 * i / 8;
-                level.sendParticles(dust, x + Math.cos(a) * 0.3, top, z + Math.sin(a) * 0.3, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x + Math.cos(a) * 0.3, top, z + Math.sin(a) * 0.3, 1, 0, 0, 0, 0);
             }
         }
     }

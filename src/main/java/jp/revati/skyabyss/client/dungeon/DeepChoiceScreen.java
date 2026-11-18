@@ -64,7 +64,7 @@ public class DeepChoiceScreen extends Screen {
             Golden.Box c = card(deep);
             boolean hover = mx >= c.x() && mx < c.right() && my >= c.y() && my < c.bottom();
             g.fill(c.x(), c.y(), c.right(), c.bottom(), deep ? (hover ? 0xFF2E2440 : 0xFF1E182C) : (hover ? 0xFF262A34 : 0xFF181B22));
-            Golden.outline(g, c.x(), c.y(), c.right(), c.bottom(), 0xFF000000 | (deep ? DEEP : hover ? Golden.TEXT : 0x59606F));
+            Golden.outline(g, c.x(), c.y(), c.right(), c.bottom(), 0xFF000000 | (deep ? DEEP : hover ? Golden.TEXT : 0x5A6690));
             if (hover) {
                 Golden.outline(g, c.x() + 1, c.y() + 1, c.right() - 1, c.bottom() - 1, 0x60FFFFFF);
             }

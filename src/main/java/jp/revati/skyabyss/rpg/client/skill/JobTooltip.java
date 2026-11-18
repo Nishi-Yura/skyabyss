@@ -30,7 +30,7 @@ public final class JobTooltip {
         }
         Job cur = event.getEntity() == null ? null : Job.byId(jp.revati.skyabyss.rpg.skill.SkillManager.get(event.getEntity()).curJob);
         boolean locked = event.getEntity() != null && jp.revati.skyabyss.rpg.skill.JobWeaponLock.wrongJob(event.getEntity(), event.getItemStack()) != null;
-        int color = locked ? 0xD9779A : cur == job ? 0xF2C14E : 0x9AA4B2;
+        int color = locked ? 0xD9779A : cur == job ? 0xE9C46A : 0x9AA4B2;
         net.minecraft.network.chat.MutableComponent line = Component.translatable("gui.skyabyss.job.tooltip",
                 Component.translatable("job.skyabyss.subtitle", Component.translatable(job.nameKey()), Component.translatable(job.tree.nameKey())))
                 .withStyle(s -> s.withColor(color));
@@ -45,7 +45,7 @@ public final class JobTooltip {
             int now = event.getEntity() == null ? -1 : jp.revati.skyabyss.rpg.Growth.get(event.getEntity()).stat(req.stat());
             boolean ok = now < 0 || now >= req.amount() || event.getEntity().isCreative();
             net.minecraft.network.chat.MutableComponent need = Component.translatable("gui.skyabyss.job.need_stat", Component.translatable(req.stat().nameKey()), req.amount())
-                    .withStyle(s -> s.withColor(ok ? 0x9FE8FF : 0xD9779A));
+                    .withStyle(s -> s.withColor(ok ? 0x8FD0FF : 0xD9779A));
             if (!ok) {
                 need.append(Component.translatable("gui.skyabyss.job.need_stat_now", now).withStyle(s -> s.withColor(0xD9779A)));
             }

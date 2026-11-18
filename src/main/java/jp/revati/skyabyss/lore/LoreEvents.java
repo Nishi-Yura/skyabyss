@@ -294,7 +294,7 @@ public final class LoreEvents {
         // 落ちてきた本人だけが拾える (マルチで取り合いにならない)
         item.setTarget(player.getUUID());
         level.addFreshEntity(item);
-        level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.01);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.01);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 0.6f);
         Notice.narrate(player, "message.skyabyss.lore.book_falls");
         DROPS.put(player.getUUID(), new Drop(item.getUUID(), now));

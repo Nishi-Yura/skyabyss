@@ -50,9 +50,14 @@ public class MoonMemoryStoneBlock extends Block {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer sp && level instanceof ServerLevel sl) {
             MoonMemories.onStone(sp, state.getValue(SECTION));
-            sl.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 12, 0.2, 0.4, 0.2, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 12, 0.2, 0.4, 0.2, 0.02);
             sl.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 0.7f);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

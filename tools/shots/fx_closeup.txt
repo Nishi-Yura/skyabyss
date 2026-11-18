@@ -1,0 +1,61 @@
+# 攻撃の粒の見比べ (目の前に出す)。生成: tools/gen/shots/gen_fx_closeup_shots.py
+world fx_closeup flat
+size 1280 720
+timeout 900
+render 6
+clouds off
+cmd time set noon
+cmd gamerule doDaylightCycle false
+cmd gamemode creative Dev
+cmd fill -8 -61 -8 8 -61 8 minecraft:polished_deepslate
+camera minecraft:overworld 0.5 -60 4.5 180 8
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+wait 10
+camera minecraft:overworld 0.5 -60 4.5 180 8
+hud off
+wait 10
+cmd particle skyabyss:fx_stone_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_stone_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_stone_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot stone
+wait 40
+cmd particle skyabyss:fx_water_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_water_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_water_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot water
+wait 40
+cmd particle skyabyss:fx_storm_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_storm_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_storm_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot storm
+wait 40
+cmd particle skyabyss:fx_ember_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_ember_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_ember_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot ember
+wait 40
+cmd particle skyabyss:fx_abyss_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_abyss_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_abyss_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot abyss
+wait 40
+cmd particle skyabyss:fx_moon_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_moon_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_moon_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot moon
+wait 40
+cmd particle skyabyss:fx_paper_shard -1.3 -58.6 0.5 0.35 0.35 0.2 0.05 18 force
+cmd particle skyabyss:fx_paper_glow 0.5 -58.4 0.5 0.35 0.35 0.2 0.01 14 force
+cmd particle skyabyss:fx_paper_smoke 2.3 -58.6 0.5 0.3 0.3 0.2 0.005 10 force
+wait 3
+shot paper
+wait 40
+quit

@@ -13,9 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 // 巨神の祠のまわりの飾り板 (C21。記録の画面を開く): 立てる・光らせる・開く中身を作る。順位の石 (C11) はもう立てず、前の世界の石は消す (サーバー側。docs/design/32 の 3.1「祠のまわり」)。
 // 置き場は祠の輪の外の開いた床から決まった手順で二つ選ぶ。祠 (titan/shrine/TitanShrine) が人のいるあいだ 10 秒に一度呼び、無ければ立てる
@@ -93,17 +91,7 @@ public final class RebirthBoards {
         return r != null && fresh(server.overworld().getGameTime(), r.at());
     }
 
-    @Nullable
-    public static BlockPos stoneOf(String titan) {
-        Spots s = SPOTS.get(titan);
-        return s == null ? null : s.stone;
-    }
 
-    @Nullable
-    public static BlockPos boardOf(String titan) {
-        Spots s = SPOTS.get(titan);
-        return s == null ? null : s.board;
-    }
 
     // 祠のまわり (半径 5〜9。輪の半径 3 の外) を 6 度から 12 度おきに探し、互いに 4 マス以上離れた二つ
     @Nullable

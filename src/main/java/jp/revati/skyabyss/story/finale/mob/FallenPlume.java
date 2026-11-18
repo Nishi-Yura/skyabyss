@@ -83,7 +83,7 @@ public class FallenPlume extends CloudMob {
         setDeltaMovement(v);
         hasImpulse = true;
         if (tickCount % 8 == 0 && level() instanceof ServerLevel sl) {
-            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.4, getZ(), 1, 0.1, 0.4, 0.1, 0.005);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.4, getZ(), 1, 0.1, 0.4, 0.1, 0.005);
         }
     }
 
@@ -163,7 +163,7 @@ public class FallenPlume extends CloudMob {
                     for (double d = 0.5; d <= LEN; d += 0.9) {
                         for (int s = -1; s <= 1; s += 2) {
                             Vec3 q = from.add(dir.scale(d)).add(side.scale(s * HALF));
-                            sl.sendParticles(ParticleTypes.WAX_ON, q.x, q.y + 0.12, q.z, 1, 0, 0, 0, 0);
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y + 0.12, q.z, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -174,8 +174,8 @@ public class FallenPlume extends CloudMob {
                 Vec3 top = position().add(0, 1.2, 0);
                 for (double d = 0; d <= LEN; d += 0.5) {
                     Vec3 q = top.lerp(from.add(dir.scale(LEN)), d / LEN);
-                    sl.sendParticles(ParticleTypes.END_ROD, q.x, q.y, q.z, 1, 0.05, 0.05, 0.05, 0.01);
-                    sl.sendParticles(ParticleTypes.CRIT, from.x + dir.x * d, from.y + 0.4, from.z + dir.z * d, 1, 0.1, 0.1, 0.1, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.05, 0.05, 0.05, 0.01);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x + dir.x * d, from.y + 0.4, from.z + dir.z * d, 1, 0.1, 0.1, 0.1, 0.02);
                 }
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, new AABB(from, from.add(dir.scale(LEN))).inflate(1.5, 3, 1.5),
                         e -> e.isAlive() && !e.isSpectator())) {
@@ -191,5 +191,10 @@ public class FallenPlume extends CloudMob {
             t = -1;
             cooldown = 60;
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

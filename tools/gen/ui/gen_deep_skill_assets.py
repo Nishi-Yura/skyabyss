@@ -373,12 +373,16 @@ def shield_rush(i):
     dot(i, 21, 12, WHITE)
 
 
-def archer_leap(i):
+def bow_spirit(i):
+    # 番の弓霊 (2026-11-13。射手の跳び退きの升目を使う): 宙に浮く骨の弓と、つがえた矢、まわりの霊の灯
     b = TAG["bone"]
-    put(i, [(5, 16), (13, 9), (13, 13), (24, 13), (24, 19), (13, 19), (13, 23)], rgba(b))
-    for k, x in enumerate((26, 28)):
-        line(i, [(x, 12 + k), (x, 20 - k)], rgba(b, 180 - k * 60))
-    dot(i, 8, 16, WHITE)
+    line(i, [(14, 6), (11, 10), (10, 16), (11, 22), (14, 26)], rgba(shade(b, 0.7)), w=2)
+    line(i, [(12, 6), (9, 10), (8, 16), (9, 22), (12, 26)], rgba(b), w=2)
+    line(i, [(14, 7), (14, 25)], rgba(WHITE, 150))
+    line(i, [(14, 16), (24, 16)], rgba(b), w=2)
+    put(i, [(23, 13), (27, 16), (23, 19)], rgba(WHITE))
+    for x, y, a in ((20, 9, 255), (24, 23, 200), (17, 24, 140)):
+        dot(i, x, y, rgba(WHITE, a))
 
 
 # ---------------------------------------------------------------- 紋
@@ -466,7 +470,7 @@ GLYPHS = [glyph(t) for t in ("rock", "wind", "tide", "ash", "bone")]
 JOB_ICONS = [
     (thunder_bolt, S, SD), (star_reading, S, SD), (ember_orb, S, SD), (frost_tide, S, SD), (blink, S, SD), (star_oath, S, SD),
     (forge_stomp, TAG["ash"], TAG["ash"]), (mist_veil, TAG["wind"], TAG["wind"]), (curse_mark, TAG["tide"], TAG["tide"]),
-    (lamp_charm, TAG["tide"], TAG["tide"]), (shield_rush, TAG["rock"], TAG["rock"]), (archer_leap, TAG["bone"], TAG["bone"]),
+    (lamp_charm, TAG["tide"], TAG["tide"]), (shield_rush, TAG["rock"], TAG["rock"]), (bow_spirit, TAG["bone"], TAG["bone"]),
     # 37〜43: 木 v2 で足した技 (docs/design/48)
     (shield_bash, TAG["rock"], TAG["rock"]), (bone_swing, TAG["rock"], TAG["bone"]), (spin_cut, TAG["rock"], TAG["rock"]),
     (twin_fang, TAG["wind"], TAG["wind"]), (spark_burst, TAG["ash"], TAG["ash"]), (snare_shot, TAG["bone"], TAG["bone"]), (stardust, S, SD),
@@ -557,6 +561,28 @@ TREE_ICONS = [
 ]
 
 
+# 番の弓霊は、弓使いのほかの技 (雲穿ち・骨の罠・天の驟雨。icons.png) と同じ「骨の縁の丸い地」の絵にする (2026-11-15 の声「ほかのアイコンと同じデザインに」)。
+# 形は gen_builds_assets の Pen で描き、骨の射手の木の地の色 (4) で塗る
+def bow_spirit_disc():
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import gen_builds_assets as gb
+    from gen_skill_assets import m_arrow
+
+    def m_bow_spirit(p):
+        # 骨の弓 (左) と、肩のそばに浮かぶ霊 (青白い炎の頭巾と角のある骨の半面)。霊から放たれる矢
+        p.arc((4, 5, 18, 27), 100, 260, "hilt", 3)
+        p.line([(10, 7), (10, 25)], "fx2", 1)
+        p.poly([(17, 17), (16, 11), (18, 6), (20, 8), (22, 3), (25, 8), (28, 11), (27, 16), (22, 18)], "fx")
+        p.poly([(18, 9), (26, 9), (25, 13), (19, 13)], "blade")
+        p.line([(18, 9), (16, 6)], "edge", 1)
+        p.line([(26, 9), (28, 6)], "edge", 1)
+        p.dot((20, 11), "mass")
+        p.dot((24, 11), "mass")
+        m_arrow(p, (8, 21), (28, 21), 3, fletch=True)
+    return gb.icon(m_bow_spirit, 4)
+
+
 def sheet():
     img = Image.new("RGBA", (256, 192), (0, 0, 0, 0))
     for n, (fn, a, b) in enumerate(ICONS):
@@ -570,6 +596,9 @@ def sheet():
         img.paste(g, ((n % 8) * 32, (n // 8) * 32))
     for k, (fn, a, b) in enumerate(JOB_ICONS):
         n = 25 + k
+        if fn is bow_spirit:
+            img.paste(bow_spirit_disc(), ((n % 8) * 32, (n // 8) * 32))
+            continue
         m = medallion(a, b, disc=(28, 30, 58) if a == S else (30, 36, 48))
         fn(m)
         img.paste(m, ((n % 8) * 32, (n // 8) * 32))

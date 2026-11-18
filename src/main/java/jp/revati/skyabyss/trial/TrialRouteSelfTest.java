@@ -325,6 +325,10 @@ public final class TrialRouteSelfTest {
                 check(f, TrialRoute.step(back, ga) == expect && TrialRoute.mid(back, ga) == toMid, titan + ": after clearing " + key + " the step is " + TrialRoute.step(back, ga) + ", expected " + expect);
                 // 挑戦の加護: 越えた人にだけ二つ見せ、選ぶと持つ (持っているものは次から出ない)
                 check(f, RouteBoons.offered(a) && !RouteBoons.offered(b), titan + ": clearing step " + i + " did not offer a boon to the party only");
+                // 加護を選ぶ間は傷を受けない (2026-11-15 の声「能力選ぶとき無敵にして。落下ダメージで死んだ」。trial/RouteSafety)
+                float hpBefore = a.getHealth();
+                a.hurt(a.damageSources().fall(), 6f);
+                check(f, a.getHealth() >= hpBefore, titan + ": a player choosing a boon took fall damage (" + hpBefore + " -> " + a.getHealth() + ")");
                 // 選ぶ前は、運びの時刻を過ぎても次の部屋へ運ばない (2026-11-06 の声「選んでないのに次の部屋に飛ばされる」)
                 TrialRoute.tick(back, titan, players, now + 1 + TrialRoute.CARRY_DELAY);
                 check(f, TrialRoute.pendingCount() == 1, titan + ": the carry to step " + expect + " ran while the boon was still being chosen");

@@ -155,13 +155,7 @@ public class TitanBackData extends SavedData {
         return added;
     }
 
-    public long courseSeed() {
-        return courseSeed;
-    }
 
-    public long mazeSeed() {
-        return mazeSeed;
-    }
 
     // 新しい種を引く (アスレチックと迷路の形が変わる)
     public void reseed(net.minecraft.util.RandomSource random) {

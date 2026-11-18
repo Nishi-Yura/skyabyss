@@ -295,7 +295,7 @@ public final class Ch3Gear {
         // 雷の刃: 近接で当てると小さな火花 (見た目と音だけ)
         if (source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player && player.hasEffect(THUNDER_WHETTED)
                 && player.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 10, 0.25, 0.3, 0.25, 0.15);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 10, 0.25, 0.3, 0.25, 0.15);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.4f, 1.8f);
         }
     }
@@ -411,11 +411,11 @@ public final class Ch3Gear {
                 Vec3 w = downwind(s.level().getDayTime() / 24000L);
                 // 柱 (小旗の竿) と、風下へ伸びる細い光の筋
                 for (double y = 0; y <= 1.4; y += 0.35) {
-                    s.level().sendParticles(WIND_LIGHT, s.at().x, s.at().y + y, s.at().z, 1, 0, 0, 0, 0);
+                    s.level().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.at().x, s.at().y + y, s.at().z, 1, 0, 0, 0, 0);
                 }
                 for (double d = 0.3; d <= STREAMER_LENGTH; d += 0.4) {
                     double wave = Math.sin((s.level().getGameTime() * 0.3) + d * 2) * 0.08;
-                    s.level().sendParticles(WIND_LIGHT, s.at().x + w.x * d, s.at().y + 1.4 + wave, s.at().z + w.z * d, 1, 0, 0, 0, 0);
+                    s.level().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.at().x + w.x * d, s.at().y + 1.4 + wave, s.at().z + w.z * d, 1, 0, 0, 0, 0);
                 }
             }
         }
@@ -444,7 +444,7 @@ public final class Ch3Gear {
             if (player instanceof ServerPlayer sp) {
                 applyWhetstone(sp);
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GRINDSTONE_USE, SoundSource.PLAYERS, 0.8f, 1.7f);
-                ((ServerLevel) level).sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+                ((ServerLevel) level).sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
                 player.getCooldowns().addCooldown(this, 40);
                 if (!player.isCreative()) {
                     stack.shrink(1);

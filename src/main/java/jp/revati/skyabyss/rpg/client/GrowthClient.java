@@ -35,7 +35,7 @@ public final class GrowthClient {
     static int levelUpAge = -1;
     static int levelUpLevel;
     // バーが光る残り時間 (経験値を得たとき)
-    static int barFlash;
+    public static int barFlash;
 
     private GrowthClient() {
     }

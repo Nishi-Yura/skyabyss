@@ -135,7 +135,7 @@ public final class PartyClient {
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name), x, y, W - 28, color, true);
             if (m.online()) {
                 String lv = "Lv" + m.level();
-                g.drawString(font, lv, x + W - font.width(lv), y, 0x9FE8FF, true);
+                g.drawString(font, lv, x + W - font.width(lv), y, 0x8FD0FF, true);
                 float f = m.maxHealth() <= 0 ? 0 : Mth.clamp(m.health() / m.maxHealth(), 0, 1);
                 g.fill(x, y + 10, x + W, y + 13, 0xFF3A1E22);
                 int hp = f > 0.5f ? 0xFF6BD06B : f > 0.25f ? 0xFFE8C04A : 0xFFE05050;

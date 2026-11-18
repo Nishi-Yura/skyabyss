@@ -41,7 +41,8 @@ public final class ContinentRoadsSelfTest {
                         int h = map.surface(x, z);
                         if (step >= 2 && Math.min(h, map.surface(lx, lz)) >= ContinentChunkGenerator.SEA_LEVEL - 1) {
                             steps++;
-                            where = x + "," + z + " (" + map.surface(lx, lz) + "->" + h + ")";
+                            where = x + "," + z + " (" + map.surface(lx, lz) + "->" + h + ", graded " + Math.round(map.graded(lx, lz)) + "->" + Math.round(map.graded(x, z))
+                                    + ", lair cap " + (ContinentLairs.cap(x, z) == Integer.MAX_VALUE ? "none" : ContinentLairs.cap(x, z)) + ", pad " + ContinentLairs.onPad(x, z) + ")";
                         }
                     }
                     lx = x;

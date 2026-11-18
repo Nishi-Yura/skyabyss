@@ -63,7 +63,7 @@ public final class BossOpenings {
         }
         if (boss.level() instanceof ServerLevel level) {
             // 見て分かる合図: 白い火花と澄んだ音
-            level.sendParticles(ParticleTypes.END_ROD, boss.getX(), boss.getY() + boss.getBbHeight() * 0.6, boss.getZ(), 14,
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), boss.getX(), boss.getY() + boss.getBbHeight() * 0.6, boss.getZ(), 14,
                     boss.getBbWidth() * 0.4, boss.getBbHeight() * 0.3, boss.getBbWidth() * 0.4, 0.04);
             level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 1.4f, 1.3f);
         }

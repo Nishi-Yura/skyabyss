@@ -73,10 +73,6 @@ public final class ChapterSky {
         return Math.max(0f, Math.min(1f, moonNearness(level) + stage(player).moonBias()));
     }
 
-    // 自己テスト用: 登録を空にする
-    static void clearStages() {
-        STAGES.clear();
-    }
 
     @SubscribeEvent
     static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
@@ -105,10 +101,6 @@ public final class ChapterSky {
     private ChapterSky() {
     }
 
-    // M4 (ループ本体) が月の近さを渡す口。値は 0 (初日の大きさ) 〜 1 (落ちる直前)
-    public static void setMoonSource(@Nullable ToDoubleFunction<ServerLevel> source) {
-        moonSource = source;
-    }
 
     // 月の近さ (0〜1)。コマンドの上書きがあればそれを使う
     public static float moonNearness(ServerLevel level) {

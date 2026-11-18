@@ -9,7 +9,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMeshes;
@@ -27,7 +26,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.cache.object.GeoQuad;
 import software.bernie.geckolib.cache.object.GeoVertex;
@@ -43,16 +41,11 @@ import software.bernie.geckolib.util.Color;
 // - 頭の向き・傾きは WatcherClient が決めた値を骨に入れる
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
-    private static final ResourceLocation GEO = path("geo/entity/watcher.geo.json");
-    private static final ResourceLocation TEXTURE = path("textures/entity/watcher.png");
-    private static final ResourceLocation GLOWMASK = path("textures/entity/watcher_glowmask.png");
     private static final ResourceLocation ANIMATION = path("animations/entity/watcher.animation.json");
     // 低ポリ (client/lowpoly): 単層のメッシュ (geo/entity/watcher_lowpoly.geo.json、textures/lowpoly/watcher.png)。
     // 半透明の描画 (entityTranslucent) はそのまま。目の光は、アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_ember_npc.py が焼く)
     private static final ResourceLocation GEO_LOW = path("geo/entity/watcher_lowpoly.geo.json");
-    private static final ResourceLocation GEO_LOW_DEBUG = path("geo/entity/watcher_lowpoly_debug.geo.json");
     private static final ResourceLocation TEXTURE_LOW = path("textures/lowpoly/watcher.png");
-    private static final ResourceLocation GLOWMASK_LOW = path("textures/lowpoly/watcher_glow.png");
     private static final ResourceLocation GLINT = path("textures/entity/watcher_glint.png");
     // 目の光は、geo の「eyes」骨 (頭の子。光る目の立方体を 1 つ持つ) の立方体の真ん中に置く。
     // 骨と立方体は tools/rough/watcher_v2.py が書くので、案を差し替えてもここは変えなくてよい
@@ -82,10 +75,10 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
         addRenderLayer(new EyeLayer(this));
     }
 
-    // 目の光は下の EyeLayer (目の強さで足す)。自動の発光層は使わない
+    // 目の光る点の強さ (目を開いている度合い)。点の模型 (client/splat) の光る点に掛ける
     @Override
-    protected boolean autoGlow() {
-        return false;
+    protected float splatGlow(WatcherEntity animatable, float partialTick) {
+        return Mth.clamp(animatable.eyeGlow(partialTick), 0f, 1f);
     }
 
     @SubscribeEvent
@@ -168,18 +161,12 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
     static final class Model extends GeoModel<WatcherEntity> {
         @Override
         public ResourceLocation getModelResource(WatcherEntity animatable) {
-            if (LowPoly.enabled) {
-                return LowPoly.debug ? GEO_LOW_DEBUG : GEO_LOW;
-            }
-            return LowPoly.cubeOr(GEO, GEO_LOW);
+            return GEO_LOW;
         }
 
         @Override
         public ResourceLocation getTextureResource(WatcherEntity animatable) {
-            if (LowPoly.enabled) {
-                return LowPoly.debug ? path("textures/lowpoly/debug.png") : TEXTURE_LOW;
-            }
-            return LowPoly.cubeOr(TEXTURE, TEXTURE_LOW);
+            return TEXTURE_LOW;
         }
 
         @Override
@@ -207,19 +194,6 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
             this.owner = owner;
         }
 
-        @Override
-        public void render(PoseStack poseStack, WatcherEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
-                           MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            float glow = Mth.clamp(animatable.eyeGlow(partialTick), 0f, 1f) * (owner.eyesFound ? owner.facing : 1f);
-            if (glow <= 0.004f) {
-                return;
-            }
-            RenderType eyes = RenderType.eyes(LowPoly.enabled ? GLOWMASK_LOW : LowPoly.cubeOr(GLOWMASK, GLOWMASK_LOW));
-            int c = (int) (glow * 255f);
-            int color = 0xFF000000 | c << 16 | c << 8 | c;
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, eyes, bufferSource.getBuffer(eyes), partialTick,
-                    LightTexture.FULL_BRIGHT, packedOverlay, color);
-        }
 
         @Override
         public void renderForBone(PoseStack poseStack, WatcherEntity animatable, GeoBone bone, RenderType renderType,
@@ -233,7 +207,7 @@ public class WatcherRenderer extends LowPolyGeoRenderer<WatcherEntity> {
             float cx = bone.getPivotX() / 16f;
             float cy = bone.getPivotY() / 16f;
             float cz = bone.getPivotZ() / 16f;
-            LowPolyMesh mesh = LowPoly.enabled ? LowPolyMeshes.get("watcher") : null;
+            LowPolyMesh mesh = LowPolyMeshes.get("watcher");
             LowPolyMesh.Bone eyeMesh = mesh == null ? null : mesh.bones.get(EYE_BONE);
             if (eyeMesh != null && eyeMesh.quadCount > 0) {
                 // 低ポリ: 骨 (cube なし) の代わりに、目のメッシュの頂点の平均 (焼いたあとの座標)

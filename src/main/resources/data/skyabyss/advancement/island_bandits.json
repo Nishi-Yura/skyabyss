@@ -2,7 +2,7 @@
   "parent": "skyabyss:island_job",
   "display": {
     "icon": {
-      "id": "skyabyss:gather_axe"
+      "id": "skyabyss:travel_shield"
     },
     "title": {
       "translate": "advancement.skyabyss.island_bandits.title"

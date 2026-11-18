@@ -150,7 +150,7 @@ public class RiftWing extends RiftMob {
                 if (t % 2 == 0) {
                     for (int i = 1; i <= 15; i++) {
                         Vec3 p = from.add(dir.scale(i));
-                        sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y + 0.2, p.z, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.2, p.z, 1, 0, 0, 0, 0);
                     }
                 }
                 setDeltaMovement(Vec3.ZERO);
@@ -193,5 +193,10 @@ public class RiftWing extends RiftMob {
         if (!echo()) {
             jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.SHADOW_THREAD.get(), 0.35, 1, 1);
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.item.TitanGearSet;
@@ -165,8 +163,4 @@ public final class AbyssGearLoot {
         }
     }
 
-    @Nullable
-    static UUID uuid(@Nullable ServerPlayer p) {
-        return p == null ? null : p.getUUID();
-    }
 }

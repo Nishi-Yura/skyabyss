@@ -102,9 +102,6 @@ public final class CircuitRun {
         return marks;
     }
 
-    public int tasks() {
-        return tasks;
-    }
 
     public Kind kind() {
         return kind;

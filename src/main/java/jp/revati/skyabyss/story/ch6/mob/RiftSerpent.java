@@ -80,7 +80,7 @@ public class RiftSerpent extends RiftMob {
         }
         if (sinking >= 0) {
             sinking++;
-            sl.sendParticles(new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.LIGHT_GRAY_CONCRETE_POWDER.defaultBlockState()),
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX(), getY() + 0.4, getZ(), 4, 0.6, 0.2, 0.6, 0.0);
             if (sinking == SINK) {
                 BlockPos to = away(sl, tg);
@@ -160,7 +160,7 @@ public class RiftSerpent extends RiftMob {
             getLookControl().setLookAt(tg, 30f, 30f);
             Vec3 mouth = position().add(0, 1.8, 0).add(Vec3.directionFromRotation(0, yHeadRot).scale(0.6));
             if (t < 12) {
-                sl.sendParticles(new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.WHITE_CONCRETE_POWDER.defaultBlockState()),
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         mouth.x, mouth.y, mouth.z, 3, 0.25, 0.25, 0.25, 0.0);
                 return;
             }
@@ -184,5 +184,10 @@ public class RiftSerpent extends RiftMob {
         if (!echo()) {
             jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.5, 1, 2);
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

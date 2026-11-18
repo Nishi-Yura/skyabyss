@@ -204,7 +204,7 @@ public class FeatherWarden extends StormMob {
         getNavigation().stop();
         level().playSound(null, getX(), getY(), getZ(), StormMobSetup.WARDEN_CROUCH.get(), SoundSource.HOSTILE, 1.2f, 1f);
         if (level() instanceof ServerLevel server) {
-            warn(server, ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 10, 0.5, 0.05, 0.5, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.2, getZ(), 10, 0.5, 0.05, 0.5, 0.02);
         }
     }
 
@@ -297,11 +297,11 @@ public class FeatherWarden extends StormMob {
         Vec3 side = new Vec3(-dir.z, 0, dir.x);
         for (double s = 0; s <= len; s += 0.5) {
             Vec3 p = lineStart.add(dir.scale(s));
-            warn(server, LINE, p.x, lineY + 0.08, p.z, 1, 0, 0, 0, 0);
-            warn(server, LINE_EDGE, p.x + side.x * 0.6, lineY + 0.08, p.z + side.z * 0.6, 1, 0, 0, 0, 0);
-            warn(server, LINE_EDGE, p.x - side.x * 0.6, lineY + 0.08, p.z - side.z * 0.6, 1, 0, 0, 0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, lineY + 0.08, p.z, 1, 0, 0, 0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x + side.x * 0.6, lineY + 0.08, p.z + side.z * 0.6, 1, 0, 0, 0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x - side.x * 0.6, lineY + 0.08, p.z - side.z * 0.6, 1, 0, 0, 0, 0);
         }
-        warn(server, ParticleTypes.ELECTRIC_SPARK, lineEnd.x, lineY + 0.3, lineEnd.z, 4, 0.2, 0.2, 0.2, 0.05);
+        warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), lineEnd.x, lineY + 0.3, lineEnd.z, 4, 0.2, 0.2, 0.2, 0.05);
     }
 
     // 宙から帯の先へ一直線に突っ込む (壁に当たればそこで落ちる。すり抜けない)
@@ -322,7 +322,7 @@ public class FeatherWarden extends StormMob {
             }
         }
         if (level() instanceof ServerLevel server) {
-            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.2, getZ(), 3, 0.3, 0.5, 0.3, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 3, 0.3, 0.5, 0.3, 0.02);
         }
         boolean blocked = horizontalCollision || position().distanceToSqr(before) < 0.01 && dist > 0.2;
         if (dist <= DIVE_SPEED + 1e-3 || blocked || --stateTicks <= 0 || (verticalCollision && onGround() && dist < 3)) {
@@ -336,7 +336,7 @@ public class FeatherWarden extends StormMob {
         setState(State.STUNNED, STUN_TICKS);
         level().playSound(null, getX(), getY(), getZ(), StormMobSetup.WARDEN_LAND.get(), SoundSource.HOSTILE, 1.3f, 1f);
         if (level() instanceof ServerLevel server) {
-            warn(server, ParticleTypes.CLOUD, getX(), getY() + 0.1, getZ(), 18, 0.6, 0.05, 0.6, 0.05);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.1, getZ(), 18, 0.6, 0.05, 0.6, 0.05);
         }
     }
 
@@ -478,5 +478,10 @@ public class FeatherWarden extends StormMob {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.FEATHER_WARDEN_STEP.get(), 0.2f);
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -77,10 +77,10 @@ public class StormCharmItem extends Item implements ModGear, Accessory {
         for (int i = 0; i < 36; i++) {
             double a = i * 0.55;
             double y = player.getY() + 0.1 + i * 0.055;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX() + Math.cos(a) * 0.7, y, player.getZ() + Math.sin(a) * 0.7, 2, 0.03, 0.03, 0.03, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX() + Math.cos(a) * 0.7, y, player.getZ() + Math.sin(a) * 0.7, 2, 0.03, 0.03, 0.03, 0.05);
         }
-        level.sendParticles(ParticleTypes.FLASH, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0, 0, 0, 0);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 12, 0.4, 0.6, 0.4, 0.03);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.2, player.getZ(), 1, 0, 0, 0, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 12, 0.4, 0.6, 0.4, 0.03);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35f, 1.6f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.7f, 1.4f);
         player.getCooldowns().addCooldown(this, StormGear.CHARM_COOLDOWN);
@@ -117,5 +117,10 @@ public class StormCharmItem extends Item implements ModGear, Accessory {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         ModGear.tooltip(stack, tooltip, tier(), "item.skyabyss.storm_charm.desc", false);
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

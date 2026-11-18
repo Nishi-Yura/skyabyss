@@ -11,7 +11,6 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.story.ch6.MoonWorld;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -46,10 +45,6 @@ public final class RiftEcho {
     private RiftEcho() {
     }
 
-    public static boolean recording(ServerPlayer p) {
-        Take t = TAKES.get(p.getUUID());
-        return t != null && t.recording;
-    }
 
     public static boolean waiting(ServerPlayer p) {
         Take t = TAKES.get(p.getUUID());
@@ -79,7 +74,7 @@ public final class RiftEcho {
         TAKES.put(p.getUUID(), n);
         setMode(level, mirror, EchoMirrorBlock.Mode.RECORDING);
         level.playSound(null, mirror, RiftBlocks.ECHO_RECORD.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
-        level.sendParticles(ParticleTypes.END_ROD, mirror.getX() + 0.5, mirror.getY() + 0.8, mirror.getZ() + 0.5, 20, 0.4, 0.5, 0.4, 0.03);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), mirror.getX() + 0.5, mirror.getY() + 0.8, mirror.getZ() + 0.5, 20, 0.4, 0.5, 0.4, 0.03);
         Notice.narrate(p, "message.skyabyss.moon.echo.recording");
     }
 
@@ -187,5 +182,10 @@ public final class RiftEcho {
                 it.remove();
             }
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

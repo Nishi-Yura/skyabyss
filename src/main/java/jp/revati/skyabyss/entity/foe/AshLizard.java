@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -30,6 +31,34 @@ public class AshLizard extends RegionBoss {
 
     public AshLizard(EntityType<? extends Monster> type, Level level) {
         super(type, level, "ash_lizard", MobSounds.ASH_LIZARD_AMBIENT, MobSounds.ASH_LIZARD_HURT, MobSounds.ASH_LIZARD_DEATH, "breath", "sweep", "bite", "hurt", "death");
+        body.reserveIds(this::setId);
+    }
+
+    // 体に沿った当たりの部品 (entity/LongBody)。鼻先から尾まで 6.5 ブロック (前 2.6・後ろ 3.9)。本体の箱 (四角) の外の頭・尾にも、杖や弓が当たる
+    private final jp.revati.skyabyss.entity.LongBody body = jp.revati.skyabyss.entity.LongBody.of(this, new double[][] {{1.8, 0, 1.6, 1.4}, {-1.8, 0, 1.6, 1.4}, {-3.2, 0, 1.4, 1.4}});
+
+    @Override
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    @Override
+    public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
+        return body.parts();
+    }
+
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (body != null) {
+            body.setIds(id);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        body.follow();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -58,7 +87,6 @@ public class AshLizard extends RegionBoss {
                     .floor(getY()).warn(SWEEP_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.ASH_LIZARD_SWEEP.get(), 1.4f, 1.0f)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.4, getZ(), 40, SWEEP_OUT * 0.45, 0.1, SWEEP_OUT * 0.45, 0.02))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage());
                         Vec3 away = player.position().subtract(position()).multiply(1, 0, 1).normalize();
@@ -86,15 +114,11 @@ public class AshLizard extends RegionBoss {
         begin(target, "breath");
         cue("ash_lizard", "breath", BREATH_WARN);
         Vec3 f = forward();
-        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(30)))
+        Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BREATH_RANGE, Math.toRadians(30))).prop(PropFx.shots("ash_ball", 3))
                 .floor(getY()).warn(BREATH_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.ASH_LIZARD_BREATH.get(), 1.4f, 1.0f)
                 .victims(this::canHit)
                 .onImpact(server -> {
-                    for (double d = 1.5; d <= BREATH_RANGE; d += 0.8) {
-                        server.sendParticles(ParticleTypes.FLAME, getX() + f.x * d, getY() + 0.9, getZ() + f.z * d, 4, d * 0.22, 0.25, d * 0.22, 0.02);
-                        server.sendParticles(ParticleTypes.ASH, getX() + f.x * d, getY() + 1.2, getZ() + f.z * d, 6, d * 0.25, 0.4, d * 0.25, 0.02);
-                    }
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 0.9f);

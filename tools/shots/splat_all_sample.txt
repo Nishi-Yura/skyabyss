@@ -1,0 +1,76 @@
+# 全部の模型の点の版の見本 (自動変換。tools/gen なし、SplatGen がその場で作る)
+world splatall flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode creative
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_stone destroy
+fov 60
+hud off
+chat clear
+cmd tp @s 0 -60 12 180 0
+waitchunks
+wait 20
+cmd kill @e[type=!player]
+cmd summon skyabyss:moss_crawler -10.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bone_footman -7.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bandit -4.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:crag_tortoise -1.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:thunder_wolf 1.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:crystal_lizard 4.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:rock_boar 7.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bell_hermit 10.5 -60 0.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:storyteller -4.5 -60 -5.5 {NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:ash_smith -0.5 -60 -5.5 {NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:town_guest 3.5 -60 -5.5 {Guest:"whale_bonecarver",NoAI:1b,Rotation:[0f,0f]}
+cmd summon skyabyss:town_guest 6.5 -60 -5.5 {Guest:"whale_lookout",NoAI:1b,Rotation:[0f,0f]}
+cmd gamemode spectator
+camera minecraft:overworld 0 -56.5 13 180 14
+wait 80
+shot mobs_wide
+camera minecraft:overworld -7 -58.5 5 180 10
+wait 30
+shot mobs_left
+camera minecraft:overworld 4 -58.5 5 180 10
+wait 30
+shot mobs_right
+camera minecraft:overworld 1 -58.3 -1 180 6
+wait 30
+shot npcs
+# 防具と武器 (自分)
+cmd gamemode creative
+cmd tp @s 0 -60 20 180 0
+wait 10
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+hud on
+wait 40
+perspective front
+wait 30
+shot player_front
+perspective back
+wait 20
+shot player_back
+perspective first
+wait 20
+shot first_person
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+wait 30
+shot first_person_pike
+open inventory
+wait 40
+shot inventory
+close
+quit

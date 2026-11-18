@@ -254,7 +254,7 @@ public final class CleftCave {
         if (centre != null) {
             level.playSound(null, centre, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.4f, 0.7f);
             level.playSound(null, centre, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.0f, 0.6f);
-            level.sendParticles(ParticleTypes.POOF, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 12, 1.0, 1.0, 1.0, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 12, 1.0, 1.0, 1.0, 0.02);
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 40 * 40) {
                     Notice.hint(p, "message.skyabyss.ch1.plate.open");
@@ -316,5 +316,10 @@ public final class CleftCave {
     // 自己テスト用: 鳴り石のグループごとの進み
     static int progress(UUID group, SiteData.Entry cave) {
         return PROGRESS.getOrDefault(group + "@" + cave.pos.asLong(), 0);
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

@@ -108,8 +108,8 @@ public final class StormGearEvents {
             event.setAmount((float) (event.getAmount() * WardenGlaiveItem.aerial(hand)));
             if (attacker.level() instanceof ServerLevel level) {
                 LivingEntity t = event.getEntity();
-                level.sendParticles(ParticleTypes.CLOUD, t.getX(), t.getY(0.6), t.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, t.getX(), t.getY(0.6), t.getZ(), 10, 0.3, 0.4, 0.3, 0.15);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), t.getX(), t.getY(0.6), t.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), t.getX(), t.getY(0.6), t.getZ(), 10, 0.3, 0.4, 0.3, 0.15);
             }
         }
     }
@@ -162,9 +162,9 @@ public final class StormGearEvents {
     public static void strike(ServerLevel level, LivingEntity target, Player owner, float damage) {
         for (double y = 0; y < 3.5; y += 0.25) {
             double jitter = Math.sin(y * 7 + target.getId()) * 0.25;
-            level.sendParticles(ParticleTypes.END_ROD, target.getX() + jitter, target.getY() + y, target.getZ() - jitter, 1, 0.02, 0.02, 0.02, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX() + jitter, target.getY() + y, target.getZ() - jitter, 1, 0.02, 0.02, 0.02, 0);
         }
-        level.sendParticles(ParticleTypes.FLASH, target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
         zap(level, target, owner, damage);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.6f, 1.5f);
     }
@@ -182,7 +182,7 @@ public final class StormGearEvents {
     }
 
     public static void sparks(ServerLevel level, LivingEntity target) {
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.5), target.getZ(), 14, 0.3, 0.45, 0.3, 0.25);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.5), target.getZ(), 14, 0.3, 0.45, 0.3, 0.25);
     }
 
     // 二体のあいだに走る稲妻の線 (折れ線の粒)
@@ -193,7 +193,7 @@ public final class StormGearEvents {
         for (int i = 0; i <= steps; i++) {
             Vec3 p = a.lerp(b, i / (double) steps);
             double k = (i % 2 == 0 ? 0.18 : -0.18) * Math.sin(i * 1.3);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x + k, p.y + k, p.z - k, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x + k, p.y + k, p.z - k, 1, 0, 0, 0, 0);
         }
     }
 
@@ -232,8 +232,8 @@ public final class StormGearEvents {
             ProjectileDeflection.REVERSE.deflect(p, player, player.getRandom());
             p.hurtMarked = true;
             ServerLevel level = player.serverLevel();
-            level.sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY(), p.getZ(), 8, 0.2, 0.2, 0.2, 0.08);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY(), p.getZ(), 12, 0.25, 0.25, 0.25, 0.2);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY(), p.getZ(), 8, 0.2, 0.2, 0.2, 0.08);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY(), p.getZ(), 12, 0.25, 0.25, 0.25, 0.2);
             level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 1.0f, 1.2f);
             player.getCooldowns().addCooldown(feather, StormGear.FEATHER_COOLDOWN);
             return true;
@@ -282,8 +282,8 @@ public final class StormGearEvents {
         p.fallDistance = 0;
         p.getCooldowns().addCooldown(StormGearSetup.CHESTPLATE.get(), StormGear.DASH_COOLDOWN);
         ServerLevel level = p.serverLevel();
-        level.sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.3, p.getZ(), 14, 0.35, 0.15, 0.35, 0.06);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY() + 0.8, p.getZ(), 16, 0.3, 0.5, 0.3, 0.2);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.3, p.getZ(), 14, 0.35, 0.15, 0.35, 0.06);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 0.8, p.getZ(), 16, 0.3, 0.5, 0.3, 0.2);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.6f, 1.6f);
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.8f, 1.3f);
         return true;
@@ -307,5 +307,10 @@ public final class StormGearEvents {
                 dash(player);
             }
         });
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -154,7 +154,7 @@ public final class RpgTabs {
             // 選んでいるつまみは画面の縁より手前に描き、縁とつながって見えるようにする
             g.pose().translate(0, 0, selected ? 50 : 0);
             g.blit(SkillHud.TEXTURE, getX(), getY(), TAB_W, TAB_H, u, 470, 112, 32, SkillHud.TEX_W, SkillHud.TEX_H);
-            int color = selected ? 0xF2C14E : isHoveredOrFocused() ? 0xE6E2D6 : 0xA9AEBC;
+            int color = selected ? 0xE9C46A : isHoveredOrFocused() ? 0xECE8DC : 0xB4BBD6;
             var font = Minecraft.getInstance().font;
             g.drawString(font, getMessage(), getX() + (TAB_W - font.width(getMessage())) / 2, getY() + 5, color, false);
             g.pose().popPose();

@@ -100,7 +100,7 @@ public final class VowHud {
         boolean first = true;
         for (Component line : lines(s, net.minecraft.Util.getMillis() - receivedAt)) {
             net.minecraft.util.FormattedCharSequence shown = net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(line, r.w()));
-            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? 0xF2C14E : 0xE9E3D4, true);
+            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? 0xE9C46A : 0xE9E3D4, true);
             first = false;
             y += 11;
         }

@@ -89,10 +89,16 @@ public final class MoonGate {
             int tt = t;
             Tasks.later(t, () -> {
                 for (int y = 0; y < 40; y += 2) {
-                    level.sendParticles(ParticleTypes.END_ROD, gate.getX() + 0.5, gate.getY() + 1 + y + tt * 0.1, gate.getZ() + 0.5, 2, 0.3, 0.6, 0.3, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), gate.getX() + 0.5, gate.getY() + 1 + y + tt * 0.1, gate.getZ() + 0.5, 2, 0.3, 0.6, 0.3, 0.01);
                 }
             });
         }
+        // 光の柱の終わりに、空が縦に裂けて月の夜がのぞき、覆ったところで渡る (2026-11-15 の光の表現。fx/RiftPayload)
+        Tasks.later(Math.max(0, BEAM_TICKS - jp.revati.skyabyss.fx.RiftPayload.LEAD), () -> {
+            if (p.isAlive() && !p.hasDisconnected()) {
+                jp.revati.skyabyss.fx.RiftPayload.send(p, jp.revati.skyabyss.fx.RiftPayload.MOON);
+            }
+        });
         Tasks.later(BEAM_TICKS, () -> {
             if (p.isAlive() && !p.hasDisconnected() && MoonWorld.enter(p)) {
                 Quests.signal(p, SIGNAL);
@@ -100,5 +106,10 @@ public final class MoonGate {
                         MoonClock.name(MoonClock.phase(p.serverLevel())));
             }
         });
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

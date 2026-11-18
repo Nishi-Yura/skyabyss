@@ -201,9 +201,6 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return entityData.get(MODE) == Mode.REST.ordinal() && entityData.get(REST) < 0;
     }
 
-    public boolean isApproaching() {
-        return entityData.get(MODE) == Mode.APPROACH.ordinal();
-    }
 
     // 潮門を開けておく残り tick (テスト用)
     public int stayLeft() {
@@ -365,8 +362,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(this) < 300 * 300) {
                     double y = level.getSeaLevel() + 0.5;
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.BUBBLE_POP, true, getX(), y, getZ(), 30, 28, 0.3, 28, 0.02);
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.SPLASH, true, getX(), y, getZ(), 20, 30, 0.2, 30, 0.1);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, getX(), y, getZ(), 24, 28, 0.3, 28, 0.02);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, getX(), y, getZ(), 20, 30, 0.2, 30, 0.1);
                 }
             }
         }
@@ -816,11 +813,6 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         groundNow = jp.revati.skyabyss.titan.TitanGround.anyUnloaded(level, volume, getX(), getZ(), getYRot(), 3.0) ? Math.max(groundNow, fresh) : fresh;
     }
 
-    // 試験用: 今の位置・向きで体が地形にめり込まない最低の高さ (間引かずに測る)
-    public double groundRequiredY() {
-        return jp.revati.skyabyss.titan.TitanGround.requiredY((ServerLevel) level(), jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
-                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot());
-    }
 
     private double horizontalDistanceTo(double x, double z) {
         return Math.hypot(x - getX(), z - getZ());
@@ -856,10 +848,6 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return RequestResult.OK;
     }
 
-    // この刻に呼んだ人の名前 (いなければ空)
-    public String requesterNow() {
-        return requestWindow == TideOcean.windowId(level().getDayTime()) ? requesterName : "";
-    }
 
     // 呼び貝 (titan.travel.TitanCalls): 干満・昼夜に関わらず、その人にいちばん近い浅瀬へ寄って、20 分 (TitanStay) 潮門を開ける。
     // 遠くにいるときは、休む場所から 90〜140 ブロックの沖から歩いてくる。休む場所がなければ false
@@ -1195,5 +1183,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

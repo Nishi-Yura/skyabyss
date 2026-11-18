@@ -109,7 +109,7 @@ public final class AbyssMarks {
         }
         Quests.signalWithParty(level, List.of(p), SIGNAL_MARK + key);
         int n = count(p, layer);
-        Notice.gain(p, Component.translatable("message.skyabyss.abyss_v2.mark_got", Component.translatable("abyss_v2.skyabyss.mark." + key), n));
+        Notice.gainLog(p, Component.translatable("message.skyabyss.abyss_v2.mark_got", Component.translatable("abyss_v2.skyabyss.mark." + key), n));
         for (ServerPlayer mate : Parties.onlineMembers(p.server, Parties.of(p))) {
             if (mate != p) {
                 Notice.hint(mate, "message.skyabyss.abyss_v2.mark_mate", p.getDisplayName(), Component.translatable("abyss_v2.skyabyss.mark." + key));
@@ -118,7 +118,7 @@ public final class AbyssMarks {
         BlockPos m = AbyssBuild.mark("mark_" + key);
         if (m != null) {
             level.playSound(null, m, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.BLOCKS, 1f, 0.8f);
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, m.getX() + 0.5, m.getY() + 1.1, m.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.getX() + 0.5, m.getY() + 1.1, m.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.02);
         }
         openShortcut(level, layer, i);
         if (n >= 3 && !AbyssEscort.expedition(layer)) {
@@ -382,7 +382,7 @@ public final class AbyssMarks {
             if (open) {
                 if (level.getBlockState(b).is(Blocks.IRON_BARS)) {
                     level.setBlock(b, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-                    level.sendParticles(SOCKET, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.25, 0.25, 0.1, 0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.25, 0.25, 0.1, 0);
                 }
             } else if (level.getBlockState(b).isAir()) {
                 level.setBlock(b, Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_ALL);
@@ -435,7 +435,7 @@ public final class AbyssMarks {
                 for (int i = 1; i <= 3; i++) {
                     BlockPos so = AbyssBuild.mark("socket_" + layer + "_" + i);
                     if (so != null && i <= n) {
-                        level.sendParticles(p, SOCKET, true, so.getX() + 0.5, so.getY() + 0.5, so.getZ() + 0.5, 4, 0.15, 0.15, 0.15, 0);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, so.getX() + 0.5, so.getY() + 0.5, so.getZ() + 0.5, 4, 0.15, 0.15, 0.15, 0);
                     }
                 }
             }
@@ -443,7 +443,7 @@ public final class AbyssMarks {
             for (int i = 1; i <= 3; i++) {
                 BlockPos m = AbyssBuild.mark("mark_" + layer + "_" + i);
                 if (m != null && m.closerThan(p.blockPosition(), 24) && !d.has(p.getUUID(), "mark:" + layer + "_" + i)) {
-                    level.sendParticles(p, ParticleTypes.SOUL_FIRE_FLAME, true, m.getX() + 0.5, m.getY() + 1.0, m.getZ() + 0.5, 2, 0.2, 0.2, 0.2, 0.01);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, m.getX() + 0.5, m.getY() + 1.0, m.getZ() + 0.5, 2, 0.2, 0.2, 0.2, 0.01);
                 }
             }
         }
@@ -454,5 +454,10 @@ public final class AbyssMarks {
                 }
             }
         }
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

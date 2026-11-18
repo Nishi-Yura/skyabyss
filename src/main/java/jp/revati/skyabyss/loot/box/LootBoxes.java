@@ -290,7 +290,7 @@ public final class LootBoxes {
         return box == null ? 0 : Pouch.countAll(p, box);
     }
 
-    // n 個まで開ける: 箱を取り、品を渡し (旅嚢 → 持ち物 → 足もと)、ルーレットの帯を作る。開けた分を返す
+    // n 個まで開ける: 箱を取り、品を渡し (旅袋 → 持ち物 → 足もと)、ルーレットの帯を作る。開けた分を返す
     public static List<Opened> open(ServerPlayer p, BoxKind kind, int n) {
         List<Opened> out = new ArrayList<>();
         Item box = LootBoxSetup.item(kind);
@@ -367,12 +367,12 @@ public final class LootBoxes {
         }
         // 品の名は画面のルーレットが見せる (知らせの欄に先に出すと当たりが分かってしまう)。画面のない開け方 (自己テストなど) だけ一行
         if (!(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && !BoxService.viewing(p)) {
-            Notice.gain(p, Component.translatable("message.skyabyss.box.opened", new ItemStack(LootBoxSetup.item(kind)).getHoverName(),
+            Notice.gainLog(p, Component.translatable("message.skyabyss.box.opened", new ItemStack(LootBoxSetup.item(kind)).getHoverName(),
                     ComponentUtils.formatList(names, Component.literal(" "))));
         }
         // ヒロイック以上: 頭の上に小さな光 (近くの人にも見える。チャットには出さない)
         if (best.atLeast(GearTier.HEROIC)) {
-            p.serverLevel().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, p.getX(), p.getY() + 2.4, p.getZ(), 24, 0.25, 0.2, 0.25, 0.08);
+            p.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 2.4, p.getZ(), 24, 0.25, 0.2, 0.25, 0.08);
         }
     }
 

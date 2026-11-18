@@ -1,4 +1,4 @@
-"""旅嚢 (docs/design/22_mod_pouch.md) の画面の素材を作る。装飾の画面 (tools/gen/items/gen_accessory_assets.py) と同じ作り: 2 倍密度 (GUI の 1 単位 = 2 px、32 画素の絵に合わせた細かさ)、
+"""旅袋 (docs/design/22_mod_pouch.md) の画面の素材を作る。装飾の画面 (tools/gen/items/gen_accessory_assets.py) と同じ作り: 2 倍密度 (GUI の 1 単位 = 2 px、32 画素の絵に合わせた細かさ)、
 骨の枠・石板・くぼみ・枠・角の石は共鳴の炉 (tools/gen/items/gen_forge_assets.py) と同じ。つまみは装飾の画面の素材 (accessory.png) を使うのでここでは作らない。
 
 使い方:

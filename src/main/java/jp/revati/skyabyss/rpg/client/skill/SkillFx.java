@@ -218,15 +218,14 @@ public final class SkillFx {
         c.at(1, x -> FxDraw.add(x, FxDraw.Prim.ring(x.feet(), 0.8, 3.2).color(rgb).width(0.35).life(14)));
         c.at(4, x -> FxDraw.add(x, FxDraw.Prim.ring(x.feet(), 0.6, 2.4).color(rgb).width(0.22).life(12)));
         net.minecraft.core.particles.ParticleOptions dot = switch (c.rewrite.source()) {
-            case "tide" -> net.minecraft.core.particles.ParticleTypes.SPLASH;
-            case "storm" -> net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK;
-            case "ember" -> net.minecraft.core.particles.ParticleTypes.FLAME;
-            case "whale" -> new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
-                    net.minecraft.world.level.block.Blocks.DEEPSLATE.defaultBlockState());
-            case "moon" -> net.minecraft.core.particles.ParticleTypes.END_ROD;
-            case "divine" -> net.minecraft.core.particles.ParticleTypes.WAX_ON;
-            case "abyss" -> net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME;
-            default -> net.minecraft.core.particles.ParticleTypes.CRIT;
+            case "tide" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE);
+            case "storm" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
+            case "ember" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
+            case "whale" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
+            case "moon" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
+            case "divine" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
+            case "abyss" -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
+            default -> jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW);
         };
         c.at(5, x -> burst(x, dot, x.aim(3.0), 10, 0.6, 0.08));
     }
@@ -282,6 +281,10 @@ public final class SkillFx {
 
     // 手元の一粒
     public static boolean put(Cast c, ParticleOptions p, double x, double y, double z, double vx, double vy, double vz) {
+        // 試作 (client/look/GearLook): 技の絵札の案のあいだは、独自の光の粒を出さない
+        if (jp.revati.skyabyss.client.look.GearLook.skill != '0') {
+            return false;
+        }
         Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         double dx = x - cam.x;
         double dy = y - cam.y;

@@ -269,6 +269,7 @@ class Cave:
         cells.update(self.mats)
         cells.update(self.blk)
         settle_gravity(cells)
+        remove_crumbs(cells)
         palette, index, runs = [], {}, []
         rows = {}
         for (x, y, z), s in cells.items():
@@ -389,3 +390,99 @@ def bone_arc(cv, cx, cz, r, y0, angle, thick=1, seed=0, block="minecraft:bone_bl
         for dx in range(-thick + 1, thick):
             for dy in range(-thick + 1, thick):
                 cv.put(int(round(px)) + dx, int(round(py)) + dy, int(round(pz)), f"{block}[axis=y]" if "bone_block" in block else block)
+
+
+# 縦坑の壁ぎわを回って上がる、歩いて登れる段 (2026-11-11: 前の段は 30 度おきで一段ごとに斜め 2 マスの隙間があり、登れなかった)。
+# 輪の上の 4 方向につながったマスを順にたどり、per マスごとに 1 段上がる (上がるマスは段、同じ高さのマスは石)。下は fill で詰め、上は 4 マス空ける。
+# 段の上面は y0 + 1 から y0 + rise まで。戻り値は最後のマス (x, z)
+def spiral_stair(cv, cx, cz, r, y0, rise, end_deg=45.0, per=1, landing=2, mat="stone_brick", full="minecraft:stone_bricks", fill="minecraft:snow_block"):
+    """段の上面は y0 + 1 から y0 + rise。登り切るのは輪の end_deg の所 (棚の縁の手前で上り終わり、頭の上に棚がかからない)。
+    per マスごとに 1 段 (1 なら毎マス段)。登り切った先に landing マスの平らな踊り場 (輪の先へ)。"""
+    def ring_from(deg, sign):
+        out = []
+        for i in range(0, 7200):
+            a = math.radians(deg + sign * i * 0.05)
+            c = (int(round(cx + r * math.cos(a))), int(round(cz + r * math.sin(a))))
+            if out and c == out[-1]:
+                continue
+            if out and abs(c[0] - out[-1][0]) + abs(c[1] - out[-1][1]) == 2:
+                mid = (c[0], out[-1][1])
+                if mid in out:
+                    break
+                out.append(mid)
+            if c in out:
+                break
+            out.append(c)
+        return out
+    ring = ring_from(end_deg, -1)
+    cells = list(reversed(ring[:per * rise]))
+    ahead = ring_from(end_deg, 1)[1:1 + landing]
+    names = {(1, 0): "east", (-1, 0): "west", (0, 1): "south", (0, -1): "north"}
+    prev_h = y0 - 1
+    for i, (x, z) in enumerate(cells):
+        h = y0 + i // per
+        nx, nz = cells[i + 1] if i + 1 < len(cells) else (x, z)
+        px, pz = cells[i - 1] if i > 0 else (2 * x - nx, 2 * z - nz)
+        d = (max(-1, min(1, x - px)), max(-1, min(1, z - pz)))
+        for yy in range(y0 - 1, h):
+            cv.put(x, yy, z, fill)
+        cv.put(x, h, z, stair(mat, names.get(d, "north")) if h > prev_h else full)
+        for yy in range(h + 1, h + 5):
+            cv.put(x, yy, z, AIR)
+        prev_h = h
+    for (x, z) in ahead:
+        for yy in range(y0 - 1, prev_h):
+            cv.put(x, yy, z, fill)
+        cv.put(x, prev_h, z, full)
+        for yy in range(prev_h + 1, prev_h + 5):
+            cv.put(x, yy, z, AIR)
+    return cells[-1]
+
+
+# 通路の床の段差を、z の向きに歩いて上がれる段にする。x0..x1 の幅で、z_from から z の向き (dz = ±1) に、y_from (立つ高さ) から y_to まで。
+# 段の下は full で詰め、上は 4 マス空ける
+def step_run(cv, x0, x1, z_from, dz, y_from, y_to, mat, full):
+    facing = "south" if dz > 0 else "north"
+    z = z_from
+    for y in range(y_from, y_to):
+        for x in range(x0, x1 + 1):
+            for yy in range(y_from - 2, y):
+                cv.put(x, yy, z, full)
+            cv.put(x, y, z, stair(mat, facing))
+            for yy in range(y + 1, y + 5):
+                cv.put(x, yy, z, AIR)
+        z += dz
+    return z
+
+
+# 宙に浮いた岩のかけら (彫った壁の粗さで残った、下も上も空きで横の 3 方以上が空きの石) を消す。景色の中のごみに見え、
+# 通り道をわかりにくくしていた (2026-11-11 の声「前の建築が残ってる？奥がわかりづらい」、潮の洞)。
+# 自然の石だけ (階段・板・柱・灯り・鍾乳石・置き物は残す)。隣が書き出しの外 (None) のものは殻なので残す
+CRUMB_KEEP = ("stairs", "slab", "wall", "fence", "log", "planks", "wood", "lantern", "chain", "bars", "dripstone[", "pointed", "chest",
+              "barrel", "lodestone", "torch", "glass", "lamp", "light", "sea_lantern", "bud", "cluster", "kelp", "coral", "button", "ice")
+
+
+def remove_crumbs(cells, passes=2):
+    def open_(p):
+        b = cells.get(p)
+        return b is not None and (b == AIR or b.split("[")[0] in ("minecraft:air", "minecraft:water", "minecraft:light", "minecraft:cave_air"))
+    for _ in range(passes):
+        gone = []
+        for (x, y, z), b in cells.items():
+            if open_((x, y, z)) or any(k in b for k in CRUMB_KEEP):
+                continue
+            if not open_((x, y - 1, z)):
+                continue
+            sides = [(x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1)]
+            if any(cells.get(q) is None for q in sides):
+                continue
+            n = sum(open_(q) for q in sides)
+            # 宙のかけら (上も空き・横 3 方以上が空き)、または天井から垂れた細い先 (横 4 方とも空き)
+            if (open_((x, y + 1, z)) and n >= 3) or n == 4:
+                gone.append((x, y, z))
+        for q in gone:
+            below = cells.get((q[0], q[1] - 1, q[2]))
+            cells[q] = "minecraft:water" if below and below.startswith("minecraft:water") else AIR
+        if not gone:
+            break
+

@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.client.npc;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.npc.ArtisanLook;
 import jp.revati.skyabyss.npc.NpcEntity;
@@ -76,7 +75,7 @@ public final class NpcRenderer {
         }
     }
 
-    // 低ポリ (client/lowpoly): LowPoly.enabled = false で元の滑らかなボクセルの geo (geo/entity/<name>.geo.json) に戻る
+    // 低ポリ (client/lowpoly):。
     private static LowPolyGeoRenderer<NpcEntity> create(EntityRendererProvider.Context ctx, String name, float shadow) {
         return new LowPolyGeoRenderer<>(ctx, new Model(name), e -> name, 1.0f) {
             {

@@ -3,7 +3,6 @@ package jp.revati.skyabyss.rpg;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
@@ -11,12 +10,9 @@ import jp.revati.skyabyss.rpg.GrowthRules.Stat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -67,18 +63,6 @@ public final class GrowthCommands {
                             Growth.sync(p);
                             Growth.applyModifiers(p);
                             return done(ctx, p);
-                        }))))
-                .then(Commands.literal("fragment")
-                        .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
-                                .then(Commands.argument("id", ResourceLocationArgument.id())
-                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(MemoryFragments.KNOWN, b))
-                                        .executes(ctx -> giveFragment(ctx, 1))
-                                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
-                                                .executes(ctx -> giveFragment(ctx, IntegerArgumentType.getInteger(ctx, "count")))))))
-                        .then(Commands.literal("clear").then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
-                            ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
-                            Growth.clearFragments(p);
-                            return done(ctx, p);
                         })))));
     }
 
@@ -87,22 +71,12 @@ public final class GrowthCommands {
         return 1;
     }
 
-    private static int giveFragment(CommandContext<CommandSourceStack> ctx, int count) throws CommandSyntaxException {
-        ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-        ResourceLocation id = ResourceLocationArgument.getId(ctx, "id");
-        int added = Growth.grantFragment(player, id, count);
-        if (added < count) {
-            ctx.getSource().sendFailure(Component.translatable("message.skyabyss.growth.fragment_full", count - added));
-        }
-        return done(ctx, player);
-    }
-
     // 一行の要約 (管理者のコマンドの返事)
     private static MutableComponent summary(ServerPlayer player) {
         GrowthData d = Growth.get(player);
         return Component.translatable("message.skyabyss.growth.summary", player.getDisplayName(), d.level, d.xp,
                 d.xpNeed(), d.stat(Stat.STRENGTH), d.stat(Stat.AGILITY), d.stat(Stat.SPIRIT),
-                d.stat(Stat.VITALITY), d.unspentPoints(), d.fragmentCount(), d.fragmentCapacity);
+                d.stat(Stat.VITALITY), d.unspentPoints());
     }
 
     private static int show(CommandSourceStack source, ServerPlayer player) {
@@ -124,14 +98,6 @@ public final class GrowthCommands {
                 pct(GrowthRules.projectileMultiplier(d.stat(Stat.AGILITY))),
                 jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(d.stat(Stat.VITALITY))),
                 (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(d.stat(Stat.SPIRIT)))));
-        MutableComponent frag = ModText.lore("message.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity);
-        source.sendSystemMessage(frag);
-        if (!d.fragments.isEmpty()) {
-            MutableComponent list = Component.literal("  ");
-            d.fragments.forEach((id, n) -> list.append(Component.translatable(MemoryFragments.nameKey(id)).withStyle(ChatFormatting.AQUA))
-                    .append(Component.literal(" ×" + n + "  ").withStyle(ChatFormatting.GRAY)));
-            source.sendSystemMessage(list);
-        }
         return 1;
     }
 

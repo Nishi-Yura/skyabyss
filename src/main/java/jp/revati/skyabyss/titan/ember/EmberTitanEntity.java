@@ -557,8 +557,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             // 浮かぶあいだ、まわりに灰が舞う
             Vec3 c = position().add(offset(getYRot(), 0, 0, 10));
             for (ServerPlayer p : playersWithin(level, 160)) {
-                level.sendParticles(p, ParticleTypes.WHITE_ASH, true, c.x, restGround + 4, c.z, 60, 40, 6, 60, 0.02);
-                level.sendParticles(p, ParticleTypes.LARGE_SMOKE, true, c.x, restGround + 1, c.z, 6, 30, 1, 50, 0.01);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, restGround + 4, c.z, 24, 40, 6, 60, 0.02);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, restGround + 1, c.z, 6, 30, 1, 50, 0.01);
             }
         }
         if (moveTicks % 100 == 0) {
@@ -691,13 +691,13 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             }
             // 灰はその人のまわりに降る (描画距離の外でも、遠くから巨神を探す手がかりになる)
             int count = tier == 3 ? 24 : tier == 2 ? 10 : 4;
-            level.sendParticles(p, ParticleTypes.WHITE_ASH, false, p.getX(), p.getY() + 6, p.getZ(), count, 10, 4, 10, 0.0);
+            level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), false, p.getX(), p.getY() + 6, p.getZ(), count, 10, 4, 10, 0.0);
             if (tickCount % 40 == 0) {
                 EmberSurfaceNetwork.send(p, new EmberSurfaceNetwork.AshSky(tier));
             }
             if (d < 160) {
-                level.sendParticles(p, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, crater.x, crater.y, crater.z, 3, 3, 1, 3, 0.02);
-                level.sendParticles(p, ParticleTypes.LAVA, true, crater.x, crater.y - 1, crater.z, 1, 3, 0, 3, 0.0);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, crater.x, crater.y, crater.z, 3, 3, 1, 3, 0.02);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), true, crater.x, crater.y - 1, crater.z, 1, 3, 0, 3, 0.0);
             }
             if (d < 140) {
                 if (now == Breath.IN) {
@@ -707,8 +707,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
                         double sz = snout.z + (random.nextDouble() - 0.5) * 14;
                         double sy = snout.y + random.nextDouble() * 4;
                         Vec3 v = mouth.add(0, 2, 0).subtract(sx, sy, sz).normalize();
-                        ParticleOptions type = i % 3 == 0 ? ParticleTypes.SMALL_FLAME : ParticleTypes.WHITE_ASH;
-                        level.sendParticles(p, type, true, sx, sy, sz, 0, v.x, v.y, v.z, 0.4);
+                        ParticleOptions type = i % 3 == 0 ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, sx, sy, sz, 0, v.x, v.y, v.z, 0.4);
                     }
                 } else if (now == Breath.OUT) {
                     // 熱い風と灰が吹き出す
@@ -716,8 +716,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
                     for (int i = 0; i < 5; i++) {
                         double sx = mouth.x + (random.nextDouble() - 0.5) * 3;
                         double sz = mouth.z + (random.nextDouble() - 0.5) * 3;
-                        ParticleOptions type = i % 2 == 0 ? ParticleTypes.FLAME : ParticleTypes.LARGE_SMOKE;
-                        level.sendParticles(p, type, true, sx, mouth.y + 1 + random.nextDouble() * 2, sz, 0, dir.x, 0.05, dir.z, 0.6);
+                        ParticleOptions type = i % 2 == 0 ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, sx, mouth.y + 1 + random.nextDouble() * 2, sz, 0, dir.x, 0.05, dir.z, 0.6);
                     }
                 }
             }
@@ -749,7 +749,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         setPos(getX(), Mth.lerp(t * t, moveFromY, Math.min(target, moveFromY)), getZ());
         if (moveTicks % 4 == 0) {
             for (ServerPlayer p : playersWithin(level, 128)) {
-                level.sendParticles(p, ParticleTypes.WHITE_ASH, true, getX(), getY() + 30, getZ(), 30, 40, 10, 60, 0.02);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, getX(), getY() + 30, getZ(), 24, 40, 10, 60, 0.02);
             }
         }
         if (moveTicks >= SINK_TICKS) {
@@ -763,9 +763,9 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         Vec3 ridge = ridgePoint();
         if (tickCount % 10 == 0) {
             for (ServerPlayer p : playersWithin(level, 160)) {
-                level.sendParticles(p, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, ridge.x, ridge.y + 1, ridge.z, 2, 2, 1, 2, 0.015);
-                level.sendParticles(p, ParticleTypes.WHITE_ASH, true, ridge.x, ridge.y, ridge.z, 12, 8, 3, 8, 0.02);
-                level.sendParticles(p, ParticleTypes.ASH, true, ridge.x, ridge.y - 2, ridge.z, 8, 10, 2, 10, 0.0);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, ridge.x, ridge.y + 1, ridge.z, 2, 2, 1, 2, 0.015);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, ridge.x, ridge.y, ridge.z, 12, 8, 3, 8, 0.02);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), true, ridge.x, ridge.y - 2, ridge.z, 8, 10, 2, 10, 0.0);
             }
         }
         if (--rumbleCooldown <= 0) {
@@ -1228,5 +1228,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

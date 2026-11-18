@@ -74,7 +74,7 @@ public class CrumblingLedgeBlock extends Block {
         level.setBlock(pos, state.setValue(SHAKING, true), 3);
         level.scheduleTick(pos, state.getBlock(), SHAKE_TICKS);
         level.playSound(null, pos, CliffBlocks.LEDGE_SHAKE.get(), SoundSource.BLOCKS, 0.8f, 0.9f + level.random.nextFloat() * 0.2f);
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TUFF.defaultBlockState()), pos.getX() + 0.5, pos.getY() + 0.1,
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), pos.getX() + 0.5, pos.getY() + 0.1,
                 pos.getZ() + 0.5, 8, 0.3, 0.05, 0.3, 0.02);
     }
 
@@ -85,9 +85,9 @@ public class CrumblingLedgeBlock extends Block {
             level.setBlock(pos, state.setValue(SHAKING, false).setValue(FALLEN, true), 3);
             level.scheduleTick(pos, this, BACK_TICKS);
             level.playSound(null, pos, CliffBlocks.LEDGE_FALL.get(), SoundSource.BLOCKS, 0.9f, 0.8f + random.nextFloat() * 0.2f);
-            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TUFF.defaultBlockState()), pos.getX() + 0.5, pos.getY() + 0.5,
-                    pos.getZ() + 0.5, 30, 0.35, 0.3, 0.35, 0.05);
-            level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 4, 0.3, 0.1, 0.3, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), pos.getX() + 0.5, pos.getY() + 0.5,
+                    pos.getZ() + 0.5, 24, 0.35, 0.3, 0.35, 0.05);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 4, 0.3, 0.1, 0.3, 0.01);
             return;
         }
         if (state.getValue(FALLEN)) {
@@ -107,5 +107,10 @@ public class CrumblingLedgeBlock extends Block {
         if (st.getBlock() instanceof CrumblingLedgeBlock) {
             level.setBlock(pos, st.setValue(FALLEN, false).setValue(SHAKING, false), 3);
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

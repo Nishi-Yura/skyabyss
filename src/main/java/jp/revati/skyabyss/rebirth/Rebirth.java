@@ -17,7 +17,6 @@ import jp.revati.skyabyss.rpg.Rpg;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -118,9 +117,6 @@ public final class Rebirth {
         return Growth.get(player).rebirths;
     }
 
-    public static boolean isRebirthed(Player player) {
-        return count(player) > 0;
-    }
 
     // 装備・クエストの要求レベルに使うレベル。転生した人は、レベルを 1 から上げ直している間も 50 として扱う (できることが減らない)
     public static int gearLevel(Player player) {
@@ -311,8 +307,8 @@ public final class Rebirth {
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 0.8f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 0.6f);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 1.0, 0.5, 0.06);
-        level.sendParticles(ParticleTypes.GLOW, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.6, 1.0, 0.6, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.5, 1.0, 0.5, 0.06);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.6, 1.0, 0.6, 0.02);
         Notice.alert(player, "message.skyabyss.rebirth.done", n);
         Notice.gain(player, "message.skyabyss.rebirth.done_detail", Component.translatable(arm.nameKey()), Component.translatable(boon.nameKey()));
         jp.revati.skyabyss.advancement.Beats.fire(player, "rebirth:" + n);

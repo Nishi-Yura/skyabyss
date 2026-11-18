@@ -277,7 +277,7 @@ public final class WildGearEvents {
                 case CRIT -> {
                     if (player.getRandom().nextDouble() < f.p(0)) {
                         m *= 1 + f.p(1);
-                        level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.3, 0.3, 0.3, 0.2);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 12, 0.3, 0.3, 0.3, 0.2);
                     }
                 }
                 case ARMOR_PIERCE -> m *= 1 + f.p(0) * armorShare(target, amount);
@@ -302,7 +302,7 @@ public final class WildGearEvents {
                 case WEAKEN -> {
                     td.putLong(WEAK, now + f.ticks(0));
                     td.putDouble(WEAK_AMT, f.p(1));
-                    level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(0.8), target.getZ(), 4, 0.3, 0.2, 0.3, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.8), target.getZ(), 4, 0.3, 0.2, 0.3, 0.01);
                 }
                 case ARMOR_SHRED -> shred(target, f.p(0), f.p(1), f.ticks(2), now);
                 case ARMOR_DOWN -> armorDown(target, f.p(0), f.ticks(1), now);
@@ -312,7 +312,7 @@ public final class WildGearEvents {
                     if (n >= f.p(0)) {
                         n = 0;
                         effect(target, MobEffects.MOVEMENT_SLOWDOWN, f.ticks(1), 2);
-                        level.sendParticles(ParticleTypes.SNOWFLAKE, target.getX(), target.getY(0.5), target.getZ(), 16, 0.4, 0.4, 0.4, 0.05);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.5), target.getZ(), 16, 0.4, 0.4, 0.4, 0.05);
                     } else {
                         effect(target, MobEffects.MOVEMENT_SLOWDOWN, 40, 0);
                     }
@@ -322,7 +322,7 @@ public final class WildGearEvents {
                     if (pd.getLong(ROOT_CD) <= now) {
                         pd.putLong(ROOT_CD, now + f.ticks(1));
                         effect(target, MobEffects.MOVEMENT_SLOWDOWN, f.ticks(0), boss ? 1 : 6);
-                        level.sendParticles(ParticleTypes.WHITE_ASH, target.getX(), target.getY(0.2), target.getZ(), 16, 0.4, 0.1, 0.4, 0.01);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.2), target.getZ(), 16, 0.4, 0.1, 0.4, 0.01);
                     }
                 }
                 case LINK -> link(level, target, f.ticks(0), f.p(1), f.p(2), now);
@@ -339,12 +339,12 @@ public final class WildGearEvents {
                 }
                 case PULL_AOE -> {
                     pull(player, target, f.p(0), boss);
-                    area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), target, ParticleTypes.SQUID_INK);
+                    area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), target, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD));
                 }
                 case STUN_CHANCE -> {
                     if (player.getRandom().nextDouble() < f.p(0)) {
                         effect(target, MobEffects.MOVEMENT_SLOWDOWN, f.ticks(1), boss ? 1 : 6);
-                        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.4, 0.3, 0.1);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.4, 0.3, 0.1);
                     }
                 }
                 case SNUFF -> {
@@ -359,31 +359,31 @@ public final class WildGearEvents {
                 case EVERY_N_BOLT -> {
                     if (count(pd, w, (int) f.p(0))) {
                         bolt(level, target.position());
-                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), null, ParticleTypes.ELECTRIC_SPARK);
+                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), null, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                     }
                 }
                 case EVERY_N_BITE -> {
                     if (count(pd, w, (int) f.p(0))) {
-                        proc(level, player, target, (float) (attack * f.p(1)), ParticleTypes.LAVA);
+                        proc(level, player, target, (float) (attack * f.p(1)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD));
                         target.igniteForTicks(f.ticks(2));
                         sound(level, target, SoundEvents.EVOKER_FANGS_ATTACK, 0.8f);
                     }
                 }
                 case EVERY_N_QUAKE -> {
                     if (count(pd, w, (int) f.p(0))) {
-                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), target, ParticleTypes.EXPLOSION);
+                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), target, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                         sound(level, target, SoundEvents.ANVIL_LAND, 0.5f);
                     }
                 }
                 case EVERY_N_ASHRAIN -> {
                     if (count(pd, w, (int) f.p(0))) {
                         for (LivingEntity e : foes(level, player, target.position(), f.p(2))) {
-                            proc(level, player, e, (float) (attack * f.p(1)), ParticleTypes.WHITE_ASH);
+                            proc(level, player, e, (float) (attack * f.p(1)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                             effect(e, MobEffects.BLINDNESS, f.ticks(3), 0);
                             e.getPersistentData().putLong(WEAK, now + f.ticks(3));
                             e.getPersistentData().putDouble(WEAK_AMT, 0.15);
                         }
-                        level.sendParticles(ParticleTypes.ASH, target.getX(), target.getY() + 3, target.getZ(), 60, 2.5, 0.5, 2.5, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY() + 3, target.getZ(), 24, 2.5, 0.5, 2.5, 0.02);
                     }
                 }
                 case EVERY_N_SPIT -> {
@@ -394,7 +394,7 @@ public final class WildGearEvents {
                 case EVERY_N_SPARKS -> {
                     if (count(pd, w, (int) f.p(0))) {
                         for (LivingEntity e : foes(level, player, target.position(), f.p(2))) {
-                            proc(level, player, e, (float) (attack * f.p(1)), ParticleTypes.FIREWORK);
+                            proc(level, player, e, (float) (attack * f.p(1)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                             e.igniteForTicks(f.ticks(3));
                         }
                         sound(level, target, SoundEvents.FIREWORK_ROCKET_BLAST, 1.0f);
@@ -404,24 +404,24 @@ public final class WildGearEvents {
                     int n = pd.getInt(HEAT) + 1;
                     if (n > f.p(0)) {
                         n = 0;
-                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), null, ParticleTypes.FLAME);
-                        level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
+                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), null, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
                         sound(level, target, SoundEvents.FIRECHARGE_USE, 1.0f);
                     } else {
-                        level.sendParticles(ParticleTypes.SMALL_FLAME, player.getX(), player.getY(0.6), player.getZ(), n * 2, 0.3, 0.3, 0.3, 0.01);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY(0.6), player.getZ(), n * 2, 0.3, 0.3, 0.3, 0.01);
                     }
                     pd.putInt(HEAT, n);
                 }
                 case DELAYED_BOLT -> {
                     later(now + f.ticks(0), target, player, (float) (attack * f.p(1)), LOOK_BOLT, false);
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(1.0), target.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(1.0), target.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
                 }
                 case EMBERBUG -> later(now + f.ticks(1), target, player, (float) (attack * f.p(0)), LOOK_EMBER, true);
                 case FEATHERS -> {
                     if (player.getRandom().nextDouble() < f.p(0)) {
                         for (int i = 0; i < (int) f.p(1); i++) {
                             Vec3 at = target.position().add((player.getRandom().nextDouble() - 0.5) * f.p(3), 0, (player.getRandom().nextDouble() - 0.5) * f.p(3));
-                            area(level, player, at, f.p(3) * 0.6, (float) (attack * f.p(2)), null, ParticleTypes.ELECTRIC_SPARK);
+                            area(level, player, at, f.p(3) * 0.6, (float) (attack * f.p(2)), null, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                         }
                         bolt(level, target.position());
                     }
@@ -429,23 +429,23 @@ public final class WildGearEvents {
                 case PROC_BOLT -> {
                     if (player.getRandom().nextDouble() < f.p(0)) {
                         bolt(level, target.position());
-                        proc(level, player, target, (float) (attack * f.p(1)), ParticleTypes.ELECTRIC_SPARK);
+                        proc(level, player, target, (float) (attack * f.p(1)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                     }
                 }
                 case BACK_THRUST -> {
                     if (count(pd, w, (int) f.p(0))) {
                         Vec3 behind = player.position().subtract(player.getLookAngle().multiply(1.6, 0, 1.6));
-                        area(level, player, behind, f.p(2), (float) (attack * f.p(1)), null, ParticleTypes.CRIT);
+                        area(level, player, behind, f.p(2), (float) (attack * f.p(1)), null, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                     }
                 }
                 case WIND_SLASH -> windSlash(level, player, f.p(0), (float) (attack * f.p(1)), target);
                 case CONSTELLATION -> {
                     int n = pd.getInt(STARS) + 1;
-                    level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + 2.4, target.getZ(), 3, 0.5, 0.1, 0.5, 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + 2.4, target.getZ(), 3, 0.5, 0.1, 0.5, 0.0);
                     if (n >= f.p(0)) {
                         n = 0;
-                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), null, ParticleTypes.END_ROD);
-                        level.sendParticles(ParticleTypes.FIREWORK, target.getX(), target.getY() + 2, target.getZ(), 40, 2, 1, 2, 0.05);
+                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), null, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + 2, target.getZ(), 24, 2, 1, 2, 0.05);
                         sound(level, target, SoundEvents.AMETHYST_CLUSTER_BREAK, 1.2f);
                     }
                     pd.putInt(STARS, n);
@@ -454,7 +454,7 @@ public final class WildGearEvents {
                 case BACK_VENOM -> {
                     if (back) {
                         dot(level, player, target, (float) (attack * f.p(0)), f.ticks(1));
-                        level.sendParticles(ParticleTypes.ITEM_SLIME, target.getX(), target.getY(0.6), target.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
                     }
                 }
                 case MIRROR -> {
@@ -472,7 +472,7 @@ public final class WildGearEvents {
                         if (n >= f.p(1)) {
                             n = 0;
                             next(pd, 1.0, now);
-                            level.sendParticles(ParticleTypes.HEART, player.getX(), player.getY() + 2.1, player.getZ(), 3, 0.3, 0.1, 0.3, 0.0);
+                            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 2.1, player.getZ(), 3, 0.3, 0.1, 0.3, 0.0);
                             sound(level, player, SoundEvents.WARDEN_HEARTBEAT, 1.0f);
                         }
                         pd.putInt(BEATS, n);
@@ -486,7 +486,7 @@ public final class WildGearEvents {
                         }
                     }
                     low.heal((float) (amount * f.p(0)));
-                    level.sendParticles(ParticleTypes.HAPPY_VILLAGER, low.getX(), low.getY() + 1.2, low.getZ(), 3, 0.3, 0.3, 0.3, 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), low.getX(), low.getY() + 1.2, low.getZ(), 3, 0.3, 0.3, 0.3, 0.0);
                 }
                 case WARD_STACK -> {
                     if (player.getAbsorptionAmount() > 0) {
@@ -515,13 +515,13 @@ public final class WildGearEvents {
                         for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16), q -> q.getTarget() == player)) {
                             mob.setTarget(null);
                         }
-                        level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(0.5), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY(0.5), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
                     }
                 }
                 case PLUNGE -> {
                     if (player.fallDistance > 1.0f && !player.onGround()) {
                         m *= 1 + f.p(0);
-                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), target, ParticleTypes.EXPLOSION);
+                        area(level, player, target.position(), f.p(2), (float) (attack * f.p(1)), target, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                         sound(level, target, SoundEvents.MACE_SMASH_GROUND_HEAVY, 1.0f);
                     }
                 }
@@ -561,7 +561,7 @@ public final class WildGearEvents {
                             ally.heal((float) f.p(3));
                         }
                         sound(level, player, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), 2.0f);
-                        level.sendParticles(ParticleTypes.NOTE, player.getX(), player.getY() + 2.2, player.getZ(), 8, 1.0, 0.3, 1.0, 0.5);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 2.2, player.getZ(), 8, 1.0, 0.3, 1.0, 0.5);
                     }
                 }
                 case LULLABY -> {
@@ -572,7 +572,7 @@ public final class WildGearEvents {
                             if (!b && e instanceof Mob mob) {
                                 mob.setTarget(null);
                             }
-                            level.sendParticles(ParticleTypes.NOTE, e.getX(), e.getY() + e.getBbHeight() + 0.3, e.getZ(), 2, 0.2, 0.1, 0.2, 0.5);
+                            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() + 0.3, e.getZ(), 2, 0.2, 0.1, 0.2, 0.5);
                         }
                         for (Player ally : withSelf(level, player, f.p(1))) {
                             ally.heal((float) f.p(4));
@@ -585,7 +585,7 @@ public final class WildGearEvents {
                         for (Player ally : withSelf(level, player, f.p(4))) {
                             ally.heal((float) f.p(1));
                             buff(ally, BUFF, BUFF_AMT, f.p(2), now + f.ticks(3));
-                            level.sendParticles(ParticleTypes.END_ROD, ally.getX(), ally.getY() + 2, ally.getZ(), 6, 0.3, 0.2, 0.3, 0.02);
+                            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ally.getX(), ally.getY() + 2, ally.getZ(), 6, 0.3, 0.2, 0.3, 0.02);
                         }
                         sound(level, player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.4f);
                     }
@@ -597,12 +597,12 @@ public final class WildGearEvents {
                             effect(ally, MobEffects.REGENERATION, f.ticks(2), 1);
                         }
                         sound(level, player, SoundEvents.BELL_BLOCK, 1.6f);
-                        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 2.5, player.getZ(), 20, 1.5, 0.3, 1.5, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 2.5, player.getZ(), 20, 1.5, 0.3, 1.5, 0.02);
                     }
                 }
                 case SMOKE -> {
                     SMOKES.add(new Smoke(now + f.ticks(0), player.position(), f.p(1), f.p(2), level.dimension()));
-                    level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, player.getX(), player.getY() + 0.2, player.getZ(), 6, f.p(1) * 0.4, 0.1, f.p(1) * 0.4, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 0.2, player.getZ(), 6, f.p(1) * 0.4, 0.1, f.p(1) * 0.4, 0.01);
                 }
                 default -> {
                 }
@@ -697,12 +697,12 @@ public final class WildGearEvents {
                     if (full) {
                         for (LivingEntity e : foes(level, player, target.position(), f.p(1))) {
                             if (e != target) {
-                                proc(level, player, e, (float) (amount * f.p(0)), ParticleTypes.FLAME);
+                                proc(level, player, e, (float) (amount * f.p(0)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                             }
                             e.igniteForTicks(f.ticks(2));
                         }
-                        level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
-                        level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.5), target.getZ(), 10, 0.6, 0.4, 0.6, 0.1);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.5), target.getZ(), 1, 0, 0, 0, 0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY(0.5), target.getZ(), 10, 0.6, 0.4, 0.6, 0.1);
                         sound(level, target, SoundEvents.FIRECHARGE_USE, 0.9f);
                     }
                 }
@@ -715,7 +715,7 @@ public final class WildGearEvents {
                         }
                         target.getPersistentData().putLong(HANG, now + f.ticks(0) + 10);
                         target.getPersistentData().putDouble(HANG_AMT, f.p(1));
-                        level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY(1.0) + 0.6, target.getZ(), 8, 0.1, 0.8, 0.1, 0.01);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(1.0) + 0.6, target.getZ(), 8, 0.1, 0.8, 0.1, 0.01);
                     }
                 }
                 case MARK -> mark(level, target, f.p(0), f.ticks(1), now);
@@ -746,11 +746,11 @@ public final class WildGearEvents {
                 break;
             }
             if (((int) (d * 2)) % 2 == 0) {
-                level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
             }
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(0.8), q -> foe(q, p))) {
                 if (hit.add(e)) {
-                    proc(level, p, e, dmg, ParticleTypes.FLASH);
+                    proc(level, p, e, dmg, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                 }
             }
         }
@@ -796,10 +796,10 @@ public final class WildGearEvents {
                 case KILL_WARD -> {
                     player.setAbsorptionAmount((float) Math.max(player.getAbsorptionAmount(), f.p(0)));
                     player.getPersistentData().putLong(WARD_AT, now + f.ticks(1));
-                    level.sendParticles(ParticleTypes.WHITE_ASH, player.getX(), player.getY(0.6), player.getZ(), 20, 0.5, 0.6, 0.5, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY(0.6), player.getZ(), 20, 0.5, 0.6, 0.5, 0.02);
                 }
                 case KILL_BLAST -> {
-                    area(level, player, dead.position(), f.p(1), (float) (attack * f.p(0)), dead, ParticleTypes.EXPLOSION);
+                    area(level, player, dead.position(), f.p(1), (float) (attack * f.p(0)), dead, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                     sound(level, dead, SoundEvents.GENERIC_EXPLODE.value(), 0.6f);
                 }
                 case MOVE_RAMP -> {
@@ -829,7 +829,7 @@ public final class WildGearEvents {
         if (td.getLong(LINK) > now && event.getSource().getEntity() instanceof Player p) {
             Entity other = level.getEntity(td.getInt(LINK_TO));
             if (other instanceof LivingEntity o && o.isAlive()) {
-                proc(level, p, o, (float) (event.getNewDamage() * td.getDouble(LINK_AMT)), ParticleTypes.ENCHANT);
+                proc(level, p, o, (float) (event.getNewDamage() * td.getDouble(LINK_AMT)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
             }
         }
         // 身代わりの人形柱: まわりの仲間の受けた傷の一部を持ち主へ移す (仲間を癒やし、持ち主が受ける)
@@ -845,14 +845,14 @@ public final class WildGearEvents {
                     } finally {
                         inProc = false;
                     }
-                    level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, keeper.getX(), keeper.getY(0.8), keeper.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), keeper.getX(), keeper.getY(0.8), keeper.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
                     break;
                 }
             }
             // 鏡写し: 受けた傷の一部を返す
             Fx reflect = fx(hurt, Kind.REFLECT);
             if (reflect != null && event.getSource().getEntity() instanceof LivingEntity a && a != hurt && !(a instanceof Player)) {
-                proc(level, hurt, a, (float) (event.getNewDamage() * reflect.p(0)), ParticleTypes.ENCHANTED_HIT);
+                proc(level, hurt, a, (float) (event.getNewDamage() * reflect.p(0)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
             }
         }
     }
@@ -957,21 +957,21 @@ public final class WildGearEvents {
                 switch (d.look()) {
                     case LOOK_BOLT -> {
                         bolt(level, target.position());
-                        proc(level, player, target, d.damage(), ParticleTypes.ELECTRIC_SPARK);
+                        proc(level, player, target, d.damage(), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                     }
                     case LOOK_EMBER -> {
-                        proc(level, player, target, d.damage(), ParticleTypes.FLAME);
+                        proc(level, player, target, d.damage(), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                         target.igniteForTicks(80);
-                        level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 4, 0.2, 0.2, 0.2, 0.05);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY(0.6), target.getZ(), 4, 0.2, 0.2, 0.2, 0.05);
                         sound(level, target, SoundEvents.FIRECHARGE_USE, 1.6f);
                     }
                     case LOOK_MIRROR -> {
                         if (d.damage() > 0) {
-                            proc(level, player, target, d.damage(), ParticleTypes.ENCHANTED_HIT);
+                            proc(level, player, target, d.damage(), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                             sound(level, target, SoundEvents.AMETHYST_BLOCK_HIT, 1.4f);
                         }
                     }
-                    default -> proc(level, player, target, d.damage(), d.look() == LOOK_VENOM ? ParticleTypes.ITEM_SLIME : ParticleTypes.DAMAGE_INDICATOR);
+                    default -> proc(level, player, target, d.damage(), d.look() == LOOK_VENOM ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD));
                 }
             }
         }
@@ -992,7 +992,7 @@ public final class WildGearEvents {
                     it.remove();
                     continue;
                 }
-                proc(level, p, target, (float) (b[0] * b[2]), ParticleTypes.DAMAGE_INDICATOR);
+                proc(level, p, target, (float) (b[0] * b[2]), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD));
             }
         }
         // 曲がる矢
@@ -1033,7 +1033,7 @@ public final class WildGearEvents {
                     if (s.dim() != level.dimension()) {
                         continue;
                     }
-                    level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, s.pos().x, s.pos().y + 0.3, s.pos().z, 2, s.radius() * 0.4, 0.05, s.radius() * 0.4, 0.005);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), s.pos().x, s.pos().y + 0.3, s.pos().z, 2, s.radius() * 0.4, 0.05, s.radius() * 0.4, 0.005);
                     for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(s.pos(), s.pos()).inflate(s.radius()),
                             q -> q.isAlive() && !(q instanceof Player))) {
                         effect(e, MobEffects.MOVEMENT_SLOWDOWN, 15, 0);
@@ -1113,7 +1113,7 @@ public final class WildGearEvents {
         Vec3 b = other.position().add(0, other.getBbHeight() * 0.6, 0);
         for (int i = 0; i <= 8; i++) {
             Vec3 p = a.lerp(b, i / 8.0);
-            level.sendParticles(ParticleTypes.ENCHANT, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
         }
     }
 
@@ -1124,7 +1124,7 @@ public final class WildGearEvents {
         if (target instanceof Mob mob) {
             mob.setTarget(null);
         }
-        level.sendParticles(ParticleTypes.SMOKE, target.getX(), target.getY(1.0), target.getZ(), 14, 0.2, 0.3, 0.2, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(1.0), target.getZ(), 14, 0.2, 0.3, 0.2, 0.02);
         sound(level, target, SoundEvents.CANDLE_EXTINGUISH, 1.0f);
     }
 
@@ -1160,7 +1160,7 @@ public final class WildGearEvents {
             case 1 -> effect(target, MobEffects.MOVEMENT_SLOWDOWN, 60, 1);
             case 2 -> {
                 bolt(level, target.position());
-                proc(level, player, target, (float) (attack * 0.5), ParticleTypes.ELECTRIC_SPARK);
+                proc(level, player, target, (float) (attack * 0.5), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
             }
             case 3 -> effect(target, MobEffects.POISON, 80, 1);
             case 4 -> effect(target, MobEffects.MOVEMENT_SLOWDOWN, 30, BossFooting.planted(target) ? 1 : 6);
@@ -1174,7 +1174,7 @@ public final class WildGearEvents {
         int[] rgb = {0xFF4A3A, 0x7FD4FF, 0xFFF06A, 0x6ADA5A, 0x9A7AFF, 0xFFB0D8, 0xFFFFFF};
         net.minecraft.core.particles.DustParticleOptions dust = new net.minecraft.core.particles.DustParticleOptions(
                 new org.joml.Vector3f(((rgb[c] >> 16) & 255) / 255f, ((rgb[c] >> 8) & 255) / 255f, (rgb[c] & 255) / 255f), 1.4f);
-        level.sendParticles(dust, target.getX(), target.getY(0.7), target.getZ(), 12, 0.3, 0.4, 0.3, 0.0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.7), target.getZ(), 12, 0.3, 0.4, 0.3, 0.0);
         return 1;
     }
 
@@ -1186,11 +1186,11 @@ public final class WildGearEvents {
         for (double d = 1; d <= range; d += 0.5) {
             Vec3 at = from.add(dir.scale(d));
             if (((int) (d * 2)) % 2 == 0) {
-                level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y, at.z, 1, 0, 0, 0, 0);
             }
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(0.9), q -> foe(q, player))) {
                 if (hit.add(e)) {
-                    proc(level, player, e, damage, ParticleTypes.CLOUD);
+                    proc(level, player, e, damage, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
                 }
             }
         }
@@ -1202,12 +1202,12 @@ public final class WildGearEvents {
         for (LivingEntity e : foes(level, player, player.position(), range)) {
             Vec3 to = e.position().subtract(player.position()).multiply(1, 0, 1);
             if (to.lengthSqr() < 1e-4 || to.normalize().dot(dir) > 0.5) {
-                proc(level, player, e, damage, ParticleTypes.END_ROD);
+                proc(level, player, e, damage, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
             }
         }
         for (int i = 1; i <= 5; i++) {
             Vec3 at = player.getEyePosition().add(dir.scale(i));
-            level.sendParticles(ParticleTypes.END_ROD, at.x, at.y - 0.3, at.z, 4, 0.3 * i * 0.3, 0.2, 0.3 * i * 0.3, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y - 0.3, at.z, 4, 0.3 * i * 0.3, 0.2, 0.3 * i * 0.3, 0.02);
         }
         sound(level, player, SoundEvents.BLAZE_SHOOT, 1.4f);
     }
@@ -1227,7 +1227,7 @@ public final class WildGearEvents {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(0.7), q -> foe(q, player))) {
                 if (done < n && hit.add(e)) {
                     done++;
-                    proc(level, player, e, (float) (damage * (1 + step * done)), ParticleTypes.CRIT);
+                    proc(level, player, e, (float) (damage * (1 + step * done)), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                 }
             }
         }
@@ -1255,9 +1255,9 @@ public final class WildGearEvents {
             Vec3 b = next.position().add(0, next.getBbHeight() * 0.6, 0);
             for (int k = 0; k <= 6; k++) {
                 Vec3 p = a.lerp(b, k / 6.0);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
             }
-            proc(level, player, next, damage, ParticleTypes.ELECTRIC_SPARK);
+            proc(level, player, next, damage, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
             prev = next;
         }
     }
@@ -1269,7 +1269,7 @@ public final class WildGearEvents {
                 proc(level, player, e, damage, look);
             }
         }
-        level.sendParticles(look, at.x, at.y + 0.4, at.z, 10, radius * 0.4, 0.2, radius * 0.4, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.4, at.z, 10, radius * 0.4, 0.2, radius * 0.4, 0.02);
     }
 
     // 能力の傷 (ここの発動をもう一度起こさない)
@@ -1284,14 +1284,14 @@ public final class WildGearEvents {
         } finally {
             inProc = false;
         }
-        level.sendParticles(look, target.getX(), target.getY(0.6), target.getZ(), 3, 0.2, 0.3, 0.2, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.6), target.getZ(), 3, 0.2, 0.3, 0.2, 0.02);
     }
 
     static void bolt(ServerLevel level, Vec3 at) {
         for (int i = 0; i < 10; i++) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + i * 0.6, at.z, 3, 0.08, 0.2, 0.08, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + i * 0.6, at.z, 3, 0.08, 0.2, 0.08, 0.02);
         }
-        level.sendParticles(ParticleTypes.FLASH, at.x, at.y + 1, at.z, 1, 0, 0, 0, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 1, at.z, 1, 0, 0, 0, 0);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35f, 1.6f);
     }
 

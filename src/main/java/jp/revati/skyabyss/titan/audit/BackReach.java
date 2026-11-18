@@ -92,27 +92,6 @@ public final class BackReach {
             this.bounds = bounds;
         }
 
-        // 同じ決まり (落とし穴・戻し・昇り風・溶岩の足場 …) で、範囲と入口と目標だけを替えた写し
-        public Spec narrowed(String name, Box bounds, BlockPos entrance, Map<String, BlockPos> goals) {
-            Spec s = new Spec(name, bounds);
-            s.entrances.add(entrance);
-            s.exits.add(entrance);
-            s.goals.putAll(goals);
-            s.allowTrap.addAll(allowTrap);
-            s.allowHole.addAll(allowHole);
-            s.scan.addAll(scan);
-            s.voidY = voidY;
-            s.longFallIsExit = longFallIsExit;
-            s.walkableLava = walkableLava;
-            s.verbose = verbose;
-            s.minHoleDepth = minHoleDepth;
-            s.resets.addAll(resets);
-            s.exitNode = exitNode;
-            s.glide = glide;
-            s.solidGate = solidGate;
-            s.extra = extra;
-            return s;
-        }
     }
 
     // extra から呼ぶ道の出し先

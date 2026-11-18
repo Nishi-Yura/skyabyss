@@ -10,7 +10,7 @@ import math
 import numpy as np
 
 from blp import *  # noqa: F401,F403
-from blp import keys, eye
+from blp import keys, eye, punch
 
 JELLY = [(40, 70, 120), (70, 120, 180), (110, 170, 220), (170, 220, 246), (220, 246, 255)]
 FROND = [(90, 60, 150), (130, 90, 200), (180, 140, 236)]
@@ -107,6 +107,31 @@ def build():
     return m
 
 
+
+def _merge(*poses):
+    out = {}
+    for p in poses:
+        for b, ch in p.items():
+            out.setdefault(b, {}).update(ch)
+    return out
+
+
+def _shake(base, bones, amp, t0, t1, step=0.07, axis=1):
+    out = []
+    t, k = t0, 0
+    while t <= t1 + 1e-6:
+        p = _merge(base)
+        for b in bones:
+            r = list(p.get(b, {}).get("rot", (0, 0, 0)))
+            r[axis] += amp if k % 2 == 0 else -amp
+            p.setdefault(b, {})["rot"] = tuple(r)
+        out.append((round(t, 3), p))
+        t += step
+        k += 1
+    return out
+
+# 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」): 技の動きに溜めの震えと行き過ぎ (blp.punch)、登場 (intro) と後半の咆哮 (scream) を足した
+
 def gaits():
     g = []
     idle = Gait("idle", 3.6)
@@ -134,10 +159,10 @@ def gaits():
         a = k * 360 / N_TENT + 22.5
         front = math.sin(math.radians(a)) < 0
         whip[f"tent{k}"] = {"rot": (-70 if front else -10, 0, 0)}
-    g.append(keys("lash", 1.4, [(0.0, rest), (0.7, lift), (0.9, whip), (1.1, whip), (1.4, rest)]))
+    g.append(keys("lash", 1.4, punch([(0.0, rest), (0.7, lift), (0.9, whip), (1.1, whip), (1.4, rest)], 2)))
     swell = {"bell": {"rot": (0, 0, 0)}, "body": {"pos": (0, 4, 0)}, "priest": {"rot": (-14, 0, 0)}}
     drip = {"body": {"pos": (0, 2, 0)}, "bell": {"rot": (6, 0, 0)}}
-    g.append(keys("rain", 1.4, [(0.0, rest), (0.6, swell), (1.0, drip), (1.4, rest)]))
+    g.append(keys("rain", 1.4, punch([(0.0, rest), (0.6, swell), (1.0, drip), (1.4, rest)], 2)))
     shrink = {"body": {"pos": (0, -2, 0)}}
     for k in range(N_TENT):
         shrink[f"tent{k}"] = {"rot": (0, 0, 0)}
@@ -145,7 +170,13 @@ def gaits():
     for k in range(N_TENT):
         a = math.radians(k * 360 / N_TENT + 22.5)
         burst[f"tent{k}"] = {"rot": (-30 * math.sin(a), 0, 30 * math.cos(a))}
-    g.append(keys("pulse", 1.8, [(0.0, rest), (0.8, shrink), (1.0, burst), (1.2, shrink), (1.4, burst), (1.8, rest)]))
+    g.append(keys("pulse", 1.8, punch([(0.0, rest), (0.8, shrink), (1.0, burst), (1.2, shrink), (1.4, burst), (1.8, rest)], 2)))
+    # 登場 (3.6 秒): 床の下から触手を垂らしたまま浮かび上がり、傘を縮めて一気に開く (名前の札 2.40 秒 = introCardAt 48)
+    g.append(keys("intro", 3.6, [(0.0, _merge({"bell": {"rot": (14, 0, 0)}, "priest": {"rot": (30, 0, 0)}}, {"body": {"pos": (0, -60, 0)}})), (1.2, _merge({"bell": {"rot": (14, 0, 0)}, "priest": {"rot": (30, 0, 0)}}, {"body": {"pos": (0, -30, 0)}})),
+                                 (2.0, _merge(shrink, {"priest": {"rot": (-10, 0, 0)}})), (2.4, _merge(burst, {"priest": {"rot": (-24, 0, 0)}})),
+                                 (2.7, shrink), (3.0, _merge(burst, {"priest": {"rot": (-24, 0, 0)}})), (3.6, rest)]))
+    scr = _merge(burst, {"priest": {"rot": (-26, 0, 0)}, "phead": {"rot": (-20, 0, 0)}})
+    g.append(keys("scream", 1.6, [(0.0, rest), (0.3, scr)] + _shake(scr, ["priest", "bell"], 4, 0.36, 1.04, axis=2) + [(1.2, shrink), (1.6, rest)]))
     g.append(keys("hurt", 0.3, [(0.0, rest), (0.1, {"bell": {"rot": (-8, 0, 6)}, "priest": {"rot": (-12, 0, 0)}}), (0.3, rest)]))
     sink = {"body": {"pos": (0, -24, 0)}, "bell": {"rot": (20, 0, 10)}, "priest": {"rot": (30, 0, 0)}}
     for k in range(N_TENT):
@@ -154,5 +185,5 @@ def gaits():
     return g
 
 
-POSES = [("idle", 0.0), ("walk", 0.6), ("lash", 0.7), ("lash", 0.9), ("rain", 0.6), ("pulse", 1.0), ("hurt", 0.1), ("death", 2.4)]
+POSES = [("idle", 0.0), ("walk", 0.6), ("lash", 0.7), ("lash", 0.9), ("rain", 0.6), ("pulse", 1.0), ("hurt", 0.1), ("death", 2.4), ("intro", 1.2), ("intro", 2.4), ("scream", 0.5)]
 BOUNDS = (7, 7)

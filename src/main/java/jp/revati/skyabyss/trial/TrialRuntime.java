@@ -11,7 +11,6 @@ import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.trial.Trial.Def;
-import jp.revati.skyabyss.trial.Trial.Mods;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,30 +20,6 @@ public final class TrialRuntime {
     private TrialRuntime() {
     }
 
-    // 出会った修飾の印 (図鑑の「出会った修飾」の数え)
-    public static Set<String> modKeys(Def def, Mods mods) {
-        Set<String> keys = new LinkedHashSet<>();
-        Trial.Space sp = def.space();
-        if (sp.layouts() > 1) {
-            keys.add("layout:" + mods.layout());
-        }
-        for (int i = 0; i < sp.numbers().size(); i++) {
-            keys.add("number:" + sp.numbers().get(i) + ":" + mods.number(i));
-        }
-        if (mods.enemy() >= 0 && sp.enemySets() > 1) {
-            keys.add("enemy:" + mods.enemy());
-        }
-        for (int h : mods.hazards()) {
-            keys.add("hazard:" + sp.hazards().get(h));
-        }
-        if (mods.goal() >= 0) {
-            keys.add("goal:" + sp.goals().get(mods.goal()));
-        }
-        if (mods.extreme() != Trial.Extreme.NONE) {
-            keys.add("extreme:" + mods.extreme().id());
-        }
-        return keys;
-    }
 
     // 図鑑の「全部」の数 (その試練に出る修飾の印の総数)
     public static int modTotal(Def def) {
@@ -68,7 +43,7 @@ public final class TrialRuntime {
                 String titan = Titans.titanOfBack(back.dimension());
                 if (p != null && titan != null) {
                     jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, new ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)));
-                    Notice.gain(p, ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
+                    Notice.gainItem(p, new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.songShard(titan)), ModText.progress("message.skyabyss.shrine.shard_gained", jp.revati.skyabyss.registry.ModItems.songShard(titan).getDescription()));
                 }
             }
             if (heartCounted.add(epoch)) {

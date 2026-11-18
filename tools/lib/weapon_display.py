@@ -165,6 +165,29 @@ def left_of(d, item=None):
     return m
 
 
+# 鉤や腕が片側へ張り出した呪術師の杖。そのまま持つと張り出し (鉤と鈴) が体の外 (一人称では画面の右の外) を向く。
+# 羊飼いの杖のように張り出しを前へ向ける: 一人称・三人称とも y を 90 度回す (右手 +90、左手 -90)。11-13
+# 祠の鈴杖は install_starter_weapons.py が同じ値を書く
+HEAD_FORWARD = ("shrine_bell_staff", "ember_censer_bell_staff", "tide_surf_bell_staff", "whale_deep_bell_staff",
+                "whale_bell_staff", "wild_calming_censer", "wild_mourning_bell_staff", "storm_thunder_bell_staff", "ember_censer")
+# 一人称で握りが低く、頭が画面の下へ沈む杖 (一人称の translation の y を足す)
+FP_LIFT = {"storm_thunder_bell_staff": 1.5}
+
+
+def adjust_fp(item, display):
+    out = copy.deepcopy(display)
+    if item in HEAD_FORWARD:
+        y = 90.0
+        for hand in ("firstperson", "thirdperson"):
+            r, l = out[hand + "_righthand"], out[hand + "_lefthand"]
+            r["rotation"] = [r["rotation"][0], y, abs(r["rotation"][2])]
+            l["rotation"] = [l["rotation"][0], -y, -abs(l["rotation"][2])]
+    if item in FP_LIFT:
+        for key in ("firstperson_righthand", "firstperson_lefthand"):
+            out[key]["translation"][1] = round(1.3 + FP_LIFT[item], 3)
+    return out
+
+
 def display_for(item: str, current: dict) -> dict:
     """item の display。表にない武器 (弓・盾など) は今のまま。表にあるものは tp/fp を差し替え、そのほかのキーは今のものを残す。"""
     if item not in HELD:
@@ -179,7 +202,7 @@ def display_for(item: str, current: dict) -> dict:
     out["firstperson_lefthand"] = left_of(out["firstperson_righthand"], item)
     for k, v in COMMON.items():
         out.setdefault(k, copy.deepcopy(v))
-    return out
+    return adjust_fp(item, out)
 
 
 # 盾 (coral_shield = ふだん、coral_shield_blocking = 構えている間)。一人称だけ作り直す (大きさ・位置)。左手は x の移動を逆にしただけ
@@ -208,6 +231,15 @@ def shield_display(name, current):
 def main():
     check = "--check" in sys.argv
     bad = []
+    for name in (n for n in (*HEAD_FORWARD, *FP_LIFT) if n not in HELD):
+        path = MODELS / f"{name}.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        new = adjust_fp(name, data["base"]["display"])
+        if new != data["base"]["display"]:
+            bad.append(name)
+            if not check:
+                data["base"]["display"] = new
+                path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for name in SHIELD_FP:
         path = MODELS / f"{name}.json"
         data = json.loads(path.read_text(encoding="utf-8"))

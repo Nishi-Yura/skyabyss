@@ -225,14 +225,6 @@ public final class EmberBackTrials {
         return EmberIds.RESTS.contains(id) ? id : "";
     }
 
-    // 休み場の記録 (その人のグループの試練の番号で確かめる)。背中にいない人は、背中のディメンションの記録で見る
-    public static String checkpoint(ServerPlayer player) {
-        ServerLevel back = player.server.getLevel(EmberIds.BACK);
-        if (back == null) {
-            return "";
-        }
-        return validCheckpoint(persisted(player), EmberBackState.of(back, player).epoch());
-    }
 
     static void clearCheckpoint(Player player) {
         CompoundTag tag = persisted(player);

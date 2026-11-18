@@ -198,7 +198,7 @@ public final class Oddities {
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(bx), (int) Math.floor(bz));
                 // かかと・土踏まず・つま先の 3 点
                 for (int k = 0; k < 3; k++) {
-                    level.sendParticles(player, HOLLOW, true, bx + look.x * (k * 0.35 - 0.35), y + 0.06, bz + look.z * (k * 0.35 - 0.35), 3, 0.05, 0, 0.05, 0);
+                    level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, bx + look.x * (k * 0.35 - 0.35), y + 0.06, bz + look.z * (k * 0.35 - 0.35), 3, 0.05, 0, 0.05, 0);
                 }
             });
         }
@@ -213,9 +213,14 @@ public final class Oddities {
                     return;
                 }
                 Vec3 face = player.getEyePosition().add(player.getLookAngle().scale(0.5));
-                level.sendParticles(player, ParticleTypes.CLOUD, true, face.x, face.y - 0.1, face.z, 3, 0.04, 0.02, 0.04, 0.006);
+                level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, face.x, face.y - 0.1, face.z, 3, 0.04, 0.02, 0.04, 0.006);
             });
         }
         Notice.narrate(player, "message.skyabyss.ch1.oddity.cold");
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

@@ -47,9 +47,6 @@ public final class SoulData implements INBTSerializable<CompoundTag> {
         Arrays.fill(spareItem, "");
     }
 
-    public int shardNodeRoom() {
-        return RebirthRules.MAX_SHARD_NODES - shardNodes;
-    }
 
     // 欠片で足せる節が 1 つあるか
     public boolean canClaimShardNode() {

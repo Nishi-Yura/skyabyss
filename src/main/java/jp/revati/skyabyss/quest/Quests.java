@@ -6,12 +6,10 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.npc.Affinity;
 import jp.revati.skyabyss.rpg.Growth;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -515,22 +513,6 @@ public final class Quests {
         }
     }
 
-    // 月のループ (M4) で呼ぶ: loop_reset のクエストのうち、まだ終えていないものを最初に戻す。
-    // 終えたクエストと、ループに関わらないクエストはそのまま (01 の「攻略済みの章とボス撃破記録」は残る)
-    public static void onLoop(ServerPlayer player) {
-        QuestLog log = QuestLog.of(player);
-        for (QuestDef def : QuestManager.all()) {
-            QuestLog.Entry e = log.quests.get(def.id());
-            if (def.loopReset() && e != null && !e.done) {
-                log.quests.remove(def.id());
-            }
-        }
-        if (!log.tracked.isEmpty() && log.quests.get(log.tracked) == null) {
-            log.tracked = nextToTrack(log);
-        }
-        sync(player);
-    }
-
     // ---------------------------------------------------------------- 道具
     private static void ensureSize(QuestLog.Entry entry, QuestDef.Stage stage) {
         if (entry.progress.length != stage.objectives().size()) {
@@ -543,6 +525,8 @@ public final class Quests {
         if (jp.revati.skyabyss.rpg.rules.NoPlaceables.blockGive(player, stack)) {
             return;
         }
+        // 手に入れた品は左の列に絵で (notice/GainFeed)
+        jp.revati.skyabyss.notice.GainFeed.note(player, stack);
         // 留め袋に入る品は袋へ (docs/design/22 の 4.1)
         jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
         if (!stack.isEmpty()) {

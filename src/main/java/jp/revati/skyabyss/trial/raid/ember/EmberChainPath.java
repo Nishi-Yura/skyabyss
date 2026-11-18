@@ -197,13 +197,13 @@ public final class EmberChainPath extends EmberRoom {
                 .warn(PLANK_WARN).danger().onHit((lvl, p) -> {
                 }).start();
         ctx.level().playSound(null, ctx.local(0, DECK, z), SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 0.7f, 0.7f);
-        particles(ctx, ParticleTypes.SMOKE, ctx.origin().getX() + 0.5, ctx.origin().getY() + DECK + 1.2, zc, 6, 0.8, 0.02);
+        particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), ctx.origin().getX() + 0.5, ctx.origin().getY() + DECK + 1.2, zc, 6, 0.8, 0.02);
     }
 
     private void dropRow(RaidCtx ctx, int s, int j) {
         int z = SPANS[s][0] - j;
         setRow(ctx, z, AIR);
-        particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, ctx.origin().getY() + DECK + 0.5, ctx.origin().getZ() + z + 0.5, 4, 0.8, 0.1);
+        particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), ctx.origin().getX() + 0.5, ctx.origin().getY() + DECK + 0.5, ctx.origin().getZ() + z + 0.5, 4, 0.8, 0.1);
         ctx.level().playSound(null, ctx.local(0, DECK, z), SoundEvents.CHAIN_FALL, SoundSource.BLOCKS, 0.8f, 0.8f);
     }
 
@@ -296,7 +296,7 @@ public final class EmberChainPath extends EmberRoom {
         if (!ps.isEmpty() && n == ps.size()) {
             done = true;
             opened(ctx);
-            particles(ctx, ParticleTypes.LAVA, ctx.origin().getX() + 0.5, fy + 3, ctx.origin().getZ() - HZ + 2, 20, 1.5, 0.2);
+            particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), ctx.origin().getX() + 0.5, fy + 3, ctx.origin().getZ() - HZ + 2, 20, 1.5, 0.2);
         }
     }
 

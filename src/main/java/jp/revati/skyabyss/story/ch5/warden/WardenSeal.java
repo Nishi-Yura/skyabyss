@@ -39,14 +39,16 @@ final class WardenSeal {
             set(level, base, DARK);
             level.playSound(null, base, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.HOSTILE, 1.2f, 0.5f);
             sealed = true;
-        } else if (!fight && (sealed || level.getBlockState(base).is(Blocks.BLACK_CONCRETE))) {
+        } else if (!fight && level.isLoaded(base) && (sealed || level.getBlockState(base).is(Blocks.BLACK_CONCRETE))) {
+            // 入口のチャンクが読み込まれていないときは見ない (誰もいない深淵で 10 tick ごとにチャンクを読み込ませていた)。
+            // 開けるのは、だれかが近づいて読み込まれたとき
             set(level, base, Blocks.AIR.defaultBlockState());
             level.playSound(null, base, SoundEvents.SCULK_BLOCK_BREAK, SoundSource.BLOCKS, 1.0f, 0.6f);
             sealed = false;
         }
         if (sealed) {
             for (int side = -1; side <= 1; side += 2) {
-                level.sendParticles(ParticleTypes.SQUID_INK, base.getX() + 0.5, base.getY() + 2, base.getZ() + 0.5 + side * 0.7, 6, 0.9, 1.2, 0.1, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), base.getX() + 0.5, base.getY() + 2, base.getZ() + 0.5 + side * 0.7, 6, 0.9, 1.2, 0.1, 0.01);
             }
         }
     }
@@ -68,5 +70,10 @@ final class WardenSeal {
     static boolean closed(ServerLevel level) {
         BlockPos heart = AbyssBuild.mark("heart");
         return heart != null && level.getBlockState(heart.offset(0, 0, DOOR_DZ)).is(Blocks.BLACK_CONCRETE);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

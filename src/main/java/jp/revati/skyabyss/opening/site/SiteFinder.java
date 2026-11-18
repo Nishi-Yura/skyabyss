@@ -205,9 +205,6 @@ public final class SiteFinder {
     public record Rest(List<Planned> planned, List<ChapterGrounds.Found> grounds) {
     }
 
-    public static List<Planned> planRest(Probe p, BlockPos camp) {
-        return planRestAll(p, camp).planned();
-    }
 
     public static Rest planRestAll(Probe p, BlockPos camp) {
         long t0 = System.nanoTime();

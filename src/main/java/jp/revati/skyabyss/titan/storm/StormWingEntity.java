@@ -437,8 +437,8 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         if (tickCount % 3 == 0) {
             for (ServerPlayer p : level.players()) {
                 if (p.distanceToSqr(this) < 400 * 400) {
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, true, getX(), getY(), getZ(), 14, 18, 6, 18, 0.2);
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, getX(), getY() - 4, getZ(), 10, 24, 4, 24, 0.02);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, getX(), getY(), getZ(), 14, 18, 6, 18, 0.2);
+                    level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, getX(), getY() - 4, getZ(), 10, 24, 4, 24, 0.02);
                 }
             }
         }
@@ -993,5 +993,10 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     // コマンドの表示用
     public String modeName() {
         return mode.name().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -191,12 +191,6 @@ public final class SiteData extends SavedData {
         setDirty();
     }
 
-    // 自己テスト・開発コマンド用: 跡地を捨てる (次の起動か ChapterGrounds.plan で決め直す)
-    public void clearGrounds() {
-        grounds.clear();
-        groundsPlanned = false;
-        setDirty();
-    }
 
     static Ground newGround(String chapter, BlockPos center) {
         return new Ground(chapter, center);

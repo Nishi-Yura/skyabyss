@@ -1,0 +1,39 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.prop_bow_spirit.idle": {
+   "loop": true,
+   "animation_length": 2.4,
+   "bones": {
+    "body": {
+     "rotation": [
+      "2.500*math.sin(query.anim_time*150.0000)",
+      "4.000*math.sin(query.anim_time*150.0000+60.0)",
+      0
+     ]
+    },
+    "soul": {
+     "position": [
+      0,
+      "0.350*math.sin(query.anim_time*150.0000+90.0)",
+      0
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "10.000*math.sin(query.anim_time*150.0000)",
+      "14.000*math.sin(query.anim_time*150.0000+120.0)",
+      0
+     ]
+    },
+    "bow": {
+     "rotation": [
+      0,
+      0,
+      "3.000*math.sin(query.anim_time*150.0000+200.0)"
+     ]
+    }
+   }
+  }
+ }
+}

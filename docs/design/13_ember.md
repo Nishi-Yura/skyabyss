@@ -152,13 +152,13 @@
 
 **口で待てば夜を待たない**（初めての乗り込み。`FirstBoardWait`）: 夜の刻（11300〜23000）の外に、まだ余燼の心臓を止めておらず乗る資格のある人が、灰の地の中心（跡地のない世界では、地の中を泳ぐ余燼）から 48 ブロック以内に 30 秒居続けると、余燼が気づき、呼び鈴と同じ形（`callNear`）で灰の地の眠る場所へ浮かぶ。本人へ一行「足もとで、熱い息が動いた。余燼が、待つ者に気づいて浮かんでくる……」。乗り込みを時刻で閉じない決まりのため。夜は、ふだん浮かぶ時刻として残る。
 
-**呼び鈴でいつでも呼べる**（09 の 4.4。`ember_call`）: 余燼が浮かんで眠る姿を一度見た（200 ブロック以内）か、背へ入った、心臓を倒した人は、呼び鈴（旅嚢から）で、昼でも余燼を呼べる。余燼は夜を待たず、近くの平らな陸（なければ 160 ブロックまで広げる。`EmberGround.findCallSpot`）の地の中へ移って、30 秒で浮かび、通常の眠りと同じ 20 分（`TitanStay`、無人 3 分で去る）口を開け閉めする（`EmberTitanEntity.callNear`。夜明けでは沈まない）。口は息の周期（18 秒のうち 10 秒）で開く。温石（2.6）は従来どおり（夜の刻に頼む別の道具）。眠っている間は応えない。
+**呼び鈴でいつでも呼べる**（09 の 4.4。`ember_call`）: 余燼が浮かんで眠る姿を一度見た（200 ブロック以内）か、背へ入った、心臓を倒した人は、呼び鈴（旅袋から）で、昼でも余燼を呼べる。余燼は夜を待たず、近くの平らな陸（なければ 160 ブロックまで広げる。`EmberGround.findCallSpot`）の地の中へ移って、30 秒で浮かび、通常の眠りと同じ 20 分（`TitanStay`、無人 3 分で去る）口を開け閉めする（`EmberTitanEntity.callNear`。夜明けでは沈まない）。口は息の周期（18 秒のうち 10 秒）で開く。温石（2.6）は従来どおり（夜の刻に頼む別の道具）。眠っている間は応えない。
 
 ### 2.5 背中から地上へ戻る
 
 | 方法 | 内容 |
 |---|---|
-| 地上へ下りる | 休み場・到着点に帰り石は置かない。試練を越えても地上へは戻らず、次の段の入口へ運ばれる（32 の 2.3）。背中の中でその巨神の呼び笛（旅嚢。Y 短押し・輪）を使うと、呼ばずに「地上へ下りる？」と聞かれる（帯下の一行）。5 秒以内にもう一度使うと、地上へ戻る（`ReturnBeacons.whistleInBack` → `Titans.sendDown`）（戻り先は口の前の地面） |
+| 地上へ下りる | 休み場・到着点に帰り石は置かない。試練を越えても地上へは戻らず、次の段の入口へ運ばれる（32 の 2.3）。背中の中でその巨神の呼び笛（旅袋。Y 短押し・輪）を使うと、呼ばずに「地上へ下りる？」と聞かれる（帯下の一行）。5 秒以内にもう一度使うと、地上へ戻る（`ReturnBeacons.whistleInBack` → `Titans.sendDown`）（戻り先は口の前の地面） |
 | 口から出る | 背中の到着点の前、下の顎の先にある「見送りの段」（5 段）を下り、いちばん下の光る「見送りの石」（3 × 2）に 0.5 秒いると戻る。巨神が眠っていれば口の前 6 ブロックの地面へ（巨神に背を向ける）、潜行中なら最後に眠った場所の口の前、記録もなければ共有スポーン地点 |
 | 灰の原に下りる・落ちる | 見送りの石のほかの灰の原に 5 秒いると、到着点へ戻される（地上へは戻さない）。「灰に押し戻された」 |
 | 遠くへ歩く | 体の中心から 220 ブロックより外へ出ると、到着点へ戻される |
@@ -596,7 +596,7 @@
 | 灰の礫 | `EmberAshPellet` |
 | 熾の底 | `EmberHeartArena` |
 | 戦い（GroupBossRoom の Host、集合・封印・放棄・撃破、光の柱、撃破の記録） | `EmberHeartBattle` |
-| 報酬（個人抽選・天井・図鑑・巨神ごとの記録・初回の選択・四つ目の欠片・経験値・クエストと伝承の合図） | `EmberLoot` |
+| 報酬（個人抽選・天井・図鑑・巨神ごとの記録・四つ目の欠片・経験値・クエストと伝承の合図） | `EmberLoot` |
 | 登録（心臓・礫・音 14・経験値の一行） | `EmberHeartSetup`（`SkyAbyss` に一行、`GrowthRewards.MOD_ENEMIES` に一行） |
 | パケット（引き寄せ・画面写し・灰の帳・凍え。版 `ember-heart-1`） | `EmberHeartNetwork` |
 | 描画・ボスバー・灰の帳と凍えの画面 | `client/EmberHeartRenderer`・`client/EmberHeartClient` |
@@ -990,7 +990,7 @@
 | ブロック | `ash_forge`・`forge_bellows`・`ash_anvil`・`quench_trough`、`cinder_lamp` |
 | 地上の品 | `warm_stone`（温石） |
 | 素材 | `ember_shard`・`ember_core`・`spark_dust`・`cinder_husk`・`ember_horn`（熾火の角杯） |
-| 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯）。初回の選択は後ろの 3 つ |
+| 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯） |
 | 休み場 | 部屋ごとの入口の休み場（`RaidKit`）、中ボスの間の休み場、`heart` |
 | 碑文 | `lore_ember_west`・`_east`・`_south`、`lore_raid_ember_chain`・`_valve`・`_pupil` |
 | 伝承 | 12.3 |
@@ -1035,7 +1035,7 @@
 | `/skyabyss embermob spawn <thrall\|moth\|roller\|mix> [数]` / `ignite` / `clear` | 敵を湧かせる（自分のまわり 4〜7 ブロック。保存されない。moth は数を省くと 3〜6 体、mix は灰被り 1・蛾の群れ・燠虫 1）/ まわり 16 ブロックの灰被りの殻を割る / まわり 64 ブロックの余燼の敵を消す |
 | `/skyabyss emberheart go\|start\|phase <1-3>\|action <技>\|sink <0-5>\|win\|reset\|rebuild\|status\|shot <人> <名前>` | 心臓の確かめ（`action` は breath・pulse・orb・floor・gale・pellet・chill・embers・fading・veil・roar）。`go` は前室へ |
 | `/skyabyss dev emberforce <対象> <技> [人数]` | 開発用（本番の jar には入らない）。心臓（BREATH・PULSE・ORB・FLOOR・GALE・PELLET・EMBERS・FADING・VEIL・ROAR）と鍛え手（SLAM・COLD_SLAM・BREATH・SPARKS）の技を、部屋の外（平らな世界）でも一つ出す。人数は部屋にいる人数を多いことにする（18 章） |
-| `/titanmemory ember` | 初回の選択（誰でも） |
+| `/titanmemory ember` | 余燼の記憶と図鑑を見る（誰でも） |
 
 ### 14.1 自己テスト
 

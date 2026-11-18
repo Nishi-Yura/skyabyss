@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.guide.GuideClient;
@@ -162,9 +161,4 @@ public final class GuideNetwork {
         }
     }
 
-    // 開発・テスト用: 持ち主の鍵ごとの予定表を外から見る
-    @Nullable
-    static GuideScheduler<UUID> scheduler() {
-        return SCHEDULER;
-    }
 }

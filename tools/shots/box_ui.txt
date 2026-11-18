@@ -1,4 +1,4 @@
-# 封の箱 (docs/design/52): 地面の 9 種・一人称で持つ・封切り師の画面 (一覧・回る途中・当たり・まとめて)・旅嚢の「封の箱」の欄・封切り師の姿
+# 封の箱 (docs/design/52): 地面の 9 種・一人称で持つ・封切り師の画面 (一覧・回る途中・当たり・まとめて)・旅袋の「封の箱」の欄・封切り師の姿
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/box_ui.txt -PshotsName=box_ui
 world box_ui flat
 size 960 540

@@ -113,7 +113,7 @@ public class LampEater extends AbyssMobB {
     // 灯りを消す (予告のあと)。点の灯りは消え、ブロックの灯りは消す (松明は壊れ、蝋燭と焚き火は火を落とす)
     private void snuff(ServerLevel sl) {
         if (lampAt != null && lampAt.distanceTo(position()) <= 2.5 && AbyssLight.snuffNear(sl, lampAt, 2.0) > 0) {
-            sl.sendParticles(ParticleTypes.SMOKE, lampAt.x, lampAt.y, lampAt.z, 12, 0.2, 0.2, 0.2, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), lampAt.x, lampAt.y, lampAt.z, 12, 0.2, 0.2, 0.2, 0.02);
         } else if (lightBlock != null && !nearProtected(lightBlock)) {
             BlockState s = sl.getBlockState(lightBlock);
             if (s.hasProperty(BlockStateProperties.LIT)) {
@@ -121,7 +121,7 @@ public class LampEater extends AbyssMobB {
             } else {
                 sl.setBlock(lightBlock, Blocks.AIR.defaultBlockState(), 3);
             }
-            sl.sendParticles(ParticleTypes.SMOKE, lightBlock.getX() + 0.5, lightBlock.getY() + 0.5, lightBlock.getZ() + 0.5, 12, 0.2, 0.2, 0.2, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), lightBlock.getX() + 0.5, lightBlock.getY() + 0.5, lightBlock.getZ() + 0.5, 12, 0.2, 0.2, 0.2, 0.02);
         }
         lightBlock = null;
         lampAt = null;
@@ -175,5 +175,10 @@ public class LampEater extends AbyssMobB {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.LAMP_ASH.get(), 0.6, 1, 2);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

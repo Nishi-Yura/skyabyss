@@ -80,14 +80,6 @@ public final class TitanVolume {
         return out;
     }
 
-    // 試験用: 柱の表を直接作る (単位は半ブロック)
-    static TitanVolume ofBox(double cell, double x0, double z0, int nx, int nz, double margin, int loHalf, int hiHalf) {
-        int[][] cols = new int[nx * nz][];
-        for (int i = 0; i < cols.length; i++) {
-            cols[i] = new int[] {loHalf, hiHalf};
-        }
-        return new TitanVolume(cell, x0, z0, nx, nz, margin, cols, cols);
-    }
 
     public double margin() {
         return margin;

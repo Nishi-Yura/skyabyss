@@ -40,6 +40,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
+// 形 (2026-11-12): 武器の粉の技は出るときに模型が出る (地割れ pa_quake・つむじ pa_whirl・引き潮 pa_ebb・熾の印 pa_brand と爆ぜる pa_brand_burst・骨の呪い pa_curse)。
 // 巨神の粉の技と、土地の敵が落とす粉 (docs/design/41 の 3。2026-11-05 の粉と炉の頁 1-1・1-5)。
 //   粉の技は、一つの装備で同じ粉の段の和が Powder.WEIGHT_FOR_ART 以上のとき働く。強さは段の和で伸びる (4 で ×1、8 で ×1.5、12 で ×2)。
 //   武器: 4 回当てるごとに一度 (近接は満ちた一撃だけ数える。矢・技の当たりも数える)。出るときに粉の色の粒と音、傷の数字も粉の色
@@ -202,9 +203,10 @@ public final class PowderArts {
                     artHurt(e, p, v, dmg);
                     v.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, QUAKE_STAGGER, 4), p);
                     // 打たれた敵の足もとに石の欠片 (目の前を覆わないよう少なく)
-                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLESTONE.defaultBlockState()), v.getX(), v.getY() + 0.1, v.getZ(), 6, 0.25, 0.05, 0.25, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), v.getX(), v.getY() + 0.1, v.getZ(), 6, 0.25, 0.05, 0.25, 0);
                 }
                 ring(level, c, QUAKE_RADIUS, new DustParticleOptions(color(e), 1.0f), 24);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_quake", p, c, (float) (QUAKE_RADIUS * 0.8), 12);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.DEEPSLATE_BREAK, SoundSource.PLAYERS, 1.2f, 0.6f);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35f, 0.5f);
             }
@@ -222,9 +224,10 @@ public final class PowderArts {
                 for (int i = 0; i < 24; i++) {
                     double a = i * Math.PI / 6;
                     double r = WHIRL_RADIUS * (1 - i / 30.0);
-                    level.sendParticles(ParticleTypes.CLOUD, c.x + Math.cos(a) * r, c.y + 0.2 + i * 0.07, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x + Math.cos(a) * r, c.y + 0.2 + i * 0.07, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0.01);
                 }
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.7f, 1.6f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_whirl", p, c, 1.2f, 20);
             }
             case TIDE -> {
                 List<ServerPlayer> near = new ArrayList<>();
@@ -237,23 +240,26 @@ public final class PowderArts {
                 float each = (float) (dealt * EBB_HEAL * s / near.size());
                 for (ServerPlayer q : near) {
                     q.heal(each);
-                    level.sendParticles(ParticleTypes.SPLASH, q.getX(), q.getY() + 0.4, q.getZ(), 12, 0.35, 0.2, 0.35, 0.1);
-                    level.sendParticles(new DustParticleOptions(color(e), 1.0f), q.getX(), q.getY() + 0.4, q.getZ(), 8, 0.35, 0.3, 0.35, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.getX(), q.getY() + 0.4, q.getZ(), 12, 0.35, 0.2, 0.35, 0.1);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.getX(), q.getY() + 0.4, q.getZ(), 8, 0.35, 0.3, 0.35, 0);
                 }
-                level.sendParticles(ParticleTypes.BUBBLE_POP, c.x, c.y + target.getBbHeight() * 0.6, c.z, 16, 0.3, 0.3, 0.3, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + target.getBbHeight() * 0.6, c.z, 16, 0.3, 0.3, 0.3, 0.05);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_SPLASH, SoundSource.PLAYERS, 0.5f, 1.3f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_ebb", p, p.position(), 1.0f, 16);
             }
             case ASH -> {
                 target.igniteForSeconds(BRAND_TICKS / 20f);
                 BRANDS.put(target, new Brand(p, level.getGameTime() + BRAND_TICKS, (float) (base(p) * BRAND_DAMAGE * s)));
-                level.sendParticles(ParticleTypes.FLAME, c.x, c.y + target.getBbHeight() * 0.6, c.z, 16, 0.25, 0.4, 0.25, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + target.getBbHeight() * 0.6, c.z, 16, 0.25, 0.4, 0.25, 0.02);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6f, 1.2f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_brand", p, c, Math.max(0.6f, target.getBbWidth() * 0.9f), BRAND_TICKS);
             }
             case BONE -> {
                 CURSES.put(target, new Curse(level.getGameTime() + CURSE_TICKS, 1 + CURSE_TAKEN * s));
-                level.sendParticles(ParticleTypes.SCULK_SOUL, c.x, c.y + target.getBbHeight() * 0.8, c.z, 10, 0.3, 0.3, 0.3, 0.02);
-                level.sendParticles(new DustParticleOptions(color(e), 1.2f), c.x, c.y + target.getBbHeight() * 0.5, c.z, 14, 0.35, 0.5, 0.35, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + target.getBbHeight() * 0.8, c.z, 10, 0.3, 0.3, 0.3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + target.getBbHeight() * 0.5, c.z, 14, 0.35, 0.5, 0.35, 0);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 0.6f, 0.5f);
+                jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_curse", p, c, Math.max(0.6f, target.getBbWidth() * 0.9f), 30);
             }
         }
         // どの技にも、粉の色の小さな輪
@@ -284,7 +290,7 @@ public final class PowderArts {
     static void ring(ServerLevel level, Vec3 c, double r, net.minecraft.core.particles.ParticleOptions particle, int count) {
         for (int i = 0; i < count; i++) {
             double a = i * Math.PI * 2 / count;
-            level.sendParticles(particle, c.x + Math.cos(a) * r, c.y + 0.1, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y + 0.1, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0);
         }
     }
 
@@ -313,17 +319,17 @@ public final class PowderArts {
         switch (e) {
             case STONE -> {
                 SKIN.put(p, level.getGameTime() + Math.round(SKIN_TICKS * s));
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), p.getX(), p.getY() + 0.1, p.getZ(), 8, 0.35, 0.05, 0.35, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.getX(), p.getY() + 0.1, p.getZ(), 8, 0.35, 0.05, 0.35, 0);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.STONE_PLACE, SoundSource.PLAYERS, 0.9f, 0.6f);
             }
             case WIND -> {
                 p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, (int) Math.round(GUST_TICKS * s), 1));
-                level.sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.3, p.getZ(), 12, 0.4, 0.1, 0.4, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.3, p.getZ(), 12, 0.4, 0.1, 0.4, 0.05);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.6f, 1.4f);
             }
             case TIDE -> {
                 p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) Math.round(FLOOD_TICKS * s), 0));
-                level.sendParticles(ParticleTypes.SPLASH, p.getX(), p.getY() + 0.3, p.getZ(), 12, 0.35, 0.2, 0.35, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.3, p.getZ(), 12, 0.35, 0.2, 0.35, 0.1);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.5f, 1.3f);
             }
             case ASH -> {
@@ -331,7 +337,7 @@ public final class PowderArts {
                     return false;
                 }
                 attacker.igniteForSeconds((float) (SPARK_SECONDS * s));
-                level.sendParticles(ParticleTypes.FLAME, attacker.getX(), attacker.getY() + attacker.getBbHeight() * 0.6, attacker.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), attacker.getX(), attacker.getY() + attacker.getBbHeight() * 0.6, attacker.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.4f, 1.5f);
             }
             case BONE -> {
@@ -345,7 +351,7 @@ public final class PowderArts {
                 } finally {
                     IN_ART.set(before);
                 }
-                level.sendParticles(new DustParticleOptions(color(e), 1.1f), attacker.getX(), attacker.getY() + attacker.getBbHeight() * 0.6, attacker.getZ(), 12, 0.3, 0.4, 0.3, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), attacker.getX(), attacker.getY() + attacker.getBbHeight() * 0.6, attacker.getZ(), 12, 0.3, 0.4, 0.3, 0);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 0.5f, 0.6f);
             }
         }
@@ -421,10 +427,11 @@ public final class PowderArts {
         for (LivingEntity w : foesNear(b.owner(), c, BRAND_RADIUS)) {
             artHurt(Element.ASH, b.owner(), w, b.damage());
         }
-        level.sendParticles(ParticleTypes.LAVA, c.x, c.y + v.getBbHeight() * 0.5, c.z, 10, 0.3, 0.3, 0.3, 0.1);
-        level.sendParticles(ParticleTypes.FLAME, c.x, c.y + v.getBbHeight() * 0.5, c.z, 30, 0.6, 0.5, 0.6, 0.06);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + v.getBbHeight() * 0.5, c.z, 10, 0.3, 0.3, 0.3, 0.1);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + v.getBbHeight() * 0.5, c.z, 24, 0.6, 0.5, 0.6, 0.06);
         ring(level, c, BRAND_RADIUS, new DustParticleOptions(color(Element.ASH), 1.4f), 20);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.7f, 0.7f);
+        jp.revati.skyabyss.combat.prop.AttackProps.here(level, "pa_brand_burst", b.owner(), c, (float) (BRAND_RADIUS * 0.6), 12);
     }
 
     // 熾の印の残り (自己テスト)
@@ -488,7 +495,7 @@ public final class PowderArts {
         }
     }
 
-    // 直に渡す (旅嚢か持ち物。入らなければ足もとに、その人だけが拾える)
+    // 直に渡す (旅袋か持ち物。入らなければ足もとに、その人だけが拾える)
     public static void givePowder(ServerPlayer p, ItemStack powder) {
         Component name = powder.getHoverName();
         ItemStack left = jp.revati.skyabyss.pouch.PouchRouting.give(p, powder);
@@ -498,7 +505,7 @@ public final class PowderArts {
             e.setPickUpDelay(10);
             p.level().addFreshEntity(e);
         }
-        jp.revati.skyabyss.notice.Notice.gain(p, Component.translatable("message.skyabyss.powder.named", name));
+        jp.revati.skyabyss.notice.Notice.gainLog(p, Component.translatable("message.skyabyss.powder.named", name));
         p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.2f);
     }
 

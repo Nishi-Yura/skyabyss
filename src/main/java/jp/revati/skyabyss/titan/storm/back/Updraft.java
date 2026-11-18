@@ -78,9 +78,9 @@ public final class Updraft {
             double a = level.random.nextDouble() * Math.PI * 2;
             double r = level.random.nextDouble() * radius;
             double h = level.random.nextDouble() * height;
-            StormFx.forced(level, ParticleTypes.CLOUD, base.x + Math.cos(a) * r, base.y + h, base.z + Math.sin(a) * r, 0, 0, 1, 0, 0.25);
+            StormFx.forced(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), base.x + Math.cos(a) * r, base.y + h, base.z + Math.sin(a) * r, 0, 0, 1, 0, 0.25);
         }
         // 上の端の印 (白い羽根の輪)
-        StormFx.ring(level, ParticleTypes.END_ROD, base.add(0, height, 0), radius * 0.8, 6);
+        StormFx.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), base.add(0, height, 0), radius * 0.8, 6);
     }
 }

@@ -1,0 +1,100 @@
+# 攻撃の見せ方の見本 (岩鯨の心臓)。生成: tools/gen/shots/gen_attack_pilot_shots.py
+world attack_pilot flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:polished_deepslate
+cmd fill -3 -47 16 3 -47 21 minecraft:barrier
+camera minecraft:overworld 0.5 -46 18.5 180 34
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+wait 10
+camera minecraft:overworld 0.5 -46 18.5 180 34
+hud off
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+wait 5
+camera minecraft:overworld 0.5 -46 18.5 180 34
+hud off
+wait 110
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 16
+shot thrust_1_charge
+wait 9
+shot thrust_2_hit
+wait 10
+shot thrust_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] SPIKE
+wait 14
+shot spike_1_charge
+wait 9
+shot spike_2_hit
+wait 10
+shot spike_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] LEAP
+wait 16
+shot leap_1_charge
+wait 9
+shot leap_2_hit
+wait 10
+shot leap_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] CRACK
+wait 20
+shot crack_1_charge
+wait 11
+shot crack_2_hit
+wait 10
+shot crack_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] VOLLEY
+wait 20
+shot volley_1_charge
+wait 11
+shot volley_2_hit
+wait 10
+shot volley_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BEAM
+wait 26
+shot beam_1_charge
+wait 27
+shot beam_2_hit
+wait 10
+shot beam_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] CHAIN
+wait 16
+shot chain_1_charge
+wait 9
+shot chain_2_hit
+wait 10
+shot chain_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] SHELL_DROP
+wait 20
+shot shell_drop_1_charge
+wait 11
+shot shell_drop_2_hit
+wait 10
+shot shell_drop_3_after
+wait 60
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] ROAR
+wait 14
+shot roar_1_charge
+wait 9
+shot roar_2_hit
+wait 10
+shot roar_3_after
+wait 60
+quit

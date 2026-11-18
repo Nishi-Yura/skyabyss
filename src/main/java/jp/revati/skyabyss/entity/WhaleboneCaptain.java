@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -226,7 +227,6 @@ public class WhaleboneCaptain extends GuardMob {
                     .victims(this::canHit)
                     .onImpact(server -> {
                         server.playSound(null, getX(), getY(), getZ(), MobSounds.WHALEBONE_CAPTAIN_SLAM.get(), SoundSource.HOSTILE, 2f, 0.95f + random.nextFloat() * 0.1f);
-                        server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + look.x * 2.5, getY() + 1.5, getZ() + look.z * 2.5, 4, 1.2, 0.2, 1.2, 0);
                     })
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), SWEEP_DAMAGE);
@@ -317,13 +317,13 @@ public class WhaleboneCaptain extends GuardMob {
 
     private void stompEffects(ServerLevel server, Vec3 at, double radius) {
         server.playSound(null, at.x, at.y, at.z, MobSounds.CAPTAIN_SHOCKWAVE.get(), SoundSource.HOSTILE, 2.5f, 1.0f);
-        server.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.3, at.z, 1, 0, 0, 0, 0);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y + 0.3, at.z, 1, 0, 0, 0, 0);
         for (int ring = 1; ring <= 3; ring++) {
             double r = radius * ring / 3.0;
             int points = 8 + ring * 8;
             for (int i = 0; i < points; i++) {
                 double a = Math.PI * 2 * i / points;
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         at.x + Math.cos(a) * r, at.y + 0.1, at.z + Math.sin(a) * r, 2, 0.1, 0.05, 0.1, 0.05);
             }
         }
@@ -347,13 +347,10 @@ public class WhaleboneCaptain extends GuardMob {
             }
             boolean first = true;
             for (Vec3 p : spots) {
-                var builder = Telegraph.in(server, TelegraphShape.circle(p.x, p.z, ERUPT_RADIUS))
+                var builder = Telegraph.in(server, TelegraphShape.circle(p.x, p.z, ERUPT_RADIUS)).prop(PropFx.rise("bone_spike"))
                         .floor(p.y).warn(ERUPT_WARN).danger().owner(this)
                         .victims(this::canHit)
                         .onImpact(s -> {
-                            s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                                    p.x, p.y + 1, p.z, 30, 0.3, 0.9, 0.3, 0.15);
-                            s.sendParticles(ParticleTypes.CRIT, p.x, p.y + 1.5, p.z, 10, 0.2, 0.8, 0.2, 0.3);
                             s.playSound(null, BlockPos.containing(p), MobSounds.CAPTAIN_ERUPT_BURST.get(), SoundSource.HOSTILE, 1.5f, 0.95f + random.nextFloat() * 0.1f);
                         })
                         .onHit((s, player) -> {
@@ -379,6 +376,7 @@ public class WhaleboneCaptain extends GuardMob {
         if (actionTicks == 1) {
             roared = true;
             lockedYaw = getYRot();
+            // 咆哮は吹き飛ばすだけなので、攻撃の形 (棘の輪) は出さない
             Telegraph.in((ServerLevel) level(), TelegraphShape.circle(getX(), getZ(), ROAR_RADIUS))
                     .floor(floorY()).warn(ROAR_WARN).danger().owner(this)
                     .victims(this::canHit)
@@ -445,8 +443,8 @@ public class WhaleboneCaptain extends GuardMob {
         super.die(source);
         bossBar.removeAllPlayers();
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                    getX(), getY() + 1.5, getZ(), 80, 0.8, 1.2, 0.8, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 1.5, getZ(), 24, 0.8, 1.2, 0.8, 0.2);
         }
     }
 
@@ -490,7 +488,7 @@ public class WhaleboneCaptain extends GuardMob {
     public void tick() {
         super.tick();
         if (level().isClientSide && random.nextFloat() < 0.15f) {
-            level().addParticle(ParticleTypes.SOUL_FIRE_FLAME, getX() + Mth.nextDouble(random, -0.6, 0.6), getY() + 2.4, getZ() + Mth.nextDouble(random, -0.6, 0.6), 0, 0.02, 0);
+            level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -0.6, 0.6), getY() + 2.4, getZ() + Mth.nextDouble(random, -0.6, 0.6), 0, 0.02, 0);
         }
     }
 
@@ -498,5 +496,10 @@ public class WhaleboneCaptain extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

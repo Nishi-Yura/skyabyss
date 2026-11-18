@@ -303,11 +303,6 @@ public final class WatcherEvents {
         }
     }
 
-    @Nullable
-    static Vec3 activePosition(UUID player) {
-        Active a = ACTIVE.get(player);
-        return a == null ? null : a.pos();
-    }
 
     @SubscribeEvent
     static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {

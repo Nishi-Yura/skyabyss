@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.opening.site;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -1446,7 +1445,4 @@ public final class SiteJob {
         return m == null ? null : Blueprint.transform(m[0], m[1] + 1, m[2], rotation, false, o);
     }
 
-    public int[] debugRect() {
-        return rect == null ? null : Arrays.copyOf(rect, 4);
-    }
 }

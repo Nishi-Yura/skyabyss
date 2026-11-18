@@ -99,7 +99,6 @@ public class RockShellBeetle extends GroundFoe {
                 .target(target)
                 .startSound(MobSounds.ROCK_SHELL_BEETLE_CHARGE.get(), 1.2f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.POOF, getX() + f.x, getY() + 0.2, getZ() + f.z, 6, 0.4, 0.1, 0.4, 0.02))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), (float) getAttributeValue(Attributes.ATTACK_DAMAGE));
                     player.knockback(0.9, -f.x, -f.z);

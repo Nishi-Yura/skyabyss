@@ -42,7 +42,7 @@
 
 ## 5. 作り
 
-- モデルは低ポリ（docs/design/15 の 9）。見た目ごとに `lowpoly/mount_<id>.json`・`textures/lowpoly/mount_<id>.png`（光る見た目は `_glowmask.png`）・骨だけの `geo/entity/mount_<id>_lowpoly.geo.json`・動き `animations/entity/mount_<id>.animation.json`。`LowPoly.enabled = false` のときは骨ごとの箱の `geo/entity/mount_<id>.geo.json`。描画は `MountClient.MountRenderer`（`LowPolyGeoRenderer` の派生）。
+- モデルは低ポリ（docs/design/15 の 9）。見た目ごとに `lowpoly/mount_<id>.json`・`textures/lowpoly/mount_<id>.png`（光る見た目は `_glowmask.png`）・骨だけの `geo/entity/mount_<id>_lowpoly.geo.json`・動き `animations/entity/mount_<id>.animation.json`。描画は `MountClient.MountRenderer`（`LowPolyGeoRenderer` の派生。メッシュから作る点の模型で描く。15 の「点の模型」）。
 - 生成: `python -I tools/gen/mobs/mounts_lp/build_all.py [id ...]`（一体ずつ `<id>.py`、共通は `mlp.py`）。形・鞍・あぶみ・絵・骨・動きを作って入れ、比べシート `docs/review/mounts_v2/<id>_sheet.png`（四方・乗った人・寄り・歩き/駆け/跳び/待機の帯）を書き、`MountLook` の当たり・席の高さ・乗った人の脚の向きを書き換える。メッシュは閉じていて、脚・首・尾は親に沈めてある（`tools/audit/mesh_audit.py mount_ --check`）。
 - 採用した案（`docs/review/roughs_mounts/`）: 角の荷獣 C 渦角の山羊（荷袋・巻いた荷・首の鈴）、灰色の鹿 A 枝角の牡鹿、大トカゲ B 帆背のトカゲ（襟・喉袋・帆、口が開く）、岩の子鯨 A 四つ足の子鯨（フジツボの石・尾びれ・首の綱）、殻の亀 A 珊瑚の丸甲亀、雷の雛 B まるまる雛（冠・翼・尾羽の雷が光る）、炉の狐 C 三尾の熾狐（尾の先・耳の内・背の割れ目が光る）。三角形は一体 2,300 から 3,400。
 - 鞍は体の表面を光線で拾って沿わせる（敷き布・座・前後の山・横の垂れ・腹帯）。席は原点の真上（`MountEntity` の乗る位置は x = z = 0）で、`seat` は鞍の上面 - 1/16 ブロック。

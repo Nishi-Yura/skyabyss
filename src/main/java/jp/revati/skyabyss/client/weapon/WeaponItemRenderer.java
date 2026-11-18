@@ -37,14 +37,13 @@ import net.neoforged.neoforge.client.event.RenderLivingEvent;
 // 品の item モデル (models/item/<id>.json) は base が builtin/entity (display は持ち方の表のまま)、gui は 32x32 の絵 (perspectives)。
 // base のときだけここが呼ばれる (IClientItemExtensions#getCustomRenderer)。メッシュは階級 (common / rare / legend) で選び、
 // アトラスと光る画像は強化 (+0〜4 / +5〜9 / +10) で選ぶ。光る画素は entityTranslucentEmissive でもう一度描く。
-// `LowPoly.weaponMeshes = false` なら元のボクセルのモデル (models/item_voxel/<名>.json) を同じ置き方で描く。
+// メッシュの無い品だけ、元のボクセルのモデル (models/item_voxel/<名>.json) を同じ置き方で描く。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static final String[] VOXEL_MODELS = {"whalebone_greatsword", "captain_pike", "waterway_fang", "tide_shell_trident", "coral_harpoon",
             "tidecaller_claw", "coral_shield", "thunder_wing_bow", "thunder_wing_bow_pulling_0", "thunder_wing_bow_pulling_1", "thunder_wing_bow_pulling_2",
             "warden_glaive", "raiju_claw", "ember_war_axe", "smith_hammer", "thrall_poker"};
     private static final int WHITE = 0xFFFFFFFF;
-    private static final int FULL_BRIGHT = 0xF000F0;
 
     private static WeaponItemRenderer instance;
     // 三人称で今描いている生き物 (弓の引き絵を決めるため)。RenderLivingEvent の Pre/Post の間だけ入る。一人称は自分
@@ -70,18 +69,20 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         ItemStack shown = lookItem == null ? stack : new ItemStack(lookItem);
         String id = BuiltInRegistries.ITEM.getKey(shown.getItem()).getPath();
         int stage = pullStage(stack, context);
-        if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
-            String tier = tierName(shown, id);
-            LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tier + (stage >= 0 ? "_pull" + stage : ""));
-            if (mesh != null) {
-                renderMesh(mesh, id, tier, level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
-                return;
-            }
+        String tier = tierName(shown, id);
+        LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tier + (stage >= 0 ? "_pull" + stage : ""));
+        if (mesh != null) {
+            cubeStage = stage >= 0 ? "_pull" + stage : "";
+            renderMesh(mesh, id, tier, level(stack), stack.hasFoil(), mythic(stack), context, pose, buffers, light, overlay);
+            return;
         }
         renderVoxel(id, stage, shown, pose, buffers, light, overlay);
     }
 
     // ---------------------------------------------------------------- メッシュ
+
+    // 試作 (client/look/GearLook): 弓の引きの段 ("_pull0" など。引いていなければ "")
+    private static String cubeStage = "";
 
     // 今の軌跡の濃さと光の強まり ([0] = 軌跡、[1] = 光)。手 (一人称) は WeaponClient が入れた値、三人称は持っている人の今の動き、それ以外 (地面・額縁・画面) は 0
     private static float[] effects(ItemDisplayContext context) {
@@ -103,10 +104,6 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         return stack.getItem() instanceof ModGear g && g.tier() == GearTier.MYTHIC;
     }
 
-    // 神器の光の脈 (0〜1。約 2.6 秒で一巡)
-    public static float mythicPulse() {
-        return 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() / 420.0);
-    }
 
     private static void renderMesh(LowPolyMesh mesh, String id, String tier, int level, boolean foil, boolean mythic, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         ResourceLocation[] tex = variant(mesh.texture, level);
@@ -122,7 +119,10 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         pose.scale(-1f, 1f, 1f);
         // 刃の向きが逆に作ってあるメッシュは、柄の軸で半回転 (2026-10-29 の試遊「短剣や斧、持ち方逆」: 一人称で刃が後ろを向いていた)。
         // 鎚はどれも打つ面を +x に作ってあり、持ち方を借りた戦斧 (刃が -x) と逆なので、まとめて半回転 (2026-11-01「ハンマー、全体的に前後ろ逆かも」)
-        if (EDGE_FLIP.contains(id) || faceFlip(id)) {
+        // 手で組んだ模型 (look a) は種類で決める: 片刃の武器は刃・打つ面を +x に作る決まり (docs/design/60 の 1.2) なので、いつも半回転
+        char look = jp.revati.skyabyss.client.look.GearLook.weapon;
+        boolean hasCube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id) != null;
+        if (hasCube ? singleEdge(id) : (EDGE_FLIP.contains(id) || faceFlip(id))) {
             pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
         }
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
@@ -138,29 +138,62 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
             pose.scale(grow, grow, grow);
         }
         // 輝き (foil: エンチャント・品の foil): 本体のメッシュを glint の描画型へもう一度流す (バニラの item と同じ getFoilBuffer。UV はアトラスのまま)
-        VertexConsumer body = foil ? ItemRenderer.getFoilBuffer(buffers, RenderType.entityCutoutNoCull(tex[0]), true, true) : buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0]));
-        LowPoly.drawAll(pose, body, mesh, light, overlay, WHITE);
-        if (tex[1] != null) {
-            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
-            if (mythic) {
-                // 神器: 光る画素をもう一度、脈打つ濃さで重ねる
-                int a = (int) (40 + 150 * mythicPulse());
-                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
+        // 点の模型 (client/splat)。強化の段の絵で塗る。光る画素は光る点になる
+        LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id + cubeStage);
+        if (cube == null && !cubeStage.isEmpty()) {
+            cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id);
+        }
+        if (cube != null) {
+            // 試作: 立方体の模型 (client/look/GearLook)。一人称もそのままの大きさ (面のまま描くと点の模型より手前に大きく見える)
+            // 弓は弓腕の端から端まで 1.8 ブロックあり、一人称ではバニラの弓の倍に見えるので、握りを中心に縮める (2026-11-18「弓近すぎない？」。引いている間も同じ大きさ)
+            if (context.firstPerson() && id.endsWith("bow")) {
+                pose.translate(-0.375f, 0.47f, 0f);   // 握り (x32 の 12, 15。メッシュは x を反転して焼いてある)
+                pose.scale(0.62f, 0.62f, 0.62f);
+                pose.translate(0.375f, -0.47f, 0f);
             }
+            // 手は原点より柄の向きに 1/4 ブロック上を握る (2026-11-18 の撮影で 6 品とも、手が鍔・輪の高さにあった)。
+            // 立方体の模型は握りの真ん中を原点に作るので、その分だけ模型を上げて、握りを手に合わせる (三人称だけ。一人称の置き場所は前のままで合う)
+            if (!context.firstPerson()) {
+                // 弓は握りが原点より上 (弦の真ん中の高さ) にあるので上げない (撮って手の高さに合うのを確かめた)。
+                // 弓の腹の向き (模型の +x。メッシュは x を反転して焼いてある) へ前に出す (2026-11-18「弓のみもう少し前」)
+                if (id.endsWith("bow")) {
+                    pose.translate(-0.2f, 0f, 0f);
+                    // 引いていない間は、握りを中心に弓を斜めに倒して持つ (2026-11-18「弓の向き下なんじゃない？」→ 4 案から B)
+                    if (cubeStage.isEmpty()) {
+                        pose.translate(-0.375f, 0.47f, 0f);
+                        pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(BOW_REST_TILT));
+                        pose.translate(0.375f, -0.47f, 0f);
+                    }
+                } else {
+                    pose.translate(0f, 0.25f, 0f);
+                }
+            }
+            jp.revati.skyabyss.client.look.GearLookDraw.mesh(cube, null, pose, buffers, light, overlay);
+        } else {
+            jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, tex[0], null, pose.last().pose(), buffers, light, overlay, WHITE);
         }
-        // 動きの間だけ: 光る画素をもう一度重ねて強め (GLOW)、刃の軌跡の帯を引く (TRAIL)
+        // 動きの間だけ: 刃の軌跡の帯を引く (TRAIL)
         float[] fx = effects(context);
-        if (fx[1] > 0.02f && tex[1] != null) {
-            int a = Math.min(255, (int) (fx[1] * 255f));
-            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
-        }
         WeaponTrail.draw(pose, buffers, mesh, id, context.firstPerson() ? -1 : holder == null ? -2 : holder.getId(), !context.firstPerson(), fx[0]);
         pose.popPose();
     }
 
-    // 刃を +x に作ってある品 (宿り木の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
-    static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger", "gather_axe",
+    // 三人称で引いていない弓を倒す角度 (度)。上の端が後ろ上、下の端が前下へ斜めに倒れる (2026-11-18 に 4 案を撮って B を選んだ)
+    static final float BOW_REST_TILT = 65f;
+
+    // 刃を +x に作ってある品 (祠の短剣・採取の斧と、野の斧 5 本。2026-11-01 にメッシュの刃の側を見て足した。天割りの両刃斧は両側に刃があるので入れない)
+    static final java.util.Set<String> EDGE_FLIP = java.util.Set.of("shrine_dagger",
             "wild_tusk_axe", "wild_conductor_axe", "wild_snowsplitter_axe", "wild_blasting_axe", "wild_molten_axe");
+
+    // 片刃の武器 (刃・打つ面が片側だけにある)。名前で見分ける (tools/gen/pixel/gear_manifest.py の種類と同じ語)
+    static boolean singleEdge(String id) {
+        for (String w : new String[] {"dagger", "knife", "fang", "claw", "sickle", "axe", "scythe", "hammer", "maul", "mace", "anchor"}) {
+            if (id.contains(w)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // 打つ面が +x の鎚 (武器の種類が鎚のもの。採集の道具は除く)
     static boolean faceFlip(String id) {
@@ -214,7 +247,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (e == null || !e.isUsingItem() || !e.getUseItem().is(stack.getItem())) {
             return -1;
         }
-        float pull = (stack.getUseDuration(e) - e.getUseItemRemainingTicks()) / 20f;
+        float pull = jp.revati.skyabyss.combat.BowDraw.pull(stack.getUseDuration(e) - e.getUseItemRemainingTicks());
         return pull >= 0.9f ? 2 : pull >= 0.65f ? 1 : 0;
     }
 

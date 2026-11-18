@@ -253,9 +253,9 @@ public final class NamedFoes {
             if (p.distanceToSqr(le) < BEAM_RANGE * BEAM_RANGE) {
                 for (int i = 0; i < 12; i++) {
                     double y = top + level.random.nextDouble() * 40;
-                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.END_ROD, true, le.getX(), y, le.getZ(), 1, 0.08, 0.4, 0.08, 0.0);
+                    level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, le.getX(), y, le.getZ(), 1, 0.08, 0.4, 0.08, 0.0);
                 }
-                level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME, true, le.getX(), le.getY() + 0.2, le.getZ(), 3, 0.6, 0.1, 0.6, 0.01);
+                level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, le.getX(), le.getY() + 0.2, le.getZ(), 3, 0.6, 0.1, 0.6, 0.01);
             }
         }
     }
@@ -298,7 +298,7 @@ public final class NamedFoes {
             jp.revati.skyabyss.facility.Coins.give(p, d.coins());
             jp.revati.skyabyss.advancement.Beats.fire(p, "named:any");
             jp.revati.skyabyss.advancement.Beats.fire(p, "named:" + RegionSpawner.REGIONS[region]);
-            Notice.gain(p, "message.skyabyss.named.down", e.getDisplayName(), d.coins());
+            Notice.gainLog(p, "message.skyabyss.named.down", e.getDisplayName(), d.coins());
             jp.revati.skyabyss.endgame.RegionPoints.add(p, region, 1);
         }
     }

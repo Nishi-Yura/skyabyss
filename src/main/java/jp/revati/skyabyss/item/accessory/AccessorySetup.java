@@ -7,12 +7,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -24,7 +22,6 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 public final class AccessorySetup {
     private static final DeferredRegister<net.neoforged.neoforge.attachment.AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SkyAbyss.MODID);
-    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, SkyAbyss.MODID);
 
     // 枠の中身。死んでも落とさない場面 (keepInventory・岩鯨の背) では copyOnDeath で残る。付けた品はほかのプレイヤーにも見える (体に描く AccessoryWornLayer) ので、
     // 持ち主と、その周りで追っているプレイヤーみんなへ同期する (中身は付けている品だけで、隠すものはない)
@@ -34,29 +31,15 @@ public final class AccessorySetup {
                     .sync((holder, to) -> true, AccessoryData.STREAM_CODEC)
                     .build());
 
-    public static final DeferredHolder<MenuType<?>, MenuType<AccessoryMenu>> MENU = MENUS.register("accessories",
-            () -> IMenuTypeExtension.create((id, inventory, buf) -> new AccessoryMenu(id, inventory)));
 
     private AccessorySetup() {
     }
 
     public static void register(IEventBus modEventBus) {
         ATTACHMENTS.register(modEventBus);
-        MENUS.register(modEventBus);
     }
 
     // ---------------------------------------------------------------- パケット (持ち主 → サーバー)
-    // 持ち物の画面のつまみから、装飾の画面を開く
-    public record OpenPayload() implements CustomPacketPayload {
-        public static final Type<OpenPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "accessory_open"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, OpenPayload> STREAM_CODEC = StreamCodec.unit(new OpenPayload());
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
-        }
-    }
-
     // 護符の枠の品を使う (キー)
     public record UseCharmPayload() implements CustomPacketPayload {
         public static final Type<UseCharmPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "accessory_use_charm"));
@@ -71,11 +54,6 @@ public final class AccessorySetup {
     @SubscribeEvent
     static void onPayloads(RegisterPayloadHandlersEvent event) {
         event.registrar("1")
-                .playToServer(OpenPayload.TYPE, OpenPayload.STREAM_CODEC, (payload, context) -> {
-                    if (context.player() instanceof ServerPlayer player) {
-                        Accessories.openMenu(player);
-                    }
-                })
                 .playToServer(UseCharmPayload.TYPE, UseCharmPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         Accessories.useCharm(player);

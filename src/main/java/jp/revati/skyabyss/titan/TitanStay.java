@@ -32,13 +32,6 @@ public final class TitanStay {
     // 知らせの境の幅 (残りの値が跳んでも、この幅の中で一度は見る)
     public static final int WARN_WINDOW = 20;
 
-    // 前回の値を持たない版: 残りが境から WARN_WINDOW tick の中にあれば、近くの人に一行 (key = message.skyabyss.stay_ending.<titan>)。
-    // 毎 tick 呼ぶ前提 (値が 1 ずつ減るときは境ちょうどの 1 回だけ。幅の中で値が減り続けるあいだは、境ちょうどの値のときだけ)
-    public static void warnIfDue(ServerLevel level, Vec3 at, int left, String key) {
-        if (boundary(left) > 0 && left == boundary(left)) {
-            send(level, at, key);
-        }
-    }
 
     // left が境 (WARN_TICKS / WARN_LAST) の幅の中なら、その境。そうでなければ 0
     public static int boundary(int left) {

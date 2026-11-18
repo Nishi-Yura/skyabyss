@@ -25,14 +25,12 @@ import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.story.Chapters;
-import jp.revati.skyabyss.story.ch1.Tasks;
 import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.titan.tide.TideOcean;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -52,7 +50,6 @@ import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -164,8 +161,7 @@ public final class SaltVault {
     }
 
     public static final String SIGNAL_DOOR = "ch2_salt_door";
-    // 前の版の地下の仕掛け (潮の喉・塩樽・白い戸・出口の縦穴) はもう動かさない (2026-11-07。dungeon/MiniDungeons)
-    public static final boolean RETIRED_UNDERGROUND = true;
+    // 前の版の地下の仕掛け (潮の喉・塩樽・白い戸・出口の縦穴) はもう動かさない (2026-11-07。dungeon/MiniDungeons)。見回りは道の標だけ
     static final String BARREL_HINT = "skyabyss_ch2_salt_barrel_hint";
 
     // 戸が開いているか (読み込まれていない所は開いていないとみなす)
@@ -373,27 +369,6 @@ public final class SaltVault {
         return true;
     }
 
-    // 前の版で建った蔵の坑口を一度だけ手当てする
-    static void mendOld(MinecraftServer server, ServerLevel level) {
-        boolean dirty = false;
-        for (SiteData.Entry e : entries(server)) {
-            if (e.extra(MOUTH_FIX) != null) {
-                continue;
-            }
-            Vault v = new Vault(e.pos, e.yaw);
-            if (!loaded(level, v)) {
-                continue;
-            }
-            int n = clearMouth(level, v);
-            decorate(level, v);
-            e.extra(MOUTH_FIX, BlockPos.ZERO);
-            dirty = true;
-            SkyAbyss.LOGGER.info("Salt vault at {}: mouth mended ({} cells)", e.pos, n);
-        }
-        if (dirty) {
-            SiteData.get(level).setDirty();
-        }
-    }
 
     // 碑の文を刻み、出口の縦穴の口を地表まで延ばす (開発コマンドの蔵にも)
     public static void decorate(ServerLevel level, Vault v) {
@@ -570,10 +545,6 @@ public final class SaltVault {
         return !TideOcean.isLowTide(level.getDayTime());
     }
 
-    static boolean wantFlooded(ServerLevel level, Vault v) {
-        Boolean f = FORCE.get(v.pos().asLong());
-        return f != null ? f : flooded(level);
-    }
 
     // 喉の中身のセル (部品で空気か梯子の所)。部品の座標
     private static List<int[]> sumpCells;
@@ -716,6 +687,9 @@ public final class SaltVault {
         level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
         level.playSound(null, at, SoundEvents.BARREL_CLOSE, SoundSource.BLOCKS, 0.8f, 0.7f);
         ItemStack stack = token();
+        if (p instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+            jp.revati.skyabyss.notice.GainFeed.note(gainTo, stack);
+        }
         if (!p.getInventory().add(stack)) {
             level.setBlock(at, Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP), 3);
             return false;
@@ -776,7 +750,7 @@ public final class SaltVault {
         dropTokens(p);
         ServerLevel level = p.serverLevel();
         level.playSound(null, p.blockPosition(), SoundEvents.WOOD_BREAK, SoundSource.PLAYERS, 1.0f, 0.8f);
-        level.sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 1, p.getZ(), 30, 0.5, 0.4, 0.5, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 1, p.getZ(), 24, 0.5, 0.4, 0.5, 0.02);
         Notice.hint(p, "message.skyabyss.ch2.vault.broke");
     }
 
@@ -790,7 +764,7 @@ public final class SaltVault {
         }
         level.playSound(null, centre, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.0f, 0.6f);
         level.playSound(null, centre, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 1.0f, 0.8f);
-        level.sendParticles(ParticleTypes.WHITE_ASH, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 60, 0.4, 1.0, 1.0, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 24, 0.4, 1.0, 1.0, 0.02);
         for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 32 * 32) {
                 Notice.narrate(p, "message.skyabyss.ch2.vault.door");
@@ -842,48 +816,9 @@ public final class SaltVault {
             }
         }
         // 潮の喉・塩樽・坑口の手当ては前の版の地下のもの。地下は小ダンジョンの写しへ移り、地上の口は埋めた (dungeon/MiniDungeons)
-        if (RETIRED_UNDERGROUND) {
-            roadTick(server, level, players);
-            return;
-        }
-        if (t % 40 == 7) {
-            mendOld(server, level);
-            for (Vault v : vaults(server)) {
-                if (!level.isLoaded(v.pos()) || !anyNear(players, v.pos(), ACTIVE)) {
-                    continue;
-                }
-                boolean wet = wantFlooded(level, v);
-                if (setSump(level, v, wet)) {
-                    BlockPos mouth = v.mark("mouth");
-                    for (ServerPlayer p : players) {
-                        if (mouth != null && p.distanceToSqr(mouth.getX(), mouth.getY(), mouth.getZ()) < 40 * 40) {
-                            Notice.hint(p, wet ? "message.skyabyss.ch2.vault.wet" : "message.skyabyss.ch2.vault.dry");
-                        }
-                    }
-                }
-                tidyBarrels(level, v, players);
-                // 塩樽の間に初めて入った人に、樽の運び方を一度だけ
-                BlockPos room = v.mark("room2");
-                for (ServerPlayer p : players) {
-                    if (room != null && !p.isSpectator() && !p.getPersistentData().getBoolean(BARREL_HINT)
-                            && p.distanceToSqr(room.getX() + 0.5, room.getY() + 0.5, room.getZ() + 0.5) < 8 * 8 && !doorOpen(level, v)) {
-                        p.getPersistentData().putBoolean(BARREL_HINT, true);
-                        Notice.hint(p, "message.skyabyss.ch2.vault.barrels");
-                    }
-                }
-            }
-        }
         roadTick(server, level, players);
     }
 
-    static boolean anyNear(List<ServerPlayer> players, BlockPos at, double r) {
-        for (ServerPlayer p : players) {
-            if (!p.isSpectator() && Math.hypot(p.getX() - at.getX(), p.getZ() - at.getZ()) <= r) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     // 塩の道の標: 読み込まれたら建て、二章の人が近くに来たら一行と合図
     static void roadTick(MinecraftServer server, ServerLevel level, List<ServerPlayer> players) {
@@ -1050,5 +985,10 @@ public final class SaltVault {
 
     static void log(String msg) {
         SkyAbyss.LOGGER.info("[ch2 vault] {}", msg);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

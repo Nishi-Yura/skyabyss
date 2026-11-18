@@ -161,9 +161,9 @@ public final class TowerDesk {
         if (Towers.eligible(p)) {
             // その人にだけ送る光の柱
             for (int i = 0; i < 6; i++) {
-                level.sendParticles(p, ParticleTypes.END_ROD, true, s.getX() + 0.5, s.getY() + 1 + i * 2.5, s.getZ() + 0.5, 2, 0.15, 1.0, 0.15, 0.0);
+                level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, s.getX() + 0.5, s.getY() + 1 + i * 2.5, s.getZ() + 0.5, 2, 0.15, 1.0, 0.15, 0.0);
             }
-            level.sendParticles(p, TowerArena.VIOLET, true, s.getX() + 0.5, s.getY() + 0.3, s.getZ() + 0.5, 6, 0.6, 0.1, 0.6, 0.0);
+            level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, s.getX() + 0.5, s.getY() + 0.3, s.getZ() + 0.5, 6, 0.6, 0.1, 0.6, 0.0);
         }
     }
 
@@ -409,5 +409,10 @@ public final class TowerDesk {
                     }
                     return 1;
                 })));
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

@@ -32,6 +32,8 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.cancel(payload.id()))
                 .playToClient(jp.revati.skyabyss.combat.BossCue.Payload.TYPE, jp.revati.skyabyss.combat.BossCue.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.BossCueClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.combat.BossIntro.Payload.TYPE, jp.revati.skyabyss.combat.BossIntro.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.titan.BossIntroClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.titan.dungeon.LampBand.Payload.TYPE, jp.revati.skyabyss.titan.dungeon.LampBand.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.LampBandClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.weapon.StrikePayload.TYPE, jp.revati.skyabyss.weapon.StrikePayload.STREAM_CODEC,
@@ -40,11 +42,17 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.weapon.ChargeRing.receiveMiss())
                 .playToClient(jp.revati.skyabyss.combat.BreakGauge.Payload.TYPE, jp.revati.skyabyss.combat.BreakGauge.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.combat.BreakGaugeClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.combat.FoeStatus.Payload.TYPE, jp.revati.skyabyss.combat.FoeStatus.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.hud.FoeStatusClient.receive(payload))
                 .playBidirectional(jp.revati.skyabyss.weapon.InspectPayload.TYPE, jp.revati.skyabyss.weapon.InspectPayload.STREAM_CODEC,
                         new net.neoforged.neoforge.network.handling.DirectionalPayloadHandler<>(
                                 (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveInspect(payload),
                                 (payload, context) -> jp.revati.skyabyss.weapon.InspectPayload.relay(context.player())))
                 .playToClient(jp.revati.skyabyss.titan.domain.DomainPayload.TYPE, jp.revati.skyabyss.titan.domain.DomainPayload.STREAM_CODEC,
-                        (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload));
+                        (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.fx.RiftPayload.TYPE, jp.revati.skyabyss.fx.RiftPayload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.fx.RiftFx.receive(payload))
+                .playToClient(jp.revati.skyabyss.fx.OrbitCuePayload.TYPE, jp.revati.skyabyss.fx.OrbitCuePayload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.combat.AttackLightFx.cue(payload));
     }
 }

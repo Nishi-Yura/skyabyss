@@ -29,8 +29,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 
 // 予告した技が当たった瞬間の見た目と音だけ (ダメージ・判定には触れない)。
-// 床の印の範囲に、その技の主の属性 (石・水・雷・熱・深淵) に合う衝撃の輪と破片の粒を出し、近くのプレイヤーには小さく画面を揺らす。
-// 粒の数は上限つき (輪 24 + 破片 18 + 爆発 1)。揺れは screenShake 設定と weaponShake の強さに従う。爆発と揺れは大きな技 (BIG_RADIUS) だけ。
+// 床の印の範囲に、その技の主の属性 (石・水・雷・熱・深淵) の mod の粒を一層だけ出し (docs/design/59)、大きな技 (BIG_RADIUS) だけ画面を揺らす。
+// 揺れは screenShake 設定と weaponShake の強さに従う。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class ImpactFx {
     enum Element {
@@ -99,45 +99,25 @@ public final class ImpactFx {
         if (light) {
             return;
         }
-        // 心臓の後のボスの技は、持ち主ごとの飾りを重ねる (BossImpactFx)
-        BossImpactFx.burst(level, d, cx, y0, cz, radius);
-        if (bespoke) {
-            if (big) {
-                shake(cx, cz, radius, size);
-            }
-            return;
-        }
-        final double fy0 = y0;
-        ParticleOptions rim = rimParticle(el);
-        double spacing = Math.max(0.7, Math.max(b[2] - b[0], b[3] - b[1]) / 24.0);
-        int[] count = {0};
-        s.outline((x, z) -> {
-            if (count[0]++ >= 24) {
-                return;
-            }
-            double y = d.ground(x, z);
-            if (!Double.isNaN(y)) {
-                level.addParticle(rim, x, y + 0.15, z, (x - cx) * 0.02, 0.12, (z - cz) * 0.02);
-            }
-        }, spacing);
-        ParticleOptions debris = debrisParticle(el);
-        for (int i = 0; i < 18; i++) {
-            double a = level.random.nextDouble() * Math.PI * 2;
-            double r = Math.sqrt(level.random.nextDouble()) * radius;
-            double x = cx + Math.cos(a) * r;
-            double z = cz + Math.sin(a) * r;
-            if (!s.contains(x, z)) {
-                continue;
-            }
-            double y = d.ground(x, z);
-            if (!Double.isNaN(y)) {
-                level.addParticle(debris, x, y + 0.2, z, 0, 0.18 + level.random.nextDouble() * 0.2, 0);
-            }
+        // 当たった瞬間の粒は一層だけ (docs/design/59): 心臓の後の主は主の粒 (BossImpactFx)、技の見た目があればそちら (AttackFx)、
+        // ほかは属性の mod の粒を AttackFx.burst で (多くて IMPACT_MAX)。爆発の煙は出さない。揺れは大きな技だけ
+        boolean boss = !bespoke && BossImpactFx.burst(level, d, cx, y0, cz, radius);
+        if (!bespoke && !boss) {
+            AttackFx.burst(level, d, fxElement(el), 1f);
         }
         if (big) {
-            level.addParticle(ParticleTypes.EXPLOSION, cx, fy0 + 0.3, cz, 0, 0, 0);
             shake(cx, cz, radius, size);
         }
+    }
+
+    static jp.revati.skyabyss.fx.FxParticles.Element fxElement(Element el) {
+        return switch (el) {
+            case WATER -> jp.revati.skyabyss.fx.FxParticles.Element.WATER;
+            case STORM -> jp.revati.skyabyss.fx.FxParticles.Element.STORM;
+            case EMBER -> jp.revati.skyabyss.fx.FxParticles.Element.EMBER;
+            case ABYSS -> jp.revati.skyabyss.fx.FxParticles.Element.ABYSS;
+            default -> jp.revati.skyabyss.fx.FxParticles.Element.STONE;
+        };
     }
 
     private static void shake(double cx, double cz, double radius, float size) {
@@ -155,26 +135,6 @@ public final class ImpactFx {
                 }
             }
         }
-    }
-
-    private static ParticleOptions rimParticle(Element el) {
-        return switch (el) {
-            case WATER -> ParticleTypes.SPLASH;
-            case STORM -> ParticleTypes.ELECTRIC_SPARK;
-            case EMBER -> ParticleTypes.FLAME;
-            case ABYSS -> new DustParticleOptions(new Vector3f(0.45f, 0.05f, 0.7f), 1.6f);
-            default -> ParticleTypes.CLOUD;
-        };
-    }
-
-    private static ParticleOptions debrisParticle(Element el) {
-        return switch (el) {
-            case WATER -> ParticleTypes.BUBBLE_POP;
-            case STORM -> ParticleTypes.ELECTRIC_SPARK;
-            case EMBER -> ParticleTypes.LAVA;
-            case ABYSS -> ParticleTypes.SQUID_INK;
-            default -> new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState());
-        };
     }
 
     // 主 = 範囲の近くにいる mod の生き物のうち最も近いもの。登録名から属性を決める (サーバーの通信は変えない)

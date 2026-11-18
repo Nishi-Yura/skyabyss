@@ -47,7 +47,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //  - 潮渡りの旅装 4 部位の値 (防御 18・強靭 9・水中移動効率 0.1 × 4・アンコモン・鍛えない・必要 Lv 13) と GearCurve.TRAVEL[1]、備えの身の灯
 //  - 塩の砥石 (+1.8・20 分・岩の砥石と重ねない・備えの刃は大きい方だけ・水の中の +1)、塩漬け (水中呼吸 60 秒)、粉薬 (3❤・浮遊と鈍足を治す)、糧の点
 //  - 手段の名前が章 (巨神) ごとに分かれる
-//  - レシピ 8 本 (旅装の素材の合計は 小真珠 10・塩結晶 12・岩鯨の鱗片 4・革 3)・鍵・旅嚢の素材
+//  - レシピ 8 本 (旅装の素材の合計は 小真珠 10・塩結晶 12・岩鯨の鱗片 4・革 3)・鍵・旅袋の素材
 //  - 砂時計の潮の計算 (一歩ずつ数えた答えと一致)・使うと帯に一度・30 秒の待ち・消えない
 //  - 鼓動守 (潮殻) の編み方の表と、編み直し (1 日 1 つ)
 //  - 一式で合図 ch2_travel_gear_made
@@ -309,7 +309,7 @@ public final class Ch2GearSelfTest {
                 Map.of(Ch2Gear.SMALL_PEARL.get(), 10, Ch2Gear.SALT_CRYSTAL.get(), 12, shard, 4), "tide wader set");
         check(f, Ch2Gear.MADE.size() == 8, "the chapter-2 notes should hold 8 items, got " + Ch2Gear.MADE);
         madeChapter(f, 2, Ch2Gear.MADE);
-        // 二章の素材は旅嚢の品ではない (旅嚢の画面の枠が埋まっている。足すなら画面の並びから直す)。持ち物のまま
+        // 二章の素材は旅袋の品ではない (旅袋の画面の枠が埋まっている。足すなら画面の並びから直す)。持ち物のまま
         for (Item mat : List.of(Ch2Gear.SMALL_PEARL.get(), Ch2Gear.SALT_CRYSTAL.get(), Ch2Gear.PEARL_WARD_THREAD.get(), Ch2Gear.SHELL_CHIP.get())) {
             check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " became a pouch item (check the pouch layout first)");
         }

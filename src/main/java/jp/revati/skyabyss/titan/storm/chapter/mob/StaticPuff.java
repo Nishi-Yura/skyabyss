@@ -134,7 +134,7 @@ public class StaticPuff extends GroundFoe {
         super.aiStep();
         if (level().isClientSide) {
             if (getCharge() > 0.4f && random.nextFloat() < getCharge() * 0.5f) {
-                level().addParticle(ParticleTypes.ELECTRIC_SPARK, getRandomX(0.7), getRandomY(), getRandomZ(0.7), 0, 0, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getRandomX(0.7), getRandomY(), getRandomZ(0.7), 0, 0, 0);
             }
             return;
         }
@@ -224,7 +224,7 @@ public class StaticPuff extends GroundFoe {
             double t = i / (double) n;
             double j = (i % 2 == 0 ? 1 : -1) * 0.12 * Math.sin(t * Math.PI);
             Vec3 p = a.add(d.scale(t)).add(j, j * 0.5, -j);
-            warn(server, ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
         }
     }
 
@@ -330,5 +330,10 @@ public class StaticPuff extends GroundFoe {
     @Override
     protected SoundEvent getDeathSound() {
         return Ch3Mobs.PUFF_DEATH.get();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

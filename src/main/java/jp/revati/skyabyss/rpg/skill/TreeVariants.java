@@ -60,10 +60,6 @@ public final class TreeVariants {
     static final double THROWN_TRAP_RANGE = 12;
     static final double GREAT_TRAP_RADIUS = 2.0;
     public static final double GREAT_TRAP_BIND = 1.5;
-    // 射手の跳び退き
-    static final int PARTING_ARROWS = 3;
-    static final double PARTING_RANGE = 10;
-    static final double PARTING_DAMAGE = 0.5;
     // 雷の矢
     static final int BRANCH_TARGETS = 2;
     static final double BRANCH_SCALE = 0.7;
@@ -148,11 +144,6 @@ public final class TreeVariants {
                     TreeActions.shieldBash(player, rank);
                 }
             }
-            case ARCHER_LEAP -> {
-                if (r == 1) {
-                    partingArrows(player, from);
-                }
-            }
             case LAMP_CHARM -> {
                 if (r == 2) {
                     burningLamp(player, rank, from);
@@ -183,7 +174,7 @@ public final class TreeVariants {
         ServerLevel level = player.serverLevel();
         if (r == 2) {
             target.addEffect(new MobEffectInstance(MobEffects.POISON, VENOM_TICKS, 1), player);
-            level.sendParticles(ParticleTypes.ITEM_SLIME, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
         } else {
             float third = SkillActions.attackDamage(player) * (float) (SkillRules.FANG_MULTIPLIER * TRIPLE_FANG_SCALE);
             SkillEffects.later(level, SkillRules.FANG_GAP * 2, () -> {
@@ -246,7 +237,7 @@ public final class TreeVariants {
             long now = level.getGameTime();
             SkillEvents.mark(next, p.bonus, now, p.ticks, owner);
             PASSING.put(next.getUUID(), new Pass(p.owner, now + p.ticks, p.bonus, p.ticks));
-            level.sendParticles(ParticleTypes.SOUL, next.getX(), next.getY() + next.getBbHeight() + 0.3, next.getZ(), 10, 0.3, 0.2, 0.3, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), next.getX(), next.getY() + next.getBbHeight() + 0.3, next.getZ(), 10, 0.3, 0.2, 0.3, 0.01);
             level.playSound(null, next.getX(), next.getY(), next.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.6f);
         }
     }
@@ -284,7 +275,7 @@ public final class TreeVariants {
                         e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), 30));
                     }
                 }
-                level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.5, at.z, 10, radius * 0.4, 0.2, radius * 0.4, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.5, at.z, 10, radius * 0.4, 0.2, radius * 0.4, 0.01);
             });
         }
     }
@@ -301,8 +292,8 @@ public final class TreeVariants {
                 SkillEffects.bind(e, HEAVY_STOMP_BIND);
             }
         }
-        level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.2, player.getZ(), 10, radius * 0.4, 0.1, radius * 0.4, 0.0);
-        level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, player.getX(), player.getY() + 0.2, player.getZ(), 6, radius * 0.4, 0.1, radius * 0.4, 0.01);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.getX(), player.getY() + 0.2, player.getZ(), 10, radius * 0.4, 0.1, radius * 0.4, 0.0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 0.2, player.getZ(), 6, radius * 0.4, 0.1, radius * 0.4, 0.01);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.7f, 0.4f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
@@ -332,7 +323,7 @@ public final class TreeVariants {
             ServerLevel level = player.serverLevel();
             for (double d = 1; d <= ASH_WIND_LENGTH; d += 1) {
                 Vec3 q = a.add(dir.scale(d));
-                level.sendParticles(ParticleTypes.ASH, q.x, q.y + 0.8, q.z, 6, 0.6, 0.4, 0.6, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), q.x, q.y + 0.8, q.z, 6, 0.6, 0.4, 0.6, 0.02);
             }
         }
         if (foes.isEmpty()) {
@@ -344,7 +335,7 @@ public final class TreeVariants {
             if (r == 1) {
                 SkillEffects.thickAsh(e, SkillRules.ashScatterTicks(rank));
             }
-            level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 4, 0.2, 0.2, 0.2, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 4, 0.2, 0.2, 0.2, 0.02);
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillActions.sound(player, Skills.SOUND_SWEEP.get(), 0.8f, 0.5f);
@@ -366,7 +357,7 @@ public final class TreeVariants {
                 return "message.skyabyss.skill.no_target";
             }
             at = ground.getLocation();
-            level.sendParticles(ParticleTypes.CRIT, at.x, at.y + 0.3, at.z, 10, 0.3, 0.1, 0.3, 0.05);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.3, at.z, 10, 0.3, 0.1, 0.3, 0.05);
         } else {
             if (!player.onGround() || player.isPassenger()) {
                 return "message.skyabyss.skill.need_ground";
@@ -383,39 +374,19 @@ public final class TreeVariants {
         return null;
     }
 
-    // ---------------------------------------------------------------- 射手の跳び退き: 置き矢 (跳んだ元の場所から、近くの敵へ矢を 3 本)
-    private static void partingArrows(ServerPlayer player, Vec3 from) {
-        ServerLevel level = player.serverLevel();
-        List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, new AABB(from, from).inflate(PARTING_RANGE, 3, PARTING_RANGE),
-                e -> SkillActions.isFoe(player, e));
-        near.sort(java.util.Comparator.comparingDouble(e -> e.position().distanceToSqr(from)));
-        float dmg = SkillActions.attackDamage(player) * (float) PARTING_DAMAGE;
-        for (int i = 0; i < Math.min(PARTING_ARROWS, near.size()); i++) {
-            LivingEntity e = near.get(i);
-            int delay = 2 + i * 3;
-            SkillEffects.later(level, delay, () -> {
-                if (e.isAlive() && player.isAlive()) {
-                    SkillActions.hit(player, e, dmg, Skill.ARCHER_LEAP);
-                    level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.2, 0.2, 0.2, 0.1);
-                    level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.ARROW_HIT, SoundSource.PLAYERS, 0.6f, 1.2f);
-                }
-            });
-        }
-    }
-
     // ---------------------------------------------------------------- 雷の矢: 枝雷 (はじめから近くの 2 体へ跳ねる・一度 ×0.7)・重い雷 (跳ねない・×1.4)
     private static String bolt(ServerPlayer player, int rank, int r) {
         ServerLevel level = player.serverLevel();
         Vec3[] stop = new Vec3[1];
         LivingEntity target = JobActions.aimed(player, SkillRules.BOLT_RANGE, stop);
         Vec3 from = player.getEyePosition().add(player.getLookAngle().scale(0.6)).subtract(0, 0.25, 0);
-        JobActions.line(level, from, stop[0], r == 3 ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK, r == 3 ? 0.35 : 0.5);
+        JobActions.line(level, from, stop[0], r == 3 ? jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW) : jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), r == 3 ? 0.35 : 0.5);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, r == 3 ? 1.2f : 1.9f);
         if (target != null) {
             float dmg = JobActions.spell(player, SkillRules.boltMultiplier(rank));
             if (r == 3) {
                 SkillActions.hit(player, target, dmg * (float) HEAVY_BOLT_SCALE, Skill.THUNDER_BOLT);
-                level.sendParticles(ParticleTypes.FLASH, stop[0].x, stop[0].y, stop[0].z, 1, 0, 0, 0, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), stop[0].x, stop[0].y, stop[0].z, 1, 0, 0, 0, 0);
             } else {
                 float part = dmg * (float) BRANCH_SCALE;
                 SkillActions.hit(player, target, part, Skill.THUNDER_BOLT);
@@ -426,11 +397,11 @@ public final class TreeVariants {
                 for (int i = 0; i < Math.min(BRANCH_TARGETS, near.size()); i++) {
                     LivingEntity e = near.get(i);
                     Vec3 to = e.position().add(0, e.getBbHeight() * 0.6, 0);
-                    JobActions.line(level, at, to, ParticleTypes.ELECTRIC_SPARK, 0.4);
+                    JobActions.line(level, at, to, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 0.4);
                     SkillActions.hit(player, e, part, Skill.THUNDER_BOLT);
                 }
             }
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, stop[0].x, stop[0].y, stop[0].z, 12, 0.3, 0.3, 0.3, 0.2);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), stop[0].x, stop[0].y, stop[0].z, 12, 0.3, 0.3, 0.3, 0.2);
         }
         SkillActions.fxTarget = stop[0];
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -453,8 +424,8 @@ public final class TreeVariants {
                 }
             }
             dmg *= (float) ICE_RING_SCALE;
-            JobActions.ring(level, c, outer, ParticleTypes.SNOWFLAKE, (int) (outer * 10));
-            JobActions.ring(level, c, ICE_RING_INNER, ParticleTypes.SNOWFLAKE, 16);
+            JobActions.ring(level, c, outer, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), (int) (outer * 10));
+            JobActions.ring(level, c, ICE_RING_INNER, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), 16);
         } else {
             Vec3 dir = SkillActions.flatLook(player);
             for (LivingEntity e : SkillActions.foesAround(player, FROST_ROAD_LENGTH + 1, 1.0, 2.0)) {
@@ -467,7 +438,7 @@ public final class TreeVariants {
             }
             for (double d = 1; d <= FROST_ROAD_LENGTH; d += 0.8) {
                 Vec3 q = c.add(dir.scale(d));
-                level.sendParticles(ParticleTypes.SNOWFLAKE, q.x, q.y + 0.3, q.z, 4, 0.5, 0.1, 0.5, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.x, q.y + 0.3, q.z, 4, 0.5, 0.1, 0.5, 0.01);
             }
         }
         for (LivingEntity e : hits) {
@@ -483,7 +454,7 @@ public final class TreeVariants {
     // ---------------------------------------------------------------- 転移: 星の残り (元の場所に 1 秒後に弾ける星)・二度の転移 (3 秒のうちにもう一度跳べる)
     private static void starRemnant(ServerPlayer player, Vec3 at) {
         ServerLevel level = player.serverLevel();
-        level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1, at.z, 12, 0.2, 0.3, 0.2, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 1, at.z, 12, 0.2, 0.3, 0.2, 0.02);
         SkillEffects.later(level, STAR_REMNANT_DELAY, () -> {
             if (!player.isAlive() || player.level() != level) {
                 return;
@@ -494,7 +465,7 @@ public final class TreeVariants {
                     SkillActions.hit(player, e, dmg, Skill.BLINK);
                 }
             }
-            level.sendParticles(ParticleTypes.FIREWORK, at.x, at.y + 1, at.z, 30, 0.6, 0.6, 0.6, 0.15);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 1, at.z, 24, 0.6, 0.6, 0.6, 0.15);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.8f, 1.3f);
         });
     }
@@ -530,12 +501,12 @@ public final class TreeVariants {
                 if (!player.isAlive() || player.level() != level) {
                     return;
                 }
-                level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 4, center.z, 14, CLOUD_RADIUS * 0.5, 0.3, CLOUD_RADIUS * 0.5, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), center.x, center.y + 4, center.z, 14, CLOUD_RADIUS * 0.5, 0.3, CLOUD_RADIUS * 0.5, 0.01);
                 List<LivingEntity> under = level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(CLOUD_RADIUS, 4, CLOUD_RADIUS),
                         e -> SkillActions.isFoe(player, e));
                 if (!under.isEmpty()) {
                     LivingEntity e = under.get((tt / CLOUD_EVERY) % under.size());
-                    JobActions.line(level, new Vec3(e.getX(), center.y + 4, e.getZ()), e.position().add(0, e.getBbHeight() * 0.5, 0), ParticleTypes.ELECTRIC_SPARK, 0.3);
+                    JobActions.line(level, new Vec3(e.getX(), center.y + 4, e.getZ()), e.position().add(0, e.getBbHeight() * 0.5, 0), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 0.3);
                     SkillActions.hit(player, e, dmg, Skill.THUNDER_BOLT);
                     level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4f, 1.6f);
                 }
@@ -572,7 +543,7 @@ public final class TreeVariants {
                         Gauges.chill(e, SEA_FREEZE);
                     }
                 }
-                JobActions.ring(level, c, radius, ParticleTypes.SNOWFLAKE, (int) (radius * 9));
+                JobActions.ring(level, c, radius, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), (int) (radius * 9));
             });
         }
         level.playSound(null, c.x, c.y, c.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.8f, 0.6f);

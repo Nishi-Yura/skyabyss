@@ -13,10 +13,7 @@ import net.minecraft.world.item.ItemStack;
 // 低ポリの防具 (案 C「骨組み」) の選び方 (docs/design/16_armor_design.md 5 章)。
 //  - メッシュ: 階級で決まる (コモン・アンコモン = 無印、レア = _rare、ヒロイック・アーティファクト = _legend)
 //  - アトラス + 光る画素: 強化段階で決まる (+0〜4 = 基準、+5〜9 = _plus5、+10 = _plus10)。無印メッシュには +5/+10 の絵が無いので基準のまま
-// 戻し方: enabled = false にすると 4 組とも元のキューブの geo (geo/armor/<組>_armor.geo.json) に戻る
 public final class LowPolyArmor {
-    // false: 元のキューブの防具。ShotRunner の `lowpoly armoroff|armoron` で実行中にも切り替えられる
-    public static volatile boolean enabled = true;
     // 撮影用: "common" / "rare" / "legend" で階級を決め打つ (null = 品の階級)
     public static volatile String forcedTier = null;
     // 撮影用: 0 以上で強化段階を決め打つ (-1 = 品の強化段階)
@@ -76,7 +73,7 @@ public final class LowPolyArmor {
 
     // 低ポリで描けるか (スイッチが入っていて、メッシュが読めている)。キューブ版と切り替える判定
     public static boolean usable(String set, EquipmentSlot slot) {
-        return enabled && LowPolyMeshes.get("armor/" + set + "/" + pieceName(slot)) != null;
+        return LowPolyMeshes.get("armor/" + set + "/" + pieceName(slot)) != null;
     }
 
     private static boolean exists(ResourceLocation id) {

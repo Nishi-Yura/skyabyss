@@ -205,7 +205,7 @@ public final class WhaleCoreRoom extends RaidRoom {
             if (now - lastHurtFx >= 10) {
                 lastHurtFx = now;
                 ServerLevel level = ctx.level();
-                level.sendParticles(ParticleTypes.CRIT, core.x, core.y + 1.5, core.z, 8, 0.8, 0.8, 0.8, 0.1);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), core.x, core.y + 1.5, core.z, 8, 0.8, 0.8, 0.8, 0.1);
                 level.playSound(null, BlockPos.containing(core), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.2f, 0.6f);
             }
         } else if (hp > 0 && hp < CORE_MAX && waveOut && captain == null) {
@@ -227,13 +227,13 @@ public final class WhaleCoreRoom extends RaidRoom {
             int n = (int) Math.max(4, dir.length() * 2);
             for (int i = 0; i <= n; i++) {
                 Vec3 p = from.add(dir.scale(i / (double) n));
-                level.sendParticles(ParticleTypes.CRIT, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
             }
             level.playSound(null, from.x, from.y, from.z, SoundEvents.SKELETON_SHOOT, SoundSource.HOSTILE, 0.8f, 0.9f);
         } else {
             level.playSound(null, hit.x, hit.y, hit.z, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, 0.7f, 1.2f);
         }
-        level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                 hit.x, hit.y, hit.z, 10, 0.5, 0.5, 0.5, 0.1);
     }
 
@@ -342,5 +342,10 @@ public final class WhaleCoreRoom extends RaidRoom {
 
     public void damageCore(double amount) {
         hp = Math.max(0, hp - amount);
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

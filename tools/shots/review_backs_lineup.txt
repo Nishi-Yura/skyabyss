@@ -10,7 +10,6 @@ cmd time set noon
 cmd weather clear
 cmd gamemode spectator
 hud off
-lowpoly on
 
 cmd fill -20 -61 -12 140 -61 12 minecraft:smooth_basalt
 cmd kill @e[type=!minecraft:player]

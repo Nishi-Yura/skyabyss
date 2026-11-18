@@ -87,7 +87,7 @@ public class AshTrail extends AbyssMobB {
         }
         // 歩いた跡: 灰の粒と歩く音 (見えなくても残る)
         if (getDeltaMovement().horizontalDistanceSqr() > 0.002 && tickCount % 6 == 0 && level() instanceof ServerLevel sl) {
-            sl.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY() + 0.05, getZ(), 3, 0.2, 0.0, 0.2, 0.0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.05, getZ(), 3, 0.2, 0.0, 0.2, 0.0);
             playSound(jp.revati.skyabyss.abyss.mobs.AbyssMobsBSetup.ASH_TRAIL_STEP.get(), 0.35f, 0.9f + random.nextFloat() * 0.2f);
         }
     }
@@ -105,5 +105,10 @@ public class AshTrail extends AbyssMobB {
     protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.LAMP_ASH.get(), 0.4, 1, 1);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

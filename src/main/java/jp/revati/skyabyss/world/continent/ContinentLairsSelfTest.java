@@ -106,6 +106,12 @@ public final class ContinentLairsSelfTest {
                     f.add(t + ": the shrine overlaps the " + region + " town");
                 }
             }
+            // ダンジョンの口は祠から 90 以上離す (2026-11-11 の声「雷のところ、中ダンジョンの入り口の場所がおかしい」。風穴の口が雷翼の祠の 48 横にあった)
+            for (ContinentPois.Poi q : ContinentPois.all()) {
+                if (q.kind().startsWith("dungeon_") && Math.hypot(q.x() - c[0], q.z() - c[1]) < 90) {
+                    f.add(t + ": the " + q.kind() + " mouth is only " + Math.round(Math.hypot(q.x() - c[0], q.z() - c[1])) + " from the shrine");
+                }
+            }
             // 台地 (±12) と参道 (x ±4、南へ z 12..31) が道の縁から 1 以上離れる (2026-11-03 の声「まだ道の上に建造物が立つ」。前は台地の角と鳥居が道にかかった)
             double worst = 1e9;
             for (int dx = -12; dx <= 12; dx++) {

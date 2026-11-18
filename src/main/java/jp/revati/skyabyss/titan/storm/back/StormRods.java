@@ -144,7 +144,7 @@ public final class StormRods {
                 SoundSource.BLOCKS, 1.5f, 0.8f + 0.2f * r.charge);
         if (!wasFull && r.full()) {
             level.playSound(null, tip.x, tip.y, tip.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2f, 1.4f);
-            StormFx.burst(level, ParticleTypes.ELECTRIC_SPARK, tip, 40, 0.6);
+            StormFx.burst(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), tip, 40, 0.6);
         }
         return r.charge;
     }

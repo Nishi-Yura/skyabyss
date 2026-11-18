@@ -29,7 +29,7 @@ public class JellyPriestess extends DungeonBoss {
 
     public JellyPriestess(EntityType<? extends Monster> type, Level level) {
         super(type, level, "jelly_priestess", () -> SoundEvents.CONDUIT_AMBIENT, () -> SoundEvents.SLIME_HURT, () -> SoundEvents.CONDUIT_DEACTIVATE,
-                "lash", "rain", "pulse", "hurt", "death");
+                "lash", "rain", "pulse", "intro", "scream", "hurt", "death");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -40,6 +40,33 @@ public class JellyPriestess extends DungeonBoss {
                 .add(Attributes.MOVEMENT_SPEED, 0.18)
                 .add(Attributes.FOLLOW_RANGE, 32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
+    }
+
+    // 登場の動きと後半の咆哮 (2026-11-11 の声「他のボスたちもこの方向性で」。アニメ intro / scream)
+    @Override
+    protected String introAnim() {
+        return "intro";
+    }
+
+    @Override
+    protected int introLength() {
+        return 72;
+    }
+
+    @Override
+    protected int introCardAt() {
+        return 48;
+    }
+
+    @Override
+    protected void enterPhase2(LivingEntity target) {
+        playAction("scream");
+        super.enterPhase2(target);
+    }
+
+    @Override
+    protected String entrance() {
+        return "sky";
     }
 
     @Override

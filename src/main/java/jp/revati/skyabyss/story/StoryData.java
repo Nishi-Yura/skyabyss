@@ -49,13 +49,7 @@ public final class StoryData extends SavedData {
         }
     }
 
-    public String firstBy() {
-        return firstBy;
-    }
 
-    public long firstDay() {
-        return firstDay;
-    }
 
     public int count() {
         return keys.size();

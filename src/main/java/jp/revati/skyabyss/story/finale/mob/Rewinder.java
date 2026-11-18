@@ -292,15 +292,15 @@ public class Rewinder extends CloudMob {
                 if (t % 3 == 0) {
                     for (int i = 0; i < 20; i++) {
                         double a = i / 20.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.FLAME, spot.x + Math.cos(a) * SLAM_R, spot.y + 0.15, spot.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x + Math.cos(a) * SLAM_R, spot.y + 0.15, spot.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
                     }
                 }
                 return;
             }
             if (t == SLAM_TELL + 2) {
                 playSound(CloudMobsSetup.REWINDER_SLAM.get(), 2.0f, 0.8f);
-                sl.sendParticles(ParticleTypes.EXPLOSION, spot.x, spot.y + 0.4, spot.z, 1, 0, 0, 0, 0);
-                sl.sendParticles(ParticleTypes.LAVA, spot.x, spot.y + 0.3, spot.z, 8, SLAM_R * 0.4, 0.1, SLAM_R * 0.4, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.4, spot.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x, spot.y + 0.3, spot.z, 8, SLAM_R * 0.4, 0.1, SLAM_R * 0.4, 0);
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, new AABB(spot, spot).inflate(SLAM_R + 0.5, 2, SLAM_R + 0.5), e -> e.isAlive() && !e.isSpectator())) {
                     if (p.position().subtract(spot).horizontalDistance() <= SLAM_R + 0.3) {
                         strike(p, dmg(1.3));
@@ -319,7 +319,7 @@ public class Rewinder extends CloudMob {
                     for (int i = -6; i <= 6; i++) {
                         Vec3 d = dir.yRot((float) Math.toRadians(i * 10));
                         Vec3 p = spot.add(d.scale(SWEEP_R));
-                        sl.sendParticles(ParticleTypes.FLAME, p.x, p.y + 0.15, p.z, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.15, p.z, 1, 0, 0, 0, 0);
                     }
                 }
                 return;
@@ -361,5 +361,10 @@ public class Rewinder extends CloudMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

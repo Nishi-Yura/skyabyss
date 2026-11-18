@@ -119,7 +119,6 @@ public final class BossLookSelfTest {
         check(res("assets/skyabyss/lowpoly/" + stem + ".json"), "mesh missing: " + stem);
         check(res("assets/skyabyss/textures/lowpoly/" + stem + ".png"), "atlas missing: " + stem);
         check(res("assets/skyabyss/geo/entity/" + stem + "_lowpoly.geo.json"), "skeleton missing: " + stem);
-        check(res("assets/skyabyss/geo/entity/" + stem + "_lowpoly_debug.geo.json"), "debug skeleton missing: " + stem);
     }
 
     private static void alias(String anim, String body, String... acts) {

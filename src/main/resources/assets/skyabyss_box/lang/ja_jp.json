@@ -21,7 +21,7 @@
   "item.skyabyss.box.kind_titan": "巨神の箱 · %s",
   "item.skyabyss.box.kind_rarity": "%sの箱 · Lv %s〜%s",
   "item.skyabyss.box.kind_artifact": "金の箱 · 深淵のアーティファクトと伝説の武器",
-  "item.skyabyss.box.contents": "武器・防具・アクセサリーのどれかが入っている",
+  "item.skyabyss.box.contents": "武器・防具・装飾のどれかが入っている",
   "item.skyabyss.box.open_hint": "町の封切り師に渡すと開けてくれる",
   "message.skyabyss.box.opened": "封を切った (%s): %s",
   "skyabyss_box.tab": "封印の箱",
@@ -46,5 +46,5 @@
   "item.skyabyss.box.hint.job_weapon": "次の中身: 今のジョブの武器の気配",
   "item.skyabyss.box.hint.weapon": "次の中身: 武器の気配（ほかのジョブ）",
   "item.skyabyss.box.hint.armor": "次の中身: 防具の気配",
-  "item.skyabyss.box.hint.trinket": "次の中身: アクセサリーの気配"
+  "item.skyabyss.box.hint.trinket": "次の中身: 装飾の気配"
 }

@@ -1,0 +1,59 @@
+# 跡地の小ダンジョンの地上: 埋めた前の版の地下が地形へ戻ったか (MiniDungeons.restore)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/mini_ground.txt -PshotsName=mini_ground
+world mini_ground continent
+size 1600 900
+timeout 1800
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd skyabyss dev grounds prepare whale
+wait 40
+cmd skyabyss dev grounds prepare tide
+wait 40
+cmd skyabyss dev grounds prepare ember
+wait 40
+cmd skyabyss dev grounds sites
+cmd gamemode spectator
+hud off
+chat clear
+cmd skyabyss dev grounds go whale ch1_cleft_shell_cave 26 14 0 25
+waitchunks 300
+wait 400
+shot cleft_a
+cmd skyabyss dev grounds go whale ch1_cleft_shell_cave 26 14 180 25
+waitchunks 200
+wait 60
+shot cleft_b
+cmd skyabyss dev grounds go whale ch1_bone_pit 28 16 0 25
+waitchunks 300
+wait 400
+shot pit_a
+cmd skyabyss dev grounds go whale ch1_bone_pit 28 16 180 25
+waitchunks 200
+wait 60
+shot pit_b
+cmd skyabyss dev grounds go tide ch2_salt_vault 28 16 0 25
+waitchunks 300
+wait 400
+shot vault_a
+cmd skyabyss dev grounds go tide ch2_salt_vault 28 16 180 25
+waitchunks 200
+wait 60
+shot vault_b
+cmd skyabyss dev grounds go ember ch4_dead_forge_pit 28 16 0 25
+waitchunks 300
+wait 400
+shot forge_a
+cmd skyabyss dev grounds go ember ch4_dead_forge_pit 28 16 180 25
+waitchunks 200
+wait 60
+shot forge_b

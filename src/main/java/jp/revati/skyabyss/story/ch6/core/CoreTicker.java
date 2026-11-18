@@ -167,7 +167,7 @@ public final class CoreTicker {
                     if (gt % STOP_EVERY == 0 && !lords.isEmpty()) {
                         MoonCoreBoss core = lords.get(0);
                         MomentStop.freeze(core, gt + MomentStop.DURATION);
-                        level.sendParticles(ParticleTypes.END_ROD, g.getX(), g.getY() + 1.5, g.getZ(), 30, 0.4, 0.6, 0.4, 0.08);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g.getX(), g.getY() + 1.5, g.getZ(), 24, 0.4, 0.6, 0.4, 0.08);
                         for (ServerPlayer p : CoreArena.players(level)) {
                             Notice.narrate(p, "message.skyabyss.moon.core_ally_stop");
                         }
@@ -177,7 +177,7 @@ public final class CoreTicker {
                     for (ServerPlayer p : near(level, g)) {
                         if (p.getHealth() < p.getMaxHealth()) {
                             p.heal(1.0f);
-                            level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 3, 0.3, 0.5, 0.3, 0.02);
+                            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 3, 0.3, 0.5, 0.3, 0.02);
                         }
                     }
                 }
@@ -190,5 +190,10 @@ public final class CoreTicker {
     static List<ServerPlayer> near(ServerLevel level, TownGuestEntity g) {
         return level.getEntitiesOfClass(ServerPlayer.class, g.getBoundingBox().inflate(MoonCoreBoss.SAFE_R, 2, MoonCoreBoss.SAFE_R),
                 p -> p.isAlive() && !p.isSpectator() && Math.hypot(p.getX() - g.getX(), p.getZ() - g.getZ()) <= MoonCoreBoss.SAFE_R);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

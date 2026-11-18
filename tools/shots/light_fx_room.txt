@@ -1,0 +1,89 @@
+# 領域の空と核の光の確かめ (2026-11-15 の声: 天井が低くて裂け目が見切れる・背景で周りを覆う・核はずっと光らない)
+# 天井の低い閉じた部屋 (床の上 10 段) の中で、岩鯨の心臓に領域を宣言させ、広がりを時刻ごとに撮る。最後に崩して核の光
+# ./gradlew runShots -Pscript=tools/shots/light_fx_room.txt
+world lightfx_room9 flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd fill -24 -61 -24 24 -61 24 minecraft:polished_deepslate
+cmd fill -24 -60 -24 24 -46 -24 minecraft:deepslate_bricks
+cmd fill -24 -60 24 24 -46 24 minecraft:deepslate_bricks
+cmd fill -24 -60 -24 -24 -46 24 minecraft:deepslate_bricks
+cmd fill 24 -60 -24 24 -46 24 minecraft:deepslate_bricks
+cmd fill -24 -46 -24 24 -46 24 minecraft:deepslate_bricks
+cmd fill -20 -54 -24 -16 -52 -24 minecraft:glowstone
+cmd fill 16 -54 -24 20 -52 -24 minecraft:glowstone
+cmd fill -24 -54 -2 -24 -52 2 minecraft:glowstone
+cmd fill 24 -54 -2 24 -52 2 minecraft:glowstone
+cmd fill -23 -50 -18 -17 -49 -17 minecraft:dark_oak_planks
+cmd fill 17 -50 -18 23 -50 -17 minecraft:dark_oak_planks
+cmd fill -23 -48 -18 -14 -48 -17 minecraft:dark_oak_planks
+cmd fill 14 -48 -18 23 -48 -17 minecraft:dark_oak_planks
+cmd fill -23 -50 -10 -17 -49 -9 minecraft:dark_oak_planks
+cmd fill 17 -50 -10 23 -50 -9 minecraft:dark_oak_planks
+cmd fill -23 -48 -10 -14 -48 -9 minecraft:dark_oak_planks
+cmd fill 14 -48 -10 23 -48 -9 minecraft:dark_oak_planks
+cmd fill -23 -50 -2 -17 -49 -1 minecraft:dark_oak_planks
+cmd fill 17 -50 -2 23 -50 -1 minecraft:dark_oak_planks
+cmd fill -23 -48 -2 -14 -48 -1 minecraft:dark_oak_planks
+cmd fill 14 -48 -2 23 -48 -1 minecraft:dark_oak_planks
+cmd fill -23 -50 6 -17 -49 7 minecraft:dark_oak_planks
+cmd fill 17 -50 6 23 -50 7 minecraft:dark_oak_planks
+cmd fill -23 -48 6 -14 -48 7 minecraft:dark_oak_planks
+cmd fill 14 -48 6 23 -48 7 minecraft:dark_oak_planks
+cmd fill -23 -50 14 -17 -49 15 minecraft:dark_oak_planks
+cmd fill 17 -50 14 23 -50 15 minecraft:dark_oak_planks
+cmd fill -23 -48 14 -14 -48 15 minecraft:dark_oak_planks
+cmd fill 14 -48 14 23 -48 15 minecraft:dark_oak_planks
+cmd fill 9 -60 -9 10 -47 -8 minecraft:stone_bricks
+camera minecraft:overworld 0.5 -60 20.5 180 -16
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+wait 10
+camera minecraft:overworld 0.5 -60 20.5 180 -16
+hud off
+cmd summon skyabyss:stone_whale_heart 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+wait 5
+camera minecraft:overworld 0.5 -60 20.5 180 -16
+hud off
+wait 110
+shot room_before
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN
+wait 20
+shot room_open
+wait 22
+shot room_wide
+wait 10
+shot room_spread_a
+wait 10
+shot room_spread_b
+wait 14
+shot room_covered
+look 90 -10
+wait 2
+shot room_covered_side
+look 180 -40
+wait 2
+shot room_covered_up
+look 180 -16
+wait 60
+shot room_active
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] BREAK
+wait 4
+shot room_break
+wait 40
+shot room_break_later
+cmd kill @e[type=skyabyss:stone_whale_heart]
+wait 30
+shot room_after
+quit

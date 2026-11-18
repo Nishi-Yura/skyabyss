@@ -175,11 +175,11 @@ public final class PeakScarEvents {
         level.playSound(null, c.getX() + 0.5, c.getY(), c.getZ() + 0.5, ChapterSkyRegistry.PEAK_SCRAPE.get(), SoundSource.AMBIENT,
                 1.0f, 0.9f + level.random.nextFloat() * 0.15f);
         // 削られた所から白い砕けた石が舞う
-        BlockParticleOption dust = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.CALCITE.defaultBlockState());
+        net.minecraft.core.particles.SimpleParticleType dust = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         for (int i = 0; i < 6; i++) {
             double t = (i / 5.0 - 0.5) * 14.0;
-            level.sendParticles(dust, c.getX() + 0.5 + plan.dirX() * t, c.getY() + 0.5, c.getZ() + 0.5 + plan.dirZ() * t,
-                    30, 3.0, 1.0, 3.0, 0.15);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5 + plan.dirX() * t, c.getY() + 0.5, c.getZ() + 0.5 + plan.dirZ() * t,
+                    24, 3.0, 1.0, 3.0, 0.15);
         }
         SkyAbyss.LOGGER.info("A peak was scarred at {} ({} blocks)", c, plan.removed());
     }

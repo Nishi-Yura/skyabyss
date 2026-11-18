@@ -53,7 +53,6 @@ perf 100 armor20_lowpoly_rare_0
 perf 100 armor20_lowpoly_rare_1
 perf 100 armor20_lowpoly_rare_2
 shot armor_lp_perf_lowpoly_rare
-lowpoly armoroff
 wait 20
 perf 100 armor20_cubes_0
 perf 100 armor20_cubes_1

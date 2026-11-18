@@ -149,7 +149,7 @@ public class LampMoth extends CloudMob {
             if (t < TELL) {
                 setDeltaMovement(getDeltaMovement().scale(0.5));
                 if (t % 2 == 0) {
-                    sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.4, getZ(), 3, 0.4, 0.3, 0.4, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.4, getZ(), 3, 0.4, 0.3, 0.4, 0.02);
                 }
                 return;
             }
@@ -160,7 +160,7 @@ public class LampMoth extends CloudMob {
                 done = true;
                 strike(tg, dmg(0.5));
                 mark(tg);
-                sl.sendParticles(ParticleTypes.FLASH, tg.getX(), tg.getY() + 1.2, tg.getZ(), 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), tg.getX(), tg.getY() + 1.2, tg.getZ(), 1, 0, 0, 0, 0);
             }
         }
 
@@ -170,5 +170,10 @@ public class LampMoth extends CloudMob {
             cooldown = 80;
             setDeltaMovement(getDeltaMovement().scale(-0.5).add(0, 0.2, 0));
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

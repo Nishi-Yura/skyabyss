@@ -429,6 +429,11 @@ public abstract class HeartBoss extends GuardMob {
         super.tick();
         if (isIntroPlaying()) {
             introTicks++;
+            // 登場の山場で名前の札 (combat/BossIntro。ダンジョンの主と同じ札)
+            if (introTicks == INTRO_TICKS - 34 && level() instanceof ServerLevel) {
+                jp.revati.skyabyss.combat.BossIntro.send(this, jp.revati.skyabyss.combat.BossIntro.NAME,
+                        net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(getType()).getPath(), 90);
+            }
         }
         if (level() instanceof ServerLevel server) {
             if (!isRemoved()) {

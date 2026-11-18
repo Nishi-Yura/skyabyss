@@ -229,8 +229,8 @@ public final class BonePit {
                 }
             }
             if (anyone) {
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, pack.getX() + 0.5, pack.getY() + 1.4, pack.getZ() + 0.5, 3, 0.18, 0.35, 0.18, 0.01);
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.GLOW, pack.getX() + 0.5, pack.getY() + 1.0, pack.getZ() + 0.5, 2, 0.3, 0.2, 0.3, 0.0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pack.getX() + 0.5, pack.getY() + 1.4, pack.getZ() + 0.5, 3, 0.18, 0.35, 0.18, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pack.getX() + 0.5, pack.getY() + 1.0, pack.getZ() + 0.5, 2, 0.3, 0.2, 0.3, 0.0);
             }
         }
     }
@@ -295,7 +295,7 @@ public final class BonePit {
         if (centre != null) {
             level.playSound(null, centre, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.0f, 0.5f);
             level.playSound(null, centre, SoundEvents.POWDER_SNOW_STEP, SoundSource.BLOCKS, 1.0f, 0.6f);
-            level.sendParticles(ParticleTypes.SNOWFLAKE, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 30, 0.6, 1.0, 0.6, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 24, 0.6, 1.0, 0.6, 0.02);
             for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5) < 24 * 24) {
                     Notice.narrate(p, "message.skyabyss.ch1.pit.cold_open");
@@ -309,5 +309,10 @@ public final class BonePit {
     static boolean onTrail(ServerPlayer player) {
         QuestLog.Entry e = QuestLog.of(player).entry(Ch1Prep.Q_IRON);
         return e != null && !e.done;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

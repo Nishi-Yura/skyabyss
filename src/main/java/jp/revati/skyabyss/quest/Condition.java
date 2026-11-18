@@ -14,9 +14,7 @@ import com.google.gson.JsonObject;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.npc.Affinity;
 import jp.revati.skyabyss.npc.NpcBonds;
-import jp.revati.skyabyss.npc.WorldLoop;
 import jp.revati.skyabyss.prologue.PrologueData;
-import jp.revati.skyabyss.rpg.Growth;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -47,7 +45,7 @@ import net.minecraft.world.item.Item;
 //   ending {is: calm|break|accept} : 今選んでいる終章の結末 (story/finale/FinaleEnding.chosen)
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
-    public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
+    public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", 
             "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "no_keepsake", "prep", "ward_ok", "repeat_run", "in_capital", "in_town", "endings_seen", "ending", "at_shrine", "stash_pages");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
@@ -189,14 +187,6 @@ public final class Condition {
             case "flag" -> {
                 String role = ctx.role(optStr("npc"));
                 yield role != null && NpcBonds.of(ctx.player()).hasFlag(role, str("flag"));
-            }
-            case "remembers" -> {
-                String role = ctx.role(optStr("npc"));
-                yield role != null && NpcBonds.of(ctx.player()).hasEcho(role, str("flag"));
-            }
-            case "loop" -> {
-                int n = WorldLoop.count(ctx.player().server);
-                yield n >= GsonHelper.getAsInt(json, "min", 0) && n <= GsonHelper.getAsInt(json, "max", Integer.MAX_VALUE);
             }
             case "item" -> QuestItems.count(ctx.player(), str("item"), optStr("token")) >= GsonHelper.getAsInt(json, "count", 1);
             case "stage" -> {

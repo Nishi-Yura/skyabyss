@@ -160,7 +160,7 @@ public final class SkillRules {
             case CURSE_MARK -> 8;
             case LAMP_CHARM -> 14;
             case SHIELD_RUSH -> 6;
-            case ARCHER_LEAP -> 4;
+            case BOW_SPIRIT -> 14;
             // 木 v2 で足した技 (docs/design/48)
             case SHIELD_BASH -> 8;
             case BONE_SWING -> 14;
@@ -212,7 +212,7 @@ public final class SkillRules {
             case CURSE_MARK -> 9 * SECOND;
             case LAMP_CHARM -> 18 * SECOND;
             case SHIELD_RUSH -> (r >= 2 ? 4 : 6) * SECOND;
-            case ARCHER_LEAP -> (r >= 2 ? 3 : 5) * SECOND;
+            case BOW_SPIRIT -> 24 * SECOND;
             case SHIELD_BASH -> (r >= 2 ? 6 : 7) * SECOND;
             case BONE_SWING -> 12 * SECOND;
             case SPIN_CUT -> (r >= 2 ? 8 : 9) * SECOND;
@@ -401,7 +401,7 @@ public final class SkillRules {
     public static final int DOUBLE_SWEEP_GAP = 8;
 
     public static double sweepMultiplier(int rank) {
-        return rank >= 2 ? 1.2 : 0.9;
+        return rank >= 2 ? 1.5 : 1.1;
     }
 
     // ---------------------------------------------------------------- 風読み
@@ -512,6 +512,11 @@ public final class SkillRules {
     // 引き潮: 前方 6 / 7 ブロックの敵を足もとへ引き寄せ、鈍足 II を 2 / 3 秒。大きな相手は引かず鈍足だけ。長で +1
     public static final double EBB_ANGLE = 40;
     public static final double WHIRL_SLOW = 0.45;
+
+    // 引き潮の傷 (引いた敵それぞれに魔法の傷)
+    public static double ebbDamage(int rank) {
+        return rank >= 2 ? 1.2 : 0.9;
+    }
 
     public static double ebbRange(int rank) {
         return rank >= 2 ? 9 : 8;
@@ -664,6 +669,23 @@ public final class SkillRules {
         return rank >= 2 ? 4.5 : 3.0;
     }
 
+    // 弓の技の矢の傷に掛ける、手の弓の強さ (はじめの弓 = 1。雲穿ち・驟雨・足止めの矢は傷が決まった数だったので、良い弓でも伸びなかった)
+    public static double bowScale(float attackDamage) {
+        return Math.max(1.0, attackDamage / 6.0);
+    }
+
+    // 番の弓霊 (2026-11-13 の声「弓のペットみたいなの召喚して勝手に撃ってくれる、その数を増やすのも可能」。射手の跳び退きと入れ替え。
+    // Wynncraft の弓使いの Guardian Angels の形): 肩のまわりに弓の霊を呼ぶ。SPIRIT_TICKS のあいだ、SPIRIT_SHOT_GAP ごとに近くの敵を射る。
+    // 一射 = 技の基準の傷 (弓の満月の一矢) × spiritShot。数は 1 + 木の節 spirit_count (罠の型に 2 つ) で SPIRIT_MAX まで
+    public static final int SPIRIT_TICKS = 12 * SECOND;
+    public static final int SPIRIT_SHOT_GAP = 30;
+    public static final double SPIRIT_RANGE = 16;
+    public static final int SPIRIT_MAX = 3;
+
+    public static double spiritShot(int rank) {
+        return rank >= 2 ? 0.25 : 0.2;
+    }
+
     // ---------------------------------------------------------------- 職の新しい技 (docs/design/43)
     // 魔法の傷 = 手の武器の攻撃力 × 倍率 × (1 + 精神 × GrowthRules.SPIRIT_SPELL)。星読みの技 (JobActions.spell)
     // 雷の矢: 見ている向きへ 24 ブロックの稲妻。最初の敵に当たる。3 段で近くの敵へ 50% で跳ねる
@@ -719,7 +741,7 @@ public final class SkillRules {
     public static final int STOMP_BURN = 2 * SECOND;
 
     public static double stompMultiplier(int rank) {
-        return rank >= 2 ? 1.2 : 0.9;
+        return rank >= 2 ? 1.5 : 1.1;
     }
 
     // 霧隠れ (暗殺者): 姿を消し、速くなる。狙っていた敵は見失う。消えている間の最初の一撃 +50%
@@ -731,7 +753,10 @@ public final class SkillRules {
         return (rank >= 2 ? 4 : 3) * SECOND;
     }
 
-    // 呪いの印 (呪術師): 見ている敵に印。受ける傷が増え、攻撃が弱る
+    // 呪いの印 (呪術師): 見ている敵に印。受ける傷が増え、攻撃が弱る。付けた時に魔法の傷 ×CURSE_HIT、印のあいだ 1 秒ごとに ×CURSE_ROT (呪い蝕み)。
+    // 2026-11-13 の見直し「呪術師は全体的にスキル弱い」: 技 4 本がどれも傷を出さず、呪いの詠唱も働かなかったので、印・灯・引き潮に傷を足した
+    public static final double CURSE_HIT = 0.8;
+    public static final double CURSE_ROT = 0.2;
     public static final double CURSE_RANGE = 16;
     public static final double CURSE_WEAKEN = 0.2;
 
@@ -751,6 +776,11 @@ public final class SkillRules {
         return (rank >= 2 ? 10 : 8) * SECOND;
     }
 
+    // 灯は 2 秒ごとに、輪の中の敵へ魔法の傷 ×0.35 / 0.45 (Wynncraft のトーテムの形)
+    public static double lampDamage(int rank) {
+        return rank >= 2 ? 0.45 : 0.35;
+    }
+
     public static float lampAbsorb(int rank) {
         return rank >= 2 ? 3f : 2f;
     }
@@ -768,13 +798,14 @@ public final class SkillRules {
             case STONE_OATH -> new Object[] {pct(OATH_SHARE), 2, fmt(ALLY_RANGE)};
             case LUNGE, SHIELD_RUSH -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
             case NIMBLE -> new Object[] {fmt(nimbleMove(r) * 100), fmt(nimbleFall(r))};
-            case BACKSTEP, ARCHER_LEAP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
+            case BACKSTEP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
+            case BOW_SPIRIT -> new Object[] {SPIRIT_TICKS / SECOND, fmtSeconds(SPIRIT_SHOT_GAP), pct(spiritShot(r)), SPIRIT_MAX};
             case FORESIGHT -> new Object[] {fmt(foresightBonus(r) * 100), FORESIGHT_TICKS / SECOND};
             case WIND_REND -> new Object[] {pct(rendBack(r)), pct(rendFront(r))};
             case LONE_WIND -> new Object[] {pct(LONE_ATTACK), pct(LONE_MOVE), fmt(LONE_RANGE)};
             case WARD_SONG -> new Object[] {fmt(WARD_SONG_RADIUS), hp(wardAbsorb(r)), hp(wardAbsorb(r)), WARD_SONG_TICKS / SECOND};
             case CALM_HEART -> new Object[] {fmt(calmHeartBonus(r) * 100)};
-            case EBB_TIDE -> new Object[] {fmt(ebbRange(r)), ebbSlowTicks(r) / SECOND};
+            case EBB_TIDE -> new Object[] {fmt(ebbRange(r)), ebbSlowTicks(r) / SECOND, pct(ebbDamage(r))};
             case RIPPLE -> new Object[] {fmt(rippleSlow(r) * 100), RIPPLE_TICKS / SECOND};
             case CYCLE_SONG -> new Object[] {fmt(CYCLE_SONG_RADIUS), cycleSongTicks(r) / SECOND, pct(CYCLE_SONG_ALLY), pct(CYCLE_SONG_SELF)};
             case CHORUS_VOICE -> new Object[] {fmt(CHORUS_PER_ALLY * 100), CHORUS_MAX_ALLIES, fmt(ALLY_RANGE)};
@@ -817,8 +848,8 @@ public final class SkillRules {
             case SNARE_SHOT -> new Object[] {fmt(SNARE_RANGE), hp(pierceDamage(r) * SNARE_MULTIPLIER), fmt(SNARE_SLOW * 100), snareTicks(r) / SECOND};
             case STARDUST -> new Object[] {fmt(DUST_RADIUS), pct(dustMultiplier(r))};
             case MIST_VEIL -> new Object[] {veilTicks(r) / SECOND, fmt(VEIL_SPEED * 100), pct(VEIL_STRIKE)};
-            case CURSE_MARK -> new Object[] {fmt(CURSE_RANGE), fmt(curseBonus(r) * 100), curseTicks(r) / SECOND};
-            case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, hp(lampAbsorb(r)), LAMP_PULSE / SECOND};
+            case CURSE_MARK -> new Object[] {fmt(CURSE_RANGE), fmt(curseBonus(r) * 100), curseTicks(r) / SECOND, pct(CURSE_HIT), pct(CURSE_ROT)};
+            case LAMP_CHARM -> new Object[] {fmt(LAMP_RADIUS), lampTicks(r) / SECOND, hp(lampAbsorb(r)), LAMP_PULSE / SECOND, pct(lampDamage(r))};
         };
     }
 

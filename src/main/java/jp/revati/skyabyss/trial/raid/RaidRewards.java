@@ -303,7 +303,7 @@ public final class RaidRewards {
         }
         int held = TitanLoot.handOver(server, uuid, player, items, 0);
         if (player != null && !(player instanceof FakePlayer)) {
-            Notice.gain(player, TitanLoot.rewardLine(items));
+            Notice.gainItems(player, items, TitanLoot.rewardLine(items));
             TitanLoot.tellHeld(player, held);
         }
     }

@@ -238,14 +238,6 @@ public final class GrowthSelfTest {
 
         // ステータスの振り直し (00 の 3 = A): 炉のそばで、技と同じ費用 (初回無料、以後結晶)。回数は技と別
         checkStatRespec(f, overworld, p);
-
-        // 記憶の断片の器: 上限を超えて入らない
-        GrowthData frag = new GrowthData();
-        frag.fragmentCapacity = 2;
-        check(f, frag.addFragments(MemoryFragments.PROLOGUE, 3) == 2 && frag.fragmentCount() == 2, "fragments overflowed the capacity");
-        check(f, frag.addFragments(MemoryFragments.STONE_WHALE, 1) == 0 && !frag.fragments.containsKey(MemoryFragments.STONE_WHALE),
-                "a full container accepted a fragment");
-        check(f, frag.addFragments(MemoryFragments.PROLOGUE, -4) == 0, "a negative fragment count was accepted");
     }
 
     private static void checkStatRespec(List<String> f, ServerLevel level, FakePlayer p) {
@@ -299,9 +291,6 @@ public final class GrowthSelfTest {
         a.stats[2] = 7;
         a.stats[3] = 9;
         a.bonusPoints = 2;
-        a.fragments.put(MemoryFragments.PROLOGUE, 1);
-        a.fragments.put(MemoryFragments.STONE_WHALE, 2);
-        a.fragmentCapacity = 14;
         a.discoveries.add("biome:minecraft:plains");
         a.discoveries.add("first:skyabyss:heart");
         a.statRespecs = 3;
@@ -313,9 +302,6 @@ public final class GrowthSelfTest {
         to.xp = from.xp;
         System.arraycopy(from.stats, 0, to.stats, 0, from.stats.length);
         to.bonusPoints = from.bonusPoints;
-        to.fragments.clear();
-        to.fragments.putAll(from.fragments);
-        to.fragmentCapacity = from.fragmentCapacity;
         to.statRespecs = from.statRespecs;
         to.discoveries.clear();
         to.discoveries.addAll(from.discoveries);
@@ -323,7 +309,6 @@ public final class GrowthSelfTest {
 
     private static boolean same(GrowthData a, GrowthData b, boolean serverFields) {
         boolean ok = a.level == b.level && a.xp == b.xp && java.util.Arrays.equals(a.stats, b.stats) && a.bonusPoints == b.bonusPoints
-                && a.fragments.equals(b.fragments) && a.fragmentCapacity == b.fragmentCapacity
                 && a.statRespecs == b.statRespecs;
         if (serverFields) {
             ok &= a.discoveries.equals(b.discoveries);

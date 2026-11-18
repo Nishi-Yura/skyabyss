@@ -132,6 +132,25 @@ public final class WildEffect {
         CLOUD_WARD,        // a tick ごとに膜 b、膜があるあいだ移動 +c
         // ---------------------------------------------------------------- 装飾 (付けているあいだ)
         REGEN_TICK,        // b tick ごとに体力 +a
+        // 装飾の固有の働き (2026-11-10 の選び a_stats: 数字だけだった 19 品に一つずつ。WildArmorEvents)
+        MOSS_STILL,        // 止まっていると REGEN_TICK の回復が ×a
+        WATER_EXIT,        // 水から上がると b tick 速さ (段 a)
+        CRIT_RUSH,         // 会心のあと b tick 速さ (段 a)
+        CRIT_CHAIN,        // 会心の次の一撃も会心
+        CRIT_SLOW,         // 会心で相手を a tick 遅く (段 b)
+        FALL_SHOCK,        // 落下の傷を受けて着地すると、まわり a の敵に b
+        DARK_GLOW,         // 暗い所で、まわり a の敵が光る
+        HURT_MANA,         // 打たれるとマナ +a (待ち b tick)
+        HURT_BURST,        // 体力が半分を切ると、まわり a の敵に b と押し返し (待ち c tick)
+        HURT_IGNITE,       // 打たれると a の確率で相手を b 秒燃やす
+        HORN,              // 体力が半分を切ると角笛: まわり a の仲間 (自分も) に b tick 耐性 I (待ち c tick)
+        KILL_COOLDOWN,     // 倒すと技の待ちが a tick 縮む
+        BONE_WARD,         // 倒すと膜 a (b tick)
+        AIR_STRIKE,        // 空中から打つと +a
+        WET_MANA,          // 水の中か雨の中ではマナの戻り +a
+        STORM_DAMAGE,      // 雨か嵐のあいだ +a
+        BURNING_RAGE,      // 自分が燃えているあいだ +a
+        WATER_REGEN,       // 水の中では毎秒体力 +a
         // ---------------------------------------------------------------- 護符 (H キーで使う。WildAccessoryItem.activate)
         CHARM_HEAL,        // 体力 +a
         CHARM_FOG,         // まわり a の敵を b tick 遅く II・目くらみ

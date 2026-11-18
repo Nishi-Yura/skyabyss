@@ -42,11 +42,11 @@ KV = {
     'gear.skyabyss.origin_weapon.island_shrine': ('島の祠の武器', 'Island shrine weapon'),
     'message.skyabyss.job.lent': ('%sの始めの武器、%sを受け取った', "Received the %s's first weapon: %s"),
     'message.skyabyss.job.lent_already': ('%sの武器は、もう受け取っている', "You already have the %s's weapon"),
-    'item.skyabyss.shrine_staff': ('宿り木の杖', 'Mistletoe Staff'),
+    'item.skyabyss.shrine_staff': ('祠の杖', 'Shrine Staff'),
     'item.skyabyss.shrine_staff.desc': ('島の祠が星読みに授ける流木の杖。星の石が淡く光る。', 'A driftwood staff the island shrine gives to stargazers. Its star stone glows faintly.'),
     'item.skyabyss.shrine_bell_staff': ('祠の鈴杖', 'Shrine Bell Staff'),
     'item.skyabyss.shrine_bell_staff.desc': ('島の祠が潮歌いに授ける鈴の杖。振ると潮の音がする。', 'A bell staff the island shrine gives to tide singers. It sounds like the tide when shaken.'),
-    'item.skyabyss.shrine_dagger': ('宿り木の短剣', 'Mistletoe Dagger'),
+    'item.skyabyss.shrine_dagger': ('祠の短剣', 'Shrine Dagger'),
     # 祠の始めの武器 (戦士・鍛冶師・弓使い)
     'item.skyabyss.shrine_sword': ('祠の剣', 'Shrine Sword'),
     'item.skyabyss.shrine_sword.desc': ('島の祠が岩守りに授ける剣。まっすぐで扱いやすい。', 'A sword the island shrine gives to rock guards. Straight and easy to handle.'),

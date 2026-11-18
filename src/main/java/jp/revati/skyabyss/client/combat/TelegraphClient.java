@@ -69,7 +69,7 @@ public final class TelegraphClient {
         }
 
         int lifetime() {
-            return warn + Math.max(0, active) + FLASH_TICKS;
+            return warn + Math.max(0, active) + Math.max(FLASH_TICKS, AreaFx.after(look));
         }
 
         // 点の床の高さ (歩ける床が無ければ NaN)。粒用。面と線は TelegraphGround の列を使って描く
@@ -186,6 +186,7 @@ public final class TelegraphClient {
                 boolean bespoke = d.look.impact != jp.revati.skyabyss.combat.AttackLook.Impact.NONE;
                 ImpactFx.burst(level, d, bespoke);
                 AttackFx.impact(level, d);
+                AttackLightFx.impact(level, d);
             }
             AttackFx.tick(level, d, (int) t);
             if (t > d.lifetime()) {
@@ -209,7 +210,7 @@ public final class TelegraphClient {
         TelegraphShape.PointSink sink = (x, z) -> {
             double y = d.ground(x, z);
             if (!Double.isNaN(y)) {
-                level.addParticle(dust, x, y + 0.1, z, 0, 0, 0);
+                level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.1, z, 0, 0, 0);
             }
         };
         current.outline(sink, spacing);

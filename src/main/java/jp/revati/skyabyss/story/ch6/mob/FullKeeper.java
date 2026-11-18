@@ -141,7 +141,7 @@ public class FullKeeper extends MoonMob {
         jp.revati.skyabyss.combat.BreakGauge.solved(this, KNEEL_TICKS);
         playAction("kneel");
         playSound(MoonMobsSetup.KEEPER_KNEEL.get(), 2.0f, 0.8f);
-        sl.sendParticles(ParticleTypes.END_ROD, orb().x, orb().y, orb().z, 50, 1.0, 1.0, 1.0, 0.15);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), orb().x, orb().y, orb().z, 24, 1.0, 1.0, 1.0, 0.15);
         if (!toldKneel) {
             toldKneel = true;
             for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(24), e -> e.isAlive())) {
@@ -193,7 +193,7 @@ public class FullKeeper extends MoonMob {
                     // 珠へ光が集まる
                     double a = random.nextDouble() * Math.PI * 2;
                     Vec3 o = orb();
-                    sl.sendParticles(ParticleTypes.END_ROD, o.x + Math.cos(a) * 3, o.y + 1, o.z + Math.sin(a) * 3, 0, -Math.cos(a), -0.3, -Math.sin(a), 0.15);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.x + Math.cos(a) * 3, o.y + 1, o.z + Math.sin(a) * 3, 0, -Math.cos(a), -0.3, -Math.sin(a), 0.15);
                 }
             } else if (tide == FieldTide.Tide.TO_DIM && charge >= CHARGE_FULL / 2) {
                 release = 0;
@@ -247,17 +247,22 @@ public class FullKeeper extends MoonMob {
                 int n = 20 + (int) (r * 4);
                 for (int i = 0; i < n; i++) {
                     double a = i / (double) n * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.END_ROD, c.x + Math.cos(a) * r, c.y - 0.4, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y - 0.4, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
-                sl.sendParticles(ParticleTypes.FLASH, o.x, o.y, o.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.x, o.y, o.z, 1, 0, 0, 0, 0);
             }
             return;
         }
         if (release == RELEASE_TELL) {
             playSound(MoonMobsSetup.KEEPER_RELEASE.get(), 2.5f, 0.8f);
+            // 技の形: 主のまわりに光の柱が八本立ち、波が広がる
+            for (int i = 0; i < 8; i++) {
+                double a = i / 8.0 * Math.PI * 2;
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", this, new Vec3(getX() + Math.cos(a) * 4, c.y - 0.5, getZ() + Math.sin(a) * 4), i * 45f, 0.7f, 14);
+            }
             for (int i = 0; i < 60; i++) {
                 double a = i / 60.0 * Math.PI * 2;
-                sl.sendParticles(ParticleTypes.END_ROD, o.x, o.y, o.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.9);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), o.x, o.y, o.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.9);
             }
             for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(17, 6, 17), e -> e.isAlive() && !e.isSpectator())) {
                 if (shaded(sl, p)) {
@@ -398,7 +403,7 @@ public class FullKeeper extends MoonMob {
                 for (int i = -4; i <= 4; i++) {
                     Vec3 d = fwd.yRot((float) Math.toRadians(i * 17.5));
                     Vec3 p = position().add(d.scale(5.0));
-                    sl.sendParticles(ParticleTypes.END_ROD, p.x, p.y + 0.2, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.2, p.z, 1, 0, 0, 0, 0);
                 }
             }
             if (t == 18) {
@@ -436,5 +441,10 @@ public class FullKeeper extends MoonMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

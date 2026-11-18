@@ -26,11 +26,8 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     // 物語の上限のレベルであふれた経験値 (上限が上がったら入る。Growth.releaseBank。04 の 3 章)
     public long banked;
     public final int[] stats = new int[Stat.values().length];
-    // レベル以外から得た力 (記憶の断片やクエストの報酬に使う予定。今は 0)
+    // レベル以外から得た力 (クエストの報酬に使う予定。今は 0)
     public int bonusPoints;
-    // 記憶の断片: 種類 (ID) ごとの数。上限は capacity
-    public final Map<String, Integer> fragments = new LinkedHashMap<>();
-    public int fragmentCapacity = GrowthRules.FRAGMENT_CAPACITY;
     // ステータスを振り直した回数 (費用を決める。技の振り直しとは別に数える。持ち主のクライアントへも送る)
     public int statRespecs;
     // 転生した回数 (0〜20。docs/design/31)。表示は「Lv 50+n」、必要経験値が減る。持ち主のクライアントへも送る
@@ -62,24 +59,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         return totalPoints() - spentPoints();
     }
 
-    public int fragmentCount() {
-        int sum = 0;
-        for (int v : fragments.values()) {
-            sum += v;
-        }
-        return sum;
-    }
-
-    // 記憶の断片を器へ入れる。入りきらない分は入れず、入れた数を返す
-    public int addFragments(String id, int count) {
-        int room = Math.max(0, fragmentCapacity - fragmentCount());
-        int added = Math.min(room, Math.max(0, count));
-        if (added > 0) {
-            fragments.merge(id, added, Integer::sum);
-        }
-        return added;
-    }
-
     // いまのレベルから次へ要る経験値 (転生ごとに減る。B03)
     public int xpNeed() {
         return GrowthRules.xpToNext(level, rebirths);
@@ -99,9 +78,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
             stats[i] = Mth.clamp(stats[i], 0, GrowthRules.STAT_CAP);
         }
         // 基礎は技の木から導く (SkillManager.refreshStats が上書きする) ので、ここでは使いすぎを見ない
-        fragmentCapacity = Math.max(0, fragmentCapacity);
         statRespecs = Math.max(0, statRespecs);
-        fragments.values().removeIf(v -> v == null || v <= 0);
     }
 
     @Override
@@ -116,10 +93,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         }
         tag.put("stats", s);
         tag.putInt("bonusPoints", bonusPoints);
-        CompoundTag f = new CompoundTag();
-        fragments.forEach(f::putInt);
-        tag.put("fragments", f);
-        tag.putInt("fragmentCapacity", fragmentCapacity);
         tag.putInt("statRespecs", statRespecs);
         tag.putInt("rebirths", rebirths);
         CompoundTag m = new CompoundTag();
@@ -143,12 +116,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
             stats[stat.ordinal()] = s.getInt(stat.id);
         }
         bonusPoints = tag.getInt("bonusPoints");
-        fragments.clear();
-        CompoundTag f = tag.getCompound("fragments");
-        for (String key : f.getAllKeys()) {
-            fragments.put(key, f.getInt(key));
-        }
-        fragmentCapacity = tag.contains("fragmentCapacity") ? tag.getInt("fragmentCapacity") : GrowthRules.FRAGMENT_CAPACITY;
         statRespecs = tag.getInt("statRespecs");
         rebirths = tag.getInt("rebirths");
         mastery.clear();
@@ -172,12 +139,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                     buf.writeVarInt(v);
                 }
                 buf.writeVarInt(data.bonusPoints);
-                buf.writeVarInt(data.fragmentCapacity);
-                buf.writeVarInt(data.fragments.size());
-                data.fragments.forEach((id, n) -> {
-                    buf.writeUtf(id);
-                    buf.writeVarInt(n);
-                });
                 buf.writeVarInt(data.statRespecs);
                 buf.writeVarInt(data.rebirths);
                 buf.writeVarInt(data.mastery.size());
@@ -194,11 +155,6 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                     data.stats[i] = buf.readVarInt();
                 }
                 data.bonusPoints = buf.readVarInt();
-                data.fragmentCapacity = buf.readVarInt();
-                int n = buf.readVarInt();
-                for (int i = 0; i < n; i++) {
-                    data.fragments.put(buf.readUtf(), buf.readVarInt());
-                }
                 data.statRespecs = buf.readVarInt();
                 data.rebirths = buf.readVarInt();
                 int k = buf.readVarInt();

@@ -128,7 +128,7 @@ public class StaticMoth extends StormMob {
         super.aiStep();
         if (level().isClientSide) {
             if (getCharge() > 0.5f && random.nextFloat() < getCharge() * 0.4f) {
-                level().addParticle(ParticleTypes.ELECTRIC_SPARK, getRandomX(0.8), getRandomY(), getRandomZ(0.8), 0, 0, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getRandomX(0.8), getRandomY(), getRandomZ(0.8), 0, 0, 0);
             }
             return;
         }
@@ -225,9 +225,9 @@ public class StaticMoth extends StormMob {
             double t = i / (double) n;
             double j = (i % 2 == 0 ? 1 : -1) * 0.15 * Math.sin(t * Math.PI);
             Vec3 p = a.add(d.scale(t)).add(j, j * 0.5, -j);
-            warn(server, ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
         }
-        warn(server, ParticleTypes.FLASH, b.x, b.y, b.z, 1, 0, 0, 0, 0);
+        warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.x, b.y, b.z, 1, 0, 0, 0, 0);
     }
 
     // 相手のいないとき: 近くの避雷の柱に寄り、触れると柱の雷を 1 回分吸う
@@ -265,8 +265,8 @@ public class StaticMoth extends StormMob {
                     e -> e instanceof Player && fair(e) && e.position().add(0, e.getBbHeight() / 2, 0).distanceTo(c) <= BURST_RADIUS + 0.5)) {
                 e.hurt(damageSources().mobAttack(this), BURST_DAMAGE);
             }
-            warn(server, ParticleTypes.ELECTRIC_SPARK, c.x, c.y, c.z, 40, 1.0, 1.0, 1.0, 0.3);
-            warn(server, ParticleTypes.FLASH, c.x, c.y, c.z, 1, 0, 0, 0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 24, 1.0, 1.0, 1.0, 0.3);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0, 0, 0, 0);
             level().playSound(null, getX(), getY(), getZ(), StormMobSetup.MOTH_BURST.get(), SoundSource.HOSTILE, 1.3f, 1f);
             setCharge(0);
         }
@@ -341,5 +341,10 @@ public class StaticMoth extends StormMob {
     @Override
     protected SoundEvent getDeathSound() {
         return StormMobSetup.MOTH_DEATH.get();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

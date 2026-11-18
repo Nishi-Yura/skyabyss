@@ -61,7 +61,7 @@ public class ResonanceForgeBlock extends HorizontalDirectionalBlock {
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (random.nextInt(3) == 0) {
-            level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 1.05,
+            level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 1.05,
                     pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0, 0.02, 0);
         }
     }

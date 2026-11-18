@@ -1,0 +1,56 @@
+# 全部の模型の点の版の見本 2 (巨神・落ちた品・額縁・持ち物の画面)
+world splatall flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode creative
+cmd kill @e[type=!player]
+fov 60
+hud off
+chat clear
+cmd tp @s 0 -60 20 180 0
+waitchunks
+wait 20
+cmd summon minecraft:item 0.5 -60 15.5 {Item:{id:"skyabyss:whalebone_greatsword",count:1},PickupDelay:32767,Age:-32768}
+cmd summon minecraft:item 1.5 -60 15.5 {Item:{id:"skyabyss:captain_pike",count:1},PickupDelay:32767,Age:-32768}
+cmd summon minecraft:item -0.5 -60 15.5 {Item:{id:"skyabyss:stone_whale_helmet",count:1},PickupDelay:32767,Age:-32768}
+cmd setblock 0 -59 13 minecraft:stone
+cmd summon minecraft:item_frame 0.5 -58.5 13.97 {Facing:3,Item:{id:"skyabyss:waterway_fang",count:1},Fixed:1b}
+cmd gamemode spectator
+camera minecraft:overworld 0.5 -58.6 18 180 25
+wait 60
+shot items_ground
+# 持ち物の画面のプレイヤー (サバイバル)
+cmd gamemode survival
+cmd tp @s 0 -60 20 180 0
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+hud on
+wait 30
+open inventory
+wait 40
+shot inventory_survival
+close
+hud off
+# 巨神 (岩鯨。titan_end_whale.txt と同じ出し方: 休みの状態で浮かべる)
+cmd gamemode creative
+cmd time set noon
+camera minecraft:overworld 0 -60 0 0 0
+wait 20
+cmd summon skyabyss:stone_whale 50 20 150 {Rotation:[90f,0f],Mode:2,RestTicks:999999}
+wait 120
+shot titan_whale
+camera minecraft:overworld 0 0 60 20 -10
+wait 60
+shot titan_whale_near
+quit

@@ -58,7 +58,7 @@ public class EmberKeeper extends AbyssMobB {
         super.tick();
         if (!level().isClientSide && tickCount % 20 == 0 && random.nextInt(3) == 0) {
             // 胸の燠の粒 (近くの人に見える)
-            ((ServerLevel) level()).sendParticles(ParticleTypes.SMALL_FLAME, getX(), getY() + 1.3, getZ(), 2, 0.15, 0.2, 0.15, 0.01);
+            ((ServerLevel) level()).sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.3, getZ(), 2, 0.15, 0.2, 0.15, 0.01);
         }
     }
 
@@ -141,7 +141,7 @@ public class EmberKeeper extends AbyssMobB {
         private void ringParticles(ServerLevel level) {
             for (int i = 0; i < 8; i++) {
                 double a = (i / 8.0) * Math.PI * 2;
-                level.sendParticles(ParticleTypes.FLAME, mob.getX() + Math.cos(a) * HEAT_RADIUS, mob.getY() + 0.1,
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), mob.getX() + Math.cos(a) * HEAT_RADIUS, mob.getY() + 0.1,
                         mob.getZ() + Math.sin(a) * HEAT_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
             }
         }
@@ -149,7 +149,7 @@ public class EmberKeeper extends AbyssMobB {
         private void heat(ServerLevel level) {
             mob.playAction("heat");
             mob.playSound(AbyssMobsBSetup.EMBER_KEEPER_HEAT.get(), 1.0f, 1.0f);
-            level.sendParticles(ParticleTypes.LAVA, mob.getX(), mob.getY() + 0.5, mob.getZ(), 10, HEAT_RADIUS / 2, 0.3, HEAT_RADIUS / 2, 0.0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), mob.getX(), mob.getY() + 0.5, mob.getZ(), 10, HEAT_RADIUS / 2, 0.3, HEAT_RADIUS / 2, 0.0);
             for (ServerPlayer p : java.util.List.copyOf(level.players())) {
                 if (!p.isAlive() || p.isCreative() || p.isSpectator()) {
                     continue;
@@ -162,5 +162,10 @@ public class EmberKeeper extends AbyssMobB {
                 }
             }
         }
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

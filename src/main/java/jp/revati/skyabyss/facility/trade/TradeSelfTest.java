@@ -76,7 +76,7 @@ public final class TradeSelfTest {
         here.put(s.getUUID(), s);
         here.put(b.getUUID(), b);
         here.put(c.getUUID(), c);
-        // ---- 出す: 鉄 10 を鐘銭 5,000 で (持ち物の枠を越える額。鐘銭は旅嚢で受け渡す)
+        // ---- 出す: 鉄 10 を鐘銭 5,000 で (持ち物の枠を越える額。鐘銭は旅袋で受け渡す)
         s.getInventory().setItem(0, new ItemStack(Items.IRON_INGOT, 16));
         check(f, Trades.list(s, List.of(), List.of(), List.of(), 5) == Trades.Result.EMPTY_GIVE, "nothing to give refused");
         check(f, Trades.list(s, slot(0, 10), List.of(), List.of(), 0) == Trades.Result.EMPTY_WANT, "a price of nothing refused");
@@ -142,7 +142,7 @@ public final class TradeSelfTest {
         for (int i = 0; i < 36; i++) {
             b.getInventory().setItem(i, keep.get(i));
         }
-        // ---- 受ける: 一度に入れ替え (鐘銭は旅嚢で)
+        // ---- 受ける: 一度に入れ替え (鐘銭は旅袋で)
         int sIron = s.getInventory().countItem(Items.IRON_INGOT);
         check(f, Trades.accept(s, l.id, b.getUUID()) == Trades.Result.ACCEPTED, "accept");
         check(f, data.byId(l.id) == null, "listing closes on accept");

@@ -68,6 +68,14 @@ public final class SiteTargets {
         bind("main_ember/heart", TITAN_PREFIX + "ember");
         // 一章の支度の段: 骨の坑の荷・割れ殻の洞の台座 (SiteNetwork.CHAPTER_TARGETS)
         bind("ch1/trail_iron/pit", "ch1_bone_pit");
+        // 鉄の跡: 見つけた鉄くずの数で次の一つ (三つ見つけたら坑) を指す。前は標がなく、イサナを指したままだった
+        bindPos("ch1/trail_iron/track", () -> {
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            jp.revati.skyabyss.quest.QuestLog.Entry e = mc.player == null ? null : jp.revati.skyabyss.quest.QuestLog.of(mc.player).entry("ch1/trail_iron");
+            int found = e == null ? 0 : Math.min(3, e.progress(0));
+            BlockPos p = found < 3 ? site("ch1_iron_scrap_" + found) : null;
+            return p != null ? p : site("ch1_bone_pit");
+        });
         bind("ch1/follow_hauler/follow", "ch1_bone_cache");
         bind("ch1/trail_blade/cave", "ch1_cleft_shell_cave");
         // 二章の支度の段: 塩の蔵 (道の段も蔵を指す。標は蔵へ向かう線の上)・沖の難破船・筏の跡

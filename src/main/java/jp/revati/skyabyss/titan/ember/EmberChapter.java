@@ -129,8 +129,8 @@ public final class EmberChapter {
         if (!(player.level() instanceof ServerLevel level)) {
             return false;
         }
-        level.sendParticles(player, ParticleTypes.WHITE_ASH, false, player.getX(), player.getY() + 0.2, player.getZ(), 30, 3, 0.1, 3, 0.01);
-        level.sendParticles(player, ParticleTypes.CAMPFIRE_COSY_SMOKE, false, player.getX(), player.getY() + 0.1, player.getZ(), 4, 2.5, 0.0, 2.5, 0.01);
+        level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), false, player.getX(), player.getY() + 0.2, player.getZ(), 24, 3, 0.1, 3, 0.01);
+        level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), false, player.getX(), player.getY() + 0.1, player.getZ(), 4, 2.5, 0.0, 2.5, 0.01);
         Notice.narrate(player, LINE_GROUND);
         return true;
     }
@@ -149,8 +149,8 @@ public final class EmberChapter {
         if (ridge == null || !(player.level() instanceof ServerLevel level)) {
             return false;
         }
-        level.sendParticles(player, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, ridge.x, ridge.y, ridge.z, 12, 3, 2, 3, 0.02);
-        level.sendParticles(player, ParticleTypes.WHITE_ASH, true, ridge.x, ridge.y - 2, ridge.z, 40, 8, 3, 8, 0.02);
+        level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, ridge.x, ridge.y, ridge.z, 12, 3, 2, 3, 0.02);
+        level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, ridge.x, ridge.y - 2, ridge.z, 24, 8, 3, 8, 0.02);
         Notice.narrate(player, LINE_RIDGE);
         return true;
     }
@@ -226,12 +226,17 @@ public final class EmberChapter {
                 || Math.hypot(base.getX() - player.getX(), base.getZ() - player.getZ()) > BASE_RADIUS) {
             return false;
         }
-        level.sendParticles(player, ParticleTypes.WHITE_ASH, false, player.getX(), player.getY() + 0.1, player.getZ(), 3, 2, 0.0, 2, 0.0);
+        level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), false, player.getX(), player.getY() + 0.1, player.getZ(), 3, 2, 0.0, 2, 0.0);
         CompoundTag data = player.getPersistentData();
         if (!data.getBoolean(BASE_KEY)) {
             data.putBoolean(BASE_KEY, true);
             Notice.narrate(player, LINE_BASE);
         }
         return true;
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

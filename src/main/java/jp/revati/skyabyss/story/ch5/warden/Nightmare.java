@@ -98,9 +98,6 @@ public final class Nightmare {
         return Data.get(server).players.getOrDefault(player, 0);
     }
 
-    public static boolean crowned(MinecraftServer server, UUID group) {
-        return Data.get(server).crowned.contains(group);
-    }
 
     // 組が次に挑む段 (越えた段の次。十段のあとは十段)
     public static NightmareTier next(MinecraftServer server, UUID group) {

@@ -90,7 +90,7 @@ public class TowerMaster extends CloudMob {
         if (shielded && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             if (level() instanceof ServerLevel sl && tickCount % 5 == 0) {
                 Vec3 c = chest();
-                sl.sendParticles(ParticleTypes.ENCHANTED_HIT, c.x, c.y, c.z, 12, 3.0, 3.0, 1.0, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 12, 3.0, 3.0, 1.0, 0.1);
             }
             return false;
         }
@@ -144,5 +144,10 @@ public class TowerMaster extends CloudMob {
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false;
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

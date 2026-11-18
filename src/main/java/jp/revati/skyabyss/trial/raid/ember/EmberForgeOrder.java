@@ -241,7 +241,7 @@ public final class EmberForgeOrder extends EmberRoom {
                 charge[i]++;
                 BlockPos c = ctx.local(SPOTS[i][0], 2, SPOTS[i][1]);
                 if (charge[i] % 5 == 0) {
-                    particles(ctx, ParticleTypes.FLAME, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 3, 0.3, 0.02);
+                    particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 3, 0.3, 0.02);
                 }
                 if (charge[i] >= CHARGE_TICKS) {
                     state[i] = READY;
@@ -262,7 +262,7 @@ public final class EmberForgeOrder extends EmberRoom {
             set(ctx, ctx.local(MURAL_X[next], 1, -12), b(Blocks.SHROOMLIGHT));
             next++;
             ctx.level().playSound(null, c, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1f, 0.8f + 0.1f * next);
-            particles(ctx, ParticleTypes.LAVA, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 8, 0.4, 0.1);
+            particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 8, 0.4, 0.1);
             if (next >= 4) {
                 done = true;
                 opened(ctx);
@@ -272,7 +272,7 @@ public final class EmberForgeOrder extends EmberRoom {
             ctx.level().playSound(null, c, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 1.2f, 0.6f);
             for (int i = 0; i < 4; i++) {
                 BlockPos p = ctx.local(SPOTS[i][0], 3, SPOTS[i][1]);
-                particles(ctx, ParticleTypes.SMOKE, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 12, 0.4, 0.03);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 12, 0.4, 0.03);
             }
             wipeStations(ctx);
             bar(ctx, Component.translatable("raid.skyabyss.ER2.wrong"));

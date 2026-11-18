@@ -40,7 +40,7 @@ public class WhaleboneGreatswordItem extends SwordItem implements ModGear {
         boolean awakened = ModGear.awakened(stack);
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, awakened ? 70 : 50, awakened ? 2 : 1), attacker);
         if (attacker.level() instanceof ServerLevel level) {
-            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 14, 0.3, 0.3, 0.3, 0.1);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.PLAYERS, 1f, 0.6f);
         }

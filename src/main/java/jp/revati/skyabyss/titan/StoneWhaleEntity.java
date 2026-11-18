@@ -185,9 +185,6 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         return List.of(chainTop(0, 0, 0, yaw), chainAnchor(0, 0, 0, yaw));
     }
 
-    public boolean isHeadChain() {
-        return entityData.get(HEAD_CHAIN);
-    }
 
     // 向き yaw の岩鯨の、(横, 上, 前) の点の中心からの位置。横は左が + (chainTop と同じ回し方)
     public static Vec3 offset(float yaw, double side, double up, double forward) {
@@ -433,7 +430,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, -4, 0);
-                        level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
                     }
                 }
             }
@@ -446,7 +443,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, 14, 0);
-                        level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
+                        level.sendParticles(p, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
                     }
                 }
             }
@@ -851,9 +848,6 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         approachTicks = 0;
     }
 
-    public boolean isCalled() {
-        return called;
-    }
 
     // 大陸の居場所で休み続ける (world.continent.ContinentLairs。見守りが毎秒付け直すので保存しない)。休みの残りは減らず、無人でも去らない
     private boolean anchored;
@@ -1026,5 +1020,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

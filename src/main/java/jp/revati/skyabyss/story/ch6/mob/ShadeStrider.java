@@ -132,12 +132,12 @@ public class ShadeStrider extends MoonMob {
                 if (t % 2 == 0) {
                     for (int i = 0; i < 14; i++) {
                         double a = i / 14.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.SQUID_INK, at.x + Math.cos(a) * STOMP_R, at.y + 0.1, at.z + Math.sin(a) * STOMP_R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.x + Math.cos(a) * STOMP_R, at.y + 0.1, at.z + Math.sin(a) * STOMP_R, 1, 0, 0, 0, 0);
                     }
                 }
                 if (t == TELL) {
                     playSound(MoonMobsSetup.STRIDER_STOMP.get(), 1.4f, 0.8f);
-                    sl.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.2, at.z, 14, 0.8, 0.1, 0.8, 0.05);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y + 0.2, at.z, 14, 0.8, 0.1, 0.8, 0.05);
                     for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(at, at).inflate(STOMP_R + 0.5, 2.5, STOMP_R + 0.5), e -> e.isAlive())) {
                         if (p.position().subtract(at).horizontalDistance() <= STOMP_R + 0.3) {
                             strike(p, dmg(1.3));
@@ -178,5 +178,10 @@ public class ShadeStrider extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.SHADOW_THREAD.get(), 0.35, 1, 1);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

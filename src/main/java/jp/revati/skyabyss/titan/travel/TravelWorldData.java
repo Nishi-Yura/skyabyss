@@ -50,10 +50,6 @@ public final class TravelWorldData extends SavedData {
         return removed;
     }
 
-    public void putOfflineReady(UUID player, long readyAt) {
-        offlineReady.merge(player, readyAt, Math::max);
-        setDirty();
-    }
 
     @Nullable
     public Long takeOfflineReady(UUID player) {

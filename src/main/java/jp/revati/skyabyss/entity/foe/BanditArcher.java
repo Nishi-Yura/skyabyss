@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -47,15 +48,12 @@ public class BanditArcher extends ContinentFoe {
         }
         begin(target, "shoot");
         Vec3 f = forward();
-        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), LENGTH, HALF_WIDTH))
+        Telegraph.in(server(), TelegraphShape.line(getX(), getZ(), Telegraph.angleOf(f), LENGTH, HALF_WIDTH)).prop(PropFx.shots("arrow", 1))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_ARCHER_DRAW.get(), 1.0f, 1.0f)
                 .victims(this::clearShot)
                 .onImpact(server -> {
                     server.playSound(null, getX(), getY(), getZ(), MobSounds.BANDIT_ARCHER_SHOOT.get(), SoundSource.HOSTILE, 1f, 0.9f + random.nextFloat() * 0.2f);
-                    for (double d = 1; d <= LENGTH; d += 0.8) {
-                        server.sendParticles(ParticleTypes.CRIT, getX() + f.x * d, getY() + 1.3, getZ() + f.z * d, 1, 0.02, 0.02, 0.02, 0);
-                    }
                     setDeltaMovement(-f.x * 0.5, 0.38, -f.z * 0.5);
                     hasImpulse = true;
                 })

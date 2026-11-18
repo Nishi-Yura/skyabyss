@@ -1,23 +1,14 @@
 package jp.revati.skyabyss.titan.storm.heart.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.storm.heart.StormHeart;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 雷翼の心臓の描画。段階ごとの geo とテクスチャ (包む翼 → 開いた翼と冠の翼 → 骨だけの翼と稲妻の網) を切り替え、
 // 核・稲妻・網を光らせる (GlowLayer)。模型は tools/install/install_storm_heart.py が書く。
@@ -30,17 +21,11 @@ public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
     private static final float SCALE = 6.0f;  // 2026-11-08 の声「心臓の大きさ2倍にして」で 2 倍
 
     public StormHeartRenderer(EntityRendererProvider.Context context) {
-        // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo と自前の発光層に戻る
+        // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。
         super(context, new Model(), h -> "storm_heart_p" + Model.phase(h), SCALE);
-        addRenderLayer(new GlowLayer(this));
         this.shadowRadius = 0f;
     }
 
-    // 発光は低ポリでもキューブでも下の GlowLayer (目の光で足す)。AutoGlowingGeoLayer は光る画素に面の陰がかかり、核や稲妻が灰色に沈む
-    @Override
-    protected boolean autoGlow() {
-        return false;
-    }
 
     @Override
     protected int getBlockLightLevel(StormHeart heart, BlockPos pos) {
@@ -59,48 +44,18 @@ public class StormHeartRenderer extends LowPolyGeoRenderer<StormHeart> {
         return OverlayTexture.pack(OverlayTexture.u(u), OverlayTexture.v(heart.hurtTime > 0));
     }
 
-    static final class GlowLayer extends GeoRenderLayer<StormHeart> {
-        GlowLayer(StormHeartRenderer renderer) {
-            super(renderer);
-        }
-
-        @Override
-        public void render(PoseStack poseStack, StormHeart heart, BakedGeoModel model, RenderType renderType,
-                           MultiBufferSource buffers, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            if (heart.isInvisible()) {
-                return;
-            }
-            // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install/install_lowpoly_storm.py が焼く)
-            ResourceLocation cubeMask = Model.path("textures/entity/storm_heart_p" + Model.phase(heart) + "_glowmask.png");
-            if (!LowPoly.enabled && !LowPoly.cubeHere(cubeMask)) {
-                return;
-            }
-            RenderType glow = RenderType.eyes(LowPoly.enabled
-                    ? Model.path("textures/lowpoly/storm_heart_p" + Model.phase(heart) + "_glow.png")
-                    : cubeMask);
-            getRenderer().reRender(model, poseStack, buffers, heart, glow, buffers.getBuffer(glow), partialTick,
-                    LightTexture.FULL_BRIGHT, packedOverlay, getRenderer().getRenderColor(heart, partialTick, packedLight).argbInt());
-        }
-    }
 
     static final class Model extends GeoModel<StormHeart> {
         private static final ResourceLocation ANIMATION = path("animations/entity/storm_heart.animation.json");
 
         @Override
         public ResourceLocation getModelResource(StormHeart heart) {
-            if (LowPoly.enabled) {
-                return path("geo/entity/storm_heart_p" + phase(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
-            }
-            return LowPoly.cubeOr(path("geo/entity/storm_heart_p" + phase(heart) + ".geo.json"),
-                    path("geo/entity/storm_heart_p" + phase(heart) + "_lowpoly.geo.json"));
+            return path("geo/entity/storm_heart_p" + phase(heart) + "_lowpoly" + ".geo.json");
         }
 
         @Override
         public ResourceLocation getTextureResource(StormHeart heart) {
-            if (LowPoly.enabled) {
-                return LowPoly.debug ? path("textures/lowpoly/debug.png") : path("textures/lowpoly/storm_heart_p" + phase(heart) + ".png");
-            }
-            return LowPoly.cubeOr(path("textures/entity/storm_heart_p" + phase(heart) + ".png"), path("textures/lowpoly/storm_heart_p" + phase(heart) + ".png"));
+            return path("textures/lowpoly/storm_heart_p" + phase(heart) + ".png");
         }
 
         @Override

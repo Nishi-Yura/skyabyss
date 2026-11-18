@@ -20,10 +20,8 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.guide.HeartbeatWard;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.titan.TitanBacks;
 import jp.revati.skyabyss.titan.group.GroupBossRoom;
 import jp.revati.skyabyss.titan.group.ReentryRules;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -261,7 +259,7 @@ public final class Downed {
         jp.revati.skyabyss.rebirth.RebirthFx.burst(victim, true);
         if (victim.level() instanceof ServerLevel level) {
             level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.2f, 1.4f);
-            level.sendParticles(ParticleTypes.HEART, victim.getX(), victim.getY() + 1.0, victim.getZ(), 8, 0.4, 0.5, 0.4, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), victim.getX(), victim.getY() + 1.0, victim.getZ(), 8, 0.4, 0.5, 0.4, 0.02);
         }
         Notice.bar(victim, ModText.battle("message.skyabyss.revive.up_self", reviver == null ? Component.empty() : reviver.getName()));
         if (reviver != null) {
@@ -289,10 +287,6 @@ public final class Downed {
         return was || timeout;
     }
 
-    // 倒れてから死んだ人か (一度取り出すと消える)
-    public static boolean takeDownDeath(UUID id) {
-        return DOWN_DEATH.remove(id);
-    }
 
     // ---------------------------------------------------------------- 毎 tick
     @SubscribeEvent
@@ -352,7 +346,7 @@ public final class Downed {
         }
         for (int i = 0; i < 10; i++) {
             double a = Math.PI * 2 * i / 10 + (now % 40) * 0.05;
-            level.sendParticles(ParticleTypes.END_ROD, p.getX() + Math.cos(a) * 1.1, p.getY() + 0.15, p.getZ() + Math.sin(a) * 1.1, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + Math.cos(a) * 1.1, p.getY() + 0.15, p.getZ() + Math.sin(a) * 1.1, 1, 0, 0, 0, 0);
         }
     }
 

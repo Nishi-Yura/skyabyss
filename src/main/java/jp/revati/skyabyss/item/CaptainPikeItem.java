@@ -82,7 +82,7 @@ public class CaptainPikeItem extends SwordItem implements ModGear {
             }
             e.hurt(source, damage);
         }
-        level.sendParticles(ParticleTypes.SWEEP_ATTACK, attacker.getX() + look.x * 2, attacker.getY(0.6), attacker.getZ() + look.z * 2, 3, 0.8, 0.1, 0.8, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), attacker.getX() + look.x * 2, attacker.getY(0.6), attacker.getZ() + look.z * 2, 3, 0.8, 0.1, 0.8, 0);
     }
 
     // 骨の噴出: 相手の足もとから骨が噴き上がり、まわりの敵を打ち上げる
@@ -95,9 +95,9 @@ public class CaptainPikeItem extends SwordItem implements ModGear {
             e.push(0, 0.45, 0);
             e.hurtMarked = true;
         }
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                target.getX(), target.getY() + 0.2, target.getZ(), 50, radius * 0.4, 0.6, radius * 0.4, 0.2);
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, target.getX(), target.getY() + 0.2, target.getZ(), 12, radius * 0.3, 0.1, radius * 0.3, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                target.getX(), target.getY() + 0.2, target.getZ(), 24, radius * 0.4, 0.6, radius * 0.4, 0.2);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + 0.2, target.getZ(), 12, radius * 0.3, 0.1, radius * 0.3, 0.05);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.PLAYERS, 1.4f, 0.5f);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 0.8f, 0.7f);
     }

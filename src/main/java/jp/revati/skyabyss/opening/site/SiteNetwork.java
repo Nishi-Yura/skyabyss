@@ -24,6 +24,17 @@ public final class SiteNetwork {
     // 章の担当が足す行き先 (場所の表にないもの。二章の沖の難破船など)。名前 → 場所 (なければ null)
     public static final java.util.Map<String, java.util.function.Function<MinecraftServer, BlockPos>> EXTRA_TARGETS = new java.util.concurrent.ConcurrentHashMap<>();
 
+    // 地上に行き先のあるメインの段 (キーは「クエスト/段」。クライアントは段のキーでそのまま引く)。前は行き先がなく、標が頼んだ人 (都の語り部) を指していた
+    // (2026-11-15「ピンが全く違う場所を指す」): 酒場の地下の戸、門の前の大広間 (縦穴・門)、鐘の間の門 (月・雲海・始祖の鐘の内)
+    static {
+        EXTRA_TARGETS.put("main_abyss/door", server -> jp.revati.skyabyss.town.TownGuests.mark(server, jp.revati.skyabyss.story.ch5.AbyssEntrance.DOOR));
+        EXTRA_TARGETS.put("main_abyss/shaft", server -> jp.revati.skyabyss.town.TownGuests.mark(server, jp.revati.skyabyss.story.ch5.AbyssEntrance.GATE));
+        EXTRA_TARGETS.put("main_abyss/gate", server -> jp.revati.skyabyss.town.TownGuests.mark(server, jp.revati.skyabyss.story.ch5.AbyssEntrance.GATE));
+        EXTRA_TARGETS.put("main_moon/gate", jp.revati.skyabyss.story.ch6.MoonGate::gatePos);
+        EXTRA_TARGETS.put("main_finale_ascend/ascend", jp.revati.skyabyss.story.ch6.MoonGate::gatePos);
+        EXTRA_TARGETS.put("side_founder/enter", jp.revati.skyabyss.story.ch6.MoonGate::gatePos);
+    }
+
     private SiteNetwork() {
     }
 

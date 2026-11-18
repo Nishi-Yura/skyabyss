@@ -3,7 +3,6 @@ package jp.revati.skyabyss.world;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -249,7 +248,4 @@ public final class LodestoneLabels {
         return SHOWN.size();
     }
 
-    static List<GlobalPos> shownAt() {
-        return new ArrayList<>(SHOWN.keySet());
-    }
 }

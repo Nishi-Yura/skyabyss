@@ -261,16 +261,16 @@ public class LastBellkeeper extends CloudMob {
                     int n = 20;
                     for (int i = 0; i < n; i++) {
                         double a = i / (double) n * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.END_ROD, spot.x + Math.cos(a) * SLAM_R, spot.y + 0.15, spot.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x + Math.cos(a) * SLAM_R, spot.y + 0.15, spot.z + Math.sin(a) * SLAM_R, 1, 0, 0, 0, 0);
                     }
-                    sl.sendParticles(ParticleTypes.WAX_OFF, spot.x, spot.y + 0.2, spot.z, 6, SLAM_R * 0.4, 0, SLAM_R * 0.4, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x, spot.y + 0.2, spot.z, 6, SLAM_R * 0.4, 0, SLAM_R * 0.4, 0);
                 }
                 return;
             }
             if (t == SLAM_TELL + 3) {
                 playSound(CloudMobsSetup.KEEPER_SLAM.get(), 2.0f, 0.8f);
-                sl.sendParticles(ParticleTypes.EXPLOSION, spot.x, spot.y + 0.4, spot.z, 2, 0.6, 0.1, 0.6, 0);
-                sl.sendParticles(ParticleTypes.CLOUD, spot.x, spot.y + 0.2, spot.z, 24, SLAM_R * 0.5, 0.1, SLAM_R * 0.5, 0.08);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.4, spot.z, 2, 0.6, 0.1, 0.6, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.2, spot.z, 24, SLAM_R * 0.5, 0.1, SLAM_R * 0.5, 0.08);
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(spot, spot).inflate(SLAM_R + 0.3, 2.0, SLAM_R + 0.3), e -> e.isAlive() && !e.isSpectator())) {
                     if (p.position().subtract(spot).horizontalDistance() <= SLAM_R + 0.3) {
                         strike(p, dmg(1.3));
@@ -289,12 +289,16 @@ public class LastBellkeeper extends CloudMob {
             Vec3 c = position();
             if (t < WAVE_TELL) {
                 if (t % 4 == 0) {
-                    sl.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 3.5, c.z, 6, 0.8, 0.8, 0.8, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 3.5, c.z, 6, 0.8, 0.8, 0.8, 0.02);
                 }
                 return;
             }
             if (t == WAVE_TELL + 2) {
                 playSound(CloudMobsSetup.KEEPER_WAVE.get(), 2.5f, 0.7f);
+                // 技の形: 広がる鐘の波の頭に、床から小さな光の柱が順に立つ
+                jp.revati.skyabyss.combat.prop.PropFx.motion(sl, "light_pillar", 0.32f,
+                        new jp.revati.skyabyss.combat.TelegraphShape.Wave(c.x, c.z, 1.0, WAVE_MAX, 0.8, new double[0], 0),
+                        floorY(), (int) Math.round(WAVE_MAX / WAVE_STEP), LastBellkeeper.this);
             }
             double r = (t - WAVE_TELL - 2) * WAVE_STEP;
             if (r < 0) {
@@ -304,7 +308,7 @@ public class LastBellkeeper extends CloudMob {
                 int n = 16 + (int) (r * 5);
                 for (int i = 0; i < n; i += (t % 2 == 0 ? 1 : 2)) {
                     double a = i / (double) n * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.END_ROD, c.x + Math.cos(a) * r, floorY() + 0.25, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, floorY() + 0.25, c.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(c, c).inflate(r + 1, 4, r + 1), e -> e.isAlive() && !e.isSpectator())) {
                     double d = p.position().subtract(c).horizontalDistance();
@@ -325,14 +329,14 @@ public class LastBellkeeper extends CloudMob {
         private void silence(ServerLevel sl) {
             if (t < SILENCE_TELL) {
                 if (t % 3 == 0) {
-                    sl.sendParticles(ParticleTypes.SCULK_SOUL, getX(), getY() + 3.6, getZ(), 2, 0.6, 0.3, 0.6, 0.01);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 3.6, getZ(), 2, 0.6, 0.3, 0.6, 0.01);
                 }
                 return;
             }
             if (t == SILENCE_TELL) {
                 sinceSilence = 0;
                 BellIsle.silence(sl, BellIsle.mark("arena"), 20);
-                sl.sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + 3.0, getZ(), 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 3.0, getZ(), 1, 0, 0, 0, 0);
                 if (!toldSilence) {
                     toldSilence = true;
                     for (ServerPlayer p : BellArena.present(sl)) {
@@ -349,5 +353,10 @@ public class LastBellkeeper extends CloudMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

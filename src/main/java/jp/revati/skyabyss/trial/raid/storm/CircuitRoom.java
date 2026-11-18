@@ -307,7 +307,7 @@ public final class CircuitRoom extends RaidRoom {
                 order.sort((a, b) -> Integer.compare(dist(a), dist(b)));
                 int[] t = order.get((int) ((age / 3) % order.size()));
                 BlockPos at = tileCenter(ctx, t[0], t[1]);
-                ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 2, 0.4, 0.1, 0.4, 0.02);
+                ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 2, 0.4, 0.1, 0.4, 0.02);
             }
         }
     }
@@ -365,7 +365,7 @@ public final class CircuitRoom extends RaidRoom {
         BlockPos at = tileCenter(ctx, gx, gz);
         ServerLevel level = ctx.level();
         level.playSound(null, at, SoundEvents.COPPER_PLACE, SoundSource.BLOCKS, 1.0f, 1.2f);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 6, 0.5, 0.1, 0.5, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 6, 0.5, 0.1, 0.5, 0.05);
         refresh(ctx, false);
         return true;
     }
@@ -390,7 +390,7 @@ public final class CircuitRoom extends RaidRoom {
             if (on && !lampOn[i] && !all) {
                 BlockPos at = tileCenter(ctx, layout.lampX[i], layout.lampZ[i]);
                 level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.4f, 0.7f + 0.2f * lampsLit);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 2.2, at.getZ() + 0.5, 24, 0.3, 0.5, 0.3, 0.1);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 2.2, at.getZ() + 0.5, 24, 0.3, 0.5, 0.3, 0.1);
             }
             lampOn[i] = on;
             StormRoomDeco.lampLit(ctx, (layout.lampX[i] - N / 2) * T, (layout.lampZ[i] - N / 2) * T, on);
@@ -428,5 +428,10 @@ public final class CircuitRoom extends RaidRoom {
         }
         drawn[gx][gz] = m;
         drawnLit[gx][gz] = on;
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

@@ -946,6 +946,36 @@ def close_mesh(data, with_collar=True):
     return data, stats
 
 
+def tidy_bones(data):
+    """閉じ済みのメッシュに部品を足したあとの仕上げ (install_*_addons.py・install_boss_split.py が書き出す前に呼ぶ)。
+    開いた縁・向きの食い違い・逆の体積がある骨だけを、向きをそろえて蓋で塞ぐ (襟や付け根の直しはしない。ほかの骨は触らない)。
+    戻り値 直した骨の名前のリスト。何度流しても同じ"""
+    fixed = []
+    for n, b in data.get("bones", {}).items():
+        if not b.get("triangles"):
+            continue
+        V = np.array(b["vertices"], float).reshape(-1, 3)
+        UV = np.array(b["uvs"], float).reshape(-1, 2)
+        T = np.array(b["triangles"], int).reshape(-1, 3)
+        r = ma.analyze(V, T)
+        if not (r["open"] or r["wind"] or r["inv"]):
+            continue
+        T2, _ = fix_orientation(V, T)
+        nv0 = len(V)
+        V2, UV2, T2, caps = close_bone(V, UV, T2, V.mean(0))
+        T2, _ = fix_orientation(V2, T2)
+        b["vertices"] = [[round(float(x), 4) for x in p] for p in V2]
+        b["uvs"] = [[round(float(x), 6) for x in p] for p in UV2]
+        b["triangles"] = [[int(i) for i in t] for t in T2]
+        b["triangle_count"] = len(T2)
+        if caps and b.get("cap_vertex_start") is None:
+            b["cap_vertex_start"] = nv0
+        fixed.append(n)
+    if fixed:
+        data["triangle_count"] = sum(len(b.get("triangles", [])) for b in data["bones"].values())
+    return fixed
+
+
 def close_mesh_file(path, with_collar=True, force=False):
     with open(path, encoding="utf-8") as f:
         data = json.load(f)

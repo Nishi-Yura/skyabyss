@@ -149,7 +149,4 @@ public enum Dungeon {
         return null;
     }
 
-    public static Dungeon byPoiKind(String kind) {
-        return kind.startsWith("dungeon_") ? byId(kind.substring("dungeon_".length())) : null;
-    }
 }

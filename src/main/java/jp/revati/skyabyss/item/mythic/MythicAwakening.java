@@ -17,7 +17,6 @@ import jp.revati.skyabyss.tower.gear.TowerGearSetup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -211,7 +210,7 @@ public final class MythicAwakening {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6f, 1.2f);
         Vector3f c = color(s.getItem());
         if (c != null) {
-            level.sendParticles(new DustParticleOptions(c, 1.4f), p.getX(), p.getY() + 1.2, p.getZ(), 40, 0.5, 0.8, 0.5, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.2, p.getZ(), 24, 0.5, 0.8, 0.5, 0);
         }
         SkyAbyss.LOGGER.info("[awaken] {}'s {} reached stage {}", p.getGameProfile().getName(), id, stage);
     }
@@ -262,7 +261,7 @@ public final class MythicAwakening {
         for (int i = -4; i <= 4; i++) {
             double t = i / 4.0;
             Vec3 q = center.add(side.scale(t * 1.1)).add(look.scale(-Math.abs(t) * 0.4)).add(0, t * 0.3, 0);
-            level.sendParticles(dust, q.x, q.y, q.z, 1, 0.02, 0.02, 0.02, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.02, 0.02, 0.02, 0);
         }
     }
 
@@ -303,11 +302,6 @@ public final class MythicAwakening {
         return null;
     }
 
-    // 自己テスト用
-    static CompoundTag tagOf(ItemStack s) {
-        CustomData d = s.get(DataComponents.CUSTOM_DATA);
-        return d == null ? new CompoundTag() : d.copyTag();
-    }
 
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {

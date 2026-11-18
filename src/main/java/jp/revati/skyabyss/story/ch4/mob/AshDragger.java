@@ -135,7 +135,7 @@ public class AshDragger extends EmberMob {
         if (level().isClientSide) {
             // 引きずる灰の跡
             if (getDeltaMovement().horizontalDistanceSqr() > 1e-4 && random.nextInt(3) == 0) {
-                level().addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()),
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                         getX() - getDeltaMovement().x * 4, getY() + 0.1, getZ() - getDeltaMovement().z * 4, 0, 0, 0);
             }
             return;
@@ -147,7 +147,7 @@ public class AshDragger extends EmberMob {
 
     // 窯の跡に転がり着いた: 近くの人に一行 (人ごとに一度。灰ひきずりの頼みの道しるべ)、窯の口へ潜って消える
     void reachNest(ServerLevel level, BlockPos kiln) {
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()), getX(), getY() + 0.3, getZ(),
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(),
                 24, 0.4, 0.3, 0.4, 0.05);
         for (ServerPlayer p : level.players()) {
             if (p.distanceToSqr(this) < 32 * 32 && jp.revati.skyabyss.rpg.Growth.discover(p, "ch4_dragger_nest")) {
@@ -239,5 +239,10 @@ public class AshDragger extends EmberMob {
                 mob.getNavigation().moveTo(to.x, to.y, to.z, 1.6);
             }
         }
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

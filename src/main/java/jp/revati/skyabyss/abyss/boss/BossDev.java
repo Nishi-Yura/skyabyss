@@ -94,6 +94,13 @@ public final class BossDev {
             BossLook.setPhase(le, 1);
         } else if (act.startsWith("strike_")) {
             BossLook.strike(le, code(act.substring(7)));
+        } else if (act.equals("emerge")) {
+            // 地の中から這い出る (combat/BossEmerge) と、出きったら名前の札と顔のアップ
+            java.util.List<net.minecraft.server.level.ServerPlayer> watch = src.getLevel().players();
+            String style = king ? DepthBoss.entrance(DepthBoss.KINGS[ki].id())
+                    : new String[] {"lord_rib", "drop", "lord_storm", "thread"}[idx];
+            jp.revati.skyabyss.combat.BossEmerge.start(le, style, ticks, java.util.List.copyOf(watch),
+                    () -> jp.revati.skyabyss.combat.BossIntro.card(watch, le.getDisplayName(), Component.empty(), 90, le));
         } else if (!act.equals("-")) {
             BossLook.windup(le, code(act), ticks);
         }

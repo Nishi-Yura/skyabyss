@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.story.ch6.mob.CliffCreeper;
 import jp.revati.skyabyss.story.ch6.mob.DustCrawler;
@@ -30,7 +29,6 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 //   影抱き     影に潜っている間は描かない (床を走る影の粒だけ)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class MoonMobRenderers {
-    private static final ResourceLocation DEBUG = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");
     private static final String[] STAGE_SUFFIX = {"", "_s1", "_s2"};
     private static final String[] STITCHER_BODY = {"body", "arm_l", "arm_r"};
 
@@ -51,7 +49,7 @@ public final class MoonMobRenderers {
         event.registerEntityRenderer(MoonMobsSetup.SHADE_STRIDER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.ShadeStrider.ID, 0.7f));
         event.registerEntityRenderer(MoonMobsSetup.MIRROR_BEARER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.MirrorBearer.ID, 0.7f));
         event.registerEntityRenderer(MoonMobsSetup.FULL_KEEPER.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.FullKeeper.ID, 1.1f, 1.1f));
-        event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.field.FieldBlocks.FALLING_LIGHT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+        event.registerEntityRenderer(jp.revati.skyabyss.story.ch6.field.FieldBlocks.FALLING_LIGHT.get(), FallingLightRenderer::new);
         event.registerEntityRenderer(MoonMobsSetup.RIFT_WING.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftWing.ID, 0.0f));
         event.registerEntityRenderer(MoonMobsSetup.RIFT_ARMOR.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftArmor.ID, 0.5f));
         event.registerEntityRenderer(MoonMobsSetup.RIFT_SERPENT.get(), ctx -> new Foe<>(ctx, jp.revati.skyabyss.story.ch6.mob.RiftSerpent.ID, 0.6f));
@@ -73,10 +71,7 @@ public final class MoonMobRenderers {
         public ResourceLocation getTextureResource(T mob) {
             ResourceLocation low = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID,
                     "textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage() - 1))] + ".png");
-            if (LowPoly.enabled) {
-                return LowPoly.debug ? DEBUG : low;
-            }
-            return LowPoly.cubeOr(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/" + name + ".png"), low);
+            return low;
         }
     }
 

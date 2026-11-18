@@ -3,7 +3,6 @@ package jp.revati.skyabyss.opening;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +16,6 @@ import jp.revati.skyabyss.lore.LorePageItem;
 import jp.revati.skyabyss.lore.LoreSetup;
 import jp.revati.skyabyss.lore.LoreState;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.npc.NpcSpawner;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
 import jp.revati.skyabyss.opening.OpeningLogic.Env;
@@ -33,7 +31,6 @@ import jp.revati.skyabyss.sky.SkyEventData;
 import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.sky.SkyPass;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
@@ -287,7 +284,7 @@ public final class OpeningDirector {
 
     static boolean metIsana(ServerPlayer player) {
         NpcBonds.Bond bond = NpcBonds.of(player).bonds().get(NpcSetup.WHALE_CHASER_ID);
-        return bond != null && (bond.talks() > 0 || bond.flags().contains("met") || bond.echoes().contains("met"));
+        return bond != null && (bond.talks() > 0 || bond.flags().contains("met"));
     }
 
     // メインのクエストの今の段の ID。始まっていなければ空、終わっていれば "done"
@@ -395,11 +392,6 @@ public final class OpeningDirector {
         }
     }
 
-    // ---------------------------------------------------------------- 岩鯨
-    // 岩鯨を迎えられる人 (影・歌・イサナを済ませた人) がオーバーワールドにいるか
-    public static boolean anyoneReady(ServerLevel level) {
-        return readyPlayer(level) != null;
-    }
 
     // 岩鯨を迎えられる人: 影・歌・イサナを済ませ、一章の支度も済ませた人 (仲間が済ませていてもよい)
     @Nullable
@@ -510,7 +502,7 @@ public final class OpeningDirector {
             // 帳面を拾う = 伝承の書を手に入れる (最初の頁「忘れないうちに書け」が記される)
             Lore.unlock(player, Lore.BOOK_ENTRY, true);
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.7f);
-            level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
         }
 
         @Override
@@ -585,7 +577,7 @@ public final class OpeningDirector {
             item.setTarget(player.getUUID());
             item.getPersistentData().putUUID(PAGE_OWNER_TAG, player.getUUID());
             level.addFreshEntity(item);
-            level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.01);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.9f);
             PAGES.put(player.getUUID(), item.getUUID());
             Notice.narrate(player, "message.skyabyss.beats.page_falls");
@@ -593,6 +585,9 @@ public final class OpeningDirector {
 
         private void giveShadowPage() {
             ItemStack page = LorePageItem.of("shadow");
+            if (player instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+                jp.revati.skyabyss.notice.GainFeed.note(gainTo, page);
+            }
             if (!player.getInventory().add(page)) {
                 player.drop(page, false);
             }
@@ -726,7 +721,4 @@ public final class OpeningDirector {
         state(player).reset();
     }
 
-    public static List<OpeningBeat> doneList(ServerPlayer player) {
-        return List.copyOf(state(player).doneBeats());
-    }
 }

@@ -220,6 +220,8 @@ def temple_1():
         cv.mark(f"foe_a_{n}_{kind}", x, -1, z)
     B.chest(cv, "chest_1", -9, -1, 34, "east")
     D.box_mark(cv, "tide_1", -2, 2, -4, -1, 54, 68)
+    # 沈む回廊の出口: 床 (立つ高さ -4) から回廊の先 (-1) へ上がる段。前は 3 段の壁で、引き潮のあいだ登れなかった (2026-11-11)
+    K.step_run(cv, -2, 2, 69, 1, -4, -1, "prismarine_brick", "minecraft:prismarine_bricks")
     cv.mark("trap_1_brine", 0, -1, 74)
     # 祭壇の間: 段の上の祭壇 (段は石段で上がる)
     for x in range(-4, 5):
@@ -326,17 +328,8 @@ def ice_1():
         cv.mark(f"foe_a_{n}_{kind}", x, 0, z)
     B.chest(cv, "chest_1", -13, 0, 36, "east")
     cv.mark("trap_1_spark", 0, 0, 52)
-    # 吹き抜け: 壁ぎわを回って上がる石段 (12 段)、下は雪で詰める
-    for k in range(12):
-        a = math.radians(-90 + k * 30)
-        x = int(round(5 * math.cos(a)))
-        z = 62 + int(round(5 * math.sin(a)))
-        facing = ["east", "south", "west", "north"][int(((k * 30) % 360) // 90)]
-        for yy in range(0, k):
-            cv.put(x, yy, z, "minecraft:snow_block")
-        cv.put(x, k, z, stair("stone_brick", facing))
-        for yy in range(k + 1, k + 4):
-            cv.put(x, yy, z, AIR)
+    # 12 段 (壁ぎわの輪の上を、2 マスごとに 1 段。dungeon_kit.spiral_stair)
+    K.spiral_stair(cv, 0, 62, 5, 0, 12)
     for x in range(-3, 4):
         for z in range(66, 72):
             cv.put(x, 11, z, "minecraft:packed_ice")

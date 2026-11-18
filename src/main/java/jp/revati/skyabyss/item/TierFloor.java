@@ -75,9 +75,6 @@ public final class TierFloor {
         return m;
     }
 
-    public static double epicBestOf(String dungeon) {
-        return epicBest().getOrDefault(dungeon, 0.0);
-    }
 
     // 足す攻撃の上乗せ (0 なら足さない)
     public static double extra(Item item) {

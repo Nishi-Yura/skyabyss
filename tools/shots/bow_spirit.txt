@@ -1,0 +1,46 @@
+# 番の弓霊 (2026-11-13 の清書): 呼んで、肩のそばに浮かぶ霊と、霊が敵を射るところを撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/bow_spirit.txt -PshotsName=bow_spirit
+world bow_spirit flat
+size 1280 720
+timeout 2400
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+perspective back
+fov 60
+cmd skyabyss level set @p 30
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s far_shot 1
+cmd skyabyss skill learn @s hawk_eye 1
+cmd skyabyss skill learn @s bow_spirit 2
+cmd skyabyss skill slot @s 1 bow_spirit
+cmd skyabyss skill cooldowns @s
+cmd summon skyabyss:bandit 0.5 -60 9.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 8
+shot back
+perspective front
+wait 10
+shot front
+perspective back
+wait 14
+shot shooting
+cmd tp @s 0.5 -60 0.5 90 10
+wait 6
+shot side

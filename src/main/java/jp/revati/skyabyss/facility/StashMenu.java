@@ -18,7 +18,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 // 預かり所 (docs/design/35 の 3.1、00 の 225)。人ごとの 54 枠 (StashData)。どの預かり番から開いても同じ中身。
-// 画面はバニラの大きな箱 (generic_9x6。絵柄は 18 の 3.2 の同梱のパック)。旅嚢の大事な品 (笛・鍵・心核・書) と、守る品 (Keepsakes) は預けられない
+// 画面はバニラの大きな箱 (generic_9x6。絵柄は 18 の 3.2 の同梱のパック)。旅袋の大事な品 (笛・鍵・心核・書) と、守る品 (Keepsakes) は預けられない
 public final class StashMenu extends ChestMenu {
     @Nullable
     private final Entity keeper;
@@ -43,7 +43,7 @@ public final class StashMenu extends ChestMenu {
         }
     }
 
-    // 預けられる品か (旅嚢の「取り出せない」区分 = 道具・鍵と心核・書、守る品は不可)
+    // 預けられる品か (旅袋の「取り出せない」区分 = 道具・鍵と心核・書、守る品は不可)
     public static boolean allowed(ItemStack stack) {
         if (stack.isEmpty()) {
             return true;

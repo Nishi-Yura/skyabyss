@@ -15,7 +15,7 @@ public final class WardenSetup {
 
     public static final DeferredHolder<EntityType<?>, EntityType<HeartWarden>> HEART_WARDEN = ENTITIES.register("heart_warden",
             () -> EntityType.Builder.<HeartWarden>of(HeartWarden::new, MobCategory.MONSTER)
-                    .sized(1.9f, 4.3f)   // 描く大きさ 1.35 倍 (client WardenRenderer.SCALE) に合わせる
+                    .sized(1.9f, 5.6f).eyeHeight(3.655f)   // 描く大きさ 1.35 倍の体 (高さ 6.3) に合わせる。目の高さは前のまま
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":heart_warden"));

@@ -238,7 +238,7 @@ public final class TidePearlRoom extends RaidRoom {
             stillLit.add(p.getUUID());
             p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 12, 0, false, false, false));
             moveLight(ctx, p);
-            level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 2.2, p.getZ(), 1, 0.15, 0.1, 0.15, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 2.2, p.getZ(), 1, 0.15, 0.1, 0.15, 0.01);
             double dx = p.getX() - (origin.getX() + 0.5);
             double dz = p.getZ() - (origin.getZ() + ALTAR_Z + 0.5);
             if (dx * dx + dz * dz <= ALTAR_R * ALTAR_R && Math.abs(p.getY() - (origin.getY() + 1)) < 3) {
@@ -260,7 +260,7 @@ public final class TidePearlRoom extends RaidRoom {
                     stillLit.remove(p.getUUID());
                     p.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
                     level.playSound(null, q.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 1.2f);
-                    level.sendParticles(ParticleTypes.END_ROD, q.getX(), q.getY() + 1.5, q.getZ(), 8, 0.3, 0.3, 0.3, 0.05);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.getX(), q.getY() + 1.5, q.getZ(), 8, 0.3, 0.3, 0.3, 0.05);
                     break;
                 }
             }
@@ -274,7 +274,7 @@ public final class TidePearlRoom extends RaidRoom {
         if (now % 10 == 0) {
             for (int i = 0; i < count; i++) {
                 if (!delivered[i] && carrier[i] == null) {
-                    level.sendParticles(ParticleTypes.END_ROD, home[i].getX() + 0.5, home[i].getY() + 1.1, home[i].getZ() + 0.5, 1, 0.1, 0.1, 0.1, 0.0);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), home[i].getX() + 0.5, home[i].getY() + 1.1, home[i].getZ() + 0.5, 1, 0.1, 0.1, 0.1, 0.0);
                 }
             }
         }
@@ -353,7 +353,7 @@ public final class TidePearlRoom extends RaidRoom {
         refreshSockets(ctx);
         BlockPos s = origin.offset(SOCKET_X[i], 1, ALTAR_Z);
         ctx.level().playSound(null, s, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5f, 0.9f);
-        ctx.level().sendParticles(ParticleTypes.END_ROD, s.getX() + 0.5, s.getY() + 1.2, s.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.getX() + 0.5, s.getY() + 1.2, s.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
     }
 
     // 窪みの灯り: 置かれた真珠は海のランタンに
@@ -492,5 +492,10 @@ public final class TidePearlRoom extends RaidRoom {
 
     public boolean isDelivered(int i) {
         return delivered[i];
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

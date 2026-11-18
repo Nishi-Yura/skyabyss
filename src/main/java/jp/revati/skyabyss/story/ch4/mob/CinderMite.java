@@ -106,7 +106,7 @@ public class CinderMite extends EmberMob {
         super.aiStep();
         if (level().isClientSide) {
             if (random.nextInt(6) == 0) {
-                level().addParticle(ParticleTypes.SMALL_FLAME, getRandomX(0.3), getY() + 0.3, getRandomZ(0.3), 0, 0.01, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getRandomX(0.3), getY() + 0.3, getRandomZ(0.3), 0, 0.01, 0);
             }
             return;
         }
@@ -161,8 +161,8 @@ public class CinderMite extends EmberMob {
     public void die(DamageSource source) {
         super.die(source);
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.2, getZ(), 3, 0.15, 0.1, 0.15, 0.0);
-            server.sendParticles(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.2, getZ(), 8, 0.2, 0.15, 0.2, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.2, getZ(), 3, 0.15, 0.1, 0.15, 0.0);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.2, getZ(), 8, 0.2, 0.15, 0.2, 0.02);
         }
     }
 
@@ -260,5 +260,10 @@ public class CinderMite extends EmberMob {
     public static int swarm(ServerLevel level, Vec3 at) {
         List<CinderMite> list = level.getEntitiesOfClass(CinderMite.class, new AABB(at, at).inflate(6), CinderMite::isAlive);
         return list.size();
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

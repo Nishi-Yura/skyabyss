@@ -10,7 +10,6 @@ import java.util.WeakHashMap;
 
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -24,10 +23,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 技が残す「時間のある効き目」をまとめて持つ (サーバーだけ。保存しない)。
 //   - 期限つきの修飾子 (鈍足・灰かぶり・見切り・連れ風・逃げ足)
@@ -277,7 +274,7 @@ public final class SkillEffects {
                     }
                     absorb(next, half, (int) Math.max(20, a.until - now), false);
                     if (next.level() instanceof ServerLevel l) {
-                        l.sendParticles(ParticleTypes.NOTE, next.getX(), next.getY() + 1.8, next.getZ(), 4, 0.3, 0.2, 0.3, 0.0);
+                        l.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), next.getX(), next.getY() + 1.8, next.getZ(), 4, 0.3, 0.2, 0.3, 0.0);
                     }
                 }
             }
@@ -320,7 +317,7 @@ public final class SkillEffects {
             b.left--;
             SkillActions.hitPlain(owner, b.target, b.perTick, Skill.WIND_REND);
             if (b.target.level() instanceof ServerLevel l) {
-                l.sendParticles(ParticleTypes.DAMAGE_INDICATOR, b.target.getX(), b.target.getY() + b.target.getBbHeight() * 0.6, b.target.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
+                l.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), b.target.getX(), b.target.getY() + b.target.getBbHeight() * 0.6, b.target.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
             }
         }
     }
@@ -466,7 +463,7 @@ public final class SkillEffects {
                         for (int i = 0; i < 6; i++) {
                             double a = (now * 0.5 + i * Math.PI / 3);
                             double d = z.radius * (0.4 + 0.5 * ((now + i) % 5) / 5.0);
-                            z.level.sendParticles(Skills.SKY_MOTE.get(), z.center.x + Math.cos(a) * d, z.center.y + 0.3, z.center.z + Math.sin(a) * d, 1, 0.02, 0.02, 0.02, 0.0);
+                            z.level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), z.center.x + Math.cos(a) * d, z.center.y + 0.3, z.center.z + Math.sin(a) * d, 1, 0.02, 0.02, 0.02, 0.0);
                         }
                     }
                     if (now % 5 == 0) {
@@ -494,7 +491,7 @@ public final class SkillEffects {
                     if ((z.until - now) % SkillRules.LAMP_PULSE == 0) {
                         JobActions.lampPulse(owner, z.center, z.rank, z.radius);
                     } else if (now % 20 == 0) {
-                        z.level.sendParticles(net.minecraft.core.particles.ParticleTypes.GLOW, z.center.x, z.center.y + 0.8, z.center.z, 2, 0.15, 0.2, 0.15, 0.0);
+                        z.level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), z.center.x, z.center.y + 0.8, z.center.z, 2, 0.15, 0.2, 0.15, 0.0);
                     }
                 }
             }
@@ -557,10 +554,6 @@ public final class SkillEffects {
         return hasTimed(e, "slow");
     }
 
-    // 偽のプレイヤーは tick されないので、自己テストの手伝い
-    public static boolean isFake(Player p) {
-        return p instanceof FakePlayer;
-    }
 
     // 使っていない import を避けるための小さな窓口 (効果の見た目)
     static void glow(LivingEntity e, int ticks, LivingEntity source) {

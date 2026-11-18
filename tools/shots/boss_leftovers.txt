@@ -21,7 +21,6 @@ cmd effect give Dev minecraft:resistance 1000000 4 true
 cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
 cmd kill @e[type=!minecraft:player,distance=..80]
 hud off
-lowpoly on
 camera minecraft:overworld 0.5 -52 9.5 180 30
 waitchunks
 wait 20

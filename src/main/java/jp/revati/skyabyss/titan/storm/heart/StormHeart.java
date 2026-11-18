@@ -300,7 +300,7 @@ public class StormHeart extends HeartBoss {
         this.setPersistenceRequired();
         this.noPhysics = true;
         this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
-                new jp.revati.skyabyss.combat.HeartPursuit.Theme("storm", FEATHER_DAMAGE, ParticleTypes.ELECTRIC_SPARK, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.9f, 16),
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("storm", FEATHER_DAMAGE, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), SoundEvents.LIGHTNING_BOLT_IMPACT, 0.9f, 16),
                 this::canReach, this::strike,
                 () -> level() instanceof ServerLevel s ? reachable(s, 40) : List.<ServerPlayer>of(),
                 () -> new Vec3(centerX(), getY(), centerZ()), this::floorY, this::roomRadius);
@@ -512,7 +512,7 @@ public class StormHeart extends HeartBoss {
         int cycle = HIGH_TICKS + PERCH_TICKS;
         if (riseClock % cycle == HIGH_TICKS || riseClock % cycle == 0) {
             sound(server, StormHeartSetup.WINGBEAT.get(), 2.5f, riseClock % cycle == 0 ? 1.2f : 0.8f);
-            server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1, getZ(), 40, 2.5, 0.4, 2.5, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1, getZ(), 24, 2.5, 0.4, 2.5, 0.1);
         }
     }
 
@@ -846,12 +846,11 @@ public class StormHeart extends HeartBoss {
             }
             double qx = i == steps ? x : px;
             double qz = i == steps ? z : pz;
-            warn(server, dust(toRod ? 0xFFE278 : 0xFFFFFF, 1.6f), qx, y, qz, 1, 0, 0, 0, 0);
             if (i % 2 == 0) {
-                warn(server, ParticleTypes.ELECTRIC_SPARK, qx, y, qz, 2, 0.1, 0.1, 0.1, 0.05);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), qx, y, qz, 2, 0.1, 0.1, 0.1, 0.05);
             }
         }
-        server.sendParticles(ParticleTypes.FLASH, x, yBottom + 0.5, z, 1, 0, 0, 0, 0);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, yBottom + 0.5, z, 1, 0, 0, 0, 0);
         server.playSound(null, x, yBottom, z, StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2.2f, 0.9f + random.nextFloat() * 0.2f);
     }
 
@@ -1012,9 +1011,6 @@ public class StormHeart extends HeartBoss {
             });
         } else {
             BlockPos base = StormHeartArena.rod(toRod);
-            for (double t = 0; t <= 1; t += 0.1) {
-                warn(server, dust(0xFFE278, 0.9f), Mth.lerp(t, x, base.getX() + 0.5), y + 0.2, Mth.lerp(t, z, base.getZ() + 0.5), 1, 0, 0, 0, 0);
-            }
         }
         b.start();
     }
@@ -1025,7 +1021,6 @@ public class StormHeart extends HeartBoss {
         if (actionTicks == 1) {
             entityData.set(DATA_ROARING, true);
             sound(server, StormHeartSetup.ROAR.get(), 3f, 1f);
-            server.sendParticles(ParticleTypes.CLOUD, getX(), core().y, getZ(), 60, 1.6, 1.4, 1.6, 0.15);
             safeFallTicks = ROAR_TICKS + 60;
             tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, H).look(jp.revati.skyabyss.combat.AttackLook.STORM_ROAR)
                     .onHit((s, player) -> {
@@ -1037,11 +1032,8 @@ public class StormHeart extends HeartBoss {
             tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, H).look(jp.revati.skyabyss.combat.AttackLook.STORM_ROAR).active(24).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
-            if (enrageRoar) {
-                warn(server, dust(0xFF4A3A, 1.5f), getX(), core().y, getZ(), 8, 1.4, 1.4, 1.4, 0.05);
-            }
-            warn(server, dust(getPhase() == 0 ? 0xA8D8FF : 0xF6F0C8, 1.3f), getX(), core().y, getZ(), 6, 1.2, 1.2, 1.2, 0.05);
-            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), core().y, getZ(), 6, 1.6, 1.6, 1.6, 0.2);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 6, 1.2, 1.2, 1.2, 0.05);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 6, 1.6, 1.6, 1.6, 0.2);
         }
         if (actionTicks >= ROAR_TICKS) {
             entityData.set(DATA_ROARING, false);
@@ -1057,7 +1049,7 @@ public class StormHeart extends HeartBoss {
                 StormHeartArena.resetRods(server);
             }
             sound(server, SoundEvents.BEACON_ACTIVATE, 2.5f, 1.4f);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 60, 1.8, 1.6, 1.8, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 24, 1.8, 1.6, 1.8, 0.1);
             finish();
             cooldown = enraged ? 20 : 30;
         }
@@ -1078,7 +1070,7 @@ public class StormHeart extends HeartBoss {
             }
         }
         if (actionTicks < 24 && actionTicks % 3 == 0) {
-            warn(server, dust(0xFFFFFF, 1.2f), getX(), core().y + 1.5, getZ(), 6, 1.0, 0.4, 1.0, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y + 1.5, getZ(), 6, 1.0, 0.4, 1.0, 0.02);
         }
         if (actionTicks >= 40) {
             finish();
@@ -1117,15 +1109,6 @@ public class StormHeart extends HeartBoss {
             }
         }
         // 頭の高さの白い筋: 予告のあいだは扇の始めの縁に、薙いでいるあいだは帯の上に
-        if (actionTicks % 2 == 0 && actionTicks <= BLADE_WARN + BLADE_ACTIVE) {
-            double progress = actionTicks < BLADE_WARN ? 0 : (double) (actionTicks - BLADE_WARN) / BLADE_ACTIVE;
-            for (double start : armStart) {
-                double ang = start + armSpan * progress;
-                for (double d = 2.5; d <= BLADE_REACH; d += actionTicks < BLADE_WARN ? 2.2 : 1.1) {
-                    warn(server, dust(0xFFFFFF, 1.5f), getX() + Math.cos(ang) * d, floorY() + 2.0, getZ() + Math.sin(ang) * d, 1, 0.05, 0.25, 0.05, 0);
-                }
-            }
-        }
         if (actionTicks >= BLADE_WARN + BLADE_ACTIVE + 8) {
             finish();
         }
@@ -1191,9 +1174,6 @@ public class StormHeart extends HeartBoss {
                     if (sound) {
                         s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2f, 1.3f);
                     }
-                    for (double d = 0.5; d <= length; d += 0.8) {
-                        warn(s, ParticleTypes.ELECTRIC_SPARK, x + dx * d, floorY() + 1.0, z + dz * d, 2, 0.3, 0.4, 0.3, 0.1);
-                    }
                 })
                 .onHit((s, player) -> {
                     if (chainHit.add(player.getUUID())) {
@@ -1206,7 +1186,7 @@ public class StormHeart extends HeartBoss {
 
     private void chainNode(ServerLevel server, double x, double z) {
         tg(server, TelegraphShape.circle(x, z, CHAIN_NODE_RADIUS), Action.CHAIN.warnTicks, D).look(jp.revati.skyabyss.combat.AttackLook.STORM_CHAIN_NODE)
-                .onImpact(s -> warn(s, ParticleTypes.ELECTRIC_SPARK, x, floorY() + 1.0, z, 12, 0.6, 0.6, 0.6, 0.2))
+                .onImpact(s -> warn(s, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, floorY() + 1.0, z, 12, 0.6, 0.6, 0.6, 0.2))
                 .onHit((s, player) -> {
                     if (chainHit.add(player.getUUID())) {
                         strike(player, CHAIN_DAMAGE);
@@ -1225,7 +1205,7 @@ public class StormHeart extends HeartBoss {
         Telegraph.cancelAll(this);
         playAction("split");
         sound(server, StormHeartSetup.SPLIT.get(), 3f, 1f);
-        server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 80, 2.0, 1.5, 2.0, 0.15);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 24, 2.0, 1.5, 2.0, 0.15);
         if (isBound()) {
             for (int i = 0; i < 4; i++) {
                 Vec3 tip = StormHeartArena.rodTip(i);
@@ -1247,8 +1227,8 @@ public class StormHeart extends HeartBoss {
     private void tickSplit(ServerLevel server) {
         splitTicks--;
         if (tickCount % 4 == 0) {
-            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1, getZ(), 6, 1.6, 0.6, 1.6, 0.1);
-            warn(server, dust(0xFFE278, 1.0f), getX(), getY() + 1.5, getZ(), 3, 1.4, 0.8, 1.4, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1, getZ(), 6, 1.6, 0.6, 1.6, 0.1);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.5, getZ(), 3, 1.4, 0.8, 1.4, 0);
         }
         if (getPhase() < phaseForHealth() || splitTicks <= 0) {
             endSplit();
@@ -1277,17 +1257,8 @@ public class StormHeart extends HeartBoss {
                 if (!active && !warnDown) {
                     continue;
                 }
-                for (int i = 0; i < 3; i++) {
-                    double a = random.nextDouble() * Math.PI * 2;
-                    double r = random.nextDouble() * StormHeartArena.UPDRAFT_RADIUS;
-                    double y = fy + random.nextDouble() * (StormHeartArena.UPDRAFT_TOP - fy);
-                    warn(server, dust(warnDown ? 0x6FA8E8 : (updraftStrong ? 0xFFFFFF : 0xD8ECFF), 1.0f),
-                            h.x + Math.cos(a) * r, y, h.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
-                }
                 // 上の端の印 (どこまで上がるか)
-                warn(server, dust(0xFFFFFF, 0.8f), h.x + (random.nextDouble() - 0.5) * 2.4, StormHeartArena.UPDRAFT_TOP + 0.2,
-                        h.z + (random.nextDouble() - 0.5) * 2.4, 1, 0, 0, 0, 0);
-                server.sendParticles(ParticleTypes.CLOUD, h.x, fy + (warnDown ? 4 : 0.3), h.z, 1, 0.5, 0.1, 0.5, warnDown ? 0 : 0.05);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), h.x, fy + (warnDown ? 4 : 0.3), h.z, 1, 0.5, 0.1, 0.5, warnDown ? 0 : 0.05);
             }
         }
         if (!active) {
@@ -1348,7 +1319,7 @@ public class StormHeart extends HeartBoss {
         }
         if (actionTicks == 30) {
             updraftStopped = true;
-            server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1, getZ(), 80, 6, 0.5, 6, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1, getZ(), 24, 6, 0.5, 6, 0.2);
             safeFallTicks = Math.max(safeFallTicks, 60);
         }
         if (actionTicks > 30 && actionTicks < 70 && actionTicks % 5 == 0) {
@@ -1420,9 +1391,7 @@ public class StormHeart extends HeartBoss {
                         .floor(y).reach(1.5)
                         .onImpact(s -> {
                             s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 1.6f);
-                            s.sendParticles(ParticleTypes.WHITE_ASH, x, y + 1.5, z, 40, 1.2, 1.0, 1.2, 0.05);
                             // 羽が舞う (前の end_rod は人の目の高さで大きな白い四角に見えた。羽の粒は小さく、目の近くで薄れる)
-                            warn(s, jp.revati.skyabyss.rpg.skill.Skills.STORM_FEATHER.get(), x, y + 1.0, z, 10, 0.8, 0.5, 0.8, 0.02);
                         })
                         .onHit((s, player) -> {
                             strike(player, FEATHER_DAMAGE);
@@ -1432,7 +1401,7 @@ public class StormHeart extends HeartBoss {
             }
         }
         if (actionTicks < 24 && actionTicks % 3 == 0) {
-            warn(server, ParticleTypes.WHITE_ASH, getX(), core().y, getZ(), 6, 3.0, 0.6, 3.0, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), core().y, getZ(), 6, 3.0, 0.6, 3.0, 0);
         }
         if (actionTicks >= 34) {
             finish();
@@ -1460,20 +1429,10 @@ public class StormHeart extends HeartBoss {
                         .start();
             }
         }
-        if (actionTicks < 40 && actionTicks % 2 == 0) {
-            // 光を吸い込む (外から心臓へ寄る粒)
-            for (int i = 0; i < 10; i++) {
-                double a = random.nextDouble() * Math.PI * 2;
-                double b = (random.nextDouble() - 0.5) * Math.PI;
-                double r = 4.0 - (actionTicks % 10) * 0.3;
-                warn(server, dust(0xFFFAE0, 1.0f), getX() + Math.cos(a) * Math.cos(b) * r, core().y + Math.sin(b) * r,
-                        getZ() + Math.sin(a) * Math.cos(b) * r, 1, 0, 0, 0, 0);
-            }
-        }
         if (actionTicks == 40) {
             Vec3 core = core();
-            server.sendParticles(ParticleTypes.FLASH, core.x, core.y, core.z, 3, 0.5, 0.5, 0.5, 0);
-            warn(server, ParticleTypes.END_ROD, core.x, core.y, core.z, 60, 0.4, 0.4, 0.4, 0.6);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), core.x, core.y, core.z, 3, 0.5, 0.5, 0.5, 0);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), core.x, core.y, core.z, 24, 0.4, 0.4, 0.4, 0.6);
         }
         if (actionTicks == 42) {
             // 扇の当たりは予告の最後の tick (40) で済んでいる。当たった人には白い瞬き
@@ -1527,12 +1486,8 @@ public class StormHeart extends HeartBoss {
         if (actionTicks < 30 && actionTicks % 4 == 0 && isBound()) {
             for (int i = 0; i < 4; i++) {
                 Vec3 a = StormHeartArena.rodTip(i);
-                warn(server, ParticleTypes.ELECTRIC_SPARK, a.x, a.y, a.z, 3, 0.2, 0.2, 0.2, 0.1);
+                warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), a.x, a.y, a.z, 3, 0.2, 0.2, 0.2, 0.1);
                 Vec3 b = StormHeartArena.rodTip(i == 0 ? 1 : i == 1 ? 3 : i == 3 ? 2 : 0);
-                for (double t = 0; t <= 1; t += 0.12) {
-                    Vec3 q = a.lerp(b, t);
-                    warn(server, dust(0xAAD2FF, 0.9f), q.x, q.y - 0.4, q.z, 1, 0, 0, 0, 0);
-                }
             }
         }
         // 回っている腕の稲妻 (印の上を通る)
@@ -1544,10 +1499,8 @@ public class StormHeart extends HeartBoss {
                     double x = centerX() + Math.cos(ang) * r;
                     double z = centerZ() + Math.sin(ang) * r;
                     double fy = floorY();
-                    warn(server, dust(0xD8ECFF, 1.3f), x, fy + 0.5, z, 1, 0, 0.1, 0, 0);
-                    warn(server, dust(0xFFFFFF, 1.3f), x, fy + 1.4, z, 1, 0, 0.1, 0, 0);
                     if (random.nextFloat() < 0.12f) {
-                        warn(server, ParticleTypes.ELECTRIC_SPARK, x, fy + 1.2, z, 1, 0.1, 0.5, 0.1, 0.05);
+                        warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, fy + 1.2, z, 1, 0.1, 0.5, 0.1, 0.05);
                     }
                 }
             }
@@ -1599,9 +1552,6 @@ public class StormHeart extends HeartBoss {
                             if (first) {
                                 s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2.4f, 1.1f);
                             }
-                            for (double d = 1.0; d <= reach; d += 0.9) {
-                                warn(s, ParticleTypes.ELECTRIC_SPARK, getX() + dx * d, floorY() + 1.0, getZ() + dz * d, 2, 0.3, 0.4, 0.3, 0.1);
-                            }
                         })
                         .onHit((s, player) -> {
                             strike(player, CROSS_DAMAGE);
@@ -1622,8 +1572,7 @@ public class StormHeart extends HeartBoss {
         }
         if (actionTicks < 2 * CROSS_STEP && actionTicks % 3 == 0) {
             // 翼の先の火花 (骨の翼に雷が溜まる)
-            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), core().y + 1.0, getZ(), 8, 2.8, 0.8, 2.8, 0.1);
-            warn(server, dust(0xFF6A4A, 1.2f), getX(), core().y, getZ(), 4, 1.0, 1.0, 1.0, 0.02);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y + 1.0, getZ(), 8, 2.8, 0.8, 2.8, 0.1);
         }
         if (actionTicks >= lengthOf(Action.CROSS)) {
             finish();
@@ -1637,14 +1586,14 @@ public class StormHeart extends HeartBoss {
         if (isRoaring()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.8f);
-                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), core().y, getZ(), 8, 0.8, 0.8, 0.8, 0.1);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 8, 0.8, 0.8, 0.8, 0.1);
             }
             return false;
         }
         if (domain != null && domain.invulnerable()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.8f);
-                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), core().y, getZ(), 8, 0.8, 0.8, 0.8, 0.1);
+                server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 8, 0.8, 0.8, 0.8, 0.1);
             }
             return false;
         }
@@ -1752,8 +1701,8 @@ public class StormHeart extends HeartBoss {
         }
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), StormHeartSetup.DEATH.get(), SoundSource.HOSTILE, 3f, 1f);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 120, 1.5, 1.6, 1.5, 0.2);
-            warn(server, dust(0xF6F0C8, 1.6f), getX(), core().y, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 24, 1.5, 1.6, 1.5, 0.2);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), core().y, getZ(), 24, 1.5, 1.5, 1.5, 0.1);
             StormHeartNetwork.warn(reachable(server, 32), null, 0);
         }
     }
@@ -1783,7 +1732,7 @@ public class StormHeart extends HeartBoss {
             sound(server, StormHeartSetup.BEAT.get(), 2f, 1.4f);
         }
         if (tick < 32 && tick % 4 == 0) {
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), cy, getZ(), 2 + tick / 8, 0.4, 0.4, 0.4, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 2 + tick / 8, 0.4, 0.4, 0.4, 0.1);
         }
         if (tick == 14 || tick == 24) {
             sound(server, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.6f, 1.6f + tick * 0.01f);
@@ -1791,19 +1740,19 @@ public class StormHeart extends HeartBoss {
         if (tick == 32) {
             visualBolt(server);
             sound(server, SoundEvents.LIGHTNING_BOLT_THUNDER, 4f, 0.9f);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 80, 0.6, 0.8, 0.6, 0.4);
-            warn(server, dust(0xF6F0C8, 1.6f), getX(), cy, getZ(), 60, 1.2, 1.2, 1.2, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 0.6, 0.8, 0.6, 0.4);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 1.2, 1.2, 1.2, 0.2);
         }
         if (tick == 40) {
             sound(server, StormHeartSetup.ROAR.get(), 3f, 1.2f);
-            server.sendParticles(ParticleTypes.CLOUD, getX(), cy, getZ(), 60, 2.8, 0.6, 2.8, 0.15);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), cy, getZ(), 24, 2.8, 0.6, 2.8, 0.15);
         }
         if (tick >= 36 && tick <= 60 && tick % 3 == 0) {
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1, 1.5), getZ(), 3, 0.5, 0.5, 0.3, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1, 1.5), getZ(), 3, 0.5, 0.5, 0.3, 0.1);
         }
         if (tick == 70) {
             sound(server, SoundEvents.COPPER_HIT, 2f, 0.7f);
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), cy, getZ(), 40, 1.8, 1.4, 1.8, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 1.8, 1.4, 1.8, 0.2);
         }
     }
 
@@ -1816,7 +1765,7 @@ public class StormHeart extends HeartBoss {
             setPos(getX(), Math.max(land, getY() - 0.12), getZ());
         }
         if (tick <= 20 && tick % 3 == 0) {
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1, 1.5), getZ(), 4, 0.4, 0.4, 0.3, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1, 1.5), getZ(), 4, 0.4, 0.4, 0.3, 0.1);
         }
         if (tick == 6 || tick == 12) {
             sound(server, SoundEvents.LIGHTNING_BOLT_IMPACT, 1.2f, 1.2f - tick * 0.02f);
@@ -1825,12 +1774,12 @@ public class StormHeart extends HeartBoss {
             sound(server, SoundEvents.PHANTOM_FLAP, 3f, 0.5f);
         }
         if (tick >= 24 && tick <= 50 && tick % 2 == 0) {
-            server.sendParticles(ParticleTypes.CLOUD, getX() + Mth.nextDouble(random, -3, 3), cy - 0.5, getZ(), 2, 0.4, 0.2, 0.3, 0.02);
-            server.sendParticles(ParticleTypes.END_ROD, getX() + Mth.nextDouble(random, -3, 3), cy, getZ(), 1, 0.3, 0.3, 0.3, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX() + Mth.nextDouble(random, -3, 3), cy - 0.5, getZ(), 2, 0.4, 0.2, 0.3, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -3, 3), cy, getZ(), 1, 0.3, 0.3, 0.3, 0.02);
         }
         if (tick >= 40 && tick <= 78 && tick % 2 == 0) {
             double a = tick * 0.9;
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Math.cos(a) * 1.5, cy + Math.sin(a * 0.6), getZ() + Math.sin(a) * 1.5, 2 + (tick - 40) / 10, 0.2, 0.2, 0.2, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * 1.5, cy + Math.sin(a * 0.6), getZ() + Math.sin(a) * 1.5, 2 + (tick - 40) / 10, 0.2, 0.2, 0.2, 0.2);
         }
         if (tick == 60) {
             sound(server, SoundEvents.BEACON_AMBIENT, 3f, 1.8f);
@@ -1838,8 +1787,8 @@ public class StormHeart extends HeartBoss {
         if (tick == 78) {
             visualBolt(server);
             sound(server, SoundEvents.LIGHTNING_BOLT_THUNDER, 4f, 0.8f);
-            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 150, 0.4, 0.4, 0.4, 0.5);
-            warn(server, dust(0xF6F0C8, 1.8f), getX(), cy, getZ(), 100, 1.0, 1.0, 1.0, 0.3);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 0.4, 0.4, 0.4, 0.5);
+            warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), cy, getZ(), 24, 1.0, 1.0, 1.0, 0.3);
         }
         if (tick == 84) {
             sound(server, SoundEvents.BEACON_DEACTIVATE, 3f, 1.4f);
@@ -1893,21 +1842,26 @@ public class StormHeart extends HeartBoss {
         int phase = getPhase();
         if (phase == 0) {
             if (random.nextFloat() < 0.2f) {
-                level().addParticle(ParticleTypes.ELECTRIC_SPARK, getX() + Mth.nextDouble(random, -1.6, 1.6), cy + Mth.nextDouble(random, -1.5, 1.5),
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -1.6, 1.6), cy + Mth.nextDouble(random, -1.5, 1.5),
                         getZ() + Mth.nextDouble(random, -0.8, 0.8), 0, 0, 0);
             }
         } else if (phase == 1) {
             if (random.nextFloat() < 0.4f) {
-                level().addParticle(dust(0xD8ECFF, 1.0f), getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1.5, 2.5),
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1.5, 2.5),
                         getZ() + Mth.nextDouble(random, -1, 1), 0, -0.02, 0);
             }
         } else {
             for (int k = 0; k < 2; k++) {
                 if (random.nextFloat() < 0.5f) {
-                    level().addParticle(ParticleTypes.ELECTRIC_SPARK, getX() + Mth.nextDouble(random, -2.8, 2.8), cy + Mth.nextDouble(random, -1.0, 1.4),
+                    level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Mth.nextDouble(random, -2.8, 2.8), cy + Mth.nextDouble(random, -1.0, 1.4),
                             getZ() + Mth.nextDouble(random, -0.6, 0.6), 0, 0, 0);
                 }
             }
         }
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

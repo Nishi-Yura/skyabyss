@@ -236,6 +236,10 @@ public final class FxDraw {
     }
 
     public static boolean add(SkillFx.Cast c, Prim p) {
+        // 試作 (client/look/GearLook): 技の絵札の案のあいだは、光の形を出さない
+        if (jp.revati.skyabyss.client.look.GearLook.skill != '0') {
+            return false;
+        }
         if (c.live >= SkillFx.CAST_PRIMS || PRIMS.size() >= MAX_PRIMS) {
             return false;
         }
@@ -661,8 +665,4 @@ public final class FxDraw {
         }
     }
 
-    // 直近のフレームで描いた板の数 (計測用・Prof と併用)
-    public static int lastFrameQuads() {
-        return lastFrameQuads;
-    }
 }

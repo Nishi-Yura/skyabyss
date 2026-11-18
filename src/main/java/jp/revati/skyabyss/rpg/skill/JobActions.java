@@ -126,14 +126,14 @@ public final class JobActions {
         int n = Math.max(1, (int) (d.length() / step));
         for (int i = 0; i <= n; i++) {
             Vec3 q = a.add(d.scale(i / (double) n));
-            level.sendParticles(p, q.x, q.y, q.z, 1, 0.03, 0.03, 0.03, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.03, 0.03, 0.03, 0.0);
         }
     }
 
     static void ring(ServerLevel level, Vec3 c, double r, net.minecraft.core.particles.ParticleOptions p, int n) {
         for (int i = 0; i < n; i++) {
             double a = i * Math.PI * 2 / n;
-            level.sendParticles(p, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.01);
         }
     }
 
@@ -143,12 +143,12 @@ public final class JobActions {
         Vec3[] stop = new Vec3[1];
         LivingEntity target = aimed(player, SkillRules.BOLT_RANGE, stop);
         Vec3 from = player.getEyePosition().add(player.getLookAngle().scale(0.6)).subtract(0, 0.25, 0);
-        line(level, from, stop[0], ParticleTypes.ELECTRIC_SPARK, 0.5);
+        line(level, from, stop[0], jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 0.5);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, 1.7f);
         if (target != null) {
             float dmg = spell(player, SkillRules.boltMultiplier(rank));
             SkillActions.hit(player, target, dmg, Skill.THUNDER_BOLT);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, stop[0].x, stop[0].y, stop[0].z, 12, 0.3, 0.3, 0.3, 0.2);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), stop[0].x, stop[0].y, stop[0].z, 12, 0.3, 0.3, 0.3, 0.2);
             if (rank >= 3) {
                 LivingEntity next = null;
                 double best = SkillRules.BOLT_CHAIN_RANGE * SkillRules.BOLT_CHAIN_RANGE;
@@ -161,7 +161,7 @@ public final class JobActions {
                     }
                 }
                 if (next != null) {
-                    line(level, stop[0], next.position().add(0, next.getBbHeight() * 0.6, 0), ParticleTypes.ELECTRIC_SPARK, 0.4);
+                    line(level, stop[0], next.position().add(0, next.getBbHeight() * 0.6, 0), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 0.4);
                     SkillActions.hit(player, next, (float) (dmg * SkillRules.BOLT_CHAIN), Skill.THUNDER_BOLT);
                 }
             }
@@ -213,8 +213,8 @@ public final class JobActions {
             boolean foe = !o.level.getEntitiesOfClass(LivingEntity.class, new AABB(o.pos, at).inflate(0.6), e -> SkillActions.isFoe(owner, e)).isEmpty();
             o.pos = at;
             o.age++;
-            o.level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 3, 0.12, 0.12, 0.12, 0.01);
-            o.level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+            o.level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 3, 0.12, 0.12, 0.12, 0.01);
+            o.level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
             if (wall || foe || o.age >= SkillRules.ORB_LIFE) {
                 burst(owner, o);
                 it.remove();
@@ -225,8 +225,8 @@ public final class JobActions {
     private static void burst(ServerPlayer owner, Orb o) {
         ServerLevel level = o.level;
         Vec3 c = o.pos;
-        level.sendParticles(ParticleTypes.EXPLOSION, c.x, c.y, c.z, 1, 0, 0, 0, 0);
-        level.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 30, 0.8, 0.5, 0.8, 0.06);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 24, 0.8, 0.5, 0.8, 0.06);
         level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6f, 1.4f);
         double r = SkillRules.ORB_RADIUS + o.radiusBonus;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r), e -> SkillActions.isFoe(owner, e))) {
@@ -247,7 +247,7 @@ public final class JobActions {
                         SkillActions.hit(owner, e, burn, Skill.EMBER_ORB);
                         e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), 30));
                     }
-                    level.sendParticles(ParticleTypes.FLAME, c.x, c.y + 0.2, c.z, 12, r * 0.4, 0.1, r * 0.4, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.2, c.z, 12, r * 0.4, 0.1, r * 0.4, 0.01);
                 });
             }
         }
@@ -285,10 +285,10 @@ public final class JobActions {
             SkillActions.hit(player, e, dmg, Skill.FROST_TIDE);
             SkillEffects.slow(e, SkillRules.FROST_SLOW * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.frostTicks(rank));
             Gauges.chill(e, SkillRules.frostTicks(rank));
-            level.sendParticles(ParticleTypes.SNOWFLAKE, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
         }
         for (double rr = 1.5; rr <= r; rr += 1.5) {
-            ring(level, center, rr, ParticleTypes.SNOWFLAKE, (int) (rr * 8));
+            ring(level, center, rr, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), (int) (rr * 8));
         }
         level.playSound(null, center.x, center.y, center.z, SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8f, 0.8f);
         level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.6f, 0.7f);
@@ -321,12 +321,12 @@ public final class JobActions {
         if (dest == null) {
             return "message.skyabyss.skill.blink_blocked";
         }
-        level.sendParticles(ParticleTypes.REVERSE_PORTAL, start.x, start.y + 1, start.z, 24, 0.3, 0.6, 0.3, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), start.x, start.y + 1, start.z, 24, 0.3, 0.6, 0.3, 0.05);
         level.playSound(null, start.x, start.y, start.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6f, 1.5f);
         player.moveTo(dest.x, dest.y, dest.z, player.getYRot(), player.getXRot());
         player.teleportTo(dest.x, dest.y, dest.z);
         player.resetFallDistance();
-        level.sendParticles(ParticleTypes.END_ROD, dest.x, dest.y + 1, dest.z, 16, 0.3, 0.6, 0.3, 0.03);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), dest.x, dest.y + 1, dest.z, 16, 0.3, 0.6, 0.3, 0.03);
         level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6f, 1.8f);
         SkillActions.fxTarget = dest;
         return null;
@@ -345,9 +345,9 @@ public final class JobActions {
             }
         }
         for (double rr = 1.0; rr <= SkillRules.STOMP_RADIUS; rr += 1.0) {
-            ring(level, player.position(), rr, ParticleTypes.FLAME, (int) (rr * 9));
+            ring(level, player.position(), rr, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), (int) (rr * 9));
         }
-        level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.2, player.getZ(), 8, 0.6, 0.1, 0.6, 0.0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.getX(), player.getY() + 0.2, player.getZ(), 8, 0.6, 0.1, 0.6, 0.0);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 0.6f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7f, 0.7f);
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -364,7 +364,7 @@ public final class JobActions {
         for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SkillRules.VEIL_LOSE_RANGE), m -> m.getTarget() == player)) {
             m.setTarget(null);
         }
-        level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 20, 0.5, 0.6, 0.5, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1, player.getZ(), 20, 0.5, 0.6, 0.5, 0.02);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.7f, 1.2f);
         return null;
     }
@@ -382,7 +382,7 @@ public final class JobActions {
             event.setAmount(event.getAmount() * (float) SkillRules.VEIL_STRIKE);
             VEIL.remove(p.getUUID());
             p.removeEffect(MobEffects.INVISIBILITY);
-            p.serverLevel().sendParticles(ParticleTypes.CLOUD, event.getEntity().getX(), event.getEntity().getY() + 1, event.getEntity().getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+            p.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), event.getEntity().getX(), event.getEntity().getY() + 1, event.getEntity().getZ(), 10, 0.3, 0.4, 0.3, 0.02);
         }
     }
 
@@ -398,10 +398,21 @@ public final class JobActions {
         SkillActions.lastTarget = target;
         SkillEvents.mark(target, SkillRules.curseBonus(rank), level.getGameTime(), ticks, player);
         SkillEffects.timedMod(target, Attributes.ATTACK_DAMAGE, "curse_mark", -SkillRules.CURSE_WEAKEN, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, ticks);
+        // 付けた時の傷と、印のあいだの呪い蝕み (1 秒ごと)
+        SkillActions.hit(player, target, spell(player, SkillRules.CURSE_HIT), Skill.CURSE_MARK);
+        float rot = spell(player, SkillRules.CURSE_ROT);
+        for (int k = 1; k <= ticks / SkillRules.SECOND; k++) {
+            SkillEffects.later(level, k * SkillRules.SECOND, () -> {
+                if (target.isAlive() && player.isAlive() && target.level() == level) {
+                    SkillActions.hit(player, target, rot, Skill.CURSE_MARK);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY() + target.getBbHeight() * 0.7, target.getZ(), 3, 0.25, 0.3, 0.25, 0.0);
+                }
+            });
+        }
         // 呪いの重ね (呪いの型の溜まるもの)
         Gauges.onCurse(player, target, rank, ticks);
-        line(level, player.getEyePosition().subtract(0, 0.3, 0), stop[0], ParticleTypes.WITCH, 0.6);
-        level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 8, 0.3, 0.2, 0.3, 0.01);
+        line(level, player.getEyePosition().subtract(0, 0.3, 0), stop[0], jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 0.6);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 8, 0.3, 0.2, 0.3, 0.01);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 1.3f);
         SkillActions.fxTarget = stop[0];
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -444,8 +455,17 @@ public final class JobActions {
             SkillEffects.absorb(p, amount, SkillRules.LAMP_PULSE + 40, false);
         }
         ServerLevel level = owner.serverLevel();
-        level.sendParticles(ParticleTypes.GLOW, center.x, center.y + 0.8, center.z, 6, 0.2, 0.3, 0.2, 0.01);
-        ring(level, center, radius, ParticleTypes.END_ROD, (int) (radius * 7));
+        // 輪の中の敵を灯が焼く (守りと同じ 2 秒ごと)
+        if (owner.isAlive()) {
+            float dmg = (float) (spell(owner, SkillRules.lampDamage(rank)) * scale);
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius, 2.5, radius),
+                    e -> e.isAlive() && SkillActions.isFoe(owner, e) && e.position().distanceToSqr(center) <= r2)) {
+                SkillActions.hit(owner, e, dmg, Skill.LAMP_CHARM);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
+            }
+        }
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 0.8, center.z, 6, 0.2, 0.3, 0.2, 0.01);
+        ring(level, center, radius, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), (int) (radius * 7));
     }
 
     // ---------------------------------------------------------------- 毎 tick (SkillActions.tick から)

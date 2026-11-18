@@ -64,7 +64,6 @@ def script(item):
                 o.append(f"shot {item}_{view}_{tier}_p{lv}")
     o.append("weapontier off")
     # 元のボクセル (比べる用)
-    o.append("weaponmesh off")
     o.append(f"cmd item replace entity @s weapon.mainhand with skyabyss:{item}")
     for view, persp in (("fp", "first"), ("tp", "front")):
         o.append(f"perspective {persp}")
@@ -73,7 +72,6 @@ def script(item):
         o.append("wait 10")
         o.append("chat clear")
         o.append(f"shot {item}_{view}_voxel")
-    o.append("weaponmesh on")
     # 弓の引き / 盾の構え
     if item == "thunder_wing_bow":
         o.append("weapontier legend")

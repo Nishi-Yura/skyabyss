@@ -3,7 +3,6 @@ package jp.revati.skyabyss.story.ch6.mob;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.story.ch6.field.FieldTide;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -70,9 +69,6 @@ public class MirrorBearer extends MoonMob {
         return hidden;
     }
 
-    public boolean aiming() {
-        return aim >= 0;
-    }
 
     // 叩いた者が前 (鏡と頭の側) にいるか
     boolean fromFront(DamageSource source) {
@@ -94,7 +90,7 @@ public class MirrorBearer extends MoonMob {
             aim = -1;
             playSound(MoonMobsSetup.BEARER_BREAK.get(), 1.0f, 1.2f);
             if (level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.6, getZ(), 16, 0.6, 0.4, 0.6, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.6, getZ(), 16, 0.6, 0.4, 0.6, 0.1);
             }
         }
         return super.hurt(source, hidden && front ? amount * 0.3f : amount);
@@ -178,15 +174,19 @@ public class MirrorBearer extends MoonMob {
             if (aim < TELL && aim % 2 == 0) {
                 for (int i = 1; i <= BEAM; i++) {
                     Vec3 p = beamFrom.add(beamDir.scale(i));
-                    sl.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
+            }
+            if (aim == TELL - 4) {
+                // 技の形: 鏡から光の珠が線の先へ走る (打つ瞬間に着く)
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "pearl", MirrorBearer.this, beamFrom, beamFrom.add(beamDir.scale(BEAM)), 4, 4, 0f, 0.6f, 2);
             }
             if (aim == TELL) {
                 playAction("beam");
                 playSound(MoonMobsSetup.BEARER_BEAM.get(), 1.4f, 1.0f);
                 for (int i = 1; i <= BEAM * 2; i++) {
                     Vec3 p = beamFrom.add(beamDir.scale(i * 0.5));
-                    sl.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
                 }
                 for (Player p : sl.getEntitiesOfClass(Player.class, getBoundingBox().inflate(BEAM + 1), e -> e.isAlive() && !e.isSpectator())) {
                     Vec3 c = p.position().add(0, 0.9, 0).subtract(beamFrom);
@@ -216,5 +216,10 @@ public class MirrorBearer extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.CRESCENT_SHELL.get(), 0.35, 1, 1);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

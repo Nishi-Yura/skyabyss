@@ -165,7 +165,7 @@ public final class StormStrike {
         StormFx.ring(s.level, RING, s.pos, RADIUS * 0.5, 8);
         if (s.rod != null) {
             Vec3 tip = new Vec3(s.rod.getX() + 0.5, s.rod.getY() + StormRods.HEIGHT, s.rod.getZ() + 0.5);
-            StormFx.forced(s.level, ParticleTypes.ELECTRIC_SPARK, tip.x, tip.y, tip.z, 3, 0.2, 0.2, 0.2, 0.05);
+            StormFx.forced(s.level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), tip.x, tip.y, tip.z, 3, 0.2, 0.2, 0.2, 0.05);
         }
     }
 
@@ -228,12 +228,12 @@ public final class StormStrike {
             if (i < n) {
                 q = q.add((r.nextDouble() - 0.5) * 1.2, 0, (r.nextDouble() - 0.5) * 1.2);
             }
-            StormFx.line(level, ParticleTypes.ELECTRIC_SPARK, prev, q, 0.35);
-            StormFx.line(level, ParticleTypes.END_ROD, prev, q, 0.9);
+            StormFx.line(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), prev, q, 0.35);
+            StormFx.line(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), prev, q, 0.9);
             prev = q;
         }
-        StormFx.burst(level, ParticleTypes.FLASH, to, 1, 0);
-        StormFx.burst(level, ParticleTypes.ELECTRIC_SPARK, to, 24, 0.5);
+        StormFx.burst(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), to, 1, 0);
+        StormFx.burst(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), to, 24, 0.5);
         jp.revati.skyabyss.trial.TrialFx.worldSound(level, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 1.6f, 1.2f);
         jp.revati.skyabyss.trial.TrialFx.worldSound(level, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.7f, 1.6f);
     }

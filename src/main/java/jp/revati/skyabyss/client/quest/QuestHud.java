@@ -21,8 +21,8 @@ public final class QuestHud {
         return Math.min(150, ObjectiveStrip.bandWidth(Minecraft.getInstance()));
     }
 
-    static final int TITLE = 0xFF7FD6D0;
-    static final int MAIN_TITLE = 0xFFF2C14E;
+    static final int TITLE = 0xFF8FD0FF;
+    static final int MAIN_TITLE = 0xFFE9C46A;
     static final int TEXT = 0xFFE0DCD0;
     static final int SOFT = 0xFF9A9AAE;
     private static int flash;
@@ -126,7 +126,7 @@ public final class QuestHud {
         int WIDTH = w();
         int h = 12 + lines.size() * 10 + 3 + (withGuide ? 10 : 0);
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
-        g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
+        g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0E1E);
         g.fill(X - 3, top - 3, X - 2, top + h - 2, main ? MAIN_TITLE : TITLE);
         // 長い題は省かずに横へ流す (Marquee)
         jp.revati.skyabyss.client.ui.Marquee.draw(g, font, title.getString(), X + 1, top, WIDTH - 2, main ? MAIN_TITLE : TITLE, true);
@@ -177,7 +177,7 @@ public final class QuestHud {
                 fx += 9;
             }
         }
-        g.drawString(font, far, fx, top, 0xFF7FD6D0, true);
+        g.drawString(font, far, fx, top, 0xFF8FD0FF, true);
     }
 
     record Line(String text, int indent, int color) {

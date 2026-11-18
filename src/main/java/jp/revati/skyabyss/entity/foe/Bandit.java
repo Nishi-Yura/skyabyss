@@ -49,7 +49,6 @@ public class Bandit extends ContinentFoe {
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_SWING.get(), 0.9f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + f.x * 1.4, getY() + 1.0, getZ() + f.z * 1.4, 1, 0, 0, 0, 0))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.knockback(0.4, -f.x, -f.z);

@@ -184,8 +184,6 @@ public class BoneGull extends GuardMob {
                 .target(target)
                 .startSound(Ch1BackSounds.GULL_CRY.get(), 1.6f, 1.0f + random.nextFloat() * 0.1f)
                 .victims(this::canHit)
-                .onImpact(s -> s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                        getX(), getY() + 0.3, getZ(), 12, 0.3, 0.2, 0.3, 0.1))
                 .onHit((s, player) -> {
                     player.hurt(attackSource(), DAMAGE);
                     player.setDeltaMovement(player.getDeltaMovement().add(ux * 0.3, 0.2, uz * 0.3));
@@ -214,7 +212,7 @@ public class BoneGull extends GuardMob {
         setNoGravity(true);
         setDeltaMovement(Vec3.ZERO);
         move(MoverType.SELF, delta);
-        server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.3, getZ(), 2, 0.1, 0.1, 0.1, 0.0);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.3, getZ(), 2, 0.1, 0.1, 0.1, 0.0);
         if (phaseTicks >= DIVE_TICKS) {
             phase = Phase.RECOVER;
             phaseTicks = 0;
@@ -268,5 +266,10 @@ public class BoneGull extends GuardMob {
     @Override
     protected boolean autoHurtDeath() {
         return true;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

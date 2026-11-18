@@ -1,0 +1,132 @@
+# 点の模型の試作: 戦闘中の見え方 (AI のある熔岩の大蛇に攻めさせて撮る。被弾・燃え・倒れ)
+world splatfight flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 18000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobLoot false
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+fov 70
+hud on
+chat clear
+cmd tp @s 0 -60 12 180 0
+waitchunks
+wait 40
+cmd kill @e[type=skyabyss:lava_wyrm]
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+cmd effect give @s minecraft:regeneration infinite 255 true
+cmd effect give @s minecraft:saturation infinite 255 true
+camera minecraft:overworld 0 -60 12 180 8
+wait 10
+cmd summon skyabyss:lava_wyrm 0 -60 0 {Rotation:[0f,0f],PersistenceRequired:1b,Tags:["m"]}
+cmd skyabyss cinematic stop
+close
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_00
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_01
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_02
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_03
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_04
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_05
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_06
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_07
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_08
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_09
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_10
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_11
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_12
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_13
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_14
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_15
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_16
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_17
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_18
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_19
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_20
+wait 20
+camera minecraft:overworld 0 -60 12 180 8
+shot fight_21
+# 被弾・燃え・倒れは、竜を止めて正面に置いて撮る (見る側は観戦で、画面の炎を消す)
+cmd gamemode spectator
+cmd data merge entity @e[tag=m,limit=1] {NoAI:1b}
+cmd tp @e[tag=m,limit=1] 0 -60 0 0 0
+camera minecraft:overworld -5 -57 10 -155 12
+wait 40
+cmd damage @e[tag=m,limit=1] 4 minecraft:generic
+wait 2
+shot hit_0
+wait 20
+cmd damage @e[tag=m,limit=1] 4 minecraft:generic
+wait 2
+shot hit_1
+wait 20
+cmd damage @e[tag=m,limit=1] 4 minecraft:generic
+wait 2
+shot hit_2
+wait 20
+cmd data merge entity @e[tag=m,limit=1] {Fire:400s}
+wait 10
+shot burn_0
+wait 25
+shot burn_1
+cmd data merge entity @e[tag=m,limit=1] {Fire:0s}
+wait 10
+cmd kill @e[tag=m]
+wait 6
+shot death_0
+wait 16
+shot death_1
+wait 20
+shot death_2
+quit

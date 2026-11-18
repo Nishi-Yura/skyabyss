@@ -169,7 +169,7 @@ except ImportError:
 
 
 # 辞書の読みが、この mod で使う読みと違う言葉 (長いものを先に)
-READING_FIX = [("大百足", "おおむかで"), ("百足", "むかで"), ("旅嚢", "たびのう")]
+READING_FIX = [("大百足", "おおむかで"), ("百足", "むかで"), ("旅袋", "たびのう")]
 
 
 def reading(name):
@@ -273,7 +273,7 @@ def gear_pages(items):
         if its:
             body += section(k, "%s（%d）" % (h, len(its)), '<div class="tips">%s</div>' % "".join(tip_card(a) for a in its))
     n = sum(len(by.get(k, [])) for k, _ in groups)
-    wiki_page("wiki-items.html", "道具と素材", "装備のほかの品 %d 点。旅嚢に入る品も、ここにあります。" % n, body, count="%d 点" % n)
+    wiki_page("wiki-items.html", "道具と素材", "装備のほかの品 %d 点。旅袋に入る品も、ここにあります。" % n, body, count="%d 点" % n)
 
 
 # ================================================================== 敵と主

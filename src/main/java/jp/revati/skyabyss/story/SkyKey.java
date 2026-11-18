@@ -109,7 +109,7 @@ public final class SkyKey {
             }
         }
         // ほかの人にも見える小さな印: 光の粒が、空から足もとへ落ちて地面に沈む
-        player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 6, player.getZ(), 40, 0.4, 3.0, 0.4, 0.0);
+        player.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 6, player.getZ(), 24, 0.4, 3.0, 0.4, 0.0);
         if (scene) {
             PacketDistributor.sendToPlayer(player, new SkyKeyScenePayload((int) day + 1, false));
         }

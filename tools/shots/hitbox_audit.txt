@@ -1,0 +1,16 @@
+# 2026-11-15: mod の生き物の当たり判定と描く体の大きさを比べる (client/dev/HitboxAudit)。結果は撮影のフォルダの hitbox.txt
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/hitbox_audit.txt -PshotsName=hitbox_audit
+world hitboxaudit flat
+size 1280 720
+timeout 300
+render 4
+clouds off
+guiscale 3
+
+cmd gamemode creative
+cmd skyabyss playtest skip opening
+waitchunks
+wait 60
+cmd skyabyss cinematic stop
+wait 20
+hitboxaudit hitbox.txt

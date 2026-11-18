@@ -238,9 +238,6 @@ public final class ContinentLayout {
         return roads;
     }
 
-    public List<List<BlockPos>> ferries() {
-        return ferries;
-    }
 
     public List<List<BlockPos>> ferryDocks() {
         return ferryDocks;

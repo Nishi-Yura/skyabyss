@@ -124,6 +124,8 @@ public final class WardenArena {
         level.addFreshEntity(w);
         warden = w.getUUID();
         empty = 0;
+        jp.revati.skyabyss.combat.BossIntro.card(in, w.getDisplayName(), tier.nightmare() ? Component.translatable(Nightmare.nameKey(tier.n()))
+                : Component.translatable("gui.skyabyss.boss_intro.sub.heart_warden"), 90, w);
         for (ServerPlayer p : in) {
             if (tier.nightmare()) {
                 Notice.narrate(p, "message.skyabyss.abyss_nm.wake", tier.n(), Component.translatable(Nightmare.nameKey(tier.n())), Component.translatable(Nightmare.ruleKey(tier.n())));

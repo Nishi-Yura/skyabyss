@@ -248,7 +248,7 @@ public final class EyeAdvance extends RaidRoom {
                 double r = 1.5 + ctx.rng().nextDouble() * (HX - 2);
                 double y = ctx.origin().getY() + 1 + ctx.rng().nextInt(3);
                 double[] v = pushOf(0, 0, Math.cos(a), Math.sin(a), blow ? 0.9 : 0.25);
-                level.sendParticles(ParticleTypes.CLOUD, c.x + Math.cos(a) * r, y, c.z + Math.sin(a) * r, 0, v[0], 0, v[1], 1.0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x + Math.cos(a) * r, y, c.z + Math.sin(a) * r, 0, v[0], 0, v[1], 1.0);
             }
         }
         if (blow && age % 10 == 0) {
@@ -367,5 +367,10 @@ public final class EyeAdvance extends RaidRoom {
 
     public List<int[]> pillars() {
         return pillars;
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

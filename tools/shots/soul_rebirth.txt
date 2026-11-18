@@ -1,4 +1,4 @@
-# 転生の画面 (docs/design/31): 灰色の説明 / 転生できる / 12 回 / 旅嚢の余白。./gradlew runShots -Pscript=tools/shots/soul_rebirth.txt
+# 転生の画面 (docs/design/31): 灰色の説明 / 転生できる / 12 回 / 旅袋の余白。./gradlew runShots -Pscript=tools/shots/soul_rebirth.txt
 world shots flat
 size 960 540
 timeout 400

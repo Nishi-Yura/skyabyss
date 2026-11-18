@@ -102,12 +102,12 @@ public class AshStriker extends CloudMob {
             if (t < TELL && t % 3 == 0) {
                 for (int i = 0; i < 16; i++) {
                     double a = i / 16.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SMALL_FLAME, spot.x + Math.cos(a) * R, spot.y + 0.15, spot.z + Math.sin(a) * R, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), spot.x + Math.cos(a) * R, spot.y + 0.15, spot.z + Math.sin(a) * R, 1, 0, 0, 0, 0);
                 }
             }
             if (t == TELL + 2) {
                 playSound(CloudMobsSetup.STRIKER_SLAM.get(), 1.4f, 0.9f);
-                sl.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, spot.x, spot.y + 0.2, spot.z, 6, R * 0.4, 0.1, R * 0.4, 0.01);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.2, spot.z, 6, R * 0.4, 0.1, R * 0.4, 0.01);
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(REACH + R), e -> e.isAlive() && !e.isSpectator())) {
                     if (p.position().subtract(spot).horizontalDistance() <= R + 0.3 && Math.abs(p.getY() - spot.y) < 2) {
                         strike(p, dmg());
@@ -131,5 +131,10 @@ public class AshStriker extends CloudMob {
             t = -1;
             getNavigation().stop();
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

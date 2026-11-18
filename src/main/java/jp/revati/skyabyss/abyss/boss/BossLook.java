@@ -34,7 +34,7 @@ public final class BossLook {
 
     // 動きの長さ (秒)。アニメの JSON もこの長さで書く (tools/gen/abyss/gen_abyss_boss_anims.py)
     public static final double WINDUP_SEC = 2.0;
-    public static final int STRIKE_TICKS = 16;
+    public static final int STRIKE_TICKS = 24;
     public static final int PHASE_TICKS = 40;
     // 倒れる動きの長さ (tick)。ふつうの 20 tick より長く体を残す
     public static final int DEATH_TICKS = 44;

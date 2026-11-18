@@ -22,11 +22,11 @@ import net.minecraft.util.GsonHelper;
 //   unlock   : 受けられる条件 (段階のほか。サーバーだけが持つ)
 //   chapter  : 所属する章 (Chapters の ID: prologue / titan_whale / titan_tide / titan_storm / titan_ember / chapter2 …)。"" = どの章にも属さない。
 //              クエストログがメイン・サブの中を章ごとの見出し (「一章　岩鯨」) で分ける。ID・段階・進行には関わらない
-public record QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen, boolean loopReset,
+public record QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen,
                        List<Stage> stages, Reward reward, String repeat, boolean board, int minStage, Condition unlock, String chapter) {
-    public QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen, boolean loopReset,
+    public QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen,
                     List<Stage> stages, Reward reward, String repeat, boolean board, int minStage, Condition unlock) {
-        this(id, category, order, giver, startWhen, loopReset, stages, reward, repeat, board, minStage, unlock, "");
+        this(id, category, order, giver, startWhen, stages, reward, repeat, board, minStage, unlock, "");
     }
 
     // 章 (なければ null)
@@ -173,7 +173,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         }
         return new QuestDef(id, category, GsonHelper.getAsInt(o, "order", 100), o.has("giver") ? GsonHelper.getAsString(o, "giver") : null,
                 o.has("start_when") ? Condition.parse(o.get("start_when"), errors, where + " start_when") : null,
-                GsonHelper.getAsBoolean(o, "loop_reset", false), List.copyOf(stages), reward, repeat,
+                List.copyOf(stages), reward, repeat,
                 GsonHelper.getAsBoolean(o, "board", false), minStage,
                 o.has("unlock") ? Condition.parse(o.get("unlock"), errors, where + " unlock") : Condition.ALWAYS, chapter);
     }
@@ -355,7 +355,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
             String name = buf.readUtf();
             items.add(new ItemReward(item, count, null, name.isEmpty() ? null : name, List.of()));
         }
-        return new QuestDef(id, category, order, giver.isEmpty() ? null : giver, null, false, List.copyOf(stages),
+        return new QuestDef(id, category, order, giver.isEmpty() ? null : giver, null, List.copyOf(stages),
                 new Reward(xp, List.copyOf(items), Map.of(), List.of()), repeat, board, minStage, Condition.ALWAYS, chapter);
     }
 }

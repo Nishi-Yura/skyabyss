@@ -138,10 +138,6 @@ public final class BossGate {
         new BossGate(level, spec, palette).run();
     }
 
-    // 大門の上端の局所の高さ (飾りの先まで)。前庭の高さの目安に使う
-    public static int totalHeight(int height, boolean bigEmblem) {
-        return height + 4 + (bigEmblem ? 6 : 4) + 2;
-    }
 
     private BlockPos at(int u, int v, int y) {
         return s.base.offset(fwd.getStepX() * v + right.getStepX() * u, y, fwd.getStepZ() * v + right.getStepZ() * u);

@@ -11,7 +11,9 @@
     "AdvancementManagerMixin",
     "ItemNameMixin",
     "AttributeShownMixin",
-    "MaxHealthCapMixin"
+    "MaxHealthCapMixin",
+    "InventoryMenuAccessoryMixin",
+    "BowPowerMixin"
   ],
   "client": [
     "GuiGraphicsMixin",
@@ -25,9 +27,11 @@
     "StringSplitterMixin",
     "BossHealthOverlayAccessor",
     "AbstractWidgetAuditMixin",
+    "GlassButtonMixin",
     "CameraShoulderMixin",
     "MouseHandlerShoulderMixin",
-    "CinematicHidePlayersMixin"
+    "CinematicHidePlayersMixin",
+    "EntityFlameMixin"
   ],
   "injectors": {
     "defaultRequire": 1

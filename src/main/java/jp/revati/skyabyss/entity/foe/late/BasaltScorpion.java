@@ -66,7 +66,6 @@ public class BasaltScorpion extends LateFoe {
                 .floor(getY()).warn(STRIKE_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.ELDER_SENTRY_SWING.get(), 0.9f, 1.3f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.CRIT, getX() + f.x * 3, getY() + 0.8, getZ() + f.z * 3, 8, 0.3, 0.2, 0.3, 0.1))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.POISON, 40, 0), this);

@@ -230,8 +230,8 @@ public final class ForgeIsle {
         }
         FORGE_ON.put(pos, level.getGameTime() + FORGE_TICKS);
         level.playSound(null, pos, CloudMobsSetup.FORGE_LIT.get(), SoundSource.BLOCKS, 1.4f, 1.0f);
-        level.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 20, 0.4, 0.5, 0.4, 0.03);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5, pos.getY() + 3.2, pos.getZ() + 0.5, 10, 0.2, 0.4, 0.2, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 20, 0.4, 0.5, 0.4, 0.03);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), pos.getX() + 0.5, pos.getY() + 3.2, pos.getZ() + 0.5, 10, 0.2, 0.4, 0.2, 0.02);
     }
 
     // ---------------------------------------------------------------- 右クリック (炉・扉・帰りの台)
@@ -298,5 +298,10 @@ public final class ForgeIsle {
         PHASE.clear();
         FORGE_ON.clear();
         arenaRewinds = false;
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

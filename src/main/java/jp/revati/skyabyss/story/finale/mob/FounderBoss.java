@@ -275,7 +275,7 @@ public class FounderBoss extends CloudMob {
         // 歩くときの腰の小鐘 (本物だけが鳴らす。ななつの見分け)
         if (tickCount % 16 == 0 && getDeltaMovement().horizontalDistanceSqr() > 0.001) {
             sl.playSound(null, blockPosition(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.HOSTILE, 0.5f, 1.9f);
-            sl.sendParticles(ParticleTypes.NOTE, getX(), getY() + 1.0, getZ(), 1, 0.2, 0.1, 0.2, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.0, getZ(), 1, 0.2, 0.1, 0.2, 0);
         }
         effects(sl);
     }
@@ -286,7 +286,7 @@ public class FounderBoss extends CloudMob {
         sl.playSound(null, c, SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 1.4f, 0.5f);
         double a = random.nextDouble() * Math.PI * 2;
         BlockPos ce = FounderArena.mark("center");
-        sl.sendParticles(ParticleTypes.END_ROD, ce.getX() + 0.5 + Math.cos(a) * 15, ce.getY() + 9, ce.getZ() + 0.5 + Math.sin(a) * 15, 30, 0.6, 2.5, 0.6, 0.02);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ce.getX() + 0.5 + Math.cos(a) * 15, ce.getY() + 9, ce.getZ() + 0.5 + Math.sin(a) * 15, 24, 0.6, 2.5, 0.6, 0.02);
         hearEveryone(sl);
     }
 
@@ -380,10 +380,10 @@ public class FounderBoss extends CloudMob {
             sl.playSound(null, blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 1.2f, 0.8f + line * 0.15f);
         }
         if (finalFor % 4 == 0) {
-            sl.sendParticles(LIGHT, getX(), getY() + 1.2, getZ(), 4, 0.4, 0.8, 0.4, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 4, 0.4, 0.8, 0.4, 0);
         }
         if (finalFor >= FINAL_TICKS) {
-            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.2, getZ(), 120, 0.6, 1.2, 0.6, 0.08);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 24, 0.6, 1.2, 0.6, 0.08);
             sl.playSound(null, blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 2.5f, 1.2f);
             FounderArena.defeated(sl, this);
             discard();
@@ -397,19 +397,19 @@ public class FounderBoss extends CloudMob {
         int n = (int) Math.min(40, 10 + r * 6);
         for (int k = 0; k < n; k++) {
             double a = Math.PI * 2 * k / n;
-            sl.sendParticles(feather, x + Math.cos(a) * r, y + 0.2, z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x + Math.cos(a) * r, y + 0.2, z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
-        sl.sendParticles(feather, x, y + 0.6, z, (int) (10 + r * 4), r * 0.5, 0.5, r * 0.5, 0.03);
-        sl.sendParticles(lace, x, y + 0.5, z, (int) (4 + r * 2), r * 0.4, 0.4, r * 0.4, 0.02);
-        sl.sendParticles(ParticleTypes.CLOUD, x, y + 0.3, z, (int) (6 + r * 2), r * 0.4, 0.1, r * 0.4, 0.04);
-        sl.sendParticles(ParticleTypes.END_ROD, x, y + 0.4, z, (int) (6 + r * 2), r * 0.3, 0.6, r * 0.3, 0.05);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.6, z, (int) (10 + r * 4), r * 0.5, 0.5, r * 0.5, 0.03);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.5, z, (int) (4 + r * 2), r * 0.4, 0.4, r * 0.4, 0.02);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, y + 0.3, z, (int) (6 + r * 2), r * 0.4, 0.1, r * 0.4, 0.04);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.4, z, (int) (6 + r * 2), r * 0.3, 0.6, r * 0.3, 0.05);
     }
 
     // ---------------------------------------------------------------- 写し (ななつ)
     void echoTick(ServerLevel sl) {
         FounderBoss real = FounderArena.real(sl);
         if (real == null || --echoLife <= 0 || real.echoStart >= 0 && real.realHits - real.echoStart >= 3) {
-            sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1.2, getZ(), 20, 0.3, 0.8, 0.3, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1.2, getZ(), 20, 0.3, 0.8, 0.3, 0.02);
             if (real != null) {
                 real.echoStart = -1;
             }
@@ -422,7 +422,7 @@ public class FounderBoss extends CloudMob {
 
     void shatterEcho(ServerPlayer by) {
         ServerLevel sl = (ServerLevel) level();
-        sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.2, getZ(), 40, 0.4, 0.9, 0.4, 0.1);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.2, getZ(), 24, 0.4, 0.9, 0.4, 0.1);
         sl.playSound(null, blockPosition(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.6f, 0.7f);
         strike(by, dmg(1.0));
         by.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 3));
@@ -449,7 +449,19 @@ public class FounderBoss extends CloudMob {
                 for (double b = 0; b <= 6; b += shadowT < 20 ? 6 : 2) {
                     Vec3 q = c.add(shadowDir.scale(front - b)).add(side.scale(s));
                     if (q.subtract(c).horizontalDistance() <= ARENA_R) {
-                        sl.sendParticles(SHADOW, q.x, c.y + 0.15, q.z, 1, 0.2, 0, 0.2, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, c.y + 0.15, q.z, 1, 0.2, 0, 0.2, 0);
+                    }
+                }
+            }
+            if (shadowT == 20) {
+                // 技の形: 帯の頭が通る所に影の腕が順に突き出る (60 tick で端から端へ)
+                for (int k = 0; k <= 6; k++) {
+                    double fr = -ARENA_R + k * (ARENA_R * 2 + 6) / 6.0;
+                    for (double s = -ARENA_R; s <= ARENA_R; s += 3.2) {
+                        Vec3 q = c.add(shadowDir.scale(fr - 1.5)).add(side.scale(s));
+                        if (q.subtract(c).horizontalDistance() <= ARENA_R) {
+                            jp.revati.skyabyss.combat.prop.AttackProps.riseLater(sl, "tentacle", this, q, (float) (s * 40), 0.55f, 6, k * 10);
+                        }
                     }
                 }
             }
@@ -475,7 +487,14 @@ public class FounderBoss extends CloudMob {
                 int n = (int) (r * 4);
                 for (int i = 0; i < n; i++) {
                     double a = i / (double) n * Math.PI * 2;
-                    sl.sendParticles(LIGHT, lidAt.x + Math.cos(a) * r, c.y + 0.3 + (i % 3), lidAt.z + Math.sin(a) * r, 1, 0, 0.2, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), lidAt.x + Math.cos(a) * r, c.y + 0.3 + (i % 3), lidAt.z + Math.sin(a) * r, 1, 0, 0.2, 0, 0);
+                }
+            }
+            if (lidT == 40) {
+                // 技の形: 閉じきった蓋の縁に光の柱 (安全な円の境)
+                for (int i = 0; i < 12; i++) {
+                    double a = i / 12.0 * Math.PI * 2;
+                    jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", this, new Vec3(lidAt.x + Math.cos(a) * 5, c.y, lidAt.z + Math.sin(a) * 5), i * 30f, 0.4f, 80);
                 }
             }
             if (lidT >= 40 && lidT % 20 == 0) {
@@ -497,12 +516,19 @@ public class FounderBoss extends CloudMob {
             if (pulseT <= 60 && k == 14) {
                 for (int i = 0; i < 48; i++) {
                     double a = i / 48.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, c.x + Math.cos(a) * 3, c.y + 0.1, c.z + Math.sin(a) * 3, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * 3, c.y + 0.1, c.z + Math.sin(a) * 3, 1, 0, 0, 0, 0);
                 }
-                sl.sendParticles(ParticleTypes.SONIC_BOOM, c.x, c.y + 0.3, c.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.3, c.z, 1, 0, 0, 0, 0);
             }
             if (pulseT <= 60 && k == 0 && pulseT > 0) {
                 sl.playSound(null, ce, SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3.0f, 0.7f);
+                // 技の形: 鼓動のたびに床から光の柱が輪になって跳ねる
+                for (int i = 0; i < 10; i++) {
+                    double a = i / 10.0 * Math.PI * 2 + pulseT * 0.3;
+                    for (double rr : new double[] {4, 9, 14}) {
+                        jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", this, new Vec3(c.x + Math.cos(a) * rr, c.y, c.z + Math.sin(a) * rr), i * 36f, 0.3f, 6);
+                    }
+                }
                 for (ServerPlayer p : here) {
                     if (p.onGround()) {
                         strike(p, dmg(0.6));
@@ -520,7 +546,7 @@ public class FounderBoss extends CloudMob {
         if (slowT > 0) {
             slowT--;
             if (slowT % 4 == 0) {
-                sl.sendParticles(MOONLIGHT, slowAt.x, c.y + 0.1, slowAt.z, 6, 2.0, 0, 2.0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), slowAt.x, c.y + 0.1, slowAt.z, 6, 2.0, 0, 2.0, 0);
             }
             for (ServerPlayer p : here) {
                 if (p.position().subtract(slowAt).horizontalDistance() <= 4) {
@@ -677,7 +703,7 @@ public class FounderBoss extends CloudMob {
                 Notice.alert(p, "message.skyabyss.founder.verse" + v);
             }
             BlockPos m = FounderArena.mark("verse_" + v);
-            sl.sendParticles(LIGHT, m.getX() + 0.5, m.getY() + 0.3, m.getZ() + 0.5, 30, 0.6, 0.6, 0.6, 0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.getX() + 0.5, m.getY() + 0.3, m.getZ() + 0.5, 24, 0.6, 0.6, 0.6, 0);
             sl.playSound(null, blockPosition(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.HOSTILE, 1.4f, 0.6f + v * 0.1f);
         }
 
@@ -759,7 +785,7 @@ public class FounderBoss extends CloudMob {
         void line(ServerLevel sl, double len) {
             for (double s = 1; s <= len; s += 0.5) {
                 Vec3 q = position().add(dir.scale(s));
-                sl.sendParticles(ParticleTypes.WAX_OFF, q.x, getY() + 0.15, q.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, getY() + 0.15, q.z, 1, 0, 0, 0, 0);
             }
         }
 
@@ -794,13 +820,13 @@ public class FounderBoss extends CloudMob {
             if (t < 16 && t % 3 == 0) {
                 for (int i = -9; i <= 9; i++) {
                     double a = Math.atan2(dir.z, dir.x) + i * Math.PI / 18;
-                    sl.sendParticles(ParticleTypes.WAX_OFF, getX() + Math.cos(a) * 4.5, getY() + 0.15, getZ() + Math.sin(a) * 4.5, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * 4.5, getY() + 0.15, getZ() + Math.sin(a) * 4.5, 1, 0, 0, 0, 0);
                 }
             }
             if (t == 17) {
                 sl.playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.4f, 0.7f);
                 plume(sl, getX() + dir.x * 2.5, getY(), getZ() + dir.z * 2.5, 3.0);
-                sl.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + dir.x * 2, getY() + 1.2, getZ() + dir.z * 2, 3, 1.2, 0.2, 1.2, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX() + dir.x * 2, getY() + 1.2, getZ() + dir.z * 2, 3, 1.2, 0.2, 1.2, 0);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     Vec3 r = p.position().subtract(position());
                     if (r.horizontalDistance() <= 4.7 && r.dot(dir) >= 0) {
@@ -833,7 +859,7 @@ public class FounderBoss extends CloudMob {
                         p.hurtMarked = true;
                     }
                 }
-                sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.3, getZ(), 2, 0.2, 0.1, 0.2, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.3, getZ(), 2, 0.2, 0.1, 0.2, 0);
                 return;
             }
             if (t >= 28) {
@@ -848,7 +874,7 @@ public class FounderBoss extends CloudMob {
                 if (t % 3 == 0) {
                     for (int i = 0; i < 16; i++) {
                         double a = i / 16.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX() + Math.cos(a) * 1.2, getY() + 0.1, getZ() + Math.sin(a) * 1.2, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * 1.2, getY() + 0.1, getZ() + Math.sin(a) * 1.2, 1, 0, 0, 0, 0);
                     }
                 }
                 if (listening == 0) {
@@ -867,7 +893,7 @@ public class FounderBoss extends CloudMob {
                 if (t % 3 == 0) {
                     for (int i = 0; i < 24; i++) {
                         double a = i / 24.0 * Math.PI * 2;
-                        sl.sendParticles(LIGHT, getX() + Math.cos(a) * 2.2, getY() + 1.6, getZ() + Math.sin(a) * 2.2, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * 2.2, getY() + 1.6, getZ() + Math.sin(a) * 2.2, 1, 0, 0, 0, 0);
                     }
                 }
                 return;
@@ -877,11 +903,19 @@ public class FounderBoss extends CloudMob {
                 int n = 12 + (int) (r * 3);
                 for (int i = 0; i < n; i++) {
                     double a = i / (double) n * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + Math.cos(a) * r, getY() + 1.6, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX() + Math.cos(a) * r, getY() + 1.6, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
                 if (t == 24) {
                     sl.playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 2.0f, 0.5f);
                     plume(sl, getX(), getY(), getZ(), 4.0);
+                    // 技の形: 頭の高さを風の刃が輪になって外へ飛ぶ (しゃがめば下をくぐる)
+                    int fly = (int) Math.ceil((ARENA_R + 2) / 1.6);
+                    for (int i = 0; i < 10; i++) {
+                        double a = i / 10.0 * Math.PI * 2;
+                        Vec3 from = position().add(Math.cos(a) * 1.5, 1.2, Math.sin(a) * 1.5);
+                        Vec3 to = position().add(Math.cos(a) * (ARENA_R + 2), 1.2, Math.sin(a) * (ARENA_R + 2));
+                        jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "wind_blade", FounderBoss.this, from, to, fly, fly, 0f, 1.2f, 2);
+                    }
                 }
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     double d = p.position().subtract(position()).horizontalDistance();
@@ -912,15 +946,17 @@ public class FounderBoss extends CloudMob {
                 setPos(top.x, top.y, top.z);
                 setDeltaMovement(Vec3.ZERO);
                 if (t % 2 == 0) {
-                    sl.sendParticles(LIGHT, top.x, top.y + 3.5, top.z, 8, 1.2, 0.6, 1.2, 0);
-                    sl.sendParticles(ParticleTypes.END_ROD, top.x, top.y + 2.5, top.z, 2, 0.4, 0.4, 0.4, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), top.x, top.y + 3.5, top.z, 8, 1.2, 0.6, 1.2, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), top.x, top.y + 2.5, top.z, 2, 0.4, 0.4, 0.4, 0.02);
                 }
                 return;
             }
             if (t == 42) {
+                // 技の形: 舌の上から光の柱が立つ (見上げた人を灼く閃光)
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", FounderBoss.this, top, 0f, 1.2f, 10);
                 sl.playSound(null, cl, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0f, 1.4f);
                 plume(sl, cl.getX() + 0.5, cl.getY(), cl.getZ() + 0.5, 3.5);
-                sl.sendParticles(ParticleTypes.FLASH, top.x, top.y + 2, top.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), top.x, top.y + 2, top.z, 1, 0, 0, 0, 0);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     if (p.getXRot() < -15f) {
                         p.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 80, 0));
@@ -937,7 +973,7 @@ public class FounderBoss extends CloudMob {
                 setPos(to.x, to.y, to.z);
                 setDeltaMovement(Vec3.ZERO);
                 if (t == 54) {
-                    sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 20, 1.5, 0.1, 1.5, 0.05);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.2, getZ(), 20, 1.5, 0.1, 1.5, 0.05);
                     for (ServerPlayer p : FounderArena.present(sl)) {
                         if (p.distanceTo(FounderBoss.this) <= 2.6) {
                             strike(p, dmg(0.8));
@@ -954,6 +990,8 @@ public class FounderBoss extends CloudMob {
         // 4 よっつ: 暗くなり、狙った人の足もとに月の円 (半径 4、40 tick) → 落ちる (×2.0)。落ちた所は 6 秒遅くなる床
         void moon(ServerLevel sl) {
             if (t == 1) {
+                // 技の形: 月の円へ大きな月の珠が落ちてくる (t 40 で着く)
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "pearl", FounderBoss.this, aim, 39, 20, 20f, 3.0f, 14);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 70, 0));
                 }
@@ -962,17 +1000,17 @@ public class FounderBoss extends CloudMob {
                 if (t % 2 == 0) {
                     for (int i = 0; i < 28; i++) {
                         double a = i / 28.0 * Math.PI * 2;
-                        sl.sendParticles(MOONLIGHT, aim.x + Math.cos(a) * 4, aim.y + 0.15, aim.z + Math.sin(a) * 4, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), aim.x + Math.cos(a) * 4, aim.y + 0.15, aim.z + Math.sin(a) * 4, 1, 0, 0, 0, 0);
                     }
                     double h = 14 * (1 - t / 40.0);
-                    sl.sendParticles(ParticleTypes.END_ROD, aim.x, aim.y + 1 + h, aim.z, 6, 0.8, 0.8, 0.8, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), aim.x, aim.y + 1 + h, aim.z, 6, 0.8, 0.8, 0.8, 0);
                 }
                 return;
             }
             if (t == 40) {
                 sl.playSound(null, BlockPos.containing(aim), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 1.6f);
                 plume(sl, aim.x, aim.y, aim.z, 4.5);
-                sl.sendParticles(ParticleTypes.END_ROD, aim.x, aim.y + 0.5, aim.z, 80, 2.0, 0.4, 2.0, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), aim.x, aim.y + 0.5, aim.z, 24, 2.0, 0.4, 2.0, 0.1);
                 for (ServerPlayer p : FounderArena.present(sl)) {
                     if (p.position().subtract(aim).horizontalDistance() <= 4.2) {
                         strike(p, dmg(2.0));
@@ -1040,5 +1078,10 @@ public class FounderBoss extends CloudMob {
                 fight.startVerse(sl, v, tg);
             }
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

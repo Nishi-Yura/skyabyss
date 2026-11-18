@@ -176,7 +176,7 @@ public final class SoulSelfTest {
         check(f, layout.spare().size() == 3 && layout.spare().get(2)[0] + 18 <= PouchLayout.W - PouchLayout.X0 + 2, "the spare slots leave the panel");
         for (var sp : layout.spare()) {
             for (var spot : layout.spots()) {
-                check(f, Math.abs(spot.x() - sp[0]) >= 18 || Math.abs(spot.y() - sp[1]) >= 18, "a spare slot overlaps a pouch slot at " + sp[0] + "," + sp[1]);
+                check(f, spot.page() != jp.revati.skyabyss.pouch.PouchConfig.Page.KEEP || Math.abs(spot.x() - sp[0]) >= 18 || Math.abs(spot.y() - sp[1]) >= 18, "a spare slot overlaps a pouch slot at " + sp[0] + "," + sp[1]);
             }
         }
         check(f, RebirthEvents.isWhalePedestal(new BlockPos(0, 104, -35)) && !RebirthEvents.isWhalePedestal(new BlockPos(1, 104, -35)), "the altar block is wrong");
@@ -487,7 +487,7 @@ public final class SoulSelfTest {
         rd.spareCount[1] = 0;
         PouchMenu menu = new PouchMenu(55, p.getInventory());
         int base = menu.pouchSlotCount();
-        check(f, menu.spareCount() == 1 && menu.slots.size() == base + 1, "the pouch menu has the wrong slot count: " + menu.slots.size() + "/" + base);
+        check(f, menu.spareCount() == 1 && menu.slots.size() == base + 1 + jp.revati.skyabyss.pouch.PouchData.PARTS, "the pouch menu has the wrong slot count: " + menu.slots.size() + "/" + base);
         menu.setCarried(new ItemStack(Items.COBBLESTONE, 10));
         menu.clicked(base, 0, ClickType.PICKUP, p);
         check(f, menu.getCarried().isEmpty() && rd.spareCount[0] == 10, "the menu did not deposit into the spare slot");

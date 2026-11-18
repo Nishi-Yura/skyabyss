@@ -183,7 +183,7 @@ public class LightSwarm extends MoonMob {
                 if (t % 2 == 0) {
                     for (int i = 1; i <= 14; i++) {
                         Vec3 p = from.add(dir.scale(i));
-                        sl.sendParticles(ParticleTypes.END_ROD, p.x, p.y + 0.3, p.z, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.3, p.z, 1, 0, 0, 0, 0);
                     }
                 }
                 setDeltaMovement(Vec3.ZERO);
@@ -224,5 +224,10 @@ public class LightSwarm extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.45, 1, 2);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

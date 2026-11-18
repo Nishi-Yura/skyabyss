@@ -132,9 +132,9 @@ public final class BoardGlow {
             boolean far = best > 40 * 40;
             double spread = far ? 1.1 : 0.5;
             for (Vec3 p : points) {
-                level.sendParticles(player, dust, true, p.x, p.y, p.z, far ? 4 + (int) (pulse * 5) : 1 + (int) (pulse * 2), spread, spread, spread, 0.0);
+                level.sendParticles(player, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, p.x, p.y, p.z, far ? 4 + (int) (pulse * 5) : 1 + (int) (pulse * 2), spread, spread, spread, 0.0);
                 if (t % (EVERY * 3) == 0) {
-                    level.sendParticles(player, ParticleTypes.END_ROD, true, p.x, p.y, p.z, 1, 0.4, 0.8, 0.4, 0.01);
+                    level.sendParticles(player, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, p.x, p.y, p.z, 1, 0.4, 0.8, 0.4, 0.01);
                 }
             }
         }

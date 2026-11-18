@@ -7,7 +7,6 @@ import jp.revati.skyabyss.rpg.GrowthRules.Stat;
 import jp.revati.skyabyss.rpg.net.GrowthGainPayload;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -176,7 +175,7 @@ public final class Growth {
         }
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 1f);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);
         // 基礎の振り分けは無い (技の木の節で上がる。docs/design/48)。知らせは技の木の点が増えたこと
         int skill = jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level) - jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(data.level - gained);
         Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level, skill);
@@ -275,25 +274,5 @@ public final class Growth {
     // 記録していなければ書かずに false (控え帳など、読むだけの所から)
     public static boolean discovered(Player player, String key) {
         return get(player).discoveries.contains(key);
-    }
-
-    // ---------------------------------------------------------------- 記憶の断片
-    // 記憶の断片を付ける。器に入りきらない分は付けず、付けた数を返す。
-    // 効果 (永続強化の枝) はまだない。入れ物と記録だけ (03 の 5.1 節、E9)
-    public static int grantFragment(ServerPlayer player, ResourceLocation id, int count) {
-        GrowthData data = get(player);
-        int added = data.addFragments(id.toString(), count);
-        if (added > 0) {
-            sync(player);
-            player.playNotifySound(Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
-            Notice.gain(player, "message.skyabyss.growth.fragment_gained",
-                    Component.translatable(MemoryFragments.nameKey(id.toString())), data.fragmentCount(), data.fragmentCapacity);
-        }
-        return added;
-    }
-
-    public static void clearFragments(ServerPlayer player) {
-        get(player).fragments.clear();
-        sync(player);
     }
 }
