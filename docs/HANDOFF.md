@@ -105,7 +105,8 @@
         - 柳刃: 細く長い真っ直ぐな片刃（25 箱）。刃元に焼き物のはばき、背に焼き物の細い筋と刻み 3 つ、刃の縁に研ぎの明るい帯、樋、先は背へ 4 段で細る。
         - 箱は設計（ember_bold.py）をスクリプトで Blockbench に読み込んだ。Blockbench で目で直したのは背の筋だけ（厚すぎて背が全部焼き物に見えたので細くした。設計に写した）。
         - 筆（Blockbench）: 1 回目 = 樋の黒を中間の暗さに（穴に見えたため）、2 回目 = 刃元の切り欠きを中間色に・先の段に明るい縁、3 回目 = 刃の平の背側に光の線、4 回目 = 先の段の明るい縁がゲームで櫛の歯に見えたので刃の色へ戻した。
-        - 見比べ: docs/review/ash_knife_b.png。持ち方の「浮き」は鯨の短剣・大剣と同じ位置と確かめた（docs/review/ember_hold_vs_whale.png）。まだユーザーの返事待ち。
+        - 見比べ: docs/review/ash_knife_b.png。ユーザー OK（「これでいい」）。
+      - 手から浮く件（2026-11-19、ユーザー: 「手から浮く件をなおして」）: 振る武器（上へ起こす持ち方）は握りが拳の先へ出ていた（鯨・祠も同じ）。三人称の高さを 1.5 下げた（4.0 → 2.5 など）。短剣・剣・大剣で高さを 4 通り撮って決めた。`tools/gen/pixel/look_holds.py` の決まりに入れたので、取り込みのあとに流せば保たれる（22 品が変わった）。見比べ: docs/review/hold_drop.png。
     - 読み直しのこつ（箱を置き直さない）: `tools/models/x32/look5/bb2geo.py <取り込んだ.bbmodel> <出力先>` で geo.json と絵を出す（骨は g_root 一つ、上下の面の UV は向きを合わせてある）→ create_project(free) → from_geo_json → create_texture（絵）→ list_outline で g_root の uuid → apply_texture(g_root, all) → 筆 → export → `tools/models/x32/look5/ungeo.py <書き出し> <元の.bbmodel>`（箱の名前を UV で照合して戻す。_glow も戻る）→ install.py / install_bow.py。
       - paint_with_brush の connect_strokes=true は端の 2 点しか塗らないことがある。線は 1 画素ずつ座標を並べて connect_strokes=false で塗る。
 - 次: 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
