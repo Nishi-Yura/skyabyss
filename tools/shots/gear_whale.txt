@@ -1,258 +1,215 @@
-# 岩鯨の武器の確認 (tools/gen/shots/gen_gear_whale_shots.py が作る)
-world shots flat
-size 960 540
-timeout 3000
+# 鯨のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_whale.txt -PshotsName=gear_whale
+world gear_look flat
+size 1280 720
+timeout 4000
 render 6
+clouds off
+guiscale 2
 cmd time set noon
+cmd gamerule doWeatherCycle false
 cmd weather clear
-cmd gamemode creative
-camera 0 -60 8 180 0
-waitchunks
-hud on
-wait 350
-cmd skyabyss cinematic stop
-close
-wait 20
-weapontier common
-cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_common_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_common_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_common_tpSide
-cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_captain_pike_common_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_captain_pike_common_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_captain_pike_common_tpSide
-cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_waterway_fang_common_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_waterway_fang_common_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_waterway_fang_common_tpSide
-weapontier rare
-cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_rare_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_rare_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_rare_tpSide
-cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_captain_pike_rare_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_captain_pike_rare_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_captain_pike_rare_tpSide
-cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_waterway_fang_rare_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_waterway_fang_rare_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_waterway_fang_rare_tpSide
-weapontier legend
-cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_legend_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_legend_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_whalebone_greatsword_legend_tpSide
-cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_captain_pike_legend_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_captain_pike_legend_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_captain_pike_legend_tpSide
-cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
-mainhand right
-perspective first
-bodyyaw 0
-hud on
-close
-wait 8
-chat clear
-shot hold_waterway_fang_legend_fpR
-perspective front
-bodyyaw 0
-hud off
-close
-wait 8
-chat clear
-shot hold_waterway_fang_legend_tpR
-perspective front
-bodyyaw 50
-hud off
-close
-wait 8
-chat clear
-shot hold_waterway_fang_legend_tpSide
-weapontier legend
-cmd gamemode creative
-cmd kill @e[type=!minecraft:player,distance=..64]
-cmd summon item -2 -59 4 {Item:{id:"skyabyss:whalebone_greatsword",count:1},PickupDelay:32767,Age:-32768}
-cmd summon zombie -2 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
-cmd summon item 0 -59 4 {Item:{id:"skyabyss:captain_pike",count:1},PickupDelay:32767,Age:-32768}
-cmd summon zombie 0 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:captain_pike",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
-cmd summon item 2 -59 4 {Item:{id:"skyabyss:waterway_fang",count:1},PickupDelay:32767,Age:-32768}
-cmd summon zombie 2 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:waterway_fang",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
-camera 0 -58.4 8 180 -6
-perspective first
-hud off
-wait 30
-shot ground_and_mob_all
-camera 0 -59.2 2.4 180 25
-wait 6
-shot ground_close
-camera 0 -59.6 -6.0 0 3
-wait 6
-shot mob_held_close
-cmd kill @e[type=!minecraft:player,distance=..64]
-cmd clear @s
-cmd give @s skyabyss:whalebone_greatsword
-cmd give @s skyabyss:captain_pike
-cmd give @s skyabyss:waterway_fang
 cmd gamemode survival
-guiscale 4
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
 chat clear
-open inventory
-wait 10
-shot gui_inventory
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_hammer
 close
-quit
+wait 30
+chat clear
+shot fp_whale_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_choir_hammer
+close
+wait 30
+chat clear
+shot fp_whale_choir_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_choir_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_choir_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bell_staff
+close
+wait 30
+chat clear
+shot fp_whale_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_deep_bell_staff
+close
+wait 30
+chat clear
+shot fp_whale_deep_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_deep_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_deep_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_staff
+close
+wait 30
+chat clear
+shot fp_whale_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_star_staff
+close
+wait 30
+chat clear
+shot fp_whale_star_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_star_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_star_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_dagger
+close
+wait 30
+chat clear
+shot fp_whale_dagger
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+close
+wait 30
+chat clear
+shot fp_whalebone_greatsword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whalebone_greatsword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whalebone_greatsword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bow
+close
+wait 30
+chat clear
+shot fp_whale_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_rib_longbow
+close
+wait 30
+chat clear
+shot fp_whale_rib_longbow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_rib_longbow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_rib_longbow

@@ -1077,7 +1077,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_bow": {
   "series": "whale",
@@ -1087,7 +1087,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_choir_hammer": {
   "series": "whale",
@@ -1097,7 +1097,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_dagger": {
   "series": "whale",
@@ -1107,7 +1107,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_deep_bell_staff": {
   "series": "whale",
@@ -1117,7 +1117,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_hammer": {
   "series": "whale",
@@ -1127,7 +1127,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "polished"
+  "craft": "look5"
  },
  "whale_rib_longbow": {
   "series": "whale",
@@ -1137,7 +1137,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_staff": {
   "series": "whale",
@@ -1147,7 +1147,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whale_star_staff": {
   "series": "whale",
@@ -1157,7 +1157,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "whalebone_greatsword": {
   "series": "whale",
@@ -1167,7 +1167,7 @@
   "role": "gear-warrior",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "wild_abyss_mace": {
   "series": "wild_abyss_lower",
