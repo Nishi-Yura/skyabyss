@@ -6,7 +6,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_bell_staff": {
@@ -16,7 +16,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_depth_bow": {
@@ -26,7 +26,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_ember_bell_staff": {
@@ -36,7 +36,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_ember_bow": {
@@ -46,7 +46,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_ember_dagger": {
@@ -56,7 +56,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_ember_staff": {
@@ -66,7 +66,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_ember_sword": {
@@ -76,7 +76,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_greatsword": {
@@ -86,7 +86,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_lamp_staff": {
@@ -96,7 +96,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_lamp_sword": {
@@ -106,7 +106,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_pulse_dagger": {
@@ -116,7 +116,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_sinking_anchor": {
@@ -126,7 +126,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_storm_bell_staff": {
@@ -136,7 +136,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_storm_bow": {
@@ -146,7 +146,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_storm_dagger": {
@@ -156,7 +156,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_storm_hammer": {
@@ -166,7 +166,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_storm_staff": {
@@ -176,7 +176,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_storm_sword": {
@@ -186,7 +186,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_tide_bow": {
@@ -196,7 +196,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_tide_dagger": {
@@ -206,7 +206,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_tide_hammer": {
@@ -216,7 +216,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_tide_staff": {
@@ -226,7 +226,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_tide_sword": {
@@ -236,7 +236,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_toll_bell_staff": {
@@ -246,7 +246,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_whale_bell_staff": {
@@ -256,7 +256,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_whale_bow": {
@@ -266,7 +266,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_whale_fang": {
@@ -276,7 +276,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_whale_hammer": {
@@ -286,7 +286,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "abyss_whale_staff": {
@@ -296,7 +296,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "captain_pike": {
@@ -306,7 +306,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "coral_harpoon": {
@@ -756,7 +756,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "storm_anvil_hammer": {
@@ -856,7 +856,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "thunder_wing_bow": {
@@ -1046,7 +1046,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "warden_glaive": {
@@ -1056,7 +1056,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "waterway_fang": {
