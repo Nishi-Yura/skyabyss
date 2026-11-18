@@ -77,23 +77,34 @@ def wild_bonestring_bow():
 
 
 def wild_lantern_bow():
-    """提灯の弓: 坑道の鉄の弓。上の弓腕の先から小さな角灯が一つ下がって点り、下の弓腕の先は塩に覆われる。
-    弓腕の中ほどに塩の結晶が一粒ずつ付く"""
+    """提灯の弓（エピック）: 坑道の鉄の弓。握りの上下に塩の結晶の鍔板、握りの前に塩晶の房が咲き、芯に灯がともる。
+    弓腕の背には塩の縁取りが通り、腕の中ほどに結晶の棘が二本ずつ。上の弓腕の先から角灯が下がり、下の先は塩の結晶の飾り"""
     m = M('wild_lantern_bow')
     bow_grip(m)
+    for k, y in enumerate((8.75, 20.25)):
+        m.box(f'riser_{k}', T, [9.9, y, -1.9], [14.1, y + 1, 1.9], 3 + k)
+    diamond(m, 'guard_salt', T, (14.5, 15), 3, 2.4, 3, 5)
+    diamond(m, 'guard_salt_s', T, (15.5, 17.25), 1.75, 1.6, 4, 5)
+    diamond(m, 'guard_salt_t', T, (15.25, 12.75), 1.5, 1.4, 4, 5)
+    m.box('guard_glow', L, [14.9, 14.4, -0.5], [15.6, 15.6, 0.5], 4)
     arm = [(12, 19.5), (11.5, 27), (10, 34), (7.75, 39.5), (5.5, 43)]
     for sign, n in ((1, 'u'), (-1, 'd')):
         m.chain(f'arm_{n}', H, [mirror(p, sign) for p in arm], [3, 2.5, 2.25, 1.75], 1.2, 5, 8, tip=False)
-        q = mirror((11.75, 30), sign)
-        diamond(m, f'salt_{n}', T, (q[0] + 1.25, q[1]), 2, 1.2, 4, 5)
+        m.chain(f'trim_{n}', T, [mirror((p[0] + 1.45 - k * 0.1, p[1]), sign) for k, p in enumerate(arm[:4])], [0.7, 0.7, 0.6], 1.35, 3, 5, tip=False)
+        for k, (x, y) in enumerate(((12.75, 28.5), (11.25, 33.5))):
+            q = mirror((x, y), sign)
+            m.seg(f'spike_{n}{k}', T, q, (q[0] + 2.25, q[1] + sign * 1.5), 1.2, 1, 4, 5, tip=True)
         if sign < 0:
-            diamond(m, 'crust_d', T, (5.75, -12.5), 2, 1.4, 3, 4)
+            diamond(m, 'crust_d', T, (5.75, -12.5), 2.5, 1.6, 3, 5)
+            diamond(m, 'crust_d2', T, (4.5, -11.25), 1.5, 1.3, 4, 5)
             continue
         m.box('hook_u', H, [5.25, 42.5, -0.25], [11.9, 43.1, 0.25], 6)
         m.box('chain_u', H, [11.3, 41.75, -0.2], [11.7, 42.5, 0.2], 5)
         m.box('cage_u', H, [10.4, 39.5, -1.1], [12.6, 41.75, 1.1], 6)
+        m.box('cage_roof_u', T, [10.15, 41.75, -1.3], [12.85, 42.25, 1.3], 4)
         m.box('cage_floor_u', H, [10.15, 39, -1.3], [12.85, 39.5, 1.3], 7)
         m.box('light_u_glow', L, [10.75, 39.75, -1.2], [12.25, 41.5, 1.2], 4)
+        diamond(m, 'crown_u', T, (5.25, 44.25), 1.75, 1.4, 4, 5)
     strings(m, (4.5, 43.25), (4.5, -13.25))
     return m
 
