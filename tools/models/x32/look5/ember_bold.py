@@ -53,6 +53,19 @@ def haft(m, y0, grip_to, y1, tail=True, bands=()):
         m.seg('tail_spine_1', K, (1.25, y0 - 4.5), (0.5, y0 - 6.5), 2, 0.75, 4, 5, tip=True)
 
 
+def lift(m, dy):
+    """模型ごと上下に動かす。原点を握りの真ん中に合わせるため（docs/design/60 の 1.2。2026-11-18「持ち手がおかしい」）"""
+    for p in m.parts:
+        for k in ('frm', 'to', 'origin'):
+            p[k][1] += dy
+        if p['grad']:
+            g = p['grad']
+            p['grad'] = (g[0] + dy, g[1], g[2] + dy, g[3])
+        if p['wrap']:
+            p['wrap'] = (p['wrap'][0] + dy, p['wrap'][1] + dy)
+    return m
+
+
 # ---------------------------------------------------------------- 杖・香炉
 
 def ember_staff():
@@ -145,11 +158,12 @@ def ember_dagger():
     m.box('guard', K, [-3, 5.5, -1.75], [3.5, 7.5, 1.75], grad=(5.5, 3, 7.5, 5))
     m.chain('quillon_l', K, [(-3, 6.5), (-5, 5.5), (-5.75, 3.5)], 2, 0.9, 4, 6, tip=True)
     m.chain('quillon_r', K, [(3.5, 6.5), (5.5, 7.5), (6.25, 9.5)], 2, 0.9, 4, 6, tip=True)
-    m.chain('spine', I, [(-0.75, 7), (-0.5, 15), (0.25, 22), (1.75, 28), (3.5, 31)], [2.5, 2.5, 2, 2], 1.1, 3, 6.5, tip=True)
-    m.chain('edge', I, [(1.5, 7.5), (2, 15), (2.5, 21.5), (3.25, 26)], [3, 2.5, 2], 0.7, 6, 8.5, tip=True)
-    for k, y in enumerate((10, 15.5, 21)):
-        m.box(f'stud_{k}', K, [-1.75, y, -1.4], [0, y + 2, 1.4], 5)
-    return m
+    # 刃は背（-x）の側へ反る。刃（+x）が外側のふくらみに来る（2026-11-18「剣の向きがおかしい」: 前は刃の側へ鉤のように反っていた）
+    m.chain('spine', I, [(-0.75, 7), (-1, 15), (-1.75, 22), (-3.25, 28), (-5, 31)], [2.5, 2.5, 2, 2], 1.1, 3, 6.5, tip=True)
+    m.chain('edge', I, [(1.5, 7.5), (1, 15), (0.5, 21.5), (-0.25, 26)], [3, 2.5, 2], 0.7, 6, 8.5, tip=True)
+    for k, (x, y) in enumerate(((-1.75, 10), (-2.25, 15.5), (-2.75, 21))):
+        m.box(f'stud_{k}', K, [x, y, -1.4], [x + 1.75, y + 2, 1.4], 5)
+    return lift(m, 2.5)
 
 
 def ember_ash_knife():
@@ -166,7 +180,7 @@ def ember_ash_knife():
     m.seg('chip_r', I, (3, 7), (5, 9.5), 2, 0.8, 1, 4, tip=True)
     m.seg('chip_l2', I, (-1.25, 12.5), (-3.5, 15.5), 2, 0.8, 1, 4, tip=True)   # 刃の途中の欠け（Blockbench で足した）
     m.seg('chip_r2', I, (2.5, 11.5), (4.5, 14), 2, 0.8, 1, 4, tip=True)
-    return m
+    return lift(m, 2.5)
 
 
 def ember_war_axe():
@@ -197,12 +211,13 @@ def ember_greatsword():
         m.box(f'stud_f{k}', I, [x - 1, 4, -2.9], [x + 1, 6, -2.5], 6)
         m.box(f'stud_b{k}', I, [x - 1, 4, 2.5], [x + 1, 6, 2.9], 6)
     m.box('seam', E, [-4.5, 7.25, -1.5], [4.5, 9.25, 1.5], 3)
+    # 左右の刃は真ん中で重ねる（2026-11-18「刃に間があるのおかしくない？」: 前は刃元に隙間があった）。右を少し薄くして面が重ならないように
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'blade_{n}', I, (sd * 3.5, 8.5), (sd * 1.5, 47), 5, 1.25, 2, 5)
-        m.seg(f'column_{n}', I, (sd * 5.25, 9.5), (sd * 3.25, 45), 2, 1.35, 4, 7)
-        m.seg(f'facet_{n}', I, (sd * 2.25, 10), (sd * 0.75, 40), 2, 1.3, 1, 3)
+        m.seg(f'blade_{n}', I, (sd * 2.5, 8.5), (sd * 0.5, 47), 5, 1.25 if sd < 0 else 1.15, 2, 5)
+        m.seg(f'column_{n}', I, (sd * 4.25, 9.5), (sd * 2.25, 45), 2, 1.35, 4, 7)
+        m.seg(f'facet_{n}', I, (sd * 1.5, 10), (sd * 0.75, 40), 2, 1.3, 1, 3)
         m.seg(f'tip_{n}', I, (sd * 2.75, 46), (0, 55), 3.5, 1.15, 4, 7, tip=True)
-    return m
+    return lift(m, 6.5)
 
 
 def ember_cinder_blade():
@@ -220,7 +235,7 @@ def ember_cinder_blade():
         pts.append((math.sin(k * 0.95) * 2.25 * (1 - k / 14), 10.5 + k * 4))
     widths = [7 - 0.4 * k for k in range(11)]
     m.chain('blade', I, pts, widths, 1.1, 3, 7.5, tip=True)
-    return m
+    return lift(m, 6.5)
 
 
 # ---------------------------------------------------------------- 弓（握りの中心 (12, 15) だけを残し、形は火で立て直す）
