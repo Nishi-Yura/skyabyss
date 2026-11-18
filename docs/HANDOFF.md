@@ -123,7 +123,8 @@
 - 野・海岸 12 本: wild_coast_bold.py（青灰の流木＋綱＋夜光虫）。docs/review/wild_coast_*.png。
 - 野・丘 5 本: wild_hills_bold.py（苔の古木＋象牙＋胞子）。docs/review/wild_hills_*.png。
 - 野・高地 14 本: wild_heights_bold.py（霜の岩鉄＋角＋薄紫の雷）。docs/review/wild_heights_*.png。
-- 次: 野の残り（荒れ地・雲・月・深淵上・深淵下）。・高地・荒れ地・雲・月・深淵上・深淵下）。シリーズごとにコミット（main には入れない）。
+- 野・荒れ地 10 本: wild_wastes_bold.py（鉱滓の焦げ鉄＋灰白＋熔岩）。docs/review/wild_wastes_*.png。
+- 次: 野の残り（雲・月・深淵上・深淵下）。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）

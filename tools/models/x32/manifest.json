@@ -1196,7 +1196,7 @@
   "level": 26,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ashrite_maul": {
@@ -1206,7 +1206,7 @@
   "level": 30,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ashsow_bell_staff": {
@@ -1216,7 +1216,7 @@
   "level": 26,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ballspark_staff": {
@@ -1246,7 +1246,7 @@
   "level": 26,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_blasting_axe": {
@@ -1356,7 +1356,7 @@
   "level": 26,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_cloudcleaver_greatsword": {
@@ -1446,7 +1446,7 @@
   "level": 30,
   "role": "gear-archer",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_crow_bow": {
@@ -1516,7 +1516,7 @@
   "level": 26,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_fishhook_knife": {
@@ -1566,7 +1566,7 @@
   "level": 26,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_frostfang_dagger": {
@@ -1696,7 +1696,7 @@
   "level": 30,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_lighthouse_longbow": {
@@ -2166,7 +2166,7 @@
   "level": 30,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_warden_crown_staff": {
