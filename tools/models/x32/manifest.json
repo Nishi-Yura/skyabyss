@@ -1276,7 +1276,7 @@
   "level": 9,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_bonepipe_staff": {
@@ -1296,7 +1296,7 @@
   "level": 9,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_bonestring_bow": {
@@ -1786,7 +1786,7 @@
   "level": 9,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_mourning_bell_staff": {
@@ -2006,7 +2006,7 @@
   "level": 9,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_shipwright_maul": {
@@ -2146,7 +2146,7 @@
   "level": 9,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_twin_spear": {
