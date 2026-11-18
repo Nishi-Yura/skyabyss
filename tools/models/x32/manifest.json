@@ -566,7 +566,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_full_hammer": {
@@ -576,7 +576,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_halo_bell_staff": {
@@ -586,7 +586,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_light_sword": {
@@ -596,7 +596,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_new_staff": {
@@ -606,7 +606,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_scale_hammer": {
@@ -616,7 +616,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_starfall_bow": {
@@ -626,7 +626,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_starlight_bell_staff": {
@@ -636,7 +636,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_tide_staff": {
@@ -646,7 +646,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_umbra_dagger": {
@@ -656,7 +656,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_waning_blade": {
@@ -666,7 +666,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "moon_waning_bow": {
@@ -676,7 +676,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "raiju_claw": {

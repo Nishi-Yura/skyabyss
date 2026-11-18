@@ -1,0 +1,334 @@
+# -*- coding: utf-8 -*-
+"""月のシリーズ（look5・個性版）。六章「月」（46）の装備 12 品。月の満ち欠け・三日月・暈・星・影から一品ずつ形を立てる。
+色: 夜空の銀（silver）の 1 系統、差し色は夜の藍（night）、光は淡い金の月光（moonlight）。
+
+形は他のシリーズから借りない（ユーザー: 「形自体はシリーズごとに毎回作り直してね」）。
+- 柄: 藍の紐を巻いた銀の握り、上に藍の輪。柄頭は下へ開いた三日月（∩）。
+- 振る武器（剣・太刀・短剣・鎚）は握りの真ん中を原点にする（docs/design/60 の 1.2。2026-11-19 の持ち方の直しで確かめた）。
+- 弓: 握りの中心 (12, 15) だけ残す。握りは銀の台に藍の紐、上下に三日月の板。
+- 光は品ごとに場所を変える（同じ種類の場所は 2 回まで、光なしもある）:
+  月光の長剣 = 鍔の満月、満ち引きの杖 = 珠の光る半分、朔の杖 = 珠を巡るコロナの輪、星灯りの鈴杖 = 輪の四方の星、
+  月暈の鈴杖 = 満月を巡る暈の輪、星落ちの弓 = 弓先の星と尾、朔影の短剣 = 黒い刃の縁、残月の太刀 = 鍔の三日月。
+  欠け月の短剣・月秤の鎚・望月の大鎚・下弦の弓は光なし。
+"""
+import math
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import lib  # noqa: E402
+from lib import Model  # noqa: E402
+
+lib.RAMPS.update({
+    'silver': ['#141626', '#23263a', '#353a52', '#4c536e', '#66708c', '#8590aa', '#a6b0c6', '#c6cede', '#e2e8f2', '#f8faff'],
+    'night': ['#120c26', '#21164a', '#33236e', '#4a3592', '#6650b4', '#8a74d0'],
+    'moonlight': ['#7a6428', '#b8973e', '#e0c060', '#f2dc90', '#fdf0c4', '#fffbea'],
+})
+I, N, L = 'silver', 'night', 'moonlight'
+
+
+def M(name):
+    return Model(name, accent=N, glowmat=L)
+
+
+def disc(m, name, mat, c, r, d, t, zc=0.0):
+    """丸い板（十字に重ねた 2 枚で八角に見せる）。縦の板は奥へ 0.1 下げて面が重ならないように"""
+    k = 0.55
+    m.box(f'{name}_h', mat, [c[0] - r, c[1] - r * k, zc - d], [c[0] + r, c[1] + r * k, zc + d], t)
+    m.box(f'{name}_v', mat, [c[0] - r * k, c[1] - r, zc - d + 0.1], [c[0] + r * k, c[1] + r, zc + d - 0.1], t - 0.5)
+
+
+def ring(m, name, mat, c, r, n, w, d, t0, t1, a0=0, a1=360):
+    m.arc(name, mat, c, r, a0, a1, n, w, d, t0, t1)
+
+
+def star(m, name, mat, c, s, d, t):
+    """四方へ尖る星: 縦と横の菱形の節"""
+    m.seg(f'{name}_v', mat, (c[0], c[1] - s), (c[0], c[1] + s), s * 0.7, d, t, t + 1, over=0, tip=False)
+    m.seg(f'{name}_h', mat, (c[0] - s, c[1]), (c[0] + s, c[1]), s * 0.7, d - 0.1, t, t + 1, over=0, tip=False)
+
+
+def grip(m, y0, y1, cap=True):
+    """月の柄: 藍の紐を巻いた銀の握り、上に藍の輪と銀の薄い円盤。柄頭は下へ開いた三日月"""
+    m.box('grip', I, [-1.5, y0, -1.5], [1.5, y1, 1.5], grad=(y0, 2, y1, 4), wrap=(y0, y1))
+    m.box('collar', N, [-2.25, y1, -2.25], [2.25, y1 + 1.5, 2.25], grad=(y1, 2, y1 + 1.5, 4))
+    m.box('collar_plate', I, [-3, y1 + 0.25, -0.75], [3, y1 + 1.25, 0.75], 6)
+    if cap:
+        m.box('cap', N, [-2, y0 - 1.5, -2], [2, y0, 2], grad=(y0 - 1.5, 1, y0, 3))
+        ring(m, 'pommel', I, (0.75, y0 - 4.25), 2.75, 4, 1.75, 1.0, 5, 7, a0=95, a1=265)
+        m.seg('pommel_horn_u', I, (0.5, y0 - 1.75), (2.25, y0 - 1.25), 1.5, 0.9, 6, 8, tip=True)
+        m.seg('pommel_horn_d', I, (0.5, y0 - 6.75), (2.5, y0 - 7.5), 1.5, 0.9, 6, 8, tip=True)
+
+
+def rod(m, y0, y1, bands=()):
+    m.box('rod', I, [-1.25, y0, -1.25], [1.25, y1, 1.25], grad=(y0, 3, y1, 6))
+    for k, y in enumerate(bands):
+        m.box(f'band_{k}', N, [-1.75, y, -1.75], [1.75, y + 1.5, 1.75], grad=(y, 2, y + 1.5, 4))
+        m.box(f'band_{k}_plate', I, [-2.5, y + 0.25, -0.6], [2.5, y + 1.25, 0.6], 6)
+
+
+# ---------------------------------------------------------------- 剣・太刀
+
+def moon_light_sword():
+    """月光の長剣: 鍔に満月を抱いた銀の長剣。満月は藍の縁の中で光る。刃はまっすぐ、真ん中に藍の樋、縁は明るい研ぎ"""
+    m = M('moon_light_sword')
+    grip(m, -5, 5)
+    disc(m, 'guard_rim', N, (0, 10), 5.5, 1.4, 3)
+    disc(m, 'guard_moon', L, (0, 10), 4, 1.6, 4)
+    m.box('quillon', I, [-8.5, 9, -1], [8.5, 11, 1], grad=(9, 4, 11, 6))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'quillon_tip_{n}', I, (sd * 8, 10), (sd * 10.5, 12), 2, 0.9, 6, 8, tip=True)
+    m.box('ricasso', I, [-2.25, 15.5, -1.1], [2.25, 18, 1.1], grad=(15.5, 3, 18, 5))
+    m.box('blade', I, [-2.5, 18, -0.9], [2.5, 42, 0.9], grad=(18, 4, 42, 6))
+    m.box('fuller', N, [-0.5, 19, -1.0], [0.5, 36, 1.0], grad=(19, 1, 36, 3))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        x0, x1 = (2.5, 3.25) if sd > 0 else (-3.25, -2.5)
+        m.box(f'edge_{n}', I, [x0, 18.5, -0.6], [x1, 41, 0.6], 8)
+        m.seg(f'tip_{n}', I, (sd * 2.5, 41.5), (0, 47), 2.25, 0.8, 6, 8, tip=True)
+    m.box('tip_core', I, [-1.25, 41, -0.85], [1.25, 44, 0.85], 6)
+    return m
+
+
+def moon_waning_blade():
+    """残月の太刀: 反りのある銀の太刀。長い柄に藍の菱巻き、鍔は丸い藍の板に残月（細い三日月）が光る。刃は背へ反り、刃先へ明るい刃文の帯"""
+    m = M('moon_waning_blade')
+    grip(m, -6, 6)
+    for k, y in enumerate((-4, -0.75, 2.5)):
+        m.box(f'diamond_{k}', N, [-1.75, y, -1.75], [1.75, y + 1.5, 1.75], 3)
+    disc(m, 'tsuba', N, (0, 9.5), 4.5, 1.3, 2)
+    ring(m, 'tsuba_moon', L, (0.5, 9.5), 3, 4, 1.25, 1.45, 3, 5, a0=120, a1=300)
+    m.box('habaki', I, [-1.75, 10.5, -1.1], [2, 13, 1.1], grad=(10.5, 4, 13, 6))
+    pts = [(0, 12.5)]
+    for k in range(1, 9):
+        y = 12.5 + k * 4.5
+        pts.append((-0.006 * (y - 12.5) ** 2, y))
+    widths = [4.25 - 0.15 * k for k in range(8)]
+    m.chain('blade', I, pts, widths, 0.9, 4, 7, tip=False)
+    edge = [(x + 2.1, y) for x, y in pts[:-1]]
+    m.chain('hamon', I, edge, [1.25] * (len(edge) - 1), 0.6, 8, 9, tip=False)
+    x, y = pts[-1]
+    m.seg('kissaki', I, (x + 1.5, y - 1), (x - 1.5, y + 4.5), 3, 0.8, 7, 9, tip=True)
+    m.chain('shinogi', N, [(px - 0.5, py) for px, py in pts[:6]], [0.75] * 5, 0.95, 2, 3, tip=False)
+    return m
+
+
+# ---------------------------------------------------------------- 短剣
+
+def moon_crescent_dagger():
+    """欠け月の短剣: 細い三日月の刃。背の側へ大きく反り、先は鋭い。鍔は小さな∪の三日月、刃の内に藍の筋"""
+    m = M('moon_crescent_dagger')
+    grip(m, -4, 4)
+    ring(m, 'guard', N, (0, 8.25), 3.25, 4, 1.5, 1.1, 2, 4, a0=200, a1=340)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'guard_horn_{n}', N, (sd * 3, 7.25), (sd * 4, 10.25), 1.5, 1.0, 3, 5, tip=True)
+    m.box('socket', I, [-1.75, 5.5, -1.25], [1.75, 8, 1.25], grad=(5.5, 4, 8, 6))
+    pts = [(0.25, 7.5), (1, 13), (1, 18.5), (0, 23.5), (-2, 27.5), (-4.75, 30)]
+    m.chain('blade', I, pts, [3.5, 3.25, 3, 2.5, 2], 0.85, 4, 7, tip=True)
+    m.chain('edge', I, [(x + 1.6, y) for x, y in pts[:4]] + [(-0.5, 25.5)], [1.25, 1.25, 1.25, 1], 0.6, 8, 9, tip=False)
+    m.chain('vein', N, [(x - 0.4, y) for x, y in pts[:4]], [0.75, 0.75, 0.75], 0.9, 2, 3, tip=False)
+    return m
+
+
+def moon_umbra_dagger():
+    """朔影の短剣: 影の光を縁に走らせた黒い刃。刃は藍の黒、両の縁と先に月光が走る。鍔は後ろへ流れる影の棘が二本"""
+    m = M('moon_umbra_dagger')
+    grip(m, -4, 4)
+    m.box('guard', N, [-3, 5.5, -1.5], [3, 7.5, 1.5], grad=(5.5, 1, 7.5, 3))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'thorn_{n}', N, [(sd * 2.75, 7), (sd * 5, 5.5), (sd * 6.5, 3)], [2, 1.75], 0.9, 1, 3, tip=True)
+    m.box('blade', N, [-2, 7.5, -0.85], [2, 25, 0.85], grad=(7.5, 0, 25, 2))
+    m.box('ridge', N, [-0.5, 8, -1.0], [0.5, 24, 1.0], grad=(8, 2, 24, 4))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        x0, x1 = (sd * 2, sd * 2.75) if sd > 0 else (sd * 2.75, sd * 2)
+        m.box(f'edge_{n}', L, [x0, 9, -0.5], [x1, 24.5, 0.5], grad=(9, 2, 24.5, 4))
+        m.seg(f'tip_{n}', N, (sd * 2, 24.5), (0, 31), 2.5, 0.8, 1, 2, tip=True)
+        m.seg(f'tip_edge_{n}', L, (sd * 2.6, 24.5), (sd * 0.6, 30.5), 0.9, 0.85, 3, 5, tip=True)
+    m.box('tip_core', N, [-1.25, 24.5, -0.8], [1.25, 27, 0.8], 2)
+    return m
+
+
+# ---------------------------------------------------------------- 鎚
+
+def moon_scale_hammer():
+    """月秤の鎚: 柄の先に天秤の竿。竿の真ん中に菱形の支点、両端から鎖で分銅が下がる。+x の分銅が打つ面（大きく平ら）"""
+    m = M('moon_scale_hammer')
+    grip(m, -6, 6)
+    rod(m, 7.5, 27, bands=(15,))
+    m.box('fulcrum_base', N, [-2.5, 26.5, -2], [2.5, 28.5, 2], grad=(26.5, 2, 28.5, 4))
+    m.seg('fulcrum', I, (0, 27.5), (0, 33.5), 4, 1.5, 5, 7, over=0, tip=True)
+    m.box('beam', I, [-11, 30, -1.25], [11, 32, 1.25], grad=(30, 4, 32, 6))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.box(f'beam_end_{n}', N, [sd * 11 - 1.5, 29.5, -1.6], [sd * 11 + 1.5, 32.5, 1.6], 3)
+        m.box(f'link_{n}0', I, [sd * 11 - 0.6, 27, -0.5], [sd * 11 + 0.6, 30, 0.5], 5)
+        m.box(f'link_{n}1', I, [sd * 11 - 0.5, 24.5, -1], [sd * 11 + 0.5, 27.5, 1], 6)
+    # 打つ側（+x）の分銅: 上が細く下が太い釣鐘の形、底が打つ面
+    m.box('weight_r_neck', N, [9.75, 23, -1.5], [12.25, 25, 1.5], 3)
+    m.box('weight_r', I, [8, 16, -3.25], [14, 23.5, 3.25], grad=(16, 3, 23.5, 6))
+    m.box('weight_r_band', N, [7.75, 19, -3.5], [14.25, 20.5, 3.5], 3)
+    m.box('weight_r_face', I, [7.5, 14.5, -3.5], [14.5, 16, 3.5], 7)
+    # 反対の分銅は小さい（天秤が傾く）
+    m.box('weight_l_neck', N, [-12, 23, -1.25], [-10, 24.75, 1.25], 3)
+    m.box('weight_l', I, [-13.25, 19, -2.25], [-8.75, 23.25, 2.25], grad=(19, 3, 23.25, 6))
+    m.box('weight_l_band', N, [-13.5, 20.5, -2.5], [-8.5, 21.5, 2.5], 3)
+    return m
+
+
+def moon_full_hammer():
+    """望月の大鎚: 満月の石を銀の帯で締めた大鎚。頭は横（x）に長い太い円柱、両の打つ面に満月の石の丸。帯は三本、真ん中に藍の座"""
+    m = M('moon_full_hammer')
+    grip(m, -6, 6)
+    rod(m, 7.5, 25, bands=(16,))
+    m.box('socket', N, [-3, 24, -3], [3, 27.5, 3], grad=(24, 1, 27.5, 3))
+    c = 33.5
+    m.box('drum_h', I, [-8, c - 4, -4.5], [8, c + 4, 4.5], grad=(c - 4, 4, c + 4, 6))
+    m.box('drum_v', I, [-7.9, c - 5.5, -3], [7.9, c + 5.5, 3], grad=(c - 5.5, 4, c + 5.5, 7))
+    for k, x in enumerate((-5.5, 0, 5.5)):
+        m.box(f'strap_{k}', I, [x - 0.9, c - 5.9, -3.4], [x + 0.9, c + 5.9, 3.4], 8)
+        m.box(f'strap_{k}_side', I, [x - 0.9, c - 4.4, -4.9], [x + 0.9, c + 4.4, 4.9], 7)
+    m.box('seat', N, [-2.5, c - 1.5, -5], [2.5, c + 1.5, 5], grad=(c - 1.5, 2, c + 1.5, 4))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        x0, x1 = (8, 8.75) if sd > 0 else (-8.75, -8)
+        m.box(f'face_{n}_h', I, [x0, c - 3.25, -3.5], [x1, c + 3.25, 3.5], 8)
+        m.box(f'face_{n}_v', I, [x0 - sd * 0.05, c - 4.5, -2.25], [x1 - sd * 0.05, c + 4.5, 2.25], 9)
+        m.box(f'crater_{n}', I, [x0 + sd * 0.1, c + 0.5, -1.75], [x1 + sd * 0.1, c + 2, 0], 6)
+    m.box('crown', N, [-1.5, c + 5.5, -1.5], [1.5, c + 7.5, 1.5], 3)
+    return m
+
+
+# ---------------------------------------------------------------- 杖
+
+def moon_tide_staff():
+    """満ち引きの杖: 銀の棒の先に三日月の揺り籠（∪）。籠の中に半分だけ光る珠（左が月光、右が藍の影）。籠の角から雫が一つずつ下がる"""
+    m = M('moon_tide_staff')
+    grip(m, -14, 2)
+    rod(m, 3.5, 34, bands=(13, 23))
+    m.box('socket', N, [-2.5, 33, -2.25], [2.5, 35.5, 2.25], grad=(33, 2, 35.5, 4))
+    ring(m, 'cradle', I, (0, 42), 7, 6, 2.25, 1.25, 4, 7, a0=190, a1=350)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'horn_{n}', I, (sd * 6.9, 40.8), (sd * 6, 47), 2, 1.1, 6, 8, tip=True)
+        m.box(f'drop_{n}', N, [sd * 6.5 - 0.6, 37, -0.6], [sd * 6.5 + 0.6, 39.5, 0.6], 4)
+    m.box('orb_lit_h', L, [-4, 40, -2.25], [0, 45, 2.25], grad=(40, 3, 45, 5))
+    m.box('orb_lit_v', L, [-2.75, 38.75, -2.15], [0, 46.25, 2.15], 4)
+    m.box('orb_dark_h', N, [0, 40, -2.25], [4, 45, 2.25], grad=(40, 1, 45, 3))
+    m.box('orb_dark_v', N, [0, 38.75, -2.15], [2.75, 46.25, 2.15], 2)
+    m.box('terminator', I, [-0.4, 39, -2.4], [0.4, 46, 2.4], 7)
+    return m
+
+
+def moon_new_staff():
+    """朔の杖: 光をのんだ新月の珠。真っ黒な珠のまわりをコロナの細い輪が光り、銀の爪四本が珠を抱く"""
+    m = M('moon_new_staff')
+    grip(m, -14, 2)
+    rod(m, 3.5, 35, bands=(13, 24))
+    m.box('socket', N, [-2.5, 34, -2.25], [2.5, 36.5, 2.25], grad=(34, 2, 36.5, 4))
+    c = (0, 43.5)
+    disc(m, 'orb', N, c, 4.5, 2.25, 0)
+    ring(m, 'corona', L, c, 5.5, 8, 1.25, 0.9, 3, 5)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'claw_{n}', I, [(sd * 1.5, 36), (sd * 6.5, 39), (sd * 7.5, 44), (sd * 5, 49.5)], [2, 2, 1.75], 1.1, 4, 7, tip=True, zc=-0.4)
+        m.chain(f'claw_{n}b', I, [(sd * 1.25, 36.5), (sd * 4.5, 38), (sd * 5, 41)], [1.75, 1.5], 0.9, 3, 6, tip=True, zc=1.6)
+    m.box('spire', I, [-0.75, 49, -0.75], [0.75, 52.5, 0.75], 7)
+    return m
+
+
+def moon_starlight_bell_staff():
+    """星灯りの鈴杖: 大きな銀の輪に四方へ光る星。輪の頂から銀の鈴が下がり、輪は藍の座で棒に留まる"""
+    m = M('moon_starlight_bell_staff')
+    grip(m, -14, 2)
+    rod(m, 3.5, 33, bands=(13, 23))
+    m.box('seat', N, [-3, 32, -2.5], [3, 34.5, 2.5], grad=(32, 2, 34.5, 4))
+    c = (0, 42.5)
+    ring(m, 'hoop', I, c, 8, 10, 2, 1.0, 5, 7)
+    for k, (dx, dy) in enumerate(((0, 1), (1, 0), (-1, 0))):
+        star(m, f'star_{k}', L, (c[0] + dx * 8, c[1] + dy * 8), 2.5, 1.3, 3)
+    m.box('hanger', N, [-0.6, 46.5, -0.6], [0.6, 49.5, 0.6], 3)
+    m.box('bell_top', I, [-1.75, 44.5, -1.75], [1.75, 46.5, 1.75], 6)
+    m.box('bell', I, [-2.75, 40, -2.75], [2.75, 44.5, 2.75], grad=(40, 4, 44.5, 7))
+    m.box('bell_lip', I, [-3.25, 39, -3.25], [3.25, 40.25, 3.25], 8)
+    m.box('clapper', N, [-0.75, 37.5, -0.75], [0.75, 39.25, 0.75], 2)
+    return m
+
+
+def moon_halo_bell_staff():
+    """月暈の鈴杖: 満月の石を月暈の光の輪が巡る。満月の下に藍の紐で鈴が二つ下がる"""
+    m = M('moon_halo_bell_staff')
+    grip(m, -14, 2)
+    rod(m, 3.5, 34, bands=(13, 23))
+    m.box('cup', N, [-3, 33, -2.5], [3, 35.5, 2.5], grad=(33, 2, 35.5, 4))
+    c = (0, 42.5)
+    disc(m, 'moon', I, c, 5, 1.75, 7)
+    m.box('crater_a', I, [-2.5, 43, -1.85], [-0.5, 45, -1.75], 5)
+    m.box('crater_b', I, [1, 39.5, -1.85], [2.5, 41, -1.75], 5)
+    ring(m, 'halo', L, c, 8, 10, 1.25, 0.8, 3, 5)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.box(f'cord_{n}', N, [sd * 4 - 0.5, 33.5, -0.5], [sd * 4 + 0.5, 38, 0.5], 3)
+        m.box(f'bell_{n}', I, [sd * 4 - 1.75, 30, -1.75], [sd * 4 + 1.75, 33.5, 1.75], grad=(30, 4, 33.5, 7))
+        m.box(f'bell_{n}_lip', I, [sd * 4 - 2.25, 29.25, -2.25], [sd * 4 + 2.25, 30.25, 2.25], 8)
+    return m
+
+
+# ---------------------------------------------------------------- 弓（握りの中心 (12, 15)）
+
+def mirror(p, sign):
+    return (p[0], 15 + sign * (p[1] - 15))
+
+
+def strings(m, top, bot):
+    for key, pull in (('0', 0), ('p0', 2.4), ('p1', 6.8), ('p2', 11.6)):
+        if pull == 0:
+            m.box(f'string_{key}', 'string', [top[0] - 0.5, bot[1], -0.5], [top[0] + 0.5, top[1], 0.5], 3)
+        else:
+            mid = (top[0] - pull, 15)
+            m.seg(f'string_{key}_u', 'string', mid, top, 1, 0.5, 3, 3, over=0.2)
+            m.seg(f'string_{key}_d', 'string', bot, mid, 1, 0.5, 3, 3, over=0.2)
+
+
+def bow_grip(m):
+    """月の弓の握り: 藍の紐を巻いた銀の台、上下に外へ反る三日月の板"""
+    m.box('grip', I, [10.5, 10, -1.75], [13.5, 20, 1.75], grad=(10, 2, 20, 4), wrap=(10, 20))
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        m.chain(f'plate_{n}', N, [mirror(p, sign) for p in ((13.5, 19.5), (15.5, 21), (16, 23))], [1.75, 1.5], 1.9, 2, 4, tip=True)
+        m.box(f'band_{n}', I, [10, mirror((0, 20), sign)[1] - (0 if sign > 0 else 1.5), -2.1],
+              [14, mirror((0, 20), sign)[1] + (1.5 if sign > 0 else 0), 2.1], 6)
+
+
+def moon_waning_bow():
+    """下弦の弓: 銀の腕は細い三日月の弧。外側に、少し遅れて沿う残像の腕（藍、薄く細く）が離れて並ぶ"""
+    m = M('moon_waning_bow')
+    bow_grip(m)
+    arm = [(12, 21), (12.5, 27), (11.75, 33), (9.75, 38.5), (6.75, 43), (3.5, 46)]
+    ghost = [(14.5, 22.5), (15.25, 28.5), (14.5, 34.5), (12.25, 40), (9, 44.5), (5.5, 47.5)]
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        m.chain(f'arm_{n}', I, [mirror(p, sign) for p in arm], [3, 2.75, 2.5, 2.25, 2], 1.2, 3, 7, tip=False)
+        m.chain(f'ghost_{n}', N, [mirror(p, sign) for p in ghost], [1.5, 1.5, 1.25, 1.25, 1], 0.5, 3, 5, tip=True, zc=0.9)
+        for k in (1, 3):
+            a, b = mirror(arm[k], sign), mirror(ghost[k], sign)
+            m.seg(f'tie_{n}{k}', N, a, b, 1, 0.45, 2, 3, over=0.3, zc=0.5)
+        m.seg(f'nock_{n}', I, mirror((5, 46.25), sign), mirror((2, 46.25), sign), 2, 1, 6, 8)
+    strings(m, (3, 46.25), (3, -16.25))
+    return m
+
+
+def moon_starfall_bow():
+    """星落ちの弓: 先に星を灯した弓。銀の腕の先に四方へ尖る星が光り、星から腕へ尾が流れる（先ほど明るい）"""
+    m = M('moon_starfall_bow')
+    bow_grip(m)
+    arm = [(12, 21), (13, 27), (12.75, 33), (11, 38.5), (8, 43), (5, 45.5)]
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        pts = [mirror(p, sign) for p in arm]
+        m.chain(f'arm_{n}', I, pts, [3.25, 3, 2.75, 2.5, 2.25], 1.3, 3, 7, tip=False)
+        m.chain(f'tail_{n}', L, [(x + 1.9, y) for x, y in pts[2:]], [1.5, 1.75, 2], 0.75, 1, 4, tip=False, zc=-0.7)
+        star(m, f'star_{n}', L, mirror((4.5, 47.5), sign), 3, 1.3, 3)
+        m.seg(f'nock_{n}', N, mirror((6, 45.25), sign), mirror((3, 45.25), sign), 2, 1.05, 2, 4)
+    strings(m, (3.5, 45.5), (3.5, -15.5))
+    return m
+
+
+ALL = [moon_light_sword, moon_waning_blade, moon_crescent_dagger, moon_umbra_dagger, moon_scale_hammer, moon_full_hammer,
+       moon_tide_staff, moon_new_staff, moon_starlight_bell_staff, moon_halo_bell_staff, moon_waning_bow, moon_starfall_bow]
+
+if __name__ == '__main__':
+    want = set(sys.argv[1:])
+    for fn in ALL:
+        if not want or fn.__name__ in want:
+            fn().build('.')

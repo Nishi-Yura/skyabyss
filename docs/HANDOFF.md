@@ -109,7 +109,12 @@
       - 手から浮く件（2026-11-19、ユーザー: 「手から浮く件をなおして」）: 振る武器（上へ起こす持ち方）は握りが拳の先へ出ていた（鯨・祠も同じ）。三人称の高さを 2 下げ（4.0 → 2.0 など）、z を 2 足して体の内側へ寄せた（0.5 → 2.5）。1 回目は高さ 1.5 だけで「まだ浮いてる。もうちょっと全体的に内側」と言われ、短剣で x・z・高さを撮り比べて z が内外に効くのを確かめた。`tools/gen/pixel/look_holds.py` の決まりに入れたので、取り込みのあとに流せば保たれる（22 品が変わった）。見比べ: docs/review/hold_drop.png。
     - 読み直しのこつ（箱を置き直さない）: `tools/models/x32/look5/bb2geo.py <取り込んだ.bbmodel> <出力先>` で geo.json と絵を出す（骨は g_root 一つ、上下の面の UV は向きを合わせてある）→ create_project(free) → from_geo_json → create_texture（絵）→ list_outline で g_root の uuid → apply_texture(g_root, all) → 筆 → export → `tools/models/x32/look5/ungeo.py <書き出し> <元の.bbmodel>`（箱の名前を UV で照合して戻す。_glow も戻る）→ install.py / install_bow.py。
       - paint_with_brush の connect_strokes=true は端の 2 点しか塗らないことがある。線は 1 画素ずつ座標を並べて connect_strokes=false で塗る。
-- 次: 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
+- 月 12 品（2026-11-19、moon_bold.py。色は夜空の銀、差し色は夜の藍、光は淡い金の月光）
+  - 月光の長剣（鍔の満月が光る）・残月の太刀（鍔の残月が光る）・欠け月の短剣・朔影の短剣（黒い刃の縁が光る）・月秤の鎚（天秤と分銅）・望月の大鎚・満ち引きの杖（半分光る珠）・朔の杖（黒い珠とコロナ）・星灯りの鈴杖（輪の四方の星）・月暈の鈴杖（暈の輪）・下弦の弓（残像の腕）・星落ちの弓（弓先の星と尾）
+  - 箱は設計から Blockbench へ読み込み（スクリプト）、筆は Blockbench で 3 回ずつ（座標は設計の UV から計算）。朔影の短剣は先の光の線が刃に埋もれていたので設計を直して読み直した。
+  - 月光の長剣は大剣の大きさ（1.7）を借りていたので 1.3 に下げた。弓の基の模型に引きの弦が全部入っていたのを直した（mstep の prep で string_0 以外を外す）。
+  - 一覧: docs/review/moon_bb_sheet.png・moon_ingame.png
+- 次: 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）
