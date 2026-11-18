@@ -12,7 +12,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 sys.path.insert(0, str(HERE))
-import whale_series  # noqa: E402
+import whale_bold as whale_series  # noqa: E402
 from lib import write_bbmodel  # noqa: E402
 
 work, out, ids = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
