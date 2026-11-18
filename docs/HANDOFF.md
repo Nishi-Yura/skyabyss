@@ -33,6 +33,33 @@
 - 古い作り方（設定画 → 箱の絵の板、薄い絵の板）はユーザーが却下した。`concept_boxes.py` の流れには戻らない。
 - 担当の指示（`.claude/agents/gear-*.md`）と doc 60 の 1.9 はまだ古い流れのまま。担当を使う前に look5 に書き直す。
 
+## シリーズの個性（2026-11-18 夜、鯨で決まったこと）
+
+- ユーザー: 「祠（初期）の武器に寄せすぎ」「それぞれのシリーズでもっと個性や奇抜な物に」「剣でか」。
+  - 祠の組み方（段の刃・箱の頭）を使わず、シリーズの生き物・題材のモチーフで一品ずつ形を立てる。
+  - 鯨の例: 一角の牙の短剣、顎の骨の大剣、潮吹きの杖、尾びれの星杖、ひげ板の鈴杖、鯨の背の鈴杖、頭骨の鎚、フジツボの弓、肋骨の籠の長弓。
+- ユーザー: 「blockbenchでちゃんと作り直した？」。
+  - スクリプトで箱を置いただけでは手作りと言わない。
+  - 必ず Blockbench で 3/4 を見て、箱を目で直し（modify_cube / remove_element）、筆で描き足す。
+  - 報告では、スクリプトで作った部分と手で直した部分をはっきり分けて書く。
+- 大きさ: 剣は祠の剣（全長 70 前後）を超えない。
+- 道具（tools/models/x32/look5/）:
+  - lib.py: 塗りの規則、節、円弧。
+  - whale_bold.py: 鯨の設計。シリーズごとに <series>_bold.py を作る。
+  - preview.py: 下見。Blockbench で組む前に形を確かめる。
+  - install.py / install_bow.py: 取り込み。弓の引きの 3 段は弦の差し替えで作る。
+- 古い *_parts.py は build_all.sh で新しい模型を上書きしてしまうので、シリーズを作り直したら消す。
+
+## 進み具合（look5）
+
+- 済み:
+  - 祠 6 品（元のまま）
+  - 鯨 10 品（3871c63cd）
+- 次: 潮 14 品
+  - coral_harpoon, coral_shield, tide_bell_staff, tide_bow, tide_coral_bow, tide_dagger, tide_hammer
+  - tide_pearl_staff, tide_reef_hammer, tide_shell_trident, tide_staff, tide_surf_bell_staff, tidecaller_claw, waterway_fang
+- その後: 嵐 → 火 → 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
+
 ## Blockbench の注意（無人で回すとき）
 
 - **プロジェクトを閉じない。** `close_project` は保存の確認の窓を出し、窓が出ている間は MCP の道具が止まる。人が押すまで戻らない。
