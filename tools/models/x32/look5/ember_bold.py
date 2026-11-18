@@ -164,6 +164,8 @@ def ember_ash_knife():
     m.seg('facet_c', I, (-1, 8.5), (-0.5, 15), 2, 1.05, 4, 6)
     m.seg('chip_l', I, (-1.5, 7), (-4, 10.5), 2, 0.8, 1, 4, tip=True)
     m.seg('chip_r', I, (3, 7), (5, 9.5), 2, 0.8, 1, 4, tip=True)
+    m.seg('chip_l2', I, (-1.25, 12.5), (-3.5, 15.5), 2, 0.8, 1, 4, tip=True)   # 刃の途中の欠け（Blockbench で足した）
+    m.seg('chip_r2', I, (2.5, 11.5), (4.5, 14), 2, 0.8, 1, 4, tip=True)
     return m
 
 
