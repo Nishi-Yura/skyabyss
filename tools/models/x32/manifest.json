@@ -467,7 +467,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_censer": {
   "series": "ember",
@@ -517,7 +517,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "ember_greatsword": {
   "series": "ember",

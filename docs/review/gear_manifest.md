@@ -2,7 +2,7 @@
 
 tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest.json。
 
-全 219 品。出来: polished 6、bb 0、script 2、none 167。
+全 219 品。出来: polished 6、bb 0、script 0、none 167。
 
 ## abyss（30、済み 0）
 
@@ -61,12 +61,12 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | id | 種類 | 階級 | 担当 | 出来 |
 | --- | --- | --- | --- | --- |
 | ember_ash_knife | dagger | legend | gear-assassin | look5 |
-| ember_bow | bow | rare | gear-archer | script |
+| ember_bow | bow | rare | gear-archer | look5 |
 | ember_censer | bell | rare | gear-shaman | look5 |
 | ember_censer_bell_staff | bell | legend | gear-shaman | look5 |
 | ember_cinder_blade | greatsword | legend | gear-warrior | look5 |
 | ember_dagger | dagger | rare | gear-assassin | look5 |
-| ember_flare_bow | bow | legend | gear-archer | script |
+| ember_flare_bow | bow | legend | gear-archer | look5 |
 | ember_greatsword | greatsword | rare | gear-warrior | look5 |
 | ember_kiln_staff | staff | legend | gear-mage | look5 |
 | ember_staff | staff | rare | gear-mage | look5 |

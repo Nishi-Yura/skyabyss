@@ -80,7 +80,7 @@
 - 火（余燼）11 品（ember_bold.py。色は灰をかぶった炭鉄、差し色は焼き物の土、光は熾火の橙）
   - 柄は革巻きの鉄の握り＋焼き物の帯、柄頭は火蜥蜴の尾が横へ巻く。
   - 済み（Blockbench で組み、取り込み済み）: 熾火の杖（熾の灰の殻は筆）・炉心の杖・灰の香炉（煙の筋→小さな炎 3 つに変更）・香炉の鈴杖・熾の短剣・灰の小刀・灰の戦斧（頬と刃のあいだに板を追加）・熾火の大剣・熾の大刃
-  - 残り: 灰の弓（ember_bow）・火の粉の弓（ember_flare_bow）は install_bow.py で取り込む。その後、撮影（gear_ember.txt を gear_storm.txt から作る）・一覧・古い ember_bow_parts.py / ember_flare_bow_parts.py の削除・台帳。
+  - 灰の弓（背骨のとげ、光なし）・火の粉の弓（焼けた枝、節の裂け目が光る）も済み。一覧: `docs/review/ember_glow_bb_sheet.png`・`ember_glow_ingame.png`
   - 熾の大刃の揺れる刃は節の継ぎ目が段に見える。見直しが要る。
 - 次: 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
