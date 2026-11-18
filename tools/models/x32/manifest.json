@@ -1366,7 +1366,7 @@
   "level": 50,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_cloudhymn_bell_staff": {
@@ -1376,7 +1376,7 @@
   "level": 50,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_cloudreader_staff": {
@@ -1396,7 +1396,7 @@
   "level": 50,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_cog_hammer": {
@@ -1846,7 +1846,7 @@
   "level": 50,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_quarry_hammer": {
@@ -2036,7 +2036,7 @@
   "level": 50,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_skysplit_axe": {
@@ -2046,7 +2046,7 @@
   "level": 50,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_snowsplitter_axe": {
