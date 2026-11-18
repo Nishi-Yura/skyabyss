@@ -1,0 +1,82 @@
+# 薄い絵の板の鯨の鎚を、祠の鎚・剣と同じ撮り方で並べる
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_plate.txt -PshotsName=gear_plate
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+close
+wait 30
+chat clear
+shot fp_shrine_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_shrine_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_shrine_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+close
+wait 30
+chat clear
+shot fp_shrine_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_shrine_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_shrine_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_hammer
+close
+wait 30
+chat clear
+shot fp_whale_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_hammer

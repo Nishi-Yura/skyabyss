@@ -2,18 +2,36 @@
 
 ユーザーの頼み: 「武器をすべて新しくして。すべて完成してから、シリーズごとにまとめて見せて」。続けて「ちゃんと Blockbench で作って」「レベル低くない？何回もブラッシュアップしてから次の武器に行くようにして」「完成までやり切って」（ユーザーは離席中）。
 
-## 今の作り方（これ以外で作らない）
+## 今の作り方: look5（2026-11-18 夜、ユーザーが「めちゃいい。これで行こう」と決めた）
 
-1. 平面の設定画（正面のドット絵、1 画素 = 1 単位 x32）を描き、暗い背景で参照の斧（`docs/review/refs_1118/02_crystal_axe.jpg`）と並べて 3 回以上直す。
-2. 箱の割り方を書く。
-3. `tools/gen/pixel/concept_boxes.py` で絵の板を作る（箱の表と裏に設定画、側面に素材の絵）。
-4. Blockbench（MCP）で箱を置き、側面と表を筆で描き込む。
-5. 書き出して取り込み、`tools/gen/pixel/dark_compare.py` で参照と並べる。
-6. ブラッシュアップを 3 回以上。
+手本: 鯨の鎚 v5。
+- 箱と下塗り: `tools/models/x32/look5/whale_hammer.py`
+- 模型: `tools/models/x32/whale_hammer.bbmodel`
+- ゲーム内の撮影: `docs/review/whale_hammer_v5_ingame.png`
+- 参照: `docs/review/refs_1118/`（12〜15 が決め手）
 
-- 手本: `tools/models/x32/whale_hammer.bbmodel` と `tools/models/x32/concepts/whale_hammer_*`。見比べの絵は `docs/review/whale_hammer_exemplar_1118.png`。
-- 決まりの文書: `docs/design/60_gear_look_roles.md` の 1.9（作り方・ブラッシュアップ）と 1.8（参照との差）。
-- 担当の指示: `.claude/agents/gear-*.md`（設定画 → Blockbench の流れ、ブラッシュアップ、Blockbench の注意）。
+見た目の決まり（ユーザーの言葉: 「のっぺり」「チープ」「最低でも 2 ドット」「弓みたいに綺麗に曲げる」「違和感」を直した結果）:
+1. **形**: 細く長くする。柄は太さ 3、全体は一方向に流れる。部品はどれも 2 ドット以上（1 ドットの部品は作らない）。絵の細かさは 1 単位 = 1 画素（x32）のまま。
+2. **曲線**: 段の箱で作らない。少しずつ回した節（rotation z）をつないで円弧にする。`bb_import` は回転に対応している。
+3. **色**: 1 色相の系統（鯨なら深い紺 → 青 → 泡の白）に、差し色 1 つ（骨）と光 1 つ（結晶）。素材を 5 つ同じ強さで並べない。
+4. **色の流れ**: 長さ方向に流す。柄は根元が暗く頭へ明るく、刃・ひれは根元が暗く先端が白近くまで明るい。
+5. **面の塗り**: 面の向きで明暗を変える（上 +1・横 -1・下 -2）。上と左の縁は明るく、下と右の縁は暗く、左上の角に光を入れる。大きな面には、1 画素内側に骨の縁取りの線。結晶は菱形の切子。握りは 2 ドットの輪と影の帯を交互に巻く。点の模様（まだら）は使わない。
+6. **元の特徴は残す**: 参照の構造を写さない（四角い枠など）。前の模型の素材・特徴の部品で組む。
+
+作業の流れ:
+1. `tools/models/x32/look5/<id>.py` を手本にならって書く（箱・回した節・素材・下塗りの規則）。作業フォルダで実行し、`v5.json` と `v5_base.png` を出す。
+2. Blockbench で次の順に組む。
+   - create_project → get_project_info で作業先を確かめる。
+   - create_texture（data に `v5_base.png` の絶対パス、uv_width/uv_height は絵の大きさ）。
+   - 箱を place_cube で一つずつ置く（faces に UV、回す節は origin と rotation）。
+3. 3/4 の角度（offscreen view `look`）で見て、筆（paint_with_brush）で描き足す。
+4. 書き出して取り込み、撮影で確かめる。
+   - export_model（スクラッチパッドへ）→ name を item id にして `tools/models/x32/<id>.bbmodel` に置く。
+   - `bb_import`、`look_holds.py`。
+   - `./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_plate.txt -PshotsName=gear_plate` で、祠の鎚・剣と並べて撮る。
+
+- 古い作り方（設定画 → 箱の絵の板、薄い絵の板）はユーザーが却下した。`concept_boxes.py` の流れには戻らない。
+- 担当の指示（`.claude/agents/gear-*.md`）と doc 60 の 1.9 はまだ古い流れのまま。担当を使う前に look5 に書き直す。
 
 ## Blockbench の注意（無人で回すとき）
 
