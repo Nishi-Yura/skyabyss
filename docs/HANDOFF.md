@@ -97,6 +97,10 @@
         - 大剣の刃の「間」は、3 回目で右の刃の内側の縁に塗った明るい線だった。外側の縁へ移し、左右の刃も真ん中で重ねた。
         - 箱は設計を直して位置だけ写した（`tools/models/x32/look5/transplant.py <build先> <取り込み済み.bbmodel> <出力>`。箱の大きさが変わらないことを確かめるので、筆の絵はそのまま残る）。Blockbench では読み直して目で確かめただけ。大剣の切子の色の 2 段上げと線の移し替えはスクリプトで絵を書き換えた。
         - 見比べ: docs/review/ember_hold_fix.png（左 = 前、中 = 後、右 = 全身）。
+      - 続き（2026-11-19、ユーザー: 「小刀のみまだ刃に間開いてる」「小刀と短剣は持つ部分がおかしいかも」）:
+        - 小刀の「間」: 根元で左右の欠片が 0.5 離れていたので重ねた。奥の欠片がほぼ黒（0〜2 段）で隙間に見えたので 2 段明るく、手前の欠片は面ごとに一色にした（2 段上げると細かい市松が目立ったため）。`tools/models/x32/look5/lighten.py <bbmodel> <箱名,...> <段>` を使った（スクリプトで絵を書き換え）。
+        - 短剣・小刀の握りを 11 → 8 に縮めた（柄が刃より長く見えた）。真ん中は手のまま。transplant.py の 4 番目の引数で、縮めた箱の側面の絵は上から使う。
+        - 見比べ: docs/review/ember_knife_fix.png（上 = 短剣、下 = 小刀。左から 前・後・全身前・全身後）。
     - 読み直しのこつ（箱を置き直さない）: `tools/models/x32/look5/bb2geo.py <取り込んだ.bbmodel> <出力先>` で geo.json と絵を出す（骨は g_root 一つ、上下の面の UV は向きを合わせてある）→ create_project(free) → from_geo_json → create_texture（絵）→ list_outline で g_root の uuid → apply_texture(g_root, all) → 筆 → export → `tools/models/x32/look5/ungeo.py <書き出し> <元の.bbmodel>`（箱の名前を UV で照合して戻す。_glow も戻る）→ install.py / install_bow.py。
       - paint_with_brush の connect_strokes=true は端の 2 点しか塗らないことがある。線は 1 画素ずつ座標を並べて connect_strokes=false で塗る。
 - 次: 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
