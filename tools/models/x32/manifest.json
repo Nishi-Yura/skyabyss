@@ -316,8 +316,8 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
-  "craft": "none"
+  "status": "done",
+  "craft": "look5"
  },
  "coral_shield": {
   "series": "tide",
@@ -326,8 +326,8 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
-  "craft": "none"
+  "status": "done",
+  "craft": "look5"
  },
  "divine_ash_hammer": {
   "series": "divine",
@@ -836,8 +836,8 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
-  "craft": "none"
+  "status": "done",
+  "craft": "look5"
  },
  "storm_thunder_bell_staff": {
   "series": "storm",
@@ -946,8 +946,8 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
-  "craft": "none"
+  "status": "done",
+  "craft": "look5"
  },
  "tide_staff": {
   "series": "tide",

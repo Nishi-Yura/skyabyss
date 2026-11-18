@@ -69,7 +69,14 @@
   - 光の置き場所: 金床の鎚は稲妻の鎖、渦雲の杖は火花の玉、雷鈴は短冊、短剣は火花 3 つ、爪は爪の間の放電、疾風の弓は弦そのもの。
   - 光なし: 雷石の鎚・羽根の杖・風見の鈴杖・雷翼の弓。
   - 一覧: `docs/review/storm_glow_bb_sheet.png`・`storm_glow_ingame.png`
-  - storm_sword は look/a の模型がないので扱いを確かめる。
+  - 追加 4 品（ユーザー: 「4品も作って」。look/a の模型が無かった品）:
+    - 嵐の剣（storm_sword）: 銅の翼の鍔、左右の半分を傾けた刃、先が光る。刃元に銅の稲妻の刻み（筆）
+    - 潮の円錐貝の三叉（tide_shell_trident）、珊瑚の銛（coral_harpoon、光は真珠の浮き）、海亀の甲羅の盾（coral_shield、光なし）
+    - 一覧: `docs/review/extra4_bb_sheet.png`・`extra4_ingame.png`
+    - 槍（PIKE）の持ち方はゲーム内で確かめた（握りに手、穂先は画面内）。盾の構え（coral_shield_blocking）はまだ撮っていない。盾の裏は貝色の平らな板のまま。
+  - 手で直した形は必ず `<series>_bold.py` に写して作り直す（modify_cube は UV をそのままにするので 1 単位 1 画素が崩れる）。
+    雷翼の弓（thunder_wing_bow）の primary_u/d と plume_u2/u3 はこの崩れが残っている（直していない）。
+  - 武器の手持ちの絵（textures/item/<id>.png）は模型から作り直していない（鯨・潮・嵐とも前の絵のまま）。
 - 次: 火 → 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 

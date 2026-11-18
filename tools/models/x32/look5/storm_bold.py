@@ -233,8 +233,24 @@ def storm_gale_bow():
     return m
 
 
+# ---------------------------------------------------------------- 剣
+
+def storm_sword():
+    """雷翼の剣: 鍔は上へ反る銅の翼、刃は細長い避雷の鉄。刃の付け根を銅の爪が噛み、雷を受けた先だけが光る"""
+    m = M('storm_sword')
+    rod(m, -10, 3, 3)
+    m.box('guard', S, [-3, 3, -2], [3, 6, 2], grad=(3, 3, 6, 5))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'wing_{n}', K, [(sd * 2.5, 4.5), (sd * 7, 5.5), (sd * 10.5, 7.5), (sd * 12.5, 10.5)], [3, 2.5, 2], 1.25, 3, 5.5, tip=True)
+        # 刃は左右の半分を少し傾けて重ね、段を作らずに先へ細らせる
+        m.seg(f'blade_{n}', S, (sd * 2.25, 5.5), (sd * 0.25, 44), 4.5, 0.9, 3, 6.5)
+        m.seg(f'edge_{n}', S, (sd * 4.25, 6), (sd * 2.35, 44), 2, 1.0, 6, 8.5)         # 刃の縁（明るい筋）
+        m.seg(f'tip_{n}', B, (sd * 2, 43), (0, 51.5), 2.5, 0.8, 2, 5, tip=True)        # 雷を受けた先
+    return m
+
+
 ALL = [storm_hammer, storm_anvil_hammer, storm_staff, storm_cloud_staff, storm_bell_staff, storm_thunder_bell_staff,
-       storm_dagger, raiju_claw, thunder_wing_bow, storm_gale_bow]
+       storm_dagger, raiju_claw, thunder_wing_bow, storm_gale_bow, storm_sword]
 
 if __name__ == '__main__':
     want = set(sys.argv[1:])

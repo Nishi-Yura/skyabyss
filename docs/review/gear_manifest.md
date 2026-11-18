@@ -2,7 +2,7 @@
 
 tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest.json。
 
-全 219 品。出来: polished 6、bb 0、script 9、none 173。
+全 219 品。出来: polished 6、bb 0、script 9、none 169。
 
 ## abyss（30、済み 0）
 
@@ -110,7 +110,7 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | shrine_staff | staff | common | gear-mage | polished |
 | shrine_sword | sword | common | gear-warrior | polished |
 
-## storm（11、済み 10）
+## storm（11、済み 11）
 
 | id | 種類 | 階級 | 担当 | 出来 |
 | --- | --- | --- | --- | --- |
@@ -122,16 +122,16 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | storm_gale_bow | bow | legend | gear-archer | look5 |
 | storm_hammer | hammer | rare | gear-smith | look5 |
 | storm_staff | staff | rare | gear-mage | look5 |
-| storm_sword | sword | rare | gear-warrior | none |
+| storm_sword | sword | rare | gear-warrior | look5 |
 | storm_thunder_bell_staff | bell | legend | gear-shaman | look5 |
 | thunder_wing_bow | bow | rare | gear-archer | look5 |
 
-## tide（14、済み 11）
+## tide（14、済み 14）
 
 | id | 種類 | 階級 | 担当 | 出来 |
 | --- | --- | --- | --- | --- |
-| coral_harpoon | spear | legend | gear-warrior | none |
-| coral_shield | shield | rare | gear-warrior | none |
+| coral_harpoon | spear | legend | gear-warrior | look5 |
+| coral_shield | shield | rare | gear-warrior | look5 |
 | tide_bell_staff | bell | rare | gear-shaman | look5 |
 | tide_bow | bow | rare | gear-archer | look5 |
 | tide_coral_bow | bow | legend | gear-archer | look5 |
@@ -139,7 +139,7 @@ tools/gen/pixel/gear_manifest.py が作る。状態は tools/models/x32/manifest
 | tide_hammer | hammer | rare | gear-smith | look5 |
 | tide_pearl_staff | staff | legend | gear-mage | look5 |
 | tide_reef_hammer | hammer | legend | gear-smith | look5 |
-| tide_shell_trident | spear | rare | gear-warrior | none |
+| tide_shell_trident | spear | rare | gear-warrior | look5 |
 | tide_staff | staff | rare | gear-mage | look5 |
 | tide_surf_bell_staff | bell | legend | gear-shaman | look5 |
 | tidecaller_claw | claw | legend | gear-assassin | look5 |

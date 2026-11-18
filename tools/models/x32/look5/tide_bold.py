@@ -281,8 +281,63 @@ def tide_coral_bow():
     return m
 
 
+# ---------------------------------------------------------------- 槍・盾
+
+def tide_shell_trident():
+    """円錐貝の三叉: 珊瑚の茎の先で、外の二本が上へ反る珊瑚の歯。三本の先に細い円錐貝をかぶせる。光は入れない"""
+    m = M('tide_shell_trident')
+    stalk(m, -16, 0, 32.5, knuckles=[(0.75, 12), (-0.75, 22)])
+    m.box('collar', S, [-2.5, 31, -2], [2.5, 34, 2], 4)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'prong_{n}', C, [(sd * 1.5, 33), (sd * 5, 34.5), (sd * 6.5, 38.5), (sd * 6.5, 43)], [3, 2.5, 2.5], 1.25, 4, 6.5)
+        for h, hn in ((-1, 'a'), (1, 'b')):                                   # 円錐貝: 左右の半分を傾けて先で合わせる
+            m.seg(f'cone_{n}{hn}', S, (sd * 6.5 + h * 1.75, 42), (sd * 6.5, 50), 2, 1.25, 3, 5, tip=True)
+    m.seg('prong_m', C, (0, 33.5), (0, 45), 3, 1.5, 4, 6.5)
+    for h, hn in ((-1, 'a'), (1, 'b')):
+        m.seg(f'cone_m{hn}', S, (h * 2, 44), (0, 54), 2.5, 1.4, 3, 5, tip=True)
+    return m
+
+
+def coral_harpoon():
+    """珊瑚の銛: 長い珊瑚の茎の先に、返しの付いた貝の穂先。茎に巻いた綱が垂れ、綱の先の真珠の浮きが光る"""
+    m = M('coral_harpoon')
+    stalk(m, -16, 0, 38.5, knuckles=[(0.75, 14), (-0.75, 26)], nubs=False)
+    m.box('socket', C, [-2, 37.5, -1.75], [2, 41.5, 1.75], grad=(37.5, 4, 41.5, 6))
+    for sd, n in ((-1, 'l'), (1, 'r')):                                                     # 穂先: 左右の半分を傾けて先へ細らせる
+        m.seg(f'point_{n}', S, (sd * 1.5, 41), (0, 55), 3, 1.1, 3, 5)
+    h = 3.5 / (2 * math.sqrt(2))
+    m.seg('point_tip', S, (-h, 55 - h), (h, 55 + h), 3.5, 1, 4, 5, over=0)                 # 先の菱形
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'barb_{n}', S, (sd * 1.5, 45.5), (sd * 4.75, 40.5), 2, 0.75, 3, 5, tip=True)   # 手元へ向く返し
+    m.box('line_coil', S, [-2, 29, -2], [2, 32, 2], 4)                                       # 茎に巻いた綱
+    m.chain('line', S, [(1.75, 30), (4.5, 26.5), (5.5, 22)], 2, 0.5, 3, 4)
+    f = 4.5 / (2 * math.sqrt(2))
+    m.seg('float', P, (5.5 - f, 19.5 - f), (5.5 + f, 19.5 + f), 6, 2, 3, 5, over=0)           # 真珠の浮き（菱形）
+    return m
+
+
+def coral_shield():
+    """海亀の甲羅の盾: 前（-Z）に盛り上がる甲羅の板（甲板の縁は貝の色）、縁から珊瑚の小枝が生える。光は入れない"""
+    m = M('coral_shield')
+    # 楕円の甲羅: 幅の違う板を重ねて輪郭を丸く。いちばん外の板は貝の色で、縁甲板の白い縁に見せる
+    m.box('marginal', S, [-11.5, -3, -2], [11.5, 27, 0], grad=(-3, 2, 27, 4))
+    m.box('shell_w', C, [-10.5, -6, -2.5], [10.5, 30, -0.5], grad=(-6, 2, 30, 4))
+    m.box('shell_m', C, [-7.5, -9, -2.5], [7.5, 33, -0.5], grad=(-9, 2, 33, 4))
+    m.box('shell_n', C, [-4, -10.5, -2.5], [4, 34.5, -0.5], grad=(-10.5, 1, 34.5, 3))
+    for k, y in enumerate((1, 11.5, 22)):                                                    # 背の甲板（菱形の列）
+        h = 7 / (2 * math.sqrt(2))
+        m.seg(f'scute_m{k}', C, (-h, y - h), (h, y + h), 7, 0.9, 4, 6, over=0, zc=-3.25)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        for k, y in enumerate((6, 17)):                                                      # 肋の甲板
+            h = 5 / (2 * math.sqrt(2))
+            m.seg(f'scute_{n}{k}', C, (sd * 6.5 - h, y - h), (sd * 6.5 + h, y + h), 5, 0.75, 3, 5, over=0, zc=-3)
+        m.chain(f'twig_{n}', C, [(sd * 8.5, 30), (sd * 11, 34), (sd * 10.5, 38)], [2.5, 2], 1.25, 5, 8, tip=True)
+    m.box('handle', S, [-1.5, -3, 0], [1.5, 6, 2.5], grad=(-3, 2, 6, 4))                    # 裏の握り
+    return m
+
+
 ALL = [tide_hammer, tide_reef_hammer, tide_staff, tide_pearl_staff, tide_bell_staff, tide_surf_bell_staff,
-       tide_dagger, waterway_fang, tidecaller_claw, tide_bow, tide_coral_bow]
+       tide_dagger, waterway_fang, tidecaller_claw, tide_bow, tide_coral_bow, tide_shell_trident, coral_harpoon, coral_shield]
 
 if __name__ == '__main__':
     want = set(sys.argv[1:])
