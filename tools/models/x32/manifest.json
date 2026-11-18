@@ -1706,7 +1706,7 @@
   "level": 48,
   "role": "gear-archer",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_loom_bell_staff": {
@@ -1746,7 +1746,7 @@
   "level": 48,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_mimic_heart_staff": {
@@ -1766,7 +1766,7 @@
   "level": 48,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_molten_axe": {
@@ -2086,7 +2086,7 @@
   "level": 48,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_starchart_staff": {
@@ -2096,7 +2096,7 @@
   "level": 48,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_starforge_hammer": {
@@ -2106,7 +2106,7 @@
   "level": 48,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_stormdrum_totem": {
