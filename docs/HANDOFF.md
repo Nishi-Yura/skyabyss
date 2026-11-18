@@ -127,7 +127,8 @@
 - 野・雲 6 本: wild_cloud_bold.py（雲の白銀＋淡い金＋空の青）。docs/review/wild_cloud_*.png。
 - 野・月 6 本: wild_moon_bold.py（夜の鉄＋真珠色＋星の黄）。docs/review/wild_moon_*.png。
 - 野・深淵上 24 本: wild_abyss_upper_bold.py（頁岩の坑道鉄＋塩＋坑夫の灯）。docs/review/wild_abyss_upper_*.png。
-- 次: 野の残り（深淵下）。シリーズごとにコミット（main には入れない）。
+- 野・深淵下 18 本: wild_abyss_lower_bold.py（紫黒の底の鉄＋錆び真鍮＋底の雷）。docs/review/wild_abyss_lower_*.png。
+- 次: 全武器 look5 完了。一覧は docs/review/all_weapons.html。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）

@@ -1176,7 +1176,7 @@
   "level": 46,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ash_sickle_claw": {
@@ -1186,7 +1186,7 @@
   "level": 44,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ashhook_bow": {
@@ -1226,7 +1226,7 @@
   "level": 42,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_banner_spear": {
@@ -1316,7 +1316,7 @@
   "level": 46,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_calming_censer": {
@@ -1326,7 +1326,7 @@
   "level": 44,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ceiling_claw": {
@@ -1346,7 +1346,7 @@
   "level": 46,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_cinder_claw": {
@@ -1406,7 +1406,7 @@
   "level": 44,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_compass_staff": {
@@ -1466,7 +1466,7 @@
   "level": 46,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_delver_sword": {
@@ -1506,7 +1506,7 @@
   "level": 46,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_emberbug_staff": {
@@ -1526,7 +1526,7 @@
   "level": 46,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_flash_bow": {
@@ -1536,7 +1536,7 @@
   "level": 42,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_fluff_staff": {
@@ -1586,7 +1586,7 @@
   "level": 42,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_gale_glaive": {
@@ -1646,7 +1646,7 @@
   "level": 44,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_inverted_greatsword": {
@@ -1776,7 +1776,7 @@
   "level": 42,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_moss_staff": {
@@ -1866,7 +1866,7 @@
   "level": 42,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_ramhorn_greatsword": {
@@ -1976,7 +1976,7 @@
   "level": 44,
   "role": "gear-archer",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_scribe_staff": {
@@ -2076,7 +2076,7 @@
   "level": 42,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_starbell_totem": {
@@ -2156,7 +2156,7 @@
   "level": 44,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_venom_fang": {

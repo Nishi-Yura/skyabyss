@@ -1,0 +1,367 @@
+# 月のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_wild_abyss_lower.txt -PshotsName=gear_wild_abyss_lower
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_calling_bow
+close
+wait 30
+chat clear
+shot fp_wild_calling_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_calling_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_calling_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_flash_bow
+close
+wait 30
+chat clear
+shot fp_wild_flash_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_flash_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_flash_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_scope_longbow
+close
+wait 30
+chat clear
+shot fp_wild_scope_longbow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_scope_longbow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_scope_longbow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fulgurite_sword
+close
+wait 30
+chat clear
+shot fp_wild_fulgurite_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_fulgurite_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_fulgurite_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_chain_greatsword
+close
+wait 30
+chat clear
+shot fp_wild_chain_greatsword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_chain_greatsword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_chain_greatsword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fishhook_knife
+close
+wait 30
+chat clear
+shot fp_wild_fishhook_knife
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_fishhook_knife
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_fishhook_knife
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_spark_dagger
+close
+wait 30
+chat clear
+shot fp_wild_spark_dagger
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_spark_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_spark_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ash_sickle_claw
+close
+wait 30
+chat clear
+shot fp_wild_ash_sickle_claw
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_ash_sickle_claw
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_ash_sickle_claw
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_abyss_mace
+close
+wait 30
+chat clear
+shot fp_wild_abyss_mace
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_abyss_mace
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_abyss_mace
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cog_hammer
+close
+wait 30
+chat clear
+shot fp_wild_cog_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_cog_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_cog_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_molten_axe
+close
+wait 30
+chat clear
+shot fp_wild_molten_axe
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_molten_axe
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_molten_axe
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_twin_spear
+close
+wait 30
+chat clear
+shot fp_wild_twin_spear
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_twin_spear
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_twin_spear
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ballspark_staff
+close
+wait 30
+chat clear
+shot fp_wild_ballspark_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_ballspark_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_ballspark_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_deep_eye_staff
+close
+wait 30
+chat clear
+shot fp_wild_deep_eye_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_deep_eye_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_deep_eye_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_hourglass_staff
+close
+wait 30
+chat clear
+shot fp_wild_hourglass_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_hourglass_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_hourglass_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_calming_censer
+close
+wait 30
+chat clear
+shot fp_wild_calming_censer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_calming_censer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_calming_censer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_raincall_bell_staff
+close
+wait 30
+chat clear
+shot fp_wild_raincall_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_raincall_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_raincall_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_effigy_totem
+close
+wait 30
+chat clear
+shot fp_wild_effigy_totem
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_wild_effigy_totem
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_wild_effigy_totem
