@@ -1236,7 +1236,7 @@
   "level": 9,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_bellows_hammer": {
@@ -1456,7 +1456,7 @@
   "level": 4,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_deep_eye_staff": {
@@ -1606,7 +1606,7 @@
   "level": 4,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_gull_bow": {
@@ -1856,7 +1856,7 @@
   "level": 4,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_raincall_bell_staff": {
@@ -1886,7 +1886,7 @@
   "level": 4,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_rope_halberd": {
@@ -1966,7 +1966,7 @@
   "level": 4,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_scope_longbow": {
@@ -1986,7 +1986,7 @@
   "level": 4,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_shell_bell_staff": {
