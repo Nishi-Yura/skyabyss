@@ -6,8 +6,9 @@
 
 決まり（2026-11-18 の祠の 6 品で決めた。ユーザーが見て OK を出した）:
 - 振る武器（剣・大剣・短剣・牙・爪・鎚・斧・鎌）: 三人称は前で上へ起こして構える。z を 55 → 20（左手 -35 → -70）
-- 振る武器の三人称の高さは、借りた値から 1.5 下げる（4.0 → 2.5、4.2 → 2.7、4.5 → 3.0）。
-  2026-11-19「手から浮いてない？」: 上へ起こすと握りが拳の先へ出ていた。短剣・剣・大剣で 1.5 下げると握りが手に入るのを撮って確かめた
+- 振る武器の三人称は、借りた値から高さを 2 下げ（4.0 → 2.0、4.2 → 2.2、4.5 → 2.5）、z を 2 足して体の内側へ寄せる（0.5 → 2.5）。
+  2026-11-19「手から浮いてない？」→「まだ浮いてる。もうちょっと全体的に内側」: 上へ起こすと握りが拳の先・体の外へ出ていた。
+  短剣で x・z・高さを撮り比べ、z が体の内外に効くのを確かめた（x はほとんど変わらない）
 - 杖・鈴杖・弓・槍・長柄: 今の持ち方のまま（三人称の位置と弓の倒し方は WeaponItemRenderer の look a の枝で足す）
 
   python -I tools/gen/pixel/look_holds.py [--check]
@@ -24,7 +25,22 @@ RAISED = {"sword", "greatsword", "dagger", "fang", "claw", "hammer", "maul", "ma
 TP_R = (0, -90, 55)      # 振る武器の、借りた持ち方の三人称（右手）
 RAISED_R, RAISED_L = [0, -90, 20], [0, -90, -70]
 BORROWED_Y = (4.0, 4.2, 4.5)   # 借りた持ち方の三人称の高さ
-DROP_Y = 1.5
+DROP_Y, IN_Z = 2.0, 2.0
+BORROWED_Z = 0.5
+
+
+def settle(d):
+    """三人称の位置を決まりに合わせる。借りた値（または前の決まりで 1.5 だけ下げた値）から直すので、何度流しても同じ"""
+    t = d["thirdperson_righthand"]["translation"]
+    base = {round(y - 1.5, 2): y for y in BORROWED_Y}
+    y0 = round(t[1], 2)
+    y0 = base.get(y0, y0)
+    if y0 not in BORROWED_Y or round(t[2], 2) != BORROWED_Z:
+        return False
+    for hand in ("thirdperson_righthand", "thirdperson_lefthand"):
+        d[hand]["translation"][1] = round(y0 - DROP_Y, 2)
+        d[hand]["translation"][2] = round(BORROWED_Z + IN_Z, 2)
+    return True
 
 
 def main():
@@ -38,13 +54,10 @@ def main():
         data = json.loads(p.read_text(encoding="utf-8"))
         d = data["base"]["display"]
         rot = tuple(round(v) for v in d["thirdperson_righthand"]["rotation"])
-        y = d["thirdperson_righthand"]["translation"][1]
         if rot == tuple(RAISED_R):
-            if round(y, 2) in BORROWED_Y:
+            if settle(d):
                 changed.append(i)
                 if not check:
-                    for hand in ("thirdperson_righthand", "thirdperson_lefthand"):
-                        d[hand]["translation"][1] = round(d[hand]["translation"][1] - DROP_Y, 2)
                     p.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
             continue
         if rot != TP_R:
@@ -54,8 +67,7 @@ def main():
         if not check:
             d["thirdperson_righthand"]["rotation"] = list(RAISED_R)
             d["thirdperson_lefthand"]["rotation"] = list(RAISED_L)
-            for hand in ("thirdperson_righthand", "thirdperson_lefthand"):
-                d[hand]["translation"][1] = round(d[hand]["translation"][1] - DROP_Y, 2)
+            settle(d)
             p.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(("differs: " if check else "updated: ") + ", ".join(changed) if changed else "ok")
     if check and changed:
