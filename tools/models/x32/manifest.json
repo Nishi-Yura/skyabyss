@@ -1386,7 +1386,7 @@
   "level": 22,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_cloudveil_claw": {
@@ -1426,7 +1426,7 @@
   "level": 19,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_crab_hammer": {
@@ -1496,7 +1496,7 @@
   "level": 19,
   "role": "gear-archer",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_effigy_totem": {
@@ -1546,7 +1546,7 @@
   "level": 19,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_fogbell_bell_staff": {
@@ -1576,7 +1576,7 @@
   "level": 22,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_fulgurite_sword": {
@@ -1596,7 +1596,7 @@
   "level": 22,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_guard_sword": {
@@ -1716,7 +1716,7 @@
   "level": 19,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_lullaby_bell_staff": {
@@ -1826,7 +1826,7 @@
   "level": 22,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_pick_hammer": {
@@ -1876,7 +1876,7 @@
   "level": 19,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_rat_knife": {
@@ -2056,7 +2056,7 @@
   "level": 22,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_snuffer_dagger": {
@@ -2116,7 +2116,7 @@
   "level": 30,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_stormwolf_fang": {
@@ -2126,7 +2126,7 @@
   "level": 19,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_tidewatch_staff": {
@@ -2176,7 +2176,7 @@
   "level": 30,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "wild_windcutter_bow": {
@@ -2186,7 +2186,7 @@
   "level": 22,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  }
 }
