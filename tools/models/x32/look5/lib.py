@@ -23,20 +23,26 @@ RAMPS = {
     'bone': ['#4a3430', '#7a5c4a', '#a88a6a', '#ccb08a', '#e8d4ae', '#fff6e2'],
     'glow': ['#0e4a98', '#1a78d0', '#3cb0f0', '#86e0ff', '#c8f6ff', '#ffffff'],
     'string': ['#3a4a5a', '#6a7e90', '#9cb2c4', '#cfe2ee', '#f2fbff'],
+    # 潮: 深い珊瑚の赤紫 → 珊瑚 → 桃 → 泡の白、差し色の貝（クリーム）、光る真珠（桃白）
+    'coral': ['#2a0e22', '#4a1630', '#6e1e3a', '#962a44', '#bc3c50', '#de5a62', '#f08478', '#f8b0a0', '#fcd8cc', '#fff4ee'],
+    'shell': ['#4a3a3a', '#7a6458', '#a89282', '#d0bea8', '#ece0cc', '#fffaf0'],
+    'pearl': ['#8a4a70', '#c070a0', '#e8a0c8', '#f8d0e8', '#fff0f8', '#ffffff'],
 }
 OFF = {'up': 1, 'south': 0, 'north': 0, 'east': -1, 'west': -1, 'down': -2}
 
 
 class Model:
-    def __init__(self, name):
+    def __init__(self, name, accent='bone', glowmat='glow'):
         self.name = name
         self.parts = []
+        self.accent = accent      # 巻き・縁取りの線の素材
+        self.glowmat = glowmat    # 光る素材（名前を _glow にする）
 
     def box(self, name, mat, frm, to, base=3, grad=None, rim=False, wrap=None, gem=False, glow=None):
         """grad=(y0, t0, y1, t1): 世界の y で色の段を流す。wrap=(y0, y1): その高さに巻きを描く"""
         self.parts.append(dict(name=self._nm(name, mat, glow), mat=mat, frm=list(frm), to=list(to),
                                origin=[(frm[0] + to[0]) / 2, (frm[1] + to[1]) / 2, (frm[2] + to[2]) / 2], rot=0,
-                               base=base, grad=grad, rim=rim, wrap=wrap, gem=gem, seg=None, tip=False))
+                               base=base, grad=grad, rim=rim, wrap=wrap, gem=gem, seg=None, tip=False, accent=self.accent))
 
     def seg(self, name, mat, a, b, w, d, t0=3, t1=None, over=0.5, zc=0.0, tip=False, glow=None):
         """a から b へ伸びる回した節（幅 w、奥行き ±d）。色の段は a で t0、b で t1"""
@@ -47,7 +53,7 @@ class Model:
         self.parts.append(dict(name=self._nm(name, mat, glow), mat=mat,
                                frm=[r2(cx - L / 2), r2(cy - w / 2), r2(zc - d)], to=[r2(cx + L / 2), r2(cy + w / 2), r2(zc + d)],
                                origin=[r2(cx), r2(cy), r2(zc)], rot=r2(ang), base=t0, grad=None, rim=False, wrap=None,
-                               gem=False, seg=(t0, t0 if t1 is None else t1), tip=tip))
+                               gem=False, seg=(t0, t0 if t1 is None else t1), tip=tip, accent=self.accent))
 
     def chain(self, prefix, mat, pts, widths, depths, t0, t1, tip=True, zc=0.0, over=0.5):
         """点の列を節でつなぐ。幅・奥行きは各節（列か一つの数）"""
@@ -64,9 +70,8 @@ class Model:
                 center[1] + r * math.sin(math.radians(a0 + (a1 - a0) * k / n))) for k in range(n + 1)]
         self.chain(prefix, mat, pts, widths, depths, t0, t1, tip=tip, zc=zc)
 
-    @staticmethod
-    def _nm(name, mat, glow):
-        g = (mat == 'glow') if glow is None else glow
+    def _nm(self, name, mat, glow):
+        g = (mat in ('glow', self.glowmat)) if glow is None else glow
         return name + '_glow' if g and not name.endswith('_glow') else name
 
     def build(self, out_dir, width=128):
@@ -154,16 +159,16 @@ def paint_face(img, e, face, rect):
                     k = int(y1 - 1 - wy) % 5
                     lit = face in ('south', 'north')
                     if k in (0, 1):
-                        mat, t = 'bone', ((4 if k == 0 else 3) if lit else (3 if k == 0 else 2))
+                        mat, t = e.get('accent', 'bone'), ((4 if k == 0 else 3) if lit else (3 if k == 0 else 2))
                         if i == w - 1:
                             t -= 1
                     elif k == 2:
-                        mat, t = 'bone', 0
+                        mat, t = e.get('accent', 'bone'), 0
                     else:
                         t = b + OFF[face] + (0.6 if i == 0 else 0)
             if e['rim'] and face in ('south', 'north', 'east', 'west') and w >= 5 and h >= 5:
                 if (i in (1, w - 2) and 1 <= j <= h - 2) or (j in (1, h - 2) and 1 <= i <= w - 2):
-                    mat, t = 'bone', (4 if (j == 1 or i == 1) else 2.6)
+                    mat, t = e.get('accent', 'bone'), (4 if (j == 1 or i == 1) else 2.6)
             if e['gem'] and face in ('south', 'north'):
                 cx, cy = (w - 1) / 2, (h - 1) / 2
                 d = abs(i - cx) / (w / 2) + abs(j - cy) / (h / 2)

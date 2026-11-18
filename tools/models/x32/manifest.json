@@ -877,7 +877,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "tide_bow": {
   "series": "tide",
@@ -887,7 +887,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "tide_coral_bow": {
   "series": "tide",
@@ -897,7 +897,7 @@
   "role": "gear-archer",
   "bow": true,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "tide_dagger": {
   "series": "tide",
@@ -907,7 +907,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "tide_hammer": {
   "series": "tide",
@@ -917,7 +917,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "tide_pearl_staff": {
   "series": "tide",
@@ -927,7 +927,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "tide_reef_hammer": {
   "series": "tide",
@@ -937,7 +937,7 @@
   "role": "gear-smith",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "tide_shell_trident": {
   "series": "tide",
@@ -957,7 +957,7 @@
   "role": "gear-mage",
   "bow": false,
   "status": "done",
-  "craft": "bb"
+  "craft": "look5"
  },
  "tide_surf_bell_staff": {
   "series": "tide",
@@ -967,7 +967,7 @@
   "role": "gear-shaman",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "tidecaller_claw": {
   "series": "tide",
@@ -977,7 +977,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "tower_balance_sword": {
   "series": "tower",
@@ -1067,7 +1067,7 @@
   "role": "gear-assassin",
   "bow": false,
   "status": "done",
-  "craft": "script"
+  "craft": "look5"
  },
  "whale_bell_staff": {
   "series": "whale",

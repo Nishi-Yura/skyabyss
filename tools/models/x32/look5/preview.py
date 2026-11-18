@@ -12,12 +12,14 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 sys.path.insert(0, str(HERE))
-import whale_bold as whale_series  # noqa: E402
+import whale_bold  # noqa: E402
+import tide_bold  # noqa: E402
+MODS = [whale_bold, tide_bold]
 from lib import write_bbmodel  # noqa: E402
 
 work, out, ids = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
 for i in ids:
-    getattr(whale_series, i)().build(work)
+    next(getattr(md, i) for md in MODS if hasattr(md, i))().build(work)
     cubes = json.loads((work / f'{i}.json').read_text(encoding='utf-8'))
     only = (lambda n: not n.startswith('string_') or n == 'string_0') if 'bow' in i else None
     dst = ROOT / 'tools/models/x32' / f'{i}.bbmodel'
