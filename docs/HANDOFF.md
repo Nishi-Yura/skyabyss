@@ -101,6 +101,11 @@
         - 小刀の「間」: 根元で左右の欠片が 0.5 離れていたので重ねた。奥の欠片がほぼ黒（0〜2 段）で隙間に見えたので 2 段明るく、手前の欠片は面ごとに一色にした（2 段上げると細かい市松が目立ったため）。`tools/models/x32/look5/lighten.py <bbmodel> <箱名,...> <段>` を使った（スクリプトで絵を書き換え）。
         - 短剣・小刀の握りを 11 → 8 に縮めた（柄が刃より長く見えた）。真ん中は手のまま。transplant.py の 4 番目の引数で、縮めた箱の側面の絵は上から使う。
         - 見比べ: docs/review/ember_knife_fix.png（上 = 短剣、下 = 小刀。左から 前・後・全身前・全身後）。
+      - 小刀の刃を作り直し（2026-11-19、ユーザー: 「小刀の刃気に入らない」→ ラフ docs/review/ash_knife_roughs.png の A 鉈刃 / B 柳刃 / C 灰の葉 から B）:
+        - 柳刃: 細く長い真っ直ぐな片刃（25 箱）。刃元に焼き物のはばき、背に焼き物の細い筋と刻み 3 つ、刃の縁に研ぎの明るい帯、樋、先は背へ 4 段で細る。
+        - 箱は設計（ember_bold.py）をスクリプトで Blockbench に読み込んだ。Blockbench で目で直したのは背の筋だけ（厚すぎて背が全部焼き物に見えたので細くした。設計に写した）。
+        - 筆（Blockbench）: 1 回目 = 樋の黒を中間の暗さに（穴に見えたため）、2 回目 = 刃元の切り欠きを中間色に・先の段に明るい縁、3 回目 = 刃の平の背側に光の線、4 回目 = 先の段の明るい縁がゲームで櫛の歯に見えたので刃の色へ戻した。
+        - 見比べ: docs/review/ash_knife_b.png。持ち方の「浮き」は鯨の短剣・大剣と同じ位置と確かめた（docs/review/ember_hold_vs_whale.png）。まだユーザーの返事待ち。
     - 読み直しのこつ（箱を置き直さない）: `tools/models/x32/look5/bb2geo.py <取り込んだ.bbmodel> <出力先>` で geo.json と絵を出す（骨は g_root 一つ、上下の面の UV は向きを合わせてある）→ create_project(free) → from_geo_json → create_texture（絵）→ list_outline で g_root の uuid → apply_texture(g_root, all) → 筆 → export → `tools/models/x32/look5/ungeo.py <書き出し> <元の.bbmodel>`（箱の名前を UV で照合して戻す。_glow も戻る）→ install.py / install_bow.py。
       - paint_with_brush の connect_strokes=true は端の 2 点しか塗らないことがある。線は 1 画素ずつ座標を並べて connect_strokes=false で塗る。
 - 次: 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
