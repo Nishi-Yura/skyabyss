@@ -12,12 +12,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 sys.path.insert(0, str(HERE))
-import whale_bold  # noqa: E402
-import tide_bold  # noqa: E402
-import storm_bold  # noqa: E402
-import ember_bold  # noqa: E402
-import moon_bold  # noqa: E402
-MODS = [whale_bold, tide_bold, storm_bold, ember_bold, moon_bold]
+import importlib  # noqa: E402
+MODS = [importlib.import_module(f.stem) for f in sorted(HERE.glob('*_bold.py'))]
 from lib import write_bbmodel  # noqa: E402
 
 work, out, ids = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]

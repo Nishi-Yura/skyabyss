@@ -114,7 +114,9 @@
   - 箱は設計から Blockbench へ読み込み（スクリプト）、筆は Blockbench で 3 回ずつ（座標は設計の UV から計算）。朔影の短剣は先の光の線が刃に埋もれていたので設計を直して読み直した。
   - 月光の長剣は大剣の大きさ（1.7）を借りていたので 1.3 に下げた。弓の基の模型に引きの弦が全部入っていたのを直した（mstep の prep で string_0 以外を外す）。
   - 一覧: docs/review/moon_bb_sheet.png・moon_ingame.png
-- 次: 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
+- 神器 12 品（2026-11-19 夜、divine_bold.py。白い石・金・朝の光、形は docs/design/50 の 4.5 の説明どおり）。一覧 docs/review/divine_bb_sheet.png・divine_ingame.png
+  - 夜通しの流れ（ユーザー就寝中「すべての武器完成させて」）: 設計 → preview → Blockbench に読み込み（スクリプト）→ 筆 3 回（brush.py が設計の UV から座標を選ぶ: 主の明るい上縁・差し色の明るい縁・主の下縁の影）→ 書き出し → mstep.sh done → series_check.sh（持ち方・manifest・撮影・一覧）。
+- 次: 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 
 ## Blockbench の注意（無人で回すとき）

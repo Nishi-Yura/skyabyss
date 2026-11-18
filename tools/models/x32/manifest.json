@@ -336,7 +336,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_bell_hammer": {
@@ -346,7 +346,7 @@
   "level": null,
   "role": "gear-smith",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_dawn_staff": {
@@ -356,7 +356,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_eyelid_staff": {
@@ -366,7 +366,7 @@
   "level": null,
   "role": "gear-mage",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_keeper_bell_staff": {
@@ -376,7 +376,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_mist_bow": {
@@ -386,7 +386,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_moth_dagger": {
@@ -396,7 +396,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_plume_bow": {
@@ -406,7 +406,7 @@
   "level": null,
   "role": "gear-archer",
   "bow": true,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_promise_bell_staff": {
@@ -416,7 +416,7 @@
   "level": null,
   "role": "gear-shaman",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_rewind_dagger": {
@@ -426,7 +426,7 @@
   "level": null,
   "role": "gear-assassin",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_sky_sword": {
@@ -436,7 +436,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "divine_warden_blade": {
@@ -446,7 +446,7 @@
   "level": null,
   "role": "gear-warrior",
   "bow": false,
-  "status": "todo",
+  "status": "done",
   "craft": "none"
  },
  "ember_ash_knife": {
