@@ -59,6 +59,10 @@
     - 法螺貝の鎚・脳珊瑚の礁の鎚・帆立の杖・海月の真珠杖・巻貝の鈴杖・海馬の波鈴杖・エイの棘の短剣・鰻の顎の牙・蟹の鋏の爪・珊瑚の枝の弓・マンタの翼の弓
     - 一覧: `docs/review/tide_series_bold_bb_sheet.png`
   - 潮の残り 3 品（coral_harpoon, coral_shield, tide_shell_trident）は look/a ではなく items/<id>/legend.json の別の描き方。look5 の流れでは作れないので、扱いをユーザーに確かめる。
+- 2026-11-18 夜の追加の決まり（ユーザー: 「光は入れていいんだけど、本当にそこだけなの？」「形自体はシリーズごとに毎回作り直してね」）:
+  - 光の置き場所を型にしない。柄頭の先・弓の握りの宝石・刃の中央の線・鐘の舌を既定にせず、品ごとにモチーフから選ぶ（同じシリーズで同じ場所は 2 回まで、光なしの品があってもよい）。
+  - 形は他のシリーズから借りない。柄・柄頭・弓腕・弓の握り・鈴はシリーズごとに設計する（共有してよいのは lib.py の塗りの規則だけ）。握りの中心 (12, 15) だけは持ち方のため残す。
+  - 潮はこの決まりで組み直した（1ff0f5840、一覧 `docs/review/tide_glow_bb_sheet.png`・`tide_glow_ingame.png`）。鯨は形を残して光だけ動かした（whale_series.py の grip(butt='none')・bell(clapper=False)・bow_grip(gems=False)）。
 - 次: 嵐 → 火 → 月 → 神器 → 塔 → 深淵 → 野 → その他。シリーズごとにコミット（main には入れない）。
 - 作業の手順のこつ: 作業フォルダで `python -I <series>_bold.py` → `python -I tools/models/x32/look5/dump.py <id>`（箱ごとの place_cube 引数を出す）→ Blockbench で place_cube を 1 箱ずつ → 3/4 を見て modify_cube → 筆 → export → install.py。
 

@@ -20,6 +20,8 @@ def grip(m, y0, y1, pommel_y, bands=(), wrap_to=None, butt='glow'):
     m.box('pommel_flare', 'sea', [-2.5, pommel_y, -2.5], [2.5, pommel_y + 2, 2.5], 2)
     if butt == 'glow':
         m.box('pommel_tip_glow', 'glow', [-1, pommel_y - 6, -1], [1, pommel_y - 3, 1], 3)
+    elif butt == 'none':
+        pass
     else:
         m.seg('butt_tip', 'bone', (0, pommel_y - 3), (0, pommel_y - 8), 2, 1, 3, 5, tip=True)
 
@@ -87,13 +89,14 @@ def whale_star_staff():
     return m
 
 
-def bell(m, prefix, cx, top, size):
+def bell(m, prefix, cx, top, size, clapper=True):
     """紺の釣鐘（上がすぼまり、口が開く）と光る舌。size 1 = レア、1.4 = 伝説"""
     s = size
     m.box(f'{prefix}_crown', 'sea', [cx - 2 * s, top - 3 * s, -2 * s], [cx + 2 * s, top, 2 * s], grad=(top - 3 * s, 3, top, 5))
     m.box(f'{prefix}_body', 'sea', [cx - 3 * s, top - 8 * s, -3 * s], [cx + 3 * s, top - 3 * s, 3 * s], grad=(top - 8 * s, 2, top - 3 * s, 4), rim=s > 1.2)
     m.box(f'{prefix}_lip', 'bone', [cx - 4 * s, top - 10 * s, -3.5 * s], [cx + 4 * s, top - 8 * s, 3.5 * s], 4)
-    m.box(f'{prefix}_clapper_glow', 'glow', [cx - 1, top - 10 * s - 2.5, -1], [cx + 1, top - 10 * s, 1], 4)
+    if clapper:
+        m.box(f'{prefix}_clapper_glow', 'glow', [cx - 1, top - 10 * s - 2.5, -1], [cx + 1, top - 10 * s, 1], 4)
 
 
 def whale_bell_staff():
@@ -157,10 +160,12 @@ def bow_body(m, body, tips, w_body, w_tip, thorns=True, ribs=False):
                 m.chain(f'rib_{n}{zn}', 'sea', [f(p) for p in body], [2, 2, 2, 2, 2][:len(body) - 1], 1, 3, 6, tip=True, zc=zc)
 
 
-def bow_grip(m, legend=False):
+def bow_grip(m, legend=False, gems=True):
     m.box('grip', 'sea', [9, 9, -3], [15, 21, 3], grad=(9, 2, 21, 4), wrap=(9, 21))
     m.box('grip_ring_t', 'bone', [8.5, 21, -3.5], [15.5, 23, 3.5], 4)
     m.box('grip_ring_b', 'bone', [8.5, 7, -3.5], [15.5, 9, 3.5], 3)
+    if not gems:
+        return
     m.box('socket_f', 'bone', [10, 12, -4], [14, 18, -3], 4)
     m.box('crystal_f_glow', 'glow', [10.5, 12.5, -4.75], [13.5, 17.5, -3.75], gem=True)
     m.box('socket_b', 'bone', [10, 12, 3], [14, 18, 4], 4)
