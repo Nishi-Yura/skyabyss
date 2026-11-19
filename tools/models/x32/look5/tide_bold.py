@@ -254,28 +254,31 @@ def kelp_grip(m, x0, x1, d):
 
 
 def tide_bow():
-    """珊瑚の枝の反り弓: 細い握りから珊瑚の弓腕がまっすぐ伸び、先で外へ跳ね返る。背の小枝の先のポリプが光る"""
+    """潮殻の弓（エピック）: 弓腕そのものが、珊瑚と貝の縞の部屋を連ねたオウム貝の殻。弓の先で殻が渦に巻き込み、
+    渦の芯に真珠が光る。弦は渦の内の巻きが受ける。弦には貝の留めが二つ"""
     m = M('tide_bow')
     kelp_grip(m, 10.5, 13.5, 2)
-    arm = [(12, 20.5), (11, 27), (9, 33), (6.5, 38), (4, 42)]
-    curl = [(4, 42), (3.25, 45.5), (4.75, 48.5)]
+    arm = [(12, 20.5), (13, 26.5), (12.5, 32.5), (10.5, 37.5), (7.5, 41)]
+    c = (6.5, 46.5)
+    top, bot = (4.25, 45.25), (4.25, -15.25)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', C, [mirror(p, sign) for p in arm], [3, 3, 2.5, 2.5], 1.5, 3, 6, tip=False)
-        m.chain(f'curl_{n}', C, [mirror(p, sign) for p in curl], [2.5, 2], 1.25, 6, 8.5, tip=True)
-        m.chain(f'twig_{n}0', C, [mirror(p, sign) for p in ((10.25, 29), (13.5, 31.5), (14.5, 35))], [2.5, 2], 1.25, 4, 7)
-        m.chain(f'twig_{n}1', C, [mirror(p, sign) for p in ((7.5, 36), (10.5, 39), (11, 42.5))], [2, 2], 1, 5, 7.5)
-        for k, (x, y) in enumerate(((14.5, 35.5), (11, 43))):
-            yy = mirror((x, y), sign)[1]
-            m.box(f'polyp_{n}{k}', P, [x - 1, yy - 1, -1.1], [x + 1, yy + 1, 1.1], 4)
-        m.seg(f'nock_{n}', S, mirror((4.5, 44.75), sign), mirror((1.5, 44.75), sign), 2, 1, 4, 5)
-    strings(m, (2, 44.75), (2, -14.75))
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            q = mirror((9.5, 32), sign)
-            z0 = 1.4 if zs > 0 else -1.4
-            m.box(f'zbranch_{n}{zn}', C, [q[0] - 0.75, q[1] - 0.75, min(z0, z0 + zs * 3)], [q[0] + 0.75, q[1] + 0.75, max(z0, z0 + zs * 3)], 4)
-            z1 = z0 + zs * 3
-            m.box(f'zpolyp_{n}{zn}', P, [q[0] - 0.9, q[1] - 0.9, min(z1, z1 + zs * 1.3)], [q[0] + 0.9, q[1] + 0.9, max(z1, z1 + zs * 1.3)], 4)
+        P = lambda q, s=sign: mirror(q, s)
+        for k in range(len(arm) - 1):
+            m.seg(f'chamber_{n}{k}', S if k % 2 else C, P(arm[k]), P(arm[k + 1]), 4.6 - k * 0.3, 1.8, 4, 6, over=0.15)
+        pts = []
+        for i in range(10):
+            a = math.radians(-60 + i * 40)
+            r = 5.6 - i * 0.45
+            pts.append((c[0] + r * math.cos(a), c[1] + r * math.sin(a)))
+        m.chain(f'whorl_{n}', S, [P(q) for q in [(7.5, 41)] + pts], [3.4 - i * 0.18 for i in range(10)], 1.7, 5, 8, tip=False, over=0.3)
+        q = P(c)
+        m.box(f'pearl_{n}_glow', 'pearl', [q[0] - 1, q[1] - 1, -1.7], [q[0] + 1, q[1] + 1, 1.7], 4)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((38, -8)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_shell{k}', S, [q[0] - 1, q[1] - 1.2, -1], [q[0] + 1, q[1] + 1.2, 1], 5)
+            m.box(f'string_{key}_shell{k}_glow', 'pearl', [q[0] - 0.5, q[1] - 0.5, -1.15], [q[0] + 0.5, q[1] + 0.5, 1.15], 5)
     return m
 
 

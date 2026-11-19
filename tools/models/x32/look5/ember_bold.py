@@ -266,23 +266,37 @@ def bow_grip(m):
 
 
 def ember_bow():
-    """灰の弓: 余燼の鉄の腕（太め）。背（+x）に火蜥蜴の背骨のとげが四本ずつ、先へ短く。腕の付け根に焼き物の鱗、弓の先は焼き物の弦受け"""
+    """灰の弓（エピック）: 弓腕そのものが一匹の火蜥蜴。握りの尾から胴が太り、弓の先で頭（光る目と顎）になって弦をくわえる。
+    背には焼き物の脚が二対、腹（弦の側）に熾火の筋が通る。弦には熾火の玉が二つ"""
     m = M('ember_bow')
     bow_grip(m)
-    arm = [(12, 21), (12.75, 26.5), (12.25, 32), (10.25, 38), (7.25, 42.5), (4.5, 45)]
-    spikes = [((13.25, 25), (16.25, 26.5), 2.5), ((13, 29.75), (15.75, 31.75), 2.25),
-              ((12, 34.5), (14.5, 37), 2), ((10, 38.75), (12, 41.25), 2)]
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (5.5, 44.25)]
+    top, bot = (1.5, 46.5), (1.5, -16.5)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', I, [mirror(p, sign) for p in arm], [3.5, 3.25, 3, 2.75, 2.25], 1.4, 3, 6, tip=False)
-        for k, (a, b, w) in enumerate(spikes):
-            m.seg(f'spike_{n}{k}', I, mirror(a, sign), mirror(b, sign), w, 0.8, 4, 7.5, tip=True)
-        m.seg(f'scale_{n}', K, mirror((12.25, 22.5), sign), mirror((12.5, 27.5), sign), 2.5, 1.6, 3, 5)
-        m.seg(f'nock_{n}', K, mirror((6.5, 45.5), sign), mirror((3, 45.5), sign), 2.5, 1.1, 4, 5)
-    strings(m, (4.5, 45.5), (4.5, -15.5))
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        for k, (x, y) in enumerate(((10.75, 27.5), (9.75, 33), (7.75, 38.5))):
-            q = mirror((x, y), sign)
-            m.seg(f'belly_scale_{n}{k}', K, q, (q[0] - 2.25, q[1] - sign * 1.5), 2, 1.2, 3, 5, tip=True)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'body_{n}', I, [P(q) for q in arm], [3.2, 4.2, 4.8, 4.4, 3.8], 1.8, 2, 5, tip=False)
+        m.chain(f'belly_{n}_glow', E, [P(q) for q in lib.offset_line(arm, -1.9)[1:5]], [0.8, 0.9, 0.8], 1.6, 3, 5, tip=False)
+        for k, c in enumerate(((13.6, 29.5), (12.9, 34.5), (11, 39))):
+            q = P(c)
+            m.box(f'spot_{n}{k}', K, [q[0] - 0.9, q[1] - 0.9, -1.95], [q[0] + 0.9, q[1] + 0.9, 1.95], 4)
+        # 頭: 首から太る頭、上顎と下顎、目は左右の面で光る
+        m.seg(f'neck_{n}', I, P((7.5, 42.5)), P((5.5, 44.75)), 3.6, 1.9, 4, 5)
+        m.seg(f'head_{n}', I, P((6, 44.5)), P((2.5, 46.25)), 4.6, 2.3, 5, 6)
+        m.seg(f'jaw_up_{n}', I, P((3, 46.75)), P((0, 47.75)), 2.0, 1.8, 6, 7, tip=True)
+        m.seg(f'jaw_lo_{n}', K, P((3, 45.25)), P((0.25, 45.25)), 1.6, 1.6, 4, 5, tip=True)
+        h = P((4.25, 46))
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            z0, z1 = sorted((zs * 2.3, zs * 2.5))
+            m.box(f'eye_{n}{zn}_glow', E, [h[0] - 0.7, h[1] - 0.5, z0], [h[0] + 0.7, h[1] + 0.5, z1], 5)
+        for k, (a, b) in enumerate((((14.5, 28.5), (18.5, 26.5)), ((12.5, 37), (16.5, 37.5)))):
+            m.seg(f'leg_{n}{k}', K, P(a), P(b), 2.2, 1.4, 3, 5)
+            m.seg(f'foot_{n}{k}', K, P(b), P((b[0] + 0.5, b[1] + 1.5)), 1.4, 1.4, 5, 6, tip=True)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((38, -8)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_bead{k}', K, [q[0] - 1, q[1] - 1.2, -1], [q[0] + 1, q[1] + 1.2, 1], 4)
+            m.box(f'string_{key}_bead{k}_glow', E, [q[0] - 0.5, q[1] - 0.5, -1.15], [q[0] + 0.5, q[1] + 0.5, 1.15], 5)
     return m
 
 

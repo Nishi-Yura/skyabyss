@@ -209,21 +209,30 @@ def raiju_claw():
 # ---------------------------------------------------------------- 弓
 
 def thunder_wing_bow():
-    """雷翼の弓: 弓腕が鳥の翼の骨で、背の側に羽根が段に並ぶ（先は黒、筆）。光なし"""
+    """雷翼の弓（エピック）: 弓腕そのものが一枚の翼。背の縁は銅の骨、腹（弦の側）へ羽の板が重なって塊の翼になり、
+    羽の付け根に銅の縁。翼の先の風切羽は長く外へ伸び、その縁が雷の色に光る。弦には銅の留めが二つ"""
     m = M('thunder_wing_bow')
     bow_grip(m)
-    arm = [(12, 20.5), (12.5, 27), (12, 33), (10.5, 38.5), (8, 43), (5, 46.5)]
+    arm = [(12, 21), (14.5, 27), (15, 33), (13, 38.5), (9.5, 42.5), (5.5, 45)]
+    top, bot = (4.5, 45.5), (4.5, -15.5)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', S, [mirror(p, sign) for p in arm], [3, 3, 2.5, 2.5, 2], 1.25, 3, 7, tip=True)
-        for k, L in enumerate((6, 5.5, 5, 4)):
-            x, y = arm[k + 1]
-            a, b = mirror((x + 1, y), sign), mirror((x + 1 + L * 0.8, y - L * 0.6), sign)
-            m.seg(f'plume_{n}{k}', S, a, b, 2.5, 0.5, 7, 9, tip=True)
-        m.seg(f'nock_{n}', K, mirror((6, 46), sign), mirror((3.5, 46), sign), 2, 1, 4, 5)
-    strings(m, (4, 46), (4, -16))
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        q = mirror((11.25, 33), sign)
-        m.chain(f'claw_{n}', K, [q, (q[0] - 2.25, q[1] + sign * 0.75), (q[0] - 3.25, q[1] - sign * 0.75)], [1.4, 1], 0.8, 3, 5, tip=True)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'bone_{n}', K, [P(q) for q in arm], [2, 2, 1.75, 1.5, 1.25], 1.3, 3, 5, tip=False)
+        belly = lib.offset_line(arm, -0.8)
+        for k in range(1, 5):
+            a = belly[k]
+            ln = 8 - k * 0.8
+            b = (a[0] - 2.5 - k * 0.4, a[1] - ln)
+            m.seg(f'feather_{n}{k}', S, P(a), P(b), 4.4, 1.2, 8, 5, tip=True, over=0.2)
+            m.seg(f'feather_edge_{n}{k}', K, P(a), P(((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), 1.0, 1.3, 4, 5, over=0)
+        m.seg(f'primary_{n}', S, P((6.5, 44.5)), P((2, 53)), 3.6, 1.1, 7, 9, tip=True)
+        m.seg(f'primary_edge_{n}_glow', B, P((5.5, 46.5)), P((2.6, 51.5)), 1.0, 1.15, 4, 5, tip=True)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((38, -8)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_clasp{k}', K, [q[0] - 0.9, q[1] - 1.1, -0.9], [q[0] + 0.9, q[1] + 1.1, 0.9], 4)
+            m.box(f'string_{key}_clasp{k}_glow', B, [q[0] - 0.45, q[1] - 0.45, -1.05], [q[0] + 0.45, q[1] + 0.45, 1.05], 5)
     return m
 
 
@@ -269,15 +278,22 @@ def storm_gale_bow():
             wind_streaks(m, f'wind_{n}{zn}', [([(15.5, 29.5), (19, 31.5), (23, 30.5), (27, 32)], 1.6 * zs),
                                                ([(15, 35), (18.5, 37.5), (22, 36.75), (25, 38.25)], -1.2 * zs),
                                                ([(14, 41), (17, 43.5), (20.5, 43), (22.5, 45)], 1.1 * zs)],
-                         (13, 26, 31, 50), zs * 1.55, sign < 0)
+                         (13, 26, 31, 50), zs * 1.4, sign < 0)
         # 腕を取り巻く風の輪（奥行きにも回る）
         for r, (cx, cy) in enumerate(((14.6, 31), (12, 41.5))):
             c = P((cx, cy))
             R = 4.25 - r * 0.6
-            for j in range(8):
-                a = math.radians(j * 360 / 8 + r * 20)
-                x, z = c[0] + R * math.cos(a), R * math.sin(a)
-                m.box(f'ring_{n}{r}{j}', S if j % 2 else K, [x - 0.9, c[1] - 0.45 + j * 0.15 * sign, z - 0.9], [x + 0.9, c[1] + 0.45 + j * 0.15 * sign, z + 0.9], 7 if j % 2 else 4)
+            t, cut = 0.9, 0.9
+            for sd, (z0, z1) in (('a', (-R, -R + t)), ('b', (R - t, R))):
+                m.box(f'ring_{n}{r}{sd}', K, [c[0] - R + cut, c[1] - 0.45, z0], [c[0] + R - cut, c[1] + 0.45, z1], 4)
+            for sd, (x0, x1) in (('c', (c[0] - R, c[0] - R + t)), ('d', (c[0] + R - t, c[0] + R))):
+                m.box(f'ring_{n}{r}{sd}', S, [x0, c[1] - 0.45, -R + cut], [x1, c[1] + 0.45, R - cut], 7)
+            for sd, (x, z) in enumerate(((-1, -1), (1, -1), (-1, 1), (1, 1))):
+                cx0, cz0 = c[0] + x * (R - cut), z * (R - cut)
+                m.box(f'ring_{n}{r}k{sd}', K, [min(cx0, cx0 - x * t), c[1] - 0.45, min(cz0, cz0 - z * t)],
+                      [max(cx0, cx0 - x * t), c[1] + 0.45, max(cz0, cz0 - z * t)], 5)
+            for sd, zz in (('f', 1), ('b', -1)):   # 輪を弓腕へつなぐ細い留め
+                m.box(f'ring_{n}{r}tie{sd}', K, [c[0] - 0.4, c[1] - 0.35, min(zz * 1.2, zz * (R - t))], [c[0] + 0.4, c[1] + 0.35, max(zz * 1.2, zz * (R - t))], 3)
     top, bot = (5, 47), (5, -17)
     strings(m, top, bot, mat=B)
     for key, pull in lib.PULLS:

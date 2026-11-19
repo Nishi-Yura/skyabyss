@@ -122,26 +122,32 @@ def whale_choir_hammer():
 
 
 def whale_bow():
-    """フジツボの肋骨弓: 骨の弓腕（回した節で反る）に、フジツボの塊がつく"""
-    from whale_series import bow_body
+    """鯨肋の弓（エピック）: 弓腕そのものが鯨の下顎の骨。弦の側（腹）に歯が並び、歯の根元に紺の歯茎の筋。
+    先は顎の関節のこぶで弦を受け、顎の付け根の小さな目が灯る。弦には骨の留めが二つ"""
     m = Model('whale_bow')
-    bow_body(m, [(12, 21), (13.5, 26), (14, 31), (13, 35)], [(13, 35), (10, 39.5), (5, 42.5), (0, 44), (-3, 44.5)],
-             3, [3, 2.5, 2, 2], thorns=False)
-    for k, (x, y, s) in enumerate(((16, 25, 4), (16.5, 30, 3), (15.5, 34, 2.5), (16, 5, 4), (16.5, 0, 3), (15.5, -4, 2.5))):
-        m.box(f'barnacle_{k}', 'sea', [x - s / 2, y - s / 2, -s / 2 - 0.5], [x + s / 2, y + s / 2, s / 2 + 0.5], grad=(y - s / 2, 5, y + s / 2, 7))
-        if s >= 3:                                                            # 大きいフジツボの口（外向きの面）が灯る
-            m.box(f'barnacle_{k}_mouth', 'glow', [x + s / 2 - 0.5, y - 1, -1], [x + s / 2 + 0.25, y + 1, 1], 4)
     bow_grip(m, gems=False)
-    m.seg('nock_u', 'bone', (-1, 44.3), (-3.5, 44.6), 2, 1.25, 4, 5)
-    m.seg('nock_d', 'bone', (-3.5, -14.6), (-1, -14.3), 2, 1.25, 4, 5)
-    strings(m, (-3, 44.5), (-3, -14.5), [('0', 0), ('p0', 2.4), ('p1', 6.8), ('p2', 11.6)])
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.25, 38.5), (6.75, 42.5), (3.5, 44.5)]
+    top, bot = (2.5, 45), (2.5, -15)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        y = 15 + sign * 16
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            z0 = 1.75 if zs > 0 else -1.75
-            m.box(f'zbarnacle_{n}{zn}', 'sea', [12.25, y - 1.5, min(z0, z0 + zs * 2.5)], [15.25, y + 1.5, max(z0, z0 + zs * 2.5)], 6)
-            z1 = z0 + zs * 2.5
-            m.box(f'zbarnacle_{n}{zn}_mouth', 'glow', [13.25, y - 0.6, min(z1, z1 + zs * 0.3)], [14.25, y + 0.6, max(z1, z1 + zs * 0.3)], 4)
+        P = lambda q, s=sign: (q[0], 15 + s * (q[1] - 15))
+        m.chain(f'jaw_{n}', 'bone', [P(q) for q in arm], [4.6, 4.4, 4.0, 3.4, 2.8], 1.8, 3, 5, tip=False)
+        belly = lib.offset_line(arm, -1.7)
+        nr = lib.line_normals(arm)
+        m.chain(f'gum_{n}', 'sea', [P(q) for q in belly[1:5]], [0.9, 0.9, 0.8], 1.3, 4, 5, tip=False)
+        for k in range(1, 5):
+            a = belly[k]
+            b = (a[0] - nr[k][0] * 3.4, a[1] - nr[k][1] * 3.4 - 0.6)
+            m.seg(f'tooth_{n}{k}', 'bone', P(a), P(b), 2.0, 1.1, 6, 9, tip=True)
+        q = P((3.5, 44.75))
+        m.box(f'condyle_{n}', 'bone', [q[0] - 1.9, q[1] - 1.5, -1.8], [q[0] + 1.9, q[1] + 1.5, 1.8], 6)
+        g = P((12.75, 30))
+        m.box(f'eye_{n}_glow', 'glow', [g[0] + 1.2, g[1] - 0.7, -0.7], [g[0] + 1.8, g[1] + 0.7, 0.7], 4)
+    strings(m, top, bot, list(lib.PULLS))
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((36, -6)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_tooth{k}', 'bone', [q[0] - 1.1, q[1] - 1.4, -1.1], [q[0] + 1.1, q[1] + 1.4, 1.1], 5)
+            m.box(f'string_{key}_tooth{k}_glow', 'glow', [q[0] - 0.5, q[1] - 0.5, -1.25], [q[0] + 0.5, q[1] + 0.5, 1.25], 4)
     return m
 
 

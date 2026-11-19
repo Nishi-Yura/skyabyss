@@ -245,7 +245,7 @@ def abyss_whale_bow():
     m.chain('harpoon', B, [(5, -16), (5.75, -19), (5, -23)], [2.25, 1.75], 1.1, 4, 5, tip=True)
     m.seg('barb_0', B, (5.5, -20), (8, -18.25), 1.1, 0.8, 4, 5, tip=True)
     m.seg('barb_1', B, (5.25, -20.5), (2.75, -18.75), 1.1, 0.8, 4, 5, tip=True)
-    top, bot = (3.5, 46.5), (3.5, -16.5)
+    top, bot = (4.5, 46.5), (4.5, -16.5)
     strings(m, top, bot)
     for key, pull in lib.PULLS:
         for k, y in enumerate((42, 38.5, 35, -5, -8.5, -12)):
@@ -742,27 +742,37 @@ def abyss_toll_bell_staff():
 
 
 def abyss_depth_bow():
-    """測鉛の弓: 細い黒い弓の両端から、深さを測る鉛の錘が紐で下がる（錘の底が光る）"""
+    """測鉛の弓（エピック）: 弓腕そのものが、骨の紐でつないだ鉛の錘の列（握りから先へ小さくなる）。
+    両端の弦受けから大きな測鉛が下へ吊り下がり、錘の腹の目が淵の光で光る。弦にも小さな錘が二つ"""
     m = M('abyss_depth_bow')
     bow_grip(m)
-    arm = [(12, 21), (12.5, 27), (11.75, 33), (9.75, 38.5), (6.75, 43), (3.5, 46)]
+    beads = [((12.75, 24), 5.4), ((13.5, 29.5), 5.0), ((12.5, 34.75), 4.5), ((10.25, 39.25), 4.0), ((7.25, 43), 3.4)]
+    top, bot = (3, 46), (3, -16)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', V, [mirror(p, sign) for p in arm], [3, 2.75, 2.5, 2.25, 2], 1.2, 3, 6, tip=False)
-        m.seg(f'nock_{n}', B, mirror((5, 46.25), sign), mirror((2, 46.25), sign), 2, 1, 4, 5)
-    for n, top in (('u', 46), ('d', -16)):
-        m.box(f'line_{n}', B, [-1.25, top - 5, -0.3], [-0.75, top + 0.25, 0.3], 3)
-        m.box(f'arm_tie_{n}', B, [-1.25, top - 0.25, -0.3], [2.5, top + 0.25, 0.3], 3)
-        m.box(f'lead_{n}', V, [-2.5, top - 9, -1.25], [0.5, top - 5, 1.25], grad=(top - 9, 2, top - 5, 4))
-        m.box(f'lead_{n}_glow', G, [-1.75, top - 9.5, -0.75], [-0.25, top - 9, 0.75], 3)
-    strings(m, (3, 46.25), (3, -16.25))
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'cord_{n}', B, [P((12, 21))] + [P(c) for c, _ in beads] + [P((4.5, 45.5))], 1.1, 0.6, 3, 4, tip=False)
+        for k, (c, w) in enumerate(beads):
+            q = P(c)
+            m.box(f'bead_{n}{k}', V, [q[0] - w / 2, q[1] - w / 2.6, -w / 2], [q[0] + w / 2, q[1] + w / 2.6, w / 2], 3 + k * 0.4)
+            m.box(f'beadc_{n}{k}', V, [q[0] - w / 2 + 0.6, q[1] - w / 2.6 - 0.5, -w / 2 + 0.6],
+                  [q[0] + w / 2 - 0.6, q[1] + w / 2.6 + 0.5, w / 2 - 0.6], 5 + k * 0.3)
+        m.seg(f'nock_{n}', B, P((6, 46)), P((-0.75, 46)), 2.2, 1.2, 4, 5)
+        # 測鉛は弦受けの外の端から下へ吊るす（上も下も重さで下へ）
+        hang = P((0, 46))
+        y0 = hang[1]
+        m.box(f'plumb_line_{n}', B, [-0.4, y0 - 4.5, -0.4], [0.4, y0, 0.4], 3)
+        m.box(f'plumb_{n}', V, [-2.2, y0 - 10, -2.2], [2.2, y0 - 4.5, 2.2], grad=(y0 - 10, 2, y0 - 4.5, 5))
+        m.box(f'plumb_tip_{n}', V, [-1.2, y0 - 11.5, -1.2], [1.2, y0 - 10, 1.2], 2)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            m.box(f'plumb_eye_{n}{zn}_glow', G, [-0.9, y0 - 8.2, zs * 2.2 - 0.15], [0.9, y0 - 6.4, zs * 2.2 + 0.15], 4)
+    strings(m, top, bot)
     for key, pull in lib.PULLS:
-        for k, y in enumerate((40, 36, 32, -2, -6, -10)):
-            q = lib.string_at((3, 46.25), (3, -16.25), pull, lib.string_t((3, 46.25), (3, -16.25), y))
-            m.box(f'string_{key}_mark{k}', B if k % 3 else V, [q[0] - 0.7, q[1] - 0.35, -0.7], [q[0] + 0.7, q[1] + 0.35, 0.7], 4)
+        for k, y in enumerate((37, -7)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_weight{k}', V, [q[0] - 1.1, q[1] - 1.3, -1.1], [q[0] + 1.1, q[1] + 1.3, 1.1], 4)
+            m.box(f'string_{key}_weight{k}_glow', G, [q[0] - 0.5, q[1] - 0.5, -1.25], [q[0] + 0.5, q[1] + 0.5, 1.25], 5)
     return m
 
-
-# ---------------------------------------------------------------- 弓の共通（握りの中心 (12, 15)）
 
 def mirror(p, sign):
     return (p[0], 15 + sign * (p[1] - 15))

@@ -79,6 +79,10 @@ def wild_calling_bow():
                 m.box(f'wave_{n}{k}{sd}_glow', P, [cx - h + cut, y - t / 2, a], [cx + h - cut, y + t / 2, b], tone)
             for sd, (a, b) in (('c', (cx - h, cx - h + t)), ('d', (cx + h - t, cx + h))):
                 m.box(f'wave_{n}{k}{sd}_glow', P, [a, y - t / 2, -h + cut], [b, y + t / 2, h - cut], tone)
+            for j, (sx, sz) in enumerate(((-1, -1), (1, -1), (-1, 1), (1, 1))):
+                x0, z0 = cx + sx * (h - cut), sz * (h - cut)
+                m.box(f'wave_{n}{k}k{j}_glow', P, [min(x0, x0 + sx * (cut - t / 2)) - t / 2 * (sx < 0), y - t / 2, min(z0, z0 + sz * (cut - t / 2)) - t / 2 * (sz < 0)],
+                      [max(x0, x0 + sx * (cut - t / 2)) + t / 2 * (sx > 0), y + t / 2, max(z0, z0 + sz * (cut - t / 2)) + t / 2 * (sz > 0)], tone)
     strings(m, (3.25, 43.75), (3.25, -13.75))
     return m
 
@@ -137,7 +141,7 @@ def wild_scope_longbow():
             m.seg(f'collar_{n}{k}', B, P_(b), P_((b[0] + (a[0] - b[0]) * 0.12, b[1] + (a[1] - b[1]) * 0.12)), w + 0.8, w / 2.2 + 0.4, 4, 5, over=0)
         q = P_((4.5, 53))
         m.box(f'lens_{n}_glow', P, [q[0] - 1, q[1] - 0.5, -1], [q[0] + 1, q[1] + 0.5, 1], 4)
-    strings(m, (3.25, 54), (3.25, -24))
+    strings(m, (4.25, 53), (4.25, -23))
     return m
 
 

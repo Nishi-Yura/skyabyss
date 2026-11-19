@@ -76,14 +76,14 @@ def wild_bonestring_bow():
             m.seg(f'spine_{n}{k}', T, mx, (mx[0] + ln, mx[1] + sign * 1.25), 1.1, 0.55, 4, 5, tip=True)
             if k < 3:
                 for zs, zn in ((1, 'f'), (-1, 'b')):
-                    z0 = 1.6 if zs > 0 else -1.6
+                    z0 = (1.6 - k * 0.15) * zs
                     m.box(f'rib_{n}{k}{zn}', T, [mx[0] - 0.5, mx[1] - 0.45, min(z0, z0 + zs * 2.25)], [mx[0] + 0.5, mx[1] + 0.45, max(z0, z0 + zs * 2.25)], 4)
                     z1 = z0 + zs * 2.25
                     m.box(f'rib_tip_{n}{k}{zn}', T, [mx[0] - 1.5, mx[1] - 0.4, min(z1, z1 + zs * 0.8)], [mx[0] + 0.5, mx[1] + 0.4, max(z1, z1 + zs * 0.8)], 5)
         for k, p in enumerate(pts[1:5]):
             q = P(p)
             m.box(f'disc_{n}{k}', H, [q[0] - 1.6, q[1] - 0.35, -1.25], [q[0] + 1.6, q[1] + 0.35, 1.25], 3)
-    top, bot = (3.5, 44), (3.5, -14)
+    top, bot = (4, 43.5), (4, -13.5)
     strings(m, top, bot)
     for key, pull in lib.PULLS:
         for k, y in enumerate((36, 32.5, -2.5, -6)):
@@ -189,8 +189,8 @@ def wild_hanged_longbow():
     m.seg('banner_sigil', T, (14.5, 27.5), (19.5, 33.5), 1.2, 0.4, 4, 5, over=0)
     m.seg('banner_sigil_b', T, (14.5, 33.5), (19.5, 27.5), 1.2, 0.4, 4, 5, over=0)
     diamond(m, 'banner_eye_glow', L, (17, 30.5), 1.75, 0.45, 4, 5)
-    for k, (x, ln) in enumerate(((12.75, 3), (15.5, 5), (18.25, 2), (21, 4))):
-        m.box(f'chime_cord_{k}', T, [x - 0.15, 20 - ln + 3, -0.15], [x + 0.15, 23, 0.15], 3)
+    for k, (x, ln, top) in enumerate(((12.75, 3, 22.5), (15.5, 5, 25), (18.25, 2, 21), (21, 4, 24))):
+        m.box(f'chime_cord_{k}', T, [x - 0.15, 20.5 - ln, -0.15], [x + 0.15, top, 0.15], 3)
         m.box(f'chime_{k}', T, [x - 0.55, 17.5 - ln, -0.55], [x + 0.55, 20.5 - ln + 0.5, 0.55], 5)
     # 上の腹: 輪にした綱と札
     m.box('noose_top', T, [7.5, 41.5, -1.6], [10.75, 42.5, 1.6], 3)
@@ -213,7 +213,7 @@ def wild_hanged_longbow():
             m.box('key_shaft', T, [x - 0.3, yb - 5, -0.3], [x + 0.3, yb - 1.75, 0.3], 4)
             m.box('key_bit', T, [x + 0.3, yb - 5, -0.3], [x + 1.4, yb - 3.75, 0.3], 4)
         else:
-            diamond(m, 'charm_salt', T, (x, yb - 1.5), 2.5, 1, 4, 5)
+            diamond(m, 'charm_salt', T, (x, yb - 0.6), 2.5, 1, 4, 5)
     top, bot = (2.5, 54.25), (2.5, -24.25)
     strings(m, top, bot)
     for key, pull in lib.PULLS:

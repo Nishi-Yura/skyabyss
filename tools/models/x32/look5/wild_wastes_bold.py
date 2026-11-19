@@ -75,7 +75,7 @@ def wild_ashhook_bow():
             z0 = 1.75 if zs > 0 else -1.75
             for j, (dx, dy, l) in enumerate(((0.5, -1.5, 2.5), (1.5, -4, 2.25), (2.75, -6.25, 2))):
                 za = z0 + zs * j * 1.4
-                m.box(f'tail_{n}{zn}{j}', A, [10 + dx, y + sign * dy - 1, min(za, za + zs * 1.6)], [10 + dx + 1.25, y + sign * dy + 1, max(za, za + zs * 1.6)], 2 + j * 0.5)
+                m.box(f'tail_{n}{zn}{j}', A, [10 + dx, y + sign * dy - 1.5, min(za, za + zs * 1.6)], [10 + dx + 1.3, y + sign * dy + 1.5, max(za, za + zs * 1.6)], 2 + j * 0.5)
     top, bot = (3.5, 44), (3.5, -14)
     strings(m, top, bot)
     for key, pull in lib.PULLS:
@@ -119,7 +119,7 @@ def wild_crater_longbow():
                 q = P(p)
                 z0 = 1.6 if zs > 0 else -1.6
                 for j, (w, ln) in enumerate(((1.75, 2), (1.25, 1.75), (0.75, 1.25))):
-                    za = z0 + zs * (j * 1.9)
+                    za = z0 + zs * (j * 1.7)
                     m.box(f'spike_{n}{zn}{k}{j}', S, [q[0] - w / 2 + 0.3, q[1] - w / 2, min(za, za + zs * ln)], [q[0] + w / 2 + 0.3, q[1] + w / 2, max(za, za + zs * ln)], 2 + j)
         for k, (bx, by, h, w) in enumerate(((12.75, 25, 6.5, 3.25), (11.75, 32, 7.5, 3.5), (10, 39.5, 6.5, 3), (7.75, 46.5, 4.75, 2.5))):
             q = P((bx, by))
