@@ -297,13 +297,12 @@ def thunder_wing_bow():
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
         m.chain(f'bone_{n}', K, [P(q) for q in arm], [2, 2, 1.75, 1.5, 1.25], 1.3, 3, 5, tip=False)
-        belly = lib.offset_line(arm, -0.8)
-        for k in range(1, 5):
-            a = belly[k]
-            ln = 8 - k * 0.8
-            b = (a[0] - 2.5 - k * 0.4, a[1] - ln)
-            m.seg(f'feather_{n}{k}', S, P(a), P(b), 4.4, 1.2, 8, 5, tip=True, over=0.2)
-            m.seg(f'feather_edge_{n}{k}', K, P(a), P(((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), 1.0, 1.3, 4, 5, over=0)
+        belly = lib.offset_line(arm, -2.0)
+        for k in range(1, 5):                                              # 羽: 弓腕の腹（弦の側）に沿って握り側へ重なる羽。弓腕と弦の間に収め、輪郭の外へ出さない
+            a, nxt = belly[k + 1], belly[k]
+            b = (nxt[0] + (nxt[0] - a[0]) * 0.3, nxt[1] + (nxt[1] - a[1]) * 0.3)
+            m.seg(f'feather_{n}{k}', S, P(a), P(b), 3.0, 1.0, 8, 5, tip=True, over=0.2)
+            m.seg(f'feather_edge_{n}{k}', K, P(a), P(((a[0] * 2 + b[0]) / 3, (a[1] * 2 + b[1]) / 3)), 0.8, 1.3, 4, 5, over=0)
         m.seg(f'primary_{n}', S, P((6.5, 44.5)), P((2, 53)), 3.6, 1.1, 7, 9, tip=True)
         m.seg(f'primary_edge_{n}_glow', B, P((5.5, 46.5)), P((2.6, 51.5)), 1.0, 1.15, 4, 5, tip=True)
     strings(m, top, bot)
@@ -315,28 +314,9 @@ def thunder_wing_bow():
     return m
 
 
-def wind_streaks(m, name, lines, box, at, mirror15):
-    """風の筋（板の絵）: 細い線が流れて先で小さく巻く。線は根元が太く先が細い"""
-    cv = lib.Canvas(*box)
-    curves = []
-    for pts, curl in lines:
-        ex, ey = pts[-1]
-        c = [(ex + abs(curl) * math.sin(a / 6 * math.pi * 1.6), ey + curl * (1 - math.cos(a / 6 * math.pi * 1.6))) for a in range(1, 7)]
-        curves.append(pts + c)
-
-    def f(x, y, cur):
-        for k, pts in enumerate(curves):
-            d, t = lib.near_line((x, y), pts)
-            if d < 0.55 - 0.3 * t:
-                return (S, 9 if t < 0.5 else 8) if k % 2 == 0 else (S, 8 if t < 0.5 else 7)
-        return cur
-    cv.paint(f)
-    cv.put(m, name, at=at, mirror15=mirror15)
-
-
 def storm_gale_bow():
     """嵐の風弓（伝説）: 太い嵐雲色の弓腕の先が大きな風の渦に巻き込む。弓腕のまわりを風の輪が二重に取り巻いて
-    （奥行きにも回る）、腕からは長い風の筋（板の絵、先で小さく巻く）が後ろへたなびく。握りの前には銅の風見の羽根が三枚開き、
+    （奥行きにも回る）、弦からは風の筋が射手の側（矢と逆の向き）へ流れて先で小さく巻く（弦と一緒に引かれる）。握りの前には銅の風見の羽根が三枚開き、
     弦そのものは稲妻で光り、銅の風鈴の板が上下に二枚ずつ下がる"""
     m = M('storm_gale_bow')
     m.box('grip', S, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
@@ -353,11 +333,6 @@ def storm_gale_bow():
         m.chain(f'arm_{n}', S, [P(q) for q in arm], [4, 3.5, 3.25, 2.75, 2.5], 1.45, 3, 6, tip=False)
         m.chain(f'curl_{n}', S, [P(q) for q in curl], [3, 2.75, 2.5, 2, 1.75], 1.2, 6, 9, tip=True)
         m.chain(f'curl_in_{n}_glow', B, [P(q) for q in ((1.25, 45.5), (1.5, 43.5), (3, 43))], [0.8, 0.7], 0.6, 4, 5, tip=True)
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            wind_streaks(m, f'wind_{n}{zn}', [([(15.5, 29.5), (19, 31.5), (23, 30.5), (27, 32)], 1.6 * zs),
-                                               ([(15, 35), (18.5, 37.5), (22, 36.75), (25, 38.25)], -1.2 * zs),
-                                               ([(14, 41), (17, 43.5), (20.5, 43), (22.5, 45)], 1.1 * zs)],
-                         (13, 26, 31, 50), zs * 1.4, sign < 0)
         # 腕を取り巻く風の輪（奥行きにも回る）
         for r, (cx, cy) in enumerate(((14.6, 31), (12, 41.5))):
             c = P((cx, cy))
@@ -379,6 +354,16 @@ def storm_gale_bow():
         for k, y in enumerate((39, 35, -5, -9)):
             q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
             m.box(f'string_{key}_chime{k}', K, [q[0] - 0.9, q[1] - 2.25, -0.25], [q[0] + 0.9, q[1], 0.25], 3 + k % 2)
+        # 弦に付いた風の筋: 弦から射手の側（-x、矢の飛ぶ向きと逆）へ流れ、先で小さく巻く。弦と一緒に引かれる。引きの通り道（y 8〜22）は空ける
+        for sign, n in ((1, 'u'), (-1, 'd')):
+            for j, (y, dy, ln) in enumerate(((31, 1.2, 1.0), (37, -1.0, 0.8), (43, 0.8, 0.65))):
+                yy = 15 + sign * (y - 15)
+                q = lib.string_at(top, bot, pull, lib.string_t(top, bot, yy))
+                pts = [(0, 0), (-3, 1.2 * dy), (-6.5 * ln - 1, 0.6 * dy), (-9.5 * ln - 1.5, 1.6 * dy)]
+                ex, ey = pts[-1]
+                pts += [(ex - 1.6, ey + 0.9 * dy), (ex - 1.8, ey + 2.4 * dy), (ex - 0.6, ey + 2.9 * dy)]
+                pts = [(q[0] + x, q[1] + sign * y2) for x, y2 in pts]
+                m.chain(f'string_{key}_wind_{n}{j}', S, pts, [1.1, 1, 0.9, 0.8, 0.7, 0.6], 0.55, 9, 7, tip=True, over=0.3)
     return m
 
 
