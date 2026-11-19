@@ -15,109 +15,123 @@ from whale_series import grip, bell, bow_grip, strings  # noqa: E402
 
 
 def whalebone_greatsword():
-    """鯨の顎の骨: 少し反った長い骨の刃、背（-x）に歯が並ぶ、光る溝。前より小さく（全長 64）"""
+    """顎の骨（太く）: 反った幅広の顎骨の刃、背に歯の列、歯の根元が灯る。鍔は椎骨＋左右の胸びれ、刃の根元にフジツボ"""
     m = Model('whalebone_greatsword')
-    grip(m, -6, 6, -6, bands=(0,), wrap_to=6, butt='none')
-    m.box('guard', 'sea', [-4.5, 6, -3], [4.5, 9, 3], 4)           # 背骨の一節（椎骨）
-    m.seg('guard_fin_l', 'sea', (-4, 7.5), (-8, 6), 2.5, 1.5, 4, 6, tip=True)
-    m.seg('guard_fin_r', 'sea', (4, 7.5), (8, 6), 2.5, 1.5, 4, 6, tip=True)
-    pts = [(0, 8.5), (1, 20), (2.4, 32), (2.8, 42), (2, 50), (0.2, 56)]
-    m.chain('jaw', 'bone', pts, [6, 6, 5.5, 4.5, 3], [1.4, 1.4, 1.3, 1.2, 1], 2.4, 5)
-    for k, y in enumerate((14, 21, 28, 35, 42)):
-        cx = 0.3 + 2.4 * (y - 9) / 33
-        m.seg(f'tooth_{k}', 'bone', (cx - 2.5, y), (cx - 5.5, y + 2), 2, 1, 3.5, 5, tip=True)
-        m.box(f'gum_{k}', 'glow', [cx - 3.25, y - 1, -1.6], [cx - 1.25, y + 1, 1.6], 3)   # 歯の根元（歯茎）が灯る
+    grip(m, -8, 6, -8, bands=(-1,), wrap_to=6, butt='none')
+    m.box('guard', 'sea', [-5.5, 6, -3.5], [5.5, 9.5, 3.5], 4, rim=True)
+    for s, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'fin_{n}', 'sea', (s * 5, 8), (s * 11, 5), 3.5, 1.6, 4, 7, tip=True)
+    pts = [(0, 9), (1.5, 22), (3, 36), (3.2, 48), (2, 58), (0, 64)]
+    m.chain('jaw', 'bone', pts, [8, 8, 7, 5.5, 3.5], [1.6, 1.6, 1.5, 1.3, 1.1], 2.4, 5)
+    m.chain('jaw_edge', 'sea', [(q[0] + 3.6 - k * 0.3, q[1]) for k, q in enumerate(pts[:5])], [1, 1, 0.9, 0.8], 1.65, 6, 8, tip=False)
+    for k, y in enumerate((14, 22, 30, 38, 46)):
+        cx = 0.4 + 2.6 * (y - 9) / 37
+        m.seg(f'tooth_{k}', 'bone', (cx - 3.2, y), (cx - 7.5, y + 2.5), 2.6, 1.2, 4, 6, tip=True)
+        m.box(f'gum_{k}_glow', 'glow', [cx - 4, y - 1, -1.8], [cx - 2, y + 1, 1.8], 3)
+    for k, (x, y, s) in enumerate(((2.5, 12, 2.4), (-1.5, 15, 1.8))):
+        m.box(f'barnacle_{k}', 'sea', [x - s / 2, y - s / 2, -1.9], [x + s / 2, y + s / 2, 1.9], 6)
     return m
 
 
 def whale_dagger():
-    """一角鯨の牙: 真っ直ぐ細く尖る牙に、斜めのねじれの筋。鍔は小さな尾びれ"""
+    """一角の牙（ねじれ）: 牙の節を少しずつ回して交互の明暗でねじれを見せる。鍔は尾びれ、柄頭に小さな光"""
     m = Model('whale_dagger')
-    grip(m, -6, 5, -6, bands=(-1,), wrap_to=5, butt='none')
-    m.box('guard', 'sea', [-3, 5, -2.5], [3, 7.5, 2.5], 4)
-    m.seg('guard_fluke_l', 'sea', (-2.5, 6), (-7.5, 9), 3, 1.25, 4, 7, tip=True)
-    m.seg('guard_fluke_r', 'sea', (2.5, 6), (7.5, 9), 3, 1.25, 4, 7, tip=True)
-    m.chain('tusk', 'bone', [(0, 7), (0, 17), (0, 27), (0, 33)], [5, 4, 3], [2, 1.75, 1.25], 3, 5, tip=False)
-    m.seg('tusk_tip', 'glow', (0, 33), (0, 40), 2.5, 1, 2, 5, tip=True)               # 牙の先が光に溶ける
-    # ねじれの溝は Blockbench の筆で牙の面に斜めに描いた（板を足すと牙から浮いて見えたので外した）
+    grip(m, -6, 5, -6, bands=(-1,), wrap_to=5, butt='glow')
+    m.box('guard', 'sea', [-3.5, 5, -2.5], [3.5, 8, 2.5], 4)
+    for s, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'fluke_{n}', 'sea', (s * 3, 6.5), (s * 9, 10.5), 3.5, 1.3, 4, 8, tip=True)
+    y = 8
+    for k in range(8):
+        w = 5 - k * 0.45
+        m.seg(f'twist_{k}', 'bone', (0.3 * (-1) ** k, y), (-0.3 * (-1) ** k, y + 3.6), w, 1.9 - k * 0.12, 4 + (k % 2) * 2, 5 + (k % 2) * 2, over=0.3)
+        y += 3.6
+    m.seg('tip_glow', 'glow', (0, y), (0, y + 5), 2, 1, 3, 5, tip=True)
     return m
 
 
 def whale_staff():
-    """潮吹き: 噴き口から光る水柱が立ち、左右へしぶきの弧が落ちる"""
+    """潮吹き（大きく）: 紺の鯨の頭が上を向き、噴き口から光る水柱が高く立ち、左右に大きなしぶきの弧と粒"""
     m = Model('whale_staff')
-    grip(m, -14, 30, -14, bands=(10,), wrap_to=0, butt='spike')
-    m.box('blowhole', 'sea', [-3.5, 30, -3.5], [3.5, 34, 3.5], 4, rim=True)
-    m.box('blowhole_lip', 'bone', [-3, 34, -3], [3, 35, 3], 4)
-    m.chain('spout', 'glow', [(0, 34.5), (0, 40), (0, 46), (0, 50)], [3.5, 3, 2], [1.75, 1.5, 1], 3, 5)
+    grip(m, -14, 30, -14, bands=(10, 22), wrap_to=0, butt='spike')
+    m.seg('head', 'sea', (0, 29), (0, 38), 8, 3.4, 3, 6)
+    m.box('head_lip', 'bone', [-4.5, 37, -3], [4.5, 38.5, 3], 4)
     for s, n in ((-1, 'l'), (1, 'r')):
-        m.chain(f'splash_{n}', 'glow', [(s * 1, 48.5), (s * 4.5, 50.5), (s * 7.5, 49), (s * 9, 45.5)], [2.5, 2, 2], 1, 5, 3, tip=False)
-        m.box(f'drop_{n}', 'glow', [s * 9.5 - 1, 40.5, -1], [s * 9.5 + 1, 42.5, 1], 3)
-        m.box(f'drop2_{n}', 'glow', [s * 6 - 1, 44, -1], [s * 6 + 1, 46, 1], 4)
+        m.box(f'eye_{n}_glow', 'glow', [s * 3.9 - 0.5, 32, -1], [s * 3.9 + 0.5, 33.5, 1], 4)
+    m.chain('spout_glow', 'glow', [(0, 38.5), (0, 45), (0, 52), (0, 57)], [4, 3.2, 2.2], [2, 1.6, 1.1], 3, 5)
+    for s, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'splash_{n}_glow', 'glow', [(s * 1, 55), (s * 6, 57.5), (s * 10.5, 55), (s * 12, 49)], [3, 2.5, 2], 1.2, 5, 3, tip=True)
+        for k, (x, y) in enumerate(((12.5, 44), (8.5, 47.5), (11, 40))):
+            m.box(f'drop_{n}{k}_glow', 'glow', [s * x - 0.9, y - 0.9, -0.9], [s * x + 0.9, y + 0.9, 0.9], 4)
     return m
 
 
 def whale_star_staff():
-    """持ち上げた尾びれ: 柄の先から二枚の葉が左右へ反り上がり、その間に星の結晶が浮く"""
+    """持ち上げた尾びれ（大物）: 大きな尾びれが左右へ高く反り、縁は骨、間に大きな星の結晶。星のまわりに小さな星が三つ浮く"""
     m = Model('whale_star_staff')
     grip(m, -14, 32, -14, bands=(10, 22), wrap_to=0, butt='spike')
-    m.box('peduncle', 'sea', [-2.5, 32, -2], [2.5, 36, 2], 4)
+    m.seg('peduncle', 'sea', (0, 31), (0, 38), 5, 2.4, 4, 6)
     for s, n in ((-1, 'l'), (1, 'r')):
-        pts = [(0, 35), (s * 4, 37.5), (s * 8, 41), (s * 11.5, 46), (s * 12.5, 51)]
-        m.chain(f'fluke_{n}', 'sea', pts, [4.5, 4, 3, 2], [1.5, 1.25, 1, 1], 4, 8.5)
-    m.box('star_l_glow', 'glow', [-7, 49.5, -1], [-5, 51.5, 1], 4)   # Blockbench で散らした位置
-    m.box('star_r_glow', 'glow', [4.5, 52.5, 0], [6.5, 54.5, 2], 4)
-    m.box('star_t_glow', 'glow', [-1.5, 56, -1], [0.5, 58, 1], 4)
+        pts = [(0, 37), (s * 5, 40), (s * 10, 45), (s * 14, 51), (s * 15, 58)]
+        m.chain(f'fluke_{n}', 'sea', pts, [6, 5, 4, 2.5], [1.8, 1.6, 1.4, 1.2], 4, 8.5)
+        m.chain(f'fluke_rim_{n}', 'bone', [(q[0] + s * 1.6, q[1] - 1.2) for q in pts[1:4]], 0.9, 1.85, 5, 6, tip=False)
+    for k, (x, y, sz) in enumerate(((0, 49, 5), (-6, 58, 1.8), (6.5, 60, 1.6), (0, 63, 1.4))):
+        h = sz / 2
+        m.seg(f'mote_star_{k}_glow', 'glow', (x - h, y - h), (x + h, y + h), sz, 1.4 if k == 0 else 0.8, 4, 5, over=0)
+        if k == 0:
+            m.seg('mote_star_x_glow', 'glow', (x - h, y + h), (x + h, y - h), sz, 1.4, 4, 5, over=0)
     return m
 
 
 def whale_bell_staff():
-    """ひげ板の風鈴: 反った骨の横木の左に、長さの違う鯨のひげ板が垂れ、右の端に鐘"""
+    """ひげ板の簾（大きく）: 反った骨の横木から長さの違うひげ板が六枚垂れ、先が光る。右の端に大きな鐘"""
     m = Model('whale_bell_staff')
     grip(m, -14, 38, -14, bands=(8, 24), wrap_to=0, butt='none')
-    m.arc('yoke', 'bone', (0, 52), 14, 235, 305, 5, 2.5, 1.5, 4, 4)
-    m.seg('yoke_tip_l', 'bone', (-8, 40.5), (-10.5, 43.5), 2, 1, 4, 5, tip=True)
-    m.seg('yoke_tip_r', 'bone', (8, 40.5), (10.5, 43.5), 2, 1, 4, 5, tip=True)
-    for k, (x, L) in enumerate(((-8, 11), (-5.5, 8), (-3, 5))):
-        top = 52 - math.sqrt(14 ** 2 - x ** 2) + 0.5
-        m.box(f'baleen_{k}', 'sea', [x - 1, top - L, -1.5], [x + 1, top, 1.5], grad=(top - L, 3, top, 6))
-        m.box(f'baleen_{k}_glow', 'glow', [x - 1, top - L - 2, -1], [x + 1, top - L, 1], 4)
-    m.box('cord_r', 'bone', [7, 36, -1], [9, 40, 1], 3)
-    bell(m, 'bell', 8, 36, 1.2, clapper=False)
+    m.arc('yoke', 'bone', (0, 54), 15, 230, 310, 6, 3, 1.6, 4, 4)
+    for k, (x, L) in enumerate(((-10, 13), (-7.5, 10), (-5, 8), (-2.5, 6))):
+        top = 54 - math.sqrt(15 ** 2 - x ** 2) + 0.5
+        m.box(f'baleen_{k}', 'sea', [x - 1.1, top - L, -1.8], [x + 1.1, top, 1.8], grad=(top - L, 3, top, 6))
+        m.box(f'baleen_{k}_glow', 'glow', [x - 1.1, top - L - 1.6, -1.2], [x + 1.1, top - L, 1.2], 4)
+    m.box('cord_r', 'bone', [8.5, 35.5, -1], [10.5, 41, 1], 3)
+    bell(m, 'bell', 9.5, 35.5, 1.4, clapper=True)
     return m
 
 
 def whale_deep_bell_staff():
-    """鯨の背: 柄の先が大きく弧を描き（背びれ付き）、先が尾びれに開いて、そこから鐘が下がる"""
+    """鯨の背（大物）: 柄の先が鯨の背の大きな弧（背びれ付き、発光の点が並ぶ）、尾びれに開いて大きな鐘と小さな鐘が下がる"""
     m = Model('whale_deep_bell_staff')
     grip(m, -16, 32, -16, bands=(8, 20), wrap_to=2, butt='none')
-    m.arc('back', 'sea', (8, 32), 8, 180, 15, 8, [3.5, 3.5, 3.5, 3, 3, 3, 2.5, 2.5], 1.75, 3, 6)
-    m.seg('dorsal', 'sea', (6, 39.5), (9, 44.5), 3, 1.25, 5, 7.5, tip=True)
-    m.seg('tail_fluke_l', 'sea', (15.5, 34), (13, 37.5), 2.5, 1.25, 6, 8.5, tip=True)
-    m.seg('tail_fluke_r', 'sea', (15.5, 34), (19.5, 36.5), 2.5, 1.25, 6, 8.5, tip=True)
-    m.box('tail_cap', 'bone', [14, 30, -2], [17, 34, 2], 4)
-    m.box('cord', 'bone', [14.5, 27, -1], [16.5, 30, 1], 3)
-    bell(m, 'bell', 15.5, 27, 1.4, clapper=False)
-    for k, a in enumerate((160, 125, 90, 55)):                                # 背の弧の脇に並ぶ発光の点（深海の鯨）
-        x, y = 8 + 7.5 * math.cos(math.radians(a)), 32 + 7.5 * math.sin(math.radians(a))
-        m.box(f'spot_{k}', 'glow', [x - 1, y - 1, -2.1], [x + 1, y + 1, 2.1], 4)
+    m.arc('back', 'sea', (9, 32), 9, 180, 15, 8, [4.5, 4.5, 4.5, 4, 4, 3.5, 3, 3], 2.0, 3, 6)
+    m.seg('dorsal', 'sea', (7, 40.5), (11, 47), 3.5, 1.4, 5, 7.5, tip=True)
+    m.seg('tail_l', 'sea', (17.5, 34), (14.5, 38.5), 3, 1.4, 6, 8.5, tip=True)
+    m.seg('tail_r', 'sea', (17.5, 34), (22.5, 37.5), 3, 1.4, 6, 8.5, tip=True)
+    m.box('tail_cap', 'bone', [16, 30, -2.2], [19, 34, 2.2], 4)
+    m.box('cord', 'bone', [17, 26, -0.6], [18, 30, 0.6], 3)
+    bell(m, 'bell', 17.5, 26, 1.6, clapper=True)
+    m.box('cord2', 'bone', [3.5, 30, -0.5], [4.5, 33, 0.5], 3)
+    bell(m, 'bell_s', 4, 30, 0.8, clapper=True)
+    for k, a in enumerate((165, 135, 105, 75, 45)):
+        x, y = 9 + 8.6 * math.cos(math.radians(a)), 32 + 8.6 * math.sin(math.radians(a))
+        m.box(f'spot_{k}_glow', 'glow', [x - 0.9, y - 0.9, -2.3], [x + 0.9, y + 0.9, 2.3], 4)
     return m
 
 
 def whale_choir_hammer():
-    """鯨の頭骨: 長い吻（打つ面）、口を開けた下顎、口にかかるひげ、光る目、後ろへ反る骨の角"""
+    """鯨の頭骨（大物）: 太い吻（打つ面）、開いた下顎とひげ板、光る目、後ろへ大きく反る骨の角が二本、額にフジツボ"""
     m = Model('whale_choir_hammer')
     grip(m, -12, 22, -12, bands=(-1, 15), wrap_to=12, butt='none')
-    m.box('collar', 'bone', [-2.5, 20, -2.5], [2.5, 24, 2.5], 3)
-    m.box('cranium', 'sea', [-5, 24, -4.5], [6, 37, 4.5], 4, rim=True)
-    m.box('snout', 'sea', [6, 27, -3.5], [16, 35, 3.5], grad=(27, 4, 35, 6))
-    m.box('snout_face', 'bone', [16, 28, -3], [18, 34, 3], 4)
-    m.box('jaw', 'bone', [4, 22, -3], [16, 25, 3], grad=(22, 3, 25, 4))
-    for k, x in enumerate((8, 11, 14)):
-        m.box(f'baleen_{k}', 'bone', [x - 1, 25, -2], [x + 1, 27, 2], 4)
-    m.box('eye_f_glow', 'glow', [0, 30, -4.9], [3, 33, -4.4], 4)
-    m.box('eye_b_glow', 'glow', [0, 30, 4.4], [3, 33, 4.9], 4)
-    m.chain('horn', 'bone', [(-4.5, 32), (-9, 35), (-12, 40), (-12.5, 45)], [3.5, 3, 2], [1.75, 1.5, 1], 3, 5)
+    m.box('collar', 'bone', [-3, 20, -3], [3, 24, 3], 3)
+    m.box('cranium', 'sea', [-6, 24, -5.5], [7, 40, 5.5], 4, rim=True)
+    m.box('snout', 'sea', [7, 27, -4.5], [19, 37, 4.5], grad=(27, 4, 37, 6))
+    m.box('snout_face', 'bone', [19, 28, -4], [21.5, 36, 4], 4)
+    m.box('jaw', 'bone', [5, 21.5, -4], [19, 25, 4], grad=(21.5, 3, 25, 4))
+    for k, x in enumerate((8, 11, 14, 17)):
+        m.box(f'baleen_{k}', 'bone', [x - 1, 25, -3], [x + 1, 27.5, 3], 4)
+    for s, n in ((-1, 'l'), (1, 'r')):
+        m.box(f'eye_{n}_glow', 'glow', [0, 32, s * 5.5 - 0.25], [3.5, 35.5, s * 5.5 + 0.25], 4)
+    for k, z in enumerate((-2.5, 2.5)):
+        m.chain(f'horn_{k}', 'bone', [(-5.5, 36), (-10, 40), (-13.5, 46), (-14, 52)], [4, 3.2, 2.2], [1.6, 1.4, 1.1], 3, 5, zc=z)
+    for k, (x, y, s) in enumerate(((1, 41, 2.6), (4.5, 40.5, 1.8))):
+        m.box(f'barnacle_{k}', 'sea', [x - s / 2, y - 1.2, -s / 2], [x + s / 2, y + s - 1.2, s / 2], 7)
     return m
 
 
