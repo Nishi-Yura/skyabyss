@@ -20,6 +20,7 @@ lib.RAMPS.update({
     'stone': ['#2a2a32', '#45454f', '#62626c', '#80808a', '#9e9ea6', '#bbbbc2', '#d4d4d9', '#e8e8ec', '#f6f6f8', '#ffffff'],
     'gold': ['#4a3410', '#7a5618', '#a87a22', '#d4a432', '#f0c858', '#fce69a'],
     'dawn': ['#a85a3a', '#d8805a', '#f4a878', '#fcd0a8', '#fff0dc', '#fffaf2'],
+    'rose': ['#4a2026', '#6e2e34', '#94403f', '#b8584c', '#d47862', '#ea9c80'],
     'glass': ['#0c0c14', '#18182a', '#26263e', '#383856', '#4e4e70', '#6a6a8c'],
 })
 S, G, D, K = 'stone', 'gold', 'dawn', 'glass'
@@ -256,6 +257,12 @@ def divine_moth_dagger():
 
 # ---------------------------------------------------------------- 弓（握りの中心 (12, 15)）
 
+def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
+    """45 度に回した四角（菱）"""
+    h = s / (2 * math.sqrt(2))
+    m.seg(name, mat, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, d, t0, t1, over=0, zc=zc)
+
+
 def mirror(p, sign):
     return (p[0], 15 + sign * (p[1] - 15))
 
@@ -277,19 +284,61 @@ def bow_grip(m):
 
 
 def divine_plume_bow():
-    """巡礼の羽弓: 腕は金の軸に白い風切羽を外へ重ねる。握りの外に金の輪（光る）"""
+    """巡礼の羽弓（伝説）: 聖堂の柱のような白い石の弓腕を金の縁で挟み、両端は金の尖塔になって弦の先へ伸びる。
+    握りの背には暁の光の二重の光輪が立ち、外の輪から金の光条が放たれ、まわりを金の小さな菱が巡る。
+    弓腕の中ほどからは左右（奥行き）へ白い巡礼の羽根飾りが立つ。弦には石と金の数珠が連なり、上に暁色の聖印が下がる"""
     m = M('divine_plume_bow')
-    bow_grip(m)
-    m.arc('halo_glow', D, (15.5, 15), 2.75, 0, 360, 8, 1, 0.8, 3, 5)
-    arm = [(12, 21), (12.5, 27), (11.75, 33), (9.75, 38.5), (6.75, 43), (3.5, 46)]
+    m.box('grip', G, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'cap_{n}', S, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], grad=(y, 6, y + 1.5, 8))
+    c = (21, 15)
+    m.box('halo_stem', G, [13.75, 14.25, -0.7], [14.5, 15.75, 0.7], 4)
+    m.arc('halo_rim', G, c, 7, -155, 155, 14, 1.4, 0.8, 3, 5)
+    m.arc('halo_out', S, c, 5.5, 0, 360, 12, 1, 0.65, 7, 8)
+    m.arc('halo_in_glow', D, c, 3.75, 0, 360, 10, 1.1, 0.85, 3, 5)
+    diamond(m, 'halo_core', G, c, 2.75, 1, 4, 5)
+    diamond(m, 'halo_core_glow', D, c, 1.25, 1.1, 4, 5)
+    for k, a in enumerate((-110, -70, -35, 0, 35, 70, 110)):
+        dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
+        ln = 4.5 if a % 70 == 0 else 3
+        m.seg(f'ray_{k}', G, (c[0] + dx * 7.75, c[1] + dy * 7.75), (c[0] + dx * (7.75 + ln), c[1] + dy * (7.75 + ln)), 1.25, 0.55, 4, 5, tip=True, over=0)
+    for k, a in enumerate((-55, -15, 15, 55)):
+        dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
+        diamond(m, f'orbit_{k}', G, (c[0] + dx * 14, c[1] + dy * 14), 1.5 if k % 2 else 2, 0.6, 4, 5)
+    for k, pts in enumerate(([(14, 8.75), (15.25, 5), (14.25, 1), (15.75, -3), (15, -7.5)], [(12.5, 8.25), (12.75, 4.5), (11.75, 0.5), (12.75, -3.5)])):
+        m.chain(f'streamer_{k}', 'rose', pts, [1.75, 1.75, 1.5, 1.25][:len(pts) - 1], 0.3, 1, 3, tip=False)
+        m.seg(f'streamer_end_{k}', G, pts[-1], (pts[-1][0], pts[-1][1] - 1.5), 1.6, 0.4, 4, 5, tip=True)
+    arm = [(12, 21), (12.75, 27), (12, 33), (10, 38.5), (7, 43), (4, 46)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'shaft_{n}', G, pts, [2, 2, 1.75, 1.75, 1.5], 1, 3, 5, tip=False)
-        for k in range(4):
-            x, y = pts[k + 1]
-            m.seg(f'feather_{n}{k}', S, (x + 0.5, y), (x + 5 - k * 0.6, y + sign * (4 - k * 0.5)), 2.5, 0.6, 6, 9, tip=True)
-        m.seg(f'nock_{n}', G, mirror((5, 46.25), sign), mirror((2, 46.25), sign), 2, 1, 3, 5)
-    strings(m, (3, 46.25), (3, -16.25))
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'pillar_{n}', S, pts, [3.5, 3.25, 3, 2.5, 2.25], 1.3, 6, 8, tip=False)
+        m.chain(f'gild_back_{n}', G, [P((q[0] + 1.75 - k * 0.1, q[1])) for k, q in enumerate(arm[:5])], [0.8, 0.8, 0.75, 0.7], 1.45, 3, 5, tip=False)
+        m.chain(f'gild_belly_{n}', G, [P((q[0] - 1.6 + k * 0.1, q[1])) for k, q in enumerate(arm[1:5])], [0.7, 0.7, 0.6], 1.45, 3, 5, tip=False)
+        for k, w in ((2, 4.75), (4, 3.75)):
+            x, y = pts[k]
+            m.box(f'capital_{n}{k}', G, [x - w / 2, y - 0.9, -1.75], [x + w / 2, y + 0.9, 1.75], 4)
+            m.box(f'capital_s_{n}{k}', S, [x - w / 2 + 0.5, y - 1.6, -1.55], [x + w / 2 - 0.5, y + 1.6, 1.55], 7)
+        m.chain(f'spire_{n}', G, [P((4, 46)), P((3.5, 49)), P((4.5, 56))], [2.5, 1.75], 1.2, 3, 5, tip=True)
+        for k, (a, b) in enumerate((((5.5, 47.5), (8, 52)), ((2.5, 48), (1, 51.5)))):
+            m.seg(f'pinnacle_{n}{k}', G, P(a), P(b), 1.25, 0.8, 4, 5, tip=True)
+        diamond(m, f'spire_gem_{n}_glow', D, P((3.75, 49)), 1.5, 1.25, 4, 5)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            for k, (x0, y0, x1, y1, z0, z1) in enumerate(((11, 32.5, 13.25, 35, 1.3, 4), (11.25, 35, 13, 37.5, 3.5, 6), (11.5, 37.5, 12.75, 40, 5.5, 7.75), (11.75, 40, 12.5, 41.5, 7.25, 8.75))):
+                ya, yb = sorted((P((x0, y0))[1], P((x1, y1))[1]))
+                za, zb = (z0, z1) if zs > 0 else (-z1, -z0)
+                m.box(f'plume_{n}{zn}{k}', S if k < 3 else G, [x0, ya, za], [x1, yb, zb], 7 + k * 0.6 if k < 3 else 4)
+    top, bot = (3.5, 49), (3.5, -19)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        ys = [y for y in (46, 42.5, 39, 35.5, 32, 28.5, 25, 21.5, 8.5, 5, 1.5, -2, -5.5, -9, -12.5, -16)]
+        for k, y in enumerate(ys):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            diamond(m, f'string_{key}_bead{k}', G if k % 3 == 0 else S, q, 1.3, 0.7, 4 if k % 3 == 0 else 7, 5 if k % 3 == 0 else 8)
+        q = lib.string_at(top, bot, pull, lib.string_t(top, bot, 28.5))
+        m.box(f'string_{key}_seal_cord', G, [q[0] - 0.2, q[1] - 2.5, -0.2], [q[0] + 0.2, q[1], 0.2], 4)
+        diamond(m, f'string_{key}_seal', G, (q[0], q[1] - 3.75), 2.5, 0.6, 3, 5)
+        diamond(m, f'string_{key}_seal_glow', D, (q[0], q[1] - 3.75), 1.25, 0.75, 4, 5)
     return m
 
 

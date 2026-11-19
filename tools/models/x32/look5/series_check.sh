@@ -22,7 +22,7 @@ head = s[:s.find('hud on', s.find('gearlook'))]
 blk = s[s.find('hud on', len(head)):]
 one = blk[:blk.find('hud on', 10)]
 open(f'tools/shots/gear_{name}.txt', 'w', encoding='utf-8').write(
-    head.replace('gear_moon', f'gear_{name}') + ''.join(one.replace('moon_light_sword', i) for i in ids))
+    head.replace('gear_moon', f'gear_{name}') + ''.join(one.replace('moon_light_sword', i).replace('fov 30', 'fov 42') for i in ids))
 PY
 ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_$name.txt -PshotsName=gear_$name > "$S/shots_$name.log" 2>&1 || { echo SHOTS FAILED; tail -20 "$S/shots_$name.log"; exit 1; }
 mkdir -p "$S/dc"

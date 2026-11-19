@@ -98,7 +98,22 @@ def wild_skylark_bow():
         diamond(m, f'tip_glow_{n}', Z, P((4.25, 48.25)), 2, 1.3, 4, 5)
     m.chain('ribbon', 'sky', [(13, 8.25), (15.25, 5.25), (14.25, 2.25), (16.5, -0.75), (16, -3.75)], [1.75, 1.75, 1.5, 1.25], 0.35, 3, 5, tip=False)
     diamond(m, 'ribbon_end', G, (16, -4.5), 1.75, 0.6, 4, 5)
-    strings(m, (3.25, 45.5), (3.25, -15.5))
+    # 腹（弦の側）: 握りの上下から金の小さな鉤羽が弦の方へ巻く。握りの左右（奥行き）に金の耳羽
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'belly_curl_{n}', G, [P((10.5, 21.25)), P((8.25, 22.75)), P((7.5, 25)), P((8.25, 26.5))], [1.5, 1.25, 1], 0.8, 3, 5, tip=True)
+    for zs, n in ((1, 'f'), (-1, 'b')):
+        m.box(f'ear_{n}', G, [11.25, 22, zs * 2 if zs > 0 else -4.25], [13.25, 25.5, 4.25 if zs > 0 else -2], grad=(22, 3, 25.5, 5))
+        m.box(f'ear_tip_{n}', G, [11.75, 25.5, zs * 3 if zs > 0 else -4.25], [12.75, 27, 4.25 if zs > 0 else -3], 5)
+    top, bot = (3.25, 45.5), (3.25, -15.5)
+    strings(m, top, bot)
+    # 弦: 金の玉が上下に二つずつ、上の玉の下に青い羽の飾りが下がる
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((33, 36.5, -3, -6.5)):
+            c = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            diamond(m, f'string_{key}_bead{k}', G, c, 1.6 if k % 2 else 2, 1, 4, 5)
+        c = lib.string_at(top, bot, pull, lib.string_t(top, bot, 33))
+        m.seg(f'string_{key}_charm', 'sky', (c[0], c[1] - 1), (c[0] + 0.5, c[1] - 4.5), 1.5, 0.35, 3, 5, tip=True)
     return m
 
 

@@ -220,3 +220,25 @@ def write_bbmodel(cubes, png_path, out_path, name, only=None):
                         'uv_height': im.height, 'render_mode': 'default', 'render_sides': 'auto', 'internal': True,
                         'uuid': str(uuid.uuid5(uuid.NAMESPACE_URL, name + '/tex')), 'source': src}]}
     Path(out_path).write_text(json.dumps(bb, ensure_ascii=False), encoding='utf-8')
+
+
+# ---------------------------------------------------------------- 弓の弦の上の飾り（引きの段ごとに同じ場所へ付ける）
+PULLS = (('0', 0), ('p0', 2.4), ('p1', 6.8), ('p2', 11.6))
+
+
+def string_at(top, bot, pull, t):
+    """弦の上の点。t=0 が下の弦受け、t=1 が上の弦受け。pull は引きの量（弦の中ほど y=15 が -x へ下がる）"""
+    if pull == 0:
+        return (top[0], bot[1] + (top[1] - bot[1]) * t)
+    mid = (top[0] - pull, 15)
+    tm = (15 - bot[1]) / (top[1] - bot[1])
+    if t <= tm:
+        s = t / tm
+        return (bot[0] + (mid[0] - bot[0]) * s, bot[1] + (mid[1] - bot[1]) * s)
+    s = (t - tm) / (1 - tm)
+    return (mid[0] + (top[0] - mid[0]) * s, mid[1] + (top[1] - mid[1]) * s)
+
+
+def string_t(top, bot, y):
+    """弦の上で高さ y にあたる t（まっすぐの弦で）"""
+    return (y - bot[1]) / (top[1] - bot[1])

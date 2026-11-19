@@ -390,18 +390,63 @@ def abyss_storm_bell_staff():
 
 
 def abyss_storm_bow():
-    """雷淵の弓: 雷雲の底で曲がった弓。腕は途中で一度鋭く折れ（稲妻の形）、折れ目が淵の光で継がれる"""
+    """雷淵の弓（伝説）: 雷雲の底で鍛えた弓。弓腕は稲妻のように三度鋭く折れ、折れ目ごとに淵の光の核が継ぐ。
+    折れ目の背からは骨の雷角が外へ、左右（奥行き）へは骨の風切りの板が張り出す。握りの前に黒い雷雲の塊が湧き、
+    その奥に淵の光の目。弦は三本、真ん中の一本が淵の光で光り、外の二本は骨の白。弓の懐には折れた稲妻が走り、
+    両端の先には雷雲のかけらが浮かぶ"""
     m = M('abyss_storm_bow')
-    bow_grip(m)
-    arm = [(12, 21), (13.5, 27), (10.5, 30), (12.5, 36), (9, 41), (5, 45.5)]
+    m.box('grip', V, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', B, [9.75, y, -2.4], [14.25, y + 1.5, 2.4], 4)
+    # 握りの前の雷雲
+    for k, (x, y, w, h, d) in enumerate(((15.5, 15, 4, 5, 2.4), (17.25, 17.75, 3.5, 3, 2), (17, 12.25, 3.25, 2.75, 1.9), (19, 15.25, 2.5, 3, 1.6))):
+        m.box(f'cloud_{k}', V, [x - w / 2, y - h / 2, -d], [x + w / 2, y + h / 2, d], grad=(y - h / 2, 2, y + h / 2, 5))
+    for k, (x, y, w, h, d) in enumerate(((21, 15, 3.5, 4.5, 1.8), (20, 19.25, 3, 2.5, 1.5), (20.25, 10.75, 3, 2.5, 1.5))):
+        m.box(f'cloud_x{k}', V, [x - w / 2, y - h / 2, -d], [x + w / 2, y + h / 2, d], grad=(y - h / 2, 3, y + h / 2, 6))
+    for k, (dy, pts) in enumerate(((1, [(22.5, 16), (25.5, 18.5), (24.5, 20), (28, 23.5)]), (-1, [(22.5, 14), (25.5, 11.5), (24.5, 10), (28, 6.5)]), (0, [(22.75, 15), (26.5, 15.75), (25.75, 14.25), (30, 15)]))):
+        m.chain(f'cloud_fork_{k}_glow', G, pts, [1, 0.9, 0.75], 0.45, 4, 5, tip=True)
+    diamond(m, 'eye_glow', G, (17.25, 15), 2.75, 2.5, 3, 5)
+    m.box('eye_pupil', V, [16.9, 14.25, -2.6], [17.6, 15.75, 2.6], 1)
+    arm = [(12, 21), (17.5, 26.5), (10.25, 31), (16.75, 37), (8.5, 42.5), (4.75, 47)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'arm_{n}', V, pts, [3, 2.75, 2.75, 2.5, 2], 1.3, 3, 6, tip=False)
-        for k in (2, 3):
-            x, y = pts[k]
-            m.box(f'joint_{n}{k}_glow', G, [x - 1, y - 1, -1.4], [x + 1, y + 1, 1.4], 4)
-        m.seg(f'nock_{n}', B, mirror((6.5, 45.25), sign), mirror((3, 45.25), sign), 2, 1, 4, 5)
-    strings(m, (3.5, 45.5), (3.5, -15.5))
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'arm_{n}', V, pts, [4.25, 4, 3.75, 3.25, 2.75], 1.7, 3, 6, tip=False)
+        for k, sz in ((1, 4), (2, 3.5), (3, 3.5), (4, 3)):
+            diamond(m, f'joint_{n}{k}_glow', G, pts[k], sz, 1.85, 3, 5)
+        for k, (b, e) in enumerate((((17.5, 26.5), (24.5, 29.5)), ((16.75, 37), (23.5, 41.5)))):
+            m.seg(f'horn_{n}{k}', B, P(b), P(e), 2.5, 1.2, 3, 5, tip=True)
+            m.chain(f'fork_{n}{k}_glow', G, [P(e), P((e[0] + 2.5, e[1] - 1.5)), P((e[0] + 3.5, e[1] + 1)), P((e[0] + 6, e[1] - 0.5))], [0.9, 0.8, 0.7], 0.4, 4, 5, tip=True)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            for k, (x, y) in enumerate(((17.5, 26.5), (16.75, 37))):
+                q = P((x, y))
+                z0, z1 = (1.5, 4.25) if zs > 0 else (-4.25, -1.5)
+                m.box(f'vane_{n}{zn}{k}', B, [q[0] - 1.25, q[1] - 1, z0], [q[0] + 1, q[1] + 1, z1], 3 + k)
+                z2 = (4.25, 5.5) if zs > 0 else (-5.5, -4.25)
+                m.box(f'vane_tip_{n}{zn}{k}', B, [q[0] - 0.75, q[1] - 0.5, z2[0]], [q[0] + 0.5, q[1] + 0.5, z2[1]], 5)
+        m.chain(f'hook_{n}', B, [P((4.75, 47)), P((3.25, 48.5)), P((4, 50))], [1.75, 1.25], 1, 4, 5, tip=True)
+        # 懐の稲妻（弓腕の腹から弦の手前まで、折れながら走る）
+        m.chain(f'bolt_{n}_glow', G, [P((10, 31)), P((7.75, 29.25)), P((8.75, 27.25)), P((6.5, 25))], [1, 0.9, 0.8], 0.45, 3, 5, tip=True)
+        # 先に浮かぶ雷雲のかけら
+        for k, (x, y, w, h) in enumerate(((9.5, 52.5, 4.5, 2.25), (13.5, 51.25, 3, 1.75), (7, 55, 2.5, 1.5))):
+            q = P((x, y))
+            m.box(f'drift_{n}{k}', V, [q[0] - w / 2, q[1] - h / 2, -1.4], [q[0] + w / 2, q[1] + h / 2, 1.4], 3 + k)
+        q = P((11.25, 49.25))
+        m.seg(f'spark_{n}_glow', G, (q[0] - 0.75, q[1] + sign * 1), (q[0] + 0.75, q[1] - sign * 1), 0.8, 0.4, 4, 5, over=0)
+    top, bot = (3.5, 49), (3.5, -19)
+    for key, pull in lib.PULLS:
+        for zc, zn in ((0, 'c'), (1, 'f'), (-1, 'b')):
+            mat = G if zc == 0 else 'string'
+            nm = f'string_{key}_{zn}' + ('_glow' if zc == 0 else '')
+            if pull == 0:
+                m.box(nm, mat, [top[0] - 0.5, bot[1], zc - 0.4], [top[0] + 0.5, top[1], zc + 0.4], 4 if zc == 0 else 3)
+            else:
+                mid = (top[0] - pull, 15)
+                m.seg(nm + '_u', mat, mid, top, 1, 0.4, 3, 3, over=0.2, zc=zc)
+                m.seg(nm + '_d', mat, bot, mid, 1, 0.4, 3, 3, over=0.2, zc=zc)
+        for k, y in enumerate((38, -8)):
+            c = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_clasp{k}', B, [c[0] - 0.9, c[1] - 0.6, -1.6], [c[0] + 0.9, c[1] + 0.6, 1.6], 4)
     return m
 
 
