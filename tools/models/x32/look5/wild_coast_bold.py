@@ -221,38 +221,39 @@ def wild_shell_bell_staff():
 # ---------------------------------------------------------------- 弓
 
 def wild_gull_bow():
-    """海鳥の弓: 海鳥の翼の形。握りから弓腕が翼の骨のように一度後ろへ折れ、先で前へ戻る。
-    弓腕の外側に白い羽根の段（綱の色）、上の先に夜光虫の目のような点"""
+    """海鳥の弓（アンコモン）: 上下の弓腕で一羽の鴎の輪郭（M の形。腕の中ほどが外へ尖る）。
+    流木の弓腕の背の縁を綱の色の羽の線がなぞる。光はない"""
     m = M('wild_gull_bow')
-    m.box('grip', R, [10.5, 10, -1.5], [13.5, 20, 1.5], grad=(10, 2, 20, 4), wrap=(10, 20))
-    arm = [(12, 19.5), (13.5, 26), (11.5, 33), (8, 39), (5, 43.5)]
+    m.box('grip', D, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', R, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (4.5, 44.5)]
+    arm = [(12, 21), (16, 26.5), (14, 31), (11, 36), (8, 41), (4.5, 44.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', D, [mirror(p, sign) for p in arm], [3, 2.75, 2.5, 2], 1.25, 4, 7, tip=False)
-        for k, (x, y) in enumerate(((14, 27), (12.5, 33), (9.5, 38.5))):
-            m.seg(f'feather_{n}{k}', R, mirror((x, y), sign), mirror((x + 3, y - 2.5), sign), 2, 0.5, 4, 5, tip=True)
-        m.seg(f'nock_{n}', D, mirror((5.5, 43.5), sign), mirror((2.5, 43.5), sign), 2, 1, 6, 7)
-    m.box('eye_glow', F, [4.75, 41.5, -1.35], [5.75, 42.5, 1.35], 4)
-    strings(m, (3, 43.5), (3, -13.5))
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'wing_{n}', D, [P(q) for q in arm], [2.8, 2.6, 2.4, 2.2, 1.8], 1.2, 3, 5, tip=False)
+        m.chain(f'edge_{n}', R, [P(q) for q in lib.offset_line(arm, 1.2)[1:4]], [0.9, 0.9], 1.25, 6, 7, tip=False)
+    strings(m, (4.5, 44.5), (4.5, -14.5))
     return m
 
 
 def wild_nacre_bow():
-    """真珠層の弓: 二枚の大きな貝殻を背中合わせに削って作った短い弓。弓腕は幅広の板で、外の縁が段になって細る。
-    弓腕の内側（真珠層）に夜光虫の光が一筋流れる"""
+    """真珠層の弓（レア）: 弓腕そのものが幅広の帆立の殻の板。背の縁に放射の肋が段に立ち、
+    腹（弦の側）の真珠層の縁に夜光虫の光が一筋流れる"""
     m = M('wild_nacre_bow')
-    m.box('grip', D, [10.5, 10, -1.75], [13.5, 20, 1.75], grad=(10, 3, 20, 5), wrap=(10, 20))
+    m.box('grip', D, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', R, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (4.5, 44.5)]
+    nr = lib.line_normals(arm)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [(12, 19.5), (11.25, 26), (9.75, 32), (7.75, 37), (6, 41)]
-        m.chain(f'plate_{n}', R, [mirror(p, sign) for p in pts], [3.75, 3.5, 3, 2.5], 1.1, 3, 5, tip=False)
-        for k, (x, y) in enumerate(((11.5, 26), (9.75, 32), (7.75, 37))):          # 貝の成長線の段
-            m.seg(f'growth_{n}{k}', D, mirror((x - 2, y), sign), mirror((x + 2, y), sign), 0.6, 1.2, 4, 5, over=0)
-        m.seg(f'nock_{n}', D, mirror((6.5, 41), sign), mirror((3.5, 41), sign), 2, 1, 5, 6)
-    m.chain('nacre_glow', F, [(12.25, 21), (11, 27), (9, 33)], [0.8, 0.8], 1.2, 2, 4, tip=False)
-    strings(m, (4, 41), (4, -11))
-    for key, pull in lib.PULLS:
-        for k, y in enumerate((33, 30, -3, 0)):
-            q = lib.string_at((4, 41), (4, -11), pull, lib.string_t((4, 41), (4, -11), y))
-            m.box(f'string_{key}_pearl{k}', R, [q[0] - 0.75, q[1] - 0.75, -0.75], [q[0] + 0.75, q[1] + 0.75, 0.75], 5)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'shell_{n}', R, [P(q) for q in arm], [3.6, 5, 5.2, 4.2, 2.8], 1.2, 5, 7, tip=True)
+        for k in range(1, 5):
+            a = lib.offset_line(arm, 2.2)[k]
+            m.seg(f'rib_{n}{k}', R, P(a), P((a[0] + nr[k][0] * 1.4, a[1] + nr[k][1] * 1.4)), 1.2, 1.3, 7, 8, tip=True)
+        m.chain(f'lustre_{n}_glow', F, [P(q) for q in lib.offset_line(arm, -1.8)[1:4]], [0.7, 0.7], 1.25, 4, 5, tip=False)
+    strings(m, (4.5, 44.5), (4.5, -14.5))
     return m
 
 

@@ -293,23 +293,19 @@ def bow_grip(m):
 
 
 def moon_waning_bow():
-    """下弦の弓: 銀の腕は細い三日月の弧。外側に、少し遅れて沿う残像の腕（藍、薄く細く）が離れて並ぶ"""
+    """下弦の弓（レア）: 弓腕そのものが細い三日月。中ほどが一番太く、両端は細く尖って弦を受ける。
+    内（弦の側）の縁は夜の藍、背の縁に月光の筋が一本だけ光る"""
     m = M('moon_waning_bow')
-    bow_grip(m)
-    arm = [(12, 21), (12.5, 27), (11.75, 33), (9.75, 38.5), (6.75, 43), (3.5, 46)]
-    ghost = [(14.5, 22.5), (15.25, 28.5), (14.5, 34.5), (12.25, 40), (9, 44.5), (5.5, 47.5)]
+    m.box('grip', N, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', I, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (4.5, 44.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', I, [mirror(p, sign) for p in arm], [3, 2.75, 2.5, 2.25, 2], 1.2, 3, 7, tip=False)
-        m.chain(f'ghost_{n}', N, [mirror(p, sign) for p in ghost], [1.5, 1.5, 1.25, 1.25, 1], 0.5, 3, 5, tip=True, zc=0.9)
-        for k in (1, 3):
-            a, b = mirror(arm[k], sign), mirror(ghost[k], sign)
-            m.seg(f'tie_{n}{k}', N, a, b, 1, 0.45, 2, 3, over=0.3, zc=0.5)
-        m.seg(f'nock_{n}', I, mirror((5, 46.25), sign), mirror((2, 46.25), sign), 2, 1, 6, 8)
-    strings(m, (3, 46.25), (3, -16.25))
-    for key, pull in lib.PULLS:
-        q = lib.string_at((3, 46.25), (3, -16.25), pull, lib.string_t((3, 46.25), (3, -16.25), 34))
-        m.box(f'string_{key}_cord', N, [q[0] - 0.2, q[1] - 2, -0.2], [q[0] + 0.2, q[1], 0.2], 3)
-        m.arc(f'string_{key}_moon', I, (q[0] + 0.25, q[1] - 3.5), 1.4, 100, 260, 4, 0.7, 0.35, 7, 8)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'moon_{n}', I, [P(q) for q in arm], [3, 4.6, 5.2, 4.2, 2.6], 1.4, 4, 7, tip=True)
+        m.chain(f'inner_{n}', N, [P(q) for q in lib.offset_line(arm, -1.9)[1:5]], [1.2, 1.4, 1.1], 1.45, 3, 4, tip=False)
+        m.chain(f'gleam_{n}_glow', L, [P(q) for q in lib.offset_line(arm, 2.0)[1:4]], [0.6, 0.6], 1.45, 4, 5, tip=False)
+    strings(m, (4.5, 44.5), (4.5, -14.5))
     return m
 
 

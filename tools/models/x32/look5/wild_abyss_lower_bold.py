@@ -87,27 +87,22 @@ def wild_calling_bow():
     return m
 
 def wild_flash_bow():
-    """閃光の弓: 弓腕が稲妻のように折れ曲がった黒鉄の弓。上の弓腕の先端だけが雷の色に光り、
-    折れ目ごとに真鍮の留め金"""
+    """稲光の弓（レア）: 弓腕そのものが太く折れ曲がる黒鉄の稲妻。二つの折れ目を真鍮の留め金が締め、
+    上の弓腕の先だけが雷の色に光る"""
     m = M('wild_flash_bow')
-    m.box('grip', U, [10.5, 10, -1.5], [13.5, 20, 1.5], grad=(10, 3, 20, 5), wrap=(10, 20))
-    zig = [(12, 19.5), (12.5, 25), (9.5, 29), (10.5, 34), (7, 38.5), (5, 42.5)]
+    m.box('grip', U, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', B, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (4.5, 44.5)]
+    zz = [(12, 21), (15, 26), (11, 30), (14.5, 35.5), (9, 39), (10.5, 43.5), (5, 46)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'bolt_{n}', U, [mirror(p, sign) for p in zig], [2.75, 2.5, 2.25, 2, 1.75], 1.25, 4, 7, tip=False)
-        for k, p in enumerate(zig[1:5]):
-            q = mirror(p, sign)
-            m.box(f'clasp_{n}{k}', B, [q[0] - 1.4, q[1] - 0.4, -1.35], [q[0] + 1.4, q[1] + 0.4, 1.35], 4)
-        tip = mirror((5, 42.5), sign)
-        mat = P if sign > 0 else U
-        m.seg(f'tip_{n}' + ('_glow' if sign > 0 else ''), mat, tip, mirror((3.75, 44.5), sign), 1.5, 1.1, 4, 6, tip=True)
-    strings(m, (4, 44), (4, -14))
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            q = mirror((9.5, 29), sign)
-            z0 = 1.3 if zs > 0 else -1.3
-            m.box(f'rod_{n}{zn}', B, [q[0] - 0.4, q[1] - 0.4, min(z0, z0 + zs * 3.25)], [q[0] + 0.4, q[1] + 0.4, max(z0, z0 + zs * 3.25)], 4)
-            z1 = z0 + zs * 3.25
-            m.box(f'rod_ball_{n}{zn}', B, [q[0] - 0.75, q[1] - 0.75, min(z1, z1 + zs * 1.25)], [q[0] + 0.75, q[1] + 0.75, max(z1, z1 + zs * 1.25)], 5)
+        P_ = lambda q, s=sign: mirror(q, s)
+        m.chain(f'bolt_{n}', U, [P_(q) for q in zz], [3.6, 3.4, 3.2, 3, 2.6, 2.2], 1.4, 3, 6, tip=False, over=0.9)
+        for k in (2, 4):
+            q = P_(zz[k])
+            m.box(f'clasp_{n}{k}', B, [q[0] - 1.6, q[1] - 0.8, -1.55], [q[0] + 1.6, q[1] + 0.8, 1.55], 4)
+    m.seg('tip_glow', P, (6.5, 45.25), (4.5, 46.5), 2.2, 1.45, 4, 5, tip=True)
+    strings(m, (5, 46), (5, -16))
     return m
 
 

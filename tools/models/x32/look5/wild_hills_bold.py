@@ -67,25 +67,21 @@ def wild_bonebird_totem():
 
 
 def wild_bonespike_bow():
-    """骨棘の弓: 古木の弓腕の背（外側）に、骨の棘が三本ずつ外へ突き出る。先端は骨の鉤で弦を受ける。
-    握りの上の樹脂の塊に胞子が一粒光る"""
+    """骨棘の弓（レア）: 弓腕そのものが太い獣の牙。根元が太く先へ細り、二か所に古木の帯が巻かれる。
+    牙の先の尖りが弦を受ける。握りの上の樹脂の塊に胞子が一粒光る"""
     m = M('wild_bonespike_bow')
-    m.box('grip', L, [10.5, 10, -1.5], [13.5, 20, 1.5], grad=(10, 2, 20, 4), wrap=(10, 20))
-    m.box('resin_glow', S, [13.4, 19.25, -0.75], [14.25, 20.75, 0.75], 4)
-    arm = [(12, 19.5), (10.75, 27), (8.75, 34), (6.25, 39.5), (4, 43)]
+    m.box('grip', L, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', T, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (4.5, 44.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', L, [mirror(p, sign) for p in arm], [3, 2.75, 2.25, 2], 1.25, 4, 7, tip=False)
-        for k, (x, y) in enumerate(((11.5, 26), (9.75, 32), (7.5, 37.5))):
-            m.seg(f'spike_{n}{k}', T, mirror((x, y), sign), mirror((x + 3.25, y + 1.5), sign), 1.5, 0.6, 3, 5, tip=True)
-        m.chain(f'tip_{n}', T, [mirror(p, sign) for p in ((4, 43), (2.75, 45), (3.75, 46.5))], [1.5, 1.25], 0.8, 3, 5, tip=True)
-    strings(m, (3, 44.5), (3, -14.5))
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            q = mirror((9.75, 31), sign)
-            z0 = 1.25 if zs > 0 else -1.25
-            for j, (w, l) in enumerate(((1.2, 1.75), (0.8, 1.5))):
-                za = z0 + zs * j * 1.75
-                m.box(f'zspike_{n}{zn}{j}', T, [q[0] - w / 2, q[1] - w / 2, min(za, za + zs * l)], [q[0] + w / 2, q[1] + w / 2, max(za, za + zs * l)], 3 + j)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'tusk_{n}', T, [P(q) for q in arm], [4.4, 4, 3.4, 2.8, 2.0], 1.8, 3, 7, tip=True)
+        for k in (1, 3):
+            m.seg(f'ring_{n}{k}', L, P(lib.offset_line(arm, 1.6)[k]), P(lib.offset_line(arm, -1.6)[k]), 1.0, 1.9, 3, 4, over=0)
+    m.box('resin', L, [13.5, 20.5, -1.2], [15, 23, 1.2], 3)
+    m.box('spore_glow', S, [14.6, 21.2, -0.7], [15.3, 22.4, 0.7], 4)
+    strings(m, (5, 44), (5, -14))
     return m
 
 

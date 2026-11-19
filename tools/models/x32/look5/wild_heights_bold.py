@@ -177,24 +177,25 @@ def wild_eaglet_longbow():
 
 
 def wild_windcutter_bow():
-    """風切りの弓: 鳥の風切羽をそのまま弓腕にしたような、片側に羽枝のぎざぎざが並ぶ弓。
+    """風切りの弓（レア）: 弓腕そのものが一枚の風切羽。角の羽軸の外側に霜の白の羽枝の板が段に並び、先ほど短い。
     握りの上の羽軸の付け根に雷の小玉"""
     m = M('wild_windcutter_bow')
-    m.box('grip', H, [10.5, 10, -1.4], [13.5, 20, 1.4], grad=(10, 2, 20, 4), wrap=(10, 20))
-    arm = [(12, 19.5), (11, 27), (9, 34), (6.5, 40), (4, 44)]
+    m.box('grip', H, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', R, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 42.5), (4.5, 44.5)]
+    nr = lib.line_normals(arm)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', R, [mirror(p, sign) for p in arm], [2.5, 2.25, 2, 1.75], 1, 5, 8, tip=False)
-        for k, (x, y) in enumerate(((11.75, 24), (10.5, 29), (9, 34), (7, 38.5))):
-            m.seg(f'barb_{n}{k}', R, mirror((x, y), sign), mirror((x + 3 - k * 0.4, y + 2.5), sign), 1.5, 0.4, 7, 9, tip=True)
-        m.seg(f'nock_{n}', H, mirror((4.5, 44), sign), mirror((2, 44), sign), 1.75, 0.9, 4, 5)
-    m.box('quill_glow', Z, [13.4, 20, -0.6], [14.4, 21.25, 0.6], 4)
-    strings(m, (2.5, 44), (2.5, -14))
-    for k, (x, y) in enumerate(((10.5, 5), (9, 0), (7.25, -4.5))):
-        m.seg(f'belly_barb_{k}', R, (x, y), (x - 2.75 + k * 0.3, y - 2.25), 1.4, 0.4, 7, 9, tip=True)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'shaft_{n}', H, [P(q) for q in arm], [1.6, 1.5, 1.4, 1.2, 1], 1.2, 4, 5, tip=True)
+        for k in range(1, 5):
+            a = arm[k]
+            b = (a[0] + nr[k][0] * (4 - k * 0.5), a[1] + nr[k][1] * (4 - k * 0.5) - 1.8)
+            m.seg(f'barb_{n}{k}', R, P(a), P(b), 3.6 - k * 0.4, 1.0, 6, 8, tip=True)
+    m.box('zap_glow', Z, [13.9, 21, -0.8], [14.7, 22.6, 0.8], 4)
+    strings(m, (4.5, 44.5), (4.5, -14.5))
     return m
 
-
-# ---------------------------------------------------------------- 短剣・牙
 
 def wild_frostfang_dagger():
     """霜牙の短剣: 氷の牙のように半透明の層を重ねた細い刃（段で先へ細る）。鍔は霜の結晶の十字、
