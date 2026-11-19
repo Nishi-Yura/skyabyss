@@ -287,9 +287,40 @@ def raiju_claw():
 
 # ---------------------------------------------------------------- 弓
 
+def wing_plate(m, name, arm, mirror15):
+    """雷翼の弓の翼の面（板の絵）: 弓腕（前縁）から弦の側へ、先の尖った風切羽が握りの方へ流れて重なる。
+    羽の長さは弓腕の中ほどで長く両端で短い。羽と羽の境に暗い線、羽軸に明るい線。弦（x 4.5）の手前で止める"""
+    back = lib.offset_line(arm, 2.0)
+    n_f = 6
+
+    def f(x, y, cur):
+        d, tt = lib.near_line((x, y), arm)
+        if lib.near_line((x, y), back)[0] < d or x < 5.6:              # 背の側と弦より外は塗らない
+            return cur
+        if tt < 0.06 or tt > 0.94:
+            return cur
+        u = (tt - 0.06) / 0.88 * n_f
+        k, v = int(u), u - int(u)                                       # k 枚目の羽、羽の中の位置 v（0 = 先側の端）
+        tc = 0.06 + (k + 0.5) / n_f * 0.88
+        L = 2.5 + 5.0 * math.sin(math.pi * tc)                          # 羽の長さ
+        depth = L * (0.35 + 0.65 * v)                                   # 握りの側ほど長く、先は尖る
+        if d > depth:
+            return cur
+        if v < 0.14:
+            return (S, 4)                                               # 羽と羽の境
+        if abs(v - 0.6) < 0.09 and d < depth - 0.6:
+            return (S, 9)                                               # 羽軸
+        if d > depth - 0.6:
+            return (S, 5)                                               # 羽の縁
+        return (S, 8 if d < 1.6 else 7)
+    cv = lib.Canvas(5, 21, 16, 46)
+    cv.paint(f)
+    cv.put(m, name, at=0.0, mirror15=mirror15)
+
+
 def thunder_wing_bow():
-    """雷翼の弓（エピック）: 弓腕そのものが一枚の翼。背の縁は銅の骨、腹（弦の側）へ羽の板が重なって塊の翼になり、
-    羽の付け根に銅の縁。翼の先の風切羽は長く外へ伸び、その縁が雷の色に光る。弦には銅の留めが二つ"""
+    """雷翼の弓（エピック）: 弓腕そのものが一枚の翼。背の縁は銅の骨、腹（弦の側）へ翼の面（板の絵）が広がり、
+    先の尖った風切羽が握りの方へ流れて重なる（弓腕と弦の間に収め、輪郭の外へ出さない）。羽の付け根に銅の縁。翼の先の風切羽は長く外へ伸び、その縁が雷の色に光る。弦には銅の留めが二つ"""
     m = M('thunder_wing_bow')
     bow_grip(m)
     arm = [(12, 21), (14.5, 27), (15, 33), (13, 38.5), (9.5, 42.5), (5.5, 45)]
@@ -297,12 +328,7 @@ def thunder_wing_bow():
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
         m.chain(f'bone_{n}', K, [P(q) for q in arm], [2, 2, 1.75, 1.5, 1.25], 1.3, 3, 5, tip=False)
-        belly = lib.offset_line(arm, -2.0)
-        for k in range(1, 5):                                              # 羽: 弓腕の腹（弦の側）に沿って握り側へ重なる羽。弓腕と弦の間に収め、輪郭の外へ出さない
-            a, nxt = belly[k + 1], belly[k]
-            b = (nxt[0] + (nxt[0] - a[0]) * 0.3, nxt[1] + (nxt[1] - a[1]) * 0.3)
-            m.seg(f'feather_{n}{k}', S, P(a), P(b), 3.0, 1.0, 8, 5, tip=True, over=0.2)
-            m.seg(f'feather_edge_{n}{k}', K, P(a), P(((a[0] * 2 + b[0]) / 3, (a[1] * 2 + b[1]) / 3)), 0.8, 1.3, 4, 5, over=0)
+        wing_plate(m, f'wing_{n}', arm, sign < 0)                       # 翼の面（板の絵）: 弓腕と弦の間に先の尖った羽が重なる
         m.seg(f'primary_{n}', S, P((6.5, 44.5)), P((2, 53)), 3.6, 1.1, 7, 9, tip=True)
         m.seg(f'primary_edge_{n}_glow', B, P((5.5, 46.5)), P((2.6, 51.5)), 1.0, 1.15, 4, 5, tip=True)
     strings(m, top, bot)
@@ -314,9 +340,27 @@ def thunder_wing_bow():
     return m
 
 
+def wind_streaks(m, name, lines, box, at, mirror15, dirx=1):
+    """風の筋（板の絵）: 細い線が流れて先で小さく巻く。線は根元が太く先が細い。dirx=-1 で -x へ流れて巻く"""
+    cv = lib.Canvas(*box)
+    curves = []
+    for pts, curl in lines:
+        ex, ey = pts[-1]
+        c = [(ex + dirx * abs(curl) * math.sin(a / 6 * math.pi * 1.6), ey + curl * (1 - math.cos(a / 6 * math.pi * 1.6))) for a in range(1, 7)]
+        curves.append(pts + c)
+
+    def f(x, y, cur):
+        for k, pts in enumerate(curves):
+            d, t = lib.near_line((x, y), pts)
+            if d < 0.55 - 0.3 * t:
+                return (S, 9 if t < 0.5 else 8) if k % 2 == 0 else (S, 8 if t < 0.5 else 7)
+        return cur
+    cv.paint(f)
+    cv.put(m, name, at=at, mirror15=mirror15)
+
+
 def storm_gale_bow():
-    """嵐の風弓（伝説）: 太い嵐雲色の弓腕の先が大きな風の渦に巻き込む。弓腕のまわりを風の輪が二重に取り巻いて
-    （奥行きにも回る）、弦からは風の筋が射手の側（矢と逆の向き）へ流れて先で小さく巻く（弦と一緒に引かれる）。握りの前には銅の風見の羽根が三枚開き、
+    """嵐の風弓（伝説）: 太い嵐雲色の弓腕の先が大きな風の渦に巻き込む。弓腕のまわりを風の輪が二重に取り巻いて（奥行きにも回る）、弦からは風の筋（板の絵）が射手の側（矢と逆の向き）へ流れて先で小さく巻き、弦と一緒に引かれる。握りの前には銅の風見の羽根が三枚開き、
     弦そのものは稲妻で光り、銅の風鈴の板が上下に二枚ずつ下がる"""
     m = M('storm_gale_bow')
     m.box('grip', S, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
@@ -354,16 +398,19 @@ def storm_gale_bow():
         for k, y in enumerate((39, 35, -5, -9)):
             q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
             m.box(f'string_{key}_chime{k}', K, [q[0] - 0.9, q[1] - 2.25, -0.25], [q[0] + 0.9, q[1], 0.25], 3 + k % 2)
-        # 弦に付いた風の筋: 弦から射手の側（-x、矢の飛ぶ向きと逆）へ流れ、先で小さく巻く。弦と一緒に引かれる。引きの通り道（y 8〜22）は空ける
-        for sign, n in ((1, 'u'), (-1, 'd')):
-            for j, (y, dy, ln) in enumerate(((31, 1.2, 1.0), (37, -1.0, 0.8), (43, 0.8, 0.65))):
-                yy = 15 + sign * (y - 15)
-                q = lib.string_at(top, bot, pull, lib.string_t(top, bot, yy))
-                pts = [(0, 0), (-3, 1.2 * dy), (-6.5 * ln - 1, 0.6 * dy), (-9.5 * ln - 1.5, 1.6 * dy)]
-                ex, ey = pts[-1]
-                pts += [(ex - 1.6, ey + 0.9 * dy), (ex - 1.8, ey + 2.4 * dy), (ex - 0.6, ey + 2.9 * dy)]
-                pts = [(q[0] + x, q[1] + sign * y2) for x, y2 in pts]
-                m.chain(f'string_{key}_wind_{n}{j}', S, pts, [1.1, 1, 0.9, 0.8, 0.7, 0.6], 0.55, 9, 7, tip=True, over=0.3)
+        # 弦の風の筋（板の絵）: 弦の上から射手の側（-x、矢の飛ぶ向きと逆）へ流れ、先で小さく巻く。弦と一緒に引かれる。引きの通り道（y 8〜22）は空ける
+        # 前の弓腕の風の筋（表と裏の二枚、巻きの向きは表裏で逆）を左右逆にして、そのまま弦に付けた形。二枚で弦をはさむ
+        q0 = [lib.string_at(top, bot, pull, lib.string_t(top, bot, y)) for y in (29.5, 35, 41)]
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            lines = []
+            for (qx, qy), rel, curl in zip(q0, ([(0, 0), (-3.5, 2), (-7.5, 1), (-11.5, 2.5)],
+                                                 [(0, 0), (-3.5, 2.5), (-7, 1.75), (-10, 3.25)],
+                                                 [(0, 0), (-3, 2.5), (-6.5, 2), (-8.5, 4)]), (1.6, -1.2, 1.1)):
+                lines.append(([(qx + 0.4 + x, qy + y) for x, y in rel], curl * zs))
+            xs = [p[0] for pts, _ in lines for p in pts]
+            box = (min(xs) - 4, 26, max(xs) + 1, 50)
+            for sign, n in ((1, 'u'), (-1, 'd')):
+                wind_streaks(m, f'string_{key}_wind_{n}{zn}', lines, box, zs * 0.3, sign < 0, dirx=-1)
     return m
 
 
