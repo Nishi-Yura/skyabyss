@@ -185,4 +185,4 @@
   - 全 35 弓（祠の弓は設計ファイルがないので除く）で流して見つけた離れ: 淵の鯨・遠見・背骨の弦の端（弦を先へ寄せた）、背骨の肋骨、星落ちの三日月の留め、嵐の風弓の風の輪（ばらばらの 8 箱 → 角を欠いた一続きの四角い輪）と風の筋の板、灰ひきずりの布の端、火口の棘、逆さ吊りの風鈴の紐と塩の結晶、呼び声の輪の角。設計ファイルは直した。**ゲームへの取り込み（Blockbench の流れ）はまだ**。
   - エピックの巨神の弓 5 本は形から作り直して設計ファイルに清書済み（測鉛=鉛の錘の列と吊るした測鉛、灰=火蜥蜴、雷翼=翼の板、潮殻=オウム貝、鯨肋=顎の骨と歯。私が 3 案から選んだ。ラフ `look5/rough_epic_bold.py`、一覧 `docs/review/bow_epic_roughs.png`）。**取り込みはまだ**。
   - レア 6・アンコモン 2 も形から清書済み（下弦=三日月の刃、骨棘=牙、稲光=太い稲妻、真珠層=帆立の板、塩鴉=鴉の首と塩の頭蓋、風切り=風切羽、鳥追い=素朴な丸木、海鳥=鴎の M の輪郭。一覧 `docs/review/bow_low_roughs.png`、ラフの設計ファイルは消した）。祠の弓は祠の 6 品なので据え置き。joint_check は全 35 弓 OK。
-  - 残り: 設計を変えた 22 弓（エピック 5・レア 6・アンコモン 2・つながりを直した 9: abyss_whale, wild_scope_longbow, wild_bonestring, moon_starfall, storm_gale, wild_ashhook, wild_crater_longbow, wild_hanged_longbow, wild_calling）を Blockbench の流れで取り込む → joint_check をもう一度 → series_check でゲーム内を撮る → 全弓を並べてユーザーに見せる（つながりと弦を確かめたことも書く）。
+  - 22 弓の取り込みも済み（Blockbench の流れ）。取り込み後に joint_check を全 35 弓でもう一度流して OK。全 36 弓のゲーム内の一覧 `docs/review/bow_all36_ingame.png`。弓はこれで一巡。次はユーザーの確認待ち（その後ほかの武器 183 品に同じ流れと joint_check を広げる）。
