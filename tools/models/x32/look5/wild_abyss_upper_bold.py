@@ -93,51 +93,39 @@ def wild_bonestring_bow():
 
 
 def wild_lantern_bow():
-    """提灯の弓（エピック）: 坑道の鉄の太い弓。上の弓腕の内側（弦の側）から鎖で角灯が下がり、弓の懐で灯がともる。
-    握りの前に塩の結晶の房が咲き、弓腕は節ごとに塩の帯で締め、背に結晶の棘が二本ずつ。
-    弦には塩の結晶の玉が上下に一つずつ通り、下の弓腕の先は塩の結晶の房"""
+    """提灯の弓（エピック）: 弓腕そのものが坑道の鉄の枠。外と内の二本の縁のあいだに灯の窓が並び、窓は鉄の格子で区切られる。
+    窓の一つずつの中で小さな灯の炎が揺れる（板の絵、前後に一枚ずつ）。格子の頭に塩の鋲、弓の先は鉄の笠"""
     m = M('wild_lantern_bow')
     m.box('grip', H, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
-    for k, y in enumerate((8.25, 20.5)):
-        m.box(f'riser_{k}', T, [9.6, y, -2.3], [14.4, y + 1.25, 2.3], 3 + k)
-    diamond(m, 'guard_salt', T, (15.25, 15), 4.25, 2.2, 3, 5)
-    diamond(m, 'guard_glow', L, (15.25, 15), 2.25, 2.45, 3, 5)
-    diamond(m, 'guard_salt_s', T, (16.75, 18.25), 2.5, 1.7, 4, 5)
-    diamond(m, 'guard_salt_t', T, (16.5, 11.75), 2.25, 1.6, 4, 5)
-    arm = [(12, 20), (11.5, 27), (10, 34), (7.75, 39.5), (5.5, 43)]
+    arm = [(12, 21), (13.5, 27), (13.25, 33), (11.25, 38.5), (8, 42), (4.5, 43.25)]
+    outer, inner = lib.offset_line(arm, 2.1), lib.offset_line(arm, -2.1)
+    centers = [((arm[k][0] + arm[k + 1][0]) / 2, (arm[k][1] + arm[k + 1][1]) / 2) for k in range(4)]
+    cv = lib.Canvas(5, 20, 18, 44)
+
+    def f(x, y, cur):
+        for k, c in enumerate(centers):
+            u, v = x - c[0], y - c[1] + 1.2
+            h = 2.6 - k * 0.3
+            if 0 <= v <= h:
+                w = 0.9 * (1 - v / h) ** 0.7 * (1 if k < 3 else 0.8)
+                if abs(u - 0.2 * math.sin(v * 2)) < w:
+                    return (L, 5) if abs(u) < w * 0.45 and v < h * 0.6 else (L, 3)
+        return None
+    cv.paint(f)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
-        m.chain(f'arm_{n}', H, [P(q) for q in arm], [3.75, 3.25, 2.75, 2.25], 1.5, 5, 8, tip=False)
-        for k in (1, 2, 3):
-            (x0, y0), (x1, y1) = arm[k - 1], arm[k + 1]
-            L0 = math.hypot(x1 - x0, y1 - y0)
-            px, py = -(y1 - y0) / L0, (x1 - x0) / L0
-            c = arm[k]
-            hw = (2.4, 2.1, 1.8)[k - 1]
-            m.seg(f'band_{n}{k}', T, P((c[0] - px * hw, c[1] - py * hw)), P((c[0] + px * hw, c[1] + py * hw)), 1.25, 1.75, 3, 4, over=0)
-        for k, (x, y, ln) in enumerate(((13.25, 25, 3.5), (11.75, 31.5, 3.25))):
-            q = P((x, y))
-            m.seg(f'spike_{n}{k}', T, q, (q[0] + ln, q[1] + sign * ln * 0.55), 1.6, 1.1, 4, 5, tip=True)
-    m.chain('tip_u', H, [(5.5, 43), (4.5, 44.75)], [1.75], 1.2, 7, 8, tip=False)
-    diamond(m, 'crown_u', T, (5, 45.25), 2.25, 1.5, 4, 5)
-    # 懐の角灯（上の弓腕の腹から鎖で下がる）
-    m.box('hanger', H, [6.8, 31.25, -0.3], [10.25, 31.85, 0.3], 6)
-    m.box('chain', H, [7.05, 30, -0.25], [7.55, 31.5, 0.25], 5)
-    m.box('cage_roof', T, [5.4, 29.25, -1.9], [9.2, 30, 1.9], 4)
-    m.box('cage_peak', T, [6.3, 30, -1.1], [8.3, 30.5, 1.1], 5)
-    m.box('cage', H, [5.75, 25.5, -1.5], [8.85, 29.25, 1.5], 6)
-    m.box('light_glow', L, [6.1, 25.9, -1.75], [8.5, 28.9, 1.75], 4)
-    m.box('cage_floor', H, [5.4, 24.75, -1.9], [9.2, 25.5, 1.9], 7)
-    m.seg('cage_drip', T, (7.3, 24.75), (7.3, 23), 1, 0.8, 4, 5, tip=True)
-    diamond(m, 'crust_d', T, (5.75, -13), 3.25, 1.8, 3, 5)
-    diamond(m, 'crust_d2', T, (4.25, -11), 2, 1.4, 4, 5)
-    m.seg('crust_spike', T, (6.5, -14), (8.25, -18.25), 1.6, 1.1, 4, 5, tip=True)
-    top, bot = (4.5, 43.25), (4.5, -13.25)
-    strings(m, top, bot)
-    for key, pull in lib.PULLS:
-        for k, y in enumerate((35.5, -4.5)):
-            c = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
-            diamond(m, f'string_{key}_bead{k}', T, c, 1.9, 1.1, 4, 5)
+        m.chain(f'pane_{n}_glow', L, [P(q) for q in arm], [3, 3, 2.75, 2.25, 1.75], 0.9, 1, 2, tip=False)
+        m.chain(f'rim_out_{n}', H, [P(q) for q in outer], [1.1, 1.1, 1, 0.9, 0.8], 1.3, 3, 6, tip=False)
+        m.chain(f'rim_in_{n}', H, [P(q) for q in inner], [1.1, 1.1, 1, 0.9, 0.8], 1.3, 3, 6, tip=False)
+        for k in range(1, 5):
+            m.seg(f'bar_{n}{k}', H, P(inner[k]), P(outer[k]), 0.8, 1.3, 5, 6, over=0.3)
+            q = P(outer[k])
+            m.box(f'rivet_{n}{k}', T, [q[0] - 0.5, q[1] - 0.5, -1.45], [q[0] + 0.5, q[1] + 0.5, 1.45], 4)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            cv.put(m, f'flame_{n}{zn}_glow', at=zs * 0.95, mirror15=sign < 0)
+        c = P((4.5, 43.25))
+        m.box(f'cap_{n}', H, [c[0] - 1.5, c[1] - 1, -1.5], [c[0] + 1.5, c[1] + 1, 1.5], 6)
+    strings(m, (4.5, 43.25), (4.5, -13.25))
     return m
 
 

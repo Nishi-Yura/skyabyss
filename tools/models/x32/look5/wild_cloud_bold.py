@@ -59,61 +59,41 @@ def strings(m, top, bot):
 
 
 def wild_skylark_bow():
-    """雲雀の弓（ヒロイック）: 両端に雲雀の翼が大きく扇に開く弓。白い風切羽が五枚ずつ外へ広がり、羽先は金、
-    その間から青い内羽がのぞく。翼の先には空の青の光のかけらが離れて舞う。弓腕は白の太い節を金の菱の留め具でつなぎ、
-    握りの背には金の日輪と大きな青い宝玉、日輪から金の小翼が上下へ伸びる。握りの下から青い飾り紐がなびく"""
+    """雲雀の弓（ヒロイック）: 弓腕そのものが雲雀の翼。白い翼の背の縁は金、腹（弦の側）には段になった白い風切羽が
+    板の絵で並び（縁は空の青、羽先は金）、翼の先には空の青の光のかけらが舞う。握りは空の青に金の帯"""
     m = M('wild_skylark_bow')
     m.box('grip', 'sky', [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
-    for k, y in enumerate((8.25, 20.5)):
-        m.box(f'grip_cap_{k}', G, [9.75, y, -2.4], [14.25, y + 1.25, 2.4], 3 + k)
-    diamond(m, 'sun', G, (17.25, 15), 8, 1.5, 3, 5)
-    diamond(m, 'sun_rim', 'sky', (17.25, 15), 5.5, 1.75, 2, 3)
-    diamond(m, 'gem_glow', Z, (17.25, 15), 3.5, 2.1, 3, 5)
-    m.seg('sun_ray', G, (21.5, 15), (24.5, 15), 1.5, 1, 4, 5, tip=True)
-    arm = [(12, 20.5), (11.25, 27.5), (9.75, 34), (7.5, 39.5), (5, 43.5)]
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        P = lambda q: mirror(q, sign)
-        m.chain(f'brace_{n}', G, [P((15.5, 18.5)), P((19, 21)), P((21.25, 24.75))], [2.25, 1.5], 1, 3, 5, tip=True)
-        m.chain(f'arm_{n}', N, [P(q) for q in arm], [4, 3.5, 3, 2.5], 1.6, 6, 9, tip=False)
-        for k, sz in ((1, 3.75), (2, 3.5), (3, 3)):
-            diamond(m, f'node_{n}{k}', G, P(arm[k]), sz, 1.9, 3, 5)
-        diamond(m, f'node_gem_{n}', 'sky', P(arm[2]), 1.75, 2.15, 4, 5)
-        for k, (r, ang, ln, w) in enumerate((((9, 36.5), -8, 14.5, 3.5), ((8.25, 39), 12, 17, 3.5), ((7.25, 41.25), 32, 18, 3.25),
-                                             ((6, 43), 52, 16, 3), ((4.75, 44.5), 72, 12, 2.75))):
-            dx, dy = math.cos(math.radians(ang)), math.sin(math.radians(ang))
-            e = (r[0] + dx * ln * 0.78, r[1] + dy * ln * 0.78)
-            f = (r[0] + dx * ln, r[1] + dy * ln)
-            m.seg(f'quill_{n}{k}', N, P(r), P(e), w, 0.7, 6, 9, over=0.3, zc=0.35)
-            m.seg(f'quill_tip_{n}{k}', G, P(e), P(f), w * 0.85, 0.65, 4, 5, tip=True, zc=0.35)
-            if k < 4:
-                a2 = ang + 10
-                g = (r[0] + math.cos(math.radians(a2)) * ln * 0.6, r[1] + math.sin(math.radians(a2)) * ln * 0.6)
-                m.seg(f'down_{n}{k}', 'sky', P(r), P(g), 2, 0.6, 3, 5, tip=True, zc=-0.55)
-        for k, (ang, ln) in enumerate(((2, 19), (22, 21.5), (42, 21.5), (62, 18.5))):
-            dx, dy = math.cos(math.radians(ang)), math.sin(math.radians(ang))
-            o = (7.75, 39.5)
-            m.seg(f'shard_{n}{k}_glow', Z, P((o[0] + dx * ln, o[1] + dy * ln)), P((o[0] + dx * (ln + 3.25), o[1] + dy * (ln + 3.25))),
-                  0.9, 0.45, 3, 5, over=0)
-        m.chain(f'tip_{n}', G, [P(q) for q in ((5, 43.5), (3.25, 45.5), (4.25, 47.5))], [2, 1.5], 1.2, 4, 5, tip=False)
-        diamond(m, f'tip_glow_{n}', Z, P((4.25, 48.25)), 2, 1.3, 4, 5)
-    m.chain('ribbon', 'sky', [(13, 8.25), (15.25, 5.25), (14.25, 2.25), (16.5, -0.75), (16, -3.75)], [1.75, 1.75, 1.5, 1.25], 0.35, 3, 5, tip=False)
-    diamond(m, 'ribbon_end', G, (16, -4.5), 1.75, 0.6, 4, 5)
-    # 腹（弦の側）: 握りの上下から金の小さな鉤羽が弦の方へ巻く。握りの左右（奥行き）に金の耳羽
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', G, [9.75, y, -2.4], [14.25, y + 1.5, 2.4], 4)
+    arm = [(12, 21), (15, 27), (16, 33), (14.5, 39), (11, 43.5), (6.5, 45.5), (3.25, 45.5)]
+    belly = lib.offset_line(arm, -2.6)
+    nr = lib.line_normals(arm)
+    quills = []
+    for k in range(1, 6):
+        a = belly[k]
+        quills.append((a, (a[0] - nr[k][0] * 5 - 1, a[1] - nr[k][1] * 5 - 2.4), 5 - k * 0.4))
+    cv = lib.Canvas(-2, 16, 18, 47)
+
+    def f(x, y, cur):
+        for k, (a, b, w) in enumerate(quills):
+            d, t = lib.near_line((x, y), [a, b])
+            ww = w * (0.8 + 0.2 * t)
+            if d < ww / 2 and t < 1 - 0.3 * (d / (ww / 2)) ** 2:
+                if t > 0.8:
+                    return (G, 4)
+                if d > ww / 2 - 0.5:
+                    return ('sky', 5)
+                return (N, 9) if k % 2 else (N, 8)
+        return cur
+    cv.paint(f)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
-        m.chain(f'belly_curl_{n}', G, [P((10.5, 21.25)), P((8.25, 22.75)), P((7.5, 25)), P((8.25, 26.5))], [1.5, 1.25, 1], 0.8, 3, 5, tip=True)
-    for zs, n in ((1, 'f'), (-1, 'b')):
-        m.box(f'ear_{n}', G, [11.25, 22, zs * 2 if zs > 0 else -4.25], [13.25, 25.5, 4.25 if zs > 0 else -2], grad=(22, 3, 25.5, 5))
-        m.box(f'ear_tip_{n}', G, [11.75, 25.5, zs * 3 if zs > 0 else -4.25], [12.75, 27, 4.25 if zs > 0 else -3], 5)
-    top, bot = (3.25, 45.5), (3.25, -15.5)
-    strings(m, top, bot)
-    # 弦: 金の玉が上下に二つずつ、上の玉の下に青い羽の飾りが下がる
-    for key, pull in lib.PULLS:
-        for k, y in enumerate((33, 36.5, -3, -6.5)):
-            c = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
-            diamond(m, f'string_{key}_bead{k}', G, c, 1.6 if k % 2 else 2, 1, 4, 5)
-        c = lib.string_at(top, bot, pull, lib.string_t(top, bot, 33))
-        m.seg(f'string_{key}_charm', 'sky', (c[0], c[1] - 1), (c[0] + 0.5, c[1] - 4.5), 1.5, 0.35, 3, 5, tip=True)
+        m.chain(f'wing_{n}', N, [P(q) for q in arm], [6, 7, 6, 4.5, 3, 1.8], 1.4, 6, 9, tip=False)
+        m.chain(f'lead_{n}', G, [P(q) for q in lib.offset_line(arm, 3.1)[1:5]], [0.8, 0.8, 0.7], 1.45, 3, 5, tip=False)
+        cv.put(m, f'quills_{n}', at=0.0, mirror15=sign < 0)
+        for k, (x, y, s) in enumerate(((5.5, 48.5, 1.4), (9, 48, 1), (2.5, 50, 0.9))):
+            diamond(m, f'spark_{n}{k}_glow', Z, P((x, y)), s, 0.6, 4, 5)
+    strings(m, (3.25, 45.5), (3.25, -15.5))
     return m
 
 

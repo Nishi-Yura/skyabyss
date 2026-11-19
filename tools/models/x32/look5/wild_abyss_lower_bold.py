@@ -52,30 +52,37 @@ def strings(m, top, bot):
 # ================================================================ 弓
 
 def wild_calling_bow():
-    """呼び声の弓（エピック）: 黒鉄の弓。握りの背（+x）に真鍮の角笛が大きく反って付き、角笛の口の奥が雷の色に光る。
-    角笛の口からは音の波が雷の色の弧になって三重に広がる。弓腕の先は真鍮の巻き貝のように大きく内へ巻き、
-    腕の継ぎ目には真鍮の帯。弦には真鍮のリードの玉が上下に一つずつ"""
+    """呼び声の弓（エピック）: 弓腕そのものが真鍮の角笛。握りから先へ太りながら反り、管の継ぎ目に濃い帯。
+    弓の先で口が開いて奥が雷の色に光り、口から音の波が雷の色の弧になって三重に広がる（板の絵）"""
     m = M('wild_calling_bow')
-    m.box('grip', U, [10.25, 9.5, -1.75], [13.75, 20.5, 1.75], grad=(9.5, 3, 20.5, 5), wrap=(9.5, 20.5))
-    m.chain('horn', B, [(13.5, 11), (16, 12.5), (18, 15.5), (18.5, 19.5)], [1.5, 2.25, 3], 1.9, 3, 5, tip=False)
-    m.box('horn_bell', B, [16.5, 19.5, -2.1], [20.5, 20.5, 2.1], 5)
-    m.box('horn_mouth_glow', P, [17, 20.25, -1.5], [20, 20.75, 1.5], 4)
-    for k, (r, w) in enumerate(((3, 1), (5, 0.9), (7, 0.75))):
-        m.arc(f'wave_{k}_glow', P, (18.5, 21), r, 35, 145, 5, w, 0.35, 3, 5)
-    arm = [(12, 19.5), (11, 27), (9.25, 34), (7, 39.5), (5, 42.5)]
+    m.box('grip', U, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 3, 20.5, 5), wrap=(9.5, 20.5))
+    arm = [(12, 21), (13.5, 27), (13.5, 33), (11.5, 38.5), (8, 42), (4.5, 44)]
+    c0 = (4, 44.75)
+    cv = lib.Canvas(-6, 45, 14, 55)
+
+    def f(x, y, cur):
+        dx, dy = x - c0[0], y - c0[1]
+        r = math.hypot(dx, dy)
+        a = math.degrees(math.atan2(dy, dx))
+        if not 30 < a < 150:
+            return None
+        for k, rr in enumerate((3.25, 5.25, 7.5)):
+            if abs(r - rr) < 0.45 - k * 0.05:
+                return (P, 4 - k)
+        return None
+    cv.paint(f)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P_ = lambda q, s=sign: mirror(q, s)
-        m.chain(f'arm_{n}', U, [P_(q) for q in arm], [3.5, 3, 2.5, 2], 1.4, 4, 7, tip=False)
-        for k, p in enumerate(arm[1:4]):
-            q = P_(p)
-            m.box(f'band_{n}{k}', B, [q[0] - 1.9, q[1] - 0.45, -1.6], [q[0] + 1.9, q[1] + 0.45, 1.6], 4)
-        m.chain(f'curl_{n}', B, [P_(q) for q in ((5, 42.5), (3, 45.25), (0.5, 44.5), (0, 41.75), (2, 40.25), (3.25, 41.75))], [2, 1.75, 1.5, 1.25, 1], 1.1, 3, 5, tip=True)
-    top, bot = (3.25, 43.75), (3.25, -13.75)
-    strings(m, top, bot)
-    for key, pull in lib.PULLS:
-        for k, y in enumerate((35, -5)):
-            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
-            m.box(f'string_{key}_reed{k}', B, [q[0] - 0.8, q[1] - 1.1, -0.8], [q[0] + 0.8, q[1] + 1.1, 0.8], 4)
+        m.chain(f'horn_{n}', B, [P_(q) for q in arm], [2.25, 2.75, 3.25, 4, 4.75], 1.4, 2, 5, tip=False)
+        for k in range(1, 5):
+            q = P_(arm[k])
+            w = 1.6 + k * 0.45
+            m.box(f'ring_{n}{k}', B, [q[0] - w, q[1] - 0.35, -1.65 - k * 0.1], [q[0] + w, q[1] + 0.35, 1.65 + k * 0.1], 1)
+        c = P_(c0)
+        m.box(f'mouth_{n}', B, [c[0] - 3, c[1] - 1, -2.5], [c[0] + 3, c[1] + 1, 2.5], 5)
+        m.box(f'mouth_in_{n}_glow', P, [c[0] - 2, c[1] - 1.05 if sign < 0 else c[1] + 0.2, -1.7], [c[0] + 2, c[1] - 0.2 if sign < 0 else c[1] + 1.05, 1.7], 4)
+        cv.put(m, f'wave_{n}_glow', at=0.0, mirror15=sign < 0)
+    strings(m, (3.25, 43.75), (3.25, -13.75))
     return m
 
 
@@ -105,43 +112,36 @@ def wild_flash_bow():
 
 
 def wild_scope_longbow():
-    """遠見の大弓（エピック）: 背丈ほどの黒鉄の長弓。握りの上に真鍮の望遠筒が載り、筒の前のレンズが雷の色に光り、
-    その先に照準の輪が浮かぶ。握りの左右（奥行き）には真鍮の歯車、腹には真鍮の矢置き。弓腕の継ぎ目に真鍮の帯、
-    弦には真鍮ののぞき穴の輪（ピープ）と口当ての玉が付く"""
+    """遠見の大弓（エピック）: 弓腕そのものが伸び縮みする望遠筒。握りから先へ一段ずつ細る黒鉄の筒が重なり、
+    継ぎ目ごとに真鍮の襟。先のレンズが雷の色に光り、レンズの先に照準の輪（板の絵、十字と目盛り）が浮かぶ"""
     m = M('wild_scope_longbow')
     m.box('grip', U, [10.25, 9, -1.9], [13.75, 21, 1.9], grad=(9, 3, 21, 5), wrap=(9, 21))
-    m.box('mount', B, [13.5, 17, -0.85], [15, 19, 0.85], 4)
-    m.box('scope', B, [15, 15.5, -1.6], [18.25, 26, 1.6], grad=(15.5, 3, 26, 5))
-    for k, y in enumerate((17, 24.25)):
-        m.box(f'scope_ring_{k}', U, [14.75, y, -1.85], [18.5, y + 0.9, 1.85], 6)
-    m.box('lens_glow', P, [15.4, 26, -1.15], [17.85, 26.6, 1.15], 4)
-    m.box('scope_hood', B, [14.85, 26.6, -1.75], [18.4, 27.4, 1.75], 5)
-    m.arc('sight_ring_glow', P, (16.6, 31), 2, 0, 360, 8, 0.5, 0.3, 3, 5)
-    m.box('sight_cross_glow', P, [16.35, 29.25, -0.2], [16.85, 32.75, 0.2], 4)
-    m.box('rest', B, [8.25, 20.5, -0.75], [10.5, 21.25, 0.75], 4)
-    for zs, zn in ((1, 'f'), (-1, 'b')):
-        z0, z1 = (1.9, 2.9) if zs > 0 else (-2.9, -1.9)
-        m.box(f'gear_{zn}', B, [10.5, 22, z0], [13.5, 25, z1], 4)
-        for k, (dx, dy) in enumerate(((0, 1.9), (0, -1.9), (1.9, 0), (-1.9, 0))):
-            m.box(f'gear_tooth_{zn}{k}', B, [12 + dx - 0.45, 23.5 + dy - 0.45, z0], [12 + dx + 0.45, 23.5 + dy + 0.45, z1], 5)
-        m.box(f'gear_hub_{zn}', U, [11.6, 23.1, z1 - 0.1 if zs > 0 else z0 - 0.15], [12.4, 23.9, z1 + 0.15 if zs > 0 else z0 + 0.1], 2)
-    arm = [(12, 20.5), (11.5, 30), (10, 39), (7.5, 46.5), (4.75, 52)]
+    arm = [(12, 21), (12.5, 31), (11, 40), (8, 48), (4.5, 53)]
+    c0 = (2.5, 58.5)
+    cv = lib.Canvas(-2, 54, 7, 63)
+
+    def f(x, y, cur):
+        dx, dy = x - c0[0], y - c0[1]
+        r = math.hypot(dx, dy)
+        if 3.6 < r < 4.2:
+            return (P, 4)
+        if r < 3.6 and (abs(dx) < 0.25 or abs(dy) < 0.25) and r > 0.8:
+            return (P, 3)
+        if 4.2 <= r < 4.6 and (abs(dx) < 0.3 or abs(dy) < 0.3):
+            return (B, 5)
+        return None
+    cv.paint(f)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P_ = lambda q, s=sign: mirror(q, s)
-        m.chain(f'arm_{n}', U, [P_(q) for q in arm], [3.25, 2.75, 2.25, 2], 1.35, 4, 7, tip=False)
-        for k, p in enumerate(arm[1:4]):
-            q = P_(p)
-            m.box(f'band_{n}{k}', B, [q[0] - 1.8, q[1] - 0.45, -1.55], [q[0] + 1.8, q[1] + 0.45, 1.55], 4)
-        m.seg(f'nock_{n}', B, P_((4.75, 52)), P_((3, 54.5)), 1.75, 1.05, 3, 5, tip=True)
-        m.seg(f'fin_{n}', B, P_((10.75, 34)), P_((14.25, 36.5)), 1.5, 0.6, 3, 5, tip=True)
-    top, bot = (3.25, 54), (3.25, -24)
-    strings(m, top, bot)
-    for key, pull in lib.PULLS:
-        q = lib.string_at(top, bot, pull, lib.string_t(top, bot, 27))
-        m.box(f'string_{key}_peep', B, [q[0] - 1, q[1] - 1, -0.35], [q[0] + 1, q[1] + 1, 0.35], 4)
-        m.box(f'string_{key}_peep_hole_glow', P, [q[0] - 0.35, q[1] - 0.35, -0.4], [q[0] + 0.35, q[1] + 0.35, 0.4], 4)
-        q = lib.string_at(top, bot, pull, lib.string_t(top, bot, 22))
-        m.box(f'string_{key}_kisser', B, [q[0] - 0.7, q[1] - 0.5, -0.7], [q[0] + 0.7, q[1] + 0.5, 0.7], 5)
+        for k in range(len(arm) - 1):
+            a, b = arm[k], arm[k + 1]
+            w = 4 - k * 0.6
+            m.seg(f'tube_{n}{k}', U, P_(a), P_(b), w, w / 2.2, 4 + k * 0.6, 6 + k * 0.5, over=0.2)
+            m.seg(f'collar_{n}{k}', B, P_(b), P_((b[0] + (a[0] - b[0]) * 0.12, b[1] + (a[1] - b[1]) * 0.12)), w + 0.8, w / 2.2 + 0.4, 4, 5, over=0)
+        q = P_((4.5, 53))
+        m.box(f'lens_{n}_glow', P, [q[0] - 1, q[1] - 0.5, -1], [q[0] + 1, q[1] + 0.5, 1], 4)
+        cv.put(m, f'reticle_{n}_glow', at=0.0, mirror15=sign < 0)
+    strings(m, (3.25, 54), (3.25, -24))
     return m
 
 
