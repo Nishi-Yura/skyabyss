@@ -53,24 +53,11 @@ def strings(m, top, bot):
 
 def wild_calling_bow():
     """呼び声の弓（エピック）: 弓腕そのものが真鍮の角笛。握りから先へ太りながら反り、管の継ぎ目に濃い帯。
-    弓の先で口が開いて奥が雷の色に光り、口から音の波が雷の色の弧になって三重に広がる（板の絵）"""
+    弓の先で口が開いて奥が雷の色に光り、口の上に横に寝た雷の色の光の輪が三段、上ほど大きく淡く重なって、音が広がる"""
     m = M('wild_calling_bow')
     m.box('grip', U, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 3, 20.5, 5), wrap=(9.5, 20.5))
     arm = [(12, 21), (13.5, 27), (13.5, 33), (11.5, 38.5), (8, 42), (4.5, 44)]
     c0 = (4, 44.75)
-    cv = lib.Canvas(-6, 45, 14, 55)
-
-    def f(x, y, cur):
-        dx, dy = x - c0[0], y - c0[1]
-        r = math.hypot(dx, dy)
-        a = math.degrees(math.atan2(dy, dx))
-        if not 30 < a < 150:
-            return None
-        for k, rr in enumerate((3.25, 5.25, 7.5)):
-            if abs(r - rr) < 0.45 - k * 0.05:
-                return (P, 4 - k)
-        return None
-    cv.paint(f)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P_ = lambda q, s=sign: mirror(q, s)
         m.chain(f'horn_{n}', B, [P_(q) for q in arm], [2.25, 2.75, 3.25, 4, 4.75], 1.4, 2, 5, tip=False)
@@ -81,10 +68,19 @@ def wild_calling_bow():
         c = P_(c0)
         m.box(f'mouth_{n}', B, [c[0] - 3, c[1] - 1, -2.5], [c[0] + 3, c[1] + 1, 2.5], 5)
         m.box(f'mouth_in_{n}_glow', P, [c[0] - 2, c[1] - 1.05 if sign < 0 else c[1] + 0.2, -1.7], [c[0] + 2, c[1] - 0.2 if sign < 0 else c[1] + 1.05, 1.7], 4)
-        cv.put(m, f'wave_{n}_glow', at=0.0, mirror15=sign < 0)
+        # 音の輪: 横に寝た四角い輪。上ほど大きく、細く、淡く。角は一段欠いて丸みを出す
+        for k in range(3):
+            y = P_((0, 46.5 + k * 1.75))[1]
+            h = 2.75 + k * 1.4
+            t = 0.55 - k * 0.05
+            cx, tone = c0[0], 4 - k
+            cut = 0.5 + k * 0.25
+            for sd, (a, b) in (('a', (-h, -h + t)), ('b', (h - t, h))):
+                m.box(f'wave_{n}{k}{sd}_glow', P, [cx - h + cut, y - t / 2, a], [cx + h - cut, y + t / 2, b], tone)
+            for sd, (a, b) in (('c', (cx - h, cx - h + t)), ('d', (cx + h - t, cx + h))):
+                m.box(f'wave_{n}{k}{sd}_glow', P, [a, y - t / 2, -h + cut], [b, y + t / 2, h - cut], tone)
     strings(m, (3.25, 43.75), (3.25, -13.75))
     return m
-
 
 def wild_flash_bow():
     """閃光の弓: 弓腕が稲妻のように折れ曲がった黒鉄の弓。上の弓腕の先端だけが雷の色に光り、
