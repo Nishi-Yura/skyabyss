@@ -145,8 +145,33 @@ def strings(m, top, bot):
             m.seg(f'string_{key}_d', 'string', bot, mid, 1, 0.5, 3, 3, over=0.2)
 
 
+def sigil_wheel(m, name, c, at):
+    """横向き（ZY）の印の輪（板の絵）: 真鍮の二重の輪のあいだに印の文字が八つ。前から見ると目を貫く輪"""
+    cv = lib.Canvas(-10, c[1] - 10, 10, c[1] + 10)
+    glyphs = ['x.x/.x./x.x', 'xxx/x.x/xxx', '.x./xxx/.x.', 'x../xxx/..x', 'xx./.x./.xx', 'x.x/xxx/x.x', '.xx/x../.xx', 'xxx/.x./.x.']
+
+    def f(z, y, cur):
+        dz, dy = z, y - c[1]
+        r = math.hypot(dz, dy)
+        if 8.6 < r < 9.6:
+            return (B, 4 if dy > 0 else 3)
+        if 5.9 < r < 6.5:
+            return (B, 3)
+        if 6.5 <= r <= 8.6:
+            a = math.degrees(math.atan2(dy, dz)) % 360
+            k = int((a + 22.5) // 45) % 8
+            ca = math.radians(k * 45)
+            gu = (dz - math.cos(ca) * 7.55) / 0.5 + 1.5
+            gv = (dy - math.sin(ca) * 7.55) / 0.5 + 1.5
+            if 0 <= gu < 3 and 0 <= gv < 3 and glyphs[k].split('/')[2 - int(gv)][int(gu)] == 'x':
+                return (G, 4)
+        return cur
+    cv.paint(f)
+    cv.put(m, name, at=at, plane='zy')
+
+
 def tower_eye_bow():
-    """側の目の弓（伝説）: 握りの前に石の瞼に抱かれた大きな一つ目が光り、そのまわりを真鍮の印の輪が二重に巡る。
+    """側の目の弓（伝説）: 握りの前に石の瞼に抱かれた大きな一つ目が光り、そのまわりを真鍮の印の輪が二重に巡り、横向き（奥行きの面）にも印の文字を刻んだ輪（板の絵）が目を貫いて立つ。
     弓腕は角張った石の板を段に重ねた階段の形で、腹（弦の側）の継ぎ目ごとに小さな目が開いて弓の懐を見つめる。
     左右（奥行き）には印を刻んだ石の札が張り出し、両端は真鍮の尖塔。弦は真鍮の鎖の輪を連ねたもの"""
     m = M('tower_eye_bow')
@@ -162,6 +187,7 @@ def tower_eye_bow():
     for k, a in enumerate((-120, -60, 0, 60, 120)):
         dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
         diamond(m, f'sigil_{k}_glow', G, (c[0] + dx * 7.4, c[1] + dy * 7.4), 1.25, 0.55, 4, 5)
+    sigil_wheel(m, 'wheel', c, c[0])
     steps = [(12, 20), (13, 24.5), (12.5, 28.5), (13.25, 32.5), (11.5, 36.5), (10.25, 40), (7.75, 43), (5, 45.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)

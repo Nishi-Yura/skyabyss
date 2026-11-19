@@ -215,7 +215,7 @@ def abyss_whale_fang():
 
 
 def abyss_whale_bow():
-    """鯨ひげの弓（伝説）: 太く反った淵の岩の弓腕。腕の腹（弦の側）から鯨ひげの板が櫛のように垂れ下がって弓の懐を埋める。
+    """鯨ひげの弓（伝説）: 太く反った淵の岩の弓腕。腕の腹（弦の側）から鯨ひげが櫛のように密に垂れ下がって弓の懐を埋める（板の絵、先は骨の白の毛羽）。
     上の先は大きな鯨の尾びれ、下の先は骨の銛の穂先。握りの前には骨の頭骨の殻が張り出し、その潮吹きの穴から淵の光の
     しぶきが上へ噴き上がって浮かぶ。弦には骨の椎骨の玉が並ぶ"""
     m = M('abyss_whale_bow')
@@ -235,9 +235,7 @@ def abyss_whale_bow():
         pts = [P(q) for q in arm]
         m.chain(f'arm_{n}', V, pts, [4.25, 4, 3.5, 3, 2.5], 1.6, 3, 6, tip=False)
         m.chain(f'ridge_{n}', B, [P((q[0] + 1.9 - k * 0.15, q[1])) for k, q in enumerate(arm[1:5])], [0.8, 0.8, 0.7], 1.75, 3, 5, tip=False)
-        for k, (x, y, ln) in enumerate(((12, 25.5, 5), (11.75, 29, 5.75), (11.5, 32.5, 6), (10.75, 35.75, 5.75), (9.5, 39, 5), (7.75, 42, 3.75))):
-            a, b = P((x, y)), P((x - ln * 0.62, y - ln * 0.78))
-            m.seg(f'baleen_{n}{k}', V, a, b, 1.5, 1.2, 5 + k % 2, 8, tip=True, over=0.3)
+        baleen_comb(m, f'baleen_{n}', arm, sign < 0)
     # 上の先: 鯨の尾びれ
     m.chain('fluke_stem', V, [(5, 46), (5.5, 48.5)], [2.25], 1.3, 5, 6, tip=False)
     m.chain('fluke_l', V, [(5.5, 48.5), (1.5, 51.5), (-3.5, 52.5)], [3.5, 2.5], 1.1, 5, 7, tip=True)
@@ -313,7 +311,7 @@ def abyss_tide_dagger():
 
 
 def abyss_tide_bow():
-    """鰭の弓（伝説）: 骨の弓腕の先が外へ跳ね返る反り弓。腕の背には大魚の背びれ（骨の軸が扇に開き、間に暗い膜）が
+    """鰭の弓（伝説）: 骨の弓腕の先が外へ跳ね返る反り弓。腕の背には大魚の背びれ（骨の軸が扇に開き、間の暗い膜は板の絵で、縁が明るく切れ込む）が
     大きく立ち、握りの左右（奥行き）からは胸びれが大きく張り出す。握りの前に淵の光の鰓の筋が三本走り、
     両端のまわりには淵の光の水の粒が浮かぶ。弦には鱗の玉が並ぶ"""
     m = M('abyss_tide_bow')
@@ -338,10 +336,7 @@ def abyss_tide_bow():
             e = (r[0] + math.cos(math.radians(ang)) * ln, r[1] + math.sin(math.radians(ang)) * ln)
             ends.append(e)
             m.seg(f'ray_{n}{k}', B, P(r), P(e), 1, 0.55, 4, 5, tip=True)
-        for k in range(len(rays) - 1):
-            (r0, _, _), (r1, _, _) = rays[k], rays[k + 1]
-            c = ((r0[0] + r1[0] + ends[k][0] + ends[k + 1][0]) / 4, (r0[1] + r1[1] + ends[k][1] + ends[k + 1][1]) / 4)
-            m.seg(f'membrane_{n}{k}', 'fin', P(((r0[0] + r1[0]) / 2, (r0[1] + r1[1]) / 2)), P(((ends[k][0] + ends[k + 1][0]) / 2 - 0.5, (ends[k][1] + ends[k + 1][1]) / 2)), 3.75, 0.35, 2, 5, over=0.2)
+        fin_membrane(m, f'membrane_{n}', [(r, e) for (r, _, _), e in zip(rays, ends)], sign < 0)
         m.chain(f'fin_rim_{n}_glow', G, [P(e) for e in ends], [0.7] * 4, 0.45, 4, 5, tip=False)
         for k, (x, y, s) in enumerate(((9.5, 49.5, 1.4), (12, 47.25, 1), (4, 51.5, 1.1), (11, 51.5, 0.8))):
             diamond(m, f'drop_{n}{k}_glow', G, P((x, y)), s, 0.55, 4, 5)
@@ -441,9 +436,107 @@ def abyss_storm_bell_staff():
     return m
 
 
+def bolt_picture(m, name, branches, box, at=0.0, plane='xy', core=1.0):
+    """稲妻の絵（板）: 折れ線の枝ごとに、芯は白に近い淵の光、外は濃い淵の光。枝は先へ細る"""
+    cv = lib.Canvas(*box)
+
+    def f(x, y, cur):
+        for pts, w in branches:
+            d, t = lib.near_line((x, y), pts)
+            ww = w * (1 - 0.6 * t)
+            ww *= 1.5
+            if d < ww * 0.45 * core:
+                return (G, 5)
+            if d < ww:
+                return (G, 3) if cur is None or cur[1] < 3 else cur
+        return cur
+    cv.paint(f)
+    cv.put(m, name, at=at, plane=plane)
+
+
+def fin_membrane(m, name, rays, mirror15, at=0.0):
+    """背びれの膜（板の絵）: 骨の軸のあいだを暗い膜で埋め、軸の脇に濃い筋、縁へ向かって明るく、縁にぎざぎざの切れ込み"""
+    poly = [rays[0][0]] + [e for _, e in rays] + [rays[-1][0]]
+    xs = [p[0] for p in poly]
+    ys = [p[1] for p in poly]
+    cv = lib.Canvas(min(xs) - 1, min(ys) - 1, max(xs) + 1, max(ys) + 1)
+    base = [r for r, _ in rays]
+
+    def f(x, y, cur):
+        if not lib.inside((x, y), poly):
+            return None
+        dmin = min(lib.near_line((x, y), [r, e])[0] for r, e in rays)
+        _, tb = lib.near_line((x, y), base)
+        db = min(math.hypot(x - r[0], y - r[1]) for r in base)
+        de = min(lib.near_line((x, y), [rays[k][1], rays[k + 1][1]])[0] for k in range(len(rays) - 1))
+        if de < 1.2 and (int(x * 2) + int(y * 2)) % 3 == 0:
+            return None
+        if dmin < 0.5:
+            return ('fin', 1)
+        return ('fin', 2 if de > 3 else (3 if de > 1.5 else 4))
+    cv.paint(f)
+    cv.put(m, name, at=at, mirror15=mirror15)
+
+
+
+def baleen_comb(m, name, arm, mirror15, at=0.0):
+    """鯨ひげの櫛（板の絵）: 弓腕の腹から斜め下へ細い板が並んで垂れる。板ごとに濃淡を変え、先は骨の白の毛羽"""
+    strands = []
+    L = [math.hypot(arm[i + 1][0] - arm[i][0], arm[i + 1][1] - arm[i][1]) for i in range(len(arm) - 1)]
+    for k in range(12):
+        t = 0.14 + k * 0.066
+        d = t * sum(L)
+        for i, l in enumerate(L):
+            if d <= l:
+                f = d / l
+                b = (arm[i][0] + (arm[i + 1][0] - arm[i][0]) * f - 1.2, arm[i][1] + (arm[i + 1][1] - arm[i][1]) * f)
+                break
+            d -= l
+        ln = 8 * math.sin(math.pi * (t - 0.1) / 0.85) + 1.5 + (k % 2) * 0.75
+        e = (b[0] - 0.36 * ln, b[1] - 0.93 * ln)
+        strands.append((b, e, k))
+    cv = lib.Canvas(1, 17, 15, 45)
+
+    def f(x, y, cur):
+        for b, e, k in strands:
+            d, t = lib.near_line((x, y), [b, e])
+            if d < 0.55:
+                if t > 0.85:
+                    return (B, 5 if d < 0.3 else 4)
+                return (V, 7 if k % 2 else 5) if d < 0.3 else (V, 4 if k % 2 else 3)
+        return cur
+    cv.paint(f)
+    cv.put(m, name, at=at, mirror15=mirror15)
+
+
+def shard_halo(m, name, at):
+    """黒曜の破片の後光（握りの前に横向き＝ZY の板で立てる）: 中心から鋭い破片が放射に並び、
+    破片の片面は明るく片面は暗い切子。中心の割れ目は淵の光"""
+    spikes = [(a, (9 if k % 2 == 0 else 6.5)) for k, a in enumerate(range(0, 360, 30))]
+    cv = lib.Canvas(-10, 5, 10, 25)
+
+    def f(z, y, cur):
+        dz, dy = z, y - 15
+        r = math.hypot(dz, dy)
+        if r < 1.6:
+            return (G, 4)
+        a = math.degrees(math.atan2(dy, dz)) % 360
+        for ang, ln in spikes:
+            da = (a - ang + 180) % 360 - 180
+            w = 13 * (1 - r / ln)
+            if abs(da) < w and r < ln:
+                if r < 2.6:
+                    return (G, 2)
+                return (V, 7 if da > 0 else 3) if r < ln - 1 else (V, 9)
+        return None
+    cv.paint(f)
+    cv.put(m, name, at=at, plane='zy')
+
+
+
 def abyss_storm_bow():
     """雷淵の弓（伝説）: 雷雲の底で鍛えた弓。弓腕は稲妻のように三度鋭く折れ、折れ目ごとに淵の光の核が継ぐ。
-    折れ目の背からは骨の雷角が外へ、左右（奥行き）へは骨の風切りの板が張り出す。握りの前に黒い雷雲の塊が湧き、
+    折れ目の背からは骨の雷角が外へ、左右（奥行き）へは骨の風切りの板が張り出す。握りの前に黒い雷雲の塊が湧き、雲から稲妻（板の絵）が後ろへ大きく枝分かれして走り（横向きの板にも一本）、
     その奥に淵の光の目。弦は三本、真ん中の一本が淵の光で光り、外の二本は骨の白。弓の懐には折れた稲妻が走り、
     両端の先には雷雲のかけらが浮かぶ"""
     m = M('abyss_storm_bow')
@@ -455,8 +548,12 @@ def abyss_storm_bow():
         m.box(f'cloud_{k}', V, [x - w / 2, y - h / 2, -d], [x + w / 2, y + h / 2, d], grad=(y - h / 2, 2, y + h / 2, 5))
     for k, (x, y, w, h, d) in enumerate(((21, 15, 3.5, 4.5, 1.8), (20, 19.25, 3, 2.5, 1.5), (20.25, 10.75, 3, 2.5, 1.5))):
         m.box(f'cloud_x{k}', V, [x - w / 2, y - h / 2, -d], [x + w / 2, y + h / 2, d], grad=(y - h / 2, 3, y + h / 2, 6))
-    for k, (dy, pts) in enumerate(((1, [(22.5, 16), (25.5, 18.5), (24.5, 20), (28, 23.5)]), (-1, [(22.5, 14), (25.5, 11.5), (24.5, 10), (28, 6.5)]), (0, [(22.75, 15), (26.5, 15.75), (25.75, 14.25), (30, 15)]))):
-        m.chain(f'cloud_fork_{k}_glow', G, pts, [1, 0.9, 0.75], 0.45, 4, 5, tip=True)
+    bolt_picture(m, 'bolt_glow', [([(22, 15.5), (26, 18), (24.75, 20.5), (29, 23), (28, 25.5), (32.5, 28.5)], 1.6),
+                                  ([(22, 14.5), (25.5, 12), (24.25, 9.75), (28.5, 7), (27.5, 4.5), (31.5, 1.5)], 1.5),
+                                  ([(26, 18), (30.5, 17.5), (29.5, 15.5), (34, 14.75)], 1.1),
+                                  ([(28.5, 7), (31.75, 9), (34.5, 8)], 0.9)], (21, 0, 36, 30))
+    bolt_picture(m, 'bolt_z_glow', [([(-6.5, 25), (-3, 22), (-4.25, 19.5), (0, 17)], 1.2), ([(6.5, 5), (3, 8), (4.25, 10.5), (0, 13)], 1.2)],
+                 (-8, 3, 8, 27), at=21.5, plane='zy')
     diamond(m, 'eye_glow', G, (17.25, 15), 2.75, 2.5, 3, 5)
     m.box('eye_pupil', V, [16.9, 14.25, -2.6], [17.6, 15.75, 2.6], 1)
     arm = [(12, 21), (17.5, 26.5), (10.25, 31), (16.75, 37), (8.5, 42.5), (4.75, 47)]
@@ -565,7 +662,7 @@ def abyss_ember_dagger():
 
 def abyss_ember_bow():
     """黒曜の弓（伝説）: 黒曜石の切子の板を継いだ弓。上の弓腕は途中で割れて、割れたかけらが淵の光の熾火の芯に
-    支えられて宙に浮く。握りの前には大きな黒曜の結晶の房、左右（奥行き）には切子の棘が突き出す。
+    支えられて宙に浮く。握りの前には大きな黒曜の結晶の房、その房を横切って黒曜の破片の後光（横向きの板の絵）が奥行きへ放射に開く。
     下の先は斜めに割れた黒曜の穂。弦は熾火の光の一本で、上下に黒曜の留め玉"""
     m = M('abyss_ember_bow')
     m.box('grip', V, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
@@ -577,11 +674,7 @@ def abyss_ember_bow():
         diamond(m, f'float_{k}', V, (x, y), s, 1, 5, 8)
         diamond(m, f'float_{k}_glow', G, (x, y), s * 0.45, 1.1, 4, 5)
     diamond(m, 'crystal_core_glow', G, (16, 15.25), 3, 1.85, 4, 5)
-    for zs, zn in ((1, 'f'), (-1, 'b')):
-        for k, (y, ln) in enumerate(((23.5, 5), (6.5, 4.5))):
-            z0 = 1.6 if zs > 0 else -1.6 - ln
-            m.box(f'side_spike_{zn}{k}', V, [11.25, y - 0.9, z0], [12.75, y + 0.9, z0 + ln], 5 + k)
-            m.box(f'side_spike_tip_{zn}{k}', V, [11.6, y - 0.5, z0 + ln if zs > 0 else z0 - 1.25], [12.4, y + 0.5, z0 + ln + 1.25 if zs > 0 else z0], 8)
+    shard_halo(m, 'shard_halo', 16.5)
     arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 43), (4.5, 46)]
     pts = arm
     # 上の弓腕: 割れて浮く切子（継ぎ目に光の芯）

@@ -227,9 +227,28 @@ def thunder_wing_bow():
     return m
 
 
+def wind_streaks(m, name, lines, box, at, mirror15):
+    """風の筋（板の絵）: 細い線が流れて先で小さく巻く。線は根元が太く先が細い"""
+    cv = lib.Canvas(*box)
+    curves = []
+    for pts, curl in lines:
+        ex, ey = pts[-1]
+        c = [(ex + abs(curl) * math.sin(a / 6 * math.pi * 1.6), ey + curl * (1 - math.cos(a / 6 * math.pi * 1.6))) for a in range(1, 7)]
+        curves.append(pts + c)
+
+    def f(x, y, cur):
+        for k, pts in enumerate(curves):
+            d, t = lib.near_line((x, y), pts)
+            if d < 0.55 - 0.3 * t:
+                return (S, 9 if t < 0.5 else 8) if k % 2 == 0 else (S, 8 if t < 0.5 else 7)
+        return cur
+    cv.paint(f)
+    cv.put(m, name, at=at, mirror15=mirror15)
+
+
 def storm_gale_bow():
     """嵐の風弓（伝説）: 太い嵐雲色の弓腕の先が大きな風の渦に巻き込む。弓腕のまわりを風の輪が二重に取り巻いて
-    （奥行きにも回る）、腕からは長い風の筋が後ろへたなびく。握りの前には銅の風見の羽根が三枚開き、
+    （奥行きにも回る）、腕からは長い風の筋（板の絵、先で小さく巻く）が後ろへたなびく。握りの前には銅の風見の羽根が三枚開き、
     弦そのものは稲妻で光り、銅の風鈴の板が上下に二枚ずつ下がる"""
     m = M('storm_gale_bow')
     m.box('grip', S, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
@@ -246,9 +265,11 @@ def storm_gale_bow():
         m.chain(f'arm_{n}', S, [P(q) for q in arm], [4, 3.5, 3.25, 2.75, 2.5], 1.45, 3, 6, tip=False)
         m.chain(f'curl_{n}', S, [P(q) for q in curl], [3, 2.75, 2.5, 2, 1.75], 1.2, 6, 9, tip=True)
         m.chain(f'curl_in_{n}_glow', B, [P(q) for q in ((1.25, 45.5), (1.5, 43.5), (3, 43))], [0.8, 0.7], 0.6, 4, 5, tip=True)
-        for k, (base, pts) in enumerate((((14.75, 30), [(18.5, 31.75), (21.5, 29.5), (25, 30.75), (27.5, 29.25)]),
-                                         ((13.75, 37), [(17, 39.25), (20, 37.5), (22.5, 38.5)]))):
-            m.chain(f'wisp_{n}{k}', S, [P(base)] + [P(q) for q in pts], [2.25, 1.9, 1.5, 1.1][:len(pts)], 0.4, 7, 9, tip=True)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            wind_streaks(m, f'wind_{n}{zn}', [([(15.5, 29.5), (19, 31.5), (23, 30.5), (27, 32)], 1.6 * zs),
+                                               ([(15, 35), (18.5, 37.5), (22, 36.75), (25, 38.25)], -1.2 * zs),
+                                               ([(14, 41), (17, 43.5), (20.5, 43), (22.5, 45)], 1.1 * zs)],
+                         (13, 26, 31, 50), zs * 1.55, sign < 0)
         # 腕を取り巻く風の輪（奥行きにも回る）
         for r, (cx, cy) in enumerate(((14.6, 31), (12, 41.5))):
             c = P((cx, cy))

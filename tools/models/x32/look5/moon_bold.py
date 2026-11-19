@@ -313,9 +313,37 @@ def moon_waning_bow():
     return m
 
 
+def comet_tail(m, name, mirror15):
+    """星から弓腕の背へ流れる彗星の尾（板の絵）。芯は明るい月光、縁は藍、先へ行くほど点々にほどける。尾のまわりに小さな星屑"""
+    path = [(7.5, 50.5), (11, 49.5), (14.75, 46.5), (17.75, 42), (19.75, 36), (20.25, 29.5), (19.5, 23)]
+    cv = lib.Canvas(5, 21, 25, 54)
+    dust = {(22.75, 38), (23, 31.5), (13.25, 52), (17.25, 49), (22, 25.5), (16, 43.25), (17.5, 33)}
+
+    def f(x, y, cur):
+        d, t = lib.near_line((x, y), path)
+        w = 2.1 * (1 - t) + 0.45
+        if d < w:
+            h = (int(x * 2) * 7 + int(y * 2) * 13) % 10
+            if t > 0.55 and h < (t - 0.55) * 22:
+                return None
+            if d < w * 0.35:
+                return (L, 5 if t < 0.5 else 4)
+            if d < w * 0.7:
+                return (L, 3) if t < 0.35 else (I, 7)
+            return (N, 4) if t < 0.6 else (N, 3)
+        for q in dust:
+            if abs(x - q[0]) < 0.3 and abs(y - q[1]) < 0.8 or abs(y - q[1]) < 0.3 and abs(x - q[0]) < 0.8:
+                return (L, 5)
+        return None
+    cv.paint(f)
+    for zs, zn in ((1, 'f'), (-1, 'b')):
+        cv.put(m, f'{name}{zn}', at=zs * 1.6, mirror15=mirror15)
+
+
+
 def moon_starfall_bow():
-    """星落ちの弓（伝説）: 銀の弓腕の両端に四方へ尖る大きな星が灯り、星から弓腕へ月光の尾が流れる。
-    弓の背の外には、細い月光の糸でつながった星座の星々が弧を描いて浮かぶ。弓の懐には藍の三日月が弦の方を向いて抱かれ、
+    """星落ちの弓（伝説）: 銀の弓腕の両端に四方へ尖る大きな星が灯り、星から弓の背の外へ彗星の尾（板の絵）が大きく流れ、
+    芯は月光、縁は藍で、先へ行くほど点々にほどけて星屑になる。尾は弓腕をはさんで前後に一枚ずつ。弓の懐には藍の三日月が弦の方を向いて抱かれ、
     握りの左右（奥行き）には藍の小さな三日月の鰭。弦には銀の玉が並び、上から小さな星の飾りが下がる"""
     m = M('moon_starfall_bow')
     bow_grip(m)
@@ -324,16 +352,10 @@ def moon_starfall_bow():
         P = lambda q, s=sign: mirror(q, s)
         pts = [P(q) for q in arm]
         m.chain(f'arm_{n}', I, pts, [3.75, 3.5, 3.25, 2.75, 2.25], 1.45, 3, 7, tip=False)
-        m.chain(f'tail_{n}', L, [(x + 2.1, y) for x, y in pts[2:]], [1.5, 1.9, 2.25], 0.8, 1, 4, tip=False, zc=-0.7)
+        comet_tail(m, f'tail_{n}', sign < 0)
         star(m, f'star_{n}', L, P((4.5, 48)), 4, 1.4, 3)
         star(m, f'star_core_{n}', I, P((4.5, 48)), 1.6, 1.6, 8)
         m.seg(f'nock_{n}', N, P((6, 45.25)), P((3, 45.25)), 2, 1.05, 2, 4)
-        # 背の外の星座（星を月光の糸でつなぐ）
-        cons = [(17, 22.5), (20.5, 27.5), (19.5, 33.5), (22.5, 38.5), (18.5, 43.5)]
-        for k in range(len(cons) - 1):
-            m.seg(f'thread_{n}{k}_glow', L, P(cons[k]), P(cons[k + 1]), 0.4, 0.25, 3, 4, over=0)
-        for k, q in enumerate(cons):
-            star(m, f'cstar_{n}{k}', L if k % 2 == 0 else I, P(q), 1.6 if k % 2 == 0 else 1.2, 0.6, 3 if k % 2 == 0 else 8)
     # 懐の三日月（上の弓腕の腹から、弦の方を向く）
     m.arc('crescent', N, (9.75, 30.5), 3.25, 110, 250, 5, [1.6, 1.9, 2.1, 1.9, 1.6], 0.9, 3, 5)
     m.seg('crescent_hold', I, (10.5, 33.5), (12, 34), 1, 0.7, 6, 7)

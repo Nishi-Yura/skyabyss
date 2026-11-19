@@ -145,15 +145,36 @@ def whale_bow():
     return m
 
 
+def rib_net(m, name, ribs, mirror15):
+    """肋骨のあいだに張った網（板の絵）: 斜めの目の網、結び目は骨の白、糸は深い海の色"""
+    poly = [a for a, _ in ribs] + [b for _, b in ribs][::-1]
+    cv = lib.Canvas(13, 22, 24, 50)
+
+    def f(x, y, cur):
+        if not lib.inside((x, y), poly):
+            return None
+        u, v = (x + y) / 2.0, (x - y) / 2.0
+        fu, fv = u - math.floor(u), v - math.floor(v)
+        if fu < 0.2 and fv < 0.2:
+            return ('bone', 5)
+        if fu < 0.2 or fv < 0.2:
+            return ('sea', 5)
+        return None
+    cv.paint(f)
+    cv.put(m, name, mirror15=mirror15)
+
+
 def whale_rib_longbow():
     """肋骨の籠（伝説）: 長い骨の背骨の弓腕から、外へ肋骨が何本も弧を描いて出て籠をなす。肋骨は背だけでなく
-    左右（奥行き）にも張り出し、籠の中には鯨の心臓の光の塊が浮かぶ。肋骨の先は深海の光で光り、
+    左右（奥行き）にも張り出し、肋骨のあいだには深い海の色の網（板の絵、結び目は骨の白）が張られ、籠の中には鯨の心臓の光の塊が浮かぶ。肋骨の先は深海の光で光り、
     握りの左右には深海の光の結晶。下の先からは骨の尾びれが垂れる。弦には椎骨の玉が連なる"""
     from whale_series import bow_body
     m = Model('whale_rib_longbow')
     bow_body(m, [(12, 21), (14, 28), (15, 35), (14.5, 41), (12, 45)], [(12, 45), (8, 48), (3, 49.5), (-1, 50)],
              [3.75, 3.5, 3, 2.75], [3, 2.5, 2], thorns=False)
+    ribs = [((x + 0.3, y), (x + L * 0.72, y + L * 0.85)) for x, y, L in ((14.5, 25, 8), (15.5, 31, 9.5), (15.5, 37, 8.5), (14.25, 42.5, 6.5))]
     for sign, n in ((1, 'u'), (-1, 'd')):
+        rib_net(m, f'net_{n}', ribs, sign < 0)
         for k, (x, y, L) in enumerate(((14.5, 25, 8), (15.5, 31, 9.5), (15.5, 37, 8.5), (14.25, 42.5, 6.5))):
             yy = 15 + sign * (y - 15)
             a = (x, yy)

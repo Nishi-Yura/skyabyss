@@ -286,9 +286,36 @@ def ember_bow():
     return m
 
 
+def brazier_fire(m, name, base, at, plane, h=11.0, seed=0):
+    """火鉢の炎（板の絵）: 舌が揺れて立ち昇る。芯は白に近く、外へ橙、縁は赤。炎の上に火の粉がちぎれる"""
+    bx, by = base
+    cv = lib.Canvas(bx - 5, by, bx + 5, by + h + 3)
+
+    def f(x, y, cur):
+        u, v = x - bx, (y - by) / h
+        if v < 0:
+            return None
+        if v > 1:
+            k = int(x * 2) * 5 + int(y * 2) * 3 + seed
+            return (E, 4) if k % 23 == 0 and abs(u) < 2.5 else None
+        sway = 0.9 * math.sin(v * 5 + seed) * v
+        w = 3.2 * (1 - v) ** 0.8 * (0.75 + 0.25 * math.cos((u - sway) * 2.2 + seed))
+        d = abs(u - sway)
+        if d > w:
+            return None
+        r = d / max(w, 0.01)
+        if r < 0.3 and v < 0.7:
+            return (E, 5)
+        if r < 0.6:
+            return (E, 4)
+        return (E, 3) if r < 0.85 else (E, 1)
+    cv.paint(f)
+    cv.put(m, name, at=at, plane=plane)
+
+
 def ember_flare_bow():
     """火の粉の弓（伝説）: 焼けた枝の太い弓腕。節ごとの裂け目から橙の光が漏れ、裂け目の背からは炎の舌が上へ立ち昇る。
-    握りの前には焼き物の火鉢が抱かれ、中で大きな炎が燃え上がる。弓腕の途中からは焦げた小枝が背と左右（奥行き）へ
+    握りの前には焼き物の火鉢が抱かれ、中で大きな炎（板の絵を前と横に十字に立てる）が燃え上がる。弓腕の途中からは焦げた小枝が背と左右（奥行き）へ
     分かれて伸び、その先にも火が灯る。まわりには火の粉が舞う。弦は焼き物の結び玉で三か所留め、結び玉が熾火で光る"""
     m = M('ember_flare_bow')
     m.box('grip', I, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
@@ -298,8 +325,8 @@ def ember_flare_bow():
     m.box('brazier', K, [13.75, 11.5, -2.25], [19.25, 15.25, 2.25], grad=(11.5, 1, 15.25, 4))
     m.box('brazier_rim', K, [13.25, 15.25, -2.75], [19.75, 16.25, 2.75], 5)
     m.box('brazier_foot', K, [15, 10.5, -1.5], [18, 11.5, 1.5], 2)
-    for k, (a, b, w) in enumerate((((16.5, 16), (16.75, 23.5), 3), ((15, 16), (13.75, 21.5), 2), ((18, 16), (19.75, 21), 2), ((16.5, 18), (17.5, 26.5), 1.5))):
-        m.seg(f'flame_{k}_glow', E, a, b, w, 1.4 - k * 0.2, 3 + (k == 3), 5, tip=True)
+    brazier_fire(m, 'flame_glow', (16.5, 16), 0, 'xy')
+    brazier_fire(m, 'flame_z_glow', (0, 16), 16.5, 'zy', h=9, seed=2)
     arm = [(12, 21), (12, 27), (11, 33), (9, 38.5), (6.5, 43), (3.5, 46)]
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)

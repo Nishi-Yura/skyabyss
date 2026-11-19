@@ -401,9 +401,30 @@ def divine_plume_bow():
     return m
 
 
+def mist_ribbons(m, name, ribbons, at):
+    """霞の帯（板の絵）: 波打つ帯が先へ細ってほどける。芯は白、縁は灰、終わりは点々"""
+    cv = lib.Canvas(10, -10, 31, 43)
+
+    def f(x, y, cur):
+        for x0, y0, ln, amp in ribbons:
+            u = (x - x0) / ln
+            if not 0 <= u <= 1:
+                continue
+            cy = y0 + amp * math.sin(u * 5.5 + x0)
+            w = 1.6 * math.sin(math.pi * min(1, u * 1.6)) * (1 - 0.45 * u) + 0.3
+            d = abs(y - cy)
+            if d < w:
+                if u > 0.7 and (int(x * 2) + int(y * 2)) % 2:
+                    return None
+                return (S, 9) if d < w * 0.45 else (S, 7)
+        return cur
+    cv.paint(f)
+    cv.put(m, name, at=at)
+
+
 def divine_mist_bow():
     """霞鳥の弓（伝説）: 弓腕は霞鳥の灰白の幅広い翼。上の先は霞鳥の頭（金の嘴が前へ）、下の先は長い尾羽が三枚垂れる。
-    上の弓腕の腹（弓の懐）からは金の鈴が大中小の三つ吊られ、鈴の舌が暁の光で光る。弓のまわりには霞の帯が
+    上の弓腕の腹（弓の懐）からは金の鈴が大中小の三つ吊られ、鈴の舌が暁の光で光る。弓のまわりには波打つ霞の帯（板の絵、先は点々にほどける）が
     奥行きの前後に離れて漂い、弦には金の糸が絡んで小さな鈴が上下に付く"""
     m = M('divine_mist_bow')
     m.box('grip', S, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 5, 20.5, 7), wrap=(9.5, 20.5))
@@ -433,12 +454,9 @@ def divine_mist_bow():
         m.box(f'bell_{k}', G, [x - s / 2, y1 - s, -s / 2], [x + s / 2, y1, s / 2], grad=(y1 - s, 2, y1, 5))
         m.box(f'bell_lip_{k}', G, [x - s / 2 - 0.3, y1 - s - 0.4, -s / 2 - 0.3], [x + s / 2 + 0.3, y1 - s, s / 2 + 0.3], 3)
         m.box(f'clapper_{k}_glow', D, [x - 0.4, y1 - s - 1.25, -0.4], [x + 0.4, y1 - s - 0.4, 0.4], 4)
-    # 霞の帯（前後に離れて漂う）
-    for zs, zn in ((1, 'f'), (-1, 'b')):
-        for k, (x, y, w, h) in enumerate(((18.5, 22, 7, 1.25), (20.5, 9, 6, 1), (17, 38.5, 5, 1), (16.5, -6, 5.5, 1.25))):
-            z = zs * (4.25 + (k % 2) * 1.5)
-            m.box(f'mist_{zn}{k}', S, [x - w / 2, y - h / 2, z - 0.4], [x + w / 2, y + h / 2, z + 0.4], 8 + k % 2 * 0.5)
-            m.box(f'mist_tail_{zn}{k}', S, [x + w / 2 - 0.25, y - h / 2 + 0.25, z - 0.3], [x + w / 2 + 2, y + h / 2 - 0.25, z + 0.3], 9)
+    # 霞の帯（板の絵、前後に離れて漂う）
+    mist_ribbons(m, 'mist_f', [(13, 22, 16, 1.1), (14, 9, 15, 1.0), (12, 38.5, 13, 0.9), (12.5, -6, 14, 1.0)], 4.5)
+    mist_ribbons(m, 'mist_b', [(14.5, 26, 15, 1.0), (13.5, 4.5, 15, 1.1), (12, 33.5, 12, 0.8), (13, -1.5, 13, 0.9)], -4.5)
     top = (3, 47)
     bot = (3, -16.75)
     strings(m, top, bot)

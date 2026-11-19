@@ -44,12 +44,27 @@ class Model:
                                origin=[(frm[0] + to[0]) / 2, (frm[1] + to[1]) / 2, (frm[2] + to[2]) / 2], rot=0,
                                base=base, grad=grad, rim=rim, wrap=wrap, gem=gem, seg=None, tip=False, accent=self.accent))
 
-    def decal(self, name, pixels, frm, to):
-        """絵の板（厚みなし、z = frm[2]）。pixels は上の行から並べた (mat, tone) か None（透明）の格子。
-        表（south）にそのまま、裏（north）に左右を返して貼る。板の大きさと格子の数で絵の細かさが決まる"""
-        self.parts.append(dict(name=name, mat='decal', frm=list(frm), to=list(to),
-                               origin=[(frm[0] + to[0]) / 2, (frm[1] + to[1]) / 2, frm[2]], rot=0, base=0, grad=None,
-                               rim=False, wrap=None, gem=False, seg=None, tip=False, accent=self.accent, pix=pixels))
+    def decal(self, name, pixels, frm, to, plane='xy'):
+        """絵の板（厚みなし）。pixels は上の行から並べた (mat, tone) か None（透明）の格子。
+        plane='xy' は z = frm[2] の板（表 south にそのまま、裏 north は左右を返す）、
+        plane='zy' は x = frm[0] の板（横の u は z。-x から見て z が右へ増える向き＝west にそのまま、east は左右を返す）。板の大きさと格子の数で絵の細かさが決まる"""
+        o = [(frm[i] + to[i]) / 2 for i in range(3)]
+        self.parts.append(dict(name=name, mat='decal', frm=list(frm), to=list(to), origin=o, rot=0, base=0, grad=None,
+                               rim=False, wrap=None, gem=False, seg=None, tip=False, accent=self.accent, pix=pixels, plane=plane))
+
+    def picture(self, name, art, pal, origin, px=0.5, plane='xy', at=0.0, flip_y=False):
+        """文字で描いたドット絵（上の行から、'.' は透明）を板にする。pal = 文字 → (素材, 段)。
+        origin = 絵の左下（xy なら (x, y)、zy なら (z, y)）、at = 板の z（xy）か x（zy）"""
+        rows = [[pal[ch] if ch != '.' else None for ch in r] for r in art]
+        if flip_y:
+            rows = rows[::-1]
+        W, H = max(len(r) for r in rows), len(rows)
+        rows = [r + [None] * (W - len(r)) for r in rows]
+        if plane == 'xy':
+            frm, to = [origin[0], origin[1], at], [origin[0] + W * px, origin[1] + H * px, at]
+        else:
+            frm, to = [at, origin[1], origin[0]], [at, origin[1] + H * px, origin[0] + W * px]
+        self.decal(name, rows, frm, to, plane)
 
     def seg(self, name, mat, a, b, w, d, t0=3, t1=None, over=0.5, zc=0.0, tip=False, glow=None):
         """a から b へ伸びる回した節（幅 w、奥行き ±d）。色の段は a で t0、b で t1"""
@@ -87,7 +102,8 @@ class Model:
         for e in self.parts:
             if e.get('pix'):
                 ph, pw = len(e['pix']), len(e['pix'][0])
-                rects += [(ph, pw, e['name'], 'south'), (ph, pw, e['name'], 'north')]
+                fs = ('south', 'north') if e.get('plane', 'xy') == 'xy' else ('east', 'west')
+                rects += [(ph, pw, e['name'], fs[0]), (ph, pw, e['name'], fs[1])]
                 continue
             dx, dy, dz = (max(1, math.ceil(e['to'][i] - e['frm'][i] - 1e-6)) for i in range(3))
             for face, (w, h) in {'south': (dx, dy), 'north': (dx, dy), 'east': (dz, dy), 'west': (dz, dy),
@@ -135,7 +151,7 @@ def paint_face(img, e, face, rect):
         for j, row in enumerate(e['pix']):
             for i, px in enumerate(row):
                 if px:
-                    put(img, u0 + (i if face == 'south' else w - 1 - i), v0 + j, px[0], px[1])
+                    put(img, u0 + (i if face in ('south', 'west') else w - 1 - i), v0 + j, px[0], px[1])
         return
     side = face in ('south', 'north', 'east', 'west')
     for i in range(w):
@@ -259,3 +275,62 @@ def string_at(top, bot, pull, t):
 def string_t(top, bot, y):
     """弦の上で高さ y にあたる t（まっすぐの弦で）"""
     return (y - bot[1]) / (top[1] - bot[1])
+
+
+# ---------------------------------------------------------------- 絵の板の下地（塗りの規則だけ。形は各シリーズで描く）
+class Canvas:
+    """世界の座標で塗る格子（px ごとの一マス）。grid[r][c] は (素材, 段) か None。r=0 が下の行"""
+
+    def __init__(self, x0, y0, x1, y1, px=0.5):
+        self.x0, self.y0, self.px = x0, y0, px
+        self.W, self.H = int(round((x1 - x0) / px)), int(round((y1 - y0) / px))
+        self.grid = [[None] * self.W for _ in range(self.H)]
+
+    def cells(self):
+        for r in range(self.H):
+            for c in range(self.W):
+                yield c, r, self.x0 + (c + 0.5) * self.px, self.y0 + (r + 0.5) * self.px
+
+    def paint(self, fn):
+        """fn(x, y, 今の色) → 新しい色（None で透明、今の色を返せばそのまま）"""
+        for c, r, x, y in self.cells():
+            self.grid[r][c] = fn(x, y, self.grid[r][c])
+
+    def put(self, m, name, at=0.0, plane='xy', mirror15=False):
+        """板にする。mirror15 で y=15 の鏡（下の弓腕）。plane='zy' のときは x 座標の代わりに z として置く"""
+        rows = [list(r) for r in self.grid[::-1]]
+        y0, y1 = self.y0, self.y0 + self.H * self.px
+        if mirror15:
+            rows = rows[::-1]
+            y0, y1 = 30 - y1, 30 - y0
+        rows = [r for r in rows]
+        u0, u1 = self.x0, self.x0 + self.W * self.px
+        if plane == 'xy':
+            m.decal(name, rows, [u0, y0, at], [u1, y1, at], 'xy')
+        else:
+            m.decal(name, rows, [at, y0, u0], [at, y1, u1], 'zy')
+
+
+def inside(p, poly):
+    """点が多角形の内側か"""
+    x, y = p
+    n, ins = len(poly), False
+    for i in range(n):
+        (x1, y1), (x2, y2) = poly[i], poly[(i + 1) % n]
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            ins = not ins
+    return ins
+
+
+def near_line(p, pts):
+    """点から折れ線までの距離と、折れ線の上の位置 t（0..1）"""
+    L = [math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) for i in range(len(pts) - 1)]
+    tot, acc, best = sum(L), 0, (1e9, 0)
+    for i, l in enumerate(L):
+        ux, uy = (pts[i + 1][0] - pts[i][0]) / l, (pts[i + 1][1] - pts[i][1]) / l
+        s = max(0, min(l, (p[0] - pts[i][0]) * ux + (p[1] - pts[i][1]) * uy))
+        d = math.hypot(p[0] - pts[i][0] - ux * s, p[1] - pts[i][1] - uy * s)
+        if d < best[0]:
+            best = (d, (acc + s) / tot)
+        acc += l
+    return best
