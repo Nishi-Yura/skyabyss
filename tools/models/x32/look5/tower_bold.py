@@ -58,208 +58,185 @@ def _bs_black(sp, face, w, h):
             sp.line(a, b, 1.8, WC, 4, shade=False)
 
 
-def tower_balance_sword():
-    """あいだの大剣（伝説・神器）。設定画 A（tools/sources/tower_balance_sword_concept_A.png、2026-11-20）から立てる。
-    座標は設定画の画素で読む: 列 c は X = c - 24（刃の中心の線が X = 0）、画の行 r は描く高さ y = 87 - r（下が 0）、
-    Y = y - 12（握りの高さが Y = 0）。刃は 2 単位ごとの段の箱を縦に積む（幅は設定画の行ごとの刃の輪郭）。
-    芯は厚さ 3、縁取りは厚さ 2 で芯から 0.5 引っ込む。前と後ろの面は設定画の画素をそのまま貼る（黒い石は一段明るく）。
-    横と上下の面は縁取りの色（白い側は天秤の光の段、黒い側は紫）。白は先（天）、黒は根元（淵）。境は天秤の台（厚さ 5）。
-    光るのは天秤の光の菱と、黒い側の樋の紫だけ。"""
+def _bl_bar(m, name, mat, t, a, b, w, d, paint=None, glow=None):
+    """a から b へ伸びる回した板（幅 w、奥行き ±d。面に絵を描ける）"""
     from paintbox import skin
-    from pathlib import Path
-    from PIL import Image
+    L = math.dist(a, b)
+    cx, cy = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    skin(m, name, mat, t, (cx - L / 2, cy - w / 2, -d), (cx + L / 2, cy + w / 2, d), paint, rot=ang, pivot=(cx, cy), glow=glow)
 
-    src = Path(__file__).resolve().parents[3] / 'sources' / 'tower_balance_sword_concept_A.png'
-    im = Image.open(src).convert('RGBA')
-    CW, CH = im.size
-    cpx = im.load()
-    rev = {}
-    for mat in (WM, WG, WB, WN, WC, WL):
-        for k, hx in enumerate(lib.RAMPS[mat]):
-            rev.setdefault(hx.lower(), (mat, k))
-    BORDER = 47   # 設定画の白と黒の境（描く高さ）
 
-    def cp(X, y):
-        """設定画の画素（X、描く高さ y）→ (素材, 段)。透明は None。黒い石は一段明るくして暗い背景で沈まないようにする"""
-        c, r = X + 24, CH - 1 - y
-        if not (0 <= c < CW and 0 <= r < CH):
-            return None
-        rr, gg, bb, aa = cpx[c, r]
-        if aa == 0:
-            return None
-        mat, t = rev['#%02x%02x%02x' % (rr, gg, bb)]
-        if mat == WB:
-            t = max(3, min(5, t + 2))
-        return mat, t
+def _bl_white(sp, face, w, h):
+    """白い刃の面: 大理石の筋を斜めに一本（暗い段で二画素）"""
+    if face in ('south', 'north'):
+        sp.line((w * 0.3, 0), (w * 0.6, h), 1.6, WM, 4, shade=False)
 
-    def paint(x0, y0, edge=None, edge_t=2):
-        """箱の正面と裏に設定画の画素を貼る（裏は左右を返す）。edge があれば横と上下の面をその色で塗る。
-        x0 は箱の左端の X、y0 は箱の下端の描く高さ"""
-        def f(sp, face, w, h):
-            for i in range(w):
-                for j in range(h):
-                    cell = sp.cell[(i, j)]
-                    if face in ('south', 'north'):
-                        ii = i if face == 'south' else w - 1 - i
-                        v = cp(x0 + ii, y0 + j)
-                        if v:
-                            cell['mat'], cell['t'] = v
-                    elif edge and face in ('east', 'west', 'up', 'down'):
-                        cell['mat'], cell['t'] = edge, edge_t
-        return f
 
-    def box(name, mat, X0, X1, y0, y1, d, t, pic=None, glow=None):
-        """箱: X0〜X1、描く高さ y0〜y1（設定画の単位）、奥行きは ±d（厚さ 2d）"""
-        skin(m, name, mat, t, [X0, y0 - 12, -d], [X1, y1 - 12, d], paint=pic, glow=glow)
+def _bl_course(sp, face, w, h):
+    """石の面: 目地を横に一本（黒い石の段）"""
+    if face in ('south', 'north') and h >= 4:
+        sp.rect(0, int(h * 0.5), w, int(h * 0.5) + 1, WB, 0, shade=False)
 
-    def dia_row(y, c, r):
-        """菱（|X+0.5| + |y-c| <= r）の行 y の片側の幅"""
-        return max((max(-a, a + 1) for a in range(-12, 12) if abs(a + 0.5) + abs(y - c) <= r), default=0)
 
-    def ext(y):
-        """刃の行 y の片側の幅。台や鍔に触れない行から読み、左右が揃っているか確かめる"""
-        xs = [X for X in range(-9, 9) if cp(X, y)]
-        if not xs:
-            return 0
-        lo, hi = min(xs), max(xs) + 1
-        assert lo == -hi, ('blade row is not symmetric', y, lo, hi)
-        return hi
+def _bl_black(sp, face, w, h):
+    """黒い刃の面: 目地を一本。正面（south）だけ紫の割れ目を斜めに一本（二画素）"""
+    _bl_course(sp, face, w, h)
+    if face == 'south' and w >= 4 and h >= 6:
+        sp.line((w * 0.25, h * 0.1), (w * 0.7, h * 0.9), 1.6, WC, 3, shade=False)
 
-    def blade_ext(y):
-        if y in (24, 25):      # 首（台）に隠れる行は上の行の幅
-            return ext(26)
-        if y == 46:            # 天秤の腕の行は、上下の刃の幅
-            return ext(45)
-        if y == 47:
-            return ext(48)
-        return ext(y)
 
+def _bl_core(sp, face, w, h):
+    """光の芯の面: 縁は濃く、中央を明るく（単色にしない）"""
+    if face in ('south', 'north') and w >= 3:
+        sp.rect(1, 0, w - 1, h, WC, 5, shade=False)
+
+
+def _bl_blade(m, pre, mat, t0, t1, spine, sw, sd, side, edge, ew, ed, paint, edge_paint):
+    """刃（回した板の節）。芯の折れ線を節でつなぎ、各節に厚みの板（plate）と、内側へ寄る縦の段（ridge）を重ねる。
+    edge は外の縁の折れ線（刃の稜を太くする）。先は石の尖り（tip）で閉じる。side は刃のある側（-1 左、+1 右）"""
+    n = len(spine) - 1
+    for k in range(n):
+        f = k / max(1, n - 1)
+        t = int(round(t0 + (t1 - t0) * f))
+        a, b = spine[k], spine[k + 1]
+        _bl_bar(m, f'{pre}_c{k}', mat, t, a, b, sw[k], sd[k], paint=paint)
+        _bl_bar(m, f'{pre}_p{k}', mat, t, a, b, sw[k] * 0.72, sd[k] + 0.8, paint=paint)
+        off = -side * sw[k] * 0.22
+        _bl_bar(m, f'{pre}_r{k}', mat, t, (a[0] + off, a[1]), (b[0] + off, b[1]), sw[k] * 0.3, sd[k] + 0.5, paint=paint)
+    for k in range(len(edge) - 1):
+        _bl_bar(m, f'{pre}_e{k}', mat, t1, edge[k], edge[k + 1], ew[k], ed[k], paint=edge_paint)
+        ix = edge[k][0] - side * ew[k] * 0.9
+        jx = edge[k + 1][0] - side * ew[k] * 0.9
+        _bl_bar(m, f'{pre}_b{k}', mat, t1, (ix, edge[k][1]), (jx, edge[k + 1][1]), ew[k] * 0.5, ed[k] - 0.8, paint=edge_paint)
+
+
+def tower_balance_sword():
+    """あいだの大剣（伝説・神器。2026-11-20 清書。ラフ B「二股の刃」）: 鍔から白の刃と黒の刃が V 字に開き、
+    間を紫の光の芯が渡る。刃は厚く広く、外の縁が刃の稜。
+    色: 白の刃（-x）と黒の刃（+x）は左右で分ける（選ばれた案の対比をそのまま残す。色の統一の上下割りとの食い違いは報告に書く）。
+    鍔・柄頭・角は黒い石。金は刃の帯三か所（左右に分けた）、先の尖塔、天秤の台（鍔の中央）だけ。
+    光は天秤の菱（WL）一つと、紫の光の芯（WC）一つだけ。"""
+    from paintbox import skin
     m = _wM('tower_balance_sword')
-
-    # ---- 柄・柄頭（柄は夜の紫、金の輪が二つ。柄頭は黒い石の菱を三段）
-    for k, (a, b) in enumerate(((0, 2), (2, 4), (4, 7))):
-        E = max(dia_row(y, 3, 3.6) for y in range(a, b))
-        box(f'pommel_{k}', WB, -E, E, a, b, 2, 3, paint(-E, a))
-    box('grip', WN, -2, 2, 7, 19, 1.5, 2, paint(-2, 7))
-    box('grip_ring_a', WG, -3, 3, 7, 9, 2, 4, paint(-3, 7))
-    box('grip_ring_b', WG, -3, 3, 16, 18, 2, 4, paint(-3, 16))
-
-    # ---- 首と鍔の梁（梁は高さ 5、厚さ 5）。端の鉤は二単位、下の皿は金
-    box('neck', WB, -8, 8, 24, 26, 2, 2, paint(-8, 24))
-    box('beam', WB, -15, 15, 19, 24, 2.5, 2, paint(-15, 19))
-    for sd, n in ((1, 'r'), (-1, 'l')):
-        X0, X1 = (13, 15) if sd > 0 else (-15, -13)
-        box(f'hook_{n}', WB, X0, X1, 15, 19, 1.5, 3, paint(X0, 15, WC, 3))
-        X0, X1 = (9, 16) if sd > 0 else (-16, -9)
-        box(f'pan_{n}', WG, X0, X1, 13, 15, 2, 4, paint(X0, 13))
-
-    # ---- 刃: 2 単位の段の箱を積む。根元の一段（3 単位）、以降 2 単位ずつ、先の一段（3 単位）。
-    #      縁取り（外の 1 単位）は厚さ 2、芯（残り）は厚さ 3。白い側（境より上）は金の樋まで PNG で塗り、黒い側は紫の樋を光る箱にする
-    bands = [(24, 27)] + [(a, a + 2) for a in range(27, 79, 2)] + [(79, 82)]
-    for a, b in bands:
-        E = max(blade_ext(y) for y in range(a, b))
-        white = a >= BORDER
-        emat, eg, et = (WL, False, 2) if white else (WC, None, 3)   # 縁: 白い側は天秤の光の段（光らせない）、黒い側は紫
-        cmat, ct = (WM, 6) if white else (WB, 2)
-        nm = f'b{a}'
-        if E <= 1:
-            box(f'{nm}_edge', emat, -E, E, a, b, 1, et, paint(-E, a, emat, et), glow=eg)
-            continue
-        box(f'{nm}_edl', emat, -E, -E + 1, a, b, 1, et, paint(-E, a, emat, et), glow=eg)
-        box(f'{nm}_edr', emat, E - 1, E, a, b, 1, et, paint(E - 1, a, emat, et), glow=eg)
-        groove = (not white) and 29 <= a < BORDER and E >= 3
-        if groove:
-            box(f'{nm}_cl', cmat, -E + 1, -1, a, b, 1.5, ct, paint(-E + 1, a, emat, et))
-            box(f'{nm}_groove_glow', WC, -1, 1, a, b, 1.5, 3, paint(-1, a, emat, et), glow=True)
-            box(f'{nm}_cr', cmat, 1, E - 1, a, b, 1.5, ct, paint(1, a, emat, et))
-        else:
-            box(f'{nm}_core', cmat, -E + 1, E - 1, a, b, 1.5, ct, paint(-E + 1, a, emat, et))
-
-    # ---- 天秤の台（厚さ 5。設定画の菱。刃より前後に張り出す）と、光る菱（三段の箱）、腕
-    for k, (a, b) in enumerate(((42, 44), (44, 46), (46, 48), (48, 50), (50, 53))):
-        E = max(dia_row(y, 47, 5.6) for y in range(a, b))
-        box(f'plinth_{k}', WG, -E, E, a, b, 2.5, 4, paint(-E, a))
-    box('libra_a', WL, -2, 2, 45, 47, 3, 5)     # 光る菱（名前は _glow になる）
-    box('libra_b', WL, -3, 3, 47, 49, 3, 5)
-    for sd, n in ((1, 'r'), (-1, 'l')):
-        X0, X1 = (6, 9) if sd > 0 else (-9, -6)
-        box(f'libra_arm_{n}', WG, X0, X1, 46, 48, 1.5, 4, paint(X0, 46))
-
-    # ---- 切っ先: 尖塔（金の二単位）。刃の先の行（80・81）は刃の先の段で埋める
-    box('spire', WG, -1, 1, 82, 84, 1, 5, paint(-1, 82))
+    # 柄: 夜の紫の握りに金の輪、柄頭は黒い石、首
+    skin(m, 'grip', WN, 2, [-2, -7, -2], [2, 6, 2], paint=_bs_bands)
+    for k, (y0, y1) in enumerate(((-6.2, -4.4), (3.6, 5.4))):
+        skin(m, f'grip_ring_{k}', WG, 4, [-2.5, y0, -2.5], [2.5, y1, 2.5])
+    skin(m, 'pommel', WB, 3, [-2.5, -9.5, -2.5], [2.5, -7, 2.5], paint=_bl_course)
+    skin(m, 'pommel_rim', WB, 4, [-2.9, -7.6, -2.9], [2.9, -6.5, 2.9])
+    m.seg('pommel_tip', WB, (0, -9.5), (0, -12), 2.5, 1.25, 2, 3, tip=True)
+    skin(m, 'neck', WN, 4, [-2.4, 4.0, -2.4], [2.4, 12.4, 2.4])
+    # 鍔: 黒い石の大きな梁。両端は刃の開きより外へ張り、上へ反る角（horn）になる
+    skin(m, 'guard', WB, 3, [-18, 12.0, -3.6], [18, 20.0, 3.6], paint=_bl_course)
+    skin(m, 'guard_lip', WB, 5, [-18.8, 18.4, -3.9], [18.8, 20.4, 3.9])
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        skin(m, f'guard_face_{n}', WB, 4, [min(sd * 6, sd * 13), 13.6, -4.4], [max(sd * 6, sd * 13), 17.6, 4.4], paint=_bl_course)
+    m.chain('horn_l', WB, [(-17, 15), (-19.5, 20), (-19, 26)], [5.0, 3.0], [3.4, 2.4], 2, 3, tip=True)
+    m.chain('horn_r', WB, [(17, 15), (19.5, 20), (19, 26)], [5.0, 3.0], [3.4, 2.4], 2, 3, tip=True)
+    # 天秤の台（鍔の中央の金の台と、光る菱）: 二つの刃の根元と光の芯の起点を一つにまとめる
+    skin(m, 'plinth', WG, 4, [-4.6, 13.6, -3.8], [4.6, 19.4, 3.8])
+    skin(m, 'plinth_top', WG, 6, [-5.6, 18.6, -4.4], [5.6, 20.2, 4.4])
+    diamond(m, 'libra_gem', WL, (0, 23.4), 5.8, 1.8, 2, 3, zc=3.6)
+    # 刃: 白（左）と黒（右）。芯の節は根元で幅 10・奥行き ±3.2、先へ細る。外の縁を刃の稜にし、先は石の尖り
+    base_spine = [(3.4, 16), (6.2, 38), (8.4, 58), (8.0, 77)]
+    base_edge = [(8.6, 18), (10.6, 38), (11.4, 58), (10.4, 75)]
+    for side, mat, t0, t1, paint, epaint, pre in (
+            (-1, WM, 6, 8, _bl_white, None, 'fork_w'),
+            (1, WB, 2, 3, _bl_black, None, 'fork_b')):
+        spine = [(side * abs(x), y) for x, y in base_spine]
+        edge = [(side * abs(x), y) for x, y in base_edge]
+        _bl_blade(m, pre, mat, t0, t1, spine, [10.0, 8.6, 5.6], [3.2, 2.9, 2.0], side,
+                  edge, [2.4, 2.2, 1.8], [3.4, 3.2, 2.4], paint, epaint)
+        tx = side * 8.0
+        m.seg(f'{pre}_tip', mat, (tx, 76), (tx + side * 0.5, 85), 4.0, 2.2, t0, t0, tip=True)
+    # 刃の帯: 三か所、左右の刃にそれぞれ（光の芯のところは空ける）
+    for y, hw in ((25.0, 9.6), (47.0, 11.2), (65.0, 10.4)):
+        for side in (-1, 1):
+            _bl_bar(m, f'band_{int(y)}_{side}', WG, 5, (side * 2.2, y), (side * hw, y), 2.2, 4.0)
+    # 紫の光の芯: 根元が太く、先へ細る光の刃（二枚の刃のあいだを渡る）
+    _bl_bar(m, 'core_a_glow', WC, 4, (0, 18), (0, 38), 3.4, 4.2, paint=_bl_core)
+    _bl_bar(m, 'core_b_glow', WC, 5, (0, 38), (0, 58), 3.0, 4.0, paint=_bl_core)
+    _bl_bar(m, 'core_c_glow', WC, 5, (0, 58), (0, 74), 2.0, 3.0, paint=_bl_core)
+    # 先の金の尖塔（三節）
+    m.chain('spire', WG, [(0, 70), (0, 76), (0, 81), (0, 88)], [3.2, 2.4, 1.4], [2.6, 2.0, 1.2], 4, 5, tip=True)
     return m
 
-def _hm_eye(x0, w0, y0, cy, outer, outer_t, crack=False):
-    """頭の芯の前と後ろの面の印の目: 外の輪は半分ごとに反対の明るさ（白の半分は黒い輪、黒の半分は白い輪）、内は黒い輪。
-    x0 は面の左端の x、w0 は面の幅。north は左右が反対（絵の向きが反対）。crack は黒い半分の下の方に紫の割れ目（一本）"""
-    def paint(sp, face, w, h):
-        if face not in ('south', 'north'):
-            return
-        for i in range(w):
-            for j in range(h):
-                x = x0 + i + 0.5 if face == 'south' else x0 + w0 - i - 0.5
-                y = y0 + j + 0.5
-                r = math.hypot(x, y - cy)
-                if 3.0 <= r < 5.0:
-                    sp.rect(i, j, i + 1, j + 1, outer, outer_t, shade=False)
-                elif 2.0 <= r < 3.0:
-                    sp.rect(i, j, i + 1, j + 1, WB, 1, shade=False)
-        if crack:
-            sp.line((w * 0.22, h * 0.05), (w * 0.4, h * 0.4), 1.6, WC, 4, shade=False)
-    return paint
+
+# 引き合いの鎚（伝説・神器。2026-11-20 夜の清書。ラフ C「二つの石」）: 頭の幅いっぱいの重い石塊が二つ。
+# 各々九段の石積み（上が白の大理石、下が黒い石）。段ごとに外の角を 45 度に面取りし、外へ張り出す段と引っ込む段を交互に、
+# 奥行きは根元で厚く先で薄く。間に太い金の環（天秤の台）が二つの石を引き合わせ、環の芯に天秤の光る菱。
+# 石から環へ引かれる欠片の列を、手前と奥の二列に（float_）。根元の台と欠けた破片で重さを出す。
+# 金は帯 3 か所（段の境）＋先の尖塔＋環（台）。光は天秤の菱（WL）一つと、左の石の紫の光（WC）一つ。
+PH_YS = (21.0, 24.0, 27.0, 30.0, 33.0, 35.0, 38.0, 42.0, 46.0, 49.0)   # 九段の境（35 が白と黒の境）
+PH_OUT = (18.0, 17.2, 18.0, 16.8, 17.6, 17.4, 18.0, 17.0, 16.0)        # 段ごとの外の端（張り出しと引っ込み）
+PH_DEP = (7.0, 6.7, 6.6, 6.4, 6.3, 6.1, 6.0, 5.8, 5.5)                 # 段ごとの奥行き（根元が厚い）
+
+
+def _ph_black(sp, face, w, h):
+    """黒い石の段の面: 紫の割れ目を二本（斜めの線。光らない紫の線）"""
+    if face in ('south', 'north') and w >= 3:
+        sp.line((w * 0.15, h * 0.15), (w * 0.85, h * 0.85), 1.2, WC, 3, shade=False)
+        if h >= 3:
+            sp.line((w * 0.1, h * 0.85), (w * 0.6, h * 0.1), 1.0, WC, 3, shade=False)
+
+
+def _ph_strike(sp, face, w, h):
+    """外へ向いた打つ面（平ら）: 白の大理石の筋を一本だけ。打つ面はほかより明るく"""
+    if face in ('east', 'west') and h >= 3:
+        sp.line((w * 0.3, 0), (w * 0.6, h), 1.0, WM, 9, shade=False)
 
 
 def tower_pull_hammer():
-    """引き合いの鎚（伝説・神器）: 柄の上に横長の大きな頭。頭は四段（計八段）の石積みが左右へ大きく張り出し、両端の平らな面が打つ面。
-    頭の上半分（天）が白の大理石、下半分（淵）が黒い石。境に天秤の印の台（金の四角い台と光る菱）。
-    前と後ろの中央に印の目。頭の上と下に太く短い角が反り、角の先は石の色。
-    金は柄の輪二つ、頭の帯三か所（段の 0・1・3 の前と後ろ）、天秤の台だけ。光は天秤の印の菱（WL）一つと、黒い半分の紫の割れ目（WC）一つ"""
+    """引き合いの鎚（伝説・神器）: 頭は幅 36・高さ 28 の二つの石塊（九段ずつ）。外の端が平らな打つ面。
+    白（天）と黒（淵）の境は y 35。金の環（天秤の台）と光る菱が、両の石を引き合わせる。石の欠片は三つずつの太い列。"""
     from paintbox import skin
-    LAY = [(27, 31.5, 4, 9, 5.5), (31.5, 36, 5, 10, 6.0), (36, 40.5, 5, 10, 6.0), (40.5, 45, 4, 9, 5.2)]
     m = _wM('tower_pull_hammer')
-    # 柄と柄頭（夜の紫の柄に金の輪二つ、黒い石の柄頭）
-    skin(m, 'grip', WN, 2, [-1.5, -6, -1.5], [1.5, 5, 1.5], paint=_bs_bands)
-    for k, (y0, y1) in enumerate(((-5.6, -3.6), (2.6, 4.6))):
+    # 柄: 夜の紫の握りに金の輪二つ、黒い石の柄頭（長さは今のまま。上端は環の下に届く）
+    skin(m, 'grip', WN, 2, [-1.5, -9.0, -1.5], [1.5, 30.0, 1.5], paint=_bs_bands)
+    for k, (y0, y1) in enumerate(((-6.6, -4.6), (2.4, 4.4))):
         skin(m, f'grip_ring_{k}', WG, 4, [-2.1, y0, -2.1], [2.1, y1, 2.1])
-    skin(m, 'pommel', WB, 3, [-2.5, -8.5, -2.5], [2.5, -6, 2.5])
-    skin(m, 'pommel_rim', WB, 4, [-2.9, -6.8, -2.9], [2.9, -5.7, 2.9])
-    m.seg('pommel_tip', WB, (0, -8.5), (0, -11), 2.5, 1.25, 2, 3, tip=True)
-    # 柄の上（夜の紫に、石の色の二本の帯）
-    skin(m, 'rod', WN, 2, [-1.25, 5, -1.25], [1.25, 27, 1.25], paint=_bs_bands)
-    for k, y in enumerate((12, 20)):
-        m.box(f'rod_band_{k}', WB, [-1.7, y, -1.7], [1.7, y + 2, 1.7], 5)
-    # 頭の芯: 上半分は白の大理石（天）、下半分は黒い石（淵）。前と後ろに印の目。黒い半分に紫の割れ目一本
-    skin(m, 'core_top', WM, 4, [-6, 36, -4.5], [6, 45, 4.5], paint=_hm_eye(-6, 12, 36, 36, WB, 3))
-    skin(m, 'core_bot', WB, 2, [-6, 27, -4.5], [6, 36, 4.5], paint=_hm_eye(-6, 12, 27, 36, WM, 6, crack=True))
-    # 天秤の印の台（大剣の台と同じ作り）: 金の四角い台。前の菱だけ光る（WL）、後ろの菱は台の金
-    for sd, n in ((1, 'f'), (-1, 'b')):
-        z0, z1 = (4.5, 5.4) if sd > 0 else (-5.4, -4.5)
-        skin(m, f'plinth_{n}', WG, 4, [-2.4, 33.6, z0], [2.4, 38.4, z1])
-        skin(m, f'plinth_top_{n}', WG, 6, [-2.8, 38.2, z0 - 0.2], [2.8, 39.0, z1 + 0.2])
-        skin(m, f'plinth_bot_{n}', WG, 6, [-2.8, 33.0, z0 - 0.2], [2.8, 33.8, z1 + 0.2])
-        diamond(m, f'eye_gem_{n}_glow', WL if sd > 0 else WG, (0, 36), 3.6, 1.2, 4, 5, zc=sd * 5.6)
-    # 四段の石積み（左右へ張り出す）。段 0・1 は黒い石、段 2・3 は白の大理石。帯は段 0・1・3 の前と後ろ（金の三か所）
+    skin(m, 'pommel', WB, 3, [-2.5, -11.5, -2.5], [2.5, -9.0, 2.5])
+    m.seg('pommel_tip', WB, (0, -11.5), (0, -14.0), 2.5, 1.25, 2, 3, tip=True)
+    # 中の太い金の環（天秤の台）と、芯の光る菱（環の穴にはまる）
+    m.arc('ring', WG, (0.0, 35.0), 6.0, 0, 360, 12, 3.6, 4.4, 4, 4)
+    diamond(m, 'libra_glow', WL, (0.0, 35.0), 5.6, 1.2, 4, 4, zc=2.8)
+    # 石塊二つ: 九段。段ごとに外の上の角を一単位落とす（階段状の面取り）
     for sd, n in ((-1, 'l'), (1, 'r')):
-        for k, (y0, y1, xi, xo, z) in enumerate(LAY):
-            a, b = sorted((sd * xi, sd * xo))
-            top = k >= 2
-            mat, t = (WM, 6) if top else (WB, 2)
-            skin(m, f'lay_{n}{k}', mat, t, [a, y0, -z], [b, y1, z], paint=_bs_white if top else None)
-            lo, hi = (a, a + 0.8) if sd < 0 else (b - 0.8, b)
-            m.box(f'lay_rim_{n}{k}', mat, [lo, y0 + 0.6, -z - 0.3], [hi, y1 - 0.6, z + 0.3], t)
-            if k in (0, 1, 3):
-                mid = (y0 + y1) / 2
-                m.box(f'band_{n}{k}', WG, [min(a, b) + 1, mid - 0.5, z], [max(a, b) - 1, mid + 0.5, z + 0.6], 3)
-                m.box(f'bandb_{n}{k}', WG, [min(a, b) + 1, mid - 0.5, -z - 0.6], [max(a, b) - 1, mid + 0.5, -z], 3)
-        a, b = sorted((sd * 6, sd * 9))
-        skin(m, f'cap_top_{n}', WM, 5, [a, 45, -3], [b, 46, 3])
-        a, b = sorted((sd * 4, sd * 9))
-        skin(m, f'cap_bot_{n}', WB, 5, [a, 26, -4.6], [b, 27, 4.6])
-        # 太く短い角（上は白、下は黒）。角の先は石の色の菱（光らない）
-        m.chain(f'horn_up_{n}', WM, [(sd * 6, 45), (sd * 8.6, 48.6), (sd * 8.2, 52.2)], [3.6, 2.6], [2.6, 2.0], 5, 3, tip=True)
-        diamond(m, f'horn_up_gem_{n}_glow', WM, (sd * 8.2, 54.0), 2.6, 1.2, 4, 5)
-        m.chain(f'horn_dn_{n}', WB, [(sd * 6, 27), (sd * 8.6, 23.4), (sd * 8.2, 19.8)], [3.6, 2.6], [2.6, 2.0], 5, 3, tip=True)
-        diamond(m, f'horn_dn_gem_{n}_glow', WB, (sd * 8.2, 18.0), 2.2, 1.0, 4, 5)
+        for k in range(9):
+            y0, y1 = PH_YS[k], PH_YS[k + 1]
+            white = y0 >= 35.0
+            mat, t = (WM, 6) if white else (WB, 2)
+            out, z = PH_OUT[k], PH_DEP[k]
+            a, b = sorted((sd * 3.0, sd * (out - 1.0)))
+            skin(m, f'stone_{n}{k}', mat, t, [a, y0, -z], [b, y1, z],
+                 paint=_bs_white if white else _ph_black)
+            a, b = sorted((sd * 3.0, sd * out))
+            skin(m, f'stone_low_{n}{k}', mat, t, [a, y0, -z + 0.3], [b, y1 - 1.0, z - 0.3],
+                 paint=_bs_white if white else _ph_black)
+        # 根元の台（石より少し広い黒い台）
+        a, b = sorted((sd * 4.0, sd * 17.2))
+        skin(m, f'foot_{n}', WB, 2, [a, 19.0, -6.0], [b, 21.0, 6.0], paint=_ph_strike)
+        # 欠けた破片（頭の上の角と、根元の下に一つずつ）
+        a, b = sorted((sd * 13.0, sd * 15.8))
+        skin(m, f'chip_top_{n}', WM, 7, [a, 49.0, -2.6], [b, 50.8, 2.6], paint=_bs_white)
+        a, b = sorted((sd * 13.4, sd * 16.4))
+        skin(m, f'chip_low_{n}', WB, 2, [a, 17.4, -2.8], [b, 19.0, 2.8])
+        # 金の帯（段の境に三か所。両の石をまたぐ）
+        for y, zb in ((27.0, 6.9), (35.0, 6.3), (42.0, 5.9)):
+            a, b = sorted((sd * 3.0, sd * 18.0))
+            skin(m, f'band_{n}{int(y)}', WG, 5, [a, y - 0.5, -zb], [b, y + 0.5, zb])
+    # 頭の上の金の尖塔（二つの石のあいだから立つ）
+    m.chain('spire', WG, [(0, 41.0), (0, 47.0), (0, 52.5), (0, 57.0)], [3.2, 2.4, 1.5], [2.6, 2.0, 1.2], 4, 6, tip=True)
+    # 紫の光（一つ）: 左の石の正面、段 2 の黒い面
+    skin(m, 'crack_glow', WC, 6, [-15.6, 28.0, 6.0], [-12.2, 29.2, 6.9], glow=True)
+    # 石から環へ引かれる欠片の列（手前一列、三つずつ。環へ近いほど小さい）。浮く部品
+    pulls = ((15.0, 29.5, 3.0), (11.6, 32.4, 2.6), (8.8, 34.6, 2.2))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        for j, (x, y, s) in enumerate(pulls):
+            mat, t = (WM, 6) if y > 35.0 else (WB, 2)
+            a, b = sorted((sd * x - s / 2, sd * x + s / 2))
+            skin(m, f'float_pull_{n}{j}', mat, t, [a, y - s / 2, 9.8 - s / 2], [b, y + s / 2, 9.8 + s / 2])
     return m
 
 
@@ -270,247 +247,370 @@ def _ms_black(sp, face, w, h):
         sp.line((w * 0.6, h * 0.35), (w * 0.85, h * 0.05), 1.8, WC, 4, shade=False)
 
 
-def _ms_claw(m, name, pts, widths, depth, sd):
-    """爪（太い節の点の列）。節の中点が境（y=50、天秤の台の高さ）より上は白、下は黒（2026-11-20 上下割り）"""
-    n = len(pts) - 1
-    for k in range(n):
-        a, b = pts[k], pts[k + 1]
-        mat = WM if (a[1] + b[1]) / 2 > 50.0 else WB
-        m.seg(f'{name}_{k}', mat, a, b, widths[k], depth, 3 + 3 * k / n, 3 + 3 * (k + 1) / n, over=0.5,
-              tip=(k == n - 1))
+def _mst_pt(c, r, a):
+    return (c[0] + r * math.cos(math.radians(a)), c[1] + r * math.sin(math.radians(a)))
 
 
-def tower_moon_staff():
-    """落ちる月の杖（伝説・神器）: 石の軸の上で、金の襟から白と黒の太い爪が左右へ張り出し、頂で反って月の籠を作る。
-    色は上下で割る: 籠の上半分（境より上）と先は白の大理石（天）、軸と籠の下半分は黒い石（淵）。境は天秤の印の台（金の台と光る菱）。
-    金は三つの帯（軸の二段の縁と襟）、先の尖塔、天秤の台だけ。光は天秤の印の菱（WL）一つと、籠の中の紫の月（WC）一つだけ。
-    紫の月は今より小さく。落ちる欠片は白と黒の石の色で光らせない（この職だけ浮く）"""
+def _mst_grip(m):
+    """柄と柄頭（夜の紫の帯、金の輪二つは数えない。柄頭は黒い石）"""
     from paintbox import skin
-    m = _wM('tower_moon_staff')
-    # 柄と柄頭（夜の紫の帯、金の輪二つは数えない、柄頭は黒い石）
     skin(m, 'grip', WN, 2, [-1.6, -14, -1.6], [1.6, 1.5, 1.6], paint=_bs_bands)
     for k, (y0, y1) in enumerate(((-12.6, -10.6), (-0.8, 1.2))):
         skin(m, f'grip_ring_{k}', WG, 4, [-2.3, y0, -2.3], [2.3, y1, 2.3])
     skin(m, 'pommel', WB, 3, [-2.6, -16.5, -2.6], [2.6, -14, 2.6])
     skin(m, 'pommel_rim', WB, 4, [-3.0, -14.8, -3.0], [3.0, -13.7, 3.0])
     m.seg('pommel_tip', WB, (0, -16.5), (0, -19), 2.5, 1.25, 2, 3, tip=True)
-    # 石の軸（段を重ね、軸は根元の側なので全部黒い石。黒の段に紫の割れ目を一か所）。段の継ぎ目に金の縁
-    spans = [(1.5, 10, 1.6), (10, 14, 1.9), (14, 26, 1.5), (26, 30, 1.9), (30, 38, 1.6)]
-    for k, (y0, y1, hw) in enumerate(spans):
-        skin(m, f'shaft_{k}_w', WB, 6, [-hw, y0, -hw], [0, y1, hw], paint=_ms_black if k == 2 else None)
-        skin(m, f'shaft_{k}_b', WB, 2, [0, y0, -hw], [hw, y1, hw])
-        if k in (1, 3):
-            skin(m, f'shaft_rim_{k}', WG, 5, [-hw - 0.7, y0 - 0.8, -hw - 0.7], [hw + 0.7, y0 + 0.8, hw + 0.7])
-    # 金の襟（爪の根元。三つ目の帯）
-    skin(m, 'collar', WG, 4, [-3.6, 38, -3.6], [3.6, 41, 3.6])
-    # 白と黒の太い爪（左右へ張り出し、頂で反る）。境（y=50）の上は白、下は黒
-    left = [(-2.4, 40.5), (-8.2, 43.4), (-13.2, 48.0), (-14.8, 54.0), (-12.4, 60.0), (-6.4, 64.0), (-1.6, 65.6)]
-    right = [(-x, y) for x, y in left]
-    widths = [6.2, 5.8, 5.2, 4.6, 4.0, 3.4]
-    _ms_claw(m, 'claw_l', left, widths, 3.6, -1)
-    _ms_claw(m, 'claw_r', right, widths, 3.6, 1)
-    # 籠の中の月（紫の割れ目の光。今より小さく）と印の目（淵の黒の瞳）
-    diamond(m, 'moon_glow', WC, (0, 50), 8.5, 2.6, 2, 4, zc=0.0)
-    diamond(m, 'moon_pupil', WN, (0, 50), 3.4, 1.8, 2, 4, zc=2.8)
-    # 天秤の印の台: 金の四角い台に天秤の印の光る菱（籠の中の前に一つ）。境の台
-    skin(m, 'plinth', WG, 4, [-3.4, 46.4, 3.0], [3.4, 53.6, 5.2])
-    skin(m, 'plinth_top', WG, 6, [-3.8, 53.2, 2.8], [3.8, 54.2, 5.4])
-    diamond(m, 'libra_gem_glow', WL, (0, 50), 5.0, 1.6, 4, 5, zc=5.2)
-    m.seg('moon_chain', WM, (0, 64.6), (0, 55.6), 1.4, 0.9, 4, 4, over=0.5)
-    # 尖塔（金）と先の菱（金。光らせない）
-    m.chain('spire', WG, [(0, 64), (0, 68.5), (0, 72)], [2.6, 1.6], [2.0, 1.2], 4, 5, tip=True)
-    diamond(m, 'spire_gem', WG, (0, 73.8), 3.6, 1.5, 4, 5, zc=0.0)
-    # 籠の外へ落ちる月の欠片（この職だけ浮く部品。石の色で、光らせない）
-    shards = [(-21.0, 40.0, 3.6, WM), (-23.6, 33.0, 2.8, WM), (-19.6, 27.6, 2.2, WM),
-              (21.0, 40.0, 3.6, WB), (23.6, 33.0, 2.8, WB), (19.6, 27.6, 2.2, WB)]
-    for k, (x, y, s, mat) in enumerate(shards):
-        diamond(m, f'float_shard_{k}', mat, (x, y), s, 1.4, 2, 4, zc=0.0)
-    return m
 
 
-def _dg_at(pts, vals, y):
-    """折れ線の各点の値 vals を、高さ y で直線に読む（pts の y は増える順）"""
-    for k in range(len(pts) - 1):
-        (x0, y0), (x1, y1) = pts[k], pts[k + 1]
-        if y0 <= y <= y1:
-            s = (y - y0) / (y1 - y0)
-            return vals[k] + (vals[k + 1] - vals[k]) * s
-    return vals[-1]
-
-
-def _ds_root(sp, face, w, h):
-    """黒い根元（淵）: 紫の割れ目を一本（二画素の線。黒い側に一本だけ）"""
-    if face in ('south', 'north'):
-        sp.line((w * 0.3, 0), (w * 0.6, h), 1.6, WC, 4, shade=False)
-
-
-def _ds_vein(sp, face, w, h):
-    """白い石（天）: 大理石の暗い筋を二画素で一本"""
-    if face in ('south', 'north'):
-        sp.line((w * 0.2, h * 0.9), (w * 0.8, h * 0.1), 1.6, WM, 3, shade=False)
-
-
-def tower_sigil_dagger():
-    """追う印の短剣: 形（輪郭・部品の配置）は前の版のまま。天秤の台だけ刃の中ほど（y=21）へ動かし、そこを白黒の境にする（2026-11-20 夜、主の指示）。
-    刃の上（台より先）は天の白い大理石（WM）、下（台より根元）は淵の黒い石（WB）。鰭は境より上が白・下が黒。鍔・柄頭は黒い石。
-    金は柄の輪と刃先の帯二か所と天秤の台だけ。光は天秤の菱（WL）一つと、黒い刃の下半分の紫の割れ目（WC）一本だけ。"""
+def _mst_shaft(m, top):
+    """黒い石の柄（紫の割れ目を一本）と金の帯三本（帯の数は柄の上で三か所）"""
     from paintbox import skin
-    m = _wM('tower_sigil_dagger')
-    # 柄と柄頭（柄は夜の紫に金の輪。柄頭は黒い石）
-    skin(m, 'grip', WN, 2, [-1.8, -4, -1.8], [1.8, 3.6, 1.8], paint=_bs_bands)
-    skin(m, 'grip_ring', WG, 4, [-2.2, -1.6, -2.2], [2.2, 0.0, 2.2])
-    skin(m, 'pommel', WB, 3, [-2.4, -6.4, -2.4], [2.4, -4, 2.4])
-    skin(m, 'pommel_rim', WB, 4, [-2.8, -4.6, -2.8], [2.8, -3.6, 2.8])
-    m.seg('pommel_tip', WB, (0, -6.4), (0, -8.8), 2.4, 1.2, 2, 3, tip=True)
-    # 鍔: 四角い輪（黒い石）
-    gx, gy, h, t = 0.0, 4.6, 2.6, 1.0
-    skin(m, 'guard_l', WB, 4, [gx - h - t, gy - h - t, -1.2], [gx - h, gy + h + t, 1.2])
-    skin(m, 'guard_r', WB, 4, [gx + h, gy - h - t, -1.2], [gx + h + t, gy + h + t, 1.2])
-    skin(m, 'guard_b', WB, 4, [gx - h, gy - h - t, -1.2], [gx + h, gy - h, 1.2])
-    skin(m, 'guard_t', WB, 4, [gx - h, gy + h, -1.2], [gx + h, gy + h + t, 1.2])
-    # 刃の中心線（節の点）と幅・奥行き。根元 7 から先へ細る。先は背の側へ返る鉤
-    P = [(0, 6), (0.3, 12), (1.0, 18), (2.6, 23.5), (4.8, 27.5), (6.8, 30.6), (7.6, 33.2), (6.8, 35.2), (4.6, 35.8), (2.6, 34.8)]
-    W = [7.0, 6.4, 5.8, 5.0, 4.2, 3.4, 2.6, 2.0, 1.5, 1.2]
-    D = [1.5, 1.4, 1.4, 1.3, 1.2, 1.1, 1.0, 0.9, 0.8, 0.7]
-    # 境（天秤の台の高さ y=21 = 刃の中ほど）で刃を二つに切る: 下は黒い石、上は白い大理石（形は同じ）
-    BY = 21.0
-    k = max(i for i in range(len(P) - 1) if P[i][1] <= BY)
-    xB = _dg_at(P, [x for x, _ in P], BY)
-    wB = _dg_at(P, W, BY)
-    dB = _dg_at(P, D, BY)
-    lowP, lowW, lowD = P[:k + 1] + [(xB, BY)], W[:k + 1] + [wB], D[:k + 1] + [dB]
-    upP, upW, upD = [(xB, BY)] + P[k + 1:], [wB] + W[k + 1:], [dB] + D[k + 1:]
-
-    def halves(pts, ws):
-        pw = [(x - w / 4, y) for (x, y), w in zip(pts, ws)]
-        pk = [(x + w / 4, y) for (x, y), w in zip(pts, ws)]
-        return pw, pk, [w / 2 for w in ws]
-    lw_, lk_, lhw = halves(lowP, lowW)
-    m.chain('lower_w', WB, lw_, lhw, lowD, 2, 2, tip=False, zc=0.0)
-    m.chain('lower_k', WB, lk_, lhw, lowD, 3, 3, tip=False, zc=0.0)
-    uw_, uk_, uhw = halves(upP, upW)
-    m.chain('blade_w', WM, uw_, uhw, upD, 6, 8, tip=True, zc=0.0)
-    m.chain('blade_k', WM, uk_, uhw, upD, 4, 5, tip=True, zc=0.0)
-    # 黒い刃の下半分の紫の割れ目（一本）: 薄い板を正面に置き、その面に線を描く
-    skin(m, 'crack_plate', WB, 2, [-1.0, 8.5, 1.2], [1.0, 19.0, 1.6], paint=_ds_root)
-    # 背の鰭: 四枚。境より下は黒い石、上は白い大理石
-    ys = (11.0, 16.5, 22.0, 27.5)
-    for k2, (y, ph, pwd) in enumerate(zip(ys, (5.2, 5.4, 5.2, 4.8), (4.0, 4.0, 3.6, 3.2))):
-        xc = _dg_at(P, [x for x, _ in P], y)
-        hw = _dg_at(P, [w / 2 for w in W], y)
-        x0 = xc + hw - 0.6
-        if y < BY:
-            skin(m, f'fin_{k2}', WB, 3, [x0, y - ph / 2, -1.0], [x0 + pwd, y + ph / 2, 1.0])
-            skin(m, f'fin_rim_{k2}', WB, 6, [x0 + pwd - 0.4, y - ph / 2 - 0.3, -1.2], [x0 + pwd + 0.3, y + ph / 2 + 0.3, 1.2])
-            skin(m, f'fin_tooth_{k2}', WB, 4, [x0 + pwd * 0.5, y + ph / 2, -0.7], [x0 + pwd * 0.5 + 1.2, y + ph / 2 + 1.4, 0.7])
-        else:
-            skin(m, f'fin_{k2}', WM, 2, [x0, y - ph / 2, -1.0], [x0 + pwd, y + ph / 2, 1.0], paint=_ds_vein)
-            skin(m, f'fin_rim_{k2}', WM, 8, [x0 + pwd - 0.4, y - ph / 2 - 0.3, -1.2], [x0 + pwd + 0.3, y + ph / 2 + 0.3, 1.2])
-            skin(m, f'fin_tooth_{k2}', WM, 5, [x0 + pwd * 0.5, y + ph / 2, -0.7], [x0 + pwd * 0.5 + 1.2, y + ph / 2 + 1.4, 0.7])
-    # 縁の段が二枚（境より下は黒、上は白）
-    for k2, y in enumerate((14.0, 25.0)):
-        xc = _dg_at(P, [x for x, _ in P], y)
-        hw = _dg_at(P, [w / 2 for w in W], y)
-        x1 = xc - hw + 0.6
-        if y < BY:
-            skin(m, f'scale_{k2}', WB, 4, [x1 - 2.0, y - 1.5, -1.0], [x1, y + 1.5, 1.0])
-        else:
-            skin(m, f'scale_{k2}', WM, 8, [x1 - 2.0, y - 1.5, -1.0], [x1, y + 1.5, 1.0], paint=_ds_vein)
-    # 金の帯二か所（刃先の反りの上。金は帯二か所だけ）
-    for k2, y in enumerate((30.6, 33.4)):
-        xc = _dg_at(P, [x for x, _ in P], y)
-        hw = _dg_at(P, [w / 2 for w in W], y)
-        d = _dg_at(P, D, y)
-        skin(m, f'band_{k2}', WG, 5, [xc - hw - 0.5, y - 0.7, -d - 0.4], [xc + hw + 0.5, y + 0.7, d + 0.4])
-    # 天秤の印の台（金）と光る菱（白黒の境＝刃の中ほど）
-    skin(m, 'libra_seat', WG, 4, [-3.4, BY - 2.6, 1.0], [3.4, BY + 2.6, 2.2])
-    diamond(m, 'libra_gem_glow', WL, (0, BY), 4.4, 1.3, 4, 5, zc=2.4)
-    return m
+    skin(m, 'shaft', WB, 2, [-1.8, 1.5, -1.8], [1.8, top, 1.8], paint=_ms_black)
+    for k, y in enumerate((7.2, 13.5, 18.5)):
+        skin(m, f'band_{k}', WG, 5, [-2.6, y, -2.6], [2.6, y + 1.6, 2.6])
 
 
-def _cb_palm(mat, vein, t):
-    """合わせた掌の正面: 指の境を一本（二画素。中ほど）と、石の筋を一本"""
+def _mst_moon_paint(sp, face, w, h):
+    """紫の月の面: 縁は最も明るい段、芯は濃い段（表と裏とも。中に穴は開けない）"""
+    if face in ('south', 'north'):
+        sp.rect(0, 0, w, h, WC, 5, shade=False)
+        sp.rect(1, 1, w - 1, h - 1, WC, 0, shade=False)
+
+
+def _mst_board_paint(outer_up, white):
+    """三日月の板の面: 外の縁は明るい一列、内の縁は一段暗い一列、大理石（白）か紫の割れ目（黒）の筋を一本。
+    outer_up は板の +y が外（弧の外側）を向くか。外の縁・内の縁の画素の行は、外向きの向きで決める"""
     def paint(sp, face, w, h):
-        if face in ('south', 'north') and w >= 4 and h >= 4:
-            j = int(h * 0.5)
-            sp.rect(0, j, w, j + 2, mat, t, shade=False)
-            sp.line((w * 0.25, h * 0.85), (w * 0.7, h * 0.15), 1.6, vein, t + 3, shade=False)
+        if face not in ('south', 'north') or h < 2:
+            return
+        top_t, bot_t = (9, 4) if white else (4, 1)
+        top_m, bot_m = (WM, WM) if white else (WB, WB)
+        hi_row, lo_row = (h - 1, 0) if outer_up else (0, h - 1)
+        sp.rect(0, hi_row, w, hi_row + 1, top_m, top_t, shade=False)
+        sp.rect(0, lo_row, w, lo_row + 1, bot_m, bot_t, shade=False)
+        if white:
+            sp.line((w * 0.3, 0), (w * 0.6, h), 1.0, WM, 6, shade=False)
+        elif w >= 3:
+            sp.line((w * 0.25, h * 0.1), (w * 0.7, h * 0.9), 1.4, WC, 3, shade=False)
     return paint
 
 
-def _cb_bell(m, name, cx, top, body, s=1.0, tongue=WB):
-    """鈴: 冠と胴は黒い石（境より下）、口の縁だけ白（形を読ませる）。舌は tongue（一つだけ紫）。top は冠の上の面"""
-    from paintbox import skin
+# 三日月の定数（2026-11-20 仕上げ）: 外の円の半径・中心の高さ・底の厚み・角の先の角度・弧の節数
+MST_R, MST_YC, MST_T, MST_PHI, MST_N = 19.0, 52.0, 9.5, 25.0, 16
 
-    def w(v):
-        return v * s
-    skin(m, f'{name}_crown', WB, 5, [cx - w(1.1), top - 1.6, -w(1.1)], [cx + w(1.1), top, w(1.1)])
-    skin(m, f'{name}_shoulder', body, 4, [cx - w(2.0), top - 3.8, -w(1.8)], [cx + w(2.0), top - 1.6, w(1.8)])
-    skin(m, f'{name}_body', body, 4, [cx - w(2.8), top - 7.0, -w(2.4)], [cx + w(2.8), top - 3.8, w(2.4)])
-    skin(m, f'{name}_lip', WM, 5, [cx - w(3.4), top - 7.8, -w(2.9)], [cx + w(3.4), top - 7.0, w(2.9)])
-    skin(m, f'{name}_tongue', tongue, 5, [cx - 0.8, top - 9.8, -0.8], [cx + 0.8, top - 7.6, 0.8])
+
+def _mst_crescent():
+    """三日月の点列。外の円（中心 (0, MST_YC)、半径 MST_R）の上の点 P と、内の円（中心を上へ s ずらし、
+    半径 s+R-T、角の点で外の円と交わる）の上で最も近い点 Q の組。P と Q の中点が中心線、|PQ| が厚み。
+    角（P=Q）は角の先が月の上端の高さ（約 Yc+8）に来る"""
+    R, Yc, K = MST_R, MST_YC, MST_R - MST_T
+    x_t, y_t = R * math.cos(math.radians(MST_PHI)), R * math.sin(math.radians(MST_PHI))
+    s = (R * R - K * K) / (2 * K + 2 * y_t)
+    Ri = s + K
+    C = (0.0, Yc + s)
+    th0, th1 = 180 - MST_PHI, 360 + MST_PHI
+    out = []
+    for k in range(MST_N + 1):
+        th = math.radians(th0 + (th1 - th0) * k / MST_N)
+        P = (R * math.cos(th), Yc + R * math.sin(th))
+        dx, dy = P[0] - C[0], P[1] - C[1]
+        L = math.hypot(dx, dy)
+        Q = (C[0] + Ri * dx / L, C[1] + Ri * dy / L)
+        out.append((P, Q))
+    return out, C, Ri, (th0, th1)
+
+
+def _mst_bar(m, name, mat, t, a, b, w, d, paint=None, zc=0.0):
+    """a から b へ伸びる回した板（幅 w、奥行き ±d、中心の奥行き zc）。両端を少し伸ばして節どうしを重ねる"""
+    from paintbox import skin
+    L = math.dist(a, b) + 0.8
+    cx, cy = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    skin(m, name, mat, t, (cx - L / 2, cy - w / 2, zc - d), (cx + L / 2, cy + w / 2, zc + d), paint, rot=ang, pivot=(cx, cy))
+
+
+def _mst_stone(sp, face, w, h):
+    """台座の石: 目地を一本（黒い石の段）"""
+    _bl_course(sp, face, w, h)
+
+
+def tower_moon_staff():
+    """落ちる月の杖（伝説・神器。2026-11-20 仕上げ）: 石の柄の頭に三日月。
+    三日月は回した板 16 節の弧（外の円 R19、底の厚み 9.5、両の角は月の上端の高さまで反る）。
+    弧の外の縁は明るく、内の縁は一段暗い。外と内の縁に一枚の薄い縁を重ね、輪郭を滑らかに見せる。
+    弧の下に石の台座を 2 段（塔の言葉）。弧の中で紫の光の菱の月（一辺 11）が落ちる途中で止まり、
+    上へ石の欠片 3 つ、先に太い金の尖塔。
+    色（上下で割る）: 境の天秤の台（y≈40）より上は白の大理石、下は黒い石と紫の割れ目。
+    金は帯三か所・先の尖塔・天秤の台だけ。光は天秤の菱（WL）一つと、紫の月（WC）一つ。
+    欠片・尖塔・月は浮く部品（float_）。"""
+    from paintbox import skin
+    m = _wM('tower_moon_staff')
+    _mst_grip(m)
+    _mst_shaft(m, 37.0)
+    pr, C, Ri, (th0, th1) = _mst_crescent()
+    mids = [((P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2) for P, Q in pr]
+    th = [math.dist(P, Q) for P, Q in pr]
+    for k in range(MST_N):
+        M0, M1 = mids[k], mids[k + 1]
+        Om = ((pr[k][0][0] + pr[k + 1][0][0]) / 2, (pr[k][0][1] + pr[k + 1][0][1]) / 2)
+        Im = ((pr[k][1][0] + pr[k + 1][1][0]) / 2, (pr[k][1][1] + pr[k + 1][1][1]) / 2)
+        ang = math.atan2(M1[1] - M0[1], M1[0] - M0[0])
+        nx, ny = -math.sin(ang), math.cos(ang)
+        outer_up = (Om[0] - Im[0]) * nx + (Om[1] - Im[1]) * ny > 0
+        ymid = (M0[1] + M1[1]) / 2
+        white = ymid >= 40.0
+        mat, tt = (WM, 6) if white else (WB, 4)
+        tav = (th[k] + th[k + 1]) / 2
+        w = max(0.6, tav)
+        d = 1.5 + 2.5 * min(1.0, tav / MST_T)
+        _mst_bar(m, f'crest_{k}', mat, tt, M0, M1, w, d, paint=_mst_board_paint(outer_up, white))
+        # 外の縁の薄い縁（前へ一枚出る。外の円の内側 0.6 の所）
+        A0 = math.radians(th0 + (th1 - th0) * k / MST_N)
+        A1 = math.radians(th0 + (th1 - th0) * (k + 1) / MST_N)
+        Ro = MST_R - 0.6
+        ea = (Ro * math.cos(A0), MST_YC + Ro * math.sin(A0))
+        eb = (Ro * math.cos(A1), MST_YC + Ro * math.sin(A1))
+        em, et = (WM, 9) if white else (WC, 5)
+        _mst_bar(m, f'crest_out_{k}', em, et, ea, eb, 1.0, 0.9, zc=d - 0.4)
+        # 内の縁の一段暗い縁（空洞の側へ少し出る）
+        ia = ((pr[k][1][0] - C[0]) * (Ri + 0.4) / Ri + C[0], (pr[k][1][1] - C[1]) * (Ri + 0.4) / Ri + C[1])
+        ib = ((pr[k + 1][1][0] - C[0]) * (Ri + 0.4) / Ri + C[0], (pr[k + 1][1][1] - C[1]) * (Ri + 0.4) / Ri + C[1])
+        im, it = (WB, 1) if white else (WN, 2)
+        _mst_bar(m, f'crest_in_{k}', im, it, ia, ib, 1.0, 0.9, zc=d - 0.4)
+    # 台座（底の外に石の段を二つ。上の段は弧の底に入る）
+    skin(m, 'stand_0', WB, 3, [-9.5, 21.0, -5.5], [9.5, 26.5, 5.5], paint=_mst_stone)
+    skin(m, 'stand_1', WM, 5, [-7.0, 26.0, -4.5], [7.0, 35.5, 4.5], paint=_mst_stone)
+    # 天秤の台（弧の底の前。境）と光る菱
+    skin(m, 'plinth', WG, 4, [-4.6, 34.0, 3.0], [4.6, 41.0, 6.0])
+    skin(m, 'plinth_top', WG, 6, [-5.2, 39.6, 2.6], [5.2, 41.2, 6.6])
+    diamond(m, 'libra_gem_glow', WL, (0, 37.5), 5.0, 1.8, 4, 5, zc=6.4)
+    # 落ちる途中で止まった光の菱の月（一辺 11。浮く部品）
+    h = 11.0 / (2 * math.sqrt(2))
+    _bl_bar(m, 'float_moon_glow', WC, 3, (-h, MST_YC - h), (h, MST_YC + h), 11.0, 3.6, paint=_mst_moon_paint)
+    # 月の上の石の欠片 3 つ（白・黒・白）と、先の太い金の尖塔
+    diamond(m, 'float_shard_0', WM, (-5.2, 65.0), 3.6, 2.0, 3, 4)
+    diamond(m, 'float_shard_1', WB, (5.0, 66.6), 2.6, 1.6, 2, 3)
+    diamond(m, 'float_shard_2', WM, (0.2, 70.0), 3.0, 1.8, 3, 4)
+    m.chain('float_spire', WG, [(0.4, 70.5), (0.9, 74.5), (1.7, 78.5)], [3.2, 2.2], [2.0, 1.4], 2, 5, tip=True)
+    return m
+
+
+# 追う印の短剣（2026-11-20 清書。ラフ A「逆鉤」）: 根元から上へ反り、上で内へ返る鉤の刃。
+# 刃は回した板の節で組む（段の箱で積まない）。天秤の台（y=22）が白と黒の境: 上は天の白い大理石、下は淵の黒い石。
+# 鉤の内側（-x 側）が切る縁で、紫の縁。背（+x 側）に鰭が三枚。柄は夜の紫に金の輪、柄の下に逆手の黒い石の指輪。
+# 金は刃の帯三か所・先の尖塔・天秤の台と柄の輪だけ。光は天秤の菱（WL）一つと、黒い側の紫の光（WC）の芯一つ。
+
+SD_BY = 22.0   # 天秤の台の高さ（白と黒の境）
+# 刃の芯の節 (x, y, 幅, 奥行き)。根元は幅 7 で、上へ細り、先で内へ返る
+SD_NODES = [
+    (0.0, 7.0, 7.0, 2.6), (0.8, 12.5, 7.6, 2.5), (2.0, 18.0, 7.4, 2.4), (2.53, SD_BY, 7.0, 2.3),
+    (2.8, 24.0, 6.2, 2.2), (2.7, 30.0, 5.0, 2.0), (1.4, 35.5, 3.8, 1.7), (-0.8, 39.2, 3.0, 1.4),
+    (-3.6, 40.6, 2.4, 1.2), (-6.2, 39.0, 2.0, 1.1), (-7.6, 35.8, 1.8, 1.0),
+]
+
+
+def _sd_bar(m, name, mat, t, a, b, w, d, paint=None, glow=None):
+    """a から b へ伸びる回した板（幅 w、奥行き ±d。面に絵を描ける）。両端を少し伸ばして節どうしを重ねる"""
+    from paintbox import skin
+    L = math.dist(a, b) + 1.2
+    cx, cy = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    skin(m, name, mat, t, (cx - L / 2, cy - w / 2, -d), (cx + L / 2, cy + w / 2, d), paint, rot=ang, pivot=(cx, cy),
+         glow=glow)
+
+
+def _sd_at(nodes, y, k):
+    """節の列で高さ y の値（k: 0 x、2 幅、3 奥行き）を直線に読む（y は節の並びの順に当たる所）"""
+    for i in range(len(nodes) - 1):
+        y0, y1 = nodes[i][1], nodes[i + 1][1]
+        if y0 <= y <= y1:
+            s = (y - y0) / (y1 - y0)
+            return nodes[i][k] + (nodes[i + 1][k] - nodes[i][k]) * s
+    return nodes[-1][k]
+
+
+def _sd_white(sp, face, w, h):
+    """白い大理石の面（天）: 横の筋を四画素おき"""
+    if face in ('south', 'north'):
+        for j in range(2, int(h) - 1, 4):
+            sp.rect(0, j, w, j + 1, WM, 3, shade=False)
+
+
+def _sd_black(sp, face, w, h):
+    """黒い石の面（淵）: 横の暗い筋と、紫の割れ目の斜めの一本（黒い側に一本だけ）"""
+    if face in ('south', 'north'):
+        for j in range(3, int(h) - 1, 5):
+            sp.rect(0, j, w, j + 1, WB, 1, shade=False)
+        sp.line((w * 0.3, h * 0.1), (w * 0.7, h * 0.9), 1.6, WC, 4, shade=False)
+
+
+def _sd_glow(sp, face, w, h):
+    """光の芯（黒い側の紫の光）: 縁を濃く、中央を明るく"""
+    if face in ('south', 'north') and w >= 3:
+        sp.rect(1, 0, w - 1, h, WC, 5, shade=False)
+
+
+def _sd_blade(m, nodes):
+    """刃の芯（節ごとに板を三枚: 芯・表の板・縁の稜）。色は節の中ほどの高さで白と黒を分ける"""
+    pts = [(x, y) for x, y, _, _ in nodes]
+    ws = [w for _, _, w, _ in nodes]
+    ds = [d for _, _, _, d in nodes]
+    ns = lib.line_normals(pts)
+    for k in range(len(nodes) - 1):
+        a, b = pts[k], pts[k + 1]
+        w = (ws[k] + ws[k + 1]) / 2
+        d = (ds[k] + ds[k + 1]) / 2
+        black = (a[1] + b[1]) / 2 < SD_BY
+        mat, t, paint = (WB, 3, _sd_black) if black else (WM, 6, _sd_white)
+        _sd_bar(m, f'core_{k}', mat, t, a, b, w, d, paint=paint)
+        _sd_bar(m, f'plate_{k}', mat, t, a, b, w * 0.6, d + 0.6, paint=paint)
+        # 外の縁の稜（幅 2 の板を縁の内側に重ねる）: -x 側（鉤の内側）は切る縁、+x 側は背の稜
+        for sgn, nm in ((-1, 'edge'), (1, 'ridge')):
+            if black:
+                rmat, rt = (WN, 4) if sgn < 0 else (WB, 3)
+            else:
+                rmat, rt = WM, 7
+            ea = (a[0] + ns[k][0] * sgn * (ws[k] / 2 - 0.3), a[1] + ns[k][1] * sgn * (ws[k] / 2 - 0.3))
+            eb = (b[0] + ns[k + 1][0] * sgn * (ws[k + 1] / 2 - 0.3), b[1] + ns[k + 1][1] * sgn * (ws[k + 1] / 2 - 0.3))
+            _sd_bar(m, f'{nm}_{k}', rmat, rt, ea, eb, 2.0, d + 0.4)
+
+
+def tower_sigil_dagger():
+    """追う印の短剣（伝説・神器。2026-11-20 清書。ラフ A「逆鉤」）: 根元から上へ反り、上で内へ返る鉤。
+    柄の下に逆手の黒い石の指輪。鍔はない。刃の上の半分は天の白い大理石、下の半分は淵の黒い石（境は天秤の台）。
+    金は帯三か所・先の尖塔・天秤の台・柄の輪だけ。光は天秤の菱（WL）一つと、黒い側の紫の光（WC）の芯一つ。"""
+    from paintbox import skin
+    m = _wM('tower_sigil_dagger')
+    # 柄: 夜の紫の握りに金の輪、柄頭は黒い石。柄の下に逆手の黒い石の輪（指輪）
+    skin(m, 'grip', WN, 2, [-2.2, -2.0, -2.0], [2.2, 7.0, 2.0], paint=_bs_bands)
+    skin(m, 'grip_ring', WG, 4, [-2.6, 0.6, -2.4], [2.6, 2.2, 2.4])
+    skin(m, 'pommel', WB, 3, [-2.6, -4.2, -2.4], [2.6, -2.0, 2.4], paint=_sd_black)
+    cx, cy, r, n = 0.0, -8.2, 3.4, 12
+    for k in range(n):
+        a0 = 2 * math.pi * k / n
+        a1 = 2 * math.pi * (k + 1) / n
+        pa = (cx + r * math.cos(a0), cy + r * math.sin(a0))
+        pb = (cx + r * math.cos(a1), cy + r * math.sin(a1))
+        _sd_bar(m, f'ring_{k}', WB, 3, pa, pb, 1.8, 1.2, paint=_sd_black)
+    # 刃（回した板の節）
+    _sd_blade(m, SD_NODES)
+    # 背の鰭: 三枚（境より下は黒い石、上は白い大理石）
+    for y in (12.5, 18.0, 27.0):
+        xc = _sd_at(SD_NODES, y, 0)
+        hw = _sd_at(SD_NODES, y, 2) / 2
+        mat, t, paint = (WB, 3, _sd_black) if y < SD_BY else (WM, 6, _sd_white)
+        _sd_bar(m, f'fin_{int(y)}', mat, t, (xc + hw - 1.2, y), (xc + hw + 2.8, y + 1.4), 1.6, 1.0, paint=paint)
+    # 天秤の台（金の襟が刃を横切る）と、台の光る菱（白黒の境）
+    xB = _sd_at(SD_NODES, SD_BY, 0)
+    hB = _sd_at(SD_NODES, SD_BY, 2) / 2
+    _sd_bar(m, 'collar', WG, 4, (xB - hB - 0.6, SD_BY), (xB + hB + 0.6, SD_BY), 2.4, 2.6)
+    diamond(m, 'libra', WL, (xB, SD_BY + 0.6), 3.6, 1.0, 3, 3, zc=2.4)
+    # 帯（金）三か所
+    for y in (12.5, 30.0, 38.0):
+        xc = _sd_at(SD_NODES, y, 0)
+        hw = _sd_at(SD_NODES, y, 2) / 2
+        _sd_bar(m, f'band_{int(y)}', WG, 5, (xc - hw - 0.5, y), (xc + hw + 0.5, y), 1.8, 2.0)
+    # 先の尖塔（金）
+    _sd_bar(m, 'tip', WG, 4, SD_NODES[9][:2], SD_NODES[10][:2], 2.0, 1.2)
+    # 黒い側の紫の光の芯（一つ。小さく、表の板の前へ少し出す）
+    gx = _sd_at(SD_NODES, 15.0, 0)
+    _sd_bar(m, 'crack_glow', WC, 4, (gx, 13.5), (gx + 0.2, 16.5), 2.2, 3.0, paint=_sd_glow, glow=True)
+    return m
+
+
+def _cs_split(y):
+    """掌の色: 上（先の半分）は白の大理石、下（根元の半分）は黒い石。境は天秤の台の高さ 50"""
+    return WM if y >= 50 else WB
+
+
+def _cs_white(sp, face, w, h):
+    """白い掌（天）: 大理石の筋を斜めに一本（暗い段で二画素）"""
+    if face in ('south', 'north') and w >= 3 and h >= 4:
+        sp.line((w * 0.2, h * 0.15), (w * 0.8, h * 0.85), 1.2, WM, 8, shade=False)
+
+
+def _cs_black(sp, face, w, h):
+    """黒い掌（淵）: 紫の割れ目を斜めに一本（光らない）"""
+    if face in ('south', 'north') and w >= 3 and h >= 4:
+        sp.line((w * 0.25, h * 0.85), (w * 0.75, h * 0.15), 1.2, WC, 3, shade=False)
+
+
+def _cs_grip(sp, face, w, h):
+    """柄: 夜の紫の帯を三画素おきに"""
+    for j in range(2, int(h) - 1, 3):
+        sp.rect(0, j, w, j + 1, WN, 4, shade=False)
+
+
+def _cs_bar(m, name, mat, t, a, b, w, d, zc=0.0, paint=None, glow=None):
+    """a から b へ伸びる回した板（幅 w・奥行き ±d・前後へ zc ずらす）。面に絵を描ける"""
+    from paintbox import skin
+    L = math.dist(a, b) + 1.0
+    cx, cy = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    skin(m, name, mat, t, (cx - L / 2, cy - w / 2, zc - d), (cx + L / 2, cy + w / 2, zc + d), paint, rot=ang,
+         pivot=(cx, cy), glow=glow)
+
+
+def _cs_palm(m, pre, pts, ws, ds):
+    """掌（回した板の節）: 各節に芯の板と厚みの板（plate）を一枚。色は節の高さで白と黒を分け、筋を描く"""
+    for k in range(len(pts) - 1):
+        a, b = pts[k], pts[k + 1]
+        white = (a[1] + b[1]) / 2 >= 50
+        mat, t, paint = (WM, 6, _cs_white) if white else (WB, 3, _cs_black)
+        _cs_bar(m, f'{pre}_c{k}', mat, t, a, b, ws[k], ds[k], paint=paint)
+        _cs_bar(m, f'{pre}_p{k}', mat, t, a, b, ws[k] * 0.6, ds[k] + 0.9, paint=paint)
+
+
+def _cs_bell(m, pre, cx, top, s):
+    """鈴（大きく・裾が広がる形）: 冠（夜の紫）、胴（黒い石。首から裾へ外へ広がる二本の板と中の芯）、白い口の縁、紫の舌。
+    top は冠の上の面。s は大きさの倍率"""
+    from paintbox import skin
+    skin(m, f'{pre}_crown', WN, 5, [cx - 0.9 * s, top - 1.4 * s, -0.9 * s], [cx + 0.9 * s, top, 0.9 * s])
+    skin(m, f'{pre}_neck', WB, 4, [cx - 1.3 * s, top - 3.2 * s, -1.2 * s], [cx + 1.3 * s, top - 1.4 * s, 1.2 * s])
+    skin(m, f'{pre}_core', WB, 4, [cx - 2.2 * s, top - 9.4 * s, -1.8 * s], [cx + 2.2 * s, top - 3.0 * s, 1.8 * s])
+    for sg, n in ((-1, 'l'), (1, 'r')):
+        pts = [(cx + sg * 1.6 * s, top - 2.6 * s), (cx + sg * 3.0 * s, top - 6.4 * s), (cx + sg * 3.8 * s, top - 10.0 * s)]
+        for k in range(2):
+            _cs_bar(m, f'{pre}_flare_{n}{k}', WB, 3, pts[k], pts[k + 1], [2.2 * s, 2.6 * s][k], 2.2 * s)
+    skin(m, f'{pre}_lip', WM, 6, [cx - 3.9 * s, top - 10.8 * s, -2.8 * s], [cx + 3.9 * s, top - 9.2 * s, 2.8 * s])
+    skin(m, f'{pre}_tongue', WN, 4, [cx - 0.7 * s, top - 12.0 * s, -0.7 * s], [cx + 0.7 * s, top - 9.0 * s, 0.7 * s])
 
 
 def tower_clap_bell_staff():
-    """合掌の鈴杖（伝説・神器）: 柄の先で白と黒の二つの石の掌が合わさり、指先が上で合う。
-    掌のあいだに金の天秤の印の台（光る菱を前に置く）。掌の下で柄が黒い鉤に曲がり、鉤の先と外から黒い鈴が三つ下へ吊る。先の尖りは金の菱。
-    色: 上（合わせた掌の上半分・指先）は白の大理石、下（掌の下半分・鉤・鈴・紐）は黒い石、境は天秤の印の台。柄は夜の紫に金の輪。
-    金は柄の輪二つを除いて帯三か所（柄頭の蓋・柄の中の帯・手首）、先の尖り、天秤の台だけ。光は天秤の菱（WL）一つと、鈴の舌の紫（WC）一つだけ"""
+    """合掌の鈴杖（伝説・神器。2026-11-20 清書。ラフ A「掌の杯」）: 柄の先で合わせた二つの石の掌が杯になって開く。
+    指は回した板で三本ずつ、先が外へ開く。掌の外の関節（金の帯）から大きな鈴が二つこぼれて吊る。
+    杯の中を金の天秤の台が渡り、台の下に光る菱。
+    色: 指と掌の上半分は白の大理石、掌の下半分と鈴は黒い石、境は天秤の台。柄は夜の紫に金の輪二つ。
+    金は帯三か所（手首と両の関節）と天秤の台だけ。光は天秤の菱（WL）一つと、黒い側の掌の外の紫の光（WC）一つ。"""
     from paintbox import skin
     m = _wM('tower_clap_bell_staff')
-    # 柄頭（黒い石・金の蓋・尖り）と握り（夜の紫に金の輪）
-    skin(m, 'pommel', WB, 4, [-2.2, -18.0, -2.2], [2.2, -14.0, 2.2])
-    skin(m, 'pommel_cap', WG, 4, [-2.6, -18.8, -2.6], [2.6, -17.6, 2.6])
-    m.seg('pommel_tip', WB, (0, -18.8), (0, -21.6), 2.4, 1.2, 4, 5, tip=True)
-    skin(m, 'grip_l', WN, 4, [-1.8, -14.0, -1.8], [0, 1.5, 1.8])
-    skin(m, 'grip_r', WN, 4, [0, -14.0, -1.8], [1.8, 1.5, 1.8])
-    skin(m, 'grip_ring', WG, 4, [-2.2, -10.6, -2.2], [2.2, -8.6, 2.2])
-    skin(m, 'grip_wrap_0', WN, 4, [-2.0, -6.0, -2.0], [2.0, -4.6, 2.0])
-    skin(m, 'grip_wrap_1', WN, 4, [-2.0, -2.2, -2.0], [2.0, -0.8, 2.0])
-    # 柄（夜の紫）と、金の輪、金の帯
-    skin(m, 'rod_l', WN, 5, [-1.25, 1.5, -1.25], [0, 38.0, 1.25])
-    skin(m, 'rod_r', WN, 4, [0, 1.5, -1.25], [1.25, 38.0, 1.25])
-    skin(m, 'rod_band', WG, 4, [-1.9, 9.4, -1.9], [1.9, 11.0, 1.9])
-    skin(m, 'rod_wrap', WG, 4, [-1.8, 24.0, -1.8], [1.8, 25.4, 1.8])
-    # 手首の金の帯と、掌（上の半分は白、下の半分は黒。左右では割らない。厚く大きく）
-    skin(m, 'wrist', WG, 4, [-2.4, 37.4, -2.4], [2.4, 39.0, 2.4])
-    skin(m, 'palm_l', WB, 4, [-4.6, 39.0, -2.8], [0, 50.0, 2.8], _cb_palm(WB, WB, 2))
-    skin(m, 'palm_r', WB, 4, [0, 39.0, -2.8], [4.6, 50.0, 2.8], _cb_palm(WB, WB, 2))
-    skin(m, 'palm_top_l', WM, 6, [-4.2, 50.0, -2.4], [0, 58.0, 2.4], _cb_palm(WM, WM, 2))
-    skin(m, 'palm_top_r', WM, 4, [0, 50.0, -2.4], [4.2, 58.0, 2.4], _cb_palm(WM, WM, 2))
-    skin(m, 'tip_l', WM, 6, [-2.6, 58.0, -1.6], [0, 63.0, 1.6])
-    skin(m, 'tip_r', WM, 4, [0, 58.0, -1.6], [2.6, 63.0, 1.6])
-    skin(m, 'thumb_l', WB, 4, [-5.0, 41.0, 2.8], [-2.4, 47.0, 4.4])
-    skin(m, 'thumb_r', WB, 4, [2.4, 41.0, 2.8], [5.0, 47.0, 4.4])
-    skin(m, 'thumb_tip_l', WB, 4, [-5.4, 46.0, 2.4], [-4.4, 50.0, 3.4])
-    skin(m, 'thumb_tip_r', WB, 4, [4.4, 46.0, 2.4], [5.4, 50.0, 3.4])
-    # 天秤の印の台（掌のあいだ・前に出す）: 金の台と、光る菱（境の上に置く）
-    skin(m, 'libra_plinth', WG, 4, [-2.2, 45.0, 2.6], [2.2, 52.0, 4.6])
-    skin(m, 'libra_plinth_top', WG, 6, [-2.6, 52.0, 2.2], [2.6, 53.2, 5.0])
-    diamond(m, 'libra_gem', WL, (0, 48.5), 3.6, 1.2, 4, 5, zc=4.8)
-    # 先の尖り: 金の菱（光らせない）
-    diamond(m, 'tip_gem', WG, (0, 64.8), 5.0, 1.4, 4, 5)
-    # 柄の鉤（黒い石、掌の下から曲がって下へ）。鉤の先と外から鈴が吊る
-    c = (-5.2, 37.2)
-    m.arc('hook', WB, c, 5.2, 0, 250, 8, [2.6, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 2.0], [1.6] * 8, 4, 5, tip=True)
-    tip = (c[0] + 5.2 * math.cos(math.radians(250)), c[1] + 5.2 * math.sin(math.radians(250)))
-    outer = (c[0] + 5.2 * math.cos(math.radians(165)), c[1] + 5.2 * math.sin(math.radians(165)))
-    # 鈴A: 鉤の先。紐の先に玉。鉤の外に紫の結び目
-    skin(m, 'hook_knot', WN, 4, [-10.6, 33.2, -2.0], [-8.4, 35.2, 2.0])
-    m.seg('cord_a', WB, (tip[0], tip[1] - 0.3), (tip[0], 26.8), 1.6, 0.8, 5, 4)
-    skin(m, 'bead_a', WB, 5, [tip[0] - 0.9, 30.2, -0.9], [tip[0] + 0.9, 32.0, 0.9])
-    _cb_bell(m, 'bell_a', tip[0], 27.4, WB, s=1.0, tongue=WC)
-    # 鈴C: 鉤の外。細い腕から下がる
-    m.seg('arm_c', WB, (outer[0], outer[1] - 0.4), (-15.0, 32.6), 1.8, 0.9, 5, 4)
-    m.seg('cord_c', WB, (-15.0, 32.9), (-15.0, 31.0), 1.6, 0.8, 5, 4)
-    skin(m, 'bead_c', WB, 5, [-15.9, 33.6, -0.9], [-14.1, 35.4, 0.9])
-    _cb_bell(m, 'bell_c', -15.0, 31.4, WB, s=0.9)
-    # 鈴B: 柄の右の腕から下がる
-    m.seg('arm_b', WB, (0.6, 33.2), (7.0, 29.6), 1.8, 0.9, 5, 4)
-    m.seg('cord_b', WB, (7.0, 29.8), (7.0, 26.0), 1.6, 0.8, 5, 4)
-    skin(m, 'bead_b', WB, 5, [6.1, 28.0, -0.9], [7.9, 29.8, 0.9])
-    _cb_bell(m, 'bell_b', 7.0, 26.4, WB, s=0.9)
+    # 石突き（黒い石）・柄（夜の紫に金の輪）・手首の金の帯
+    skin(m, 'pommel', WB, 3, [-2.4, -11.0, -2.4], [2.4, -8.0, 2.4])
+    m.seg('pommel_tip', WB, (0, -11.0), (0, -13.4), 2.4, 1.2, 2, 3, tip=True)
+    skin(m, 'grip', WN, 3, [-1.9, -8.0, -1.9], [1.9, 4.0, 1.9], paint=_cs_grip)
+    for k, (y0, y1) in enumerate(((-6.0, -4.4), (0.6, 2.2))):
+        skin(m, f'grip_ring_{k}', WG, 4, [-2.4, y0, -2.4], [2.4, y1, 2.4])
+    skin(m, 'rod', WN, 3, [-1.2, 3.0, -1.2], [1.2, 29.5, 1.2])
+    skin(m, 'wrist', WG, 5, [-3.4, 28.4, -3.0], [3.4, 32.6, 3.0])
+    # 掌（二つ）: 根元で合わさり、外へ張って先で開く。指は三本ずつ、回した板の先が細る
+    for sg, n in ((-1, 'l'), (1, 'r')):
+        pts = [(sg * 2.0, 31.5), (sg * 8.2, 37.5), (sg * 11.6, 46.0), (sg * 11.2, 55.0), (sg * 8.8, 63.5), (sg * 7.4, 71.0)]
+        _cs_palm(m, f'palm_{n}', [(x, y) for x, y in pts], [6.4, 7.0, 7.4, 6.8, 5.6], [3.2, 3.6, 3.8, 3.6, 3.0])
+        for k, (bx, by, tx, ty) in enumerate(((12.8, 55.5, 13.6, 67.0), (10.0, 57.0, 10.4, 70.0), (7.4, 57.5, 7.0, 72.4))):
+            m.seg(f'finger_{n}{k}', WM, (sg * bx, by), (sg * tx, ty), 2.8, 1.9, 5, 6, over=0.3, zc=2.4, tip=True)
+        # 掌の外の関節の金の帯（手の外へ張り出す）と、そこから吊る鈴
+        lo, hi = sorted((sg * 7.2, sg * 15.8))
+        skin(m, f'band_{n}', WG, 5, [lo, 45.0, -4.2], [hi, 47.0, 4.2])
+        m.seg(f'cord_{n}', WN, (sg * 15.4, 45.2), (sg * 16.2, 39.6), 2.0, 1.2, 5, 4, over=0.2)
+        _cs_bell(m, f'bell_{n}', sg * 16.4, 39.6, 1.35)
+        # 掌の外の割れ目の光（黒い側・外の縁に一つ）
+        lo, hi = sorted((sg * 12.4, sg * 14.3))
+        skin(m, f'crack_glow_{n}', WC, 5, [lo, 39.2, -1.2], [hi, 41.6, 1.2], glow=True)
+    # 杯の中の天秤の台（金の梁）と、台の下の光る菱
+    skin(m, 'beam', WG, 5, [-9.6, 48.7, -2.2], [9.6, 51.3, 2.2])
+    diamond(m, 'libra_gem', WL, (0, 47.6), 5.0, 1.6, 4, 5, zc=2.6)
     return m
+
 
 
 def mirror(p, sign):
@@ -527,95 +627,123 @@ def strings(m, top, bot):
             m.seg(f'string_{key}_d', WM, bot, mid, 1, 0.5, 3, 3, over=0.2)
 
 
-def sigil_wheel(m, name, c, at):
-    """横向き（ZY）の印の輪（板の絵）: 金の二重の輪のあいだに印の文字が八つ。前から見ると目を貫く輪"""
-    cv = lib.Canvas(-10, c[1] - 10, 10, c[1] + 10)
-    glyphs = ['x.x/.x./x.x', 'xxx/x.x/xxx', '.x./xxx/.x.', 'x../xxx/..x', 'xx./.x./.xx', 'x.x/xxx/x.x', '.xx/x../.xx', 'xxx/.x./.x.']
-
-    def f(z, y, cur):
-        dz, dy = z, y - c[1]
-        r = math.hypot(dz, dy)
-        if 8.6 < r < 9.6:
-            return (WG, 4 if dy > 0 else 3)
-        if 5.9 < r < 6.5:
-            return (WG, 3)
-        if 6.5 <= r <= 8.6:
-            a = math.degrees(math.atan2(dy, dz)) % 360
-            k = int((a + 22.5) // 45) % 8
-            ca = math.radians(k * 45)
-            gu = (dz - math.cos(ca) * 7.55) / 0.5 + 1.5
-            gv = (dy - math.sin(ca) * 7.55) / 0.5 + 1.5
-            if 0 <= gu < 3 and 0 <= gv < 3 and glyphs[k].split('/')[2 - int(gv)][int(gu)] == 'x':
-                return (WL, 4)
-        return cur
-    cv.paint(f)
-    cv.put(m, name, at=at, plane='zy')
+# ---------------------------------------------------------------- 側の目の弓（神器。清書 2026-11-20 夜。ラフ B「浮く塔の弓」）
+EB_UP = [(12.5, 19.5), (15.5, 23.5), (17.0, 29.0), (15.5, 35.0), (11.5, 40.5), (6.5, 45.0), (3.5, 47.5)]   # 上の腕の芯（握りから先へ）
+EB_W = (6.6, 6.2, 5.8, 5.0, 4.2, 3.4)                                                         # 段ごとの幅（根元で太く、先へ細る）
+EB_S = ((0.0, 0.84), (0.14, 0.86), (0.14, 0.86), (0.14, 0.86), (0.14, 0.86), (0.14, 0.9))    # 段ごとの使う範囲（段のあいだは空く）
 
 
-def _eb_crack(sp, face, w, h):
-    """黒い札（淵）の前の面に紫の割れ目を一本（二画素の折れ線）"""
-    if face == 'south':
-        sp.line((w * 0.25, h * 0.9), (w * 0.7, h * 0.5), 1.8, WC, 4, shade=False)
-        sp.line((w * 0.7, h * 0.5), (w * 0.45, h * 0.1), 1.8, WC, 4, shade=False)
+def _eb_lerp(a, b, s):
+    return (a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s)
 
 
-def tower_eye_bow():
-    """側の目の弓（伝説）: 握りの前に石の瞼に抱かれた大きな一つ目が光り、そのまわりを金の印の輪が二重に巡り、横向き（奥行きの面）にも印の文字を刻んだ輪（板の絵）が目を貫いて立つ。
-    弓腕は角張った石の板を段に重ねた階段の形で、腹（弦の側）の継ぎ目ごとに小さな目が開いて弓の懐を見つめる。
-    上の半分は白の大理石（天）、下の半分は黒い石（淵）。左右（奥行き）には印を刻んだ石の札が張り出し、両端は金の尖塔。弦は金の鎖の輪を連ねたもの"""
+def _eb_bar(m, name, mat, t, a, b, w, d, paint=None, glow=None):
+    """a から b へ伸びる回した板（幅 w、奥行き ±d。面に絵を描ける）。両端を少し伸ばして節どうしを重ねる"""
     from paintbox import skin
-    m = _wM('tower_eye_bow')
-    m.box('grip', WN, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
-    m.box('lid_u', WM, [13.5, 17, -2.5], [20, 19.75, 2.5], 6)
-    m.box('lid_d', WB, [13.5, 10.25, -2.5], [20, 13, 2.5], 4)
-    m.box('lash_u', WM, [19, 19.75, -2], [20.5, 20.75, 2], 7)
-    m.box('eye_glow', WL, [13.75, 13, -2.25], [19.5, 17, 2.25], 4)
-    m.box('pupil', WB, [19, 14, -1.1], [19.9, 16, 1.1], 1)
-    c = (17.5, 15)
-    m.arc('ring_in', WG, c, 6.25, -140, 140, 10, 0.9, 0.55, 3, 5)
-    m.arc('ring_out', WG, c, 8.5, -150, 150, 14, 0.8, 0.5, 3, 5)
-    for k, a in enumerate((-120, -60, 0, 60, 120)):
-        dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
-        lg = WC if dy < -0.1 else WL   # 光: 白の側 WL・黒の側 WC
-        diamond(m, f'sigil_{k}_glow', lg, (c[0] + dx * 7.4, c[1] + dy * 7.4), 1.25, 0.55, 4, 5)
-    sigil_wheel(m, 'wheel', c, c[0])
-    steps = [(12, 20), (13, 24.5), (12.5, 28.5), (13.25, 32.5), (11.5, 36.5), (10.25, 40), (7.75, 43), (5, 45.5)]
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        P = lambda q, s=sign: mirror(q, s)
-        pts = [P(q) for q in steps]
-        hm = WM if sign > 0 else WB    # 上（+y）は白の大理石、下（-y）は黒い石
-        lg = WL if sign > 0 else WC    # 光: 白の側 WL・黒の側 WC
-        m.chain(f'arm_{n}', hm, pts, [4, 3.75, 3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 3, 7, tip=False)
-        for k in (1, 3, 5):
-            x, y = pts[k]
-            m.box(f'plate_{n}{k}', hm, [x - 0.5, y - 1, -1.8], [x + 3.25, y + 1, 1.8], 5 + k * 0.3)
-            m.box(f'plate_rim_{n}{k}', WG, [x + 3.25, y - 1.25, -1.9], [x + 4, y + 1.25, 1.9], 4)
-        for k in (2, 4):
-            x, y = pts[k]
-            m.box(f'belly_lid_{n}{k}', hm, [x - 3.25, y - 1.1, -1.5], [x - 1.25, y + 1.1, 1.5], 6)
-            m.box(f'belly_eye_{n}{k}_glow', lg, [x - 3.6, y - 0.55, -0.9], [x - 2.9, y + 0.55, 0.9], 4)
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            x, y = pts[3]
-            z0, z1 = (1.5, 5.5) if zs > 0 else (-5.5, -1.5)
-            if n == 'd' and zn == 'f':
-                # 黒い札の前の面に紫の割れ目（一面に一本）
-                skin(m, f'tablet_{n}{zn}', WB, 7, [x - 1.5, y - 2.25, z0], [x + 1.5, y + 2.25, z1], paint=_eb_crack)
-            else:
-                m.box(f'tablet_{n}{zn}', hm, [x - 1.5, y - 2.25, z0], [x + 1.5, y + 2.25, z1], 7)
-            zg = (z1 - 0.1, z1 + 0.15) if zs > 0 else (z0 - 0.15, z0 + 0.1)
-            m.box(f'tablet_rune_{n}{zn}_glow', lg, [x - 0.75, y - 1.25, zg[0]], [x + 0.75, y + 1.25, zg[1]], 4)
-        m.chain(f'spire_{n}', WG, [P((5, 45.5)), P((3.5, 47.5)), P((4.25, 52))], [2.25, 1.5], 1.1, 3, 5, tip=True)
-        diamond(m, f'spire_gem_{n}_glow', lg, P((3.6, 47.6)), 1.4, 1.2, 4, 5)
-    top, bot = (3.5, 47.5), (3.5, -17.5)
-    strings(m, top, bot)
+    L = math.dist(a, b) + 0.8
+    cx, cy = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    skin(m, name, mat, t, (cx - L / 2, cy - w / 2, -d), (cx + L / 2, cy + w / 2, d), paint, rot=ang, pivot=(cx, cy), glow=glow)
+
+
+def _eb_marble(sp, face, w, h):
+    """白い石の段（天）: 暗い大理石の筋を一本（二画素の斜め）"""
+    if face in ('south', 'north'):
+        sp.line((w * 0.2, h * 0.05), (w * 0.6, h * 0.95), 1.8, WM, 4, shade=False)
+
+
+def _eb_dark(sp, face, w, h):
+    """黒い石の段（淵）: 紫の割れ目を折れ線で一本（光らない）"""
+    if face in ('south', 'north') and h >= 4:
+        sp.line((w * 0.25, h * 0.9), (w * 0.7, h * 0.5), 1.6, WC, 4, shade=False)
+        sp.line((w * 0.7, h * 0.5), (w * 0.45, h * 0.1), 1.6, WC, 4, shade=False)
+
+
+def _eb_gold(sp, face, w, h):
+    """金の帯・台の面: 中ほどに細い明るい金の筋"""
+    sp.rect(0, int(h * 0.5), w, int(h * 0.5) + 1, WG, 5, shade=False)
+
+
+def _eb_grip(sp, face, w, h):
+    """柄: 夜の紫の帯を三画素おきに"""
+    for j in range(2, int(h) - 1, 3):
+        sp.rect(0, j, w, j + 1, WN, 4, shade=False)
+
+
+def _eb_piece(m, pre, mat, t, a, b, w, paint):
+    """塔の破片一つ（a から b へ）: 石の板の本体、外（+x、弦の反対）へ一段張る段、先の端に面取りの角。
+    本体の奥行きは ±3 で、ほかの 4 本の刃と同じ厚み"""
+    from paintbox import skin  # noqa: F401
+    L = math.dist(a, b)
+    ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    nx, ny = -uy, ux
+    if nx < 0:
+        nx, ny = -nx, -ny
+    _eb_bar(m, pre, mat, t, a, b, w, 3.0, paint=paint)
+    o = w * 0.4
+    _eb_bar(m, pre + '_step', mat, t + 1, (a[0] + nx * o, a[1] + ny * o), (b[0] + nx * o, b[1] + ny * o), w * 0.5, 3.6, paint=paint)
+    cap = 0.6
+    _eb_bar(m, pre + '_cap', mat, t + 2, b, (b[0] + ux * cap, b[1] + uy * cap), w * 0.7, 2.6, paint=paint)
+
+
+def _eb_pull_links(m, top, bot):
+    """引きの 3 段の弦の飾り（string_<段>_link<k>）。弦と一緒に動く。黒い石"""
     for key, pull in lib.PULLS:
         for k, y in enumerate((44, 40.5, 37, 33.5, 30, 26.5, 3.5, 0, -3.5, -7, -10.5, -14)):
             q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
             if k % 2:
-                m.box(f'string_{key}_link{k}', WG, [q[0] - 0.75, q[1] - 0.9, -0.3], [q[0] + 0.75, q[1] + 0.9, 0.3], 4)
+                m.box(f'string_{key}_link{k}', WB, [q[0] - 0.75, q[1] - 0.9, -0.3], [q[0] + 0.75, q[1] + 0.9, 0.3], 4)
             else:
-                m.box(f'string_{key}_link{k}', WG, [q[0] - 0.3, q[1] - 0.9, -0.75], [q[0] + 0.3, q[1] + 0.9, 0.75], 3)
+                m.box(f'string_{key}_link{k}', WB, [q[0] - 0.3, q[1] - 0.9, -0.75], [q[0] + 0.3, q[1] + 0.9, 0.75], 3)
+
+
+def tower_eye_bow():
+    """側の目の弓（神器。2026-11-20 夜の清書。ラフ B「浮く塔の弓」）: 弓腕は塔の破片の列で、段ごとに空中に浮く。
+    握りに付くのは根元の一片だけ（arm_u0 / arm_d0）。ほかの破片は float_ で、弦の先の尖塔だけが弦を受ける。
+    握りの前に天秤の光の瞳が浮き、その後ろに黒い枠。握りの金の台が白と黒の境（天秤の印）。
+    色: 上の腕は白の大理石（天）、下の腕は黒い石（淵）。金は帯三か所（上に二、下に一）・先の尖塔・天秤の台。
+    光は天秤の瞳（WL）一つと、黒い腕の前の割れ目の紫の光（WC）一つだけ。"""
+    from paintbox import skin
+    m = _wM('tower_eye_bow')
+    # 握り（夜の紫、金の輪二つは数えない）と、白黒の境の天秤の台（金）
+    skin(m, 'grip', WN, 3, [10.5, 9.5, -2], [13.5, 20.5, 2], paint=_eb_grip)
+    for k, (y0, y1) in enumerate(((9.4, 10.6), (19.4, 20.6))):
+        skin(m, f'grip_ring_{k}', WG, 4, [10.2, y0, -2.3], [13.8, y1, 2.3])
+    skin(m, 'plinth', WG, 5, [9.4, 13.0, -2.8], [14.6, 17.0, 2.8], paint=_eb_gold)
+    # 握りの前に浮く瞳: 黒い枠（後ろ）と、天秤の光る菱（前）。どちらも握りから離れて浮く
+    diamond(m, 'float_eye_frame', WB, (12.0, 15), 6.8, 1.4, 3, 4, zc=2.2)
+    diamond(m, 'float_eye_glow', WL, (12.0, 15), 4.6, 2.6, 5, 5, zc=3.6)
+    # 上（白）と下（黒）の腕: 塔の破片の列
+    for sg, pre, mat, t, paint in ((1, 'u', WM, 7, _eb_marble), (-1, 'd', WB, 3, _eb_dark)):
+        P = [mirror(p, sg) for p in EB_UP]
+        for k in range(6):
+            a, b = P[k], P[k + 1]
+            A, B = _eb_lerp(a, b, EB_S[k][0]), _eb_lerp(a, b, EB_S[k][1])
+            name = f'arm_{pre}0' if k == 0 else f'float_{pre}{k}'
+            _eb_piece(m, name, mat, t, A, B, EB_W[k], paint)
+        # 金の帯（破片の上に一本ずつ。上の腕は二つ、下の腕は一つ）
+        for k in ((1, 3) if sg > 0 else (2,)):
+            a, b = P[k], P[k + 1]
+            A, B = _eb_lerp(a, b, EB_S[k][0]), _eb_lerp(a, b, EB_S[k][1])
+            c = _eb_lerp(A, B, 0.5)
+            L = math.dist(A, B)
+            u = ((B[0] - A[0]) / L, (B[1] - A[1]) / L)
+            _eb_bar(m, f'float_band_{pre}{k}', WG, 5, (c[0] - u[0] * 0.6, c[1] - u[1] * 0.6), (c[0] + u[0] * 0.6, c[1] + u[1] * 0.6),
+                    EB_W[k] + 1.0, 3.4, paint=_eb_gold)
+        # 先の尖塔（金。菱は光らせない）
+        pts = [mirror(q, sg) for q in ((4.6, 44.0), (3.5, 47.5), (4.3, 52.0))]
+        m.chain(f'float_spire_{pre}', WG, pts, [2.25, 1.5], 1.1, 3, 5, tip=True)
+        diamond(m, f'float_spire_gem_{pre}', WG, mirror((3.6, 47.6), sg), 1.4, 1.2, 4, 5)
+    # 黒い腕（下）の前の割れ目の光（一つだけ。二つ目の破片の前の面）
+    P = [mirror(p, -1) for p in EB_UP]
+    A, B = _eb_lerp(P[2], P[3], EB_S[2][0]), _eb_lerp(P[2], P[3], EB_S[2][1])
+    gx, gy = _eb_lerp(A, B, 0.5)
+    skin(m, 'float_crack_glow', WC, 6, [gx - 0.7, gy - 0.7, 3.0], [gx + 0.7, gy + 0.7, 3.8], glow=True)
+    top, bot = (3.5, 47.5), (3.5, -17.5)
+    strings(m, top, bot)
+    _eb_pull_links(m, top, bot)
     return m
+
 
 
 ALL = [tower_balance_sword, tower_pull_hammer, tower_moon_staff, tower_sigil_dagger, tower_clap_bell_staff, tower_eye_bow]
