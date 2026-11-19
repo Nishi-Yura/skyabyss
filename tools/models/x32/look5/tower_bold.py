@@ -46,88 +46,195 @@ def rod(m, y0, y1, bands=()):
         m.box(f'band_{k}', B, [-1.75, y, -1.75], [1.75, y + 1.5, 1.75], grad=(y, 2, y + 1.5, 4))
 
 
+def towered(fn):
+    """塔の色（石 = slate、金具 = brass、光 = sigil、暗 = abyssal）で神器の道具を使う"""
+    def run():
+        import divine_kit
+        with divine_kit.pal(T, B, G, A):
+            return fn()
+    run.__name__ = fn.__name__
+    run.__doc__ = fn.__doc__
+    return run
+
+
+def tgrip(m, y0, y1):
+    """塔の柄: 石の握りに真鍮の四角い輪を二つ、柄頭は真鍮の枠の付いた石の四角錐"""
+    from divine_kit import fm, frame_face, bar, skin
+    skin(m, 'grip', T, 3.5, (-1.6, y0, -1.6), (1.6, y1, 1.6),
+         fm(lambda sp, f, w, h: [sp.rect(0, j, w, j + 1, T, 1.5) for j in range(1, int(h), 2)]))
+    for k, y in enumerate((y0 + 0.4, y1 - 1.9)):
+        skin(m, f'grip_ring_{k}', B, 3.6, (-2.3, y, -2.3), (2.3, y + 1.7, 2.3), fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)))
+    skin(m, 'pommel', T, 5, (-2.5, y0 - 3, -2.5), (2.5, y0 + 0.2, 2.5), frame_face(2.6, B))
+    bar(m, 'pommel_tip', T, 7, (0, y0 - 2.8), (0, y0 - 6.4), 2.6, 1.3)
+    skin(m, 'pommel_sigil', G, 4, (-0.8, y0 - 2.2, -2.7), (0.8, y0 - 0.6, 2.7), rot=45, pivot=(0, y0 - 1.4), glow=True)
+
+
+@towered
 def tower_balance_sword():
-    """あいだの大剣: 刃の半分（-x）は天の白い石、半分（+x）は淵の黒。真ん中の境に印の線が光る。鍔は天秤の竿と二つの皿"""
+    """あいだの大剣（伝説、三回目）: 刃は真ん中の光る印の線で二つに分かれ、左は天の白い石、右は淵の黒。
+    鍔は真鍮の天秤（竿・支点の菱の宝石・鎖で下がる二つの皿。左の皿に白い錘、右の皿に黒い錘）。切っ先の上に白と黒の欠片が浮く"""
+    from divine_kit import fm, frame_face, edge_top, bar, gem, sparkles, skin
     m = M('tower_balance_sword')
-    grip(m, -7, 7)
-    m.box('beam', B, [-8, 8.5, -1], [8, 10, 1], grad=(8.5, 3, 10, 5))
-    m.box('pivot', B, [-1.75, 7.5, -1.75], [1.75, 11.5, 1.75], 4)
-    for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'cord_{n}', B, [sd * 7.5 - 0.3, 5.5, -0.3], [sd * 7.5 + 0.3, 8.5, 0.3], 3)
-        m.box(f'pan_{n}', B, [sd * 7.5 - 2, 4.75, -2], [sd * 7.5 + 2, 5.75, 2], grad=(4.75, 2, 5.75, 4))
-    m.box('blade_sky', T, [-3.5, 11.5, -1], [0, 44, 1], grad=(11.5, 6, 44, 9))
-    m.box('blade_abyss', A, [0, 11.5, -1], [3.5, 44, 1], grad=(11.5, 1, 44, 4))
-    m.box('seam_glow', G, [-0.4, 12, -1.1], [0.4, 43, 1.1], grad=(12, 2, 43, 4))
-    for k, w in enumerate((2.75, 2, 1.25, 0.5)):   # 先は真ん中へ段で細る（天と淵の半分ずつ）
-        y = 44 + k * 1.75
-        m.box(f'tip_sky_{k}', T, [-w, y, -0.95 + k * 0.05], [0, y + 1.75, 0.95 - k * 0.05], 8)
-        m.box(f'tip_abyss_{k}', A, [0, y, -0.95 + k * 0.05], [w, y + 1.75, 0.95 - k * 0.05], 3)
+    tgrip(m, -7, 6)
+    skin(m, 'pivot_post', B, 3.6, (-1.3, 5.5, -1.3), (1.3, 11.5, 1.3))
+    bar(m, 'beam', B, 3.6, (-12.5, 9.2), (12.5, 9.2), 2.2, 1.6, edge_top(B, 5.5))
+    gem(m, 'pivot_gem', (0, 9.2), 4.4, 2.6)
+    for sd, n, wm, wt in ((-1, 'l', T, 9), (1, 'r', A, 2)):
+        x = sd * 11.5
+        bar(m, f'chain_{n}', B, 4.5, (x, 8.4), (x, 4.6), 0.7, 0.45)
+        skin(m, f'pan_{n}', B, 3.6, (x - 3.2, 3.4, -2.4), (x + 3.2, 4.8, 2.4), fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)))
+        skin(m, f'weight_{n}', wm, wt, (x - 1.2, 4.6, -1.2), (x + 1.2, 7, 1.2))
+    skin(m, 'collar', B, 3.4, (-5.6, 11, -1.9), (5.6, 13.6, 1.9), frame_face(2.2, B))
+
+    def marks(mat, t):
+        return fm(lambda sp, f, w, h: [sp.diamond((w / 2, y), 1.2, mat, t) for y in (h * 0.25, h * 0.55, h * 0.85)])
+    skin(m, 'blade_sky', T, 7, (-4.8, 13, -1.2), (0, 52, 1.2), marks(T, 4))
+    skin(m, 'blade_abyss', A, 2.5, (0, 13, -1.2), (4.8, 52, 1.2), marks(A, 5))
+    bar(m, 'edge_sky', T, 9, (-4.9, 13.4), (-4.9, 51.6), 1.0, 0.75)
+    bar(m, 'edge_abyss', A, 5, (4.9, 13.4), (4.9, 51.6), 1.0, 0.75)
+    bar(m, 'tip_sky', T, 8, (-4.9, 51.2), (-0.1, 65), 3.0, 1.0)
+    bar(m, 'tip_abyss', A, 3.5, (4.9, 51.2), (0.1, 65), 3.0, 1.0)
+    skin(m, 'tip_core_sky', T, 7.5, (-2.6, 51, -1.1), (0, 58, 1.1))
+    skin(m, 'tip_core_abyss', A, 2.5, (0, 51, -1.1), (2.6, 58, 1.1))
+    skin(m, 'seam', G, 3, (-0.5, 13.4, -1.45), (0.5, 62, 1.45), fm(lambda sp, f, w, h: sp.rect(0, 0, w, h, G, 4.5)), glow=True)
+    skin(m, 'float_shard_sky', T, 9, (-6.6, 67.4, -1.1), (-4.4, 69.6, 1.1), rot=45, pivot=(-5.5, 68.5))
+    skin(m, 'float_shard_abyss', A, 3, (4.4, 65.4, -1.1), (6.6, 67.6, 1.1), rot=45, pivot=(5.5, 66.5))
+    sparkles(m, 'float_sigil', [(0, 71)], -0.6)
     return m
 
 
+@towered
 def tower_pull_hammer():
-    """引き合いの鎚: 頭は二つの重い石の塊を真鍮の環がつなぐ。環の芯（引力の点）が光る。塊の外面は平ら"""
+    """引き合いの鎚（伝説、三回目）: 頭は内へ傾き合う二つの重い石の塊（外は平ら、上に真鍮の冠、前に光る印の目）。
+    塊の内面の真鍮の板のあいだに真鍮の環がかかり、環の芯の光の菱が二つを引き合う。まわりに引かれた石の欠片が浮く"""
+    from divine_kit import fm, frame_face, arc, bar, gem, skin, glow_plane
     m = M('tower_pull_hammer')
-    grip(m, -6, 6)
-    rod(m, 7.5, 25, bands=(16,))
-    c = 30
+    tgrip(m, -6, 5)
+    skin(m, 'rod', T, 3.5, (-1.3, 5, -1.3), (1.3, 32.5, 1.3))
+    for k, y in enumerate((14, 22)):
+        skin(m, f'rod_band_{k}', B, 3.8, (-1.8, y, -1.8), (1.8, y + 1.2, 1.8))
+    c = (0, 37)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'mass_{n}', T, [sd * 4 - 3, c - 4, -3.5] if sd > 0 else [sd * 4 - 3, c - 4, -3.5],
-              [sd * 4 + 3, c + 4, 3.5], grad=(c - 4, 3, c + 4, 6))
-        m.box(f'face_{n}', T, [sd * 7 - (0 if sd > 0 else 1.25), c - 3.5, -3], [sd * 7 + (1.25 if sd > 0 else 0), c + 3.5, 3], 7)
-    m.arc('orbit', B, (0, c), 6, 0, 360, 10, 1.25, 1, 3, 5)
-    m.box('core_glow', G, [-1.25, c - 1.25, -1.25], [1.25, c + 1.25, 1.25], 4)
-    m.box('socket', B, [-2, 24, -2], [2, 26, 2], 3)
+        x0, x1 = sorted((sd * 5, sd * 15))
+        cx = (x0 + x1) / 2
+        rot = -sd * 7
+        skin(m, f'block_{n}', T, 5, (x0, 30, -5), (x1, 44, 5), frame_face(3.2, T), rot=rot, pivot=(cx, 37))
+        skin(m, f'crown_{n}', B, 3.8, (x0 - 0.5, 43.6, -5.5), (x1 + 0.5, 45.6, 5.5), fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)),
+             rot=rot, pivot=(cx, 37))
+        skin(m, f'foot_{n}', B, 3.4, (x0 - 0.5, 28.6, -5.5), (x1 + 0.5, 30.4, 5.5), rot=rot, pivot=(cx, 37))
+        skin(m, f'eye_{n}', G, 4, (cx - 1.4, 36, -5.4), (cx + 1.4, 38.4, 5.4), rot=rot, pivot=(cx, 37), glow=True)
+        xi = sd * 5
+        skin(m, f'plate_{n}', B, 4, (min(xi, xi - sd * 1.2), 31.5, -4), (max(xi, xi - sd * 1.2), 42.5, 4), frame_face(2.4, B))
+    arc(m, 'ring', B, 3.6, c, 4.2, 0, 360, 10, 1.8, 1.8, 1.5, 1.5, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)))
+    gem(m, 'core', c, 4, 2.2, seat=False)
+
+    def pull(sp):
+        for y in (33.5, 40.5):
+            for x0, x1 in ((-15.5, -18.5), (15.5, 18.5)):
+                sp.line((x0, y), (x1, y + (1 if y > 37 else -1)), 1.0, G, 2.5, shade=False)
+    glow_plane(m, 'float_pull', pull, (-20, 30, 20, 44), 0.0)
+    for k, (x, y, s) in enumerate(((-9, 50, 2.2), (8.5, 52, 1.8), (-17.5, 27, 1.6), (17, 25.5, 2))):
+        skin(m, f'float_chip_{k}', T, 6.5, (x - s / 2, y - s / 2, -s / 2), (x + s / 2, y + s / 2, s / 2), rot=45, pivot=(x, y))
     return m
 
 
+@towered
 def tower_moon_staff():
-    """落ちる月の杖: 石の棒の先に三本の真鍮の爪が下向きの月（光る珠）を吊る。月の下に落ちる欠片が二つ"""
+    """落ちる月の杖（伝説、三回目）: 杖の先の真鍮の冠から二本の大きな爪が反り上がって頂で結ばれ、その籠の中に
+    光る月（大きな菱の光）が鎖で吊られる。籠の外へ月の欠片が落ちていき、後ろに落ちる光の筋"""
+    from divine_kit import fm, frame_face, path, bar, skin, glow_plane, sparkles
     m = M('tower_moon_staff')
-    grip(m, -14, 2)
-    rod(m, 3.5, 36, bands=(13, 24))
-    m.box('cap', B, [-3, 35.5, -3], [3, 37.5, 3], grad=(35.5, 2, 37.5, 4))
-    for k, a in enumerate((90, 210, 330)):
-        x, z = 3 * math.cos(math.radians(a)), 3 * math.sin(math.radians(a))
-        m.box(f'claw_{k}', B, [x - 0.5, 37.5, z - 0.5], [x + 0.5, 45, z + 0.5], 4)
-    m.box('claw_ring', B, [-3.5, 44.5, -3.5], [3.5, 45.5, 3.5], 5)
-    m.box('moon_h_glow', G, [-3, 39.5, -2.25], [3, 43.5, 2.25], grad=(39.5, 2, 43.5, 4))
-    m.box('moon_v_glow', G, [-2.25, 38.75, -2], [2.25, 44.25, 2], 4)
-    for k, (x, y) in enumerate(((-1.5, 35), (2, 33))):
-        m.seg(f'shard_{k}', T, (x - 0.9, y - 0.9), (x + 0.9, y + 0.9), 1.5, 0.6, 6, 8, over=0)
+    tgrip(m, -14, 1.5)
+    skin(m, 'rod', T, 3.5, (-1.3, 1.5, -1.3), (1.3, 41, 1.3))
+    for k, y in enumerate((12, 24)):
+        skin(m, f'rod_band_{k}', B, 3.8, (-1.8, y, -1.8), (1.8, y + 1.2, 1.8))
+    skin(m, 'crown', B, 3.6, (-3.4, 39, -3.4), (3.4, 41.8, 3.4), frame_face(2.4, B))
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        path(m, f'claw_{n}', B, 3.4, [(sd * 2.6, 41), (sd * 8, 45), (sd * 9, 52), (sd * 6.4, 58), (sd * 1.4, 61.2)],
+             [2.6, 2.4, 2.1, 1.8], [1.6, 1.5, 1.4, 1.2], fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)), dt=0.4)
+        bar(m, f'talon_{n}', B, 5, (sd * 8.6, 47), (sd * 6.2, 44.2), 1.2, 0.8)
+    skin(m, 'knot', B, 4, (-1.8, 60, -1.8), (1.8, 63.4, 1.8), frame_face(2.4, B))
+    bar(m, 'finial', B, 4.6, (0, 63), (0, 67.5), 1.6, 0.8)
+    skin(m, 'finial_gem', G, 4, (-1, 66.6, -1), (1, 68.6, 1), rot=45, pivot=(0, 67.6), glow=True)
+    bar(m, 'chain', B, 4.5, (0, 60.4), (0, 55.4), 0.7, 0.45)
+    c = (0, 50.5)
+    skin(m, 'moon', G, 3, (c[0] - 3.8, c[1] - 3.8, -3.8), (c[0] + 3.8, c[1] + 3.8, 3.8),
+         fm(lambda sp, f, w, h: sp.diamond((w / 2, h / 2), w / 3, G, 5)), rot=45, pivot=c, glow=True)
+    skin(m, 'moon_shadow', A, 3, (c[0] + 0.6, c[1] - 3.2, -4), (c[0] + 3.4, c[1] + 3.2, 4), rot=45, pivot=c)
+    frags = [(-12, 42, 2.2), (11.5, 38, 1.8), (-9.5, 33, 1.4)]
+    for k, (x, y, s) in enumerate(frags):
+        skin(m, f'float_frag_{k}', G, 4, (x - s / 2, y - s / 2, -s / 2), (x + s / 2, y + s / 2, s / 2), rot=45, pivot=(x, y), glow=True)
+
+    def trails(sp):
+        for x, y, s in frags:
+            sp.line((x, y + s * 0.6), (x * 0.75, y + 7), 1.2, G, 2, shade=False)
+    glow_plane(m, 'float_trail', trails, (-14, 31, 14, 51), -1.2)
     return m
 
 
+@towered
 def tower_sigil_dagger():
-    """追う印の短剣: 細い石の刃に印の筋が刃元から先まで刻まれる（光る）。鍔は真鍮の四角い輪、刃元に印の菱形"""
+    """追う印の短剣（伝説、三回目）: 鍔は菱に立てた真鍮の四角い輪で、中に印の宝石。細い石の刃の真ん中を印の筋が切っ先まで走り、
+    刃の右に印の菱が三つ、切っ先から鍔へ小さくなりながら追ってくる（平面の光）"""
+    from divine_kit import fm, bar, path, gem, skin, glow_plane
     m = M('tower_sigil_dagger')
-    grip(m, -4, 4)
-    m.box('guard', B, [-3.5, 5.5, -1.5], [3.5, 7.5, 1.5], grad=(5.5, 2, 7.5, 4))
+    tgrip(m, -4, 3)
+    c = (0, 8)
+    pts = [(0, 2.2), (5.8, 8), (0, 13.8), (-5.8, 8), (0, 2.2)]
+    path(m, 'ring', B, 3.6, pts, 1.8, 1.6, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)), ext=0.9)
+    gem(m, 'heart', c, 6.6, 2.2, seat=False)
+    skin(m, 'blade', T, 6, (-2.6, 13, -0.9), (2.6, 38, 0.9), fm(lambda sp, f, w, h: [
+        sp.cell[(i, j)].__setitem__('t', sp.cell[(i, j)]['t'] + j / h * 2) for i in range(w) for j in range(h)]))
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'guard_end_{n}', B, [sd * 3.5 - 1, 5, -1.75], [sd * 3.5 + 1, 8, 1.75], 4)
-    m.box('blade', T, [-2, 7.5, -0.85], [2, 27, 0.85], grad=(7.5, 4, 27, 7))
-    m.box('mark_glow', G, [-0.4, 10, -0.95], [0.4, 26, 0.95], grad=(10, 2, 26, 4))
-    m.seg('rune', G, (-1.25, 10.5 - 1.25), (1.25, 10.5 + 1.25), 2.5, 1, 3, 4, over=0)
-    for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'tip_{n}', T, (sd * 2, 26.5), (0, 33), 2.5, 0.8, 6, 8, tip=True)
-    m.box('tip_core', T, [-1.25, 26.5, -0.8], [1.25, 29, 0.8], 7)
+        bar(m, f'edge_{n}', T, 9, (sd * 2.7, 13.6), (sd * 2.7, 37.6), 0.9, 0.7)
+        bar(m, f'tip_{n}', T, 8, (sd * 2.8, 37.4), (0, 49), 2.2, 0.8)
+        bar(m, f'spur_{n}', B, 4, (sd * 2.6, 14.6), (sd * 5, 17.6), 1.4, 0.9)
+    skin(m, 'tip_core', T, 7.5, (-1.8, 37, -0.8), (1.8, 42, 0.8))
+    skin(m, 'channel', G, 3, (-0.5, 14, -1.1), (0.5, 45, 1.1), fm(lambda sp, f, w, h: sp.rect(0, 0, w, h, G, 4.5)), glow=True)
+
+    def chase(sp):
+        for k, (y, r) in enumerate(((42, 2.6), (33, 2.0), (25, 1.5))):
+            x = 7 + k * 0.6
+            sp.diamond((x, y), r, G, 4 - k * 0.6, shade=False)
+            sp.diamond((x, y), r * 0.45, G, 5, shade=False)
+        sp.line((7, 39), (7.6, 35.5), 0.8, G, 2, shade=False)
+        sp.line((7.6, 30.5), (8.2, 27.2), 0.8, G, 1.6, shade=False)
+    glow_plane(m, 'float_chase', chase, (3, 21, 12, 46), 0.0)
     return m
 
 
+@towered
 def tower_clap_bell_staff():
-    """合掌の鈴杖: 先に合わせた二つの石の掌（指は上へ）、掌のあいだが光る。手首に真鍮の腕輪、鈴が二つ下がる"""
+    """合掌の鈴杖（伝説、三回目）: 杖の先で石の両の掌が合わさって指を上へ立て、掌のあいだから印の光が漏れる。
+    手首に真鍮の腕輪が二重、腕輪から鈴が二つ下がる。手の後ろに真鍮の輪（光の印を四つ嵌める）"""
+    from divine_kit import fm, frame_face, arc, bar, bell3d, skin
     m = M('tower_clap_bell_staff')
-    grip(m, -14, 2)
-    rod(m, 3.5, 34, bands=(13, 23))
-    m.box('cuff', B, [-3.25, 33.5, -2.5], [3.25, 36, 2.5], grad=(33.5, 2, 36, 4))
+    tgrip(m, -14, 1.5)
+    skin(m, 'rod', T, 3.5, (-1.3, 1.5, -1.3), (1.3, 37, 1.3))
+    for k, y in enumerate((12, 24)):
+        skin(m, f'rod_band_{k}', B, 3.8, (-1.8, y, -1.8), (1.8, y + 1.2, 1.8))
+    c = (0, 50)
+    arc(m, 'halo', B, 3.4, c, 10.5, 0, 360, 16, 1.5, 1.5, 0.7, 0.7, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)))
+    for k in range(4):
+        a = math.radians(45 + k * 90)
+        p = (c[0] + math.cos(a) * 10.5, c[1] + math.sin(a) * 10.5)
+        skin(m, f'halo_sigil_{k}', G, 4, (p[0] - 1.2, p[1] - 1.2, -1), (p[0] + 1.2, p[1] + 1.2, 1), rot=45, pivot=p, glow=True)
+    for k, y in enumerate((36, 37.9)):
+        skin(m, f'bracelet_{k}', B, 3.6 + k * 0.4, (-4.8, y, -3.2), (4.8, y + 2.2, 3.2), frame_face(2.4, B))
+    skin(m, 'wrist', T, 5, (-4, 39.9, -2.6), (4, 43.4, 2.6))
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'palm_{n}', T, [sd * 0.4 - (2.5 if sd < 0 else 0), 36, -2.25], [sd * 0.4 + (2.5 if sd > 0 else 0), 44, 2.25], grad=(36, 4, 44, 6))
-        for k, (h, z) in enumerate(((4.5, -1.5), (5.5, -0.5), (5, 0.5), (4, 1.5))):
-            m.box(f'finger_{n}{k}', T, [sd * 0.4 - (1.5 if sd < 0 else 0), 44, z - 0.45], [sd * 0.4 + (1.5 if sd > 0 else 0), 44 + h, z + 0.45], 7)
-        m.seg(f'thumb_{n}', T, (sd * 2.5, 39), (sd * 3.25, 42.5), 1.5, 1, 6, 7, tip=True)
-        m.box(f'cord_{n}', B, [sd * 3.5 - 0.3, 31, -0.3], [sd * 3.5 + 0.3, 34, 0.3], 3)
-        m.box(f'bell_{n}', B, [sd * 3.5 - 1.25, 28.5, -1.25], [sd * 3.5 + 1.25, 31, 1.25], grad=(28.5, 3, 31, 5))
-    m.box('prayer_glow', G, [-0.4, 37, -1.75], [0.4, 48, 1.75], grad=(37, 3, 48, 5))
+        x0, x1 = sorted((sd * 0.45, sd * 4.2))
+        skin(m, f'palm_{n}', T, 6, (x0, 43, -2.5), (x1, 53, 2.5), fm(lambda sp, f, w, h: sp.rect(0, h - 2, w, h - 1, T, 4)))
+        fx0, fx1 = (x0, x1 - 0.25) if sd < 0 else (x0 + 0.25, x1)
+        # 指は奥行きの方向に四本並ぶ（中指が一番長い）。先は一段細い節で丸める
+        for k, (z, ln) in enumerate(((-1.75, 5.2), (-0.58, 7), (0.58, 6.4), (1.75, 4.6))):
+            skin(m, f'finger_{n}{k}', T, 6.5 + k * 0.3, (fx0, 52.6, z - 0.52), (fx1, 52.6 + ln, z + 0.52))
+            skin(m, f'finger_{n}{k}_tip', T, 8, (fx0 + (0.4 if sd > 0 else 0), 52.4 + ln, z - 0.42), (fx1 - (0.4 if sd < 0 else 0), 53.6 + ln, z + 0.42))
+        skin(m, f'thumb_{n}', T, 7, (fx0 + (0.6 if sd > 0 else 0), 45, 2.3), (fx1 - (0.6 if sd < 0 else 0), 51.5, 3.3))
+        bar(m, f'arm_{n}', B, 4, (sd * 4.6, 37.2), (sd * 7.6, 37.2), 1.0, 0.7)
+        bar(m, f'cord_{n}', B, 4.5, (sd * 7.4, 37.4), (sd * 7.4, 33.6), 0.6, 0.4)
+        bell3d(m, f'bell_{n}', (sd * 7.4, 32), 1.9, B)
+    skin(m, 'light', G, 3, (-0.5, 43, -2), (0.5, 60.5, 2), fm(lambda sp, f, w, h: sp.rect(0, 0, w, h, G, 4.5)), glow=True)
     return m
 
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """神器（四回目、2026-11-20）の共通の道具: 太い箱の面にドット絵（paintbox.skin）、回した板・弧・鐘・宝石・平面の板。
 天穹の剣で決めた作り（立体の芯 + 面の絵 + 平面の板、細かい四角を並べず形として意味のある少数の部品）を残り 9 本で使う"""
+import contextlib
 import math
 
 from paintbox import skin
@@ -9,17 +10,31 @@ from pix3d import Sprite, sprite_planes
 S, G, D, K = 'stone', 'gold', 'dawn', 'glass'
 
 
+@contextlib.contextmanager
+def pal(s, g, d, k):
+    """別のシリーズの色で道具を使う（石・金・光・硝子をその間だけ差し替える）"""
+    global S, G, D, K
+    old = (S, G, D, K)
+    S, G, D, K = s, g, d, k
+    try:
+        yield
+    finally:
+        S, G, D, K = old
+
+
 def fm(fn):
     """south・north だけに描く"""
     return lambda sp, f, w, h: fn(sp, f, w, h) if f in ('south', 'north') else None
 
 
-def frame_face(t=2.2, mat=G):
+def frame_face(t=2.2, mat=None):
+    mat = mat or G
     return fm(lambda sp, f, w, h: sp.rect(1, 1, w - 1, h - 1, mat, t) if w > 2 and h > 2 else None)
 
 
-def edge_top(mat=G, t=5.5):
+def edge_top(mat=None, t=5.5):
     """回した板の上の縁（v の高い行）に一本の線"""
+    mat = mat or G
     return fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, mat, t))
 
 
@@ -93,8 +108,9 @@ def rod(m, y0, y1, bands=()):
         skin(m, f'rod_band_{k}', G, 3.8, (-1.8, y, -1.8), (1.8, y + 1.2, 1.8))
 
 
-def bell3d(m, name, c, s, mat=G):
+def bell3d(m, name, c, s, mat=None):
     """口を下にした鐘（つまみ・胴・口の縁）"""
+    mat = mat or G
     x, y = c
     skin(m, f'{name}_top', mat, 4.5, (x - s * 0.35, y + s * 0.55, -s * 0.35), (x + s * 0.35, y + s * 0.95, s * 0.35))
     skin(m, f'{name}_body', mat, 3.5, (x - s * 0.7, y - s * 0.45, -s * 0.7), (x + s * 0.7, y + s * 0.6, s * 0.7),
