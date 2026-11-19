@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """塔（look5・個性版）。天と淵のあいだの塔の主たち「側」の武器 6 品（docs/design/03 の塔の装備）。
-色: 塔の石（slate 青灰）の 1 系統、差し色は古い真鍮（brass）、光は印の青白（sigil）。
+色: 白の大理石と金（天）と、黒い石と紫の割れ目（淵）。つなぎ目に天秤の印の光（2026-11-20 に白黒へ統一。全品これ）。
 天秤・目・落ちる月・引力の環・追う印・合わせた掌から一品ずつ形を立てる。
-- 柄: 石の握りに真鍮の四角い輪を二つ、柄頭は四角錐の石。
+- 柄: 夜の紫の握りに金の輪、柄頭は黒い石の四角錐。
 - 光: あいだの大剣 = 刃の真ん中の境の線、側の目の弓 = 目、落ちる月の杖 = 月、引き合いの鎚 = 環の芯、追う印の短剣 = 印、合掌の鈴杖 = 掌のあいだ。
 """
 import math
@@ -13,13 +13,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lib  # noqa: E402
 from lib import Model  # noqa: E402
 
-lib.RAMPS.update({
-    'slate': ['#14181e', '#222a32', '#323c46', '#46525e', '#5c6a78', '#768694', '#92a2ae', '#b0bec8', '#ccd8e0', '#e8f0f4'],
-    'brass': ['#3a2a12', '#5e4620', '#86682e', '#ae8e42', '#d0b264', '#ecd69a'],
-    'sigil': ['#2a4a8a', '#3e6ec0', '#5a9ae6', '#8cc4f8', '#c4e4ff', '#f0f8ff'],
-    'abyssal': ['#0a0812', '#14101e', '#201a2e', '#2e2640', '#3e3454', '#524668'],
-})
-T, B, G, A = 'slate', 'brass', 'sigil', 'abyssal'
 # 塔の装備の色（書類 54 の 2 章: 半分が白の大理石と金、半分が黒い石と紫の割れ目、つなぎ目に天秤の印。2026-11-20）
 # 塔の品はこの段階だけで塗る。白は -x、黒は +x（左右で割る）
 lib.RAMPS.update({
@@ -37,24 +30,6 @@ def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
     """45 度に回した四角（菱）"""
     h = s / (2 * math.sqrt(2))
     m.seg(name, mat, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, d, t0, t1, over=0, zc=zc)
-
-
-def M(name):
-    return Model(name, accent=B, glowmat=G)
-
-
-def grip(m, y0, y1):
-    m.box('grip', T, [-1.5, y0, -1.5], [1.5, y1, 1.5], grad=(y0, 2, y1, 4), wrap=(y0, y1))
-    for k, y in enumerate((y0 + 0.5, y1 - 2)):
-        m.box(f'ring_{k}', B, [-2, y, -2], [2, y + 1.5, 2], grad=(y, 2, y + 1.5, 4))
-    m.box('pommel', T, [-2.25, y0 - 2.5, -2.25], [2.25, y0, 2.25], grad=(y0 - 2.5, 3, y0, 5))
-    m.seg('pommel_tip', T, (0, y0 - 2.5), (0, y0 - 5), 2.5, 1.25, 5, 7, tip=True)
-
-
-def rod(m, y0, y1, bands=()):
-    m.box('rod', T, [-1.25, y0, -1.25], [1.25, y1, 1.25], grad=(y0, 3, y1, 6))
-    for k, y in enumerate(bands):
-        m.box(f'band_{k}', B, [-1.75, y, -1.75], [1.75, y + 1.5, 1.75], grad=(y, 2, y + 1.5, 4))
 
 
 def _wM(name):
@@ -450,15 +425,15 @@ def mirror(p, sign):
 def strings(m, top, bot):
     for key, pull in (('0', 0), ('p0', 2.4), ('p1', 6.8), ('p2', 11.6)):
         if pull == 0:
-            m.box(f'string_{key}', 'string', [top[0] - 0.5, bot[1], -0.5], [top[0] + 0.5, top[1], 0.5], 3)
+            m.box(f'string_{key}', WM, [top[0] - 0.5, bot[1], -0.5], [top[0] + 0.5, top[1], 0.5], 3)
         else:
             mid = (top[0] - pull, 15)
-            m.seg(f'string_{key}_u', 'string', mid, top, 1, 0.5, 3, 3, over=0.2)
-            m.seg(f'string_{key}_d', 'string', bot, mid, 1, 0.5, 3, 3, over=0.2)
+            m.seg(f'string_{key}_u', WM, mid, top, 1, 0.5, 3, 3, over=0.2)
+            m.seg(f'string_{key}_d', WM, bot, mid, 1, 0.5, 3, 3, over=0.2)
 
 
 def sigil_wheel(m, name, c, at):
-    """横向き（ZY）の印の輪（板の絵）: 真鍮の二重の輪のあいだに印の文字が八つ。前から見ると目を貫く輪"""
+    """横向き（ZY）の印の輪（板の絵）: 金の二重の輪のあいだに印の文字が八つ。前から見ると目を貫く輪"""
     cv = lib.Canvas(-10, c[1] - 10, 10, c[1] + 10)
     glyphs = ['x.x/.x./x.x', 'xxx/x.x/xxx', '.x./xxx/.x.', 'x../xxx/..x', 'xx./.x./.xx', 'x.x/xxx/x.x', '.xx/x../.xx', 'xxx/.x./.x.']
 
@@ -466,9 +441,9 @@ def sigil_wheel(m, name, c, at):
         dz, dy = z, y - c[1]
         r = math.hypot(dz, dy)
         if 8.6 < r < 9.6:
-            return (B, 4 if dy > 0 else 3)
+            return (WG, 4 if dy > 0 else 3)
         if 5.9 < r < 6.5:
-            return (B, 3)
+            return (WG, 3)
         if 6.5 <= r <= 8.6:
             a = math.degrees(math.atan2(dy, dz)) % 360
             k = int((a + 22.5) // 45) % 8
@@ -476,60 +451,75 @@ def sigil_wheel(m, name, c, at):
             gu = (dz - math.cos(ca) * 7.55) / 0.5 + 1.5
             gv = (dy - math.sin(ca) * 7.55) / 0.5 + 1.5
             if 0 <= gu < 3 and 0 <= gv < 3 and glyphs[k].split('/')[2 - int(gv)][int(gu)] == 'x':
-                return (G, 4)
+                return (WL, 4)
         return cur
     cv.paint(f)
     cv.put(m, name, at=at, plane='zy')
 
 
+def _eb_crack(sp, face, w, h):
+    """黒い札（淵）の前の面に紫の割れ目を一本（二画素の折れ線）"""
+    if face == 'south':
+        sp.line((w * 0.25, h * 0.9), (w * 0.7, h * 0.5), 1.8, WC, 4, shade=False)
+        sp.line((w * 0.7, h * 0.5), (w * 0.45, h * 0.1), 1.8, WC, 4, shade=False)
+
+
 def tower_eye_bow():
-    """側の目の弓（伝説）: 握りの前に石の瞼に抱かれた大きな一つ目が光り、そのまわりを真鍮の印の輪が二重に巡り、横向き（奥行きの面）にも印の文字を刻んだ輪（板の絵）が目を貫いて立つ。
+    """側の目の弓（伝説）: 握りの前に石の瞼に抱かれた大きな一つ目が光り、そのまわりを金の印の輪が二重に巡り、横向き（奥行きの面）にも印の文字を刻んだ輪（板の絵）が目を貫いて立つ。
     弓腕は角張った石の板を段に重ねた階段の形で、腹（弦の側）の継ぎ目ごとに小さな目が開いて弓の懐を見つめる。
-    左右（奥行き）には印を刻んだ石の札が張り出し、両端は真鍮の尖塔。弦は真鍮の鎖の輪を連ねたもの"""
-    m = M('tower_eye_bow')
-    m.box('grip', T, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
-    m.box('lid_u', T, [13.5, 17, -2.5], [20, 19.75, 2.5], 6)
-    m.box('lid_d', T, [13.5, 10.25, -2.5], [20, 13, 2.5], 4)
-    m.box('lash_u', T, [19, 19.75, -2], [20.5, 20.75, 2], 7)
-    m.box('eye_glow', G, [13.75, 13, -2.25], [19.5, 17, 2.25], 4)
-    m.box('pupil', A, [19, 14, -1.1], [19.9, 16, 1.1], 1)
+    上の半分は白の大理石（天）、下の半分は黒い石（淵）。左右（奥行き）には印を刻んだ石の札が張り出し、両端は金の尖塔。弦は金の鎖の輪を連ねたもの"""
+    from paintbox import skin
+    m = _wM('tower_eye_bow')
+    m.box('grip', WN, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    m.box('lid_u', WM, [13.5, 17, -2.5], [20, 19.75, 2.5], 6)
+    m.box('lid_d', WB, [13.5, 10.25, -2.5], [20, 13, 2.5], 4)
+    m.box('lash_u', WM, [19, 19.75, -2], [20.5, 20.75, 2], 7)
+    m.box('eye_glow', WL, [13.75, 13, -2.25], [19.5, 17, 2.25], 4)
+    m.box('pupil', WB, [19, 14, -1.1], [19.9, 16, 1.1], 1)
     c = (17.5, 15)
-    m.arc('ring_in', B, c, 6.25, -140, 140, 10, 0.9, 0.55, 3, 5)
-    m.arc('ring_out', B, c, 8.5, -150, 150, 14, 0.8, 0.5, 3, 5)
+    m.arc('ring_in', WG, c, 6.25, -140, 140, 10, 0.9, 0.55, 3, 5)
+    m.arc('ring_out', WG, c, 8.5, -150, 150, 14, 0.8, 0.5, 3, 5)
     for k, a in enumerate((-120, -60, 0, 60, 120)):
         dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
-        diamond(m, f'sigil_{k}_glow', G, (c[0] + dx * 7.4, c[1] + dy * 7.4), 1.25, 0.55, 4, 5)
+        lg = WC if dy < -0.1 else WL   # 光: 白の側 WL・黒の側 WC
+        diamond(m, f'sigil_{k}_glow', lg, (c[0] + dx * 7.4, c[1] + dy * 7.4), 1.25, 0.55, 4, 5)
     sigil_wheel(m, 'wheel', c, c[0])
     steps = [(12, 20), (13, 24.5), (12.5, 28.5), (13.25, 32.5), (11.5, 36.5), (10.25, 40), (7.75, 43), (5, 45.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
         pts = [P(q) for q in steps]
-        m.chain(f'arm_{n}', T, pts, [4, 3.75, 3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 3, 7, tip=False)
+        hm = WM if sign > 0 else WB    # 上（+y）は白の大理石、下（-y）は黒い石
+        lg = WL if sign > 0 else WC    # 光: 白の側 WL・黒の側 WC
+        m.chain(f'arm_{n}', hm, pts, [4, 3.75, 3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 3, 7, tip=False)
         for k in (1, 3, 5):
             x, y = pts[k]
-            m.box(f'plate_{n}{k}', T, [x - 0.5, y - 1, -1.8], [x + 3.25, y + 1, 1.8], 5 + k * 0.3)
-            m.box(f'plate_rim_{n}{k}', B, [x + 3.25, y - 1.25, -1.9], [x + 4, y + 1.25, 1.9], 4)
+            m.box(f'plate_{n}{k}', hm, [x - 0.5, y - 1, -1.8], [x + 3.25, y + 1, 1.8], 5 + k * 0.3)
+            m.box(f'plate_rim_{n}{k}', WG, [x + 3.25, y - 1.25, -1.9], [x + 4, y + 1.25, 1.9], 4)
         for k in (2, 4):
             x, y = pts[k]
-            m.box(f'belly_lid_{n}{k}', T, [x - 3.25, y - 1.1, -1.5], [x - 1.25, y + 1.1, 1.5], 6)
-            m.box(f'belly_eye_{n}{k}_glow', G, [x - 3.6, y - 0.55, -0.9], [x - 2.9, y + 0.55, 0.9], 4)
+            m.box(f'belly_lid_{n}{k}', hm, [x - 3.25, y - 1.1, -1.5], [x - 1.25, y + 1.1, 1.5], 6)
+            m.box(f'belly_eye_{n}{k}_glow', lg, [x - 3.6, y - 0.55, -0.9], [x - 2.9, y + 0.55, 0.9], 4)
         for zs, zn in ((1, 'f'), (-1, 'b')):
             x, y = pts[3]
             z0, z1 = (1.5, 5.5) if zs > 0 else (-5.5, -1.5)
-            m.box(f'tablet_{n}{zn}', T, [x - 1.5, y - 2.25, z0], [x + 1.5, y + 2.25, z1], 7)
+            if n == 'd' and zn == 'f':
+                # 黒い札の前の面に紫の割れ目（一面に一本）
+                skin(m, f'tablet_{n}{zn}', WB, 7, [x - 1.5, y - 2.25, z0], [x + 1.5, y + 2.25, z1], paint=_eb_crack)
+            else:
+                m.box(f'tablet_{n}{zn}', hm, [x - 1.5, y - 2.25, z0], [x + 1.5, y + 2.25, z1], 7)
             zg = (z1 - 0.1, z1 + 0.15) if zs > 0 else (z0 - 0.15, z0 + 0.1)
-            m.box(f'tablet_rune_{n}{zn}_glow', G, [x - 0.75, y - 1.25, zg[0]], [x + 0.75, y + 1.25, zg[1]], 4)
-        m.chain(f'spire_{n}', B, [P((5, 45.5)), P((3.5, 47.5)), P((4.25, 52))], [2.25, 1.5], 1.1, 3, 5, tip=True)
-        diamond(m, f'spire_gem_{n}_glow', G, P((3.6, 47.6)), 1.4, 1.2, 4, 5)
+            m.box(f'tablet_rune_{n}{zn}_glow', lg, [x - 0.75, y - 1.25, zg[0]], [x + 0.75, y + 1.25, zg[1]], 4)
+        m.chain(f'spire_{n}', WG, [P((5, 45.5)), P((3.5, 47.5)), P((4.25, 52))], [2.25, 1.5], 1.1, 3, 5, tip=True)
+        diamond(m, f'spire_gem_{n}_glow', lg, P((3.6, 47.6)), 1.4, 1.2, 4, 5)
     top, bot = (3.5, 47.5), (3.5, -17.5)
     strings(m, top, bot)
     for key, pull in lib.PULLS:
         for k, y in enumerate((44, 40.5, 37, 33.5, 30, 26.5, 3.5, 0, -3.5, -7, -10.5, -14)):
             q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
             if k % 2:
-                m.box(f'string_{key}_link{k}', B, [q[0] - 0.75, q[1] - 0.9, -0.3], [q[0] + 0.75, q[1] + 0.9, 0.3], 4)
+                m.box(f'string_{key}_link{k}', WG, [q[0] - 0.75, q[1] - 0.9, -0.3], [q[0] + 0.75, q[1] + 0.9, 0.3], 4)
             else:
-                m.box(f'string_{key}_link{k}', B, [q[0] - 0.3, q[1] - 0.9, -0.75], [q[0] + 0.3, q[1] + 0.9, 0.75], 3)
+                m.box(f'string_{key}_link{k}', WG, [q[0] - 0.3, q[1] - 0.9, -0.75], [q[0] + 0.3, q[1] + 0.9, 0.75], 3)
     return m
 
 
