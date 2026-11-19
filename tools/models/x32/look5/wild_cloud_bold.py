@@ -60,7 +60,7 @@ def strings(m, top, bot):
 
 def wild_skylark_bow():
     """雲雀の弓（ヒロイック）: 弓腕そのものが雲雀の翼。白い翼の背の縁は金、腹（弦の側）には段になった白い風切羽が
-    板の絵で並び（縁は空の青、羽先は金）、翼の先には空の青の光のかけらが舞う。握りは空の青に金の帯"""
+    板の絵で翼の表と裏に重なって並び（羽軸は灰、縁は空の青、羽先は金）、翼の先には空の青の光のかけらが舞う。握りは空の青に金の帯"""
     m = M('wild_skylark_bow')
     m.box('grip', 'sky', [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
     for n, y in (('u', 20.25), ('d', 8.25)):
@@ -81,6 +81,8 @@ def wild_skylark_bow():
             if d < ww / 2 and t < 1 - 0.3 * (d / (ww / 2)) ** 2:
                 if t > 0.8:
                     return (G, 4)
+                if d < 0.3 and t < 0.7:
+                    return (N, 6)
                 if d > ww / 2 - 0.5:
                     return ('sky', 5)
                 return (N, 9) if k % 2 else (N, 8)
@@ -90,7 +92,8 @@ def wild_skylark_bow():
         P = lambda q, s=sign: mirror(q, s)
         m.chain(f'wing_{n}', N, [P(q) for q in arm], [6, 7, 6, 4.5, 3, 1.8], 1.4, 6, 9, tip=False)
         m.chain(f'lead_{n}', G, [P(q) for q in lib.offset_line(arm, 3.1)[1:5]], [0.8, 0.8, 0.7], 1.45, 3, 5, tip=False)
-        cv.put(m, f'quills_{n}', at=0.0, mirror15=sign < 0)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            cv.put(m, f'quills_{n}{zn}', at=zs * 1.45, mirror15=sign < 0)
         for k, (x, y, s) in enumerate(((5.5, 48.5, 1.4), (9, 48, 1), (2.5, 50, 0.9))):
             diamond(m, f'spark_{n}{k}_glow', Z, P((x, y)), s, 0.6, 4, 5)
     strings(m, (3.25, 45.5), (3.25, -15.5))

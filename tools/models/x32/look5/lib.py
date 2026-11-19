@@ -296,8 +296,45 @@ class Canvas:
         for c, r, x, y in self.cells():
             self.grid[r][c] = fn(x, y, self.grid[r][c])
 
+    def finish(self):
+        """ドット絵の仕上げ（一度だけ）: 孤立した点を消し、塗りの上の縁を明るく下の縁を暗くし、
+        外側に一マスの濃い縁取りを付ける。細い線がちらつく点に見えず、模型の箱と同じ塊に見えるように"""
+        if getattr(self, '_done', False):
+            return
+        self._done = True
+        g, W, H = self.grid, self.W, self.H
+        at = lambda c, r: g[r][c] if 0 <= c < W and 0 <= r < H else None
+        n8 = [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+        g2 = [row[:] for row in g]
+        for r in range(H):
+            for c in range(W):
+                if g[r][c] and sum(1 for dc, dr in n8 if at(c + dc, r + dr)) <= 1:
+                    g2[r][c] = None
+        g = self.grid = g2
+        g2 = [row[:] for row in g]
+        for r in range(H):
+            for c in range(W):
+                v = g[r][c]
+                if not v:
+                    continue
+                if not at(c, r + 1):
+                    g2[r][c] = (v[0], v[1] + 1)
+                elif not at(c, r - 1):
+                    g2[r][c] = (v[0], max(0, v[1] - 1))
+        for r in range(H):
+            for c in range(W):
+                if g[r][c]:
+                    continue
+                nb = [at(c + dc, r + dr) for dc, dr in ((0, 1), (0, -1), (1, 0), (-1, 0))]
+                nb = [v for v in nb if v]
+                if nb:
+                    v = min(nb, key=lambda q: q[1])
+                    g2[r][c] = (v[0], max(0, v[1] - 3))
+        self.grid = g2
+
     def put(self, m, name, at=0.0, plane='xy', mirror15=False):
         """板にする。mirror15 で y=15 の鏡（下の弓腕）。plane='zy' のときは x 座標の代わりに z として置く"""
+        self.finish()
         rows = [list(r) for r in self.grid[::-1]]
         y0, y1 = self.y0, self.y0 + self.H * self.px
         if mirror15:
