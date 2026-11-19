@@ -89,13 +89,13 @@ def tower_balance_sword():
     def marks(mat, t):
         return fm(lambda sp, f, w, h: [sp.diamond((w / 2, y), 1.2, mat, t) for y in (h * 0.25, h * 0.55, h * 0.85)])
     skin(m, 'blade_sky', T, 7, (-4.8, 13, -1.2), (0, 52, 1.2), marks(T, 4))
-    skin(m, 'blade_abyss', A, 2.5, (0, 13, -1.2), (4.8, 52, 1.2), marks(A, 5))
+    skin(m, 'blade_abyss', A, 4, (0, 13, -1.2), (4.8, 52, 1.2), marks(A, 5))
     bar(m, 'edge_sky', T, 9, (-4.9, 13.4), (-4.9, 51.6), 1.0, 0.75)
-    bar(m, 'edge_abyss', A, 5, (4.9, 13.4), (4.9, 51.6), 1.0, 0.75)
+    bar(m, 'edge_abyss', G, 1.5, (4.9, 13.4), (4.9, 51.6), 1.0, 0.75)
     bar(m, 'tip_sky', T, 8, (-4.9, 51.2), (-0.1, 65), 3.0, 1.0)
-    bar(m, 'tip_abyss', A, 3.5, (4.9, 51.2), (0.1, 65), 3.0, 1.0)
+    bar(m, 'tip_abyss', A, 4.5, (4.9, 51.2), (0.1, 65), 3.0, 1.0)
     skin(m, 'tip_core_sky', T, 7.5, (-2.6, 51, -1.1), (0, 58, 1.1))
-    skin(m, 'tip_core_abyss', A, 2.5, (0, 51, -1.1), (2.6, 58, 1.1))
+    skin(m, 'tip_core_abyss', A, 4, (0, 51, -1.1), (2.6, 58, 1.1))
     skin(m, 'seam', G, 3, (-0.5, 13.4, -1.45), (0.5, 62, 1.45), fm(lambda sp, f, w, h: sp.rect(0, 0, w, h, G, 4.5)), glow=True)
     skin(m, 'float_shard_sky', T, 9, (-6.6, 67.4, -1.1), (-4.4, 69.6, 1.1), rot=45, pivot=(-5.5, 68.5))
     skin(m, 'float_shard_abyss', A, 3, (4.4, 65.4, -1.1), (6.6, 67.6, 1.1), rot=45, pivot=(5.5, 66.5))
@@ -210,32 +210,40 @@ def tower_clap_bell_staff():
     from divine_kit import fm, frame_face, arc, bar, bell3d, skin
     m = M('tower_clap_bell_staff')
     tgrip(m, -14, 1.5)
-    skin(m, 'rod', T, 3.5, (-1.3, 1.5, -1.3), (1.3, 37, 1.3))
+    skin(m, 'rod', T, 3.5, (-1.3, 1.5, -1.3), (1.3, 40, 1.3))
     for k, y in enumerate((12, 24)):
         skin(m, f'rod_band_{k}', B, 3.8, (-1.8, y, -1.8), (1.8, y + 1.2, 1.8))
-    c = (0, 50)
-    arc(m, 'halo', B, 3.4, c, 10.5, 0, 360, 16, 1.5, 1.5, 0.7, 0.7, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)))
+    c = (0, 53)
+    arc(m, 'halo', B, 3.4, c, 11, 0, 360, 16, 1.5, 1.5, 0.7, 0.7, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, B, 5.5)))
     for k in range(4):
         a = math.radians(45 + k * 90)
-        p = (c[0] + math.cos(a) * 10.5, c[1] + math.sin(a) * 10.5)
+        p = (c[0] + math.cos(a) * 11, c[1] + math.sin(a) * 11)
         skin(m, f'halo_sigil_{k}', G, 4, (p[0] - 1.2, p[1] - 1.2, -1), (p[0] + 1.2, p[1] + 1.2, 1), rot=45, pivot=p, glow=True)
     for k, y in enumerate((36, 37.9)):
         skin(m, f'bracelet_{k}', B, 3.6 + k * 0.4, (-4.8, y, -3.2), (4.8, y + 2.2, 3.2), frame_face(2.4, B))
     skin(m, 'wrist', T, 5, (-4, 39.9, -2.6), (4, 43.4, 2.6))
+    def fingers(sp, f, w, h):
+        # 手の外の側面（回した板の up・down の面）に、指の境の線を三本
+        if f in ('up', 'down'):
+            for q in (0.25, 0.5, 0.75):
+                sp.rect(0, h * q - 0.5, w, h * q + 0.5, T, 4)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        x0, x1 = sorted((sd * 0.45, sd * 4.2))
-        skin(m, f'palm_{n}', T, 6, (x0, 43, -2.5), (x1, 53, 2.5), fm(lambda sp, f, w, h: sp.rect(0, h - 2, w, h - 1, T, 4)))
-        fx0, fx1 = (x0, x1 - 0.25) if sd < 0 else (x0 + 0.25, x1)
-        # 指は奥行きの方向に四本並ぶ（中指が一番長い）。先は一段細い節で丸める
-        for k, (z, ln) in enumerate(((-1.75, 5.2), (-0.58, 7), (0.58, 6.4), (1.75, 4.6))):
-            skin(m, f'finger_{n}{k}', T, 6.5 + k * 0.3, (fx0, 52.6, z - 0.52), (fx1, 52.6 + ln, z + 0.52))
-            skin(m, f'finger_{n}{k}_tip', T, 8, (fx0 + (0.4 if sd > 0 else 0), 52.4 + ln, z - 0.42), (fx1 - (0.4 if sd < 0 else 0), 53.6 + ln, z + 0.42))
-        skin(m, f'thumb_{n}', T, 7, (fx0 + (0.6 if sd > 0 else 0), 45, 2.3), (fx1 - (0.6 if sd < 0 else 0), 51.5, 3.3))
+        # 合わせた手を横から見た形: 手首から掌でふくらみ、指先へ細って頂で合わさる
+        pts = [(sd * 2.25, 42.2), (sd * 2.7, 50), (sd * 2.05, 57.4), (sd * 0.95, 63.6)]
+        for k, (pa, pb, w, t) in enumerate(zip(pts, pts[1:], (4.5, 4.1, 2.9), (6, 6.6, 7.4))):
+            L = math.dist(pa, pb)
+            ux, uy = (pb[0] - pa[0]) / L, (pb[1] - pa[1]) / L
+            bar(m, f'hand_{n}{k}', T, t, (pa[0] - ux * 0.5, pa[1] - uy * 0.5), (pb[0] + ux * 0.5, pb[1] + uy * 0.5), w, 2.4,
+                fingers if k else None)
+        bar(m, f'tip_{n}', T, 8.5, (sd * 1.2, 62.6), (sd * 0.3, 65.2), 1.4, 2.0)
+        bar(m, f'thumb_{n}', T, 7.5, (sd * 2.7, 45), (sd * 1.1, 53.5), 1.9, 0.75, zc=2.6)
+        bar(m, f'thumb_tip_{n}', T, 8.5, (sd * 1.25, 52.6), (sd * 0.7, 55), 1.3, 0.65, zc=2.6)
         bar(m, f'arm_{n}', B, 4, (sd * 4.6, 37.2), (sd * 7.6, 37.2), 1.0, 0.7)
         bar(m, f'cord_{n}', B, 4.5, (sd * 7.4, 37.4), (sd * 7.4, 33.6), 0.6, 0.4)
         bell3d(m, f'bell_{n}', (sd * 7.4, 32), 1.9, B)
-    skin(m, 'light', G, 3, (-0.5, 43, -2), (0.5, 60.5, 2), fm(lambda sp, f, w, h: sp.rect(0, 0, w, h, G, 4.5)), glow=True)
-    return m
+    skin(m, 'light', G, 3, (-0.45, 43, -2), (0.45, 64.5, 2), fm(lambda sp, f, w, h: sp.rect(0, 0, w, h, G, 4.5)), glow=True)
+    from divine_bold import big
+    return big(m, 30, 1.3, 1.3)
 
 
 def mirror(p, sign):
