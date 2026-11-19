@@ -113,24 +113,25 @@ def wild_flash_bow():
 
 def wild_scope_longbow():
     """遠見の大弓（エピック）: 弓腕そのものが伸び縮みする望遠筒。握りから先へ一段ずつ細る黒鉄の筒が重なり、
-    継ぎ目ごとに真鍮の襟。先のレンズが雷の色に光り、レンズの先に照準の輪（板の絵、十字と目盛り）が浮かぶ"""
+    継ぎ目ごとに真鍮の襟。先のレンズが雷の色に光る。握りの前には真鍮の腕で横向きの照準の輪（板の絵、十字と目盛り）が立ち、射手がのぞく窓になる"""
     m = M('wild_scope_longbow')
     m.box('grip', U, [10.25, 9, -1.9], [13.75, 21, 1.9], grad=(9, 3, 21, 5), wrap=(9, 21))
     arm = [(12, 21), (12.5, 31), (11, 40), (8, 48), (4.5, 53)]
-    c0 = (2.5, 58.5)
-    cv = lib.Canvas(-2, 54, 7, 63)
+    cv = lib.Canvas(-6, 9, 6, 21)
 
-    def f(x, y, cur):
-        dx, dy = x - c0[0], y - c0[1]
-        r = math.hypot(dx, dy)
+    def f(z, y, cur):
+        dz, dy = z, y - 15
+        r = math.hypot(dz, dy)
         if 3.6 < r < 4.2:
             return (P, 4)
-        if r < 3.6 and (abs(dx) < 0.25 or abs(dy) < 0.25) and r > 0.8:
+        if r < 3.6 and (abs(dz) < 0.3 or abs(dy) < 0.3) and r > 1.26:
             return (P, 3)
-        if 4.2 <= r < 4.6 and (abs(dx) < 0.3 or abs(dy) < 0.3):
+        if 4.2 <= r < 5.1 and (abs(dz) < 0.3 or abs(dy) < 0.3):
             return (B, 5)
         return None
     cv.paint(f)
+    cv.put(m, 'sight_glow', at=17.5, plane='zy')
+    m.box('sight_arm', B, [13.75, 14.5, -0.5], [17.5, 15.5, 0.5], 4)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P_ = lambda q, s=sign: mirror(q, s)
         for k in range(len(arm) - 1):
@@ -140,7 +141,6 @@ def wild_scope_longbow():
             m.seg(f'collar_{n}{k}', B, P_(b), P_((b[0] + (a[0] - b[0]) * 0.12, b[1] + (a[1] - b[1]) * 0.12)), w + 0.8, w / 2.2 + 0.4, 4, 5, over=0)
         q = P_((4.5, 53))
         m.box(f'lens_{n}_glow', P, [q[0] - 1, q[1] - 0.5, -1], [q[0] + 1, q[1] + 0.5, 1], 4)
-        cv.put(m, f'reticle_{n}_glow', at=0.0, mirror15=sign < 0)
     strings(m, (3.25, 54), (3.25, -24))
     return m
 

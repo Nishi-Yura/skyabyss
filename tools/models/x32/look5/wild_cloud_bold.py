@@ -59,29 +59,31 @@ def strings(m, top, bot):
 
 
 def wild_skylark_bow():
-    """雲雀の弓（ヒロイック）: 弓腕そのものが雲雀の翼。白い翼の背の縁は金、腹（弦の側）には段になった白い風切羽が
-    板の絵で翼の表と裏に重なって並び（羽軸は灰、縁は空の青、羽先は金）、翼の先には空の青の光のかけらが舞う。握りは空の青に金の帯"""
+    """雲雀の弓（ヒロイック）: 弓腕そのものが雲雀の翼。白い翼の背の縁は金。翼の先からは風切羽が扇に大きく開き
+    （板の絵。羽軸は灰、縁は空の青、羽先は金）、翼の先の羽の付け根を金の帯が束ねる。握りは空の青に金の帯"""
     m = M('wild_skylark_bow')
     m.box('grip', 'sky', [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
     for n, y in (('u', 20.25), ('d', 8.25)):
         m.box(f'band_{n}', G, [9.75, y, -2.4], [14.25, y + 1.5, 2.4], 4)
     arm = [(12, 21), (15, 27), (16, 33), (14.5, 39), (11, 43.5), (6.5, 45.5), (3.25, 45.5)]
-    belly = lib.offset_line(arm, -2.6)
-    nr = lib.line_normals(arm)
+    cv = lib.Canvas(-10, 38, 24, 64)
+    # 翼の先の縁（11,43.5)→(3.25,45.5) に沿って付け根を並べ、外ほど長く外へ倒す
     quills = []
-    for k in range(1, 6):
-        a = belly[k]
-        quills.append((a, (a[0] - nr[k][0] * 5 - 1, a[1] - nr[k][1] * 5 - 2.4), 5 - k * 0.4))
-    cv = lib.Canvas(-2, 16, 18, 47)
+    for k in range(6):
+        f = k / 5
+        a = (11 - 7.5 * f, 44 + 1.6 * f)
+        ang = math.radians(62 + 82 * f)
+        ln = 7.5 + 5 * math.sin(math.pi * (0.25 + 0.6 * f))
+        quills.append((a, (a[0] + ln * math.cos(ang), a[1] + ln * math.sin(ang)), 3.4 - 0.2 * abs(k - 3)))
 
     def f(x, y, cur):
-        for k, (a, b, w) in enumerate(quills):
+        for k, (a, b, w) in reversed(list(enumerate(quills))):
             d, t = lib.near_line((x, y), [a, b])
-            ww = w * (0.8 + 0.2 * t)
-            if d < ww / 2 and t < 1 - 0.3 * (d / (ww / 2)) ** 2:
-                if t > 0.8:
+            ww = w * (0.75 + 0.35 * math.sin(math.pi * min(t, 1) * 0.9))
+            if d < ww / 2 and t < 1 - 0.35 * (d / (ww / 2)) ** 2:
+                if t > 0.84:
                     return (G, 4)
-                if d < 0.3 and t < 0.7:
+                if d < 0.3 and t < 0.78:
                     return (N, 6)
                 if d > ww / 2 - 0.5:
                     return ('sky', 5)
@@ -92,13 +94,10 @@ def wild_skylark_bow():
         P = lambda q, s=sign: mirror(q, s)
         m.chain(f'wing_{n}', N, [P(q) for q in arm], [6, 7, 6, 4.5, 3, 1.8], 1.4, 6, 9, tip=False)
         m.chain(f'lead_{n}', G, [P(q) for q in lib.offset_line(arm, 3.1)[1:5]], [0.8, 0.8, 0.7], 1.45, 3, 5, tip=False)
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            cv.put(m, f'quills_{n}{zn}', at=zs * 1.45, mirror15=sign < 0)
-        for k, (x, y, s) in enumerate(((5.5, 48.5, 1.4), (9, 48, 1), (2.5, 50, 0.9))):
-            diamond(m, f'spark_{n}{k}_glow', Z, P((x, y)), s, 0.6, 4, 5)
+        m.seg(f'quill_band_{n}', G, P((11, 43.75)), P((4, 45.5)), 1.2, 1.6, 4, 5, over=0.3)
+        cv.put(m, f'quills_{n}', at=0.0, mirror15=sign < 0)
     strings(m, (3.25, 45.5), (3.25, -15.5))
     return m
-
 
 def wild_cloudhymn_bell_staff():
     """雲歌の鈴杖: 杖の先に雲のふくらみが三つ重なった冠、その下に逆さの鐘が一つ（右の雲から）吊られ、
