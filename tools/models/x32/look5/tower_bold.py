@@ -126,41 +126,43 @@ def tower_balance_sword():
     skin(m, 'pommel', WB, 3, [-2.5, -9.5, -2.5], [2.5, -7, 2.5], paint=_bl_course)
     skin(m, 'pommel_rim', WB, 4, [-2.9, -7.6, -2.9], [2.9, -6.5, 2.9])
     m.seg('pommel_tip', WB, (0, -9.5), (0, -12), 2.5, 1.25, 2, 3, tip=True)
-    skin(m, 'neck', WN, 4, [-2.4, 4.0, -2.4], [2.4, 12.4, 2.4])
-    # 鍔: 黒い石の大きな梁。両端は刃の開きより外へ張り、上へ反る角（horn）になる
-    skin(m, 'guard', WB, 3, [-18, 12.0, -3.6], [18, 20.0, 3.6], paint=_bl_course)
-    skin(m, 'guard_lip', WB, 5, [-18.8, 18.4, -3.9], [18.8, 20.4, 3.9])
+    skin(m, 'neck', WN, 4, [-2.2, 4.0, -2.2], [2.2, 12.4, 2.2])
+    # 鍔: 黒い石の梁（幅 ±11）。両端は上へ反る角
+    skin(m, 'guard', WB, 3, [-10.6, 12.0, -2.8], [10.6, 17.4, 2.8], paint=_bl_course)
+    skin(m, 'guard_lip', WB, 5, [-11.2, 16.4, -3.1], [11.2, 18.0, 3.1])
     for sd, n in ((-1, 'l'), (1, 'r')):
-        skin(m, f'guard_face_{n}', WB, 4, [min(sd * 6, sd * 13), 13.6, -4.4], [max(sd * 6, sd * 13), 17.6, 4.4], paint=_bl_course)
-    m.chain('horn_l', WB, [(-17, 15), (-19.5, 20), (-19, 26)], [5.0, 3.0], [3.4, 2.4], 2, 3, tip=True)
-    m.chain('horn_r', WB, [(17, 15), (19.5, 20), (19, 26)], [5.0, 3.0], [3.4, 2.4], 2, 3, tip=True)
-    # 天秤の台（鍔の中央の金の台と、光る菱）: 二つの刃の根元と光の芯の起点を一つにまとめる
-    skin(m, 'plinth', WG, 4, [-4.6, 13.6, -3.8], [4.6, 19.4, 3.8])
-    skin(m, 'plinth_top', WG, 6, [-5.6, 18.6, -4.4], [5.6, 20.2, 4.4])
-    diamond(m, 'libra_gem', WL, (0, 23.4), 5.8, 1.8, 2, 3, zc=3.6)
-    # 刃: 白（左）と黒（右）。芯の節は根元で幅 10・奥行き ±3.2、先へ細る。外の縁を刃の稜にし、先は石の尖り
-    base_spine = [(3.4, 16), (6.2, 38), (8.4, 58), (8.0, 77)]
-    base_edge = [(8.6, 18), (10.6, 38), (11.4, 58), (10.4, 75)]
+        skin(m, f'guard_face_{n}', WB, 4, [min(sd * 4.2, sd * 8.4), 13.2, -3.4], [max(sd * 4.2, sd * 8.4), 16.2, 3.4], paint=_bl_course)
+    m.chain('horn_l', WB, [(-10.0, 14.0), (-11.8, 18.0), (-11.4, 23.0)], [3.4, 2.0], [2.4, 1.6], 2, 3, tip=True)
+    m.chain('horn_r', WB, [(10.0, 14.0), (11.8, 18.0), (11.4, 23.0)], [3.4, 2.0], [2.4, 1.6], 2, 3, tip=True)
+    # 天秤の台（鍔の中央の金の台と、光る菱）
+    skin(m, 'plinth', WG, 4, [-3.4, 13.2, -3.0], [3.4, 17.6, 3.0])
+    skin(m, 'plinth_top', WG, 6, [-4.0, 17.0, -3.4], [4.0, 18.4, 3.4])
+    diamond(m, 'libra_gem', WL, (0, 20.6), 4.4, 1.4, 2, 3, zc=2.8)
+    # 刃: 白（左）と黒（右）が細く V に開く。芯の節は根元で幅 5.2・奥行き ±2.2、先へ細る
+    base_spine = [(1.9, 16), (3.2, 38), (4.2, 57), (4.0, 72)]
+    base_edge = [(4.6, 18), (5.6, 38), (6.0, 57), (5.2, 70)]
     for side, mat, t0, t1, paint, epaint, pre in (
             (-1, WM, 6, 8, _bl_white, None, 'fork_w'),
             (1, WB, 2, 3, _bl_black, None, 'fork_b')):
         spine = [(side * abs(x), y) for x, y in base_spine]
         edge = [(side * abs(x), y) for x, y in base_edge]
-        _bl_blade(m, pre, mat, t0, t1, spine, [10.0, 8.6, 5.6], [3.2, 2.9, 2.0], side,
-                  edge, [2.4, 2.2, 1.8], [3.4, 3.2, 2.4], paint, epaint)
-        tx = side * 8.0
-        m.seg(f'{pre}_tip', mat, (tx, 76), (tx + side * 0.5, 85), 4.0, 2.2, t0, t0, tip=True)
+        _bl_blade(m, pre, mat, t0, t1, spine, [5.2, 4.4, 3.0], [2.2, 2.0, 1.5], side,
+                  edge, [1.4, 1.2, 1.0], [2.4, 2.2, 1.8], paint, epaint)
+        tx = side * 4.0
+        m.seg(f'{pre}_tip', mat, (tx, 71), (tx + side * 0.3, 79), 2.6, 1.6, t0, t0, tip=True)
     # 刃の帯: 三か所、左右の刃にそれぞれ（光の芯のところは空ける）
-    for y, hw in ((25.0, 9.6), (47.0, 11.2), (65.0, 10.4)):
+    for y, hw in ((25.0, 5.4), (46.0, 6.2), (63.0, 5.6)):
         for side in (-1, 1):
-            _bl_bar(m, f'band_{int(y)}_{side}', WG, 5, (side * 2.2, y), (side * hw, y), 2.2, 4.0)
-    # 紫の光の芯: 根元が太く、先へ細る光の刃（二枚の刃のあいだを渡る）
-    _bl_bar(m, 'core_a_glow', WC, 4, (0, 18), (0, 38), 3.4, 4.2, paint=_bl_core)
-    _bl_bar(m, 'core_b_glow', WC, 5, (0, 38), (0, 58), 3.0, 4.0, paint=_bl_core)
-    _bl_bar(m, 'core_c_glow', WC, 5, (0, 58), (0, 74), 2.0, 3.0, paint=_bl_core)
+            _bl_bar(m, f'band_{int(y)}_{side}', WG, 5, (side * 1.4, y), (side * hw, y), 1.6, 2.9)
+    # 紫の光の芯: 根元が太く、先へ細る光の刃
+    _bl_bar(m, 'core_a_glow', WC, 4, (0, 18), (0, 38), 2.2, 2.8, paint=_bl_core)
+    _bl_bar(m, 'core_b_glow', WC, 5, (0, 38), (0, 57), 2.0, 2.6, paint=_bl_core)
+    _bl_bar(m, 'core_c_glow', WC, 5, (0, 57), (0, 70), 1.4, 2.0, paint=_bl_core)
     # 先の金の尖塔（三節）
-    m.chain('spire', WG, [(0, 70), (0, 76), (0, 81), (0, 88)], [3.2, 2.4, 1.4], [2.6, 2.0, 1.2], 4, 5, tip=True)
-    return m
+    m.chain('spire', WG, [(0, 67), (0, 72), (0, 76), (0, 81)], [2.4, 1.8, 1.0], [2.0, 1.5, 1.0], 4, 5, tip=True)
+    # 全体（握りより上）を 8 割に: ほかのシリーズの剣（天穹の剣も 8 割）と長さをそろえる
+    from divine_bold import big
+    return big(m, 5.0, 0.8, 0.8)
 
 
 # 引き合いの鎚（伝説・神器。2026-11-20 夜の清書。ラフ C「二つの石」）: 頭の幅いっぱいの重い石塊が二つ。
@@ -237,7 +239,9 @@ def tower_pull_hammer():
             mat, t = (WM, 6) if y > 35.0 else (WB, 2)
             a, b = sorted((sd * x - s / 2, sd * x + s / 2))
             skin(m, f'float_pull_{n}{j}', mat, t, [a, y - s / 2, 9.8 - s / 2], [b, y + s / 2, 9.8 + s / 2])
-    return m
+    # 頭（y 17 より上）を横 0.62・縦 0.72・奥 0.7 に: ほかのシリーズの鎚と頭の大きさをそろえる
+    from divine_bold import big
+    return big(m, 17.0, 0.7, 0.78, 0.75)
 
 
 def _ms_black(sp, face, w, h):
