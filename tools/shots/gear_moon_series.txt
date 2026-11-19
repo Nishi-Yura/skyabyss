@@ -1,0 +1,253 @@
+# 月のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_moon_series.txt -PshotsName=gear_moon_series
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_crescent_dagger
+close
+wait 30
+chat clear
+shot fp_moon_crescent_dagger
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_crescent_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_crescent_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_umbra_dagger
+close
+wait 30
+chat clear
+shot fp_moon_umbra_dagger
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_umbra_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_umbra_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_light_sword
+close
+wait 30
+chat clear
+shot fp_moon_light_sword
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_light_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_light_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_waning_blade
+close
+wait 30
+chat clear
+shot fp_moon_waning_blade
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_waning_blade
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_waning_blade
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_scale_hammer
+close
+wait 30
+chat clear
+shot fp_moon_scale_hammer
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_scale_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_scale_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_full_hammer
+close
+wait 30
+chat clear
+shot fp_moon_full_hammer
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_full_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_full_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_tide_staff
+close
+wait 30
+chat clear
+shot fp_moon_tide_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_tide_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_tide_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_new_staff
+close
+wait 30
+chat clear
+shot fp_moon_new_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_new_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_new_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_starlight_bell_staff
+close
+wait 30
+chat clear
+shot fp_moon_starlight_bell_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_starlight_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_starlight_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_halo_bell_staff
+close
+wait 30
+chat clear
+shot fp_moon_halo_bell_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_halo_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_halo_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_waning_bow
+close
+wait 30
+chat clear
+shot fp_moon_waning_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_waning_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_waning_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_starfall_bow
+close
+wait 30
+chat clear
+shot fp_moon_starfall_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_starfall_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_starfall_bow
