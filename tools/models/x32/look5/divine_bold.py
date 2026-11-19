@@ -503,38 +503,32 @@ def divine_keeper_bell_staff():
 
 
 def divine_rewind_dagger():
-    """巻き戻りの短剣（五回目）: 鍔は金の文字盤。刃は時計の長針を剣にしたもの: 両刃の白い刃が根元で張り出してから長く鋭く絞られ、
-    真ん中に黒い硝子の窓（光の筋）。根元の両脇に針の返しのような鋭い棘。光る秒針が刃を斜めに貫いて前へ突き出す"""
-    from divine_kit import arc, bar, path, strapped_grip, pommel, skin, fm
+    """巻き戻りの短剣（六回目、B 歯車と三本の針）: 鍔は歯の付いた金の歯車（軸に光る宝石）。長針が主の刃（先に菱の窓の付いた時計の針の形で鋭く伸びる）、
+    短針が左へ斜め後ろに伸びる短い副刃、光る秒針が右へ細く走る"""
+    from divine_kit import S, G, D, K, fm, arc, bar, path, gem, strapped_grip, pommel, skin
+    EDGE = fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, S, 9.5))
+    GLINE = fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, G, 5.5))
     m = M('divine_rewind_dagger')
     strapped_grip(m, -4, 1.6)
     pommel(m, -6.6)
-    c = (0, 8)
-
-    def dial(sp, f, w, h):
-        if f not in ('south', 'north'):
-            return
-        for k in range(12):
-            a = math.radians(k * 30)
-            r = min(w, h) / 2 - 1.2
-            sp.dot(w / 2 + math.cos(a) * r, h / 2 + math.sin(a) * r, G, 2 if k % 3 else 1)
-    skin(m, 'dial_face', S, 7.5, (c[0] - 5, c[1] - 5, -1), (c[0] + 5, c[1] + 5, 1), dial)
-    arc(m, 'dial_rim', G, 3.4, c, 6.2, 0, 360, 12, 1.8, 1.8, 1.5, 1.5)
-    skin(m, 'hub', D, 4, (c[0] - 1.3, c[1] - 1.3, -1.8), (c[0] + 1.3, c[1] + 1.3, 1.8), rot=45, pivot=c, glow=True)
-    edge = fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, S, 9.5))
-    # 刃の身: 根元が張り出し、先へ長く絞る（左右それぞれ二節の回した板）
+    c = (0, 7.5)
+    arc(m, 'gear', G, 3.6, c, 5.2, 0, 360, 12, 2.2, 2.2, 1.6, 1.6, GLINE)
+    for k in range(10):
+        a = math.radians(k * 36 + 18)
+        x, y = c[0] + math.cos(a) * 6.6, c[1] + math.sin(a) * 6.6
+        skin(m, f'tooth_{k}', G, 4.6, (x - 0.9, y - 0.8, -1.4), (x + 0.9, y + 0.8, 1.4), rot=math.degrees(a), pivot=(x, y))
+    skin(m, 'gear_face', S, 7, (c[0] - 4, c[1] - 4, -0.9), (c[0] + 4, c[1] + 4, 0.9))
+    gem(m, 'hub', c, 3, 2)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        path(m, f'blade_{n}', S, 6.5, [(sd * 2.2, 13), (sd * 4.2, 19), (sd * 2.4, 36), (0, 50)], [3.0, 2.6, 2.0], [0.9, 0.85, 0.7], edge, dt=0.6)
-        bar(m, f'rim_{n}', G, 4, (sd * 1.5, 14), (sd * 1.2, 34), 0.9, 1.05)
-        bar(m, f'barb_{n}', G, 4.2, (sd * 3.8, 21), (sd * 7.6, 17), 1.8, 0.8, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, G, 6)))
-        bar(m, f'barb_{n}_tip', G, 5, (sd * 7.2, 17.4), (sd * 9, 14.8), 0.9, 0.6)
-    skin(m, 'body', S, 6, (-2.6, 12.4, -0.6), (2.6, 34, 0.6))
-    bar(m, 'body_tip', S, 7, (0, 33.5), (0, 47), 2.6, 0.6)
-    skin(m, 'window', K, 2.5, (-0.9, 15, -0.8), (0.9, 33, 0.8), fm(lambda sp, f, w, h: sp.rect(w / 2 - 0.5, 1, w / 2 + 0.5, h - 1, D, 3.5)))
-    skin(m, 'base_bar', G, 3.4, (-4, 11.8, -1.3), (4, 13.6, 1.3))
-    # 秒針: 文字盤の軸から刃を斜めに貫き、鋭く前へ
-    bar(m, 'second_hand', D, 3.5, (-2.5, 4), (5.5, 30), 0.8, 1.9, glow=True)
-    bar(m, 'second_hand_tip', D, 5, (5.3, 29.4), (6.6, 34), 0.45, 1.9, glow=True)
+        path(m, f'minute_{n}', S, 6.5, [(sd * 1.8, 13), (sd * 1.4, 33), (sd * 4.4, 39), (sd * 1.2, 45), (0, 56)],
+             [2.2, 1.8, 1.8, 1.6], 0.8, EDGE, dt=0.4)
+    skin(m, 'minute_core', S, 6, (-1.6, 12.5, -0.6), (1.6, 34, 0.6), fm(lambda sp, f, w, h: sp.rect(w / 2 - 0.5, 0, w / 2 + 0.5, h, G, 5)))
+    skin(m, 'float_spade', K, 2.5, (-1.8, 37.2, -0.7), (1.8, 40.8, 0.7), rot=45, pivot=(0, 39))
+    skin(m, 'float_spade_light', D, 4, (-0.7, 38.3, -0.8), (0.7, 39.7, 0.8), rot=45, pivot=(0, 39), glow=True)
+    path(m, 'hour', S, 6, [(-2.6, 11), (-9, 22), (-12.4, 27)], [2.6, 1.8], 0.7, EDGE, dt=0.6)
+    bar(m, 'hour_rim', G, 4, (-3.2, 11.6), (-9.2, 21.6), 0.8, 0.85)
+    bar(m, 'second', D, 3.5, (2, 9.5), (13, 26), 0.7, 0.9, glow=True)
+    bar(m, 'second_tail', D, 3, (-0.5, 6), (2.4, 10), 0.7, 0.9, glow=True)
     return big(m, 1.5, 1.3, 1.3)
 
 
@@ -788,3 +782,4 @@ if __name__ == '__main__':
     for fn in ALL:
         if not want or fn.__name__ in want:
             fn().build('.')
+
