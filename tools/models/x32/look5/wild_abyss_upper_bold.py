@@ -77,53 +77,66 @@ def wild_bonestring_bow():
 
 
 def wild_lantern_bow():
-    """提灯の弓（エピック）: 坑道の鉄の弓。握りの上下に塩の結晶の鍔板、握りの前に塩晶の房が咲き、芯に灯がともる。
-    弓腕の背には塩の縁取りが通り、腕の中ほどに結晶の棘が二本ずつ。上の弓腕の先から角灯が下がり、下の先は塩の結晶の飾り"""
+    """提灯の弓（エピック）: 坑道の鉄の太い弓。握りの前に塩の結晶の房が大きく咲き、芯に灯がともる。弓腕は節ごとに塩の帯で締め、
+    背には塩の縁取りと結晶の棘が三本ずつ。上の弓腕の先から屋根付きの角灯が下がり、火の粉が二つ舞い上がる。下の先は塩の結晶の房"""
     m = M('wild_lantern_bow')
-    bow_grip(m)
-    for k, y in enumerate((8.75, 20.25)):
-        m.box(f'riser_{k}', T, [9.9, y, -1.9], [14.1, y + 1, 1.9], 3 + k)
-    diamond(m, 'guard_salt', T, (14.5, 15), 3, 2.4, 3, 5)
-    diamond(m, 'guard_salt_s', T, (15.5, 17.25), 1.75, 1.6, 4, 5)
-    diamond(m, 'guard_salt_t', T, (15.25, 12.75), 1.5, 1.4, 4, 5)
-    m.box('guard_glow', L, [14.9, 14.4, -0.5], [15.6, 15.6, 0.5], 4)
-    arm = [(12, 19.5), (11.5, 27), (10, 34), (7.75, 39.5), (5.5, 43)]
+    m.box('grip', H, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for k, y in enumerate((8.25, 20.5)):
+        m.box(f'riser_{k}', T, [9.6, y, -2.3], [14.4, y + 1.25, 2.3], 3 + k)
+    diamond(m, 'guard_salt', T, (15.25, 15), 4.25, 2.2, 3, 5)
+    diamond(m, 'guard_glow', L, (15.25, 15), 2.25, 2.45, 3, 5)
+    diamond(m, 'guard_salt_s', T, (16.75, 18.25), 2.5, 1.7, 4, 5)
+    diamond(m, 'guard_salt_t', T, (16.5, 11.75), 2.25, 1.6, 4, 5)
+    m.seg('guard_spike', T, (16.5, 15), (20, 15.5), 1.75, 1.1, 4, 5, tip=True)
+    arm = [(12, 20), (11.5, 27), (10, 34), (7.75, 39.5), (5.5, 43)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', H, [mirror(p, sign) for p in arm], [3, 2.5, 2.25, 1.75], 1.2, 5, 8, tip=False)
-        m.chain(f'trim_{n}', T, [mirror((p[0] + 1.45 - k * 0.1, p[1]), sign) for k, p in enumerate(arm[:4])], [0.7, 0.7, 0.6], 1.35, 3, 5, tip=False)
-        for k, (x, y) in enumerate(((12.75, 28.5), (11.25, 33.5))):
-            q = mirror((x, y), sign)
-            m.seg(f'spike_{n}{k}', T, q, (q[0] + 2.25, q[1] + sign * 1.5), 1.2, 1, 4, 5, tip=True)
-        if sign < 0:
-            diamond(m, 'crust_d', T, (5.75, -12.5), 2.5, 1.6, 3, 5)
-            diamond(m, 'crust_d2', T, (4.5, -11.25), 1.5, 1.3, 4, 5)
-            continue
-        m.box('hook_u', H, [5.25, 42.5, -0.25], [11.9, 43.1, 0.25], 6)
-        m.box('chain_u', H, [11.3, 41.75, -0.2], [11.7, 42.5, 0.2], 5)
-        m.box('cage_u', H, [10.4, 39.5, -1.1], [12.6, 41.75, 1.1], 6)
-        m.box('cage_roof_u', T, [10.15, 41.75, -1.3], [12.85, 42.25, 1.3], 4)
-        m.box('cage_floor_u', H, [10.15, 39, -1.3], [12.85, 39.5, 1.3], 7)
-        m.box('light_u_glow', L, [10.75, 39.75, -1.2], [12.25, 41.5, 1.2], 4)
-        diamond(m, 'crown_u', T, (5.25, 44.25), 1.75, 1.4, 4, 5)
+        P = lambda q, sign=sign: mirror(q, sign)
+        m.chain(f'arm_{n}', H, [P(q) for q in arm], [3.75, 3.25, 2.75, 2.25], 1.5, 5, 8, tip=False)
+        m.chain(f'trim_{n}', T, [P((q[0] + 1.75 - k * 0.15, q[1])) for k, q in enumerate(arm[:4])], [0.9, 0.85, 0.75], 1.6, 3, 5, tip=False)
+        for k in (1, 2, 3):
+            (x0, y0), (x1, y1) = arm[k - 1], arm[k + 1]
+            L0 = math.hypot(x1 - x0, y1 - y0)
+            px, py = -(y1 - y0) / L0, (x1 - x0) / L0
+            c = arm[k]
+            hw = (2.4, 2.1, 1.8)[k - 1]
+            m.seg(f'band_{n}{k}', T, P((c[0] - px * hw, c[1] - py * hw)), P((c[0] + px * hw, c[1] + py * hw)), 1.25, 1.75, 3, 4, over=0)
+        for k, (x, y, ln) in enumerate(((13.25, 25, 3.5), (12.25, 31, 3.5), (10.5, 36.5, 3))):
+            q = P((x, y))
+            m.seg(f'spike_{n}{k}', T, q, (q[0] + ln, q[1] + sign * ln * 0.55), 1.6, 1.1, 4, 5, tip=True)
+    m.chain('tip_u', H, [(5.5, 43), (4.5, 44.75)], [1.75], 1.2, 7, 8, tip=False)
+    diamond(m, 'crown_u', T, (5, 45.25), 2.25, 1.5, 4, 5)
+    m.box('hook_u', H, [5.5, 43.6, -0.3], [13.4, 44.3, 0.3], 6)
+    m.box('chain_u', H, [12.55, 42.25, -0.25], [13.05, 43.6, 0.25], 5)
+    m.box('cage_roof_u', T, [10.6, 41.5, -2], [15, 42.25, 2], 4)
+    m.box('cage_peak_u', T, [11.6, 42.25, -1.25], [14, 42.75, 1.25], 5)
+    m.box('cage_u', H, [11, 37.25, -1.6], [14.6, 41.5, 1.6], 6)
+    m.box('light_u_glow', L, [11.4, 37.75, -1.85], [14.2, 41, 1.85], 4)
+    m.box('cage_floor_u', H, [10.6, 36.5, -2], [15, 37.25, 2], 7)
+    diamond(m, 'ember_a_glow', L, (14.5, 46), 1.25, 0.6, 4, 5)
+    diamond(m, 'ember_b_glow', L, (16.25, 48.75), 0.9, 0.45, 4, 5)
+    diamond(m, 'crust_d', T, (5.75, -13), 3.25, 1.8, 3, 5)
+    diamond(m, 'crust_d2', T, (4.25, -11), 2, 1.4, 4, 5)
+    m.seg('crust_spike', T, (6.5, -14), (8.25, -18.25), 1.6, 1.1, 4, 5, tip=True)
     strings(m, (4.5, 43.25), (4.5, -13.25))
     return m
 
 
 def wild_saltcrow_bow():
-    """塩鴉の弓: 鴉の黒い翼の弓腕。羽根先（弓腕の先）が塩の結晶に覆われて白く、上の結晶だけ灯を宿す。
-    握りには鴉の頭蓋の飾り"""
+    """塩鴉の弓（レア）: 鴉の黒い翼の太い弓腕。背に風切羽が四枚ずつ重なり、羽根先（弓腕の先）が塩の結晶に覆われて白い。
+    上の結晶だけ灯を宿す。握りの前に塩の白い鴉の頭蓋"""
     m = M('wild_saltcrow_bow')
-    bow_grip(m)
-    m.box('skull', T, [13.25, 17, -1.25], [15.25, 19.5, 1.25], 4)
-    m.seg('beak', T, (15.25, 18.5), (17.25, 17.5), 1.25, 0.8, 4, 5, tip=True)
+    m.box('grip', H, [10.25, 9.5, -1.75], [13.75, 20.5, 1.75], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    m.box('skull', T, [13.5, 16.25, -1.6], [16.25, 19.75, 1.6], 4)
+    m.box('eye', H, [15.25, 18, -1.7], [16, 18.75, 1.7], 1)
+    m.seg('beak', T, (16.25, 18.75), (19.25, 17.25), 1.6, 1, 4, 5, tip=True)
     arm = [(12, 19.5), (10.75, 27), (9, 33.5), (6.75, 39), (4.5, 42.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'wing_{n}', H, [mirror(p, sign) for p in arm], [3.25, 3, 2.5, 2], 1.1, 2, 4, tip=False)
-        for k, (x, y) in enumerate(((11, 24.5), (9.5, 30.5), (7.5, 36))):
-            m.seg(f'pinion_{n}{k}', H, mirror((x, y), sign), mirror((x + 2.75, y - 2.25), sign), 1.5, 0.6, 3, 5, tip=True)
+        m.chain(f'wing_{n}', H, [mirror(p, sign) for p in arm], [3.75, 3.25, 2.75, 2.25], 1.4, 2, 4, tip=False)
+        for k, (x, y, ln) in enumerate(((11.5, 23.5, 4), (10.5, 28.5, 4.5), (9.25, 33, 4.5), (7.5, 37.5, 3.75))):
+            m.seg(f'pinion_{n}{k}', H, mirror((x, y), sign), mirror((x + ln, y - ln * 0.75), sign), 2, 0.7, 3, 5, tip=True)
         tip = mirror((4.5, 42.5), sign)
         mat = L if sign > 0 else T
-        diamond(m, f'crust_{n}' + ('_glow' if sign > 0 else ''), mat, (tip[0] - 0.25, tip[1] + sign * 0.75), 2.5, 1.5, 4, 5)
+        diamond(m, f'crust_{n}' + ('_glow' if sign > 0 else ''), mat, (tip[0] - 0.25, tip[1] + sign * 0.75), 3, 1.6, 4, 5)
     strings(m, (3.75, 42.75), (3.75, -12.75))
     return m
 

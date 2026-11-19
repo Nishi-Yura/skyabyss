@@ -14,6 +14,7 @@ from lib import Model  # noqa: E402
 lib.RAMPS.update({
     'nimbus': ['#2a3446', '#3a465c', '#4c5a72', '#606e88', '#76849e', '#8e9cb4', '#a8b4c8', '#c2ccdc', '#dce2ec', '#f2f5fa'],
     'gilt': ['#5a4420', '#86682e', '#b08e44', '#d2b264', '#ecd290', '#fcf0c8'],
+    'sky': ['#101c3c', '#18295a', '#22397c', '#2e4c9c', '#4064bc', '#5880d4'],
     'azure': ['#0c3a7a', '#1660b0', '#2a8ce0', '#5cb8f8', '#a4dcff', '#e6f6ff'],
 })
 N, G, Z = 'nimbus', 'gilt', 'azure'
@@ -58,31 +59,45 @@ def strings(m, top, bot):
 
 
 def wild_skylark_bow():
-    """雲雀の弓（ヒロイック）: 弓腕が大きく広げた雲雀の翼。腕の背に長短二列の風切羽が重なって後ろへ流れ、羽根の先は金。
-    腕の外縁を金の縁取りが走り、握りの背からは金の小翼が上下に開く。握りの前に空の青の宝玉、両端の先にも青い光の羽先。
-    握りの下から金の飾り紐が垂れる"""
+    """雲雀の弓（ヒロイック）: 両端に雲雀の翼が大きく扇に開く弓。白い風切羽が五枚ずつ外へ広がり、羽先は金、
+    その間から青い内羽がのぞく。翼の先には空の青の光のかけらが離れて舞う。弓腕は白の太い節を金の菱の留め具でつなぎ、
+    握りの背には金の日輪と大きな青い宝玉、日輪から金の小翼が上下へ伸びる。握りの下から青い飾り紐がなびく"""
     m = M('wild_skylark_bow')
-    m.box('grip', N, [10.5, 10, -1.5], [13.5, 20, 1.5], grad=(10, 4, 20, 6), wrap=(10, 20))
-    for k, y in enumerate((9.25, 20)):
-        m.box(f'grip_cap_{k}', G, [10.2, y, -1.8], [13.8, y + 0.75, 1.8], 4)
-    m.box('gem_seat', G, [13.4, 13.5, -1.4], [14.4, 16.5, 1.4], 3)
-    diamond(m, 'gem_glow', Z, (15, 15), 3, 2, 3, 5)
-    arm = [(12, 19.5), (11, 27), (9.25, 34), (7, 39.5), (4.75, 43.5)]
+    m.box('grip', 'sky', [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for k, y in enumerate((8.25, 20.5)):
+        m.box(f'grip_cap_{k}', G, [9.75, y, -2.4], [14.25, y + 1.25, 2.4], 3 + k)
+    diamond(m, 'sun', G, (17.25, 15), 8, 1.5, 3, 5)
+    diamond(m, 'sun_rim', 'sky', (17.25, 15), 5.5, 1.75, 2, 3)
+    diamond(m, 'gem_glow', Z, (17.25, 15), 3.5, 2.1, 3, 5)
+    m.seg('sun_ray', G, (21.5, 15), (24.5, 15), 1.5, 1, 4, 5, tip=True)
+    arm = [(12, 20.5), (11.25, 27.5), (9.75, 34), (7.5, 39.5), (5, 43.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', N, [mirror(p, sign) for p in arm], [3.25, 2.75, 2.25, 1.75], 1.3, 5, 8, tip=False)
-        m.chain(f'edge_{n}', G, [mirror((p[0] + 1.6 - k * 0.15, p[1]), sign) for k, p in enumerate(arm[:4])], [0.75, 0.7, 0.6], 1.45, 3, 5, tip=False)
-        m.chain(f'winglet_{n}', G, [mirror(p, sign) for p in ((13.5, 17.5), (16.5, 19.5), (19, 23), (19.75, 26.5))], [2.5, 2, 1.25], 0.9, 3, 5, tip=True)
-        for k, (x, y, ln) in enumerate(((11.75, 23.5, 7.5), (10.25, 29.5, 8.5), (8.5, 35, 7.5), (6.5, 39.5, 5.5))):
-            a, b = mirror((x, y), sign), mirror((x + ln, y - ln * 0.45), sign)
-            m.seg(f'quill_{n}{k}', N, a, b, 2.5, 0.8, 6, 8, tip=False)
-            m.seg(f'quill_tip_{n}{k}', G, b, (b[0] + 1.75, b[1] - sign * 1), 2, 0.8, 4, 5, tip=True)
-        for k, (x, y) in enumerate(((11, 26.5), (9.25, 32.5), (7.25, 37.5))):
-            a = mirror((x, y), sign)
-            m.seg(f'covert_{n}{k}', N, a, mirror((x + 3.25, y - 1.5), sign), 2, 0.6, 7, 9, tip=True, zc=0.35)
-        m.chain(f'tip_{n}', G, [mirror(p, sign) for p in ((4.75, 43.5), (3.25, 45.5), (4.25, 47.5))], [1.4, 1.1], 0.9, 4, 5, tip=False)
-        diamond(m, f'tip_glow_{n}', Z, mirror((4.75, 48), sign), 1.5, 1.1, 4, 5)
-    m.chain('tassel', G, [(12.75, 9.25), (13.75, 6.5), (13.25, 3.5)], [0.6, 0.6], 0.6, 3, 4, tip=False)
-    diamond(m, 'tassel_bead', Z, (13.25, 2.75), 1.25, 1.25, 4, 5)
+        P = lambda q: mirror(q, sign)
+        m.chain(f'brace_{n}', G, [P((15.5, 18.5)), P((19, 21)), P((21.25, 24.75))], [2.25, 1.5], 1, 3, 5, tip=True)
+        m.chain(f'arm_{n}', N, [P(q) for q in arm], [4, 3.5, 3, 2.5], 1.6, 6, 9, tip=False)
+        for k, sz in ((1, 3.75), (2, 3.5), (3, 3)):
+            diamond(m, f'node_{n}{k}', G, P(arm[k]), sz, 1.9, 3, 5)
+        diamond(m, f'node_gem_{n}', 'sky', P(arm[2]), 1.75, 2.15, 4, 5)
+        for k, (r, ang, ln, w) in enumerate((((9, 36.5), -8, 14.5, 3.5), ((8.25, 39), 12, 17, 3.5), ((7.25, 41.25), 32, 18, 3.25),
+                                             ((6, 43), 52, 16, 3), ((4.75, 44.5), 72, 12, 2.75))):
+            dx, dy = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+            e = (r[0] + dx * ln * 0.78, r[1] + dy * ln * 0.78)
+            f = (r[0] + dx * ln, r[1] + dy * ln)
+            m.seg(f'quill_{n}{k}', N, P(r), P(e), w, 0.7, 6, 9, over=0.3, zc=0.35)
+            m.seg(f'quill_tip_{n}{k}', G, P(e), P(f), w * 0.85, 0.65, 4, 5, tip=True, zc=0.35)
+            if k < 4:
+                a2 = ang + 10
+                g = (r[0] + math.cos(math.radians(a2)) * ln * 0.6, r[1] + math.sin(math.radians(a2)) * ln * 0.6)
+                m.seg(f'down_{n}{k}', 'sky', P(r), P(g), 2, 0.6, 3, 5, tip=True, zc=-0.55)
+        for k, (ang, ln) in enumerate(((2, 19), (22, 21.5), (42, 21.5), (62, 18.5))):
+            dx, dy = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+            o = (7.75, 39.5)
+            m.seg(f'shard_{n}{k}_glow', Z, P((o[0] + dx * ln, o[1] + dy * ln)), P((o[0] + dx * (ln + 3.25), o[1] + dy * (ln + 3.25))),
+                  0.9, 0.45, 3, 5, over=0)
+        m.chain(f'tip_{n}', G, [P(q) for q in ((5, 43.5), (3.25, 45.5), (4.25, 47.5))], [2, 1.5], 1.2, 4, 5, tip=False)
+        diamond(m, f'tip_glow_{n}', Z, P((4.25, 48.25)), 2, 1.3, 4, 5)
+    m.chain('ribbon', 'sky', [(13, 8.25), (15.25, 5.25), (14.25, 2.25), (16.5, -0.75), (16, -3.75)], [1.75, 1.75, 1.5, 1.25], 0.35, 3, 5, tip=False)
+    diamond(m, 'ribbon_end', G, (16, -4.5), 1.75, 0.6, 4, 5)
     strings(m, (3.25, 45.5), (3.25, -15.5))
     return m
 
