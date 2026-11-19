@@ -14,6 +14,7 @@ from lib import Model  # noqa: E402
 lib.RAMPS.update({
     'void': ['#0c0a12', '#16131e', '#221e2c', '#302a3c', '#40384e', '#524862', '#665a78', '#7e7090', '#988aa8', '#b4a8c2'],
     'abone': ['#3e3a34', '#5e584e', '#827a6c', '#a69e8e', '#c8c0b0', '#e6e0d2'],
+    'fin': ['#0a2a30', '#0f3c44', '#165058', '#1e666e', '#2a7e84', '#3a989a'],
     'deep': ['#0e4a4a', '#147070', '#1e9a96', '#3cc4bc', '#86e8dc', '#d4fff6'],
 })
 V, B, G = 'void', 'abone', 'deep'
@@ -214,18 +215,44 @@ def abyss_whale_fang():
 
 
 def abyss_whale_bow():
-    """鯨ひげの弓: 腕は鯨のひげ板を重ねた暗い板（腕に沿って斜めの板が並ぶ）、握りは骨"""
+    """鯨ひげの弓（伝説）: 太く反った淵の岩の弓腕。腕の腹（弦の側）から鯨ひげの板が櫛のように垂れ下がって弓の懐を埋める。
+    上の先は大きな鯨の尾びれ、下の先は骨の銛の穂先。握りの前には骨の頭骨の殻が張り出し、その潮吹きの穴から淵の光の
+    しぶきが上へ噴き上がって浮かぶ。弦には骨の椎骨の玉が並ぶ"""
     m = M('abyss_whale_bow')
-    bow_grip(m)
-    arm = [(12, 21), (13, 27), (12.75, 33), (11, 38.5), (8, 43), (5, 45.5)]
+    m.box('grip', B, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', V, [9.75, y, -2.4], [14.25, y + 1.5, 2.4], 4)
+    m.box('skull', B, [13.5, 10.5, -2.5], [19.5, 19, 2.5], grad=(10.5, 2, 19, 5))
+    m.box('skull_brow', B, [15, 19, -2], [20, 20.5, 2], 5)
+    m.seg('jaw', B, (18.5, 11.5), (23.5, 13), 2.25, 1.9, 3, 4, tip=True)
+    m.seg('spout_glow', G, (16.6, 20.5), (19.5, 26), 1.25, 0.6, 3, 5, over=0.2)
+    m.box('blowhole', V, [15.75, 20, -0.9], [17.4, 20.75, 0.9], 1)
+    for k, (x, y, s) in enumerate(((17.5, 26.5, 2.25), (19.5, 28.25, 1.75), (22, 27.5, 1.75), (18.5, 31, 1.4), (23.25, 30.75, 1.4), (20.75, 31.5, 1.6), (20, 34.5, 1), (24, 34, 1), (16.75, 29.5, 1.1))):
+        diamond(m, f'spray_{k}_glow', G, (x, y), s, 0.6, 4, 5)
+    arm = [(12, 21), (13.5, 27), (13.25, 33), (11.5, 38.5), (8.5, 43), (5, 46)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'arm_{n}', V, pts, [3, 2.75, 2.5, 2.25, 2], 1.2, 3, 6, tip=False)
-        for k in range(1, 5):
-            x, y = pts[k]
-            m.seg(f'plate_{n}{k}', V, (x + 0.5, y), (x + 4 - k * 0.5, y - sign * 2), 2, 0.4, 5, 7, tip=True)
-        m.seg(f'nock_{n}', B, mirror((6.5, 45.25), sign), mirror((3, 45.25), sign), 2, 1, 4, 5)
-    strings(m, (3.5, 45.5), (3.5, -15.5))
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'arm_{n}', V, pts, [4.25, 4, 3.5, 3, 2.5], 1.6, 3, 6, tip=False)
+        m.chain(f'ridge_{n}', B, [P((q[0] + 1.9 - k * 0.15, q[1])) for k, q in enumerate(arm[1:5])], [0.8, 0.8, 0.7], 1.75, 3, 5, tip=False)
+        for k, (x, y, ln) in enumerate(((12, 25.5, 5), (11.75, 29, 5.75), (11.5, 32.5, 6), (10.75, 35.75, 5.75), (9.5, 39, 5), (7.75, 42, 3.75))):
+            a, b = P((x, y)), P((x - ln * 0.62, y - ln * 0.78))
+            m.seg(f'baleen_{n}{k}', V, a, b, 1.5, 1.2, 5 + k % 2, 8, tip=True, over=0.3)
+    # 上の先: 鯨の尾びれ
+    m.chain('fluke_stem', V, [(5, 46), (5.5, 48.5)], [2.25], 1.3, 5, 6, tip=False)
+    m.chain('fluke_l', V, [(5.5, 48.5), (1.5, 51.5), (-3.5, 52.5)], [3.5, 2.5], 1.1, 5, 7, tip=True)
+    m.chain('fluke_r', V, [(5.5, 48.5), (9.5, 51.75), (14.5, 53)], [3.5, 2.5], 1.1, 5, 7, tip=True)
+    m.chain('fluke_edge', B, [(-3, 53.5), (1.5, 53), (5.5, 50.5), (9.5, 53.25), (14, 54.25)], [0.8, 0.8, 0.8, 0.8], 1.15, 4, 5, tip=False)
+    # 下の先: 骨の銛の穂先
+    m.chain('harpoon', B, [(5, -16), (5.75, -19), (5, -23)], [2.25, 1.75], 1.1, 4, 5, tip=True)
+    m.seg('barb_0', B, (5.5, -20), (8, -18.25), 1.1, 0.8, 4, 5, tip=True)
+    m.seg('barb_1', B, (5.25, -20.5), (2.75, -18.75), 1.1, 0.8, 4, 5, tip=True)
+    top, bot = (3.5, 46.5), (3.5, -16.5)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((42, 38.5, 35, -5, -8.5, -12)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_vert{k}', B, [q[0] - 0.9, q[1] - 0.75, -0.9], [q[0] + 0.9, q[1] + 0.75, 0.9], 4 + k % 2)
     return m
 
 
@@ -286,19 +313,44 @@ def abyss_tide_dagger():
 
 
 def abyss_tide_bow():
-    """鰭の弓: 大魚の鰭の骨（細い軸が扇に開く）と間に張った膜。腕の外側に鰭が広がる"""
+    """鰭の弓（伝説）: 骨の弓腕の先が外へ跳ね返る反り弓。腕の背には大魚の背びれ（骨の軸が扇に開き、間に暗い膜）が
+    大きく立ち、握りの左右（奥行き）からは胸びれが大きく張り出す。握りの前に淵の光の鰓の筋が三本走り、
+    両端のまわりには淵の光の水の粒が浮かぶ。弦には鱗の玉が並ぶ"""
     m = M('abyss_tide_bow')
-    bow_grip(m)
-    arm = [(12, 21), (12.5, 27), (11.75, 33), (9.75, 38.5), (6.75, 43), (3.5, 46)]
+    m.box('grip', V, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', B, [9.75, y, -2.4], [14.25, y + 1.5, 2.4], 4)
+    m.box('gill_plate', B, [13.5, 11, -1.75], [15.5, 19, 1.75], grad=(11, 3, 19, 5))
+    for k, y in enumerate((12.5, 14.75, 17)):
+        m.seg(f'gill_{k}_glow', G, (15.25, y), (17.25, y + 0.75), 0.75, 1.1, 4, 5, over=0)
+    for zs, zn in ((1, 'f'), (-1, 'b')):
+        for k, (y0, y1, z0, z1) in enumerate(((12, 18, 2, 4.5), (12.5, 17.5, 4.5, 7), (13, 16.75, 7, 9.25), (13.5, 16, 9.25, 11))):
+            za, zb = (z0, z1) if zs > 0 else (-z1, -z0)
+            m.box(f'pec_{zn}{k}', V if k % 2 else B, [11, y0, za], [13, y1, zb], 3 + k * 0.5)
+    arm = [(12, 21), (12.5, 27), (11.5, 33), (9.25, 38.5), (6.25, 42.5), (5, 45.5), (6.75, 48)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'arm_{n}', B, pts, [2.5, 2.25, 2, 2, 1.75], 1, 3, 5, tip=False)
-        m.chain(f'membrane_{n}', V, [(x + 2.5, y) for x, y in pts[1:5]], [4, 4, 3.5], 0.3, 3, 5, tip=False)
-        for k in range(1, 5):
-            x, y = pts[k]
-            m.seg(f'ray_{n}{k}', B, (x + 0.5, y), (x + 5.5 - k * 0.6, y + sign * 0.5), 1, 0.5, 4, 5, tip=True)
-        m.seg(f'nock_{n}', B, mirror((5, 46.25), sign), mirror((2, 46.25), sign), 2, 1, 4, 5)
-    strings(m, (3, 46.25), (3, -16.25))
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'arm_{n}', B, pts, [3.25, 3, 2.75, 2.5, 2.25, 1.75], 1.3, 3, 5, tip=True)
+        rays = (((12.5, 25), 0, 7), ((12.5, 28.5), 12, 8.5), ((12, 32), 24, 9), ((10.75, 35.5), 38, 8.5), ((9, 38.75), 52, 7))
+        ends = []
+        for k, (r, ang, ln) in enumerate(rays):
+            e = (r[0] + math.cos(math.radians(ang)) * ln, r[1] + math.sin(math.radians(ang)) * ln)
+            ends.append(e)
+            m.seg(f'ray_{n}{k}', B, P(r), P(e), 1, 0.55, 4, 5, tip=True)
+        for k in range(len(rays) - 1):
+            (r0, _, _), (r1, _, _) = rays[k], rays[k + 1]
+            c = ((r0[0] + r1[0] + ends[k][0] + ends[k + 1][0]) / 4, (r0[1] + r1[1] + ends[k][1] + ends[k + 1][1]) / 4)
+            m.seg(f'membrane_{n}{k}', 'fin', P(((r0[0] + r1[0]) / 2, (r0[1] + r1[1]) / 2)), P(((ends[k][0] + ends[k + 1][0]) / 2 - 0.5, (ends[k][1] + ends[k + 1][1]) / 2)), 3.75, 0.35, 2, 5, over=0.2)
+        m.chain(f'fin_rim_{n}_glow', G, [P(e) for e in ends], [0.7] * 4, 0.45, 4, 5, tip=False)
+        for k, (x, y, s) in enumerate(((9.5, 49.5, 1.4), (12, 47.25, 1), (4, 51.5, 1.1), (11, 51.5, 0.8))):
+            diamond(m, f'drop_{n}{k}_glow', G, P((x, y)), s, 0.55, 4, 5)
+    top, bot = (6.25, 47.75), (6.25, -17.75)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((41, 36.5, 32, 27.5, -0.5, -5, -9.5)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            diamond(m, f'string_{key}_scale{k}', B if k % 2 else V, q, 1.5, 0.75, 4, 6)
     return m
 
 
@@ -512,19 +564,58 @@ def abyss_ember_dagger():
 
 
 def abyss_ember_bow():
-    """黒曜の弓: 腕は黒曜石の切子（角張った板）で、内側に熾火の芯（淵の光）が透ける"""
+    """黒曜の弓（伝説）: 黒曜石の切子の板を継いだ弓。上の弓腕は途中で割れて、割れたかけらが淵の光の熾火の芯に
+    支えられて宙に浮く。握りの前には大きな黒曜の結晶の房、左右（奥行き）には切子の棘が突き出す。
+    下の先は斜めに割れた黒曜の穂。弦は熾火の光の一本で、上下に黒曜の留め玉"""
     m = M('abyss_ember_bow')
-    bow_grip(m)
-    arm = [(12, 21), (12.75, 27), (12.25, 33), (10.25, 38.5), (7.25, 43), (4.5, 45.5)]
-    for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'arm_{n}', V, pts, [3.5, 3.25, 3, 2.75, 2.25], 1.4, 2, 5, tip=False)
-        m.chain(f'core_{n}_glow', G, [(x - 0.25, y) for x, y in pts[:4]], [1, 1, 1], 1.5, 2, 4, tip=False)
-        for k in (1, 3):
-            x, y = pts[k]
-            m.seg(f'facet_{n}{k}', V, (x + 1.5, y - 1), (x + 3, y + 1), 2, 1, 6, 7, tip=True)
-        m.seg(f'nock_{n}', B, mirror((6, 45.5), sign), mirror((2.5, 45.5), sign), 2, 1, 4, 5)
-    strings(m, (3, 45.5), (3, -15.5))
+    m.box('grip', V, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', B, [9.75, y, -2.4], [14.25, y + 1.5, 2.4], 4)
+    for k, (a, b, w) in enumerate((((13.5, 15), (24, 16.5), 4.25), ((13.5, 16.5), (21, 24), 3), ((13.5, 13.5), (21.25, 6.5), 3), ((14, 15.5), (19.5, 20.5), 2), ((14, 14), (19.75, 9.5), 2))):
+        m.seg(f'crystal_{k}', V, a, b, w, 1.7 - k * 0.15, 4, 8, tip=True)
+    for k, (x, y, s) in enumerate(((19, 33, 2.5), (16, 39.5, 2), (20.5, 41, 1.6), (11.5, 50.5, 2), (17.5, -3, 2.5), (14.5, -9.5, 2), (19.5, -11, 1.5))):
+        diamond(m, f'float_{k}', V, (x, y), s, 1, 5, 8)
+        diamond(m, f'float_{k}_glow', G, (x, y), s * 0.45, 1.1, 4, 5)
+    diamond(m, 'crystal_core_glow', G, (16, 15.25), 3, 1.85, 4, 5)
+    for zs, zn in ((1, 'f'), (-1, 'b')):
+        for k, (y, ln) in enumerate(((23.5, 5), (6.5, 4.5))):
+            z0 = 1.6 if zs > 0 else -1.6 - ln
+            m.box(f'side_spike_{zn}{k}', V, [11.25, y - 0.9, z0], [12.75, y + 0.9, z0 + ln], 5 + k)
+            m.box(f'side_spike_tip_{zn}{k}', V, [11.6, y - 0.5, z0 + ln if zs > 0 else z0 - 1.25], [12.4, y + 0.5, z0 + ln + 1.25 if zs > 0 else z0], 8)
+    arm = [(12, 21), (13, 27), (12.5, 33), (10.5, 38.5), (7.5, 43), (4.5, 46)]
+    pts = arm
+    # 上の弓腕: 割れて浮く切子（継ぎ目に光の芯）
+    for k in range(len(pts) - 1):
+        a, b = pts[k], pts[k + 1]
+        sh = 0.55 * k
+        dx, dy = (b[0] - a[0]), (b[1] - a[1])
+        L0 = math.hypot(dx, dy)
+        ux, uy = dx / L0, dy / L0
+        a2 = (a[0] + ux * 0.6 + sh * 0.6, a[1] + uy * 0.6)
+        b2 = (b[0] - ux * 0.6 + sh * 0.6, b[1] - uy * 0.6)
+        m.seg(f'shard_u{k}', V, a2, b2, [3.75, 3.5, 3.25, 2.75, 2.25][k], 1.5, 3 + k * 0.5, 6, over=0.1)
+        if k:
+            diamond(m, f'ember_u{k}_glow', G, (a[0] + sh * 0.55, a[1]), 1.75, 1.2, 4, 5)
+    m.chain('tip_u', V, [(6.7, 46), (5.5, 49.5)], [2], 1.1, 6, 8, tip=True)
+    # 下の弓腕: 継いだ切子、腹に光の筋
+    low = [mirror(p, -1) for p in pts]
+    m.chain('arm_d', V, low, [3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 3, 6, tip=False)
+    m.chain('core_d_glow', G, [(x - 1.2, y) for x, y in low[1:5]], [0.8, 0.8, 0.7], 1.55, 3, 5, tip=False)
+    for k in (1, 3):
+        x, y = low[k]
+        m.seg(f'facet_d{k}', V, (x + 1.5, y + 1), (x + 4.25, y - 1.5), 2.25, 1.2, 6, 8, tip=True)
+    m.chain('blade_d', V, [(5, -16), (7, -19.5), (4.75, -23)], [2.5, 1.75], 1.2, 5, 8, tip=True)
+    top, bot = (5.5, 47), (5.5, -16.5)
+    for key, pull in lib.PULLS:
+        if pull == 0:
+            m.box(f'string_{key}', G, [top[0] - 0.5, bot[1], -0.5], [top[0] + 0.5, top[1], 0.5], 4)
+        else:
+            mid = (top[0] - pull, 15)
+            m.seg(f'string_{key}_u', G, mid, top, 1, 0.5, 4, 4, over=0.2)
+            m.seg(f'string_{key}_d', G, bot, mid, 1, 0.5, 4, 4, over=0.2)
+        for k, y in enumerate((40, -9)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            diamond(m, f'string_{key}_stud{k}', V, q, 2, 1, 5, 7)
     return m
 
 
