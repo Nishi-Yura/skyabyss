@@ -310,17 +310,48 @@ def moon_waning_bow():
 
 
 def moon_starfall_bow():
-    """星落ちの弓: 先に星を灯した弓。銀の腕の先に四方へ尖る星が光り、星から腕へ尾が流れる（先ほど明るい）"""
+    """星落ちの弓（伝説）: 銀の弓腕の両端に四方へ尖る大きな星が灯り、星から弓腕へ月光の尾が流れる。
+    弓の背の外には、細い月光の糸でつながった星座の星々が弧を描いて浮かぶ。弓の懐には藍の三日月が弦の方を向いて抱かれ、
+    握りの左右（奥行き）には藍の小さな三日月の鰭。弦には銀の玉が並び、上から小さな星の飾りが下がる"""
     m = M('moon_starfall_bow')
     bow_grip(m)
-    arm = [(12, 21), (13, 27), (12.75, 33), (11, 38.5), (8, 43), (5, 45.5)]
+    arm = [(12, 21), (13.25, 27), (13, 33), (11.25, 38.5), (8.25, 43), (5, 45.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'arm_{n}', I, pts, [3.25, 3, 2.75, 2.5, 2.25], 1.3, 3, 7, tip=False)
-        m.chain(f'tail_{n}', L, [(x + 1.9, y) for x, y in pts[2:]], [1.5, 1.75, 2], 0.75, 1, 4, tip=False, zc=-0.7)
-        star(m, f'star_{n}', L, mirror((4.5, 47.5), sign), 3, 1.3, 3)
-        m.seg(f'nock_{n}', N, mirror((6, 45.25), sign), mirror((3, 45.25), sign), 2, 1.05, 2, 4)
-    strings(m, (3.5, 45.5), (3.5, -15.5))
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'arm_{n}', I, pts, [3.75, 3.5, 3.25, 2.75, 2.25], 1.45, 3, 7, tip=False)
+        m.chain(f'tail_{n}', L, [(x + 2.1, y) for x, y in pts[2:]], [1.5, 1.9, 2.25], 0.8, 1, 4, tip=False, zc=-0.7)
+        star(m, f'star_{n}', L, P((4.5, 48)), 4, 1.4, 3)
+        star(m, f'star_core_{n}', I, P((4.5, 48)), 1.6, 1.6, 8)
+        m.seg(f'nock_{n}', N, P((6, 45.25)), P((3, 45.25)), 2, 1.05, 2, 4)
+        # 背の外の星座（星を月光の糸でつなぐ）
+        cons = [(17, 22.5), (20.5, 27.5), (19.5, 33.5), (22.5, 38.5), (18.5, 43.5)]
+        for k in range(len(cons) - 1):
+            m.seg(f'thread_{n}{k}_glow', L, P(cons[k]), P(cons[k + 1]), 0.4, 0.25, 3, 4, over=0)
+        for k, q in enumerate(cons):
+            star(m, f'cstar_{n}{k}', L if k % 2 == 0 else I, P(q), 1.6 if k % 2 == 0 else 1.2, 0.6, 3 if k % 2 == 0 else 8)
+    # 懐の三日月（上の弓腕の腹から、弦の方を向く）
+    m.arc('crescent', N, (9.75, 30.5), 3.25, 110, 250, 5, [1.6, 1.9, 2.1, 1.9, 1.6], 0.9, 3, 5)
+    m.seg('crescent_hold', I, (10.5, 33.5), (12, 34), 1, 0.7, 6, 7)
+    m.arc('crescent_low', N, (9.75, -0.5), 3.25, 110, 250, 5, [1.6, 1.9, 2.1, 1.9, 1.6], 0.9, 3, 5)
+    m.seg('crescent_low_hold', I, (10.5, -3.5), (12, -4), 1, 0.7, 6, 7)
+    for zs, zn in ((1, 'f'), (-1, 'b')):
+        z0, z1 = (1.75, 5.25) if zs > 0 else (-5.25, -1.75)
+        m.box(f'fin_{zn}', N, [11, 21.5, z0], [13, 23, z1], 3)
+        z2 = (5.25, 6.5) if zs > 0 else (-6.5, -5.25)
+        m.box(f'fin_tip_{zn}', N, [11.25, 23, z2[0]], [12.75, 24.75, z2[1]], 4)
+        m.box(f'fin_d_{zn}', N, [11, 7, z0], [13, 8.5, z1], 3)
+        m.box(f'fin_d_tip_{zn}', N, [11.25, 5.25, z2[0]], [12.75, 7, z2[1]], 4)
+    top, bot = (3.5, 45.5), (3.5, -15.5)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((41, 37.5, -7.5, -11)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_bead{k}', I, [q[0] - 0.75, q[1] - 0.75, -0.75], [q[0] + 0.75, q[1] + 0.75, 0.75], 8)
+        q = lib.string_at(top, bot, pull, lib.string_t(top, bot, 34))
+        m.box(f'string_{key}_cord', N, [q[0] - 0.2, q[1] - 3, -0.2], [q[0] + 0.2, q[1], 0.2], 3)
+        m.seg(f'string_{key}_charm_v_glow', L, (q[0], q[1] - 5.5), (q[0], q[1] - 2.75), 1.1, 0.5, 4, 5, over=0)
+        m.seg(f'string_{key}_charm_h_glow', L, (q[0] - 1.4, q[1] - 4.1), (q[0] + 1.4, q[1] - 4.1), 1.1, 0.45, 4, 5, over=0)
     return m
 
 

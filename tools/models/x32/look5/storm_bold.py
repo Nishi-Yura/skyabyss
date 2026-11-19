@@ -24,6 +24,12 @@ lib.RAMPS.update({
 S, K, B = 'storm', 'copper', 'bolt'
 
 
+def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
+    """45 度に回した四角（菱）"""
+    h = s / (2 * math.sqrt(2))
+    m.seg(name, mat, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, d, t0, t1, over=0, zc=zc)
+
+
 def M(name):
     return Model(name, accent=K, glowmat=B)
 
@@ -219,17 +225,41 @@ def thunder_wing_bow():
 
 
 def storm_gale_bow():
-    """嵐の風弓: 弓腕の先が風の渦に巻き込み、腕から風の筋がたなびく。弦そのものが稲妻で光る"""
+    """嵐の風弓（伝説）: 太い嵐雲色の弓腕の先が大きな風の渦に巻き込む。弓腕のまわりを風の輪が二重に取り巻いて
+    （奥行きにも回る）、腕からは長い風の筋が後ろへたなびく。握りの前には銅の風見の羽根が三枚開き、
+    弦そのものは稲妻で光り、銅の風鈴の板が上下に二枚ずつ下がる"""
     m = M('storm_gale_bow')
-    bow_grip(m)
-    arm = [(12, 20.5), (14, 27), (14.5, 33), (13, 39), (10, 44), (6.5, 47)]
-    curl = [(6.5, 47), (3, 47.75), (0.75, 45.75), (1.25, 43), (3.5, 42.25)]
+    m.box('grip', S, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', K, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    m.box('vane_hub', K, [13.75, 13.75, -1], [15.75, 16.25, 1], 4)
+    for k, (e, w) in enumerate((((21.5, 15), 2.5), ((19.5, 20.5), 2), ((19.5, 9.5), 2))):
+        m.seg(f'vane_{k}', K, (15.5, 15), e, w, 0.55, 3, 5, tip=True)
+    diamond(m, 'vane_eye_glow', B, (14.75, 15), 1.25, 1.1, 4, 5)
+    arm = [(12, 20.5), (14.25, 27), (14.75, 33), (13.25, 39), (10.25, 44), (6.5, 47)]
+    curl = [(6.5, 47), (2.5, 48.25), (-0.5, 46), (0, 42.5), (3, 41.25), (5, 43)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', S, [mirror(p, sign) for p in arm], [3.5, 3, 3, 2.5, 2.5], 1.25, 3, 6, tip=False)
-        m.chain(f'curl_{n}', S, [mirror(p, sign) for p in curl], [2.5, 2, 2, 2], 1, 6, 9, tip=True)
-        m.chain(f'wisp_{n}', S, [mirror(p, sign) for p in ((14.5, 30), (18, 31.5), (20.5, 29.5), (23.5, 30.5))], 2, 0.4, 6, 9, tip=True)
-        m.seg(f'nock_{n}', K, mirror((7, 47), sign), mirror((4.5, 47), sign), 2, 1, 4, 5)
-    strings(m, (5, 47), (5, -17), mat=B)
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'arm_{n}', S, [P(q) for q in arm], [4, 3.5, 3.25, 2.75, 2.5], 1.45, 3, 6, tip=False)
+        m.chain(f'curl_{n}', S, [P(q) for q in curl], [3, 2.75, 2.5, 2, 1.75], 1.2, 6, 9, tip=True)
+        m.chain(f'curl_in_{n}_glow', B, [P(q) for q in ((1.25, 45.5), (1.5, 43.5), (3, 43))], [0.8, 0.7], 0.6, 4, 5, tip=True)
+        for k, (base, pts) in enumerate((((14.75, 30), [(18.5, 31.75), (21.5, 29.5), (25, 30.75), (27.5, 29.25)]),
+                                         ((13.75, 37), [(17, 39.25), (20, 37.5), (22.5, 38.5)]))):
+            m.chain(f'wisp_{n}{k}', S, [P(base)] + [P(q) for q in pts], [2.25, 1.9, 1.5, 1.1][:len(pts)], 0.4, 7, 9, tip=True)
+        # 腕を取り巻く風の輪（奥行きにも回る）
+        for r, (cx, cy) in enumerate(((14.6, 31), (12, 41.5))):
+            c = P((cx, cy))
+            R = 4.25 - r * 0.6
+            for j in range(8):
+                a = math.radians(j * 360 / 8 + r * 20)
+                x, z = c[0] + R * math.cos(a), R * math.sin(a)
+                m.box(f'ring_{n}{r}{j}', S if j % 2 else K, [x - 0.9, c[1] - 0.45 + j * 0.15 * sign, z - 0.9], [x + 0.9, c[1] + 0.45 + j * 0.15 * sign, z + 0.9], 7 if j % 2 else 4)
+    top, bot = (5, 47), (5, -17)
+    strings(m, top, bot, mat=B)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((39, 35, -5, -9)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_chime{k}', K, [q[0] - 0.9, q[1] - 2.25, -0.25], [q[0] + 0.9, q[1], 0.25], 3 + k % 2)
     return m
 
 
