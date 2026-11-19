@@ -1,0 +1,291 @@
+# 月のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_tide_series.txt -PshotsName=gear_tide_series
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_hammer
+close
+wait 30
+chat clear
+shot fp_tide_hammer
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_reef_hammer
+close
+wait 30
+chat clear
+shot fp_tide_reef_hammer
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_reef_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_reef_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_shell_trident
+close
+wait 30
+chat clear
+shot fp_tide_shell_trident
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_shell_trident
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_shell_trident
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_harpoon
+close
+wait 30
+chat clear
+shot fp_coral_harpoon
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_coral_harpoon
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_coral_harpoon
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_staff
+close
+wait 30
+chat clear
+shot fp_tide_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl_staff
+close
+wait 30
+chat clear
+shot fp_tide_pearl_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_pearl_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_pearl_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bell_staff
+close
+wait 30
+chat clear
+shot fp_tide_bell_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_surf_bell_staff
+close
+wait 30
+chat clear
+shot fp_tide_surf_bell_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_surf_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_surf_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_dagger
+close
+wait 30
+chat clear
+shot fp_tide_dagger
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+close
+wait 30
+chat clear
+shot fp_waterway_fang
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_waterway_fang
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_waterway_fang
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
+close
+wait 30
+chat clear
+shot fp_tidecaller_claw
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tidecaller_claw
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tidecaller_claw
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+close
+wait 30
+chat clear
+shot fp_coral_shield
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_coral_shield
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_coral_shield
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bow
+close
+wait 30
+chat clear
+shot fp_tide_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_coral_bow
+close
+wait 30
+chat clear
+shot fp_tide_coral_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_coral_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_coral_bow
