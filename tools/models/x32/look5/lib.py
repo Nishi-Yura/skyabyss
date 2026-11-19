@@ -334,3 +334,19 @@ def near_line(p, pts):
             best = (d, (acc + s) / tot)
         acc += l
     return best
+
+
+def line_normals(pts):
+    """折れ線の各点の法線（進む向きの右手側。上へ伸びる弓腕なら +x 側）"""
+    out = []
+    for i in range(len(pts)):
+        a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+        ux, uy = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(ux, uy)
+        out.append((uy / L, -ux / L))
+    return out
+
+
+def offset_line(pts, d):
+    """折れ線を法線の向きへ d だけずらす（負なら弦の側）"""
+    return [(p[0] + n[0] * d, p[1] + n[1] * d) for p, n in zip(pts, line_normals(pts))]

@@ -146,39 +146,37 @@ def whale_bow():
 
 
 def whale_rib_longbow():
-    """肋骨の籠（伝説）: 長い骨の背骨の弓腕から、外へ肋骨が何本も弧を描いて出て籠をなす。肋骨は背だけでなく
-    左右（奥行き）にも張り出し、籠の中には鯨の心臓の光の塊が浮かぶ。肋骨の先は深海の光で光り、
-    握りの左右には深海の光の結晶。下の先からは骨の尾びれが垂れる。弦には椎骨の玉が連なる"""
-    from whale_series import bow_body
+    """肋骨の籠（伝説）: 上下の弓腕がそれぞれ一頭の鯨。握りの近くが太い胴で、先へ細って弓の先で尾びれが横（奥行き）に開く。
+    背は深い海の色、腹は骨の白で、腹には畝の筋が二本。背には深海の光の斑点が並び、目も光る。胴の脇から胸びれが一枚ずつ。
+    握りは骨に深海の光の結晶。弦には椎骨の玉が連なる"""
     m = Model('whale_rib_longbow')
-    bow_body(m, [(12, 21), (14, 28), (15, 35), (14.5, 41), (12, 45)], [(12, 45), (8, 48), (3, 49.5), (-1, 50)],
-             [3.75, 3.5, 3, 2.75], [3, 2.5, 2], thorns=False)
+    body = [(12, 21), (15, 27.5), (16, 34), (14.5, 40), (11, 44.5), (6, 47.5), (1.5, 49)]
+    back = lib.offset_line(body, 2.6)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        for k, (x, y, L) in enumerate(((14.5, 25, 8), (15.5, 31, 9.5), (15.5, 37, 8.5), (14.25, 42.5, 6.5))):
-            yy = 15 + sign * (y - 15)
-            a = (x, yy)
-            mid = (x + L * 0.6, yy + sign * L * 0.35)
-            b = (x + L * 0.75, yy + sign * L * 0.95)
-            m.seg(f'rib_{n}{k}_0', 'bone', a, mid, 2, 1, 3, 4.5)
-            m.seg(f'rib_{n}{k}_tip', 'glow', mid, b, 1.9, 0.95, 3, 5, tip=True)
+        P = lambda q, s=sign: (q[0], 15 + s * (q[1] - 15))
+        m.chain(f'body_{n}', 'sea', [P(q) for q in body], [7, 7.5, 6.5, 5, 3.5, 2], 2.0, 2, 4, tip=False)
+        m.chain(f'belly_{n}', 'bone', [P(q) for q in lib.offset_line(body, -2.6)[0:5]], [2.2, 2.4, 2, 1.5], 2.05, 4, 5, tip=False)
+        for j, d in enumerate((-2.0, -3.0)):
+            m.chain(f'groove_{n}{j}', 'sea', [P(q) for q in lib.offset_line(body, d)[0:5]], [0.35] * 4, 2.1, 2, 3, tip=False)
+        for k, t in enumerate((1, 2, 3, 4)):
+            q = P(back[t])
+            m.box(f'spot_{n}{k}_glow', 'glow', [q[0] - 0.45, q[1] - 0.45, -2.05], [q[0] + 0.45, q[1] + 0.45, 2.05], 4 + k % 2)
+        e = P((16.25, 25.5))
+        m.box(f'eye_{n}_glow', 'glow', [e[0] - 0.6, e[1] - 0.6, -2.1], [e[0] + 0.6, e[1] + 0.6, 2.1], 4)
         for zs, zn in ((1, 'f'), (-1, 'b')):
-            for k, (x, y) in enumerate(((14.75, 28), (15.25, 34), (14.75, 40))):
-                yy = 15 + sign * (y - 15)
-                z0 = 1.75 if zs > 0 else -1.75
-                for j in range(3):
-                    zz = z0 + zs * j * 1.75
-                    xo = x + j * 1.1
-                    m.box(f'zrib_{n}{zn}{k}{j}', 'bone', [xo - 0.75, yy - 0.8, min(zz, zz + zs * 1.9)], [xo + 0.75, yy + 0.8, max(zz, zz + zs * 1.9)], 3.5 + j * 0.4)
-        c = (24, 15 + sign * 14)
-        m.box(f'heart_{n}_glow', 'glow', [c[0] - 1.75, c[1] - 2, -1.75], [c[0] + 1.75, c[1] + 2, 1.75], grad=(c[1] - 2, 3, c[1] + 2, 5))
-        m.box(f'heart_vein_{n}', 'sea', [c[0] - 2.1, c[1] - 0.4, -2.1], [c[0] + 2.1, c[1] + 0.4, 2.1], 5)
+            q = P((13.5, 29))
+            m.box(f'flipper_{n}{zn}', 'sea', [q[0] - 1, q[1] - 2.25, min(zs * 1.9, zs * 4.25)], [q[0] + 1, q[1] + 1, max(zs * 1.9, zs * 4.25)], 3)
+            m.box(f'flipper_edge_{n}{zn}', 'bone', [q[0] - 0.75, q[1] - 2.25, min(zs * 4.25, zs * 4.75)], [q[0] + 0.75, q[1] + 0.25, max(zs * 4.25, zs * 4.75)], 5)
+        f = P((1.5, 49))
+        m.seg(f'fluke_{n}c', 'sea', f, (f[0] - 1, f[1] + sign * 0.6), 2.2, 1.0, 4, 5, over=0.3)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            m.box(f'fluke_{n}{zn}', 'sea', [f[0] - 1.75, f[1] - 0.6, min(0, zs * 5)], [f[0] + 0.75, f[1] + 0.6, max(0, zs * 5)], 4)
+            m.box(f'fluke_tip_{n}{zn}', 'bone', [f[0] - 1.25, f[1] - 0.5, min(zs * 5, zs * 6.25)], [f[0] + 0.25, f[1] + 0.5, max(zs * 5, zs * 6.25)], 5)
     bow_grip(m, legend=True, gems=True)
-    m.seg('fluke_l', 'bone', (-1, -20), (-4.5, -23.5), 2.5, 1.1, 4, 5, tip=True)
-    m.seg('fluke_r', 'bone', (-1, -20), (2.5, -23.75), 2.5, 1.1, 4, 5, tip=True)
-    top, bot = (-1, 50), (-1, -20)
+    top, bot = (1, 48.5), (1, -18.5)
     strings(m, top, bot, list(lib.PULLS))
     for key, pull in lib.PULLS:
-        for k, y in enumerate((45, 41, 37, 33, -3, -7, -11, -15)):
+        for k, y in enumerate((44, 40, 36, 32, -2, -6, -10, -14)):
             q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
             m.box(f'string_{key}_vert{k}', 'bone', [q[0] - 0.9, q[1] - 0.75, -0.9], [q[0] + 0.9, q[1] + 0.75, 0.9], 4 + k % 2)
     return m
