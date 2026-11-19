@@ -1,0 +1,234 @@
+# 月のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_ember_series.txt -PshotsName=gear_ember_series
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+close
+wait 30
+chat clear
+shot fp_ember_war_axe
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_war_axe
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_war_axe
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_greatsword
+close
+wait 30
+chat clear
+shot fp_ember_greatsword
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_greatsword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_greatsword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_cinder_blade
+close
+wait 30
+chat clear
+shot fp_ember_cinder_blade
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_cinder_blade
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_cinder_blade
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_dagger
+close
+wait 30
+chat clear
+shot fp_ember_dagger
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_staff
+close
+wait 30
+chat clear
+shot fp_ember_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_kiln_staff
+close
+wait 30
+chat clear
+shot fp_ember_kiln_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_kiln_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_kiln_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer
+close
+wait 30
+chat clear
+shot fp_ember_censer
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_censer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_censer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer_bell_staff
+close
+wait 30
+chat clear
+shot fp_ember_censer_bell_staff
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_censer_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_censer_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_ash_knife
+close
+wait 30
+chat clear
+shot fp_ember_ash_knife
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_ash_knife
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_ash_knife
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_bow
+close
+wait 30
+chat clear
+shot fp_ember_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_flare_bow
+close
+wait 30
+chat clear
+shot fp_ember_flare_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_flare_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_flare_bow
