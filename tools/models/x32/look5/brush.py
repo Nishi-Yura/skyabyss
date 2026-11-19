@@ -22,6 +22,7 @@ def area(p):
     return abs(u1 - u0) * abs(v1 - v0)
 
 
+parts = [p for p in parts if p['mat'] != 'decal']
 tot = Counter()
 for p in parts:
     tot[p['mat']] += area(p)

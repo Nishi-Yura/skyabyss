@@ -44,6 +44,13 @@ class Model:
                                origin=[(frm[0] + to[0]) / 2, (frm[1] + to[1]) / 2, (frm[2] + to[2]) / 2], rot=0,
                                base=base, grad=grad, rim=rim, wrap=wrap, gem=gem, seg=None, tip=False, accent=self.accent))
 
+    def decal(self, name, pixels, frm, to):
+        """絵の板（厚みなし、z = frm[2]）。pixels は上の行から並べた (mat, tone) か None（透明）の格子。
+        表（south）にそのまま、裏（north）に左右を返して貼る。板の大きさと格子の数で絵の細かさが決まる"""
+        self.parts.append(dict(name=name, mat='decal', frm=list(frm), to=list(to),
+                               origin=[(frm[0] + to[0]) / 2, (frm[1] + to[1]) / 2, frm[2]], rot=0, base=0, grad=None,
+                               rim=False, wrap=None, gem=False, seg=None, tip=False, accent=self.accent, pix=pixels))
+
     def seg(self, name, mat, a, b, w, d, t0=3, t1=None, over=0.5, zc=0.0, tip=False, glow=None):
         """a から b へ伸びる回した節（幅 w、奥行き ±d）。色の段は a で t0、b で t1"""
         dx, dy = b[0] - a[0], b[1] - a[1]
@@ -78,6 +85,10 @@ class Model:
         out_dir = Path(out_dir)
         rects = []
         for e in self.parts:
+            if e.get('pix'):
+                ph, pw = len(e['pix']), len(e['pix'][0])
+                rects += [(ph, pw, e['name'], 'south'), (ph, pw, e['name'], 'north')]
+                continue
             dx, dy, dz = (max(1, math.ceil(e['to'][i] - e['frm'][i] - 1e-6)) for i in range(3))
             for face, (w, h) in {'south': (dx, dy), 'north': (dx, dy), 'east': (dz, dy), 'west': (dz, dy),
                                  'up': (dx, dz), 'down': (dx, dz)}.items():
@@ -120,6 +131,12 @@ def put(img, x, y, mat, t):
 def paint_face(img, e, face, rect):
     u0, v0, u1, v1 = rect
     w, h = u1 - u0, v1 - v0
+    if e.get('pix'):
+        for j, row in enumerate(e['pix']):
+            for i, px in enumerate(row):
+                if px:
+                    put(img, u0 + (i if face == 'south' else w - 1 - i), v0 + j, px[0], px[1])
+        return
     side = face in ('south', 'north', 'east', 'west')
     for i in range(w):
         for j in range(h):

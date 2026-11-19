@@ -6,7 +6,7 @@
 - 柄: 白い石の握りに金の細い帯を三本、柄頭は小さな金の輪（ループ）。
 - 振る武器は握りの真ん中を原点にする。杖・鈴杖は握り -14..2。弓は握りの中心 (12, 15)。
 - 光: 天穹の剣 = 樋の朝の光、羽の番人 = 面頬の目、七つ鐘 = 鐘の口の撞木、灰打ち = 胴の熱の継ぎ目、暁の灯杖 = 籠の中の目、
-  雲の瞼 = 瞳、巡礼の羽弓 = 握りの外の輪、霞鳥の弓 = 光なし、巻き戻り = 刃の残り火の縁、灯蛾 = 翅の紋、約束 = 四つの灯、鐘守 = 光なし。
+  雲の瞼 = 瞳、巡礼の羽弓 = 弓腕と握りの宝石の芯、霞鳥の弓 = 光なし、巻き戻り = 刃の残り火の縁、灯蛾 = 翅の紋、約束 = 四つの灯、鐘守 = 光なし。
 """
 import math
 import sys
@@ -283,75 +283,106 @@ def bow_grip(m):
         m.box(f'band_{n}', G, [10, y, -2.1], [14, y + 1.5, 2.1], 4)
 
 
+PLUME_PAL = {'W': (S, 9), 'w': (S, 7), 's': (S, 5), 'G': (G, 4), 'g': (G, 3)}
+
+
+def plume_along(pts, t):
+    """折れ線の上の点（t = 0..1）"""
+    L = [math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) for i in range(len(pts) - 1)]
+    d = t * sum(L)
+    for i, l in enumerate(L):
+        if d <= l or i == len(L) - 1:
+            f = min(d / l, 1)
+            return (pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f)
+        d -= l
+
+
+def plume_grid(arm, feathers, coverts, px=0.5):
+    """翼のドット絵を XY の格子に塗る。羽 = (t, 角度, 長さ, 幅)。羽は根元から先へ少し太り、先は尖って金。
+    先に並べた羽（弓の先の側）を、後の羽と雨覆いが上から重ねる"""
+    quads = []
+    for kind, lst in (('f', feathers), ('c', coverts)):
+        for i, (t, ang, ln, w) in enumerate(lst):
+            b = plume_along(arm, t)
+            d = (math.cos(math.radians(ang)), math.sin(math.radians(ang)))
+            quads.append((kind, i, (b[0] - d[0], b[1] - d[1]), d, ln + 1.0, w))
+    xs, ys = [], []
+    for _, _, b, d, ln, w in quads:
+        for s in (0, ln):
+            for p in (-w * 1.1, w * 1.1):
+                xs.append(b[0] + d[0] * s - d[1] * p)
+                ys.append(b[1] + d[1] * s + d[0] * p)
+    x0, y0 = math.floor(min(xs) / px) * px, math.floor(min(ys) / px) * px
+    W, H = int((max(xs) - x0) / px) + 2, int((max(ys) - y0) / px) + 2
+    grid = [['.'] * W for _ in range(H)]
+    for kind, i, b, d, ln, w in quads:
+        for r in range(H):
+            for c in range(W):
+                vx, vy = x0 + (c + 0.5) * px - b[0], y0 + (r + 0.5) * px - b[1]
+                s = vx * d[0] + vy * d[1]
+                p = -vx * d[1] + vy * d[0]
+                ww = w * (0.9 + 0.6 * max(s, 0) / ln)
+                if s < 0 or abs(p) > ww / 2 or s > ln - w * 1.6 * (abs(p) / (ww / 2)) ** 1.3:
+                    continue
+                if kind == 'c':
+                    ch = 'W' if p < ww / 2 - px else 's'
+                elif s / ln > 0.86:
+                    ch = 'g' if p > ww / 2 - px * 1.2 else 'G'
+                elif p > ww / 2 - px * 1.2:
+                    ch = 's'
+                else:
+                    ch = 'Ww'[i % 2]
+                grid[r][c] = ch
+    return grid, (x0, y0), px
+
+
+def plume_decal(m, name, grid, origin, px, sign, z):
+    """翼の格子を一枚の絵の板にする（sign = -1 は y=15 で鏡）"""
+    rows = [[PLUME_PAL[ch] if ch != '.' else None for ch in row] for row in grid[::-1]]
+    H, W = len(grid), len(grid[0])
+    y0, y1 = origin[1], origin[1] + H * px
+    if sign < 0:
+        rows = rows[::-1]
+        y0, y1 = 30 - y1, 30 - y0
+    m.decal(name, rows, [origin[0], y0, z], [origin[0] + W * px, y1, z])
+
+
 def divine_plume_bow():
-    """巡礼の羽弓（伝説）: 見せ場は二つ、両端の天使の翼と握りの背の光輪。翼は金の翼骨から白い風切羽が屋根瓦のように重なって
-    垂れ、ひとつの面（翼の形）として見える。羽の付け根は短い雨覆いが一段覆い、羽先だけが金。光輪は二重の輪のまわりを
-    金の花弁が縁取る。あいだの弓腕は静かに、先へ細って反り返る白い石に細い金の象嵌一本と宝玉一つ。
-    弓の先の金の鉤は弦の後ろへ巻き込み、鉤の先から金の紐と白い房が垂れる。弦は暁の光の一本に石の数珠と聖印"""
+    """巡礼の羽弓（伝説）: 弓の先から天使の翼が上下へ大きく開き、弓の丈より高く飛び出す。翼は板のドット絵で、
+    白い風切羽が先ほど長く、羽の境に灰の線、羽先だけが金で尖る。根元は白い雨覆いが一段覆う。
+    翼の板は弓腕をはさんで前後（z±1.3）に一枚ずつ、奥行きのある二重の翼に見える。
+    弓腕は白い骨の節を金の宝石の留めで継ぎ（宝石の芯が朝の光）、握りの背にも宝石。
+    弦は暁の光の一本に石の数珠と聖印。矢の通り道（握りの前）は空ける"""
     m = M('divine_plume_bow')
     m.box('grip', G, [10, 9, -2.1], [14, 21, 2.1], grad=(9, 2, 21, 4), wrap=(9, 21))
     for n, y in (('u', 20.75), ('d', 7.5)):
         m.box(f'cap_{n}', S, [9.5, y, -2.5], [14.5, y + 1.75, 2.5], grad=(y, 6, y + 1.75, 8))
-    # 見せ場 2: 光輪（二重の輪と金の花弁）
-    c = (22, 15)
-    m.box('halo_stem', G, [14, 14.1, -0.8], [15.5, 15.9, 0.8], 4)
-    m.arc('halo_out', G, c, 6.75, -155, 155, 14, 1.3, 0.75, 3, 5)
-    m.arc('halo_in_glow', D, c, 4, 0, 360, 10, 1.1, 0.85, 3, 5)
-    diamond(m, 'halo_core', G, c, 3, 1, 4, 5)
-    diamond(m, 'halo_core_glow', D, c, 1.5, 1.15, 4, 5)
-    m.arc('halo_rim', S, c, 9, -145, 145, 16, 0.7, 0.5, 7, 8)
-    for k, a in enumerate((-100, -35, 35, 100)):
-        dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
-        diamond(m, f'halo_gem_{k}', G, (c[0] + dx * 9, c[1] + dy * 9), 2.4, 0.9, 4, 5)
-        diamond(m, f'halo_gem_{k}_glow', D, (c[0] + dx * 9, c[1] + dy * 9), 1.1, 1, 4, 5)
-    # 静かな弓腕
-    arm = [(12, 21), (13.5, 27.5), (13.25, 34), (11.25, 39.5), (8, 43.5), (5, 45.5), (3.5, 47.5)]
-    spine = [(8.5, 42.5), (12, 48), (16.5, 52.5), (22, 55), (27.5, 55.5), (32, 53.5)]
-    def along(t):
-        L = [math.hypot(spine[i + 1][0] - spine[i][0], spine[i + 1][1] - spine[i][1]) for i in range(len(spine) - 1)]
-        d = t * sum(L)
-        for i, l in enumerate(L):
-            if d <= l:
-                f = d / l
-                return (spine[i][0] + (spine[i + 1][0] - spine[i][0]) * f, spine[i][1] + (spine[i + 1][1] - spine[i][1]) * f)
-            d -= l
-        return spine[-1]
+    diamond(m, 'riser_jewel', G, (15, 15), 3.5, 1.4, 3, 5)
+    m.box('riser_jewel_z', G, [14.4, 14.4, -2.6], [15.6, 15.6, 2.6], 4)
+    diamond(m, 'riser_jewel_glow', D, (15, 15), 1.75, 1.55, 4, 5)
+    limb = [(12, 21), (13.5, 27.5), (13.25, 34), (11.25, 39.5), (8, 43.5), (4.5, 46.5)]
+    arm = [(14, 30), (12.5, 38), (9, 44), (4.5, 47)]
+    fe = [(1.0, 118, 18, 2.2), (0.9, 108, 20, 2.3), (0.8, 98, 19, 2.3), (0.7, 88, 17, 2.2), (0.6, 78, 15, 2.1),
+          (0.5, 68, 12.5, 2.0), (0.4, 58, 10, 1.9), (0.3, 48, 7.5, 1.8), (0.2, 38, 5.5, 1.7)]
+    cv = [(0.95, 105, 4.5, 3.4), (0.78, 88, 4.5, 3.4), (0.6, 70, 4, 3.2), (0.42, 54, 3.5, 3), (0.25, 40, 3, 2.8)]
+    grid, org, px = plume_grid(arm, fe, cv)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
-        pts = [P(q) for q in arm]
-        m.chain(f'pillar_{n}', S, pts, [4.5, 4, 3.5, 3, 2.5, 2], 1.6, 5, 9, tip=False)
-        m.chain(f'inlay_{n}', G, [P((q[0] + 1.9 - k * 0.25, q[1])) for k, q in enumerate(arm[1:5])], [0.55, 0.55, 0.5], 1.7, 4, 5, tip=False)
-        diamond(m, f'gem_seat_{n}', G, pts[2], 2.75, 1.75, 3, 5)
-        diamond(m, f'gem_{n}_glow', D, pts[2], 1.4, 1.9, 4, 5)
-        # 見せ場 1: 弦の側の様式化した翼（弦を左右から挟む一対。帯を段々に重ねた翼、帯の先は金）
-        R = (9.5, 33)
-        ux, uy = -0.8, 0.6
-        nx, ny = -uy, ux
-        nx, ny = (nx, ny) if ny < 0 else (-nx, -ny)
-        rows = (21, 18.5, 15.5, 12.5, 9.5, 6.5)
+        pts = [P(q) for q in limb]
+        for k in range(len(pts) - 1):
+            a, b = pts[k], pts[k + 1]
+            ux, uy = b[0] - a[0], b[1] - a[1]
+            L = math.hypot(ux, uy)
+            m.seg(f'bone_{n}{k}', S, (a[0] + ux / L * 1.4, a[1] + uy / L * 1.4), (b[0] - ux / L * 1.4, b[1] - uy / L * 1.4),
+                  4 - k * 0.4, 1.7, 7, 9, over=0)
+        for k in range(1, len(pts)):
+            q = pts[k]
+            s = 3.4 - k * 0.25
+            diamond(m, f'jewel_{n}{k}', G, q, s, 1.2, 3, 5)
+            m.box(f'jewel_z_{n}{k}', G, [q[0] - s * 0.3, q[1] - s * 0.3, -s * 0.75], [q[0] + s * 0.3, q[1] + s * 0.3, s * 0.75], 4)
+            diamond(m, f'jewel_{n}{k}_glow', D, q, s * 0.45, 1.3, 4, 5)
         for zs, zn in ((1, 'f'), (-1, 'b')):
-            zc = zs * 2.6
-            for j, L in enumerate(rows):
-                sx = R[0] + nx * 2.3 * j + ux * 0.6 * j
-                sy = R[1] + ny * 2.3 * j + uy * 0.6 * j
-                ex, ey = sx + ux * L, sy + uy * L
-                cx_, cy_ = ex - ux * 1.75, ey - uy * 1.75
-                mat = G if j == 0 else S
-                m.seg(f'band_{n}{zn}{j}', mat, P((sx, sy)), P((cx_, cy_)), 2.6 if j == 0 else 2.4, 0.45, (3 if j == 0 else 9 - j * 0.6), (5 if j == 0 else 8 - j * 0.5), over=0.15, zc=zc)
-                m.seg(f'band_tip_{n}{zn}{j}', G, P((cx_, cy_)), P((ex, ey)), 2.6 if j == 0 else 2.4, 0.45, 4, 5, tip=(j == 0), over=0.15, zc=zc)
-            ex, ey = R[0] + ux * rows[0], R[1] + uy * rows[0]
-            diamond(m, f'band_gem_{n}{zn}_glow', D, P((ex + 1, ey + 0.75)), 2.2, 0.6, 4, 5, zc=zc)
-            m.box(f'band_root_{n}{zn}', G, [8.25, P((0, 31.5))[1] - 1.75 if sign > 0 else P((0, 31.5))[1] - 1.75, min(zc - 0.6, 0) if zs < 0 else 1.6], [13.25, P((0, 31.5))[1] + 1.75, zc + 0.6 if zs > 0 else -1.6], 4)
-        # 弦の後ろへ巻き込む金の鉤
-        hook = [(3.5, 47.5), (1.5, 50.5), (-1.75, 51.5), (-4.5, 50), (-5.5, 47.25)]
-        m.chain(f'hook_{n}', G, [P(q) for q in hook], [2.25, 2, 1.75, 1.5], 1.2, 3, 5, tip=False)
-        diamond(m, f'hook_gem_{n}_glow', D, P((-5.5, 46.5)), 1.75, 1.3, 4, 5)
-    # 鉤の先から垂れる金の紐と白い房（上も下も下へ垂れる）
-    for n, y0 in (('u', 45.5), ('d', -17.5)):
-        m.box(f'tassel_cord_{n}', G, [-5.8, y0 - 2.75, -0.3], [-5.2, y0, 0.3], 4)
-        diamond(m, f'tassel_cap_{n}', G, (-5.5, y0 - 3.5), 2, 1, 4, 5)
-        m.box(f'tassel_{n}', S, [-6.6, y0 - 8, -1.1], [-4.4, y0 - 4.25, 1.1], grad=(y0 - 8, 6, y0 - 4.25, 9))
-        m.box(f'tassel_band_{n}', G, [-6.75, y0 - 5, -1.25], [-4.25, y0 - 4.5, 1.25], 4)
+            plume_decal(m, f'wing_{n}{zn}', grid, org, px, sign, zs * 1.3)
     top, bot = (3.5, 47.5), (3.5, -17.5)
     for key, pull in lib.PULLS:
         if pull == 0:
