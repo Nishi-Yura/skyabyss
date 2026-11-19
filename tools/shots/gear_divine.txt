@@ -34,7 +34,7 @@ chat clear
 shot fp_divine_sky_sword
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_sky_sword
@@ -53,7 +53,7 @@ chat clear
 shot fp_divine_warden_blade
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_warden_blade
@@ -72,7 +72,7 @@ chat clear
 shot fp_divine_bell_hammer
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_bell_hammer
@@ -91,7 +91,7 @@ chat clear
 shot fp_divine_ash_hammer
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_ash_hammer
@@ -110,7 +110,7 @@ chat clear
 shot fp_divine_dawn_staff
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_dawn_staff
@@ -129,7 +129,7 @@ chat clear
 shot fp_divine_eyelid_staff
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_eyelid_staff
@@ -148,7 +148,7 @@ chat clear
 shot fp_divine_promise_bell_staff
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_promise_bell_staff
@@ -167,7 +167,7 @@ chat clear
 shot fp_divine_keeper_bell_staff
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_keeper_bell_staff
@@ -186,7 +186,7 @@ chat clear
 shot fp_divine_rewind_dagger
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_rewind_dagger
@@ -205,7 +205,7 @@ chat clear
 shot fp_divine_moth_dagger
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_moth_dagger
@@ -224,7 +224,7 @@ chat clear
 shot fp_divine_plume_bow
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_plume_bow
@@ -243,7 +243,7 @@ chat clear
 shot fp_divine_mist_bow
 hud off
 perspective front
-fov 30
+fov 42
 cmd tp @s 0.5 -60 0.5 -60 0
 wait 20
 shot close_divine_mist_bow
