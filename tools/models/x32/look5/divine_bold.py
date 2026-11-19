@@ -323,24 +323,25 @@ def divine_plume_bow():
         m.chain(f'inlay_{n}', G, [P((q[0] + 1.9 - k * 0.25, q[1])) for k, q in enumerate(arm[1:5])], [0.55, 0.55, 0.5], 1.7, 4, 5, tip=False)
         diamond(m, f'gem_seat_{n}', G, pts[2], 2.75, 1.75, 3, 5)
         diamond(m, f'gem_{n}_glow', D, pts[2], 1.4, 1.9, 4, 5)
-        # 見せ場 1: 天使の翼（翼骨 + 風切羽 8 枚が重なって垂れる + 雨覆い 6 枚）
-        m.chain(f'wingbone_{n}', G, [P(q) for q in spine], [2.75, 2.5, 2.25, 2, 1.5], 1.05, 3, 5, tip=True)
-        for k in range(8):
-            t = 0.08 + k * 0.125
-            r = along(t)
-            ang = -105 + k * 7
-            ln = (7, 9, 11, 12.5, 14, 15, 15, 13.5)[k]
-            dx, dy = math.cos(math.radians(ang)), math.sin(math.radians(ang))
-            e = (r[0] + dx * ln * 0.78, r[1] + dy * ln * 0.78)
-            f = (r[0] + dx * ln, r[1] + dy * ln)
-            m.seg(f'quill_{n}{k}', S, P(r), P(e), 4.25, 0.7, 7 + (k % 2) * 0.6, 9, over=0.4, zc=-0.1)
-            m.seg(f'quill_tip_{n}{k}', G, P(e), P(f), 3.6, 0.65, 4, 5, tip=True, zc=-0.1)
-        for k in range(6):
-            t = 0.1 + k * 0.15
-            r = along(t)
-            ang = -95 + k * 9
-            dx, dy = math.cos(math.radians(ang)), math.sin(math.radians(ang))
-            m.seg(f'covert_{n}{k}', S, P((r[0] - dx * 0.5, r[1] - dy * 0.5)), P((r[0] + dx * 5, r[1] + dy * 5)), 4, 0.55, 8, 9, tip=True, zc=0.55)
+        # 見せ場 1: 弦の側の様式化した翼（弦を左右から挟む一対。帯を段々に重ねた翼、帯の先は金）
+        R = (9.5, 33)
+        ux, uy = -0.8, 0.6
+        nx, ny = -uy, ux
+        nx, ny = (nx, ny) if ny < 0 else (-nx, -ny)
+        rows = (21, 18.5, 15.5, 12.5, 9.5, 6.5)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            zc = zs * 2.6
+            for j, L in enumerate(rows):
+                sx = R[0] + nx * 2.3 * j + ux * 0.6 * j
+                sy = R[1] + ny * 2.3 * j + uy * 0.6 * j
+                ex, ey = sx + ux * L, sy + uy * L
+                cx_, cy_ = ex - ux * 1.75, ey - uy * 1.75
+                mat = G if j == 0 else S
+                m.seg(f'band_{n}{zn}{j}', mat, P((sx, sy)), P((cx_, cy_)), 2.6 if j == 0 else 2.4, 0.45, (3 if j == 0 else 9 - j * 0.6), (5 if j == 0 else 8 - j * 0.5), over=0.15, zc=zc)
+                m.seg(f'band_tip_{n}{zn}{j}', G, P((cx_, cy_)), P((ex, ey)), 2.6 if j == 0 else 2.4, 0.45, 4, 5, tip=(j == 0), over=0.15, zc=zc)
+            ex, ey = R[0] + ux * rows[0], R[1] + uy * rows[0]
+            diamond(m, f'band_gem_{n}{zn}_glow', D, P((ex + 1, ey + 0.75)), 2.2, 0.6, 4, 5, zc=zc)
+            m.box(f'band_root_{n}{zn}', G, [8.25, P((0, 31.5))[1] - 1.75 if sign > 0 else P((0, 31.5))[1] - 1.75, min(zc - 0.6, 0) if zs < 0 else 1.6], [13.25, P((0, 31.5))[1] + 1.75, zc + 0.6 if zs > 0 else -1.6], 4)
         # 弦の後ろへ巻き込む金の鉤
         hook = [(3.5, 47.5), (1.5, 50.5), (-1.75, 51.5), (-4.5, 50), (-5.5, 47.25)]
         m.chain(f'hook_{n}', G, [P(q) for q in hook], [2.25, 2, 1.75, 1.5], 1.2, 3, 5, tip=False)
