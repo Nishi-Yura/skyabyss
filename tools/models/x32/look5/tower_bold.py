@@ -277,7 +277,7 @@ def _mst_moon_paint(sp, face, w, h):
         sp.rect(1, 1, w - 1, h - 1, WC, 0, shade=False)
 
 
-def _mst_board_paint(outer_up, white):
+def _mst_board_paint(outer_up, white, vein=True):
     """三日月の板の面: 外の縁は明るい一列、内の縁は一段暗い一列、大理石（白）か紫の割れ目（黒）の筋を一本。
     outer_up は板の +y が外（弧の外側）を向くか。外の縁・内の縁の画素の行は、外向きの向きで決める"""
     def paint(sp, face, w, h):
@@ -288,6 +288,8 @@ def _mst_board_paint(outer_up, white):
         hi_row, lo_row = (h - 1, 0) if outer_up else (0, h - 1)
         sp.rect(0, hi_row, w, hi_row + 1, top_m, top_t, shade=False)
         sp.rect(0, lo_row, w, lo_row + 1, bot_m, bot_t, shade=False)
+        if not vein:
+            return
         if white:
             sp.line((w * 0.3, 0), (w * 0.6, h), 1.0, WM, 6, shade=False)
         elif w >= 3:
@@ -296,7 +298,7 @@ def _mst_board_paint(outer_up, white):
 
 
 # 三日月の定数（2026-11-20 仕上げ）: 外の円の半径・中心の高さ・底の厚み・角の先の角度・弧の節数
-MST_R, MST_YC, MST_T, MST_PHI, MST_N = 19.0, 52.0, 9.5, 25.0, 16
+MST_R, MST_YC, MST_T, MST_PHI, MST_N = 19.0, 52.0, 9.5, 25.0, 28
 
 
 def _mst_crescent():
@@ -363,23 +365,12 @@ def tower_moon_staff():
         tav = (th[k] + th[k + 1]) / 2
         w = max(0.6, tav)
         d = 1.5 + 2.5 * min(1.0, tav / MST_T)
-        _mst_bar(m, f'crest_{k}', mat, tt, M0, M1, w, d, paint=_mst_board_paint(outer_up, white))
-        # 外の縁の薄い縁（前へ一枚出る。外の円の内側 0.6 の所）
-        A0 = math.radians(th0 + (th1 - th0) * k / MST_N)
-        A1 = math.radians(th0 + (th1 - th0) * (k + 1) / MST_N)
-        Ro = MST_R - 0.6
-        ea = (Ro * math.cos(A0), MST_YC + Ro * math.sin(A0))
-        eb = (Ro * math.cos(A1), MST_YC + Ro * math.sin(A1))
-        em, et = (WM, 9) if white else (WC, 5)
-        _mst_bar(m, f'crest_out_{k}', em, et, ea, eb, 1.0, 0.9, zc=d - 0.4)
-        # 内の縁の一段暗い縁（空洞の側へ少し出る）
-        ia = ((pr[k][1][0] - C[0]) * (Ri + 0.4) / Ri + C[0], (pr[k][1][1] - C[1]) * (Ri + 0.4) / Ri + C[1])
-        ib = ((pr[k + 1][1][0] - C[0]) * (Ri + 0.4) / Ri + C[0], (pr[k + 1][1][1] - C[1]) * (Ri + 0.4) / Ri + C[1])
-        im, it = (WB, 1) if white else (WN, 2)
-        _mst_bar(m, f'crest_in_{k}', im, it, ia, ib, 1.0, 0.9, zc=d - 0.4)
+        _mst_bar(m, f'crest_{k}', mat, tt, M0, M1, w, d, paint=_mst_board_paint(outer_up, white, k % 5 == 2))
+
     # 台座（底の外に石の段を二つ。上の段は弧の底に入る）
-    skin(m, 'stand_0', WB, 3, [-9.5, 21.0, -5.5], [9.5, 26.5, 5.5], paint=_mst_stone)
-    skin(m, 'stand_1', WM, 5, [-7.0, 26.0, -4.5], [7.0, 35.5, 4.5], paint=_mst_stone)
+    skin(m, 'stand_0', WB, 3, [-6.0, 22.0, -4.2], [6.0, 25.0, 4.2], paint=_mst_stone)
+    skin(m, 'stand_1', WB, 4, [-4.4, 24.6, -3.4], [4.4, 29.5, 3.4], paint=_ms_black)
+    skin(m, 'stand_2', WB, 5, [-3.0, 29.0, -2.6], [3.0, 35.0, 2.6])
     # 天秤の台（弧の底の前。境）と光る菱
     skin(m, 'plinth', WG, 4, [-4.6, 34.0, 3.0], [4.6, 41.0, 6.0])
     skin(m, 'plinth_top', WG, 6, [-5.2, 39.6, 2.6], [5.2, 41.2, 6.6])
@@ -567,12 +558,12 @@ def _cs_bell(m, pre, cx, top, s):
     from paintbox import skin
     skin(m, f'{pre}_crown', WN, 5, [cx - 0.9 * s, top - 1.4 * s, -0.9 * s], [cx + 0.9 * s, top, 0.9 * s])
     skin(m, f'{pre}_neck', WB, 4, [cx - 1.3 * s, top - 3.2 * s, -1.2 * s], [cx + 1.3 * s, top - 1.4 * s, 1.2 * s])
-    skin(m, f'{pre}_core', WB, 4, [cx - 2.2 * s, top - 9.4 * s, -1.8 * s], [cx + 2.2 * s, top - 3.0 * s, 1.8 * s])
+    skin(m, f'{pre}_core', WB, 5, [cx - 2.2 * s, top - 9.4 * s, -1.8 * s], [cx + 2.2 * s, top - 3.0 * s, 1.8 * s], paint=_cs_black)
     for sg, n in ((-1, 'l'), (1, 'r')):
         pts = [(cx + sg * 1.6 * s, top - 2.6 * s), (cx + sg * 3.0 * s, top - 6.4 * s), (cx + sg * 3.8 * s, top - 10.0 * s)]
         for k in range(2):
-            _cs_bar(m, f'{pre}_flare_{n}{k}', WB, 3, pts[k], pts[k + 1], [2.2 * s, 2.6 * s][k], 2.2 * s)
-    skin(m, f'{pre}_lip', WM, 6, [cx - 3.9 * s, top - 10.8 * s, -2.8 * s], [cx + 3.9 * s, top - 9.2 * s, 2.8 * s])
+            _cs_bar(m, f'{pre}_flare_{n}{k}', WB, 4, pts[k], pts[k + 1], [2.0 * s, 2.4 * s][k], 2.0 * s)
+    skin(m, f'{pre}_lip', WM, 8, [cx - 4.1 * s, top - 11.0 * s, -2.9 * s], [cx + 4.1 * s, top - 9.4 * s, 2.9 * s])
     skin(m, f'{pre}_tongue', WN, 4, [cx - 0.7 * s, top - 12.0 * s, -0.7 * s], [cx + 0.7 * s, top - 9.0 * s, 0.7 * s])
 
 
@@ -602,7 +593,7 @@ def tower_clap_bell_staff():
         lo, hi = sorted((sg * 7.2, sg * 15.8))
         skin(m, f'band_{n}', WG, 5, [lo, 45.0, -4.2], [hi, 47.0, 4.2])
         m.seg(f'cord_{n}', WN, (sg * 15.4, 45.2), (sg * 16.2, 39.6), 2.0, 1.2, 5, 4, over=0.2)
-        _cs_bell(m, f'bell_{n}', sg * 16.4, 39.6, 1.35)
+        _cs_bell(m, f'bell_{n}', sg * 16.3, 39.6, 1.0)
         # 掌の外の割れ目の光（黒い側・外の縁に一つ）
         lo, hi = sorted((sg * 12.4, sg * 14.3))
         skin(m, f'crack_glow_{n}', WC, 5, [lo, 39.2, -1.2], [hi, 41.6, 1.2], glow=True)
