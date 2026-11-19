@@ -301,9 +301,9 @@ def divine_sky_sword():
 
 
 def divine_warden_blade():
-    """羽の番人の大剣（四回目）: 番人の面頬の鍔（目の細い窓が光る）から、光の刃を左右の白い翼の刃が包むように立ち上がり、
-    切っ先で合わさる。翼の外の縁には平面の小さな羽が並ぶ"""
-    from divine_kit import fm, frame_face, edge_top, bar, path, gem, strapped_grip, pommel, feather_plane, skin
+    """羽の番人の大剣（五回目）: 番人の面頬の鍔（目の細い窓が光る）から、光の刃を左右の白い翼の刃が包むように立ち上がり、
+    切っ先で合わさる。刃の後ろには左右に大きな翼（平面、長い風切羽が上へ扇に開く）"""
+    from divine_kit import fm, frame_face, edge_top, bar, path, strapped_grip, pommel, feather_plane, fan, skin
     m = M('divine_warden_blade')
     strapped_grip(m, -8, 7.5)
     pommel(m, -10.6)
@@ -316,44 +316,50 @@ def divine_warden_blade():
     for sd, n in ((-1, 'l'), (1, 'r')):
         pts = [(sd * 4.6, 14.5), (sd * 8.6, 26), (sd * 8.4, 40), (sd * 5.4, 52), (sd * 1.6, 62), (0, 67)]
         path(m, f'wing_{n}', S, 5.5, pts, [4.6, 4.4, 3.8, 3.2, 2.4], 1.4, edge_top(G, 5) if sd < 0 else fm(lambda sp, f, w, h: sp.rect(0, 0, w, 1, G, 5)), dt=0.5)
-        for k, (a, b) in enumerate(zip(pts[:4], pts[1:5])):
-            x, y = a[0] + (b[0] - a[0]) * 0.5, a[1] + (b[1] - a[1]) * 0.5
-            ln = 9.5 - k * 1.8
-            feathers.append(((x + sd * 1.2, y + 1), (x + sd * (1.2 + ln), y - ln * 0.35), 5.2, 2.6))
         skin(m, f'clasp_{n}', G, 4, (min(sd * 3.6, sd * 6.4), 13.4, -2.2), (max(sd * 3.6, sd * 6.4), 17.4, 2.2), frame_face())
-    feather_plane(m, 'fringe', feathers, 0.0, t0=5, glowline=False)
+        # 翼: 鍔の脇から、長い羽（上ほど長い）が刃に沿って上へ、外ほど寝て開く
+        a0 = 84 if sd > 0 else 96
+        feathers += fan((sd * 7, 17), 5, 36, -6, a0, -11 * sd, 6, 3)
+    feather_plane(m, 'float_wings', feathers, -1.7, t0=5)
     return big(m, 8, 1.1, 1.0)
 
 
 def divine_bell_hammer():
-    """七つ鐘の大鎚（四回目）: 頭は金の車輪。七本の輻の先に大きさの違う鐘が口を下に下がり、軸に菱の光の宝石。
-    車輪の外に光の音の輪（平面）が広がる"""
+    """七つ鐘の大鎚（五回目）: 頭は太い金の車輪。七本の輻が車輪の外へ腕として突き出し、その先に大きさの違う鐘が口を下に下がる
+    （鐘は車輪の外にあって隠れない）。軸に菱の光の宝石。車輪の外に光の音の輪（平面）"""
     from divine_kit import arc, bar, gem, strapped_grip, pommel, rod, bell3d, glow_plane, edge_top, skin
     m = M('divine_bell_hammer')
     strapped_grip(m, -6, 5.5)
     pommel(m, -8.6)
     rod(m, 6, 31, bands=(14, 22))
     c = (0, 41)
-    arc(m, 'wheel', G, 3.4, c, 10, 0, 360, 12, 3.2, 3.2, 2.2, 2.2, edge_top(G, 5.2))
+    arc(m, 'wheel', G, 3.4, c, 9, 0, 360, 12, 3.2, 3.2, 2.2, 2.2, edge_top(G, 5.2))
     gem(m, 'hub', c, 4.2, 2.6)
     for k in range(7):
         a = math.radians(90 + 360 / 7 * k)
-        p0 = (c[0] + math.cos(a) * 2.6, c[1] + math.sin(a) * 2.6)
-        p1 = (c[0] + math.cos(a) * 9.6, c[1] + math.sin(a) * 9.6)
-        bar(m, f'spoke_{k}', G, 3, p0, p1, 1.3, 1.1)
-        s = 2.1 + (k % 3) * 0.45
-        q = (c[0] + math.cos(a) * 10, c[1] + math.sin(a) * 10)
-        bar(m, f'cord_{k}', G, 4, q, (q[0], q[1] - 2.2), 0.7, 0.4)
-        bell3d(m, f'bell_{k}', (q[0], q[1] - 2.2 - s * 0.9), s)
+        ca, sa = math.cos(a), math.sin(a)
+        bar(m, f'spoke_{k}', G, 3, (c[0] + ca * 2.6, c[1] + sa * 2.6), (c[0] + ca * 13.2, c[1] + sa * 13.2), 1.3, 1.1)
+        skin(m, f'knob_{k}', G, 5, (c[0] + ca * 13 - 1, c[1] + sa * 13 - 1, -1.2), (c[0] + ca * 13 + 1, c[1] + sa * 13 + 1, 1.2))
+        s = 2.3 + (k % 3) * 0.4
+        q = (c[0] + ca * 13, c[1] + sa * 13)
+        if k == 0:
+            # 真上の鐘は腕の先に立つ（口を下に、腕の上に乗る）
+            bell3d(m, f'bell_{k}', (q[0], q[1] + 0.9 + s * 0.9), s)
+            continue
+        bar(m, f'cord_{k}', G, 4, (q[0], q[1] + 0.5), (q[0], q[1] - 1.8), 0.7, 0.4)
+        bell3d(m, f'bell_{k}', (q[0], q[1] - 1.6 - s * 0.95), s)
+
+    big(m, 29, 1.35, 1.35)
+    c = (0, 29 + (41 - 29) * 1.35)
 
     def waves(sp):
-        for r in (13.5, 16):
-            for a0 in (20, 140, 260):
-                pts = [(c[0] + r * math.cos(math.radians(a0 + i * 4)), c[1] + r * math.sin(math.radians(a0 + i * 4))) for i in range(10)]
+        for r in (17.5 * 1.35, 20 * 1.35):
+            for a0 in (25, 145):
+                pts = [(c[0] + r * math.cos(math.radians(a0 + i * 4)), c[1] + r * math.sin(math.radians(a0 + i * 4))) for i in range(9)]
                 for p, q in zip(pts, pts[1:]):
-                    sp.line(p, q, 1.2, D, 2.5 if r < 15 else 1.5, shade=False)
-    glow_plane(m, 'float_wave', waves, (c[0] - 18, c[1] - 18, c[0] + 18, c[1] + 18), -2.2)
-    return big(m, 29, 1.6, 1.6)
+                    sp.line(p, q, 1.5, D, 2.5 if r < 25 else 1.5, shade=False)
+    glow_plane(m, 'float_wave', waves, (c[0] - 29, c[1] - 29, c[0] + 29, c[1] + 29), -2.4)
+    return m
 
 
 def divine_ash_hammer():
@@ -497,9 +503,9 @@ def divine_keeper_bell_staff():
 
 
 def divine_rewind_dagger():
-    """巻き戻りの短剣（四回目）: 鍔は金の文字盤（目盛りを描いた白い面と光る軸）。刃は時計の長針そのもので、二本の金の縁が
-    黒い硝子の窓を挟み、先は金の矢じり。光る秒針が斜めに交差し、後ろに巻き戻る針の残像（平面）"""
-    from divine_kit import arc, bar, path, strapped_grip, pommel, glow_plane, skin, fm
+    """巻き戻りの短剣（五回目）: 鍔は金の文字盤。刃は時計の長針を剣にしたもの: 両刃の白い刃が根元で張り出してから長く鋭く絞られ、
+    真ん中に黒い硝子の窓（光の筋）。根元の両脇に針の返しのような鋭い棘。光る秒針が刃を斜めに貫いて前へ突き出す"""
+    from divine_kit import arc, bar, path, strapped_grip, pommel, skin, fm
     m = M('divine_rewind_dagger')
     strapped_grip(m, -4, 1.6)
     pommel(m, -6.6)
@@ -515,50 +521,58 @@ def divine_rewind_dagger():
     skin(m, 'dial_face', S, 7.5, (c[0] - 5, c[1] - 5, -1), (c[0] + 5, c[1] + 5, 1), dial)
     arc(m, 'dial_rim', G, 3.4, c, 6.2, 0, 360, 12, 1.8, 1.8, 1.5, 1.5)
     skin(m, 'hub', D, 4, (c[0] - 1.3, c[1] - 1.3, -1.8), (c[0] + 1.3, c[1] + 1.3, 1.8), rot=45, pivot=c, glow=True)
+    edge = fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, S, 9.5))
+    # 刃の身: 根元が張り出し、先へ長く絞る（左右それぞれ二節の回した板）
     for sd, n in ((-1, 'l'), (1, 'r')):
-        bar(m, f'rail_{n}', G, 3.6, (sd * 2, 13), (sd * 1.4, 33), 1.6, 1.2, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, G, 5.5)))
-        bar(m, f'head_{n}', G, 4, (sd * 4.6, 32.8), (0, 43.5), 2.6, 1.1, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, G, 5.5)))
-    skin(m, 'window', K, 2.5, (-1.4, 13, -0.8), (1.4, 33.5, 0.8), fm(lambda sp, f, w, h: sp.rect(w / 2 - 0.5, 1, w / 2 + 0.5, h - 1, D, 3)))
-    skin(m, 'head_bar', G, 3.4, (-4.6, 32.2, -1.2), (4.6, 34, 1.2))
-    bar(m, 'second_hand', D, 3.5, c, (6.5, 26), 0.8, 1.9, glow=True)
-
-    def ghosts(sp):
-        for k, a in enumerate((100, 115, 130)):
-            r = math.radians(a)
-            sp.line(c, (c[0] + math.cos(r) * 22, c[1] + math.sin(r) * 22), 2.2 - k * 0.5, D, 2 - k * 0.5, shade=False)
-    glow_plane(m, 'afterimage', ghosts, (-20, 4, 4, 34), -1.3)
+        path(m, f'blade_{n}', S, 6.5, [(sd * 2.2, 13), (sd * 4.2, 19), (sd * 2.4, 36), (0, 50)], [3.0, 2.6, 2.0], [0.9, 0.85, 0.7], edge, dt=0.6)
+        bar(m, f'rim_{n}', G, 4, (sd * 1.5, 14), (sd * 1.2, 34), 0.9, 1.05)
+        bar(m, f'barb_{n}', G, 4.2, (sd * 3.8, 21), (sd * 7.6, 17), 1.8, 0.8, fm(lambda sp, f, w, h: sp.rect(0, h - 1, w, h, G, 6)))
+        bar(m, f'barb_{n}_tip', G, 5, (sd * 7.2, 17.4), (sd * 9, 14.8), 0.9, 0.6)
+    skin(m, 'body', S, 6, (-2.6, 12.4, -0.6), (2.6, 34, 0.6))
+    bar(m, 'body_tip', S, 7, (0, 33.5), (0, 47), 2.6, 0.6)
+    skin(m, 'window', K, 2.5, (-0.9, 15, -0.8), (0.9, 33, 0.8), fm(lambda sp, f, w, h: sp.rect(w / 2 - 0.5, 1, w / 2 + 0.5, h - 1, D, 3.5)))
+    skin(m, 'base_bar', G, 3.4, (-4, 11.8, -1.3), (4, 13.6, 1.3))
+    # 秒針: 文字盤の軸から刃を斜めに貫き、鋭く前へ
+    bar(m, 'second_hand', D, 3.5, (-2.5, 4), (5.5, 30), 0.8, 1.9, glow=True)
+    bar(m, 'second_hand_tip', D, 5, (5.3, 29.4), (6.6, 34), 0.45, 1.9, glow=True)
     return big(m, 1.5, 1.3, 1.3)
 
 
 def divine_moth_dagger():
-    """灯蛾の短剣（四回目）: 白い縁の光の刃の根元に、金の蛾が止まる。前翅は V に立って刃を包み、後翅は下へ開く（平面の絵、
-    眼状紋が光る）。金の触角が二本"""
-    from divine_kit import bar, strapped_grip, pommel, sparkles, skin, fm
+    """灯蛾の短剣（五回目）: 虫の体は描かず、灯に寄る蛾の「羽だけ」を光の刃で表す。光の芯の刃の根元から、
+    鋭い葉の形の前翅が刃に沿って上へ、短い後翅が下へ開く（白から先へ朝の光に溶ける、金の縁）。根元に菱の宝石、刃の先に灯の炎"""
+    from divine_kit import bar, strapped_grip, pommel, sparkles, skin, fm, gem
     from pix3d import Sprite, sprite_planes
     m = M('divine_moth_dagger')
     strapped_grip(m, -4, 4)
     pommel(m, -6.6)
     skin(m, 'guard', G, 3.4, (-4.4, 5.2, -1.6), (4.4, 6.8, 1.6))
-    skin(m, 'blade', D, 2.5, (-1.5, 9, -0.6), (1.5, 33, 0.6), fm(lambda sp, f, w, h: sp.rect(w / 2 - 0.5, 0, w / 2 + 0.5, h, D, 5)), glow=True)
+    skin(m, 'blade', S, 6.5, (-1.8, 7, -0.7), (1.8, 30, 0.7), fm(lambda sp, f, w, h: sp.rect(w / 2 - 0.5, 0, w / 2 + 0.5, h, D, 4.5)))
     for sd, n in ((-1, 'l'), (1, 'r')):
-        bar(m, f'edge_{n}', S, 8, (sd * 1.9, 9.5), (sd * 1.2, 32.5), 0.9, 0.8)
-        bar(m, f'antenna_{n}', G, 4, (sd * 0.8, 12.5), (sd * 4.5, 17.5), 0.8, 0.5)
-    bar(m, 'tip', D, 4, (0, 32.5), (0, 39), 2.4, 0.5, glow=True)
-    skin(m, 'thorax', G, 3.2, (-1.9, 6.5, -1.9), (1.9, 11, 1.9), fm(lambda sp, f, w, h: sp.rect(0, h / 2, w, h / 2 + 1, G, 1.5)))
-    skin(m, 'head', G, 4.2, (-1.3, 11, -1.4), (1.3, 13, 1.4))
-    sp = Sprite(-14, 0, 14, 32)
+        bar(m, f'tip_{n}', S, 8, (sd * 1.8, 29.5), (0, 37), 1.6, 0.6)
+    skin(m, 'tip_core', S, 8, (-1.2, 29, -0.6), (1.2, 33, 0.6))
+    gem(m, 'heart', (0, 8.5), 3.6, 2.2)
+    big(m, 4.9, 1.35, 1.35)
+
+    def T(pts):
+        return [(x * 1.35, 4.9 + (y - 4.9) * 1.35) for x, y in pts]
+    sp = Sprite(-19, 1, 19, 40)
+
+    def wing_tone(y0, y1):
+        return lambda x, y: 8.5 - max(0.0, min(1.0, (abs(x) - 2) / 9)) * 3
     for sd in (-1, 1):
-        fore = [(sd * 1.8, 9), (sd * 7, 13), (sd * 10.5, 21), (sd * 9, 29), (sd * 5, 30), (sd * 2.2, 18)]
-        sp.poly(fore, S, 6, tone=lambda x, y: 5 + (y - 9) / 21 * 3, edge=(G, 4.5))
-        sp.disc((sd * 6.8, 21), 2.2, G, 4)
-        sp.disc((sd * 6.8, 21), 1.3, D, 3)
-        hind = [(sd * 1.8, 8.5), (sd * 6.5, 6), (sd * 9, 2.5), (sd * 5.5, 1.2), (sd * 2, 5)]
-        sp.poly(hind, S, 4.8, edge=(G, 4))
-        sp.disc((sd * 5.4, 4.2), 1.1, D, 3)
+        fore = [(sd * 2.2, 9), (sd * 7, 10.5), (sd * 11.5, 16.5), (sd * 13, 25), (sd * 11.5, 29), (sd * 8, 25), (sd * 4.6, 19.5), (sd * 2.4, 15)]
+        sp.poly(T(fore), S, 7, tone=wing_tone(9, 27), edge=(G, 4.5))
+        sp.line(*T([(sd * 2.8, 11), (sd * 11.4, 26)]), 1.3, G, 5, shade=False)
+        sp.poly(T([(sd * 11, 23.5), (sd * 13, 25), (sd * 11.5, 29), (sd * 10.2, 26.5)]), D, 4, shade=False)
+        hind = [(sd * 2.2, 8.4), (sd * 6.4, 7.4), (sd * 9.6, 2), (sd * 6.4, 2.6), (sd * 2.2, 5.4)]
+        sp.poly(T(hind), S, 6, tone=wing_tone(1, 8), edge=(G, 4))
     sp.shade(light=1.0, dark=1.2, outline=(G, 0))
     sprite_planes(sp, m, 'wings', 0.0)
-    sparkles(m, 'float_dust', [(-9, 36), (8, 38), (-11, 28)], -1)
-    return big(m, 4.9, 1.35, 1.35)
+    skin(m, 'flame', D, 4, (-1.2, 44.8, -1.2), (1.2, 47.2, 1.2), rot=45, pivot=(0, 46), glow=True)
+    bar(m, 'flame_tip', D, 5, (0, 46.6), (0, 52), 1.3, 0.6, glow=True)
+    sparkles(m, 'float_dust', [(-11, 47), (9.5, 51)], -1)
+    return m
 
 
 # ---------------------------------------------------------------- 弓（握りの中心 (12, 15)）
