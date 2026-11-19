@@ -94,6 +94,13 @@ def wild_flash_bow():
         mat = P if sign > 0 else U
         m.seg(f'tip_{n}' + ('_glow' if sign > 0 else ''), mat, tip, mirror((3.75, 44.5), sign), 1.5, 1.1, 4, 6, tip=True)
     strings(m, (4, 44), (4, -14))
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            q = mirror((9.5, 29), sign)
+            z0 = 1.3 if zs > 0 else -1.3
+            m.box(f'rod_{n}{zn}', B, [q[0] - 0.4, q[1] - 0.4, min(z0, z0 + zs * 3.25)], [q[0] + 0.4, q[1] + 0.4, max(z0, z0 + zs * 3.25)], 4)
+            z1 = z0 + zs * 3.25
+            m.box(f'rod_ball_{n}{zn}', B, [q[0] - 0.75, q[1] - 0.75, min(z1, z1 + zs * 1.25)], [q[0] + 0.75, q[1] + 0.75, max(z1, z1 + zs * 1.25)], 5)
     return m
 
 

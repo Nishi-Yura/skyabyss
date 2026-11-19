@@ -269,6 +269,13 @@ def tide_bow():
             m.box(f'polyp_{n}{k}', P, [x - 1, yy - 1, -1.1], [x + 1, yy + 1, 1.1], 4)
         m.seg(f'nock_{n}', S, mirror((4.5, 44.75), sign), mirror((1.5, 44.75), sign), 2, 1, 4, 5)
     strings(m, (2, 44.75), (2, -14.75))
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            q = mirror((9.5, 32), sign)
+            z0 = 1.4 if zs > 0 else -1.4
+            m.box(f'zbranch_{n}{zn}', C, [q[0] - 0.75, q[1] - 0.75, min(z0, z0 + zs * 3)], [q[0] + 0.75, q[1] + 0.75, max(z0, z0 + zs * 3)], 4)
+            z1 = z0 + zs * 3
+            m.box(f'zpolyp_{n}{zn}', P, [q[0] - 0.9, q[1] - 0.9, min(z1, z1 + zs * 1.3)], [q[0] + 0.9, q[1] + 0.9, max(z1, z1 + zs * 1.3)], 4)
     return m
 
 

@@ -221,6 +221,9 @@ def thunder_wing_bow():
             m.seg(f'plume_{n}{k}', S, a, b, 2.5, 0.5, 7, 9, tip=True)
         m.seg(f'nock_{n}', K, mirror((6, 46), sign), mirror((3.5, 46), sign), 2, 1, 4, 5)
     strings(m, (4, 46), (4, -16))
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        q = mirror((11.25, 33), sign)
+        m.chain(f'claw_{n}', K, [q, (q[0] - 2.25, q[1] + sign * 0.75), (q[0] - 3.25, q[1] - sign * 0.75)], [1.4, 1], 0.8, 3, 5, tip=True)
     return m
 
 

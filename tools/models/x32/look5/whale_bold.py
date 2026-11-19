@@ -135,6 +135,13 @@ def whale_bow():
     m.seg('nock_u', 'bone', (-1, 44.3), (-3.5, 44.6), 2, 1.25, 4, 5)
     m.seg('nock_d', 'bone', (-3.5, -14.6), (-1, -14.3), 2, 1.25, 4, 5)
     strings(m, (-3, 44.5), (-3, -14.5), [('0', 0), ('p0', 2.4), ('p1', 6.8), ('p2', 11.6)])
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        y = 15 + sign * 16
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            z0 = 1.75 if zs > 0 else -1.75
+            m.box(f'zbarnacle_{n}{zn}', 'sea', [12.25, y - 1.5, min(z0, z0 + zs * 2.5)], [15.25, y + 1.5, max(z0, z0 + zs * 2.5)], 6)
+            z1 = z0 + zs * 2.5
+            m.box(f'zbarnacle_{n}{zn}_mouth', 'glow', [13.25, y - 0.6, min(z1, z1 + zs * 0.3)], [14.25, y + 0.6, max(z1, z1 + zs * 0.3)], 4)
     return m
 
 

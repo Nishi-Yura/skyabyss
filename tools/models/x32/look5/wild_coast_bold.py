@@ -249,6 +249,10 @@ def wild_nacre_bow():
         m.seg(f'nock_{n}', D, mirror((6.5, 41), sign), mirror((3.5, 41), sign), 2, 1, 5, 6)
     m.chain('nacre_glow', F, [(12.25, 21), (11, 27), (9, 33)], [0.8, 0.8], 1.2, 2, 4, tip=False)
     strings(m, (4, 41), (4, -11))
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((33, 30, -3, 0)):
+            q = lib.string_at((4, 41), (4, -11), pull, lib.string_t((4, 41), (4, -11), y))
+            m.box(f'string_{key}_pearl{k}', R, [q[0] - 0.75, q[1] - 0.75, -0.75], [q[0] + 0.75, q[1] + 0.75, 0.75], 5)
     return m
 
 

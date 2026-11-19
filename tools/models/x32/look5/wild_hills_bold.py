@@ -79,6 +79,13 @@ def wild_bonespike_bow():
             m.seg(f'spike_{n}{k}', T, mirror((x, y), sign), mirror((x + 3.25, y + 1.5), sign), 1.5, 0.6, 3, 5, tip=True)
         m.chain(f'tip_{n}', T, [mirror(p, sign) for p in ((4, 43), (2.75, 45), (3.75, 46.5))], [1.5, 1.25], 0.8, 3, 5, tip=True)
     strings(m, (3, 44.5), (3, -14.5))
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            q = mirror((9.75, 31), sign)
+            z0 = 1.25 if zs > 0 else -1.25
+            for j, (w, l) in enumerate(((1.2, 1.75), (0.8, 1.5))):
+                za = z0 + zs * j * 1.75
+                m.box(f'zspike_{n}{zn}{j}', T, [q[0] - w / 2, q[1] - w / 2, min(za, za + zs * l)], [q[0] + w / 2, q[1] + w / 2, max(za, za + zs * l)], 3 + j)
     return m
 
 

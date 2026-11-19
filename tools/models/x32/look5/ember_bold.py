@@ -279,6 +279,10 @@ def ember_bow():
         m.seg(f'scale_{n}', K, mirror((12.25, 22.5), sign), mirror((12.5, 27.5), sign), 2.5, 1.6, 3, 5)
         m.seg(f'nock_{n}', K, mirror((6.5, 45.5), sign), mirror((3, 45.5), sign), 2.5, 1.1, 4, 5)
     strings(m, (4.5, 45.5), (4.5, -15.5))
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        for k, (x, y) in enumerate(((10.75, 27.5), (9.75, 33), (7.75, 38.5))):
+            q = mirror((x, y), sign)
+            m.seg(f'belly_scale_{n}{k}', K, q, (q[0] - 2.25, q[1] - sign * 1.5), 2, 1.2, 3, 5, tip=True)
     return m
 
 

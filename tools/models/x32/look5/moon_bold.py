@@ -306,6 +306,10 @@ def moon_waning_bow():
             m.seg(f'tie_{n}{k}', N, a, b, 1, 0.45, 2, 3, over=0.3, zc=0.5)
         m.seg(f'nock_{n}', I, mirror((5, 46.25), sign), mirror((2, 46.25), sign), 2, 1, 6, 8)
     strings(m, (3, 46.25), (3, -16.25))
+    for key, pull in lib.PULLS:
+        q = lib.string_at((3, 46.25), (3, -16.25), pull, lib.string_t((3, 46.25), (3, -16.25), 34))
+        m.box(f'string_{key}_cord', N, [q[0] - 0.2, q[1] - 2, -0.2], [q[0] + 0.2, q[1], 0.2], 3)
+        m.arc(f'string_{key}_moon', I, (q[0] + 0.25, q[1] - 3.5), 1.4, 100, 260, 4, 0.7, 0.35, 7, 8)
     return m
 
 

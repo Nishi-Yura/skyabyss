@@ -665,6 +665,10 @@ def abyss_depth_bow():
         m.box(f'lead_{n}', V, [-2.5, top - 9, -1.25], [0.5, top - 5, 1.25], grad=(top - 9, 2, top - 5, 4))
         m.box(f'lead_{n}_glow', G, [-1.75, top - 9.5, -0.75], [-0.25, top - 9, 0.75], 3)
     strings(m, (3, 46.25), (3, -16.25))
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((40, 36, 32, -2, -6, -10)):
+            q = lib.string_at((3, 46.25), (3, -16.25), pull, lib.string_t((3, 46.25), (3, -16.25), y))
+            m.box(f'string_{key}_mark{k}', B if k % 3 else V, [q[0] - 0.7, q[1] - 0.35, -0.7], [q[0] + 0.7, q[1] + 0.35, 0.7], 4)
     return m
 
 

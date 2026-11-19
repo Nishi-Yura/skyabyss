@@ -189,6 +189,8 @@ def wild_windcutter_bow():
         m.seg(f'nock_{n}', H, mirror((4.5, 44), sign), mirror((2, 44), sign), 1.75, 0.9, 4, 5)
     m.box('quill_glow', Z, [13.4, 20, -0.6], [14.4, 21.25, 0.6], 4)
     strings(m, (2.5, 44), (2.5, -14))
+    for k, (x, y) in enumerate(((10.5, 5), (9, 0), (7.25, -4.5))):
+        m.seg(f'belly_barb_{k}', R, (x, y), (x - 2.75 + k * 0.3, y - 2.25), 1.4, 0.4, 7, 9, tip=True)
     return m
 
 
