@@ -386,7 +386,7 @@ def storm_gale_bow():
         # 弦の風の筋（板の絵）: 弦の上から射手の側（-x、矢の飛ぶ向きと逆）へ流れ、先で小さく巻く。弦と一緒に引かれる。引きの通り道（y 8〜22）は空ける
         # 弓腕にあった風の輪（角を欠いた四角い輪、同じ大きさ）を弦へ移した形: 弦が輪の真ん中を通り、細い留めで弦に付く
         for sign, n in ((1, 'u'), (-1, 'd')):
-            for r, y in enumerate((23.5, 26)):                         # 風の筋と重ならないよう弦の中央寄り（引きの通り道 y 8〜22 の外）
+            for r, y in enumerate((23, 34)):                         # 弦の中央寄り（引きの通り道 y 8〜22 の外）。風の筋はこの輪から出る
                 c = lib.string_at(top, bot, pull, lib.string_t(top, bot, 15 + sign * (y - 15)))
                 R, th, cut = 4.25 - r * 0.6, 0.9, 0.9
                 nm = f'string_{key}_ring_{n}{r}'
@@ -400,7 +400,7 @@ def storm_gale_bow():
                           [max(cx0, cx0 - x * th), c[1] + 0.45, max(cz0, cz0 - z * th)], 5)
                 m.box(f'{nm}tie', K, [c[0] - 0.4, c[1] - 0.35, -R + th * 0.5], [c[0] + 0.4, c[1] + 0.35, R - th * 0.5], 3)
         # 前の弓腕の風の筋（表と裏の二枚、巻きの向きは表裏で逆）を左右逆にして、そのまま弦に付けた形。二枚で弦をはさむ
-        q0 = [lib.string_at(top, bot, pull, lib.string_t(top, bot, y)) for y in (28.5, 32.5, 36.5)]   # 弦の中央寄り
+        q0 = [lib.string_at(top, bot, pull, lib.string_t(top, bot, y)) for y in (22.5, 28.5, 34.5)]   # 輪のところに集め、筋どうしは重ならない間隔
         for zs, zn in ((1, 'f'), (-1, 'b')):
             lines = []
             for (qx, qy), rel, curl in zip(q0, ([(0, 0), (-3.5, 2), (-7.5, 1), (-11.5, 2.5)],
@@ -408,7 +408,7 @@ def storm_gale_bow():
                                                  [(0, 0), (-3, 2.5), (-6.5, 2), (-8.5, 4)]), (1.6, -1.2, 1.1)):
                 lines.append(([(qx + 0.4 + x, qy + y) for x, y in rel], curl * zs))
             xs = [p[0] for pts, _ in lines for p in pts]
-            box = (min(xs) - 4, 25, max(xs) + 1, 46)
+            box = (min(xs) - 4, 22, max(xs) + 1, 44)
             for sign, n in ((1, 'u'), (-1, 'd')):
                 wind_streaks(m, f'string_{key}_wind_{n}{zn}', lines, box, zs * 0.3, sign < 0, dirx=-1)
     return m
