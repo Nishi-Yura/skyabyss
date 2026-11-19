@@ -16,9 +16,16 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import lib  # noqa: E402
 from lib import Model  # noqa: E402
 
 C, S, P = 'coral', 'shell', 'pearl'
+
+
+def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
+    """45 度に回した四角（菱）"""
+    h = s / (2 * math.sqrt(2))
+    m.seg(name, mat, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, d, t0, t1, over=0, zc=zc)
 
 
 def M(name):
@@ -266,18 +273,47 @@ def tide_bow():
 
 
 def tide_coral_bow():
-    """マンタの翼の弓: 幅広く平たい翼の弓腕が外へ張り出して先へ細る。下の先は細い尾になって弦より下へ垂れる。翼の後ろ縁が光る"""
+    """マンタの翼の弓（伝説）: 幅広く平たいマンタの翼が弓腕になって外へ大きく張り出す。翼の面には貝の白の斑紋が並び、
+    翼の縁は左右（奥行き）へ反り返る。翼の後ろ縁が真珠の光で光り、そのあとを光る泡が離れて追う。
+    握りの前には貝殻の扇の冠、下の先は細い尾が弦より下へ長く垂れて先に棘。弦は貝の玉を連ねた数珠で、ところどころ真珠が光る"""
     m = M('tide_coral_bow')
     m.box('grip', C, [10.5, 9, -2.25], [13.5, 21, 2.25], grad=(9, 2, 21, 4), wrap=(9, 21))
+    for k, (e, w) in enumerate((((19, 15), 2.5), ((18, 19), 2), ((18, 11), 2), ((16.25, 21.5), 1.5), ((16.25, 8.5), 1.5))):
+        m.seg(f'crest_{k}', S, (13.25, 15), e, w, 0.7, 3 + k * 0.3, 5, tip=True)
+    diamond(m, 'crest_pearl_glow', P, (14.25, 15), 1.75, 1.2, 4, 5)
     wing = [(12, 20.5), (15, 25), (18.5, 29.5), (20, 34), (18.5, 38.5), (14.5, 42.5), (9, 46), (4, 48.5), (1, 49.5)]
-    wd = [5, 6.5, 6.5, 6, 5, 4, 3, 2]
+    wd = [5.5, 7, 7, 6.5, 5.5, 4.25, 3, 2]
     edge = [(13.5, 26.5), (15.75, 30.5), (16.5, 34.5), (15, 38), (11.5, 41.5), (7, 44.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'wing_{n}', C, [mirror(p, sign) for p in wing], wd, 1.25, 2.5, 8, tip=n == 'u')
-        m.chain(f'edge_{n}', P, [mirror(p, sign) for p in edge], 2, 1.5, 2, 4, tip=True)   # 翼の後ろ縁
-        m.seg(f'horn_{n}', C, mirror((10, 19.5), sign), mirror((6.5, 22.5), sign), 2.5, 1.5, 4, 7, tip=True)  # 頭びれ
-    m.chain('tail', C, [(1, -19.5), (-1, -23), (-2, -28), (-1.5, -32)], [2.5, 2, 2], 1, 5, 8.5, tip=True)    # 尾
-    strings(m, (0.5, 49.5), (0.5, -19.5))
+        P_ = lambda q, s=sign: mirror(q, s)
+        m.chain(f'wing_{n}', C, [P_(q) for q in wing], wd, 1.3, 2.5, 8, tip=n == 'u')
+        m.chain(f'edge_{n}', P, [P_(q) for q in edge], 2, 1.55, 2, 4, tip=True)
+        m.seg(f'horn_{n}', C, P_((10, 19.5)), P_((6, 23)), 2.75, 1.5, 4, 7, tip=True)
+        for k, (x, y, s) in enumerate(((17, 28.5, 1.75), (19, 33, 2), (17.75, 37.5, 1.75), (14.5, 40.5, 1.5), (10.5, 44, 1.25))):
+            for zs in (1, -1):
+                q = P_((x, y))
+                m.box(f'spot_{n}{k}{"f" if zs > 0 else "b"}', S, [q[0] - s / 2, q[1] - s / 2, zs * 1.3 - 0.15 if zs > 0 else -1.45],
+                      [q[0] + s / 2, q[1] + s / 2, 1.45 if zs > 0 else -1.15], 4 + k % 2)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            for k, (x, y) in enumerate(((20, 31.5), (19.75, 36.5))):
+                q = P_((x, y))
+                z0, z1 = (1.3, 4.25) if zs > 0 else (-4.25, -1.3)
+                m.box(f'flap_{n}{zn}{k}', C, [q[0] - 1.25, q[1] - 2, z0], [q[0] + 0.75, q[1] + 2, z1], 6 + k)
+        for k, (x, y, s) in enumerate(((22, 30, 1.4), (23.5, 35, 1.1), (21.75, 39.75, 1.2), (25, 32.5, 0.8), (19, 43.5, 0.9))):
+            diamond(m, f'bubble_{n}{k}_glow', P, P_((x, y)), s, s * 0.45, 4, 5)
+    m.chain('tail', C, [(1, -19.5), (-1, -23), (-2, -28), (-1.5, -33), (0.25, -37)], [2.75, 2.25, 2, 1.5], 1.1, 5, 8.5, tip=False)
+    m.seg('tail_barb', S, (0.25, -37), (1.25, -40.5), 1.75, 1, 4, 5, tip=True)
+    m.seg('tail_barb_l', S, (0, -36.5), (-2, -38), 1, 0.7, 4, 5, tip=True)
+    top, bot = (0.5, 49.5), (0.5, -19.5)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        ys = (45, 41.5, 38, 34.5, 31, 27.5, 24, 6, 2.5, -1, -4.5, -8, -11.5, -15)
+        for k, y in enumerate(ys):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            if k % 3 == 1:
+                diamond(m, f'string_{key}_pearl{k}_glow', P, q, 1.5, 0.75, 4, 5)
+            else:
+                m.box(f'string_{key}_shell{k}', S, [q[0] - 0.65, q[1] - 0.65, -0.65], [q[0] + 0.65, q[1] + 0.65, 0.65], 4 + k % 2)
     return m
 
 

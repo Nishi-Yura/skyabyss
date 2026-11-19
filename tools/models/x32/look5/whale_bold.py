@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import lib  # noqa: E402
 from lib import Model  # noqa: E402
 from whale_series import grip, bell, bow_grip, strings  # noqa: E402
 
@@ -138,21 +139,41 @@ def whale_bow():
 
 
 def whale_rib_longbow():
-    """肋骨の籠: 長い紺の背骨の弓腕から、外へ肋骨が何本も弧を描いて出る"""
+    """肋骨の籠（伝説）: 長い骨の背骨の弓腕から、外へ肋骨が何本も弧を描いて出て籠をなす。肋骨は背だけでなく
+    左右（奥行き）にも張り出し、籠の中には鯨の心臓の光の塊が浮かぶ。肋骨の先は深海の光で光り、
+    握りの左右には深海の光の結晶。下の先からは骨の尾びれが垂れる。弦には椎骨の玉が連なる"""
     from whale_series import bow_body
     m = Model('whale_rib_longbow')
     bow_body(m, [(12, 21), (14, 28), (15, 35), (14.5, 41), (12, 45)], [(12, 45), (8, 48), (3, 49.5), (-1, 50)],
-             3.5, [3, 2.5, 2], thorns=False)
+             [3.75, 3.5, 3, 2.75], [3, 2.5, 2], thorns=False)
     for sign, n in ((1, 'u'), (-1, 'd')):
-        for k, (x, y, L) in enumerate(((14.5, 26, 7), (15.5, 32, 8), (15.5, 38, 7))):
+        for k, (x, y, L) in enumerate(((14.5, 25, 8), (15.5, 31, 9.5), (15.5, 37, 8.5), (14.25, 42.5, 6.5))):
             yy = 15 + sign * (y - 15)
             a = (x, yy)
             mid = (x + L * 0.6, yy + sign * L * 0.35)
             b = (x + L * 0.75, yy + sign * L * 0.95)
             m.seg(f'rib_{n}{k}_0', 'bone', a, mid, 2, 1, 3, 4.5)
-            m.seg(f'rib_{n}{k}_tip', 'glow', mid, b, 2, 1, 3, 5, tip=True)          # 肋骨の先が光る
-    bow_grip(m, legend=True, gems=False)
-    strings(m, (-1, 50), (-1, -20), [('0', 0), ('p0', 2.4), ('p1', 6.8), ('p2', 11.6)])
+            m.seg(f'rib_{n}{k}_tip', 'glow', mid, b, 1.9, 0.95, 3, 5, tip=True)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            for k, (x, y) in enumerate(((14.75, 28), (15.25, 34), (14.75, 40))):
+                yy = 15 + sign * (y - 15)
+                z0 = 1.75 if zs > 0 else -1.75
+                for j in range(3):
+                    zz = z0 + zs * j * 1.75
+                    xo = x + j * 1.1
+                    m.box(f'zrib_{n}{zn}{k}{j}', 'bone', [xo - 0.75, yy - 0.8, min(zz, zz + zs * 1.9)], [xo + 0.75, yy + 0.8, max(zz, zz + zs * 1.9)], 3.5 + j * 0.4)
+        c = (24, 15 + sign * 14)
+        m.box(f'heart_{n}_glow', 'glow', [c[0] - 1.75, c[1] - 2, -1.75], [c[0] + 1.75, c[1] + 2, 1.75], grad=(c[1] - 2, 3, c[1] + 2, 5))
+        m.box(f'heart_vein_{n}', 'sea', [c[0] - 2.1, c[1] - 0.4, -2.1], [c[0] + 2.1, c[1] + 0.4, 2.1], 5)
+    bow_grip(m, legend=True, gems=True)
+    m.seg('fluke_l', 'bone', (-1, -20), (-4.5, -23.5), 2.5, 1.1, 4, 5, tip=True)
+    m.seg('fluke_r', 'bone', (-1, -20), (2.5, -23.75), 2.5, 1.1, 4, 5, tip=True)
+    top, bot = (-1, 50), (-1, -20)
+    strings(m, top, bot, list(lib.PULLS))
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((45, 41, 37, 33, -3, -7, -11, -15)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_vert{k}', 'bone', [q[0] - 0.9, q[1] - 0.75, -0.9], [q[0] + 0.9, q[1] + 0.75, 0.9], 4 + k % 2)
     return m
 
 

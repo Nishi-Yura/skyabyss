@@ -22,6 +22,12 @@ lib.RAMPS.update({
 T, B, G, A = 'slate', 'brass', 'sigil', 'abyssal'
 
 
+def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
+    """45 度に回した四角（菱）"""
+    h = s / (2 * math.sqrt(2))
+    m.seg(name, mat, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, d, t0, t1, over=0, zc=zc)
+
+
 def M(name):
     return Model(name, accent=B, glowmat=G)
 
@@ -140,21 +146,52 @@ def strings(m, top, bot):
 
 
 def tower_eye_bow():
-    """側の目の弓: 握りの外に石の瞼に抱かれた一つ目（光る）。腕は角張った石の板を段に重ね、先に真鍮の弦受け"""
+    """側の目の弓（伝説）: 握りの前に石の瞼に抱かれた大きな一つ目が光り、そのまわりを真鍮の印の輪が二重に巡る。
+    弓腕は角張った石の板を段に重ねた階段の形で、腹（弦の側）の継ぎ目ごとに小さな目が開いて弓の懐を見つめる。
+    左右（奥行き）には印を刻んだ石の札が張り出し、両端は真鍮の尖塔。弦は真鍮の鎖の輪を連ねたもの"""
     m = M('tower_eye_bow')
-    m.box('grip', T, [10.5, 10, -1.75], [13.5, 20, 1.75], grad=(10, 2, 20, 4), wrap=(10, 20))
-    m.box('lid_u', T, [13.5, 17, -2.25], [19, 19.5, 2.25], 6)
-    m.box('lid_d', T, [13.5, 10.5, -2.25], [19, 13, 2.25], 4)
-    m.box('eye_glow', G, [13.75, 13, -2], [18.5, 17, 2], 4)
-    m.box('pupil', A, [18, 14, -1], [18.9, 16, 1], 1)
-    arm = [(12, 20), (12.75, 26), (12.25, 32), (10.25, 38), (7.25, 42.5), (4.5, 45)]
+    m.box('grip', T, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    m.box('lid_u', T, [13.5, 17, -2.5], [20, 19.75, 2.5], 6)
+    m.box('lid_d', T, [13.5, 10.25, -2.5], [20, 13, 2.5], 4)
+    m.box('lash_u', T, [19, 19.75, -2], [20.5, 20.75, 2], 7)
+    m.box('eye_glow', G, [13.75, 13, -2.25], [19.5, 17, 2.25], 4)
+    m.box('pupil', A, [19, 14, -1.1], [19.9, 16, 1.1], 1)
+    c = (17.5, 15)
+    m.arc('ring_in', B, c, 6.25, -140, 140, 10, 0.9, 0.55, 3, 5)
+    m.arc('ring_out', B, c, 8.5, -150, 150, 14, 0.8, 0.5, 3, 5)
+    for k, a in enumerate((-120, -60, 0, 60, 120)):
+        dx, dy = math.cos(math.radians(a)), math.sin(math.radians(a))
+        diamond(m, f'sigil_{k}_glow', G, (c[0] + dx * 7.4, c[1] + dy * 7.4), 1.25, 0.55, 4, 5)
+    steps = [(12, 20), (13, 24.5), (12.5, 28.5), (13.25, 32.5), (11.5, 36.5), (10.25, 40), (7.75, 43), (5, 45.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', T, [mirror(p, sign) for p in arm], [3.5, 3, 3, 2.5, 2.25], 1.4, 3, 7, tip=False)
-        for k in (1, 3):
-            x, y = mirror(arm[k], sign)
-            m.box(f'plate_{n}{k}', B, [x - 2.25, y - 0.75, -1.6], [x + 2.25, y + 0.75, 1.6], 4)
-        m.seg(f'nock_{n}', B, mirror((6, 45.5), sign), mirror((2.5, 45.5), sign), 2.25, 1.1, 3, 5)
-    strings(m, (3.5, 45.5), (3.5, -15.5))
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in steps]
+        m.chain(f'arm_{n}', T, pts, [4, 3.75, 3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 3, 7, tip=False)
+        for k in (1, 3, 5):
+            x, y = pts[k]
+            m.box(f'plate_{n}{k}', T, [x - 0.5, y - 1, -1.8], [x + 3.25, y + 1, 1.8], 5 + k * 0.3)
+            m.box(f'plate_rim_{n}{k}', B, [x + 3.25, y - 1.25, -1.9], [x + 4, y + 1.25, 1.9], 4)
+        for k in (2, 4):
+            x, y = pts[k]
+            m.box(f'belly_lid_{n}{k}', T, [x - 3.25, y - 1.1, -1.5], [x - 1.25, y + 1.1, 1.5], 6)
+            m.box(f'belly_eye_{n}{k}_glow', G, [x - 3.6, y - 0.55, -0.9], [x - 2.9, y + 0.55, 0.9], 4)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            x, y = pts[3]
+            z0, z1 = (1.5, 5.5) if zs > 0 else (-5.5, -1.5)
+            m.box(f'tablet_{n}{zn}', T, [x - 1.5, y - 2.25, z0], [x + 1.5, y + 2.25, z1], 7)
+            zg = (z1 - 0.1, z1 + 0.15) if zs > 0 else (z0 - 0.15, z0 + 0.1)
+            m.box(f'tablet_rune_{n}{zn}_glow', G, [x - 0.75, y - 1.25, zg[0]], [x + 0.75, y + 1.25, zg[1]], 4)
+        m.chain(f'spire_{n}', B, [P((5, 45.5)), P((3.5, 47.5)), P((4.25, 52))], [2.25, 1.5], 1.1, 3, 5, tip=True)
+        diamond(m, f'spire_gem_{n}_glow', G, P((3.6, 47.6)), 1.4, 1.2, 4, 5)
+    top, bot = (3.5, 47.5), (3.5, -17.5)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((44, 40.5, 37, 33.5, 30, 26.5, 3.5, 0, -3.5, -7, -10.5, -14)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            if k % 2:
+                m.box(f'string_{key}_link{k}', B, [q[0] - 0.75, q[1] - 0.9, -0.3], [q[0] + 0.75, q[1] + 0.9, 0.3], 4)
+            else:
+                m.box(f'string_{key}_link{k}', B, [q[0] - 0.3, q[1] - 0.9, -0.75], [q[0] + 0.3, q[1] + 0.9, 0.75], 3)
     return m
 
 
