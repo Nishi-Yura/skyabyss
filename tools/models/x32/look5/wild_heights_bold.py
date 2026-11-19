@@ -142,19 +142,37 @@ def wild_snowsplitter_axe():
 # ---------------------------------------------------------------- 弓
 
 def wild_eaglet_longbow():
-    """雛鷲の長弓: 背丈ほどある長い弓。弓腕は角の色の薄板を重ね、上下の先が雛鷲の頭（嘴は前へ）。
-    上の鷲の目が雷の光"""
+    """雛鷲の長弓（エピック）: 背丈ほどある長い弓。弓腕は角の色の薄板を重ね、上下の先が雛鷲の頭（嘴は前へ、頭に冠羽）。
+    頭のうしろで畳んだ小さな翼が背へ張り出し、首には左右（奥行き）へ羽の房。上の鷲の目が雷の光。
+    弦には鷲の爪の飾りが一つ下がる"""
     m = M('wild_eaglet_longbow')
-    m.box('grip', H, [10.5, 9.5, -1.5], [13.5, 20.5, 1.5], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    m.box('grip', H, [10.25, 9.5, -1.75], [13.75, 20.5, 1.75], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
     arm = [(12, 20), (11.25, 30), (9.5, 40), (7, 48), (4.5, 53)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', R, [mirror(p, sign) for p in arm], [2.75, 2.5, 2.25, 2], 1.1, 4, 7, tip=False)
-        m.chain(f'lam_{n}', H, [mirror(p, sign) for p in ((12.75, 21), (12, 30), (10.25, 39))], [1, 1], 1.2, 3, 5, tip=False)
-        hy = mirror((4, 54.5), sign)
-        m.box(f'head_{n}', H, [2.5, hy[1] - 1.25, -1.1], [5.5, hy[1] + 1.25, 1.1], 5)
-        m.seg(f'beak_{n}', R, mirror((5.5, 54.5), sign), mirror((7.5, 53.5), sign), 1.25, 0.6, 7, 8, tip=True)
-    m.box('eye_glow', Z, [4.5, 54.75, -1.2], [5.25, 55.5, 1.2], 4)
-    strings(m, (3, 53), (3, -23))
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'arm_{n}', R, [P(q) for q in arm], [3.25, 3, 2.5, 2.25], 1.3, 4, 7, tip=False)
+        m.chain(f'lam_{n}', H, [P(q) for q in ((13, 21), (12.25, 30), (10.5, 39), (8, 47))], [1.1, 1.1, 1], 1.4, 3, 5, tip=False)
+        hy = P((4, 54.75))[1]
+        m.box(f'head_{n}', H, [2, hy - 1.6, -1.4], [6, hy + 1.6, 1.4], 5)
+        m.seg(f'beak_{n}', R, P((6, 55)), P((9, 53.5)), 1.6, 0.8, 7, 8, tip=True)
+        for k, (a, b) in enumerate((((2.5, 56), (0, 58.5)), ((3.5, 56.25), (2, 59.5)), ((4.75, 56.25), (4.5, 59)))):
+            m.seg(f'crest_{n}{k}', H, P(a), P(b), 1.1, 0.5, 4, 6, tip=True)
+        for k, (a, b, w) in enumerate((((7.5, 47.5), (13.5, 50.5), 2.5), ((8.5, 45), (14, 46.5), 2), ((9.25, 42.5), (13.25, 42.75), 1.6))):
+            m.seg(f'wing_{n}{k}', H, P(a), P(b), w, 0.6, 3 + k, 6, tip=True)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            q = P((6.25, 50.5))
+            z0 = 1.3 if zs > 0 else -1.3
+            for j in range(3):
+                za = z0 + zs * j * 1.25
+                m.box(f'tuft_{n}{zn}{j}', R, [q[0] - 0.8 + j * 0.4, q[1] - 0.9 - sign * j * 0.6, min(za, za + zs * 1.4)], [q[0] + 0.8 + j * 0.4, q[1] + 0.9 - sign * j * 0.6, max(za, za + zs * 1.4)], 6 + j)
+    m.box('eye_glow', Z, [4.6, 55.25, -1.5], [5.4, 56, 1.5], 4)
+    m.box('eye_d', R, [4.6, -26, -1.5], [5.4, -25.25, 1.5], 1)
+    top, bot = (3, 53), (3, -23)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        q = lib.string_at(top, bot, pull, lib.string_t(top, bot, 38))
+        m.box(f'string_{key}_cord', H, [q[0] - 0.2, q[1] - 2.5, -0.2], [q[0] + 0.2, q[1], 0.2], 3)
+        m.chain(f'string_{key}_talon', R, [(q[0], q[1] - 2.5), (q[0] + 0.75, q[1] - 4.5), (q[0] - 0.25, q[1] - 6)], [1.1, 0.8], 0.55, 6, 8, tip=True)
     return m
 
 

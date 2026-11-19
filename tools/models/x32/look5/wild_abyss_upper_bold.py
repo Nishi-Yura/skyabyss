@@ -57,23 +57,38 @@ def bow_grip(m, y0=10, y1=20):
 # ================================================================ 弓
 
 def wild_bonestring_bow():
-    """背骨の弓: 弓腕が獣の背骨の節（椎骨）を連ねたもの。節ごとに小さな棘が背へ立ち、
-    握りの真上の一番大きな椎骨の穴の奥に灯が点る"""
+    """背骨の弓（エピック）: 弓腕が獣の背骨の節（椎骨）を連ねたもの。節ごとに棘が背へ長く立ち、左右（奥行き）には
+    小さな肋骨が一対ずつ張り出す。握りの真上の一番大きな椎骨の穴の奥に灯が点る。弦は干した腱で、
+    指の骨の玉が上下に二つずつ"""
     m = M('wild_bonestring_bow')
-    bow_grip(m)
-    m.box('core_vert', T, [10, 19.5, -2], [14, 22, 2], 4)
-    m.box('core_glow', L, [13.9, 20.25, -0.75], [14.3, 21.25, 0.75], 4)
+    m.box('grip', H, [10.25, 9.5, -1.75], [13.75, 20.5, 1.75], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    m.box('core_vert', T, [9.75, 19.5, -2.25], [14.5, 22.5, 2.25], 4)
+    m.box('core_glow', L, [14.4, 20.25, -1], [14.8, 21.75, 1], 4)
+    m.box('core_vert_d', T, [9.75, 7.5, -2.25], [14.5, 10.5, 2.25], 4)
     pts = [(12, 22), (11.25, 27), (10, 32), (8.25, 36.5), (6.25, 40.5), (4.25, 43.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
+        P = lambda q, s=sign: mirror(q, s)
         for k in range(len(pts) - 1):
-            a, b = mirror(pts[k], sign), mirror(pts[k + 1], sign)
-            m.seg(f'vert_{n}{k}', T, a, b, 2.5 - k * 0.2, 1.6 - k * 0.15, 3, 4, over=0.1)
+            a, b = P(pts[k]), P(pts[k + 1])
+            m.seg(f'vert_{n}{k}', T, a, b, 3 - k * 0.25, 1.75 - k * 0.15, 3, 4, over=0.1)
             mx = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
-            m.seg(f'spine_{n}{k}', T, mx, (mx[0] + 1.75, mx[1] + sign * 0.5), 0.9, 0.5, 4, 5, tip=True)
+            ln = 3.75 - k * 0.5
+            m.seg(f'spine_{n}{k}', T, mx, (mx[0] + ln, mx[1] + sign * 1.25), 1.1, 0.55, 4, 5, tip=True)
+            if k < 3:
+                for zs, zn in ((1, 'f'), (-1, 'b')):
+                    z0 = 1.6 if zs > 0 else -1.6
+                    m.box(f'rib_{n}{k}{zn}', T, [mx[0] - 0.5, mx[1] - 0.45, min(z0, z0 + zs * 2.25)], [mx[0] + 0.5, mx[1] + 0.45, max(z0, z0 + zs * 2.25)], 4)
+                    z1 = z0 + zs * 2.25
+                    m.box(f'rib_tip_{n}{k}{zn}', T, [mx[0] - 1.5, mx[1] - 0.4, min(z1, z1 + zs * 0.8)], [mx[0] + 0.5, mx[1] + 0.4, max(z1, z1 + zs * 0.8)], 5)
         for k, p in enumerate(pts[1:5]):
-            q = mirror(p, sign)
-            m.box(f'disc_{n}{k}', H, [q[0] - 1.4, q[1] - 0.35, -1.1], [q[0] + 1.4, q[1] + 0.35, 1.1], 3)
-    strings(m, (3.5, 44), (3.5, -14))
+            q = P(p)
+            m.box(f'disc_{n}{k}', H, [q[0] - 1.6, q[1] - 0.35, -1.25], [q[0] + 1.6, q[1] + 0.35, 1.25], 3)
+    top, bot = (3.5, 44), (3.5, -14)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((36, 32.5, -2.5, -6)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_knuckle{k}', T, [q[0] - 0.75, q[1] - 1, -0.75], [q[0] + 0.75, q[1] + 1, 0.75], 4)
     return m
 
 

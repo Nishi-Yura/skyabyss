@@ -52,18 +52,36 @@ def strings(m, top, bot):
 # ---------------------------------------------------------------- 弓
 
 def wild_ashhook_bow():
-    """灰ひきずりの鉤弓: 弓腕の先がそれぞれ内側（弦の方）へ鋭く曲がる鉤。弓腕の中ほどに灰の布が巻かれ、
-    握りの上の割れ目から熔岩が覗く"""
+    """灰ひきずりの鉤弓（エピック）: 弓腕の先がそれぞれ内側（弦の方）へ鋭く大きく曲がる鉤。腕の腹にも小さな鉤が二本ずつ並ぶ。
+    弓腕の中ほどに灰の布が巻かれ、布の端が左右（奥行き）へ垂れてたなびく。握りの上の割れ目から熔岩が大きく覗き、
+    火の粉が二つ立つ。弦には鉄の小さな鉤が上下に一つずつ掛かる"""
     m = M('wild_ashhook_bow')
-    m.box('grip', A, [10.5, 10, -1.5], [13.5, 20, 1.5], grad=(10, 1, 20, 3), wrap=(10, 20))
-    m.box('crack_glow', G, [13.4, 20.25, -0.5], [14, 22, 0.5], 4)
+    m.box('grip', A, [10.25, 9.5, -1.75], [13.75, 20.5, 1.75], grad=(9.5, 1, 20.5, 3), wrap=(9.5, 20.5))
+    m.box('crack_lip', S, [13.25, 19.75, -1.6], [15.25, 23, 1.6], 3)
+    m.box('crack_glow', G, [14.75, 20.25, -0.9], [15.5, 22.5, 0.9], 4)
+    diamond(m, 'ember_a_glow', G, (16.75, 24.5), 1, 0.45, 4, 5)
+    diamond(m, 'ember_b_glow', G, (15.75, 26.75), 0.75, 0.4, 4, 5)
     arm = [(12, 19.5), (11.75, 27), (10, 34), (7.5, 39.5), (5.5, 42.5)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', S, [mirror(p, sign) for p in arm], [3, 2.75, 2.25, 2], 1.25, 4, 7, tip=False)
-        m.chain(f'hook_{n}', S, [mirror(p, sign) for p in ((5.5, 42.5), (3.5, 44.5), (1, 43.5), (0.5, 41))], [2, 1.75, 1.25], 1, 7, 9, tip=True)
-        y = mirror((10.5, 31), sign)[1]
-        m.box(f'rag_{n}', A, [9.25, y - 1.5, -1.5], [12.5, y + 1.5, 1.5], grad=(y - 1.5, 2, y + 1.5, 3))
-    strings(m, (3.5, 44), (3.5, -14))
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'arm_{n}', S, [P(q) for q in arm], [3.5, 3.25, 2.75, 2.25], 1.4, 4, 7, tip=False)
+        m.chain(f'hook_{n}', S, [P(q) for q in ((5.5, 42.5), (3, 45.25), (0, 44.25), (-1, 40.75), (0.25, 38.5))], [2.5, 2.25, 1.75, 1.25], 1.15, 7, 9, tip=True)
+        for k, (x, y) in enumerate(((10.5, 27.5), (8.5, 35))):
+            q = P((x, y))
+            m.chain(f'barb_{n}{k}', S, [q, (q[0] - 2, q[1] + sign * 0.5), (q[0] - 2.5, q[1] - sign * 1)], [1.25, 0.9], 0.8, 6, 8, tip=True)
+        y = P((10.5, 31))[1]
+        m.box(f'rag_{n}', A, [8.75, y - 2, -1.75], [12.75, y + 2, 1.75], grad=(y - 2, 2, y + 2, 3))
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            z0 = 1.75 if zs > 0 else -1.75
+            for j, (dx, dy, l) in enumerate(((0.5, -1.5, 2.5), (1.5, -4, 2.25), (2.75, -6.25, 2))):
+                za = z0 + zs * j * 1.4
+                m.box(f'tail_{n}{zn}{j}', A, [10 + dx, y + sign * dy - 1, min(za, za + zs * 1.6)], [10 + dx + 1.25, y + sign * dy + 1, max(za, za + zs * 1.6)], 2 + j * 0.5)
+    top, bot = (3.5, 44), (3.5, -14)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((36, -6)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.chain(f'string_{key}_hook{k}', S, [(q[0] - 0.25, q[1]), (q[0] + 1.5, q[1] - 1.25), (q[0] + 1, q[1] - 2.75)], [0.8, 0.7], 0.45, 6, 8, tip=True)
     return m
 
 
