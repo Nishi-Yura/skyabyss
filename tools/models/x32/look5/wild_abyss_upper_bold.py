@@ -14,6 +14,7 @@ from lib import Model  # noqa: E402
 lib.RAMPS.update({
     'shale': ['#0c1414', '#141e1e', '#1c2a2a', '#26383a', '#30464a', '#3c565a', '#4a686c', '#5c7c80', '#729296', '#8eaaae'],
     'salt': ['#6a6a64', '#8e8e86', '#b0b0a8', '#cecec6', '#e6e6e0', '#f8f8f4'],
+    'rag': ['#2a2420', '#3c342c', '#504538', '#665846', '#7e6e58', '#98876e'],
     'lamp': ['#6a3008', '#a4520c', '#d87e1a', '#f6a834', '#ffd27a', '#fff2c8'],
 })
 H, T, L = 'shale', 'salt', 'lamp'
@@ -151,21 +152,71 @@ def wild_saltcrow_bow():
 
 
 def wild_hanged_longbow():
-    """吊り人の大弓: 背丈ほどの長弓。上の弓腕に輪にした綱が掛かってだらりと下がり、
-    綱の端に結ばれた小さな札が灯色に光る。弓腕は継ぎ目ごとに塩の白"""
+    """吊り人の大弓（ヒロイック）: 背丈ほどの長弓。弓腕には綱がぐるぐると巻きつき、継ぎ目ごとに塩の白。
+    上の弓腕の腹には輪にした綱が掛かってだらりと下がり、端に結んだ札が灯色に光る。下の弓腕の腹からは鎖が二本垂れ、
+    骨の鍵と塩の結晶の飾りが揺れる。左右（奥行き）にはぼろぼろの布切れがたなびく。弦は結び目の瘤が並ぶ綱"""
     m = M('wild_hanged_longbow')
-    m.box('grip', H, [10.25, 9, -1.75], [13.75, 21, 1.75], grad=(9, 2, 21, 4), wrap=(9, 21))
+    m.box('grip', H, [10.25, 9, -1.9], [13.75, 21, 1.9], grad=(9, 2, 21, 4), wrap=(9, 21))
     arm = [(12, 20.5), (11.25, 30), (9.5, 39), (7, 46.5), (4.25, 52)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'arm_{n}', H, [mirror(p, sign) for p in arm], [3, 2.5, 2.25, 1.75], 1.3, 4, 7, tip=False)
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'arm_{n}', H, pts, [3.75, 3.25, 2.75, 2.25], 1.5, 4, 7, tip=False)
         for k, p in enumerate(arm[1:4]):
-            q = mirror(p, sign)
-            m.box(f'joint_{n}{k}', T, [q[0] - 1.6, q[1] - 0.4, -1.45], [q[0] + 1.6, q[1] + 0.4, 1.45], 3)
-        m.seg(f'nock_{n}', T, mirror((4.25, 52), sign), mirror((2.25, 54.5), sign), 1.5, 1, 3, 5, tip=True)
-    m.box('noose_top', T, [9.75, 41.5, -1.6], [13, 42.5, 1.6], 3)
-    m.chain('noose', T, [(12.5, 42), (14, 38), (14.25, 33), (13.5, 29.5)], [0.8, 0.8, 0.8], 0.8, 3, 4, tip=False)
-    m.box('tag_glow', L, [12.75, 27, -0.4], [14.5, 29.5, 0.4], 4)
-    strings(m, (2.5, 54.25), (2.5, -24.25))
+            q = P(p)
+            m.box(f'joint_{n}{k}', T, [q[0] - 2, q[1] - 0.5, -1.75], [q[0] + 2, q[1] + 0.5, 1.75], 3)
+        for k in range(6):
+            y = 23 + k * 3.25
+            x = 11.6 - (y - 21) * 0.13
+            q = P((x, y))
+            m.seg(f'coil_{n}{k}', T, (q[0] - 2.25, q[1] - sign * 0.6), (q[0] + 2.25, q[1] + sign * 0.6), 0.9, 1.85, 2, 3, over=0)
+        m.seg(f'nock_{n}', T, P((4.25, 52)), P((2.25, 54.5)), 1.75, 1.1, 3, 5, tip=True)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            q = P((10.25, 35))
+            pts_z = [(q[0], q[1], 1.6), (q[0] + 1.25, q[1] - sign * 1.5, 4), (q[0] + 0.5, q[1] - sign * 3.5, 6.25), (q[0] + 1.5, q[1] - sign * 5.75, 7.75)]
+            for j in range(len(pts_z) - 1):
+                (x0, y0, z0), (x1, y1, z1) = pts_z[j], pts_z[j + 1]
+                m.box(f'rag_{n}{zn}{j}', 'rag', [min(x0, x1) - 0.9, min(y0, y1) - 0.4, zs * min(z0, z1) if zs > 0 else -max(z0, z1)],
+                      [max(x0, x1) + 0.9, max(y0, y1) + 0.4, zs * max(z0, z1) if zs > 0 else -min(z0, z1)], 2 + j)
+    # 背の旗: 上の弓腕の背から下がるぼろの旗（塩の印）
+    m.box('banner_pole', T, [10.5, 36.5, -0.45], [24, 37.4, 0.45], 4)
+    diamond(m, 'banner_pole_end', T, (24.25, 36.95), 1.6, 0.6, 4, 5)
+    for k, (x0, x1, ylo) in enumerate(((11.5, 14.25, 22), (14.25, 17, 24.5), (17, 19.75, 20.5), (19.75, 22.25, 23.5), (22.25, 23.5, 27.5))):
+        m.box(f'banner_{k}', 'rag', [x0, ylo, -0.3], [x1, 36.5, 0.3], grad=(ylo, 1, 36.5, 4))
+    m.seg('banner_sigil', T, (14.5, 27.5), (19.5, 33.5), 1.2, 0.4, 4, 5, over=0)
+    m.seg('banner_sigil_b', T, (14.5, 33.5), (19.5, 27.5), 1.2, 0.4, 4, 5, over=0)
+    diamond(m, 'banner_eye_glow', L, (17, 30.5), 1.75, 0.45, 4, 5)
+    for k, (x, ln) in enumerate(((12.75, 3), (15.5, 5), (18.25, 2), (21, 4))):
+        m.box(f'chime_cord_{k}', T, [x - 0.15, 20 - ln + 3, -0.15], [x + 0.15, 23, 0.15], 3)
+        m.box(f'chime_{k}', T, [x - 0.55, 17.5 - ln, -0.55], [x + 0.55, 20.5 - ln + 0.5, 0.55], 5)
+    # 上の腹: 輪にした綱と札
+    m.box('noose_top', T, [7.5, 41.5, -1.6], [10.75, 42.5, 1.6], 3)
+    m.chain('noose', T, [(8.25, 42), (6.75, 38), (6.5, 33), (7.25, 29.5)], [0.9, 0.9, 0.9], 0.8, 3, 4, tip=False)
+    m.chain('noose_loop', T, [(7.25, 29.5), (8.75, 28.25), (9, 30.75), (7.75, 31.5)], [0.75, 0.75, 0.75], 0.75, 3, 4, tip=False)
+    m.box('tag_glow', L, [6.25, 25.25, -0.45], [8.5, 28.25, 0.45], 4)
+    m.box('tag_tie', T, [7, 28.25, -0.3], [7.5, 29.75, 0.3], 3)
+    # 下の腹: 鎖二本と骨の鍵・塩の結晶
+    for k, (x, ln) in enumerate(((9.25, 6), (7.85, 9))):
+        y0 = -9 + k * -2.5
+        for j in range(int(ln / 1.5)):
+            yy = y0 - j * 1.5
+            if j % 2:
+                m.box(f'chain_{k}{j}', H, [x - 0.25, yy - 0.8, -0.55], [x + 0.25, yy + 0.8, 0.55], 6)
+            else:
+                m.box(f'chain_{k}{j}', H, [x - 0.55, yy - 0.8, -0.25], [x + 0.55, yy + 0.8, 0.25], 5)
+        yb = y0 - int(ln / 1.5) * 1.5
+        if k == 0:
+            m.box('key_bow', T, [x - 1.1, yb - 1.75, -0.4], [x + 1.1, yb, 0.4], 4)
+            m.box('key_shaft', T, [x - 0.3, yb - 5, -0.3], [x + 0.3, yb - 1.75, 0.3], 4)
+            m.box('key_bit', T, [x + 0.3, yb - 5, -0.3], [x + 1.4, yb - 3.75, 0.3], 4)
+        else:
+            diamond(m, 'charm_salt', T, (x, yb - 1.5), 2.5, 1, 4, 5)
+    top, bot = (2.5, 54.25), (2.5, -24.25)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((48, 42, 36, -6, -12, -18)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_knot{k}', T, [q[0] - 0.85, q[1] - 0.7, -0.85], [q[0] + 0.85, q[1] + 0.7, 0.85], 2 + k % 2)
     return m
 
 

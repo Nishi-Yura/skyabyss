@@ -68,21 +68,53 @@ def wild_ashhook_bow():
 
 
 def wild_crater_longbow():
-    """火口の大弓: 背丈ほどの重い弓。弓腕は冷えた溶岩の塊を継いだように節くれ、継ぎ目ごとに赤い割れ目。
-    いちばん上の継ぎ目だけが光る。弦受けは灰の骨"""
+    """火口の大弓（ヒロイック）: 背丈ほどの重い弓。弓腕は冷えた溶岩の塊を継いだように節くれ、継ぎ目の割れ目はどれも熔岩の光で光る。
+    継ぎ目の下からは熔岩のしずくが弓の懐へ垂れ、左右（奥行き）には黒い溶岩の棘が突き出す。握りの前には小さな火口の鉢が抱かれ、
+    中に熔岩がたまって煙の石が浮く。弦受けは灰の骨、弦には灰の骨の玉が二つずつ"""
     m = M('wild_crater_longbow')
-    m.box('grip', A, [10.25, 9, -1.75], [13.75, 21, 1.75], grad=(9, 1, 21, 3), wrap=(9, 21))
+    m.box('grip', A, [10.25, 9, -1.9], [13.75, 21, 1.9], grad=(9, 1, 21, 3), wrap=(9, 21))
+    m.box('crater', S, [13.5, 10.5, -2.75], [21, 15.5, 2.75], grad=(10.5, 2, 15.5, 5))
+    m.box('crater_rim_l', S, [13.25, 15.5, -2.6], [14.75, 17, 2.6], 6)
+    m.box('crater_rim_r', S, [19.5, 15.5, -2.9], [21.25, 17.75, 2.9], 6)
+    m.box('crater_pool_glow', G, [14.75, 15, -2.4], [19.5, 15.9, 2.4], 4)
+    for k, (a1, b1, w1) in enumerate((((17, 15.75), (17.5, 21), 1.6), ((15.75, 15.75), (15, 19), 1.1), ((18.75, 15.75), (19.75, 19.5), 1.1))):
+        m.seg(f'spout_{k}_glow', G, a1, b1, w1, 0.8, 3, 5, tip=True)
+    for k, (x, y, s) in enumerate(((16, 23, 1.75), (18.75, 24.75, 1.4), (16.75, 27, 1.1), (19.5, 28.5, 0.8))):
+        diamond(m, f'smoke_{k}', A, (x, y), s, 0.7, 3, 5)
+    m.box('crater_foot', S, [15, 10.5, -1.6], [18, 11.5, 1.6], 3)
     nodes = [(12, 20.5), (11.5, 28), (10, 36), (7.75, 43.5), (5, 50), (3.5, 53)]
     for sign, n in ((1, 'u'), (-1, 'd')):
+        P = lambda q, s=sign: mirror(q, s)
         for k in range(len(nodes) - 1):
-            a, b = mirror(nodes[k], sign), mirror(nodes[k + 1], sign)
-            m.seg(f'lump_{n}{k}', S, a, b, 3.5 - k * 0.4, 1.6 - k * 0.15, 3 + k, 4 + k)
-        for k, p in enumerate(nodes[1:4]):
-            q = mirror(p, sign)
-            m.box(f'seam_{n}{k}', S, [q[0] - 1.9, q[1] - 0.3, -1.7], [q[0] + 1.9, q[1] + 0.3, 1.7], 1)
-        m.seg(f'nock_{n}', A, mirror((3.5, 53), sign), mirror((1, 53.5), sign), 1.75, 0.9, 3, 5)
-    m.box('seam_glow', G, [8.1, 43.25, -1.75], [11.9, 43.75, 1.75], 4)
-    strings(m, (1.5, 53.5), (1.5, -23.5))
+            a, b = P(nodes[k]), P(nodes[k + 1])
+            m.seg(f'lump_{n}{k}', S, a, b, 4.25 - k * 0.45, 1.8 - k * 0.15, 3 + k, 4 + k)
+        for k, p in enumerate(nodes[1:5]):
+            q = P(p)
+            w = 2.2 - k * 0.25
+            m.box(f'seam_{n}{k}_glow', G, [q[0] - w, q[1] - 0.3, -1.85 + k * 0.15], [q[0] + w, q[1] + 0.3, 1.85 - k * 0.15], 4)
+        for k, (x, y, ln) in enumerate(((10.25, 27, 3.5), (8.75, 35, 3), (6.5, 42.5, 2.25))):
+            q = P((x, y))
+            m.seg(f'drip_{n}{k}_glow', G, q, (q[0] - 0.4, q[1] - sign * ln), 1, 0.6, 3, 5, tip=True)
+            diamond(m, f'drop_{n}{k}_glow', G, (q[0] - 0.5, q[1] - sign * (ln + 1.4)), 0.9, 0.45, 4, 5)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            for k, p in enumerate(nodes[1:3]):
+                q = P(p)
+                z0 = 1.6 if zs > 0 else -1.6
+                for j, (w, ln) in enumerate(((1.75, 2), (1.25, 1.75), (0.75, 1.25))):
+                    za = z0 + zs * (j * 1.9)
+                    m.box(f'spike_{n}{zn}{k}{j}', S, [q[0] - w / 2 + 0.3, q[1] - w / 2, min(za, za + zs * ln)], [q[0] + w / 2 + 0.3, q[1] + w / 2, max(za, za + zs * ln)], 2 + j)
+        for k, (bx, by, h, w) in enumerate(((12.75, 25, 6.5, 3.25), (11.75, 32, 7.5, 3.5), (10, 39.5, 6.5, 3), (7.75, 46.5, 4.75, 2.5))):
+            q = P((bx, by))
+            m.seg(f'ridge_{n}{k}', S, q, (q[0] + h, q[1] + sign * h * 0.35), w, 1.2, 5 + k * 0.5, 8, tip=True)
+            m.seg(f'ridge_vein_{n}{k}_glow', G, (q[0] + 0.5, q[1]), (q[0] + h * 0.7, q[1] + sign * h * 0.25), 0.6, 1.25, 3, 5, over=0)
+        m.chain(f'vein_{n}_glow', G, [P((q0[0] - 1.6, q0[1])) for q0 in nodes[1:5]], [0.7, 0.65, 0.6], 1.7, 3, 5, tip=False)
+        m.seg(f'nock_{n}', A, P((3.5, 53)), P((1, 53.5)), 2, 1, 3, 5)
+    top, bot = (1.5, 53.5), (1.5, -23.5)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((47, 44, -14, -17)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_bone{k}', A, [q[0] - 0.8, q[1] - 0.8, -0.8], [q[0] + 0.8, q[1] + 0.8, 0.8], 4 + k % 2)
     return m
 
 
