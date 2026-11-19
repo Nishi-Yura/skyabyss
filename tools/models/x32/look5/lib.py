@@ -38,11 +38,12 @@ class Model:
         self.accent = accent      # 巻き・縁取りの線の素材
         self.glowmat = glowmat    # 光る素材（名前を _glow にする）
 
-    def box(self, name, mat, frm, to, base=3, grad=None, rim=False, wrap=None, gem=False, glow=None):
+    def box(self, name, mat, frm, to, base=3, grad=None, rim=False, wrap=None, gem=False, glow=None, solid=False, facepix=None):
         """grad=(y0, t0, y1, t1): 世界の y で色の段を流す。wrap=(y0, y1): その高さに巻きを描く"""
         self.parts.append(dict(name=self._nm(name, mat, glow), mat=mat, frm=list(frm), to=list(to),
                                origin=[(frm[0] + to[0]) / 2, (frm[1] + to[1]) / 2, (frm[2] + to[2]) / 2], rot=0,
-                               base=base, grad=grad, rim=rim, wrap=wrap, gem=gem, seg=None, tip=False, accent=self.accent))
+                               base=base, grad=grad, rim=rim, wrap=wrap, gem=gem, seg=None, tip=False, accent=self.accent,
+                               solid=solid, facepix=facepix))
 
     def decal(self, name, pixels, frm, to, plane='xy'):
         """絵の板（厚みなし）。pixels は上の行から並べた (mat, tone) か None（透明）の格子。
@@ -99,7 +100,16 @@ class Model:
     def build(self, out_dir, width=128):
         out_dir = Path(out_dir)
         rects = []
+        solid = {}   # 一色の箱（ドット絵の芯）は面の向きの明暗ごとに 1 ドットの UV を分け合う
         for e in self.parts:
+            if e.get('solid'):
+                for face in OFF:
+                    solid.setdefault((e['mat'], round(e['base'] + OFF[face], 1)), None)
+                continue
+            if e.get('facepix'):
+                for face, rows in e['facepix'].items():
+                    rects.append((len(rows), len(rows[0]), e['name'], face))
+                continue
             if e.get('pix'):
                 ph, pw = len(e['pix']), len(e['pix'][0])
                 fs = ('south', 'north') if e.get('plane', 'xy') == 'xy' else ('east', 'west')
@@ -109,6 +119,7 @@ class Model:
             for face, (w, h) in {'south': (dx, dy), 'north': (dx, dy), 'east': (dz, dy), 'west': (dz, dy),
                                  'up': (dx, dz), 'down': (dx, dz)}.items():
                 rects.append((h, w, e['name'], face))
+        rects += [(1, 1, ('solid', k), 's') for k in solid]
         rects.sort(key=lambda r: (-r[0], -r[1]))
         x = y = rowh = 0
         uv = {}
@@ -122,7 +133,20 @@ class Model:
         while H < y + rowh:
             H *= 2
         img = Image.new('RGBA', (width, H), (0, 0, 0, 0))
+        for k in solid:
+            r = uv[('solid', k)]['s']
+            put(img, r[0], r[1], k[0], k[1])
         for e in self.parts:
+            if e.get('solid'):
+                uv[e['name']] = {f: uv[('solid', (e['mat'], round(e['base'] + OFF[f], 1)))]['s'] for f in OFF}
+                continue
+            if e.get('facepix'):
+                for face, r in uv[e['name']].items():
+                    for j, row in enumerate(e['facepix'][face]):
+                        for i, px in enumerate(row):
+                            if px:
+                                put(img, r[0] + i, r[1] + j, px[0], px[1])
+                continue
             for face, r in uv[e['name']].items():
                 paint_face(img, e, face, r)
         img.save(out_dir / f'{self.name}_base.png')
