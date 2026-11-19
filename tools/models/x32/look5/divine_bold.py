@@ -343,18 +343,54 @@ def divine_plume_bow():
 
 
 def divine_mist_bow():
-    """霞鳥の弓: 腕は霞鳥の灰白の翼（幅広の羽が先へ細る）、握りに金の鈴。光なし"""
+    """霞鳥の弓（伝説）: 弓腕は霞鳥の灰白の幅広い翼。上の先は霞鳥の頭（金の嘴が前へ）、下の先は長い尾羽が三枚垂れる。
+    上の弓腕の腹（弓の懐）からは金の鈴が大中小の三つ吊られ、鈴の舌が暁の光で光る。弓のまわりには霞の帯が
+    奥行きの前後に離れて漂い、弦には金の糸が絡んで小さな鈴が上下に付く"""
     m = M('divine_mist_bow')
-    bow_grip(m)
-    m.box('bell_cord', G, [13.5, 13.5, -0.3], [15, 14, 0.3], 3)
-    m.box('bell', G, [14.75, 11.5, -1.25], [17, 14, 1.25], grad=(11.5, 2, 14, 4))
-    wingp = [(12, 20.5), (14.5, 26), (15.5, 32), (14, 38), (10.5, 42.5), (6, 45.5), (2.5, 47)]
+    m.box('grip', S, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 5, 20.5, 7), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'cap_{n}', G, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    wingp = [(12, 20.5), (15, 26), (16.25, 32), (14.75, 38), (11, 42.5), (6.5, 45.5), (3, 47)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        m.chain(f'wing_{n}', S, [mirror(p, sign) for p in wingp], [4, 4.5, 4, 3.5, 2.5, 2], 1, 4, 8, tip=True)
-        for k, (a, b) in enumerate((((14, 27), (17.5, 29)), ((15, 33), (18, 34.5)), ((13.5, 39), (16, 41)))):
-            m.seg(f'tuft_{n}{k}', S, mirror(a, sign), mirror(b, sign), 2, 0.7, 5, 7, tip=True)
-        m.seg(f'nock_{n}', G, mirror((4.5, 46.75), sign), mirror((1.5, 46.75), sign), 2, 1, 3, 5)
-    strings(m, (2, 46.75), (2, -16.75))
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'wing_{n}', S, [P(q) for q in wingp], [4.5, 5, 4.5, 4, 3, 2.25], 1.2, 4, 8, tip=False)
+        m.chain(f'wing_edge_{n}', G, [P((q[0] + 2.3 - k * 0.2, q[1])) for k, q in enumerate(wingp[1:5])], [0.75, 0.7, 0.65], 1.3, 3, 5, tip=False)
+        for k, (a, b, w) in enumerate((((15, 27), (20, 29.5), 2.75), ((16.25, 32.5), (21.25, 34.5), 2.75), ((15, 38), (19.25, 41), 2.25), ((12, 42), (15, 45.5), 2))):
+            m.seg(f'covert_{n}{k}', S, P(a), P(b), w, 0.75, 6, 9, tip=True)
+    # 上の先: 霞鳥の頭
+    m.box('head', S, [1.5, 46.25, -1.6], [5, 49.5, 1.6], grad=(46.25, 6, 49.5, 8))
+    m.seg('beak', G, (5, 48.25), (8.25, 47.25), 1.6, 1, 3, 5, tip=True)
+    m.box('eye_glow', D, [3.75, 48, -1.7], [4.5, 48.75, 1.7], 4)
+    m.chain('crest', S, [(2, 49.5), (0.5, 51.5), (-1.5, 52.25)], [1.25, 1], 0.6, 7, 9, tip=True)
+    # 下の先: 長い尾羽三枚
+    for k, (e, w) in enumerate((((1.5, -27), 2.25), ((4.5, -28.5), 2.5), ((7.5, -26.5), 2.25))):
+        m.seg(f'tail_{k}', S, (3.5 + (k - 1) * 0.75, -16.5), e, w, 0.55, 7, 9, tip=True)
+        m.seg(f'tail_tip_{k}', G, e, (e[0] + (k - 1) * 0.5, e[1] - 1.5), w * 0.8, 0.5, 4, 5, tip=True)
+    # 懐の鈴三つ（上の弓腕の腹から）
+    m.box('bell_bar', G, [6.5, 33.75, -0.35], [14.75, 34.4, 0.35], 4)
+    for k, (x, ln, s) in enumerate(((7.25, 3, 3.25), (9.5, 5.5, 2.5), (11.75, 2.25, 2))):
+        m.box(f'bell_cord_{k}', G, [x - 0.2, 33.75 - ln, -0.2], [x + 0.2, 33.75, 0.2], 3)
+        y1 = 33.75 - ln
+        m.box(f'bell_{k}', G, [x - s / 2, y1 - s, -s / 2], [x + s / 2, y1, s / 2], grad=(y1 - s, 2, y1, 5))
+        m.box(f'bell_lip_{k}', G, [x - s / 2 - 0.3, y1 - s - 0.4, -s / 2 - 0.3], [x + s / 2 + 0.3, y1 - s, s / 2 + 0.3], 3)
+        m.box(f'clapper_{k}_glow', D, [x - 0.4, y1 - s - 1.25, -0.4], [x + 0.4, y1 - s - 0.4, 0.4], 4)
+    # 霞の帯（前後に離れて漂う）
+    for zs, zn in ((1, 'f'), (-1, 'b')):
+        for k, (x, y, w, h) in enumerate(((18.5, 22, 7, 1.25), (20.5, 9, 6, 1), (17, 38.5, 5, 1), (16.5, -6, 5.5, 1.25))):
+            z = zs * (4.25 + (k % 2) * 1.5)
+            m.box(f'mist_{zn}{k}', S, [x - w / 2, y - h / 2, z - 0.4], [x + w / 2, y + h / 2, z + 0.4], 8 + k % 2 * 0.5)
+            m.box(f'mist_tail_{zn}{k}', S, [x + w / 2 - 0.25, y - h / 2 + 0.25, z - 0.3], [x + w / 2 + 2, y + h / 2 - 0.25, z + 0.3], 9)
+    top = (3, 47)
+    bot = (3, -16.75)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((40, 36, 32, -2, -6, -10)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_thread{k}', G, [q[0] - 0.65, q[1] - 0.3, -0.65], [q[0] + 0.65, q[1] + 0.3, 0.65], 4)
+        for k, y in enumerate((28, 1.5)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_chime{k}', G, [q[0] - 0.75, q[1] - 1.75, -0.75], [q[0] + 0.75, q[1] - 0.25, 0.75], 4)
+            m.box(f'string_{key}_chime{k}_glow', D, [q[0] - 0.3, q[1] - 2.25, -0.3], [q[0] + 0.3, q[1] - 1.75, 0.3], 4)
     return m
 
 

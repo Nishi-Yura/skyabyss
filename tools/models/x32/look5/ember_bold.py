@@ -283,29 +283,53 @@ def ember_bow():
 
 
 def ember_flare_bow():
-    """火の粉の弓: 焼けた枝の腕（表に焦げた樹皮の板）。節ごとの裂け目から橙の光が漏れ、腕の途中から焦げた小枝が二本出る"""
+    """火の粉の弓（伝説）: 焼けた枝の太い弓腕。節ごとの裂け目から橙の光が漏れ、裂け目の背からは炎の舌が上へ立ち昇る。
+    握りの前には焼き物の火鉢が抱かれ、中で大きな炎が燃え上がる。弓腕の途中からは焦げた小枝が背と左右（奥行き）へ
+    分かれて伸び、その先にも火が灯る。まわりには火の粉が舞う。弦は焼き物の結び玉で三か所留め、結び玉が熾火で光る"""
     m = M('ember_flare_bow')
-    bow_grip(m)
+    m.box('grip', I, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
+    for n, y in (('u', 20.25), ('d', 8.25)):
+        m.box(f'band_{n}', K, [9.75, y, -2.3], [14.25, y + 1.5, 2.3], 4)
+    # 火鉢と炎
+    m.box('brazier', K, [13.75, 11.5, -2.25], [19.25, 15.25, 2.25], grad=(11.5, 1, 15.25, 4))
+    m.box('brazier_rim', K, [13.25, 15.25, -2.75], [19.75, 16.25, 2.75], 5)
+    m.box('brazier_foot', K, [15, 10.5, -1.5], [18, 11.5, 1.5], 2)
+    for k, (a, b, w) in enumerate((((16.5, 16), (16.75, 23.5), 3), ((15, 16), (13.75, 21.5), 2), ((18, 16), (19.75, 21), 2), ((16.5, 18), (17.5, 26.5), 1.5))):
+        m.seg(f'flame_{k}_glow', E, a, b, w, 1.4 - k * 0.2, 3 + (k == 3), 5, tip=True)
     arm = [(12, 21), (12, 27), (11, 33), (9, 38.5), (6.5, 43), (3.5, 46)]
     for sign, n in ((1, 'u'), (-1, 'd')):
-        pts = [mirror(p, sign) for p in arm]
-        m.chain(f'arm_{n}', I, pts, [3.25, 3, 2.75, 2.5, 2.25], 1.3, 1, 4, tip=False)
+        P = lambda q, s=sign: mirror(q, s)
+        pts = [P(q) for q in arm]
+        m.chain(f'arm_{n}', I, pts, [3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 1, 4, tip=False)
         for k in (1, 2, 3, 4):
             x, y = pts[k]
             px, py = pts[k + 1]
             ux, uy = (px - x), (py - y)
-            L = math.hypot(ux, uy)
-            m.seg(f'crack_{n}{k}', E, (x - ux / L * 0.75, y - uy / L * 0.75), (x + ux / L * 0.75, y + uy / L * 0.75),
-                  3.5 - 0.25 * k, 1.45, 3, 4, over=0)
-        for k in (0, 2):
-            ax, ay = pts[k]
-            bx, by = pts[k + 1]
-            m.seg(f'bark_{n}{k}', I, (ax + (bx - ax) * 0.2, ay + (by - ay) * 0.2), (ax + (bx - ax) * 0.8, ay + (by - ay) * 0.8),
-                  2, 0.4, 0, 1, zc=-1.5)
-        m.chain(f'twig_{n}0', I, [mirror(p, sign) for p in ((11.75, 30), (14.5, 33), (15, 36.5))], [2, 2], 0.9, 2, 5, tip=True)
-        m.chain(f'twig_{n}1', I, [mirror(p, sign) for p in ((9.5, 37.5), (12, 40), (11.5, 42.5))], [2, 2], 0.8, 2, 5, tip=True)
-        m.seg(f'nock_{n}', K, mirror((5, 46.5), sign), mirror((2, 46.5), sign), 2, 1, 4, 5)
-    strings(m, (3, 46.5), (3, -16.5))
+            L0 = math.hypot(ux, uy)
+            m.seg(f'crack_{n}{k}', E, (x - ux / L0 * 0.75, y - uy / L0 * 0.75), (x + ux / L0 * 0.75, y + uy / L0 * 0.75),
+                  4 - 0.3 * k, 1.6, 3, 4, over=0)
+            if k < 4:
+                ln = 4.5 - k * 0.75
+                m.seg(f'tongue_{n}{k}_glow', E, (x + 1.5, y), (x + 3, y + ln), 1.6 - k * 0.2, 0.6, 3, 5, tip=True)
+        tw = P((11.75, 30))
+        m.chain(f'twig_{n}0', I, [tw, P((15.5, 33)), P((16.5, 37))], [2, 1.5], 0.9, 2, 5, tip=False)
+        diamond(m, f'twig_fire_{n}0_glow', E, P((16.75, 38)), 1.75, 1, 4, 5)
+        for zs, zn in ((1, 'f'), (-1, 'b')):
+            q = P((9.5, 37.5))
+            z0, z1 = (1.4, 5) if zs > 0 else (-5, -1.4)
+            m.box(f'twig_z_{n}{zn}', I, [q[0] - 0.8, q[1] - 0.8, z0], [q[0] + 0.8, q[1] + 0.8, z1], 3)
+            z2 = (5, 6.25) if zs > 0 else (-6.25, -5)
+            m.box(f'twig_z_fire_{n}{zn}_glow', E, [q[0] - 0.6, q[1] - 0.6 + 0.5, z2[0]], [q[0] + 0.6, q[1] + 1.2, z2[1]], 4)
+        m.seg(f'nock_{n}', K, P((5, 46.5)), P((2, 46.5)), 2.25, 1.1, 4, 5)
+    for k, (x, y, s) in enumerate(((19.5, 30, 1.2), (21.5, 26.5, 0.9), (14.5, 29.5, 0.8), (18.5, 44, 1), (13, 50, 0.9), (20.5, 6, 1), (17, 0, 0.8), (22.5, 15, 0.8))):
+        diamond(m, f'spark_{k}_glow', E, (x, y), s, 0.45, 4, 5)
+    top, bot = (2.5, 46.5), (2.5, -16.5)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((37, -7)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            diamond(m, f'string_{key}_knot{k}', K, q, 2.25, 1, 3, 5)
+            diamond(m, f'string_{key}_knot{k}_glow', E, q, 1.1, 1.1, 4, 5)
     return m
 
 
