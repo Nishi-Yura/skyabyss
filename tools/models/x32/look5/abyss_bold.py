@@ -311,8 +311,8 @@ def abyss_tide_dagger():
 
 
 def abyss_tide_bow():
-    """鰭の弓（伝説）: 骨の弓腕の先が外へ跳ね返る反り弓。腕の背には大魚の背びれ（骨の軸が扇に開き、間の暗い膜は板の絵で、縁が明るく切れ込む）が
-    大きく立ち、握りの左右（奥行き）からは胸びれが大きく張り出す。握りの前に淵の光の鰓の筋が三本走り、
+    """鰭の弓（伝説）: 弓腕そのものが大魚の鰭。細い骨の芯の背に幅広の暗い膜が付き、骨の筋が膜を横切って縁へ走り、
+    縁は淵の光で光る。先は外へ跳ね返る。握りの左右（奥行き）からは胸びれが大きく張り出す。握りの前に淵の光の鰓の筋が三本走り、
     両端のまわりには淵の光の水の粒が浮かぶ。弦には鱗の玉が並ぶ"""
     m = M('abyss_tide_bow')
     m.box('grip', V, [10.25, 9.5, -2], [13.75, 20.5, 2], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
@@ -328,16 +328,13 @@ def abyss_tide_bow():
     arm = [(12, 21), (12.5, 27), (11.5, 33), (9.25, 38.5), (6.25, 42.5), (5, 45.5), (6.75, 48)]
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
-        pts = [P(q) for q in arm]
-        m.chain(f'arm_{n}', B, pts, [3.25, 3, 2.75, 2.5, 2.25, 1.75], 1.3, 3, 5, tip=True)
-        rays = (((12.5, 25), 0, 7), ((12.5, 28.5), 12, 8.5), ((12, 32), 24, 9), ((10.75, 35.5), 38, 8.5), ((9, 38.75), 52, 7))
-        ends = []
-        for k, (r, ang, ln) in enumerate(rays):
-            e = (r[0] + math.cos(math.radians(ang)) * ln, r[1] + math.sin(math.radians(ang)) * ln)
-            ends.append(e)
-            m.seg(f'ray_{n}{k}', B, P(r), P(e), 1, 0.55, 4, 5, tip=True)
-        fin_membrane(m, f'membrane_{n}', [(r, e) for (r, _, _), e in zip(rays, ends)], sign < 0)
-        m.chain(f'fin_rim_{n}_glow', G, [P(e) for e in ends], [0.7] * 4, 0.45, 4, 5, tip=False)
+        m.chain(f'web_{n}', 'fin', [P(q) for q in lib.offset_line(arm, 1.8)], [5.5, 7, 7.5, 6.5, 4.5, 2.5], 0.6, 2, 4, tip=True)
+        m.chain(f'bone_{n}', B, [P(q) for q in arm], [2.25, 2, 1.85, 1.6, 1.4, 1.2], 1.2, 3, 5, tip=True)
+        edge = lib.offset_line(arm, 5.2)
+        m.chain(f'rim_{n}_glow', G, [P(q) for q in edge[1:5]], [0.7, 0.7, 0.6], 0.65, 4, 5, tip=False)
+        for k in range(1, 5):
+            a, b = arm[k], edge[k]
+            m.seg(f'ray_{n}{k}', B, P(a), P((b[0] + (k - 2) * 0.6, b[1] + 0.8)), 0.8, 0.7, 4, 5, tip=True)
         for k, (x, y, s) in enumerate(((9.5, 49.5, 1.4), (12, 47.25, 1), (4, 51.5, 1.1), (11, 51.5, 0.8))):
             diamond(m, f'drop_{n}{k}_glow', G, P((x, y)), s, 0.55, 4, 5)
     top, bot = (6.25, 47.75), (6.25, -17.75)

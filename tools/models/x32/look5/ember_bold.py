@@ -314,9 +314,8 @@ def brazier_fire(m, name, base, at, plane, h=11.0, seed=0):
 
 
 def ember_flare_bow():
-    """火の粉の弓（伝説）: 焼けた枝の太い弓腕。節ごとの裂け目から橙の光が漏れ、裂け目の背からは炎の舌が上へ立ち昇る。
-    握りの前には焼き物の火鉢が抱かれ、中で大きな炎（板の絵を前と横に十字に立てる）が燃え上がる。弓腕の途中からは焦げた小枝が背と左右（奥行き）へ
-    分かれて伸び、その先にも火が灯る。まわりには火の粉が舞う。弦は焼き物の結び玉で三か所留め、結び玉が熾火で光る"""
+    """火の粉の弓（伝説）: 弓腕そのものが炎。焦げた細い芯から炎の舌が左右へ交互に揺れて先へ燃え上がり、弓の先で一本の細い火になる。
+    握りの前には焼き物の火鉢が抱かれ、中で大きな炎（板の絵を前と横に十字に立てる）が燃え上がる。まわりには火の粉が舞う。弦は焼き物の結び玉で三か所留め、結び玉が熾火で光る"""
     m = M('ember_flare_bow')
     m.box('grip', I, [10.25, 9.5, -1.9], [13.75, 20.5, 1.9], grad=(9.5, 2, 20.5, 4), wrap=(9.5, 20.5))
     for n, y in (('u', 20.25), ('d', 8.25)):
@@ -328,29 +327,19 @@ def ember_flare_bow():
     brazier_fire(m, 'flame_glow', (17.5, 15.5), 0, 'xy', h=22)
     brazier_fire(m, 'flame_z_glow', (0, 15.5), 16.5, 'zy', h=14, seed=2)
     arm = [(12, 21), (12, 27), (11, 33), (9, 38.5), (6.5, 43), (3.5, 46)]
+    nr = lib.line_normals(arm)
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)
-        pts = [P(q) for q in arm]
-        m.chain(f'arm_{n}', I, pts, [3.75, 3.5, 3.25, 2.75, 2.25], 1.5, 1, 4, tip=False)
-        for k in (1, 2, 3, 4):
-            x, y = pts[k]
-            px, py = pts[k + 1]
-            ux, uy = (px - x), (py - y)
-            L0 = math.hypot(ux, uy)
-            m.seg(f'crack_{n}{k}', E, (x - ux / L0 * 0.75, y - uy / L0 * 0.75), (x + ux / L0 * 0.75, y + uy / L0 * 0.75),
-                  4 - 0.3 * k, 1.6, 3, 4, over=0)
-            if k < 4:
-                ln = 4.5 - k * 0.75
-                m.seg(f'tongue_{n}{k}_glow', E, (x + 1.5, y), (x + 3, y + ln), 1.6 - k * 0.2, 0.6, 3, 5, tip=True)
-        tw = P((11.75, 30))
-        m.chain(f'twig_{n}0', I, [tw, P((15.5, 33)), P((16.5, 37))], [2, 1.5], 0.9, 2, 5, tip=False)
-        diamond(m, f'twig_fire_{n}0_glow', E, P((16.75, 38)), 1.75, 1, 4, 5)
-        for zs, zn in ((1, 'f'), (-1, 'b')):
-            q = P((9.5, 37.5))
-            z0, z1 = (1.4, 5) if zs > 0 else (-5, -1.4)
-            m.box(f'twig_z_{n}{zn}', I, [q[0] - 0.8, q[1] - 0.8, z0], [q[0] + 0.8, q[1] + 0.8, z1], 3)
-            z2 = (5, 6.25) if zs > 0 else (-6.25, -5)
-            m.box(f'twig_z_fire_{n}{zn}_glow', E, [q[0] - 0.6, q[1] - 0.6 + 0.5, z2[0]], [q[0] + 0.6, q[1] + 1.2, z2[1]], 4)
+        m.chain(f'core_{n}', I, [P(q) for q in arm], [3, 2.75, 2.5, 2, 1.5], 1.4, 1, 3, tip=False)
+        for k in range(1, len(arm)):
+            side = 1 if k % 2 else -1
+            a, b = arm[k - 1], arm[k]
+            mid = ((a[0] + b[0]) / 2 + nr[k][0] * side * 1.2, (a[1] + b[1]) / 2 + nr[k][1] * side * 1.2)
+            tipp = (b[0] + nr[k][0] * side * 3.2, b[1] + nr[k][1] * side * 3.2 + 1.5)
+            w = 3.2 - k * 0.35
+            m.seg(f'flame_{n}{k}_glow', E, P(mid), P(tipp), w, 1.0, 3, 5, tip=True)
+            m.seg(f'flame_in_{n}{k}_glow', E, P(mid), P(((mid[0] + tipp[0]) / 2, (mid[1] + tipp[1]) / 2)), w * 0.45, 1.05, 5, 5, tip=True)
+        m.seg(f'wick_{n}_glow', E, P((3.5, 46)), P((2.5, 50)), 1.4, 0.6, 4, 5, tip=True)
         m.seg(f'nock_{n}', K, P((5, 46.5)), P((2, 46.5)), 2.25, 1.1, 4, 5)
     for k, (x, y, s) in enumerate(((19.5, 30, 1.2), (21.5, 26.5, 0.9), (14.5, 29.5, 0.8), (18.5, 44, 1), (13, 50, 0.9), (20.5, 6, 1), (17, 0, 0.8), (22.5, 15, 0.8))):
         diamond(m, f'spark_{k}_glow', E, (x, y), s, 0.45, 4, 5)
