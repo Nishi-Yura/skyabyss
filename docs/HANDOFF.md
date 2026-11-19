@@ -31,7 +31,7 @@
    - `./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_plate.txt -PshotsName=gear_plate` で、祠の鎚・剣と並べて撮る。
 
 - 古い作り方（設定画 → 箱の絵の板、薄い絵の板）はユーザーが却下した。`concept_boxes.py` の流れには戻らない。
-- 担当の指示（`.claude/agents/gear-*.md`）と doc 60 の 1.9 はまだ古い流れのまま。担当を使う前に look5 に書き直す。
+- 担当の指示（`.claude/agents/gear-*.md`。git には入らない手元のファイル）と doc 60 の 1.6・1.9・1.10・2.4 は 2026-11-19 に look5 とこれまでの決まり（レア度ほど派手・形そのものをデザイン・板の絵）に書き直した。防具の担当だけは古い道具の使い方のまま。
 
 ## シリーズの個性（2026-11-18 夜、鯨で決まったこと）
 
