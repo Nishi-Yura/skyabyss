@@ -289,7 +289,7 @@ def ember_bow():
 def brazier_fire(m, name, base, at, plane, h=11.0, seed=0):
     """火鉢の炎（板の絵）: 舌が揺れて立ち昇る。芯は白に近く、外へ橙、縁は赤。炎の上に火の粉がちぎれる"""
     bx, by = base
-    cv = lib.Canvas(bx - 5, by, bx + 5, by + h + 3)
+    cv = lib.Canvas(bx - 7, by, bx + 7, by + h + 4)
 
     def f(x, y, cur):
         u, v = x - bx, (y - by) / h
@@ -298,8 +298,8 @@ def brazier_fire(m, name, base, at, plane, h=11.0, seed=0):
         if v > 1:
             k = int(x * 2) * 5 + int(y * 2) * 3 + seed
             return (E, 4) if k % 23 == 0 and abs(u) < 2.5 else None
-        sway = 0.9 * math.sin(v * 5 + seed) * v
-        w = 3.2 * (1 - v) ** 0.8 * (0.75 + 0.25 * math.cos((u - sway) * 2.2 + seed))
+        sway = 1.4 * math.sin(v * 5 + seed) * v
+        w = 4.6 * (1 - v) ** 0.75 * (0.75 + 0.25 * math.cos((u - sway) * 2.2 + seed))
         d = abs(u - sway)
         if d > w:
             return None
@@ -325,8 +325,8 @@ def ember_flare_bow():
     m.box('brazier', K, [13.75, 11.5, -2.25], [19.25, 15.25, 2.25], grad=(11.5, 1, 15.25, 4))
     m.box('brazier_rim', K, [13.25, 15.25, -2.75], [19.75, 16.25, 2.75], 5)
     m.box('brazier_foot', K, [15, 10.5, -1.5], [18, 11.5, 1.5], 2)
-    brazier_fire(m, 'flame_glow', (16.5, 16), 0, 'xy')
-    brazier_fire(m, 'flame_z_glow', (0, 16), 16.5, 'zy', h=9, seed=2)
+    brazier_fire(m, 'flame_glow', (17.5, 15.5), 0, 'xy', h=22)
+    brazier_fire(m, 'flame_z_glow', (0, 15.5), 16.5, 'zy', h=14, seed=2)
     arm = [(12, 21), (12, 27), (11, 33), (9, 38.5), (6.5, 43), (3.5, 46)]
     for sign, n in ((1, 'u'), (-1, 'd')):
         P = lambda q, s=sign: mirror(q, s)

@@ -403,7 +403,7 @@ def divine_plume_bow():
 
 def mist_ribbons(m, name, ribbons, at):
     """霞の帯（板の絵）: 波打つ帯が先へ細ってほどける。芯は白、縁は灰、終わりは点々"""
-    cv = lib.Canvas(10, -10, 31, 43)
+    cv = lib.Canvas(9, -12, 36, 46)
 
     def f(x, y, cur):
         for x0, y0, ln, amp in ribbons:
@@ -411,12 +411,12 @@ def mist_ribbons(m, name, ribbons, at):
             if not 0 <= u <= 1:
                 continue
             cy = y0 + amp * math.sin(u * 5.5 + x0)
-            w = 1.6 * math.sin(math.pi * min(1, u * 1.6)) * (1 - 0.45 * u) + 0.3
+            w = 2.4 * math.sin(math.pi * min(1, u * 1.4)) * (1 - 0.4 * u) + 0.4
             d = abs(y - cy)
             if d < w:
                 if u > 0.7 and (int(x * 2) + int(y * 2)) % 2:
                     return None
-                return (S, 9) if d < w * 0.45 else (S, 7)
+                return (S, 9) if d < w * 0.4 else ((S, 7) if d < w * 0.75 else (S, 5))
         return cur
     cv.paint(f)
     cv.put(m, name, at=at)
@@ -455,8 +455,8 @@ def divine_mist_bow():
         m.box(f'bell_lip_{k}', G, [x - s / 2 - 0.3, y1 - s - 0.4, -s / 2 - 0.3], [x + s / 2 + 0.3, y1 - s, s / 2 + 0.3], 3)
         m.box(f'clapper_{k}_glow', D, [x - 0.4, y1 - s - 1.25, -0.4], [x + 0.4, y1 - s - 0.4, 0.4], 4)
     # 霞の帯（板の絵、前後に離れて漂う）
-    mist_ribbons(m, 'mist_f', [(13, 22, 16, 1.1), (14, 9, 15, 1.0), (12, 38.5, 13, 0.9), (12.5, -6, 14, 1.0)], 4.5)
-    mist_ribbons(m, 'mist_b', [(14.5, 26, 15, 1.0), (13.5, 4.5, 15, 1.1), (12, 33.5, 12, 0.8), (13, -1.5, 13, 0.9)], -4.5)
+    mist_ribbons(m, 'mist_f', [(12, 23, 21, 1.3), (13, 8, 20, 1.2), (11, 39, 17, 1.0), (11.5, -8, 18, 1.1)], 3.2)
+    mist_ribbons(m, 'mist_b', [(13.5, 29, 19, 1.2), (12.5, 2, 19, 1.3), (11, 34.5, 15, 0.9), (12, -2.5, 16, 1.0)], -3.2)
     top = (3, 47)
     bot = (3, -16.75)
     strings(m, top, bot)
