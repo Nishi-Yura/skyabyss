@@ -181,7 +181,7 @@ def wild_scope_longbow():
 def wild_fulgurite_sword():
     """（レア、2026-11-21 に作り直し・案 A）閃電岩の剣: 雷に焼かれて固まった砂の管が、少しずつ左右へ振れながら伸びる刃。根のような短い枝が三本、
     刃の芯の割れ目だけが雷の色に光る（表裏に通る）
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ硝子の管を、左右へ振れながら先へ細る一本の帯のメッシュに替え、三本の枝を前後へ互い違いに傾けた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_fulgurite_sword.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ硝子の管を、左右へ振れながら先へ細る一本の帯のメッシュに替え、三本の枝を前後へ互い違いに傾けた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_fulgurite_sword.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（硝子の内の縁に明るい筋、刃に暗いひび二本、枝の上の縁に明るい線）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_fulgurite_sword')
     coil_grip(m, -6, 6)
     m.box('pommel', B, [-1.5, -9, -1.5], [1.5, -7.25, 1.5], 4)
@@ -196,7 +196,7 @@ def wild_fulgurite_sword():
 def wild_chain_greatsword():
     """（エピック、2026-11-21 に作り直し・案 B）鎖巻きの大剣: 刃の背筋に鎖の輪が縦に連なって刃先まで走る（表裏とも）。鍔の真ん中に真鍮の錠前が下がり、
     鍵穴が雷の色。鍔の両端から短い鎖の端が垂れる
-    ※ 2026-11-21 に Blockbench で手を入れた（段の刃先を四角錐のメッシュに替え、錠前（と鍵穴の光）を鍔から 8 度傾けて吊り、縦の鎖の輪を一つおきに ±6 度ひねった）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_chain_greatsword.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（段の刃先を四角錐のメッシュに替え、錠前（と鍵穴の光）を鍔から 8 度傾けて吊り、縦の鎖の輪を一つおきに ±6 度ひねった）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_chain_greatsword.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（刃の両の縁（表裏）に明るい面取り、刃に暗い刻みの点、錠前の上の縁に明るい真鍮）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_chain_greatsword')
     coil_grip(m, -8, 8, 1.6)
     m.box('guard', U, [-5.5, 9, -2], [5.5, 11.5, 2], grad=(9, 4, 11.5, 6))
@@ -219,7 +219,7 @@ def wild_chain_greatsword():
 def wild_fishhook_knife():
     """（エピック、2026-11-21 に作り直し・案 A）釣り針の小刀: 刃の先が大きな釣り針のように後ろへ返り、返しが一つ立つ。返しの付け根が雷の色。
     柄頭には糸を通す真鍮の輪、握りに真鍮の糸が二巻き
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ曲がりを、内の縁が薄い刃で先へ細る一本の帯のメッシュに替え、握りの糸の巻きを ±6 度、返しを少し傾けた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_fishhook_knife.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ曲がりを、内の縁が薄い刃で先へ細る一本の帯のメッシュに替え、握りの糸の巻きを ±6 度、返しを少し傾けた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_fishhook_knife.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（鉤の内の刃の縁に明るい線、軸の縁に明るい線、糸の輪の上に明るい真鍮）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_fishhook_knife')
     coil_grip(m, -4, 4, 1.25)
     m.box('eye', B, [-1, -7, -0.35], [1, -5.25, 0.35], 4)
@@ -235,7 +235,7 @@ def wild_fishhook_knife():
 
 def wild_spark_dagger():
     """（レア、2026-11-21 に作り直し・案 A）火花の短剣: 細い三角の刃の根元に、真鍮の二本の電極が角のように立ち、その間に雷の火花が一筋渡る
-    ※ 2026-11-21 に Blockbench で手を入れた（刃を菱形の断面で尖る一枚のメッシュに替え、二本の電極を前後へ開いた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_spark_dagger.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（刃を菱形の断面で尖る一枚のメッシュに替え、二本の電極を前後へ開いた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_spark_dagger.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（刃の芯に明るい稜線、刃の両の縁に影、電極の上の縁に明るい真鍮）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_spark_dagger')
     coil_grip(m, -4, 4, 1.25)
     m.box('guard', U, [-2.5, 5.25, -1], [2.5, 6.5, 1], 5)
@@ -249,7 +249,7 @@ def wild_spark_dagger():
 def wild_ash_sickle_claw():
     """（エピック、2026-11-21 に作り直し・案 B）灰鎌の爪: 籠手から一枚の大きな鎌の刃が拳の上を大きく回り込んで前（-x）へ垂れ、内にもう一枚小さな刃。
     拳の真鍮の当て板に雷の色の細い窓（表裏）
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ大小の鎌を、内の縁が刃で先へ細る帯のメッシュ二枚に替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_ash_sickle_claw.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ大小の鎌を、内の縁が刃で先へ細る帯のメッシュ二枚に替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_ash_sickle_claw.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（大小の鎌の刃の縁に明るい線、背に影、籠手の四隅に真鍮の鋲）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_ash_sickle_claw')
     coil_grip(m, -7, 3, 1.4)
     m.box('gauntlet', U, [-2.75, 3.25, -2.5], [2.75, 9, 2.5], grad=(3.25, 4, 9, 6))
@@ -264,7 +264,7 @@ def wild_ash_sickle_claw():
 def wild_abyss_mace():
     """（エピック、2026-11-21 に作り直し・案 B）深淵の鎚矛: 頭が真鍮の格子の籠。四本の縦の桟の間に雷の球が閉じ込められ、籠の外へ黒鉄の棘が
     左右・前後・上に突き出る
-    ※ 2026-11-21 に Blockbench で手を入れた（棘を四角錐のメッシュ五本に替え、籠の四本の桟を互い違いに ±6 度ひねった）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_abyss_mace.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（棘を四角錐のメッシュ五本に替え、籠の四本の桟を互い違いに ±6 度ひねった）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_abyss_mace.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（棘の稜線に明るい線、籠の上下の板に真鍮の鋲）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_abyss_mace')
     haft(m, 19)
     m.box('base', U, [-2.75, 19, -2.75], [2.75, 20.25, 2.75], 5)
@@ -282,7 +282,7 @@ def wild_abyss_mace():
 def wild_cog_hammer():
     """（エピック、2026-11-21 に作り直し・案 C）歯車の大鎚: 大きな歯車と、その斜め上でかみ合う小さな歯車の二枚の頭。小さな歯車の軸が雷の色、
     大きな歯車の軸は黒鉄の帽子
-    ※ 2026-11-21 に Blockbench で手を入れた（大小の歯車の縦横二枚の板を、十六角と十二角の円盤のメッシュに替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_cog_hammer.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（大小の歯車の縦横二枚の板を、十六角と十二角の円盤のメッシュに替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_cog_hammer.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（歯車の縁に明るい真鍮、内に暗い刻み、軸受けに暗い溝）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_cog_hammer')
     coil_grip(m, -7, 7, 1.6)
     m.box('shaft', U, [-1.3, 8.25, -1.3], [1.3, 21, 1.3], grad=(8.25, 3, 21, 5))
@@ -298,7 +298,7 @@ def wild_cog_hammer():
 
 def wild_molten_axe():
     """（レア、2026-11-21 に作り直し・案 A）熔け斧: 黒鉄の半月の刃が熔けかけて、刃の下から雫が三つ垂れる。刃の縁だけが雷の色の熱の筋
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ半月の刃を、外の縁が薄い刃の帯のメッシュに替え、三つの雫を違う向きに揺らした）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_molten_axe.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ半月の刃を、外の縁が薄い刃の帯のメッシュに替え、三つの雫を違う向きに揺らした）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_molten_axe.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（刃の縁に熱の色の線とその内に明るい線、刃の付け根の板に暗いひび）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_molten_axe')
     haft(m, 25)
     m.box('cheek', U, [1, 18, -1.3], [4.5, 25, 1.3], grad=(18, 4, 25, 6))
@@ -313,7 +313,7 @@ def wild_molten_axe():
 def wild_twin_spear():
     """（エピック、2026-11-21 に作り直し・案 B）双子の槍: 二本の細い穂が互いに巻き付くようにねじれ合って登り、先で一つの穂先に合わさる。
     分かれ目の真鍮の継ぎ手の芯が雷の色、継ぎ手の左右に小さな真鍮の耳
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ二本の穂を、本当にねじれ合う二本のらせんの管のメッシュに替え、穂先を四角錐に、耳を前後へ開いた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_twin_spear.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ二本の穂を、本当にねじれ合う二本のらせんの管のメッシュに替え、穂先を四角錐に、耳を前後へ開いた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_twin_spear.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（らせんの管に明るい筋と影の筋、穂先の稜線に明るい線）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_twin_spear')
     spear_haft(m, 33)
     m.box('yoke', B, [-2.25, 33, -1.75], [2.25, 35, 1.75], grad=(33, 3, 35, 5))
@@ -328,7 +328,7 @@ def wild_twin_spear():
 
 def wild_ballspark_staff():
     """（レア、2026-11-21 に作り直し・案 B）球雷の杖: 杖の先に真鍮の巻き線が六段（雷の柱）、上に黒い平たい冠、冠の上に雷の球が浮かぶ
-    ※ 2026-11-21 に Blockbench で手を入れた（六段の巻き線の輪を、五巻き半のらせんの管のメッシュに替え、冠を八角の皿のメッシュにした）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_ballspark_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（六段の巻き線の輪を、五巻き半のらせんの管のメッシュに替え、冠を八角の皿のメッシュにした）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_ballspark_staff.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（巻き線に暗い継ぎ目、冠の縁に明るい線、継ぎ手の上の縁に明るい真鍮）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_ballspark_staff')
     staff(m, 26)
     for k in range(6):
@@ -343,7 +343,7 @@ def wild_ballspark_staff():
 def wild_deep_eye_staff():
     """（エピック、2026-11-21 に作り直し・案 B）深淵の眼の杖: 望遠鏡の絞りのような真鍮の輪の中に眼が一つ。輪の内に黒い羽根が六枚重なって瞳を囲み、
     瞳が雷の色。輪は二本の腕で杖に留まる
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ絞りの輪を一本の輪の帯のメッシュに替え、六枚の羽根を互い違いに前後へ傾けた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_deep_eye_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ絞りの輪を一本の輪の帯のメッシュに替え、六枚の羽根を互い違いに前後へ傾けた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_deep_eye_staff.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（輪の外の縁に明るい真鍮と内の縁に影、羽根の上の縁に明るい線）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_deep_eye_staff')
     staff(m, 28)
     m.arc('ring', B, (0, 34), 4, 0, 360, 12, [1.1] * 12, 1.6, 3, 5)
@@ -359,7 +359,7 @@ def wild_deep_eye_staff():
 def wild_hourglass_staff():
     """（エピック、2026-11-21 に作り直し・案 B）砂時計の杖: 杖の先の真鍮の縦の輪の中で、砂時計が横に寝ている（今まさに返される途中）。
     左の玉に雷の色の砂、輪の上に小さな歯車
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ輪を一本の輪の帯のメッシュに、二つの玉を横向きの回転体のメッシュに替え、玉・首・砂を 20 度傾けた（返される途中）。砂の光は玉の表裏から覗く大きさに縮めたので、この関数の数値とは違う）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_hourglass_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ輪を一本の輪の帯のメッシュに、二つの玉を横向きの回転体のメッシュに替え、玉・首・砂を 20 度傾けた（返される途中）。砂の光は玉の表裏から覗く大きさに縮めたので、この関数の数値とは違う）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_hourglass_staff.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（輪の縁に明るい真鍮、二つの玉に硝子の照り）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_hourglass_staff')
     staff(m, 28)
     m.arc('ring', B, (0, 33.5), 5, 0, 360, 12, [1] * 12, 1.2, 3, 5)
@@ -375,7 +375,7 @@ def wild_hourglass_staff():
 def wild_calming_censer():
     """（エピック、2026-11-21 に作り直し・案 A）鎮めの香炉: 杖の先が下へ鉤のように曲がり、短い鎖で丸い真鍮の香炉を吊る。香炉の格子窓から
     雷の色の煙火が漏れ、蓋に黒い摘み
-    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ鉤を一本の帯のメッシュに、壺を八角の回転体のメッシュに替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_calming_censer.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（節をつないだ鉤を一本の帯のメッシュに、壺を八角の回転体のメッシュに替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_calming_censer.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（壺に暗い格子の筋と上の縁に明るい真鍮、鉤の上の縁に明るい線）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_calming_censer')
     staff(m, 32)
     m.chain('crook', U, [(0, 31.5), (1.25, 34.5), (3.75, 35.25), (5.25, 33.5)], [2, 1.75, 1.5], 1.4, 5, 7, tip=False)
@@ -391,7 +391,7 @@ def wild_calming_censer():
 def wild_raincall_bell_staff():
     """（レア、2026-11-21 に作り直し・案 A）雨呼びの鈴杖: 杖の先に黒鉄の小さな傘が開き、傘の縁の四方から雨粒の形の鈴が下がる。
     手前の一粒だけが雷の色
-    ※ 2026-11-21 に Blockbench で手を入れた（三段の傘を八角の円錐のメッシュに、四つの雨粒の鈴を六角の回転体（しずく）のメッシュに替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_raincall_bell_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（三段の傘を八角の円錐のメッシュに、四つの雨粒の鈴を六角の回転体（しずく）のメッシュに替えた）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_raincall_bell_staff.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（傘に暗い骨の筋、三つの鈴の頭に明るい真鍮の照り）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_raincall_bell_staff')
     staff(m, 32)
     m.box('canopy_low', U, [-5, 32, -3], [5, 33, 3], 5)
@@ -407,7 +407,7 @@ def wild_raincall_bell_staff():
 def wild_effigy_totem():
     """（エピック、2026-11-21 に作り直し・案 B）人形の祈り柱: 機械の屑で組んだ案山子。頭が真鍮の歯車で軸が雷の色、腕は黒鉄の横木で両端からボルトが
     一本ずつ吊られ、胴に真鍮の板が括られる
-    ※ 2026-11-21 に Blockbench で手を入れた（歯車の頭の縦横二枚の板を十二角の円盤のメッシュに替え、胸の板と鋲を斜めに 6 度傾けて括った）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_effigy_totem.bbmodel。この関数から prep し直すと手入れが消える"""
+    ※ 2026-11-21 に Blockbench で手を入れた（歯車の頭の縦横二枚の板を十二角の円盤のメッシュに替え、胸の板と鋲を斜めに 6 度傾けて括った）。メッシュの形と UV はスクリプト（al_gen.py）で作って MCP で置き、UV は書き出した .bbmodel にスクリプトで入れた。正本は tools/models/x32/wild_effigy_totem.bbmodel。この関数から prep し直すと手入れが消える。同日、取り込み済みの絵に Blockbench の筆で描き足した（歯車の頭の縁に明るい真鍮と内に影、胸の板に暗い引っかき傷）。画素は塗りの計画をスクリプト（paint_plan.py）で決め、paint_with_brush で 1 画素ずつ打った"""
     m = M('wild_effigy_totem')
     coil_grip(m, -14, 2, 1.6)
     m.box('pillar', U, [-1.5, 3.25, -1.5], [1.5, 31, 1.5], grad=(3.25, 3, 31, 5))
