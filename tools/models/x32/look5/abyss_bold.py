@@ -227,16 +227,17 @@ def abyss_sinking_anchor():
 
 
 def abyss_ash_scythe():
-    """灰喰いの鎌: 長い柄の先から -x へ大きく反る黒い刃、刃の背に灰の骨の鋸歯、刃の縁に淵の光"""
-    m = M('abyss_ash_scythe')
-    grip(m, -12, 2)
-    rod(m, 3.5, 34, bands=(14, 24))
-    m.box('socket', B, [-2, 32, -2], [2, 36, 2], grad=(32, 2, 36, 4))
-    pts = [(1, 35), (-4, 37.5), (-9, 38), (-13.5, 36), (-16.5, 32.5)]
-    m.chain('blade', V, pts, [4, 3.5, 3, 2.5], 1, 3, 6, tip=True)
-    m.chain('edge_glow', G, [(x, y - 1.75) for x, y in pts[:4]], [1, 1, 1], 0.7, 2, 4, tip=False)
-    for k, (x, y) in enumerate(((-3, 39.5), (-7, 40), (-11, 38.5))):
-        m.seg(f'tooth_{k}', B, (x, y), (x - 1, y + 2), 1.5, 0.8, 4, 5, tip=True)
+    """灰喰いの鎌（エピック、2026-11-20 に作り直し）: 長い椎骨の柄の先に骨の襟。襟から -x へ、冷えた溶岩の殻の三日月の刃が大きく反る。
+    刃の背に灰の骨の鋸歯が三本、襟の表と裏に青い熾の割れ目
+    ※ 2026-11-20 に Blockbench で手を入れた（刃を三日月の一枚刃メッシュにし、内側の縁を光らせ、灰のひびを筆で描いた）。正本は tools/models/x32/abyss_ash_scythe.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_ash_scythe', SB)
+    spine_haft(m, 35)
+    drum(m, 'collar', SB, -2.6, 2.6, 36.0, 2.6, 4)
+    m.box('collar_crack_glow', G, [-0.5, 34.6, -2.9], [0.5, 37.4, 2.9], 4)
+    m.chain('blade', V, [(1.5, 36.5), (-4, 39.5), (-10, 40), (-15, 37.5), (-18.5, 32.5)], [5.0, 4.4, 3.6, 2.6], [1.6, 1.4, 1.2, 1.0], 2, 5, tip=True)
+    for k, (x, y) in enumerate(((-4, 41.5), (-9, 42.0), (-13.5, 40.0))):
+        m.seg(f'tooth_{k}', SB, (x, y - 0.8), (x + 1.4, y + 2.6), 1.8, 1.0, 5, 7, tip=True)
+    m.seg('heel', SB, (1.5, 35), (4.5, 33), 2.0, 1.4, 4, 6, tip=True)
     return m
 
 
@@ -745,61 +746,79 @@ def abyss_storm_bow():
 # ================================================================ 火（余燼の心核）
 
 def abyss_ember_sword():
-    """溶岩流の大剣: 冷えかけた溶岩の流れが刃（幅が波打つ黒い塊の列）、塊の継ぎ目の割れ目が淵の光（青い熾）"""
-    m = M('abyss_ember_sword')
-    grip(m, -7, 7)
-    m.box('crust', B, [-4.5, 8.5, -2], [4.5, 11, 2], grad=(8.5, 3, 11, 5))
+    """溶岩流の大剣（伝説、2026-11-20 に作り直し）: 刃は冷えかけた溶岩の殻の板を積んだもの（板ごとに左右へずれ、先ほど細い）。
+    板の継ぎ目から青い熾が表と裏へ漏れる。鍔は左右へ開く骨の噴気孔、孔の口が光る
+    ※ 2026-11-20 に Blockbench で手を入れた（殻の板を一枚ずつ交互に傾けて重ね、表の枠模様を溶岩の殻と熾の割れ目に塗り直した）。正本は tools/models/x32/abyss_ember_sword.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_ember_sword', SB)
+    sword_grip(m)
+    m.box('guard_core', V, [-4.5, 5.8, -2.2], [4.5, 9.6, 2.2], grad=(5.8, 2, 9.6, 4), rim=True)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'vent_{n}', SB, [(sd * 3.5, 8), (sd * 7, 9), (sd * 9.5, 12), (sd * 10, 15.5)], [3.2, 2.8, 2.4], [2.6, 2.2, 1.9], 4, 6, tip=False)
+        m.box(f'vent_{n}_mouth_glow', G, [sd * 10 - 1.0, 15.0, -0.9], [sd * 10 + 1.0, 16.4, 0.9], 4)
+    y = 9.4
     for k in range(8):
-        w = 3.5 + (0.75 if k % 2 == 0 else 0) - k * 0.2
-        x = 0.5 if k % 2 == 0 else -0.5
-        y = 11 + k * 4.5
-        m.box(f'flow_{k}', V, [x - w, y, -1.2], [x + w, y + 4.5, 1.2], 2 + k * 0.4)
-        m.box(f'crack_{k}_glow', G, [x - w * 0.6, y + 4, -1.3], [x + w * 0.6, y + 4.6, 1.3], 3)
-    point(m, 'tip', V, -3, 3, 47, 3, 1.1, 4)
+        w = 4.4 - k * 0.32
+        x = 0.45 if k % 2 == 0 else -0.45
+        h = 5.0 - k * 0.12
+        m.box(f'plate_{k}', V, [x - w, y, -1.3], [x + w, y + h, 1.3], grad=(y, 2, y + h, 4), rim=True)
+        if k < 7:
+            m.box(f'seam_{k}_glow', G, [x - w * 0.55, y + h - 0.3, -1.45], [x + w * 0.55, y + h + 0.3, 1.45], 4)
+        y += h
+    m.seg('tip', V, (0, y - 0.5), (0.3, y + 6), 3.0, 1.0, 3, 5, tip=True)
     return m
 
 
 def abyss_ember_staff():
-    """火山弾の杖: 先の三本の黒い爪の上に、噴き上げられた火山弾（割れ目が光る黒い塊）が浮く"""
-    m = M('abyss_ember_staff')
-    staff(m, 34)
-    for k, a in enumerate((90, 210, 330)):
-        x, z = 2.5 * math.cos(math.radians(a)), 2.5 * math.sin(math.radians(a))
-        m.seg(f'prong_{k}', V, (x * 0.5, 34), (x * 1.6, 39), 1.5, 0.75, 4, 6, tip=True, zc=z)
-    c = 43
-    m.box('bomb', V, [-3.5, c - 3, -3], [3.5, c + 3, 3], grad=(c - 3, 2, c + 3, 5))
-    m.box('bomb_top', V, [-2.5, c + 3, -2], [2.5, c + 4.5, 2], 5)
-    m.box('bomb_tail', V, [-2, c - 4.5, -2], [2, c - 3, 2], 3)
-    m.chain('fissure_glow', G, [(-3.6, c + 1), (-1, c - 1), (1.5, c + 1.5), (3.6, c - 0.5)], [1, 1, 1], 3.1, 3, 5, tip=False)
+    """火山弾の杖（伝説、2026-11-20 に作り直し）: 杖の先の骨の火口から三本の骨の爪が外へ開き、その上に火山弾が浮く。
+    火山弾は黒い殻で、割れ目が青い熾。まわりを灰のかけらが三つ回る
+    ※ 2026-11-20 に Blockbench で手を入れた（三本の爪を 120° ずつ回して火口を囲ませ、火山弾と灰のかけらを傾け、割れ目を表裏へ出した）。正本は tools/models/x32/abyss_ember_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_ember_staff', SB)
+    staff2(m, 40)
+    m.box('crater', SB, [-3.2, 39, -3.2], [3.2, 42, 3.2], grad=(39, 3, 42, 5), rim=True)
+    m.box('crater_glow', G, [-2.0, 41.8, -2.0], [2.0, 42.4, 2.0], 4)
+    for k in range(3):
+        m.chain(f'claw_{k}', SB, [(2.6, 41.5), (5.2, 45), (5.6, 49), (4.0, 52)], [2.0, 1.7, 1.3], 1.4, 4, 6, tip=True)
+    c = 52.0
+    m.box('bomb_a', V, [-4.2, c - 3.4, -3.4], [4.2, c + 3.4, 3.4], grad=(c - 3.4, 2, c + 3.4, 5), rim=True)
+    m.box('bomb_b', V, [-3.4, c - 4.2, -2.6], [3.4, c + 4.2, 2.6], 3)
+    m.box('bomb_c', V, [-2.6, c - 2.6, -4.2], [2.6, c + 2.6, 4.2], 4)
+    m.chain('fissure_glow', G, [(-4.3, c + 1.5), (-1.5, c - 1), (1.5, c + 1.8), (4.3, c - 0.6)], [1.0, 1.0, 1.0], 7.0, 3, 5, tip=False)
+    for k, (x, y, z) in enumerate(((-7, 49, 2.5), (6.5, 55, -2.5), (-1, 59, -4))):
+        m.box(f'float_ash_{k}', V, [x - 1.1, y - 1.1, z - 1.1], [x + 1.1, y + 1.1, z + 1.1], 4, rim=True)
     return m
 
 
 def abyss_ember_bell_staff():
-    """坩堝の鈴杖: 先の骨の鉤から鎖で坩堝が下がる。坩堝の口から淵の熔けた光が溢れて縁を垂れる"""
-    m = M('abyss_ember_bell_staff')
-    staff(m, 38)
-    m.chain('hook', B, [(0, 37.5), (0.5, 41), (3, 43), (5.5, 42)], [2, 2, 1.75], 1, 4, 6, tip=False)
-    m.box('chain_0', V, [5, 38.5, -0.5], [6, 41.5, 0.5], 4)
-    m.box('chain_1', V, [5.25, 36, -1], [5.75, 39, 1], 5)
-    m.box('crucible', V, [2.5, 30, -3], [8.5, 36, 3], grad=(30, 2, 36, 5))
-    m.box('crucible_foot', V, [3.5, 29, -2], [7.5, 30, 2], 3)
-    m.box('lip', B, [2, 35.5, -3.5], [9, 36.5, 3.5], 4)
-    m.box('melt_glow', G, [3, 35.75, -2.5], [8, 36.75, 2.5], 4)
-    m.box('drip_glow', G, [8.6, 32, -0.5], [9.4, 35.5, 0.5], 3)
+    """坩堝の鈴杖（伝説、2026-11-20 に作り直し）: 杖の先の骨の鉤から鎖で黒い坩堝が下がる。坩堝が鈴。
+    口に青い熾の湯が満ち、注ぎ口から一筋垂れる。坩堝の底から熾の滴が舌のように下がる
+    ※ 2026-11-20 に Blockbench で手を入れた（坩堝を胴の膨らんだ八角の壺メッシュにし、鎖の輪を互い違いにし、熾の垂れ筋を描いた）。正本は tools/models/x32/abyss_ember_bell_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_ember_bell_staff', SB)
+    staff2(m, 44)
+    m.chain('hook', SB, [(0, 43.5), (0.6, 48.5), (4, 51.5), (8, 51), (9.5, 48.5)], [2.6, 2.4, 2.1, 1.8], 1.8, 4, 6, tip=False)
+    for k, y in enumerate((47.6, 45.6)):
+        m.box(f'link_{k}', V, [9.0, y - 1.1, -0.7 + 0.2 * k], [10.0, y + 1.1, 0.7 - 0.2 * k], 4, rim=True)
+    cx, top = 9.5, 44.4
+    m.box('crucible', V, [cx - 4.0, top - 8.5, -4.0], [cx + 4.0, top, 4.0], grad=(top - 8.5, 2, top, 4))
+    m.box('lip', SB, [cx - 4.6, top - 1.2, -4.6], [cx + 4.6, top + 0.4, 4.6], 5, rim=True)
+    m.box('melt_glow', G, [cx - 3.4, top + 0.2, -3.4], [cx + 3.4, top + 0.6, 3.4], 4)
+    m.box('spout', SB, [cx + 4.4, top - 1.6, -1.2], [cx + 6.2, top + 0.2, 1.2], 4)
+    m.box('pour_glow', G, [cx + 5.4, top - 6.0, -0.5], [cx + 6.2, top - 1.4, 0.5], 4)
+    m.box('foot', SB, [cx - 3.0, top - 9.6, -3.0], [cx + 3.0, top - 8.4, 3.0], 4, rim=True)
+    m.seg('tongue_glow', G, (cx, top - 9.4), (cx, top - 13.5), 1.6, 1.6, 4, 5, tip=True)
     return m
 
 
 def abyss_ember_dagger():
-    """熔け滴の短剣: 滴った熔け鉄が波打つ刃のまま固まった（左右へ揺れる節の刃）、先の滴が光る"""
-    m = M('abyss_ember_dagger')
-    grip(m, -4, 4)
-    m.box('guard', B, [-3, 5.5, -1.75], [3, 7.5, 1.75], grad=(5.5, 2, 7.5, 4))
-    pts = [(0, 7)]
-    for k in range(1, 7):
-        pts.append((math.sin(k * 1.2) * 1.5, 7 + k * 3.5))
-    m.chain('blade', V, pts, [4.5, 4.25, 4, 3.5, 3, 2.5], 1, 3, 6, tip=True)
-    m.box('drop_glow', G, [-0.75, 30, -0.75], [0.75, 32, 0.75], 4)
-    m.seg('drop_tip', G, (0, 32), (0, 34), 1, 0.5, 4, 5, tip=True)
+    """熔け滴の短剣（伝説、2026-11-20 に作り直し）: 滴った熔け鉄が波打つ刃のまま固まった（左右へ揺れる黒い刃）。
+    鍔は冷えた殻の襟、先にもう一滴垂れかけた熾の滴が光る
+    ※ 2026-11-20 に Blockbench で手を入れた（刃を鎬のある菱形断面の波打つメッシュにし、縁・鎬・熾の流れ筋を描いた）。正本は tools/models/x32/abyss_ember_dagger.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_ember_dagger', SB)
+    sword_grip(m, 4)
+    m.box('collar', SB, [-3.6, 4.0, -2.4], [3.6, 7.0, 2.4], grad=(4, 3, 7, 5), rim=True)
+    pts = [(0, 6.5)] + [(math.sin(k * 1.25) * 1.6, 6.5 + k * 4.2) for k in range(1, 7)]
+    m.chain('blade', V, pts, [5.0, 4.6, 4.2, 3.6, 3.0, 2.2], [1.6, 1.5, 1.4, 1.2, 1.0, 0.8], 2, 5, tip=True)
+    m.box('drop_glow', G, [-0.9, 35.5, -0.9], [0.9, 37.5, 0.9], 4)
+    m.seg('drop_tip_glow', G, (0, 35.6), (0, 33.6), 1.2, 1.2, 4, 5, tip=True)
     return m
 
 
