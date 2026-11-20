@@ -720,78 +720,126 @@ def _moon(m, c, s=9.0, name='float_moon_glow'):
     _bl_bar(m, name, WC, 3, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, 3.2, paint=_mst_moon_paint)
 
 
+
+def _bell2(m, pre, cx, top, s, body):
+    """鈴（石の胴は body の色、口の縁は反対の色で太く、舌は紫の光）。top は冠の上の面"""
+    from paintbox import skin
+    lip = WB if body == WM else WM
+    skin(m, f'{pre}_crown', WG, 5, [cx - 1.0 * s, top - 1.4 * s, -1.0 * s], [cx + 1.0 * s, top, 1.0 * s])
+    skin(m, f'{pre}_neck', body, 6 if body == WM else 4, [cx - 1.5 * s, top - 3.4 * s, -1.4 * s], [cx + 1.5 * s, top - 1.4 * s, 1.4 * s])
+    skin(m, f'{pre}_core', body, 6 if body == WM else 4, [cx - 2.6 * s, top - 9.6 * s, -2.2 * s], [cx + 2.6 * s, top - 3.2 * s, 2.2 * s],
+         paint=_bl_white if body == WM else _cs_black)
+    for sg, n in ((-1, 'l'), (1, 'r')):
+        pts = [(cx + sg * 1.8 * s, top - 2.8 * s), (cx + sg * 3.2 * s, top - 6.6 * s), (cx + sg * 4.2 * s, top - 10.2 * s)]
+        for k in range(2):
+            _cs_bar(m, f'{pre}_flare_{n}{k}', body, 6 if body == WM else 4, pts[k], pts[k + 1], [2.2 * s, 2.6 * s][k], 2.2 * s)
+    skin(m, f'{pre}_lip', lip, 8 if lip == WM else 4, [cx - 4.6 * s, top - 11.4 * s, -3.2 * s], [cx + 4.6 * s, top - 9.6 * s, 3.2 * s])
+    skin(m, f'{pre}_tongue_glow', WC, 4, [cx - 0.8 * s, top - 12.6 * s, -0.8 * s], [cx + 0.8 * s, top - 9.4 * s, 0.8 * s])
+
+
 def tower_moon_staff():
+    """落ちる月の杖（崩れた塔。案 B、2026-11-20 のブラッシュアップ）: 柄の先に白黒の尖塔が段ごとに浮いて積み上がり、
+    その真ん中を太い石の三日月が斜めに貫く。三日月は岩の塊を弧に並べ、真ん中が厚く両の角へ細って尖る。
+    三日月の抱く所に紫の月が落ちて止まる。尖塔のてっぺんは欠けた胸壁と金の尖塔"""
     from paintbox import skin  # noqa: F401
-    """落ちる月の杖（崩れた塔。2026-11-20 案 B）: 三日月に貫かれた尖塔。 柄の先に細い白黒の尖塔が浮いて積み上がり、その真ん中を石の三日月が斜めに貫く。月の光は三日月の内側"""
     m = _wM('tower_moon_staff')
     r = _rng(m)
-    _staff_base(m, 36.0)
-    y = 35.0
-    for i in range(7):
-        w = 6.2 - 0.6 * i
-        h = 4.0 - 0.2 * i
-        y += 0.0 if i == 0 else r.uniform(0.6, 1.4)
-        mat, t = (WB, 3) if i < 3 else (WM, 6)
-        _stone(m, 'spire_0' if i == 0 else f'float_spire_{i}', mat, t, r.uniform(-0.6, 0.6) * i * 0.3, y + h / 2, w, h, 2.8,
-               rot=r.uniform(-1, 1) * (2 + 2 * i))
+    _staff_base(m, 35.0)
+    # 尖塔: 6 段。下 2 段は黒、上は白。上ほど離れて傾き、左右へずれる
+    y = 34.2
+    tops = []
+    for i, (w, h) in enumerate(((8.4, 4.6), (7.6, 4.4), (6.8, 4.2), (6.0, 4.0), (5.2, 3.6), (4.4, 3.4))):
+        y += 0.0 if i == 0 else r.uniform(0.9, 1.6) + 0.25 * i
+        cx = 0.0 if i == 0 else r.uniform(-1, 1) * (0.5 + 0.35 * i)
+        mat, t = (WB, 3) if i < 2 else (WM, 6)
+        _stone(m, 'spire_0' if i == 0 else f'float_spire_{i}', mat, t, cx, y + h / 2, w, h, 3.2 - 0.2 * i,
+               rot=0 if i == 0 else r.uniform(-1, 1) * (3 + 2.5 * i))
+        tops.append((cx, y + h))
         y += h
-    m.chain('float_tipg', WG, [(0, y + 1.0), (0.3, y + 4.6), (0.4, y + 7.6)], [1.6, 0.9], [1.2, 0.8], 4, 5, tip=True)
-    c = (0.0, 50.0)
-    for k in range(9):
-        a0 = math.radians(150 - k * 22)
-        a1 = math.radians(150 - (k + 1) * 22)
-        R = 11.0
-        w = 3.6 - abs(k - 4) * 0.6
-        _bl_bar(m, f'float_cres_{k}', WM if k >= 3 else WB, 6 if k >= 3 else 3,
-                (c[0] + R * math.cos(a0), c[1] + R * math.sin(a0) * 0.75 - k * 0.4),
-                (c[0] + R * math.cos(a1), c[1] + R * math.sin(a1) * 0.75 - (k + 1) * 0.4), max(1.2, w), 2.2)
-    _moon(m, (2.0, 47.0), 6.0)
-    _libra(m, 0, 38.0, 3.8, 3.0)
-    _rockify(m, per=(0, 1))
+    for k, x in enumerate((-1.6, 1.6)):
+        _stone(m, f'float_merlon_{k}', WM, 7, tops[-1][0] + x + r.uniform(-0.3, 0.3), y + 1.8 + r.uniform(0, 1.0), 1.8, 2.4, 2.2,
+               rot=r.uniform(-18, 18))
+    m.chain('float_tipg', WG, [(tops[-1][0], y + 4.4), (tops[-1][0] + 0.3, y + 8.0), (tops[-1][0] + 0.4, y + 11.0)],
+            [1.8, 1.0], [1.4, 0.9], 4, 5, tip=True)
+    _libra(m, 0, 36.6, 4.4, 3.4)
+    # 三日月: 岩の塊 9 つ。弧（125°→-125°、右がふくらみ左が開く）を 22° 傾け、真ん中が厚く角が細い
+    c, R, tilt = (2.4, 53.0), 15.0, math.radians(18)
+    N = 9
+    for k in range(N):
+        t0, t1 = k / N, (k + 1) / N
+        tm = (t0 + t1) / 2
+        a = math.radians(125 - 250 * tm)
+        th = 1.4 + 4.0 * math.sin(math.pi * tm)
+        rr = R - th / 2
+        x, yy = rr * math.cos(a) * 0.82, rr * math.sin(a)
+        px = c[0] + x * math.cos(tilt) - yy * math.sin(tilt)
+        py = c[1] + x * math.sin(tilt) + yy * math.cos(tilt)
+        L = 2 * R * math.sin(math.radians(250 / N) / 2) * 0.86
+        ang = math.degrees(a + tilt) + 90 + r.uniform(-6, 6)
+        mat, t = (WB, 3) if py < c[1] - 2 else (WM, 6)
+        _stone(m, f'float_cres_{k}', mat, t, px + r.uniform(-0.3, 0.3), py + r.uniform(-0.3, 0.3), L, th, 2.6 - 0.6 * abs(tm - 0.5),
+               rot=ang)
+    # 月: 三日月の抱く所（弧の内側）
+    # 三日月は尖塔の奥（z を下げる）に置き、尖塔の前後で重ならないようにする
+    for p in m.parts:
+        if p['name'].startswith('float_cres_'):
+            p['frm'][2] -= 3.6
+            p['to'][2] -= 3.6
+            p['origin'][2] -= 3.6
+    _moon(m, (c[0] - 7.6, c[1] + 1.0), 7.0)
+    for k in range(3):
+        a = r.uniform(0, 2 * math.pi)
+        diamond(m, f'float_chip_{k}', WM if k % 2 else WB, (c[0] + math.cos(a) * 16.0, c[1] + math.sin(a) * 10.0),
+                r.uniform(1.4, 2.2), 1.0, 5, 6)
+    _rockify(m, per=(1, 1), scale=0.8)
     return m
 
 
 def tower_sigil_dagger():
-    """追う印の短剣（崩れた塔）: 刃は塔から折れた尖塔の鉤。大きさを減らしながら弧に並ぶ石の破片が浮いて連なり、先で鉤に返る。
-    根元の破片は黒、先は白。破片のあいだを紫の力の糸がつなぎ、根元に天秤の印。柄の下に逆手の黒い石の輪"""
+    """追う印の短剣（崩れた塔。2026-11-20 のブラッシュアップ）: 刃は塔から折れた尖塔の鉤。幅のある石の破片 7 つが弧に浮いて連なり、
+    先で大きく鉤に返って尖る。根元の 2 つは黒、先は白。破片の脇に小さな欠片。根元に天秤の印、柄の下に逆手の黒い石の輪"""
     from paintbox import skin
     m = _wM('tower_sigil_dagger')
     r = _rng(m)
     skin(m, 'grip', WN, 2, [-2.0, -2.0, -1.9], [2.0, 7.0, 1.9], paint=_bs_bands)
     skin(m, 'grip_ring', WG, 4, [-2.5, 0.6, -2.3], [2.5, 2.0, 2.3])
-    _stone(m, 'pommel', WB, 3, 0, -3.0, 5.0, 2.4, 2.3)
+    _stone(m, 'pommel', WB, 3, 0, -3.0, 5.2, 2.6, 2.4)
     for k in range(10):
         a0, a1 = 2 * math.pi * k / 10, 2 * math.pi * (k + 1) / 10
-        _bl_bar(m, f'ring_{k}', WB, 3, (3.2 * math.cos(a0), -7.4 + 3.2 * math.sin(a0)),
-                (3.2 * math.cos(a1), -7.4 + 3.2 * math.sin(a1)), 1.8, 1.2, paint=_bl_course)
-    path = [(0.0, 6.0), (1.4, 13.5), (2.6, 20.0), (2.8, 26.0), (1.8, 31.5), (-0.6, 35.6), (-3.6, 37.0), (-6.0, 35.0)]
-    ws = (7.0, 6.4, 5.6, 4.8, 4.0, 3.2, 2.4)
-    prev = None
+        _bl_bar(m, f'ring_{k}', WB, 3, (3.4 * math.cos(a0), -7.6 + 3.4 * math.sin(a0)),
+                (3.4 * math.cos(a1), -7.6 + 3.4 * math.sin(a1)), 2.0, 1.3, paint=_bl_course)
+    path = [(0.0, 6.0), (1.6, 13.0), (3.0, 19.6), (3.4, 25.8), (2.4, 31.4), (0.0, 35.6), (-3.4, 37.6), (-6.8, 36.0), (-8.6, 31.8)]
+    ws = (8.4, 7.6, 6.8, 5.8, 4.8, 3.8, 3.0, 2.2)
     for i in range(len(path) - 1):
         a, b = path[i], path[i + 1]
-        g = 0.0 if i == 0 else r.uniform(0.6, 1.5)
+        g = 0.0 if i == 0 else r.uniform(1.0, 1.9)
         L = math.dist(a, b)
         ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-        A = (a[0] + ux * g / 2 + r.uniform(-0.4, 0.4) * i * 0.3, a[1] + uy * g / 2)
-        B = (b[0] - ux * g / 2, b[1] - uy * g / 2)
+        nx, ny = -uy, ux
+        off = 0.0 if i == 0 else r.uniform(-0.8, 0.8)
+        A = (a[0] + ux * g / 2 + nx * off, a[1] + uy * g / 2 + ny * off)
+        B = (b[0] - ux * g / 2 + nx * off, b[1] - uy * g / 2 + ny * off)
         mat, t = (WB, 3) if i < 2 else (WM, 6)
-        name = 'shard_0' if i == 0 else f'float_shard_{i}'
         cx, cy = (A[0] + B[0]) / 2, (A[1] + B[1]) / 2
-        ang = math.degrees(math.atan2(B[1] - A[1], B[0] - A[0])) + (r.uniform(-6, 6) if i > 0 else 0)
-        _stone(m, name, mat, t, cx, cy, math.dist(A, B), ws[i], 2.2 - 0.15 * i, rot=ang)
-        if prev:
-            _force(m, f'float_f_{i}', prev, (cx, cy), 0.8)
-        prev = (cx, cy)
-    _libra(m, 0.6, 9.0, 3.6, 2.4)
-    m.seg('float_tip', WM, (-6.0, 35.0), (-7.4, 31.0), 2.0, 1.0, 6, 8, tip=True)
-    _rockify(m, per=(1, 1), scale=0.8)
+        ang = math.degrees(math.atan2(B[1] - A[1], B[0] - A[0])) + (r.uniform(-8, 8) if i > 0 else 0)
+        last = i == len(path) - 2
+        if last:
+            m.seg('float_tip', WM, A, (b[0] - ux * 0.5, b[1] - uy * 0.5), ws[i] + 0.6, 1.4, 6, 8, tip=True)
+        else:
+            _stone(m, 'shard_0' if i == 0 else f'float_shard_{i}', mat, t, cx, cy, math.dist(A, B), ws[i], 2.4 - 0.15 * i, rot=ang)
+        if 1 <= i <= 5 and r.random() < 0.7:
+            sd = r.choice((-1, 1))
+            diamond(m, f'float_chip_{i}', mat, (cx + nx * sd * (ws[i] / 2 + 1.6), cy + ny * sd * (ws[i] / 2 + 1.6)),
+                    r.uniform(1.2, 1.8), 0.9, t, t + 1)
+    _libra(m, 0.6, 9.4, 4.0, 2.6)
+    _rockify(m, per=(1, 1), scale=0.75)
     return m
 
 
 def tower_clap_bell_staff():
-    """合掌の鈴杖（崩れた塔）: 杖の頭は崩れた鐘楼の尖りアーチ。左右のアーチの半分が石の塊に割れて浮き、
-    合わせた掌のように頂で向き合う（頂は触れずに紫の力でつながる）。アーチの中に大きな鈴が吊られ、外に小さな鈴が二つ。
-    アーチの根元は黒い石、上は白。根元の梁に天秤の印"""
+    """合掌の鈴杖（崩れた塔。2026-11-20 のブラッシュアップ）: 杖の頭は崩れた鐘楼の尖りアーチ。左右のアーチの半分が大きな岩の塊に割れて浮き、
+    合わせた掌のように頂で向き合う（頂は触れない）。アーチの中に白い大きな鈴、外に黒い小さな鈴が二つ浮いて下がる。
+    アーチの根元は黒い石、上は白。根元の割れた梁に天秤の印"""
     from paintbox import skin
     m = _wM('tower_clap_bell_staff')
     r = _rng(m)
@@ -800,39 +848,33 @@ def tower_clap_bell_staff():
     for k, (y0, y1) in enumerate(((-6.0, -4.4), (0.6, 2.2))):
         skin(m, f'grip_ring_{k}', WG, 4, [-2.4, y0, -2.4], [2.4, y1, 2.4])
     skin(m, 'rod', WN, 3, [-1.2, 3.0, -1.2], [1.2, 30.0, 1.2])
-    _stone(m, 'lintel', WB, 3, 0, 31.2, 20.0, 3.4, 3.2)
-    _libra(m, 0, 31.2, 4.2, 3.2)
-    apex = []
+    # 割れた梁: 真ん中だけが柄に付き、左右の欠片は浮いて少し下がる
+    _stone(m, 'lintel', WB, 3, 0, 31.2, 8.0, 3.6, 3.4)
+    _libra(m, 0, 31.2, 4.4, 3.4)
+    for sd in (-1, 1):
+        _stone(m, f'float_lintel_{"lr"[sd > 0]}', WB, 4, sd * 8.4 + r.uniform(-0.3, 0.3), 30.6 + r.uniform(-0.8, 0.4), 6.4, 3.4, 3.2,
+               rot=r.uniform(-1, 1) * 8)
     for sd in (-1, 1):
         sn = 'lr'[sd > 0]
-        P = [(sd * 9.0, 32.0), (sd * 10.4, 41.0), (sd * 9.8, 48.5), (sd * 7.4, 55.0), (sd * 4.2, 60.0), (sd * 1.6, 63.4)]
-        prev = None
+        P = [(sd * 10.0, 34.0), (sd * 12.0, 43.0), (sd * 11.4, 51.0), (sd * 8.8, 58.0), (sd * 5.2, 63.4), (sd * 1.8, 67.0)]
         for i in range(5):
             a, b = P[i], P[i + 1]
-            g = 0.0 if i == 0 else r.uniform(0.5, 1.4)
+            g = r.uniform(1.0, 1.8)
             L = math.dist(a, b)
             ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-            off = sd * r.uniform(0.0, 0.8) * i
-            A = (a[0] + ux * g + off, a[1] + uy * g)
-            B = (b[0] + off, b[1])
+            off = sd * r.uniform(0.2, 1.0) * (i + 1) * 0.6
+            A = (a[0] + ux * g / 2 + off, a[1] + uy * g / 2)
+            B = (b[0] - ux * g / 2 + off, b[1] - uy * g / 2)
             cx, cy = (A[0] + B[0]) / 2, (A[1] + B[1]) / 2
             mat, t = (WB, 3) if i < 2 else (WM, 6)
-            name = f'arch_{sn}0' if i == 0 else f'float_arch_{sn}{i}'
-            ang = math.degrees(math.atan2(B[1] - A[1], B[0] - A[0])) + (r.uniform(-7, 7) if i > 0 else 0)
-            _stone(m, name, mat, t, cx, cy, math.dist(A, B) + 0.4, 4.6 - 0.4 * i, 3.0 - 0.2 * i, rot=ang)
-            if prev:
-                _force(m, f'float_f_{sn}{i}', prev, (cx, cy), 0.8)
-            prev = (cx, cy)
-        apex.append(prev)
-        bx = sd * 13.6
-        _force(m, f'float_f_bell_{sn}', (sd * 10.6, 43.0), (bx, 38.6), 0.7)
-        _cs_bell(m, f'float_bell_{sn}', bx, 38.6, 0.75)
-    _force(m, 'float_f_apex', apex[0], apex[1], 1.0)
-    _force(m, 'float_f_bell_c', (0, 62.0), (0, 53.0), 0.9)
-    _cs_bell(m, 'float_bell_c', 0.0, 53.0, 1.05)
+            ang = math.degrees(math.atan2(B[1] - A[1], B[0] - A[0])) + r.uniform(-9, 9)
+            _stone(m, f'float_arch_{sn}{i}', mat, t, cx, cy, math.dist(A, B) + 0.6, 5.4 - 0.5 * i, 3.4 - 0.25 * i, rot=ang)
+        # 外の小さな鈴（黒、白い口）
+        _bell2(m, f'float_bell_{sn}', sd * 16.0 + r.uniform(-0.5, 0.5), 41.0 + r.uniform(-1, 1), 0.72, WB)
+    # 中の大きな鈴（白、黒い口）。頂の下に浮く
+    _bell2(m, 'float_bell_c', r.uniform(-0.4, 0.4), 58.0, 1.1, WM)
     _rockify(m, per=(1, 2))
     return m
-
 
 ALL = [tower_balance_sword, tower_pull_hammer, tower_moon_staff, tower_sigil_dagger, tower_clap_bell_staff, tower_eye_bow]
 
