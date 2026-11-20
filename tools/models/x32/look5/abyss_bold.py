@@ -137,6 +137,29 @@ def ear_bell(m, pre, x, top, s, curl=1):
     m.box(f'{pre}_tongue_glow', G, [x - 0.7 * s, top - 9.6 * s, -0.7 * s], [x + 0.7 * s, top - 7.6 * s, 0.7 * s], 4)
 
 
+def shell_whorls(m, pre, x, y0, n, w0, h0, shrink, mat=SB, tilt=6):
+    """巻貝の殻の輪を下から積む（上ほど細い）。輪の継ぎ目に淵の光の線。積んだ上端の y を返す"""
+    y = y0
+    for k in range(n):
+        w = w0 * (shrink ** k)
+        h = h0 * (shrink ** k)
+        m.seg(f'{pre}_{k}', mat, (x - w / 2, y + h / 2), (x + w / 2, y + h / 2 + (tilt if k % 2 else -tilt) * 0.05 * w), h, w * 0.36, 4, 6)
+        m.box(f'{pre}_suture_{k}_glow', G, [x - w * 0.42, y + h - 0.4, -w * 0.38], [x + w * 0.42, y + h + 0.3, w * 0.38], 3)
+        y += h * 0.92
+    return y
+
+
+def sunk_bell(m, pre, cx, top, s):
+    """沈んだ鐘: 冠・肩・胴・口の縁、口の奥の淵の光、まわりにフジツボ"""
+    m.box(f'{pre}_crown', V, [cx - 1.4 * s, top - 1.6 * s, -1.4 * s], [cx + 1.4 * s, top, 1.4 * s], 3)
+    m.box(f'{pre}_shoulder', F, [cx - 3.0 * s, top - 3.6 * s, -3.0 * s], [cx + 3.0 * s, top - 1.4 * s, 3.0 * s], 4, rim=True)
+    m.box(f'{pre}_body', F, [cx - 3.8 * s, top - 9.0 * s, -3.8 * s], [cx + 3.8 * s, top - 3.4 * s, 3.8 * s], grad=(top - 9 * s, 3, top - 3.4 * s, 5))
+    m.box(f'{pre}_lip', F, [cx - 4.8 * s, top - 10.4 * s, -4.8 * s], [cx + 4.8 * s, top - 8.8 * s, 4.8 * s], 5, rim=True)
+    m.box(f'{pre}_mouth_glow', G, [cx - 3.0 * s, top - 10.5 * s, -3.0 * s], [cx + 3.0 * s, top - 9.8 * s, 3.0 * s], 4)
+    for k, (dx, dy, dz) in enumerate(((-3.9, -5, 1.5), (3.9, -7, -1), (1, -4, 3.9), (-1.5, -7.5, -3.9))):
+        m.box(f'{pre}_barnacle_{k}', SB, [cx + dx * s - 1.0, top + dy * s - 1.0, dz * s - 1.0], [cx + dx * s + 1.0, top + dy * s + 1.2, dz * s + 1.0], 6)
+
+
 # ================================================================ 底の品（大剣・剣・短剣・錨・鎌）
 
 def abyss_greatsword():
@@ -346,56 +369,67 @@ def abyss_whale_bow():
 # ================================================================ 潮（潮殻の心核）
 
 def abyss_tide_sword():
-    """螺旋貝の大剣: 長い巻貝（タケノコ貝）がそのまま刃。段ごとに少しずつ細る殻の輪と、輪の溝の淵の光"""
-    m = M('abyss_tide_sword')
-    grip(m, -7, 7)
-    m.box('aperture', B, [-4.5, 8.5, -3], [4.5, 12, 3], grad=(8.5, 3, 12, 5))
-    for k in range(9):
-        w = 3.75 - k * 0.38
-        y = 12 + k * 4.25
-        m.box(f'whorl_{k}', V if k % 2 == 0 else B, [-w, y, -w * 0.6], [w, y + 4.25, w * 0.6], 3 + k * 0.3)
-        if k < 8:
-            m.box(f'suture_{k}_glow', G, [-w - 0.1, y + 3.75, -w * 0.6 - 0.1], [w + 0.1, y + 4.25, w * 0.6 + 0.1], 2)
-    m.seg('apex', V, (0, 50), (0, 54), 1.25, 0.6, 5, 7, tip=True)
+    """螺旋貝の大剣（伝説、2026-11-20 に作り直し・案 A）: 刃はタケノコ貝の殻そのもの。殻の輪が段ごとに細って先へ尖り、
+    輪の継ぎ目（縫合線）が淵の光。輪は一段ごとに左右へ少し傾いて螺旋に見える。鍔は貝の口の縁（青緑の殻）
+    ※ 2026-11-20 に Blockbench で手を入れた（殻の輪 21 箱 → 段ごとに 24° 回りながら細る菱の断面の尖塔メッシュ（ねじれた巻貝）、継ぎ目の青緑と角の明るい螺旋の線を筆で）。正本は tools/models/x32/abyss_tide_sword.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_tide_sword', SB)
+    sword_grip(m)
+    m.chain('lip', F, [(-8.5, 10), (-4, 7.2), (4, 7.2), (8.5, 10.5)], [3.4, 2.6, 3.4], 2.6, 4, 6)
+    y = shell_whorls(m, 'whorl', 0, 8.5, 10, 11.0, 7.6, 0.9)
+    m.seg('apex', SB, (0, y - 0.5), (0.5, y + 8), 2.8, 1.1, 6, 8, tip=True)
     return m
 
 
 def abyss_tide_hammer():
-    """大蛤の鎚: 頭は閉じた大きな二枚貝（上下の殻の筋）、殻の隙間に真珠が光る"""
-    m = M('abyss_tide_hammer')
-    hammer_haft(m)
-    c = 30.5
-    for sd, n in ((1, 'u'), (-1, 'd')):
-        m.box(f'valve_{n}', V, [-6, c + (0.4 if sd > 0 else -4.5), -4], [6, c + (4.5 if sd > 0 else -0.4), 4], grad=(c - 4, 3, c + 4.5, 6))
-        for k, x in enumerate((-3.5, 0, 3.5)):
-            m.box(f'rib_{n}{k}', B, [x - 0.4, c + (0.6 if sd > 0 else -4.3), -4.2], [x + 0.4, c + (4.3 if sd > 0 else -0.6), 4.2], 4)
-    m.box('pearl_glow', G, [5, c - 1, -1], [7, c + 1, 1], 4)
-    m.box('hinge', B, [-7, c - 1.5, -2], [-5.5, c + 1.5, 2], 4)
-    m.box('socket', V, [-2, 24, -2], [2, 26.5, 2], 3)
+    """大蛤の鎚（伝説、2026-11-20 に作り直し・案 A）: 頭は横に寝た大きな二枚貝。上下の殻が閉じて、青緑の筋が放射に走る。
+    合わせ目の前と後ろから真珠が光る。殻の両端が打つ面、上に黒い蝶番
+    ※ 2026-11-20 に Blockbench で手を入れた（殻の箱と筋 9 箱 → ふくらんだ二枚の殻のメッシュ、放射の筋と成長線を筆で、両端に黒い打ち板を足した）。正本は tools/models/x32/abyss_tide_hammer.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_tide_hammer', SB)
+    spine_haft(m, 27)
+    cy = 33.0
+    drum(m, 'valve_up', SB, -15, 15, cy + 3.2, 4.2, 5)
+    drum(m, 'valve_dn', SB, -15, 15, cy - 3.2, 4.2, 4)
+    for k, x in enumerate((-10, -5, 0, 5, 10)):
+        m.box(f'rib_{k}', F, [x - 0.6, cy - 7.0, -5.0], [x + 0.6, cy + 7.0, 5.0], 4)
+    m.box('seam', V, [-15.2, cy - 0.7, -4.4], [15.2, cy + 0.7, 4.4], 2)
+    m.box('pearl_glow', G, [-2.0, cy - 2.0, 3.6], [2.0, cy + 2.0, 5.6], 4)
+    m.box('pearl_b_glow', G, [-2.0, cy - 2.0, -5.6], [2.0, cy + 2.0, -3.6], 4)
+    m.box('hinge', V, [-4, cy + 6.6, -2], [4, cy + 8.6, 2], 3, rim=True)
+    m.box('neck', SB, [-2.6, 25.5, -2.6], [2.6, 28.8, 2.6], 4, rim=True)
     return m
 
 
 def abyss_tide_staff():
-    """渦潮の杖: 先に巻いた貝の殻（輪が三段、上ほど小さく片側へずれる）、殻の口の中で渦が光る"""
-    m = M('abyss_tide_staff')
-    staff(m, 33)
-    for k, (x, y, w) in enumerate(((0, 34, 5), (1, 38, 4), (1.75, 41.5, 3), (2.25, 44.5, 1.75))):
-        m.box(f'coil_{k}', V if k % 2 == 0 else B, [x - w, y, -w], [x + w, y + 3.5, w], 4 + k * 0.6)
-    m.box('mouth_glow', G, [-5.25, 35, -2], [-4.4, 37, 2], 4)
-    m.arc('whirl', G, (-5, 36), 1.75, 0, 300, 5, 0.75, 0.6, 3, 4, zc=-2.6)
+    """渦潮の杖（伝説、2026-11-20 に作り直し・案 A）: 杖の先に大きく巻いた平たい渦巻の殻（オウムガイのよう）。
+    殻は外から内へ細って巻き込み、殻の口の中で渦潮が光の輪になって回る
+    ※ 2026-11-20 に Blockbench で手を入れた（渦の節 14 箱 → 外ほど太く巻き込むオウムガイの殻のメッシュ、縞を筆で）。正本は tools/models/x32/abyss_tide_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_tide_staff', SB)
+    staff2(m, 40)
+    c = (0.0, 53.0)
+    pts = []
+    for k in range(15):
+        a = math.radians(-90 + k * 30)
+        r = 11.5 * (0.93 ** k)
+        pts.append((c[0] + math.cos(a) * r, c[1] + math.sin(a) * r))
+    m.chain('coil', SB, pts, [5.0 * 0.94 ** k for k in range(14)], [3.6 * 0.95 ** k for k in range(14)], 4, 7, tip=False)
+    m.arc('vortex_glow', G, (c[0] + 0.5, c[1] - 1.5), 4.4, 0, 330, 8, 1.2, 1.0, 3, 4)
+    m.box('stem', V, [-2.2, 39, -2.2], [2.2, 43, 2.2], 3, rim=True)
     return m
 
 
 def abyss_tide_dagger():
-    """海胆の針: 大海胆の長い棘（細くまっすぐ、先へ光る）。殻の欠片の鍔に小さな棘が並ぶ"""
-    m = M('abyss_tide_dagger')
-    grip(m, -4, 4)
-    m.box('test', B, [-3.5, 5.5, -2.5], [3.5, 8.5, 2.5], grad=(5.5, 3, 8.5, 5))
-    for k, (x, z) in enumerate(((-3, -1.5), (3, 1.5), (-1.5, 2.5), (1.5, -2.5))):
-        m.seg(f'spinelet_{k}', V, (x, 8.5), (x * 1.35, 10.5), 1, 0.5, 3, 5, tip=True, zc=z)
-    m.box('spine', V, [-1.25, 8.5, -1.25], [1.25, 26, 1.25], grad=(8.5, 2, 26, 4))
-    m.box('spine_glow', G, [-0.75, 24, -0.75], [0.75, 31, 0.75], grad=(24, 2, 31, 5))
-    m.seg('needle', G, (0, 31), (0, 34), 1, 0.5, 4, 5, tip=True)
+    """海胆の針（伝説、2026-11-20 に作り直し・案 C）: 鍔は丸い海胆の殻そのもの（まわりに短い棘が放射に生える）。
+    そこから長い棘が一本伸びて刃になる。殻の表と裏に淵の光の目
+    ※ 2026-11-20 に Blockbench で手を入れた（棘の箱 → 六角の断面で細る針のメッシュ（節の輪を筆で）、海胆の棘を前後に傾け、前後の棘 4 本を足した）。正本は tools/models/x32/abyss_tide_dagger.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_tide_dagger', SB)
+    sword_grip(m, 3)
+    drum(m, 'test', F, -5, 5, 8.0, 5.0, 4)
+    for k in range(8):
+        a = math.radians(k * 45 + 22)
+        m.seg(f'spinelet_{k}', SB, (math.cos(a) * 4.6, 8 + math.sin(a) * 4.6), (math.cos(a) * 8.6, 8 + math.sin(a) * 8.6), 1.2, 0.8, 5, 7, tip=True)
+    m.seg('spine', SB, (0, 12), (0, 40), 3.2, 1.5, 4, 7, tip=True)
+    m.box('eye_glow', G, [-1.2, 6.8, 4.8], [1.2, 9.2, 5.6], 4)
+    m.box('eye_b_glow', G, [-1.2, 6.8, -5.6], [1.2, 9.2, -4.8], 4)
     return m
 
 
@@ -436,14 +470,13 @@ def abyss_tide_bow():
 
 
 def abyss_bell_staff():
-    """沈み鐘の杖: 先に沈んだ鐘を吊る。鐘はフジツボに覆われ、口の奥に淵の光、鐘を吊る錆びた鉤"""
-    m = M('abyss_bell_staff')
-    staff(m, 36)
-    m.chain('hook', V, [(0, 35.5), (0.5, 41), (3.5, 44), (7, 43.5), (8, 41.5)], [2.25, 2.25, 2, 1.75], 1.1, 4, 6, tip=False)
-    bell(m, 'bell', V, (7.5, 29.5), 4.5, 11, 3)
-    m.box('throat_glow', G, [3.75, 29.25, -3.25], [11.25, 29.75, 3.25], 4)
-    for k, (x, y, z) in enumerate(((4.5, 35, -3.7), (10, 32, 3.7), (8.5, 37.5, -3.7))):
-        m.box(f'barnacle_{k}', B, [x - 0.75, y - 0.75, z - 0.4], [x + 0.75, y + 0.75, z + 0.4], 5)
+    """沈み鐘の杖（エピック、2026-11-20 に作り直し・案 A）: 杖の先が錆びた鉤に曲がり、鉤から大きな鐘が下がる。
+    鐘はフジツボに覆われ、口の中が淵の光
+    ※ 2026-11-20 に Blockbench で手を入れた（鐘の 3 箱 → 八角でまわしてふくらむ鐘のメッシュ、フジツボを不揃いに傾けた）。正本は tools/models/x32/abyss_bell_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_bell_staff', SB)
+    staff2(m, 44)
+    m.chain('hook', V, [(0, 43), (0.5, 50), (4, 54), (8.5, 53), (10, 49.5)], [2.6, 2.4, 2.2, 2.0], 1.4, 3, 5)
+    sunk_bell(m, 'bell', 10, 50.2, 0.95)
     return m
 
 
