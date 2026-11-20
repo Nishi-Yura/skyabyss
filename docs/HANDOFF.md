@@ -198,3 +198,6 @@
   - 第五章のまとまり（ラフなしの一案）: 灯り番の剣・鼓動の短剣・沈め錨・灯籠の杖・弔鐘の鈴杖。全品 Blockbench で手入れ済み。docs/review/abyss_ch5_ingame.png。これで深淵シリーズの武器は全部済み。残り: 承認済みの深淵の弓 5 本を sbone へ塗り直すかをユーザーに聞く、シリーズ一覧を見せる。
 - 2026-11-20 野シリーズの作り直しを始めた（深淵の次）。牧草地: 試作の石切りの鎚 A → 残り 5 品のラフ（docs/review/meadow_roughs.png）からおすすめ（剣 A・小刀 A・鳴子杖 A・羽杖 A・旗槍 C）。古い鉄の色 oldiron（I）を足し、アンコモンは光なし、レアの旗槍だけ蛍の飾り 1 か所。全 6 品 Blockbench で手入れ済み（docs/review/wild_meadow_ingame.png）。次は野の次の土地（丘 → 海辺 → …）。弓は承認済みなので据え置き。
 - 2026-11-20 丘（全品レア、光は 1 か所）: ラフ docs/review/hills_roughs.png からおすすめ（斧 A 牙の三日月・杖 B 棚茸・爪 B 甲虫の大顎・祈り柱 C 三羽の骨鳥）。全 4 品 Blockbench で手入れ済み（docs/review/wild_hills_ingame.png）。次は海辺（wild_coast）。
+- 2026-11-20〜21 海辺（10 品。レア 5 品は夜光虫の光 1 か所、アンコモン 5 品は光なし）: ラフ docs/review/coast_roughs_1.png・_2.png からおすすめ（鋏鎚 A・木槌 C 帆柱・曲刀 A・櫂剣 A・隠し刃 C 角貝・針 B 魚の骨・漁り火の杖 A・潮見の杖 C 羅針・霧鐘 A・貝鈴杖 B 巻貝の風鈴）。全 10 品 Blockbench で手入れ済み（docs/review/wild_coast_ingame.png）。貝鈴杖は真ん中の貝が柄に重なるので四つにした。次は海辺の次の土地。
+  - 気づいたこと: paint_with_brush の線（2 点以上を結ぶ）は描けない区間が出る。面を塗るときは draw_shape_tool の rectangle（両端を含む）か、1 画ずつの点で打つ。塗ったあと透明の画素が残っていないか確かめる。
+  - メッシュの面は外向きの順に並べる（内向きだと裏から抜けて見える）。scratchpad の orient.py で並べ、書き出した .bbmodel を normals.py で確かめる（鋏鎚のとげが内向きだったので直した）。
