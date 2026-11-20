@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lib  # noqa: E402
 from lib import Model  # noqa: E402
+from paintbox import skin  # noqa: E402
 
 # 塔の装備の色（書類 54 の 2 章: 半分が白の大理石と金、半分が黒い石と紫の割れ目、つなぎ目に天秤の印。2026-11-20）
 # 塔の品はこの段階だけで塗る。白は -x、黒は +x（左右で割る）
@@ -737,144 +738,148 @@ def _bell2(m, pre, cx, top, s, body):
     skin(m, f'{pre}_tongue_glow', WC, 4, [cx - 0.8 * s, top - 12.6 * s, -0.8 * s], [cx + 0.8 * s, top - 9.4 * s, 0.8 * s])
 
 
+def _flat(tone):
+    def f(sp, face, w, h):
+        sp.rect(0, 0, w, h, WC, tone, shade=False)
+    return f
+
+
+def _split_moon(m, c, R=6.8, rows=8):
+    """月を岩の円盤で組む。ぎざぎざの割れ目で、左（天）は紫に光る半月、右（淵）は黒い石の半月に割れて、上下左右へ少しずれて浮く。
+    黒い半月の割れ口だけ紫に光る"""
+    import random
+    r = random.Random('split_moon')
+    hh = 2 * R / rows
+    for k in range(rows):
+        y0 = c[1] - R + k * hh
+        ym = y0 + hh / 2
+        half = math.sqrt(max(R * R - (ym - c[1]) ** 2, 0.0)) + 0.5
+        xc = c[0] + r.uniform(-1.3, 1.3)
+        lx0, lx1 = c[0] - half - 0.8, xc - 0.5 - 0.8
+        if lx1 - lx0 > 0.6:
+            skin(m, f'float_moon_l{k}_glow', WC, 3, [lx0, y0 + 0.5, -1.8], [lx1, y0 + hh + 0.5, 1.8], paint=_flat(3 if k > 1 else 2))
+        rx0, rx1 = xc + 0.5 + 0.8, c[0] + half + 0.8
+        if rx1 - rx0 > 1.4:
+            skin(m, f'float_moon_e{k}_glow', WC, 5, [rx0, y0 - 0.5, -1.6], [rx0 + 0.7, y0 + hh - 0.5, 1.6], paint=_flat(5))
+            skin(m, f'float_moon_r{k}_core', WB, 2 + (k % 2), [rx0 + 0.7, y0 - 0.5, -2.0], [rx1, y0 + hh - 0.5, 2.0])
+    for k, (dx, dy) in enumerate(((-0.4, R + 2.2), (0.9, -R - 2.0), (2.6, R + 1.0))):
+        diamond(m, f'float_moon_chip_{k}', WB if k == 1 else WC, (c[0] + dx, c[1] + dy), 1.4, 0.8, 3, 4)
+
+
+def _scales(m, cx, cy):
+    """天秤の印を本物の天秤に: 金の柱の上に傾いた竿、高い皿は白、低い皿は黒。支点に光る菱"""
+    skin(m, 'libra_post', WG, 4, [cx - 0.6, cy, -0.6], [cx + 0.6, cy + 3.6, 0.6])
+    _bl_bar(m, 'libra_beam', WG, 5, (cx - 5.8, cy + 4.4), (cx + 5.8, cy + 2.6), 1.0, 0.7)
+    diamond(m, 'libra_gem', WL, (cx, cy + 3.5), 2.4, 1.0, 2, 3, zc=0.9)
+    for sd, top, mat, t in ((-1, cy + 4.3, WM, 7), (1, cy + 2.7, WB, 3)):
+        x = cx + sd * 5.4
+        nm = 'lr'[sd > 0]
+        skin(m, f'libra_cord_{nm}', WG, 3, [x - 0.3, top - 2.4, -0.3], [x + 0.3, top, 0.3])
+        skin(m, f'libra_pan_{nm}', mat, t, [x - 1.8, top - 3.2, -1.6], [x + 1.8, top - 2.4, 1.6])
+
+
+def _dgrip(m):
+    skin(m, 'grip', WN, 2, [-2.0, -2.0, -1.9], [2.0, 7.0, 1.9], paint=_bs_bands)
+    skin(m, 'grip_ring', WG, 4, [-2.5, 0.6, -2.3], [2.5, 2.0, 2.3])
+    _stone(m, 'pommel', WB, 3, 0, -3.0, 5.2, 2.6, 2.4)
+
+
+def _sgrip(m):
+    _stone(m, 'pommel', WB, 3, 0, -9.4, 4.8, 3.2, 2.4)
+    skin(m, 'grip', WN, 3, [-1.9, -8.0, -1.9], [1.9, 4.0, 1.9], paint=_cs_grip)
+    for k, (y0, y1) in enumerate(((-6.0, -4.4), (0.6, 2.2))):
+        skin(m, f'grip_ring_{k}', WG, 4, [-2.4, y0, -2.4], [2.4, y1, 2.4])
+
+
+def _zs(m, i0, dz):
+    for p in m.parts[i0:]:
+        for kk in ('frm', 'to', 'origin'):
+            p[kk][2] += dz
+
+
+def _rod(m, top, libra_y):
+    _sgrip(m)
+    skin(m, 'rod', WN, 3, [-1.2, 3.0, -1.2], [1.2, top, 1.2])
+    if libra_y is not None:
+        _libra(m, 0, libra_y, 4.0, 2.0)
+
+
 def tower_moon_staff():
-    """落ちる月の杖（崩れた塔。案 B、2026-11-20 のブラッシュアップ）: 柄の先に白黒の尖塔が段ごとに浮いて積み上がり、
-    その真ん中を太い石の三日月が斜めに貫く。三日月は岩の塊を弧に並べ、真ん中が厚く両の角へ細って尖る。
-    三日月の抱く所に紫の月が落ちて止まる。尖塔のてっぺんは欠けた胸壁と金の尖塔"""
-    from paintbox import skin  # noqa: F401
+    """落ちる月の杖（崩れた塔。2026-11-20 に模型から作り直し、案 A）: 月を抱く冠。 杖の先に、崩れた塔の冠（胸壁の輪）が石ごとにばらけて浮き、輪の中に割れた月が浮かぶ。輪は上ほど白。
+    月は天（紫の光）と淵（黒い石）の半月に割れ、根元の天秤は竿と二つの皿の本物の天秤"""
     m = _wM('tower_moon_staff')
     r = _rng(m)
-    _staff_base(m, 35.0)
-    # 尖塔: 6 段。下 2 段は黒、上は白。上ほど離れて傾き、左右へずれる
-    y = 34.2
-    tops = []
-    for i, (w, h) in enumerate(((8.4, 4.6), (7.6, 4.4), (6.8, 4.2), (6.0, 4.0), (5.2, 3.6), (4.4, 3.4))):
-        y += 0.0 if i == 0 else r.uniform(0.9, 1.6) + 0.25 * i
-        cx = 0.0 if i == 0 else r.uniform(-1, 1) * (0.5 + 0.35 * i)
-        mat, t = (WB, 3) if i < 2 else (WM, 6)
-        _stone(m, 'spire_0' if i == 0 else f'float_spire_{i}', mat, t, cx, y + h / 2, w, h, 3.2 - 0.2 * i,
-               rot=0 if i == 0 else r.uniform(-1, 1) * (3 + 2.5 * i))
-        tops.append((cx, y + h))
-        y += h
-    for k, x in enumerate((-1.6, 1.6)):
-        _stone(m, f'float_merlon_{k}', WM, 7, tops[-1][0] + x + r.uniform(-0.3, 0.3), y + 1.8 + r.uniform(0, 1.0), 1.8, 2.4, 2.2,
-               rot=r.uniform(-18, 18))
-    m.chain('float_tipg', WG, [(tops[-1][0], y + 4.4), (tops[-1][0] + 0.3, y + 8.0), (tops[-1][0] + 0.4, y + 11.0)],
-            [1.8, 1.0], [1.4, 0.9], 4, 5, tip=True)
-    _libra(m, 0, 36.6, 4.4, 3.4)
-    # 三日月: 岩の塊 9 つ。弧（125°→-125°、右がふくらみ左が開く）を 22° 傾け、真ん中が厚く角が細い
-    c, R, tilt = (2.4, 53.0), 15.0, math.radians(18)
-    N = 9
-    for k in range(N):
-        t0, t1 = k / N, (k + 1) / N
-        tm = (t0 + t1) / 2
-        a = math.radians(125 - 250 * tm)
-        th = 1.4 + 4.0 * math.sin(math.pi * tm)
-        rr = R - th / 2
-        x, yy = rr * math.cos(a) * 0.82, rr * math.sin(a)
-        px = c[0] + x * math.cos(tilt) - yy * math.sin(tilt)
-        py = c[1] + x * math.sin(tilt) + yy * math.cos(tilt)
-        L = 2 * R * math.sin(math.radians(250 / N) / 2) * 0.86
-        ang = math.degrees(a + tilt) + 90 + r.uniform(-6, 6)
-        mat, t = (WB, 3) if py < c[1] - 2 else (WM, 6)
-        _stone(m, f'float_cres_{k}', mat, t, px + r.uniform(-0.3, 0.3), py + r.uniform(-0.3, 0.3), L, th, 2.6 - 0.6 * abs(tm - 0.5),
-               rot=ang)
-    # 月: 三日月の抱く所（弧の内側）
-    # 三日月は尖塔の奥（z を下げる）に置き、尖塔の前後で重ならないようにする
-    for p in m.parts:
-        if p['name'].startswith('float_cres_'):
-            p['frm'][2] -= 3.6
-            p['to'][2] -= 3.6
-            p['origin'][2] -= 3.6
-    _moon(m, (c[0] - 7.6, c[1] + 1.0), 7.0)
-    for k in range(3):
-        a = r.uniform(0, 2 * math.pi)
-        diamond(m, f'float_chip_{k}', WM if k % 2 else WB, (c[0] + math.cos(a) * 16.0, c[1] + math.sin(a) * 10.0),
-                r.uniform(1.4, 2.2), 1.0, 5, 6)
+    _staff_base(m, 36.0)
+    _stone(m, 'cap', WB, 4, 0, 36.6, 7.0, 3.2, 3.4)
+    _scales(m, 0, 38.2)
+    c = (0.0, 57.0)
+    _split_moon(m, c)
+    for k in range(9):
+        a = math.radians(-50 + k * 35 + r.uniform(-8, 8))
+        rr = 11.6 + r.uniform(-0.8, 1.2)
+        x, y = c[0] + math.cos(a) * rr, c[1] + math.sin(a) * rr
+        mat, t = (WM, 6) if y > c[1] - 3 else (WB, 3)
+        w, h = r.uniform(3.6, 5.0), r.uniform(3.0, 4.2)
+        _stone(m, f'float_ring_{k}', mat, t, x, y, w, h, 3.0, rot=math.degrees(a) + 90 + r.uniform(-14, 14))
+        if y > c[1] + 4 and r.random() < 0.8:
+            _stone(m, f'float_merlon_{k}', WM, 7, x + math.cos(a) * 3.0, y + math.sin(a) * 3.0, 2.0, 2.4, 2.4, rot=r.uniform(-20, 20))
     _rockify(m, per=(1, 1), scale=0.8)
     return m
 
 
 def tower_sigil_dagger():
-    """追う印の短剣（崩れた塔。2026-11-20 のブラッシュアップ）: 刃は塔から折れた尖塔の鉤。幅のある石の破片 7 つが弧に浮いて連なり、
-    先で大きく鉤に返って尖る。根元の 2 つは黒、先は白。破片の脇に小さな欠片。根元に天秤の印、柄の下に逆手の黒い石の輪"""
-    from paintbox import skin
+    """追う印の短剣（崩れた塔。2026-11-20 に模型から作り直し、案 A）: 矢じり。 幅のある木の葉形の刃を、大きな石の破片三つが上下に浮いて作る（下の黒い根元が一番広く、先の白が尖る）"""
     m = _wM('tower_sigil_dagger')
     r = _rng(m)
-    skin(m, 'grip', WN, 2, [-2.0, -2.0, -1.9], [2.0, 7.0, 1.9], paint=_bs_bands)
-    skin(m, 'grip_ring', WG, 4, [-2.5, 0.6, -2.3], [2.5, 2.0, 2.3])
-    _stone(m, 'pommel', WB, 3, 0, -3.0, 5.2, 2.6, 2.4)
-    for k in range(10):
-        a0, a1 = 2 * math.pi * k / 10, 2 * math.pi * (k + 1) / 10
-        _bl_bar(m, f'ring_{k}', WB, 3, (3.4 * math.cos(a0), -7.6 + 3.4 * math.sin(a0)),
-                (3.4 * math.cos(a1), -7.6 + 3.4 * math.sin(a1)), 2.0, 1.3, paint=_bl_course)
-    path = [(0.0, 6.0), (1.6, 13.0), (3.0, 19.6), (3.4, 25.8), (2.4, 31.4), (0.0, 35.6), (-3.4, 37.6), (-6.8, 36.0), (-8.6, 31.8)]
-    ws = (8.4, 7.6, 6.8, 5.8, 4.8, 3.8, 3.0, 2.2)
-    for i in range(len(path) - 1):
-        a, b = path[i], path[i + 1]
-        g = 0.0 if i == 0 else r.uniform(1.0, 1.9)
-        L = math.dist(a, b)
-        ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-        nx, ny = -uy, ux
-        off = 0.0 if i == 0 else r.uniform(-0.8, 0.8)
-        A = (a[0] + ux * g / 2 + nx * off, a[1] + uy * g / 2 + ny * off)
-        B = (b[0] - ux * g / 2 + nx * off, b[1] - uy * g / 2 + ny * off)
-        mat, t = (WB, 3) if i < 2 else (WM, 6)
-        cx, cy = (A[0] + B[0]) / 2, (A[1] + B[1]) / 2
-        ang = math.degrees(math.atan2(B[1] - A[1], B[0] - A[0])) + (r.uniform(-8, 8) if i > 0 else 0)
-        last = i == len(path) - 2
-        if last:
-            m.seg('float_tip', WM, A, (b[0] - ux * 0.5, b[1] - uy * 0.5), ws[i] + 0.6, 1.4, 6, 8, tip=True)
-        else:
-            _stone(m, 'shard_0' if i == 0 else f'float_shard_{i}', mat, t, cx, cy, math.dist(A, B), ws[i], 2.4 - 0.15 * i, rot=ang)
-        if 1 <= i <= 5 and r.random() < 0.7:
-            sd = r.choice((-1, 1))
-            diamond(m, f'float_chip_{i}', mat, (cx + nx * sd * (ws[i] / 2 + 1.6), cy + ny * sd * (ws[i] / 2 + 1.6)),
-                    r.uniform(1.2, 1.8), 0.9, t, t + 1)
-    _libra(m, 0.6, 9.4, 4.0, 2.6)
-    _rockify(m, per=(1, 1), scale=0.75)
+    _dgrip(m)
+    for sd in (-1, 1):
+        _stone(m, f'guard_{"lr"[sd > 0]}', WB, 4, sd * 4.0, 7.6, 3.6, 2.4, 2.2, rot=sd * r.uniform(10, 22))
+    _stone(m, 'shard_0', WB, 3, 0, 11.0, 8.4, 7.0, 2.2)
+    _libra(m, 0, 10.6, 3.6, 2.2)
+    y = 14.5
+    for i, (w, h) in enumerate(((7.4, 8.0), (5.6, 7.4))):
+        y += r.uniform(1.0, 1.8)
+        _stone(m, f'float_shard_{i + 1}', WM, 6, r.uniform(-0.6, 0.6), y + h / 2, w, h, 2.0 - 0.3 * i, rot=r.uniform(-6, 6))
+        y += h
+    m.seg('float_tip', WM, (r.uniform(-0.4, 0.4), y + 1.2), (0.2, y + 9.0), 4.2, 1.6, 6, 8, tip=True)
+    for i in range(3):
+        diamond(m, f'float_chip_{i}', WM, (r.choice((-1, 1)) * r.uniform(5.0, 6.4), 18.0 + i * 6.0), r.uniform(1.2, 1.8), 0.8, 6, 7)
+    _rockify(m, per=(1, 1), scale=0.7)
     return m
 
 
 def tower_clap_bell_staff():
-    """合掌の鈴杖（崩れた塔。2026-11-20 のブラッシュアップ）: 杖の頭は崩れた鐘楼の尖りアーチ。左右のアーチの半分が大きな岩の塊に割れて浮き、
-    合わせた掌のように頂で向き合う（頂は触れない）。アーチの中に白い大きな鈴、外に黒い小さな鈴が二つ浮いて下がる。
-    アーチの根元は黒い石、上は白。根元の割れた梁に天秤の印"""
-    from paintbox import skin
+    """合掌の鈴杖（崩れた塔。2026-11-20 に模型から作り直し、案 E）: 鈴の環。杖の先の上に白い要石が浮き、
+    そのまわりを鈴六つと小石が斜めの輪（軌道）を描いて回る。手前の鈴は白、奥の鈴は黒。要石の芯に天秤の光"""
     m = _wM('tower_clap_bell_staff')
     r = _rng(m)
-    skin(m, 'pommel', WB, 3, [-2.4, -11.0, -2.4], [2.4, -8.0, 2.4])
-    skin(m, 'grip', WN, 3, [-1.9, -8.0, -1.9], [1.9, 4.0, 1.9], paint=_cs_grip)
-    for k, (y0, y1) in enumerate(((-6.0, -4.4), (0.6, 2.2))):
-        skin(m, f'grip_ring_{k}', WG, 4, [-2.4, y0, -2.4], [2.4, y1, 2.4])
-    skin(m, 'rod', WN, 3, [-1.2, 3.0, -1.2], [1.2, 30.0, 1.2])
-    # 割れた梁: 真ん中だけが柄に付き、左右の欠片は浮いて少し下がる
-    _stone(m, 'lintel', WB, 3, 0, 31.2, 8.0, 3.6, 3.4)
-    _libra(m, 0, 31.2, 4.4, 3.4)
-    for sd in (-1, 1):
-        _stone(m, f'float_lintel_{"lr"[sd > 0]}', WB, 4, sd * 8.4 + r.uniform(-0.3, 0.3), 30.6 + r.uniform(-0.8, 0.4), 6.4, 3.4, 3.2,
-               rot=r.uniform(-1, 1) * 8)
-    for sd in (-1, 1):
-        sn = 'lr'[sd > 0]
-        P = [(sd * 10.0, 34.0), (sd * 12.0, 43.0), (sd * 11.4, 51.0), (sd * 8.8, 58.0), (sd * 5.2, 63.4), (sd * 1.8, 67.0)]
-        for i in range(5):
-            a, b = P[i], P[i + 1]
-            g = r.uniform(1.0, 1.8)
-            L = math.dist(a, b)
-            ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-            off = sd * r.uniform(0.2, 1.0) * (i + 1) * 0.6
-            A = (a[0] + ux * g / 2 + off, a[1] + uy * g / 2)
-            B = (b[0] - ux * g / 2 + off, b[1] - uy * g / 2)
-            cx, cy = (A[0] + B[0]) / 2, (A[1] + B[1]) / 2
-            mat, t = (WB, 3) if i < 2 else (WM, 6)
-            ang = math.degrees(math.atan2(B[1] - A[1], B[0] - A[0])) + r.uniform(-9, 9)
-            _stone(m, f'float_arch_{sn}{i}', mat, t, cx, cy, math.dist(A, B) + 0.6, 5.4 - 0.5 * i, 3.4 - 0.25 * i, rot=ang)
-        # 外の小さな鈴（黒、白い口）
-        _bell2(m, f'float_bell_{sn}', sd * 16.0 + r.uniform(-0.5, 0.5), 41.0 + r.uniform(-1, 1), 0.72, WB)
-    # 中の大きな鈴（白、黒い口）。頂の下に浮く
-    _bell2(m, 'float_bell_c', r.uniform(-0.4, 0.4), 58.0, 1.1, WM)
-    _rockify(m, per=(1, 2))
+    _rod(m, 42.0, 30.0)
+    _stone(m, 'cap', WB, 3, 0, 42.6, 6.0, 2.6, 2.8)
+    c = (0.0, 55.0)
+    _stone(m, 'float_key', WM, 7, c[0], c[1], 6.4, 6.4, 3.0, rot=45)
+    _stone(m, 'float_key_chip', WM, 6, c[0] + 4.6, c[1] + 3.4, 2.0, 1.6, 1.4, rot=30)
+    m.chain('float_spire', WG, [(0, c[1] + 4.2), (0.2, c[1] + 8.0), (0.3, c[1] + 11.0)], [1.8, 1.0], [1.3, 0.8], 4, 5, tip=True)
+    diamond(m, 'float_key_gem_glow', WL, c, 2.4, 1.0, 2, 3, zc=3.2)
+    n = 6
+    rx, ry, rz, tilt = 13.0, 4.0, 8.0, 14
+    for k in range(n):
+        a = math.radians(k * 360 / n + 20)
+        p = _xf((math.cos(a) * rx, math.sin(a) * ry), (0, 0), tilt, c[0], c[1])
+        z = math.sin(a) * rz
+        i0 = len(m.parts)
+        _bell2(m, f'float_bell_{k}', p[0], p[1] + 3.6, 0.6, WM if z < 0 else WB)
+        _zs(m, i0, -z)
+        for j, da in enumerate((22, 38)):
+            a2 = a + math.radians(da)
+            q = _xf((math.cos(a2) * rx, math.sin(a2) * ry), (0, 0), tilt, c[0], c[1])
+            i0 = len(m.parts)
+            s = 1.0 if j else 1.4
+            _stone(m, f'float_pebble_{k}{j}', WM if math.sin(a2) < 0 else WB, 5, q[0], q[1], r.uniform(1.4, 2.2) * s,
+                   r.uniform(1.2, 1.8) * s, 0.9, rot=r.uniform(-30, 30))
+            _zs(m, i0, -math.sin(a2) * rz)
+    _rockify(m, per=(0, 1), scale=0.5)
     return m
+
 
 ALL = [tower_balance_sword, tower_pull_hammer, tower_moon_staff, tower_sigil_dagger, tower_clap_bell_staff, tower_eye_bow]
 
