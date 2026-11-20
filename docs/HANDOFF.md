@@ -201,3 +201,5 @@
 - 2026-11-20〜21 海辺（10 品。レア 5 品は夜光虫の光 1 か所、アンコモン 5 品は光なし）: ラフ docs/review/coast_roughs_1.png・_2.png からおすすめ（鋏鎚 A・木槌 C 帆柱・曲刀 A・櫂剣 A・隠し刃 C 角貝・針 B 魚の骨・漁り火の杖 A・潮見の杖 C 羅針・霧鐘 A・貝鈴杖 B 巻貝の風鈴）。全 10 品 Blockbench で手入れ済み（docs/review/wild_coast_ingame.png）。貝鈴杖は真ん中の貝が柄に重なるので四つにした。次は海辺の次の土地。
   - 気づいたこと: paint_with_brush の線（2 点以上を結ぶ）は描けない区間が出る。面を塗るときは draw_shape_tool の rectangle（両端を含む）か、1 画ずつの点で打つ。塗ったあと透明の画素が残っていないか確かめる。
   - メッシュの面は外向きの順に並べる（内向きだと裏から抜けて見える）。scratchpad の orient.py で並べ、書き出した .bbmodel を normals.py で確かめる（鋏鎚のとげが内向きだったので直した）。
+- 2026-11-21 高地（12 品。レア 5 = 光 1 か所、エピック 5 = 飾り 2〜3 か所、ヒロイック 2 = 輪郭が変わる大物）: ラフ docs/review/heights_roughs_1〜3.png からおすすめ（雲読み B 雲の枠・綿雷 A・焼け冠杖 B 雷鷲・避雷斧 A・雪割り A・霜牙 A・雷狼 A・薙刀 C 三日月・羊角 A・風鈴杖 B 小さな機・祈り柱 A・太鼓柱 C 枠太鼓）。全 12 品 Blockbench で手入れ済み（docs/review/wild_heights_ingame.png）。焼け冠杖は灰色の風切羽の棒を外して翼の帯を広げた。次は高地の次の土地（荒野 wastes → 雲 → 月 → 淵の上・下）。
+  - 道具（scratchpad、消えたら作り直す）: ribbon2.py（曲がる帯）、paddle.py（菱形断面の板・刃）、axeblade.py（背が厚く刃先が薄い斧の刃）、lathe.py（n 角の回転体）、orient.py（面を外向きに並べる）、normals.py（.bbmodel の面の向きを確かめる・直す）。塗りは draw_shape_tool の rectangle と 1 画ずつの点。
