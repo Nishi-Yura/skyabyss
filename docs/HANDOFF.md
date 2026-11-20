@@ -209,3 +209,4 @@
 - 2026-11-21 雲（作り直し 5 品、全品ヒロイック = 輪郭が変わる大物。雲雀の弓は承認済みで据え置き）: ラフ docs/review/cloud_roughs_1.png・_2.png からおすすめ（天の鐘楼 B・大プリズム A・翼の大剣 B・天割りの大半月 A・鷹の足 B）。全 5 品 Blockbench で手入れ済み（docs/review/wild_cloud_ingame.png）。節つなぎの門・翼・刃・爪はすべて一枚のメッシュ（帯・回転体・斧の刃）に替えた。次は月（wild_moon）→ 淵の上・下。
   - メッシュの UV は、Blockbench で 1 面ずつ set_mesh_uv する代わりに、書き出した out_*.bbmodel へ scratchpad の patch_uv.py で入れた（place_mesh に渡した頂点・面と、lathe / ribbon2 / axeblade の UV 表を位置で突き合わせる）。形・傾き・塗りは Blockbench で手で行った。patch のあと dark_compare.py で見て UV が合っているか確かめる。
   - Blockbench の画面ではメッシュが UV 未設定のまま（金や灰の別の場所の色）に見えるが、取り込み後は正しい。塗りは UV の表の範囲（テクスチャの空き行など）に描く。
+- 2026-11-21 月（作り直し 5 品、全品ヒロイック。灯台の大弓は承認済みで据え置き）: ラフ docs/review/moon_roughs_1.png・_2.png からおすすめ（落ちる星 B・三日月の刃 B・月と星の天秤 B・三日月の揺りかご C・大金床 A）。全 5 品 Blockbench で手入れ済み（docs/review/wild_moon_ingame.png）。星は 8 本の尖り（star4 を設計ファイルに足した）。メッシュの UV は雲と同じく patch_uv.py で入れた（scratchpad の moon_gen.py が 5 品分のメッシュと UV 表をまとめて作る）。次は淵の上（wild_abyss_upper）→ 淵の下。
