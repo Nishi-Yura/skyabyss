@@ -483,75 +483,99 @@ def abyss_bell_staff():
 # ================================================================ 雷（雷翼の心核）
 
 def abyss_storm_sword():
-    """避雷の大剣: まっすぐな黒い刃に骨の帯（銅の代わり）を螺旋に巻く。先は二股に割れ、間に淵の稲妻"""
-    m = M('abyss_storm_sword')
-    grip(m, -7, 7)
-    guard_bar(m, 8.5, 5.5)
-    m.box('blade', V, [-3, 10.5, -1.1], [3, 44, 1.1], grad=(10.5, 3, 44, 6))
-    for k in range(6):
-        y = 13 + k * 5
-        m.seg(f'wrap_{k}', B, (-3.2, y), (3.2, y + 2), 1.25, 1.25, 4, 5, over=0)
+    """避雷の大剣（伝説、2026-11-20 に作り直し）: まっすぐな黒い刃に骨の帯が斜めに巻く（表と裏で向きが交差する）。
+    鍔は避雷針の碍子のような骨の円盤を横に重ねたもの。先は二股に割れて外へ反り、股のあいだに淵の稲妻の火花が浮く
+    ※ 2026-11-20 に Blockbench で手を入れた（刃と二股の先をメッシュにし、筆で骨の帯と火花を描いた）。正本は tools/models/x32/abyss_storm_sword.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_storm_sword', SB)
+    sword_grip(m)
+    for k, x in enumerate((-8.4, -5.2, 5.2, 8.4)):
+        drum(m, f'insulator_{k}', SB, x - 1.1, x + 1.1, 8.0, 2.6 - 0.4 * (abs(x) > 6), 5)
+    m.box('guard_core', V, [-7.5, 5.6, -1.6], [7.5, 9.6, 1.6], 3, rim=True)
+    m.box('blade', V, [-3.2, 9.4, -1.3], [3.2, 54, 1.3], grad=(9.4, 2, 54, 5), rim=True)
+    for k in range(5):
+        y = 14 + k * 8.0
+        for sd, z in ((1, 1.35), (-1, -1.35)):
+            m.seg(f'band_{k}{"fb"[sd < 0]}', SB, (-3.6, y), (3.6, y + sd * 3.6), 1.6, 0.3, 5, 6, zc=z)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'prong_{n}', V, (sd * 1.75, 44), (sd * 2.5, 52), 2.5, 1, 5, 7, tip=True)
-    m.chain('arc_glow', G, [(0, 44), (-0.75, 46.5), (0.75, 48.5), (0, 51)], [0.9, 0.9, 0.9], 0.7, 3, 5, tip=False)
+        m.chain(f'prong_{n}', V, [(sd * 1.6, 53.5), (sd * 3.2, 59), (sd * 4.8, 64), (sd * 5.6, 68)], [3.0, 2.4, 1.6], 1.2, 4, 6)
+    m.box('float_spark_glow', G, [-1.0, 58.5, -1.0], [1.0, 61.5, 1.0], 4)
     return m
 
 
 def abyss_storm_hammer():
-    """雷鼓の鎚: 頭は横に寝かせた太鼓（胴は黒、両の打面は骨、縁に鋲）。胴の帯に淵の稲妻"""
-    m = M('abyss_storm_hammer')
-    hammer_haft(m)
-    c = 30
-    m.box('shell', V, [-5.5, c - 4, -4], [5.5, c + 4, 4], grad=(c - 4, 2, c + 4, 5))
+    """雷鼓の鎚（伝説、2026-11-20 に作り直し）: 頭は横に寝かせた雷の太鼓。胴は淵の黒、両端の打面は骨の皮、縁は骨の輪と鋲。
+    胴の表と裏に淵の稲妻が一筋ずつ走る
+    ※ 2026-11-20 に Blockbench で手を入れた（胴を膨らんだ樽のメッシュにし、骨の輪・鋲・ひびを筆で描いた）。正本は tools/models/x32/abyss_storm_hammer.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_storm_hammer', SB)
+    spine_haft(m, 26)
+    cy = 33.0
+    drum(m, 'shell', V, -11, 11, cy, 6.4, 3)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'head_{n}', B, [sd * 5.5 - (1.25 if sd < 0 else 0), c - 4.5, -4.5], [sd * 5.5 + (1.25 if sd > 0 else 0), c + 4.5, 4.5], 5)
-        for k, (y, z) in enumerate(((c + 3.5, 0), (c - 3.5, 0))):
-            m.box(f'tack_{n}{k}', V, [sd * 6.8 - 0.4, y - 0.5, z - 0.5], [sd * 6.8 + 0.4, y + 0.5, z + 0.5], 6)
-    m.chain('bolt_glow', G, [(-4, c + 1), (-1.5, c - 1.5), (1.5, c + 1.5), (4, c - 1)], [1, 1, 1], 4.1, 3, 5, tip=False)
-    m.box('socket', B, [-2, 24, -2], [2, 26.5, 2], 3)
+        x0 = -13.5 if sd < 0 else 11
+        drum(m, f'rim_{n}', SB, x0, x0 + 2.5, cy, 7.0, 4)
+        x1 = -14.3 if sd < 0 else 13.5
+        drum(m, f'head_{n}', SB, x1, x1 + 0.8, cy, 6.0, 6, rim=False)
+        for k, a in enumerate((45, 135, 225, 315)):
+            import math as _m
+            y = cy + _m.sin(_m.radians(a)) * 5.0
+            z = _m.cos(_m.radians(a)) * 5.0
+            xc = x0 + 1.25
+            m.box(f'tack_{n}{k}', V, [xc - 0.8, y - 0.8, z - 0.8], [xc + 0.8, y + 0.8, z + 0.8], 5)
+    for sd, n in ((1, 'f'), (-1, 'b')):
+        m.chain(f'bolt_{n}_glow', G, [(-8, cy + 3), (-3, cy - 1), (0, cy + 2), (4, cy - 2.5), (8, cy + 1)], 1.4, 0.4, 4, 5, zc=sd * 6.3)
+    m.box('neck', SB, [-2.6, 25, -2.6], [2.6, 27.5, 2.6], 4, rim=True)
     return m
 
 
 def abyss_storm_staff():
-    """雲籠の杖: 先に骨の籠（六本の柱と上下の輪）、中に雷雲の塊が淵の光をはらむ"""
-    m = M('abyss_storm_staff')
-    staff(m, 33)
-    for k, (y, r) in enumerate(((33.5, 4.5), (44, 4))):
-        m.box(f'hoop_{k}', B, [-r, y, -r], [r, y + 1.5, r], 4)
+    """雲籠の杖（伝説、2026-11-20 に作り直し）: 杖の先に骨の籠（上下の輪と、外へふくらむ柱）。籠の中に雷雲の塊が浮き、
+    雲の芯が淵の光をはらむ。籠の頂に骨の避雷の尖り
+    ※ 2026-11-20 に Blockbench で手を入れた（籠の柱 6 本を軸のまわりに 60° ずつ回し、上下の輪を 6 本のスポークにし、雲を傾けて稲妻を描いた）。正本は tools/models/x32/abyss_storm_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_storm_staff', SB)
+    staff2(m, 40)
+    drum(m, 'ring_lo', SB, -4.5, 4.5, 42.0, 1.4, 5)
+    drum(m, 'ring_hi', SB, -3.6, 3.6, 58.0, 1.2, 5)
     for k in range(6):
-        a = math.radians(30 + k * 60)
-        x, z = 3.9 * math.cos(a), 3.9 * math.sin(a)
-        m.box(f'bar_{k}', B, [x - 0.45, 35, z - 0.45], [x + 0.45, 44, z + 0.45], 5)
-    for k, (x, y, s) in enumerate(((-1, 38, 3), (1.25, 40, 3.25), (0, 41.5, 2.5))):
-        m.box(f'cloud_{k}', V, [x - s, y - s * 0.6, -s * 0.8], [x + s, y + s * 0.6, s * 0.8], 6 + k * 0.5)
-    m.chain('bolt_glow', G, [(-0.5, 41), (0.75, 38.5), (-0.5, 36.5)], [0.9, 0.9], 2.9, 3, 5, tip=False)
-    m.seg('finial', B, (0, 45.5), (0, 49), 1.5, 0.75, 4, 6, tip=True)
+        m.chain(f'rib_{k}', SB, [(3.8, 42.5), (6.6, 47), (7.0, 51), (5.6, 55), (3.0, 58)], [1.6, 1.5, 1.4, 1.3], 1.0, 4, 6)
+    for k, (x, y, s) in enumerate(((0, 50, 3.4), (-2.4, 48.5, 2.6), (2.6, 49, 2.6), (-1.2, 52.6, 2.4), (1.6, 52, 2.2))):
+        m.box(f'float_cloud_{k}', V, [x - s, y - s * 0.7, -s * 0.8], [x + s, y + s * 0.7, s * 0.8], 8 - (k % 2), rim=True)
+    m.box('float_core_glow', G, [-1.4, 48.6, -2.9], [1.4, 51.4, 2.9], 4)
+    m.seg('spire', SB, (0, 58.5), (0, 65), 2.2, 1.0, 5, 7, tip=True)
+    m.box('stem', V, [-2.2, 39, -2.2], [2.2, 42.5, 2.2], 3, rim=True)
     return m
 
 
 def abyss_storm_dagger():
-    """雷翼の鉤爪: 大きな鉤爪がそのまま刃（背へ反る太い爪）、根元の羽毛の房、爪の内側の縁に淵の光"""
-    m = M('abyss_storm_dagger')
-    grip(m, -4, 4)
-    m.box('knuckle', B, [-2.5, 5.5, -2], [2.5, 8.5, 2], grad=(5.5, 3, 8.5, 5))
-    pts = [(0, 8), (0.5, 13), (0, 18), (-2, 22.5), (-5, 25.5), (-8, 26)]
-    m.chain('talon', V, pts, [4.5, 4, 3.5, 2.75, 2], 1.25, 3, 6, tip=True)
-    m.chain('edge_glow', G, [(x + 1.75, y) for x, y in pts[:4]], [0.75, 0.75, 0.75], 0.8, 2, 4, tip=False)
-    for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'tuft_{n}', B, (sd * 2, 7), (sd * 4, 4), 2, 0.6, 3, 5, tip=True)
+    """雷翼の鉤爪（伝説、2026-11-20 に作り直し）: 雷翼の大きな鉤爪がそのまま刃。根元が太く、背へ大きく反って先が鋭い。
+    爪の内側の縁が淵の光。根元に骨の羽毛の房が三枚、下へ開く
+    ※ 2026-11-20 に Blockbench で手を入れた（爪を反った一枚刃のメッシュにし、大きな光る縁は消して内側の縁を筆で光らせた）。正本は tools/models/x32/abyss_storm_dagger.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_storm_dagger', SB)
+    sword_grip(m, 4)
+    m.box('knuckle', V, [-3.4, 3.5, -2.6], [3.4, 8.5, 2.6], grad=(3.5, 2, 8.5, 4), rim=True)
+    m.chain('claw', V, [(0, 8), (1.6, 16), (1.4, 24), (-1.6, 31), (-6, 36)], [6.4, 5.2, 4.0, 2.6], [2.0, 1.8, 1.5, 1.1], 3, 6, tip=True)
+    m.chain('edge_glow', G, [(-2.6, 10), (-1.4, 17), (-1.8, 24), (-4.0, 30)], [1.2, 1.1, 1.0], 2.1, 3, 4)
+    for k, a in enumerate((-150, -120, -90)):
+        import math as _m
+        r = _m.radians(a)
+        m.seg(f'plume_{k}', SB, (2.6 + _m.cos(r) * 1.0, 6 + _m.sin(r) * 1.0), (2.6 + _m.cos(r) * 7.0 + 4.0, 6 + _m.sin(r) * 7.0 + 1.0),
+              2.4, 0.6, 6, 4, tip=True, zc=(k - 1) * 0.9)
     return m
 
 
 def abyss_storm_bell_staff():
-    """風鈴の鈴杖: 先の骨の横木から長さの違う管が五本下がる（中の一本が光る）。横木の上に小さな風受け"""
-    m = M('abyss_storm_bell_staff')
-    staff(m, 40)
-    m.box('crossbar', B, [-6.5, 39, -1.5], [6.5, 41, 1.5], grad=(39, 3, 41, 5))
-    m.box('cap', V, [-2.5, 41, -2], [2.5, 43, 2], 4)
-    m.seg('vane', B, (0, 43), (0, 47), 3, 0.4, 4, 6, tip=True)
-    for k, (x, L) in enumerate(((-5.5, 7), (-3, 9.5), (0, 11), (3, 9), (5.5, 6.5))):
+    """風鈴の鈴杖（伝説、2026-11-20 に作り直し）: 杖の先に骨の横木。横木から長さの違う五本の黒い管が紐で下がり、
+    真ん中の一本は淵の光。管の口は骨の輪。横木の上に骨の風受け（菱の板）
+    ※ 2026-11-20 に Blockbench で手を入れた（横木を十字にし、光る管を表と裏に 1 本ずつ下げ、管をすべて風になびくように傾け、骨の帯を描いた）。正本は tools/models/x32/abyss_storm_bell_staff.bbmodel。この関数から prep し直すと手入れが消える"""
+    m = M('abyss_storm_bell_staff', SB)
+    staff2(m, 46)
+    m.box('beam', SB, [-10, 46, -1.4], [10, 48.4, 1.4], grad=(46, 4, 48.4, 6), rim=True)
+    m.seg('vane', SB, (0, 48), (0, 55), 5.0, 0.6, 5, 7, tip=True)
+    for k, (x, L) in enumerate(((-8, 9), (-4, 12), (0, 15), (4, 12.5), (8, 9.5))):
+        m.box(f'cord_{k}', V, [x - 0.3, 43.4, -0.3], [x + 0.3, 46.2, 0.3], 3)
+        top = 43.6
         mat = G if k == 2 else V
-        m.box(f'tube_{k}' + ('_glow' if k == 2 else ''), mat, [x - 0.75, 39 - L, -0.75], [x + 0.75, 39, 0.75], grad=(39 - L, 2, 39, 5))
+        m.box(f'tube_{k}' + ('_glow' if k == 2 else ''), mat, [x - 1.1, top - L, -1.1], [x + 1.1, top, 1.1], grad=(top - L, 3, top, 5) if k != 2 else None)
+        m.box(f'mouth_{k}', SB, [x - 1.4, top - L - 0.6, -1.4], [x + 1.4, top - L + 0.8, 1.4], 5)
     return m
 
 
