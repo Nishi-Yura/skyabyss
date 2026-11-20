@@ -206,3 +206,6 @@
 - 2026-11-21 荒野（作り直し 8 品。エピック 5 = 飾り 2〜3 か所、ヒロイック 3 = 輪郭が変わる大物。弓 2 本は承認済みで据え置き）: ラフ docs/review/wastes_roughs_1.png・_2.png からおすすめ（閂の剣 A・熔け顎 A・炉の鎚 B・葬列の門柱 C・吊り灯の蟲 C・双爪 A・大蜥蜴の毒牙 A・逆さ柄杓 A）。全 8 品 Blockbench で手入れ済み（docs/review/wild_wastes_ingame.png）。双爪と毒牙は熔岩の筋を角材から刃に沿う帯のメッシュにして表裏に出した。逆さ柄杓の縁の板は外した。次は雲（wild_cloud）→ 月 → 淵の上・下。
   - 気づいたこと: mstep.sh は WORK を渡さないと古い作業フォルダ（33cb91ee…/work）を使い、そこにある古い out_*.bbmodel を取り込んでしまう。毎回 `export WORK=…/scratchpad/me` してから prep / done する。
   - normals.py は模型全体の重心で向きを見るので、曲がった帯の内側の縁の面は内向きと出ることがある（ribbon2 は段ごとの中心で向きを決めているので正しい）。帯で出たら、どの面かを見て内の縁なら直さない。
+- 2026-11-21 雲（作り直し 5 品、全品ヒロイック = 輪郭が変わる大物。雲雀の弓は承認済みで据え置き）: ラフ docs/review/cloud_roughs_1.png・_2.png からおすすめ（天の鐘楼 B・大プリズム A・翼の大剣 B・天割りの大半月 A・鷹の足 B）。全 5 品 Blockbench で手入れ済み（docs/review/wild_cloud_ingame.png）。節つなぎの門・翼・刃・爪はすべて一枚のメッシュ（帯・回転体・斧の刃）に替えた。次は月（wild_moon）→ 淵の上・下。
+  - メッシュの UV は、Blockbench で 1 面ずつ set_mesh_uv する代わりに、書き出した out_*.bbmodel へ scratchpad の patch_uv.py で入れた（place_mesh に渡した頂点・面と、lathe / ribbon2 / axeblade の UV 表を位置で突き合わせる）。形・傾き・塗りは Blockbench で手で行った。patch のあと dark_compare.py で見て UV が合っているか確かめる。
+  - Blockbench の画面ではメッシュが UV 未設定のまま（金や灰の別の場所の色）に見えるが、取り込み後は正しい。塗りは UV の表の範囲（テクスチャの空き行など）に描く。
