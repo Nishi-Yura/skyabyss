@@ -21,6 +21,7 @@ lib.RAMPS.update({
 })
 V, B, G = 'void', 'abone', 'deep'
 SB = 'sbone'
+F = 'fin'
 
 
 def spine_haft(m, top):
@@ -96,19 +97,61 @@ def bell(m, prefix, mat, c, r, h, t=4):
     m.box(f'{prefix}_lip', mat, [x - r, y, -r], [x + r, y + 1.25, r], t + 3)
 
 
+def sword_grip(m, top=6.0):
+    """剣・短剣の握り: 淵の岩に椎骨の輪、柄頭は小さな椎骨"""
+    m.box('grip', V, [-1.6, -9, -1.6], [1.6, top, 1.6], grad=(-9, 2, top, 4), wrap=(-9, top))
+    for k, y in enumerate((-9.5, top - 1.5)):
+        m.box(f'ring_{k}', SB, [-2.3, y, -2.3], [2.3, y + 1.8, 2.3], grad=(y, 3, y + 1.8, 5), rim=True)
+    m.box('pommel', SB, [-2.6, -13, -2.6], [2.6, -9.5, 2.6], grad=(-13, 3, -9.5, 5), rim=True)
+    m.seg('pommel_spine', SB, (0, -13), (0.5, -16), 1.8, 1.1, 4, 6, tip=True)
+
+
+def staff2(m, top):
+    spine_haft(m, top)
+    m.box('band_hi', SB, [-2.0, top - 6, -2.0], [2.0, top - 4.5, 2.0], 4, rim=True)
+
+
+def jaw_guard(m, y):
+    """鍔: 骨の顎が左右へ開く（歯が刃の根を噛む）"""
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'jaw_{n}', SB, [(0, y), (sd * 6, y + 0.5), (sd * 11, y + 3), (sd * 13, y + 6)], [3.6, 3.0, 2.0], [2.0, 1.6, 1.2], 4, 6)
+        for k, x in enumerate((3, 6, 9)):
+            m.seg(f'tooth_{n}{k}', SB, (sd * x, y + 1.5), (sd * (x + 0.4), y + 4.2), 1.6, 1.0, 6, 7, tip=True)
+
+
+def whale_eye(m, c, r):
+    """鯨の目: 骨の白目（八角）と淵の光の瞳"""
+    m.box('sclera_a', SB, [c[0] - r, c[1] - r * 0.62, -2.0], [c[0] + r, c[1] + r * 0.62, 2.0], 6, rim=True)
+    m.box('sclera_b', SB, [c[0] - r * 0.62, c[1] - r, -2.0], [c[0] + r * 0.62, c[1] + r, 2.0], 6)
+    m.box('pupil_glow', G, [c[0] - r * 0.45, c[1] - r * 0.45, -2.3], [c[0] + r * 0.45, c[1] + r * 0.45, 2.3], 4)
+
+
+def ear_bell(m, pre, x, top, s, curl=1):
+    """耳の骨の鈴（鼓室胞）: 丸く膨れた骨の殻で、片側が巻いて口が開く。舌は淵の光"""
+    m.box(f'{pre}_cap', SB, [x - 1.2 * s, top - 1.6 * s, -1.2 * s], [x + 1.2 * s, top, 1.2 * s], 5)
+    m.box(f'{pre}_body', SB, [x - 2.6 * s, top - 7.0 * s, -2.4 * s], [x + 2.6 * s, top - 1.4 * s, 2.4 * s],
+          grad=(top - 7.0 * s, 4, top - 1.4 * s, 6), rim=True)
+    cx0, cx1 = sorted((x + curl * 1.8 * s, x + curl * 3.8 * s))
+    m.box(f'{pre}_curl', SB, [cx0, top - 6.2 * s, -1.6 * s], [cx1, top - 2.6 * s, 1.6 * s], 6)
+    m.box(f'{pre}_lip', V, [x - 2.9 * s, top - 8.0 * s, -2.7 * s], [x + 2.9 * s, top - 6.8 * s, 2.7 * s], 4)
+    m.box(f'{pre}_tongue_glow', G, [x - 0.7 * s, top - 9.6 * s, -0.7 * s], [x + 0.7 * s, top - 7.6 * s, 0.7 * s], 4)
+
+
 # ================================================================ 底の品（大剣・剣・短剣・錨・鎌）
 
 def abyss_greatsword():
-    """底なしの大剣: 黒い幅広の刃の真ん中が縦に割れ、割れ目の奥で淵の光がのぞく。鍔は骨の顎"""
-    m = M('abyss_greatsword')
-    grip(m, -8, 8)
-    guard_bar(m, 9, 7)
+    """底なしの大剣（伝説、2026-11-20 に作り直し・案 A）: A 割れて開く刃: 黒い幅広の刃が縦に二つに割れ、あいだが抜けて向こうが見える。外の縁は青緑の明るい縁取り。
+    割れ目の底（刃の根）に淵の光の玉。鍔は骨の顎"""
+    m = M('abyss_greatsword', SB)
+    sword_grip(m)
+    jaw_guard(m, 7.0)
+    m.box('root', V, [-5, 7.5, -2], [5, 13, 2], grad=(7.5, 2, 13, 4), rim=True)
+    m.box('core_glow', G, [-1.8, 10, -2.3], [1.8, 13.5, 2.3], 4)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'jaw_{n}', B, (sd * 6.5, 10), (sd * 8.5, 13.5), 2.25, 1.25, 4, 6, tip=True)
-        m.box(f'blade_{n}', V, [sd * 1 - (4 if sd < 0 else 0), 11, -1.2], [sd * 1 + (4 if sd > 0 else 0), 48, 1.2], grad=(11, 2, 48, 5))
-        m.box(f'edge_{n}', V, [sd * 5 - (0.75 if sd < 0 else 0), 12, -0.8], [sd * 5 + (0.75 if sd > 0 else 0), 47, 0.8], 7)
-    m.box('rift_glow', G, [-1, 13, -0.9], [1, 44, 0.9], grad=(13, 1, 44, 4))
-    point(m, 'tip', V, -5.75, 5.75, 48, 4, 1.15, 4)
+        pts = [(sd * 3.2, 12), (sd * 4.6, 30), (sd * 4.4, 48), (sd * 2.4, 62)]
+        m.chain(f'half_{n}', V, pts, [5.2, 4.8, 3.8], [1.8, 1.6, 1.3], 3, 5)
+        m.chain(f'edge_{n}', F, [(p[0] + sd * 2.6, p[1]) for p in pts[:3]] + [(sd * 1.0, 64)], [1.4, 1.4, 1.2], [1.2, 1.1, 0.9], 4, 5)
+    m.seg('tip', V, (0, 61), (0, 70), 3.0, 1.2, 4, 6, tip=True)
     return m
 
 
@@ -204,46 +247,53 @@ def abyss_whale_hammer():
 
 
 def abyss_whale_staff():
-    """鯨眼の杖: 先に石の瞼が上下から抱く大きな鯨の目（淵の光の瞳）"""
-    m = M('abyss_whale_staff')
-    staff(m, 33)
-    m.box('socket', B, [-2.5, 32.5, -2.25], [2.5, 35, 2.25], 3)
-    c = 40.5
-    m.box('eye_glow', G, [-3.5, c - 2.5, -2.25], [3.5, c + 2.5, 2.25], grad=(c - 2.5, 2, c + 2.5, 4))
-    m.box('pupil', V, [-1, c - 1.25, -2.4], [1, c + 1.25, 2.4], 0)
-    for sd, n in ((1, 'u'), (-1, 'd')):
-        m.box(f'lid_{n}', V, [-5, c + sd * 2.25 - 1.5, -2.75], [5, c + sd * 2.25 + 1.5, 2.75], 5 if sd > 0 else 3)
-        m.box(f'lid_{n}_rim', B, [-4.5, c + sd * 3.75 - 0.5, -3], [4.5, c + sd * 3.75 + 0.5, 3], 4)
-    for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'corner_{n}', V, [sd * 5 - (1.5 if sd < 0 else 0), c - 1.5, -2], [sd * 5 + (1.5 if sd > 0 else 0), c + 1.5, 2], 4)
+    """鯨眼の杖（伝説、2026-11-20 に作り直し・案 A）: A 瞼に抱かれた目: 大きな鯨の目を、上と下から淵の黒い石の瞼（三日月）が抱く。上の瞼から骨のまつげが四本反る"""
+    m = M('abyss_whale_staff', SB)
+    staff2(m, 40)
+    c = (0.0, 52.0)
+    whale_eye(m, c, 6.0)
+    m.arc('lid_up', V, c, 8.0, 165, 15, 6, 3.4, 2.6, 3, 5)
+    m.arc('lid_dn', V, c, 8.0, 200, 340, 5, 3.0, 2.6, 3, 4)
+    for k, a in enumerate((140, 110, 75, 45)):
+        p = (c[0] + math.cos(math.radians(a)) * 9.5, c[1] + math.sin(math.radians(a)) * 9.5)
+        q = (c[0] + math.cos(math.radians(a)) * 14.5, c[1] + math.sin(math.radians(a)) * 14.5 + 1.5)
+        m.seg(f'lash_{k}', SB, p, q, 1.8, 1.0, 5, 7, tip=True)
+    m.box('stem', V, [-2.2, 40, -2.2], [2.2, 44.5, 2.2], 3, rim=True)
     return m
 
 
 def abyss_whale_bell_staff():
-    """耳骨の鈴杖: 先は U 字の鯨の顎骨、顎の先から耳の骨の鈴が二つ下がる"""
-    m = M('abyss_whale_bell_staff')
-    staff(m, 33)
-    m.arc('jaw', B, (0, 40), 6, 190, 350, 6, 2.25, 1.4, 4, 6)
+    """耳骨の鈴杖（伝説、2026-11-20 に作り直し・案 A）: A U の顎と二つの耳骨: 杖の先に鯨の下顎骨が U に開き、両方の顎先から耳の骨の鈴が一つずつ下がる"""
+    m = M('abyss_whale_bell_staff', SB)
+    staff2(m, 38)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'ramus_{n}', B, (sd * 5.9, 39), (sd * 6.5, 46), 2.25, 1.4, 5, 7, tip=True)
-        m.box(f'cord_{n}', V, [sd * 6.25 - 0.3, 41, -0.3], [sd * 6.25 + 0.3, 44, 0.3], 3)
-        m.box(f'ossicle_{n}', B, [sd * 6.25 - 1.5, 38, -1.25], [sd * 6.25 + 1.5, 41, 1.25], grad=(38, 3, 41, 5))
-        m.box(f'ossicle_{n}_glow', G, [sd * 6.25 - 0.75, 37.5, -0.75], [sd * 6.25 + 0.75, 38.25, 0.75], 3)
+        m.chain(f'jaw_{n}', SB, [(0, 38), (sd * 6, 40), (sd * 11, 45), (sd * 12.5, 52), (sd * 11, 58), (sd * 7.5, 60.5)],
+                [4.0, 3.6, 3.0, 2.6, 2.2], 2.0, 4, 6)
+        m.box(f'cord_{n}', V, [sd * 6.2 - 0.5, 57.5, -0.5], [sd * 6.2 + 0.5, 60.6, 0.5], 3)
+        ear_bell(m, f'bell_{n}', sd * 6.2, 58.5, 1.15, curl=-sd)
     return m
 
 
 def abyss_whale_fang():
-    """古銛の牙: 錆びた古い銛先（返しの付いた三角の頭）、柄に巻いた縄が垂れる"""
-    m = M('abyss_whale_fang')
-    grip(m, -4, 5)
-    m.box('socket', V, [-1.75, 6.5, -1.5], [1.75, 11, 1.5], grad=(6.5, 2, 11, 4))
-    m.box('lash', B, [-2, 7.5, -1.75], [2, 9, 1.75], 4)
-    m.box('head', V, [-3, 11, -0.9], [3, 17, 0.9], grad=(11, 3, 17, 5))
-    point(m, 'point', V, -3, 3, 17, 4, 0.9, 5)
+    """古銛の牙（伝説、2026-11-20 に作り直し・案 A）: A 返しの銛先: 黒い古鉄の三角の銛先、両側に大きな返し。根元の袋（ソケット）に縄が巻いて垂れる"""
+    m = M('abyss_whale_fang', SB)
+    sword_grip(m, 4)
+    m.box('socket', V, [-2.4, 4, -2.4], [2.4, 11, 2.4], grad=(4, 2, 11, 4), rim=True)
+    for k, y in enumerate((5, 7.5)):
+        m.box(f'rope_{k}', SB, [-2.8, y, -2.8], [2.8, y + 1.6, 2.8], 3)
+    m.chain('rope_tail', SB, [(2.6, 6), (5.0, 3.5), (6.0, -1), (5.4, -5)], [1.6, 1.4, 1.2], 1.0, 3, 4)
+    # 頭: 根元が一番広い三角の銛先。段ごとに 2 単位ずつ細って尖る（方眼の段の輪郭）
+    y = 11.0
+    for k, w in enumerate((5.6, 5.0, 4.4, 3.8, 3.2, 2.6, 2.0, 1.4)):
+        h = 2.4 if k < 6 else 2.0
+        m.box(f'head_{k}', V, [-w, y, -1.5 + 0.08 * k], [w, y + h, 1.5 - 0.08 * k], 3 + k * 0.4, rim=True)
+        m.box(f'edge_{k}', F, [-w - 0.8, y, -1.0], [w + 0.8, y + h - 0.3, 1.0], 4 + k * 0.2)
+        y += h
+    m.seg('point', V, (0, y - 0.5), (0, y + 4.0), 2.0, 1.0, 6, 7, tip=True)
+    # 返し: 根元の両角から下へ大きく反る鉤
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.seg(f'barb_{n}', V, (sd * 2.5, 13), (sd * 5, 9.5), 2, 0.8, 5, 6, tip=True)
-    m.box('rust_glow', G, [-0.5, 12, -1], [0.5, 22, 1], 3)
-    m.chain('rope', B, [(1.75, 8), (3.5, 5), (3.25, 1.5)], [1, 1], 0.6, 3, 4, tip=True)
+        m.chain(f'barb_{n}', V, [(sd * 5.0, 13.0), (sd * 7.6, 10.0), (sd * 8.6, 6.0), (sd * 8.0, 3.0)], [3.0, 2.4, 1.6], 1.3, 4, 6)
+    m.box('rust_glow', G, [-1.2, 13.5, -1.7], [1.2, 17.5, 1.7], 3)
     return m
 
 
