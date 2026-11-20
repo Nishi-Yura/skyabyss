@@ -203,3 +203,6 @@
   - メッシュの面は外向きの順に並べる（内向きだと裏から抜けて見える）。scratchpad の orient.py で並べ、書き出した .bbmodel を normals.py で確かめる（鋏鎚のとげが内向きだったので直した）。
 - 2026-11-21 高地（12 品。レア 5 = 光 1 か所、エピック 5 = 飾り 2〜3 か所、ヒロイック 2 = 輪郭が変わる大物）: ラフ docs/review/heights_roughs_1〜3.png からおすすめ（雲読み B 雲の枠・綿雷 A・焼け冠杖 B 雷鷲・避雷斧 A・雪割り A・霜牙 A・雷狼 A・薙刀 C 三日月・羊角 A・風鈴杖 B 小さな機・祈り柱 A・太鼓柱 C 枠太鼓）。全 12 品 Blockbench で手入れ済み（docs/review/wild_heights_ingame.png）。焼け冠杖は灰色の風切羽の棒を外して翼の帯を広げた。次は高地の次の土地（荒野 wastes → 雲 → 月 → 淵の上・下）。
   - 道具（scratchpad、消えたら作り直す）: ribbon2.py（曲がる帯）、paddle.py（菱形断面の板・刃）、axeblade.py（背が厚く刃先が薄い斧の刃）、lathe.py（n 角の回転体）、orient.py（面を外向きに並べる）、normals.py（.bbmodel の面の向きを確かめる・直す）。塗りは draw_shape_tool の rectangle と 1 画ずつの点。
+- 2026-11-21 荒野（作り直し 8 品。エピック 5 = 飾り 2〜3 か所、ヒロイック 3 = 輪郭が変わる大物。弓 2 本は承認済みで据え置き）: ラフ docs/review/wastes_roughs_1.png・_2.png からおすすめ（閂の剣 A・熔け顎 A・炉の鎚 B・葬列の門柱 C・吊り灯の蟲 C・双爪 A・大蜥蜴の毒牙 A・逆さ柄杓 A）。全 8 品 Blockbench で手入れ済み（docs/review/wild_wastes_ingame.png）。双爪と毒牙は熔岩の筋を角材から刃に沿う帯のメッシュにして表裏に出した。逆さ柄杓の縁の板は外した。次は雲（wild_cloud）→ 月 → 淵の上・下。
+  - 気づいたこと: mstep.sh は WORK を渡さないと古い作業フォルダ（33cb91ee…/work）を使い、そこにある古い out_*.bbmodel を取り込んでしまう。毎回 `export WORK=…/scratchpad/me` してから prep / done する。
+  - normals.py は模型全体の重心で向きを見るので、曲がった帯の内側の縁の面は内向きと出ることがある（ribbon2 は段ごとの中心で向きを決めているので正しい）。帯で出たら、どの面かを見て内の縁なら直さない。
