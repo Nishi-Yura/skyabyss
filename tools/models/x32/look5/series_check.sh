@@ -15,14 +15,28 @@ orig = subprocess.run(['git', 'show', 'HEAD:' + p], capture_output=True).stdout.
 open(p, 'w', encoding='utf-8', newline='\n').write(json.dumps(m, ensure_ascii=False, indent=1) + ('\n' if orig.endswith('\n') else ''))
 PY
 python -I - "$name" "$@" <<'PY'
-import sys
+import json, math, sys
 name, ids = sys.argv[1], sys.argv[2:]
 s = open('tools/shots/gear_moon.txt', encoding='utf-8').read()
 head = s[:s.find('hud on', s.find('gearlook'))]
 blk = s[s.find('hud on', len(head)):]
 one = blk[:blk.find('hud on', 10)]
+
+
+def fov(i):
+    """模型の上の端の高さで画角を決める（高さ 18.5 まで fov 42、それより高い長柄は先が画面の上で切れないよう広げる）"""
+    try:
+        d = json.load(open(f'src/main/resources/assets/skyabyss/lowpoly/look/a/{i}.json', encoding='utf-8'))
+        top = max(v[1] for b in d['bones'].values() for v in b.get('vertices', []))
+    except (OSError, ValueError):
+        return 42
+    if top <= 18.5:
+        return 42
+    return min(68, round(2 * math.degrees(math.atan(math.tan(math.radians(21)) * top / 18.5))))
+
+
 open(f'tools/shots/gear_{name}.txt', 'w', encoding='utf-8').write(
-    head.replace('gear_moon', f'gear_{name}') + ''.join(one.replace('moon_light_sword', i).replace('fov 30', 'fov 42') for i in ids))
+    head.replace('gear_moon', f'gear_{name}') + ''.join(one.replace('moon_light_sword', i).replace('fov 30', f'fov {fov(i)}') for i in ids))
 PY
 ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_$name.txt -PshotsName=gear_$name > "$S/shots_$name.log" 2>&1 || { echo SHOTS FAILED; tail -20 "$S/shots_$name.log"; exit 1; }
 mkdir -p "$S/dc"
