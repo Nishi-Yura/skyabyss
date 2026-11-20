@@ -34,6 +34,13 @@ def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
     m.seg(name, mat, (c[0] - h, c[1] - h), (c[0] + h, c[1] + h), s, d, t0, t1, over=0, zc=zc)
 
 
+def diamond2(m, name, mat, c, s, d, t0, t1, zc):
+    """表と裏の両方に置く菱（2026-11-20 ユーザー「裏表どちらかにしかない装飾はやめて、どちらにも」）"""
+    diamond(m, name, mat, c, s, d, t0, t1, zc=zc)
+    nb = name[:-5] + '_b_glow' if name.endswith('_glow') else name + '_b'
+    diamond(m, nb, mat, c, s, d, t0, t1, zc=-zc)
+
+
 def _wM(name):
     """塔の白と黒の品の道具（素材の色は WM〜WL）。光は天秤の印の光（WL）"""
     return Model(name, accent=WG, glowmat=WL)
@@ -542,8 +549,8 @@ def tower_eye_bow():
         skin(m, f'grip_ring_{k}', WG, 4, [10.2, y0, -2.3], [13.8, y1, 2.3])
     skin(m, 'plinth', WG, 5, [9.4, 13.0, -2.8], [14.6, 17.0, 2.8], paint=_eb_gold)
     # 握りの前に浮く瞳: 黒い枠（後ろ）と、天秤の光る菱（前）。どちらも握りから離れて浮く
-    diamond(m, 'float_eye_frame', WB, (12.0, 15), 6.8, 1.4, 3, 4, zc=2.2)
-    diamond(m, 'float_eye_glow', WL, (12.0, 15), 4.6, 2.6, 5, 5, zc=3.6)
+    diamond2(m, 'float_eye_frame', WB, (12.0, 15), 6.8, 1.4, 3, 4, zc=2.2)
+    diamond2(m, 'float_eye_glow', WL, (12.0, 15), 4.6, 2.6, 5, 5, zc=3.6)
     # 上（白）と下（黒）の腕: 塔の破片の列
     for sg, pre, mat, t, paint in ((1, 'u', WM, 7, _eb_marble), (-1, 'd', WB, 3, _eb_dark)):
         P = [mirror(p, sg) for p in EB_UP]
@@ -570,6 +577,7 @@ def tower_eye_bow():
     A, B = _eb_lerp(P[2], P[3], EB_S[2][0]), _eb_lerp(P[2], P[3], EB_S[2][1])
     gx, gy = _eb_lerp(A, B, 0.5)
     skin(m, 'float_crack_glow', WC, 6, [gx - 0.7, gy - 0.7, 3.0], [gx + 0.7, gy + 0.7, 3.8], glow=True)
+    skin(m, 'float_crack_b_glow', WC, 6, [gx - 0.7, gy - 0.7, -3.8], [gx + 0.7, gy + 0.7, -3.0], glow=True)
     # もっと崩す: 破片ごとに外へずれて傾き、割れ目に紫の力の糸（弦の先の尖塔と弦は動かさない）
     frags = []
     for sg, pre in ((1, 'u'), (-1, 'd')):
@@ -624,8 +632,8 @@ def _rgrip(m, y0, y1, pom):
 def _libra(m, cx, cy, s=4.6, zc=3.0):
     """天秤の印: 金の台と光る菱"""
     from paintbox import skin
-    skin(m, 'libra_plate', WG, 4, [cx - s * 0.7, cy - s * 0.55, zc - 1.6], [cx + s * 0.7, cy + s * 0.55, zc + 0.6])
-    diamond(m, 'libra_gem', WL, (cx, cy), s * 0.8, 1.0, 4, 5, zc=zc + 0.8)
+    skin(m, 'libra_plate', WG, 4, [cx - s * 0.7, cy - s * 0.55, -zc - 0.6], [cx + s * 0.7, cy + s * 0.55, zc + 0.6])
+    diamond2(m, 'libra_gem', WL, (cx, cy), s * 0.8, 1.0, 4, 5, zc=zc + 0.8)
 
 
 def tower_balance_sword():
@@ -658,9 +666,18 @@ def tower_balance_sword():
             diamond(m, f'float_chip_{i}', mat, (sx, cy + r.uniform(-1, 1)), r.uniform(1.2, 2.0), 1.0, t, t + 1)
         pts.append((cx, cy))
         y = cy + h / 2
+    # 黒と白の境（4 段目の下）に紫の割れ目の光。段のあいだに薄く浮く
+    seam_y = (pts[3][1] + pts[4][1]) / 2
+    skin(m, 'float_seam_glow', WC, 4, [pts[3][0] - 4.6, seam_y - 0.5, -1.2], [pts[3][0] + 4.6, seam_y + 0.5, 1.2])
     tx = pts[-1][0] + r.uniform(-0.6, 0.6)
-    m.seg('float_tip', WM, (tx, y + 1.6), (tx + 0.4, y + 8.0), 3.0, 1.4, 6, 8, tip=True)
-    m.chain('float_spire', WG, [(tx + 0.4, y + 9.6), (tx + 0.6, y + 13.0), (tx + 0.7, y + 16.0)], [1.8, 1.0], [1.4, 0.9], 4, 5, tip=True)
+    # 切っ先: 段ごとに細る白い尖り（四つの欠片）と、欠けて横へ浮く肩の石
+    yy = y + 1.2
+    for k, (w, h) in enumerate(((3.0, 3.8), (2.3, 3.6), (1.6, 3.4), (0.9, 3.0))):
+        _stone(m, f'float_tip_{k}', WM, 6 + (k > 1), tx + 0.15 * k, yy + h / 2, w, h, 1.4 - 0.2 * k, rot=r.uniform(-4, 4))
+        yy += h + 0.5
+    for sd in (-1, 1):
+        diamond(m, f'float_tip_chip_{"lr"[sd > 0]}', WM, (tx + sd * 4.0, y + 3.0 + (sd > 0) * 1.6), 1.8, 0.9, 6, 7)
+    m.chain('float_spire', WG, [(tx + 0.6, yy + 0.6), (tx + 0.7, yy + 3.6), (tx + 0.8, yy + 6.4)], [1.4, 0.8], [1.0, 0.7], 4, 5, tip=True)
     for k in range(len(pts) - 1):
         _force(m, f'float_core_{k}', pts[k], pts[k + 1], 1.3)
     _force(m, 'float_core_tip', pts[-1], (tx, y + 4.0), 1.0)
@@ -679,7 +696,7 @@ def tower_pull_hammer():
     _stone(m, 'collar', WB, 3, 0, 27.0, 6.0, 3.4, 3.0)
     yc = 33.0
     m.arc('ring', WG, (0.0, yc), 3.6, 0, 360, 10, 1.6, 1.4, 4, 4)
-    diamond(m, 'float_libra_gem', WL, (0.0, yc), 3.4, 1.0, 4, 5, zc=1.4)
+    diamond2(m, 'float_libra_gem', WL, (0.0, yc), 3.4, 1.0, 4, 5, zc=1.4)
     skin(m, 'ring_post', WG, 4, [-0.9, 28.4, -0.9], [0.9, 30.0, 0.9])
     for sd, mat, t in ((-1, WM, 6), (1, WB, 3)):
         sn = 'lr'[sd > 0]
@@ -770,7 +787,7 @@ def _scales(m, cx, cy):
     """天秤の印を本物の天秤に: 金の柱の上に傾いた竿、高い皿は白、低い皿は黒。支点に光る菱"""
     skin(m, 'libra_post', WG, 4, [cx - 0.6, cy, -0.6], [cx + 0.6, cy + 3.6, 0.6])
     _bl_bar(m, 'libra_beam', WG, 5, (cx - 5.8, cy + 4.4), (cx + 5.8, cy + 2.6), 1.0, 0.7)
-    diamond(m, 'libra_gem', WL, (cx, cy + 3.5), 2.4, 1.0, 2, 3, zc=0.9)
+    diamond2(m, 'libra_gem', WL, (cx, cy + 3.5), 2.4, 1.0, 2, 3, zc=1.1)
     for sd, top, mat, t in ((-1, cy + 4.3, WM, 7), (1, cy + 2.7, WB, 3)):
         x = cx + sd * 5.4
         nm = 'lr'[sd > 0]
@@ -836,14 +853,17 @@ def tower_sigil_dagger():
         _stone(m, f'guard_{"lr"[sd > 0]}', WB, 4, sd * 4.0, 7.6, 3.6, 2.4, 2.2, rot=sd * r.uniform(10, 22))
     _stone(m, 'shard_0', WB, 3, 0, 11.0, 8.4, 7.0, 2.2)
     _libra(m, 0, 10.6, 3.6, 2.2)
-    y = 14.5
-    for i, (w, h) in enumerate(((7.4, 8.0), (5.6, 7.4))):
-        y += r.uniform(1.0, 1.8)
-        _stone(m, f'float_shard_{i + 1}', WM, 6, r.uniform(-0.6, 0.6), y + h / 2, w, h, 2.0 - 0.3 * i, rot=r.uniform(-6, 6))
-        y += h
-    m.seg('float_tip', WM, (r.uniform(-0.4, 0.4), y + 1.2), (0.2, y + 9.0), 4.2, 1.6, 6, 8, tip=True)
-    for i in range(3):
-        diamond(m, f'float_chip_{i}', WM, (r.choice((-1, 1)) * r.uniform(5.0, 6.4), 18.0 + i * 6.0), r.uniform(1.2, 1.8), 0.8, 6, 7)
+    # 根元の黒い破片の上に紫の割れ目の光（黒と白の境）
+    skin(m, 'float_seam_glow', WC, 4, [-4.6, 15.0, -1.0], [4.6, 15.8, 1.0])
+    # 真ん中の白い破片は 45 度に立てた菱。左右の角が刃の一番広い所になり、木の葉・矢じりの形を作る
+    _stone(m, 'float_shard_1', WM, 6, r.uniform(-0.3, 0.3), 22.2, 7.6, 7.6, 2.0, rot=45 + r.uniform(-4, 4))
+    # 先: 段ごとに細る白い欠片で尖らせる
+    yy = 28.4
+    for k, (w, h) in enumerate(((4.2, 4.0), (3.0, 3.8), (2.0, 3.4), (1.0, 3.0))):
+        _stone(m, f'float_tip_{k}', WM, 6 + (k > 1), 0.1 * k, yy + h / 2, w, h, 1.6 - 0.25 * k, rot=r.uniform(-4, 4))
+        yy += h + 0.5
+    for i, (x, yy) in enumerate(((-6.6, 21.0), (6.4, 24.2), (-3.8, 30.0), (3.6, 33.4))):
+        diamond(m, f'float_chip_{i}', WM if i else WB, (x, yy), r.uniform(1.2, 1.8), 0.8, 6 if i else 3, 7 if i else 4)
     _rockify(m, per=(1, 1), scale=0.7)
     return m
 
@@ -859,7 +879,7 @@ def tower_clap_bell_staff():
     _stone(m, 'float_key', WM, 7, c[0], c[1], 6.4, 6.4, 3.0, rot=45)
     _stone(m, 'float_key_chip', WM, 6, c[0] + 4.6, c[1] + 3.4, 2.0, 1.6, 1.4, rot=30)
     m.chain('float_spire', WG, [(0, c[1] + 4.2), (0.2, c[1] + 8.0), (0.3, c[1] + 11.0)], [1.8, 1.0], [1.3, 0.8], 4, 5, tip=True)
-    diamond(m, 'float_key_gem_glow', WL, c, 2.4, 1.0, 2, 3, zc=3.2)
+    diamond2(m, 'float_key_gem_glow', WL, c, 2.4, 1.0, 2, 3, zc=3.2)
     n = 6
     rx, ry, rz, tilt = 13.0, 4.0, 8.0, 14
     for k in range(n):
