@@ -106,7 +106,10 @@ def check(i):
                     seen.add(v)
                     st.append(v)
         comps.append(comp)
-    comps.sort(key=len, reverse=True)
+    # 本体は「浮かせない部品を含む塊」のうち一番大きいもの（浮く破片どうしが力の糸でつながって大きな塊になっても本体と取り違えない）
+    def has_body(comp):
+        return any(not any(f in body[k]['name'] for f in FLOAT_OK) for k in comp)
+    comps.sort(key=lambda c: (has_body(c), len(c)), reverse=True)
     for comp in comps[1:]:
         names = [body[k]['name'] for k in comp]
         if all(any(f in nm for f in FLOAT_OK) for nm in names):

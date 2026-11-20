@@ -6,6 +6,7 @@
 - 光: あいだの大剣 = 刃の真ん中の境の線、側の目の弓 = 目、落ちる月の杖 = 月、引き合いの鎚 = 環の芯、追う印の短剣 = 印、合掌の鈴杖 = 掌のあいだ。
 """
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -56,6 +57,104 @@ def _bs_black(sp, face, w, h):
         pts = [(w * 0.15, h * 0.95), (w * 0.5, h * 0.6), (w * 0.3, h * 0.42), (w * 0.8, h * 0.05)]
         for a, b in zip(pts, pts[1:]):
             sp.line(a, b, 1.8, WC, 4, shade=False)
+
+
+# ---- 崩れて浮く塔（2026-11-20 夜。ユーザー「崩壊しているけど、謎の力で浮いてつながっている」。塔の 6 本の共通のモチーフ）
+def _part_center(p):
+    """部品の中心（z 回りの回転を origin のまわりで当てた位置）"""
+    o = p['origin']
+    c = [(p['frm'][i] + p['to'][i]) / 2 for i in range(3)]
+    a = math.radians(p.get('rot') or 0)
+    dx, dy = c[0] - o[0], c[1] - o[1]
+    return (o[0] + dx * math.cos(a) - dy * math.sin(a), o[1] + dx * math.sin(a) + dy * math.cos(a))
+
+
+def _xf(pt, piv, deg, dx, dy):
+    a = math.radians(deg)
+    x, y = pt[0] - piv[0], pt[1] - piv[1]
+    return (piv[0] + x * math.cos(a) - y * math.sin(a) + dx, piv[1] + x * math.sin(a) + y * math.cos(a) + dy)
+
+
+def _shatter(m, frags):
+    """組んだ模型を割って浮かせる。frags は (sel, dx, dy, deg, pivot, anchors) の並び。
+    sel(name, cx, cy) に当たる部品を、pivot のまわりに deg 回してから (dx, dy) ずらし、名前を float_ にする。
+    anchors の各点 P から、動いた先 P' へ紫の力の糸（光る細い板）を張る。弦（string_）は動かさない"""
+    import random
+    rng = random.Random(m.name)
+    jit = []
+    for _f in frags:
+        a, b = rng.uniform(0.45, 1.6), rng.uniform(0.45, 1.6)
+        jit.append((a, b, rng.uniform(-9, 9), rng.uniform(-1.2, 1.2), rng.uniform(-1.0, 1.0)))
+    frags = [(sel, dx * a + ex, dy * b + ey, deg * a + eg, piv, anc) for (sel, dx, dy, deg, piv, anc), (a, b, eg, ex, ey) in zip(frags, jit)]
+    for p in m.parts:
+        n = p['name']
+        if n.startswith('string_'):
+            continue
+        cx, cy = _part_center(p)
+        for sel, dx, dy, deg, piv, _ in frags:
+            if not sel(n, cx, cy):
+                continue
+            o = p['origin']
+            no = _xf((o[0], o[1]), piv, deg, dx, dy)
+            sx, sy = no[0] - o[0], no[1] - o[1]
+            p['origin'] = [round(no[0], 3), round(no[1], 3), o[2]]
+            p['frm'] = [round(p['frm'][0] + sx, 3), round(p['frm'][1] + sy, 3), p['frm'][2]]
+            p['to'] = [round(p['to'][0] + sx, 3), round(p['to'][1] + sy, 3), p['to'][2]]
+            p['rot'] = round((p.get('rot') or 0) + deg, 2)
+            if not n.startswith('float_'):
+                p['name'] = 'float_' + n
+            break
+    k = 0
+    for sel, dx, dy, deg, piv, anchors in frags:
+        for P in anchors or ():
+            Q = _xf(P, piv, deg, dx, dy)
+            if math.dist(P, Q) < 0.4:
+                continue
+            _bl_bar(m, f'float_force_{k}', WC, 5, P, Q, 1.1, 0.6, glow=True)
+            mx, my = (P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2
+            diamond(m, f'float_dust_{k}', WB if k % 2 else WM, (mx + 1.4 * (1 if k % 2 else -1), my + 0.6), 1.3, 0.6, 3, 5)
+            k += 1
+
+
+ROCK_SKIP = ('grip', 'pommel', 'band', 'ring', 'plinth', 'libra', 'glow', 'force', 'dust', 'spire', 'tip', 'gem', 'beam',
+             'collar', 'lip', 'tongue', 'cord', 'crown', 'neck', 'link', 'eye', 'shaft', 'finger', 'core')
+
+
+def _rockify(m, per=(1, 2), scale=1.0):
+    """石の部品（白の大理石・黒い石）に、大きさも向きも不揃いな岩の塊を一つか二つずつ付けて、ごろごろした輪郭にする。
+    塊は親の部品に半分めり込ませる（継ぎ目は見せない）。親が浮く欠片なら塊も float_。乱数は模型の名前で決まる"""
+    import random
+    from paintbox import skin
+    rng = random.Random(m.name + '_rock')
+    for p in list(m.parts):
+        n = p['name']
+        if p['mat'] not in (WM, WB) or any(k in n for k in ROCK_SKIP):
+            continue
+        L = p['to'][0] - p['frm'][0]
+        W = p['to'][1] - p['frm'][1]
+        D = p['to'][2] - p['frm'][2]
+        if min(L, W) < 1.6:
+            continue
+        o = p['origin']
+        a = math.radians(p.get('rot') or 0)
+        ca, sa = math.cos(a), math.sin(a)
+        for j in range(rng.randint(*per)):
+            s0 = min(W, L) * rng.uniform(0.45, 0.8) * scale
+            sx, sy = s0 * rng.uniform(0.8, 1.5), s0 * rng.uniform(0.7, 1.1)
+            lx = rng.uniform(p['frm'][0] + sx * 0.3, p['to'][0] - sx * 0.3) - o[0]
+            side = rng.choice((-1, 1))
+            ly = (W / 2 + p['frm'][1] + p['to'][1] - 2 * o[1]) / 2 if False else ((p['frm'][1] + p['to'][1]) / 2 - o[1]) + side * (W / 2 - sy * rng.uniform(0.15, 0.4))
+            cx = o[0] + lx * ca - ly * sa
+            cy = o[1] + lx * sa + ly * ca
+            dz = min(D / 2 + rng.uniform(0.2, 0.9), D / 2 + 1.0)
+            zc = (p['frm'][2] + p['to'][2]) / 2 + rng.uniform(-0.4, 0.4)
+            t = (p.get('base') or 4) + rng.choice((-1, 0, 1))
+            skin(m, f'{n}_rk{j}', p['mat'], t, (cx - sx / 2, cy - sy / 2, zc - dz), (cx + sx / 2, cy + sy / 2, zc + dz),
+                 _bl_course if p['mat'] == WB else _bl_white, rot=(p.get('rot') or 0) + rng.uniform(-28, 28), pivot=(cx, cy))
+
+
+def _name_has(*keys):
+    return lambda n: any(k in n for k in keys)
 
 
 def _bl_bar(m, name, mat, t, a, b, w, d, paint=None, glow=None):
@@ -128,8 +227,13 @@ def tower_balance_sword():
     m.seg('pommel_tip', WB, (0, -9.5), (0, -12), 2.5, 1.25, 2, 3, tip=True)
     skin(m, 'neck', WN, 4, [-2.2, 4.0, -2.2], [2.2, 12.4, 2.2])
     # 鍔: 黒い石の梁（幅 ±11）。両端は上へ反る角
-    skin(m, 'guard', WB, 3, [-10.6, 12.0, -2.8], [10.6, 17.4, 2.8], paint=_bl_course)
-    skin(m, 'guard_lip', WB, 5, [-11.2, 16.4, -3.1], [11.2, 18.0, 3.1])
+    skin(m, 'guard', WB, 3, [-4.6, 12.0, -2.8], [4.6, 17.4, 2.8], paint=_bl_course)
+    skin(m, 'guard_lip', WB, 5, [-5.0, 16.4, -3.1], [5.0, 18.0, 3.1])
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        a, b = sorted((sd * 4.8, sd * 10.6))
+        skin(m, f'guard_wing_{n}', WB, 3, [a, 12.0, -2.8], [b, 17.4, 2.8], paint=_bl_course)
+        a, b = sorted((sd * 4.8, sd * 11.2))
+        skin(m, f'guard_wing_lip_{n}', WB, 5, [a, 16.4, -3.1], [b, 18.0, 3.1])
     for sd, n in ((-1, 'l'), (1, 'r')):
         skin(m, f'guard_face_{n}', WB, 4, [min(sd * 4.2, sd * 8.4), 13.2, -3.4], [max(sd * 4.2, sd * 8.4), 16.2, 3.4], paint=_bl_course)
     m.chain('horn_l', WB, [(-10.0, 14.0), (-11.8, 18.0), (-11.4, 23.0)], [3.4, 2.0], [2.4, 1.6], 2, 3, tip=True)
@@ -160,6 +264,18 @@ def tower_balance_sword():
     _bl_bar(m, 'core_c_glow', WC, 5, (0, 57), (0, 70), 1.4, 2.0, paint=_bl_core)
     # 先の金の尖塔（三節）
     m.chain('spire', WG, [(0, 67), (0, 72), (0, 76), (0, 81)], [2.4, 1.8, 1.0], [2.0, 1.5, 1.0], 4, 5, tip=True)
+    # 崩れて浮く: 鍔の両翼と、二枚の刃の上の三つの欠片が割れて離れ、紫の力の糸でつながる
+    def side_frag(side, y0, y1):
+        return lambda n, cx, cy: (cx * side > 0.6) and y0 <= cy < y1 and (n.startswith(('fork_', 'band_')))
+    frags = []
+    for side in (-1, 1):
+        frags.append((lambda n, cx, cy, sd=side: ('guard_wing' in n or 'guard_face' in n or 'horn' in n) and cx * sd > 0,
+                      side * 2.2, 1.0, side * 12, (side * 4.6, 15.0), [(side * 4.6, 16.0)]))
+        for (y0, y1), (dx, dy, dg) in zip(((31.0, 45.0), (45.0, 58.5), (58.5, 99.0)), ((1.2, 1.8, 6), (2.4, 3.8, 11), (3.4, 6.0, 16))):
+            frags.append((side_frag(side, y0, y1), side * dx, dy, -side * dg, (side * 3.0, y0), [(side * 3.0, y0)]))
+    frags.append((lambda n, cx, cy: n.startswith('spire'), 0.0, 3.0, 0, (0, 70), [(0, 70.5)]))
+    _shatter(m, frags)
+    _rockify(m)
     # 全体（握りより上）を 8 割に: ほかのシリーズの剣（天穹の剣も 8 割）と長さをそろえる
     from divine_bold import big
     return big(m, 5.0, 0.8, 0.8)
@@ -239,6 +355,14 @@ def tower_pull_hammer():
             mat, t = (WM, 6) if y > 35.0 else (WB, 2)
             a, b = sorted((sd * x - s / 2, sd * x + s / 2))
             skin(m, f'float_pull_{n}{j}', mat, t, [a, y - s / 2, 9.8 - s / 2], [b, y + s / 2, 9.8 + s / 2])
+    # 崩れて浮く: 両の石塊が三段ずつの塊に割れ、外へずれて傾き、紫の力の糸で環へ引かれる
+    frags = []
+    for sd in (-1, 1):
+        for (y0, y1), (dx, dy, dg) in zip(((16.0, 30.0), (30.0, 38.0), (38.0, 60.0)), ((3.0, -3.2, -10), (4.8, 0.0, 6), (3.8, 3.6, 14))):
+            frags.append((lambda n, cx, cy, s0=sd, a=y0, b=y1: n.startswith(('stone', 'foot', 'chip', 'band', 'crack')) and cx * s0 > 0 and a <= cy < b,
+                          sd * dx, dy, sd * dg, (sd * 4.0, (y0 + y1) / 2), [(sd * 6.0, (max(y0, 21.0) + min(y1, 49.0)) / 2)]))
+    _shatter(m, frags)
+    _rockify(m)
     # 頭（y 17 より上）を横 0.62・縦 0.72・奥 0.7 に: ほかのシリーズの鎚と頭の大きさをそろえる
     from divine_bold import big
     return big(m, 17.0, 0.7, 0.78, 0.75)
@@ -387,6 +511,23 @@ def tower_moon_staff():
     diamond(m, 'float_shard_1', WB, (5.0, 66.6), 2.6, 1.6, 2, 3)
     diamond(m, 'float_shard_2', WM, (0.2, 70.0), 3.0, 1.8, 3, 4)
     m.chain('float_spire', WG, [(0.4, 70.5), (0.9, 74.5), (1.7, 78.5)], [3.2, 2.2], [2.0, 1.4], 2, 5, tip=True)
+    # 崩れて浮く: 三日月が七つの欠片に割れ、底の欠片から外へ離れて傾く（紫の力の糸でつながる）
+    frags = []
+    for g in range(7):
+        if g == 3:
+            continue
+        th = math.radians(th0 + (th1 - th0) * (g * 4 + 2) / MST_N)
+        far = abs(g - 3)
+        rr = 1.6 * far
+        dg = (6 + 2 * far) * (1 if g > 3 else -1)
+        ks = set(range(g * 4, g * 4 + 4))
+        bk = g * 4 if g > 3 else g * 4 + 4
+        tb = math.radians(th0 + (th1 - th0) * bk / MST_N)
+        anchor = (MST_R * 0.75 * math.cos(tb), MST_YC + MST_R * 0.75 * math.sin(tb))
+        frags.append((lambda n, cx, cy, kk=ks: n.startswith('crest_') and int(n.split('_')[1]) in kk,
+                      math.cos(th) * rr, math.sin(th) * rr, dg, (MST_R * math.cos(th), MST_YC + MST_R * math.sin(th)), [anchor]))
+    _shatter(m, frags)
+    _rockify(m)
     return m
 
 
@@ -510,6 +651,24 @@ def tower_sigil_dagger():
     # 黒い側の紫の光の芯（一つ。小さく、表の板の前へ少し出す）
     gx = _sd_at(SD_NODES, 15.0, 0)
     _sd_bar(m, 'crack_glow', WC, 4, (gx, 13.5), (gx + 0.2, 16.5), 2.2, 3.0, paint=_sd_glow, glow=True)
+    # 崩れて浮く: 刃の上の三つが割れて浮き、鉤の先ほど大きく離れる（紫の力の糸）
+    def kidx(n):
+        m2 = re.match(r'(?:core|plate|edge|ridge)_(\d+)$', n)
+        return int(m2.group(1)) if m2 else None
+    groups = (((4, 5), (24.0, 35.5), (1.4, 2.2, -8)), ((6, 7), (35.5, 41.0), (1.2, 4.6, -14)), ((8, 9), (99.0, 99.0), (-2.6, 6.4, -20)))
+    frags = []
+    for ks, (y0, y1), (dx, dy, dg) in groups:
+        x0, yy = SD_NODES[ks[0]][0], SD_NODES[ks[0]][1]
+        def sel(n, cx, cy, kk=ks, a=y0, b=y1):
+            k = kidx(n)
+            if k is not None:
+                return k in kk
+            if kk == (8, 9):
+                return n == 'tip'
+            return n.startswith(('fin_', 'band_')) and a <= cy < b
+        frags.append((sel, dx, dy, dg, (x0, yy), [(x0, yy)]))
+    _shatter(m, frags)
+    _rockify(m)
     return m
 
 
@@ -604,6 +763,18 @@ def tower_clap_bell_staff():
     # 杯の中の天秤の台（金の梁）と、台の下の光る菱
     skin(m, 'beam', WG, 5, [-9.6, 48.7, -2.2], [9.6, 51.3, 2.2])
     diamond(m, 'libra_gem', WL, (0, 47.6), 5.0, 1.6, 4, 5, zc=2.6)
+    # 崩れて浮く: 掌が三つに割れて外へ離れ、指先ほど大きく離れる。鈴は関節の欠片と一緒に浮く（紫の力の糸）
+    frags = []
+    for sg, n in ((-1, 'l'), (1, 'r')):
+        def palm(kk, n=n):
+            return lambda nm, cx, cy: nm.startswith((f'palm_{n}_c', f'palm_{n}_p')) and int(nm[-1]) in kk
+        frags.append((lambda nm, cx, cy, n=n, pk=palm((2,)): pk(nm, cx, cy) or nm.startswith((f'band_{n}', f'cord_{n}', f'bell_{n}', f'crack_glow_{n}')),
+                      sg * 2.6, 1.4, -sg * 7, (sg * 11.4, 46.0), [(sg * 10.0, 46.0)]))
+        frags.append((palm((3, 4)), sg * 4.4, 3.8, -sg * 12, (sg * 11.0, 55.0), [(sg * 10.6, 55.0)]))
+        frags.append((lambda nm, cx, cy, n=n: nm.startswith(f'finger_{n}'), sg * 5.6, 6.6, -sg * 16, (sg * 9.0, 57.0), [(sg * 9.0, 63.0)]))
+    frags.append((lambda nm, cx, cy: nm == 'beam' or nm.startswith('libra_gem'), 0.0, 1.2, 0, (0, 50), [(0, 47.0)]))
+    _shatter(m, frags)
+    _rockify(m)
     return m
 
 
@@ -734,6 +905,19 @@ def tower_eye_bow():
     A, B = _eb_lerp(P[2], P[3], EB_S[2][0]), _eb_lerp(P[2], P[3], EB_S[2][1])
     gx, gy = _eb_lerp(A, B, 0.5)
     skin(m, 'float_crack_glow', WC, 6, [gx - 0.7, gy - 0.7, 3.0], [gx + 0.7, gy + 0.7, 3.8], glow=True)
+    # もっと崩す: 破片ごとに外へずれて傾き、割れ目に紫の力の糸（弦の先の尖塔と弦は動かさない）
+    frags = []
+    for sg, pre in ((1, 'u'), (-1, 'd')):
+        P = [mirror(p, sg) for p in EB_UP]
+        for k, (dx, da, dg) in zip(range(1, 6), ((1.8, 1.0, 10), (3.0, 1.8, -9), (3.4, 2.4, 13), (2.6, 2.4, -11), (1.0, 0.8, 7))):
+            a, b = P[k], P[k + 1]
+            L = math.dist(a, b)
+            ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+            c = _eb_lerp(a, b, 0.5)
+            frags.append((lambda n, cx, cy, pr=pre, kk=k: n.startswith((f'float_{pr}{kk}', f'float_band_{pr}{kk}')),
+                          dx + ux * da, uy * da, sg * dg, c, [_eb_lerp(a, b, EB_S[k][0])]))
+    _shatter(m, frags)
+    _rockify(m)
     top, bot = (3.5, 47.5), (3.5, -17.5)
     strings(m, top, bot)
     _eb_pull_links(m, top, bot)
