@@ -16,12 +16,32 @@ lib.RAMPS.update({
     'abone': ['#3e3a34', '#5e584e', '#827a6c', '#a69e8e', '#c8c0b0', '#e6e0d2'],
     'fin': ['#0a2a30', '#0f3c44', '#165058', '#1e666e', '#2a7e84', '#3a989a'],
     'deep': ['#0e4a4a', '#147070', '#1e9a96', '#3cc4bc', '#86e8dc', '#d4fff6'],
+    # 沈んだ骨（2026-11-20 の作り直しから）: 灰色にせず、深みの青緑へ寄せた骨。明るい段ほど白く、影は青緑
+    'sbone': ['#1c3436', '#2c4c4c', '#40665f', '#5e8478', '#83a596', '#abc6b4', '#d3e6d6', '#f0fbf2'],
 })
 V, B, G = 'void', 'abone', 'deep'
+SB = 'sbone'
 
 
-def M(name):
-    return Model(name, accent=B, glowmat=G)
+def spine_haft(m, top):
+    """作り直した品の柄（深淵）: 淵の岩の握りと柄に、小さな椎骨の輪が三つ。柄頭も小さな椎骨で、下へ棘が一本"""
+    m.box('grip', V, [-1.6, -12, -1.6], [1.6, 8, 1.6], grad=(-12, 2, 8, 4), wrap=(-12, 8))
+    m.box('haft', V, [-1.3, 8, -1.3], [1.3, top, 1.3], grad=(8, 3, top, 5))
+    for k, y in enumerate((-11, 6, 16)):
+        m.box(f'ring_{k}', SB, [-2.3, y, -2.3], [2.3, y + 1.8, 2.3], grad=(y, 3, y + 1.8, 5), rim=True)
+    m.box('pommel', SB, [-2.8, -15.5, -2.8], [2.8, -12, 2.8], grad=(-15.5, 3, -12, 5), rim=True)
+    m.seg('pommel_spine', SB, (0, -15.5), (0.6, -19), 2.0, 1.2, 4, 6, tip=True)
+
+
+def drum(m, name, mat, x0, x1, cy, r, t, glow=None, rim=True):
+    """x 向きの太い円柱（八角: 縦長と横長の箱を十字に重ねる）"""
+    k = 0.62
+    m.box(f'{name}_a', mat, [x0, cy - r, -r * k], [x1, cy + r, r * k], grad=(cy - r, t - 1, cy + r, t + 1), rim=rim, glow=glow)
+    m.box(f'{name}_b', mat, [x0, cy - r * k, -r], [x1, cy + r * k, r], t, glow=glow)
+
+
+def M(name, accent=None):
+    return Model(name, accent=accent or B, glowmat=G)
 
 
 def diamond(m, name, mat, c, s, d, t0, t1, zc=0.0):
@@ -156,17 +176,30 @@ def abyss_ash_scythe():
 # ================================================================ 鯨（岩鯨の心核）
 
 def abyss_whale_hammer():
-    """背骨打ちの鎚: 頭は岩鯨の背骨ひとつ（椎体の円筒と上へ伸びる棘突起、左右の横突起）"""
-    m = M('abyss_whale_hammer')
-    hammer_haft(m)
-    c = 30
-    m.box('centrum', B, [-6, c - 3.5, -3.5], [6, c + 3.5, 3.5], grad=(c - 3.5, 3, c + 3.5, 5))
+    """背骨打ちの鎚（伝説、2026-11-20 に作り直し・案 B）: 頭は横に連なる岩鯨の椎骨三つ。両端の大きな椎骨が打つ面で、
+    面は淵の黒い岩に骨の縁。真ん中は小さく、骨と骨のあいだの椎間板が淵の光。棘突起が背びれのように三本、
+    後ろへ反って並ぶ（真ん中が一番高い）。両端の椎骨の下に短い横突起。柄との継ぎ目は椎骨の首"""
+    m = M('abyss_whale_hammer', SB)
+    spine_haft(m, 27)
+    cy = 33.0
+    for k, (x0, x1, r) in enumerate(((-15, -7, 6.0), (-4.5, 4.5, 4.6), (7, 15, 6.0))):
+        drum(m, f'vert_{k}', SB, x0, x1, cy, r, 4 + (k == 1))
+        h = (8.0, 13.0, 9.0)[k]
+        xm = (x0 + x1) / 2
+        m.chain(f'spine_{k}', SB, [(xm + 0.6, cy + r - 0.5), (xm - 0.8, cy + r + h * 0.5), (xm - 2.6, cy + r + h * 0.85),
+                                   (xm - 4.0, cy + r + h)], [4.2 if k == 1 else 3.6, 2.8, 1.8], [1.6, 1.3, 1.0], 4, 7)
+        if k != 1:
+            for sd in (-1, 1):
+                m.seg(f'process_{k}{"lr"[sd > 0]}', SB, (xm, cy - r + 1.5), (xm + (-1.5 if k == 0 else 1.5), cy - r - 3.0),
+                      2.4, 1.2, 4, 6, tip=True, zc=sd * 2.6)
+    for k, x in enumerate((-7.2, 4.7)):
+        drum(m, f'disc_{k}', G, x - 0.6, x + 3.0, cy, 4.2, 3, glow=True, rim=False)
     for sd, n in ((-1, 'l'), (1, 'r')):
-        m.box(f'face_{n}', B, [sd * 6 - (1 if sd < 0 else 0), c - 3, -3], [sd * 6 + (1 if sd > 0 else 0), c + 3, 3], 5)
-        m.seg(f'process_{n}', B, (sd * 2, c), (sd * 3, c - 6), 2, 1.5, 4, 3, tip=True, zc=sd * 2.5)
-    m.seg('spine', B, (0, c + 3.5), (-1, c + 10), 2.5, 1.25, 4, 5, tip=True)
-    m.box('canal_glow', G, [-6.1, c - 1, -1], [6.1, c + 1, 1], 3)
-    m.box('socket', V, [-2, 24, -2], [2, 26.5, 2], 3)
+        x = 15 if sd > 0 else -17
+        drum(m, f'face_{n}', SB, x, x + 2, cy, 5.6, 6)
+        x2 = x + 2 if sd > 0 else x - 1
+        drum(m, f'strike_{n}', V, x2, x2 + 1, cy, 4.4, 3)
+    m.box('neck', SB, [-2.6, 25.5, -2.6], [2.6, 28.8, 2.6], grad=(25.5, 3, 28.8, 5), rim=True)
     return m
 
 
