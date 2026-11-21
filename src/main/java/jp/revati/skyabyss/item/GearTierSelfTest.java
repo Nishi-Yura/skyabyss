@@ -366,10 +366,22 @@ public final class GearTierSelfTest {
                 }
             }
             check(f, maxExclusive < minPiece, set.titan + ": an exclusive drops as often as a codex piece");
-            // 月は専用の逸品が 2 つ (太刀と環。03 の 12.2)
+            // 専用の逸品の武器は 6 職ぶんそろう (どの職も同じ入り方。2026-11-21 に「3 つまで」をやめた)。
             // 終章の神器・あいだの塔は図鑑に品を持たない (燃料のための形だけ)
-            int want = set.titan.equals("moon") ? 2 : set.titan.equals("cloudsea") || set.titan.equals("tower") ? 0 : 3;
-            check(f, set.exclusives().size() == want, set.titan + " should have " + want + " exclusives");
+            if (!set.exclusives().isEmpty()) {
+                java.util.Set<jp.revati.skyabyss.rpg.skill.Job> jobs = java.util.EnumSet.noneOf(jp.revati.skyabyss.rpg.skill.Job.class);
+                for (String id : set.exclusives()) {
+                    jp.revati.skyabyss.rpg.skill.Job j = TitanGearSet.item(id).map(jp.revati.skyabyss.rpg.skill.Job::of).orElse(null);
+                    if (j != null) {
+                        jobs.add(j);
+                    }
+                }
+                check(f, jobs.size() == jp.revati.skyabyss.rpg.skill.Job.values().length, set.titan + " exclusives cover only " + jobs);
+                check(f, set.exclusives().size() <= jp.revati.skyabyss.forge.ResonanceForgeMenu.EXCHANGE_STRIDE, set.titan + " has more exclusives than the forge can list");
+            }
+            for (String id : HeroicGear.forTitan(set.titan)) {
+                check(f, set.isExclusive(id), id + " is a heroic weapon outside its codex");
+            }
         }
         for (String id : AbyssSetup.legends()) {
             check(f, item(id) instanceof ModGear g && g.tier() == GearTier.ARTIFACT, "abyss heart item " + id + " is not an artifact");

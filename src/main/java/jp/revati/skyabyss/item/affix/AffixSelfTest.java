@@ -266,8 +266,13 @@ public final class AffixSelfTest {
         check(f, TitanLoot.exchangeState(r) == ForgeRules.ExchangeState.READY, "exchange did not come back after the next heart");
         // 天井の進みは交換で変わらない (判断の記録どおり)
         r.owned.add(TitanLoot.id(ex.get(2)));
-        check(f, TitanLoot.exchangeState(r) == ForgeRules.ExchangeState.ALL_OWNED, "all exclusives owned is not reported");
         check(f, TitanLoot.ownedExclusiveMask(r) == 0b111, "owned mask is wrong: " + TitanLoot.ownedExclusiveMask(r));
+        // 残りの職のヒロイック武器も専用の逸品 (2026-11-21)。全部そろって初めて「そろった」
+        check(f, ex.size() == 7 && TitanLoot.exchangeState(r) == ForgeRules.ExchangeState.READY, "stone whale should have 7 exclusives and still offer the rest");
+        for (Item i : ex) {
+            r.owned.add(TitanLoot.id(i));
+        }
+        check(f, TitanLoot.exchangeState(r) == ForgeRules.ExchangeState.ALL_OWNED, "all exclusives owned is not reported");
         // 何回心臓を倒しても、交換は撃破の回数を超えない
         TitanMemoryData.Record g = new TitanMemoryData.Record();
         int done = 0;

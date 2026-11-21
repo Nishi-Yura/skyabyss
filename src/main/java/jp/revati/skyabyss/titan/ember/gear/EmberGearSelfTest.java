@@ -438,7 +438,7 @@ public final class EmberGearSelfTest {
         // 模擬 (13 の 6.4節): 毎回鍛え手と心臓を倒し、初回は灯を選ぶ。図鑑 10 品がそろうまでの平均の撃破数
         double mean = meanClears(4000, random);
         notes.add(String.format("collection in %.1f clears on average (13 6.4 says 13.8)", mean));
-        check(f, mean > 11 && mean < 17, "mean clears to complete the ember collection " + mean);
+        check(f, mean > 21 && mean < 30, "mean clears to complete the ember collection " + mean);
     }
 
     static double meanClears(int players, RandomSource random) {

@@ -121,8 +121,6 @@ public final class AbyssGearLoot {
             TitanMemoryData.Record r = memory.record(p.getUUID(), AbyssGear.DUNGEON);
             List<ItemStack> items = new ArrayList<>();
             rollWarden(r, tier, level.random, TitanGearSet::registered, items);
-            // 英雄の武器の別枠 (item/HeroicGear。図鑑・天井・交換には入れない)
-            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(AbyssGear.DUNGEON, level.random));
             int held = TitanLoot.handOver(server, p.getUUID(), p, items, 0);
             tell(p, items, "message.skyabyss.abyss_gear.warden_reward");
             TitanLoot.tellHeld(p, held);

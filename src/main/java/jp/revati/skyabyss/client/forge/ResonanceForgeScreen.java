@@ -47,7 +47,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int CARD_Y = 55;
     private static final int CARD_STEP = 30;
     private static final int EXCHANGE_Y = 62;
-    private static final int EXCHANGE_STEP = 24;
+    private static final int EXCHANGE_STEP = 19;
+    // 交換の欄は 4 行ずつの頁 (専用の逸品は巨神ごとに 7〜8 品。2026-11-21 に「3 つまで」の決まりを外した)
+    private static final int EXCHANGE_ROWS = 4;
 
     private static final int TEXT = 0xFFD8DCE6;
     private static final int DIM = 0xFF7A8090;
@@ -93,7 +95,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private Button trialButton;
     private Button confirmButton;
     private Button keepButton;
-    private final Button[] exchangeButtons = new Button[3];
+    private final Button[] exchangeButtons = new Button[EXCHANGE_ROWS];
+    private Button exchangePageButton;
+    private int exchangePage;
     // 交換の巨神を切り替える (岩鯨 → 潮殻 → …)
     private Button titanButton;
     private static int lastTitan;
@@ -155,7 +159,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                     exchangeArmed = index;
                 } else {
                     exchangeArmed = -1;
-                    press(ResonanceForgeMenu.BUTTON_EXCHANGE + titan * ResonanceForgeMenu.EXCHANGE_STRIDE + index);
+                    press(ResonanceForgeMenu.BUTTON_EXCHANGE + titan * ResonanceForgeMenu.EXCHANGE_STRIDE + exchangePage * EXCHANGE_ROWS + index);
                 }
             }).bounds(sx + 98, topPos + EXCHANGE_Y + i * EXCHANGE_STEP, 44, 16).build());
         }
@@ -163,8 +167,14 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             titan = (titan + 1) % Math.max(1, TitanGearSets.exchangeable().size());
             lastTitan = titan;
             exchangeArmed = -1;
+            exchangePage = 0;
             updateButtons();
-        }).bounds(sx + 10, topPos + 140, 132, 16).build());
+        }).bounds(sx + 10, topPos + 140, 96, 16).build());
+        exchangePageButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
+            exchangePage = (exchangePage + 1) % exchangePages();
+            exchangeArmed = -1;
+            updateButtons();
+        }).bounds(sx + 108, topPos + 140, 34, 16).build());
         String[] subKeys = {"gui.skyabyss.forge.sub_reforge", "gui.skyabyss.forge.sub_extract", "gui.skyabyss.forge.sub_imprint"};
         for (int i = 0; i < subButtons.length; i++) {
             Sub target = Sub.values()[i];
@@ -306,10 +316,16 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         titanButton.visible = exchangeTab && TitanGearSets.exchangeable().size() > 1;
         titanButton.setMessage(Component.translatable("gui.skyabyss.forge.exchange_titan", Component.translatable(set().originKey())));
         titanButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.exchange_titan_hint")));
+        if (exchangePage >= exchangePages()) {
+            exchangePage = 0;
+        }
+        exchangePageButton.visible = exchangeTab && exchangePages() > 1;
+        exchangePageButton.setMessage(Component.literal((exchangePage + 1) + "/" + exchangePages()));
         for (int i = 0; i < exchangeButtons.length; i++) {
             Button b = exchangeButtons[i];
-            boolean owned = menu.ownsExclusive(titan, i);
-            b.visible = exchangeTab && i < exclusives.size() && exclusives.get(i) != null && !owned;
+            int at = exchangePage * EXCHANGE_ROWS + i;
+            boolean owned = menu.ownsExclusive(titan, at);
+            b.visible = exchangeTab && at < exclusives.size() && exclusives.get(at) != null && !owned;
             b.active = ready && affordable;
             b.setMessage(Component.translatable(exchangeArmed == i ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.exchange_pick"));
         }
@@ -409,9 +425,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         // 交換の品にカーソルを合わせると、その品の説明
         if (shownTab() == Tab.EXCHANGE) {
             List<Item> exclusives = exclusives();
-            for (int i = 0; i < exclusives.size(); i++) {
+            for (int i = exchangePage * EXCHANGE_ROWS; i < Math.min(exclusives.size(), (exchangePage + 1) * EXCHANGE_ROWS); i++) {
                 int x = leftPos + SIDE_X + 10;
-                int y = topPos + EXCHANGE_Y + i * EXCHANGE_STEP;
+                int y = topPos + EXCHANGE_Y + (i - exchangePage * EXCHANGE_ROWS) * EXCHANGE_STEP;
                 if (exclusives.get(i) != null && mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
                     g.renderTooltip(font, new ItemStack(exclusives.get(i)), mouseX, mouseY);
                 }
@@ -790,11 +806,11 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }
         drawWrapped(g, Component.translatable(state), x, 37, 132, 2, menu.exchangeState(titan) == ForgeRules.ExchangeState.READY ? TEXT : DIM);
         List<Item> exclusives = exclusives();
-        for (int i = 0; i < exclusives.size(); i++) {
+        for (int i = exchangePage * EXCHANGE_ROWS; i < Math.min(exclusives.size(), (exchangePage + 1) * EXCHANGE_ROWS); i++) {
             if (exclusives.get(i) == null) {
                 continue;
             }
-            int y = EXCHANGE_Y + i * EXCHANGE_STEP;
+            int y = EXCHANGE_Y + (i - exchangePage * EXCHANGE_ROWS) * EXCHANGE_STEP;
             ItemStack shown = new ItemStack(exclusives.get(i));
             boolean owned = menu.ownsExclusive(titan, i);
             g.renderItem(shown, x, y);
@@ -818,7 +834,11 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         for (String id : set().exclusives()) {
             out.add(TitanGearSet.item(id).orElse(null));
         }
-        return out.subList(0, Math.min(out.size(), exchangeButtons.length));
+        return out.subList(0, Math.min(out.size(), ResonanceForgeMenu.EXCHANGE_STRIDE));
+    }
+
+    private int exchangePages() {
+        return Math.max(1, (exclusives().size() + EXCHANGE_ROWS - 1) / EXCHANGE_ROWS);
     }
 
     private void costLine(GuiGraphics g, Item material, int need, int x, int y) {

@@ -289,7 +289,7 @@ public final class TideHeartSelfTest {
         TideLoot.Roll first = TideLoot.rollHeart(r, random, id -> true);
         check(first.draws().stream().anyMatch(d -> d.id().equals(TideLoot.CORE)), "first clear has no core", failures);
         check(first.draws().stream().anyMatch(d -> d.id().equals(TideLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", failures);
-        check(TideLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.TIDE.size(), "collection should have 10 items + the job weapons", failures);
+        check(TideLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.TIDE.size() + 4, "collection should have 10 items + the job weapons + 4 heroic weapons", failures);
         // ハード天井: 記憶 4 から撃破で 5 になり、未所持を一つ保証
         TitanMemoryData.Record p = new TitanMemoryData.Record();
         p.memory = TitanLoot.HARD_PITY - 1;
@@ -308,7 +308,7 @@ public final class TideHeartSelfTest {
         check(none.owned.isEmpty(), "unmade items were recorded", failures);
         // 6.4節の模擬 (潮招きなしで平均 16 前後)
         double mean = TideLoot.meanClearsToComplete(4000, 7, id -> true);
-        check(mean > 13 && mean < 20, "mean clears to complete the collection is " + mean, failures);
+        check(mean > 21 && mean < 30, "mean clears to complete the collection is " + mean, failures);
         notes.add(String.format("collection in %.1f clears on average", mean));
         // 撃破の報酬 (いない人の分は預かる)。欠片は一人一回。巨神ごとの記録
         UUID fake = UUID.randomUUID();

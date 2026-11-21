@@ -102,7 +102,12 @@ public final class TitanLoot {
     // ---------------------------------------------------------------- 図鑑
     // 岩鯨の専用の逸品 (初回の選択の対象)
     public static List<Item> exclusives() {
-        return List.of(ModItems.CAPTAIN_PIKE.get(), ModItems.WATERWAY_FANG.get(), ModItems.STONE_WHALE_PLATING.get());
+        List<Item> all = new ArrayList<>(List.of(ModItems.CAPTAIN_PIKE.get(), ModItems.WATERWAY_FANG.get(), ModItems.STONE_WHALE_PLATING.get()));
+        // 残りの職のヒロイック武器 (item/HeroicGear。どの職も同じ入り方。2026-11-21 に「専用の逸品は 3 つまで」をやめた)
+        for (String id : jp.revati.skyabyss.item.HeroicGear.forTitan(STONE_WHALE)) {
+            jp.revati.skyabyss.item.TitanGearSet.item(id).ifPresent(all::add);
+        }
+        return all;
     }
 
     public static List<Item> armorSet() {
@@ -147,6 +152,9 @@ public final class TitanLoot {
         }
         if (item == ModItems.STONE_WHALE_PLATING.get()) {
             return PLATING_CHANCE;
+        }
+        if (jp.revati.skyabyss.item.HeroicGear.forTitan(STONE_WHALE).contains(id(item))) {
+            return FANG_CHANCE;
         }
         return 0f;
     }
@@ -368,8 +376,6 @@ public final class TitanLoot {
             items.addAll(roll.items());
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(STONE_WHALE, level.random));
-            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
-            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(STONE_WHALE, level.random));
             int held = handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {
@@ -823,7 +829,7 @@ public final class TitanLoot {
                         }
                         if (run == 1) {
                             // 初回の選択 (専用の逸品のどれか一つ)
-                            r.owned.add(id(exclusives().get(random.nextInt(3))));
+                            r.owned.add(id(exclusives().get(random.nextInt(exclusives().size()))));
                         }
                         dry[p] = roll.fresh().isEmpty() && !captainFresh ? dry[p] + 1 : 0;
                         longestDry = Math.max(longestDry, dry[p]);

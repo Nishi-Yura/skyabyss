@@ -75,7 +75,7 @@ public final class TideLoot {
     public static final String SHIELD = id("coral_shield");
     public static final String CHARM = id("tide_chime_charm");
     // 専用の逸品: 潮招きの大鋏、珊瑚憑きの銛、月潮の真珠
-    public static final List<String> EXCLUSIVES = List.of(id("tidecaller_claw"), id("coral_harpoon"), id("moontide_pearl"));
+    public static final List<String> EXCLUSIVES = jp.revati.skyabyss.titan.tide.gear.TideGear.SET.exclusives();
 
     public static final float ARMOR_CHANCE = 0.25f;
     public static final float TRIDENT_CHANCE = 0.20f;
@@ -220,8 +220,6 @@ public final class TideLoot {
             List<ItemStack> items = stacks(draws, level.random, unmade);
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(TITAN, level.random));
-            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
-            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(TITAN, level.random));
             int held = TitanLoot.handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {
