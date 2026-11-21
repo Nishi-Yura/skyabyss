@@ -150,7 +150,7 @@ class Model:
             for face, r in uv[e['name']].items():
                 paint_face(img, e, face, r)
         img.save(out_dir / f'{self.name}_base.png')
-        cubes = [{'name': e['name'], 'from': e['frm'], 'to': e['to'], 'origin': e['origin'], 'rotation': [0, 0, e['rot']],
+        cubes = [{'name': e['name'], 'from': e['frm'], 'to': e['to'], 'origin': e['origin'], 'rotation': (list(e['rot']) if isinstance(e['rot'], (list, tuple)) else [0, 0, e['rot']]),
                   'faces': [{'face': f, 'uv': v} for f, v in uv[e['name']].items()]} for e in self.parts]
         (out_dir / f'{self.name}.json').write_text(json.dumps(cubes), encoding='utf-8')
         print(self.name, 'texture', width, H, 'cubes', len(cubes))

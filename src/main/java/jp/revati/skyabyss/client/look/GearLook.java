@@ -7,7 +7,8 @@ package jp.revati.skyabyss.client.look;
 // 台本では `gearlook weapon|armor|skill|all 0|a|b|c`
 public final class GearLook {
     public static volatile char weapon = 'a';
-    public static volatile char armor = '0';
+    // 防具も 2026-11-21 から a が既定 (look5 の作り直し)。a の模型が無い組は前の描き方のまま
+    public static volatile char armor = 'a';
     public static volatile char skill = '0';
 
     private GearLook() {

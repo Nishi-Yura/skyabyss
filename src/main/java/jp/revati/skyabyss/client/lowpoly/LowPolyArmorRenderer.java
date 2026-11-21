@@ -75,7 +75,12 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
             return;
         }
         // 試作 (client/look/GearLook): 立方体の模型があればそれを描く
-        LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(jp.revati.skyabyss.client.look.GearLook.armor, "armor/" + set + "/" + LowPolyArmor.pieceName(currentSlot));
+        // look5 の防具 (tools/gen/pixel/bb_armor_import.py): 階級の模型 (<部位>_rare / _legend) が無ければ無印
+        String cubeName = "armor/" + set + "/" + LowPolyArmor.pieceName(currentSlot);
+        LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(jp.revati.skyabyss.client.look.GearLook.armor, cubeName + (currentStack != null ? LowPolyArmor.tierSuffix(currentStack) : ""));
+        if (cube == null) {
+            cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(jp.revati.skyabyss.client.look.GearLook.armor, cubeName);
+        }
         if (cube != null) {
             if (cube.bones.containsKey(bone.getName())) {
                 jp.revati.skyabyss.client.look.GearLookDraw.mesh(cube, bone.getName(), poseStack, splatSource, packedLight, packedOverlay);

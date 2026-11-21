@@ -1,3 +1,18 @@
+# 引き継ぎ（2026-11-21）: 全防具の作り直し（look5）
+
+ユーザーの頼み: 「武器のモデルがすべて終わったので、全防具のモデルの作り直しを行って」。対象は 37 組（野の wild_* も含む）、部位 4 x 階級（無印・_rare・_legend）。
+
+## 今
+- 岩鯨の兜 v15 が決まった（2026-11-21、ユーザー OK）。正本 `tools/models/x32/armor/stone_whale.bbmodel`（Blockbench プロジェクト sw_helm15、群 armorHead）。絵 `docs/review/armor_look5/stone_whale_helm_v15b.png`・`_v15b_game.png`。
+- 次: 岩鯨の胴（armorBody＋両腕）→ 脚 → 靴を同じ作り方で。そのあと残り 36 組をシリーズごとに。まだ: アイコン（3D から）、強化段階（_plus5/_plus10）、古い生成スクリプト（install_armor_v2.py ほか）が新しい模型を上書きしないようにする。
+
+## 作り方（決まり。理由はメモリ skyabyss-armor-rebuild）
+- 大きさは体・頭の箱＋1 画素（x32 で ±2 単位。頭は ±8 → 兜の外面 ±10）。1 画素 = 2 単位、板の厚さは 2 単位。
+- 形は Blockbench で手で置く。角は外側の面どうしが 1 本の線で出会う（突き合わせ。斜めの板は回転の中心を外側の面の線に置く）。のぞき穴・格子は本当の隙間にして、中に暗い芯（d_ 、頭より少し大きい）を置く。覆う兜に顔を描かない（骨色の縦格子は歯に見える）。
+- 塗り: Blockbench から書き出し → `python -X utf8 -I tools/models/x32/look5/armor_paint.py <in> <out>`（箱名の頭 b_ 骨 / d_ 影 / g_・_glow 光 / ほか岩。名前に _t で縁取り、_p で「板の中の枠」）→ `python -X utf8 -I tools/gen/pixel/armor_view_head.py <out> <png>` で確かめる → Blockbench に create_texture（uv 128）して set_cube_uv で全箱の UV を貼る → 正本へ書き出し → `python -X utf8 -I tools/gen/pixel/bb_armor_import.py <正本>`（ファイル名が組の名前になる）。
+- 確かめ: 取り込みの rot_point で角の座標・はみ出しを数値で見る（y 回転の向きの取り違えがあった）。ゲームは `./gradlew runShots --offline --no-daemon -Pscript=tools/shots/armor_helm_close.txt -PshotsName=<名>`（防具立ての兜を 斜め前・正面・後ろ。絵は run/shots/<名>/shots/armor_helm_close/）。
+- 描画: `GearLook.armor` は 'a' が既定。`LowPolyArmorRenderer` が look の模型（階級 → 無ければ無印）を描く。古い `lowpoly/armor/`・`splat/armor/` は触らない。
+
 # 引き継ぎ（2026-11-18 夜）: 全武器の作り直し
 
 ユーザーの頼み: 「武器をすべて新しくして。すべて完成してから、シリーズごとにまとめて見せて」。続けて「ちゃんと Blockbench で作って」「レベル低くない？何回もブラッシュアップしてから次の武器に行くようにして」「完成までやり切って」（ユーザーは離席中）。
