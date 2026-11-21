@@ -122,7 +122,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         // 手で組んだ模型 (look a) は種類で決める: 片刃の武器は刃・打つ面を +x に作る決まり (docs/design/60 の 1.2) なので、いつも半回転
         char look = jp.revati.skyabyss.client.look.GearLook.weapon;
         boolean hasCube = jp.revati.skyabyss.client.look.GearLookDraw.cube(look, id) != null;
-        if (hasCube ? singleEdge(id) : (EDGE_FLIP.contains(id) || faceFlip(id))) {
+        if (hasCube ? lookFlip(id) : (EDGE_FLIP.contains(id) || faceFlip(id))) {
             pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f));
         }
         // 短剣・爪・火かき棒は小さく見えるので、階級が上がるほど大きくする (握りの位置 = メッシュの原点を中心に)
@@ -186,6 +186,13 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
             "wild_tusk_axe", "wild_conductor_axe", "wild_snowsplitter_axe", "wild_blasting_axe", "wild_molten_axe");
 
     // 片刃の武器 (刃・打つ面が片側だけにある)。名前で見分ける (tools/gen/pixel/gear_manifest.py の種類と同じ語)
+    // look a: swung weapons (sword, greatsword, dagger, fang, claw, hammer, axe, scythe) are built with the edge / striking face at +x
+    // (docs/design/60 1.2) and get the half turn. Until 2026-11-21 the swords were left out, so one-edged swords and the key sword
+    // showed their back edge forward. Staffs, bell staffs, poles and bows use other holds where +x already faces forward: no turn.
+    static boolean lookFlip(String id) {
+        return singleEdge(id) || id.contains("sword") || id.contains("blade");
+    }
+
     static boolean singleEdge(String id) {
         for (String w : new String[] {"dagger", "knife", "fang", "claw", "sickle", "axe", "scythe", "hammer", "maul", "mace", "anchor"}) {
             if (id.contains(w)) {
