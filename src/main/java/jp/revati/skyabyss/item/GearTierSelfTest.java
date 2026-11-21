@@ -90,8 +90,10 @@ public final class GearTierSelfTest {
         row(4, A, "abyss_ash_scythe", "abyss_ember_sword", "abyss_ember_staff", "abyss_ember_bow", "abyss_ember_dagger", "abyss_ember_bell_staff");
         // 五章 深淵
         row(5, R, "abyss_diver_helmet", "abyss_diver_chestplate", "abyss_diver_leggings", "abyss_diver_boots");
-        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff");
-        row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb");
+        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff",
+                "abyss_stake_hammer", "abyss_vial_knife");
+        row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb", "abyss_key_sword", "abyss_moon_staff", "abyss_fluke_bow",
+                "abyss_grave_bell_staff");
         // 六章 月 (story/ch6/gear)
         row(6, R, "moon_walker_helmet", "moon_walker_chestplate", "moon_walker_leggings", "moon_walker_boots");
         row(6, R, "moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");

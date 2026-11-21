@@ -960,6 +960,143 @@ def abyss_depth_bow():
     return m
 
 
+# ================================================================ 五章の足りなかった職の武器（2026-11-21。ラフ rough_ch5 から A・A・A・B・C・B）
+
+def abyss_stake_hammer():
+    """杭打ちの鎚（エピック・鍛冶師）: 荷運びロクが錨の杭を打った木槌。黒い樽の頭に骨の箍が二つ、縄が斜めに掛かり、
+    片側から骨の杭が突き出る。打つ面の真ん中が淵の光"""
+    m = M('abyss_stake_hammer', SB)
+    spine_haft(m, 30)
+    m.box('neck', SB, [-2.4, 28.5, -2.4], [2.4, 30.5, 2.4], 5, rim=True)
+    drum(m, 'head', V, -8.5, 8.5, 35, 5.4, 3)
+    for k, x in enumerate((-7.6, 5.6)):
+        drum(m, f'hoop_{k}', SB, x, x + 2.0, 35, 5.9, 5)
+    m.seg('stake', SB, (-8.5, 35), (-18, 35), 3.4, 1.7, 4, 7, tip=True)
+    m.box('stake_ring', V, [-11.5, 33.0, -2.0], [-10.0, 37.0, 2.0], 3)
+    m.box('face', SB, [8.5, 31.4, -3.4], [9.6, 38.6, 3.4], 5, rim=True)
+    m.box('face_glow', G, [9.6, 33.2, -1.8], [10.1, 36.8, 1.8], 4)
+    m.seg('rope_a', SB, (-3.5, 29.8), (1.5, 40.4), 1.3, 5.8, 3, 5)
+    m.seg('rope_b', SB, (0.5, 29.8), (3.5, 40.4), 1.3, 5.8, 3, 5)
+    m.box('knot', SB, [-1.4, 40.0, -1.6], [2.6, 42.0, 1.6], 6, rim=True)
+    return m
+
+
+def abyss_vial_knife():
+    """薬師の小刀（エピック・暗殺者）: 薬師シズの細い刃。鍔が横倒しの薬瓶で中の薬が淵の光、栓から骨の匙が下がる。
+    刃は細く長い片刃で、背に骨の筋、先は背へ反る"""
+    m = M('abyss_vial_knife', SB)
+    sword_grip(m, 4)
+    m.box('vial_glow', G, [-4.6, 4.1, -1.6], [2.6, 7.6, 1.6], 4)
+    m.box('vial_glass', V, [-5.2, 4.2, -1.9], [-4.2, 8.0, 1.9], 4)
+    m.box('vial_neck', SB, [2.6, 4.2, -1.9], [4.6, 8.0, 1.9], 5, rim=True)
+    m.box('vial_cork', V, [4.6, 5.0, -1.2], [6.2, 7.2, 1.2], 3)
+    m.box('spoon_cord', SB, [5.2, 1.6, -0.3], [5.8, 5.0, 0.3], 4)
+    m.box('spoon', SB, [4.4, -0.6, -1.0], [6.6, 1.6, 1.0], 6, rim=True)
+    m.box('blade', V, [-1.7, 7.6, -0.8], [1.3, 25, 0.8], grad=(7.6, 2, 25, 5))
+    m.box('spine', SB, [-2.3, 9, -0.55], [-1.7, 23, 0.55], grad=(9, 3, 23, 6))
+    m.box('edge', SB, [1.3, 8.6, -0.45], [1.9, 24.4, 0.45], 7)
+    m.chain('tip', V, [(-0.2, 24.6), (-0.6, 28), (-2.2, 31.5)], [3.0, 2.0], [0.8, 0.6], 4, 7, tip=True)
+    for k, y in enumerate((12, 16)):
+        m.box(f'notch_{k}', SB, [-0.6, y, -0.9], [0.6, y + 0.9, 0.9], 5)
+    return m
+
+
+def abyss_key_sword():
+    """番人の大鍵（ヒロイック・戦士）: 心臓の番人の大鍵をそのまま剣にした。柄元に大きな鍵の輪と淵の光の石、
+    長い軸に骨の節が二つ、先に大きな歯が三つ並ぶ。歯のまわりに錆の欠片が浮く"""
+    m = M('abyss_key_sword', SB)
+    sword_grip(m)
+    m.arc('bow', SB, (0, 12), 5.8, 0, 360, 12, 2.6, 1.7, 4, 6)
+    m.box('gem_glow', G, [-2.0, 10.0, -2.0], [2.0, 14.0, 2.0], 4)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.seg(f'bow_horn_{n}', SB, (sd * 4.6, 15.6), (sd * 7.4, 19), 2.0, 1.3, 5, 7, tip=True)
+    m.box('stem', V, [-1.9, 17.5, -1.4], [1.9, 51, 1.4], grad=(17.5, 2, 51, 5), rim=True)
+    for k, y in enumerate((21, 27.5)):
+        m.box(f'collar_{k}', SB, [-2.6, y, -2.0], [2.6, y + 1.8, 2.0], 5, rim=True)
+    for k, (y0, y1, x1) in enumerate(((33.5, 38, 11), (39.5, 42.5, 7.6), (44, 50, 13))):
+        m.box(f'bit_{k}', V, [1.9, y0, -1.2], [x1, y1, 1.2], 3 + k, rim=True)
+        m.box(f'bit_edge_{k}', SB, [x1, y0 + 0.4, -0.75], [x1 + 1.0, y1 - 0.4, 0.75], 6)
+    m.box('ward_glow', G, [3.2, 46.2, -1.35], [9.5, 47.4, 1.35], 4)
+    m.seg('tip', V, (0, 50.5), (0, 56.5), 3.8, 1.4, 4, 6, tip=True)
+    for k, (x, y, w) in enumerate(((-6.5, 39, 1.8), (-8.4, 45.5, 1.3), (-5.4, 50.5, 1.1))):
+        m.box(f'float_rust_{k}', SB, [x - w / 2, y - w / 2, -w / 2], [x + w / 2, y + w / 2, w / 2], 5 + k % 2)
+    return m
+
+
+def abyss_moon_staff():
+    """月引きの杖（ヒロイック・魔法使い）: 緩んだ錨と近づく月。杖の先に大きな三日月が浮き、内側の縁が淵の光。
+    月の下の角から鎖が垂れ、杖の横で小さな錨を吊る。月のまわりに欠片が浮く"""
+    m = M('abyss_moon_staff', SB)
+    staff2(m, 40)
+    m.box('seat', SB, [-2.6, 39.5, -2.2], [2.6, 41.5, 2.2], 5, rim=True)
+    m.seg('seat_point', SB, (0, 41.5), (0, 44), 2.2, 1.2, 5, 7, tip=True)
+    m.arc('float_moon', SB, (0, 52), 7.6, 205, 425, 10, [1.4, 2.6, 3.6, 4.2, 4.4, 4.2, 3.6, 2.6, 1.6, 1.0], 1.6, 4, 7, tip=True)
+    m.arc('moon_inner_glow', G, (0, 52), 5.3, 235, 395, 6, 0.9, 1.75, 3, 5)
+    hx = -7.2
+    for k in range(4):
+        y = 46.5 - k * 2.3
+        w, d = (1.0, 0.45) if k % 2 == 0 else (0.45, 1.0)
+        m.box(f'float_link_{k}', V if k % 2 else SB, [hx - w, y - 2.2, -d], [hx + w, y, d], 4)
+    m.box('float_anchor_shank', V, [hx - 0.8, 31.5, -0.8], [hx + 0.8, 37.6, 0.8], 3)
+    m.box('float_anchor_stock', SB, [hx - 2.6, 35.6, -0.6], [hx + 2.6, 36.6, 0.6], 6)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'float_anchor_{n}', V, [(hx, 31.9), (hx + sd * 3.2, 31.3), (hx + sd * 4.4, 34.2)], [1.8, 1.5], 1.2, 3, 5, tip=True)
+    m.box('float_anchor_eye_glow', G, [hx - 0.5, 33.2, -0.95], [hx + 0.5, 34.4, 0.95], 4)
+    for k, (x, y, w) in enumerate(((8.5, 58, 1.6), (10.5, 52.5, 1.2), (6.0, 62, 1.0))):
+        m.box(f'float_shard_{k}', V, [x - w / 2, y - w / 2, -w / 2], [x + w / 2, y + w / 2, w / 2], 5 + k)
+    return m
+
+
+def abyss_fluke_bow():
+    """錨の弓（ヒロイック・弓使い）: 弓の両端が錨。黒い弓腕の先で腕が二股に反り、骨の爪が外と内へ開く。
+    弓腕の途中に骨の横竿、握りは錨の軸で冠の目が淵の光。弦に小さな錘が二つ"""
+    m = M('abyss_fluke_bow', SB)
+    bow_grip(m)
+    for zs, zn in ((1, 'f'), (-1, 'b')):
+        m.box(f'eye_{zn}_glow', G, [11.2, 13.6, zs * 1.75 - 0.15], [12.8, 16.4, zs * 1.75 + 0.15], 4)
+    limb = [(12, 21), (12.75, 24), (13.5, 29.5), (12.5, 34.75), (10.25, 39.25), (7.25, 43)]
+    for sign, n in ((1, 'u'), (-1, 'd')):
+        P = lambda q, s=sign: mirror(q, s)
+        m.chain(f'limb_{n}', V, [P(q) for q in limb], [3.6, 3.4, 3.0, 2.7, 2.4], 1.6, 2, 5, tip=False)
+        m.chain(f'arm_out_{n}', V, [P((7.25, 43)), P((12, 47)), P((15.5, 44.5))], [2.6, 2.2], 1.4, 4, 5, tip=False)
+        m.seg(f'fluke_out_{n}', SB, P((15.4, 45)), P((18.4, 39.5)), 3.4, 1.3, 5, 7, tip=True)
+        m.chain(f'arm_in_{n}', V, [P((7.25, 43)), P((4.5, 46.2)), P((1.5, 45.6))], [2.4, 2.0], 1.4, 4, 5, tip=False)
+        m.seg(f'fluke_in_{n}', SB, P((1.7, 45.8)), P((-1.8, 42)), 2.8, 1.2, 5, 7, tip=True)
+        c = P((9.8, 30.5))
+        m.box(f'stock_{n}', SB, [c[0] - 3.0, c[1] - 0.9, -2.0], [c[0] + 6.6, c[1] + 0.9, 2.0], 5, rim=True)
+        for kx, x in enumerate((c[0] - 3.4, c[0] + 6.2)):
+            m.box(f'stock_knob_{n}{kx}', SB, [x - 0.2, c[1] - 1.3, -1.4], [x + 1.2, c[1] + 1.3, 1.4], 6)
+    top, bot = (3, 45.6), (3, -15.6)
+    strings(m, top, bot)
+    for key, pull in lib.PULLS:
+        for k, y in enumerate((36, -6)):
+            q = lib.string_at(top, bot, pull, lib.string_t(top, bot, y))
+            m.box(f'string_{key}_weight{k}', V, [q[0] - 1.0, q[1] - 1.4, -1.0], [q[0] + 1.0, q[1] + 1.4, 1.0], 4)
+    return m
+
+
+def abyss_grave_bell_staff():
+    """墓の鈴杖（ヒロイック・呪術師）: 杖の先の反った骨の横木から、前の私たちの墓標の板が下がる。
+    左右に長さの違う板が二枚、右の角の先にもう一枚小さな板。板の名の行と、頭の灯明が淵の光"""
+    m = M('abyss_grave_bell_staff', SB)
+    staff2(m, 46)
+    m.box('yoke', SB, [-9.5, 46, -1.8], [9.5, 48.6, 1.8], grad=(46, 3, 48.6, 5), rim=True)
+    for sd, n in ((-1, 'l'), (1, 'r')):
+        m.chain(f'yoke_tip_{n}', SB, [(sd * 9, 47.6), (sd * 12, 50), (sd * 13.2, 53.5)], [2.2, 1.6], 1.4, 5, 7, tip=True)
+    m.box('cap', SB, [-2.0, 48.6, -2.0], [2.0, 51, 2.0], 6, rim=True)
+    m.box('candle', SB, [-0.8, 51, -0.8], [0.8, 53.6, 0.8], 7)
+    m.box('flame_glow', G, [-0.6, 53.6, -0.6], [0.6, 55.6, 0.6], 5)
+    for k, (x, top, ln, w) in enumerate(((-6.6, 46, 11, 2.5), (6.6, 46, 14.5, 2.5), (12.6, 49.6, 6.5, 1.7))):
+        m.box(f'cord_{k}', V, [x - 0.3, top - 2.4, -0.3], [x + 0.3, top, 0.3], 3)
+        y1 = top - 2.4
+        m.box(f'slab_{k}', V, [x - w, y1 - ln, -0.9], [x + w, y1 - 1.0, 0.9], grad=(y1 - ln, 2, y1 - 1, 5), rim=True)
+        m.box(f'slab_top_{k}', V, [x - w * 0.65, y1 - 1.0, -0.9], [x + w * 0.65, y1 + 0.2, 0.9], 5)
+        for j in range(2 if ln > 8 else 1):
+            m.box(f'name_{k}{j}_glow', G, [x - w * 0.55, y1 - 4.0 - j * 2.6, -1.05], [x + w * 0.55, y1 - 3.1 - j * 2.6, 1.05], 4)
+        m.box(f'foot_{k}', SB, [x - w * 0.8, y1 - ln - 0.9, -1.1], [x + w * 0.8, y1 - ln, 1.1], 5)
+    return m
+
+
 def mirror(p, sign):
     return (p[0], 15 + sign * (p[1] - 15))
 
@@ -986,7 +1123,8 @@ ALL = [abyss_greatsword, abyss_lamp_sword, abyss_pulse_dagger, abyss_sinking_anc
        abyss_tide_sword, abyss_tide_hammer, abyss_tide_staff, abyss_tide_dagger, abyss_tide_bow, abyss_bell_staff,
        abyss_storm_sword, abyss_storm_hammer, abyss_storm_staff, abyss_storm_dagger, abyss_storm_bell_staff, abyss_storm_bow,
        abyss_ember_sword, abyss_ember_staff, abyss_ember_bell_staff, abyss_ember_dagger, abyss_ember_bow,
-       abyss_lamp_staff, abyss_toll_bell_staff, abyss_depth_bow]
+       abyss_lamp_staff, abyss_toll_bell_staff, abyss_depth_bow,
+       abyss_stake_hammer, abyss_vial_knife, abyss_key_sword, abyss_moon_staff, abyss_fluke_bow, abyss_grave_bell_staff]
 
 if __name__ == '__main__':
     want = set(sys.argv[1:])

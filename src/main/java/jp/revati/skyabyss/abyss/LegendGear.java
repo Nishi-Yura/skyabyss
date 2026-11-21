@@ -18,7 +18,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 伝説の武器を巨神ごとに 6 職ぶんへ (2026-10-26)。深淵の専用伝説 (AbyssSetup の 4 本) に、足りない職の 20 本を足す。
 // 出どころは伝説と同じ (abyss/LegendLoot。五章の番人・悪夢・深みの王の褒美。巨神の心臓からは出ない)。
-// あわせて五章 (深淵) の装備に、無かった職の武器 3 本 (魔法使い・弓使い・呪術師。エピック。AbyssGear.SET の図鑑)。
+// あわせて五章 (深淵) の装備に、無かった職の武器 5 本 (魔法使い・弓使い・呪術師・鍛冶師・暗殺者。エピック。AbyssGear.SET の図鑑)。
 // 強さは今の伝説と同じ 1 秒あたり 19 前後 (剣 19.9・鎚 20・杖 20.4・短剣 20・鈴杖 19.6・弓 近接の目安 20.1。四章の英雄の 1.05 倍より上)。五章の 3 本は灯り番の剣 (19.4) の少し下
 public final class LegendGear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
@@ -54,6 +54,11 @@ public final class LegendGear {
                 "item.skyabyss.abyss_depth_bow.desc")));
         CH5.add(ITEMS.register("abyss_toll_bell_staff", () -> new ChapterWeaponItem(new Item.Properties().rarity(Rarity.EPIC), "abyss", 13.5, 1.4,
                 "item.skyabyss.abyss_toll_bell_staff.desc")));
+        // 残りの職 (鍛冶師・暗殺者。2026-11-21。戦士は灯り番の剣)
+        CH5.add(ITEMS.register("abyss_stake_hammer", () -> new ChapterWeaponItem(new Item.Properties().rarity(Rarity.EPIC), "abyss", 21.0, 0.9,
+                "item.skyabyss.abyss_stake_hammer.desc")));
+        CH5.add(ITEMS.register("abyss_vial_knife", () -> new ChapterWeaponItem(new Item.Properties().rarity(Rarity.EPIC), "abyss", 9.45, 2.0,
+                "item.skyabyss.abyss_vial_knife.desc")));
     }
 
     private LegendGear() {

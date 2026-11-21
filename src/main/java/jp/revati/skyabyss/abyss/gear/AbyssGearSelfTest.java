@@ -97,8 +97,8 @@ public final class AbyssGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(AbyssGear.DUNGEON) == AbyssGear.SET, "abyss set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, AbyssGear.SET.collection().size() == 13 && AbyssGear.SET.exclusives().equals(List.of(AbyssGear.ANCHOR, AbyssGear.DAGGER, AbyssGear.PLUMB)),
-                "abyss codex should hold 10 items with 3 exclusives: " + AbyssGear.SET.collection());
+        check(f, AbyssGear.SET.collection().size() == 15 && AbyssGear.SET.exclusives().equals(List.of(AbyssGear.ANCHOR, AbyssGear.DAGGER, AbyssGear.PLUMB)),
+                "abyss codex should hold 15 items with 3 exclusives: " + AbyssGear.SET.collection());
         for (String id : AbyssGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
             Item it = item(id);

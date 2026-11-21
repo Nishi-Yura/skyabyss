@@ -71,6 +71,8 @@ public enum WeaponKind {
             Map.entry("abyss_ember_bell_staff", POKER),
             Map.entry("abyss_lamp_staff", POKER),
             Map.entry("abyss_toll_bell_staff", POKER),
+            Map.entry("abyss_stake_hammer", HAMMER), Map.entry("abyss_vial_knife", FANG), Map.entry("abyss_key_sword", GREATSWORD),
+            Map.entry("abyss_moon_staff", POKER), Map.entry("abyss_grave_bell_staff", POKER),
             // 巨神のヒロイック武器 (item/HeroicGear。弓は WeaponClient が BowExtension で登録する)
             Map.entry("whale_choir_hammer", HAMMER), Map.entry("whale_star_staff", POKER), Map.entry("whale_deep_bell_staff", POKER),
             Map.entry("tide_reef_hammer", HAMMER), Map.entry("tide_pearl_staff", POKER), Map.entry("tide_surf_bell_staff", POKER),

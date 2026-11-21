@@ -44,7 +44,7 @@ ROLE_OF_KIND = {"sword": "gear-warrior", "greatsword": "gear-warrior", "spear": 
 
 # 名前の頭でわからない品のシリーズ（前の模型の色と、出てくる章で決めた）
 SERIES_OF = {"whalebone_greatsword": "whale", "thunder_wing_bow": "storm", "raiju_claw": "storm", "coral_harpoon": "tide",
-             "coral_shield": "tide", "tidecaller_claw": "tide", "waterway_fang": "tide"}
+             "coral_shield": "tide", "tidecaller_claw": "tide", "waterway_fang": "whale"}
 
 
 def series_of(i):

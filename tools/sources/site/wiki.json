@@ -7132,14 +7132,14 @@
     },
     {
       "id": "skyabyss:ember_war_axe",
-      "name": "余燼の戦斧",
+      "name": "熾火の戦斧",
       "class": "jp.revati.skyabyss.titan.ember.gear.EmberWarAxeItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "余燼の戦斧",
+            "t": "熾火の戦斧",
             "c": "B98CFF"
           }
         ],
@@ -8035,14 +8035,14 @@
     },
     {
       "id": "skyabyss:abyss_bell_staff",
-      "name": "沈み鐘の杖",
+      "name": "沈み鐘の鈴杖",
       "class": "jp.revati.skyabyss.abyss.AbyssWeaponItem",
       "stack": 1,
       "tier": "artifact",
       "tooltip": [
         [
           {
-            "t": "沈み鐘の杖",
+            "t": "沈み鐘の鈴杖",
             "c": "F2C94C"
           }
         ],
@@ -23724,14 +23724,14 @@
     },
     {
       "id": "skyabyss:wild_lantern_bow",
-      "name": "灯籠の弓",
+      "name": "坑灯の弓",
       "class": "jp.revati.skyabyss.item.wild.WildGearItems$Bow",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "灯籠の弓",
+            "t": "坑灯の弓",
             "c": "B98CFF"
           }
         ],
@@ -27134,14 +27134,14 @@
     },
     {
       "id": "skyabyss:wild_starchart_staff",
-      "name": "星図の杖",
+      "name": "星秤の杖",
       "class": "jp.revati.skyabyss.item.wild.WildGearItems$Weapon",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "星図の杖",
+            "t": "星秤の杖",
             "c": "FF7A3D"
           }
         ],
@@ -28599,14 +28599,14 @@
     },
     {
       "id": "skyabyss:wild_mirror_dagger",
-      "name": "鏡写しの短剣",
+      "name": "月鏡の短剣",
       "class": "jp.revati.skyabyss.item.wild.WildGearItems$Weapon",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "鏡写しの短剣",
+            "t": "月鏡の短剣",
             "c": "FF7A3D"
           }
         ],
@@ -29349,14 +29349,14 @@
     },
     {
       "id": "skyabyss:wild_starbell_totem",
-      "name": "星鈴の木",
+      "name": "星鈴の揺りかご",
       "class": "jp.revati.skyabyss.item.wild.WildGearItems$Weapon",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "星鈴の木",
+            "t": "星鈴の揺りかご",
             "c": "FF7A3D"
           }
         ],
@@ -39324,14 +39324,14 @@
     },
     {
       "id": "skyabyss:whale_staff",
-      "name": "鯨骨の星杖",
+      "name": "鯨骨の杖",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "鯨骨の星杖",
+            "t": "鯨骨の杖",
             "c": "B98CFF"
           }
         ],
@@ -39909,14 +39909,14 @@
     },
     {
       "id": "skyabyss:tide_staff",
-      "name": "潮殻の真珠杖",
+      "name": "潮殻の杖",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "潮殻の真珠杖",
+            "t": "潮殻の杖",
             "c": "B98CFF"
           }
         ],
@@ -40790,14 +40790,14 @@
     },
     {
       "id": "skyabyss:storm_hammer",
-      "name": "雷の鎚",
+      "name": "雷石の鎚",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "雷の鎚",
+            "t": "雷石の鎚",
             "c": "B98CFF"
           }
         ],
@@ -41086,14 +41086,14 @@
     },
     {
       "id": "skyabyss:ember_censer",
-      "name": "灰の香炉",
+      "name": "熾火の香炉",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "灰の香炉",
+            "t": "熾火の香炉",
             "c": "B98CFF"
           }
         ],
@@ -41382,14 +41382,14 @@
     },
     {
       "id": "skyabyss:ember_bow",
-      "name": "灰の弓",
+      "name": "熾火の弓",
       "class": "jp.revati.skyabyss.item.ChapterBowItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "灰の弓",
+            "t": "熾火の弓",
             "c": "B98CFF"
           }
         ],
@@ -41523,14 +41523,14 @@
     },
     {
       "id": "skyabyss:ember_dagger",
-      "name": "熾の短剣",
+      "name": "熾火の短剣",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "熾の短剣",
+            "t": "熾火の短剣",
             "c": "B98CFF"
           }
         ],
@@ -41819,14 +41819,14 @@
     },
     {
       "id": "skyabyss:tide_dagger",
-      "name": "馬刀貝の短剣",
+      "name": "潮殻の短剣",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "epic",
       "tooltip": [
         [
           {
-            "t": "馬刀貝の短剣",
+            "t": "潮殻の短剣",
             "c": "B98CFF"
           }
         ],
@@ -44719,14 +44719,14 @@
     },
     {
       "id": "skyabyss:abyss_storm_dagger",
-      "name": "雷翼の鉤爪",
+      "name": "嵐羽の鉤爪",
       "class": "jp.revati.skyabyss.abyss.AbyssWeaponItem",
       "stack": 1,
       "tier": "artifact",
       "tooltip": [
         [
           {
-            "t": "雷翼の鉤爪",
+            "t": "嵐羽の鉤爪",
             "c": "F2C94C"
           }
         ],
@@ -46479,14 +46479,14 @@
     },
     {
       "id": "skyabyss:whale_choir_hammer",
-      "name": "鯨唄の鎚",
+      "name": "鯨頭の鎚",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "鯨唄の鎚",
+            "t": "鯨頭の鎚",
             "c": "FF7A3D"
           }
         ],
@@ -47042,14 +47042,14 @@
     },
     {
       "id": "skyabyss:whale_deep_bell_staff",
-      "name": "深鳴りの鈴杖",
+      "name": "鯨鳴りの鈴杖",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "深鳴りの鈴杖",
+            "t": "鯨鳴りの鈴杖",
             "c": "FF7A3D"
           }
         ],
@@ -47612,14 +47612,14 @@
     },
     {
       "id": "skyabyss:tide_coral_bow",
-      "name": "珊瑚の弓",
+      "name": "潮珊瑚の弓",
       "class": "jp.revati.skyabyss.item.ChapterBowItem",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "珊瑚の弓",
+            "t": "潮珊瑚の弓",
             "c": "FF7A3D"
           }
         ],
@@ -48548,14 +48548,14 @@
     },
     {
       "id": "skyabyss:storm_thunder_bell_staff",
-      "name": "雷鈴の杖",
+      "name": "遠雷の鈴杖",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "雷鈴の杖",
+            "t": "遠雷の鈴杖",
             "c": "FF7A3D"
           }
         ],
@@ -48738,14 +48738,14 @@
     },
     {
       "id": "skyabyss:ember_cinder_blade",
-      "name": "熾の大刃",
+      "name": "灰の大刃",
       "class": "jp.revati.skyabyss.item.ChapterWeaponItem",
       "stack": 1,
       "tier": "heroic",
       "tooltip": [
         [
           {
-            "t": "熾の大刃",
+            "t": "灰の大刃",
             "c": "FF7A3D"
           }
         ],

@@ -164,7 +164,10 @@ VIEWS = ((200, 22, 0), (200, 22, -45), (180, 0, -45), (200, 40, -30), (200, 55, 
 
 
 # 品ごとの向きの決め打ち (目で選んだ。2026-11-16): 杖は武器と同じ斜め、細い羽は斜め、離れた肩当ては斜め上から
-VIEW_OF = {"abyss_bell_staff": (200, 22, -45), "storm_eye_feather": (110, 15, -45), "ember_mantle": (200, 40, -30), "cinder_lamp": (200, 22, 0)}
+VIEW_OF = {"abyss_bell_staff": (200, 22, -45), "storm_eye_feather": (110, 15, -45), "ember_mantle": (200, 40, -30), "cinder_lamp": (200, 22, 0),
+           # 五章の残りの職の武器 (2026-11-21): 長い武器は欄の対角へ
+           "abyss_stake_hammer": (200, 22, -45), "abyss_vial_knife": (200, 22, -45), "abyss_key_sword": (200, 22, -45),
+           "abyss_moon_staff": (200, 22, -45), "abyss_fluke_bow": (200, 22, -45), "abyss_grave_bell_staff": (200, 22, -45)}
 
 
 def best_icon(iid):

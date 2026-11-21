@@ -792,7 +792,7 @@ public final class SkillActions {
         return null;
     }
 
-    // 逸品の書き換え「沈む唄」(沈み鐘の杖): 割られずに残った守りは、唄の終わりに体力へ沈み、いちばん傷ついた仲間にも合計の半分が届く
+    // 逸品の書き換え「沈む唄」(沈み鐘の鈴杖): 割られずに残った守りは、唄の終わりに体力へ沈み、いちばん傷ついた仲間にも合計の半分が届く
     private static void abyssSunkSong(ServerPlayer player, List<ServerPlayer> targets, int ticks) {
         ServerLevel level = player.serverLevel();
         SkillEffects.later(level, Math.max(1, ticks - 2), () -> {

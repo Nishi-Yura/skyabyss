@@ -85,7 +85,7 @@ public final class EmberIds {
     public static final String EMBER_CHESTPLATE = "ember_chestplate";
     public static final String EMBER_LEGGINGS = "ember_leggings";
     public static final String EMBER_BOOTS = "ember_boots";
-    public static final String EMBER_WAR_AXE = "ember_war_axe";     // → G 余燼の戦斧
+    public static final String EMBER_WAR_AXE = "ember_war_axe";     // → G 熾火の戦斧
     public static final String EMBER_MANTLE = "ember_mantle";       // → G 熾火の外套 (装飾の枠)
     public static final String KINDLING_CHARM = "kindling_charm";   // → G 熾りの護符 (護符の枠)
     public static final String SMITH_HAMMER = "smith_hammer";       // → G 鍛え手の大鎚 (専用の逸品。E のモデルと同じ形)

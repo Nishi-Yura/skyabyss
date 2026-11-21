@@ -905,7 +905,7 @@ public final class WildGearEvents {
                 }
             }
         }
-        // 仲間の体力の上限 (星鈴の木)
+        // 仲間の体力の上限 (星鈴の揺りかご)
         if (player.tickCount % 20 == 11) {
             double hp = 0;
             for (Player ally : withSelf(player.serverLevel(), player, 8)) {

@@ -31,7 +31,9 @@ public final class MoveSets {
             // 巨神の英雄の武器 (item/HeroicGear。弓は動きを持たない)
             "whale_choir_hammer", "whale_star_staff", "whale_deep_bell_staff", "tide_reef_hammer", "tide_pearl_staff", "tide_surf_bell_staff",
             "storm_anvil_hammer", "storm_cloud_staff", "storm_thunder_bell_staff", "ember_cinder_blade", "ember_ash_knife", "ember_kiln_staff",
-            "ember_censer_bell_staff");
+            "ember_censer_bell_staff",
+            // 五章の残りの職 (2026-11-21)
+            "abyss_stake_hammer", "abyss_vial_knife", "abyss_key_sword", "abyss_moon_staff", "abyss_grave_bell_staff");
     // 野の装備の近接・杖・鈴杖 (item/wild。弓は動きを持たない。docs/design/51)
     public static final List<String> ITEMS = withWild();
 

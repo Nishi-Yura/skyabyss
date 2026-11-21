@@ -58,7 +58,7 @@ public final class AbyssGear {
     public static final float PLUMB_CHANCE = 0.02f;
     public static final float CORE_CHANCE = 0.25f;
 
-    // 図鑑 (13 品。五章の職の武器 3 本を足した)
+    // 図鑑 (15 品。五章の職の武器 5 本を足した)
     public static final TitanGearSet SET = new TitanGearSet(DUNGEON, SHARD, CORE, List.of(
             TitanGearSet.piece(HELMET, ARMOR_CHANCE),
             TitanGearSet.piece(CHESTPLATE, ARMOR_CHANCE),
@@ -67,10 +67,12 @@ public final class AbyssGear {
             TitanGearSet.piece(LAMP_SWORD, BASE_CHANCE),
             TitanGearSet.piece(LISTENER, BASE_CHANCE),
             TitanGearSet.piece(CHARM, BASE_CHANCE),
-            // 五章の職の武器 (魔法使い・弓使い・呪術師。abyss/LegendGear)
+            // 五章の職の武器 (魔法使い・弓使い・呪術師・鍛冶師・暗殺者。abyss/LegendGear)
             TitanGearSet.piece(id("abyss_lamp_staff"), BASE_CHANCE),
             TitanGearSet.piece(id("abyss_depth_bow"), BASE_CHANCE),
             TitanGearSet.piece(id("abyss_toll_bell_staff"), BASE_CHANCE),
+            TitanGearSet.piece(id("abyss_stake_hammer"), BASE_CHANCE),
+            TitanGearSet.piece(id("abyss_vial_knife"), BASE_CHANCE),
             TitanGearSet.exclusive(ANCHOR, EXCLUSIVE_CHANCE),
             TitanGearSet.exclusive(DAGGER, EXCLUSIVE_CHANCE),
             TitanGearSet.exclusive(PLUMB, PLUMB_CHANCE)));

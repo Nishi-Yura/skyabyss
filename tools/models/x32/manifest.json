@@ -79,6 +79,26 @@
   "status": "done",
   "craft": "none"
  },
+ "abyss_fluke_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_grave_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
  "abyss_greatsword": {
   "series": "abyss",
   "kind": "greatsword",
@@ -88,6 +108,16 @@
   "bow": false,
   "status": "done",
   "craft": "none"
+ },
+ "abyss_key_sword": {
+  "series": "abyss",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
  },
  "abyss_lamp_staff": {
   "series": "abyss",
@@ -109,6 +139,16 @@
   "status": "done",
   "craft": "none"
  },
+ "abyss_moon_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
  "abyss_pulse_dagger": {
   "series": "abyss",
   "kind": "dagger",
@@ -128,6 +168,16 @@
   "bow": false,
   "status": "done",
   "craft": "none"
+ },
+ "abyss_stake_hammer": {
+  "series": "abyss",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
  },
  "abyss_storm_bell_staff": {
   "series": "abyss",
@@ -248,6 +298,16 @@
   "bow": false,
   "status": "done",
   "craft": "none"
+ },
+ "abyss_vial_knife": {
+  "series": "abyss",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
  },
  "abyss_whale_bell_staff": {
   "series": "abyss",
@@ -1060,7 +1120,7 @@
   "craft": "none"
  },
  "waterway_fang": {
-  "series": "tide",
+  "series": "whale",
   "kind": "fang",
   "tier": "legend",
   "level": null,
