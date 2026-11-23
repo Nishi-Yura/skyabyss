@@ -7,6 +7,7 @@
 - 返事は日本語。作業ブランチは `m1-sky-pass`。`main` へ直接コミットしない。頼まれるまでプッシュ・コミットしない。
 - コミットに入れないもの: `docs/design/60_gear_look_roles.md`（他の人の途中の変更あり）、`tools/shots/gear_tower.txt`、`docs/review/tower_ruin_rough.png`、`tools/models/x32/look5/vox.py`。
 - 模型の直しは必ず Blockbench (MCP) を通す。`.bbmodel` へ数値を直接書かない。
+- 防具は 1 部位ずつ作り、見直しは回数の上限なしで納得いくまで（`docs/HANDOFF.md` の「作り方」）。
 - フォルダの名前や場所は変えない（スクリプト・サイト・書類が場所を決め打ちで指している）。
 
 ## トークンを使いすぎないための働き方

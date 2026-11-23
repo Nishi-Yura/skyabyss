@@ -366,6 +366,14 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 ## 装備まわりの文と絵
 
+- 防具の模型 (一組 1 つ): Blockbench で群 8 つ (armorHead … armorLeftBoot) の下に箱を置いて書き出し → `tools/models/x32/look5/armor_pass.py prep|done` (色は `armor_palettes.py`、箱の名前の頭 b_/c_/k_/d_/g_ で素材)。下見 `tools/gen/pixel/armor_view_big.py` (`AV_SCALE`/`AV_CY` で引き)、ゲーム `armor_shots.py <組...>` → runShots、一覧 `armor_overview.py <撮影名> <出力>`。
+  - 防具の一式を近くから撮る: `runShots -Pscript=tools/shots/armor_set_close.txt`（防具立てに一式、前・斜め前・横・斜め後ろ・後ろ。組の名前は台本の stone_whale を置き換える）。
+  - 手で組むときの数値: `tools/models/x32/look5/armor_calc.py end|seg|mem`（節の継ぎ目・2 点を渡す棒・畝の間の板。数値を出すだけ）。八角の輪・円錐の壁は `armor_ring.py`、平面の円弧を棒の節でつなぐのは `armor_arc.py`、右の箱の並び（JSON）を左へ返すのは `armor_mirror.py`（どちらも place_cube に渡す数値を出すだけ）。見せる絵: `tools/gen/pixel/armor_sheet.py <出力> "<見出し>=<撮影の絵のフォルダ>:set|player" ...`。
+  - 2D の絵の板: 名前に `pic_<絵>` を入れた厚み 0 の板（north の面だけ塗る。後ろへ向けるなら Y 180°）。絵は `tools/models/x32/look5/armor_pics.py` の PICS（banner・wisp・ring・orbit・chime・wing・radiance・halo）。名前を `_glow` で終えると光る。後光・背の絵・エピックの紋は `armor_pics_more.py`（PICS に足される）。塗りの絵の大きさは prep の出力（128/256/512）を見て、通しの create_texture はその大きさ・uv は 2 倍。
+  - 背の 3D の飾りを絵の板に替える: 板だけを置いた Blockbench の書き出しを prep に足し、外す箱は `'-<正規表現>'`（外した名前を出す）。背の飾りの段は エピック = 小さな紋・ヒロイック = 大きな絵・神器 = 大きな絵＋頭の後ろの後光＋aura_glow。
+  - 背に垂らす外套・裳裾は、上端を原点に X を**マイナス**に回す（Blockbench の X プラスは原点より下を -z へ倒すので、裾が体や脚の中へ入って見えなくなる）。外套の上の飾りも同じ原点・同じ回転で。
+  - はみ出しの確かめ: `python -X utf8 -I tools/gen/pixel/armor_skin_cover.py <組の.bbmodel>`（立ち姿で体の表面から外へ光線を出し、どの板にも当たらない所を出す。0 が合格）。プレイヤーに着せた姿（待機・歩き・しゃがみ・見上げ／見下ろし）は `tools/shots/armor_player_check.txt`（item replace の 4 行を組に合わせる）。
+  - Blockbench (MCP) で前の案に戻る: `trigger_action switch_tabs`（`confirmEvent {"shiftKey": true}` で 1 つ前のタブ）→ `get_project_info` で名前を確かめる。prep は raw を複数受け取るので、兜だけ・胴だけの raw に分けてよい（同じ名前の箱は不可）。
 - `python tools/gen/items/gen_resonance_shards.py` : 巨神ごとの共鳴の欠片の絵 4 枚 (`textures/item/resonance_shard_<巨神>.png`。共通の欠片の色味を替える)。03 の 2.2節
 
 ### 上から落ちる影 (空の影・巨神の影。`client/sky/OverheadShadow`、設計書 06 の 2.4)

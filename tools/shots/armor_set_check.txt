@@ -1,0 +1,315 @@
+world shots flat
+size 1280 720
+timeout 3000
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+armorlevel 0
+camera minecraft:overworld 0 -59.0 4.6 180 4
+waitchunks
+
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wayfarer_boots",count:1},{id:"skyabyss:wayfarer_leggings",count:1},{id:"skyabyss:wayfarer_chestplate",count:1},{id:"skyabyss:wayfarer_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wayfarer
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:ironclad_boots",count:1},{id:"skyabyss:ironclad_leggings",count:1},{id:"skyabyss:ironclad_chestplate",count:1},{id:"skyabyss:ironclad_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot ironclad
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:whale_road_boots",count:1},{id:"skyabyss:whale_road_leggings",count:1},{id:"skyabyss:whale_road_chestplate",count:1},{id:"skyabyss:whale_road_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot whale_road
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:tide_wader_boots",count:1},{id:"skyabyss:tide_wader_leggings",count:1},{id:"skyabyss:tide_wader_chestplate",count:1},{id:"skyabyss:tide_wader_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot tide_wader
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:peak_crossing_boots",count:1},{id:"skyabyss:peak_crossing_leggings",count:1},{id:"skyabyss:peak_crossing_chestplate",count:1},{id:"skyabyss:peak_crossing_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot peak_crossing
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:ash_walking_boots",count:1},{id:"skyabyss:ash_walking_leggings",count:1},{id:"skyabyss:ash_walking_chestplate",count:1},{id:"skyabyss:ash_walking_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot ash_walking
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{},{},{id:"skyabyss:sky_stone_chestplate",count:1},{}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{},{},{id:"skyabyss:sky_stone_chestplate",count:1},{}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{},{},{id:"skyabyss:sky_stone_chestplate",count:1},{}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{},{},{id:"skyabyss:sky_stone_chestplate",count:1},{}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{},{},{id:"skyabyss:sky_stone_chestplate",count:1},{}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot sky_stone
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_oilskin_boots",count:1},{id:"skyabyss:wild_oilskin_leggings",count:1},{id:"skyabyss:wild_oilskin_chestplate",count:1},{id:"skyabyss:wild_oilskin_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_oilskin_boots",count:1},{id:"skyabyss:wild_oilskin_leggings",count:1},{id:"skyabyss:wild_oilskin_chestplate",count:1},{id:"skyabyss:wild_oilskin_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_oilskin_boots",count:1},{id:"skyabyss:wild_oilskin_leggings",count:1},{id:"skyabyss:wild_oilskin_chestplate",count:1},{id:"skyabyss:wild_oilskin_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_oilskin_boots",count:1},{id:"skyabyss:wild_oilskin_leggings",count:1},{id:"skyabyss:wild_oilskin_chestplate",count:1},{id:"skyabyss:wild_oilskin_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_oilskin_boots",count:1},{id:"skyabyss:wild_oilskin_leggings",count:1},{id:"skyabyss:wild_oilskin_chestplate",count:1},{id:"skyabyss:wild_oilskin_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_oilskin
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_belfry_boots",count:1},{id:"skyabyss:wild_belfry_leggings",count:1},{id:"skyabyss:wild_belfry_chestplate",count:1},{id:"skyabyss:wild_belfry_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_belfry_boots",count:1},{id:"skyabyss:wild_belfry_leggings",count:1},{id:"skyabyss:wild_belfry_chestplate",count:1},{id:"skyabyss:wild_belfry_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_belfry_boots",count:1},{id:"skyabyss:wild_belfry_leggings",count:1},{id:"skyabyss:wild_belfry_chestplate",count:1},{id:"skyabyss:wild_belfry_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_belfry_boots",count:1},{id:"skyabyss:wild_belfry_leggings",count:1},{id:"skyabyss:wild_belfry_chestplate",count:1},{id:"skyabyss:wild_belfry_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_belfry_boots",count:1},{id:"skyabyss:wild_belfry_leggings",count:1},{id:"skyabyss:wild_belfry_chestplate",count:1},{id:"skyabyss:wild_belfry_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_belfry
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_sailcloth_boots",count:1},{id:"skyabyss:wild_sailcloth_leggings",count:1},{id:"skyabyss:wild_sailcloth_chestplate",count:1},{id:"skyabyss:wild_sailcloth_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_sailcloth_boots",count:1},{id:"skyabyss:wild_sailcloth_leggings",count:1},{id:"skyabyss:wild_sailcloth_chestplate",count:1},{id:"skyabyss:wild_sailcloth_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_sailcloth_boots",count:1},{id:"skyabyss:wild_sailcloth_leggings",count:1},{id:"skyabyss:wild_sailcloth_chestplate",count:1},{id:"skyabyss:wild_sailcloth_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_sailcloth_boots",count:1},{id:"skyabyss:wild_sailcloth_leggings",count:1},{id:"skyabyss:wild_sailcloth_chestplate",count:1},{id:"skyabyss:wild_sailcloth_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_sailcloth_boots",count:1},{id:"skyabyss:wild_sailcloth_leggings",count:1},{id:"skyabyss:wild_sailcloth_chestplate",count:1},{id:"skyabyss:wild_sailcloth_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_sailcloth
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot stone_whale
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot tide_shell
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot thunder_wing
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot ember
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:abyss_diver_boots",count:1},{id:"skyabyss:abyss_diver_leggings",count:1},{id:"skyabyss:abyss_diver_chestplate",count:1},{id:"skyabyss:abyss_diver_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot abyss_diver
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:moon_walker_boots",count:1},{id:"skyabyss:moon_walker_leggings",count:1},{id:"skyabyss:moon_walker_chestplate",count:1},{id:"skyabyss:moon_walker_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:moon_walker_boots",count:1},{id:"skyabyss:moon_walker_leggings",count:1},{id:"skyabyss:moon_walker_chestplate",count:1},{id:"skyabyss:moon_walker_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:moon_walker_boots",count:1},{id:"skyabyss:moon_walker_leggings",count:1},{id:"skyabyss:moon_walker_chestplate",count:1},{id:"skyabyss:moon_walker_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:moon_walker_boots",count:1},{id:"skyabyss:moon_walker_leggings",count:1},{id:"skyabyss:moon_walker_chestplate",count:1},{id:"skyabyss:moon_walker_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:moon_walker_boots",count:1},{id:"skyabyss:moon_walker_leggings",count:1},{id:"skyabyss:moon_walker_chestplate",count:1},{id:"skyabyss:moon_walker_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot moon_walker
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_oldsoldier_boots",count:1},{id:"skyabyss:wild_oldsoldier_leggings",count:1},{id:"skyabyss:wild_oldsoldier_chestplate",count:1},{id:"skyabyss:wild_oldsoldier_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_oldsoldier_boots",count:1},{id:"skyabyss:wild_oldsoldier_leggings",count:1},{id:"skyabyss:wild_oldsoldier_chestplate",count:1},{id:"skyabyss:wild_oldsoldier_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_oldsoldier_boots",count:1},{id:"skyabyss:wild_oldsoldier_leggings",count:1},{id:"skyabyss:wild_oldsoldier_chestplate",count:1},{id:"skyabyss:wild_oldsoldier_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_oldsoldier_boots",count:1},{id:"skyabyss:wild_oldsoldier_leggings",count:1},{id:"skyabyss:wild_oldsoldier_chestplate",count:1},{id:"skyabyss:wild_oldsoldier_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_oldsoldier_boots",count:1},{id:"skyabyss:wild_oldsoldier_leggings",count:1},{id:"skyabyss:wild_oldsoldier_chestplate",count:1},{id:"skyabyss:wild_oldsoldier_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_oldsoldier
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_lurelight_boots",count:1},{id:"skyabyss:wild_lurelight_leggings",count:1},{id:"skyabyss:wild_lurelight_chestplate",count:1},{id:"skyabyss:wild_lurelight_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_lurelight_boots",count:1},{id:"skyabyss:wild_lurelight_leggings",count:1},{id:"skyabyss:wild_lurelight_chestplate",count:1},{id:"skyabyss:wild_lurelight_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_lurelight_boots",count:1},{id:"skyabyss:wild_lurelight_leggings",count:1},{id:"skyabyss:wild_lurelight_chestplate",count:1},{id:"skyabyss:wild_lurelight_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_lurelight_boots",count:1},{id:"skyabyss:wild_lurelight_leggings",count:1},{id:"skyabyss:wild_lurelight_chestplate",count:1},{id:"skyabyss:wild_lurelight_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_lurelight_boots",count:1},{id:"skyabyss:wild_lurelight_leggings",count:1},{id:"skyabyss:wild_lurelight_chestplate",count:1},{id:"skyabyss:wild_lurelight_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_lurelight
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_windweave_boots",count:1},{id:"skyabyss:wild_windweave_leggings",count:1},{id:"skyabyss:wild_windweave_chestplate",count:1},{id:"skyabyss:wild_windweave_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_windweave_boots",count:1},{id:"skyabyss:wild_windweave_leggings",count:1},{id:"skyabyss:wild_windweave_chestplate",count:1},{id:"skyabyss:wild_windweave_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_windweave_boots",count:1},{id:"skyabyss:wild_windweave_leggings",count:1},{id:"skyabyss:wild_windweave_chestplate",count:1},{id:"skyabyss:wild_windweave_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_windweave_boots",count:1},{id:"skyabyss:wild_windweave_leggings",count:1},{id:"skyabyss:wild_windweave_chestplate",count:1},{id:"skyabyss:wild_windweave_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_windweave_boots",count:1},{id:"skyabyss:wild_windweave_leggings",count:1},{id:"skyabyss:wild_windweave_chestplate",count:1},{id:"skyabyss:wild_windweave_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_windweave
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_delver_boots",count:1},{id:"skyabyss:wild_delver_leggings",count:1},{id:"skyabyss:wild_delver_chestplate",count:1},{id:"skyabyss:wild_delver_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_delver_boots",count:1},{id:"skyabyss:wild_delver_leggings",count:1},{id:"skyabyss:wild_delver_chestplate",count:1},{id:"skyabyss:wild_delver_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_delver_boots",count:1},{id:"skyabyss:wild_delver_leggings",count:1},{id:"skyabyss:wild_delver_chestplate",count:1},{id:"skyabyss:wild_delver_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_delver_boots",count:1},{id:"skyabyss:wild_delver_leggings",count:1},{id:"skyabyss:wild_delver_chestplate",count:1},{id:"skyabyss:wild_delver_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_delver_boots",count:1},{id:"skyabyss:wild_delver_leggings",count:1},{id:"skyabyss:wild_delver_chestplate",count:1},{id:"skyabyss:wild_delver_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_delver
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_copperwire_boots",count:1},{id:"skyabyss:wild_copperwire_leggings",count:1},{id:"skyabyss:wild_copperwire_chestplate",count:1},{id:"skyabyss:wild_copperwire_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_copperwire_boots",count:1},{id:"skyabyss:wild_copperwire_leggings",count:1},{id:"skyabyss:wild_copperwire_chestplate",count:1},{id:"skyabyss:wild_copperwire_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_copperwire_boots",count:1},{id:"skyabyss:wild_copperwire_leggings",count:1},{id:"skyabyss:wild_copperwire_chestplate",count:1},{id:"skyabyss:wild_copperwire_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_copperwire_boots",count:1},{id:"skyabyss:wild_copperwire_leggings",count:1},{id:"skyabyss:wild_copperwire_chestplate",count:1},{id:"skyabyss:wild_copperwire_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_copperwire_boots",count:1},{id:"skyabyss:wild_copperwire_leggings",count:1},{id:"skyabyss:wild_copperwire_chestplate",count:1},{id:"skyabyss:wild_copperwire_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_copperwire
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_ramfleece_boots",count:1},{id:"skyabyss:wild_ramfleece_leggings",count:1},{id:"skyabyss:wild_ramfleece_chestplate",count:1},{id:"skyabyss:wild_ramfleece_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_ramfleece_boots",count:1},{id:"skyabyss:wild_ramfleece_leggings",count:1},{id:"skyabyss:wild_ramfleece_chestplate",count:1},{id:"skyabyss:wild_ramfleece_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_ramfleece_boots",count:1},{id:"skyabyss:wild_ramfleece_leggings",count:1},{id:"skyabyss:wild_ramfleece_chestplate",count:1},{id:"skyabyss:wild_ramfleece_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_ramfleece_boots",count:1},{id:"skyabyss:wild_ramfleece_leggings",count:1},{id:"skyabyss:wild_ramfleece_chestplate",count:1},{id:"skyabyss:wild_ramfleece_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_ramfleece_boots",count:1},{id:"skyabyss:wild_ramfleece_leggings",count:1},{id:"skyabyss:wild_ramfleece_chestplate",count:1},{id:"skyabyss:wild_ramfleece_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_ramfleece
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_ashleather_boots",count:1},{id:"skyabyss:wild_ashleather_leggings",count:1},{id:"skyabyss:wild_ashleather_chestplate",count:1},{id:"skyabyss:wild_ashleather_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_ashleather_boots",count:1},{id:"skyabyss:wild_ashleather_leggings",count:1},{id:"skyabyss:wild_ashleather_chestplate",count:1},{id:"skyabyss:wild_ashleather_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_ashleather_boots",count:1},{id:"skyabyss:wild_ashleather_leggings",count:1},{id:"skyabyss:wild_ashleather_chestplate",count:1},{id:"skyabyss:wild_ashleather_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_ashleather_boots",count:1},{id:"skyabyss:wild_ashleather_leggings",count:1},{id:"skyabyss:wild_ashleather_chestplate",count:1},{id:"skyabyss:wild_ashleather_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_ashleather_boots",count:1},{id:"skyabyss:wild_ashleather_leggings",count:1},{id:"skyabyss:wild_ashleather_chestplate",count:1},{id:"skyabyss:wild_ashleather_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_ashleather
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_saltplate_boots",count:1},{id:"skyabyss:wild_saltplate_leggings",count:1},{id:"skyabyss:wild_saltplate_chestplate",count:1},{id:"skyabyss:wild_saltplate_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_saltplate_boots",count:1},{id:"skyabyss:wild_saltplate_leggings",count:1},{id:"skyabyss:wild_saltplate_chestplate",count:1},{id:"skyabyss:wild_saltplate_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_saltplate_boots",count:1},{id:"skyabyss:wild_saltplate_leggings",count:1},{id:"skyabyss:wild_saltplate_chestplate",count:1},{id:"skyabyss:wild_saltplate_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_saltplate_boots",count:1},{id:"skyabyss:wild_saltplate_leggings",count:1},{id:"skyabyss:wild_saltplate_chestplate",count:1},{id:"skyabyss:wild_saltplate_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_saltplate_boots",count:1},{id:"skyabyss:wild_saltplate_leggings",count:1},{id:"skyabyss:wild_saltplate_chestplate",count:1},{id:"skyabyss:wild_saltplate_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_saltplate
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_lampkeeper_boots",count:1},{id:"skyabyss:wild_lampkeeper_leggings",count:1},{id:"skyabyss:wild_lampkeeper_chestplate",count:1},{id:"skyabyss:wild_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_lampkeeper_boots",count:1},{id:"skyabyss:wild_lampkeeper_leggings",count:1},{id:"skyabyss:wild_lampkeeper_chestplate",count:1},{id:"skyabyss:wild_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_lampkeeper_boots",count:1},{id:"skyabyss:wild_lampkeeper_leggings",count:1},{id:"skyabyss:wild_lampkeeper_chestplate",count:1},{id:"skyabyss:wild_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_lampkeeper_boots",count:1},{id:"skyabyss:wild_lampkeeper_leggings",count:1},{id:"skyabyss:wild_lampkeeper_chestplate",count:1},{id:"skyabyss:wild_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_lampkeeper_boots",count:1},{id:"skyabyss:wild_lampkeeper_leggings",count:1},{id:"skyabyss:wild_lampkeeper_chestplate",count:1},{id:"skyabyss:wild_lampkeeper_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_lampkeeper
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_soot_boots",count:1},{id:"skyabyss:wild_soot_leggings",count:1},{id:"skyabyss:wild_soot_chestplate",count:1},{id:"skyabyss:wild_soot_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_soot_boots",count:1},{id:"skyabyss:wild_soot_leggings",count:1},{id:"skyabyss:wild_soot_chestplate",count:1},{id:"skyabyss:wild_soot_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_soot_boots",count:1},{id:"skyabyss:wild_soot_leggings",count:1},{id:"skyabyss:wild_soot_chestplate",count:1},{id:"skyabyss:wild_soot_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_soot_boots",count:1},{id:"skyabyss:wild_soot_leggings",count:1},{id:"skyabyss:wild_soot_chestplate",count:1},{id:"skyabyss:wild_soot_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_soot_boots",count:1},{id:"skyabyss:wild_soot_leggings",count:1},{id:"skyabyss:wild_soot_chestplate",count:1},{id:"skyabyss:wild_soot_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_soot
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_deepwarden_boots",count:1},{id:"skyabyss:wild_deepwarden_leggings",count:1},{id:"skyabyss:wild_deepwarden_chestplate",count:1},{id:"skyabyss:wild_deepwarden_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_deepwarden_boots",count:1},{id:"skyabyss:wild_deepwarden_leggings",count:1},{id:"skyabyss:wild_deepwarden_chestplate",count:1},{id:"skyabyss:wild_deepwarden_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_deepwarden_boots",count:1},{id:"skyabyss:wild_deepwarden_leggings",count:1},{id:"skyabyss:wild_deepwarden_chestplate",count:1},{id:"skyabyss:wild_deepwarden_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_deepwarden_boots",count:1},{id:"skyabyss:wild_deepwarden_leggings",count:1},{id:"skyabyss:wild_deepwarden_chestplate",count:1},{id:"skyabyss:wild_deepwarden_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_deepwarden_boots",count:1},{id:"skyabyss:wild_deepwarden_leggings",count:1},{id:"skyabyss:wild_deepwarden_chestplate",count:1},{id:"skyabyss:wild_deepwarden_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_deepwarden
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_fortress_boots",count:1},{id:"skyabyss:wild_fortress_leggings",count:1},{id:"skyabyss:wild_fortress_chestplate",count:1},{id:"skyabyss:wild_fortress_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_fortress_boots",count:1},{id:"skyabyss:wild_fortress_leggings",count:1},{id:"skyabyss:wild_fortress_chestplate",count:1},{id:"skyabyss:wild_fortress_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_fortress_boots",count:1},{id:"skyabyss:wild_fortress_leggings",count:1},{id:"skyabyss:wild_fortress_chestplate",count:1},{id:"skyabyss:wild_fortress_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_fortress_boots",count:1},{id:"skyabyss:wild_fortress_leggings",count:1},{id:"skyabyss:wild_fortress_chestplate",count:1},{id:"skyabyss:wild_fortress_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_fortress_boots",count:1},{id:"skyabyss:wild_fortress_leggings",count:1},{id:"skyabyss:wild_fortress_chestplate",count:1},{id:"skyabyss:wild_fortress_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_fortress
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_hanged_boots",count:1},{id:"skyabyss:wild_hanged_leggings",count:1},{id:"skyabyss:wild_hanged_chestplate",count:1},{id:"skyabyss:wild_hanged_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_hanged_boots",count:1},{id:"skyabyss:wild_hanged_leggings",count:1},{id:"skyabyss:wild_hanged_chestplate",count:1},{id:"skyabyss:wild_hanged_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_hanged_boots",count:1},{id:"skyabyss:wild_hanged_leggings",count:1},{id:"skyabyss:wild_hanged_chestplate",count:1},{id:"skyabyss:wild_hanged_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_hanged_boots",count:1},{id:"skyabyss:wild_hanged_leggings",count:1},{id:"skyabyss:wild_hanged_chestplate",count:1},{id:"skyabyss:wild_hanged_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_hanged_boots",count:1},{id:"skyabyss:wild_hanged_leggings",count:1},{id:"skyabyss:wild_hanged_chestplate",count:1},{id:"skyabyss:wild_hanged_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_hanged
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_stargazer_boots",count:1},{id:"skyabyss:wild_stargazer_leggings",count:1},{id:"skyabyss:wild_stargazer_chestplate",count:1},{id:"skyabyss:wild_stargazer_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_stargazer_boots",count:1},{id:"skyabyss:wild_stargazer_leggings",count:1},{id:"skyabyss:wild_stargazer_chestplate",count:1},{id:"skyabyss:wild_stargazer_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_stargazer_boots",count:1},{id:"skyabyss:wild_stargazer_leggings",count:1},{id:"skyabyss:wild_stargazer_chestplate",count:1},{id:"skyabyss:wild_stargazer_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_stargazer_boots",count:1},{id:"skyabyss:wild_stargazer_leggings",count:1},{id:"skyabyss:wild_stargazer_chestplate",count:1},{id:"skyabyss:wild_stargazer_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_stargazer_boots",count:1},{id:"skyabyss:wild_stargazer_leggings",count:1},{id:"skyabyss:wild_stargazer_chestplate",count:1},{id:"skyabyss:wild_stargazer_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_stargazer
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:wild_cloudknight_boots",count:1},{id:"skyabyss:wild_cloudknight_leggings",count:1},{id:"skyabyss:wild_cloudknight_chestplate",count:1},{id:"skyabyss:wild_cloudknight_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:wild_cloudknight_boots",count:1},{id:"skyabyss:wild_cloudknight_leggings",count:1},{id:"skyabyss:wild_cloudknight_chestplate",count:1},{id:"skyabyss:wild_cloudknight_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:wild_cloudknight_boots",count:1},{id:"skyabyss:wild_cloudknight_leggings",count:1},{id:"skyabyss:wild_cloudknight_chestplate",count:1},{id:"skyabyss:wild_cloudknight_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:wild_cloudknight_boots",count:1},{id:"skyabyss:wild_cloudknight_leggings",count:1},{id:"skyabyss:wild_cloudknight_chestplate",count:1},{id:"skyabyss:wild_cloudknight_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:wild_cloudknight_boots",count:1},{id:"skyabyss:wild_cloudknight_leggings",count:1},{id:"skyabyss:wild_cloudknight_chestplate",count:1},{id:"skyabyss:wild_cloudknight_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot wild_cloudknight
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:divine_bellkeeper_boots",count:1},{id:"skyabyss:divine_bellkeeper_leggings",count:1},{id:"skyabyss:divine_bellkeeper_chestplate",count:1},{id:"skyabyss:divine_bellkeeper_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:divine_bellkeeper_boots",count:1},{id:"skyabyss:divine_bellkeeper_leggings",count:1},{id:"skyabyss:divine_bellkeeper_chestplate",count:1},{id:"skyabyss:divine_bellkeeper_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:divine_bellkeeper_boots",count:1},{id:"skyabyss:divine_bellkeeper_leggings",count:1},{id:"skyabyss:divine_bellkeeper_chestplate",count:1},{id:"skyabyss:divine_bellkeeper_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:divine_bellkeeper_boots",count:1},{id:"skyabyss:divine_bellkeeper_leggings",count:1},{id:"skyabyss:divine_bellkeeper_chestplate",count:1},{id:"skyabyss:divine_bellkeeper_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:divine_bellkeeper_boots",count:1},{id:"skyabyss:divine_bellkeeper_leggings",count:1},{id:"skyabyss:divine_bellkeeper_chestplate",count:1},{id:"skyabyss:divine_bellkeeper_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot divine_bellkeeper
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:divine_mistwalker_boots",count:1},{id:"skyabyss:divine_mistwalker_leggings",count:1},{id:"skyabyss:divine_mistwalker_chestplate",count:1},{id:"skyabyss:divine_mistwalker_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:divine_mistwalker_boots",count:1},{id:"skyabyss:divine_mistwalker_leggings",count:1},{id:"skyabyss:divine_mistwalker_chestplate",count:1},{id:"skyabyss:divine_mistwalker_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:divine_mistwalker_boots",count:1},{id:"skyabyss:divine_mistwalker_leggings",count:1},{id:"skyabyss:divine_mistwalker_chestplate",count:1},{id:"skyabyss:divine_mistwalker_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:divine_mistwalker_boots",count:1},{id:"skyabyss:divine_mistwalker_leggings",count:1},{id:"skyabyss:divine_mistwalker_chestplate",count:1},{id:"skyabyss:divine_mistwalker_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:divine_mistwalker_boots",count:1},{id:"skyabyss:divine_mistwalker_leggings",count:1},{id:"skyabyss:divine_mistwalker_chestplate",count:1},{id:"skyabyss:divine_mistwalker_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot divine_mistwalker
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:divine_lampkeeper_boots",count:1},{id:"skyabyss:divine_lampkeeper_leggings",count:1},{id:"skyabyss:divine_lampkeeper_chestplate",count:1},{id:"skyabyss:divine_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:divine_lampkeeper_boots",count:1},{id:"skyabyss:divine_lampkeeper_leggings",count:1},{id:"skyabyss:divine_lampkeeper_chestplate",count:1},{id:"skyabyss:divine_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:divine_lampkeeper_boots",count:1},{id:"skyabyss:divine_lampkeeper_leggings",count:1},{id:"skyabyss:divine_lampkeeper_chestplate",count:1},{id:"skyabyss:divine_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:divine_lampkeeper_boots",count:1},{id:"skyabyss:divine_lampkeeper_leggings",count:1},{id:"skyabyss:divine_lampkeeper_chestplate",count:1},{id:"skyabyss:divine_lampkeeper_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:divine_lampkeeper_boots",count:1},{id:"skyabyss:divine_lampkeeper_leggings",count:1},{id:"skyabyss:divine_lampkeeper_chestplate",count:1},{id:"skyabyss:divine_lampkeeper_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot divine_lampkeeper
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tower_scale_boots",count:1},{id:"skyabyss:tower_scale_leggings",count:1},{id:"skyabyss:tower_scale_chestplate",count:1},{id:"skyabyss:tower_scale_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:tower_scale_boots",count:1},{id:"skyabyss:tower_scale_leggings",count:1},{id:"skyabyss:tower_scale_chestplate",count:1},{id:"skyabyss:tower_scale_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:tower_scale_boots",count:1},{id:"skyabyss:tower_scale_leggings",count:1},{id:"skyabyss:tower_scale_chestplate",count:1},{id:"skyabyss:tower_scale_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:tower_scale_boots",count:1},{id:"skyabyss:tower_scale_leggings",count:1},{id:"skyabyss:tower_scale_chestplate",count:1},{id:"skyabyss:tower_scale_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:tower_scale_boots",count:1},{id:"skyabyss:tower_scale_leggings",count:1},{id:"skyabyss:tower_scale_chestplate",count:1},{id:"skyabyss:tower_scale_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot tower_scale
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tower_bridge_boots",count:1},{id:"skyabyss:tower_bridge_leggings",count:1},{id:"skyabyss:tower_bridge_chestplate",count:1},{id:"skyabyss:tower_bridge_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:tower_bridge_boots",count:1},{id:"skyabyss:tower_bridge_leggings",count:1},{id:"skyabyss:tower_bridge_chestplate",count:1},{id:"skyabyss:tower_bridge_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:tower_bridge_boots",count:1},{id:"skyabyss:tower_bridge_leggings",count:1},{id:"skyabyss:tower_bridge_chestplate",count:1},{id:"skyabyss:tower_bridge_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:tower_bridge_boots",count:1},{id:"skyabyss:tower_bridge_leggings",count:1},{id:"skyabyss:tower_bridge_chestplate",count:1},{id:"skyabyss:tower_bridge_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:tower_bridge_boots",count:1},{id:"skyabyss:tower_bridge_leggings",count:1},{id:"skyabyss:tower_bridge_chestplate",count:1},{id:"skyabyss:tower_bridge_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot tower_bridge
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand -2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tower_halo_boots",count:1},{id:"skyabyss:tower_halo_leggings",count:1},{id:"skyabyss:tower_halo_chestplate",count:1},{id:"skyabyss:tower_halo_helmet",count:1}]}
+cmd summon armor_stand -1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:tower_halo_boots",count:1},{id:"skyabyss:tower_halo_leggings",count:1},{id:"skyabyss:tower_halo_chestplate",count:1},{id:"skyabyss:tower_halo_helmet",count:1}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{id:"skyabyss:tower_halo_boots",count:1},{id:"skyabyss:tower_halo_leggings",count:1},{id:"skyabyss:tower_halo_chestplate",count:1},{id:"skyabyss:tower_halo_helmet",count:1}]}
+cmd summon armor_stand 1.3 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:tower_halo_boots",count:1},{id:"skyabyss:tower_halo_leggings",count:1},{id:"skyabyss:tower_halo_chestplate",count:1},{id:"skyabyss:tower_halo_helmet",count:1}]}
+cmd summon armor_stand 2.6 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[20f,0f],ArmorItems:[{id:"skyabyss:tower_halo_boots",count:1},{id:"skyabyss:tower_halo_leggings",count:1},{id:"skyabyss:tower_halo_chestplate",count:1},{id:"skyabyss:tower_halo_helmet",count:1}],Pose:{LeftArm:[-95f,0f,-12f],RightArm:[-100f,0f,14f],RightLeg:[-28f,0f,0f],LeftLeg:[22f,0f,0f]}}
+wait 30
+shot tower_halo

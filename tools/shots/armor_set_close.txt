@@ -1,0 +1,43 @@
+# Full armor set on an armor stand, close: front / 3-4 front / side / 3-4 back / back.
+# Replace stone_whale with another set name to shoot it.
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/armor_set_close.txt -PshotsName=<name>
+world shots flat
+size 1280 720
+timeout 2000
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon armor_stand 0 -60 12 {Invisible:1b}
+armortier rare
+armorlevel 0
+camera minecraft:overworld 0 -60.55 2.9 180 0
+waitchunks
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot set_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot set_q34
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[90f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot set_side
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[145f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot set_q34back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot set_back

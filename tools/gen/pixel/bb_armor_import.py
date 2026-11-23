@@ -11,7 +11,7 @@
 - 座標は Blockbench の見たまま (プレイヤーは -Z を向く。右腕は +X 側)。geo は x が逆なので、書き出しで x を反転し、面の向きも戻す。
   骨の pivot (geo、1/16): 頭・胴 (0,24,0)、右腕 (-5,22,0)、左腕 (5,22,0)、右脚・右靴 (-1.9,12,0)、左脚・左靴 (1.9,12,0)。
   Blockbench (x32) では x を反転して 2 倍: 右腕の付け根 = (10,44,0)。
-- 名前が _glow で終わる箱は光る (その面の絵を _glowmask にも写す)。
+- 名前が _glow で終わる箱と g_ で始まる箱は光る (その面の絵を _glowmask にも写す)。
 - テクスチャは 1 枚。部位ごとに同じ絵を写す。
 
 書き出すもの:
@@ -143,7 +143,7 @@ def main(path):
         infl = e.get("inflate", 0)
         frm = [frm[i] - infl for i in range(3)]
         to = [to[i] + infl for i in range(3)]
-        is_glow = e.get("name", "").endswith("_glow")
+        is_glow = e.get("name", "").endswith("_glow") or e.get("name", "").startswith("g_")
         b = bones.setdefault(bone, dict(parent=None, pivot=list(PIV[bone]), vertices=[], uvs=[], triangles=[]))
         for face, fd in e["faces"].items():
             if fd.get("texture") is None or "uv" not in fd:
